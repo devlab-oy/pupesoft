@@ -18,12 +18,12 @@ $laskun_tilausviite 	= utf8_decode($xml->InvoiceDetails->AgreementIdentifier);
 $kauttalaskutus 		= utf8_decode($xml->DeliveryDetails->TerminalAddressText);
 
 $toim_asiakkaantiedot = array();
-$toim_asiakkaantiedot["toim_ovttunnus"] = $xml->DeliveryOrganisationUnitNumber;
-$toim_asiakkaantiedot["ytunnus"] 		= $xml->DeliveryPartyDetails->DeliveryPartyIdentifier;
-$toim_asiakkaantiedot["nimi"] 			= utf8_decode($xml->DeliveryPartyDetails->DeliveryOrganisationName);
-$toim_asiakkaantiedot["osoite"] 		= utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryStreetName);
-$toim_asiakkaantiedot["postino"] 		= utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryPostCodeIdentifier);
-$toim_asiakkaantiedot["postitp"] 		= utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryTownName);
+$toim_asiakkaantiedot["toim_ovttunnus"] = trim($xml->DeliveryOrganisationUnitNumber);
+$toim_asiakkaantiedot["ytunnus"] 		= trim($xml->DeliveryPartyDetails->DeliveryPartyIdentifier);
+$toim_asiakkaantiedot["nimi"] 			= trim(utf8_decode($xml->DeliveryPartyDetails->DeliveryOrganisationName));
+$toim_asiakkaantiedot["osoite"] 		= trim(utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryStreetName));
+$toim_asiakkaantiedot["postino"] 		= trim(utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryPostCodeIdentifier));
+$toim_asiakkaantiedot["postitp"] 		= trim(utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryTownName));
 
 if ($yhtio == "") {
 	$yhtio = $xml->BuyerPartyDetails->BuyerPartyIdentifier;

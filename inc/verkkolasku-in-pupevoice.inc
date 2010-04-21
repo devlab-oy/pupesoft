@@ -18,12 +18,12 @@ $laskun_tilausviite 	= "";
 $kauttalaskutus			= "";
 
 $toim_asiakkaantiedot = array();
-$toim_asiakkaantiedot["toim_ovttunnus"]	= array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC082.3039'));
-$toim_asiakkaantiedot["ytunnus"] 		= array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC082.3039'));
-$toim_asiakkaantiedot["nimi"] 			= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC080.3036.1')));
-$toim_asiakkaantiedot["osoite"] 		= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC059.3042.1')));
-$toim_asiakkaantiedot["postino"] 		= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3251')));
-$toim_asiakkaantiedot["postitp"] 		= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3164')));
+$toim_asiakkaantiedot["toim_ovttunnus"]	= trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC082.3039')));
+$toim_asiakkaantiedot["ytunnus"] 		= trim(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC082.3039')));
+$toim_asiakkaantiedot["nimi"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC080.3036.1'))));
+$toim_asiakkaantiedot["osoite"] 		= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@eC059.3042.1'))));
+$toim_asiakkaantiedot["postino"] 		= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3251'))));
+$toim_asiakkaantiedot["postitp"] 		= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3164'))));
 
 // jos ei löytynyt EUR summaa kokeillaan ilman valkoodia
 if ($laskun_summa_eur == 0) {

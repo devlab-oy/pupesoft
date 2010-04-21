@@ -848,7 +848,6 @@
 					echo "</tr></table>";
 					echo "</td></tr>";
 
-
 					if ($toim == 'extranet') {
 						echo "<tr><th align='left'>".t("Oletusasiakastiedot").":</th><td>";
 						echo "<table><tr>";
@@ -875,10 +874,9 @@
 						else {
 							echo "<td>".t("Asiakastietoasiakasta ei ole syötetty")."!</td>";
 						}
-					}
-					
-					echo "</tr></table>";
-					echo "</td></tr>";
+						echo "</tr></table>";					
+						echo "</td></tr>";
+					}														
 				}
 
 				if ($toim == 'extranet') {

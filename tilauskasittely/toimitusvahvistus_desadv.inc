@@ -290,7 +290,7 @@
 			$x++;
 
 			// IMD - additional information of the article
-			$desadv_message .= "IMD+F+8+:::$tuotteet_row[nimitys]'";
+			$desadv_message .= "IMD+F+8+:::".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['nimitys']), 0, 256)."'";
 			$x++;
 
 			// QTY - quantity

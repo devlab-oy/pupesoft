@@ -359,7 +359,7 @@
 
 			while ($alkurow = mysql_fetch_assoc($omavarastores)) {
 
-				if ($alkurow["hyllyalue"] != "!!M" and (($alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma'])
+				if ($alkurow["hyllyalue"] != "!!M" and (($alkurow['varastotyyppi'] == 'E' and $kukarow['kassamyyja'] == '' and $maksuehtorow["jv"] == "" and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma'])
 														or ($alkurow["varastotyyppi"] != "E" and $laskurow["varasto"] == 0 and (in_array($alkurow["varasto"], $varastot_array) or count($varastot_array) == 0))
 														or $laskurow["varasto"] == $alkurow["varasto"]
 														or (in_array($alkurow["varasto"], $varastot_array) and $laskurow["varasto"] == 0)

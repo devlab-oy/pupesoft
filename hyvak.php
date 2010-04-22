@@ -1355,7 +1355,7 @@
 		echo "</tr></table>";
 
 		if ($iframe == 'yes' and $iframe_id != '') {
-			echo "<iframe src='$iframe_id' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
+			echo "<iframe src='$iframe_id' name='alaikkuna' width='100%' height='600px' align='bottom' scrolling='auto'></iframe>";
 		}
 	}
 	elseif ($kutsuja == "") {

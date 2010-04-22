@@ -295,13 +295,15 @@ if (!function_exists('alku_lahete')) {
 		$pdf->draw_text(310, 750, t("Myyjä", $kieli), 						$thispage, $pieni);
 
 		//etsitään myyjän nimi
-		$query  = "	select nimi, kuka
+		$query  = "	SELECT nimi, kuka
 					from kuka
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 		$myyresult = mysql_query($query) or pupe_error($query);
 		$myyrow = mysql_fetch_array($myyresult);
-
-		$pdf->draw_text(310, 740, $myyrow["nimi"], 										$thispage, $norm);
+		
+		list($ff_string, $ff_font) = pdf_fontfit($myyrow["nimi"], 105, $pdf, $norm);
+		
+		$pdf->draw_text(310, 740, $ff_string, 										$thispage, $ff_font);
 
 		$pdf->draw_text(430, 750, t("Tilauspvm", $kieli),							 	$thispage, $pieni);
 		$pdf->draw_text(430, 740, tv1dateconv($laskurow["luontiaika"], "pitka"), 		$thispage, $norm);
@@ -1401,7 +1403,8 @@ if (!function_exists('rivi_eialeja_lahete')) {
 		$pdf->draw_text(465-$oikpos, $kala, $row["myyntihinta"], 							$thispage, $norm);
 
 		if ($extranet_tilausvahvistus != 1) {
-			$pdf->draw_text(475, $kala, $row["aleryhma"],										$thispage, $norm);
+			list($ff_string, $ff_font) = pdf_fontfit($row["aleryhma"], 50, $pdf, $norm);
+			$pdf->draw_text(475, $kala, $ff_string, $thispage, $ff_font);
 		}
 
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["brutto_rivihinta"]), $norm);
@@ -1411,7 +1414,7 @@ if (!function_exists('rivi_eialeja_lahete')) {
 			$kala = $kala - $rivinkorkeus;
 		}
 		$pdf->draw_text(190, $kala, $row["nimitys"], 										$thispage, $norm);
-
+		
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {

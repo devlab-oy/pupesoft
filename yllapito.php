@@ -1356,6 +1356,11 @@
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='asiakaskommentti_iframe' name='asiakaskommentti_iframe' src='yllapito.php?toim=asiakaskommentti&from=yllapito&ohje=off&haku[1]=$trow[ytunnus]&lukitse_avaimeen=$trow[ytunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'asiakkaan_avainsanat' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
+			$res = mysql_query($queryoik) or pupe_error($queryoik);
+
+			if (mysql_num_rows($res) > 0) echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=asiakkaan_avainsanat&from=yllapito&ohje=off&haku[3]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
 
 		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
@@ -1371,10 +1376,6 @@
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[6]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
-
-			if ($toim == "asiakas") {
-				include ("inc/asiakkaan_avainsanat.inc");
-			}
 		}
 
 		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto")) {
@@ -1439,6 +1440,7 @@
 			$toim == "autodata_tuote" or
 			$toim == "tuotteen_toimittajat" or
 			$toim == "extranet_kayttajan_lisatiedot" or
+			$toim == "asiakkaan_avainsanat" or
 			($toim == "liitetiedostot" and $poistolukko == "") or
 			($toim == "tuote" and $poistolukko == "") or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {
@@ -1524,6 +1526,10 @@
 
 	if ($from == "yllapito" and $toim == "asiakaskommentti") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('asiakaskommentti_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "asiakkaan_avainsanat") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('asiakkaan_avainsanat_iframe' $jcsmaxheigth);</script>";
 	}
 
 	if ($from == "yllapito" and $toim == "avainsana") {

@@ -1086,7 +1086,7 @@ if ($tee == "asiakastiedot") {
 
 if ($tee == "selaa") {
 
-	$tuoteno = $toim_tuoteno = $nimitys = "";
+	$tuoteno = $toim_tuoteno = $nimitys = $alkukoodilla = "";
 	
 	if (isset($tuotehaku) and mb_detect_encoding($tuotehaku, mb_detect_order(), TRUE) == "UTF-8") {
 		$tuotehaku = iconv("UTF-8", "latin1//TRANSLIT", $tuotehaku);
@@ -1107,6 +1107,10 @@ if ($tee == "selaa") {
 	if ($hakutapa != "" and $tuotehaku == "") {
 		die ("<font class='error'>".t("Anna jokin hakukriteeri")."</font>");
 	}
+	elseif ($hakutapa == "alkukoodilla") {
+		$tuotenumero = $tuotehaku;
+		$alkukoodilla = "JOO";
+	}	
 	elseif ($hakutapa == "koodilla") {
 		$tuotenumero = $tuotehaku;
 	}
@@ -1172,12 +1176,12 @@ if ($tee == "") {
 	else {
 		$verkko = "";
 	}
-
+		
 	if ($tuotenumero != "") {
 		$verkkokauppa_ulos .= "	<div class='selain' id='selain'>
 								$verkko
 								<script TYPE=\"text/javascript\" language=\"JavaScript\">
-								sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$tuotenumero');
+								sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=alkukoodilla&tuotehaku=$tuotenumero');
 								</script>
 								</div>";
 	}

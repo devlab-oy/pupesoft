@@ -399,7 +399,14 @@
 
 	if (trim($tuotenumero) != '') {
 		$tuotenumero = mysql_real_escape_string(trim($tuotenumero));
-		$lisa .= " and tuote.tuoteno like '%$tuotenumero%' ";
+		
+		if ($alkukoodilla != "") {
+			$lisa .= " and tuote.tuoteno like '$tuotenumero%' ";
+		}
+		else {
+			$lisa .= " and tuote.tuoteno like '%$tuotenumero%' ";
+		}
+		
 		$ulisa .= "&tuotenumero=$tuotenumero";
 	}
 

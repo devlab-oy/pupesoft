@@ -129,11 +129,20 @@
 						and oletus != ''
 						LIMIT 1";
 			$result = mysql_query($query) or pupe_error($query);
+			
+			if ($perutaan == "JOO") {
+				$query = "	UPDATE tilausrivi
+							SET varattu=kpl, kpl=0, toimitettuaika='0000-00-00 00:00:00'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = '$perherow[tunnus]'";
+			}
+			else {
+				$query = "	UPDATE tilausrivi
+							SET kpl=$perherow[varattu], varattu=0
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = '$perherow[tunnus]'";
+			}
 
-			$query = "	UPDATE tilausrivi
-						SET kpl=$perherow[varattu], varattu=0
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tunnus = '$perherow[tunnus]'";
 			$updresult = mysql_query($query) or pupe_error($query);
 		}
 	}
@@ -156,9 +165,18 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<font class='message'>Valmisteen valmistusmuutos: $valmkpl.</font><br>";
-
+		
+		$query = "	SELECT sum(kpl) valmistetut
+					FROM tilausrivi
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.otunnus = '$tilrivirow[otunnus]'
+					and tilausrivi.perheid = '$tilrivirow[perheid]'
+					and tilausrivi.tyyppi = 'D'";
+		$resisa = mysql_query($query) or pupe_error($query);
+		$rowisa = mysql_fetch_assoc($resisa);
+		
 		$query = "	UPDATE tilausrivi
-					SET kpl=0, varattu=0
+					SET varattu = '$rowisa[valmistetut]', kpl=0, toimitettuaika='0000-00-00 00:00:00'
 					WHERE yhtio = '$kukarow[yhtio]'
 					and otunnus = '$tilrivirow[otunnus]'
 					and tunnus  = '$tilrivirow[tunnus]'";
@@ -190,7 +208,7 @@
 					and tilausrivi.perheid = '$tilrivirow[perheid]'
 					and tilausrivi.tyyppi = 'D'";
 		$resisa = mysql_query($query) or pupe_error($query);
-		$rowisa = mysql_fetch_array($resisa);
+		$rowisa = mysql_fetch_assoc($resisa);
 
 		while ($taparow = mysql_fetch_array($res)) {
 

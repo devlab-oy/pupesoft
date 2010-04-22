@@ -100,14 +100,12 @@
 	$formi  = 'formi';
 	$kentta = 'tuoteno';
 
-
 	//Paluu nappi osto/myyntitilaukselle
 	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($result);
 
 	if ($kukarow["kuka"] != "" and $laskurow["tila"] == "O") {
-
 		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_osto.php'>
 				<input type='hidden' name='aktivoinnista' value='true'>
 				<input type='hidden' name='tee' value='AKTIVOI'>
@@ -124,7 +122,8 @@
 				</form><br><br>";
 	}
 
-	echo "<br><table>";
+	echo "<br>";
+	echo "<table>";
 
 	echo "<tr>";
 	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
@@ -355,14 +354,20 @@
 				}
 			}
 
-
 			//eka laitetaan tuotteen yleiset (aika staattiset) tiedot
 			echo "<table>";
 
-			//1
-			echo "<tr><th>".t("Tuotenumero")."<br>".t("Tuotemerkki")."</th><th>".t("Yksikkö")."</th><th>".t("Eankoodi")."</th><th colspan='2'>".t("Nimitys")."</th><th>".t("Hinnastoon")."<br>".t("Status")."</th>";
+			echo "<tr>";
+			echo "<th>".t("Tuotenumero")."<br>".t("Tuotemerkki")."</th>";
+			echo "<th>".t("Yksikkö")."</th>";
+			echo "<th>".t("Eankoodi")."</th>";
+			echo "<th colspan='2'>".t("Nimitys")."</th>";
+			echo "<th>".t("Hinnastoon")."<br>".t("Status")."</th>";
+			echo "</tr>";
 
-			echo "<tr><td>$tuoterow[tuoteno]";
+			echo "<tr>";
+			echo "<td>$tuoterow[tuoteno]";
+
 			//haetaan orginaalit
 			if (table_exists("tuotteen_orginaalit")) {
 				$query = "	SELECT *
@@ -398,142 +403,214 @@
 
 				}
 			}
-			echo "<br>".t_avainsana("TUOTEMERKKI", "", " and avainsana.selite='$tuoterow[tuotemerkki]'", "", "", "selite")."</td><td>".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td><td>$tuoterow[hinnastoon]<br>".t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark")."</td></tr>";
+
+			//1
+			echo "<br>".t_avainsana("TUOTEMERKKI", "", " and avainsana.selite='$tuoterow[tuotemerkki]'", "", "", "selite")."</td>";
+			echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td>";
+			echo "<td>$tuoterow[eankoodi]</td><td colspan='2'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
+			echo "<td>$tuoterow[hinnastoon]<br>".t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark")."</td>";
+			echo "</tr>";
 
 			//2
-			echo "<tr><th>".t("Osasto/try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th>".t("Perusalennus")."</th><th>".t("VAK")."</th></tr>";
-			echo "<td>$tuoterow[osasto] - ".t_avainsana("OSASTO", "", "and avainsana.selite='$tuoterow[osasto]'", "", "", "selitetark")."<br>$tuoterow[try] - ".t_avainsana("TRY", "", "and avainsana.selite='$tuoterow[try]'", "", "", "selitetark")."</td><td>$tuoterow[toimittaja]</td>
-					<td>$tuoterow[aleryhma]</td><td>$tuoterow[tahtituote]</td><td>$peralrow[alennus]%</td><td>$tuoterow[vakkoodi]</td></tr>";
+			echo "<tr>";
+			echo "<th>".t("Osasto/try")."</th>";
+			echo "<th>".t("Toimittaja")."</th>";
+			echo "<th>".t("Aleryhmä")."</th>";
+			echo "<th>".t("Tähti")."</th>";
+			echo "<th>".t("Perusalennus")."</th>";
+			echo "<th>".t("VAK")."</th>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td>$tuoterow[osasto] - ".t_avainsana("OSASTO", "", "and avainsana.selite='$tuoterow[osasto]'", "", "", "selitetark")."<br>$tuoterow[try] - ".t_avainsana("TRY", "", "and avainsana.selite='$tuoterow[try]'", "", "", "selitetark")."</td>";
+			echo "<td>$tuoterow[toimittaja]</td>";
+			echo "<td>$tuoterow[aleryhma]</td>";
+			echo "<td>$tuoterow[tahtituote]</td>";
+			echo "<td>$peralrow[alennus]%</td>";
+			echo "<td>$tuoterow[vakkoodi]</td>";
+			echo "</tr>";
 
 			//3
-			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Netto/Ovh")."</th><th>".t("Ostohinta")." / ".t("Alennus")."</th><th>".t("Kehahinta")."</th><th>".t("Vihahinta")."</th>";
-			echo "<tr><td valign='top' >$tuoterow[toim_tuoteno]</td>
-					<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>
-					<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["nettohinta"])."/".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myymalahinta"])."</td>
-					<td valign='top' align='right'>";
+			echo "<tr>";
+			echo "<th>".t("Toimtuoteno")."</th>";
+			echo "<th>".t("Myyntihinta")."</th>";
+			echo "<th>".t("Netto/Ovh")."</th>";
+			echo "<th>".t("Ostohinta")." / ".t("Alennus")."</th>";
+			echo "<th>".t("Kehahinta")."</th>";
+			echo "<th>".t("Vihahinta")."</th>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td valign='top' >$tuoterow[toim_tuoteno]</td>";
+			echo "<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>";
+			echo "<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["nettohinta"])."/".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myymalahinta"])."</td>";
+			echo "<td valign='top' align='right'>";
 
 			if ($tuoterow["ostohinta"][0] != '/') {
 				echo $tuoterow["ostohinta"];
 			}
 
-			echo"</td><td valign='top' align='right'>$tuoterow[kehahin]</td>
-					<td valign='top' align='right'>$tuoterow[vihahin] ".tv1dateconv($tuoterow["vihapvm"])."</td>
-					</tr>";
+			echo "</td>";
+			echo "<td valign='top' align='right'>$tuoterow[kehahin]</td>";
+			echo "<td valign='top' align='right'>$tuoterow[vihahin] ".tv1dateconv($tuoterow["vihapvm"])."</td>";
+			echo "</tr>";
 
 			//4
-			echo "<tr><th>".t("Hälyraja")." / ".t("Varastoitava")."</th><th>".t("Tilerä")."</th><th>".t("Toierä")."</th><th>".t("Kerroin")."</th><th>".t("Tarrakerroin")."</th><th>".t("Tarrakpl")."</th>";
-			echo "<tr><td valign='top' align='right'>$tuoterow[halytysraja] / $tuoterow[ei_varastoida]</td>
-						<td valign='top' align='right'>$tuoterow[osto_era]</td>
-						<td valign='top' align='right'>$tuoterow[myynti_era]</td>
-						<td valign='top' align='right'>$tuoterow[tuotekerroin]</td>
-						<td valign='top' align='right'>$tuoterow[tarrakerroin]</td>
-						<td valign='top' align='right'>$tuoterow[tarrakpl]</td>
-					</tr>";
+			echo "<tr>";
+			echo "<th>".t("Hälyraja")." / ".t("Varastoitava")."</th>";
+			echo "<th>".t("Tilerä")."</th>";
+			echo "<th>".t("Toierä")."</th>";
+			echo "<th>".t("Kerroin")."</th>";
+			echo "<th>".t("Tarrakerroin")."</th>";
+			echo "<th>".t("Tarrakpl")."</th>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td valign='top' align='right'>$tuoterow[halytysraja] / $tuoterow[ei_varastoida]</td>";
+			echo "<td valign='top' align='right'>$tuoterow[osto_era]</td>";
+			echo "<td valign='top' align='right'>$tuoterow[myynti_era]</td>";
+			echo "<td valign='top' align='right'>$tuoterow[tuotekerroin]</td>";
+			echo "<td valign='top' align='right'>$tuoterow[tarrakerroin]</td>";
+			echo "<td valign='top' align='right'>$tuoterow[tarrakpl]</td>";
+			echo "</tr>";
 
 			//5
-			echo "<tr><th>".t("Tullinimike")." / %</th><th colspan='4'>".t("Tullinimikkeen kuvaus")."</th><th>".t("Toinen paljous")."</th></tr>";
-			echo "<tr><td>$tullirow1[cn] $prossat</td><td colspan='4'>".wordwrap(substr($tullirow3['dm'],0,20)." - ".substr($tullirow2['dm'],0,20)." - ".substr($tullirow1['dm'],0,20), 70, "<br>")."</td><td>$tullirow1[su]</td></tr>";
-			// $prossa
+			echo "<tr>";
+			echo "<th>".t("Tullinimike")." / %</th>";
+			echo "<th colspan='4'>".t("Tullinimikkeen kuvaus")."</th>";
+			echo "<th>".t("Toinen paljous")."</th>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td>$tullirow1[cn] $prossat</td>";
+			echo "<td colspan='4'>".wordwrap(substr($tullirow3['dm'],0,20)." - ".substr($tullirow2['dm'],0,20)." - ".substr($tullirow1['dm'],0,20), 70, "<br>")."</td>";
+			echo "<td>$tullirow1[su]</td>";
+			echo "</tr>";
 
 			//6
-			echo "<tr><th>".t("Luontipvm")."</th><th>".t("Muutospvm")."</th><th>".t("Epäkurantti25pvm")."</th><th>".t("Epäkurantti50pvm")."</th><th>".t("Epäkurantti75pvm")."</th><th>".t("Epäkurantti100pvm")."</th></tr>";
-			echo "<tr><td>".tv1dateconv($tuoterow["luonti"])."</td><td>".tv1dateconv($tuoterow["muutos"])."</td><td>".tv1dateconv($tuoterow["epakurantti25pvm"])."</td><td>".tv1dateconv($tuoterow["epakurantti50pvm"])."</td><td>".tv1dateconv($tuoterow["epakurantti75pvm"])."</td><td>".tv1dateconv($tuoterow["epakurantti100pvm"])."</td></tr>";
+			echo "<tr>";
+			echo "<th>".t("Luontipvm")."</th>";
+			echo "<th>".t("Muutospvm")."</th>";
+			echo "<th>".t("Epäkurantti25pvm")."</th>";
+			echo "<th>".t("Epäkurantti50pvm")."</th>";
+			echo "<th>".t("Epäkurantti75pvm")."</th>";
+			echo "<th>".t("Epäkurantti100pvm")."</th>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td>".tv1dateconv($tuoterow["luonti"])."</td>";
+			echo "<td>".tv1dateconv($tuoterow["muutos"])."</td>";
+			echo "<td>".tv1dateconv($tuoterow["epakurantti25pvm"])."</td>";
+			echo "<td>".tv1dateconv($tuoterow["epakurantti50pvm"])."</td>";
+			echo "<td>".tv1dateconv($tuoterow["epakurantti75pvm"])."</td>";
+			echo "<td>".tv1dateconv($tuoterow["epakurantti100pvm"])."</td>";
+			echo "</tr>";
 
 			//7
-			echo "<tr><th colspan='6'>".t("Tuotteen kuvaus")."</th></tr>";
-			echo "<td colspan='6'>".wordwrap($tuoterow["kuvaus"], 130, "<br>")."&nbsp;</td></tr>";
+			echo "<tr>";
+			echo "<th colspan='6'>".t("Tuotteen kuvaus")."</th>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td colspan='6'>".wordwrap($tuoterow["kuvaus"], 130, "<br>")."&nbsp;</td>";
+			echo "</tr>";
 
 			//8
-			echo "<tr><th>".t("Muuta")."</th><th colspan='5'>".t("Lyhytkuvaus")."</th></tr>";
-			echo "<tr><td>$tuoterow[muuta]&nbsp;</td><td colspan='5'>".wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>")."</td></tr>";
-			echo "</table>";
+			echo "<tr>";
+			echo "<th>".t("Muuta")."</th>";
+			echo "<th colspan='5'>".t("Lyhytkuvaus")."</th>";
+			echo "</tr>";
 
-			echo "<table><tr>";
-			echo "<td class='back' valign='top' align='left'>";
-			echo "<table>";
-			echo "<tr><th>".t("Korvaavat")."</th><th>".t("Myytävissä")."</th></tr>";
+			echo "<tr>";
+			echo "<td>$tuoterow[muuta]&nbsp;</td>";
+			echo "<td colspan='5'>".wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>")."</td>";
+			echo "</tr>";
 
-			//korvaavat tuotteet
-			$query  = "select * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-			$korvaresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($korvaresult)==0) {
-				echo "<tr><td>".t("Ei korvaavia")."!</td><td></td></tr>";
-			}
-			else {
-				// tuote löytyi, joten haetaan sen id...
-				$row    = mysql_fetch_array($korvaresult);
-				$id		= $row['id'];
-
-				$query = "select * from korvaavat where id='$id' and tuoteno<>'$tuoteno' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
-				$korva2result = mysql_query($query) or pupe_error($query);
-
-				while ($row = mysql_fetch_array($korva2result)) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
-
-					echo "<tr><td><a href='$PHP_SELF?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td><td>$myytavissa</td></tr>";
-				}
-			}
-
-			echo "</table>";
-			echo "</td>";
-
-			// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
-			$query = "describe yhteensopivuus_tuote";
-			$res = mysql_query($query);
-
-			if (mysql_error() == "" and file_exists("yhteensopivuus_tuote.php")) {
-
-				$query = "	SELECT tyyppi, count(*) countti
-							from yhteensopivuus_tuote
-							where tuoteno = '$tuoteno'
-							and yhtio = '$kukarow[yhtio]'
-							GROUP BY 1";
-				$yhtresult = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($yhtresult) > 0) {
-					echo "<td class='back' valign='top' align='left'>";
-					echo "<table>";
-					echo "<tr><th>".t("Yhteensopivuudet")."</th></tr>";
-				}
-
-				while ($yhtrow = mysql_fetch_array($yhtresult)) {
-
-					if ($yhtrow["countti"] > 0) {
-
-						if ($yhtrow["tyyppi"] == "HA") $yhttoim = "";
-						else $yhttoim = $yhtrow["tyyppi"];
-
-						echo "<tr><td><a href='yhteensopivuus_tuote.php?toim=$yhttoim&tee=etsi&tuoteno=".urlencode($tuoteno)."'>Siirry tuotteen $yhttoim yhteensopivuuksiin</a></td></tr>";
-					}
-				}
-
-				if (mysql_num_rows($yhtresult) > 0) {
-					echo "</table>";
-					echo "</td>";
-				}
-			}
+			echo "</table><br>";
 
 			// Onko liitetiedostoja
 			$liitteet = liite_popup("TN", $tuoterow["tunnus"]);
 
 			if ($liitteet != "") {
-				echo "<td class='back'><table><tr><th>".t("Tuotekuvat")."</th></tr><tr><td>$liitteet</td></tr></table></td>";
+				echo "$liitteet";
 			}
 
-			echo "</tr></table><br>";
+			// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
+			if (table_exists("yhteensopivuus_tuote") and file_exists("yhteensopivuus_tuote.php")) {
 
-			// Varastosaldot ja paikat
-			echo "<font class='message'>".t("Varastopaikat")."</font><hr>";
-			echo "<table>";
-			echo "<tr>";
-			echo "<td class='back' valign='top' align='left'>";
+				$query = "	SELECT tyyppi, count(*) countti
+							from yhteensopivuus_tuote
+							where tuoteno = '$tuoteno'
+							and yhtio = '$kukarow[yhtio]'
+							GROUP BY 1
+							HAVING countti > 0";
+				$yhtresult = mysql_query($query) or pupe_error($query);
 
+				if (mysql_num_rows($yhtresult) > 0) {
+					while ($yhtrow = mysql_fetch_array($yhtresult)) {
+						if ($yhtrow["tyyppi"] == "HA") $yhttoim = "";
+						else $yhttoim = $yhtrow["tyyppi"];
+
+						echo "<form action='yhteensopivuus_tuote.php' method='post'>";
+						echo "<input type='hidden' name='tee' value='etsi'>";
+						echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+						echo "<input type='submit' value='Siirry tuotteen $yhttoim yhteensopivuuksiin'>";
+						echo "</form>";
+					}
+				}
+				echo "<br><br>";
+			}
+			elseif ($liitteet != "") {
+				echo "<br><br>";
+			}
+
+			//korvaavat tuotteet
+			$query  = "SELECT * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+			$korvaresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($korvaresult) > 0) {
+				// Varastosaldot ja paikat
+				echo "<font class='message'>".t("Korvaavat tuotteet")."</font><hr>";
+
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>".t("Tuotenumero")."</th>";
+				echo "<th>".t("Myytävissä")."</th>";
+				echo "</tr>";
+
+				// tuote löytyi, joten haetaan sen id...
+				$row    = mysql_fetch_array($korvaresult);
+				$id		= $row['id'];
+
+				$query = "SELECT * from korvaavat where id='$id' and tuoteno<>'$tuoteno' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
+				$korva2result = mysql_query($query) or pupe_error($query);
+
+				while ($row = mysql_fetch_array($korva2result)) {
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+
+					echo "<tr>";
+					echo "<td><a href='$PHP_SELF?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
+					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+					echo "</tr>";
+				}
+
+				echo "</table><br>";
+			}
 
 			if ($tuoterow["ei_saldoa"] == '') {
+
+				// Varastosaldot ja paikat
+				echo "<font class='message'>".t("Varastopaikat")."</font><hr>";
+
 				// Saldot
 				echo "<table>";
-				echo "<tr><th>".t("Varasto")."</th><th>".t("Varastopaikka")."</th><th>".t("Saldo")."</th><th>".t("Hyllyssä")."</th><th>".t("Myytävissä")."</th></tr>";
+				echo "<tr>";
+				echo "<th>".t("Varasto")."</th>";
+				echo "<th>".t("Varastopaikka")."</th>";
+				echo "<th>".t("Saldo")."</th>";
+				echo "<th>".t("Hyllyssä")."</th>";
+				echo "<th>".t("Myytävissä")."</th>";
+				echo "</tr>";
 
 				$kokonaissaldo = 0;
 				$kokonaishyllyssa = 0;
@@ -603,11 +680,13 @@
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'ORVOT', '', '', '', '', '', '', '', $saldoaikalisa);
 
 				if ($myytavissa != 0) {
-					echo "<tr><td>".t("Tuntematon")."</td><td>?</td>";
-					echo "<td align='right'>".sprintf("%.2f", $saldo)."</td>
-							<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
-							<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
-							</tr>";
+					echo "<tr>";
+					echo "<td>".t("Tuntematon")."</td>";
+					echo "<td>?</td>";
+					echo "<td align='right'>".sprintf("%.2f", $saldo)."</td>";
+					echo "<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>";
+					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+					echo "</tr>";
 
 					//summataan kokonaissaldoa
 					$kokonaissaldo += $saldo;
@@ -617,12 +696,13 @@
 
 				echo "<tr>
 						<th colspan='2'>".t("Yhteensä")."</th>
-						<td align='right'>".sprintf("%.2f", $kokonaissaldo)."</td>
-						<td align='right'>".sprintf("%.2f", $kokonaishyllyssa)."</td>
-						<td align='right'>".sprintf("%.2f", $kokonaismyytavissa)."</td>
-						</tr></td>";
+						<th style='text-align:right;'>".sprintf("%.2f", $kokonaissaldo)."</th>
+						<th style='text-align:right;'>".sprintf("%.2f", $kokonaishyllyssa)."</th>
+						<th style='text-align:right;'>".sprintf("%.2f", $kokonaismyytavissa)."</th>
+						</tr>
+						";
 
-				echo "</table>";
+				echo "</table><br>";
 
 				$kokonaissaldo_tapahtumalle = $kokonaissaldo;
 
@@ -643,8 +723,12 @@
 				$kres  = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($kres) > 0) {
-					echo "<td class='back' valign='top' align='left'><table>";
-					echo "<tr><th>".t("Suoratoimitus Yhtiö/Varasto")."</th><th>".t("Saldo")."</th></tr>";
+
+					echo "<table>";
+					echo "<tr>";
+					echo "<th>".t("Suoratoimitus Yhtiö/Varasto")."</th>";
+					echo "<th>".t("Saldo")."</th>";
+					echo "</tr>";
 
 					$kokonaissaldo = 0;
 					$firmanimi = '';
@@ -708,13 +792,9 @@
 					}
 					echo "<tr><th>".t("Suoratoimitettavissa Yhteensä")."</th><td align='right'>".sprintf("%.02f",$kokonaissaldo)."</td></tr>";
 
-					echo "</table></td></tr>";
+					echo "</table>";
 				}
 			}
-
-			echo "</td>";
-			echo "</tr><tr><td class='back' valign='top' align='left' colspan='2'>";
-
 
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT if(asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
@@ -737,8 +817,11 @@
 
 			if (mysql_num_rows($jtresult) != 0) {
 
+				// Varastosaldot ja paikat
+				echo "<font class='message'>".t("Tuotteen tilaukset")."</font><hr>";
+
 				// Avoimet rivit
-				echo "<br><table>";
+				echo "<table>";
 
 				echo "<tr>
 						<th>".t("Asiakas/Toimittaja")."</th>
@@ -845,22 +928,18 @@
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
 							<td align='right'>".sprintf('%.2f', $myyta)."</td>
 							</tr>";
-
-
 				}
 
-				echo "<tr><td class='back'>&nbsp;</td></tr>";
-
-				foreach($yhteensa as $type => $kappale) {
-					echo "<tr><th colspan='1'>".t("$type yhteensä")."</th><td align='right'>$kappale</td></tr>";
+				foreach ($yhteensa as $type => $kappale) {
+					echo "<tr>";
+					echo "<th colspan='4'>".t("$type yhteensä")."</th>";
+					echo "<th style='text-align:right;'>$kappale</th>";
+					echo "<th></th>";
+					echo "</tr>";
 				}
 
-				echo "</table>";
+				echo "</table><br>";
 			}
-
-			echo "</td>";
-			echo "</tr>";
-			echo "</table><br>";
 
 			if(!isset($raportti)) {
 				if($tuoterow["tuotetyyppi"] == "R") $raportti="KULUTUS";
@@ -877,13 +956,13 @@
 					<input type='hidden' name='tapahtumalaji' value='$tapahtumalaji'>
 					<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>
 					<font class='message'>".t("Raportointi")."</font><a href='#' name='Raportit'></a>
-					<input type='radio' onclick='submit()' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")."
-					<input type='radio' onclick='submit()' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta")."
+					(<input type='radio' onclick='submit()' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")." /
+					<input type='radio' onclick='submit()' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta").")
 				</form><hr>";
 
 			echo "<table>";
 
-			if($raportti=="MYYNTI") {
+			if ($raportti=="MYYNTI") {
 				//myynnit
 				$edvuosi  = date('Y')-1;
 				$taavuosi = date('Y');
@@ -956,7 +1035,7 @@
 
 				echo "</table><br>";
 			}
-			elseif($raportti == "KULUTUS") {
+			elseif ($raportti == "KULUTUS") {
 
 				$kk=date("m");
 				$vv=date("Y");
@@ -1467,15 +1546,17 @@
 			$vararvo_nyt = sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"]);
 			$saldo_nyt = $kokonaissaldo_tapahtumalle;
 
-			echo "<tr class='aktiivi'>
-					<td colspan='4'>".t("Varastonarvo nyt").":</td>
-					<td align='right'>$tuoterow[kehahin]</td>
-					<td align='right'></td>
-					<td align='right'>$vararvo_nyt</td>
-					<td align='right'>".sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"])."</td>
-					<td align='right'>".sprintf('%.2f', $saldo_nyt)."</td>
-					<td></td>
-					</tr>";
+			if ($tuoterow["ei_saldoa"] == "") {
+				echo "<tr class='aktiivi'>
+						<td colspan='4'>".t("Varastonarvo nyt").":</td>
+						<td align='right'>$tuoterow[kehahin]</td>
+						<td align='right'></td>
+						<td align='right'>$vararvo_nyt</td>
+						<td align='right'>".sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"])."</td>
+						<td align='right'>".sprintf('%.2f', $saldo_nyt)."</td>
+						<td></td>
+						</tr>";
+			}
 
 			while ($prow = mysql_fetch_array ($qresult)) {
 
@@ -1517,9 +1598,16 @@
 						echo "<td nowrap align='right' valign='top'></td>";
 					}
 
-					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $prow["arvo"])."</td>";
-					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $vararvo_nyt)."</td>";
-					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $saldo_nyt)."</td>";
+					if ($tuoterow["ei_saldoa"] == "") {
+						echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $prow["arvo"])."</td>";
+						echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $vararvo_nyt)."</td>";
+						echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $saldo_nyt)."</td>";
+					}
+					else {
+						echo "<td></td>";
+						echo "<td></td>";
+						echo "<td></td>";
+					}
 
 					if ($tilalehinta != '') {
 						echo "<td nowrap align='right' valign='top'>$prow[tilalehinta]</td>";

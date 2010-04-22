@@ -1265,8 +1265,6 @@
 
 			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow["sarjanumeroseuranta"] == "V" or $tuoterow['sarjanumeroseuranta'] == 'T') {
 
-				echo "<font class='message'>".t("Sarjanumerot")."</font><hr>";
-
 				$query	= "	SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
 							tilausrivi_osto.tunnus osto_rivitunnus,
 							tilausrivi_osto.perheid2 osto_perheid2,
@@ -1285,8 +1283,9 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sarjares) > 0) {
+					echo "<font class='message'>".t("Sarjanumerot")."</font><hr>";
+
 					echo "<table>";
-					echo "<tr><th colspan='5'>".t("Varasto").":</th></tr>";
 					echo "<tr><th>".t("Nimitys")."</th>";
 					echo "<th>".t("Sarjanumero")."</th>";
 					echo "<th>".t("Varastopaikka")."</th>";
@@ -1342,7 +1341,6 @@
 				}
 			}
 			elseif ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F" or $tuoterow["sarjanumeroseuranta"] == "G") {
-				echo "<font class='message'>".t("Er‰numerot")."</font><hr>";
 
 				$query	= "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto,
 							sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso,
@@ -1358,6 +1356,8 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sarjares) > 0) {
+					echo "<font class='message'>".t("Er‰numerot")."</font><hr>";
+
 					echo "<table>";
 					if ($tuoterow["sarjanumeroseuranta"] == "F") {
 						echo "<tr><th colspan='4'>".t("Varasto").":</th></tr>";
@@ -1411,7 +1411,7 @@
 			}
 
 			// Varastotapahtumat
-			echo "<font class='message'>".t("Tapahtumat")."</font><hr>";
+			echo "<font class='message'>".t("Tuotteen tapahtumat")."</font><hr>";
 			echo "<table>";
 			echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";
 
@@ -1423,8 +1423,8 @@
 			echo "<input type='hidden' name='raportti' value='$raportti'>";
 			echo "<a href='#' name='Tapahtumat'>";
 
-			echo "<tr><th>".t("Tuotehistoria").":</th>";
-			echo "<th colspan='4'>".t("N‰yt‰ tapahtumat").":";
+			echo "<tr>";
+			echo "<th colspan='5'>".t("N‰yt‰ tapahtumat").": ";
 			echo "<select name='historia' onchange='submit();'>'";
 			echo "<option value='1' $chk[1]> ".t("20 viimeisint‰")."</option>";
 
@@ -1479,11 +1479,17 @@
 			echo "<option value='poistettupaikka' $sel8>".t("Poistetut tuotepaikat")."</option>";
 			echo "<option value='uusipaikka' $sel9>".t("Perustetut tuotepaikat")."</option>";
 			echo "</select>";
-			echo t("N‰yt‰ tilausrivin hinta ja ale").": <input type='checkbox' name='tilalehinta' id='tilalehinta' $check onClick='javascript:submit();'></th>";
+			echo "</th>";
+
+			echo "<th>";
+			echo t("N‰yt‰ tilausrivin hinta ja ale").": <input type='checkbox' name='tilalehinta' id='tilalehinta' $check onClick='javascript:submit();'>";
+			echo "</th>";
+
 			echo "</tr>";
 
 			echo "<tr>";
-			echo "<th>".t("K‰ytt‰j‰@Pvm")."</th>";
+			echo "<th>".t("Laatija")."</th>";
+			echo "<th>".t("Pvm")."</th>";
 			echo "<th>".t("Tyyppi")."</th>";
 			echo "<th>".t("M‰‰r‰")."</th>";
 			echo "<th>".t("Kplhinta")."</th>";
@@ -1518,7 +1524,7 @@
 				$ehto  = "";
 			}
 
-			$query = "	SELECT tapahtuma.tuoteno, tapahtuma.laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
+			$query = "	SELECT tapahtuma.tuoteno, ifnull(kuka.nimi, tapahtuma.laatija) laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
 						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus,
 						concat_ws(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) tapapaikka,
 						concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
@@ -1528,10 +1534,11 @@
 						lasku2.tunnus lasku2tunnus,
 						concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), concat(tilausrivi.ale, ' %'), round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
-						LEFT JOIN tilausrivi use index (primary) ON tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus
-						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-						LEFT JOIN lasku use index (primary) ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
-						LEFT JOIN lasku as lasku2 use index (primary) ON lasku2.yhtio=tilausrivi.yhtio and lasku2.tunnus=tilausrivi.uusiotunnus
+						LEFT JOIN tilausrivi use index (primary) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+						LEFT JOIN lasku use index (primary) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+						LEFT JOIN lasku AS lasku2 use index (primary) ON (lasku2.yhtio = tilausrivi.yhtio AND lasku2.tunnus = tilausrivi.uusiotunnus)
+						LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
 						WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 						and tapahtuma.tuoteno = '$tuoteno'
 						$ehto
@@ -1547,15 +1554,20 @@
 			$saldo_nyt = $kokonaissaldo_tapahtumalle;
 
 			if ($tuoterow["ei_saldoa"] == "") {
-				echo "<tr class='aktiivi'>
-						<td colspan='4'>".t("Varastonarvo nyt").":</td>
-						<td align='right'>$tuoterow[kehahin]</td>
-						<td align='right'></td>
-						<td align='right'>$vararvo_nyt</td>
-						<td align='right'>".sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"])."</td>
-						<td align='right'>".sprintf('%.2f', $saldo_nyt)."</td>
-						<td></td>
-						</tr>";
+				echo "<tr class='aktiivi'>";
+				echo "<td colspan='5'>".t("Varastonarvo nyt").":</td>";
+				echo "<td align='right'>$tuoterow[kehahin]</td>";
+				echo "<td align='right'></td>";
+				echo "<td align='right'>$vararvo_nyt</td>";
+				echo "<td align='right'>".sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"])."</td>";
+				echo "<td align='right'>".sprintf('%.2f', $saldo_nyt)."</td>";
+				echo "<td></td>";
+
+				if ($tilalehinta != '') {
+					echo "<td></td>";
+				}
+				
+				echo "</tr>";
 			}
 
 			while ($prow = mysql_fetch_array ($qresult)) {
@@ -1569,7 +1581,8 @@
 
 				if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
 					echo "<tr class='aktiivi'>";
-					echo "<td nowrap valign='top'>$prow[laatija]@".tv1dateconv($prow["laadittu"], "pitka")."</td>";
+					echo "<td nowrap valign='top'>$prow[laatija]</td>";
+					echo "<td nowrap valign='top'>".tv1dateconv($prow["laadittu"], "pitka")."</td>";
 					echo "<td nowrap valign='top'>";
 
 					if ($prow["laji"] == "laskutus" and $prow["laskutunnus"] != "") {

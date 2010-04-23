@@ -390,7 +390,10 @@
 		// Asiaakkaallevalmistus ja halutaan myydä rivi varastosta
 		$perhelisa = " and tuoteperhe.tyyppi in ('P','') ";
 		$var 		= "";
-		$rivityyppi = 'L'; // Myyntitilausrivi
+		
+		if (!isset($perheid) or $perheid == 0 or $perheid == $rivitunnus) {
+			$rivityyppi = 'L'; // Myyntitilausrivi
+		}
 	}
 	else {
 		$perhelisa = " and tuoteperhe.tyyppi in ('P','') ";

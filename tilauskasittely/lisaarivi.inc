@@ -1320,6 +1320,19 @@
 
 										$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi' where yhtio='$kukarow[yhtio]' and tunnus in ('$perheid_lisaarivi','$lisatty_tun')";
 										$result = mysql_query($query) or pupe_error($query);
+
+										if (isset($rekkari) and trim($rekkari) != '') {
+											$kommentti = t("Rekisterinumero").": ".$rekkari."\n".$kommentti;
+											$query = "UPDATE tilausrivi SET kommentti = '$kommentti' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$perheid_lisaarivi'";
+											$result = mysql_query($query) or pupe_error($query);
+										}
+									}
+								}
+								else {
+									if (isset($rekkari) and trim($rekkari) != '') {
+										$kommentti = t("Rekisterinumero").": ".$rekkari."\n".$kommentti;
+										$query = "UPDATE tilausrivi SET kommentti = '$kommentti' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$lisatty_tun'";
+										$result = mysql_query($query) or pupe_error($query);
 									}
 								}
 

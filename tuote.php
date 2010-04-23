@@ -537,11 +537,32 @@
 
 			// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
 			if (table_exists("yhteensopivuus_tuote") and file_exists("yhteensopivuus_tuote.php")) {
+                
+                $lisa = " and tuoteno = '$tuoteno' ";
 
+                $query = "  SELECT isatuoteno
+                            FROM tuoteperhe
+                            WHERE yhtio = '$kukarow[yhtio]'
+                            AND tuoteno = '$tuoteno'";
+                $tuoteperhe_result = mysql_query($query) or pupe_error($query);
+                
+                if (mysql_num_rows($tuoteperhe_result) > 0) {
+                    $lisa = " and tuoteno in ('$tuoteno',";
+                }
+                
+                while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
+                    $lisa .= "'$tuoteperhe_row[isatuoteno]',";
+                }
+                
+                if (mysql_num_rows($tuoteperhe_result) > 0) {
+                    $lisa = substr($lisa, 0, -1);
+                    $lisa .= ") ";
+                }
+                
 				$query = "	SELECT tyyppi, count(*) countti
 							from yhteensopivuus_tuote
-							where tuoteno = '$tuoteno'
-							and yhtio = '$kukarow[yhtio]'
+							where yhtio = '$kukarow[yhtio]'
+							$lisa
 							GROUP BY 1
 							HAVING countti > 0";
 				$yhtresult = mysql_query($query) or pupe_error($query);
@@ -553,6 +574,7 @@
 
 						echo "<form action='yhteensopivuus_tuote.php' method='post'>";
 						echo "<input type='hidden' name='tee' value='etsi'>";
+                        echo "<input type='hidden' name='lopetus' value='".$palvelin2."tuote.php////tuoteno=$tuoteno//tee=Z'>";
 						echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 						echo "<input type='submit' value='Siirry tuotteen $yhttoim yhteensopivuuksiin'>";
 						echo "</form>";

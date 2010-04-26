@@ -2210,15 +2210,21 @@ if ($tee == '') {
 
 			$tresult = t_avainsana("TV","", $extralisa);
 
-			echo "<td><select name='tilausvahvistus' onchange='submit();' ".js_alasvetoMaxWidth("tilausvahvistus", 250)." $state>";
-			echo "<option value=' '>".t("Ei Vahvistusta")."</option>";
+            if ($kukarow["extranet"] != "" and $kukarow["yhtio"] == 'orum') {
+                $row = mysql_fetch_assoc($tresult);
+    			echo "<td><input type='hidden' name='tilausvahvistus' value='$row[selite]'>$row[selitetark]</td>";
+            }
+            else {
+    			echo "<td><select name='tilausvahvistus' onchange='submit();' ".js_alasvetoMaxWidth("tilausvahvistus", 250)." $state>";
+    			echo "<option value=' '>".t("Ei Vahvistusta")."</option>";
 
-			while($row = mysql_fetch_assoc($tresult)) {
-				$sel = "";
-				if ($row["selite"]== $laskurow["tilausvahvistus"]) $sel = 'selected';
-				echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
-			}
-			echo "</select></td>";
+    			while($row = mysql_fetch_assoc($tresult)) {
+    				$sel = "";
+    				if ($row["selite"]== $laskurow["tilausvahvistus"]) $sel = 'selected';
+    				echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
+    			}
+    			echo "</select></td>";
+            }
 		}
 		elseif (($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOLISTA") and $yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
 			echo "<td>".t("Kyllä")."</td>";

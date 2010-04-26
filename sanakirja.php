@@ -25,11 +25,11 @@ foreach ($sanakirja_kielet as $sanakirja_kieli) {
 
 	$sels = '';
 
-	if ($kieli[$r] == $sanakirja_kieli) {
+	if (strtoupper($kieli[$r]) == strtoupper($sanakirja_kieli)) {
 		$sels = "CHECKED";
 	}
 
-	echo "<tr><td>".t("$maa")."</td><td><input type='checkbox' name='kieli[$r]' value='$sanakirja_kieli' $sels></td></tr>";
+	echo "<tr><td>".strtoupper(t("$maa"))."</td><td><input type='checkbox' name='kieli[$r]' value='$sanakirja_kieli' $sels></td></tr>";
 	$r++;
 }
 

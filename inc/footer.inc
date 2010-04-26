@@ -30,7 +30,28 @@
 		echo "<font class='info'>$aika ".round((($loppumem-$alkumem)/1000000), 1)."</font>";
 
 		if (isset($kaannetyt_sanat) and count($kaannetyt_sanat) > 0) {
-			echo " <a href='".$palvelin."sanakirja.php?hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON&etsi_kieli=fi&kieli[0]=en&show=all'><font class='info'>".t("Sanakirja")."</font></a>";
+
+			switch (strtoupper($kukarow["kieli"])) {
+				case "EN":
+					$kindex = 0;
+					break;
+				case "SE":
+					$kindex = 1;
+					break;
+				case "DE":
+					$kindex = 2;
+					break;
+				case "DK":
+					$kindex = 3;
+					break;
+				case "EE":
+					$kindex = 4;
+					break;
+				default:
+					$kindex = 0;
+			}
+
+			echo " <a href='".$palvelin."sanakirja.php?hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON&etsi_kieli=fi&kieli[$kindex]=$kukarow[kieli]&show=all'><font class='info'>".t("Sanakirja")."</font></a>";
 		}
 
 		echo "<br><br>";

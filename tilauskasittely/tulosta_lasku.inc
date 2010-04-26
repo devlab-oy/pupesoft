@@ -874,7 +874,10 @@ if (!function_exists('rivi_original')) {
 		//Kommentti
 		if (trim($row["kommentti"]) != '') {
 			$kommentit = explode("\n", trim($row["kommentti"]));
-
+			
+			$pdf->draw_text(35, $kala, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
+			$kala = $kala - 10;
+			
 			foreach($kommentit as $akey => $kommentti) {
 
 				if ($akey == 0) {
@@ -885,7 +888,7 @@ if (!function_exists('rivi_original')) {
 					$rpit1 = 500;
 					$rpit2 = 450;
 				}
-
+			
 				// Jos rivikommentti on pitkä niin rivitämme sen
 				if ($pdf->strlen($kommentti, $pieni) > $rpit1) {
 
@@ -895,11 +898,11 @@ if (!function_exists('rivi_original')) {
 
 					$sanat = explode('##', $kommentti);
 					$lause = "";
-
+					
 					foreach ($sanat as $sana) {
 						if ($pdf->strlen($lause, $pieni) > $rpit2) {
 
-							$pdf->draw_text(35, $kala, $row["otunnus"].": ".$lause, $thispage, $pieni);
+							$pdf->draw_text(35, $kala, $lause, $thispage, $pieni);
 							$kala = $kala - 10;
 
 							if ($kala <= 180 + $barcode_korkeus) {
@@ -923,7 +926,7 @@ if (!function_exists('rivi_original')) {
 						$pdf->draw_text(35, $kala, $kommentti, $thispage, $pieni);
 					}
 					else {
-						$pdf->draw_text(35, $kala, $row["otunnus"].": ".$kommentti, $thispage, $pieni);
+						$pdf->draw_text(35, $kala, $kommentti, $thispage, $pieni);
 					}
 					$kala = $kala - 10;
 
@@ -938,7 +941,7 @@ if (!function_exists('rivi_original')) {
 			$kala += 10;
 		}
 		elseif ($laskutyyppi != 6) {
-			$pdf->draw_text(35, $kala, $row["otunnus"],	$thispage, $pieni);
+			$pdf->draw_text(35, $kala, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
 		}
 
 		$kala = $kala - 15;

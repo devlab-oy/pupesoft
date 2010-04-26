@@ -664,6 +664,10 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
 
+	//Poistetaan asennuskalenterimerkinnät
+	$query = "	UPDATE kalenteri SET tyyppi = 'DELETEDasennuskalenteri' WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'asennuskalenteri' and liitostunnus = '$kukarow[kesken]'";
+	$result = mysql_query($query) or pupe_error($query);
+
 	if ($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and ($toim != "TARJOUS" or ($toim == "TARJOUS" and $laskurow["tunnusnippu"] != $laskurow["tunnus"])) and $toim != "PROJEKTI") {
 
 		$aika = date("d.m.y @ G:i:s", time());
@@ -2187,7 +2191,10 @@ if ($tee == '') {
 
 		echo "<tr>$jarjlisa";
 
-		if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
+		if ($kukarow["extranet"] != "" and $kukarow["yhtio"] == 'orum') {
+			echo "<th>&nbsp;</th>";
+		}
+		elseif ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 			echo "<th>".t("Tilausvahvistus").":</th>";
 		}
 		elseif (($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOLISTA") and $yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
@@ -2197,7 +2204,10 @@ if ($tee == '') {
 			echo "<th>&nbsp;</th>";
 		}
 
-		if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
+		if ($kukarow["extranet"] != "" and $kukarow["yhtio"] == 'orum') {
+			echo "<td><input type='hidden' name='tilausvahvistus' value='$laskurow[tilausvahvistus]'>&nbsp;</td>";
+		}
+		elseif ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 			$extralisa = "";
 
 			if ($kukarow["extranet"] != "") {
@@ -2210,21 +2220,16 @@ if ($tee == '') {
 
 			$tresult = t_avainsana("TV","", $extralisa);
 
-            if ($kukarow["extranet"] != "" and $kukarow["yhtio"] == 'orum') {
-                $row = mysql_fetch_assoc($tresult);
-    			echo "<td><input type='hidden' name='tilausvahvistus' value='$row[selite]'>$row[selitetark]</td>";
-            }
-            else {
-    			echo "<td><select name='tilausvahvistus' onchange='submit();' ".js_alasvetoMaxWidth("tilausvahvistus", 250)." $state>";
-    			echo "<option value=' '>".t("Ei Vahvistusta")."</option>";
+    		echo "<td><select name='tilausvahvistus' onchange='submit();' ".js_alasvetoMaxWidth("tilausvahvistus", 250)." $state>";
+   			echo "<option value=' '>".t("Ei Vahvistusta")."</option>";
 
-    			while($row = mysql_fetch_assoc($tresult)) {
-    				$sel = "";
-    				if ($row["selite"]== $laskurow["tilausvahvistus"]) $sel = 'selected';
-    				echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
-    			}
-    			echo "</select></td>";
-            }
+   			while($row = mysql_fetch_assoc($tresult)) {
+   				$sel = "";
+   				if ($row["selite"]== $laskurow["tilausvahvistus"]) $sel = 'selected';
+   				echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
+   			}
+   			echo "</select></td>";
+
 		}
 		elseif (($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOLISTA") and $yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
 			echo "<td>".t("Kyllä")."</td>";
@@ -2294,6 +2299,37 @@ if ($tee == '') {
 					$liitemaara++;
 				}
 				echo "</td></tr>";
+			}
+
+
+			if ($toim == 'TYOMAARAYS') {
+				// Katsotaan onko kalenterimerkintöjä
+				$query = "	SELECT
+							concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', kuka.nimi, '##', kuka.kuka) asennuskalenteri
+							FROM  kalenteri
+							LEFT JOIN kuka ON kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
+							WHERE kalenteri.yhtio = '$kukarow[yhtio]'
+							and kalenteri.tyyppi = 'asennuskalenteri'
+							and kalenteri.liitostunnus = '$kukarow[kesken]'";
+				$liiteres = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($liiteres) > 0) {
+
+					echo "<tr>$jarjlisa<th>".t("Asennustyöt").":</th><td colspan='3'>";
+
+					while ($liiterow = mysql_fetch_array($liiteres)) {
+
+						list($asekal_alku, $asekal_loppu, $asekal_nimi, $asekal_kuka) = explode("##", $liiterow["asennuskalenteri"]);
+
+						$asekal_atstamp = mktime(substr($asekal_alku,11,2), substr($asekal_alku,14,2), 0, substr($asekal_alku,5,2), substr($asekal_alku,8,2), substr($asekal_alku,0,4));
+						$asekal_ltstamp = mktime(substr($asekal_loppu,11,2), substr($asekal_loppu,14,2), 0, substr($asekal_loppu,5,2), substr($asekal_loppu,8,2), substr($asekal_loppu,0,4));
+
+						$kaletunnit[$nimi] += ($ltstamp - $atstamp)/60;
+
+						echo "$asekal_nimi: ".tv1dateconv($asekal_alku, "P")." - ".tv1dateconv($asekal_loppu, "P")."<br>";
+					}
+					echo "</td></tr>";
+				}
 			}
 
 			if ($toim == 'TARJOUS') {

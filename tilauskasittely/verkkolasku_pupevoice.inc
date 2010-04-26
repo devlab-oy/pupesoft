@@ -181,7 +181,7 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("RowVatAmount",						$vatamount, 								$tootxml); // veron m‰‰r‰
 		xml_add("RowTotalVatExcludedAmount",		$tilrow['rivihinta'],		 				$tootxml); // veroton rivihinta
 		xml_add("RowTotalVatIncludedAmount",		$totalvat, 									$tootxml); // verollinen rivihinta
-		xml_add("RowFreeText",						$tilrow['kommentti'],		 				$tootxml);
+		xml_add("RowFreeText",						substr($tilrow['kommentti'], 0, 512),		$tootxml);
 		fputs($tootxml, "</Row>\n");
 	}
 }

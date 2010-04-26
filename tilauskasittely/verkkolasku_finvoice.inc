@@ -521,7 +521,8 @@ if (!function_exists('finvoice_rivi')) {
 			#xml_add("RowAccountDimensionText", 												"", 							$tootfinvoice);
 			#xml_add("RowSellerAccountText", 													"", 							$tootfinvoice);
 
-			$kommentit = explode("|", trim($tilrow["kommentti"]));
+			// Kommenttirivi max 512 pitkä
+			$kommentit = explode("|", wordwrap(trim($tilrow["kommentti"]), 512, "|"));
 
 			foreach($kommentit as $kommentti) {
 				if (trim($kommentti) != "") {

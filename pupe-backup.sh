@@ -59,3 +59,4 @@ find $BACKUPDIR -mtime +$BACKUPPAIVAT -delete
 
 echo -n `date "+%Y-%m-%d %H:%M:%S"`
 echo " - All done."
+echo

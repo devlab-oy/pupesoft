@@ -311,7 +311,7 @@
 
 		if ($iltasiivo != "") {
 
-			echo "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]\n\n";
+			echo date("Y-m-d H:i:s")." - Iltasiivo $yhtiorow[nimi]\n";
 			echo $iltasiivo;
 			echo "\n";
 

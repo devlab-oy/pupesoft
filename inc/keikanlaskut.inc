@@ -191,7 +191,7 @@
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
 				sum(tiliointi.summa) 'varastossa',
 				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
-				round(sum(lasku2.summa*lasku2.vienti_kurssi),2) 'kohdistettu'
+				round(sum(lasku2.arvo*lasku2.vienti_kurssi),2) 'kohdistettu'
 				FROM lasku
 				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
 				LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio and

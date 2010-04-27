@@ -576,6 +576,7 @@
 						echo "<input type='hidden' name='tee' value='etsi'>";
                         echo "<input type='hidden' name='lopetus' value='".$palvelin2."tuote.php////tuoteno=$tuoteno//tee=Z'>";
 						echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+						echo "<input type='hidden' name='toim' value='$yhttoim'>";
 						echo "<input type='submit' value='Siirry tuotteen $yhttoim yhteensopivuuksiin'>";
 						echo "</form>";
 					}

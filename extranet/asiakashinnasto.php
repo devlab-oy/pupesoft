@@ -3,168 +3,168 @@
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
 
+	if (isset($_POST["tee_lataa"])) {
+		if($_POST["tee_lataa"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	}
+
 	if (@include("../inc/parametrit.inc"));
 	elseif (@include("parametrit.inc"));
 	else exit;
 
-	echo "<font class='head'>".t("Hinnasto asiakashinnoin")."</font><hr>";
-
-	if ($kukarow["eposti"] == "") {
-		echo "<font class='error'>".t("Sinulle ei ole määritelty sähköpostiosoitetta. Et voi ajaa tätä raporttia.")."</font><br>";
-	}
-
-	$ytunnus = trim($ytunnus);
-
-	if ($tee != '' and $ytunnus != '' and (int) $asiakas == 0 and $kukarow["extranet"] == '') {
-
-		if (isset($muutparametrit)) {
-			$muutparametrit = unserialize(urldecode($muutparametrit));
-			$osasto 	= $muutparametrit[0];
-			$try 		= $muutparametrit[1];
-			$checkall	= $muutparametrit[2];
-		}
-
-		$muutparametrit = array($osasto, $try, $checkall);
-		$muutparametrit = urlencode(serialize($muutparametrit));
-
-		require("../inc/asiakashaku.inc");
-
-		$asiakas = $asiakasrow["tunnus"];
-		$ytunnus = $asiakasrow["ytunnus"];
-	}
-	elseif ($tee != '' and $kukarow["extranet"] != '') {
-		//Haetaan asiakkaan tunnuksella
-		$query  = "	SELECT *
-					FROM asiakas
-					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) == 1) {
-			$asiakasrow = mysql_fetch_array($result);
-
-			$ytunnus = $asiakasrow["ytunnus"];
-			$asiakas = $asiakasrow["tunnus"];
-		}
-		else {
-			echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."<br><br>";
+	if (isset($tee_lataa)) {
+		if ($tee_lataa == "lataa_tiedosto") {
+			readfile("/tmp/".basename($tmpfilenimi));
 			exit;
 		}
 	}
+	else {
 
-	if ($tee != '' and $kukarow["eposti"] != "" and $asiakas > 0) {
-		$where1 = '';
-		$where2 = '';
-		$osasto = mysql_real_escape_string(trim($osasto));
-		$try    = mysql_real_escape_string(trim($try));
+		echo "<font class='head'>".t("Hinnasto asiakashinnoin")."</font><hr>";
 
-		if ($osasto != '' and $checkall == "") {
-			$osastot = split(" ", $osasto);
+		$ytunnus = trim($ytunnus);
 
-			for($i = 0; $i < sizeof($osastot); $i++) {
-				$osastot[$i] = trim($osastot[$i]);
+		if ($tee != '' and $ytunnus != '' and $kukarow["extranet"] == '') {
 
-				if ($osastot[$i] != '') {
-					if (strpos($osastot[$i],"-")) {
-
-						$osastot2 = split("-",$osastot[$i]);
-
-						for($ia = $osastot2[0]; $ia<= $osastot2[1]; $ia++) {
-							$where1 .= "'".$ia."',";
-						}
-					}
-					else {
-						$where1 .= "'".$osastot[$i]."',";
-					}
-				}
+			if (isset($muutparametrit)) {
+				$muutparametrit = unserialize(urldecode($muutparametrit));
+				$mul_osasto 	= $muutparametrit[0];
+				$mul_try 		= $muutparametrit[1];
 			}
-			$where1 = substr($where1,0,-1);
-			$where1 = " osasto in (".$where1.") ";
-	    }
 
-		if ($try != '' and $checkall == "") {
-			$tryt = split(" ",$try);
+			$muutparametrit = array($mul_osasto, $mul_try);
+			$muutparametrit = urlencode(serialize($muutparametrit));
 
-			for($i = 0; $i < sizeof($tryt); $i++) {
-				$tryt[$i] = trim($tryt[$i]);
+			require("../inc/asiakashaku.inc");
 
-				if ($tryt[$i] != '') {
-					if (strpos($tryt[$i],"-")) {
-						$tryt2 = split("-",$tryt[$i]);
-						for($ia = $tryt2[0]; $ia<= $tryt2[1]; $ia++) {
-							$where2 .= "'".$ia."',";
-						}
-					}
-					else {
-						$where2 .= "'".$tryt[$i]."',";
-					}
-				}
+			$asiakas = $asiakasrow["tunnus"];
+			$ytunnus = $asiakasrow["ytunnus"];
+		}
+		elseif ($tee != '' and $kukarow["extranet"] != '') {
+			//Haetaan asiakkaan tunnuksella
+			$query  = "	SELECT *
+						FROM asiakas
+						WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$asiakasrow = mysql_fetch_array($result);
+
+				$ytunnus = $asiakasrow["ytunnus"];
+				$asiakas = $asiakasrow["tunnus"];
 			}
-			$where2 = substr($where2, 0, -1);
-			$where2 = " try in (".$where2.") ";
+			else {
+				echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."<br><br>";
+				exit;
+			}
 		}
 
-		if (strlen($where1) > 0) {
-			$where = $where1." and ";
-		}
-		if (strlen($where2) > 0) {
-			$where = $where2." and ";
-		}
-		if (strlen($where2) > 0 and strlen($where1) > 0) {
-			$where = "(". $where1." and ".$where2.")  and ";
-		}
+		//Käyttöliittymä
+		echo "<br>";
+		echo "<table><form method='post' action='$PHP_SELF'>";
+		echo "<input type='hidden' name='tee' value='kaikki'>";
 
-		$query  = "	SELECT if(toim_maa != '', toim_maa, maa) sallitut_maat, osasto
-					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$asiakas'";
-		$maa_result = mysql_query($query) or pupe_error($query);
-		$asiakas_maa_row = mysql_fetch_array($maa_result);
+		if ($kukarow["extranet"] == '') {
+			if ($asiakas > 0) {
+				echo "<tr><th>".t("Asiakas").":</th><td><input type='hidden' name='ytunnus' value='$ytunnus'>$ytunnus $asiakasrow[nimi]</td></tr>";
 
-		$kieltolisa = '';
-
-		if ($asiakas_maa_row["sallitut_maat"] != "") {
-			$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$asiakas_maa_row[sallitut_maat]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$asiakas_maa_row[sallitut_maat]%' ";
+				echo "<input type='hidden' name='asiakasid' value='$asiakas'></td></tr>";
+			}
+			else {
+				echo "<tr><th>".t("Asiakas").":</th><td><input type='text' name='ytunnus' size='15' value='$ytunnus'></td></tr>";
+			}
 		}
 
-		if ((strlen($where) > 0 or $checkall != "") and $ytunnus != '' and $asiakas != '') {
+		// Monivalintalaatikot (osasto, try tuotemerkki...)
+		// Määritellään mitkä latikot halutaan mukaan
+		$monivalintalaatikot = array("OSASTO", "TRY");
+
+		echo "<tr><th>".t("Osasto")." / ".t("tuoteryhmä").":</th><td nowrap>";
+
+		if (@include("tilauskasittely/monivalintalaatikot.inc"));
+		elseif (@include("monivalintalaatikot.inc"));
+
+		echo "</td></tr>";
+		echo "</table><br>";
+		echo "<input type='submit' name='ajahinnasto' value='".t("Aja hinnasto")."'>";
+		echo "</form>";
+
+		if ($kukarow["extranet"] == '' and $asiakas > 0) {
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='submit' value='Valitse uusi asiakas'>";
+			echo "</form>";
+		}
+
+		if ($tee != '' and $asiakas > 0 and isset($ajahinnasto)) {
+
+			$query  = "	SELECT if(toim_maa != '', toim_maa, maa) sallitut_maat, osasto
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$asiakas'";
+			$maa_result = mysql_query($query) or pupe_error($query);
+			$asiakas_maa_row = mysql_fetch_array($maa_result);
+
+			$kieltolisa = '';
+
+			if ($asiakas_maa_row["sallitut_maat"] != "") {
+				$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$asiakas_maa_row[sallitut_maat]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$asiakas_maa_row[sallitut_maat]%' ";
+			}
+
 			$query = "	SELECT *
 						FROM tuote
-						WHERE $where tuote.yhtio='$kukarow[yhtio]'
-						and tuote.status NOT IN ('P','X') and hinnastoon != 'E'
+						WHERE tuote.yhtio = '$kukarow[yhtio]'
+						and tuote.status NOT IN ('P','X')
+						and hinnastoon != 'E'
 						$kieltolisa
+						$lisa
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 			$rresult = mysql_query($query) or pupe_error($query);
 
-			//kirjoitetaan pdf faili levylle..
-			$filenimi = "$kukarow[yhtio]-asiakashinnasto-".md5(uniqid(rand(),true)).".txt";
-
-			if (!$fh = fopen("/tmp/".$filenimi, "w+"))
-					die("filen luonti epäonnistui!");
-
-			echo "<font class='message'>";
-			echo t("Asiakashinnastoa luodaan...");
-			echo "</font>";
-			echo "<br>";
+			echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
 			flush();
 
-			$rivi = t("Ytunnus").": $ytunnus";
-			$rivi .= "\r\n";
-			$rivi .= t("Asiakas").": $asiakasrow[nimi] $asiakasrow[nimitark]";
-			$rivi .= "\r\n";
-			$rivi .= t("Tuotenumero")."\t";
-			$rivi .= t("EAN-koodi")."\t";
-			$rivi .= t("Osasto")."\t";
-			$rivi .= t("Tuoteryhmä")."\t";
-			$rivi .= t("Nimitys")."\t";
-			$rivi .= t("Yksikkö")."\t";
-			$rivi .= t("Aleryhmä")."\t";
-			$rivi .= t("Verollinen Myyntihinta")."\t";
-			$rivi .= t("Alennus")."\t";
-			$rivi .= t("Sinun veroton hinta")."\t";
-			$rivi .= t("Sinun verollinen hinta")."\t";
-			$rivi .= "\r\n";
-			fwrite($fh, $rivi);
+			require_once ('inc/ProgressBar.class.php');
+			$bar = new ProgressBar();
+			$elements = mysql_num_rows($rresult); // total number of elements to process
+			$bar->initialize($elements); // print the empty bar
 
-			$kala = 0;
+			if (include('Spreadsheet/Excel/Writer.php')) {
+
+				//keksitään failille joku varmasti uniikki nimi:
+				list($usec, $sec) = explode(' ', microtime());
+				mt_srand((float) $sec + ((float) $usec * 100000));
+				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+
+				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+				$workbook->setVersion(8);
+				$worksheet = $workbook->addWorksheet('Sheet 1');
+
+				$format_bold = $workbook->addFormat();
+				$format_bold->setBold();
+
+				$excelrivi = 0;
+			}
+
+			if (isset($workbook)) {
+				$worksheet->writeString($excelrivi,  0, t("Ytunnus").": $ytunnus", $format_bold);
+				$excelrivi++;
+
+				$worksheet->writeString($excelrivi,  0, t("Asiakas").": $asiakasrow[nimi] $asiakasrow[nimitark]", $format_bold);
+				$excelrivi++;
+
+				$worksheet->writeString($excelrivi,  0, t("Tuotenumero"), $format_bold);
+				$worksheet->writeString($excelrivi,  1, t("EAN-koodi"), $format_bold);
+				$worksheet->writeString($excelrivi,  2, t("Osasto"), $format_bold);
+				$worksheet->writeString($excelrivi,  3, t("Tuoteryhmä"), $format_bold);
+				$worksheet->writeString($excelrivi,  4, t("Nimitys"), $format_bold);
+				$worksheet->writeString($excelrivi,  5, t("Yksikkö"), $format_bold);
+				$worksheet->writeString($excelrivi,  6, t("Aleryhmä"), $format_bold);
+				$worksheet->writeString($excelrivi,  7, t("Veroton Myyntihinta"), $format_bold);
+				$worksheet->writeString($excelrivi,  8, t("Verollinen Myyntihinta"), $format_bold);
+				$worksheet->writeString($excelrivi,  9, t("Alennus"), $format_bold);
+				$worksheet->writeString($excelrivi, 10, t("Sinun veroton hinta"), $format_bold);
+				$worksheet->writeString($excelrivi, 11, t("Sinun verollinen hinta"), $format_bold);
+				$excelrivi++;
+			}
 
 			if ($GLOBALS['eta_yhtio'] != '' and ($GLOBALS['koti_yhtio'] != $kukarow['yhtio'] or $asiakas_maa_row['osasto'] != '6')) {
 				unset($GLOBALS['eta_yhtio']);
@@ -172,13 +172,13 @@
 
 			while ($rrow = mysql_fetch_assoc($rresult)) {
 
-				$kala++;
+				$bar->increase();
 
 				if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
 					$query = "	SELECT *
 								FROM tuote
-								WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
-								AND tuoteno = '{$rrow['tuoteno']}'";
+								WHERE yhtio = '$GLOBALS[eta_yhtio]'
+								AND tuoteno = '$rrow[tuoteno]'";
 					$tres_eta = mysql_query($query) or pupe_error($query);
 					$alehinrrow = mysql_fetch_assoc($tres_eta);
 				}
@@ -189,16 +189,17 @@
 				//haetaan asiakkaan oma hinta
 				$laskurow["ytunnus"] 		= $ytunnus;
 				$laskurow["liitostunnus"] 	= $asiakas;
-				$laskurow["vienti"] 		= '';
-				$laskurow["alv"] 			= '';
+				$laskurow["vienti"] 		= $asiakasrow["vienti"];
+				$laskurow["alv"] 			= $asiakasrow["alv"];
+				$laskurow["valkoodi"]		= $asiakasrow["valkoodi"];
 
 				$hinnat = alehinta($laskurow, $alehinrrow, 1, '', '', '', "hinta,netto,ale,alehinta_alv,alehinta_val,hintaperuste,aleperuste", $GLOBALS['eta_yhtio']);
 
-				$hinta = $hinnat["hinta"];
-				$netto = $hinnat["netto"];
-				$ale = $hinnat["ale"];
-				$alehinta_alv = $hinnat["alehinta_alv"];
-				$alehinta_val = $hinnat["alehinta_val"];
+				$hinta 			= $hinnat["hinta"];
+				$netto 			= $hinnat["netto"];
+				$ale 			= $hinnat["ale"];
+				$alehinta_alv	= $hinnat["alehinta_alv"];
+				$alehinta_val	= $hinnat["alehinta_val"];
 
 				list($hinta, $lis_alv) = alv($laskurow, $rrow, $hinta, '', $alehinta_alv);
 
@@ -207,134 +208,80 @@
 					continue;
 				}
 
-				if ($netto != '') {
-					$ale = t("Netto");
-				}
-
-				if ($hinta == 0) {
+				if ((float) $hinta == 0) {
 					$hinta = $rrow["myyntihinta"];
 				}
 
 				if ($netto == "") {
-					$asiakashinta = round($hinta * (1-($ale/100)),$yhtiorow['hintapyoristys']);
+					$asiakashinta = round($hinta * (1-($ale/100)), $yhtiorow['hintapyoristys']);
 				}
 				else {
 					$asiakashinta = $hinta;
 				}
 
-				$asiakashinta_veroton = 0;
+				$veroton				 = 0;
+				$verollinen 			 = 0;
+				$asiakashinta_veroton 	 = 0;
 				$asiakashinta_verollinen = 0;
-				$verollinen = 0;
 
 				if ($yhtiorow["alv_kasittely"] == "") {
-					$verollinen = $rrow["myyntihinta"];
-					$asiakashinta_veroton = $asiakashinta;
-					$asiakashinta_verollinen = round(($asiakashinta*(1+$rrow['alv']/100)),2);
-				}
-				else {
-					$verollinen = round(($rrow["myyntihinta"]*(1+$rrow['alv']/100)),2);
-					$asiakashinta_veroton = round(($asiakashinta/(1+$rrow['alv']/100)),2);
+					// Hinnat sisältävät arvonlisäveron
+					$verollinen				 = $rrow["myyntihinta"];
+					$veroton				 = round(($rrow["myyntihinta"]/(1+$rrow['alv']/100)), 2);
+					$asiakashinta_veroton 	 = round(($asiakashinta/(1+$rrow['alv']/100)), 2);
 					$asiakashinta_verollinen = $asiakashinta;
 				}
-
-				$rivi  = $rrow["tuoteno"]."\t";
-				$rivi .= $rrow["eankoodi"]."\t";
-				$rivi .= $rrow["osasto"]."\t";
-				$rivi .= $rrow["try"]."\t";
-				$rivi .= $rrow["nimitys"]."\t";
-				$rivi .= t_avainsana("Y", "", "and avainsana.selite='$rrow[yksikko]'", "", "", "selite")."\t";
-				$rivi .= $rrow["aleryhma"]."\t";
-				$rivi .= str_replace(".",",",$verollinen)."\t";
-
-				if ($netto == "") {
-					$rivi .= str_replace(".",",",sprintf('%.2f',$ale))."\t";
-				}
 				else {
-					$rivi .= $ale."\t";
+					// Hinnat ovat nettohintoja joihin lisätään arvonlisävero
+					$verollinen 			 = round(($rrow["myyntihinta"]*(1+$rrow['alv']/100)), 2);
+					$veroton				 = $rrow["myyntihinta"];
+					$asiakashinta_veroton 	 = $asiakashinta;
+					$asiakashinta_verollinen = round(($asiakashinta*(1+$rrow['alv']/100)), 2);
 				}
 
-				$rivi .= str_replace(".",",",sprintf("%.".$yhtiorow['hintapyoristys']."f",$asiakashinta_veroton))."\t";
-				$rivi .= str_replace(".",",",sprintf("%.".$yhtiorow['hintapyoristys']."f",$asiakashinta_verollinen))."\t";
-				$rivi .= "\r\n";
+				if (isset($workbook)) {
+					$worksheet->writeString($excelrivi, 0, $rrow["tuoteno"]);
+					$worksheet->writeString($excelrivi, 1, $rrow["eankoodi"]);
+					$worksheet->writeString($excelrivi, 2, $rrow["osasto"]);
+					$worksheet->writeString($excelrivi, 3, $rrow["try"]);
+					$worksheet->writeString($excelrivi, 4, $rrow["nimitys"]);
+					$worksheet->writeString($excelrivi, 5, t_avainsana("Y", "", "and avainsana.selite='$rrow[yksikko]'", "", "", "selite"));
+					$worksheet->writeString($excelrivi, 6, $rrow["aleryhma"]);
+					$worksheet->writeNumber($excelrivi, 7, $veroton);
+					$worksheet->writeNumber($excelrivi, 8, $verollinen);
 
-				fwrite($fh, $rivi);
+					if ($netto != "") {
+						$worksheet->writeString($excelrivi, 9, t("Netto"));
+					}
+					else {
+						$worksheet->writeNumber($excelrivi, 9, sprintf('%.2f',$ale));
+					}
+
+					$worksheet->writeNumber($excelrivi, 10, sprintf("%.".$yhtiorow['hintapyoristys']."f", $asiakashinta_veroton));
+					$worksheet->writeNumber($excelrivi, 11, sprintf("%.".$yhtiorow['hintapyoristys']."f", $asiakashinta_verollinen));
+					$excelrivi++;
+				}
 			}
-			fclose($fh);
 
-			//pakataan faili
-			$cmd = "cd /tmp/;/usr/bin/zip $ytunnus-price.zip $filenimi";
+			if (isset($workbook)) {
 
-			$palautus = exec($cmd);
+				// We need to explicitly close the workbook
+				$workbook->close();
 
-			$liite = "/tmp/$ytunnus-price.zip";
+				echo "<br><br><table>";
+				echo "<tr><th>".t("Tallenna hinnasto").":</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='tee_lataa' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xls'>";
+				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br>";
+			}
 
-			$bound = uniqid(time()."_") ;
-
-			$header  = "From: <$yhtiorow[postittaja_email]>\n";
-			$header .= "MIME-Version: 1.0\n" ;
-			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-			$content .= "--$bound\n";
-
-			$content .= "Content-Type: application/zip; name=\"$ytunnus-price.zip\"\n" ;
-			$content .= "Content-Transfer-Encoding: base64\n" ;
-			$content .= "Content-Disposition: inline; filename=\"$ytunnus-price.zip\"\n\n";
-
-			$handle  = fopen($liite, "r");
-			$sisalto = fread($handle, filesize($liite));
-			fclose($handle);
-
-			$content .= chunk_split(base64_encode($sisalto));
-			$content .= "\n" ;
-
-			$content .= "--$bound\n";
-			$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - Pricelist", $content, $header, "-f $yhtiorow[postittaja_email]");
-
-			exec("rm -f /tmp/".$filenimi);
-			exec("rm -f $liite");
-
-			echo "<font class='message'>".t("Hinnasto lähetetty sähköpostiosoitteeseen").": $kukarow[eposti]</font><br>";
 		}
+
+		if (@include("inc/footer.inc"));
+		elseif (@include("footer.inc"));
+		else exit;
 	}
-
-	//Käyttöliittymä
-	echo "<br>";
-
-	echo "<font class='message'>".("Osastot ja tuoteryhmät voit syöttää joko listana, pilkulla eroteltuna, tai osasto/tuoteryhmävälin väliviivalla.")."</font><br><br>";
-
-	echo "<table><form method='post' action='$PHP_SELF'>";
-	echo "<input type='hidden' name='tee' value='kaikki'>";
-
-	if ($kukarow["extranet"] == '') {
-		if ($asiakas > 0) {
-			echo "<tr><th>".t("Asiakkaan ytunnus").":</th><td><input type='hidden' name='ytunnus' value='$ytunnus'>$ytunnus</td></tr>";
-			echo "<input type='hidden' name='asiakas' value='$asiakas'></td></tr>";
-		}
-		else {
-			echo "<tr><th>".t("Syötä asiakkaan ytunnus").":</th><td><input type='text' name='ytunnus' size='15' value='$ytunnus'></td></tr>";
-		}
-	}
-
-	echo "<tr><th>".t("Osasto").":</th><td><input type='text' name='osasto' value='$osasto' size='15'></td></tr>";
-	echo "<tr><th>".t("Tuoteryhmä").":</th><td><input type='text' name='try' value='$try' size='15'></td></tr>";
-
-	if (isset($checkall) !== FALSE) {
-		$chk='CHECKED';
-	}
-
-	echo "<tr><th>".t("Kaikki osastot ja tuoteryhmät").":</th><td><input type='checkbox' name='checkall' $chk></td></tr>";
-
-	echo "</table><br>";
-	echo "<input type='submit' value='Aja hinnasto'>";
-	echo "</form>";
-
-	if ($kukarow["extranet"] == '' and $asiakas > 0) {
-		echo "<form method='post' action='$PHP_SELF'>";
-		echo "<input type='submit' value='Valitse uusi asiakas'>";
-		echo "</form>";
-	}
-
-	if (@include("inc/footer.inc"));
-	elseif (@include("footer.inc"));
-	else exit;
 ?>

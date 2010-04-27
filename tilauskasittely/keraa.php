@@ -171,12 +171,12 @@
 					}
 				}
 				else {
-					
+
 					//Siivotaan hieman käyttäjän syöttämää kappalemäärää
 					$eratsekkpl = (float) str_replace( ",", ".", $maara[$toimrow["tunnus"]]);
-					
+
 					// Muutetaanko eräseurattavan tuotteen kappalemäärää
-					if (trim($maara[$toimrow["tunnus"]]) != '' and $eratsekkpl >= 0) {					
+					if (trim($maara[$toimrow["tunnus"]]) != '' and $eratsekkpl >= 0) {
 						if ($eratsekkpl < $toimrow["varattu"]) {
 							//Jos erä on keksitty käsin täältä keräyksestä
 							$query = "	SELECT *
@@ -226,9 +226,9 @@
 						$sarjares2 = mysql_query($query) or pupe_error($query);
 
 						if ($era_new_paikka[$toimrow["tunnus"]] != "") {
-							
+
 							$oslisa = "";
-							
+
 							if ($toimrow["varattu"] > 0) {
 								$query = "	SELECT *
 											FROM sarjanumeroseuranta
@@ -243,7 +243,7 @@
 											and ostorivitunnus > 0
 											LIMIT 1";
 								$lisa_res = mysql_query($query) or pupe_error($query);
-																
+
 								if (mysql_num_rows($lisa_res) > 0) {
 									$lisa_row = mysql_fetch_array($lisa_res);
 									$oslisa = " ostorivitunnus ='$lisa_row[ostorivitunnus]', ";
@@ -535,7 +535,7 @@
 											// Mitätöidään nollarivi koska poikkeamalle kuitenkin tehdään jotain fiksua
 											$query .= ", tyyppi = 'D', kommentti=trim(concat(kommentti, ' Mitätöitiin koska keräyspoikkeamasta tehtiin: ".$poikkeama_kasittely[$apui]."'))";
 										}
-										
+
 										$rotunnus	= $tilrivirow['otunnus'];
 										$rtyyppi	= $tilrivirow['tyyppi'];
 										$rtilkpl 	= round($tilrivirow['varattu']-$maara[$apui],2);
@@ -669,10 +669,10 @@
 
 							// Tässä tehdään uusi rivi
 							if ($rotunnus != 0) {
-								
+
 								// Aina jos rivi splitataan niin päivitetään alkuperäisen rivin tilkpl
 								$query .= ", tilkpl = '".$maara[$apui]."'";
-																
+
 								$querys = "	INSERT into tilausrivi set
 											hyllyalue   = '$tilrivirow[hyllyalue]',
 											hyllynro    = '$tilrivirow[hyllynro]',
@@ -899,6 +899,17 @@
 
 					if ($laskurow["tila"] == 'L' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X") {
 						$alatilak = "D";
+
+						// Päivitetään myös rivit toimitetuiksi
+						$query = "	UPDATE tilausrivi
+									SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
+									WHERE otunnus 	= '$laskurow[tunnus]'
+									and var not in ('P','J')
+									and yhtio 		= '$kukarow[yhtio]'
+									and keratty    != ''
+									and toimitettu  = ''
+									and tyyppi 		= 'L'";
+						$yoimresult = mysql_query($query) or pupe_error($query);
 					}
 					else {
 						$alatilak = "C";
@@ -945,7 +956,6 @@
 							$result_rk = mysql_query($query) or pupe_error($query);
 						}
 					}
-
 				}
 
 				// Tutkitaan vielä aivan lopuksi mihin tilaan me laitetaan tämä otsikko
@@ -961,7 +971,7 @@
 								and tila  = 'L'";
 					$lasresult = mysql_query($query) or pupe_error($query);
 
-					while($laskurow = mysql_fetch_array($lasresult)) {
+					while ($laskurow = mysql_fetch_array($lasresult)) {
 						require("tilaus-valmis-valitsetila.inc");
 					}
 				}
@@ -1609,8 +1619,8 @@
 	if ($id != 0 and $rahtikirjaan == '') {
 
 		//päivitä kerätyt formi
-		$formi="rivit";
-		$kentta="keraajanro";
+		$formi	= "rivit";
+		$kentta	= "keraajanro";
 
 		$otsik_row = array();
 		$keraysklontti = FALSE;
@@ -1618,7 +1628,6 @@
 		$query = "SELECT kerayslista from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
 		$testresult = mysql_query($query) or pupe_error($query);
 		$testrow = mysql_fetch_array($testresult);
-
 
 		if ($testrow['kerayslista'] > 0) {
 			//haetaan kaikki tälle klöntille kuuluvat otsikot
@@ -1657,25 +1666,30 @@
 		else {
 			$query = "	SELECT concat_ws(' ',lasku.nimi, lasku.nimitark) nimi,
 						concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) toim_nimi,
-						osoite, concat_ws(' ', postino, postitp) postitp,
-						toim_osoite, concat_ws(' ', toim_postino, toim_postitp) toim_postitp,
-						clearing,
-						tila,
-						mapvm,
-						pakkaamo,
-						lasku.yhtio
-						FROM lasku LEFT JOIN kuka ON lasku.myyja = kuka.tunnus
+						lasku.osoite,
+						concat_ws(' ', lasku.postino, lasku.postitp) postitp,
+						lasku.toim_osoite,
+						concat_ws(' ', lasku.toim_postino, lasku.toim_postitp) toim_postitp,
+						lasku.clearing,
+						lasku.tila,
+						lasku.mapvm,
+						lasku.pakkaamo,
+						lasku.yhtio,
+						toimitustapa.tulostustapa
+						FROM lasku
+						LEFT JOIN kuka ON lasku.myyja = kuka.tunnus
+						LEFT JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite
 						WHERE lasku.tunnus in ($tilausnumeroita)
 						and lasku.yhtio = '$kukarow[yhtio]'
-						and tila in ($tila)
-						and alatila	= 'A'";
+						and lasku.tila in ($tila)
+						and lasku.alatila = 'A'";
 			$result = mysql_query($query) or pupe_error($query);
-			$otsik_row    = mysql_fetch_array($result);
+			$otsik_row = mysql_fetch_array($result);
 
-			echo "<tr><th>" . t("Tilaus") ."</th><td>$tilausnumeroita $otsik_row[clearing]</td></tr>";
-			echo "<tr><th>" . t("Asiakas") ."</th><td>$otsik_row[nimi]<br>$otsik_row[toim_nimi]</td></tr>";
-			echo "<tr><th>" . t("Laskutusosoite") ."</th><td>$otsik_row[osoite], $otsik_row[postitp]</td></tr>";
-			echo "<tr><th>" . t("Toimitusosoite") ."</th><td>$otsik_row[toim_osoite], $otsik_row[toim_postitp]</td></tr>";
+			echo "<tr><th>".t("Tilaus") ."</th><td>$tilausnumeroita $otsik_row[clearing]</td></tr>";
+			echo "<tr><th>".t("Asiakas") ."</th><td>$otsik_row[nimi]<br>$otsik_row[toim_nimi]</td></tr>";
+			echo "<tr><th>".t("Laskutusosoite") ."</th><td>$otsik_row[osoite], $otsik_row[postitp]</td></tr>";
+			echo "<tr><th>".t("Toimitusosoite") ."</th><td>$otsik_row[toim_osoite], $otsik_row[toim_postitp]</td></tr>";
 		}
 
 		if ($toim == "VALMISTUS") {
@@ -1756,7 +1770,7 @@
 				}
 			}
 
-			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $keraysklontti === FALSE) {
+			if ($otsik_row["tulostustapa"] != "X" and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $keraysklontti === FALSE) {
 				echo "<tr><th>".t("Haluatko mennä rahtikirjan syöttöön")."</th><td><input type='checkbox' name='rahtikirjalle'>".t("Kyllä")."</td></tr>";
 			}
 
@@ -1845,7 +1859,7 @@
 						echo "<input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]' $poikkeava_maara_disabled> $puute";
 						echo "<input type='hidden' name='kerivi[]' value='$row[tunnus]'>";
 					}
-					
+
 					if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
 						$tunken1 = "siirtorivitunnus";
 						$tunken2 = "siirtorivitunnus";
@@ -1860,7 +1874,7 @@
 					}
 
 					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V") {
-						
+
 						$query = "	SELECT count(*) kpl, min(sarjanumero) sarjanumero
 									from sarjanumeroseuranta
 									where yhtio  = '$kukarow[yhtio]'
@@ -2121,7 +2135,7 @@
 
 			echo "<tr>";
 
-			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' and ($otsik_row['pakkaamo'] == 0 or $yhtiorow['pakkaamolokerot'] == '')) {
+			if (($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' or $otsik_row["tulostustapa"] == "X") and ($otsik_row['pakkaamo'] == 0 or $yhtiorow['pakkaamolokerot'] == '')) {
 				echo "<th>".t("Osoitelappu").":</th>";
 
 				echo "<th colspan='$spanni'>";
@@ -2158,13 +2172,18 @@
 
 			echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'>";
 			echo "<input type='hidden' name='lasku_yhtio' value='$otsik_row[yhtio]'>";
-			echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."'></form>";
 
+			if ($otsik_row["tulostustapa"] != "X") {
+				echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."'></form>";
+			}
+			else {
+				echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa toimitetuksi")."'></form>";
+			}
 
-			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') {
+			if ($otsik_row["tulostustapa"] != "X" and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') {
 				echo "<br><br><font class='message'>".t("Siirryt automaattisesti rahtikirjan syöttöön")."!</font>";
 			}
-			elseif ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H'  and $keraysklontti === FALSE) {
+			elseif ($otsik_row["tulostustapa"] != "X" and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $keraysklontti === FALSE) {
 				echo "<br><br><font class='message'>".t("Voit halutessasi siirtyä rahtikirjan syöttöön")."!</font>";
 			}
 		}

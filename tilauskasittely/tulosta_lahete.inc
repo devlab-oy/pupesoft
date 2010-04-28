@@ -967,18 +967,15 @@ if (!function_exists('rivi_lahete')) {
 		$row["kommentti"] = trim($row["kommentti"]);
 
 		//hatetaan tuotteen myyntihinta
-		$query = "	SELECT round(if (isnull(hinnasto.hinta) or hinnasto.hinta='', round(tuote.myyntihinta/if ('$laskurow[vienti_kurssi]'=0,1,'$laskurow[vienti_kurssi]'),'$yhtiorow[hintapyoristys]'), hinnasto.hinta) / (1+(if ('$yhtiorow[alv_kasittely]'='',0,tuote.alv)/100)), '$yhtiorow[hintapyoristys]') myyntihinta,
-       				tuote.aleryhma,
-					tuote.sarjanumeroseuranta
+		$query = "	SELECT *
                     FROM tuote
-                    LEFT JOIN hinnasto on tuote.yhtio = hinnasto.yhtio and tuote.tuoteno = hinnasto.tuoteno and hinnasto.valkoodi = '$laskurow[valkoodi]'
                     WHERE tuote.tuoteno='$row[tuoteno]' and tuote.yhtio='$kukarow[yhtio]'";
         $asresult = mysql_query($query) or pupe_error($query);
 		$asrow1 = mysql_fetch_array($asresult);
 
 		//saadaan lähetteen summa menemään oikein, taaksepäin yhteensopivasti
-		$row["brutto_rivihinta"] 	= $asrow1["myyntihinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"]);
-		$row["myyntihinta"] 		= $asrow1["myyntihinta"];
+		$row['myyntihinta']			= tuotteen_myyntihinta($laskurow, $asrow1, ($row["kpl"]+$row["varattu"]+$row["jt"]), '');
+		$row["brutto_rivihinta"] 	= $row["myyntihinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"]);
 		$row["aleryhma"] 			= $asrow1["aleryhma"];
 
 		if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
@@ -1017,9 +1014,9 @@ if (!function_exists('rivi_lahete')) {
 
 				if ($vtunrow["vanhatunnus"] != 0) {
 					$query = " SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
-							FROM lasku use index (yhtio_vanhatunnus)
-							WHERE yhtio         = '$kukarow[yhtio]'
-							and vanhatunnus     = '$vtunrow[vanhatunnus]'";
+								FROM lasku use index (yhtio_vanhatunnus)
+								WHERE yhtio         = '$kukarow[yhtio]'
+								and vanhatunnus     = '$vtunrow[vanhatunnus]'";
 					$perheresult = mysql_query($query) or pupe_error($query);
 					$numrows = mysql_num_rows($perheresult);
 				}
@@ -1040,7 +1037,8 @@ if (!function_exists('rivi_lahete')) {
 					// lasketaan isätuotteen riville lapsien hinnat yhteen
 					$query = "	SELECT
 								round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),'$yhtiorow[hintapyoristys]') rivihinta,
-								round(round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)),'$yhtiorow[hintapyoristys]') / $isahintarivikpl,'$yhtiorow[hintapyoristys]') hinta
+								round(round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)),'$yhtiorow[hintapyoristys]') / $isahintarivikpl,'$yhtiorow[hintapyoristys]') hinta,
+								GROUP_CONCAT(CONCAT(tilausrivi.tuoteno, '¡!¡!', tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)) perheen_tuotteet
 								FROM tilausrivi
 								JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -1051,6 +1049,24 @@ if (!function_exists('rivi_lahete')) {
 
 					$row["hinta"] 		= $perherow["hinta"];
 					$row["rivihinta"] 	= $perherow["rivihinta"];
+
+					$row['myyntihinta'] 		= 0;
+					$row['brutto_rivihinta'] 	= 0;
+					$myyntihinta_temp 			= 0;
+
+					foreach (explode(",", $perherow['perheen_tuotteet']) as $perhetuote) {
+						
+						list($perhetuoteno, $perhekpl) = explode('¡!¡!', $perhetuote);
+
+						$query = "SELECT * FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '$perhetuoteno'";
+						$lapsi_res = mysql_query($query) or pupe_error($query);
+						$lapsi_row = mysql_fetch_assoc($lapsi_res);
+
+						$myyntihinta_temp = tuotteen_myyntihinta($laskurow, $lapsi_row, $perhekpl, '');
+						$row['myyntihinta'] += $myyntihinta_temp;
+						$row['brutto_rivihinta'] += $myyntihinta_temp * $perhekpl;
+					}
+
 					$row["ale"] 		= round(100 * (1 - ($perherow["rivihinta"] / ($perherow["hinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"])))),2);
 				}
 			}
@@ -1399,8 +1415,8 @@ if (!function_exists('rivi_eialeja_lahete')) {
 		$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
 
 
-		$oikpos = $pdf->strlen($row["myyntihinta"], $norm);
-		$pdf->draw_text(465-$oikpos, $kala, $row["myyntihinta"], 							$thispage, $norm);
+		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"]), $norm);
+		$pdf->draw_text(465-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"]), 							$thispage, $norm);
 
 		if ($extranet_tilausvahvistus != 1) {
 			list($ff_string, $ff_font) = pdf_fontfit($row["aleryhma"], 50, $pdf, $norm);

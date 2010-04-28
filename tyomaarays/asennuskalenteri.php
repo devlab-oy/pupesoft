@@ -421,11 +421,12 @@
 							if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus,
 							if(lasku.nimi='', kalenteri.kuka, lasku.nimi) nimi,
 							if(tyomaarays.komm1='' or tyomaarays.komm1 is null, kalenteri.kentta01, tyomaarays.komm1) komm1,
-							tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus, kalenteri.konserni
+							tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus, kalenteri.konserni, a2.selitetark_2 tyostatusvari
 							FROM kalenteri
 							LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
 							LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and lasku.tunnus=kalenteri.liitostunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+							LEFT JOIN avainsana a2 ON a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus
 							WHERE kalenteri.yhtio = '$kukarow[yhtio]'
 							and kalenteri.tyyppi in ('asennuskalenteri','kalenteri')
 							and (	(pvmalku >= '$year-$month-$i 00:00:00' and pvmalku <= '$year-$month-$i 23:59:00') or
@@ -464,7 +465,7 @@
 										echo "</div>";
 									}
 
-									$varaukset[$b][$a][] = $vrow["nimi"]."|||".$vrow["liitostunnus"]."|||".$vrow["tapa"]."|||".$vrow["tyyppi"]."|||".$vrow["tyostatus"]."|||".$vrow['kuka']."|||".$vrow['konserni']."|||".$vrow['pvmalku'];
+									$varaukset[$b][$a][] = $vrow["nimi"]."|||".$vrow["liitostunnus"]."|||".$vrow["tapa"]."|||".$vrow["tyyppi"]."|||".$vrow["tyostatus"]."|||".$vrow['kuka']."|||".$vrow['konserni']."|||".$vrow['pvmalku']."|||".$vrow['tyostatusvari'];
 								}
 							}
 						}
@@ -491,24 +492,18 @@
 
 					foreach ($ASENTAJA_ARRAY as $b) {
 						if (isset($varaukset[$b][$a])) {
-							echo "<td align='center' $varilisa width='40px'>";
+							
+							$varilisa = "";
+							$tdekotus = "";
+							
 							foreach ($varaukset[$b][$a] as $varaus) {
-								list($nimi, $tilausnumero, $tapa, $tyyppi, $tyostatus, $kuka, $konserni, $pvmalku) = explode("|||", $varaus);
+								list($nimi, $tilausnumero, $tapa, $tyyppi, $tyostatus, $kuka, $konserni, $pvmalku, $tyostatusvari) = explode("|||", $varaus);
 
 								if ($tyyppi == "asennuskalenteri") {
 									$zul = $tilausnumero;
 
-									$query = "	SELECT selitetark_2
-												FROM avainsana
-												WHERE laji = 'TYOM_TYOSTATUS' and selite='$tyostatus' and yhtio = '$kukarow[yhtio]'";
-									$varires = mysql_query($query) or pupe_error($query);
-									$varirow = mysql_fetch_array($varires);
-
-									if ($varirow["selitetark_2"] != "") {
-										$varilisa = "style='background-color: $varirow[selitetark_2];'";
-									}
-									else {
-										$varilisa = "";
+									if ($tyostatusvari != "") {
+										$varilisa = "style='background-color: $tyostatusvari;'";
 									}
 								}
 								else {
@@ -516,15 +511,16 @@
 								}
 
 								if ($tyyppi == 'asennuskalenteri') {
-									echo "<a class='tooltip' id='$tilausnumero' href='tyojono.php?myyntitilaus_haku=$tilausnumero&lopetus=$lopetus'>$zul</a>";
+									$tdekotus .= "<a class='tooltip' id='$tilausnumero' href='tyojono.php?myyntitilaus_haku=$tilausnumero&lopetus=$lopetus'>$zul</a>";
 								}
 								else {
-									echo "<a class='tooltip' id='$tilausnumero' href='".$palvelin2."crm/kalenteri.php?valitut=$kuka&kenelle=$kuka&tee=SYOTA&kello=".substr($pvmalku, 11, 5)."&year=$year&kuu=$month&paiva=$i&tunnus=$tilausnumero&konserni=$konserni&lopetus=$lopetus'>$zul</a>";
+									$tdekotus .= "<a class='tooltip' id='$tilausnumero' href='".$palvelin2."crm/kalenteri.php?valitut=$kuka&kenelle=$kuka&tee=SYOTA&kello=".substr($pvmalku, 11, 5)."&year=$year&kuu=$month&paiva=$i&tunnus=$tilausnumero&konserni=$konserni&lopetus=$lopetus'>$zul</a>";
 								}
 
-								echo "&nbsp;&nbsp;";
+								$tdekotus .= "&nbsp;&nbsp;";
 							}
-							echo "</td>";
+							
+							echo "<td align='center' $varilisa width='40px'>$tdekotus</td>";
 						}
 						elseif ($liitostunnus > 0 and $tyojono != "" and (float) str_replace("-", "", $laskurow["toimaika"]) < (float) $year.sprintf("%02d", $month).sprintf("%02d", $i)) {
 							echo "<td align='center' class='tumma' width='40px'>&nbsp;</td>";

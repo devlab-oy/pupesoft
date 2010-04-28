@@ -264,7 +264,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 				$ulos .= sprintf("%8.s"  ,$tvtilausrivirow['varattu']);
 			}
 			else {
-				$ulos .= sprintf("%8.s"  ,$tvtilausrivirow['jt']).t(" Jälkitoimitukseen", $kieli);
+				$ulos .= sprintf("%8.s"  ,$tvtilausrivirow['jt'])." ".t("Jälkitoimitukseen", $kieli);
 			}
 
 			if ($naytatvale==3) {

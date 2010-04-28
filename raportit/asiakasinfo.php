@@ -1117,7 +1117,7 @@ if ($asiakasid > 0) {
 					require("inc/sahkoposti.inc");
 				}
 
-				echo "<br><br>".t("Alennustaulukko l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...<br>";
+				echo "<br><br>".t("Alennustaulukko l‰hetet‰‰n osoitteeseen")." $kukarow[eposti]...<br>";
 			}
 			elseif ($komento["Alennustaulukko"] != '' and $komento["Alennustaulukko"] != 'edi') {
 				$line = exec("$komento[Alennustaulukko] $pdffilenimi");

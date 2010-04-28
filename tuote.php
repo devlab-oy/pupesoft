@@ -955,7 +955,7 @@
 
 				foreach ($yhteensa as $type => $kappale) {
 					echo "<tr>";
-					echo "<th colspan='4'>".t("$type yhteensä")."</th>";
+					echo "<th colspan='4'>$type ".t("yhteensä")."</th>";
 					echo "<th style='text-align:right;'>$kappale</th>";
 					echo "<th></th>";
 					echo "</tr>";

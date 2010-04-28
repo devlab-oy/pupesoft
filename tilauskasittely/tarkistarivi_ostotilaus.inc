@@ -247,7 +247,7 @@
 			// katotaan tuotteen saldo
 			$loytyymaara = sprintf("%.02f",$krow["saldo"] - $krtur["keratty"] - $krtur["ennpois"]);
 
-			$varaosavirhe .= t("Toimittajalta tilattavissa ")."$loytyymaara ".t("kappaletta tuotetta")." $trow[tuoteno]<br>";
+			$varaosavirhe .= t("Toimittajalta tilattavissa")." $loytyymaara ".t("kappaletta tuotetta")." $trow[tuoteno]<br>";
 		}
 	}
 ?>

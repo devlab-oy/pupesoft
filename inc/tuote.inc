@@ -6,7 +6,7 @@
 	$jarjestys = 'tuoteno';
 
 	if ($laji == "V") {
-		$otsikko = ' Viranomaistuotteet';
+		$otsikko = 'Viranomaistuotteet';
 		$rajauslisa = " and tuote.tuotetyyppi IN ('A','B') ";
 	}
 	else {

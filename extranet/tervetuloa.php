@@ -394,7 +394,7 @@ if ($tee == "PRINTTAA") {
 		<TR><TD VALIGN=middle bgcolor='#000000'>
 				<FONT FACE='Lucida,Verdana,Helvetica,Arial' COLOR='#FFFFFF'>
 				<B><SMALL>&nbsp;".t("Toimittaja").": $toimittaja</SMALL></B><BR>
-				<B><SMALL>&nbsp;".t("P&auml;iv&auml;m&auml;&auml;r&auml;").": $paivays</SMALL></B>
+				<B><SMALL>&nbsp;".t("P‰iv‰m‰‰r‰").": $paivays</SMALL></B>
 				</FONT>
 		<!--
 			</TD><TD ALIGN=right bgcolor='#000000'>

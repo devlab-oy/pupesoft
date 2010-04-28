@@ -71,7 +71,7 @@ if ($tee == 'go') {
 			echo "<th>".t("Kate")." %</th>";
 			echo "<th>".t("ind Kate")."</th>";
 			echo "<th>".t("Osuus")." %</th>";
-			echo "<th>".t("Varastonarvo<")."/th>";
+			echo "<th>".t("Varastonarvo")."</th>";
 		}
 
 		echo "</tr>";

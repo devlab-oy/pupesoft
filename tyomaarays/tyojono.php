@@ -124,6 +124,7 @@
 				a1.selite tyojonokoodi, 
 				a1.selitetark tyojono, 
 				a2.selitetark tyostatus, 
+				a2.selitetark_2 tyostatusvari, 
 				yhtio.nimi yhtio, 
 				yhtio.yhtio yhtioyhtio,
 				a3.nimi suorittajanimi,
@@ -213,14 +214,22 @@
 			echo "<td valign='top'>".tv1dateconv($vrow["toimaika"])."</td>";	
 		}
 		
-		echo "<td valign='top'>$vrow[myyja]<br>".t("$laskutyyppi")." ".t("$alatila")."</td>
-				<td valign='top'>$vrow[tyojono]<br>$vrow[tyostatus]</td>";
+		echo "<td valign='top'>$vrow[myyja]<br>".t("$laskutyyppi")." ".t("$alatila")."</td>";
 		
-		if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {		
-			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."tyomaarays/tyojono.php////konserni=$konserni'>".t("Muokkaa")."</a></td>";
+		if ($vrow["tyostatusvari"] != "") {
+			$varilisa = "style='background-color: $vrow[tyostatusvari];'";
 		}
 		else {
-			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."tyomaarays/tyojono.php////konserni=$konserni'>".t("Muokkaa")."</a></td>";
+			$varilisa = "";
+		}
+		
+		echo "<td valign='top' $varilisa>$vrow[tyojono]<br>$vrow[tyostatus]</td>";
+		
+		if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {		
+			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]'>".t("Muokkaa")."</a></td>";
+		}
+		else {
+			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]'>".t("Muokkaa")."</a></td>";
 		}
 				
 		echo "</tr>";

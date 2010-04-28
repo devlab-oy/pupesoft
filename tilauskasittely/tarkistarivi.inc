@@ -503,7 +503,7 @@
 				$sel2 = "";
 
 				// katsotaan onko tuote suoratoimituskelpoinen (vain ei tuoteperheet, tai tuoteoperheiden saldolliset isät tai jos yhtiöllä suoratoimitetaan perheet per tuote)
-				if (($yhtiorow['tuoteperhe_suoratoimitus'] == '' or $row["perheid"] == 0 or $row["perheid"] == $row["tunnus"]) and ($yhtiorow["tee_osto_myyntitilaukselta"] == "X" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y" or ($yhtiorow["tee_osto_myyntitilaukselta"] == "V" and $trow["suoratoimitus"] != '') or ($yhtiorow["tee_osto_myyntitilaukselta"] == "W" and $trow["suoratoimitus"] != ''))) {
+				if (($yhtiorow['tuoteperhe_suoratoimitus'] == '' or $row["perheid"] == 0 or $row["perheid"] == $row["tunnus"]) and ($yhtiorow["tee_osto_myyntitilaukselta"] == "U" or $yhtiorow["tee_osto_myyntitilaukselta"] == "X" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y" or ($yhtiorow["tee_osto_myyntitilaukselta"] == "V" and $trow["suoratoimitus"] != '') or ($yhtiorow["tee_osto_myyntitilaukselta"] == "W" and $trow["suoratoimitus"] != ''))) {
 
 					if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
 						if ($row["var"] == 'T' or ($row["var"] == "J" and $row["suoraan_laskutukseen"] == "")) {
@@ -520,12 +520,14 @@
 						}
 					}
 
-					// tallennetaan riville toimittajan tunnus
-					$title = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
-					$paikat .= "<option value='¡¡¡$krow[liitostunnus]' title='$title' $sel1>$title</option>";
-					$paikatlask++;
+					if ($yhtiorow["tee_osto_myyntitilaukselta"] != "U") {
+						// tallennetaan riville toimittajan tunnus
+						$title = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
+						$paikat .= "<option value='¡¡¡$krow[liitostunnus]' title='$title' $sel1>$title</option>";
+						$paikatlask++;
+					}
 
-					if ($yhtiorow["tee_osto_myyntitilaukselta"] == "Y" or $yhtiorow["tee_osto_myyntitilaukselta"] == "W") {
+					if ($yhtiorow["tee_osto_myyntitilaukselta"] == "U" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y" or $yhtiorow["tee_osto_myyntitilaukselta"] == "W") {
 						$title = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
 						$paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel2>$title</option>";
 						$paikatlask++;
@@ -585,8 +587,7 @@
 		}
 	}
 	// jos kyseessä on tuoteperheen suoratoimitus suoraan asiakkaalle, niin tehdään isädropdown (dropdownin sisältö haetaan lapsilta).
-	elseif ((($kukarow['extranet'] == '' and ($yhtiorow['tuoteperhe_suoratoimitus'] == 'M' or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and ($yhtiorow["tee_osto_myyntitilaukselta"] == "W" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y") and $trow["ei_saldoa"] != "" and $row["tyyppi"] == "L" and $kpl_st > 0 and $row["tunnus"] == $row["perheid"] and in_array($row["var"], array('P','J','U','T'))) {
-
+	elseif ((($kukarow['extranet'] == '' and ($yhtiorow['tuoteperhe_suoratoimitus'] == 'M' or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and ($yhtiorow["tee_osto_myyntitilaukselta"] == "U" or $yhtiorow["tee_osto_myyntitilaukselta"] == "W" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y") and $trow["ei_saldoa"] != "" and $row["tyyppi"] == "L" and $kpl_st > 0 and $row["tunnus"] == $row["perheid"] and in_array($row["var"], array('P','J','U','T'))) {
 
 		$query = "	SELECT tuoteno
 					FROM tilausrivi

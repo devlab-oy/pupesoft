@@ -596,6 +596,7 @@
 
 		$ulos .= "<option value=''>".t("Myyntitilaukselta ei voi luoda ostorivejä")."</option>";
 		$ulos .= "<option value='X' $sel[X]>".t("Myyntitilaukselta voi luoda ostorivejä varastoon")."</option>";
+		$ulos .= "<option value='U' $sel[U]>".t("Myyntitilaukselta voi luoda ostorivejä asiakkaalle")."</option>";
 		$ulos .= "<option value='Y' $sel[Y]>".t("Myyntitilaukselta voi luoda ostorivejä asiakkaalle ja varastoon")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Myyntitilaukselta voi luoda ostorivejä varastoon, jos se on tuotteen takana sallittu")."</option>";
 		$ulos .= "<option value='W' $sel[W]>".t("Myyntitilaukselta voi luoda ostorivejä asiakkaalle ja varastoon, jos se on tuotteen takana sallittu")."</option>";

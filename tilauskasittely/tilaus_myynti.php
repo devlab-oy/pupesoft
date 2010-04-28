@@ -1591,7 +1591,7 @@ if ($tee == '') {
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
 						<input type='hidden' name='projektilla' value='$projektilla'>
-						<input type='submit' value='".t("Vaihda $vaihdaselite")."'>
+						<input type='submit' value='".t("Vaihda")." $vaihdaselite'>
 						</form>";
 			}
 		}

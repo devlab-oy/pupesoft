@@ -250,6 +250,6 @@
 
 	}
 
-	require ("inc/footer.inc");
+	require ("../inc/footer.inc");
 
 ?>

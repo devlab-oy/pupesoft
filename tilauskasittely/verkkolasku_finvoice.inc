@@ -48,7 +48,13 @@ if (!function_exists('finvoice_otsik')) {
 		//	Aloitellaan aineiston luontia
 		if (($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") or $lasrow["chn"] == "112") {
 
-			list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+			if ($yhtiorow["verkkolasku_lah"] == "iPost") {
+				$receiverpartyid = $lasrow["verkkotunnus"];
+				$receiverintermediator = "003710948874";
+			}
+			else {
+				list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+			}
 
 			// jos t‰nne ei saada mit‰‰n arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
 			if ($receiverpartyid == "" or $receiverintermediator == "" or $lasrow["chn"] == "100") {
@@ -344,11 +350,11 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "</DeliveryPeriodDetails>\r\n");
 			xml_add("DeliveryMethodText",                                   $lasrow['toimitustapa'],          		$tootfinvoice);
 			xml_add("DeliveryTermsText",									$lasrow['toimitusehto'],          		$tootfinvoice);
-						
+
 			if ($lasrow["chn"] == "112") {
 				xml_add("TerminalAddressText",								"KAUTTALASKUTUS",	     				$tootfinvoice);
 			}
-						
+
 			#xml_add("WaybillIdentifier",									"",					     				$tootfinvoice);
 			#xml_add("WaybillTypeCode",										"",					     				$tootfinvoice);
 			#xml_add("DelivererIdentifier",									"",					     				$tootfinvoice);
@@ -379,7 +385,13 @@ if (!function_exists('finvoice_otsik')) {
 			xml_add("InvoiceDate Format=\"CCYYMMDD\"",						vlas_dateconv($lasrow['tapvm']),		$tootfinvoice);
 			xml_add("SellerReferenceIdentifier",							$lasrow['tunnus'],						$tootfinvoice);
 			#xml_add("SellerReferenceIdentifierUrlText",					"",										$tootfinvoice);
-			xml_add("OrderIdentifier",										$lasrow['asiakkaan_tilausnumero'],		$tootfinvoice);
+
+			if (trim($lasrow['asiakkaan_tilausnumero']) != "") {
+				xml_add("OrderIdentifier",					substr($lasrow['asiakkaan_tilausnumero'], 0, 35),		$tootfinvoice);
+			}
+			else {
+				xml_add("OrderIdentifier",									substr($lasrow['viesti'], 0, 35),		$tootfinvoice);
+			}
 
 			#xml_add("OrderIdentifierUrlText",								"",										$tootfinvoice);
 			xml_add("AgreementIdentifier",									substr($lasrow['viesti'], 0, 35),		$tootfinvoice);

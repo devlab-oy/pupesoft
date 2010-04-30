@@ -239,12 +239,17 @@ if (!function_exists('finvoice_otsik')) {
 			#fputs($tootfinvoice, "</InvoiceSenderPartyDetails>\r\n");
 
 			//	Oisko toista laskutusosoitetta?
-			$query = "	SELECT *
-						FROM lasku
-						JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus and laskun_lisatiedot.laskutus_nimi != ''
-						WHERE lasku.yhtio = '$lasrow[yhtio]'
-						and lasku.laskunro = '$lasrow[laskunro]'
-						and lasku.tila = 'L'
+			$query = "	SELECT laskutus_nimi, 
+						laskutus_nimitark,
+						laskutus_osoite,
+						laskutus_postino,
+						laskutus_postitp,
+						laskutus_maa
+						FROM laskun_lisatiedot
+						WHERE yhtio = '{$lasrow['yhtio']}'
+						AND laskutus_nimi != ''
+						AND CONCAT(laskutus_nimi, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa) != '$lasrow[nimi]$lasrow[osoite]$lasrow[postino]$lasrow[postitp]$lasrow[maa]'
+						AND otunnus = '{$lasrow['tunnus']}'
 						LIMIT 1";
 			$tarkres = mysql_query($query) or pupe_error($query);
 

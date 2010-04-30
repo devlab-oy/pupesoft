@@ -444,12 +444,13 @@
 					}
 
 					// Kirjoitetaan rivitietoja tilausriveiltä
-					$query = "	SELECT tilausrivi.*, lasku.vienti_kurssi,
+					$query = "	SELECT tilausrivi.*, tuote.eankoodi, lasku.vienti_kurssi,
 								if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika,
 								if (tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,
 								$sorttauskentta
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+								LEFT JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.uusiotunnus = '$lasrow[tunnus]'
 								and tilausrivi.kpl <> 0

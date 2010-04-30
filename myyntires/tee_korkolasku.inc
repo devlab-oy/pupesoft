@@ -7,7 +7,7 @@
 	//ja $loppusumma jossa on maksettavan koron m‰‰r‰. $loppusumma tulee paperikorkolasku.php-failista
 
 	//Haetaan asiakkaan tiedot
-	$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
+	$query = "SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$liitostunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	
 	if (mysql_num_rows($result) != 1) {
@@ -17,7 +17,7 @@
 	$asrow = mysql_fetch_array($result);
 
 	//Etsit‰‰n t‰m‰ t‰ss‰ tilanteessa k‰ytett‰v‰ maksuehto
-	$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$vmehto'";
+	$apuqu = "SELECT * FROM maksuehto WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$vmehto'";
 	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 	
 	if (mysql_num_rows($meapu) != 1) {
@@ -30,7 +30,7 @@
 	$comments = str_replace($crlf, " ", $comments);
 
 	//Haetaan tuotteen tiedot
-	$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='Korko'";
+	$query = "SELECT * FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno = 'Korko'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 1) {
@@ -63,8 +63,7 @@
 		}
 
 
-		$query = "	INSERT into lasku
-					SET
+		$query = "	INSERT INTO lasku SET
 					yhtio_nimi		= '$yhtiorow[nimi]',
 					yhtio_osoite	= '$yhtiorow[osoite]',
 					yhtio_postino	= '$yhtiorow[postino]',
@@ -111,12 +110,34 @@
 					laatija 		= '$kukarow[kuka]',
 					liitostunnus    = '$asrow[tunnus]',
 					piiri			= '$asrow[piiri]',
-					olmapvm			= NOW(),
-					luontiaika		= NOW()";
+					olmapvm			= now(),
+					luontiaika		= now()";
 		$result = mysql_query($query) or pupe_error($query);
 		$otunnus = mysql_insert_id();
 
-		$query = "	INSERT into tilausrivi set
+		if (strlen(trim($asrow['laskutus_nimi'])) == 0) {
+			$asrow['laskutus_nimi'] 		= $asrow['nimi'];
+			$asrow['laskutus_nimitark'] 	= $asrow['nimitark'];
+			$asrow['laskutus_osoite'] 		= $asrow['osoite'];
+			$asrow['laskutus_postino'] 		= $asrow['postino'];
+			$asrow['laskutus_postitp'] 		= $asrow['postitp'];
+			$asrow['laskutus_maa'] 			= $asrow['maa'];
+		}
+
+		$query = "	INSERT INTO laskun_lisatiedot SET
+					laskutus_nimi		= '$asrow[laskutus_nimi]',
+					laskutus_nimitark 	= '$asrow[laskutus_nimitark]',
+					laskutus_osoite		= '$asrow[laskutus_osoite]',
+					laskutus_postino	= '$asrow[laskutus_postino]',
+					laskutus_postitp	= '$asrow[laskutus_postitp]',
+					laskutus_maa		= '$asrow[laskutus_maa]',
+					laatija				= '$kukarow[kuka]',
+					laadittu			= now(),
+					otunnus				= '$otunnus',
+					yhtio				= '$kukarow[yhtio]'";
+		$lisatiedot_result = mysql_query($query) or pupe_error($query);
+
+		$query = "	INSERT INTO tilausrivi SET
 					laatija 		= '$kukarow[kuka]',
 					laadittu 		= now(),
 					toimaika		= now(),

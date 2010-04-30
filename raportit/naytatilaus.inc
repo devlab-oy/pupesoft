@@ -4,15 +4,16 @@
 
 	$lis = "";
 	if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-		$lis = " and liitostunnus = '$kukarow[oletus_asiakas]' ";
+		$lis = " and lasku.liitostunnus = '$kukarow[oletus_asiakas]' ";
 	}
 
 	$query = "	SELECT *,
-				if(tila = 'L' and laskunro>0, (select mapvm from lasku l where l.yhtio = lasku.yhtio and l.laskunro = lasku.laskunro and l.tila = 'U'), mapvm) mapvm
+				if(lasku.tila = 'L' and lasku.laskunro>0, (select lasku.mapvm from lasku l where l.yhtio = lasku.yhtio and l.laskunro = lasku.laskunro and l.tila = 'U'), lasku.mapvm) mapvm
 				FROM lasku
-				WHERE tunnus = '$tunnus'
+				LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+				WHERE lasku.tunnus = '$tunnus'
 				$lis
-				and yhtio='$kukarow[yhtio]'";
+				and lasku.yhtio='$kukarow[yhtio]'";
 	$aresult = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($aresult) == 0) {
@@ -56,7 +57,8 @@
 	echo "<tr>
 			<th>".t("Ytunnus")."</th>
 			<th colspan='2'>".t("Laskutusosoite")."</th>
-			<th colspan='3'>".t("Toimitusosoite")."</th>
+			<th colspan='2'>".t("Toimitusosoite")."</th>
+			<th>",t("Laskun postitusosoite"),"</th>
 			<th>".t("Toimitustapa")."</th>";
 
 	if ($laskurow["tila"] == "O") {
@@ -107,7 +109,7 @@
 			<td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]<br>".maa($laskurow["maa"])."</td>";
 
 	if ($verkkokauppa != "" and $muokkaa != "") {
-		echo "<td colspan='3'>
+		echo "<td colspan='2'>
 				<input type = 'text' name='toim_nimi' value = '$laskurow[toim_nimi]' size = '30'><br>
 				<input type = 'text' name='toim_nimitark' value = '$laskurow[toim_nimitark]' size = '30'><br>
 				<input type = 'text' name='toim_osoite' value = '$laskurow[toim_osoite]' size = '30'><br>
@@ -115,11 +117,22 @@
 				".maa($laskurow["toim_maa"])."</td>";
 	}
 	else {
-		echo "<td colspan='3'>
+		echo "<td colspan='2'>
 				$laskurow[toim_nimi] $laskurow[toim_nimitark]<br>
 				$laskurow[toim_osoite]<br>
 				$laskurow[toim_postino] $laskurow[toim_postitp]<br>
 				".maa($laskurow["toim_maa"])."</td>";
+
+		if (trim($laskurow['laskutus_nimi']) == '') {
+			$laskurow['laskutus_nimi'] 		= $laskurow['nimi'];
+			$laskurow['laskutus_nimitark'] 	= $laskurow['nimitark'];
+			$laskurow['laskutus_osoite'] 	= $laskurow['osoite'];
+			$laskurow['laskutus_postino'] 	= $laskurow['postino'];
+			$laskurow['laskutus_postitp'] 	= $laskurow['postitp'];
+			$laskurow['laskutus_maa'] 		= $laskurow['maa'];
+		}
+
+		echo "<td>$laskurow[laskutus_nimi] $laskurow[laskutus_nimitark]<br>$laskurow[laskutus_osoite]<br>$laskurow[laskutus_postino] $laskurow[laskutus_postitp]<br>",maa($laskurow['laskutus_maa']),"</td>";
 	}
 
 	echo "<td>$laskurow[toimitustapa]<br>$laskurow[toimitusehto]</td>";

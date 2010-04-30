@@ -288,13 +288,18 @@
 
 	if ($tee == "VALITSE") {
 
-		$query = "	SELECT lasku.*,
+		$query = "	SELECT lasku.*, 
+					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
 					maksuehto.teksti meh,
 					maksuehto.itsetulostus,
 					maksuehto.kateinen,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
 					FROM lasku use index (tila_index)
+					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}' 
+													AND laskun_lisatiedot.laskutus_nimi != '' 
+													AND laskun_lisatiedot.otunnus = lasku.tunnus
+													AND CONCAT(laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa) != CONCAT(lasku.nimi, lasku.osoite, lasku.postino, lasku.postitp, lasku.maa))
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
@@ -306,7 +311,7 @@
 					$muutlisa
 					GROUP BY lasku.tunnus
 					ORDER BY lasku.tunnus";
-		$res   = mysql_query($query) or pupe_error($query);
+		$res = mysql_query($query) or pupe_error($query);
 
 		$kateinen = "";
 		$maa = "";
@@ -416,10 +421,16 @@
 			if ($ekarow["chn"] == '666') $toimitusselite = t("Sähköpostiin");
 			if ($ekarow["chn"] == '667') $toimitusselite = t("Sisäinen");
 
-			echo "<tr><th>".t("Laskutus:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
+			echo "<tr><th>".t("Ostaja:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
 			echo "<tr><td>$ekarow[ytunnus]</td><td>$ekarow[nimi]</td><td>$ekarow[osoite]</td><td>$ekarow[postino]</td><td>$ekarow[postitp]</td><td>$ekarow[maa]</td></tr>";
-			echo "<tr><th>".t("Toimitus:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
+			echo "<tr><th>".t("Toimitusosoite:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
 			echo "<tr><td>$toimitusselite</td><td>$ekarow[toim_nimi]</td><td>$ekarow[toim_osoite]</td><td>$ekarow[toim_postino]</td><td>$ekarow[toim_postitp]</td><td>$ekarow[toim_maa]</td></tr>";
+
+			if (trim($ekarow['laskutus_nimi']) != '') {
+				echo "<tr><th>".t("Laskutusosoite:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
+				echo "<tr><td>&nbsp;</td><td>$ekarow[laskutus_nimi] $ekarow[laskutus_nimitark]</td><td>$ekarow[laskutus_osoite]</td><td>$ekarow[laskutus_postino]</td><td>$ekarow[laskutus_postitp]</td><td>$ekarow[laskutus_maa]</td></tr>";
+			}
+
 			echo "</table><br>";
 
 			mysql_data_seek($res,0);
@@ -799,21 +810,23 @@
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
 					FROM lasku use index (tila_index)
+					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
-					and chn	!= '999'
+					and lasku.chn	!= '999'
 					$alatilat
 					$vientilisa
 					$muutlisa
 					$haku
 					GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
-							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
-							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
-							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi
-							$ketjutus_group
+					lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
+					lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
+					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
+					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
+					$ketjutus_group
 					ORDER BY lasku.ytunnus, lasku.nimi";
 		$tilre = mysql_query($query) or pupe_error($query);
 

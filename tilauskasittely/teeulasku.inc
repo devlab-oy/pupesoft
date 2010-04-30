@@ -344,6 +344,34 @@
 	// otetaan uuden otsikon tunnus talteen
 	$uusiotunnus = (string) mysql_insert_id();
 
+	// haetaan laskun lisätiedot ketjun ekalta laskulta
+	$query = "	SELECT *
+				FROM laskun_lisatiedot
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND otunnus = '$lasrow[tunnus]'";
+	$lisatiedot_result = mysql_query($query) or pupe_error($query);
+	$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
+
+	$query = "INSERT INTO laskun_lisatiedot SET ";
+
+	for ($i = 0; $i < mysql_num_fields($lisatiedot_result); $i++) {
+		if (mysql_field_name($lisatiedot_result, $i) == 'laatija') {
+			$query .= mysql_field_name($lisatiedot_result, $i)."='$kukarow[kuka]',";
+		}
+		elseif (mysql_field_name($lisatiedot_result, $i) == 'luontiaika') {
+			$query .= mysql_field_name($lisatiedot_result, $i)."=now(),";
+		}
+		elseif (mysql_field_name($lisatiedot_result, $i) == 'otunnus') {
+			$query .= mysql_field_name($lisatiedot_result, $i)."='$uusiotunnus',";
+		}
+		elseif (mysql_field_name($lisatiedot_result, $i) != 'tunnus') {
+			$query .= mysql_field_name($lisatiedot_result, $i)."='".$lisatiedot_row[$i]."',";
+		}
+	}
+
+	$query = substr($query, 0, -1);
+	$lisatiedot_result = mysql_query($query) or pupe_error($query);
+
 	// haetaan nyt varmuuden vuoksi vielä insertoidut tiedot takaisin..
 	$query = "SELECT * FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$uusiotunnus'";
 	$uusiuresult = mysql_query($query) or pupe_error($query);

@@ -19,9 +19,10 @@
 				echo "Otsikkoa '$tunnus' ei löytynyt, tai se on väärässä tilassa.";
 				return 0;
 			}
-			$laskurow=mysql_fetch_array ($stresult);
-			if ($debug==1) echo t("Perusotsikko löytyi")." $laskurow[nimi]<br>";
 
+			$laskurow = mysql_fetch_array($stresult);
+
+			if ($debug==1) echo t("Perusotsikko löytyi")." $laskurow[nimi]<br>";
 
 			// Onko sopimuksella vielä jotain ennakkolaskutettavaa
 			$query = "	SELECT yhtio
@@ -67,7 +68,7 @@
 			$lahteva_lasku = ($aburow["laskutettu"] + 1)."/".$aburow["yhteensa"];
 
 			// tehdään vanhasta laskusta 1:1 kopio...
-			$query = "insert into lasku set ";
+			$query = "INSERT INTO lasku SET ";
 			for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
 				// paitsi tilaan laitetaan N
@@ -160,6 +161,34 @@
 			$query = substr($query,0,-1);
 			$stresult = mysql_query($query) or pupe_error($query);
 			$id = mysql_insert_id();
+
+			// tehdään vanhan laskun lisätiedoista 1:1 kopio...
+			$query = "	SELECT *
+						FROM laskun_lisatiedot
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND otunnus = '$tunnus'";
+			$lisatiedot_result = mysql_query($query) or pupe_error($query);
+			$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
+
+			$query = "INSERT INTO laskun_lisatiedot SET ";
+
+			for ($i = 0; $i < mysql_num_fields($lisatiedot_result); $i++) {
+				if (mysql_field_name($lisatiedot_result, $i) == 'laatija') {
+					$query .= mysql_field_name($lisatiedot_result, $i)."='$kukarow[kuka]',";
+				}
+				elseif (mysql_field_name($lisatiedot_result, $i) == 'luontiaika') {
+					$query .= mysql_field_name($lisatiedot_result, $i)."=now(),";
+				}
+				elseif (mysql_field_name($lisatiedot_result, $i) == 'otunnus') {
+					$query .= mysql_field_name($lisatiedot_result, $i)."='$id',";
+				}
+				elseif (mysql_field_name($lisatiedot_result, $i) != 'tunnus') {
+					$query .= mysql_field_name($lisatiedot_result, $i)."='".$lisatiedot_row[$i]."',";
+				}
+			}
+
+			$query = substr($query, 0, -1);
+			$lisatiedot_result = mysql_query($query) or pupe_error($query);
 
 			if ($debug==1) echo t("Perustin laskun")." $laskurow[nimi] $id<br>";
 

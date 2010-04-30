@@ -825,9 +825,37 @@ else {
 					$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 					$uusires = mysql_query($kysely) or pupe_error($kysely);
 
+					$query = "	SELECT *
+								FROM laskun_lisatiedot
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND otunnus = '$laskurow[tunnus]'";
+					$lisatiedot_result = mysql_query($query) or pupe_error($query);
+					$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
+
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tilausnumerot[] = $laskurow["tunnus"];
 
+					$fields = "yhtio";
+					$values = "'$kukarow[yhtio]'";
+
+					// Ei monisteta tunnusta
+					for ($i = 1; $i < mysql_num_fields($lisatiedot_result) - 1; $i++) {
+
+						$fieldname = mysql_field_name($lisatiedot_result, $i);
+
+						$fields .= ", ".$fieldname;
+
+						switch ($fieldname) {
+							case 'otunnus':
+								$values .= ", '$laskurow[tunnus]'";
+								break;
+							default:
+								$values .= ", '".$lisatiedot_row[$fieldname]."'";
+						}
+					}
+
+					$query = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
+					$lisatiedot_result = mysql_query($query) or pupe_error($query);
 				}
 				else {
 					$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o' " : '';

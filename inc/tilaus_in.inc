@@ -11,14 +11,15 @@ if ($tyyppi == 'yct') {
 	echo "<hr>";
 	echo t("Tilaus").": ".t("asiakas")." '" . $asno .  "' ";	
 	
-	$query = 	"SELECT * FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and ytunnus='$asno'";
+	$query = "	SELECT * 
+				FROM asiakas
+				WHERE yhtio = '$kukarow[yhtio]' 
+				AND ytunnus = '$asno'";
 	$result = mysql_query($query) or pupe_error($query);
 		
 	if (mysql_num_rows($result) != 1) {
 		echo t("Asiakasta ei löydy tai järjestelmässä on usea asiakas samalla ytunnuksella")."<br>";
 	}
-	
 	else {
 		$asiakasrow = mysql_fetch_array($result);
 					
@@ -77,12 +78,36 @@ if ($tyyppi == 'yct') {
 					yhtio 			= '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$id = mysql_insert_id();
+
+		if (strlen(trim($asiakasrow['laskutus_nimi'])) == 0) {
+			$asiakasrow['laskutus_nimi'] 		= $asiakasrow['nimi'];
+			$asiakasrow['laskutus_nimitark'] 	= $asiakasrow['nimitark'];
+			$asiakasrow['laskutus_osoite'] 		= $asiakasrow['osoite'];
+			$asiakasrow['laskutus_postino'] 	= $asiakasrow['postino'];
+			$asiakasrow['laskutus_postitp'] 	= $asiakasrow['postitp'];
+			$asiakasrow['laskutus_maa'] 		= $asiakasrow['maa'];
+		}
+
+		$query = "	INSERT INTO laskun_lisatiedot SET
+					laskutus_nimi 		= '$asiakasrow[laskutus_nimi]',
+					laskutus_nimitark 	= '$asiakasrow[laskutus_nimitark]',
+					laskutus_osoite		= '$asiakasrow[laskutus_osoite]',
+					laskutus_postino	= '$asiakasrow[laskutus_postino]',
+					laskutus_postitp	= '$asiakasrow[laskutus_postitp]',
+					laskutus_maa		= '$asiakasrow[laskutus_maa]',
+					yhtio				= '$kukarow[yhtio]',
+					otunnus				= '$id',
+					laatija				= '$kukarow[kuka]',
+					luontiaika			= now()";
+		$lisatiedot_result = mysql_query($query) or pupe_error($query);
+
 		$kukarow['kesken'] = $id;
 		//$laskurow['tunnus'] = $id
 		
 		$query = "	SELECT * 
 					FROM lasku
-					WHERE yhtio='$kukarow[yhtio]' and tunnus='$id'";
+					WHERE yhtio = '$kukarow[yhtio]' 
+					AND tunnus = '$id'";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
 		
@@ -112,15 +137,14 @@ while ((!feof ($fd)) and ($error!=1)) {
 		$rivihinta = trim($rivihinta);
 		$ale = '15';
 		
-		
-		
 		if ($tuoteno != '') {
 			$kplhinta = abs($rivihinta) / abs($maara);
-		//echo "tuoteno:$tuoteno<br>$maara<br>$rivihinta<br>$ale<br>$kplhinta<br>";
 		}
 		
-		$query = "SELECT tuoteno FROM tuote
-					WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+		$query = "	SELECT tuoteno 
+					FROM tuote
+					WHERE yhtio = '$kukarow[yhtio]' 
+					AND tuoteno = '$tuoteno'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0 and $tuoteno != '') {
@@ -129,13 +153,15 @@ while ((!feof ($fd)) and ($error!=1)) {
 			break;
 		}
 		
-		else if ($tuoteno != '') {
+		elseif ($tuoteno != '') {
 
 			$tilanne = '1';
 			echo "".t("Uusi rivi")." $id\t$tuoteno\t$maara\t$kplhinta\t$ale\t$rivihinta<br>";
 			
-			$query = "SELECT * FROM tuote
-					WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+			$query = "	SELECT * 
+						FROM tuote
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tuoteno = '$tuoteno'";
 			$result = mysql_query($query) or pupe_error($query);
 			$trow = mysql_fetch_array($result);
 			
@@ -143,9 +169,16 @@ while ((!feof ($fd)) and ($error!=1)) {
 			$alue = 'Y00';
 			
 			if ($trow['ei_saldoa'] == '') {
-				$query = 	"SELECT * FROM tuotepaikat
-							WHERE yhtio='$trow[yhtio]' and tuoteno='$trow[tuoteno]' 
-							and hyllyalue = 'Y00' and hyllynro	= '0' and hyllytaso	= '0' and hyllyvali	= '0' and saldo > 0";
+
+				$query = "	SELECT * 
+							FROM tuotepaikat
+							WHERE yhtio = '$trow[yhtio]' 
+							AND tuoteno = '$trow[tuoteno]' 
+							AND hyllyalue = 'Y00' 
+							AND hyllynro = '0' 
+							AND hyllytaso = '0' 
+							AND hyllyvali = '0' 
+							AND saldo > 0";
 				$result = mysql_query($query) or pupe_error($query);
 				
 				if (mysql_num_rows($result) == 0) {
@@ -157,10 +190,18 @@ while ((!feof ($fd)) and ($error!=1)) {
 				}
 				
 				if ($loyty == 0) {
-					$query = 	"SELECT * FROM tuotepaikat
-								WHERE yhtio='$trow[yhtio]' and tuoteno='$trow[tuoteno]' 
-								and hyllyalue = 'Y01' and hyllynro	= '0' and hyllytaso	= '0' and hyllyvali	= '0' and saldo > 0";
+
+					$query = "	SELECT * 
+								FROM tuotepaikat
+								WHERE yhtio = '$trow[yhtio]' 
+								AND tuoteno = '$trow[tuoteno]' 
+								AND hyllyalue = 'Y01' 
+								AND hyllynro = '0' 
+								AND hyllytaso = '0' 
+								AND hyllyvali = '0' 
+								AND saldo > 0";
 					$result = mysql_query($query) or pupe_error($query);
+
 					if (mysql_num_rows($result) == 0) {
 						$loyty = 0;
 					}
@@ -171,10 +212,17 @@ while ((!feof ($fd)) and ($error!=1)) {
 				}
 				
 				if ($loyty == 0) {
-					$query = 	"SELECT * FROM tuotepaikat
-								WHERE yhtio='$trow[yhtio]' and tuoteno='$trow[tuoteno]' 
-								and hyllyalue = 'Y00' and hyllynro	= '0' and hyllytaso	= '0' and hyllyvali	= '0'";
+
+					$query = "	SELECT * 
+								FROM tuotepaikat
+								WHERE yhtio = '$trow[yhtio]' 
+								AND tuoteno = '$trow[tuoteno]' 
+								AND hyllyalue = 'Y00' 
+								AND hyllynro = '0' 
+								AND hyllytaso = '0' 
+								AND hyllyvali = '0'";
 					$result = mysql_query($query) or pupe_error($query);
+
 					if (mysql_num_rows($result) == 0) {
 						$loyty = 0;
 					}
@@ -185,10 +233,17 @@ while ((!feof ($fd)) and ($error!=1)) {
 				}
 				
 				if ($loyty == 0) {
-					$query = 	"SELECT * FROM tuotepaikat
-								WHERE yhtio='$trow[yhtio]' and tuoteno='$trow[tuoteno]' 
-								and hyllyalue = 'Y01' and hyllynro	= '0' and hyllytaso	= '0' and hyllyvali	= '0'";
+
+					$query = "	SELECT * 
+								FROM tuotepaikat
+								WHERE yhtio = '$trow[yhtio]' 
+								AND tuoteno = '$trow[tuoteno]' 
+								AND hyllyalue = 'Y01' 
+								AND hyllynro = '0' 
+								AND hyllytaso = '0' 
+								AND hyllyvali = '0'";
 					$result = mysql_query($query) or pupe_error($query);
+
 					if (mysql_num_rows($result) == 0) {
 						$loyty = 0;
 					}
@@ -255,7 +310,6 @@ while ((!feof ($fd)) and ($error!=1)) {
 			$result = mysql_query($query) or pupe_error($query);
 		}
 	}
-	
 	else {	
 		switch ($tunnus) {
 			case '1' :
@@ -263,29 +317,34 @@ while ((!feof ($fd)) and ($error!=1)) {
 				$asno = substr($tietue, 19, 6);
 				echo "".t("Tilaus").": ".t("asiakas")." '" . $asno .  "' ";
 	
-				$query = "SELECT ytunnus FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and ytunnus='$asno'";
+				$query = "	SELECT ytunnus 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND ytunnus = '$asno'";
 				$result = mysql_query($query) or pupe_error($query);
 	
 				if (mysql_num_rows($result) == 0) {
-					$query = "INSERT into asiakas
-								SET yhtio='$kukarow[yhtio]', ytunnus='$asno',
-									nimi = '$asno'";
+					$query = "	INSERT INTO asiakas SET 
+								yhtio 	= '$kukarow[yhtio]', 
+								ytunnus = '$asno',
+								nimi 	= '$asno'";
 					$result = mysql_query($query) or pupe_error($query);
 					$aperustettu += 1;
 				}
-				$query = "SELECT * FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and ytunnus='$asno'";
+				$query = "	SELECT * 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND ytunnus = '$asno'";
 				$result = mysql_query($query) or pupe_error($query);
 	
 				$asiakasrow = mysql_fetch_array($result);
 	
-				$tnimi = $asiakasrow['nimi'];
-				$tnimitark = $asiakasrow['nimitark'];
-				$tosoite = $asiakasrow['osoite'];
-				$tpostino = $asiakasrow['postino'];
-				$tpostitp = $asiakasrow['postitp'];
-				$toim_maa = $asiakasrow['maa'];
+				$tnimi 		= $asiakasrow['nimi'];
+				$tnimitark 	= $asiakasrow['nimitark'];
+				$tosoite 	= $asiakasrow['osoite'];
+				$tpostino 	= $asiakasrow['postino'];
+				$tpostitp 	= $asiakasrow['postitp'];
+				$toim_maa 	= $asiakasrow['maa'];
 	
 				$query = "	INSERT into lasku SET
 							yhtio_nimi 			= '$yhtiorow[nimi]',
@@ -296,7 +355,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 							yhtio_ovttunnus		= '$yhtiorow[ovttunnus]',
 							yhtio_kotipaikka	= '$yhtiorow[kotipaikka]',
 							laatija 			= '$kukarow[kuka]',
-							luontiaika			= NOW(),
+							luontiaika			= now(),
 							ytunnus				= '$asiakasrow[ytunnus]',
 							nimi 				= '$asiakasrow[nimi]',
 							nimitark 			= '$asiakasrow[nimitark]',
@@ -329,6 +388,29 @@ while ((!feof ($fd)) and ($error!=1)) {
 							yhtio 				= '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$id = mysql_insert_id();
+
+				if (strlen(trim($asiakasrow['laskutus_nimi'])) == 0) {
+					$asiakasrow['laskutus_nimi'] 		= $asiakasrow['nimi'];
+					$asiakasrow['laskutus_nimitark'] 	= $asiakasrow['nimitark'];
+					$asiakasrow['laskutus_osoite'] 		= $asiakasrow['osoite'];
+					$asiakasrow['laskutus_postino'] 	= $asiakasrow['postino'];
+					$asiakasrow['laskutus_postitp'] 	= $asiakasrow['postitp'];
+					$asiakasrow['laskutus_maa'] 		= $asiakasrow['maa'];
+				}
+
+				$query = "	INSERT INTO laskun_lisatiedot SET
+							laskutus_nimi 		= '$asiakasrow[laskutus_nimi]',
+							laskutus_nimitark 	= '$asiakasrow[laskutus_nimitark]',
+							laskutus_osoite		= '$asiakasrow[laskutus_osoite]',
+							laskutus_postino	= '$asiakasrow[laskutus_postino]',
+							laskutus_postitp	= '$asiakasrow[laskutus_postitp]',
+							laskutus_maa		= '$asiakasrow[laskutus_maa]',
+							yhtio				= '$kukarow[yhtio]',
+							otunnus				= '$id',
+							laatija				= '$kukarow[kuka]',
+							luontiaika			= now()";
+				$lisatiedot_result = mysql_query($query) or pupe_error($query);
+
 				echo "".t("nro")." $id ";
 				break;
 			case '2' :
@@ -337,42 +419,47 @@ while ((!feof ($fd)) and ($error!=1)) {
 				$maara = substr($tietue, 99, 10);
 				$hinta = substr($tietue, 109, 10);
 				$alv = substr($tietue, 119, 5);
-	//			echo "Tuote: '" . $tuoteno .  "' '" . $nimitys .  "'<br>";
-	//			echo "Maara: '" . $maara .  "' Hinta '" . $hinta .  "' Alv '" . $alv . "'<br>";
 	
-				$query = "SELECT tuoteno FROM tuote
-							WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+				$query = "	SELECT tuoteno 
+							FROM tuote
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND tuoteno = '$tuoteno'";
 				$result = mysql_query($query) or pupe_error($query);
 	
 				//$tuoteno = $tuoteno * 1;
 	
 				if (mysql_num_rows($result) == 0) {
-					$query = "INSERT into tuote
-								SET yhtio='$kukarow[yhtio]', tuoteno='$tuoteno',
-									nimitys = '$nimitys', myyntihinta = $hinta, yksikko = 'kpl'";
+					$query = "	INSERT INTO tuote SET 
+								yhtio 		= '$kukarow[yhtio]', 
+								tuoteno 	= '$tuoteno',
+								nimitys 	= '$nimitys', 
+								myyntihinta = $hinta, 
+								yksikko 	= 'kpl'";
 					$result = mysql_query($query) or pupe_error($query);
 					$tperustettu += 1;
 				}
-				$query = "SELECT * FROM tuote
-							WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+				$query = "	SELECT * 
+							FROM tuote
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND tuoteno = '$tuoteno'";
 				$result = mysql_query($query) or pupe_error($query);
 				$trow = mysql_fetch_array($result);
 	
-				$query = "INSERT into tilausrivi set
-					laatija = '$kukarow[kuka]',
-					laadittu = now(),
-					yhtio = '$kukarow[yhtio]',
-					tuoteno = '$tuoteno',
-					varattu = $maara,
-					yksikko = '$trow[yksikko]',
-					kpl = 0,
-					alv = $alv,
-					hinta = $hinta,
-					kerayspvm = '$toimpvm',
-					nimitys = '$nimitys',
-					otunnus = '$id',
-					tyyppi = 'L',
-					toimaika = '$toimpvm'";
+				$query = "	INSERT INTO tilausrivi SET
+							laatija 	= '$kukarow[kuka]',
+							laadittu 	= now(),
+							yhtio 		= '$kukarow[yhtio]',
+							tuoteno 	= '$tuoteno',
+							varattu 	= $maara,
+							yksikko 	= '$trow[yksikko]',
+							kpl 		= 0,
+							alv 		= $alv,
+							hinta 		= $hinta,
+							kerayspvm 	= '$toimpvm',
+							nimitys 	= '$nimitys',
+							otunnus 	= '$id',
+							tyyppi 		= 'L',
+							toimaika 	= '$toimpvm'";
 	
 				if ($trow['ei_saldoa'] != '') $query .= ", keratty = 'saldoton', kerattyaika = now()";
 	
@@ -383,32 +470,40 @@ while ((!feof ($fd)) and ($error!=1)) {
 			
 			case 'A' :
 				echo "<hr>";
+
 				$asno = substr($tietue, 19, 6);
+
 				echo "".t("Tilaus").": ".t("asiakas")." '" . $asno .  "' ";
 	
-				$query = "SELECT ytunnus FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and ytunnus='$asno'";
+				$query = "	SELECT ytunnus 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND ytunnus = '$asno'";
 				$result = mysql_query($query) or pupe_error($query);
 	
 				if (mysql_num_rows($result) == 0) {
-					$query = "INSERT into asiakas
-								SET yhtio='$kukarow[yhtio]', ytunnus='$asno',
-									nimi = '$asno'";
+					$query = "	INSERT INTO asiakas SET 
+								yhtio 	= '$kukarow[yhtio]', 
+								ytunnus = '$asno',
+								nimi 	= '$asno'";
 					$result = mysql_query($query) or pupe_error($query);
 					$aperustettu += 1;
 				}
-				$query = "SELECT * FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and ytunnus='$asno'";
+
+				$query = "	SELECT * 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND ytunnus = '$asno'";
 				$result = mysql_query($query) or pupe_error($query);
 	
 				$asiakasrow = mysql_fetch_array($result);
 	
-				$tnimi = $asiakasrow['nimi'];
-				$tnimitark = $asiakasrow['nimitark'];
-				$tosoite = $asiakasrow['osoite'];
-				$tpostino = $asiakasrow['postino'];
-				$tpostitp = $asiakasrow['postitp'];
-				$toim_maa = $asiakasrow['maa'];
+				$tnimi 		= $asiakasrow['nimi'];
+				$tnimitark 	= $asiakasrow['nimitark'];
+				$tosoite 	= $asiakasrow['osoite'];
+				$tpostino 	= $asiakasrow['postino'];
+				$tpostitp 	= $asiakasrow['postitp'];
+				$toim_maa 	= $asiakasrow['maa'];
 	
 				$query = "	INSERT into lasku SET
 							yhtio_nimi			= '$yhtiorow[nimi]',
@@ -452,6 +547,29 @@ while ((!feof ($fd)) and ($error!=1)) {
 							yhtio 				= '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$id = mysql_insert_id();
+
+				if (strlen(trim($asiakasrow['laskutus_nimi'])) == 0) {
+					$asiakasrow['laskutus_nimi'] 		= $asiakasrow['nimi'];
+					$asiakasrow['laskutus_nimitark'] 	= $asiakasrow['nimitark'];
+					$asiakasrow['laskutus_osoite'] 		= $asiakasrow['osoite'];
+					$asiakasrow['laskutus_postino'] 	= $asiakasrow['postino'];
+					$asiakasrow['laskutus_postitp'] 	= $asiakasrow['postitp'];
+					$asiakasrow['laskutus_maa'] 		= $asiakasrow['maa'];
+				}
+
+				$query = "	INSERT INTO laskun_lisatiedot SET
+							laskutus_nimi 		= '$asiakasrow[laskutus_nimi]',
+							laskutus_nimitark 	= '$asiakasrow[laskutus_nimitark]',
+							laskutus_osoite		= '$asiakasrow[laskutus_osoite]',
+							laskutus_postino	= '$asiakasrow[laskutus_postino]',
+							laskutus_postitp	= '$asiakasrow[laskutus_postitp]',
+							laskutus_maa		= '$asiakasrow[laskutus_maa]',
+							yhtio				= '$kukarow[yhtio]',
+							otunnus				= '$id',
+							laatija				= '$kukarow[kuka]',
+							luontiaika			= now()";
+				$lisatiedot_result = mysql_query($query) or pupe_error($query);
+
 				echo "".t("nro")." $id ";
 				break;
 			
@@ -460,44 +578,52 @@ while ((!feof ($fd)) and ($error!=1)) {
 		}
 	}
 }
+
 if (($tyyppi == 'yct') and ($id != '')) {
+
 	if ($tilanne == '0') {
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tilaus_in.inc")."<br>";
 	
-		$query = "	UPDATE lasku set
+		$query = "	UPDATE lasku SET
 					tila		= 'D',
 					alatila		= 'L',
 					comments = '$komm'
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
+					WHERE yhtio = '$kukarow[yhtio]' 
+					AND tunnus = '$id'";
 		$result = mysql_query($query) or pupe_error($query);
 		
-		$query = "	UPDATE tilausrivi set
+		$query = "	UPDATE tilausrivi SET
 					tyyppi		= 'D'
-					WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$id'";
+					WHERE yhtio = '$kukarow[yhtio]' 
+					AND otunnus = '$id'";
 		$result = mysql_query($query) or pupe_error($query);
 		
 		echo "".t("Ei voitu tehdä tilausta loppuun vaan se mitätöitiin")."!";
 	}
 	else {
 		require("../tilauskasittely/tilaus-valmis.inc");
+
 		echo "".t("luotiin")." $rivperustettu ".t("rivia ok")."!<br>";
-		//echo "<br>mail: $mail";
-		//echo "<br>tunnus: $tunnus";
-		//echo "<br>osoite: $mailiosoite";
-		//echo "<br>id: $id";
+
 		if ($mail == 'jep') {
 			$rivi = '';
 			$rivi .= "".t("Tuoteno")."\t".t("määrä")."\t".t("oletussaldo")."\t".t("hälytysraja")."\t".t("oletuspaikka")."\r\n";
 			
-			$query = "SELECT tuoteno, tilkpl FROM tilausrivi
-					WHERE yhtio='$kukarow[yhtio]' and otunnus='$id'";
+			$query = "	SELECT tuoteno, tilkpl 
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND otunnus = '$id'";
 			$resulttil = mysql_query($query) or pupe_error($query);
-			//echo "<br>$query";
+
 			while ($tilrow = mysql_fetch_array ($resulttil)) {
+
 				$tuoteno = $tilrow['tuoteno'];
-				//echo "<br>tuoteno: $tuoteno";
-				$query = "SELECT halytysraja FROM tuotepaikat
-					 	 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and hyllyalue = 'Y01'"; 
+
+				$query = "	SELECT halytysraja 
+							FROM tuotepaikat
+					 	 	WHERE yhtio = '$kukarow[yhtio]' 
+							AND tuoteno = '$tuoteno' 
+							AND hyllyalue = 'Y01'"; 
 				$resultyc = mysql_query($query) or pupe_error($query);
 			
 				if (mysql_num_rows($resultyc) != 0) {
@@ -508,8 +634,13 @@ if (($tyyppi == 'yct') and ($id != '')) {
 					$hraja = '0';
 				}
 				
-				$query = "SELECT saldo, concat_ws('-',hyllyalue,hyllynro,hyllytaso,hyllyvali) alue FROM tuotepaikat
-						  WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and hyllyalue != 'Y01' and oletus = 'X' and saldo > '0'"; 
+				$query = "	SELECT saldo, concat_ws('-',hyllyalue,hyllynro,hyllytaso,hyllyvali) alue 
+							FROM tuotepaikat
+						  	WHERE yhtio = '$kukarow[yhtio]' 
+							AND tuoteno = '$tuoteno' 
+							AND hyllyalue != 'Y01' 
+							AND oletus = 'X' 
+							AND saldo > '0'"; 
 				$resultmuu = mysql_query($query) or pupe_error($query);	
 		
 				if (mysql_num_rows($resultmuu) != 0) {
@@ -528,6 +659,7 @@ if (($tyyppi == 'yct') and ($id != '')) {
 				
 				$rivi .= "$tilrow[tuoteno]\t$tilrow[tilkpl]\t$oletsaldo\t$hraja\t$alue\r\n";
 			}
+
 			echo "<br>".t("Lähetetään meili osoitteeseen")." $mailiosoite";
 			$bound = uniqid(time()."_") ;
 			$ny = date("d-m-Y");
@@ -551,6 +683,7 @@ if (($tyyppi == 'yct') and ($id != '')) {
 		}
 	}
 }
+
 if ($error==1) echo "<font class='error'>".t("Käsittelyssä tapahtui virhe")."</font><br>";
 
 fclose ($fd);

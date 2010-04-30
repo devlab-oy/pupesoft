@@ -88,6 +88,12 @@
 								tunnus		= '$kukarow[kesken]' and
 								tila        in ('N', 'L', 'E', 'G')";
 					$stresult = mysql_query($query) or pupe_error($query);
+
+					$query = "	SELECT *
+								FROM laskun_lisatiedot
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND otunnus = '$kukarow[kesken]'";
+					$lisatiedot_result = mysql_query($query) or pupe_error($query);
 				}
 				elseif ($isarivirow["osatoimitus"] != "") {
 					$query = "	SELECT *
@@ -97,10 +103,18 @@
 								and tila	in ('N', 'L')
 								and alatila != 'X'";
 					$stresult = mysql_query($query) or pupe_error($query);
+
+					$query = "	SELECT *
+								FROM laskun_lisatiedot
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND otunnus = '$isarivirow[otunnus]'";
+					$lisatiedot_result = mysql_query($query) or pupe_error($query);
 				}
 				else {
 					// tila pitää olla lähete, tilaus, ennakko tai siirtolista
-					$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$isarivirow[otunnus]' and tila in ('N', 'L', 'E', 'G')";
+					$query = "	SELECT * 
+								FROM lasku 
+								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$isarivirow[otunnus]' and tila in ('N', 'L', 'E', 'G')";
 					$stresult = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($stresult) == 0) {
@@ -108,6 +122,12 @@
 						exit;
 					}
 					$otsikkorivi = mysql_fetch_array ($stresult);
+
+					$query = "	SELECT *
+								FROM laskun_lisatiedot
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND otunnus = '$isarivirow[otunnus]'";
+					$lisatiedot_result = mysql_query($query) or pupe_error($query);
 
 					if ($debug==1) echo t("Perusotsikko löytyi")." $otsikkorivi[nimi] $isarivirow[otunnus]<br>";
 
@@ -402,6 +422,28 @@
 
 					$stresult = mysql_query($query) or pupe_error($query);
 					$id = mysql_insert_id();
+
+					$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
+
+					$query = "INSERT INTO laskun_lisatiedot SET ";
+
+					for ($i = 0; $i < mysql_num_fields($lisatiedot_result); $i++) {
+						if (mysql_field_name($lisatiedot_result, $i) == 'laatija') {
+							$query .= mysql_field_name($lisatiedot_result, $i)."='$kukarow[kuka]',";
+						}
+						elseif (mysql_field_name($lisatiedot_result, $i) == 'luontiaika') {
+							$query .= mysql_field_name($lisatiedot_result, $i)."=now(),";
+						}
+						elseif (mysql_field_name($lisatiedot_result, $i) == 'otunnus') {
+							$query .= mysql_field_name($lisatiedot_result, $i)."='$id',";
+						}
+						elseif (mysql_field_name($lisatiedot_result, $i) != 'tunnus') {
+							$query .= mysql_field_name($lisatiedot_result, $i)."='".$lisatiedot_row[$i]."',";
+						}
+					}
+
+					$query = substr($query, 0, -1);
+					$lisatiedot_result = mysql_query($query) or pupe_error($query);
 
 					if ($debug==1) echo t("Perustin laskun")." $otsikkorivi[nimi] $id<br>";
 				}

@@ -59,7 +59,13 @@
 					kolm_osoite  		= '',
 					kolm_postino  		= '',
 					kolm_postitp 		= '',
-					kolm_maa    		= ''
+					kolm_maa    		= '',
+					laskutus_nimi		= '',
+					laskutus_nimitark	= '',
+					laskutus_osoite		= '',
+					laskutus_postino	= '',
+					laskutus_postitp	= '',
+					laskutus_maa		= ''
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and otunnus 		= '$kukarow[kesken]'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -433,8 +439,6 @@
 					$assrow["toim_maa"]		= $assrow["maa"];
 				}
 
-
-
 				$query = "	UPDATE lasku
 							SET liitostunnus 	= '$assrow[tunnus]',
 							ytunnus				= '$assrow[ytunnus]',
@@ -472,7 +476,13 @@
 							kolm_osoite  		= '$assrow[kolm_osoite]',
 							kolm_postino  		= '$assrow[kolm_postino]',
 							kolm_postitp 		= '$assrow[kolm_postitp]',
-							kolm_maa    		= '$assrow[kolm_maa]'
+							kolm_maa    		= '$assrow[kolm_maa]',
+							laskutus_nimi		= '$assrow[laskutus_nimi]',
+							laskutus_nimitark	= '$assrow[laskutus_nimitark]',
+							laskutus_osoite		= '$assrow[laskutus_osoite]',
+							laskutus_postino	= '$assrow[laskutus_postino]',
+							laskutus_postitp	= '$assrow[laskutus_postitp]',
+							laskutus_maa		= '$assrow[laskutus_maa]'
 							WHERE yhtio 		= '$kukarow[yhtio]'
 							and otunnus 		= '$kukarow[kesken]'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -783,50 +793,47 @@
 			echo "</table>";
 			echo "</td>";
 
-			if ($yhtiorow['laskutyyppi'] == 3) {
-				echo "<td valign='top' style='padding:0px;'>";
-				echo "<table>";
-				echo "<tr>
-						<th colspan='2' align='left' valign='top'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
-				echo "<tr>
-						<td valign='top'> ".t("Nimi").": </td>
-						<td><input type='text' name='laskutus_nimi' size='35' value='$srow[laskutus_nimi]'></td></tr>";
-				echo "<tr>
-						<td></td>
-						<td><input type='text' name='laskutus_nimitark' size='35' value='$srow[laskutus_nimitark]'></td></tr>";
-				echo "<tr>
-						<td valign='top'>".t("Osoite").": </td>
-						<td><input type='text' name='laskutus_osoite' size='35' value='$srow[laskutus_osoite]'></td></tr>";
-				echo "<tr>
-						<td valign='top'>".t("Postitp").": </td>
-						<td><input type='text' name='laskutus_postino' size='10' value='$srow[laskutus_postino]'> <input type='text' name='laskutus_postitp' size='21' value='$srow[laskutus_postitp]'></td></tr>";
+			echo "<td valign='top' style='padding:0px;'>";
+			echo "<table>";
+			echo "<tr>
+					<th colspan='2' align='left' valign='top'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
+			echo "<tr>
+					<td valign='top'> ".t("Nimi").": </td>
+					<td><input type='text' name='laskutus_nimi' size='35' value='$srow[laskutus_nimi]'></td></tr>";
+			echo "<tr>
+					<td></td>
+					<td><input type='text' name='laskutus_nimitark' size='35' value='$srow[laskutus_nimitark]'></td></tr>";
+			echo "<tr>
+					<td valign='top'>".t("Osoite").": </td>
+					<td><input type='text' name='laskutus_osoite' size='35' value='$srow[laskutus_osoite]'></td></tr>";
+			echo "<tr>
+					<td valign='top'>".t("Postitp").": </td>
+					<td><input type='text' name='laskutus_postino' size='10' value='$srow[laskutus_postino]'> <input type='text' name='laskutus_postitp' size='21' value='$srow[laskutus_postitp]'></td></tr>";
 
-				$query = "	SELECT distinct koodi, nimi
-							FROM maat
-							WHERE nimi != ''
-							ORDER BY koodi";
-				$vresult = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT distinct koodi, nimi
+						FROM maat
+						WHERE nimi != ''
+						ORDER BY koodi";
+			$vresult = mysql_query($query) or pupe_error($query);
 
-				echo "<tr><td valign='top'> ".t("Maa").": </td>
-						<td><select name='laskutus_maa' ".js_alasvetoMaxWidth("laskutus_maa", 200).">";
+			echo "<tr><td valign='top'> ".t("Maa").": </td>
+					<td><select name='laskutus_maa' ".js_alasvetoMaxWidth("laskutus_maa", 200).">";
 
-				while ($vrow=mysql_fetch_assoc($vresult)) {
-					$sel="";
-					if (strtoupper($srow["laskutus_maa"]) == strtoupper($vrow["koodi"])) {
-						$sel = "selected";
-					}
-					elseif ($srow["laskutus_maa"] == "" and strtoupper($vrow["koodi"]) == strtoupper($yhtiorow["maa"])) {
-						$sel = "selected";
-					}
-					echo "<option value = '".strtoupper($vrow["koodi"])."' $sel>".t($vrow["nimi"])."</option>";
+			while ($vrow=mysql_fetch_assoc($vresult)) {
+				$sel="";
+				if (strtoupper($srow["laskutus_maa"]) == strtoupper($vrow["koodi"])) {
+					$sel = "selected";
 				}
-
-				echo "</select></td></tr>";
-
-				echo "</table>";
-				echo "</td>";
-
+				elseif ($srow["laskutus_maa"] == "" and strtoupper($vrow["koodi"]) == strtoupper($yhtiorow["maa"])) {
+					$sel = "selected";
+				}
+				echo "<option value = '".strtoupper($vrow["koodi"])."' $sel>".t($vrow["nimi"])."</option>";
 			}
+
+			echo "</select></td></tr>";
+
+			echo "</table>";
+			echo "</td>";
 
 			echo "</tr>";
 
@@ -2468,6 +2475,15 @@
 			$tpostino  = $postino;
 			$tpostitp  = $postitp;
 			$toim_maa  = $maa;
+		}
+
+		if (strlen(trim($laskutus_nimi)) == 0) {
+			$laskutus_nimi 		= $nimi;
+			$laskutus_nimitark 	= $nimitark;
+			$laskutus_osoite 	= $osoite;
+			$laskutus_postino 	= $postino;
+			$laskutus_postitp 	= $postitp;
+			$laskutus_maa 		= $maa;
 		}
 
 		if ($tilausyhteyshenkilo == '' and $seltilausyhteyshenkilo != '') {

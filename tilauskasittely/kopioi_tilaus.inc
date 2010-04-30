@@ -11,6 +11,9 @@ if (!function_exists("kopioi_tilaus")) {
 		$query = "SELECT * FROM lasku WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
 		$monistares = mysql_query($query) or pupe_error($query);
 
+		$query = "SELECT * FROM laskun_lisatiedot WHERE otunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+		$lisatiedotres = mysql_query($query) or pupe_error($query);
+
 		$query = "SELECT * from tilausrivi where otunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
 		$rivires = mysql_query($query) or pupe_error($query);
 
@@ -48,6 +51,30 @@ if (!function_exists("kopioi_tilaus")) {
 		$insres  = mysql_query($kysely) or pupe_error($kysely);
 		$utunnus = mysql_insert_id();
 
+		// laskun_lisatiedot
+		if (mysql_num_rows($lisatiedotres) > 0) {
+			$lisatiedotrow = mysql_fetch_array($lisatiedotres);
+
+			$fields = mysql_field_name($lisatiedotres,0);
+			$values = "'".$lisatiedotrow[0]."'";
+
+			// monistetaan kaikki paitsi tunnus
+			for ($i = 1; $i < mysql_num_fields($lisatiedotres) - 1; $i++) {
+				$field = mysql_field_name($lisatiedotres, $i);
+				$fields .= ", $field";
+
+				if ($field == 'otunnus') {
+					$values .= ", '$utunnus'";
+				}
+				else {
+					$values .= ", '$lisatiedotrow[$i]'";
+				}
+			}
+		}
+
+		$query = "INSERT INTO laskun_lisatiedot ($fields) VALUES ($values)";
+		$insres = mysql_query($query) or pupe_error($query);
+
 		while ($rivirow = mysql_fetch_array($rivires)) {
 
 			$rfields = mysql_field_name($rivires,0);
@@ -64,8 +91,8 @@ if (!function_exists("kopioi_tilaus")) {
 				else {
 					
 					//	Muokkaukset
-					if(is_array($muokkaa_rivi[$field])) {
-						if($muokkaa_rivi[$field]["from"] != "" and $muokkaa_rivi[$field]["to"] != "") {
+					if (is_array($muokkaa_rivi[$field])) {
+						if ($muokkaa_rivi[$field]["from"] != "" and $muokkaa_rivi[$field]["to"] != "") {
 							$rivirow[$i] = preg_replace($muokkaa_rivi[$field]["from"], $muokkaa_rivi[$field]["to"], $rivirow[$i]);
 						}
 					}

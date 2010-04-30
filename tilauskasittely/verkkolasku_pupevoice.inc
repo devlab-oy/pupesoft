@@ -131,6 +131,22 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("DeliveredPartyTownName",				$lasrow['toim_postitp'], 							$tootxml);
 		xml_add("DeliveredPartyCountryName",			$lasrow['toim_maa'], 								$tootxml);
 		xml_add("DeliveredPartyOVT",					$lasrow['toim_ovttunnus'], 							$tootxml);
+
+		$query = "	SELECT *
+					FROM laskun_lisatiedot
+					WHERE yhtio = '$lasrow[yhtio]'
+					AND otunnus = '$lasrow[tunnus]'";
+		$lasosres = mysql_query($query) or pupe_error($query);
+		$lasosrow = mysql_fetch_assoc($lasosres);
+		
+		if ($lasosrow['laskutus_nimi'] != '') {
+			xml_add("InvoiceRecipientOrganisationName",	trim($lasosrow['laskutus_nimi']." ".$lasosrow['laskutus_nimitark']), $tootxml);
+			xml_add("InvoiceRecipientStreetName", 		$lasosrow['laskutus_osoite'],						$tootxml);
+			xml_add("InvoiceRecipientTownName",			$lasosrow['laskutus_postitp'],						$tootxml);
+			xml_add("InvoiceRecipientPostCodeIdentifier", $lasosrow['laskutus_postino'],					$tootxml);
+			xml_add("InvoiceRecipientCountryCode",		$lasosrow['laskutus_maa'],							$tootxml);
+		}
+
 		xml_add("DueDate",								vlas_dateconv($lasrow['erpcm']),					$tootxml);
 		xml_add("InvoiceTotalVatExcludedAmount",		$lasrow['arvo'],									$tootxml);
 		xml_add("InvoiceTotalVatAmount",				round($lasrow['summa']-$lasrow['arvo'], 2),			$tootxml);
@@ -171,6 +187,15 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("ArticleIdentifier",				$tilrow['tuoteno'], 						$tootxml);
 		xml_add("ArticleEANIdentifier",				$tilrow['eankoodi'], 						$tootxml);
 		xml_add("ArticleName",						$tilrow['nimitys'], 						$tootxml);
+
+		$toim_query = "SELECT toim_tuoteno FROM tuotteen_toimittajat WHERE yhtio = '$tilrow[yhtio]' AND tuoteno = '$tilrow[tuoteno]'";
+		$toim_tuoteno_res = mysql_query($toim_query) or pupe_error($toim_query);
+		$toim_tuoteno_row = mysql_fetch_assoc($toim_tuoteno_res);
+
+		$toim_tuoteno = trim($toim_tuoteno_row['toim_tuoteno']) != '' ? $toim_tuoteno_row['toim_tuoteno'] : $tilrow['tuoteno'];
+
+		xml_add("ManufacturerArticleIdentifier",	$toim_tuoteno,								$tootxml); // toimittajan tuotekoodi
+
 		xml_add("DeliveredQuantity",				$tilrow['kpl'], 							$tootxml);
 		xml_add("DeliveredQuantityUnitCode",		$tilrow['yksikko'],							$tootxml);
 		xml_add("DeliveryDate",						vlas_dateconv($tilrow['toimitettuaika']),	$tootxml);

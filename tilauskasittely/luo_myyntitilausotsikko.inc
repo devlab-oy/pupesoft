@@ -13,21 +13,27 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		if (mysql_num_rows($result) == 1) {
 			$asiakasrow  = mysql_fetch_array($result);
 
-			$ytunnus 							= $asiakasrow["ytunnus"];
-			$nimi 			   	   	   			= $asiakasrow["nimi"];
-			$nimitark 		   	   	   			= $asiakasrow["nimitark"];
-			$osoite 		   	   	   			= $asiakasrow["osoite"];
-			$postino 		   	   	   			= $asiakasrow["postino"];
-			$postitp 		   	   	   			= $asiakasrow["postitp"];
-			$maa 			   	   	   			= $asiakasrow["maa"];
-			$tnimi 			   	   	   			= $asiakasrow["toim_nimi"];
-			$tnimitark 		   	   	   			= $asiakasrow["toim_nimitark"];
-			$tosoite 		   	   	   			= $asiakasrow["toim_osoite"];
-			$tpostino 		   	   	   			= $asiakasrow["toim_postino"];
-			$tpostitp 		   	   	   			= $asiakasrow["toim_postitp"];
-			$toim_maa 		   	   	   			= $asiakasrow["toim_maa"];
-			$verkkotunnus 	   	   	   			= $asiakasrow["verkkotunnus"];
-			$piiri 								= $asiakasrow["piiri"];
+			$ytunnus 			= $asiakasrow["ytunnus"];
+			$nimi 			   	= $asiakasrow["nimi"];
+			$nimitark 		   	= $asiakasrow["nimitark"];
+			$osoite 		   	= $asiakasrow["osoite"];
+			$postino 		   	= $asiakasrow["postino"];
+			$postitp 		   	= $asiakasrow["postitp"];
+			$maa 			   	= $asiakasrow["maa"];
+			$tnimi 			   	= $asiakasrow["toim_nimi"];
+			$tnimitark 		   	= $asiakasrow["toim_nimitark"];
+			$tosoite 		   	= $asiakasrow["toim_osoite"];
+			$tpostino 		   	= $asiakasrow["toim_postino"];
+			$tpostitp 		   	= $asiakasrow["toim_postitp"];
+			$toim_maa 		   	= $asiakasrow["toim_maa"];
+			$laskutus_nimi		= $asiakasrow["laskutus_nimi"];
+			$laskutus_nimitark	= $asiakasrow["laskutus_nimitark"];
+			$laskutus_osoite	= $asiakasrow["laskutus_osoite"];
+			$laskutus_postino	= $asiakasrow["laskutus_postino"];
+			$laskutus_postitp	= $asiakasrow["laskutus_postitp"];
+			$laskutus_maa		= $asiakasrow["laskutus_maa"];
+			$verkkotunnus 	   	= $asiakasrow["verkkotunnus"];
+			$piiri 				= $asiakasrow["piiri"];
 
 			if ($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") {
 				$eilahe = "o";
@@ -101,7 +107,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$ovttunnus 			= $asiakasrow["ovttunnus"];
 			$toim_ovttunnus 	= $asiakasrow["toim_ovttunnus"];
 			$chn 				= $asiakasrow["chn"];
-			$maksuteksti 		= $asiakasrow[""];
+			$maksuteksti 		= "";
 			$tilausvahvistus	= $asiakasrow["tilausvahvistus"];
 			$laskutusvkopv 		= $asiakasrow["laskutusvkopv"];
 			$vienti 			= $asiakasrow["vienti"];

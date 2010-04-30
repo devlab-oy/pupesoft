@@ -743,6 +743,22 @@ while (!feof ($fd)) {
 					$arow["osoite"] = $losoite;
 					$arow["postitp"] = $lpostitp;
 					$arow["postino"] = $lpostino;
+
+					$arow['laskutus_nimi'] 		= $lnimi;
+					$arow['laskutus_nimitark'] 	= $lnimitark;
+					$arow['laskutus_osoite']	= $losoite;
+					$arow['laskutus_postitp'] 	= $lpostitp;
+					$arow['laskutus_postino'] 	= $lpostino;
+					$arow['laskutus_maa']		= $arow['maa'];
+				}
+
+				if (trim($arow['laskutus_nimi']) == '') {
+					$arow['laskutus_nimi'] 		= $arow['nimi'];
+					$arow['laskutus_nimitark']	= $arow['nimitark'];
+					$arow['laskutus_osoite']	= $arow['osoite'];
+					$arow['laskutus_postitp']	= $arow['postitp'];
+					$arow['laskutus_postino']	= $arow['postino'];
+					$arow['laskutus_maa']		= $arow['maa'];
 				}
 
 				// jos asiakkalla ei ole toimitusosoitetietoja, kopsataan laskutustiedot
@@ -870,10 +886,24 @@ while (!feof ($fd)) {
 							sisainen							= '$editilaus_sisainen'";
 				$result = mysql_query($query) or die($query);
 				$id = mysql_insert_id();
+
+				$query = "	INSERT INTO laskun_lisatiedot SET
+							laskutus_nimi 		= '$arow[laskutus_nimi]',
+							laskutus_nimitark 	= '$arow[laskutus_nimitark]',
+							laskutus_osoite		= '$arow[laskutus_osoite]',
+							laskutus_postitp	= '$arow[laskutus_postitp]',
+							laskutus_postino	= '$arow[laskutus_postino]',
+							laskutus_maa		= '$arow[laskutus_maa]',
+							laatija				= '$edi_laatija',
+							luontiaika			= now(),
+							yhtio				= '$kukarow[yhtio]',
+							otunnus				= '$id'";
+				$lisatiedot_result = mysql_query($query) or die($query);
+
 				$edi_ulos .= t("Tilausnumero")." $id\n\n";
 
 				// haetaan tilauksen tiedot
-				$query    = "select * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
+				$query    = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
 				$result   = mysql_query($query) or die($query);
 				$laskurow = mysql_fetch_array($result);
 			}

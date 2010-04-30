@@ -96,78 +96,61 @@
 						and tunnus 	= '$laskurow[tunnus]'";
 			$varresult = mysql_query($query) or pupe_error($query);
 
-			$query = "	INSERT into lasku SET
-						yhtio_nimi							= '$laskurow[yhtio_nimi]',
-						yhtio_osoite						= '$laskurow[yhtio_osoite]',
-						yhtio_postino						= '$laskurow[yhtio_postino]',
-						yhtio_postitp						= '$laskurow[yhtio_postitp]',
-						yhtio_maa							= '$laskurow[yhtio_maa]',
-						yhtio_ovttunnus						= '$laskurow[yhtio_ovttunnus]',
-						yhtio_kotipaikka					= '$laskurow[yhtio_kotipaikka]',
-						yhtio_toimipaikka					= '$laskurow[yhtio_toimipaikka]',
-						aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
-						aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',
-						alv									= '$laskurow[alv]',
-						bruttopaino							= '$laskurow[bruttopaino]',
-						chn									= '$laskurow[chn]',
-						comments							= '$laskurow[comments]',
-						erikoisale							= '$laskurow[erikoisale]',
-						kauppatapahtuman_luonne			 	= '$laskurow[kauppatapahtuman_luonne]',
-						kerayspvm							= '$laskurow[kerayspvm]',
-						kontti								= '$laskurow[kontti]',
-						kuljetusmuoto						= '$laskurow[kuljetusmuoto]',
-						laatija								= '$laskurow[laatija]',
-						laskutusvkopv						= '$laskurow[laskutusvkopv]',
-						lisattava_era 						= '$laskurow[lisattava_era]',
-						luontiaika							= '$laskurow[luontiaika]',
-						maa 								= '$laskurow[maa]',
-						maa_lahetys							= '$laskurow[maa_lahetys]',
-						maa_maara							= '$laskurow[maa_maara]',
-						maksuehto							= '$mrow[osamaksuehto2]',
-						myyja								= '$laskurow[myyja]',
-						nimi								= '$laskurow[nimi]',
-						nimitark							= '$laskurow[nimitark]',
-						osoite								= '$laskurow[osoite]',
-						ovttunnus							= '$laskurow[ovttunnus]',
-						poistumistoimipaikka 				= '$laskurow[poistumistoimipaikka]',
-						poistumistoimipaikka_koodi 			= '$laskurow[poistumistoimipaikka_koodi]',
-						postino								= '$laskurow[postino]',
-						postitp								= '$laskurow[postitp]',
-						sisainen							= '$laskurow[sisainen]',
-						sisamaan_kuljetus 					= '$laskurow[sisamaan_kuljetus]',
-						sisamaan_kuljetus_kansallisuus		= '$laskurow[sisamaan_kuljetus_kansallisuus]',
-						sisamaan_kuljetusmuoto 				= '$laskurow[sisamaan_kuljetusmuoto]',
-						tilausvahvistus						= '$laskurow[tilausvahvistus]',
-						toim_maa							= '$laskurow[toim_maa]',
-						toim_nimi							= '$laskurow[toim_nimi]',
-						toim_nimitark						= '$laskurow[toim_nimitark]',
-						toim_osoite							= '$laskurow[toim_osoite]',
-						toim_ovttunnus						= '$laskurow[toim_ovttunnus]',
-						toim_postino						= '$laskurow[toim_postino]',
-						toim_postitp						= '$laskurow[toim_postitp]',
-						toimaika							= '$laskurow[toimaika]',
-						toimitusehto						= '$laskurow[toimitusehto]',
-						kohdistettu							= '$laskurow[kohdistettu]',
-						toimitustapa						= '$laskurow[toimitustapa]',
-						tullausnumero						= '$laskurow[tullausnumero]',
-						vahennettava_era					= '$laskurow[vahennettava_era]',
-						valkoodi							= '$laskurow[valkoodi]',
-						verkkotunnus						= '$laskurow[verkkotunnus]',
-						vienti 								= '$laskurow[vienti]',
-						viesti								= '$laskurow[viesti]',
-						viikorkopros						= '$laskurow[viikorkopros]',
-						yhtio								= '$laskurow[yhtio]',
-						ytunnus								= '$laskurow[ytunnus]',
-						liitostunnus						= '$laskurow[liitostunnus]',
-						tilausyhteyshenkilo					= '$laskurow[tilausyhteyshenkilo]',
-						asiakkaan_tilausnumero				= '$laskurow[asiakkaan_tilausnumero]',
-						kohde								= '$laskurow[kohde]',
-						sisviesti1							= '$laskurow[sisviesti1]',
-						piiri 								= '$laskurow[piiri]',
-						alatila								= 'D',
-						tila								= 'L'";
-			$uusires = mysql_query($query) or pupe_error($query);
+			// vaikka meillä onkin laskurow, haetaan silti laskun tiedot fetch_arraylla, jotta saadaan kiva looppi
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus = '$laskurow[tunnus]'";
+			$laskufetch_res = mysql_query($query) or pupe_error($query);
+			$laskufetch_row = mysql_fetch_array($laskufetch_res);
+
+			$query = "INSERT INTO lasku SET ";
+
+			for ($i = 0; $i < mysql_num_fields($laskufetch_res); $i++) {
+				if (mysql_field_name($laskufetch_res, $i) == 'maksuehto') {
+					$query .= mysql_field_name($laskufetch_res, $i)."='$mrow[osamaksuehto2]',";
+				}
+				elseif (mysql_field_name($laskufetch_res, $i) == 'alatila') {
+					$query .= mysql_field_name($laskufetch_res, $i)."='D',";
+				}
+				elseif (mysql_field_name($laskufetch_res, $i) == 'tila') {
+					$query .= mysql_field_name($laskufetch_res, $i)."='L',";
+				}
+				elseif (mysql_field_name($laskufetch_res, $i) != 'tunnus') {
+					$query .= mysql_field_name($laskufetch_res, $i)."='".$laskufetch_row[$i]."',";
+				}
+			}
+
+			$query = substr($query, 0, -1);
+			$laskuinsert_result = mysql_query($query) or pupe_error($query);
 			$uusitunnus = (string) mysql_insert_id();
+
+			$query = "	SELECT *
+						FROM laskun_lisatiedot
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND otunnus = '$laskurow[tunnus]'";
+			$lisatiedot_res = mysql_query($query) or pupe_error($query);
+			$lisatiedot_row = mysql_fetch_array($lisatiedot_res);
+
+			$query = "INSERT INTO laskun_lisatiedot SET ";
+
+			for ($i = 0; $i < mysql_num_fields($lisatiedot_res); $i++) {
+				if (mysql_field_name($lisatiedot_res, $i) == 'laatija') {
+					$query .= mysql_field_name($lisatiedot_res, $i)."='$kukarow[kuka]',";
+				}
+				elseif (mysql_field_name($lisatiedot_res, $i) == 'luontiaika') {
+					$query .= mysql_field_name($lisatiedot_res, $i)."=now(),";
+				}
+				elseif (mysql_field_name($lisatiedot_res, $i) == 'otunnus') {
+					$query .= mysql_field_name($lisatiedot_res, $i)."='$uusitunnus',";
+				}
+				elseif (mysql_field_name($lisatiedot_res, $i) != 'tunnus') {
+					$query .= mysql_field_name($lisatiedot_res, $i)."='".$lisatiedot_row[$i]."',";
+				}
+			}
+
+			$query = substr($query, 0, -1);
+			$lisatiedot_result = mysql_query($query) or pupe_error($query);
 
 
 			$otunnus		= $uusitunnus;

@@ -300,17 +300,17 @@
 			// tarkistetaan t‰ss‰ tuleeko laskutusviikonp‰iv‰t ohittaa
 			// ohitetaan jos ruksi on ruksattu tai poikkeava laskutusp‰iv‰m‰‰r‰ on syˆtetty
 			if (!isset($laskutakaikki) or $laskutakaikki == "") {
-				$lasklisa .= " and (laskutusvkopv='0' or laskutusvkopv='$today')";
+				$lasklisa .= " and (lasku.laskutusvkopv = '0' or lasku.laskutusvkopv = '$today')";
 			}
 
 			// katotaan halutaanko laskuttaa vaan laskut joita *EI SAA* ketjuttaa
 			if (isset($eiketjut) and $eiketjut == "KYLLA") {
-				$lasklisa .= " and ketjutus != '' ";
+				$lasklisa .= " and lasku.ketjutus != '' ";
 			}
 
 			// laskutetaan vain tietyt tilausket
 			if (isset($laskutettavat) and $laskutettavat != "") {
-				$lasklisa .= " and tunnus in ($laskutettavat) ";
+				$lasklisa .= " and lasku.tunnus in ($laskutettavat) ";
 			}
 
 			$tulos_ulos_maksusoppari = "";
@@ -348,7 +348,7 @@
 
 				if ($srow1["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
 					// Jos tilauksella oli yksikin jt-rivi ja osatoimitus on kielletty
-					$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+					$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
 					if ($silent == "" or $silent == "VIENTI") {
 						$tulos_ulos_sarjanumerot .= sprintf(t("Tilauksella %s oli JT-rivej‰ ja osatoimitusta ei tehd‰, eli se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."<br>\n";
@@ -387,7 +387,7 @@
 						$sarjares2 = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($sarjares2) == 0) {
-							$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+							$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
 							if ($silent == "" or $silent == "VIENTI") {
 								$tulos_ulos_sarjanumerot .= "<font class='error'>".t("Tilausta ei voida laskuttaa arvioidulla keskihankintahinnalla").": $laskurow[tunnus] $srow1[tuoteno]!!!</font><br>\n";
@@ -404,7 +404,7 @@
 					$srow2 = mysql_fetch_array($sarjares2);
 
 					if (!in_array($srow1["alv"], explode(",", $srow2["alvit"]))) {
-						$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+						$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
 						if ($silent == "" or $silent == "VIENTI") {
 							$tulos_ulos_sarjanumerot .= t("Tilauksella virheellisi‰ verokantoja").": $laskurow[tunnus] $srow1[tuoteno] $srow1[alv]!!!<br>\n";
@@ -430,7 +430,7 @@
 							$srow2 = mysql_fetch_array($sarjares2);
 
 							if ($srow2["kpl"] != abs($srow1["varattu"])) {
-								$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+								$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
 								if ($silent == "" or $silent == "VIENTI") {
 									$tulos_ulos_sarjanumerot .= t("Tilaukselta puuttuu sarjanumeroita, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
@@ -447,7 +447,7 @@
 							$srow2 = mysql_fetch_array($sarjares2);
 
 							if ($srow2["kpl"] != 1) {
-								$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+								$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
 								if ($silent == "" or $silent == "VIENTI") {
 									$tulos_ulos_sarjanumerot .= t("Tilaukselta puuttuu er‰numeroita, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
@@ -497,7 +497,7 @@
 									$sarjares12 = mysql_query($query) or pupe_error($query);
 
 									if (mysql_num_rows($sarjares12) != 1) {
-										$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+										$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
 										if ($silent == "" or $silent == "VIENTI") {
 											$tulos_ulos_sarjanumerot .= t("Hyvitett‰v‰‰ rivi‰ ei lˆydy, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $sarjarowx[sarjanumero] $laskurow[nimi]!!!<br>\n";
@@ -515,7 +515,7 @@
 						$sarres = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($sarres) > 1) {
-							$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+							$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
 							if ($silent == "" or $silent == "VIENTI") {
 								$tulos_ulos_sarjanumerot .= t("Riviin ei voi liitt‰‰ sek‰ k‰ytettyj‰ ett‰ uusia sarjanumeroita").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
@@ -535,7 +535,7 @@
 							$srow2 = mysql_fetch_array($sarres);
 
 							if (mysql_num_rows($sarres) > 0 and $srow2["ei_ostohintaa"] > 0) {
-								$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+								$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
 								if ($silent == "" or $silent == "VIENTI") {
 									$tulos_ulos_sarjanumerot .= t("Olet myym‰ss‰ k‰ytetty‰ venett‰, jota ei ole viel‰ ostettu! Ei voida laskuttaa!").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
@@ -839,7 +839,7 @@
 						}
 
 						if (count($lisakulu_maksuehto) > 0) {
-							$lisakulun_lisays_ehto = " and maksuehto not in(".implode(',',$lisakulu_maksuehto).") ";
+							$lisakulun_lisays_ehto = " and lasku.maksuehto not in (".implode(',',$lisakulu_maksuehto).") ";
 						}
 
 					}
@@ -858,29 +858,31 @@
 						}
 
 						if (count($lisakulu_toimitustapa) > 0) {
-							$lisakulun_lisays_ehto = " and toimitustapa not in(".implode(',',$lisakulu_toimitustapa).") ";
+							$lisakulun_lisays_ehto = " and lasku.toimitustapa not in (".implode(',',$lisakulu_toimitustapa).") ";
 						}
 
 					}
 
 					if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
-						$ketjutus_group = ", toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa ";
+						$ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
 					}
 					else {
 						$ketjutus_group = "";
 					}
 
 					// tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kun alhaalla) rivi ~1009
-					$query = "	SELECT group_concat(tunnus) tunnukset
+					$query = "	SELECT group_concat(lasku.tunnus) tunnukset
 								FROM lasku
-								where yhtio = '$kukarow[yhtio]'
-								and tunnus in ($tunnukset)
-								and ketjutus = ''
+								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+								where lasku.yhtio = '$kukarow[yhtio]'
+								and lasku.tunnus in ($tunnukset)
+								and lasku.ketjutus = ''
 								$lisakulun_lisays_ehto
-								GROUP BY ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
-								lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
-								sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
-								sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi
+								GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
+								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
+								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
+								laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 								$ketjutus_group";
 					$result = mysql_query($query) or pupe_error($query);
 
@@ -994,27 +996,30 @@
 				$ketjut = array();
 
 				//haetaan kaikki laskutusvalmiit tilaukset jotka saa ketjuttaa, viite pit‰‰ olla tyhj‰‰ muuten ei laskuteta
-				$query  = "	SELECT ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
-							lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
-							sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
-							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi,
-							count(*) yht, group_concat(tunnus) tunnukset
+				$query  = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
+							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
+							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
+							count(*) yht, group_concat(lasku.tunnus) tunnukset
 							FROM lasku
-							WHERE yhtio		= '$kukarow[yhtio]'
-							and alatila		= 'V'
-							and tila		= 'L'
-							and ketjutus	= ''
-							and viite		= ''
+							LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+							WHERE lasku.yhtio	= '$kukarow[yhtio]'
+							and lasku.alatila	= 'V'
+							and lasku.tila		= 'L'
+							and lasku.ketjutus	= ''
+							and lasku.viite		= ''
 							$lasklisa
-							GROUP BY ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
-							lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
-							sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
-							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi
+							GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
+							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
+							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
+							laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 							$ketjutus_group
-							ORDER BY ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
-							lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
-							sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
-							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi";
+							ORDER BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
+							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
+							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
+							laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if ($silent == "") {

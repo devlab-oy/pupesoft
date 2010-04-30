@@ -163,21 +163,57 @@ if (!function_exists('alku')) {
 		//Vasen sarake
 		//$pdf->draw_rectangle(737, 20,  674, 300, $thispage, $rectparam);
 		$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$thispage, $pieni);
-		$pdf->draw_text(50, 717, $laskurow["nimi"], 			$thispage, $norm);
-		$pdf->draw_text(50, 707, $laskurow["nimitark"],			$thispage, $norm);
-		$pdf->draw_text(50, 697, $laskurow["osoite"], 			$thispage, $norm);
-		$pdf->draw_text(50, 687, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
-		$pdf->draw_text(50, 677, $laskurow["maa"], 				$thispage, $norm);
 
+		$query = "	SELECT laskutus_nimi, 
+					laskutus_nimitark,
+					laskutus_osoite,
+					laskutus_postino,
+					laskutus_postitp,
+					laskutus_maa
+					FROM laskun_lisatiedot
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laskutus_nimi != ''
+					AND CONCAT(laskutus_nimi, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa) != '$laskurow[nimi]$laskurow[osoite]$laskurow[postino]$laskurow[postitp]$laskurow[maa]'
+					AND otunnus = '{$laskurow['tunnus']}'";
+		$laskutusosoite_result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($laskutusosoite_result) > 0) {
+			$laskutusosoite_row = mysql_fetch_assoc($laskutusosoite_result);
+
+			$pdf->draw_text(50, 717, $laskutusosoite_row["laskutus_nimi"], 			$thispage, $norm);
+			$pdf->draw_text(50, 707, $laskutusosoite_row["laskutus_nimitark"],			$thispage, $norm);
+			$pdf->draw_text(50, 697, $laskutusosoite_row["laskutus_osoite"], 			$thispage, $norm);
+			$pdf->draw_text(50, 687, $laskutusosoite_row["laskutus_postino"]." ".$laskutusosoite_row["laskutus_postitp"], $thispage, $norm);
+			$pdf->draw_text(50, 677, $laskutusosoite_row["laskutus_maa"], 				$thispage, $norm);
+		}
+
+		if (mysql_num_rows($laskutusosoite_result) > 0) {
+
+			$ostaja_kala = 644;
+			$toim_kala = 583;
+			$pohja = 504;
+
+			$pdf->draw_text(50, 656, t("Ostaja", $kieli), 			$thispage, $pieni);
+		}
+		else {
+			$ostaja_kala = 717;
+			$toim_kala = 656;
+			$pohja  = 577;
+		}
+
+		$pdf->draw_text(50, $ostaja_kala, $laskurow["nimi"], 			$thispage, $norm);
+		$pdf->draw_text(50, $ostaja_kala-10, $laskurow["nimitark"],			$thispage, $norm);
+		$pdf->draw_text(50, $ostaja_kala-20, $laskurow["osoite"], 			$thispage, $norm);
+		$pdf->draw_text(50, $ostaja_kala-30, $laskurow["postino"]." ".$laskurow["postitp"], $thispage, $norm);
+		$pdf->draw_text(50, $ostaja_kala-40, $laskurow["maa"], 				$thispage, $norm);
 
 		//$pdf->draw_rectangle(674, 20,  611, 300, $thispage, $rectparam);
-		$pdf->draw_text(50, 656, t("Toimitusosoite", $kieli), 	$thispage, $pieni);
-		$pdf->draw_text(50, 644, $laskurow["toim_nimi"], 		$thispage, $norm);
-		$pdf->draw_text(50, 634, $laskurow["toim_nimitark"], 	$thispage, $norm);
-		$pdf->draw_text(50, 624, $laskurow["toim_osoite"],	 	$thispage, $norm);
-		$pdf->draw_text(50, 614, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $norm);
-		$pdf->draw_text(50, 604, $laskurow["toim_maa"], 		$thispage, $norm);
-
+		$pdf->draw_text(50, $toim_kala, t("Toimitusosoite", $kieli), 	$thispage, $pieni);
+		$pdf->draw_text(50, $toim_kala-12, $laskurow["toim_nimi"], 		$thispage, $norm);
+		$pdf->draw_text(50, $toim_kala-22, $laskurow["toim_nimitark"], 	$thispage, $norm);
+		$pdf->draw_text(50, $toim_kala-32, $laskurow["toim_osoite"],	 	$thispage, $norm);
+		$pdf->draw_text(50, $toim_kala-42, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $norm);
+		$pdf->draw_text(50, $toim_kala-52, $laskurow["toim_maa"], 		$thispage, $norm);
 
 		//Oikea sarake
 		$pdf->draw_rectangle(800, 300, 779, 580, 	$thispage, $rectparam);
@@ -392,7 +428,6 @@ if (!function_exists('alku')) {
 		if (trim($komm) != '') {
 			$kommentit = explode("\n", trim($komm));
 
-			$pohja  = 577;
 			$maxoik = 0;
 
 			foreach($kommentit as $kommentti) {

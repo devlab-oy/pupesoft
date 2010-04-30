@@ -593,7 +593,7 @@
 			echo "<td>$trow[ytunnus]</td>";
 			echo "<td>$trow[nimi]</td>";
 			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
-			echo "<td style='text-align: right;' nowrap>".round($trow["rahti"],2)." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".round($trow["rahti"], 6)." $yhtiorow[valkoodi]</td>";
 			echo "</tr>";
 
 			$yhteesa += $trow["rahti"];
@@ -601,7 +601,7 @@
 
 		echo "<tr>";
 		echo "<th colspan='4'>".t("Yhteensä")."</th>";
-		echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+		echo "<th style='text-align: right;'>".round($yhteesa, 6)." $yhtiorow[valkoodi]</th>";
 		echo "</tr>";
 		echo "</table><br>";
 		echo "</div>";

@@ -137,7 +137,7 @@ else {
 
 if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
 	// jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
-	$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 2);
+	$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 6);
 	$rahtitapa  = t("Virallinen");
 }
 else {
@@ -261,7 +261,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	$ohinta = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu']+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
 	// Osuus kululaskuista # Osuus eturahdista
-	$hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] * $osuus, 2);
+	$hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] * $osuus, 6);
 
 	$tulliprossa = "";
 	$tv_nimrow	 = "";

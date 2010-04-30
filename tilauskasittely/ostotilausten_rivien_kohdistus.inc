@@ -715,7 +715,7 @@ if ($tila == '') {
 
 	//Jos käyttäjä on syöttänyt alvillisen hinnan niin lisätään alvi
 	if ((int) $laskurow["rahti_etu_alv"] != 0) {
-		$laskurow["rahti_etu"] = round($laskurow["rahti_etu"]*(1+($laskurow["rahti_etu_alv"]/100)), 2);
+		$laskurow["rahti_etu"] = round($laskurow["rahti_etu"]*(1+($laskurow["rahti_etu_alv"]/100)), 6);
 	}
 	
 	$valittusumma 			= sprintf("%.2f", round($hintarow["hinta"],2));

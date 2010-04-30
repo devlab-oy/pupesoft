@@ -170,25 +170,24 @@
 
 			if (mysql_num_rows($tilrivi_res) > 0) {
 
-				$ed_tunn = '';
-
-				$yht_paino = 0;
-				$yht_kpl = 0;
-				$yht_varastossa_kpl = 0;
-				$yht_rivit = 0;
-				$yht_varastossa_rivit = 0;
-				$yht_arvo = 0;
-				$yht_tavara_summa = array();
-				$yht_kulu_summa = array();
-				$yht_eturahti = array();
-				$tilrivi_laskuri = 0;
+				$ed_tunn 				= "";
+				$yht_paino 				= 0;
+				$yht_kpl 				= 0;
+				$yht_varastossa_kpl 	= 0;
+				$yht_rivit 				= 0;
+				$yht_varastossa_rivit	= 0;
+				$yht_arvo 				= 0;
+				$yht_tavara_summa 		= array();
+				$yht_kulu_summa 		= array();
+				$yht_eturahti 			= array();
+				$tilrivi_laskuri 		= 0;
 
 				while ($tilrivi_row = mysql_fetch_assoc($tilrivi_res)) {
 
 					$tilrivi_laskuri++;
 
 					// keikka
-					$query = "	SELECT distinct laskunro, rahti_etu, lasku.tunnus, lasku.mapvm
+					$query = "	SELECT distinct lasku.laskunro, lasku.rahti_etu, lasku.tunnus, lasku.mapvm
 								FROM lasku
 								JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' and tilausrivi.otunnus = '$tilrivi_row[ltunnus]')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -207,7 +206,7 @@
 					}
 
 					if ($tilrivi_laskuri == mysql_num_rows($tilrivi_res)) {
-						$query = "	SELECT distinct laskunro, rahti_etu, lasku.tunnus
+						$query = "	SELECT distinct lasku.laskunro, lasku.rahti_etu, lasku.tunnus
 									FROM lasku
 									LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
 									WHERE lasku.yhtio = '$kukarow[yhtio]' and

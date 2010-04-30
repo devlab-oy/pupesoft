@@ -2179,7 +2179,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 				}
 
 				// Jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
-				$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 2);
+				$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 6);
 
 				while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
@@ -2637,7 +2637,8 @@ if (!function_exists("alv")) {
 		// $laskurow[ytunnus]   		--> Laskunsaajan y-tunnus
 		// $laskurow[tila]      		--> Laskun tila O=osto, muut tilat on myyntiä
 		// $laskurow[alv]       		--> Laskun otsikolla oleva alv
-
+		// $laskurow["valkoodi"]		--> Laskun valuutta
+		
 		///* Ulos *///
 		// $alv                			--> Uusi lakettu ALV
 		// $hinta           			--> Uusi lakettu kappalehinta

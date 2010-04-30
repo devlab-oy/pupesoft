@@ -56,9 +56,9 @@
 
 	echo "<tr>
 			<th>".t("Ytunnus")."</th>
-			<th colspan='2'>".t("Laskutusosoite")."</th>
+			<th colspan='2'>".t("Ostaja")."</th>
 			<th colspan='2'>".t("Toimitusosoite")."</th>
-			<th>",t("Laskun postitusosoite"),"</th>
+			<th>",t("Laskutusosoite"),"</th>
 			<th>".t("Toimitustapa")."</th>";
 
 	if ($laskurow["tila"] == "O") {

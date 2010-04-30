@@ -38,10 +38,10 @@ if ($ytunnus!='' and $try!='') {
 	echo "</tr><tr>";
 	echo "<td>$asiakasrow[ytunnus]</td>";
 	echo "<td>$asiakasrow[asiakasnro]</td>";
-	echo "<td>$asiakasrow[nimi]</td>";
-	echo "<td>$asiakasrow[osoite]</td>";
-	echo "<td>$asiakasrow[postino]</td>";
-	echo "<td>$asiakasrow[postitp]</td>";
+	echo "<td>$asiakasrow[nimi]<br>$asiakasrow[toim_nimi]</td>";
+	echo "<td>$asiakasrow[osoite]<br>$asiakasrow[toim_osoite]</td>";
+	echo "<td>$asiakasrow[postino]<br>$asiakasrow[toim_postino]</td>";
+	echo "<td>$asiakasrow[postitp]<br>$asiakasrow[toim_postitp]</td>";
 	echo "</tr></table>";
 
 

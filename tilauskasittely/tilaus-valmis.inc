@@ -243,21 +243,13 @@ else {
 		}
 	}
 
-	if ($yhtiorow["kerataanko_saldottomat"] == '') {
-		$lisasalker = " and tuote.ei_saldoa = '' ";
-	}
-	else {
-		$lisasalker = " ";
-	}
-
 	// Katotaan, onko tämä jo kerätty...
 	$query = "	SELECT tilausrivi.*
 				FROM tilausrivi use index (yhtio_otunnus)
-				JOIN tuote on tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+				JOIN tuote on (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				AND tilausrivi.otunnus = '$laskurow[tunnus]'
-				AND tilausrivi.keratty != ''
-				$lisasalker";
+				AND tilausrivi.keratty != ''";
 	$keres = mysql_query($query) or pupe_error($query);
 
 	// jos on yksikin kerätty rivi

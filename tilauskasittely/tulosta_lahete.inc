@@ -907,7 +907,7 @@ if (!function_exists('rivi_lahete')) {
 		$row["perhe_kommentti"] = "";
 
 		// Info tuoteperheestä
-		if ($row["perheid"] > 0 and $perheid != $row["perheid"]) {
+		if ($yhtiorow["tuoteperheinfo_lahetteella"] == "" and $row["perheid"] > 0 and $perheid != $row["perheid"]) {
 			$numrows = 0;
 
 			$query = "	SELECT vanhatunnus

@@ -230,55 +230,96 @@ elseif ($ytunnus != '') {
 	}
 
 	if ($monta == 0 and is_string($ytunnus)) {
+
+		// ei rikota alkuper‰ist‰ ytunnus-muuttuja
+		$ytunnus2 = $ytunnus;
+
+		// mahdollistetaan asiakashaku monella eri sanalla
+		if (strpos($ytunnus," ") !== FALSE) {
+			$ytunnus2 = str_replace(" ", "%", $ytunnus);
+		}
+
+		$postitplisa = '';
+
+		// jos on annettu postitoimipaikka, niin lis‰t‰‰ se jokaiseen asiakashakuqueryyn ja ei tehd‰ erillist‰ postitoimipaikka unionia
+		if (trim($postitp) != '') {
+			$postitp2 = mysql_real_escape_string($postitp);
+			$postitplisa = " and asiakas.postitp like '%$postitp2%' ";
+		}
+		else {
+			$postitp2 = $ytunnus;
+		}
+
+		$postinolisa = '';
+
+		if (trim($postino) != '') {
+			$postinolisa = " and asiakas.postino like '%".(int) $postino."%' ";
+		}
+
 		// arvailuhaku
 		$query	= "	(SELECT asiakas.*, yhtio.nimi yhtionimi
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
-						and asiakas.nimi like '%$ytunnus%'
+						and asiakas.nimi like '%$ytunnus2%'
 						and asiakas.nimi!=''
+						$postitplisa
+						$postinolisa
 						$lajilisa $asiakasrajaus)
 					UNION
 					(SELECT asiakas.*, yhtio.nimi yhtionimi
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
-						and asiakas.nimitark like '%$ytunnus%'
+						and asiakas.nimitark like '%$ytunnus2%'
 						and asiakas.nimitark!=''
+						$postitplisa
+						$postinolisa
 						$lajilisa $asiakasrajaus)
 					UNION
 					(SELECT asiakas.*, yhtio.nimi yhtionimi
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
-						and asiakas.toim_nimi like '%$ytunnus%'
+						and asiakas.toim_nimi like '%$ytunnus2%'
 						and asiakas.toim_nimi!=''
+						$postitplisa
+						$postinolisa
 						$lajilisa $asiakasrajaus)
 					UNION
 					(SELECT asiakas.*, yhtio.nimi yhtionimi
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
-						and asiakas.toim_nimitark like '%$ytunnus%'
+						and asiakas.toim_nimitark like '%$ytunnus2%'
 						and asiakas.toim_nimitark!=''
+						$postitplisa
+						$postinolisa
 						$lajilisa $asiakasrajaus)
 					UNION
 					(SELECT asiakas.*, yhtio.nimi yhtionimi
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
-						and asiakas.ovttunnus like '%$ytunnus%'
+						and asiakas.ovttunnus like '%$ytunnus2%'
 						and asiakas.ovttunnus!=''
-						$lajilisa $asiakasrajaus)
-					UNION
-					(SELECT asiakas.*, yhtio.nimi yhtionimi
-						FROM asiakas
-						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
-						WHERE asiakas.$konsyhtiot
-						and asiakas.postitp like '%$ytunnus%'
-						and asiakas.postitp!=''
-						$lajilisa $asiakasrajaus)
-					ORDER BY nimi";
+						$postitplisa
+						$postinolisa
+						$lajilisa $asiakasrajaus)";
+
+		if (trim($postitplisa) == '') {
+			$query .= "	UNION
+						(SELECT asiakas.*, yhtio.nimi yhtionimi
+							FROM asiakas
+							JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+							WHERE asiakas.$konsyhtiot
+							and asiakas.postitp like '%$postitp2%' 
+							and asiakas.postitp!=''
+							$postinolisa
+							$lajilisa $asiakasrajaus)
+						ORDER BY nimi";
+		}
+
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}

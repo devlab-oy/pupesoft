@@ -77,7 +77,7 @@
 
 		$valinta = "";
 		for ($i=0; $i < count($lista); $i++) {
-			if (($kotimaa == "FI" and substr($lista[$i], 0, 5+strlen($kukarow["yhtio"])) == "lum3-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($lista[$i],0, 4+strlen($kukarow["yhtio"])) == "bgut-$kukarow[yhtio]-")) {
+			if (($kotimaa == "FI" and substr($lista[$i], 0, 5+strlen($kukarow["yhtio"])) == "lum2-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($lista[$i],0, 4+strlen($kukarow["yhtio"])) == "bgut-$kukarow[yhtio]-")) {
 				$valinta .= "<option value='$lista[$i]' $sel>$lista[$i]</option>";
 			}
 		}
@@ -132,7 +132,7 @@
 
 		$valinta = "";
 		for ($i=0; $i < count($lista); $i++) {
-			if (($kotimaa == "FI" and substr($lista[$i], 0, 5+strlen($kukarow["yhtio"])) == "lum3-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($lista[$i],0, 4+strlen($kukarow["yhtio"])) == "bgut-$kukarow[yhtio]-")) {
+			if (($kotimaa == "FI" and substr($lista[$i], 0, 5+strlen($kukarow["yhtio"])) == "lum2-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($lista[$i],0, 4+strlen($kukarow["yhtio"])) == "bgut-$kukarow[yhtio]-")) {
 				$valinta .= "<option value='$lista[$i]' $sel>$lista[$i]</option>";
 			}
 		}

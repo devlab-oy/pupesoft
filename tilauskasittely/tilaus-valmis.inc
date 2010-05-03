@@ -243,13 +243,21 @@ else {
 		}
 	}
 
+ 	if ($yhtiorow["kerataanko_saldottomat"] == '') {
+		$lisasalker = " and tuote.ei_saldoa = '' ";
+	}
+	else {
+		$lisasalker = " ";
+	}
+
 	// Katotaan, onko tämä jo kerätty...
 	$query = "	SELECT tilausrivi.*
 				FROM tilausrivi use index (yhtio_otunnus)
 				JOIN tuote on (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				AND tilausrivi.otunnus = '$laskurow[tunnus]'
-				AND tilausrivi.keratty != ''";
+				AND tilausrivi.keratty != ''
+				$lisasalker";
 	$keres = mysql_query($query) or pupe_error($query);
 
 	// jos on yksikin kerätty rivi
@@ -952,7 +960,7 @@ else {
 				// LÄHETETÄÄN TILAUSVAHVISTUS
 				//
 				// Tässä haarassa tulostetaan tilausvahvistus KOKO tilauksesta
-				
+
 				if (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
 					$naytatvale = 5; // jos mellä on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
 				}

@@ -239,6 +239,13 @@ elseif ($ytunnus != '') {
 			$ytunnus2 = str_replace(" ", "%", $ytunnus);
 		}
 
+		$osoitelisa = '';
+
+		if (trim($osoite) != '') {
+			$osoitelisa = " and asiakas.osoite like '".mysql_real_escape_string($osoite)."%' ";
+			$osoite_toim_lisa = " and asiakas.toim_osoite like '".mysql_real_escape_string($osoite)."%' ";
+		}
+
 		$postitplisa = '';
 
 		// jos on annettu postitoimipaikka, niin lis‰t‰‰ se jokaiseen asiakashakuqueryyn ja ei tehd‰ erillist‰ postitoimipaikka unionia
@@ -265,6 +272,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.nimi like '%$ytunnus2%'
 						and asiakas.nimi!=''
+						$osoitelisa
 						$postitplisa
 						$postinolisa
 						$lajilisa $asiakasrajaus)
@@ -275,6 +283,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.nimitark like '%$ytunnus2%'
 						and asiakas.nimitark!=''
+						$osoitelisa
 						$postitplisa
 						$postinolisa
 						$lajilisa $asiakasrajaus)
@@ -285,6 +294,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.toim_nimi like '%$ytunnus2%'
 						and asiakas.toim_nimi!=''
+						$osoite_toim_lisa
 						$postitp_toim_lisa
 						$postino_toim_lisa
 						$lajilisa $asiakasrajaus)
@@ -295,6 +305,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.toim_nimitark like '%$ytunnus2%'
 						and asiakas.toim_nimitark!=''
+						$osoite_toim_lisa
 						$postitp_toim_lisa
 						$postino_toim_lisa
 						$lajilisa $asiakasrajaus)
@@ -305,6 +316,7 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.ovttunnus like '%$ytunnus2%'
 						and asiakas.ovttunnus!=''
+						$osoitelisa
 						$postitplisa
 						$postinolisa
 						$lajilisa $asiakasrajaus)";
@@ -317,6 +329,7 @@ elseif ($ytunnus != '') {
 							WHERE asiakas.$konsyhtiot
 							and asiakas.postitp like '%$postitp2%' 
 							and asiakas.postitp!=''
+							$osoitelisa
 							$postinolisa
 							$lajilisa $asiakasrajaus)
 						ORDER BY nimi";

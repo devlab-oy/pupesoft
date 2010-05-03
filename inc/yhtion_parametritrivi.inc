@@ -12,22 +12,22 @@
 		$ulos = "<td><textarea cols='45' rows='7' name='css'>$trow[$i]</textarea><input type='hidden' name='cssi' value='$i'></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "css_pieni") {
 		$ulos = "<td><textarea cols='45' rows='7' name='css_pieni'>$trow[$i]</textarea><input type='hidden' name='csspienii' value='$i'></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "css_extranet") {
 		$ulos = "<td><textarea cols='45' rows='7' name='css_extranet'>$trow[$i]</textarea><input type='hidden' name='cssextraneti' value='$i'></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "css_verkkokauppa") {
 		$ulos = "<td><textarea cols='45' rows='7' name='css_verkkokauppa'>$trow[$i]</textarea><input type='hidden' name='cssverkkokauppa' value='$i'></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "web_seuranta") {
 		$ulos = "<td><textarea cols='45' rows='7' name='web_seuranta'>$trow[$i]</textarea><input type='hidden' name='webseuranta' value='$i'></td>";
 		$jatko = 0;
@@ -2096,7 +2096,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kehahinarvio_ennen_ensituloa") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2126,7 +2126,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "livetuotehaku_tilauksella") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2141,7 +2141,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "naytetaanko_osaston_ja_tryn_selite") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2156,7 +2156,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tilausvahvistus_jttoimituksista") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2219,6 +2219,21 @@
 		$ulos .= "<option value = ''>".t("Tuoteperheen lapsituotteet voidaan suoratoimittaa erikseen")."</option>";
 		$ulos .= "<option value = 'M' $sel[M]>".t("Tuoteperheen lapsituotteet suoratoimitetaan yhdessä ja on sallittu vain myyntitilauksella")."</option>";
 		$ulos .= "<option value = 'E' $sel[E]>".t("Tuoteperheen lapsituotteet suoratoimitetaan yhdessä ja on sallittu myyntitilauksella ja extranetissa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "tuoteperheinfo_lahetteella") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tuoteperheeseen sisältyvät tuotteet listataan lähetteellä kaikkien tuoteperheeseen kuuluvien rivien kohdalla")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Tuoteperheeseen sisältyviä tuotteita EI listata lähetteellä kaikkien tuoteperheeseen kuuluvien rivien kohdalla")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

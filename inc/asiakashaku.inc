@@ -245,6 +245,7 @@ elseif ($ytunnus != '') {
 		if (trim($postitp) != '') {
 			$postitp2 = mysql_real_escape_string($postitp);
 			$postitplisa = " and asiakas.postitp like '%$postitp2%' ";
+			$postitp_toim_lisa = " and asiakas.toim_postitp like '%$postitp2%' ";
 		}
 		else {
 			$postitp2 = $ytunnus;
@@ -254,6 +255,7 @@ elseif ($ytunnus != '') {
 
 		if (trim($postino) != '') {
 			$postinolisa = " and asiakas.postino like '%".(int) $postino."%' ";
+			$postino_toim_lisa = " and asiakas.toim_postino like '%".(int) $postino."%' ";
 		}
 
 		// arvailuhaku
@@ -283,8 +285,8 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.toim_nimi like '%$ytunnus2%'
 						and asiakas.toim_nimi!=''
-						$postitplisa
-						$postinolisa
+						$postitp_toim_lisa
+						$postino_toim_lisa
 						$lajilisa $asiakasrajaus)
 					UNION
 					(SELECT asiakas.*, yhtio.nimi yhtionimi
@@ -293,8 +295,8 @@ elseif ($ytunnus != '') {
 						WHERE asiakas.$konsyhtiot
 						and asiakas.toim_nimitark like '%$ytunnus2%'
 						and asiakas.toim_nimitark!=''
-						$postitplisa
-						$postinolisa
+						$postitp_toim_lisa
+						$postino_toim_lisa
 						$lajilisa $asiakasrajaus)
 					UNION
 					(SELECT asiakas.*, yhtio.nimi yhtionimi

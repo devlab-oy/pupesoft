@@ -2393,6 +2393,8 @@ if ($tee == '') {
 			echo "<tr>$jarjlisa
 				<th align='left'>".t("Asiakas")."</th>
 				<td><input type='text' size='10' name='syotetty_ytunnus' value='$yt'></td>
+				<th align='left'>".t("Postitp")."</th>
+				<td><input type='text' size='10' name='postitp' value='$postitp'></td>
 				</tr>";
 			echo "<tr>$jarjlisa
 				<th align='left'>".t("Myyjänro")."</th>

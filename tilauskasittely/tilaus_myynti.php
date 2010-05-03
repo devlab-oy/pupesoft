@@ -3906,8 +3906,7 @@ if ($tee == '') {
 			$erikoistuote_tuoteperhe = array();
 			$tuoteperhe_kayty 	= '';
 			$edotunnus 			= 0;
-
-			$tuotekyslinkki = "";
+			$tuotekyslinkki		= "";
 
 			if ($kukarow["extranet"] == "") {
 				$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='tuote.php' LIMIT 1";
@@ -4121,7 +4120,7 @@ if ($tee == '') {
 				if ($tilauksen_jarjestys != 'M' and $tuoteperhe_kayty != $row['perheid'] and (($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '5' or ($tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '0' and $erikoistuote_tuoteperhe[$row['perheid']] == $row['sorttauskentta']))) or $row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0) or ($row["perheid2"] == -1 or ($row["perheid"] == 0 and $row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U"))))) {
 
 					if (($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
-						$pklisa = " and (perheid = '$row[tunnus]' or perheid2 = '$row[tunnus]')";
+						$pklisa = " and (perheid = '$row[tunnus]' or perheid2 = '$row[tunnus]' or tunnus = '$row[tunnus]')";
 					}
 					elseif ($row["perheid"] == 0) {
 						$pklisa = " and perheid2 = '$row[perheid2]'";
@@ -4130,7 +4129,7 @@ if ($tee == '') {
 						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
 					}
 
-					$query = "	SELECT sum(if (kommentti != '' or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]'),1,0)), count(*)
+					$query = "	SELECT sum(if(kommentti != '' or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]'),1,0)), count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
 								WHERE yhtio = '$kukarow[yhtio]'
 								$tunnuslisa
@@ -4146,7 +4145,7 @@ if ($tee == '') {
 									and tuoteperhe.isatuoteno 	= '$row[tuoteno]'
 									and tuoteperhe.tyyppi 		= 'L'";
 						$lisaresult = mysql_query($query) or pupe_error($query);
-						$lisays = mysql_num_rows($lisaresult)+1;
+						$lisays = mysql_num_rows($lisaresult);
 					}
 					else {
 						$lisays = 0;
@@ -4213,15 +4212,21 @@ if ($tee == '') {
 
 					// jos tuoteperheit‰ ei pidet‰ yhdess‰, ei tehd‰ rowspannia eik‰ bordereita
 					if ($tilauksen_jarjestys != '0' and $tilauksen_jarjestys != '1' and $tilauksen_jarjestys != '4' and $tilauksen_jarjestys != '5' and $tilauksen_jarjestys != '8') {
-						$pknum = 1;
+						$pknum = 0;
 						$borderlask = 0;
-						echo "<td valign='top' $class>$echorivino</td>";
+
+						if ($row["kommentti"] != "" or ($GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
+							echo "<td valign='top' rowspan = '2' $class>$echorivino</td>";
+						}
+						else {
+							echo "<td valign='top' $class>$echorivino</td>";
+						}
 					}
 					else {
 						if ($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '5')) {
 							$tuoteperhe_kayty = $row['perheid'];
 						}
-						echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$echorivino</td>";
+						echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino</td>";
 					}
 				}
 				// normirivit tai jos tuoteperheit‰ ei pidet‰ yhdess‰, n‰ytet‰‰n lapsille rivinumerot

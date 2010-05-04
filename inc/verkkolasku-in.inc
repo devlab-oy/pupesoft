@@ -64,7 +64,7 @@
 			echo "20: ".$toim_asiakkaantiedot["postino"]."\n";
 			echo "21: ".$toim_asiakkaantiedot["postitp"]."\n";
 			*/
-
+		
 			// generic error messagen alku
 			$return  = "Tiedosto: $file\n";
 			$return .= "L‰hett‰j‰: $laskuttajan_nimi\n";
@@ -138,7 +138,7 @@
 				}
 			}
 
-			if (!isset($yhtiorow) and $yhtio != 0) {
+			if (!isset($yhtiorow) and $yhtio != "" and $yhtio != 0) {
 				// 5 etsit‰‰n vastaanottavaa yrityst‰ ovt-tunnuksella..
 				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$yhtio'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
@@ -147,9 +147,26 @@
 					$yhtiorow = mysql_fetch_array($result);
 				}
 			}
+			
+			if (!isset($yhtiorow) and $yhtio != "") {
+				// 6 etsit‰‰n vastaanottavaa yrityst‰ IBAN-tilinumerolla
+				$query = "SELECT * FROM yriti WHERE kaytossa != 'E' and iban = '$yhtio'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+								
+				if (mysql_num_rows($result) == 1) {								
+					$ibanrow = mysql_fetch_array($result);
+					
+					$query = "SELECT * FROM yhtio WHERE yhtio = '$ibanrow[yhtio]'";
+					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-			if (!isset($yhtiorow) and $yhtio != 0) {
-				// 6 etsit‰‰n vastaanottavaa yrityst‰ ovt-tunnuksella ilman tarkenteita
+					if (mysql_num_rows($result) == 1) {
+						$yhtiorow = mysql_fetch_array($result);
+					}
+				}
+			}
+
+			if (!isset($yhtiorow) and $yhtio != "" and $yhtio != 0) {
+				// 7 etsit‰‰n vastaanottavaa yrityst‰ ovt-tunnuksella ilman tarkenteita
 				$oyhtio2 = substr($yhtio, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
 
 				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$oyhtio2'";
@@ -160,8 +177,8 @@
 				}
 			}
 
-			if (!isset($yhtiorow) and $yhtio != 0) {
-				// 7 etsit‰‰n vastaanottavaa yrityst‰ ytunnuksella..
+			if (!isset($yhtiorow) and $yhtio != "" and $yhtio != 0) {
+				// 8 etsit‰‰n vastaanottavaa yrityst‰ ytunnuksella..
 				$yyhtio3 = substr(str_replace("0037", "", $yhtio), 0, 8); // mahdollisella etunollalla
 				$yyhtio4 = (int) $yyhtio3; // ilman etunollaa
 
@@ -173,8 +190,8 @@
 				}
 			}
 
-			if (!isset($yhtiorow) and $yhtio != 0) {
-				// 8 viimeinen h‰t‰keino, katotaan onko joku lis‰tieto ongelma
+			if (!isset($yhtiorow) and $yhtio != "" and $yhtio != 0) {
+				// 9 viimeinen h‰t‰keino, katotaan onko joku lis‰tieto ongelma
 				$query = "SELECT * FROM yhtio WHERE ovttunnus like '$yhtio%'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 

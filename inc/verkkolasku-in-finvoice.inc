@@ -33,11 +33,15 @@ if ($yhtio == "") {
 	$yhtio = $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 }
 
-// Varmistetaan, että tunnus on ovtunnus muodossa
-$yhtio = preg_replace("/[^0-9]/", "", $yhtio);
 
-if (strpos($yhtio, "0037") === FALSE) {
-	$yhtio = "0037".$yhtio;
+// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, että se on ovtmuodossa
+if (strlen($yhtio) != 18 or strtoupper(substr($yhtio,0,2)) != "FI") {
+	// Varmistetaan, että tunnus on ovtunnus muodossa
+	$yhtio = preg_replace("/[^0-9]/", "", $yhtio);
+
+	if (strpos($yhtio, "0037") === FALSE) {
+		$yhtio = "0037".$yhtio;
+	}
 }
 
 if ($laskun_erapaiva == "") {

@@ -192,9 +192,9 @@
 
 					echo "</td>";
 					
-					$tpp = (int) substr($laskun_paiva,6,2);
-					$tpk = (int) substr($laskun_paiva,4,2);
-					$tpv = (int) substr($laskun_paiva,0,4);
+					$tpp = substr($laskun_paiva,6,2);
+					$tpk = substr($laskun_paiva,4,2);
+					$tpv = substr($laskun_paiva,0,4);
 					
 					echo "<td>".tv1dateconv($tpv."-".$tpk."-".$tpp)."</td>";
 					echo "</tr>";

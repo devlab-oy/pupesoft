@@ -4,8 +4,7 @@
 	// palautetaan virheviesti jos tapahtuu jotain, muuten palautetaan tyhjää
 
 	if (!function_exists("verkkolasku_in")) {
-
-		function verkkolasku_in ($file) {
+		function verkkolasku_in ($file, $luolasku = TRUE) {
 			global $kukarow, $yhtiorow, $toim_asiakkaantiedot, $xmlstr;
 
 			if (!is_file($file)) {
@@ -29,7 +28,7 @@
 				return ("Tiedosto $file ei ole validi XML!");
 			}
 
-			require ("inc/functions.inc");
+			require_once("inc/functions.inc");
 
 			// Katsotaan mitä aineistoa käpistellään
 			if (strpos($file, "finvoice-") !== false) {
@@ -184,7 +183,7 @@
 				}
 			}
 
-			if (!isset($yhtiorow)) {
+			if (!isset($yhtiorow) and $luolasku === TRUE) {
 				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin admineille!
 				$query = "SELECT distinct alert_email, postittaja_email FROM yhtion_parametrit WHERE alert_email != '' and postittaja_email != ''";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
@@ -201,7 +200,7 @@
 
 				return ($return);
 			}
-			else {
+			elseif(isset($yhtiorow)) {
 
 				$return .= "Lasku yhtiölle: $yhtiorow[nimi] ($yhtiorow[yhtio])\n";
 
@@ -379,554 +378,562 @@
 				}
 			}
 
-			if (!isset($trow)) {
-				$return .= "\nEpäonnistumisen syy: Emme löytäneet toimittajaa yhtiöltä!\n\n";
-				$return .= "Etsittiin tiedoilla:\n";
-				$return .= "Nimi: $laskuttajan_nimi\n";
-				$return .= "Ovt: $laskuttajan_ovt $yovt $yovt1 $yovt2\n";
-				$return .= "Vat: $laskuttajan_vat $intvat $intvat2\n\n";
+			// Tätä voi ajaa myös verkkolaskuvirheetohjelmasta silloin $luolasku on FALSE ja lopetetaan tässä vaiheessa
+			if ($luolasku === TRUE) {
+				if (!isset($trow)) {
+					$return .= "\nEpäonnistumisen syy: Emme löytäneet toimittajaa yhtiöltä!\n\n";
+					$return .= "Etsittiin tiedoilla:\n";
+					$return .= "Nimi: $laskuttajan_nimi\n";
+					$return .= "Ovt: $laskuttajan_ovt $yovt $yovt1 $yovt2\n";
+					$return .= "Vat: $laskuttajan_vat $intvat $intvat2\n\n";
 
-				$urlmain = "/view/ebs-2.0/$yhtiorow[verkkotunnus_vas]/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=".gmdate("YmdHis")."Z&VERSION=ebs-2.0";
-				$digest	 = md5($urlmain . "&" . $yhtiorow['verkkosala_vas']);
-				$url	 = "http://www.verkkolasku.net".$urlmain."&DIGEST=$digest";
+					$urlmain = "/view/ebs-2.0/$yhtiorow[verkkotunnus_vas]/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=".gmdate("YmdHis")."Z&VERSION=ebs-2.0";
+					$digest	 = md5($urlmain . "&" . $yhtiorow['verkkosala_vas']);
+					$url	 = "http://www.verkkolasku.net".$urlmain."&DIGEST=$digest";
 
-				$return .= "Laskun kuva: $url\n";
+					$return .= "Laskun kuva: $url\n";
 
-				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-				return ($return);
-			}
-			else {
-				$return .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEpäonnistumisen syy: ";
-			}
-
-			// katotaan pitääks vaihtaa oletus_vientiä
-			if ($trow['oletus_vienti'] != 'C' and $trow['oletus_vienti'] != 'F' and $trow['oletus_vienti'] != 'I') {
-
-				// katotaan löydettäskö tälle vähän ostorivejä
-				$chkriviok = 0;
-
-				for ($i=0; $i<count($rtuoteno); $i++) {
-
-					$ostotunnus = (int) $rtuoteno[$i]["tilaajanrivinro"];
-
-					// ei tehdä turhaa hakua jos meillä ei ole tullu rivitunnusta
-					if ($ostotunnus != 0) {
-						$chkquery = "	SELECT *
-										FROM tilausrivi
-										where yhtio = '$yhtio' and
-										tunnus = '$ostotunnus' and
-										tyyppi = 'O'";
-						$checkostot = mysql_query($chkquery) or die ("$chkquery<br><br>".mysql_error());
-
-						if (mysql_num_rows($checkostot) == 1) {
-							$chkriviok++;
-						}
-					}
+					return ($return);
+				}
+				else {
+					$return .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEpäonnistumisen syy: ";
 				}
 
-				// löydettiin mätchi ostoriveiltä, laitetaan vaihto-omaisuus täppi päälle
-				if ($chkriviok != 0 ) {
-					if (strtoupper($trow["maa"]) == strtoupper($yhtiorow["maa"])) {
-						// kyseessä kotimaa
-						$trow['oletus_vienti'] = 'C';
-					}
-					else {
-						$chkquery = "SELECT * from maat where koodi = '$trow[maa]' and eu != ''";
-						$checkostot = mysql_query($chkquery) or die ("$chkquery<br><br>".mysql_error());
+				// katotaan pitääks vaihtaa oletus_vientiä
+				if ($trow['oletus_vienti'] != 'C' and $trow['oletus_vienti'] != 'F' and $trow['oletus_vienti'] != 'I') {
 
-						if (mysql_num_rows($checkostot) != 0) {
-							// kyseessä EU
-							$trow['oletus_vienti'] = 'F';
+					// katotaan löydettäskö tälle vähän ostorivejä
+					$chkriviok = 0;
+
+					for ($i=0; $i<count($rtuoteno); $i++) {
+
+						$ostotunnus = (int) $rtuoteno[$i]["tilaajanrivinro"];
+
+						// ei tehdä turhaa hakua jos meillä ei ole tullu rivitunnusta
+						if ($ostotunnus != 0) {
+							$chkquery = "	SELECT *
+											FROM tilausrivi
+											where yhtio = '$yhtio' and
+											tunnus = '$ostotunnus' and
+											tyyppi = 'O'";
+							$checkostot = mysql_query($chkquery) or die ("$chkquery<br><br>".mysql_error());
+
+							if (mysql_num_rows($checkostot) == 1) {
+								$chkriviok++;
+							}
+						}
+					}
+
+					// löydettiin mätchi ostoriveiltä, laitetaan vaihto-omaisuus täppi päälle
+					if ($chkriviok != 0 ) {
+						if (strtoupper($trow["maa"]) == strtoupper($yhtiorow["maa"])) {
+							// kyseessä kotimaa
+							$trow['oletus_vienti'] = 'C';
 						}
 						else {
-							// kyseessä EI-EU
-							$trow['oletus_vienti'] = 'I';
+							$chkquery = "SELECT * from maat where koodi = '$trow[maa]' and eu != ''";
+							$checkostot = mysql_query($chkquery) or die ("$chkquery<br><br>".mysql_error());
+
+							if (mysql_num_rows($checkostot) != 0) {
+								// kyseessä EU
+								$trow['oletus_vienti'] = 'F';
+							}
+							else {
+								// kyseessä EI-EU
+								$trow['oletus_vienti'] = 'I';
+							}
 						}
 					}
 				}
-			}
 
-			$ytunnus = $trow["ytunnus"];
-			$verkapunimi = $trow["nimi"];
+				$ytunnus = $trow["ytunnus"];
+				$verkapunimi = $trow["nimi"];
 
-			$hyvak[1] = $trow['oletus_hyvak1'];
-			$hyvak[2] = $trow['oletus_hyvak2'];
-			$hyvak[3] = $trow['oletus_hyvak3'];
-			$hyvak[4] = $trow['oletus_hyvak4'];
-			$hyvak[5] = $trow['oletus_hyvak5'];
+				$hyvak[1] = $trow['oletus_hyvak1'];
+				$hyvak[2] = $trow['oletus_hyvak2'];
+				$hyvak[3] = $trow['oletus_hyvak3'];
+				$hyvak[4] = $trow['oletus_hyvak4'];
+				$hyvak[5] = $trow['oletus_hyvak5'];
 
-			$oletustili     = $trow['tilino'];
-			$oletuskust     = $trow['kustannuspaikka'];
-			$oletuskohde    = $trow['kohde'];
-			$oletusprojekti = $trow['projekti'];
-			$selite         = $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
+				$oletustili     = $trow['tilino'];
+				$oletuskust     = $trow['kustannuspaikka'];
+				$oletuskohde    = $trow['kohde'];
+				$oletusprojekti = $trow['projekti'];
+				$selite         = $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
 
-			// Onko tälle toimitusasiakkaalle erityinen kustannuspaikka?
-			$query = "	SELECT kustp
-						FROM tiliointisaanto
-						WHERE ttunnus 	= '$trow[tunnus]'
-						and yhtio 		= '$yhtio'
-						and tyyppi		= 'o'
-						and kuvaus		= '$toim_asiakkaantiedot[nimi]'
-						and kuvaus2		= '$toim_asiakkaantiedot[osoite]'
-						and mintuote	= '$toim_asiakkaantiedot[postino]'
-						and maxtuote	= '$toim_asiakkaantiedot[postitp]'";
-			$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
-
-			if (mysql_num_rows($result) != 0) {
-				$tiliointirow = mysql_fetch_array($result);
-				$oletuskust = $tiliointirow['kustp'];
-			}
-
-			if (mysql_num_rows($result) == 0) {
-				// Onko tälle asiakastunnukselle erityinen kustannuspaikka?
+				// Onko tälle toimitusasiakkaalle erityinen kustannuspaikka?
 				$query = "	SELECT kustp
 							FROM tiliointisaanto
 							WHERE ttunnus 	= '$trow[tunnus]'
-							and tyyppi 		= 'a'
 							and yhtio 		= '$yhtio'
-							and tilino 		= 0
-							and kuvaus 		= '$laskun_asiakastunnus'";
+							and tyyppi		= 'o'
+							and kuvaus		= '$toim_asiakkaantiedot[nimi]'
+							and kuvaus2		= '$toim_asiakkaantiedot[osoite]'
+							and mintuote	= '$toim_asiakkaantiedot[postino]'
+							and maxtuote	= '$toim_asiakkaantiedot[postitp]'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) != 0) {
 					$tiliointirow = mysql_fetch_array($result);
 					$oletuskust = $tiliointirow['kustp'];
 				}
-			}
 
-			if (mysql_num_rows($result) == 0) {
-				// Onko tämä kauttalaskutusta?
-				$query = "	SELECT kustp
-							FROM tiliointisaanto
-							WHERE ttunnus 	= '$trow[tunnus]'
-							and tyyppi 		= 'k'
-							and yhtio 		= '$yhtio'
-							and tilino 		= 0
-							and kuvaus 		= '$kauttalaskutus'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				if (mysql_num_rows($result) == 0) {
+					// Onko tälle asiakastunnukselle erityinen kustannuspaikka?
+					$query = "	SELECT kustp
+								FROM tiliointisaanto
+								WHERE ttunnus 	= '$trow[tunnus]'
+								and tyyppi 		= 'a'
+								and yhtio 		= '$yhtio'
+								and tilino 		= 0
+								and kuvaus 		= '$laskun_asiakastunnus'";
+					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-				if (mysql_num_rows($result) != 0) {
-					$tiliointirow = mysql_fetch_array($result);
-					$oletuskust = $tiliointirow['kustp'];
+					if (mysql_num_rows($result) != 0) {
+						$tiliointirow = mysql_fetch_array($result);
+						$oletuskust = $tiliointirow['kustp'];
+					}
 				}
-			}
 
-			// errorcheckit...
-			$val = checkdate($tpk, $tpp, $tpv);
+				if (mysql_num_rows($result) == 0) {
+					// Onko tämä kauttalaskutusta?
+					$query = "	SELECT kustp
+								FROM tiliointisaanto
+								WHERE ttunnus 	= '$trow[tunnus]'
+								and tyyppi 		= 'k'
+								and yhtio 		= '$yhtio'
+								and tilino 		= 0
+								and kuvaus 		= '$kauttalaskutus'";
+					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-			if (!$val) {
-				// Laitetaan sitten ajopäivä
-				list($tpv,$tpk,$tpp) = split("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d"),date("Y"))));
-				$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui päiväys. Tarkista asia laskulta!<br>" . $komm;
-			}
-
-			// Otetaan yhtiön tiedoista ostoreskontran sallittu tilikauden ajankohta
-			$tilalk = split("-", $yhtiorow["ostoreskontrakausi_alku"]);
-			$tillop = split("-", $yhtiorow["ostoreskontrakausi_loppu"]);
-
-			// verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
-			$ostoresktilalk = (int) date('Ymd',mktime(0,0,0,$tilalk[1],$tilalk[2],$tilalk[0]));
-			$ostoresktillop = (int) date('Ymd',mktime(0,0,0,$tillop[1],$tillop[2],$tillop[0]));
-			$syotettypvm = (int) date('Ymd',mktime(0,0,0,$tpk,$tpp,$tpv));
-
-			if ($syotettypvm > $ostoresktillop) {
-				$tpp = $tillop[2];
-				$tpk = $tillop[1];
-				$tpv = $tillop[0];
-				$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli päiväys liian pitkälle tulevaisuuteen. Tarkista asia laskulta!<br>" . $komm;
-			}
-
-			if ($syotettypvm < $ostoresktilalk) {
-				$tpp = $tilalk[2];
-				$tpk = $tilalk[1];
-				$tpv = $tilalk[0];
-				$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli liian vanha päiväys. Tarkista asia laskulta!<br>" . $komm;
-			}
-
-			// oletus alv nolla paitsi jos toimittajalla on oletuksena jotain kotimaahan liittyvää ni haetaan oletus avainsanoista...
-			$oletusalvi = 0;
-
-			if ($trow['oletus_vienti'] == "A" or $trow['oletus_vienti'] == "B" or $trow['oletus_vienti'] == "C" or $trow['oletus_vienti'] == "J") {
-
-				$query = "	SELECT selite
-							FROM avainsana
-							WHERE yhtio = '$yhtio' and laji = 'alv' and selitetark != ''
-							ORDER BY jarjestys,selite";
-				$avainresult = mysql_query($query) or die ("$query".mysql_error());
-
-				if (mysql_num_rows($avainresult) != 1) {
-					$return .= "Yrityksen $yhtio oletus ALV% puuttuu tai niitä on monta!\n";
-					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-					return ($return);
+					if (mysql_num_rows($result) != 0) {
+						$tiliointirow = mysql_fetch_array($result);
+						$oletuskust = $tiliointirow['kustp'];
+					}
 				}
-				else {
-					$avainrow = mysql_fetch_array($avainresult);
-					$oletusalvi = $avainrow['selite'];
-				}
-			}
 
-			// jos eräpäivää ei tule laskulta, otetaan toimittajan oletus
-			if ($erp == 0 and $erk == 0 and $erv == 0) {
-				$err = $trow["oletus_erapvm"];
-				// jos oletustakaan ei ole, laitetaan lasku erääntymään huomenna...
-				if ($err == 0) {
-					list($erv,$erk,$erp) = split("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d")+1,date("Y"))));
-				}
-				$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui eräpvm. Tarkista asia laskulta!<br>" . $komm;
-			}
+				// errorcheckit...
+				$val = checkdate($tpk, $tpp, $tpv);
 
-			if ($err > 0) {
-				$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk,$tpp+$err,$tpv));
-				$erp = (int) substr($newer, 8, 2);
-				$erk = (int) substr($newer, 5, 2);
-				$erv = (int) substr($newer, 0, 4);
-				$err = 0;
-			}
-
-			$kar   = $trow['oletus_kapvm'];
-			$kapro = $trow['oletus_kapro'];
-
-			$kap = 0;
-			$kak = 0;
-			$kav = 0;
-
-			if ($kar > 0) {
-				$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk,$tpp+$kar,$tpv));
-				$kap = (int) substr($newer, 8, 2);
-				$kak = (int) substr($newer, 5, 2);
-				$kav = (int) substr($newer, 0, 4);
-				$kar = 0;
-			}
-
-			$val = checkdate($erk, $erp, $erv);
-			if (!$val) {
-				$return .= "Virheellinen eräpvm $erv-$erk-$erp\n";
-				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-				return ($return);
-			}
-
-			$kassaale = 0;
-			if ($kapro != 0) {
-				$kassaale = $summa * $kapro / 100;
-				$kapro = 0;
-			}
-			$kassaale = round($kassaale,2);
-
-			if ($kak > 0 and $kap > 0 and $kav > 0 and $kassaale > 0) {
-
-				$val = checkdate($kak, $kap, $kav);
 				if (!$val) {
-					$return .= "Virheellinen kassaeräpvm '$kav-$kak-$kap' kassaale '$kassaale'\n";
+					// Laitetaan sitten ajopäivä
+					list($tpv,$tpk,$tpp) = split("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d"),date("Y"))));
+					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui päiväys. Tarkista asia laskulta!<br>" . $komm;
+				}
+
+				// Otetaan yhtiön tiedoista ostoreskontran sallittu tilikauden ajankohta
+				$tilalk = split("-", $yhtiorow["ostoreskontrakausi_alku"]);
+				$tillop = split("-", $yhtiorow["ostoreskontrakausi_loppu"]);
+
+				// verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
+				$ostoresktilalk = (int) date('Ymd',mktime(0,0,0,$tilalk[1],$tilalk[2],$tilalk[0]));
+				$ostoresktillop = (int) date('Ymd',mktime(0,0,0,$tillop[1],$tillop[2],$tillop[0]));
+				$syotettypvm = (int) date('Ymd',mktime(0,0,0,$tpk,$tpp,$tpv));
+
+				if ($syotettypvm > $ostoresktillop) {
+					$tpp = $tillop[2];
+					$tpk = $tillop[1];
+					$tpv = $tillop[0];
+					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli päiväys liian pitkälle tulevaisuuteen. Tarkista asia laskulta!<br>" . $komm;
+				}
+
+				if ($syotettypvm < $ostoresktilalk) {
+					$tpp = $tilalk[2];
+					$tpk = $tilalk[1];
+					$tpv = $tilalk[0];
+					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli liian vanha päiväys. Tarkista asia laskulta!<br>" . $komm;
+				}
+
+				// oletus alv nolla paitsi jos toimittajalla on oletuksena jotain kotimaahan liittyvää ni haetaan oletus avainsanoista...
+				$oletusalvi = 0;
+
+				if ($trow['oletus_vienti'] == "A" or $trow['oletus_vienti'] == "B" or $trow['oletus_vienti'] == "C" or $trow['oletus_vienti'] == "J") {
+
+					$query = "	SELECT selite
+								FROM avainsana
+								WHERE yhtio = '$yhtio' and laji = 'alv' and selitetark != ''
+								ORDER BY jarjestys,selite";
+					$avainresult = mysql_query($query) or die ("$query".mysql_error());
+
+					if (mysql_num_rows($avainresult) != 1) {
+						$return .= "Yrityksen $yhtio oletus ALV% puuttuu tai niitä on monta!\n";
+						mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						return ($return);
+					}
+					else {
+						$avainrow = mysql_fetch_array($avainresult);
+						$oletusalvi = $avainrow['selite'];
+					}
+				}
+
+				// jos eräpäivää ei tule laskulta, otetaan toimittajan oletus
+				if ($erp == 0 and $erk == 0 and $erv == 0) {
+					$err = $trow["oletus_erapvm"];
+					// jos oletustakaan ei ole, laitetaan lasku erääntymään huomenna...
+					if ($err == 0) {
+						list($erv,$erk,$erp) = split("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d")+1,date("Y"))));
+					}
+					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui eräpvm. Tarkista asia laskulta!<br>" . $komm;
+				}
+
+				if ($err > 0) {
+					$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk,$tpp+$err,$tpv));
+					$erp = (int) substr($newer, 8, 2);
+					$erk = (int) substr($newer, 5, 2);
+					$erv = (int) substr($newer, 0, 4);
+					$err = 0;
+				}
+
+				$kar   = $trow['oletus_kapvm'];
+				$kapro = $trow['oletus_kapro'];
+
+				$kap = 0;
+				$kak = 0;
+				$kav = 0;
+
+				if ($kar > 0) {
+					$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk,$tpp+$kar,$tpv));
+					$kap = (int) substr($newer, 8, 2);
+					$kak = (int) substr($newer, 5, 2);
+					$kav = (int) substr($newer, 0, 4);
+					$kar = 0;
+				}
+
+				$val = checkdate($erk, $erp, $erv);
+				if (!$val) {
+					$return .= "Virheellinen eräpvm $erv-$erk-$erp\n";
 					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
-				else {
-					if ($kassaale == 0) {
-						$return .= "Kassapvm on, mutta kassa-ale puuttu\n";
+
+				$kassaale = 0;
+				if ($kapro != 0) {
+					$kassaale = $summa * $kapro / 100;
+					$kapro = 0;
+				}
+				$kassaale = round($kassaale,2);
+
+				if ($kak > 0 and $kap > 0 and $kav > 0 and $kassaale > 0) {
+
+					$val = checkdate($kak, $kap, $kav);
+					if (!$val) {
+						$return .= "Virheellinen kassaeräpvm '$kav-$kak-$kap' kassaale '$kassaale'\n";
+						mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						return ($return);
+					}
+					else {
+						if ($kassaale == 0) {
+							$return .= "Kassapvm on, mutta kassa-ale puuttu\n";
+							mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+							return ($return);
+						}
+					}
+				}
+
+				$summa = round($summa,2);
+
+				if ($summa == 0.0) {
+					$return .= "Laskulta puuttuu summa!\n";
+					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					return ($return);
+				}
+
+				if (strlen($viite) > 0) {
+					require ("inc/tarkistaviite.inc");
+
+					if ($ok == 0) {
+						$return .= "Viite on väärin!\n";
 						mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 						return ($return);
 					}
 				}
-			}
 
-			$summa = round($summa,2);
-
-			if ($summa == 0.0) {
-				$return .= "Laskulta puuttuu summa!\n";
-				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-				return ($return);
-			}
-
-			if (strlen($viite) > 0) {
-				require ("inc/tarkistaviite.inc");
-
-				if ($ok == 0) {
-					$return .= "Viite on väärin!\n";
+				if (strlen($viite) > 0 and strlen($viesti) > 0) {
+					$return .= "Viitettä ja viestiä ei voi antaa yhtaikaa!\n";
 					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
-			}
 
-			if (strlen($viite) > 0 and strlen($viesti) > 0) {
-				$return .= "Viitettä ja viestiä ei voi antaa yhtaikaa!\n";
-				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-				return ($return);
-			}
+				$query = "SELECT kurssi FROM valuu WHERE nimi = '$valkoodi' and yhtio = '$yhtio'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-			$query = "SELECT kurssi FROM valuu WHERE nimi = '$valkoodi' and yhtio = '$yhtio'";
-			$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				if (mysql_num_rows($result) != 1) {
+					$return .= "Valuuttaa $valkoodi ei löytynytkään!\n";
+					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					return ($return);
+				}
 
-			if (mysql_num_rows($result) != 1) {
-				$return .= "Valuuttaa $valkoodi ei löytynytkään!\n";
-				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-				return ($return);
-			}
+				$vrow = mysql_fetch_array ($result);
 
-			$vrow = mysql_fetch_array ($result);
+				$hyvaksyja_nyt 	= '';
+				$tila 			= "M";
 
-			$hyvaksyja_nyt 	= '';
-			$tila 			= "M";
+				$hyvak[5] = trim($hyvak[5]);
+				$hyvak[4] = trim($hyvak[4]);
+				$hyvak[3] = trim($hyvak[3]);
+				$hyvak[2] = trim($hyvak[2]);
+				$hyvak[1] = trim($hyvak[1]);
 
-			$hyvak[5] = trim($hyvak[5]);
-			$hyvak[4] = trim($hyvak[4]);
-			$hyvak[3] = trim($hyvak[3]);
-			$hyvak[2] = trim($hyvak[2]);
-			$hyvak[1] = trim($hyvak[1]);
+				if (strlen($hyvak[5]) > 0) {
+					$hyvaksyja_nyt=$hyvak[5];
+					$tila = "H";
+				}
+				if (strlen($hyvak[4]) > 0) {
+					$hyvaksyja_nyt=$hyvak[4];
+					$tila = "H";
+				}
+				if (strlen($hyvak[3]) > 0) {
+					$hyvaksyja_nyt=$hyvak[3];
+					$tila = "H";
+				}
+				if (strlen($hyvak[2]) > 0) {
+					$hyvaksyja_nyt=$hyvak[2];
+					$tila = "H";
+				}
+				if (strlen($hyvak[1]) > 0) {
+					$hyvaksyja_nyt=$hyvak[1];
+					$tila = "H";
+				}
 
-			if (strlen($hyvak[5]) > 0) {
-				$hyvaksyja_nyt=$hyvak[5];
-				$tila = "H";
-			}
-			if (strlen($hyvak[4]) > 0) {
-				$hyvaksyja_nyt=$hyvak[4];
-				$tila = "H";
-			}
-			if (strlen($hyvak[3]) > 0) {
-				$hyvaksyja_nyt=$hyvak[3];
-				$tila = "H";
-			}
-			if (strlen($hyvak[2]) > 0) {
-				$hyvaksyja_nyt=$hyvak[2];
-				$tila = "H";
-			}
-			if (strlen($hyvak[1]) > 0) {
-				$hyvaksyja_nyt=$hyvak[1];
-				$tila = "H";
-			}
+				$olmapvm = $erv."-".$erk."-".$erp;
 
-			$olmapvm = $erv."-".$erk."-".$erp;
+				if ($kap != 0) {
+					$olmapvm = $kav."-".$kak."-".$kap;
+				}
 
-			if ($kap != 0) {
-				$olmapvm = $kav."-".$kak."-".$kap;
-			}
+				// Kirjoitetaan lasku
+				$query = "	INSERT into lasku set
+							yhtio 				= '$yhtio',
+							summa 				= '$summa',
+							kasumma 			= '$kassaale',
+							erpcm 				= '$erv-$erk-$erp',
+							kapvm 				= '$kav-$kak-$kap',
+							olmapvm 			= '$olmapvm',
+							valkoodi 			= '$valkoodi',
+							hyvak1 				= '$hyvak[1]',
+							hyvak2 				= '$hyvak[2]',
+							hyvak3 				= '$hyvak[3]',
+							hyvak4 				= '$hyvak[4]',
+							hyvak5 				= '$hyvak[5]',
+							hyvaksyja_nyt 		= '$hyvaksyja_nyt',
+							ytunnus 			= '$ytunnus',
+							tilinumero 			= '$trow[tilinumero]',
+							nimi 				= '$trow[nimi]',
+							nimitark 			= '$trow[nimitark]',
+							osoite 				= '$trow[osoite]',
+							osoitetark 			= '$trow[osoitetark]',
+							postino 			= '$trow[postino]',
+							postitp 			= '$trow[postitp]',
+							maa 				= '$trow[maa]',
+							viite 				= '$viite',
+							viesti 				= '$viesti',
+							sisviesti1 			= '$laskun_tilausviite',
+							sisviesti2 			= '$sis2',
+							tapvm 				= '$tpv-$tpk-$tpp',
+							vienti 				= '$trow[oletus_vienti]',
+							ebid 				= '$ebid',
+							tila 				= '$tila',
+							vienti_kurssi 		= '$vrow[kurssi]',
+							laatija 			= 'verkkolas',
+							liitostunnus 		= '$trow[tunnus]',
+							luontiaika 			= now(),
+							pankki1				= '$trow[pankki1]',
+							pankki2				= '$trow[pankki2]',
+							pankki3				= '$trow[pankki3]',
+							pankki4				= '$trow[pankki4]',
+							ultilno				= '$trow[ultilno]',
+							swift				= '$trow[swift]',
+							suoraveloitus		= '$trow[oletus_suoraveloitus]',
+							hyvaksynnanmuutos	= '$trow[oletus_hyvaksynnanmuutos]',
+							comments 			= '$komm',
+							laskunro 			= '$laskun_numero',
+							asiakkaan_tilausnumero = '$laskun_numero'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$tunnus = mysql_insert_id();
+				$omasumma = round($summa * $vrow['kurssi'], 2);
 
-			// Kirjoitetaan lasku
-			$query = "	INSERT into lasku set
-						yhtio 				= '$yhtio',
-						summa 				= '$summa',
-						kasumma 			= '$kassaale',
-						erpcm 				= '$erv-$erk-$erp',
-						kapvm 				= '$kav-$kak-$kap',
-						olmapvm 			= '$olmapvm',
-						valkoodi 			= '$valkoodi',
-						hyvak1 				= '$hyvak[1]',
-						hyvak2 				= '$hyvak[2]',
-						hyvak3 				= '$hyvak[3]',
-						hyvak4 				= '$hyvak[4]',
-						hyvak5 				= '$hyvak[5]',
-						hyvaksyja_nyt 		= '$hyvaksyja_nyt',
-						ytunnus 			= '$ytunnus',
-						tilinumero 			= '$trow[tilinumero]',
-						nimi 				= '$trow[nimi]',
-						nimitark 			= '$trow[nimitark]',
-						osoite 				= '$trow[osoite]',
-						osoitetark 			= '$trow[osoitetark]',
-						postino 			= '$trow[postino]',
-						postitp 			= '$trow[postitp]',
-						maa 				= '$trow[maa]',
-						viite 				= '$viite',
-						viesti 				= '$viesti',
-						sisviesti1 			= '$laskun_tilausviite',
-						sisviesti2 			= '$sis2',
-						tapvm 				= '$tpv-$tpk-$tpp',
-						vienti 				= '$trow[oletus_vienti]',
-						ebid 				= '$ebid',
-						tila 				= '$tila',
-						vienti_kurssi 		= '$vrow[kurssi]',
-						laatija 			= 'verkkolas',
-						liitostunnus 		= '$trow[tunnus]',
-						luontiaika 			= now(),
-						pankki1				= '$trow[pankki1]',
-						pankki2				= '$trow[pankki2]',
-						pankki3				= '$trow[pankki3]',
-						pankki4				= '$trow[pankki4]',
-						ultilno				= '$trow[ultilno]',
-						swift				= '$trow[swift]',
-						suoraveloitus		= '$trow[oletus_suoraveloitus]',
-						hyvaksynnanmuutos	= '$trow[oletus_hyvaksynnanmuutos]',
-						comments 			= '$komm',
-						laskunro 			= '$laskun_numero',
-						asiakkaan_tilausnumero = '$laskun_numero'";
-			$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
-			$tunnus = mysql_insert_id();
-			$omasumma = round($summa * $vrow['kurssi'], 2);
+				// Tehdään oletustiliöinnit, ostovelat
+				$vassumma = -1 * $omasumma;
 
-			// Tehdään oletustiliöinnit, ostovelat
-			$vassumma = -1 * $omasumma;
-
-			//Tutkitaan otsovelkatiliä
-			if ($trow["konserniyhtio"] != '') {
-				$ostovelat = $yhtiorow["konserniostovelat"];
-			}
-			else {
-				$ostovelat = $yhtiorow["ostovelat"];
-			}
-
-			$query = "	INSERT into tiliointi set
-						yhtio 		= '$yhtio',
-						ltunnus 	= '$tunnus',
-						tilino 		= '$ostovelat',
-						kustp 		= 0,
-						tapvm 		= '$tpv-$tpk-$tpp',
-						summa 		= '$vassumma',
-						selite 		= '$selite',
-						vero 		= 0,
-						lukko 		= '1',
-						laatija 	= 'verkkolas',
-						laadittu 	= now()";
-			$result = mysql_query($query) or die ("$query\n\n".mysql_error());
-
-			// Onko rivikohtaisia tiliöintisääntöjä
-			$query = "	SELECT *
-						FROM tiliointisaanto
-						WHERE ttunnus	= '$trow[tunnus]'
-						and yhtio 		= '$yhtio'
-						and tyyppi 		= 't'
-						and tilino	   != 0";
-			$result = mysql_query($query) or die ("$query\n\n".mysql_error());
-
-			// Onko laskuriveillä useita alv-verokantoja?
-			if (count($ealvi) > 0) {
-				$ealvi = array_unique($ealvi);
-			}
-			else {
-				//Katsotaan alv laskuerittelystä
-				$ealvi[0] = $lisavat[0];
-			}
-
- 			// Tehdän pelkät oletustiliöinnit
-			if (mysql_num_rows($result) == 0 and count($ealvi) == 1) {
-
-				if ($oletustili > 0) {
-					$tili = $oletustili;
+				//Tutkitaan otsovelkatiliä
+				if ($trow["konserniyhtio"] != '') {
+					$ostovelat = $yhtiorow["konserniostovelat"];
 				}
 				else {
-					$tili = $yhtiorow['muutkulut'];
+					$ostovelat = $yhtiorow["ostovelat"];
 				}
 
-				$vero = $oletusalvi;
+				$query = "	INSERT into tiliointi set
+							yhtio 		= '$yhtio',
+							ltunnus 	= '$tunnus',
+							tilino 		= '$ostovelat',
+							kustp 		= 0,
+							tapvm 		= '$tpv-$tpk-$tpp',
+							summa 		= '$vassumma',
+							selite 		= '$selite',
+							vero 		= 0,
+							lukko 		= '1',
+							laatija 	= 'verkkolas',
+							laadittu 	= now()";
+				$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
-				if ($ealvi[0] != '') {
-					$vero = $ealvi[0]; //Tuliko jotain verkkolaskulta
+				// Onko rivikohtaisia tiliöintisääntöjä
+				$query = "	SELECT *
+							FROM tiliointisaanto
+							WHERE ttunnus	= '$trow[tunnus]'
+							and yhtio 		= '$yhtio'
+							and tyyppi 		= 't'
+							and tilino	   != 0";
+				$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+				// Onko laskuriveillä useita alv-verokantoja?
+				if (count($ealvi) > 0) {
+					$ealvi = array_unique($ealvi);
 				}
-				elseif ($hardcoded_alv == 1) {
-					 //salasana.php:stä
-					$query = "SELECT * FROM tili WHERE tilino = '$tili' and yhtio = '$yhtio'";
-					$tiliresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+				else {
+					//Katsotaan alv laskuerittelystä
+					$ealvi[0] = $lisavat[0];
+				}
 
-					if (mysql_num_rows($tiliresult) == 1) {
-						$tilirow = mysql_fetch_array ($tiliresult);
-						if($tilirow['oletusalv'] == 99) $tilirow['oletusalv'] = 0;
-						$vero = $tilirow['oletusalv'];
+	 			// Tehdän pelkät oletustiliöinnit
+				if (mysql_num_rows($result) == 0 and count($ealvi) == 1) {
+
+					if ($oletustili > 0) {
+						$tili = $oletustili;
 					}
-				}
-
-				$kukarow['yhtio']   = $yhtio;
-				$kukarow['kuka']    = 'verkkolas';
-
-				$verkkolaskuveroton = round($omasumma / (1 + ($vero / 100)),2);
-				$summa              = $omasumma;
-				$kustp              = $oletuskust;
-				$kohde              = $oletuskohde;
-				$projekti           = $oletusprojekti;
-
-				require ("inc/teetiliointi.inc");
-
-				// jos kyseessä on jonkin rahti/huolintakuluja, tiliöidään varastonarvoon
-				if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
-
-					$varastotili = $yhtiorow['varasto'];
-
-					if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-							$varastotili = $yhtiorow['matkalla_olevat'];
+					else {
+						$tili = $yhtiorow['muutkulut'];
 					}
 
-					$query = "	INSERT into tiliointi set
-								yhtio = '$kukarow[yhtio]',
-								ltunnus = '$tunnus',
-								tilino = '$varastotili',
-								kustp = 0,
-								tapvm = '$tpv-$tpk-$tpp',
-								summa = '$verkkolaskuveroton',
-								selite = '$selite',
-								vero = 0,
-								lukko = '',
-								laatija = '$kukarow[kuka]',
-								laadittu = now()";
-					$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+					$vero = $oletusalvi;
 
-					$query = "	INSERT into tiliointi set
-								yhtio ='$kukarow[yhtio]',
-								ltunnus = '$tunnus',
-								tilino = '$yhtiorow[varastonmuutos]',
-								kustp = '$kustp',
-								kohde = '$kohde',
-								projekti = '$projekti',
-								tapvm = '$tpv-$tpk-$tpp',
-								summa = $verkkolaskuveroton*-1,
-								selite = '$selite',
-								vero = 0,
-								lukko = '',
-								laatija = '$kukarow[kuka]',
-								laadittu = now()";
-					$result = mysql_query($query) or die ("$query\n\n".mysql_error());
-
-					// Jos tämä lasku menee varastoon, tehdään valmiiksi keikka
-					if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+					if ($ealvi[0] != '') {
+						$vero = $ealvi[0]; //Tuliko jotain verkkolaskulta
 					}
-				}
-			}
-			else {
-				// Tehdään rivikohtaiset tiliöinnit
-				$i					= 0;
-				$totsumma 			= 0;
-				$verkkolaskuveroton = 0;
-				$vtontot 			= 0;
+					elseif ($hardcoded_alv == 1) {
+						 //salasana.php:stä
+						$query = "SELECT * FROM tili WHERE tilino = '$tili' and yhtio = '$yhtio'";
+						$tiliresult = mysql_query($query) or die ("$query\n\n".mysql_error());
 
-				for ($i=0; $i < count($rtuoteno); $i++) {
+						if (mysql_num_rows($tiliresult) == 1) {
+							$tilirow = mysql_fetch_array ($tiliresult);
+							if($tilirow['oletusalv'] == 99) $tilirow['oletusalv'] = 0;
+							$vero = $tilirow['oletusalv'];
+						}
+					}
 
-					if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
+					$kukarow['yhtio']   = $yhtio;
+					$kukarow['kuka']    = 'verkkolas';
 
-						$kustp = $oletuskust;
+					$verkkolaskuveroton = round($omasumma / (1 + ($vero / 100)),2);
+					$summa              = $omasumma;
+					$kustp              = $oletuskust;
+					$kohde              = $oletuskohde;
+					$projekti           = $oletusprojekti;
 
-						$selite = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["riviinfo"])); // Poistaa SQL-virheen mahdollisuuden
-						$tuote  = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["tuoteno"]));  // Poistaa SQL-virheen mahdollisuuden
+					require ("inc/teetiliointi.inc");
 
-						$query = "	SELECT tilino, kustp
-									FROM tiliointisaanto
-									WHERE ttunnus 	= '$trow[tunnus]'
-									and tyyppi 		= 't'
-									and yhtio 		= '$yhtio'
-									and mintuote   <= '$tuote'
-									and maxtuote   >= '$tuote'
-									and tilino 	   != 0";
+					// jos kyseessä on jonkin rahti/huolintakuluja, tiliöidään varastonarvoon
+					if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
+
+						$varastotili = $yhtiorow['varasto'];
+
+						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
+								$varastotili = $yhtiorow['matkalla_olevat'];
+						}
+
+						$query = "	INSERT into tiliointi set
+									yhtio = '$kukarow[yhtio]',
+									ltunnus = '$tunnus',
+									tilino = '$varastotili',
+									kustp = 0,
+									tapvm = '$tpv-$tpk-$tpp',
+									summa = '$verkkolaskuveroton',
+									selite = '$selite',
+									vero = 0,
+									lukko = '',
+									laatija = '$kukarow[kuka]',
+									laadittu = now()";
 						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
- 						// Sopiva sääntöä ei löytynyt
-						if (mysql_num_rows($result) == 0) {
+						$query = "	INSERT into tiliointi set
+									yhtio ='$kukarow[yhtio]',
+									ltunnus = '$tunnus',
+									tilino = '$yhtiorow[varastonmuutos]',
+									kustp = '$kustp',
+									kohde = '$kohde',
+									projekti = '$projekti',
+									tapvm = '$tpv-$tpk-$tpp',
+									summa = $verkkolaskuveroton*-1,
+									selite = '$selite',
+									vero = 0,
+									lukko = '',
+									laatija = '$kukarow[kuka]',
+									laadittu = now()";
+						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+						// Jos tämä lasku menee varastoon, tehdään valmiiksi keikka
+						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
+							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+						}
+					}
+				}
+				else {
+					// Tehdään rivikohtaiset tiliöinnit
+					$i					= 0;
+					$totsumma 			= 0;
+					$verkkolaskuveroton = 0;
+					$vtontot 			= 0;
+
+					for ($i=0; $i < count($rtuoteno); $i++) {
+
+						if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
+
+							$kustp = $oletuskust;
+
+							$selite = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["riviinfo"])); // Poistaa SQL-virheen mahdollisuuden
+							$tuote  = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["tuoteno"]));  // Poistaa SQL-virheen mahdollisuuden
 
 							$query = "	SELECT tilino, kustp
 										FROM tiliointisaanto
 										WHERE ttunnus 	= '$trow[tunnus]'
 										and tyyppi 		= 't'
 										and yhtio 		= '$yhtio'
-										and kuvaus like '%$selite%'
-										and tilino     != 0";
+										and mintuote   <= '$tuote'
+										and maxtuote   >= '$tuote'
+										and tilino 	   != 0";
 							$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
- 							// Hmm, mikään sääntö ei kelpaa
+	 						// Sopiva sääntöä ei löytynyt
 							if (mysql_num_rows($result) == 0) {
 
- 								// Toimittajan oletustili
-								if ($oletustili > 0) {
-									$tili = $oletustili;
+								$query = "	SELECT tilino, kustp
+											FROM tiliointisaanto
+											WHERE ttunnus 	= '$trow[tunnus]'
+											and tyyppi 		= 't'
+											and yhtio 		= '$yhtio'
+											and kuvaus like '%$selite%'
+											and tilino     != 0";
+								$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+	 							// Hmm, mikään sääntö ei kelpaa
+								if (mysql_num_rows($result) == 0) {
+
+	 								// Toimittajan oletustili
+									if ($oletustili > 0) {
+										$tili = $oletustili;
+									}
+									else {
+										 // Yleinen kulutili
+										$tili = $yhtiorow['muutkulut'];
+									}
 								}
 								else {
-									 // Yleinen kulutili
-									$tili = $yhtiorow['muutkulut'];
+									$tiliointirow = mysql_fetch_array($result);
+									$tili = $tiliointirow['tilino'];
+									if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
 								}
 							}
 							else {
@@ -934,225 +941,175 @@
 								$tili = $tiliointirow['tilino'];
 								if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
 							}
+
+							$summa = (float) $rtuoteno[$i]["rivihinta"];
+
+	 						//Hyvityslasku tai summa alle nolla
+							if ($laskun_tyyppi == "381" or $omasumma < 0) {
+								$summa = $summa * -1;
+							}
+
+							$vero = (float) $rtuoteno[$i]["alv"];
+
+							$verkkolaskuveroton += $summa;
+							$vtonsumma 			 = $summa;
+							$vtontot 		    += $summa;
+							$summa 			 	 = round($summa * (1+($vero/100)),2);
+							$totsumma 		    += $summa;
+							$selite				 = $selite." ".$trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
+							$kukarow['yhtio'] 	 = $yhtio;
+							$kukarow['kuka'] 	 = 'verkkolas';
+
+							require ("inc/teetiliointi.inc");
+
+							// jos kyseessä on jonkin rahti/huolintakuluja, tiliöidään varastonmuutokseen
+							if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
+								$query = "	INSERT into tiliointi set
+											yhtio 		= '$kukarow[yhtio]',
+											ltunnus 	= '$tunnus',
+											tilino 		= '$yhtiorow[varastonmuutos]',
+											kustp 		= '$kustp',
+											kohde 		= '$kohde',
+											projekti 	= '$projekti',
+											tapvm 		= '$tpv-$tpk-$tpp',
+											summa 		= $vtonsumma *-1,
+											selite 		= '$selite',
+											vero 		= 0,
+											lukko 		= '',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+								$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+							}
 						}
-						else {
-							$tiliointirow = mysql_fetch_array($result);
-							$tili = $tiliointirow['tilino'];
-							if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
-						}
-
-						$summa = (float) $rtuoteno[$i]["rivihinta"];
-
- 						//Hyvityslasku tai summa alle nolla
-						if ($laskun_tyyppi == "381" or $omasumma < 0) {
-							$summa = $summa * -1;
-						}
-
-						$vero = (float) $rtuoteno[$i]["alv"];
-
-						$verkkolaskuveroton += $summa;
-						$vtonsumma 			 = $summa;
-						$vtontot 		    += $summa;
-						$summa 			 	 = round($summa * (1+($vero/100)),2);
-						$totsumma 		    += $summa;
-						$selite				 = $selite." ".$trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
-						$kukarow['yhtio'] 	 = $yhtio;
-						$kukarow['kuka'] 	 = 'verkkolas';
-
-						require ("inc/teetiliointi.inc");
-
-						// jos kyseessä on jonkin rahti/huolintakuluja, tiliöidään varastonmuutokseen
-						if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
-							$query = "	INSERT into tiliointi set
-										yhtio 		= '$kukarow[yhtio]',
-										ltunnus 	= '$tunnus',
-										tilino 		= '$yhtiorow[varastonmuutos]',
-										kustp 		= '$kustp',
-										kohde 		= '$kohde',
-										projekti 	= '$projekti',
-										tapvm 		= '$tpv-$tpk-$tpp',
-										summa 		= $vtonsumma *-1,
-										selite 		= '$selite',
-										vero 		= 0,
-										lukko 		= '',
-										laatija 	= '$kukarow[kuka]',
-										laadittu 	= now()";
-							$result = mysql_query($query) or die ("$query\n\n".mysql_error());
-						}
-					}
-					$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
-				}
-
- 				// Tuli pyöristyseroja
-				if (round(abs($totsumma - $omasumma),2) >= 0.01) {
-					$query = "	INSERT into tiliointi set
-								yhtio 		= '$yhtio',
-								ltunnus 	= '$tunnus',
-								tilino 		= '$yhtiorow[pyoristys]',
-								kustp 		= 0,
-								tapvm 		= '$tpv-$tpk-$tpp',
-								summa 		= $omasumma - $totsumma,
-								selite 		= '$selite',
-								vero 		= 0,
-								lukko 		= '',
-								laatija 	= 'verkkolas',
-								laadittu 	= now()";
-					$result = mysql_query($query) or die ("$query\n\n".mysql_error());
-				}
-
-				// jos kyseessä on jonkin rahti/huolintakuluja, tiliöidään varastonarvoon
-				if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
-
-					$varastotili = $yhtiorow['varasto'];
-					if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-							$varastotili = $yhtiorow['matkalla_olevat'];
+						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
 					}
 
-					$query = "	INSERT into tiliointi set
-								yhtio 		= '$kukarow[yhtio]',
-								ltunnus 	= '$tunnus',
-								tilino 		= '$varastotili',
-								kustp 		= 0,
-								tapvm 		= '$tpv-$tpk-$tpp',
-								summa 		= '$vtontot',
-								selite 		= '$selite',
-								vero 		= 0,
-								lukko 		= '',
-								laatija		= '$kukarow[kuka]',
-								laadittu	= now()";
-					$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+	 				// Tuli pyöristyseroja
+					if (round(abs($totsumma - $omasumma),2) >= 0.01) {
+						$query = "	INSERT into tiliointi set
+									yhtio 		= '$yhtio',
+									ltunnus 	= '$tunnus',
+									tilino 		= '$yhtiorow[pyoristys]',
+									kustp 		= 0,
+									tapvm 		= '$tpv-$tpk-$tpp',
+									summa 		= $omasumma - $totsumma,
+									selite 		= '$selite',
+									vero 		= 0,
+									lukko 		= '',
+									laatija 	= 'verkkolas',
+									laadittu 	= now()";
+						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+					}
 
-					// Jos tämä lasku menee varastoon, tehdään valmiiksi keikka
-					if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+					// jos kyseessä on jonkin rahti/huolintakuluja, tiliöidään varastonarvoon
+					if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
+
+						$varastotili = $yhtiorow['varasto'];
+						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
+								$varastotili = $yhtiorow['matkalla_olevat'];
+						}
+
+						$query = "	INSERT into tiliointi set
+									yhtio 		= '$kukarow[yhtio]',
+									ltunnus 	= '$tunnus',
+									tilino 		= '$varastotili',
+									kustp 		= 0,
+									tapvm 		= '$tpv-$tpk-$tpp',
+									summa 		= '$vtontot',
+									selite 		= '$selite',
+									vero 		= 0,
+									lukko 		= '',
+									laatija		= '$kukarow[kuka]',
+									laadittu	= now()";
+						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+						// Jos tämä lasku menee varastoon, tehdään valmiiksi keikka
+						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
+							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
+						}
 					}
 				}
-			}
 
-			// Jos meillä on suoraveloitus
-			if ($trow['oletus_suoraveloitus'] != '') {
+				// Jos meillä on suoraveloitus
+				if ($trow['oletus_suoraveloitus'] != '') {
 
-				if ($trow['oletus_suoravel_pankki'] > 0) {
-					 //Toimittajalla on pankkitili, teemme eräpäivälle suorituksen valmiiksi
-					// Oletustiliöinnit
-					// Ostovelat
-					$query = "	INSERT into tiliointi set
-								yhtio 		= '$kukarow[yhtio]',
-								ltunnus 	= '$tunnus',
-								tilino		= '$ostovelat',
-								tapvm 		= '$erv-$erk-$erp',
-								summa 		= '$omasumma',
-								vero 		= 0,
-								lukko 		= '',
-								laatija 	= '$kukarow[kuka]',
-								laadittu	= now()";
-					$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
-
-					// Rahatili
-					$query = "	INSERT into tiliointi set
-								yhtio 		= '$kukarow[yhtio]',
-								ltunnus 	= '$tunnus',
-								tilino 		= '$yhtiorow[selvittelytili]',
-								tapvm 		= '$erv-$erk-$erp',
-								summa 		= $vassumma,
-								vero 		= 0,
-								lukko 		= '',
-								laatija 	= '$kukarow[kuka]',
-								laadittu 	= now()";
-					$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
-
-					if ($tila == 'M') {
-						$query = "	UPDATE lasku set
-									tila 	= 'Y',
-									mapvm 	= '$erv-$erk-$erp',
-									maksu_kurssi = 1
-									WHERE tunnus = '$tunnus'";
+					if ($trow['oletus_suoravel_pankki'] > 0) {
+						 //Toimittajalla on pankkitili, teemme eräpäivälle suorituksen valmiiksi
+						// Oletustiliöinnit
+						// Ostovelat
+						$query = "	INSERT into tiliointi set
+									yhtio 		= '$kukarow[yhtio]',
+									ltunnus 	= '$tunnus',
+									tilino		= '$ostovelat',
+									tapvm 		= '$erv-$erk-$erp',
+									summa 		= '$omasumma',
+									vero 		= 0,
+									lukko 		= '',
+									laatija 	= '$kukarow[kuka]',
+									laadittu	= now()";
 						$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
-						//echo "Lasku merkittiin suoraan maksetuksi";
-					}
-				}
-				else {
-				 	// Tämä koskee vain suoraveloitusta
-					if ($tila == 'M') {
-						$query = "	UPDATE lasku set
-									tila = 'Q'
-									WHERE tunnus='$tunnus'";
+
+						// Rahatili
+						$query = "	INSERT into tiliointi set
+									yhtio 		= '$kukarow[yhtio]',
+									ltunnus 	= '$tunnus',
+									tilino 		= '$yhtiorow[selvittelytili]',
+									tapvm 		= '$erv-$erk-$erp',
+									summa 		= $vassumma,
+									vero 		= 0,
+									lukko 		= '',
+									laatija 	= '$kukarow[kuka]',
+									laadittu 	= now()";
 						$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
-						//echo "Lasku merkittiin odottamaan suoritusta";
+
+						if ($tila == 'M') {
+							$query = "	UPDATE lasku set
+										tila 	= 'Y',
+										mapvm 	= '$erv-$erk-$erp',
+										maksu_kurssi = 1
+										WHERE tunnus = '$tunnus'";
+							$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+							//echo "Lasku merkittiin suoraan maksetuksi";
+						}
+					}
+					else {
+					 	// Tämä koskee vain suoraveloitusta
+						if ($tila == 'M') {
+							$query = "	UPDATE lasku set
+										tila = 'Q'
+										WHERE tunnus='$tunnus'";
+							$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+							//echo "Lasku merkittiin odottamaan suoritusta";
+						}
 					}
 				}
-			}
 
-			$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-			$kuvalaskures = mysql_query($query) or pupe_error($query);
+				$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+				$kuvalaskures = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($kuvalaskures) > 0) {
+				if (mysql_num_rows($kuvalaskures) > 0) {
 
-				$kuvalaskurow = mysql_fetch_array($kuvalaskures);
+					$kuvalaskurow = mysql_fetch_array($kuvalaskures);
 
-				$ebid 	= $kuvalaskurow['ebid'];
-				$selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
+					$ebid 	= $kuvalaskurow['ebid'];
+					$selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
 
-				if ($ebid == "FINVOICEXML") {
+					if ($ebid == "FINVOICEXML") {
 
-					$filesize = strlen($xmlstr);
-					$filename = array_pop(explode("/", $file));
-					$xmlstr   = mysql_real_escape_string($xmlstr);
+						$filesize = strlen($xmlstr);
+						$filename = array_pop(explode("/", $file));
+						$xmlstr   = mysql_real_escape_string($xmlstr);
 
-					$query = "	INSERT INTO liitetiedostot SET
-								yhtio    			= '$kukarow[yhtio]',
-								liitos   			= 'lasku',
-								liitostunnus 		= '$tunnus',
-								data     			= '$xmlstr',
-								selite   			= '$selite',
-								kieli				= '$yhtiorow[kieli]',
-								filename 			= '$filename',
-								filesize 			= '$filesize',
-								filetype 			= 'text/xml',
-								image_width			= '',
-								image_height		= '',
-								image_bits			= '',
-								image_channels		= '',
-								kayttotarkoitus		= '',
-								jarjestys			= '1',
-								laatija				= '$kukarow[kuka]',
-								luontiaika			= now()";
-					$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
-
-				}
-				else {
-					$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
-					$salasana		   = $yhtiorow['verkkosala_vas'];
-
-					$timestamppi = gmdate("YmdHis")."Z";
-
-					$urlhead = "http://www.verkkolasku.net";
-					$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
-
-					$digest	 = md5($urlmain . "&" . $salasana);
-					$url	 = $urlhead.$urlmain."&DIGEST=$digest";
-
-					$sisalto = file_get_contents($url);
-
-					if (substr($sisalto,0,4) == "%PDF") {
-						// tallennetaan kuva
-						$filename = $ebid.".pdf";
-
-						//filesize functio ei toimi koska ei ole oikea file.
-						$filesize = strlen($sisalto);
-						$data  = mysql_real_escape_string($sisalto);
-
-						// lisätään kuva
 						$query = "	INSERT INTO liitetiedostot SET
 									yhtio    			= '$kukarow[yhtio]',
 									liitos   			= 'lasku',
 									liitostunnus 		= '$tunnus',
-									data     			= '$data',
+									data     			= '$xmlstr',
 									selite   			= '$selite',
 									kieli				= '$yhtiorow[kieli]',
-									filename 			= '$file',
+									filename 			= '$filename',
 									filesize 			= '$filesize',
-									filetype 			= 'application/pdf',
+									filetype 			= 'text/xml',
 									image_width			= '',
 									image_height		= '',
 									image_bits			= '',
@@ -1162,17 +1119,65 @@
 									laatija				= '$kukarow[kuka]',
 									luontiaika			= now()";
 						$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+					}
+					else {
+						$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
+						$salasana		   = $yhtiorow['verkkosala_vas'];
+
+						$timestamppi = gmdate("YmdHis")."Z";
+
+						$urlhead = "http://www.verkkolasku.net";
+						$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
+
+						$digest	 = md5($urlmain . "&" . $salasana);
+						$url	 = $urlhead.$urlmain."&DIGEST=$digest";
+
+						$sisalto = file_get_contents($url);
+
+						if (substr($sisalto,0,4) == "%PDF") {
+							// tallennetaan kuva
+							$filename = $ebid.".pdf";
+
+							//filesize functio ei toimi koska ei ole oikea file.
+							$filesize = strlen($sisalto);
+							$data  = mysql_real_escape_string($sisalto);
+
+							// lisätään kuva
+							$query = "	INSERT INTO liitetiedostot SET
+										yhtio    			= '$kukarow[yhtio]',
+										liitos   			= 'lasku',
+										liitostunnus 		= '$tunnus',
+										data     			= '$data',
+										selite   			= '$selite',
+										kieli				= '$yhtiorow[kieli]',
+										filename 			= '$file',
+										filesize 			= '$filesize',
+										filetype 			= 'application/pdf',
+										image_width			= '',
+										image_height		= '',
+										image_bits			= '',
+										image_channels		= '',
+										kayttotarkoitus		= '',
+										jarjestys			= '1',
+										laatija				= '$kukarow[kuka]',
+										luontiaika			= now()";
+							$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+						}
 					}
 				}
+
+				// päästiin onnillisesti loppuun
+		    	$sub = "$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta";
+		    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
+			    $tulos = mail($yhtiorow['alert_email'], $sub, $meili, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+
+				if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>";
+				return 0;
 			}
-
-			// päästiin onnillisesti loppuun
-	    	$sub = "$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta";
-	    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
-		    $tulos = mail($yhtiorow['alert_email'], $sub, $meili, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-
-			if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>";
-			return 0;
+			else {
+				return array($yhtiorow, $trow);
+			}
 		}
 	}
 ?>

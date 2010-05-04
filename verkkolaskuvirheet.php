@@ -2,18 +2,20 @@
 
 	if ($_REQUEST["tee"] == "NAYTATILAUS") {
 		$no_head = "yes";
-
+		$xmlstring = urldecode($_REQUEST["xml"]);
+		
 		header("Content-type: text/xml");
+		header("Content-length: ".strlen($xmlstring));
 		flush();
 	}
 	
 	require ("inc/parametrit.inc");
 	
-	if ($_REQUEST["tee"] == "NAYTATILAUS") {
-		$xml = urldecode($_REQUEST["xml"]);
-		$xml = str_replace("<!DOCTYPE Finvoice SYSTEM \"", "<!DOCTYPE Finvoice SYSTEM \"$palvelin2", $xml);
-		$xml = str_replace("<?xml-stylesheet type=\"text/xsl\" href=\"", "<?xml-stylesheet type=\"text/xsl\" href=\"$palvelin2", $xml);
-		echo $xml;
+	if ($_REQUEST["tee"] == "NAYTATILAUS") {		
+		$xmlstring = str_replace("<!DOCTYPE Finvoice SYSTEM \"", "<!DOCTYPE Finvoice SYSTEM \"$palvelin2", $xmlstring);
+		$xmlstring = str_replace("<?xml-stylesheet type=\"text/xsl\" href=\"", "<?xml-stylesheet type=\"text/xsl\" href=\"$palvelin2", $xmlstring);
+		
+		echo $xmlstring;
 		exit;
 	}
 	

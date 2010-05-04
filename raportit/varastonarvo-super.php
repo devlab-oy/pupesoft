@@ -15,8 +15,9 @@
 		require_once("../inc/functions.inc");
 		require_once("../inc/connect.inc");
 
-		// otetaan includepath aina rootista
-		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)));
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+		ini_set("display_errors", 0);
 
 		$tyyppi = "";
 		$email_osoite = "";
@@ -126,7 +127,7 @@
 
 				$varastot = explode(",", $argv[2]);
 				$email_osoite = mysql_real_escape_string($argv[3]);
-				
+
 				$epakur = 'kaikki';
 				$tyyppi = 'A';
 			}
@@ -154,7 +155,7 @@
 					}
 				}
 				$varastontunnukset .= ")";
-				
+
 				if ($summaustaso == "T") {
 					$order_lisa = "osasto, try, tuoteno";
 				}
@@ -289,13 +290,13 @@
 			if (count($argv) == 0) {
 				force_echo("Haetaan käsiteltävien tuotteiden tiedot.");
 			}
-			
+
 			$varastolisa = " varastopaikat.nimitys varastonnimi, varastopaikat.tunnus varastotunnus, ";
-			
+
 			if ($summaustaso == 'T') {
 				$varastolisa = "";
 			}
-			
+
 			// haetaan halutut tuotteet
 			$query  = "	SELECT DISTINCT
 						$varastolisa
@@ -341,7 +342,7 @@
 				list($usec, $sec) = explode(' ', microtime());
 				mt_srand((float) $sec + ((float) $usec * 100000));
 				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-				
+
 				if (count($argv) > 0) {
 					$excelnimi = "Varastonarvo_$vv-$kk-$pp.xls";
 				}
@@ -358,7 +359,7 @@
 
 			if(isset($workbook)) {
 				$excelsarake = 0;
-				
+
 				if ($summaustaso != "T") {
 					$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 		$format_bold);
 					$excelsarake++;
@@ -438,18 +439,18 @@
 				$kpl = 0;
 				$varaston_arvo = 0;
 				$bruttovaraston_arvo = 0;
-				
+
 				if (count($argv) == 0) {
 					$bar->increase();
 				}
-				
+
 				if ($summaustaso == 'T') {
-					$mistavarastosta = $varastontunnukset;						
+					$mistavarastosta = $varastontunnukset;
 				}
 				else {
 					$mistavarastosta = " and varastopaikat.tunnus = '$row[varastotunnus]' ";
 				}
-				
+
 				// Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)
 				if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
 
@@ -463,12 +464,12 @@
 					else {
 						$summaus_lisa = "";
 					}
-					
+
 					if ($row["sarjanumeroseuranta"] == "G") {
-						/*	
+						/*
 							Haetaan vapaat erät varastosta ja lasketaan niiden saldot
 						*/
-						
+
 						$query	= "		SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.era_kpl
 										FROM sarjanumeroseuranta
 										JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
@@ -506,7 +507,7 @@
 						$vararvores = mysql_query($query) or pupe_error($query);
 
 						while ($vararvorow = mysql_fetch_array($vararvores)) {
-							//	Jos meillä on eräseurattu in-out arvoinen tuote, meidän pitää 
+							//	Jos meillä on eräseurattu in-out arvoinen tuote, meidän pitää
 							$varaston_arvo += sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"]);
 							$bruttovaraston_arvo = $varaston_arvo;
 							$kpl++; // saldo
@@ -541,7 +542,7 @@
 								$summaus_lisa";
 					$vararvores = mysql_query($query) or pupe_error($query);
 					$vararvorow = mysql_fetch_array($vararvores);
-										
+
 					$kpl = (float) $vararvorow["saldo"];
 					$varaston_arvo = (float) $vararvorow["varasto"];
 					$bruttovaraston_arvo = (float) $vararvorow["bruttovarasto"];
@@ -560,14 +561,14 @@
 
 				// tuotteen muutos varastossa annetun päivän jälkeen
 				// jos samalle päivälle on epäkuranttitapahtumia ja muita tapahtumia (esim. inventointi), niin bruttovarastonarvo heittää, koska epäkuranttitapahtuma on tällöin päivän eka tapahtuma (huom. 00:00:00)
-				$query = "	SELECT 
-							sum(kpl * if(laji in ('tulo', 'valmistus'), kplhinta, hinta)) muutoshinta,							
-							sum(kpl * if(laji in ('tulo', 'valmistus'), kplhinta, 
-							if(tapahtuma.laadittu <= '$row[epakurantti100pvm] 00:00:00' or '$row[epakurantti100pvm]' = '0000-00-00', 
-								if(tapahtuma.laadittu <= '$row[epakurantti75pvm] 00:00:00' or '$row[epakurantti75pvm]' = '0000-00-00', 
-									if(tapahtuma.laadittu <= '$row[epakurantti50pvm] 00:00:00' or '$row[epakurantti50pvm]' = '0000-00-00', 
-										if(tapahtuma.laadittu <= '$row[epakurantti25pvm] 00:00:00' or '$row[epakurantti25pvm]' = '0000-00-00', hinta, hinta / 0.75), hinta / 0.5), hinta / 0.25), 0))) bmuutoshinta, 
-							sum(kpl) muutoskpl, 
+				$query = "	SELECT
+							sum(kpl * if(laji in ('tulo', 'valmistus'), kplhinta, hinta)) muutoshinta,
+							sum(kpl * if(laji in ('tulo', 'valmistus'), kplhinta,
+							if(tapahtuma.laadittu <= '$row[epakurantti100pvm] 00:00:00' or '$row[epakurantti100pvm]' = '0000-00-00',
+								if(tapahtuma.laadittu <= '$row[epakurantti75pvm] 00:00:00' or '$row[epakurantti75pvm]' = '0000-00-00',
+									if(tapahtuma.laadittu <= '$row[epakurantti50pvm] 00:00:00' or '$row[epakurantti50pvm]' = '0000-00-00',
+										if(tapahtuma.laadittu <= '$row[epakurantti25pvm] 00:00:00' or '$row[epakurantti25pvm]' = '0000-00-00', hinta, hinta / 0.75), hinta / 0.5), hinta / 0.25), 0))) bmuutoshinta,
+							sum(kpl) muutoskpl,
 							tapahtuma.laadittu
 				 			FROM tapahtuma use index (yhtio_tuote_laadittu)
 							JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
@@ -581,7 +582,7 @@
 							GROUP BY tapahtuma.laadittu
 							ORDER BY tapahtuma.laadittu DESC";
 				$muutosres = mysql_query($query) or pupe_error($query);
-								
+
 				$muutoskpl 		= $kpl;
 				$muutoshinta 	= $varaston_arvo;
 				$bmuutoshinta 	= $bruttovaraston_arvo;
@@ -592,12 +593,12 @@
 				}
 				else {
 					$muutosrow = mysql_fetch_assoc($muutosres);
-										
-					$uusintapahtuma = $muutosrow["laadittu"];	
-					
+
+					$uusintapahtuma = $muutosrow["laadittu"];
+
 					mysql_data_seek($muutosres, 0);
 				}
-				
+
 				// Epäkurantit haetaan tapahtumista erikseen, koska niillä on hyllyalue, hyllynro, hyllytaso ja hyllyvali tyhjää
 				$query = "	SELECT sum($muutoskpl * hinta) muutoshinta
 				 			FROM tapahtuma use index (yhtio_tuote_laadittu)
@@ -606,14 +607,14 @@
 				 			and tapahtuma.laadittu >= '$uusintapahtuma'
 							and tapahtuma.laji = 'Epäkurantti'";
 				$epares = mysql_query($query) or pupe_error($query);
-			
+
 				if (mysql_num_rows($epares) > 0) {
 					$eparow = mysql_fetch_assoc($epares);
-			
+
 					// Epäkuranteissa saldo ei muutu!!! eli ei vähennetä $muutoskpl
 					$muutoshinta += $eparow['muutoshinta'];
 				}
-				
+
 				if (mysql_num_rows($muutosres) > 0) {
 					while ($muutosrow = mysql_fetch_assoc($muutosres)) {
 
@@ -627,12 +628,12 @@
 										and tapahtuma.laadittu < '$edlaadittu'
 										and tapahtuma.laji = 'Epäkurantti'";
 							$epares = mysql_query($query) or pupe_error($query);
-					
+
 							if (mysql_num_rows($epares) > 0) {
 								$eparow = mysql_fetch_assoc($epares);
 
 								// Epäkuranteissa saldo ei muutu!!! eli ei vähennetä $muutoskpl
-								$muutoshinta += $eparow['muutoshinta'];								
+								$muutoshinta += $eparow['muutoshinta'];
 							}
 						}
 
@@ -642,7 +643,7 @@
 						// arvo historiassa: lasketaan nykyinen arvo - muutosarvo
 						$muutoshinta -= $muutosrow["muutoshinta"];
 						$bmuutoshinta -= $muutosrow["bmuutoshinta"];
-						
+
 						$edlaadittu = $muutosrow['laadittu'];
 					}
 				}
@@ -793,12 +794,12 @@
 					}
 
 					if (isset($workbook)) {
-						
+
 						if ($summaustaso != "T") {
 							$worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"], 	$format_bold);
 							$excelsarake++;
 						}
-						
+
 						if ($summaustaso == "P") {
 							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllyalue"], 		$format_bold);
 							$excelsarake++;
@@ -875,7 +876,7 @@
 				echo "<table>";
 				echo "<tr><th>".t("Varasto")."</th><th>".t("Varastonarvo")."</th>";
 				echo "<th>".t("Bruttovarastonarvo")."</th></tr>";
-				
+
 				ksort($varastot2);
 
 				foreach ($varastot2 AS $varasto => $arvot) {
@@ -930,7 +931,7 @@
 
 				$ctype = "excel";
 				$kukarow["eposti"] = $email_osoite;
-				
+
 				require("../inc/sahkoposti.inc");
 
 				//poistetaan tmp file samantien kuleksimasta...

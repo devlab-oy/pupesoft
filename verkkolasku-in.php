@@ -2,34 +2,44 @@
 
 	if (isset($argc) and $argc > 0) {
 		//Komentorivilt‰
-		// pit‰‰ siirty‰ www roottiin
-		chdir("/var/www/html/pupesoft");
-		
-		// m‰‰ritell‰‰n polut
-		$laskut     = "/home/verkkolaskut";
-		$oklaskut   = "/home/verkkolaskut/ok";
-		$origlaskut = "/home/verkkolaskut/orig";
-		$errlaskut  = "/home/verkkolaskut/error";
-
 		$komentorivilta = TRUE;
 
 		// otetaan includepath aina rootista
-		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 		ini_set("display_errors", 0);
 
 		require ("inc/connect.inc"); // otetaan tietokantayhteys
+		
+		// m‰‰ritell‰‰n polut
+		if (!isset($verkkolaskut_in)) {
+			$verkkolaskut_in = "/home/verkkolaskut";
+		}
+		if (!isset($verkkolaskut_ok)){
+			$verkkolaskut_ok = "/home/verkkolaskut/ok";
+		}
+		if (!isset($verkkolaskut_orig)) {
+			$verkkolaskut_orig = "/home/verkkolaskut/orig";
+		}
+		if (!isset($verkkolaskut_error)) {
+			$verkkolaskut_error = "/home/verkkolaskut/error";
+		}
+		
+		$laskut     = $verkkolaskut_in;
+		$oklaskut   = $verkkolaskut_ok;
+		$origlaskut = $verkkolaskut_orig;
+		$errlaskut  = $verkkolaskut_error;
 	}
 	elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolaskut_in != "" and $verkkolaskut_ok != "" and $verkkolaskut_orig != "" and $verkkolaskut_error != "") {
 		//Pupesoftista
+		$komentorivilta = FALSE;
+
 		echo "Aloitetaan verkkolaskun sis‰‰nluku...<br><br>";
 
 		$laskut     = $verkkolaskut_in;
 		$oklaskut   = $verkkolaskut_ok;
 		$origlaskut = $verkkolaskut_orig;
 		$errlaskut  = $verkkolaskut_error;
-
-		$komentorivilta = FALSE;
 
 		// Kopsataan uploadatta faili verkkoalskudirikkaan
 		$copy_boob = copy($filenimi, $laskut."/".$userfile);
@@ -49,7 +59,6 @@
 
 	// K‰sitell‰‰n ensin kaikki Finvoicet
 	if ($handle = opendir($laskut)) {
-
 		while (($file = readdir($handle)) !== FALSE) {
 			if (is_file($laskut."/".$file)) {
 
@@ -58,10 +67,7 @@
 
 				// Jos tiedostosta luotiin laskuja siirret‰‰n se tielt‰ pois
 				if ($luotiinlaskuja > 0) {
-
-					$cleanfile = escapeshellarg($file);
-
-					system("mv $laskut/$cleanfile $origlaskut/$cleanfile");
+					rename($laskut."/".$file, $origlaskut."/".$file);
 				}
 			}
 		}
@@ -78,25 +84,21 @@
 				unset($xmlstr);
 
 				$nimi = $laskut."/".$file;
-				$laskuvirhe = verkkolasku_in($nimi);
+				$laskuvirhe = verkkolasku_in($nimi, TRUE);
 
 			    if ($laskuvirhe == "") {
 					if (!$komentorivilta)  {
 						echo "Verkkolasku vastaanotettu onnistuneesti!<br><br>";
 					}
-
-					$cleanfile = escapeshellarg($file);
-
-			    	system("mv -f $laskut/$cleanfile $oklaskut/$cleanfile");
+					
+					rename($laskut."/".$file, $oklaskut."/".$file);
 			    }
 			    else {
 					if (!$komentorivilta)  {
 						echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br><pre>$laskuvirhe</pre><br>";
 					}
-
-					$cleanfile = escapeshellarg($file);
-
-			    	system("mv -f $laskut/$cleanfile $errlaskut/$cleanfile");
+					
+					rename($laskut."/".$file, $errlaskut."/".$file);
 				}
 			}
 		}

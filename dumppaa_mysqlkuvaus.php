@@ -5,14 +5,14 @@
 		if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 
 		// otetaan includepath aina rootista
-		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 		ini_set("display_errors", 0);
 
 		// otetaan tietokanta connect
 		require("inc/connect.inc");
 		require("inc/functions.inc");
-		
+
 		$komentorivilta = TRUE;
 	}
 	else {
@@ -22,7 +22,7 @@
 		}
 
 		require("inc/parametrit.inc");
-		
+
 		$komentorivilta = FALSE;
 	}
 
@@ -60,9 +60,9 @@
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
 		}
-		
+
 		$curlfile = "/tmp/".$tmpfilenimi;
-		
+
 		$ch  = curl_init();
 		curl_setopt ($ch, CURLOPT_URL, "http://www.devlab.fi/sqlupdate.php");
 		curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -74,23 +74,23 @@
 		curl_setopt ($ch, CURLOPT_HEADER, FALSE);
 		$result = curl_exec ($ch);
 
-		if ($result === FALSE) { 
+		if ($result === FALSE) {
 			echo "<font class='error'>VIRHE:</font><br>\n";
 		   	echo curl_errno($ch) . " - " . curl_error($ch) . "</font><br>";
 		}
 		curl_close ($ch);
-		
+
 		if (!$komentorivilta) {
 			echo "<pre>$result</pre>";
 		}
 		else {
 			$rivit = explode("\n", trim($result));
-			
+
 			foreach ($rivit as $rivi) {
 				echo "echo \"$rivi\" | mysql -u $dbuser --password=$dbpass $dbkanta;\n";
-			}						
+			}
 		}
-						
+
 		if (!$komentorivilta) require("inc/footer.inc");
 	}
 

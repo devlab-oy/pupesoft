@@ -172,10 +172,11 @@
 					if ($kumpivoice == "PUPEVOICE") {
 						$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
 						$salasana		   = $yhtiorow['verkkosala_vas'];
+
 						$timestamppi = gmdate("YmdHis")."Z";
 
 						$urlhead = "http://www.verkkolasku.net";
-						$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
+						$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$laskun_ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
 
 						$digest	 = md5($urlmain . "&" . $salasana);
 						$url	 = $urlhead.$urlmain."&DIGEST=$digest";

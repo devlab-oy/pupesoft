@@ -764,7 +764,15 @@
 						$rahtikirjanrot = substr($rahtikirjanrot,0,-1);
 
 						// haetaan rahdin hinta
-						$rahtihinta = hae_rahtimaksu($otsikot);
+						$rahtihinta_array 		= hae_rahtimaksu($otsikot);
+
+						if (is_array($rahtihinta_array)) {
+							$rahtihinta 		= $rahtihinta_array['rahtihinta'];
+							$rahtihinta_ale 	= $rahtihinta_array['alennus'];
+						}
+						else {
+							$rahtihinta = $rahtihinta_ale = 0;
+						}
 
 						if ($rahtihinta != 0 and $virhe == 0) {
 
@@ -787,13 +795,13 @@
 							$hinta		= $rahtihinta;
 							$nimitys	= "$pvm $laskurow[toimitustapa]";
 							$kommentti  = "".t("Rahtikirja").": $rahtikirjanrot";
+							$netto		 = $rahtihinta_ale != 0 ? '' : 'N';
 
-
-							list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+							list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, $rahtihinta_ale);
 							list($rahinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
-							$query  = "	INSERT INTO tilausrivi (hinta, ale, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-										values ('$rahinta', '$lis_ale', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+							$query  = "	INSERT INTO tilausrivi (hinta, ale, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, ale)
+										values ('$rahinta', '$lis_ale', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti', '$rahtihinta_ale')";
 							$addtil = mysql_query($query) or pupe_error($query);
 
 							if ($silent == "") {

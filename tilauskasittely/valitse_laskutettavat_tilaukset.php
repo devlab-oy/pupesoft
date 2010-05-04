@@ -487,13 +487,22 @@
 
 				if ($yhtiorow["rahti_hinnoittelu"] == "" and $row["rahtivapaa"] == "") {
 
-					$rahtihinta = hae_rahtimaksu($row["tunnus"]);
+					// haetaan rahtimaksu
+					$rahtihinta_array 		= hae_rahtimaksu($row["tunnus"]);
+
+					if (is_array($rahtihinta_array)) {
+						$rahtihinta 		= $rahtihinta_array['rahtihinta'];
+						$rahtihinta_ale 	= $rahtihinta_array['alennus'];
+					}
+					else {
+						$rahtihinta = $rahtihinta_ale = 0;
+					}
 
 					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 					$rhire = mysql_query($query) or pupe_error($query);
 					$trow  = mysql_fetch_array($rhire);
 
-					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', 'N', $rahtihinta, 0);
+					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', 'N', $rahtihinta, $rahtihinta_ale);
 					list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
 
 					if ($row["kohdistettu"] == "K") {

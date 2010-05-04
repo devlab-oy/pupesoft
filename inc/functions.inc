@@ -7283,7 +7283,34 @@ if (!function_exists("hae_rahtimaksu")) {
 
 		if (mysql_num_rows($rares) == 1) {
 			$hirow = mysql_fetch_assoc($rares);
-			return $hirow["rahtihinta"];
+
+			// katsotaan onko toimitustavan taakse syötetty vaihtoehtoinen rahdin tuotenumero, jolle on annettu asiakasalennus
+			$query = "	SELECT rahti_tuotenumero
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite = '$laskurow[toimitustapa]'
+						AND rahti_tuotenumero != ''";
+			$rahti_tuoteno_result = mysql_query($query) or pupe_error($query);
+
+			$ale = 0;
+
+			if (mysql_num_rows($rahti_tuoteno_result) > 0) {
+				$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
+
+				$query = "	SELECT alennus
+							FROM asiakasalennus
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND asiakas = '$laskurow[liitostunnus]'
+							AND tuoteno = '$rahti_tuoteno_row[rahti_tuotenumero]'";
+				$rahti_alennus_result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($rahti_alennus_result) > 0) {
+					$rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result);				
+					$ale = $rahti_alennus_row['alennus'];
+				}
+			}
+
+			return array('rahtihinta' => $hirow["rahtihinta"], 'alennus' => $ale);
 		}
 		else {
 			return 0;

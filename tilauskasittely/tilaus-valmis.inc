@@ -454,7 +454,15 @@ else {
 				if ($torow["nouto"] == "") {
 
 					// haetaan rahtimaksu
-					$rahtihinta = hae_rahtimaksu($rahtimaksu_tunnukset);
+					$rahtihinta_array 		= hae_rahtimaksu($rahtimaksu_tunnukset);
+
+					if (is_array($rahtihinta_array)) {
+						$rahtihinta 		= $rahtihinta_array['rahtihinta'];
+						$rahtihinta_ale 	= $rahtihinta_array['alennus'];
+					}
+					else {
+						$rahtihinta = $rahtihinta_ale = 0;
+					}
 
 					//lis‰t‰‰n rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivej‰ on ilmeisesti turha lis‰t‰
 					if ($rahtihinta != 0) {
@@ -471,13 +479,20 @@ else {
 						$hinta		 = $rahtihinta;
 						$trow["alv"] = $laskurow["alv"];
 						$nimitys	 = $laskurow["toimitustapa"];
+						$netto		 = $rahtihinta_ale != 0 ? '' : 'N';
 
-						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, $rahtihinta_ale);
 						list($hinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
-						$query = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-									values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+						$query = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, ale)
+									values  (now(), '$hinta', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '', '$rahtihinta_ale')";
 						$addtil = mysql_query($query) or pupe_error($query);
+
+						if ($rahtihinta_ale != 0) {
+							$hinta *= (1 - ($rahtihinta_ale / 100));
+						}
+
+						$hinta = money_format('%.2n', $hinta);
 
 						$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin rahtikulua").": $hinta $laskurow[valkoodi]<br>";
 
@@ -489,9 +504,11 @@ else {
 
 							list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-							$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-										values (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+							$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, ale)
+										values (now(), '$hinta', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '', '$rahtihinta_ale')";
 							$addtil = mysql_query($query) or pupe_error($query);
+
+							$hinta = money_format('%.2n', $hinta);
 
 							$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin j‰lkivaatimuskulua").": $hinta $laskurow[valkoodi]<br>";
 						}

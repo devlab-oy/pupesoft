@@ -74,7 +74,27 @@ if(!function_exists("toimitustapatarkista")) {
 		if ((mysql_field_name($result, $i)=="vak_kielto")) {
 			$apuvakkielto  = $t[$i];
 		}
-	
+
+		if (mysql_field_name($result, $i) == "rahti_tuotenumero") {
+
+			$tuote = trim($t[$i]);
+
+			// katotaan löytyykö tällänen saldoton tuote
+			if ($tuote != "") {
+
+				$query = "	SELECT *
+							FROM tuote
+							WHERE yhtio	= '$kukarow[yhtio]'
+							AND tuoteno = '$tuote'
+							AND ei_saldoa != ''";
+				$xyresult = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($xyresult) == 0) {
+					$virhe[$i] = t("Tuotetta ei löydy!")." / ".t("Tuote pitää olla saldoton!");
+				}
+			}
+		}
+
 	}
 }
 

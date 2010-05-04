@@ -69,7 +69,7 @@
 					and toimitustapa.yhtio = '$kukarow[yhtio]'
 					and lasku.tunnus = '$id'
 					and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')
-					and tulostustapa != 'H'
+					and toimitustapa.tulostustapa != 'H'
 					and maksuehto.jv = ''";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -919,7 +919,11 @@
 		if ($tee == 'P' and $real_submit == 'yes') {
 			if ($keraamaton > 0) {
 				// Jos tilauksella oli yhtään keräämätöntä riviä
-				$query = "	SELECT lasku.tunnus, lasku.vienti, lasku.tila, toimitustapa.rahtikirja, toimitustapa.tulostustapa, lasku.varasto
+				$query = "	SELECT lasku.tunnus, lasku.vienti, lasku.tila,
+							toimitustapa.rahtikirja,
+							toimitustapa.tulostustapa,
+							toimitustapa.nouto,
+							lasku.varasto
 							FROM lasku
 							LEFT JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite and toimitustapa.nouto=''
 							where lasku.yhtio = '$kukarow[yhtio]'
@@ -932,7 +936,7 @@
 
 				while ($laskurow = mysql_fetch_array($lasresult)) {
 
-					if ($laskurow["tila"] == 'L' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X") {
+					if ($laskurow["tila"] == 'L' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X" and $laskurow["nouto"] == "") {
 						$alatilak = "D";
 
 						// Päivitetään myös rivit toimitetuiksi
@@ -1710,7 +1714,8 @@
 						lasku.mapvm,
 						lasku.pakkaamo,
 						lasku.yhtio,
-						toimitustapa.tulostustapa
+						toimitustapa.tulostustapa,
+						toimitustapa.nouto
 						FROM lasku
 						LEFT JOIN kuka ON lasku.myyja = kuka.tunnus
 						LEFT JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite
@@ -2208,7 +2213,7 @@
 			echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'>";
 			echo "<input type='hidden' name='lasku_yhtio' value='$otsik_row[yhtio]'>";
 
-			if ($otsik_row["tulostustapa"] != "X") {
+			if ($otsik_row["tulostustapa"] != "X" or $otsik_row["nouto"] != "") {
 				echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."'></form>";
 			}
 			else {

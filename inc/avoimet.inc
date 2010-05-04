@@ -256,7 +256,7 @@
 			elseif ($laji == 'OK') 	$tili = "'".$yhtiorow['konserniostovelat']."'";
 			else 					$tili = "'".$yhtiorow['ostovelat']."'";
 
-			$query = "	SELECT lasku.liitostunnus, lasku.*, concat_ws(' ', viite, viesti) maksutieto, tiliointi.summa * -1 avoinsaldo
+			$query = "	SELECT lasku.liitostunnus, lasku.*, concat_ws(' ', viite, viesti) maksutieto, tiliointi.summa * -1 avoinsaldo, round(lasku.summa * lasku.vienti_kurssi, 2) laskun_summa
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio
 						and lasku.tunnus	= tiliointi.ltunnus
@@ -349,6 +349,11 @@
 						echo "<td align='right'>$yhtiorow[valkoodi]</td>";
 					}
 
+					// jos ollaan ajettu t‰lle p‰iv‰lle voidaan echota errori avoimesta saldosta
+					if ($onkotanaan == "" and abs($trow["avoinsaldo"] - $trow["laskun_summa"]) >= 0.02) {
+						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito heitt‰‰!</font> $trow[avoinsaldo] / $trow[laskun_summa]</td>";
+					}
+					
 					echo "</tr>";
 
 					if (isset($workbook)) {
@@ -550,12 +555,8 @@
 					}
 
 					// jos ollaan ajettu t‰lle p‰iv‰lle voidaan echota errori avoimesta saldosta
-					if ($onkotanaan == "" and abs($trow["tiliointiavoinsaldo"] - $trow["laskuavoinsaldo"]) >=0.05) {
-						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito avoimet summat heitt‰v‰t!</font> ($trow[laskuavoinsaldo] / <a href='muutosite.php?tee=E&tunnus=$trow[laskutunnus]'>$trow[tiliointiavoinsaldo]</a>)</td>";
-					}
-
-					if ($trow["tiliointisumma"] != $trow["laskusumma"]) {
-						//echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito summat heitt‰v‰t!</font> ($trow[laskusumma] / <a href='muutosite.php?tee=E&tunnus=$trow[laskutunnus]'>$trow[tiliointisumma]</a>)</td>";
+					if ($onkotanaan == "" and abs($trow["tiliointiavoinsaldo"] - $trow["laskuavoinsaldo"]) >= 0.05) {
+						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito heitt‰‰!</font> $trow[laskuavoinsaldo] / <a href='muutosite.php?tee=E&tunnus=$trow[laskutunnus]'>$trow[tiliointiavoinsaldo]</a></td>";
 					}
 
 					echo "</tr>";

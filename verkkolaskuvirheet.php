@@ -6,9 +6,9 @@
 		header("Content-type: text/xml");
 		flush();
 	}
-	
+
 	require ("inc/parametrit.inc");
-	
+
 	if ($_REQUEST["tee"] == "NAYTATILAUS") {
 		$xml = urldecode($_REQUEST["xml"]);
 		$xml = str_replace("<!DOCTYPE Finvoice SYSTEM \"", "<!DOCTYPE Finvoice SYSTEM \"$palvelin2", $xml);
@@ -16,7 +16,7 @@
 		echo $xml;
 		exit;
 	}
-	
+
 	// määritellään polut
 	if (!isset($verkkolaskut_in)) {
 		$verkkolaskut_in = "/home/verkkolaskut";
@@ -27,16 +27,16 @@
 	if (!isset($verkkolaskut_error)) {
 		$verkkolaskut_error = "/home/verkkolaskut/error";
 	}
-	
+
 	$verkkolaskuvirheet_kasittele	= $verkkolaskut_in;
 	$verkkolaskuvirheet_vaarat		= $verkkolaskut_error;
 	$verkkolaskuvirheet_poistetut	= $verkkolaskut_reject;
-	
+
 	// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 	js_openFormInNewWindow();
 
 	echo "<font class='head'>".t("Virheelliset verkkolaskut")."</font><hr>";
-	
+
 	if (!is_dir($verkkolaskuvirheet_poistetut) or !is_dir($verkkolaskuvirheet_vaarat) or !is_dir($verkkolaskuvirheet_kasittele)) {
 		echo t("Kansioissa ongelmia").": $verkkolaskuvirheet_poistetut, $verkkolaskuvirheet_vaarat, $verkkolaskuvirheet_kasittele<br>";
 		exit;
@@ -62,7 +62,7 @@
 		require ("inc/verkkolasku-in.inc");
 
 		echo "<table><tr>";
-		echo "<th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th></tr><tr>";
+		echo "<th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
 
 		while (($file = readdir($handle)) !== FALSE) {
 
@@ -73,9 +73,9 @@
 				list($lasku_yhtio, $lasku_toimittaja) = verkkolasku_in($verkkolaskuvirheet_vaarat."/".$file, FALSE);
 
 				if ($lasku_yhtio["yhtio"] == $kukarow["yhtio"]) {
-					
+
 					$valitutlaskut++;
-					
+
 					// Otetaan tarvittavat muuttujat tännekin
 					$xml = simplexml_load_string($xmlstr);
 
@@ -180,18 +180,19 @@
 
 						$digest	 = md5($urlmain . "&" . $salasana);
 						$url	 = $urlhead.$urlmain."&DIGEST=$digest";
-						
+
 						echo "<a href='$url' target='laskuikkuna'>". t('Näytä lasku')."</a>";
 					}
 					else {
 						echo "<form id='form_$valitutlaskut' name='form_$valitutlaskut' action='$PHP_SELF' method='post'>
 							<input type='hidden' name = 'tee' value ='NAYTATILAUS'>
 							<input type='hidden' name = 'xml' value ='".urlencode($xmlstr)."'>
-							<input type='submit' value = '".t("Näytä lasku")."' onClick=\"js_openFormInNewWindow('form_$valitutlaskut', 'form_$valitutlaskut'); return false;\"></form>";						
+							<input type='submit' value = '".t("Näytä lasku")."' onClick=\"js_openFormInNewWindow('form_$valitutlaskut', 'form_$valitutlaskut'); return false;\"></form>";
 					}
 
 					echo "</td>";
-					echo "</tr>";					
+					echo "<td>$laskun_paiva</td>";
+					echo "</tr>";
 				}
 			}
 		}

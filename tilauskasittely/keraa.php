@@ -656,7 +656,7 @@
 										$insres  = mysql_query($kysely) or pupe_error($kysely);
 										$tilausnumerot[$tilrivirow["otunnus"]] = mysql_insert_id();
 
-										$kysely2 = "	SELECT laskutus_nimi, laskutus_nimitark, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa
+										$kysely2 = "	SELECT laskutus_nimi, laskutus_nimitark, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa, laatija, luontiaika, otunnus
 														FROM laskun_lisatiedot
 														WHERE yhtio = '$kukarow[yhtio]'
 														AND otunnus = '$tilrivirow[otunnus]'";
@@ -674,6 +674,15 @@
 											$fields .= ", ".$fieldname;
 											
 											switch ($fieldname) {
+												case 'otunnus':
+													$values .= ", '".$tilausnumerot[$tilrivirow["otunnus"]]."'";
+													break;
+												case 'laatija':
+													$values .= ", '$kukarow[kuka]'";
+													break;
+												case 'luontiaika':
+													$values .= ", now()";
+													break;
 												default:
 													$values .= ", '".$lisatiedot_row[$fieldname]."'";
 											}

@@ -132,7 +132,7 @@
 					laskutus_postitp	= '$asrow[laskutus_postitp]',
 					laskutus_maa		= '$asrow[laskutus_maa]',
 					laatija				= '$kukarow[kuka]',
-					laadittu			= now(),
+					luontiaika			= now(),
 					otunnus				= '$otunnus',
 					yhtio				= '$kukarow[yhtio]'";
 		$lisatiedot_result = mysql_query($query) or pupe_error($query);

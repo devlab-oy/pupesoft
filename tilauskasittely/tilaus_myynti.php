@@ -5215,24 +5215,23 @@ if ($tee == '') {
 							$cspan--;
 						}
 					}
-
 					if ($toim == "SIIRTOLISTA") {
 						$cspan -= 7;
 					}
-
 					if ($kukarow['hinnat'] == 1) {
 						$cspan-=2;
 					}
 					if ($kukarow['hinnat'] == -1) {
 						$cspan-=4;
 					}
-
-
 					if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
 						$cspan++;
 					}
 					if ($trivityyulos != "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
 						$cspan++;
+					}
+					if ($kukarow['extranet'] != '') {
+						$cspan--;
 					}
 
 					echo "<tr>";
@@ -5255,7 +5254,7 @@ if ($tee == '') {
 					}
 
 					echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font></td>";
-
+					echo "<td class='back' valign='top' nowrap></td>";
 					echo "</tr>";
 				}
 			}

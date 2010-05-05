@@ -656,40 +656,31 @@
 										$insres  = mysql_query($kysely) or pupe_error($kysely);
 										$tilausnumerot[$tilrivirow["otunnus"]] = mysql_insert_id();
 
-										$query = "	SELECT *
-													FROM laskun_lisatiedot
-													WHERE yhtio = '$kukarow[yhtio]'
-													AND otunnus = '$tilrivirow[otunnus]'";
-										$lisatiedot_result = mysql_query($query) or pupe_error($query);
+										$kysely2 = "	SELECT laskutus_nimi, laskutus_nimitark, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa
+														FROM laskun_lisatiedot
+														WHERE yhtio = '$kukarow[yhtio]'
+														AND otunnus = '$tilrivirow[otunnus]'";
+										$lisatiedot_result = mysql_query($kysely2) or pupe_error($kysely2);
 										$lisatiedot_row = mysql_fetch_assoc($lisatiedot_result);
 
 										$fields = "yhtio";
 										$values = "'$kukarow[yhtio]'";
 
 										// Ei monisteta tunnusta
-										for ($i = 1; $i < mysql_num_fields($lisatiedot_result) - 1; $i++) {
+										for ($i = 0; $i < mysql_num_fields($lisatiedot_result); $i++) {
 
 											$fieldname = mysql_field_name($lisatiedot_result, $i);
-
+											
 											$fields .= ", ".$fieldname;
-
+											
 											switch ($fieldname) {
-												case 'otunnus':
-													$values .= ", '".$tilausnumerot[$tilrivirow["otunnus"]]."'";
-													break;
-												case 'laatija':
-													$values .= ", '$kukarow[kuka]'";
-													break;
-												case 'luontiaika':
-													$values .= ", now()";
-													break;
 												default:
 													$values .= ", '".$lisatiedot_row[$fieldname]."'";
 											}
 										}
 
-										$query  = "INSERT INTO laskun_lisatiedot ($fields) VALUES ($values)";
-										$insres  = mysql_query($query) or pupe_error($query);
+										$kysely2  = "INSERT INTO laskun_lisatiedot ($fields) VALUES ($values)";
+										$insres  = mysql_query($kysely2) or pupe_error($kysely2);
 									}
 
 									$rotunnus	= $tilausnumerot[$tilrivirow["otunnus"]];

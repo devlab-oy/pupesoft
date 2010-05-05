@@ -5669,12 +5669,21 @@ if ($tee == '') {
 					if (is_array($rahtihinta_array)) {
 						$rahtihinta 		= $rahtihinta_array['rahtihinta'];
 						$rahtihinta_ale 	= $rahtihinta_array['alennus'];
-
-						$rahtihinta *= (1 - ($rahtihinta_ale / 100));
 					}
 					else {
 						$rahtihinta = $rahtihinta_ale = 0;
 					}
+
+					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+					$rhire = mysql_query($query) or pupe_error($query);
+					$trow_rahti_tuotenumero  = mysql_fetch_array($rhire);
+
+					$netto = $rahtihinta_ale != 0 ? '' : 'N';
+
+					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow_rahti_tuotenumero, '1', $netto, $rahtihinta, $rahtihinta_ale);
+					list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
+
+					$rahtihinta = $hinta * (1 - ($lis_ale / 100));
 
 					echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>".sprintf("%.2f",$rahtihinta)."</td>";
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {

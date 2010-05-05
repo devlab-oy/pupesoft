@@ -795,14 +795,10 @@
 							$hinta		= $rahtihinta;
 							$nimitys	= "$pvm $laskurow[toimitustapa]";
 							$kommentti  = "".t("Rahtikirja").": $rahtikirjanrot";
-							$netto		 = $rahtihinta_ale != 0 ? '' : 'N';
+							$netto		= $rahtihinta_ale != 0 ? '' : 'N';
 
-							list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, $rahtihinta_ale);
+							list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', $netto, $hinta, $rahtihinta_ale);
 							list($rahinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
-
-							if ($rahtihinta_ale != 0) {
-								$lis_ale = $rahtihinta_ale;
-							}
 
 							$query  = "	INSERT INTO tilausrivi (hinta, ale, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 										values ('$rahinta', '$lis_ale', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";

@@ -481,11 +481,11 @@ else {
 						$nimitys	 = $laskurow["toimitustapa"];
 						$netto		 = $rahtihinta_ale != 0 ? '' : 'N';
 
-						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, $rahtihinta_ale);
+						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', $netto, $hinta, $rahtihinta_ale);
 						list($hinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
 						$query = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, ale)
-									values  (now(), '$hinta', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '', '$rahtihinta_ale')";
+									values  (now(), '$hinta', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '', '$lis_ale')";
 						$addtil = mysql_query($query) or pupe_error($query);
 
 						if ($rahtihinta_ale != 0) {
@@ -504,8 +504,8 @@ else {
 
 							list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-							$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, ale)
-										values (now(), '$hinta', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '', '$rahtihinta_ale')";
+							$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+										values (now(), '$hinta', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 							$addtil = mysql_query($query) or pupe_error($query);
 
 							$hinta = money_format('%.2n', $hinta);

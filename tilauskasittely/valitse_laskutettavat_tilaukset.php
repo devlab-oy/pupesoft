@@ -502,8 +502,12 @@
 					$rhire = mysql_query($query) or pupe_error($query);
 					$trow  = mysql_fetch_array($rhire);
 
-					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', 'N', $rahtihinta, $rahtihinta_ale);
+					$netto = $rahtihinta_ale != 0 ? '' : 'N';
+
+					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', $netto, $rahtihinta, $rahtihinta_ale);
 					list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
+
+					$hinta *= (1 - ($lis_ale / 100));
 
 					if ($row["kohdistettu"] == "K") {
 						$rahti_hinta = "(" . (float) $hinta ." $row[valkoodi])";

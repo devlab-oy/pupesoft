@@ -496,55 +496,48 @@
 
 				// jos kyseessä on jälkivaatimus
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] != '') {
-					// jos toimitustapa hanskaa monivarastojälkivaatimukset
-					if ($toitarow["multi_jv"] != "") {
-						require ("rahtikirja-tulostus-jv-multi.inc");
+					$tee 			= "TARKISTA";
+					$laskutakaikki 	= "KYLLA";
+					$silent		 	= "KYLLA";
+					$laskutettavat 	= $otunnukset;
+
+					if ($rakirsyotto_laskutulostin != '') {
+						$valittu_tulostin = $rakirsyotto_laskutulostin;
+						$chnlisa = ", chn = '667' ";
 					}
-					// toimitustapa ei hanskaa monivarastojälkivaatimukset
 					else {
-						$tee 			= "TARKISTA";
-						$laskutakaikki 	= "KYLLA";
-						$silent		 	= "KYLLA";
-						$laskutettavat 	= $otunnukset;
-
-						if ($rakirsyotto_laskutulostin != '') {
-							$valittu_tulostin = $rakirsyotto_laskutulostin;
-							$chnlisa = ", chn = '667' ";
-						}
-						else {
-							$valittu_tulostin = "";
-							$chnlisa = "";
-						}
-
-						$query = "	UPDATE lasku
-									set alatila='D'
-									$chnlisa
-									where tunnus in ($laskutettavat)
-									and yhtio = '$kukarow[yhtio]'";
-						$result = mysql_query($query) or pupe_error($query);
-
-						$rivitunnukset = $tunnukset;
-						chdir('tilauskasittely');
-
-						require ("verkkolasku.php");
-
-						chdir('../');
-						$tunnukset = $rivitunnukset;
-
-
-						// Nämä muuttujat tulevat toivottavasti ulos verkkolasku.php:stä
-						// $jvhinta jossa on jälkivaatimuskulut
-						// $rahinta jossa on rahtikulut
-						// $laskurow jossa on laskutetun laskun tiedot
-
-						$yhteensa = $laskurow['summa'];
-						$summa    = $laskurow['summa'] - $jvhinta - $rahinta;
-
-						$jvtext  = "<li>".t("Jälkivaatimuskulu").": $jvhinta $yhtiorow[valkoodi]";
-						$jvtext .= "<li>".t("Loppusumma yhteensä").": $yhteensa $yhtiorow[valkoodi]";
-
-						$aputeksti = t("JÄLKIVAATIMUS");
+						$valittu_tulostin = "";
+						$chnlisa = "";
 					}
+
+					$query = "	UPDATE lasku
+								set alatila='D'
+								$chnlisa
+								where tunnus in ($laskutettavat)
+								and yhtio = '$kukarow[yhtio]'";
+					$result = mysql_query($query) or pupe_error($query);
+
+					$rivitunnukset = $tunnukset;
+					chdir('tilauskasittely');
+
+					require ("verkkolasku.php");
+
+					chdir('../');
+					$tunnukset = $rivitunnukset;
+
+
+					// Nämä muuttujat tulevat toivottavasti ulos verkkolasku.php:stä
+					// $jvhinta jossa on jälkivaatimuskulut
+					// $rahinta jossa on rahtikulut
+					// $laskurow jossa on laskutetun laskun tiedot
+
+					$yhteensa = $laskurow['summa'];
+					$summa    = $laskurow['summa'] - $jvhinta - $rahinta;
+
+					$jvtext  = "<li>".t("Jälkivaatimuskulu").": $jvhinta $yhtiorow[valkoodi]";
+					$jvtext .= "<li>".t("Loppusumma yhteensä").": $yhteensa $yhtiorow[valkoodi]";
+
+					$aputeksti = t("JÄLKIVAATIMUS");
 				}
 
 				echo "<font class='message'>".t("Asiakas")." $rakir_row[toim_nimi]</font><li>".t("Yhdistetään tilaukset").": ";

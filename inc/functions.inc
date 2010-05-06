@@ -2638,7 +2638,7 @@ if (!function_exists("alv")) {
 		// $laskurow[tila]      		--> Laskun tila O=osto, muut tilat on myyntiä
 		// $laskurow[alv]       		--> Laskun otsikolla oleva alv
 		// $laskurow["valkoodi"]		--> Laskun valuutta
-		
+
 		///* Ulos *///
 		// $alv                			--> Uusi lakettu ALV
 		// $hinta           			--> Uusi lakettu kappalehinta
@@ -5940,11 +5940,11 @@ if (!function_exists('tallenna_liite')) {
 			return false;
 		}
 
-		$data = mysql_real_escape_string(file_get_contents($file["tmp_name"]));
-
-		$filename = $file["name"];
-		$filetype = $file["type"];
-		$filesize = $file["size"];
+		$data 		= mysql_real_escape_string(file_get_contents($file["tmp_name"]));
+		$filename	= mysql_real_escape_string($file["name"]);
+		$filetype	= mysql_real_escape_string($file["type"]);
+		$filesize	= mysql_real_escape_string($file["size"]);
+		$selite		= mysql_real_escape_string($selite);
 
 		//	Tarkastetaan, että kuvatunnus on oikea..
 		if ($tunnus > 0) {
@@ -7305,7 +7305,7 @@ if (!function_exists("hae_rahtimaksu")) {
 				$rahti_alennus_result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($rahti_alennus_result) > 0) {
-					$rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result);				
+					$rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result);
 					$ale = $rahti_alennus_row['alennus'];
 				}
 			}

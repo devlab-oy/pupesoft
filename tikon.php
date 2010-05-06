@@ -1,5 +1,10 @@
 <?php
 
+	if (isset($_POST["tee"])) {
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	}
+
 	require('inc/parametrit.inc');
 
 	if ($lataa_tiedosto == 1) {
@@ -341,7 +346,7 @@
 		}
 		echo "</tr>";
 
-		while ($trow=mysql_fetch_array ($result)) {
+		while ($trow = mysql_fetch_array ($result)) {
 			echo "<tr>";
 			for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
 				echo "<td>$trow[$i]</td>";
@@ -359,26 +364,17 @@
 		exit;
 	}
 
-	//tiedoston polku ja nimi
-	$nimi = "$kukarow[yhtio]/TIKON-$kukarow[yhtio]-".date("ymd.His-s").".dat";
-
-	$hakemisto = dirname("dataout/".$nimi);
-
-	if (!is_dir($hakemisto)) {
-		mkdir($hakemisto);
-		if (is_dir($hakemisto))
-			echo "<font class='message'>".t("Loin hakemiston"). " $hakemisto</font><br>";
-		else {
-			echo "<font class='error'>".t("Yritin luoda hakemistoa, mutta se ei onnistu. Ota yhteyttä järjestelmän ylläpitoon")." $hakemisto</font><br>";
-			exit;
-		}
-	}
+	// Tiedoston polku ja nimi
+	$nimi = "TIKON-$kukarow[yhtio]-".date("ymd.His-s").".dat";
 
 	//avataan tiedosto
 	$toot = fopen("dataout/".$nimi,"w+");
 
 	echo "$yhtiorow[nimi] ".t("kirjanpidolliset tapahtumat kaudella")." $kausi. ";
-	if ($summataan=='') echo "Tapahtumia ei summata. "; else echo "Tapahtumat summataan. ";
+	
+	if ($summataan=='') echo "Tapahtumia ei summata. "; 
+	else echo "Tapahtumat summataan. ";
+	
 	echo " Raportti otettu $today.<br><br>";
 
 	//haetaan myyntisaamiset
@@ -438,6 +434,7 @@
 
 	if (filesize("dataout/".$nimi) > 0) {
 		echo "<br><form>";
+		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='filenimi' value='$nimi'>";
 		echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
 		echo "<input type='hidden' name='kaunisnimi' value='$txtfile'>";
@@ -538,5 +535,6 @@
 		echo "</tr>";
 	}
 	echo "</table><br><br>";
+	
 	require "inc/footer.inc";
 ?>

@@ -766,6 +766,7 @@
 						// haetaan rahdin hinta
 						$rahtihinta_array 		= hae_rahtimaksu($otsikot);
 
+						// rahtihinta tulee rahtimatriisista yhtiön kotivaluutassa ja on verollinen, jos myyntihinnat ovat verollisia, tai veroton, jos myyntihinnat ovat verottomia (huom. yhtiön parametri alv_kasittely)
 						if (is_array($rahtihinta_array)) {
 							$rahtihinta 		= $rahtihinta_array['rahtihinta'];
 							$rahtihinta_ale 	= $rahtihinta_array['alennus'];

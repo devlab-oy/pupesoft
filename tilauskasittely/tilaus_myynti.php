@@ -5664,8 +5664,11 @@ if ($tee == '') {
 				elseif ($yhtiorow["rahti_hinnoittelu"] == "P" or $yhtiorow["rahti_hinnoittelu"] == "o") {
 
 					// haetaan rahtimaksu
+					// hae_rahtimaksu-funktio palauttaa arrayn, jossa on rahtimatriisin hinta ja alennus
+					// mahdollinen alennus (i.e. asiakasalennus) tulee dummy-tuotteelta, joka voi olla syötettynä toimitustavan taakse
 					$rahtihinta_array 		= hae_rahtimaksu($laskurow["tunnus"]);
 
+					// rahtihinta tulee rahtimatriisista yhtiön kotivaluutassa ja on verollinen, jos myyntihinnat ovat verollisia, tai veroton, jos myyntihinnat ovat verottomia (huom. yhtiön parametri alv_kasittely)
 					if (is_array($rahtihinta_array)) {
 						$rahtihinta 		= $rahtihinta_array['rahtihinta'];
 						$rahtihinta_ale 	= $rahtihinta_array['alennus'];
@@ -5674,18 +5677,46 @@ if ($tee == '') {
 						$rahtihinta = $rahtihinta_ale = 0;
 					}
 
-					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-					$rhire = mysql_query($query) or pupe_error($query);
-					$trow_rahti_tuotenumero  = mysql_fetch_array($rhire);
+					if ($rahtihinta != 0) {
 
-					$netto = $rahtihinta_ale != 0 ? '' : 'N';
+						// haetaan rahtituotteen tiedot
+						$query = "	SELECT *
+									FROM tuote
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+						$rahti_trow_res = mysql_query($query) or pupe_error($query);
+						$rahti_trow  = mysql_fetch_assoc($rahti_trow_res);
 
-					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow_rahti_tuotenumero, '1', $netto, $rahtihinta, $rahtihinta_ale);
-					list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
+						$netto = $rahtihinta_ale != 0 ? '' : 'N';
 
-					$rahtihinta = $hinta * (1 - ($lis_ale / 100));
+						// muutetaan rahtihinta laskun valuuttaan, koska rahtihinta tulee matriisista aina yhtiön kotivaluutassa
+						if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+							$rahtihinta = laskuval($rahtihinta, $laskurow["vienti_kurssi"]);
+						}
 
-					echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>".sprintf("%.2f",$rahtihinta)."</td>";
+						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rahti_trow, '1', $netto, $rahtihinta, $rahtihinta_ale);
+						list($hinta, $alv) = alv($laskurow, $rahti_trow, $lis_hinta, '', $alehinta_alv);
+
+						// muutetaan rahtihinta laskun valuuttaan, koska alehinta-funktio palauttaa aina hinnan yhtiön kotivaluutassa
+						if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+							$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+						}
+
+						$rahtihinta = $hinta * (1 - ($lis_ale / 100));
+
+						// jos yhtiön tuotteiden myyntihinnat ovat arvonlisäverottomia ja lasku on verollinen, lisätään rahtihintaan arvonlisävero
+						if ($yhtiorow['alv_kasittely'] != '' and $laskurow['alv'] != 0) {
+							$rahtihinta = $rahtihinta * (1 + ($alv / 100));
+						}
+					}
+
+					echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu")." ",t("verollinen");
+
+					if ($rahtihinta_ale != 0) {
+						echo " (",t("ale")," $rahtihinta_ale %)";
+					}
+
+					echo ":</th><td class='spec' align='right'>".sprintf("%.2f",$rahtihinta)."</td>";
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 						echo "<td class='spec' align='right'>&nbsp;</td>";
 					}

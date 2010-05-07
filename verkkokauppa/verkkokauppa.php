@@ -4,8 +4,8 @@ $_GET["ohje"] = "off";
 
 if ($_REQUEST["tee"] == "login") {
 
-	$login = "yes";
-	$extranet = 1;
+	$login 			= "yes";
+	$extranet 		= 1;
 	$_GET["no_css"] = "yes";
 
 	require("parametrit.inc");
@@ -17,9 +17,10 @@ if ($_REQUEST["tee"] == "login") {
 
 		$query = "	SELECT kuka, session, salasana
 					FROM kuka
-					where kuka = '$user'
-					and extranet != ''
-					and oletus_asiakas != ''";
+					where kuka 			 = '$user'
+					and yhtio 			 = '$verkkokauppa'
+					and extranet 		!= ''
+					and oletus_asiakas 	!= ''";
 		$result = mysql_query($query) or die("VIRHE: Kysely ei onnistu!");
 		$krow = mysql_fetch_array($result);
 
@@ -44,9 +45,10 @@ if ($_REQUEST["tee"] == "login") {
 			$query = "	UPDATE kuka
 						SET session = '$session',
 						lastlogin = now()
-						WHERE kuka = '$user'
-						and extranet != ''
-						and oletus_asiakas != ''";
+						WHERE kuka 			 = '$user'
+						and yhtio 			 = '$verkkokauppa'
+						and extranet		!= ''
+						and oletus_asiakas	!= ''";
 			$result = mysql_query($query) or die ("Päivitys epäonnistui kuka $query");
 
 			$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH));
@@ -119,7 +121,7 @@ if (!function_exists("menu")) {
 	function menu($osasto = "", $try = "") {
 		global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon, $verkkokauppa_hakualkuun, $palvelin2;
 
-		
+
 		if (isset($osasto) and mb_detect_encoding($osasto, mb_detect_order(), TRUE) == "UTF-8") {
 			$osasto = iconv("UTF-8", "latin1//TRANSLIT", $osasto);
 		}
@@ -1087,30 +1089,30 @@ if ($tee == "asiakastiedot") {
 if ($tee == "selaa") {
 
 	$tuoteno = $toim_tuoteno = $nimitys = $alkukoodilla = "";
-	
+
 	if (isset($tuotehaku) and mb_detect_encoding($tuotehaku, mb_detect_order(), TRUE) == "UTF-8") {
 		$tuotehaku = iconv("UTF-8", "latin1//TRANSLIT", $tuotehaku);
-		
+
 		$_GET["tuotehaku"]		= $tuotehaku;
 		$_POST["tuotehaku"]		= $tuotehaku;
 		$_REQUEST["tuotehaku"]	= $tuotehaku;
 	}
-		
+
 	if (isset($tuotemerkki) and mb_detect_encoding($tuotemerkki, mb_detect_order(), TRUE) == "UTF-8") {
 		$tuotemerkki = iconv("UTF-8", "latin1//TRANSLIT", $tuotemerkki);
-		
+
 		$_GET["tuotemerkki"]		= $tuotemerkki;
 		$_POST["tuotemerkki"]		= $tuotemerkki;
 		$_REQUEST["tuotemerkki"]	= $tuotemerkki;
 	}
-	
+
 	if ($hakutapa != "" and $tuotehaku == "") {
 		die ("<font class='error'>".t("Anna jokin hakukriteeri")."</font>");
 	}
 	elseif ($hakutapa == "alkukoodilla") {
 		$tuotenumero = $tuotehaku;
 		$alkukoodilla = "JOO";
-	}	
+	}
 	elseif ($hakutapa == "koodilla") {
 		$tuotenumero = $tuotehaku;
 	}
@@ -1176,7 +1178,7 @@ if ($tee == "") {
 	else {
 		$verkko = "";
 	}
-		
+
 	if ($tuotenumero != "") {
 		$verkkokauppa_ulos .= "	<div class='selain' id='selain'>
 								$verkko

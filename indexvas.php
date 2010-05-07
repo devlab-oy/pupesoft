@@ -74,15 +74,14 @@ if (!isset($menu)) $menu = array();
 
 if ($kukarow["extranet"] != "") {
 	if ($tultiin == "futur") {
-		$extralisa = " and sovellus='Futursoft' ";
+		$extralisa = " and sovellus = 'Futursoft' ";
 	}
 	else {
-		$extralisa = " and sovellus='extranet' ";
+		$extralisa = " and sovellus = 'Extranet' ";
 	}
-
 }
 else {
-	$extralisa = " and sovellus not in ('extranet', 'Futursoft') ";
+	$extralisa = " and sovellus not like 'Extranet%' and sovellus not like 'Futursoft%' ";
 }
 
 // mit‰ sovelluksia k‰ytt‰j‰ saa k‰ytt‰‰

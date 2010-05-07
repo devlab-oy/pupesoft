@@ -141,55 +141,52 @@
 	echo "</select></td></form>";
 
 	if ($toim == "extranet") {
-		$sovellus = "Extranet";
+		$sovellus_rajaus = " and sovellus like 'Extranet%' ";
 	}
 	else {
-		$query = "	SELECT distinct sovellus
-					FROM oikeu
-					where yhtio='$kukarow[yhtio]'
-					and sovellus != 'Extranet'
-					order by sovellus";
-		$result = mysql_query($query) or pupe_error($query);
+		$sovellus_rajaus = " and sovellus not like 'Extranet%' ";	
+	}
+	
+	$query = "	SELECT distinct sovellus
+				FROM oikeu
+				where yhtio = '$kukarow[yhtio]'
+				$sovellus_rajaus
+				order by sovellus";
+	$result = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($result) > 1) {
-			echo "	<form action='$PHP_SELF' name='vaihdaSovellus' method='POST'>
-					<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>
-					<input type='hidden' name='toim' value='$toim'>
-					<tr><th>".t("Valitse sovellus").":</th><td>
-					<select name='sovellus' onchange='submit()'>
-					<option value=''>".t("Nayta kaikki")."</option>";
+	if (mysql_num_rows($result) > 1) {
+		echo "	<form action='$PHP_SELF' name='vaihdaSovellus' method='POST'>
+				<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>
+				<input type='hidden' name='toim' value='$toim'>
+				<tr><th>".t("Valitse sovellus").":</th><td>
+				<select name='sovellus' onchange='submit()'>
+				<option value=''>".t("Nayta kaikki")."</option>";
 
-			while ($orow = mysql_fetch_array($result)) {
-				$sel = '';
-				if ($sovellus == $orow[0] and $orow[0] != '') {
-					$sel = "SELECTED";
-				}
-				if ($orow[0] != '') {
-					echo "<option value='$orow[0]' $sel>".t("$orow[0]")."</option>";
-				}
+		while ($orow = mysql_fetch_array($result)) {
+			$sel = '';
+			if ($sovellus == $orow[0] and $orow[0] != '') {
+				$sel = "SELECTED";
+			}
+			if ($orow[0] != '') {
+				echo "<option value='$orow[0]' $sel>".t("$orow[0]")."</option>";
 			}
 		}
-		echo "</select></td><td class='back'></td></tr></table></form>";
 	}
+	echo "</select></td><td class='back'></td></tr></table></form>";
 
 	// n‰ytet‰‰n oikeuslista
 	echo "<table>";
 
-	if ($toim == "extranet") {
-		$query = "	SELECT *
-					FROM oikeu
-					WHERE kuka = ''	and yhtio='$kukarow[yhtio]' and sovellus='Extranet'";
-	}
-	else {
-		$query = "	SELECT *
-					FROM oikeu
-					WHERE kuka = ''	and yhtio='$kukarow[yhtio]' and sovellus != 'Extranet'";
-	}
-
+	$query = "	SELECT *
+				FROM oikeu
+				WHERE kuka = ''	
+				and yhtio = '$kukarow[yhtio]' 
+				$sovellus_rajaus";
+	
 	if ($sovellus != '') {
 		$query .= " and sovellus='$sovellus'";
 	}
-
+	
 	$query .= "	ORDER BY sovellus, jarjestys, jarjestys2";
 	$result = mysql_query($query) or pupe_error($query);
 

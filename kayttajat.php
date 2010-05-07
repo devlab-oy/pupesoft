@@ -1032,6 +1032,9 @@
 					$sel1 = "";
 					$andextra = " and profiili like 'extranet%' ";
 				}
+				else {
+					$andextra = " and profiili not like 'extranet%' ";
+				}
 
 				// Onko tämä extranetkäyttäjä
 				if ($toim == "extranet") {

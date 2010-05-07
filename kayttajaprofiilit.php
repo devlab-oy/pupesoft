@@ -244,12 +244,20 @@
 	echo "</tr></table><br><br>";
 
 	if ($profiili != '') {
-
+		
+		if (stripos($profiili, "EXTRANET") !== FALSE) {
+			$sovellus_rajaus = " and sovellus like 'Extranet%' ";
+		}
+		else {
+			$sovellus_rajaus = " and sovellus not like 'Extranet%' ";	
+		}
+		
 		echo "<table>";
 
 		$query = "	SELECT distinct sovellus
-					FROM oikeu
-					where yhtio='$kukarow[yhtio]'
+					FROM oikeu					
+					where yhtio = '$kukarow[yhtio]'
+					$sovellus_rajaus
 					order by sovellus";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -293,6 +301,7 @@
 					FROM oikeu
 					WHERE
 					$lisa
+					$sovellus_rajaus
 					and yhtio = '$kukarow[yhtio]'";
 
 		if ($sovellus != '') {

@@ -24,14 +24,16 @@
 
 			if ($loput[$tunnukset] == 'MITA') {
 				if ($toim == "ENNAKKO") {
-					$query = "	DELETE FROM tilausrivi
+					$query = "	UPDATE tilausrivi SET 
+								tyyppi = 'D'
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus 	in ($tunnukset)
 								and kpl		= 0
 								and tyyppi	= 'E'";
 				}
 				else {
-					$query = "	DELETE FROM tilausrivi
+					$query = "	UPDATE tilausrivi SET
+								tyyppi = 'D'
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus 	in ($tunnukset)
 								and kpl		= 0
@@ -767,7 +769,45 @@
 							// Poistetaan loput
 							if ($loput[$tunnukset] == 'POISTA') {
 								foreach ($tunnusarray as $tunnus_nyt) {
-									$query = "	DELETE FROM tilausrivi
+									if ($toim == "ENNAKKO") {
+										$query = "	SELECT tilausrivi.varattu jt
+													FROM tilausrivi
+													WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+													and tilausrivi.tunnus  = '$tunnus_nyt'";
+									}
+									else {
+										$query = "	SELECT tilausrivi.jt $lisavarattu jt
+													FROM tilausrivi
+													WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+													and tilausrivi.tunnus  = '$tunnus_nyt'";
+									}
+									$rivitres = mysql_query($query) or pupe_error($query);
+
+									$poista_update_lisa = "";
+
+									if (mysql_num_rows($rivitres) == 1) {
+										$row = mysql_fetch_array ($rivitres);
+
+										if ($row["jt"] > $luodut_kpl[$tunnus_nyt]) {
+
+											$jaljella = $row["jt"] - $luodut_kpl[$tunnus_nyt];
+
+											if ($toim == "ENNAKKO" or $yhtiorow["varaako_jt_saldoa"] != "") {
+												$poista_update_lisa = ", varattu = '$jaljella', jt = '0' ";
+												
+											}
+											else {
+												$poista_update_lisa = ", jt = '$jaljella', varattu = '0' ";
+											}
+										}
+										elseif ($row['jt'] == $luodut_kpl[$tunnus_nyt]) {
+											$poista_update_lisa = ", varattu = '0', jt = '0' ";
+										}
+									}
+
+									$query = "	UPDATE tilausrivi SET
+												tyyppi = 'D'
+												$poista_update_lisa
 												WHERE yhtio = '$kukarow[yhtio]'
 												and tunnus = '$tunnus_nyt'
 												and kpl = 0";

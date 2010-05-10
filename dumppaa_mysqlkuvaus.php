@@ -83,7 +83,7 @@
 		if (!$komentorivilta) {
 			echo "<pre>$result</pre>";
 		}
-		else {
+		elseif (trim($result) != "") {
 			$rivit = explode("\n", trim($result));
 
 			foreach ($rivit as $rivi) {

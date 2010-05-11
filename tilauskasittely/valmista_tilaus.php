@@ -374,7 +374,7 @@
 											$tee 			= "VALMISTA";
 										}
 
-																			// T‰n verran saldoa k‰ytet‰‰n
+										// T‰n verran saldoa k‰ytet‰‰n
 										$saldot_valm[$perherow["tuoteno"]] -= $kpl_chk;
 
 										//	Tarkistetaan sarjanumerot
@@ -1089,7 +1089,6 @@
 				if (is_string($etsi))  $haku = " and lasku.nimi LIKE '%$etsi%' ";
 				if (is_numeric($etsi)) $haku = " and lasku.tunnus = '$etsi' ";
 			}
-
 
 			if ($toim == "TUOTE") {
 				$query 		= "	SELECT tilausrivi.tuoteno,

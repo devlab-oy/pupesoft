@@ -244,15 +244,17 @@ function naytaValinta($laskurow, $row, $tunken1, $tunken2, $lisaaTilausriviTyypi
 function tarkistaSarjanumerot ($otsikot, $tunnukset, $tunken) {
 	global $yhtiorow, $kukarow;
 	
-	if($tunnukset>0) {
+	if ($tunnukset > 0) {
 		$lisa = "tilausrivi.tunnus in ($tunnukset) and ";
+		$indexlisa = " use index (PRIMARY) ";
 	}
 	else {
 		$lisa = "tilausrivi.otunnus in ($otsikot) and ";
+		$indexlisa = " use index (yhtio_otunnus) ";
 	}
 	// katotaan aluks onko yhtään tuotetta sarjanumeroseurannassa tällä keräyslistalla
 	$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu, tuote.sarjanumeroseuranta
-				FROM tilausrivi use index (yhtio_otunnus)
+				FROM tilausrivi $indexlisa
 				JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 				WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
 				$lisa
@@ -260,6 +262,7 @@ function tarkistaSarjanumerot ($otsikot, $tunnukset, $tunken) {
 				and tilausrivi.var not in ('P','T','U','J')";
 	$toimresult = mysql_query($query) or pupe_error($query);
 	$virheet = 0;
+	
 	if (mysql_num_rows($toimresult) > 0) {
 
 		while ($toimrow = mysql_fetch_array($toimresult)) {

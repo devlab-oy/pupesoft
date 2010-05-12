@@ -389,21 +389,17 @@
 						}
 					}
 
-					if ($mukaan == "ytunnus" and $osoitetarrat == "") {
+					if ($mukaan == "ytunnus") {
 						if ($group!="") $group .= ",asiakas.tunnus";
 						else $group  .= "asiakas.tunnus";
+						
+						if ($osoitetarrat != "") $select .= "asiakas.tunnus astunnus, ";
+						
 						$select .= "asiakas.ytunnus, asiakas.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi!='' and asiakas.nimi!=asiakas.toim_nimi,concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark),NULL)) nimi, concat_ws('<br>',asiakas.postitp,if(asiakas.toim_postitp!='' and asiakas.postitp!=asiakas.toim_postitp,asiakas.toim_postitp,NULL)) postitp, ";
 						$order  .= "asiakas.ytunnus,";
 						$gluku++;
 					}
-					elseif ($mukaan == "ytunnus" and $osoitetarrat != "") {
-						if ($group!="") $group .= ",asiakas.tunnus";
-						else $group  .= "asiakas.tunnus";
-						$select .= "asiakas.tunnus astunnus, concat_ws(' ',asiakas.ytunnus,asiakas.toim_ovttunnus,asiakas.toim_nimi) ytunnus, ";
-						$order  .= "asiakas.ytunnus,";
-						$gluku++;
-					}
-
+					
 					if ($mukaan == "asiakasnro") {
 						if ($group!="") $group .= ",asiakas.tunnus";
 						else $group .= "asiakas.tunnus";
@@ -1409,7 +1405,7 @@
 								$edluku = $row[0];
 
 								// hoidetaan pisteet pilkuiksi!!
-								if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate')) {
+								if ((is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate')) and mysql_field_name($result, $i) != 'astunnus') {
 									if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 
 									if(isset($workbook)) {

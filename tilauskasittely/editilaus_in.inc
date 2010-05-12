@@ -280,7 +280,7 @@ while (!feof ($fd)) {
 
 		case 'OBGMITYPE' :
 
-			$type = split("@", $tieto);
+			$type = explode("@", $tieto);
 
 			// jos terminaalitoimitus
 			if (trim($type[1]) == "TKT") {
@@ -330,7 +330,7 @@ while (!feof ($fd)) {
 
 		case 'ODTM2__DT' :
 		// Toimitusp‰iv‰
-			$type = split("@", $tieto);
+			$type = explode("@", $tieto);
 
 			// 102 on p‰iv‰m‰‰r‰, 616 on viikkonumero
 			if (trim($type[1]) == "102") {
@@ -572,7 +572,7 @@ while (!feof ($fd)) {
 			// Asiakkaan joku toimitus ovttunnus tms... t‰‰ ylikirjottaa kaiken...
 			if ($tieto != "") {
 
-				$type = split("@", $tieto);
+				$type = explode("@", $tieto);
 				$tieto = trim($type[0]);
 
 				$edi_ulos .= t("Tilaava toim_asiakas")." $tieto -> ";
@@ -598,7 +598,7 @@ while (!feof ($fd)) {
 		// t‰‰ on lopullisen asiaakkaan tiedot
 		case 'ONADCN_PC' :
 		// lopullisen asiakkaan ovttunnus
-			$type = split("@", $tieto);
+			$type = explode("@", $tieto);
 			$lopnumero = trim($type[0]);
 			break;
 
@@ -625,7 +625,7 @@ while (!feof ($fd)) {
 		// t‰ss‰ alkaa toimitusasiakkaan tiedot
 		case 'ONADDP_PC' :
 		// toimitusasiakkaan ovttunnus
-			$type = split("@", $tieto);
+			$type = explode("@", $tieto);
 			$tnumero = trim($type[0]);
 			break;
 
@@ -969,7 +969,7 @@ while (!feof ($fd)) {
 
 		case 'OLINSA_PI' :
 			// t‰m‰n rivin asiakkaan oma tuotenumero
-			$type = split("@", $tieto);
+			$type = explode("@", $tieto);
 			$olinsapi    = trim($type[0]);
 			$olinvarasto = trim($type[2]); // kolmannessa segmentiss‰ tulee meid‰n varastopaikka jos l‰hett‰j‰ tiet‰‰ sen
 			break;
@@ -1021,14 +1021,14 @@ while (!feof ($fd)) {
 
 		case 'OLIN8__IF' :
 			// asiakkaan antama nimitys tuotteelle
-			$type = split("@", $tieto);
+			$type = explode("@", $tieto);
 			$edi_nimitys = $type[4]; // rivin nelj‰nness‰ segmentiss‰ tulee oikee info
 //			$edi_sarjanumero = $type[5]; // rivin viidenness‰ segmentiss‰ tulee tuotteen sarjanumeron tunnus jos asiakas sen tiesi???
 			break;
 
 		case 'OLINCONIV' :
 			// asiakkaan antama hinta tuotteelle
-			$type = split(" ", $tieto);
+			$type = explode(" ", $tieto);
 //			$edi_hinta = abs($type[0]);
 			break;
 

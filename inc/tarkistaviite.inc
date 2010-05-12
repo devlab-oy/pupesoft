@@ -3,7 +3,7 @@
 	// palautetaan $ok muuttujassa numero 1 jos viite on ok
 	// sallitaan viitteessä vaan numerot 0-9
 
-	$viite  = ereg_replace("[^0-9]","",$viite);
+	$viite  = preg_replace("/[^0-9]/","",$viite);
 	$kerroin = 7;
 	$tulo    = 0;
 

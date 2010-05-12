@@ -402,7 +402,8 @@ if ((int) $kukarow["kesken"] != 0) {
 		$lasklisatied_row  = mysql_fetch_assoc($result);
 	}
 
-	if ($yhtiorow["suoratoim_ulkomaan_alarajasumma"] > 0 and $laskurow["vienti_kurssi"] != 0) {
+	
+	if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0 and $yhtiorow["suoratoim_ulkomaan_alarajasumma"] > 0) {
 		$yhtiorow["suoratoim_ulkomaan_alarajasumma"] = round(laskuval($yhtiorow["suoratoim_ulkomaan_alarajasumma"], $laskurow["vienti_kurssi"]),0);
 	}
 
@@ -2843,7 +2844,7 @@ if ($tee == '') {
 				$hinta = (float) $tilausrivi["hinta"];
 			}
 
-			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 				$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) laskuval($hinta, $laskurow["vienti_kurssi"]));
 			}
 			else {
@@ -3951,7 +3952,7 @@ if ($tee == '') {
 			}
 
 			while ($row = mysql_fetch_assoc($result)) {
-
+												
 				if (strpos($row['sorttauskentta'], 'ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ') !== FALSE) {
 					$erikoistuote_tuoteperhe[$row['perheid']] = $row['sorttauskentta'];
 				}
@@ -3969,7 +3970,7 @@ if ($tee == '') {
 					require('tarkistarivi.inc');
 
 					//tarkistarivi.inc:stä saadaan $trow jossa on select * from tuote
-				}
+				}							
 
 				if ($edotunnus == 0 or $edotunnus != $row["otunnus"]) {
 					if ($edotunnus > 0) echo "<tr>$jarjlisa<td class='back' colspan='10'><br></td></tr>";
@@ -4009,7 +4010,10 @@ if ($tee == '') {
 
 				//Käännetään tän rivin hinta oikeeseen valuuttaan
 				$row["kotihinta"] = $row["hinta"];
-				$row["hinta"] = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
+				
+				if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+					$row["hinta"] = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
+				}
 
 				// Tän rivin rivihinta
 				$summa		= $row["hinta"]*($row["varattu"]+$row["jt"])*(1-$row["ale"]/100);
@@ -5316,7 +5320,6 @@ if ($tee == '') {
 						$hinta_myy = "tuote.myyntihinta";
 					}
 
-
 					if ($kukarow['hinnat'] == 1) {
 						$lisat = "	$hinta_myy / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * (tilausrivi.alv/100) alv,
 									$hinta_myy / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) rivihinta,
@@ -5467,7 +5470,7 @@ if ($tee == '') {
 				}
 				elseif ($kukarow["extranet"] != "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {
 					if ($tm_toimitustaparow['ulkomaanlisa'] > 0) {
-						$ulkom_huom = "<font class='message'>".t("Olet tilaamassa ulkomaanvarastosta, rahtikulut nousevat")." ".round(laskuval($tm_toimitustaparow["ulkomaanlisa"],$laskurow["vienti_kurssi"]),0)." $laskurow[valkoodi] ".t("verran")." </font><br>";
+						$ulkom_huom = "<font class='message'>".t("Olet tilaamassa ulkomaanvarastosta, rahtikulut nousevat")." ".round(laskuval($tm_toimitustaparow["ulkomaanlisa"], $laskurow["vienti_kurssi"]),0)." $laskurow[valkoodi] ".t("verran")." </font><br>";
 					}
 					else {
 						$ulkom_huom = "";
@@ -5690,7 +5693,7 @@ if ($tee == '') {
 						$netto = $rahtihinta_ale != 0 ? '' : 'N';
 
 						// muutetaan rahtihinta laskun valuuttaan, koska rahtihinta tulee matriisista aina yhtiön kotivaluutassa
-						if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 							$rahtihinta = laskuval($rahtihinta, $laskurow["vienti_kurssi"]);
 						}
 
@@ -5698,7 +5701,7 @@ if ($tee == '') {
 						list($hinta, $alv) = alv($laskurow, $rahti_trow, $lis_hinta, '', $alehinta_alv);
 
 						// muutetaan rahtihinta laskun valuuttaan, koska alehinta-funktio palauttaa aina hinnan yhtiön kotivaluutassa
-						if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 							$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
 						}
 

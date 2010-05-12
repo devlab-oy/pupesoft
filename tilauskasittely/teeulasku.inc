@@ -21,7 +21,7 @@
 	$query  = "	SELECT
 				sum(arvo) arvo,
 				sum(arvo_valuutassa) arvo_valuutassa,
-				sum(arvo/vienti_kurssi) arvo_valuutassa_matikka,
+				sum(arvo/if(vienti_kurssi=0, 1, vienti_kurssi)) arvo_valuutassa_matikka,
 				sum(summa) summa,
 				sum(summa_valuutassa) summa_valuutassa,
 				sum(pyoristys) pyoristys,

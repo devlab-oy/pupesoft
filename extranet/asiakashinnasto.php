@@ -228,7 +228,7 @@
 					// Hinnat sisältävät arvonlisäveron
 					$verollinen				 = $rrow["myyntihinta"];
 					$veroton				 = round(($rrow["myyntihinta"]/(1+$rrow['alv']/100)), 2);
-					$asiakashinta_veroton 	 = round(($asiakashinta/(1+$rrow['alv']/100)), 2);
+					$asiakashinta_veroton 	 = round(($asiakashinta/(1+$lis_alv/100)), 2);
 					$asiakashinta_verollinen = $asiakashinta;
 				}
 				else {
@@ -236,7 +236,7 @@
 					$verollinen 			 = round(($rrow["myyntihinta"]*(1+$rrow['alv']/100)), 2);
 					$veroton				 = $rrow["myyntihinta"];
 					$asiakashinta_veroton 	 = $asiakashinta;
-					$asiakashinta_verollinen = round(($asiakashinta*(1+$rrow['alv']/100)), 2);
+					$asiakashinta_verollinen = round(($asiakashinta*(1+$lis_alv/100)), 2);
 				}
 
 				if (isset($workbook)) {

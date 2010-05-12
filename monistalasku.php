@@ -479,6 +479,7 @@ if ($tee == 'MONISTA') {
 					case 'pyoristys_valuutassa':
 					case 'maksaja':
 					case 'lahetepvm':
+					case 'h1time':
 					case 'lahetepvm':
 					case 'laskuttaja':
 					case 'laskutettu':

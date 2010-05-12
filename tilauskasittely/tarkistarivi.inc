@@ -207,10 +207,10 @@
 		}
 	}
 
-
-	// Otataan oieka kappalem‰‰r‰ k‰sittelyyn
+	// Otetaan oikea kappalem‰‰r‰ k‰sittelyyn
 	if ($row["var"] == 'J' or $row["var"] == 'S' or $row["var"] == 'T' or $row["var"] == 'U') {
-		$kpl_st = $row['jt'];
+		// jos yhtiˆn parametreiss‰ jt-rivit varaavat saldoa, laitetaan "varattu kpl"-m‰‰r‰, muuten "jt kpl"-m‰‰r‰
+		$kpl_st = $yhtiorow['varaako_jt_saldoa'] != '' ? $row['varattu'] : $row['jt'];
 	}
 	elseif($row["var"] == 'P') {
 		$kpl_st = $row['tilkpl'];

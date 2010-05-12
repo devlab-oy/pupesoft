@@ -64,7 +64,7 @@
 			echo "20: ".$toim_asiakkaantiedot["postino"]."\n";
 			echo "21: ".$toim_asiakkaantiedot["postitp"]."\n";
 			*/
-		
+
 			// generic error messagen alku
 			$return  = "Tiedosto: $file\n";
 			$return .= "L‰hett‰j‰: $laskuttajan_nimi\n";
@@ -147,15 +147,15 @@
 					$yhtiorow = mysql_fetch_array($result);
 				}
 			}
-			
+
 			if (!isset($yhtiorow) and $yhtio != "") {
 				// 6 etsit‰‰n vastaanottavaa yrityst‰ IBAN-tilinumerolla
 				$query = "SELECT * FROM yriti WHERE kaytossa != 'E' and iban = '$yhtio'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
-								
-				if (mysql_num_rows($result) == 1) {								
+
+				if (mysql_num_rows($result) == 1) {
 					$ibanrow = mysql_fetch_array($result);
-					
+
 					$query = "SELECT * FROM yhtio WHERE yhtio = '$ibanrow[yhtio]'";
 					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
@@ -536,13 +536,13 @@
 
 				if (!$val) {
 					// Laitetaan sitten ajop‰iv‰
-					list($tpv,$tpk,$tpp) = split("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d"),date("Y"))));
+					list($tpv,$tpk,$tpp) = explode("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d"),date("Y"))));
 					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui p‰iv‰ys. Tarkista asia laskulta!<br>" . $komm;
 				}
 
 				// Otetaan yhtiˆn tiedoista ostoreskontran sallittu tilikauden ajankohta
-				$tilalk = split("-", $yhtiorow["ostoreskontrakausi_alku"]);
-				$tillop = split("-", $yhtiorow["ostoreskontrakausi_loppu"]);
+				$tilalk = explode("-", $yhtiorow["ostoreskontrakausi_alku"]);
+				$tillop = explode("-", $yhtiorow["ostoreskontrakausi_loppu"]);
 
 				// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
 				$ostoresktilalk = (int) date('Ymd',mktime(0,0,0,$tilalk[1],$tilalk[2],$tilalk[0]));
@@ -590,7 +590,7 @@
 					$err = $trow["oletus_erapvm"];
 					// jos oletustakaan ei ole, laitetaan lasku er‰‰ntym‰‰n huomenna...
 					if ($err == 0) {
-						list($erv,$erk,$erp) = split("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d")+1,date("Y"))));
+						list($erv,$erk,$erp) = explode("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d")+1,date("Y"))));
 					}
 					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui er‰pvm. Tarkista asia laskulta!<br>" . $komm;
 				}

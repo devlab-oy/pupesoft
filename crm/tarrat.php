@@ -2,6 +2,7 @@
 	require "../inc/parametrit.inc";
 
 	echo "<font class='head'>".t("Tulosta osoitetarrat")."</font><hr>";
+	
 	if ($oikeurow[2] != '1') { // Saako p‰ivitt‰‰
 		if ($uusi == 1) {
 			echo "<b>".t("Sinulla ei ole oikeutta lis‰t‰ t‰t‰ tietoa")."</b><br>";
@@ -213,6 +214,27 @@
 
 	// Nyt selataan
 	if ($tee == '') {
+		
+		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+			<!--
+
+			function toggleAll(toggleBox) {
+
+				var currForm = toggleBox.form;
+				var isChecked = toggleBox.checked;
+				var nimi = toggleBox.name;
+
+				for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+					if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,6) == nimi) {
+						currForm.elements[elementIdx].checked = isChecked;
+					}
+				}
+			}
+
+			//-->
+			</script>";
+		
+		
 		$kentat = "nimi, osoite, postino, postitp, maa, ryhma, piiri, flag_1, flag_2, flag_3, flag_4";
 
 		$array = split(",", $kentat);
@@ -257,11 +279,11 @@
 		$result = mysql_query($query) or pupe_error($query);
 			
 		echo "<form action = '$PHP_SELF' method = 'post'>
-		<input type='hidden' name='arvomatikka' value='$arvomatikka'>
-		<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
-		<input type='hidden' name='raportti' value='$raportti'>
-		<input type='hidden' name='toimas' value='$toimas'>
-		<input type='hidden' name='as_yht_tiedot' value='$as_yht_tiedot'>";
+			<input type='hidden' name='arvomatikka' value='$arvomatikka'>
+			<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
+			<input type='hidden' name='raportti' value='$raportti'>
+			<input type='hidden' name='toimas' value='$toimas'>
+			<input type='hidden' name='as_yht_tiedot' value='$as_yht_tiedot'>";
 				
 		echo "<table><tr>";
 		echo "<th></th>";
@@ -303,6 +325,10 @@
 			}
 			echo "</tr>";
 		}
+		
+		
+		echo "<tr><td><input type='checkbox' name='otunnu' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
+		
 		echo "</table>";
 		echo "<br><br>";
 

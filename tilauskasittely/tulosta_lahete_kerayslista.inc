@@ -12,29 +12,29 @@ if (in_array("gd", get_loaded_extensions())) {
 
 require_once("pdflib/phppdflib.class.php");
 
-$norm["height"] 		= 10;
-$norm["font"] 			= "Times-Roman";
+$norm["height"] 			= 10;
+$norm["font"] 				= "Times-Roman";
 
-$pieni["height"] 		= 8;
-$pieni["font"] 			= "Times-Roman";
+$pieni["height"] 			= 8;
+$pieni["font"] 				= "Times-Roman";
 
-$boldi["height"] 		= 10;
-$boldi["font"] 			= "Times-Bold";
+$boldi["height"] 			= 10;
+$boldi["font"] 				= "Times-Bold";
 
-$pieni_boldi["height"] 	= 8;
-$pieni_boldi["font"] 	= "Times-Bold";
+$pieni_boldi["height"] 		= 8;
+$pieni_boldi["font"] 		= "Times-Bold";
 
-$kommentti_font["height"] 			= 18;
-$kommentti_font["font"] 			= "Helvetica";
+$kommentti_font["height"] 	= 18;
+$kommentti_font["font"] 	= "Helvetica";
 
-$keraaja_font["height"]			= 12;
-$keraaja_font["font"] 			= "Helvetica";
+$keraaja_font["height"]		= 12;
+$keraaja_font["font"] 		= "Helvetica";
 
-$iso["height"] 			= 14;
-$iso["font"] 			= "Helvetica-Bold";
+$iso["height"] 				= 14;
+$iso["font"] 				= "Helvetica-Bold";
 
-$rectparam["width"] 	= 0.3;
-$rivinkorkeus			= 17;
+$rectparam["width"] 		= 0.3;
+$rivinkorkeus				= 17;
 
 if (!function_exists('alku_kerayslista')) {
 	function alku_kerayslista($tyyppi = "") {
@@ -77,7 +77,7 @@ if (!function_exists('alku_kerayslista')) {
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
-				$yhtion_toimipaikkarow = mysql_fetch_array($result);
+				$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
 				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
 		 	}
 		}
@@ -88,7 +88,7 @@ if (!function_exists('alku_kerayslista')) {
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query".mysql_error());
 
 			if (mysql_num_rows($result) == 1) {
-				$yhtion_parametritrow = mysql_fetch_array($result);
+				$yhtion_parametritrow = mysql_fetch_assoc($result);
 				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
 			}
 		}
@@ -142,7 +142,7 @@ if (!function_exists('alku_kerayslista')) {
 		// haetaan maksuehdon tiedot
 		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$masresult = mysql_query($query) or pupe_error($query);
-		$masrow = mysql_fetch_array($masresult);
+		$masrow = mysql_fetch_assoc($masresult);
 
 		//maksuehto tekstinä
 		$maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
@@ -185,10 +185,10 @@ if (!function_exists('alku_kerayslista')) {
 		$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
-		
+
 		$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
-		if ($laskurow["keraysvko"] != '') {			
+		if ($laskurow["keraysvko"] != '') {
 			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
 
 			if ($laskurow['keraysvko'] != '7') {
@@ -237,7 +237,7 @@ if (!function_exists('alku_kerayslista')) {
 					from kuka
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 		$myyresult = mysql_query($query) or pupe_error($query);
-		$myyrow = mysql_fetch_array($myyresult);
+		$myyrow = mysql_fetch_assoc($myyresult);
 
 		$pdf->draw_text(310, 719, $myyrow["nimi"], 										$thispage, $norm);
 
@@ -271,16 +271,15 @@ if (!function_exists('alku_kerayslista')) {
 						from kuka
 						where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
 			$laaresult = mysql_query($query) or pupe_error($query);
-			$laarow = mysql_fetch_array($laaresult);
+			$laarow = mysql_fetch_assoc($laaresult);
 
 			$pdf->draw_text(310, 645, t("Laatija", $kieli), $thispage, $pieni);
 			$pdf->draw_text(310, 635, $laarow["nimi"], $thispage, $norm);
 		}
 		else {
-			$pdf->draw_text(310, 645, t("", $kieli), $thispage, $pieni);
-			$pdf->draw_text(310, 635, $laskurow[""], $thispage, $norm);
+			$pdf->draw_text(310, 645, "", $thispage, $pieni);
+			$pdf->draw_text(310, 635, "", $thispage, $norm);
 		}
-
 
 		if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
 			$keraaja_teksti = "";
@@ -293,9 +292,9 @@ if (!function_exists('alku_kerayslista')) {
 			$pakkaamo_fetch_res = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($pakkaamo_fetch_res) == 1) {
-				$pakkaamo_fetch_row = mysql_fetch_array($pakkaamo_fetch_res, MYSQL_ASSOC);
+				$pakkaamo_fetch_row = mysql_fetch_assoc($pakkaamo_fetch_res);
 
-				$keraaja_teksti = "Pakkaamo: $pakkaamo_fetch_row[nimi] Lokero: $pakkaamo_fetch_row[lokero]";
+				$keraaja_teksti = t("Pakkaamo", $kieli).": $pakkaamo_fetch_row[nimi] ".t("Lokero", $kieli).": $pakkaamo_fetch_row[lokero]";
 			}
 
 			$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
@@ -304,7 +303,7 @@ if (!function_exists('alku_kerayslista')) {
 		}
 		else {
 			$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
-			$pdf->draw_text(310, 624, t("", $kieli), 	$thispage, $pieni);
+			$pdf->draw_text(310, 624, "", 	$thispage, $pieni);
 			$pdf->draw_text(310, 614, "", 	$thispage, $norm);
 		}
 
@@ -450,7 +449,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
-				$yhtion_toimipaikkarow = mysql_fetch_array($result);
+				$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
 				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
 		 	}
 		}
@@ -461,7 +460,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
-				$yhtion_parametritrow = mysql_fetch_array($result);
+				$yhtion_parametritrow = mysql_fetch_assoc($result);
 				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
 			}
 		}
@@ -515,7 +514,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		// haetaan maksuehdon tiedot
 		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$masresult = mysql_query($query) or pupe_error($query);
-		$masrow = mysql_fetch_array($masresult);
+		$masrow = mysql_fetch_assoc($masresult);
 
 		//maksuehto tekstinä
 		$maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
@@ -687,7 +686,7 @@ if (!function_exists('rivi_kerayslista')) {
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus	= '$row[otunnus]'";
 				$vtunres = mysql_query($query) or pupe_error($query);
-				$vtunrow = mysql_fetch_array($vtunres);
+				$vtunrow = mysql_fetch_assoc($vtunres);
 
 				if ($vtunrow["vanhatunnus"] != 0) {
 					$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
@@ -707,7 +706,7 @@ if (!function_exists('rivi_kerayslista')) {
 				}
 
 				if (mysql_num_rows($perheresult) > 0) {
-					$perherow = mysql_fetch_array($perheresult);
+					$perherow = mysql_fetch_assoc($perheresult);
 
 					$query = "	SELECT distinct tilausrivi.tuoteno, tilausrivi.nimitys, varattu
 								FROM tilausrivi
@@ -719,7 +718,7 @@ if (!function_exists('rivi_kerayslista')) {
 					$perheresult = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($perheresult) > 1) {
-						while ($perherow = mysql_fetch_array($perheresult)) {
+						while ($perherow = mysql_fetch_assoc($perheresult)) {
 							if ($row["perhe_kommentti"] == "") {
 								$row["perhe_kommentti"] .= t("Tuoteperhe", $kieli).": ";
 								$row["perhe_kommentti"] .= $perherow["tuoteno"]." (".$row["varattu"].") ".$perherow["nimitys"].".\n".t("Sisältää tuotteet", $kieli).": ";
@@ -749,7 +748,7 @@ if (!function_exists('rivi_kerayslista')) {
 						WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno = '$row[tuoteno]'
 						GROUP BY tuote.tuoteno";
 			$tresult = mysql_query($query) or pupe_error($query);
-			$trow	 = mysql_fetch_array($tresult);
+			$trow	 = mysql_fetch_assoc($tresult);
 
 
 			$pdf->draw_text(330, $kala, pdf_substr($trow["toim_tuoteno"], 80, $pdf, $norm), $thispage, $norm);
@@ -805,7 +804,7 @@ if (!function_exists('rivi_kerayslista')) {
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) > 0) {
-					while ($saldorow = mysql_fetch_array ($sresult)) {
+					while ($saldorow = mysql_fetch_assoc ($sresult)) {
 						if ($yhtiorow["saldo_kasittely"] == "T") {
 							$saldoaikalisa = date("Y-m-d");
 						}
@@ -896,7 +895,7 @@ if (!function_exists('rivi_kerayslista')) {
 		   					and $tunken = '$row[tunnus]'";
 		   		$sarjares = mysql_query($query) or pupe_error($query);
 
-				while ($sarjarow = mysql_fetch_array($sarjares)) {
+				while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 
 					if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "G") {
 						$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"];
@@ -948,7 +947,7 @@ if (!function_exists('loppu_kerayslista')) {
 
 			if (mysql_num_rows($alhire) == 1) {
 				// haetaan toimipaikan tiedot
-				$alhiro = mysql_fetch_array($alhire);
+				$alhiro = mysql_fetch_assoc($alhire);
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
@@ -963,7 +962,7 @@ if (!function_exists('loppu_kerayslista')) {
 
 			if (mysql_num_rows($alhire) == 1) {
 				// haetaan toimipaikan tiedot
-				$alhiro = mysql_fetch_array($alhire);
+				$alhiro = mysql_fetch_assoc($alhire);
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];

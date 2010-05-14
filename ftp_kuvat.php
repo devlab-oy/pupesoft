@@ -64,7 +64,6 @@ function ftp_rmfiles($ftp_stream, $directory, $nodel = "", $nodelpict = "") {
     }
 }
 
-
 //tarvitaan yhtiö
 if (empty($argv)) {
 	require ("inc/parametrit.inc");
@@ -80,6 +79,8 @@ else {
 }
 
 if ($tee == "aja") {
+
+	echo date("H:i:s").": Aloitetaan tuotekuvien siirto.\n";
 
 	// tarvitaan $ftpkuvahost $ftpkuvauser $ftpkuvapass $ftpkuvapath $ftpmuupath
 	// palautetaan $palautus ja $syy
@@ -207,18 +208,15 @@ if ($tee == "aja") {
 		if ($poistosyy != "") {
 			echo $poistosyy;
 		}
-		else {
-			echo "Vanhat tiedostot poistettiin onnistuneesti\n";
-		}
 
 		if ($syy != "") {
 			echo $syy;
 		}
-		else {
-			echo "Tiedostojen siirto onnistui\n";
-		}
 
 	}
+
+	echo date("H:i:s").": Tuotekuvien siirto valmis.\n\n";
+
 }
 
 if ($tee == "") {
@@ -231,4 +229,5 @@ if ($tee == "") {
 	echo "</form>";
 
 }
+
 ?>

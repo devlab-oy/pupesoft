@@ -12,4 +12,5 @@ cd ${POLKU};php check-tables.php
 cd ${POLKU};php hae_valuutat_cron.php
 
 # Siivotaan dataout dirikasta vanhat failit pois
-find ${POLKU}/dataout -mtime +30 -not -path '*/.svn/*' -delete
+touch ${POLKU}/dataout
+find ${POLKU}/dataout -mtime +30 -not -path '*/.svn*' -delete

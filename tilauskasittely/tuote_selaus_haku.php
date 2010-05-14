@@ -63,7 +63,10 @@
 		$toim_kutsu = "RIVISYOTTO";
 	}
 
-	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
+	$query    = "	SELECT * 
+					from lasku 
+					where tunnus = '$kukarow[kesken]' 
+					and yhtio	 = '$kukarow[yhtio]'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_assoc($result);
 
@@ -98,7 +101,7 @@
 					<input type='submit' value='".t("Takaisin tilaukselle")."'>
 					</form><br><br>";
 		}
-		elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $toim_kutsu != "") {
+		elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $laskurow["tila"] != "K" and $toim_kutsu != "") {
 
 			if ($kukarow["extranet"] != "") {
 				$toim_kutsu 	 = "EXTRANET";

@@ -4,23 +4,28 @@ echo
 echo "Tervetuloa Pupesoft-narupalveluun"
 echo "---------------------------------"
 echo
-echo "Haetaan tietokantamuutokset..."
-echo
+echo -n "Haetaan tietokantamuutokset.."
 
 pupedir=`dirname $0`
+dumppi=`php ${pupedir}/dumppaa_mysqlkuvaus.php komentorivilta`
 
-php ${pupedir}/dumppaa_mysqlkuvaus.php komentorivilta
+if [ -z "${dumppi}" ]; then
+	echo " Tietokanta ajantasalla!"
+	echo
+else
+	echo " Muutoksia loytyi!"
+	echo
+	echo ${dumppi}
+	echo
+	echo "HUOM: Tee tarvittavat tietokantamuutoket ennen kuin jatkat!"
+	echo
+fi
 
-echo
-echo "HUOM: Tee tarvittavat tietokantamuutoket ennen kuin jatkat!"
-echo
 echo -n "Jatketaanko (k/e)? "
-
 read jatketaanko
-
 echo
 
-if [ $jatketaanko = "k" ]; then
+if [ ${jatketaanko} = "k" ]; then
        echo "Paivitetaan Pupesoft..."
        echo
        svn update ${pupedir}

@@ -15,3 +15,7 @@ BACKUPSAVEDAYS="30"
 sh ${POLKU}pupe-cron.sh $YHTIO
 sh ${POLKU}pupe-cron-server.sh
 sh ${POLKU}pupe-backup.sh $BACKUPDIR $BACKUPDB $BACKUPUSER $BACKUPPASS $BACKUPSAVEDAYS
+
+# Jos haluat seurata hitaita kyselyitä
+#SLOWLOG="/var/lib/mysql/mysqld-slow.log"
+#sh ${POLKU}mysql-slow-log.sh $SLOWLOG $BACKUPUSER $BACKUPPASS

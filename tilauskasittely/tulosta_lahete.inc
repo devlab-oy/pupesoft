@@ -356,17 +356,17 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_text(310, 656, $laarow["nimi"], $thispage, $norm);
 		}
 		else {
-			$pdf->draw_text(310, 666, t("", $kieli), 	$thispage, $pieni);
-			$pdf->draw_text(310, 656, $laskurow[""], 	$thispage, $norm);
+			$pdf->draw_text(310, 666, "", 	$thispage, $pieni);
+			$pdf->draw_text(310, 656, "", 	$thispage, $norm);
 		}
 
 		$pdf->draw_rectangle(653, 300, 632, 580, $thispage, $rectparam);
-		$pdf->draw_text(310, 645, t("", $kieli), $thispage, $pieni);
-		$pdf->draw_text(310, 635, $laskurow[""], $thispage, $norm);
+		$pdf->draw_text(310, 645, "", $thispage, $pieni);
+		$pdf->draw_text(310, 635, "", $thispage, $norm);
 
 		$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
-		$pdf->draw_text(310, 624, t("", $kieli), 	$thispage, $pieni);
-		$pdf->draw_text(310, 614, $laskurow[""], 	$thispage, $norm);
+		$pdf->draw_text(310, 624, "", 	$thispage, $pieni);
+		$pdf->draw_text(310, 614, "", 	$thispage, $norm);
 
 		$komm = "";
 

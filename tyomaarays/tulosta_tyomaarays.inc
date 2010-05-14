@@ -608,9 +608,9 @@ if (!function_exists('rivi_otsikot')) {
 			$pdf->draw_text(25,  $kala+15, "#",									$thispage, $norm);
 			$pdf->draw_text(45,  $kala+15, t("Paikka", $kieli),					$thispage, $norm);
 			$pdf->draw_text(125, $kala+15, t("Tuotenumero/Tuotenimi", $kieli),	$thispage, $norm);
-			$pdf->draw_text(330, $kala+15, t("", $kieli),						$thispage, $norm);
-			$pdf->draw_text(425, $kala+15, t("", $kieli),						$thispage, $norm);
-			$pdf->draw_text(473, $kala+15, t("", $kieli),						$thispage, $norm);
+			$pdf->draw_text(330, $kala+15, "",									$thispage, $norm);
+			$pdf->draw_text(425, $kala+15, "",									$thispage, $norm);
+			$pdf->draw_text(473, $kala+15, "",									$thispage, $norm);
 			$pdf->draw_text(530, $kala+15, t("Tilattu", $kieli),				$thispage, $norm);
 		}
 

@@ -24,7 +24,7 @@
 
 			if ($loput[$tunnukset] == 'MITA') {
 				if ($toim == "ENNAKKO") {
-					$query = "	UPDATE tilausrivi SET 
+					$query = "	UPDATE tilausrivi SET
 								tyyppi = 'D'
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus 	in ($tunnukset)
@@ -114,8 +114,8 @@
 				}
 				else {
 					// tila pit‰‰ olla l‰hete, tilaus, ennakko tai siirtolista
-					$query = "	SELECT * 
-								FROM lasku 
+					$query = "	SELECT *
+								FROM lasku
 								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$isarivirow[otunnus]' and tila in ('N', 'L', 'E', 'G')";
 					$stresult = mysql_query($query) or pupe_error($query);
 
@@ -288,6 +288,7 @@
 								mysql_field_name($stresult,$i)=='arvo' or
 								mysql_field_name($stresult,$i)=='maksuaika' or
 								mysql_field_name($stresult,$i)=='lahetepvm' or
+								mysql_field_name($stresult,$i)=='h1time' or
 								mysql_field_name($stresult,$i)=='viite' or
 								mysql_field_name($stresult,$i)=='laskunro' or
 								mysql_field_name($stresult,$i)=='mapvm' or
@@ -794,7 +795,7 @@
 
 											if ($toim == "ENNAKKO" or $yhtiorow["varaako_jt_saldoa"] != "") {
 												$poista_update_lisa = ", varattu = '$jaljella', jt = '0' ";
-												
+
 											}
 											else {
 												$poista_update_lisa = ", jt = '$jaljella', varattu = '0' ";

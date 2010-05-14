@@ -31,9 +31,6 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 	else {
 		die ("Yhtiö $kukarow[yhtio] ei löydy!");
 	}
-
-	echo date("Y-m-d H:i:s")." - ABC tuote $yhtiorow[nimi]\n";
-
 	$tee = "YHTEENVETO";
 }
 else {
@@ -701,9 +698,6 @@ if ($tee == "") {
 
 if (trim($argv[1]) == '') {
 	require ("../inc/footer.inc");
-}
-else {
-	echo date("Y-m-d H:i:s")." - ABC tuote valmis\n\n";
 }
 
 ?>

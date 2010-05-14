@@ -9,6 +9,6 @@ if [ -f $SLOWLOG ]; then
 	echo
 	echo "Pupesoft slowlog:"
 	mysqldumpslow $SLOWLOG
-	rm -f $SLOWLOG
+	echo -n > $SLOWLOG	
 	mysqladmin -u $SLOWKAYTTAJA --password="$SLOWSALASANA" flush-logs
 fi

@@ -17,8 +17,6 @@
 			$valkoodi = (string) $valuutta->attributes()->currency;
 			$kurssi   = (float)  $valuutta->attributes()->rate;
 
-			// echo "$valkoodi ".sprintf("%.9f", (1/$kurssi))." ($kurssi)\n";
-
 	    	$query = "	UPDATE valuu, yhtio SET
 						valuu.kurssi = round(1 / $kurssi, 9),
 						valuu.muutospvm = now(),

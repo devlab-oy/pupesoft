@@ -42,8 +42,15 @@ mysqlhotcopy -q -u $DBKAYTTAJA --password=$DBSALASANA $DBKANTA /tmp
 echo -n `date "+%Y-%m-%d %H:%M:%S"`
 echo " - Copy done."
 
+if [ ! -d /tmp/${DBKANTA} ]; then
+	echo
+	echo "ERROR! Hakemistoa /tmp/${DBKANTA} ei löydy!"
+	echo
+	exit
+fi
+
 # Siirrytään temppidirriin
-cd /tmp/$DBKANTA
+cd /tmp/${DBKANTA}
 
 # Pakataan failit
 tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *

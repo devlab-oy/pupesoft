@@ -6,10 +6,16 @@ if(!function_exists("toimitarkista")) {
 		
 		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift;
 		
-		if ((mysql_field_name($result, $i) == "nimi") or (mysql_field_name($result, $i) == "maa") or (mysql_field_name($result, $i) == "ytunnus") or (mysql_field_name($result, $i) == "oletus_hyvak1") or (mysql_field_name($result, $i) == "oletus_valkoodi")) {
+		if ((mysql_field_name($result, $i) == "nimi") or 
+			(mysql_field_name($result, $i) == "maa") or 
+			(mysql_field_name($result, $i) == "ytunnus") or 
+			(mysql_field_name($result, $i) == "oletus_hyvak1") or 
+			(mysql_field_name($result, $i) == "oletus_valkoodi")) {
+			
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
+			
 			if (mysql_field_name($result, $i) == "maa") {
 				$t[$i] = strtoupper($t[$i]);
 				$tmp_maakoodi = $t[$i];
@@ -93,7 +99,7 @@ if(!function_exists("toimitarkista")) {
 			$t[$i] = strtoupper($t[$i]);
 		}
 
-		if ((mysql_field_name($result, $i) == "ytunnus") and (trim($t[$i])!='')) {
+		if ((mysql_field_name($result, $i) == "ytunnus") and trim($t[$i])!='') {
 			$ytunnus = trim($t[$i]);
 
 			if ($tmp_maakoodi == 'FI' and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "T")) {
@@ -144,9 +150,9 @@ if(!function_exists("toimitarkista")) {
 			}
 		}
 			
-
 		if (mysql_field_name($result, $i) == "ovttunnus") {
 			if ($tmp_maakoodi=='FI') {
+				
 				if (trim($t[$i])=='') {
 					// t‰ytet‰‰n ovttunnus jos sit‰ ei ole
 					$t[$i] = "0037". sprintf("%08.0f",$tmp_ytunnus);

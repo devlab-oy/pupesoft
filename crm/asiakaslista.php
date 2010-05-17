@@ -372,16 +372,19 @@
 	}
 
 	echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></tr>\n\n";
+		
+	$kalalask = 1;
 	
 	while ($trow=mysql_fetch_array ($result)) {
 		echo "<tr class='aktiivi'>";
+		
 		for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 			if ($i == 1) {
 				if (trim($trow[1]) == '') $trow[1] = "".t("*tyhjä*")."";
-				echo "<td><a href='asiakasmemo.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]'>$trow[1]</a></td>";
+				echo "<td><a name='1_$kalalask' href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]&lopetus=".$palvelin2."crm/asiakaslista.php////asos=$asos//konserni=$konserni//aspiiri=$aspiiri//asryhma=$asryhma//asmyyja=$asmyyja//astila=$astila".str_replace("&", "//", $ulisa)."//ojarj=$ojarj///1_$kalalask'>$trow[1]</a></td>";
 			}
 			elseif(mysql_field_name($result,$i) == 'ytunnus') {
-				echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=crm/asiakaslista.php'>$trow[$i]</a></td>";
+				echo "<td><a name='2_$kalalask' href='".$palvelin2."yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=".$palvelin2."crm/asiakaslista.php////asos=$asos//konserni=$konserni//aspiiri=$aspiiri//asryhma=$asryhma//asmyyja=$asmyyja//astila=$astila".str_replace("&", "//", $ulisa)."//ojarj=$ojarj///2_$kalalask'>$trow[$i]</a></td>";
 			}
 			else {
 				echo "<td>$trow[$i]</td>";
@@ -398,6 +401,8 @@
 
 		echo "</td>";		
 		echo "</tr>\n\n";
+		
+		$kalalask++;
 	}
 	echo "</table>";
 

@@ -1380,6 +1380,14 @@
 					echo "<input type='hidden' name='hyllyssa[$tuoterow[tptunnus]]' value='$tuoterow[saldo]'>";
 					echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]#$tuoterow[hyllyalue]#$tuoterow[hyllynro]#$tuoterow[hyllyvali]#$tuoterow[hyllytaso]'>";
 					echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
+					
+					if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
+						echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+					}
+					elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
+						echo "<td valign='top' class='back'>".t("Tuote on eränumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+					}
+					
 					echo "</tr>";
 
 					if ($rivilask == 0) {
@@ -1435,6 +1443,14 @@
 						echo "<td valign='top' colspan='4'><font class='error'>$viesti</font>";
 					}
 					echo "</td>";
+								
+					if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
+						echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+					}
+					elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
+						echo "<td valign='top' class='back'>".t("Tuote on eränumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+					}					
+					
 					echo "</tr>";
 				}
 				else {

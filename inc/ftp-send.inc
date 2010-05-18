@@ -1,6 +1,8 @@
 <?php
 
-require("functions.inc");
+if (@include_once("inc/functions.inc"));
+elseif (@include_once("functions.inc"));
+else exit;
 
 // tarvitaan $ftphost $ftpuser $ftppass $ftppath $ftpfile
 // palautetaan $palautus ja $syy

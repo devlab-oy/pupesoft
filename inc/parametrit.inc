@@ -257,8 +257,8 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 	}
 
 	// haetaan jotain tarpeellisia funktioita mukaan..
-	if (@include("inc/functions.inc"));
-	elseif (@include("functions.inc"));
+	if (@include_once("inc/functions.inc"));
+	elseif (@include_once("functions.inc"));
 	else exit;
 
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);

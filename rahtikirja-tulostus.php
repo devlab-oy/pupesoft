@@ -282,7 +282,7 @@
 		$query .= "	and rahtikirjat.toimitustapa	= '$toimitustapa'
 					and rahtikirjat.tulostuspaikka	= '$varasto'
 					$jvehto
-					order by lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus";
+					ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
 		$rakir_res = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($rakir_res) == 0) {
@@ -371,7 +371,8 @@
 						$asiakaslisa
 						and rahtikirjat.merahti			= '$rakir_row[merahti]'
 						and rahtikirjat.rahtisopimus	= '$rakir_row[rahtisopimus]'
-						$jvehto";
+						$jvehto
+						ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
 			$res   = mysql_query($query) or pupe_error($query);
 
 			while ($rivi = mysql_fetch_assoc($res)) {
@@ -566,13 +567,7 @@
 						if (file_exists("tilauskasittely/rahtikirja_erittely_pdf.inc")) {
 							require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 						}
-					}
-
-					if ($rakir_row['toimitusvahvistus'] != '') {
-						if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
-							require("tilauskasittely/$rakir_row[toimitusvahvistus]");
-						}
-					}
+					}					
 				}
 				else {
 					echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
@@ -584,6 +579,12 @@
 								where tunnus in ($tunnukset)
 								and yhtio = '$kukarow[yhtio]'";
 					$ures  = mysql_query($query) or pupe_error($query);
+				}
+				
+				if ($rakir_row['toimitusvahvistus'] != '') {
+					if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
+						require("tilauskasittely/$rakir_row[toimitusvahvistus]");
+					}
 				}
 
 				// jos ei JV merkataan rahtikirjat tulostetuksi otsikollekkin..

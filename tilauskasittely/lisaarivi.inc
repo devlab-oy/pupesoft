@@ -390,7 +390,7 @@
 		// Asiaakkaallevalmistus ja halutaan myydä rivi varastosta
 		$perhelisa = " and tuoteperhe.tyyppi in ('P','') ";
 		$var 		= "";
-		
+
 		if (!isset($perheid) or $perheid == 0 or $perheid == $rivitunnus) {
 			$rivityyppi = 'L'; // Myyntitilausrivi
 		}
@@ -713,14 +713,14 @@
 				// usort($zzrow, "zzrowcmp");
 
 				if (count($zzrow) > 0) {
-					
+
 					// Katsotaan onko maksuehto jälkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
 					if (!isset($jalkivaatimusmehto)) {
 						$apuqu = "SELECT tunnus from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]' and jv = ''";
 						$jalkivaatimusmehtores = mysql_query($apuqu) or pupe_error($apuqu);
 						$jalkivaatimusmehto = mysql_num_rows($jalkivaatimusmehtores);
 					}
-										
+
 					// Jos tuotteella on tuotepaikkoja
 					foreach($zzrow as $zrow) {
 
@@ -1633,7 +1633,7 @@
 							$var 	= "";
 							$varattu = $kpl;
 						}
-						// Normaalisti kaikki menee puuteeksi.
+						// Normaalisti kaikki menee puutteeksi.
 						else {
 							$var 	= "P";
 						}

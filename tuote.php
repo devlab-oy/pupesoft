@@ -270,7 +270,7 @@
 			}
 
 			// Varastoon
-			if (strtoupper($tuoterow['ei_varastoida']) == 'O') {
+			if ($tuoterow['ei_varastoida'] != '') {
 			 	$tuoterow['ei_varastoida'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
 			}
 			else {
@@ -537,7 +537,7 @@
 
 			// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
 			if (table_exists("yhteensopivuus_tuote") and file_exists("yhteensopivuus_tuote.php")) {
-                
+
                 $lisa = " and tuoteno = '$tuoteno' ";
 
                 $query = "  SELECT isatuoteno
@@ -545,20 +545,20 @@
                             WHERE yhtio = '$kukarow[yhtio]'
                             AND tuoteno = '$tuoteno'";
                 $tuoteperhe_result = mysql_query($query) or pupe_error($query);
-                
+
                 if (mysql_num_rows($tuoteperhe_result) > 0) {
                     $lisa = " and tuoteno in ('$tuoteno',";
                 }
-                
+
                 while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
                     $lisa .= "'$tuoteperhe_row[isatuoteno]',";
                 }
-                
+
                 if (mysql_num_rows($tuoteperhe_result) > 0) {
                     $lisa = substr($lisa, 0, -1);
                     $lisa .= ") ";
                 }
-                
+
 				$query = "	SELECT tyyppi, count(*) countti
 							from yhteensopivuus_tuote
 							where yhtio = '$kukarow[yhtio]'
@@ -1589,7 +1589,7 @@
 				if ($tilalehinta != '') {
 					echo "<td></td>";
 				}
-				
+
 				echo "</tr>";
 			}
 

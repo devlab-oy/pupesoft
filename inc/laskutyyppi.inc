@@ -31,16 +31,16 @@
 				case "K":
 					$alatila = "käteisalennuksella";
 			}
-			break;					
+			break;
 		case "K":
-			$laskutyyppi = "Saapuva ostotilaus";			
+			$laskutyyppi = "Saapuva ostotilaus";
 			switch($alatila) {
 				case "X":
 					$alatila = "Valmis";
-					break;	
+					break;
 				case "I":
 					$alatila = "Inventointi";
-					break;	
+					break;
 			}
 			break;
 		case "X":
@@ -91,7 +91,7 @@
 					$alatila = "Odottaa hyväksyntää";
 					break;
 				case "T":
-					$laskutyyppi = "Myyntitilaus";				
+					$laskutyyppi = "Myyntitilaus";
 					$alatila = "odottaa JT tuotteita";
 					break;
 				case "U":
@@ -127,7 +127,7 @@
 					$alatila = "rivit valmistuksessa toisella otsikolla";
 					break;
 			}
-			break;		
+			break;
 		case "A":
 			$laskutyyppi = "Työmääräys";
 			break;
@@ -276,16 +276,52 @@
 			$laskutyyppi = "Mitätöity";
 			switch($alatila) {
 				case "L":
-					$alatila = "myyntitilaus";
+					$alatila = "Myyntitilaus";
 					break;
 				case "N":
-					$alatila = "lähete";
+					$alatila = "Myyntitilaus kesken";
+					break;
+				case "V":
+					$alatila = "Valmistus";
+					break;
+				case "A":
+					$alatila = "Työmääräys";
+					break;
+				case "E":
+					$alatila = "Ennakkotilaus";
+					break;
+				case "R":
+					$alatila = "Projekti";
+					break;
+				case "T":
+					$alatila = "Tarjous";
+					break;
+				case "G":
+					$alatila = "Siirtolista";
+					break;
+				case "S":
+					$alatila = "Sisäinen työmääräys";
 					break;
 				case "O":
-					$alatila = "ostotilaus";
+					$alatila = "Varaston ostotilaus";
+					break;
+				case "Z":
+					$alatila = "Terminaalitoimitus";
+					break;
+				case "B":
+					$alatila = "Ostoskori";
+					break;
+				case "C":
+					$alatila = "Reklamaatio";
+					break;
+				case "0":
+					$alatila = "Ylläpitosopimus";
+					break;
+				case "F":
+					$alatila = "Tallennettu web-tilaus/tarjous";
 					break;
 				case "H":
-					$alatila = "ostolasku";
+					$alatila = "Ostolasku";
 					break;
 			}
 			break;

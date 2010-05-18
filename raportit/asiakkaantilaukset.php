@@ -34,15 +34,16 @@
 	}
 
 	$til = "";
+	
 	if ($cleantoim == 'MYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tilaukset").":</font><hr>";
 
-		$til = " tila in ('L','U','N','R','E') ";
+		$til = " tila in ('L','U','N','R','E','D') ";
 	}
 	if ($cleantoim == 'VALMISTUSMYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tilaukset ja valmistukset").":</font><hr>";
 
-		$til = " tila in ('L','U','N','R','E','V') ";
+		$til = " tila in ('L','U','N','R','E','V','D') ";
 	}
 	if ($cleantoim == 'OSTO') {
 		echo "<font class='head'>".t("Toimittajan tilaukset").":</font><hr>";
@@ -52,21 +53,21 @@
 	if ($cleantoim == 'TARJOUS') {
 		echo "<font class='head'>".t("Asiakkaan tarjoukset").":</font><hr>";
 
-		$til = " tila = 'T' ";
+		$til = " tila in ('T','D') and tilaustyyppi='T' ";
 	}
 	if ($cleantoim == 'YLLAPITO') {
 		echo "<font class='head'>".t("Asiakkaan ylläpitosopimukset").":</font><hr>";
 
-		$til = " tila in ('L','0') ";
+		$til = " tila in ('L','0','D') and tilaustyyppi='0' ";
 	}
 	if ($cleantoim == 'REKLAMAATIO') {
 		echo "<font class='head'>".t("Asiakkaan reklamaatiot").":</font><hr>";
 
-		$til = " tila in ('L','N','C') and tilaustyyppi='R' ";
+		$til = " tila in ('L','N','C','D') and tilaustyyppi='R' ";
 	}
 
 	//	Voidaan näyttää vain tilaus ilman hakuja yms. Haluamme kuitenkin tarkastaa oikeudet.
-	if($tee=="NAYTA" and $til != "") {
+	if ($tee=="NAYTA" and $til != "") {
 		require ("raportit/naytatilaus.inc");
 		require ("inc/footer.inc");
 		die();
@@ -179,7 +180,7 @@
 			require ("../inc/kevyt_toimittajahaku.inc");
 		}
 	}
-	elseif($otunnus > 0) {
+	elseif ($otunnus > 0) {
 		$query = "	(SELECT laskunro, ytunnus, liitostunnus
 					FROM lasku use index (PRIMARY)
 					WHERE tunnus='$otunnus'
@@ -204,7 +205,7 @@
 			$asiakasid 		= $row["liitostunnus"];
 		}
 	}
-	elseif($sopimus > 0) {
+	elseif ($sopimus > 0) {
 		$query = "	SELECT laskunro, ytunnus, liitostunnus
 					FROM lasku
 					WHERE tunnus='$sopimus'
@@ -222,7 +223,7 @@
 			$asiakasid 		= $row["liitostunnus"];
 		}
 	}
-	elseif($laskunro > 0) {
+	elseif ($laskunro > 0) {
 		if ($cleantoim == 'OSTO') {
 			$query = "	SELECT laskunro, ytunnus, liitostunnus
 						FROM lasku
@@ -252,7 +253,7 @@
 			$asiakasid 		= $row["liitostunnus"];
 		}
 	}
-	elseif($astilnro != '') {
+	elseif ($astilnro != '') {
 		$query = "	SELECT laskunro, ytunnus, liitostunnus, tunnus
 					FROM lasku use index (yhtio_asiakkaan_tilausnumero)
 					WHERE asiakkaan_tilausnumero LIKE ('%$astilnro%')
@@ -376,7 +377,7 @@
 							and $til
 							and lasku.laskunro='$laskunro'";
 			}
-			elseif($sopimus > 0) {
+			elseif ($sopimus > 0) {
 				$query = "	(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
 							FROM lasku
 							$yhtioekojoin
@@ -478,7 +479,7 @@
 					$pknum 		= $pkrow[0];
 					$borderlask = $pkrow[0];
 				}
-				elseif($row["laskunro"] == 0) {
+				elseif ($row["laskunro"] == 0) {
 					$borderlask		= 1;
 					$pknum			= 1;
 					$pkrow[0] 		= 1;
@@ -487,28 +488,28 @@
 				$lask--;
 				$classlisa = "";
 
-				if($borderlask == 1 and $pkrow[0] == 1 and $pknum == 1) {
+				if ($borderlask == 1 and $pkrow[0] == 1 and $pknum == 1) {
 					$classalku	= " style='border-left: 1px solid; border-top: 1px solid; border-bottom: 1px solid;' ";
 					$classloppu = " style='border-top: 1px solid; border-bottom: 1px solid; border-right: 1px solid;' ";
 					$class 		= " style=' border-top: 1px solid; border-bottom: 1px solid;' ";
 
 					$borderlask--;
 				}
-				elseif($borderlask == $pkrow[0] and $pkrow[0] > 0) {
+				elseif ($borderlask == $pkrow[0] and $pkrow[0] > 0) {
 					$classalku	= " style='border-left: 1px solid; border-top: 1px solid;' ";
 					$classloppu = " style='border-top: 1px solid; border-right: 1px solid;' ";
 					$class 		= " style='border-top: 1px solid;' ";
 
 					$borderlask--;
 				}
-				elseif($borderlask == 1) {
+				elseif ($borderlask == 1) {
 					$classalku	= " style='border-left: 1px solid; border-bottom: 1px solid;' ";
 					$classloppu	= " style='border-right: 1px solid; border-bottom: 1px solid;' ";
 					$class 		= " style='border-bottom: 1px solid;' ";
 
 					$borderlask--;
 				}
-				elseif($borderlask > 0 and $borderlask < $pknum) {
+				elseif ($borderlask > 0 and $borderlask < $pknum) {
 					$classalku	= " style='border-left: 1px solid;' ";
 					$classloppu	= " style='border-right: 1px solid;' ";
 					$class 		= " ";
@@ -551,7 +552,16 @@
 				//tehdään selväkielinen tila/alatila
 				require "../inc/laskutyyppi.inc";
 
-				echo "<$ero valign='top' $classloppu>".t($laskutyyppi)." ".t($alatila)."</$ero>";
+				if ($laskutyyppi == "Mitätöity") {
+					$fn1 = "<font class='error'>";
+					$fn2 = "</font>";
+				}
+				else {
+					$fn1 = "";
+					$fn2 = "";
+				}
+				
+				echo "<$ero valign='top' $classloppu>$fn1".t($laskutyyppi)." ".t($alatila)."$fn2</$ero>";
 
 				echo "<form method='post' action='$PHP_SELF'><td class='back' valign='top'>
 						<input type='hidden' name='tee' 			value = 'NAYTATILAUS'>
@@ -563,8 +573,8 @@
 						<input type='hidden' name='tunnus' 			value = '$row[tilaus]'>";
 
 				//	Pysytään projektilla jos valitaan vain projekti
-				if($row["tila"] == "R" or $nippu > 0) {
-					if($nippu>0) {
+				if ($row["tila"] == "R" or $nippu > 0) {
+					if ($nippu > 0) {
 						echo "<input type='hidden' name='otunnus' value='$nippu'>";
 						echo "<input type='hidden' name='nippu' value='$nippu'>";
 					}
@@ -573,7 +583,7 @@
 						echo "<input type='hidden' name='nippu' value='$otunnus'>";
 					}
 				}
-				elseif($sopimus>0) {
+				elseif ($sopimus>0) {
 					echo "<input type='hidden' name='sopimus' value='$sopimus'>";
 				}
 				else {
@@ -611,7 +621,7 @@
 		else {
 			echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
 		}
-		if($cleantoim == "YLLAPITO") {
+		if ($cleantoim == "YLLAPITO") {
 			echo "<tr><th>".t("Sopimusnumero")."</th><td><input type='text' size='10' name='sopimus'></td></tr>";
 		}
 		else {

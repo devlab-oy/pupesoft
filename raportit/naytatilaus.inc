@@ -174,16 +174,29 @@
 	}
 
 	if ($laskurow["vienti"] == "K") {
-		$vteksti=t("Vienti ei-EU");
+		$vteksti = t("Vienti ei-EU");
 	}
 	elseif ($laskurow["vienti"] == "E") {
-		$vteksti=t("Vienti EU");
+		$vteksti = t("Vienti EU");
 	}
 	else {
-		$vteksti=t("Kotimaa");
+		$vteksti = t("Kotimaa");
+	}
+	
+	if ($laskutyyppi == "Mitätöity") {
+		$fn1 = "<font class='error'>";
+		$fn2 = "</font>";
+		
+		$deletedlisa = ",'D'";
+	}
+	else {
+		$fn1 = "";
+		$fn2 = "";
+		
+		$deletedlisa = "";
 	}
 
-	echo "	<td colspan='2'>".t("$laskutyyppi")." ".t("$alatila")."</td>
+	echo "	<td colspan='2'>$fn1".t("$laskutyyppi")." ".t("$alatila")."$fn2</td>
 			<td>$vteksti</td>
 			<td>".str_replace(".",",",$laskurow['erikoisale'])."</td>
 			<td>".tv1dateconv($laskurow["toimaika"])."</td>";
@@ -543,7 +556,7 @@
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
-					and tilausrivi.tyyppi='O'
+					and tilausrivi.tyyppi in ('O' $deletedlisa)
 					ORDER BY $jarjestys";
 		$presult = mysql_query($query) or pupe_error($query);
 
@@ -710,7 +723,7 @@
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
-					and tilausrivi.tyyppi in ('E','L','G','V','W','T')
+					and tilausrivi.tyyppi in ('E','L','G','V','W','T' $deletedlisa)
 					ORDER BY tilausrivi.otunnus, $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 

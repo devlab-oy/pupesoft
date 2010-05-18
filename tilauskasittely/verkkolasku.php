@@ -1758,10 +1758,10 @@
 					}
 
 					//siirretaan laskutiedosto operaattorille
-					$ftphost = "ftp.verkkolasku.net";
+					$ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
 					$ftpuser = $yhtiorow['verkkotunnus_lah'];
 					$ftppass = $yhtiorow['verkkosala_lah'];
-					$ftppath = "out/einvoice/data/";
+					$ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
 					$ftpfile = realpath($nimixml);
 
 					// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰

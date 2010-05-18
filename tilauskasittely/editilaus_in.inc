@@ -823,22 +823,39 @@ while (!feof ($fd)) {
 				$apuro = mysql_fetch_array($meapu);
 				$edimyyja = $apuro['tunnus'];
 
+				if ($yhtiorow["splittauskielto"] == "E") {
+					$splittauskielto = "E";
+				}
+				else {
+					$splittauskielto = "";
+				}
 
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
 							alatila 		   					= '$editilaus_alatila',
 							alv 			   					= '$arow[alv]',
+							alv_tili							= '',
 							asiakkaan_tilausnumero		   		= '$asiakkaan_tilausnumero',
 							chn				   					= '$arow[chn]',
+							clearing							= '',
 							comments 		   					= '$edi_kommentti',
 							eilahetetta							= '$editilaus_eilahetetta',
 							erikoisale		   					= '$arow[erikoisale]',
+							erpcm								= '',
+							huolitsija 							= '',
+							hyvaksynnanmuutos 					= '',
+							jakelu 								= '',
+							jaksotettu							= '',
+							jtkielto							= '$arow[jtkielto]',
 							kassalipas							= '$editilaus_kassalipas',
 							kauppatapahtuman_luonne				= '$arow[kauppatapahtuman_luonne]',
 							kerayspvm 		   					= '$toimpvm',
+							keraysvko 							= '',
 							ketjutus		   					= '$arow[ketjutus]',
+							kohde								= '',
 							kohdistettu 	   					= '$maksaja',
+							kuljetus 							= '',
 							kuljetusmuoto						= '$arow[kuljetusmuoto]',
 							laatija 		   					= '$edi_laatija',
 							laskutusvkopv	   					= '$arow[laskutusvkopv]',
@@ -847,9 +864,12 @@ while (!feof ($fd)) {
 							maa 			   					= '$arow[maa]',
 							maa_maara							= '$arow[maa_maara]',
 							maksuehto 		   					= '$editilaus_maksuehto',
+							maksuteksti 						= '',
 							myyja 			   					= '$edimyyja',
 							nimi 			   					= '$arow[nimi]',
 							nimitark 		   					= '$arow[nimitark]',
+							olmapvm								= '',
+							osatoimitus							= '',
 							osoite 			   					= '$arow[osoite]',
 							ovttunnus 		   					= '$arow[ovttunnus]',
 							piiri								= '$arow[piiri]',
@@ -859,11 +879,15 @@ while (!feof ($fd)) {
 							sisainen							= '$editilaus_sisainen',
 							sisviesti1         					= '$arow[sisviesti1]',
 							sisviesti2         					= '$lopviesti',
+							splittauskielto						= '$splittauskielto',
 							tila 			   					= '$editilaus_tila',
+							tilaustyyppi						= '',
 							tilausvahvistus    					= '$vastaustapa',
+							tilausyhteyshenkilo					= '',
 							toimaika 		   					= '$toimpvm',
 							toimitusehto 	   					= '$arow[toimitusehto]',
 							toimitustapa 	   					= '$arow[toimitustapa]',
+							toimvko	 							= '',
 							toim_maa		   					= '$arow[toim_maa]',
 							toim_nimi		   					= '$arow[toim_nimi]',
 							toim_nimitark	   					= '$arow[toim_nimitark]',
@@ -871,10 +895,14 @@ while (!feof ($fd)) {
 							toim_ovttunnus 	   					= '$arow[toim_ovttunnus]',
 							toim_postino	   					= '$arow[toim_postino]',
 							toim_postitp	   					= '$arow[toim_postitp]',
+							tunnusnippu							= '',
 							valkoodi		   					= '$yhtiorow[valkoodi]',
+							varasto 							= '',
 							verkkotunnus	   					= '$arow[verkkotunnus]',
 							vienti			   					= '$arow[vienti]',
+							vienti_kurssi						= '1',
 							viesti 			   					= '$viite',
+							viikorkopros 						= '$yhtiorow[viivastyskorko]',
 							yhtio 			   					= '$kukarow[yhtio]',
 							yhtio_kotipaikka					= '$yhtiorow[kotipaikka]',
 							yhtio_maa							= '$yhtiorow[maa]',
@@ -883,6 +911,7 @@ while (!feof ($fd)) {
 							yhtio_ovttunnus						= '$yhtiorow[ovttunnus]',
 							yhtio_postino						= '$yhtiorow[postino]',
 							yhtio_postitp						= '$yhtiorow[postitp]',
+							yhtio_toimipaikka					= '',
 							ytunnus			   					= '$arow[ytunnus]'";
 				$result = mysql_query($query) or die($query);
 				$id = mysql_insert_id();

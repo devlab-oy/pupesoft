@@ -18,7 +18,7 @@
 			$tilausnumero 		= 0;
 		}
 	}
-	
+
 	//katsotaan että kukarow kesken ja $tilausnumero stemmaavat keskenään
 	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
 		echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("Käy aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
@@ -1592,7 +1592,7 @@
 				// Alku mätsää
 				if ($srow["toimitusehto"] != "" and strtoupper(substr($srow["toimitusehto"], 0, 3)) == strtoupper($row["selite"])) {
 					$toimehtosel2 = $row["tunnus"];
-					$toimehtoseltark2 = substr($srow["toimitusehto"], 4);				
+					$toimehtoseltark2 = substr($srow["toimitusehto"], 4);
 				}
 
 				// Otetaan yhtiön oletus
@@ -1637,7 +1637,7 @@
 				$tresult = t_avainsana("TOIMEHTO");
 
 				echo "<select name='toimitusehto2' onchange='toimehtoTarkenne(\"toimitusehto2\");' ".js_alasvetoMaxWidth("toimitusehto2", 60).">";
-				
+
 				$toimehtosel  = "";
 				$toimehtosel1 = "";
 				$toimehtosel2 = "";
@@ -2636,6 +2636,7 @@
 		}
 
 		$query .= "	lasku SET
+					aktiivinen_kuljetus					= '',
 					alatila 							= '$alatila',
 					alv 								= '$alv',
 					alv_tili							= '$yhtioalv_tilino',
@@ -2652,12 +2653,14 @@
 					jaksotettu							= '$jaksotettu',
 					jtkielto							= '$jtkielto',
 					kassalipas							= '$kassalipas',
+					kauppatapahtuman_luonne				= '',
 					kerayspvm 							= '$kervv-$kerkk-$kerpp',
 					keraysvko 							= '$keraysvko',
 					ketjutus 							= '$ketjutus',
 					kohde								= '$kohde',
 					kohdistettu 						= '$maksaja',
 					kuljetus 							= '$kuljetus',
+					kuljetusmuoto						= '',
 					laskutusvkopv 						= '$laskutusvkopv',
 					liitostunnus						= '$liitostunnus',
 					maa 								= '$maa',

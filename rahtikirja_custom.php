@@ -472,10 +472,6 @@ if (! isset($_POST['toimitustapa'])) {
 		$sel_oslapp[$valittu_oslapp_tulostin]	= "SELECTED";
 	}
 
-	#2823
-	#2824
-	#3244
-
     $query = "	SELECT *
 				from kirjoittimet
 				where yhtio = '$kukarow[yhtio]'

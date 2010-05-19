@@ -107,20 +107,9 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		);
 	}
 
-	$query = "	SELECT komento 
-				from kirjoittimet 
-				where tunnus = ". (int) $_POST['tulostin']. " 
-				AND yhtio='{$kukarow['yhtio']}'";
-	$res = mysql_query($query) or pupe_error($query);
-
-	$k = mysql_fetch_array($res);
-
-    $kirjoitin = $k['komento'];
-	$tulostuskpl = $oslappkpl;
-
-	$query = "	SELECT * 
-				FROM asiakas 
-				WHERE yhtio = '$kukarow[yhtio]' 
+	$query = "	SELECT *
+				FROM asiakas
+				WHERE yhtio = '$kukarow[yhtio]'
 				AND ytunnus = '$ytunnus'";
 	$asres = mysql_query($query) or pupe_error($query);
 	$asiakasrow = mysql_fetch_array($asres);
@@ -176,9 +165,9 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	$osoitelappurow['yhtio_postitp']	= $yhtiorow["postitp"];
 
 	// poikkeava toimipaikka,otetaan sen ositetiedot
-	$alhqur = "	SELECT * 
-				from yhtion_toimipaikat 
-				WHERE yhtio = '$kukarow[yhtio]' 
+	$alhqur = "	SELECT *
+				from yhtion_toimipaikat
+				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus = '$kukarow[toimipaikka]'";
 	$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
@@ -193,7 +182,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		$osoitelappurow["yhtio_maa"]      	= $apualvrow["maa"];
 		$osoitelappurow['yhtio_toimipaikka']= $apualvrow["tunnus"];
 	}
-	
+
 	// haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
 	$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 				FROM varastopaikat
@@ -211,18 +200,33 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		$postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
 		$postirow["yhtio_maa"]      = $postirow_varasto["maa"];
 	}
-	
+
 	$rahtikirjanrostring = mysql_real_escape_string(serialize($osoitelappurow));
 
-	$query  = "	SELECT * 
-				FROM toimitustapa 
-				WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}' 
-				AND selite = '$toimitustapa' 
+	$query  = "	SELECT *
+				FROM toimitustapa
+				WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}'
+				AND selite = '$toimitustapa'
 				ORDER BY jarjestys,selite";
 	$result = mysql_query($query) or pupe_error($query);
 	$toitarow = mysql_fetch_array($result);
 
-	include ("tilauskasittely/{$toitarow['rahtikirja']}");
+	if ((int) $tulostin > 0 and $oslappkpl > 0) {
+		$query = "	SELECT komento
+					from kirjoittimet
+					where tunnus 	= '$tulostin'
+					AND yhtio		= '$kukarow[yhtio]'";
+		$res = mysql_query($query) or pupe_error($query);
+
+		$k = mysql_fetch_array($res);
+
+	    $kirjoitin = $k['komento'];
+		$tulostuskpl = $oslappkpl;
+
+		include ("tilauskasittely/$toitarow[rahtikirja]");
+
+		echo "<p>".t("Tulostetaan rahtikirja")."...</p><br>";
+	}
 
 	//Tallennetaan customrahtikirjan tiedot järjestelmään
 	if ((int) $otsikkonro != 0) {
@@ -234,18 +238,19 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		$kirres = mysql_query($query) or pupe_error($query);
 	}
 
-	//haetaan osoitelapun tulostuskomento
-	$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_oslapp_tulostin'";
-	$kirres = mysql_query($query) or pupe_error($query);
-	$kirrow = mysql_fetch_array($kirres);
-	$oslapp = $kirrow['komento'];
+	if ((int) $valittu_oslapp_tulostin > 0 and $oslappkpl > 0) {
 
-	// Tulostetaan osoitelappu
-	if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
+		//haetaan osoitelapun tulostuskomento
+		$query  = "	SELECT *
+					from kirjoittimet
+					where yhtio	= '$kukarow[yhtio]'
+					and tunnus	= '$valittu_oslapp_tulostin'";
+		$kirres = mysql_query($query) or pupe_error($query);
+		$kirrow = mysql_fetch_array($kirres);
+		$oslapp = $kirrow['komento'];
 
-		if ($oslappkpl > 0) {
-			$oslapp .= " -#$oslappkpl ";
-		}
+		// Tulostetaan osoitelappu
+		if ($oslapp != "email") $oslapp .= " -#$oslappkpl ";
 
 		if ($toitarow['osoitelappu'] == 'intrade') {
 			require('tilauskasittely/osoitelappu_intrade_pdf.inc');
@@ -253,10 +258,11 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		else {
 			require ("tilauskasittely/osoitelappu_pdf.inc");
 		}
+
+		echo "<p>".t("Tulostetaan osoitelappu")."...</p><br>";
 	}
 
 	$asiakasid = false;
-	echo "<p>".t("Tulostetaan rahtikirja").".</p>";
 }
 
 if (isset($_POST['ytunnus']) && $asiakasid !== false) {
@@ -291,7 +297,7 @@ if (!$asiakasid) {
 
 			$query = "	SELECT *
 						FROM kirjoittimet
-						WHERE yhtio='$kukarow[yhtio]'
+						WHERE yhtio = '$kukarow[yhtio]'
 						ORDER by kirjoitin";
 			$kirre = mysql_query($query) or pupe_error($query);
 
@@ -354,10 +360,21 @@ if ($asiakasid) {
 
 ?>
 
-<tr><th><?php echo t('Varasto') ?></th><td><select name='varasto'>
-	<?php foreach (pupe_varasto_fetch_all() as $key => $val): ?>
-		<option value="<?php echo $key ?>"><?php echo $val ?></option>
-	<?php endforeach; ?>
+<tr><th><?php echo t('Varasto') ?></th><td><select name='varasto' onChange='document.rahtikirja.submit();'>
+	<?php
+		foreach (pupe_varasto_fetch_all() as $key => $val) {
+
+			if ($varasto == $key or !isset($varasto)) {
+				$sel = "SELECTED";
+				$varasto = $key;
+			}
+			else {
+				$sel = "";
+			}
+
+			echo "<option value='$key' $sel>$val</option>";
+		}
+	?>
 	</select></td>
 </tr>
 <tr>
@@ -428,25 +445,45 @@ if (! isset($_POST['toimitustapa'])) {
 </tr>
 
 <?php
-	echo "<tr><th>".t('Lähettäjän viite')."</th><td><input type=hidden name='asiakas' value='{$asiakasrow['ytunnus']}'><input type='text' name='viitelah'></td></tr>";
+	echo "<tr><th>".t('Lähettäjän viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'><input type='text' name='viitelah'></td></tr>";
 	echo "<tr><th>".t('Vastaanottajan viite')."</th><td><input type='text' name='viitevas'></td></tr>";
     echo "<tr><th>".t('Rahtikirja')."</th><td><select name='tulostin'>";
+	echo "<option value=''>".t("Ei tulosteta")."</option>";
+
+	// Hetaan varaston tulostimet
+	if ($varasto > 0) {
+		$query = "	SELECT *
+					from varastopaikat
+					where yhtio	= '$kukarow[yhtio]'
+					and tunnus	= '$varasto'
+					order by alkuhyllyalue, alkuhyllynro";
+	}
+	$kirre = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($kirre) > 0) {
+
+		$prirow = mysql_fetch_assoc($kirre);
+
+		$sel_lahete[$prirow['printteri1']] = "SELECTED";
+		$sel_oslapp[$prirow['printteri3']] = "SELECTED";
+	}
+	else {
+		$sel_lahete[$tulostin] 					= "SELECTED";
+		$sel_oslapp[$valittu_oslapp_tulostin]	= "SELECTED";
+	}
+
+	#2823
+	#2824
+	#3244
 
     $query = "	SELECT *
 				from kirjoittimet
-				where yhtio='$kukarow[yhtio]'
+				where yhtio = '$kukarow[yhtio]'
 				ORDER BY kirjoitin";
 	$kires = mysql_query($query) or pupe_error($query);
 
 	while ($kirow = mysql_fetch_array($kires)) {
-		if ($kirow["tunnus"] == $_POST['tulostin']) {
-			$sel = "SELECTED";
-		}
-		else {
-			$sel = "";
-		}
-
-		echo "<option value='{$kirow['tunnus']}' $sel>{$kirow['kirjoitin']}</option>\n";
+		echo "<option value='$kirow[tunnus]' ".$sel_lahete[$kirow["tunnus"]].">$kirow[kirjoitin]</option>\n";
 	}
 
 	echo "</select></td></tr>";
@@ -460,13 +497,7 @@ if (! isset($_POST['toimitustapa'])) {
 	mysql_data_seek($kires, 0);
 
 	while ($kirow = mysql_fetch_array($kires)) {
-		if ($kirow["tunnus"] == $_POST['tulostin']) {
-			$sel = "SELECTED";
-		}
-		else {
-			$sel = "";
-		}
-		echo "<option value='{$kirow['tunnus']}' $sel>{$kirow['kirjoitin']}</option>";
+		echo "<option value='$kirow[tunnus]' ".$sel_oslapp[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
 	}
 
 	echo "</select></td></tr>";
@@ -488,15 +519,15 @@ if (! isset($_POST['toimitustapa'])) {
 	while ($row = mysql_fetch_array($result)) {
     	echo "<tr>
             <td>
-                <input type='hidden' name='pakkaus[$i]' value='{$row['selite']}'>
-    		    <input type='hidden' name='pakkauskuvaus[$i]' value='{$row['selitetark']}'>
+                <input type='hidden' name='pakkaus[$i]' value='$row[selite]'>
+    		    <input type='hidden' name='pakkauskuvaus[$i]' value='$row[selitetark]'>
     	        <input type='text' size='3' value='' name='kollit[$i]'>
     	    </td>
     	    <td><input type='text' size='3' value='' name='kilot[$i]'></td>
     	    <td><input type='text' size='3' value='' name='kuutiot[$i]'></td>
     	    <td><input type='text' size='3' value='' name='lavametri[$i]'></td>
-    	    <td>{$row['selite']}</td>
-			<td>{$row['selitetark']}</td>";
+    	    <td>$row[selite]</td>
+			<td>$row[selitetark]</td>";
 
 		echo "<td><input type='text' size='10' name='pakkauskuvaustark[$i]'></td>";
 

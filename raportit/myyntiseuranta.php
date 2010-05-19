@@ -392,14 +392,14 @@
 					if ($mukaan == "ytunnus") {
 						if ($group!="") $group .= ",asiakas.tunnus";
 						else $group  .= "asiakas.tunnus";
-						
+
 						if ($osoitetarrat != "") $select .= "asiakas.tunnus astunnus, ";
-						
+
 						$select .= "asiakas.ytunnus, asiakas.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi!='' and asiakas.nimi!=asiakas.toim_nimi,concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark),NULL)) nimi, concat_ws('<br>',asiakas.postitp,if(asiakas.toim_postitp!='' and asiakas.postitp!=asiakas.toim_postitp,asiakas.toim_postitp,NULL)) postitp, ";
 						$order  .= "asiakas.ytunnus,";
 						$gluku++;
 					}
-					
+
 					if ($mukaan == "asiakasnro") {
 						if ($group!="") $group .= ",asiakas.tunnus";
 						else $group .= "asiakas.tunnus";
@@ -1893,6 +1893,7 @@
 			$query = "	SELECT tunnus selite, nimi selitetark
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
 						and tyyppi = 'K'
 						ORDER BY nimi";
 			$res2  = mysql_query($query) or die($query);

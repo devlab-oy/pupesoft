@@ -13,7 +13,7 @@
 		(mysql_field_name($result, $i) == "pankkikortti") or
 		(mysql_field_name($result, $i) == "luottokortti") or
 		(mysql_field_name($result, $i) == "kateistilitys") or
-		(mysql_field_name($result, $i) == "kassaerotus") or 
+		(mysql_field_name($result, $i) == "kassaerotus") or
 		(mysql_field_name($result, $i) == "kateisotto")) {
 
 		if ($ulosarray[$i] != '') {
@@ -22,14 +22,16 @@
 		}
 		else {
 			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+
 			$query = "	SELECT nimi
 						FROM tili
-						WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tilino = '$trow[$i]'";
 			$vresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($vresult) == 1) {
-				$vrow=mysql_fetch_array($vresult);
-				$ulos .= " " . $vrow[nimi] . "</td>";
+				$vrow = mysql_fetch_array($vresult);
+				$ulos .= " $vrow[nimi]</td>";
 				$jatko = 0;
 			}
 		}
@@ -41,10 +43,12 @@
 			$jatko = 0;
 		}
 		else {
-			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";	
+			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
 			$query = "	SELECT tunnus, nimi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'K'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 

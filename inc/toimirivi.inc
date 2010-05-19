@@ -161,8 +161,9 @@
     if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat
 		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and
-					tyyppi = 'K'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'K'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 

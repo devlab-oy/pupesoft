@@ -44,7 +44,10 @@
 					// Etsit‰‰‰n vastaava kustannuspaikka
 					$query = "	SELECT tunnus
 								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P' and kaytossa != 'E' and nimi = '$ikustp[$maara]'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi = 'P'
+								and kaytossa != 'E'
+								and nimi = '$ikustp[$maara]'";
 					$result = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($result) == 1) {
@@ -74,7 +77,10 @@
 				if ($ikustp_tsk != "") {
 					$query = "	SELECT tunnus
 								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa != 'E' and nimi = '$ikustp_tsk'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi = 'K'
+								and kaytossa != 'E'
+								and nimi = '$ikustp_tsk'";
 					$ikustpres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($ikustpres) == 1) {
@@ -86,7 +92,10 @@
 				if ($ikustp_tsk != "" and $ikustp[$maara] == 0) {
 					$query = "	SELECT tunnus
 								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa != 'E' and koodi = '$ikustp_tsk'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi = 'K'
+								and kaytossa != 'E'
+								and koodi = '$ikustp_tsk'";
 					$ikustpres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($ikustpres) == 1) {
@@ -101,7 +110,10 @@
 
 					$query = "	SELECT tunnus
 								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa != 'E' and tunnus = '$ikustp_tsk'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi = 'K'
+								and kaytossa != 'E'
+								and tunnus = '$ikustp_tsk'";
 					$ikustpres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($ikustpres) == 1) {
@@ -126,7 +138,10 @@
 				if ($ikustp_tsk != "") {
 					$query = "	SELECT tunnus
 								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa != 'E' and nimi = '$ikustp_tsk'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi = 'K'
+								and kaytossa != 'E'
+								and nimi = '$ikustp_tsk'";
 					$ikustpres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($ikustpres) == 1) {
@@ -138,7 +153,10 @@
 				if ($ikustp_tsk != "" and $ikustp[$maara] == 0) {
 					$query = "	SELECT tunnus
 								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa != 'E' and koodi = '$ikustp_tsk'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi = 'K'
+								and kaytossa != 'E'
+								and koodi = '$ikustp_tsk'";
 					$ikustpres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($ikustpres) == 1) {
@@ -153,7 +171,10 @@
 
 					$query = "	SELECT tunnus
 								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa != 'E' and tunnus = '$ikustp_tsk'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi = 'K'
+								and kaytossa != 'E'
+								and tunnus = '$ikustp_tsk'";
 					$ikustpres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($ikustpres) == 1) {

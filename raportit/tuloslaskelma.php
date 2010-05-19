@@ -264,7 +264,7 @@
 				// tasonimi talteen (rightp‰dd‰t‰‰n ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
 				$apusort = str_pad($tasorow["taso"], 20, "÷");
 				$tasonimi[$apusort] = $tasorow["nimi"];
-				
+
 				if ($toim == "TASOMUUTOS") {
 					$summattavattasot[$apusort] = $tasorow["summattava_taso"];
 				}
@@ -570,9 +570,9 @@
 
 						$rivi .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
 					}
-					
+
 					if ($toim == "TASOMUUTOS" and $summattavattasot[$key_c] != "") {
-						$rivi .= "<td class='back' nowrap>".t("Summattava taso").": ".$summattavattasot[$key_c]."</td>";					
+						$rivi .= "<td class='back' nowrap>".t("Summattava taso").": ".$summattavattasot[$key_c]."</td>";
 					}
 
 					$rivi .= "</tr>\n";
@@ -674,19 +674,19 @@
 			echo "</td>
 					</tr>";
 
-				
+
 			if (!isset($plvv)) {
-				$query = "	SELECT * 
+				$query = "	SELECT *
 							FROM tilikaudet
 							WHERE yhtio = '$kukarow[yhtio]'
 							and '".date("Y-m-d")."' >= tilikausi_alku
 							and '".date("Y-m-d")."' <= tilikausi_loppu";
 				$result = mysql_query($query) or pupe_error($query);
 				$tilikausirow = mysql_fetch_array($result);
-				
+
 				$plvv = substr($tilikausirow['tilikausi_alku'], 0, 4);
 				$plvk = substr($tilikausirow['tilikausi_alku'], 5, 2);
-				$plvp = substr($tilikausirow['tilikausi_alku'], 8, 2);			
+				$plvp = substr($tilikausirow['tilikausi_alku'], 8, 2);
 			}
 
 			echo "	<th valign='top'>".t("Alkukausi")."</th>
@@ -852,21 +852,27 @@
 			// haetaan kustannuspaikat
 			$query = "	SELECT tunnus, nimi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'K'
 						ORDER BY nimi";
 			$k_result = mysql_query($query) or pupe_error($query);
 
 			// haetaan kohteet
 			$query = "	SELECT tunnus, nimi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'O'
 						ORDER BY nimi";
 			$o_result = mysql_query($query) or pupe_error($query);
 
 			// haetaan projektit
 			$query = "	SELECT tunnus, nimi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'P'
 						ORDER BY nimi";
 			$p_result = mysql_query($query) or pupe_error($query);
 

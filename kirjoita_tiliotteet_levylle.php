@@ -1,4 +1,9 @@
 <?php
+	
+	if (@include("inc/parametrit.inc"));
+	elseif (@include("parametrit.inc"));
+	else exit;
+
 	if (!function_exists("kirjoitaote")) {
 		function kirjoitaote($tiliointi) { // Voisimme kirjoittaa otteen levylle
 			global $kukarow, $otsikko, $sisalto, $ote;
@@ -44,10 +49,7 @@
 			}
 		}
 	}
-
-	require ("inc/functions.inc");
-	require ("inc/parametrit.inc");
-	
+		
 	echo "<font class='head'>Tiliotteiden siirto levylle</font><hr><br>";
 
 	if ($tee == 'all') { // haetaan sopivat tiliotteet
@@ -291,7 +293,11 @@
 			<input type='text' name='kausi' value=''> esim 2008-01
 			<input type='Submit' value='Siirrä'>
 			</form>";
+	
 	$formi='formi';
 	$kentta='kausi';
-	require "inc/footer.inc";
+	
+	if (@include("inc/footer.inc"));
+	elseif (@include("footer.inc"));
+	else exit; 
 ?>

@@ -323,7 +323,7 @@
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi = 'K'
-					and kaytossa <> 'E'
+					and kaytossa != 'E'
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 

@@ -244,10 +244,11 @@ if (isset($tee)) {
 					else {
 						// Selväkieliset tarkenteet
 						if (($i > 1) and ($i < 5) and ($trow[$i] > 0)) {
-							$query = "SELECT nimi
-										FROM kustannuspaikka WHERE tunnus = '$trow[$i]'";
+							$query = "	SELECT nimi
+										FROM kustannuspaikka
+										WHERE tunnus = '$trow[$i]'";
 							$vresult = mysql_query($query) or pupe_error($query);
-							$vrow=mysql_fetch_array($vresult);
+							$vrow = mysql_fetch_array($vresult);
 							$trow[$i] = $vrow[0];
 						}
 						if (($i == 5) and ($excel!='')) $trow[$i]=str_replace("<br>"," ",$trow[$i]);
@@ -416,7 +417,9 @@ if (isset($tee)) {
 
 	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa != 'E'
+				and tyyppi = 'K'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
@@ -438,7 +441,9 @@ if (isset($tee)) {
 
 	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa != 'E'
+				and tyyppi = 'O'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
@@ -460,7 +465,9 @@ if (isset($tee)) {
 
 	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa != 'E'
+				and tyyppi = 'P'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 

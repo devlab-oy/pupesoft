@@ -423,9 +423,9 @@
 								if (mysql_field_name($result, $i) == "tuotemyyjä") {
 									$query = "	SELECT nimi
 												FROM kuka
-												WHERE yhtio in ($yhtio) 
-												and myyja = '$row[$i]' 
-												AND myyja > 0 
+												WHERE yhtio in ($yhtio)
+												and myyja = '$row[$i]'
+												AND myyja > 0
 												limit 1";
 									$osre = mysql_query($query) or pupe_error($query);
 
@@ -439,8 +439,8 @@
 								if (mysql_field_name($result, $i) == "tuoteostaja") {
 									$query = "	SELECT nimi
 												FROM kuka
-												WHERE yhtio in ($yhtio) 
-												and myyja = '$row[$i]' 
+												WHERE yhtio in ($yhtio)
+												and myyja = '$row[$i]'
 												AND myyja > 0
 												limit 1";
 									$osre = mysql_query($query) or pupe_error($query);
@@ -835,6 +835,7 @@
 			$query = "	SELECT tunnus selite, nimi selitetark
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
 						and tyyppi = 'K'
 						ORDER BY nimi";
 			$res2  = mysql_query($query) or die($query);
@@ -879,8 +880,8 @@
 			echo "<tr>";
 			echo "<td valign='top'>";
 
-			$query  = "	SELECT tunnus, nimitys 
-						FROM varastopaikat 
+			$query  = "	SELECT tunnus, nimitys
+						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
 						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);

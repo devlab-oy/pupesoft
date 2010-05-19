@@ -40,9 +40,11 @@ foreach ($keissit as $keissi) {
 			break;
 		case "Kustannupaikka" :
 			// K = kustannuspaikka, O = kohde ja P = projekti
-			$query =	"SELECT tunnus, IF(INSTR(nimi,tunnus) != 0,LTRIM(RIGHT(nimi,CHAR_LENGTH(nimi)-CHAR_LENGTH(tunnus))),nimi) as nimi
+			$query = "	SELECT tunnus, IF(INSTR(nimi,tunnus) != 0,LTRIM(RIGHT(nimi,CHAR_LENGTH(nimi)-CHAR_LENGTH(tunnus))),nimi) as nimi
 						FROM kustannuspaikka
-						WHERE kustannuspaikka.yhtio = '$kukarow[yhtio]' and tyyppi = 'K'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'K'";
 			break;
 		case "Laskunumero" :
 			$query =	"SELECT laskunro

@@ -35,8 +35,9 @@
 	if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat
 		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and
-					tyyppi = 'K'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'K'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -62,8 +63,9 @@
 	if (mysql_field_name($result, $i) == "kohde") { //kohteet
 		$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and
-						tyyppi = 'O'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'O'
 						ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -89,8 +91,9 @@
 
 		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and
-					tyyppi = 'P'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'P'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 

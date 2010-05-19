@@ -11,7 +11,7 @@ if ($kausi!='') {
 	$erotin="\t";
 	$nimi = "/tmp/SIE-$kukarow[yhtio]-".date("ymd.His-s").".txt";
 	$toot = fopen($nimi,"w+");
-	
+
 	fputs($toot, '#FLAGGA'.$erotin.'0'.$riviloppu);
 
 	fputs($toot, '#PROGRAM'.$erotin.'"Pupesoft the open alternative"'.$riviloppu);
@@ -27,8 +27,6 @@ if ($kausi!='') {
 	fputs($toot, "#FNAMN".$erotin.'"'.$yhtiorow['nimi'].'"'.$riviloppu);
 	fputs($toot, '#ADRESS'.$erotin.'"'.$yhtiorow['osoite'].'"'.$erotin.'"'.$yhtiorow['postino']." ".$yhtiorow['postitp'].'"'.$riviloppu);
 
-
-
 	if ($perustiedot=='on') {
 
 		//Tilikartta
@@ -42,21 +40,26 @@ if ($kausi!='') {
 			$ulos.='#KONTO'.$erotin.$trow['tilino'].$erotin.'"'.$trow['nimi'].'"'.$riviloppu;
 		}
 		fputs($toot, $ulos);
-		
+
 		//Kustannuspaikan koodien haku
 		echo "<font class='message'>Tarkenteet</font><br>";
-		$query = "SELECT tunnus, nimi FROM kustannuspaikka WHERE yhtio = '$kukarow[yhtio]'";
-
+		$query = "	SELECT tunnus, nimi
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'";
 		$result = mysql_query($query)
 					or die ("Kysely ei onnistu $query");
 		$ulos='';
+
 		while ($trow = mysql_fetch_array($result)) {
 			$ulos.='#DIM'.$erotin.$trow['tunnus'].$erotin.'"'.$trow['nimi'].'"'.$riviloppu;
 		}
+
 		fputs($toot, $ulos);
 
 	}
 	echo "<font class='message'>Tapahtumat</font><br>";
+
 	//Itse tapahtumat
 	$query  = "SELECT date_format(tiliointi.tapvm, '%Y%m%d') tapvm,
 			tilino, kustp, projekti, tiliointi.summa
@@ -70,15 +73,15 @@ if ($kausi!='') {
 	$result = mysql_query($query) or pupe_error($query);
 
 	while ($trow=mysql_fetch_array ($result)) {
-	
+
 		if (($vanhaltunnus!=$trow['ltunnus']) or ($vanhatapvm!=$trow['tapvm'])) { // Uusi tosite
-			
+
 			if ($kesken == 1) {
 				$ulos.=$riviloppu."}";
 				fputs($toot,$ulos.$riviloppu);
 				$kesken = 0;
 			}
-			
+
 			$ulos='#VER'.$erotin.'""'.$erotin.'""'.$erotin.$trow['tapvm'].$erotin.'"';
 			if ($trow['nimi']=='') $ulos.=$trow['nimi']; else $ulos.=$trow['selite'];
 			$ulos.='"'.$riviloppu."{".$riviloppu;
@@ -86,18 +89,18 @@ if ($kausi!='') {
 			$vanhaltunnus = $trow['ltunnus'];
 			$vanhatapvm = $trow['tapvm'];
 		}
-		
+
 		$ulos.=$erotin.'#TRANS'.$erotin.$trow['tilino'].$erotin.'{'.$trow['kustp'].' '.$trow['kohde'].' '.$trow['projekti'].'}';
 		$ulos.=$erotin.$trow['summa'].$erotin.$trow['tapvm'].$erotin.'"'.$trow['selite'].'"'.$riviloppu;
-		
+
 	}
-	
+
 	if ($kesken == 1) {
 		$ulos.=$riviloppu."}";
 		fputs($toot,$ulos.$riviloppu);
 		$kesken = 0;
 	}
-		
+
 	fclose($toot);
 	echo "<br><br><br>";
 	$kausi='';

@@ -11,7 +11,7 @@
 	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti
 		$maxsize++; //Tilaa mahdolliselle viivalle
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kaytossa") {
 
 		$sel1 = '';
@@ -99,7 +99,9 @@
 	if (mysql_field_name($result, $i) == "oletus_kustp") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'K'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
@@ -118,7 +120,9 @@
 	if (mysql_field_name($result, $i) == "oletus_kohde") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'O'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kohdetta")."</option>";
@@ -137,7 +141,9 @@
 	if (mysql_field_name($result, $i) == "oletus_projekti") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'P'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei projektia")."</option>";

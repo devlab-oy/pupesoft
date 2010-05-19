@@ -1,22 +1,23 @@
 <?php
 	require "inc/parametrit.inc";
+
 	echo "<font class='head'>".t("Tiliotteen tiliöintisäännöt")."</font><hr>";
 
-// Jos $pankkitili = 'x' niin kyseessä on viiteaineiston sääntö
+	// Jos $pankkitili = 'x' niin kyseessä on viiteaineiston sääntö
 
 	if ($tee == 'P') {
-// Olemassaolevaa sääntöä muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
-
-		$query = "SELECT *
+		// Olemassaolevaa sääntöä muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
+		$query = "	SELECT *
 					FROM tiliotesaanto
 					WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
+
 		if (mysql_num_rows($result) == 0) {
-			echo "".t("Sääntöä ei löydy")."! $query";
+			echo t("Sääntöä ei löydy")."! $query";
 			exit;
 		}
 
-		$tiliointirow=mysql_fetch_array($result);
+		$tiliointirow = mysql_fetch_array($result);
 		$koodi = $tiliointirow['koodi'];
 		$koodiselite= $tiliointirow['koodiselite'];
 		$nimitieto = $tiliointirow['nimitieto'];
@@ -32,11 +33,12 @@
 		$query = "DELETE from tiliotesaanto WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
+
 	if ($tee == 'U') {
-// Tarkistetaan sääntö
+		// Tarkistetaan sääntö
 		if ($erittely == '') {
 			$virhe="";
-			$query = "SELECT tilino
+			$query = "	SELECT tilino
 						FROM tili
 						WHERE tilino = '$tilino' and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -49,20 +51,26 @@
 			$nimitieto=strtoupper($nimitieto);
 
 			if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA")) {
-				$query = "SELECT tilino
+				$query = "	SELECT tilino
 							FROM tili
 							WHERE tilino = '$tilino2' and yhtio = '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
+
 				if (mysql_num_rows($result) == 0) {
 					$virhe .= t("Palkkiotiliä ei löydy")."<br>";
 					$ok = 1;
 					$tee = '';
 				}
+
 				if ($kustp2 != 0) {
-					$query = "SELECT tunnus
+					$query = "	SELECT tunnus
 								FROM kustannuspaikka
-								WHERE tunnus = '$kustp2' and yhtio = '$kukarow[yhtio]' and tyyppi='K'";
+								WHERE tunnus = '$kustp2'
+								and yhtio = '$kukarow[yhtio]'
+								and kaytossa != 'E'
+								and tyyppi = 'K'";
 					$result = mysql_query($query) or pupe_error($query);
+
 					if (mysql_num_rows($result) == 0) {
 						$virhe.= t("Kustannuspaikkaa ei löydy")."<br>";
 						$ok = 1;
@@ -180,9 +188,12 @@
 				if (mysql_field_name($result,$i) == 'kustp') {
 					echo "<td>";
 					if ($tiliointirow[$i] != 0) { // Meillä on kustannuspaikka
-						$query = "SELECT nimi FROM kustannuspaikka
-									WHERE yhtio = '$kukarow[yhtio]' and
-									tunnus = '$tiliointirow[$i]' and tyyppi = 'K'";
+						$query = "	SELECT nimi
+									FROM kustannuspaikka
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '$tiliointirow[$i]'
+									and kaytossa != 'E'
+									and tyyppi = 'K'";
 						$xresult = mysql_query($query) or pupe_error($query);
 						$xrow=mysql_fetch_array ($xresult);
 						echo "$xrow[0]";
@@ -192,11 +203,15 @@
 				elseif (mysql_field_name($result,$i) == 'kustp2') {
 					echo "<td>";
 					if ($tiliointirow[$i] != 0) { // Meillä on kustannuspaikka
-						$query = "SELECT nimi FROM kustannuspaikka
-									WHERE yhtio = '$kukarow[yhtio]' and
-									tunnus = '$tiliointirow[$i]' and tyyppi = 'K'";
+						$query = "	SELECT nimi
+									FROM kustannuspaikka
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '$tiliointirow[$i]'
+									and kaytossa != 'E'
+									and tyyppi = 'K'";
 						$xresult = mysql_query($query) or pupe_error($query);
-						$xrow=mysql_fetch_array ($xresult);
+						$xrow = mysql_fetch_array ($xresult);
+
 						echo "$xrow[0]";
 					}
 					echo "</td>";
@@ -215,9 +230,9 @@
 				</td></tr></form>";
 		}
 
-	// Annetaan mahdollisuus tehdä uusi sääntö
+		// Annetaan mahdollisuus tehdä uusi sääntö
 		if ($ok != 1) {
-		// Annetaan tyhjät tiedot, jos rivi oli virheetön
+			// Annetaan tyhjät tiedot, jos rivi oli virheetön
 			$koodi = '';
 			$koodiselite= '';
 			$nimitieto = '';
@@ -229,15 +244,16 @@
 			$kustp2 = '';
 		}
 
-		$query = "SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and
-					tyyppi = 'K' and
-					kaytossa <> 'E'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = 'K'
+					and kaytossa != 'E'
 					ORDER BY nimi";
-
 		$result = mysql_query($query) or pupe_error($query);
+
 		$ulos = "<select name = 'kustp'><option value = ' '>Ei kustannuspaikkaa";
+
 		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 			$valittu = "";
 			if ($kustannuspaikkarow[0] == $kustp) {
@@ -248,7 +264,9 @@
 		$ulos .= "</select>";
 
 		mysql_data_seek($result,0);
+
 		$ulos2 = "<select name = 'kustp2'><option value = ' '>Ei kustannuspaikkaa";
+
 		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 			$valittu = "";
 			if ($kustannuspaikkarow[0] == $kustp2) {
@@ -256,6 +274,7 @@
 			}
 			$ulos2 .= "<option value = '$kustannuspaikkarow[0]' $valittu>$kustannuspaikkarow[1]";
 		}
+
 		$ulos2 .= "</select>";
 
 		if ($pankkitili != 'x') {

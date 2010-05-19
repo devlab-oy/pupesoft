@@ -444,7 +444,9 @@ if ($ytunnus != '' and $tee == "") {
 	// Tehd‰‰n kustannuspaikkapopup
 	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa <> 'E'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tyyppi = 'K'
+				and kaytossa != 'E'
 				ORDER BY nimi";
 	$kustpvr = mysql_query($query) or pupe_error($query);
 

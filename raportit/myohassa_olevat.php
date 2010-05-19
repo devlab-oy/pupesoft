@@ -81,7 +81,9 @@
 
 	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa != 'E'
+				and tyyppi = 'K'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 

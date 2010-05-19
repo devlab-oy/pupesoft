@@ -21,9 +21,11 @@
 
 		echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
 
-		$query = "SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'K'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -40,9 +42,11 @@
 		echo "</tr>";
 		echo "<tr><th>".t("Vain kohde")."</th>";
 
-		$query = "SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'O'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -60,9 +64,11 @@
 		echo "</tr>";
 		echo "<tr><th>".t("Vain projekti")."</th>";
 
-		$query = "SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'P'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 

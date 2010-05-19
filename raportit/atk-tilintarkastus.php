@@ -15,7 +15,7 @@ $sqlhaku = $sqlapu;
 
 if (isset($tee)) {
 	if ($tee == "lataa_tiedosto") {
-		readfile("/tmp/".$tmpfilenimi);	
+		readfile("/tmp/".$tmpfilenimi);
 		exit;
 	}
 }
@@ -51,8 +51,8 @@ else {
 		$fh = fopen("/tmp/".$file1, "w");
 
 		// haetaan kaikki vuoden tapahtumat.. uh
-		$query  = "	SELECT tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, 
-					tiliointi.summa, tiliointi.vero, tiliointi.selite, tiliointi.laatija, 
+		$query  = "	SELECT tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti,
+					tiliointi.summa, tiliointi.vero, tiliointi.selite, tiliointi.laatija,
 					tiliointi.laadittu, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.osoitetark, lasku.postino, lasku.postitp
 					FROM tiliointi
 					JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus
@@ -122,7 +122,11 @@ else {
 		$fh = fopen("/tmp/".$file3, "w");
 
 		// haetaan kaikki kustannuspaikat
-		$query  = "select * from kustannuspaikka where yhtio='$kukarow[yhtio]' and kaytossa!='E' order by tyyppi, tunnus";
+		$query  = "	SELECT *
+					from kustannuspaikka
+					where yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					order by tyyppi, tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
 		while($row = mysql_fetch_array($result)) {

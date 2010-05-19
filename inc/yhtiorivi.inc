@@ -197,7 +197,7 @@
 			$jatko = 0;
 		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "myynti_projekti" or mysql_field_name($result, $i) == "myynti_kohde" or mysql_field_name($result, $i) == "myynti_kustp") {
 
 		if (mysql_field_name($result, $i) == "myynti_projekti")	$kptyyppi = "P";
@@ -205,9 +205,9 @@
 		if (mysql_field_name($result, $i) == "myynti_kustp")	$kptyyppi = "K";
 
 		$tpque = "	SELECT tunnus, nimi, koodi
-					from kustannuspaikka 
-					where yhtio = '$kukarow[yhtio]' 
-					and tyyppi = '$kptyyppi' 
+					from kustannuspaikka
+					where yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$kptyyppi'
 					and kaytossa != 'E'";
 		$vresult = mysql_query($tpque) or pupe_error($tpque);
 

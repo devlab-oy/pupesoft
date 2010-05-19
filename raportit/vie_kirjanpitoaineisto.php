@@ -143,7 +143,7 @@ elseif($tee == "vie") {
 								FROM liitetiedostot
 								WHERE liitos = 'lasku' and liitostunnus = '$row[tunnus]'";
 					$lres = mysql_query($query) or pupe_error($query);
-					
+
 					if(mysql_num_rows($lres)>0) {
 						echo "Tallennan liitteet laskulta<br>";
 						$y = 0;
@@ -223,8 +223,7 @@ elseif($tee == "vie") {
 }
 else {
 
-	echo "
-			<form name = 'valinta' action = '$PHP_SELF' method='post'>
+	echo "	<form name = 'valinta' action = '$PHP_SELF' method='post'>
 			<input type = 'hidden' name = 'tee' value = 'vie'>
 			<table>
 			<tr>
@@ -243,12 +242,15 @@ else {
 			</tr>";
 
 	echo "<tr><th>".t("tai koko tilikausi")."</th>";
- 	$query = "SELECT *
+
+	$query = "SELECT *
 				FROM tilikaudet
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY tilikausi_alku";
 	$vresult = mysql_query($query) or pupe_error($query);
+
 	echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow["tunnus"]) {
@@ -256,6 +258,7 @@ else {
 		}
 		echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
 	}
+
 	echo "</select></td>";
 	echo "</tr>";
 
@@ -265,12 +268,17 @@ else {
 			</tr>";
 
 	echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
-	$query = "SELECT tunnus, nimi
+
+	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa != 'E'
+				and tyyppi = 'K'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
+
 	echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
+
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow['tunnus'] or $kustp == $vrow["tunnus"]) {
@@ -281,6 +289,7 @@ else {
 	echo "</select> - <select name='kustp2'><option value=' '>".t("Ei valintaa");
 
 	mysql_data_seek($vresult,0);
+
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow['tunnus'] or $kustp2 == $vrow["tunnus"]) {
@@ -294,12 +303,17 @@ else {
 	echo "</td>";
 	echo "</tr>";
 	echo "<tr><th>".t("Vain kohde")."</th>";
- 	$query = "SELECT tunnus, nimi
+
+ 	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa != 'E'
+				and tyyppi = 'O'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
+
 	echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
+
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow['tunnus'] or $kohde == $vrow['tunnus']) {
@@ -307,15 +321,21 @@ else {
 		}
 		echo "<option value = '$vrow[0]' $sel>$vrow[1]";
 	}
+
 	echo "</select></td>";
 	echo "</tr>";
 	echo "<tr><th>".t("Vain projekti")."</th>";
-	$query = "SELECT tunnus, nimi
+
+	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa != 'E'
+				and tyyppi = 'P'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
+
 	echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
+
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow['tunnus'] or $proj == $vrow['tunnus']) {

@@ -1052,7 +1052,9 @@ if ($tee == 'P' or $tee == 'E') {
 			// Tehd‰‰n kustannuspaikkapopup
 			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa <> 'E'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tyyppi = 'K'
+						and kaytossa != 'E'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 
@@ -1076,7 +1078,9 @@ if ($tee == 'P' or $tee == 'E') {
 			// Tehd‰‰n kohdepopup
 			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O' and kaytossa <> 'E'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tyyppi = 'O'
+						and kaytossa != 'E'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 
@@ -1099,7 +1103,9 @@ if ($tee == 'P' or $tee == 'E') {
 			if (mysql_num_rows($vresult) > 0) {
 				$query = "	SELECT tunnus, nimi, koodi
 							FROM kustannuspaikka
-							WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P' and kaytossa <> 'E'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tyyppi = 'P'
+							and kaytossa != 'E'
 							ORDER BY nimi";
 				$vresult = mysql_query($query) or pupe_error($query);
 

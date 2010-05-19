@@ -1855,44 +1855,6 @@ if (!function_exists("synkronoi")) {
 						foreach(array("oletus_hyvak1","oletus_hyvak2","oletus_hyvak3","oletus_hyvak4","oletus_hyvak5","tilino","kustp","kohde","projekti") as $value) {
 							$override[$value] = "";
 						}
-
-						/*
-						//	onko hyväksyjät myös kohdeyrityksessä
-						foreach(array("oletus_hyvak1","oletus_hyvak2","oletus_hyvak3","oletus_hyvak4","oletus_hyvak5") as $value) {
-							$query = "select tunnus from kuka where yhtio='$kohderow[yhtio]' and kuka='".$masterrow[$value]."'";
-							$tarkres=mysql_query($query) or pupe_error($query);
-
-							//	Käyttäjää ei ole, joten tätä tietuetta ei voida synkronoida..
-							if (mysql_num_rows($tarkres) != 1) {
-								$override[$value] = "";
-							}
-						}
-
-						//	Onko tilino myös kohdeyrityksessä?
-						$query = "select tunnus from tili where yhtio='$kohderow[yhtio]' and tilino='$masterrow[tilino]'";
-						$tarkres = mysql_query($query) or pupe_error($query);
-
-						//	tiliä ei ole, joten tätä tietuetta ei voida synkronoida..
-						if (mysql_num_rows($tarkres)!=1) {
-							$override["tilino"] = "";
-						}
-
-						// Onko kustannuspaikat olemassa?
-						foreach(array("kustp","kohde","projekti") as $value) {
-							$query = "select nimi, tyyppi from kustannuspaikka where yhtio='$yhtio' and tunnus='".$masterrow[$value]."'";
-							$abures=mysql_query($query) or pupe_error($query);
-
-							if (mysql_num_rows($abures)==1) {
-								$aburow = mysql_fetch_assoc($abures);
-								$query = "select tunnus from kustannuspaikka where yhtio='$kohderow[yhtio]' and nimi='$aburow[nimi]' and tyyppi='$aburow[tyyppi]'";
-								$tarkres = mysql_query($query) or pupe_error($query);
-
-								if (mysql_num_rows($tarkres)!=1) {
-									$override[$value]="";
-								}
-							}
-						}
-						*/
 					}
 
 					if ($table == "tuote") {
@@ -1900,44 +1862,6 @@ if (!function_exists("synkronoi")) {
 						foreach(array("myyjanro","ostajanro","tilino","tilino_eu","tilino_ei_eu","kustp","kohde","projekti","kehahin","vihahin","vihapvm","epakurantti25pvm","epakurantti50pvm","epakurantti75pvm","epakurantti100pvm") as $value) {
 							$override[$value] = "";
 						}
-
-						/*
-						//	onko ostajat/myyjät myös kohdeyrityksessä
-						foreach(array("myyjanro","ostajanro") as $value) {
-							$query = "select tunnus from kuka where yhtio='$kohderow[yhtio]' and kuka='".$masterrow[$value]."'";
-							$tarkres = mysql_query($query) or pupe_error($query);
-
-							//	Käyttäjää ei ole, joten tätä tietuetta ei voida synkronoida..
-							if (mysql_num_rows($tarkres)!=1) {
-								$override[$value]="";
-							}
-						}
-
-						//	Onko tilinot myös kohdeyrityksessä?
-						foreach(array("tilino","tilino_eu","tilino_ei_eu") as $value) {
-							$query = "select tunnus from tili where yhtio='$kohderow[yhtio]' and tilino='".$masterrow[$value]."'";
-							$tarkres=mysql_query($query) or pupe_error($query);
-							if (mysql_num_rows($tarkres)!=1) {
-								$override[$value]="";
-							}
-						}
-
-						// Onko kustannuspaikat olemassa?
-						foreach(array("kustp","kohde","projekti") as $value) {
-							$query = "select nimi, tyyppi from kustannuspaikka where yhtio='$yhtio' and tunnus='".$masterrow[$value]."'";
-							$abures=mysql_query($query) or pupe_error($query);
-
-							if (mysql_num_rows($abures)==1) {
-								$aburow = mysql_fetch_assoc($abures);
-								$query = "select tunnus from kustannuspaikka where yhtio='$kohderow[yhtio]' and nimi='$aburow[nimi]' and tyyppi='$aburow[tyyppi]'";
-								$tarkres = mysql_query($query) or pupe_error($query);
-
-								if (mysql_num_rows($tarkres)!=1) {
-									$override[$value]="";
-								}
-							}
-						}
-						*/
 
 						// Tarkastetaan että hinnat eivät mene aivan päin metsää..
 						$query = "select tunnus from yhtion_parametrit where yhtio='$kohderow[yhtio]' and alv_kasittely!='$yhtion_parametrit[alv_kasittely]'";

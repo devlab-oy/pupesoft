@@ -1,7 +1,7 @@
 <?php
 	require "inc/parametrit.inc";
 	require "inc/alvpopup.inc";
-	
+
 	echo "<font class='head'>".t("Uusi konsernitosite")."</font><hr>";
 
 	if ($tee == 'I') { // Tarkistetetaan syˆtteet perustusta varten
@@ -10,7 +10,7 @@
 		$tpp += 0;
 		$tpv += 0;
 		if ($tpv < 1000) $tpv += 2000;
-		
+
 		$val = checkdate($tpk, $tpp, $tpv);
 		if (!$val) {
 			echo "<font class='error'>" . t('Virheellinen tapahtumapvm') . "</font><br>";
@@ -35,7 +35,7 @@
 						filename   = '$filename',
 						filesize   = '$filesize',
 						filetype   = '$filetype'";
-			
+
 			$result = mysql_query($query) or pupe_error($query);
 			$liitostunnus = mysql_insert_id();
 			$fnimi = $liitostunnus;
@@ -76,13 +76,13 @@
 					$gok = 1;
 				}
 				$totsumma[$kukarow['yhtio']] += $isumma[$i];
-				
+
 				if ((strlen($itili[$i]) != 5) and (strlen($itili[$i]) != 0)) { // Onko t‰m‰ konsernitili
 					$ivirhe[$i] .= t('Tili ei ole konsernitili (Ne ovat 5 merkki‰ pitki‰)') . '<br>';
 					$gok = 1;
 				}
-				
-			
+
+
 				$ulos='';
 				$virhe = '';
 				$tili = $itili[$i];
@@ -103,7 +103,7 @@
 				$gok = $ok; // Nostetaan virhe ylemm‰lle tasolle
 			}
 		}
-		
+
 		if ($totsumma[$kukarow['yhtio']] != -1 * $totsumma[$turvayhtio]) {
 			echo "<font class='error'>".t("Yrityksille menev‰t tiliˆinnit eiv‰t t‰sm‰‰")."</font><br>";
 			$tee = '';
@@ -118,7 +118,7 @@
 // Kirjoitetaan tosite jos tiedot ok!
 
 	if ($tee == 'I') {
-		
+
 		$query = "	INSERT into lasku set
 						yhtio = '$kukarow[yhtio]',
 						tapvm = '$tpv-$tpk-$tpp',
@@ -127,13 +127,13 @@
 						luontiaika = now()";
 		$result = mysql_query($query) or pupe_error($query);
 		$tunnus = mysql_insert_id($link);
-		
+
 		if ($fnimi) {
 			// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
 			$query = "update liitetiedostot set liitostunnus='$tunnus', selite='$selite $summa' where tunnus='$fnimi'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
-		
+
 		$totsumma = 0;
 		$totmaara = $omaara+$vmaara; // Yhteens‰ tarvittavien tiliˆintirivien m‰‰r‰
 		for ($i=0; $i<$totmaara; $i++) {
@@ -155,7 +155,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($result) != 1) {
 					echo "".t("Yrityst‰")." $kukarow[yhtio] ".t("ei lˆytynytk‰‰n")."!";
-					
+
 					require "inc/footer.inc";
 					exit;
 				}
@@ -168,29 +168,29 @@
 								luontiaika = now()";
 				$result = mysql_query($query) or pupe_error($query);
 				$tunnus = mysql_insert_id ($link);
-				
+
 				if (! empty($fnimi)) {
 					// kopioidaan liitetiedosto toiselta rivilt‰
 					$query = "SELECT * from liitetiedostot where tunnus='$fnimi'";
 					$res = mysql_query($query) or pupe_error($query);
 					$liite = mysql_fetch_assoc($res);
-				
+
 					// n‰m‰ arvot vaihdetaan ainoastaan
 					$liite['liitostunnus'] = $tunnus;
 					$liite['yhtio']        = $kukarow['yhtio'];
 					unset($liite['tunnus']);
-					
+
 					$cols = array();
 					foreach ($liite as $col => $val) {
 						$cols[] =  "$col = '" . mysql_real_escape_string($val) . "'";
 					}
-				
+
 					$ins = "INSERT into liitetiedostot set " . implode(', ', $cols);
 					mysql_query($ins) or pupe_error($ins);
-					
+
 					$fnimi = '';
 				}
-				
+
 			}
 			if (strlen($itili[$i]) > 0) {
 		// Tehd‰‰n tiliˆinnit
@@ -226,7 +226,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		if (mysql_num_rows($result) != 1) {
 			echo "Yrityst‰ $kukarow[yhtio] ei lˆytynytk‰‰n!";
-			
+
 			require "inc/footer.inc";
 			exit;
 		}
@@ -245,7 +245,7 @@
 			$yresult = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($yresult) < 2) {
 				echo "<font class='error'>".t("Konsernissasi ei ole yht‰‰n yrityst‰. N‰in ollen et voi k‰ytt‰‰ t‰t‰ toimintoa")."</font>";
-				
+
 				require "inc/footer.inc";
 				exit;
 			}
@@ -292,7 +292,7 @@
 					</select>
 					</td><td><input type = 'submit' value = '".t("Perusta") ."'></td>
 					</tr></table></form>";
-						
+
 			$formi = 'tosite';
 			$kentta = 'tpp';
 			echo "<form name = 'tosite' action = '$PHP_SELF' method='post' enctype='multipart/form-data'>
@@ -320,11 +320,12 @@
 
 			echo "<br><br><table>
 			      <tr><th>".t("Tili")."</th><th>".t("Tarkenne")."</th>
-			      <th>".t("Summa")."</th><th>".t("Vero")."</th></tr>";			
+			      <th>".t("Summa")."</th><th>".t("Vero")."</th></tr>";
 			$totmaara = $omaara+$vmaara; // Yhteens‰ tarvittavien tiliˆintirivien m‰‰r‰
+
 			for ($i=0; $i<$totmaara; $i++) {
-	// Valitaan vastaanottava konsernin j‰sen
-				if ($i == $omaara) { 
+				// Valitaan vastaanottava konsernin j‰sen
+				if ($i == $omaara) {
 					$turvayhtio=$kukarow['yhtio'];
 					$kukarow['yhtio']=$vastaanottaja;
 					$query = "SELECT *
@@ -333,7 +334,7 @@
 					$result = mysql_query($query) or pupe_error($query);
 					if (mysql_num_rows($result) != 1) {
 						echo "".t("Yrityst‰")." $kukarow[yhtio] ".t("ei lˆytynytk‰‰n")."!";
-						
+
 						require "inc/footer.inc";
 						exit;
 					}
@@ -347,14 +348,19 @@
 				else {
 					echo "<td>$iulos[$i]</td>";
 				}
-	// Tehd‰‰n kustannuspaikkapopup
-				$query = "SELECT tunnus, nimi
+
+				// Tehd‰‰n kustannuspaikkapopup
+				$query = "	SELECT tunnus, nimi
 							FROM kustannuspaikka
-							WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa <> 'E'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tyyppi = 'K'
+							and kaytossa != 'E'
 							ORDER BY nimi";
 				$vresult = mysql_query($query) or pupe_error($query);
+
 				echo "<td><select name='ikustp[$i]'>";
 				echo "<option value =' '>".t("Ei kustannuspaikkaa");
+
 				while ($vrow=mysql_fetch_array($vresult)) {
 					$sel="";
 					if ($ikustp[$i] == $vrow[0]) {
@@ -364,14 +370,18 @@
 				}
 				echo "</select><br>";
 
-	// Tehd‰‰n kohdepopup
-				$query = "SELECT tunnus, nimi
+				// Tehd‰‰n kohdepopup
+				$query = "	SELECT tunnus, nimi
 							FROM kustannuspaikka
-							WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O' and kaytossa <> 'E'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tyyppi = 'O'
+							and kaytossa != 'E'
 							ORDER BY nimi";
 				$vresult = mysql_query($query) or pupe_error($query);
+
 				echo "<select name='ikohde[$i]'>";
 				echo "<option value =' '>".t("Ei kohdetta");
+
 				while ($vrow=mysql_fetch_array($vresult)) {
 					$sel="";
 					if ($ikohde[$i] == $vrow[0]) {
@@ -381,14 +391,18 @@
 				}
 				echo "</select><br>";
 
-	// Tehd‰‰n projektipopup
-				$query = "SELECT tunnus, nimi
+				// Tehd‰‰n projektipopup
+				$query = "	SELECT tunnus, nimi
 							FROM kustannuspaikka
-							WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P' and kaytossa <> 'E'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tyyppi = 'P'
+							and kaytossa != 'E'
 							ORDER BY nimi";
 				$vresult = mysql_query($query) or pupe_error($query);
+
 				echo "<select name='iprojekti[$i]'>";
 				echo "<option value =' '>".t("Ei projektia");
+
 				while ($vrow=mysql_fetch_array($vresult)) {
 					$sel="";
 					if ($iprojekti[$i] == $vrow[0]) {

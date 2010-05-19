@@ -16,15 +16,17 @@ if($tee == "aja") {
 
 	// Tutkitaan ensiksi, mille tilikaudelle pyydettävä lista löytyy, jos lista on sopiva
 	if ($tkausi > 0) {
-		$query = "SELECT *
-						FROM tilikaudet
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+		$query = "	SELECT *
+					FROM tilikaudet
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$tkausi'";
 		$result = mysql_query($query) or pupe_error($query);
+
 		if (mysql_num_rows($result) != 1) {
 			echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei löytynyt")."</font>";
 			exit;
-
 		}
+
 		$tilikaudetrow=mysql_fetch_array($result);
 		$alku = $tilikaudetrow["tilikausi_alku"];
 		$loppu = $tilikaudetrow["tilikausi_loppu"];
@@ -42,32 +44,33 @@ if($tee == "aja") {
 	}
 
 	$lisa=array();
-	if($maa!="") {
-		$query = "select nimi from maat where koodi='$maa' and nimi!='' limit 1";
+
+	if ($maa!="") {
+		$query = "SELECT nimi from maat where koodi='$maa' and nimi!='' limit 1";
 		$result=mysql_query($query) or pupe_error($query);
 		$row=mysql_fetch_array($result);
 
 		$lisa["lisatiedot"] .= " and tilausrivin_lisatiedot.kulun_kohdemaa='$maa'";
 		echo "<font class='info'>".t("Maahan")." {$row["nimi"]}</font><br>";
 	}
-	if($kustp!="") {
-		$query = "select nimi from kustannuspaikka where tunnus='$kustp'";
+	if ($kustp!="") {
+		$query = "SELECT nimi from kustannuspaikka where tunnus='$kustp'";
 		$result=mysql_query($query) or pupe_error($query);
 		$row=mysql_fetch_array($result);
 
 		$lisa["where"] .= " and tiliointi.kustp='$kustp'";
 		echo "<font class='info'>".t("kustannuspaikalle")." {$row["nimi"]}</font><br>";
 	}
-	if($kohde!="") {
-		$query = "select nimi from kustannuspaikka where tunnus='$kohde'";
+	if ($kohde!="") {
+		$query = "SELECT nimi from kustannuspaikka where tunnus='$kohde'";
 		$result=mysql_query($query) or pupe_error($query);
 		$row=mysql_fetch_array($result);
 
 		$lisa["where"] .= " and tiliointi.kohde='$kohde'";
 		echo "<font class='info'>".t("Kohtelle")." {$row["nimi"]}</font><br>";
 	}
-	if($proj!="") {
-		$query = "select nimi from kustannuspaikka where tunnus='$proj'";
+	if ($proj!="") {
+		$query = "SELECT nimi from kustannuspaikka where tunnus='$proj'";
 		$result=mysql_query($query) or pupe_error($query);
 		$row=mysql_fetch_array($result);
 
@@ -249,9 +252,11 @@ if ($tee == '') {
 
 	echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
 
-	$query = "SELECT tunnus, nimi
+	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa != 'E'
+				and tyyppi = 'K'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
@@ -269,9 +274,11 @@ if ($tee == '') {
 	echo "</tr>";
 	echo "<tr><th>".t("Vain kohde")."</th>";
 
-	$query = "SELECT tunnus, nimi
+	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa != 'E'
+				and tyyppi = 'O'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
@@ -291,7 +298,9 @@ if ($tee == '') {
 
 	$query = "SELECT tunnus, nimi
 				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa != 'E'
+				and tyyppi = 'P'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 

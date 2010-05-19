@@ -30,7 +30,7 @@
 			$toimerrorit++;
 			echo "<font class='error'>Virheellinen vat-numero!</font><br>";
 		}
-		
+
 		if ($toim_tilino != "") {
 			$query = "	SELECT nimi
 						FROM tili
@@ -42,7 +42,7 @@
 				$toimerrorit++;
 			}
 		}
-		
+
 		if ($toim_tilino_eu != "") {
 			$query = "	SELECT nimi
 						FROM tili
@@ -54,7 +54,7 @@
 				$toimerrorit++;
 			}
 		}
-		
+
 		if ($toim_tilino_ei_eu != "") {
 			$query = "	SELECT nimi
 						FROM tili
@@ -66,7 +66,7 @@
 				$toimerrorit++;
 			}
 		}
-		
+
 		if ($toim_tilino_marginaali != "") {
 			$query = "	SELECT nimi
 						FROM tili
@@ -78,7 +78,7 @@
 				$toimerrorit++;
 			}
 		}
-		
+
 		if ($toim_osto_marginaali != "") {
 			$query = "	SELECT nimi
 						FROM tili
@@ -102,7 +102,7 @@
 				$toimerrorit++;
 			}
 		}
-		
+
 		if ($vat_numero != "") {
 			$query = "	SELECT selite
 						FROM avainsana
@@ -168,7 +168,7 @@
 					tilino_ei_eu					= '$toim_tilino_ei_eu',
 					tilino_marginaali				= '$toim_tilino_marginaali',
 					tilino_osto_marginaali 			= '$toim_osto_marginaali',
-					toim_alv						= '$toim_alv', 
+					toim_alv						= '$toim_alv',
 					toim_automaattinen_jtraportti 	= '$toim_automaattinen_jtraportti',
 					kustp							= '$toim_kustp',
 					kohde							= '$toim_kohde',
@@ -236,8 +236,8 @@
 		echo "<tr><th>".t("Fax")."</th>							<td><input type='text' name='toim_fax'      				value='$toim_fax'></td></tr>";
 		echo "<tr><th>".t("Puhelin")."</th>						<td><input type='text' name='toim_puhelin'  				value='$toim_puhelin'></td></tr>";
 		echo "<tr><th>".t("Email")."</th>						<td><input type='text' name='toim_email'    				value='$toim_email'></td></tr>";
-		echo "<tr><th>".t("Lasku logo")."</th>					<td><input type='text' name='lasku_logo'    				value='$lasku_logo'></td></tr>";                                                		
-		echo "<tr><th>".t("Tilino")."</th>						<td><input type='text' name='toim_tilino'   				value='$toim_tilino'></td></tr>";		
+		echo "<tr><th>".t("Lasku logo")."</th>					<td><input type='text' name='lasku_logo'    				value='$lasku_logo'></td></tr>";
+		echo "<tr><th>".t("Tilino")."</th>						<td><input type='text' name='toim_tilino'   				value='$toim_tilino'></td></tr>";
 		echo "<tr><th>".t("Tilino_eu")."</th>					<td><input type='text' name='toim_tilino_eu'   				value='$toim_tilino_eu'></td></tr>";
 		echo "<tr><th>".t("Tilino_ei_eu")."</th>				<td><input type='text' name='toim_tilino_ei_eu'   			value='$toim_tilino_ei_eu'></td></tr>";
 		echo "<tr><th>".t("Tilino_marginaali")."</th>			<td><input type='text' name='toim_tilino_marginaali'   		value='$toim_tilino_marginaali'></td></tr>";
@@ -257,14 +257,16 @@
 		echo "<option value = '2vk' {$selecti["2vk"]}>".t("Joka toinen viikko")."</option>";
 		echo "<option value = 'kk' $selecti[kk]>".t("Kuukausittain")."</option>";
 		echo "</select></td></tr>";
-		
+
 
 		echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
 		echo "<select name='toim_kustp'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
 
 		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'K'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -276,13 +278,15 @@
 			echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 		}
 		echo "</select>";
-		echo "</td></tr>";	
+		echo "</td></tr>";
 		echo "<tr><th>".t("Kohde")."</th><td>";
 
-		echo "<select name='toim_kohde'><option value=' '>".t("Ei kohdetta")."</option>";	
+		echo "<select name='toim_kohde'><option value=' '>".t("Ei kohdetta")."</option>";
 		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'O'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -297,10 +301,12 @@
 		echo "</td></tr>";
 		echo "<tr><th>".t("Projekti")."</th><td>";
 
-		echo "<select name='toim_projekti'><option value=' '>".t("Ei projektia")."</option>";	
+		echo "<select name='toim_projekti'><option value=' '>".t("Ei projektia")."</option>";
 		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'P'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -311,7 +317,7 @@
 			}
 			echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 		}
-		echo "</select>";	
+		echo "</select>";
 		echo "</td></tr>";
 
 
@@ -370,10 +376,12 @@
 			echo "</select></td></tr>";
 
 			echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
-			echo "<select name='toim_kustp'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";	
+			echo "<select name='toim_kustp'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
 			$query = "	SELECT tunnus, nimi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'K'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 
@@ -385,13 +393,15 @@
 				echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
 			}
 			echo "</select>";
-			echo "</td></tr>";	
+			echo "</td></tr>";
 			echo "<tr><th>".t("Kohde")."</th><td>";
 
-			echo "<select name='toim_kohde'><option value=' '>".t("Ei kohdetta")."</option>";	
+			echo "<select name='toim_kohde'><option value=' '>".t("Ei kohdetta")."</option>";
 			$query = "	SELECT tunnus, nimi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'O'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 
@@ -406,10 +416,12 @@
 			echo "</td></tr>";
 			echo "<tr><th>".t("Projekti")."</th><td>";
 
-			echo "<select name='toim_projekti'><option value=' '>".t("Ei projektia")."</option>";	
+			echo "<select name='toim_projekti'><option value=' '>".t("Ei projektia")."</option>";
 			$query = "	SELECT tunnus, nimi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'P'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 
@@ -420,7 +432,7 @@
 				}
 				echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
 			}
-			echo "</select>";	
+			echo "</select>";
 			echo "</td></tr>";
 			echo "<tr><td class='back'>";
 			echo "<input type='hidden' name='tee' value='update'>";

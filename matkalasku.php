@@ -1492,7 +1492,9 @@ if ($tee == "MUOKKAA") {
 			//	Tehd‰‰n kustannuspaikkamenut
 			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'K'
 						ORDER BY koodi+0, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -1513,7 +1515,9 @@ if ($tee == "MUOKKAA") {
 
 			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'O'
 						ORDER BY koodi+0, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -1534,7 +1538,9 @@ if ($tee == "MUOKKAA") {
 
 			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'P'
 						ORDER BY koodi+0, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 

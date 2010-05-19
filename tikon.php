@@ -116,12 +116,18 @@
 		while ($row = mysql_fetch_array($result)) {
 
 			//Kustannuspaikan koodien haku
-			$query = "SELECT nimi FROM kustannuspaikka WHERE yhtio = '$yhtio' and tunnus = '$row[kustp]'";
+			$query = "	SELECT nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$yhtio'
+						and tunnus = '$row[kustp]'";
 			$vresult = mysql_query($query) or pupe_error("Kysely ei onnistu $query");
 			$kustprow = mysql_fetch_array($vresult);
 
 			//Projekti koodien haku
-			$query = "SELECT nimi FROM kustannuspaikka WHERE yhtio = '$yhtio' and tunnus = '$row[projekti]'";
+			$query = "	SELECT nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$yhtio'
+						and tunnus = '$row[projekti]'";
 			$vresult = mysql_query($query) or pupe_error("Kysely ei onnistu $query");
 			$projprow = mysql_fetch_array($vresult);
 
@@ -371,10 +377,10 @@
 	$toot = fopen("dataout/".$nimi,"w+");
 
 	echo "$yhtiorow[nimi] ".t("kirjanpidolliset tapahtumat kaudella")." $kausi. ";
-	
-	if ($summataan=='') echo "Tapahtumia ei summata. "; 
+
+	if ($summataan=='') echo "Tapahtumia ei summata. ";
 	else echo "Tapahtumat summataan. ";
-	
+
 	echo " Raportti otettu $today.<br><br>";
 
 	//haetaan myyntisaamiset
@@ -429,7 +435,7 @@
 	}
 
 	fclose($toot);
-	
+
 	$txtfile = "TIKON-$kukarow[yhtio]-".date("ymd.His-s").".dat";
 
 	if (filesize("dataout/".$nimi) > 0) {
@@ -441,10 +447,10 @@
 		echo "<input type='submit' value='".t("Tallenna tiedosto")."'>";
 		echo "</form><br><br>";
 	}
-	
+
 	echo "<br><font class=head>$yhtiorow[nimi] myyntisaamiset: $kausi</font><br>";
 	echo t("Myyntisaamisia").": ".mysql_num_rows($result_ms)." ".t("kappaletta")."<br><br>";
-	
+
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Tapvm")."</th>";
@@ -475,10 +481,10 @@
 		echo "</tr>";
 	}
 	echo "</table><br><br>";
-	
+
 	echo "<br><font class=head>$yhtiorow[nimi] ostovelkojen tiliöinnit: $kausi</font><br>";
 	echo t("Ostovelkoja").": ".mysql_num_rows($result_ov)." ".t("kappaletta")."<br><br>";
-	
+
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Tapvm")."</th>";
@@ -505,10 +511,10 @@
 		echo "</tr>";
 	}
 	echo "</table><br><br>";
-	
+
 	echo "<br><font class=head>$yhtiorow[nimi] tiliotteen tiliöinnit: $kausi</font><br>";
 	echo t("Tiliotteiden tiliöinnit").": ".mysql_num_rows($result_mrt)." ".t("tapahtumaa")."<br><br>";
-	
+
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Tapvm")."</th>";
@@ -535,6 +541,6 @@
 		echo "</tr>";
 	}
 	echo "</table><br><br>";
-	
+
 	require "inc/footer.inc";
 ?>

@@ -31,7 +31,7 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
-		
+
 		$ulos .= "<option value = ''>".t("Valitse maa")."</option>";
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel = "";
@@ -48,7 +48,9 @@
 	if (mysql_field_name($result, $i) == "kustp") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'K'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
@@ -67,7 +69,9 @@
 	if (mysql_field_name($result, $i) == "kohde") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'O'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kohdetta")."</option>";
@@ -86,7 +90,9 @@
 	if (mysql_field_name($result, $i) == "projekti") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'P'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei projektia")."</option>";
@@ -103,7 +109,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "alv") {
-		
+
 		if($maa!="") {
 			//	Onko tämä viranomaistuote? Näille voidaan antaa alv vaikkei meillä ole toimipaikkaa ko. maassa
 			$query = "	SELECT tunnus
@@ -116,14 +122,14 @@
 			else {
 				$lisa="";
 			}
-			
+
 			$ulos = "<td>".alv_popup_oletus("t[$i]",$trow[$i], $maa, $lisa)."</td>";
 		}
 		else {
 			$ulos = "<td>".t("Valitse ensin maa")."</td>";
 		}
-		
+
 		$jatko = 0;
 	}
-	
+
 ?>

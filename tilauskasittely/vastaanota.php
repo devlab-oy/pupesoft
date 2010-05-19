@@ -587,9 +587,12 @@
 		$kentta = "etsi";
 
 		// tehd‰‰n etsi valinta
-		echo "<table><form action='$PHP_SELF' name='find' method='post'><tr><th>".t("Etsi siirtolistaa").":</th><td><input type='text' name='etsi'></td>";
+		echo "<form action='$PHP_SELF' name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
-		echo "<tr><th>Varasto</th><td><select name='varasto'>";
+		
+		echo "<table>
+				<tr><th>".t("Etsi siirtolistaa").":</th><td><input type='text' name='etsi'></td></tr>
+				<tr><th>".t("Varasto")."</th><td><select name='varasto'>";
 		echo "<option value=''>" . t('Kaikki varastot') . "</option>";
 
 		$query  = "SELECT tunnus, nimitys, maa FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
@@ -624,7 +627,7 @@
 			echo "<option value='{$maarow['koodi']}' $sel>{$maarow['nimi']}</option>";
 		}
 
-		echo "</select></td><td class='back'><input type='Submit' value='".t("Etsi")."'></td></tr></form>";
+		echo "</select></td><td class='back'><input type='Submit' value='".t("Etsi")."'></td></tr></table></form><br>";
 
 		$haku = '';
 		if (is_string($etsi))  $haku = " and nimi LIKE '%$etsi%' ";
@@ -689,6 +692,7 @@
 					// piirret‰‰n vaan kerran taulukko-otsikot
 					if ($boob == '') {
 						$boob = 'kala';
+						
 						echo "<table>";
 						echo "<tr>";
 						for ($y=0; $y<mysql_num_fields($result); $y++)

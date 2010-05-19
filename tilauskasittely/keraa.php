@@ -950,6 +950,9 @@
 									and tyyppi 		= 'L'";
 						$yoimresult = mysql_query($query) or pupe_error($query);
 					}
+					elseif ($laskurow["tila"] == 'G' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X" and $laskurow["nouto"] == "") {
+						$alatilak = "D";
+					}
 					else {
 						$alatilak = "C";
 					}

@@ -1,5 +1,6 @@
 <?php
 require ("inc/parametrit.inc");
+
 echo "<font class='head'>".t("Tyhj‰ rahtikirja").":</font><hr><br>";
 
 if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
@@ -106,8 +107,10 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		);
 	}
 
-	$query = "SELECT komento from kirjoittimet where tunnus=". (int) $_POST['tulostin']
-	        . " AND yhtio='{$kukarow['yhtio']}'";
+	$query = "	SELECT komento 
+				from kirjoittimet 
+				where tunnus = ". (int) $_POST['tulostin']. " 
+				AND yhtio='{$kukarow['yhtio']}'";
 	$res = mysql_query($query) or pupe_error($query);
 
 	$k = mysql_fetch_array($res);
@@ -115,7 +118,10 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
     $kirjoitin = $k['komento'];
 	$tulostuskpl = $oslappkpl;
 
-	$query = "	SELECT * FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND ytunnus='$ytunnus'";
+	$query = "	SELECT * 
+				FROM asiakas 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				AND ytunnus = '$ytunnus'";
 	$asres = mysql_query($query) or pupe_error($query);
 	$asiakasrow = mysql_fetch_array($asres);
 
@@ -129,7 +135,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		$osoitelappurow["toim_osoite"] 	= $tosoite;
 		$osoitelappurow["toim_maa"] 	= $asiakasrow["toim_maa"];
 	}
-	else if ($asiakasrow["toim_nimi"] != '') {
+	elseif ($asiakasrow["toim_nimi"] != '') {
 		$osoitelappurow["toim_postino"] = $asiakasrow["toim_postino"];
 		$osoitelappurow["toim_nimi"] 	= $asiakasrow["toim_nimi"];
 		$osoitelappurow["toim_nimitark"]= $asiakasrow["toim_nimitark"];
@@ -169,31 +175,56 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	$osoitelappurow['yhtio_postino']	= $yhtiorow["postino"];
 	$osoitelappurow['yhtio_postitp']	= $yhtiorow["postitp"];
 
-	// poikkeava toimipaikka
-	$alhqur = "SELECT * from yhtion_toimipaikat WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[toimipaikka]'";
+	// poikkeava toimipaikka,otetaan sen ositetiedot
+	$alhqur = "	SELECT * 
+				from yhtion_toimipaikat 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and tunnus = '$kukarow[toimipaikka]'";
 	$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 	if (mysql_num_rows($alhire) == 1) {
-		$apualvrow  = mysql_fetch_array($alhire);
+		$apualvrow = mysql_fetch_array($alhire);
 
 		$osoitelappurow['yhtio_nimi'] 		= $apualvrow["nimi"];
+		$osoitelappurow['yhtio_nimitark']	= $apualvrow["nimitark"];
 		$osoitelappurow['yhtio_osoite']		= $apualvrow["osoite"];
 		$osoitelappurow['yhtio_postino']	= $apualvrow["postino"];
 		$osoitelappurow['yhtio_postitp']	= $apualvrow["postitp"];
+		$osoitelappurow["yhtio_maa"]      	= $apualvrow["maa"];
 		$osoitelappurow['yhtio_toimipaikka']= $apualvrow["tunnus"];
 	}
+	
+	// haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
+	$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
+				FROM varastopaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus = '$varasto'";
+	$tempr = mysql_query($query) or pupe_error($query);
+	$postirow_varasto = mysql_fetch_array($tempr);
 
+	// jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
+	if ($postirow_varasto["nimi"] != "") {
+		$postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
+		$postirow['yhtio_nimitark']	= $postirow_varasto["nimitark"];
+		$postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
+		$postirow["yhtio_postino"]  = $postirow_varasto["postino"];
+		$postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
+		$postirow["yhtio_maa"]      = $postirow_varasto["maa"];
+	}
+	
 	$rahtikirjanrostring = mysql_real_escape_string(serialize($osoitelappurow));
 
-	$query  = "SELECT * FROM toimitustapa WHERE yhtio='{$GLOBALS['kukarow']['yhtio']}' AND selite='$toimitustapa' ORDER BY jarjestys,selite";
+	$query  = "	SELECT * 
+				FROM toimitustapa 
+				WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}' 
+				AND selite = '$toimitustapa' 
+				ORDER BY jarjestys,selite";
 	$result = mysql_query($query) or pupe_error($query);
 	$toitarow = mysql_fetch_array($result);
 
 	include ("tilauskasittely/{$toitarow['rahtikirja']}");
 
 	//Tallennetaan customrahtikirjan tiedot j‰rjestelm‰‰n
-	# update rahtikirjat set rahtikirjanro=concat('JJFI','123456','01',lpad(abs(otsikkonro),9,0)) where yhtio='demo' and otsikkonro<0 and toimitustapa like '%posti%';
-
 	if ((int) $otsikkonro != 0) {
 		$query  = "	UPDATE rahtikirjat
 					SET rahtikirjanro = '$rahtikirjanro',
@@ -484,8 +515,7 @@ if (! isset($_POST['toimitustapa'])) {
  * @return void
  *
  */
-function pupe_rahtikirja_insert($data)
-{
+function pupe_rahtikirja_insert($data) {
 	// alustetaan tiedot jotka insertoidaan
 	$alustus = array(
 		'yhtio'         	=> $GLOBALS['yhtiorow']['yhtio'],
@@ -537,8 +567,7 @@ function pupe_rahtikirja_insert($data)
  * @return void
  *
  */
-function pupe_rahtikirja_fetch($otsikkonro)
-{
+function pupe_rahtikirja_fetch($otsikkonro) {
     $query = sprintf("SELECT * from rahtikirjat where otsikkonro=%d", (int) $otsikkonro);
     $result = mysql_query($query);
 
@@ -584,8 +613,7 @@ function pupe_rahtikirja_fetch($otsikkonro)
  * @return array tunnus => nimitys
  *
  */
-function pupe_varasto_fetch_all()
-{
+function pupe_varasto_fetch_all() {
 	$query = sprintf("SELECT tunnus, nimitys
 				FROM varastopaikat
 				WHERE yhtio = '%s'
@@ -608,8 +636,7 @@ function pupe_varasto_fetch_all()
  * @return void
  *
  */
-function pupe_toimitustapa_fetch_all()
-{
+function pupe_toimitustapa_fetch_all() {
 	// haetaan kaikki toimitustavat
 	$query  = "SELECT * FROM toimitustapa WHERE yhtio='{$GLOBALS['kukarow']['yhtio']}' order by jarjestys,selite";
 	$result = mysql_query($query) or pupe_error($query);
@@ -630,8 +657,7 @@ function pupe_toimitustapa_fetch_all()
  * @return void
  *
  */
-function pupe_rahtisopimus($merahti, $toimitustapa, $ytunnus = null)
-{
+function pupe_rahtisopimus($merahti, $toimitustapa, $ytunnus = null) {
 	if ($merahti) {
 		$query = "SELECT merahti,sopimusnro from toimitustapa where selite='{$toimitustapa}' and yhtio='{$GLOBALS['kukarow']['yhtio']}'";
 		$res = mysql_query($query) or pupe_error($query);
@@ -655,6 +681,6 @@ function pupe_rahtisopimus($merahti, $toimitustapa, $ytunnus = null)
 	return false;
 }
 
-include 'inc/footer.inc';
+require ("inc/footer.inc");
 
 ?>

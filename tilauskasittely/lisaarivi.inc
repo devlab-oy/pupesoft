@@ -1061,7 +1061,7 @@
 									$varattu = 0;
 								}
 
-								if ($yhtiorow['rivinumero_syotto'] != '') {
+								if ($yhtiorow['rivinumero_syotto'] != '' and $kutsuja != "EDITILAUS") {
 									if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
 										$query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 										$triviresult = mysql_query($query) or pupe_error($query);

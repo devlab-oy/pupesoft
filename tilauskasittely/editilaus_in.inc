@@ -373,130 +373,24 @@ while (!feof ($fd)) {
 			$viite .= $tieto;
 			break;
 
-		case 'ONADCN_PC' :
-			//Asiakkaan toim_OVTtunnus
-			$tieto = trim(substr($tieto, 0, 17));
-
-			if (!is_array($arow)) {
-				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
-
-				$query = "	SELECT *
-							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]'
-							and toim_ovttunnus = '$tieto'
-							and toim_ovttunnus not in ('','0')
-							and laji not in ('R','P')";
-				$result = mysql_query($query) or die($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
-					$vastaustapa .= $arow['tilausvahvistus'];
-					$edi_ulos .= "$arow[nimi]\n";
-				}
-			}
-
-			if (!is_array($arow)) {
-				$query = "	SELECT *
-							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]'
-							and ovttunnus = '$tieto'
-							and ovttunnus not in ('','0')
-							and laji not in ('R','P')";
-				$result = mysql_query($query) or die($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
-					$vastaustapa .= $arow['tilausvahvistus'];
-					$edi_ulos .= "$arow[nimi]\n";
-				}
-			}
-
-			if (!is_array($arow)) {
-				$query = "	SELECT *
-							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]'
-							and asiakasnro = '$tieto'
-							and asiakasnro not in ('','0')
-							and laji not in ('R','P')";
-				$result = mysql_query($query) or die($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
-					$vastaustapa .= $arow['tilausvahvistus'];
-					$edi_ulos .= "$arow[nimi]\n";
-				}
-				else {
-					$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
-				}
-			}
-
-			break;
-
-		case 'ONADBY_PC' :
-			//Asiakkaan OVTtunnus
-			$tieto = trim(substr($tieto, 0, 17));
-
-			if (!is_array($arow)) {
-				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
-
-				$query = "	SELECT *
-							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]'
-							and toim_ovttunnus = '$tieto'
-							and toim_ovttunnus not in ('','0')
-							and laji not in ('R','P')";
-				$result = mysql_query($query) or die($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
-					$vastaustapa .= $arow['tilausvahvistus'];
-					$edi_ulos .= "$arow[nimi]\n";
-				}
-			}
-
-			if (!is_array($arow)) {
-				$query = "	SELECT *
-							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]'
-							and ovttunnus = '$tieto'
-							and ovttunnus not in ('','0')
-							and laji not in ('R','P')";
-				$result = mysql_query($query) or die($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
-					$vastaustapa .= $arow['tilausvahvistus'];
-					$edi_ulos .= "$arow[nimi]\n";
-				}
-			}
-
-			if (!is_array($arow)) {
-				$query = "	SELECT *
-							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]'
-							and asiakasnro = '$tieto'
-							and asiakasnro not in ('','0')
-							and laji not in ('R','P')";
-				$result = mysql_query($query) or die($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
-					$vastaustapa .= $arow['tilausvahvistus'];
-					$edi_ulos .= "$arow[nimi]\n";
-				}
-				else {
-					$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
-				}
-			}
-
-			break;
-
 		case 'ONADBY_RF' :
-		case 'OSTOTIL.OT_ASIAKASNRO' :
-			//Asiakkaan meidän asiakasnumero
 			if (substr($tieto, 0, 4) == 'IT @') {
 				$tieto = substr($tieto, 4, 10) * 1;
 			}
+		case 'ONADCN_PC' :
+			// lopullisen asiakkaan ovttunnus
+			$type = explode("@", $tieto);
+			$lopnumero = trim($type[0]);
+		case 'ONADBY_PC' :
+		case 'OSTOTIL.OT_ASIAKASNRO' :
+		case 'ONADDP_PC' :
+			//ONADBY_PC  - Ostajan OVT-tunnus
+			//ONADCN_PC  - Toimitusosoitteen OVT-tunnus			
+			//ONADDP_PC  - Ostajan logistiikkakeskuksen OVT-tunnus
+			//ONADBY_RF  - Ostajan meidän asiakasnumero		
+			//OSTOTIL.OT_ASIAKASNRO  - Ostajan meidän asiakasnumero
+
+			$tieto = trim(substr($tieto, 0, 17));
 
 			if (!is_array($arow)) {
 				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
@@ -512,7 +406,7 @@ while (!feof ($fd)) {
 				if (mysql_num_rows($result) == 1) {
 					$arow = mysql_fetch_array($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
-					$edi_ulos .= "$arow[nimi]\n";
+					$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
 				}
 			}
 
@@ -528,7 +422,7 @@ while (!feof ($fd)) {
 				if (mysql_num_rows($result) == 1) {
 					$arow = mysql_fetch_array($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
-					$edi_ulos .= "$arow[nimi]\n";
+					$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
 				}
 			}
 
@@ -544,30 +438,35 @@ while (!feof ($fd)) {
 				if (mysql_num_rows($result) == 1) {
 					$arow = mysql_fetch_array($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
-					$edi_ulos .= "$arow[nimi]\n";
+					$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
 				}
 				else {
 					$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
 				}
-
 			}
 
 			break;
+
 		case 'OSTOTIL.OT_YRITYS':
 			$lnimitark = $tieto;
 			break;
+
 		case 'OSTOTIL.OT_KATUOSOITE':
 			$losoite = $tieto;
 			break;
+
 		case 'OSTOTIL.OT_POSTITOIMIPAIKKA':
 			$lpostitp = $tieto;
 			break;
+
 		case 'OSTOTIL.OT_POSTINRO':
 			$lpostino = $tieto;
 			break;
+
 		case 'OSTOTIL.OT_YHTEYSHENKILO':
 			$lnimi = $tieto;
 			break;
+
 		case 'ONADPL_PC' :
 			// Asiakkaan joku toimitus ovttunnus tms... tää ylikirjottaa kaiken...
 			if ($tieto != "") {
@@ -595,13 +494,6 @@ while (!feof ($fd)) {
 
 			break;
 
-		// tää on lopullisen asiaakkaan tiedot
-		case 'ONADCN_PC' :
-		// lopullisen asiakkaan ovttunnus
-			$type = explode("@", $tieto);
-			$lopnumero = trim($type[0]);
-			break;
-
 		case 'ONADCN_NA' :
 		// lopullisen asiakkkaan nimi
 			$lopnimi = $tieto;
@@ -620,13 +512,6 @@ while (!feof ($fd)) {
 		case 'ONADCN_PO' :
 		// lopullisen asiakkkaan postitn
 			$loppostino = $tieto;
-			break;
-
-		// tässä alkaa toimitusasiakkaan tiedot
-		case 'ONADDP_PC' :
-		// toimitusasiakkaan ovttunnus
-			$type = explode("@", $tieto);
-			$tnumero = trim($type[0]);
 			break;
 
 		case 'ONADDP_NA' :
@@ -935,6 +820,21 @@ while (!feof ($fd)) {
 				$query    = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
 				$result   = mysql_query($query) or die($query);
 				$laskurow = mysql_fetch_array($result);
+				
+				//vientikieltotarkistus
+				$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
+							FROM asiakas
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and tunnus  = '$laskurow[liitostunnus]'";
+				$vieres = mysql_query($query) or pupe_error($query);
+				$vierow = mysql_fetch_array($vieres);
+				
+				if (isset($vierow) and $vierow["maa"] != "") {
+					$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+				}
+				else {
+					$kieltolisa = "";
+				}
 			}
 
 			break;
@@ -945,21 +845,6 @@ while (!feof ($fd)) {
 
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsiä tuote tuotenumerolla
 			if ($tuoteno == "" and $tieto != "") {
-
-				$kieltolisa = "";
-				//vientikieltotarkistus
-				if (isset($laskurow) and $laskurow["liitostunnus"] != 0) {
-					$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
-								FROM asiakas
-								WHERE yhtio	= '$kukarow[yhtio]'
-								and tunnus  = '$laskurow[liitostunnus]'";
-					$vieres = mysql_query($query) or pupe_error($query);
-					$vierow = mysql_fetch_array($vieres);
-
-					if (isset($vierow) and $vierow["maa"] != "") {
-						$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
-					}
-				}
 
 				if ($edi_tyyppi != "magento" and $edi_tyyppi != "futursoft" and $yhtiorow["yhtio"] == "artr") {
 					// poistetaan jos kolmas merkki jos se on viiva
@@ -978,18 +863,22 @@ while (!feof ($fd)) {
 					$tieto = trim($tieto);
 				}
 
-				$query = "SELECT * FROM tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tieto' $kieltolisa";
+				$query = "	SELECT * 
+							FROM tuote 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$tieto' 
+							$kieltolisa";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 0) {
 					///* Lisätään tilaukselle dummytuote ja kommentti *///
-					$edi_ulos .= t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
+					$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
 					$tuoteerrortxt .= " $tieto";
 					$tuoteerror = 1;
 				}
 				else {
 					$trow = mysql_fetch_array($result);
-					$edi_ulos .= t("Tuote")." $tieto ";
+					$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
 					$tuoteno = $trow['tuoteno'];
 					$tuoteerror = 0; // tuote ok
 				}
@@ -1009,21 +898,6 @@ while (!feof ($fd)) {
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsiä tuote EAN koodilla
 			if ($tuoteno == "" and $tieto != "") {
 
-				$kieltolisa = "";
-				//vientikieltotarkistus
-				if (isset($laskurow) and $laskurow["liitostunnus"] != 0) {
-					$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
-								FROM asiakas
-								WHERE yhtio	= '$kukarow[yhtio]'
-								and tunnus  = '$laskurow[liitostunnus]'";
-					$vieres = mysql_query($query) or pupe_error($query);
-					$vierow = mysql_fetch_array($vieres);
-
-					if (isset($vierow) and $vierow["maa"] != "") {
-						$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
-					}
-				}
-
 				$query = "	SELECT *
 							FROM tuote USE INDEX (yhtio_eankoodi_index)
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -1034,13 +908,13 @@ while (!feof ($fd)) {
 
 				if (mysql_num_rows($result) == 0) {
 					///* Lisätään tilaukselle dummytuote ja kommentti *///
-					$edi_ulos .= t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
+					$edi_ulos .= t("Rivi")." $rivinumero EAN '$tieto' ".t("ei löydy")."!\n";
 					$tuoteerrortxt .= " $tieto";
 					$tuoteerror = 1;
 				}
 				else {
 					$trow = mysql_fetch_array($result);
-					$edi_ulos .= t("Tuote")." $tieto ";
+					$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $trow[tuoteno] / EAN: $tieto ";
 					$tuoteno = $trow['tuoteno'];
 					$tuoteerror = 0; // tuote ok
 				}
@@ -1229,9 +1103,9 @@ while (!feof ($fd)) {
 
 				} // end jos tuote on löydetty oikein
 				else {
-
+					
 					// tuotenumero ei löytynyt, tehdään dummyrivi..
-
+					
 					$kommentti = t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
 
 					$query = "	INSERT into tilausrivi set

@@ -498,11 +498,14 @@ if ($tee == '') {
 		$ehto = "kalenteri.yhtio='$kukarow[yhtio]'";
 	}
 
-	if ($kukarow['kieli'] == $yhtiorow['kieli']) {
+	if ($kukarow['kieli'] != "" and $kukarow['kieli'] == $yhtiorow['kieli']) {
 		$lisa = " and (kalenteri.kieli = '$kukarow[kieli]' or kalenteri.kieli = '') ";
 	}
-	else {
+	elseif ($kukarow['kieli'] != "") {
 		$lisa = " and kalenteri.kieli = '$kukarow[kieli]' ";
+	}
+	else {
+		$lisa = "";
 	}
 
 	$querylisa_tapa = "";

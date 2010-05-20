@@ -9,9 +9,14 @@
 	}
 
 	$yhtio = $argv[1];
-
-	require('/var/www/html/pupesoft/inc/connect.inc');
-	require('/var/www/html/pupesoft/inc/functions.inc');
+	
+	// otetaan includepath aina rootista
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+	ini_set("display_errors", 0);
+	
+	require('inc/connect.inc');
+	require('inc/functions.inc');
 
 	$path = "/tmp/logisticar_siirto_$yhtio/";
 
@@ -109,7 +114,7 @@
 			        tuote.try				tuoteryhma,
 					avainsana.selitetark	tuoteryhma_nimi,
 					tuote.kustp				kustannuspaikka,
-					(SELECT liitostunnus from tuotteen_toimittajat where tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno limit 1) toimittajatunnus,
+					''						toimittajatunnus,
 					'0'						varastotunnus,
 					'0'						toimittajannimiketunnus,
 					'1'						hintayksikko,
@@ -161,7 +166,7 @@
 						liitostunnus toimittajatunnus,
 						toim_tuoteno toimittajannimiketunnus
 						FROM tuotteen_toimittajat
-						WHERE tuoteno = '{$tuote['tuoteno']}'
+						WHERE tuoteno = '{$tuote['nimiketunnus']}'
 						AND yhtio = '$yhtio'
 						LIMIT 1";
 			$tuot_toim_res = mysql_query($query) or pupe_error($query);
@@ -177,7 +182,7 @@
 
 			$query = "	SELECT hyllyalue, hyllynro
 						from tuotepaikat
-						where tuoteno='{$tuote['tuoteno']}'
+						where tuoteno = '{$tuote['tuoteno']}'
 						and oletus != ''
 						and yhtio='$yhtio'
 						limit 1";

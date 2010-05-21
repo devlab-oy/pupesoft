@@ -4,15 +4,27 @@
 
 	echo "<font class='head'>".t("Työjono").":</font><hr><br>";
 	
-	$AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
+	if (!isset($AIKA_ARRAY)) $AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
 	
 	//kuukaudet ja päivät ja ajat
-	$MONTH_ARRAY = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
-	$DAY_ARRAY = array("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai");
-	
+	if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
+	if (!isset($DAY_ARRAY)) $DAY_ARRAY = array("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai");
+
 	echo "<form name='haku' action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-	
+	echo "<input type='hidden' name='toim' value='$toim'>";
+
+	if ($tyostatus_muutos != '' and $tyomaarayksen_tunnus != '') {
+		$tyostatus_muutos = mysql_real_escape_string($tyostatus_muutos);
+		$tyomaarayksen_tunnus = (int) $tyomaarayksen_tunnus;
+
+		$query = "	UPDATE tyomaarays SET
+					tyostatus = '$tyostatus_muutos'
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND otunnus = '$tyomaarayksen_tunnus'";
+		$update_tyom_res = mysql_query($query) or pupe_error($query);
+	}
+
 	$chk = "";
 	if (trim($konserni) != '') {
 		$chk = "CHECKED";
@@ -52,8 +64,38 @@
 							<input type='text' size='10' name='suorittaja_haku' 		value='$suorittaja_haku'><br></td>";
 	echo "<td valign='top'></td>";
 	echo "<td valign='top'></td>";
-	echo "<td valign='top'><input type='text' size='10' name='tyojono_haku' 			value='$tyojono_haku'><br>
-								<input type='text' size='10' name='tyostatus_haku' 		value='$tyostatus_haku'></td>";
+	echo "<td valign='top'>";
+
+	if (strtolower($toim) != 'tyomaarays_asentaja') {
+		$tyojono_result = t_avainsana("TYOM_TYOJONO");
+
+		echo "<select name='tyojono_haku' onchange='submit();'>";
+		echo "<option value=''>",t("Oletus"),"</option>";
+
+		while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
+			$sel = $tyojono_haku == $tyojono_row['selitetark'] ? ' SELECTED' : '';
+			echo "<option value='$tyojono_row[selitetark]'$sel>$tyojono_row[selitetark]</option>";
+		}
+
+		echo "</select><br><br>";
+
+		$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
+
+		echo "<select name='tyostatus_haku' onchange='submit();'>";
+		echo "<option value=''>",t("Oletus"),"</option>";
+
+		while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
+			$sel = $tyostatus_haku == $tyostatus_row['selitetark'] ? ' SELECTED' : '';
+			echo "<option value='$tyostatus_row[selitetark]'$sel>$tyostatus_row[selitetark]</option>";
+		}
+
+		echo "</select>";
+	}
+	else {
+		echo "<input type='text' size='10' name='tyojono_haku' 			value='$tyojono_haku'><br>";
+		echo "<input type='text' size='10' name='tyostatus_haku' 		value='$tyostatus_haku'></td>";
+	}
+
 	echo "<td valign='top'></td>";
 	echo "<td valign='top' class='back'><input type='submit' value='Hae'></td>";
 	echo "</tr>";
@@ -106,7 +148,14 @@
 	
 	// scripti balloonien tekemiseen
 	js_popup();	
-	
+
+	$selectlisa = " group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', a4.selitetark_2, '##', kalenteri.tunnus, '##', a4.selitetark)) asennuskalenteri ";
+
+	if (strtolower($toim) == 'tyomaarays_asentaja') {
+		$selectlisa = " group_concat(concat(left(kalenteri.pvmalku,10), '##', left(kalenteri.pvmloppu,10), '##', a4.selitetark_2, '##', kalenteri.tunnus, '##', a4.selitetark)) asennuskalenteri ";
+	}
+
+
 	// Myyydyt sarjanumerot joita ei olla ollenkaan ostettu
 	$query = "	SELECT 
 				lasku.tunnus,
@@ -114,6 +163,7 @@
 				lasku.nimi,
 				lasku.tila, 
 				lasku.alatila,
+				lasku.tilaustyyppi,
 				lasku.ytunnus,
 				lasku.toimaika,
 				tyomaarays.komm1,
@@ -129,7 +179,7 @@
 				yhtio.yhtio yhtioyhtio,
 				a3.nimi suorittajanimi,
 				group_concat(a4.selitetark) asekalsuorittajanimi,
-				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', a4.selitetark_2, '##', kalenteri.tunnus)) asennuskalenteri
+				$selectlisa
 				FROM lasku
 				JOIN yhtio ON lasku.yhtio=yhtio.yhtio
 				JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -141,22 +191,30 @@
 				LEFT JOIN kalenteri ON kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus
 				LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka
 				WHERE $konsernit
-				and lasku.tila in ('A','L','N','S')
+				and lasku.tila in ('A','L','N','S','C')
 				and lasku.alatila != 'X'
 				$lisa
-				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
 				$lisa2
-				ORDER BY toimaika";
+				ORDER BY toimaika ";
 	$vresult = mysql_query($query) or pupe_error($query);
 
+	$tyomaarays_tunti_yhteensa = array();
+
 	while ($vrow = mysql_fetch_array($vresult)) {	
-		
+
 		$laskutyyppi = $vrow["tila"];
 		$alatila	 = $vrow["alatila"];
 		
 		//tehdään selväkielinen tila/alatila
 		require "inc/laskutyyppi.inc";
-		
+
+		if ($vrow['tilaustyyppi'] != '' and $vrow['tila'] != 'C') {
+			$laskutyyppi = $vrow['tilaustyyppi'];
+			
+			require "inc/laskutyyppi.inc";
+		}
+
 		echo "<tr>";
 		
 		if (trim($konserni) != '') {
@@ -195,11 +253,197 @@
 			
 			$lopetusx = $lopetus;
 			
-			if ($lopetusx == "") $lopetusx = "$PHP_SELF////konserni=$konserni";
-			
-			foreach(explode(",", $vrow["asennuskalenteri"]) as $asekale) {				
-				list($a, $l, $s, $t) = explode("##", $asekale);												
-				echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$t&tee=MUOKKAA&lopetus=$lopetusx'>".tv1dateconv($a, "P")." - ".tv1dateconv($l, "P")." $s</a><br>";
+			if ($lopetusx == "") $lopetusx = "$PHP_SELF////konserni=$konserni//toim=$toim";
+
+			$pvm_array = array();
+
+			foreach(explode(",", $vrow["asennuskalenteri"]) as $asekale) {
+				list($a, $l, $s, $t, $s2) = explode("##", $asekale);
+
+				if (strtolower($toim) == 'tyomaarays_asentaja') {
+
+					list($alku_pvm, $alku_klo) = explode(" ", $a);
+					list($loppu_pvm, $loppu_klo) = explode(" ", $l);
+
+					$tuntimaara = 0;
+
+					if (trim($alku_pvm) != trim($loppu_pvm)) {
+
+						if ($kukarow['kuka'] == $s2 and !in_array($alku_pvm, $pvm_array[$s])) {
+							// to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
+							date_default_timezone_set('UTC');
+
+							$query = "	SELECT right(pvmalku, 8) pvmalku, right(pvmloppu, 8) pvmloppu
+										FROM kalenteri
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND kuka = '$kukarow[kuka]'
+										AND kentta02 = '$vrow[tunnus]'
+										AND tyyppi = 'kalenteri'
+										AND pvmalku like '$alku_pvm%'
+										AND pvmloppu != '$loppu_pvm%'";
+							$tunti_chk_res = mysql_query($query) or pupe_error($query);
+
+							while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
+								if (trim($tunti_chk_row['pvmalku']) != '' and trim($tunti_chk_row['pvmloppu']) != '') {
+
+									list($ah, $am, $as) = explode(":", $tunti_chk_row['pvmalku']);
+									list($lh, $lm, $ls) = explode(":", $tunti_chk_row['pvmloppu']);
+
+									list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
+
+									if ($temp_tunnit != 0 or $temp_minuutit != 0) {
+										$temp_minuutit = $temp_minuutit != 0 ? $temp_minuutit / 60 : 0;
+										$tuntimaara += ($temp_tunnit+$temp_minuutit);
+										$tyomaarays_tunti_yhteensa[$vrow['tunnus']] = $vrow['tunnus'];
+									}
+								}
+							}
+
+							list($url_vuosi, $url_kk, $url_pp) = explode("-", $alku_pvm);
+
+							echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>";
+						}
+
+						if ($tuntimaara != 0) {
+							$tuntimaara = "(".str_replace(".",",",$tuntimaara)." h)";
+						}
+						else {
+							$tuntimaara = '';
+						}
+
+						if (!in_array($alku_pvm, $pvm_array[$s])) {
+							echo tv1dateconv($a, '', 'LYHYT')." $tuntimaara $s";
+						
+							if ($kukarow['kuka'] == $s2) {
+								echo "</a>";
+							}
+
+							echo "<br>";
+						}
+
+						if ($kukarow['kuka'] == $s2 and !in_array($loppu_pvm, $pvm_array[$s])) {
+							$query = "	SELECT right(pvmalku, 8) pvmalku, right(pvmloppu, 8) pvmloppu
+										FROM kalenteri
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND kuka = '$kukarow[kuka]'
+										AND tyyppi = 'kalenteri'
+										AND kentta02 = '$vrow[tunnus]'
+										AND pvmalku like '$loppu_pvm%'";
+							$tunti_chk_res = mysql_query($query) or pupe_error($query);
+
+							while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
+								if (trim($tunti_chk_row['pvmalku']) != '' and trim($tunti_chk_row['pvmloppu']) != '') {
+
+									list($ah, $am, $as) = explode(":", $tunti_chk_row['pvmalku']);
+									list($lh, $lm, $ls) = explode(":", $tunti_chk_row['pvmloppu']);
+
+									list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
+
+									if ($temp_tunnit != 0 or $temp_minuutit != 0) {
+										$temp_minuutit = $temp_minuutit != 0 ? $temp_minuutit / 60 : 0;
+										$tuntimaara += ($temp_tunnit+$temp_minuutit);
+										$tyomaarays_tunti_yhteensa[$vrow['tunnus']] = $vrow['tunnus'];
+									}
+								}
+							}
+
+							list($url_vuosi, $url_kk, $url_pp) = explode("-", $loppu_pvm);
+							echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>";
+
+							$pvm_array[$s][] = $loppu_pvm;
+						}
+
+						if ($tuntimaara != 0) {
+							$tuntimaara = "(".str_replace(".",",",$tuntimaara)." h)";
+						}
+						else {
+							$tuntimaara = '';
+						}
+
+						if (!in_array($alku_pvm, $pvm_array[$s])) {
+							echo tv1dateconv($l, '', 'LYHYT')." $tuntimaara";
+						}
+						else {
+							$s = $s2 = '';
+						}
+					}
+					elseif (!in_array($alku_pvm, $pvm_array[$s]) and !in_array($loppu_pvm, $pvm_array[$s])) {
+
+						if ($kukarow['kuka'] == $s2) {
+							$query = "	SELECT right(pvmalku, 8) pvmalku, right(pvmloppu, 8) pvmloppu
+										FROM kalenteri
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND kuka = '$kukarow[kuka]'
+										AND tyyppi = 'kalenteri'
+										AND kentta02 = '$vrow[tunnus]'
+										AND pvmalku like '$alku_pvm%'
+										AND pvmloppu like '$loppu_pvm%'";
+							$tunti_chk_res = mysql_query($query) or pupe_error($query);
+
+							while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
+								if (trim($tunti_chk_row['pvmalku']) != '' and trim($tunti_chk_row['pvmloppu']) != '') {
+									list($ah, $am, $as) = explode(":", $tunti_chk_row['pvmalku']);
+									list($lh, $lm, $ls) = explode(":", $tunti_chk_row['pvmloppu']);
+
+									// to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
+									date_default_timezone_set('UTC');
+
+									list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
+
+									if ($temp_tunnit != 0 or $temp_minuutit != 0) {
+										$temp_minuutit = $temp_minuutit != 0 ? $temp_minuutit / 60 : 0;
+										$tuntimaara += ($temp_tunnit+$temp_minuutit);
+										$tyomaarays_tunti_yhteensa[$vrow['tunnus']] = $vrow['tunnus'];
+									}
+								}
+							}
+
+							list($url_vuosi, $url_kk, $url_pp) = explode("-", $alku_pvm);
+							echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>";
+						}
+
+						if ($tuntimaara != 0) {
+							$tuntimaara = "(".str_replace(".",",",$tuntimaara)." h)";
+						}
+						else {
+							$tuntimaara = '';
+						}
+
+						echo tv1dateconv($a, '', 'LYHYT')." $tuntimaara";
+					}
+					else {
+						$pvm_array[$s][] = $alku_pvm;
+						continue;
+					}
+
+					$pvm_array[$s][] = $alku_pvm;
+				}
+				else {
+					$klo_alku = substr($a, 11);
+					$klo_loppu = substr($l, 11);
+
+					list($ah, $am) = explode(":", $klo_alku);
+					list($lh, $lm) = explode(":", $klo_loppu);
+
+					// to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
+					date_default_timezone_set('UTC');
+
+					list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
+
+					if ($temp_tunnit != 0 or $temp_minuutit != 0) {
+						$temp_minuutit = $temp_minuutit != 0 ? $temp_minuutit / 60 : 0;
+						$tyomaarays_tunti_yhteensa[$vrow['tunnus']][$s] += ($temp_tunnit+$temp_minuutit);
+					}
+
+					echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$t&tee=MUOKKAA&lopetus=$lopetusx'>".tv1dateconv($a, 'P')." - ".tv1dateconv($l, 'P');
+				}
+
+				echo " $s";
+				if ($kukarow['kuka'] == $s2 and strtolower($toim) == 'tyomaarays_asentaja') {
+					echo "</a>";
+				}
+
+				if ($s != '') echo "<br>";
 			}
 		}
 		
@@ -207,11 +451,11 @@
 		
 		echo "</td>";
 				
-		if ($vrow["tyojono"] != "") {
-			echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&lopetus=$lopetus/SPLIT/$PHP_SELF////konserni=$konserni'>".tv1dateconv($vrow["toimaika"])."</a></td>";
+		if ($vrow["tyojono"] != "" and strtolower($toim) != 'tyomaarays_asentaja') {
+			echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&toim=$toim&lopetus=$lopetus/SPLIT/$PHP_SELF////konserni=$konserni//toim=$toim'>".tv1dateconv($vrow["toimaika"])."</a></td>";
 		}
 		else {
-			echo "<td valign='top'>".tv1dateconv($vrow["toimaika"])."</td>";	
+			echo "<td valign='top'>".tv1dateconv($vrow["toimaika"])."</td>";
 		}
 		
 		echo "<td valign='top'>$vrow[myyja]<br>".t("$laskutyyppi")." ".t("$alatila")."</td>";
@@ -223,20 +467,142 @@
 			$varilisa = "";
 		}
 		
-		echo "<td valign='top' $varilisa>$vrow[tyojono]<br>$vrow[tyostatus]</td>";
-		
+		echo "<td valign='top' $varilisa>$vrow[tyojono]<br>";
+
+		if (strtolower($toim) != 'tyomaarays_asentaja') {
+			$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
+
+			echo "<form method='post'>";
+			echo "<input type='hidden' name='tyomaarayksen_tunnus' value='$vrow[tunnus]'>";
+			echo "<input type='hidden' name='konserni' value='$konserni'>";
+			echo "<input type='hidden' name='myyntitilaus_haku' value='$myyntitilaus_haku'>";
+			echo "<input type='hidden' name='viesti_haku' value='$viesti_haku'>";
+			echo "<input type='hidden' name='asiakasnimi_haku' value='$asiakasnimi_haku'>";
+			echo "<input type='hidden' name='asiakasnumero_haku' value='$asiakasnumero_haku'>";
+			echo "<input type='hidden' name='tyojono_haku' value='$tyojono_haku'>";
+			echo "<input type='hidden' name='tyostatus_haku' value='$tyostatus_haku'>";
+			echo "<input type='hidden' name='suorittaja_haku' value='$suorittaja_haku'>";
+			echo "<input type='hidden' name='tyojono' value='$tyojono'>";
+
+			echo "<select name='tyostatus_muutos' onchange='submit();'>";
+
+			while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
+				$sel = $vrow['tyostatus'] == $tyostatus_row['selitetark'] ? ' SELECTED' : '';
+				echo "<option value='$tyostatus_row[selite]'$sel>$tyostatus_row[selitetark]</option>";
+			}
+
+			echo "</select></form>";
+		}
+		else {
+			echo "$vrow[tyostatus]";
+		}
+
+		echo "</td>";
+
 		if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {		
 			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]'>".t("Muokkaa")."</a></td>";
 		}
 		else {
-			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]'>".t("Muokkaa")."</a></td>";
+
+			if (strtolower($toim) == 'tyomaarays_asentaja' and $toimi != 'TYOMAARAYS_ASENTAJA') $toimi = 'TYOMAARAYS_ASENTAJA';
+
+			if ($vrow['tila'] == 'C') {
+				$toimi = 'REKLAMAATIO';
+			}
+			elseif ($vrow['tila'] == 'L' and $vrow['tilaustyyppi'] == 'A') {
+				$toimi = $toimi != 'TYOMAARAYS_ASENTAJA' ? 'TYOMAARAYS' : 'TYOMAARAYS_ASENTAJA';
+			}
+
+			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&tyojono=$tyojono'>".t("Muokkaa")."</a></td>";
 		}
 				
 		echo "</tr>";
 	}
-	
+
 	echo "</table><br><br>";
-	
+
+	if (strtolower($toim) != 'tyomaarays_asentaja') {
+		echo "<table><tr><td class='back'>";
+		echo "<table><tr><th colspan='2'>",t("Työmääräyksien tuntiyhteenveto"),"</th></tr>";
+
+		$total_yht = 0;
+
+		foreach ($tyomaarays_tunti_yhteensa as $tyom_id => $tyom_array) {
+			$yht = 0;
+
+			echo "<tr><td>$tyom_id</td><td><table width='100%'>";
+
+			foreach ($tyom_array as $tyom_asentaja => $tyom_tunnit) {
+				echo "<tr><td>$tyom_asentaja</td><td class='ok' align='right'><strong>$tyom_tunnit</strong></td></tr>";
+				$yht += $tyom_tunnit;
+			}
+
+			echo "</td></table></td></tr>";
+			echo "<tr><td class='tumma'>",t("Yhteensä")," ",t("Työmääräys")," $tyom_id</td><td class='tumma'>$yht</td></tr>";
+
+			$total_yht += $yht;
+		}
+
+		echo "<tr><th>",t("Yhteensä"),"</th><th>$total_yht</th></tr>";
+		echo "</table></td>";
+	}
+
+	echo "<td class='back'><table>";
+	echo "<tr><th colspan='2'>",t("Työmääräyksien asentajien tuntiyhteenveto"),"</th></tr>";
+
+	$total_yht = 0;
+
+	foreach ($tyomaarays_tunti_yhteensa as $tyom_id => $tyom_array) {
+
+		$query = "	SELECT kuka, right(pvmalku, 8) pvmalku, right(pvmloppu, 8) pvmloppu
+					FROM kalenteri
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND kentta02 = '$tyom_id'
+					AND tyyppi = 'kalenteri'";
+		$tunti_chk_res = mysql_query($query) or pupe_error($query);
+
+		$tyom_kuka = array();
+
+		if (mysql_num_rows($tunti_chk_res) > 0) {
+
+			while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
+				list($ah, $am, $as) = explode(":", $tunti_chk_row['pvmalku']);
+				list($lh, $lm, $ls) = explode(":", $tunti_chk_row['pvmloppu']);
+
+				// to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
+				date_default_timezone_set('UTC');
+
+				list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
+
+				if ($temp_tunnit != 0 or $temp_minuutit != 0) {
+					$temp_minuutit = $temp_minuutit != 0 ? $temp_minuutit / 60 : 0;
+
+					$tunti_chk_row['kuka'] = t_avainsana("TYOM_TYOLINJA", '', " and avainsana.selitetark = '$tunti_chk_row[kuka]' ", "'$kukarow[yhtio]'", '', 'selitetark_2');
+					$tyom_kuka[$tunti_chk_row['kuka']] += ($temp_tunnit+$temp_minuutit);
+				}
+			}
+		}
+
+		if (count($tyom_kuka) > 0) {
+			echo "<tr><td>$tyom_id</td><td><table width='100%'>";
+
+			$yht = 0;
+
+			foreach ($tyom_kuka as $t_kuka => $t_tunnit) {
+				echo "<tr><td>$t_kuka</td><td class='ok' align='right'><strong>",str_replace(".",",",$t_tunnit),"</strong></td></tr>";
+				$yht += $t_tunnit;
+			}
+
+			echo "</td></table></td></tr>";
+			echo "<tr><td class='tumma'>",t("Yhteensä")," ",t("Työmääräys")," $tyom_id</td><td class='tumma'>",str_replace(".",",",$yht),"</td></tr>";
+
+			$total_yht += $yht;
+		}
+	}
+
+	echo "<tr><th>",t("Yhteensä"),"</th><th>",str_replace(".",",",$total_yht),"</th></tr>";
+	echo "</table></td></tr></table><br><br>";
+
 	require ("../inc/footer.inc");
 
 ?>

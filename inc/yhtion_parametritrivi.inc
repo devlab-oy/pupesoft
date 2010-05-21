@@ -1191,19 +1191,14 @@
 
 	if (mysql_field_name($result, $i) == "tilauksen_yhteyshenkilot") {
 
-		$sela = "";
-		$selb = "";
-
-		if ($trow[$i] == 'K') {
-			$selb = "selected";
-		}
-		else {
-			$sela = "selected";
-		}
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value='' $sela>".t("Ei yhteyshenkilöitä")."</option>
-					<option value='K' $selb>".t("Tilaukselle saa liittää yhteyshenkilöitä")."</option>
+					<option value=''>".t("Vain tilausyhteyshenkilö")."</option>
+					<option value='P' $sel[P]>".t("Vain tilausyhteyshenkilö, pakollinen")."</option>
+					<option value='K' $sel[K]>".t("Tekninen yhteyshenkilö, kaupallinen yhteyshenkilö ja projektipäällikkö")."</option>
 				</select></td>";
 
 
@@ -2234,6 +2229,21 @@
 
 		$ulos .= "<option value = ''>".t("Tuoteperheeseen sisältyvät tuotteet listataan lähetteellä kaikkien tuoteperheeseen kuuluvien rivien kohdalla")."</option>";
 		$ulos .= "<option value = 'E' $sel[E]>".t("Tuoteperheeseen sisältyviä tuotteita EI listata lähetteellä kaikkien tuoteperheeseen kuuluvien rivien kohdalla")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "tyomaarays_tulostus_lisarivit") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Työmääräyksen tulosteeseen ei lisätä tyhjiä kirjoitusrivejä")."</option>";
+		$ulos .= "<option value = 'L' $sel[L]>".t("Työmääräyksen tulosteeseen lisätään tyhjiä kirjoitusrivejä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

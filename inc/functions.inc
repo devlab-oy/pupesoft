@@ -3815,9 +3815,9 @@ if (!function_exists("kalenteritapahtuma")) {
 	function kalenteritapahtuma ($tyyppi, $tapa, $viesti, $liitostunnus, $kuittaus="", $henkilo="", $otunnus="", $pvmalku='now()') {
 		global $yhtiorow, $kukarow;
 
-		$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
-		$result = mysql_query($query) or pupe_error($query);
-		$asrow = mysql_fetch_assoc($result);
+			$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			$asrow = mysql_fetch_assoc($result);
 
 		//Tehd‰‰n asiakasmemotapahtuma jos se on tarpeellinen
 		$kysely = "	INSERT INTO kalenteri
@@ -6268,7 +6268,7 @@ if (!function_exists("tee_asiakashaku")) {
 			}
 
 
-			if ($toim == "TYOMAARAYS") {
+			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 				$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, lasku.yhtio
 							FROM lasku
 							JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus

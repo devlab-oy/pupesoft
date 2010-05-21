@@ -342,7 +342,7 @@
 				echo "<td valign='top'><input type='text' size='2' name='tilrivinumero' value='$rivinumero'></td>";
 			}
 
-			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T"))) {
+			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T"))) {
 				echo "</tr>
 					<tr>$jarjlisa
 						<th colspan='7' align='left'>".t("Tuotteen nimitys")."</th>

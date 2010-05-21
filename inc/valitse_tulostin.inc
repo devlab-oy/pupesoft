@@ -118,6 +118,14 @@
 		echo "</select></td></tr>";
 	}
 
+	if ($toim == "TARJOUS") {
+		echo "<tr><td>",t("Näytetäänkö verolliset vai verottomat hinnat"),"</td><td><select name='verolliset_verottomat_hinnat'>";
+		echo "<option value=''>",t("Haetaan yhtiön parametreistä"),"</option>";
+		echo "<option value='verolliset'>",t("Verolliset"),"</option>";
+		echo "<option value='verottomat'>",t("Verottomat"),"</option>";
+		echo "</select></td></tr>";
+	}
+
 	echo "<tr><td>".t("Kpl")."</td><td><input type='text' name='kappaleet' size='3'></td></tr>";
 
 	echo "<tr><td>".t("Valitse kieli")."</td>";

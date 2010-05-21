@@ -118,7 +118,12 @@
 		}
 
 		if ($toim != "REKLAMAATIO") {
-			loppu($page[$sivu], 1);
+			if ((strtolower($toim) == 'tyomaarays_asentaja' or strtolower($toim) == 'tyomaarays') and $yhtiorow['tyomaarays_tulostus_lisarivit'] == 'L') {
+				loppu_lisarivit($page[$sivu], 1);
+			}
+			else {
+				loppu($page[$sivu], 1);
+			}
 		}
 		else {
 			loppu_kerayslista($page[$sivu], 1);
@@ -133,7 +138,7 @@
 		}
 	}
 
-	if (($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO") and $tee == 'LEPAA') {
+	if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO") and $tee == 'LEPAA') {
 		$query = "UPDATE kuka SET kesken=0 WHERE session='$session'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -147,7 +152,7 @@
 		}
 	}
 
-	if ($toim == "TYOMAARAYS" and $tee == 'VALMIS') {
+	if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMIS') {
 		$query  = "	UPDATE lasku
 					SET tila='L'
 					WHERE tunnus='$laskurow[tunnus]'
@@ -263,13 +268,13 @@
 		$tee = "";
 	}
 
-	if ($toim == "TYOMAARAYS" and $tee == "VAHINKO") {
+	if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == "VAHINKO") {
 
 		$polku = "kuvat/";
 
 		if ($tila == "") {
 
-			echo "<font class='head'>Työmääräyksen $kukarow[kesken] vahinkotiedot:</font><hr>";
+			echo "<font class='head'>",t("Työmääräyksen")," $kukarow[kesken] ",t("vahinkotiedot"),":</font><hr>";
 
 			$query = "	select *
 						from vahinkotiedot
@@ -289,19 +294,19 @@
 					<input type='hidden' name='tila' value = 'LISAA'>
 
 
-					<tr><th>Vak.yht. korjattava:</th><td><input type='text' name='vakuutus' size='38' value='$row[vakuutus]'></td></tr>
-					<tr><th>Tapahtuma:</th><td><input type='text' name='tapahtuma' size='38' value='$row[tapahtuma]'></td></tr>
-					<tr><th>Vahinkopäivä:</th><td><input type='text' name='paivamaara' size='38' value='$row[paivamaara]'></td></tr>
-					<tr><th>Vastapuoli:</th><td><input type='text' name='vastapuoli' size='38' value='$row[vastapuoli]'></td></tr>
-					<tr><th>Tarkastaja:</th><td><input type='text' name='tarkastaja' size='38' value='$row[tarkastaja]'></td></tr>
-					<tr><th>Lupa/omavastuu:</th><td><input type='text' name='omavastuu_lupa' size='38' value='$row[omavastuu_lupa]'></td></tr>
-					<tr><th>Korjausaika:</th><td><input type='text' name='korjausaika' size='38' value='$row[korjausaika]'></td></tr>
+					<tr><th>",t("Vak.yht. korjattava"),":</th><td><input type='text' name='vakuutus' size='38' value='$row[vakuutus]'></td></tr>
+					<tr><th>",t("Tapahtuma"),":</th><td><input type='text' name='tapahtuma' size='38' value='$row[tapahtuma]'></td></tr>
+					<tr><th>",t("Vahinkopäivä"),":</th><td><input type='text' name='paivamaara' size='38' value='$row[paivamaara]'></td></tr>
+					<tr><th>",t("Vastapuoli"),":</th><td><input type='text' name='vastapuoli' size='38' value='$row[vastapuoli]'></td></tr>
+					<tr><th>",t("Tarkastaja"),":</th><td><input type='text' name='tarkastaja' size='38' value='$row[tarkastaja]'></td></tr>
+					<tr><th>",t("Lupa/omavastuu"),":</th><td><input type='text' name='omavastuu_lupa' size='38' value='$row[omavastuu_lupa]'></td></tr>
+					<tr><th>",t("Korjausaika"),":</th><td><input type='text' name='korjausaika' size='38' value='$row[korjausaika]'></td></tr>
 
-					<tr><th>Liitä kuva 1:</th><td>$row[kuva1] <input name='userfile1' type='file'></td></tr>
-					<tr><th>Liitä kuva 2:</th><td>$row[kuva2] <input name='userfile2' type='file'></td></tr>
-					<tr><th>Liitä kuva 3:</th><td>$row[kuva3] <input name='userfile3' type='file'></td></tr>
-					<tr><th>Liitä kuva 4:</th><td>$row[kuva4] <input name='userfile4' type='file'></td></tr>
-					<tr><th>Liitä kuva 5:</th><td>$row[kuva5] <input name='userfile5' type='file'></td><td><input type='submit' value='Lisää'></td></tr>
+					<tr><th>",t("Liitä")," ",t("kuva")," 1:</th><td>$row[kuva1] <input name='userfile1' type='file'></td></tr>
+					<tr><th>",t("Liitä")," ",t("kuva")," 2:</th><td>$row[kuva2] <input name='userfile2' type='file'></td></tr>
+					<tr><th>",t("Liitä")," ",t("kuva")," 3:</th><td>$row[kuva3] <input name='userfile3' type='file'></td></tr>
+					<tr><th>",t("Liitä")," ",t("kuva")," 4:</th><td>$row[kuva4] <input name='userfile4' type='file'></td></tr>
+					<tr><th>",t("Liitä")," ",t("kuva")," 5:</th><td>$row[kuva5] <input name='userfile5' type='file'></td><td><input type='submit' value='Lisää'></td></tr>
 					</form>
 					</table><br><br>";
 

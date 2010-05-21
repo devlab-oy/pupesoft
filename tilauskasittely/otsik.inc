@@ -180,6 +180,13 @@
 			$tila = "";
 			unset($jatka);
 		}
+
+		if ($yhtiorow["tilauksen_yhteyshenkilot"] == 'P' and ($tilausyhteyshenkilo == '' and $seltilausyhteyshenkilo == '') and in_array($toim, array("PROJEKTI", "TARJOUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "RIVISYOTTO", "REKLAMAATIO"))) {
+			echo "<font class='error'>".t("VIRHE: Anna tilaukselle yhteyshenkilö")."!</font><br>";
+			$tee = "OTSIK";
+			$tila = "";
+			unset($jatka);
+		} 
 	}
 
 	if (isset($jatka) and $asiakasid == "" and $override_ytunnus_check != 'YES') {
@@ -382,7 +389,7 @@
 	}
 
 	if ($tila == "" and !isset($jatka)) {
-		if ($toim == "TYOMAARAYS") {
+		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
 		}
 		elseif ($toim == "REKLAMAATIO") {
@@ -456,7 +463,7 @@
 							toim_postino  		= '$assrow[toim_postino]',
 							toim_postitp 		= '$assrow[toim_postitp]',
 							toim_maa    		= '$assrow[toim_maa]',
-							tilausyhteyshenkilo	= '$assrow[tilausyhteyshenkilo]',
+							tilausyhteyshenkilo	= '',
 							laskutusvkopv		= '$assrow[laskutusvkopv]',
 							chn					= '$assrow[chn]',
 							verkkotunnus		= '$assrow[verkkotunnus]'
@@ -502,7 +509,7 @@
 			}
 			elseif ($asiakasid != "" and $tiedot_laskulta == "") {
 				// asiakashaussa pitää olla vakio columni kohdistettu, jonka arvo on O että saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydessä
-				if ($toim == "TYOMAARAYS") {
+				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 					$puhlisa = " if (asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm) kotipuh, asiakas.tyopuhelin tyopuh,";
 				}
 				else {
@@ -745,6 +752,8 @@
 					<input type='hidden' name='projekti'						 value = '$srow[projekti]'>
 					<input type='hidden' name='jaksotettu'	 					 value = '$srow[jaksotettu]'>
 					<input type='hidden' name='tunnusnippu_tarjous' 			 value = '$srow[tunnusnippu_tarjous]'>
+					<input type='hidden' name='asentaja' 						 value ='$asentaja'>
+					<input type='hidden' name='tyojono' 						 value ='$tyojono'>
 					<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
 
 // 					<input type='hidden' name='toim_maa' 						 value = '$srow[toim_maa]'>
@@ -894,7 +903,7 @@
 
 			echo "<table>";
 
-			if ($toim == "TYOMAARAYS") {
+			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 				echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot").":</th></tr>";
 			}
 			elseif ($toim == "REKLAMAATIO") {
@@ -1378,7 +1387,7 @@
 				echo "<td></td><td></td></tr>";
 			}
 
-			if ($toim == "TYOMAARAYS") {
+			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
 
 				//Jos kyseessä on työmääräys
@@ -1827,7 +1836,7 @@
 				echo "</tr>";
 			}
 
-			if ($toim == "TYOMAARAYS" or (($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
+			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or (($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
 
@@ -1868,7 +1877,7 @@
 				echo "</td></tr>";
 			}
 
-			if ($toim == "TYOMAARAYS" or $srow["tilaustyyppi"] == "A") {
+			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
 				//Täysin dynaaminen osio
 				$al_res = t_avainsana("MYSQLALIAS","", "and avainsana.selite like 'tyomaarays.%' and avainsana.selitetark != ''");
 
@@ -2139,7 +2148,7 @@
 
 			echo "<table>";
 
-			if ($toim == "TYOMAARAYS") {
+			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 				echo "<tr><th colspan='3'>".t("Työmääräyksen kommentit").":</th></tr>";
 			}
 			elseif ($toim == "REKLAMAATIO") {
@@ -2173,22 +2182,25 @@
 				if (mysql_num_rows($yhteysresult) > 0) {
 					echo "<td colspan = '1'><select name='seltilausyhteyshenkilo'>";
 					echo "<option value = ''>".t("Ei valintaa")."</option>";
+
 					while ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
+
 						$sela = "";
+
 						if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"]) {
 							$sela = "SELECTED";
 							$srow["tilausyhteyshenkilo"] = "";
 						}
-						echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
 
+						echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
 					}
+
 					echo "</select>";
 					echo "<input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 				}
 				else {
 					echo "<td colspan = '1'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 				}
-
 			}
 
 			echo "<tr><td>".t("Asiakkaan tilausnumero").":</td><td colspan = '1'><input type='text' size='43' name='asiakkaan_tilausnumero' value='$srow[asiakkaan_tilausnumero]'><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
@@ -2726,7 +2738,7 @@
 			}
 			$tee = "";
 		}
-		elseif ($toim == "TYOMAARAYS") {
+		elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			if ($ylatila=='') {
 				$ylatila='A';
 			}
@@ -2937,7 +2949,7 @@
 		// varmistetaan, että meillä on kukarow
 		if ((int) $kukarow["kesken"] != 0) {
 
-			if ($tunnusnippu == "" and $toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") or (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $yhtiorow["myyntitilaus_osatoimitus"] != "")) {
+			if ($tunnusnippu == "" and $toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") or (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA")) and $yhtiorow["myyntitilaus_osatoimitus"] != "")) {
 				$query = "	UPDATE lasku
 							SET tunnusnippu = '$kukarow[kesken]'
 							WHERE tunnus = '$kukarow[kesken]' and tunnusnippu = 0";
@@ -2953,7 +2965,7 @@
 				}
 			}
 
-			if ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
+			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
 				//otetaan kantaa pyörän malliin
 				if ($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;
@@ -2989,7 +3001,7 @@
 				$result = mysql_query($query2) or pupe_error($query2);
 			}
 
-			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $vienti =='K' or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS","TYOMAARAYS", "REKLAMAATIO")))) {
+			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $vienti =='K' or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO")))) {
 				$query3 .= "laskun_lisatiedot SET
 							yhtio						= '$kukarow[yhtio]',
 							kolm_ovttunnus				= '$kolm_ovttunnus',

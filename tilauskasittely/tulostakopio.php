@@ -71,7 +71,7 @@
 	if ($toim == "TILAUSTUOTETARRA") {
 		$fuse = t("Tilauksen tuotetarrat");
 	}
-	if ($toim == "TYOMAARAYS") {
+	if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 		$fuse = t("Työmääräys");
 	}
 	if ($toim == "SAD") {
@@ -686,7 +686,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
-		if ($toim == "TYOMAARAYS") {
+		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			/// Työmääräys
 			$where1 .= " lasku.tila in ('L','A','N','S','T')";
 
@@ -1108,7 +1108,7 @@
 				$komento["Rekisteröinti_ilmoitus"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "TYOMAARAYS" and $komento["Työmääräys"] != 'email') {
+		if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $komento["Työmääräys"] != 'email') {
 			$tulostimet[0] = 'Työmääräys';
 			if ($kappaleet > 0) {
 				$komento["Työmääräys"] .= " -# $kappaleet ";
@@ -1509,7 +1509,7 @@
 
 				require_once ("tulosta_tarjous.inc");
 
-				tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat);
+				tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat, $verolliset_verottomat_hinnat);
 
 				$tee = '';
 			}
@@ -1570,7 +1570,7 @@
 				$tee = '';
 			}
 
-			if ($toim == "TYOMAARAYS") {
+			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 				//Tehdään joini
 				$query = "  SELECT tyomaarays.*, lasku.*
 							FROM lasku
@@ -1657,7 +1657,12 @@
 					rivi($page[$sivu], $tyyppi);
 				}
 
-				loppu($page[$sivu], 1);
+				if ($yhtiorow['tyomaarays_tulostus_lisarivit'] == 'L') {
+					loppu_lisarivit($page[$sivu], 1);
+				}
+				else {
+					loppu($page[$sivu], 1);
+				}
 
 				//tulostetaan sivu
 				print_pdf($komento["Työmääräys"]);

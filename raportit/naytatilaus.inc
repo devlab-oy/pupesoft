@@ -690,7 +690,7 @@
 		// katotaan miten halutaan sortattavan
 		$tilauksen_jarjestys = $yhtiorow['tilauksen_jarjestys'];
 
-		if ($toim == "TYOMAARAYS") {
+		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			$sorttauslisa = "tuotetyyppi, ";
 		}
 		elseif ($toim == 'EXTRANET') {

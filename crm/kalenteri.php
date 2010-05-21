@@ -20,6 +20,7 @@ $seurday  = date("j",mktime(0, 0, 0, $kuu, $paiva+1,  $year));
 $seurmonth= date("n",mktime(0, 0, 0, $kuu, $paiva+1,  $year));
 $seuryear = date("Y",mktime(0, 0, 0, $kuu, $paiva+1,  $year));
 
+if (trim($toim) == 'TYOMAARAYS_ASENTAJA') $asentaja = 'tyomaarays_asentaja';
 
 if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
 if (!isset($AIKA_ARRAY)) $AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00");
@@ -90,7 +91,7 @@ if ($tee == 'LISAA') {
 
 	if ($ytunnus != '') {
 		if (!isset($muutparametrit)) {
-			$muutparametrit	= 	$valitut."!¡!".$kenelle."!¡!".$asyhtio."!¡!".$kello."!¡!".$year."!¡!".$kuu."!¡!".$paiva."!¡!".$tunnus."!¡!".$konserni."!¡!".$lkello."!¡!".$lyear."!¡!".$lkuu."!¡!".$lpaiva."!¡!".$tapa."!¡!".$lopetus."!¡!".$viesti;
+			$muutparametrit	= 	$valitut."!¡!".$kenelle."!¡!".$asyhtio."!¡!".$kello."!¡!".$year."!¡!".$kuu."!¡!".$paiva."!¡!".$tunnus."!¡!".$konserni."!¡!".$lkello."!¡!".$lyear."!¡!".$lkuu."!¡!".$lpaiva."!¡!".$tapa."!¡!".$lopetus."!¡!".$viesti."!¡!".$asentaja."!¡!".$tyomaarays;
 		}
 				
 		echo "<br><font class='message'>".t("Valitse asiakas").":</font><br><br>";
@@ -124,6 +125,8 @@ if ($tee == 'LISAA') {
 		$tapa 		= $muut[13];
 		$lopetus	= $muut[14];
 		$viesti 	= $muut[15];
+		$asentaja	= $muut[16];
+		$tyomaarays = $muut[17];
 
 		$ok = "OK";
 	}
@@ -147,7 +150,8 @@ if ($tee == 'LISAA') {
 		$tapa 		= $muut[13];
 		$lopetus	= $muut[14];
 		$viesti 	= $muut[15];
-
+		$asentaja	= $muut[16];
+		$tyomaarays = $muut[17];
 	}
 	else {
 		//syötetään siis ilman asiakasta
@@ -193,8 +197,13 @@ if ($tee == 'LISAA') {
 					pvmloppu 	= '$lyear-$lkuu-$lpaiva $lkello',
 					asiakas 	= '$ytunnus',
 					liitostunnus = '$asiakasid',
-					kentta01 	= '$viesti',
-					kentta03    = '$kilometrit',
+					kentta01 	= '$viesti',";
+
+		if (strtolower($asentaja) == 'tyomaarays_asentaja' or $tyomaarays != '') {
+			$query .= "kentta02	= '$tyomaarays',";
+		}
+
+		$query .= "	kentta03    = '$kilometrit',
 					kentta04    = '$paivarahat',
 					tapa 		= '$tapa',
 					tyyppi 		= 'kalenteri'";
@@ -213,6 +222,8 @@ if ($tee == "POISTA") {
 // tehdään lisäys ruutu ja laitetaan kaikki muuttujaan jotta voidaan echota sit oikeessa kohdassa
 if($tee == "SYOTA") {
 	if ($tunnus != '') {
+		$kukalisa = strtolower($asentaja) == 'tyomaarays_asentaja' ? " AND kuka = '$kukarow[kuka]' " : '';
+
 		$query = "	SELECT *,
 					if(asiakas='0','',asiakas) asiakas,
 					if(liitostunnus=0,'',liitostunnus) liitostunnus,
@@ -224,6 +235,7 @@ if($tee == "SYOTA") {
 					FROM kalenteri
 					WHERE tunnus = '$tunnus'
 					$konsernit
+					$kukalisa
 					and tyyppi = 'kalenteri'";
 		$res  = mysql_query($query) or pupe_error($query);
 		$irow = mysql_fetch_array($res);
@@ -240,6 +252,10 @@ if($tee == "SYOTA") {
 		$lpaiva 	= $irow["lpaiva"];
 		$asyhtio 	= $irow["yhtio"];
 		$kenelle 	= $irow["kuka"];
+
+		if (strtolower($asentaja) == 'tyomaarays_asentaja') {
+			$tyomaarays = $irow["kentta02"];
+		}
 
 		if ($irow["lopkello"] == "23:59:59") $aikaloppu = "00:00:00";
 		else $aikaloppu = $irow["lopkello"];
@@ -267,6 +283,8 @@ if($tee == "SYOTA") {
 		<input type='hidden' name='tunnus'   value='$tunnus'>
 		<input type='hidden' name='konserni' value='$konserni'>
 		<input type='hidden' name='asiakasid' value='$asiakasid'>
+		<input type='hidden' name='asentaja' value='$asentaja'>
+		<input type='hidden' name='tyomaarays' value='$tyomaarays'>
 
 	<table width='100%'>";
 
@@ -356,6 +374,11 @@ if($tee == "SYOTA") {
 	$lisays .= "<tr><td>".t("Asiakas").":</td><td><input type text name='ytunnus' value='$ytunnus'>";
 	$lisays .= "</td></tr>";
 
+	if (strtolower($asentaja) == 'tyomaarays_asentaja' or $tyomaarays != '') {
+		$lisays .= "<tr><td>".t("Työmääräys").":</td><td><input type text name='tyomaarays' value='$tyomaarays'>";
+		$lisays .= "</td></tr>";
+	}
+
 	$lisays .= "<tr><td valign='top'>".t("Kommentti").":</td>";
 	$lisays .= "<td>
 		  		<textarea name='viesti' cols='50' rows='5'>$viesti</textarea><br>
@@ -384,6 +407,8 @@ if($tee == "SYOTA") {
 				<input type='hidden' name='paiva' value='$paiva'>
 				<input type='hidden' name='tunnus' value='$tunnus'>
 				<input type='hidden' name='konserni' value='$konserni'>
+				<input type='hidden' name='asentaja' value='$asentaja'>
+				<input type='hidden' name='tyomaarays' value='$tyomaarays'>
 				<td><input type='submit' value='".t("Poista")."'></td></form></tr>
 				</table></td>";
 }
@@ -445,6 +470,8 @@ echo "<table width='100%'>
 		<tr><td class='back' align='center' colspan='8'>
 		<form action='$PHP_SELF?valitut=$valitut&year=$year&paiva=1&konserni=$konserni' method='post'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
+		<input type='hidden' name='asentaja' value='$asentaja'>
+		<input type='hidden' name='tyomaarays' value='$tyomaarays'>
 		<select name='kuu' onchange='submit();'>";
 
 $i=1;
@@ -507,7 +534,7 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
 		$class = "tumma";
 	}
 
-	echo "<td align='center' style='$style' class='$class'><a href='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$i&konserni=$konserni&lopetus=$lopetus'>$fn1 $i $fn2</a></td>";
+	echo "<td align='center' style='$style' class='$class'><a href='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$i&konserni=$konserni&asentaja=$asentaja&tyomaarays=$tyomaarays&toim=$toim&lopetus=$lopetus'>$fn1 $i $fn2</a></td>";
 
 	// tehdään rivinvaihto jos kyseessä on sunnuntai ja seuraava päivä on olemassa..
 	if ((weekday_number($i, $kuu, $year)==6) and (days_in_month($kuu, $year)>$i)) {
@@ -523,7 +550,7 @@ for ($i=0; $i<6 - weekday_number(days_in_month($kuu, $year), $kuu, $year); $i++)
 
 echo "</tr>";
 
-echo "<tr><td class='back' align='center' colspan='8'><a href='$PHP_SELF?valitut=$valitut&kuu=$backmonth&year=$backyear&paiva=1&konserni=$konserni&lopetus=$lopetus'>".t("Edellinen")."</a>  - <a href='$PHP_SELF?valitut=$valitut&kuu=$nextmonth&year=$nextyear&paiva=1&konserni=$konserni&lopetus=$lopetus'>".t("Seuraava")."</a><br><br></td></tr>";
+echo "<tr><td class='back' align='center' colspan='8'><a href='$PHP_SELF?valitut=$valitut&kuu=$backmonth&year=$backyear&paiva=1&konserni=$konserni&asentaja=$asentaja&tyomaarays=$tyomaarays&toim=$toim&lopetus=$lopetus'>".t("Edellinen")."</a>  - <a href='$PHP_SELF?valitut=$valitut&kuu=$nextmonth&year=$nextyear&paiva=1&konserni=$konserni&asentaja=$asentaja&tyomaarays=$tyomaarays&toim=$toim&lopetus=$lopetus'>".t("Seuraava")."</a><br><br></td></tr>";
 echo "</table>";
 
 if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
@@ -536,7 +563,9 @@ if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
 	//konsernivalinta
 	if ($yhtiorow["konserni"] != "") {
 		echo "<form action='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$paiva' method='post'>
-				<input type='hidden' name='lopetus' value='$lopetus'>";
+				<input type='hidden' name='lopetus' value='$lopetus'>
+				<input type='hidden' name='asentaja' value='$asentaja'>
+				<input type='hidden' name='tyomaarays' value='$tyomaarays'>";
 		echo "<input type='checkbox' name='konserni' $ckhk onclick='submit();'> ".t("Kaikkien konserniyritysten merkinnät");
 		echo "</form>";
 	}
@@ -549,7 +578,10 @@ if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
 	}
 
 	echo "<form action='$PHP_SELF?year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni' method='post'>
-			<input type='hidden' name='lopetus' value='$lopetus'>";
+			<input type='hidden' name='lopetus' value='$lopetus'>
+			<input type='hidden' name='asentaja' value='$asentaja'>
+			<input type='hidden' name='tyojono' value='$tyojono'>
+			<input type='hidden' name='toim' value='$toim'>";
 
 	echo t("Näytä kalenterit").":
 			<div style='width:250px;height:275px;overflow:auto;'>
@@ -644,9 +676,9 @@ echo "<td class='back' valign='top' nowrap width='100%'>";
 
 echo "<table width='100%'>
 		<tr>
-			<th nowrap><a href='$PHP_SELF?valitut=$valitut&year=$edelyear&kuu=$edelmonth&paiva=$edelday&konserni=$konserni&lopetus=$lopetus'><< ".t("Edellinen")."</a></th>
+			<th nowrap><a href='$PHP_SELF?valitut=$valitut&year=$edelyear&kuu=$edelmonth&paiva=$edelday&konserni=$konserni&asentaja=$asentaja&tyomaarays=$tyomaarays&lopetus=$lopetus'><< ".t("Edellinen")."</a></th>
 			<th style='text-align:center' nowrap>$paiva. $MONTH_ARRAY[$kuu] $year</th>
-			<th style='text-align:right' nowrap><a href='$PHP_SELF?valitut=$valitut&year=$seuryear&kuu=$seurmonth&paiva=$seurday&konserni=$konserni&lopetus=$lopetus'>".t("Seuraava")." >></a></th>
+			<th style='text-align:right' nowrap><a href='$PHP_SELF?valitut=$valitut&year=$seuryear&kuu=$seurmonth&paiva=$seurday&konserni=$konserni&asentaja=$asentaja&tyomaarays=$tyomaarays&lopetus=$lopetus'>".t("Seuraava")." >></a></th>
 		</tr>
 		</table>";
 
@@ -714,6 +746,8 @@ while ($date != $whileloppu) {
 //kalenterin taulukko alkaa tästä
 echo "<table width='100%'>";
 
+$tyyppi = strtolower($asentaja) == 'tyomaarays_asentaja' ? $tyyppi = "'kalenteri'" : "'kalenteri', 'asennuskalenteri'";
+
 $kello_nyt	= '';
 list($whalkt, $whalkm) = explode(":", $AIKA_ARRAY[0]);
 $hh   = $whalkt-1;
@@ -739,7 +773,7 @@ while ($kello_nyt != $whileloppu) {
 				FROM kalenteri
 				LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
 				WHERE kalenteri.kuka in ($vertaa)
-				and kalenteri.tyyppi in ('kalenteri', 'asennuskalenteri')
+				and kalenteri.tyyppi in ($tyyppi)
 				and kokopaiva = ''
 				$konsernit
 				HAVING pvmalku  = '$year-$kuu-$paiva $kello_nyt:00'
@@ -754,7 +788,7 @@ while ($kello_nyt != $whileloppu) {
 				LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
 				WHERE kalenteri.kuka in ($vertaa)
 				$konsernit
-				and kalenteri.tyyppi in ('kalenteri', 'asennuskalenteri')
+				and kalenteri.tyyppi in ($tyyppi)
 				and kokopaiva = ''
 				HAVING
 				pvmalku  <= '$year-$kuu-$paiva $kello_nyt:00'
@@ -767,7 +801,7 @@ while ($kello_nyt != $whileloppu) {
 
 	//kirjoitetaan tiedot tauluun (paitsi jos ollaa lisäämässä uutta tähän ja taulu oisi tyhjä)
 	echo "<tr>";
-	echo "<td nowrap width='10%'>$kello_nyt <a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni&lopetus=$lopetus'>".t("Lisää")."</a></td>";
+	echo "<td nowrap width='10%'>$kello_nyt <a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni&asentaja=$asentaja&tyomaarays=$tyomaarays&lopetus=$lopetus'>".t("Lisää")."</a></td>";
 
 	if ($kello_nyt == $lisayskello) {
 		echo $lisays;
@@ -827,7 +861,7 @@ while ($kello_nyt != $whileloppu) {
 
 				// Vanhoja kalenteritapahtumia ei saa enää muuttaa ja Hyväksyttyjä lomia ei saa ikinä muokata
 				if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "" and $row['tyyppi'] == 'kalenteri') {
-					echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&lopetus=$lopetus'>$row[tapa]</a> ";
+					echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&asentaja=$asentaja&tyomaarays=$tyomaarays&lopetus=$lopetus'>$row[tapa]</a> ";
 				}
 				elseif ($row['tyyppi'] == 'asennuskalenteri') {
 					echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>",t("Asennustyö")," $row[liitostunnus] ";

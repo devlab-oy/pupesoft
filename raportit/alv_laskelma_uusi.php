@@ -448,7 +448,7 @@
 			if ($tilirow["tilitMUU"] != "") $query .= " tiliointi.tilino in ($tilirow[tilitMUU])";
 
 			$query .= "	)
-						GROUP BY maa, valuutta, vero, tilino, nimi
+						GROUP BY 1, 2, 3, 4, 5
 						ORDER BY maa, valuutta, vero, tilino, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -551,30 +551,10 @@
 
 			if ($ryhma == 'fi311' or $ryhma == 'fi312') {
 
-				/*
-				if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
-							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
-							tiliointi.vero,
-							tiliointi.tilino,
-							tili.nimi,
-							sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) bruttosumma,
-							sum(round(tiliointi.summa * if (('$ryhma' = 'fi305' or '$ryhma' = 'fi306'), 0.22, tiliointi.vero / 100), 2)) verot,
-							sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) bruttosumma_valuutassa,
-							sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) verot_valuutassa,
-							count(*) kpl
-							FROM tiliointi
-							LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
-				*/
-
-				/*
-				GROUP BY maa, valuutta, vero, tilino, nimi
-				ORDER BY maa, valuutta, vero, tilino, nimi";
-				*/
-
 				$query = "	SELECT if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
 							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 							(tilausrivi.alv / 100) vero,
-							lasku.tunnus ltunnus,
+							group_concat(lasku.tunnus) ltunnus,
 							sum(round(rivihinta * (1 + tilausrivi.alv / 100), 2)) bruttosumma,
 							sum(round(rivihinta * (tilausrivi.alv / 100), 2)) verot,
 							sum(round(rivihinta / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + tilausrivi.alv / 100), 2)) bruttosumma_valuutassa,
@@ -587,7 +567,7 @@
 							and lasku.tapvm >= '$alkupvm'
 							and lasku.tapvm <= '$loppupvm'
 							and lasku.vienti = 'E'
-							GROUP BY maa, valuutta, vero
+							GROUP BY 1, 2, 3
 							ORDER BY maa, valuutta, vero";
 				$result = mysql_query($query) or pupe_error($query);
 
@@ -620,7 +600,9 @@
 				unset($edmaa);
 
 				while ($trow = mysql_fetch_array ($result)) {
+
 					if ($trow['bruttosumma'] == 0) continue;
+
 					if (isset($edvero) and ($edvero != $trow["vero"] or (isset($edmaa) and $edmaa != $trow["maa"]))) { // Vaihtuiko verokanta?
 						echo "<tr>
 								<td colspan='5' align='right'>".t("Yhteensä").":</td>
@@ -634,14 +616,15 @@
 						$kantasum	= 0.0;
 					}
 
-					$query = "	SELECT *
+					$query = "	SELECT group_concat(distinct tili.tilino) tilino, group_concat(distinct tili.nimi) nimi
 								FROM tiliointi
 								JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
 								WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-								AND tiliointi.ltunnus = $trow[ltunnus]
+								AND tiliointi.ltunnus in ($trow[ltunnus])
 								AND tiliointi.tilino in ($tilirow[tilitMUU])";
 					$tili_res = mysql_query($query) or pupe_error($query);
 					$tili_row = mysql_fetch_assoc($tili_res);
+
 					$trow['tilino'] = $tili_row['tilino'];
 					$trow['nimi'] = $tili_row['nimi'];
 

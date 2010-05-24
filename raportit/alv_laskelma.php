@@ -386,7 +386,7 @@
 			if ($tilirow["tilitMUU"] != "") $query .= " tiliointi.tilino in ($tilirow[tilitMUU])";
 
 			$query .= "	)
-						GROUP BY maa, valuutta, vero, tilino, nimi
+						GROUP BY 1, 2, 3, 4, 5
 						ORDER BY maa, valuutta, vero, tilino, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 												

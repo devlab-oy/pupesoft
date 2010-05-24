@@ -523,87 +523,91 @@
 
 	echo "</table><br><br>";
 
-	if (strtolower($toim) != 'tyomaarays_asentaja') {
-		echo "<table><tr><td class='back'>";
-		echo "<table><tr><th colspan='2'>",t("Työmääräyksien tuntiyhteenveto"),"</th></tr>";
+	if (count($tyomaarays_tunti_yhteensa) > 0) {
+		if (strtolower($toim) != 'tyomaarays_asentaja') {
+			echo "<table><tr><td class='back'>";
+			echo "<table><tr><th colspan='2'>",t("Työmääräyksien tuntiyhteenveto"),"</th></tr>";
+
+			$total_yht = 0;
+
+			foreach ($tyomaarays_tunti_yhteensa as $tyom_id => $tyom_array) {
+				$yht = 0;
+
+				echo "<tr><td>$tyom_id</td><td><table width='100%'>";
+
+				foreach ($tyom_array as $tyom_asentaja => $tyom_tunnit) {
+					echo "<tr><td>$tyom_asentaja</td><td class='ok' align='right'><strong>$tyom_tunnit</strong></td></tr>";
+					$yht += $tyom_tunnit;
+				}
+
+				echo "</td></table></td></tr>";
+				echo "<tr><td class='tumma'>",t("Yhteensä")," ",t("Työmääräys")," $tyom_id</td><td class='tumma'>$yht</td></tr>";
+
+				$total_yht += $yht;
+			}
+
+			echo "<tr><th>",t("Yhteensä"),"</th><th>$total_yht</th></tr>";
+			echo "</table></td>";
+		}
+
+		echo "<td class='back'><table>";
+		echo "<tr><th colspan='2'>",t("Työmääräyksien asentajien tuntiyhteenveto"),"</th></tr>";
 
 		$total_yht = 0;
 
 		foreach ($tyomaarays_tunti_yhteensa as $tyom_id => $tyom_array) {
-			$yht = 0;
 
-			echo "<tr><td>$tyom_id</td><td><table width='100%'>";
+			$query = "	SELECT kuka, right(pvmalku, 8) pvmalku, right(pvmloppu, 8) pvmloppu
+						FROM kalenteri
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND kentta02 = '$tyom_id'
+						AND tyyppi = 'kalenteri'";
+			$tunti_chk_res = mysql_query($query) or pupe_error($query);
 
-			foreach ($tyom_array as $tyom_asentaja => $tyom_tunnit) {
-				echo "<tr><td>$tyom_asentaja</td><td class='ok' align='right'><strong>$tyom_tunnit</strong></td></tr>";
-				$yht += $tyom_tunnit;
-			}
+			$tyom_kuka = array();
 
-			echo "</td></table></td></tr>";
-			echo "<tr><td class='tumma'>",t("Yhteensä")," ",t("Työmääräys")," $tyom_id</td><td class='tumma'>$yht</td></tr>";
+			if (mysql_num_rows($tunti_chk_res) > 0) {
 
-			$total_yht += $yht;
-		}
+				while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
+					list($ah, $am, $as) = explode(":", $tunti_chk_row['pvmalku']);
+					list($lh, $lm, $ls) = explode(":", $tunti_chk_row['pvmloppu']);
 
-		echo "<tr><th>",t("Yhteensä"),"</th><th>$total_yht</th></tr>";
-		echo "</table></td>";
-	}
+					// to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
+					date_default_timezone_set('UTC');
 
-	echo "<td class='back'><table>";
-	echo "<tr><th colspan='2'>",t("Työmääräyksien asentajien tuntiyhteenveto"),"</th></tr>";
+					list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
 
-	$total_yht = 0;
+					if ($temp_tunnit != 0 or $temp_minuutit != 0) {
+						$temp_minuutit = $temp_minuutit != 0 ? $temp_minuutit / 60 : 0;
 
-	foreach ($tyomaarays_tunti_yhteensa as $tyom_id => $tyom_array) {
-
-		$query = "	SELECT kuka, right(pvmalku, 8) pvmalku, right(pvmloppu, 8) pvmloppu
-					FROM kalenteri
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND kentta02 = '$tyom_id'
-					AND tyyppi = 'kalenteri'";
-		$tunti_chk_res = mysql_query($query) or pupe_error($query);
-
-		$tyom_kuka = array();
-
-		if (mysql_num_rows($tunti_chk_res) > 0) {
-
-			while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
-				list($ah, $am, $as) = explode(":", $tunti_chk_row['pvmalku']);
-				list($lh, $lm, $ls) = explode(":", $tunti_chk_row['pvmloppu']);
-
-				// to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
-				date_default_timezone_set('UTC');
-
-				list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
-
-				if ($temp_tunnit != 0 or $temp_minuutit != 0) {
-					$temp_minuutit = $temp_minuutit != 0 ? $temp_minuutit / 60 : 0;
-
-					$tunti_chk_row['kuka'] = t_avainsana("TYOM_TYOLINJA", '', " and avainsana.selitetark = '$tunti_chk_row[kuka]' ", "'$kukarow[yhtio]'", '', 'selitetark_2');
-					$tyom_kuka[$tunti_chk_row['kuka']] += ($temp_tunnit+$temp_minuutit);
+						$tunti_chk_row['kuka'] = t_avainsana("TYOM_TYOLINJA", '', " and avainsana.selitetark = '$tunti_chk_row[kuka]' ", "'$kukarow[yhtio]'", '', 'selitetark_2');
+						$tyom_kuka[$tunti_chk_row['kuka']] += ($temp_tunnit+$temp_minuutit);
+					}
 				}
 			}
-		}
 
-		if (count($tyom_kuka) > 0) {
-			echo "<tr><td>$tyom_id</td><td><table width='100%'>";
+			if (count($tyom_kuka) > 0) {
+				echo "<tr><td>$tyom_id</td><td><table width='100%'>";
 
-			$yht = 0;
+				$yht = 0;
 
-			foreach ($tyom_kuka as $t_kuka => $t_tunnit) {
-				echo "<tr><td>$t_kuka</td><td class='ok' align='right'><strong>",str_replace(".",",",$t_tunnit),"</strong></td></tr>";
-				$yht += $t_tunnit;
+				foreach ($tyom_kuka as $t_kuka => $t_tunnit) {
+					echo "<tr><td>$t_kuka</td><td class='ok' align='right'><strong>",str_replace(".",",",$t_tunnit),"</strong></td></tr>";
+					$yht += $t_tunnit;
+				}
+
+				echo "</td></table></td></tr>";
+				echo "<tr><td class='tumma'>",t("Yhteensä")," ",t("Työmääräys")," $tyom_id</td><td class='tumma'>",str_replace(".",",",$yht),"</td></tr>";
+
+				$total_yht += $yht;
 			}
-
-			echo "</td></table></td></tr>";
-			echo "<tr><td class='tumma'>",t("Yhteensä")," ",t("Työmääräys")," $tyom_id</td><td class='tumma'>",str_replace(".",",",$yht),"</td></tr>";
-
-			$total_yht += $yht;
 		}
+
+		echo "<tr><th>",t("Yhteensä"),"</th><th>",str_replace(".",",",$total_yht),"</th></tr>";
+		echo "</table></td></tr></table>";
 	}
 
-	echo "<tr><th>",t("Yhteensä"),"</th><th>",str_replace(".",",",$total_yht),"</th></tr>";
-	echo "</table></td></tr></table><br><br>";
+	echo "<br><br>";
 
 	require ("../inc/footer.inc");
 

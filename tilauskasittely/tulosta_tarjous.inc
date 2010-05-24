@@ -976,10 +976,13 @@ if (!function_exists('tulosta_tarjous')) {
 
 			$tuotetyyppi = $row['tuotetyyppi'];
 
-			if (trim($verolliset_verottomat_hinnat) == 'verolliset') {
+			if ($yhtiorow['alv_kasittely'] != '' and trim($verolliset_verottomat_hinnat) == 'verolliset') {
 				$row["rivihinta"] = $row["rivihinta"] * (1+$row["alv"]/100);
 			}
-			elseif ($yhtiorow['tarjouksen_alv_kasittely'] != '' and trim($verolliset_verottomat_hinnat) != 'verottomat') {
+			elseif ($yhtiorow['alv_kasittely'] == '' and trim($verolliset_verottomat_hinnat) == 'verottomat') {
+				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
+			}
+			elseif ($yhtiorow['tarjouksen_alv_kasittely'] != '' and trim($verolliset_verottomat_hinnat) == '') {
 				if ($yhtiorow['alv_kasittely'] == '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
 		        	$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
 				}

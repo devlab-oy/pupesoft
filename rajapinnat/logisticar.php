@@ -9,12 +9,12 @@
 	}
 
 	$yhtio = $argv[1];
-	
+
 	// otetaan includepath aina rootista
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 	ini_set("display_errors", 0);
-	
+
 	require('inc/connect.inc');
 	require('inc/functions.inc');
 
@@ -453,7 +453,7 @@
 					(tapahtuma.kplhinta * tapahtuma.kpl * -1) myyntiarvo,
 					(tapahtuma.kplhinta * tapahtuma.kpl * -1) ostoarvo,
 					(tapahtuma.kpl * (tapahtuma.kplhinta - tapahtuma.hinta) * -1) kate,
-					tapahtuma.kpl tapahtumamaara,
+					tapahtuma.kpl 				tapahtumamaara,
 					lasku.laskunro              laskunumero,
 					kuka.kuka	                myyjatunnus,
 					lasku.yhtio_toimipaikka		toimipaikka,
@@ -462,18 +462,18 @@
 					FROM tapahtuma
 					LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
 					LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-					LEFT JOIN tuotepaikat USE INDEX (yhtio_tuoteno_paikka) ON (	tuotepaikat.yhtio		= tapahtuma.yhtio and 
-																				tuotepaikat.tuoteno 	= tapahtuma.tuoteno and 
-																				tuotepaikat.hyllyvali 	= tapahtuma.hyllyvali and 
-																				tuotepaikat.hyllytaso 	= tapahtuma.hyllytaso and 
-																				tuotepaikat.hyllyalue 	= tapahtuma.hyllyalue and 
+					LEFT JOIN tuotepaikat USE INDEX (yhtio_tuoteno_paikka) ON (	tuotepaikat.yhtio		= tapahtuma.yhtio and
+																				tuotepaikat.tuoteno 	= tapahtuma.tuoteno and
+																				tuotepaikat.hyllyvali 	= tapahtuma.hyllyvali and
+																				tuotepaikat.hyllytaso 	= tapahtuma.hyllytaso and
+																				tuotepaikat.hyllyalue 	= tapahtuma.hyllyalue and
 																				tuotepaikat.hyllynro 	= tapahtuma.hyllynro)
 					LEFT JOIN varastopaikat ON
 					concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
 					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 					and varastopaikat.yhtio = tuotepaikat.yhtio
 					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
-					WHERE tapahtuma.laji in ('tulo', 'laskutus', 'siirto')
+					WHERE tapahtuma.laji in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus')
 					and tapahtuma.yhtio = '$yhtio'
 					$pvmlisa
 					ORDER BY tapahtumapaiva, nimiketunnus ASC
@@ -547,7 +547,7 @@
 					}
 
 					break;
-				
+
 				// varastosiirrot
 				case 'siirto':
 
@@ -563,8 +563,8 @@
 						$trow['toimitusasiakas'] = $trow['varastotunnus'];
 						$trow['varastotunnus'] = $trow['asiakastunnus'];
 					}
-				
-					
+
+
 			}
 
 			unset($trow['kate']);

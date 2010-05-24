@@ -472,26 +472,28 @@
 		if (strtolower($toim) != 'tyomaarays_asentaja') {
 			$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
 
-			echo "<form method='post'>";
-			echo "<input type='hidden' name='tyomaarayksen_tunnus' value='$vrow[tunnus]'>";
-			echo "<input type='hidden' name='konserni' value='$konserni'>";
-			echo "<input type='hidden' name='myyntitilaus_haku' value='$myyntitilaus_haku'>";
-			echo "<input type='hidden' name='viesti_haku' value='$viesti_haku'>";
-			echo "<input type='hidden' name='asiakasnimi_haku' value='$asiakasnimi_haku'>";
-			echo "<input type='hidden' name='asiakasnumero_haku' value='$asiakasnumero_haku'>";
-			echo "<input type='hidden' name='tyojono_haku' value='$tyojono_haku'>";
-			echo "<input type='hidden' name='tyostatus_haku' value='$tyostatus_haku'>";
-			echo "<input type='hidden' name='suorittaja_haku' value='$suorittaja_haku'>";
-			echo "<input type='hidden' name='tyojono' value='$tyojono'>";
+			if (mysql_num_rows($tyostatus_result) > 0) {
+				echo "<form method='post'>";
+				echo "<input type='hidden' name='tyomaarayksen_tunnus' value='$vrow[tunnus]'>";
+				echo "<input type='hidden' name='konserni' value='$konserni'>";
+				echo "<input type='hidden' name='myyntitilaus_haku' value='$myyntitilaus_haku'>";
+				echo "<input type='hidden' name='viesti_haku' value='$viesti_haku'>";
+				echo "<input type='hidden' name='asiakasnimi_haku' value='$asiakasnimi_haku'>";
+				echo "<input type='hidden' name='asiakasnumero_haku' value='$asiakasnumero_haku'>";
+				echo "<input type='hidden' name='tyojono_haku' value='$tyojono_haku'>";
+				echo "<input type='hidden' name='tyostatus_haku' value='$tyostatus_haku'>";
+				echo "<input type='hidden' name='suorittaja_haku' value='$suorittaja_haku'>";
+				echo "<input type='hidden' name='tyojono' value='$tyojono'>";
 
-			echo "<select name='tyostatus_muutos' onchange='submit();'>";
+				echo "<select name='tyostatus_muutos' onchange='submit();'>";
 
-			while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
-				$sel = $vrow['tyostatus'] == $tyostatus_row['selitetark'] ? ' SELECTED' : '';
-				echo "<option value='$tyostatus_row[selite]'$sel>$tyostatus_row[selitetark]</option>";
+				while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
+					$sel = $vrow['tyostatus'] == $tyostatus_row['selitetark'] ? ' SELECTED' : '';
+					echo "<option value='$tyostatus_row[selite]'$sel>$tyostatus_row[selitetark]</option>";
+				}
+
+				echo "</select></form>";
 			}
-
-			echo "</select></form>";
 		}
 		else {
 			echo "$vrow[tyostatus]";

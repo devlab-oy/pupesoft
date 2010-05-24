@@ -250,19 +250,8 @@ else {
 		$lisasalker = " ";
 	}
 
-	// Katotaan, onko tämä jo kerätty...
-	$query = "	SELECT tilausrivi.*
-				FROM tilausrivi use index (yhtio_otunnus)
-				JOIN tuote on (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
-				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-				AND tilausrivi.otunnus = '$laskurow[tunnus]'
-				AND tilausrivi.keratty != ''
-				$lisasalker";
-	$keres = mysql_query($query) or pupe_error($query);
-
-	// jos on yksikin kerätty rivi
-	// lisäksi tila ei saa olla N (myyntitilaus kesken), koska sitä ei ole voitu kerätä tai jos tila on L (myyntitilaus) niin alatila ei saa olla A (tulostusjonossa), koska sitä ei olla voitu kerätä
-	if (mysql_num_rows($keres) > 0 and ($laskurow["tila"] != "N" or ($laskurow["tila"] == "L" and $laskurow["alatila"] != "A"))) {
+	// Jos otsikko on kerätty tai pidemmällä
+	if ($laskurow["tila"] == "L" and in_array($laskurow["alatila"], array('C','D','J','E'))) {
 		$query = "	UPDATE tilausrivi
 					SET keratty = '$kukarow[kuka]', kerattyaika = now()
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -273,7 +262,7 @@ else {
 		$result = mysql_query($query) or pupe_error($query);
 
 		// Laitetaan rivit toimitetuiksi jos otsikko sanoo toimitettu
-		if ($laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E' or $laskurow["alatila"] == 'J') {
+		if ($laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'J' or $laskurow["alatila"] == 'E') {
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -285,7 +274,7 @@ else {
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
-		$tilaus_valmis_ulos .= "<font class='message'>".t("Tilauksella oli jo kerättyjä rivejä, joten lähetettä ei tulosteta").".<br>".t("Jos haluat lähetteen tulosta lähetteen kopio. Tilausnumero on")." $laskurow[tunnus].</font><br><br>";
+		$tilaus_valmis_ulos .= "<font class='message'>".t("HUOM: Tilaus oli jo kerätty! Jos tarvitset keräyslistan, tulosta keräyslistan kopio").".</font><br><br>";
 
 		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
 		if ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {

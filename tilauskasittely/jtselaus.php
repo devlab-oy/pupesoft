@@ -2073,13 +2073,13 @@
 					</SCRIPT>";
 		}
 
-		$sel = '';
-		if ($superit != '') $sel = 'CHECKED';
-
-		echo "	<tr>
-				<th>".t("Näytä vain suoratoimitusrivit")."</th>
-				<td><input type='checkbox' name='superit' $sel></td><td class='back'>".t("Älä toimita suoratoimituksia, ellet ole 100% varma että voit niin tehdä")."!</td>
-				</tr>";
+		#$sel = '';
+		#if ($superit != '') $sel = 'CHECKED';
+        #
+		#echo "	<tr>
+		#		<th>".t("Näytä vain suoratoimitusrivit")."</th>
+		#		<td><input type='checkbox' name='superit' $sel></td><td class='back'>".t("Älä toimita suoratoimituksia, ellet ole 100% varma että voit niin tehdä")."!</td>
+		#		</tr>";
 
 		echo "</table>
 

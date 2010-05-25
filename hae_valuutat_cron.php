@@ -32,10 +32,10 @@
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
-		echo date("H:i:s").": Eurokurssit päivitetty $pvm\n\n";
+		echo date("d.m.Y @ G:i:s").": Eurokurssit päivitetty $pvm\n\n";
 	}
 	else {
-		echo "Valuuttakurssien haku epäonnistui!\n\n";
+		echo date("d.m.Y @ G:i:s").": Valuuttakurssien haku epäonnistui!\n\n";
 	}
 
 ?>

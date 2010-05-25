@@ -16,6 +16,8 @@
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 		$aja = 'run';
+
+		echo date("d.m.Y @ G:i:s")." - Iltasiivo $yhtiorow[nimi]\n";
 	}
 	else {
 		require ("inc/parametrit.inc");
@@ -270,31 +272,31 @@
 
 				$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (4)<br>";
 
-				$query = "	UPDATE lasku SET 
-							alatila = 'N', 
-							tila = 'D',  
-							comments = '$komm' 
-							WHERE yhtio = '{$kukarow['yhtio']}' 
+				$query = "	UPDATE lasku SET
+							alatila = 'N',
+							tila = 'D',
+							comments = '$komm'
+							WHERE yhtio = '{$kukarow['yhtio']}'
 							and tunnus = '{$row['laskutunnus']}'";
 				$deler = mysql_query($query) or die($query);
 
-				$query = "	UPDATE tilausrivi SET 
-							tyyppi = 'D' 
-							WHERE yhtio = '{$kukarow['yhtio']}' 
-							AND otunnus = '{$row['laskutunnus']}' 
+				$query = "	UPDATE tilausrivi SET
+							tyyppi = 'D'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND otunnus = '{$row['laskutunnus']}'
 							and var != 'P'";
 				$deler = mysql_query($query) or die($query);
 
 				//poistetaan TIETENKIN kukarow[kesken] ettei voi syöttää extranetissä rivejä tälle
-				$query = "	UPDATE kuka SET 
-							kesken = '' 
-							WHERE yhtio = '{$kukarow['yhtio']}' 
+				$query = "	UPDATE kuka SET
+							kesken = ''
+							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND kesken = '{$row['laskutunnus']}'";
 				$deler = mysql_query($query) or die($query);
 
 				$laskuri++;
 			}
-			
+
 			if ($laskuri > 0) $iltasiivo .= "Mitätöitiin $laskuri extranet-tilausta, jotka olivat $aikaraja tuntia vanhoja.\n";
 		}
 
@@ -303,22 +305,22 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND luontiaika < date_sub(now(), INTERVAL 1 YEAR)";
 			$deler = mysql_query($query) or die($query);
-			
+
 			if (mysql_affected_rows() > 0) {
 				$iltasiivo .= "Poistettiin ".mysql_affected_rows()." riviä suorituskykylokista.\n";
 			}
 		}
 
-		if ($iltasiivo != "") {
-
-			echo date("Y-m-d H:i:s")." - Iltasiivo $yhtiorow[nimi]\n";
+		if ($iltasiivo != "" or trim($argv[1]) != '') {
 			echo $iltasiivo;
-			echo "\n";
+			echo date("d.m.Y @ G:i:s")." - Iltasiivo $yhtiorow[nimi]. Done!\n\n";
+		}
 
+		if ($iltasiivo != "") {
 			if ($iltasiivo_email == 1) {
-				$header 	= "From: <$yhtiorow[postittaja_email]>\n";
-				$header 	.= "MIME-Version: 1.0\n" ;
-				$subject 	= "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";
+				$header	 = "From: <$yhtiorow[postittaja_email]>\n";
+				$header .= "MIME-Version: 1.0\n" ;
+				$subject = "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";
 
 				mail($yhtiorow["admin_email"], "Iltasiivo yhtiolle '{$yhtiorow["yhtio"]}'", $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
 			}

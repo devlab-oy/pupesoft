@@ -124,5 +124,7 @@
 			}
 		}
 	}
-
+	
+	echo date("d.m.Y @ G:i:s").": UPS-rahtikirjojen paivitys. Done!\n\n";
+	
 ?>

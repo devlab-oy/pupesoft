@@ -234,16 +234,23 @@
 
 							if ($tuotetyyppi == 'Työt') {
 								echo "<br/>";
-								$i = 0;
+								$yksgroup = array();
+
 								foreach (explode(',', $kplyht) as $yksikko_kpl) {
 									
 									list($yksikko, $kpl) = explode('#', $yksikko_kpl);
 									if ($yksikko != '' and $kpl != 0) {
-										if ($i != 0) echo "<br/>";
-										echo "$kpl ".t_avainsana("Y", "", " and avainsana.selite='$yksikko'", "", "", "selite");
-										$i++;
+										$yksgroup[$yksikko] += $kpl;
 									}
 								}
+
+								$i = 0;
+								foreach ($yksgroup as $yksikko => $kpl) {
+									if ($i != 0) echo "<br/>";
+									echo "$kpl ".t_avainsana("Y", "", " and avainsana.selite='$yksikko'", "", "", "selite");
+									$i++;
+								}
+								
 							}
 
 							echo "</td><td class='spec' align='right'>$rivihinta $valuutta</td></tr>";

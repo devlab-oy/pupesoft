@@ -73,7 +73,7 @@ if ((int) $valitsetoimitus > 0) {
 		$toim = "PROJEKTI";
 	}
 }
-elseif (in_array($valitsetoimitus, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI"))) {
+elseif (in_array($valitsetoimitus, array("ENNAKKO","TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI"))) {
 	$uusitoimitus = $valitsetoimitus;
 }
 
@@ -402,7 +402,7 @@ if ((int) $kukarow["kesken"] != 0) {
 		$lasklisatied_row  = mysql_fetch_assoc($result);
 	}
 
-	
+
 	if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0 and $yhtiorow["suoratoim_ulkomaan_alarajasumma"] > 0) {
 		$yhtiorow["suoratoim_ulkomaan_alarajasumma"] = round(laskuval($yhtiorow["suoratoim_ulkomaan_alarajasumma"], $laskurow["vienti_kurssi"]),0);
 	}
@@ -2152,12 +2152,15 @@ if ($tee == '') {
 				$ptilat = "'V','W'";
 			}
 			else {
-				$ptilat = "'L','N','A','T','G','S','O','R'";
+				$ptilat = "'L','N','A','T','G','S','O','R','E'";
 			}
 
 			$vquery = " SELECT count(*) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tunnus<=lasku.tunnus and l.tila='T'";
 
-			$query = " 	SELECT tila, alatila, varastopaikat.nimitys varasto, lasku.toimaika, if (tila='T',if (tunnusnippu>0,concat(lasku.tunnusnippu,'/',($vquery)), concat(lasku.tunnusnippu,'/1')),lasku.tunnus) tilaus, lasku.tunnus tunnus
+			$query = " 	SELECT lasku.tila, lasku.alatila, varastopaikat.nimitys varasto, lasku.toimaika,
+						if (lasku.tila='T',if (lasku.tunnusnippu>0,concat(lasku.tunnusnippu,'/',($vquery)), concat(lasku.tunnusnippu,'/1')),lasku.tunnus) tilaus,
+						lasku.tunnus tunnus,
+						lasku.tilaustyyppi
 						FROM lasku
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -2178,12 +2181,31 @@ if ($tee == '') {
 
 					$laskutyyppi = $row["tila"];
 					$alatila 	 = $row["alatila"];
+
 				 	require ("inc/laskutyyppi.inc");
+
+					$tarkenne = " ";
+
+					if ($row["tila"] == "V" and $row["tilaustyyppi"] == "V") {
+						$tarkenne = " (".t("Asiakkaalle").") ";
+					}
+					elseif ($row["tila"] == "V" and  $row["tilaustyyppi"] == "W") {
+						$tarkenne = " (".t("Varastoon").") ";
+					}
+					elseif(($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "R") {
+						$tarkenne = " (".t("Reklamaatio").") ";
+					}
+					elseif(($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "A") {
+						$laskutyyppi = "Tyˆm‰‰r‰ys";
+					}
+					elseif($row["tila"] == "N" and $row["tilaustyyppi"] == "E") {
+						$laskutyyppi = "Ennakkotilaus kesken";
+					}
 
 					if ($row["alatila"] == "X") $disabled = "DISABLED";
 					else $disabled = "";
 
-					echo "<option value ='$row[tunnus]' $sel $disabled>".t("$laskutyyppi")." $row[tilaus] ".t("$alatila")." $row[varasto]</option>";
+					echo "<option value ='$row[tunnus]' $sel $disabled>".t("$laskutyyppi")." $tarkenne $row[tilaus] ".t("$alatila")." $row[varasto]</option>";
 				}
 			}
 			echo "<optgroup label='".t("Perusta uusi")."'>";
@@ -2203,6 +2225,9 @@ if ($tee == '') {
 						echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
 						echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
 					}
+				}
+				elseif ($laskurow["tilaustyyppi"] == "E") {
+					echo "<option value='ENNAKKO'>".T("Ennakkotilaus")."</option>";
 				}
 				elseif ($toim == "PIKATILAUS") {
 					echo "<option value='PIKATILAUS'>".T("Toimitus")."</option>";
@@ -4073,7 +4098,7 @@ if ($tee == '') {
 			}
 
 			while ($row = mysql_fetch_assoc($result)) {
-												
+
 				if (strpos($row['sorttauskentta'], '÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷') !== FALSE) {
 					$erikoistuote_tuoteperhe[$row['perheid']] = $row['sorttauskentta'];
 				}
@@ -4091,7 +4116,7 @@ if ($tee == '') {
 					require('tarkistarivi.inc');
 
 					//tarkistarivi.inc:st‰ saadaan $trow jossa on select * from tuote
-				}							
+				}
 
 				if ($edotunnus == 0 or $edotunnus != $row["otunnus"]) {
 					if ($edotunnus > 0) echo "<tr>$jarjlisa<td class='back' colspan='10'><br></td></tr>";
@@ -4131,7 +4156,7 @@ if ($tee == '') {
 
 				//K‰‰nnet‰‰n t‰n rivin hinta oikeeseen valuuttaan
 				$row["kotihinta"] = $row["hinta"];
-				
+
 				if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 					$row["hinta"] = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
 				}

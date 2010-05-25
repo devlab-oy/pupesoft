@@ -8,7 +8,7 @@
 	$query  = "show tables from $dbkanta";
 	$result =  mysql_query($query);
 
-	echo date("H:i:s").": Checking tables from $dbkanta.\n";
+	echo date("d.m.Y @ G:i:s").": Check tables from $dbkanta.\n";
 
 	while ($row = mysql_fetch_array($result)) {
 
@@ -40,6 +40,6 @@
 
 	}
 
-	echo date("H:i:s").": Done.\n\n";
+	echo date("d.m.Y @ G:i:s").": Check tables. Done.\n\n";
 
 ?>

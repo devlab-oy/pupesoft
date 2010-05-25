@@ -83,7 +83,7 @@
 				$kaletunnit = array();
 				$asekaletunnit = array();
 				$rivihinnat = array();
-				$kplyht = 0;
+				$kplyht = '';
 				$i = 0;
 	
 				while ($row = mysql_fetch_array($sresult)) {
@@ -140,7 +140,8 @@
 							echo "</table>";
 						}
 
-						$query = "	SELECT sum(if(tuote.tuotetyyppi = 'K', tilausrivi.varattu, 0)) kpl, sum(if(tuote.tuotetyyppi = '', round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$row[erikoisale]-(tilausrivi.ale*$row[erikoisale]/100))/100)),2), 0)) rivihinta_tuote,
+						$query = "	SELECT GROUP_CONCAT(tilausrivi.yksikko,'#',if(tuote.tuotetyyppi = 'K', tilausrivi.varattu, 0)) yksikko, 
+									sum(if(tuote.tuotetyyppi = '', round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$row[erikoisale]-(tilausrivi.ale*$row[erikoisale]/100))/100)),2), 0)) rivihinta_tuote,
 									sum(if(tuote.tuotetyyppi = 'K', round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$row[erikoisale]-(tilausrivi.ale*$row[erikoisale]/100))/100)),2), 0)) rivihinta_tyo
 									FROM tilausrivi 
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -154,7 +155,10 @@
 
 						$rivihinnat['Tuotteet'][$row['valkoodi']] += $rivihinta_row['rivihinta_tuote'];
 						$rivihinnat['Työt'][$row['valkoodi']] += $rivihinta_row['rivihinta_tyo'];
-						$kplyht += $rivihinta_row['kpl'];
+						
+						if ($rivihinta_row['yksikko'] != '') {
+							$kplyht = $rivihinta_row['yksikko'];
+						}
 
 						echo "</td>";
 
@@ -226,11 +230,23 @@
 						foreach ($hinta as $valuutta => $rivihinta) {
 							if ($rivihinta == 0) continue;
 
-							echo "<tr><td class='spec'>",t("$tuotetyyppi");
+							echo "<tr><td class='spec' align='left'>",t("$tuotetyyppi").":";
 
-							if ($tuotetyyppi == 'Työt') echo " ($kplyht ",t("kpl"),")";
+							if ($tuotetyyppi == 'Työt') {
+								echo "<br/>";
+								$i = 0;
+								foreach (explode(',', $kplyht) as $yksikko_kpl) {
+									
+									list($yksikko, $kpl) = explode('#', $yksikko_kpl);
+									if ($yksikko != '' and $kpl != 0) {
+										if ($i != 0) echo "<br/>";
+										echo "$kpl ".t_avainsana("Y", "", " and avainsana.selite='$yksikko'", "", "", "selite");
+										$i++;
+									}
+								}
+							}
 
-							echo ":</td><td class='spec' align='right'>$rivihinta $valuutta</td></tr>";
+							echo "</td><td class='spec' align='right'>$rivihinta $valuutta</td></tr>";
 
 							if (!isset($hinnatyht[$valuutta])) $hinnatyht[$valuutta] = 0;
 

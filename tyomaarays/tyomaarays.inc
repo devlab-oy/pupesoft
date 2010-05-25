@@ -82,6 +82,8 @@
 		$sivu  = 1;
 		$paino = 0;
 
+		$tyyppi = "";
+
 		if ($tyomtyyppi == "P" or $kukarow['hinnat'] != 0) {
 			$tyyppi = "P";
 		}
@@ -94,9 +96,6 @@
 
 		if ($toim == "SIIRTOTYOMAARAYS") {
 			$tyyppi = "SISAINEN";
-		}
-		else {
-			$tyyppi = "";
 		}
 
 

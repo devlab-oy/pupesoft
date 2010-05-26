@@ -251,6 +251,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 		list($table_mysql, ) = explode(".", $taulu);
 		$table_mysql = preg_replace("/__[0-9]*$/", "", $table_mysql);
 
+		// jos tullaan jotenkin hassusti, nmiin ei tehd‰ mit‰‰n
+		if (trim($table_mysql) == "") continue;
+				
 		// Haetaan valitun taulun sarakkeet
 		$query = "SHOW COLUMNS FROM $table_mysql";
 		$fres  = mysql_query($query) or pupe_error($query);

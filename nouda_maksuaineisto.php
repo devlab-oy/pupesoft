@@ -1,18 +1,34 @@
 <?php
 
-	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-	if($_POST["filenimi"] != '') $kaunisnimi=$_POST["filenimi"];
+	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+	if($_POST["pankkifilenimi"] != '') $kaunisnimi = $_POST["pankkifilenimi"];
 
 	require("inc/parametrit.inc");
 
+	// Onko maksuaineistoille annettu salasanat.php:ssä oma polku jonne tallennetaan
+	if (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
+
+		$pankkitiedostot_polku = trim($pankkitiedostot_polku);
+
+		if (substr($pankkitiedostot_polku, -1) != "/") {
+			$pankkitiedostot_polku .= "/";
+		}
+	}
+	else {
+		$pankkitiedostot_polku = $pupe_root_polku."/dataout/";
+	}
+
+	if (!is_dir($pankkitiedostot_polku)) {
+		echo t("Kansioissa ongelmia").": $pankkitiedostot_polku<br>";
+		exit;
+	}
+
 	if ($tee == "poista_tiedosto") {
-		$filenimi = basename($filenimi);
-		unlink("dataout/".$filenimi);
+		unlink($pankkitiedostot_polku.basename($pankkifilenimi));
 	}
 
 	if ($tee == "lataa_tiedosto") {
-		$filenimi = basename($filenimi);
-		readfile("dataout/".$filenimi);
+		readfile($pankkitiedostot_polku.basename($pankkifilenimi));
 		exit;
 	}
 	else {
@@ -28,7 +44,7 @@
 			exit;
 		}
 
-		$handle = opendir("dataout");
+		$handle = opendir($pankkitiedostot_polku);
 		$i=0;
 		$lista = array();
 
@@ -59,7 +75,7 @@
 		if ($valinta != "") {
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<select name='filenimi' multiple='FALSE' size='10'>";
+			echo "<select name='pankkifilenimi' multiple='FALSE' size='10'>";
 			echo $valinta;
 			echo "</select>";
 			echo "<input type='submit' value='".t("Tallenna")."'></form><br>";
@@ -85,7 +101,7 @@
 		if ($valinta != "") {
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<select name='filenimi' multiple='FALSE' size='10'>";
+			echo "<select name='pankkifilenimi' multiple='FALSE' size='10'>";
 			echo $valinta;
 			echo "</select>";
 			echo "<input type='submit' value='".t("Tallenna")."'></form>";
@@ -114,7 +130,7 @@
 		if ($valinta != "") {
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tee' value='poista_tiedosto'>";
-			echo "<select name='filenimi' multiple='FALSE' size='10'>";
+			echo "<select name='pankkifilenimi' multiple='FALSE' size='10'>";
 			echo $valinta;
 			echo "</select>";
 			echo "<input type='submit' value='".t("Poista")."'></form><br>";
@@ -140,7 +156,7 @@
 		if ($valinta != "") {
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tee' value='poista_tiedosto'>";
-			echo "<select name='filenimi' multiple='FALSE' size='10'>";
+			echo "<select name='pankkifilenimi' multiple='FALSE' size='10'>";
 			echo $valinta;
 			echo "</select>";
 			echo "<input type='submit' value='".t("Poista")."'></form>";

@@ -1,18 +1,33 @@
 <?php
 
 	if (isset($_POST["tee"])) {
-		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	require("inc/parametrit.inc");
 
-	if (isset($tee)) {
-		$filenimi = basename($filenimi);
-		if ($tee == "lataa_tiedosto") {
-			readfile("dataout/".$filenimi);
-			exit;
+	// Onko maksuaineistoille annettu salasanat.php:ssä oma polku jonne tallennetaan
+	if (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
+
+		$pankkitiedostot_polku = trim($pankkitiedostot_polku);
+
+		if (substr($pankkitiedostot_polku, -1) != "/") {
+			$pankkitiedostot_polku .= "/";
 		}
+	}
+	else {
+		$pankkitiedostot_polku = $pupe_root_polku."/dataout/";
+	}
+
+	if (!is_dir($pankkitiedostot_polku)) {
+		echo t("Kansioissa ongelmia").": $pankkitiedostot_polku<br>";
+		exit;
+	}
+
+	if ($tee == "lataa_tiedosto") {
+		readfile($pankkitiedostot_polku.basename($pankkifilenimi));
+		exit;
 	}
 	else {
 
@@ -93,10 +108,10 @@
 				$kaunisnimi = "bg-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";
 			}
 
-			$toot = fopen("dataout/".$kaunisnimi, "w+");
+			$toot = fopen($pankkitiedostot_polku.$kaunisnimi, "w+");
 
 			if (!$toot) {
-				echo t("En saanut tiedostoa auki! Tarkista polku")." dataout/$kaunisnimi !";
+				echo t("En saanut tiedostoa auki! Tarkista polku")." $pankkitiedostot_polku$kaunisnimi !";
 				exit;
 			}
 
@@ -208,10 +223,10 @@
 							$kaunisnimi = "bg-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";
 						}
 
-						$toot = fopen("dataout/".$kaunisnimi, "w+");
+						$toot = fopen($pankkitiedostot_polku.$kaunisnimi, "w+");
 
 						if (!$toot) {
-							echo t("En saanut tiedostoa auki! Tarkista polku")." dataout/$kaunisnimi !";
+							echo t("En saanut tiedostoa auki! Tarkista polku")." $pankkitiedostot_polku$kaunisnimi !";
 							exit;
 						}
 					}
@@ -330,7 +345,7 @@
 							echo "<form method='post' action='$PHP_SELF'>";
 							echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 							echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
-							echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
+							echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
 							echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
 							echo "</tr>";
 						}
@@ -380,7 +395,7 @@
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
-				echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
+				echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
 				echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
 				echo "</tr></table>";
 			}
@@ -441,13 +456,13 @@
 					}
 
 					$generaatio++;
-					$toot = fopen("dataout/".$kaunisnimi,"w+");
+					$toot = fopen($pankkitiedostot_polku.$kaunisnimi,"w+");
 				}
 
 				unset($edmaksu_tili);
 
 				if (!$toot) {
-					echo t("En saanut tiedostoa auki! Tarkista polku")." dataout/$kaunisnimi !";
+					echo t("En saanut tiedostoa auki! Tarkista polku")." $pankkitiedostot_polku$kaunisnimi !";
 					exit;
 				}
 
@@ -789,7 +804,7 @@
 						echo "<form method='post' action='$PHP_SELF'>";
 						echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 						echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimilum2'>";
-						echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
+						echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
 						echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
 						echo "</tr>";
 					}
@@ -820,7 +835,7 @@
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimilum2'>";
-				echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
+				echo "<input type='hidden' name='pankkifilenimi' value='$kaunisnimi'>";
 				echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
 				echo "</tr>";
 			}

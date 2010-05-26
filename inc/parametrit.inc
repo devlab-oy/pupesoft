@@ -40,7 +40,154 @@ $_GET		= pupe_register_globals($_GET);
 $_POST		= pupe_register_globals($_POST);
 $_REQUEST	= pupe_register_globals($_REQUEST);
 
-$verkkokauppa = "";
+// Nollataan kaikki muuttujat joita voi setata salasanat.php:ssä
+unset($palvelin);
+unset($dbhost);
+unset($dbkanta);
+unset($dbuser);
+unset($dbpass);
+
+unset($dbhostvosa);
+unset($dbkantavosa);
+unset($dbuservosa);
+unset($dbpassvosa);
+
+unset($desadv_host);
+unset($desadv_pass);
+unset($desadv_path);
+unset($desadv_user);
+
+unset($dpd_delisprint_host);
+unset($dpd_delisprint_pass);
+unset($dpd_delisprint_path);
+unset($dpd_delisprint_user);
+
+unset($dpdss);
+unset($dpdtun);
+
+unset($edi_ftphost);
+unset($edi_ftppass);
+unset($edi_ftppath);
+unset($edi_ftpuser);
+
+unset($ekirje_config);
+
+unset($elmatuotehost);
+unset($elmatuotepass);
+unset($elmatuotepath);
+unset($elmatuoteuser);
+
+unset($eta_yhtio);
+unset($eta_yhtio_email);
+unset($eta_yhtio_fax);
+unset($eta_yhtio_kotipaikka);
+unset($eta_yhtio_maa);
+unset($eta_yhtio_nimi);
+unset($eta_yhtio_osoite);
+unset($eta_yhtio_ovttunnus);
+unset($eta_yhtio_postino);
+unset($eta_yhtio_postitp);
+unset($eta_yhtio_puhelin);
+unset($eta_yhtio_ytunnus);
+
+unset($faxhost);
+unset($faxpass);
+unset($faxpath);
+unset($faxuser);
+
+unset($ftpget_dest);
+unset($ftpget_host);
+unset($ftpget_pass);
+unset($ftpget_path);
+unset($ftpget_user);
+
+unset($ftpkuvahost);
+unset($ftpkuvapass);
+unset($ftpkuvapath);
+unset($ftpkuvauser);
+unset($ftpmuupath);
+
+unset($futurtilvahhost);
+unset($futurtilvahpass);
+unset($futurtilvahuser);
+
+unset($google_analytics);
+
+unset($hardcoded_alv);
+
+unset($infoglove_host);
+unset($infoglove_pass);
+unset($infoglove_path);
+unset($infoglove_user);
+
+unset($koti_yhtio);
+
+unset($kpvm_aikaa);
+
+unset($logisticar);
+
+unset($luettelo_dbhost);
+unset($luettelo_dbkanta);
+unset($luettelo_dbpass);
+unset($luettelo_dbuser);
+
+unset($normaali_size_x);
+unset($normaali_size_y);
+unset($thumb_size_x);
+unset($thumb_size_y);
+
+unset($nrahdemo);
+
+unset($pankkitiedostot_polku);
+
+unset($postiedihost);
+unset($postiedipass);
+unset($postiedipath);
+unset($postiediuser);
+
+unset($sisainenfoinvoice_ftphost);
+unset($sisainenfoinvoice_ftppass);
+unset($sisainenfoinvoice_ftppath);
+unset($sisainenfoinvoice_ftpuser);
+
+unset($slavedb);
+unset($slavepass);
+unset($slaveuser);
+
+unset($sms_palvelin);
+unset($sms_pass);
+unset($sms_user);
+
+unset($tilvahhost);
+unset($tilvahpass);
+unset($tilvahpath);
+unset($tilvahuser);
+
+unset($ups_host);
+unset($ups_pass);
+unset($ups_path);
+unset($ups_user);
+
+unset($verkkohost_lah);
+unset($verkkopath_lah);
+
+unset($verkkokauppa);
+unset($verkkokauppa_anon);
+unset($verkkokauppa_hakualkuun);
+unset($verkkokauppa_saldotsk);
+unset($verkkokauppa_tuotemerkit);
+
+unset($verkkolaskut_in);
+unset($verkkolaskut_ok);
+unset($verkkolaskut_orig);
+unset($verkkolaskut_error);
+unset($verkkolaskut_reject);
+
+unset($DAY_ARRAY);
+unset($AIKA_ARRAY);
+unset($MONTH_ARRAY);
+
+unset($VOIPURL);
 
 require("salasanat.php");
 
@@ -298,6 +445,23 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			}
 			elseif (isset($tmpfilenimi) and $tmpfilenimi != '') {
 				header("Content-Length: ".filesize("/tmp/".basename($tmpfilenimi)));
+			}
+			elseif (isset($pankkifilenimi) and $pankkifilenimi != '') {
+
+				// Onko maksuaineistoille annettu salasanat.php:ssä oma polku jonne tallennetaan
+				if (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
+
+					$pankkitiedostot_polku = trim($pankkitiedostot_polku);
+
+					if (substr($pankkitiedostot_polku, -1) != "/") {
+						$pankkitiedostot_polku .= "/";
+					}
+				}
+				else {
+					$pankkitiedostot_polku = $pupe_root_polku."/dataout/";
+				}
+
+				header("Content-Length: ".filesize($pankkitiedostot_polku.basename($pankkifilenimi)));
 			}
 			else {
 				header("Content-Length: ".strlen($file));

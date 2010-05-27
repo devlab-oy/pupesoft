@@ -3,9 +3,7 @@
 if(!function_exists("yhtion_parametrittarkista")) {
 	function yhtion_parametrittarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $tiedostopaate;
-		
-		static $tmp_lasku_polku_http;
-		
+				
 		if (mysql_field_name($result, $i) == "admin_email" or
 			mysql_field_name($result, $i) == "alert_email" or
 			mysql_field_name($result, $i) == "postittaja_email") {
@@ -20,11 +18,6 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			if ($t[$i] != "" and !is_writable($t[$i]."/".$kukarow['yhtio'])) {
 				$virhe[$i] = "<font class='error'>Kansiossa ei ole kirjoitusoikeutta!<br></font>";
 			}
-		}
-
-		if (mysql_field_name($result, $i) == "lasku_polku_http") {
-			//Tämä turvaan
-			$tmp_lasku_polku_http = $t[$i];
 		}
 
 		//	TODO ale ja ennakkomaksutuotteet voisi tarkastaa vain jos tarpeellista

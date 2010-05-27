@@ -3845,26 +3845,6 @@ if (!function_exists('ebid')) {
 		$laskurow = mysql_fetch_assoc($res);
 
 		if ($laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML") {
-			if (substr($laskurow['ebid'], 0, 1) == '/') {
-
-				// otetaan palvelin muuttujasta mahdolliset turhat alut pois
-				$alut    = array("http://","https://");
-				$apunimi = str_replace($alut, "", $yhtiorow['lasku_polku_http']);
-
-				if ($_SERVER["HTTPS"] == "on") {
-					$url = "https://$apunimi".$laskurow["ebid"];
-				}
-				else {
-					$url = "http://$apunimi".$laskurow["ebid"];
-				}
-
-				if ($url_only) {
-					return array($url);
-				}
-
-				return "<a href='$url' target='Attachment'>". t('Näytä lasku')."</a>";
-			}
-
 			$ebid = $laskurow['ebid'];
 
 			$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];

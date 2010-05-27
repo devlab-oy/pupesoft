@@ -198,7 +198,6 @@
 							verkkosala_lah = '$row[verkkosala_lah]',
 							lasku_tulostin = '$row[lasku_tulostin]',
 							pankkitiedostot = '$row[pankkitiedostot]',
-							lasku_polku_http = '$row[lasku_polku_http]',
 							kuvapankki_polku = '$row[kuvapankki_polku]',
 							postittaja_email = '$row[postittaja_email]',
 							lahetteen_tulostustapa = '$row[lahetteen_tulostustapa]',

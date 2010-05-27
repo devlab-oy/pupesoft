@@ -3001,7 +3001,7 @@
 				$result = mysql_query($query2) or pupe_error($query2);
 			}
 
-			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $toim == 'EXTRANET' or $tilaustyyppi == "T" or $vienti =='K' or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO")))) {
+			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $toim == "ENNAKKO" or $toim == 'EXTRANET' or $tilaustyyppi == "T" or $vienti =='K' or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO")))) {
 				$query3 .= "laskun_lisatiedot SET
 							yhtio						= '$kukarow[yhtio]',
 							kolm_ovttunnus				= '$kolm_ovttunnus',

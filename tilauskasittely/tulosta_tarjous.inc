@@ -472,11 +472,13 @@ if (!function_exists('tarjous_rivi_otsikot')) {
 			$pdf_tarjous->draw_text(530, $kala+15, t("Rivihinta", $kieli),		$page_tarjous, $norm);
 		}
 
-		if ($tuotetyyppi == "2 Työt") {
-			$pdf_tarjous->draw_text(45,  $kala+25, t("Työt ja palvelut", $kieli), $page_tarjous, $boldi);
-		}
-		else {
-			$pdf_tarjous->draw_text(45,  $kala+25, t("Osat ja tarvikkeet", $kieli), $page_tarjous, $boldi);
+		if ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '') {
+			if ($tuotetyyppi == "2 Työt") {
+				$pdf_tarjous->draw_text(45,  $kala+25, t("Työt ja palvelut", $kieli), $page_tarjous, $boldi);
+			}
+			else {
+				$pdf_tarjous->draw_text(45,  $kala+25, t("Osat ja tarvikkeet", $kieli), $page_tarjous, $boldi);
+			}
 		}
 
 		return $kala;
@@ -945,6 +947,12 @@ if (!function_exists('tulosta_tarjous')) {
 
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
+		$orderlisa = '';
+
+		if ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '') {
+			$orderlisa = " tuotetyyppi, ";
+		}
+
 		$query = "	SELECT tilausrivi.*,
 					round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2) rivihinta,
 					round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,
@@ -959,7 +967,7 @@ if (!function_exists('tulosta_tarjous')) {
 					and tilausrivi.tyyppi in  ('L','T','U')
 					$ennakkolisa
 					$osasto
-					ORDER BY tuotetyyppi, sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
+					ORDER BY $orderlisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);
 
 		$row = mysql_fetch_array($riresult);
@@ -1014,7 +1022,7 @@ if (!function_exists('tulosta_tarjous')) {
 				$kala = $kala_nyt;
 			}
 
-			if ($edtuotetyyppi != $tuotetyyppi) {
+			if ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and $edtuotetyyppi != $tuotetyyppi) {
 				$kala -= 30;
 				$kala = tarjous_rivi_otsikot($pdf_tarjous, $page_tarjous[$sivu], $kieli, $kala, $tuotetyyppi);
 			}

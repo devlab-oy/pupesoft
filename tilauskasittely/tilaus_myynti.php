@@ -2366,14 +2366,15 @@ if ($tee == '') {
 
 			if ($toim == 'TYOMAARAYS' or $toim == "TYOMAARAYS_ASENTAJA") {
 				// Katsotaan onko kalenterimerkintöjä
-				$query = "	SELECT left(kalenteri.pvmalku, 10) pvmalku_sort, kalenteri.pvmalku, kalenteri.pvmloppu,
+				$query = "	SELECT left(kalenteri.pvmalku, 10) pvmalku_sort, 
+							kalenteri.pvmalku, 
+							kalenteri.pvmloppu,
 							concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', kuka.nimi, '##', kuka.kuka) asennuskalenteri
 							FROM  kalenteri
 							LEFT JOIN kuka ON kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
 							WHERE kalenteri.yhtio = '$kukarow[yhtio]'
 							and kalenteri.tyyppi = 'asennuskalenteri'
-							and kalenteri.liitostunnus = '$kukarow[kesken]'
-							GROUP BY 1";
+							and kalenteri.liitostunnus = '$kukarow[kesken]'";
 				$liiteres = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($liiteres) > 0) {
@@ -3757,7 +3758,7 @@ if ($tee == '') {
 
 		$tilauksen_jarjestys = $yhtiorow['tilauksen_jarjestys'];
 
-		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "TARJOUS" or $toim == "PROJEKTI") {
+		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and $toim == "TARJOUS") or $toim == "PROJEKTI") {
 			$sorttauslisa = "tuotetyyppi, ";
 		}
 		elseif ($toim == 'EXTRANET') {
@@ -4126,7 +4127,7 @@ if ($tee == '') {
 
 				$edotunnus = $row["otunnus"];
 
-				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "TARJOUS" or $toim == "PROJEKTI") {
+				if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and $toim == "TARJOUS") or $toim == "PROJEKTI") {
 					if ($tuotetyyppi == "" and $row["tuotetyyppi"] == '2 Työt') {
 						$tuotetyyppi = 1;
 

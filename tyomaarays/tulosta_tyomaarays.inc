@@ -643,7 +643,7 @@ if (!function_exists('rivi')) {
 
 			loppu($thispage, 0);
 
-			$page[$sivu] = uusi_sivu(g);
+			$page[$sivu] = uusi_sivu($tyyppi);
 			$thispage    = $page[$sivu];
 			$uudehko 	 = "ON";
 

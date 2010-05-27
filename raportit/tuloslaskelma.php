@@ -144,6 +144,22 @@
 
 		if ($tltee == "aja") {
 
+			// Tehdäänkö linkit päiväkirjaan
+			$query = "	SELECT yhtio
+						FROM oikeu
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and kuka	= '$kukarow[kuka]'
+						and nimi	= 'raportit.php'
+						and alanimi = 'paakirja'";
+			$oikresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($oikresult) > 0) {
+				$paakirjalink = TRUE;
+			}
+			else {
+				$paakirjalink = FALSE;
+			}
+
 			$lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//mul_kustp_seri=".base64_encode(serialize($mul_kustp))."//mul_kohde_seri=".base64_encode(serialize($mul_kohde))."//mul_proj_seri=".base64_encode(serialize($mul_proj))."//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//eiyhteensa=$eiyhteensa//vertailued=$vertailued//vertailubu=$vertailubu";
 
 			$startmonth	= date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
@@ -531,7 +547,14 @@
 									$tilirivi .= "<td class='back' nowrap><input type='checkbox' name='tiliarray[]' value=\"'$tilirow[tilino]'\"></td>";
 								}
 								$tilirivi .= "<td nowrap>";
-								$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&mul_kustp_seri=".base64_encode(serialize($mul_kustp))."&mul_kohde_seri=".base64_encode(serialize($mul_kohde))."&mul_proj_seri=".base64_encode(serialize($mul_proj))."&tili=$tilirow[tilino]$lopelinkki'>$tilirow[tilino] - $tilirow[nimi]</a>";
+
+								if ($paakirjalink) {
+									$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&mul_kustp_seri=".base64_encode(serialize($mul_kustp))."&mul_kohde_seri=".base64_encode(serialize($mul_kohde))."&mul_proj_seri=".base64_encode(serialize($mul_proj))."&tili=$tilirow[tilino]$lopelinkki'>$tilirow[tilino] - $tilirow[nimi]</a>";
+								}
+								else {
+									$tilirivi .= "$tilirow[tilino] - $tilirow[nimi]";
+								}
+
 								$tilirivi .= "</td>$tilirivi2</tr>";
 							}
 						}

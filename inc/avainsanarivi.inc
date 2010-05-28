@@ -155,9 +155,9 @@
 
 			$ulos = "<td><select name = '$nimi'>";
 			$ulos .= "<option value = ''>".t("N‰ytet‰‰n tyˆm‰‰r‰yksell‰")."</option>";
-			$ulos .= "<option value = 'KAI' $sel[KAI]>".t("N‰ytet‰‰n tyˆm‰‰r‰yksell‰ ja laskulla")."</option>";
-			$ulos .= "<option value = 'LAS' $sel[LAS]>".t("N‰ytet‰‰n laskulla")."</option>";
-			$ulos .= "<option value = 'SIS' $sel[SIS]>".t("Sis‰inen tieto")."</option>";
+			$ulos .= "<option value = 'K' $sel[K]>".t("N‰ytet‰‰n tyˆm‰‰r‰yksell‰ ja laskulla")."</option>";
+			$ulos .= "<option value = 'L' $sel[L]>".t("N‰ytet‰‰n laskulla")."</option>";
+			$ulos .= "<option value = 'S' $sel[S]>".t("Sis‰inen tieto")."</option>";
 			$ulos .= "</select></td>";
 		}
 		else {

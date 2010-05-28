@@ -75,6 +75,7 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
   		exec("nice -n 20 convert -resize $xkoko -quality 90 $upfile1 $upfilesgh", $output, $error);
     }
 	else {
+		exec("mv -f $upfile1 $upfilesgh");
 		$error = 0;
     }
 
@@ -385,7 +386,7 @@ if ($tee == 'GO') {
 
 			$filee = fopen($file, 'r');
 			$data = addslashes(fread($filee, $filesize));
-			
+
 			if ($data === FALSE) {
 				echo " &raquo; <font class='error'>Ohitetaan kuva, koska tiedoston luku epäonnistui!</font><br>";
 				continue;
@@ -451,7 +452,7 @@ if ($tee == 'GO') {
 								image_channels		= '$image_channels',
 								kayttotarkoitus		= '$kayttotarkoitus',
 								jarjestys			= '$jarjestys',
-								laatija				= '$kukarow[kuka]',								
+								laatija				= '$kukarow[kuka]',
 								luontiaika			= now()";
 					$insre = mysql_query($query) or pupe_error($query);
 

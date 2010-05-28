@@ -11,8 +11,6 @@ if ($livesearch_tee == "TILIHAKU") {
 	exit;
 }
 
-require "inc/alvpopup.inc";
-
 echo "<font class='head'>".t("Uuden laskun perustus")."</font><hr>";
 
 if ($tee == 'VIIVA') {

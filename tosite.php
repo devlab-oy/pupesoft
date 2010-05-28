@@ -8,8 +8,6 @@
 		exit;
 	}
 
-	require "inc/alvpopup.inc";
-
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>";
 
 	$kurssi = 1;

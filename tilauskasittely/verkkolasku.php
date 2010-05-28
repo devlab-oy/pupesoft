@@ -1417,7 +1417,7 @@
 
 									while ($al_row = mysql_fetch_array($al_res)) {
 
-										list($kanta, $kentta) = explode(".", $al_row["selite"]);
+										$kentta = $al_row["selite"];
 
 										if (((!is_numeric($tyomrow[$kentta]) and trim($tyomrow[$kentta]) != '') or (is_numeric($tyomrow[$kentta]) and $tyomrow[$kentta] != 0)) and trim($tyomrow[$kentta]) != '0000-00-00') {
 											if (strtoupper($al_row["selitetark_2"]) == "TEXT") {

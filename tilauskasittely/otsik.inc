@@ -1894,7 +1894,7 @@
 						echo "<tr>";
 					}
 
-					list($kanta, $kentta) = explode(".", $al_row["selite"]);
+					$kentta = $al_row["selite"];
 
 					if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
 

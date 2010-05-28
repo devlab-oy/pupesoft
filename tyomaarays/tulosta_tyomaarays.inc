@@ -248,7 +248,7 @@ if (!function_exists('alku')) {
 				$al_lask = 35;
 			}
 
-			list($kanta, $kentta) = explode(".", $al_row["selite"]);
+			$kentta = $al_row["selite"];
 
 			if (((!is_numeric($laskurow[$kentta]) and trim($laskurow[$kentta]) != '') or (is_numeric($laskurow[$kentta]) and $laskurow[$kentta] != 0)) and trim($laskurow[$kentta]) != '0000-00-00') {
 				if (strtoupper($al_row["selitetark_2"]) == "TEXT") {

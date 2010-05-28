@@ -208,7 +208,7 @@
 				$return .= "\nEpäonnistumisen syy: Laskun vastaanottajaa ei löytynyt järjestelmästä $_SERVER[SERVER_ADDR]!\n\n";
 				$return .= "Etsittiin tiedoilla:\n";
 				$return .= "Verkkotunnus: $verkkotunnus_vas\n";
-				$return .= "Ovt: $oyhtio1 $oyhtio2 $verkkotunnus_vas\n";
+				$return .= "Ovt: $yhtio $oyhtio1 $oyhtio2\n";
 				$return .= "Ytunnus: $yyhtio1 $yyhtio2 $yyhtio3 $yyhtio4\n\n";
 
 				while ($yhtiorow = mysql_fetch_array($result)) {

@@ -391,7 +391,7 @@ if (!function_exists('alku')) {
 
 				$komm .= "\n".t("Työmääräys", $kieli). ":###$tyomrow[otunnus]";
 
-				$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != '' and avainsana.nakyvyys in ('KAI','LAS')");
+				$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
 
 				while ($al_row = mysql_fetch_array($al_res)) {
 

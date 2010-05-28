@@ -235,7 +235,7 @@ if (!function_exists('alku')) {
 		$kala  = 575;
 
 		//Täysin dynaaminen osio
-		$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != '' and avainsana.nakyvyys in ('','KAI','LAS')");
+		$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != '' and avainsana.nakyvyys in ('','K','L')");
 
 		$al_lask = 35;
 		$al_fask = 0;

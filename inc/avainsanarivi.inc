@@ -34,6 +34,10 @@
 		$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "selite") {
+		$avain_selite 	= "SELECTED";
+	}
 
 	if (mysql_field_name($result, $i) == "laji") {
 
@@ -94,6 +98,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_TYOJONO") 		$ulos .= "<option value='TYOM_TYOJONO' $avain_sel[TYOM_TYOJONO]>			".t("Työmääräysten työjono")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_TYOSTATUS") 	$ulos .= "<option value='TYOM_TYOSTATUS' $avain_sel[TYOM_TYOSTATUS]>		".t("Työmääräysten työstatus")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_TYOLINJA") 	$ulos .= "<option value='TYOM_TYOLINJA' $avain_sel[TYOM_TYOLINJA]>			".t("Työmääräysten työlinja")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_TYOKENTAT") 	$ulos .= "<option value='TYOM_TYOKENTAT' $avain_sel[TYOM_TYOKENTAT]>		".t("Työmääräysten kentät")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Viennin avainsanat")."'>";
@@ -135,13 +140,24 @@
 	}
 
 	if (mysql_field_name($result, $i) == "nakyvyys") {
-		if ($avain_sel["TRY"] == "SELECTED" or $avain_sel["OSASTO"] == "SELECTED") {
+		if ($avain_sel["TRY"] == "SELECTED"  or $avain_sel["OSASTO"] == "SELECTED") {
 			$sel = array();
 			$sel[$trow[$i]] = "SELECTED";
 
 			$ulos = "<td><select name = '$nimi'>";
 			$ulos .= "<option value = ''>".t("Näytetään verkkokaupassa")."</option>";
 			$ulos .= "<option value = 'E' $sel[E]>".t("Ei näytetä verkkokaupassa")."</option>";
+			$ulos .= "</select></td>";
+		}
+		elseif ($avain_sel["TYOM_TYOKENTAT"] == "SELECTED") {
+			$sel = array();
+			$sel[$trow[$i]] = "SELECTED";
+
+			$ulos = "<td><select name = '$nimi'>";
+			$ulos .= "<option value = ''>".t("Näytetään työmääräyksellä")."</option>";
+			$ulos .= "<option value = 'KAI' $sel[KAI]>".t("Näytetään työmääräyksellä ja laskulla")."</option>";
+			$ulos .= "<option value = 'LAS' $sel[LAS]>".t("Näytetään laskulla")."</option>";
+			$ulos .= "<option value = 'SIS' $sel[SIS]>".t("Sisäinen tieto")."</option>";
 			$ulos .= "</select></td>";
 		}
 		else {

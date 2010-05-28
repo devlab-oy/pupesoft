@@ -4,13 +4,6 @@
 	$jatko = 1; // oletetaan normaali käsittely
 	$tyyppi = 1; // oletetaan rivin näkyvyys
 
-	if (file_exists("../inc/alvpopup.inc")) {
-		require ("../inc/alvpopup.inc");
-	}
-	else {
-		require ("alvpopup.inc");
-	}
-
 	if (mysql_field_name($result, $i) == "yhtio") {
 		$tyyppi = 0;
 	}

@@ -1,7 +1,6 @@
 <?php
 	require "inc/parametrit.inc";
-	require "inc/alvpopup.inc";
-
+	
 	echo "<font class='head'>".t("Uusi konsernitosite")."</font><hr>";
 
 	if ($tee == 'I') { // Tarkistetetaan syötteet perustusta varten

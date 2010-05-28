@@ -363,10 +363,9 @@
 	}
 
 	if (mysql_field_name($result, $i) == "alv") {
-			require ('alvpopup.inc');
-			if ($trow[$i]=='') $trow[$i]=alv_oletus();
-			$ulos = "<td>".alv_popup($nimi,$trow[$i])."</td>";
-			$jatko = 0;
+		if ($trow[$i]=='') $trow[$i]=alv_oletus();
+		$ulos = "<td>".alv_popup($nimi,$trow[$i])."</td>";
+		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "suoratoimitus") {

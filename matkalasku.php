@@ -1,7 +1,6 @@
 <?php
 
 require ("inc/parametrit.inc");
-require ("inc/alvpopup.inc");
 
 echo "<font class='head'>".t('Matkalasku / kulukorvaus')."</font><hr>";
 

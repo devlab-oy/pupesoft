@@ -1,7 +1,6 @@
 <?php
 
 	// Annetaan mahdollisuus tehdä uusi tiliöinti, jos siihen on oikeus
-	require "alvpopup.inc";
 
 	// Onko tosite liitetty keikkaan
 	$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";

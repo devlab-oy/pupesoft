@@ -932,6 +932,7 @@ if (!function_exists('loppu_kerayslista')) {
 		$y_puhelin		= $yhtiorow['puhelin'];
 		$y_fax			= $yhtiorow['fax'];
 		$y_email		= $yhtiorow['email'];
+		$y_www			= $yhtiorow['www'];
 		$y_nimi 		= $laskurow["yhtio_nimi"];
 		$y_osoite 		= $laskurow["yhtio_osoite"];
 		$y_postino	 	= $laskurow["yhtio_postino"];
@@ -985,6 +986,8 @@ if (!function_exists('loppu_kerayslista')) {
 		$pdf->draw_text(257, 45, $y_fax,							$thispage, $pieni);
 		$pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",		$thispage, $pieni);
 		$pdf->draw_text(257, 35, $y_email,							$thispage, $pieni);
+		$pdf->draw_text(217, 25, t("Web", $kieli).":",				$thispage, $pieni);
+		$pdf->draw_text(257, 25, $y_www,							$thispage, $pieni);
 
 		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$thispage, $pieni);
 		$pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);

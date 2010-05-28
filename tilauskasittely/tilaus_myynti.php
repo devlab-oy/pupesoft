@@ -1931,7 +1931,7 @@ if ($tee == '') {
 						<input type='submit' value='" . t('Työjono')."'>
 						</form>";
 
-				echo "<form method='POST' action='".$palvelin2."tyomaarays/asennuskalenteri.php?liitostunnus=$tilausnumero&tyojono=$tyojono'>
+				echo "<form method='POST' action='".$palvelin2."tyomaarays/asennuskalenteri.php?liitostunnus=$tilausnumero&tyojono=$tyojono#".date("j_n_Y")."'>
 						<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//from=VALITSETOIMITUS//tyojono=$tyojono'>
 						<input type='hidden' name='toim' value='$toim2'>
 						<input type='submit' value='" . t('Asennuskalenteri')."'>
@@ -2377,6 +2377,8 @@ if ($tee == '') {
 
 					echo "<tr>$jarjlisa<th>".t("Asennustyöt").":</th><td colspan='3'>";
 
+					$asekal_distinct_chk = array();
+
 					while ($liiterow = mysql_fetch_array($liiteres)) {
 
 						list($asekal_alku, $asekal_loppu, $asekal_nimi, $asekal_kuka) = explode("##", $liiterow["asennuskalenteri"]);
@@ -2388,9 +2390,14 @@ if ($tee == '') {
 
 						if ($toim == 'TYOMAARAYS' or $toim == "TYOMAARAYS_ASENTAJA") {
 
+							if ($asekal_distinct_chk[$asekal_kuka][$laskurow['tunnus']] == $liiterow['pvmalku_sort'] and substr($asekal_alku,5,2).substr($asekal_alku,8,2).substr($asekal_alku,0,4) == substr($asekal_loppu,5,2).substr($asekal_loppu,8,2).substr($asekal_loppu,0,4)) {
+								continue;
+							}
+
 							echo "$asekal_nimi: ".tv1dateconv($asekal_alku, "", "LYHYT");
 
 							if ($kukarow['kuka'] == $asekal_kuka) {
+
 								// to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
 								date_default_timezone_set('UTC');
 
@@ -2465,6 +2472,8 @@ if ($tee == '') {
 
 								if ($tuntimaara != '') echo $tuntimaara;
 							}
+
+							$asekal_distinct_chk[$asekal_kuka][$laskurow['tunnus']] = $liiterow['pvmalku_sort'];
 
 							echo "<br>";
 						}

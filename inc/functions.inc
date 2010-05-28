@@ -3812,12 +3812,17 @@ if (!function_exists("alehinta")) {
 }
 
 if (!function_exists("kalenteritapahtuma")) {
-	function kalenteritapahtuma ($tyyppi, $tapa, $viesti, $liitostunnus, $kuittaus="", $henkilo="", $otunnus="", $pvmalku='now()') {
+	function kalenteritapahtuma ($tyyppi, $tapa, $viesti, $liitostunnus, $kuittaus="", $henkilo="", $otunnus="", $pvmalku='now()', $pvmloppu='now()', $asentaja='') {
 		global $yhtiorow, $kukarow;
 
+		if (trim($asentaja) == '') {
 			$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$asrow = mysql_fetch_assoc($result);
+		}
+		else {
+			$asrow['ytunnus'] = '';
+		}
 
 		//Tehd‰‰n asiakasmemotapahtuma jos se on tarpeellinen
 		$kysely = "	INSERT INTO kalenteri
@@ -3832,6 +3837,11 @@ if (!function_exists("kalenteritapahtuma")) {
 					otunnus  		= '$otunnus',
 					kuittaus  		= '$kuittaus',
 					kentta01 		= '$viesti'";
+
+		if (trim($asentaja) != '') {
+			$kysely .= ", kentta02 = '$liitostunnus', pvmloppu = $pvmloppu ";
+		}
+
  		$result = mysql_query($kysely) or pupe_error($kysely);
 	}
 }

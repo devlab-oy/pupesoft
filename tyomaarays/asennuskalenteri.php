@@ -172,6 +172,40 @@
 						and tunnus  = '$tyotunnus'";
 			mysql_query($query) or pupe_error($query);
 
+			
+			if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' and isset($lisaa_muistutus) and trim($lisaa_muistutus) == 'kylla') {
+				$query = "	SELECT *
+							FROM kalenteri
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tyyppi = 'Muistutus'
+							AND tapa = 'Asentajan kuittaus'
+							AND liitostunnus = '$liitostunnus'
+							AND kentta02 = '$liitostunnus'
+							AND kuittaus != ''
+							ORDER BY tunnus DESC";
+				$muistutus_chk_res = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($muistutus_chk_res) != 0) {
+					$muistutus_chk_row = mysql_fetch_assoc($muistutus_chk_res);
+
+					$query = "	UPDATE kalenteri SET
+								pvmloppu = '$lyear-$lmonth-$lday $laika'
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$muistutus_chk_row[tunnus]'";
+					$muistutus_insert_res = mysql_query($query) or pupe_error($query);
+				}
+				else {
+					$kysely = "	SELECT viesti, comments, sisviesti2
+								FROM lasku
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$liitostunnus'";
+					$viestit_chk_res = mysql_query($kysely) or pupe_error($kysely);
+					$viestit_chk_row = mysql_fetch_assoc($viestit_chk_res);
+
+					kalenteritapahtuma ("Muistutus", "Asentajan kuittaus", "Muista työmääräys $liitostunnus\n\n$viestit_chk_row[viesti]\n$viestit_chk_row[comments]\n$viestit_chk_row[sisviesti2]", $liitostunnus, "K", '', $liitostunnus, "'$year-$month-$day $aika'", "'$lyear-$lmonth-$lday $laika'", 'ASENTAJA');
+				}
+			}
+
 			$tee = "";
 		}
 		elseif ($tee == "LISAA") {
@@ -186,6 +220,43 @@
 						pvmloppu 	= '$lyear-$lmonth-$lday $laika',
 						liitostunnus= '$liitostunnus',
 						tyyppi 		= 'asennuskalenteri'";
+
+			if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' and isset($lisaa_muistutus) and trim($lisaa_muistutus) == 'kylla') {
+				$query .= ", kentta02 = '$liitostunnus' ";
+
+				$kysely = "	SELECT *
+							FROM kalenteri
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tyyppi = 'Muistutus'
+							AND tapa = 'Asentajan kuittaus'
+							AND liitostunnus = '$liitostunnus'
+							AND kentta02 = '$liitostunnus'
+							AND kuittaus != ''
+							ORDER BY tunnus DESC";
+				$muistutus_chk_res = mysql_query($kysely) or pupe_error($kysely);
+
+				if (mysql_num_rows($muistutus_chk_res) != 0) {
+					$muistutus_chk_row = mysql_fetch_assoc($muistutus_chk_res);
+
+					$kysely = "	UPDATE kalenteri SET
+								pvmloppu = '$lyear-$lmonth-$lday $laika'
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$muistutus_chk_row[tunnus]'";
+					$muistutus_insert_res = mysql_query($kysely) or pupe_error($kysely);
+				}
+				else {
+
+					$kysely = "	SELECT viesti, comments, sisviesti2
+								FROM lasku
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$liitostunnus'";
+					$viestit_chk_res = mysql_query($kysely) or pupe_error($kysely);
+					$viestit_chk_row = mysql_fetch_assoc($viestit_chk_res);
+
+					kalenteritapahtuma ("Muistutus", "Asentajan kuittaus", "Muista työmääräys $liitostunnus\n\n$viestit_chk_row[viesti]\n$viestit_chk_row[comments]\n$viestit_chk_row[sisviesti2]", $liitostunnus, "K", '', $liitostunnus, "'$year-$month-$day $aika'", "'$lyear-$lmonth-$lday $laika'", 'ASENTAJA');
+				}
+			}
+
 			mysql_query($query) or pupe_error($query);
 
 			$tee = "";
@@ -224,6 +295,59 @@
 	}
 
 	if ($tee == "POISTA") {
+
+		if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K') {
+
+			$query = "	SELECT pvmloppu, tunnus
+						FROM kalenteri
+						WHERE tyyppi = 'asennuskalenteri'
+						AND liitostunnus = '$liitostunnus'
+						AND kentta02 = '$liitostunnus'
+						#AND tapa = '$tyojono'
+						AND tunnus != '$tyotunnus'
+						ORDER BY pvmloppu DESC";
+			$kappale_chk_res = mysql_query($query) or pupe_error($query);
+
+			$query = "	SELECT *
+						FROM kalenteri
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tyyppi = 'Muistutus'
+						AND tapa = 'Asentajan kuittaus'
+						AND liitostunnus = '$liitostunnus'
+						AND kentta02 = '$liitostunnus'
+						AND kuittaus != ''
+						ORDER BY tunnus DESC";
+			$muistutus_chk_res = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($muistutus_chk_res) != 0) {
+				$muistutus_chk_row = mysql_fetch_assoc($muistutus_chk_res);
+
+				if (mysql_num_rows($kappale_chk_res) == 0) {
+					$query = "	DELETE FROM kalenteri 
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$muistutus_chk_row[tunnus]'
+								AND pvmalku	= '$year-$month-$day $aika'
+								AND pvmloppu = '$lyear-$lmonth-$lday $laika'
+								AND liitostunnus = '$liitostunnus'
+								AND kentta02 = '$liitostunnus'
+								AND tunnus = '$muistutus_chk_row[tunnus]'";
+					$muistutus_delete_res = mysql_query($query) or pupe_error($query);
+				}
+				else {
+					while ($kappale_chk_row = mysql_fetch_assoc($kappale_chk_res)) {
+						if ($kappale_chk_row['pvmloppu'] != "$lyear-$lmonth-$lday $laika") {
+							$query = "	UPDATE kalenteri SET
+										pvmloppu = '$kappale_chk_row[pvmloppu]'
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND tunnus = '$muistutus_chk_row[tunnus]'";
+							$muistutus_update_res = mysql_query($query) or pupe_error($query);
+							break;
+						}
+					}
+				}
+			}
+		}
+
 		$query = "	DELETE
 					FROM kalenteri
 					WHERE
@@ -232,7 +356,7 @@
 					and tyyppi = 'asennuskalenteri'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<font class='error'>".t("Kalenterimerkintä poistettu")."!</font><br><br>";
+		echo "<font class='message'>".t("Kalenterimerkintä poistettu")."!</font><br><br>";
 		$tee = "";
 	}
 
@@ -255,8 +379,16 @@
 			echo "<input type='hidden' name='tyotunnus' 	value='$tyotunnus'>";
 		}
 
-		echo "<tr><th>Asentaja:</th><td>$asentaja</td></tr>";
-		echo "<tr><th>Työjono:</th><td>$tyojono</td></tr>";
+		echo "<tr><th>",t("Asentaja"),":</th><td>$asentaja</td></tr>";
+		echo "<tr><th>",t("Työjono"),":</th><td>$tyojono</td></tr>";
+
+		if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K') {
+			echo "<tr><th>",t("Lisää muistutus"),":</th>";
+			echo "<td><select name='lisaa_muistutus'>";
+			echo "<option value=''>",t("Ei lisätä muistutusta kalenteriin"),"</option>";
+			echo "<option value='kylla'>",t("Lisätään muistutus kalenteriin"),"</option>";
+			echo "</select></td></tr>";
+		}
 
 		if (!isset($lday)) $lday     = $day;
 		if (!isset($lmonth)) $lmonth = $month;
@@ -275,7 +407,7 @@
 		$whileloppu = $whileloppu.":".$whlopm;
 
 		echo  "<tr>
-			<th nowrap>$whileloppu".t("Työn loppu").":</th>
+			<th nowrap>$whileloppu ".t("Työn loppu").":</th>
 			<td>
 			<input type='text' size='3' name='lday' value='$lday'>
 			<input type='text' size='3' name='lmonth' value='$lmonth'>
@@ -292,7 +424,7 @@
 			$whileaika = date("H:i", mktime(substr($whileaika,0,2), substr($whileaika,3,2)+60, 0));
 		}
 
-		echo  "</select></td>";
+		echo "</select></td>";
 		echo "</tr>";
 		echo "</table><br>";
 
@@ -313,10 +445,14 @@
 					<input type='hidden' name='year'  			value='$year'>
 					<input type='hidden' name='month'  			value='$month'>
 					<input type='hidden' name='day'  			value='$day'>
+					<input type='hidden' name='lyear'			value='$lyear'>
+					<input type='hidden' name='lmonth'			value='$lmonth'>
+					<input type='hidden' name='lday'			value='$lday'>
 					<input type='hidden' name='liitostunnus'  	value='$liitostunnus'>
 					<input type='hidden' name='asentaja'  		value='$asentaja'>
 					<input type='hidden' name='tyojono'  		value='$tyojono'>
 					<input type='hidden' name='aika'  			value='$aika'>
+					<input type='hidden' name='laika'			value='$aikaloppu'>
 					<input type='hidden' name='tyotunnus' 	value='$tyotunnus'>";
 			echo "<input type='submit' value='".t("Poista")."'>";
 		}
@@ -381,13 +517,7 @@
 			echo "<td class='back'></td>";
 
 			foreach ($DAY_ARRAY as $d) {
-				echo "<th nowrap><b>$d</b><br><table width='100%'><tr>";
-
-				foreach ($ASENTAJA_ARRAY_TARK as $b) {
-					echo "<td align='center' nowrap width='40px'>$b</td>";
-				}
-
-		        echo "</tr></table></th>";
+				echo "<th nowrap><b>$d</b></th>";
 			}
 
 			echo "</tr>";
@@ -439,7 +569,7 @@
 					$tyyppilisa = "'asennuskalenteri'";
 				}
 
-				$query = "	SELECT kalenteri.kuka, 
+				$query = "	SELECT $selectlisa kalenteri.kuka, 
 							kalenteri.pvmalku, 
 							kalenteri.pvmloppu, 
 							kalenteri.tapa, 
@@ -524,10 +654,15 @@
 				echo "<table width='100%'>";
 
 				if (count($ASENTAJA_ARRAY_TARK) < 5) {
-					echo "<tr><td class='tumma' align='center' colspan='".count($ASENTAJA_ARRAY)."'><b>$i</b></th></tr>";
+					echo "<tr><th style='text-align: center;' colspan='".count($ASENTAJA_ARRAY)."'><a name='{$i}_{$month}_{$year}'><b>$i</b></a></th></tr><tr>";
+
+					foreach ($ASENTAJA_ARRAY_TARK as $b) {
+						echo "<td align='center' nowrap width='40px'>$b</td>";
+					}
+					echo "</tr>";
 				}
 				else {
-					echo "<tr><th colspan='".count($ASENTAJA_ARRAY)."'>".$DAY_ARRAY[$pvanro].": $i.$month.$year</tr><tr>";
+					echo "<tr><th colspan='".count($ASENTAJA_ARRAY)."'><a name='{$i}_{$month}_{$year}'>".$DAY_ARRAY[$pvanro].": $i.$month.$year</a></th><tr>";
 
 					foreach ($ASENTAJA_ARRAY_TARK as $b) {
 						echo "<td align='center' nowrap width='40px'>$b</td>";

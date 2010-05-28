@@ -134,8 +134,11 @@ if (!isset($tee) or $tee == '') {
 
 	///* MUISTUTUKSET *///
 	//listataan paivan muistutukset
+
+	$selectlisa = $yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' ? ", kalenteri.pvmloppu, kalenteri.kentta02 " : '';
+
 	$query = "	SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo,
-				kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa
+				kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa $selectlisa
 				FROM kalenteri
 				LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
 				LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
@@ -154,12 +157,38 @@ if (!isset($tee) or $tee == '') {
 
 
         while ($prow = mysql_fetch_array ($result)) {
-                echo "<tr>";
-               	echo "<td nowrap><a href='".$palvelin2."crm/kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]'>".tv1dateconv($prow["Muistutukset"])."</a></td>";
-                echo "<td>$prow[Asiakas]<br>$prow[Yhteyshenkilo]</td>";
-                echo "<td>$prow[Kommentit]</td>";
-                echo "<td nowrap>$prow[Tapa]</td>";
-                echo "</tr>";
+
+			if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' and trim($prow['kentta02']) != '' and is_numeric($prow['kentta02']) and $prow['Tapa'] == "Asentajan kuittaus") {
+
+				if ($prow['pvmloppu'] > date("Y-m-d H:i:s")) {
+					continue;
+				}
+
+				$query = "	SELECT *
+							FROM kalenteri
+							WHERE tyyppi = 'kalenteri'
+							AND pvmalku like '$prow[Muistutukset]%'
+							AND kentta02 = '$prow[kentta02]'";
+				$asentajien_merkkaukset_res = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($asentajien_merkkaukset_res) > 0) {
+
+					$query = "	UPDATE kalenteri SET
+								kuittaus = ''
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$prow[tunnus]'";
+					$muistutus_kuittaus_res = mysql_query($query) or pupe_error($query);
+
+					continue;
+				}
+			}
+
+			echo "<tr>";
+			echo "<td nowrap><a href='".$palvelin2."crm/kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]'>".tv1dateconv($prow["Muistutukset"])."</a></td>";
+			echo "<td>$prow[Asiakas]<br>$prow[Yhteyshenkilo]</td>";
+			echo "<td>$prow[Kommentit]</td>";
+			echo "<td nowrap>$prow[Tapa]</td>";
+			echo "</tr>";
         }
         echo "</table><br>";
 }

@@ -126,6 +126,7 @@ if (!function_exists('finvoice_otsik')) {
 					$y_puhelin		= $alhiro['puhelin'];
 					$y_fax			= $alhiro['fax'];
 					$y_email		= $alhiro['email'];
+					$y_www			= $yhtiorow['www'];
 					$y_nimi 		= $lasrow["yhtio_nimi"];
 					$y_osoite 		= $lasrow["yhtio_osoite"];
 					$y_postino	 	= $lasrow["yhtio_postino"];
@@ -138,6 +139,7 @@ if (!function_exists('finvoice_otsik')) {
 					$y_puhelin		= $yhtiorow['puhelin'];
 					$y_fax			= $yhtiorow['fax'];
 					$y_email		= $yhtiorow['email'];
+					$y_www			= $yhtiorow['www'];
 					$y_nimi 		= $yhtiorow["nimi"];
 					$y_osoite 		= $yhtiorow["osoite"];
 					$y_postino	 	= $yhtiorow["postino"];
@@ -151,6 +153,7 @@ if (!function_exists('finvoice_otsik')) {
 				$y_puhelin		= $yhtiorow['puhelin'];
 				$y_fax			= $yhtiorow['fax'];
 				$y_email		= $yhtiorow['email'];
+				$y_www			= $yhtiorow['www'];
 				$y_nimi 		= $yhtiorow["nimi"];
 				$y_osoite 		= $yhtiorow["osoite"];
 				$y_postino	 	= $yhtiorow["postino"];
@@ -205,7 +208,7 @@ if (!function_exists('finvoice_otsik')) {
 			xml_add("SellerPhoneNumber", 								  	$y_puhelin, 						$tootfinvoice);
 			xml_add("SellerFaxNumber", 									  	$y_fax, 							$tootfinvoice);
 			xml_add("SellerCommonEmailaddressIdentifier",				  	$y_email, 							$tootfinvoice);
-			xml_add("SellerWebaddressIdentifier",						  	$yhtiorow['www'],   				$tootfinvoice);
+			xml_add("SellerWebaddressIdentifier",						  	$y_www, 			  				$tootfinvoice);
 			#xml_add("SellerFreeText",   		                     	  	"",									$tootfinvoice);
 
 			fputs($tootfinvoice, "<SellerAccountDetails>\r\n");
@@ -239,7 +242,7 @@ if (!function_exists('finvoice_otsik')) {
 			#fputs($tootfinvoice, "</InvoiceSenderPartyDetails>\r\n");
 
 			//	Oisko toista laskutusosoitetta?
-			$query = "	SELECT laskutus_nimi, 
+			$query = "	SELECT laskutus_nimi,
 						laskutus_nimitark,
 						laskutus_osoite,
 						laskutus_postino,
@@ -440,7 +443,15 @@ if (!function_exists('finvoice_alvierittely')) {
 			xml_add("VatFreeText",													"",					   	$tootfinvoice);
 			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
 
-			xml_add("InvoiceFreeText",	substr(trim(str_replace("|", " ", $lasrow["sisviesti1"])), 0, 512),	$tootfinvoice);
+			$InvoiceFreeTexts = explode("|", trim($lasrow["sisviesti1"]));
+
+			foreach ($InvoiceFreeTexts as $InvoiceFreeText) {
+				if (trim($InvoiceFreeText) != "") {
+					$InvoiceFreeText = wordwrap($InvoiceFreeText, 512, "</InvoiceFreeText>\r\n<InvoiceFreeText>");
+
+					xml_add("InvoiceFreeText", $InvoiceFreeText, $tootfinvoice);
+				}
+			}
 		}
 	}
 }
@@ -538,12 +549,13 @@ if (!function_exists('finvoice_rivi')) {
 			#xml_add("RowAccountDimensionText", 												"", 							$tootfinvoice);
 			#xml_add("RowSellerAccountText", 													"", 							$tootfinvoice);
 
-			// Kommenttirivi max 512 pitkä
-			$kommentit = explode("|", wordwrap(trim($tilrow["kommentti"]), 512, "|"));
+			$RowFreeTexts = explode("|", trim($tilrow["kommentti"]));
 
-			foreach($kommentit as $kommentti) {
-				if (trim($kommentti) != "") {
-					xml_add("RowFreeText",														$kommentti,		 				$tootfinvoice);
+			foreach ($RowFreeTexts as $RowFreeText) {
+				if (trim($RowFreeText) != "") {
+					$RowFreeText = wordwrap($RowFreeText, 512, "</RowFreeText>\r\n<RowFreeText>");
+
+					xml_add("RowFreeText", $RowFreeText, $tootfinvoice);
 				}
 			}
 

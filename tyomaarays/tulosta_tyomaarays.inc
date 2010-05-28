@@ -235,15 +235,7 @@ if (!function_exists('alku')) {
 		$kala  = 575;
 
 		//Täysin dynaaminen osio
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio 		= '$kukarow[yhtio]'
-					and laji			= 'MYSQLALIAS'
-					and selite			like 'tyomaarays.%'
-					and selitetark		!= ''
-					and selitetark_3 	!= 'SIS'
-					ORDER BY jarjestys, selite";
-		$al_res = mysql_query($query) or pupe_error($query);
+		$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != '' and avainsana.nakyvyys in ('','KAI','LAS')");
 
 		$al_lask = 35;
 		$al_fask = 0;

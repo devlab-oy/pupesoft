@@ -118,7 +118,7 @@
 			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti epäonnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ";
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, tyomaarays READ";
 			$locre = mysql_query($query) or pupe_error($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -309,6 +309,61 @@
 
 					if (trim($lasrow['sisviesti1']) != '') {
 						$komm .= "\n".t("Kommentti").": ".$lasrow['sisviesti1'];
+					}
+
+					$query = "	SELECT tyomaarays.*
+								FROM lasku
+								JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+								WHERE lasku.yhtio = '$kukarow[yhtio]'
+								and lasku.tilaustyyppi = 'A'
+								and lasku.laskunro = '$lasrow[laskunro]'";
+					$tyomres = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($tyomres) > 0) {
+
+						while ($tyomrow = mysql_fetch_array($tyomres)) {
+
+							$komm .= "\n".t("Työmääräys", $kieli). ": $tyomrow[otunnus]";
+
+							$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != '' and avainsana.nakyvyys in ('KAI','LAS')");
+
+							while ($al_row = mysql_fetch_array($al_res)) {
+
+								list($kanta, $kentta) = explode(".", $al_row["selite"]);
+
+								if (((!is_numeric($tyomrow[$kentta]) and trim($tyomrow[$kentta]) != '') or (is_numeric($tyomrow[$kentta]) and $tyomrow[$kentta] != 0)) and trim($tyomrow[$kentta]) != '0000-00-00') {
+									if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
+										$komm .= "\n$al_row[selitetark]: ".$tyomrow[$kentta];
+									}
+									else {
+										if (strtoupper($al_row["selitetark_2"]) == "DATE") {
+											$tyomrow[$kentta] = tv1dateconv($tyomrow[$kentta]);
+										}
+										elseif ($kentta == "suorittaja") {
+											$query = "	SELECT nimi
+														FROM kuka
+														WHERE yhtio = '$kukarow[yhtio]'
+														and kuka  	= '".$tyomrow[$kentta]."'";
+											$yresult = mysql_query($query) or pupe_error($query);
+											$row = mysql_fetch_array($yresult);
+
+											$tyomrow[$kentta] = $row["nimi"];
+										}
+										elseif ($kentta == "merkki") {
+											$yresult = t_avainsana("SARJANUMERON_LI", $kieli, "and avainsana.selite = 'MERKKI' and avainsana.selitetark = '".$tyomrow[$kentta]."'");
+
+											if (mysql_num_rows($yresult) > 0) {
+												$row = mysql_fetch_array($yresult);
+
+												$tyomrow[$kentta] = $row["selitetark_2"];
+											}
+										}
+
+										$komm .= "\n$al_row[selitetark]: ".$tyomrow[$kentta];
+									}
+								}
+							}
+						}
 					}
 
 					if (trim($komm) != '') {

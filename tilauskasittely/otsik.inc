@@ -1879,7 +1879,7 @@
 
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
 				//Täysin dynaaminen osio
-				$al_res = t_avainsana("MYSQLALIAS","", "and avainsana.selite like 'tyomaarays.%' and avainsana.selitetark != ''");
+				$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != ''");
 
 				$al_lask = 0;
 

@@ -164,7 +164,7 @@ if (!function_exists('alku')) {
 		//$pdf->draw_rectangle(737, 20,  674, 300, $thispage, $rectparam);
 		$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$thispage, $pieni);
 
-		$query = "	SELECT laskutus_nimi, 
+		$query = "	SELECT laskutus_nimi,
 					laskutus_nimitark,
 					laskutus_osoite,
 					laskutus_postino,
@@ -322,7 +322,7 @@ if (!function_exists('alku')) {
 
 		$query = "	SELECT date_format(if(keratty = 'saldoton' and '$yhtiorow[saldottomien_toimitettuaika]' = 'K', toimaika, toimitettuaika), '%Y-%m-%d') toimitettupaiva
 					FROM tilausrivi
-					WHERE yhtio='$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]'
 					and $where
 					and toimitettuaika!='0000-00-00'
 					GROUP BY toimitettupaiva";
@@ -370,41 +370,68 @@ if (!function_exists('alku')) {
 		}
 
 		// Tutkitaan onko tämä työmääräys
-		$query = "	SELECT group_concat(distinct otunnus) otunnus
-					FROM tilausrivi
-					WHERE yhtio='$kukarow[yhtio]'
+		if ($laskurow["tila"] == 'U') {
+			$where = " lasku.laskunro = '$laskurow[laskunro]' ";
+		}
+		else {
+			$where = " lasku.tunnus = '$laskurow[tunnus]' ";
+		}
+
+		$query = "	SELECT tyomaarays.*
+					FROM lasku
+					JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tilaustyyppi = 'A'
 					and $where";
 		$tyomres = mysql_query($query) or pupe_error($query);
-		$tyomrow = mysql_fetch_array($tyomres);
 
-		if ($tyomrow["otunnus"] != "") {
-			$squery = "	SELECT tyomaarays.*
-						FROM tyomaarays
-						WHERE tyomaarays.yhtio = '$kukarow[yhtio]'
-						and tyomaarays.otunnus in ($tyomrow[otunnus])";
-			$tyomres = mysql_query($squery) or pupe_error($squery);
+		if (mysql_num_rows($tyomres) > 0) {
 
 			while ($tyomrow = mysql_fetch_array($tyomres)) {
 
-				$query = "	SELECT selitetark_2
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]'
-							and laji = 'sarjanumeron_li'
-							and selite = 'MERKKI'
-							and selitetark = '$tyomrow[merkki]'
-							LIMIT 1";
-				$merkkires = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($merkkires) > 0) {
-					$merkkirow = mysql_fetch_array($merkkires);
-					$tyomrow["merkki"] = $merkkirow["selitetark_2"];
-				}
-
 				$komm .= "\n".t("Työmääräys", $kieli). ":###$tyomrow[otunnus]";
-				if ($tyomrow["valmnro"] != "") $komm .= "\n".t("Sarjanumero", $kieli). ":###$tyomrow[valmnro]";
-				if ($tyomrow["merkki"] != "") $komm .= "\n".t("Merkki", $kieli). ":###$tyomrow[merkki]";
-				if ($tyomrow["mallivari"] != "") $komm .= "\n".t("Malli", $kieli). ":###$tyomrow[mallivari]";
+
+				$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != '' and avainsana.nakyvyys in ('KAI','LAS')");
+
+				while ($al_row = mysql_fetch_array($al_res)) {
+
+					list($kanta, $kentta) = explode(".", $al_row["selite"]);
+
+					if (((!is_numeric($tyomrow[$kentta]) and trim($tyomrow[$kentta]) != '') or (is_numeric($tyomrow[$kentta]) and $tyomrow[$kentta] != 0)) and trim($tyomrow[$kentta]) != '0000-00-00') {
+						if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
+							$komm .= "\n$al_row[selitetark]:###".wordwrap(str_replace("\n","\n###", $tyomrow[$kentta]), 90, "\n###");
+						}
+						else {
+							if (strtoupper($al_row["selitetark_2"]) == "DATE") {
+								$tyomrow[$kentta] = tv1dateconv($tyomrow[$kentta]);
+							}
+							elseif ($kentta == "suorittaja") {
+								$query = "	SELECT nimi
+											FROM kuka
+											WHERE yhtio = '$kukarow[yhtio]'
+											and kuka  	= '".$tyomrow[$kentta]."'";
+								$yresult = mysql_query($query) or pupe_error($query);
+								$row = mysql_fetch_array($yresult);
+
+								$tyomrow[$kentta] = $row["nimi"];
+							}
+							elseif ($kentta == "merkki") {
+								$yresult = t_avainsana("SARJANUMERON_LI", $kieli, "and avainsana.selite = 'MERKKI' and avainsana.selitetark = '".$tyomrow[$kentta]."'");
+
+								if (mysql_num_rows($yresult) > 0) {
+									$row = mysql_fetch_array($yresult);
+
+									$tyomrow[$kentta] = $row["selitetark_2"];
+								}
+							}
+
+							$komm .= "\n$al_row[selitetark]:###$tyomrow[$kentta]";
+						}
+					}
+				}
 			}
+
+			$komm .= "\n";
 		}
 
 		if (isset($asiakasrow['laskutyyppi']) and $asiakasrow['laskutyyppi'] != -9) {
@@ -909,10 +936,10 @@ if (!function_exists('rivi_original')) {
 		//Kommentti
 		if (trim($row["kommentti"]) != '') {
 			$kommentit = explode("\n", trim($row["kommentti"]));
-			
+
 			$pdf->draw_text(35, $kala, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
 			$kala = $kala - 10;
-			
+
 			foreach($kommentit as $akey => $kommentti) {
 
 				if ($akey == 0) {
@@ -923,7 +950,7 @@ if (!function_exists('rivi_original')) {
 					$rpit1 = 500;
 					$rpit2 = 450;
 				}
-			
+
 				// Jos rivikommentti on pitkä niin rivitämme sen
 				if ($pdf->strlen($kommentti, $pieni) > $rpit1) {
 
@@ -933,7 +960,7 @@ if (!function_exists('rivi_original')) {
 
 					$sanat = explode('##', $kommentti);
 					$lause = "";
-					
+
 					foreach ($sanat as $sana) {
 						if ($pdf->strlen($lause, $pieni) > $rpit2) {
 
@@ -1550,6 +1577,7 @@ if (!function_exists('loppu')) {
 		$y_puhelin		= $yhtiorow['puhelin'];
 		$y_fax			= $yhtiorow['fax'];
 		$y_email		= $yhtiorow['email'];
+		$y_www			= $yhtiorow['www'];
 		$y_nimi 		= $laskurow["yhtio_nimi"];
 		$y_osoite 		= $laskurow["yhtio_osoite"];
 		$y_postino	 	= $laskurow["yhtio_postino"];
@@ -1603,6 +1631,8 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(257, 45 + $tileja + $barcode_korkeus, $y_fax,						$thispage, $pieni);
 		$pdf->draw_text(217, 35 + $tileja + $barcode_korkeus, t("Sähköposti", $kieli).":",	$thispage, $pieni);
 		$pdf->draw_text(257, 35 + $tileja + $barcode_korkeus, $y_email,						$thispage, $pieni);
+		$pdf->draw_text(217, 25 + $tileja + $barcode_korkeus, t("Web", $kieli).":",			$thispage, $pieni);
+		$pdf->draw_text(257, 25 + $tileja + $barcode_korkeus, $y_www,						$thispage, $pieni);
 
 		$pdf->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).":",										$thispage, $pieni);
 		$pdf->draw_text(444, 55 + $tileja + $barcode_korkeus, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]),	$thispage, $pieni);
@@ -1680,7 +1710,7 @@ if (!function_exists('alvierittely')) {
 
 			$page[$sivu] = uusi_sivu('alvierittely');
 			$thispage    = $page[$sivu];
-			
+
 			$sivu_vaihtui = true;
 		}
 

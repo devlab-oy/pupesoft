@@ -15,7 +15,6 @@
 		exit;
 	}
 
-	require ("inc/alvpopup.inc");
 	require_once ("inc/tilinumero.inc");
 
 	if ($keikalla == "on") {

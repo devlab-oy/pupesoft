@@ -9,10 +9,6 @@ if ($livesearch_tee == "TUOTEHAKU") {
 	exit;
 }
 
-if (@include("inc/alvpopup.inc"));
-elseif (@include("alvpopup.inc"));
-else exit;
-
 if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K" or $yhtiorow["asiakkaan_kohde"] == "K" or $yhtiorow["livetuotehaku_tilauksella"] == "K") {
 	enable_ajax();
 }
@@ -2366,8 +2362,8 @@ if ($tee == '') {
 
 			if ($toim == 'TYOMAARAYS' or $toim == "TYOMAARAYS_ASENTAJA") {
 				// Katsotaan onko kalenterimerkintöjä
-				$query = "	SELECT left(kalenteri.pvmalku, 10) pvmalku_sort, 
-							kalenteri.pvmalku, 
+				$query = "	SELECT left(kalenteri.pvmalku, 10) pvmalku_sort,
+							kalenteri.pvmalku,
 							kalenteri.pvmloppu,
 							concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', kuka.nimi, '##', kuka.kuka) asennuskalenteri
 							FROM  kalenteri

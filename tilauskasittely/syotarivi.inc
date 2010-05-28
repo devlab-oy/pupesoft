@@ -6,13 +6,6 @@
 		echo " kukarow[extranet] = $kukarow[extranet] | toim = $toim | miniliittyma = $miniliittyma | syotarivi = $syotarivi | rivinumero = $rivinumero<br>";
 	}
 
-	if (file_exists("../inc/alvpopup.inc")) {
-		require ("../inc/alvpopup.inc");
-	}
-	else {
-		require ("alvpopup.inc");
-	}
-
 	$variaaritorivi = FALSE;
 
 	if ($yhtiorow['variaatiomyynti'] == "K" and $kukarow["extranet"] == '' and (is_array($tuoteno_array) or $tuoteno != "" or $variaatio_tuoteno) and $ulos == "" and $rivitunnus == "") {

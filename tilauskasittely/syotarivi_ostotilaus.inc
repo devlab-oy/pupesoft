@@ -1,7 +1,5 @@
 <?php
 
-	require ('../inc/alvpopup.inc');
-	
 	// Syˆtet‰‰n rivi
 	echo "	<tr><form name='rivi' action = '$PHP_SELF#$rivitunnus' method='post' autocomplete='off'>
 			<input type='hidden' name='toiminto' value='$toiminto'>
@@ -19,15 +17,15 @@
 			<input type='hidden' name='rivinvar' value = '$var'>
 			<input type='hidden' name='toim' value = '$toim'>
 			<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>";
-	
+
 	$variaaritorivi = FALSE;
 
 	if ($yhtiorow['variaatiomyynti'] == "K" and $kukarow["extranet"] == '' and (is_array($tuoteno_array) or $tuoteno != "" or $variaatio_tuoteno) and $ulos == "" and $rivitunnus == "") {
 		$variaaritorivi_osto = TRUE;
-		
+
 		require ("syota_variaatiorivi.inc");
 	}
-	
+
 	if ($variaaritorivi === FALSE) {
 		// Annetaan mahdollisuus tehd‰ uusi tilausrivi tai n‰ytet‰‰n virhe
 		echo "<table border='0' cellspacing='1' cellpadding='2'>
@@ -88,9 +86,9 @@
 
 		echo "<tr>
 				<th align='left'>".t("Toimitusaika")."</th>";
-	
+
 		echo "<th colspan='6' align='left'>".t("Kommentti")."</th>";
-			
+
 		echo "<td class='back'></td>
 				</tr>";
 
@@ -109,7 +107,7 @@
 			$toimvva = substr($toimaika, 0, 4);
 			$toimppa = substr($toimaika, 8, 2);
 		}
-	
+
 		echo "<tr>
 				<td><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>
 				<td colspan='6'><textarea name='kommentti' cols='50'>$kommentti</textarea></td>";
@@ -118,7 +116,7 @@
 		echo "<td class='back'><input type='Submit' name= 'tyhjenna' value = '".t("Tyhjenn‰")."'></td></tr>";
 		echo "</form></table><br>";
 	}
-	
+
 	// Kursorinohjausta
 	if ($formi == '') {
 		$formi = 'rivi';
@@ -127,5 +125,5 @@
    if ($kentta == '') {
        $kentta = 'tuoteno';
    }
-	
+
 ?>

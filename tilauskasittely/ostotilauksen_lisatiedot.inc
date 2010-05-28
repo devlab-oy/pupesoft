@@ -232,10 +232,6 @@ if ($tee == "") {
 		$laskurow["rahti"] = $toimittaja["oletus_kulupros"];
 	}
 
-	//Haetaan alvifunktio
-	require ('../inc/alvpopup.inc');
-
-
 	if ($laskurow["bruttopaino"] == 0) {
 		$query  = "	SELECT round(sum(tuotemassa*(varattu+kpl)),2) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 					FROM tilausrivi

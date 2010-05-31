@@ -417,51 +417,58 @@ if($tee == "SYOTA") {
 //tästä alkaa main table
 echo "<table>";
 echo "<tr>";
-echo "<td class='back' valign='top' nowrap>";
 
-//listataan paivan muistutukset
-$query = "	SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo, kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa, kuka.nimi Nimi, kalenteri.yhtio
-			FROM kalenteri
-			LEFT JOIN kuka ON kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-			LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
-			LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
-			WHERE kalenteri.kuka in ($vertaa)
-			and kalenteri.tyyppi='Muistutus'
-			and kalenteri.kuittaus='K'
-			$konsernit
-			ORDER BY kalenteri.pvmalku desc";
-$result = mysql_query($query) or pupe_error($query);
+if ($toim != 'TYOMAARAYS_ASENTAJA') {
 
-if (mysql_num_rows($result) > 0) {
-        echo "<table width='100%'>";
-        echo "<tr>";
-       	echo "<th colspan='6'>".t("Muistutukset")."</th>";
-        echo "</tr>";
+	echo "<td class='back' valign='top' nowrap>";
+
+	//listataan paivan muistutukset
+	$query = "	SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo, kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa, kuka.nimi Nimi, kalenteri.yhtio
+				FROM kalenteri
+				LEFT JOIN kuka ON kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
+				LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
+				LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
+				WHERE kalenteri.kuka in ($vertaa)
+				and kalenteri.tyyppi='Muistutus'
+				and kalenteri.kuittaus='K'
+				$konsernit
+				ORDER BY kalenteri.pvmalku desc";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) > 0) {
+	        echo "<table width='100%'>";
+	        echo "<tr>";
+	       	echo "<th colspan='6'>".t("Muistutukset")."</th>";
+	        echo "</tr>";
 
 
-        while ($prow = mysql_fetch_array ($result)) {
-                echo "	<form action='kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]' method='post'>
-						<input type='hidden' name='lopetus' value='$lopetus'>
-						<tr>";
+	        while ($prow = mysql_fetch_array ($result)) {
+	                echo "	<form action='kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]' method='post'>
+							<input type='hidden' name='lopetus' value='$lopetus'>
+							<tr>";
 
-               	echo "<td nowrap>$prow[Muistutukset]</td>";
-                echo "<td nowrap>$prow[Asiakas]</td>";
-                echo "<td nowrap>$prow[Yhteyshenkilo]</td>";
-                echo "<td nowrap>$prow[Kommentit]</td>";
-                echo "<td nowrap>$prow[Tapa]</td>";
+	               	echo "<td nowrap>$prow[Muistutukset]</td>";
+	                echo "<td nowrap>$prow[Asiakas]</td>";
+	                echo "<td nowrap>$prow[Yhteyshenkilo]</td>";
+	                echo "<td nowrap>$prow[Kommentit]</td>";
+	                echo "<td nowrap>$prow[Tapa]</td>";
 
-             	if ($kons == 1) {
-             		$ko = "(".$prow["yhtio"]."), ";
-             	}
+	             	if ($kons == 1) {
+	             		$ko = "(".$prow["yhtio"]."), ";
+	             	}
 
-                echo "<td nowrap>$ko $prow[Nimi]</td>";
+	                echo "<td nowrap>$ko $prow[Nimi]</td>";
 
-                echo "<td class='back'><input type='submit' value='".t("Kuittaa")."'></td>";
-                echo "</tr></form>";
-        }
-        echo "</table>";
+	                echo "<td class='back'><input type='submit' value='".t("Kuittaa")."'></td>";
+	                echo "</tr></form>";
+	        }
+	        echo "</table>";
+	}
+	echo "</td>";
 }
-echo "</td>";
+else {
+	echo "<td class='back'>&nbsp;</td>";
+}
 
 //oikean ylälaidan pikkukalenteri..
 echo "<td class='back' valign='top' rowspan='3' align='left'>";

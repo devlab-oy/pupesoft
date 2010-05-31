@@ -17,7 +17,7 @@
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 		$aja = 'run';
 
-		echo date("d.m.Y @ G:i:s")." - Iltasiivo $yhtiorow[nimi]\n";
+		echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]\n";
 	}
 	else {
 		require ("inc/parametrit.inc");
@@ -53,7 +53,7 @@
 			$laskuri ++;
 		}
 
-		if ($laskuri > 0) $iltasiivo .= "Poistettiin $laskuri poistetun toimittajan tuoteliitosta.\n";
+		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri poistetun toimittajan tuoteliitosta.\n";
 		$laskuri = 0;
 
 		// poistetaan kaikki tuotteen_toimittajat liitokset joiden tuote on poistettu
@@ -70,7 +70,7 @@
 			$laskuri ++;
 		}
 
-		if ($laskuri > 0) $iltasiivo .= "Poistettiin $laskuri poistetun tuotteen tuoteliitosta.\n";
+		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri poistetun tuotteen tuoteliitosta.\n";
 
 		$laskuri = 0;
 		$laskuri2 = 0;
@@ -105,8 +105,8 @@
 
 		}
 
-		if ($laskuri > 0) $iltasiivo .= "Poistettiin $laskuri rivitöntä tilausta.\n";
-		if ($laskuri2 > 0) $iltasiivo .= "Merkattiin toimitetuksi $laskuri2 rivitöntä tilausta.\n";
+		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $laskuri rivitöntä tilausta.\n";
+		if ($laskuri2 > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Merkattiin toimitetuksi $laskuri2 rivitöntä tilausta.\n";
 
 		$laskuri = 0;
 
@@ -134,7 +134,7 @@
 
 		}
 
-		if ($laskuri > 0) $iltasiivo .= "Mitätöitiin $laskuri tilausta joilla oli pelkkiä mitätöityjä rivejä.\n";
+		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri tilausta joilla oli pelkkiä mitätöityjä rivejä.\n";
 
 
 		$laskuri = 0;
@@ -157,7 +157,7 @@
 			$laskuri ++;
 		}
 
-		if ($laskuri > 0) $iltasiivo .= "Mitätöitiin $laskuri mitätöidyn tilauksen rivit. (Rivit jostain syystä ei dellattuja)\n";
+		if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri mitätöidyn tilauksen rivit. (Rivit jostain syystä ei dellattuja)\n";
 
 
 		// tässä tehdään isittömistä perheistä ei-perheitä ja myös perheistä joissa ei ole lapsia eli nollataan perheid
@@ -191,7 +191,7 @@
 		}
 
 		if ($lask+$lask2 > 0) {
-			$iltasiivo .= "Tuhotiin $lask orpoa perhettä, ja $lask2 lapsetonta isää (eli perheid nollattiin)\n";
+			$iltasiivo .= date("d.m.Y @ G:i:s").": Tuhottiin $lask orpoa perhettä, ja $lask2 lapsetonta isää (eli perheid nollattiin)\n";
 		}
 
 		$lasktuote = 0;
@@ -220,7 +220,7 @@
 		}
 
 		if ($lasktuote > 0) {
-			$iltasiivo .= "Poistettiin $lasktuote tuotteelta yhteensä $laskpois duplikaatti tuotteen_toimittajaa\n";
+			$iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin $lasktuote tuotteelta yhteensä $laskpois duplikaatti tuotteen_toimittajaa\n";
 		}
 
 		$kukaquery = "	UPDATE kuka
@@ -229,7 +229,7 @@
 		$kukaresult = mysql_query($kukaquery) or pupe_error($kukaquery);
 
 		if (mysql_affected_rows() > 0) {
-			$iltasiivo .= "Päivitettiin ".mysql_affected_rows()." käyttäjän taso 3 --> 2\n";
+			$iltasiivo .= date("d.m.Y @ G:i:s").": Päivitettiin ".mysql_affected_rows()." käyttäjän taso 3 --> 2\n";
 		}
 
 		// mitätöidään keskenolevia extranet-tilauksia, jos ne on liian vanhoja ja yhtiön parametri on päällä
@@ -297,7 +297,7 @@
 				$laskuri++;
 			}
 
-			if ($laskuri > 0) $iltasiivo .= "Mitätöitiin $laskuri extranet-tilausta, jotka olivat $aikaraja tuntia vanhoja.\n";
+			if ($laskuri > 0) $iltasiivo .= date("d.m.Y @ G:i:s").": Mitätöitiin $laskuri extranet-tilausta, jotka olivat $aikaraja tuntia vanhoja.\n";
 		}
 
 		if (table_exists('suorituskykyloki')) {
@@ -307,13 +307,13 @@
 			$deler = mysql_query($query) or die($query);
 
 			if (mysql_affected_rows() > 0) {
-				$iltasiivo .= "Poistettiin ".mysql_affected_rows()." riviä suorituskykylokista.\n";
+				$iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin ".mysql_affected_rows()." riviä suorituskykylokista.\n";
 			}
 		}
 
 		if ($iltasiivo != "" or trim($argv[1]) != '') {
 			echo $iltasiivo;
-			echo date("d.m.Y @ G:i:s")." - Iltasiivo $yhtiorow[nimi]. Done!\n\n";
+			echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]. Done!\n\n";
 		}
 
 		if ($iltasiivo != "") {

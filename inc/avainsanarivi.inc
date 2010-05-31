@@ -129,6 +129,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "LASKUTUS_SAATE")	$ulos .= "<option value='LASKUTUS_SAATE' $avain_sel[LASKUTUS_SAATE]>		".t("Laskun s‰hkˆpostisaatekirje asiakkaalle")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO") 		$ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>			".t("Tilausvahvistuksen lis‰tiedot")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "INVEN_LAJI") 		$ulos .= "<option value='INVEN_LAJI' $avain_sel[INVEN_LAJI]>				".t("Inventoinnin laji")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "HAE_JA_SELAA") 		$ulos .= "<option value='HAE_JA_SELAA' $avain_sel[HAE_JA_SELAA]>			".t("Hae ja selaa -ohjelman parametrit")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -309,19 +310,6 @@
 		$jatko = 0;
 	}
 
-	if ($avain_sel["PARAMETRI"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
-		$sel = array();
-		$sel[$trow[$i]] = "SELECTED";
-
-		$ulos = "<td><select name = '$nimi'>";
-		$ulos .= "<option value = ''>".t("Ei k‰ytet‰ tuotehaussa")."</option>";
-		$ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n tuotehaussa alasvetovalikkona")."</option>";
-		$ulos .= "<option value = 'B' $sel[B]>".t("K‰ytet‰‰n tuotehaussa monivalintalaatikkona")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
 	if ($avain_sel["ALVULK"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
 
 		$query = "	SELECT distinct koodi, nimi
@@ -452,6 +440,18 @@
 		}
 		
 		$ulos .= "</td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel["HAE_JA_SELAA"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos = "<td><select name = '$nimi'>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("Hae ja selaa -ohjelmassa k‰ytet‰‰n alkuper‰ist‰ ulkoasua")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("Hae ja selaa -ohjelmassa k‰ytet‰‰n uutta ulkoasua")."</option>";
+		$ulos .= "</select></td>";
+
 		$jatko = 0;
 	}
 

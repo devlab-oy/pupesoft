@@ -609,11 +609,20 @@
 					<input type='Submit' value='".t("Muuta otsikkoa")."'>
 					</form></td>";
 
-			echo "<td class='back'>
-					<form action='tuote_selaus_haku.php' method='post'>
-					<input type='hidden' name='toim_kutsu' value='$toim'>
-					<input type='submit' value='".t("Selaa tuotteita")."'>
-					</form></td>";
+			if ($kukarow['yhtio'] == 'allr') {
+				echo "<td class='back'>
+						<form action='tuote_selaus_haku_vanha.php' method='post'>
+						<input type='hidden' name='toim_kutsu' value='$toim'>
+						<input type='submit' value='".t("Selaa tuotteita")."'>
+						</form></td>";
+			}
+			else {
+				echo "<td class='back'>
+						<form action='tuote_selaus_haku.php' method='post'>
+						<input type='hidden' name='toim_kutsu' value='$toim'>
+						<input type='submit' value='".t("Selaa tuotteita")."'>
+						</form></td>";
+			}
 
 			echo "<td class='back'>
 					<form action='$PHP_SELF' method='post'>

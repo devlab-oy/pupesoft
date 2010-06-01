@@ -1,15 +1,23 @@
 <?php
 	//$toim='YKS' tarkottaa yksinkertainen ja silloin ei välitetä onko tuotteella eankoodia vaan tulostetaan suoraan tuoteno viivakoodiin
 
-	if ($_REQUEST['malli'] == 'PDF') {
+	if ($_REQUEST['malli'] == 'PDF20' or $_REQUEST['malli'] == 'PDF40') {
 		$_REQUEST['nayta_pdf'] = 1;
 	}
 
 	require("inc/parametrit.inc");
 
-	echo "<font class='head'>".t("Tulosta tuotetarroja")."</font><hr>";
+	echo "<font class='head'>",t("Tulosta tuotetarroja"),"</font><hr>";
 
-	if ($tulostakappale == '') {
+	if (!isset($toim)) $toim = '';
+	if (!isset($tuoteno)) $tuoteno = '';
+	if (!isset($updateean)) $updateean = '';
+	if (!isset($tee)) $tee = '';
+	if (!isset($malli)) $malli = '';
+	if (!isset($ulos)) $ulos = '';
+	if (!isset($kirjoitin)) $kirjoitin = '';
+
+	if (!isset($tulostakappale) or $tulostakappale == '') {
 		$tulostakappale = 1;
 	}
 
@@ -131,7 +139,7 @@
 	echo "<td><input type='text' name='tuoteno' size='20' maxlength='20' value='$tuoteno'></td>";
 	echo "<td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'></td>";
 	echo "<td><select name='kirjoitin'>";
-	echo "<option value='$kirow[tunnus]'>".t("Ei kirjoitinta")."</option>";
+	echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
 	$query = "	SELECT * 
 				FROM kirjoittimet 
@@ -157,7 +165,7 @@
 	$pohjat[] = 'PDF40';
 
 	echo "<td><select name='malli'>";
-	echo "<option value='$kirow[tunnus]'>".t("Ei mallia")."</option>";
+	echo "<option value=''>".t("Ei mallia")."</option>";
 
 	foreach ($pohjat as $pohja) {
 		if ($pohja == $malli) $select = 'SELECTED';

@@ -94,7 +94,7 @@
 					elseif ($malli == 'Intermec') {
 						require("inc/tulosta_tuotetarrat_intermec.inc");
 					}
-					elseif ($malli == 'PDF') {
+					elseif ($malli == 'PDF24' or $malli == 'PDF40') {
 						require("inc/tulosta_tuotetarrat_pdf.inc");
 					}
 				}
@@ -153,7 +153,8 @@
 	$pohjat[] = 'Tec';
 	$pohjat[] = 'Intermec';
 	$pohjat[] = 'Zebra';
-	$pohjat[] = 'PDF';
+	$pohjat[] = 'PDF24';
+	$pohjat[] = 'PDF40';
 
 	echo "<td><select name='malli'>";
 	echo "<option value='$kirow[tunnus]'>".t("Ei mallia")."</option>";

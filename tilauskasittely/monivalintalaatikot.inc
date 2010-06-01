@@ -28,7 +28,7 @@
 
 	foreach ($monivalintalaatikot as $monivalintalaatikko) {
 		if (strtolower(substr($monivalintalaatikko, 0, 9)) == "parametri") {
-			$param = strtolower(substr($monivalintalaatikko, 10));
+			$param = substr($monivalintalaatikko, 10);
 
 			${"lisa_haku_".$param} = '';
 			if (!isset(${"mul_".$param})) ${"mul_".$param} = array();
@@ -154,7 +154,7 @@
 
 		foreach ($monivalintalaatikot as $monivalintalaatikko) {
 			if (strtolower(substr($monivalintalaatikko, 0, 9)) == "parametri") {
-				$param = strtolower(substr($monivalintalaatikko, 10));
+				$param = substr($monivalintalaatikko, 10);
 
 				$i = 1;
 
@@ -290,6 +290,7 @@
 				            FROM avainsana as avainsana_kieli
 				            WHERE avainsana_kieli.yhtio = avainsana.yhtio
 				            and avainsana_kieli.laji = avainsana.laji
+							and avainsana_kieli.perhe > 0
 				            and avainsana_kieli.perhe = avainsana.perhe
 				            and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark,
 							sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
@@ -310,6 +311,7 @@
 				            FROM avainsana as avainsana_kieli
 				            WHERE avainsana_kieli.yhtio = avainsana.yhtio
 				            and avainsana_kieli.laji = avainsana.laji
+							and avainsana_kieli.perhe > 0
 				            and avainsana_kieli.perhe = avainsana.perhe
 				            and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark
 				            FROM avainsana
@@ -372,12 +374,12 @@
 					$sel = '';
 
 					if (count($mul_osasto) > 0) {
-						if (in_array(trim($sxrow['selite']), $mul_osasto)) {
+						if (in_array(strtolower(trim($sxrow['selite'])), $mul_osasto)) {
 							$sel = 'SELECTED';
 						}
 					}
 
-					echo "<option value='$sxrow[selite]' $sel>";
+					echo "<option value='".strtolower($sxrow['selite'])."' $sel>";
 
 					if ($yhtiorow['naytetaanko_osaston_ja_tryn_selite'] == '') {
 						echo $sxrow['selite']." ";
@@ -399,6 +401,7 @@
 					        FROM avainsana as avainsana_kieli
 					        WHERE avainsana_kieli.yhtio = avainsana.yhtio
 					        and avainsana_kieli.laji = avainsana.laji
+							and avainsana_kieli.perhe > 0
 					        and avainsana_kieli.perhe = avainsana.perhe
 					        and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark,
 							sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
@@ -420,6 +423,7 @@
 				            FROM avainsana as avainsana_kieli
 				            WHERE avainsana_kieli.yhtio = avainsana.yhtio
 				            and avainsana_kieli.laji = avainsana.laji
+							and avainsana_kieli.perhe > 0
 				            and avainsana_kieli.perhe = avainsana.perhe
 				            and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark
 				            FROM avainsana
@@ -435,6 +439,7 @@
 					        FROM avainsana as avainsana_kieli
 					        WHERE avainsana_kieli.yhtio = avainsana.yhtio
 					        and avainsana_kieli.laji = avainsana.laji
+							and avainsana_kieli.perhe > 0
 					        and avainsana_kieli.perhe = avainsana.perhe
 					        and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark
 							FROM tuote
@@ -496,11 +501,11 @@
 				while ($srow = mysql_fetch_assoc($sresult)) {
 					$sel = '';
 
-					if (count($mul_try) > 0 and in_array(trim($srow['selite']), $mul_try)) {
+					if (count($mul_try) > 0 and in_array(strtolower(trim($srow['selite'])), $mul_try)) {
 						$sel = 'SELECTED';
 					}
 
-					echo "<option value='$srow[selite]' $sel>";
+					echo "<option value='".strtolower($srow['selite'])."' $sel>";
 
 					if ($yhtiorow['naytetaanko_osaston_ja_tryn_selite'] == '') {
 						echo $srow['selite']." ";
@@ -522,6 +527,7 @@
 		        			FROM avainsana as avainsana_kieli
 		        			WHERE avainsana_kieli.yhtio = avainsana.yhtio
 		        			and avainsana_kieli.laji = avainsana.laji
+							and avainsana_kieli.perhe > 0
 		        			and avainsana_kieli.perhe = avainsana.perhe
 		        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite,
 							sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
@@ -544,6 +550,7 @@
 		        			FROM avainsana as avainsana_kieli
 		        			WHERE avainsana_kieli.yhtio = avainsana.yhtio
 		        			and avainsana_kieli.laji = avainsana.laji
+							and avainsana_kieli.perhe > 0
 		        			and avainsana_kieli.perhe = avainsana.perhe
 		        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite
 				            FROM avainsana
@@ -558,6 +565,7 @@
 		        			FROM avainsana as avainsana_kieli
 		        			WHERE avainsana_kieli.yhtio = avainsana.yhtio
 		        			and avainsana_kieli.laji = avainsana.laji
+							and avainsana_kieli.perhe > 0
 		        			and avainsana_kieli.perhe = avainsana.perhe
 		        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite
 							FROM tuote";
@@ -566,7 +574,7 @@
 
 				foreach ($monivalintalaatikot as $monivalintalaatikko2) {
 					if (strtolower(substr($monivalintalaatikko2, 0, 9)) == "parametri") {						
-						$param = strtolower(substr($monivalintalaatikko2, 10));
+						$param = substr($monivalintalaatikko2, 10);
 
 						if (${"lisa_haku_".$param} != "") {
 							$lisaquery .= " JOIN tuotteen_avainsanat t_av_$param ON (t_av_$param.yhtio = tuote.yhtio and t_av_$param.tuoteno = tuote.tuoteno and t_av_$param.laji = 'parametri_$param' ".${"lisa_haku_".$param}.") ";
@@ -639,11 +647,11 @@
 				while ($srow = mysql_fetch_assoc($tmsresult)) {
 					$sel = '';
 
-					if (count($mul_tme) > 0 and in_array(trim($srow['tme']), $mul_tme)) {
+					if (count($mul_tme) > 0 and in_array(strtolower(trim($srow['tme'])), $mul_tme)) {
 						$sel = 'SELECTED';
 					}
 
-					echo "<option value='$srow[tme]' $sel>$srow[selite]</option>";
+					echo "<option value='".strtolower($srow['tme'])."' $sel>$srow[selite]</option>";
 				}
 
 				echo "</select></td>";
@@ -663,6 +671,7 @@
 				        			FROM avainsana as avainsana_kieli
 				        			WHERE avainsana_kieli.yhtio = avainsana.yhtio
 				        			and avainsana_kieli.laji = avainsana.laji
+									and avainsana_kieli.perhe > 0
 				        			and avainsana_kieli.perhe = avainsana.perhe
 				        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite,
 									sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
@@ -686,6 +695,7 @@
 				        			FROM avainsana as avainsana_kieli
 				        			WHERE avainsana_kieli.yhtio = avainsana.yhtio
 				        			and avainsana_kieli.laji = avainsana.laji
+									and avainsana_kieli.perhe > 0
 				        			and avainsana_kieli.perhe = avainsana.perhe
 				        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite
 						            FROM avainsana
@@ -700,7 +710,8 @@
 				        			FROM avainsana as avainsana_kieli
 				        			WHERE avainsana_kieli.yhtio = avainsana.yhtio
 				        			and avainsana_kieli.laji = avainsana.laji
-				        			and avainsana_kieli.perhe = avainsana.perhe
+				        			and avainsana_kieli.perhe > 0
+									and avainsana_kieli.perhe = avainsana.perhe
 				        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite
 									FROM tuote";
 
@@ -708,7 +719,7 @@
 
 						foreach ($monivalintalaatikot as $monivalintalaatikko3) {
 							if (strtolower(substr($monivalintalaatikko3, 0, 9)) == "parametri") {						
-								$param = strtolower(substr($monivalintalaatikko3, 10));
+								$param = substr($monivalintalaatikko3, 10);
 
 								if (${"lisa_haku_".$param} != "") {
 									$lisaquery .= " JOIN tuotteen_avainsanat t_av_$param ON (t_av_$param.yhtio = tuote.yhtio and t_av_$param.tuoteno = tuote.tuoteno and t_av_$param.laji = 'parametri_$param' ".${"lisa_haku_".$param}.") ";
@@ -782,11 +793,11 @@
 						while ($mallirow = mysql_fetch_assoc($sxresult)) {
 							$sel = '';
 
-							if (count($mul_malli) > 0 and in_array(trim($mallirow['malli']), $mul_malli)) {
+							if (count($mul_malli) > 0 and in_array(strtolower(trim($mallirow['malli'])), $mul_malli)) {
 								$sel = 'SELECTED';
 							}
 
-							echo "<option value='$mallirow[malli]' $sel>$mallirow[selite]</option>";
+							echo "<option value='".strtolower($mallirow['malli'])."' $sel>$mallirow[selite]</option>";
 						}
 
 						echo "</select>";
@@ -804,6 +815,7 @@
 				        			FROM avainsana as avainsana_kieli
 				        			WHERE avainsana_kieli.yhtio = avainsana.yhtio
 				        			and avainsana_kieli.laji = avainsana.laji
+									and avainsana_kieli.perhe > 0
 				        			and avainsana_kieli.perhe = avainsana.perhe
 				        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite,
 									sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
@@ -828,6 +840,7 @@
 				        			FROM avainsana as avainsana_kieli
 				        			WHERE avainsana_kieli.yhtio = avainsana.yhtio
 				        			and avainsana_kieli.laji = avainsana.laji
+									and avainsana_kieli.perhe > 0
 				        			and avainsana_kieli.perhe = avainsana.perhe
 				        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite
 						            FROM avainsana
@@ -842,6 +855,7 @@
 				        			FROM avainsana as avainsana_kieli
 				        			WHERE avainsana_kieli.yhtio = avainsana.yhtio
 				        			and avainsana_kieli.laji = avainsana.laji
+									and avainsana_kieli.perhe > 0
 				        			and avainsana_kieli.perhe = avainsana.perhe
 				        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite
 									FROM tuote";
@@ -850,7 +864,7 @@
 
 						foreach ($monivalintalaatikot as $monivalintalaatikko4) {
 							if (strtolower(substr($monivalintalaatikko4, 0, 9)) == "parametri") {						
-								$param = strtolower(substr($monivalintalaatikko4, 10));
+								$param = substr($monivalintalaatikko4, 10);
 
 								if (${"lisa_haku_".$param} != "") {
 									$lisaquery .= " JOIN tuotteen_avainsanat t_av_$param ON (t_av_$param.yhtio = tuote.yhtio and t_av_$param.tuoteno = tuote.tuoteno and t_av_$param.laji = 'parametri_$param' ".${"lisa_haku_".$param}.") ";
@@ -928,11 +942,11 @@
 						while ($mallitarkennerow = mysql_fetch_assoc($sxresult)) {
 							$sel = '';
 
-							if (count($mul_mallitarkenne) > 0 and in_array(trim($mallitarkennerow['mallitarkenne']), $mul_mallitarkenne)) {
+							if (count($mul_mallitarkenne) > 0 and in_array(strtolower(trim($mallitarkennerow['mallitarkenne'])), $mul_mallitarkenne)) {
 								$sel = 'SELECTED';
 							}
 
-							echo "<option value='$mallitarkennerow[mallitarkenne]' $sel>$mallitarkennerow[selite]</option>";
+							echo "<option value='".strtolower($mallitarkennerow['mallitarkenne'])."' $sel>$mallitarkennerow[selite]</option>";
 						}
 
 						echo "</select>";
@@ -947,7 +961,7 @@
 
 			unset($sxresult);
 
-			$parametri = strtolower(substr($monivalintalaatikko, 10));
+			$parametri = substr($monivalintalaatikko, 10);
 
 			if (($lisa_haku_osasto != "" or $lisa_haku_try != "")) {
 				if ($kukarow["extranet"] == "" and $verkkokauppa == "") {
@@ -959,8 +973,8 @@
 				$lisaquery = '';
 
 				foreach ($monivalintalaatikot as $monivalintalaatikko5) {
-					if (strtolower(substr($monivalintalaatikko5, 0, 9)) == "parametri" and strtolower(substr($monivalintalaatikko5, 10)) != $parametri) {
-						$param = strtolower(substr($monivalintalaatikko5, 10));
+					if (strtolower(substr($monivalintalaatikko5, 0, 9)) == "parametri" and strtolower(substr($monivalintalaatikko5, 10)) != strtolower($parametri)) {
+						$param = substr($monivalintalaatikko5, 10);
 
 						if (${"lisa_haku_".$param} != "") {
 							$lisaquery .= " JOIN tuotteen_avainsanat t_av_$param ON (t_av_$param.yhtio = tuote.yhtio and t_av_$param.tuoteno = tuote.tuoteno and t_av_$param.laji = 'parametri_$param' ".${"lisa_haku_".$param}.") ";
@@ -1064,11 +1078,11 @@
 					while (${$parametri."row"} = mysql_fetch_assoc($sxresult)) {
 						$sel = '';
 
-						if (count(${"mul_".$parametri}) > 0 and in_array(trim(${$parametri."row"}["$parametri"]), ${"mul_".$parametri})) {
+						if (count(${"mul_".$parametri}) > 0 and in_array(strtolower(trim(${$parametri."row"}["$parametri"])), ${"mul_".$parametri})) {
 							$sel = 'SELECTED';
 						}
 
-						echo "<option value='".${$parametri."row"}[$parametri]."' $sel>".${$parametri."row"}[$parametri]."</option>";
+						echo "<option value='".strtolower(${$parametri."row"}[$parametri])."' $sel>".${$parametri."row"}[$parametri]."</option>";
 					}
 
 					echo "</select>";

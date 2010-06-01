@@ -297,8 +297,18 @@ if ($tee == "ETSILASKU") {
 				if ($sailytaprojekti[$row["tilaus"]] != '') {
 					$sel = "CHECKED";
 				}
+
 				echo "<input type='checkbox' name='sailytaprojekti[$row[tilaus]]' value='on' $sel> ".t("Säilytä projektitiedot")."<br>";
 
+				if ($toim == '') {
+					$sel = "";
+					if ($sailytatyomaarays[$row["tilaus"]] != '') {
+						$sel = "CHECKED";
+					}
+
+					echo "<input type='checkbox' name='sailytatyomaarays[$row[tilaus]]' value='on' $sel> ".t("Säilytä työmääräystiedot")."<br>";
+				}
+				echo "</$ero>";
 			}
 
 			echo "<$ero valign='top'><a href='$PHP_SELF?tunnus=$row[tilaus]&tunnukset=$tunnukset&asiakasid=$asiakasid&otunnus=$otunnus&laskunro=$laskunro&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tee=NAYTATILAUS&toim=$toim'>".t("Näytä")."</a></$ero>";
@@ -334,17 +344,19 @@ if ($tee == 'MONISTA') {
 		$alvik 		= "";
 		$slask 		= "";
 		$sprojekti  = "";
+		$koptyom	= "";
 
-		if ($korjaaalvit[$lasku] != '')  $alvik = "on";
-		if ($suoraanlasku[$lasku] != '') $slask = "on";
-		if ($sailytaprojekti[$lasku] != '') $sprojekti = "on";
+		if ($korjaaalvit[$lasku] != '')  		$alvik		= "on";
+		if ($suoraanlasku[$lasku] != '') 		$slask		= "on";
+		if ($sailytaprojekti[$lasku] != '') 	$sprojekti	= "on";
+		if ($sailytatyomaarays[$lasku] != '')	$koptyom 	= "on";
 
 		if ($kumpi == 'HYVITA') {
-				$kklkm = 1;
-				echo t("Hyvitetään")." ";
+			$kklkm = 1;
+			echo t("Hyvitetään")." ";
 		}
 		else {
-				echo t("Kopioidaan")." ";
+			echo t("Kopioidaan")." ";
 		}
 
 		if ($toim == 'SOPIMUS') {
@@ -363,7 +375,7 @@ if ($tee == 'MONISTA') {
 			echo "$kklkm ".t("lasku(a)").".<br><br>";
 		}
 
-		for($monta=1; $monta <= $kklkm; $monta++) {
+		for ($monta=1; $monta <= $kklkm; $monta++) {
 
 			$query = "	SELECT *
 						FROM lasku
@@ -443,7 +455,7 @@ if ($tee == 'MONISTA') {
 						elseif ($toim == 'TARJOUS') {
 							$values .= ", 'T'";
 						}
-						elseif ($toim == 'TYOMAARAYS') {
+						elseif ($toim == 'TYOMAARAYS' or $koptyom == 'on') {
 							$values .= ", 'A'";
 						}
 						else {
@@ -451,7 +463,7 @@ if ($tee == 'MONISTA') {
 						}
 						break;
 					case 'tilaustyyppi':
-						if ($toim == 'TYOMAARAYS') {
+						if ($toim == 'TYOMAARAYS' or $koptyom == 'on') {
 							$values .= ", 'A'";
 							break;
 						}
@@ -614,14 +626,14 @@ if ($tee == 'MONISTA') {
 			}
 
 			//	Päivitetään myös tunnusnippu jotta tätä voidaan versioida..
-			if($toim == "TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") {
+			if ($toim == "TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") {
 				$kysely  = "UPDATE lasku SET
 								tunnusnippu = tunnus
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$utunnus'";
 				$updres  = mysql_query($kysely) or pupe_error($kysely);
 			}
 
-			if($toim == "TARJOUS" and $monistarow["jaksotettu"] > 0) {
+			if ($toim == "TARJOUS" and $monistarow["jaksotettu"] > 0) {
 
 				// Oliko meillä maksusopparia?
 				$query = "	SELECT *
@@ -692,11 +704,30 @@ if ($tee == 'MONISTA') {
 				$insres2 = mysql_query($kysely) or pupe_error($kysely);
 			}
 
-			if ($toim == 'TYOMAARAYS') {
+			if ($toim == 'TYOMAARAYS' or $koptyom == 'on') {
+
+				if ($koptyom == 'on') {
+					$query = "	SELECT distinct otunnus as tyomaarays
+								from tilausrivi
+								where uusiotunnus = '$lasku'
+								and kpl<>0
+								and tyyppi = 'L'
+								and yhtio = '$monistarow[yhtio]'
+								ORDER BY tunnus
+								LIMIT 1";
+					$monistalisres = mysql_query($query) or pupe_error($query);
+					$monistalisrow = mysql_fetch_array($monistalisres);
+
+					$tyomaarays = $monistalisrow["tyomaarays"];
+				}
+				else {
+					$tyomaarays = $lasku;
+				}
+
 				//Kopioidaan otsikon työmääräystiedot
 				$query = "	SELECT *
 							FROM tyomaarays
-							WHERE otunnus	= '$lasku'
+							WHERE otunnus	= '$tyomaarays'
 							and yhtio 		= '$monistarow[yhtio]'";
 				$monistalisres = mysql_query($query) or pupe_error($query);
 				$monistalisrow = mysql_fetch_array($monistalisres);
@@ -806,7 +837,7 @@ if ($tee == 'MONISTA') {
 							if ($kumpi == 'HYVITA') {
 								$uusikpl = ($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"]) * -1;
 								$rvalues .= ", '$uusikpl'";
-								
+
 							}
 							else {
 								$uusikpl = ($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"]);
@@ -815,7 +846,7 @@ if ($tee == 'MONISTA') {
 							break;
 						case 'tilkpl':
 							if ($kumpi == 'HYVITA') {
-								$rvalues .= ", '".(($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"]) * -1)."'";								
+								$rvalues .= ", '".(($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"]) * -1)."'";
 							}
 							else {
 								$rvalues .= ", '".($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"])."'";

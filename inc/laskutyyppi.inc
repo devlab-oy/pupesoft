@@ -15,7 +15,7 @@
 			$laskutyyppi = "Lähdössä pankkiin";
 			switch($alatila) {
 				case "K":
-					$alatila = "Ostolasku maksettu käteisalennuksella";
+					$alatila = "maksettu käteisalennuksella";
 			}
 			break;
 		case "Q":

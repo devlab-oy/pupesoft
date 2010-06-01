@@ -443,15 +443,19 @@ if (!function_exists('finvoice_alvierittely')) {
 			xml_add("VatFreeText",													"",					   	$tootfinvoice);
 			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
 
-			$InvoiceFreeTexts = explode("|", trim($lasrow["sisviesti1"]));
-
-			foreach ($InvoiceFreeTexts as $InvoiceFreeText) {
-				if (trim($InvoiceFreeText) != "") {
-					$InvoiceFreeText = wordwrap($InvoiceFreeText, 512, "</InvoiceFreeText>\r\n<InvoiceFreeText>");
-
-					xml_add("InvoiceFreeText", $InvoiceFreeText, $tootfinvoice);
-				}
-			}
+			#Tää sit ku otetaan Finvoice 1.3 käyttöön
+			#
+			#$InvoiceFreeTexts = explode("|", trim($lasrow["sisviesti1"]));
+            #
+			#foreach ($InvoiceFreeTexts as $InvoiceFreeText) {
+			#	if (trim($InvoiceFreeText) != "") {
+			#		$InvoiceFreeText = wordwrap($InvoiceFreeText, 512, "</InvoiceFreeText>\r\n<InvoiceFreeText>");
+            #
+			#		xml_add("InvoiceFreeText", $InvoiceFreeText, $tootfinvoice);
+			#	}
+			#}
+			
+			xml_add("InvoiceFreeText", substr(str_replace("|", " ## ", trim($lasrow["sisviesti1"])), 0, 512), $tootfinvoice);						
 		}
 	}
 }

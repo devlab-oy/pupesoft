@@ -288,7 +288,7 @@
 
 	if ($tee == "VALITSE") {
 
-		$query = "	SELECT lasku.*, 
+		$query = "	SELECT lasku.*,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
 					maksuehto.teksti meh,
 					maksuehto.itsetulostus,
@@ -296,8 +296,8 @@
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
 					FROM lasku use index (tila_index)
-					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}' 
-													AND laskun_lisatiedot.laskutus_nimi != '' 
+					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+													AND laskun_lisatiedot.laskutus_nimi != ''
 													AND laskun_lisatiedot.otunnus = lasku.tunnus
 													AND CONCAT(laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa) != CONCAT(lasku.nimi, lasku.osoite, lasku.postino, lasku.postitp, lasku.maa))
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
@@ -816,6 +816,7 @@
 					lasku.maksuehto, lasku.chn,
 					lasku.tila, lasku.alatila,
 					maksuehto.teksti meh,
+					max(lasku.tilaustyyppi) tilaustyyppi,
 					group_concat(distinct lasku.tunnus) tunnukset,
 					group_concat(distinct lasku.tunnus separator '<br>') tunnukset_ruudulle,
 					count(distinct lasku.tunnus) tilauksia,
@@ -845,7 +846,7 @@
 
 		if (mysql_num_rows($tilre) > 0) {
 			echo "<table>";
-			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivejä")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th><th>".t("Toimitus")."</th><th>".t("Tyyppi")."</th></tr>";
+			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Tilauksia")."<br>".t("Rivejä")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th><th>".t("Toimitus")."</th><th>".t("Tyyppi")."</th></tr>";
 
 			$arvoyhteensa = 0;
 			$tilauksiayhteensa = 0;
@@ -858,24 +859,43 @@
 				//tehdään selväkielinen tila/alatila
 				require "../inc/laskutyyppi.inc";
 
+				$tarkenne = " ";
+
+				if ($tilrow["tila"] == "V" and $tilrow["tilaustyyppi"] == "V") {
+					$tarkenne = " (".t("Asiakkaalle").") ";
+				}
+				elseif ($tilrow["tila"] == "V" and  $tilrow["tilaustyyppi"] == "W") {
+					$tarkenne = " (".t("Varastoon").") ";
+				}
+				elseif(($tilrow["tila"] == "N" or $tilrow["tila"] == "L") and $tilrow["tilaustyyppi"] == "R") {
+					$tarkenne = " (".t("Reklamaatio").") ";
+				}
+				elseif(($tilrow["tila"] == "N" or $tilrow["tila"] == "L") and $tilrow["tilaustyyppi"] == "A") {
+					$laskutyyppi = "Työmääräys";
+				}
+				elseif($tilrow["tila"] == "N" and $tilrow["tilaustyyppi"] == "E") {
+					$laskutyyppi = "Ennakkotilaus kesken";
+				}
+
 				$toimitusselite = "";
-				if ($tilrow["chn"] == '100') $toimitusselite = t("Paperilasku");
-				if ($tilrow["chn"] == '010') $toimitusselite = t("eInvoice");
-				if ($tilrow["chn"] == '020') $toimitusselite = t("Vienti eInvoice");
-				if ($tilrow["chn"] == '111') $toimitusselite = t("Elma EDI-inhouse");
-				if ($tilrow["chn"] == '666') $toimitusselite = t("Sähköpostiin");
-				if ($tilrow["chn"] == '667') $toimitusselite = t("Sisäinen");
+				if ($tilrow["chn"] == '100') $toimitusselite = t("Paperilasku, tulostuspalvelu");
+				if ($tilrow["chn"] == '010') $toimitusselite = t("Verkkolasku");
+				if ($tilrow["chn"] == '020') $toimitusselite = t("Itella Pupevoice: Vienti-Verkkolasku");
+				if ($tilrow["chn"] == '111') $toimitusselite = t("Itella EDI: EIH-1.4 sähköinen lasku");
+				if ($tilrow["chn"] == '112') $toimitusselite = t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin");
+				if ($tilrow["chn"] == '666') $toimitusselite = t("Sähköposti");
+				if ($tilrow["chn"] == '667') $toimitusselite = t("Sisäinen, käsitellään manuaalisesti");
+				if ($tilrow["chn"] == '999') $toimitusselite = t("Laskutuskielto, laskutusta ei tehdä");
 
 				echo "	<tr class='aktiivi'>
 						<td valign='top'>$tilrow[tunnukset_ruudulle]</td>
 						<td valign='top'>$tilrow[ytunnus]</td>
 						<td valign='top'>$tilrow[nimi] $tilrow[nimitark]</td>
-						<td valign='top'>$tilrow[tilauksia]</td>
-						<td valign='top'>$tilrow[riveja]</td>
-						<td valign='top' align='right'>$tilrow[arvo]</td>
+						<td valign='top'>$tilrow[tilauksia]<br>$tilrow[riveja]</td>
+						<td valign='top' align='right' nowrap>$tilrow[arvo]</td>
 						<td valign='top'>$tilrow[meh]</td>
 						<td valign='top'>$toimitusselite</td>
-						<td valign='top'>".t($laskutyyppi)." ".t($alatila)."</td>";
+						<td valign='top'>".t($laskutyyppi)."$tarkenne".t($alatila)."</td>";
 
 				echo "	<td class='back' valign='top'>
 						<form method='post' action='$palvelin2"."tilauskasittely/valitse_laskutettavat_tilaukset.php'>

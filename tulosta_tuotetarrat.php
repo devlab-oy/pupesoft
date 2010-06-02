@@ -1,7 +1,7 @@
 <?php
 	//$toim='YKS' tarkottaa yksinkertainen ja silloin ei välitetä onko tuotteella eankoodia vaan tulostetaan suoraan tuoteno viivakoodiin
 
-	if ($_REQUEST['malli'] == 'PDF20' or $_REQUEST['malli'] == 'PDF40') {
+	if ($_REQUEST['malli'] == 'PDF24' or $_REQUEST['malli'] == 'PDF40') {
 		$_REQUEST['nayta_pdf'] = 1;
 	}
 

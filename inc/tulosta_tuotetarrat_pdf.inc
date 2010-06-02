@@ -27,11 +27,12 @@
 	// A4 pointteina 595x842
 
 	if ($malli == 'PDF40') {
-		$x = 10;
-		$riville = 5;
+		$x = 15;
+		$riville = 4;
 		$leveys = 315;
 		$kappalemaara = 41;
 		$mm_pt = 35;
+		$y = 286;
 	}
 	else {
 		$x = 15;
@@ -39,9 +40,8 @@
 		$leveys = 450;
 		$kappalemaara = 25;
 		$mm_pt = 50;
+		$y = 285;
 	}
-
-	$y = 285;
 
 	$koodi = $toim == 'YKS' ? 'tuoteno' : 'eankoodi';
 
@@ -88,7 +88,7 @@
 		}
 
 		if ($malli == 'PDF40') {
-			$x += 40;
+			$x += 50;
 		}
 		else {
 			$x += 68;
@@ -96,8 +96,8 @@
 
 		if ($i % $riville == 0) {
 			if ($malli == 'PDF40') {
-				$x = 10;
-				$y -= 36;
+				$x = 15;
+				$y -= 29;
 			}
 			else {
 				$x = 15;

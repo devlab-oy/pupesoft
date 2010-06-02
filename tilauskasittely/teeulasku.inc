@@ -152,9 +152,13 @@
 					and valkoodi 		= '$lasrow[valkoodi]'";
 		$fres = mysql_query($query) or pupe_error($query);
 
-		if(mysql_num_rows($fres) > 0) {
+		if (mysql_num_rows($fres) > 0) {
 			$frow = mysql_fetch_array($fres);
-			$lisa_comments .= $frow["teksti_fi"]." \n";
+
+			$kieliind = "teksti_".$kielirow["kieli"];
+
+			if (trim($frow[$kieliind]) != "") $lisa_comments .= trim($frow[$kieliind])." \n";
+			else $lisa_comments .= trim($frow["teksti_fi"])." \n";
 		}
 	}
 

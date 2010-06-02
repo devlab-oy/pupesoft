@@ -10,7 +10,8 @@
 
 	if ((mysql_field_name($result, $i) == "teksti_fi") or
 		(mysql_field_name($result, $i) == "teksti_en") or
-		(mysql_field_name($result, $i) == "teksti_se")) {
+		(mysql_field_name($result, $i) == "teksti_se") or
+		(mysql_field_name($result, $i) == "teksti_ee")) {
 		$ulos = "<td><textarea cols='100' rows='8' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}

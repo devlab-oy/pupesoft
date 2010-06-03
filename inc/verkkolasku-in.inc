@@ -63,6 +63,12 @@
 			echo "19: ".$toim_asiakkaantiedot["osoite"]."\n";
 			echo "20: ".$toim_asiakkaantiedot["postino"]."\n";
 			echo "21: ".$toim_asiakkaantiedot["postitp"]."\n";
+			echo "22: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."\n";
+			echo "23: ".$ostaja_asiakkaantiedot["ytunnus"]."\n";
+			echo "24: ".$ostaja_asiakkaantiedot["nimi"]."\n";
+			echo "25: ".$ostaja_asiakkaantiedot["osoite"]."\n";
+			echo "26: ".$ostaja_asiakkaantiedot["postino"]."\n";
+			echo "27: ".$ostaja_asiakkaantiedot["postitp"]."\n";
 			*/
 
 			// generic error messagen alku
@@ -486,6 +492,23 @@
 							WHERE ttunnus 	= '$trow[tunnus]'
 							and yhtio 		= '$yhtio'
 							and tyyppi		= 'o'
+							and kuvaus		= '$toim_asiakkaantiedot[nimi]'
+							and kuvaus2		= '$toim_asiakkaantiedot[osoite]'
+							and mintuote	= '$toim_asiakkaantiedot[postino]'
+							and maxtuote	= '$toim_asiakkaantiedot[postitp]'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+				if (mysql_num_rows($result) != 0) {
+					$tiliointirow = mysql_fetch_array($result);
+					$oletuskust = $tiliointirow['kustp'];
+				}
+
+				// Onko tälle ostajatiedoille erityinen kustannuspaikka?
+				$query = "	SELECT kustp
+							FROM tiliointisaanto
+							WHERE ttunnus 	= '$trow[tunnus]'
+							and yhtio 		= '$yhtio'
+							and tyyppi		= 'b'
 							and kuvaus		= '$toim_asiakkaantiedot[nimi]'
 							and kuvaus2		= '$toim_asiakkaantiedot[osoite]'
 							and mintuote	= '$toim_asiakkaantiedot[postino]'

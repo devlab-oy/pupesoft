@@ -236,9 +236,10 @@
 				<th>".t("Valitse tiliöintisäännön tyyppi").":</th>
 				<td><select name='tyyppi' onchange='submit();'>
 				<option value='t' $sel[t]>1 ".t("Tuotesäännöt")."</option>
-				<option value='o' $sel[o]>2 ".t("Toimitusosoiteet")."</option>
-				<option value='a' $sel[a]>3 ".t("Asiakastunnukset")."</option>
-				<option value='k' $sel[k]>4 ".t("Kauttalaskutukset")."</option>
+				<option value='b' $sel[b]>2 ".t("Ostajan osoitetiedot")."</option>
+				<option value='o' $sel[o]>3 ".t("Toimitusosoitteen tiedot")."</option>
+				<option value='a' $sel[a]>4 ".t("Asiakastunnukset")."</option>
+				<option value='k' $sel[k]>5 ".t("Kauttalaskutukset")."</option>
 				</select></td>
 				<td class='back'><input type='submit' value='".t("Näytä")."'></td>
 				</tr>
@@ -253,16 +254,16 @@
 						LEFT JOIN tili ON tili.yhtio = tiliointisaanto.yhtio and tili.tilino = tiliointisaanto.tilino
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus	= '$tunnus'
-						and tiliointisaanto.tyyppi 		= 't'
+						and tiliointisaanto.tyyppi 		= '$tyyppi'
 						and tiliointisaanto.yhtio 		= '$kukarow[yhtio]'
 						order by tiliointisaanto.mintuote";
 		}
-		elseif ($tyyppi == 'o') {
+		elseif ($tyyppi == 'o' or $tyyppi == 'b') {
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Nimi, tiliointisaanto.kuvaus2 Osoite, tiliointisaanto.mintuote Postino, tiliointisaanto.maxtuote Postitp, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
-						and tiliointisaanto.tyyppi 		= 'o'
+						and tiliointisaanto.tyyppi 		= '$tyyppi'
 						and tiliointisaanto.yhtio 		= '$kukarow[yhtio]'
 						order by tiliointisaanto.kuvaus";
 		}
@@ -271,7 +272,7 @@
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
-						and tiliointisaanto.tyyppi 		= 'a'
+						and tiliointisaanto.tyyppi 		= '$tyyppi'
 						and tiliointisaanto.yhtio 		= '$kukarow[yhtio]'
 						and tiliointisaanto.tilino 		= 0";
 		}
@@ -280,7 +281,7 @@
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
-						and tiliointisaanto.tyyppi 		= 'k'
+						and tiliointisaanto.tyyppi 		= '$tyyppi'
 						and tiliointisaanto.yhtio 		= '$kukarow[yhtio]'
 						order by tiliointisaanto.kuvaus";
 		}
@@ -350,7 +351,7 @@
 					<td><input type='text' name='kuvaus' size='15' value = '$kuvaus'></td>
 					<td><input type='text' name='tilino' size='5' value = '$tilino'></td>";
 		}
-		elseif ($tyyppi == 'o') {
+		elseif ($tyyppi == 'o' or $tyyppi == 'b') {
 			echo "	<td><input type='text' name='kuvaus' size='35' value = '$kuvaus'></td>
 					<td><input type='text' name='kuvaus2' size='35' value = '$kuvaus2'></td>
 					<td><input type='text' name='mintuote' size='15' value = '$mintuote'></td>

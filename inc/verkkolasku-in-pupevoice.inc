@@ -25,6 +25,14 @@ $toim_asiakkaantiedot["osoite"] 		= trim(utf8_decode(array_shift($xml->xpath('Gr
 $toim_asiakkaantiedot["postino"] 		= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3251'))));
 $toim_asiakkaantiedot["postitp"] 		= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="DP"]/@e3164'))));
 
+$ostaja_asiakkaantiedot = array();
+$ostaja_asiakkaantiedot["toim_ovttunnus"]	= trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC082.3039')));
+$ostaja_asiakkaantiedot["ytunnus"] 			= trim(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC082.3039')));
+$ostaja_asiakkaantiedot["nimi"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC080.3036.1'))));
+$ostaja_asiakkaantiedot["osoite"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@eC059.3042.1'))));
+$ostaja_asiakkaantiedot["postino"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3251'))));
+$ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3164'))));
+
 // jos ei löytynyt EUR summaa kokeillaan ilman valkoodia
 if ($laskun_summa_eur == 0) {
 	$laskun_summa_eur = (float) array_shift($xml->xpath('Group48/MOA[@eC516.5025="9" and @eC516.6345=""]/@eC516.5004'));

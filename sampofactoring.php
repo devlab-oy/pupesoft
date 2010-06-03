@@ -194,7 +194,11 @@
 			}
 
 			// sitte käydään vasta laskut läpi..
-			$query  = "select * from factoring where yhtio='$kukarow[yhtio]' and factoringyhtio = 'SAMPO' and valkoodi='$yhtiorow[valkoodi]'";
+			$query  = "	SELECT *
+						from factoring
+						where yhtio = '$kukarow[yhtio]'
+						and factoringyhtio = 'SAMPO'
+						and valkoodi = '$yhtiorow[valkoodi]'";
 			$result = mysql_query ($query) or pupe_error($query);
 			$soprow = mysql_fetch_array($result);
 
@@ -257,9 +261,27 @@
 			$otsikkoulos .= sprintf("%20.20s",  "$kaikki eur\n");
 			$otsikkoulos .= "\n\n";
 
-			lpr($otsikkoulos, $valittu_tulostin);
-			lpr($ulos, $valittu_tulostin);
+			$query = "	SELECT komento
+						FROM kirjoittimet
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus = '$valittu_tulostin'";
+			$kirres = mysql_query($query) or pupe_error($query);
+			$kirrow = mysql_fetch_assoc($kirres);
 
+			$tempfile1 = tempnam("/tmp", "SAMPOFAC");
+			$null = file_put_contents($tempfile1, $otsikkoulos);
+			$null = exec("a2ps -o ".$tempfile1.".ps --no-header --columns=1 -R --medium=a4 --chars-per-line=80 --margin=0 --borders=0 $tempfile1");
+			$null = exec("$kirrow[komento] ".$tempfile1.".ps");
+
+			$tempfile2 = tempnam("/tmp", "SAMPOFAC");
+			$null = file_put_contents($tempfile2, $ulos);
+			$null = exec("a2ps -o ".$tempfile2.".ps --no-header --columns=1 -R --medium=a4 --chars-per-line=80 --margin=0 --borders=0 $tempfile2");
+			$null = exec("$kirrow[komento] ".$tempfile2.".ps");
+
+			unlink($tempfile1);
+			unlink($tempfile1.".ps");
+			unlink($tempfile2);
+			unlink($tempfile2.".ps");
 		}
 		else {
 			echo "<font class='message'>Yhtään factoroitavaa laskua ei löytynyt.</font><br><br>";

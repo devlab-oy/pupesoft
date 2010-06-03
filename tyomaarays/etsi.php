@@ -40,7 +40,7 @@
 					and lasku.tila in ('A','L','N')
 					and lasku.tilaustyyppi = 'A'
 					and $muu1 '$muu2'
-					ORDER BY lasku.nimi, tyomaarays.suorittaja";
+					ORDER BY lasku.tunnus desc";
 		$sresult = mysql_query($squery) or pupe_error($query);
 			
 		if(mysql_num_rows($sresult) > 0){

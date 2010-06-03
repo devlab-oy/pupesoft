@@ -9,7 +9,9 @@
 
 	$varaposti = '';
 
-	$subject = "$yhtiorow[nimi] - $kutsu";
+	if (trim($subject) == '') {
+		$subject = "$yhtiorow[nimi] - $kutsu";
+	}
 
 	if (substr($komento,0,12) == 'asiakasemail') {
 		$varaposti = $kukarow['eposti'];
@@ -39,37 +41,53 @@
 
 	$content .= "--$bound\n";
 
-	if ($ctype == "TEXT") {
-		$content .= "Content-Type: text/plain; name=\"".$kutsu."\"\n" ;
-		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"".$kutsu."\"\n\n";
+	if (!is_array($liite)) {
+		$liite = array(0 => "$liite");
 	}
-	elseif ($ctype == "ps") {
-		$content .= "Content-Type: application/ps; name=\"".$kutsu."\"\n" ;
-		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"".$kutsu."\"\n\n";
+
+	if (!is_array($kutsu)) {
+		$kutsu = array(0 => "$kutsu");
 	}
-	elseif ($ctype == "excel") {
-		if ($liitenimi == '') {
-			$liitenimi = basename($liite);
+
+	if (!is_array($ctype)) {
+		$ctype = array(0 => "$ctype");
+	}
+
+	foreach ($liite as $key => $value) {
+		if ($ctype[$key] == "TEXT") {
+			$content .= "Content-Type: text/plain; name=\"".$kutsu[$key]."\"\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key]."\"\n\n";
+		}
+		elseif ($ctype[$key] == "ps") {
+			$content .= "Content-Type: application/ps; name=\"".$kutsu[$key]."\"\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key]."\"\n\n";
+		}
+		elseif ($ctype[$key] == "excel") {
+			if ($liitenimi == '') {
+				$liitenimi = basename($liite[$key]);
+			}
+
+			$content .= "Content-Type: application/excel; name=\"".$liitenimi[$key]."\"\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"".$liitenimi[$key]."\"\n\n";
+		}
+		else {
+			$content .= "Content-Type: application/pdf; name=\"".$kutsu[$key].".pdf\"\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key].".pdf\"\n\n";
 		}
 
-		$content .= "Content-Type: application/excel; name=\"".$liitenimi."\"\n" ;
-		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"".$liitenimi."\"\n\n";
-	}
-	else {
-		$content .= "Content-Type: application/pdf; name=\"".$kutsu.".pdf\"\n" ;
-		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"".$kutsu.".pdf\"\n\n";
-	}
+		$handle  = fopen($liite[$key], "r");
+		$sisalto = fread($handle, filesize($liite[$key]));
+		fclose($handle);
 
-	$handle  = fopen($liite, "r");
-	$sisalto = fread($handle, filesize($liite));
-	fclose($handle);
+		$content .= chunk_split(base64_encode($sisalto));
+		$content .= "\n" ;
 
-	$content .= chunk_split(base64_encode($sisalto));
-	$content .= "\n" ;
+		$content .= "--$bound\n";
+	}
 
 	$boob = mail($kukarow["eposti"], $subject, $content, $header, "-f $yhtiorow[postittaja_email]");
 

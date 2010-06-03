@@ -46,6 +46,7 @@ if (!function_exists('pupevoice_otsik')) {
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
+				$y_www			= $yhtiorow['www'];
 				$y_nimi 		= $lasrow["yhtio_nimi"];
 				$y_osoite 		= $lasrow["yhtio_osoite"];
 				$y_postino	 	= $lasrow["yhtio_postino"];
@@ -58,6 +59,7 @@ if (!function_exists('pupevoice_otsik')) {
 				$y_puhelin		= $yhtiorow['puhelin'];
 				$y_fax			= $yhtiorow['fax'];
 				$y_email		= $yhtiorow['email'];
+				$y_www			= $yhtiorow['www'];
 				$y_nimi 		= $yhtiorow["nimi"];
 				$y_osoite 		= $yhtiorow["osoite"];
 				$y_postino	 	= $yhtiorow["postino"];
@@ -71,6 +73,7 @@ if (!function_exists('pupevoice_otsik')) {
 			$y_puhelin		= $yhtiorow['puhelin'];
 			$y_fax			= $yhtiorow['fax'];
 			$y_email		= $yhtiorow['email'];
+			$y_www			= $yhtiorow['www'];
 			$y_nimi 		= $yhtiorow["nimi"];
 			$y_osoite 		= $yhtiorow["osoite"];
 			$y_postino	 	= $yhtiorow["postino"];
@@ -99,10 +102,18 @@ if (!function_exists('pupevoice_otsik')) {
 
 		xml_add("SellerAccountName1", 					$pankkitiedot['pankkinimi1'],						$tootxml);
 		xml_add("SellerAccountID1", 					$pankkitiedot['pankkitili1'],						$tootxml);
+		xml_add("SellerAccountIBAN1", 					$pankkitiedot["pankkiiban1"],						$tootxml);
+		xml_add("SellerAccountBIC1", 					$pankkitiedot["pankkiswift1"],						$tootxml);
+
 		xml_add("SellerAccountName2", 					$pankkitiedot['pankkinimi2'],						$tootxml);
 		xml_add("SellerAccountID2", 					$pankkitiedot['pankkitili2'],						$tootxml);
+		xml_add("SellerAccountIBAN2", 					$pankkitiedot["pankkiiban2"],						$tootxml);
+		xml_add("SellerAccountBIC2", 					$pankkitiedot["pankkiswift2"],						$tootxml);
+
 		xml_add("SellerAccountName3", 					$pankkitiedot['pankkinimi3'],						$tootxml);
 		xml_add("SellerAccountID3", 					$pankkitiedot['pankkitili3'],						$tootxml);
+		xml_add("SellerAccountIBAN3", 					$pankkitiedot["pankkiiban3"],						$tootxml);
+		xml_add("SellerAccountBIC3", 					$pankkitiedot["pankkiswift3"],						$tootxml);
 
 		xml_add("SellerVatRegistrationText", 			t("Alv.Rek"), 										$tootxml);
 		xml_add("SellerContactPerson", 					$myyrow['nimi'],									$tootxml);
@@ -138,7 +149,7 @@ if (!function_exists('pupevoice_otsik')) {
 					AND otunnus = '$lasrow[tunnus]'";
 		$lasosres = mysql_query($query) or pupe_error($query);
 		$lasosrow = mysql_fetch_assoc($lasosres);
-		
+
 		if ($lasosrow['laskutus_nimi'] != '') {
 			xml_add("InvoiceRecipientOrganisationName",	trim($lasosrow['laskutus_nimi']." ".$lasosrow['laskutus_nimitark']), $tootxml);
 			xml_add("InvoiceRecipientStreetName", 		$lasosrow['laskutus_osoite'],						$tootxml);

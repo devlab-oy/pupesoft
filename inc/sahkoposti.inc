@@ -42,15 +42,15 @@
 	$content .= "--$bound\n";
 
 	if (!is_array($liite)) {
-		$liite = array(0 => "$liite");
+		$liite = array(0 => $liite);
 	}
 
 	if (!is_array($kutsu)) {
-		$kutsu = array(0 => "$kutsu");
+		$kutsu = array(0 => $kutsu);
 	}
 
 	if (!is_array($ctype)) {
-		$ctype = array(0 => "$ctype");
+		$ctype = array(0 => $ctype);
 	}
 
 	foreach ($liite as $key => $value) {

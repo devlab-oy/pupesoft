@@ -271,12 +271,43 @@
 			$tempfile1 = tempnam("/tmp", "SAMPOFAC");
 			$null = file_put_contents($tempfile1, $otsikkoulos);
 			$null = exec("a2ps -o ".$tempfile1.".ps --no-header --columns=1 -R --medium=a4 --chars-per-line=80 --margin=0 --borders=0 $tempfile1");
-			$null = exec("$kirrow[komento] ".$tempfile1.".ps");
+			
+			if ($kirrow["komento"] == 'email') {
+				
+				$subject = "$yhtiorow[nimi] - Sampofactoring";
+				$liite = array();
+				$kutsu = array();
+				$ctype = array();
+				
+				$liite[0] = $tempfile1.".pdf";
+				$kutsu[0] = "Sampofactoring-otsikko";
+				$ctype[0] = "pdf";
+
+				system("ps2pdf -sPAPERSIZE=a4 $tempfile1.ps $liite[0]");							
+			}
+			else {
+				$null = exec("$kirrow[komento] ".$tempfile1.".ps");
+			}
 
 			$tempfile2 = tempnam("/tmp", "SAMPOFAC");
 			$null = file_put_contents($tempfile2, $ulos);
 			$null = exec("a2ps -o ".$tempfile2.".ps --no-header --columns=1 -R --medium=a4 --chars-per-line=80 --margin=0 --borders=0 $tempfile2");
-			$null = exec("$kirrow[komento] ".$tempfile2.".ps");
+			
+			if ($kirrow["komento"] == 'email') {
+				$liite[1] = $tempfile2.".pdf";
+				$kutsu[1] = "Sampofactoring-laskut";
+				$ctype[1] = "pdf";
+
+				system("ps2pdf -sPAPERSIZE=a4 $tempfile2.ps $liite[1]");
+
+				require("inc/sahkoposti.inc");
+				
+				unlink($tempfile1.".pdf");
+				unlink($tempfile2.".pdf");
+			}
+			else {
+				$null = exec("$kirrow[komento] ".$tempfile2.".ps");
+			}
 
 			unlink($tempfile1);
 			unlink($tempfile1.".ps");

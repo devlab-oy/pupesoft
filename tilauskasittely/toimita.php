@@ -571,7 +571,7 @@
 		echo "<table>";
 		echo "<tr><th>" . t("Tilaus") ."</th><td>$row[laskutunnus]</td></tr>";
 		echo "<tr><th>" . t("Asiakas") ."</th><td>$row[nimi]<br>$row[toim_nimi]</td></tr>";
-		echo "<tr><th>" . t("Laskutusosoite") ."</th><td>$row[osoite], $row[postitp]</td></tr>";
+		echo "<tr><th>" . t("Ostajan osoite") ."</th><td>$row[osoite], $row[postitp]</td></tr>";
 		echo "<tr><th>" . t("Toimitusosoite") ."</th><td>$row[toim_osoite], $row[toim_postitp]</td></tr>";
 		echo "<tr><th>" . t("Maksuehto") ."</th><td>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</td></tr>";
 		echo "<tr><th>" . t("Toimitustapa") ."</th><td>$row[toimitustapa]</td></tr>";

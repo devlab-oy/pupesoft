@@ -852,7 +852,7 @@ if ($tee == "asiakastiedot") {
 
 		echo "<table>
 				<tr>
-					<th>".t("Laskutusosoite")."</th><th>".t("Toimitusosoite")."</th>
+					<th>".t("Ostajan osoite")."</th><th>".t("Toimitusosoite")."</th>
 				</tr>
 				<tr>
 					<td>$asiakasrow[laskutusosoite]</td><td>$asiakasrow[toimitusosoite]</td>

@@ -197,7 +197,7 @@ if (!function_exists('alku_lahete')) {
 		$pdf->draw_text(310, 803, t("Sivu", $kieli), 					$thispage, $norm);
 
 		//Vasen sarake
-		$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$thispage, $pieni);
+		$pdf->draw_text(50, 729, t("Ostaja", $kieli), 	$thispage, $pieni);
 
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '') {
 			$pdf->draw_text(50, 717, $asiakas_tunnus_row["nimi"], 			$thispage, $norm);
@@ -300,9 +300,9 @@ if (!function_exists('alku_lahete')) {
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 		$myyresult = mysql_query($query) or pupe_error($query);
 		$myyrow = mysql_fetch_array($myyresult);
-		
+
 		list($ff_string, $ff_font) = pdf_fontfit($myyrow["nimi"], 105, $pdf, $norm);
-		
+
 		$pdf->draw_text(310, 740, $ff_string, 										$thispage, $ff_font);
 
 		$pdf->draw_text(430, 750, t("Tilauspvm", $kieli),							 	$thispage, $pieni);
@@ -1055,7 +1055,7 @@ if (!function_exists('rivi_lahete')) {
 					$myyntihinta_temp 			= 0;
 
 					foreach (explode(",", $perherow['perheen_tuotteet']) as $perhetuote) {
-						
+
 						list($perhetuoteno, $perhekpl) = explode('¡!¡!', $perhetuote);
 
 						$query = "SELECT * FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '$perhetuoteno'";
@@ -1430,7 +1430,7 @@ if (!function_exists('rivi_eialeja_lahete')) {
 			$kala = $kala - $rivinkorkeus;
 		}
 		$pdf->draw_text(190, $kala, $row["nimitys"], 										$thispage, $norm);
-		
+
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {

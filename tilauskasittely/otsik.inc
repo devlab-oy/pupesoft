@@ -186,7 +186,7 @@
 			$tee = "OTSIK";
 			$tila = "";
 			unset($jatka);
-		} 
+		}
 	}
 
 	if (isset($jatka) and $asiakasid == "" and $override_ytunnus_check != 'YES') {
@@ -638,7 +638,6 @@
 					echo "<input type='hidden' name='alv_velvollisuus' value='$alhiro[vat_numero]'>";
 				}
 			}
-
 		}
 
 		//jos käyttäjällä on oletusaiskas
@@ -659,7 +658,7 @@
 
 		echo "<table>";
 		echo "<tr>
-				<th colspan='2' align='left' valign='top'>".t("Laskutusosoite").":</td></tr>";
+				<th colspan='2' align='left' valign='top'>".t("Ostaja").":</td></tr>";
 		echo "<tr>
 				<td valign='top'>".t("Nimi").": </td>
 				<td><input type='text' name='nimi' size='35' value='$srow[nimi]'></td></tr>";
@@ -2955,7 +2954,7 @@
 							WHERE tunnus = '$kukarow[kesken]' and tunnusnippu = 0";
 				$result = mysql_query($query) or pupe_error($query);
 
-				if ($toim=="PROJEKTI") {
+				if ($toim == "PROJEKTI") {
 					// avataan projekti kirjanpitoon
 					$query = " INSERT into kustannuspaikka set yhtio  = '$kukarow[yhtio]', nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '$kukarow[kuka]'";
 					$result = mysql_query($query) or pupe_error($query);
@@ -3001,9 +3000,17 @@
 				$result = mysql_query($query2) or pupe_error($query2);
 			}
 
-			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $toim == "ENNAKKO" or $toim == 'EXTRANET' or $tilaustyyppi == "T" or $vienti =='K' or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO")))) {
+			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "ENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE"))) {
+
+				$sopimus_kk = implode(",", $yllapito_kk);
+				$sopimus_pp = implode(",", $yllapito_pp);
+
 				$query3 .= "laskun_lisatiedot SET
 							yhtio						= '$kukarow[yhtio]',
+							sopimus_kk					= '$sopimus_kk',
+							sopimus_pp					= '$sopimus_pp',
+							sopimus_alkupvm				= '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
+							sopimus_loppupvm			= '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
 							kolm_ovttunnus				= '$kolm_ovttunnus',
 							kolm_nimi					= '$kolm_nimi',
 							kolm_nimitark				= '$kolm_nimitark',
@@ -3028,24 +3035,6 @@
 							rivihintoja_ei_nayteta		= '$rivihintoja_ei_nayteta',
 							kasinsyotetty_viite			= '$kasinsyotetty_viite',
 							asiakkaan_kohde				= '$asiakkaan_kohde',
-							otunnus 					= '$kukarow[kesken]'";
-				$query3 .= $postquery3;
-				$result = mysql_query($query3) or pupe_error($query3);
-			}
-
-			if ($toim == "YLLAPITO") {
-
-				$sopimus_kk = implode(",", $yllapito_kk);
-				$sopimus_pp = implode(",", $yllapito_pp);
-
-				$query3 .= "laskun_lisatiedot SET
-							yhtio						= '$kukarow[yhtio]',
-							sopimus_kk					= '$sopimus_kk',
-							sopimus_pp					= '$sopimus_pp',
-							yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
-							yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
-							sopimus_alkupvm				= '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
-							sopimus_loppupvm			= '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
 							otunnus 					= '$kukarow[kesken]'";
 				$query3 .= $postquery3;
 				$result = mysql_query($query3) or pupe_error($query3);

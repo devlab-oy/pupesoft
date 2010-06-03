@@ -50,7 +50,7 @@ if (!function_exists('alku_lahete')) {
 		list ($kervv, $kerkk, $kerpp) = split("-", $kerattyrow["kerattyaika"]);
 
 		//etsitään asiakkasnumero
-		$query  = "	select asiakasnro
+		$query  = "	SELECT asiakasnro
 					from asiakas
 					where ytunnus='$laskurow[ytunnus]' and yhtio='$kukarow[yhtio]' and toim_ovttunnus='$laskurow[toim_ovttunnus]'";
 		$myyresult = mysql_query($query) or pupe_error($query);
@@ -64,7 +64,7 @@ if (!function_exists('alku_lahete')) {
 
 		//Vasen sarake
 		//$pdf->draw_rectangle(737, 20,  674, 300, $thispage, $rectparam);
-		$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$thispage, $pieni);
+		$pdf->draw_text(50, 729, t("Ostaja", $kieli), 	$thispage, $pieni);
 		$pdf->draw_text(50, 717, $laskurow["toim_nimi"], 			$thispage, $norm);
 		$pdf->draw_text(50, 707, $laskurow["toim_nimitark"],			$thispage, $norm);
 		$pdf->draw_text(50, 697, $laskurow["toim_osoite"], 			$thispage, $norm);

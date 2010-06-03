@@ -160,7 +160,7 @@ if (!function_exists('alku_kerayslista')) {
 
 		//Vasen sarake
 		//$pdf->draw_rectangle(737, 20,  674, 300, $thispage, $rectparam);
-		$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$thispage, $pieni);
+		$pdf->draw_text(50, 729, t("Ostaja", $kieli), 	$thispage, $pieni);
 		$pdf->draw_text(50, 717, $laskurow["nimi"], 			$thispage, $norm);
 		$pdf->draw_text(50, 707, $laskurow["nimitark"],			$thispage, $norm);
 		$pdf->draw_text(50, 697, $laskurow["osoite"], 			$thispage, $norm);

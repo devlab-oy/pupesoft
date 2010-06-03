@@ -166,7 +166,7 @@
 							$h=260;
 
 							if($laskurow["laskutus_nimi"] != "") {
-								$pdf->writeToTemplate($h, 1, 0, $s[1], t("Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
+								$pdf->writeToTemplate($h, 1, 0, $s[1], t("Ostaja", $kieli).":", "norm", "L", "B", $tid);
 								$h-=$pdf->ln();
 								foreach(array("laskutus_nimi", "laskutus_nimitark", "laskutus_osoite", "laskutus_postiosoite", "laskutus_maa") as $key) {
 									if($key == "laskutus_maa") {

@@ -132,7 +132,7 @@ if (!function_exists('alku_tarjous')) {
 
 		//Vasen sarake
 		//$pdf_tarjous->draw_rectangle(737, 20,  674, 300, $page_tarjous, $rectparam);
-		$pdf_tarjous->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$page_tarjous, $pieni);
+		$pdf_tarjous->draw_text(50, 729, t("Ostaja", $kieli), 	$page_tarjous, $pieni);
 		$pdf_tarjous->draw_text(50, 717, $laskurow["nimi"], 			$page_tarjous, $norm);
 		$pdf_tarjous->draw_text(50, 707, $laskurow["nimitark"],			$page_tarjous, $norm);
 		$pdf_tarjous->draw_text(50, 697, $laskurow["osoite"], 			$page_tarjous, $norm);
@@ -957,7 +957,7 @@ if (!function_exists('tulosta_tarjous')) {
 					round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2) rivihinta,
 					round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,
 					tilausrivin_lisatiedot.positio,
-					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi, 
+					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					$sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno

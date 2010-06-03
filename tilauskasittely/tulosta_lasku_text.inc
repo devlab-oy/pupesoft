@@ -22,7 +22,7 @@ if (!function_exists('text_alku')) {
 
 
 		$sisalto .= "\r\n";
-		$sisalto .= sprintf('%-35.35s', t("Laskutusosoite", $kieli).":");
+		$sisalto .= sprintf('%-35.35s', t("Ostaja", $kieli).":");
 		$sisalto .= sprintf('%-25.25s', t("Laskun pvm", $kieli).":");
 		$sisalto .= sprintf('%-20.20s', t("Eräpäivä", $kieli).":");
 

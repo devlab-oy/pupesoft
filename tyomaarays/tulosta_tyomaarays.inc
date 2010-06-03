@@ -128,7 +128,7 @@ if (!function_exists('alku')) {
 
 		//Vasen sarake
 		//$pdf->draw_rectangle(737, 20,  674, 300, $thispage, $rectparam);
-		$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$thispage, $pieni);
+		$pdf->draw_text(50, 729, t("Ostaja", $kieli), 	$thispage, $pieni);
 		$pdf->draw_text(50, 717, $laskurow["nimi"], 			$thispage, $norm);
 		$pdf->draw_text(50, 707, $laskurow["nimitark"],			$thispage, $norm);
 		$pdf->draw_text(50, 697, $laskurow["osoite"], 			$thispage, $norm);
@@ -387,7 +387,7 @@ if (!function_exists('alku')) {
 			//dellataan tmp filet kuleksimasta
 			system("rm -f $nimi1 $nimi2");
 		}
-		
+
 		return($thispage);
 	}
 }
@@ -1036,9 +1036,9 @@ if (!function_exists('loppu_lisarivit')) {
 			$pdf->draw_line($x, $y, $thispage, $lineparam);
 		}
 		else {
-			
+
 			loppu($thispage, 0);
-			
+
 			$sivu++;
 			$page[$sivu] = uusi_sivu($tyyppi);
 			$thispage    = $page[$sivu];

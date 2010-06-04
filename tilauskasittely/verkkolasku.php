@@ -316,6 +316,40 @@
 			$tulos_ulos_maksusoppari = "";
 			$tulos_ulos_sarjanumerot = "";
 
+			// alustetaan muuttujia
+			$laskutus_esto_saldot = array();
+
+			// parametri, jolla voidaan est‰‰ tilauksen laskutus, jos tilauksen yhdelt‰kin tuotteelta saldo menee miinukselle
+			if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
+
+				$query = "	SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu, group_concat(distinct lasku.tunnus) tunnukset
+							FROM lasku
+							JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+							WHERE lasku.yhtio	= '$kukarow[yhtio]'
+							and lasku.tila	= 'L'
+							and lasku.alatila	= 'D'
+							and lasku.viite	= ''
+							and lasku.chn	!= '999'
+							$lasklisa
+							GROUP BY 1";
+				$lasku_chk_res = mysql_query($query) or pupe_error($query);
+
+				while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
+
+					$query = "	SELECT sum(saldo) saldo
+								FROM tuotepaikat
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tuoteno = '$lasku_chk_row[tuoteno]'";
+					$saldo_chk_res = mysql_query($query) or pupe_error($query);
+					$saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
+
+					if ($saldo_chk_row["saldo"] - $lasku_chk_row["varattu"] < 0) {
+						$lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
+						$tulos_ulos .= "<br>\n".t("Saldovirheet").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen")." $lasku_chk_row[tuoteno] ".t("saldo ei riit‰")."!<br>\n";
+					}
+				}
+			}
+
 			//haetaan kaikki laskutettavat tilaukset ja tehd‰‰n maksuehtosplittaukset ja muita tarkistuksia jos niit‰ on
 			$query = "	SELECT *
 						FROM lasku
@@ -324,10 +358,55 @@
 						and alatila	= 'D'
 						and viite	= ''
 						and chn	!= '999'
-						$lasklisa";
+						$lasklisa
+						ORDER BY lasku.tunnus";
 			$res   = mysql_query($query) or pupe_error($query);
 
 			while ($laskurow = mysql_fetch_array($res)) {
+
+				// SALLITTAAN FIFO PERIAATTELLA SALDOJA
+				if ($yhtiorow['saldovirhe_esto_laskutus'] == 'K') {
+
+					// haetaan tilausriveilt‰ tuotenumero ja summataan varatut kappaleet
+					$query = "	SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu
+								FROM tilausrivi
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+								AND tilausrivi.otunnus = '$laskurow[tunnus]'
+								AND tilausrivi.tyyppi = 'L'
+								AND tilausrivi.varattu > 0
+								GROUP BY 1";
+					$tuoteno_varattu_chk_res = mysql_query($query) or pupe_error($query);
+
+					while ($tuoteno_varattu_chk_row = mysql_fetch_assoc($tuoteno_varattu_chk_res)) {
+
+						if (!isset($laskutus_esto_saldot[$tuoteno_varattu_chk_row['tuoteno']])) {
+
+							// haetaan saldo tuotepaikalta
+							$query = "	SELECT sum(tuotepaikat.saldo) saldo
+										FROM tuotepaikat
+										WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+										AND tuotepaikat.tuoteno = '$tuoteno_varattu_chk_row[tuoteno]'";
+							$saldo_chk_res = mysql_query($query) or pupe_error($query);
+							$saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
+
+							$laskutus_esto_saldot[$tuoteno_varattu_chk_row['tuoteno']] = $saldo_chk_row['saldo'];
+						}
+
+						if ($laskutus_esto_saldot[$tuoteno_varattu_chk_row['tuoteno']] - $tuoteno_varattu_chk_row['varattu'] < 0) {
+
+							$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
+							$tulos_ulos .= "<br>\n".t("Saldovirheet").":<br>\n".t("Tilausta")." $laskurow[tunnus] ".t("ei voida laskuttaa, koska tuotteen")." $tuoteno_varattu_chk_row[tuoteno] ".t("saldo ei riit‰")."!<br>\n";
+
+							// skipataan seuraavaan laskuun
+							continue 2;
+						}
+
+						$laskutus_esto_saldot[$tuoteno_varattu_chk_row['tuoteno']] -= $tuoteno_varattu_chk_row['varattu'];
+
+					}
+
+				}
 
 				// Tsekataan ettei lipsahda JT-rivej‰ laskutukseen jos osaotoimitus on kielletty
 				if ($yhtiorow["varaako_jt_saldoa"] != "") {
@@ -1398,7 +1477,7 @@
 							if (trim($lasrow['sisviesti1']) != '') {
 								$komm .= "\n".t("Kommentti").": ".$lasrow['sisviesti1'];
 							}
-							
+
 							$query = "	SELECT tyomaarays.*
 										FROM lasku
 										JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
@@ -1451,7 +1530,7 @@
 											}
 										}
 									}
-								}							
+								}
 							}
 
 							if (trim($komm) != '') {

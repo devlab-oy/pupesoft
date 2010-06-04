@@ -180,23 +180,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "ei_varastoida") {
-
-		$sel = $sela = "";
-		if ($trow[$i] != '') {
-			$sel = "SELECTED";
-		}
-		else {
-			$sela = "SELECTED";
-		}
-
-		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-		$ulos .= "<option value = '' $sela>".t("Varastoitava tuote")."</option>";
-		$ulos .= "<option value = 'o' $sel>".t("Tuotetta ei varastoida")."</option>";
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "kommentoitava") {
 
 		$sel = $sela = "";

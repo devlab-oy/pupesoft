@@ -196,7 +196,6 @@
 		$sarakkeet["SARAKE18G"] = t("tuotesyvyys")."\t";
 		$sarakkeet["SARAKE18H"] = t("tuotemassa")."\t";
 		$sarakkeet["SARAKE18I"] = t("hinnastoon")."\t";
-		$sarakkeet["SARAKE18J"] = t("ei_varastoida")."\t";
 		
 		$sarakkeet["SARAKE19"] 	= t("ostohinta")."\t";
 		$sarakkeet["SARAKE20"] 	= t("myyntihinta")."\t";
@@ -437,7 +436,7 @@
 				$lisaa .= " and tuote.hinnastoon != 'E' ";
 			}
 			if ($valitut["EIVARASTOITAVA"] != '') {
-				$lisaa .= " and tuote.ei_varastoida = '' ";
+				$lisaa .= " and tuote.status != 'T' ";
 			}
 			// Listaa vain äskettäin perustetut tuotteet:
 			if ($valitut["VAINUUDETTUOTTEET"] != '') {
@@ -591,7 +590,6 @@
 							tuote.try,
 							tuote.aleryhma,
 							tuote.kehahin,
-							tuote.ei_varastoida,
 							abc_aputaulu.luokka abcluokka,
 							abc_aputaulu.luokka_osasto abcluokka_osasto,
 							abc_aputaulu.luokka_try abcluokka_try,
@@ -633,7 +631,6 @@
 							tuote.try,
 							tuote.aleryhma,
 							tuote.kehahin,
-							tuote.ei_varastoida,							
 							abc_aputaulu.luokka abcluokka,
 							abc_aputaulu.luokka_osasto abcluokka_osasto,
 							abc_aputaulu.luokka_try abcluokka_try,
@@ -1358,15 +1355,6 @@
 						}
 					}
 
-					if($valitut["SARAKE18J"] != '') { 
-						$rivi .= "\"$row[ei_varastoida]\"\t";
-				
-						if(isset($workbook)) {
-							$worksheet->writeString($excelrivi, $excelsarake, $row["ei_varastoida"]);
-							$excelsarake++;
-						}
-					}
-					
 					if($valitut["SARAKE19"] != '') { 
 						$rivi .= str_replace(".",",",$row['ostohinta'])."\t";
 				

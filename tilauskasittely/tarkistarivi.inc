@@ -481,7 +481,7 @@
 				}
 			}
 
-			if ($row['var'] == 'P' and $trow['ei_varastoida'] != '') {
+			if ($row['var'] == 'P' and $trow['status'] == 'T') {
 				$varaosakommentti .= " ".t("Tämä on tehdastilaustuote ja on saatavilla tilauksena")."!<br>";
 			}
 		}

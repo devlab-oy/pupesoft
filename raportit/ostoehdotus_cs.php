@@ -39,7 +39,7 @@
 		
 			$query = "	UPDATE tuote
 						SET varmuus_varasto = '$varmuus_varastot[$tuoteno]',
-							ei_varastoida = '$varastoitavat[$tuoteno]',
+							status = '$varastoitavat[$tuoteno]',
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
 						WHERE yhtio = '$tuotteen_yhtiot[$tuoteno]'
@@ -499,10 +499,10 @@
 			$lisaa .= " and tuote.hinnastoon != 'E' ";
 		}
 		if ($varastointi == 'vainvarastoitavat') {
-			$lisaa .= " and tuote.ei_varastoida = '' ";
+			$lisaa .= " and tuote.status != 'T' ";
 		}
 		if ($varastointi == 'vaineivarastoitavat') {
-			$lisaa .= " and tuote.ei_varastoida != '' ";
+			$lisaa .= " and tuote.status = 'T' ";
 		}
 		if ($vainuudet != '') {
 			$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
@@ -603,8 +603,7 @@
 					tuote.aleryhma,
 					tuote.kehahin,
 					tuote.varmuus_varasto,
-					if(tuote.ei_varastoida='', '".t("Varastoitava")."','".t("Ei varastoida")."') ei_varastoida,
-					ei_varastoida ei_varastoida_clean,
+					if(tuote.status != 'T', '".t("Varastoitava")."','".t("Ei varastoida")."') ei_varastoida,
 					abc_aputaulu.luokka abcluokka,
 					tuote.luontiaika
 					FROM tuote
@@ -715,7 +714,7 @@
 
 				$lisa = (float) $row["halytysraja"] - $vapaasaldo;
 
-				if ($row["ei_varastoida_clean"] == "" or $lisa != 0) {
+				if ($row["status"] != "T" or $lisa != 0) {
 
 					$ostoehdotus 		= $row["halytysraja"] - $vapaasaldo;
 					$ostoehdotus_lisa 	= (2 * (($vku / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"]));
@@ -731,14 +730,13 @@
 				$ostoehdotus = 0;
 			}
 
-			if ($eivarastoivattilaus == '' and $ostot+$enp == 0 and $row["ei_varastoida_clean"] != '') {
+			if ($eivarastoivattilaus == '' and $ostot+$enp == 0 and $row["status"] == 'T') {
 				$naytetaan = "nope";
 			}
 			else {
 				$naytetaan = "juu";
 			}
 		
-
 			if (($ostoehdotus > 0 or $naytakaikkituotteet != '') and ($naytavainmyydyt == '' or $vku+$enp != 0) and $naytetaan == "juu") {
 			
 				echo "<tr>";
@@ -816,19 +814,31 @@
 				echo t("Pakkauskoko").": <input type='text' size='10' name='pakkauskoot[$row[tuoteno]]' value='".(float) $toimirow["pakkauskoko"]."'> ";
 				echo t("Toimitusaika").": <input type='text' size='10' name='toimitusajat[$row[tuoteno]]' value='".(float) $toimirow["toimitusaika"]."'> ".t("pva").". ";
 			
-				$sel1 = "";
-				$sel2 = "";
-			
-				if ($row["ei_varastoida_clean"] == '') {
-					$sel1 = "selected";
+				echo " <select name='varastoitavat[$row[tuoteno]]'>";
+
+				$query = "	SELECT selite, selitetark
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND laji = 'S'";
+				$status_select_res = mysql_query($query) or pupe_error($query);
+
+				while ($status_select_row = mysql_fetch_assoc($status_select_res)) {
+					$sel = '';
+
+					if ($row['status'] == $status_select_row['selite']) $sel = 'SELECTED';
+
+					echo "<option value='$status_select_row[selite]' $sel>";
+
+					if ($status_select_row['selite'] != 'T') {
+						echo t("Varastoitava");
+					}
+					else {
+						echo t("Ei varastoitava");
+					}
+
+					echo " ",t("Status")," $status_select_row[selitetark]</option>";
 				}
-				else {
-					$sel2 = "selected";
-				}
-			
-				echo " <select name='varastoitavat[$row[tuoteno]]'";
-				echo "<option value='' $sel1>".t("Varastoitava")."</option>";
-				echo "<option value='o' $sel2>".t("Ei varastoida")."</option>";
+
 				echo "</select>";
 			
 				echo "<input type='hidden' name='toimittajien_tunnukset[$row[tuoteno]]' value='$toim_tunnukset[0]'>";

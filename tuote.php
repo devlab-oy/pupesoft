@@ -270,7 +270,7 @@
 			}
 
 			// Varastoon
-			if ($tuoterow['ei_varastoida'] != '') {
+			if ($tuoterow['status'] == 'T') {
 			 	$tuoterow['ei_varastoida'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
 			}
 			else {

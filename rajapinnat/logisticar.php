@@ -118,7 +118,7 @@
 					'0'						varastotunnus,
 					'0'						toimittajannimiketunnus,
 					'1'						hintayksikko,
-					tuote.ei_varastoida 	varastoimiskoodi,
+					if(tuote.status = 'T', 'T', '') varastoimiskoodi,
 			        tuote.tuotetyyppi    	nimikelaji,
 			        kuka.kuka      			ostaja,
 			        tuote.tuotemassa     	paino

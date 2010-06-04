@@ -222,7 +222,7 @@
 							"ostoera1", "ostoera3", "ostoera6", "ostoera12", "osthaly1", "osthaly3", "osthaly6", "osthaly12",
 							"o_era", "m_era", "kosal", "komy", "Määrä",
 							"kuvaus", "lyhytkuvaus", "tkorkeus", "tleveys", "tmassa", "tsyvyys",
-							"hinnastoon", "ei_var", "toimittaja", "toim_tuoteno",
+							"hinnastoon", "toimittaja", "toim_tuoteno",
 							"nimitys", "ostohinta", "myyntihinta",
 							"epa25pvm", "epa50pvm", "epa75pvm", "epa100pvm",
 							"osaldo", "hyllypaikka",
@@ -286,7 +286,6 @@
 								"tmassa"		=> "tuotemassa",
 								"tsyvyys"		=> "tuotesyvyys",
 								"hinnastoon"	=> "hinnastoon",
-								"ei_var"		=> "ei_varastoida",
 								"toimittaja"	=> "toimittaja",
 								"toim_tuoteno"	=> "toim_tuoteno",
 								"nimitys"		=> "nimitys",
@@ -479,7 +478,7 @@
 				$lisaa .= " and tuote.hinnastoon != 'E' ";
 			}
 			if ($valitut["EIVARASTOITAVA"] != '') {
-				$lisaa .= " and tuote.ei_varastoida = '' ";
+				$lisaa .= " and tuote.status != 'T' ";
 			}
 			// Listaa vain äskettäin perustetut tuotteet:
 			if ($valitut["VAINUUDETTUOTTEET"] != '') {
@@ -726,7 +725,6 @@
 							tuote.try,
 							tuote.aleryhma,
 							tuote.kehahin,
-							tuote.ei_varastoida,
 							abc_aputaulu.luokka abcluokka,
 							abc_aputaulu.luokka_osasto abcluokka_osasto,
 							abc_aputaulu.luokka_try abcluokka_try,
@@ -772,7 +770,6 @@
 							tuote.try,
 							tuote.aleryhma,
 							tuote.kehahin,
-							tuote.ei_varastoida,
 							abc_aputaulu.luokka abcluokka,
 							abc_aputaulu.luokka_osasto abcluokka_osasto,
 							abc_aputaulu.luokka_try abcluokka_try,
@@ -2276,7 +2273,7 @@
 
 			echo "<tr><th>".t("Älä näytä tuotteita joita ei varastoida")."</th><td colspan='2'><input type='checkbox' name='valitut[EIVARASTOITAVA]' value='EIVARASTOITAVA' $chk></td></tr>";
 
-			//Näytetäänkö poistuvat tuotteet
+			//Näytetäänkö ehdotettavat tuotteet
 			$chk = "";
 			if ($valitut["EHDOTETTAVAT"] != '') {
 				$chk = "CHECKED";

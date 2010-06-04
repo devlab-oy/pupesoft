@@ -510,8 +510,10 @@
 	}
 
 	if ($tee == "") {
-		echo "<table width='90%'>";
-
+		echo "<table style='width: 90%; height: 90%;'>";
+		
+		$korkeus = floor(100 / (count($AIKA_ARRAY)+2))."%";
+		
 		if (count($ASENTAJA_ARRAY_TARK) < 5) {
 			echo "<tr>";
 			echo "<td class='back'></td>";
@@ -521,30 +523,30 @@
 			}
 
 			echo "</tr>";
-		}
+			echo "<tr>";
+			echo "<td class='back' style='height: 100%;'>
+					<table style='width: 100%; height: 100%;'>
+					<tr><td class='back' style='height: $korkeus;'>&nbsp;</td></tr>
+					<tr><td class='back' style='height: $korkeus;'>&nbsp;</td></tr>";
 
-		echo "<tr>";
-		echo "<td class='back' style='vertical-align: bottom;'><br><table width='100%'>";
-
-		foreach ($AIKA_ARRAY as $a) {
-			if (strtolower($toim) == 'tyomaarays_asentaja') {
-				$a = '&nbsp;';
+			foreach ($AIKA_ARRAY as $a) {
+				if (strtolower($toim) == 'tyomaarays_asentaja') $a = '&nbsp;';			
+				echo "<tr><td class='back' style='height: $korkeus;'>$a</td></tr>";
 			}
-			echo "<tr><td class='back'>$a</td></tr>";
-		}
 
-		echo "</table>";
-		echo "</td>";
+			echo "</table>";
+			echo "</td>";
 
-		if (count($ASENTAJA_ARRAY_TARK) < 5) {
-			// Kirjotetaan alkuun tyhjiä soluja
-			if (weekday_number("1", $month, $year) < count($DAY_ARRAY)) {
-				for ($i = 0; $i < weekday_number("1", $month, $year); $i++) {
-					echo "<td class='back'>&nbsp;</td>";
+			if (count($ASENTAJA_ARRAY_TARK) < 5) {
+				// Kirjotetaan alkuun tyhjiä soluja
+				if (weekday_number("1", $month, $year) < count($DAY_ARRAY)) {
+					for ($i = 0; $i < weekday_number("1", $month, $year); $i++) {
+						echo "<td class='back' style='height: 100%;'>&nbsp;</td>";
+					}
 				}
 			}
 		}
-
+		
 		$div_arrayt = array();
 		$solu = 0;
 
@@ -556,7 +558,7 @@
 
 			if ($pvanro < count($DAY_ARRAY)) {
 
-				echo "<td class='back' align='center'>";
+				if (count($ASENTAJA_ARRAY_TARK) < 5) echo "<td class='back' align='center' style='height: 100%;'>";
 
 				$selectlisa = '';
 				$orderlisa = '';
@@ -651,29 +653,48 @@
 					}
 				}
 
-				echo "<table width='100%'>";
-
 				if (count($ASENTAJA_ARRAY_TARK) < 5) {
-					echo "<tr><th style='text-align: center;' colspan='".count($ASENTAJA_ARRAY)."'><a name='{$i}_{$month}_{$year}'><b>$i</b></a></th></tr><tr>";
+					
+					echo "<table style='width: 100%; height: 100%;'>";
+					
+					$sarakeleveys = "40px";
+					
+					echo "<tr><th style='text-align: center; height: $korkeus;' colspan='".count($ASENTAJA_ARRAY)."'><a name='{$i}_{$month}_{$year}'><b>$i</b></a></th></tr><tr>";
 
 					foreach ($ASENTAJA_ARRAY_TARK as $b) {
-						echo "<td align='center' nowrap width='40px'>$b</td>";
+						echo "<td align='center' nowrap style='width: $sarakeleveys; height: $korkeus;'>$b</td>";
 					}
 					echo "</tr>";
 				}
 				else {
-					echo "<tr><th colspan='".count($ASENTAJA_ARRAY)."'><a name='{$i}_{$month}_{$year}'>".$DAY_ARRAY[$pvanro].": $i.$month.$year</a></th><tr>";
+					
+					$sarakeleveys = floor(100 / (count($ASENTAJA_ARRAY) + 1))."%";
+					
+					echo "<tr>";
+
+					if (strtolower($toim) != 'tyomaarays_asentaja') echo "<td class='back'></td>";
+
+					echo "<th colspan='".count($ASENTAJA_ARRAY)."'><a name='{$i}_{$month}_{$year}'>".$DAY_ARRAY[$pvanro].": $i.$month.$year</a></th></tr>";
+					echo "<tr>";
+
+
+					if (strtolower($toim) != 'tyomaarays_asentaja') echo "<td class='back'></td>";				
 
 					foreach ($ASENTAJA_ARRAY_TARK as $b) {
-						echo "<td align='center' nowrap width='40px'>$b</td>";
+						echo "<td align='center' style='width: $sarakeleveys; height: $korkeus;'>$b</td>";
 					}
 
-			    	echo "</tr>";
+				    echo "</tr>";
 				}
 
 				foreach ($AIKA_ARRAY as $a) {
+					
 					echo "<tr>";
-
+					
+					if (count($ASENTAJA_ARRAY_TARK) >= 5 and strtolower($toim) != 'tyomaarays_asentaja') {
+						echo "<td class='back' style='width: $sarakeleveys; height: $korkeus;'>$a</td>";
+					}
+					
 					foreach ($ASENTAJA_ARRAY as $b) {
 						if (isset($varaukset[$b][$a])) {
 							
@@ -692,7 +713,7 @@
 									$zul = $tilausnumero;
 
 									if ($tyostatusvari != "") {
-										$varilisa = "style='background-color: $tyostatusvari;'";
+										$varilisa = " background-color: $tyostatusvari; ";
 									}
 								}
 								else {
@@ -700,48 +721,52 @@
 								}
 
 								if ($tyyppi == 'asennuskalenteri') {
-									$tdekotus .= "<a class='tooltip' id='$tilausnumero' href='tyojono.php?myyntitilaus_haku=$tilausnumero&toim=$toim&tyojono=$tyojono&lopetus=$lopetus'>$zul</a>";
+									$tdekotus .= "<a class='tooltip' id='$tilausnumero' href='tyojono.php?myyntitilaus_haku=$tilausnumero&toim=$toim&tyojono=$tyojono&lopetus=$lopetus'>$zul</a> ";
 								}
 								else {
-									$tdekotus .= "<a class='tooltip' id='$tilausnumero' href='".$palvelin2."crm/kalenteri.php?valitut=$kuka&kenelle=$kuka&tee=SYOTA&kello=".substr($pvmalku, 11, 5)."&year=$year&kuu=$month&paiva=$i&tunnus=$tilausnumero&tyomaarays=$tunnus&konserni=$konserni&lopetus=$lopetus'>$zul</a>";
+									$tdekotus .= "<a class='tooltip' id='$tilausnumero' href='".$palvelin2."crm/kalenteri.php?valitut=$kuka&kenelle=$kuka&tee=SYOTA&kello=".substr($pvmalku, 11, 5)."&year=$year&kuu=$month&paiva=$i&tunnus=$tilausnumero&tyomaarays=$tunnus&konserni=$konserni&lopetus=$lopetus'>$zul</a> ";
 								}
-
-								$tdekotus .= "&nbsp;&nbsp;";
 							}
 							
-							echo "<td align='center' $varilisa width='40px'>$tdekotus</td>";
+							if ($tdekotus == "") $tdekotus = "&nbsp;";
+							
+							echo "<td align='center' style='width: $sarakeleveys; height: $korkeus; $varilisa'>$tdekotus</td>";
 						}
 						elseif ($liitostunnus > 0 and $tyojono != "" and (float) str_replace("-", "", $laskurow["toimaika"]) < (float) $year.sprintf("%02d", $month).sprintf("%02d", $i)) {
-							echo "<td align='center' class='tumma' width='40px'>&nbsp;</td>";
+							echo "<td align='center' style='width: $sarakeleveys; height: $korkeus;' class='tumma'>&nbsp;</td>";
 						}
 						elseif ($liitostunnus > 0 and $tyojono != "") {
-		                    echo "<td align='center' width='40px'><a class='td' name='$year$month$i' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&toim=$toim&asentaja=$b&aika=$a&tee=VARAA&lopetus=$lopetus'>&nbsp;</a></td>";
+		                    echo "<td align='center' style='width: $sarakeleveys; height: $korkeus;'><a class='td' name='$year$month$i' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&toim=$toim&asentaja=$b&aika=$a&tee=VARAA&lopetus=$lopetus'>&nbsp;</a></td>";
 		                }
 						else {
-							echo "<td align='center' width='40px'>&nbsp;</td>";
+							echo "<td align='center' style='width: $sarakeleveys; height: $korkeus;'>&nbsp;</td>";
 						}
-					}
-					echo "</tr>";
+					}										
 				}
-
-				echo "</table>";
-				echo "</td>";
+				
+				echo "</tr>";
+				
+				if (count($ASENTAJA_ARRAY_TARK) < 5) {
+					echo "</table>";
+					echo "</td>";
+				}
 
 				$solu++;
 			}
 
-			if ((count($ASENTAJA_ARRAY_TARK) >= 5 and $pvanro < count($DAY_ARRAY)) or (count($ASENTAJA_ARRAY_TARK) < 5 and weekday_number($i, $month, $year) == 6 and $solu > 0)) {
+			if (count($ASENTAJA_ARRAY_TARK) < 5 and weekday_number($i, $month, $year) == 6 and $solu > 0) {
 				// Rivinvaihto jos seuraava viikko on olemassa
 				if (days_in_month($month, $year) != $i) {
 					echo "</tr><tr>";
 
-					echo "<td class='back' style='vertical-align: bottom;'><br><table width='100%'>";
+					echo "<td class='back' style='vertical-align: bottom;'>
+							<table style='width: 100%; height: 100%;'>
+							<tr><td class='back' style='height: $korkeus;'>&nbsp;</td></tr>
+							<tr><td class='back' style='height: $korkeus;'>&nbsp;</td></tr>";
 
 					foreach ($AIKA_ARRAY as $a) {
-						if (strtolower($toim) == 'tyomaarays_asentaja') {
-							$a = '&nbsp;';
-						}
-						echo "<tr><td class='back'>$a</td></tr>";
+						if (strtolower($toim) == 'tyomaarays_asentaja') $a = '&nbsp;';
+						echo "<tr><td class='back' style='height: $korkeus;'>$a</td></tr>";
 					}
 					echo "</table>";
 					echo "</td>";
@@ -750,7 +775,7 @@
 		}
 
 		// Kirjotetaan loppuun tyhjiä soluja
-		if (weekday_number($i, $month, $year) < count($DAY_ARRAY) and weekday_number($i, $month, $year) > 0) {
+		if (count($ASENTAJA_ARRAY_TARK) < 5 and weekday_number($i, $month, $year) < count($DAY_ARRAY) and weekday_number($i, $month, $year) > 0) {
 			for ($a = weekday_number($i, $month, $year); $a <= count($DAY_ARRAY)-1; $a++) {
 				echo "<td class='back'>&nbsp;</td>";
 			}
@@ -760,5 +785,6 @@
 		echo "</table>";
 	}
 
-	require("../inc/footer.inc");
+	require("inc/footer.inc");
+
 ?>

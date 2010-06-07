@@ -664,7 +664,7 @@
 
 			if (($lisa_haku_osasto != "" or $lisa_haku_try != "") or ($lisa_haku_osasto != "" and in_array("PUPEKAIKKIMUUT", $mul_try))) {
 
-				if (($lisa_haku_tme != '' or  $lisa_haku_try != '') and strtolower($monivalintalaatikko) == "malli") {
+				if (($lisa_haku_tme != '' or $lisa_haku_try != '') and (strtolower($monivalintalaatikko) == "malli" or (!in_array("malli", array_map('strtolower', $monivalintalaatikot)) and strtolower($monivalintalaatikko) == 'malli/mallitark'))) {
 					// malli dropdown
 					if (isset($monivalinta_tuotteet)) {
 						$query = "	SELECT avainsana.selite as malli, IFNULL((SELECT avainsana_kieli.selite

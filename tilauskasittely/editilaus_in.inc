@@ -983,18 +983,26 @@ while (!feof ($fd)) {
 					// halutaan $tuoteno
 					// $kpl kappaletta
 					// $trow jossa on tuotten tiedot
-					$ytunnus    		= $arow["ytunnus"];
-					$hinta 				= "";
-					$netto 				= "";
-					$ale 				= "";
-					$var				= "";
-					$alv				= "";
-					$toimaika 			= $laskurow["toimaika"];
-					$kerayspvm			= $laskurow["kerayspvm"];
-					$paikka				= "";
-					$varasto 			= $olinvarasto;
-					$kukarow["kesken"] 	= $laskurow["tunnus"];
-					$jtkielto 			= $laskurow['jtkielto'];
+					$ytunnus    			= $laskurow["ytunnus"];
+					$hinta 					= "";
+					$netto 					= "";
+					$ale 					= "";
+					$var					= "";
+					$alv					= "";
+					$toimaika 				= $laskurow["toimaika"];
+					$kerayspvm				= $laskurow["kerayspvm"];
+					$paikka					= "";					
+					$kukarow["kesken"] 		= $laskurow["tunnus"];
+					$jtkielto 				= $laskurow['jtkielto'];					
+					$varasto 				= array();
+					$laskurow["varasto"]	= "";
+										
+					if ($edi_tyyppi == "magento" and is_array($verkkokauppa_sallitutvarastot)) {
+						$varasto = $verkkokauppa_sallitutvarastot;
+					}
+					elseif ($olinvarasto != "") {
+						$varasto = $olinvarasto;
+					}
 
 					if ($ketjutus == 'o') {
 						// kiellet‰‰n kaikki muutokset alkuper‰iseen tilausriviin, jos ketjutus = 'o' eli pupesoft --> pupesoft
@@ -1021,9 +1029,7 @@ while (!feof ($fd)) {
 					// Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
 					// Jos tilattu kpl-m‰‰r‰ on suurempi kuin myyt‰viss‰ oleva kpl-m‰‰r‰, niin pakotetaan rivi hyv‰ksytyksi
 					if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
-						list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno);
-
-						$laskurow["varasto"] = ""; // spooffaillaan laskurow varastoa verkkokaupan takia
+						list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno);					
 
 						// jos saldo ei riit‰ normivarastoista, pit‰‰ katsoa miss‰ varastossa riitt‰‰ ja myyd‰‰n sielt‰ (koska jossain riitt‰‰, muuten tilaus ei olisi edes tullu t‰nne asti)
 						if ($chk_myytavissa < $kpl) {
@@ -1077,8 +1083,8 @@ while (!feof ($fd)) {
 
 					//jos meill‰ on t‰pp‰ p‰‰ll‰, ett‰ asiakas haluaa kamat j‰lkitoimitukseen
 					if ($sallitaanjt == '1') {
-						$var = "J";
-						$kommentti = ""; // Huom! nollataan kommentti
+						$var 		= "J";
+						$kommentti 	= ""; // Huom! nollataan kommentti
 					}
 
 					require ("lisaarivi.inc");
@@ -1086,7 +1092,7 @@ while (!feof ($fd)) {
 					// jos meill‰ on tiedossa tuotteen sarjanumero, lis‰t‰‰n se
 					if ($edi_sarjanumero != "") {
 						// etsit‰‰n sarjanumero
-						$sarjaquery = "select * from sarjanumeroseuranta where tunnus='$edi_sarjanumero'";
+						$sarjaquery = "SELECT * from sarjanumeroseuranta where tunnus='$edi_sarjanumero'";
 						$sarjaresult = mysql_query($sarjaquery) or pupe_error($sarjaquery);
 
 						if (mysql_num_rows($sarjaresult) == 1) {

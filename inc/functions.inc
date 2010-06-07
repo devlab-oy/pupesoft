@@ -8135,7 +8135,32 @@ if (!function_exists("liite_popup")) {
 			if (isset($images_exist) or isset($pdf_exist)) {
 
 				if ($filetype_row["peukalokuva"] > 0) {
-					$liitteet = "<img src='".$palvelin2."view.php?id=$filetype_row[peukalokuva]' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
+					$liitteet  = "<img src='".$palvelin2."view.php?id=$filetype_row[peukalokuva]' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\"";
+
+					if (!isset($thumb_size_x) or !isset($thumb_size_y)) {
+
+						$query = "	SELECT image_width, image_height
+									FROM liitetiedostot
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus = '$filetype_row[peukalokuva]'";
+						$image_resize_chk_res = mysql_query($query) or pupe_error($query);
+						$image_resize_chk_row = mysql_fetch_assoc($image_resize_chk_res);
+
+						$uusi_h = 100;
+						$uusi_w = 100;
+
+						if ($image_resize_chk_row['image_width'] > $image_resize_chk_row['image_height']) {
+							$uusi_h = ($image_resize_chk_row['image_height'] / $image_resize_chk_row['image_width']) * 100;
+						}
+						elseif ($image_resize_chk_row['image_height'] > $image_resize_chk_row['image_width']) {
+							$uusi_w = ($image_resize_chk_row['image_width'] / $image_resize_chk_row['image_height']) * 100;
+						}
+
+						$liitteet .= " width='$uusi_w' ";
+						$liitteet .= " height='$uusi_h' ";
+					} 
+
+					$liitteet .= ">";
 				}
 				else {
 					$liitteet = "<input type='button' value='";

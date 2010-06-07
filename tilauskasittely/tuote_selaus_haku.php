@@ -1733,9 +1733,15 @@
 										}
 									}
 									elseif ($myytavissa != 0 or ($lisatiedot != "" and $kukarow["extranet"] == "" and $verkkokauppa == "" and $hyllyssa != 0)) {
-										echo "	<tr>
-												<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
-												<td class='$vari' align='right' nowrap>";
+										$id2 = md5(uniqid());
+
+										echo "<tr>";
+										echo "<td class='$vari' nowrap>";
+										echo "<a class='tooltip' id='$id2'>$saldorow[nimitys]</a> $saldorow[tyyppi]";
+										echo "<div id='div_$id2' class='popup' style='width: 300px'>($saldorow[hyllyalue]-$saldorow[hyllynro]-$saldorow[hyllyvali]-$saldorow[hyllytaso])</div>";
+										echo "</td>";
+
+										echo "<td class='$vari' align='right' nowrap>";
 
 										if ($hae_ja_selaa_row['selite'] == 'B') {
 											echo "<font class='green'>";

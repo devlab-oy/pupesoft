@@ -4950,7 +4950,7 @@ if (!function_exists("js_popup")) {
 		}
 
 	    function toolTipShow(e, x, y) {
-	        toolTip.css({'top':y, 'left':x}).delay(2000).show('fast');
+	        toolTip.css({'top':y, 'left':x}).delay(1000).show('fast');
 	    }
 
 	    function toolTipHide() {

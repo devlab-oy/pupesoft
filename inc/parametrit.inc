@@ -176,6 +176,7 @@ unset($verkkokauppa_anon);
 unset($verkkokauppa_hakualkuun);
 unset($verkkokauppa_saldotsk);
 unset($verkkokauppa_tuotemerkit);
+unset($verkkokauppa_hinnatedifailista);
 
 unset($verkkolaskut_in);
 unset($verkkolaskut_ok);

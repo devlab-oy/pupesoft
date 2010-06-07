@@ -103,7 +103,7 @@ $editilaus_tilaustyyppi = "";
 $editilaus_eilahetetta	= "";
 $editilaus_sisainen		= "";
 $editilaus_kassalipas	= "";
-$editilaus_rahtikulu_hinta = "";
+$editilaus_rivihinta	= "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror      = 1; // oletetaan aina ettei  tuotetta löydy
@@ -385,9 +385,9 @@ while (!feof ($fd)) {
 		case 'OSTOTIL.OT_ASIAKASNRO' :
 		case 'ONADDP_PC' :
 			//ONADBY_PC  - Ostajan OVT-tunnus
-			//ONADCN_PC  - Toimitusosoitteen OVT-tunnus			
+			//ONADCN_PC  - Toimitusosoitteen OVT-tunnus
 			//ONADDP_PC  - Ostajan logistiikkakeskuksen OVT-tunnus
-			//ONADBY_RF  - Ostajan meidän asiakasnumero		
+			//ONADBY_RF  - Ostajan meidän asiakasnumero
 			//OSTOTIL.OT_ASIAKASNRO  - Ostajan meidän asiakasnumero
 
 			$tieto = trim(substr($tieto, 0, 17));
@@ -820,7 +820,7 @@ while (!feof ($fd)) {
 				$query    = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
 				$result   = mysql_query($query) or die($query);
 				$laskurow = mysql_fetch_array($result);
-				
+
 				//vientikieltotarkistus
 				$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
 							FROM asiakas
@@ -828,7 +828,7 @@ while (!feof ($fd)) {
 							and tunnus  = '$laskurow[liitostunnus]'";
 				$vieres = mysql_query($query) or pupe_error($query);
 				$vierow = mysql_fetch_array($vieres);
-				
+
 				if (isset($vierow) and $vierow["maa"] != "") {
 					$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 				}
@@ -863,10 +863,10 @@ while (!feof ($fd)) {
 					$tieto = trim($tieto);
 				}
 
-				$query = "	SELECT * 
-							FROM tuote 
-							WHERE yhtio = '$kukarow[yhtio]' 
-							and tuoteno = '$tieto' 
+				$query = "	SELECT *
+							FROM tuote
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tieto'
 							$kieltolisa";
 				$result = mysql_query($query) or die($query);
 
@@ -950,9 +950,16 @@ while (!feof ($fd)) {
 			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").".\n";
 			break;
 		case 'OSTOTILRIV.OTR_RIVISUMMA' :
-			// jos tullaan magentosta ja meillä on rahtikulu, niin otetaan se hinta talteeen
-			if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
-				$editilaus_rahtikulu_hinta = $tieto;
+
+			// Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
+			// TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
+			if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
+				// Tämä hinta on aina verollinen lasketaan vero pois jos myyntihinnat ovat verottomia
+				$editilaus_rivihinta = (float) trim($tieto);
+
+				if ($yhtiorow["alv_kasittely"] != '') {
+					$editilaus_rivihinta = round($editilaus_rivihinta / (1 + $laskurow["alv"]/100), 2);
+				}
 			}
 			break;
 		case 'OSTOTILRIV.OTR_SALLITAANJT' :
@@ -1007,8 +1014,8 @@ while (!feof ($fd)) {
 					}
 
 					// jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
-					if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $editilaus_rahtikulu_hinta != '') {
-						$hinta = $editilaus_rahtikulu_hinta;
+					if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $editilaus_rivihinta > 0) {
+						$hinta = $editilaus_rivihinta;
 					}
 
 					// Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
@@ -1103,9 +1110,9 @@ while (!feof ($fd)) {
 
 				} // end jos tuote on löydetty oikein
 				else {
-					
+
 					// tuotenumero ei löytynyt, tehdään dummyrivi..
-					
+
 					$kommentti = t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
 
 					$query = "	INSERT into tilausrivi set
@@ -1345,8 +1352,7 @@ while (!feof ($fd)) {
 			$editilaus_tilaustyyppi = "";
 			$editilaus_eilahetetta	= "";
 			$editilaus_sisainen		= "";
-			$editilaus_rahtikulu_hinta = "";
-
+			$editilaus_rivihinta 	= "";
 			break;
 	}
 }

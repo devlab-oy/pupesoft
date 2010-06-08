@@ -27,10 +27,9 @@
 		}
 	}
 
-	if(!function_exists("alku")) {
+	if (!function_exists("alku")) {
 		function alku ($viesti = null, $karhukierros_tunnus = '') {
-			global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu,
-				$rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli, $_POST, $iso;
+			global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli, $_POST, $iso;
 
 			$firstpage = $pdf->new_page("a4");
 
@@ -48,59 +47,8 @@
 			//Otsikko
 			$pdf->draw_text(310, 815, t("Maksukehotus", $kieli), $firstpage, $iso);
 			$pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
-			
-			unset($data);
-
-			if( (int) $yhtiorow["lasku_logo"] > 0) {
-				$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
-				$data = $liite["data"];
-				$isizelogo[0] = $liite["image_width"];
-				$isizelogo[1] = $liite["image_height"];
-				unset($liite);
-			}
-			elseif(file_exists($yhtiorow["lasku_logo"])) {
-				$filename = $yhtiorow["lasku_logo"];
-
-				$fh = fopen($filename, "r");
-				$data = fread($fh, filesize($filename));
-				fclose($fh);
-
-				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-			}
-
-			if($data) {
-				$image = $pdf->jfif_embed($data);
-
-				if(!$image) {
-					echo t("Logokuvavirhe");
-				}
-				else {
-
-					$logoparam = array();
-
-					$lasku_logo_koko = 50;
-					$lasku_logo_positio = 830;
-
-					if ((int) $yhtiorow["lasku_logo_koko"] > 0) {
-						$lasku_logo_koko = (int) $yhtiorow["lasku_logo_koko"];
-					}
-					if ((int) $yhtiorow["lasku_logo_positio"] > 0) {
-						$lasku_logo_positio = (int) $yhtiorow["lasku_logo_positio"];
-					}
-
-					if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= $lasku_logo_koko) {
-						$logoparam['scale'] = 240 / $isizelogo[0];
-					}
-					else {
-						$logoparam['scale'] = $lasku_logo_koko  / $isizelogo[1];
-					}
-
-					$placement = $pdf->image_place($image, $lasku_logo_positio-($logoparam['scale']*$isizelogo[1]), 20, $firstpage, $logoparam);
-				}
-			}
-			else {
-				$pdf->draw_text(30, 815,  $yhtiorow["nimi"], $firstpage);
-			}
+						
+			tulosta_logo_pdf($pdf, $firstpage, "");
 
 			if (isset($_POST['ekirje_laheta']) === false) {
 				//Vasen sarake

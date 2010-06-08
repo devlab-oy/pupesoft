@@ -4,13 +4,11 @@
 		global $pdf, $asiakastiedot, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli;
 
 		$firstpage = $pdf->new_page("a4");
-		$pdf->enable('template');
-		$tid = $pdf->template->create();
-		$pdf->template->size($tid, 600, 830);
+		
+		tulosta_logo_pdf($pdf, $firstpage, "");
 
 		//Otsikko
 		//$pdf->draw_rectangle(830, 20,  800, 580, $firstpage, $rectparam);
-		$pdf->draw_text(30, 815,  $yhtiorow["nimi"], $firstpage);
 		$pdf->draw_text(280, 815, t("TILIOTE", $kieli), $firstpage);
 		$pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
 
@@ -71,55 +69,7 @@
 		$oikpos = $pdf->strlen(t("Avoinsumma", $kieli), $pieni);
 		$pdf->draw_text(480-$oikpos, $kala, t("Avoinsumma", $kieli),		$firstpage, $pieni);
 
-
-
 		$kala -= 15;
-
-		//toka rivi
-/*		if ($kaatosumma != 0 and $sivu == 1) {
-			$pdf->draw_text(30,  $kala, t("Kohdistamattomia suorituksia", $kieli),	$firstpage, $norm);
-			$pdf->draw_text(440, $kala, $kaatosumma,								$firstpage, $norm);
-			$kala -= 13;
-		}
-*/
-
-		unset($data);
-		if( (int) $yhtiorow["lasku_logo"] > 0) {
-			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
-			$data = $liite["data"];
-			$isizelogo[0] = $liite["image_width"];
-			$isizelogo[1] = $liite["image_height"];
-			unset($liite);
-		}
-		elseif(file_exists($yhtiorow["lasku_logo"])) {
-			$filename = $yhtiorow["lasku_logo"];
-
-			$fh = fopen($filename, "r");
-			$data = fread($fh, filesize($filename));
-			fclose($fh);
-
-			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-		}
-
-		if($data) {
-
-			$image = $pdf->jfif_embed($data);
-
-			if(!$image) {
-				echo t("Logokuvavirhe");
-			}
-			else {				
-				$logoparam = array();
-
-				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 50) {
-					$logoparam['scale'] = 120 / $isizelogo[0];
-				}
-				else {
-					$logoparam['scale'] = 50  / $isizelogo[1];
-				}
-				$placement = $pdf->image_place($image, 785, 20, $firstpage, $logoparam);
-			}			
-		}
 
 		return($firstpage);
 	}

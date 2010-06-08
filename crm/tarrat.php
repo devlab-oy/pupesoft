@@ -197,7 +197,7 @@
 
 			system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps $liite");
 			
-			require("../inc/sahkoposti.inc");
+			require("inc/sahkoposti.inc");
 		}
 		else {
 			$cmd = $komento["Tarrat"]." ".$filenimi.".ps";

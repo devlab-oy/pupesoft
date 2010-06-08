@@ -539,50 +539,7 @@
 					$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
 					$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
-					unset($data);
-					if ( (int) $yhtiorow["lasku_logo"] > 0) {
-						$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
-						$data = $liite["data"];
-						$isizelogo[0] = $liite["image_width"];
-						$isizelogo[1] = $liite["image_height"];
-						unset($liite);
-					}
-					elseif (file_exists($yhtiorow["lasku_logo"])) {
-						$filename = $yhtiorow["lasku_logo"];
-
-						$fh = fopen($filename, "r");
-						$data = fread($fh, filesize($filename));
-						fclose($fh);
-
-						$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-					}
-
-					if ($data) {
-						$image = $pdf->jfif_embed($data);
-
-						if (!$image) {
-							echo t("Logokuvavirhe");
-						}
-						else {
-
-							$logoparam = array();
-
-							if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 50) {
-								$logoparam['scale'] = 240 / $isizelogo[0];
-							}
-							else {
-								$logoparam['scale'] = 50  / $isizelogo[1];
-							}
-
-							$placement = $pdf->image_place($image, 830-($logoparam['scale']*$isizelogo[1]), 20, $thispage, $logoparam);
-						}
-					}
-					else {
-						$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$thispage, $norm);
-						$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$thispage, $norm);
-						$pdf->draw_text(30, 795, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$thispage, $norm);
-						$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $norm);
-					}
+					tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
 					$pdf->draw_text(310,815, t("Ostotilaus", $kieli), 			$thispage, $iso);
 					$pdf->draw_text(310, 803, t("Sivu", $kieli), 				$thispage, $norm);

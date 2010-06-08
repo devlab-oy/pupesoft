@@ -33,58 +33,16 @@
 			$pieni["height"] 	= 8;
 			$pieni["font"] 		= "Times-Roman";
 
-			unset($data);
-			if( (int) $yhtiorow["lasku_logo"] > 0) {
-				$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
-				$data = $liite["data"];
-				$isizelogo[0] = $liite["image_width"];
-				$isizelogo[1] = $liite["image_height"];
-				unset($liite);
-			}
-			elseif(file_exists($yhtiorow["lasku_logo"])) {
-				$filename = $yhtiorow["lasku_logo"];
-
-				$fh = fopen($filename, "r");
-				$data = fread($fh, filesize($filename));
-				fclose($fh);
-
-				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-			}
-
-			if($data) {
-				$image = $pdf->jfif_embed($data);
-
-				if(!$image) {
-					echo t("Logokuvavirhe");
-				}
-				else {
-
-					$logoparam = array();
-
-					if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 25) {
-						$logoparam['scale'] = 120 / $isizelogo[0];
-					}
-					else {
-						$logoparam['scale'] = 25  / $isizelogo[1];
-					}
-
-					$placement = $pdf->image_place($image, 568-($logoparam['scale']*$isizelogo[1]), 22, $firstpage, $logoparam);
-				}
-			}
-			else {
-				$pdf->draw_text(30,  555, $yhtiorow["nimi"], 				$firstpage);
-			}
-
+			tulosta_logo_pdf($pdf, $firstpage, $laskurow, 568, 22, 25, 120);
 
 			$pdf->draw_rectangle(570, 20,  530, 808, $firstpage, 			$rectparam);
 
 			if ($mista == 'vastaanota') {
-				$pdf->draw_text(280, 555, t("VASTAANOTETUT", $kieli), 				$firstpage);
+				$pdf->draw_text(280, 555, t("VASTAANOTETUT", $kieli), 		$firstpage);
 			}
 			else {
-				$pdf->draw_text(280, 555, t("PURKULISTA", $kieli), 				$firstpage);
+				$pdf->draw_text(280, 555, t("PURKULISTA", $kieli), 			$firstpage);
 			}
-
 
 			$pdf->draw_text(440, 555, $laskurow["nimi"], 					$firstpage);
 
@@ -92,20 +50,20 @@
 			$pdf->draw_text(155, 535, $sivu, 								$firstpage, $p);
 
 			if ($mista == 'vastaanota') {
-				$pdf->draw_text(280,  545, t("Tilaus", $kieli),			$firstpage, $pieni);
+				$pdf->draw_text(280,  545, t("Tilaus", $kieli),				$firstpage, $pieni);
 				$pdf->draw_text(280,  535, $laskurow["tunnus"],				$firstpage, $p);
 			}
 			else {
-				$pdf->draw_text(280,  545, t("Keikkanumero", $kieli),			$firstpage, $pieni);
-				$pdf->draw_text(280,  535, $laskurow["laskunro"],				$firstpage, $p);
+				$pdf->draw_text(280,  545, t("Keikkanumero", $kieli),		$firstpage, $pieni);
+				$pdf->draw_text(280,  535, $laskurow["laskunro"],			$firstpage, $p);
 			}
 
 			$pdf->draw_text(440, 545, t("Ajoaika", $kieli), 				$firstpage, $pieni);
 			$pdf->draw_text(440, 535, tv1dateconv(date("Y-m-d H:i"), 'P'), 	$firstpage, $p);
 
 			if ($mista != 'vastaanota') {
-				$pdf->draw_text(520, 545, t("Kommentti", $kieli), 				$firstpage, $pieni);
-				$pdf->draw_text(520, 535, $laskurow["comments"],				$firstpage, $p);
+				$pdf->draw_text(520, 545, t("Kommentti", $kieli), 			$firstpage, $pieni);
+				$pdf->draw_text(520, 535, $laskurow["comments"],			$firstpage, $p);
 			}
 
 			$pdf->draw_rectangle(530, 20,  510, 808, $firstpage, $rectparam);

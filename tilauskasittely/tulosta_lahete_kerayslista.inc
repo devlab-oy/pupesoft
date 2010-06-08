@@ -67,77 +67,7 @@ if (!function_exists('alku_kerayslista')) {
 		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
 		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
-		$apu_yhtiorow = array();
-
-		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
-		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
-			$query = "	SELECT *
-						FROM yhtion_toimipaikat
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
-
-			if (mysql_num_rows($result) == 1) {
-				$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
-				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
-		 	}
-		}
-		else {
-			$query = "	SELECT *
-						FROM yhtion_parametrit
-						WHERE yhtio = '$laskurow[yhtio]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query".mysql_error());
-
-			if (mysql_num_rows($result) == 1) {
-				$yhtion_parametritrow = mysql_fetch_assoc($result);
-				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
-			}
-		}
-
-		unset($data);
-		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
-			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
-			$data = $liite["data"];
-			$isizelogo[0] = $liite["image_width"];
-			$isizelogo[1] = $liite["image_height"];
-			unset($liite);
-		}
-		elseif(file_exists($apu_yhtiorow["lasku_logo"])) {
-			$filename = $apu_yhtiorow["lasku_logo"];
-
-			$fh = fopen($filename, "r");
-			$data = fread($fh, filesize($filename));
-			fclose($fh);
-
-			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
-		}
-
-		if($data) {
-			$image = $pdf->jfif_embed($data);
-
-			if(!$image) {
-				echo t("Logokuvavirhe");
-			}
-			else {
-
-				$logoparam = array();
-
-				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 50) {
-					$logoparam['scale'] = 240 / $isizelogo[0];
-				}
-				else {
-					$logoparam['scale'] = 50  / $isizelogo[1];
-				}
-
-				$placement = $pdf->image_place($image, 830-($logoparam['scale']*$isizelogo[1]), 20, $thispage, $logoparam);
-			}
-		}
-		else {
-			$pdf->draw_text(30, 815, $laskurow["yhtio_nimi"],	 	$thispage, $norm);
-			$pdf->draw_text(30, 805, $laskurow["yhtio_osoite"], 	$thispage, $norm);
-			$pdf->draw_text(30, 795, $laskurow["yhtio_postino"], 	$thispage, $norm);
-			$pdf->draw_text(60, 795, $laskurow["yhtio_postitp"], 	$thispage, $norm);
-			$pdf->draw_text(30, 785, $laskurow["yhtio_maa"], 		$thispage, $norm);
-		}
+		tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
 		// haetaan maksuehdon tiedot
 		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
@@ -439,77 +369,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
 		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
-		$apu_yhtiorow = array();
-
-		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
-		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
-			$query = "	SELECT *
-						FROM yhtion_toimipaikat
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
-
-			if (mysql_num_rows($result) == 1) {
-				$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
-				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
-		 	}
-		}
-		else {
-			$query = "	SELECT *
-						FROM yhtion_parametrit
-						WHERE yhtio = '$laskurow[yhtio]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
-
-			if (mysql_num_rows($result) == 1) {
-				$yhtion_parametritrow = mysql_fetch_assoc($result);
-				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
-			}
-		}
-
-		unset($data);
-		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
-			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
-			$data = $liite["data"];
-			$isizelogo[0] = $liite["image_width"];
-			$isizelogo[1] = $liite["image_height"];
-			unset($liite);
-		}
-		elseif(file_exists($apu_yhtiorow["lasku_logo"])) {
-			$filename = $apu_yhtiorow["lasku_logo"];
-
-			$fh = fopen($filename, "r");
-			$data = fread($fh, filesize($filename));
-			fclose($fh);
-
-			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
-		}
-
-		if($data) {
-			$image = $pdf->jfif_embed($data);
-
-			if(!$image) {
-				echo t("Logokuvavirhe");
-			}
-			else {
-
-				$logoparam = array();
-
-				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 50) {
-					$logoparam['scale'] = 240 / $isizelogo[0];
-				}
-				else {
-					$logoparam['scale'] = 50  / $isizelogo[1];
-				}
-
-				$placement = $pdf->image_place($image, 830-($logoparam['scale']*$isizelogo[1]), 20, $thispage, $logoparam);
-			}
-		}
-		else {
-			$pdf->draw_text(30, 815, $laskurow["yhtio_nimi"], 		$thispage, $norm);
-			$pdf->draw_text(30, 805, $laskurow["yhtio_osoite"], 	$thispage, $norm);
-			$pdf->draw_text(30, 795, $laskurow["yhtio_postino"], 	$thispage, $norm);
-			$pdf->draw_text(60, 795, $laskurow["yhtio_postitp"], 	$thispage, $norm);
-			$pdf->draw_text(30, 785, $laskurow["yhtio_maa"], 		$thispage, $norm);
-		}
+		tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
 		// haetaan maksuehdon tiedot
 		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";

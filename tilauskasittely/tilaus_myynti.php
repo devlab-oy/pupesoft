@@ -353,7 +353,7 @@ if (($tee == "" and (($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 a
 	elseif (@include("luo_myyntitilausotsikko.inc"));
 	else exit;
 
-	$tilausnumero = luo_myyntitilausotsikko($asiakasid, $tilausnumero, $myyjanro);
+	$tilausnumero = luo_myyntitilausotsikko($asiakasid, $tilausnumero, $myyjanro, '', $kantaasiakastunnus);
 	$kukarow["kesken"] = $tilausnumero;
 	$kaytiin_otsikolla = "NOJOO!";
 }

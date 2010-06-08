@@ -169,7 +169,7 @@ elseif ($ytunnus != '') {
 
 	if ($monta == 0) {
 		// exactihaku
-		$query	= "	(SELECT asiakas.*, yhtio.nimi yhtionimi
+		$query	= "	(SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
@@ -177,7 +177,7 @@ elseif ($ytunnus != '') {
 						and asiakas.ytunnus!=''
 						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT asiakas.*, yhtio.nimi yhtionimi
+					(SELECT asiakas.*, yhtio.nimi yhtionimi, '2' osuma
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
@@ -185,7 +185,7 @@ elseif ($ytunnus != '') {
 						and asiakas.asiakasnro!=0
 						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT asiakas.*, yhtio.nimi yhtionimi
+					(SELECT asiakas.*, yhtio.nimi yhtionimi, '3' osuma
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
@@ -193,7 +193,7 @@ elseif ($ytunnus != '') {
 						and asiakas.ovttunnus!=''
 						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT asiakas.*, yhtio.nimi yhtionimi
+					(SELECT asiakas.*, yhtio.nimi yhtionimi, '4' osuma
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
@@ -201,7 +201,7 @@ elseif ($ytunnus != '') {
 						and asiakas.toim_ovttunnus!=''
 						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT asiakas.*, yhtio.nimi yhtionimi
+					(SELECT asiakas.*, yhtio.nimi yhtionimi, '5' osuma
 						FROM asiakas
 						JOIN asiakkaan_avainsanat ON (asiakas.yhtio=asiakkaan_avainsanat.yhtio and asiakas.tunnus=asiakkaan_avainsanat.liitostunnus and asiakkaan_avainsanat.laji='kantaasiakastunnus')
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
@@ -438,6 +438,18 @@ if ($monta == 1) {
 	}
 
 	$asiakasid = $asiakasrow['tunnus'];
+
+	if ($kutsuja == 'otsik.inc' and $asiakasrow['osuma'] == '5') {
+		$query = "	SELECT avainsana
+					FROM asiakkaan_avainsanat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND laji = 'kantaasiakastunnus'
+					AND liitostunnus = '$asiakasid'";
+		$kantaasiakastunnus_result = mysql_query($query) or pupe_error($query);
+		$kantaasiakastunnus_row = mysql_fetch_assoc($kantaasiakastunnus_result);
+
+		$kantaasiakastunnus = $kantaasiakastunnus_row['avainsana'];
+	}
 }
 
 if ($monta > 1 and $monta <= $limit) {

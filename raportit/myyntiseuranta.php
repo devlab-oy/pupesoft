@@ -281,6 +281,7 @@
 				$select = "";
 				$gluku  = 0;
 				$varastojoin = "";
+				$kantaasiakasjoin = "";
 
 				// n‰it‰ k‰ytet‰‰n queryss‰
 				$sel_osasto = "";
@@ -561,6 +562,21 @@
 						$varastojoin = "LEFT JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio
 										and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 										and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))";
+					}
+
+					if ($ajotapa != "lasku" and $mukaan == "kantaasiakkaittain") {
+						if ($group != "") $group .= ",kantaasiakas.avainsana";
+						else $group  .= "kantaasiakas.avainsana";
+						$select .= "kantaasiakas.avainsana Kantaasiakastunnus, ";
+						$order  .= "kantaasiakas.avainsana,";
+						$gluku++;
+
+						if ($rajaus[$i] != "") {
+							$lisa .= " and kantaasiakas.avainsana = '$rajaus[$i]' ";
+						}
+
+						$kantaasiakasjoin	= " JOIN laskun_lisatiedot lasklisa ON (lasklisa.yhtio = lasku.yhtio AND lasklisa.otunnus = lasku.tunnus) ";
+						$kantaasiakasjoin  .= " JOIN asiakkaan_avainsanat kantaasiakas ON (kantaasiakas.yhtio = lasku.yhtio AND kantaasiakas.laji = 'kantaasiakastunnus' AND kantaasiakas.liitostunnus = lasku.liitostunnus AND kantaasiakas.avainsana = lasklisa.kantaasiakastunnus) ";						
 					}
 				}
 
@@ -944,6 +960,7 @@
 							JOIN tilausrivi use index ($index) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.$ouusio=lasku.tunnus and tilausrivi.tyyppi=$tyyppi
 							$trlisatiedot
 							$varastojoin
+							$kantaasiakasjoin
 							LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							LEFT JOIN asiakas use index (PRIMARY) ON asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 							LEFT JOIN toimitustapa ON lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite
@@ -1943,6 +1960,7 @@
 			if ($ruksit[170] != '')			$ruk170chk 				= "CHECKED";
 			if ($ruksit[180] != '')			$ruk180chk 				= "CHECKED";
 			if ($ruksit[190] != '')			$ruk190chk 				= "CHECKED";
+			if ($ruksit[200] != '')			$ruk200chk 				= "CHECKED";
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
 			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
@@ -1962,7 +1980,6 @@
 			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($status != '')				${'status_'.$status.'_sel'} = 'SELECTED';
-
 
 			echo "<table>
 				<tr>
@@ -2122,6 +2139,13 @@
 				<td><input type='text' name='jarjestys[190]' size='2' value='$jarjestys[190]'></td>
 				<td><input type='checkbox' name='ruksit[190]' value='varastoittain' $ruk190chk></td>
 				<td><input type='text' name='rajaus[190]' value='$rajaus[190]'></td>
+				</tr>
+				<tr>
+				<th>".t("Listaa kanta-asiakkaittain")."</th>
+				<td><input type='text' name='jarjestys[200]' size='2' value='$jarjestys[200]'></td>
+				<td><input type='checkbox' name='ruksit[200]' value='kantaasiakkaittain' $ruk200chk></td>
+				<td><input type='text' name='rajaus[200]' value='$rajaus[200]'></td>
+				<td class='back'>".t("(Toimii vain jos ajat raporttia tilauksista)")."</td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

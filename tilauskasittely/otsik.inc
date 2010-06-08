@@ -1835,6 +1835,12 @@
 				echo "</tr>";
 			}
 
+			if (($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and ((trim($kantaasiakastunnus) != '' and trim($kantaasiakastunnus) != '0') or (trim($srow['kantaasiakastunnus']) != '' and trim($srow['kantaasiakastunnus']) != '0'))) {
+				if ($srow['kantaasiakastunnus'] != '') $kantaasiakastunnus = $srow['kantaasiakastunnus'];
+
+				echo "<tr><td>",t("Kanta-asiakastunnus"),"</td><td><input type='text' name='kantaasiakastunnus' value='$kantaasiakastunnus'></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+			}
+			
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or (($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
@@ -3035,6 +3041,7 @@
 							rivihintoja_ei_nayteta		= '$rivihintoja_ei_nayteta',
 							kasinsyotetty_viite			= '$kasinsyotetty_viite',
 							asiakkaan_kohde				= '$asiakkaan_kohde',
+							kantaasiakastunnus			= '$kantaasiakastunnus',
 							otunnus 					= '$kukarow[kesken]'";
 				$query3 .= $postquery3;
 				$result = mysql_query($query3) or pupe_error($query3);

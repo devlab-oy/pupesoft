@@ -27,12 +27,12 @@
 	// A4 pointteina 595x842
 
 	if ($malli == 'PDF40') {
-		$x = 15;
+		$x = 10;
 		$riville = 4;
 		$leveys = 315;
 		$kappalemaara = 41;
 		$mm_pt = 35;
-		$y = 286;
+		$y = 292;
 	}
 	else {
 		$x = 15;
@@ -53,9 +53,18 @@
 			list($ff_string, $ff_font) = pdf_fontfit($eankoodirow['nimitys'], mm_pt($mm_pt), $pdf, $norm);
 
 			$nimitys1 = substr($eankoodirow['nimitys'], 0, strlen($ff_string));
-			$pdf->draw_text(mm_pt($x), mm_pt($y), $nimitys1, $firstpage, $ff_font);		
-
 			$nimitys2 = substr($eankoodirow['nimitys'], strlen($ff_string));
+
+			if ($malli == 'PDF40' and trim($nimitys2) == '' and ($i == 1 or $i == 2 or $i == 3 or $i == 4 or $i == 37 or $i == 38 or $i == 39 or $i == 40) ) {
+				if ($i == 37) {
+					$y += 3;
+				}
+
+				$pdf->draw_text(mm_pt($x), mm_pt($y - 4), $nimitys1, $firstpage, $ff_font);
+			}
+			else {
+				$pdf->draw_text(mm_pt($x), mm_pt($y), $nimitys1, $firstpage, $ff_font);		
+			}
 
 			if ($pdf->strlen($nimitys2, $norm) >= mm_pt($mm_pt)) {
 				list($ff_string2, $ff_font2) = pdf_fontfit($nimitys2, mm_pt($mm_pt), $pdf, $norm);
@@ -88,7 +97,7 @@
 		}
 
 		if ($malli == 'PDF40') {
-			$x += 50;
+			$x += 53;
 		}
 		else {
 			$x += 68;
@@ -96,8 +105,8 @@
 
 		if ($i % $riville == 0) {
 			if ($malli == 'PDF40') {
-				$x = 15;
-				$y -= 29;
+				$x = 10;
+				$y -= 29.5;
 			}
 			else {
 				$x = 15;

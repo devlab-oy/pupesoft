@@ -72,7 +72,6 @@ if ($tee == 'YHTEENVETO') {
 		$abcchar = "TM";
 	}
 
-
 	if ($abctyyppi == "kulutus") {
 		$kpltyyppi = " tilausrivi.tyyppi='V' ";
 		$summasql  = " sum(if($kpltyyppi, (SELECT sum(-1*kpl*hinta) from tapahtuma where tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus), 0)) ";
@@ -92,18 +91,24 @@ if ($tee == 'YHTEENVETO') {
 				ORDER by luokka";
 	$res = mysql_query($query) or pupe_error($query);
 
-	$ryhmanimet   	= array();
-	$ryhmaprossat	= array();
-	$sisainen_taso	= "";
+	if (mysql_num_rows($res) > 0) {
+		$ryhmanimet   	= array();
+		$ryhmaprossat	= array();
+		$sisainen_taso	= "";
 
-	while ($row = mysql_fetch_array($res)) {
-		$ryhmanimet[] 	= $row["luokka"];
-		$ryhmaprossat[] = $row["osuusprosentti"];
+		while ($row = mysql_fetch_array($res)) {
+			$ryhmanimet[] 	= $row["luokka"];
+			$ryhmaprossat[] = $row["osuusprosentti"];
 
-		// Otetaan eka kulutaso
-		if ($sisainen_taso == "" and $row["kulujen_taso"] != "") {
-			$sisainen_taso = $row["kulujen_taso"];
+			// Otetaan eka kulutaso
+			if ($sisainen_taso == "" and $row["kulujen_taso"] != "") {
+				$sisainen_taso = $row["kulujen_taso"];
+			}
 		}
+	}
+	else {
+		echo t("ABC-parametrit puuttuu. ABC-aputaulua ei voida rakentaa!");
+		exit;
 	}
 
 	$i_luokka = count($ryhmaprossat)-1;
@@ -697,7 +702,7 @@ if ($tee == "") {
 }
 
 if (trim($argv[1]) == '') {
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 }
 
 ?>

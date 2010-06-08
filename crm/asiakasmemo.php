@@ -308,8 +308,7 @@
 			// Haetaan viimeisin muistiinpano
 			$query = "	SELECT *
 						FROM kalenteri
-						WHERE asiakas		= '$ytunnus' 
-						and liitostunnus 	= '$asiakasid' 
+						WHERE liitostunnus 	= '$asiakasid' 
 						and tyyppi			in ('Memo','Muistutus','Kuittaus','Lead')
 						and tapa		   != 'asiakasanalyysi' 
 						and yhtio			= '$kukarow[yhtio]'
@@ -793,10 +792,9 @@
 						LEFT JOIN kuka ON kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka
 						LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
 						LEFT JOIN kuka kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE kalenteri.asiakas		= '$ytunnus'
-						and kalenteri.liitostunnus	= '$asiakasid'
+						WHERE kalenteri.liitostunnus = '$asiakasid'
 						$lisadel
-						and kalenteri.yhtio			= '$kukarow[yhtio]'";
+						and kalenteri.yhtio = '$kukarow[yhtio]'";
 
 			if($yhtunnus != '') {
 				$query .= " and henkilo='$yhtunnus'";

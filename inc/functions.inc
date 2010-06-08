@@ -8460,13 +8460,24 @@ if (!function_exists("alv_oletus")) {
 }
 
 if (!function_exists("tulosta_logo_pdf")) {
-	function tulosta_logo_pdf($pdf, $thispage, $laskurow) {
+	function tulosta_logo_pdf($pdf, $thispage, $laskurow, $lasku_logo_positio_y=0, $lasku_logo_positio_x=0, $lasku_logo_koko_y=0, $lasku_logo_koko_x=0) {
 		global $kukarow, $yhtiorow;
 
 		$apu_yhtiorow = array();
 
 		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
-		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+		if (isset($laskurow["eta_yhtio"]) and $laskurow["eta_yhtio"] != "") {
+			$query = "	SELECT *
+						FROM yhtion_parametrit
+						WHERE yhtio = '$laskurow[eta_yhtio]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_parametritrow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
+			}
+		}
+		elseif ((int) $laskurow["yhtio_toimipaikka"] > 0) {
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
@@ -8477,7 +8488,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
 		 	}
 		}
-		else {
+		elseif ($laskurow["yhtio"] != "") {
 			$query = "	SELECT *
 						FROM yhtion_parametrit
 						WHERE yhtio = '$laskurow[yhtio]'";
@@ -8487,6 +8498,9 @@ if (!function_exists("tulosta_logo_pdf")) {
 				$yhtion_parametritrow = mysql_fetch_array($result);
 				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
 			}
+		}
+		else {
+			$apu_yhtiorow["lasku_logo"] = $yhtiorow["lasku_logo"];
 		}
 
 		unset($data);
@@ -8511,40 +8525,55 @@ if (!function_exists("tulosta_logo_pdf")) {
 		if ($data) {
 			$image = $pdf->jfif_embed($data);
 
-			if(!$image) {
+			if (!$image) {
 				echo t("Logokuvavirhe");
 			}
 			else {
 
 				$logoparam = array();
 
-				$lasku_logo_koko 		= 50;
-				$lasku_logo_positio_y	= 830;
-				$lasku_logo_positio_x	= 20;
+				if ($lasku_logo_koko_y == 0 and $lasku_logo_koko_x == 0) {
+					$lasku_logo_koko_y = 20;
+					$lasku_logo_koko_x = 240;
 
-				if ((int) $yhtiorow["lasku_logo_koko"] > 0) {
-					$lasku_logo_koko = (int) $yhtiorow["lasku_logo_koko"];
+					if ((int) $yhtiorow["lasku_logo_koko"] > 0) {
+						$lasku_logo_koko_y = (int) $yhtiorow["lasku_logo_koko"];
+					}
 				}
 
-				if ($yhtiorow["lasku_logo_positio"] != "") {
-					list($llp_y, $llp_x) = explode("x", trim($yhtiorow["lasku_logo_positio"]));
+				if ($lasku_logo_positio_y == 0 and $lasku_logo_positio_x == 0) {
+					$lasku_logo_positio_y = 830;
+					$lasku_logo_positio_x = 20;
 
-					if ($llp_y != "") $lasku_logo_positio_y = (int) $llp_y;
-					if ($llp_x != "") $lasku_logo_positio_x = (int) $llp_x;
+					if ($yhtiorow["lasku_logo_positio"] != "") {
+						list($llp_y, $llp_x) = explode("x", trim($yhtiorow["lasku_logo_positio"]));
+
+						if ((int) $llp_y > 0) $lasku_logo_positio_y = (int) $llp_y;
+						if ((int) $llp_x > 0) $lasku_logo_positio_x = (int) $llp_x;
+					}
 				}
 
-				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= $lasku_logo_koko) {
-					$logoparam['scale'] = 240 / $isizelogo[0];
+				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * ($lasku_logo_koko_x / $isizelogo[0]) <= $lasku_logo_koko_y) {
+					$logoparam['scale'] = $lasku_logo_koko_x / $isizelogo[0];
 				}
 				else {
-					$logoparam['scale'] = $lasku_logo_koko  / $isizelogo[1];
+					$logoparam['scale'] = $lasku_logo_koko_y  / $isizelogo[1];
 				}
 
 				$placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
 			}
 		}
 		else {
-			$pdf->draw_text(30, 815,  $laskurow["yhtio_nimi"], $thispage);
+
+			$iso["height"] 	= 14;
+			$iso["font"] 	= "Helvetica-Bold";
+
+			if ($laskurow["yhtio_nimi"] != "") $yhtionimi = $laskurow["yhtio_nimi"];
+			else $yhtionimi = $yhtiorow["nimi"];
+
+			list($ff_string, $ff_font) = pdf_fontfit($yhtionimi, 270, $pdf, $iso);
+
+			$pdf->draw_text(30, 815, $ff_string, $thispage, $ff_font);
 		}
 	}
 }

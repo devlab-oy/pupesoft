@@ -8158,7 +8158,7 @@ if (!function_exists("liite_popup")) {
 
 						$liitteet .= " width='$uusi_w' ";
 						$liitteet .= " height='$uusi_h' ";
-					} 
+					}
 
 					$liitteet .= ">";
 				}
@@ -8456,6 +8456,96 @@ if (!function_exists("alv_oletus")) {
 			$ulos = $vrow['selite'];
 		}
 		return $ulos;
+	}
+}
+
+if (!function_exists("tulosta_logo_pdf")) {
+	function tulosta_logo_pdf($pdf, $thispage, $laskurow) {
+		global $kukarow, $yhtiorow;
+
+		$apu_yhtiorow = array();
+
+		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
+		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_toimipaikkarow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
+		 	}
+		}
+		else {
+			$query = "	SELECT *
+						FROM yhtion_parametrit
+						WHERE yhtio = '$laskurow[yhtio]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_parametritrow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
+			}
+		}
+
+		unset($data);
+
+		if ((int) $apu_yhtiorow["lasku_logo"] > 0) {
+			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
+			$data = $liite["data"];
+			$isizelogo[0] = $liite["image_width"];
+			$isizelogo[1] = $liite["image_height"];
+			unset($liite);
+		}
+		elseif (file_exists($apu_yhtiorow["lasku_logo"])) {
+			$filename = $apu_yhtiorow["lasku_logo"];
+
+			$fh = fopen($filename, "r");
+			$data = fread($fh, filesize($filename));
+			fclose($fh);
+
+			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
+		}
+
+		if ($data) {
+			$image = $pdf->jfif_embed($data);
+
+			if(!$image) {
+				echo t("Logokuvavirhe");
+			}
+			else {
+
+				$logoparam = array();
+
+				$lasku_logo_koko 		= 50;
+				$lasku_logo_positio_y	= 830;
+				$lasku_logo_positio_x	= 20;
+
+				if ((int) $yhtiorow["lasku_logo_koko"] > 0) {
+					$lasku_logo_koko = (int) $yhtiorow["lasku_logo_koko"];
+				}
+
+				if ($yhtiorow["lasku_logo_positio"] != "") {
+					list($llp_y, $llp_x) = explode("x", trim($yhtiorow["lasku_logo_positio"]));
+
+					if ($llp_y != "") $lasku_logo_positio_y = (int) $llp_y;
+					if ($llp_x != "") $lasku_logo_positio_x = (int) $llp_x;
+				}
+
+				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= $lasku_logo_koko) {
+					$logoparam['scale'] = 240 / $isizelogo[0];
+				}
+				else {
+					$logoparam['scale'] = $lasku_logo_koko  / $isizelogo[1];
+				}
+
+				$placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
+			}
+		}
+		else {
+			$pdf->draw_text(30, 815,  $laskurow["yhtio_nimi"], $thispage);
+		}
 	}
 }
 

@@ -8565,8 +8565,8 @@ if (!function_exists("tulosta_logo_pdf")) {
 		}
 		else {
 
-			$iso["height"] 	= 14;
-			$iso["font"] 	= "Helvetica-Bold";
+			$iso["height"] = 14;
+			$iso["font"]   = "Helvetica-Bold";
 
 			if ($laskurow["yhtio_nimi"] != "") $yhtionimi = $laskurow["yhtio_nimi"];
 			else $yhtionimi = $yhtiorow["nimi"];

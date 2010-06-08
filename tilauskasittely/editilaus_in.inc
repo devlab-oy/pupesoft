@@ -97,6 +97,7 @@ $loposoite            	= "";
 $lopviesti            	= "";
 $ketjutus             	= "";
 $editilaus_maksuehto	= "";
+$editilaus_toimitustapa = "";
 $tilaus_hyvaksyntaan	= "";
 $editilaus_rahtivapaa	= "";
 $editilaus_tilaustyyppi = "";
@@ -584,12 +585,14 @@ while (!feof ($fd)) {
 
 			if ($edi_tyyppi == "magento" and $tieto == 'pending_cashondelivery_asp') {
 				// t‰m‰ on j‰lkivaatimus
-				$kukarow["kassamyyja"] = $editilaus_kassalipas = "";
+				$kukarow["kassamyyja"] = "";
+				$editilaus_kassalipas = "";
 
 				$query = "	SELECT tunnus
 							FROM maksuehto
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND jv = 'o'
+							ORDER BY jarjestys
 							LIMIT 1";
 				$editilaus_kateinen_res = mysql_query($query) or pupe_error($query);
 				$editilaus_kateinen_row = mysql_fetch_array($editilaus_kateinen_res);
@@ -600,6 +603,23 @@ while (!feof ($fd)) {
 				else {
 					$editilaus_maksuehto = "";
 					$edi_ulos .= t("J‰lkivaatimus-maksuehtoa ei lˆytynyt")."!\n";
+				}
+
+				$query = "	SELECT selite
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND jvkielto = ''
+							ORDER BY jarjestys
+							LIMIT 1";
+				$editilaus_kateinen_res = mysql_query($query) or pupe_error($query);
+				$editilaus_kateinen_row = mysql_fetch_array($editilaus_kateinen_res);
+
+				if (mysql_num_rows($editilaus_kateinen_res) == 1) {
+					$editilaus_toimitustapa = $editilaus_kateinen_row["selite"];
+				}
+				else {
+					$editilaus_toimitustapa = "";
+					$edi_ulos .= t("J‰lkivaatimus-toimitustapaa ei lˆytynyt")."!\n";
 				}
 			}
 			break;
@@ -668,6 +688,11 @@ while (!feof ($fd)) {
 				// jos tilauksella ei ole maksuehtoa, k‰ytet‰‰n asiakkaan oletusta
 				if ($editilaus_maksuehto == '') {
 					$editilaus_maksuehto = $arow["maksuehto"];
+				}
+
+				// jos tilauksella ei ole maksuehtoa, k‰ytet‰‰n asiakkaan oletusta
+				if ($editilaus_toimitustapa == '') {
+					$editilaus_toimitustapa = $arow["toimitustapa"];
 				}
 
 				// jos ei olla pakotettu rahtivapaata, niin otetaan asiakkaan oletus
@@ -771,7 +796,7 @@ while (!feof ($fd)) {
 							tilausyhteyshenkilo					= '',
 							toimaika 		   					= '$toimpvm',
 							toimitusehto 	   					= '$arow[toimitusehto]',
-							toimitustapa 	   					= '$arow[toimitustapa]',
+							toimitustapa 	   					= '$editilaus_toimitustapa',
 							toimvko	 							= '',
 							toim_maa		   					= '$arow[toim_maa]',
 							toim_nimi		   					= '$arow[toim_nimi]',
@@ -991,12 +1016,12 @@ while (!feof ($fd)) {
 					$alv					= "";
 					$toimaika 				= $laskurow["toimaika"];
 					$kerayspvm				= $laskurow["kerayspvm"];
-					$paikka					= "";					
+					$paikka					= "";
 					$kukarow["kesken"] 		= $laskurow["tunnus"];
-					$jtkielto 				= $laskurow['jtkielto'];					
+					$jtkielto 				= $laskurow['jtkielto'];
 					$varasto 				= array();
 					$laskurow["varasto"]	= "";
-										
+
 					if ($edi_tyyppi == "magento" and is_array($verkkokauppa_sallitutvarastot)) {
 						$varasto = $verkkokauppa_sallitutvarastot;
 					}
@@ -1029,7 +1054,7 @@ while (!feof ($fd)) {
 					// Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
 					// Jos tilattu kpl-m‰‰r‰ on suurempi kuin myyt‰viss‰ oleva kpl-m‰‰r‰, niin pakotetaan rivi hyv‰ksytyksi
 					if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
-						list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno);					
+						list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno);
 
 						// jos saldo ei riit‰ normivarastoista, pit‰‰ katsoa miss‰ varastossa riitt‰‰ ja myyd‰‰n sielt‰ (koska jossain riitt‰‰, muuten tilaus ei olisi edes tullu t‰nne asti)
 						if ($chk_myytavissa < $kpl) {
@@ -1352,6 +1377,7 @@ while (!feof ($fd)) {
 			$edi_hinta            	= "";
 			$ketjutus             	= "";
 			$editilaus_maksuehto	= "";
+			$editilaus_toimitustapa = "";
 			$tilaus_hyvaksyntaan	= "";
 			$editilaus_rahtivapaa	= "";
 			$editilaus_kassalipas	= "";

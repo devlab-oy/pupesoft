@@ -814,7 +814,7 @@ if (!function_exists("saldo_myytavissa")) {
 				$valinta3 = " HAVING varastopaikat.tyyppi is null ";
 			}
 			else {
-				$valinta1 = " varastopaikat.tyyppi = '' and ";
+				$valinta1 = " (varastopaikat.tyyppi = '' or (varastopaikat.tyyppi = 'E' and varastopaikat.erikoistoimitus_alarajasumma > 0 and '$tuote[myyntihinta]' >= varastopaikat.erikoistoimitus_alarajasumma)) and ";
 				$valinta2 = "";
 				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 			}

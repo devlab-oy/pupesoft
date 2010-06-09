@@ -177,7 +177,7 @@ elseif ($ytunnus != '') {
 						and asiakas.ytunnus!=''
 						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT asiakas.*, yhtio.nimi yhtionimi, '2' osuma
+					(SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
@@ -185,7 +185,7 @@ elseif ($ytunnus != '') {
 						and asiakas.asiakasnro!=0
 						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT asiakas.*, yhtio.nimi yhtionimi, '3' osuma
+					(SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
@@ -193,7 +193,7 @@ elseif ($ytunnus != '') {
 						and asiakas.ovttunnus!=''
 						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT asiakas.*, yhtio.nimi yhtionimi, '4' osuma
+					(SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
 						FROM asiakas
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot

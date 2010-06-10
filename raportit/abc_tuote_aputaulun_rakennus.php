@@ -107,7 +107,7 @@ if ($tee == 'YHTEENVETO') {
 		}
 	}
 	else {
-		echo t("ABC-parametrit puuttuu. ABC-aputaulua ei voida rakentaa!");
+		echo t("ABC-parametrit puuttuu. ABC-aputaulua ei voida rakentaa!")."\n";
 		exit;
 	}
 

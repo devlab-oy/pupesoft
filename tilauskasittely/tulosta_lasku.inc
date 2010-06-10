@@ -242,7 +242,17 @@ if (!function_exists('alku')) {
 			$where = " otunnus='$laskurow[tunnus]' ";
 		}
 
-		$query = "	SELECT date_format(if(keratty = 'saldoton' and '$yhtiorow[saldottomien_toimitettuaika]' = 'K', toimaika, toimitettuaika), '%Y-%m-%d') toimitettupaiva
+		if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K') {
+			$toimitettuaikak = " if(keratty = 'saldoton' and toimaika != '0000-00-00', toimaika, toimitettuaika) ";
+		}
+		elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+			$toimitettuaikak = " if(toimaika != '0000-00-00', toimaika, toimitettuaika) ";
+		}
+		else {
+			$toimitettuaikak = " toimitettuaika ";
+		}
+
+		$query = "	SELECT date_format($toimitettuaikak, '%Y-%m-%d') toimitettupaiva
 					FROM tilausrivi
 					WHERE yhtio = '$kukarow[yhtio]'
 					and $where

@@ -1689,9 +1689,15 @@
 									$tilrow['nimitys'] = t_tuotteen_avainsanat($tilrow, 'nimitys', $laskun_kieli);
 								}
 
-								// Palvelutuotteiden toimitettuaika syötetään käsin
-								if ($tilrow["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
-									$tilrow['toimitettuaika'] = $tilrow['toimaika'];
+								// Rivin toimitusaika
+								if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' and $tilrow["keratty"] == "saldoton") {
+									$tilrow["toimitettuaika"] = $tilrow["toimaika"];
+								}
+								elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+									$tilrow["toimitettuaika"] = $tilrow["toimaika"];
+								}
+								else {
+									$tilrow["toimitettuaika"] = $tilrow["toimitettuaika"];
 								}
 
 								//Käytetyn tavaran myynti
@@ -2121,9 +2127,15 @@
 
 							while ($row = mysql_fetch_array($result)) {
 
-								// Palvelutuotteiden toimitettuaika syötetään käsin
-								if ($row["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
-									$row['toimitettuaika'] = $row['toimaika'];
+								// Rivin toimitusaika
+								if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' and $row["keratty"] == "saldoton") {
+									$row["toimitettuaika"] = $row["toimaika"];
+								}
+								elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+									$row["toimitettuaika"] = $row["toimaika"];
+								}
+								else {
+									$row["toimitettuaika"] = $row["toimitettuaika"];
 								}
 
 								rivi($page[$sivu]);

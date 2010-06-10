@@ -129,6 +129,7 @@ if (!function_exists('text_alku')) {
 		$sisalto .= "\r\n";
 		$sisalto .= sprintf('%-35.35s', '');
 		$sisalto .= sprintf('%-25.25s', $laskurow["toimitustapa"]);
+
 		//	Onko meill‰ monta toimitusp‰iv‰‰ vai ei?
 		if ($laskurow["tila"] == 'U') {
 			$where = " uusiotunnus='$laskurow[tunnus]' ";
@@ -136,7 +137,18 @@ if (!function_exists('text_alku')) {
 		else {
 			$where = " otunnus='$laskurow[tunnus]' ";
 		}
-		$query = "	SELECT date_format(if(keratty = 'saldoton' and '$yhtiorow[saldottomien_toimitettuaika]' = 'K', toimaika, toimitettuaika), '%Y-%m-%d') toimitettupaiva
+
+		if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K') {
+			$toimitettuaikak = " if(keratty = 'saldoton' and toimaika != '0000-00-00', toimaika, toimitettuaika) ";
+		}
+		elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+			$toimitettuaikak = " if(toimaika != '0000-00-00', toimaika, toimitettuaika) ";
+		}
+		else {
+			$toimitettuaikak = " toimitettuaika ";
+		}
+
+		$query = "	SELECT date_format($toimitettuaikak, '%Y-%m-%d') toimitettupaiva
 					FROM tilausrivi
 					WHERE yhtio='$kukarow[yhtio]'
 					and $where

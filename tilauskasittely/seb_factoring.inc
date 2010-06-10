@@ -31,9 +31,22 @@
 		$firstpage = text_alku();
 		
 		while ($row = mysql_fetch_array($ffaktresult)) {
+						
+			// Rivin toimitusaika
+			if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' and $row["keratty"] == "saldoton") {
+				$row["toimitettuaika"] = $row["toimaika"];
+			}
+			elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+				$row["toimitettuaika"] = $row["toimaika"];
+			}
+			else {
+				$row["toimitettuaika"] = $row["toimitettuaika"];
+			}
+						
 			text_rivi();
 		}
-		text_alvierittely ();
+		
+		text_alvierittely();
 		text_loppu();
 	}
 	

@@ -1408,9 +1408,16 @@
 					$page[$sivu] = alku();
 
 					while ($row = mysql_fetch_assoc($result)) {
-						// Palvelutuotteiden toimitettuaika syötetään käsin
-						if ($row["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
-							$row['toimitettuaika'] = $row['toimaika'];
+						
+						// Rivin toimitusaika
+						if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' and $row["keratty"] == "saldoton") {
+							$row["toimitettuaika"] = $row["toimaika"];
+						}
+						elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+							$row["toimitettuaika"] = $row["toimaika"];
+						}
+						else {
+							$row["toimitettuaika"] = $row["toimitettuaika"];
 						}
 
 						rivi($page[$sivu]);

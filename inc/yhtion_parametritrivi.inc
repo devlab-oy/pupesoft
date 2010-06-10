@@ -1006,7 +1006,6 @@
 		$jatko = 0;
 	}
 
-
 	if (mysql_field_name($result, $i) == "rivinumero_syotto") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2077,7 +2076,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "saldottomien_toimitettuaika") {
+	if (mysql_field_name($result, $i) == "tilausrivien_toimitettuaika") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -2085,8 +2084,9 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = ''>".t("Saldottomien tuotteiden toimitettuaika tulostetaan laskulle normaalisti")."</option>";
+		$ulos .= "<option value = ''>".t("Tuotteiden toimitettuaika tulostetaan laskulle normaalisti")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Saldottomien tuotteiden toimitettuajaksi tulostetaan laskulle rivin toimitusaika")."</option>";
+		$ulos .= "<option value = 'X' $sel[X]>".t("Kaikkien tuotteiden toimitettuajaksi tulostetaan laskulle rivin toimitusaika")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

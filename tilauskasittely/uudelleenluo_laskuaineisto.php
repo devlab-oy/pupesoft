@@ -522,10 +522,16 @@
 							$tilrow['nimitys'] = t_tuotteen_avainsanat($tilrow, 'nimitys', $laskun_kieli);
 						}
 
-						// Palvelutuotteiden toimitettuaika syötetään käsin
-						if ($tilrow["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
-							$tilrow['toimitettuaika'] = $tilrow['toimaika'];
+						// Rivin toimitusaika
+						if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' and $tilrow["keratty"] == "saldoton") {
+							$tilrow["toimitettuaika"] = $tilrow["toimaika"];
 						}
+						elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+							$tilrow["toimitettuaika"] = $tilrow["toimaika"];
+						}
+						else {
+							$tilrow["toimitettuaika"] = $tilrow["toimitettuaika"];
+						}												
 
 						//Käytetyn tavaran myynti
 						if ($tilrow["alv"] >= 500) {

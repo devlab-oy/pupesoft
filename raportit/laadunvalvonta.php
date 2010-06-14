@@ -4,8 +4,12 @@ require ("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Laadunvalvonta").":</font><hr>";
 
+if (!isset($tuoteryhmittain)) $tuoteryhmittain = '';
+if (!isset($submit)) $submit = '';
+if (!isset($vva)) $vva = date('Y');
+
 if ($submit) {
-	if (isset($tuoteryhmittain)) {
+	if (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') {
 		$tuoteryhma = "tuote.try, ";
 		$group_by = "1, 2";
 		$order_by = "1, 2";
@@ -14,16 +18,24 @@ if ($submit) {
 		$group_by = "1";
 		$order_by = "1";
 	}
+
+	$tuotelisa = '';
+
+	if (isset($try) and trim($try) != '') {
+		$tuotelisa = " and tuote.try = '$try' ";
+	}
+
+	$vva = (int) $vva;
+
 	$query = "	SELECT $tuoteryhma LEFT(toimitettuaika, 7) as toimitettuaika, SUM(IF(toimaika = LEFT(toimitettuaika, 10), 1, 0)) as ajallaan, SUM(IF(toimaika > LEFT(toimitettuaika, 10), 1, 0)) as etuajassa, SUM(IF(toimaika < LEFT(toimitettuaika, 10), 1, 0)) as myohassa
 				FROM tilausrivi USE INDEX (yhtio_laadittu)
-				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' AND laadittu >= '$vva-01-01 00:00:00' AND laadittu <= '$vva-12-31 23:59:59' AND tilausrivi.tyyppi = 'L' AND toimitettuaika != '0000-00-00 00:00:00' AND tuote.ei_saldoa = '' AND tilausrivi.var != 'P'
 				GROUP BY $group_by
 				ORDER BY $order_by";
-
 	$toimaikares = mysql_query($query) or pupe_error($query);
 
-	if (isset($tuoteryhmittain)) {
+	if (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') {
 		while ($toimaikarow = mysql_fetch_array($toimaikares)) {
 			$tuoteryh[] = $toimaikarow;
 		}
@@ -46,10 +58,6 @@ if ($submit) {
 	}
 }
 
-if (!$vva) {
-	$vva = date('Y');
-}
-
 $ajallaan_summa = 0;
 $etuajassa_summa = 0;
 $myohassa_summa = 0;
@@ -58,11 +66,28 @@ echo "<table>";
 echo "<form name='laatu' action='$PHP_SELF' method='post' autocomplete='off'>";
 echo "<tr><th>".t("Syötä vuosi (vvvv)")."</th>
 		<td><input type='text' name='vva' value='$vva' size='5'></td></tr>
-		<tr><th>".t("Tuoteryhmittäin")."</th><td align='center'><input type='checkbox' name='tuoteryhmittain'></td><td class='back'><input type='submit' name='submit' value='Hae'></td></tr>";
+		<tr><th>",t("Valitse tuoteryhmä"),"</th>";
+echo "	<td><select name='try'><option value=''>",t("Näytä kaikki"),"</option>";
+
+$seliteres = t_avainsana("TRY", $kukarow['kieli']);
+
+while ($seliterow = mysql_fetch_array($seliteres)) {
+
+	$sel = '';
+
+	if (isset($try) and $try == $seliterow['selite']) $sel = ' SELECTED';
+
+	echo "<option value='$seliterow[selite]'$sel>$seliterow[selitetark]</option>";
+}
+
+$tuoteryhmittain_chk = (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') ? ' CHECKED' : '';
+
+echo "	</select></td></tr>
+		<tr><th>".t("Tuoteryhmittäin")."</th><td align='center'><input type='checkbox' name='tuoteryhmittain'$tuoteryhmittain_chk></td><td class='back'><input type='submit' name='submit' value='Hae'></td></tr>";
 echo "</form>";
 echo "</table>";
 
-if (isset($tuoteryhmittain)) {
+if (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') {
 	echo "<table>";
 	echo "<tr><th>".t("Tuoteryhmä")."</th><th>".t("Selite")."</th><th>".t("Aika")."</th><th>".t("Ajallaan")."</th><th>".t("Etuajassa")."</th><th>".t("Myöhässä")."</th></tr>";
 	
@@ -93,7 +118,7 @@ elseif ($submit != '' and $tuoteryhmittain == '') {
 		echo "<tr><th>".t("Toimitukset")."</th><th>".t("Tammikuu")."</th><th>".t("Helmikuu")."</th><th>".t("Maaliskuu")."</th><th>".t("Huhtikuu")."</th><th>".t("Toukokuu")."</th><th>".t("Kesäkuu")."</th><th>".t("Heinäkuu")."</th><th>".t("Elokuu")."</th><th>".t("Syyskuu")."</th><th>".t("Lokakuu")."</th><th>".t("Marraskuu")."</th><th>".t("Joulukuu")."</th><th>".t("Yhteensä")."</th></tr>";
 		echo "<tr><th>".t("Myöhästyneet").":</th>";
 			for ($i = 0; $i < 12; $i++) {
-				if ($myohassa[$i] != null) {
+				if (isset($myohassa[$i]) and $myohassa[$i] != null) {
 					$myohassa_summa += $myohassa[$i];
 						echo "<td align='right'>$myohassa[$i]</td>";
 				} else {
@@ -104,7 +129,7 @@ elseif ($submit != '' and $tuoteryhmittain == '') {
 		echo "</tr>";
 		echo "<tr><th>".t("Ajallaan").":</th>";
 			for ($i = 0; $i < 12; $i++) {
-				if ($ajallaan[$i] != null) {
+				if (isset($ajallaan[$i]) and $ajallaan[$i] != null) {
 					$ajallaan_summa += $ajallaan[$i];
 						echo "<td align='right'>$ajallaan[$i]</td>";
 				} else {
@@ -115,7 +140,7 @@ elseif ($submit != '' and $tuoteryhmittain == '') {
 		echo "</tr>";
 		echo "<tr><th>".t("Etuajassa").":</th>";
 			for ($i = 0; $i < 12; $i++) {
-				if ($etuajassa[$i] != null) {
+				if (isset($etuajassa[$i]) and $etuajassa[$i] != null) {
 					$etuajassa_summa += $etuajassa[$i];
 					echo "<td align='right'>$etuajassa[$i]</td>";
 				} else {

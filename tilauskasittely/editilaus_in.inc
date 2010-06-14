@@ -94,6 +94,8 @@ $lopnimi              	= "";
 $loppostitp           	= "";
 $loppostino           	= "";
 $loposoite            	= "";
+$ltoim_maa				= "";
+$yhteyshenkilon_puhelin = "";
 $lopviesti            	= "";
 $ketjutus             	= "";
 $editilaus_maksuehto	= "";
@@ -544,6 +546,17 @@ while (!feof ($fd)) {
 		// toimitusasiakkaan postitoimipaikka
 			$tpostitp = $tieto;
 			break;
+
+		case 'OT_TOIMITUS_MAAKOODI' :
+			// toimitusosoitteen maakoodi
+			$ltoim_maa = $tieto;
+			break;
+
+		case 'YHTEYSHENKILONPUH' :
+			// yhteyshenkilön puhelinnumero
+			$yhteyshenkilon_puhelin = $tieto;
+			break;
+
 		case 'OSTOTIL.OT_MAKSETTU' :
 			// jos Magenton tilaus on jo maksettu luottokortilla niin päivitetään maksuehto
 			if ($edi_tyyppi == "magento" and $tieto == 'processing') {
@@ -648,13 +661,14 @@ while (!feof ($fd)) {
 					$arow["osoite"] = $losoite;
 					$arow["postitp"] = $lpostitp;
 					$arow["postino"] = $lpostino;
+					$arow["maa"] = $ltoim_maa;
 
 					$arow['laskutus_nimi'] 		= $lnimi;
 					$arow['laskutus_nimitark'] 	= $lnimitark;
 					$arow['laskutus_osoite']	= $losoite;
 					$arow['laskutus_postitp'] 	= $lpostitp;
 					$arow['laskutus_postino'] 	= $lpostino;
-					$arow['laskutus_maa']		= $arow['maa'];
+					$arow['laskutus_maa']		= $ltoim_maa;
 				}
 
 				if (trim($arow['laskutus_nimi']) == '') {
@@ -956,8 +970,8 @@ while (!feof ($fd)) {
 
 		case 'OLINCONIV' :
 			// asiakkaan antama hinta tuotteelle
-			$type = explode(" ", $tieto);
-//			$edi_hinta = abs($type[0]);
+			$type = explode("@", $tieto);
+//			$edi_hinta = abs(trim($type[0]));
 			break;
 
 		case 'OLIN21_QT' :
@@ -974,8 +988,8 @@ while (!feof ($fd)) {
 
 			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").".\n";
 			break;
-		case 'OSTOTILRIV.OTR_RIVISUMMA' :
 
+		case 'OSTOTILRIV.OTR_RIVISUMMA' :
 			// Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
 			// TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
 			if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
@@ -987,6 +1001,7 @@ while (!feof ($fd)) {
 				}
 			}
 			break;
+
 		case 'OSTOTILRIV.OTR_SALLITAANJT' :
 			// Sallitaan JT-Rivit
 			if ($tieto == '1') {
@@ -997,6 +1012,7 @@ while (!feof ($fd)) {
 			}
 
 			break;
+
 		case 'OLIN__END' :
 		case '*RE  OSTOTILRIV' :
 
@@ -1369,6 +1385,8 @@ while (!feof ($fd)) {
 			$loppostitp           	= "";
 			$loppostino           	= "";
 			$loposoite            	= "";
+			$ltoim_maa				= "";
+			$yhteyshenkilon_puhelin = "";
 			$edi_nimitys          	= "";
 			$olinsapi             	= "";
 			$olinvarasto          	= "";

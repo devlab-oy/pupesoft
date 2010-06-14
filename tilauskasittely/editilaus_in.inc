@@ -549,12 +549,12 @@ while (!feof ($fd)) {
 
 		case 'OT_TOIMITUS_MAAKOODI' :
 			// toimitusosoitteen maakoodi
-			$ltoim_maa = $tieto;
+			$ltoim_maa = substr(trim($tieto), 0, 2);
 			break;
 
 		case 'YHTEYSHENKILONPUH' :
 			// yhteyshenkilön puhelinnumero
-			$yhteyshenkilon_puhelin = $tieto;
+			$yhteyshenkilon_puhelin = trim($tieto);
 			break;
 
 		case 'OSTOTIL.OT_MAKSETTU' :
@@ -669,6 +669,23 @@ while (!feof ($fd)) {
 					$arow['laskutus_postitp'] 	= $lpostitp;
 					$arow['laskutus_postino'] 	= $lpostino;
 					$arow['laskutus_maa']		= $ltoim_maa;
+
+					if ($arow["maa"] != $yhtiorow["maa"]) {
+						// katsotaan mimmosesta viennistä on kysymys
+						$maa_eu_query = "	SELECT distinct eu
+											FROM maat
+											WHERE koodi = '$arow[maa]'";
+						$maa_eu_res = mysql_query($maa_eu_query) or pupe_error($maa_eu_query);
+						$maa_eu_row = mysql_fetch_array($maa_eu_res);
+
+						if ($maa_eu_row["eu"] == "") {
+							$arow["vienti"] = "K";
+						}
+						else {
+							$arow["vienti"] = "E";
+						}
+
+					}
 				}
 
 				if (trim($arow['laskutus_nimi']) == '') {

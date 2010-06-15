@@ -314,4 +314,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "uudet_pakkaustiedot") {
+
+		$ulos  = "<td><select name='$nimi'>";
+
+		$sel			= array();
+		$sel[$trow[$i]]	= " selected";
+
+		$ulos .= "<option value=''>".t("Koonti-erätulostuksessa ei voi syöttää uusia pakkaustietoja ennen tulostusta")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Koonti-erätulostuksessa voi syöttää uudet pakkaustiedot ennen tulostusta")."</option>";
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 ?>

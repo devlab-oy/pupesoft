@@ -147,6 +147,26 @@
 		$toitares = mysql_query($query) or pupe_error($query);
 		$toitarow = mysql_fetch_assoc($toitares);
 
+		if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin != 'koonti_eratulostus_pakkaustiedot' and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+
+			$linkkilisa = '';
+			
+			if ($sel_ltun != '') {
+
+				$linkkilisa = "&sel_ltun=";
+
+				foreach ($sel_ltun as $ltun_x) {
+					$ltun_x = (int) $ltun_x;
+					$linkkilisa .= "$ltun_x,";
+				}
+
+				$linkkilisa = substr($linkkilisa, 0, -1);
+			}
+
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=rahtikirja.php?toim=lisaa&id=dummy&jv=$jv&komento=$komento&mista=rahtikirja-tulostus.php&toimitustapa_varasto=$toimitustapa_varasto&valittu_rakiroslapp_tulostin={$valittu_rakiroslapp_tulostin}{$linkkilisa}'>";
+			exit;
+		}
+
 		// haetaan rahtikirjan tyyppi
 		$query    = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
 		$avainres = mysql_query($query) or pupe_error($query);
@@ -292,6 +312,8 @@
 		while ($rakir_row = mysql_fetch_assoc($rakir_res)) {
 			// muutama muuttuja tarvitaan
 			$pakkaus       	= array();
+			$pakkauskuvaus 	= array();
+			$pakkauskuvaustark = array();
 			$kilot         	= array();
 			$kollit        	= array();
 			$kuutiot       	= array();
@@ -377,8 +399,8 @@
 
 			while ($rivi = mysql_fetch_assoc($res)) {
 				//otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan myˆhemmin hauissa
-				$otunnukset   .="'$rivi[otunnus]',";
-				$tunnukset    .="'$rivi[rtunnus]',";
+				$otunnukset   .= "'$rivi[otunnus]',";
+				$tunnukset    .= "'$rivi[rtunnus]',";
 
 				//otsikkonumerot talteen, n‰m‰ printataan paperille
 				if (!in_array($rivi['otunnus'], $lotsikot)) {
@@ -399,6 +421,8 @@
 				$otunnukset = substr($otunnukset,0,-1);
 				$tunnukset  = substr($tunnukset,0,-1);
 
+				$vanhat_tunnukset = $tunnukset;
+
 				if ($yhtiorow['rahtikirjan_kollit_ja_lajit'] != "") {
 					$groupby_lisa = ", tunnus";
 				}
@@ -406,15 +430,33 @@
 					$groupby_lisa = "";
 				}
 
+				$pakkaustieto_tunnukset = '';
+
+				if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin == 'koonti_eratulostus_pakkaustiedot' and trim($pakkaustieto_rahtikirjanro) != '') {
+					$query = "	SELECT group_concat(tunnus) pakkaustieto_tunnukset
+								FROM rahtikirjat
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND rahtikirjanro = '$pakkaustieto_rahtikirjanro'
+								AND pakkaustieto_tunnukset != ''";
+					$koonti_era_pakkaustieto_tunnus_res = mysql_query($query) or pupe_error($query);
+					$koonti_era_pakkaustieto_tunnus_row = mysql_fetch_assoc($koonti_era_pakkaustieto_tunnus_res);
+
+					if (trim($koonti_era_pakkaustieto_tunnus_row['pakkaustieto_tunnukset']) != '') {
+						$tunnukset = $pakkaustieto_tunnukset = $koonti_era_pakkaustieto_tunnus_row['pakkaustieto_tunnukset'];
+					}
+				}
+
 				//summataan kaikki painot yhteen
-				$query = "	SELECT pakkaus, sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri
+				$query = "	SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark, sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri
 							FROM rahtikirjat
 							WHERE tunnus in ($tunnukset) and yhtio='$kukarow[yhtio]'
-							group by pakkaus $groupby_lisa order by pakkaus";
+							group by pakkaus, pakkauskuvaus, pakkauskuvaustark $groupby_lisa order by pakkaus, pakkauskuvaus, pakkauskuvaustark";
 				$pakka = mysql_query($query) or pupe_error($query);
 
 				while ($pak = mysql_fetch_assoc($pakka)) {
-					$pakkaus[]   = $pak["pakkaus"];
+					$pakkaus[]   			= $pak["pakkaus"];
+					$pakkauskuvaus[]   		= $pak["pakkauskuvaus"];
+					$pakkauskuvaustark[]   	= $pak["pakkauskuvaustark"];
 
 					if ($pak["kilot"] > 0 or $pak["kollit"] > 0) {
 						$kilot[]     = $pak["kilot"];
@@ -431,6 +473,20 @@
 
 				$tulostuskpl = $kollityht;
 
+				if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin == 'koonti_eratulostus_pakkaustiedot' and trim($pakkaustieto_rahtikirjanro) != '') {
+					// merkataan rahtikirjat tulostetuksi..
+					if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+						$query = "	UPDATE rahtikirjat
+									set tulostettu=now()
+									where tunnus in ($tunnukset)
+									and yhtio = '$kukarow[yhtio]'";
+						$ures  = mysql_query($query) or pupe_error($query);
+					}
+
+					// k‰ytet‰‰n t‰st‰ alasp‰in vanhoja tunnuksia
+					$tunnukset = $vanhat_tunnukset;
+				}
+	
 				// merkataan tilausrivit toimitetuiksi..
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 					$query = "	UPDATE tilausrivi
@@ -579,6 +635,15 @@
 								where tunnus in ($tunnukset)
 								and yhtio = '$kukarow[yhtio]'";
 					$ures  = mysql_query($query) or pupe_error($query);
+
+					if (trim($pakkaustieto_tunnukset) != '') {
+						$query = "	UPDATE rahtikirjat
+									set rahtikirjanro='$rahtikirjanro'
+									where tunnus in ($pakkaustieto_tunnukset)
+									and yhtio = '$kukarow[yhtio]'";
+						$ures  = mysql_query($query) or pupe_error($query);
+					}
+
 				}
 				
 				if ($rakir_row['toimitusvahvistus'] != '') {

@@ -7,30 +7,38 @@
 
 		if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 
+		// otetaan includepath aina rootista
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+		ini_set("display_errors", 0);
+
 		require ("inc/connect.inc");
 		require ("inc/functions.inc");
 
-		$userfile = trim($argv[2]);
-		$filenimi = $userfile;
+		$komentorivilta = "ON";
 
-		$ok = 1;
+		$userfile	= trim($argv[2]);
+		$filenimi	= $userfile;
+		$ok 		= 1;
 	}
 	else {
 		require ("inc/parametrit.inc");
+		
+		$komentorivilta = "";
 
 		echo "<font class='head'>Tiliotteen, LMP:n, kurssien, verkkolaskujen ja viitemaksujen käsittely</font><hr><br><br>";
 	}
 
-	// katotaan onko faili uploadttu
+	// katotaan onko faili uploadattu
 	if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-		$userfile = $_FILES['userfile']['name'];
-		$filenimi = $_FILES['userfile']['tmp_name'];
-		$ok = 1;
+		$userfile	= $_FILES['userfile']['name'];
+		$filenimi	= $_FILES['userfile']['tmp_name'];
+		$ok			= 1;
 	}
 
 	if ($ok == 1) {
 
-		$fd = fopen ($filenimi, "r");
+		$fd = fopen($filenimi, "r");
 
 		if (!($fd)) {
 			echo "<font class='message'>Tiedosto '$filenimi' ei auennut!</font>";
@@ -59,7 +67,6 @@
 		}
 		else {
 			// Tämä oli tiliote tai viiteaineisto
-
 			require ("inc/tilinumero.inc");
 
 			$query= "LOCK TABLE tiliotedata WRITE, yriti READ";
@@ -233,18 +240,19 @@
 		}
 	}
 
+	if ($komentorivilta != "ON") { 
+		echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>";
+		echo "<table>";
+		echo "	<tr>
+					<th>Pankin aineisto:</th>
+					<td><input type='file' name='userfile'></td>
+					<td class='back'><input type='submit' value='Käsittele tiedosto'></td>
+				</tr>";
+		echo "</table>";
 
-	echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>";
-	echo "<table>";
-	echo "	<tr>
-				<th>Pankin aineisto:</th>
-				<td><input type='file' name='userfile'></td>
-				<td class='back'><input type='submit' value='Käsittele tiedosto'></td>
-			</tr>";
-	echo "</table>";
+		echo "</form>";
 
-	echo "</form>";
-
-	require("inc/footer.inc");
+		require("inc/footer.inc");
+	}
 
 ?>

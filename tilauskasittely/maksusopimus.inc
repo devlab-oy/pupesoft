@@ -1,30 +1,30 @@
 <?php
 
 	echo "<font class='head'>".t("Tilauksen maksusopimus")."</font><hr><br>";
-	
+
 	/*
 		Jotta osataan hakea oikeat tilaukset laitetaan tilat talteen
 	*/
-	if($toim == "TARJOUS") {
+	if ($toim == "TARJOUS") {
 		$sallitut_tilat = "'T'";
 	}
 	else {
 		$sallitut_tilat = "'L','G','E','V','W','N','A'";
 	}
-	
-	if($tila == "lisaa_kaikki_jaksotukseen") {
-		
-		if($laskurow["jaksotettu"] == 0) {
+
+	if ($tila == "lisaa_kaikki_jaksotukseen") {
+
+		if ($laskurow["jaksotettu"] == 0) {
 			echo "<font class='error'>".t("Lasku ei osa maksusopimusta")."</font>";
 		}
 		else {
 			//	Varmistetaan että kaikki otsikot on nipussa
 			$query = "	UPDATE lasku
-						SET jaksotettu=(if(tunnusnippu=0,tunnus,tunnusnippu))
+						SET jaksotettu=(if (tunnusnippu=0,tunnus,tunnusnippu))
 						WHERE yhtio = '$kukarow[yhtio]'
-						and if(tunnusnippu = 0,tunnus=$laskurow[tunnus], tunnusnippu=$laskurow[tunnusnippu])
+						and if (tunnusnippu = 0,tunnus=$laskurow[tunnus], tunnusnippu=$laskurow[tunnusnippu])
 						and jaksotettu = 0
-						and tila in ('N','L','T','R','A')
+						and tila in ($sallitut_tilat)
 						and alatila != 'X'";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -38,7 +38,7 @@
 							and alatila != 'X'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
-			
+
 			//	Haetaan kaikki tunnukset
 			$query = "	SELECT group_concat(distinct tunnus) tunnukset
 						FROM lasku
@@ -48,9 +48,9 @@
 						and alatila != 'X'";
 			$result = mysql_query($query) or pupe_error($query);
 			$posrow = mysql_fetch_array($result);
-			
+
 			$ltunnukset	= $posrow["tunnukset"];
-			
+
 			$query = "	UPDATE tilausrivi
 						SET jaksotettu = '$laskurow[jaksotettu]'
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -59,25 +59,24 @@
 		}
 	}
 
-	
-	if($tila == "uusi") {
+	if ($tila == "uusi") {
 		if ($laskurow["jaksotettu"] == 0) {
 			$query = "	UPDATE lasku
 						SET jaksotettu=(if(tunnusnippu=0,tunnus,tunnusnippu))
 						WHERE yhtio = '$kukarow[yhtio]'
 						and if(tunnusnippu = 0,tunnus=$laskurow[tunnus],tunnusnippu=$laskurow[tunnusnippu])
-						and tila in ('N','L','T','R')
+						and tila in ($sallitut_tilat)
 						and alatila != 'X'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// Tässä meidän on hieman fiilattava tätä muuttujaa
-			if($laskurow["tunnusnippu"] > 0) {
+			if ($laskurow["tunnusnippu"] > 0) {
 				$laskurow["jaksotettu"] = $laskurow["tunnusnippu"];
 			}
 			else {
 				$laskurow["jaksotettu"] = $laskurow["tunnus"];
 			}
-			
+
 
 			// Jos tilaus on slittaantunut useaksi osaksi laitetaan maksusoppari koskemaan kaikkia splittejä jotka periytyvät samalta tilaukselta
 			if ($laskurow["vanhatunnus"] > 0) {
@@ -119,15 +118,15 @@
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
-	if($tila == "tallenna") {
+	if ($tila == "tallenna") {
 
 		$query = "	SELECT
-					sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))) jaksotettavaa_veroton,
-					sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))) jaksotettavaa_verolli					
+					sum(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))) jaksotettavaa_veroton,
+					sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))) jaksotettavaa_verolli
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.jaksotettu='$laskurow[jaksotettu]'
 					WHERE lasku.yhtio 		= '$kukarow[yhtio]'
-					and lasku.tila 			IN ($sallitut_tilat)					
+					and lasku.tila 			IN ($sallitut_tilat)
 					and lasku.jaksotettu 	= '$laskurow[jaksotettu]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$rivrow = mysql_fetch_array($result);
@@ -141,26 +140,25 @@
 
 		$summa = str_replace(",", ".", $summa);
 		$osuus = str_replace(",", ".", $osuus);
-		
-		
+
 		$query = "	SELECT *
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tuoterow = mysql_fetch_array($result);
-		
+
 		if ($summa != 0 and $yhtiorow["alv_kasittely"] != "" and $kukarow["alv_kasittely"] == "A" and $tuoterow["alv"] != 0) {
 			$summa = sprintf('%.2f', $summa / (1+$tuoterow["alv"]/100));
 		}
-		
-		if($yhtiorow["alv_kasittely"] == '') {
+
+		if ($yhtiorow["alv_kasittely"] == '') {
 			$laskunsumma = $rivrow["jaksotettavaa_verolli"];
 		}
 		else {
 			$laskunsumma = $rivrow["jaksotettavaa_veroton"];
 		}
-		
+
 		if ($posrow["summa"] != $summa and $summa > 0) {
 			//Lasketaan prossa annetun summan perusteella
 			$osuus = round($summa / $laskunsumma * 100,4);
@@ -169,8 +167,8 @@
 			//Lasketaan summa annetun prossan perusteella
 			$summa = round($osuus/100 * $laskunsumma,2);
 		}
-		
-		
+
+
 		if ($mehto != "") {
 			// haetaan maksuehdoen tiedot tarkastuksia varten
 			$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$mehto'";
@@ -199,7 +197,7 @@
 				$erpcmpp = 0;
 			}
 		}
-		
+
 		$query = "	UPDATE maksupositio SET
 					osuus 		= '$osuus',
 					summa  		= '$summa',
@@ -212,22 +210,23 @@
 					and otunnus = '$laskurow[jaksotettu]'
 					and tunnus  = '$maksupositio'";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		$erpcmpp = "";
 		$erpcmkk = "";
 		$erpcmvv = "";
 	}
 
 	if ($tila == "poista") {
-		$query = "	DELETE 
-					FROM maksupositio 
-					WHERE yhtio = '$kukarow[yhtio]' 
+				
+		$query = "	DELETE
+					FROM maksupositio
+					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$maksupositio'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$query = "	SELECT *
 					FROM maksupositio
-					WHERE yhtio = '$kukarow[yhtio]' 
+					WHERE yhtio = '$kukarow[yhtio]'
 					and otunnus = '$laskurow[jaksotettu]'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -237,13 +236,15 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and jaksotettu = '$laskurow[jaksotettu]'";
 			$result = mysql_query($query) or pupe_error($query);
-			$jaksorow = mysql_fetch_array($query);
+			$jaksorow = mysql_fetch_array($result);
 
 			$query = "	UPDATE lasku USE INDEX (yhtio_jaksotettu)
 						SET jaksotettu = 0
 						WHERE yhtio = '$kukarow[yhtio]'
 						and jaksotettu = '$laskurow[jaksotettu]'";
 			$result = mysql_query($query) or pupe_error($query);
+			
+			$laskurow["jaksotettu"] = 0;
 
 			$query = "	UPDATE tilausrivi USE INDEX (yhtio_otunnus)
 						SET jaksotettu = 0
@@ -262,8 +263,32 @@
 				and jaksotettu != ''";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if(mysql_num_rows($result) == 1) {
+	if (mysql_num_rows($result) == 1) {
 
+		echo "<form method='post' name='maksupositiot' action='$PHP_SELF'>
+				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+				<input type='hidden' name='tee' value='$tee'>
+				<input type='hidden' name='tila' value='uusi'>
+				<input type='submit' name='uusi_maksupositio' value='".t("Uusi positio")."'>
+				</form>";
+
+		if ($laskurow["jaksotettu"] > 0) {
+			echo "<form method='post' name='maksupositiot' action='$PHP_SELF'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='tee' value='$tee'>
+					<input type='hidden' name='tila' value='lisaa_kaikki_jaksotukseen'>
+					<input type='submit' name='uusi_maksupositio' value='".t("Lisää kaikki rivit sopimukseen")."'>
+					</form>";
+		}
+
+		echo "<form method='post' action='$PHP_SELF'>
+				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+				<input type='submit' value='".t("Takaisin tilaukselle")."'>
+				</form><br><br>";
+		
 		$tot = 0;
 
 		$query	= "	SELECT *
@@ -278,11 +303,11 @@
 
 		// Haetaan laskun summat
 		$query = "	SELECT
-					group_concat(distinct lasku.tunnus) tilaukset,					
-					round(sum(if(tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa_veroton,
-					round(sum(if(tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa_verolli,
-					round(sum(if(tilausrivi.jaksotettu=0 , tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput_veroton,
-					round(sum(if(tilausrivi.jaksotettu=0 , tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput_verolli
+					group_concat(distinct lasku.tunnus) tilaukset,
+					round(sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa_veroton,
+					round(sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa_verolli,
+					round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput_veroton,
+					round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput_verolli
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D'
 					WHERE lasku.yhtio		= '$kukarow[yhtio]'
@@ -293,15 +318,15 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$rivrow = mysql_fetch_array($result);
 
-		
+
 		$jaksotettavaa_verolli 	= $rivrow["jaksotettavaa_verolli"];
 		$loput_verolli 			= $rivrow["loput_verolli"];
-		
+
 		$jaksotettavaa_veroton 	= $rivrow["jaksotettavaa_veroton"];
 		$loput_veroton 			= $rivrow["loput_veroton"];
-		
-		
-		
+
+
+
 		// Haetaan kaikki tämän tilauksen laskutuspositiot (HUOM! Positioiden summ on veroton tai verollinen riippuen yhtiön myyntihinnoista)
 		$query = "	SELECT *
 					FROM maksupositio
@@ -310,22 +335,22 @@
 					ORDER BY tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
-		if(mysql_num_rows($result) > 0) {
+		if (mysql_num_rows($result) > 0) {
 
 			echo "<table>";
 			echo "<tr><th>".t("Maksusopimukseen kuuluvat tilaukset").":</th><td> $rivrow[tilaukset] </td></tr>";
 			echo "</table><br>";
 
 			$kuvares = t_avainsana("LASKUKUVAUS");
-			
+
 			$query = "	SELECT *
-						FROM maksuehto						
+						FROM maksuehto
 						WHERE yhtio = '$kukarow[yhtio]'
 						and jaksotettu = ''
 						ORDER BY jarjestys";
 			$mresult = mysql_query($query) or pupe_error($query);
 
-			echo "<table cellspacing='1' cellpadding='2'>
+			echo "<table>
 					<tr>
 					<th>#</th>
 					<th>".t("Osuus-%")."</th>
@@ -344,7 +369,7 @@
 
 				$i++;
 
-				if($row["uusiotunnus"] == 0) {
+				if ($row["uusiotunnus"] == 0) {
 					echo "<form method='post' name='maksupositiot' action='$PHP_SELF'>";
 					echo "<tr>";
 
@@ -352,16 +377,16 @@
 					echo "<td><input type='text' size ='5' name='osuus' value='$row[osuus]'></td>";
 					echo "<td><select name='mehto'>";
 
-					while($prow = mysql_fetch_array($mresult)) {
-						if($row["maksuehto"] == $prow["tunnus"]) $sel = "SELECTED";
-						elseif($asiakasrow["maksuehto"] == $prow["tunnus"] and $row["maksuehto"] == "") $sel = "SELECTED";
+					while ($prow = mysql_fetch_array($mresult)) {
+						if ($row["maksuehto"] == $prow["tunnus"]) $sel = "SELECTED";
+						elseif ($asiakasrow["maksuehto"] == $prow["tunnus"] and $row["maksuehto"] == "") $sel = "SELECTED";
 						else $sel = "";
 
 						echo "<option value='$prow[tunnus]' $sel>".t_tunnus_avainsanat($prow, "teksti", "MAKSUEHTOKV")."</option>";
 					}
 					echo "</select><br>";
-					
-					
+
+
 					// otetaan erpcm kannasta jos mitään ei ole syötetty ruudulle
 					if ($row["erpcm"] != "" and (int) $erpcmpp == 0 and (int) $ercpmkk == 0 and (int) $erpcmvv == 0 and $erpcm_virhe == "") {
 						list($erpcmvv, $erpcmkk, $erpcmpp) = split('-', $row["erpcm"]);
@@ -380,22 +405,22 @@
 					echo "</td>";
 
 					echo "<td><input type='text' size='30' name='lisatiedot' value='$row[lisatiedot]'></td>";
-					
+
 					$query = "	SELECT *
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
 					$tuoteresult = mysql_query($query) or pupe_error($query);
 					$tuoterow = mysql_fetch_array($tuoteresult);
-					
-					if($yhtiorow["alv_kasittely"] != "" and $kukarow["alv_kasittely"] == "A") {
-						$row["summa"] = round($row["summa"] * (1+($tuoterow["alv"]/100)),2);	
+
+					if ($yhtiorow["alv_kasittely"] != "" and $kukarow["alv_kasittely"] == "A") {
+						$row["summa"] = round($row["summa"] * (1+($tuoterow["alv"]/100)),2);
 					}
 					else {
 						$row["summa"] = round($row["summa"],2);
 					}
-					
-					
+
+
 					echo "<td align ='right'><input type='text' size='6'  name='summa' value='".sprintf('%.2f', $row["summa"])."'></td>";
 					echo "</tr>";
 
@@ -403,13 +428,13 @@
 					echo "<td></td><td></td><td valign='top'><select name='kuvaus'>";
 
 					while($prow= mysql_fetch_array($kuvares)) {
-						if($row["kuvaus"] == $prow["selitetark"]) $sel = "SELECTED";
+						if ($row["kuvaus"] == $prow["selitetark"]) $sel = "SELECTED";
 						else $sel = "";
 
 						echo "<option value='$prow[selitetark]' $sel>$prow[selitetark]</option>";
 					}
 					echo "</select></td>";
-					
+
 					echo "<td><textarea rows='2' cols='30' name='ohje'>$row[ohje]</textarea></td>";
 					echo "<td></td>";
 
@@ -435,30 +460,30 @@
 				else {
 					echo "<tr><td>$i</td>";
 					echo "<td>$row[osuus]</td>";
-					
+
 					echo "<td>";
-					
+
 					while($prow = mysql_fetch_array($mresult)) {
-						if($row["maksuehto"] == $prow["tunnus"]) echo t_tunnus_avainsanat($prow, "teksti", "MAKSUEHTOKV");
+						if ($row["maksuehto"] == $prow["tunnus"]) echo t_tunnus_avainsanat($prow, "teksti", "MAKSUEHTOKV");
 					}
-					
+
 					echo "<br>$row[kuvaus]</td>";
 					echo "<td>$row[lisatiedot]<br>$row[ohje]</td>";
 					echo "<td align ='right'>$row[summa]</td></tr>";
 				}
-				
+
 				$erpcmpp = "";
 				$erpcmkk = "";
 				$erpcmvv = "";
-				
+
 				//alkuun tämä resultti
 				mysql_data_seek($kuvares,0);
 				mysql_data_seek($mresult,0);
 			}
-			
+
 			$ihakaikki_verolli  = $loput_verolli + $jaksotettavaa_verolli;
-			$ihakaikki_veroton  = $loput_veroton + $jaksotettavaa_veroton; 		
-			
+			$ihakaikki_veroton  = $loput_veroton + $jaksotettavaa_veroton;
+
 			//Käsin syötetty summa johon lasku pyöristetään
 			if (abs($laskurow["hinta"]-$ihakaikki_verolli) <= 0.5) {
 				$ihakaikki_verolli = sprintf("%.2f",$laskurow["hinta"]);
@@ -467,15 +492,15 @@
 			if (abs($laskurow["hinta"]-$loput_verolli-$jaksotettavaa_verolli) <= 0.5) {
 				$jaksotettavaa_verolli = $laskurow["hinta"]-$loput_verolli;
 			}
-			
+
 			if ($yhtiorow["alv_kasittely"] != "") {
 				$jaksotettavaa = $jaksotettavaa_veroton;
 			}
 			else {
 				$jaksotettavaa = $jaksotettavaa_verolli;
 			}
-					
-			if(round($tot,2) != $jaksotettavaa) {
+
+			if (round($tot,2) != $jaksotettavaa) {
 				$osuusvippaus 	= round(($osuus - 100) * -1,2);
 				$summavippaus 	= round($jaksotettavaa-$tot,2);
 				$osuus 			= round($osuus,2);
@@ -488,45 +513,18 @@
 				echo "</tr>";
 			}
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $tot)."</td></tr>";
-			
+
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä")." ".t("veroton").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput_veroton)."</td></tr>";
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä")." ".t("verollinen").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput_verolli)."</td></tr>";
-			
+
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Tilaus yhteensä")." ".t("veroton").":</th><td class='spec' align='right'>".sprintf('%.2f', $ihakaikki_veroton)."</td></tr>";
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Tilaus yhteensä")." ".t("verollinen").":</th><td class='spec' align='right'>".sprintf('%.2f', $ihakaikki_verolli)."</td></tr>";
-			
+
 			echo "</table>";
 		}
 		else {
 			echo "<font class='error'>".t("Tilauksella ei ole maksupositioita!")."</font><br><br>";
 		}
-		
-		echo "<form method='post' name='maksupositiot' action='$PHP_SELF'>
-				<input type='hidden' name='toim' value='$toim'>
-				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-				<input type='hidden' name='tee' value='$tee'>
-				<input type='hidden' name='tila' value='uusi'>
-				<input type='submit' name='uusi_maksupositio' value='".t("Uusi positio")."'>
-			</form>";
-			
-		if($laskurow["jaksotettu"] > 0) {
-			echo "
-					<form method='post' name='maksupositiot' action='$PHP_SELF'>
-							<input type='hidden' name='toim' value='$toim'>
-							<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-							<input type='hidden' name='tee' value='$tee'>
-							<input type='hidden' name='tila' value='lisaa_kaikki_jaksotukseen'>
-							<input type='submit' name='uusi_maksupositio' value='".t("Lisää kaikki rivit sopimukseen")."'>
-					</form>";
-		}
-			
-				
-		echo "
-				<form method='post' action='$PHP_SELF'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='submit' value='".t("Takaisin tilaukselle")."'>
-				</form>";
-
 	}
+
 ?>

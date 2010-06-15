@@ -57,7 +57,7 @@
 
 			// Tilausrivin kommentti-kenttään menevä kommentti
 			$query = "	SELECT
-						sum(if(uusiotunnus > 0, 1, 0)) laskutettu,
+						sum(if (uusiotunnus > 0, 1, 0)) laskutettu,
 						count(*) yhteensa
 						FROM maksupositio
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -189,13 +189,42 @@
 
 			$query = substr($query, 0, -1);
 			$lisatiedot_result = mysql_query($query) or pupe_error($query);
+				
+			// tehdään vanhan laskun ltyömääräystidoista 1:1 kopio...
+			$query = "	SELECT *
+						FROM tyomaarays
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND otunnus = '$tunnus'";
+			$lisatiedot_result = mysql_query($query) or pupe_error($query);
+			$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
 
+			$query = "INSERT INTO tyomaarays SET ";
+
+			for ($i = 0; $i < mysql_num_fields($lisatiedot_result); $i++) {
+				if (mysql_field_name($lisatiedot_result, $i) == 'laatija') {
+					$query .= mysql_field_name($lisatiedot_result, $i)."='$kukarow[kuka]',";
+				}
+				elseif (mysql_field_name($lisatiedot_result, $i) == 'luontiaika') {
+					$query .= mysql_field_name($lisatiedot_result, $i)."=now(),";
+				}
+				elseif (mysql_field_name($lisatiedot_result, $i) == 'otunnus') {
+					$query .= mysql_field_name($lisatiedot_result, $i)."='$id',";
+				}
+				elseif (mysql_field_name($lisatiedot_result, $i) != 'tunnus') {
+					$query .= mysql_field_name($lisatiedot_result, $i)."='".$lisatiedot_row[$i]."',";
+				}
+			}
+
+			$query = substr($query, 0, -1);
+			$lisatiedot_result = mysql_query($query) or pupe_error($query);	
+				
+				
 			if ($debug==1) echo t("Perustin laskun")." $laskurow[nimi] $id<br>";
 
 			// Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
 			// ja lisätään ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
 			$query = "	SELECT
-						sum(if(tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) jaksotettavaa
+						sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) jaksotettavaa
 						FROM lasku
 						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
@@ -205,8 +234,8 @@
 			$sumrow = mysql_fetch_array($result);
 
 			$query = "	SELECT
-						sum(if(tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) summa,
-						if(tilausrivi.alv>=500, 0, tilausrivi.alv) alv
+						sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) summa,
+						if (tilausrivi.alv>=500, 0, tilausrivi.alv) alv
 						FROM lasku
 						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
@@ -220,7 +249,7 @@
 			$kielires = mysql_query($query) or pupe_error($query);
 			$kielirow = mysql_fetch_array($kielires);
 
-			if($kielirow["kieli"] == "") {
+			if ($kielirow["kieli"] == "") {
 				$kielirow["kieli"]="fi";
 			}
 
@@ -231,7 +260,7 @@
 				$rivikommentti .= "\n ".$posrow["lisatiedot"];
 			}
 
-			if(mysql_num_rows($sresult) == 0) {
+			if (mysql_num_rows($sresult) == 0) {
 				echo "<font class = 'error'>".t("VIRHE: Ennakkolaskulla ei ole yhtään jaksotettua tilausriviä!")." $tunnus</font><br>";
 				echo "<font class = 'message'>".t("Käy tekemässä ennakkolasku manuaalisesti. Ennakkolaskulle perustetun laskun tunnus on")." $id</font><br>";
 				echo "<font class = 'message'>".t("Ennakkolaskutuksen tuotenumero on")." $yhtiorow[ennakkomaksu_tuotenumero]</font><br><br>";
@@ -285,7 +314,7 @@
 			global $kukarow, $yhtiorow;
 
 			///* Tutkitaan alkuperäisten tilausten tiloja *///
-			$query = "	SELECT sum(if(tila='L' and alatila = 'J',1,0)) toimitus_valmis, sum(if(tila='R',1,0)) rojekti, count(*) kaikki, max(tunnus) vikatunnus
+			$query = "	SELECT sum(if (tila='L' and alatila = 'J',1,0)) toimitus_valmis, sum(if (tila='R',1,0)) rojekti, count(*) kaikki, max(tunnus) vikatunnus
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						and jaksotettu = '$tunnus' and tila != 'D' and tila in ('L','N','R')";
@@ -297,7 +326,7 @@
 			}
 			else {
 				$row = mysql_fetch_array($stresult);
-				if($row["kaikki"] - ($row["toimitus_valmis"] + $row["rojekti"]) <> 0) {
+				if ($row["kaikki"] - ($row["toimitus_valmis"] + $row["rojekti"]) <> 0) {
 					echo "<font class='error'>Laskutussopimuksella on kaikki tilaukset oltava toimitettuna ennen loppulaskutusta.</font><br><br>";
 					return 0;
 				}
@@ -319,7 +348,7 @@
 
 			// Tilausrivin kommentti-kenttään menevä kommentti
 			$query = "	SELECT
-						sum(if(uusiotunnus > 0, 1, 0)) laskutettu,
+						sum(if (uusiotunnus > 0, 1, 0)) laskutettu,
 						count(*) yhteensa
 						FROM maksupositio
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -330,7 +359,7 @@
 			$lahteva_lasku = ($aburow["laskutettu"] + 1)."/".$aburow["yhteensa"];
 
 			// varmistetaan että laskutus näyttäisi olevan OK!!
-			if($aburow["yhteensa"] - $aburow["laskutettu"] > 1) {
+			if ($aburow["yhteensa"] - $aburow["laskutettu"] > 1) {
 				echo "<font class='error'>".t("VIRHE: Koitetaan loppulaskuttaa mutta positioita on jäljellä enemmän kuin yksi!")."</font><br><br>";
 				return 0;
 			}
@@ -341,10 +370,10 @@
 						where yhtio='$kukarow[yhtio]' and tunnus='$posrow[maksuehto]' and jaksotettu=''";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 
-			if(mysql_num_rows($meapu) > 0) {
+			if (mysql_num_rows($meapu) > 0) {
 				$meapurow = mysql_fetch_array($meapu);
 
-				if($meapurow["erapvmkasin"] != "" and $posrow["erpcm"] == "0000-00-00") {
+				if ($meapurow["erapvmkasin"] != "" and $posrow["erpcm"] == "0000-00-00") {
 					echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehdon eräpäivä puuttuu")."!!!</font><br><br>";
 					return 0;
 				}
@@ -356,7 +385,7 @@
 				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 				$meapurow = mysql_fetch_array($meapu);
 
-				if($meapurow["erpcm"] == "0000-00-00") {
+				if ($meapurow["erpcm"] == "0000-00-00") {
 					echo "<font class='error'>".t("VIRHE: Loppulaskun eräpäivä puuttuu")."!!!</font><br><br>";
 					return 0;
 				}
@@ -366,7 +395,7 @@
 			echo "<font class = 'message'>".t("Loppulaskutetaan tilaus")." $tunnus<br></font><br>";
 
 			//Lasketaan paljonko ollaan jo laskutettu ja millä verokannoilla
-			$query = "	SELECT round(sum(rivihinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) laskutettu, tilausrivi.alv
+			$query = "	SELECT round(sum(rivihinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) laskutettu, tilausrivi.alv
 						FROM lasku
 						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and kpl <> 0 and uusiotunnus > 0 and tilausrivi.tuoteno='$yhtiorow[ennakkomaksu_tuotenumero]'
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -379,7 +408,7 @@
 			$kielires = mysql_query($query) or pupe_error($query);
 			$kielirow = mysql_fetch_array($kielires);
 
-			if($kielirow["kieli"] == "") {
+			if ($kielirow["kieli"] == "") {
 				$kielirow["kieli"]="fi";
 			}
 
@@ -448,16 +477,16 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
 		$tresult = mysql_query($query) or pupe_error($query);
 
-		if(mysql_num_rows($tresult) == 0) die(t("VIRHE: Yhtiöllä EI OLE ennakkolaskutustuotetta, sopimuslaskutusta ei voida toteuttaa!"));
+		if (mysql_num_rows($tresult) == 0) die(t("VIRHE: Yhtiöllä EI OLE ennakkolaskutustuotetta, sopimuslaskutusta ei voida toteuttaa!"));
 		echo "<font class='head'>".t("Sopimuslaskutus").":</font><hr><br>";
 
 
-		if($tee == "ennakkolaskuta") {
+		if ($tee == "ennakkolaskuta") {
 			ennakkolaskuta($tunnus);
 			$tee = "";
 		}
 
-		if($tee == "ennakkolaskuta_kaikki") {
+		if ($tee == "ennakkolaskuta_kaikki") {
 			// seuraava positio on tämä siis
 			$query = "	SELECT count(*)-1 as ennakko_kpl
 						FROM maksupositio
@@ -477,12 +506,12 @@
 		}
 
 
-		if($tee == "loppulaskuta") {
+		if ($tee == "loppulaskuta") {
 			loppulaskuta($tunnus);
 			$tee = "";
 		}
 
-		if($tee == "") {
+		if ($tee == "") {
 
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(msg){
@@ -493,11 +522,11 @@
 			$query = "	SELECT
 						lasku.jaksotettu jaksotettu,
 						concat_ws(' ',lasku.nimi, lasku.nimitark) nimi,
-						sum(if(maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0)) laskutettu_kpl,
-						sum(if(maksupositio.uusiotunnus = 0, 1, 0)) tekematta_kpl,
+						sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0)) laskutettu_kpl,
+						sum(if (maksupositio.uusiotunnus = 0, 1, 0)) tekematta_kpl,
 						count(*) yhteensa_kpl,
-						sum(if(maksupositio.uusiotunnus = 0 or (maksupositio.uusiotunnus > 0 and uusiolasku.alatila!='X'), maksupositio.summa,0)) laskuttamatta,
-						sum(if(maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', maksupositio.summa, 0)) laskutettu,
+						sum(if (maksupositio.uusiotunnus = 0 or (maksupositio.uusiotunnus > 0 and uusiolasku.alatila!='X'), maksupositio.summa,0)) laskuttamatta,
+						sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', maksupositio.summa, 0)) laskutettu,
 						sum(maksupositio.summa) yhteensa
 						FROM lasku
 						JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio and maksupositio.otunnus = lasku.tunnus
@@ -571,8 +600,8 @@
 				if ($row["yhteensa_kpl"] - $row["laskutettu_kpl"] <= 1) {
 					// tarkastetaan onko kaikki jo toimitettu ja tämä on good to go
 					$query = "	SELECT
-								sum(if(lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
-								sum(if(tilausrivi.toimitettu='',1,0)) toimittamatta,
+								sum(if (lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
+								sum(if (tilausrivi.toimitettu='',1,0)) toimittamatta,
 								count(*) toimituksia
 								FROM lasku
 								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P')

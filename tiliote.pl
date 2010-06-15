@@ -2,23 +2,47 @@
 
 use FileHandle;
 
-print "\npupesoft tiliote.pl v0.1a\n-------------------------\n\n";
+$dirri1		= "/joku/polku/tiliotteet/";    		# mistä haetaan
+$dirri2		= "/joku/polku/tiliotteet/done/";		# minne siirretään
+$pupeote	= "/joku/polku/pupesoft/tiliote.php";	# pupesoft-hakemisto
+$komento	= "/usr/bin/php"; 						# ajettava komento
+$email		= "pupesoft\@devlab.fi"; 				# kenelle meilataan jos on ongelma
+$emailfrom	= "pupesoft\@devlab.fi"; 				# millä osoitteella meili lähetetään
+$tmpfile	= "/tmp/##tiliote-tmp";  	 			# minne tehdään lock file
 
-$dirri  = "/tiliotteet/uudet/";				# dirri mistä etsitään tiliotefaileja
-$done   = "/tiliotteet/valmiit/";			# dirri minne käsitellyt filet siirretään
-$php    = "/usr/bin/php";				# php executable
-$script = "/home/pupesoft/public_html/tiliote.php";	# polku mistä tiliote.php löytyy
+# jos lukkofaili löytyy, mutta se on yli 15 minsaa vanha niin dellatan se
+if (-f $tmpfile) {
+	$mode = (stat($tmpfile))[9];
+	$now = time();
 
-opendir($hakemisto, $dirri);
+	$smtp = Net::SMTP->new('localhost');
+	$smtp->mail($emailfrom);
+	$smtp->to($email);
+	$smtp->data();
+	$smtp->datasend("Subject: Tiliotteiden sisäänluku HUOM!\n\n");
+	$smtp->datasend("\nTiliotteiden sisäänluvussa saattaa olla ongelma. Lukkotiedosto oli yli 15 minuuttia vanha ja se poistettiin. Tutki asia!");
+	$smtp->dataend();
+	$smtp->quit;
 
-while ($file = readdir($hakemisto))
-{
-	$nimi = $dirri.$file;
-	
-	if (-f $nimi)
-	{
-		system("$php $script perl $nimi");
-		system("mv -f $nimi $done");
+	if ($now - $mode > 900) {
+		system("rm -f $tmpfile");
+	}
+}
+
+if (!-f $tmpfile) {
+
+	system("touch $tmpfile");
+	opendir($hakemisto, $dirri1);
+
+	while ($file = readdir($hakemisto)) {
+
+		$nimi = $dirri1.$file;
+
+		if (-f $nimi) {
+			system("$komento $pupeote perl $nimi");
+			system("mv -f $nimi $dirri2");
+		}
 	}
 
+	system("rm -f $tmpfile");
 }

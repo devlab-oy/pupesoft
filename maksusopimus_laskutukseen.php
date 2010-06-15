@@ -74,7 +74,6 @@
 				// paitsi tilaan laitetaan N
 				if (mysql_field_name($stresult,$i)=='tila') {
 					$query .= "tila='N',";
-
 				}
 				elseif (mysql_field_name($stresult,$i)=='alatila') {
 					$query .= "alatila='',";
@@ -83,7 +82,12 @@
 					$query .= "ketjutus='o',";
 				}
 				elseif (mysql_field_name($stresult,$i)=='tilaustyyppi') {
-					$query .= "tilaustyyppi='L',";
+					if (strtoupper($laskurow[$i]) == "A") {
+						$query .= "tilaustyyppi='A',";
+					}
+					else {
+						$query .= "tilaustyyppi='L',";
+					}
 				}
 				// laatijaksi klikkaaja
 				elseif (mysql_field_name($stresult,$i)=='laatija') {
@@ -189,8 +193,8 @@
 
 			$query = substr($query, 0, -1);
 			$lisatiedot_result = mysql_query($query) or pupe_error($query);
-				
-			// tehdään vanhan laskun ltyömääräystidoista 1:1 kopio...
+
+			// tehdään vanhan laskun työmääräystidoista 1:1 kopio...
 			$query = "	SELECT *
 						FROM tyomaarays
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -216,9 +220,9 @@
 			}
 
 			$query = substr($query, 0, -1);
-			$lisatiedot_result = mysql_query($query) or pupe_error($query);	
-				
-				
+			$lisatiedot_result = mysql_query($query) or pupe_error($query);
+
+
 			if ($debug==1) echo t("Perustin laskun")." $laskurow[nimi] $id<br>";
 
 			// Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa

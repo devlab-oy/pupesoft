@@ -98,6 +98,8 @@ if (!function_exists('alku')) {
 					AND otunnus = '{$laskurow['tunnus']}'";
 		$laskutusosoite_result = mysql_query($query) or pupe_error($query);
 
+		$osoitekenttia = 2;
+
 		if (mysql_num_rows($laskutusosoite_result) > 0) {
 			$laskutusosoite_row = mysql_fetch_assoc($laskutusosoite_result);
 
@@ -111,6 +113,7 @@ if (!function_exists('alku')) {
 			$ostaja_kala = 644;
 			$toim_kala = 583;
 			$pohja = 504;
+			$osoitekenttia = 3;
 
 			$pdf->draw_text(50, 656, t("Ostaja", $kieli), 			$thispage, $pieni);
 
@@ -420,7 +423,12 @@ if (!function_exists('alku')) {
 
 		}
 		else {
-			$kala = 565;
+			if ($osoitekenttia == 3) {
+				$kala = 510;
+			}
+			else {
+				$kala = 565;
+			}
 		}
 
 		rivi_otsikot($thispage);

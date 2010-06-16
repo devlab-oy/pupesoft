@@ -223,9 +223,9 @@
 
 				// sisäisessä tuloslaskelmassa voidaan joinata budjetti
 				if ($vertailubu != "" and $kirjain == "S") {
-					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.taso = tili.$tilikarttataso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny'\n";
+					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny'\n";
 					$alkuquery2 .= " ,0 'budj $headny'\n";
-					$alkuquery3 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.taso = tili.taso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny'\n";
+					$alkuquery3 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny'\n";
 
 					$kaudet[] = "budj $headny";
 				}
@@ -256,9 +256,9 @@
 				}
 
 				if ($vertailubu != "" and $kirjain == "S") {
-					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.taso = tili.$tilikarttataso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
+					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
 					$alkuquery2 .= " ,0 'budj $vka - $vkl' \n";
-					$alkuquery3 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.taso = tili.taso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
+					$alkuquery3 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
 					$kaudet[] = "budj ".$vka." - ".$vkl;
 				}
 			}
@@ -267,7 +267,7 @@
 						FROM taso
 						WHERE yhtio = '$kukarow[yhtio]' AND
 						tyyppi = '$kirjain' AND
-						LEFT(taso, 1) = '$aputyyppi'
+						LEFT(taso, 1) = BINARY '$aputyyppi'
 						and taso != ''
 						ORDER BY taso";
 			$tasores = mysql_query($query) or pupe_error($query);
@@ -295,7 +295,7 @@
 						 	FROM tili
 							LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppu' $lisa)
 							WHERE tili.yhtio 		 = '$kukarow[yhtio]'
-							and tili.$tilikarttataso = '$tasorow[taso]'
+							and tili.$tilikarttataso = BINARY '$tasorow[taso]'
 							group by tili.$tilikarttataso";
 				$tilires = mysql_query($query) or pupe_error($query);
 
@@ -306,7 +306,7 @@
 								JOIN budjetti tili ON (tili.yhtio = budjetti.yhtio and tili.tunnus=budjetti.tunnus)
 								LEFT JOIN tiliointi USE INDEX (PRIMARY) ON (tiliointi.tunnus = 0)
 								WHERE budjetti.yhtio  = '$kukarow[yhtio]'
-								and budjetti.taso 	  = '$tasorow[taso]'
+								and budjetti.taso 	  = BINARY '$tasorow[taso]'
 								group by budjetti.taso";
 					$tilires = mysql_query($query) or pupe_error($query);
 				}
@@ -512,7 +512,7 @@
 
 						$class = "tumma";
 
-						$query = "SELECT * FROM tili WHERE yhtio = '$kukarow[yhtio]' and $tilikarttataso = '$key'";
+						$query = "SELECT * FROM tili WHERE yhtio = '$kukarow[yhtio]' and $tilikarttataso = BINARY '$key'";
 						$tilires = mysql_query($query) or pupe_error($query);
 
 						while ($tilirow = mysql_fetch_array($tilires)) {
@@ -569,7 +569,7 @@
 						$query = "	SELECT summattava_taso
 									FROM taso
 									WHERE yhtio 		 = '$kukarow[yhtio]'
-									and taso 			 = '$key'
+									and taso 			 = BINARY '$key'
 									and summattava_taso != ''
 									and tyyppi 			 = '$kirjain'";
 						$summares = mysql_query($query) or pupe_error($query);
@@ -996,7 +996,7 @@
 			echo "<tr><th valign='top'>".t("Raportointitaso")."</th>
 					<td><select name='rtaso'>";
 
-			$query = "select max(length(taso)) taso from taso where yhtio = '$kukarow[yhtio]'";
+			$query = "SELECT max(length(taso)) taso from taso where yhtio = '$kukarow[yhtio]'";
 			$vresult = mysql_query($query) or pupe_error($query);
 			$vrow = mysql_fetch_array($vresult);
 

@@ -229,15 +229,17 @@
 
 		if ($tulostin == 'Työmääräys' and $kukarow['hinnat'] == 0) {
 
-			if ($yhtiorow["tyomaaraystyyppi"] == "") {
-				$seltt = "CHECKED";
-			}
-			else {
-				$seltp = "CHECKED";
-			}
+			echo "<tr><td rowspan='2'>".t("Työmääräystyyppi")."</td><td>";			
+			echo "<select name='tyomtyyppi'>";
 
-			echo "<tr><td rowspan='2'>".t("Työmääräystyyppi")."</td><td><input type='radio' name='tyomtyyppi' value='N' $seltt> ".t("näytetään hinnat")."</td></tr>";
-			echo "<tr><td><input type='radio' name='tyomtyyppi' value='P' $seltp> ".t("hintoja ei näytetä")."</td></tr>";
+			$sel = array();
+			$sel[$yhtiorow["tyomaaraystyyppi"]] = "selected";
+
+			echo "<option value = 'A'>".t("Tuotetiedot, hinnat ja alennukset");
+			echo "<option value = 'O' $sel[O]>".t("Tuotetiedot");
+			echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");          
+			echo "</select>";
+			echo "</td></tr>";
 		}
 
 		if ($tulostin == 'Purkulista') {

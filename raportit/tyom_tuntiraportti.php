@@ -5,7 +5,7 @@
 	if (!isset($tee)) $tee = '';
 
 	if (!function_exists("piirra_tuntiraportti")) {
-		function piirra_tuntiraportti($asentaja = "", $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro = '', $asiakasid = '', $asiakasosasto = '', $asiakasryhma = '', $tyojono = '', $tyostatus = '') {
+		function piirra_tuntiraportti($asentaja = "", $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro = '', $asiakasid = '', $asiakasosasto = '', $asiakasryhma = '', $tyojono = '', $tyostatus = '', $ytunnus = '') {
 			
 			if (trim($vva) != '' and trim($kka) != '' and trim($ppa) != '' and trim($vvl) != '' and trim($kkl) != '' and trim($ppl) != ''){
 				$vva = (int) $vva;
@@ -45,6 +45,10 @@
 
 			if (trim($asiakasryhma) != '') {
 				$asiakaslisa .= " and asiakas.ryhma = '".mysql_real_escape_string($asiakasryhma)."' ";
+			}
+
+			if (trim($ytunnus) != '') {
+				$asiakaslisa .= " and asiakas.ytunnus = '".mysql_real_escape_string($ytunnus)."' ";
 			}
 
 			$tyomaarayslisa = '';
@@ -321,6 +325,11 @@
 		}
 	}
 
+	//Voidaan tarvita jotain muuttujaa t‰‰lt‰
+	if (isset($muutparametrit)) {
+		list($tyom_nro,$asentaja,$tyojono,$tyostatus,$asiakasid,$asiakasosasto,$asiakasryhma,$kka,$vva,$ppa,$kkl,$vvl,$ppl,$tultiin) = explode('#', $muutparametrit);
+	}
+
 	if (!isset($tyom_nro)) $tyom_nro = '';
 	if (!isset($ytunnus)) $ytunnus = '';
 	if (!isset($asentaja)) $asentaja = '';
@@ -453,9 +462,14 @@
 
 	echo "<input type='submit' value='",t("Hae"),"'></form><br/><br/>";
 
-	if ($tee == 'raportoi' and trim($ytunnus) != '') {
+	if ($tee == 'raportoi' and trim($ytunnus) != '' and $tultiin != 'asiakashaku') {
 
 		$ahlopetus 	= "raportit/tyom_tuntiraportti.php////tee=$tee//ytunnus=$ytunnus//tyom_nro=$tyom_nro//vva=$vva//kka=$kka//ppa=$ppa//vvl=$vvl//kkl=$kkl//ppl=$ppl";
+
+		$tultiin = 'asiakashaku';
+
+		//Voidaan tarvita jotain muuttujaa t‰‰lt‰
+		$muutparametrit = $tyom_nro.'#'.$asentaja.'#'.$tyojono.'#'.$tyostatus.'#'.$asiakasid.'#'.$asiakasosasto.'#'.$asiakasryhma.'#'.$kka.'#'.$vva.'#'.$ppa.'#'.$kkl.'#'.$vvl.'#'.$ppl.'#'.$tultiin;
 
 		if (@include("inc/asiakashaku.inc"));
 		elseif (@include("asiakashaku.inc"));
@@ -471,11 +485,11 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 			
 			while ($vrow=mysql_fetch_array($vresult)) {
-				piirra_tuntiraportti($vrow["kuka"], $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro, $asiakasid, $asiakasosasto, $asiakasryhma, $tyojono, $tyostatus);
+				piirra_tuntiraportti($vrow["kuka"], $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro, $asiakasid, $asiakasosasto, $asiakasryhma, $tyojono, $tyostatus, $ytunnus);
 			}
 		}
 		else {
-			piirra_tuntiraportti($asentaja, $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro, $asiakasid, $asiakasosasto, $asiakasryhma, $tyojono, $tyostatus);
+			piirra_tuntiraportti($asentaja, $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro, $asiakasid, $asiakasosasto, $asiakasryhma, $tyojono, $tyostatus, $ytunnus);
 		}
 		
 		echo "</table><br>";

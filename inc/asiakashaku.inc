@@ -537,17 +537,7 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<input type='hidden' name='myyjanro' 		  value='$myyjanro'>";
 			echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
 			echo "<input type='hidden' name='lasku_yhtio'	  value='$asiakas[yhtio]'>";
-			echo "<input type='hidden' name='vva'  			  value='$vva'>";
-			echo "<input type='hidden' name='kka'  			  value='$kka'>";
-			echo "<input type='hidden' name='ppa'			  value='$ppa'>";
-			echo "<input type='hidden' name='vvl'			  value='$vvl'>";
-			echo "<input type='hidden' name='kkl'			  value='$kkl'>";
-			echo "<input type='hidden' name='ppl'			  value='$ppl'>";
-			echo "<input type='hidden' name='tyom_nro' 		  value='$tyom_nro'>";
-			echo "<input type='hidden' name='asiakasosasto'	  value='$asiakasosasto'>";
-			echo "<input type='hidden' name='asiakasryhma'	  value='$asiakasryhma'>";
-			echo "<input type='hidden' name='tyojono' 		  value='$tyojono'>";
-			echo "<input type='hidden' name='tyostatus'		  value='$tyostatus'>";
+			echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
 
 			if (is_array($varastosta)) {
 				foreach ($varastosta as $varatunnu) {

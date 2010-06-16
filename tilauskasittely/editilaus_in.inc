@@ -547,7 +547,7 @@ while (!feof ($fd)) {
 			$tpostitp = $tieto;
 			break;
 
-		case 'OT_TOIMITUS_MAAKOODI' :
+		case 'OSTOTIL.OT_TOIMITUS_MAAKOODI' :
 			// toimitusosoitteen maakoodi
 			$ltoim_maa = substr(trim($tieto), 0, 2);
 			break;
@@ -656,12 +656,13 @@ while (!feof ($fd)) {
 
 				// Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
 				if ($edi_tyyppi == "magento") {
-					$arow["nimi"] = $lnimi;
-					$arow["nimitark"] = $lnimitark;
-					$arow["osoite"] = $losoite;
-					$arow["postitp"] = $lpostitp;
-					$arow["postino"] = $lpostino;
-					$arow["maa"] = $ltoim_maa;
+					$arow["nimi"]		= $lnimi;
+					$arow["nimitark"]	= $lnimitark;
+					$arow["osoite"]		= $losoite;
+					$arow["postitp"]	= $lpostitp;
+					$arow["postino"]	= $lpostino;
+					$arow["maa"]		= $ltoim_maa;
+					$arow["vienti"]		= "";
 
 					$arow['laskutus_nimi'] 		= $lnimi;
 					$arow['laskutus_nimitark'] 	= $lnimitark;
@@ -670,7 +671,7 @@ while (!feof ($fd)) {
 					$arow['laskutus_postino'] 	= $lpostino;
 					$arow['laskutus_maa']		= $ltoim_maa;
 
-					if ($arow["maa"] != $yhtiorow["maa"]) {
+					if ($arow["maa"] != $yhtiorow["maa"] and $arow["maa"] != "") {
 						// katsotaan mimmosesta viennistä on kysymys
 						$maa_eu_query = "	SELECT distinct eu
 											FROM maat

@@ -1703,7 +1703,7 @@
 								unset($lapsires);
 							}
 
-							if ($kukarow['extranet'] == '' and !array_key_exists('SHELL', $_ENV)) {
+							if ($kukarow['extranet'] == '' and $komentorivilta != "ON") {
 								// $argc == 0
 								// Korvaavat tuotteet //
 								$query  = "SELECT * from korvaavat where tuoteno='$jtrow[tuoteno]' and yhtio='$kukarow[yhtio]'";

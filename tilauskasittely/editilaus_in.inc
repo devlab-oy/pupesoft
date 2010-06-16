@@ -61,6 +61,9 @@ if (!function_exists('jt_toimita_editilaus')) {
 		}
 
 		if ($asiakasid > 0 and count($varastosta) > 0) {
+
+			$komentorivilta = "ON";
+
 			require('jtselaus.php');
 		}
 	}

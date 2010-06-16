@@ -1124,6 +1124,9 @@
 								$order_sorttaus = $yhtiorow["lahetteen_jarjestys_suunta"];
 							}
 
+							if ($yhtiorow["lahetteen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+							else $pjat_sortlisa = "";
+
 							if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
 								$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
 							}
@@ -1136,7 +1139,8 @@
 										round(if (tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 										round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 										$sorttauskentta,
-										if(tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort
+										if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+										if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 										FROM tilausrivi
 										JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 										JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -1145,7 +1149,7 @@
 										and tilausrivi.yhtio = '$kukarow[yhtio]'
 										$tyyppilisa
 										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-										ORDER BY jtsort, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+										ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 							$riresult = mysql_query($query) or pupe_error($query);
 
 							//generoidaan rivinumerot
@@ -1206,14 +1210,15 @@
 												round(if (tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 												round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 												$sorttauskentta,
-												if (tilausrivi.var='J', 1, 0) jtsort
+												if (tilausrivi.var='J', 1, 0) jtsort,
+												if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 												FROM tilausrivi
 												JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 												JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 												WHERE tilausrivi.otunnus in ('$tunrow[tunnukset]')
 												and tilausrivi.yhtio = '$kukarow[yhtio]'
 												$tyyppilisa
-												ORDER BY jtsort, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+												ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 									$riresult = mysql_query($query) or pupe_error($query);
 
 									while ($row = mysql_fetch_assoc($riresult)) {
@@ -1702,15 +1707,19 @@
 		}
 
 		if ($toim == "VALMISTUS") {
-			$sorttaus = "valmistus_kerayslistan_jarjestys";
-			$sorttaussuunta = "valmistus_kerayslistan_jarjestys_suunta";
+			$sorttauskentta = generoi_sorttauskentta($yhtiorow["valmistus_kerayslistan_jarjestys"]);
+			$order_sorttaus = $yhtiorow["valmistus_kerayslistan_jarjestys_suunta"];
+
+			if ($yhtiorow["valmistus_kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+			else $pjat_sortlisa = "";
 		}
 		else {
-			$sorttaus = "kerayslistan_jarjestys";
-			$sorttaussuunta = "kerayslistan_jarjestys_suunta";
-		}
+			$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
+			$order_sorttaus = $yhtiorow["kerayslistan_jarjestys_suunta"];
 
-		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
+			if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+			else $pjat_sortlisa = "";
+		}
 
 		// Summataan rivit yhteen
 		if ($yhtiorow[$sorttaus] == "S") {
@@ -1729,14 +1738,15 @@
 					tilausrivi.tuoteno puhdas_tuoteno,
 					tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
 					concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka,
-					tuote.ei_saldoa, 
+					tuote.ei_saldoa,
 					tuote.sarjanumeroseuranta,
-					tilausrivi.keratty, 
-					tilausrivi.tunnus, 
+					tilausrivi.keratty,
+					tilausrivi.tunnus,
 					tilausrivi.var,
 					lasku.jtkielto,
 					$select_lisa
-					$sorttauskentta
+					$sorttauskentta,
+					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 					FROM tilausrivi
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 					JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
@@ -1746,7 +1756,7 @@
 					and tilausrivi.tyyppi in ($tyyppi)
 					and tilausrivi.kerattyaika = '0000-00-00 00:00:00'
 					$group_lisa
-					ORDER BY sorttauskentta ".$yhtiorow[$sorttaussuunta].", tilausrivi.tunnus";
+					ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 		$riveja = mysql_num_rows($result);
 
@@ -1852,7 +1862,7 @@
 					}
 
 					echo "</tr>";
-					
+
 					if ($yhtiorow[$sorttaus] == "S" and strpos($row["rivitunnukset"], ",") > 0) {
 						foreach(explode(",", $row["rivitunnukset"]) as $tunn) {
 							$tunn = trim($tunn);
@@ -1862,7 +1872,7 @@
 					else {
 						echo "<input type='hidden' name='kerivi[]' value='$row[tunnus]'>
 								<input type='hidden' name='maara[$row[tunnus]]' $poikkeava_maara_disabled>";
-					}										
+					}
 				}
 				else {
 					echo "<tr class='aktiivi'>

@@ -59,21 +59,25 @@
 		}
 
 		if ($laskurow["tila"] == "V") {
-			$sorttaus = "valmistus_kerayslistan_jarjestys";
-			$sorttaussuunta = "valmistus_kerayslistan_jarjestys_suunta";
+			$sorttauskentta = generoi_sorttauskentta($yhtiorow["valmistus_kerayslistan_jarjestys"]);
+			$order_sorttaus = $yhtiorow["valmistus_kerayslistan_jarjestys_suunta"];
+
+			if ($yhtiorow["valmistus_kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+			else $pjat_sortlisa = "";
 		}
 		else {
-			$sorttaus = "kerayslistan_jarjestys";
-			$sorttaussuunta = "kerayslistan_jarjestys_suunta";
-		}
+			$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
+			$order_sorttaus = $yhtiorow["kerayslistan_jarjestys_suunta"];
 
-		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
+			if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+			else $pjat_sortlisa = "";
+		}
 
 		$select_lisa = $where_lisa = "";
 
-		//	 Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+		// Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
 		if ($yhtiorow[$sorttaus] == "S") {
-			$select_lisa = "sum(kpl) kpl, sum(tilkpl) tilkpl, sum(varattu) varattu, sum(jt) jt, '' perheid, '' perheid2, ";
+			$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
 			$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
 		}
 
@@ -82,15 +86,14 @@
 					tuote.sarjanumeroseuranta,
 					$select_lisa
 					$sorttauskentta
-					FROM tilausrivi, tuote
+					FROM tilausrivi
+					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					WHERE tilausrivi.otunnus in ($tilausnumeroita)
 					and tilausrivi.yhtio   = '$kukarow[yhtio]'
-					and tilausrivi.yhtio   = tuote.yhtio
-					and tilausrivi.tuoteno = tuote.tuoteno
 					and tilausrivi.tyyppi  != 'D'
 					$lisa1
 					$where_lisa
-					ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
+					ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);
 
 		//generoidaan rivinumerot

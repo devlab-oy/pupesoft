@@ -182,17 +182,17 @@
 	else {
 		$vteksti = t("Kotimaa");
 	}
-	
+
 	if ($laskutyyppi == "Mitätöity") {
 		$fn1 = "<font class='error'>";
 		$fn2 = "</font>";
-		
+
 		$deletedlisa = ",'D'";
 	}
 	else {
 		$fn1 = "";
 		$fn2 = "";
-		
+
 		$deletedlisa = "";
 	}
 
@@ -201,8 +201,11 @@
 			<td>".str_replace(".",",",$laskurow['erikoisale'])."</td>
 			<td>".tv1dateconv($laskurow["toimaika"])."</td>";
 
-	$dpdtun = ${$kukarow['yhtio'].'_dpdtun'};
-	$dpdss 	= ${$kukarow['yhtio'].'_dpdss'};
+	if (isset($dpdtun[$kukarow['yhtio']])) $dpdtun = $dpdtun[$kukarow['yhtio']];
+	else $dpdtun = "";
+
+	if (isset($dpdss[$kukarow['yhtio']]))  $dpdss  = $dpdss[$kukarow['yhtio']];
+	else $dpdss = "";
 
 	$possi = strpos(strtoupper($laskurow['toimitustapa']),"DPD");
 
@@ -385,10 +388,10 @@
 		$komm .= "\n".t("Lisätietoja").":###".$laskurow['viesti'];
 	}
 
-	if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T') {
+	if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T' or $laskurow['tilaustyyppi'] == 'A') {
 		$query  = "	SELECT komm1, komm2
 					from tyomaarays
-					where yhtio='$kukarow[yhtio]'
+					where yhtio = '$kukarow[yhtio]'
 					and otunnus = '$laskurow[tunnus]'";
 		$reklaresult = mysql_query($query) or pupe_error($query);
 		$reklarow = mysql_fetch_array($reklaresult);

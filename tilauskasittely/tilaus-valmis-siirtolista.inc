@@ -486,31 +486,39 @@
 				$riresult = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_array($riresult);
 
-
 				$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
+
+				if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+				else $pjat_sortlisa = "";
 
 				// Keräyslistan rivit
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-					$query = " 	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
-								sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, group_concat(tilausrivi.tunnus) tunnus,";
-					$lisa = " 	and tilausrivi.tyyppi in ($tvs_tyyppi)
-								GROUP BY 1,2,3,4,5,6,7,8 ";
+					$querysel = "	tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
+									sum(tilausrivi.tilkpl) tilkpl,
+									sum(tilausrivi.varattu) varattu,
+									sum(tilausrivi.jt) jt,
+									group_concat(tilausrivi.tunnus) tunnus, ";
+
+					$lisa = "	and tilausrivi.tyyppi in ($tvs_tyyppi)
+								GROUP BY 1,2,3,4,5,6,7,8,9,10 ";
 				}
 				else {
-					$query = " 	SELECT tilausrivi.*,";
+					$querysel = " tilausrivi.*, ";
 					$lisa = " ";
 				}
 
-				$query .= "	$sorttauskentta
-							FROM tilausrivi use index (yhtio_otunnus), tuote
+				$query = "	SELECT
+							$querysel
+							$sorttauskentta,
+							if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
+							FROM tilausrivi use index (yhtio_otunnus)
+							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 							WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.var in ('','H')
-							and tuote.yhtio=tilausrivi.yhtio
-							and tuote.tuoteno=tilausrivi.tuoteno
 							$lisasalker
 							$lisa
-							ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
+							ORDER BY $pjat_sortlisa sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tilausnumeroita = $laskurow["tunnus"];
@@ -613,14 +621,19 @@
 						$order_sorttaus = $yhtiorow["lahetteen_jarjestys_suunta"];
 					}
 
-					$query = " 	SELECT *,
-								$sorttauskentta
+					if ($yhtiorow["lahetteen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+					else $pjat_sortlisa = "";
+
+					$query = " 	SELECT tilausrivi.*,
+								$sorttauskentta,
+								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 								FROM tilausrivi use index (yhtio_otunnus)
-								WHERE otunnus = '$laskurow[tunnus]'
-								and yhtio = '$kukarow[yhtio]'
-								and var in ('','H')
-								and tyyppi != 'D'
-								ORDER BY sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+								WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+								and tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.var in ('','H')
+								and tilausrivi.tyyppi != 'D'
+								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 
 					require_once ("tulosta_valmistus.inc");

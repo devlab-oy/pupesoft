@@ -44,9 +44,9 @@
 
 		//hateaan laskun kaikki tiedot
 		$query = "	SELECT *
-					FROM lasku 
-					WHERE tila    = 'U' 
-					and alatila   = 'X' 
+					FROM lasku
+					WHERE tila    = 'U'
+					and alatila   = 'X'
 					and sisainen != ''
 					$where
 					and yhtio ='$kukarow[yhtio]'
@@ -54,16 +54,16 @@
 		$laskurrrresult = mysql_query ($query) or die ("".t("Kysely ei onnistu")." $query");
 
 		while ($laskurow = mysql_fetch_array($laskurrrresult)) {
-						
+
 			$otunnus = $laskurow["tunnus"];
-			
+
 			// haetaan maksuehdon tiedot
 			$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
-						from maksuehto 
+						from maksuehto
 						left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 						where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($result) == 0) {
 				$masrow = array();
 				if ($laskurow["erpcm"] == "0000-00-00") {
@@ -73,11 +73,11 @@
 			else {
 				$masrow = mysql_fetch_array($result);
 			}
-			
+
 			//maksuehto tekstinä
 			$maksuehto      = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 			$kateistyyppi   = $masrow["kateinen"];
-			
+
 			if ($yhtiorow['laskutyyppi'] == 3) {
 				require_once ("tulosta_lasku_simppeli.inc");
 				tulosta_lasku($otunnus, $komento["Lasku"], $kieli, $toim, $tee);
@@ -97,9 +97,9 @@
 				// haetaan asiakkaan tietojen takaa sorttaustiedot
 				$order_sorttaus = '';
 
-				$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta 
-										FROM asiakas 
-										WHERE yhtio='$kukarow[yhtio]' 
+				$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta
+										FROM asiakas
+										WHERE yhtio='$kukarow[yhtio]'
 										and tunnus='$laskurow[liitostunnus]'";
 				$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
@@ -113,18 +113,24 @@
 					$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
 				}
 
+				if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+				else $pjat_sortlisa = "";
+
 				// haetaan tilauksen kaikki rivit
-				$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys, $sorttauskentta
+				$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys,
+							$sorttauskentta,
+							if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 							FROM tilausrivi
+							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 							WHERE $where
-							and tilausrivi.yhtio		 = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi		 = 'L'
+							and tilausrivi.yhtio	= '$kukarow[yhtio]'
+							and tilausrivi.tyyppi	= 'L'
 							and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-							and tilausrivi.kpl <> 0
-							ORDER BY tilausrivi.otunnus, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+							and tilausrivi.kpl != 0
+							ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				//kuollaan jos yhtään riviä ei löydy
 				if (mysql_num_rows($result) == 0) {
 					echo t("Laskurivejä ei löytynyt");
@@ -149,7 +155,7 @@
 					else {
 						$row["toimitettuaika"] = $row["toimitettuaika"];
 					}
-					
+
 					rivi($page[$sivu]);
 				}
 
@@ -186,18 +192,18 @@
 				elseif ($komento["Lasku"] != '' and $komento["Lasku"] != 'edi') {
 					$line = exec("$komento[Lasku] $pdffilenimi");
 				}
-				
+
 				echo t("Sisäiset laskut tulostuu")."....<br>";
 
 				//poistetaan tmp file samantien kuleksimasta...
 				system("rm -f $pdffilenimi");
 
 				unset($pdf);
-				unset($page);					
+				unset($page);
 
 			}
 		}
-		
+
 		$tee = '';
 		echo "<br>";
 	}

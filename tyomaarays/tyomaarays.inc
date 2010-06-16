@@ -35,23 +35,28 @@
 		$asrow = mysql_fetch_array($result);
 
 		// katotaan miten halutaan sortattavan
-		if ($toim != "REKLAMAATIO") {
-			$sorttaus = "lahetteen_jarjestys";
-			$sortlisa = "ORDER BY tuotetyyppi, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+		if ($toim == "REKLAMAATIO") {
+			$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
+			$order_sorttaus = $yhtiorow["kerayslistan_jarjestys_suunta"];
+
+			if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+			else $pjat_sortlisa = "";
+
 		}
 		else {
-			$sorttaus = "kerayslistan_jarjestys";
-			$sortlisa = "ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
-		}
+			$sorttauskentta = generoi_sorttauskentta($yhtiorow["tyomaarayksen_jarjestys"]);
+			$order_sorttaus = $yhtiorow["tyomaarayksen_jarjestys_suunta"];
 
-		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
+			if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+			else $pjat_sortlisa = "";
+		}
 
 		//työmääräyksen rivit
 		$query = "  SELECT tilausrivi.*,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 					tuote.sarjanumeroseuranta,
 					$sorttauskentta,
-					if (tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
+					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -59,7 +64,7 @@
 					and tilausrivi.yhtio 	= '$kukarow[yhtio]'
 					and tilausrivi.yhtio 	= tuote.yhtio
 					and tilausrivi.tuoteno  = tuote.tuoteno
-					$sortlisa";
+					ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$tilausnumeroita = $otunnus;
@@ -82,22 +87,21 @@
 		$sivu  = 1;
 		$paino = 0;
 
-		$tyyppi = "";
-
-		if ($tyomtyyppi == "P" or $kukarow['hinnat'] != 0) {
+		if ($toim == "SIIRTOTYOMAARAYS") {
+			$tyyppi = "SISAINEN";
+		}
+		elseif ($tyomtyyppi == "O" or $kukarow['hinnat'] != 0) {
+			$tyyppi = "O";
+		}
+		elseif ($tyomtyyppi == "P") {
 			$tyyppi = "P";
 		}
-		elseif($tyomtyyppi == "N") {
+		elseif ($tyomtyyppi == "A") {
 			$tyyppi = "";
 		}
 		else {
 			$tyyppi = $yhtiorow["tyomaaraystyyppi"];
 		}
-
-		if ($toim == "SIIRTOTYOMAARAYS") {
-			$tyyppi = "SISAINEN";
-		}
-
 
 		// Aloitellaan lähetteen teko
 		if ($toim != "REKLAMAATIO") {
@@ -160,7 +164,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Katotaan löytyykö tilausrivejä
-		$query = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
 		$keres = mysql_query($query) or pupe_error($query);
 
 		//Yhtään riviä ei ole
@@ -169,7 +173,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			// tilaus ei enää kesken...
-			$query	= "update kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+			$query	= "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		else {
@@ -187,7 +191,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Katotaan löytyykö tilausrivejä
-		$query = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
 		$keres = mysql_query($query) or pupe_error($query);
 
 		//Yhtään riviä ei ole
@@ -214,7 +218,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Katotaan löytyykö tilausrivejä
-		$query = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
 		$keres = mysql_query($query) or pupe_error($query);
 
 		//Yhtään riviä ei ole
@@ -223,7 +227,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			// tilaus ei enää kesken...
-			$query	= "update kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+			$query	= "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		else {

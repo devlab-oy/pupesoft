@@ -39,8 +39,8 @@
 					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 					LEFT JOIN rahtisopimukset on lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus
-					WHERE rahtikirjat.yhtio	= '$kukarow[yhtio]' 
-					and rahtikirjat.tulostettu	= '0000-00-00 00:00:00' 
+					WHERE rahtikirjat.yhtio	= '$kukarow[yhtio]'
+					and rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
 					and rahtikirjat.toimitustapa	= '$toimitustapa'
 					and rahtikirjat.tulostuspaikka	= '$varasto'
 					$jvehto";
@@ -771,6 +771,9 @@
 						$order_sorttaus = $yhtiorow["lahetteen_jarjestys_suunta"];
 					}
 
+					if ($yhtiorow["lahetteen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+					else $pjat_sortlisa = "";
+
 					if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
 						$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
 					}
@@ -783,7 +786,8 @@
 								round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 								round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 								$sorttauskentta,
-								if(tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort
+								if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
+								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 								FROM tilausrivi
 								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 								JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -792,7 +796,7 @@
 								and tilausrivi.yhtio = '$kukarow[yhtio]'
 								$tyyppilisa
 								and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-								ORDER BY jtsort, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+								ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$riresult = mysql_query($query) or pupe_error($query);
 
 					//generoidaan rivinumerot
@@ -852,14 +856,15 @@
 										round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 										round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 										$sorttauskentta,
-										if(tilausrivi.var='J', 1, 0) jtsort
+										if (tilausrivi.var='J', 1, 0) jtsort,
+										if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 										FROM tilausrivi
 										JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 										JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 										WHERE tilausrivi.otunnus in ('$tunrow[tunnukset]')
 										and tilausrivi.yhtio = '$kukarow[yhtio]'
 										$tyyppilisa
-										ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+										ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 							$riresult = mysql_query($query) or pupe_error($query);
 
 							while ($row = mysql_fetch_assoc($riresult)) {
@@ -888,7 +893,7 @@
 					$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
 
 					loppu_lahete($page[$sivu], 1);
-					
+
 					//katotaan onko laskutus nouto
 					$query = "  SELECT toimitustapa.nouto, maksuehto.kateinen
 								FROM lasku
@@ -901,7 +906,7 @@
 					if (mysql_num_rows($kures) > 0 and $yhtiorow["lahete_nouto_allekirjoitus"] != "") {
 						kuittaus_lahete();
 					}
-					
+
 					if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 						alvierittely_lahete($page[$sivu]);
 					}
@@ -1963,7 +1968,7 @@
 			echo "<input type='hidden' name='komento' value='$komento'>";
 			echo "<input type='hidden' name='valittu_rakiroslapp_tulostin' value='$valittu_rakiroslapp_tulostin'>";
 			echo "<input type='hidden' name='sel_ltun' value='$sel_ltun'>";
-			
+
 		}
 		else {
 			echo "<input type='hidden' name='rahtikirjan_esisyotto' value='$rahtikirjan_esisyotto'>";

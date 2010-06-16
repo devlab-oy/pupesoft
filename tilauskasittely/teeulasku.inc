@@ -399,8 +399,8 @@
 
 		$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta
 								FROM asiakas
-								WHERE yhtio='$kukarow[yhtio]'
-								and tunnus='$laskurow[liitostunnus]'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = '$laskurow[liitostunnus]'";
 		$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
 		if (mysql_num_rows($asiakas_apu_res) == 1) {
@@ -413,20 +413,25 @@
 			$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
 		}
 
+		if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+		else $pjat_sortlisa = "";
+
 		//laitetaan välisummat rivin kommenttiin aina kun otunnus vaihtuu
-		$query = "	SELECT otunnus, tunnus, $sorttauskentta
+		$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus,
+					$sorttauskentta,
+					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 					FROM tilausrivi
-					WHERE yhtio='$kukarow[yhtio]'
-					and otunnus in ($tunnukset)
-					and kpl != 0
-					ORDER BY otunnus, sorttauskentta $order_sorttaus, tunnus";
+					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.otunnus in ($tunnukset)
+					and tilausrivi.kpl != 0
+					ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$valsures = mysql_query($query) or pupe_error($query);
 
 		$edotunnus = '';
 		$edtunnus  = '';
 
 		while ($valsurow = mysql_fetch_array($valsures)) {
-
 			if ($valsurow["otunnus"] != $edotunnus and $edotunnus != '') {
 
 				$query = "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi
@@ -437,7 +442,10 @@
 				$sumsrow	= mysql_fetch_array($sumsresult);
 
 				if ($sumsrow["valkoodi"] != '' and trim(strtoupper($sumsrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $sumsrow["vienti_kurssi"] != 0) {
-					$query 		= "SELECT sum(round((rivihinta/$sumsrow[vienti_kurssi])*(1+alv/100), 2)) summa FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and otunnus='$edotunnus'";
+					$query = "	SELECT sum(round((rivihinta/$sumsrow[vienti_kurssi])*(1+alv/100), 2)) summa
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and otunnus = '$edotunnus'";
 					$sumsresult = mysql_query($query) or pupe_error($query);
 					$sumsrow2	= mysql_fetch_array($sumsresult);
 
@@ -445,15 +453,17 @@
 				}
 
 				// jos meillä on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteensäriville kommenttiin...
-				if ((strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) or
-				 	strtoupper($sumsrow["osoite"]) != strtoupper($sumsrow["toim_osoite"])) and $sumsrow["toim_nimi"] != "") {
+				if ((strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) or strtoupper($sumsrow["osoite"]) != strtoupper($sumsrow["toim_osoite"])) and $sumsrow["toim_nimi"] != "") {
 					$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 				}
 				else {
 					$sumskommentti = t("Tilaus", $kielirow["kieli"])." $edotunnus ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 				}
 
-				$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
+				$query = "	UPDATE tilausrivi
+							SET kommentti = concat(kommentti, '\n', '$sumskommentti')
+							WHERE tunnus = '$edtunnus'
+							and yhtio = '$kukarow[yhtio]'";
 				$paivres = mysql_query($query) or pupe_error($query);
 			}
 

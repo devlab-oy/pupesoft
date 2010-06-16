@@ -498,19 +498,23 @@
 						$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
 					}
 
+					if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+					else $pjat_sortlisa = "";
+
 					// Kirjoitetaan rivitietoja tilausriveiltä
 					$query = "	SELECT tilausrivi.*, tuote.eankoodi, lasku.vienti_kurssi,
 								if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika,
 								if (tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,
-								$sorttauskentta
+								$sorttauskentta,
+								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-								LEFT JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-								and tilausrivi.uusiotunnus = '$lasrow[tunnus]'
-								and tilausrivi.kpl <> 0
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+								WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
+								and tilausrivi.uusiotunnus 	= '$lasrow[tunnus]'
+								and tilausrivi.kpl != 0
 								and tilausrivi.tyyppi = 'L'
-								ORDER BY otunnus, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+								ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$tilres = mysql_query($query) or pupe_error($query);
 
 					$rivinumerot = array(0 => 0);
@@ -531,7 +535,7 @@
 						}
 						else {
 							$tilrow["toimitettuaika"] = $tilrow["toimitettuaika"];
-						}												
+						}
 
 						//Käytetyn tavaran myynti
 						if ($tilrow["alv"] >= 500) {

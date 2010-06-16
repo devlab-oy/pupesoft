@@ -243,8 +243,9 @@
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
 
-		$ulos .= "<option value = ''>".t("Normaali työmääräyspohja");
-		$ulos .= "<option value = 'P' $sel[P]>".t("Pelkistetty työmääräyspohja");
+		$ulos .= "<option value = ''>".t("Tuotetiedot, hinnat ja alennukset");
+		$ulos .= "<option value = 'O' $sel[O]>".t("Tuotetiedot");
+		$ulos .= "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");
 
 
 		$ulos .= "</select></td>";
@@ -1054,7 +1055,9 @@
 		mysql_field_name($result, $i) == "kerayslistan_jarjestys" or
 		mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys" or
 		mysql_field_name($result, $i) == "laskun_jarjestys" or
-		mysql_field_name($result, $i) == "ostotilauksen_jarjestys") {
+		mysql_field_name($result, $i) == "ostotilauksen_jarjestys" or
+		mysql_field_name($result, $i) == "tarjouksen_jarjestys" or
+		mysql_field_name($result, $i) == "tyomaarayksen_jarjestys") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -1088,7 +1091,9 @@
 		mysql_field_name($result, $i) == "kerayslistan_jarjestys_suunta" or
 		mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys_suunta" or
 		mysql_field_name($result, $i) == "laskun_jarjestys_suunta" or
-		mysql_field_name($result, $i) == "ostotilauksen_jarjestys_suunta") {
+		mysql_field_name($result, $i) == "ostotilauksen_jarjestys_suunta" or
+		mysql_field_name($result, $i) == "tarjouksen_jarjestys_suunta" or
+		mysql_field_name($result, $i) == "tyomaarayksen_jarjestys_suunta") {
 
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1098,6 +1103,26 @@
 
 		$ulos .= "<option value = 'ASC'  $sel[ASC]>".t("Nouseva");
 		$ulos .= "<option value = 'DESC' $sel[DESC]>".t("Laskeva");
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "lahetteen_palvelutjatuottet" or
+		mysql_field_name($result, $i) == "laskun_palvelutjatuottet" or
+		mysql_field_name($result, $i) == "kerayslistan_palvelutjatuottet" or
+		mysql_field_name($result, $i) == "valmistus_kerayslistan_palvelutjatuottet" or
+		mysql_field_name($result, $i) == "tarjouksen_palvelutjatuottet" or
+		mysql_field_name($result, $i) == "tyomaarayksen_palvelutjatuottet") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = ''>".t("Yhdessä");
+		$ulos .= "<option value = 'E' $sel[E]>".t("Erikseen");
 
 		$ulos .= "</select></td>";
 

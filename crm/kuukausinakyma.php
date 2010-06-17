@@ -26,8 +26,6 @@
 	$MONTH_ARRAY = array(1=>t('Tammi'),t('Helmi'),t('Maalis'),t('Huhti'),t('Touko'),t('Kesä'),t('Heinä'),t('Elo'),t('Syys'),t('Loka'),t('Marras'),t('Joulu'));
 	$DAY_ARRAY = array(t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
-	if (trim($toim) == 'TYOMAARAYS_ASENTAJA') $asentaja = 'tyomaarays_asentaja';
-
 	//kalenteritoiminnot
 	function days_in_month($month, $year){
 		// calculate number of days in a month
@@ -86,7 +84,7 @@
 	$mymonth = $month;
 	$myday = $day;
 
-	$lopetus = "../crm/kuukausinakyma.php////osasto=$osasto//year=$year//month=$month//day=$pva//asentaja=$asentaja//toim=$toim";
+	$lopetus = "../crm/kuukausinakyma.php////osasto=$osasto//year=$year//month=$month//day=$pva//toim=$toim";
 
 	echo "<font class='head'>".t("Kuukausinäkymä").": ". $MONTH_ARRAY[$month] ." $year</font><hr>";
 
@@ -94,9 +92,8 @@
 	echo "<th>".t("Valitse kuukausi").":</th><td>
 			<form action='$PHP_SELF' method='post'>
 			<input type='hidden' name='year'  value='$year'>
-			<input type='hidden' name='asentaja' value='$asentaja'>
 			<input type='hidden' name='toim' value='$toim'>
-			<a href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth&osasto=$osasto&asentaja=$asentaja&toim=$toim'> << </a>
+			<a href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth&osasto=$osasto&toim=$toim'> << </a>
 			<select name='month' Onchange='submit();'>";
 
 	$i=1;
@@ -111,7 +108,7 @@
 		$i++;
 	}
 
-	echo "</select><a href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth&osasto=$osasto&asentaja=$asentaja&toim=$toim'> >> </a></td>";
+	echo "</select><a href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth&osasto=$osasto&toim=$toim'> >> </a></td>";
 	echo "<td class='back' width='20'></td>";
 	echo "<th>".t("Valitse osasto").":</th><td><select name='osasto' Onchange='submit();'>";
 
@@ -236,7 +233,7 @@
 			$varitys = "td";
 		}
 
-		echo "<tr><$varitys nowrap><a href='$PHP_SELF?day=1&month=$month&year=$year&valkuka=$row[kuka]&osasto=$osasto&asentaja=$asentaja&toim=$toim' title='$row[nimi]'>$row[nimi]</a></$varitys><td></td>";
+		echo "<tr><$varitys nowrap><a href='$PHP_SELF?day=1&month=$month&year=$year&valkuka=$row[kuka]&osasto=$osasto&toim=$toim' title='$row[nimi]'>$row[nimi]</a></$varitys><td></td>";
 
 		for ($i = 1; $i <= days_in_month($month, $year); $i++) {
 			$pva = $i;
@@ -290,7 +287,7 @@
 					}
 					echo "</div>";
 
-					echo "<$varitys align='center' width='35' nowrap class='tooltip' id='$krow[tunnus]'><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=$krow[kello]&year=$krow[vuosi]&kuu=$krow[kuu]&paiva=$krow[paiva]&tunnus=$krow[tunnus]&konserni=XXX&asentaja=$asentaja&toim=$toim'>$etufontti $krow[tapa] $takafontti</a></$varitys>";
+					echo "<$varitys align='center' width='35' nowrap class='tooltip' id='$krow[tunnus]'><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=$krow[kello]&year=$krow[vuosi]&kuu=$krow[kuu]&paiva=$krow[paiva]&tunnus=$krow[tunnus]&konserni=XXX&toim=$toim'>$etufontti $krow[tapa] $takafontti</a></$varitys>";
 				}
 				else {
 					echo "	<div id='div_$krow[tunnus]' class='popup' style='width:200px;'>
@@ -301,7 +298,7 @@
 				}
 			}
 			else {
-				echo "<$varitys align='center' width='35' nowrap><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=&year=$year&kuu=$month&paiva=$pva&konserni=XXX&asentaja=$asentaja&toim=$toim'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></$varitys>";
+				echo "<$varitys align='center' width='35' nowrap><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=&year=$year&kuu=$month&paiva=$pva&konserni=XXX&toim=$toim'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></$varitys>";
 			}
 
 			if (weekday_number($i, $month, $year)==6) {

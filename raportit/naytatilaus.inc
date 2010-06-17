@@ -3,6 +3,7 @@
 	$useslave = 1;
 
 	$lis = "";
+	
 	if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
 		$lis = " and lasku.liitostunnus = '$kukarow[oletus_asiakas]' ";
 	}
@@ -25,7 +26,7 @@
 
 	$vientikurssi = 1;
 
-	if (!in_array($laskurow["vienti_kurssi"],array(1,0))) {
+	if (!in_array($laskurow["vienti_kurssi"], array(1,0))) {
 		$vientikurssi = $laskurow["vienti_kurssi"];
 	}
 
@@ -34,13 +35,13 @@
 		$query = "SELECT * from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$laskurow[tunnus]' limit 1";
 		$rakre = mysql_query($query) or pupe_error($query);
 		$rakirrow = mysql_fetch_array($rakre);
+		
 		// spacet rivinvaihdoiksi niin n‰ytt‰‰ kivemmalta
 		$rakirrow['rahtikirjanro'] = str_replace(" ", "<br>", trim($rakirrow['rahtikirjanro']));
 	}
 
 	//	Onko koko projekti maksettu
 	if ($laskurow['tila']=='R') {
-
 		$query = "	SELECT count(distinct laskunro) laskuja, sum(if (laskunro=0, 1, 0)) laskuttamatta,
 					sum(if ((select mapvm from lasku l where l.yhtio = lasku.yhtio and l.laskunro = lasku.laskunro and l.tila = 'U') = '0000-00-00', 1, 0)) maksamatta,
 					max((select mapvm from lasku l where l.yhtio = lasku.yhtio and l.laskunro = lasku.laskunro and l.tila = 'U')) maksettu
@@ -48,6 +49,7 @@
 					WHERE yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnus]' and tila = 'L'";
 		$mares = mysql_query($query) or pupe_error($query);
 		$marow = mysql_fetch_array($mares);
+		
 		if ($marow["laskuttamatta"] == 0 and $marow["maksamatta"] == 0) {
 			$laskurow["mapvm"] = $marow["maksettu"];
 		}
@@ -707,9 +709,17 @@
 				$sorttauslisa = "";
 			}
 		}
-
+		
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
-
+		
+		if ($toim == "TILAUSVAHVISTUS") {
+			// Ei raaka-aineita mukaan tilausvahvistuksiin
+			$rivityypit = "'E','L','G','W','T'";
+		}
+		else {
+			$rivityypit = "'E','L','G','V','W','T'";
+		}
+		
 		// Tilausrivit
 		$query  = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
 					tilausrivi.kpl m‰‰r‰,
@@ -726,7 +736,7 @@
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
-					and tilausrivi.tyyppi in ('E','L','G','V','W','T' $deletedlisa)
+					and tilausrivi.tyyppi in ($rivityypit $deletedlisa)
 					ORDER BY tilausrivi.otunnus, $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -965,7 +975,7 @@
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and $where
 							$pklisa
-							and tilausrivi.tyyppi != 'D'";
+							and tilausrivi.tyyppi in ($rivityypit)";
 				$pkres = mysql_query($pkquery) or pupe_error($pkquery);
 				$pkrow = mysql_fetch_row($pkres);
 
@@ -1418,7 +1428,7 @@
 							FROM tilausrivi
 							WHERE $where
 							and yhtio	= '$kukarow[yhtio]'
-							and tyyppi	= 'L'
+							and tyyppi in ($rivityypit)
 							and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'
 							ORDER BY alv";
 			$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
@@ -1432,7 +1442,7 @@
 								round(sum((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.varattu+tilausrivi.kpl)*(1-tilausrivi.ale/100)),2) rivihinta
 								FROM tilausrivi
 								JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-								WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L' and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'";
+								WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi in ($rivityypit) and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'";
 				}
 				else {
 					$aquery = "	SELECT
@@ -1440,7 +1450,7 @@
 								round(sum((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),2) rivihinta
 								FROM tilausrivi
 								JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-								WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L' and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'";
+								WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi in ($rivityypit) and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'";
 				}
 
 				$aresult = mysql_query($aquery) or pupe_error($aquery);
@@ -1479,7 +1489,7 @@
 								FROM tilausrivi
 								WHERE $where
 								and yhtio	= '$kukarow[yhtio]'
-								and tyyppi	= 'L'
+								and tyyppi in ($rivityypit)
 								and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'
 								ORDER BY alv";
 				$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
@@ -1493,7 +1503,7 @@
 									round(sum((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.varattu+tilausrivi.kpl)*(1-tilausrivi.ale/100)),2) rivihinta
 									FROM tilausrivi
 									JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-									WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L' and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
+									WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi in ($rivityypit) and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
 					}
 					else {
 						$aquery = "	SELECT
@@ -1501,7 +1511,7 @@
 									round(sum((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),2) rivihinta
 									FROM tilausrivi
 									JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-									WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L' and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
+									WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi in ($rivityypit) and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
 					}
 
 					$aresult = mysql_query($aquery) or pupe_error($aquery);

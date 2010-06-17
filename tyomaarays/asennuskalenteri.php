@@ -36,11 +36,6 @@
 	$ASENTAJA_ARRAY_TARK = array();
 
 	while ($kirow = mysql_fetch_array($kires)) {
-
-		if (strtolower($toim) == 'tyomaarays_asentaja' and !isset($tyojono) and $kirow['selitetark'] == $kukarow['kuka']) {
-			$tyojono = $kirow['selite'];
-		}
-
 		$ASENTAJA_ARRAY[] = $kirow["selitetark"];
 		$ASENTAJA_ARRAY_TARK[] = $kirow["selitetark_2"];
 	}
@@ -172,7 +167,7 @@
 						and tunnus  = '$tyotunnus'";
 			mysql_query($query) or pupe_error($query);
 
-			
+
 			if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' and isset($lisaa_muistutus) and trim($lisaa_muistutus) == 'kylla') {
 				$query = "	SELECT *
 							FROM kalenteri
@@ -323,7 +318,7 @@
 				$muistutus_chk_row = mysql_fetch_assoc($muistutus_chk_res);
 
 				if (mysql_num_rows($kappale_chk_res) == 0) {
-					$query = "	DELETE FROM kalenteri 
+					$query = "	DELETE FROM kalenteri
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$muistutus_chk_row[tunnus]'
 								AND pvmalku	= '$year-$month-$day $aika'
@@ -511,9 +506,9 @@
 
 	if ($tee == "") {
 		echo "<table style='width: 90%; height: 90%;'>";
-		
+
 		$korkeus = floor(100 / (count($AIKA_ARRAY)+2))."%";
-		
+
 		if (count($ASENTAJA_ARRAY_TARK) < 5) {
 			echo "<tr>";
 			echo "<td class='back'></td>";
@@ -530,7 +525,7 @@
 					<tr><td class='back' style='height: $korkeus;'>&nbsp;</td></tr>";
 
 			foreach ($AIKA_ARRAY as $a) {
-				if (strtolower($toim) == 'tyomaarays_asentaja') $a = '&nbsp;';			
+				if (strtolower($toim) == 'tyomaarays_asentaja') $a = '&nbsp;';
 				echo "<tr><td class='back' style='height: $korkeus;'>$a</td></tr>";
 			}
 
@@ -546,7 +541,7 @@
 				}
 			}
 		}
-		
+
 		$div_arrayt = array();
 		$solu = 0;
 
@@ -571,10 +566,10 @@
 					$tyyppilisa = "'asennuskalenteri'";
 				}
 
-				$query = "	SELECT $selectlisa kalenteri.kuka, 
-							kalenteri.pvmalku, 
-							kalenteri.pvmloppu, 
-							kalenteri.tapa, 
+				$query = "	SELECT $selectlisa kalenteri.kuka,
+							kalenteri.pvmalku,
+							kalenteri.pvmloppu,
+							kalenteri.tapa,
 							kalenteri.tyyppi,
 							if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus,
 							if(lasku.nimi='', kalenteri.kuka, lasku.nimi) nimi,
@@ -606,12 +601,12 @@
 							$ed_aika = array_shift($aika_temp);
 
 							foreach ($AIKA_ARRAY as $a) {
-								
+
 								$slot = str_replace(array(":","-"," "), "", $year."-".sprintf('%02d', $month)."-".sprintf('%02d', $i)." ".$a);
-								
+
 								// Koska kale on tuntitarkuudella työ alkaa aina "00" minuuttina
 								$alku = str_replace(array(":","-"," "), "", substr($vrow["pvmalku"],0,14)."00");
-																								
+
 								$lopp = str_replace(array(":","-"," "), "", substr($vrow["pvmloppu"],0,16));
 
 								if ($alku <= $slot and $lopp > $slot and $vrow["kuka"] == $b) {
@@ -654,11 +649,11 @@
 				}
 
 				if (count($ASENTAJA_ARRAY_TARK) < 5) {
-					
+
 					echo "<table style='width: 100%; height: 100%;'>";
-					
+
 					$sarakeleveys = "40px";
-					
+
 					echo "<tr><th style='text-align: center; height: $korkeus;' colspan='".count($ASENTAJA_ARRAY)."'><a name='{$i}_{$month}_{$year}'><b>$i</b></a></th></tr><tr>";
 
 					foreach ($ASENTAJA_ARRAY_TARK as $b) {
@@ -667,9 +662,9 @@
 					echo "</tr>";
 				}
 				else {
-					
+
 					$sarakeleveys = floor(100 / (count($ASENTAJA_ARRAY) + 1))."%";
-					
+
 					echo "<tr>";
 
 					if (strtolower($toim) != 'tyomaarays_asentaja') echo "<td class='back'></td>";
@@ -678,7 +673,7 @@
 					echo "<tr>";
 
 
-					if (strtolower($toim) != 'tyomaarays_asentaja') echo "<td class='back'></td>";				
+					if (strtolower($toim) != 'tyomaarays_asentaja') echo "<td class='back'></td>";
 
 					foreach ($ASENTAJA_ARRAY_TARK as $b) {
 						echo "<td align='center' style='width: $sarakeleveys; height: $korkeus;'>$b</td>";
@@ -688,28 +683,32 @@
 				}
 
 				foreach ($AIKA_ARRAY as $a) {
-					
+
 					echo "<tr>";
-					
+
 					if (count($ASENTAJA_ARRAY_TARK) >= 5 and strtolower($toim) != 'tyomaarays_asentaja') {
 						echo "<td class='back' style='width: $sarakeleveys; height: $korkeus;'>$a</td>";
 					}
-					
+
 					foreach ($ASENTAJA_ARRAY as $b) {
 						if (isset($varaukset[$b][$a])) {
-							
+
 							$varilisa = "";
 							$tdekotus = "";
-							
+
 							foreach ($varaukset[$b][$a] as $varaus) {
 								list($nimi, $tilausnumero, $tapa, $tyyppi, $tyostatus, $kuka, $konserni, $pvmalku, $tyostatusvari, $tunnus) = explode("|||", $varaus);
 
 								if ($tyyppi == "asennuskalenteri") {
 
 									if ($lopetus == '') {
-										$lopetus = $palvelin2."tyomaarays/asennuskalenteri.php////toim=$toim//tyojono=$tyojono//year=$year//month=$month";
+										$lopetus = $palvelin2."tyomaarays/asennuskalenteri.php////toim=$toim//";
+
+										if (isset($tyojono)) $tyojono .= "tyojono=$tyojono//";
+
+										$lopetus .= "year=$year//month=$month";
 									}
-									
+
 									$zul = $tilausnumero;
 
 									if ($tyostatusvari != "") {
@@ -727,9 +726,9 @@
 									$tdekotus .= "<a class='tooltip' id='$tilausnumero' href='".$palvelin2."crm/kalenteri.php?valitut=$kuka&kenelle=$kuka&tee=SYOTA&kello=".substr($pvmalku, 11, 5)."&year=$year&kuu=$month&paiva=$i&tunnus=$tilausnumero&tyomaarays=$tunnus&konserni=$konserni&lopetus=$lopetus'>$zul</a> ";
 								}
 							}
-							
+
 							if ($tdekotus == "") $tdekotus = "&nbsp;";
-							
+
 							echo "<td align='center' style='width: $sarakeleveys; height: $korkeus; $varilisa'>$tdekotus</td>";
 						}
 						elseif ($liitostunnus > 0 and $tyojono != "" and (float) str_replace("-", "", $laskurow["toimaika"]) < (float) $year.sprintf("%02d", $month).sprintf("%02d", $i)) {
@@ -741,11 +740,11 @@
 						else {
 							echo "<td align='center' style='width: $sarakeleveys; height: $korkeus;'>&nbsp;</td>";
 						}
-					}										
+					}
 				}
-				
+
 				echo "</tr>";
-				
+
 				if (count($ASENTAJA_ARRAY_TARK) < 5) {
 					echo "</table>";
 					echo "</td>";

@@ -8533,7 +8533,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 				$logoparam = array();
 
 				if ($lasku_logo_koko_y == 0 and $lasku_logo_koko_x == 0) {
-					$lasku_logo_koko_y = 20;
+					$lasku_logo_koko_y = 50;
 					$lasku_logo_koko_x = 240;
 
 					if ((int) $yhtiorow["lasku_logo_koko"] > 0) {

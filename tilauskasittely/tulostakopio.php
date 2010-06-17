@@ -36,7 +36,7 @@
 			echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		}
 
-		require ("../raportit/naytatilaus.inc");
+		require ("raportit/naytatilaus.inc");
 		echo "<br><br>";
 		$tee = "ETSILASKU";
 	}
@@ -383,9 +383,10 @@
 		// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 		js_openFormInNewWindow();
 
-		$where1 = "";
-		$where2 = "";
-		$where3 = "";
+		$where1 		= "";
+		$where2 		= "";
+		$where3 		= "";
+		$tyyppieimukaan = "";
 
 		$wherenimi = "	and lasku.nimi			= '$asiakasrow[nimi]'
 					 	and lasku.nimitark		= '$asiakasrow[nimitark]'
@@ -397,7 +398,6 @@
 					 	and lasku.toim_osoite	= '$asiakasrow[toim_osoite]'
 					 	and lasku.toim_postino	= '$asiakasrow[toim_postino]'
 				 	 	and lasku.toim_postitp	= '$asiakasrow[toim_postitp]' ";
-
 
 		if ($toim == "OSTO") {
 			//ostotilaus kyseessä, ainoa paperi joka voidaan tulostaa on itse tilaus
@@ -651,6 +651,8 @@
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
+			
+			$tyyppieimukaan = ",'V'";
 		}
 		if ($toim == "YLLAPITOSOPIMUS") {
 			//myyntitilaus.
@@ -763,7 +765,7 @@
 					if (lasku.tapvm = '0000-00-00', left(lasku.luontiaika,10), lasku.tapvm) pvm,
 					lasku.toimaika,
 					if (kuka.nimi !='' and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija,
-					if (lasku.summa=0, (SELECT round(sum(hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D'), lasku.summa) summa,
+					if (lasku.summa=0, (SELECT round(sum(hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi not in ('D' $tyyppieimukaan)), lasku.summa) summa,
 					toimaika Toimitusaika,
 					lasku.tila,
 					lasku.alatila,

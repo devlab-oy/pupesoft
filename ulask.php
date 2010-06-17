@@ -11,6 +11,27 @@ if ($livesearch_tee == "TILIHAKU") {
 	exit;
 }
 
+if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $tee == '' and $skippi != 'joo' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	list($micro, $timestamp) = explode(" ", microtime());
+
+	$kukarow['kesken'] = substr($timestamp.substr(($micro * 10), 0, 1), 2);
+
+	$query = "	UPDATE kuka SET
+				kesken = '$kukarow[kesken]'
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND kuka = '$kukarow[kuka]'";
+	$kesken_upd_res = mysql_query($query) or pupe_error($query);
+
+	$path_parts = pathinfo($skannattu_lasku);
+
+	if (!rename("$yhtiorow[skannatut_laskut_polku]$skannattu_lasku", "$yhtiorow[skannatut_laskut_polku]$kukarow[kesken].$path_parts[extension]")) {
+		echo "Ei pystytä nimeämään tiedostoa.<br>";
+		exit;
+	}
+
+	$skannattu_lasku = $kukarow['kesken'].".".$path_parts['extension'];
+}
+
 echo "<font class='head'>".t("Uuden laskun perustus")."</font><hr>";
 
 if ($tee == 'VIIVA') {
@@ -111,6 +132,58 @@ if ($tee == 'I') {
 		$tee = "E";
 	}
 
+	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		$a = getimagesize($skannattu_lasku);
+
+		$data 			= mysql_real_escape_string(file_get_contents("$yhtiorow[skannatut_laskut_polku]$skannattu_lasku"));
+		$filename		= mysql_real_escape_string($skannattu_lasku);
+		$filetype		= mysql_real_escape_string($a["mime"]);
+		$filesize		= mysql_real_escape_string(filesize("$yhtiorow[skannatut_laskut_polku]$skannattu_lasku"));
+		$image_width 	= "";
+		$image_height 	= "";
+		$image_bits 	= "";
+		$image_channels	= "";
+		$filetype 		= "application/pdf";
+		$liitos 		= 'lasku';
+		$liitostunnus   = 0;
+		$kayttotarkoitus = '';
+
+		if ($kieli == "") {
+			$kieli = $yhtiorow["kieli"];
+		}
+
+		$query = "	SELECT max(jarjestys) jarjestys
+					FROM liitetiedostot
+					WHERE yhtio 		= '$kukarow[yhtio]'
+					and liitos   		= '$liitos'
+					and liitostunnus 	= '$liitostunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		$row = mysql_fetch_assoc($result);
+
+		$jarjestys = $row["jarjestys"]+1;
+
+		$query = "	INSERT INTO liitetiedostot SET
+				  	yhtio    		= '$kukarow[yhtio]',
+				  	liitos   		= '$liitos',
+				  	liitostunnus 	= '$liitostunnus',
+				  	data     		= '$data',
+				  	selite   		= trim('$selite'),
+					kieli			= '$kieli',
+				  	filename 		= '$filename',
+				  	filesize 		= '$filesize',
+				  	filetype 		= '$filetype',
+				  	image_width		= '$image_width',
+				  	image_height	= '$image_height',
+				  	image_bits		= '$image_bits',
+				  	image_channels	= '$image_channels',
+				  	kayttotarkoitus	= '$kayttotarkoitus',
+				  	jarjestys		= '$jarjestys',
+				  	laatija			= '$kukarow[kuka]',
+				  	luontiaika		= now()";
+		$result = mysql_query($query) or pupe_error($query);
+		$kuva = mysql_insert_id();
+	}
+
 	if (isset($toitilinumero)) {
 		$query = "SELECT * FROM toimi WHERE tunnus = '$toimittajaid'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -140,6 +213,7 @@ if ($tee == 'I') {
 			$result = mysql_query($query) or pupe_error($query);
 		}
 	}
+
 	// Hoidetaan pilkut pisteiksi....
 	$kassaale = str_replace (",", ".", trim($kassaale));
 	$summa    = str_replace (",", ".", trim($summa));
@@ -529,6 +603,9 @@ if ($tee == 'P' or $tee == 'E') {
 				}
 			</SCRIPT>";
 
+	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		echo "<table><tr><td class='back'>";
+	}
 
 	if ($toimittajaid > 0) {
 
@@ -579,7 +656,8 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
 		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus])</td></tr>";
 		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maa]-$trow[postino] $trow[postitp], $trow[maa] $fakta</td></tr>";
-		echo "<tr><td><form action='yllapito.php?toim=toimi&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara' method='post'>";
+		echo "<tr><td><form action='yllapito.php?toim=toimi&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara//iframe=$iframe//skannattu_lasku=$skannattu_lasku//tultiin=$tultiin' method='post'>";
+
 		echo "<input type = 'submit' value = '".t("Muuta toimittajan tietoja")."'></form>";
 		echo "</td></tr></table>";
 		echo "</td>";
@@ -900,6 +978,9 @@ if ($tee == 'P' or $tee == 'E') {
 	if ($kuva) {
 		echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '$kuva'></td>";
 	}
+	elseif (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		echo "<td>".t("Kts. oikealle")."!</td>";
+	}
 	else {
 		echo "<input type='hidden' name='MAX_FILE_SIZE' value='50000000'>";
 		echo "<td><input name='userfile' type='file'></td>";
@@ -1137,8 +1218,20 @@ if ($tee == 'P' or $tee == 'E') {
 	} // end taso < 2
 
 	echo "</td></tr>
-		</table>
-		<br>
+		</table>";
+
+	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		echo "</td><td class='back' width='100%'><font class='message'>",t("Skannattu lasku"),"</font>";
+		echo "<div style='height: 100%; overflow: auto; width: 100%;'>";
+		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
+		echo "<input type='hidden' name='iframe' value='$iframe'>";
+		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
+		echo "<iframe src='$yhtiorow[skannatut_laskut_polku]$skannattu_lasku' style='width:100%; height: 800px; border: 0px; display: block;'></iFrame>";
+		echo "</div>";
+		echo "</td></tr></table>";
+	}
+
+	echo "<br>
 		<input type = 'hidden' name = 'toimittajaid' value = '$toimittajaid'>
 		<input type = 'hidden' name = 'maara' value = '$maara'>
 		<input type = 'submit' value = '".t("Perusta")."'></form>";
@@ -1692,6 +1785,34 @@ if ($tee == 'I') {
 	// Näytettään käyttöliittymä
 	$tee = '';
 
+	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		unset($kuva);
+
+		unlink("$yhtiorow[skannatut_laskut_polku]$skannattu_lasku");
+
+		$silent = 'ei näytetä käyttöliittymää';
+		require('skannatut_laskut.php');
+
+		list($micro, $timestamp) = explode(" ", microtime());
+
+		$kukarow['kesken'] = substr($timestamp.substr(($micro * 10), 0, 1), 2);
+
+		$query = "	UPDATE kuka SET
+					kesken = '$kukarow[kesken]'
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND kuka = '$kukarow[kuka]'";
+		$kesken_upd_res = mysql_query($query) or pupe_error($query);
+
+		$path_parts = pathinfo($skannattu_lasku);
+
+		if (!rename("$yhtiorow[skannatut_laskut_polku]$skannattu_lasku", "$yhtiorow[skannatut_laskut_polku]$kukarow[kesken].$path_parts[extension]")) {
+			echo "Ei pystytä nimeämään tiedostoa.<br>";
+		}
+
+		$skannattu_lasku = $kukarow['kesken'].".".$path_parts['extension'];
+
+	}
+
 	//Luodaan uusi keikka jos käyttäjä ruksasi keikkaruksin
 	if ($luouusikeikka == "LUO") {
 
@@ -1746,11 +1867,22 @@ if (strlen($tee) == 0) {
 	$formi  = 'viivat';
 	$kentta = 'nimi';
 
+	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		echo "<table><tr><td class='back'>";
+	}
+
 	echo "<table>";
 
-	echo "<tr><td><form name = 'viivat' action = '$PHP_SELF?tee=VIIVA' method='post'>".t("Perusta lasku viivakoodilukijalla")."</td>
-		<input type='hidden' name='lopetus' value='$lopetus'>
-		<td><input type = 'text' name = 'nimi' size='8'></td>
+	echo "<tr><td nowrap><form name = 'viivat' action = '$PHP_SELF?tee=VIIVA' method='post'>".t("Perusta lasku viivakoodilukijalla")."</td>
+		<input type='hidden' name='lopetus' value='$lopetus'>";
+
+	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
+		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
+		echo "<input type='hidden' name='iframe' value='$iframe'>";
+	}
+
+	echo "<td><input type = 'text' name = 'nimi' size='8'></td>
 		<td>".t("tiliöintirivejä").":</td>
 		<td><select name='maara'><option value ='2'>1
 		<option value ='4'>3
@@ -1760,9 +1892,16 @@ if (strlen($tee) == 0) {
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<tr><td><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</td>
-		<input type='hidden' name='lopetus' value='$lopetus'>
-		<td><input type = 'text' name = 'ytunnus' size='8' maxlength='15'></td>
+	echo "<tr><td nowrap><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</td>
+		<input type='hidden' name='lopetus' value='$lopetus'>";
+
+	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
+		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
+		echo "<input type='hidden' name='iframe' value='$iframe'>";
+	}
+
+	echo "<td><input type = 'text' name = 'ytunnus' size='8' maxlength='15'></td>
 		<td>".t("tiliöintirivejä").":</td>
 		<td><select name='maara'><option value ='2'>1
 		<option value ='4'>3
@@ -1772,9 +1911,16 @@ if (strlen($tee) == 0) {
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<td><form action = '$PHP_SELF?tee=P' method='post'>".t("Perusta lasku ilman toimittajatietoja")."</td>
-		<input type='hidden' name='lopetus' value='$lopetus'>
-		<td>
+	echo "<td nowrap><form action = '$PHP_SELF?tee=P' method='post'>".t("Perusta lasku ilman toimittajatietoja")."</td>
+		<input type='hidden' name='lopetus' value='$lopetus'>";
+
+	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
+		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
+		echo "<input type='hidden' name='iframe' value='$iframe'>";
+	}
+
+	echo "<td>
 		<select name='tyyppi'>
 		<option value =".strtoupper($yhtiorow['maa']).">".t("Kotimaa")."
 		<option value ='nonfi'>".t("Ulkomaa")."
@@ -1799,8 +1945,15 @@ if (strlen($tee) == 0) {
 			$row = mysql_fetch_array($result);
 
 			echo "<td><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajalle")." $row[nimi]</td>
-			<input type='hidden' name='lopetus' value='$lopetus'>
-			<td><input type='hidden'  name='toimittajaid' value='$toimittajaid'></td>
+			<input type='hidden' name='lopetus' value='$lopetus'>";
+
+			if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+				echo "<input type='hidden' name='tultiin' value='$tultiin'>";
+				echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
+				echo "<input type='hidden' name='iframe' value='$iframe'>";
+			}
+
+			echo "<td><input type='hidden'  name='toimittajaid' value='$toimittajaid'></td>
 			<td>".t("tiliöintirivejä").":</td>
 			<td><select name='maara'><option value ='2'>1
 			<option value ='4'>3
@@ -1814,6 +1967,15 @@ if (strlen($tee) == 0) {
 	else {
 		echo "</table>";
 	}
+
+	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		echo "</td><td class='back' width='100%'><font class='message'>",t("Skannattu lasku"),"</font>";
+		echo "<div style='height: 100%; overflow: auto; width: 100%;'>";
+		echo "<iframe src='$yhtiorow[skannatut_laskut_polku]$skannattu_lasku' style='width:100%; height: 800px; border: 0px; display: block;'></iFrame>";
+		echo "</div>";
+		echo "</td></tr></table>";
+	}
+
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "ulask.php")  !== FALSE) {

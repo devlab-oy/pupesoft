@@ -80,6 +80,21 @@ else {
 	$kons = 0;
 }
 
+$query = "	SELECT yhtio
+			FROM oikeu
+			WHERE yhtio	= '$kukarow[yhtio]'
+			and kuka	= '$kukarow[kuka]'
+			and nimi like '%asiakasmemo.php'
+			and alanimi = ''";
+$result = mysql_query($query) or pupe_error($query);
+
+if (mysql_num_rows($result) > 0) {
+	$asmemolinkki = TRUE;
+}
+else {
+	$asmemolinkki = FALSE;
+}
+
 echo "<font class='head'>".t("Kalenteri")."</font><hr>";
 
 // ollaan painettu lisää nappia
@@ -650,7 +665,7 @@ if (mysql_num_rows($result) > 0) {
 		echo "<tr>";
 		echo "<td>$prow[tapa]</td>";
 
-		if ($kukarow["yhtio"] == $prow["yhtio"]) {
+		if ($asmemolinkki and $kukarow["yhtio"] == $prow["yhtio"]) {
 			echo "<td><a href='asiakasmemo.php?ytunnus=$prow[asiakas]&asiakasid=$prow[liitostunnus]'>$asiak[nimi]</a></td>";
 		}
 		else {
@@ -873,7 +888,7 @@ while ($kello_nyt != $whileloppu) {
 				}
 
 				if ($row['tyyppi'] == 'kalenteri' and $row["liitostunnus"] != 0) {
-					if ($kukarow["yhtio"] == $row["yhtio"]) {
+					if ($asmemolinkki and $kukarow["yhtio"] == $row["yhtio"]) {
 						echo " - <a href='asiakasmemo.php?ytunnus=$row[asiakas]&asiakasid=$row[liitostunnus]'>$asiak[nimi]</a>";
 					}
 					else {

@@ -22,13 +22,15 @@ if (trim($argv[1]) != '') {
 	// ja toinen parametri komentoriviltä
 	$edi_tyyppi	= $argv[2];
 
+	$komentorivilta = "ON";
+
 	// laitetaan pupe-rootti ja tilauskäsittely mukaan includepathiin
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname($argv[0])).PATH_SEPARATOR.dirname($argv[0]));
 }
 
 if (!function_exists('jt_toimita_editilaus')) {
 	function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa) {
-		global $yhtiorow, $kukarow, $edi_ulos;
+		global $yhtiorow, $kukarow, $edi_ulos, $komentorivilta;
 
 		$automaaginen 			= "automaaginen";
 		$tee 					= "JATKA";
@@ -61,9 +63,6 @@ if (!function_exists('jt_toimita_editilaus')) {
 		}
 
 		if ($asiakasid > 0 and count($varastosta) > 0) {
-
-			$komentorivilta = "ON";
-
 			require('jtselaus.php');
 		}
 	}

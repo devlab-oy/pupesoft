@@ -321,6 +321,7 @@
 
 			//loopataan kaikki yhdest‰ tilausesta syntyneet l‰hetteet
 			foreach ($tvs_tilausnumerot as $tvs_tilausnumero) {
+
 				//luetaan laskun tiedot uudestaan t‰ss‰, per splitti
 				$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tvs_tilausnumero'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -377,6 +378,96 @@
 
 					if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 						echo "<font class='message'>".t("Valmistus siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
+
+						if ($toim == "VALMISTAASIAKKAALLE") {
+							// Tilausvahvistukset muuttavat t‰t‰ niin otetaan talteen
+							$laskurow_tvorig = $laskurow;
+
+							//
+							// LƒHETETƒƒN TILAUSVAHVISTUS
+							//
+							// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
+
+							if (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
+								$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+							}
+							elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
+								$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+							}
+							elseif (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
+								$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+							}
+							elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
+								$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+							}
+							else {
+								$naytatvale = 1; // halutaan n‰h‰ alet
+							}
+
+							if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
+								require("tilausvahvistus-edi.inc");
+							}
+
+							if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
+								require("tilausvahvistus-email.inc");
+							}
+
+							if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
+								require("tilausvahvistus-fax.inc");
+							}
+
+							if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
+								require("tilausvahvistus-email.inc");
+							}
+
+							if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
+								require("tilausvahvistus-futursoft.inc");
+							}
+
+							if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
+								$query = "	SELECT komento
+											FROM kirjoittimet
+											WHERE yhtio = '$kukarow[yhtio]' and
+											tunnus = '$kukarow[kirjoitin]'";
+								$tilvares = mysql_query($query) or pupe_error($query);
+
+								if ($tilvakir = mysql_fetch_assoc($tilvares)) {
+									$komento["Tilausvahvistus"] = $tilvakir["komento"];
+
+									$toim_save = $toim;
+									if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
+
+									require("tulosta_tilausvahvistus_pdf.inc");
+									$toim = $toim_save;
+								}
+							}
+
+							if ($yhtiorow['tilausvahvistus_tallenna'] == 'K' and $tilausvahvistus_tallenna != '') {
+
+								if (stristr(basename($tilausvahvistus_tallenna), ".pdf")) {
+									$liite_tyyppi = "application/pdf";
+								}
+								else {
+									$liite_tyyppi = "text/plain";
+								}
+
+								$file["name"] 		= basename($tilausvahvistus_tallenna);
+								$file["type"] 		= $liite_tyyppi;
+								$file["tmp_name"] 	= $tilausvahvistus_tallenna;
+								$file["error"] 		= 0;
+								$file["size"] 		= filesize($tilausvahvistus_tallenna);
+
+								$_FILES['tilvah_liite'] = $file;
+
+								$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnus'], t('Myyntilaskun tilausvahvistus'));
+
+								//poistetaan tmp file samantien kuleksimasta...
+								system("rm -f ".basename($tilausvahvistus_tallenna));
+							}
+
+							// takaisin k‰yttˆˆn
+							$laskurow = $laskurow_tvorig;
+						}
 					}
 					elseif ($yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
 
@@ -429,7 +520,7 @@
 
 				//katotaan speciaalirivit joilla tilkpl = 999999999 and varattu = 0
 				//t‰llˆin halutaan siirt‰‰ kaikki mit‰ hyllyss‰ on t‰ll‰ hetkell‰
-				while($crow = mysql_fetch_array($cresult)) {
+				while ($crow = mysql_fetch_array($cresult)) {
 					if ($crow['varattu'] == 0 and $crow['tilkpl'] == 9999.99) {
 						//siirret‰‰n kaikki mit‰ paikalla on
 
@@ -722,18 +813,18 @@
 		}
 
 		// ollaan k‰sitelty projektin osatoimitus joten palataan tunnusnipun otsikolle..
-		if($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $projektilla > 0) {
+		if ($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $projektilla > 0) {
 
 			$aika=date("d.m.y @ G:i:s", time());
 			echo "<font class='message'>".t("Osatoimitus")." $otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
 
-			if($projektilla>0) {
-				$tilausnumero		= $laskurow["tunnusnippu"];
+			if ($projektilla > 0) {
+				$tilausnumero = $laskurow["tunnusnippu"];
 
 				//	Hyp‰t‰‰n takaisin otsikolle
 				echo "<font class='info'>".t("Palataan projektille odota hetki..")."</font><br>";
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$PHP_SELF?toim=PROJEKTI&valitsetoimitus=$tilausnumero'>";
-				die();
+				exit;
 			}
 		}
 	}

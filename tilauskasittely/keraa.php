@@ -1731,8 +1731,6 @@
 			$group_lisa 	= "";
 		}
 
-		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
-
 		$query = "	SELECT
 					concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
 					tilausrivi.tuoteno puhdas_tuoteno,

@@ -52,8 +52,12 @@
 	if (!is_array($ctype)) {
 		$ctype = array(0 => $ctype);
 	}
-
+	
+	$liitelask = 0;
+	
 	foreach ($liite as $key => $value) {
+		$liitelask++;
+		
 		if ($ctype[$key] == "TEXT") {
 			$content .= "Content-Type: text/plain; name=\"".$kutsu[$key]."\"\n" ;
 			$content .= "Content-Transfer-Encoding: base64\n" ;
@@ -85,10 +89,17 @@
 
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\n" ;
-
-		$content .= "--$bound\n";
+		
+		if ($liitelask = count($liite)) {
+			$content .= "--$bound--\n";
+		} 
+		else {
+			$content .= "--$bound\n";
+		}		
 	}
-
+	
+	$subject = mb_encode_mimeheader($subject, "ISO-8859-1", "Q");
+	
 	$boob = mail($kukarow["eposti"], $subject, $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";

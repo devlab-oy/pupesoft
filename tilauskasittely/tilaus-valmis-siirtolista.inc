@@ -591,7 +591,7 @@
 									group_concat(tilausrivi.tunnus) tunnus, ";
 
 					$lisa = "	and tilausrivi.tyyppi in ($tvs_tyyppi)
-								GROUP BY 1,2,3,4,5,6,7,8,9,10 ";
+								GROUP BY tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys, sorttauskentta, tuotetyyppi";
 				}
 				else {
 					$querysel = " tilausrivi.*, ";

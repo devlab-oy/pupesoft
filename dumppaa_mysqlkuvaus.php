@@ -92,7 +92,13 @@
 		}
 
 		// Löytyykö custom updateja?
-		$updatet = file_get_contents("http://www.devlab.fi/sqlupdate.sql");
+		$ch  = curl_init();
+		curl_setopt ($ch, CURLOPT_URL, "http://www.devlab.fi/sqlupdate.sql");
+		curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt ($ch, CURLOPT_HEADER, FALSE);
+		$updatet = curl_exec ($ch);
 
 		if (!$komentorivilta) {
 			echo "<pre>$updatet</pre>";

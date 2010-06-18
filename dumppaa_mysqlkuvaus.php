@@ -92,12 +92,13 @@
 		}
 
 		// Löytyykö custom updateja?
-		if ($komentorivilta) {
+		$updatet = file_get_contents("http://www.devlab.fi/sqlupdate.sql");
 
+		if (!$komentorivilta) {
+			echo "<pre>$updatet</pre>";
+		}
+		elseif (trim($result) != "") {
 			echo "\n\n";
-
-			$updatet = file_get_contents("http://www.devlab.fi/sqlupdate.sql");
-
 			$rivit = explode("\n", trim($updatet));
 
 			foreach ($rivit as $rivi) {

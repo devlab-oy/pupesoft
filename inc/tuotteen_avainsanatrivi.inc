@@ -119,8 +119,6 @@
 
 	if (mysql_field_name($result, $i) == "kieli") {
 
-		$kieli = $trow[$i];
-
 		$ulos = "<td><select name='$nimi'>";
 		$sel  = "";
 

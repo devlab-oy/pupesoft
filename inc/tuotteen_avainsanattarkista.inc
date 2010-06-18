@@ -37,22 +37,40 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 				$virhe[$i] = t("Tuotenumero puuttuu!");
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "kieli") {
 			if ($t[$i] == '') {
 				$virhe[$i] = t("Kieltä ei voi jättää tyhjäksi")."!";
 			}
-			$kielitalteen = $t[$i];
+			else {
+				$query  = "SHOW columns from sanakirja";
+				$fields =  mysql_query($query);
+
+				$loytyyko = FALSE;
+
+				while ($apurow = mysql_fetch_array($fields)) {
+					if (strtoupper($apurow[0]) == strtoupper($t[$i])) {
+						$loytyyko = TRUE;
+					}
+				}
+				
+				if (!$loytyyko) {
+					$virhe[$i] = t("Virheellinen kieli")."!";
+				}
+				else {
+					$kielitalteen = $t[$i];
+				} 
+			}						
 		}
 
 		if (mysql_field_name($result, $i) == "laji") {
 			if ($t[$i] == '') {
 				$virhe[$i] = t("Lajia ei voi jättää tyhjäksi")."!";
 			}
-			
+
 			// Katsotaan, että samaa avainsanaa ei ole jo perustettu!
 			$chtunnari = (int) $tunnus;
-			
+
 			$query = "	SELECT yhtio, tuoteno, laji, kieli
 						FROM tuotteen_avainsanat
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -61,11 +79,11 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 						and laji 	= '$t[$i]'
 						and tunnus != $chtunnari";
 			$sresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($sresult) > 0) {
 				$virhe[$i] = t("Tuotteen avainsana löytyy jo").": $t[$i]/$kielitalteen!";
 			}
-			
+
 			$lajitalteen = $t[$i];
 		}
 
@@ -83,7 +101,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 			}
 			elseif (strtoupper($lajitalteen) == "OLETUSVALINTA") {
 				if(!in_array(substr($t[$i], 0, 3), array("", "!!!", "¡¡¡", "¡¡V"))) {
-					$virhe[$i] = t("Tuotteen %s oletusvalinta %s ei kelpaa!", $kieli, $chtuoteno, $t[$i]);
+					$virhe[$i] = t("Tuotteen %s oletusvalinta %s ei kelpaa!", "", $chtuoteno, $t[$i]);
 				}
 			}
 

@@ -103,7 +103,7 @@
 		if (!$komentorivilta) {
 			echo "<pre>$updatet</pre>";
 		}
-		elseif (trim($result) != "") {
+		elseif (trim($updatet) != "") {
 			echo "\n\n";
 			$rivit = explode("\n", trim($updatet));
 

@@ -91,7 +91,20 @@
 			}
 		}
 
+		// Löytyykö custom updateja?
+		if ($komentorivilta) {
+
+			echo "\n\n";
+
+			$updatet = file_get_contents("http://www.devlab.fi/sqlupdate.sql");
+
+			$rivit = explode("\n", trim($updatet));
+
+			foreach ($rivit as $rivi) {
+				echo "echo \"$rivi\" | mysql -u $dbuser --password=$dbpass $dbkanta;\n";
+			}
+		}
+
 		if (!$komentorivilta) require("inc/footer.inc");
 	}
-
 ?>

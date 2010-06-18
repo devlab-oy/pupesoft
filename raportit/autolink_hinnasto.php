@@ -25,7 +25,7 @@
 		$where2 = '';
 
 		if ($osasto != '') {
-			$osastot = split(" ",$osasto);
+			$osastot = explode(" ",$osasto);
 
 			for($i = 0; $i < sizeof($osastot); $i++) {
 				$osastot[$i] = trim($osastot[$i]);
@@ -33,7 +33,7 @@
 				if ($osastot[$i] != '') {
 					if (strpos($osastot[$i],"-")) {
 
-						$osastot2 = split("-",$osastot[$i]);
+						$osastot2 = explode("-",$osastot[$i]);
 
 						for($ia = $osastot2[0]; $ia<= $osastot2[1]; $ia++) {
 							$where1 .= "'".$ia."',";
@@ -49,14 +49,14 @@
 	    }
 
 		if ($try != '') {
-			$tryt = split(" ",$try);
+			$tryt = explode(" ",$try);
 
 			for($i = 0; $i < sizeof($tryt); $i++) {
 				$tryt[$i] = trim($tryt[$i]);
 
 				if ($tryt[$i] != '') {
 					if (strpos($tryt[$i],"-")) {
-						$tryt2 = split("-",$tryt[$i]);
+						$tryt2 = explode("-",$tryt[$i]);
 						for($ia = $tryt2[0]; $ia<= $tryt2[1]; $ia++) {
 							$where2 .= "'".$ia."',";
 						}

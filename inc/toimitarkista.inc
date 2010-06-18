@@ -184,7 +184,7 @@ if(!function_exists("toimitarkista")) {
 
 		if (mysql_field_name($result, $i) == "email" and trim($t[$i]) != '') {
 			// katotaan löytyykö email osoitteen domain...
-			list($nimi, $domain) = split("@", trim($t[$i]));
+			list($nimi, $domain) = explode("@", trim($t[$i]));
 
 	 		$domain = trim($domain);
 			if ($domain != "") {

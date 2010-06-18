@@ -291,8 +291,8 @@ if ($ytunnus != '' and $tee == "") {
 	}
 
 	//p‰iv‰m‰‰r‰n tarkistus
-	$tilalk = split("-", $yhtiorow["myyntireskontrakausi_alku"]);
-	$tillop = split("-", $yhtiorow["myyntireskontrakausi_loppu"]);
+	$tilalk = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+	$tillop = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
 
 	$tilalkpp = $tilalk[2];
 	$tilalkkk = $tilalk[1]-1;

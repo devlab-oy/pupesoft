@@ -5,7 +5,7 @@ if ($tee == "file") {
 		$timeparts = explode(" ",microtime());
 		$starttime = $timeparts[1].substr($timeparts[0],1);
 
-		list($name,$ext) = split("\.", $_FILES['userfile']['name']);
+		list($name,$ext) = explode("\.", $_FILES['userfile']['name']);
 
 		if (!(strtoupper($ext) == "TXT" || strtoupper($ext) == "CSV")) {
 			die ("<font class='error'><br>".t("Ainoastaa .txt tai .csv tiedostot sallittuja")."!</font>");

@@ -1145,7 +1145,7 @@ if ($tila == 'kohdistaminen') {
 	//Näytetään laskut!
 	$kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite, ytunnus';
 	$kentankoko = array(10,10,15,10,10,15);
-	$array = split(",", $kentat);
+	$array = explode(",", $kentat);
 	$count = count($array);
 	$lisa='';
 	$ulisa='';

@@ -366,7 +366,7 @@
 			for ($i=1; $i<=5; $i++) {
 				if (is_uploaded_file($_FILES['userfile'.$i]['tmp_name']) == TRUE) {
 
-					list($name,$ext) = split("\.", $_FILES['userfile'.$i]['name']);
+					list($name,$ext) = explode("\.", $_FILES['userfile'.$i]['name']);
 
 					if (!(strtoupper($ext) == "JPG" || strtoupper($ext) == "GIF")){
 						echo "<font class='error'><br>".t("Ainoastaa .jpg tai .gif tiedostot sallittuja")."!</font>";

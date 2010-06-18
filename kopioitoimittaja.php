@@ -115,7 +115,7 @@
 		$kentat = 'tunnus, ytunnus, nimi, postitp, maa, oletus_valkoodi';
 		$jarjestys = 'selaus';
 		
-		$array = split(",", $kentat);
+		$array = explode(",", $kentat);
         $count = count($array);
 		
         for ($i=0; $i<=$count; $i++) {

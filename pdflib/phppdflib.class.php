@@ -299,20 +299,20 @@ class pdffile
             if (preg_match("/in/",$size)) {
                 $o = $this->_addnewoid();
                 $size = substr($size, 0, strlen($size) - 2);
-                $dims = split("x",$size);
+                $dims = explode("x",$size);
                 $this->objects[$o]["height"] = ($dims[1] * 72);
                 $this->objects[$o]["width"] = ($dims[0] * 72);
             } else {
                 if (preg_match("/cm/",$size)) {
                     $o = $this->_addnewoid();
                     $size = substr($size, 0, strlen($size) - 2);
-                    $dims = split("x",$size);
+                    $dims = explode("x",$size);
                     $this->objects[$o]["height"] = ($dims[1] * 28.346);
                     $this->objects[$o]["width"] = ($dims[0] * 28.346);
                 } else {
                     // Default to using PDF units
                     $o = $this->_addnewoid();
-                    $dims = split("x", $size);
+                    $dims = explode("x", $size);
                     $this->objects[$o]['height'] = (float)$dims[1];
                     $this->objects[$o]['width'] = (float)$dims[0];
                 }
@@ -1114,7 +1114,7 @@ class pdffile
 
     function draw_paragraph($top, $left, $bottom, $right, $text, $page, $param = array())
     {
-        $paras = split("\n", $text);
+        $paras = explode("\n", $text);
         for ($i = 0; $i < count($paras); $i++) {
             $over = $this->draw_one_paragraph($top,
                                               $left,

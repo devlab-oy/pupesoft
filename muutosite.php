@@ -266,7 +266,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 
 		if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 			if (strlen($tositenro) > 0) {
-				list($tositenro1, $tositenro2) = split("-",$tositenro);
+				list($tositenro1, $tositenro2) = explode("-",$tositenro);
 				$tositenro1 = (int) $tositenro1;
 				$tositenro2 = (int) $tositenro2;
 				$tositenro = sprintf ('%02d', $tositenro1) . sprintf ('%06d', $tositenro2);

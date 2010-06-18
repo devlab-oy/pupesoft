@@ -11,7 +11,7 @@
 	if(substr($tuoteno,0,1) == '*') { // Nyt me selataan
 
 		$tuoteno 	= substr($tuoteno,1);
-		$sanat 		= split(" ", $tuoteno);
+		$sanat 		= explode(" ", $tuoteno);
 		$lisa1		= '';
 
 		foreach ($sanat as $sana) $lisa1 .= " and concat_ws(' ', nimitys, lyhytkuvaus, tuotemerkki) like '%" . trim($sana) . "%' ";

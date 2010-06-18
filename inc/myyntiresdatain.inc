@@ -7,8 +7,8 @@ if (file_exists($filename)) {
 	$fp = fopen ($filename, "r");
 	while (!feof ($fp)) {
 		$line = fgets($fp, 4096);
-		list($roskaa,$pvm,$summa) = split(" ", $line, 3);
-		list($pv,$kk,$yy) = split("\.", $pvm, 3);
+		list($roskaa,$pvm,$summa) = explode(" ", $line, 3);
+		list($pv,$kk,$yy) = explode("\.", $pvm, 3);
 		$pvm = $yy . "-" . $kk . "-" . $pv;
 
 		$query = "INSERT into maksu values (

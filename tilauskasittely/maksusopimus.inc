@@ -389,7 +389,7 @@
 
 					// otetaan erpcm kannasta jos mit‰‰n ei ole syˆtetty ruudulle
 					if ($row["erpcm"] != "" and (int) $erpcmpp == 0 and (int) $ercpmkk == 0 and (int) $erpcmvv == 0 and $erpcm_virhe == "") {
-						list($erpcmvv, $erpcmkk, $erpcmpp) = split('-', $row["erpcm"]);
+						list($erpcmvv, $erpcmkk, $erpcmpp) = explode('-', $row["erpcm"]);
 					}
 
 					// jos p‰iv‰m‰‰r‰ on nollaa laitetaan tyhj‰‰

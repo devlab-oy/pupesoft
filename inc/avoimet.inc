@@ -1,6 +1,6 @@
 <?php
 
-	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto,$excel) = split("/",$muutparametrit);
+	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto,$excel) = explode("/",$muutparametrit);
 
 	echo "<font class=head>".t("Avoimet laskut")."</font><hr>";
 	

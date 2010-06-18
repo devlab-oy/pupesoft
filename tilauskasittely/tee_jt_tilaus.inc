@@ -142,7 +142,7 @@
 						$erpres = mysql_query($erpquery) or pupe_error($erpquery);
 						$meapurow = mysql_fetch_array($erpres);
 
-						list($erpcmvv, $erpcmkk, $erpcmpp) = split('-', $otsikkorivi["erpcm"]);
+						list($erpcmvv, $erpcmkk, $erpcmpp) = explode('-', $otsikkorivi["erpcm"]);
 
 						$nyt = (int) date("Ymd");
 						$erp = (int) $erpcmvv.$erpcmkk.$erpcmpp;

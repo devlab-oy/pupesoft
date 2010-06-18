@@ -266,7 +266,7 @@ echo "<font class=head>".t("Pankkiyhteys")."</font><hr>";
 
 if (is_array($tilit)) {
 	foreach($tilit as $tili) {
-		list($maksu_tili, $olmapvm) = split("#",$tili);
+		list($maksu_tili, $olmapvm) = explode("#",$tili);
 		$tunnus=$maksu_tili;
 		$query="SELECT * FROM yriti WHERE tunnus = '$maksu_tili'";
 		$result = mysql_query($query) or pupe_error($query);

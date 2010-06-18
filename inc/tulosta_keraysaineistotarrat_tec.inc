@@ -43,8 +43,8 @@ if (mysql_num_rows($tarrares) > 0) {
 		$suunnistus		=$tarrarow['suunnistus'];
 		$xtunnus		=$tarrarow['xtunnus'];
 
-		list($tuoteno,$nimitys) = split("#",$tarrarow['tuoteno']);
-		list($asnro,$asnimi) = split("#",$tarrarow['astunnus']);
+		list($tuoteno,$nimitys) = explode("#",$tarrarow['tuoteno']);
+		list($asnro,$asnimi) = explode("#",$tarrarow['astunnus']);
 
 		$asnimi = substr($asnimi,0,25);
 

@@ -237,7 +237,7 @@
 		
 		$kentat = "nimi, osoite, postino, postitp, maa, ryhma, piiri, flag_1, flag_2, flag_3, flag_4";
 
-		$array = split(",", $kentat);
+		$array = explode(",", $kentat);
         $count = count($array);
         for ($i=0; $i<=$count; $i++) {
 			if (strlen($haku[$i]) > 0) {

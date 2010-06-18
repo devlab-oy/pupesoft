@@ -306,10 +306,10 @@ else {
 			$taprow = mysql_fetch_assoc($tapres);
 
 			// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
-			list($vv1,$kk1,$pp1) = split("-",$taprow["max"]); //$saapunut
-			list($vv2,$kk2,$pp2) = split("-",$alkupvm); //$alaraja
-			list($vv3,$kk3,$pp3) = split("-",$epispvm); //$epaku1pv
-			list($vv4,$kk4,$pp4) = split("-",$taysraja); //$epa2raja
+			list($vv1,$kk1,$pp1) = explode("-",$taprow["max"]); //$saapunut
+			list($vv2,$kk2,$pp2) = explode("-",$alkupvm); //$alaraja
+			list($vv3,$kk3,$pp3) = explode("-",$epispvm); //$epaku1pv
+			list($vv4,$kk4,$pp4) = explode("-",$taysraja); //$epa2raja
 			$saapunut = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
 			$alaraja  = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
 			$epaku1pv = (int) date('Ymd',mktime(0,0,0,$kk3,$pp3,$vv3));

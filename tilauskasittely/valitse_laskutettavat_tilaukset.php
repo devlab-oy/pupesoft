@@ -320,8 +320,8 @@
 		if (mysql_num_rows($res) > 0) {
 
 			//p‰iv‰m‰‰r‰n tarkistus
-			$tilalk = split("-", $yhtiorow["tilikausi_alku"]);
-			$tillop = split("-", $yhtiorow["tilikausi_loppu"]);
+			$tilalk = explode("-", $yhtiorow["tilikausi_alku"]);
+			$tillop = explode("-", $yhtiorow["tilikausi_loppu"]);
 
 			$tilalkpp = $tilalk[2];
 			$tilalkkk = $tilalk[1]-1;

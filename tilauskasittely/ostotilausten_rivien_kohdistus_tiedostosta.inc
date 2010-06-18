@@ -8,7 +8,7 @@ if ($faarao == 'TUTKHM') {
 
 	if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
-		list($name,$ext) = split("\.", $_FILES['userfile']['name']);
+		list($name,$ext) = explode("\.", $_FILES['userfile']['name']);
 
 		if (strtoupper($ext) !="TXT" and strtoupper($ext)!="CSV") {
 			die ("<font class='error'><br>".t("Ainoastaa .txt ja .csv tiedostot sallittuja")."!</font>");

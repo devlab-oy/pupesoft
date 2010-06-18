@@ -973,7 +973,7 @@
 
 			// otetaan erpcm kannasta jos mitään ei ole syötetty ruudulle
 			if ($srow["erpcm"] != "" and (int) $erpcmpp == 0 and (int) $ercpmkk == 0 and (int) $erpcmvv == 0 and $erpcm_virhe == "") {
-				list($erpcmvv, $erpcmkk, $erpcmpp) = split('-', $srow["erpcm"]);
+				list($erpcmvv, $erpcmkk, $erpcmpp) = explode('-', $srow["erpcm"]);
 			}
 			else {
 				$erpcm_kasin = "KYLLA";
@@ -1096,8 +1096,8 @@
 				$toimvv = $kervv = date("Y");
 			}
 			else {
-				list($toimvv, $toimkk, $toimpp) = split('-', $srow["toimaika"]);
-				list($kervv, $kerkk, $kerpp)    = split('-', $srow["kerayspvm"]);
+				list($toimvv, $toimkk, $toimpp) = explode('-', $srow["toimaika"]);
+				list($kervv, $kerkk, $kerpp)    = explode('-', $srow["kerayspvm"]);
 				$kerpp = substr($kerpp,0,2);
 				$toimpp = substr($toimpp,0,2);
 			}
@@ -1913,7 +1913,7 @@
 					}
 					elseif (strtoupper($al_row["selitetark_2"]) == "DATE") {
 
-						list($al_vv, $al_kk, $al_pp) = split('-', $srow["$kentta"]);
+						list($al_vv, $al_kk, $al_pp) = explode('-', $srow["$kentta"]);
 
 						if ($al_kk == "00") 	$al_kk = date("m");
 						if ($al_vv == "0000") 	$al_vv = date("Y");

@@ -24,7 +24,7 @@
 	}
 
 	if (isset($muutparametrit)) {
-		list ($tee, $selkuka, $kumpi) = split("#", $muutparametrit);
+		list ($tee, $selkuka, $kumpi) = explode("#", $muutparametrit);
 		$ytunnus = "";
 		$ytunnus2 = "";
 	}

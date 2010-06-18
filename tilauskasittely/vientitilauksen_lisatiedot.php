@@ -210,7 +210,7 @@
 	elseif ($tee != "") {
 		if ($tee == 'L') {
 
-			list($poistumistoimipaikka, $poistumistoimipaikka_koodi) = split("##", $poistumistoimipaikka, 2);
+			list($poistumistoimipaikka, $poistumistoimipaikka_koodi) = explode("##", $poistumistoimipaikka, 2);
 
 			if ($aktiivinen_kuljetus_kansallisuus == '') {
 				$aktiivinen_kuljetus_kansallisuus = $sisamaan_kuljetus_kansallisuus;

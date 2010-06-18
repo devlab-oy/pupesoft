@@ -60,7 +60,7 @@ else {
 	}
 }
 
-$ruksatut   = split(",", $valitut);					//tata kaytetaan ihan lopussa
+$ruksatut   = explode(",", $valitut);					//tata kaytetaan ihan lopussa
 $ruksattuja = count($ruksatut);   					//taman avulla pohditaan tarvitaanko tarkenteita
 $vertaa     = "'".implode("','", $ruksatut)."'";	// tehd‰‰n mysql:n ymm‰rt‰m‰ muoto
 
@@ -856,7 +856,7 @@ while ($kello_nyt != $whileloppu) {
 				else $kukanimi = '';
 
 				//Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa
-				list($rvv,$rkk,$rpp) = split("-",substr($row["pvmloppu"],0,10));
+				list($rvv,$rkk,$rpp) = explode("-",substr($row["pvmloppu"],0,10));
 
 				$kaleloppu  = (int) date('Ymd',mktime(0,0,0,$rkk,$rpp,$rvv));
 				$aikanyt 	= (int) date('Ymd',mktime(0,0,0,date('m'),date('d'),date('Y')));

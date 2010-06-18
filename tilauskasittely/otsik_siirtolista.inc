@@ -182,8 +182,8 @@
 			$toimvv = $kervv = date("Y");
 		}
 		else {
-			list($toimvv, $toimkk, $toimpp) = split('-', $srow["toimaika"]);
-			list($kervv, $kerkk, $kerpp)    = split('-', $srow["kerayspvm"]);
+			list($toimvv, $toimkk, $toimpp) = explode('-', $srow["toimaika"]);
+			list($kervv, $kerkk, $kerpp)    = explode('-', $srow["kerayspvm"]);
 			$kerpp = substr($kerpp,0,2);
 			$toimpp = substr($toimpp,0,2);
 
@@ -300,7 +300,7 @@
 				$luvattuvv = date("Y");
 			}
 			else {
-				list($ostopvmvv, $ostopvmkk, $ostopvmpp) = split('-', $srow["ostopvm"]);
+				list($ostopvmvv, $ostopvmkk, $ostopvmpp) = explode('-', $srow["ostopvm"]);
 			}
 			if ($srow["tuotu"] == "" or $srow["tuotu"] == "0000-00-00") {
 				$tuotupp = date("d");
@@ -308,7 +308,7 @@
 				$tuotuvv = date("Y");
 			}
 			else {
-				list($tuotuvv, $tuotukk, $tuotupp) = split('-', $srow["tuotu"]);
+				list($tuotuvv, $tuotukk, $tuotupp) = explode('-', $srow["tuotu"]);
 			}
 
 			if ($srow["luvattu"] == "" or $srow["luvattu"] == "0000-00-00") {
@@ -317,7 +317,7 @@
 				$luvattuvv = date("Y");
 			}
 			else {
-				list($luvattuvv, $luvattukk, $luvattupp) = split('-', $srow["luvattu"]);
+				list($luvattuvv, $luvattukk, $luvattupp) = explode('-', $srow["luvattu"]);
 			}
 
 			echo "<tr><td>Ostopvm:</td>

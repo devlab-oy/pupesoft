@@ -154,7 +154,7 @@
 		echo "<select name='otunnus' onchange='submit();'>";
 		echo "<option value=''>".t("Näytä kaikki")."</option>";
 		
-		$tunnukset = split(',',$tunnusrow["tunnukset"]);
+		$tunnukset = explode(',',$tunnusrow["tunnukset"]);
 		
 		foreach($tunnukset as $tunnus) {
 			$sel = '';

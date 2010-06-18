@@ -19,7 +19,7 @@ if (mysql_num_rows($tarrares) == 1) {
 		//jos nimitys on pidempi kuin 25 merkkiä niin se ei mahdu yhdelle riville vaan pitää jakaa kahtia
 		if (strlen($nimitys) > 25) {
 			if (strpos($nimitys, " ")) {
-				$nimipalat = split(' ',$nimitys);
+				$nimipalat = explode(' ',$nimitys);
 				
 				$merkkimaara = 0;
 				$nimitys = "";

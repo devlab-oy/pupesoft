@@ -53,7 +53,7 @@
 		// sitten tutkaillaan onko jotain ruksattu...
 		if (count($valittu) != 0) {
 			foreach ($valittu as $rastit) { // Tehd‰‰n oikeudet
-				list ($nimi, $alanimi, $sov) = split("#", $rastit);
+				list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
 				//haetaan menu itemi
 				$query = "	SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2, hidden
@@ -83,7 +83,7 @@
 
 		if (count($paivitys) != 0) {
 			foreach ($paivitys as $rastit) { // P‰ivitet‰‰n p‰ivitys-kentt‰
-				list ($nimi, $alanimi, $sov) = split("#", $rastit);
+				list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
 				$query = "	SELECT nimi
 							FROM oikeu use index (sovellus_index)

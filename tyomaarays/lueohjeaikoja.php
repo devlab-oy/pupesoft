@@ -4,7 +4,7 @@
 	$ekapoint = fopen($faili, 'r') or die ("$faili ei auennut");
 
 	while($rivi = fgets($ekapoint, 100)){
-		$rivi = split("\t", $rivi);
+		$rivi = explode("\t", $rivi);
 		$huo = 1000;
 		for($a=1; $a <= 5; $a++){
 			if($a == 2){
@@ -27,7 +27,7 @@
 	$ekapoint = fopen($faili, 'r') or die ("$faili ei auennut");
 
 	while($rivi = fgets($ekapoint, 100)){
-		$rivi = split("\t", $rivi);
+		$rivi = explode("\t", $rivi);
 		$huo = 1000;
 		for($a=1; $a <= 6; $a++){
 			if($a == 2){

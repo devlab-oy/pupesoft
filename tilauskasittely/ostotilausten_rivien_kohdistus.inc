@@ -463,7 +463,7 @@ if (isset($muut_siirrettavat)) {
 	$toimittajaid 		= $muut[5];
 
 	for($i = 4; $i < count($muut); $i++) {
-		list($h,$s) = split('#', $muut[$i]);
+		list($h,$s) = explode('#', $muut[$i]);
 		$haku[$h] = $s;
 	}
 }

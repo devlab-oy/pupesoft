@@ -356,7 +356,7 @@ if ($tee == "") {
 		$maa_lisa = " and koodi in (";
 
 		while ($row = mysql_fetch_array($meapu)) {
-			$maat = split('[, ]', $row["sallitut_maat"]);
+			$maat = explode('[, ]', $row["sallitut_maat"]);
 			foreach ($maat as $maa) {
 				$maa_lisa .= "'$maa',";
 			}

@@ -7,7 +7,7 @@
 	$tila = '';
 	$kentat = 'laskunro, nimi, nimitark, erpcm, summa, viite, tunnus';
         $kentankoko = array(10,30,10,10,10,10,15);
-	$array = split(",", $kentat);
+	$array = explode(",", $kentat);
 	$count = count($array);
 	for ($i=0; $i<=$count; $i++) {
 			// tarkastetaan onko hakukentässä jotakin

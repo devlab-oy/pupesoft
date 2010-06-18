@@ -193,7 +193,7 @@
 			echo "	&nbsp;&nbsp;$row[kentta05]</td>
 					</tr>"; 
 	
-			$aika = split(':', $row["aikaloppu"]);
+			$aika = explode(':', $row["aikaloppu"]);
 			$tun = $aika[0];
 			$min = $aika[1];
 			

@@ -6,7 +6,7 @@
 
 	if ($tee == 'laheta') {
 
-		$kotinums2 = split("\r", $kotinums);
+		$kotinums2 = explode("\r", $kotinums);
 		$lahetetyt = array();
 
 		foreach ($kotinums2 as $kotinum) {

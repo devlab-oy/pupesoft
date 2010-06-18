@@ -837,7 +837,7 @@
 
 			//Myydään tietyltä paikalta
 			if ($paikka != '') {
-				$paikat = split('#',$paikka);
+				$paikat = explode('#',$paikka);
 
 				if ($lisaarivi_debug==1) echo "Halutaan myydä paikalta $paikka<br>";
 
@@ -1657,7 +1657,7 @@
 
 			if ($paikka != '') {
 				//Käyttäjän syöttämä paikka
-				$paikat = split('#',$paikka);
+				$paikat = explode('#',$paikka);
 
 				$p_hyllyalue	= $paikat[0];
 				$p_hyllynro		= $paikat[1];

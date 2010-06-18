@@ -4,7 +4,7 @@
 	echo "<font class='head'>".t("Kopioi käyttäjäprofiileja").":</font><hr>";
 
 		if (isset($fromkuka)) {
-			$fromkuka = split('##',$fromkuka);
+			$fromkuka = explode('##',$fromkuka);
 			
 			$fromyhtio = $fromkuka[1];
 			$fromkuka  = $fromkuka[0];			

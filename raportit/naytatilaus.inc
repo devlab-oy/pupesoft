@@ -214,7 +214,7 @@
 	// postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
 	if (stripos($rakirrow['rahtikirjanro'],"JFI") !== FALSE) {
 		$linkurl = "";
-		$jjfi = split("<br>", trim($rakirrow['rahtikirjanro']));
+		$jjfi = explode("<br>", trim($rakirrow['rahtikirjanro']));
 
 		foreach ($jjfi as $nro) {
 			$linkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId=$nro&LOTUS_hae=Hae'>$nro</a><br>";

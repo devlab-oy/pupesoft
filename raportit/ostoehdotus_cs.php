@@ -118,13 +118,13 @@
 		elseif ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] == '2') {
 			$toimittajan_toimaika = date('Y-m-d',time() + $srow["oletus_toimaika"] * 24 * 60 * 60);
 		
-			list($toimvv, $toimkk, $toimpp) = split('-', $toimittajan_toimaika);
-		//	list($kervv, $kerkk, $kerpp)    = split('-', $toimittajan_toimaika);
+			list($toimvv, $toimkk, $toimpp) = explode('-', $toimittajan_toimaika);
+		//	list($kervv, $kerkk, $kerpp)    = explode('-', $toimittajan_toimaika);
 		
 		}
 		else {
-			list($toimvv, $toimkk, $toimpp) = split('-', $srow["toimaika"]);
-		//	list($kervv, $kerkk, $kerpp)    = split('-', $srow["kerayspvm"]);
+			list($toimvv, $toimkk, $toimpp) = explode('-', $srow["toimaika"]);
+		//	list($kervv, $kerkk, $kerpp)    = explode('-', $srow["kerayspvm"]);
 		//	$kerpp = substr($kerpp,0,2);
 			$toimpp = substr($toimpp,0,2);
 

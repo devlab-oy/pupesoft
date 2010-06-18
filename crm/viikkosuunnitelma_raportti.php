@@ -158,7 +158,7 @@ if ($tee == '') {
 		}
 	}
 	
-	$ruksatut   = split(",", $valitut);					//tata kaytetaan ihan lopussa
+	$ruksatut   = explode(",", $valitut);					//tata kaytetaan ihan lopussa
 	$ruksattuja = count($ruksatut);   					//taman avulla pohditaan tarvitaanko tarkenteita
 	$vertaa     = "'".implode("','", $ruksatut)."'";	// tehdään mysql:n ymmärtämä muoto
 	

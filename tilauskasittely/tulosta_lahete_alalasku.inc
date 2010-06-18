@@ -47,7 +47,7 @@ if (!function_exists('alku_lahete')) {
 		$query = "select left(kerattyaika,10) kerattyaika from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' order by kerattyaika limit 1";
 		$myyresult = mysql_query($query) or pupe_error($query);
 		$kerattyrow = mysql_fetch_array($myyresult);
-		list ($kervv, $kerkk, $kerpp) = split("-", $kerattyrow["kerattyaika"]);
+		list ($kervv, $kerkk, $kerpp) = explode("-", $kerattyrow["kerattyaika"]);
 
 		//etsit‰‰n asiakkasnumero
 		$query  = "	SELECT asiakasnro

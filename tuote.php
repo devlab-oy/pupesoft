@@ -332,7 +332,7 @@
 
 			if ($tullirow1['cn'] != '') {
 				$alkuperamaat = array();
-				$alkuperamaat[] = split(',',$tuoterow['alkuperamaa']);
+				$alkuperamaat[] = explode(',',$tuoterow['alkuperamaa']);
 				$tuorow = $tuoterow;
 				$prossat = '';
 				$prossa_str = '';

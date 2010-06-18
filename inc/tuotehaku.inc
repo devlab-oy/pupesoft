@@ -81,7 +81,7 @@
 			elseif (substr($tuoteno,0,1) == '*') {
 				// Jos eka merkki on t‰hti etsit‰‰n teksteist‰
 				$tuoteno = substr($tuoteno, 1);
-				$sanat = split(" ", $tuoteno);
+				$sanat = explode(" ", $tuoteno);
 
 				foreach ($sanat as $sana) {
 					$lisa1 .= " and concat_ws(' ', tuote.nimitys, tuote.lyhytkuvaus, tuote.tuotemerkki) like '%" . trim($sana) . "%' ";

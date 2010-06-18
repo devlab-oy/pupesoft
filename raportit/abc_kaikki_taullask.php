@@ -22,7 +22,7 @@
 		$saapumisvv	= $saapumisvv;
 	}
 	elseif (trim($saapumispvm) != '') {
-		list($saapumisvv, $saapumiskk, $saapumispp) = split('-', $saapumispvm);
+		list($saapumisvv, $saapumiskk, $saapumispp) = explode('-', $saapumispvm);
 	}
 
 	// piirrellään formi

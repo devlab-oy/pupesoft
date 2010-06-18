@@ -10,7 +10,7 @@
 		$where1 = '';
 
 		if ($piiri != '') {
-			$piirit = split(" ",$piiri);
+			$piirit = explode(" ",$piiri);
 
 			for($i = 0; $i < sizeof($piirit); $i++) {
 				$piirit[$i] = trim($piirit[$i]);
@@ -18,7 +18,7 @@
 				if ($piirit[$i] != '') {
 					if (strpos($piirit[$i],"-")) {
 
-						$piirit2 = split("-",$piirit[$i]);
+						$piirit2 = explode("-",$piirit[$i]);
 
 						for($ia = $piirit2[0]; $ia<= $piirit2[1]; $ia++) {
 							$where1 .= "'".$ia."',";

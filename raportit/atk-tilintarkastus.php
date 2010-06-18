@@ -25,7 +25,7 @@ else {
 	echo "<font class='head'>Atk-tilintarkastus</font><hr>";
 
 	if ($alku != '') {
-		list($vv, $kk, $pp) = split("-", $alku);
+		list($vv, $kk, $pp) = explode("-", $alku);
 		if (!checkdate($kk, $pp, $vv)) {
 			echo "<font class='error'>Virheellinen alkupvm $alku</font><br><br>";
 			$alku = '';
@@ -33,7 +33,7 @@ else {
 	}
 
 	if ($loppu != '') {
-		list($vv, $kk, $pp) = split("-", $loppu);
+		list($vv, $kk, $pp) = explode("-", $loppu);
 		if (!checkdate($kk, $pp, $vv)) {
 			echo "<font class='error'>Virheellinen loppupvm $loppu</font><br><br>";
 			$loppu = '';

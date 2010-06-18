@@ -53,7 +53,7 @@
 			unset($seipp);
 			
 			$tilausnumero = $laskutatun[$pointteri];
-			list($tapvmvv,$tapvmkk,$tapvmpp) = split("-", $tapahtumapvm);
+			list($tapvmvv,$tapvmkk,$tapvmpp) = explode("-", $tapahtumapvm);
 
 			//	Haetaan se sopimuskausi ja kommentti
 			$query = "	SELECT lasku.viesti, laskun_lisatiedot.sopimus_kk, laskun_lisatiedot.sopimus_pp, UNIX_TIMESTAMP(laskun_lisatiedot.sopimus_alkupvm) sopimus_alkupvm, UNIX_TIMESTAMP(laskun_lisatiedot.sopimus_loppupvm) sopimus_loppupvm

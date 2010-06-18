@@ -20,7 +20,7 @@ for($a = 1; $a < count($argv); $a++) {
 		if ($tiedosto != "." and $tiedosto != "..") {
 			$file = fopen($tiedosto,"r") or die ("Ei aukea!\n");
 			
-			$filenimi = split("/",$tiedosto);
+			$filenimi = explode("/",$tiedosto);
 			$lukumaar = count($filenimi);
 			$laji 	  = $filenimi[$lukumaar-1];
 			

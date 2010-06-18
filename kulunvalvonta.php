@@ -1281,7 +1281,7 @@
 
 				while ($kirjautumisetrow = mysql_fetch_array($kirjautumisetres)) {
 					//	Puretaan ulosajat splitillä
-					list($ulosaika, $ulostunnus) = split("#", $kirjautumisetrow['ulos']);
+					list($ulosaika, $ulostunnus) = explode("#", $kirjautumisetrow['ulos']);
 
 					if ($kirjautumisetrow["tunnus"] == $muokkaa) {
 						echo "

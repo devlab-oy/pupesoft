@@ -74,7 +74,7 @@
 			$retval = tarkasta_liite("tositefile", array("TXT", "CSV", "XLS"));
 
 			if ($retval === true) {
-				list($name, $ext) = split("\.", $_FILES['tositefile']['name']);
+				list($name, $ext) = explode("\.", $_FILES['tositefile']['name']);
 
 				if (strtoupper($ext)=="XLS") {
 					require_once ('excel_reader/reader.php');
@@ -433,8 +433,8 @@
 		if ($maara=='') $maara='3'; //n‰ytet‰‰n defaulttina kaks
 
 		//p‰iv‰m‰‰r‰n tarkistus
-		$tilalk = split("-", $yhtiorow["tilikausi_alku"]);
-		$tillop = split("-", $yhtiorow["tilikausi_loppu"]);
+		$tilalk = explode("-", $yhtiorow["tilikausi_alku"]);
+		$tillop = explode("-", $yhtiorow["tilikausi_loppu"]);
 
 		$tilalkpp = $tilalk[2];
 		$tilalkkk = $tilalk[1]-1;

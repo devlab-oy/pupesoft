@@ -25,7 +25,7 @@
 
 	echo "<font class='head'>".t("$otsikko")."</font><hr>";
 	
-	$array = split("::", $kentat);
+	$array = explode("::", $kentat);
 	$count = count($array);
 	for ($i=0; $i<=$count; $i++) {
 		if (strlen($haku[$i]) > 0) {

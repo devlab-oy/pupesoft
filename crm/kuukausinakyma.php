@@ -270,7 +270,7 @@
 				}
 
 				//Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa
-				list($rvv,$rkk,$rpp) = split("-",substr($krow["pvmloppu"],0,10));
+				list($rvv,$rkk,$rpp) = explode("-",substr($krow["pvmloppu"],0,10));
 				$kaleloppu  = (int) date('Ymd',mktime(0,0,0,$rkk,$rpp,$rvv));
 				$aikanyt 	= (int) date('Ymd',mktime(0,0,0,date('m'),date('d'),date('Y')));
 

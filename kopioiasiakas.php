@@ -174,7 +174,7 @@
 
 		$jarjestys = 'selaus, nimi';
 		
-		$array = split(",", $kentat);
+		$array = explode(",", $kentat);
         $count = count($array);
 		
         for ($i=0; $i<=$count; $i++) {

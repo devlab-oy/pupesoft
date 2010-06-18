@@ -1455,8 +1455,11 @@ if ($yhtiorow["alert_email"] != "") {
 
 	$content .= chunk_split(base64_encode($sisalto));
 	$content .= "\n";
+	$content .= "--$bound--\n";
 
-	$boob = mail($yhtiorow["alert_email"],  "$edi_subj - $yhtiorow[nimi]", $content, $header, "-f $yhtiorow[postittaja_email]");
+	$edi_subj = mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q");
+
+	$boob = mail($yhtiorow["alert_email"], $edi_subj, $content, $header, "-f $yhtiorow[postittaja_email]");
 
 }
 

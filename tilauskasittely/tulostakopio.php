@@ -386,7 +386,6 @@
 		$where1 		= "";
 		$where2 		= "";
 		$where3 		= "";
-		$tyyppieimukaan = "";
 
 		$wherenimi = "	and lasku.nimi			= '$asiakasrow[nimi]'
 					 	and lasku.nimitark		= '$asiakasrow[nimitark]'
@@ -650,9 +649,7 @@
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
-			$use = " use index (yhtio_tila_luontiaika) ";
-			
-			$tyyppieimukaan = ",'V'";
+			$use = " use index (yhtio_tila_luontiaika) ";			
 		}
 		if ($toim == "YLLAPITOSOPIMUS") {
 			//myyntitilaus.
@@ -765,7 +762,7 @@
 					if (lasku.tapvm = '0000-00-00', left(lasku.luontiaika,10), lasku.tapvm) pvm,
 					lasku.toimaika,
 					if (kuka.nimi !='' and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija,
-					if (lasku.summa=0, (SELECT round(sum(hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi not in ('D' $tyyppieimukaan)), lasku.summa) summa,
+					if (lasku.summa=0, (SELECT round(sum(hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi not in ('D','V')), lasku.summa) summa,
 					toimaika Toimitusaika,
 					lasku.tila,
 					lasku.alatila,

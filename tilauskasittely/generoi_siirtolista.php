@@ -229,7 +229,7 @@
 			echo "</table><br>";
 
 			if (count($otsikot) == 0) {
-				echo "<font class='error'>".t("Kohdevaraston h‰lyrajat on paukkunut eik‰ kamaa saatu mist‰‰n toimitettua")."!!!!</font><br>";
+				echo "<font class='error'>".t("L‰hdevarastojen saldo ei riit‰ kohdevaraston tarpeeseen")."!</font><br>";
 			}
 			else {
 				echo "<font class='message'>".t("Luotiin %s siirtolistaa", $kieli, count($otsikot))."</font><br><br><br>";

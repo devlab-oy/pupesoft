@@ -366,10 +366,12 @@
 			for ($i=1; $i<=5; $i++) {
 				if (is_uploaded_file($_FILES['userfile'.$i]['tmp_name']) == TRUE) {
 
-					list($name,$ext) = explode("\.", $_FILES['userfile'.$i]['name']);
+					$path_parts = pathinfo($_FILES['userfile'.$i]['name']);
+					$name	= strtoupper($path_parts['filename']);
+					$ext	= strtoupper($path_parts['extension']);
 
-					if (!(strtoupper($ext) == "JPG" || strtoupper($ext) == "GIF")){
-						echo "<font class='error'><br>".t("Ainoastaa .jpg tai .gif tiedostot sallittuja")."!</font>";
+					if ($ext != "JPG" and $ext != "GIF") {
+						echo "<font class='error'><br>".t("Ainoastaan .jpg tai .gif tiedostot sallittuja")."!</font>";
 					}
 					else {
 						if ($_FILES['userfile'.$i]['size']==0){

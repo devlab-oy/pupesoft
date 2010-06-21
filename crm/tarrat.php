@@ -235,7 +235,7 @@
 			</script>";
 		
 		
-		$kentat = "nimi, osoite, postino, postitp, maa, ryhma, piiri, flag_1, flag_2, flag_3, flag_4";
+		$kentat = "nimi, osoite, postino, postitp, maa, osasto, ryhma, piiri, flag_1, flag_2, flag_3, flag_4";
 
 		$array = explode(",", $kentat);
         $count = count($array);
@@ -269,7 +269,7 @@
 		}
 
 		//haetaan omat asiakkaat
-		$query = "	SELECT nimi, osoite, postino, postitp, maa, ryhma, piiri, flag_1, flag_2, flag_3, flag_4, tunnus
+		$query = "	SELECT nimi, osoite, postino, postitp, maa, osasto, ryhma, piiri, flag_1, flag_2, flag_3, flag_4, tunnus
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]' 
 					and nimi != '' 

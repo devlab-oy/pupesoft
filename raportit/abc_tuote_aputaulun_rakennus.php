@@ -31,11 +31,15 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 	else {
 		die ("Yhtiö $kukarow[yhtio] ei löydy!");
 	}
+
 	$tee = "YHTEENVETO";
+	$komentorivilta = TRUE;
 }
 else {
 	require ("../inc/parametrit.inc");
 	echo "<font class='head'>".t("ABC-Aputaulun rakennus")."<hr></font>";
+
+	$komentorivilta = FALSE;
 }
 
 if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
@@ -74,13 +78,18 @@ if ($tee == 'YHTEENVETO') {
 
 	if ($abctyyppi == "kulutus") {
 		$kpltyyppi = " tilausrivi.tyyppi='V' ";
-		$summasql  = " sum(if($kpltyyppi, (SELECT sum(-1*kpl*hinta) from tapahtuma where tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus), 0)) ";
+		$summasql  = " sum(if(tilausrivi.tyyppi='V', (SELECT sum(-1*kpl*hinta) from tapahtuma where tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus), 0)) ";
 		$katesql   = " 0 ";
+
+		$riviwhere = " (tilausrivi.tyyppi = 'V' and tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59') ";
 	}
 	else {
 		$kpltyyppi = " tilausrivi.tyyppi='L' ";
-		$summasql  = " sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), tilausrivi.rivihinta, 0)) ";
-		$katesql   = " sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), tilausrivi.kate, 0)) ";
+		$summasql  = " sum(if(tilausrivi.tyyppi='L', tilausrivi.rivihinta, 0)) ";
+		$katesql   = " sum(if(tilausrivi.tyyppi='L', tilausrivi.kate, 0)) ";
+
+		$riviwhere = " (tilausrivi.tyyppi in ('L','O') and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl') or 
+					   (tilausrivi.tyyppi = 'L' and tilausrivi.var = 'P' and tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59') ";
 	}
 
 	// Haetaan abc-parametrit
@@ -142,8 +151,7 @@ if ($tee == 'YHTEENVETO') {
 				FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 				$tuotejoin
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-				and ((tilausrivi.tyyppi in ('L','O') and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')
-				or (tilausrivi.tyyppi = 'V' and tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59'))
+				and ($riviwhere)
 				GROUP BY 1";
 	$res = mysql_query($query) or pupe_error($query);
 
@@ -242,9 +250,7 @@ if ($tee == 'YHTEENVETO') {
 				FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
 				$tuotejoin
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-				and ((tilausrivi.tyyppi in ('L','O') and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')
-				or (tilausrivi.tyyppi = 'L' and tilausrivi.var = 'P' and tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59')
-				or (tilausrivi.tyyppi = 'V' and tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59'))
+				and ($riviwhere)
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
 	   			ORDER BY $abcwhat desc";
 	$res = mysql_query($query) or pupe_error($query);
@@ -386,7 +392,7 @@ if ($tee == 'YHTEENVETO') {
 				JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
 				LEFT JOIN abc_aputaulu USE INDEX (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuotepaikat.yhtio and abc_aputaulu.tuoteno = tuotepaikat.tuoteno and tyyppi = '$abcchar')
 				WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-				GROUP BY 1,2,3,4,5,6
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 				HAVING saldo > 0 and luokka is null";
 	$tuores = mysql_query($query) or pupe_error($query);
 
@@ -660,9 +666,14 @@ if ($tee == 'YHTEENVETO') {
 
 	$query = "OPTIMIZE table abc_aputaulu";
 	$optir = mysql_query($query) or pupe_error($query);
+
+
+	if (!$komentorivilta) {
+		echo t("ABC-aputaulu rakennettu")."!<br><br>";
+	}
 }
 
-if ($tee == "") {
+if (!$komentorivilta) {
 
 	// piirrellään formi
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";

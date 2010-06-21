@@ -41,15 +41,17 @@
 	if ($tee == "FILE") {
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) == TRUE) {
 
-			list($name,$ext) = explode("\.", $_FILES['userfile']['name']);
+			$path_parts = pathinfo($_FILES['userfile']['name']);
+			$name	= strtoupper($path_parts['filename']);
+			$ext	= strtoupper($path_parts['extension']);
 
-			if (!(strtoupper($ext) == "TXT" || strtoupper($ext) == "XLS" || strtoupper($ext) == "CSV")) {
-				die ("<font class='error'><br>".t("Ainoastaa .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
+			if ($ext != "TXT" and $ext != "CSV" and $ext != "XLS") {
+				die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
 			}
+
 			if ($_FILES['userfile']['size']==0) {
-				die ("<font class='error'><br>".t("Tiedosto oli tyhjä")."!</font>");
+				die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
 			}
-
 
 			if (strtoupper($ext)=="XLS") {
 				require_once ('excel_reader/reader.php');
@@ -70,18 +72,18 @@
 			$maara = array();
 
 			if (strtoupper($ext) == "XLS") {
-				for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {				
-					// luetaan rivi tiedostosta..					
+				for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {
+					// luetaan rivi tiedostosta..
 					$tuo		= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][0]));
 					$hyl		= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][1]));
 					$maa		= mysql_real_escape_string(str_replace(",", ".", trim($data->sheets[0]['cells'][$excei][2])));
 					$lisaselite	= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][3]));
-					
+
 					if ($tuo != '' and $hyl != '' and $maa != '') {
 						$hylp = explode("-", $hyl);
 						$tuote[] = $tuo."#".$hylp[0]."#".$hylp[1]."#".$hylp[2]."#".$hylp[3];
 						$maara[] = $maa;
-					}										
+					}
 				}
 			}
 			else {
@@ -1380,14 +1382,14 @@
 					echo "<input type='hidden' name='hyllyssa[$tuoterow[tptunnus]]' value='$tuoterow[saldo]'>";
 					echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]#$tuoterow[hyllyalue]#$tuoterow[hyllynro]#$tuoterow[hyllyvali]#$tuoterow[hyllytaso]'>";
 					echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
-					
+
 					if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
 						echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
 					}
 					elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
 						echo "<td valign='top' class='back'>".t("Tuote on eränumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
 					}
-					
+
 					echo "</tr>";
 
 					if ($rivilask == 0) {
@@ -1443,14 +1445,14 @@
 						echo "<td valign='top' colspan='4'><font class='error'>$viesti</font>";
 					}
 					echo "</td>";
-								
+
 					if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
 						echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
 					}
 					elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
 						echo "<td valign='top' class='back'>".t("Tuote on eränumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
-					}					
-					
+					}
+
 					echo "</tr>";
 				}
 				else {

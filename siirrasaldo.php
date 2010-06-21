@@ -70,14 +70,16 @@
 
 		if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
-			list($name,$ext) = explode("\.", $_FILES['userfile']['name']);
+			$path_parts = pathinfo($_FILES['userfile']['name']);
+			$name	= strtoupper($path_parts['filename']);
+			$ext	= strtoupper($path_parts['extension']);
 
-			if (strtoupper($ext) !="TXT" and strtoupper($ext)!="CSV") {
-				die ("<font class='error'><br>".t("Ainoastaa .txt ja .csv tiedostot sallittuja")."!</font>");
+			if ($ext != "TXT" and $ext != "CSV") {
+				die ("<font class='error'><br>".t("Ainoastaan .txt ja .cvs tiedostot sallittuja")."!</font>");
 			}
 
 			if ($_FILES['userfile']['size']==0) {
-				die ("<font class='error'><br>".t("Tiedosto oli tyhjä")."!</font>");
+				die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
 			}
 
 			$file=fopen($_FILES['userfile']['tmp_name'],"r") or die ("".t("Tiedoston avaus epäonnistui")."!");
@@ -227,13 +229,13 @@
 						$result = mysql_query($query) or pupe_error($query);
 					}
 
-					$kehahin_query = "	SELECT kehahin, yksikko 
+					$kehahin_query = "	SELECT kehahin, yksikko
 										FROM tuote
 										WHERE yhtio = '$kukarow[yhtio]'
 										and tuoteno = '$tuoteno'";
 					$kehahin_result = mysql_query($kehahin_query) or pupe_error($kehahin_query);
 					$kehahin_row = mysql_fetch_array($kehahin_result);
-					
+
 					$query = "	INSERT into tapahtuma set
 									yhtio ='$kukarow[yhtio]',
 									tuoteno = '$tuoteno',

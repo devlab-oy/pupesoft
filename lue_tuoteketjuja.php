@@ -37,7 +37,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) == TRUE) {
 	$ext = $path_parts['extension'];
 
 	if (strtoupper($ext) != "TXT" and strtoupper($ext) != "CSV") {
-		die ("<font class='error'><br>".t("Ainoastaa .txt ja .csv tiedostot sallittuja")."!</font>");
+		die ("<font class='error'><br>".t("Ainoastaan .txt ja .csv tiedostot sallittuja")."!</font>");
 	}
 
 	if ($_FILES['userfile']['size'] == 0) {

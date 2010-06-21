@@ -29,17 +29,17 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 	require ("inc/pakolliset_sarakkeet.inc");
 
 	$path_parts = pathinfo($_FILES['userfile']['name']);
-	$ext = strtolower($path_parts['extension']);
+	$ext = strtoupper($path_parts['extension']);
 
-	if (strtoupper($ext) != "TXT" and strtoupper($ext) != "XLS" and strtoupper($ext) != "CSV") {
-		die ("<font class='error'><br>".t("Ainoastaan .txt ja .cvs tiedostot sallittuja")."!</font>");
+	if ($ext != "TXT" and $ext != "XLS" and $ext != "CSV") {
+		die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
 	}
 
 	if ($_FILES['userfile']['size'] == 0) {
 		die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
 	}
 
-	if (strtoupper($ext) == "XLS") {
+	if ($ext == "XLS") {
 		require_once ('excel_reader/reader.php');
 
 		// ExcelFile
@@ -54,7 +54,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 	echo "<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...<br><br></font>";
 
 	// luetaan eka rivi tiedostosta..
-	if (strtoupper($ext) == "XLS") {
+	if ($ext == "XLS") {
 		$headers = array();
 
 		for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
@@ -156,7 +156,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 	}
 
 	// Luetaan tiedosto loppuun ja tehd‰‰n taulukohtainen array koko datasta
-	if (strtoupper($ext) == "XLS") {
+	if ($ext == "XLS") {
 		for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
 			for ($excej = 0; $excej < count($headers); $excej++) {
 
@@ -253,7 +253,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 		// jos tullaan jotenkin hassusti, nmiin ei tehd‰ mit‰‰n
 		if (trim($table_mysql) == "") continue;
-				
+
 		// Haetaan valitun taulun sarakkeet
 		$query = "SHOW COLUMNS FROM $table_mysql";
 		$fres  = mysql_query($query) or pupe_error($query);

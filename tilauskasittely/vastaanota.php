@@ -85,16 +85,16 @@
 			$timeparts = explode(" ",microtime());
 			$starttime = $timeparts[1].substr($timeparts[0],1);
 
-			list($name,$ext) = explode("\.", $_FILES['userfile']['name']);
+			$path_parts = pathinfo($_FILES['userfile']['name']);
+			$name	= strtoupper($path_parts['filename']);
+			$ext	= strtoupper($path_parts['extension']);
 
-			if (!(strtoupper($ext) == "TXT" || strtoupper($ext) == "CSV"))
-			{
-				die ("<font class='error'><br>".t("Ainoastaa .txt tai .csv tiedostot sallittuja")."!</font>");
+			if ($ext != "TXT" and $ext != "CSV") {
+				die ("<font class='error'><br>".t("Ainoastaan .txt ja .cvs tiedostot sallittuja")."!</font>");
 			}
 
-			if ($_FILES['userfile']['size']==0)
-			{
-				die ("<font class='error'><br>".t("Tiedosto oli tyhj‰")."!</font>");
+			if ($_FILES['userfile']['size']==0) {
+				die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
 			}
 
 			$file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
@@ -274,12 +274,12 @@
 				}
 				else {
 					$paikkarow = mysql_fetch_array($result);
-					
+
 					if ($paikkarow["inventointilista_aika"] > 0) {
 						echo "<font class='error'>$paikkarow[hyllyalue]-$paikkarow[hyllynro]-$paikkarow[hyllyvali]-$paikkarow[hyllytaso] ".t("VIRHE: Kohdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
-						$virheita++;	
+						$virheita++;
 					}
-					
+
 					$t1[$tun] = $paikkarow['hyllyalue'];
 					$t2[$tun] = $paikkarow['hyllynro'];
 					$t3[$tun] = $paikkarow['hyllyvali'];
@@ -295,7 +295,7 @@
 							and tuoteno = '$tilausrivirow[tuoteno]'";
 				$resulteankoodi = mysql_query($query) or pupe_error($query);
 			}
-			
+
 			//haetaan antavan varastopaikan tunnus
 			$query = "	SELECT inventointilista_aika
 						FROM tuotepaikat
@@ -307,10 +307,10 @@
 						and tuoteno		= '$tilausrivirow[tuoteno]'";
 			$presult = mysql_query($query) or pupe_error($query);
 			$prow = mysql_fetch_array($presult);
-			
+
 			if ($prow["inventointilista_aika"] > 0) {
 				echo "<font class='error'>$tilausrivirow[hyllyalue]-$tilausrivirow[hyllynro]-$tilausrivirow[hyllyvali]-$tilausrivirow[hyllytaso] ".t("VIRHE: L‰hdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
-				$virheita++;	
+				$virheita++;
 			}
 		}
 
@@ -414,10 +414,10 @@
 
 						$sarjano_array = array();
 
-						while ($sarjarow = mysql_fetch_array($sarjares)) {														
+						while ($sarjarow = mysql_fetch_array($sarjares)) {
 							if ($tilausrivirow["sarjanumeroseuranta"] == "E" or $tilausrivirow["sarjanumeroseuranta"] == "F" or $tilausrivirow["sarjanumeroseuranta"] == "G") {
 								// er‰numeroseurannassa pit‰‰ etsi‰ ostotunnuksella er‰ josta kappaleeet otetaan
-								
+
 								// koitetaan lˆyt‰‰ vapaita ostettuja eri‰ mit‰ myyd‰
 								$query =   "SELECT era_kpl, tunnus, ostorivitunnus
 											FROM sarjanumeroseuranta
@@ -431,19 +431,19 @@
 											and hyllynro    		= '$tilausrivirow[hyllynro]'
 											and hyllyvali   		= '$tilausrivirow[hyllyvali]'
 											and hyllytaso   		= '$tilausrivirow[hyllytaso]'
-											ORDER BY era_kpl DESC, tunnus 
+											ORDER BY era_kpl DESC, tunnus
 											LIMIT 1";
 								$erajaljella_res = mysql_query($query) or pupe_error($query);
-																
+
 								// jos lˆytyy ostettuja eri‰ myyt‰v‰ks niin menn‰‰n t‰nne
 								if (mysql_num_rows($erajaljella_res) == 1) {
 									$erajaljella_row = mysql_fetch_array($erajaljella_res);
-									
-									
-									
+
+
+
 									$sarjano_array[] = $erajaljella_row["tunnus"];
-									$sarjano_kpl_array[$erajaljella_row["tunnus"]] = $erajaljella_row["era_kpl"];									
-								}																								
+									$sarjano_kpl_array[$erajaljella_row["tunnus"]] = $erajaljella_row["era_kpl"];
+								}
 							}
 							else {
 								$sarjano_array[] = $sarjarow["tunnus"];
@@ -513,17 +513,17 @@
 									and yhtio					= '$kukarow[yhtio]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 					}
-					
+
 					if ($toim == "MYYNTITILI") {
-						$uprquery = "UPDATE tilausrivi SET 
-									hyllyalue 	= '$t1[$tun]', 
-									hyllynro 	= '$t2[$tun]', 
-									hyllyvali 	= '$t3[$tun]', 
-									hyllytaso 	= '$t4[$tun]' 
+						$uprquery = "UPDATE tilausrivi SET
+									hyllyalue 	= '$t1[$tun]',
+									hyllynro 	= '$t2[$tun]',
+									hyllyvali 	= '$t3[$tun]',
+									hyllytaso 	= '$t4[$tun]'
 									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tun'";
 						$uprresult = mysql_query($uprquery) or pupe_error($uprquery);
 					}
-					
+
 
 				}
 				if ($tee == "X") {
@@ -577,7 +577,7 @@
 	elseif ($tee == "OK" and $id != '0' and $toim == "MYYNTITILI") {
 		$id = 0;
 	}
-	
+
 	if ($id == '') $id = 0;
 
 	// meill‰ ei ole valittua tilausta
@@ -589,7 +589,7 @@
 		// tehd‰‰n etsi valinta
 		echo "<form action='$PHP_SELF' name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
-		
+
 		echo "<table>
 				<tr><th>".t("Etsi siirtolistaa").":</th><td><input type='text' name='etsi'></td></tr>
 				<tr><th>".t("Varasto")."</th><td><select name='varasto'>";
@@ -692,7 +692,7 @@
 					// piirret‰‰n vaan kerran taulukko-otsikot
 					if ($boob == '') {
 						$boob = 'kala';
-						
+
 						echo "<table>";
 						echo "<tr>";
 						for ($y=0; $y<mysql_num_fields($result); $y++)
@@ -844,7 +844,7 @@
 		if ($toim == "") {
 			echo "<td>";
 			$chk = '';
-			
+
 			if ($oletuspaiv != '') {
 				$chk = 'checked';
 			}
@@ -982,8 +982,8 @@
 				//Miss‰ tuotetta on?
 				$query  = "	SELECT *
 							FROM tuotepaikat
-							WHERE yhtio = '$kukarow[yhtio]' 
-							and tuoteno = '$rivirow[tuoteno]' 
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$rivirow[tuoteno]'
 							$lisa
 							ORDER BY oletus DESC, hyllyalue, hyllynro, hyllyvali, hyllytaso";
 				$vares = mysql_query($query) or pupe_error($query);
@@ -1041,7 +1041,7 @@
 					$echk = "CHECKED";
 				}
 				echo "<td align='center'><input type='checkbox' name='eancheck[$rivirow[tunnus]]' $echk></td>";
-				
+
 			}
 
 			echo"</tr>";
@@ -1088,15 +1088,15 @@
 			}
 
 			echo "</select></td><td>";
-			
+
 			echo t("Vain listaus")."<br>";
 			echo "<input type='checkbox' name='vainlistaus'></td>";
 			echo "</table>";
 		}
 		echo "<br><br><input type='submit' name='Laheta' value='".t("Valitse")."'>";
 		echo "</form>";
-		
-		
+
+
 	}
 
 	require ("../inc/footer.inc");

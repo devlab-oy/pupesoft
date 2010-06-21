@@ -74,7 +74,9 @@
 			$retval = tarkasta_liite("tositefile", array("TXT", "CSV", "XLS"));
 
 			if ($retval === true) {
-				list($name, $ext) = explode("\.", $_FILES['tositefile']['name']);
+				$path_parts = pathinfo($_FILES['tositefile']['name']);
+				$name	= strtoupper($path_parts['filename']);
+				$ext	= strtoupper($path_parts['extension']);
 
 				if (strtoupper($ext)=="XLS") {
 					require_once ('excel_reader/reader.php');

@@ -20,9 +20,11 @@ $uusi_on_jo		= "";
 
 if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file") {
 	//Tuotenumerot tulevat tiedostosta
-	list($name,$ext) = explode("\.", $_FILES['userfile']['name']);
+	$path_parts = pathinfo($_FILES['userfile']['name']);
+	$name	= strtoupper($path_parts['filename']);
+	$ext	= strtoupper($path_parts['extension']);
 
-	if (strtoupper($ext) !="TXT" and strtoupper($ext)!="CSV") {
+	if ($ext != "TXT" and $ext != "CSV") {
 		die ("<font class='error'><br>".t("Ainoastaan .txt ja .cvs tiedostot sallittuja")."!</font>");
 	}
 

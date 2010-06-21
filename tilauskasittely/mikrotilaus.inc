@@ -4,14 +4,16 @@
 			$timeparts = explode(" ",microtime());
 			$starttime = $timeparts[1].substr($timeparts[0],1);
 
-			list($name,$ext) = explode("\.", $_FILES['userfile']['name']);
+			$path_parts = pathinfo($_FILES['userfile']['name']);
+			$name	= strtoupper($path_parts['filename']);
+			$ext	= strtoupper($path_parts['extension']);
 
-			if (strtoupper($ext) !="TXT" and strtoupper($ext)!="XLS" and strtoupper($ext)!="CSV") {
-				die ("<font class='error'><br>".t("Ainoastaan .xls, .txt ja .cvs tiedostot sallittuja")."!</font>");
+			if ($ext != "TXT" and $ext != "CSV" and $ext != "XLS") {
+				die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
 			}
 
 			if ($_FILES['userfile']['size']==0) {
-				die ("<font class='error'><br>".t("Tiedosto oli tyhjä")."!</font>");
+				die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
 			}
 
 			if (strtoupper($ext)=="XLS") {

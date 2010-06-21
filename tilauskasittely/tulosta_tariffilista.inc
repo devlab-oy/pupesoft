@@ -67,7 +67,7 @@
 	}
 	if (!function_exists('print_pdf_tariffi')) {
 		function print_pdf_tariffi () {
-			global $pdf, $kukarow, $yhtiorow, $komento, $otunnus;
+			global $pdf, $kukarow, $yhtiorow, $komento, $otunnus, $tee;
 
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
@@ -85,9 +85,17 @@
 				$kutsu = "Tariffilista";
 
 				require("../inc/sahkoposti.inc");
+				
+				echo t("Tariffilista tulostuu")."...<br>";
 			}
+			elseif ($tee == 'NAYTATILAUS') {
+    			//Tyˆnnet‰‰n tuo pdf vaan putkeen!
+    			echo file_get_contents($pdffilenimi);
+    		}
 			elseif ($komento["Tariffilista"] != '' and $komento["Tariffilista"] != 'edi') {
 				$line = exec("$komento[Tariffilista] $pdffilenimi");
+				
+				echo t("Tariffilista tulostuu")."...<br>";
 			}
 
 			//poistetaan tmp file samantien kuleksimasta...
@@ -144,7 +152,4 @@
 
 	//kutsutaan lopuksi viel‰ print_pdf_tariffi funktiota
 	print_pdf_tariffi();
-
-	//p‰‰dyt‰‰n taas selailemaan toimittajia
-	echo "".t("Tariffilista tulostuu")."...<br>";
 ?>

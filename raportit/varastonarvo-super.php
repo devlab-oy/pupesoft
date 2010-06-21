@@ -1153,15 +1153,22 @@
 					</td>";
 			echo "</tr>";
 
-			if ($status != '') {
-				${'status_'.$status.'_sel'} = 'SELECTED';
+			echo "<tr><th>",t("Näytä myös tuotteet statuksella"),"</th>";
+
+			$result = t_avainsana("S");
+
+			echo "<td><select name='status'><option value=''>",t("Kaikki"),"</option>";
+
+			while ($statusrow = mysql_fetch_assoc($result)) {
+
+				$sel = '';
+
+				if (isset($status) and $status == $statusrow['selite']) $sel = ' SELECTED';
+
+				echo "<option value='$statusrow[selite]'$sel>$statusrow[selite] - $statusrow[selitetark]</option>";
 			}
 
-			echo "
-			<tr>
-			<th>",t("Näytä myös tuotteet statuksella"),"</th>
-			<td><select name='status'><option value=''></option><option value='a' $status_a_sel>A</option><option value='x' $status_x_sel>X</option><option value='p' $status_p_sel>P</option></select></td>
-			</tr>";
+			echo "</select></td></tr>";
 
 			$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
 			$vares = mysql_query($query) or pupe_error($query);

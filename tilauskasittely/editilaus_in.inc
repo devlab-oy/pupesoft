@@ -554,7 +554,7 @@ while (!feof ($fd)) {
 			$ltoim_maa = substr(trim($tieto), 0, 2);
 			break;
 
-		case 'YHTEYSHENKILONPUH' :
+		case 'OSTOTIL.OT_YHTEYSHENKILONPUH' :
 			// yhteyshenkilön puhelinnumero
 			$yhteyshenkilon_puhelin = trim($tieto);
 			break;

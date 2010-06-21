@@ -1153,7 +1153,7 @@
 					</td>";
 			echo "</tr>";
 
-			echo "<tr><th>",t("Näytä myös tuotteet statuksella"),"</th>";
+			echo "<tr><th>",t("Tuotteen status"),"</th>";
 
 			$result = t_avainsana("S");
 

@@ -8464,7 +8464,8 @@ if (!function_exists("tulosta_logo_pdf")) {
 		global $kukarow, $yhtiorow;
 
 		$apu_yhtiorow = array();
-
+		$apu_yhtiorow["nimi"] = $yhtiorow["nimi"];
+		
 		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
 		if (isset($laskurow["eta_yhtio"]) and $laskurow["eta_yhtio"] != "") {
 			$query = "	SELECT *
@@ -8486,6 +8487,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_toimipaikkarow = mysql_fetch_array($result);
 				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
+				$apu_yhtiorow["nimi"] = $yhtion_toimipaikkarow["nimi"];
 		 	}
 		}
 		elseif ($laskurow["yhtio"] != "") {
@@ -8496,7 +8498,24 @@ if (!function_exists("tulosta_logo_pdf")) {
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_parametritrow = mysql_fetch_array($result);
-				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
+				
+				// Ostotilauksille aina logo käyttäjän toimipaikan takaa
+				if (isset($kukarow["toimipaikka"]) and $kukarow["toimipaikka"] != 0 and ($laskurow["tila"] == "O" or $laskurow["tila"] == "K")) {
+					$query = "	SELECT *
+								FROM yhtion_toimipaikat
+								WHERE yhtio='$yhtio' and tunnus='$kukarow[toimipaikka]'";
+					$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+					if (mysql_num_rows($result) == 1) {
+						$yhtion_toimipaikkarow = mysql_fetch_assoc($result);
+
+						$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
+						$apu_yhtiorow["nimi"] = $yhtion_toimipaikkarow["nimi"];
+				 	}
+				}
+				else {
+					$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
+				}
 			}
 		}
 		else {
@@ -8512,7 +8531,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif (file_exists($apu_yhtiorow["lasku_logo"])) {
+		elseif ($apu_yhtiorow["lasku_logo"] != "" and file_exists($apu_yhtiorow["lasku_logo"])) {
 			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
@@ -8569,11 +8588,17 @@ if (!function_exists("tulosta_logo_pdf")) {
 			$iso["font"]   = "Helvetica-Bold";
 
 			if ($laskurow["yhtio_nimi"] != "") $yhtionimi = $laskurow["yhtio_nimi"];
+			elseif ($apu_yhtiorow["nimi"] != "") $yhtionimi = $apu_yhtiorow["nimi"];
 			else $yhtionimi = $yhtiorow["nimi"];
 
 			list($ff_string, $ff_font) = pdf_fontfit($yhtionimi, 270, $pdf, $iso);
-
-			$pdf->draw_text(30, 815, $ff_string, $thispage, $ff_font);
+			
+			if ($lasku_logo_positio_y == 0 and $lasku_logo_positio_x == 0) {
+				$lasku_logo_positio_y = 815;
+				$lasku_logo_positio_x = 30;
+			}
+			
+			$pdf->draw_text($lasku_logo_positio_x, $lasku_logo_positio_y, $ff_string, $thispage, $ff_font);
 		}
 	}
 }

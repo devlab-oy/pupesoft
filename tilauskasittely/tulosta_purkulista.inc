@@ -33,7 +33,7 @@
 			$pieni["height"] 	= 8;
 			$pieni["font"] 		= "Times-Roman";
 
-			tulosta_logo_pdf($pdf, $firstpage, $laskurow, 568, 22, 25, 120);
+			tulosta_logo_pdf($pdf, $firstpage, $laskurow, 555, 22, 25, 120);
 
 			$pdf->draw_rectangle(570, 20,  530, 808, $firstpage, 			$rectparam);
 

@@ -265,11 +265,12 @@
 			$x++;
 
 			// LIN - line item
-			$query = "	SELECT tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.varattu
+			$query = "	SELECT tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, sum(tilausrivi.varattu) varattu
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
- 						AND tilausrivi.otunnus = '$desadv_laskurow[laskutunnus]'";
+ 						AND tilausrivi.otunnus = '$desadv_laskurow[laskutunnus]'
+						GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
 			$tuotteet_res = mysql_query($query) or pupe_error($query);
 
 			$i = 1;

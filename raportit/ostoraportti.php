@@ -2185,9 +2185,10 @@
 
 			echo "<tr><td class='back'><br></td></tr>";
 
-			echo "<tr><th>",t("Vuosimalliväli"),"<td colspan='2'><input type='text' name='vm1' id='vm1' size='10' value='$vm1'> - <input type='text' name='vm2' id='vm2' size='10' value='$vm2'></td></tr>";
-
-			echo "<tr><td class='back'><br></td></tr>";
+			if (table_exists(yhteensopivuus_rekisteri)) {
+				echo "<tr><th>",t("Vuosimalliväli"),"<td colspan='2'><input type='text' name='vm1' id='vm1' size='10' value='$vm1'> - <input type='text' name='vm2' id='vm2' size='10' value='$vm2'></td></tr>";
+				echo "<tr><td class='back'><br></td></tr>";
+			}
 
 			//Yhtiövalinnat
 			$query	= "	SELECT distinct yhtio, nimi

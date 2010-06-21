@@ -79,7 +79,7 @@
 		echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Tuoteosastoittain"),"<br/>";
 		echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Tuoteryhmittäin"),"<br/>";
 	}
-	
+
 	if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemerkeittain' $nayta_select3>",t("Tuotemerkeittäin"),"<br/>";
 	if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemyyjittain' $nayta_select4>",t("Tuotemyyjittäin"),"<br/>";
 	if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteostajittain' $nayta_select5>",t("Tuoteostajittain");
@@ -87,21 +87,28 @@
 	echo "</tr>";
 
 	if (!$asiakasanalyysi) {
-		if ($status != '') {
-			${'status_'.$status.'_sel'} = 'SELECTED';
-		}
+		$result = t_avainsana("S");
 
 		echo "<tr>";
-		echo "<th>",t("Näytä myös tuotteet statuksella"),"</th>";
-		echo "<td><select name='status'><option value=''></option><option value='a' $status_a_sel>A</option><option value='x' $status_x_sel>X</option><option value='p' $status_p_sel>P</option></select></td>";
-		echo "</tr>";
-	}
+		echo "<th>",t("Tuotteen status"),"</th>";
+		echo "<td><select name='status'><option value=''>".t("Kaikki")."</option>";
 
-	echo "<tr>";
-	echo "<th>".t("Syötä viimeinen saapumispäivä").":</th>";
-	echo "	<td nowrap><input type='text' name='saapumispp' value='$saapumispp' size='2'>
-			<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
-			<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td></tr>";
+		while ($lajirow = mysql_fetch_array ($result)) {
+			$selli = '';
+			if ($lajirow['selite'] == $status) {
+				$selli = 'SELECTED';
+			}
+			echo "<option value='$lajirow[selite]' $selli>$lajirow[selite] - $lajirow[selitetark]</option>";
+		}
+
+		echo "</select></td>";
+		echo "</tr>";
+		echo "<tr>";
+		echo "<th>".t("Viimeinen saapumispäivä").":</th>";
+		echo "<td nowrap><input type='text' name='saapumispp' value='$saapumispp' size='2'>
+				<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
+				<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td></tr>";
+	}
 
 	echo "<tr>";
 	echo "<th>".t("Taso").":</th>";
@@ -279,9 +286,6 @@
 			if ($status != '') {
 				$lisa .= " and status = '".(string) $status."' ";
 			}
-			else {
-				$lisa .= " and status in ('a', 'p', 'x') ";
-			}
 		}
 
 		//kauden yhteismyynnit ja katteet
@@ -404,7 +408,7 @@
 				else {
 					$keyres = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
 				}
-				
+
 				$keyosa = mysql_fetch_array($keyres);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_osasto[]=$row[osasto]&lisatiedot=$lisatiedot&status=$status'>$row[osasto] $keyosa[selitetark]</a></td>";
@@ -418,7 +422,7 @@
 				else {
 					$keyres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");
 				}
-				
+
 				$keytry = mysql_fetch_array($keyres);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_try[]=$row[try]&lisatiedot=$lisatiedot&status=$status'>$row[try] $keytry[selitetark]</a></td>";
@@ -429,9 +433,9 @@
 			}
 
 			if ($tuotemyyja == 'KAIKKI') {
-				$keymyyja = "	SELECT nimi 
-								FROM kuka 
-								WHERE yhtio = '$kukarow[yhtio]' 
+				$keymyyja = "	SELECT nimi
+								FROM kuka
+								WHERE yhtio = '$kukarow[yhtio]'
 								and myyja = '$row[myyjanro]'
 								AND myyja > 0";
 				$myyjares = mysql_query($keymyyja) or pupe_error($keymyyja);
@@ -441,9 +445,9 @@
 			}
 
 			if ($tuoteostaja == 'KAIKKI') {
-				$keyostaja = "	SELECT nimi 
-								FROM kuka 
-								WHERE yhtio = '$kukarow[yhtio]' 
+				$keyostaja = "	SELECT nimi
+								FROM kuka
+								WHERE yhtio = '$kukarow[yhtio]'
 								and myyja = '$row[ostajanro]'
 								AND myyja > 0";
 				$ostajares = mysql_query($keyostaja) or pupe_error($keymyyja);
@@ -574,7 +578,7 @@
 
 					echo "</pre>";
 				}
-				
+
 				if (${'palvelutaso_input'.$i} == '') {
 					$pttvalue = str_replace(".",",",$paramrow["palvelutaso_tavoite"]);
 				}

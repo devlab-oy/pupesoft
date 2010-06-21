@@ -50,20 +50,27 @@
 	echo "<table style='display:inline;'>";
 
 	if (!$asiakasanalyysi) {
-		echo "<tr>";
-		echo "<th>".t("Syötä viimeinen saapumispäivä").":</th>";
-		echo "<td><input type='text' name='saapumispp' value='$saapumispp' size='2'>
-				<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
-				<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td></tr>";
+		$result = t_avainsana("S");
 
-		if ($status != '') {
-			${'status_'.$status.'_sel'} = 'SELECTED';
+		echo "<tr>";
+		echo "<th>",t("Tuotteen status"),"</th>";
+		echo "<td><select name='status'><option value=''>".t("Kaikki")."</option>";
+
+		while ($lajirow = mysql_fetch_array ($result)) {
+			$selli = '';
+			if ($lajirow['selite'] == $status) {
+				$selli = 'SELECTED';
+			}
+			echo "<option value='$lajirow[selite]' $selli>$lajirow[selite] - $lajirow[selitetark]</option>";
 		}
 
-		echo "<tr>";
-		echo "<th>",t("Näytä myös tuotteet statuksella"),"</th>";
-		echo "<td><select name='status'><option value=''></option><option value='a' $status_a_sel>A</option><option value='x' $status_x_sel>X</option><option value='p' $status_p_sel>P</option></select></td>";
+		echo "</select></td>";
 		echo "</tr>";
+		echo "<tr>";
+		echo "<th>".t("Viimeinen saapumispäivä").":</th>";
+		echo "<td nowrap><input type='text' name='saapumispp' value='$saapumispp' size='2'>
+				<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
+				<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td></tr>";
 	}
 
 	echo "<tr>";

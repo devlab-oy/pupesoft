@@ -31,7 +31,7 @@ if(!function_exists("asiakashintatarkista")) {
 					require("asiakashaku.inc");
 
 					if ($ulos != "" and $ytunnus == "") {
-						$alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
+						$alasveto[$i] = "<select name='t[$i]'><option value=''>".t("Valitse asiakas")."</option>".$ulos."</select>";
 						$virhe[$i]    = t("Valitse asiakas!");
 					}
 					elseif ($ytunnus != "") {
@@ -46,25 +46,30 @@ if(!function_exists("asiakashintatarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "asiakas") {
-			$chastunn = (int) trim($t[$i]);
+			$chastunn = trim($t[$i]);
 
-			if ($chastunn != '' and $chastunn != 0) {
-				$query	= "	SELECT *
-							FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]'
-							and laji != 'P'
-							and tunnus='$chastunn'";
-				$result = mysql_query($query) or pupe_error($query);
+			if ($chastunn != '') {
 
-				if (mysql_num_rows($result) != 1) {
+				unset($result);
+
+				if (is_numeric($chastunn)) {
+					$query	= "	SELECT *
+								FROM asiakas
+								WHERE yhtio = '$kukarow[yhtio]'
+								and laji != 'P'
+								and tunnus = '$chastunn'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
+
+				if (!isset($result) or mysql_num_rows($result) != 1) {
 
 					$ytunnus 		= $chastunn;
 					$kutsuja 		= "yllapito.php";
 					$ulos2 			= "";
 					require("asiakashaku.inc");
 
-					if ($ulos != "" and $ytunnus == "") {
-						$alasveto[$i] = "<select name='t[$i]'>".$ulos2."</select>";
+					if ($ulos2 != "" and $ytunnus == "") {
+						$alasveto[$i] = "<select name='t[$i]'><option value=''>".t("Valitse asiakas")."</option>".$ulos2."</select>";
 						$virhe[$i]    = t("Valitse asiakas!");
 					}
 					elseif ($ytunnus != "") {
@@ -187,7 +192,7 @@ if(!function_exists("asiakashintatarkista")) {
 
 		if (mysql_field_name($result, $i) == "loppupvm") {
 			$chloppupvm = $t[$i];
-						
+
 			if ($chloppupvm == '') {
 				$chloppupvm = '0000-00-00';
 			}

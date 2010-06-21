@@ -1817,6 +1817,7 @@
 
 			echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
 					<input type='hidden' name='tee' id='tee' value=''>
+					<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 					<br/>",t("Valitse v‰hint‰‰n yksi seuraavista:"),"<br/>";
 
 			// Monivalintalaatikot (osasto, try tuotemerkki...)

@@ -90,7 +90,7 @@
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\n" ;
 		
-		if ($liitelask = count($liite)) {
+		if ($liitelask == count($liite)) {
 			$content .= "--$bound--\n";
 		} 
 		else {

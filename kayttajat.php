@@ -24,30 +24,45 @@
 	}
 
 	if (isset($muutparametrit)) {
-		list ($tee, $selkuka, $kumpi) = explode("#", $muutparametrit);
-		$ytunnus = "";
-		$ytunnus2 = "";
+		list ($tee, $selkuka, $kumpi, $yoaid) = explode("#", $muutparametrit);
+		
+		if ($kumpi == 1) {
+			$ytunnus_oa_id = $asiakasid;	
+			$oletus_asiakastiedot = $yoaid;			
+		}
+		else {
+			$oletus_asiakas = $yoaid;
+			$ytunnus_oat_id = $asiakasid;			
+		}
+				
+		$ytunnus_oa = "";
+		$ytunnus_oat = "";
 	}
 
-	if ($tee == "MUUTA" and $ytunnus != "" and $ytunnus != '0') {
-		$muutparametrit = "MUUTA#$selkuka#1";
-		$asiakasid = "";
-		$ytunnus2 = "";
+	if ($tee == "MUUTA" and $ytunnus_oa != "" and $ytunnus_oa != '0') {
+		$muutparametrit = "MUUTA#$selkuka#1#$oletus_asiakastiedot";
+		$ytunnus 		= $ytunnus_oa;
+		$asiakasid 		= "";
+		$ytunnus_oat  	= "";
+
 		require ("inc/asiakashaku.inc");
 
 		if ($monta == 1) {
-			$krow["oletus_asiakas"] = $asiakasid;
-			$tee = "MUUTA";
-			$firname = "";
-			$kumpi = 1;
+			$ytunnus_oa_id	= $asiakasid;
+			$asiakasid 		= "";
+			$tee			= "MUUTA";
+			$firname		= "";
+			$kumpi			= 1;
+			$ytunnus_oa		= $ytunnus;
 		}
 		else {
 			$tee = "eimitään";
 		}
 	}
-	elseif ($ytunnus == '0') {
+	elseif ($ytunnus_oa == '0') {
 		// Nollalla saa poistettua aletus_asiakkaan
 		$krow["oletus_asiakas"] = "";
+		$oletus_asiakas = "";
 		$tee = "MUUTA";
 		$firname = "";
 
@@ -55,27 +70,30 @@
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
-	if ($tee == "MUUTA" and $ytunnus2 != "" and $ytunnus2 != '0') {
-		$muutparametrit = "MUUTA#$selkuka#2";
-		$ytunnus = $ytunnus2;
-		$asiakasid = "";
+	if ($tee == "MUUTA" and $ytunnus_oat != "" and $ytunnus_oat != '0') {
+		$muutparametrit = "MUUTA#$selkuka#2#$oletus_asiakas";	
+		$ytunnus 		= $ytunnus_oat;
+		$asiakasid 		= "";
+		$ytunnus_oa  	= "";
+
 		require ("inc/asiakashaku.inc");
 
 		if ($monta == 1) {
-			$krow["oletus_asiakastiedot"] = $asiakasid;
-			$tee = "MUUTA";
-			$firname = "";
-			$ytunnus2 = $ytunnus;
-			$ytunnus = "";
-			$kumpi = 2;
+			$ytunnus_oat_id	= $asiakasid;
+			$asiakasid 		= "";
+			$tee			= "MUUTA";
+			$firname		= "";
+			$kumpi			= 2;
+			$ytunnus_oat	= $ytunnus;
 		}
 		else {
 			$tee = "eimitään";
 		}
 	}
-	elseif ($ytunnus2 == '0') {
+	elseif ($ytunnus_oat == '0') {
 		// Nollalla saa poistettua aletus_asiakkaan
 		$krow["oletus_asiakastiedot"] = "";
+		$oletus_asiakastiedot = "";
 		$tee = "MUUTA";
 		$firname = "";
 
@@ -424,10 +442,10 @@
 
 			//poistetaan käyttäjän vanhat profiilioikeudet
 			$query = "	DELETE FROM oikeu
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and kuka = '$kuka' 
-						and kuka != '' 
-						and profiili = '' 
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kuka = '$kuka'
+						and kuka != ''
+						and profiili = ''
 						and lukittu = ''";
 			$pres = mysql_query($query) or pupe_error($query);
 
@@ -436,8 +454,8 @@
 				foreach($profiilit as $prof) {
 					$query = "	SELECT *
 								FROM oikeu
-								WHERE yhtio = '$kukarow[yhtio]' 
-								and kuka = '$prof' 
+								WHERE yhtio = '$kukarow[yhtio]'
+								and kuka = '$prof'
 								and profiili = '$prof'";
 					$pres = mysql_query($query) or pupe_error($query);
 
@@ -821,10 +839,11 @@
 
 					echo "<tr><th align='left'>".t("Oletusasiakas").":</th><td>";
 					echo "<table><tr>";
-					echo "<td><input type='text' name='ytunnus'></td>";
+					echo "<td><input type='text' name='ytunnus_oa'></td>";
 
-					if ($kumpi == "1" and $asiakasid != "") $krow["oletus_asiakas"] = $asiakasid;
-
+					if ($kumpi == "1" and $ytunnus_oa_id != "") $krow["oletus_asiakas"] = $ytunnus_oa_id;
+					elseif ($oletus_asiakas != '') $krow["oletus_asiakas"] = $oletus_asiakas;
+					
 					if ($krow["oletus_asiakas"] != "") {
 
 						$query = "SELECT * from asiakas where tunnus='$krow[oletus_asiakas]'";
@@ -833,7 +852,7 @@
 						if (mysql_num_rows($vares) == 1) {
 							$varow = mysql_fetch_array($vares);
 
-							echo "<td>$varow[ytunnus] $varow[nimi] $varow[nimitark]<br>$varow[toim_ovttunnus] $varow[toim_nimi] $varow[toim_nimitark] $varow[toim_postitp] 
+							echo "<td>$varow[ytunnus] $varow[nimi] $varow[nimitark]<br>$varow[toim_ovttunnus] $varow[toim_nimi] $varow[toim_nimitark] $varow[toim_postitp]
 									<input type='hidden' name='oletus_asiakas' value='$krow[oletus_asiakas]'></td>";
 						}
 						else {
@@ -844,20 +863,21 @@
 					else {
 						echo "<td>".t("Oletusasiakasta ei ole syötetty")."!</td>";
 					}
-					
+
 					echo "</tr></table>";
 					echo "</td></tr>";
 
 					if ($toim == 'extranet') {
 						echo "<tr><th align='left'>".t("Oletusasiakastiedot").":</th><td>";
 						echo "<table><tr>";
-						echo "<td><input type='text' name='ytunnus2'></td>";
+						echo "<td><input type='text' name='ytunnus_oat'></td>";
 
-						if ($kumpi == "2" and $asiakasid != "") $krow["oletus_asiakastiedot"] = $asiakasid;
+						if ($kumpi == "2" and $ytunnus_oat_id != "") $krow["oletus_asiakastiedot"] = $ytunnus_oat_id;
+						elseif ($oletus_asiakastiedot != '') $krow["oletus_asiakastiedot"] = $oletus_asiakastiedot;
 
 						if ($krow["oletus_asiakastiedot"] != "") {
 
-							$query = "select * from asiakas where tunnus='$krow[oletus_asiakastiedot]'";
+							$query = "SELECT * from asiakas where tunnus='$krow[oletus_asiakastiedot]'";
 							$vares = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($vares) == 1) {
@@ -865,7 +885,6 @@
 
 								echo "<td>$varow[ytunnus] $varow[nimi] $varow[nimitark]<br>$varow[toim_ovttunnus] $varow[toim_nimi] $varow[toim_nimitark] $varow[toim_postitp]
 										<input type='hidden' name='oletus_asiakastiedot' value='$krow[oletus_asiakastiedot]'></td>";
-
 							}
 							else {
 								echo "<td>".t("Asiakas ei löydy")."!</td>";
@@ -874,9 +893,9 @@
 						else {
 							echo "<td>".t("Asiakastietoasiakasta ei ole syötetty")."!</td>";
 						}
-						echo "</tr></table>";					
+						echo "</tr></table>";
 						echo "</td></tr>";
-					}														
+					}
 				}
 
 				if ($toim == 'extranet') {
@@ -913,10 +932,10 @@
 					echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";
 					echo "<option value=''>".t("Ei oletusta")."</option>";
 
-					$query  = "	SELECT distinct concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus 
-								FROM oikeu 
-								WHERE yhtio = '$kukarow[yhtio]' 
-								and kuka = '$krow[kuka]' 
+					$query  = "	SELECT distinct concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus
+								FROM oikeu
+								WHERE yhtio = '$kukarow[yhtio]'
+								and kuka = '$krow[kuka]'
 								ORDER by sovellus, nimitys";
 					$vares = mysql_query($query) or pupe_error($query);
 
@@ -1047,8 +1066,8 @@
 
 				$query = "	SELECT distinct profiili
 							FROM oikeu
-							WHERE yhtio='$kukarow[yhtio]' 
-							and profiili!='' 
+							WHERE yhtio='$kukarow[yhtio]'
+							and profiili!=''
 							$andextra
 							ORDER BY profiili";
 				$pres = mysql_query($query) or pupe_error($query);
@@ -1099,11 +1118,11 @@
 			echo "</td>";
 
 			if ($toim == 'extranet') {
-				$queryoik = "	SELECT tunnus 
-								from oikeu 
-								where nimi like '%yllapito.php' 
-								and alanimi = 'extranet_kayttajan_lisatiedot' 
-								and kuka = '$kukarow[kuka]' 
+				$queryoik = "	SELECT tunnus
+								from oikeu
+								where nimi like '%yllapito.php'
+								and alanimi = 'extranet_kayttajan_lisatiedot'
+								and kuka = '$kukarow[kuka]'
 								and yhtio = '$yhtiorow[yhtio]'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
 

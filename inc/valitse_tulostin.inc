@@ -51,7 +51,8 @@
 		<input type='hidden' name='sorttauskentan_jarjestys1' value='$sorttauskentan_jarjestys1'>
 		<input type='hidden' name='sorttauskentan_jarjestys2' value='$sorttauskentan_jarjestys2'>
 		<input type='hidden' name='sorttauskentan_jarjestys3' value='$sorttauskentan_jarjestys3'>
-		<input type='hidden' name='sorttauskentan_jarjestys4' value='$sorttauskentan_jarjestys4'>";
+		<input type='hidden' name='sorttauskentan_jarjestys4' value='$sorttauskentan_jarjestys4'>
+		<input type='hidden' name='kertakassa' value='$kertakassa'>";
 
 	if ($nappikeikalle == 'menossa') {
 		echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";

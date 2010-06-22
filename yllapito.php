@@ -844,6 +844,7 @@
 					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
+					<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 		}
@@ -855,6 +856,7 @@
 					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 					<input type = 'hidden' name = 'limit' value = 'NO'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
+					<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("Näytä kaikki")."'></form>";
 		}
@@ -866,8 +868,20 @@
 					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = 'YES'>
+					<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("Näytä poistetut")."'></form>";
+		}
+		
+		if ($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") {
+			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
+					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+					<input type = 'hidden' name = 'limit' value = 'NO'>
+					<input type = 'hidden' name = 'nayta_eraantyneet' value = 'YES'>
+					<input type = 'hidden' name = 'laji' value = '$laji'>
+					<input type = 'submit' value = '".t("Näytä erääntyneet")."'></form>";
 		}
 
 		if ($toim == "tuote" and $uusi != 1 and $errori == '' and $tmp_tuote_tunnus > 0) {
@@ -893,6 +907,7 @@
 			echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
 			echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 			echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
+			echo "<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>";
 			echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 			echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";
@@ -914,6 +929,7 @@
 			echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
 			echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 			echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
+			echo "<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>";
 			echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 			echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";
@@ -930,6 +946,7 @@
 				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
+				<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>";
 
 		if ($from != "" and mysql_num_rows($result) > 0) {
@@ -943,7 +960,7 @@
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 
-					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
+					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
 
 					if 	(mysql_field_len($result,$i)>10) $size='15';
 					elseif	(mysql_field_len($result,$i)<5)  $size='5';
@@ -973,6 +990,7 @@
 					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
+					<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'hidden' name = 'del' value = '2'></tr>";
 		}
@@ -998,10 +1016,10 @@
 					if ($i == 1) {
 						if (trim($trow[1]) == '' or (is_numeric($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
 
-						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji";
+						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji";
 
 						if ($lopetus == "") {
-							echo "&lopetus=".$palvelin2."yllapito.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//laji=$laji///$trow[0]";
+							echo "&lopetus=".$palvelin2."yllapito.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//nayta_eraantyneet=$nayta_eraantyneet//laji=$laji///$trow[0]";
 						}
 						else {
 							echo "&lopetus=$lopetus";
@@ -1106,6 +1124,7 @@
 		echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 		echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
+		echo "<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>";
 		echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
@@ -1462,6 +1481,7 @@
 						<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 						<input type = 'hidden' name = 'limit' value = '$limit'>
 						<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
+						<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
 						<input type = 'hidden' name = 'laji' value = '$laji'>
 						<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1483,6 +1503,7 @@
 				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
+				<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name = 'uusi' value = '1'>

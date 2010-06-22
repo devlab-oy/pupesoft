@@ -12,4 +12,8 @@
 	$hakukentat = "tunnus, asiakas, ytunnus, asiakas_ryhma, tuoteno, ryhma, hinta, laji, minkpl/maxkpl, alkupvm/loppupvm";
 	
 	$jarjestys = 'ytunnus, asiakas_ryhma, tuoteno, ryhma, laji, minkpl, alkupvm, loppupvm';
+	
+	if ($nayta_eraantyneet != "") {
+		$rajauslisa = " and asiakashinta.loppupvm > '0000-00-00' and asiakashinta.loppupvm < now() ";
+	}
 ?>

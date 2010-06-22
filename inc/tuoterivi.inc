@@ -351,7 +351,8 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "suoratoimitus") {
+
+	if (mysql_field_name($result, $i) == "suoratoimitus") { 
 		$sele = "";
 
 		if ($trow[$i] == 'S') {
@@ -359,8 +360,8 @@
 		}
 
 		$ulos = "<td><select name='$nimi'".js_alasvetoMaxWidth($nimi, 300).">
-			<option value=''>".t("Normaalituote")."</option>
-			<option value='S' $sele>".t("Suoratoimitustuote")."</option>";
+			<option value=''>".t("Oletus")."</option>
+			<option value='S' $sele>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta jos yhtiön parametreissä se on sallittu")."</option>";
 		$jatko = 0;
 	}
 

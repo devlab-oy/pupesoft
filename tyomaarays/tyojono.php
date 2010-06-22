@@ -19,7 +19,6 @@
 		}
 	}
 
-
 	echo "<form name='haku' action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
@@ -252,6 +251,8 @@
 
 		echo "<td valign='top'>";
 
+		$olenko_asentaja_tassa_hommassa = FALSE;
+
 		if ($vrow["asennuskalenteri"] != "") {
 
 			$lopetusx = "";
@@ -279,12 +280,15 @@
 								GROUP BY 1,2,3,4
 								ORDER BY 1,2,3";
 					$tunti_chk_res = mysql_query($query) or pupe_error($query);
-					
+
 					if ($toim == 'TYOMAARAYS_ASENTAJA') {
+
+						$olenko_asentaja_tassa_hommassa = TRUE;
+
 						list($url_vuosi, $url_kk, $url_pp) = explode("-", $alku_pvm);
 						echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>".tv1dateconv($alku_pvm, "", "LYHYT")." $selitetark_2</a><br>";
 					}
-					
+
 					if (mysql_num_rows($tunti_chk_res) > 0) {
 						while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
 
@@ -297,7 +301,7 @@
 								echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>".tv1dateconv($tunti_chk_row["pvmalku"], "", "LYHYT")." $selitetark_2 ".(int) $url_tunti."h".$url_min."m</a><br>";
 							}
 						}
-					}					
+					}
 				}
 				elseif ($toim == 'TYOMAARAYS_ASENTAJA') {
 					echo tv1dateconv($pvmloppu, "", "LYHYT")." $selitetark_2<br>";
@@ -380,23 +384,29 @@
 
 		echo "</td>";
 
-		if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
-			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]'>".t("Muokkaa")."</a></td>";
+
+		if ($toim == 'TYOMAARAYS_ASENTAJA' and $toimi != 'TYOMAARAYS_ASENTAJA') $toimi = 'TYOMAARAYS_ASENTAJA';
+
+		if ($vrow['tila'] == 'C') {
+			$toimi = 'REKLAMAATIO';
+		}
+		elseif ($vrow['tila'] == 'L' and $vrow['tilaustyyppi'] == 'A') {
+			$toimi = $toimi != 'TYOMAARAYS_ASENTAJA' ? 'TYOMAARAYS' : 'TYOMAARAYS_ASENTAJA';
+		}
+
+		if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
+			if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
+				$muoklinkki = "<a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]'>".t("Muokkaa")."</a>";
+			}
+			else {
+				$muoklinkki = "<a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&tyojono=$tyojono'>".t("Muokkaa")."</a>";
+			}
 		}
 		else {
-
-			if ($toim == 'TYOMAARAYS_ASENTAJA' and $toimi != 'TYOMAARAYS_ASENTAJA') $toimi = 'TYOMAARAYS_ASENTAJA';
-
-			if ($vrow['tila'] == 'C') {
-				$toimi = 'REKLAMAATIO';
-			}
-			elseif ($vrow['tila'] == 'L' and $vrow['tilaustyyppi'] == 'A') {
-				$toimi = $toimi != 'TYOMAARAYS_ASENTAJA' ? 'TYOMAARAYS' : 'TYOMAARAYS_ASENTAJA';
-			}
-
-			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&tyojono=$tyojono'>".t("Muokkaa")."</a></td>";
+			$muoklinkki = "";
 		}
 
+		echo "<td valign='top'>$muoklinkki</td>";
 		echo "</tr>";
 	}
 

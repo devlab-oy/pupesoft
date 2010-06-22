@@ -2,7 +2,14 @@
 
 	require ("inc/parametrit.inc");
 
-	if (!isset($tyyppi)) $tyyppi='t';
+	if (!isset($tyyppi)) 	$tyyppi = 't';
+	if (!isset($tee)) 		$tee = '';
+	if (!isset($virhe)) 	$virhe = '';
+	if (!isset($lisat)) 	$lisat = '';
+	if (!isset($mintuote)) 	$mintuote = '';
+	if (!isset($maxtuote))	$maxtuote = '';
+	if (!isset($kuvaus2))	$kuvaus2 = '';
+	if (!isset($tilino))	$tilino = '';
 
 	echo "<font class='head'>".t("Toimittajan tiliöintisäännöt")."</font><hr>";
 
@@ -50,6 +57,9 @@
 				echo "<td><input type='submit' value='".t("Valitse")."'></td></tr></form>";
 			}
 			echo "</table>";
+
+			require ("inc/footer.inc");
+
 			exit;
 		}
 	}
@@ -73,6 +83,11 @@
 		$kuvaus2	= $tiliointirow['kuvaus2'];
 		$tilino		= $tiliointirow['tilino'];
 		$kustp		= $tiliointirow['kustp'];
+		$hyvak1		= $tiliointirow['hyvak1'];
+		$hyvak2		= $tiliointirow['hyvak2'];
+		$hyvak3		= $tiliointirow['hyvak3'];
+		$hyvak4		= $tiliointirow['hyvak4'];
+		$hyvak5		= $tiliointirow['hyvak5'];
 		$ok 		= 1;
 
 		$query = "DELETE from tiliointisaanto WHERE tunnus = '$rtunnus' and yhtio = '$kukarow[yhtio]'";
@@ -181,6 +196,40 @@
 				$tee = '';
 			}
 		}
+		elseif ($tyyppi == 'b' or $tyyppi == 'o') {
+			if (trim($kuvaus) == '' and trim($kuvaus2) == '' and trim($mintuote) == '' and trim($maxtuote) == '' and trim($kustp) == '') {
+				$virhe = "<font class='error'>".t("Kaikki tiedot eivät saa olla tyhjiä")."!</font>";
+				$ok = 1;
+				$tee = '';
+			}
+		}
+
+		if ($tyyppi != 't') {
+
+			if (trim($hyvak1) != '' or trim($hyvak2) != '' or trim($hyvak3) != '' or trim($hyvak4) != '' or trim($hyvak5) != '') {
+
+				for ($i = 1; $i < 6; $i++) {
+					if ($i == 1) {
+						if ($hyvak1 == '') {
+							$virhe = "<font class='error'>".t("Valitse ensimmäinen hyväksyjä")."!</font>";
+							$ok = 1;
+							$tee = '';
+							break;
+						}
+					}
+					else {
+						if (${'hyvak'.$i} != '' and ${'hyvak'.($i-1)} == '') {
+							$virhe = "<font class='error'>".t("Valitse hyväksyjät järjestyksessä")."!</font>";
+							$ok = 1;
+							$tee = '';
+							break;
+						}
+					}
+				}
+			}
+
+		}
+
 	}
 
 	if ($tee == 'U') {
@@ -195,6 +244,11 @@
 				'$kuvaus2',
 				'$tilino',
 				'$kustp',
+				'$hyvak1',
+				'$hyvak2',
+				'$hyvak3',
+				'$hyvak4',
+				'$hyvak5',
 				'')";
 		$result = mysql_query($query) or pupe_error($query);
 	}
@@ -225,7 +279,7 @@
 		}
 		echo "</tr></table><br>";
 
-		$sel[] = array();
+		$sel = array('t' => '', 'b' => '', 'o' => '', 'a' => '', 'k' => '');
 		$sel[$tyyppi] = "SELECTED";
 
 		echo "<font class='head'>".t("Säännöt")."</font><hr>
@@ -259,7 +313,7 @@
 						order by tiliointisaanto.mintuote";
 		}
 		elseif ($tyyppi == 'o' or $tyyppi == 'b') {
-			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Nimi, tiliointisaanto.kuvaus2 Osoite, tiliointisaanto.mintuote Postino, tiliointisaanto.maxtuote Postitp, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
+			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Nimi, tiliointisaanto.kuvaus2 Osoite, tiliointisaanto.mintuote Postino, tiliointisaanto.maxtuote Postitp, concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -268,7 +322,7 @@
 						order by tiliointisaanto.kuvaus";
 		}
 		elseif ($tyyppi == 'a') {
-			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Asiakastunnus, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
+			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Asiakastunnus, concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -277,7 +331,7 @@
 						and tiliointisaanto.tilino 		= 0";
 		}
 		elseif ($tyyppi == 'k') {
-			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Kauttalaskutus, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
+			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Kauttalaskutus, concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -297,7 +351,34 @@
 		while ($tiliointirow = mysql_fetch_array($result)) {
 			echo "<tr>";
 			for ($i = 1; $i<mysql_num_fields($result)-1; $i++) {
-				echo "<td>$tiliointirow[$i]</td>";
+
+				if ($tyyppi != 't' and mysql_field_name($result, $i) == 'Hyvak') {
+					echo "<td>";
+
+					$xxx = 1;
+
+					foreach (explode('#', $tiliointirow[$i]) as $hyvaksyja) {
+
+						if (trim($hyvaksyja) != '') {
+							$query = "	SELECT nimi
+										FROM kuka
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND kuka = '".mysql_real_escape_string($hyvaksyja)."'
+										and hyvaksyja = 'o'";
+							$kuka_chk_res = mysql_query($query) or pupe_error($query);
+							$kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
+
+							echo t("Hyväksyjä")." {$xxx}: {$kuka_chk_row['nimi']}<br/>";
+						}
+
+						$xxx++;
+					}
+
+					echo "</td>";
+				}
+				else {
+					echo "<td>$tiliointirow[$i]</td>";
+				}
 			}
 			echo "<td class='back'>
 					<form action = '$PHP_SELF' method='post'>
@@ -310,7 +391,7 @@
 		}
 
 		// Annetaan mahdollisuus tehdä uusi tiliöinti
-		if ($ok != 1) {
+		if (!isset($ok) or $ok != 1) {
 			// Annetaan tyhjät tiedot, jos rivi oli virheetön
 			$maxtuote	= '';
 			$mintuote	= '';
@@ -318,6 +399,11 @@
 			$kuvaus2	= '';
 			$kustp		= '';
 			$tilino		= '';
+			$hyvak1		= '';
+			$hyvak2		= '';
+			$hyvak3		= '';
+			$hyvak4		= '';
+			$hyvak5		= '';
 		}
 
 		$query = "	SELECT tunnus, nimi
@@ -362,6 +448,63 @@
 		}
 		elseif ($tyyppi == 'k') {
 			echo "	<td><input type='text' name='kuvaus' size='15' value = '$kuvaus'></td>";
+		}
+
+		if ($tyyppi != 't') {
+			$query = "	SELECT kuka, nimi
+						FROM kuka
+						WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
+						ORDER BY nimi";
+			$hyvak_result = mysql_query($query) or pupe_error($query);
+
+			echo "<td nowrap>",t("Hyväksyjä")," 1: <select name='hyvak1'><option value=''>",t("Oletus"),"</option>";
+
+			while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
+				$sel = (isset($hyvak1) and $hyvak1 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
+				echo "<option value='$hyvak_row[kuka]'$sel>$hyvak_row[nimi]</option>";
+			}
+
+			echo "</select><br/>";
+
+			mysql_data_seek($hyvak_result, 0);
+			echo t("Hyväksyjä")," 2: <select name='hyvak2'><option value=''>",t("Oletus"),"</option>";
+
+			while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
+				$sel = (isset($hyvak2) and $hyvak2 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
+				echo "<option value='$hyvak_row[kuka]'$sel>$hyvak_row[nimi]</option>";
+			}
+
+			echo "</select><br/>";
+
+			mysql_data_seek($hyvak_result, 0);
+			echo t("Hyväksyjä")," 3: <select name='hyvak3'><option value=''>",t("Oletus"),"</option>";
+
+			while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
+				$sel = (isset($hyvak3) and $hyvak3 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
+				echo "<option value='$hyvak_row[kuka]'$sel>$hyvak_row[nimi]</option>";
+			}
+
+			echo "</select><br/>";
+
+			mysql_data_seek($hyvak_result, 0);
+			echo t("Hyväksyjä")," 4: <select name='hyvak4'><option value=''>",t("Oletus"),"</option>";
+
+			while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
+				$sel = (isset($hyvak4) and $hyvak4 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
+				echo "<option value='$hyvak_row[kuka]'$sel>$hyvak_row[nimi]</option>";
+			}
+
+			echo "</select><br/>";
+
+			mysql_data_seek($hyvak_result, 0);
+			echo t("Hyväksyjä")," 5: <select name='hyvak5'><option value=''>",t("Oletus"),"</option>";
+
+			while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
+				$sel = (isset($hyvak5) and $hyvak5 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
+				echo "<option value='$hyvak_row[kuka]'$sel>$hyvak_row[nimi]</option>";
+			}
+
+			echo "</select></td>";
 		}
 
 		echo "<td>$ulos</td><td class='back'><input type='Submit' value = '".t("Lisää tiliöintisääntö")."'>$virhe</td>";

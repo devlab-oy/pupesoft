@@ -2151,7 +2151,7 @@
 								rivi($page[$sivu]);
 
 								//Tutkitaan mihin printteriin tämän laskun voisi tulostaa
-								if ($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA" and $varasto == 0) {
+								if (($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA" or $valittu_tulostin == "AUTOMAAGINEN_VALINTA") and $varasto == 0) {
 									//otetaan varastopaikat talteen
 									$query = "	SELECT *
 												FROM tuote
@@ -2211,7 +2211,7 @@
 							}
 							else {
 								//haetaan varaston tiedot
-								if ($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA") {
+								if ($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA" or $valittu_tulostin == "AUTOMAAGINEN_VALINTA") {
 									if ($varasto != 0) {
 										$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto' order by alkuhyllyalue,alkuhyllynro";
 									}
@@ -2225,7 +2225,7 @@
 									if ($silent == "") $tulos_ulos .= t("Lasku tulostuu varastoon").": $prirow[nimitys]<br>\n";
 								}
 
-								if (isset($valittu_tulostin)) {
+								if (isset($valittu_tulostin) and $valittu_tulostin != "AUTOMAAGINEN_VALINTA") {
 									$yhtiorow["lasku_tulostin"] = $valittu_tulostin;
 								}
 
@@ -2236,7 +2236,6 @@
 								$kirow = mysql_fetch_array($kires);
 
 								if ($silent == "") $tulos_ulos .= t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
-
 
 								if ($kirow["komento"] != "email") {
 									// itse print komento...

@@ -8465,7 +8465,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 
 		$apu_yhtiorow = array();
 		$apu_yhtiorow["nimi"] = $yhtiorow["nimi"];
-		
+
 		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
 		if (isset($laskurow["eta_yhtio"]) and $laskurow["eta_yhtio"] != "") {
 			$query = "	SELECT *
@@ -8498,12 +8498,12 @@ if (!function_exists("tulosta_logo_pdf")) {
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_parametritrow = mysql_fetch_array($result);
-				
+
 				// Ostotilauksille aina logo käyttäjän toimipaikan takaa
 				if (isset($kukarow["toimipaikka"]) and $kukarow["toimipaikka"] != 0 and ($laskurow["tila"] == "O" or $laskurow["tila"] == "K")) {
-					$query = "	SELECT *
+					$query = "	SELECT lasku_logo, nimi
 								FROM yhtion_toimipaikat
-								WHERE yhtio='$yhtio' and tunnus='$kukarow[toimipaikka]'";
+								WHERE yhtio='$laskurow[yhtio]' and tunnus='$kukarow[toimipaikka]'";
 					$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 					if (mysql_num_rows($result) == 1) {
@@ -8592,12 +8592,12 @@ if (!function_exists("tulosta_logo_pdf")) {
 			else $yhtionimi = $yhtiorow["nimi"];
 
 			list($ff_string, $ff_font) = pdf_fontfit($yhtionimi, 270, $pdf, $iso);
-			
+
 			if ($lasku_logo_positio_y == 0 and $lasku_logo_positio_x == 0) {
 				$lasku_logo_positio_y = 815;
 				$lasku_logo_positio_x = 30;
 			}
-			
+
 			$pdf->draw_text($lasku_logo_positio_x, $lasku_logo_positio_y, $ff_string, $thispage, $ff_font);
 		}
 	}

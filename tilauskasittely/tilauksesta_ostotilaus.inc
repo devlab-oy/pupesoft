@@ -117,7 +117,7 @@
 							$toim_maa 			= $yhtiorow["maa"];
 						}
 
-						$commentsit = trim(t("Myyntitilaus").": $otunnus \n".$tiltoi["comments"]);
+						$commentsit = trim(t("Myyntitilaus").": $myytilrow[tunnus] \n".t("Myyntitilauksen toimitustapa").": $myytilrow[toimitustapa] \n".$tiltoi["comments"]);
 
 						$query = "	SELECT tunnus
 									from lasku

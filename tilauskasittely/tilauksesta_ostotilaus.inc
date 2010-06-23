@@ -20,12 +20,12 @@
 			}
 			else {
 				echo "VIRHE: Funktiota kutsuttiin v‰‰r‰ll‰ parametrilla!<br><br>";
-				return false;				
+				return false;
 			}
 
-			$query = "	SELECT * 
-						FROM lasku 
-						WHERE yhtio	= '$kukarow[yhtio]' 
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio	= '$kukarow[yhtio]'
 						and tunnus	= '$otunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$myytilrow = mysql_fetch_assoc($result);
@@ -59,15 +59,15 @@
 
 					//	Jos tehd‰‰n vaan t‰m‰ tilaus niin haetaan t‰m‰n oletustoimittaja, by default
 					if ($tyyppi == "KAIKKI" and $rivi["toimittajan_tunnus"] == 0) {
-						
+
 						$query = "SELECT liitostunnus from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$rivi[tuoteno]' limit 1";
 						$abures = mysql_query($query) or pupe_error($query);
-						
+
 						if(mysql_num_rows($abures) == 1) {
 							$aburow = mysql_fetch_assoc($abures);
 
 							$query = "	UPDATE tilausrivin_lisatiedot
-										SET 
+										SET
 										toimittajan_tunnus	= '$aburow[liitostunnus]',
 										muutospvm			= now(),
 										muuttaja			= '$kukarow[kuka]'
@@ -75,13 +75,13 @@
 										and tilausrivitunnus = '$rivi[rivitunnus]'";
 							$updres = mysql_query($query) or pupe_error($query);
 
-							$rivi["toimittajan_tunnus"] = $aburow["liitostunnus"];							
+							$rivi["toimittajan_tunnus"] = $aburow["liitostunnus"];
 						}
 						else {
 							$tilauksesta_ostotilaus .= "<font class='error'>Koitettiin p‰ivitt‰‰ riville toimittaja, mutta toimittajaa ei lˆydy! '$rivi[tunnus]'<br>";
 						}
 					}
-					
+
 					// tehd‰‰n aluksi v‰h‰n oikeellisuustarkastuksia
 					$query = "SELECT * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$rivi[tuoteno]' and liitostunnus='$rivi[toimittajan_tunnus]'";
 					$erres = mysql_query($query) or pupe_error($query);
@@ -116,6 +116,8 @@
 							$toim_postitp 		= $yhtiorow["postitp"];
 							$toim_maa 			= $yhtiorow["maa"];
 						}
+
+						$commentsit = trim(t("Myyntitilaus").": $otunnus \n".$tiltoi["comments"]);
 
 						$query = "	SELECT tunnus
 									from lasku
@@ -162,7 +164,7 @@
 										toimitusehto 		= '$tiltoi[toimitusehto]',
 										laatija 			= '$kukarow[kuka]',
 										alv 				= '$tiltoi[alv]',
-										comments 			= '$tiltoi[comments]',
+										comments 			= '$commentsit',
 										viesti 				= '$myytilrow[viesti]',
 										sisviesti1			= '$myytilrow[sisviesti1]',
 										kuljetus 			= '$tiltoi[kuljetus]',
@@ -213,15 +215,15 @@
 										('$pid','$osstu[ostohinta]','$osstu[alennus]','$tilrivirow[nimitys]','$tilrivirow[tuoteno]', '$tilrivirow[kpl]', '$tilrivirow[kpl]', '$tunnus', '$kukarow[yhtio]', 'O','$tilrivirow[kommentti]', '$tilrivirow[toimaika]', '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]', '$kukarow[kuka]', now())";
 							$updre = mysql_query($query) or pupe_error($query);
 							$lisatty_tun = mysql_insert_id();
-							
-							// ostorivin lis‰tiedot							
+
+							// ostorivin lis‰tiedot
 							$query = "	INSERT INTO tilausrivin_lisatiedot
 										SET tilausrivitunnus 	= '$lisatty_tun',
 										luontiaika				= now(),
 										laatija 				= '$kukarow[kuka]',
 										yhtio		 	 		= '$kukarow[yhtio]'";
-							$updres = mysql_query($query) or pupe_error($query);	
-							
+							$updres = mysql_query($query) or pupe_error($query);
+
 							// myyntirivin lis‰tiedot
 							if($rivi["var"] == "U") {
 								$suoraan_laskutukseen = "o";
@@ -229,9 +231,9 @@
 							else {
 								$suoraan_laskutukseen = "";
 							}
-							
+
 							$query = "	UPDATE tilausrivin_lisatiedot
-										SET tilausrivilinkki 	= '$lisatty_tun', 
+										SET tilausrivilinkki 	= '$lisatty_tun',
 										toimittajan_tunnus		= '$ttrow[liitostunnus]',
 										suoraan_laskutukseen	= '$suoraan_laskutukseen',
 										muutospvm				= now(),
@@ -239,7 +241,7 @@
 										WHERE yhtio		 	 = '$kukarow[yhtio]'
 										and tilausrivitunnus = '$tilrivirow[rivitunnus]'";
 							$updres = mysql_query($query) or pupe_error($query);
-							
+
 							$tilauksesta_ostotilaus .= "<font class='message'>Tuote: $tilrivirow[tuoteno] $tilrivirow[kpl] kpl lis‰tty ostotilaukselle: $tunnus</font><br>";
 
 							if($tilrivirow["tunnus"] == $tilrivirow["perheid2"] and mysql_num_rows($tilrivires) > 1) {
@@ -252,11 +254,11 @@
 							}
 						}
 					}
-					
+
 					// tehd‰‰n rivist‰ tavallinen JT jos meill‰ oli joku tilattava rivi
 					if($rivi["var"]=="T" or $rivi["var"]=="U") {
 						$query = "UPDATE tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tunnus]'";
-						$updre = mysql_query($query) or pupe_error($query);						
+						$updre = mysql_query($query) or pupe_error($query);
 					}
 				}
 			}

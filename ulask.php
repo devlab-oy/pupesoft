@@ -11,7 +11,77 @@ if ($livesearch_tee == "TILIHAKU") {
 	exit;
 }
 
-if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $tee == '' and $skippi != 'joo' and $yhtiorow['skannatut_laskut_polku'] != '') {
+function listdir($start_dir = '.') {
+
+	$files = array();
+
+	if (is_dir($start_dir)) {
+
+		$fh = opendir($start_dir);
+
+		while (($file = readdir($fh)) !== false) {
+			if (strcmp($file, '.') == 0 or strcmp($file, '..') == 0 or substr($file, 0, 1) == ".") {
+				continue;
+			}
+			$filepath = $start_dir . '/' . $file;
+
+			if (is_dir($filepath)) {
+				$files = array_merge($files, listdir($filepath));
+			}
+			else {
+				array_push($files, $filepath);
+			}
+		}
+		closedir($fh);
+		sort($files);
+	}
+	else {
+		$files = false;
+	}
+
+	return $files;
+}
+
+function hae_skannattu_lasku($kukarow, $yhtiorow, $palautus = '') {
+
+	$dir = $yhtiorow['skannatut_laskut_polku'];
+
+	// käydään läpi ensin käsiteltävät kuvat
+	$files = listdir($dir);
+
+	$i = 0;
+
+	foreach ($files as $file) {
+		$path_parts = pathinfo($file);
+
+		$query = "	SELECT kesken
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'";
+		$kesken_chk_res = mysql_query($query) or pupe_error($query);
+
+		while ($kesken_chk_row = mysql_fetch_assoc($kesken_chk_res)) {
+			if ($path_parts['filename'] == $kukarow['kesken']) {
+				return array('kesken' => "$path_parts[basename]");
+			}
+			elseif ($path_parts['filename'] == $kesken_chk_row['kesken']) continue 2;
+		}
+
+		if ($palautus == '') {
+			return $path_parts['basename'];
+		}
+
+		$i++;
+	}
+
+	if ($i > 0) {
+		return $i;
+	}
+	else {
+		return false;
+	}
+}
+
+if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $tee == '' and $yhtiorow['skannatut_laskut_polku'] != '') {
 	list($micro, $timestamp) = explode(" ", microtime());
 
 	$kukarow['kesken'] = substr($timestamp.substr(($micro * 10), 0, 1), 2);
@@ -134,7 +204,7 @@ if ($tee == 'I') {
 		$tee = "E";
 	}
 
-	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 
 		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
 
@@ -608,7 +678,7 @@ if ($tee == 'P' or $tee == 'E') {
 				}
 			</SCRIPT>";
 
-	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		echo "<table><tr><td class='back'>";
 	}
 
@@ -983,7 +1053,7 @@ if ($tee == 'P' or $tee == 'E') {
 	if ($kuva) {
 		echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '$kuva'></td>";
 	}
-	elseif (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	elseif (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		echo "<td>".t("Kts. oikealle")."!</td>";
 	}
 	else {
@@ -1225,7 +1295,7 @@ if ($tee == 'P' or $tee == 'E') {
 	echo "</td></tr>
 		</table>";
 
-	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
 		
 		echo "</td><td class='back' width='100%'><font class='message'>",t("Skannattu lasku"),"</font>";
@@ -1792,7 +1862,7 @@ if ($tee == 'I') {
 	// Näytettään käyttöliittymä
 	$tee = '';
 
-	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		unset($kuva);
 
 		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
@@ -1800,26 +1870,33 @@ if ($tee == 'I') {
 		unlink($skannatut_laskut_polku.$skannattu_lasku);
 
 		$silent = 'ei näytetä käyttöliittymää';
-		require('skannatut_laskut.php');
+		$skannattu_lasku = hae_skannattu_lasku($kukarow, $yhtiorow);
 
-		list($micro, $timestamp) = explode(" ", microtime());
+		if ($skannattu_lasku !== FALSE) {
+			list($micro, $timestamp) = explode(" ", microtime());
 
-		$kukarow['kesken'] = substr($timestamp.substr(($micro * 10), 0, 1), 2);
+			$kukarow['kesken'] = substr($timestamp.substr(($micro * 10), 0, 1), 2);
 
-		$query = "	UPDATE kuka SET
-					kesken = '$kukarow[kesken]'
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND kuka = '$kukarow[kuka]'";
-		$kesken_upd_res = mysql_query($query) or pupe_error($query);
+			$query = "	UPDATE kuka SET
+						kesken = '$kukarow[kesken]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND kuka = '$kukarow[kuka]'";
+			$kesken_upd_res = mysql_query($query) or pupe_error($query);
 
-		$path_parts = pathinfo($skannattu_lasku);
+			$path_parts = pathinfo($skannattu_lasku);
 
-		if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku.$kukarow['kesken'].".".$path_parts['extension'])) {
-			echo "Ei pystytä nimeämään tiedostoa.<br>";
+			if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku.$kukarow['kesken'].".".$path_parts['extension'])) {
+				echo "Ei pystytä nimeämään tiedostoa.<br>";
+			}
+
+			$skannattu_lasku = $kukarow['kesken'].".".$path_parts['extension'];
 		}
-
-		$skannattu_lasku = $kukarow['kesken'].".".$path_parts['extension'];
-
+		else {
+			$skannattu_lasku = '';
+			$iframe = '';
+			$tultiin = '';
+			echo "<br/>",t("Skannatut laskut loppuivat"),".<br/><br/>";
+		}
 	}
 
 	//Luodaan uusi keikka jos käyttäjä ruksasi keikkaruksin
@@ -1876,7 +1953,7 @@ if (strlen($tee) == 0) {
 	$formi  = 'viivat';
 	$kentta = 'nimi';
 
-	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		echo "<table><tr><td class='back'>";
 	}
 
@@ -1885,7 +1962,7 @@ if (strlen($tee) == 0) {
 	echo "<tr><td nowrap><form name = 'viivat' action = '$PHP_SELF?tee=VIIVA' method='post'>".t("Perusta lasku viivakoodilukijalla")."</td>
 		<input type='hidden' name='lopetus' value='$lopetus'>";
 
-	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
 		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
 		echo "<input type='hidden' name='iframe' value='$iframe'>";
@@ -1904,7 +1981,7 @@ if (strlen($tee) == 0) {
 	echo "<tr><td nowrap><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</td>
 		<input type='hidden' name='lopetus' value='$lopetus'>";
 
-	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
 		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
 		echo "<input type='hidden' name='iframe' value='$iframe'>";
@@ -1923,7 +2000,7 @@ if (strlen($tee) == 0) {
 	echo "<td nowrap><form action = '$PHP_SELF?tee=P' method='post'>".t("Perusta lasku ilman toimittajatietoja")."</td>
 		<input type='hidden' name='lopetus' value='$lopetus'>";
 
-	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
 		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
 		echo "<input type='hidden' name='iframe' value='$iframe'>";
@@ -1956,7 +2033,7 @@ if (strlen($tee) == 0) {
 			echo "<td><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajalle")." $row[nimi]</td>
 			<input type='hidden' name='lopetus' value='$lopetus'>";
 
-			if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+			if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 				echo "<input type='hidden' name='tultiin' value='$tultiin'>";
 				echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
 				echo "<input type='hidden' name='iframe' value='$iframe'>";
@@ -1977,7 +2054,34 @@ if (strlen($tee) == 0) {
 		echo "</table>";
 	}
 
-	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+	if (trim($yhtiorow['skannatut_laskut_polku']) != '' and (trim($skannattu_lasku) == '' or $skannattu_lasku === FALSE) and $silent == '') {
+
+		echo "<br/><table>";
+
+		$montakolaskua = hae_skannattu_lasku($kukarow, $yhtiorow, 'lukumaara');
+
+		if (is_array($montakolaskua)) {
+			echo "<tr><td nowrap><form action='ulask.php?iframe=yes&tultiin=skannatut_laskut&skannattu_lasku=$montakolaskua[kesken]' method='post'>".t("Sinulla on skannatun laskunsyöttö kesken").".</td>
+				<input type='hidden' name='lopetus' value='$lopetus'>";
+
+			echo "<td><input type = 'submit' value = '".t("Jatka")."'></td></tr></form>";
+		}
+		elseif ($montakolaskua !== FALSE and $montakolaskua > 0) {
+
+			echo "<tr><td nowrap><form action='ulask.php?iframe=yes&tultiin=skannatut_laskut&skannattu_lasku=".hae_skannattu_lasku($kukarow, $yhtiorow)."' method='post'>".t("Skannattuja laskuja löytyi")." ",$montakolaskua," ",t("kappaletta"),".</td>
+				<input type='hidden' name='lopetus' value='$lopetus'>";
+
+			echo "<td><input type = 'submit' value = '".t("Valitse")."'></td></tr></form>";
+
+		}
+		else {
+			echo "<tr><td nowrap>",t("Yhtään skannattua laskua ei löytynyt"),".</td></tr>";
+		}
+
+		echo "</table>";
+	}
+
+	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
 
 		echo "</td><td class='back' width='100%'><font class='message'>",t("Skannattu lasku"),"</font>";

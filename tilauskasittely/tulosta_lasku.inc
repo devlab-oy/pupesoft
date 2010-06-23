@@ -1379,8 +1379,8 @@ if (!function_exists('loppu')) {
 			else {
 				// ja kotimaisissa tällästä
 				$pdf->draw_text(30, 82 + $barcode_korkeus,  t("Pankkiyhteys", $kieli),							$thispage, $pieni);
-	        	$pdf->draw_text(30, 82 + $barcode_korkeus,  $frow["pankkinimi1"]." ".$frow["pankkitili1"],		$thispage, $norm);
-	        	$pdf->draw_text(217, 82 + $barcode_korkeus, $frow["pankkinimi2"]." ".$frow["pankkitili2"],		$thispage, $norm);
+	        	$pdf->draw_text(30, 72 + $barcode_korkeus,  $frow["pankkinimi1"]." ".$frow["pankkitili1"],		$thispage, $norm);
+	        	$pdf->draw_text(217, 72 + $barcode_korkeus, $frow["pankkinimi2"]." ".$frow["pankkitili2"],		$thispage, $norm);
 			}
 		}
 		else {

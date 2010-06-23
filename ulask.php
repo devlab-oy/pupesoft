@@ -24,7 +24,9 @@ if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skanna
 
 	$path_parts = pathinfo($skannattu_lasku);
 
-	if (!rename("$yhtiorow[skannatut_laskut_polku]$skannattu_lasku", "$yhtiorow[skannatut_laskut_polku]$kukarow[kesken].$path_parts[extension]")) {
+	$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
+
+	if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku.$kukarow['kesken'].".".$path_parts['extension'])) {
 		echo "Ei pystytä nimeämään tiedostoa.<br>";
 		exit;
 	}
@@ -133,12 +135,15 @@ if ($tee == 'I') {
 	}
 
 	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+
+		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
+
 		$a = getimagesize($skannattu_lasku);
 
-		$data 			= mysql_real_escape_string(file_get_contents("$yhtiorow[skannatut_laskut_polku]$skannattu_lasku"));
+		$data 			= mysql_real_escape_string(file_get_contents($skannatut_laskut_polku.$skannattu_lasku));
 		$filename		= mysql_real_escape_string($skannattu_lasku);
 		$filetype		= mysql_real_escape_string($a["mime"]);
-		$filesize		= mysql_real_escape_string(filesize("$yhtiorow[skannatut_laskut_polku]$skannattu_lasku"));
+		$filesize		= mysql_real_escape_string(filesize($skannatut_laskut_polku.$skannattu_lasku));
 		$image_width 	= "";
 		$image_height 	= "";
 		$image_bits 	= "";
@@ -1221,12 +1226,14 @@ if ($tee == 'P' or $tee == 'E') {
 		</table>";
 
 	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
+		
 		echo "</td><td class='back' width='100%'><font class='message'>",t("Skannattu lasku"),"</font>";
 		echo "<div style='height: 100%; overflow: auto; width: 100%;'>";
 		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
 		echo "<input type='hidden' name='iframe' value='$iframe'>";
 		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
-		echo "<iframe src='$yhtiorow[skannatut_laskut_polku]$skannattu_lasku' style='width:100%; height: 800px; border: 0px; display: block;'></iFrame>";
+		echo "<iframe src='{$skannatut_laskut_polku}{$skannattu_lasku}' style='width:100%; height: 800px; border: 0px; display: block;'></iFrame>";
 		echo "</div>";
 		echo "</td></tr></table>";
 	}
@@ -1788,7 +1795,9 @@ if ($tee == 'I') {
 	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		unset($kuva);
 
-		unlink("$yhtiorow[skannatut_laskut_polku]$skannattu_lasku");
+		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
+
+		unlink($skannatut_laskut_polku.$skannattu_lasku);
 
 		$silent = 'ei näytetä käyttöliittymää';
 		require('skannatut_laskut.php');
@@ -1805,7 +1814,7 @@ if ($tee == 'I') {
 
 		$path_parts = pathinfo($skannattu_lasku);
 
-		if (!rename("$yhtiorow[skannatut_laskut_polku]$skannattu_lasku", "$yhtiorow[skannatut_laskut_polku]$kukarow[kesken].$path_parts[extension]")) {
+		if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku.$kukarow['kesken'].".".$path_parts['extension'])) {
 			echo "Ei pystytä nimeämään tiedostoa.<br>";
 		}
 
@@ -1969,9 +1978,11 @@ if (strlen($tee) == 0) {
 	}
 
 	if (trim($iframe) != '' and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
+
 		echo "</td><td class='back' width='100%'><font class='message'>",t("Skannattu lasku"),"</font>";
 		echo "<div style='height: 100%; overflow: auto; width: 100%;'>";
-		echo "<iframe src='$yhtiorow[skannatut_laskut_polku]$skannattu_lasku' style='width:100%; height: 800px; border: 0px; display: block;'></iFrame>";
+		echo "<iframe src='{$skannatut_laskut_polku}{$skannattu_lasku}' style='width:100%; height: 800px; border: 0px; display: block;'></iFrame>";
 		echo "</div>";
 		echo "</td></tr></table>";
 	}

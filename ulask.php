@@ -451,7 +451,7 @@ if ($tee == 'I') {
 		if ($syottotyyppi=='prosentti') {
 			$viimeinensumma=0;
 			for ($i=1; $i<$maara; $i++) {
-				$viimeinensumma += $isumma[$i];
+				$viimeinensumma += (float) $isumma[$i];
 			}
 			if ($viimeinensumma != 100) {
 				$errormsg .= "<font class='error'>".t("Prosenttien yhteisumma ei ole 100")." $viimeinensumma</font><br>";
@@ -461,7 +461,7 @@ if ($tee == 'I') {
 				for ($i=1; $i<$maara; $i++) {
 					if ($isumma[$i] != 0) {
 						$isumma[$i] = round((float) $summa * (float) $isumma[$i] / 100,2);
-						$summatotaali += $isumma[$i];
+						$summatotaali += (float) $isumma[$i];
 						$viimeinensumma = $i;
 					}
 				}
@@ -490,10 +490,10 @@ if ($tee == 'I') {
 			$turvasumma 	= $summa;
 			$virhe 			= '';
 			$tili 			= $itili[$i];
-			$summa 			= $isumma[$i];
+			$summa 			= (float) $isumma[$i];
 			$selausnimi		= 'itili[' . $i .']'; // Minka niminen mahdollinen popup on?
 			$mistatullaan	= 'ulask.php'; // koska nykyään on sallittua syöttää nollalasku, eli tässä tapauksessa ei sallita että kaadutaan tilioinnin summan puuttumiseen
-			$ulos			=''; // Mahdollinen popup tyhjennetaan
+			$ulos			= ''; // Mahdollinen popup tyhjennetaan
 
 			require "inc/tarkistatiliointi.inc";
 
@@ -1297,7 +1297,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
-		
+
 		echo "</td><td class='back' width='100%'><font class='message'>",t("Skannattu lasku"),"</font>";
 		echo "<div style='height: 100%; overflow: auto; width: 100%;'>";
 		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
@@ -1491,8 +1491,9 @@ if ($tee == 'I') {
 	$muusumma_valuutassa = 0;
 
 	for ($i=1; $i<$maara; $i++) {
-		$isumma_valuutassa[$i] = $isumma[$i];
-		$isumma[$i] = round($isumma[$i] * $vrow['kurssi'], 2);
+		$ivero[$i]				= (float) $ivero[$i];
+		$isumma_valuutassa[$i]	= (float) $isumma[$i];
+		$isumma[$i] 			= (float) round($isumma[$i] * $vrow['kurssi'], 2);
 
  		// Netotetaan alvi
 		if ($ivero[$i] != 0) {

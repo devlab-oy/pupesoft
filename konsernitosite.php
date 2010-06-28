@@ -295,7 +295,7 @@
 						AND yhtio != '$kukarow[yhtio]'";
 			$yresult = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($yresult) < 2) {
+			if (mysql_num_rows($yresult) < 1) {
 				echo "<font class='error'>".t("Konsernissasi ei ole yht‰‰n yrityst‰. N‰in ollen et voi k‰ytt‰‰ t‰t‰ toimintoa")."</font>";
 				require ("inc/footer.inc");
 				exit;

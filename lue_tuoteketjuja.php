@@ -31,7 +31,7 @@ $postoiminto 	= 'X';
 $kielletty		= 0;
 $table_apu		= '';
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name']) == TRUE) {
+if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 	$path_parts = pathinfo($_FILES['userfile']['name']);
 	$ext = $path_parts['extension'];

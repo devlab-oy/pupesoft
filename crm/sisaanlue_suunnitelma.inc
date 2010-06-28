@@ -1,7 +1,7 @@
 <?php
 
 if ($tee == "FILE") {
-	if (is_uploaded_file($_FILES['userfile']['tmp_name']) == TRUE) {
+	if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 		$timeparts = explode(" ",microtime());
 		$starttime = $timeparts[1].substr($timeparts[0],1);
 

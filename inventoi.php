@@ -39,7 +39,7 @@
 
 	//katotaan onko tiedosto ladattu
 	if ($tee == "FILE") {
-		if (is_uploaded_file($_FILES['userfile']['tmp_name']) == TRUE) {
+		if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 			$path_parts = pathinfo($_FILES['userfile']['name']);
 			$name	= strtoupper($path_parts['filename']);

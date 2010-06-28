@@ -2626,6 +2626,30 @@ if ($tee == '') {
 
 	echo "<br>";
 
+	$myyntikielto = '';
+
+	// Tarkastetaan onko asiakas myyntikiellossa
+	if ($laskurow['liitostunnus'] > 0) {
+		$query = "	SELECT myyntikielto
+					FROM asiakas
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$laskurow[liitostunnus]'";
+		$myyntikielto_res = mysql_query($query) or pupe_error($query);
+		$myyntikielto_row = mysql_fetch_assoc($myyntikielto_res);
+
+		if ($myyntikielto_row['myyntikielto'] == 'K') {
+			if ($kukarow['extranet'] != '') {
+				echo "<font class='error'>",t("Luottorajasi on täynnä, ota yhteys asiakaspalveluun"),".</font><br/>";
+			}
+			else {
+				echo "<font class='error'>",t("Asiakas on myyntikiellossa"),"!</font><br/>";
+			}
+
+			$muokkauslukko = 'LUKOSSA';
+			$myyntikielto = 'MYYNTIKIELTO';
+		}
+	}
+
 	if ($smsnumero != "" and strlen("smsviesti") > 0) {
 
 		if (strlen($smsviesti) > 160) {
@@ -6386,7 +6410,7 @@ if ($tee == '') {
 			$projektilask = 0;
 		}
 
-		if ($muokkauslukko == "" and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0))) {
+		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0))) {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
 								msg = '".t("Haluatko todella poistaa tämän tietueen?")."';

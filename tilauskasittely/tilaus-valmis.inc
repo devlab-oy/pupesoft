@@ -13,7 +13,25 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 $query  = "UPDATE lasku set vanhatunnus=tunnus where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]' and vanhatunnus=0";
 $oldtur = mysql_query($query) or pupe_error($query);
 
-if ($laskurow["tilaustyyppi"] == 'E') {
+// Katsotaan onko asiakas myyntikiellossa
+$query  = "	SELECT * 
+			FROM asiakas 
+			WHERE yhtio = '$kukarow[yhtio]' 
+			AND tunnus = '$laskurow[liitostunnus]'";
+$tilausvalmis_asiakas_res = mysql_query($query) or pupe_error($query);
+$tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
+
+if ($tilausvalmis_asiakas_row['myyntikielto'] == 'K') {
+	$query = "	UPDATE lasku SET
+				alatila = ''
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus = '$laskurow[tunnus]'";
+	$myyntikielto_res = mysql_query($query) or pupe_error($query);
+
+	echo "<font class='message'>",t("Asiakas on myyntikiellossa"),". ",t("Tilausta ei merkitä valmiiksi"),".</font><br/>";
+
+}
+elseif ($laskurow["tilaustyyppi"] == 'E') {
 	//Ennakkotilaukset
 
 	//tila on E ja alatila on A kun on ennakkotilaus

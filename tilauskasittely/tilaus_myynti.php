@@ -1551,10 +1551,10 @@ if ($tee == '') {
  	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0) {
 		if ($yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI"))) {
-			$jarjlisa="<td class='back' width='10px'>&nbsp;</td>";
+			$jarjlisa = "<td class='back' width='10px'>&nbsp;</td>";
 		}
 		else {
-			$jarjlisa="";
+			$jarjlisa = "";
 		}
 
 		if ($kukarow["extranet"] == "") {
@@ -1652,7 +1652,7 @@ if ($tee == '') {
 					<input type='hidden' name='toim_kutsu' value='$toim'>
 					<input type='hidden' name='tyojono' value='$tyojono'>
 					<input type='submit' value='".t("Selaa tuotteita")."'>
-					</form>";			
+					</form>";
 		}
 		else {
 			echo "<form action='tuote_selaus_haku.php' method='post'>
@@ -3923,14 +3923,83 @@ if ($tee == '') {
 
 			echo "<br><table>";
 
+			// Sarakemäärä ruudulla
+			$sarakkeet = 0;
+			$sarakkeet_alku = 0;
+
+			// Sarakkeiden otsikot
+			$headerit = "<tr>$jarjlisa<th>".t("#")."</th>";
+			$sarakkeet++;
+
+			if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or ($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("RIVISYOTTO")))) {
+				$trivityyppi_result = t_avainsana("TRIVITYYPPI");
+
+				if (mysql_num_rows($trivityyppi_result) > 0) {
+					$headerit .= "<th>".t("Tyyppi")."</th>";
+					$sarakkeet++;
+				}
+			}
+			elseif ($yhtiorow['tilauksen_kohteet'] == 'K') {
+				$headerit .= "<th>".t("Tyyppi")."</th>";
+				$sarakkeet++;
+			}
+
+			if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
+				$headerit .= "<th>".t("Nimitys")."</th>";
+				$sarakkeet++;
+			}
+
+			if (($toim != "TARJOUS" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and (($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) or $yhtiorow['varastopaikan_lippu'] != '')) {
+				$headerit .= "<th>".t("Paikka")."</th>";
+				$sarakkeet++;
+			}
+
+			$headerit .= "<th>".t("Tuotenumero")."</th><th>".t("Määrä")."</th><th>".t("Var")."</th>";
+			$sarakkeet += 3;
+
+			if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
+
+				$headerit .= "<th>".t("Netto")."</th>";
+				$sarakkeet++;
+
+				if ($kukarow['hinnat'] >= 0) {
+					$headerit .= "<th style='text-align:right;'>".t("Svh")."</th>";
+					$sarakkeet++;
+				}
+
+				if ($kukarow['hinnat'] == 0) {
+					$headerit .= "<th style='text-align:right;'>".t("Ale%")."</th><th style='text-align:right;'>".t("Hinta")."</th>";
+					$sarakkeet += 2;
+				}
+
+				$sarakkeet_alku = $sarakkeet;
+
+				if ($kukarow['hinnat'] >= 0) {
+					$headerit .= "<th style='text-align:right;'>".t("Rivihinta")."</th>";
+					$sarakkeet++;
+				}
+
+				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					$headerit .= "<th style='text-align:right;'>".t("Kate")."</th>";
+					$sarakkeet++;
+				}
+
+				$headerit .= "<th style='text-align:right;'>".t("Alv%")."</th><td class='back'>&nbsp;</td>";
+				$sarakkeet++;
+			}
+			else {
+				$sarakkeet_alku = $sarakkeet;
+			}
+			$headerit .= "</tr>";
+
 			if ($toim == "VALMISTAVARASTOON") {
-				echo "<tr>$jarjlisa<td class='back' colspan='5' nowrap>";
+				echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
 				echo "<font class='head'>".t("Valmistusrivit").":</font>";
 			}
 			else {
 				// jos meillä on yhtiön myyntihinnoissa alvit mukana ja meillä on alvillinen tilaus, annetaan mahdollisuus switchata listaus alvittomaksi
 				if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
-					echo "<tr>$jarjlisa<td class='back' colspan='10' nowrap>";
+					echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
 					echo "<font class='head'>".t("Tilausrivit").":</font>";
 
 					$sele = array();
@@ -3967,7 +4036,7 @@ if ($tee == '') {
 						</form>";
 				}
 				else {
-					echo "<tr>$jarjlisa<td class='back' colspan='5' nowrap>";
+					echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
 					echo "<font class='head'>".t("Tilausrivit").":</font>";
 					$tilausrivi_alvillisuus = "";
 				}
@@ -4013,51 +4082,6 @@ if ($tee == '') {
 			}
 
 			echo "</td></tr>";
-
-			$headerit = "";
-
-			$headerit .= "<tr>$jarjlisa<th>".t("#")."</th>";
-
-			if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or ($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("RIVISYOTTO")))) {
-				$trivityyppi_result = t_avainsana("TRIVITYYPPI");
-
-				if (mysql_num_rows($trivityyppi_result) > 0) {
-					$headerit .= "<th>".t("Tyyppi")."</th>";
-				}
-			}
-			elseif ($yhtiorow['tilauksen_kohteet'] == 'K') {
-				$headerit .= "<th>".t("Tyyppi")."</th>";
-			}
-
-			if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-				$headerit .= "<th>".t("Nimitys")."</th>";
-			}
-
-			if (($toim != "TARJOUS" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and (($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) or $yhtiorow['varastopaikan_lippu'] != '')) {
-				$headerit .= "<th>".t("Paikka")."</th>";
-			}
-
-			$headerit .= "	<th>".t("Tuotenumero")."</th>
-					<th>".t("Määrä")."</th>
-					<th>".t("Var")."</th>";
-
-			if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
-
-				$headerit .= "<th>".t("Netto")."</th>";
-
-				if ($kukarow['hinnat'] >= 0) $headerit .= "<th style='text-align:right;'>".t("Svh")."</th>";
-				if ($kukarow['hinnat'] == 0) $headerit .= "<th style='text-align:right;'>".t("Ale%")."</th><th style='text-align:right;'>".t("Hinta")."</th>";
-				if ($kukarow['hinnat'] >= 0) $headerit .= "<th style='text-align:right;'>".t("Rivihinta")."</th>";
-
-				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					$headerit .= "<th style='text-align:right;'>".t("Kate")."</th>";
-				}
-
-				$headerit .= "	<th style='text-align:right;'>".t("Alv%")."</th>
-						<td class='back'>&nbsp;</td>
-						<td class='back'>&nbsp;</td>";
-			}
-			$headerit .= "</tr>";
 
 			$tuotetyyppi		= "";
 			$positio_varattu	= "";
@@ -4134,8 +4158,8 @@ if ($tee == '') {
 				}
 
 				if ($edotunnus == 0 or $edotunnus != $row["otunnus"]) {
-					if ($edotunnus > 0) echo "<tr>$jarjlisa<td class='back' colspan='10'><br></td></tr>";
-					if ($ruuturow["otunnukset"] > 1) echo "<tr>$jarjlisa<td class='back' colspan='10'>".t("Toimitus").": $row[otunnus]</td></tr>";
+					if ($edotunnus > 0) echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
+					if ($ruuturow["otunnukset"] > 1) echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'>".t("Toimitus").": $row[otunnus]</td></tr>";
 					echo $headerit;
 				}
 
@@ -4145,17 +4169,17 @@ if ($tee == '') {
 					if ($tuotetyyppi == "" and $row["tuotetyyppi"] == '2 Työt') {
 						$tuotetyyppi = 1;
 
-						echo "<tr>$jarjlisa<td class='back' colspan='10'><br></td></tr>";
-						echo "<tr>$jarjlisa<td class='back' colspan='10'><font class='head'>".t("Työt")."</font>:</td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("Työt")."</font>:</td></tr>";
 					}
 				}
 				elseif ($toim == 'EXTRANET' and $kukarow['extranet'] != '') {
 					if ($positio_varattu == '' and $row['positio'] == 'Ei varaa saldoa') {
 						$positio_varattu = 1;
 
-						echo "<tr>$jarjlisa<td class='back' colspan='10'><br></td></tr>";
-						echo "<tr>$jarjlisa<td class='back' colspan='10'><font class='head'>",t("Umpeutuneet tilausrivit"),"</font>:</td></tr>";
-						echo "<tr>$jarjlisa<td class='back' colspan='10'><font class='message'>",t("Pahoittelumme! Alla olevien tilausrivien varausajat ovat umpeutuneet");
+						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>",t("Umpeutuneet tilausrivit"),"</font>:</td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='message'>",t("Pahoittelumme! Alla olevien tilausrivien varausajat ovat umpeutuneet");
 
 						if ($ei_saldoa_varausaika != '') {
 							echo " (",t("varausaika")," $ei_saldoa_varausaika ",t("tuntia"),")";
@@ -4239,7 +4263,7 @@ if ($tee == '') {
 					}
 
 					if ($vanhaid != $row["perheid"] and $vanhaid != 'KALA') {
-						echo "<tr>$jarjlisa<td class='back' colspan='10'><br></td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
 					}
 				}
 
@@ -5371,33 +5395,6 @@ if ($tee == '') {
 				}
 
 				if ($row['kommentti'] != '') {
-					$cspan = 10;
-
-					if ($toim == "VALMISTAVARASTOON") {
-						$cspan -= 6;
-
-						if ($yhtiorow["tilauksen_kohteet"] == "K") {
-							$cspan--;
-						}
-					}
-					if ($toim == "SIIRTOLISTA") {
-						$cspan -= 7;
-					}
-					if ($kukarow['hinnat'] == 1) {
-						$cspan-=2;
-					}
-					if ($kukarow['hinnat'] == -1) {
-						$cspan-=4;
-					}
-					if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-						$cspan++;
-					}
-					if ($trivityyulos != "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
-						$cspan++;
-					}
-					if ($kukarow['extranet'] != '') {
-						$cspan--;
-					}
 
 					echo "<tr>";
 
@@ -5418,7 +5415,7 @@ if ($tee == '') {
 						$cspan++;
 					}
 
-					echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font></td>";
+					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>".t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font></td>";
 					echo "<td class='back' valign='top' nowrap></td>";
 					echo "</tr>";
 				}
@@ -5641,33 +5638,9 @@ if ($tee == '') {
 					$ulkom_huom = "";
 				}
 
-				$ycspan = 4;
-
-				if ($laskurow["liitostunnus"] > 0 and $yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO","PROJEKTI"))) {
-					$ycspan++;
-				}
-				if ($kukarow['hinnat'] == 1) {
-					$ycspan = $ycspan - 2;
-				}
-				if ($jarjlisa != "") {
-					$ycspan--;
-				}
-				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-					$ycspan++;
-				}
-				if ($trivityyulos != "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
-					$ycspan++;
-				}
-				if ($kukarow["extranet"] != "" and $yhtiorow['varastopaikan_lippu'] != '') {
-					$ycspan++;
-				}
-				if (!(($toim != "TARJOUS" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != ''))) {
-					$ycspan--;
-				}
-
 				if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0) {
 					echo "<tr>$jarjlisa
-							<td class='back' colspan='$ycspan'>&nbsp;</td>
+							<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
 							<th colspan='5' align='right'>".t("Kotimaan myynti").":</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$arvo_kotimaa_eieri)."</td>";
 
@@ -5681,7 +5654,7 @@ if ($tee == '') {
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
 					echo "<tr>$jarjlisa
-						<td class='back' colspan='$ycspan' align='right'>$ulkom_huom</td>
+						<td class='back' colspan='".($sarakkeet_alku-5)."' align='right'>$ulkom_huom</td>
 						<th colspan='5' align='right'>".t("Ulkomaan myynti").":</th>
 						<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa_eieri)."</td>";
 
@@ -5696,8 +5669,8 @@ if ($tee == '') {
 				}
 				else {
 					echo "<tr>$jarjlisa
-							<td class='back' colspan='$ycspan'>&nbsp;</td>
-							<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
+							<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+							<th colspan='5' align='right'>$sarakkeet_alku".t("Veroton yhteensä").":</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$arvo_eieri)."</td>";
 
 					if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) and $kotiarvo_eieri-$ostot_eieri != 0) {
@@ -5712,7 +5685,7 @@ if ($tee == '') {
 
 				if ($laskurow["erikoisale"] > 0 and $kukarow['hinnat'] == 0) {
 					echo "<tr>$jarjlisa
-						<td class='back' colspan='$ycspan'>&nbsp;</td>
+						<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
 						<th colspan='5' align='right'>".t("Erikoisalennus")." $laskurow[erikoisale]%:</th>
 						<td class='spec' align='right'>".sprintf("%.2f", ($arvo_eieri-$arvo)*-1)."</td>";
 
@@ -5724,7 +5697,7 @@ if ($tee == '') {
 
 					if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0) {
 						echo "<tr>$jarjlisa
-								<td class='back' colspan='$ycspan'>&nbsp;</td>
+								<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
 								<th colspan='5' align='right'>".t("Kotimaan myynti").":</th>
 								<td class='spec' align='right' nowrap>".sprintf("%.2f",$arvo_kotimaa)."</td>";
 
@@ -5738,7 +5711,7 @@ if ($tee == '') {
 						echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
 						echo "<tr>$jarjlisa
-							<td class='back' colspan='$ycspan' align='right'>$ulkom_huom</td>
+							<td class='back' colspan='".($sarakkeet_alku-5)."' align='right'>$ulkom_huom</td>
 							<th colspan='5' align='right'>".t("Ulkomaan myynti").":</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa)."</td>";
 
@@ -5750,7 +5723,7 @@ if ($tee == '') {
 					}
 					else {
 						echo "<tr>$jarjlisa
-								<td class='back' colspan='$ycspan'>&nbsp;</td>
+								<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
 								<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
 								<td class='spec' align='right'>".sprintf("%.2f",$arvo)."</td>";
 
@@ -5783,7 +5756,7 @@ if ($tee == '') {
 				}
 
 				echo "<tr>$jarjlisa
-						<td class='back' colspan='$ycspan'>&nbsp;</td>
+						<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
 						<th colspan='5' align='right'>".t("Verollinen yhteensä").":</th>";
 
 				echo "<td class='spec' align='right'>".sprintf("%.2f",$summa)."</td>";
@@ -5819,7 +5792,7 @@ if ($tee == '') {
 				}
 
 				if (($kaikkiyhteensa > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
-					echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>0.00</td>";
+					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>0.00</td>";
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 						echo "<td class='spec' align='right'>&nbsp;</td>";
 					}
@@ -5874,7 +5847,7 @@ if ($tee == '') {
 						}
 					}
 
-					echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu")." ",t("verollinen");
+					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu")." ",t("verollinen");
 
 					if ($rahtihinta_ale != 0) {
 						echo " (",t("ale")," $rahtihinta_ale %)";
@@ -5886,7 +5859,7 @@ if ($tee == '') {
 					}
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
-					echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Loppusumma").":</th><td class='spec' align='right'>".sprintf("%.2f",$summa+$rahtihinta)."</td>";
+					echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Loppusumma").":</th><td class='spec' align='right'>".sprintf("%.2f",$summa+$rahtihinta)."</td>";
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 						echo "<td class='spec' align='right'>&nbsp;</td>";
 					}
@@ -5902,16 +5875,14 @@ if ($tee == '') {
 						$jyvsumma = '0.00';
 					}
 
-					$xcolspan = $ycspan-4;
-
 					if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
 						echo "	<th colspan='2' nowrap>".t("Näytä").":</th>
 								<td colspan='2' nowrap>
 								<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti'>
-									<input type='hidden' name='otunnus' value='$tilausnumero'>
-									<input type='hidden' name='projektilla' value='$projektilla'>
-									<input type='hidden' name='tee' value='TULOSTA'>
-									<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>";
+								<input type='hidden' name='otunnus' value='$tilausnumero'>
+								<input type='hidden' name='projektilla' value='$projektilla'>
+								<input type='hidden' name='tee' value='TULOSTA'>
+								<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>";
 
 						echo "<select name='toim'>";
 
@@ -5977,12 +5948,12 @@ if ($tee == '') {
 							</form>
 							</td>";
 
-						if ($xcolspan > 0) {
-							echo "<td class='back' colspan='$xcolspan'></td>";
+						if ($sarakkeet_alku-9 > 0) {
+							echo "<td class='back' colspan='".($sarakkeet_alku-9)."'></td>";
 						}
 					}
 					else {
-						echo "<td class='back' colspan='$ycspan' nowrap>&nbsp;</td>";
+						echo "<td class='back' colspan='".($sarakkeet_alku-5)."' nowrap>&nbsp;</td>";
 					}
 
 					if (strlen(sprintf("%.2f",$summa)) > 7) {
@@ -6033,7 +6004,7 @@ if ($tee == '') {
 
 					if ($kulusumma != 0) {
 						echo "<tr>$jarjlisa
-								<td class='back' colspan='$ycspan'>&nbsp;</td>
+								<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
 								<th colspan='5' align='right'>".t("Liitetyt kululaskut").":</th>
 								<td class='spec' align='right'>".sprintf("%.2f",$kulusumma)."</td>";
 

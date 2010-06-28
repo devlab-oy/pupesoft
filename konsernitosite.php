@@ -158,6 +158,7 @@
 					luontiaika = now()";
 		$result = mysql_query($query) or pupe_error($query);
 		$tunnus = mysql_insert_id($link);
+		$turvatunnus = $tunnus;
 
 		if ($fnimi) {
 			// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
@@ -276,10 +277,10 @@
 
 		echo "<font class='message'>".t("Konsernitosite luotu")."!</font>";
 
-		echo "	<form action = 'muutosite.php' method='post'>
+		echo "	<form action='muutosite.php' method='post'>
 				<input type='hidden' name='tee' value='E'>
-				<input type='hidden' name='tunnus' value='$tunnus'>
-				<input type='Submit' value='".t("N‰yt‰ tosite")."'>
+				<input type='hidden' name='tunnus' value='$turvatunnus'>
+				<input type='submit' value='".t("N‰yt‰ tosite")."'>
 				</form><br><hr><br>";
 	}
 

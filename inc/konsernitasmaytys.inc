@@ -185,6 +185,10 @@
 
 					echo "<tr><td class='back' colspan='5'><br><font class='message'>$konsernirow[nimi] ($konsernirow[ytunnus])</font></td></tr>";
 
+					$myyntisaamiset_yhteensa = 0;
+					$ostovelat_yhteensa = 0;
+					$erotus_yhteensa = 0;
+					
 					$query = "	SELECT lasku.ytunnus, group_concat(distinct lasku.nimi) nimi, sum(tiliointi.summa) myyntisaamiset
 								FROM tiliointi
 								JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
@@ -205,11 +209,6 @@
 					echo "</tr>";
 
 					while ($trow = mysql_fetch_array($result)) {
-
-						echo "<tr>";
-						echo "<td>$trow[ytunnus]</td>";
-						echo "<td>$trow[nimi]</td>";
-						echo "<td align='right'>$trow[myyntisaamiset]</td>";
 
 						$query = "	SELECT *
 									FROM yhtio
@@ -232,19 +231,37 @@
 										AND tiliointi.korjattu = ''";
 							$ostovelatresult = mysql_query($query) or pupe_error($query);
 							$ostovelatrow = mysql_fetch_array ($ostovelatresult);
-
-							echo "<td align='right'>$ostovelatrow[ostovelat]</td>";
 						}
 						else {
-							echo "<td align='right'>N/A</td>";
-							$ostovelatrow['ostovelat'] = 0;
+							$ostovelatrow['ostovelat'] = "N/A";
 						}
 
-						echo "<td align='right'>".sprintf("%.02f", $trow['myyntisaamiset'] + $ostovelatrow['ostovelat'])."</td>";
-						echo "</tr>";
-					}
-				}
+						if ($trow["myyntisaamiset"] != 0 or $ostovelatrow["ostovelat"] != 0) {
 
+							$erotus = $trow['myyntisaamiset'] + (float) $ostovelatrow['ostovelat'];
+							$myyntisaamiset_yhteensa += $trow["myyntisaamiset"];
+							$ostovelat_yhteensa += $trow["ostovelat"];
+							$erotus_yhteensa += $erotus;
+							
+							echo "<tr>";
+							echo "<td>$trow[ytunnus]</td>";
+							echo "<td>$trow[nimi]</td>";
+							echo "<td align='right'>$trow[myyntisaamiset]</td>";
+							echo "<td align='right'>$ostovelatrow[ostovelat]</td>";
+							echo "<td align='right'>".sprintf("%.02f", $erotus)."</td>";
+							echo "</tr>";							
+						}
+					}
+					
+					echo "<tr>";
+					echo "<th colspan='2'>Yhteensä</th>";
+					echo "<th>".sprintf("%.02f", $myyntisaamiset_yhteensa)."</th>";
+					echo "<th>".sprintf("%.02f", $ostovelat_yhteensa)."</th>";
+					echo "<th>".sprintf("%.02f", $erotus_yhteensa)."</th>";
+					echo "</tr>";
+					
+				}
+				
 				echo "</table><br>";
 		}
 		else {

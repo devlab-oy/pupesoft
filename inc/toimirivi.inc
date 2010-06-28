@@ -467,4 +467,16 @@
 		}
 	}
 
+	if (mysql_field_name($result, $i) == "maksukielto") {
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Toimittaja ei ole maksukiellossa")."</option>";
+		$ulos .= "<option value='K'  $sel[K] >".t("Toimittaja on maksukiellossa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

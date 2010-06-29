@@ -48,7 +48,7 @@ if ((int) $valitsetoimitus > 0) {
 	$toimrow = mysql_fetch_assoc($result);
 
 	if ($toimrow["tila"] == "A" or (($toimrow["tila"] == "L" or $toimrow["tila"] == "N") and $toimrow["tilaustyyppi"] == "A")) {
-		$toim = (strtolower($asentaja) == 'tyomaarays_asentaja' or strtolower($toim) == 'tyomaarays_asentaja') ? "TYOMAARAYS_ASENTAJA" : "TYOMAARAYS";
+		$toim = (strtolower($asentaja) == 'tyomaarays_asentaja' or $toim == 'TYOMAARAYS_ASENTAJA') ? "TYOMAARAYS_ASENTAJA" : "TYOMAARAYS";
 	}
 	elseif ($toimrow["tila"] == "L" or $toimrow["tila"] == "N") {
 		if ($toim != "RIVISYOTTO" and $toim != "PIKATILAUS") $toim = "RIVISYOTTO";
@@ -610,7 +610,7 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 }
 
 // Poistetaan tilaus
-if ($tee == 'POISTA' and $muokkauslukko == "") {
+if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] == "") {
 
 	// tilausta mitätöidessä laitetaan kaikki poimitut jt-rivit takaisin omille tilauksille
 	$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.vanha_otunnus
@@ -4107,26 +4107,45 @@ if ($tee == '') {
 
 			echo "</td></tr>";
 
-			$tuotetyyppi		= "";
-			$positio_varattu	= "";
-			$varaosatyyppi		= "";
-			$vanhaid 			= "KALA";
-			$borderlask			= 0;
-			$pknum				= 0;
-			$erikoistuote_tuoteperhe = array();
-			$tuoteperhe_kayty 	= '';
-			$edotunnus 			= 0;
-			$tuotekyslinkki		= "";
+			$tuotetyyppi				= "";
+			$positio_varattu			= "";
+			$varaosatyyppi				= "";
+			$vanhaid 					= "KALA";
+			$borderlask					= 0;
+			$pknum						= 0;
+			$erikoistuote_tuoteperhe 	= array();
+			$tuoteperhe_kayty 			= '';
+			$edotunnus 					= 0;
+			$tuotekyslinkki				= "";
+			$tuotekyslinkkilisa			= "";
 
 			if ($kukarow["extranet"] == "") {
-				$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='tuote.php' LIMIT 1";
+				$query = "	SELECT tunnus, alanimi
+							from oikeu
+							where yhtio	= '$kukarow[yhtio]'
+							and kuka	= '$kukarow[kuka]'
+							and nimi	= 'tuote.php'
+							ORDER BY alanimi
+							LIMIT 1";
 				$tarkres = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($tarkres) > 0) {
+					
 					$tuotekyslinkki = "tuote.php";
+					
+					$tarkrow = mysql_fetch_assoc($tarkres);
+										
+					if ($tarkrow["alanimi"] != "") {
+						$tuotekyslinkkilisa = "toim=$tarkrow[alanimi]&";
+					}													
 				}
 				else {
-					$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='tuvar.php' LIMIT 1";
+					$query = "	SELECT tunnus
+								from oikeu
+								where yhtio	= '$kukarow[yhtio]'
+								and kuka	= '$kukarow[kuka]'
+								and nimi	= 'tuvar.php'
+								LIMIT 1";
 					$tarkres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($tarkres) > 0) {
@@ -4792,7 +4811,7 @@ if ($tee == '') {
 				}
 
 				if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
-					echo "<td $class valign='top'><a href='../$tuotekyslinkki?tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim'>$row[tuoteno]</a>";
+					echo "<td $class valign='top'><a href='../$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim'>$row[tuoteno]</a>";
 				}
 				else {
 					echo "<td $class valign='top'>$row[tuoteno]";
@@ -6396,7 +6415,6 @@ if ($tee == '') {
 				echo "</form>";
 				echo "</td>";
 			}
-
 		}
 
 		//	Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
@@ -6410,7 +6428,7 @@ if ($tee == '') {
 			$projektilask = 0;
 		}
 
-		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0))) {
+		if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "") {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
 								msg = '".t("Haluatko todella poistaa tämän tietueen?")."';

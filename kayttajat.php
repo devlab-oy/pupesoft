@@ -25,16 +25,16 @@
 
 	if (isset($muutparametrit)) {
 		list ($tee, $selkuka, $kumpi, $yoaid) = explode("#", $muutparametrit);
-		
+
 		if ($kumpi == 1) {
-			$ytunnus_oa_id = $asiakasid;	
-			$oletus_asiakastiedot = $yoaid;			
+			$ytunnus_oa_id = $asiakasid;
+			$oletus_asiakastiedot = $yoaid;
 		}
 		else {
 			$oletus_asiakas = $yoaid;
-			$ytunnus_oat_id = $asiakasid;			
+			$ytunnus_oat_id = $asiakasid;
 		}
-				
+
 		$ytunnus_oa = "";
 		$ytunnus_oat = "";
 	}
@@ -71,7 +71,7 @@
 	}
 
 	if ($tee == "MUUTA" and $ytunnus_oat != "" and $ytunnus_oat != '0') {
-		$muutparametrit = "MUUTA#$selkuka#2#$oletus_asiakas";	
+		$muutparametrit = "MUUTA#$selkuka#2#$oletus_asiakas";
 		$ytunnus 		= $ytunnus_oat;
 		$asiakasid 		= "";
 		$ytunnus_oa  	= "";
@@ -250,6 +250,7 @@
 						lomaoikeus						= '$lomaoikeus',
 						asema							= '$asema',
 						toimipaikka						= '$toimipaikka',
+						mitatoi_tilauksia				= '$mitatoi_tilauksia',
 						naytetaan_katteet_tilauksella 	= '$naytetaan_katteet_tilauksella',
 						naytetaan_asiakashinta 			= '$naytetaan_asiakashinta',
 						naytetaan_tuotteet				= '$naytetaan_tuotteet',
@@ -392,42 +393,44 @@
 			}
 
 			$query = "	UPDATE kuka
-						SET nimi 		= '$firname',
-						puhno 			= '$phonenum',
-						eposti 			= '$email',
-						kieli 			= '$lang',
-						ip				= '$ip',
-						taso 			= '$taso',
-						hinnat			= '$hinnat',
-						saatavat		= '$saatavat',
-						keraajanro 		= '$keraajanro',
-						myyja 			= '$myyja',
-						osasto			= '$osasto',
-						varasto 		= '$varasto',
-						oletus_varasto 	= '$oletus_varasto',
-						oletus_pakkaamo	= '$oletus_pakkaamo',
-						kirjoitin 		= '$kirjoitin',
-						oletus_asiakas 	= '$oletus_asiakas',
-						oletus_asiakastiedot = '$oletus_asiakastiedot',
-						resoluutio 		= '$resoluutio',
-						extranet		= '$extranet',
-						hyvaksyja		= '$hyvaksyja',
-						lomaoikeus		= '$lomaoikeus',
-						asema			= '$asema',
-						toimipaikka		= '$toimipaikka',
-						kassamyyja 		= '$kassamyyja',
-						dynaaminen_kassamyynti = '$dynaaminen_kassamyynti',
-						jyvitys			= '$jyvitys',
-						oletus_ohjelma 	= '$oletus_ohjelma',
+						SET nimi 						= '$firname',
+						puhno 							= '$phonenum',
+						eposti 							= '$email',
+						kieli 							= '$lang',
+						ip								= '$ip',
+						taso 							= '$taso',
+						hinnat							= '$hinnat',
+						saatavat						= '$saatavat',
+						keraajanro 						= '$keraajanro',
+						myyja 							= '$myyja',
+						osasto							= '$osasto',
+						varasto 						= '$varasto',
+						oletus_varasto 					= '$oletus_varasto',
+						oletus_pakkaamo					= '$oletus_pakkaamo',
+						kirjoitin 						= '$kirjoitin',
+						oletus_asiakas 					= '$oletus_asiakas',
+						oletus_asiakastiedot 			= '$oletus_asiakastiedot',
+						resoluutio 						= '$resoluutio',
+						extranet						= '$extranet',
+						hyvaksyja						= '$hyvaksyja',
+						lomaoikeus						= '$lomaoikeus',
+						asema							= '$asema',
+						toimipaikka						= '$toimipaikka',
+						mitatoi_tilauksia				= '$mitatoi_tilauksia',
+						kassamyyja 						= '$kassamyyja',
+						dynaaminen_kassamyynti			= '$dynaaminen_kassamyynti',
+						jyvitys							= '$jyvitys',
+						oletus_ohjelma 					= '$oletus_ohjelma',
 						naytetaan_katteet_tilauksella 	= '$naytetaan_katteet_tilauksella',
 						naytetaan_asiakashinta 			= '$naytetaan_asiakashinta',
 						naytetaan_tuotteet				= '$naytetaan_tuotteet',
 						naytetaan_tilaukset				= '$naytetaan_tilaukset',
-						profiilit 		= '$profile',
-						piirit			= '$piirit',
-						muuttaja		= '$kukarow[kuka]',
-						muutospvm		= now()
-						WHERE kuka='$kuka' and yhtio='$yhtio'";
+						profiilit 						= '$profile',
+						piirit							= '$piirit',
+						muuttaja						= '$kukarow[kuka]',
+						muutospvm						= now()
+						WHERE kuka	= '$kuka'
+						and yhtio	= '$yhtio'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$query = "	SELECT nimi, kuka, tunnus
@@ -843,7 +846,7 @@
 
 					if ($kumpi == "1" and $ytunnus_oa_id != "") $krow["oletus_asiakas"] = $ytunnus_oa_id;
 					elseif ($oletus_asiakas != '') $krow["oletus_asiakas"] = $oletus_asiakas;
-					
+
 					if ($krow["oletus_asiakas"] != "") {
 
 						$query = "SELECT * from asiakas where tunnus='$krow[oletus_asiakas]'";
@@ -1006,7 +1009,6 @@
 
 					echo "</select></td></tr>";
 
-
 					echo "<tr><th align='left'>".t("Toimipaikka").":</td>";
 					echo "<td><select name='toimipaikka'><option value=''>".t("Oletustoimipaikka")."</option>";
 
@@ -1019,6 +1021,18 @@
 						echo "<option value='$varow[tunnus]' $sel>$varow[ovtlisa] $varow[nimi]</option>";
 					}
 
+					echo "</select></td></tr>";
+
+					$sel1 = "";
+
+					if ($krow['mitatoi_tilauksia'] != "") {
+						$sel1 = "SELECTED";
+					}
+
+					echo "<tr><th align='left'>".t("Tilausten mitätöiminen").":</td>";
+					echo "<td><select name='mitatoi_tilauksia'>
+							<option value=''>".t("Käyttäjä saa mitätöidä tilauksia")."</option>
+							<option value='X' $sel1>".t("Käyttäjä ei saa mitätöidä tilauksia")."</option>";
 					echo "</select></td></tr>";
 
 					//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta

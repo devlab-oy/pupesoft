@@ -1130,8 +1130,7 @@
 					$keraysvko = "";
 				}
 
-				echo t("Vko").": <input type='text' name='keraysvko' value='$keraysvko' size='2'>
-					<input type='hidden' name='vkeraysvko' value='".$srow["keraysvko"]."'>";
+				echo t("Vko").": <input type='text' name='keraysvko' value='$keraysvko' size='2'>";
 
 				echo "<select name='keraysvkopva'>";
 				echo "<option value=''></option>";
@@ -1210,8 +1209,7 @@
 					$toimvko = "";
 				}
 
-				echo t("Vko").": <input type='text' name='toimvko' value='$toimvko' size='2'>
-					<input type='hidden' name='vtoimvko' value='".$srow["toimvko"]."'>";
+				echo t("Vko").": <input type='text' name='toimvko' value='$toimvko' size='2'>";
 
 				echo "<select name='toimvkopva'>";
 				echo "<option value=''></option>";
@@ -1840,7 +1838,7 @@
 
 				echo "<tr><td>",t("Kanta-asiakastunnus"),"</td><td><input type='text' name='kantaasiakastunnus' value='$kantaasiakastunnus'></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
 			}
-			
+
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or (($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
@@ -2384,13 +2382,13 @@
 		$nyviikko = date("W");
 		$nypaiva  = date("N");
 
-		if ($toimvko != '' and ($apuro["toimvko"] == "" or $toimvko >= $nyviikko or $toimvkopva != $vtoimvko)) {
+		if ($toimvko != '') {
 
 			$nyvuosi  = date("Y");
 
 			$toimvkopva = $toimvkopva == '' ? 7 : $toimvkopva;
 
-			if ($toimvko < $nyviikko) {
+			if ($toimvko < $nyviikko and $toimvko != date("W", strtotime($apuro["toimaika"]))) {
 				$nyvuosi += 1;
 			}
 
@@ -2400,32 +2398,34 @@
 			$toimkk	 = date("m",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
 			$toimpp  = date("d",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
 
-			$toimvko = $toimvkopvat = $toimvkopva;
+			$toimvko = $toimvkopva;
 		}
 		else {
-			$toimvko = $vtoimvko;
+			$toimvko	= "";
+			$toimvkopva	= "";
 		}
 
-		if ($keraysvko != '' and ($apuro["keraysvko"] == "" or $keraysvko >= $nyviikko or $keraysvkopva != $vkeraysvko)) {
+		if ($keraysvko != '') {
 
 			$nyvuosi  = date("Y");
 
 			$keraysvkopva = $keraysvkopva == '' ? 7 : $keraysvkopva;
 
-			if ($keraysvko < $nyviikko) {
+			if ($keraysvko < $nyviikko and $keraysvko != date("W", strtotime($apuro["kerayspvm"]))) {
 				$nyvuosi += 1;
 			}
 
 			$keraysvko = strlen($keraysvko) == 1 ? "0".$keraysvko : $keraysvko;
 
 			$kervv  = date("Y",strtotime("$nyvuosi-W$keraysvko-$keraysvkopva"));
-			$kerkk	 = date("m",strtotime("$nyvuosi-W$keraysvko-$keraysvkopva"));
+			$kerkk	= date("m",strtotime("$nyvuosi-W$keraysvko-$keraysvkopva"));
 			$kerpp  = date("d",strtotime("$nyvuosi-W$keraysvko-$keraysvkopva"));
 
-			$keraysvko = $keraysvkopvat = $keraysvkopva;
+			$keraysvko = $keraysvkopva;
 		}
 		else {
-			$keraysvko = $vkeraysvko;
+			$keraysvko		= "";
+			$keraysvkopva	= "";
 		}
 
 		if ($kukarow["kesken"] == 0) {

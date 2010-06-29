@@ -25,6 +25,25 @@
 		js_popup();
 		enable_ajax();
 
+		// Saako poistaa tarjouksia
+		$deletarjous = FALSE;
+
+		if ($toim == "TARJOUS" or $toim == "TARJOUSSUPER" or $toim == "HYPER") {
+			//Saako poistaa tarjouksia
+			$query = "	SELECT yhtio
+						FROM oikeu
+						WHERE yhtio		= '$kukarow[yhtio]'
+						and kuka		= '$kukarow[kuka]'
+						and nimi		= 'tilauskasittely/tilaus_myynti.php'
+						and alanimi 	= 'TARJOUS'
+						and paivitys	= '1'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) > 0) {
+				$deletarjous = TRUE;
+			}
+		}
+
 		echo "	<script type='text/javascript' language='JavaScript'>
 				<!--
 					function verify() {
@@ -936,7 +955,7 @@
 			$miinus = 3;
 		}
 		elseif ($toim == 'OSTO') {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext, 
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
 							(SELECT count(*)
 							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
 							WHERE aputilausrivi.yhtio = lasku.yhtio
@@ -957,7 +976,7 @@
 			$miinus = 4;
 		}
 		elseif ($toim == 'OSTOSUPER') {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, 
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
 							(SELECT count(*)
 							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
 							WHERE aputilausrivi.yhtio = tilausrivi.yhtio
@@ -1582,7 +1601,7 @@
 					echo "<input type='submit' name='$aputoim1' value='$lisa1' $button_disabled>";
 					echo "</form></td>";
 
-					if ($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER" and $kukarow["kesken"] != 0) {
+					if (($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous and $kukarow["mitatoi_tilauksia"] == "") {
 						echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return verify();'>";
 						echo "<input type='hidden' name='toim' value='$whiletoim'>";
 						echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";

@@ -121,7 +121,7 @@
 		}
 
 		if ($toim != "REKLAMAATIO") {
-			if ((strtolower($toim) == 'tyomaarays_asentaja' or strtolower($toim) == 'tyomaarays') and $yhtiorow['tyomaarays_tulostus_lisarivit'] == 'L') {
+			if (($toim == 'TYOMAARAYS_ASENTAJA' or $toim == 'TYOMAARAYS') and $yhtiorow['tyomaarays_tulostus_lisarivit'] == 'L') {
 				loppu_lisarivit($page[$sivu], 1);
 			}
 			else {

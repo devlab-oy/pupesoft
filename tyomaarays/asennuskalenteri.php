@@ -26,7 +26,7 @@
 		$lis = " and (avainsana.selite = '' or avainsana.selite = '$tyojono') ";
 	}
 
-	if (!isset($tyojono) and strtolower($toim) == 'tyomaarays_asentaja') {
+	if (!isset($tyojono) and $toim == 'TYOMAARAYS_ASENTAJA') {
 		$lis .= " and avainsana.selitetark = '$kukarow[kuka]' ";
 	}
 
@@ -525,7 +525,7 @@
 					<tr><td class='back' style='height: $korkeus;'>&nbsp;</td></tr>";
 
 			foreach ($AIKA_ARRAY as $a) {
-				if (strtolower($toim) == 'tyomaarays_asentaja') $a = '&nbsp;';
+				if ($toim == 'TYOMAARAYS_ASENTAJA') $a = '&nbsp;';
 				echo "<tr><td class='back' style='height: $korkeus;'>$a</td></tr>";
 			}
 
@@ -560,7 +560,7 @@
 				$tyyppilisa = "'asennuskalenteri','kalenteri'";
 
 				// asentaja saa nähdä vaan asennuskalenterin merkinnät.
-				if (strtolower($toim) == 'tyomaarays_asentaja') {
+				if ($toim == 'TYOMAARAYS_ASENTAJA') {
 					$selectlisa = "lasku.tunnus, ";
 					$orderlisa = " lasku.tunnus, ";
 					$tyyppilisa = "'asennuskalenteri'";
@@ -611,7 +611,7 @@
 
 								if ($alku <= $slot and $lopp > $slot and $vrow["kuka"] == $b) {
 
-									if (strtolower($toim) == 'tyomaarays_asentaja') {
+									if ($toim == 'TYOMAARAYS_ASENTAJA') {
 										if (in_array($vrow['tunnus'], $ed_tunnukset["$b"])) {
 											continue;
 										}
@@ -667,13 +667,13 @@
 
 					echo "<tr>";
 
-					if (strtolower($toim) != 'tyomaarays_asentaja') echo "<td class='back'></td>";
+					if ($toim != 'TYOMAARAYS_ASENTAJA') echo "<td class='back'></td>";
 
 					echo "<th colspan='".count($ASENTAJA_ARRAY)."'><a name='{$i}_{$month}_{$year}'>".$DAY_ARRAY[$pvanro].": $i.$month.$year</a></th></tr>";
 					echo "<tr>";
 
 
-					if (strtolower($toim) != 'tyomaarays_asentaja') echo "<td class='back'></td>";
+					if ($toim != 'TYOMAARAYS_ASENTAJA') echo "<td class='back'></td>";
 
 					foreach ($ASENTAJA_ARRAY_TARK as $b) {
 						echo "<td align='center' style='width: $sarakeleveys; height: $korkeus;'>$b</td>";
@@ -686,7 +686,7 @@
 
 					echo "<tr>";
 
-					if (count($ASENTAJA_ARRAY_TARK) >= 5 and strtolower($toim) != 'tyomaarays_asentaja') {
+					if (count($ASENTAJA_ARRAY_TARK) >= 5 and $toim != 'TYOMAARAYS_ASENTAJA') {
 						echo "<td class='back' style='width: $sarakeleveys; height: $korkeus;'>$a</td>";
 					}
 
@@ -764,7 +764,7 @@
 							<tr><td class='back' style='height: $korkeus;'>&nbsp;</td></tr>";
 
 					foreach ($AIKA_ARRAY as $a) {
-						if (strtolower($toim) == 'tyomaarays_asentaja') $a = '&nbsp;';
+						if ($toim == 'TYOMAARAYS_ASENTAJA') $a = '&nbsp;';
 						echo "<tr><td class='back' style='height: $korkeus;'>$a</td></tr>";
 					}
 					echo "</table>";

@@ -18,11 +18,7 @@ $edytunnus = "jokuarvovaan, ett‰ menn‰‰n ekalla luupilla jo sis‰‰n";
 	kommentti
 */
 
-
-
-while (!feof ($fd)) {
-
-	$rivi = fgets($fd);
+while ($rivi = fgets($fd)) {
 
 	$poista	  	= array("\"", "'", "\\");
 	$rivi	  	= str_replace($poista,"",$rivi);

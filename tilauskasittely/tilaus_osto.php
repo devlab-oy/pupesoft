@@ -1207,7 +1207,7 @@
 				}
 
 			}
-			if ($eimitatoi != "EISAA") {
+			if ($eimitatoi != "EISAA" and $kukarow["mitatoi_tilauksia"] == "") {
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 							function verify(){
 									msg = '".t("Haluatko todella poistaa tämän tietueen?")."';

@@ -1068,19 +1068,19 @@
 			elseif ($srow["vienti"] == '') {
 				if (isset($srow)) {
 					if ($srow['alv'] == 0) {
-						$sel00 = 'selected';
-						$sel22 ='';
+						$sel_veroton 	= 'selected';
+						$sel_verollinen ='';
 					}
 					if ($srow['alv'] == $wtrow["selite"]) {
-						$sel22 = 'selected';
-						$sel00 = '';
+						$sel_verollinen = 'selected';
+						$sel_veroton 	= '';
 					}
 				}
 
 				echo " <td>
 						<select name='alv'>
-						<option value='$wtrow[selite]' $sel22>".t("Verollinen myynti")."</option>
-						<option value='0' $sel00>".t("Veroton myynti")."</option>
+						<option value='$wtrow[selite]' $sel_verollinen>".t("Verollinen myynti")."</option>
+						<option value='0' $sel_veroton>".t("Veroton myynti")."</option>
 						</select>
 						</td></tr>";
 			}

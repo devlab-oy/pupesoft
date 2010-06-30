@@ -1190,7 +1190,7 @@ while (!feof ($fd)) {
 								tuoteno 	= 'TUNTEMATON',
 								var			= 'P',
 								kpl 		= '0',
-								alv			= '22',
+								alv			= '23',
 								tilkpl 		= '$kpl',
 								otunnus 	= '$id',
 								tyyppi 		= '$editilaus_tyyppi',

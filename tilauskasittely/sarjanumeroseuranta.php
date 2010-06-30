@@ -716,7 +716,6 @@
 		}
 	}
 
-
 	// Näytetään koneella olevat sarjanumerot
 	$lisa  = "";
 	$lisa2 = "";
@@ -778,7 +777,11 @@
 	}
 
 	if ($lisa == "") {
-		$lisa = " and sarjanumeroseuranta.myyntirivitunnus != -1 and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') ";
+		$lisa = " and sarjanumeroseuranta.myyntirivitunnus != -1 ";
+		
+		if ($ostonhyvitysrivi != "ON") {
+			$lisa .= " and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') ";
+		}
 	}
 
 	$query	= "	SELECT sarjanumeroseuranta.*,

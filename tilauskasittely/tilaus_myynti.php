@@ -1976,7 +1976,7 @@ if ($tee == '') {
 			$prosres = mysql_query($prosque) or pupe_error($prosque);
 			if (mysql_num_rows($prosres)==1) {
 				$asiakasOnProspekti = "JOO";
-				echo "<br><font class='error'>".t("HUOM!!! Asiakas on prosketiasiakas, tarkista asiakasrekisterissä asiakkaan tiedot ja päivitä tiedot tilauksen otsikolle.")."</font>";
+				echo "<br><font class='error'>".t("HUOM!!! Asiakas on prospektiasiakas, tarkista asiakasrekisterissä asiakkaan tiedot ja päivitä tiedot tilauksen otsikolle.")."</font>";
 			}
 		}
 

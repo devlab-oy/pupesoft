@@ -60,7 +60,7 @@ if ($Xtunnukset2 != "") {
 				tullinimike.su,
 				tuote.tullinimike1,
 				tuote.tullikohtelu,
-				(SELECT alkuperamaa from tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa != '$yhtiorow[maa]' LIMIT 1) alkuperamaa,
+				(SELECT tuotteen_toimittajat.alkuperamaa from tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno ORDER BY if (tuotteen_toimittajat.alkuperamaa='$yhtiorow[maa]', concat('2', tuotteen_toimittajat.alkuperamaa), concat('1', tuotteen_toimittajat.alkuperamaa)) LIMIT 1) alkuperamaa,
 				sum(tilausrivi.rivihinta) summa,
 				sum(tilausrivi.kpl) kpl,
 				round(sum((tilausrivi.rivihinta/$laskurow[summa])*$Xkilot),0) paino

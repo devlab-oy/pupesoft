@@ -358,24 +358,24 @@
 		$wtres  = mysql_query($wquery) or pupe_error($wquery);
 		$wtrow  = mysql_fetch_array($wtres);
 
-		$sel00 = "";
-		$sel22 = "";
+		$sel_veroton 	= "";
+		$sel_verollinen = "";
 
 		if (isset($trow[$i])) {
 			if ($trow[$i] == 0) {
-				$sel00 = 'selected';
-				$sel22 ='';
+				$sel_veroton 	= 'selected';
+				$sel_verollinen ='';
 			}
 			if ($trow[$i] == $wtrow["selite"]) {
-				$sel22 = 'selected';
-				$sel00 = '';
+				$sel_verollinen = 'selected';
+				$sel_veroton 	= '';
 			}
 		}
 
 		$ulos = " 	<td>
 					<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
-					<option value='$wtrow[selite]' $sel22>".t("Verollinen myynti")."</option>
-					<option value='0' $sel00>".t("Veroton myynti")."</option>
+					<option value='$wtrow[selite]' $sel_verollinen>".t("Verollinen myynti")."</option>
+					<option value='0' $sel_veroton>".t("Veroton myynti")."</option>
 					</select>
 					</td>";
 		$jatko = 0;

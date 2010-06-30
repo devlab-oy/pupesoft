@@ -1110,10 +1110,14 @@
 				$loppu = $rivimaara;
 			}
 
-			$order = "sorttauskentta, tuoteno";
-
 			if ($jarjestys == 'tuoteno') {
-				$order = "tuoteno, sorttauskentta";
+				$order = " tuoteno, sorttauskentta ";
+			}
+			elseif ($jarjestys == 'osastotrytuoteno') {
+				$order = " osasto, try, tuoteno, sorttauskentta ";
+			}
+			else {
+				$order = " sorttauskentta, tuoteno ";
 			}
 
 			$where = "";
@@ -1178,13 +1182,18 @@
 				$sel180rivi = "SELECTED";
 			}
 
-			$seljarj1=$seljarj2="";
+			$seljarj1 = "";
+			$seljarj2 = "";
+			$seljarj3 = "";
 
-			if ($jarjestys == '') {
-				$seljarj1 = "SELECTED";
+			if ($jarjestys == 'tuoteno') {
+				$seljarj2 = "SELECTED";
+			}
+			elseif ($jarjestys == 'osastotrytuoteno') {
+				$seljarj3 = "SELECTED";
 			}
 			else {
-				$seljarj2 = "SELECTED";
+				$seljarj1 = "SELECTED";
 			}
 
 			if ($lista != "") {
@@ -1197,6 +1206,7 @@
 				echo "<select name='jarjestys' onchange='submit()'>";
 				echo "<option value='' $seljarj1>".t("Tuotepaikkajärjestys")."</option>";
 				echo "<option value='tuoteno' $seljarj2>".t("Tuotenumerojärjestys")."</option>";
+				echo "<option value='osastotrytuoteno' $seljarj3>".t("Osasto/Tuoteryhmä/Tuotenumerojärjestykseen")."</option>";
 				echo "</select>";
 				echo "<input type='hidden' name='tee' value='INVENTOI'>";
 				echo "<input type='hidden' name='tee2' value='$tee2'>";

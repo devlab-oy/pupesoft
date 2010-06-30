@@ -118,11 +118,26 @@
 	echo "<td><select name='arvomatikka'>";
 	echo "<option value=''>".t("Kaikki")."</option>";
 	echo "<option value='S' $sel1>".t("Saldolliset")."</option>";
-	echo "<option value='N' $sel2>".t("Ei nolla saldollisia")."</option>";
+	echo "<option value='N' $sel2>".t("Ei nolla saldollisia")."</option></select>";
 	echo "</td></tr>";
 
+	$sel1 = "";
+	$sel2 = "";
+
+	if ($naytasaldo == 'H') {
+		$sel1 = "SELECTED";
+	}
+	elseif ($naytasaldo == 'S') {
+		$sel2 = "SELECTED";
+	}
+	
 	echo "<tr><th>".t("Tulosta hyllyss‰ oleva m‰‰r‰:")."</th>
-	<td><input type='checkbox' name='naytasaldo'></td>
+	<td><select name='naytasaldo'>";
+	echo "<option value=''>".t("Ei n‰ytet‰ m‰‰r‰‰")."</option>";
+	echo "<option value='H' $sel1>".t("Hyllyss‰ oleva m‰‰r‰")."</option>";
+	echo "<option value='S' $sel2>".t("Saldo")."</option></select>
+	
+	</td>
 	</tr>";
 
 
@@ -138,19 +153,24 @@
 
 	echo "<tr><th>".t("J‰rjest‰ lista:")."</th>";
 
+	$sel1 = "";
+	$sel2 = "";
 	$sel3 = "";
-	$sel4 = "";
 
-	if ($jarjestys == '') {
+	if ($jarjestys == 'tuoteno') {
+		$sel2 = "SELECTED";
+	}
+	elseif ($jarjestys == 'osastotrytuoteno') {
 		$sel3 = "SELECTED";
 	}
 	else {
-		$sel4 = "SELECTED";
+		$sel1 = "SELECTED";
 	}
 
 	echo "<td><select name='jarjestys'>";
-	echo "<option value=''  $sel3>".t("Osoitej‰rjestykseen")."</option>";
-	echo "<option value='tuoteno' $sel4>".t("Tuotenumeroj‰rjestykseen")."</option>";
+	echo "<option value=''  $sel1>".t("Osoitej‰rjestykseen")."</option>";
+	echo "<option value='tuoteno' $sel2>".t("Tuotenumeroj‰rjestykseen")."</option>";
+	echo "<option value='osastotrytuoteno' $sel3>".t("Osasto/Tuoteryhm‰/Tuotenumeroj‰rjestykseen")."</option>";
 
 	echo "</td></tr>";
 
@@ -442,6 +462,9 @@
 			if ($jarjestys == 'tuoteno') {
 				$orderby = " tuoteno, sorttauskentta ";
 			}
+			elseif ($jarjestys == 'osastotrytuoteno') {
+				$orderby = " osasto, try, tuoteno, sorttauskentta ";
+			}
 			else {
 				$orderby = " sorttauskentta, tuoteno ";
 			}
@@ -471,6 +494,9 @@
 				if ($jarjestys == 'tuoteno') {
 					$orderby = " tuoteno, sorttauskentta ";
 				}
+				elseif ($jarjestys == 'osastotrytuoteno') {
+					$orderby = " osasto, try, tuoteno, sorttauskentta ";
+				}
 				else {
 					$orderby = " sorttauskentta, tuoteno ";
 				}
@@ -497,6 +523,9 @@
 
 				if ($jarjestys == 'tuoteno') {
 					$orderby = " tuotepaikat.tuoteno, sorttauskentta ";
+				}
+				elseif ($jarjestys == 'osastotrytuoteno') {
+					$orderby = " osasto, try, tuoteno, sorttauskentta ";
 				}
 				else {
 					$orderby = " sorttauskentta, tuotepaikat.tuoteno ";
@@ -530,6 +559,9 @@
 
 				if ($jarjestys == 'tuoteno') {
 					$orderby = " tuoteno, sorttauskentta ";
+				}
+				elseif ($jarjestys == 'osastotrytuoteno') {
+					$orderby = " osasto, try, tuoteno, sorttauskentta ";
 				}
 				else {
 					$orderby = " sorttauskentta, tuoteno ";
@@ -608,9 +640,14 @@
 			$ots .= sprintf ('%-21.21s', 	t("Toim.Tuoteno"));
 			$ots .= sprintf ('%-40.38s', 	t("Nimitys"));
 
-			if ($naytasaldo != '') {
+			if ($naytasaldo == 'H') {
 				$rivinleveys += 10;
 				$ots .= sprintf ('%-10.10s',t("Hyllyss‰"));
+				$katkoviiva = '__________';
+			}
+			elseif ($naytasaldo == 'S') {
+				$rivinleveys += 10;
+				$ots .= sprintf ('%-10.10s',t("Saldo"));
 				$katkoviiva = '__________';
 			}
 
@@ -669,8 +706,10 @@
 
 					$sresult = mysql_query($query) or pupe_error($query);
 
-					$rivipaikkahyllyssa = 0;
-					$rivivarastohyllyssa = 0;
+					$rivipaikkahyllyssa 	= 0;
+					$rivivarastohyllyssa	= 0;
+					$rivipaikkasaldo 		= 0;
+					$rivivarastosaldo 		= 0;
 
 					if (mysql_num_rows($sresult) > 0) {
 						while ($saldorow = mysql_fetch_array ($sresult)) {
@@ -679,17 +718,19 @@
 
 							if ($saldorow['hyllyalue'] == $tuoterow['hyllyalue'] and $saldorow['hyllynro'] == $tuoterow['hyllynro'] and $saldorow['hyllyvali'] == $tuoterow['hyllyvali'] and $saldorow['hyllytaso'] == $tuoterow['hyllytaso']){
 								$rivipaikkahyllyssa  += $hyllyssa;
+								$rivipaikkasaldo += $saldo;
 							}
 
 							$rivivarastohyllyssa += $hyllyssa;
+							$rivivarastosaldo += $saldo;
 						}
 					}
-
-
 				}
 				else {
-					$rivipaikkahyllyssa = 0;
-					$rivivarastohyllyssa = 0;
+					$rivipaikkahyllyssa 	= 0;
+					$rivivarastohyllyssa 	= 0;
+					$rivipaikkasaldo 		= 0;
+					$rivivarastosaldo 		= 0;
 				}
 
 				//katsotaan onko tuotetta tilauksessa
@@ -708,12 +749,20 @@
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["toim_tuoteno"]);
 				$prn .= sprintf ('%-40.38s', 	t_tuotteen_avainsanat($tuoterow, 'nimitys'));
 
-				if ($naytasaldo != '') {
+				if ($naytasaldo == 'H') {
 					if ($rivipaikkahyllyssa != $rivivarastohyllyssa) {
 						$prn .= sprintf ('%-10.10s', $rivipaikkahyllyssa."(".$rivivarastohyllyssa.")");
 					}
 					else {
 						$prn .= sprintf ('%-10.10s', $rivipaikkahyllyssa);
+					}
+				}
+				elseif ($naytasaldo == 'S') {
+					if ($rivipaikkasaldo != $rivivarastosaldo) {
+						$prn .= sprintf ('%-10.10s', $rivipaikkasaldo."(".$rivivarastosaldo.")");
+					}
+					else {
+						$prn .= sprintf ('%-10.10s', $rivipaikkasaldo);
 					}
 				}
 
@@ -722,7 +771,14 @@
 				$prn .= sprintf ('%-8.8d', 	$prow["varattu"]);
 
 				if ($tuoterow["sarjanumeroseuranta"] != "") {
-					$query = "	SELECT sarjanumeroseuranta.sarjanumero, tilausrivi_osto.nimitys, sarjanumeroseuranta.tunnus, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, era_kpl
+					$query = "	SELECT sarjanumeroseuranta.sarjanumero,
+								sarjanumeroseuranta.siirtorivitunnus,
+								tilausrivi_osto.nimitys, 
+								tilausrivi_osto.perheid2 osto_perheid2,
+								tilausrivi_osto.tunnus osto_rivitunnus,
+								sarjanumeroseuranta.tunnus, 
+								round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, 
+								era_kpl
 								FROM sarjanumeroseuranta
 								LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 								LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -744,12 +800,35 @@
 
 					if (mysql_num_rows($sarjares) > 0) {
 						while ($sarjarow = mysql_fetch_array($sarjares)) {
+							
+							if ($sarjarow["nimitys"] == $tuoterow["nimitys"]) $sarjarow["nimitys"] = "";
+							
+							if ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"]) {
+								$ztun = $sarjarow["osto_perheid2"];
+							}
+							else {
+								$ztun = $sarjarow["siirtorivitunnus"];
+							}
+
+							if ($ztun > 0) {
+								$query = "	SELECT tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero
+											FROM tilausrivi
+											LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+											WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
+								$siires = mysql_query($query) or pupe_error($query);
+								$siirow = mysql_fetch_array($siires);
+
+								$fnlina22 = " / Lis‰varusteena: $siirow[tuoteno] $siirow[sarjanumero]";
+							}
+							else {
+								$fnlina22 = "";
+							}
 
 							$prn .= "\n";
 
 							$prn .= sprintf ('%-28.28s', "");
 							$prn .= sprintf ('%-42.42s', $sarjarow["sarjanumero"]);
-							$prn .= sprintf ('%-40.38s', $sarjarow["nimitys"]);
+							$prn .= sprintf ('%-74.74s', $sarjarow["nimitys"].$fnlina22);
 
 							if ($rivit >= 17) {
 								fwrite($fh, $ots);

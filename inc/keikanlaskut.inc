@@ -91,7 +91,7 @@
 	echo "<br><font class='head'>".t("Laskut joita ei ole liitetty keikkoihin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
-				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur'
+				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur', if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
 				FROM lasku
 				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -120,6 +120,7 @@
 		echo "<th>".t("Nimi")."</th>";
 		echo "<th>".t("Summa valuutassa")."</th>";
 		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Laskunro")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
 		echo "<th>".t("Tyyppi")."</th>";
 		echo "</tr>";
@@ -148,6 +149,7 @@
 			echo "<td>$trow[nimi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>$trow[laskunro]</td>";
 			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
 			echo "<td>$vienti</td>";
 
@@ -177,7 +179,7 @@
 		echo "<tr>";
 		echo "<th colspan='3'>".t("Yhteensä")."</th>";
 		echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
-		echo "<th colspan='2'></th>";
+		echo "<th colspan='3'></th>";
 		echo "</tr>";
 		echo "</table><br>";
 		echo "</div>";

@@ -141,7 +141,7 @@
 					$limlis = " LIMIT $alku, 50 ";
 				}
 
-				$query = "	SELECT tapvm, erpcm, summa, valkoodi, vienti, concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus
+				$query = "	SELECT tapvm, erpcm, summa, valkoodi, vienti, concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus, if(laskunro = 0, '', laskunro) laskunro
 						  	FROM lasku
 						  	WHERE yhtio = '$kukarow[yhtio]'
 						  	$toimiliilisa
@@ -160,6 +160,7 @@
 				echo "<th>".t("Tapvm/Erpvm")."</th>";
 				echo "<th>".t("Summa")."</th>";
 				echo "<th>".t("Valuutta")."</th>";
+				echo "<th>".t("Laskunro")."</th>";
 				echo "<th>".t("Viite/Viesti")."</th>";
 				echo "<th>".t("Keikka")."</th>";
 				echo "<th>".t("EBID")."</th>";
@@ -180,6 +181,7 @@
 
 					echo "<td valign='top' align='right'>$trow[summa]</td>";
 					echo "<td valign='top'>$trow[valkoodi]</td>";
+					echo "<td valign='top'>$trow[laskunro]</td>";
 					echo "<td valign='top'>".$trow["viite/viesti"]."</td>";
 
 					//tehd‰‰n keikka linkki

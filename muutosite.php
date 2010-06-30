@@ -923,6 +923,9 @@ if ($tee == 'E' or $tee == 'F') {
 					$osa++;
 				}
 			}
+
+			if ($trow['laskunro'] != 0) echo "<tr><th nowrap>",t("Laskunro"),"</th><td align='right'>$trow[laskunro]</td></tr>";
+
 			echo "</table>";
 		}
 		else { //Laajennetut

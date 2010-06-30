@@ -781,7 +781,7 @@
 					lasku.tunnus peru,
 					yriti.tilino,
 					yriti.nimi tilinimi,
-					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viite, lasku.viesti, lasku.vanhatunnus, lasku.arvo
+					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viite, lasku.viesti, lasku.vanhatunnus, lasku.arvo, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
 					FROM lasku, valuu, yriti
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and valuu.yhtio = lasku.yhtio
@@ -807,6 +807,7 @@
 			echo "<th valign='top'>".t("Eräpvm")." / ".t("Maksupvm")."</th>";
 			echo "<th valign='top' nowrap>".t("Kassa-ale")."</th>";
 			echo "<th valign='top'>".t("Summa")."</th>";
+			echo "<th valign='top'>".t("Laskunro")."</th>";
 			echo "<th valign='top'>".t("Maksutili")."</th>";
 			echo "<th valign='top'>".t("Viite")." / ".t("Viesti")."</th>";
 			echo "<th valign='top'>".t("Ebid")."</th>";
@@ -877,6 +878,7 @@
 				}
 
 				echo "</td>";
+				echo "<td valign='top'>$trow[laskunro]</td>";
 				echo "<td valign='top'>$trow[tilinimi]<br>".tilinumero_print($trow["tilino"])."</td>";
 				echo "<td valign='top'>$trow[viite] $trow[viesti]";
 
@@ -974,7 +976,7 @@
 					h3time,
 					h4time,
 					h5time,
-					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viesti, lasku.comments, lasku.viite, lasku.vanhatunnus, lasku.arvo, lasku.maa
+					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viesti, lasku.comments, lasku.viite, lasku.vanhatunnus, lasku.arvo, lasku.maa, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
 					FROM lasku use index (yhtio_tila_mapvm)
 					JOIN valuu ON lasku.yhtio=valuu.yhtio and lasku.valkoodi = valuu.nimi
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -998,6 +1000,7 @@
 			echo "<th valign='top'>".t("Eräpvm")."</th>";
 			echo "<th valign='top' nowrap>".t("Kassa-ale")."</th>";
 			echo "<th valign='top'>".t("Summa")."</th>";
+			echo "<th valign='top'>".t("Laskunro")."</th>";
 			echo "<th valign='top'>".t("Viite")." / ".t("Viesti")."</th>";
 			echo "<th valign='top'>".t("Ebid")."</th>";
 			echo "<th valign='top'>".t("Maksatus")."</th>";
@@ -1072,6 +1075,7 @@
 
 				echo "</td>";
 
+				echo "<td valign='top'>$trow[laskunro]</td>";
 				echo "<td valign='top'>$trow[viite] $trow[viesti]";
 
 				if ($trow["vanhatunnus"] != 0) {

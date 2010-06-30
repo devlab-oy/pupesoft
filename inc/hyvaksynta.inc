@@ -112,7 +112,7 @@ if ($tee == 'T') {
 	$ulos .= "</select>";
 
 	$query = "	SELECT tapvm, kapvm, erpcm, if(alatila='',nimi,concat_ws('<br>', nimi, comments)) nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma',
-				summa, valkoodi, ebid, tunnus, alatila
+				summa, valkoodi, ebid, tunnus, alatila, if(laskunro = 0, '', laskunro) laskunro
 				FROM lasku
 				WHERE hyvaksyja_nyt='$kuka'
 				and yhtio = '$kukarow[yhtio]'
@@ -126,6 +126,7 @@ if ($tee == 'T') {
 	echo "<th>".t("Eräpvm")."</th>";
 	echo "<th>".t("Nimi")."</th>";
 	echo "<th>".t("Postitp")."</th>";
+	echo "<th>".t("Laskunro")."</th>";
 	echo "<th>".t("Yhtiön valuutassa")."</th>";
 	echo "<th>".t("Laskun valuutassa")."</th>";
 	echo "<th>".t("EBID")."</th>";
@@ -155,6 +156,7 @@ if ($tee == 'T') {
 		echo "<$erotin>".tv1dateconv($trow["erpcm"])."</$erotin>";
 		echo "<$erotin>$trow[nimi]</$erotin>";
 		echo "<$erotin>$trow[postitp]</$erotin>";
+		echo "<$erotin>$trow[laskunro]</$erotin>";
 		echo "<$erotin style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</$erotin>";
 		echo "<$erotin style='text-align: right;'>$trow[summa] $trow[valkoodi]</$erotin>";
 

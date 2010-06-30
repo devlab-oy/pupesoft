@@ -30,7 +30,7 @@
 	
 	if (isset($erittely)) {
 		$query = "	SELECT lasku.tapvm, lasku.kapvm, lasku.erpcm, if (lasku.comments!='',concat_ws('<br>', lasku.nimi, lasku.comments), lasku.nimi) nimi, lasku.postitp, 
-					round(lasku.summa * lasku.vienti_kurssi, 2) 'kotisumma', lasku.summa, lasku.valkoodi, lasku.ebid, lasku.tunnus, yriti.nimi tilinimi, yriti.tunnus maksutili
+					round(lasku.summa * lasku.vienti_kurssi, 2) 'kotisumma', lasku.summa, lasku.valkoodi, lasku.ebid, lasku.tunnus, yriti.nimi tilinimi, yriti.tunnus maksutili, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
 					FROM lasku
 					left join yriti on lasku.yhtio=yriti.yhtio and lasku.maksu_tili=yriti.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = '$erittely' and lasku.alatila = '$alatila'
@@ -43,6 +43,7 @@
 		echo "<th valign='top'>".t("Nimi")."</th>";		
 		echo "<th valign='top'>".t("Summa")." $yhtiorow[valkoodi]</th>";
 		echo "<th valign='top'>".t("Summa")."</th>";
+		echo "<th valign='top'>".t("Laskunro")."</th>";
 		echo "<th valign='top'>".t("EBID")."</th>";
 				
 		if ($erittely == "Q" or $erittely == "P") {
@@ -66,6 +67,7 @@
 			echo "<td valign='top'>$trow[nimi]<br>$trow[postitp]</td>";
 			echo "<td valign='top' style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
 			echo "<td valign='top' style='text-align: right;'>$trow[summa] $trow[valkoodi]</td>";
+			echo "<td valign='top' style='text-align: right;'>$trow[laskunro]</td>";
 			
 			// tehdään lasku linkki
 			echo "<td valign='top'>". ebid($trow['tunnus']) ."</td>";

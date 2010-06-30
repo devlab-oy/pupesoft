@@ -504,7 +504,8 @@
 						erpcm,
 						viite,
 						olmapvm,
-						popvm
+						popvm,
+						if(laskunro = 0, '', laskunro) laskunro
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and maksu_tili='$mtili' and tila='Q'
 						ORDER BY $order $jarj";
@@ -522,6 +523,7 @@
 		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=erpcm&jarj=$jarj'>",t("Erpvm"),"</a></th>";
 		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=popvm&jarj=$jarj'>",t("Popvm"),"</a></th>";
 		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=olmapvm&jarj=$jarj'>",t("Olmapvm"),"</a></th>";
+		echo "<th valign='top'>",t("Laskunro"),"</th>";
 		echo "<th valign='top'>",t("Viite"),"</th>";
 		echo "<th valign='top' style='text-align:right;'>",t("Summa"),"</th>";
 		echo "<th valign='top' style='text-align:right;'>",t('Kasumma'),"</th>";
@@ -539,6 +541,7 @@
 			echo "<td nowrap valign='top'>".tv1dateconv($trow["erpcm"], "", "LYHYT")."</td>";
 			echo "<td nowrap valign='top'>".tv1dateconv($trow["popvm"], "", "LYHYT")."</td>";
 			echo "<td nowrap valign='top'>".tv1dateconv($trow["olmapvm"], "", "LYHYT")."</td>";
+			echo "<td valign='top'>$trow[laskunro]</td>";
 			echo "<td valign='top'>$trow[viite]</td>";
 
 			if ($trow["summa"] != $trow["summa_valuutassa"]) {

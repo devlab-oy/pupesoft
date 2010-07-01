@@ -101,21 +101,29 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 $presult = mysql_query($query) or pupe_error($query);
 
 // jos meillä on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille
-if ($laskurow["vienti_kurssi"] != 1) {
-	$query  = "	SELECT ifnull(round(sum(summa * vienti_kurssi) / sum(summa), 6), 0) vientikurssi
-				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]'
-				and tila = 'K'
-				and alatila in ('','S')
-				and vanhatunnus <> 0
-				and laskunro = '$laskurow[laskunro]'
-				and vienti in ('C','F','I','J','K','L')";
-	$result = mysql_query($query) or pupe_error($query);
-	$kurssirow = mysql_fetch_array($result);
+$query  = "	SELECT sum(summa) summa, sum(arvo) arvo, ifnull(round(sum(summa * vienti_kurssi) / sum(summa), 6), 0) vientikurssi
+			FROM lasku
+			WHERE yhtio = '$kukarow[yhtio]'
+			and tila = 'K'
+			and alatila in ('','S')
+			and vanhatunnus <> 0
+			and laskunro = '$laskurow[laskunro]'
+			and vienti in ('C','F','I','J','K','L')";
+$result = mysql_query($query) or pupe_error($query);
+$kurssirow = mysql_fetch_array($result);
 
-	if ($kurssirow["vientikurssi"] != 0) {
-		$laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
-	}
+if ($laskurow["vienti_kurssi"] != 1 and $kurssirow["vientikurssi"] != 0) {
+	$laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
+}
+
+// Onko miellä oletuksesta poikkeava alvi (esim alvimuutoksen yhteydessä)
+$simualv = round(100 * (($kurssirow["summa"]/$kurssirow["arvo"])-1),2);
+
+if (in_array($simualv, array(8,12,17,22))) {
+	$simualv = (float) $simualv;
+}
+else {
+	$simualv = 0;
 }
 
 // tsekataan vielä
@@ -232,13 +240,18 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	if ((float) $tuorow['tuotekerroin'] <= 0) $tuorow['tuotekerroin'] = 1;
 
 	// jos kysessä on kotimainen vaihto-omaisuuslasku, pitää lisätä tuotteen hintaan alvi
-	if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
-		$alvit = 1 + $tuorow["alv"] / 100;
+	if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {		
+		if ($simualv > 0) {
+			$alvit = 1 + $simualv / 100;
+		}
+		else {
+			$alvit = 1 + $tuorow["alv"] / 100;
+		}
 	}
 	else {
 		$alvit = 1;
 	}
-
+	
 	// lasketaan rivin hinta
 	$osuus_apu_hinta = round($erikoisale*$tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
 

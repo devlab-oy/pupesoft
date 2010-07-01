@@ -2272,9 +2272,12 @@
 
 		//otetaan käyttöliittymästä tullut alv talteen
 		$laskunalv = $alv;
-
+		
+		// HUOM: ALVIMUUTOKSESTA JOHTUEN:
+		$alvmuuttui = abs((float) $apuro['alv'] - (float) $alv);
+		
 		// Tutkitaan onko ytunnus-, alvi- tai vienti-kenttä vaihtunut (Poislukien tarjoukset)
-		if ($apuro["tila"] != "T" and (int) $kukarow["kesken"] != 0 and ($from == 'vaihdaasiakas' or $apuro['liitostunnus'] != $asiakasid or $apuro['alv'] != $alv or $apuro['vienti'] != $vienti)) {
+		if ($apuro["tila"] != "T" and (int) $kukarow["kesken"] != 0 and ($from == 'vaihdaasiakas' or $apuro['liitostunnus'] != $asiakasid or $alvmuuttui > 1 or $apuro['vienti'] != $vienti)) {
 
 			// Nyt alennukset ja hinnat ja alvi lasketaan automaattisesti uudestaan
 			// Netotettuja rivejä ei päivitetä

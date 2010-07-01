@@ -93,14 +93,95 @@ if ($tee == 'L') {
 	$jarj = "nimi, summa";
 }
 
+if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or $tee == 'L') and isset($ehto) and trim($ehto) != '' and is_numeric($alkuvv) and is_numeric($alkukk) and is_numeric($alkupp) and is_numeric($loppuvv) and is_numeric($loppukk) and is_numeric($loppupp)) {
+	$ehto .= " and tapvm >= '$alkuvv-$alkukk-$alkupp' and tapvm <= '$loppuvv-$loppukk-$loppupp' ";
+}
+
+echo "<br><form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>
+		<input type = 'hidden' name = 'toim' value = 'laskuhaku'>
+		<table>";
+
+echo "<th valign='top'>".t("Alkukausi")."</th>";
+echo "<td><select name='alkuvv'>";
+
+$sel = array();
+$sel[$alkuvv] = "SELECTED";
+
+for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+	echo "<option value='$i' $sel[$i]>$i</option>";
+}
+
+echo "</select>";
+
+$sel = array();
+$sel[$alkukk] = "SELECTED";
+
+echo "<select name='alkukk'>";
+
+for ($i = 1; $i < 13; $i++) {
+	$val = $i < 10 ? '0'.$i : $i;
+	echo "<option value='$val' $sel[$val]>$val</option>";
+}
+
+echo "</select>";
+
+$sel = array();
+$sel[$alkupp] = "SELECTED";
+
+echo "<select name='alkupp'>";
+
+for ($i = 1; $i < 32; $i++) {
+	$val = $i < 10 ? '0'.$i : $i;
+	echo "<option value='$val' $sel[$val]>$val</option>";
+}
+
+echo "</select></td><td class='back'>&nbsp;</td>";
+
+
+echo "<tr>
+	<th valign='top'>".t("Loppukausi")."</th>
+	<td><select name='loppuvv'>";
+
+$sel = array();
+if (!isset($loppuvv) or $loppuvv == "") $loppuvv = date("Y");
+$sel[$loppuvv] = "SELECTED";
+
+for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
+	echo "<option value='$i' $sel[$i]>$i</option>";
+}
+
+echo "</select>";
+
+$sel = array();
+if (!isset($loppukk) or $loppukk == "") $loppukk = date("m");
+$sel[$loppukk] = "SELECTED";
+
+echo "<select name='loppukk'>";
+
+for ($i = 1; $i < 13; $i++) {
+	$val = $i < 10 ? '0'.$i : $i;
+	echo "<option value='$val' $sel[$val]>$val</option>";
+}
+
+echo "</select>";
+
+$sel = array();
+if (!isset($loppupp) or $loppupp == "") $loppupp = date("d", mktime(0, 0, 0, (date("m")+1), 0, date("Y")));
+$sel[$loppupp] = "SELECTED";
+
+echo "<select name='loppupp'>";
+
+for ($i = 1; $i < 32; $i++) {
+	$val = $i < 10 ? '0'.$i : $i;
+	echo "<option value='$val' $sel[$val]>$val</option>";
+}
+
+echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
 $sel=array();
 $sel[$tee] = "SELECTED";
 
-echo "<br><form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>
-		<input type = 'hidden' name = 'toim' value = 'laskuhaku'>
-		<table><tr>
-		<th>".t("Etsi lasku")."</th>
+echo	"<tr><th>".t("Etsi lasku")."</th>
 		<td><select name = 'tee'>
 		<option value = 'S' $sel[S]>".t("summalla")."
 		<option value = 'N' $sel[N]>".t("nimellä")."
@@ -184,7 +265,7 @@ if ($tee != '') {
 
 	if ($alku > 0) {
 		$siirry = $alku - 50;
-		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila'>".t("Edelliset")."</a> ";
+		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp'>".t("Edelliset")."</a> ";
 	}
 	else {
 		echo t("Edelliset")." ";
@@ -192,7 +273,7 @@ if ($tee != '') {
 	
 	if ($seraavako >= 50) {
 		$siirry = $alku + 50;
-		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila'>".t("Seuraavat")."</a> ";
+		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp'>".t("Seuraavat")."</a> ";
 	}
 	echo "<br><br>";
 

@@ -13,7 +13,8 @@ if ($submit) {
 		$tuoteryhma = "tuote.try, ";
 		$group_by = "1, 2";
 		$order_by = "1, 2";
-	} else {
+	}
+	else {
 		$tuoteryhma = "";
 		$group_by = "1";
 		$order_by = "1";
@@ -40,10 +41,18 @@ if ($submit) {
 
 	$vva = (int) $vva;
 
-	$query = "	SELECT $tuoteryhma LEFT(toimitettuaika, 7) as toimitettuaika, SUM(IF(toimaika = LEFT(toimitettuaika, 10), 1, 0)) as ajallaan, SUM(IF(toimaika > LEFT(toimitettuaika, 10), 1, 0)) as etuajassa, SUM(IF(toimaika < LEFT(toimitettuaika, 10), 1, 0)) as myohassa
+	$query = "	SELECT $tuoteryhma LEFT(toimitettuaika, 7) as toimitettuaika,
+				SUM(IF(toimaika = LEFT(toimitettuaika, 10), 1, 0)) as ajallaan,
+				SUM(IF(toimaika > LEFT(toimitettuaika, 10), 1, 0)) as etuajassa,
+				SUM(IF(toimaika < LEFT(toimitettuaika, 10), 1, 0)) as myohassa
 				FROM tilausrivi USE INDEX (yhtio_laadittu)
-				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
-				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' AND laadittu >= '$vva-01-01 00:00:00' AND laadittu <= '$vva-12-31 23:59:59' AND tilausrivi.tyyppi = 'L' AND toimitettuaika != '0000-00-00 00:00:00' AND tuote.ei_saldoa = '' AND tilausrivi.var != 'P'
+				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '' $tuotelisa)
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				AND tilausrivi.laadittu >= '$vva-01-01 00:00:00'
+				AND tilausrivi.laadittu <= '$vva-12-31 23:59:59'
+				AND tilausrivi.tyyppi = 'L'
+				AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00'
+				AND tilausrivi.var != 'P'
 				GROUP BY $group_by
 				ORDER BY $order_by";
 	$toimaikares = mysql_query($query) or pupe_error($query);
@@ -52,7 +61,8 @@ if ($submit) {
 		while ($toimaikarow = mysql_fetch_array($toimaikares)) {
 			$tuoteryh[] = $toimaikarow;
 		}
-	} else {
+	}
+	else {
 		while ($toimaikarow = mysql_fetch_array($toimaikares)) {
 			$myohassa[] = $toimaikarow['myohassa'];
 		}
@@ -98,28 +108,28 @@ echo "</table>";
 if (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') {
 	echo "<table>";
 	echo "<tr><th>".t("Tuoteryhmä")."</th><th>".t("Selite")."</th><th>".t("Aika")."</th><th>".t("Ajallaan")."</th><th>".t("Etuajassa")."</th><th>".t("Myöhässä")."</th></tr>";
-	
+
 	foreach ($tuoteryh as $key) {
 		// tehdään avainsana query
-		$seliteres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$key[try]'");			
+		$seliteres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$key[try]'");
 		$seliterow = mysql_fetch_array($seliteres);
-		
+
 		echo "<tr><td align='right'>$key[try]</td><td align='left'>";
-		
+
 		if ($seliterow["selitetark"] != "") {
 			echo "$seliterow[selitetark]";
 		}
-		
+
 		echo "</td><td align='left'>$key[toimitettuaika]</td><td align='right'>$key[ajallaan]</td><td align='right'>$key[etuajassa]</td><td align='right'>$key[myohassa]</td></tr>";
-		
+
 		$ajallaan_summa += $key['ajallaan'];
 		$etuajassa_summa += $key['etuajassa'];
 		$myohassa_summa += $key['myohassa'];
 	}
-	
+
 	echo "<tr><th colspan='3'>".t("Yhteensä")."</th><td class='tumma' align='right'><strong>$ajallaan_summa</strong></td><td class='tumma' align='right'><strong>$etuajassa_summa</strong></td><td class='tumma' align='right'><strong>$myohassa_summa</strong></td></tr>";
 	echo "</table>";
-} 
+}
 elseif ($submit != '' and $tuoteryhmittain == '') {
 
 	echo "<table width='700'>";

@@ -5397,7 +5397,7 @@ if (!function_exists("decodeURI")) {
 }
 
 if (!function_exists("tallenna_muisti")) {
-	function tallenna_muisti($nimitys, $exclude = "") {
+	function tallenna_muisti($nimitys, $exclude = "", $kuka = "") {
 		global $kukarow;
 
 		if ($nimitys == "") {
@@ -5413,12 +5413,13 @@ if (!function_exists("tallenna_muisti")) {
 		}
 
 		$nimitys = mysql_real_escape_string($nimitys);
-		$sovellus = mysql_real_escape_string($sovellus);
 		$data = mysql_real_escape_string(serialize($data));
+
+		$kuka = trim($kuka) != '' ? mysql_real_escape_string($kuka) : $kukarow['kuka'];
 
 		$query = "	REPLACE INTO tallennetut_parametrit SET
 					yhtio		= '$kukarow[yhtio]',
-					kuka		= '$kukarow[kuka]',
+					kuka		= '$kuka',
 					nimitys		= '$nimitys',
 					sovellus	= '$_SERVER[SCRIPT_NAME]',
 					data		= '$data',
@@ -8599,6 +8600,148 @@ if (!function_exists("tulosta_logo_pdf")) {
 			}
 
 			$pdf->draw_text($lasku_logo_positio_x, $lasku_logo_positio_y, $ff_string, $thispage, $ff_font);
+		}
+	}
+}
+
+if (!function_exists("listdir")) {
+	function listdir($start_dir = '.') {
+
+		$files = array();
+
+		if (is_dir($start_dir)) {
+
+			$fh = opendir($start_dir);
+
+			while (($file = readdir($fh)) !== false) {
+				if (strcmp($file, '.') == 0 or strcmp($file, '..') == 0 or substr($file, 0, 1) == ".") {
+					continue;
+				}
+				$filepath = $start_dir . '/' . $file;
+
+				if (is_dir($filepath)) {
+					$files = array_merge($files, listdir($filepath));
+				}
+				else {
+					array_push($files, $filepath);
+				}
+			}
+			closedir($fh);
+			sort($files);
+		}
+		else {
+			$files = false;
+		}
+
+		return $files;
+	}
+}
+
+if (!function_exists("laskun_ja_tilauksen_vertailu")) {
+	function laskun_ja_tilauksen_vertailu($kukarow, $laskutunnus) {
+
+		$laskutunnus = (int) $laskutunnus;
+
+		$query = "	SELECT filename, data, kayttotarkoitus
+					FROM liitetiedostot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND liitos = 'lasku'
+					AND liitostunnus = '$laskutunnus'";
+		$liite_res = mysql_query($query) or pupe_error($query);
+
+		$purchaseorder_data = $invoice_data = '';
+
+		if (mysql_num_rows($liite_res) < 2) return FALSE;
+
+		while ($liite_row = mysql_fetch_assoc($liite_res)) {
+
+			if ($liite_row['kayttotarkoitus'] == 'FINVOICE') {
+				$invoice_data = $liite_row['data'];
+			}
+			elseif ($liite_row['kayttotarkoitus'] == 'EDI') {
+				$purchaseorder_data = $liite_row['data'];
+			}
+
+		}
+
+		if ($invoice_data != '' and $purchaseorder_data != '') {
+
+			$invoice = $purchaseorder = array();
+
+			if (!$invoice_obj = @simplexml_load_string($invoice_data)) {
+				return FALSE;
+			}
+
+			$purchaseorder_tuoteno = '';
+			$purchaseorder_tilausnumero = '';
+
+			foreach (explode("\n", $purchaseorder_data) as $tietue) {
+
+				// tää on futurikeisi
+				if (substr($tietue,0,1) != '*') {
+					if (strpos($tietue, ":") !== FALSE) list($tunnus, $tieto)  = explode(':',$tietue);
+				}
+				else {
+					$tunnus = $tietue;
+					$tieto	= "";
+				}
+
+				$tunnus = trim($tunnus);
+				$tieto  = trim($tieto);
+
+				if (substr($tunnus,0,15) == '*RE  OSTOTILRIV') {
+					$tunnus='*RE  OSTOTILRIV'; // Poistetaan häiritsevä nro
+				}
+
+				switch ($tunnus) {
+					case 'OSTOTILRIV.OTR_TUOTEKOODI':
+						$purchaseorder_tuoteno = $tieto;
+						break;
+					case 'OSTOTILRIV.OTR_NIMI':
+						$purchaseorder[$purchaseorder_tuoteno]['nimitys'] = $tieto;
+						break;
+					case 'OSTOTILRIV.OTR_TILATTUMAARA':
+						$purchaseorder[$purchaseorder_tuoteno]['tilattumaara'] = $tieto;
+						break;
+					case 'OSTOTILRIV.OTR_OSTOHINTA':
+						$purchaseorder[$purchaseorder_tuoteno]['nettohinta'] = $tieto;
+						break;
+					case 'OSTOTIL.OT_NRO':
+						$purchaseorder_tilausnumero = $tieto;
+						break;
+				}
+			}
+
+			foreach ($invoice_obj->InvoiceRow as $row) {
+
+				$invoice[(string) $row->ArticleIdentifier]['nimitys'] = $row->ArticleName;
+				$invoice[(string) $row->ArticleIdentifier]['tilattumaara'] = $row->OrderedQuantity;
+				$invoice[(string) $row->ArticleIdentifier]['bruttohinta'] = $row->UnitPriceAmount;
+
+				foreach ($row as $child => $value) {
+					if ($child == 'RowDiscountPercent') {
+						$invoice[(string) $row->ArticleIdentifier]['ale'][] = $value;
+					}
+				}
+
+				if (!isset($invoice[(string) $row->ArticleIdentifier]['ale'])) $invoice["$row->ArticleIdentifier"]['ale'] = '';
+
+				if ($row->RowAmount) {
+					$invoice[(string) $row->ArticleIdentifier]['nettohinta'] = $row->RowAmount;
+				}
+				else {
+					$invoice[(string) $row->ArticleIdentifier]['nettohinta'] = '';
+				}
+			}
+
+			$invoice_ei_loydy 		= array_diff_key($invoice, $purchaseorder);
+			$purchaseorder_ei_loydy = array_diff_key($purchaseorder, $invoice);
+			$loytyy_kummastakin 	= array_intersect_key($invoice, $purchaseorder);
+
+			return array($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero);
+		}
+		else {
+			return FALSE;
 		}
 	}
 }

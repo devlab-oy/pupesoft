@@ -1538,19 +1538,39 @@
 						$tulossalisa = "";
 						$tehtaalla = false;
 
-						if ($verkkokauppa == "" and $kukarow["extranet"] != "" and $hae_ja_selaa_row['selite'] == 'B' and trim($hae_ja_selaa_row['selitetark_3']) != '' and $myytavissa < $hae_ja_selaa_row['selitetark_3']) {
-							$query = "	SELECT selite
-										FROM tuotteen_avainsanat
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tuoteno = '$row[tuoteno]'
-										AND laji ='tuote_tehdas_saldo'
-										AND selite != ''";
+						// tehtaan saldot
+						if ($verkkokauppa == "" and $kukarow["extranet"] != "" and $hae_ja_selaa_row['selite'] == 'B' and $myytavissa < $yhtiorow['tehdas_saldo_alaraja']) {
+							$tehdas_saldo_tuoteperhelisa = " and tuotteen_toimittajat.tuoteno = '$row[tuoteno]' ";
+
+							if (trim($row['tuoteperhe']) != '' and trim($row["tuoteperhe"]) == trim($row["tuoteno"])) {
+								$query = "	SELECT group_concat(distinct concat(\"'\",tuoteno,\"'\") separator ',') lapsituotteet
+											FROM tuoteperhe
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND isatuoteno = '$row[tuoteno]'";
+								$lapsi_chk_res = mysql_query($query) or pupe_error($query);
+								$lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res);
+
+								if (trim($lapsi_chk_row['lapsituotteet']) != '') {
+									$tehdas_saldo_tuoteperhelisa = " and tuotteen_toimittajat.tuoteno in ($lapsi_chk_row[lapsituotteet]) ";
+								}
+							}
+
+							$query = "	SELECT tuotteen_toimittajat.tehdas_saldo, tuotteen_toimittajat.tehdas_saldo_toimaika, toimi.oletus_toimaika
+										FROM tuotteen_toimittajat
+										JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
+										WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' 
+										$tehdas_saldo_tuoteperhelisa	
+										and tuotteen_toimittajat.tehdas_saldo > 0";
 							$tehdassaldo_res = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($tehdassaldo_res) > 0) {
 								$tehdassaldo_row = mysql_fetch_assoc($tehdassaldo_res);
-								$tulossalisa .= "<br/><br/>".t("TEHTAALLA")." ".sprintf("%.2f", $tehdassaldo_row['selite'])." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
-								$tulossalisa .= "<br/>".t("Toimaika")." ".t("4 pvä");
+
+								$tehdas_saldo_toimaika = $tehdassaldo_row['oletus_toimaika'] > 0 ? $tehdassaldo_row['oletus_toimaika'] : $tehdassaldo_row['tehdas_saldo_toimaika'];
+
+								$tulossalisa .= "<br/><br/>".t("Tehtaalla")." ".sprintf("%.2f", $tehdassaldo_row['tehdas_saldo'])." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
+								$tulossalisa .= "<br/>".t("Toimaika")." $tehdas_saldo_toimaika ".t("pvä");
+
 								$tehtaalla = true;
 							}
 						}
@@ -1716,19 +1736,40 @@
 										}
 									}
 
-									if ($hae_ja_selaa_row['selite'] == 'B' and trim($hae_ja_selaa_row['selitetark_3']) != '' and $myytavissa < $hae_ja_selaa_row['selitetark_3'] and !$tehtaalla) {
-										$query = "	SELECT selite
-													FROM tuotteen_avainsanat
-													WHERE yhtio = '$kukarow[yhtio]'
-													AND tuoteno = '$row[tuoteno]'
-													AND laji ='tuote_tehdas_saldo'
-													AND selite != ''";
+									// tehtaan saldot
+									if ($hae_ja_selaa_row['selite'] == 'B' and $myytavissa < $yhtiorow['tehdas_saldo_alaraja'] and !$tehtaalla) {
+
+										$tehdas_saldo_tuoteperhelisa = " and tuotteen_toimittajat.tuoteno = '$row[tuoteno]' ";
+
+										if (trim($row['tuoteperhe']) != '' and trim($row["tuoteperhe"]) == trim($row["tuoteno"])) {
+											$query = "	SELECT group_concat(distinct concat(\"'\",tuoteno,\"'\") separator ',') lapsituotteet
+														FROM tuoteperhe
+														WHERE yhtio = '$kukarow[yhtio]'
+														AND isatuoteno = '$row[tuoteno]'";
+											$lapsi_chk_res = mysql_query($query) or pupe_error($query);
+											$lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res);
+
+											if (trim($lapsi_chk_row['lapsituotteet']) != '') {
+												$tehdas_saldo_tuoteperhelisa = " and tuotteen_toimittajat.tuoteno in ($lapsi_chk_row[lapsituotteet]) ";
+											}
+										}
+
+										$query = "	SELECT tuotteen_toimittajat.tehdas_saldo, tuotteen_toimittajat.tehdas_saldo_toimaika, toimi.oletus_toimaika
+													FROM tuotteen_toimittajat
+													JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
+													WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' 
+													$tehdas_saldo_tuoteperhelisa	
+													and tuotteen_toimittajat.tehdas_saldo > 0";
 										$tehdassaldo_res = mysql_query($query) or pupe_error($query);
 
 										if (mysql_num_rows($tehdassaldo_res) > 0) {
 											$tehdassaldo_row = mysql_fetch_assoc($tehdassaldo_res);
-											echo "<tr><td class='$vari' valign='top' align='left'>".t("TEHTAALLA")."</td><td class='$vari' nowrap align='right'>".sprintf("%.2f", $tehdassaldo_row['selite'])." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
-											echo "<tr><td class='$vari'>".t("Toimaika")."</td><td class='$vari' nowrap align='right'>".t("4 pvä")."</td></tr>";
+
+											$tehdas_saldo_toimaika = $tehdassaldo_row['oletus_toimaika'] > 0 ? $tehdassaldo_row['oletus_toimaika'] : $tehdassaldo_row['tehdas_saldo_toimaika'];
+
+											echo "<tr><td class='$vari' valign='top' align='left'>",t("Tehtaalla"),"</td><td class='$vari' nowrap align='right'>",sprintf("%.2f", $tehdassaldo_row['tehdas_saldo'])," ",t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite"),"</td></tr>";
+											echo "<tr><td class='$vari'>",t("Toimaika"),"</td><td class='$vari' nowrap align='right'>$tehdas_saldo_toimaika ",t("pvä"),"</td></tr>";
+
 											$tehtaalla = true;
 										}
 									}

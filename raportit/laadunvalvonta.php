@@ -21,8 +21,21 @@ if ($submit) {
 
 	$tuotelisa = '';
 
-	if (isset($try) and trim($try) != '') {
-		$tuotelisa = " and tuote.try = '$try' ";
+	if (isset($mul_try) and count($mul_try) > 0) {
+
+		if (!in_array("PUPEKAIKKIMUUT", $mul_try)) {
+
+			foreach ($mul_try as $mul_try_selite) {
+				$tuotelisa .= "'$mul_try_selite',";
+			}
+
+			if (count($mul_try) == 1 and $mul_try[0] == '') {
+				$tuotelisa = '';
+			}
+			else {
+				$tuotelisa = " and tuote.try in (".substr($tuotelisa, 0, -1).") ";
+			}
+		}
 	}
 
 	$vva = (int) $vva;
@@ -67,18 +80,13 @@ echo "<form name='laatu' action='$PHP_SELF' method='post' autocomplete='off'>";
 echo "<tr><th>".t("Syötä vuosi (vvvv)")."</th>
 		<td><input type='text' name='vva' value='$vva' size='5'></td></tr>
 		<tr><th>",t("Valitse tuoteryhmä"),"</th>";
-echo "	<td><select name='try'><option value=''>",t("Näytä kaikki"),"</option>";
 
-$seliteres = t_avainsana("TRY", $kukarow['kieli']);
+echo "<td>";
+$monivalintalaatikot = array("TRY");
+$monivalintalaatikot_normaali = array();
 
-while ($seliterow = mysql_fetch_array($seliteres)) {
-
-	$sel = '';
-
-	if (isset($try) and $try == $seliterow['selite']) $sel = ' SELECTED';
-
-	echo "<option value='$seliterow[selite]'$sel>$seliterow[selitetark]</option>";
-}
+require ("../tilauskasittely/monivalintalaatikot.inc");
+echo "</td>";
 
 $tuoteryhmittain_chk = (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') ? ' CHECKED' : '';
 

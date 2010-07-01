@@ -105,6 +105,7 @@ echo "<th valign='top'>".t("Alkukausi")."</th>";
 echo "<td><select name='alkuvv'>";
 
 $sel = array();
+if (!isset($alkuvv) or $alkuvv == "") $alkuvv = date("Y") - 1;
 $sel[$alkuvv] = "SELECTED";
 
 for ($i = date("Y"); $i >= date("Y")-4; $i--) {
@@ -114,6 +115,7 @@ for ($i = date("Y"); $i >= date("Y")-4; $i--) {
 echo "</select>";
 
 $sel = array();
+if (!isset($alkukk) or $alkukk == "") $alkukk = date("m");
 $sel[$alkukk] = "SELECTED";
 
 echo "<select name='alkukk'>";
@@ -126,6 +128,7 @@ for ($i = 1; $i < 13; $i++) {
 echo "</select>";
 
 $sel = array();
+if (!isset($alkupp) or $alkupp == "") $alkupp = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 $sel[$alkupp] = "SELECTED";
 
 echo "<select name='alkupp'>";

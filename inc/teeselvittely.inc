@@ -111,8 +111,14 @@
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
+			$loydettiinko_sopiva_tili_lisa = '';
+
+			if ($loydettiinko_sopiva_tili != '') {
+				$loydettiinko_sopiva_tili_lisa = ", kuitattu = 'tiliote', kuitattuaika = now() ";
+			}
+
 	        // Merkataan t‰m‰ kirjaus tiliotteelle
-	        $query= "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=" . mysql_insert_id ($link) . " WHERE tunnus='$tiliotedataid'";
+	        $query= "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=" . mysql_insert_id ($link) . " $loydettiinko_sopiva_tili_lisa WHERE tunnus='$tiliotedataid'";
 			$dummyresult = mysql_query($query) or pupe_error($query);
 
 			// Merkataan k‰sitellyiksi & lis‰t‰‰n linkki

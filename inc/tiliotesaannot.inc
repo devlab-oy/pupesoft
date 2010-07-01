@@ -4,6 +4,8 @@
 	$tiliotesaantotilino = $yhtiorow['selvittelytili'];
 	$tiliointisaantorow['tilino'] = $yhtiorow['selvittelytili'];
 
+	$loydettiinko_sopiva_tili = '';
+
 	// Jos pankkitilillä on oletus selvittelytili käytetään sitä
 	if ($yritirow["oletus_selvittelytili"] != "") {
 		$tiliotesaantotilino = $yritirow["oletus_selvittelytili"];
@@ -96,6 +98,10 @@
 				}
 			}
 		}
+	}
+
+	if ($tiliotesaantotilino != $yhtiorow['selvittelytili']) {
+		$loydettiinko_sopiva_tili = 'joo';
 	}
 
 ?>

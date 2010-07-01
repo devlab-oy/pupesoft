@@ -9,6 +9,17 @@
 
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
+	if ($tee == 'T' and trim($kuitattava_tiliotedata_tunnus) != '') {
+
+		$kuitataan_lisa = $kuitattu == 'on' ? " kuitattu = '$kukarow[kuka]', kuitattuaika = now() " : " kuitattu = '', kuitattuaika = '0000-00-00 00:00:00' ";
+
+		$query = "	UPDATE tiliotedata SET
+					$kuitataan_lisa
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$kuitattava_tiliotedata_tunnus'";
+		$kuitetaan_result = mysql_query($query) or pupe_error($query);
+	}
+
 	//Olemme tulossa takain suorituksista
 	if ($tee == 'Z' or $tiliote == 'Z') {
 		$query = "	SELECT tilino 
@@ -71,12 +82,16 @@
 	if ($tee == 'S') {
 
 		if ($tyyppi == '3') {
-			$query = "	SELECT * FROM tiliotedata
+			$query = "	SELECT tiliotedata.*, ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi
+						FROM tiliotedata
+						LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
 						WHERE alku = '$pvm' and tilino = '$tilino' and tyyppi ='$tyyppi'
 						ORDER BY tieto";
 		}
 		else {
-			$query = "	SELECT * FROM tiliotedata
+			$query = "	SELECT tiliotedata.*, ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi
+						FROM tiliotedata
+						LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
 						WHERE alku = '$pvm' and tilino = '$tilino' and tyyppi ='$tyyppi'
 						ORDER BY tunnus";
 		}
@@ -85,6 +100,11 @@
 
 		$txttieto = "";
 		$txtfile  = "$tilino-$pvm.txt";
+
+		// kuittausta varten nämä _temp muuttujat
+		$pvm_temp = $pvm;
+		$tilino_temp = $tilino;
+		$tyyppi_temp = $tyyppi;
 
 		if (mysql_num_rows($tiliotedataresult) == 0) {
 			echo "<font class='message'>".t("Tuollaista aineistoa ei löytynyt")."! $query</font><br>";

@@ -429,7 +429,7 @@ if ($tee == 'MONISTA') {
 						}
 					break;
 					case 'toimaika':
-						if ($kumpi == 'HYVITA') {
+						if ($kumpi == 'HYVITA' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
 							$values .= ", '$monistarow[$i]'";
 						}
 						else {
@@ -753,12 +753,21 @@ if ($tee == 'MONISTA') {
 			}
 
 			if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS') {
-				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$monistarow[yhtio]' ORDER BY tunnus";
+				$query = "	SELECT * 
+							from tilausrivi 
+							where otunnus = '$lasku' 
+							and yhtio = '$monistarow[yhtio]' 
+							ORDER BY otunnus, tunnus";
 			}
 			else {
-				$query = "SELECT * from tilausrivi where uusiotunnus='$lasku' and kpl<>0 and tyyppi = 'L' and yhtio ='$monistarow[yhtio]' ORDER BY tunnus";
+				$query = "	SELECT * 
+							from tilausrivi 
+							where uusiotunnus = '$lasku' 
+							and kpl <> 0 
+							and tyyppi = 'L' 
+							and yhtio = '$monistarow[yhtio]' 
+							ORDER BY otunnus, tunnus";
 			}
-
 			$rivires = mysql_query($query) or pupe_error($query);
 
 			while ($rivirow = mysql_fetch_array($rivires)) {
@@ -794,13 +803,20 @@ if ($tee == 'MONISTA') {
 				$rfields = "yhtio";
 				$rvalues = "'$kukarow[yhtio]'";
 
-				for($i=1; $i < mysql_num_fields($rivires)-1; $i++) { // Ei tunnusta
+				for ($i=1; $i < mysql_num_fields($rivires)-1; $i++) { // Ei tunnusta
 
 					$rfields .= ", ".mysql_field_name($rivires,$i);
 
-					switch (mysql_field_name($rivires,$i)) {
-						case 'kerayspvm':
+					switch (mysql_field_name($rivires,$i)) {						
 						case 'toimaika':
+							if ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+								$rvalues .= ", '".$rivirow[$i]."'";
+							}
+							else {
+								$rvalues .= ", now()";
+							}
+							break;
+						case 'kerayspvm':
 						case 'laadittu':
 							$rvalues .= ", now()";
 							break;

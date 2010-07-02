@@ -1705,9 +1705,13 @@ if (!function_exists("synkronoi")) {
 			//	Tehd‰‰n kysely
 			$where = "";
 
-			$indeksi = array_merge($wherelliset, $pakolliset);
-			$indeksi = array_unique($indeksi);
-
+			if(is_array($wherelliset)) {
+				$indeksi = array_merge($wherelliset, $pakolliset);
+				$indeksi = array_unique($indeksi);
+			}
+			else {
+				$indeksi = &$pakolliset;
+			}
 
 			foreach($indeksi as $pakollinen) {
 				//	Jos meill‰ on viel‰ se originaali tallessa vertailu sit‰ vastaan

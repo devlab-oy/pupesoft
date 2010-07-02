@@ -188,6 +188,64 @@ if (!function_exists('alku_tarjous')) {
 			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
 		}
 
+		if ($yhtiorow["tyomaaraystiedot_tarjouksella"] == "") {
+			$query = "	SELECT tyomaarays.*
+						FROM lasku
+						JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tunnus = '$laskurow[tunnus]'";
+			$tyomres = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($tyomres) > 0) {
+
+				while ($tyomrow = mysql_fetch_array($tyomres)) {
+
+					#$komm .= "\n".t("Työmääräys", $kieli). ":###$tyomrow[otunnus]";
+
+					$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
+
+					while ($al_row = mysql_fetch_array($al_res)) {
+
+						$kentta = $al_row["selite"];
+
+						if (((!is_numeric($tyomrow[$kentta]) and trim($tyomrow[$kentta]) != '') or (is_numeric($tyomrow[$kentta]) and $tyomrow[$kentta] != 0)) and trim($tyomrow[$kentta]) != '0000-00-00') {
+							if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
+								$komm .= "\n$al_row[selitetark]:###".wordwrap(str_replace("\n","\n###", $tyomrow[$kentta]), 90, "\n###");
+							}
+							else {
+								if (strtoupper($al_row["selitetark_2"]) == "DATE") {
+									$tyomrow[$kentta] = tv1dateconv($tyomrow[$kentta]);
+								}
+								elseif ($kentta == "suorittaja") {
+									$query = "	SELECT nimi
+												FROM kuka
+												WHERE yhtio = '$kukarow[yhtio]'
+												and kuka  	= '".$tyomrow[$kentta]."'";
+									$yresult = mysql_query($query) or pupe_error($query);
+									$row = mysql_fetch_array($yresult);
+
+									$tyomrow[$kentta] = $row["nimi"];
+								}
+								elseif ($kentta == "merkki") {
+									$yresult = t_avainsana("SARJANUMERON_LI", $kieli, "and avainsana.selite = 'MERKKI' and avainsana.selitetark = '".$tyomrow[$kentta]."'");
+
+									if (mysql_num_rows($yresult) > 0) {
+										$row = mysql_fetch_array($yresult);
+
+										$tyomrow[$kentta] = $row["selitetark_2"];
+									}
+								}
+
+								$komm .= "\n$al_row[selitetark]:###$tyomrow[$kentta]";
+							}
+						}
+					}
+				}
+
+				$komm .= "\n";
+			}
+		}
+
 		// Tulostetaan laskun kommentti
 		if (trim($komm) != '') {
 			$kommentit = explode("\n", trim($komm));
@@ -1014,6 +1072,10 @@ if (!function_exists('tulosta_tarjous')) {
 
 			// Mahtuuko rivi tälle sivulle
 			$kala_nyt = $kala;
+
+			if ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and $edtuotetyyppi != $tuotetyyppi) {
+				$kala -= 30;
+			}
 
 			if (substr($tarjoustyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
 				if (str_replace("perhe_", "", $tarjoustyyppi) == "") {

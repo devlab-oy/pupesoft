@@ -8,17 +8,15 @@
 		// Tuetaan myös M2 matkalaskuohjelmista
 		// Tuetaan myös M2 matkalaskuohjelmista
 
-		if ($_FILES['userfile']['size']==0){
+		if ($_FILES['userfile']['size'] == 0){
 			die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
 		}
 
-		$file	 = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
-		$rivi    = fgets($file);
-
+		$file  = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
 		$maara = 1;
 		$flip  = 0;
 
-		while (!feof($file)) {
+		while ($rivi = fgets($file)) {
 
 			//  M2 matkalaskuohjelma
 			if ($tiedostomuoto == "M2MATKALASKU") {
@@ -126,68 +124,112 @@
 			}
 			elseif ($tiedostomuoto == "AMMATTILAINEN") {
 
+				/*
+					Aineisto sarkaineroteltu tekstitiedosto
+					0 tilinumero
+					1 kustannuspaikka
+					2 selite
+					3 summa
+					4 summa 2
+					5 tositepvm
+					6 projekti
+					7 henkilö
+				*/
+
 				$kentat = explode("\t", $rivi);
 
+				//	Trimmataan kaikki
+				foreach ($kentat as &$k) {
+					$k = trim($k);
+				}
+
 				// Tili
-				$itili[$maara]   = (int) trim($kentat[0]);
+				$itili[$maara] = $kentat[0];
 
-				// Kustannuspaikka
-				$ikustp_tsk  	 = trim($kentat[1]);
-				$ikustp[$maara]  = 0;
+				//	Poimitaan kustannuspaikka ja projekti, perustetaan jos puuttuu
+				$ikustp[$maara] 	= "";
+				$iprojekti[$maara]	= "";
 
-				if ($ikustp_tsk != "") {
-					$query = "	SELECT tunnus
-								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tyyppi = 'K'
-								and kaytossa != 'E'
-								and nimi = '$ikustp_tsk'";
-					$ikustpres = mysql_query($query) or pupe_error($query);
+				foreach (array(1=>"K", 6=>"P") as $x => $tsk_tyyppi) {
 
-					if (mysql_num_rows($ikustpres) == 1) {
-						$ikustprow = mysql_fetch_assoc($ikustpres);
-						$ikustp[$maara] = $ikustprow["tunnus"];
+					$tsk_nimi = $kentat[$x];
+
+					if (strlen($tsk_nimi) > 0) {
+
+						if ($tsk_tyyppi == "K") {
+							$tsk_tyyppinimi = "Kustannuspaikka";
+						}
+						elseif ($tsk_tyyppi == "P") {
+							$tsk_tyyppinimi = "Projekti";
+						}
+
+						//	tarkastetaan löytyykö oikea tsk!
+						$tsk = "";
+						
+						if ($tsk_nimi != "") {
+							$query = "	SELECT tunnus
+										FROM kustannuspaikka
+										WHERE yhtio = '$kukarow[yhtio]' 
+										and tyyppi = '$tsk_tyyppi' 
+										and kaytossa != 'E' 
+										and nimi = '$tsk_nimi'";
+							$tskres = mysql_query($query) or pupe_error($query);
+
+							if (mysql_num_rows($tskres) == 1) {
+								$tskrow = mysql_fetch_assoc($tskres);
+								$tsk = $tskrow["tunnus"];
+							}
+						}
+
+						if ($tsk_nimi != "" and $tsk == 0) {
+							$query = "	SELECT tunnus
+										FROM kustannuspaikka
+										WHERE yhtio = '$kukarow[yhtio]' 
+										and tyyppi = '$tsk_tyyppi' 
+										and kaytossa != 'E' 
+										and koodi = '$tsk_nimi'";
+							$tskres = mysql_query($query) or pupe_error($query);
+
+							if (mysql_num_rows($tskres) == 1) {
+								$tskrow = mysql_fetch_assoc($tskres);
+								$tsk = $tskrow["tunnus"];
+							}
+						}
+
+						if (is_numeric($tsk_nimi) and (int) $tsk_nimi > 0 and $tsk == 0) {
+
+							$tsk_nimi = (int) $tsk_nimi;
+
+							$query = "	SELECT tunnus
+										FROM kustannuspaikka
+										WHERE yhtio = '$kukarow[yhtio]' 
+										and tyyppi = '$tsk_tyyppi' 
+										and kaytossa != 'E' 
+										and tunnus = '$tsk_nimi'";
+							$tskres = mysql_query($query) or pupe_error($query);
+
+							if (mysql_num_rows($tskres) == 1) {
+								$tskrow = mysql_fetch_assoc($tskres);
+								$tsk = $tskrow["tunnus"];
+							}
+						}
+						
+						if ($tsk == 0) {
+							echo "<font class='error'>".t("Kustannuspaikkaa ei löydy").": $tsk_nimi</font><br>";
+						}
+						else {
+							if ($tsk_tyyppi == "K") {
+								$ikustp[$maara] = $tsk;
+							}
+							elseif ($tsk_tyyppi == "P") {
+								$iprojekti[$maara] = $tsk;
+							}
+						}						
 					}
 				}
-
-				if ($ikustp_tsk != "" and $ikustp[$maara] == 0) {
-					$query = "	SELECT tunnus
-								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tyyppi = 'K'
-								and kaytossa != 'E'
-								and koodi = '$ikustp_tsk'";
-					$ikustpres = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($ikustpres) == 1) {
-						$ikustprow = mysql_fetch_assoc($ikustpres);
-						$ikustp[$maara] = $ikustprow["tunnus"];
-					}
-				}
-
-				if (is_numeric($ikustp_tsk) and (int) $ikustp_tsk > 0 and $ikustp[$maara] == 0) {
-
-					$ikustp_tsk = (int) $ikustp_tsk;
-
-					$query = "	SELECT tunnus
-								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tyyppi = 'K'
-								and kaytossa != 'E'
-								and tunnus = '$ikustp_tsk'";
-					$ikustpres = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($ikustpres) == 1) {
-						$ikustprow = mysql_fetch_assoc($ikustpres);
-						$ikustp[$maara] = $ikustprow["tunnus"];
-					}
-				}
-
-				// Selite
-				$iselite[$maara] = "Palkkatosite $tpp.$tpk.$tpv / ".trim($kentat[2]);
 
 				// Summa
-				if (trim($kentat[3]) != "") {
+				if ($kentat[3] != "") {
 					$isumma[$maara]  = (float) str_replace(",", ".", $kentat[3]);
 				}
 				else {
@@ -200,12 +242,17 @@
 					$tpk=substr($kentat[5],3,2);
 					$tpp=substr($kentat[5],0,2);
 				}
+				
+				// Selite
+				$iselite[$maara] = "Palkkatosite $tpp.$tpk.$tpv / ".$kentat[2];
+
+				// Liitetään tähän henkilönumero jos se haluttiin aineistoon
+				if ($kentat[7] != "") {
+					$iselite[$maara] .= " / #".$kentat[7];
+				}
 			}
 
 			$maara++;
-
-			// luetaan seuraava rivi failista
-			$rivi = fgets($file);
 		}
 
 		fclose($file);
@@ -228,7 +275,7 @@
 			<tr><th>".t("Valitse tiedostomuoto")."</th><td>
 			<select name = 'tiedostomuoto'>
 			<option value ='PRETAX'>Pretax palkkatosite</option>
-			<option value ='AMMATTILAINEN'>Ammattilainen palkkatosite</option>
+			<option value ='AMMATTILAINEN'>Ammattilainen/Aboa palkanlaskenta</option>
 			<option value ='M2MATKALASKU'>M2 Matkalasku</option>
 			</select>
 			</td></tr>

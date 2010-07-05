@@ -104,6 +104,10 @@ if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku
 	$skannattu_lasku = $kukarow['kesken'].".".$path_parts['extension'];
 }
 
+if (trim($muutparametrit) != '') {
+	list($iframe,$skannattu_lasku,$tultiin) = explode('#', $muutparametrit);
+}
+
 echo "<font class='head'>".t("Uuden laskun perustus")."</font><hr>";
 
 if ($tee == 'VIIVA') {
@@ -584,6 +588,10 @@ if ($tee == 'I') {
 
 
 if ($tee == 'Y') {
+
+	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		$muutparametrit = $iframe.'#'.$skannattu_lasku.'#'.$tultiin;
+	}
 
 	require ("inc/kevyt_toimittajahaku.inc");
 

@@ -37,6 +37,8 @@
 
 	if ($tee == "KIRJOITA") {
 
+		$popvm_nyt = date("Y-m-d H:i:s");
+		
 		// Onko maksuaineistoille annettu salasanat.php:ssä oma polku jonne tallennetaan
 		if (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
 
@@ -386,7 +388,7 @@
 
 						$query = "	UPDATE lasku SET
 									tila = 'Q',
-									popvm = now()
+									popvm = '$popvm_nyt'
 						          	WHERE yhtio 	= '$kukarow[yhtio]'
 						          	and tila 		= 'P'
 									and maa		 	= '$kotimaa'
@@ -625,7 +627,7 @@
 
 								$query = "	UPDATE lasku SET
 											tila = 'Q',
-											popvm = now()
+											popvm = '$popvm_nyt'
 											WHERE lasku.yhtio = '$kukarow[yhtio]'
 											and tila = 'P'
 											and maa <> '$kotimaa'
@@ -841,7 +843,7 @@
 
 						$query = "	UPDATE lasku SET
 									tila = 'Q',
-									popvm = now()
+									popvm = '$popvm_nyt'
 									WHERE lasku.yhtio = '$kukarow[yhtio]'
 									and tila = 'P'
 									and maa <> '$kotimaa'

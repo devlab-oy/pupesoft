@@ -3,20 +3,20 @@
 	$useslave = 1;
 
 	$lis = "";
-	
+
 	if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
 		$lis = " and lasku.liitostunnus = '$kukarow[oletus_asiakas]' ";
 	}
 
 	$query = "	SELECT lasku.*,
-				laskun_lisatiedot.laskutus_nimi, 
-				laskun_lisatiedot.laskutus_nimitark, 
-				laskun_lisatiedot.laskutus_osoite, 
-				laskun_lisatiedot.laskutus_postino, 
-				laskun_lisatiedot.laskutus_postitp, 
+				laskun_lisatiedot.laskutus_nimi,
+				laskun_lisatiedot.laskutus_nimitark,
+				laskun_lisatiedot.laskutus_osoite,
+				laskun_lisatiedot.laskutus_postino,
+				laskun_lisatiedot.laskutus_postitp,
 				laskun_lisatiedot.laskutus_maa,
-				if (lasku.tila = 'L' and lasku.laskunro>0, (select lasku.mapvm from lasku l where l.yhtio = lasku.yhtio and l.laskunro = lasku.laskunro and l.tila = 'U'), lasku.mapvm) mapvm,
-				(SELECT group_concat(distinct alv SEPARATOR ' ') FROM tilausrivi WHERE tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D') alv
+				if (lasku.tila = 'L' and lasku.laskunro > 0, (SELECT lasku.mapvm FROM lasku l WHERE l.yhtio = lasku.yhtio AND l.laskunro = lasku.laskunro AND l.tila = 'U'), lasku.mapvm) mapvm,
+				(SELECT group_concat(distinct alv SEPARATOR ' ') FROM tilausrivi WHERE tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D') alv
 				FROM lasku
 				LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
 				WHERE lasku.tunnus = '$tunnus'
@@ -41,7 +41,7 @@
 		$query = "SELECT * from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$laskurow[tunnus]' limit 1";
 		$rakre = mysql_query($query) or pupe_error($query);
 		$rakirrow = mysql_fetch_array($rakre);
-		
+
 		// spacet rivinvaihdoiksi niin n‰ytt‰‰ kivemmalta
 		$rakirrow['rahtikirjanro'] = str_replace(" ", "<br>", trim($rakirrow['rahtikirjanro']));
 	}
@@ -55,7 +55,7 @@
 					WHERE yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnus]' and tila = 'L'";
 		$mares = mysql_query($query) or pupe_error($query);
 		$marow = mysql_fetch_array($mares);
-		
+
 		if ($marow["laskuttamatta"] == 0 and $marow["maksamatta"] == 0) {
 			$laskurow["mapvm"] = $marow["maksettu"];
 		}
@@ -311,7 +311,7 @@
 	echo "<th>".t("Er‰p‰iv‰")."</th>
 			<th>".t("Maksup‰iv‰")."</th>
 			<th>".t("Luontiaika")."</th>
-			<th>".t("ALV")."</th>";
+			<th>".t("ALV%")."</th>";
 
 	if ($laskurow["tila"] == "O") {
 		echo "<th>".t("Huolinta")."</th>";
@@ -328,7 +328,7 @@
 	echo "<td>".tv1dateconv($laskurow["erpcm"])."</td>
 			<td>".tv1dateconv($laskurow["mapvm"])."</td>
 			<td>".tv1dateconv($laskurow["luontiaika"], "P")."</td>
-			<td>".str_replace(".",",",$laskurow['alv'])." %</td>";
+			<td>".str_replace(".",",",$laskurow['alv'])."</td>";
 
 	if ($laskurow["tila"] == "O") {
 		echo "<td>$laskurow[rahti_huolinta]</td>";
@@ -715,9 +715,9 @@
 				$sorttauslisa = "";
 			}
 		}
-		
+
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
-		
+
 		// Tilausrivit
 		$query  = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
 					tilausrivi.kpl m‰‰r‰,
@@ -1319,10 +1319,10 @@
 					}
 				}
 				elseif ($kukarow['extranet'] == '') {
-					
+
 					if ($row["tyyppi"] == "V") {
 						$kate = "";
-					}					
+					}
 					elseif ($row["rivihinta"] != 0) {
 						$kate = sprintf('%.2f',100*($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])))/$row["rivihinta"])."%";
 					}

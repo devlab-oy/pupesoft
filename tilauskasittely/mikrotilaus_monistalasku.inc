@@ -17,17 +17,14 @@ if ($tee == "file") {
 			die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
 		}
 
-		$file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
-
-		// luetaan tiedosto alusta loppuun...
-		$rivi = fgets($file, 4096);
+		$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
 
 		$tunnukset 		= "";
 		$korjaaalvit 	= array();
 		$monistettavat	= array();
 		$suoraanlasku 	= array();
 
-		while (!feof($file)) {
+		while ($rivi = fgets($file, 4096)) {
 
 			$tila='';
 			$valinta='';
@@ -67,9 +64,7 @@ if ($tee == "file") {
 				$korjaaalvit[$row["tunnus"]]  = $alvik;
 				$suoraanlasku[$row["tunnus"]] = $slask;
 			}
-
-			$rivi = fgets($file, 4096);
-		} // end while eof
+		}
 
 		$tunnukset	= substr($tunnukset,0,-1);
 		$lasku 		= "";

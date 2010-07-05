@@ -108,6 +108,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tila = 'P'
 							and olmapvm = '$trow[olmapvm]'
+							and maksaja = '$kukarow[kuka]'
 							and maksu_tili = '$tili'
 							and maa = 'FI'
 							and tilinumero = '$trow[tilinumero]'";
@@ -118,6 +119,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tila = 'P'
 							and olmapvm = '$trow[olmapvm]'
+							and maksaja = '$kukarow[kuka]'
 							and maksu_tili = '$tili'
 							and maa <> 'FI'
 							and valkoodi = '$trow[valkoodi]'
@@ -201,7 +203,8 @@
 					tila = 'P',
 					olmapvm = '$maksupvm'
 					$alatila
-					WHERE tunnus='$tunnus' and yhtio = '$kukarow[yhtio]'";
+					WHERE tunnus='$tunnus'
+					and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$kurssi = 1;
@@ -407,7 +410,8 @@
 	if ($tee == 'DP') {
 		$query = "	SELECT *, if(alatila='K', summa - kasumma, summa) usumma
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$lasku'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$lasku'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -1182,8 +1186,8 @@
 					}
 					echo "</form>";
 					echo "</td>";
-					
-					
+
+
 					//Tutkitaan voidaanko lasku poistaa
 					$query = "	SELECT tunnus
 								from lasku use index (yhtio_vanhatunnus)
@@ -1207,7 +1211,7 @@
 								</form>
 								</td>";
 					}
-					
+
 				}
 				else {
 					// ei ollutkaan varaa!!

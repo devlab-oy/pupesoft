@@ -2594,7 +2594,7 @@ if (!function_exists("alv")) {
 		elseif ($alv >= 500) {
 			//Tässä keississä on marginaalimyyntiä
 			if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 500;											// Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
-			if ($laskurow["vienti"] == ""  and $laskurow["alv"] == $wtrow["selite"]) $alv = $trow["alv"]+500;				// Otsikolla on valittu verollinen kotimaan myynti
+			if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0) $alv = $trow["alv"]+500;								// Otsikolla on valittu verollinen kotimaan myynti
 			if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 500; 										// EU-vienti ytunnuksella --> alviton
 			if ($laskurow["vienti"] == "K") $alv = 500; 																	// Vienti eu:n ulkopuolelle on aina verotonta
 
@@ -2603,7 +2603,7 @@ if (!function_exists("alv")) {
 		elseif ($yhtiorow["alv_kasittely"] != "") {
 			//Tässä keississä kaikki hinnat ovat aina verottomia ja vero lisätään vasta laskutuksessa
 			if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;												// Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
-			if ($laskurow["vienti"] == ""  and $laskurow["alv"] == $wtrow["selite"] and $alv == "") $alv = $trow["alv"];	// Otsikolla on valittu verollinen kotimaan myynti
+			if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"];					// Otsikolla on valittu verollinen kotimaan myynti
 			if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 0; 										// EU-vienti ytunnuksella --> alviton
 			if ($laskurow["vienti"] == "K") $alv = 0; 																		// Vienti eu:n ulkopuolelle on aina verotonta
 
@@ -2612,7 +2612,7 @@ if (!function_exists("alv")) {
 		else {
 			//Tässä keississä kaikki hinnat sisältävät arvonlisäveron
 			if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;												// Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
-			if ($laskurow["vienti"] == ""  and $laskurow["alv"] == $wtrow["selite"] and $alv == "") $alv = $trow["alv"];	// Otsikolla on valittu verollinen kotimaan myynti
+			if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"];					// Otsikolla on valittu verollinen kotimaan myynti
 			if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 0; 										// EU-vienti ytunnuksella --> alviton
 			if ($laskurow["vienti"] == "K") $alv = 0; 																		// Vienti eu:n ulkopuolelle on aina verotonta
 

@@ -6,14 +6,19 @@
 		if ($copyready != '') {
 			echo "<font class='message'>".t("Kopioitiin oikeudet")." $fromkuka ($fromyhtio) --> $tokuka ($toyhtio)</font><br><br>";
 
-			$query = "SELECT * FROM oikeu where kuka='$fromkuka' and yhtio='$fromyhtio'";
+			$query = "	SELECT *
+						FROM oikeu
+						WHERE kuka = '$fromkuka'
+						and yhtio = '$fromyhtio'";
 			$kukar = mysql_query($query) or pupe_error($query);
 
-			$query = "delete from oikeu where kuka='$tokuka' and yhtio='$toyhtio'";
+			$query = "	DELETE FROM oikeu
+						WHERE kuka = '$tokuka'
+						AND yhtio = '$toyhtio'";
 			$delre = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
-				$query = "insert into oikeu values ('$tokuka','$row[sovellus]','$row[nimi]','$row[alanimi]','$row[paivitys]','$row[lukittu]','$row[nimitys]','$row[jarjestys]','$row[jarjestys2]','','$toyhtio','$row[hidden]',0)";
+				$query = "INSERT INTO oikeu VALUES ('$tokuka','$row[sovellus]','$row[nimi]','$row[alanimi]','$row[paivitys]','$row[lukittu]','$row[nimitys]','$row[jarjestys]','$row[jarjestys2]','','$toyhtio','$row[hidden]',0)";
 				$upres = mysql_query($query) or pupe_error($query);
 			}
 
@@ -30,7 +35,12 @@
 
 		// tehd‰‰n k‰ytt‰j‰listaukset
 
-		$query = "SELECT distinct(nimi), kuka FROM kuka WHERE extranet='' ORDER BY nimi";
+		$query = "	SELECT distinct kuka.nimi, kuka.kuka
+					FROM kuka
+					JOIN yhtio USING (yhtio)
+					WHERE kuka.extranet = ''
+					AND ((yhtio.konserni = '$yhtiorow[konserni]' and yhtio.konserni != '') OR kuka.yhtio = '$kukarow[yhtio]')
+					ORDER BY nimi";
 		$kukar = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr><th align='left'>".t("K‰ytt‰j‰").":</th><td>
@@ -49,7 +59,11 @@
 		if ($fromkuka!='') {
 			// tehd‰‰n yhtiolistaukset
 
-			$query = "select distinct kuka.yhtio, yhtio.nimi from kuka, yhtio where kuka.kuka='$fromkuka' and kuka.extranet='' and yhtio.yhtio=kuka.yhtio ";
+			$query = "	SELECT DISTINCT kuka.yhtio, yhtio.nimi
+						FROM kuka, yhtio
+						WHERE kuka.kuka = '$fromkuka'
+						AND kuka.extranet = ''
+						AND yhtio.yhtio = kuka.yhtio ";
 			$yhres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($yhres) > 1){
@@ -83,7 +97,12 @@
 
 		// tehd‰‰n k‰ytt‰j‰listaukset
 
-		$query = "SELECT distinct(nimi), kuka FROM kuka WHERE extranet='' ORDER BY nimi";
+		$query = "	SELECT distinct kuka.nimi, kuka.kuka
+					FROM kuka
+					JOIN yhtio USING (yhtio)
+					WHERE kuka.extranet = ''
+					AND ((yhtio.konserni = '$yhtiorow[konserni]' and yhtio.konserni != '') OR kuka.yhtio = '$kukarow[yhtio]')
+					ORDER BY nimi";
 		$kukar = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr><th align='left'>".t("K‰ytt‰j‰").":</th><td>

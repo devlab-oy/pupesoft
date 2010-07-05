@@ -156,7 +156,8 @@
 				}
 
 				$query = "	UPDATE lasku
-							SET tila = 'Q'
+							SET tila = 'Q',
+							popvm = now()
 							WHERE tunnus = $laskurow[tunnus]";
 				$uresult = mysql_query($query) or pupe_error($query);
 			}

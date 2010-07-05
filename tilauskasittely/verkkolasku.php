@@ -2523,7 +2523,8 @@
 					<td><input type='text' name='laskvv' value='' size='5'></td></tr>\n";
 
 			echo "<tr><th>".t("Ohita laskujen laskutusviikonpäivät").":</th><td colspan='3'><input type='checkbox' name='laskutakaikki'></td></tr>\n";
-
+			
+			echo "<tr><th>".t("Laskuta vain tilaukset, lista pilkulla eroteltuna").":</th><td colspan='3'><textarea name='laskutettavat' rows='10' cols='60'></textarea></td></tr>";
 
 			echo "</table>";
 

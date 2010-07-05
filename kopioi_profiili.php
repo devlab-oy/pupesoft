@@ -1,17 +1,17 @@
 <?php
 	require ("inc/parametrit.inc");
-	
+
 	echo "<font class='head'>".t("Kopioi k‰ytt‰j‰profiileja").":</font><hr>";
 
 		if (isset($fromkuka)) {
 			$fromkuka = explode('##',$fromkuka);
-			
+
 			$fromyhtio = $fromkuka[1];
-			$fromkuka  = $fromkuka[0];			
+			$fromkuka  = $fromkuka[0];
 		}
-		
-		
-		
+
+
+
 		if ($copyready!='') // ollaan painettu kopio submittia
 		{
 			echo "<font class='message'>".t("Kopioitiin k‰ytt‰j‰profiili")." $fromkuka ($fromyhtio) --> Yhtiˆlle $tokuka</font><br><br>";
@@ -26,7 +26,7 @@
 
 			while ($row = mysql_fetch_array($kukar)) {
 				$query = "insert into oikeu values ('$fromkuka','$row[sovellus]','$row[nimi]','$row[alanimi]','$row[paivitys]','','$row[nimitys]','$row[jarjestys]','$row[jarjestys2]','$fromkuka','$tokuka','$row[hidden]',0)";
-				$upres = mysql_query($query) or pupe_error($query);						
+				$upres = mysql_query($query) or pupe_error($query);
 			}
 
 			//p‰ivitet‰‰n myˆs k‰ytt‰jien tiedot joilla on t‰m‰ profiili
@@ -36,31 +36,31 @@
 			$kres = mysql_query($query) or pupe_error($query);
 			while ($krow = mysql_fetch_array($kres)) {
 				$profiilit = explode(',', $krow["profiilit"]);
-				if (count($profiilit) > 0) {											
+				if (count($profiilit) > 0) {
 					//k‰yd‰‰n l‰pi k‰ytt‰j‰n kaikki profiilit
 					$triggeri = "";
 					foreach($profiilit as $prof) {
-						//jos t‰m‰ kyseinen profiili on ollut k‰ytt‰j‰ll‰ aikaisemmin, niin joudumme p‰ivitt‰m‰‰n oikeudet		
+						//jos t‰m‰ kyseinen profiili on ollut k‰ytt‰j‰ll‰ aikaisemmin, niin joudumme p‰ivitt‰m‰‰n oikeudet
 						if (strtoupper($prof) == strtoupper($fromkuka)) {
 							$triggeri = "HAPPY";
-						}							
+						}
 					}
-					
-					if ($triggeri == "HAPPY") {				
-						//poistetaan k‰ytt‰j‰n vanhat 
+
+					if ($triggeri == "HAPPY") {
+						//poistetaan k‰ytt‰j‰n vanhat
 						$query = "	DELETE FROM oikeu
 									WHERE yhtio='$tokuka' and kuka='$krow[kuka]' and lukittu=''";
-						$pres = mysql_query($query) or pupe_error($query);	
-																
+						$pres = mysql_query($query) or pupe_error($query);
+
 						//k‰yd‰‰n uudestaan profiili l‰pi
 						foreach($profiilit as $prof) {
 							$query = "	SELECT *
 										FROM oikeu
 										WHERE yhtio='$tokuka' and kuka='$prof' and profiili='$prof'";
-							$pres = mysql_query($query) or pupe_error($query);	
-												
+							$pres = mysql_query($query) or pupe_error($query);
+
 							while ($trow = mysql_fetch_array($pres)) {
-								//joudumme tarkistamaan ettei t‰t‰ oikeutta ole jo t‰ll‰ k‰ytt‰j‰ll‰. 
+								//joudumme tarkistamaan ettei t‰t‰ oikeutta ole jo t‰ll‰ k‰ytt‰j‰ll‰.
 								//voi olla esim jos se on lukittuna annettu
 								$query = "	SELECT yhtio
 											FROM oikeu
@@ -72,28 +72,28 @@
 											and nimitys		= '$trow[nimitys]'
 											and jarjestys 	= '$trow[jarjestys]'
 											and jarjestys2	= '$trow[jarjestys2]'
-											and yhtio		= '$tokuka'";			
+											and yhtio		= '$tokuka'";
 								$tarkesult = mysql_query($query) or pupe_error($query);
-								
+
 								if (mysql_num_rows($tarkesult) == 0) {
-									$query = "	INSERT into oikeu 
+									$query = "	INSERT into oikeu
 												SET
-												kuka		= '$krow[kuka]', 
-												sovellus	= '$trow[sovellus]', 
-												nimi		= '$trow[nimi]', 
-												alanimi 	= '$trow[alanimi]', 
+												kuka		= '$krow[kuka]',
+												sovellus	= '$trow[sovellus]',
+												nimi		= '$trow[nimi]',
+												alanimi 	= '$trow[alanimi]',
 												paivitys	= '$trow[paivitys]',
-												nimitys		= '$trow[nimitys]', 
+												nimitys		= '$trow[nimitys]',
 												jarjestys 	= '$trow[jarjestys]',
 												jarjestys2	= '$trow[jarjestys2]',
-												yhtio		= '$tokuka'";			
+												yhtio		= '$tokuka'";
 									$rresult = mysql_query($query) or pupe_error($query);
-								}																							
-							}												
+								}
+							}
 						}
 						echo "<font class='message'>P‰ivitettiin k‰ytt‰j‰n $krow[kuka] profiili $prof</font><br>";
 					}
-				}			
+				}
 			}
 
 			$fromkuka='';
@@ -101,32 +101,36 @@
 			$fromyhtio='';
 			$toyhtio='';
 		}
-		
-		
+
+		$query	= "	SELECT distinct yhtio, nimi
+					from yhtio
+					where konserni = '$yhtiorow[konserni]'
+					and konserni != ''";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "<br><font class='message'>".t("Palvelimella ei ole muita yhtiˆit‰")."!</font>";
+			exit;
+		}
+
+		$sovyhtiot = "'$kukarow[yhtio]'";
+
+		while ($prow = mysql_fetch_array($result)) {
+			$sovyhtiot .= ",'$prow[yhtio]'";
+		}
+
+		// tehd‰‰n k‰ytt‰j‰listaukset
+		$query = "	SELECT distinct kuka, profiili, yhtio
+					FROM oikeu
+					WHERE kuka = profiili
+					and profiili != ''
+					and yhtio in ($sovyhtiot)";
+		$kukar = mysql_query($query) or pupe_error($query);
 
 		echo "<br><form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='tila' value='copy'>";
 
 		echo "<font class='message'>".t("Kopioitava profiili").":</font>";
-
-		$query	= "	SELECT distinct yhtio, nimi
-					from yhtio
-					where konserni = '$yhtiorow[konserni]'";
-		$result = mysql_query($query) or pupe_error($query);
-		
-		$sovyhtiot = "";
-		
-		while ($prow = mysql_fetch_array($result)) {
-			$sovyhtiot .= "'$prow[yhtio]',";
-		}
-		
-		$sovyhtiot = substr($sovyhtiot,0,-1);
-
-		
-
-		// tehd‰‰n k‰ytt‰j‰listaukset
-		$query = "SELECT distinct kuka, profiili, yhtio FROM oikeu WHERE kuka=profiili and profiili!='' and yhtio in ($sovyhtiot)";
-		$kukar = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr><th align='left'>".t("Profiili").":</th><td>
 		<select name='fromkuka' onchange='submit()'>
@@ -157,7 +161,7 @@
 		{
 			if ($tokuka==$kurow["yhtio"]) {
 				$select = 'selected';
-				$tonimi = $kurow["nimi"]; 
+				$tonimi = $kurow["nimi"];
 			}
 			else $select='';
 

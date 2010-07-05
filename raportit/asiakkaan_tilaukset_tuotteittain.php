@@ -277,15 +277,30 @@
 			echo "<br><table>";
 			echo "<tr>";
 
+			if ($toim == 'OSTO' and $pvmtapa == 'toimaika') {
+				$pvmtapa_url = "&pvmtapa=toimaika";
+			}
+			
+			$j = 0;
+			
 			for ($i=1; $i < mysql_num_fields($result)-$miinus; $i++) {
-				if ($toim == 'OSTO' and $pvmtapa == 'toimaika') {
-					$pvmtapa_url = "&pvmtapa=toimaika";
-				}
+
 				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=".urlencode($tuoteno)."&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."$pvmtapa_url'>".t(mysql_field_name($result,$i))."</a></th>";
 
-				if(isset($workbook)) {
-					$worksheet->write($excelrivi, ($i-1), ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+				if (isset($workbook)) {
+					$worksheet->write($excelrivi, $j, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 				}
+
+				$j++;
+				
+				if (mysql_field_name($result,$i) == 'kate') {
+					echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=".urlencode($tuoteno)."&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."$pvmtapa_url'>".t("Katepros")."</a></th>";
+
+					if (isset($workbook)) {
+						$worksheet->write($excelrivi, $j, ucfirst(t("Katepros")), $format_bold);
+						$j++;
+					}
+				}								
 			}
 
 			if ($toim != "OSTO") {
@@ -331,12 +346,14 @@
 					}
 					elseif (mysql_field_name($result,$i) == 'kate') {
 						// T‰n rivin kate
-						$kate = 0;
+						$kate 		= 0;
+						$kate_eur	= 0;
 
 						if ($row["tapvm"] != '0000-00-00') {
 
 							if ($row["m‰‰r‰"] == 0) {
 								$kate = "";
+								$kate_eur = 0;
 							}
 							elseif ($row["rivihinta"] != 0) {
 								if ($row["kate"] < 0) {
@@ -350,7 +367,8 @@
 								$kate = "-100.00%";
 							}
 
-							$kate_yht += $row["kate"];
+							$kate_eur  = $row["kate"];
+							$kate_yht += $kate_eur;
 						}
 						elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U")) {
 							if ($kpl > 0) {
@@ -362,7 +380,8 @@
 									$kate = sprintf('%.2f',100*($row["rivihinta"] - ($ostohinta * $kpl))/$row["rivihinta"])."%";
 								}
 
-								$kate_yht += ($row["rivihinta"] - ($ostohinta * $kpl));
+								$kate_eur  = ($row["rivihinta"] - ($ostohinta * $kpl));
+								$kate_yht += $kate_eur;
 							}
 							elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "O") {
 								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
@@ -410,7 +429,8 @@
 									$kate = "100.00%";
 								}
 
-								$kate_yht += ($row["rivihinta"]*-1 - $ostohinta);
+								$kate_eur  = ($row["rivihinta"]*-1 - $ostohinta);
+								$kate_yht += $kate_eur;
 							}
 							else {
 								$kate = "N/A";
@@ -425,11 +445,18 @@
 								$kate = "-100.00%";
 							}
 
-							$kate_yht += ($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])));
+							$kate_eur  = ($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])));
+							$kate_yht += $kate_eur;
 						}
 
 						$row[$i] = $kate;
 
+						if (isset($workbook)) {
+							$worksheet->writeNumber($excelrivi, $excelsarake, $kate_eur, $format_num);
+							$excelsarake++;
+						}
+
+						echo "<$ero align='right' valign='top' nowrap>".sprintf("%.2f", $kate_eur)."</$ero>";
 						echo "<$ero align='right' valign='top' nowrap>$kate</$ero>";
 					}
 					elseif (is_numeric($row[$i]) and mysql_field_name($result,$i) != 'ytunnus') {
@@ -493,7 +520,12 @@
 				$csp = 4;
 			}
 			else {
-				$csp = 6;
+				if ($asiakaslisa != "") {
+					$csp = 6;
+				}
+				else {
+					$csp = 3;
+				}
 			}
 
 			echo "<tr>
@@ -512,7 +544,7 @@
 					$ykate = @round(abs($kate_yht / $rivihintasumma * 100), 2);
 				}
 
-				echo "<td class='spec' align='right' nowrap>".sprintf('%.2f',$ykate)."%</td>";
+				echo "<td align='right' class='spec'>".sprintf('%.2f',$kate_yht)."</td><td class='spec' align='right' nowrap>".sprintf('%.2f',$ykate)."%</td>";
 			}
 
 
@@ -526,12 +558,26 @@
 					$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
 				}
 				else {
-					$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
-					$worksheet->writeFormula($excelrivi, 10, "=sum(K2:K$excelrivi)");
 
-					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					if ($asiakaslisa != "") {
+						$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
+						$worksheet->writeFormula($excelrivi, 10, "=sum(K2:K$excelrivi)");
 
-						$worksheet->write($excelrivi, 11, $ykate);
+						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+
+							$worksheet->write($excelrivi, 11, $kate_yht);
+							$worksheet->write($excelrivi, 12, $ykate);
+						}
+					}
+					else {
+						$worksheet->writeFormula($excelrivi, 4, "=sum(E2:E$excelrivi)");
+						$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
+
+						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+
+							$worksheet->write($excelrivi, 8, $kate_yht);
+							$worksheet->write($excelrivi, 9, $ykate);
+						}
 					}
 				}
 

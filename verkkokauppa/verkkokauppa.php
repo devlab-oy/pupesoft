@@ -1132,7 +1132,7 @@ if ($tee == "selaa") {
 
 	if ($kukarow["kuka"] != "www" and (int) $kukarow["kesken"] == 0) {
 		require_once("luo_myyntitilausotsikko.inc");
-		$tilausnumero = luo_myyntitilausotsikko($kukarow["oletus_asiakas"], $tilausnumero, "");
+		$tilausnumero = luo_myyntitilausotsikko("EXTRANET", $kukarow["oletus_asiakas"], $tilausnumero, "");
 		$kukarow["kesken"] = $tilausnumero;
 	}
 

@@ -2272,10 +2272,10 @@
 
 		//otetaan käyttöliittymästä tullut alv talteen
 		$laskunalv = $alv;
-		
+
 		// HUOM: ALVIMUUTOKSESTA JOHTUEN:
 		$alvmuuttui = abs((float) $apuro['alv'] - (float) $alv);
-		
+
 		// Tutkitaan onko ytunnus-, alvi- tai vienti-kenttä vaihtunut (Poislukien tarjoukset)
 		if ($apuro["tila"] != "T" and (int) $kukarow["kesken"] != 0 and ($from == 'vaihdaasiakas' or $apuro['liitostunnus'] != $asiakasid or $alvmuuttui > 1 or $apuro['vienti'] != $vienti)) {
 
@@ -2475,7 +2475,7 @@
 			}
 
 			//Tsekataan vielä, että olio varmasi löytyy, muuten lisätään se
-			$apuqu = "select yhtio from laskun_lisatiedot where yhtio='$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
+			$apuqu = "SELECT yhtio from laskun_lisatiedot where yhtio='$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 			$mexapu = mysql_query($apuqu) or pupe_error($apuqu);
 
 			if (mysql_num_rows($mexapu) == 0) {
@@ -2647,12 +2647,6 @@
 			$voimaika_vv = "0000";
 			$voimaika_kk = "00";
 			$voimaika_pp = "00";
-		}
-
-		if ($toim == "PIKATILAUS") {
-			if ($myynti_kommentti != '') {
-				$comments = $myynti_kommentti;
-			}
 		}
 
 		$query .= "	lasku SET

@@ -1,8 +1,8 @@
 <?php
 
 if(!function_exists("luo_myyntitilausotsikko")) {
-	function luo_myyntitilausotsikko($asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '') {
-		global $kukarow, $yhtiorow, $toim, $session;
+	function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '') {
+		global $kukarow, $yhtiorow, $session;
 
 		$query	= "	SELECT *
 					FROM asiakas
@@ -115,8 +115,8 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$valkoodi 			= $asiakasrow["valkoodi"];
 			$sisviesti1			= $asiakasrow["sisviesti1"];
 
-			if ($toim == "PIKATILAUS") {
-				$myynti_kommentti	= $asiakasrow["myynti_kommentti1"];
+			if ($asiakasrow["myynti_kommentti1"] != "") {
+				$comments = $asiakasrow["myynti_kommentti1"];
 			}
 
 			if (trim($asiakasrow["toimitusehto"]) != "") {

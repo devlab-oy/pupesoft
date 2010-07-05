@@ -28,7 +28,7 @@
 
 	if ((int) $asirow["tunnus"] > 0) {
 		ob_start();
-		$tilausnumero = luo_myyntitilausotsikko($asirow["tunnus"]);
+		$tilausnumero = luo_myyntitilausotsikko("RIVISYOTTO", $asirow["tunnus"]);
 		ob_end_clean();
 	}
 

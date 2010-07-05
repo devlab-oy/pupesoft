@@ -67,7 +67,7 @@ while ($rivi = fgets($fd)) {
 			// Luodaan uusi myyntitilausotsikko
  			require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
 
-			$id = luo_myyntitilausotsikko($arow["tunnus"]);
+			$id = luo_myyntitilausotsikko("RIVISYOTTO", $arow["tunnus"]);
 
  			echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
 

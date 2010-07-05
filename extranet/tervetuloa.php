@@ -14,7 +14,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 	else {
 		// Luodaan uusi myyntitilausotsikko
 		require_once("luo_myyntitilausotsikko.inc");
-		$tilausnumero = luo_myyntitilausotsikko($kukarow["oletus_asiakas"]);
+		$tilausnumero = luo_myyntitilausotsikko("RIVISYOTTO", $kukarow["oletus_asiakas"]);
 		$kukarow["kesken"] = $tilausnumero;
 		$kaytiin_otsikolla = "NOJOO!";
 
@@ -269,12 +269,12 @@ if ($tee == '') {
 							$hintarow["hinta"] = $trow["myyntihinta"];
 							$hintarow["valkoodi"] = $yhtiorow["valkoodi"];
 						}
-						
+
 						if ($hinta != $hintarow["hinta"]) {
 							$ashinta = sprintf('%.2f',$hinta);
 						}
 						else {
-							$ashinta = "";	
+							$ashinta = "";
 						}
 
 						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=".urlencode($m[1])."'>$trow[tuoteno]</a> $trow[nimitys] $ashinta (".t("ovh").". ".sprintf("%.".$yhtiorow['hintapyoristys']."f", $hintarow["hinta"])." $hintarow[valkoodi])";

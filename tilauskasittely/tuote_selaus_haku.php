@@ -3,7 +3,7 @@
 	if (@include("../inc/parametrit.inc"));
 	elseif (@include("parametrit.inc"));
 	else exit;
-	
+
 	if (@include("verkkokauppa/ostoskori.inc")) {
 		$kori_polku = "../verkkokauppa/ostoskori.php";
 	}
@@ -63,7 +63,7 @@
 					AND selite != ''";
 		$hae_ja_selaa_result = mysql_query($query) or pupe_error($query);
 		$hae_ja_selaa_row = mysql_fetch_assoc($hae_ja_selaa_result);
-		
+
 		if ($hae_ja_selaa_row['selite'] == 'B') {
 			echo "<font class='head'>".t("TUOTEHAKU").":</font><br/><br/>";
 		}
@@ -80,9 +80,9 @@
 		$toim_kutsu = "RIVISYOTTO";
 	}
 
-	$query    = "	SELECT * 
-					from lasku 
-					where tunnus = '$kukarow[kesken]' 
+	$query    = "	SELECT *
+					from lasku
+					where tunnus = '$kukarow[kesken]'
 					and yhtio	 = '$kukarow[yhtio]'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_assoc($result);
@@ -159,13 +159,21 @@
 			// Luodaan uusi myyntitilausotsikko
 			if ($kukarow["extranet"] == "") {
 				require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
-				$tilausnumero = luo_myyntitilausotsikko(0);
+
+				if ($toim_kutsu != "") {
+					$lmyytoim = $toim_kutsu;
+				}
+				else {
+					$lmyytoim = "RIVISYOTTO";
+				}
+
+				$tilausnumero = luo_myyntitilausotsikko($lmyytoim, 0);
 				$kukarow["kesken"] = $tilausnumero;
 				$kaytiin_otsikolla = "NOJOO!";
 			}
 			else {
 				require_once("luo_myyntitilausotsikko.inc");
-				$tilausnumero = luo_myyntitilausotsikko($kukarow["oletus_asiakas"]);
+				$tilausnumero = luo_myyntitilausotsikko("EXTRANET", $kukarow["oletus_asiakas"]);
 				$kukarow["kesken"] = $tilausnumero;
 				$kaytiin_otsikolla = "NOJOO!";
 			}
@@ -327,7 +335,7 @@
 			$jarjestys = 'tuote.tuoteno';
 		}
 	}
-	
+
 	if (!isset($poistetut)) {
 		$poistetut = '';
 	}
@@ -421,14 +429,14 @@
 
 	if (trim($tuotenumero) != '') {
 		$tuotenumero = mysql_real_escape_string(trim($tuotenumero));
-		
+
 		if ($alkukoodilla != "") {
 			$lisa .= " and tuote.tuoteno like '$tuotenumero%' ";
 		}
 		else {
 			$lisa .= " and tuote.tuoteno like '%$tuotenumero%' ";
 		}
-		
+
 		$ulisa .= "&tuotenumero=$tuotenumero";
 	}
 
@@ -1063,13 +1071,13 @@
 				foreach ($rows as $ind => $row) {
 					// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
 					if ($row["sarjanumeroseuranta"] == "S" and ($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"])) {
-						$query	= "	SELECT sarjanumeroseuranta.*, 
+						$query	= "	SELECT sarjanumeroseuranta.*,
 									sarjanumeroseuranta.tunnus sarjatunnus,
 									tilausrivi_osto.tunnus osto_rivitunnus,
 									tilausrivi_osto.perheid2 osto_perheid2,
 									tilausrivi_osto.nimitys nimitys,
 									lasku_myynti.nimi myynimi,
-									tilausrivi_myynti.tyyppi, 
+									tilausrivi_myynti.tyyppi,
 									lasku_myynti.tunnus myytunnus
 									FROM sarjanumeroseuranta
 									LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -1090,7 +1098,7 @@
 
 							while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 								$fnlina1 = "";
-								
+
 								if (($sarjarow["siirtorivitunnus"] > 0) or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"])) {
 
 									if ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"]) {
@@ -1116,11 +1124,11 @@
 										$fnlina1 = " <font class='message'>(".t("Kesken siirtolistalla").": $siirow[otunnus])</font>";
 									}
 								}
-								
+
 								if ($sarjarow["nimitys"] != "") {
 									$row["nimitys"] = $sarjarow["nimitys"];
 								}
-								
+
 								if ($fnlina1 != "") {
 									$row["nimitys"] = $sarjarow["nimitys"]."<br>".$fnlina1;
 									// Sarjanumero on varattu, ei voi liittä tilaukselle
@@ -1558,8 +1566,8 @@
 							$query = "	SELECT tuotteen_toimittajat.tehdas_saldo, tuotteen_toimittajat.tehdas_saldo_toimaika, toimi.oletus_toimaika
 										FROM tuotteen_toimittajat
 										JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
-										WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' 
-										$tehdas_saldo_tuoteperhelisa	
+										WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+										$tehdas_saldo_tuoteperhelisa
 										and tuotteen_toimittajat.tehdas_saldo > 0";
 							$tehdassaldo_res = mysql_query($query) or pupe_error($query);
 
@@ -1582,9 +1590,9 @@
 								 					FROM tilausrivi
 													JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 													JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
-													WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
-													AND tilausrivi.tuoteno = '$row[tuoteno]' 
-													AND tilausrivi.varattu > 0 
+													WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+													AND tilausrivi.tuoteno = '$row[tuoteno]'
+													AND tilausrivi.varattu > 0
 													AND tilausrivi.tyyppi = 'O'";
 								$tulossa_result = mysql_query($tulossa_query) or pupe_error($tulossa_query);
 								$tulossa_row = mysql_fetch_assoc($tulossa_result);
@@ -1598,7 +1606,7 @@
 								$query = "	SELECT oletus_toimaika
 											FROM toimi
 											JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus AND tuotteen_toimittajat.tuoteno = '$row[tuoteno]')
-											WHERE toimi.yhtio = '$kukarow[yhtio]' 
+											WHERE toimi.yhtio = '$kukarow[yhtio]'
 											AND toimi.oletus_toimaika > 0
 											LIMIT 1";
 								$tulossa_result = mysql_query($query) or pupe_error($query);
@@ -1757,8 +1765,8 @@
 										$query = "	SELECT tuotteen_toimittajat.tehdas_saldo, tuotteen_toimittajat.tehdas_saldo_toimaika, toimi.oletus_toimaika
 													FROM tuotteen_toimittajat
 													JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
-													WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' 
-													$tehdas_saldo_tuoteperhelisa	
+													WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+													$tehdas_saldo_tuoteperhelisa
 													and tuotteen_toimittajat.tehdas_saldo > 0";
 										$tehdassaldo_res = mysql_query($query) or pupe_error($query);
 
@@ -1811,9 +1819,9 @@
 								 					FROM tilausrivi
 													JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 													JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
-													WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
-													AND tilausrivi.tuoteno = '$row[tuoteno]' 
-													AND tilausrivi.varattu > 0 
+													WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+													AND tilausrivi.tuoteno = '$row[tuoteno]'
+													AND tilausrivi.varattu > 0
 													AND tilausrivi.tyyppi = 'O'";
 								$tulossa_result = mysql_query($tulossa_query) or pupe_error($tulossa_query);
 								$tulossa_row = mysql_fetch_assoc($tulossa_result);
@@ -1827,7 +1835,7 @@
 								$query = "	SELECT oletus_toimaika
 											FROM toimi
 											JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus AND tuotteen_toimittajat.tuoteno = '$row[tuoteno]')
-											WHERE toimi.yhtio = '$kukarow[yhtio]' 
+											WHERE toimi.yhtio = '$kukarow[yhtio]'
 											AND toimi.oletus_toimaika > 0
 											LIMIT 1";
 								$tulossa_result = mysql_query($query) or pupe_error($query);
@@ -1845,7 +1853,7 @@
 							$query = "	SELECT oletus_toimaika
 										FROM toimi
 										JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = toimi.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus AND tuotteen_toimittajat.tuoteno = '$row[tuoteno]')
-										WHERE toimi.yhtio = '$kukarow[yhtio]' 
+										WHERE toimi.yhtio = '$kukarow[yhtio]'
 										AND toimi.oletus_toimaika > 0
 										LIMIT 1";
 							$tulossa_result = mysql_query($query) or pupe_error($query);
@@ -1887,7 +1895,7 @@
 				echo "</tr>";
 
 				if ($verkkokauppa != "") {
-					
+
 					if (stripos($_SERVER["HTTP_USER_AGENT"], "MSIE") !== FALSE) {
 						echo "<tr><td colspan='6' class='back' style='padding:0px; margin:0px;height:0px;'><div id='T_$row[tuoteno]'></div></td></tr>";
 					}

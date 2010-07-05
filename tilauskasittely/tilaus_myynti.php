@@ -353,7 +353,7 @@ if (($tee == "" and (($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 a
 	elseif (@include("luo_myyntitilausotsikko.inc"));
 	else exit;
 
-	$tilausnumero = luo_myyntitilausotsikko($asiakasid, $tilausnumero, $myyjanro, '', $kantaasiakastunnus);
+	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanro, '', $kantaasiakastunnus);
 	$kukarow["kesken"] = $tilausnumero;
 	$kaytiin_otsikolla = "NOJOO!";
 }
@@ -4130,14 +4130,14 @@ if ($tee == '') {
 				$tarkres = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($tarkres) > 0) {
-					
+
 					$tuotekyslinkki = "tuote.php";
-					
+
 					$tarkrow = mysql_fetch_assoc($tarkres);
-										
+
 					if ($tarkrow["alanimi"] != "") {
 						$tuotekyslinkkilisa = "toim=$tarkrow[alanimi]&";
-					}													
+					}
 				}
 				else {
 					$query = "	SELECT tunnus

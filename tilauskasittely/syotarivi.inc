@@ -73,6 +73,10 @@
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus != '') {
+
+			// ALVimuutoksen takia: eli p‰‰ss‰t‰‰n rivin alvi jos sit‰ muokataan niin se ei automaattisesti vaihdu oletukseksi
+			echo "<input type='hidden' name='alv' value = '$alv'>";
+
 			echo "<tr>$jarjlisa";
 
 			$nrospanni = 4;

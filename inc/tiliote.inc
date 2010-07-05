@@ -627,6 +627,8 @@
 			if ($tee == 'S') echo "<td class='$class'></td>";
 
 			switch ($tyyppi) {
+
+				// Vapaa viesti
 				case '00' :
 				   	$selite = "";
 				   	$luottokuntatieto = "";
@@ -636,7 +638,7 @@
 				   		$osa = trim(substr($arvo, $i*35, 35));
 
 						if (strlen($osa) > 0) {
-				   			$selite .= $osa . "<br>";							
+				   			$selite .= $osa . "<br>";
 				   		}
 						// Luottokunnan k‰sittely‰ varten
 						if ($i == 1) $luottokuntatieto = $osa;
@@ -646,32 +648,58 @@
 				   		// if (substr($pankkitilino, 0, 1) != '8' and $i == 1) $luottokuntatieto = $osa;
 				   	}
 					break;
+
+				// Kappalem‰‰r‰tiedot
 				case '01' :
-					$selite = t("tapahtumia").": " . substr($arvo, 0, 8) * 1;
+					$selite = t("Tapahtumia").": " . substr($arvo, 0, 8) * 1;
 					//T‰ll‰ taklataan Aktian virhett‰, jossa tuo E puuttuu aineistosta
 					if ((substr($pankkitilino,0,1) == '4') and ($kuittikoodi == ' ')) $kuittikoodi='Z';
 					break;
-				case'05' :
 
+				// Laskutapahtuman tiedot
+				case '02' :
+					$osa_osa1 = trim(substr($tietue,  8, 10));
+					$osa_osa2 = trim(substr($tietue, 19, 15));
+					$osa_osa3 = trim(substr($tietue, 35,  6));
+					$selite = "";
+
+					if ($osa_osa1 != "" and $osa_osa1 != 0) {
+						$selite .= t("Asiakasnumero").": $osa_osa1<br>";
+					}
+					if ($osa_osa2 != "" and $osa_osa2 != 0) {
+						$selite .= t("Laskun numero").": $osa_osa2<br>";
+					}
+					if ($osa_osa3 != "" and $osa_osa3 != 0) {
+						$selite .= t("Laskun p‰iv‰ys").": $osa_osa3";
+					}
+					break;
+
+				// ?
+				case '05' :
 					$vasta_arvo	= sprintf('%.2f', substr($arvo, 0, 19)/100);
 					$vasta_kurssi	= substr($arvo, 24, 11) * 1 / 10000000;
 
-					$selite  = t("vasta-arvo").": ".sprintf('%.2f', substr($arvo, 0, 19)/100)."<br>";
-					$selite .= t("valuutta").": ".substr($arvo, 20, 3)."<br>";
-					$selite .= t("kurssi").": ".substr($arvo, 24, 11) * 1 / 10000000;
+					$selite  = t("Vasta-arvo").": ".sprintf('%.2f', substr($arvo, 0, 19)/100)."<br>";
+					$selite .= t("Valuutta").": ".substr($arvo, 20, 3)."<br>";
+					$selite .= t("Kurssi").": ".substr($arvo, 24, 11) * 1 / 10000000;
 					break;
+
+				// Toimeksiantajan tiedot itselleen
 				case '06' :
-					$selite  = t("Oma sis‰inen viite").":";
+					$selite = t("Oma sis‰inen viite").": ";
 					$selite .= trim(substr($arvo, 0, 35)) . "<br>";
 					$selite .= trim(substr($arvo, 35, 35));
-					$sisviite= trim(substr($arvo, 0, 35))*1;
+					$sisviite = trim(substr($arvo, 0, 35))*1;
 
 					//T‰m‰ on (kai) ongelma Analysten pankkisoftassa. Lis‰‰v‰t joskus oman tunnuksen
 					//ekaan sis‰inenviite kentt‰‰n, silloin meid‰n onkin toisessa.
-					if ((trim(substr($arvo, 35, 35))*1 != 0) and (trim(substr($arvo, 0, 35))*1 != 0))
+					if ((trim(substr($arvo, 35, 35))*1 != 0) and (trim(substr($arvo, 0, 35))*1 != 0)) {
 						$sisviite = trim(substr($arvo, 35, 35))*1;
+					}
 
 					break;
+
+				// ?
 				case '07' :
 					for ($i = 0; $i < 13; $i++) {
 						$osa = trim(substr($arvo, $i*35, 35));
@@ -680,21 +708,29 @@
 						}
 					}
 					break;
+
+				// ?
 				case '08' :
-					$selite = "".t("maksuaihekoodi").": " . substr($arvo, 0, 3) . "<br>";
-					$selite .= "selite: " . trim(substr($arvo, 4, 31));
+					$selite = t("Maksuaihekoodi").": " . substr($arvo, 0, 3) . "<br>";
+					$selite .= "Selite: " . trim(substr($arvo, 4, 31));
 					break;
+
+				// Nimitarkenteen tiedot
 				case '09' :
-					$selite = "".t("nimen tarkenne").": " .  trim(substr($arvo, 0, 35));
+					$selite = t("Nimen tarkenne").": ".trim(substr($arvo, 0, 35));
 					break;
+
+				// Oletus
 				default :
-					$selite = "<font class='error'>*** ".t("OHITETTU LISƒTIETO")." ***</font>";
+					$selite = t("Tuntematon lis‰tieto")." '$tyyppi': $arvo";
 					$eiselitetta = 1;
 			}
 
 			echo "<td class='$class'>$selite</td><td class='$class'></td><td class='$class'></td><td class='$class'></td></tr>";
+
 			$vientiselite .= $selite;
 			break;
+
 		case 'T40':
 
 			echo "<tr><td class='back'>&nbsp;</td></tr>";

@@ -9,8 +9,14 @@
 	}
 
 	$query = "	SELECT lasku.*,
-				laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
-				if (lasku.tila = 'L' and lasku.laskunro>0, (select lasku.mapvm from lasku l where l.yhtio = lasku.yhtio and l.laskunro = lasku.laskunro and l.tila = 'U'), lasku.mapvm) mapvm
+				laskun_lisatiedot.laskutus_nimi, 
+				laskun_lisatiedot.laskutus_nimitark, 
+				laskun_lisatiedot.laskutus_osoite, 
+				laskun_lisatiedot.laskutus_postino, 
+				laskun_lisatiedot.laskutus_postitp, 
+				laskun_lisatiedot.laskutus_maa,
+				if (lasku.tila = 'L' and lasku.laskunro>0, (select lasku.mapvm from lasku l where l.yhtio = lasku.yhtio and l.laskunro = lasku.laskunro and l.tila = 'U'), lasku.mapvm) mapvm,
+				(SELECT group_concat(distinct alv SEPARATOR ' ') FROM tilausrivi WHERE tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D') alv
 				FROM lasku
 				LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
 				WHERE lasku.tunnus = '$tunnus'

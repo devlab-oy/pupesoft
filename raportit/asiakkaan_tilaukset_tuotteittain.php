@@ -5,7 +5,7 @@
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-	
+
 	require ("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -16,6 +16,7 @@
 	if ($toim == 'MYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tuoteostot").":</font><hr>";
 	}
+
 	if ($toim == 'OSTO') {
 		echo "<font class='head'>".t("Tilatut tuotteet").":</font><hr>";
 	}
@@ -34,7 +35,7 @@
 
 	if ($tee == 'NAYTATILAUS') {
 		require ("naytatilaus.inc");
-		
+
 		echo "<br><br>";
 		$tee = "TULOSTA";
 	}
@@ -179,23 +180,23 @@
 		}
 
 		if ($toim == 'OSTO') {
-			$query = "	SELECT 
-						tilausrivi.tunnus, 
+			$query = "	SELECT
+						tilausrivi.tunnus,
 						lasku.tunnus tilaus,
 			 			lasku.ytunnus,
 						lasku.nimi,
-						lasku.postitp, 
+						lasku.postitp,
 						tilausrivi.tuoteno,
-						round((tilausrivi.varattu+tilausrivi.kpl),4) m‰‰r‰,						
+						round((tilausrivi.varattu+tilausrivi.kpl),4) m‰‰r‰,
 						round((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkm‰‰r‰,
-						round(tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi), '$yhtiorow[hintapyoristys]') hinta, 
-						round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),'$yhtiorow[hintapyoristys]') rivihinta,											
+						round(tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi), '$yhtiorow[hintapyoristys]') hinta,
+						round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 						lasku.toimaika,
 						tilausrivi.laskutettuaika tuloutettu,
-						lasku.tila, lasku.alatila						
+						lasku.tila, lasku.alatila
 						FROM tilausrivi
 						JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
-						JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus						
+						JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and lasku.tila IN ('O','K')
 						and tilausrivi.tyyppi = 'O'
@@ -209,23 +210,37 @@
 			else {
 				$asiakaslisa = "ytunnus, if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi, if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp, ";
 			}
-			
-			$query = "	SELECT distinct 
-						tilausrivi.tunnus, 
-						otunnus tilaus, 
-						laskunro,
-						$asiakaslisa 
-						tuoteno, 
-						tilausrivi.nimitys, 
-						(kpl+varattu) m‰‰r‰,
-						round(tilausrivi.hinta, $yhtiorow[hintapyoristys]) hinta, 
-						tilausrivi.ale, 
-						round(rivihinta, $yhtiorow[hintapyoristys]) rivihinta,
+
+			if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+				$katelisa = " tilausrivi.kate, ";
+			}
+			else {
+				$katelisa = "";
+			}
+
+			$query = "	SELECT distinct
+						tilausrivi.tunnus,
+						tilausrivi.otunnus tilaus,
+						lasku.laskunro,
+						$asiakaslisa
+						tilausrivi.tuoteno,
+						tilausrivi.nimitys,
+						(tilausrivi.kpl+tilausrivi.varattu) m‰‰r‰,
+						tilausrivi.hinta,
+						tilausrivi.ale,
+						if (tilausrivi.kpl!=0, tilausrivi.rivihinta, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))) rivihinta,
+						tilausrivi.kate,
 						lasku.toimaika,
-						lasku.lahetepvm,
-						lasku.tila, 
-						lasku.alatila
-						FROM tilausrivi, lasku
+						lasku.lahetepvm K‰sittelyyn,
+						lasku.tila,
+						lasku.alatila,
+						lasku.tapvm,
+						tilausrivi.tyyppi,
+						tuote.kehahin,
+						tuote.sarjanumeroseuranta
+						FROM tilausrivi
+						JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and lasku.yhtio=tilausrivi.yhtio
 						and lasku.tunnus=tilausrivi.otunnus
@@ -250,12 +265,19 @@
 		$query .= "$jarj";
 		$result = mysql_query($query) or pupe_error($query);
 
+		if ($toim == 'OSTO') {
+			$miinus = 2;
+		}
+		else {
+			$miinus = 6;
+		}
+
 		if (mysql_num_rows($result) > 0) {
 
-			echo "<br><table border='0' cellpadding='2' cellspacing='1'>";
+			echo "<br><table>";
 			echo "<tr>";
 
-			for ($i=1; $i < mysql_num_fields($result)-2; $i++) {
+			for ($i=1; $i < mysql_num_fields($result)-$miinus; $i++) {
 				if ($toim == 'OSTO' and $pvmtapa == 'toimaika') {
 					$pvmtapa_url = "&pvmtapa=toimaika";
 				}
@@ -280,21 +302,22 @@
 
 			echo "</tr>";
 
-			$kplsumma = 0;
+			$kplsumma 		= 0;
 			$rivihintasumma = 0;
+			$kate_yht  		= 0;
 
 			while ($row = mysql_fetch_array($result)) {
 
 				$excelsarake = 0;
 
 				$ero = "td";
-				if ($tunnus == $row['tilaus']) $ero="th";
+				if ($tunnus == $row['tilaus']) $ero = "th";
 
 				echo "<tr class='aktiivi'>";
 
-				for ($i=1; $i<mysql_num_fields($result)-2; $i++) {
-					
-					if (mysql_field_name($result,$i) == 'kerattyaika' or mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'tuloutettu') {
+				for ($i=1; $i<mysql_num_fields($result)-$miinus; $i++) {
+
+					if (mysql_field_name($result,$i) == 'kerattyaika' or mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'tuloutettu' or mysql_field_name($result,$i) == 'K‰sittelyyn') {
 						echo "<$ero valign='top'>".tv1dateconv($row[$i],"pitka")."</$ero>";
 					}
 					elseif (mysql_field_name($result,$i) == 'kpl' or mysql_field_name($result,$i) == 'tilkpl' or mysql_field_name($result,$i) == 'jt' or mysql_field_name($result,$i) == 'ale') {
@@ -306,15 +329,118 @@
 					elseif (mysql_field_name($result,$i) == 'alv') {
 						echo "<$ero valign='top' align='right'>".($row[$i]*1)."</td>";
 					}
-					elseif (is_numeric($row[$i])) {
+					elseif (mysql_field_name($result,$i) == 'kate') {
+						// T‰n rivin kate
+						$kate = 0;
+
+						if ($row["tapvm"] != '0000-00-00') {
+
+							if ($row["m‰‰r‰"] == 0) {
+								$kate = "";
+							}
+							elseif ($row["rivihinta"] != 0) {
+								if ($row["kate"] < 0) {
+									$kate = sprintf('%.2f', -1 * abs(100 * $row["kate"] / $row["rivihinta"]))."%";
+								}
+								else {
+									$kate = sprintf('%.2f', abs(100 * $row["kate"] / $row["rivihinta"]))."%";
+								}
+							}
+							elseif ($row["kate"] != 0) {
+								$kate = "-100.00%";
+							}
+
+							$kate_yht += $row["kate"];
+						}
+						elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U")) {
+							if ($kpl > 0) {
+								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
+								$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);
+
+								// Kate = Hinta - Ostohinta
+								if ($row["rivihinta"] != 0) {
+									$kate = sprintf('%.2f',100*($row["rivihinta"] - ($ostohinta * $kpl))/$row["rivihinta"])."%";
+								}
+
+								$kate_yht += ($row["rivihinta"] - ($ostohinta * $kpl));
+							}
+							elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "O") {
+								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
+
+								// Kate = 0
+								$kate = "0%";
+							}
+							elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "") {
+								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
+
+								//T‰h‰n hyvitysriviin liitetyt sarjanumerot
+								$query = "	SELECT sarjanumero, kaytetty
+											FROM sarjanumeroseuranta
+											WHERE yhtio 		= '$kukarow[yhtio]'
+											and ostorivitunnus 	= '$row[tunnus]'";
+								$sarjares = mysql_query($query) or pupe_error($query);
+
+								$ostohinta = 0;
+
+								while($sarjarow = mysql_fetch_array($sarjares)) {
+
+									// Haetaan hyvitett‰vien myyntirivien kautta alkuper‰iset ostorivit
+									$query  = "	SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
+												FROM sarjanumeroseuranta
+												JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
+												WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
+												and sarjanumeroseuranta.tuoteno 	= '$row[tuoteno]'
+												and sarjanumeroseuranta.sarjanumero = '$sarjarow[sarjanumero]'
+												and sarjanumeroseuranta.kaytetty 	= '$sarjarow[kaytetty]'
+												and sarjanumeroseuranta.myyntirivitunnus > 0
+												and sarjanumeroseuranta.ostorivitunnus   > 0
+												ORDER BY sarjanumeroseuranta.tunnus
+												LIMIT 1";
+									$sarjares1 = mysql_query($query) or pupe_error($query);
+									$sarjarow1 = mysql_fetch_array($sarjares1);
+
+									$ostohinta += $sarjarow1["ostohinta"];
+								}
+
+								// Kate = Hinta - Alkuper‰inen ostohinta
+								if ($row["rivihinta"] != 0) {
+									$kate = sprintf('%.2f',100 * ($row["rivihinta"]*-1 - $ostohinta)/$row["rivihinta"])."%";
+								}
+								else {
+									$kate = "100.00%";
+								}
+
+								$kate_yht += ($row["rivihinta"]*-1 - $ostohinta);
+							}
+							else {
+								$kate = "N/A";
+							}
+						}
+						elseif ($kukarow['extranet'] == '') {
+
+							if ($row["rivihinta"] != 0) {
+								$kate = sprintf('%.2f',100*($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])))/$row["rivihinta"])."%";
+							}
+							elseif (kehahin($row["tuoteno"]) != 0) {
+								$kate = "-100.00%";
+							}
+
+							$kate_yht += ($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['m‰‰r‰'])));
+						}
+
+						$row[$i] = $kate;
+
+						echo "<$ero align='right' valign='top' nowrap>$kate</$ero>";
+					}
+					elseif (is_numeric($row[$i]) and mysql_field_name($result,$i) != 'ytunnus') {
 						echo "<$ero valign='top' align='right' nowrap>".(float) $row[$i]."</$ero>";
 					}
 					else {
 						echo "<$ero valign='top'>$row[$i]</td>";
 					}
 
-					if(isset($workbook)) {
-						if (is_numeric($row[$i])) {
+					if (isset($workbook)) {
+						if (is_numeric($row[$i]) and mysql_field_name($result,$i) != 'ytunnus') {
 							$worksheet->writeNumber($excelrivi, $excelsarake, $row[$i], $format_num);
 						}
 						else {
@@ -358,7 +484,7 @@
 
 				echo "</tr>";
 
-				if(isset($workbook)) {
+				if (isset($workbook)) {
 					$excelrivi++;
 				}
 			}
@@ -370,23 +496,45 @@
 				$csp = 6;
 			}
 
-			echo "<tr><td colspan='$csp' align='right' class='back'>".t("Yhteens‰").":</td>
-					<td align='right' class='back'>".(float) $kplsumma."</td>
-					<td colspan='2' align='right' class='back'></td>
-					<td align='right' class='back'>".sprintf('%01.2f', $rivihintasumma)."</td></tr>";
+			echo "<tr>
+					<td colspan='$csp' class='back'></td>
+					<td align='right' class='spec'>".t("Yhteens‰").":</td>
+					<td align='right' class='spec'>".(float) $kplsumma."</td>
+					<td colspan='2' align='right' class='spec'></td>
+					<td align='right' class='spec'>".sprintf('%01.2f', $rivihintasumma)."</td>";
+
+			if ($toim != "OSTO" and $kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+
+				if ($kate_yht < 0) {
+					$ykate = @round(-1 * abs($kate_yht / $rivihintasumma * 100), 2);
+				}
+				else {
+					$ykate = @round(abs($kate_yht / $rivihintasumma * 100), 2);
+				}
+
+				echo "<td class='spec' align='right' nowrap>".sprintf('%.2f',$ykate)."%</td>";
+			}
+
+
+			echo "</tr>";
 			echo "</table>";
 
-			if(isset($workbook)) {
-				if($toim == "OSTO") {
+			if (isset($workbook)) {
+				if ($toim == "OSTO") {
 					$worksheet->writeFormula($excelrivi, 5, "=sum(F2:F$excelrivi)");
 					$worksheet->write($excelrivi, 6, "");
 					$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
 				}
 				else {
-					$worksheet->writeFormula($excelrivi, 6, "=sum(G2:G$excelrivi)");
-					$worksheet->write($excelrivi, 7, "");
-					$worksheet->writeFormula($excelrivi, 8, "=sum(I2:I$excelrivi)");
+					$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
+					$worksheet->writeFormula($excelrivi, 10, "=sum(K2:K$excelrivi)");
+
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+
+						$worksheet->write($excelrivi, 11, $ykate);
+					}
 				}
+
 				$workbook->close();
 
 				echo "<br><table>";

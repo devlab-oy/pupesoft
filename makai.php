@@ -35,7 +35,7 @@
 
 	}
 
-	if ($tee == "KIRJOITA") {
+	if ($tee == "KIRJOITA" or $tee == "lataa_tiedosto") {
 
 		$popvm_nyt = date("Y-m-d H:i:s");
 		

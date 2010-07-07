@@ -70,6 +70,10 @@ if (!function_exists('jt_toimita_editilaus')) {
 
 // nollataan kaikki laskun muuttujat (nämä samat pitää tehdä whilen lopussa)
 unset($arow);
+unset($arow_viite);
+unset($arow_ostaja);
+unset($arow_toimitus);
+unset($arow_terminaali);
 $editilaus_tila       	= "N"; // laskun tila
 $editilaus_alatila		= "";
 $editilaus_tyyppi     	= "L"; // tilausrivi tyyppi
@@ -375,7 +379,7 @@ while (!feof ($fd)) {
 		case 'ORFFABONU' :
 		case 'OSTOTIL.OT_VIITTEEMME' :
 		//Asiakkaan viite
-			$viite .= $tieto;
+			$viite .= $tieto. ' ';
 			break;
 
 		case 'ONADBY_RF' :
@@ -383,19 +387,22 @@ while (!feof ($fd)) {
 				$tieto = substr($tieto, 4, 10) * 1;
 			}
 		case 'ONADCN_PC' :
-			// lopullisen asiakkaan ovttunnus
 			$type = explode("@", $tieto);
 			$lopnumero = trim($type[0]);
 		case 'ONADBY_PC' :
 		case 'OSTOTIL.OT_ASIAKASNRO' :
 		case 'ONADDP_PC' :
-			//ONADBY_PC  - Ostajan OVT-tunnus
-			//ONADCN_PC  - Toimitusosoitteen OVT-tunnus
-			//ONADDP_PC  - Ostajan logistiikkakeskuksen OVT-tunnus
-			//ONADBY_RF  - Ostajan meidän asiakasnumero
-			//OSTOTIL.OT_ASIAKASNRO  - Ostajan meidän asiakasnumero
+			// ONADBY_PC - Ostajan osapuolen tunniste
+			// ONADDP_PC - Toimitusosoitteen osapuolen tunniste
+			// ONADCN_PC - Ostajan logistiikkakeskuksen tunniste (CN -tarkenne ei ole Itellan speksissä, joten tämä on itse pääteltyä!)
+			// ONADBY_RF - Ostajan osapuolen viite (meidän asiakasnumero)
+			// OSTOTIL.OT_ASIAKASNRO - Ostajan meidän asiakasnumero
 
 			$tieto = trim(substr($tieto, 0, 17));
+
+			if ($tieto == "") {
+				break;
+			}
 
 			if (!is_array($arow)) {
 				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
@@ -448,6 +455,24 @@ while (!feof ($fd)) {
 				else {
 					$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
 				}
+			}
+
+			// otetaan talteen kaikki eri arowt, valitaan paras lopuksi.
+			if (is_array($arow) and $tunnus == 'ONADBY_RF') {
+				$arow_viite = $arow;
+				unset($arow);
+			}
+			elseif (is_array($arow) and $tunnus == 'ONADBY_PC') {
+				$arow_ostaja = $arow;
+				unset($arow);
+			}
+			elseif (is_array($arow) and $tunnus == 'ONADDP_PC') {
+				$arow_toimitus = $arow;
+				unset($arow);
+			}
+			elseif (is_array($arow) and $tunnus == 'ONADCN_PC') {
+				$arow_terminaali = $arow;
+				unset($arow);
 			}
 
 			break;
@@ -641,6 +666,22 @@ while (!feof ($fd)) {
 		//Tilaus päättyy. Aika tehdä se kantaan
 		case 'OHDR__END' :
 		case '*RE OSTOTIL' :
+
+			// valitaan paras arow!
+			if (!is_array($arow)) {
+				if (isset($arow_viite)) {
+					$arow = $arow_viite;
+				}
+				elseif (isset($arow_terminaali)) {
+					$arow = $arow_terminaali;
+				}
+				elseif (isset($arow_toimitus)) {
+					$arow = $arow_toimitus;
+				}
+				elseif (isset($arow_ostaja)) {
+					$arow = $arow_ostaja;
+				}
+			}
 
 			// lisätään otsikko vain jos asiakas löytyi
 			if (!is_array($arow)) {
@@ -1378,6 +1419,10 @@ while (!feof ($fd)) {
 
 			// nollataan kaikki laskun muuttujat (kaikki nämä samat pitää nollata filen alussa)
 			unset($arow);
+			unset($arow_viite);
+			unset($arow_ostaja);
+			unset($arow_toimitus);
+			unset($arow_terminaali);
 			$toimpvm				= date("Y-m-d");
 			$editilaus_tila       	= "N"; // laskun tila
 			$editilaus_alatila		= "";

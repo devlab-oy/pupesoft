@@ -4,16 +4,24 @@
 		require("../inc/parametrit.inc");
 	}
 
+	// suomen oletus ALV muuttui 1.7.2010
+	if (isset($vv) and isset($kk) and $vv == '2010' and $kk < 7) {
+		$oletus_verokanta = 22;
+	}
+	else {
+		$oletus_verokanta = 23;
+	}
+
 	if (!function_exists("alv_laskelma")) {
 		function alvlaskelma ($kk,$vv) {
-			global $yhtiorow, $kukarow, $startmonth, $endmonth;
+			global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta;
 
 			if (function_exists("laskeveroja")) die;
 
 			function laskeveroja ($taso, $tulos) {
-				global $yhtiorow, $kukarow, $startmonth, $endmonth;
+				global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta;
 
-				if ($tulos == '22' or $tulos == 'veronmaara' or $tulos == 'summa') {
+				if ($tulos == $oletus_verokanta or $tulos == 'veronmaara' or $tulos == 'summa') {
 
 					if ($taso == 'fi307') {
 						$vainsuomi = "JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.maa in ('FI', '')";
@@ -65,7 +73,7 @@
 										and lasku.vienti = 'E'";
 						}
 						else {
-							$query = "	SELECT sum(round(tiliointi.summa * if('$tulos'='22', 22, vero) / 100, 2)) veronmaara,
+							$query = "	SELECT sum(round(tiliointi.summa * if('$tulos'='$oletus_verokanta', $oletus_verokanta, vero) / 100, 2)) veronmaara,
 										sum(tiliointi.summa) summa,
 							 			count(*) kpl
 										FROM tiliointi
@@ -86,7 +94,7 @@
 						$verores = mysql_query($query) or pupe_error($query);
 
 						while ($verorow = mysql_fetch_array ($verores)) {
-							if ($tulos == '22') $tulos = 'veronmaara';
+							if ($tulos == $oletus_verokanta) $tulos = 'veronmaara';
 							$vero += $verorow[$tulos];
 						}
 					}
@@ -134,13 +142,16 @@
 					while ($verorow = mysql_fetch_array ($verores)) {
 
 						switch ($verorow['vero']) {
+							case 23 :
 							case 22 :
 								$fi301 += $verorow['veronmaara'];
 								break;
 							case 12 :
+							case 13 :
 								$fi302 += $verorow['veronmaara'];
 								break;
 							case 8 :
+							case 9 :
 								$fi303 += $verorow['veronmaara'];
 								break;
 							default:
@@ -165,10 +176,10 @@
 				******************************************/
 
 				// 305 sääntö fi305
-				$fi305 = laskeveroja('fi305','22');
+				$fi305 = laskeveroja('fi305', $oletus_verokanta);
 
 				// 306 sääntö fi306
-				$fi306 = laskeveroja('fi306','22');
+				$fi306 = laskeveroja('fi306', $oletus_verokanta);
 
 				// 307 sääntö fi307
 				$fi307 = laskeveroja('fi307','veronmaara') + $fi305 + $fi306;
@@ -206,9 +217,17 @@
 				echo "<tr><th>",t("Ilmoitettava kausi"),"</th><th>".substr($startmonth,0,4)."/".substr($startmonth,5,2)."</th></tr>";
 
 				echo "<tr><th colspan='2'>",t("Vero kotimaan myynnistä verokannoittain"),"</th></tr>";
-				echo "<tr><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk'>301</a> ",t("22% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
-				echo "<tr><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk'>302</a> ",t("12% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
-				echo "<tr><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk'>303</a> ",t("8% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
+
+				if ($oletus_verokanta == 22) {
+					echo "<tr><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk'>301</a> ",t("22% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
+					echo "<tr><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk'>302</a> ",t("12% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
+					echo "<tr><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk'>303</a> ",t("8% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
+				}
+				else {
+					echo "<tr><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk'>301</a> ",t("23% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
+					echo "<tr><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk'>302</a> ",t("13% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
+					echo "<tr><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk'>303</a> ",t("9% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
+				}
 
 				foreach ($fi3xx as $fikey => $fival) {
 					echo "<tr><td>xxx ".($fikey * 1).t("% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fival)."</td></tr>";
@@ -409,13 +428,13 @@
 
 			switch ($ryhma) {
 				case 'fi301' :
-					$tiliointilisa .= " and tiliointi.vero = '22' ";
+					$tiliointilisa .= " and tiliointi.vero in (22, 23) ";
 					break;
 				case 'fi302' :
-					$tiliointilisa .= " and tiliointi.vero = '12' ";
+					$tiliointilisa .= " and tiliointi.vero in (12, 13) ";
 					break;
 				case 'fi303' :
-					$tiliointilisa .= " and tiliointi.vero = '8' ";
+					$tiliointilisa .= " and tiliointi.vero in (8, 9) ";
 					break;
 			}
 
@@ -429,7 +448,7 @@
 						tiliointi.tilino,
 						tili.nimi,
 						sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) bruttosumma,
-						sum(round(tiliointi.summa * if (('$ryhma' = 'fi305' or '$ryhma' = 'fi306'), 0.22, tiliointi.vero / 100), 2)) verot,
+						sum(round(tiliointi.summa * if (('$ryhma' = 'fi305' or '$ryhma' = 'fi306'), ($oletus_verokanta / 100), tiliointi.vero / 100), 2)) verot,
 						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) bruttosumma_valuutassa,
 						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) verot_valuutassa,
 						count(*) kpl
@@ -529,7 +548,7 @@
 				$vero = 0.0;
 
 				if ($tilirow['tilit'] != '') {
-					$query = "SELECT sum(round(summa * 0.22, 2)) veronmaara
+					$query = "SELECT sum(round(summa * ($oletus_verokanta / 100), 2)) veronmaara
 							FROM tiliointi
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND korjattu = ''

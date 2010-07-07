@@ -1766,8 +1766,8 @@ if (!function_exists('print_pdf_lahete')) {
 			$content_body = "";
 
 			if ($tyyppi == "TILAUSVAHVISTUS") {
-				$kutsu = t("Tilausvahvistus", $kieli);
 				echo t("Tilausvahvistus tulostuu")."...<br>";
+				$kutsu = t("Tilausvahvistus %s", $kieli, $laskurow["tunnus"]);
 				$content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
 				$content_body .= t("Tilausnumeronne on", $kieli)." $laskurow[tunnus]\n\n";
 				$content_body .= t("Tämä on automaattinen vahvistus tilauksestanne, tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n\n";
@@ -1775,12 +1775,12 @@ if (!function_exists('print_pdf_lahete')) {
 				$content_body .= $yhtiorow["nimi"]."\n";
 			}
 			elseif ($tyyppi == "YLLAPITOSOPIMUS") {
-				$kutsu = t("Ylläpitosopimus", $kieli);
 				echo t("Ylläpitosopimus tulostuu")."...<br>";
+				$kutsu = t("Ylläpitosopimus %s", $kieli, $laskurow["tilaus"]);
 			}
 			else {
-				$kutsu = t("Lähete", $kieli);
 				echo t("Lähete tulostuu")."...<br>";
+				$kutsu = t("Lähete %s", $kieli, $laskurow["tilaus"]);
 			}
 
 			if (@include("../inc/sahkoposti.inc"));

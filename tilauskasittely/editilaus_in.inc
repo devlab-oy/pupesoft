@@ -670,16 +670,16 @@ while (!feof ($fd)) {
 			// valitaan paras arow!
 			if (!is_array($arow)) {
 				if (isset($arow_viite)) {
-					$arow = $arow_viite;
+					$arow = $arow_viite;				// ONADBY_RF
 				}
 				elseif (isset($arow_terminaali)) {
-					$arow = $arow_terminaali;
+					$arow = $arow_terminaali;			// ONADCN_PC
 				}
 				elseif (isset($arow_toimitus)) {
-					$arow = $arow_toimitus;
+					$arow = $arow_toimitus;				// ONADDP_PC
 				}
 				elseif (isset($arow_ostaja)) {
-					$arow = $arow_ostaja;
+					$arow = $arow_ostaja;				// ONADBY_PC
 				}
 			}
 
@@ -1134,7 +1134,7 @@ while (!feof ($fd)) {
 						list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno);
 
 						// jos saldo ei riit‰ normivarastoista, pit‰‰ katsoa miss‰ varastossa riitt‰‰ ja myyd‰‰n sielt‰ (koska jossain riitt‰‰, muuten tilaus ei olisi edes tullu t‰nne asti)
-						if ($chk_myytavissa < $kpl) {
+						if ($chk_myytavissa <= $kpl) {
 							$query = "	SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
 										FROM tuotepaikat
 										JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio

@@ -141,7 +141,9 @@
 
 				if ($laskutapahtuma == '10') {
 					$makskpl += 1;
+					$totkpl += 1;
 					$makssumma += $laskusumma;
+					$totsumma += $laskusumma;
 				}
 
 				// jos halutaan "pitk‰ viesti" (t‰nne ei toistaiseksi voi joutua mitenk‰‰n)

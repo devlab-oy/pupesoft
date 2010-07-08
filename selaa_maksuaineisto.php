@@ -11,7 +11,7 @@
 	echo "<table>";
 	echo "<form method='post' action=''>";
 
-	echo "<th valign='top'>",t("Alkukausi"),"</th>";
+	echo "<th valign='top'>",t("Alkupvm"),"</th>";
 	echo "<td><select name='alkuvv'>";
 
 	$sel = array();
@@ -22,7 +22,7 @@
 		echo "<option value='{$i}' {$sel[$i]}>{$i}</option>";
 	}
 
-	echo "</select>";
+	echo "</select> ";
 
 	$sel = array();
 	if (!isset($alkukk) or $alkukk == "") $alkukk = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -35,7 +35,7 @@
 		echo "<option value='{$val}' {$sel[$val]}>{$val}</option>";
 	}
 
-	echo "</select>";
+	echo "</select> ";
 
 	$sel = array();
 	if (!isset($alkupp) or $alkupp == "") $alkupp = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -52,7 +52,7 @@
 
 
 	echo "<tr>
-		<th valign='top'>",t("Loppukausi"),"</th>
+		<th valign='top'>",t("Loppupvm"),"</th>
 		<td><select name='loppuvv'>";
 
 	$sel = array();
@@ -63,7 +63,7 @@
 		echo "<option value='{$i}' {$sel[$i]}>{$i}</option>";
 	}
 
-	echo "</select>";
+	echo "</select> ";
 
 	$sel = array();
 	if (!isset($loppukk) or $loppukk == "") $loppukk = date("m");
@@ -76,7 +76,7 @@
 		echo "<option value='{$val}' {$sel[$val]}>{$val}</option>";
 	}
 
-	echo "</select>";
+	echo "</select> ";
 
 	$sel = array();
 	if (!isset($loppupp) or $loppupp == "") $loppupp = date("d", mktime(0, 0, 0, (date("m")+1), 0, date("Y")));
@@ -91,14 +91,12 @@
 
 	echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
-	echo "<tr><th>",t("Poimija"),"</th><td><input type='text' name='kuka_poimi' value='{$kuka_poimi}'></td><td><input type='submit' name='submitbutton' value='",t("Hae"),"'></td></tr>";
+	echo "<tr><th>",t("Poimija"),"</th><td><input type='text' name='kuka_poimi' value='{$kuka_poimi}'></td><td class='back'><input type='submit' name='submitbutton' value='",t("Hae"),"'></td></tr>";
 	echo "<input type='hidden' name='tee' value=''>";
 	echo "<input type='hidden' name='tunnukset' value=''>";
 
 	echo "</form>";
 	echo "</table>";
-
-	echo "<br />";
 
 	if ($tee == '') {
 
@@ -113,8 +111,8 @@
 					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
 					LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND lasku.tila in ('P', 'Q', 'Y') 
-					AND lasku.maksuaika >= '$alkuvv-$alkukk-$alkupp 00:00:00' and lasku.maksuaika <= '$loppuvv-$loppukk-$loppupp 23:59:59'
+					AND lasku.tila in ('P', 'Q', 'Y')
+					AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00' and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
 					$lisa
 					GROUP BY 1,2,3,4
 					ORDER BY 1,2,3,4 ASC";
@@ -128,6 +126,7 @@
 			while ($row = mysql_fetch_assoc($result)) {
 				if ($tyyppi == '' or $tyyppi != $row['tyyppi']) {
 
+					echo "<tr><td class='back'>&nbsp;</td></tr>";
 					echo "<tr><th colspan='5'>";
 
 					if ($row['tyyppi'] == 1) {
@@ -139,9 +138,23 @@
 
 					echo "</th></tr>";
 
-					echo "<tr><th>",t("Pvm"),"</th><th>",t("Poimijan nimi"),"</th><th>",t("Maksutili"),"</th><th>",t("Laskuja"),"</th><th>",t("Summa")," {$yhtiorow['valkoodi']}</th></tr>";
+					echo "<tr>";
+					echo "<th>",t("Maksuaineisto"),"</th>";
+					echo "<th>",t("Poimijan nimi"),"</th>";
+					echo "<th>",t("Maksutili"),"</th>";
+					echo "<th>",t("Laskuja"),"</th>";
+					echo "<th>",t("Summa")," {$yhtiorow['valkoodi']}</th>";
+					echo "</tr>";
 				}
-				echo "<tr><td><a href='{$palvelin2}selaa_maksuaineisto.php?tee=selaa&alkuvv={$alkuvv}&alkukk={$alkukk}&alkupp={$alkupp}&loppuvv={$loppuvv}&loppukk={$loppukk}&loppupp={$loppupp}&tunnukset={$row['tunnukset']}'>{$row['aika']}</a></td><td>{$row['kukanimi']}</td><td>{$row['maksu_tili']}</td><td align='right'>{$row['kpl']}</td><td align='right'>{$row['summa']}</td></tr>";
+
+				echo "<tr>";
+				echo "<td><a href='{$palvelin2}selaa_maksuaineisto.php?tee=selaa&alkuvv={$alkuvv}&alkukk={$alkukk}&alkupp={$alkupp}&loppuvv={$loppuvv}&loppukk={$loppukk}&loppupp={$loppupp}&tunnukset={$row['tunnukset']}'>{$row['aika']}</a></td>";
+				echo "<td>{$row['kukanimi']}</td>";
+				echo "<td>{$row['maksu_tili']}</td>";
+				echo "<td align='right'>{$row['kpl']}</td>";
+				echo "<td align='right'>{$row['summa']}</td>";
+				echo "</tr>";
+
 				$tyyppi = $row['tyyppi'];
 			}
 
@@ -159,7 +172,7 @@
 					FROM lasku
 					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND lasku.tila in ('P', 'Q', 'Y') 
+					AND lasku.tila in ('P', 'Q', 'Y')
 					AND lasku.maksuaika > '0000-00-00 00:00:00'
 					$lisa
 					ORDER BY lasku.tila, lasku.maksuaika ASC";
@@ -167,12 +180,35 @@
 
 		if (mysql_num_rows($result) > 0) {
 
-			echo "<a hreF='{$palvelin2}selaa_maksuaineisto.php?&alkuvv={$alkuvv}&alkukk={$alkukk}&alkupp={$alkupp}&loppuvv={$loppuvv}&loppukk={$loppukk}&loppupp={$loppupp}'>&laquo; ",t("Takaisin"),"</a><br /><br /><table>";
+			echo "<br />";
+			echo "<a hreF='{$palvelin2}selaa_maksuaineisto.php?&alkuvv={$alkuvv}&alkukk={$alkukk}&alkupp={$alkupp}&loppuvv={$loppuvv}&loppukk={$loppukk}&loppupp={$loppupp}'>&laquo; ",t("Takaisin"),"</a>";
+			echo "<br />";
+			echo "<br />";
 
-			echo "<tr><th>",t("Nimi"),"</th><th>",t("Laskunro"),"</th><th>",t("Tapvm"),"</th><th>",t("Summa"),"</th><th>",t("Poimija"),"</th><th>",t("Poimittu"),"</th><th>",t("Maksuaineisto luotu"),"</th><th>",t("Mapvm"),"</th></tr>";
+			echo "<table>";
+
+			echo "<tr>";
+			echo "<th>",t("Nimi"),"</th>";
+			echo "<th>",t("Laskunro"),"</th>";
+			echo "<th>",t("Tapvm"),"</th>";
+			echo "<th>",t("Summa"),"</th>";
+			echo "<th>",t("Poimija"),"</th>";
+			echo "<th>",t("Poimittu"),"</th>";
+			echo "<th>",t("Maksuaineisto luotu"),"</th>";
+			echo "<th>",t("Mapvm"),"</th>";
+			echo "</tr>";
 
 			while ($row = mysql_fetch_assoc($result)) {
-				echo "<tr class='aktiivi'><td>{$row['nimi']} {$row['nimitark']}</td><td align='right'>{$row['laskunro']}</td><td valign='top'>",tv1dateconv($row['tapvm']),"</td><td align='right'>{$row['summa']} {$row['valkoodi']}</td><td>{$row['kukanimi']}</td><td>",tv1dateconv($row['maksuaika'], 'PITKA', ''),"</td><td>",tv1dateconv($row['popvm'], 'PITKA', ''),"</td><td valign='top'>",tv1dateconv($row['mapvm']),"</td></tr>";
+				echo "<tr class='aktiivi'>";
+				echo "<td>{$row['nimi']} {$row['nimitark']}</td>";
+				echo "<td align='right'>{$row['laskunro']}</td>";
+				echo "<td valign='top'>",tv1dateconv($row['tapvm']),"</td>";
+				echo "<td align='right'>{$row['summa']} {$row['valkoodi']}</td>";
+				echo "<td>{$row['kukanimi']}</td>";
+				echo "<td>",tv1dateconv($row['maksuaika'], 'PITKA', ''),"</td>";
+				echo "<td>",tv1dateconv($row['popvm'], 'PITKA', ''),"</td>";
+				echo "<td valign='top'>",tv1dateconv($row['mapvm']),"</td>";
+				echo "</tr>";
 			}
 
 			echo "</table>";

@@ -141,7 +141,7 @@
 					$limlis = " LIMIT $alku, 50 ";
 				}
 
-				$query = "	SELECT tapvm, erpcm, summa, valkoodi, vienti, concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus, if(laskunro = 0, '', laskunro) laskunro
+				$query = "	SELECT tapvm, erpcm, summa, valkoodi, vienti, concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus, if(laskunro = 0, '', laskunro) laskunro, round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summaeur
 						  	FROM lasku
 						  	WHERE yhtio = '$kukarow[yhtio]'
 						  	$toimiliilisa
@@ -210,29 +210,32 @@
 					require "inc/laskutyyppi.inc";
 					echo "<td valign='top'>".t($laskutyyppi)."<br>".ostolaskun_vienti($trow["vienti"])."</td>";
 
-					$yhteensa += $trow["summa"];
+					$yhteensa += $trow["summaeur"];
 
 					echo "</tr>";
 				}
 
-				echo "<tr><th>".t("Yhteensä:")."</th><td align='right'>$yhteensa</td></tr>";
+				echo "<tr><th>".t("Yhteensä:")."</th><th align='right'>$yhteensa</th><th>$yhtiorow[valkoodi]</th><th colspan='5'></th></tr>";
 				echo "</table><br>";
 
 				if ($limit != "NO") {
+
 					if ($alku > 0) {
 						$siirry = $alku - 50;
-						echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Edelliset")."</a> ";
+						echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>&laquo; ".t("Edelliset")."</a> ";
 					}
-					else {
-						echo t("Edelliset")." ";
-					}
+
+					echo "&nbsp;&nbsp;";
 
 					if ($seraavako >= 50) {
 						$siirry = $alku + 50;
-						echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Seuraavat")."</a> ";
+						echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Seuraavat")." &raquo;</a> ";
 						echo "<br><br>";
 					}
+
 				}
+
+
 				require "footer.inc";
 				exit;
 			}

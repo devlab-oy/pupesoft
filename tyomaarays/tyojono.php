@@ -261,52 +261,26 @@
 
 			$lopetusx .= "/SPLIT/$PHP_SELF////konserni=$konserni//toim=$toim//myyntitilaus_haku=$myyntitilaus_haku//viesti_haku=$viesti_haku//asiakasnumero_haku=$asiakasnumero_haku//asiakasnimi_haku=$asiakasnimi_haku//suorittaja_haku=$suorittaja_haku//tyojono_haku=$tyojono_haku//tyostatus_haku=$tyostatus_haku";
 
+			// vrow.asennuskalenteri = kaikki työnjohdon tekemät merkinnät tälle työmääräykselle
 			foreach (explode(",", $vrow["asennuskalenteri"]) as $asekale) {
 
 				list($pvmalku, $pvmloppu, $selitetark_2, $tunnus, $selitetark, $asennussekunnit) = explode("##", $asekale);
-
 				list($alku_pvm, $alku_klo) = explode(" ", $pvmalku);
 				list($loppu_pvm, $loppu_klo) = explode(" ", $pvmloppu);
 
-				if ($toim != 'TYOMAARAYS_ASENTAJA' or $kukarow['kuka'] == $selitetark) {
-					$query = "	SELECT kalenteri.kuka, a4.selitetark_2 nimi, left(kalenteri.pvmalku, 10) pvmalku, left(kalenteri.pvmloppu, 10) pvmloppu,
-								sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu)) sekunnit,
-								SEC_TO_TIME(sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) aika
-								FROM kalenteri
-								LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka
-								WHERE kalenteri.yhtio = '$kukarow[yhtio]'
-								AND kalenteri.tyyppi = 'kalenteri'
-								AND kalenteri.kentta02 = '$vrow[tunnus]'
-								GROUP BY 1,2,3,4
-								ORDER BY 1,2,3";
-					$tunti_chk_res = mysql_query($query) or pupe_error($query);
-
-					if ($toim == 'TYOMAARAYS_ASENTAJA') {
-
-						$olenko_asentaja_tassa_hommassa = TRUE;
-
+				// jos ollaan asentaja
+				if ($toim == 'TYOMAARAYS_ASENTAJA') {		
+					if ($kukarow['kuka'] == $selitetark) {
+						$olenko_asentaja_tassa_hommassa = TRUE;						
 						list($url_vuosi, $url_kk, $url_pp) = explode("-", $alku_pvm);
 						echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>".tv1dateconv($alku_pvm, "", "LYHYT")." $selitetark_2</a><br>";
 					}
-
-					if (mysql_num_rows($tunti_chk_res) > 0) {
-						while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
-
-							$tyomaarays_kuitti_yhteensa[$vrow['tunnus']][$tunti_chk_row["nimi"]] += $tunti_chk_row['sekunnit'];
-
-							if ($toim == 'TYOMAARAYS_ASENTAJA' and $kukarow['kuka'] == $tunti_chk_row["kuka"]) {
-								list($url_vuosi, $url_kk, $url_pp) = explode("-", $tunti_chk_row["pvmalku"]);
-								list($url_tunti, $url_min, $url_sek) = explode(":", $tunti_chk_row["aika"]);
-
-								echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>".tv1dateconv($tunti_chk_row["pvmalku"], "", "LYHYT")." $selitetark_2 ".(int) $url_tunti."h".$url_min."m</a><br>";
-							}
-						}
+					else {
+						echo tv1dateconv($pvmloppu, "", "LYHYT")." $selitetark_2<br>";
 					}
 				}
-				elseif ($toim == 'TYOMAARAYS_ASENTAJA') {
-					echo tv1dateconv($pvmloppu, "", "LYHYT")." $selitetark_2<br>";
-				}
 
+				// jos ollaan työnjohto
 				if ($toim != 'TYOMAARAYS_ASENTAJA') {
 					$tyomaarays_tunti_yhteensa[$vrow['tunnus']][$selitetark_2] += $asennussekunnit;
 
@@ -322,6 +296,32 @@
 					echo " $selitetark_2</a><br>";
 				}
 			}
+
+			// lasketaan katotaan mitä asentajat on syöttänyt tunteja
+			$query = "	SELECT kalenteri.kuka, a4.selitetark_2 nimi, left(kalenteri.pvmalku, 10) pvmalku, left(kalenteri.pvmloppu, 10) pvmloppu,
+						sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu)) sekunnit,
+						SEC_TO_TIME(sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) aika
+						FROM kalenteri
+						LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA' and a4.selitetark=kalenteri.kuka
+						WHERE kalenteri.yhtio = '$kukarow[yhtio]'
+						AND kalenteri.tyyppi = 'kalenteri'
+						AND kalenteri.kentta02 = '$vrow[tunnus]'
+						GROUP BY 1,2,3,4
+						ORDER BY 1,2,3";
+			$tunti_chk_res = mysql_query($query) or pupe_error($query);
+
+			while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
+				$tyomaarays_kuitti_yhteensa[$vrow['tunnus']][$tunti_chk_row["nimi"]] += $tunti_chk_row['sekunnit'];
+
+				// jos me itse ollaan ko. asentaja
+				if ($toim == 'TYOMAARAYS_ASENTAJA' and $kukarow['kuka'] == $tunti_chk_row["kuka"]) {
+					list($url_vuosi, $url_kk, $url_pp) = explode("-", $tunti_chk_row["pvmalku"]);
+					list($url_tunti, $url_min, $url_sek) = explode(":", $tunti_chk_row["aika"]);
+					echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>".tv1dateconv($tunti_chk_row["pvmalku"], "", "LYHYT")." $tunti_chk_row[nimi]: ".(int) $url_tunti."h ".$url_min."m</a><br>";
+				}
+
+			}
+
 		}
 
 		echo $vrow["suorittajanimi"];

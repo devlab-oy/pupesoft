@@ -681,7 +681,7 @@
 				}
 
 				$kassaale = 0;
-				if ($kapro != 0) {
+				if ($kapro != 0 and (float) $summa > 0) {
 					$kassaale = $summa * $kapro / 100;
 					$kapro = 0;
 				}

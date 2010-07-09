@@ -617,7 +617,15 @@
 					$pdf->draw_rectangle(758, 300, 737, 580, $thispage, $rectparam);
 					$pdf->draw_rectangle(758, 420, 737, 580, $thispage, $rectparam);
 					$pdf->draw_text(310, 750, t("Asiaa hoitaa", $kieli), 				$thispage, $pieni);
-					$pdf->draw_text(310, 740, $kukarow["nimi"], 						$thispage, $norm);
+
+					//etsitään myyjän nimi
+					$query  = "	SELECT nimi
+								from kuka
+								where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
+					$myyresult = mysql_query($query) or pupe_error($query);
+					$myyrow = mysql_fetch_array($myyresult);
+
+					$pdf->draw_text(310, 740, $myyrow["nimi"], 							$thispage, $norm);
 
 					$pdf->draw_text(430, 750, t("Toimitusaika", $kieli),				$thispage, $pieni);
 					$pdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), 		$thispage, $norm);

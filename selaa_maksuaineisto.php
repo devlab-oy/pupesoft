@@ -106,7 +106,13 @@
 			$lisa .= " and (lasku.maksaja like '%".mysql_real_escape_string((string) $kuka_poimi)."%' or kuka.nimi like '%".mysql_real_escape_string((string) $kuka_poimi)."%') ";
 		}
 
-		$query = "	SELECT if(lasku.maa = 'fi', 1, 2) tyyppi, lasku.popvm aika, kuka.nimi kukanimi, CONCAT(yriti.nimi, ' ', yriti.tilino) maksu_tili, COUNT(*) kpl, GROUP_CONCAT(lasku.tunnus) tunnukset, round(sum(lasku.summa*if(lasku.maksu_kurssi=0,lasku.vienti_kurssi,lasku.maksu_kurssi)), 2) summa
+		$query = "	SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
+					lasku.popvm aika,
+					kuka.nimi kukanimi,
+					CONCAT(yriti.nimi, ' ', yriti.tilino) maksu_tili,
+					COUNT(*) kpl,
+					GROUP_CONCAT(lasku.tunnus) tunnukset,
+					round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
 					FROM lasku
 					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
 					LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
@@ -147,7 +153,7 @@
 					echo "</tr>";
 				}
 
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 				echo "<td><a href='{$palvelin2}selaa_maksuaineisto.php?tee=selaa&alkuvv={$alkuvv}&alkukk={$alkukk}&alkupp={$alkupp}&loppuvv={$loppuvv}&loppukk={$loppukk}&loppupp={$loppupp}&tunnukset={$row['tunnukset']}'>{$row['aika']}</a></td>";
 				echo "<td>{$row['kukanimi']}</td>";
 				echo "<td>{$row['maksu_tili']}</td>";
@@ -168,7 +174,21 @@
 
 		if ($tunnukset) $lisa .= " and lasku.tunnus in ($tunnukset) ";
 
-		$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.maksaja, lasku.maksuaika, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro, lasku.summa, lasku.valkoodi, kuka.nimi kukanimi, lasku.popvm, lasku.tapvm, lasku.mapvm
+		$query = "	SELECT lasku.nimi,
+					lasku.nimitark,
+					lasku.maksaja,
+					lasku.maksuaika,
+					if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
+					lasku.summa,
+					if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) poimittusumma,
+					lasku.valkoodi,
+					kuka.nimi kukanimi,
+					lasku.popvm,
+					lasku.tapvm,
+					lasku.olmapvm,
+					lasku.mapvm,
+					round(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) poimittusumma_eur,
+					round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summa_eur
 					FROM lasku
 					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -191,25 +211,42 @@
 			echo "<th>",t("Nimi"),"</th>";
 			echo "<th>",t("Laskunro"),"</th>";
 			echo "<th>",t("Tapvm"),"</th>";
+			echo "<th>",t("Mapvm"),"</th>";
 			echo "<th>",t("Summa"),"</th>";
+			echo "<th>",t("Maksettu"),"</th>";
 			echo "<th>",t("Poimija"),"</th>";
 			echo "<th>",t("Poimittu"),"</th>";
 			echo "<th>",t("Maksuaineisto luotu"),"</th>";
 			echo "<th>",t("Mapvm"),"</th>";
 			echo "</tr>";
 
+			$poimittu_summa = 0;
+			$summa = 0;
+
 			while ($row = mysql_fetch_assoc($result)) {
 				echo "<tr class='aktiivi'>";
 				echo "<td>{$row['nimi']} {$row['nimitark']}</td>";
 				echo "<td align='right'>{$row['laskunro']}</td>";
 				echo "<td valign='top'>",tv1dateconv($row['tapvm']),"</td>";
+				echo "<td valign='top'>",tv1dateconv($row['olmapvm']),"</td>";
 				echo "<td align='right'>{$row['summa']} {$row['valkoodi']}</td>";
+				echo "<td align='right'>{$row['poimittusumma']} {$row['valkoodi']}</td>";
 				echo "<td>{$row['kukanimi']}</td>";
 				echo "<td>",tv1dateconv($row['maksuaika'], 'PITKA', ''),"</td>";
 				echo "<td>",tv1dateconv($row['popvm'], 'PITKA', ''),"</td>";
 				echo "<td valign='top'>",tv1dateconv($row['mapvm']),"</td>";
 				echo "</tr>";
+
+				$poimittu_summa += $row['poimittusumma_eur'];
+				$summa += $row['summa_eur'];
 			}
+
+			echo "<tr>";
+			echo "<th colspan='4'>".t("Yhteensä")."</th>";
+			echo "<th>$summa $yhtiorow[valkoodi]</th>";
+			echo "<th>$poimittu_summa $yhtiorow[valkoodi]</th>";
+			echo "<th colspan='4'></th>";
+			echo "</tr>";
 
 			echo "</table>";
 

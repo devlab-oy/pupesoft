@@ -191,6 +191,8 @@ unset($MONTH_ARRAY);
 
 unset($VOIPURL);
 
+unset($liitetaanko_editilaus_laskulle_hakemisto);
+
 require("salasanat.php");
 
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteytt‰. Se on pois p‰‰lt‰ tai k‰ytt‰j‰tietosi ovat virheelliset.");

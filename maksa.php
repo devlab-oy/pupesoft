@@ -13,10 +13,6 @@
 					and tila in ('H', 'M')
 					and mapvm = '0000-00-00'";
 		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_affected_rows() != 0) {
-			printf(t("Päivitin %d laskua, joiden oletusmaksupäivä oli muuttunut"), mysql_affected_rows());
-		}
 	}
 
     if ($tee == 'O') {
@@ -1160,7 +1156,7 @@
 					if ($trow["ysumma"] != $trow["ykasumma"] and $trow['ysumma'] > 0) {
 						$ruksi='checked';
 						if ($trow['kapvm'] < date("Y-m-d")) {
-							$ruksi = ''; // Ooh, maksamme myösässä
+							$ruksi = ''; // Ooh, maksamme myöhässä
 						}
 						echo "<input type='checkbox' name='kaale' $ruksi> ";
 						echo t("Käytä kassa-ale");

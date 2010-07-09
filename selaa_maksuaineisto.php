@@ -106,22 +106,44 @@
 			$lisa .= " and (lasku.maksaja like '%".mysql_real_escape_string((string) $kuka_poimi)."%' or kuka.nimi like '%".mysql_real_escape_string((string) $kuka_poimi)."%') ";
 		}
 
-		$query = "	SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
-					lasku.popvm aika,
-					kuka.nimi kukanimi,
-					CONCAT(yriti.nimi, ' ', yriti.tilino) maksu_tili,
-					COUNT(*) kpl,
-					GROUP_CONCAT(lasku.tunnus) tunnukset,
-					round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
-					FROM lasku
-					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
-					LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
-					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND lasku.tila in ('P', 'Q', 'Y')
-					AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00' and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
-					$lisa
-					GROUP BY 1,2,3,4
-					ORDER BY tyyppi ASC, aika DESC";
+		if ($yhtiorow["pankkitiedostot"] == "E") {
+			$query = "	SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
+						lasku.popvm aika,
+						kuka.nimi kukanimi,
+						lasku.olmapvm,
+						CONCAT(yriti.nimi, ' ', yriti.tilino) maksu_tili,
+						COUNT(*) kpl,
+						GROUP_CONCAT(lasku.tunnus) tunnukset,
+						round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
+						FROM lasku
+						LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
+						LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						AND lasku.tila in ('P', 'Q', 'Y')
+						AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00' and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
+						$lisa
+						GROUP BY tyyppi, aika, kukanimi, olmapvm, maksu_tili
+						ORDER BY tyyppi ASC, aika DESC";
+		}
+		else {
+			$query = "	SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
+						lasku.popvm aika,
+						kuka.nimi kukanimi,
+						group_CONCAT(distinct yriti.nimi, ' ', yriti.tilino separator '<br>') maksu_tili,
+						COUNT(*) kpl,
+						GROUP_CONCAT(lasku.tunnus) tunnukset,
+						round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
+						FROM lasku
+						LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
+						LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						AND lasku.tila in ('P', 'Q', 'Y')
+						AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00' and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
+						$lisa
+						GROUP BY tyyppi, aika, kukanimi
+						ORDER BY tyyppi ASC, aika DESC";
+			
+		}
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -188,10 +210,12 @@
 					lasku.olmapvm,
 					lasku.mapvm,
 					lasku.erpcm,
+					yriti.nimi maksu_tili,
 					round(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) poimittusumma_eur,
 					round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summa_eur
 					FROM lasku
 					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
+					LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND lasku.tila in ('P', 'Q', 'Y')
 					AND lasku.maksuaika > '0000-00-00 00:00:00'
@@ -233,6 +257,7 @@
 			echo "<th>",t("Mapvm"),"</th>";
 			echo "<th>",t("Summa"),"</th>";
 			echo "<th>",t("Maksettu"),"</th>";
+			echo "<th>",t("Pankkitili"),"</th>";
 			echo "<th>",t("Poimittu aineistoon"),"</th>";
 			echo "</tr>";
 
@@ -249,6 +274,7 @@
 				echo "<td valign='top'>",tv1dateconv($row['mapvm']),"</td>";
 				echo "<td align='right'>{$row['summa']} {$row['valkoodi']}</td>";
 				echo "<td align='right'>{$row['poimittusumma']} {$row['valkoodi']}</td>";
+				echo "<td>{$row['maksu_tili']}</td>";
 				echo "<td>",tv1dateconv($row['maksuaika'], 'PITKA', ''),"</td>";
 				echo "</tr>";
 
@@ -260,7 +286,7 @@
 			echo "<th colspan='6'>".t("Yhteensä")."</th>";
 			echo "<th>$summa $yhtiorow[valkoodi]</th>";
 			echo "<th>$poimittu_summa $yhtiorow[valkoodi]</th>";
-			echo "<th></th>";
+			echo "<th colspan='2'></th>";
 			echo "</tr>";
 
 			echo "</table>";

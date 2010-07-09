@@ -8,7 +8,7 @@
 	if (count($_POST) == 0) {
 		// Tarkistetaan laskujen oletusmaksupvm, eli poistetaan vanhentuneet kassa-alet. tehd‰‰n ta‰m‰ aina kun aloitetaan maksatus
 		$query = "	UPDATE lasku use index (yhtio_tila_mapvm)
-					SET olmapvm = if(kapvm < now(), erpcm, kapvm)
+					SET olmapvm = if(kapvm < now() or kapvm > erpcm, erpcm, kapvm)
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tila in ('H', 'M')
 					and mapvm = '0000-00-00'";

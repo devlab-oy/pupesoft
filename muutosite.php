@@ -966,8 +966,23 @@ if ($tee == 'E' or $tee == 'F') {
 		if ($trow["hyvak4"] != "") echo "<tr><th>".t("Hyväksyjä4")."</th><td nowrap>".tv1dateconv($trow["h4time"], "PITKÄ")." &raquo; $trow[hyvak4_nimi]</td></tr>";
 		if ($trow["hyvak5"] != "") echo "<tr><th>".t("Hyväksyjä5")."</th><td nowrap>".tv1dateconv($trow["h5time"], "PITKÄ")." &raquo; $trow[hyvak5_nimi]</td></tr>";
 		echo "<tr><th>".t("Poimittu")."</th><td nowrap>".tv1dateconv($trow["maksuaika"], "PITKÄ", "")." &raquo; $trow[maksaja_nimi]</td></tr>";
-		echo "<tr><th>".t("Maksuaineisto")."</th><td nowrap>".tv1dateconv($trow["popvm"], "PITKÄ", "")." &raquo; ";
-		if ($trow["popvm"] != '0000-00-00 00:00:00') echo "$trow[maksaja_nimi]";
+		echo "<tr><th>".t("Maksuaineisto")."</th><td nowrap>";
+		if ($trow["popvm"] != '0000-00-00 00:00:00') {
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%selaa_maksuaineisto.php' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
+			$res = mysql_query($queryoik) or pupe_error($queryoik);
+
+			if (mysql_num_rows($res) > 0) {
+				list($apu, $dymmu) = explode(" ", $trow["popvm"]);
+				list($apu_vv, $apu_kk, $apu_pp) = explode("-", $apu);
+				echo "<a href='{$palvelin2}selaa_maksuaineisto.php?alkuvv=$apu_vv&alkukk=$apu_kk&alkupp=$apu_pp&loppuvv=$apu_vv&loppukk=$apu_kk&loppupp=$apu_pp&kuka_poimi=$trow[maksaja_nimi]'>";
+				echo tv1dateconv($trow["popvm"], "PITKÄ", "");
+				echo "</a>";
+			}
+			else {
+				echo tv1dateconv($trow["popvm"], "PITKÄ", "");
+			}
+			echo " &raquo;  $trow[maksaja_nimi]";
+		}
 		echo "</td></tr>";
 		if ($trow['maksajanpankkitili'] != '') echo "<tr><th>".t("Oma pankkitili")."</th><td>$trow[maksajanpankkitili] ($trow[maksajanpankkitilinro])</td></tr>";
 

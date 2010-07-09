@@ -121,7 +121,7 @@
 					AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00' and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
 					$lisa
 					GROUP BY 1,2,3,4
-					ORDER BY 1,2,3,4 ASC";
+					ORDER BY tyyppi ASC, aika DESC";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -187,6 +187,7 @@
 					lasku.tapvm,
 					lasku.olmapvm,
 					lasku.mapvm,
+					lasku.erpcm,
 					round(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) poimittusumma_eur,
 					round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summa_eur
 					FROM lasku
@@ -195,7 +196,7 @@
 					AND lasku.tila in ('P', 'Q', 'Y')
 					AND lasku.maksuaika > '0000-00-00 00:00:00'
 					$lisa
-					ORDER BY lasku.tila, lasku.maksuaika ASC";
+					ORDER BY lasku.liitostunnus, lasku.tapvm, lasku.summa ASC";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -205,19 +206,34 @@
 			echo "<br />";
 			echo "<br />";
 
+			$row = mysql_fetch_assoc($result);
+
+			echo "<table>";
+			echo "<tr class='aktiivi'>";
+			echo "<th>",t("Poimija"),"</th>";
+			echo "<td>{$row['kukanimi']}</td>";
+			echo "</tr>";
+			echo "<tr class='aktiivi'>";
+			echo "<th>",t("Maksuaineisto"),"</th>";
+			echo "<td>",tv1dateconv($row['popvm'], 'PITKA', ''),"</td>";
+			echo "</tr>";
+			echo "</table>";
+			echo "<br />";
+
+			mysql_data_seek($result, 0);
+
 			echo "<table>";
 
 			echo "<tr>";
 			echo "<th>",t("Nimi"),"</th>";
 			echo "<th>",t("Laskunro"),"</th>";
 			echo "<th>",t("Tapvm"),"</th>";
+			echo "<th>",t("Eräpvm"),"</th>";
+			echo "<th>",t("Olmapvm"),"</th>";
 			echo "<th>",t("Mapvm"),"</th>";
 			echo "<th>",t("Summa"),"</th>";
 			echo "<th>",t("Maksettu"),"</th>";
-			echo "<th>",t("Poimija"),"</th>";
-			echo "<th>",t("Poimittu"),"</th>";
-			echo "<th>",t("Maksuaineisto luotu"),"</th>";
-			echo "<th>",t("Mapvm"),"</th>";
+			echo "<th>",t("Poimittu aineistoon"),"</th>";
 			echo "</tr>";
 
 			$poimittu_summa = 0;
@@ -228,13 +244,12 @@
 				echo "<td>{$row['nimi']} {$row['nimitark']}</td>";
 				echo "<td align='right'>{$row['laskunro']}</td>";
 				echo "<td valign='top'>",tv1dateconv($row['tapvm']),"</td>";
+				echo "<td valign='top'>",tv1dateconv($row['erpcm']),"</td>";
 				echo "<td valign='top'>",tv1dateconv($row['olmapvm']),"</td>";
+				echo "<td valign='top'>",tv1dateconv($row['mapvm']),"</td>";
 				echo "<td align='right'>{$row['summa']} {$row['valkoodi']}</td>";
 				echo "<td align='right'>{$row['poimittusumma']} {$row['valkoodi']}</td>";
-				echo "<td>{$row['kukanimi']}</td>";
 				echo "<td>",tv1dateconv($row['maksuaika'], 'PITKA', ''),"</td>";
-				echo "<td>",tv1dateconv($row['popvm'], 'PITKA', ''),"</td>";
-				echo "<td valign='top'>",tv1dateconv($row['mapvm']),"</td>";
 				echo "</tr>";
 
 				$poimittu_summa += $row['poimittusumma_eur'];
@@ -242,10 +257,10 @@
 			}
 
 			echo "<tr>";
-			echo "<th colspan='4'>".t("Yhteensä")."</th>";
+			echo "<th colspan='6'>".t("Yhteensä")."</th>";
 			echo "<th>$summa $yhtiorow[valkoodi]</th>";
 			echo "<th>$poimittu_summa $yhtiorow[valkoodi]</th>";
-			echo "<th colspan='4'></th>";
+			echo "<th></th>";
 			echo "</tr>";
 
 			echo "</table>";

@@ -263,6 +263,7 @@
 
 			$poimittu_summa = 0;
 			$summa = 0;
+			$laskuja = 0;
 
 			while ($row = mysql_fetch_assoc($result)) {
 				echo "<tr class='aktiivi'>";
@@ -278,12 +279,13 @@
 				echo "<td>",tv1dateconv($row['maksuaika'], 'PITKA', ''),"</td>";
 				echo "</tr>";
 
+				$laskuja++;
 				$poimittu_summa += $row['poimittusumma_eur'];
 				$summa += $row['summa_eur'];
 			}
 
 			echo "<tr>";
-			echo "<th colspan='6'>".t("Yhteensä")."</th>";
+			echo "<th colspan='6'>".t("Yhteensä")." $laskuja ".t("kpl")."</th>";
 			echo "<th>$summa $yhtiorow[valkoodi]</th>";
 			echo "<th>$poimittu_summa $yhtiorow[valkoodi]</th>";
 			echo "<th colspan='2'></th>";

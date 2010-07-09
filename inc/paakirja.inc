@@ -190,7 +190,8 @@
 		}
 
 		$query = "	SELECT $alku , kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite,
-					tiliointi.summa, tiliointi.vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi, tiliointi.tunnus rivitunnus
+					tiliointi.summa, tiliointi.vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi, tiliointi.tunnus rivitunnus,
+					kustp.koodi kustp_koodi, kohde.koodi kohde_koodi, projekti.koodi projekti_koodi
 					FROM tiliointi
 					LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
 					LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
@@ -330,6 +331,10 @@
 				else {
 					if ($i == 5) {
 						$trow[$i] = str_replace("<br>"," ",$trow[$i]);
+					}
+
+					if (($i == 2 or $i == 3 or $i == 4) and trim($trow[mysql_field_name($result, $i).'_koodi']) != '') {
+						$trow[$i] = $trow[mysql_field_name($result, $i).'_koodi'].' '.$trow[$i];
 					}
 
 					echo "<td valign='top'>$trow[$i]</td>";
@@ -617,7 +622,7 @@
 	echo "</td></tr>";
 
 	// haetaan kustannuspaikat
-	$query = "	SELECT tunnus, nimi
+	$query = "	SELECT tunnus, nimi, koodi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
@@ -626,7 +631,7 @@
 	$k_result = mysql_query($query) or pupe_error($query);
 
 	// haetaan kohteet
-	$query = "	SELECT tunnus, nimi
+	$query = "	SELECT tunnus, nimi, koodi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
@@ -635,7 +640,7 @@
 	$o_result = mysql_query($query) or pupe_error($query);
 
 	// haetaan projektit
-	$query = "	SELECT tunnus, nimi
+	$query = "	SELECT tunnus, nimi, koodi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
@@ -682,7 +687,7 @@
 				if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_kustp)) {
 					$sel = "selected";
 				}
-				echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
+				echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 			}
 			echo "</select>";
 		}
@@ -704,7 +709,7 @@
 				if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_kohde)) {
 					$sel = "selected";
 				}
-				echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
+				echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 			}
 			echo "</select>";
 		}
@@ -726,7 +731,7 @@
 				if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_proj)) {
 					$sel = "selected";
 				}
-				echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
+				echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 			}
 			echo "</select>";
 		}

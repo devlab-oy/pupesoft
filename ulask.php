@@ -400,6 +400,13 @@ if ($tee == 'I') {
 				$errormsg .= "<font class='error'>".t("Kassapvm on, mutta kassa-ale puuttu")."</font><br>";
 				$tee = 'E';
 			}
+			$kassa_alepvmcheck = (int) date('Ymd',mktime(0, 0, 0, $kak, $kap, $kav));
+			$erapvmcheck = (int) date('Ymd',mktime(0, 0, 0, $erk, $erp, $erv));
+			
+			if ($kassa_alepvmcheck > $erapvmcheck) {
+				$errormsg .= "<font class='error'>".t("Kassapvm ei voi olla eräpäivän jälkeen")."</font><br>";
+				$tee = 'E';				
+			}
 		}
 	}
 
@@ -733,7 +740,6 @@ if ($tee == 'P' or $tee == 'E') {
 		}
 
 		echo "<table><tr><td valign='top' style='padding: 0px;'>";
-
 
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";

@@ -848,13 +848,13 @@
 		$laskurow = mysql_fetch_array($result);
 
 		//	Tarkistetaan onko tälläistä laskua tältä toimittajalta jo kierrossa
-		if ($laskurow["asiakkaan_tilausnumero"] != "") {
+		if ($laskurow["laskunro"] != "") {
 			$query = "	SELECT *,
 						concat_ws('@', laatija, luontiaika) kuka,
 						summa,
 						valkoodi
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and liitostunnus='$laskurow[liitostunnus]' and tila IN ('H','M','P','Q','Y') and asiakkaan_tilausnumero = '$laskurow[asiakkaan_tilausnumero]' and tunnus != $laskurow[tunnus]";
+						WHERE yhtio = '$kukarow[yhtio]' and liitostunnus='$laskurow[liitostunnus]' and tila IN ('H','M','P','Q','Y') and laskunro = '$laskurow[laskunro]' and tunnus != $laskurow[tunnus]";
 			$tarkres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($tarkres) != 0) {
@@ -1399,8 +1399,10 @@
 		echo "<th>".t("Postitp")."</th>";
 		echo "<th>".t("Yhtiön valuutassa")."</th>";
 		echo "<th>".t("Laskun valuutassa")."</th>";
+		echo "<th>".t("Laskunro")."</th>";
 		echo "<th>".t("Liitetty")."</th>";
 		echo "<th>".t("Tyyppi")."</th>";
+		if ($liitetaanko_editilaus_laskulle_hakemisto != '') echo "<th>",t("Vertailu"),"</th>";
 		echo "</tr>";
 
 		while ($trow = mysql_fetch_array ($result)) {
@@ -1454,10 +1456,48 @@
 			echo "<td valign='top'>$trow[postitp]</td>";
 			echo "<td valign='top' style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
 			echo "<td valign='top' style='text-align: right;'>$trow[summa] $trow[valkoodi]</td>";
+			echo "<td valign='top' style='text-align: right;'>$trow[laskunro]</td>";
 			echo "<td valign='top' style='text-align: right;'>$liitetty</td>";
 
 			// tehdään lasku linkki
 			echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
+
+			if ($liitetaanko_editilaus_laskulle_hakemisto != '') {
+				echo "<td valign='top'>";
+
+				list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $trow['tunnus']);
+
+				if ($invoice != FALSE and $invoice != 'ei_loydy_edia') {
+
+					if (count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
+						$ok = 'ok';
+
+						foreach ($loytyy_kummastakin as $tuoteno => $null) {
+
+							if ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or $invoice[$tuoteno]['nettohinta'] != $purchaseorder[$tuoteno]['nettohinta']) {
+								echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=hyvak.php////kutsuja=//'>",t("Eroja"),"</a>";
+								$ok = '';
+								break;
+							}
+						}
+
+						if ($ok == 'ok') {
+							echo "<font class='ok'>",t("OK"),"</font>";
+						}
+					}
+					else {
+						echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=hyvak.php////kutsuja=//'>",t("Eroja"),"</a>";
+					}
+				}
+				elseif ($invoice == 'ei_loydy_edia') {
+					echo "<font class='error'>X</font>";
+				}
+				else {
+					echo "&nbsp;";
+				}
+
+				echo "</td>";
+			}
 
 			echo "<td class='back' valign='top'>
 					<form action = '$PHP_SELF' method='post'>

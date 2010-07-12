@@ -89,7 +89,7 @@ if ($tee == 'T') {
 
 // L = Toimittajan laskunumero
 if ($tee == 'L') {
-	$ehto = "tila in ('H','Y','M','P','Q') and asiakkaan_tilausnumero = '$summa1'";
+	$ehto = "tila in ('H','Y','M','P','Q') and laskunro = '$summa1'";
 	$jarj = "nimi, summa";
 }
 

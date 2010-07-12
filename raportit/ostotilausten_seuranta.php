@@ -319,7 +319,7 @@
 
 						$query  = "	SELECT liitosotsikko.arvo * if(ostoreskontran_lasku.maksu_kurssi <> 0, ostoreskontran_lasku.maksu_kurssi, ostoreskontran_lasku.vienti_kurssi) summa_euroissa,
 									ostoreskontran_lasku.luontiaika,
-									concat(ostoreskontran_lasku.asiakkaan_tilausnumero, ' ', ostoreskontran_lasku.viesti) numero,
+									concat(ostoreskontran_lasku.laskunro, ' ', ostoreskontran_lasku.viesti) numero,
 									ostoreskontran_lasku.tunnus,
 									liitosotsikko.tunnus litunn
 									FROM lasku liitosotsikko
@@ -368,7 +368,7 @@
 
 						$query  = "	SELECT liitosotsikko.arvo * if(ostoreskontran_lasku.maksu_kurssi <> 0, ostoreskontran_lasku.maksu_kurssi, ostoreskontran_lasku.vienti_kurssi) summa_euroissa,
 									ostoreskontran_lasku.luontiaika,
-									concat(ostoreskontran_lasku.asiakkaan_tilausnumero, ' ', ostoreskontran_lasku.viesti) numero,
+									concat(ostoreskontran_lasku.laskunro, ' ', ostoreskontran_lasku.viesti) numero,
 									ostoreskontran_lasku.tunnus,
 									liitosotsikko.tunnus litunn
 									FROM lasku liitosotsikko
@@ -484,7 +484,7 @@
 				// LASKUT JOITA EI OLE LIITETTY KEIKKOIHIN
 				$query = "	SELECT lasku.summa, lasku.maksu_kurssi, lasku.vienti_kurssi, lasku.valkoodi,
 							lasku.luontiaika,
-							concat(lasku.asiakkaan_tilausnumero, ' ', lasku.viesti) numero,
+							concat(lasku.laskunro, ' ', lasku.viesti) numero,
 							lasku.tunnus
 							FROM lasku
 							LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')

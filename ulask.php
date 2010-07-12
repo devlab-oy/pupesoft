@@ -402,12 +402,17 @@ if ($tee == 'I') {
 			}
 			$kassa_alepvmcheck = (int) date('Ymd',mktime(0, 0, 0, $kak, $kap, $kav));
 			$erapvmcheck = (int) date('Ymd',mktime(0, 0, 0, $erk, $erp, $erv));
-			
+
 			if ($kassa_alepvmcheck > $erapvmcheck) {
 				$errormsg .= "<font class='error'>".t("Kassapvm ei voi olla eräpäivän jälkeen")."</font><br>";
-				$tee = 'E';				
+				$tee = 'E';
 			}
 		}
+	}
+
+	if (!is_numeric(trim($toimittajan_laskunumero))) {
+		$errormsg .= "<font class='error'>".t("Laskunumero on oltava numeerinen")."</font><br/>";
+		$tee = 'E';
 	}
 
 	if (trim($hyvak[1]) == "") {
@@ -740,6 +745,7 @@ if ($tee == 'P' or $tee == 'E') {
 		}
 
 		echo "<table><tr><td valign='top' style='padding: 0px;'>";
+
 
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
@@ -1445,7 +1451,7 @@ if ($tee == 'I') {
 			suoraveloitus = '$osuoraveloitus',
 			luontiaika = now(),
 			comments = '$komm',
-			asiakkaan_tilausnumero = '$toimittajan_laskunumero',
+			laskunro = '$toimittajan_laskunumero',
 			sisviesti1 = '$ohjeitapankille',
 			alv_tili = '$tilino_alv'";
 

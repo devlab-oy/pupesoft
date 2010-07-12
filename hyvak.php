@@ -854,13 +854,18 @@
 						summa,
 						valkoodi
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and liitostunnus='$laskurow[liitostunnus]' and tila IN ('H','M','P','Q','Y') and laskunro = '$laskurow[laskunro]' and tunnus != $laskurow[tunnus]";
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and liitostunnus='$laskurow[liitostunnus]' 
+						and tila IN ('H','M','P','Q','Y') 
+						and laskunro = '$laskurow[laskunro]' 
+						and laskunro != 0
+						and tunnus != $laskurow[tunnus]";
 			$tarkres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($tarkres) != 0) {
 				echo "<br><font class = 'error'>".t("HUOM! Toimittajalta on saapunut jo lasku samalla laskunumerolla!")."</font><table>";
 
-				while($tarkrow = mysql_fetch_array($tarkres)) {
+				while ($tarkrow = mysql_fetch_array($tarkres)) {
 					echo "<tr><td class='back'>$tarkrow[summa] $tarkrow[valkoodi]</td><td class='back'>$tarkrow[kuka]</td><td class='back'><a href='muutosite.php?tee=E&tunnus=$tarkrow[tunnus]'>".t("Avaa lasku")."</a></td>";
 				}
 				echo "</table><br><br>";

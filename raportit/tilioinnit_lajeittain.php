@@ -138,7 +138,7 @@
 
 		if ($laji == "myynti") {
 			$laskurajaus = "AND lasku.tila = 'U'";
-			
+
 			$laskutiedot = "lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi, vienti";
 		}
 
@@ -177,10 +177,17 @@
 				echo "<th>".t("vienti")."</th>";
 				echo "<th>".t("Valuutta")."</th>";
 				if($laji == "myynti") {
-					echo "<th>".t("Alv 22%")."</th>";
-					echo "<th>".t("Alv 17%")."</th>";
-					echo "<th>".t("Alv 8%")."</th>";
-					echo "<th>".t("Alv 0%")."</th>";
+					$query = "	SELECT selite
+								FROM avainsana
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND laji = 'ALV'
+								ORDER by jarjestys, selite";
+					$alv_result = mysql_query($query) or pupe_error($query);
+
+					while ($alv_row = mysql_fetch_array($alv_result)) {
+						echo "<th>".t("Alv")." $alv_row[selite]%</th>";
+					}
+
 				}
 				echo "</tr>";
 
@@ -196,7 +203,7 @@
 					elseif(in_array($row["vienti"], array("G", "H", "I", "L"))) {
 						$row["vienti"] = t("EI EU");
 					}
-					
+
 					echo "<tr class='aktiivi'>";
 					echo "<td nowrap valign='top'>$row[laskunro]</td>";
 					echo "<td valign='top'>$row[nimi]</td>";
@@ -204,49 +211,60 @@
 					echo "<td nowrap valign='top' align='right'>".number_format($row["summa"], 2, ',', ' ')."</td>";
 					echo "<td nowrap valign='top' align='right'>$row[valkoodi]</td>";
 					echo "<td nowrap valign='top' align='right'>$row[vienti]</td>";
-					
-					if($laji == "myynti") {
+
+					if ($laji == "myynti") {
+
+						// alvikannat alkuun
+						mysql_data_seek($alv_result, 0);
+
+						$query = "SELECT ";
+
+						while ($alv_row = mysql_fetch_array($alv_result)) {
+							$query .= " sum(if(tilausrivi.alv=$alv_row[selite], rivihinta*(tilausrivi.alv/100), 0)) alv$alv_row[selite], ";
+						}
+
 						//	Tehd‰‰n lista viel‰ alv erottelusta
-						$query = "	SELECT 	sum(if(tilausrivi.alv=22, rivihinta*(tilausrivi.alv/100), 0)) alv22,
-											sum(if(tilausrivi.alv=17, rivihinta*(tilausrivi.alv/100), 0)) alv17,
-											sum(if(tilausrivi.alv=8, rivihinta*(tilausrivi.alv/100), 0)) alv8,
-											sum(if(tilausrivi.alv=0, 0, 0)) alv0
+						$query .= "	'dummy'
 									FROM lasku
 									JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi!='D'
 									WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$row[tunnus]'";
 						$alvres = mysql_query($query) or pupe_error($query);
-						$alvrow=mysql_fetch_array($alvres);
-						echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv22"], 2, ',', ' ')."</td>";
-						echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv17"], 2, ',', ' ')."</td>";
-						echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv8"], 2, ',', ' ')."</td>";
-						echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv0"], 2, ',', ' ')."</td>";
-						$alvsumma["22"]+=$alvrow["alv22"];
-						$alvsumma["17"]+=$alvrow["alv17"];
-						$alvsumma["8"]+=$alvrow["alv8"];
-						$alvsumma["0"]+=$alvrow["alv0"];
+						$alvrow = mysql_fetch_array($alvres);
+
+						// alvikannat alkuun
+						mysql_data_seek($alv_result, 0);
+
+						while ($alv_row = mysql_fetch_array($alv_result)) {
+							$verokanta = $alv_row["selite"];
+							echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv$verokanta"], 2, ',', ' ')."</td>";
+							$alvsumma[$verokanta] += $alvrow["alv$verokanta"];
+						}
 					}
-					
+
 					if($laji == "myynti") {
 						echo "<td nowrap valign='top' class='back'><a href='../tilauskasittely/tulostakopio.php?otunnus=$row[tunnus]&toim=LASKU&tee=NAYTATILAUS'>".t("N‰yt‰ lasku")."</a></td>";
 					}
 					else {
 						echo "<td nowrap valign='top' class='back'>".ebid($row['tunnus'])."</td>";
 					}
-					
+
 					echo "</tr>";
 					$summa += $row["summa"];
 				}
 
 				echo "<tr>";
 				echo "<th colspan='3'>".t("Yhteens‰")."</th>";
-				echo "<th style='text-align:right;'>". number_format($summa, 2, ',', ' ')."</th>";
+				echo "<th style='text-align:right;' nowrap>". number_format($summa, 2, ',', ' ')."</th>";
 				if($laji == "myynti") {
 					echo "<th style='text-align:right;'></th>";
-					echo "<th style='text-align:right;'></th>";				
-					echo "<th style='text-align:right;'>".number_format($alvsumma["22"], 2, ',', ' ')."</th>";
-					echo "<th style='text-align:right;'>".number_format($alvsumma["17"], 2, ',', ' ')."</th>";
-					echo "<th style='text-align:right;'>".number_format($alvsumma["8"], 2, ',', ' ')."</th>";
-					echo "<th style='text-align:right;'>".number_format($alvsumma["0"], 2, ',', ' ')."</th>";
+					echo "<th style='text-align:right;'></th>";
+
+					// alvikannat alkuun
+					mysql_data_seek($alv_result, 0);
+
+					while ($alv_row = mysql_fetch_array($alv_result)) {
+						echo "<th style='text-align:right;' nowrap>".number_format($alvsumma[$alv_row["selite"]], 2, ',', ' ')."</th>";
+					}
 				}
 				echo "</tr>";
 

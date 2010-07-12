@@ -5,7 +5,7 @@
 
 	if (!function_exists("verkkolasku_in")) {
 		function verkkolasku_in ($file, $luolasku = TRUE) {
-			global $kukarow, $yhtiorow, $toim_asiakkaantiedot, $xmlstr;
+			global $kukarow, $yhtiorow, $toim_asiakkaantiedot, $xmlstr, $liitetaanko_editilaus_laskulle_hakemisto;
 
 			if (!is_file($file)) {
 				echo ("Tiedostoa $file ei löydy!\n");
@@ -821,7 +821,7 @@
 							hyvaksynnanmuutos	= '$trow[oletus_hyvaksynnanmuutos]',
 							comments 			= '$komm',
 							laskunro 			= '$laskun_numero',
-							asiakkaan_tilausnumero = '$laskun_numero'";
+							asiakkaan_tilausnumero = '$laskun_asiakkaan_tilausnumero'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 				$tunnus = mysql_insert_id();
 				$omasumma = round($summa * $vrow['kurssi'], 2);
@@ -1186,7 +1186,7 @@
 									image_height		= '',
 									image_bits			= '',
 									image_channels		= '',
-									kayttotarkoitus		= '',
+									kayttotarkoitus		= 'FINVOICE',
 									jarjestys			= '1',
 									laatija				= '$kukarow[kuka]',
 									luontiaika			= now()";
@@ -1230,11 +1230,55 @@
 										image_height		= '',
 										image_bits			= '',
 										image_channels		= '',
-										kayttotarkoitus		= '',
+										kayttotarkoitus		= 'VERKKOLASKU',
 										jarjestys			= '1',
 										laatija				= '$kukarow[kuka]',
 										luontiaika			= now()";
 							$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+						}
+					}
+
+					if (trim($liitetaanko_editilaus_laskulle_hakemisto) != '' and trim($laskun_asiakkaan_tilausnumero) != '') {
+
+						// fopen dirikka $liitetaanko_editilaus_laskulle_hakemisto eli purchaseorderit
+						$files_editilaus_laskulle = listdir($liitetaanko_editilaus_laskulle_hakemisto);
+
+						// loopataan se läpi
+						foreach ($files_editilaus_laskulle as $files_editilaus_laskulle_x) {
+
+							$path_parts = pathinfo($files_editilaus_laskulle_x);
+							$editilaus_laskulle_polku = substr($liitetaanko_editilaus_laskulle_hakemisto, -1) !== '/' ? $liitetaanko_editilaus_laskulle_hakemisto.'/' : $liitetaanko_editilaus_laskulle_hakemisto;
+
+							if ($editilaus_laskulle_data = file_get_contents($editilaus_laskulle_polku.$path_parts['basename'])) {
+
+								if (strpos($editilaus_laskulle_data, "OSTOTIL.OT_NRO:".$laskun_asiakkaan_tilausnumero) !== FALSE) {
+
+									$editilaus_laskulle_filesize = filesize($editilaus_laskulle_polku.$path_parts['basename']);
+
+									$query = "	INSERT INTO liitetiedostot SET
+												yhtio    			= '$kukarow[yhtio]',
+												liitos   			= 'lasku',
+												liitostunnus 		= '$tunnus',
+												data     			= '$editilaus_laskulle_data',
+												selite   			= 'Futursoft-tilaus $laskun_asiakkaan_tilausnumero',
+												kieli				= '$yhtiorow[kieli]',
+												filename 			= '$path_parts[basename]',
+												filesize 			= '$editilaus_laskulle_filesize',
+												filetype 			= 'text',
+												image_width			= '',
+												image_height		= '',
+												image_bits			= '',
+												image_channels		= '',
+												kayttotarkoitus		= 'EDI',
+												jarjestys			= '1',
+												laatija				= '$kukarow[kuka]',
+												luontiaika			= now()";
+									$editilaus_laskulle_result = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+									// ulos loopista
+									break;
+								}
+							}
 						}
 					}
 				}

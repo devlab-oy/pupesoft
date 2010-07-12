@@ -8642,23 +8642,31 @@ if (!function_exists("listdir")) {
 }
 
 if (!function_exists("laskun_ja_tilauksen_vertailu")) {
-	function laskun_ja_tilauksen_vertailu($kukarow, $laskutunnus) {
+	function laskun_ja_tilauksen_vertailu($kukarow, $tunnus) {
 
-		$laskutunnus = (int) $laskutunnus;
+		$tunnus = (int) $tunnus;
 
-		$query = "	SELECT filename, data, kayttotarkoitus
+		// haetaan liitetiedostot
+		$query = "	SELECT liitetiedostot.filename, liitetiedostot.data, liitetiedostot.kayttotarkoitus, liitetiedostot.liitostunnus
 					FROM liitetiedostot
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND liitos = 'lasku'
-					AND liitostunnus = '$laskutunnus'";
+					WHERE liitetiedostot.yhtio = '$kukarow[yhtio]'
+					AND liitetiedostot.liitos = 'lasku'
+					AND liitetiedostot.kayttotarkoitus IN ('EDI', 'FINVOICE')
+					AND liitetiedostot.liitostunnus = '$tunnus'";
 		$liite_res = mysql_query($query) or pupe_error($query);
 
 		$purchaseorder_data = $invoice_data = '';
 
-		if (mysql_num_rows($liite_res) < 2) return FALSE;
+		if (mysql_num_rows($liite_res) == 0) {
+			return FALSE;
+		}
+		elseif (mysql_num_rows($liite_row) == 1) {
+			return 'ei_loydy_edia';
+		}
 
 		while ($liite_row = mysql_fetch_assoc($liite_res)) {
 
+			// jos käyttötarkoituksessa lukee FINVOICE tai EDI, otetaan data talteen
 			if ($liite_row['kayttotarkoitus'] == 'FINVOICE') {
 				$invoice_data = $liite_row['data'];
 			}
@@ -8679,6 +8687,7 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 			$purchaseorder_tuoteno = '';
 			$purchaseorder_tilausnumero = '';
 
+			// loopataan EDI
 			foreach (explode("\n", $purchaseorder_data) as $tietue) {
 
 				// tää on futurikeisi
@@ -8722,13 +8731,14 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 				$invoice[(string) $row->ArticleIdentifier]['tilattumaara'] = $row->OrderedQuantity;
 				$invoice[(string) $row->ArticleIdentifier]['bruttohinta'] = $row->UnitPriceAmount;
 
+				// voi olla monta alennusta
 				foreach ($row as $child => $value) {
 					if ($child == 'RowDiscountPercent') {
 						$invoice[(string) $row->ArticleIdentifier]['ale'][] = $value;
 					}
 				}
 
-				if (!isset($invoice[(string) $row->ArticleIdentifier]['ale'])) $invoice["$row->ArticleIdentifier"]['ale'] = '';
+				if (!isset($invoice[(string) $row->ArticleIdentifier]['ale'])) $invoice[(string) $row->ArticleIdentifier]['ale'] = '';
 
 				if ($row->RowAmount) {
 					$invoice[(string) $row->ArticleIdentifier]['nettohinta'] = $row->RowAmount;
@@ -8738,9 +8748,50 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 				}
 			}
 
+			// mitkä rivit ei löydy laskulta, mutta löytyvät tilaukselta
 			$invoice_ei_loydy 		= array_diff_key($invoice, $purchaseorder);
+
+			// mitkä rivit ei löydy tilaukselta, mutta löytyvät laskulta
 			$purchaseorder_ei_loydy = array_diff_key($purchaseorder, $invoice);
+
+			// mitkä rivit löytyvät kummastakin
 			$loytyy_kummastakin 	= array_intersect_key($invoice, $purchaseorder);
+
+			// jos yksi rivi ei mätsää (esim. kuljetusvakuutus)
+			if (count($invoice_ei_loydy) == 1) {
+
+				foreach ($invoice_ei_loydy as $ei_loydy) {
+					// esim. kuljetusvakuutuksella ei ole tilattuamäärää
+					// huono tsekkaus! Miten erotetaan paremmin kuljetusvakuutukset ja runkoveloitukset?
+					if (count($ei_loydy['tilattumaara']) == 0) {
+
+						// oletetaan että tämä on kuljetusvakuutus, joten laitetaan se "löytyviin" että vertailu-check hyväksyy nämä OK:na
+						$loytyy_kummastakin[key($invoice_ei_loydy)] = $ei_loydy;
+
+						// poistetaan se ei löydetyistä
+						array_pop($invoice_ei_loydy);
+					}
+				}
+
+				$erot = '';
+
+				foreach ($loytyy_kummastakin as $tuoteno => $null) {
+
+					if ($invoice[$tuoteno]['tilattumaara'] > 0 and ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or $invoice[$tuoteno]['nettohinta'] != $purchaseorder[$tuoteno]['nettohinta'])) {
+						// löytyi ero
+						$erot = 'joo';
+					}
+
+				}
+
+				// jos eroavaisuutta ei löydy, tyhjennetään "löytyi kummastakin", että laskujen hyväksyntä osaa näyttää "OK"
+				// tämä siksi, koska lisättiin esim. kuljetusvakuutus tähän arrayhin ja silloin hyväksynnän checkit ei mätsää.
+				if ($erot == '') {
+					unset($loytyy_kummastakin);
+					$loytyy_kummastakin = array();
+				}
+
+			}
 
 			return array($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero);
 		}
@@ -8749,5 +8800,61 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 		}
 	}
 }
+
+if (!function_exists('liita_tilaus_laskun_liitetiedostoksi')) {
+	function liita_tilaus_laskun_liitetiedostoksi($kukarow, $yhtiorow, $liitetaanko_tilaus_laskulle_hakemisto, $tunnus, $laskun_asiakkaan_tilausnumero) {
+
+		if (trim($liitetaanko_tilaus_laskulle_hakemisto) != '') {
+
+			// fopen dirikka $liitetaanko_tilaus_laskulle_hakemisto eli purchaseorderit
+			$files_editilaus_laskulle = listdir($liitetaanko_tilaus_laskulle_hakemisto);
+
+			// loopataan se läpi
+			foreach ($files_editilaus_laskulle as $files_editilaus_laskulle_x) {
+
+				$path_parts = pathinfo($files_editilaus_laskulle_x);
+				$editilaus_laskulle_polku = substr($liitetaanko_tilaus_laskulle_hakemisto, -1) !== '/' ? $liitetaanko_tilaus_laskulle_hakemisto.'/' : $liitetaanko_tilaus_laskulle_hakemisto;
+
+				if ($editilaus_laskulle_data = file_get_contents($editilaus_laskulle_polku.$path_parts['basename'])) {
+
+					if (strpos($editilaus_laskulle_data, "OSTOTIL.OT_NRO:".$laskun_asiakkaan_tilausnumero) !== FALSE) {
+
+						$editilaus_laskulle_filesize = filesize($editilaus_laskulle_polku.$path_parts['basename']);
+
+						$query = "	INSERT INTO liitetiedostot SET
+									yhtio    			= '$kukarow[yhtio]',
+									liitos   			= 'lasku',
+									liitostunnus 		= '$tunnus',
+									data     			= '$editilaus_laskulle_data',
+									selite   			= 'Futursoft-tilaus $laskun_asiakkaan_tilausnumero',
+									kieli				= '$yhtiorow[kieli]',
+									filename 			= '$path_parts[basename]',
+									filesize 			= '$editilaus_laskulle_filesize',
+									filetype 			= 'text',
+									image_width			= '',
+									image_height		= '',
+									image_bits			= '',
+									image_channels		= '',
+									kayttotarkoitus		= 'EDI',
+									jarjestys			= '1',
+									laatija				= '$kukarow[kuka]',
+									luontiaika			= now()";
+						$editilaus_laskulle_result = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+						return TRUE;
+					}
+				}
+			}
+
+			return FALSE;
+
+		}
+		else {
+			echo "<br/><font class='error'>",t("Asetuksissa on virheellinen hakemistopolku"),"!</font><br/>";
+			return FALSE;
+		}
+	}
+}
+
 
 ?>

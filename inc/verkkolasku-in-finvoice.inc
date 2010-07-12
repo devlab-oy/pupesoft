@@ -15,6 +15,7 @@ $laskun_pankkiviite 	= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiRemitt
 $laskun_asiakastunnus	= $xml->BuyerPartyDetails->BuyerPartyIdentifier;
 $laskun_summa_eur		= (float) str_replace(",", ".", $xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount);
 $laskun_tilausviite 	= utf8_decode($xml->InvoiceDetails->AgreementIdentifier);
+$laskun_asiakkaan_tilausnumero = utf8_decode($xml->InvoiceDetails->OrderIdentifier);
 $kauttalaskutus 		= utf8_decode($xml->DeliveryDetails->TerminalAddressText);
 
 $toim_asiakkaantiedot = array();

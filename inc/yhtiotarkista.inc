@@ -3,7 +3,7 @@
 if(!function_exists("yhtiotarkista")) {
 	function yhtiotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
-		
+
 		if ((mysql_field_name($result, $i) == "kotipaikka") or
 			(mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "kieli") or
@@ -15,7 +15,7 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "ostoreskontrakausi_loppu") or
 			(mysql_field_name($result, $i) == "myyntireskontrakausi_alku") or
 			(mysql_field_name($result, $i) == "myyntireskontrakausi_loppu")) {
-			
+
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu!");
 			}
@@ -52,10 +52,10 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "konsernivelat") or
 			(mysql_field_name($result, $i) == "konserniostovelat") or
 			(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) and trim($t[$i]) == '') {
-				
+
 			$virhe[$i] = t("Tili puuttuu!");
 		}
-		
+
 		if (((mysql_field_name($result, $i) == "kassa") or
 			(mysql_field_name($result, $i) == "pankkikortti") or
 			(mysql_field_name($result, $i) == "luottokortti") or
@@ -88,9 +88,9 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
 			(mysql_field_name($result, $i) == "konsernisaamiset") or
 			(mysql_field_name($result, $i) == "konsernivelat") or
-			(mysql_field_name($result, $i) == "konserniostovelat") or		
+			(mysql_field_name($result, $i) == "konserniostovelat") or
 			(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) and trim($t[$i]) != '') {
-		
+
 			$query = "	SELECT nimi
 						FROM tili
 						WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
@@ -104,10 +104,10 @@ if(!function_exists("yhtiotarkista")) {
 								WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
 								ORDER BY tilino";
 					$sresult = mysql_query($query) or pupe_error($query);
-					
+
 					if (mysql_num_rows($sresult) > 0) {
 						$ulosarray[$i] = "<td><select name='t[$i]'><option value = '' $sel>".t("Ei valintaa")."</option>";
-						
+
 						while ($vrow=mysql_fetch_array($sresult)) {
 							$sel="";
 							if ($trow[$i] == $vrow[0]) {
@@ -135,6 +135,17 @@ if(!function_exists("yhtiotarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "pankkiiban1" or mysql_field_name($result, $i) == "pankkiiban2" or mysql_field_name($result, $i) == "pankkiiban3") {
+			if (trim($t[$i]) != "") {
+
+				$pankkitili = tarkista_iban($t[$i]);
+
+				if ($pankkitili == '') {
+					$virhe[$i] = t("Pankkitili on virheellinen");
+				}
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "pankkitili1" or mysql_field_name($result, $i) == "pankkitili2" or mysql_field_name($result, $i) == "pankkitili3") {
 
 			if (strtoupper($yhtiorow['maa']) == "FI" and trim($t[$i]) != "") {
@@ -144,7 +155,10 @@ if(!function_exists("yhtiotarkista")) {
 				require ('pankkitilinoikeellisuus.php');
 
 				if ($pankkitili == '') {
-					$virhe[$i] = t("Pankkitili on virheellinen");
+					$pankkitili = tarkista_iban($t[$i]);
+					if ($pankkitili == '') {
+						$virhe[$i] = t("Pankkitili on virheellinen");
+					}
 				}
 			}
 		}

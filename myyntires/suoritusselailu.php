@@ -97,12 +97,12 @@
 					$selite = t('Suoritus poistettu');
 				}
 
-				$query = "INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu)
-							values ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa], '$stili', '$selite', 0, '$kukarow[kuka]', now())";
+				$query = "	INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu, summa_valuutassa, valkoodi)
+							VALUES ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa], '$stili', '$selite', 0, '$kukarow[kuka]', now(), $tiliointi1_row[summa_valuutassa], '$tiliointi1_row[valkoodi]')";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query = "INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu)
-							values ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa] * -1, '$tiliointi1_row[tilino]', '$selite', 1, '$kukarow[kuka]', now())";
+				$query = "	INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu, summa_valuutassa, valkoodi)
+							VALUES ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa] * -1, '$tiliointi1_row[tilino]', '$selite', 1, '$kukarow[kuka]', now(), $tiliointi1_row[summa_valuutassa] * -1, '$tiliointi1_row[valkoodi]')";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$query = "UPDATE suoritus set kohdpvm = '$tapvm', summa=0 where tunnus='$suoritus_row[tunnus]'";

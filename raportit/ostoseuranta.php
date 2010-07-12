@@ -217,10 +217,10 @@
 					}
 
 					if ($mukaan == "toimittaja") {
-						if ($group!="") $group .= ",toimittaja";
-						else $group  .= "toimittaja";
-						$select .= "concat_ws(' / ', lasku.ytunnus, lasku.nimi) toimittaja, ";
-						$order  .= "toimittaja,";
+						if ($group!="") $group .= ",ytunnus";
+						else $group  .= "ytunnus";
+						$select .= "lasku.ytunnus, group_concat(distinct lasku.nimi SEPARATOR '<br>') nimi,";
+						$order  .= "ytunnus, nimi,";
 						$gluku++;
 					}
 				}
@@ -250,18 +250,18 @@
 				}
 
 				if ($toimittajaid != "") {
-					$lisa .= " and lasku.liitostunnus = '$toimittajaid' ";	
+					$lisa .= " and lasku.liitostunnus = '$toimittajaid' ";
 				}
 
 				$vvaa = $vva - '1';
-				$vvll = $vvl - '1';			
+				$vvll = $vvl - '1';
 
 				// Jos ei olla valittu mitään
 				if ($group == "") {
 					$select = "tuote.yhtio, ";
 					$group = "lasku.yhtio";
 				}
-				
+
 				// Kumpaa päivämäärää käytetään
 				if (strpos($ajotapa, "mapvm") !== FALSE) {
 					$pvmvar = " lasku.mapvm ";
@@ -269,7 +269,7 @@
 				else {
 					$pvmvar = " tilausrivi.laskutettuaika ";
 				}
-				
+
 				// Ajetaanko kuusausittain
 				if ($kuukausittain != "") {
 					$select = " substring($pvmvar, 6, 2) kuukausi, ".$select;
@@ -277,27 +277,27 @@
 					$order = " kuukausi, ".$order;
 					$gluku++;
 				}
-				
+
 				// Tehdään query
 				$query = "	SELECT $select";
-				
+
 				//Osto
 				$query .= " sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) ostonyt, ";
-				
+
 				//Ostoed
 				if ($piiloed == "") {
 					$query .= " sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) ostoed, ";
 					$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0))/sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)),2) ostoind, ";
 				}
-				
+
 				$query .= " sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) ostoarvonyt, ";
-				
+
 				//Ostoed
 				if ($piiloed == "") {
 					$query .= " sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.rivihinta,0)) ostoarvoed, ";
 					$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0))/sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.rivihinta,0)),2) ostoarvoind, ";
 				}
-				
+
 				if ($piilota_kappaleet == "") {
 					$query .= "	sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0)) ostokplnyt, ";
 
@@ -307,7 +307,7 @@
 						$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0))/sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)),2) ostokplind, ";
 					}
 				}
-				
+
 				// Vika pilkku ja space pois
 				$query = substr($query, 0 ,-2);
 
@@ -317,26 +317,25 @@
 							LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							LEFT JOIN toimi use index (PRIMARY) ON toimi.yhtio=lasku.yhtio and toimi.tunnus=lasku.liitostunnus
 							WHERE lasku.yhtio in ($yhtio)
-							$asiakasrajaus 
-							and lasku.tila = 'K'"; 
-								
+							$asiakasrajaus
+							and lasku.tila = 'K'";
+
 				if (strpos($ajotapa, "valmiit") !== FALSE) {
 					$query .= " and kohdistettu = 'X' ";
-					$query .= " and lasku.alatila = 'X' ";					
+					$query .= " and lasku.alatila = 'X' ";
 				}
-								
+
 				$query .= " and (($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl') ";
-				
+
 				if ($piiloed == "") {
 					$query .= " or ($pvmvar >= '$vvaa-$kka-$ppa' and $pvmvar <= '$vvll-$kkl-$ppl') ";
 				}
-				
+
 				$query .= " ) ";
 				$query .= "	$lisa
 							GROUP BY $group
 							ORDER BY $order";
 
-				
 				// ja sitten ajetaan itte query
 				if ($query != "") {
 
@@ -447,21 +446,21 @@
 							}
 
 							// jos kyseessa on tuoteosasto, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "tuos") {								
+							if (mysql_field_name($result, $i) == "tuos") {
 								$osre = t_avainsana("OSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 								$osrow = mysql_fetch_array($osre);
-								
-								if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
+
+								if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
 									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-								}																
+								}
 							}
 
 							// jos kyseessa on tuoteosasto, haetaan sen nimi
 							if (mysql_field_name($result, $i) == "tuoteryhmä") {
 								$osre = t_avainsana("TRY", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 								$osrow = mysql_fetch_array($osre);
-								
-								if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
+
+								if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
 									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 								}
 							}
@@ -470,8 +469,8 @@
 							if (mysql_field_name($result, $i) == "tuoteostaja") {
 								$query = "	SELECT nimi
 											FROM kuka
-											WHERE yhtio in ($yhtio) 
-											and myyja = '$row[$i]' 
+											WHERE yhtio in ($yhtio)
+											and myyja = '$row[$i]'
 											AND myyja > 0
 											limit 1";
 								$osre = mysql_query($query) or pupe_error($query);
@@ -569,7 +568,7 @@
 							if ((string) $vsum != '') {
 								$vsum = sprintf("%.2f", $vsum);
 							}
-							
+
 							if ($vnim == "ostoind") {
 								if ($valisummat["ostoed"] <> 0) 		$vsum = round($valisummat["ostonyt"] / $valisummat["ostoed"],2);
 							}
@@ -697,10 +696,10 @@
 			echo "<option value='kaikki' 				$chk2>".t("Valmiit keikat ja keskeneräiset keikat")." (".t("Varastoonvientipäivän mukaan").")</option>";
 			echo "<option value='valmiit_mapvm'			$chk3>".t("Valmiit keikat")." (".t("Virallisen varastonarvolaskentapäivän mukaan").")</option>";
 			echo "</select></td>";
-			
+
 			echo "</tr>";
 			echo "</table><br><table>";
-			
+
 			echo "<tr>";
 			echo "<th>".t("Valitse tuoteosastot").":</th>";
 			echo "<th>".t("Valitse tuoteryhmät").":</th></tr>";

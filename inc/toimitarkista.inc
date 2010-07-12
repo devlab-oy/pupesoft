@@ -68,7 +68,6 @@ if(!function_exists("toimitarkista")) {
 						}
 						else {
 							$t[$i]=$pankkitili;
-							require "luoiban.inc";
 							$vastaus = luoiban($t[$i]);
 							$tmp_iban = $vastaus['iban'];
 							$tmp_swift = $vastaus['swift'];

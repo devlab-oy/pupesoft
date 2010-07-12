@@ -8876,4 +8876,118 @@ if(!function_exists("luoiban")) {
 	}
 }
 
+if(!function_exists("tarkista_iban")) {
+	function tarkista_iban($tilino) {
+
+		// Calculating and validating IBAN checksums:
+
+		// 1. Check that the total IBAN length is correct as per the country. If not, the IBAN is invalid.
+		// 2. Move the four initial characters to the end of the string.
+		// 3. Replace each letter in the string with two digits, thereby expanding the string, where A=10, B=11, ..., Z=35.
+		// 4. Interpret the string as a decimal integer and compute the remainder of that number on division by 97.
+
+		// The IBAN number can only be valid if the remainder is 1.
+
+		$tilino		= strtoupper(trim($tilino));
+		$maa		= substr($tilino, 0, 2);
+		$pituus		= strlen($tilino);
+
+		$sallitut	= array("AL" => "28",
+							"AD" => "24",
+							"AT" => "20",
+							"BE" => "16",
+							"BA" => "20",
+							"BG" => "22",
+							"HR" => "21",
+							"CY" => "28",
+							"CZ" => "24",
+							"DK" => "18",
+							"EE" => "20",
+							"FO" => "18",
+							"FI" => "18",
+							"FR" => "27",
+							"GE" => "22",
+							"DE" => "22",
+							"GI" => "23",
+							"GR" => "27",
+							"GL" => "18",
+							"HU" => "28",
+							"IS" => "26",
+							"IE" => "22",
+							"IL" => "23",
+							"IT" => "27",
+							"KZ" => "20",
+							"LV" => "21",
+							"LB" => "28",
+							"LI" => "21",
+							"LT" => "20",
+							"LU" => "20",
+							"MK" => "19",
+							"MT" => "31",
+							"MU" => "30",
+							"MC" => "27",
+							"ME" => "22",
+							"NL" => "18",
+							"NO" => "15",
+							"PL" => "28",
+							"PT" => "25",
+							"RO" => "24",
+							"SM" => "27",
+							"SA" => "24",
+							"RS" => "22",
+							"SK" => "24",
+							"SI" => "19",
+							"ES" => "24",
+							"SE" => "24",
+							"CH" => "21",
+							"TN" => "24",
+							"TR" => "26",
+							"GB" => "22");
+
+		// maa ei ole sallittu
+		if (!isset($sallitut[$maa])) {
+			return "";
+		}
+
+		// pituus on v‰‰r‰
+		if ($pituus != $sallitut[$maa]) {
+			return "";
+		}
+
+		// siirret‰‰n nelj‰ ekaa merkki‰ tilinumeron loppuun
+		$chk_tilinumero = substr($tilino, 4).substr($tilino, 0, 4);
+		$chk_tilinumeronumeric = "";
+
+		// muutetaan kirjaimet numeroiksi (A = 10, B = 11, C = 12, jne...)
+		for ($i = 0; $i < $pituus; $i++) {
+			if (is_numeric($chk_tilinumero{$i})) {
+				$chk_tilinumeronumeric .= $chk_tilinumero{$i};
+			}
+			else {
+				$chk_tilinumeronumeric .= ord($chk_tilinumero{$i}) - 55;
+			}
+		}
+
+		// poistetaan stringist‰ etunollat
+		$chk_tilinumeronumeric = ltrim($chk_tilinumeronumeric, "0");
+
+		// lasketaan mod-97
+		$mod = 0;
+		$pituus = strlen($chk_tilinumeronumeric);
+
+		for ($i = 0; $i < $pituus; $i++) {
+		    $numero = (int) $chk_tilinumeronumeric{$i};
+		    $mod = (($mod * 10) + $numero) % 97;
+		}
+
+		// jos tulos ei ole yksi niin tilinumero on v‰‰rin
+		if ($mod != 1) {
+			return "";
+		}
+
+		// tilinumero on oikein!
+		return $tilino;
+	}
+}
+
 ?>

@@ -308,7 +308,7 @@
 			}
 
 			//	Annetaan Muu aina
-			echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten'>".t("Myyntisuoritus muu")." </a></font>";
+			echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku=$maksaa'>".t("Myyntisuoritus muu")." </a></font>";
 
 		}
 		echo "</td><td class='$class'>";

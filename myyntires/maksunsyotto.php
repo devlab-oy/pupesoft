@@ -16,10 +16,17 @@ if ($tee != "CHECK" or $tiliote != 'Z') {
 
 //Tultiinko tiliotteelta ja olisiko tämä jo viety?
 if ($tiliote == 'Z' and $ytunnus != '' and $asiakasid != '') {
-	$query = "select tunnus from suoritus where yhtio='$kukarow[yhtio]' and asiakas_tunnus='$asiakasid' and summa='$summa' and kirjpvm = '$vva-$kka-$ppa'";
+	$query = "	SELECT tunnus 
+				FROM suoritus 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				AND asiakas_tunnus = '$asiakasid' 
+				AND summa = '$summa' 
+				AND kirjpvm = '$vva-$kka-$ppa'";
 	$result = mysql_query($query) or pupe_error($query);
-	if (mysql_num_rows($result) != 0)
+
+	if (mysql_num_rows($result) != 0) {
 		echo "<br><br><font class='error'>".t("Tällainen samanlainen suoritus on jo olemassa").".</font><br><br>";
+	}
 }
 
 if ($tee == "CHECK") {
@@ -277,7 +284,6 @@ if ($asiakasid != "" and $tee == "ETSI") {
 	list ($tiliote,$summa,$ppa,$kka,$vva,$mtili, $selite) = explode("#", $muutparametrit);
 }
 
-
 // meillä on ytunnus, tehdään syöttöruutu
 if ($ytunnus != '' and $tee == "") {
 
@@ -532,13 +538,15 @@ if ($ytunnus != '' and $tee == "") {
 	$kentta = "summa";
 }
 
-
 if ($tee == "" and $ytunnus == "") {
+
+	$maksaja_haku = htmlentities($maksaja_haku);
+
 	echo "<font class='message'>Voit etsiä maksajaa nimen, ytunnuksen tai laskunumeron perusteella.</font><br>";
 	echo "<br>";
 	echo t("Maksaja").": ";
 	echo "<form action = '$PHP_SELF' method='post' name='maksaja'>";
-	echo livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300);
+	echo livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300, $maksaja_haku);
 	echo "<input type='hidden' name='tee' value='ETSI'>";
 	echo "<input type='hidden' name='muutparametrit' value='$tiliote#$summa#$ppa#$kka#$vva#$mtili#$selite'>";
 	echo "<br>";

@@ -410,7 +410,7 @@ if ($tee == 'I') {
 		}
 	}
 
-	if (!is_numeric(trim($toimittajan_laskunumero))) {
+	if (!is_numeric(trim($toimittajan_laskunumero)) and trim($toimittajan_laskunumero) != "") {
 		$errormsg .= "<font class='error'>".t("Laskunumero on oltava numeerinen")."</font><br/>";
 		$tee = 'E';
 	}

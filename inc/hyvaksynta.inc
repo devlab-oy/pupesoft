@@ -10,7 +10,12 @@ if ($tee == '') {
  	// Summaus hyväksynnässä olevista laskuista
 	echo "<font class='head'>".t("Laskuja hyväksymättä")."</font><hr>";
 
-	$query = "	SELECT hyvaksyja_nyt, if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi, concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys, min(erpcm) erpcm
+	$query = "	SELECT hyvaksyja_nyt,
+				if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
+				concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys,
+				min(erpcm) erpcm,
+				max(erpcm) maxerpcm,
+				round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
 				FROM lasku
 				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -21,13 +26,21 @@ if ($tee == '') {
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<table>";
-	echo "<tr><th>".t("Kuka")."</th><th>".t("Kpl")."/".t("pysäytetty")."</th><th>".t("Min")." ".t("eräpvm")."</th></tr>";
+	echo "<tr>";
+	echo "<th>".t("Kuka")."</th>";
+	echo "<th>".t("Kpl")."/".t("pysäytetty")."</th>";
+	echo "<th>".t("Min")." ".t("eräpvm")."</th>";
+	echo "<th>".t("Max")." ".t("eräpvm")."</th>";
+	echo "<th>".t("Summa")." $yhtiorow[valkoodi]</th>";
+	echo "</tr>";
 
 	while ($trow = mysql_fetch_array($result)) {
-		echo "<tr>";
+		echo "<tr class='aktiivi'>";
 		echo "<td><a href = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$trow[hyvaksyja_nyt]'>$trow[nimi]</a></td>";
 		echo "<td>$trow[kplpys]</td>";
 		echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
+		echo "<td>".tv1dateconv($trow["maxerpcm"])."</td>";
+		echo "<td align='right'>$trow[summa]</td>";
 		echo "</tr>";
 	}
 	echo "</table><br>";
@@ -135,7 +148,7 @@ if ($tee == 'T') {
 
 	while ($trow = mysql_fetch_array ($result)) {
 
-		echo "<tr>";
+		echo "<tr class='aktiivi'>";
 
 		if ($trow['alatila'] == 'H') {
 			$erotin = 'th';

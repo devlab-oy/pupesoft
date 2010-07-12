@@ -97,7 +97,8 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
+					WHERE yhtio = '$kukarow[yhtio]' 
+					order by tyyppi, nimitys";
 		$vtresult = mysql_query($query) or pupe_error($query);
 
 		echo "<form action='$PHP_SELF' method='post'>";
@@ -147,14 +148,15 @@
 
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio='$kukarow[yhtio]' order by nimitys";
+						WHERE yhtio = '$kukarow[yhtio]' 
+						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
 			while ($varow = mysql_fetch_array($vares)) {
 
 				$sel = '';
 				// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-				if ($varow['tunnus'] == $srow["clearing"] or ((int) $kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow["varasto"])) {
+				if ($varow['tunnus'] == $srow["clearing"] or ((int) $kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow["oletus_varasto"])) {
 					$sel = 'selected';
 				}
 

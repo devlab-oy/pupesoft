@@ -34,7 +34,7 @@
 	}
 
 	$til = "";
-	
+
 	if ($cleantoim == 'MYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tilaukset").":</font><hr>";
 
@@ -347,7 +347,7 @@
 		if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
 			$yhtioekolisa = "yhtio.nimi, ";
 			$yhtioekojoin = "JOIN yhtio on lasku.yhtio=yhtio.yhtio ";
-			
+
 			if ($jarj != '') {
 				$jarj = "ORDER BY $jarj";
 			}
@@ -358,7 +358,7 @@
 		else {
 			$yhtioekolisa = "";
 			$yhtioekojoin = "";
-			
+
 			if ($jarj != '') {
 				$jarj = "ORDER BY $jarj";
 			}
@@ -538,6 +538,11 @@
 					if (mysql_field_name($result,$i) == 'toimaika') {
 						echo "<$ero valign='top' $class>".tv1dateconv($row[$i])."</$ero>";
 					}
+					elseif (mysql_field_name($result,$i) == 'laskunro' and $row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
+						echo "<$ero valign='top' nowrap align='right' $class>";
+						echo "<a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tilaus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim'>$row[$i]</a>";
+						echo "</$ero>";
+					}
 					elseif (is_numeric($row[$i])) {
 						echo "<$ero valign='top' nowrap align='right' $class>$row[$i]</$ero>";
 					}
@@ -560,7 +565,7 @@
 					$fn1 = "";
 					$fn2 = "";
 				}
-				
+
 				echo "<$ero valign='top' $classloppu>$fn1".t($laskutyyppi)." ".t($alatila)."$fn2</$ero>";
 
 				echo "<form method='post' action='$PHP_SELF'><td class='back' valign='top'>

@@ -855,7 +855,14 @@
 
 				echo "<tr>";
 				if ($logistiikka_yhtio != '') echo "<$ero valign='top'>$row[yhtio_nimi]</$ero>";
-				echo "<$ero valign='top'>$row[tunnus]<br>$row[laskunro]</$ero>";
+				echo "<$ero valign='top'>$row[tunnus]<br>";
+				if ($row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
+					echo "<a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim//tee=$tee//otunnus=$otunnus//laskunro=$laskunro//laskunroloppu=$laskunroloppu'>$row[laskunro]</a>";
+				}
+				else {
+					echo "$row[laskunro]";
+				}
+				echo "</$ero>";
 				echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
 				echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
 				echo "<$ero valign='top'>$row[laatija]</$ero>";

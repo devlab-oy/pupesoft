@@ -231,7 +231,7 @@
 			}
 
 		}
-	}
+	} 
 
 	//	Tarkastetaan käsinsyötetty viite
 	if (isset($jatka) and $kasinsyotetty_viite!="" and $yhtiorow["viitteen_kasinsyotto"]!="") {
@@ -3003,7 +3003,7 @@
 				$result = mysql_query($query2) or pupe_error($query2);
 			}
 
-			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "ENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE"))) {
+			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "ENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS"))) {
 
 				$sopimus_kk = implode(",", $yllapito_kk);
 				$sopimus_pp = implode(",", $yllapito_pp);

@@ -485,6 +485,7 @@
 				$oletuskohde    = $trow['kohde'];
 				$oletusprojekti = $trow['projekti'];
 				$selite         = $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
+				$laskun_numero	= preg_replace("/[^0-9]/", "", $laskun_numero);
 
 				// Onko tälle toimitusasiakkaalle erityinen kustannuspaikka?
 				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5

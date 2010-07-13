@@ -197,8 +197,8 @@ if (!function_exists('finvoice_otsik')) {
 			xml_add("SellerContactPersonName",							  	$myyrow['nimi'],					$tootfinvoice);
 
 			fputs($tootfinvoice, "<SellerCommunicationDetails>\r\n");
-			xml_add("SellerPhoneNumberIdentifier",						  	$myyrow['puhno'], 					$tootfinvoice);
-			xml_add("SellerEmailaddressIdentifier",						  	$myyrow['eposti'], 					$tootfinvoice);
+			xml_add("SellerPhoneNumberIdentifier",						  	$y_puhelin, 						$tootfinvoice);
+			xml_add("SellerEmailaddressIdentifier",						  	$y_email, 							$tootfinvoice);
 			fputs($tootfinvoice, "</SellerCommunicationDetails>\r\n");
 
 			fputs($tootfinvoice, "<SellerInformationDetails>\r\n");

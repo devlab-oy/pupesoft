@@ -8990,4 +8990,33 @@ if(!function_exists("tarkista_iban")) {
 	}
 }
 
+if(!function_exists("tarkista_oikeus")) {
+	function tarkista_oikeus($ohjelma, $alanimi = '') {
+
+		global $kukarow;
+		$ohjelma = mysql_real_escape_string(trim($ohjelma));
+		$alanimi = mysql_real_escape_string(trim($alanimi));
+		$querylisa = "";
+
+		if ($alanimi != "") {
+			$querylisa = "AND alanimi = '$alanimi'";
+		}
+
+		$query = "	SELECT *
+					FROM oikeu
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND kuka = '$kukarow[kuka]'
+					AND nimi LIKE '%$ohjelma'
+					$querylisa";
+		$res = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($res) > 0) {
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
+	}
+}
+
 ?>

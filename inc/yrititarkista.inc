@@ -45,6 +45,16 @@ if(!function_exists("yrititarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "iban" and $t[$i] != "") {
+			$pankkitili = tarkista_iban($t[$i]);
+			if ($pankkitili == "") {
+				$virhe[$i] = t("Pankkitili on virheellinen");
+			}
+			else {
+				$t[$i]=$pankkitili;
+			}			
+		}
+		
 		if (mysql_field_name($result, $i) == "tilino") {
 
 			if (strtoupper($yhtiorow['maa']) == 'FI') {

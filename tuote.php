@@ -838,15 +838,17 @@
 						and tilausrivi.tuoteno = '$tuoteno'
 						and tilausrivi.laskutettuaika = '0000-00-00'
 						and tilausrivi.varattu + tilausrivi.jt != 0
-						and tilausrivi.var not in ('P')
-						ORDER BY pvm";
+						and tilausrivi.var != 'P'
+						ORDER BY pvm, tunnus";
 			$jtresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($jtresult) != 0) {
 
 				// Varastosaldot ja paikat
 				echo "<font class='message'>".t("Tuotteen tilaukset")."</font><hr>";
-
+				
+				$myyta = $kokonaismyytavissa;
+				
 				// Avoimet rivit
 				echo "<table>";
 
@@ -932,10 +934,9 @@
 
 					$yhteensa[$tyyppi] += $jtrow["kpl"];
 
-					if($jtrow["varasto"] != "") {
+					if ($jtrow["varasto"] != "") {
 						$tyyppi = $tyyppi." - ".$jtrow["varasto"];
 					}
-
 
 					if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and $ekotettiin == 0) {
 						echo "<tr>

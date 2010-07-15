@@ -1940,7 +1940,15 @@ if ($tee == '') {
 						<input type='submit' value='" . t('Työjono')."'>
 						</form>";
 
-				echo "<form method='POST' action='".$palvelin2."tyomaarays/asennuskalenteri.php?liitostunnus=$tilausnumero&tyojono=$tyojono#".date("j_n_Y")."'>
+				// Jos työjono on tyhjä niin otetaan se otsikolta
+				if ($tyojono == "") {
+					$tyojono_url = $laskurow["tyojono"];
+				}
+				else {
+					$tyojono_url = $tyojono;
+				}
+
+				echo "<form method='POST' action='".$palvelin2."tyomaarays/asennuskalenteri.php?liitostunnus=$tilausnumero&tyojono=$tyojono_url#".date("j_n_Y")."'>
 						<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//from=VALITSETOIMITUS//tyojono=$tyojono'>
 						<input type='hidden' name='toim' value='$toim2'>
 						<input type='submit' value='" . t('Asennuskalenteri')."'>

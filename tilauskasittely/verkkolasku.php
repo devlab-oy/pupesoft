@@ -325,6 +325,7 @@
 				$query = "	SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu, group_concat(distinct lasku.tunnus) tunnukset
 							FROM lasku
 							JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 							WHERE lasku.yhtio	= '$kukarow[yhtio]'
 							and lasku.tila	= 'L'
 							and lasku.alatila	= 'D'

@@ -798,16 +798,33 @@ while (!feof ($fd)) {
 				if ($ketjutus != "") {
 					$arow["ketjutus"] = $ketjutus;
 				}
-
+				
+				$edimyyja = "";
+				
 				// Haetaan vielä myyyjänumero
 				$query = "	SELECT tunnus
 							FROM kuka
 							WHERE yhtio = '$kukarow[yhtio]'
 							and kuka 	= 'EDI'";
 				$meapu = mysql_query($query) or pupe_error($query);
-				$apuro = mysql_fetch_array($meapu);
-				$edimyyja = $apuro['tunnus'];
-
+				
+				if (mysql_num_rows($meapu) == 1) {
+					$apuro = mysql_fetch_array($meapu);
+					$edimyyja = $apuro['tunnus'];
+				}
+				elseif ($arow["myyjanro"] != "")  {
+					$query = "	SELECT tunnus
+								FROM kuka
+								WHERE yhtio = '$kukarow[yhtio]'
+								and myyja 	= '$arow[myyjanro]'";
+					$meapu = mysql_query($query) or pupe_error($query);
+					
+					if (mysql_num_rows($meapu) == 1) {
+						$apuro = mysql_fetch_array($meapu);
+						$edimyyja = $apuro['tunnus'];
+					}
+				}
+			
 				if ($yhtiorow["splittauskielto"] == "E") {
 					$splittauskielto = "E";
 				}

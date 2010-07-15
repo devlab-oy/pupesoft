@@ -67,51 +67,13 @@
 			<th>".t("Ytunnus")."</th>
 			<th colspan='2'>".t("Ostaja")."</th>
 			<th colspan='2'>".t("Toimitusosoite")."</th>
-			<th>",t("Laskutusosoite"),"</th>
-			<th>".t("Toimitustapa")."</th>";
+			<th>".t("Laskutusosoite")."</th>";
 
 	if ($laskurow["tila"] == "O") {
 		echo "<th>".t("Eturahti")."</th>";
 	}
 
 	echo "</tr>";
-
-	if ($laskurow['kohdistettu']=='K') {
-		$rahdinmaksaja = "<br>".t("L‰hett‰j‰ maksaa")."";
-	}
-	else {
-		$rahdinmaksaja = "<br>".t("Vastaanottaja maksaa")."";
-	}
-
-	//	Haetaan kohdetiedot
-	$query = "	SELECT concat_ws(' - ', asiakkaan_kohde.tunnus, asiakkaan_kohde.kohde) kohde, seuranta,
-					yhteyshenkilo.nimi yhteyshenkilo,
-					kuka.nimi projektipaallikko
-				FROM laskun_lisatiedot
-				LEFT JOIN asiakkaan_kohde ON laskun_lisatiedot.yhtio=asiakkaan_kohde.yhtio and laskun_lisatiedot.asiakkaan_kohde=asiakkaan_kohde.tunnus
-				LEFT JOIN yhteyshenkilo ON laskun_lisatiedot.yhtio=yhteyshenkilo.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo.tunnus
-				LEFT JOIN kuka ON laskun_lisatiedot.yhtio=kuka.yhtio and laskun_lisatiedot.projektipaallikko=kuka.kuka
-				WHERE laskun_lisatiedot.yhtio='$kukarow[yhtio]' and laskun_lisatiedot.otunnus='$laskurow[tunnus]' and seuranta!=''";
-	$lisares=mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($lisares) > 0) {
-		$lisarow = mysql_fetch_array($lisares);
-		$lisarivi = "<tr>
-						<th>".t("Seuranta")."</th>
-						<th colspan='2'>".t("Kohde")."</th>
-						<th colspan='2'>".t("Yhteyshenkilo")."</th>
-						<th colspan='2'>".t("Projektipaallikko")."</th>
-					</tr>
-					<tr>
-						<td>$lisarow[seuranta]</td>
-						<td colspan='2'>$lisarow[kohde]</td>
-						<td colspan='2'>$lisarow[yhteyshenkilo]</td>
-						<td colspan='2'>$lisarow[projektipaallikko]</td>
-					</tr>";
-	}
-	else {
-		$lisarivi="";
-	}
 
 	echo "<tr>
 			<td>$laskurow[ytunnus]</td>
@@ -127,10 +89,7 @@
 	}
 	else {
 		echo "<td colspan='2'>
-				$laskurow[toim_nimi] $laskurow[toim_nimitark]<br>
-				$laskurow[toim_osoite]<br>
-				$laskurow[toim_postino] $laskurow[toim_postitp]<br>
-				".maa($laskurow["toim_maa"])."</td>";
+				$laskurow[toim_nimi] $laskurow[toim_nimitark]<br> $laskurow[toim_osoite]<br> $laskurow[toim_postino] $laskurow[toim_postitp]<br> ".maa($laskurow["toim_maa"])."</td>";
 
 		if (trim($laskurow['laskutus_nimi']) == '') {
 			$laskurow['laskutus_nimi'] 		= $laskurow['nimi'];
@@ -144,27 +103,52 @@
 		echo "<td>$laskurow[laskutus_nimi] $laskurow[laskutus_nimitark]<br>$laskurow[laskutus_osoite]<br>$laskurow[laskutus_postino] $laskurow[laskutus_postitp]<br>",maa($laskurow['laskutus_maa']),"</td>";
 	}
 
-	echo "<td>$laskurow[toimitustapa]<br>$laskurow[toimitusehto]</td>";
-
 	if ($laskurow["tila"] == "O") {
 		echo "<td>$laskurow[rahti_etu]</td>";
 	}
 
-	echo "</tr>$lisarivi";
+	echo "</tr>";
+
+	//	Haetaan kohdetiedot
+	$query = "	SELECT concat_ws(' - ', asiakkaan_kohde.tunnus, asiakkaan_kohde.kohde) kohde, seuranta,
+				yhteyshenkilo.nimi yhteyshenkilo,
+				kuka.nimi projektipaallikko
+				FROM laskun_lisatiedot
+				LEFT JOIN asiakkaan_kohde ON laskun_lisatiedot.yhtio=asiakkaan_kohde.yhtio and laskun_lisatiedot.asiakkaan_kohde=asiakkaan_kohde.tunnus
+				LEFT JOIN yhteyshenkilo ON laskun_lisatiedot.yhtio=yhteyshenkilo.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo.tunnus
+				LEFT JOIN kuka ON laskun_lisatiedot.yhtio=kuka.yhtio and laskun_lisatiedot.projektipaallikko=kuka.kuka
+				WHERE laskun_lisatiedot.yhtio='$kukarow[yhtio]' and laskun_lisatiedot.otunnus='$laskurow[tunnus]' and seuranta!=''";
+	$lisares=mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($lisares) > 0) {
+		$lisarow = mysql_fetch_array($lisares);
+
+		echo "<tr>
+				<th>".t("Seuranta")."</th>
+				<th colspan='2'>".t("Kohde")."</th>
+				<th colspan='2'>".t("Yhteyshenkilo")."</th>
+				<th colspan='2'>".t("Projektipaallikko")."</th>
+			</tr>
+			<tr>
+				<td>$lisarow[seuranta]</td>
+				<td colspan='2'>$lisarow[kohde]</td>
+				<td colspan='2'>$lisarow[yhteyshenkilo]</td>
+				<td colspan='2'>$lisarow[projektipaallikko]</td>
+			</tr>";
+	}
 
 	echo "<tr>
 			<th>".t("Tilausnumero")."</th>
 			<th colspan='2'>".t("Tila")."</th>
 			<th>".t("Vienti")."</th>
-			<th>".t("Erikoisalennus")."</th>
-			<th>".t("Toimitusaika")."</th>
-			<th>".t("Rahtikirjanro")."</th>";
+			<th>".t("Alv")."</th>
+			<th>".t("Erikoisalennus")."</th>";
 
 	if ($laskurow["tila"] == "O") {
 		echo "<th>".t("Rahti")."</th>";
 	}
-
 	echo "</tr>";
+
 	echo "<tr>";
 
 	if ($laskurow["tila"] != "K" and $laskurow["tila"] != "U") echo "<td>$laskurow[tunnus]</td>";
@@ -206,90 +190,8 @@
 
 	echo "	<td colspan='2'>$fn1".t("$laskutyyppi")." ".t("$alatila")."$fn2</td>
 			<td>$vteksti</td>
-			<td>".str_replace(".",",",$laskurow['erikoisale'])."</td>
-			<td>".tv1dateconv($laskurow["toimaika"])."</td>";
-
-	if (isset($dpdtun[$kukarow['yhtio']])) $dpdtun = $dpdtun[$kukarow['yhtio']];
-	else $dpdtun = "";
-
-	if (isset($dpdss[$kukarow['yhtio']]))  $dpdss  = $dpdss[$kukarow['yhtio']];
-	else $dpdss = "";
-
-	$possi = strpos(strtoupper($laskurow['toimitustapa']),"DPD");
-
-	// postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
-	if (stripos($rakirrow['rahtikirjanro'],"JFI") !== FALSE) {
-		$linkurl = "";
-		$jjfi = explode("<br>", trim($rakirrow['rahtikirjanro']));
-
-		foreach ($jjfi as $nro) {
-			$linkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId=$nro&LOTUS_hae=Hae'>$nro</a><br>";
-		}
-
-		$linkurl = substr($linkurl,0,-4); // vika br pois
-	}
-	//luodaan ups seurantalinkki
-	elseif (stripos($rakirrow['rahtikirjanro'], 'UPS') !== FALSE) {
-		$linkurl = "";
-		$upsi = explode("<br>", trim($rakirrow['rahtikirjanro']));
-
-		foreach ($upsi as $nro) {
-
-			if (substr($nro, 0, 3) == 'UPS') {
-				$linkurl .= "<a target=newikkuna href='http://www.ups.fi/hptrack/trackDlgRequest?HTMLVersion=5.0&loc=fi_FI&Requester=UPSHome&track.x=Track&trackNums=".substr($nro, 4)."&WBPM_lid=homepage/ct1.html_pnl_trk&modal=true&'>$nro</a><br>";
-			}
-			else {
-				$linkurl .= "$nro<br>";
-			}
-		}
-
-		$linkurl = substr($linkurl,0,-4); // vika br pois
-	}
-	//luodaan dpd seurantalinkk
-	elseif ($possi !== FALSE and $rakirrow['rahtikirjanro'] != '' and $dpdtun != '' and $dpdss != '') {
-		$linkurl = "";
-
-		for ($dpdi=1; $dpdi<$rakirrow['kollit']+1; $dpdi++) {
-			$sscc = "";
-
-			if (!function_exists('tarkiste')) {
-
-				function tarkiste($sscc) {
-
-					$kerroin = 3; // kerroin aluks 3
-					$summa   = 0; // summa nolla tietty
-
-					// loopataan luvut oikeelta vasemmalle
-					for ($i = 16; $i >= 0; $i--) {
-						$summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
-						$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
-					}
-
-					$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
-
-					return $sscc;
-				}
-			}
-
-			$sscc = 1;
-			$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-			$sscc .= sprintf('%06.06d', substr($rakirrow['rahtikirjanro'], -6));
-			$sscc .= sprintf('%02.02d', $dpdi);
-			$loppu = tarkiste($sscc);
-			$sscc = $sscc.$loppu;
-
-			$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
-
-		}
-
-		$linkurl = substr($linkurl,0,-4); // vika br pois
-
-	}
-	else {
-		$linkurl = $rakirrow['rahtikirjanro'];
-	}
-
-	echo "<td>$linkurl</td>";
+			<td>".(float) $laskurow['alv']."%</td>
+			<td>".(float) $laskurow['erikoisale']."%</td>";
 
 	if ($laskurow["tila"] == "O") {
 		echo "<td>$laskurow[rahti]</td>";
@@ -308,14 +210,14 @@
 		echo "<th colspan='2'>".t("Laskun pvm")."</th>";
 	}
 
-	echo "<th>".t("Er‰p‰iv‰")."</th>
+	echo "	<th>".t("Er‰p‰iv‰")."</th>
 			<th>".t("Maksup‰iv‰")."</th>
-			<th>".t("Luontiaika")."</th>
-			<th>".t("ALV%")."</th>";
+			<th>".t("Toimitusaika")."</th>";
 
 	if ($laskurow["tila"] == "O") {
 		echo "<th>".t("Huolinta")."</th>";
 	}
+	echo "</tr>";
 
 	echo "<tr><td>$laskurow[laskunro]</td>";
 
@@ -325,15 +227,136 @@
 	else {
 		echo "<td colspan='2'>".tv1dateconv($laskurow["tapvm"])."</td>";
 	}
-	echo "<td>".tv1dateconv($laskurow["erpcm"])."</td>
+	echo "	<td>".tv1dateconv($laskurow["erpcm"])."</td>
 			<td>".tv1dateconv($laskurow["mapvm"])."</td>
-			<td>".tv1dateconv($laskurow["luontiaika"], "P")."</td>
-			<td>".str_replace(".",",",$laskurow['alv'])."</td>";
+			<td>".tv1dateconv($laskurow["toimaika"])."</td>";
 
 	if ($laskurow["tila"] == "O") {
 		echo "<td>$laskurow[rahti_huolinta]</td>";
 	}
 
+	echo "</tr>";
+
+	if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
+		if (isset($dpdtun[$kukarow['yhtio']])) $dpdtun = $dpdtun[$kukarow['yhtio']];
+		else $dpdtun = "";
+
+		if (isset($dpdss[$kukarow['yhtio']]))  $dpdss  = $dpdss[$kukarow['yhtio']];
+		else $dpdss = "";
+
+		$possi = strpos(strtoupper($laskurow['toimitustapa']),"DPD");
+
+		// postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
+		if (stripos($rakirrow['rahtikirjanro'],"JFI") !== FALSE) {
+			$linkurl = "";
+			$jjfi = explode("<br>", trim($rakirrow['rahtikirjanro']));
+
+			foreach ($jjfi as $nro) {
+				$linkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId=$nro&LOTUS_hae=Hae'>$nro</a><br>";
+			}
+
+			$linkurl = substr($linkurl,0,-4); // vika br pois
+		}
+		//luodaan ups seurantalinkki
+		elseif (stripos($rakirrow['rahtikirjanro'], 'UPS') !== FALSE) {
+			$linkurl = "";
+			$upsi = explode("<br>", trim($rakirrow['rahtikirjanro']));
+
+			foreach ($upsi as $nro) {
+
+				if (substr($nro, 0, 3) == 'UPS') {
+					$linkurl .= "<a target=newikkuna href='http://www.ups.fi/hptrack/trackDlgRequest?HTMLVersion=5.0&loc=fi_FI&Requester=UPSHome&track.x=Track&trackNums=".substr($nro, 4)."&WBPM_lid=homepage/ct1.html_pnl_trk&modal=true&'>$nro</a><br>";
+				}
+				else {
+					$linkurl .= "$nro<br>";
+				}
+			}
+
+			$linkurl = substr($linkurl,0,-4); // vika br pois
+		}
+		//luodaan dpd seurantalinkk
+		elseif ($possi !== FALSE and $rakirrow['rahtikirjanro'] != '' and $dpdtun != '' and $dpdss != '') {
+			$linkurl = "";
+
+			for ($dpdi=1; $dpdi<$rakirrow['kollit']+1; $dpdi++) {
+				$sscc = "";
+
+				if (!function_exists('tarkiste')) {
+
+					function tarkiste($sscc) {
+
+						$kerroin = 3; // kerroin aluks 3
+						$summa   = 0; // summa nolla tietty
+
+						// loopataan luvut oikeelta vasemmalle
+						for ($i = 16; $i >= 0; $i--) {
+							$summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
+							$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
+						}
+
+						$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
+
+						return $sscc;
+					}
+				}
+
+				$sscc = 1;
+				$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
+				$sscc .= sprintf('%06.06d', substr($rakirrow['rahtikirjanro'], -6));
+				$sscc .= sprintf('%02.02d', $dpdi);
+				$loppu = tarkiste($sscc);
+				$sscc = $sscc.$loppu;
+
+				$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
+
+			}
+
+			$linkurl = substr($linkurl,0,-4); // vika br pois
+
+		}
+		else {
+			$linkurl = $rakirrow['rahtikirjanro'];
+		}
+	
+		echo "<tr><th colspan='4'>".t("Toimitustapa")." / ".t("Rahtikirjanro")."</th><th colspan='2'>".t("Toimitusehto")."</th></tr>";
+		echo "<tr><td colspan='4'>$laskurow[toimitustapa] / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td></tr>";
+	}
+	
+	if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extranet"] == "") {
+
+		$query = "	SELECT
+					min(if(tilausrivi.keratty = 'saldoton', '9999-99-99 23:25:59', tilausrivi.kerattyaika)) kerattyaika,
+					min(tilausrivi.toimaika) toimaika,
+					min(tilausrivi.toimitettuaika) toimitettuaika
+					FROM tilausrivi
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.otunnus = '$laskurow[tunnus]'";
+		$aikares = mysql_query($query) or pupe_error($query);
+		$aikarow = mysql_fetch_assoc($aikares);
+
+		// Rivin toimitusaika
+		if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+			$aikarow["toimitettuaika"] = $aikarow["toimaika"];
+		}
+
+		echo "<tr>
+				<th>".t("Luontiaika")."</th>
+				<th>".t("Ker‰ykseen")."</th>
+				<th>".t("Tulostettu")."</th>
+				<th>".t("Ker‰tty")."</th>
+				<th>".t("Toimitettu")."</th>
+				<th>".t("Laskutettu")."</th>
+			</tr>";
+		echo "<tr>
+				<td>".tv1dateconv($laskurow["luontiaika"], "P", "")."</td>
+				<td>".tv1dateconv($laskurow["h1time"], "P", "")."</td>
+				<td>".tv1dateconv($laskurow["lahetepvm"], "P", "")."</td>
+				<td>".tv1dateconv($aikarow["kerattyaika"], "P", "")."</td>
+				<td>".tv1dateconv($aikarow["toimitettuaika"], "P", "")."</td>
+				<td>".tv1dateconv($laskurow["laskutettu"], "P", "")."</td>
+			</tr>";
+	}
+	
 	$komm = "";
 
 	if ($laskurow['myyja'] > 0) {
@@ -354,6 +377,10 @@
 					where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
 		$laaresult = mysql_query($query) or pupe_error($query);
 		$laarow = mysql_fetch_array($laaresult);
+
+		if ($laarow["nimi"] == "") {
+			$laarow["nimi"] = $laskurow["laatija"];
+		}
 
 		$komm .= "\n".t("Laatija").":###".$laarow['nimi'];
 	}
@@ -420,7 +447,7 @@
 		$komm .= "\n".t("Kommentti")." 1:###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
 	}
 
-	if ($laskurow["sisviesti2"] != "") {
+	if ($laskurow["sisviesti2"] != "" and $kukarow["extranet"] == "") {
 		$komm .= "\n".t("Kommentti")." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 90, "\n###");
 	}
 
@@ -439,7 +466,7 @@
 
 			list($o, $v) = explode("###", $kommentti);
 
-			echo "<tr><th>$o</th><td colspan='8'>$v</td></tr>";
+			echo "<tr><th>$o</th><td colspan='5'>$v</td></tr>";
 		}
 	}
 
@@ -453,7 +480,7 @@
 
 	if (mysql_num_rows($liiteres) > 0) {
 		$liitemaara = 1;
-		echo "<tr><th>".t("Liitetiedosto")."</th><td colspan='8'>";
+		echo "<tr><th>".t("Liitetiedosto")."</th><td colspan='5'>";
 		while ($liiterow = mysql_fetch_array($liiteres)) {
 			echo "<a href='".$palvelin2."view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara</a> ";
 			$liitemaara++;
@@ -482,8 +509,8 @@
 			$muutkeikres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($muutkeikres) > 0) {
-				echo "<tr><th colspan='9'>".t("Keikkaan liitetyt ostolaskut:")."</th></tr>";
-				echo "<tr><td colspan='9'>";
+				echo "<tr><th colspan='6'>".t("Keikkaan liitetyt ostolaskut:")."</th></tr>";
+				echo "<tr><td colspan='6'>";
 
 				while ($muutkeikrow = mysql_fetch_array($muutkeikres)) {
 					$ebid = $muutkeikrow['ebid'];
@@ -642,7 +669,6 @@
 			else {
 				$sarjanutunnus = "myyntirivitunnus";
 			}
-
 
 			$query = "	SELECT distinct sarjanumero
 						from sarjanumeroseuranta

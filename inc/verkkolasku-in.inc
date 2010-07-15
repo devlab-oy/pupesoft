@@ -1255,12 +1255,13 @@
 								if (strpos($editilaus_laskulle_data, "OSTOTIL.OT_NRO:".$laskun_asiakkaan_tilausnumero) !== FALSE) {
 
 									$editilaus_laskulle_filesize = filesize($editilaus_laskulle_polku.$path_parts['basename']);
+									$data  = mysql_real_escape_string($editilaus_laskulle_data);
 
 									$query = "	INSERT INTO liitetiedostot SET
 												yhtio    			= '$kukarow[yhtio]',
 												liitos   			= 'lasku',
 												liitostunnus 		= '$tunnus',
-												data     			= '$editilaus_laskulle_data',
+												data     			= '$data',
 												selite   			= 'Futursoft-tilaus $laskun_asiakkaan_tilausnumero',
 												kieli				= '$yhtiorow[kieli]',
 												filename 			= '$path_parts[basename]',

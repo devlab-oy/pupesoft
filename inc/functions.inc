@@ -7541,7 +7541,7 @@ if (!function_exists("t")) {
 		if (trim($kieli) != '') {
 			$indeksi = trim(strtolower($kieli));
 		}
-		elseif (trim($kukarow["kieli"]) != '') {
+		elseif (isset($kukarow["kieli"]) and trim($kukarow["kieli"]) != '') {
 			$indeksi = trim(strtolower($kukarow["kieli"]));
 		}
 		else {
@@ -8820,12 +8820,13 @@ if (!function_exists('liita_tilaus_laskun_liitetiedostoksi')) {
 					if (strpos($editilaus_laskulle_data, "OSTOTIL.OT_NRO:".$laskun_asiakkaan_tilausnumero) !== FALSE) {
 
 						$editilaus_laskulle_filesize = filesize($editilaus_laskulle_polku.$path_parts['basename']);
+						$data  = mysql_real_escape_string($editilaus_laskulle_data);
 
 						$query = "	INSERT INTO liitetiedostot SET
 									yhtio    			= '$kukarow[yhtio]',
 									liitos   			= 'lasku',
 									liitostunnus 		= '$tunnus',
-									data     			= '$editilaus_laskulle_data',
+									data     			= '$data',
 									selite   			= 'Futursoft-tilaus $laskun_asiakkaan_tilausnumero',
 									kieli				= '$yhtiorow[kieli]',
 									filename 			= '$path_parts[basename]',

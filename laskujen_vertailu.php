@@ -16,7 +16,7 @@
 
 	if (trim($laskunro) != '' and is_numeric($laskunro)) {
 
-		$query = "	SELECT tapvm, erpcm, concat(nimi, ' ', nimitark) nimi, postitp, ytunnus, summa, valkoodi, laskunro
+		$query = "	SELECT tapvm, erpcm, concat(nimi, ' ', nimitark) nimi, postitp, ytunnus, summa, valkoodi, laskunro, tunnus
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laskunro = '{$laskunro}'";
@@ -44,9 +44,9 @@
 
 		echo "<br/><br/><table>";
 
-		list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $laskunro);
+		list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $lasku_row["tunnus"]);
 
-		if ($invoice !== FALSE and count($invoice_ei_loydy) > 0 or count($loytyy_kummastakin) > 0) {
+		if ($invoice !== FALSE and (count($invoice_ei_loydy) > 0 or count($loytyy_kummastakin) > 0)) {
 
 			echo "<input type='hidden' id='sort_direction' name='sort_direction' value='desc'>";
 
@@ -112,7 +112,7 @@
 					if (trim($invoice[$tuoteno]['tilattumaara']) != '') {
 						echo "id='tr_{$i}'";
 					}
-					
+
 					echo ">";
 
 					echo "<td valign='top'>{$tuoteno}</td>";
@@ -218,14 +218,14 @@
 								$('.sort').click(function(){
 									if ($('#sort_direction').val() == 'asc') {
 										$('#sort_direction').val('desc');
-									
+
 										for (key in js_array) {
 											$('#tr_summa').before($('#tr_'+key));
 										}
 									}
 									else {
 										$('#sort_direction').val('asc');
-									
+
 										for (key in js_array) {
 											$('#table_header').after($('#tr_'+key));
 										}
@@ -273,11 +273,11 @@
 			foreach ($purchaseorder_ei_loydy as $tuoteno => $tuote) {
 				echo "<tr class='aktiivi'>";
 				echo "<td>&nbsp;</td><td><font class='error'>",t("Ei löydy laskulta"),"!</font></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td>";
-			
+
 				echo "<td>{$tuoteno}</td>";
-			
+
 				foreach ($tuote as $key => $val) {
-			
+
 					if ($key == 'nettohinta' or $key == 'bruttohinta') {
 						if ($key == 'nettohinta') $purchaseorder_summa += str_replace(",", ".", $val);
 						echo "<td valign='top' style='text-align: right;'>",sprintf('%.02f', str_replace(",", ".", $val)),"</td>";
@@ -289,7 +289,7 @@
 						echo "<td valign='top'>{$val}</td>";
 					}
 				}
-			
+
 				echo "</tr>";
 			}
 

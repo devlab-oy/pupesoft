@@ -8877,23 +8877,11 @@ if(!function_exists("luoiban")) {
 	}
 }
 
-if(!function_exists("tarkista_iban")) {
-	function tarkista_iban($tilino) {
+if(!function_exists("tarkista_sepa")) {
+	function tarkista_sepa($maa) {
 
-		// Calculating and validating IBAN checksums:
-
-		// 1. Check that the total IBAN length is correct as per the country. If not, the IBAN is invalid.
-		// 2. Move the four initial characters to the end of the string.
-		// 3. Replace each letter in the string with two digits, thereby expanding the string, where A=10, B=11, ..., Z=35.
-		// 4. Interpret the string as a decimal integer and compute the remainder of that number on division by 97.
-
-		// The IBAN number can only be valid if the remainder is 1.
-
-		$tilino		= strtoupper(trim($tilino));
-		$maa		= substr($tilino, 0, 2);
-		$pituus		= strlen($tilino);
-
-		$sallitut	= array("AL" => "28",
+		// SEPA (Single Euro Payments Area) maat ja niiden IBAN tilinumeron pituus
+		$sepa_maat	= array("AL" => "28",
 							"AD" => "24",
 							"AT" => "20",
 							"BE" => "16",
@@ -8945,21 +8933,49 @@ if(!function_exists("tarkista_iban")) {
 							"TR" => "26",
 							"GB" => "22");
 
-		// maa ei ole sallittu
-		if (!isset($sallitut[$maa])) {
+		// Maa ei ole sepa maa, palautetaan FALSE
+		if (!isset($sepa_maat[$maa])) {
+			return FALSE;
+		}
+
+		// Palautetaan IBAN:in pituus, jos on SEPA maa
+		return $sepa_maat[$maa];
+
+	}
+}
+
+if(!function_exists("tarkista_iban")) {
+	function tarkista_iban($tilino) {
+
+		// Calculating and validating IBAN checksums:
+
+		// 1. Check that the total IBAN length is correct as per the country. If not, the IBAN is invalid.
+		// 2. Move the four initial characters to the end of the string.
+		// 3. Replace each letter in the string with two digits, thereby expanding the string, where A=10, B=11, ..., Z=35.
+		// 4. Interpret the string as a decimal integer and compute the remainder of that number on division by 97.
+
+		// The IBAN number can only be valid if the remainder is 1.
+
+		$tilino			= strtoupper(str_replace(" ", "", $tilino));	// Kirjaimet isoksi ja spacet pois
+		$maa			= substr($tilino, 0, 2);
+		$pituus			= strlen($tilino);
+		$oikea_pituus	= tarkista_sepa($maa);
+
+		// Maa ei ole sallittu SEPA maa
+		if ($oikea_pituus === FALSE) {
 			return "";
 		}
 
-		// pituus on v‰‰r‰
-		if ($pituus != $sallitut[$maa]) {
+		// Tilinumeron pituus on v‰‰r‰
+		if ($pituus != $oikea_pituus) {
 			return "";
 		}
 
-		// siirret‰‰n nelj‰ ekaa merkki‰ tilinumeron loppuun
+		// Siirret‰‰n nelj‰ ensimm‰ist‰ merkki‰ tilinumeron loppuun
 		$chk_tilinumero = substr($tilino, 4).substr($tilino, 0, 4);
 		$chk_tilinumeronumeric = "";
 
-		// muutetaan kirjaimet numeroiksi (A = 10, B = 11, C = 12, jne...)
+		// Muutetaan kirjaimet numeroiksi (A = 10, B = 11, C = 12, jne...)
 		for ($i = 0; $i < $pituus; $i++) {
 			if (is_numeric($chk_tilinumero{$i})) {
 				$chk_tilinumeronumeric .= $chk_tilinumero{$i};
@@ -8969,10 +8985,10 @@ if(!function_exists("tarkista_iban")) {
 			}
 		}
 
-		// poistetaan stringist‰ etunollat
+		// Poistetaan stringist‰ etunollat
 		$chk_tilinumeronumeric = ltrim($chk_tilinumeronumeric, "0");
 
-		// lasketaan mod-97
+		// Lasketaan MOD-97
 		$mod = 0;
 		$pituus = strlen($chk_tilinumeronumeric);
 
@@ -8981,12 +8997,12 @@ if(!function_exists("tarkista_iban")) {
 		    $mod = (($mod * 10) + $numero) % 97;
 		}
 
-		// jos tulos ei ole yksi niin tilinumero on v‰‰rin
+		// Jos tulos ei ole yksi, niin tilinumero on v‰‰rin
 		if ($mod != 1) {
 			return "";
 		}
 
-		// tilinumero on oikein!
+		// Tilinumero on oikein!
 		return $tilino;
 	}
 }

@@ -9080,4 +9080,58 @@ if(!function_exists("tarkista_viite")) {
 	}
 }
 
+if (!function_exists("generoi_rfviite")) {
+	function generoi_rfviite($laskunumero) {
+
+		// Tehd‰‰n laskunumerosta ensin vanha suomalainen viite
+		$viite   = ltrim(preg_replace("/[^0-9]/", "", $laskunumero), "0");
+		$kerroin = 7;
+		$tulo    = 0;
+
+		for ($i = 1; $i <= strlen($viite); $i++) {
+
+			$merkki = substr($viite, -1 * $i, 1);
+			$tulo += $kerroin * $merkki;
+
+			switch ($kerroin) {
+				case 7:
+					$kerroin = 3;
+					break;
+				case 3:
+					$kerroin = 1;
+					break;
+				case 1:
+					$kerroin = 7;
+					break;
+			}
+		}
+
+		$tulo = substr($tulo, -1) + 0;
+
+		if ($tulo != 0) {
+			$tulo = 10 - $tulo;
+		}
+
+		$viite .= $tulo;
+
+		// Generoidaan viitteest‰ RF-viite
+		$rf_viite = $viite."271500";
+
+		// Lasketaan MOD-97
+		$mod = 0;
+		$pituus = strlen($rf_viite);
+
+		for ($i = 0; $i < $pituus; $i++) {
+		    $numero = (int) $rf_viite{$i};
+		    $mod = (($mod * 10) + $numero) % 97;
+		}
+
+		$tarkiste = 98 - $mod;
+		$tarkiste = sprintf('%02d', $tarkiste); // Esitet‰‰n kahdella merkill‰
+
+		return "RF".$tarkiste.$viite;
+	}
+
+}
+
 ?>

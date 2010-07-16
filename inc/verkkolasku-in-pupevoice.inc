@@ -1,5 +1,7 @@
 <?php
 
+$laskuformaatti 		= "INVOIC.D.96A";
+
 // parseroidaan xml
 $yhtio 					= array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC082.3039'));
 $verkkotunnus_vas 		= array_shift($xml->xpath('Group2/NAD[@e3035="MR"]/@eC082.3039'));

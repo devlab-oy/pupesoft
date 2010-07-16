@@ -1,5 +1,7 @@
 <?php
 
+$laskuformaatti 		= "FINVOICE";
+
 // parseroidaan xml
 $yhtio 					= $xml->BuyerOrganisationUnitNumber;
 $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;

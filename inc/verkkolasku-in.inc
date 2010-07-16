@@ -492,11 +492,21 @@
 							FROM tiliointisaanto
 							WHERE ttunnus 	= '$trow[tunnus]'
 							and yhtio 		= '$yhtio'
-							and tyyppi		= 'o'
-							and kuvaus		= '$toim_asiakkaantiedot[nimi]'
-							and kuvaus2		= '$toim_asiakkaantiedot[osoite]'
-							and mintuote	= '$toim_asiakkaantiedot[postino]'
-							and maxtuote	= '$toim_asiakkaantiedot[postitp]'";
+							and tyyppi		= 'o'";
+
+				if ($laskuformaatti == "INVOIC.D.96A") {
+					$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$toim_asiakkaantiedot[nimi]'
+								and SUBSTRING(kuvaus2,  1, 30) = '$toim_asiakkaantiedot[osoite]'
+								and SUBSTRING(mintuote, 1, 30) = '$toim_asiakkaantiedot[postino]'
+								and SUBSTRING(maxtuote, 1, 30) = '$toim_asiakkaantiedot[postitp]'";
+				}
+				else {
+					$query .= " and kuvaus   = '$toim_asiakkaantiedot[nimi]'
+								and kuvaus2  = '$toim_asiakkaantiedot[osoite]'
+								and mintuote = '$toim_asiakkaantiedot[postino]'
+								and maxtuote = '$toim_asiakkaantiedot[postitp]'";
+				}
+
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) != 0) {
@@ -517,11 +527,21 @@
 							FROM tiliointisaanto
 							WHERE ttunnus 	= '$trow[tunnus]'
 							and yhtio 		= '$yhtio'
-							and tyyppi		= 'b'
-							and kuvaus		= '$toim_asiakkaantiedot[nimi]'
-							and kuvaus2		= '$toim_asiakkaantiedot[osoite]'
-							and mintuote	= '$toim_asiakkaantiedot[postino]'
-							and maxtuote	= '$toim_asiakkaantiedot[postitp]'";
+							and tyyppi		= 'b'";
+
+				if ($laskuformaatti == "INVOIC.D.96A") {
+					$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$ostaja_asiakkaantiedot[nimi]'
+								and SUBSTRING(kuvaus2,  1, 30) = '$ostaja_asiakkaantiedot[osoite]'
+								and SUBSTRING(mintuote, 1, 30) = '$ostaja_asiakkaantiedot[postino]'
+								and SUBSTRING(maxtuote, 1, 30) = '$ostaja_asiakkaantiedot[postitp]'";
+				}
+				else {
+					$query .= " and kuvaus   = '$ostaja_asiakkaantiedot[nimi]'
+								and kuvaus2  = '$ostaja_asiakkaantiedot[osoite]'
+								and mintuote = '$ostaja_asiakkaantiedot[postino]'
+								and maxtuote = '$ostaja_asiakkaantiedot[postitp]'";
+				}
+
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) != 0) {

@@ -15,8 +15,8 @@
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
+	// Päivitetään oletustili
     if ($tee == 'O') {
-		// Sitten oletustili päälle, jos sitä pyydettiin!
 		$query = "	UPDATE kuka set
 					oletustili = '$oltili'
 					WHERE kuka = '$kukarow[kuka]' and yhtio='$kukarow[yhtio]'";
@@ -38,8 +38,8 @@
 		$tee = 'W';
 	}
 
+	// Poistamme käyttyjän oletustilin
 	if ($tee == 'X') {
-		// Haa poistamme käyttyjän oletuksen!
 		$query = "	UPDATE kuka set
 					oletustili = ''
 					WHERE kuka ='$kukarow[kuka]' and yhtio = '$kukarow[yhtio]'";
@@ -47,8 +47,8 @@
 		$tee = 'W';
 	}
 
+	// Lasku merkitään maksettavaksi ja vähennetään limiittiä tai tehdään vain tarkistukset päittäinvientiin.
 	if ($tee == 'H' or $tee == 'G') {
-		// Lasku merkitään maksettavaksi ja vähennetään limiittiä tai tehdään vain tarkistukset päittäinvientiin.
 		$tili = $oltilrow[1];
 
 		// maksetaan kassa-alennuksella
@@ -90,6 +90,9 @@
 			exit;
 		}
 
+		// virhetilanne, että kapvm on suurempi kuin ercpm!
+		if ($trow['kapvm'] > $trow['erpcm']) $trow['kapvm'] = $trow['erpcm'];
+
 		if ($poikkeus == 'on') 						$trow['olmapvm'] = date("Y-m-d");
 		elseif (date("Y-m-d") <= $trow['kapvm']) 	$trow['olmapvm'] = $trow['kapvm'];
 		elseif(date("Y-m-d") <= $trow['erpcm']) 	$trow['olmapvm'] = $trow['erpcm'];
@@ -99,7 +102,7 @@
 		if ($trow['summa'] < 0 and $eipankkiin == '')  {
 
 			if (strtoupper($trow['maa']) == 'FI') {
-				$query = "	SELECT sum(if(alatila = 'K', summa - kasumma, summa)) summa
+				$query = "	SELECT sum(if(alatila = 'K' and summa > 0, summa - kasumma, summa)) summa
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tila = 'P'
@@ -110,7 +113,7 @@
 							and tilinumero = '$trow[tilinumero]'";
 			}
 			else {
-				$query = "	SELECT sum(if(alatila='K', summa - kasumma, summa)) summa
+				$query = "	SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tila = 'P'
@@ -182,8 +185,8 @@
 		}
 	}
 
+	// Suoritetaan päittäin (vain kotimaa)
 	if ($tee == 'G') {
-		// Suoritetaan päittäin (vain kotimaa)
 
 		//Maksetaan hyvityslasku niin käsittely helpottuu
 		if ($poikkeus=='on') 						$maksupvm = date("Y-m-d");
@@ -361,13 +364,14 @@
 		echo t("Laskut merkitty suoritetuksi!")."<br><br>";
 	}
 
+	// Poimitaan lasku
 	if ($tee == 'H') {
 
 		if ($poikkeus == 'on') {
 			$muutamaksupaiva = ", olmapvm = now()";
 		}
 		else {
-			$muutamaksupaiva = ", olmapvm = if(now()<=kapvm,kapvm,if(now()<=erpcm,erpcm,now()))";
+			$muutamaksupaiva = ", olmapvm = if(now()<=kapvm and kapvm < erpcm, kapvm, if(now()<=erpcm, erpcm, now()))";
 		}
 
 		if ($eipankkiin == 'on') {
@@ -404,7 +408,7 @@
 
 	// Perutaan maksuun meno
 	if ($tee == 'DP') {
-		$query = "	SELECT *, if(alatila='K', summa - kasumma, summa) usumma
+		$query = "	SELECT *, if(alatila='K' and summa > 0, summa - kasumma, summa) usumma
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus = '$lasku'";
@@ -419,7 +423,7 @@
 			//Hyvityslasku --> vastaava määrä rahaa on oltava veloituspuolella
 			if ($trow['usumma'] > 0) {
 				if (strtoupper($trow['maa']) == 'FI') {
-					$query = "	SELECT sum(if(alatila='K', summa - kasumma, summa)) summa
+					$query = "	SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
 								FROM lasku
 								WHERE yhtio='$kukarow[yhtio]'
 								and tila='P'
@@ -431,7 +435,7 @@
 								and tunnus != '$lasku'";
 				}
 				else {
-					$query = "	SELECT sum(if(alatila='K', summa - kasumma, summa)) summa
+					$query = "	SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
 								FROM lasku
 								WHERE yhtio='$kukarow[yhtio]'
 								and tila='P'
@@ -493,7 +497,7 @@
 		}
 	}
 
-	//Maksetaan nipussa
+	// Maksetaan nipussa
 	if ($tee == "NK" or $tee == "NT" or $tee == "NV") {
 		if ($oltilrow['tunnus'] == 0) {
 			echo "<br/><font class='error'>",t("Maksutili on kateissa"),"! ",t("Systeemivirhe"),"!</font><br/><br/>";
@@ -586,7 +590,7 @@
 		$tee = 'DM';
 	}
 
-	// Jaaha poistamme laskun!
+	// Poistetaan lasku
 	if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
 
 		$query = "	SELECT *
@@ -634,9 +638,9 @@
 		$tee 	= 'S';
 	}
 
+	// Ei oletustiliä, joten annetaan käyttäjän valita
 	if ($tee == 'W') {
 
-		// Ei oletustiliä, joten annetaan käyttäjän valita
 		echo "<font class='message'>".t("Valitse maksutili")."</font><hr>";
 
 		$query = "	SELECT tunnus, concat(nimi, ' (', tilino, ')') tili, maksulimitti, valkoodi
@@ -763,7 +767,7 @@
 		}
 	}
 
-	//Näytetään kaikki omat maksatukseen valitut
+	// Näytetään kaikki omat maksatukseen valitut
 	if ($tee == 'DM') {
 		$query = "	SELECT lasku.nimi, lasku.kapvm, lasku.erpcm, lasku.valkoodi,
 					lasku.summa - lasku.kasumma kasumma,
@@ -772,6 +776,8 @@
 					round(lasku.summa * valuu.kurssi,2) ysumma,
 					lasku.ebid, lasku.tunnus, lasku.olmapvm,
 					if(lasku.maa='$yhtiorow[maa]', lasku.tilinumero, lasku.ultilno) tilinumero,
+					if(alatila = 'K' and summa > 0, summa - kasumma, summa) maksettava_summa,
+					if(alatila = 'K' and summa > 0, round(lasku.summa * valuu.kurssi,2) - kasumma, round(lasku.summa * valuu.kurssi,2)) maksettava_ysumma,
 					h1time,
 					h2time,
 					h3time,
@@ -791,7 +797,7 @@
 					and lasku.tila = 'P'
 					and lasku.valkoodi = valuu.nimi
 					and lasku.maksaja = '$kukarow[kuka]'
-					ORDER BY olmapvm, ykasumma  desc";
+					ORDER BY olmapvm, ykasumma desc";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<br><font class='message'>".t("Maksuaineistoon poimitut laskut")."</font><hr>";
@@ -866,15 +872,15 @@
 
 				echo "<td valign='top' align='right' nowrap>$trow[ysumma] $yhtiorow[valkoodi]<br>";
 
-				$summa += $trow["ysumma"];
+				$summa += $trow["maksettava_ysumma"];
 
 				if (strtoupper($trow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
 					echo "$trow[summa] $trow[valkoodi]";
 
-					$valsumma[$trow["valkoodi"]] += $trow["summa"];
+					$valsumma[$trow["valkoodi"]] += $trow["maksettava_summa"];
 				}
 				else {
-					$valsumma[$trow["valkoodi"]] += $trow["summa"];
+					$valsumma[$trow["valkoodi"]] += $trow["maksettava_summa"];
 				}
 
 				echo "</td>";
@@ -943,6 +949,7 @@
 		$tee='V';
 	}
 
+	// Näytetään maksuvalmiit laskut
 	if ($tee == 'S') {
 
 		$lisa = "";
@@ -1248,6 +1255,7 @@
 		$tee = "V";
 	}
 
+	// Tehdään hakukäyttöliittymä
 	if ($tee == 'V') {
 
 		echo "<br><font class='message'>".t("Etsi maksuvalmiita laskuja")."</font><hr>";

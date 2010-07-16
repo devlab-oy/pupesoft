@@ -713,14 +713,10 @@
 					return ($return);
 				}
 
-				if (strlen($viite) > 0) {
-					require ("inc/tarkistaviite.inc");
-
-					if ($ok == 0) {
-						$return .= "Viite on v‰‰rin!\n";
-						mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto ep‰onnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-						return ($return);
-					}
+				if (strlen($viite) > 0 and tarkista_viite($viite) === FALSE) {
+					$return .= "Viite on v‰‰rin!\n";
+					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto ep‰onnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					return ($return);
 				}
 
 				if (strlen($viite) > 0 and strlen($viesti) > 0) {

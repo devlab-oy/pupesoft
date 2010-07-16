@@ -234,13 +234,8 @@
 	} 
 
 	//	Tarkastetaan käsinsyötetty viite
-	if (isset($jatka) and $kasinsyotetty_viite!="" and $yhtiorow["viitteen_kasinsyotto"]!="") {
-		$oviite	= $viite;
-		$viite	= $kasinsyotetty_viite;
-		require("inc/tarkistaviite.inc");
-		$viite=$oviite;
-
-		if ($ok<>1) {
+	if (isset($jatka) and $kasinsyotetty_viite != "" and $yhtiorow["viitteen_kasinsyotto"] != "") {
+		if (tarkista_viite($kasinsyotetty_viite) === FALSE) {
 			echo "<font class='error'>".t("VIRHE: Syötetty viite '%' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
 			$tee	= "OTSIK";
 			unset($jatka);

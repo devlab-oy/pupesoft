@@ -9036,4 +9036,48 @@ if(!function_exists("tarkista_oikeus")) {
 	}
 }
 
+if(!function_exists("tarkista_viite")) {
+	function tarkista_viite($viite) {
+
+		// otetaan sis‰‰n $viite muuttuja
+		// palautetaan TRUE jos viite on ok, muutoin FALSE
+		// sallitaan viitteess‰ vaan numerot 0-9
+
+		$viite = preg_replace("/[^0-9]/", "", $viite);
+		$kerroin = 7;
+		$tulo = 0;
+
+		for ($i = 2; $i <= strlen($viite); $i++) {
+
+			$merkki = substr($viite, -1 * $i, 1);
+			$tulo += $kerroin * $merkki;
+
+			switch ($kerroin) {
+				case 7:
+					$kerroin = 3;
+					break;
+				case 3:
+					$kerroin = 1;
+					break;
+				case 1:
+					$kerroin = 7;
+					break;
+			}
+		}
+
+		$tmerkki = substr($viite, -1);
+		$tulo = substr($tulo, -1) + 0;
+
+		if ($tulo != 0) {
+			$tulo = 10 - $tulo;
+		}
+
+		if ($tulo == $tmerkki) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+}
+
 ?>

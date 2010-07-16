@@ -444,12 +444,9 @@ if ($tee == 'I') {
 		$tee = 'E';
 	}
 
-	if (strlen($viite) > 0) {
-		require "inc/tarkistaviite.inc";
-		if ($ok == 0) {
-			$errormsg .= "<font class='error'>".t("Viite on v‰‰rin")."</font><br>";
-			$tee = 'E';
-		}
+	if (strlen($viite) > 0 and tarkista_viite($viite) === FALSE) {
+		$errormsg .= "<font class='error'>".t("Viite on v‰‰rin")."</font><br>";
+		$tee = 'E';
 	}
 
 	if (strlen($viite) > 0 and strlen($viesti) > 0) {

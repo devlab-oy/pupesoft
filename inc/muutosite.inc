@@ -400,7 +400,6 @@
 				$tila = '';
 			}
 		}
-
 		if ($trow['mapvm'] != '0000-00-00') {
 			echo "<font class='error'>".t("Lasku on  maksettu!")." $trow[mapvm]</font><br>";
 			$tee = 'E';
@@ -426,10 +425,23 @@
 		if ($vv < 1000) $vv += 2000;
 		$val = checkdate($kk, $pp, $vv);
 
-		if (!$val) {
+		if (!$val and $summa != 0) {
 			echo "<font class='error'>".t("Virheellinen kassapvm")." $vv-$kk-$pp</font><br>";
 			$tee = 'E';
 			$tila = '';
+		}
+		elseif ($summa != 0) {
+			$pvm = date("Y-m-d", mktime (0,0,0,$kk,$pp,$vv));
+			if ($pvm < $trow['tapvm']) {
+				echo "<font class='error'>".t("Kassa-alepvm on ennen laskunpäiväystä")."</font><br>";
+				$tee = 'E';
+				$tila = '';
+			}
+			if ($pvm > $trow['erpcm']) {
+				echo "<font class='error'>".t("Kassa-alepvm on eräpvmn jälkeen")."</font><br>";
+				$tee = 'E';
+				$tila = '';
+			}
 		}
 
 		//Poistetaan päiväys

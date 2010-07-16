@@ -98,7 +98,6 @@
 
 	$keraysvirhe = 0;
 	$muuttuiko	 = '';
-	$mitkamuuttu = '';
 
 	if ($tee == 'P') {
 
@@ -308,6 +307,7 @@
 		if ((int) $keraajanro == 0) $keraajanro = $keraajalist;
 
 		$tilausnumerot = array();
+		$poikkeamat = array();
 
 		$query = "SELECT * from kuka where yhtio='$kukarow[yhtio]' and keraajanro='$keraajanro'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -326,7 +326,7 @@
 							WHERE tunnus = '$kerivi[$i]' and yhtio='$kukarow[yhtio]'";
 				$ktresult = mysql_query($query1) or pupe_error($query1);
 				$statusrow = mysql_fetch_assoc($ktresult);
-				$keraamaton=0;
+				$keraamaton = 0;
 
 				if ($statusrow["status"] == "keraamaton") {
 					if ($kerivi[$i] > 0) {
@@ -356,7 +356,7 @@
 
 						//Aloitellaan tilausrivi päivitysqueryä
 						$query = "	UPDATE tilausrivi
-									SET yhtio=yhtio ";
+									SET yhtio = yhtio ";
 
 						if ($tilrivirow["var"] != "J" and $keraysvirhe == 0 and $real_submit == 'yes') {
 							//Muut kuin JT-rivit päivitetään aina kerätyiksi jos virhetsekit menivät ok
@@ -367,13 +367,21 @@
 						// Käyttäjä on syöttänyt jonkun luvun, päivitetään vaikka virhetsekit menisivät pepulleen
 						if (trim($maara[$apui]) != '') {
 
-							//Siivotaan hieman käyttäjän syöttämää kappalemäärää
-							$maara[$apui] = str_replace ( ",", ".", $maara[$apui]);
+							// Siivotaan hieman käyttäjän syöttämää kappalemäärää
+							$maara[$apui] = str_replace (",", ".", $maara[$apui]);
 							$maara[$apui] = (float) $maara[$apui];
+
+							// Kerätään tietoa poikkeama-maileja varten
+							$poikkeamat[$tilrivirow["otunnus"]][$i]["tuoteno"] 	= $tilrivirow["tuoteno"];
+							$poikkeamat[$tilrivirow["otunnus"]][$i]["nimitys"] 	= $tilrivirow["nimitys"];
+							$poikkeamat[$tilrivirow["otunnus"]][$i]["tilkpl"] 	= $tilrivirow["tilkpl"];
+							$poikkeamat[$tilrivirow["otunnus"]][$i]["var"] 		= $tilrivirow["var"];
+							$poikkeamat[$tilrivirow["otunnus"]][$i]["maara"] 	= $maara[$apui];
 
 							$rotunnus = 0;
 
 							if ($tilrivirow["var"] == 'P' and $maara[$apui] > 0) {
+
 								// Puuterivi löytyi poistetaan VAR
 								$query .= "	, var		= ''
 											, varattu	= '".$maara[$apui]."'";
@@ -384,6 +392,9 @@
 
 								// PUUTE-riville tehdään osatoimitus ja loput jätetään puuteriviksi
 								if ($maara[$apui] < $tilrivirow['tilkpl']) {
+
+									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Jätettiin puuteriviksi.";
+
 									$rotunnus	= $tilrivirow['otunnus'];
 									$rtyyppi	= $tilrivirow['tyyppi'];
 									$rtilkpl 	= round($tilrivirow['tilkpl']-$maara[$apui],2);
@@ -415,6 +426,9 @@
 
 								// JT-riville tehdään osatoimitus ja loput jätetään jälkitoimitukseen
 								if ($maara[$apui] < $jtsek) {
+
+									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Jätettiin JT-riviksi.";
+
 									$rotunnus		= $tilrivirow['otunnus'];
 									$rtyyppi		= $tilrivirow['tyyppi'];
 									$rtilkpl 		= round($jtsek-$maara[$apui],2);
@@ -435,6 +449,9 @@
 								}
 							}
 							elseif (($tilrivirow["var"] == 'J' or $tilrivirow["var"] == 'P') and $maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI") {
+
+								$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "JT/Puuterivi nollattiin.";
+
 								// Varastomiehellä on nyt oikeus nollata myös JT-rivi jos hän saa lähetettyä $poikkeama_kasittely[$apui] == "MI"
 								if ($keraysvirhe == 0) {
 									$query .= ", keratty = '$who',
@@ -450,6 +467,9 @@
 								$query .= ", varattu='".$maara[$apui]."'";
 
 								if ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS') {
+
+									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Siirrettiin takaisin ennakkotilaukselle.";
+
 									$ejttila    = "('E')";
 									$ejtalatila = "('A')";
 
@@ -463,7 +483,11 @@
 									$kerattyaik	= "''";
 									$rkomm 		= $tilrivirow["kommentti"];
 								}
+
 								if ($otsikkorivi['clearing'] == 'JT-TILAUS') {
+
+									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Siirrettiin takaisin JT-tilaukselle.";
+
 									$ejttila    = "('N','L')";
 									$ejtalatila = "('T','X')";
 
@@ -524,6 +548,8 @@
 								if ($maara[$apui] < 0) {
 									// Jos kerääjä kuittaa alle nollan niin ei tehdä mitään
 									$query .= ", varattu = varattu";
+
+									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Määrä nollaa pienempi. Poikkeamaa ei hyväksytty.";
 								}
 								elseif ($maara[$apui] >= 0 and $maara[$apui] < $tilrivirow['varattu']) {
 
@@ -556,6 +582,9 @@
 							if ($poikkeama_kasittely[$apui] != "" and $rotunnus != 0) {
 								// Käyttäjän valitsemia poikkeamakäsittelysääntöjä
 								if ($poikkeama_kasittely[$apui] == "PU") {
+
+									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Jätettiin puuteriviksi.";
+
 									// Riville tehdään osatoimitus ja loput jätetään puuteriviksi
 									$rvarattu	= 0;
 									$rjt  		= 0;
@@ -565,6 +594,9 @@
 									$rkomm 		= t("Tuote Loppu.");
 								}
 								elseif ($poikkeama_kasittely[$apui] == "JT") {
+
+									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Jätettiin JT-riviksi.";
+
 									// Riville tehdään osatoimitus ja loput jätetään jälkkäriin (ennakkotilauksilla takaisin ennakkoon)
 									if ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS') {
 										$rvarattu	= $rtilkpl;
@@ -589,10 +621,16 @@
 									$rkomm 		= $tilrivirow["kommentti"];
 								}
 								elseif ($poikkeama_kasittely[$apui] == "MI") {
+
+									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Mitätöitiin.";
+
 									// Riville tehdään osatoimitus ja loput mitätöidään
 									$rotunnus	= 0;
 								}
 								elseif ($poikkeama_kasittely[$apui] == "UR") {
+
+									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Siirrettiin uudelle riville.";
+
 									// Riville tehdään osatoimitus ja loput kopsataan uudelle riville
 									$rvarattu	= $rtilkpl;
 									$rjt  		= 0;
@@ -667,9 +705,9 @@
 										$values = "'$kukarow[yhtio]'";
 
 										// Ei monisteta tunnusta
-										for ($i = 0; $i < mysql_num_fields($lisatiedot_result); $i++) {
+										for ($ijk = 0; $ijk < mysql_num_fields($lisatiedot_result); $ijk++) {
 
-											$fieldname = mysql_field_name($lisatiedot_result, $i);
+											$fieldname = mysql_field_name($lisatiedot_result, $ijk);
 
 											$fields .= ", ".$fieldname;
 
@@ -691,6 +729,8 @@
 										$kysely2  = "INSERT INTO laskun_lisatiedot ($fields) VALUES ($values)";
 										$insres  = mysql_query($kysely2) or pupe_error($kysely2);
 									}
+
+									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Siirrettiin tilaukselle ".$tilausnumerot[$tilrivirow["otunnus"]].".";
 
 									$rotunnus	= $tilausnumerot[$tilrivirow["otunnus"]];
 									$rvarattu	= $rtilkpl;
@@ -787,7 +827,6 @@
 							}
 
 							$muuttuiko = 'kylsemuuttu';
-							$mitkamuuttu .= "'".$kerivi[$i]."',";
 						}
 
 						//päivitetään alkuperäinen rivi
@@ -808,110 +847,115 @@
 			$tee = '';
 		}
 
-		//Jos keräyspoikkeamia syntyi, niin lähetetään mailit myyjälle ja asiakkaalle
+		// Jos keräyspoikkeamia syntyi, niin lähetetään mailit myyjälle ja asiakkaalle
 		if ($muuttuiko == 'kylsemuuttu') {
-
-			$mitkamuuttu = substr($mitkamuuttu,0,-1);
-
-			$query = "	SELECT distinct(otunnus)
-						FROM tilausrivi
-						WHERE tunnus in ($mitkamuuttu) and yhtio='$kukarow[yhtio]'";
-			$otsresult = mysql_query($query) or pupe_error($query);
-
-			while ($otsrow = mysql_fetch_assoc($otsresult)) {
+			foreach ($poikkeamat as $poikkeamatilaus => $poikkeamatilausrivit) {
 
 				$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli
 							FROM lasku
 							JOIN asiakas on asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 							LEFT JOIN kuka on kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
-							WHERE lasku.tunnus	= '$otsrow[otunnus]'
+							WHERE lasku.tunnus	= '$poikkeamatilaus'
 							and lasku.yhtio		= '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_assoc($result);
 
 				$kieli = $laskurow["kieli"];
 
-				$query = "	SELECT *
-							FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]'
-							and otunnus = '$otsrow[otunnus]'
-							and tunnus in ($mitkamuuttu)";
-				$result = mysql_query($query) or pupe_error($query);
-
 				$rivit = '';
 
-				while ($tvtilausrivirow = mysql_fetch_assoc($result)) {
+				foreach ($poikkeamatilausrivit as $poikkeama) {
 
-					$nimitysloput = '';
+					$poikkeama['nimitys'] = t_tuotteen_avainsanat($poikkeama, 'nimitys', $kieli);
 
-					$tvtilausrivirow['nimitys'] = t_tuotteen_avainsanat($tvtilausrivirow, 'nimitys');
-
-					if (strlen($tvtilausrivirow['nimitys']) > 27) {
-						$nimitysloput = substr($tvtilausrivirow['nimitys'], 28);
-						$tvtilausrivirow['nimitys'] = substr($tvtilausrivirow['nimitys'], 0, 28);
-					}
-
-					$rivit .= sprintf("%-30.s", $tvtilausrivirow['nimitys']);
-					$rivit .= sprintf("%-20.s", $tvtilausrivirow['tuoteno']);
-					$rivit .= sprintf("%8.s",   $tvtilausrivirow['tilkpl']);
-					$rivit .= sprintf("%23.s",  $tvtilausrivirow['varattu']);
-					$rivit .= "\n";
-
-					if ($nimitysloput != '') {
-						$rivit .= sprintf("%-75.s",$nimitysloput);
-						$rivit .= "\n";
-					}
+					$rivit .= "<tr>";
+					$rivit .= "<td>$poikkeama[nimitys]</td>";
+					$rivit .= "<td>$poikkeama[tuoteno]</td>";
+					$rivit .= "<td>". (float) $poikkeama["tilkpl"]."</td>";
+					$rivit .= "<td>". (float) $poikkeama["maara"]."</td>";
+					if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $rivit .= "<td>$poikkeama[loput]</td>";
+					$rivit .= "</tr>";
 				}
 
 				$header = "From: <$yhtiorow[postittaja_email]>\n";
+				$header = "Content-type: text/html; charset=\"iso-8859-1\"\n";
 
-				$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								."".t("Keräyspoikkeamat", $kieli)."\n";
-				$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\n";
-				$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\n";
-				$ulos .= "\n";
-				$ulos .= sprintf("%-50.s","".t("Tilaaja", $kieli).":")										."".t("Toimitusosoite", $kieli).":\n";
-				$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\n";
-				$ulos .= sprintf("%-50.s",$laskurow['nimitark'])							.$laskurow['toim_nimitark']."\n";
-				$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\n";
-				$ulos .= sprintf("%-50.s",$laskurow['postino']." ".$laskurow['postitp'])	.$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\n";
-				$ulos .= "\n";
-				$ulos .= sprintf("%-50.s","".t("Toimitus", $kieli).": ".$laskurow['toimitustapa'])			."".t("Tilausnumero", $kieli).": ".$laskurow['tunnus']."\n";
-				$ulos .= sprintf("%-50.s","".t("Tilausviite", $kieli).": ".$laskurow['viesti'])				."".t("Myyjä", $kieli).": ".$laskurow['kukanimi']."\n";
+				$ulos  = "<html>\n<head>\n";
+				$ulos .= "<style type='text/css'>$css</style>\n";
+				$ulos .= "<title>$yhtiorow[nimi]</title>\n";
+				$ulos .= "</head>\n";
+
+				$ulos .= "<body>\n";
+
+				$ulos .= "<font class='head'>".t("Keräyspoikkeamat", $kieli)."</font><hr><br><br><table>";
+
+				$ulos .= "<tr><th>".t("Yhtiö", $kieli)."</th></tr>";
+				$ulos .= "<tr><td>$yhtiorow[nimi]</td></tr>";
+				$ulos .= "<tr><td>$yhtiorow[osoite]</td></tr>";
+				$ulos .= "<tr><td>$yhtiorow[postino] $yhtiorow[postitp]</td></tr>";
+				$ulos .= "</table><br><br>";
+
+				$ulos .= "<table>";
+				$ulos .= "<tr><th>".t("Ostaja", $kieli).":</th><th>".t("Toimitusosoite", $kieli).":</th></tr>";
+
+				$ulos .= "<tr><td>$laskurow[nimi]</td><td>$laskurow[toim_nimi]</td></tr>";
+				$ulos .= "<tr><td>$laskurow[nimitark]</td><td>$laskurow[toim_nimitark]</td></tr>";
+				$ulos .= "<tr><td>$laskurow[osoite]</td><td>$laskurow[toim_osoite]</td></tr>";
+				$ulos .= "<tr><td>$laskurow[postino] $laskurow[postitp]</td><td>$laskurow[toim_postino] $laskurow[toim_postitp]</td></tr>";
+				$ulos .= "</table><br><br>";
+
+				$ulos .= "<table>";
+				$ulos .= "<tr><th>".t("Laadittu", $kieli).":</th><td>".tv1dateconv($laskurow['luontiaika'])."</td></tr>";
+				$ulos .= "<tr><th>".t("Tilausnumero", $kieli).":</th><td>$laskurow[tunnus]</td></tr>";
+				$ulos .= "<tr><th>".t("Tilausviite", $kieli).":</th><td>$laskurow[viesti]</td></tr>";
+				$ulos .= "<tr><th>".t("Toimitustapa", $kieli).":</th><td>$laskurow[toimitustapa]</td></tr>";
+				$ulos .= "<tr><th>".t("Myyjä", $kieli).":</th><td>$laskurow[kukanimi]</td></tr>";
 
 				if ($laskurow['comments'] != '') {
-					$ulos .= "".t("Kommentti", $kieli).": ".$laskurow['comments']."\n";
+					$ulos .= "<tr><th>".t("Kommentti", $kieli).":</th><td>".$laskurow['comments']."</td></tr>";
 				}
 
-				$ulos .= "\n";
-				$ulos .= t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."          ".t("Tilattu", $kieli)."            ".t("Toimitetaan", $kieli)."\n";
-				$ulos .= "---------------------------------------------------------------------------------\n";
-				$ulos .= $rivit."\n";
+				$ulos .= "</table><br><br>";
 
-				$ulos .= "\n\n";
-				$ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n";
+				$ulos .= "<table>";
+				$ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Tilattu", $kieli)."</th><th>".t("Toimitetaan", $kieli)."</th>";
+				if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $ulos .= "<th>".t("Poikkeaman käsittely", $kieli)."</th>";
+				$ulos .= "</tr>";
+				$ulos .= $rivit;
+				$ulos .= "</table><br><br>";
+
+				$ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."<br><br>";
+				$ulos .= "</body></html>";
+
+				$subject = mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q");
 
 				// Lähetetään keräyspoikkeama asiakkaalle
 				if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
-					$boob = mail($laskurow["email"],  "$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli)."", $ulos, $header, "-f $yhtiorow[postittaja_email]");
-					if ($boob===FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
+					$boob = mail($laskurow["email"], $subject, $ulos, $header, "-f $yhtiorow[postittaja_email]");
+					if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 				}
 
 				// Lähetetään keräyspoikkeama myyjälle
 				if ($laskurow["kukamail"] != '' and ($laskurow["kerayspoikkeama"] == 0 or $laskurow["kerayspoikkeama"] == 2)) {
+
+					$uloslisa = "";
+
 					if (($laskurow["email"] == '' or $boob === FALSE) and $laskurow["kerayspoikkeama"] == 0) {
-						$ulos = t("Asiakkaalta puuttuu sähköpostiosoite! Keräyspoikkeamia ei voitu lähettää!")."\n\n\n".$ulos;
+						$uloslisa .= t("Asiakkaalta puuttuu sähköpostiosoite! Keräyspoikkeamia ei voitu lähettää!")."<br><br>";
 					}
 					elseif ($laskurow["kerayspoikkeama"] == 2) {
-						$ulos = t("Asiakkaalle on merkitty että hän ei halua keräyspoikkeama ilmoituksia!")."\n\n\n".$ulos;
+						$uloslisa .= t("Asiakkaalle on merkitty että hän ei halua keräyspoikkeama ilmoituksia!")."<br><br>";
 					}
 					else {
-						$ulos = t("Tämä viesti on lähetetty myös asiakkaalle")."!\n\n\n".$ulos;
+						$uloslisa .= t("Tämä viesti on lähetetty myös asiakkaalle")."!<br><br>";
 					}
 
-					$ulos = t("Tilauksen keräsi").": $keraaja[nimi]\n\n".$ulos;
+					$uloslisa .= t("Tilauksen keräsi").": $keraaja[nimi]<br><br>";
 
-					$boob = mail($laskurow["kukamail"],  "$yhtiorow[nimi] - ".t("Keräyspoikkeamat")."", $ulos, $header, "-f $yhtiorow[postittaja_email]");
-					if ($boob===FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
+					$ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
+
+					$boob = mail($laskurow["kukamail"], $subject, $ulos, $header, "-f $yhtiorow[postittaja_email]");
+					if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 				}
 			}
 		}

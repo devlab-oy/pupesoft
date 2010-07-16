@@ -9134,4 +9134,48 @@ if (!function_exists("generoi_rfviite")) {
 
 }
 
+if (!function_exists("tarkista_rfviite")) {
+	function tarkista_rfviite($viite) {
+
+		// Poistetaan välilyönnit
+		$viite  = str_replace(" ", "", $viite);
+		$pituus = strlen($viite);
+
+		// Siirretään neljä ensimmäistä merkkiä tilinumeron loppuun
+		$chk_viite = substr($viite, 4).substr($viite, 0, 4);
+		$chk_viitenumeric = "";
+
+		// Muutetaan kirjaimet numeroiksi (A = 10, B = 11, C = 12, jne...)
+		for ($i = 0; $i < $pituus; $i++) {
+			if (is_numeric($chk_viite{$i})) {
+				$chk_viitenumeric .= $chk_viite{$i};
+			}
+			else {
+				$chk_viitenumeric .= ord($chk_viite{$i}) - 55;
+			}
+		}
+
+		// Poistetaan stringistä etunollat
+		$chk_viitenumeric = ltrim($chk_viitenumeric, "0");
+
+		// Lasketaan MOD-97
+		$mod = 0;
+		$pituus = strlen($chk_viitenumeric);
+
+		for ($i = 0; $i < $pituus; $i++) {
+		    $numero = (int) $chk_viitenumeric{$i};
+		    $mod = (($mod * 10) + $numero) % 97;
+		}
+
+		// Jos tulos ei ole yksi, niin viite on väärin
+		if ($mod != 1) {
+			return FALSE;
+		}
+
+		// Viite on oikein!
+		return TRUE;
+	}
+
+}
+
 ?>

@@ -324,13 +324,13 @@
 
 				$query = "	SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu, group_concat(distinct lasku.tunnus) tunnukset
 							FROM lasku
-							JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+							JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J'))
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
-							WHERE lasku.yhtio	= '$kukarow[yhtio]'
-							and lasku.tila	= 'L'
-							and lasku.alatila	= 'D'
-							and lasku.viite	= ''
-							and lasku.chn	!= '999'
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.tila	  = 'L'
+							and lasku.alatila = 'D'
+							and lasku.viite	  = ''
+							and lasku.chn    != '999'
 							$lasklisa
 							GROUP BY 1";
 				$lasku_chk_res = mysql_query($query) or pupe_error($query);
@@ -354,11 +354,11 @@
 			//haetaan kaikki laskutettavat tilaukset ja tehdään maksuehtosplittaukset ja muita tarkistuksia jos niitä on
 			$query = "	SELECT *
 						FROM lasku
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and tila	= 'L'
-						and alatila	= 'D'
-						and viite	= ''
-						and chn	!= '999'
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila	  = 'L'
+						and lasku.alatila = 'D'
+						and lasku.viite	  = ''
+						and lasku.chn    != '999'
 						$lasklisa
 						ORDER BY lasku.tunnus";
 			$res   = mysql_query($query) or pupe_error($query);
@@ -373,9 +373,9 @@
 								FROM tilausrivi
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-								AND tilausrivi.otunnus = '$laskurow[tunnus]'
-								AND tilausrivi.tyyppi = 'L'
-								AND tilausrivi.varattu > 0
+								and tilausrivi.otunnus = '$laskurow[tunnus]'
+								and tilausrivi.tyyppi  = 'L'
+								and tilausrivi.var not in ('P','J')
 								GROUP BY 1";
 					$tuoteno_varattu_chk_res = mysql_query($query) or pupe_error($query);
 
@@ -406,7 +406,6 @@
 						$laskutus_esto_saldot[$tuoteno_varattu_chk_row['tuoteno']] -= $tuoteno_varattu_chk_row['varattu'];
 
 					}
-
 				}
 
 				// Tsekataan ettei lipsahda JT-rivejä laskutukseen jos osaotoimitus on kielletty
@@ -2522,7 +2521,7 @@
 					<td><input type='text' name='laskvv' value='' size='5'></td></tr>\n";
 
 			echo "<tr><th>".t("Ohita laskujen laskutusviikonpäivät").":</th><td colspan='3'><input type='checkbox' name='laskutakaikki'></td></tr>\n";
-			
+
 			echo "<tr><th>".t("Laskuta vain tilaukset, lista pilkulla eroteltuna").":</th><td colspan='3'><textarea name='laskutettavat' rows='10' cols='60'></textarea></td></tr>";
 
 			echo "</table>";

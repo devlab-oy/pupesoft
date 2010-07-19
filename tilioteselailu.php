@@ -22,9 +22,9 @@
 
 	//Olemme tulossa takain suorituksista
 	if ($tee == 'Z' or $tiliote == 'Z') {
-		$query = "	SELECT tilino 
+		$query = "	SELECT tilino
 					FROM yriti
-					WHERE tunnus = $mtili 
+					WHERE tunnus = $mtili
 					and yhtio = '$kukarow[yhtio]'
 					and yriti.kaytossa = ''";
 		$result = mysql_query($query) or pupe_error($query);
@@ -43,15 +43,32 @@
 		}
 	}
 
-	if ($tee == 'X') {
-		// Pyyntö seuraavasta tiliotteesta
-		$query = "	SELECT * FROM tiliotedata
-					WHERE alku > '$pvm' and tilino = '$tilino' and tyyppi ='1'
-					ORDER BY tunnus LIMIT 1";
+	if ($tee == 'X' or $tee == 'XX') {
+
+		if ($tee == 'X') {
+			// Pyyntö seuraavasta tiliotteesta
+			$query = "	SELECT *
+						FROM tiliotedata
+						WHERE alku > '$pvm'
+						AND tilino = '$tilino'
+						AND tyyppi = '1'
+						ORDER BY tunnus
+						LIMIT 1";
+		}
+		else {
+			// Pyyntö seuraavasta tiliotteesta
+			$query = "	SELECT *
+						FROM tiliotedata
+						WHERE alku < '$pvm'
+						AND tilino = '$tilino'
+						AND tyyppi = '1'
+						ORDER BY tunnus desc
+						LIMIT 1";
+		}
+
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($tiliotedataresult) == 0) {
-			echo "<font class='message'>".t("Ei uudempaa aineistoa")."</font><br>";
 			$tee = '';
 		}
 		else {
@@ -226,8 +243,8 @@
 		echo "</tr>";
 
 		while ($row = mysql_fetch_array ($result)) {
-			
-			if ($tilino != "" and $tyyppi == "1" and date("Y-m-d", mktime(0, 0, 0, substr($row["loppu"],5,2), substr($row["loppu"],8,2)+1,  substr($row["loppu"],0,4))) != $edalku and $edalku != "") {				
+
+			if ($tilino != "" and $tyyppi == "1" and date("Y-m-d", mktime(0, 0, 0, substr($row["loppu"],5,2), substr($row["loppu"],8,2)+1,  substr($row["loppu"],0,4))) != $edalku and $edalku != "") {
 				echo "<tr style='height: 5px;'></tr>";
 			}
 
@@ -243,7 +260,7 @@
 			}
 
 			$edalku = $row["alku"];
-			
+
 			echo "	<form name = 'valikko' action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='T'>
 					<input type='hidden' name='pvm' value='$row[alku]'>

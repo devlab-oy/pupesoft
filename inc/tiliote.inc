@@ -348,7 +348,7 @@
 				echo "<table>";
 
 				if ($silent == "") {
-					echo "<tr><td></td><td></td><td><a href='".$palvelin2."tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=X'>".t("Seuraava")." &gt&gt</a></td></tr>";
+					echo "<tr><td><a href='".$palvelin2."tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XX'>&laquo; ".t("Edellinen")."</td><td></td><td><a href='".$palvelin2."tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=X'>".t("Seuraava")." &raquo;</a></td></tr>";
 				}
 			}
 

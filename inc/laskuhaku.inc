@@ -97,11 +97,12 @@ if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or 
 	$ehto .= " and tapvm >= '$alkuvv-$alkukk-$alkupp' and tapvm <= '$loppuvv-$loppukk-$loppupp' ";
 }
 
-echo "<br><form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>
-		<input type = 'hidden' name = 'toim' value = 'laskuhaku'>
-		<table>";
+echo "<br>";
+echo "<form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>";
+echo "<input type = 'hidden' name = 'toim' value = 'laskuhaku'>";
+echo "<table>";
 
-echo "<th valign='top'>".t("Alkukausi")."</th>";
+echo "<th valign='top'>".t("Alkupvm")."</th>";
 echo "<td><select name='alkuvv'>";
 
 $sel = array();
@@ -142,7 +143,7 @@ echo "</select></td><td class='back'>&nbsp;</td>";
 
 
 echo "<tr>
-	<th valign='top'>".t("Loppukausi")."</th>
+	<th valign='top'>".t("Loppupvm")."</th>
 	<td><select name='loppuvv'>";
 
 $sel = array();
@@ -184,20 +185,24 @@ echo "</select></td><td class='back'>&nbsp;</td></tr>";
 $sel=array();
 $sel[$tee] = "SELECTED";
 
-echo	"<tr><th>".t("Etsi lasku")."</th>
-		<td><select name = 'tee'>
-		<option value = 'S' $sel[S]>".t("summalla")."
-		<option value = 'N' $sel[N]>".t("nimellä")."
-		<option value = 'V' $sel[V]>".t("viitteellä")."
-		<option value = 'K' $sel[K]>".t("kommentilla")."
-		<option value = 'W' $sel[W]>".t("viestillä")."
-		<option value = 'L' $sel[L]>".t("Toimittajan laskunumerolla")."
-		</select></td>
-		<td><input type = 'text' name = 'summa1' value = '$summa1' size=8> - <input type = 'text' name = 'summa2' value = '$summa2' size=8></td>
-		<td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>
-		</tr></table>
-		</form><br><br>";
-		
+echo "<tr>";
+echo "<th>".t("Etsi lasku")."</th>";
+echo "<td><select name = 'tee'>";
+echo "<option value = 'S' $sel[S]>".t("Summalla")."</option>";
+echo "<option value = 'N' $sel[N]>".t("Nimellä")."</option>";
+echo "<option value = 'V' $sel[V]>".t("Viitteellä")."</option>";
+echo "<option value = 'W' $sel[W]>".t("Viestillä")."</option>";
+echo "<option value = 'K' $sel[K]>".t("Kommentilla")."</option>";
+echo "<option value = 'L' $sel[L]>".t("Laskunumerolla")."</option>";
+echo "</select></td>";
+echo "<td><input type = 'text' name = 'summa1' value = '$summa1' size='13'> - <input type = 'text' name = 'summa2' value = '$summa2' size='13'></td>";
+echo "<td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>";
+echo "</tr>";
+
+echo "</table>";
+echo "</form>";
+echo "<br><br>";
+
 $formi = 'valinta';
 $kentta = 'summa1';
 
@@ -207,7 +212,7 @@ if ($tee != '') {
 
 	$query = "	SELECT tapvm, erpcm, concat_ws('<br>', nimi, nimitark) nimi, summa, valkoodi, vienti, concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, alatila, tunnus, if(laskunro = 0, '', laskunro) laskunro
 			  	FROM lasku $index
-			  	WHERE $ehto 
+			  	WHERE $ehto
 				and yhtio = '$kukarow[yhtio]'
 			  	ORDER BY $jarj
 			  	LIMIT $alku, 50";
@@ -216,7 +221,7 @@ if ($tee != '') {
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<b>".t("Haulla ei löytynyt yhtään laskua")."</b>";
-		
+
 		require ("inc/footer.inc");
 		exit;
 	}
@@ -236,30 +241,30 @@ if ($tee != '') {
 
 	while ($trow = mysql_fetch_array($result)) {
 		echo "<tr class='aktiivi'>";
-		
+
 		if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2 and $kukarow['taso'] != 3) {
 			echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."<br>".tv1dateconv($trow["erpcm"])."</td>";
 		}
 		else {
 			echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//summa1=$summa1//summa2=$summa2//alkuvv=$alkuvv//alkukk=$alkukk//alkupp=$alkupp//loppuvv=$loppuvv//loppukk=$loppukk//loppupp=$loppupp'>".tv1dateconv($trow["tapvm"])."</a><br>".tv1dateconv($trow["erpcm"])."</td>";
 		}
-		
+
 		echo "<td valign='top'>$trow[nimi]</td>";
 		echo "<td valign='top' align='right'>$trow[summa]</td>";
 		echo "<td valign='top'>$trow[valkoodi]</td>";
 		echo "<td valign='top'>$trow[laskunro]</td>";
 		echo "<td valign='top'>".$trow["viite/viesti"]."</td>";
-		
+
 		// tehdään lasku linkki
 		echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
-		
+
 		$laskutyyppi = $trow["tila"];
 		require "inc/laskutyyppi.inc";
-		
+
 		echo "<td valign='top'>".t($laskutyyppi)."<br>".ostolaskun_vienti($trow["vienti"])."</td>";
-		
-		$yhteensa += $trow["summa"];						
-	
+
+		$yhteensa += $trow["summa"];
+
 		echo "</tr>";
 	}
 
@@ -273,7 +278,7 @@ if ($tee != '') {
 	else {
 		echo t("Edelliset")." ";
 	}
-	
+
 	if ($seraavako >= 50) {
 		$siirry = $alku + 50;
 		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp'>".t("Seuraavat")."</a> ";

@@ -573,7 +573,7 @@
 			$omataso 	 = substr($tietue, 187, 1);
 			$koodiselite = trim(substr($tietue, 52, 35));
 
-			echo "<tr><td class='back'><a name='kuitattu_$tiliotedatarow[tunnus]'>&nbsp;</a></td></tr>";
+			echo "<tr><td class='back'><a name='kuitattu_$tiliotedatarow[tunnus]'></a></td></tr>";
 
 			echo "<tr class='aktiivi'>";
 
@@ -733,7 +733,7 @@
 
 		case 'T40':
 
-			echo "<tr><td class='back'>&nbsp;</td></tr>";
+			echo "<tr><td class='back'></td></tr>";
 
 			echo "<tr>";
 

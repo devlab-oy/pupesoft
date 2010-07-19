@@ -129,7 +129,10 @@
 	if ($tila == 'tulostakuitti') {
 
 		//Haetaan kirjoitin
-		$query  = "	select komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
+		$query  = "	SELECT komento 
+					FROM kirjoittimet 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					AND tunnus = '$kukarow[kirjoitin]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -139,7 +142,10 @@
 			$kirjoitinrow = mysql_fetch_array($result);
 			$tulostakuitti = $kirjoitinrow["komento"];
 
-			$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$asiakas_tunnus'";
+			$query = "	SELECT * 
+						FROM asiakas 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tunnus = '$asiakas_tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$asiakasrow = mysql_fetch_array($result);
 
@@ -157,14 +163,21 @@
 			if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
 			fclose($fh);
 
-			// itse print komento...Koska ei ole luotettavaa tapaa tehd‰ kahta kopiota, niin printataan kahdesti
-			$line = exec("$tulostakuitti $pdffilenimi");
-    			$line = exec("$tulostakuitti $pdffilenimi");
+			if ($tulostakuitti == "email") {
+				$liite = $pdffilenimi;
+				$kutsu = "Suoritus $asiakasrow[nimi]";
+				require ("inc/sahkoposti.inc");
+				echo "<font class='message'>".t("Kuittikopio l‰hetetty").".</font><br>";
+			}
+			else {
+				// itse print komento...Koska ei ole luotettavaa tapaa tehd‰ kahta kopiota, niin printataan kahdesti
+				$line = exec("$tulostakuitti $pdffilenimi");
+	    		$line = exec("$tulostakuitti $pdffilenimi");
+				echo "<font class='message'>".t("Kuittikopio (2 kpl) tulostettu").".</font><br>";
+			}
 
 			//poistetaan tmp file samantien kuleksimasta...
 			$line = exec("rm -f $pdffilenimi");
-
-			echo "<font class='message'>".t("Kuittikopio (2 kpl) tulostettu").".</font><br>";
 		}
 
 		// nollataan muuttujat niin ei mene mik‰‰n sekasin

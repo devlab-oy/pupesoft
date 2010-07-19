@@ -8,9 +8,9 @@
 
 	js_popup();
 
-	echo "<table>";
+	echo "<br><table>";
 	echo "<form method='post' action=''>";
-	echo "<tr><th>",t("Laskunumero"),"</th><td><input type='text' name='laskunro' value='{$laskunro}' /></td><td><input type='submit' value='",t("Hae"),"' /></td></tr>";
+	echo "<tr><th>",t("Laskunumero"),"</th><td><input type='text' name='laskunro' value='{$laskunro}' /></td><td class='back'><input type='submit' value='",t("Hae"),"' /></td></tr>";
 	echo "</form>";
 	echo "</table>";
 
@@ -86,12 +86,12 @@
 				$js_array_hinta = $js_array_kpl = array();
 
 				foreach ($loytyy_kummastakin as $tuoteno => $null) {
-					$tmp = abs(str_replace(",", ".", $invoice[$tuoteno]['nettohinta']) - (str_replace(",", ".", $purchaseorder[$tuoteno]['nettohinta']) * str_replace(",", ".", $purchaseorder[$tuoteno]['tilattumaara'])));
+					$tmp = abs($invoice[$tuoteno]['nettohinta'] - $purchaseorder[$tuoteno]['nettohinta']);
 					if ($tmp != 0) {
 						$js_array_hinta[$x] = $tmp;
 					}
 
-					$tmp = abs(str_replace(",", ".", $invoice[$tuoteno]['tilattumaara']) - str_replace(",", ".", $purchaseorder[$tuoteno]['tilattumaara']));
+					$tmp = abs($invoice[$tuoteno]['tilattumaara'] - $purchaseorder[$tuoteno]['tilattumaara']);
 					if ($tmp != 0) {
 						$js_array_kpl[$x] = $tmp;
 					}
@@ -104,8 +104,8 @@
 
 				foreach ($loytyy_kummastakin as $tuoteno => $null) {
 
-					$invoice_nettohinta 		= str_replace(",", ".", $invoice[$tuoteno]['nettohinta']);
-					$purchaseorder_nettohinta 	= str_replace(",", ".", $purchaseorder[$tuoteno]['nettohinta']) * str_replace(",", ".", $purchaseorder[$tuoteno]['tilattumaara']);
+					$invoice_nettohinta 		= $invoice[$tuoteno]['nettohinta'];
+					$purchaseorder_nettohinta 	= $purchaseorder[$tuoteno]['nettohinta'];
 
 					echo "<tr class='aktiivi' ";
 
@@ -254,8 +254,8 @@
 					}
 					else {
 						if ($key == 'nettohinta' or $key == 'bruttohinta') {
-							if ($key == 'nettohinta') $invoice_summa += str_replace(",", ".", $val);
-							echo "<td valign='top' style='text-align: right;'>",sprintf('%.02f', str_replace(",", ".", $val)),"</td>";
+							if ($key == 'nettohinta') $invoice_summa += $val;
+							echo "<td valign='top' style='text-align: right;'>",sprintf('%.02f', $val),"</td>";
 						}
 						elseif ($key == 'tilattumaara') {
 							echo "<td valign='top' style='text-align: right;'>{$val}</td>";
@@ -279,8 +279,8 @@
 				foreach ($tuote as $key => $val) {
 
 					if ($key == 'nettohinta' or $key == 'bruttohinta') {
-						if ($key == 'nettohinta') $purchaseorder_summa += str_replace(",", ".", $val);
-						echo "<td valign='top' style='text-align: right;'>",sprintf('%.02f', str_replace(",", ".", $val)),"</td>";
+						if ($key == 'nettohinta') $purchaseorder_summa += $val;
+						echo "<td valign='top' style='text-align: right;'>",sprintf('%.02f', $val),"</td>";
 					}
 					elseif ($key == 'tilattumaara') {
 						echo "<td valign='top' style='text-align: right;'>{$val}</td>";
@@ -301,6 +301,75 @@
 
 		echo "</table>";
 
+	}
+	else {
+		// Summaus hyväksynnässä olevista laskuista
+		echo "<br><br>";
+
+		$query = "	SELECT lasku.laskunro,
+					if(kuka.nimi is not null, kuka.nimi, lasku.hyvaksyja_nyt) hyvaknimi,
+					lasku.nimi,
+					round(lasku.summa *lasku.vienti_kurssi, 2) kotisumma,
+					lasku.tunnus
+					FROM lasku
+					JOIN liitetiedostot ON (liitetiedostot.yhtio = lasku.yhtio and liitetiedostot.liitos = 'lasku' AND liitetiedostot.liitostunnus = lasku.tunnus AND liitetiedostot.kayttotarkoitus IN ('FINVOICE', 'EDI'))
+					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'H'
+					GROUP BY 1,2,3,4,5";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Laskunumero")."</th>";
+		echo "<th>".t("Hyväksyjä")."</th>";
+		echo "<th>".t("Toimittaja")."</th>";
+		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Vertailu")."</th>";
+		echo "</tr>";
+
+		while ($trow = mysql_fetch_array($result)) {
+			echo "<tr class='aktiivi'>";
+			echo "<td>$trow[laskunro]</td>";
+			echo "<td>$trow[hyvaknimi]</td>";
+			echo "<td>$trow[nimi]</td>";
+			echo "<td align='right'>$trow[kotisumma]</td>";
+
+			echo "<td valign='top'>";
+
+			list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $trow['tunnus']);
+
+			if ($invoice != FALSE and $invoice != 'ei_loydy_edia') {
+				if (count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
+					$ok = 'ok';
+
+					foreach ($loytyy_kummastakin as $tuoteno => $null) {
+						if ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or abs($invoice[$tuoteno]['nettohinta'] - $purchaseorder[$tuoteno]['nettohinta']) > 1) {
+							echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=$PHP_SELF////'>",t("Eroja"),"</a>";
+							$ok = '';
+							break;
+						}
+					}
+
+					if ($ok == 'ok') {
+						echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=$PHP_SELF////'><font class='ok'>",t("OK"),"</font></a>";
+					}
+				}
+				else {
+					echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=$PHP_SELF////'>",t("Eroja"),"</a>";
+				}
+			}
+			elseif ($invoice == 'ei_loydy_edia') {
+				echo "<font class='error'>".t("Tilaus ei löydy")."</font>";
+			}
+			else {
+				echo "&nbsp;";
+			}
+
+			echo "</td>";
+			echo "</tr>";
+		}
+		echo "</table><br>";
 	}
 
 	require ("inc/footer.inc");

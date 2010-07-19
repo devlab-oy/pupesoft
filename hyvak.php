@@ -854,10 +854,10 @@
 						summa,
 						valkoodi
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and liitostunnus='$laskurow[liitostunnus]' 
-						and tila IN ('H','M','P','Q','Y') 
-						and laskunro = '$laskurow[laskunro]' 
+						WHERE yhtio = '$kukarow[yhtio]'
+						and liitostunnus='$laskurow[liitostunnus]'
+						and tila IN ('H','M','P','Q','Y')
+						and laskunro = '$laskurow[laskunro]'
 						and laskunro != 0
 						and tunnus != $laskurow[tunnus]";
 			$tarkres = mysql_query($query) or pupe_error($query);
@@ -1473,13 +1473,11 @@
 				list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $trow['tunnus']);
 
 				if ($invoice != FALSE and $invoice != 'ei_loydy_edia') {
-
 					if (count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
 						$ok = 'ok';
 
 						foreach ($loytyy_kummastakin as $tuoteno => $null) {
-
-							if ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or $invoice[$tuoteno]['nettohinta'] != $purchaseorder[$tuoteno]['nettohinta']) {
+							if ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or abs($invoice[$tuoteno]['nettohinta'] - $purchaseorder[$tuoteno]['nettohinta']) > 1) {
 								echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=hyvak.php////kutsuja=//'>",t("Eroja"),"</a>";
 								$ok = '';
 								break;
@@ -1495,7 +1493,7 @@
 					}
 				}
 				elseif ($invoice == 'ei_loydy_edia') {
-					echo "<font class='error'>X</font>";
+					echo "<font class='error'>".t("Tilaus ei löydy")."</font>";
 				}
 				else {
 					echo "&nbsp;";

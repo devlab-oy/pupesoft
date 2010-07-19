@@ -8673,7 +8673,6 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 			elseif ($liite_row['kayttotarkoitus'] == 'EDI') {
 				$purchaseorder_data = $liite_row['data'];
 			}
-
 		}
 
 		if ($invoice_data != '' and $purchaseorder_data != '') {
@@ -8714,10 +8713,10 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 						$purchaseorder[$purchaseorder_tuoteno]['nimitys'] = $tieto;
 						break;
 					case 'OSTOTILRIV.OTR_TILATTUMAARA':
-						$purchaseorder[$purchaseorder_tuoteno]['tilattumaara'] = $tieto;
+						$purchaseorder[$purchaseorder_tuoteno]['tilattumaara'] = (float) str_replace(",", ".", $tieto);
 						break;
-					case 'OSTOTILRIV.OTR_OSTOHINTA':
-						$purchaseorder[$purchaseorder_tuoteno]['nettohinta'] = $tieto;
+					case 'OSTOTILRIV.OTR_RIVISUMMA':
+						$purchaseorder[$purchaseorder_tuoteno]['nettohinta'] = (float) str_replace(",", ".", $tieto);
 						break;
 					case 'OSTOTIL.OT_NRO':
 						$purchaseorder_tilausnumero = $tieto;
@@ -8728,23 +8727,23 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 			foreach ($invoice_obj->InvoiceRow as $row) {
 
 				$invoice[(string) $row->ArticleIdentifier]['nimitys'] = $row->ArticleName;
-				$invoice[(string) $row->ArticleIdentifier]['tilattumaara'] = $row->OrderedQuantity;
-				$invoice[(string) $row->ArticleIdentifier]['bruttohinta'] = $row->UnitPriceAmount;
+				$invoice[(string) $row->ArticleIdentifier]['tilattumaara'] = (float) str_replace(",", ".", $row->OrderedQuantity);
+				$invoice[(string) $row->ArticleIdentifier]['bruttohinta'] = (float) str_replace(",", ".", $row->UnitPriceAmount);
 
 				// voi olla monta alennusta
 				foreach ($row as $child => $value) {
 					if ($child == 'RowDiscountPercent') {
-						$invoice[(string) $row->ArticleIdentifier]['ale'][] = $value;
+						$invoice[(string) $row->ArticleIdentifier]['ale'][] = (float) str_replace(",", ".", $value);
 					}
 				}
 
 				if (!isset($invoice[(string) $row->ArticleIdentifier]['ale'])) $invoice[(string) $row->ArticleIdentifier]['ale'] = '';
 
 				if ($row->RowAmount) {
-					$invoice[(string) $row->ArticleIdentifier]['nettohinta'] = $row->RowAmount;
+					$invoice[(string) $row->ArticleIdentifier]['nettohinta'] = (float) str_replace(",", ".", $row->RowAmount);
 				}
 				else {
-					$invoice[(string) $row->ArticleIdentifier]['nettohinta'] = '';
+					$invoice[(string) $row->ArticleIdentifier]['nettohinta'] = 0;
 				}
 			}
 
@@ -8762,8 +8761,8 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 
 				foreach ($invoice_ei_loydy as $ei_loydy) {
 					// esim. kuljetusvakuutuksella ei ole tilattuamäärää
-					// huono tsekkaus! Miten erotetaan paremmin kuljetusvakuutukset ja runkoveloitukset?
-					if (count($ei_loydy['tilattumaara']) == 0) {
+					// huono tsekkaus! Miten erotetaan paremmin kuljetusvakuutukset ja runkoveloitukset?								
+					if ($ei_loydy['tilattumaara'] == 0) {
 
 						// oletetaan että tämä on kuljetusvakuutus, joten laitetaan se "löytyviin" että vertailu-check hyväksyy nämä OK:na
 						$loytyy_kummastakin[key($invoice_ei_loydy)] = $ei_loydy;

@@ -48,6 +48,10 @@ if(!function_exists("asiakasalennustarkista")) {
 		if (mysql_field_name($result, $i) == "asiakas") {
 			$chastunn = trim($t[$i]);
 
+			if ((int) $chastunn == 0) {
+				$chastunn = "";
+			}
+
 			if ($chastunn != '') {
 
 				unset($result);

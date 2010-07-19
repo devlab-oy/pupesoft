@@ -862,6 +862,34 @@
 		$tila = 'X';
 	}
 
+	if ($tila == 'vaihdalaskunumero') {
+
+		$uusi_laskunumero = preg_replace("/[^0-9]/", "", $uusi_laskunumero);
+
+		$query = "	UPDATE lasku SET
+					laskunro = '$uusi_laskunumero'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tila in ('H','Y','M','P','Q')
+					and tunnus = '$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		// haetaan laskun tiedot uudestaan
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) != 1) {
+			echo t("Lasku")." $tunnus ".t("ei löytynytkään")."!";
+			exit;
+		}
+
+		$trow = mysql_fetch_array($result);
+		$tee = 'E';
+		$tila = 'X';
+	}
+
 	if ($tila == '') {
 
 		// katotaan onko lasku liitetty keikkaan
@@ -1094,6 +1122,20 @@
 					<td><input type = 'submit' value = '".t("Päivitä")."'></td>
 					</tr>
 					</form>";
+		}
+
+		if (($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
+			echo "<form action = '$PHP_SELF' method='post'>";
+			echo "<input type = 'hidden' name='lopetus' value='$lopetus'>";
+			echo "<input type = 'hidden' name='tila' value='vaihdalaskunumero'>";
+			echo "<input type = 'hidden' name='tee' value='M'>";
+			echo "<input type = 'hidden' name='tunnus' value='$tunnus'>";
+			echo "<tr>";
+			echo "<th>".t("Muuta laskunumeroa")."</th>";
+			echo "<td><input type='text' name='uusi_laskunumero' value='$trow[laskunro]'></td>";
+			echo "<td><input type='submit' value='".t("Päivitä")."'></td>";
+			echo "</tr>";
+			echo "</form>";
 		}
 
 		if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {

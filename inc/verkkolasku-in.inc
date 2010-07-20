@@ -1293,6 +1293,38 @@
 												luontiaika			= now()";
 									$editilaus_laskulle_result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
+									// Katotaan onko eroja vai onko ok
+									list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $tunnus);
+
+									if ($invoice != FALSE and $invoice != 'ei_loydy_edia') {
+										if (count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
+											$ok = 'ok';
+
+											foreach ($loytyy_kummastakin as $tuoteno => $null) {
+												if ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or abs($invoice[$tuoteno]['nettohinta'] - $purchaseorder[$tuoteno]['nettohinta']) > 1) {
+													$ok = '';
+													break;
+												}
+											}
+
+											if ($ok == 'ok') {
+												// Ei eroja, laitetaan lasku suoraan maksuvalmiiksi
+												$query = "	UPDATE lasku set
+															tila 		  = 'M',
+															hyvak1 		  = 'verkkolas',
+															h1time 		  = now(),
+															hyvak2 		  = '',
+															hyvak3 		  = '',
+															hyvak4 		  = '',
+															hyvak5 		  = '',
+															hyvaksyja_nyt = '',
+															comments 	  = trim(concat(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
+															WHERE tunnus = '$tunnus'";
+												$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+											}
+										}
+									}
+
 									// ulos loopista
 									break;
 								}

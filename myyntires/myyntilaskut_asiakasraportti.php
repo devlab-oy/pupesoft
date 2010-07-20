@@ -13,273 +13,9 @@
 		require('paperitiliote.php');
 		exit;
 	}
-	
-	
-	if ($tee == "MAKSAKAATOSUMMA") {
-		
-		require_once("inc/tilinumero.inc");
 
-		echo "<br><font class='head'>Ylimääräisen suorituksen palautus</font><hr>";
-
-		if($saajantilino=="") {
-		  echo "<b>Saajan pankkitili puuttuu</b><br>";
-		  $skip=1;
-		}
-
-		if($maksajanpankkitilitunnus=="") {
-		  echo "<b>Yrityksen pankkitili puuttuu</b><br>";
-		  $skip=1;
-		}
-
-		if($asiakas1=="") {
-		  echo "<b>Asiakkaan tiedot puuttuu</b><br>";
-		  $skip=1;
-		}
-		
-		// tarkistetaan yhtio pankkitilin oikeellisuus
-		$query = "	SELECT tilino, oletus_rahatili 
-					FROM yriti
-					WHERE yhtio = '$kukarow[yhtio]' 
-					and tunnus	= '$maksajanpankkitilitunnus'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		while ($row = mysql_fetch_array($result)) {
-		  $maksajanpankkitili=$row[0];
-		  $kassatili=$row[1];
-		}
-
-		$pankkitili = $maksajanpankkitili;
-
-		require ("inc/pankkitilinoikeellisuus.php");
-
-		if ($pankkitili == "") {
-		  echo "<b>Pankkitili $maksajanpankkitili on virheellinen</b><br>";
-		  $skip=1;
-		}
-		else {
-		  if ($maksajanpankkitili != $pankkitili) {
-		    $maksajanpankkitili=$pankkitili;
-		  }
-		}
-
-		if ($kassatili == "") {
-		  echo "<b>Rahatiliä ei löydy tilille $maksajanpankkitili</b><br>";
-		  $skip=1;
-		}
-
-		// tarkistetaan asiakkaan pankkitilin oikeellisuus
-		$pankkitili = $saajantilino;
-		require ("inc/pankkitilinoikeellisuus.php");
-
-		if ($pankkitili == "") {
-			echo "<b>Asiakkaan pankkitili $saajantilino on virheellinen</b><br>";
-		  	$skip=1;
-		}
-		else {
-		  	if ($saajantilino != $pankkitili) {
-		    	$saajantilino=$pankkitili;
-		  	}	
-		}
-
-		if($skip==1) {
-		  	$tunnus=$asiakastunnus;
-		  	$tee = "KAATOSUMMA";
-		}
-	}
-
-	if ($tee == "MAKSAKAATOSUMMA") {
-		
-		echo "<font class='head'>LM03-maksuaineisto</font><hr>";
-
-		// lukitaan taulut
-		$unlockquery = "UNLOCK TABLES";
-		$query = "LOCK TABLES yriti READ, yhtio READ, suoritus WRITE, tiliointi WRITE, lasku WRITE, sanakirja WRITE, avainsana as avainsana_kieli READ";
-		$result = mysql_query($query) or pupe_error($query);
-
-
-		$query = " SELECT SUM(summa) summa
-					FROM suoritus
-					WHERE yhtio='$kukarow[yhtio]' AND ltunnus<>0 AND asiakas_tunnus=$asiakastunnus";
-
-		if (!($result = mysql_query($query))) {
-		  $result = mysql_query($unlockquery);
-		  die ("Kysely ei onnistu $query");
-		}
-
-		$kaato = mysql_fetch_object($result);
-		$kaatosumma=$kaato->summa;
-
-		$query = "SELECT ytunnus, pankki_polku, myyntisaamiset
-		                  FROM yhtio
-		                  WHERE yhtio ='$kukarow[yhtio]'";
-
-
-		if (!($result = mysql_query($query))) {
-		  $result = mysql_query($unlockquery);
-		  die ("Kysely ei onnistu $query");
-		  if (mysql_num_rows($result) != 1) {
-		    echo "Maksava yritys ei läydy";
-		    $result = mysql_query($unlockquery);
-		    exit;
-		  }
-		}
-
-		$yritysrow=mysql_fetch_object($result);
-		$myyntisaamiset=$yritysrow->myyntisaamiset;
-		if ($myyntisaamiset=="") {
-		  echo "<b>Myyntisaamiset tiliä ei lädy yritykseltä</b>";
-		  $result = mysql_query($unlockquery);
-		  exit;
-		}
-
-		$nimi = "$yritysrow->pankki_polku/" . date("d.m.y.H.i.s") . "lm03.txt";
-		$toot = fopen($nimi,"w+");
-
-		$yritystilino =  $maksajanpankkitili;
-		$laskunimi1 = $asiakas1;
-		$laskunimi2 = $asiakas2;
-		$laskunimi3 = $asiakas3;
-		$laskusumma = $kaatosumma;
-
-		$laskutilno = $saajantilino;
-		$laskusis1  = '';
-		$laskusis2  = '';
-		$laskuvaluutta = 1; // euro
-		$laskutyyppi = 5; // käytetään viestiä
-		$laskuviesti = $viesti;
-
-		$yritystilino =  $maksajanpankkitili;
-		$yrityytunnus =  $yritysrow->ytunnus;
-		include "inc/lm03otsik.inc";
-		include "inc/lm03rivi.inc";
-		$makssumma += $laskusumma;
-
-		include "inc/lm03summa.inc";
-		fclose($toot);
-
-		$tanaan = time();
-		$tapvm = strftime("%Y-%m-%d", $tanaan);
-
-		// tehdään dummy-lasku johon liitetään kirjaukset
-		$query="INSERT into lasku set yhtio = '$kukarow[yhtio]', tapvm = '$tapvm', tila = 'X', laatija = '$kukarow[kuka]', luontiaika = now()";
-		if (!($result = mysql_query($query))) {
-		  $result = mysql_query($unlockquery);
-		  die ("Kysely ei onnistu $query");
-		}
-		$ltunnus = mysql_insert_id($link);
-
-
-		// tehdään kirjaus rahatililtä
-
-		$query="INSERT INTO tiliointi(yhtio, laatija,laadittu,tapvm,ltunnus,tilino,summa,selite) values ('$kukarow[yhtio]','$kukarow[kuka]', now(), '$tapvm','$ltunnus','$kassatili',-1*$kaatosumma,'Suorituksen palautus asiakkaalle $asiakas1')";
-
-		//echo "<font class='head'>$query</font>";
-
-		if (!($result = mysql_query($query))) {
-		  $result = mysql_query($unlockquery);
-		  die ("Kysely ei onnistu $query");
-		}
-		// myyntisaamiset
-		$query="INSERT INTO tiliointi(yhtio, laatija,laadittu,tapvm,ltunnus,tilino,summa,selite) values ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$myyntisaamiset',$kaatosumma,'Suorituksen palautus asiakkaalle $asiakas1')";
-
-		//echo "<font class='head'>$query</font>";
-
-		if (!($result = mysql_query($query))) {
-		  $result = mysql_query($unlockquery);
-		  die ("Kysely ei onnistu $query");
-		}
-
-
-		// tyhjennetään kaatotili
-
-		$query = "UPDATE suoritus SET summa='0' WHERE yhtio='$kukarow[yhtio]' AND ltunnus<>0 AND asiakas_tunnus=$asiakastunnus";
-		//echo "<font class='head'>Suorituksen päivitys: $query</font>";
-
-		if (!($result = mysql_query($query))) {
-		  $result = mysql_query($unlockquery);
-		  die ("Kysely ei onnistu $query");
-		}
-
-		$result = mysql_query($unlockquery);
-
-		echo "<br>";
-		
-		$tee = "";
-	}
-
-	if ($tee == "KAATOSUMMA") {
-
-		require_once("inc/tilinumero.inc");
-
-		if($skip!=1) {
-			echo "<br><font class='head'>Ylimääräisen suorituksen palautus</font><hr>";
-		}
-
-		$query = "SELECT ytunnus,
-				 left(concat_ws(' ', nimi, nimitark),30) asiakas1,
-				 left(concat_ws(' ', osoite),20) asiakas2,
-				 left(concat_ws(' ', postino, postitp),20) asiakas3
-		            FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND tunnus='$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if ($kalarow=mysql_fetch_object ($result)) {
-		  $ytunnus = $kalarow->ytunnus;
-		} else {
-
-		  echo "Kysely ei onnistu $query<br>";
-		  exit;
-		}
-
-		$tival = "<select name='maksajanpankkitilitunnus'>\n";
-		$tival .= "<option value=''>Valitse</option>\n";
-
-		$query = "	SELECT tunnus, nimi, tilino 
-					FROM yriti
-					WHERE yhtio 	= '$kukarow[yhtio]'
-					and kaytossa 	= '' ";
-		$result = mysql_query($query) or pupe_error($query);
-
-		while ($row = mysql_fetch_assoc($result)) {
-		  $tival .= "        <option ";
-		  if($row["tunnus"]==$maksajanpankkitilitunnus) $tival .= "selected ";
-
-		  $tival .= "value='$row[tunnus]'>$row[nimi] ";
-		  $tival .= tilinumero_print($row["tilino"]) ."</option>\n";
-		}
-		$tival .= "</select>\n";
-
-		echo "<form name='$formi' method='POST'>";
-		echo "<input type = hidden name='tee' value='MAKSAKAATOSUMMA'>";
-		echo "<input type = hidden name='tila' value='maksa'>";
-		echo "<table><tr><td class='back'>";
-		echo "<tr><td>Asiakas</td><td><input type='text'  name='asiakas1' value='$kalarow->asiakas1'></td></tr>";
-		echo "<tr><td>&nbsp;</td><td><input type='text'  name='asiakas2' value='$kalarow->asiakas2'></td></tr>";
-		echo "<tr><td>&nbsp;</td><td><input type='text'  name='asiakas3' value='$kalarow->asiakas3'></td></tr>";
-		echo "<tr><td>Viesti</td><td><input type='text' size=70 name='viesti' value='Ylimääräisen suorituksen palautus'></td></tr>";
-		echo "<tr><td>ytunnus</td><td>$ytunnus</td></tr>";
-
-		//kaatotilin saldo
-		$query = "	SELECT SUM(summa) summa
-					FROM suoritus
-					WHERE yhtio='$kukarow[yhtio]' AND ltunnus<>0 AND asiakas_tunnus=$tunnus";
-		$result = mysql_query($query) or pupe_error($query);
-
-		$kaato = mysql_fetch_object($result);
-		$kaatosumma=$kaato->summa;
-
-		echo "<tr><td>Kaatotilin summa</td><td>$kaatosumma e</td></tr>";
-		echo "<input type = hidden name='asiakastunnus' value='$tunnus'>";
-
-
-		echo "<tr><td>Saajan tilinumero</td><td><input maxlength=15 type='text' name='saajantilino' value='$saajantilino'></td></tr>";
-		echo "<tr><td>Maksajan tilinumero</td><td>$tival</td></tr>";
-		echo "<tr><td colspan=2><input type='submit' value='Maksa'></submit></td></tr>";
-
-		echo "</table></form>";
-	}
-	
 	if ($tee == "") {
-	
+
 		/* visuaalinen esitys maksunopeudesta (hymynaama) */
 		/* palauttaa listan arvoja, joissa ensimmäisessä on
 		 * pelkkä img-tagi oikeaan naamaan ja toisessa
@@ -288,54 +24,49 @@
 
 		function laskeMaksunopeus($ytunnus, $yhtio) {
 
+			global $palvelin2;
+
 			// myohassa maksetut
-			$query="	SELECT sum(if(erpcm < mapvm, summa, 0)) myohassa, sum(summa) yhteensa
-						from lasku,
-						(select tunnus from asiakas where yhtio = '$yhtio' and ytunnus = '$ytunnus') valittu
-						where yhtio = '$yhtio'
-						and liitostunnus = valittu.tunnus
-						and tila = 'U'
-						and alatila = 'X'
-						and summa > 0
-						and mapvm != '0000-00-00'";
+			$query = "	SELECT sum(if(erpcm < mapvm, summa, 0)) myohassa, sum(summa) yhteensa
+						FROM lasku,
+						(SELECT tunnus FROM asiakas WHERE yhtio = '$yhtio' and ytunnus = '$ytunnus') valittu
+						WHERE yhtio = '$yhtio'
+						AND liitostunnus = valittu.tunnus
+						AND tila = 'U'
+						AND alatila = 'X'
+						AND summa > 0
+						AND mapvm != '0000-00-00'";
 			$result = mysql_query($query) or pupe_error($query);
 			$laskut = mysql_fetch_array($result);
 
 			if ($laskut['yhteensa'] != 0) {
-				$maksunopeus = $laskut['myohassa']/$laskut['yhteensa']*100;
+				$maksunopeus = $laskut['myohassa'] / $laskut['yhteensa'] * 100;
 			}
 			else {
 				$maksunopeus = "N/A";
 			}
 
-			$maksunopeusvari="lightgreen";
-			$kuva="asiakas_jee.gif";
-
-			if ($maksunopeus > 10) {
-				$maksunopeusvari="orange";
-				$kuva="asiakas_hui.gif";
-			}
 			if ($maksunopeus > 50) {
-				$maksunopeusvari="red";
-				$kuva="asiakas_argh.gif";
+				$kuva = "asiakas_argh.gif";
+			}
+			elseif ($maksunopeus > 10) {
+				$kuva = "asiakas_hui.gif";
+			}
+			else {
+				$kuva = "asiakas_jee.gif";
 			}
 
-			//echo "<br><br>";
-			$html .= '<font color="'.$maksunopeusvari.'">';
-			$html .= "".t("Myöhässä maksettuja laskuja").": ";
-			$html .= sprintf('%.0f', $maksunopeus);
-			$html .= " % </font>";
-			$kuvaurl = "<img valign='bottom' src=\"../pics/$kuva\">";
-
-			//$html .= $kuvaurl;
+			$html = t("Myöhässä maksettuja laskuja").": ".sprintf('%.0f', $maksunopeus)."%";
+			$kuvaurl = "<img valign='bottom' src='${palvelin2}pics/$kuva'>";
 
 			return array ($kuvaurl, $html);
 		}
 
 		echo "<font class='head'>".t("Asiakasraportit myyntilaskuista")."</font><hr>";
 
-		if ($ytunnus != '') {
+		if ($ytunnus != '' and (int) $asiakasid == 0) {
 			$tila = "tee_raportti";
+			$lopetus = "${palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$ytunnus&tee=";
 			require ("inc/asiakashaku.inc");
 			$tunnus = $asiakasid;
 			if ($ytunnus == "") exit;
@@ -576,6 +307,7 @@
 
 				echo "<br>$naama<br>$nopeushtml</td>";
 				echo "<form action='' method='post'><td class='back'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name = 'tiliote' value='1'>
 				<input type='hidden' name = 'ytunnus' value='$ytunnus'>
 				<input type='submit' value='".t("Tulosta tiliote")."'></td></form>";
@@ -584,10 +316,10 @@
 				//avoimet laskut
 				$kentat = 'laskunro, tapvm, erpcm, summa, kapvm, kasumma, mapvm, ika, viikorkoeur, olmapvm, tunnus';
 				$kentankoko = array(8,8,8,10,8,8,8,4,4,8);
-				
+
 				$lisa = "";
 				$havlisa = "";
-				
+
 				$array = explode(",", $kentat);
 				$count = count($array);
 
@@ -598,9 +330,9 @@
 							$havlisa = " HAVING abs(ika)='$haku[$i]'";
 						}
 						else {
-							$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";	
+							$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
 						}
-																		
+
 						$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 					}
 				}
@@ -657,6 +389,7 @@
 
 				echo "<table>";
 				echo "<form action = '$PHP_SELF?tila=$tila&tunnus=$tunnus&ojarj=".$ojarj.$ulisa."' method = 'post'>";
+				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<tr>
 						<th>".t("Näytä").":</th>
 						<td>
@@ -727,9 +460,9 @@
 
 				// haetaan kaikki yrityksen rahatilit mysql muodossa
 				$query  = "	SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
-							FROM yriti							
-							WHERE yhtio = '$kukarow[yhtio]' 							
-							and kaytossa = '' 
+							FROM yriti
+							WHERE yhtio = '$kukarow[yhtio]'
+							and kaytossa = ''
 							and oletus_rahatili != ''";
 				$ratire = mysql_query($query) or pupe_error($query);
 				$ratiro = mysql_fetch_array($ratire);
@@ -737,7 +470,7 @@
 				while ($maksurow = mysql_fetch_array ($result)) {
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tunnus=$tunnus//tila=tee_raportti'>$maksurow[laskunro]</a></td>";
+					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tunnus=$tunnus//tila=tee_raportti//lopetus=$lopetus'>$maksurow[laskunro]</a></td>";
 
 					echo "<td align='right'>".tv1dateconv($maksurow["tapvm"])."</td>";
 					echo "<td align='right'>".tv1dateconv($maksurow["erpcm"])."</td>";
@@ -778,7 +511,7 @@
 					else echo "<td></td>";
 
 					echo "<td align='right'>";
-					
+
 					// jos rahatilejä löytyy etsitään suoritukst
 					if ($ratiro["rahatilit"] != "") {
 						$query = "	SELECT *
@@ -811,9 +544,10 @@
 					$summa += $maksurow['summa'];
 				}
 
-				echo "<tr><td class='back' colspan='2'></td><th>".t("Yhteensä").":</th><td class='tumma' align='right'>";
-				if (sizeof($totaali)==1 and isset($totaali[$yhtiorow['valkoodi']])) {
+				echo "<tr><th colspan='3'>".t("Yhteensä")."</th><th style='text-align:right'>";
+				if (sizeof($totaali) == 1 and isset($totaali[$yhtiorow['valkoodi']])) {
 					echo $totaali[$yhtiorow['valkoodi']];
+					echo " ".$yhtiorow["valkoodi"];
 				}
 				else {
 					if (count($totaali) > 0) {
@@ -824,22 +558,8 @@
 					}
 					echo "$summa $yhtiorow[valkoodi]";
 				}
-				echo "</th></tr>";
-
+				echo "</th><th colspan='7'></th></tr>";
 				echo "</table>";
-
-				echo "<br>";
-			
-				/*
-				
-				EI TAIDA OLLA IHAN TOIMIVA TÄMÄ HAARA?
-				
-				if ($kaato["summa"] > 0) {
-					echo "<form action = '?tunnus=$tunnus&tee=KAATOSUMMA' method = 'post'>";
-					echo "<input type='submit' value='".t("Maksa kaatotilin summa asiakkaalle")."'></submit>";
-					echo "</form>";
-				}
-				*/
 
 				echo "<script LANGUAGE='JavaScript'>document.forms[0][0].focus()</script>";
 			}
@@ -859,7 +579,7 @@
 			echo "</form>";
 		}
 	}
-	
+
 	require ("inc/footer.inc");
 
 ?>

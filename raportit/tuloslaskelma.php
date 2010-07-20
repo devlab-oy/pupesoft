@@ -44,632 +44,6 @@
 		if (isset($mul_proj_seri))  $mul_proj  = unserialize(base64_decode($mul_proj_seri));
 		if (isset($mul_kustp_seri)) $mul_kustp = unserialize(base64_decode($mul_kustp_seri));
 
-		if ($tltee == "aja") {
-
-			// Desimaalit
-			$muoto = "%.". (int) $desi . "f";
-
-			// Onko meill‰ lis‰rajoitteita??
-			$lisa  = "";
-			$lisa2 = "";
-
-			if (is_array($mul_kustp) and count($mul_kustp) > 0) {
-				$sel_kustp = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kustp))."')";
-				$lisa 	.= " and kustp in $sel_kustp ";
-				$lisa2	.= " and kustannuspaikka in $sel_kustp ";
-			}
-			if (is_array($mul_proj) and count($mul_proj) > 0) {
-				$sel_proj = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_proj))."')";
-				$lisa 	.= " and projekti in $sel_proj ";
-				$lisa2 	.= " and projekti in $sel_proj ";
-			}
-			if (is_array($mul_kohde) and count($mul_kohde) > 0) {
-				$sel_kohde = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kohde))."')";
-				$lisa 	.= " and kohde in $sel_kohde ";
-				$lisa2 	.= " and kohde in $sel_kohde ";
-			}
-			if ($plvk == '' or $plvv == '') {
-				$plvv = substr($yhtiorow['tilikausi_alku'], 0, 4);
-				$plvk = substr($yhtiorow['tilikausi_alku'], 5, 2);
-			}
-
-			if ($tyyppi == "1") {
-				// Vastaavaa Varat
-				$otsikko 	= "Vastaavaa Varat";
-				$kirjain 	= "U";
-				$aputyyppi 	= 1;
-				$tilikarttataso = "ulkoinen_taso";
-				$luku_kerroin = 1;
-			}
-			elseif ($tyyppi == "2") {
-				// Vastattavaa Velat
-				$otsikko 	= "Vastattavaa Velat";
-				$kirjain 	= "U";
-				$aputyyppi 	= 2;
-				$tilikarttataso = "ulkoinen_taso";
-				$luku_kerroin = 1;
-			}
-			elseif ($tyyppi == "3") {
-				// Ulkoinen tuloslaskelma
-				$otsikko 	= "Ulkoinen tuloslaskelma";
-				$kirjain 	= "U";
-				$aputyyppi 	= 3;
-				$tilikarttataso = "ulkoinen_taso";
-				$luku_kerroin = -1;
-			}
-			else {
-				// Sis‰inen tuloslaskelma
-				$otsikko 	= "Sis‰inen tuloslaskelma";
-				$kirjain 	= "S";
-				$aputyyppi 	= 3;
-				$tilikarttataso = "sisainen_taso";
-				$luku_kerroin = -1;
-			}
-
-			// edellinen taso
-			$taso     			= array();
-			$tasonimi 			= array();
-			$summattavattasot	= array();
-			$summa    			= array();
-			$kaudet   			= array();
-
-			if ((int) $tkausi > 0) {
-				$query = "	SELECT tilikausi_alku, tilikausi_loppu
-							FROM tilikaudet
-							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
-				$result = mysql_query($query) or pupe_error($query);
-				$tkrow = mysql_fetch_array($result);
-
-				$plvv = substr($tkrow['tilikausi_alku'], 0, 4);
-				$plvk = substr($tkrow['tilikausi_alku'], 5, 2);
-				$plvp = substr($tkrow['tilikausi_alku'], 8, 2);
-
-				$alvv = substr($tkrow['tilikausi_loppu'], 0, 4);
-				$alvk = substr($tkrow['tilikausi_loppu'], 5, 2);
-				$alvp = substr($tkrow['tilikausi_loppu'], 8, 2);
-			}
-
-			// Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
-			if (!checkdate($plvk, $plvp, $plvv)) {
-				echo "<font class='error'>".t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
-				$tltee = "";
-			}
-
-			if (!checkdate($alvk, $alvp, $alvv)) {
-				echo "<font class='error'>".t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
-				$tltee = "";
-			}
-		}
-
-
-		if ($tltee == "aja") {
-
-			// Tehd‰‰nkˆ linkit p‰iv‰kirjaan
-			$query = "	SELECT yhtio
-						FROM oikeu
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and kuka	= '$kukarow[kuka]'
-						and nimi	= 'raportit.php'
-						and alanimi = 'paakirja'";
-			$oikresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($oikresult) > 0) {
-				$paakirjalink = TRUE;
-			}
-			else {
-				$paakirjalink = FALSE;
-			}
-
-			$lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//mul_kustp_seri=".base64_encode(serialize($mul_kustp))."//mul_kohde_seri=".base64_encode(serialize($mul_kohde))."//mul_proj_seri=".base64_encode(serialize($mul_proj))."//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//eiyhteensa=$eiyhteensa//vertailued=$vertailued//vertailubu=$vertailubu";
-
-			$startmonth	= date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
-			$endmonth 	= date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));
-
-			$annettualk = $plvv."-".$plvk."-".$plvp;
-			$totalloppu = $alvv."-".$alvk."-".$alvp;
-
-			$budjettalk = date("Ym", mktime(0, 0, 0, $plvk, 1, $plvv));
-			$budjettlop = date("Ym", mktime(0, 0, 0, $alvk+1, 0, $alvv));
-
-			if ($vertailued != "") {
-				$totalalku  = ($plvv-1)."-".$plvk."-".$plvp;
-				$totalloppued = ($alvv-1)."-".$alvk."-".$alvp;
-			}
-			else {
-				$totalalku = $plvv."-".$plvk."-".$plvp;
-			}
-
-			$alkuquery1 = "";
-			$alkuquery2 = "";
-			$alkuquery3 = "";
-
-			for ($i = $startmonth;  $i <= $endmonth;) {
-
-				if ($i == $startmonth) $alku = $plvv."-".$plvk."-".$plvp;
-				else $alku = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)));
-
-				if ($i == $endmonth) $loppu = $alvv."-".$alvk."-".$alvp;
-				else $loppu = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)));
-
-				$bukausi = date("Ym",    mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)));
-				$headny  = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
-
-				if ($alkuquery1 != "") $alkuquery1 .= " ,";
-				if ($alkuquery2 != "") $alkuquery2 .= " ,";
-				if ($alkuquery3 != "") $alkuquery3 .= " ,";
-
-				$alkuquery1 .= "sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny'\n";
-				$alkuquery2 .= "sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny'\n";
-				$alkuquery3 .= "sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny'\n";
-
-				$kaudet[] = $headny;
-
-				if ($vertailued != "") {
-
-					if ($i == $startmonth) $alku_ed = ($plvv-1)."-".$plvk."-".$plvp;
-					else $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
-
-					if ($i == $endmonth) $loppu_ed = ($alvv-1)."-".$alvk."-".$alvp;
-					else $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)-1));
-
-					$headed   = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
-
-					$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
-					$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
-					$alkuquery3 .= " ,sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
-
-					$kaudet[] = $headed;
-				}
-
-				// sis‰isess‰ tuloslaskelmassa voidaan joinata budjetti
-				if ($vertailubu != "" and $kirjain == "S") {
-					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny'\n";
-					$alkuquery2 .= " ,0 'budj $headny'\n";
-					$alkuquery3 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny'\n";
-
-					$kaudet[] = "budj $headny";
-				}
-
-				$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1, substr($i,0,4)));
-			}
-
-			$vka = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv));
-			$vkl = date("Y/m", mktime(0, 0, 0, $alvk+1, 0, $alvv));
-
-			$vkaed = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv-1));
-			$vkled = date("Y/m", mktime(0, 0, 0, $alvk+1, 0, $alvv-1));
-
-			// Yhteens‰otsikkomukaan
-			if ($eiyhteensa == "") {
-				$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
-				$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) 'Total' \n";
-				$alkuquery3 .= " ,sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
-				$kaudet[] = $vka." - ".$vkl;
-
-				if ($vertailued != "") {
-
-					$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) '$vkaed - $vkled' \n";
-					$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) 'Totaled' \n";
-					$alkuquery3 .= " ,sum(if(tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) '$vkaed - $vkled' \n";
-
-					$kaudet[] = $vkaed." - ".$vkled;
-				}
-
-				if ($vertailubu != "" and $kirjain == "S") {
-					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
-					$alkuquery2 .= " ,0 'budj $vka - $vkl' \n";
-					$alkuquery3 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
-					$kaudet[] = "budj ".$vka." - ".$vkl;
-				}
-			}
-
-			$query = "	SELECT *
-						FROM taso
-						WHERE yhtio = '$kukarow[yhtio]' AND
-						tyyppi = '$kirjain' AND
-						LEFT(taso, 1) = BINARY '$aputyyppi'
-						and taso != ''
-						ORDER BY taso";
-			$tasores = mysql_query($query) or pupe_error($query);
-
-			while ($tasorow = mysql_fetch_array($tasores)) {
-
-				// mill‰ tasolla ollaan (1,2,3,4,5,6)
-				$tasoluku = strlen($tasorow["taso"]);
-
-				// tasonimi talteen (rightp‰dd‰t‰‰n ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
-				$apusort = str_pad($tasorow["taso"], 20, "÷");
-				$tasonimi[$apusort] = $tasorow["nimi"];
-
-				if ($toim == "TASOMUUTOS") {
-					$summattavattasot[$apusort] = $tasorow["summattava_taso"];
-				}
-
-				// pilkotaan taso osiin
-				$taso = array();
-				for ($i=0; $i < $tasoluku; $i++) {
-					$taso[$i] = substr($tasorow["taso"], 0, $i+1);
-				}
-
-				$query = "	SELECT $alkuquery1
-						 	FROM tili
-							LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppu' $lisa)
-							WHERE tili.yhtio 		 = '$kukarow[yhtio]'
-							and tili.$tilikarttataso = BINARY '$tasorow[taso]'
-							group by tili.$tilikarttataso";
-				$tilires = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($tilires) == 0) {
-					// Ei tiliˆintej‰, mutta budjetti voi olla
-					$query = "	SELECT $alkuquery3
-							 	FROM budjetti
-								JOIN budjetti tili ON (tili.yhtio = budjetti.yhtio and tili.tunnus=budjetti.tunnus)
-								LEFT JOIN tiliointi USE INDEX (PRIMARY) ON (tiliointi.tunnus = 0)
-								WHERE budjetti.yhtio  = '$kukarow[yhtio]'
-								and budjetti.taso 	  = BINARY '$tasorow[taso]'
-								group by budjetti.taso";
-					$tilires = mysql_query($query) or pupe_error($query);
-				}
-
-				while ($tilirow = mysql_fetch_array ($tilires)) {
-					// summataan kausien saldot
-					foreach ($kaudet as $kausi) {
-						// summataan kaikkia pienempi‰ summaustasoja
-						if (substr($kausi,0,4) == "budj") {
-							$i = $tasoluku - 1;
-
-							$summa[$kausi][$taso[$i]] += $tilirow[$kausi];
-						}
-						else {
-							for ($i = $tasoluku - 1; $i >= 0; $i--) {
-								$summa[$kausi][$taso[$i]] += $tilirow[$kausi];
-							}
-						}
-					}
-				}
-			}
-
-			// Haluaako k‰ytt‰j‰ n‰h‰ kaikki kaudet
-			if ($kaikkikaudet == "") {
-				$alkukausi = count($kaudet)-2;
-
-				if ($eiyhteensa == "") {
-					if ($vertailued != "") $alkukausi-=2;
-					if ($vertailubu != "") $alkukausi-=2;
-				}
-				else {
-					if ($vertailued != "" and $vertailubu != "") $alkukausi-=1;
-					if ($vertailued == "" and $vertailubu == "") $alkukausi+=1;
-				}
-
-			}
-			else {
-				$alkukausi = 0;
-			}
-
-			//	Laajempi pdf k‰sittel
-			require_once('pdflib/pupepdf.class.php');
-
-			$pdf = new pdf;
-			$pdf->set_default('margin', 0);
-			$pdf->set_default('margin-left', 5);
-			$rectparam["width"] = 0.3;
-
-			$p["height"] 	= 10;
-			$p["font"]	 	= "Times-Roman";
-	        $b["height"]	= 8;
-			$b["font"] 		= "Times-Bold";
-
-			if (count($kaudet) > 10 and $kaikkikaudet != "") {
-				$p["height"]--;
-				$b["height"]--;
-				$saraklev 			= 49;
-				$yhteensasaraklev 	= 63;
-				$vaslev 			= 150;
-				$rivikork 			= 13;
-			}
-			else {
-				$saraklev 			= 60;
-				$yhteensasaraklev 	= 70;
-				$vaslev 			= 160;
-				$rivikork 			= 15;
-			}
-
-			if(!function_exists("alku")) {
-				function alku () {
-					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev;
-
-					if(count($kaudet) > 5 and $kaikkikaudet != "") {
-						$firstpage = $pdf->new_page("842x595");
-						$bottom = "535";
-					}
-					else {
-						$firstpage = $pdf->new_page("a4");
-						$bottom = "782";
-					}
-
-					unset($data);
-
-					if ((int) $yhtiorow["lasku_logo"] > 0) {
-						$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
-						$data = $liite["data"];
-						$isizelogo[0] = $liite["image_width"];
-						$isizelogo[1] = $liite["image_height"];
-						unset($liite);
-					}
-					elseif (file_exists($yhtiorow["lasku_logo"])) {
-						$filename = $yhtiorow["lasku_logo"];
-
-						$fh = fopen($filename, "r");
-						$data = fread($fh, filesize($filename));
-						fclose($fh);
-
-						$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-					}
-
-					if ($data) {
-						$image = $pdf->jfif_embed($data);
-
-						if(!$image) {
-							echo t("Logokuvavirhe");
-						}
-						else {
-							list($height, $width, $scale) = $pdf->scaleImage("$isizelogo[1]x$isizelogo[0]", "40x80");
-
-	                        $placement = $pdf->image_place($image, ($bottom+$height-30), 10, $firstpage, array("scale" => $scale));
-						}
-					}
-					else {
-						$pdf->draw_text(10, ($bottom+30),  $yhtiorow["nimi"], $firstpage);
-					}
-
-					$pdf->draw_text(200,  ($bottom+30), $otsikko, $firstpage);
-
-					$left = $vaslev;
-
-					for ($i = $alkukausi; $i < count($kaudet); $i++) {
-						$oikpos = $pdf->strlen($kaudet[$i], $b);
-						if($i+1 == count($kaudet) and $eiyhteensa == "") {
-							$lev = $yhteensasaraklev;
-						}
-						else {
-							$lev = $saraklev;
-						}
-
-						$pdf->draw_text($left-$oikpos+$lev,  $bottom, $kaudet[$i], $firstpage, $b);
-
-						$left += $saraklev;
-					}
-
-					$bottom -= $rivikork;
-				}
-			}
-
-			alku();
-
-			echo "<table>";
-
-			// printataan headerit
-			echo "<tr>";
-
-			if ($toim == "TASOMUUTOS") {
-
-				echo "	<form method='post'>
-						<input type = 'hidden' name = 'tasomuutos' value = 'TRUE'>
-						<input type = 'hidden' name = 'tee' value = 'tilitaso'>
-						<input type = 'hidden' name = 'kirjain' value = '$kirjain'>
-						<input type = 'hidden' name = 'taso' value = '$aputyyppi'>";
-
-				$lopetus =  $palvelin2."raportit/tuloslaskelma.php////";
-
-				foreach ($_REQUEST as $key => $value) {
-					$lopetus .= $key."=".$value."//";
-				}
-
-				echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
-
-				echo "<td class='back' colspan='3'></td>";
-			}
-			else {
-				echo "<td class='back' colspan='1'></td>";
-			}
-
-			for ($i = $alkukausi; $i < count($kaudet); $i++) {
-				echo "<td class='tumma' align='right' valign='bottom'>$kaudet[$i]</td>";
-			}
-			echo "</tr>\n";
-
-			// sortataan array indexin (tason) mukaan
-			ksort($tasonimi);
-
-			// loopataan tasot l‰pi
-			foreach ($tasonimi as $key_c => $value) {
-
-				$key = str_replace("÷", "", $key_c); // ÷-kirjaimet pois
-
-				// tulostaan rivi vain jos se kuuluu rajaukseen
-				if (strlen($key) <= $rtaso or $rtaso == "TILI") {
-
-					if ($bottom < 20) {
-						alku();
-					}
-
-					$class = "";
-
-					// laitetaan ykkˆs ja kakkostason rivit tummalla selkeyden vuoksi
-					if (strlen($key) < 3 and $rtaso > 2) $class = "tumma";
-
-					$rivi  = "<tr class='aktiivi'>";
-
-					if ($toim == "TASOMUUTOS") {
-						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&tee=muuta&lopetus=$lopetus'>$key</a></td>";
-						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>".t("Lis‰‰ taso tasoon")." $key</a></td>";
-					}
-
-					$tilirivi = "";
-
-					if ($rtaso == "TILI") {
-
-						$class = "tumma";
-
-						$query = "SELECT * FROM tili WHERE yhtio = '$kukarow[yhtio]' and $tilikarttataso = BINARY '$key'";
-						$tilires = mysql_query($query) or pupe_error($query);
-
-						while ($tilirow = mysql_fetch_array($tilires)) {
-							$query = "	SELECT tilino, $alkuquery2
-										FROM tiliointi
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tilino = '$tilirow[tilino]'
-										AND korjattu = ''
-										AND tapvm >= '$totalalku'
-										AND tapvm <= '$totalloppu'
-										$lisa
-										GROUP BY tilino";
-							$summares = mysql_query($query) or pupe_error($query);
-							$summarow = mysql_fetch_array($summares);
-							$tilirivi2 = "";
-							$tulos = 0;
-
-							for ($tilii = $alkukausi + 1; $tilii < mysql_num_fields($summares); $tilii++) {
-								$apu = sprintf($muoto, $summarow[$tilii] * $luku_kerroin / $tarkkuus);
-								if ($apu == 0) $apu = "";
-
-								$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
-								if ($summarow[$tilii] != 0) $tulos++;
-							}
-
-							if ($tulos > 0 or $toim == "TASOMUUTOS") {
-
-								$tilirivi .= "<tr>";
-
-								if ($toim == "TASOMUUTOS") {
-									$tilirivi .= "<td class='back' nowrap>$key</td>";
-									$tilirivi .= "<td class='back' nowrap><input type='checkbox' name='tiliarray[]' value=\"'$tilirow[tilino]'\"></td>";
-								}
-								$tilirivi .= "<td nowrap>";
-
-								if ($paakirjalink) {
-									$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&mul_kustp_seri=".base64_encode(serialize($mul_kustp))."&mul_kohde_seri=".base64_encode(serialize($mul_kohde))."&mul_proj_seri=".base64_encode(serialize($mul_proj))."&tili=$tilirow[tilino]$lopelinkki'>$tilirow[tilino] - $tilirow[nimi]</a>";
-								}
-								else {
-									$tilirivi .= "$tilirow[tilino] - $tilirow[nimi]";
-								}
-
-								$tilirivi .= "</td>$tilirivi2</tr>";
-							}
-						}
-					}
-
-					$rivi .= "<th nowrap>$value</th>";
-
-					$tulos = 0;
-
-					for ($i = $alkukausi; $i < count($kaudet); $i++) {
-
-						$query = "	SELECT summattava_taso
-									FROM taso
-									WHERE yhtio 		 = '$kukarow[yhtio]'
-									and taso 			 = BINARY '$key'
-									and summattava_taso != ''
-									and tyyppi 			 = '$kirjain'";
-						$summares = mysql_query($query) or pupe_error($query);
-
-						// Budjettia ei summata
-						if ($summarow = mysql_fetch_array ($summares) and substr($kaudet[$i],0,4) != "budj") {
-							foreach(explode(",", $summarow["summattava_taso"]) as $staso) {
-								$summa[$kaudet[$i]][$key] = $summa[$kaudet[$i]][$key] + $summa[$kaudet[$i]][$staso];
-							}
-						}
-
-						// formatoidaan luku toivottuun muotoon
-						$apu = sprintf($muoto, $summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus);
-
-						if ($apu == 0) {
-							$apu = ""; // nollat spaseiks
-						}
-						else {
-							$tulos++; // summaillaan t‰t‰ jos meill‰ oli rivill‰ arvo niin osataan tulostaa
-						}
-
-						$rivi .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
-					}
-
-					if ($toim == "TASOMUUTOS" and $summattavattasot[$key_c] != "") {
-						$rivi .= "<td class='back' nowrap>".t("Summattava taso").": ".$summattavattasot[$key_c]."</td>";
-					}
-
-					$rivi .= "</tr>\n";
-
-					// kakkostason j‰lkeen aina yks tyhj‰ rivi.. paitsi jos otetaan vain kakkostason raportti
-					if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
-						$rivi .= "<tr><td class='back'>&nbsp;</td></tr>";
-					}
-
-					// jos jollain kaudella oli summa != 0 niin tulostetaan rivi
-					if ($tulos > 0 or $toim == "TASOMUUTOS") {
-
-						echo $tilirivi, $rivi;
-
-						$left = 10+(strlen($key)-1)*3;
-						$pdf->draw_text($left,  $bottom, $value, $firstpage, $b);
-						$left = $vaslev;
-
-						for ($i = $alkukausi; $i < count($kaudet); $i++) {
-							$oikpos = $pdf->strlen(number_format($summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $p);
-
-							if($i+1 == count($kaudet) and $eiyhteensa == "") {
-								$lev = $yhteensasaraklev;
-							}
-							else {
-								$lev = $saraklev;
-							}
-
-							$pdf->draw_text($left-$oikpos+$lev, $bottom, number_format($summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $firstpage, $p);
-							$left += $saraklev;
-						}
-
-						$bottom -= $rivikork;
-
-						if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
-							$bottom -= $rivikork;
-						}
-					}
-				}
-
-				$edkey = $key;
-			}
-
-			echo "</table>";
-
-			//	Projektikalenterilla ei sallita PDF tulostusta
-			if($from != "PROJEKTIKALENTERI") {
-
-				if ($toim == "TASOMUUTOS") {
-					echo "<br><input type='submit' value='".t("Anna tileille taso")."'></form><br><br>";
-				}
-
-				//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$pdffilenimi = "Tuloslaskelma-".md5(uniqid(mt_rand(), true)).".pdf";
-
-				//kirjoitetaan pdf faili levylle..
-				$fh = fopen("/tmp/".$pdffilenimi, "w");
-				if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
-				fclose($fh);
-
-				echo "<br><table>";
-				echo "<tr><th>".t("Tallenna pdf").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='toim' value='$toim'>";
-				echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".urlencode($otsikko).".pdf'>";
-				echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table><br>";
-			}
-		}
-
 		//	UI vain jos sille on tarvetta
 		if ($from != "PROJEKTIKALENTERI") {
 			// tehd‰‰n k‰yttˆliittym‰, n‰ytet‰‰n aina
@@ -1051,10 +425,680 @@
 			echo "&nbsp;<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava");
 			echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek> ".t("Budjetti");
 			echo "</td></tr>";
-			echo "</table><br>
-			      <input type = 'submit' value = '".t("N‰yt‰")."'></form>";
 
-			require("../inc/footer.inc");
+
+			$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA");
+			$noautosubmit = TRUE;
+
+			echo "<tr><th valign='top'>".t("Asiakasrajaus")."</th>";
+			echo "<td>";
+
+			require ("tilauskasittely/monivalintalaatikot.inc");
+
+			echo "</td></tr>";
+
+
+			echo "<tr><th valign='top'>".t("Konsernirajaus")."</th>";
+
+			$konsel = array();
+			$konsel[$konsernirajaus] = "SELECTED";
+
+			echo "<td><select name='konsernirajaus'>
+					<option value=''>".t("N‰ytet‰‰n kaikki tiliˆinnit")."</option>
+					<option value='AT' $konsel[AT]>".t("N‰ytet‰‰n konserniasiakkaiden ja konsernitoimittajien tiliˆinnit")."</option>
+					<option value='T'  $konsel[T]>".t("N‰ytet‰‰n konsernitoimitajien tiliˆinnit")."</option>
+					<option value='A'  $konsel[A]>".t("N‰ytet‰‰n konserniasiakkaiden tiliˆinnit")."</option>
+					</select>
+					</td></tr>";
+
+			echo "</table><br><input type = 'submit' value = '".t("N‰yt‰")."'></form>";
+
 		}
+
+		if ($tltee == "aja") {
+
+			// Desimaalit
+			$muoto = "%.". (int) $desi . "f";
+
+			// Onko meill‰ lis‰rajoitteita??
+			$lisa1  = "";
+			$lisa2	= "";
+
+			if (is_array($mul_kustp) and count($mul_kustp) > 0) {
+				$sel_kustp = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kustp))."')";
+				$lisa1 	.= " and tiliointi.kustp in $sel_kustp ";
+				$lisa2	.= " and budjetti.kustannuspaikka in $sel_kustp ";
+			}
+			if (is_array($mul_proj) and count($mul_proj) > 0) {
+				$sel_proj = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_proj))."')";
+				$lisa1 	.= " and tiliointi.projekti in $sel_proj ";
+				$lisa2 	.= " and budjetti.projekti in $sel_proj ";
+			}
+			if (is_array($mul_kohde) and count($mul_kohde) > 0) {
+				$sel_kohde = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kohde))."')";
+				$lisa1 	.= " and tiliointi.kohde in $sel_kohde ";
+				$lisa2 	.= " and budjetti.kohde in $sel_kohde ";
+			}
+			if ($plvk == '' or $plvv == '') {
+				$plvv = substr($yhtiorow['tilikausi_alku'], 0, 4);
+				$plvk = substr($yhtiorow['tilikausi_alku'], 5, 2);
+			}
+
+			if ($tyyppi == "1") {
+				// Vastaavaa Varat
+				$otsikko 	= "Vastaavaa Varat";
+				$kirjain 	= "U";
+				$aputyyppi 	= 1;
+				$tilikarttataso = "ulkoinen_taso";
+				$luku_kerroin = 1;
+			}
+			elseif ($tyyppi == "2") {
+				// Vastattavaa Velat
+				$otsikko 	= "Vastattavaa Velat";
+				$kirjain 	= "U";
+				$aputyyppi 	= 2;
+				$tilikarttataso = "ulkoinen_taso";
+				$luku_kerroin = 1;
+			}
+			elseif ($tyyppi == "3") {
+				// Ulkoinen tuloslaskelma
+				$otsikko 	= "Ulkoinen tuloslaskelma";
+				$kirjain 	= "U";
+				$aputyyppi 	= 3;
+				$tilikarttataso = "ulkoinen_taso";
+				$luku_kerroin = -1;
+			}
+			else {
+				// Sis‰inen tuloslaskelma
+				$otsikko 	= "Sis‰inen tuloslaskelma";
+				$kirjain 	= "S";
+				$aputyyppi 	= 3;
+				$tilikarttataso = "sisainen_taso";
+				$luku_kerroin = -1;
+			}
+
+			// edellinen taso
+			$taso     			= array();
+			$tasonimi 			= array();
+			$summattavattasot	= array();
+			$summa    			= array();
+			$kaudet   			= array();
+			$tilisumma			= array();
+
+			if ((int) $tkausi > 0) {
+				$query = "	SELECT tilikausi_alku, tilikausi_loppu
+							FROM tilikaudet
+							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+				$result = mysql_query($query) or pupe_error($query);
+				$tkrow = mysql_fetch_array($result);
+
+				$plvv = substr($tkrow['tilikausi_alku'], 0, 4);
+				$plvk = substr($tkrow['tilikausi_alku'], 5, 2);
+				$plvp = substr($tkrow['tilikausi_alku'], 8, 2);
+
+				$alvv = substr($tkrow['tilikausi_loppu'], 0, 4);
+				$alvk = substr($tkrow['tilikausi_loppu'], 5, 2);
+				$alvp = substr($tkrow['tilikausi_loppu'], 8, 2);
+			}
+
+			// Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
+			if (!checkdate($plvk, $plvp, $plvv)) {
+				echo "<font class='error'>".t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+				$tltee = "";
+			}
+
+			if (!checkdate($alvk, $alvp, $alvv)) {
+				echo "<font class='error'>".t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+				$tltee = "";
+			}
+
+			$laskujoini    = "";
+			$asiakasjoini  = "";
+			$konsernijoini = "";
+			$konsernilisa  = "";
+
+			if (isset($lisa) and $lisa != "") {
+				$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus $lisa ";
+			}
+
+			if ($konsernirajaus == "AT") {
+				$konsernijoini  = "	LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != ''
+									LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and lasku.liitostunnus = kt.tunnus and kt.konserniyhtio != '' ";
+				$konsernilisa = " and (ka.tunnus is not null or kt.tunnus is not null) ";
+			}
+			elseif ($konsernirajaus == "T") {
+				$konsernijoini = "  LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and lasku.liitostunnus = kt.tunnus and kt.konserniyhtio != '' ";
+				$konsernilisa = " and kt.tunnus is not null ";
+			}
+			elseif ($konsernirajaus == "A") {
+				$konsernijoini = "  LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != '' ";
+				$konsernilisa = " and ka.tunnus is not null ";
+			}
+
+			if ((isset($lisa) and $lisa != "") or (isset($konsernirajaus) and $konsernirajaus != "")) {
+				$laskujoini = " JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus ";
+			}
+		}
+
+		if ($tltee == "aja") {
+
+			// Tehd‰‰nkˆ linkit p‰iv‰kirjaan
+			$query = "	SELECT yhtio
+						FROM oikeu
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and kuka	= '$kukarow[kuka]'
+						and nimi	= 'raportit.php'
+						and alanimi = 'paakirja'";
+			$oikresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($oikresult) > 0) {
+				$paakirjalink = TRUE;
+			}
+			else {
+				$paakirjalink = FALSE;
+			}
+
+			$lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//mul_kustp_seri=".base64_encode(serialize($mul_kustp))."//mul_kohde_seri=".base64_encode(serialize($mul_kohde))."//mul_proj_seri=".base64_encode(serialize($mul_proj))."//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//eiyhteensa=$eiyhteensa//vertailued=$vertailued//vertailubu=$vertailubu";
+
+			$startmonth	= date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
+			$endmonth 	= date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));
+
+			$annettualk = $plvv."-".$plvk."-".$plvp;
+			$totalloppu = $alvv."-".$alvk."-".$alvp;
+
+			$budjettalk = date("Ym", mktime(0, 0, 0, $plvk, 1, $plvv));
+			$budjettlop = date("Ym", mktime(0, 0, 0, $alvk+1, 0, $alvv));
+
+			if ($vertailued != "") {
+				$totalalku  = ($plvv-1)."-".$plvk."-".$plvp;
+				$totalloppued = ($alvv-1)."-".$alvk."-".$alvp;
+			}
+			else {
+				$totalalku = $plvv."-".$plvk."-".$plvp;
+			}
+
+			$alkuquery1 = "";
+			$alkuquery2 = "";
+
+			for ($i = $startmonth;  $i <= $endmonth;) {
+
+				if ($i == $startmonth) $alku = $plvv."-".$plvk."-".$plvp;
+				else $alku = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)));
+
+				if ($i == $endmonth) $loppu = $alvv."-".$alvk."-".$alvp;
+				else $loppu = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)));
+
+				$bukausi = date("Ym",    mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)));
+				$headny  = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
+
+				if ($alkuquery1 != "") $alkuquery1 .= " ,";
+				if ($alkuquery2 != "") $alkuquery2 .= " ,";
+
+				$alkuquery1 .= "sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny'\n";
+				$alkuquery2 .= "sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny'\n";
+
+				$kaudet[] = $headny;
+
+				if ($vertailued != "") {
+
+					if ($i == $startmonth) $alku_ed = ($plvv-1)."-".$plvk."-".$plvp;
+					else $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
+
+					if ($i == $endmonth) $loppu_ed = ($alvv-1)."-".$alvk."-".$alvp;
+					else $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)-1));
+
+					$headed   = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
+
+					$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
+					$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
+
+					$kaudet[] = $headed;
+				}
+
+				// sis‰isess‰ tuloslaskelmassa voidaan joinata budjetti
+				if ($vertailubu != "" and $kirjain == "S") {
+					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny'\n";
+					$alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny'\n";
+
+					$kaudet[] = "budj $headny";
+				}
+
+				$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1, substr($i,0,4)));
+			}
+
+			$vka = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv));
+			$vkl = date("Y/m", mktime(0, 0, 0, $alvk+1, 0, $alvv));
+
+			$vkaed = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv-1));
+			$vkled = date("Y/m", mktime(0, 0, 0, $alvk+1, 0, $alvv-1));
+
+			// Yhteens‰otsikkomukaan
+			if ($eiyhteensa == "") {
+				$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
+				$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
+				$kaudet[] = $vka." - ".$vkl;
+
+				if ($vertailued != "") {
+
+					$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) '$vkaed - $vkled' \n";
+					$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) '$vkaed - $vkled' \n";
+
+					$kaudet[] = $vkaed." - ".$vkled;
+				}
+
+				if ($vertailubu != "" and $kirjain == "S") {
+					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
+					$alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
+					$kaudet[] = "budj ".$vka." - ".$vkl;
+				}
+			}
+
+			$query = "	SELECT *
+						FROM taso
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tyyppi 	= '$kirjain'
+						and LEFT(taso, 1) = BINARY '$aputyyppi'
+						and taso != ''
+						ORDER BY taso";
+			$tasores = mysql_query($query) or pupe_error($query);
+
+			while ($tasorow = mysql_fetch_array($tasores)) {
+
+				// mill‰ tasolla ollaan (1,2,3,4,5,6)
+				$tasoluku = strlen($tasorow["taso"]);
+
+				// tasonimi talteen (rightp‰dd‰t‰‰n ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
+				$apusort = str_pad($tasorow["taso"], 20, "÷");
+				$tasonimi[$apusort] = $tasorow["nimi"];
+
+				if ($toim == "TASOMUUTOS") {
+					$summattavattasot[$apusort] = $tasorow["summattava_taso"];
+				}
+
+				// pilkotaan taso osiin
+				$taso = array();
+				for ($i = 0; $i < $tasoluku; $i++) {
+					$taso[$i] = substr($tasorow["taso"], 0, $i+1);
+				}
+
+				$query = "	SELECT tili.tilino, tili.nimi, $alkuquery1
+						 	FROM tili
+							LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppu' $lisa1)
+							$laskujoini
+							$asiakasjoini
+							$konsernijoini
+							WHERE tili.yhtio 		 = '$kukarow[yhtio]'
+							and tili.$tilikarttataso = BINARY '$tasorow[taso]'
+							$konsernilisa
+							GROUP BY tili.tilino, tili.nimi";
+				$tilires = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($tilires) == 0) {
+					// Ei tiliˆintej‰, mutta budjetti voi olla
+					$query = "	SELECT $alkuquery2
+							 	FROM budjetti
+								JOIN budjetti tili ON (tili.yhtio = budjetti.yhtio and tili.tunnus = budjetti.tunnus)
+								LEFT JOIN tiliointi USE INDEX (PRIMARY) ON (tiliointi.tunnus = 0)
+								WHERE budjetti.yhtio  = '$kukarow[yhtio]'
+								and budjetti.taso 	  = BINARY '$tasorow[taso]'
+								group by budjetti.taso";
+					$tilires = mysql_query($query) or pupe_error($query);
+				}
+
+				while ($tilirow = mysql_fetch_array ($tilires)) {
+					// summataan kausien saldot
+					foreach ($kaudet as $kausi) {
+						if (substr($kausi,0,4) == "budj") {
+							$i = $tasoluku - 1;
+
+							// Budjetti per kausi/taso (huom = (ei +=) koska muuten bujetti kertautuu tilien m‰‰r‰n suhteen)
+							$summa[$kausi][$taso[$i]] = $tilirow[$kausi];
+						}
+						else {
+							// Summataan kaikkia pienempi‰ summaustasoja
+							for ($i = $tasoluku - 1; $i >= 0; $i--) {
+								// Summat per kausi/taso
+								$summa[$kausi][$taso[$i]] += $tilirow[$kausi];
+							}
+
+							// Summat per taso/tili/kausi
+							$i = $tasoluku - 1;
+							$summakey = $tilirow["tilino"]."###".$tilirow["nimi"];
+
+							$tilisumma[$taso[$i]][$summakey][$kausi] += $tilirow[$kausi];
+						}
+					}
+				}
+			}
+
+			// Haluaako k‰ytt‰j‰ n‰h‰ kaikki kaudet
+			if ($kaikkikaudet == "") {
+				$alkukausi = count($kaudet)-2;
+
+				if ($eiyhteensa == "") {
+					if ($vertailued != "") $alkukausi -= 2;
+					if ($vertailubu != "") $alkukausi -= 2;
+				}
+				else {
+					if ($vertailued != "" and $vertailubu != "") $alkukausi -= 1;
+					if ($vertailued == "" and $vertailubu == "") $alkukausi += 1;
+				}
+			}
+			else {
+				$alkukausi = 0;
+			}
+
+			//	Laajempi pdf k‰sittel
+			require_once('pdflib/pupepdf.class.php');
+
+			$pdf = new pdf;
+			$pdf->set_default('margin', 0);
+			$pdf->set_default('margin-left', 5);
+			$rectparam["width"] = 0.3;
+
+			$p["height"] 	= 10;
+			$p["font"]	 	= "Times-Roman";
+	        $b["height"]	= 8;
+			$b["font"] 		= "Times-Bold";
+
+			if (count($kaudet) > 10 and $kaikkikaudet != "") {
+				$p["height"]--;
+				$b["height"]--;
+				$saraklev 			= 49;
+				$yhteensasaraklev 	= 63;
+				$vaslev 			= 150;
+				$rivikork 			= 13;
+			}
+			else {
+				$saraklev 			= 60;
+				$yhteensasaraklev 	= 70;
+				$vaslev 			= 160;
+				$rivikork 			= 15;
+			}
+
+			if(!function_exists("alku")) {
+				function alku () {
+					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev;
+
+					if(count($kaudet) > 5 and $kaikkikaudet != "") {
+						$firstpage = $pdf->new_page("842x595");
+						$bottom = "535";
+					}
+					else {
+						$firstpage = $pdf->new_page("a4");
+						$bottom = "782";
+					}
+
+					unset($data);
+
+					if ((int) $yhtiorow["lasku_logo"] > 0) {
+						$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+						$data = $liite["data"];
+						$isizelogo[0] = $liite["image_width"];
+						$isizelogo[1] = $liite["image_height"];
+						unset($liite);
+					}
+					elseif (file_exists($yhtiorow["lasku_logo"])) {
+						$filename = $yhtiorow["lasku_logo"];
+
+						$fh = fopen($filename, "r");
+						$data = fread($fh, filesize($filename));
+						fclose($fh);
+
+						$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+					}
+
+					if ($data) {
+						$image = $pdf->jfif_embed($data);
+
+						if(!$image) {
+							echo t("Logokuvavirhe");
+						}
+						else {
+							list($height, $width, $scale) = $pdf->scaleImage("$isizelogo[1]x$isizelogo[0]", "40x80");
+
+	                        $placement = $pdf->image_place($image, ($bottom+$height-30), 10, $firstpage, array("scale" => $scale));
+						}
+					}
+					else {
+						$pdf->draw_text(10, ($bottom+30),  $yhtiorow["nimi"], $firstpage);
+					}
+
+					$pdf->draw_text(200,  ($bottom+30), $otsikko, $firstpage);
+
+					$left = $vaslev;
+
+					for ($i = $alkukausi; $i < count($kaudet); $i++) {
+						$oikpos = $pdf->strlen($kaudet[$i], $b);
+						if($i+1 == count($kaudet) and $eiyhteensa == "") {
+							$lev = $yhteensasaraklev;
+						}
+						else {
+							$lev = $saraklev;
+						}
+
+						$pdf->draw_text($left-$oikpos+$lev,  $bottom, $kaudet[$i], $firstpage, $b);
+
+						$left += $saraklev;
+					}
+
+					$bottom -= $rivikork;
+				}
+			}
+
+			alku();
+
+			echo "<table>";
+
+			// printataan headerit
+			echo "<tr>";
+
+			if ($toim == "TASOMUUTOS") {
+
+				echo "	<form method='post'>
+						<input type = 'hidden' name = 'tasomuutos' value = 'TRUE'>
+						<input type = 'hidden' name = 'tee' value = 'tilitaso'>
+						<input type = 'hidden' name = 'kirjain' value = '$kirjain'>
+						<input type = 'hidden' name = 'taso' value = '$aputyyppi'>";
+
+				$lopetus =  $palvelin2."raportit/tuloslaskelma.php////";
+
+				foreach ($_REQUEST as $key => $value) {
+					$lopetus .= $key."=".$value."//";
+				}
+
+				echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
+
+				echo "<td class='back' colspan='3'></td>";
+			}
+			else {
+				echo "<td class='back' colspan='1'></td>";
+			}
+
+			for ($i = $alkukausi; $i < count($kaudet); $i++) {
+				echo "<td class='tumma' align='right' valign='bottom'>$kaudet[$i]</td>";
+			}
+			echo "</tr>\n";
+
+			// sortataan array indexin (tason) mukaan
+			ksort($tasonimi);
+
+			// loopataan tasot l‰pi
+			foreach ($tasonimi as $key_c => $value) {
+
+				$key = str_replace("÷", "", $key_c); // ÷-kirjaimet pois
+
+				// tulostaan rivi vain jos se kuuluu rajaukseen
+				if (strlen($key) <= $rtaso or $rtaso == "TILI") {
+
+					if ($bottom < 20) {
+						alku();
+					}
+
+					$class = "";
+
+					// laitetaan ykkˆs ja kakkostason rivit tummalla selkeyden vuoksi
+					if (strlen($key) < 3 and $rtaso > 2) $class = "tumma";
+
+					$rivi  = "<tr class='aktiivi'>";
+
+					if ($toim == "TASOMUUTOS") {
+						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&tee=muuta&lopetus=$lopetus'>$key</a></td>";
+						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>".t("Lis‰‰ taso tasoon")." $key</a></td>";
+					}
+
+					$tilirivi = "";
+
+					if ($rtaso == "TILI") {
+
+						$class = "tumma";
+
+						foreach ($tilisumma[$key] as $tilitiedot => $tilisumkau) {
+							$tilirivi2	= "";
+							$tulos 		= 0;
+
+							for ($i = $alkukausi; $i < count($kaudet); $i++) {
+								$apu = sprintf($muoto, $tilisumkau[$kaudet[$i]] * $luku_kerroin / $tarkkuus);
+								if ($apu == 0) $apu = "";
+
+								$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
+								if ($tilisumkau[$kaudet[$i]] != 0) $tulos++;
+							}
+
+							if ($tulos > 0 or $toim == "TASOMUUTOS") {
+
+								list($tnumero, $tnimi) = explode("###", $tilitiedot);
+
+								$tilirivi .= "<tr>";
+
+								if ($toim == "TASOMUUTOS") {
+									$tilirivi .= "<td class='back' nowrap>$key</td>";
+									$tilirivi .= "<td class='back' nowrap><input type='checkbox' name='tiliarray[]' value=\"'$tnumero'\"></td>";
+								}
+								$tilirivi .= "<td nowrap>";
+
+								if ($paakirjalink) {
+									$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&mul_kustp_seri=".base64_encode(serialize($mul_kustp))."&mul_kohde_seri=".base64_encode(serialize($mul_kohde))."&mul_proj_seri=".base64_encode(serialize($mul_proj))."&tili=$tnumero$lopelinkki'>$tnumero - $tnimi</a>";
+								}
+								else {
+									$tilirivi .= "$tnumero - $tnimi";
+								}
+
+								$tilirivi .= "</td>$tilirivi2</tr>";
+							}
+						}
+					}
+
+					$rivi .= "<th nowrap>$value</th>";
+
+					$tulos = 0;
+
+					for ($i = $alkukausi; $i < count($kaudet); $i++) {
+
+						$query = "	SELECT summattava_taso
+									FROM taso
+									WHERE yhtio 		 = '$kukarow[yhtio]'
+									and taso 			 = BINARY '$key'
+									and summattava_taso != ''
+									and tyyppi 			 = '$kirjain'";
+						$summares = mysql_query($query) or pupe_error($query);
+
+						// Budjettia ei summata
+						if ($summarow = mysql_fetch_array ($summares) and substr($kaudet[$i],0,4) != "budj") {
+							foreach(explode(",", $summarow["summattava_taso"]) as $staso) {
+								$summa[$kaudet[$i]][$key] = $summa[$kaudet[$i]][$key] + $summa[$kaudet[$i]][$staso];
+							}
+						}
+
+						// formatoidaan luku toivottuun muotoon
+						$apu = sprintf($muoto, $summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus);
+
+						if ($apu == 0) {
+							$apu = ""; // nollat spaseiks
+						}
+						else {
+							$tulos++; // summaillaan t‰t‰ jos meill‰ oli rivill‰ arvo niin osataan tulostaa
+						}
+
+						$rivi .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
+					}
+
+					if ($toim == "TASOMUUTOS" and $summattavattasot[$key_c] != "") {
+						$rivi .= "<td class='back' nowrap>".t("Summattava taso").": ".$summattavattasot[$key_c]."</td>";
+					}
+
+					$rivi .= "</tr>\n";
+
+					// kakkostason j‰lkeen aina yks tyhj‰ rivi.. paitsi jos otetaan vain kakkostason raportti
+					if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
+						$rivi .= "<tr><td class='back'>&nbsp;</td></tr>";
+					}
+
+					// jos jollain kaudella oli summa != 0 niin tulostetaan rivi
+					if ($tulos > 0 or $toim == "TASOMUUTOS") {
+
+						echo $tilirivi, $rivi;
+
+						$left = 10+(strlen($key)-1)*3;
+						$pdf->draw_text($left,  $bottom, $value, $firstpage, $b);
+						$left = $vaslev;
+
+						for ($i = $alkukausi; $i < count($kaudet); $i++) {
+							$oikpos = $pdf->strlen(number_format($summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $p);
+
+							if($i+1 == count($kaudet) and $eiyhteensa == "") {
+								$lev = $yhteensasaraklev;
+							}
+							else {
+								$lev = $saraklev;
+							}
+
+							$pdf->draw_text($left-$oikpos+$lev, $bottom, number_format($summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $firstpage, $p);
+							$left += $saraklev;
+						}
+
+						$bottom -= $rivikork;
+
+						if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
+							$bottom -= $rivikork;
+						}
+					}
+				}
+
+				$edkey = $key;
+			}
+
+			echo "</table>";
+
+			//	Projektikalenterilla ei sallita PDF tulostusta
+			if($from != "PROJEKTIKALENTERI") {
+
+				if ($toim == "TASOMUUTOS") {
+					echo "<br><input type='submit' value='".t("Anna tileille taso")."'></form><br><br>";
+				}
+
+				//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+				list($usec, $sec) = explode(' ', microtime());
+				mt_srand((float) $sec + ((float) $usec * 100000));
+				$pdffilenimi = "Tuloslaskelma-".md5(uniqid(mt_rand(), true)).".pdf";
+
+				//kirjoitetaan pdf faili levylle..
+				$fh = fopen("/tmp/".$pdffilenimi, "w");
+				if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
+				fclose($fh);
+
+				echo "<br><table>";
+				echo "<tr><th>".t("Tallenna pdf").":</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='toim' value='$toim'>";
+				echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".urlencode($otsikko).".pdf'>";
+				echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br>";
+			}
+		}
+
+		require("../inc/footer.inc");
 	}
 ?>

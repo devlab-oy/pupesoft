@@ -1443,7 +1443,7 @@
 				$liitetty = "";
 			}
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 
 			 // Eli vain tasolla 1/2/3 ja ensimmäiselle hyväksyjälle.
 			if (($kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $trow['hyvak1'] == $kukarow['kuka']) {

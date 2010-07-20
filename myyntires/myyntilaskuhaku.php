@@ -3,25 +3,27 @@
 	$useslave = 1; // k‰ytet‰‰n slavea
 
 	require ("../inc/parametrit.inc");
+
 	echo "<font class='head'>".t("Myyntilaskuhaku")."</font><hr>";
 
 	$index = "";
+	$lopetus = "${palvelin2}myyntires/myyntilaskuhaku.php////tee=$tee//summa1=$summa1//summa2=$summa2";
 
-	if ($tee == 'VS') { // S = Etsit‰‰n summaa laskulta
+	// VS = Etsit‰‰n valuuttasummaa laskulta
+	if ($tee == 'VS') {
 		$summa1 = str_replace( ",", ".", $summa1);
 		$summa2 = str_replace( ",", ".", $summa2);
-	
+
 		if (strlen($summa2) == 0) {
 			$summa2 = $summa1;
 		}
-	
+
 		$summa1 += 0;
 		$summa2 += 0;
 
 		$ehto = "tila = 'U' and ";
-
 		$index = " use index (yhtio_tila_summavaluutassa) ";
-	
+
 		if ($summa1 == $summa2) {
 			$ehto .= "summa_valuutassa = " . $summa1;
 			$jarj = "tapvm desc";
@@ -32,65 +34,69 @@
 		}
 	}
 
-	if ($tee == 'S') { // S = Etsit‰‰n summaa laskulta
+	// S = Etsit‰‰n summaa laskulta
+	if ($tee == 'S') {
 		$summa1 = str_replace( ",", ".", $summa1);
 		$summa2 = str_replace( ",", ".", $summa2);
-	
+
 		if (strlen($summa2) == 0) {
 			$summa2 = $summa1;
 		}
-	
+
 		$summa1 += 0;
 		$summa2 += 0;
 
 		$ehto = "tila = 'U' and ";
-
 		$index = " use index (yhtio_tila_summa) ";
-	
+
 		if ($summa1 == $summa2) {
 			$ehto .= "summa = " . $summa1;
 			$jarj = "tapvm desc";
 		}
 		else {
-			$ehto .= "summa >= " . $summa1 . " and summa <= " . $summa2;
+			$ehto .= "summa >= $summa1 and summa <= $summa2";
 			$jarj = "summa, tapvm";
 		}
 	}
-	if ($tee == 'N') { // S = Etsit‰‰n nime‰ laskulta
+
+	// N = Etsit‰‰n nime‰ laskulta
+	if ($tee == 'N') {
 		$index = " use index (asiakasnimi) ";
 		$ehto = "tila = 'U' and nimi like '%".$summa1."%'";
 		$jarj = "nimi, tapvm desc";
 	}
 
-	if ($tee == 'V') { // V = viitteell‰
+	// V = viitteell‰
+	if ($tee == 'V') {
 		$ehto = "tila = 'U' and viite = '$summa1'";
 		$jarj = "nimi, summa";
 	}
 
-	if ($tee == 'L') { // L = viitteell‰
+	// L = laskunumerolla
+	if ($tee == 'L') {
 		$index = " use index (yhtio_tila_laskunro) ";
-		$ehto = "tila = 'U' and  laskunro = '$summa1'";
+		$ehto = "tila = 'U' and laskunro = '$summa1'";
 		$jarj = "nimi, summa";
 	}
 
 	if ($tee != '') {
 		$alku += 0;
-	
-		$query = "SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
-				  summa, valkoodi, ebid, tila, alatila, tunnus
-				  FROM lasku $index
-				  WHERE $ehto and yhtio='$kukarow[yhtio]'
-				  ORDER BY $jarj
-				  LIMIT $alku, 50";
+
+		$query = "	SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
+					summa, valkoodi, ebid, tila, alatila, tunnus
+					FROM lasku $index
+					WHERE $ehto and yhtio='$kukarow[yhtio]'
+					ORDER BY $jarj
+					LIMIT $alku, 50";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Haulla ei lˆytynyt yht‰‰n laskua")."</b>";
-			$tee='';
+			$tee = '';
 		}
 		else {
 			echo "<table><tr>";
-		
+
 			for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
 				echo "<th>" . t(mysql_field_name($result,$i))."</th>";
 			}
@@ -103,23 +109,23 @@
 					echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
 				}
 				else {
-					echo "<td valign='top'><a href = '../muutosite.php?tee=E&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</td>";
+					echo "<td valign='top'><a href = '../muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$lopetus'>".tv1dateconv($trow["tapvm"])."</td>";
 				}
-			
+
 				echo "<td valign='top'>".tv1dateconv($trow["erpcm"])."</td>";
-				echo "<td valign='top'><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$trow[laskunro]'>$trow[laskunro]</td>";
+				echo "<td valign='top'><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$trow[laskunro]&lopetus=$lopetus'>$trow[laskunro]</td>";
 				echo "<td valign='top'>$trow[nimi]</td>";
 				echo "<td valign='top' align='right'>$trow[summa]</td>";
 				echo "<td valign='top'>$trow[valkoodi]</td>";
-			
+
 				// tehd‰‰n lasku linkki
 				echo "<td>".ebid($trow['tunnus']) ."</td>";
-			
+
 				$laskutyyppi = $trow["tila"];
 				$alatila     = $trow["alatila"];
-				
-				require "../inc/laskutyyppi.inc";
-				
+
+				require "inc/laskutyyppi.inc";
+
 				echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
 				echo "</tr>";
 			}
@@ -132,35 +138,40 @@
 			else {
 				echo t("Edelliset")." ";
 			}
-		
+
 			$siirry = $alku + 50;
 			echo "<a href = '$PHP_SELF?tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila'>".t("Seuraavat")."</a> ";
 			echo "<br><br>";
-		
+
 			$toim = "";
 		}
 	}
 
 	if ($tee == '') {
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
-				<table><tr>
-				<td>Valitse lasku</td>
-				<td><select name = 'tee'>
-				<option value = 'S'>".t("summalla")."
-				<option value = 'VS'>".t("valuuttasummalla")."
-				<option value = 'N'>".t("nimell‰")."
-				<option value = 'V'>".t("viitteell‰")."
-				<option value = 'L'>".t("laskunnumerolla")."
-				</select></td>
-				<td><input type = 'text' name = 'summa1' size=8> - <input type = 'text' name = 'summa2' size=8></td>
-				<td><input type = 'submit' value = '".t("Valitse")."'></td>
-				</tr></table>
-				</form>";
-			
+
+		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>";
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Etsi lasku")."</th>";
+		echo "<td><select name = 'tee'>";
+		echo "<option value = 'S'>".t("summalla")."</option>";
+		echo "<option value = 'VS'>".t("valuuttasummalla")."</option>";
+		echo "<option value = 'N'>".t("nimell‰")."</option>";
+		echo "<option value = 'V'>".t("viitteell‰")."</option>";
+		echo "<option value = 'L'>".t("laskunnumerolla")."</option>";
+		echo "</select></td>";
+		echo "<td><input type = 'text' name = 'summa1' size=13> - <input type = 'text' name = 'summa2' size=13></td>";
+		echo "<td class='back'><input type = 'submit' value = '".t("Hae")."'></td>";
+		echo "</tr>";
+		echo "</table>";
+
+		echo "</form>";
+
 		$formi = 'valinta';
 		$kentta = 'summa1';
 	}
 
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 
 ?>

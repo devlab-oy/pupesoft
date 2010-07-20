@@ -1,7 +1,7 @@
 <?php
 
 	echo "<font class='head'>".t("Suorituspäiväkirja")."</font><hr>";
-	
+
 	echo "	<form name = 'valinta' action = 'raportit.php' method='post'>
 			<input type = 'hidden' name = 'toim' value = 'myyrespaakirja'>
 			<input type = 'hidden' name = 'tee' value = '1'>
@@ -15,10 +15,10 @@
 		else $sel = "";
 		echo "<option value='$i' $sel>$i</option>";
 	}
-	
+
 	$ksel = array();
 	$psel = array();
-	
+
 	$ksel[$alvk] = "SELECTED";
 	$psel[$alvp] = "SELECTED";
 
@@ -74,20 +74,20 @@
 		<option value = '31' $psel[31]>31</option>
 		</select></td>
       	<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td></tr></table></form><br><br>";
-	
+
 	if ($tee == "1") {
-		
+
 		// haetaan kaikki yrityksen rahatilit mysql muodossa
 		$query  = "	SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
-					FROM yriti							
-					WHERE yhtio = '$kukarow[yhtio]' 							
-					and kaytossa = '' 
+					FROM yriti
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa = ''
 					and oletus_rahatili != ''";
 		$ratire = mysql_query($query) or pupe_error($query);
 		$ratiro = mysql_fetch_array($ratire);
-				
+
 		if ($ratiro["rahatilit"] != "") {
-		
+
 			$lisa = "";
 			$jarj = "tiliointi.tapvm, tiliointi.summa";
 
@@ -106,65 +106,77 @@
 				}
 			}
 
+			$orderby = "o_pvm, o_sum";
+
+			if ($order == "nimi") {
+				$orderby = "nimi, $orderby";
+			}
+			elseif ($order == "laskunro") {
+				$orderby = "laskunro, $orderby";
+			}
+			elseif ($order == "o_sum") {
+				$orderby = "o_sum, $orderby";
+			}
+
 			$summa = 0;
 
-			$query = "	SELECT 
-						min(lasku.nimi) nimi, 
-						min(lasku.laskunro) laskunro, 						
-						group_concat(tiliointi.tapvm ORDER BY tiliointi.tunnus) tapvm, 
+			$query = "	SELECT
+						min(lasku.nimi) nimi,
+						min(lasku.laskunro) laskunro,
+						group_concat(tiliointi.tapvm ORDER BY tiliointi.tunnus) tapvm,
 						group_concat(tiliointi.summa ORDER BY tiliointi.tunnus) summa,
-						sum(tiliointi.summa) sum_summa,  
+						sum(tiliointi.summa) sum_summa,
 						min(tiliointi.ltunnus) ltunnus,
 						min(tiliointi.tapvm) o_pvm,
 						max(tiliointi.summa) o_sum
 						FROM tiliointi
 						JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and lasku.tila = 'U' and lasku.alatila = 'X'
-						WHERE tiliointi.yhtio  = '$kukarow[yhtio]' 
-						and tiliointi.tilino  IN ($ratiro[rahatilit]) 
+						WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+						and tiliointi.tilino  IN ($ratiro[rahatilit])
 						and tiliointi.korjattu = ''
 						and	$lisa
 						GROUP BY lasku.tunnus
-						ORDER BY o_pvm, o_sum";
+						ORDER BY $orderby";
 
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<table><tr>";
-		
-			echo "<th>".t("Nimi")."</th>";
-			echo "<th>".t("Laskunro")."</th>";
-			echo "<th>".t("Pvm")."</th>";
-			echo "<th>".t("Summa")."</th>";
-					
+
+			echo "<th><a href='${palvelin2}raportit.php?toim=myyrespaakirja&tee=$tee&alvv=$alvv&alvk=$alvk&alvp=$alvp&order=nimi'>".t("Nimi")."</a></th>";
+			echo "<th><a href='${palvelin2}raportit.php?toim=myyrespaakirja&tee=$tee&alvv=$alvv&alvk=$alvk&alvp=$alvp&order=laskunro'>".t("Laskunro")."</a></th>";
+			echo "<th><a href='${palvelin2}raportit.php?toim=myyrespaakirja&tee=$tee&alvv=$alvv&alvk=$alvk&alvp=$alvp&order=o_pvm'>".t("Pvm")."</a></th>";
+			echo "<th><a href='${palvelin2}raportit.php?toim=myyrespaakirja&tee=$tee&alvv=$alvv&alvk=$alvk&alvp=$alvp&order=o_sum'>".t("Summa")."</a></th>";
+
 			while ($trow = mysql_fetch_assoc($result)) {
-				
-				echo "<tr>";
-				echo "<td><a name='A_$trow[ltunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp///A_$trow[ltunnus]'>$trow[nimi]</a></td>";
+
+				echo "<tr class='aktiivi'>";
+				echo "<td><a name='A_$trow[ltunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//order=$order///A_$trow[ltunnus]'>$trow[nimi]</a></td>";
 				echo "<td>$trow[laskunro]</td>";
-				
+
 				echo "<td>";
-				
+
 				foreach(explode(",", $trow["tapvm"]) as $a) {
 					echo tv1dateconv($a)."<br>";
 				}
-								
+
 				echo "</td>";
-				
+
 				echo "<td align='right'>";
-				
+
 				foreach(explode(",", $trow["summa"]) as $a) {
 					echo $a."<br>";
 				}
-								
+
 				echo "</td>";
 				echo "</tr>";
-				
+
 				$summa+=$trow['sum_summa'];
 			}
 
-			echo "<tr><td></td><td></td><td align = 'right'>".t("Yhteensä")."</td>";
-			echo "<td align = 'right'>";
+			echo "<tr><th colspan='3'>".t("Yhteensä")."</th>";
+			echo "<th>";
 			printf("%.2f", $summa);
-			echo "</td></tr>";
+			echo "</th></tr>";
 			echo "</table><br>";
 		}
 		else {

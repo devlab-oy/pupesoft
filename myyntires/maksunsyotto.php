@@ -281,20 +281,11 @@ if ($asiakasid != "" and $tee == "ETSI") {
 	}
 
 	// otetaan muutparametrit takas
-	list ($tiliote,$summa,$ppa,$kka,$vva,$mtili, $selite) = explode("#", $muutparametrit);
+	list ($summa,$ppa,$kka,$vva,$mtili, $selite) = explode("#", $muutparametrit);
 }
 
 // meillä on ytunnus, tehdään syöttöruutu
 if ($ytunnus != '' and $tee == "") {
-
-	// Meitä on kutsuttu tiliotteelta!
-	if ($tiliote == 'Z') {
-		echo "<form action = '../tilioteselailu.php' method='post'>
-			<input type='hidden' name='mtili' value='$mtili'>
-			<input type='hidden' name='tee' value='Z'>
-			<input type='hidden' name='pvm' value='$vva-$kka-$ppa'>
-			<input type='Submit' value='".t("Palaa tiliotteelle")."'></form>";
-	}
 
 	//päivämäärän tarkistus
 	$tilalk = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
@@ -380,6 +371,7 @@ if ($ytunnus != '' and $tee == "") {
 
 	echo "<form action='$PHP_SELF' method='post' onSubmit = 'return verify()' name='formi'>";
 	echo "<input type='hidden' name='tee' value='CHECK'/>\n";
+	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 	if ($ytunnus{0} == "£") {
 		$query = "SELECT concat('£',tunnus) tunnus, nimi, ytunnus FROM lasku WHERE ytunnus='".substr($ytunnus, 1)."' and yhtio = '$kukarow[yhtio]'";
@@ -395,7 +387,6 @@ if ($ytunnus != '' and $tee == "") {
 	echo "<input type='hidden' name='asiakasid' value='$asiakas[tunnus]'/>\n
 			<input type='hidden' name='ytunnus' value='$asiakas[ytunnus]'/>\n
 			<input type='hidden' name='mtili' value='$mtili'>\n
-			<input type='hidden' name='tiliote' value='$tiliote'>\n
 			<input type='hidden' name='pvm' value='$vva-$kka-$ppa'>\n";
 	echo "<table>
 	<tr>
@@ -548,7 +539,8 @@ if ($tee == "" and $ytunnus == "") {
 	echo "<form action = '$PHP_SELF' method='post' name='maksaja'>";
 	echo livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300, $maksaja_haku);
 	echo "<input type='hidden' name='tee' value='ETSI'>";
-	echo "<input type='hidden' name='muutparametrit' value='$tiliote#$summa#$ppa#$kka#$vva#$mtili#$selite'>";
+	echo "<input type='hidden' name='lopetus' value='$lopetus'>";	
+	echo "<input type='hidden' name='muutparametrit' value='$summa#$ppa#$kka#$vva#$mtili#$selite'>";
 	echo "<br>";
 	echo "<input type='submit' value='".t("Etsi")."'>";
 	echo "</form>";

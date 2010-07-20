@@ -15,6 +15,8 @@
 		exit;
 	}
 
+	$lopetus = "${palvelin2}hyvak.php////kutsuja=";
+
 	require_once ("inc/tilinumero.inc");
 
 	if ($keikalla == "on") {
@@ -63,6 +65,7 @@
 					//	Kululaskun voi kohdistaa useaan keikkaan
 					if (in_array($laskurow["vienti"], array("B","E","H"))) {
 						echo "<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>";
+						echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 						echo "<input type='hidden' name='tee' value = 'liita'>";
 						echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
 						echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
@@ -92,6 +95,7 @@
 							echo "<tr><td>$row[keikka]</td><td>$row[comments]</td><td align='right'>$row[kpl]/$row[varastossa]</td><td align='right'>$row[varastossaarvo]</td>";
 							echo "<td class='back' colspan='5' align = 'right'>
 									<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>
+									<input type='hidden' name='lopetus' value='$lopetus'>
 									<input type='hidden' name='tee' value = 'liita'>
 									<input type='hidden' name='tunnus' value = '$tunnus'>
 									<input type='hidden' name='toimittajaid' value = '$toimittajaid'>
@@ -111,6 +115,7 @@
 				echo "<form id='toimi' name = 'toimi' action='javascript:ajaxPost(\"toimi\", \"hyvak.php?tee=$tee\", \"keikka\", \"\", \"\", \"\", \"post\");' method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
 				echo "<input type='hidden' name='keikalla' value = 'on'>";
+				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<table>";
 				echo "<tr>";
 				echo "<th>".t("Etsi toimittaja")."</th>";
@@ -321,6 +326,7 @@
 
 			echo "
 					<form action = '$PHP_SELF' method='post'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='tee' value='$tee'>
 					<input type='hidden' name='formilta' value='true'>
 					<input type='hidden' name='tunnus' value='$tunnus'>
@@ -1003,6 +1009,7 @@
 		echo "<br><table>";
 		// Mahdollisuus antaa kommentti
 		echo "	<form name='kommentti' action = '$PHP_SELF' method='post'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tee' value='V'>
 				<input type='hidden' name = 'nayta' value='$nayta'>
 				<input type='hidden' name='tunnus' value = '$tunnus'>
@@ -1036,11 +1043,12 @@
 			$hyvak[5] = $laskurow['hyvak5'];
 
 			echo "<form name='uusi' action = '$PHP_SELF' method='post'>
-					 <input type='hidden' name='tee' value='L'>
-					 <input type='hidden' name='nayta' value='$nayta'>
-					 <input type='hidden' name='tunnus' value='$tunnus'>
-					 <input type='hidden' name='iframe' value = '$iframe'>
-					 <input type='hidden' name='iframe_id' value = '$iframe_id'>";
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='tee' value='L'>
+					<input type='hidden' name='nayta' value='$nayta'>
+					<input type='hidden' name='tunnus' value='$tunnus'>
+					<input type='hidden' name='iframe' value = '$iframe'>
+					<input type='hidden' name='iframe_id' value = '$iframe_id'>";
 
 			echo "<tr><th colspan='2'>".t("Hyväksyjät")."</th></tr>";
 
@@ -1166,6 +1174,7 @@
 						echo "<form name='poista' action = '$PHP_SELF' method='post'>
 								<input type='hidden' name = 'keikalla' value = 'on'>
 								<input type='hidden' name = 'tee' value = 'poista'>
+								<input type='hidden' name='lopetus' value='$lopetus'>
 								<input type='hidden' name = 'toimittajaid' value = '$apurow[toimittajaid]'>
 								<input type='hidden' name = 'poistavienti' value = '$apurow[vienti]'>
 								<input type='hidden' name = 'poistasumma' value = '$apurow[summa]'>
@@ -1316,12 +1325,13 @@
 
 		if (is_array($liitteet) and count($liitteet) > 0) {
 			echo "<form action = '$PHP_SELF' method='post'>
-	  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-	  				<input type='hidden' name = 'iframe' value='yes'>
-	  				<input type='hidden' name = 'nayta' value='$nayta'>
-	  				<input type='hidden' name = 'tee' value = ''>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name = 'tunnus' value='$tunnus'>
+					<input type='hidden' name = 'iframe' value='yes'>
+					<input type='hidden' name = 'nayta' value='$nayta'>
+					<input type='hidden' name = 'tee' value = ''>
 					<th>".t("Avaa lasku tähän ikkunaan")."</th>
-	  				<td>";
+					<td>";
 
 
 			if (is_array($liitteet) and count($liitteet) == 1) {
@@ -1351,6 +1361,7 @@
 	  		echo "<td>
 					<form action = '$PHP_SELF' method='post'>
 	  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
 	  				<input type='hidden' name = 'nayta' value='$nayta'>
 	  				<input type='Submit' value='".t("Sulje lasku")."'>
 					</form></td>";
@@ -1505,6 +1516,7 @@
 			echo "<td class='back' valign='top'>
 					<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tunnus' value='$trow[tunnus]'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='submit' value='".t("Valitse")."'>
 					</form>
 				</td>";
@@ -1525,6 +1537,7 @@
 					echo "<td class='back' valign='top'>
 							<form action='$PHP_SELF' method='post'>
 							<input type='hidden' name='tee' value='Z'>
+							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tunnus' value='$trow[tunnus]'>
 							<input type='Submit' value='".t("Lisää kommentti")."'>
 							</form>

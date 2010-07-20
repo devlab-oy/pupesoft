@@ -4,6 +4,10 @@
 		$orderlisa = '';
 	}
 
+	if (!isset($noautosubmit)) {
+		$autosubmit = " onchange='submit();' ";
+	}
+
 	// Näytetäänkö osaston ja tuoteryhmän selitteet
 	if ($yhtiorow['naytetaanko_osaston_ja_tryn_selite'] == "K") {
 		$orderlisa = "ORDER BY avainsana.selitetark";
@@ -358,7 +362,7 @@
 				}
 
 				echo "</th></tr>";
-				echo "<tr><td nowrap style='padding:0px'><select name='mul_osasto[]' $multiple_lisa onchange='submit();'>";
+				echo "<tr><td nowrap style='padding:0px'><select name='mul_osasto[]' $multiple_lisa $autosubmit>";
 
 				$mul_check = "";
 				if ($mul_try != "") {
@@ -487,7 +491,7 @@
 				}
 
 				echo "</th></tr>";
-				echo "<tr><td nowrap style='padding:0px'><select name='mul_try[]' onchange='submit();' $multiple_lisa>";
+				echo "<tr><td nowrap style='padding:0px'><select name='mul_try[]' $autosubmit $multiple_lisa>";
 
 				$mul_check = '';
 				if ($mul_try != "") {
@@ -573,7 +577,7 @@
 				$lisaquery = '';
 
 				foreach ($monivalintalaatikot as $monivalintalaatikko2) {
-					if (strtolower(substr($monivalintalaatikko2, 0, 9)) == "parametri") {						
+					if (strtolower(substr($monivalintalaatikko2, 0, 9)) == "parametri") {
 						$param = substr($monivalintalaatikko2, 10);
 
 						if (${"lisa_haku_".$param} != "") {
@@ -632,7 +636,7 @@
 					$multiple_lisa = "";
 				}
 
-				echo "<select name='mul_tme[]' $multiple_lisa onchange='submit();'>";
+				echo "<select name='mul_tme[]' $multiple_lisa $autosubmit>";
 
 
 				$mul_check = '';
@@ -718,7 +722,7 @@
 						$lisaquery = '';
 
 						foreach ($monivalintalaatikot as $monivalintalaatikko3) {
-							if (strtolower(substr($monivalintalaatikko3, 0, 9)) == "parametri") {						
+							if (strtolower(substr($monivalintalaatikko3, 0, 9)) == "parametri") {
 								$param = substr($monivalintalaatikko3, 10);
 
 								if (${"lisa_haku_".$param} != "") {
@@ -779,7 +783,7 @@
 							$multiple_lisa = "";
 						}
 
-						echo "<select name='mul_malli[]' $multiple_lisa onchange='submit();'>";
+						echo "<select name='mul_malli[]' $multiple_lisa $autosubmit>";
 
 						$mul_check = '';
 						if ($mul_malli != "") {
@@ -863,7 +867,7 @@
 						$lisaquery = '';
 
 						foreach ($monivalintalaatikot as $monivalintalaatikko4) {
-							if (strtolower(substr($monivalintalaatikko4, 0, 9)) == "parametri") {						
+							if (strtolower(substr($monivalintalaatikko4, 0, 9)) == "parametri") {
 								$param = substr($monivalintalaatikko4, 10);
 
 								if (${"lisa_haku_".$param} != "") {
@@ -927,7 +931,7 @@
 							$multiple_lisa = "";
 						}
 
-						echo "<select name='mul_mallitarkenne[]' $multiple_lisa onchange='submit();'>";
+						echo "<select name='mul_mallitarkenne[]' $multiple_lisa $autosubmit>";
 
 
 						$mul_check = '';
@@ -1062,7 +1066,7 @@
 						echo " style='width: 170px;' ";
 					}
 
-					echo "onchange='submit();'>";
+					echo "$autosubmit>";
 
 					$mul_check = '';
 
@@ -1105,7 +1109,7 @@
 						ORDER BY myyja";
 			$sresult = mysql_query($query) or pupe_error($query);
 
-			echo "<td nowrap style='padding:0px'><select name='mul_tuotemyyja[]' multiple='multiple' size='7' onchange='submit();'>";
+			echo "<td nowrap style='padding:0px'><select name='mul_tuotemyyja[]' multiple='multiple' size='7' $autosubmit>";
 			echo "<option value=''>".t("Ei valintaa")."</option>";
 
 			while($sxrow = mysql_fetch_array ($sresult)){
@@ -1135,7 +1139,7 @@
 						ORDER BY myyja";
 			$sresult = mysql_query($query) or pupe_error($query);
 
-			echo "<td nowrap style='padding:0px'><select name='mul_tuoteostaja[]' multiple='multiple' size='7' onchange='submit();'>";
+			echo "<td nowrap style='padding:0px'><select name='mul_tuoteostaja[]' multiple='multiple' size='7' $autosubmit>";
 			echo "<option value=''>".t("Ei valintaa")."</option>";
 
 			while($sxrow = mysql_fetch_array ($sresult)){
@@ -1160,7 +1164,7 @@
 
 			$sresult = t_avainsana("ASIAKASOSASTO");
 
-			echo "<td nowrap style='padding:0px'><select name='mul_asiakasosasto[]' multiple='multiple' size='7' onchange='submit();'>";
+			echo "<td nowrap style='padding:0px'><select name='mul_asiakasosasto[]' multiple='multiple' size='7' $autosubmit>";
 			echo "<option value=''>".t("Ei valintaa")."</option>";
 
 			while($sxrow = mysql_fetch_array ($sresult)){
@@ -1185,7 +1189,7 @@
 
 			$sresult = t_avainsana("ASIAKASRYHMA");
 
-			echo "<td nowrap style='padding:0px'><select name='mul_asiakasryhma[]' multiple='multiple' size='7' onchange='submit();'>";
+			echo "<td nowrap style='padding:0px'><select name='mul_asiakasryhma[]' multiple='multiple' size='7' $autosubmit>";
 			echo "<option value=''>".t("Ei valintaa")."</option>";
 
 			while($sxrow = mysql_fetch_array ($sresult)){
@@ -1201,7 +1205,7 @@
 			}
 			echo "</select></td>";
 			echo "</tr></table></div>";
-		}		
+		}
 	}
 
 	echo "<div style='clear: both;'></div>";

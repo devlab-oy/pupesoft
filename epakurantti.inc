@@ -13,8 +13,8 @@ if ($tuoteno != "" and ($tee == "paalle" or $tee == "25paalle" or $tee == "puoli
 				FROM tuote
 				LEFT JOIN tuotepaikat ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
-				and tuote.sarjanumeroseuranta != 'S'
-				and tuote.tuoteno = '$tuoteno'
+				AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
+				AND tuote.tuoteno = '$tuoteno'
 				GROUP by 1,2,3,4,5,6,7";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -313,16 +313,17 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 			///* Kirjanpito *///
 			if ($muutos <> 0) {
 
-				$query = "	INSERT into lasku set
-							yhtio      = '$kukarow[yhtio]',
-							tapvm      = now(),
-							tila       = 'X',
-							viite      = '$tapahtumaid',
-							laatija    = '$kukarow[kuka]',
-							luontiaika = now()";
-
-				$result = mysql_query($query) or pupe_error($query);
-				$laskuid = mysql_insert_id($link);
+				if ($tapahtumat_samalle_tositteelle != "kylla" or $laskuid == 0) {
+					$query = "	INSERT into lasku set
+								yhtio      = '$kukarow[yhtio]',
+								tapvm      = now(),
+								tila       = 'X',
+								viite      = '$tapahtumaid',
+								laatija    = '$kukarow[kuka]',
+								luontiaika = now()";
+					$result = mysql_query($query) or pupe_error($query);
+					$laskuid = mysql_insert_id($link);
+				}
 
 				$query = "	INSERT into tiliointi set
 							yhtio    = '$kukarow[yhtio]',
@@ -353,10 +354,12 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
-			echo "<font class='message'>";
-			echo t("Tuote")." $tuoteno ok!<br>";
-			echo t("Varastonarvoa muutettiin")." $muutos<br>";
-			echo "</font><br>";
+			if ($komentorivilta != "ON") {
+				echo "<font class='message'>";
+				echo t("Tuote")." $tuoteno ok!<br>";
+				echo t("Varastonarvoa muutettiin")." $muutos<br>";
+				echo "</font><br>";
+			}
 
 		}
 	}

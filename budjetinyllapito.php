@@ -13,20 +13,20 @@ if (is_array($luvut)) {
 			if ($solu == '!' or $solu = (float) $solu) {
 				if ($solu == '!') $solu = 0;
 				$solu = (float) $solu;
-				$query="SELECT summa from budjetti where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustannuspaikka='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
+				$query="SELECT summa from budjetti where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustp='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
 				$result = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($result) == 1) {
 					$budjrow=mysql_fetch_array($result);
 					if ($budjrow['summa'] != $solu) {
 						if ($solu == 0.00)
-							$query="DELETE from budjetti where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustannuspaikka='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
-						else $query="UPDATE budjetti set summa = $solu where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustannuspaikka='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
+							$query="DELETE from budjetti where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustp='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
+						else $query="UPDATE budjetti set summa = $solu where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustp='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
 						$result = mysql_query($query) or pupe_error($query);
 						$paiv++;
 					}
 				}
 				else {
-					$query="INSERT into budjetti set summa = $solu, yhtio='$kukarow[yhtio]', kausi = '$sind', taso = '$rind', kustannuspaikka='$vkustp', kohde='$vkohde', projekti='$vproj'";
+					$query="INSERT into budjetti set summa = $solu, yhtio='$kukarow[yhtio]', kausi = '$sind', taso = '$rind', kustp='$vkustp', kohde='$vkohde', projekti='$vproj'";
 					$result = mysql_query($query) or pupe_error($query);
 					$lisaa++;
 				}
@@ -209,7 +209,7 @@ if (is_array($tilikaudetrow)) {
 						where yhtio			= '$kukarow[yhtio]'
 						and kausi 			= '$ik'
 						and taso 			= '$itaso'
-						and kustannuspaikka	= '$kustp'
+						and kustp	= '$kustp'
 						and kohde			= '$kohde'
 						and projekti		= '$proj'";
 			$xresult = mysql_query($query) or pupe_error($query);

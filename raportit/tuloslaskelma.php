@@ -9,7 +9,7 @@
 		require ("../inc/parametrit.inc");
 	}
 	else {
-		if($from != "PROJEKTIKALENTERI" or (int) $mul_proj[0] == 0) {
+		if ($from != "PROJEKTIKALENTERI" or (int) $mul_proj[0] == 0) {
 			die("<font class='error'>Älä edes yritä!</font>");
 		}
 	}
@@ -38,11 +38,6 @@
 				$tltee = '';
 			}
 		}
-
-		// Jotta saadaan arrays lopetusmuuttujassa oikein
-		if (isset($mul_kohde_seri)) $mul_kohde = unserialize(base64_decode($mul_kohde_seri));
-		if (isset($mul_proj_seri))  $mul_proj  = unserialize(base64_decode($mul_proj_seri));
-		if (isset($mul_kustp_seri)) $mul_kustp = unserialize(base64_decode($mul_kustp_seri));
 
 		//	UI vain jos sille on tarvetta
 		if ($from != "PROJEKTIKALENTERI") {
@@ -76,8 +71,8 @@
 				$query = "	SELECT *
 							FROM tilikaudet
 							WHERE yhtio = '$kukarow[yhtio]'
-							and '".date("Y-m-d")."' >= tilikausi_alku
-							and '".date("Y-m-d")."' <= tilikausi_loppu";
+							and tilikausi_alku <= now()
+							and tilikausi_loppu >= now()";
 				$result = mysql_query($query) or pupe_error($query);
 				$tilikausirow = mysql_fetch_array($result);
 
@@ -246,124 +241,6 @@
 			echo "</select></td>";
 			echo "</tr>";
 
-			// haetaan kustannuspaikat
-			$query = "	SELECT tunnus, nimi, koodi
-						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]'
-						and kaytossa != 'E'
-						and tyyppi = 'K'
-						ORDER BY nimi";
-			$k_result = mysql_query($query) or pupe_error($query);
-
-			// haetaan kohteet
-			$query = "	SELECT tunnus, nimi, koodi
-						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]'
-						and kaytossa != 'E'
-						and tyyppi = 'O'
-						ORDER BY nimi";
-			$o_result = mysql_query($query) or pupe_error($query);
-
-			// haetaan projektit
-			$query = "	SELECT tunnus, nimi, koodi
-						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]'
-						and kaytossa != 'E'
-						and tyyppi = 'P'
-						ORDER BY nimi";
-			$p_result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($k_result) > 0 or
-				mysql_num_rows($o_result) > 0 or
-				mysql_num_rows($p_result) > 0) {
-
-				echo "<tr><th valign='top'>";
-
-				// piirretään kustannuspaikat
-				if (mysql_num_rows($k_result) > 0) {
-					echo t("Kustannuspaikka")."<br>";
-				}
-				// piirretään kohde
-				if (mysql_num_rows($o_result) > 0) {
-					echo t("Kohde")."<br>";
-				}
-				// piirretään projekti
-				if (mysql_num_rows($p_result) > 0) {
-					echo t("Projekti")."<br>";
-				}
-
-				echo "</th><td valign='top'>";
-
-				// piirretään kustannuspaikat
-				if (mysql_num_rows($k_result) > 0) {
-					echo "<select name='mul_kustp[]' multiple='TRUE'>";
-
-					$mul_check = '';
-					if ($mul_kustp!="") {
-						if (in_array("PUPEKAIKKIMUUT", $mul_kustp)) {
-							$mul_check = 'SELECTED';
-						}
-					}
-
-					echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
-
-					while ($vrow = mysql_fetch_array($k_result)) {
-						$sel="";
-						if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_kustp)) {
-							$sel = "selected";
-						}
-						echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
-					}
-					echo "</select>";
-				}
-
-				// piirretään kohteet
-				if (mysql_num_rows($o_result) > 0) {
-					echo "<select name='mul_kohde[]' multiple='TRUE'>";
-
-					$mul_check = '';
-					if ($mul_kohde!="") {
-						if (in_array("PUPEKAIKKIMUUT", $mul_kohde)) {
-							$mul_check = 'SELECTED';
-						}
-					}
-					echo "<option value='PUPEKAIKKIMUUT' $mul_check>Ei valintaa</option>";
-
-					while ($vrow = mysql_fetch_array($o_result)) {
-						$sel="";
-						if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_kohde)) {
-							$sel = "selected";
-						}
-						echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
-					}
-					echo "</select>";
-				}
-
-				// piirretään projektit
-				if (mysql_num_rows($p_result) > 0) {
-					echo "<select name='mul_proj[]' multiple='TRUE'>";
-
-					$mul_check = '';
-					if ($mul_proj!="") {
-						if (in_array("PUPEKAIKKIMUUT", $mul_proj)) {
-							$mul_check = 'SELECTED';
-						}
-					}
-					echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
-
-					while ($vrow=mysql_fetch_array($p_result)) {
-						$sel="";
-						if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_proj)) {
-							$sel = "selected";
-						}
-						echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
-					}
-					echo "</select>";
-				}
-
-				echo "</td></tr>";
-			}
-
 			$sel = array();
 			$sel[$rtaso] = "SELECTED";
 
@@ -407,9 +284,9 @@
 
 			$kauchek = $vchek = $bchek = $ychek = "";
 			if ($kaikkikaudet != "") $kauchek = "SELECTED";
-			if ($vertailued != "") $vchek = "CHECKED";
-			if ($vertailubu != "") $bchek = "CHECKED";
-			if ($eiyhteensa != "") $ychek = "CHECKED";
+			if ($vertailued != "")   $vchek = "CHECKED";
+			if ($vertailubu != "")   $bchek = "CHECKED";
+			if ($eiyhteensa != "")   $ychek = "CHECKED";
 
 			echo "<tr><th valign='top'>".t("Näkymä")."</th>";
 
@@ -426,18 +303,6 @@
 			echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek> ".t("Budjetti");
 			echo "</td></tr>";
 
-
-			$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA");
-			$noautosubmit = TRUE;
-
-			echo "<tr><th valign='top'>".t("Asiakasrajaus")."</th>";
-			echo "<td>";
-
-			require ("tilauskasittely/monivalintalaatikot.inc");
-
-			echo "</td></tr>";
-
-
 			echo "<tr><th valign='top'>".t("Konsernirajaus")."</th>";
 
 			$konsel = array();
@@ -451,7 +316,14 @@
 					</select>
 					</td></tr>";
 
-			echo "</table><br><input type = 'submit' value = '".t("Näytä")."'></form>";
+			echo "</table><br>";
+
+			$monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
+			$noautosubmit = TRUE;
+
+			require ("tilauskasittely/monivalintalaatikot.inc");
+
+			echo "<br><input type = 'submit' value = '".t("Näytä")."'></form><br><br>";
 
 		}
 
@@ -460,25 +332,6 @@
 			// Desimaalit
 			$muoto = "%.". (int) $desi . "f";
 
-			// Onko meillä lisärajoitteita??
-			$lisa1  = "";
-			$lisa2	= "";
-
-			if (is_array($mul_kustp) and count($mul_kustp) > 0) {
-				$sel_kustp = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kustp))."')";
-				$lisa1 	.= " and tiliointi.kustp in $sel_kustp ";
-				$lisa2	.= " and budjetti.kustannuspaikka in $sel_kustp ";
-			}
-			if (is_array($mul_proj) and count($mul_proj) > 0) {
-				$sel_proj = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_proj))."')";
-				$lisa1 	.= " and tiliointi.projekti in $sel_proj ";
-				$lisa2 	.= " and budjetti.projekti in $sel_proj ";
-			}
-			if (is_array($mul_kohde) and count($mul_kohde) > 0) {
-				$sel_kohde = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kohde))."')";
-				$lisa1 	.= " and tiliointi.kohde in $sel_kohde ";
-				$lisa2 	.= " and budjetti.kohde in $sel_kohde ";
-			}
 			if ($plvk == '' or $plvv == '') {
 				$plvv = substr($yhtiorow['tilikausi_alku'], 0, 4);
 				$plvk = substr($yhtiorow['tilikausi_alku'], 5, 2);
@@ -557,26 +410,34 @@
 			$konsernijoini = "";
 			$konsernilisa  = "";
 
-			if (isset($lisa) and $lisa != "") {
-				$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus $lisa ";
-			}
-
-			if ($konsernirajaus == "AT") {
-				$konsernijoini  = "	LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != ''
-									LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and lasku.liitostunnus = kt.tunnus and kt.konserniyhtio != '' ";
-				$konsernilisa = " and (ka.tunnus is not null or kt.tunnus is not null) ";
-			}
-			elseif ($konsernirajaus == "T") {
-				$konsernijoini = "  LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and lasku.liitostunnus = kt.tunnus and kt.konserniyhtio != '' ";
-				$konsernilisa = " and kt.tunnus is not null ";
-			}
-			elseif ($konsernirajaus == "A") {
-				$konsernijoini = "  LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != '' ";
-				$konsernilisa = " and ka.tunnus is not null ";
-			}
-
-			if ((isset($lisa) and $lisa != "") or (isset($konsernirajaus) and $konsernirajaus != "")) {
+			if ((isset($lisa) and strpos($lisa, "asiakas.") !== FALSE) or (isset($konsernirajaus) and $konsernirajaus != "")) {
 				$laskujoini = " JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus ";
+
+				// Jos tehdään asiakas tai toimittajajoini niin ei vertailla budjettiin koska siinä ei olisi mitään järkeä
+				$vertailubu = "";
+
+				if (strpos($lisa, "asiakas.") !== FALSE) {
+					$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus ";
+				}
+
+				if ($konsernirajaus == "AT") {
+					$konsernijoini  = "	LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != ''
+										LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and lasku.liitostunnus = kt.tunnus and kt.konserniyhtio != '' ";
+					$konsernilisa = " and (ka.tunnus is not null or kt.tunnus is not null) ";
+				}
+				elseif ($konsernirajaus == "T") {
+					$konsernijoini = "  LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and lasku.liitostunnus = kt.tunnus and kt.konserniyhtio != '' ";
+					$konsernilisa = " and kt.tunnus is not null ";
+				}
+				elseif ($konsernirajaus == "A") {
+					$konsernijoini = "  LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != '' ";
+					$konsernilisa = " and ka.tunnus is not null ";
+				}
+			}
+
+			if (isset($lisa) and $lisa != "" and $vertailubu != "") {
+				// Rajataan budjettia
+				$bulisa = str_replace("tiliointi.","budjetti.", $lisa);
 			}
 		}
 
@@ -598,7 +459,7 @@
 				$paakirjalink = FALSE;
 			}
 
-			$lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//mul_kustp_seri=".base64_encode(serialize($mul_kustp))."//mul_kohde_seri=".base64_encode(serialize($mul_kohde))."//mul_proj_seri=".base64_encode(serialize($mul_proj))."//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//eiyhteensa=$eiyhteensa//vertailued=$vertailued//vertailubu=$vertailubu";
+			$lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//eiyhteensa=$eiyhteensa//vertailued=$vertailued//vertailubu=$vertailubu".str_replace("&","//",$ulisa);
 
 			$startmonth	= date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
 			$endmonth 	= date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));
@@ -657,8 +518,8 @@
 
 				// sisäisessä tuloslaskelmassa voidaan joinata budjetti
 				if ($vertailubu != "" and $kirjain == "S") {
-					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny'\n";
-					$alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny'\n";
+					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi = '$bukausi' $bulisa) 'budj $headny'\n";
+					$alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi = '$bukausi' $bulisa) 'budj $headny'\n";
 
 					$kaudet[] = "budj $headny";
 				}
@@ -687,8 +548,8 @@
 				}
 
 				if ($vertailubu != "" and $kirjain == "S") {
-					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
-					$alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
+					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $bulisa) 'budj $vka - $vkl' \n";
+					$alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $bulisa) 'budj $vka - $vkl' \n";
 					$kaudet[] = "budj ".$vka." - ".$vkl;
 				}
 			}
@@ -723,13 +584,14 @@
 
 				$query = "	SELECT tili.tilino, tili.nimi, $alkuquery1
 						 	FROM tili
-							LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppu' $lisa1)
+							LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppu')
 							$laskujoini
 							$asiakasjoini
 							$konsernijoini
 							WHERE tili.yhtio 		 = '$kukarow[yhtio]'
 							and tili.$tilikarttataso = BINARY '$tasorow[taso]'
 							$konsernilisa
+							$lisa
 							GROUP BY tili.tilino, tili.nimi";
 				$tilires = mysql_query($query) or pupe_error($query);
 
@@ -741,6 +603,7 @@
 								LEFT JOIN tiliointi USE INDEX (PRIMARY) ON (tiliointi.tunnus = 0)
 								WHERE budjetti.yhtio  = '$kukarow[yhtio]'
 								and budjetti.taso 	  = BINARY '$tasorow[taso]'
+								$bulisa
 								group by budjetti.taso";
 					$tilires = mysql_query($query) or pupe_error($query);
 				}
@@ -978,7 +841,7 @@
 								$tilirivi .= "<td nowrap>";
 
 								if ($paakirjalink) {
-									$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&mul_kustp_seri=".base64_encode(serialize($mul_kustp))."&mul_kohde_seri=".base64_encode(serialize($mul_kohde))."&mul_proj_seri=".base64_encode(serialize($mul_proj))."&tili=$tnumero$lopelinkki'>$tnumero - $tnimi</a>";
+									$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&tili=$tnumero$ulisa$lopelinkki'>$tnumero - $tnimi</a>";
 								}
 								else {
 									$tilirivi .= "$tnumero - $tnimi";

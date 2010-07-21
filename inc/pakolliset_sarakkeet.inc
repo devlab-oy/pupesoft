@@ -31,7 +31,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "budjetti" :
 				$pakolliset = array("KAUSI", "TASO", "SUMMA");
-				$wherelliset = array("KAUSI", "TASO", "SUMMA", "KUSTANNUSPAIKKA", "KOHDE", "PROJEKTI");
+				$wherelliset = array("KAUSI", "TASO", "SUMMA", "KUSTP", "KOHDE", "PROJEKTI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "asiakas" :
@@ -174,10 +174,6 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "kuka" :
 				$pakolliset = array("KUKA");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-				break;
-			case "kustannuspaikka" :
-				$pakolliset = array("TYYPPI","NIMI","KAYTOSSA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "todo" :

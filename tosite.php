@@ -11,35 +11,35 @@
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>\n";
 
 	$kurssi = 1;
-	
+
 	if ($tee == 'TOIMHAKU') {
 
 		require ("inc/kevyt_toimittajahaku.inc");
-		
+
 		if ($toimittajaid > 0) {
 			$tee = "";
 		}
-		
+
 		if ($monta == 0) {
 			$tee = "N";
 		}
 	}
-	
+
 	if ($tee == 'ASHAKU') {
 
 		require ("inc/asiakashaku.inc");
-		
+
 		if ($asiakasid > 0) {
 			$tee = "";
 		}
-		
+
 		if ($monta == 0) {
 			$tee = "N";
 		}
 	}
-	
+
 	if ($toimittajaid > 0) {
-		
+
 		$query = "SELECT * FROM toimi WHERE tunnus = '$toimittajaid'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -51,7 +51,7 @@
 		$toimasrow = mysql_fetch_assoc($result);
 	}
 	elseif ($asiakasid > 0) {
-		
+
 		$query = "SELECT * FROM asiakas WHERE tunnus = '$asiakasid'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -359,7 +359,7 @@
 		}
 
 		if (abs($totsumma) >= 0.01 and $heittook  == '') {
-			$gok=1;				
+			$gok=1;
 		}
 
 		// jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
@@ -381,7 +381,7 @@
 
 	// Kirjoitetaan tosite jos tiedot ok!
 	if ($tee == 'I' and isset($teetosite)) {
-		
+
 		if ($toimittajaid > 0 or $asiakasid > 0) {
 			$qlisa = "	ytunnus 		= '$toimasrow[ytunnus]',
 						nimi 			= '$toimasrow[nimi]',
@@ -396,8 +396,8 @@
 		else {
 			$qlisa = "	nimi			= '$nimi',";
 		}
-		
-		
+
+
 		$query = "	INSERT into lasku set
 					yhtio 		= '$kukarow[yhtio]',
 					tapvm 		= '$tpv-$tpk-$tpp',
@@ -464,7 +464,7 @@
 	else {
 		$tee = "";
 	}
-		
+
 	// Uusi tosite
 	if (($tee == '' or $tee == "N") and !isset($toimasrow)) {
 		echo "<br><table>";
@@ -474,8 +474,8 @@
 		echo "<td><input type = 'text' name = 'ytunnus' size='15'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'></form></td></tr>";
 		echo "</table>";
 	}
-		
-	if ($tee == '') {	
+
+	if ($tee == '') {
 		if ($maara=='') $maara = '3'; //n‰ytet‰‰n defaulttina kaks
 
 		//p‰iv‰m‰‰r‰n tarkistus
@@ -489,17 +489,17 @@
 		$tilloppp = $tillop[2];
 		$tillopkk = $tillop[1]-1;
 		$tillopvv = $tillop[0];
-		
+
 		echo "	<script language='javascript'>
 					function tositesumma() {
 						var summa = 0;
-						
+
 						for (var i=0; i<document.tosite.elements.length; i++) {
-				         	if (document.tosite.elements[i].type == 'text' && document.tosite.elements[i].name.substring(0,6) == 'isumma') {				
-								
+				         	if (document.tosite.elements[i].type == 'text' && document.tosite.elements[i].name.substring(0,6) == 'isumma') {
+
 								if (document.tosite.elements[i].value == '+') {
 									summa+=1.0*document.tosite.summa.value;
-								} 
+								}
 								else if (document.tosite.elements[i].value == '-') {
 									summa-=1.0*document.tosite.summa.value;
 								}
@@ -508,21 +508,21 @@
 								}
 							}
 				    	}
-																
+
 						document.tosite.tositesum.value=Math.round(summa*100)/100;
 					}
 				</script> ";
-				
+
 		echo "	<script language='javascript'>
 					function selitejs() {
 
 						var selitetxt = document.tosite.selite.value;
-						
+
 						for (var i=0; i<document.tosite.elements.length; i++) {
-				         	if (document.tosite.elements[i].type == 'text' && document.tosite.elements[i].name.substring(0,7) == 'iselite') {				
+				         	if (document.tosite.elements[i].type == 'text' && document.tosite.elements[i].name.substring(0,7) == 'iselite') {
 								document.tosite.elements[i].value=selitetxt;
 							}
-				    	}						
+				    	}
 					}
 				</script> ";
 
@@ -605,7 +605,7 @@
 
 		echo "<form name='tosite' action='tosite.php' method='post' enctype='multipart/form-data' onSubmit = 'return verify()' autocomplete='off'>\n";
 		echo "<input type='hidden' name='tee' value='I'>\n";
-		
+
 		// Tehd‰‰n haluttu m‰‰r‰ tiliˆintirivej‰
 		$sel = array();
 		$sel[$maara] = "selected";
@@ -626,7 +626,7 @@
 			<option $sel[401] value='401'>400</option>
 			<option $sel[501] value='501'>500</option>
 			</select></td></tr>";
-		
+
 		echo "<tr>\n";
 		echo "<th>".t("Tositteen p‰iv‰ys")."</th>\n";
 		echo "<td><input type='text' name='tpp' maxlength='2' size='2' value='$tpp'>\n";
@@ -689,12 +689,12 @@
 		}
 
 
-		if ($toimittajaid > 0) {						
+		if ($toimittajaid > 0) {
 			echo "<tr><th>".t("Toimittaja")."</th><td><input type='hidden' name='toimittajaid' value='$toimittajaid'>$toimasrow[ytunnus] $toimasrow[nimi]\n";
 			echo "</td>\n";
 			echo "</tr>\n";
 		}
-		elseif ($asiakasid > 0) {						
+		elseif ($asiakasid > 0) {
 			echo "<tr><th>".t("Asiakas")."</th><td><input type='hidden' name='asiakasid' value='$asiakasid'>$toimasrow[ytunnus] $toimasrow[nimi] $toimasrow[nimitark]<br>$toimasrow[toim_ovttunnus] $toimasrow[toim_nimi] $toimasrow[toim_nimitark] $toimasrow[toim_postitp]\n";
 			echo "</td>\n";
 			echo "</tr>\n";
@@ -703,28 +703,28 @@
 			echo "<tr><th>".t("Nimi")."</th><td><input type='text' name='nimi' value='$nimi'>\n";
 
 			if ($kukarow['kirjoitin'] > 0) {
-			
+
 				if ($kuitti != '') {
 					$kuitti = 'checked';
 				}
-			
+
 				echo " ".t("Tulosta kuitti")." <input type='checkbox' name='kuitti' $kuitti>\n";
 			}
 			else {
 				echo "<font class='message'>".t("Sinulla ei ole oletuskirjoitinta. Et voi tulostaa kuitteja")."!</font>\n";
 			}
-		
+
 			echo "</td>\n";
 			echo "</tr>\n";
 		}
-	
+
 		if(is_readable("excel_reader/reader.php")) {
 			$excel = ".xls, ";
 		}
 		else {
 			$excel = "";
 		}
-		
+
 		echo "<tr>\n";
 		echo "<th>".t("Tositteen kommentti")."</th>\n";
 		echo "<td><input type='text' name='comments' value='$comments' size='60'></td>\n";
@@ -758,9 +758,9 @@
 		echo "<br><font class='head'>".t("Syˆt‰ tositteen rivit").":</font>\n";
 
 		echo "<table>\n";
-		
+
 		for ($i=1; $i<$maara; $i++) {
-						
+
 			if ($i == 1) {
 				echo "<tr>\n";
 				echo "<th width='200'>".t("Tili")."</th>\n";
@@ -769,7 +769,7 @@
 				echo "<th>".t("Vero")."</th>\n";
 				echo "</tr>\n";
 			}
-			
+
 			echo "<tr>\n";
 
 			if ($iulos[$i] == '') {
@@ -781,7 +781,7 @@
 								FROM tili
 								WHERE yhtio = '$kukarow[yhtio]' and tilino = '$itili[$i]'";
 					$vresult = mysql_query($query) or pupe_error($query);
-					
+
 					if (mysql_num_rows($vresult) == 1) {
 						$vrow = mysql_fetch_assoc($vresult);
 						$tilinimi = $vrow['nimi'];
@@ -794,7 +794,7 @@
 			}
 
 			echo "<td>\n";
-			
+
 			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -874,20 +874,20 @@
 			echo "<tr><td colspan='4' nowrap><input type='text' name='iselite[$i]' value='$iselite[$i]' maxlength='150' size='80' placeholder='".t("Selite")."'></td></tr>\n";
 			echo "<tr style='height: 5px;'></tr>\n";
 		}
-		
+
 		echo "<tr><th colspan='2'>".t("Tosite yhteens‰").":</th><td><input type='text' size='13' style='text-align: right;' name='tositesum' value='' readonly> $valkoodi</td><td></td></tr>\n";
 		echo "</table><br>\n";
 
 		echo "<script language='javascript'>javascript:tositesumma();</script>";
 
 		if ($gok == 1) {
-			
+
 			$heittotila = '';
 
 			if ($heittook != '') {
 				$heittotila = 'checked';
 			}
-			
+
 			echo "<font class='error'>".t("HUOM: Tosite ei t‰sm‰‰").":</font> <input type='checkbox' name='heittook' $heittotila> ".t("Hyv‰ksy heitto").".<br><br>";
 		}
 

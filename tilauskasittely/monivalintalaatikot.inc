@@ -30,6 +30,10 @@
 	$lisa_haku_asiakasosasto = "";
 	$lisa_haku_asiakasryhma	 = "";
 
+	$lisa_haku_kustp		 = "";
+	$lisa_haku_kohde		 = "";
+	$lisa_haku_projekti		 = "";
+
 	foreach ($monivalintalaatikot as $monivalintalaatikko) {
 		if (strtolower(substr($monivalintalaatikko, 0, 9)) == "parametri") {
 			$param = substr($monivalintalaatikko, 10);
@@ -39,15 +43,18 @@
 		}
 	}
 
-	if (!isset($mul_osasto)) $mul_osasto = array();
-	if (!isset($mul_try)) $mul_try = array();
-	if (!isset($mul_tme)) $mul_tme = array();
-	if (!isset($mul_malli)) $mul_malli = array();
+	if (!isset($mul_osasto)) 		$mul_osasto = array();
+	if (!isset($mul_try)) 			$mul_try = array();
+	if (!isset($mul_tme)) 			$mul_tme = array();
+	if (!isset($mul_malli)) 		$mul_malli = array();
 	if (!isset($mul_mallitarkenne)) $mul_mallitarkenne = array();
-	if (!isset($mul_tuotemyyja)) $mul_tuotemyyja = array();
-	if (!isset($mul_tuoteostaja)) $mul_tuoteostaja = array();
+	if (!isset($mul_tuotemyyja)) 	$mul_tuotemyyja = array();
+	if (!isset($mul_tuoteostaja)) 	$mul_tuoteostaja = array();
 	if (!isset($mul_asiakasosasto)) $mul_asiakasosasto = array();
-	if (!isset($mul_asiakasryhma)) $mul_asiakasryhma = array();
+	if (!isset($mul_asiakasryhma)) 	$mul_asiakasryhma = array();
+	if (!isset($mul_kustp)) 		$mul_kustp = array();
+	if (!isset($mul_kohde)) 		$mul_kohde = array();
+	if (!isset($mul_projekti)) 		$mul_projekti = array();
 
 	// jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehdään niillä rajaukset muihin dropdowneihin
 	if (count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0) {
@@ -264,6 +271,63 @@
 
 			if ($mulselprefix == "abc_aputaulu") $lisa .= " and $mulselprefix.try in ($asiakasryhmat) ";
 			else $lisa .= " and asiakas.ryhma in ($asiakasryhmat) ";
+		}
+	}
+
+	if (count($mul_kustp) > 0) {
+		$kustpt = '';
+
+		foreach ($mul_kustp as $kustpx) {
+			if (trim($kustpx) != '') {
+				$kustpx = trim(mysql_real_escape_string($kustpx));
+				$kustpt .= "'$kustpx',";
+				$ulisa .= "&mul_kustp[]=".rawurlencode($kustpx);
+			}
+		}
+
+		$kustpt = substr($kustpt, 0, -1);
+
+		if (trim($kustpt) != '') {
+			$lisa_haku_kustp = " and tiliointi.kustp in ($kustpt) ";
+			$lisa .= " and tiliointi.kustp in ($kustpt) ";
+		}
+	}
+
+	if (count($mul_kohde) > 0) {
+		$kohdet = '';
+
+		foreach ($mul_kohde as $kohdex) {
+			if (trim($kohdex) != '') {
+				$kohdex = trim(mysql_real_escape_string($kohdex));
+				$kohdet .= "'$kohdex',";
+				$ulisa .= "&mul_kohde[]=".rawurlencode($kohdex);
+			}
+		}
+
+		$kohdet = substr($kohdet, 0, -1);
+
+		if (trim($kohdet) != '') {
+			$lisa_haku_kohde = " and tiliointi.kohde in ($kohdet) ";
+			$lisa .= " and tiliointi.kohde in ($kohdet) ";
+		}
+	}
+
+	if (count($mul_projekti) > 0) {
+		$projektit = '';
+
+		foreach ($mul_projekti as $projektix) {
+			if (trim($projektix) != '') {
+				$projektix = trim(mysql_real_escape_string($projektix));
+				$projektit .= "'$projektix',";
+				$ulisa .= "&mul_projekti[]=".rawurlencode($projektix);
+			}
+		}
+
+		$projektit = substr($projektit, 0, -1);
+
+		if (trim($projektit) != '') {
+			$lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
+			$lisa .= " and tiliointi.projekti in ($projektit) ";
 		}
 	}
 
@@ -1205,6 +1269,108 @@
 			}
 			echo "</select></td>";
 			echo "</tr></table></div>";
+		}
+
+		if ($monivalintalaatikko == "KUSTP") {
+
+			$query = "	SELECT tunnus, nimi, koodi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'K'
+						ORDER BY nimi";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sresult) > 0) {
+				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+				echo "<tr><th>",t("Kustannuspaikka"),"</th></tr>";
+				echo "<tr>";
+
+				echo "<td nowrap style='padding:0px'><select name='mul_kustp[]' multiple='multiple' size='7' $autosubmit>";
+				echo "<option value=''>".t("Ei valintaa")."</option>";
+
+				while($sxrow = mysql_fetch_array ($sresult)){
+					$sel = '';
+
+					if (count($mul_kustp) > 0) {
+						if (in_array(trim($sxrow['tunnus']), $mul_kustp)) {
+							$sel = 'SELECTED';
+						}
+					}
+
+					echo "<option value='$sxrow[tunnus]' $sel>$sxrow[koodi] $sxrow[nimi]</option>";
+				}
+				echo "</select></td>";
+				echo "</tr></table></div>";
+			}
+		}
+
+		if ($monivalintalaatikko == "KOHDE") {
+
+			$query = "	SELECT tunnus, nimi, koodi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'O'
+						ORDER BY nimi";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sresult) > 0) {
+				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+				echo "<tr><th>",t("Kohde"),"</th></tr>";
+				echo "<tr>";
+
+				echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' size='7' $autosubmit>";
+				echo "<option value=''>".t("Ei valintaa")."</option>";
+
+				while($sxrow = mysql_fetch_array ($sresult)){
+					$sel = '';
+
+					if (count($mul_kohde) > 0) {
+						if (in_array(trim($sxrow['tunnus']), $mul_kohde)) {
+							$sel = 'SELECTED';
+						}
+					}
+
+					echo "<option value='$sxrow[tunnus]' $sel>$sxrow[koodi] $sxrow[nimi]</option>";
+				}
+				echo "</select></td>";
+				echo "</tr></table></div>";
+			}
+		}
+
+		if ($monivalintalaatikko == "PROJEKTI") {
+
+			$query = "	SELECT tunnus, nimi, koodi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kaytossa != 'E'
+						and tyyppi = 'P'
+						ORDER BY nimi";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sresult) > 0) {
+				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+				echo "<tr><th>",t("Projekti"),"</th></tr>";
+				echo "<tr>";
+
+				echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' size='7' $autosubmit>";
+				echo "<option value=''>".t("Ei valintaa")."</option>";
+
+				while($sxrow = mysql_fetch_array ($sresult)){
+					$sel = '';
+
+					if (count($mul_projekti) > 0) {
+						if (in_array(trim($sxrow['tunnus']), $mul_projekti)) {
+							$sel = 'SELECTED';
+						}
+					}
+
+					echo "<option value='$sxrow[tunnus]' $sel>$sxrow[koodi] $sxrow[nimi]</option>";
+				}
+				echo "</select></td>";
+				echo "</tr></table></div>";
+			}
 		}
 	}
 

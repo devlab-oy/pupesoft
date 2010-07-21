@@ -575,13 +575,7 @@ if ($tee == 'U') {
 	$tee = 'E';
 
 	if ($ok != 1) {
-
 		require "inc/teetiliointi.inc";
-
-		if ($jaksota == 'on') {
-			$tee = 'U';
-			require "inc/jaksota.inc"; // Jos jotain jaksotetaan on $tee J
-		}
 	}
 }
 
@@ -1010,6 +1004,13 @@ if ($tee == 'E' or $tee == 'F') {
 
 		// Lopetetaan koko otsikko
 		echo "</table>";
+	}
+
+	// Jaksotus käyttöliittymä
+	if ($ok != 1 and $jaksota == 'on') {
+		$tee = 'U';
+		require "inc/jaksota.inc";
+		if ($tee != "E") exit;
 	}
 
 	// Näytetään nappi vain jos siihen on oikeus

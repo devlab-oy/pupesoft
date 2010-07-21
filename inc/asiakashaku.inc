@@ -28,7 +28,7 @@ else {
 }
 
 $ytunnus	 	= addslashes(trim($ytunnus));
-$limit  		= 300; // montako riviä on maksimi
+$limit  		= 1000; // montako riviä on maksimi
 $monta   		= 0;
 $asiakasrajaus 	= "";
 

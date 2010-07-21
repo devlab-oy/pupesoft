@@ -1,37 +1,48 @@
 <?php
+
 	$ok = 0;
-	if ((strlen($summa) > 0) || (strlen($tili) > 0)) {
-// Onko tilinumero alphaa ja pitäisi nuuttaa nimi numeroksi??
-		if ((($tili + 0) == 0) && (strlen($tili) > 0)) { //Joku kirjainyhdeistelmä löytyi
-			$tili = "%" . $tili . "%";
-			$query = "SELECT tilino, nimi
-                                  FROM tili
-                                  WHERE yhtio = '$kukarow[yhtio]' and nimi like '$tili'";
+	$summa = (float) $summa;
+
+	if ($summa != 0 or strlen($tili) > 0) {
+
+		// Onko tilinumero alphaa ja pitäisi muuttaa nimi numeroksi?
+		if (!is_numeric($tili)) {
+
+			$query = "	SELECT tilino, nimi
+						FROM tili
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND nimi LIKE '%$tili%'";
 			$result = mysql_query($query) or pupe_error($query);
+
 			if (mysql_num_rows($result) == 0) {
 				$ok = 1;
-				$virhe = "".t("Yksikään tili ei sovi")."";
+				$virhe = t("Yksikään tili ei sovi");
 			}
 			else {
 				$ok = 1;
-				$virhe = "".t("Useita tilejä löytyi")."";
+				$virhe = t("Useita tilejä löytyi");
 				$ulos = "<select name='$selausnimi'>";
-				while ($xrow = mysql_fetch_array ($result)) {
-					$ulos .= "<option value='$xrow[tilino]'>$xrow[tilino] $xrow[nimi]";
+
+				while ($xrow = mysql_fetch_array($result)) {
+					$ulos .= "<option value='$xrow[tilino]'>$xrow[tilino] $xrow[nimi]</option>";
 				}
-				$ulos .= "<option value = ''>".t("Ei valintaa")."";
+
+				$ulos .= "<option value=''>".t("Ei valintaa")."</option>";
 				$ulos .= "</select>";
 			}
 		}
-		if (($ok == 0) && (strlen($tili) > 0)) {
-			$summa = $summa + 0;
-			$query = "SELECT tilino
-		        		  FROM tili
-		          		  WHERE yhtio = '$kukarow[yhtio]' and tilino = '$tili'";
+
+		if ($ok == 0 and strlen($tili) > 0) {
+
+			$query = "	SELECT tilino
+						FROM tili
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tilino = '$tili'";
 			$result = mysql_query($query) or pupe_error($query);
+
 			if (mysql_num_rows($result) == 0) {
 				$ok = 1;
-				$virhe = "".t("Tuntematon tili")." '$tili'";
+				$virhe = t("Tuntematon tili")." '$tili'";
 			}
 			else {
 				$xrow = mysql_fetch_array($result);
@@ -40,14 +51,14 @@
 		}
 	}
 
-	$summa += 0;
 	if ($summa == 0 and $mistatullaan != 'ulask.php') {
-		$virhe = "".t("Summa puuttuu")."!";
+		$virhe = t("Summa puuttuu")."!";
 		$ok = 1;
 	}
 
 	if (strlen($tili) == 0) {
-		$virhe = "".t("Tili puuttuu")."!";
+		$virhe = t("Tili puuttuu")."!";
 		$ok = 1;
 	}
+
 ?>

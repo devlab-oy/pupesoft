@@ -1973,19 +1973,19 @@ if (strlen($tee) == 0) {
 
 	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
 		echo "<table><tr><td class='back'>";
+
+		$hiddenit = "<input type='hidden' name='lopetus' value='$lopetus'>
+					 <input type='hidden' name='tultiin' value='$tultiin'>
+					 <input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>
+					 <input type='hidden' name='iframe' value='$iframe'>";
+	}
+	else {
+		$hiddenit = "<input type='hidden' name='lopetus' value='$lopetus'>";
 	}
 
-	echo "<table>";
+	echo "<br><table>";
 
-	echo "<tr><td nowrap><form name = 'viivat' action = '$PHP_SELF?tee=VIIVA' method='post'>".t("Perusta lasku viivakoodilukijalla")."</td>
-		<input type='hidden' name='lopetus' value='$lopetus'>";
-
-	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
-		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
-		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
-		echo "<input type='hidden' name='iframe' value='$iframe'>";
-	}
-
+	echo "<tr><th nowrap><form name = 'viivat' action = '$PHP_SELF?tee=VIIVA' method='post'>$hiddenit".t("Perusta lasku viivakoodilukijalla")."</th>";
 	echo "<td><input type = 'text' name = 'nimi' size='8'></td>
 		<td>".t("tiliöintirivejä").":</td>
 		<td><select name='maara'><option value ='2'>1
@@ -1996,15 +1996,7 @@ if (strlen($tee) == 0) {
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<tr><td nowrap><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</td>
-		<input type='hidden' name='lopetus' value='$lopetus'>";
-
-	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
-		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
-		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
-		echo "<input type='hidden' name='iframe' value='$iframe'>";
-	}
-
+	echo "<tr><th nowrap><form action = '$PHP_SELF?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</th>";
 	echo "<td><input type = 'text' name = 'ytunnus' size='8' maxlength='15'></td>
 		<td>".t("tiliöintirivejä").":</td>
 		<td><select name='maara'><option value ='2'>1
@@ -2015,14 +2007,7 @@ if (strlen($tee) == 0) {
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<td nowrap><form action = '$PHP_SELF?tee=P' method='post'>".t("Perusta lasku ilman toimittajatietoja")."</td>
-		<input type='hidden' name='lopetus' value='$lopetus'>";
-
-	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
-		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
-		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
-		echo "<input type='hidden' name='iframe' value='$iframe'>";
-	}
+	echo "<th nowrap><form action = '$PHP_SELF?tee=P' method='post'>$hiddenit".t("Perusta lasku ilman toimittajatietoja")."</th>";
 
 	echo "<td>
 		<select name='tyyppi'>
@@ -2048,14 +2033,7 @@ if (strlen($tee) == 0) {
 
 			$row = mysql_fetch_array($result);
 
-			echo "<td><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajalle")." $row[nimi]</td>
-			<input type='hidden' name='lopetus' value='$lopetus'>";
-
-			if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
-				echo "<input type='hidden' name='tultiin' value='$tultiin'>";
-				echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
-				echo "<input type='hidden' name='iframe' value='$iframe'>";
-			}
+			echo "<th><form action = '$PHP_SELF?tee=Y' method='post'>$hiddenit".t("Perusta lasku toimittajalle")." $row[nimi]</th>";
 
 			echo "<td><input type='hidden'  name='toimittajaid' value='$toimittajaid'></td>
 			<td>".t("tiliöintirivejä").":</td>

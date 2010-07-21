@@ -66,7 +66,7 @@
 
 		if ($ytunnus != '' and (int) $asiakasid == 0) {
 			$tila = "tee_raportti";
-			$lopetus = "${palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$ytunnus&tee=";
+			$lopetus = "${palvelin2}myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//tee=";
 			require ("inc/asiakashaku.inc");
 			$tunnus = $asiakasid;
 			if ($ytunnus == "") exit;

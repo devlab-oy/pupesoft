@@ -25,7 +25,7 @@ function lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $t
 }
 
 function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kpl, $vero, $hinta, $maa, $kommentti, $tyyppi, $kustp, $kohde, $projekti) {
-	global $yhtiorow, $kukarow, $toim, $hardcoded_alv;
+	global $yhtiorow, $kukarow, $toim;
 
 	$query = "SELECT * from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -267,18 +267,6 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 				//	Otetaan korvaava tilinumero
 				if ($tilino == "" or $toim != "SUPER") {
 					$tilino = $trow["tilino"];
-				}
-
-				if ($hardcoded_alv == 1) {
-					$query  = "	SELECT oletusalv
-								FROM tili
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tilino = '$tilino'";
-					$verores = mysql_query($query) or pupe_error($query);
-					$verorow = mysql_fetch_array($verores);
-					$vero = $verorow[0];
-
-					if ($vero == 99) $vero = 0;
 				}
 
 				$query = "	INSERT into tilausrivi set

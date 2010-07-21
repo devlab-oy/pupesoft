@@ -137,14 +137,7 @@
 
 		// jos ollaan liitetty lasku keikkaan, ei anneta laittaa veroa
 		if (mysql_num_rows($keikres) == 0) {
-			// Jos alvit on hardkoodattu tileihin (hui, kauheaa, mutta joku niin tahtoo), niin salasanat.php:ss‰
-			// on m‰‰ritett‰v‰ $hardcoded_alv=1;
-			if ($hardcoded_alv != 1) {
-				echo "<td align='right' valign='top'>".alv_popup('vero', $vero)."</td>";
-			}
-			else {
-				echo "<td align='right' valign='top'></td>";
-			}
+			echo "<td align='right' valign='top'>".alv_popup('vero', $vero)."</td>";
 		}
 		else {
 			echo "<td align='right' valign='top'><input type='hidden' name='vero' value='0'>0</td>";

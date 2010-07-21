@@ -901,17 +901,6 @@
 					if ($ealvi[0] != '') {
 						$vero = $ealvi[0]; //Tuliko jotain verkkolaskulta
 					}
-					elseif ($hardcoded_alv == 1) {
-						 //salasana.php:stä
-						$query = "SELECT * FROM tili WHERE tilino = '$tili' and yhtio = '$yhtio'";
-						$tiliresult = mysql_query($query) or die ("$query\n\n".mysql_error());
-
-						if (mysql_num_rows($tiliresult) == 1) {
-							$tilirow = mysql_fetch_array ($tiliresult);
-							if($tilirow['oletusalv'] == 99) $tilirow['oletusalv'] = 0;
-							$vero = $tilirow['oletusalv'];
-						}
-					}
 
 					$kukarow['yhtio']   = $yhtio;
 					$kukarow['kuka']    = 'verkkolas';

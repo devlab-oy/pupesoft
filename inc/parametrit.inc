@@ -113,8 +113,6 @@ unset($futurtilvahuser);
 
 unset($google_analytics);
 
-unset($hardcoded_alv);
-
 unset($infoglove_host);
 unset($infoglove_pass);
 unset($infoglove_path);

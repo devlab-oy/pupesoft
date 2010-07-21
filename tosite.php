@@ -860,14 +860,7 @@
 
 			echo "</td>\n";
 			echo "<td valign='top' align='right'><input type='text' size='13' style='text-align: right;' name='isumma[$i]' value='$isumma_valuutassa[$i]' onchange='javascript:tositesumma();' onkeyup='javascript:tositesumma();'> $valkoodi<br>&nbsp;&nbsp;$isumma[$i]&nbsp;&nbsp;$valkoodi</td>\n";
-
-			if ($hardcoded_alv != 1) {
-				echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]) . "</td>\n";
-			}
-			else {
-				echo "<td></td>\n";
-			}
-
+			echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]) . "</td>\n";
 			echo "<td class='back'><font class='error'>$ivirhe[$i]</font></td>\n";
 			echo "</tr>\n";
 

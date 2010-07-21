@@ -25,7 +25,7 @@
 		}
 		if (($ok == 0) && (strlen($tili) > 0)) {
 			$summa = $summa + 0;
-			$query = "SELECT tilino, oletusalv
+			$query = "SELECT tilino
 		        		  FROM tili
 		          		  WHERE yhtio = '$kukarow[yhtio]' and tilino = '$tili'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -34,20 +34,8 @@
 				$virhe = "".t("Tuntematon tili")." '$tili'";
 			}
 			else {
-				$xrow=mysql_fetch_array($result);
+				$xrow = mysql_fetch_array($result);
 				$tili = $xrow['tilino'];
-				// Jos alvit on hardkoodattu tileihin (hui, kauheaa, mutta joku niin tahtoo), niin salasanat.php:ss‰
-				// on m‰‰ritett‰v‰ $hardcoded_alv=1;
-				if ($hardcoded_alv==1) {
-					if ($xrow['oletusalv'] == 0) {
-						$virhe = t('Tililt‰ puuttuu oletusalv eik‰ sit‰ voida k‰ytt‰‰');
-						$ok = 1;
-					}
-					else {
-						if ($xrow['oletusalv'] == 99) $xrow['oletusalv']=0;
-						$vero = $xrow['oletusalv'];
-					}
-				}
 			}
 		}
 	}

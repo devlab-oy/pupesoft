@@ -38,7 +38,7 @@
 					WHERE ltunnus 	= '$trow[tunnus]'
 					and yhtio 		= '$yritirow[yhtio]'
 					and tapvm 		= '$trow[tapvm]'
-					and tilino not in ('$yhtiorow[ostovelat]','$yhtiorow[alv]','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]','$yhtiorow[konserniostovelat]','$yhtiorow[kassaale]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]')
+					and tilino not in ('$yhtiorow[ostovelat]','$yhtiorow[alv]','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '$yhtiorow[matkalla_olevat]','$yhtiorow[konserniostovelat]','$yhtiorow[kassaale]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]')
 					and korjattu 	= ''";
 		$yresult = mysql_query($query) or pupe_error($query);
 
@@ -125,7 +125,7 @@
 					WHERE ltunnus	= '$trow[tunnus]'
 					and yhtio 		= '$yritirow[yhtio]'
 					and tapvm 		= '$trow[tapvm]'
-					and tilino not in ('$yhtiorow[ostovelat]','$yhtiorow[alv]','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[matkalla_olevat]','$yhtiorow[konserniostovelat]','$yhtiorow[kassaale]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]')
+					and tilino not in ('$yhtiorow[ostovelat]','$yhtiorow[alv]','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '$yhtiorow[matkalla_olevat]','$yhtiorow[konserniostovelat]','$yhtiorow[kassaale]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]')
 					and korjattu 	= ''";
 		$yresult = mysql_query($query) or pupe_error($query);
 

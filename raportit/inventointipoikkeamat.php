@@ -33,7 +33,7 @@
 		$query = "	SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino='$yhtiorow[varasto]'
-					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino='$yhtiorow[varastonmuutos]'
+					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
 					WHERE lasku.yhtio	= '$kukarow[yhtio]'
 					and lasku.tila     	= 'X'
 					and lasku.tapvm     = '$tapvm'
@@ -103,7 +103,7 @@
 		$query = "	SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino='$yhtiorow[varasto]'
-					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino='$yhtiorow[varastonmuutos]'
+					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
 					WHERE lasku.yhtio	= '$kukarow[yhtio]'
 					and lasku.tila     	= 'X'
 					and lasku.tapvm     = '$tapvm'

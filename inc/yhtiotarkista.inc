@@ -48,6 +48,9 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "selvittelytili") or
 			(mysql_field_name($result, $i) == "raaka_ainevarasto") or
 			(mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
+			(mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
+			(mysql_field_name($result, $i) == "varastonmuutos_inventointi") or
+			(mysql_field_name($result, $i) == "varastonmuutos_epakurantti") or		
 			(mysql_field_name($result, $i) == "konsernisaamiset") or
 			(mysql_field_name($result, $i) == "konsernivelat") or
 			(mysql_field_name($result, $i) == "konserniostovelat") or
@@ -86,6 +89,8 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "raaka_ainevarasto") or
 			(mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
 			(mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
+			(mysql_field_name($result, $i) == "varastonmuutos_inventointi") or
+			(mysql_field_name($result, $i) == "varastonmuutos_epakurantti") or			
 			(mysql_field_name($result, $i) == "konsernisaamiset") or
 			(mysql_field_name($result, $i) == "konsernivelat") or
 			(mysql_field_name($result, $i) == "konserniostovelat") or

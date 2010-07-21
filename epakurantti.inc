@@ -339,10 +339,17 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 							laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
 
+				if ($yhtiorow["varastonmuutos_epakurantti"] != "") {
+					$varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
+				}
+				else {
+					$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+				}
+
 				$query = "	INSERT into tiliointi set
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
-							tilino   = '$yhtiorow[varastonmuutos]',
+							tilino   = '$varastonmuutos_tili',
 							kustp    = 0,
 							tapvm    = now(),
 							summa    = $muutos * -1,

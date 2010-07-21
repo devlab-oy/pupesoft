@@ -667,10 +667,17 @@
 											laadittu = now()";
 								$result = mysql_query($query) or pupe_error($query);
 
+								if ($yhtiorow["varastonmuutos_inventointi"] != "") {
+									$varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+								}
+								else {
+									$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+								}
+
 								$query = "	INSERT into tiliointi set
 											yhtio    = '$kukarow[yhtio]',
 											ltunnus  = '$laskuid',
-											tilino   = '$yhtiorow[varastonmuutos]',
+											tilino   = '$varastonmuutos_tili',
 											kustp    = 0,
 											tapvm    = now(),
 											summa    = $summa * -1,

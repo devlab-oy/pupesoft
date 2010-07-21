@@ -686,12 +686,10 @@
 		$query = "	UPDATE tiliointi
 					SET korjattu = '$kukarow[kuka]',
 					korjausaika = now()
-					WHERE ltunnus = '$tunnus' and
-					yhtio ='$kukarow[yhtio]' and
-					korjattu = '' and
-					(tilino = '$yhtiorow[varasto]' or tilino = '$yhtiorow[varastonmuutos]' or
-					tilino = '$yhtiorow[matkalla_olevat]' or tilino = '$yhtiorow[raaka_ainevarasto]' or
-					tilino = '$yhtiorow[raaka_ainevarastonmuutos]')";
+					WHERE ltunnus = '$tunnus' 
+					AND	yhtio = '$kukarow[yhtio]' 
+					AND	korjattu = '' 
+					AND tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$query = "	UPDATE lasku

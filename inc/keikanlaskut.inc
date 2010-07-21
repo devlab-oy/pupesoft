@@ -41,7 +41,7 @@
 							WHERE yhtio ='$kukarow[yhtio]'
 							and ltunnus = '$tunnus'
 							and korjattu = ''
-							and tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]')";
+							and tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')";
 				$updres = mysql_query($query) or pupe_error($query);
 
 				// P‰ivitet‰‰n laskun tila
@@ -276,7 +276,7 @@
 				FROM lasku
 				JOIN tiliointi on (	tiliointi.yhtio = lasku.yhtio and
 									tiliointi.ltunnus = lasku.tunnus and
-									tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]') and
+									tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]') and
 									tiliointi.korjattu = '' and
 									tiliointi.selite not like ('Inventointi%') and
 									tiliointi.selite not like ('%ep‰kuranttimuutos') and
@@ -346,7 +346,7 @@
 				FROM lasku
 				LEFT JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
 									tiliointi1.ltunnus = lasku.tunnus and
-									tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]') and
+									tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]') and
 									tiliointi1.korjattu = '')
 				LEFT JOIN tiliointi AS tiliointi2 ON (tiliointi2.yhtio = lasku.yhtio and
 									tiliointi2.ltunnus = lasku.tunnus and
@@ -421,7 +421,7 @@
 				FROM lasku
 				JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
 									tiliointi1.ltunnus = lasku.tunnus and
-									tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and
+									tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and
 									tiliointi1.korjattu = '')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
 				lasku.tila in ('H','Y','M','P','Q') and
@@ -485,7 +485,7 @@
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus,
 					(SELECT sum(summa)
 						FROM tiliointi AS tiliointi1
-						WHERE tiliointi1.yhtio = lasku.yhtio and tiliointi1.ltunnus = lasku.tunnus and tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]') and tiliointi1.korjattu = ''
+						WHERE tiliointi1.yhtio = lasku.yhtio and tiliointi1.ltunnus = lasku.tunnus and tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]') and tiliointi1.korjattu = ''
 					) summa1,
 					(SELECT sum(summa)
 						FROM tiliointi AS tiliointi2

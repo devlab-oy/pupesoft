@@ -844,12 +844,35 @@ if ($tee == 'E' or $tee == 'F') {
 	}
 	// Tositteet
 	elseif ($trow["tila"] == 'X') {
+		
+		if ($trow["liitostunnus"] > 0) {
+			// Tämä on koko yläotsikon table
+			echo "<table>";
+			// Aloitetaan vasen sarake
+			echo "<tr><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
+		
+			echo "<table>";
+			echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
+			echo "<tr><th>".t("Nimi")."</th><td>$trow[nimi]</td></tr>";
+			if ($trow["nimitark"] != "") echo "<tr><th>".t("Nimitark")."</th><td>$trow[nimitark]</td></tr>";
+			echo "<tr><th>".t("Osoite")."</th><td>$trow[osoite]</td></tr>";
+			if ($trow["osoitetark"] != "") echo "<tr><th>".t("Osoitetark")."</th><td>$trow[osoitetark]</td></tr>";
+			echo "<tr><th>".t("Postino")."</th><td>$trow[postino], $trow[postitp], $trow[maa]</td></tr>";
+			echo "</table>";
+		
+			echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
+		}
+		
 		echo "<table>";
 		echo "<tr><th>".t("Laatija")."</th><td nowrap>$trow[laatija_nimi] @ ".tv1dateconv($trow["luontiaika"], "PITKÄ")."</td></tr>";
 		echo "<tr><th>".t("Tapvm")."</th><td>".tv1dateconv($trow["tapvm"])."</td></tr>";
 		echo "<tr><th>".t("Kommentti")."</th><td>$trow[comments]</td></tr>";
 		echo "<tr><th>".t("Liitetiedostot")."</th><td>".ebid($tunnus) ."</td></tr>";
 		echo "</table>";
+		
+		if ($trow["liitostunnus"] > 0) {
+			echo "</td></tr></table>";
+		}
 	}
 	// Jotain muuta kuin Myytilasku tai Tosite
 	else {

@@ -14,7 +14,7 @@
 		$sel = array();
 		$sel[$trow[$i]] = "SELECTED";
 
-		$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='S' order by taso";
+		$query = "SELECT * from taso where yhtio='$kukarow[yhtio]' and tyyppi='S' order by taso";
 		$tasoresu = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>\n";
@@ -34,7 +34,7 @@
 		$sel = array();
 		$sel[$trow[$i]] = "SELECTED";
 
-		$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='U' order by taso";
+		$query = "SELECT * from taso where yhtio='$kukarow[yhtio]' and tyyppi='U' order by taso";
 		$tasoresu = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>\n";
@@ -54,7 +54,7 @@
 		$sel = array();
 		$sel[$trow[$i]] = "SELECTED";
 
-		$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='A' order by taso";
+		$query = "SELECT * from taso where yhtio='$kukarow[yhtio]' and tyyppi='A' order by taso";
 		$tasoresu = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>\n";
@@ -67,6 +67,41 @@
 
 		$ulos .= "</select></td>\n";
 		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "kustp" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "projekti") {
+
+		$kustp_tyyppi = "K";
+		if (mysql_field_name($result, $i) == "kohde") $kustp_tyyppi = "O";
+		if (mysql_field_name($result, $i) == "projekti") $kustp_tyyppi = "P";
+
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$query = "	SELECT tunnus, nimi, koodi
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$kustp_tyyppi'
+					and kaytossa != 'E'
+					ORDER BY nimi";
+		$tasoresu = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($tasoresu) > 0) {
+			$ulos = "<td>";
+			$ulos .= "<select name='$nimi'>";
+			$ulos .= "<option value=''>".t("Ei oletusta")."</option>";
+
+			while ($kustannuspaikkarow = mysql_fetch_array($tasoresu)) {
+				$selapu = $kustannuspaikkarow["tunnus"];
+				$ulos .= "<option value='$kustannuspaikkarow[tunnus]' $sel[$selapu]>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]</option>";
+			}
+			$ulos .= "</select>";
+			$ulos .= "</td>";
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 4;
+		}
 	}
 
 ?>

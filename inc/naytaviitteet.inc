@@ -14,10 +14,10 @@
 		$kk = substr($pvm,2,2);
 		$pp = substr($pvm,4,2);
 
-		$lopetus = "$lopetus/SPLIT/${palvelin2}tilioteselailu.php////tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
+		$lopetus = "${palvelin2}tilioteselailu.php////tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
 
 		echo "<table>";
-		echo "<tr><td><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS'>&laquo; ".t("Edellinen")."</td><td><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS'>".t("Seuraava")." &raquo;</a></td></tr>";
+		echo "<tr><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</td><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a></td></tr>";
 		echo "<tr><th>".t("Aineston luontipv")."</th><td>".pankkipvm(substr($tietue,1,6))."</td></tr>";
 		echo "<tr><th>".t("Aineston luontiaika")."</th><td>".substr($tietue,7,4)."</td></tr>";
 		echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue,11,2)."</td></tr>";
@@ -41,7 +41,7 @@
 		$viiteaineisto_summa = sprintf('%01.2f', substr($tietue, 77, 10) / 100);
 		$viiteaineisto_viite = ltrim(substr($tietue, 43, 20), "0");
 
-		echo "<tr><td>".substr($tietue,27,16)."</td>";
+		echo "<tr class='aktiivi'><td>".substr($tietue,27,16)."</td>";
 		echo "<td>".tilinumero_print(substr($tietue,1,14))."</td>";
 		echo "<td>".pankkipvm(substr($tietue,15,6))."</td>";
 		echo "<td>".pankkipvm(substr($tietue,21,6))."</td>";

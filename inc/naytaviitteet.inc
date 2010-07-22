@@ -49,17 +49,15 @@
 		echo "<td>$viiteaineisto_viite</td>";
 		echo "<td>";
 
-		$query = "	SELECT suoritus.kohdpvm, asiakas.nimi, lasku.laskunro, lasku.tunnus
+		$query = "	SELECT suoritus.kohdpvm, asiakas.nimi, ifnull(lasku.laskunro, 0) laskunro, lasku.tunnus
 					FROM suoritus
 					LEFT JOIN asiakas ON (asiakas_tunnus = asiakas.tunnus)
-					LEFT JOIN lasku ON (lasku.tunnus = suoritus.ltunnus)
+					LEFT JOIN lasku ON (lasku.yhtio = suoritus.yhtio and lasku.tunnus = suoritus.ltunnus and lasku.tila = 'U')
 					WHERE suoritus.tunnus = '$tiliotedatarow[tiliointitunnus]'";
 		$suoritusresult = mysql_query($query) or pupe_error($query);
 		$suoritusrow = mysql_fetch_array ($suoritusresult);
 
-
-
-		if ($suoritusrow['kohdpvm'] != '0000-00-00') {
+		if ($suoritusrow['kohdpvm'] != '0000-00-00' and $suoritusrow["laskunro"] != 0) {
 			echo "<font class='ok'>".t("Suoritus kohdistettu laskuun")." ";
 			echo "<a href='${palvelin2}muutosite.php?tee=E&tunnus=$suoritusrow[tunnus]&lopetus=$lopetus'>$suoritusrow[laskunro]</a></font>";
 		}

@@ -17,6 +17,7 @@
 		$lopetus = "$lopetus/SPLIT/${palvelin2}tilioteselailu.php////tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
 
 		echo "<table>";
+		echo "<tr><td><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS'>&laquo; ".t("Edellinen")."</td><td><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS'>".t("Seuraava")." &raquo;</a></td></tr>";
 		echo "<tr><th>".t("Aineston luontipv")."</th><td>".pankkipvm(substr($tietue,1,6))."</td></tr>";
 		echo "<tr><th>".t("Aineston luontiaika")."</th><td>".substr($tietue,7,4)."</td></tr>";
 		echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue,11,2)."</td></tr>";

@@ -47,7 +47,7 @@
 		}
 	}
 
-	if ($tee == 'X' or $tee == 'XX') {
+	if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
 
 		if ($tee == 'X') {
 			// Pyyntö seuraavasta tiliotteesta
@@ -58,9 +58,10 @@
 						AND tyyppi = '1'
 						ORDER BY tunnus
 						LIMIT 1";
+			$tyyppi = 1;			
 		}
-		else {
-			// Pyyntö seuraavasta tiliotteesta
+		elseif ($tee == 'XX') {
+			// Pyyntö edellisestä tiliotteesta
 			$query = "	SELECT *
 						FROM tiliotedata
 						WHERE alku < '$pvm'
@@ -68,6 +69,29 @@
 						AND tyyppi = '1'
 						ORDER BY tunnus desc
 						LIMIT 1";
+			$tyyppi = 1;			
+		}
+		elseif ($tee == 'XS') {
+			// Pyyntö seuraavasta viiteaineistosta
+			$query = "	SELECT *
+						FROM tiliotedata
+						WHERE alku > '$pvm'
+						AND tilino = '$tilino'
+						AND tyyppi = '3'
+						ORDER BY tunnus
+						LIMIT 1";
+			$tyyppi = 3;		
+		}
+		elseif ($tee == 'XXS') {
+			// Pyyntö seuraavasta viiteaineistosta
+			$query = "	SELECT *
+						FROM tiliotedata
+						WHERE alku < '$pvm'
+						AND tilino = '$tilino'
+						AND tyyppi = '3'
+						ORDER BY tunnus desc
+						LIMIT 1";
+			$tyyppi = 3;	
 		}
 
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
@@ -78,7 +102,6 @@
 		else {
 			$tee = 'T';
 			$tiliotedatarow = mysql_fetch_array ($tiliotedataresult);
-			$tyyppi = 1;
 			$pvm = $tiliotedatarow['alku'];
 		}
 

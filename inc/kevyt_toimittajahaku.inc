@@ -63,7 +63,7 @@ if ($monta > 1 and $monta <= $limit) {
 		if     ($toimittaja['ytunnus']!='')    $numero=trim($toimittaja['ytunnus']);
 		else    die("VIRHE: Toimittajalla ei ole ytunnusta! Korjaa asia!");
 
-		echo "<tr>
+		echo "<tr class='aktiivi'>
 				<td>$toimittaja[ytunnus]</td>
 				<td>$toimittaja[nimi] $toimittaja[nimitark]</td>
 				<td>$toimittaja[osoite]</td>

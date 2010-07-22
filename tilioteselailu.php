@@ -1,12 +1,16 @@
 <?php
 	require "inc/parametrit.inc";
+
 	require_once ("inc/tilinumero.inc");
+
 	if ($lataa_tiedosto == 1) {
 		$filetxt = file_get_contents($file);
 		echo $filetxt;
 		exit;
 	}
 
+	$lopetus = "${palvelin2}tilioteselailu.php////tee=//pp=$pp//kk=$kk//vv=$vv//tilino=$tilino//tyyppi=$tyyppi";
+	
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	if ($tee == 'T' and trim($kuitattava_tiliotedata_tunnus) != '') {
@@ -244,11 +248,7 @@
 
 		while ($row = mysql_fetch_array ($result)) {
 
-			if ($tilino != "" and $tyyppi == "1" and date("Y-m-d", mktime(0, 0, 0, substr($row["loppu"],5,2), substr($row["loppu"],8,2)+1,  substr($row["loppu"],0,4))) != $edalku and $edalku != "") {
-				echo "<tr style='height: 5px;'></tr>";
-			}
-
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 
 			for ($i=0; $i<mysql_num_fields($result)-2 ; $i++) {
 				if ($i < 2) {
@@ -263,6 +263,7 @@
 
 			echo "	<form name = 'valikko' action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='T'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='pvm' value='$row[alku]'>
 					<input type='hidden' name='tyyppi' value='$row[tyyppi]'>
 					<input type='hidden' name='tilino' value='$row[tilino]'>

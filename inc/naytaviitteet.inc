@@ -6,15 +6,24 @@
 	# 9 -> summatietue
 
 	$type=substr($tietue,0,1);
-	
+
 	if ($type == 0 and substr($tietue, 0,3) != "\$\$E" and substr($tietue, 0,3) != "EOF") {
-		
+
+		$pvm = substr($tietue, 1, 6);
+		$vv = substr($pvm,0,2)+2000;
+		$kk = substr($pvm,2,2);
+		$pp = substr($pvm,4,2);
+
+		$lopetus = "$lopetus/SPLIT/${palvelin2}tilioteselailu.php////tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
+
 		echo "<table>";
 		echo "<tr><th>".t("Aineston luontipv")."</th><td>".pankkipvm(substr($tietue,1,6))."</td></tr>";
 		echo "<tr><th>".t("Aineston luontiaika")."</th><td>".substr($tietue,7,4)."</td></tr>";
 		echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue,11,2)."</td></tr>";
+		echo "<tr><th>".t("Aineisto käsitelty")."</th><td>".tv1dateconv($tiliotedatarow["kasitelty"])."</td></tr>";
+
 		echo "</table><br>";
-		
+
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>".t("Arkistotunnus")."</th>";
@@ -24,38 +33,47 @@
 		echo "<th>".t("Maksaja")."</th>";
 		echo "<th>".t("Summa")."</th>";
 		echo "<th>".t("Viite")."</th>";
-		echo "<th></th></tr>";
-	} 
+		echo "<th>".t("Tila")."</th></tr>";
+	}
 	elseif ($type == 3) {
+
+		$viiteaineisto_summa = sprintf('%01.2f', substr($tietue, 77, 10) / 100);
+		$viiteaineisto_viite = ltrim(substr($tietue, 43, 20), "0");
 
 		echo "<tr><td>".substr($tietue,27,16)."</td>";
 		echo "<td>".tilinumero_print(substr($tietue,1,14))."</td>";
 		echo "<td>".pankkipvm(substr($tietue,15,6))."</td>";
 		echo "<td>".pankkipvm(substr($tietue,21,6))."</td>";
 		echo "<td>".substr($tietue,63,12)."</td>";
-		echo "<td align='right'>".sprintf('%01.2f',substr($tietue,77,10) / 100) ."</td>";
-		echo "<td>".ltrim(substr($tietue,43,20),"0")."</td>";
-		echo "<td>".t("Tapahtuma on käsitelty")." ".tv1dateconv($tiliotedatarow["kasitelty"])."<br>";
-		
-		$query = "	SELECT kohdpvm, nimi 
+		echo "<td align='right'>$viiteaineisto_summa</td>";
+		echo "<td>$viiteaineisto_viite</td>";
+		echo "<td>";
+
+		$query = "	SELECT suoritus.kohdpvm, asiakas.nimi, lasku.laskunro, lasku.tunnus
 					FROM suoritus
-					LEFT JOIN asiakas on asiakas_tunnus=asiakas.tunnus 
+					LEFT JOIN asiakas ON (asiakas_tunnus = asiakas.tunnus)
+					LEFT JOIN lasku ON (lasku.tunnus = suoritus.ltunnus)
 					WHERE suoritus.tunnus = '$tiliotedatarow[tiliointitunnus]'";
 		$suoritusresult = mysql_query($query) or pupe_error($query);
 		$suoritusrow = mysql_fetch_array ($suoritusresult);
-		
-		if ($suoritusrow['kohdpvm'] != '0000-00-00') { 
-			echo t("Suoritus on kohdistettu laskuun") . " " .tv1dateconv($suoritusrow['kohdpvm']);
+
+
+
+		if ($suoritusrow['kohdpvm'] != '0000-00-00') {
+			echo "<font class='ok'>".t("Suoritus kohdistettu laskuun")." ";
+			echo "<a href='${palvelin2}muutosite.php?tee=E&tunnus=$suoritusrow[tunnus]&lopetus=$lopetus'>$suoritusrow[laskunro]</a></font>";
 		}
 		else {
 			if (mysql_num_rows($suoritusresult)==1) {
-				if ($suoritusrow['nimi'] != '')
-					echo t("Kohdistettu asiakkaaseen ")."$suoritusrow[nimi]<br>";
-				else
-					echo t("Kohdistamatta asiakkaaseen ")."<br>";
+				if ($suoritusrow['nimi'] != '') {
+					echo "<font class='error'>".t("Kohdistettu asiakkaaseen")." $suoritusrow[nimi]</font>";
+				}
+				else {
+					echo "<font class='error'>".t("Kohdistamatta asiakkaaseen")."</font>";
+				}
 			}
 			echo "</td></tr>";
-		} 
+		}
 	}
 	elseif ($type == 9) {
 		echo "</table><br><table>";
@@ -64,12 +82,12 @@
 				<th>".t("Kpl")."</th>
 				<th>".t("Summa")."</th>
 				</tr>";
-				
+
 		echo "<tr><th>".t("Tapahtumia")."</th><td>".(int) substr($tietue,1,6)."</td><td>".sprintf("%01.2f",substr($tietue,7,11)/100)."</td></tr>";
 		echo "<tr><th>".t("Oikaisutapahtumia")."</th><td>".(int) substr($tietue,18,6)."</td><td>".sprintf("%01.2f",substr($tietue,24,11)/100)."</td></tr>";
 		echo "</table>";
 		//echo "<td>Varalla</td><td>".substr($tietue,35,5)."</td></tr>";
-	} 
+	}
 	elseif(substr($tietue, 0,3) != "\$\$E" and substr($tietue, 0,3) != "EOF") {
 		echo "<td>".t("Tuntematon tietuetunnus")." $type</td>";
 	}

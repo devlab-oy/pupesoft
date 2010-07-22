@@ -30,7 +30,10 @@
 			}
 
 			if ($toimittaja != "") {
-				$query = "select distinct tuoteno from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and toimittaja='$toimittaja'";
+				$query = "	SELECT distinct tuoteno
+							from tuotteen_toimittajat
+							where yhtio = '$kukarow[yhtio]'
+							and toimittaja = '$toimittaja'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
@@ -45,16 +48,16 @@
 				}
 			}
 
-			$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
+			$query = "UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
 			$delresult = mysql_query($query) or pupe_error($query);
 			$kukarow['kesken'] = 0;
 
 			$query = "SELECT * FROM varastopaikat WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kohdevarasto'";
 			$result = mysql_query($query) or pupe_error($query);
 			$varow = mysql_fetch_array($result);
-			
+
 			//katotaan tarvetta
-			$query = "SELECT tuotepaikat.*, tuotepaikat.halytysraja, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka, tuote.nimitys
+			$query = "	SELECT tuotepaikat.*, tuotepaikat.halytysraja, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka, tuote.nimitys
 						FROM tuotepaikat
 						JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno $lisa)
 						$abcjoin
@@ -70,26 +73,27 @@
 			if ((int) $olliriveja == 0 or $olliriveja == '') {
 				$olliriveja = 20;
 			}
-			
+
 			//	Otetaan luodut otsikot talteen
 			$otsikot = array();
-			
+
 			//	Varmistetaan ettei olla miss‰‰n kesken
 			$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
 			$delresult = mysql_query($query) or pupe_error($query);
 			$kukarow["kesken"] = 0;
-			
+
 			// tehd‰‰n jokaiselle valitulle lahdevarastolle erikseen
 			foreach ($lahdevarastot as $lahdevarasto) {
 				//	Varmistetaan ett‰ aloitetaan aina uusi otsikko uudelle varastolle
 				$tehtyriveja = 0;
-				
+
 				// menn‰‰n aina varmasti alkuun
 				mysql_data_seek($resultti, 0);
+
 				while ($pairow = mysql_fetch_array($resultti)) {
-				
+
 					//katotaan paljonko sinne on jo menossa
-					$query = "SELECT sum(varattu) varattu
+					$query = "	SELECT sum(varattu) varattu
 								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 								JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -102,14 +106,11 @@
 
 					list( , , $saldo_myytavissa_kohde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $kohdevarasto);
 					$tarve_kohdevarasto = $pairow['halytysraja']-$saldo_myytavissa_kohde;
-					
+
 					if ($pairow['tilausmaara'] > 0 and $tarve_kohdevarasto > 0) {
 						$tarve_kohdevarasto = $pairow['tilausmaara'];
 					}
-				
-					//ja v‰hennet‰‰n se tarpeesta
-					//$pairow['tarve'] = $pairow['tarve'] - $vanhatrow['varattu'];
-				
+
 					//ei l‰hetet‰ lis‰‰ jos on jo matkalla
 					if ($vanhatrow['varattu'] > 0) {
 						$tarve_kohdevarasto = 0;
@@ -117,11 +118,11 @@
 
 					//katotaan myyt‰viss‰ m‰‰r‰
 					list( , , $saldo_myytavissa) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);
-				
+
 					$saldo_myytavissa = (float) $saldo_myytavissa;
-					
+
 					if ($saldo_myytavissa > 0 and $tarve_kohdevarasto > 0) {
-			
+
 						if ($tarve_kohdevarasto >= $saldo_myytavissa) {
 							if ($saldo_myytavissa == 1) {
 								$siirretaan = $saldo_myytavissa;
@@ -135,29 +136,32 @@
 						}
 
 						if ($siirretaan > 0) {
-						
+
 							//	Onko meill‰ jo otsikko vai pit‰‰kˆ tehd‰ uusi?
 							if ($tehtyriveja == 0 or $tehtyriveja == (int) $olliriveja+1) {
-								
-								$jatka		= "kala";
-							
+
+								// Nollataan kun tehd‰‰n uusi otsikko
+								$tehtyriveja = 0;
+
+								$jatka = "kala";
+
 								$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
 								$delresult = mysql_query($query) or pupe_error($query);
 
 								$kukarow["kesken"] = 0;
 
-								$tilausnumero = $kukarow["kesken"];
-								$clearing 	= $kohdevarasto;
-								$chn 		= 'GEN'; // t‰ll‰ erotellaan "tulosta siirtolista"-kohdassa generoidut ja k‰sin tehdyt siirtolistat
-								$toimpp 	= $kerpp = date(j);
-								$toimkk 	= $kerkk = date(n);
-								$toimvv 	= $kervv = date(Y);
-								$comments 	= $kukarow["nimi"]." Generoi h‰lytysrajojen perusteella";
-								$viesti 	= $kukarow["nimi"]." Generoi h‰lytysrajojen perusteella";
-								$varasto 	= $lahdevarasto;
-								$toim = "SIIRTOLISTA";
+								$tilausnumero	= $kukarow["kesken"];
+								$clearing 		= $kohdevarasto;
+								$chn 			= 'GEN'; // t‰ll‰ erotellaan "tulosta siirtolista"-kohdassa generoidut ja k‰sin tehdyt siirtolistat
+								$toimpp 		= $kerpp = date("j");
+								$toimkk 		= $kerkk = date("n");
+								$toimvv 		= $kervv = date("Y");
+								$comments 		= $kukarow["nimi"]." Generoi h‰lytysrajojen perusteella";
+								$viesti 		= $kukarow["nimi"]." Generoi h‰lytysrajojen perusteella";
+								$varasto 		= $lahdevarasto;
+								$toimitustapa 	= $valittu_toimitustapa;
+								$toim			= "SIIRTOLISTA";
 
-								//kato et t‰‰ toimii!!! siis osoitteet!!!!
 								require ("otsik_siirtolista.inc");
 
 								$query = "	SELECT *
@@ -170,23 +174,24 @@
 									exit;
 								}
 
-								$query = "select nimitys from varastopaikat where yhtio='{$kukarow["yhtio"]}' and tunnus = '$lahdevarasto'";
+								$query = "SELECT nimitys from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus = '$lahdevarasto'";
 								$varres = mysql_query($query) or pupe_error($query);
 								$varrow = mysql_fetch_array($varres);
+
 								echo "<br><font class='message'>".t("Tehtiin siirtolistalle otsikko %s l‰hdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"])."</font><br>";
 
 								//	Otetaan luotu otsikko talteen
 								$otsikot[] = $kukarow["kesken"];
-								
+
 								$laskurow = mysql_fetch_array($aresult);
 							}
-						
+
 							$query = "	SELECT *
 										FROM tuote
 										WHERE tuoteno='$pairow[tuoteno]' and yhtio='$kukarow[yhtio]'";
 							$rarresult = mysql_query($query) or pupe_error($query);
 
-							if(mysql_num_rows($rarresult) == 1) {
+							if (mysql_num_rows($rarresult) == 1) {
 								$trow = mysql_fetch_array($rarresult);
 								$toimaika 			= $laskurow["toimaika"];
 								$kerayspvm			= $laskurow["kerayspvm"];
@@ -197,11 +202,11 @@
 								$hinta 				= "";
 								$netto 				= "";
 								$ale 				= "";
-								$var				= "";							
+								$var				= "";
 								$korvaavakielto		= 1;
 								$perhekielto		= 1;
 								$orvoteikiinnosta	= "EITOD";
-							
+
 								require ('lisaarivi.inc');
 
 								$tuoteno	= '';
@@ -214,9 +219,9 @@
 								$kerayspvm	= '';
 								$kommentti	= '';
 
-								$tehtyriveja ++;
-							
-								//echo "<font class='info'>".t("Siirtolistalle lis‰ttiin %s tuotetta %s", $kieli, $siirretaan." ".$trow["yksikko"], $trow["tuoteno"])."</font><br>";							
+								$tehtyriveja++;
+
+								//echo "<font class='info'>".t("Siirtolistalle lis‰ttiin %s tuotetta %s", $kieli, $siirretaan." ".$trow["yksikko"], $trow["tuoteno"])."</font><br>";
 
 							}
 							else {
@@ -233,11 +238,21 @@
 			}
 			else {
 				echo "<font class='message'>".t("Luotiin %s siirtolistaa", $kieli, count($otsikot))."</font><br><br><br>";
-				
-				if($kesken != "X") {
-					$query = "	UPDATE lasku SET alatila = 'J' WHERE yhtio = '$kukarow[yhtio]' and tunnus IN (".implode(",",$otsikot).")";
-					$delresult = mysql_query($query) or pupe_error($query);
-					echo "<font class='message'>".t("Siirtolistat siirretiin tulostusjonoon", $kieli, count($otsikot))."</font><br><br><br>";
+
+				if ($kesken != "X") {
+					foreach ($otsikot as $ots) {
+						$query = "	SELECT *
+									FROM lasku
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '$ots'";
+						$aresult = mysql_query($query) or pupe_error($query);
+						$laskurow = mysql_fetch_assoc($aresult);
+
+						$kukarow["kesken"]	= $laskurow["tunnus"];
+						$toim 				= "SIIRTOLISTA";
+
+						require ("tilaus-valmis-siirtolista.inc");
+					}
 				}
 				else {
 					echo "<font class='message'>".t("Siirtolistat j‰tettiin kesken")."</font><br><br><br>";
@@ -259,7 +274,7 @@
 		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='M'>
 				<table>";
-				
+
 		echo "<tr><th>".t("L‰hdevarasto, eli varasto josta ker‰t‰‰n").":</th>";
 		echo "<td colspan='4'>";
 
@@ -303,7 +318,7 @@
 		echo "</select></td></tr>";
 
 		echo "<tr><th>".t("Rivej‰ per tilaus (tyhj‰ = 20)").":</th><td><input type='text' size='8' value='$olliriveja' name='olliriveja'></td>";
-		
+
 		if($kesken == "X") {
 			$c = "checked";
 		}
@@ -409,7 +424,25 @@
 			</td></tr>";
 		}
 
+		echo "<tr>";
+		echo "<th>".t("Toimitustapa")."</th><td>";
+
+		$query = "	SELECT tunnus, selite
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY jarjestys, selite";
+		$tresult = mysql_query($query) or pupe_error($query);
+		echo "<select name='valittu_toimitustapa'>";
+
+		while ($row = mysql_fetch_array($tresult)) {
+			echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
+		}
+		echo "</select>";
+
+
+		echo "</td></tr>";
 		echo "</table><br>
+
 		<input type = 'submit' value = '".t("Generoi siirtolista")."'>
 		</form>";
 	}

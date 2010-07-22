@@ -194,16 +194,19 @@ if ($tee == "ETSILASKU") {
 	// Etsit‰‰n muutettavaa tilausta
 	$query = "	SELECT yhtio, tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, summa, tapvm, laatija, tila, alatila
 				FROM lasku $use
-				WHERE $where and lasku.yhtio in ('".implode("','", $yhtiot)."')
+				WHERE $where
+				and yhtio in ('".implode("','", $yhtiot)."')
 				ORDER BY tapvm, lasku.tunnus desc LIMIT 100";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
-		echo "<table border='0' cellpadding='2' cellspacing='1'>";
+		echo "<table>";
 		echo "<tr>";
+
 		if ($toim != '') {
 			echo "<th>".t("Tilaus")."</th>";
 		}
+
 		echo "<th>".t("Laskunro")."</th>";
 		echo "<th>".t("Asiakas")."</th>";
 		echo "<th>".t("Ytunnus")."</th>";
@@ -211,10 +214,9 @@ if ($tee == "ETSILASKU") {
 		echo "<th>".t("Tapvm")."</th>";
 		echo "<th>".t("Laatija")."</th>";
 		echo "<th>".t("Tyyppi")."</th>";
-		echo "<th>".t("Monista")."</th>";
+		echo "<th>".t("Toiminto")."</th>";
 
 		if ($toim == '') {
-			echo "<th>".t("Hyvit‰")."</th>";
 			echo "<th>".t("Toiminnot")."</th>";
 		}
 
@@ -227,9 +229,9 @@ if ($tee == "ETSILASKU") {
 
 		while ($row = mysql_fetch_array($result)) {
 			echo "<tr>";
-			$ero="td";
+			$ero = "td";
 
-			if ($tunnus==$row['tilaus']) $ero="th";
+			if ($tunnus == $row['tilaus']) $ero = "th";
 
 			echo "<tr class='aktiivi'>";
 
@@ -250,31 +252,30 @@ if ($tee == "ETSILASKU") {
 			require ("inc/laskutyyppi.inc");
 
 			echo "<$ero valign='top'>".t($laskutyyppi)." ".t($alatila)."</$ero>";
+			echo "<$ero valign='top'>";
 
-			$sel = "";
-			if ($monistettavat[$row["tilaus"]] == 'MONISTA') {
-				$sel = "CHECKED";
-			}
+			$selmo = $selhy = $selre = "";
+			if ($monistettavat[$row["tilaus"]] == 'MONISTA') $selmo = "CHECKED";
+			if ($monistettavat[$row["tilaus"]] == 'HYVITA')  $selhy = "CHECKED";
+			if ($monistettavat[$row["tilaus"]] == 'REKLAMA') $selre = "CHECKED";
+
 			if ($toim == 'TILAUS') {
-				echo "<$ero valign='top'><input type='checkbox' name='monistettavat[$row[tilaus]]' value='MONISTA' $sel></$ero>";
+				echo "<input type='checkbox' name='monistettavat[$row[tilaus]]' value='MONISTA' $selmo>".t("Monista")."<br>";
 			}
 			else {
-				echo "<$ero valign='top'><input type='radio' name='monistettavat[$row[tilaus]]' value='MONISTA' $sel></$ero>";
+				echo "<input type='radio' name='monistettavat[$row[tilaus]]' value='MONISTA' $selmo>".t("Monista")."<br>";
+			}
+
+			if ($toim == '') {
+				echo "<input type='radio' name='monistettavat[$row[tilaus]]' value='HYVITA' $selhy>".t("Hyvit‰")."<br>";
+				echo "<input type='radio' name='monistettavat[$row[tilaus]]' value='REKLAMA' $selre>".t("Reklamaatio")."<br>";
 			}
 
 			if ($toim == '') {
 				$sel = "";
-				if ($monistettavat[$row["tilaus"]] == 'HYVITA') {
-					$sel = "CHECKED";
-				}
-				echo "<$ero valign='top'><input type='radio' name='monistettavat[$row[tilaus]]' value='HYVITA' $sel></$ero>";
+				if ($korjaaalvit[$row["tilaus"]] != '') $sel = "CHECKED";
 
-				$sel = "";
-				if ($korjaaalvit[$row["tilaus"]] != '') {
-					$sel = "CHECKED";
-				}
 				echo "<$ero valign='top' nowrap>";
-
 				echo "<input type='checkbox' name='korjaaalvit[$row[tilaus]]' value='on' $sel> ".t("Korjaa alvit")."<br>";
 
 				// Katotaan ettei yksik‰‰n tuote ole sarjanumeroseurannassa, silloin ei voida turvallisesti laittaa suoraan laskutukseen
@@ -339,7 +340,7 @@ if ($tee == 'MONISTA') {
 		$tee = "";
 	}
 
-	foreach($monistettavat as $lasku => $kumpi) {
+	foreach ($monistettavat as $lasku => $kumpi) {
 
 		$alvik 		= "";
 		$slask 		= "";
@@ -351,7 +352,7 @@ if ($tee == 'MONISTA') {
 		if ($sailytaprojekti[$lasku] != '') 	$sprojekti	= "on";
 		if ($sailytatyomaarays[$lasku] != '')	$koptyom 	= "on";
 
-		if ($kumpi == 'HYVITA') {
+		if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
 			$kklkm = 1;
 			echo t("Hyvitet‰‰n")." ";
 		}
@@ -429,7 +430,7 @@ if ($tee == 'MONISTA') {
 						}
 					break;
 					case 'toimaika':
-						if ($kumpi == 'HYVITA' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+						if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
 							$values .= ", '$monistarow[$i]'";
 						}
 						else {
@@ -449,7 +450,10 @@ if ($tee == 'MONISTA') {
 						}
 						break;
 					case 'tila':
-						if ($toim == 'SOPIMUS') {
+						if ($kumpi == 'REKLAMA') {
+							$values .= ", 'C'";
+						}
+						elseif ($toim == 'SOPIMUS') {
 							$values .= ", '0'";
 						}
 						elseif ($toim == 'TARJOUS') {
@@ -463,7 +467,11 @@ if ($tee == 'MONISTA') {
 						}
 						break;
 					case 'tilaustyyppi':
-						if ($toim == 'TYOMAARAYS' or $koptyom == 'on') {
+						if ($kumpi == 'REKLAMA') {
+								$values .= ", 'R'";
+								break;
+						}
+						elseif ($toim == 'TYOMAARAYS' or $koptyom == 'on') {
 							$values .= ", 'A'";
 							break;
 						}
@@ -562,7 +570,7 @@ if ($tee == 'MONISTA') {
 						}
 						break;
 					case 'ketjutus':
-						if ($kumpi == 'HYVITA' or $alvik == "on") {
+						if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $alvik == "on") {
 							echo t("Hyvityst‰/ALV-korjausta ei ketjuteta")."<br>";
 							$values .= ", 'x'";
 						}
@@ -574,11 +582,14 @@ if ($tee == 'MONISTA') {
 						if ($kumpi == 'HYVITA' and $alvik == "on") {
 							$values .= ", '".t("Hyvitet‰‰n ja tehd‰‰n ALV-korjaus laskuun").": ".$monistarow["laskunro"].".'";
 						}
-						elseif($kumpi == 'MONISTA' and $alvik == "on") {
-							$values .= ", '".t("ALV-korjaus laskuun").": ".$monistarow["laskunro"].".'";
-						}
 						elseif ($kumpi == 'HYVITA') {
 							$values .= ", '".t("Hyvitys laskuun").": ".$monistarow["laskunro"].".'";
+						}
+						elseif ($kumpi == 'REKLAMA') {
+							$values .= ", '".t("Reklamaatio laskuun").": ".$monistarow["laskunro"].".'";
+						}
+						elseif($kumpi == 'MONISTA' and $alvik == "on") {
+							$values .= ", '".t("ALV-korjaus laskuun").": ".$monistarow["laskunro"].".'";
 						}
 						else {
 							$values .= ", ''";
@@ -586,7 +597,7 @@ if ($tee == 'MONISTA') {
 						break;
 					case 'vienti_kurssi';
 						// hyvityksiss‰ pidet‰‰n kurssi samana
-						if ($kumpi == 'HYVITA') {
+						if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
 							if ($monistarow[$i] == 0) {
 								// Vanhoilla u-laskuilla ei ole vienti kurssia....
 								$vienti_kurssi = @round($monistarow["arvo"]/$monistarow["arvo_valuutassa"], 9);
@@ -704,7 +715,7 @@ if ($tee == 'MONISTA') {
 				$insres2 = mysql_query($kysely) or pupe_error($kysely);
 			}
 
-			if ($toim == 'TYOMAARAYS' or $koptyom == 'on') {
+			if ($toim == 'TYOMAARAYS' or $koptyom == 'on' or $kumpi == 'REKLAMA') {
 
 				if ($koptyom == 'on') {
 					$query = "	SELECT distinct otunnus as tyomaarays
@@ -753,19 +764,19 @@ if ($tee == 'MONISTA') {
 			}
 
 			if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS') {
-				$query = "	SELECT * 
-							from tilausrivi 
-							where otunnus = '$lasku' 
-							and yhtio = '$monistarow[yhtio]' 
+				$query = "	SELECT *
+							from tilausrivi
+							where otunnus = '$lasku'
+							and yhtio = '$monistarow[yhtio]'
 							ORDER BY otunnus, tunnus";
 			}
 			else {
-				$query = "	SELECT * 
-							from tilausrivi 
-							where uusiotunnus = '$lasku' 
-							and kpl <> 0 
-							and tyyppi = 'L' 
-							and yhtio = '$monistarow[yhtio]' 
+				$query = "	SELECT *
+							from tilausrivi
+							where uusiotunnus = '$lasku'
+							and kpl <> 0
+							and tyyppi = 'L'
+							and yhtio = '$monistarow[yhtio]'
 							ORDER BY otunnus, tunnus";
 			}
 			$rivires = mysql_query($query) or pupe_error($query);
@@ -807,7 +818,7 @@ if ($tee == 'MONISTA') {
 
 					$rfields .= ", ".mysql_field_name($rivires,$i);
 
-					switch (mysql_field_name($rivires,$i)) {						
+					switch (mysql_field_name($rivires,$i)) {
 						case 'toimaika':
 							if ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
 								$rvalues .= ", '".$rivirow[$i]."'";
@@ -850,7 +861,7 @@ if ($tee == 'MONISTA') {
 							$rvalues .= ", '$kukarow[kuka]'";
 							break;
 						case 'varattu':
-							if ($kumpi == 'HYVITA') {
+							if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
 								$uusikpl = ($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"]) * -1;
 								$rvalues .= ", '$uusikpl'";
 
@@ -861,7 +872,7 @@ if ($tee == 'MONISTA') {
 							}
 							break;
 						case 'tilkpl':
-							if ($kumpi == 'HYVITA') {
+							if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
 								$rvalues .= ", '".(($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"]) * -1)."'";
 							}
 							else {
@@ -939,10 +950,10 @@ if ($tee == 'MONISTA') {
 							case 'muuttaja':
 								break;
 							case 'osto_vai_hyvitys':
-								if ($monistarow2[$i] == "O" and $kumpi == 'HYVITA') {
+								if ($monistarow2[$i] == "O" and ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA')) {
 									$kysely .= mysql_field_name($monistares2, $i)."='H',";
 								}
-								elseif ($monistarow2[$i] == "H" and $kumpi == 'HYVITA') {
+								elseif ($monistarow2[$i] == "H" and ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA')) {
 									$kysely .= mysql_field_name($monistares2, $i)."='O',";
 								}
 								else {
@@ -959,7 +970,7 @@ if ($tee == 'MONISTA') {
 				}
 
 				// Kopsataan sarjanumerot kuntoon jos tilauksella oli sellaisia
-				if ($kumpi == 'HYVITA' and $kukarow["yhtio"] == $monistarow["yhtio"]) {
+				if (($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') and $kukarow["yhtio"] == $monistarow["yhtio"]) {
 					if ($rivirow["kpl"] > 0) {
 						$tunken = "myyntirivitunnus";
 						$tunken2 = "ostorivitunnus";
@@ -984,8 +995,6 @@ if ($tee == 'MONISTA') {
 						else {
 							$uusi_tunken = "ostorivitunnus";
 						}
-
-						//echo "# JOTAIN...$tunken $rivirow[tunnus] | $uusi_tunken $insid<br>";
 
 						$query = "SELECT sarjanumeroseuranta FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$rivirow[tuoteno]'";
 						$sarjatuoteres = mysql_query($query) or pupe_error($query);

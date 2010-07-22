@@ -110,7 +110,7 @@
 			// CR = customer reference number
 			// The format of this reference number is nnn-llllll, where nnn is Stockmann's merchandise group and llllll is the actual Stockmann's order number
 			if ($desadv_laskurow['asiakkaan_tilausnumero'] != '') {
-				$desadv_message .= "RFF+CR:$desadv_laskurow[asiakkaan_tilausnumero]'";
+				$desadv_message .= "RFF+CR:".substr($desadv_laskurow["asiakkaan_tilausnumero"], 0, 35)."'";
 				$x++;
 			}
 			else {
@@ -119,7 +119,7 @@
 
 			// RFF - waybill number
 			// AAM = waybill number
-			$desadv_message .= "RFF+AAM:$desadv_rakir_row[rahtikirjanro]'";
+			$desadv_message .= "RFF+AAM:".substr($desadv_rakir_row["rahtikirjanro"], 0, 35)."'";
 			$x++;
 
 			// RFF - buyer's order number
@@ -128,10 +128,10 @@
 				if (strpos($desadv_laskurow['asiakkaan_tilausnumero'], "-") !== FALSE) {
 					// Stockmannille explodetaan
 					list($group, $order) = explode("-", $desadv_laskurow['asiakkaan_tilausnumero']);
-					$desadv_message .= "RFF+CO:$order'";
+					$desadv_message .= "RFF+CO:".substr($order, 0, 35)."'";
 				}
 				else {
-					$desadv_message .= "RFF+CO:$desadv_laskurow[asiakkaan_tilausnumero]'";
+					$desadv_message .= "RFF+CO:".substr($desadv_laskurow["asiakkaan_tilausnumero"], 0, 35)."'";
 				}
 				$x++;
 			}
@@ -139,7 +139,7 @@
 			// NAD - identification of the seller
 			// SE = seller
 			// 100 = Finnish EDI identifier
-			$desadv_message .= "NAD+SE+$yhtiorow[ovttunnus]:100++$yhtiorow[nimi]+$yhtiorow[osoite]+$yhtiorow[postitp]++$yhtiorow[postino]+$yhtiorow[maa]'";
+			$desadv_message .= "NAD+SE+$yhtiorow[ovttunnus]:100++".substr($yhtiorow["nimi"], 0, 35)."+".substr($yhtiorow["osoite"], 0, 35)."+".substr($yhtiorow["postitp"], 0, 35)."++".substr($yhtiorow["postino"], 0, 17)."+".substr($yhtiorow["maa"], 0, 3)."'";
 			$x++;
 
 			// CTA - contact information
@@ -183,19 +183,19 @@
 
 			// IC = information contact
 			if ($yhteyshenkilo != '') {
-				$desadv_message .= "CTA+IC+:$yhteyshenkilo'";
+				$desadv_message .= "CTA+IC+:".substr($yhteyshenkilo, 0, 35)."'";
 				$x++;
 
 				// COM - communication contact
 				if ($yhteyshenkilo_puh != '') {
-					$desadv_message .= "COM+$yhteyshenkilo_puh:TE'";
+					$desadv_message .= "COM+".substr($yhteyshenkilo_puh, 0, 512).":TE'";
 					$x++;
 				}
 				else {
 					$yhteyshenkilo_puh = $desadv_laskurow['puhelin'] != '' ? $desadv_laskurow['puhelin'] : ($desadv_laskurow['gsm'] != '' ? $desadv_laskurow['gsm'] : ($desadv_laskurow['tyopuhelin'] != '' ? $desadv_laskurow['tyopuhelin'] : '')); // max 15 merkkiä, C
 
 					if ($yhteyshenkilo_puh != '') {
-						$desadv_message .= "COM+$yhteyshenkilo_puh:TE'";
+						$desadv_message .= "COM+".substr($yhteyshenkilo_puh, 0, 512).":TE'";
 						$x++;
 					}
 				}
@@ -203,7 +203,7 @@
 
 			// NAD - identification of buyer
 			if ($desadv_laskurow['asiakasovttunnus'] != '' and $desadv_laskurow['asiakasnimi'] != '') {
-				$desadv_message .= "NAD+BY+$desadv_laskurow[asiakasovttunnus]:100++$desadv_laskurow[asiakasnimi] $desadv_laskurow[asiakasnimitark]+$desadv_laskurow[asiakasosoite]+$desadv_laskurow[asiakaspostitp]++$desadv_laskurow[asiakaspostino]+$desadv_laskurow[asiakasmaa]'";
+				$desadv_message .= "NAD+BY+$desadv_laskurow[asiakasovttunnus]:100++".substr($desadv_laskurow["asiakasnimi"], 0, 35).":".substr($desadv_laskurow["asiakasnimitark"], 0, 35)."+".substr($desadv_laskurow["asiakasosoite"], 0, 35)."+".substr($desadv_laskurow["asiakaspostitp"], 0, 35)."++".substr($desadv_laskurow["asiakaspostino"], 0, 17)."+".substr($desadv_laskurow["asiakasmaa"], 0, 3)."'";
 				$x++;
 			}
 			else {
@@ -212,10 +212,10 @@
 
 			// NAD - identification of the delivery party
 			if ($desadv_laskurow['asiakastoim_nimi'] != '' and $desadv_laskurow['asiakastoim_ovttunnus'] != '') {
-				$desadv_message .= "NAD+DP+$desadv_laskurow[asiakastoim_ovttunnus]:100++$desadv_laskurow[asiakastoim_nimi] $desadv_laskurow[asiakastoim_nimitark]+$desadv_laskurow[asiakastoim_osoite]+$desadv_laskurow[asiakastoim_postitp]++$desadv_laskurow[asiakastoim_postino]+$desadv_laskurow[asiakastoim_maa]'";
+				$desadv_message .= "NAD+DP+$desadv_laskurow[asiakastoim_ovttunnus]:100++".substr($desadv_laskurow["asiakastoim_nimi"], 0, 35).":".substr($desadv_laskurow["asiakastoim_nimitark"], 0, 35)."+".substr($desadv_laskurow["asiakastoim_osoite"], 0, 35)."+".substr($desadv_laskurow["asiakastoim_postitp"], 0, 35)."++".substr($desadv_laskurow["asiakastoim_postino"], 0, 17)."+".substr($desadv_laskurow["asiakastoim_maa"], 0, 3)."'";
 				$x++;
 
-				$desadv_message .= "LOC+11+:::$desadv_laskurow[asiakastoim_postitp]'";
+				$desadv_message .= "LOC+11+:::".substr($desadv_laskurow["asiakastoim_postitp"], 0, 70)."'";
 				$x++;
 			}
 			else {
@@ -224,7 +224,7 @@
 
 			// NAD - identification of consignee
 			if ($toitarow['toim_nimi'] != '' and $toitarow['toim_ovttunnus'] != '') {
-				$desadv_message .= "NAD+CN+$toitarow[toim_ovttunnus]:100++$toitarow[toim_nimi] $toitarow[toim_nimitark]+$toitarow[toim_osoite]+$toitarow[toim_postitp]++$toitarow[toim_postino]+$toitarow[toim_maa]'";
+				$desadv_message .= "NAD+CN+$toitarow[toim_ovttunnus]:100++".substr($toitarow["toim_nimi"], 0, 35).":".substr($toitarow["toim_nimitark"], 0, 35)."+".substr($toitarow["toim_osoite"], 0, 35)."+".substr($toitarow["toim_postitp"], 0, 35)."++".substr($toitarow["toim_postino"], 0, 17)."+".substr($toitarow["toim_maa"], 0, 3)."'";
 				$x++;
 			}
 			else {
@@ -281,7 +281,7 @@
 					$error .= "Tuotteelta $tuotteet_row[tuoteno] puuttuu EAN-koodi<br>";
 				}
 
-				$desadv_message .= "LIN+$i++$tuotteet_row[eankoodi]:EN'";
+				$desadv_message .= "LIN+$i++".substr($tuotteet_row["eankoodi"], 0, 35).":EN'";
 				$x++;
 
 				// PIA - additional product identification
@@ -324,7 +324,7 @@
 				$ftppass = $desadv_pass;
 				$ftppath = $desadv_path;
 				$ftpfile = realpath($filenimi);
-				
+
 				require ("inc/ftp-send.inc");
 			}
 			else {

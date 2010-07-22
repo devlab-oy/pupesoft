@@ -8,11 +8,49 @@
 		exit;
 	}
 
+	// Talletetaan käyttäjän nimellä tositteen/liitteen kuva, jos sellainen tuli
+	// koska, jos tulee virheitä tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
+	if ($tee == 'I' and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+		$retval = tarkasta_liite("userfile", array("PNG", "JPG", "GIF", "PDF"));
+
+		if ($retval === true) {
+			$kuva = tallenna_liite("userfile", "lasku", 0, "");
+		}
+		else {
+			echo $retval;
+			$tee = "";
+		}
+	}
+
+	if (isset($muutparametrit)) {
+		list($tee, $kuitti, $kuva, $maara, $tpp, $tpk, $tpv, $summa, $valkoodi, $alv_tili, $nimi, $comments, $selite, $MAX_FILE_SIZE, $itili, $ikustp, $ikohde, $isumma, $ivero, $iselite, $summa) = explode("#!#", $muutparametrit);
+
+		$itili		= unserialize(urldecode($itili));
+		$ikustp		= unserialize(urldecode($ikustp));
+		$ikohde		= unserialize(urldecode($ikohde));
+		$isumma		= unserialize(urldecode($isumma));
+		$ivero		= unserialize(urldecode($ivero));
+		$iselite	= unserialize(urldecode($iselite));
+	}
+
+	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite))."#!#".$summa;
+
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>\n";
 
 	$kurssi = 1;
 
-	if ($tee == 'TOIMHAKU') {
+	// Jos syotetään nimi niin ei liitetä asiakasta eikä toimittajaa
+	if ($nimi != "") {
+		$toimittajaid 	= 0;
+		$asiakasid 		= 0;
+		$toimittaja_y	= "";
+		$asiakas_y		= "";
+	}
+
+	if ($toimittaja_y != '') {
+		$ytunnus = $toimittaja_y;
+		$toimittajaid = 0;
+		$asiakasid = 0;
 
 		require ("inc/kevyt_toimittajahaku.inc");
 
@@ -25,7 +63,10 @@
 		}
 	}
 
-	if ($tee == 'ASHAKU') {
+	if ($asiakas_y != '') {
+		$ytunnus = $asiakas_y;
+		$asiakasid = 0;
+		$toimittajaid = 0;
 
 		require ("inc/asiakashaku.inc");
 
@@ -66,12 +107,11 @@
 	// Tarkistetetaan syötteet perustusta varten
 	if ($tee == 'I') {
 		$totsumma = 0;
-		$summa = str_replace ( ",", ".", $summa);
+		$summa = str_replace (",", ".", $summa);
 		$gok  = 0;
 		$tpk += 0;
 		$tpp += 0;
 		$tpv += 0;
-		if ($tpv < 1000) $tpv += 2000;
 
 		if (isset($gokfrom) and $gokfrom == "palkkatosite") {
 			$gok = 1;
@@ -101,20 +141,6 @@
 			else {
 				echo "<font class='error'>".t("Ei löydetty sopivaa kurssia!")."</font><br>\n";
 				$gok = 1;
-			}
-		}
-
-		// Talletetaan käyttäjän nimellä tositteen/liitteen kuva, jos sellainen tuli
-		// koska, jos tulee virheitä tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
-		if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-			$retval = tarkasta_liite("userfile", array("PNG", "JPG", "GIF", "PDF"));
-
-			if ($retval === true) {
-				$kuva = tallenna_liite("userfile", "lasku", 0, "");
-			}
-			else {
-				echo $retval;
-				$tee = "";
 			}
 		}
 
@@ -289,6 +315,9 @@
 					if ($isumma[$i] == '-') {
 						$isumma[$i] = -1 * $turvasumma_valuutassa;
 					}
+					elseif ($isumma[$i] == '+') {
+						$isumma[$i] = 1 * $turvasumma_valuutassa;
+					}
 					// Kopioidaan summa
 					elseif (strlen($itili[$i]) > 0 and $isumma[$i] == 0) {
 						$isumma[$i] = $turvasumma_valuutassa;
@@ -313,13 +342,15 @@
 					$gok = 1;
 				}
 
-				$ulos='';
-				$virhe = '';
-				$tili = $itili[$i];
-				$summa = $isumma[$i];
-				$totsumma += $summa;
-				$selausnimi = 'itili[' . $i .']'; // Minka niminen mahdollinen popup on?
-				$vero='';
+				$ulos 		= "";
+				$virhe 		= "";
+				$tili 		= $itili[$i];
+				$summa 		= $isumma[$i];
+				$totsumma  += $summa;
+				$selausnimi = "itili['.$i.']"; // Minka niminen mahdollinen popup on?
+				$vero 		= "";
+				$tositetila = "X";
+				$tositeliit = $toimasrow["tunnus"];
 
 				require "inc/tarkistatiliointi.inc";
 
@@ -328,13 +359,13 @@
 				$ivirhe[$i] .= $virhe;
 				$iulos[$i] = $ulos;
 
-				if ($ok==0) { // Sieltä kenties tuli päivitys tilinumeroon
+				if ($ok == 0) { // Sieltä kenties tuli päivitys tilinumeroon
 					if ($itili[$i] != $tili) { // Annetaan käyttäjän päättää onko ok
 						$itili[$i] = $tili;
 						$gok = 1; // Tositetta ei kirjoiteta kantaan vielä
 					}
 					else {
-						if ($itili[$i] == $yhtiorow['kassa']) $kassaok=1;
+						if ($itili[$i] == $yhtiorow['kassa']) $kassaok = 1;
 					}
 				}
 				else {
@@ -344,22 +375,27 @@
 		}
 
 		if (count($isumma_valuutassa) == 0) {
-			$gok=1;
+			$gok = 1;
 		}
+
+		$kuittivirhe = "";
 
 		if ($kuitti != '') {
-			if ($kassaok==0) {
-				$gok=1;
-				echo "<font class='error'>".t("Pyysit kuittia, mutta kassatilille ei ole vientejä")."</font><br>\n";
+			if ($kassaok == 0) {
+				$gok = 1;
+				$kuittivirhe = "<font class='error'>".t("Pyysit kuittia, mutta kassatilille ei ole vientejä")."</font><br>\n";
 			}
-			if ($nimi == '') {
-				$gok=1;
-				echo "<font class='error'>".t("Kuitille on annettava nimi")."</font><br>\n";
+			if ($nimi == '' and $toimasrow["nimi"] == '') {
+				$gok = 1;
+				$kuittivirhe .= "<font class='error'>".t("Kuitille on annettava nimi tai asiakas tai toimittaja")."</font><br>\n";
 			}
 		}
-
-		if (abs($totsumma) >= 0.01 and $heittook  == '') {
-			$gok=1;
+		
+		$heittovirhe = 0;
+		
+		if (abs($totsumma) >= 0.01 and $heittook == '') {
+			$heittovirhe = 1;
+			$gok = 1;
 		}
 
 		// jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
@@ -443,15 +479,15 @@
 		}
 		if ($kuitti != '') require("inc/kuitti.inc");
 
-		$tee="";
-		$selite="";
-		$fnimi="";
-		$summa="";
-		$nimi="";
-		$kuitti="";
-		$kuva = "";
+		$tee		= "";
+		$selite		= "";
+		$fnimi		= "";
+		$summa		= "";
+		$nimi		= "";
+		$kuitti		= "";
+		$kuva 		= "";
 		$turvasumma_valuutassa = "";
-		$valkoodi = "";
+		$valkoodi 	= "";
 
 		echo "<font class='message'>".t("Tosite luotu")."!</font>\n";
 
@@ -463,16 +499,6 @@
 	}
 	else {
 		$tee = "";
-	}
-
-	// Uusi tosite
-	if (($tee == '' or $tee == "N") and !isset($toimasrow)) {
-		echo "<br><table>";
-		echo "<tr><th nowrap><form action = '$PHP_SELF?tee=TOIMHAKU' method='post'>".t("Perusta tosite toimittajan Y-tunnuksen/nimen perusteella")."</td>";
-		echo "<td><input type = 'text' name = 'ytunnus' size='15'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'></form></td></tr>";
-		echo "<tr><th nowrap><form action = '$PHP_SELF?tee=ASHAKU' method='post'>".t("Perusta tosite asiakkaan Y-tunnuksen/nimen perusteella")."</td>";
-		echo "<td><input type = 'text' name = 'ytunnus' size='15'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'></form></td></tr>";
-		echo "</table>";
 	}
 
 	if ($tee == '') {
@@ -606,6 +632,7 @@
 		echo "<form name='tosite' action='tosite.php' method='post' enctype='multipart/form-data' onSubmit = 'return verify()' autocomplete='off'>\n";
 		echo "<input type='hidden' name='tee' value='I'>\n";
 
+		// Uusi tosite
 		// Tehdään haluttu määrä tiliöintirivejä
 		$sel = array();
 		$sel[$maara] = "selected";
@@ -625,14 +652,42 @@
 			<option $sel[301] value='301'>300</option>
 			<option $sel[401] value='401'>400</option>
 			<option $sel[501] value='501'>500</option>
-			</select></td></tr>";
+			</select></td>";
+
+		echo "<th nowrap>".t("Liitä toimittaja")."</th>";
+		echo "<td>";
+
+		if ($toimittajaid > 0) {
+			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>$toimasrow[ytunnus] $toimasrow[nimi]\n";
+		}
+		else {
+			echo "<input type = 'text' name = 'toimittaja_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'></td></tr>";
+		}
+
+		echo "</td>\n";
+		echo "</tr>\n";
 
 		echo "<tr>\n";
 		echo "<th>".t("Tositteen päiväys")."</th>\n";
 		echo "<td><input type='text' name='tpp' maxlength='2' size='2' value='$tpp'>\n";
 		echo "<input type='text' name='tpk' maxlength='2' size='2' value='$tpk'>\n";
-		echo "<input type='text' name='tpv' maxlength='4' size='4' value='$tpv'> ".t("ppkkvvvv")."</td><td class='back'>$tapvmvirhe</td>\n";
+		echo "<input type='text' name='tpv' maxlength='4' size='4' value='$tpv'> ".t("ppkkvvvv")." $tapvmvirhe</td>\n";
+
+		echo "<th nowrap>".t("tai")." ".t("Liitä asiakas")."</th>";
+		echo "<td>";
+
+		if ($asiakasid > 0) {
+			echo "<input type='hidden' name='asiakasid' value='$asiakasid'>$toimasrow[ytunnus] $toimasrow[nimi] $toimasrow[nimitark]<br>$toimasrow[toim_ovttunnus] $toimasrow[toim_nimi] $toimasrow[toim_nimitark] $toimasrow[toim_postitp]\n";
+		}
+		else {
+			echo "<input type = 'text' name = 'asiakas_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'>";
+		}
+
+		echo "</td>\n";
 		echo "</tr>\n";
+
+		if (!isset($turvasumma_valuutassa)) $turvasumma_valuutassa = $summa;
+
 		echo "<tr><th>".t("Summa")."</th><td><input type='text' name='summa' value='$turvasumma_valuutassa' onchange='javascript:tositesumma();' onkeyup='javascript:tositesumma();'>\n";
 
 		$query = "	SELECT nimi, tunnus
@@ -652,7 +707,34 @@
 		}
 
 		echo "</select>\n";
-		echo "</td></tr>\n";
+		echo "</td>\n";
+		echo "<th>".t("tai")." ".t("Syötä nimi")."</th><td><input type='text' size='20' name='nimi' value='$nimi'></td></tr>\n";
+
+
+		echo "<tr><th>".t("Tositteen kuva/liite")."</th>\n";
+
+		if (strlen($kuva) > 0) {
+			echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '$kuva'></td>\n";
+		}
+		else {
+			echo "<td><input type='hidden' name='MAX_FILE_SIZE' value='8000000'><input name='userfile' type='file'></td>\n";
+		}
+
+		echo "<th>".t("Tulosta kuitti")."</th><td>";
+
+		if ($kukarow['kirjoitin'] > 0) {
+
+			if ($kuitti != '') {
+				$kuitti = 'checked';
+			}
+
+			echo "<input type='checkbox' name='kuitti' $kuitti>\n";
+		}
+		else {
+			echo "<font class='message'>".t("Sinulla ei ole oletuskirjoitinta. Et voi tulostaa kuitteja")."!</font>\n";
+		}
+
+		echo " $kuittivirhe</td></tr>\n";
 
 		// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity
 		$query = "	SELECT *
@@ -667,7 +749,7 @@
 		if (mysql_num_rows($alhire) >= 1) {
 
 			echo "<tr>\n";
-			echo "<th>".t("Alv tili")."</th><td>\n";
+			echo "<th>".t("Alv tili")."</th><td colspan='3'>\n";
 			echo "<select name='alv_tili'>\n";
 			echo "<option value='$yhtiorow[alv]'>$yhtiorow[alv] - $yhtiorow[nimi], $yhtiorow[kotipaikka], $yhtiorow[maa]</option>\n";
 
@@ -688,37 +770,7 @@
 			echo "<input type='hidden' name='alv_tili' value='$tilino_alv'>\n";
 		}
 
-
-		if ($toimittajaid > 0) {
-			echo "<tr><th>".t("Toimittaja")."</th><td><input type='hidden' name='toimittajaid' value='$toimittajaid'>$toimasrow[ytunnus] $toimasrow[nimi]\n";
-			echo "</td>\n";
-			echo "</tr>\n";
-		}
-		elseif ($asiakasid > 0) {
-			echo "<tr><th>".t("Asiakas")."</th><td><input type='hidden' name='asiakasid' value='$asiakasid'>$toimasrow[ytunnus] $toimasrow[nimi] $toimasrow[nimitark]<br>$toimasrow[toim_ovttunnus] $toimasrow[toim_nimi] $toimasrow[toim_nimitark] $toimasrow[toim_postitp]\n";
-			echo "</td>\n";
-			echo "</tr>\n";
-		}
-		else {
-			echo "<tr><th>".t("Nimi")."</th><td><input type='text' name='nimi' value='$nimi'>\n";
-
-			if ($kukarow['kirjoitin'] > 0) {
-
-				if ($kuitti != '') {
-					$kuitti = 'checked';
-				}
-
-				echo " ".t("Tulosta kuitti")." <input type='checkbox' name='kuitti' $kuitti>\n";
-			}
-			else {
-				echo "<font class='message'>".t("Sinulla ei ole oletuskirjoitinta. Et voi tulostaa kuitteja")."!</font>\n";
-			}
-
-			echo "</td>\n";
-			echo "</tr>\n";
-		}
-
-		if(is_readable("excel_reader/reader.php")) {
+		if (is_readable("excel_reader/reader.php")) {
 			$excel = ".xls, ";
 		}
 		else {
@@ -727,23 +779,13 @@
 
 		echo "<tr>\n";
 		echo "<th>".t("Tositteen kommentti")."</th>\n";
-		echo "<td><input type='text' name='comments' value='$comments' size='60'></td>\n";
+		echo "<td colspan='3'><input type='text' name='comments' value='$comments' size='60'></td>\n";
 		echo "</tr>\n";
 
 		echo "<tr>\n";
 		echo "<th>".t("Tiliöintien selitteet")."</th>\n";
-		echo "<td><input type='text' name='selite' value='$selite' maxlength='150' size='60' onchange='javascript:selite();' onkeyup='javascript:selitejs();'></td>\n";
+		echo "<td colspan='3'><input type='text' name='selite' value='$selite' maxlength='150' size='60' onchange='javascript:selite();' onkeyup='javascript:selitejs();'></td>\n";
 		echo "</tr>\n";
-
-		echo "<tr><th>".t("Tositteen kuva/liite")."</th>\n";
-
-		if (strlen($kuva) > 0) {
-			echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '$kuva'></td>\n";
-		}
-		else {
-			echo "<td><input type='hidden' name='MAX_FILE_SIZE' value='8000000'><input name='userfile' type='file'></td></tr>\n";
-		}
-
 		echo "</table>\n";
 
 		echo "<br><font class='head'>".t("Lue tositteen rivit tiedostosta").":</font>\n";
@@ -860,7 +902,14 @@
 
 			echo "</td>\n";
 			echo "<td valign='top' align='right'><input type='text' size='13' style='text-align: right;' name='isumma[$i]' value='$isumma_valuutassa[$i]' onchange='javascript:tositesumma();' onkeyup='javascript:tositesumma();'> $valkoodi<br>&nbsp;&nbsp;$isumma[$i]&nbsp;&nbsp;$valkoodi</td>\n";
-			echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]) . "</td>\n";
+
+			if ($hardcoded_alv != 1) {
+				echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]) . "</td>\n";
+			}
+			else {
+				echo "<td></td>\n";
+			}
+
 			echo "<td class='back'><font class='error'>$ivirhe[$i]</font></td>\n";
 			echo "</tr>\n";
 
@@ -873,7 +922,7 @@
 
 		echo "<script language='javascript'>javascript:tositesumma();</script>";
 
-		if ($gok == 1) {
+		if ($heittovirhe == 1) {
 
 			$heittotila = '';
 

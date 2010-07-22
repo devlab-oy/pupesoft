@@ -112,6 +112,8 @@
 				$tili		= $itili[$i];
 				$summa		= $isumma[$i];
 				$selausnimi	= "itili[$i]"; // Minka niminen mahdollinen popup on?
+				$tositetila = "X";
+				$tositeliit = 0;
 
 				require ("inc/tarkistatiliointi.inc");
 

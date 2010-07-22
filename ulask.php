@@ -501,13 +501,15 @@ if ($tee == 'I') {
  		// Käsitelläänkö rivi??
 		if (strlen($itili[$i]) > 0) {
 			$turvasumma 	= $summa;
-			$virhe 			= '';
+			$virhe 			= "";
 			$tili 			= $itili[$i];
 			$summa 			= (float) $isumma[$i];
-			$selausnimi		= 'itili[' . $i .']'; // Minka niminen mahdollinen popup on?
-			$mistatullaan	= 'ulask.php'; // koska nykyään on sallittua syöttää nollalasku, eli tässä tapauksessa ei sallita että kaadutaan tilioinnin summan puuttumiseen
-			$ulos			= ''; // Mahdollinen popup tyhjennetaan
-
+			$selausnimi		= "itili['.$i.']"; // Minka niminen mahdollinen popup on?
+			$mistatullaan	= "ulask.php"; // koska nykyään on sallittua syöttää nollalasku, eli tässä tapauksessa ei sallita että kaadutaan tilioinnin summan puuttumiseen
+			$ulos			= ""; // Mahdollinen popup tyhjennetaan
+			$tositetila 	= "U";
+			$tositeliit		= $trow["tunnus"];
+			
 			require "inc/tarkistatiliointi.inc";
 
  			// Sieltä kenties tuli päivitys tilinumeroon

@@ -1,12 +1,14 @@
 <?php
 
-	$ok = 0;
-	$summa = (float) $summa;
+	$ok 	= 0;
+	$summa 	= (float) $summa;
+	$tili 	= trim($tili);
+	$ulos 	= "";
 
 	if ($summa != 0 or strlen($tili) > 0) {
 
 		// Onko tilinumero alphaa ja pitäisi muuttaa nimi numeroksi?
-		if (!is_numeric($tili)) {
+		if (strlen($tili) > 0 and !is_numeric($tili)) {
 
 			$query = "	SELECT tilino, nimi
 						FROM tili
@@ -34,7 +36,7 @@
 
 		if ($ok == 0 and strlen($tili) > 0) {
 
-			$query = "	SELECT tilino
+			$query = "	SELECT tilino, toiminto
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$tili'";
@@ -47,6 +49,12 @@
 			else {
 				$xrow = mysql_fetch_array($result);
 				$tili = $xrow['tilino'];
+			}
+
+			//Jos muistiotosite ja tilille on liitettävä asiakas tai toimittaja
+			if ($tositetila == "X" and $xrow["toiminto"] != "" and (int) $tositeliit == 0) {
+				$virhe = t("Tositteeseen on liitettävä asiakas tai toimittaja")."!";
+				$ok = 1;
 			}
 		}
 	}

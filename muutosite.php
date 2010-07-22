@@ -424,15 +424,10 @@ if ($tee == 'P') {
 
 // Lisätään tiliöintirivi
 if ($tee == 'U') {
-	$summa = str_replace ( ",", ".", $summa);
-	$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
-
-	require "inc/tarkistatiliointi.inc";
-
-	$tiliulos = $ulos;
-	$ulos = '';
-
-	$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus = '$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 1) {
@@ -442,6 +437,16 @@ if ($tee == 'U') {
 	else {
 		$laskurow = mysql_fetch_array($result);
 	}
+
+	$summa 		= str_replace ( ",", ".", $summa);
+	$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
+	$tositetila = $laskurow["tila"];
+	$tositeliit = $laskurow["liitostunnus"];
+
+	require "inc/tarkistatiliointi.inc";
+
+	$tiliulos = $ulos;
+	$ulos = '';
 
 	// Katotaan voisiko meillä olla tässä joku toinen ALV tili
 	// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit

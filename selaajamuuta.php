@@ -108,14 +108,14 @@
 		$lkk='01';
 		$lvv++;
 	}
-	
+
 	if ($laji == 'MM' or $laji == 'OM') {
 		$pvmlisa = " and mapvm >= '$vv-$kk-01' and mapvm < '$lvv-$lkk-01' ";
 	}
 	else {
 		$pvmlisa = " and tapvm >= '$vv-$kk-01' and tapvm < '$lvv-$lkk-01' ";
 	}
-	
+
 	if ($iframe != '') echo "<div style='float: left; width: 55%; padding-right: 10px;'>";
 
 	if ($jarj == '') $jarj = "nimi";
@@ -241,14 +241,6 @@
 
 	if ($tee == 'U') {
 		// Lisätään tiliöintirivi
-
-		$summa = str_replace ( ",", ".", $summa);
-		$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
-
-		require ("inc/tarkistatiliointi.inc");
-
-		$tiliulos = $ulos;
-
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]' and
@@ -263,6 +255,16 @@
 		}
 
 		$laskurow = mysql_fetch_array($result);
+
+		$summa 		= str_replace ( ",", ".", $summa);
+		$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
+		$tositetila = $laskurow["tila"];
+		$tositeliit = $laskurow["liitostunnus"];
+
+		require ("inc/tarkistatiliointi.inc");
+
+		$tiliulos = $ulos;
+
 
  		// Tarvitaan kenties tositenro
 		if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {

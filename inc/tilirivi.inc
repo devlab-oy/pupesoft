@@ -104,4 +104,14 @@
 		}
 	}
 
+	if (mysql_field_name($result, $i) == "toiminto") {
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos = "<td><select name='$nimi'>\n";
+		$ulos .= "<option value = ''>".t("Ei liitospakkoa")."</option>\n";
+		$ulos .= "<option value = 'A' $sel[A]>".t("Muistiotositteelle on liitettävä asiakas tai toimittaja")."</option>\n";
+		$ulos .= "</select></td>\n";
+		$jatko = 0;
+	}
 ?>

@@ -45,6 +45,10 @@ else {
 
 	$varmuutos  = 0;
 	$vastasumma = 0;
+	$maksimisumma = 0;
+	$maksimisumma_kustp = 0;
+	$maksimisumma_kohde = 0;
+	$maksimisumma_projekti = 0;
 
 	// Tehdaan myynnin kirjaukset
 	while ($xrow = mysql_fetch_array($xresult)) {
@@ -62,6 +66,14 @@ else {
 		$kustp 		= $xrow["kustp"];
 		$kohde 		= $xrow["kohde"];
 		$projekti 	= $xrow["projekti"];
+
+		// otetaan suurimman myynnin tiedot
+		if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and $xrow["summa"] > $maksimisumma) {
+			$maksimisumma = $xrow["summa"];
+			$maksimisumma_kustp = $kustp;
+			$maksimisumma_kohde = $kohde;
+			$maksimisumma_projekti = $projekti;		
+		}
 
 		// Valitaan myyntitili, jos rivillä on alv yli 500 niin kyseessä on marginaalimyyntiä
 		if ($xrow["alv"] >= 500 and $xrow["marginaaliostot"] == "EI" and $xrow["marginaalihyvitys"] == "EI") {
@@ -431,9 +443,9 @@ else {
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$tunnus',
 					tilino 				= '$myysaatili',
-					kustp 				= 0,
-					kohde 				= 0,
-					projekti 			= 0,
+					kustp 				= $maksimisumma_kustp,
+					kohde 				= $maksimisumma_kohde,
+					projekti 			= $maksimisumma_projekti,
 					tapvm 				= '$tapvm',
 					summa 				= '$apusumma',
 					summa_valuutassa 	= '$apusumma_valuutassa',

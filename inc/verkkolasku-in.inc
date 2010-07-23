@@ -854,11 +854,24 @@
 					$ostovelat = $yhtiorow["ostovelat"];
 				}
 
+				if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
+					$ostovelat_kustp = $oletuskust;
+					$ostovelat_kohde = $oletuskohde;
+					$ostovelat_projekti = $oletusprojekti;
+				}
+				else {
+					$ostovelat_kustp = 0;
+					$ostovelat_kohde = 0;
+					$ostovelat_projekti = 0;
+				}
+
 				$query = "	INSERT into tiliointi set
 							yhtio 		= '$yhtio',
 							ltunnus 	= '$tunnus',
 							tilino 		= '$ostovelat',
-							kustp 		= 0,
+							kustp		= '$ostovelat_kustp',
+							kohde		= '$ostovelat_kohde',
+							projekti	= '$ostovelat_projekti',
 							tapvm 		= '$tpv-$tpk-$tpp',
 							summa 		= '$vassumma',
 							selite 		= '$selite',

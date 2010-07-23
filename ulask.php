@@ -1467,52 +1467,31 @@ if ($tee == 'I') {
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
+	// Tehdään oletustiliöinnit
 	$omasumma = round($summa * $vrow['kurssi'],2);
 	$omasumma_valuutassa = $summa;
 
 	$vassumma = -1 * $omasumma;
 	$vassumma_valuutassa = -1 * $omasumma_valuutassa;
 
-	// Tehdään oletustiliöinnit
-
-	//Tutkitaan otsovelkatiliä
-	if ($trow["konserniyhtio"] != '') {
-		$ostovelat = $yhtiorow["konserniostovelat"];
-	}
-	else {
-		$ostovelat = $yhtiorow["ostovelat"];
-	}
-
-	// Ostovelka
-	$query = "INSERT INTO tiliointi SET
-				yhtio				= '$kukarow[yhtio]',
-				ltunnus				= '$tunnus',
-				tilino				= '$ostovelat',
-				kustp				= 0,
-				tapvm				= '$tpv-$tpk-$tpp',
-				summa				= '$vassumma',
-				summa_valuutassa	= '$vassumma_valuutassa',
-				valkoodi			= '$valkoodi',
-				vero				= 0,
-				lukko				= '1',
-				tosite				= '$tositenro',
-				laatija 			= '$kukarow[kuka]',
-				laadittu 			= now()";
-	$result = mysql_query($query) or pupe_error($query);
-
-
-	// Oletuskulutiliöinti
 	// Nyt on saatava pyöristykset ok
 	$veroton = 0;
 	$veroton_valuutassa = 0;
 
 	$muusumma = 0;
 	$muusumma_valuutassa = 0;
+	$maksimisumma = 0;
+	$maksimisumma_i = 0;
 
 	for ($i=1; $i<$maara; $i++) {
 		$ivero[$i]				= (float) $ivero[$i];
 		$isumma_valuutassa[$i]	= (float) $isumma[$i];
 		$isumma[$i] 			= (float) round($isumma[$i] * $vrow['kurssi'], 2);
+
+		if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and $isumma[$i] > $maksimisumma) {
+			$maksimisumma = $isumma[$i];
+			$maksimisumma_i = $i;
+		}
 
  		// Netotetaan alvi
 		if ($ivero[$i] != 0) {
@@ -1533,6 +1512,33 @@ if ($tee == 'I') {
 		$veroton += $isumma[$i];
 		$veroton_valuutassa += $isumma_valuutassa[$i];
 	}
+
+	// Valitaan otsovelkatili
+	if ($trow["konserniyhtio"] != '') {
+		$ostovelat = $yhtiorow["konserniostovelat"];
+	}
+	else {
+		$ostovelat = $yhtiorow["ostovelat"];
+	}
+
+	// Ostovelka
+	$query = "	INSERT INTO tiliointi SET
+				yhtio				= '$kukarow[yhtio]',
+				ltunnus				= '$tunnus',
+				tilino				= '$ostovelat',
+				kustp 				= '$ikustp[$maksimisumma_i]',
+				kohde 				= '$ikohde[$maksimisumma_i]',
+				projekti 			= '$iprojekti[$maksimisumma_i]',
+				tapvm				= '$tpv-$tpk-$tpp',
+				summa				= '$vassumma',
+				summa_valuutassa	= '$vassumma_valuutassa',
+				valkoodi			= '$valkoodi',
+				vero				= 0,
+				lukko				= '1',
+				tosite				= '$tositenro',
+				laatija 			= '$kukarow[kuka]',
+				laadittu 			= now()";
+	$result = mysql_query($query) or pupe_error($query);
 
 	if ($muusumma != $omasumma) {
 		echo "<font class='message'>".t("Valuuttapyöristystä")." " . round($muusumma-$omasumma,2) . "</font><br>";

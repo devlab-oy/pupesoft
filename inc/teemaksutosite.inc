@@ -8,7 +8,7 @@
 	if ($tpv < 1000) $tpv += 2000;
 
 	// Mikä on oikea ostovelkatili
-	$query = "	SELECT tilino
+	$query = "	SELECT tilino, kustp, kohde, projekti
 				FROM tiliointi
 				WHERE ltunnus 	= '$trow[tunnus]'
 				and yhtio 		= '$yritirow[yhtio]'
@@ -191,7 +191,9 @@
 				yhtio 		= '$yritirow[yhtio]',
 				ltunnus 	= '$trow[tunnus]',
 				tilino		= '$ostovelkarow[tilino]',
-				kustp 		= 0,
+				kustp		= '$ostovelkarow[kustp]',
+				kohde		= '$ostovelkarow[kohde]',
+				projekti	= '$ostovelkarow[projekti]',
 				tapvm 		= '$tpv-$tpk-$tpp',
 				summa 		= '$trow[vietysumma]',
 				vero 		= 0,

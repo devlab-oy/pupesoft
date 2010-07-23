@@ -492,11 +492,21 @@ if ($tila == 'tee_kohdistus') {
 	            	VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(), '$suoritus[maksupvm]','$suoritus[kassatilino]', $suoritussumma, $suoritussummaval, '$suoritus[valkoodi]', '$ltunnus','Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]','$apukustp')";
 		$result = mysql_query($query) or pupe_error($query);
 
-		if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) $suoritussumma = round($suoritussummaval * $lasku["vienti_kurssi"],2);
+		if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) $suoritussumma = round($suoritussummaval * $lasku["vienti_kurssi"], 2);
+
+		// Haetaan myyntisaamisten kustannuspaikat
+		$query = "	SELECT kustp, kohde, projekti
+					FROM tiliointi
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND ltunnus = '$laskutunnukset'
+					AND tilino = '$suoritus[myyntisaamiset_tilino]'
+					AND korjattu = ''";
+		$result = mysql_query($query) or pupe_error($query);
+		$myyntisaamisten_tarkenteet = mysql_fetch_array($result);
 
 		// Myyntisaamiset
-		$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite)
-	            	VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(), '$suoritus[maksupvm]', '$ltunnus', '$suoritus[myyntisaamiset_tilino]', -1 * $suoritussumma, -1 * $suoritussummaval, '$suoritus[valkoodi]', 'Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]')";
+		$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, kustp, kohde, projekti)
+	            	VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(), '$suoritus[maksupvm]', '$ltunnus', '$suoritus[myyntisaamiset_tilino]', -1 * $suoritussumma, -1 * $suoritussummaval, '$suoritus[valkoodi]', 'Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]', '$myyntisaamisten_tarkenteet[kustp]', '$myyntisaamisten_tarkenteet[kohde]', '$myyntisaamisten_tarkenteet[projekti]')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// Suoritetaan valuuttalaskua
@@ -633,7 +643,7 @@ if ($tila == 'tee_kohdistus') {
 				exit;
 			}
 
-		    while($lasku = mysql_fetch_array($result)){
+		    while ($lasku = mysql_fetch_array($result)) {
 				$laskut[] = $lasku;
 				$laskujen_summa				+= $lasku["summa"] - $lasku["alennus"];
 				$laskujen_summa_valuutassa	+= $lasku["summa_valuutassa"] - $lasku["alennus_valuutassa"];
@@ -857,9 +867,19 @@ if ($tila == 'tee_kohdistus') {
 				$kassaan += $suoritettu_kassaan;
 				$kassaan_valuutassa += $suoritettu_kassaan_valuutassa;
 
+				// Haetaan myyntisaamisten kustannuspaikat
+				$query = "	SELECT kustp, kohde, projekti
+							FROM tiliointi
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND ltunnus = '$ltunnus'
+							AND tilino = '$suoritus[myyntisaamiset_tilino]'
+							AND korjattu = ''";
+				$result = mysql_query($query) or pupe_error($query);
+				$myyntisaamisten_tarkenteet = mysql_fetch_array($result);
+
 				// Myyntisaamiset
-				$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite)
-							VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(), '$suoritus[maksupvm]', '$lasku[tunnus]', '$suoritus[myyntisaamiset_tilino]', -1 * $lasku[summa], -1 * $lasku[summa_valuutassa], '$lasku[valkoodi]', 'Manuaalisesti kohdistettu suoritus $suoritus[viesti]')";
+				$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, kustp, kohde, projekti)
+							VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(), '$suoritus[maksupvm]', '$lasku[tunnus]', '$suoritus[myyntisaamiset_tilino]', -1 * $lasku[summa], -1 * $lasku[summa_valuutassa], '$lasku[valkoodi]', 'Manuaalisesti kohdistettu suoritus $suoritus[viesti]', '$myyntisaamisten_tarkenteet[kustp]', '$myyntisaamisten_tarkenteet[kohde]', '$myyntisaamisten_tarkenteet[projekti]')";
 				$result = mysql_query($query) or pupe_error($query);
 
 				// Tuliko valuuttaeroa?

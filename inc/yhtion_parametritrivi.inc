@@ -2305,4 +2305,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "kirjanpidon_tarkenteet") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Ei tarkenteita velka-/saatavat-tileille")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Lis‰t‰‰n velka-/saatavat-tileille suurimman velan/saatavan tarkenteet")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

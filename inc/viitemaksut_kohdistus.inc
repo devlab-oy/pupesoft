@@ -46,7 +46,8 @@
 				yriti.oletus_rahatili kassatili,
 				yriti.oletus_selvittelytili,
 				factoring.pankki_tili ftilino,
-				(select count(*) from tiliointi WHERE tiliointi.yhtio = suoritus.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.tilino = IF(yriti.factoring != '', yhtio.factoringsaamiset, yhtio.myyntisaamiset)) saamisetkpl
+				(select count(*) from tiliointi WHERE tiliointi.yhtio = suoritus.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.tilino = IF(yriti.factoring != '', yhtio.factoringsaamiset, yhtio.myyntisaamiset)) saamisetkpl,
+				(select concat_ws(' ', tiliointi2.kustp, tiliointi2.kohde, tiliointi2.projekti) from tiliointi as tiliointi2 WHERE tiliointi2.yhtio = suoritus.yhtio AND tiliointi2.ltunnus = lasku.tunnus AND tiliointi2.tilino = IF(yriti.factoring != '', yhtio.factoringsaamiset, yhtio.myyntisaamiset) ORDER BY tiliointi2.summa DESC LIMIT 1) saamiset_tarkenteet
 				FROM yhtio
 				JOIN lasku use index (yhtio_tila_mapvm) ON (lasku.yhtio = yhtio.yhtio and lasku.tila = 'U' and lasku.alatila = 'X' and lasku.mapvm = '0000-00-00')
 				JOIN yriti ON (yriti.yhtio = yhtio.yhtio)
@@ -99,8 +100,10 @@
 				$row["myyntisaamiset"] = $row["factoringsaamiset"];
 			}
 
+			list($myyntisaamiset_kustp, $myyntisaamiset_kohde, $myyntisaamiset_projekti) = explode(" ", $row["saamiset_tarkenteet"]);
+
 			# Myyntisaamiset
-			$query = "INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite) values ('$row[suoriyhtio]', 'automaatti', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[myyntisaamiset]', -$row[laskutettu], -$row[laskutettu_valuutassa], '$row[laskuvaluutta]', 'Automaattikohdistettu asiakkaan suoritus')";
+			$query = "INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, kustp, kohde, projekti) values ('$row[suoriyhtio]', 'automaatti', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[myyntisaamiset]', -$row[laskutettu], -$row[laskutettu_valuutassa], '$row[laskuvaluutta]', 'Automaattikohdistettu asiakkaan suoritus', $myyntisaamiset_kustp, $myyntisaamiset_kohde, $myyntisaamiset_projekti)";
 			$insres = mysql_query($query) or pupe_error($query);
 
 			if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {

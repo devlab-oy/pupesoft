@@ -106,7 +106,7 @@ echo "<th valign='top'>".t("Alkupvm")."</th>";
 echo "<td><select name='alkuvv'>";
 
 $sel = array();
-if (!isset($alkuvv) or $alkuvv == "") $alkuvv = date("Y") - 1;
+if (!isset($alkuvv) or $alkuvv == "") $alkuvv = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 $sel[$alkuvv] = "SELECTED";
 
 for ($i = date("Y"); $i >= date("Y")-4; $i--) {
@@ -116,7 +116,7 @@ for ($i = date("Y"); $i >= date("Y")-4; $i--) {
 echo "</select>";
 
 $sel = array();
-if (!isset($alkukk) or $alkukk == "") $alkukk = date("m");
+if (!isset($alkukk) or $alkukk == "") $alkukk = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 $sel[$alkukk] = "SELECTED";
 
 echo "<select name='alkukk'>";
@@ -147,7 +147,7 @@ echo "<tr>
 	<td><select name='loppuvv'>";
 
 $sel = array();
-if (!isset($loppuvv) or $loppuvv == "") $loppuvv = date("Y");
+if (!isset($loppuvv) or $loppuvv == "") $loppuvv = date("y", mktime(0, 0, 0, (date("m")+6), 0, date("Y")));
 $sel[$loppuvv] = "SELECTED";
 
 for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
@@ -157,7 +157,7 @@ for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
 echo "</select>";
 
 $sel = array();
-if (!isset($loppukk) or $loppukk == "") $loppukk = date("m");
+if (!isset($loppukk) or $loppukk == "") $loppukk = date("m", mktime(0, 0, 0, (date("m")+6), 0, date("Y")));
 $sel[$loppukk] = "SELECTED";
 
 echo "<select name='loppukk'>";
@@ -170,7 +170,7 @@ for ($i = 1; $i < 13; $i++) {
 echo "</select>";
 
 $sel = array();
-if (!isset($loppupp) or $loppupp == "") $loppupp = date("d", mktime(0, 0, 0, (date("m")+1), 0, date("Y")));
+if (!isset($loppupp) or $loppupp == "") $loppupp = date("d", mktime(0, 0, 0, (date("m")+6), 0, date("Y")));
 $sel[$loppupp] = "SELECTED";
 
 echo "<select name='loppupp'>";
@@ -268,7 +268,7 @@ if ($tee != '') {
 		echo "</tr>";
 	}
 
-	echo "<tr><th colspan='2'>".t("Yhteensä:")."</th><td align='right'>$yhteensa</td></tr>";
+	echo "<tr><th colspan='2'>".t("Yhteensä")."</th><th style='text-align:right;'>$yhteensa</th><th colspan='5'></th></tr>";
 	echo "</table><br>";
 
 	if ($alku > 0) {

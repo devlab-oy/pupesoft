@@ -145,7 +145,7 @@
 		$laskurow['maksukasumma_valuutassa'] = $laskurow['kasumma'];
 
 		// Mikä on oikea ostovelkatili
-		$query = "	SELECT tilino
+		$query = "	SELECT tilino, kustp, kohde, projekti
 					FROM tiliointi
 					WHERE ltunnus	= '$tunnus'
 					and yhtio 		= '$kukarow[yhtio]'
@@ -321,10 +321,13 @@
 		}
 
 		// Ostovelat
-		$query = "	INSERT into tiliointi set
+		$query = "	INSERT INTO tiliointi SET
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$laskurow[tunnus]',
 					tilino 				= '$ostovelkarow[tilino]',
+					kustp 				= '$ostovelkarow[kustp]',
+					kohde 				= '$ostovelkarow[kohde]',
+					projekti 			= '$ostovelkarow[projekti]',
 					tapvm 				= '$mav-$mak-$map',
 					summa 				= '$laskurow[vietysumma]',
 					summa_valuutassa	= '$laskurow[vietysumma_valuutassa]',

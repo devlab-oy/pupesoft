@@ -1982,7 +1982,7 @@
 				// jos yhtiöllä on laskuprintteri on määritelty tai halutaan jostain muusta syystä tulostella laskuja paperille
 				if ($yhtiorow['lasku_tulostin'] != 0 or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email) > 0) {
 
-					//Käsin valittu tulostin
+					// Käsin valittu tulostin
 					if ($valittu_tulostin != "") {
 						$yhtiorow['lasku_tulostin'] = $valittu_tulostin;
 					}
@@ -2189,23 +2189,26 @@
 							fclose($fh);
 
 							// jos tämä haluttiin suoraan asiakkaalle sähköpostiin
-							if (in_array($laskurow["laskunro"], $tulostettavat_email)) {
+							if ($yhtiorow['lasku_tulostin'] == -99 or in_array($laskurow["laskunro"], $tulostettavat_email)) {
 								// generoidaan laskun saatekirje, joka haetaan avainsanoista
 								include_once("inc/generoi_laskun_saate.inc");
 
 								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
+								
+								// Jos asiakkaalla on laskutussähköposti tai jos $yhtiorow['lasku_tulostin'] != -99 niin silloin lasku menee kukarow[email]:iin jos $komento == ""
+								if ($komento != "" or $yhtiorow['lasku_tulostin'] != -99) {
+									// otetaan tämä talteen jotta saadaan vientierittely
+									$vientierittelymail = $komento;
 
-								// otetaan tämä talteen jotta saadaan vientierittely
-								$vientierittelymail = $komento;
+									// lähetetään meili
+									$kutsu = t("lasku", $kieli)." $lasku";
+									$liite = $pdffilenimi;
 
-								// lähetetään meili
-								$kutsu = t("lasku", $kieli)." $lasku";
-								$liite = $pdffilenimi;
+									// lähetetään cc aina postittaja osoitteeseen
+									$sahkoposti_cc = $yhtiorow["postittaja_email"];
 
-								// lähetetään cc aina postittaja osoitteeseen
-								$sahkoposti_cc = $yhtiorow["postittaja_email"];
-
-								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
+									include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
+								}
 							}
 							else {
 								//haetaan varaston tiedot

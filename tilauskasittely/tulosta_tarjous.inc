@@ -128,7 +128,6 @@ if (!function_exists('alku_tarjous')) {
 		$pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["muutospvm"]), 								$page_tarjous, $norm);
 
 		$pdf_tarjous->draw_rectangle(758, 300, 737, 580, $page_tarjous, $rectparam);
-		$pdf_tarjous->draw_rectangle(758, 420, 737, 580, $page_tarjous, $rectparam);
 		$pdf_tarjous->draw_text(310, 750, t("Myyjä", $kieli), 												$page_tarjous, $pieni);
 
 		//etsitään myyjän nimi
@@ -140,22 +139,12 @@ if (!function_exists('alku_tarjous')) {
 
 		$pdf_tarjous->draw_text(310, 740, $myyrow["nimi"], 										$page_tarjous, $norm);
 
-
-		$pdf_tarjous->draw_text(430, 750, t("Tilauspvm", $kieli),							 	$page_tarjous, $pieni);
-		$pdf_tarjous->draw_text(430, 740, tv1dateconv($laskurow["luontiaika"], "pitka"), 		$page_tarjous, $norm);
-
-
-		$pdf_tarjous->draw_rectangle(737, 300, 716, 420, $page_tarjous, $rectparam);
-		$pdf_tarjous->draw_text(310, 729, t("Toimitustapa", $kieli), 		$page_tarjous, $pieni);
-		$pdf_tarjous->draw_text(310, 719, $laskurow["toimitustapa"],	 	$page_tarjous, $norm);
-
+		$pdf_tarjous->draw_rectangle(737, 300, 716, 580, $page_tarjous, $rectparam);
+		$pdf_tarjous->draw_text(310, 729, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), 		$page_tarjous, $pieni);
+		
 		//etsitään löytyykö rahtisopimusta
 		$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
-
-		$pdf_tarjous->draw_rectangle(737, 420, 716, 580, $page_tarjous, $rectparam);
-		$pdf_tarjous->draw_text(430, 729, t("Rahtisopimus", $kieli), 		$page_tarjous, $pieni);
-		$pdf_tarjous->draw_text(430, 719, $rahtirow["rahtisopimus"],	 	$page_tarjous, $norm);
-
+		$pdf_tarjous->draw_text(310, 719, $laskurow["toimitustapa"]." ".$rahtirow["rahtisopimus"],	 	$page_tarjous, $norm);
 
 		$pdf_tarjous->draw_rectangle(716, 300, 695, 580, $page_tarjous, $rectparam);
 		$pdf_tarjous->draw_text(310, 708, t("Toimitusehto", $kieli), 		$page_tarjous, $pieni);
@@ -811,10 +800,10 @@ if (!function_exists('loppu_tarjous')) {
 		}
 
 		if ($tots == 1) {
-			$pdf_tarjous->draw_text(30,  148,  t("Tarjoamme teille ylläolevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous, $boldi);
+			$pdf_tarjous->draw_text(30,  168,  t("Tarjoamme teille ylläolevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous, $boldi);
 
 			$oikpos = $pdf_tarjous->strlen(sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $boldi);
-			$pdf_tarjous->draw_text(575-$oikpos, 148, sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $page_tarjous, $boldi);
+			$pdf_tarjous->draw_text(575-$oikpos, 168, sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $page_tarjous, $boldi);
 
 			$veroteksti = "";
 
@@ -841,8 +830,11 @@ if (!function_exists('loppu_tarjous')) {
 				}
 			}
 
-			$pdf_tarjous->draw_text(30,  128, $veroteksti." ".t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30,  144, $veroteksti." ".t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous, $norm);
 
+			$pdf_tarjous->draw_text(30,  132, t("Tavarat ovat %s:n omaisuutta kunnes ne ovat kokonaisuudessaan maksettu.", $kieli, $yhtiorow["nimi"]), $page_tarjous, $norm);
+			
+			
 			if ($laskurow["olmapvm"] != "" and $laskurow["olmapvm"] != "0000-00-00") {
 				$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
 				$tkka = date("m",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
@@ -856,9 +848,9 @@ if (!function_exists('loppu_tarjous')) {
 
 			$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);
 
-			$pdf_tarjous->draw_text(30,  118,  t("Tarjous on voimassa", $kieli)." ".$voimassa." ". t("saakka", $kieli).". ".t("Maksuehtomme on")." ".trim($laskurow["maksuehto"]).".", $page_tarjous, $norm);
-			$pdf_tarjous->draw_text(30,  103, "Toivomme tarjouksemme kiinnostavan teitä ja johtavan tilaukseen.", $page_tarjous, $boldi);
-			$pdf_tarjous->draw_text(30,  88, "Kunnioittavasti,", $page_tarjous, $boldi);
+			$pdf_tarjous->draw_text(30,  120,  t("Tarjous on voimassa", $kieli)." ".$voimassa." ". t("saakka", $kieli).". ".t("Maksuehtomme on")." ".trim($laskurow["maksuehto"]).".", $page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30,  103, t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan tilaukseen")."!", $page_tarjous, $boldi);
+			$pdf_tarjous->draw_text(30,  88, t("Kunnioittavasti").",", $page_tarjous, $boldi);
 
 			$query  = "	SELECT *
 			            from kuka
@@ -1121,7 +1113,7 @@ if (!function_exists('tulosta_tarjous')) {
 			$pdf_tarjous->draw_text(330, 803, "$pp / $sivu", $page_tarjous[$pp], $norm);
 		}
 
-		if ($kala <= 180) {
+		if ($kala <= 170) {
 			loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous[$sivu], 0, $verolliset_verottomat_hinnat);
 
 			list($page_tarjous[$sivu], $kala) = uusi_sivu_tarjous($laskurow, $asiakasrow, $kieli, $pdf_tarjous);

@@ -34,7 +34,7 @@ if ($tee == 'LAHETA') {
 $kasittelykulu = str_replace(',','.', $kasittelykulu);
 
 if (($yhtiorow["kasittelykulu_tuotenumero"] != '') and (!is_numeric($kasittelykulu) or $kasittelykulu < 0)) {
-	echo "<font class='error'>".t("Virheellinen summa")."!</font><br>";
+	echo "<font class='error'>".t("Käsittelykulu summa on syötettävä")."!</font><br>";
 	$tee = "";
 }
 
@@ -45,6 +45,8 @@ if ($tee == "ALOITAKOROTUS") {
 		$korkosumma = str_replace(',','.',$korkosumma);
 		$korkolisa = " and korkosumma > $korkosumma ";
 	}
+	
+	$minimisumma = (float) $minimisumma;
 
 	$query = "	SELECT GROUP_CONCAT(distinct ovttunnus) konsrernyhtiot
 				FROM yhtio
@@ -82,7 +84,7 @@ if ($tee == "ALOITAKOROTUS") {
 						and lasku.olmapvm	= '0000-00-00'
 						$asiakaslisa
 						$konslisa
-						HAVING ika > $min_myoh and korkosumma2 != 0 and (maksuehto.jv is null or maksuehto.jv = '')
+						HAVING ika > $min_myoh and korkosumma2 > $minimisumma and (maksuehto.jv is null or maksuehto.jv = '')
 						ORDER BY asiakas.ytunnus) as laskut
 				JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus)
 				JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
@@ -153,8 +155,8 @@ if ($tee == "KOROTA")  {
 
 	echo "<table>";
 	echo "<tr>";
-	echo "<td><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t("Tee korkolasku")."'></td>";
-	echo "<td><input type='button' onclick='javascript:document.ohitaformi.submit();' value='".t("Ohita")."'></td>";
+	echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t("Tee korkolasku")."'></td>";
+	echo "<td class='back'><input type='button' onclick='javascript:document.ohitaformi.submit();' value='".t("Ohita")."'></td>";
 	echo "</tr>";
 	echo "</table><br>";
 
@@ -185,17 +187,17 @@ if ($tee == "KOROTA")  {
 		}
 		echo "</td><td>";
 		echo "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&laskunro=$lasku[laskunro]'>$lasku[laskunro]";
-		echo "</td><td>";
+		echo "</td><td align='right'>";
 		echo $lasku['summa'];
 		echo "</td><td>";
-		echo $lasku['erpcm'];
+		echo tv1dateconv($lasku['erpcm']);
 		echo "</td><td>";
-		echo $lasku['mapvm'];
+		echo tv1dateconv($lasku['mapvm']);
 		echo "</td><td>";
 		echo $lasku['ika'];
 		echo "</td><td>";
 		echo $lasku['viikorkopros'];
-		echo "</td><td>";
+		echo "</td><td align='right'>";
 		echo $lasku['korkosumma'];
 		echo "</td><td>";
 
@@ -212,9 +214,10 @@ if ($tee == "KOROTA")  {
 	}
 
 	echo "<th colspan='2'>".t("Yhteensä")."</th>";
-	echo "<th>$summmmma</th>";
-	echo "<td class='back' colspan='4'></td>";
-	echo "<th>$summmmma2</th></tr>";
+	echo "<th style='text-align:right;'>$summmmma</th>";
+	echo "<th colspan='4'></th>";
+	echo "<th style='text-align:right;'>$summmmma2</th>";
+	echo "<th></th></tr>";
 
 
 
@@ -240,7 +243,7 @@ if ($tee == "KOROTA")  {
 			<input type='hidden' name='kkl' value='$kkl'>
 			<input type='hidden' name='vvl' value='$vvl'>";
 
-	echo "<td><input type='submit' value='".t("Tee korkolasku")."'></td>";
+	echo "<td class='back'><input type='submit' value='".t("Tee korkolasku")."'></td>";
 	echo "</form>";
 
 	echo "<form  name='ohitaformi' action='$PHP_SELF' method='post'>";
@@ -260,7 +263,7 @@ if ($tee == "KOROTA")  {
 			<input type='hidden' name='ppl' value='$ppl'>
 			<input type='hidden' name='kkl' value='$kkl'>
 			<input type='hidden' name='vvl' value='$vvl'>";
-	echo "<td><input type='submit' value='".t("Ohita")."'></td>";
+	echo "<td class='back'><input type='submit' value='".t("Ohita")."'></td>";
 
 	echo "</tr></form>";
 	echo "</table>";
@@ -322,6 +325,9 @@ if ($tee == "") {
 
 	echo "<tr><th>".t("Minimi korkosumma").":</th>";
 	echo "<td colspan='3'><input type='text' name='korkosumma' value='$korkosumma'></td></tr>";
+
+	echo "<tr><th>".t("Minimi yksittäisen laskun korkosumma").":</th>";
+	echo "<td colspan='3'><input type='text' name='minimisumma' value='$minimisumma'></td></tr>";
 
 	if ($yhtiorow["kasittelykulu_tuotenumero"] != '') {
 

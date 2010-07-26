@@ -3,6 +3,8 @@
 	// Jos liite halutaan nimetä uudestaan annetaan uusi nimi $liitenimi muuttujassa
 	// Ja $kutsu jossa on tiedoston kuvaus
 	// $ctype muuttuja jossa on liitettävän tiedoston MIME tyyppi
+	// $content_body on viestin body
+	// $subject tai $content_subject on poikkeava subject
 
 	///*Kasataan käyttäjälle lähetettävä meili *///
 	//tässa on kaikki failit jotka tarvitaan
@@ -11,6 +13,10 @@
 
 	if (trim($subject) == '') {
 		$subject = "$yhtiorow[nimi] - $kutsu";
+	}
+
+	if (trim($content_subject) != "") {
+		$subject = $content_subject;
 	}
 
 	if (substr($komento,0,12) == 'asiakasemail') {
@@ -29,12 +35,14 @@
 	$header .= "MIME-Version: 1.0\n" ;
 	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-	if ($content_body != "" and $laskurow["chn"] == 666) {
-		if ($content_subject != "") {
-			$subject = $content_subject;
-		}
+	if ($content_body != "") {
 		$content .= "--$bound\n";
-		$content .= "Content-type: text/plain; charset=iso-8859-1\n";
+		if ($ctype == "html") {
+			$content .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
+		}
+		else {
+			$content .= "Content-type: text/plain; charset=iso-8859-1\n";
+		}
 		$content .= "Content-Transfer-Encoding: quoted-printable\n\n";
 		$content .= "$content_body\n\n";
 	}
@@ -52,12 +60,12 @@
 	if (!is_array($ctype)) {
 		$ctype = array(0 => $ctype);
 	}
-	
+
 	$liitelask = 0;
-	
+
 	foreach ($liite as $key => $value) {
 		$liitelask++;
-		
+
 		if ($ctype[$key] == "TEXT") {
 			$content .= "Content-Type: text/plain; name=\"".$kutsu[$key]."\"\n" ;
 			$content .= "Content-Transfer-Encoding: base64\n" ;
@@ -89,17 +97,17 @@
 
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\n" ;
-		
+
 		if ($liitelask == count($liite)) {
 			$content .= "--$bound--\n";
-		} 
+		}
 		else {
 			$content .= "--$bound\n";
-		}		
+		}
 	}
-	
+
 	$subject = mb_encode_mimeheader($subject, "ISO-8859-1", "Q");
-	
+
 	$boob = mail($kukarow["eposti"], $subject, $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";
@@ -111,4 +119,5 @@
 	if ($varaposti != '') {
 		$kukarow['eposti'] = $varaposti;
 	}
+
 ?>

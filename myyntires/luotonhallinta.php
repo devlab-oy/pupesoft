@@ -16,6 +16,15 @@
 	echo "}";
 	echo "</script>";
 
+	if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+		// k‰sitell‰‰n luottorajoja per ytunnus
+		$kasittely_periaate = "asiakas.ytunnus";
+	}
+	else {
+		// k‰sitell‰‰n luottorajoja per asiakas
+		$kasittely_periaate = "asiakas.tunnus";
+	}
+
 	if (isset($muutparametrit)) {
 		$muut = explode('#', $muutparametrit);
 		$pvm_alku = $muut[0];
@@ -36,7 +45,12 @@
 			$tee = "";
 		}
 		else {
-			$asiakasrajaus = " and asiakas.ytunnus = '$ytunnus' ";
+			if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+				$asiakasrajaus = " and asiakas.ytunnus = '$ytunnus' ";
+			}
+			else {
+				$asiakasrajaus = " and asiakas.tunnus = '$asiakasid' ";
+			}
 			$luottorajauksia = "Z";
 		}
 	}
@@ -66,6 +80,7 @@
 
 	echo "<form name='haku' action='luotonhallinta.php' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='1'>";
+	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 	echo "<table>";
 
@@ -146,7 +161,7 @@
 						myyntikielto = '$myyntikielto[$ytunnus]',
 						luottoraja = '$summa'
 						WHERE asiakas.yhtio = '$kukarow[yhtio]'
-						AND asiakas.ytunnus = '$ytunnus'";
+						AND $kasittely_periaate = '$ytunnus'";
 			$asiakasres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_affected_rows() != 0) {
@@ -162,21 +177,23 @@
 	if ($tee == "1") {
 
 		// haetaan kaikki yrityksen asiakkaat
-		$query  = "	SELECT ytunnus,
+		$query  = "	SELECT $kasittely_periaate ytunnus,
 					group_concat(distinct tunnus) liitostunnukset,
 					group_concat(distinct nimi ORDER BY nimi SEPARATOR '<br>') nimi,
 					group_concat(distinct toim_nimi ORDER BY nimi SEPARATOR '<br>') toim_nimi,
 					min(luottoraja) luottoraja,
-					min(myyntikielto) myyntikielto
+					min(myyntikielto) myyntikielto,
+					min(ytunnus) tunniste
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND laji != 'P'
 					$asiakasrajaus
-					GROUP BY ytunnus";
+					GROUP BY 1";
 		$asiakasres = mysql_query($query) or pupe_error($query);
 
 		echo "<form name='paivitys' action='luotonhallinta.php' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='2'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 		echo "<table>";
 
@@ -245,7 +262,7 @@
 			}
 
 			echo "<tr class='aktiivi'>";
-			echo "<td>$asiakasrow[ytunnus]</td>";
+			echo "<td>$asiakasrow[tunniste]</td>";
 			echo "<td>$asiakasrow[nimi]</td>";
 			echo "<td>$asiakasrow[toim_nimi]</td>";
 			echo "<td align='right'>$myyntirow[summa]</td>";

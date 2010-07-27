@@ -1017,4 +1017,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "luottoraja" and $yhtiorow["myyntitilaus_saatavat"] == "Y") {
+
+		$ulos = "<td>";
+
+		if (tarkista_oikeus("luotonhallinta.php")) {
+			$ulos .= "<a href='${palvelin2}myyntires/luotonhallinta.php?tee=1&ytunnus=$trow[ytunnus]&lopetus=$lopetus'>".t("Luotonhallinta")."</a>";
+		}
+		else {
+			$ulos .= t("Luottorajat ovat per ytunnus, käytä Luotonhallinta -sovellusta");
+		}
+		
+		$ulos .= "</td>";
+
+		$jatko = 0;
+	}
+
 ?>

@@ -628,12 +628,43 @@ if ($tee == 'P' or $tee == 'E') {
 	$tillopkk = $tillop[1]-1;
 	$tillopvv = $tillop[0];
 
+	$toimittajan_kaikki_laskunumerot = "";
+
+	$query = "	SELECT ifnull(group_concat(distinct laskunro), 0) laskut
+				FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND liitostunnus = '$trow[tunnus]'
+				AND tila IN ('H','M','P','Q','Y')
+				AND laskunro != 0
+				AND tapvm >= date_sub(now(), INTERVAL 12 MONTH)";
+	$tarkres = mysql_query($query) or pupe_error($query);
+	$tarkrow = mysql_fetch_array($tarkres);
+
+	if ($tarkrow["laskut"] != 0) {
+		$toimittajan_kaikki_laskunumerot = $tarkrow["laskut"];
+	}
+
 	echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 
-				function verify(){
+				function oc(a) {
+					var o = {};
+					for (var i = 0; i < a.length; i++) {
+						o[a[i]] = '';
+					}
+					return o;
+				}
+
+				function verify() {
 					var pp = document.lasku.tpp;
 					var kk = document.lasku.tpk;
 					var vv = document.lasku.tpv;
+					var laskunumerot = '$toimittajan_kaikki_laskunumerot'.split(',');
+					var laskunumero = document.lasku.toimittajan_laskunumero.value;
+
+					if (laskunumero in oc(laskunumerot)) {
+						var msg = '".t("Oletko varma, että haluat syöttää tämän laskun? Toimittajalle on perustettu lasku samalla numerolla viimeisen vuoden sisällä.")."';
+						return confirm(msg);
+					}
 
 					pp = Number(pp.value);
 					kk = Number(kk.value)-1;

@@ -1743,6 +1743,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "myyntitilaus_saatavat") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksella n‰ytet‰‰n saatavat per asiakas")."</option>";
+		$ulos .= "<option value = 'Y' $sel[Y]>".t("Myyntitilauksella n‰ytet‰‰n saatavat per ytunnus")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "myyntitilauksen_liitteet") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

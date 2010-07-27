@@ -2591,6 +2591,13 @@ if ($tee == '') {
 		$ylikolkyt = '';
 		$trattavirhe = '';
 
+		if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+			$grouppaus = "ytunnus";
+		}
+		else {
+			$grouppaus = "";
+		}
+
 		ob_start();
 		require ("raportit/saatanat.php");
 		$retval = ob_get_contents();

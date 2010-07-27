@@ -74,7 +74,7 @@
 							and tilikausi_alku <= now()
 							and tilikausi_loppu >= now()";
 				$result = mysql_query($query) or pupe_error($query);
-				$tilikausirow = mysql_fetch_array($result);
+				$tilikausirow = mysql_fetch_assoc($result);
 
 				$plvv = substr($tilikausirow['tilikausi_alku'], 0, 4);
 				$plvk = substr($tilikausirow['tilikausi_alku'], 5, 2);
@@ -231,7 +231,7 @@
 
 			echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
 
-			while ($vrow=mysql_fetch_array($vresult)) {
+			while ($vrow=mysql_fetch_assoc($vresult)) {
 				$sel="";
 				if ($trow[$i] == $vrow["tunnus"]) {
 					$sel = "selected";
@@ -249,7 +249,7 @@
 
 			$query = "SELECT max(length(taso)) taso from taso where yhtio = '$kukarow[yhtio]'";
 			$vresult = mysql_query($query) or pupe_error($query);
-			$vrow = mysql_fetch_array($vresult);
+			$vrow = mysql_fetch_assoc($vresult);
 
 			echo "<option value='TILI'>".t("Tili taso")."</option>\n";
 
@@ -315,6 +315,24 @@
 					<option value='A'  $konsel[A]>".t("Näytetään konserniasiakkaiden tiliöinnit")."</option>
 					</select>
 					</td></tr>";
+
+			echo "<tr><th valign='top'>".t("Sarakkeet")."</th>";
+
+			$bchek = array();
+
+			if (is_array($sarakebox)) {
+				foreach ($sarakebox as $sara => $sarav) {
+					if ($sara != "") $bchek[$sara] = "CHECKED";
+				}
+			}
+
+			echo "<td>";
+			echo "&nbsp;<input type='checkbox' name='sarakebox[KUSTP]' $bchek[KUSTP]> ".t("Kustannuspaikoittain");
+			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[KOHDE]' $bchek[KOHDE]> ".t("Kohteittain");
+			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[PROJEKTI]' $bchek[PROJEKTI]> ".t("Projekteittain");
+			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASOSASTO]' $bchek[ASOSASTO]> ".t("Asiakasosastoittain");
+			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASRYHMA]' $bchek[ASRYHMA]> ".t("Asiakasryhmittäin");
+			echo "</td></tr>";
 
 			echo "</table><br>";
 
@@ -383,7 +401,7 @@
 							FROM tilikaudet
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
 				$result = mysql_query($query) or pupe_error($query);
-				$tkrow = mysql_fetch_array($result);
+				$tkrow = mysql_fetch_assoc($result);
 
 				$plvv = substr($tkrow['tilikausi_alku'], 0, 4);
 				$plvk = substr($tkrow['tilikausi_alku'], 5, 2);
@@ -408,17 +426,124 @@
 			$laskujoini    = "";
 			$asiakasjoini  = "";
 			$konsernijoini = "";
+			$tilijoini	   = "";
 			$konsernilisa  = "";
+			$konsernilisa  = "";
+			$groupsarake   = "";
+			
+			$asiakasosastot  = "";
+			$asiakasryhmat   = "";
+			$kustannuspaikat = "";
+			$kohteet 		 = "";
+			$projektit 		 = "";
 
-			if ((isset($lisa) and strpos($lisa, "asiakas.") !== FALSE) or (isset($konsernirajaus) and $konsernirajaus != "")) {
-				$laskujoini = " JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus ";
+			// Ajetaan rapotti kustannuspaikoittain
+			if (isset($sarakebox["KUSTP"]) and $sarakebox["KUSTP"] != "") {
+				// Kun tehdään monta saraketta niin ei joinata budjettiin
+				$vertailubu = "";
+				
+				// Näitä tarvitaan kun piirretään headerit
+				$query = "	SELECT tunnus, concat_ws(' - ', if(koodi='', NULL, koodi), nimi) nimi
+							FROM kustannuspaikka
+							WHERE yhtio = '$kukarow[yhtio]'
+							and kaytossa != 'E'
+							and tyyppi = 'K'
+							ORDER BY nimi";
+				$vresult = mysql_query($query) or pupe_error($query);
 
-				// Jos tehdään asiakas tai toimittajajoini niin ei vertailla budjettiin koska siinä ei olisi mitään järkeä
+				while ($vrow = mysql_fetch_assoc($vresult)) {
+					$kustannuspaikat[$vrow["tunnus"]] = $vrow["nimi"];
+				}
+
+				$groupsarake .= "'kustannuspaikat::',tiliointi.kustp,'#!#',";
+			}
+
+			// Ajetaan rapotti kohteittain
+			if (isset($sarakebox["KOHDE"]) and $sarakebox["KOHDE"] != "") {
+				// Kun tehdään monta saraketta niin ei joinata budjettiin
+				$vertailubu = "";
+					
+				// Näitä tarvitaan kun piirretään headerit
+				$query = "	SELECT tunnus, concat_ws(' - ', if(koodi='', NULL, koodi), nimi) nimi
+							FROM kustannuspaikka
+							WHERE yhtio = '$kukarow[yhtio]'
+							and kaytossa != 'E'
+							and tyyppi = 'O'
+							ORDER BY nimi";
+				$vresult = mysql_query($query) or pupe_error($query);
+
+				while ($vrow = mysql_fetch_assoc($vresult)) {
+					$kohteet[$vrow["tunnus"]] = $vrow["nimi"];
+				}
+
+				$groupsarake .= "'kohteet::',tiliointi.kohde,'#!#',";
+			}
+
+			// Ajetaan rapotti projekteittain
+			if (isset($sarakebox["PROJEKTI"]) and $sarakebox["PROJEKTI"] != "") {
+				// Kun tehdään monta saraketta niin ei joinata budjettiin
+				$vertailubu = "";
+					
+				// Näitä tarvitaan kun piirretään headerit
+				$query = "	SELECT tunnus, concat_ws(' - ', if(koodi='', NULL, koodi), nimi) nimi
+							FROM kustannuspaikka
+							WHERE yhtio = '$kukarow[yhtio]'
+							and kaytossa != 'E'
+							and tyyppi = 'P'
+							ORDER BY nimi";
+				$vresult = mysql_query($query) or pupe_error($query);
+
+				while ($vrow = mysql_fetch_assoc($vresult)) {
+					$projektit[$vrow["tunnus"]] = $vrow["nimi"];
+				}
+
+				$groupsarake .= "'projektit::',tiliointi.projekti,'#!#',";
+			}
+
+			// Tarvitaan lasku/asiakasjoini jos rajataan tai ajetaan raportti asiakasosatoittain tai asiakasryhmittäin
+			if ((isset($lisa) and strpos($lisa, "asiakas.") !== FALSE) or (isset($sarakebox["ASOSASTO"]) and $sarakebox["ASOSASTO"] != "") or (isset($sarakebox["ASRYHMA"]) and $sarakebox["ASRYHMA"] != "")) {
+				// Kun tehdään asiakas tai toimittajajoini niin ei vertailla budjettiin koska siinä ei olisi mitään järkeä
 				$vertailubu = "";
 
-				if (strpos($lisa, "asiakas.") !== FALSE) {
-					$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus ";
+				$laskujoini = " JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus ";
+				$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus ";
+
+				if (isset($sarakebox["ASOSASTO"]) and $sarakebox["ASOSASTO"] != "") {
+					// Näitä tarvitaan kun piirretään headerit
+					$vresult = t_avainsana("ASIAKASOSASTO");
+
+					while ($vrow = mysql_fetch_assoc($vresult)) {
+						$asiakasosastot[$vrow["selite"]] = $vrow["selitetark"];
+					}
+
+					$groupsarake .= "'asiakasosastot::',asiakas.osasto,'#!#',";
 				}
+
+				if (isset($sarakebox["ASRYHMA"]) and $sarakebox["ASRYHMA"] != "") {
+					// Näitä tarvitaan kun piirretään headerit
+					$vresult = t_avainsana("ASIAKASRYHMA");
+
+					while ($vrow = mysql_fetch_assoc($vresult)) {
+						$asiakasryhmat[$vrow["selite"]] = $vrow["selitetark"];
+					}
+
+					$groupsarake .= "'asiakasryhmat::',asiakas.ryhma,'#!#',";
+				}
+			}
+
+			if ($groupsarake != "") {
+				$groupsarake = "concat(".substr($groupsarake, 0, -7).")";
+			}
+			else {
+				$groupsarake = "tiliointi.yhtio";
+			}
+
+			// Tarvitaan lasku/asiakasjoini/toimittajajoini jos rajataan tai ajetaan vain konserniasiakkaista tai konsernitoimittajista
+			if (isset($konsernirajaus) and $konsernirajaus != "") {
+				// Kun tehdään asiakas tai toimittajajoini niin ei vertailla budjettiin koska siinä ei olisi mitään järkeä
+				$vertailubu = "";
+
+				$laskujoini = " JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus ";
 
 				if ($konsernirajaus == "AT") {
 					$konsernijoini  = "	LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != ''
@@ -434,11 +559,12 @@
 					$konsernilisa = " and ka.tunnus is not null ";
 				}
 			}
+		}
 
-			if (isset($lisa) and $lisa != "" and $vertailubu != "") {
-				// Rajataan budjettia
-				$bulisa = str_replace("tiliointi.","budjetti.", $lisa);
-			}
+		// Budjettitauluun sopiva rajaus
+		if (isset($lisa) and $lisa != "" and $vertailubu != "") {
+			// Rajataan budjettia
+			$bulisa = str_replace("tiliointi.","budjetti.", $lisa);
 		}
 
 		if ($tltee == "aja") {
@@ -553,7 +679,56 @@
 					$kaudet[] = "budj ".$vka." - ".$vkl;
 				}
 			}
+			
+			if ($vertailubu != "") {
+				$tilijoini = "JOIN tili ON tiliointi.yhtio=tili.yhtio and tiliointi.tilino=tili.tilino";
+			}
 
+			// Haetaan kaikki tiliöinnit
+			$query = "	SELECT tiliointi.tilino, $groupsarake groupsarake, $alkuquery1
+		 	            FROM tiliointi USE INDEX (yhtio_tilino_tapvm)
+			            $laskujoini
+			            $asiakasjoini
+			            $konsernijoini
+						$tilijoini
+			            WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+			            and tiliointi.korjattu = ''
+			            and tiliointi.tapvm >= '$totalalku'
+			            and tiliointi.tapvm <= '$totalloppu'
+			            $konsernilisa
+			            $lisa
+			            GROUP BY tiliointi.tilino, groupsarake
+						ORDER BY tiliointi.tilino, groupsarake";
+			$tilires = mysql_query($query) or pupe_error($query);
+
+			$tilioinnit = array();
+			$sarakkeet  = array();
+
+			while ($tilirow = mysql_fetch_assoc($tilires)) {
+				// Otetaan kaikki distinct sarakkeet
+				$sarakkeet[(string) $tilirow["groupsarake"]] = (string) $tilirow["groupsarake"];
+
+				$tilioinnit[(string) $tilirow["tilino"]][(string) $tilirow["groupsarake"]] = $tilirow;
+			}
+
+			// Haetaan kaikki budjetit
+			$query = "	SELECT budjetti.taso, budjetti.yhtio groupsarake, $alkuquery2
+					 	FROM budjetti
+						JOIN budjetti tili ON (tili.yhtio = budjetti.yhtio and tili.tunnus = budjetti.tunnus)
+						LEFT JOIN tiliointi USE INDEX (PRIMARY) ON (tiliointi.tunnus = 0)
+						WHERE budjetti.yhtio = '$kukarow[yhtio]'						
+						$bulisa
+						GROUP BY budjetti.taso, groupsarake
+						ORDER BY budjetti.taso, groupsarake";
+			$tilires = mysql_query($query) or pupe_error($query);
+
+			$budjetit = array();
+
+			while ($tilirow = mysql_fetch_assoc($tilires)) {
+				$budjetit[(string) $tilirow["taso"]][(string) $tilirow["groupsarake"]] = $tilirow;
+			}
+
+			// Haetaan kaikki tasot ja rakennetaan tuloslaskelma-array
 			$query = "	SELECT *
 						FROM taso
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -563,7 +738,7 @@
 						ORDER BY taso";
 			$tasores = mysql_query($query) or pupe_error($query);
 
-			while ($tasorow = mysql_fetch_array($tasores)) {
+			while ($tasorow = mysql_fetch_assoc($tasores)) {
 
 				// millä tasolla ollaan (1,2,3,4,5,6)
 				$tasoluku = strlen($tasorow["taso"]);
@@ -582,53 +757,44 @@
 					$taso[$i] = substr($tasorow["taso"], 0, $i+1);
 				}
 
-				$query = "	SELECT tili.tilino, tili.nimi, $alkuquery1
+				$query = "	SELECT tilino, nimi
 						 	FROM tili
-							LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppu')
-							$laskujoini
-							$asiakasjoini
-							$konsernijoini
-							WHERE tili.yhtio 		 = '$kukarow[yhtio]'
-							and tili.$tilikarttataso = BINARY '$tasorow[taso]'
-							$konsernilisa
-							$lisa
-							GROUP BY tili.tilino, tili.nimi";
+							WHERE yhtio = '$kukarow[yhtio]'
+							and $tilikarttataso = BINARY '$tasorow[taso]'";
 				$tilires = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($tilires) == 0) {
-					// Ei tiliöintejä, mutta budjetti voi olla
-					$query = "	SELECT $alkuquery2
-							 	FROM budjetti
-								JOIN budjetti tili ON (tili.yhtio = budjetti.yhtio and tili.tunnus = budjetti.tunnus)
-								LEFT JOIN tiliointi USE INDEX (PRIMARY) ON (tiliointi.tunnus = 0)
-								WHERE budjetti.yhtio  = '$kukarow[yhtio]'
-								and budjetti.taso 	  = BINARY '$tasorow[taso]'
-								$bulisa
-								group by budjetti.taso";
-					$tilires = mysql_query($query) or pupe_error($query);
-				}
+				while ($tilirow = mysql_fetch_assoc($tilires)) {
 
-				while ($tilirow = mysql_fetch_array ($tilires)) {
-					// summataan kausien saldot
-					foreach ($kaudet as $kausi) {
-						if (substr($kausi,0,4) == "budj") {
-							$i = $tasoluku - 1;
+					$tilirow_summat = array();
 
-							// Budjetti per kausi/taso (huom = (ei +=) koska muuten bujetti kertautuu tilien määrän suhteen)
-							$summa[$kausi][$taso[$i]] = $tilirow[$kausi];
-						}
-						else {
-							// Summataan kaikkia pienempiä summaustasoja
-							for ($i = $tasoluku - 1; $i >= 0; $i--) {
-								// Summat per kausi/taso
-								$summa[$kausi][$taso[$i]] += $tilirow[$kausi];
+					if (isset($tilioinnit[(string) $tilirow["tilino"]])) {
+						$tilirow_summat = $tilioinnit[(string) $tilirow["tilino"]];
+					}
+					elseif (isset($budjetit[(string) $tasorow["taso"]])) {												
+						$tilirow_summat = $budjetit[(string) $tasorow["taso"]];
+					}
+
+					foreach ($tilirow_summat as $sarake => $tilirow_sum) {
+						// summataan kausien saldot
+						foreach ($kaudet as $kausi) {
+							if (substr($kausi,0,4) == "budj") {
+								$i = $tasoluku - 1;
+
+								$summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
 							}
+							else {
+								// Summataan kaikkia pienempiä summaustasoja
+								for ($i = $tasoluku - 1; $i >= 0; $i--) {
+									// Summat per kausi/taso
+									$summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
+								}
 
-							// Summat per taso/tili/kausi
-							$i = $tasoluku - 1;
-							$summakey = $tilirow["tilino"]."###".$tilirow["nimi"];
+								// Summat per taso/tili/kausi
+								$i = $tasoluku - 1;
+								$summakey = $tilirow["tilino"]."###".$tilirow["nimi"];
 
-							$tilisumma[$taso[$i]][$summakey][$kausi] += $tilirow[$kausi];
+								$tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$kausi];
+							}
 						}
 					}
 				}
@@ -668,7 +834,7 @@
 				$p["height"]--;
 				$b["height"]--;
 				$saraklev 			= 49;
-				$yhteensasaraklev 	= 63;
+				$yhteensasaraklev 	= 66;
 				$vaslev 			= 150;
 				$rivikork 			= 13;
 			}
@@ -679,11 +845,12 @@
 				$rivikork 			= 15;
 			}
 
-			if(!function_exists("alku")) {
+			if (!function_exists("alku")) {
 				function alku () {
-					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev;
-
-					if(count($kaudet) > 5 and $kaikkikaudet != "") {
+					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev, $sarakkeet, 
+					$asiakasosastot, $asiakasryhmat, $kustannuspaikat, $kohteet, $projektit;
+					
+					if ((count($kaudet) > 5 and $kaikkikaudet != "") or count($sarakkeet) > 2) {
 						$firstpage = $pdf->new_page("842x595");
 						$bottom = "535";
 					}
@@ -732,17 +899,32 @@
 					$left = $vaslev;
 
 					for ($i = $alkukausi; $i < count($kaudet); $i++) {
-						$oikpos = $pdf->strlen($kaudet[$i], $b);
-						if($i+1 == count($kaudet) and $eiyhteensa == "") {
-							$lev = $yhteensasaraklev;
-						}
-						else {
-							$lev = $saraklev;
-						}
+						foreach ($sarakkeet as $sarake) {
+							list($muuarray, $arvo) = explode("::", $sarake);
+							$sarakenimi = ${$muuarray}[$arvo];
 
-						$pdf->draw_text($left-$oikpos+$lev,  $bottom, $kaudet[$i], $firstpage, $b);
+							$oikpos1 = $pdf->strlen($kaudet[$i], $b);
+							$oikpos2 = $pdf->strlen($sarakenimi, $b);
+							
+							if ($oikpos2 > $oikpos1) {
+								$oikpos = $oikpos2;
+							}
+							else {
+								$oikpos = $oikpos1;
+							}
+							
+							if ($i+1 == count($kaudet) and $eiyhteensa == "") {
+								$lev = $yhteensasaraklev;
+							}
+							else {
+								$lev = $saraklev;
+							}
 
-						$left += $saraklev;
+							$pdf->draw_text($left-$oikpos+$lev,  $bottom+8, $sarakenimi, $firstpage, $b);
+							$pdf->draw_text($left-$oikpos+$lev,  $bottom, $kaudet[$i], $firstpage, $b);
+
+							$left += $saraklev;
+						}
 					}
 
 					$bottom -= $rivikork;
@@ -778,8 +960,14 @@
 				echo "<td class='back' colspan='1'></td>";
 			}
 
+
 			for ($i = $alkukausi; $i < count($kaudet); $i++) {
-				echo "<td class='tumma' align='right' valign='bottom'>$kaudet[$i]</td>";
+				foreach ($sarakkeet as $sarake) {
+					list($muuarray, $arvo) = explode("::", $sarake);
+					$sarakenimi = ${$muuarray}[$arvo];
+
+					echo "<td class='tumma' align='right' valign='bottom'>$sarakenimi<br>$kaudet[$i]</td>";
+				}
 			}
 			echo "</tr>\n";
 
@@ -821,11 +1009,16 @@
 							$tulos 		= 0;
 
 							for ($i = $alkukausi; $i < count($kaudet); $i++) {
-								$apu = sprintf($muoto, $tilisumkau[$kaudet[$i]] * $luku_kerroin / $tarkkuus);
-								if ($apu == 0) $apu = "";
+								foreach ($sarakkeet as $sarake) {
+									$apu = sprintf($muoto, $tilisumkau[$kaudet[$i]][(string) $sarake] * $luku_kerroin / $tarkkuus);
+									if ($apu == 0) $apu = "";
 
-								$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
-								if ($tilisumkau[$kaudet[$i]] != 0) $tulos++;
+									$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
+
+									if ($tilisumkau[$kaudet[$i]][(string) $sarake] != 0) {
+										$tulos++;
+									}
+								}
 							}
 
 							if ($tulos > 0 or $toim == "TASOMUUTOS") {
@@ -857,33 +1050,34 @@
 					$tulos = 0;
 
 					for ($i = $alkukausi; $i < count($kaudet); $i++) {
+						foreach ($sarakkeet as $sarake) {
+							$query = "	SELECT summattava_taso
+										FROM taso
+										WHERE yhtio 		 = '$kukarow[yhtio]'
+										and taso 			 = BINARY '$key'
+										and summattava_taso != ''
+										and tyyppi 			 = '$kirjain'";
+							$summares = mysql_query($query) or pupe_error($query);
 
-						$query = "	SELECT summattava_taso
-									FROM taso
-									WHERE yhtio 		 = '$kukarow[yhtio]'
-									and taso 			 = BINARY '$key'
-									and summattava_taso != ''
-									and tyyppi 			 = '$kirjain'";
-						$summares = mysql_query($query) or pupe_error($query);
-
-						// Budjettia ei summata
-						if ($summarow = mysql_fetch_array ($summares) and substr($kaudet[$i],0,4) != "budj") {
-							foreach(explode(",", $summarow["summattava_taso"]) as $staso) {
-								$summa[$kaudet[$i]][$key] = $summa[$kaudet[$i]][$key] + $summa[$kaudet[$i]][$staso];
+							// Budjettia ei summata
+							if ($summarow = mysql_fetch_assoc($summares) and substr($kaudet[$i],0,4) != "budj") {
+								foreach(explode(",", $summarow["summattava_taso"]) as $staso) {
+									$summa[$kaudet[$i]][$key][(string) $sarake] = $summa[$kaudet[$i]][$key][(string) $sarake] + $summa[$kaudet[$i]][$staso][(string) $sarake];
+								}
 							}
-						}
 
-						// formatoidaan luku toivottuun muotoon
-						$apu = sprintf($muoto, $summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus);
+							// formatoidaan luku toivottuun muotoon
+							$apu = sprintf($muoto, $summa[$kaudet[$i]][$key][(string) $sarake] * $luku_kerroin / $tarkkuus);
 
-						if ($apu == 0) {
-							$apu = ""; // nollat spaseiks
-						}
-						else {
-							$tulos++; // summaillaan tätä jos meillä oli rivillä arvo niin osataan tulostaa
-						}
+							if ($apu == 0) {
+								$apu = ""; // nollat spaseiks
+							}
+							else {
+								$tulos++; // summaillaan tätä jos meillä oli rivillä arvo niin osataan tulostaa
+							}
 
-						$rivi .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
+							$rivi .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
+						}
 					}
 
 					if ($toim == "TASOMUUTOS" and $summattavattasot[$key_c] != "") {
@@ -907,17 +1101,19 @@
 						$left = $vaslev;
 
 						for ($i = $alkukausi; $i < count($kaudet); $i++) {
-							$oikpos = $pdf->strlen(number_format($summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $p);
+							foreach ($sarakkeet as $sarake) {
+								$oikpos = $pdf->strlen(number_format($summa[$kaudet[$i]][$key][(string) $sarake] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $p);
 
-							if($i+1 == count($kaudet) and $eiyhteensa == "") {
-								$lev = $yhteensasaraklev;
-							}
-							else {
-								$lev = $saraklev;
-							}
+								if ($i+1 == count($kaudet) and $eiyhteensa == "") {
+									$lev = $yhteensasaraklev;
+								}
+								else {
+									$lev = $saraklev;
+								}
 
-							$pdf->draw_text($left-$oikpos+$lev, $bottom, number_format($summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $firstpage, $p);
-							$left += $saraklev;
+								$pdf->draw_text($left-$oikpos+$lev, $bottom, number_format($summa[$kaudet[$i]][$key][(string) $sarake] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $firstpage, $p);
+								$left += $saraklev;
+							}
 						}
 
 						$bottom -= $rivikork;

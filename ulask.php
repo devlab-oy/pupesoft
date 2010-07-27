@@ -661,9 +661,11 @@ if ($tee == 'P' or $tee == 'E') {
 					var laskunumerot = '$toimittajan_kaikki_laskunumerot'.split(',');
 					var laskunumero = document.lasku.toimittajan_laskunumero.value;
 
-					if (laskunumero in oc(laskunumerot)) {
-						var msg = '".t("Oletko varma, että haluat syöttää tämän laskun? Toimittajalle on perustettu lasku samalla numerolla viimeisen vuoden sisällä.")."';
-						return confirm(msg);
+					if (Number(laskunumero) > 0) {
+						if (laskunumero in oc(laskunumerot)) {
+							var msg = '".t("Oletko varma, että haluat syöttää tämän laskun? Toimittajalle on perustettu lasku samalla numerolla viimeisen vuoden sisällä.")."';
+							return confirm(msg);
+						}
 					}
 
 					pp = Number(pp.value);

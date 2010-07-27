@@ -141,7 +141,10 @@
 					$limlis = " LIMIT $alku, 50 ";
 				}
 
-				$query = "	SELECT tapvm, erpcm, summa, valkoodi, vienti, concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus, if(laskunro = 0, '', laskunro) laskunro, round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summaeur
+				$query = "	SELECT tapvm, erpcm, summa, valkoodi, vienti,
+							concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus,
+							if(laskunro = 0, '', laskunro) laskunro,
+							round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) kotisumma
 						  	FROM lasku
 						  	WHERE yhtio = '$kukarow[yhtio]'
 						  	$toimiliilisa
@@ -167,7 +170,7 @@
 				echo "<th>".t("Tila/Vienti")."</th>";
 				echo "</tr>";
 
-				$yhteensa = 0;
+				$yhteensa = array();
 
 				while ($trow = mysql_fetch_array ($result)) {
 					echo "<tr class='aktiivi'>";
@@ -210,12 +213,24 @@
 					require "inc/laskutyyppi.inc";
 					echo "<td valign='top'>".t($laskutyyppi)."<br>".ostolaskun_vienti($trow["vienti"])."</td>";
 
-					$yhteensa += $trow["summaeur"];
+					$yhteensa["ZZ_".$yhtiorow["valkoodi"]] += $trow["kotisumma"];
+
+					if (strtoupper($trow["valkoodi"]) != $yhtiorow["valkoodi"]) {
+						$yhteensa[$trow["valkoodi"]] += $trow["summa"];
+					}
 
 					echo "</tr>";
 				}
 
-				echo "<tr><th>".t("Yhteensä:")."</th><th align='right'>$yhteensa</th><th>$yhtiorow[valkoodi]</th><th colspan='5'></th></tr>";
+				ksort($yhteensa);
+
+				foreach ($yhteensa as $val => $sum) {
+
+					if ($val == "ZZ_".$yhtiorow["valkoodi"]) $val = $yhtiorow["valkoodi"];
+
+					echo "<tr><th>".t("Yhteensä:")."</th><th align='right'>".sprintf("%.2f", $sum)."</th><th>$val</th><th colspan='5'></th></tr>";
+				}
+
 				echo "</table><br>";
 
 				if ($limit != "NO") {
@@ -234,7 +249,6 @@
 					}
 
 				}
-
 
 				require "footer.inc";
 				exit;

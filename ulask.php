@@ -509,7 +509,7 @@ if ($tee == 'I') {
 			$ulos			= ""; // Mahdollinen popup tyhjennetaan
 			$tositetila 	= "U";
 			$tositeliit		= $trow["tunnus"];
-			
+
 			require "inc/tarkistatiliointi.inc";
 
  			// Sieltä kenties tuli päivitys tilinumeroon
@@ -678,12 +678,29 @@ if ($tee == 'P' or $tee == 'E') {
 					var dateTallaHet = new Date();
 					var ero = (dateTallaHet.getTime() - dateSyotetty.getTime()) / 86400000;
 
+					var era_vv = Number(document.lasku.erv.value);
+					var era_kk = Number(document.lasku.erk.value);
+					var era_pp = Number(document.lasku.erp.value);
+
+					if (era_vv < 1000 && era_vv > 0) {
+						era_vv = era_vv+2000;
+					}
+
+					if (era_vv > 0 && era_kk > 0 && era_pp > 0) {
+						var erapvm = new Date(era_vv, era_kk, era_pp);
+						var erapvm_ero = (dateTallaHet.getTime() - erapvm.getTime()) / 86400000;
+
+						if (erapvm_ero > 365 || erapvm_ero < -365) {
+							var msg = '".t("Oletko varma, että haluat syöttää eräpäivän yli vuoden menneisyyteen/tulevaisuuteen?")."';
+							return confirm(msg);
+						}
+					}
+
 					var tilalkpp = $tilalkpp;
 					var tilalkkk = $tilalkkk;
 					var tilalkvv = $tilalkvv;
 					var dateTiliAlku = new Date(tilalkvv,tilalkkk,tilalkpp);
 					dateTiliAlku = dateTiliAlku.getTime();
-
 
 					var tilloppp = $tilloppp;
 					var tillopkk = $tillopkk;

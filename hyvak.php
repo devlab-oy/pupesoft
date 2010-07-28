@@ -740,18 +740,10 @@
 
 	if ($tee == 'U') {
 		// Lisätään tiliöintirivi
-
-		$summa = str_replace ( ",", ".", $summa);
-		$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
-
-		require ("inc/tarkistatiliointi.inc");
-
-		$tiliulos = $ulos;
-
 		$query = "	SELECT *
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and
-					tunnus = '$tunnus'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -762,6 +754,15 @@
 		}
 
 		$laskurow = mysql_fetch_array($result);
+
+		$summa 		= str_replace ( ",", ".", $summa);
+		$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
+		$tositetila = $laskurow["tila"];
+		$tositeliit = $laskurow["liitostunnus"];
+
+		require ("inc/tarkistatiliointi.inc");
+
+		$tiliulos = $ulos;
 
  		// Tarvitaan kenties tositenro
 		if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {

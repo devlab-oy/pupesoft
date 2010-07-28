@@ -317,7 +317,7 @@
 		}
 
 		if ($iltasiivo != "") {
-			if ($iltasiivo_email == 1) {
+			if (isset($iltasiivo_email) and $iltasiivo_email == 1) {
 				$header	 = "From: <$yhtiorow[postittaja_email]>\n";
 				$header .= "MIME-Version: 1.0\n" ;
 				$subject = "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";

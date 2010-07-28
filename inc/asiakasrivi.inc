@@ -178,7 +178,7 @@
 
 	if (mysql_field_name($result, $i) == "konserniyhtio") {
 
-		if($yhtiorow["konserni"] != "") {
+		if ($yhtiorow["konserni"] != "" or $trow[$i] != '') {
 			$sela = $selb = '';
 			if ($trow[$i] != '') {
 				$selb = "SELECTED";
@@ -189,7 +189,7 @@
 
 			$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 			$ulos .= "<option value = '' $sela>".t("Ei")."</option>";
-		$ulos .= "<option value = 'o' $selb>".t("Kyllä")."</option>";
+			$ulos .= "<option value = 'o' $selb>".t("Kyllä")."</option>";
 			$ulos .= "</select></td>";
 			$jatko = 0;
 		}
@@ -1027,7 +1027,7 @@
 		else {
 			$ulos .= t("Luottorajat ovat per ytunnus, käytä Luotonhallinta -sovellusta");
 		}
-		
+
 		$ulos .= "</td>";
 
 		$jatko = 0;

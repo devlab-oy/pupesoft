@@ -390,9 +390,9 @@
 				$kuittivirhe .= "<font class='error'>".t("Kuitille on annettava nimi tai asiakas tai toimittaja")."</font><br>\n";
 			}
 		}
-		
+
 		$heittovirhe = 0;
-		
+
 		if (abs($totsumma) >= 0.01 and $heittook == '') {
 			$heittovirhe = 1;
 			$gok = 1;
@@ -661,7 +661,7 @@
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>$toimasrow[ytunnus] $toimasrow[nimi]\n";
 		}
 		else {
-			echo "<input type = 'text' name = 'toimittaja_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'></td></tr>";
+			echo "<input type = 'text' name = 'toimittaja_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'>";
 		}
 
 		echo "</td>\n";
@@ -784,7 +784,7 @@
 
 		echo "<tr>\n";
 		echo "<th>".t("Tiliöintien selitteet")."</th>\n";
-		echo "<td colspan='3'><input type='text' name='selite' value='$selite' maxlength='150' size='60' onchange='javascript:selite();' onkeyup='javascript:selitejs();'></td>\n";
+		echo "<td colspan='3'><input type='text' name='selite' value='$selite' maxlength='150' size='60' onchange='javascript:selitejs();' onkeyup='javascript:selitejs();'></td>\n";
 		echo "</tr>\n";
 		echo "</table>\n";
 

@@ -77,11 +77,12 @@
 
 		// poistetaan kaikki JT-otsikot jolla ei ole enää rivejä ja extranet tilaukset joilla ei ole rivejä ja tietenkin myös ennakkootsikot joilla ei ole rivejä.
 		$query = "	SELECT tilausrivi.tunnus, lasku.tunnus laskutunnus, lasku.tila, lasku.tunnusnippu
-					from lasku
-					left join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-					where lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila in ('N','E')
-					and tilausrivi.tunnus is null";
+					FROM lasku
+					LEFT JOIN tilausrivi on( tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND lasku.tila in ('N','E','L')
+					AND lasku.alatila != 'X'
+					AND tilausrivi.tunnus is null";
 		$result = mysql_query($query) or die($query);
 
 		while ($row = mysql_fetch_array($result)) {

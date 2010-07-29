@@ -107,12 +107,12 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						FROM tiliointi use index (yhtio_tilino_tapvm), tili use index (tili_index)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						and tili.yhtio = '$kukarow[yhtio]'
+						and tili.sisainen_taso like '3%'
 						and tiliointi.tilino = tili.tilino
-						and korjattu=''
-						and tapvm >= '$yhtiorow[tilikausi_alku]'
-						and tapvm <= '$yhtiorow[tilikausi_loppu]'
-						and sisainen_taso like '3%'
-						and kustp = 0
+						and tiliointi.korjattu = ''
+						and tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
+						and tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						and tiliointi.kustp = 0
 						and tiliointi.tilino!='$yhtiorow[myynti]'
 						and tiliointi.tilino!='$yhtiorow[myynti_ei_eu]'
 						and tiliointi.tilino!='$yhtiorow[myynti_eu]'
@@ -285,8 +285,9 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		$query = "	SELECT tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, tili.tilino,
 					tili.nimi, vero, selite $slisa
 					FROM tiliointi use index (yhtio_tapvm_tilino), tili
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
-					tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]' 
+					and tili.yhtio = tiliointi.yhtio 
+					and tili.tilino = tiliointi.tilino
 					$plisa
 					$vlisa
 					$lisa

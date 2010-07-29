@@ -149,9 +149,10 @@
 						and laskunro	= '$las'
 						and yhtio 		= '$kukarow[yhtio]'";
 			$rrrresult = mysql_query($query) or pupe_error($query);
-			$laskurow = mysql_fetch_assoc($rrrresult);
 
-			$tulostukseen[] = $laskurow["tunnus"];
+			if ($laskurow = mysql_fetch_assoc($rrrresult)) {
+				$tulostukseen[] = $laskurow["tunnus"];
+			}
 		}
 		$laskunro		= "";
 		$laskunroloppu	= "";

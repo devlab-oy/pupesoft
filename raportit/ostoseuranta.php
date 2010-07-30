@@ -270,46 +270,77 @@
 					$pvmvar = " tilausrivi.laskutettuaika ";
 				}
 
-				// Ajetaanko kuusausittain
-				if ($kuukausittain != "") {
-					$select = " substring($pvmvar, 6, 2) kuukausi, ".$select;
+				# Ajetaanko kuusausittain
+				if ($kuukausittain == "ALLEKKAIN") {
+					$select = " substring($pvmvar, 6, 2) kuukausi,".$select;
 					$group = " kuukausi, ".$group;
 					$order = " kuukausi, ".$order;
 					$gluku++;
 				}
 
 				// Tehdään query
-				$query = "	SELECT $select";
+				$query = "SELECT $select";
+				
+				// Katotaan mistä kohtaa queryä alkaa varsinaiset numerosarakkeet (HUOM: toi ', ' pilkkuspace erottaa sarakket toisistaan)
+				if ($kuukausittain == "SARAKE") {
+					$MONTH_ARRAY  	= array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 
-				//Osto
-				$query .= " sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) ostonyt, ";
+					$startmonth	= date("Ymd",mktime(0, 0, 0, $kka, 1,  $vva));
+					$endmonth 	= date("Ymd",mktime(0, 0, 0, $kkl, 1,  $vvl));
 
-				//Ostoed
-				if ($piiloed == "") {
-					$query .= " sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) ostoed, ";
-					$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0))/sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)),2) ostoind, ";
-				}
+					for ($i = $startmonth;  $i <= $endmonth;) {
 
-				$query .= " sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) ostoarvonyt, ";
+						$alku  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
+						$loppu = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)));
 
-				//Ostoed
-				if ($piiloed == "") {
-					$query .= " sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.rivihinta,0)) ostoarvoed, ";
-					$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0))/sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.rivihinta,0)),2) ostoarvoind, ";
-				}
+						$alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)-1));
+						$loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)-1));
 
-				if ($piilota_kappaleet == "") {
-					$query .= "	sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0)) ostokplnyt, ";
+						//Osto
+						$query .= " sum(if($pvmvar >= '$alku'  and $pvmvar <= '$loppu', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Ostot")."', ";
 
-					//KPLED
-					if ($piiloed == "") {
-						$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)) ostokpled, ";
-						$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0))/sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)),2) ostokplind, ";
+						//Ostoed
+						if ($piiloed == "") {
+							$query .= " sum(if($pvmvar >= '$alku_ed'  and $pvmvar <= '$loppu_ed', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Ostot")."', ";
+						}
+
+						$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
 					}
-				}
 
-				// Vika pilkku ja space pois
-				$query = substr($query, 0 ,-2);
+					// Vika pilkku pois
+					$query = substr($query, 0 , -2);
+				}
+				else {
+					//Osto
+					$query .= " sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) ostonyt, ";
+
+					//Ostoed
+					if ($piiloed == "") {
+						$query .= " sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) ostoed, ";
+						$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0))/sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)),2) ostoind, ";
+					}
+
+					$query .= " sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) ostoarvonyt, ";
+
+					//Ostoed
+					if ($piiloed == "") {
+						$query .= " sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.rivihinta,0)) ostoarvoed, ";
+						$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0))/sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.rivihinta,0)),2) ostoarvoind, ";
+					}
+
+					if ($piilota_kappaleet == "") {
+						$query .= "	sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0)) ostokplnyt, ";
+
+						//KPLED
+						if ($piiloed == "") {
+							$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)) ostokpled, ";
+							$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0))/sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)),2) ostokplind, ";
+						}
+					}
+
+					// Vika pilkku ja space pois
+					$query = substr($query, 0 ,-2);
+				}
 
 				$query .= "	FROM lasku use index (yhtio_tila_tapvm)
 							JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi='O'
@@ -407,7 +438,7 @@
 						if (mysql_num_rows($result) <= $rivilimitti) echo "<th>".t(mysql_field_name($result,$i))."</th>";
 					}
 
-					if(isset($workbook)) {
+					if (isset($workbook)) {
 						for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 						$excelrivi++;
 					}
@@ -484,7 +515,7 @@
 							if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {
 								$excelsarake = $ostoind = $ostoarvoind = $ostokplind = 0;
 
-								foreach($valisummat as $vnim => $vsum) {
+								foreach ($valisummat as $vnim => $vsum) {
 									if ((string) $vsum != '') {
 										$vsum = sprintf("%.2f", $vsum);
 									}
@@ -493,7 +524,7 @@
 										if ($valisummat["ostoed"] <> 0) 		$vsum = round($valisummat["ostonyt"] / $valisummat["ostoed"],2);
 									}
 									if ($vnim == "ostoarvoind") {
-										if ($valisummat["ostoarvoed"] <> 0) 		$vsum = round($valisummat["ostoarvonyt"] / $valisummat["ostoarvoed"],2);
+										if ($valisummat["ostoarvoed"] <> 0) 	$vsum = round($valisummat["ostoarvonyt"] / $valisummat["ostoarvoed"],2);
 									}
 									if ($vnim == "ostokplind") {
 										if ($valisummat["ostokpled"] <> 0)		$vsum = round($valisummat["ostokplnyt"] / $valisummat["ostokpled"],2);
@@ -544,7 +575,7 @@
 
 						for ($i=0; $i < mysql_num_fields($result); $i++) {
 
-							if($i < substr_count($select, ", ")) {
+							if ($i < substr_count($select, ", ")) {
 								$valisummat[mysql_field_name($result, $i)] = "";
 								$totsummat[mysql_field_name($result, $i)]  = "";
 							}
@@ -773,25 +804,26 @@
 			echo "</table><br>\n";
 
 			// lisärajaukset näkymä..
-			if ($ruksit[60]  != '') 		$ruk60chk  				= "CHECKED";
-			if ($ruksit[70]  != '') 		$ruk70chk  				= "CHECKED";
-			if ($ruksit[80]  != '') 		$ruk80chk  				= "CHECKED";
-			if ($ruksit[90]  != '') 		$ruk90chk  				= "CHECKED";
-			if ($ruksit[100]  != '') 		$ruk100chk 				= "CHECKED";
-			if ($ruksit[110]  != '') 		$ruk110chk 				= "CHECKED";
-			if ($ruksit[120]  != '') 		$ruk120chk 				= "CHECKED";
-			if ($ruksit[130]  != '') 		$ruk130chk 				= "CHECKED";
-			if ($ruksit[140]  != '') 		$ruk140chk 				= "CHECKED";
-			if ($ruksit[150] != '') 		$ruk150chk 				= "CHECKED";
-			if ($ruksit[160] != '')			$ruk160chk 				= "CHECKED";
-			if ($ruksit[170] != '')			$ruk170chk 				= "CHECKED";
-			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
-			if ($piiyhteensa != '')  		$piychk   				= "CHECKED";
-			if ($kuukausittain != '')		$kuuchk	  				= "CHECKED";
-			if ($piiloed != '')				$piiloedchk 			= "CHECKED";
-			if ($tilrivikomm != '')			$tilrivikommchk 		= "CHECKED";
-			if ($vain_excel != '')			$vain_excelchk 			= "CHECKED";
-			if ($piilota_kappaleet != '')	$piilota_kappaleet_sel 	= "CHECKED";
+			if ($ruksit[60]  != '') 			$ruk60chk  				= "CHECKED";
+			if ($ruksit[70]  != '') 			$ruk70chk  				= "CHECKED";
+			if ($ruksit[80]  != '') 			$ruk80chk  				= "CHECKED";
+			if ($ruksit[90]  != '') 			$ruk90chk  				= "CHECKED";
+			if ($ruksit[100]  != '') 			$ruk100chk 				= "CHECKED";
+			if ($ruksit[110]  != '') 			$ruk110chk 				= "CHECKED";
+			if ($ruksit[120]  != '') 			$ruk120chk 				= "CHECKED";
+			if ($ruksit[130]  != '') 			$ruk130chk 				= "CHECKED";
+			if ($ruksit[140]  != '') 			$ruk140chk 				= "CHECKED";
+			if ($ruksit[150] != '') 			$ruk150chk 				= "CHECKED";
+			if ($ruksit[160] != '')				$ruk160chk 				= "CHECKED";
+			if ($ruksit[170] != '')				$ruk170chk 				= "CHECKED";
+			if ($nimitykset != '')   			$nimchk   				= "CHECKED";
+			if ($piiyhteensa != '')  			$piychk   				= "CHECKED";
+			if ($kuukausittain == 'SARAKE')		$kuuchk1	  			= "CHECKED";
+			if ($kuukausittain == 'ALLEKKAIN')	$kuuchk2	  			= "CHECKED";
+			if ($piiloed != '')					$piiloedchk 			= "CHECKED";
+			if ($tilrivikomm != '')				$tilrivikommchk 		= "CHECKED";
+			if ($vain_excel != '')				$vain_excelchk 			= "CHECKED";
+			if ($piilota_kappaleet != '')		$piilota_kappaleet_sel 	= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -873,7 +905,7 @@
 				</tr>
 				<tr>
 				<th>".t("Tulosta ostot kuukausittain")."</th>
-				<td><input type='checkbox' name='kuukausittain' $kuuchk></td>
+				<td><input type='radio' name='kuukausittain' value='SARAKE' $kuuchk1>".t("Kuukaudet sarakkeisiin")."<br><input type='radio' name='kuukausittain' value='ALLEKKAIN' $kuuchk2>".t("Kukaudet allekkain")."</td>
 				<td></td>
 				<td class='back'></td>
 				</tr>

@@ -23,7 +23,7 @@
 	}
 
 	if (isset($muutparametrit)) {
-		list($tee, $kuitti, $kuva, $maara, $tpp, $tpk, $tpv, $summa, $valkoodi, $alv_tili, $nimi, $comments, $selite, $MAX_FILE_SIZE, $itili, $ikustp, $ikohde, $isumma, $ivero, $iselite, $summa) = explode("#!#", $muutparametrit);
+		list($tee, $kuitti, $kuva, $maara, $tpp, $tpk, $tpv, $summa, $valkoodi, $alv_tili, $nimi, $comments, $selite, $MAX_FILE_SIZE, $itili, $ikustp, $ikohde, $isumma, $ivero, $iselite) = explode("#!#", $muutparametrit);
 
 		$itili		= unserialize(urldecode($itili));
 		$ikustp		= unserialize(urldecode($ikustp));
@@ -33,7 +33,7 @@
 		$iselite	= unserialize(urldecode($iselite));
 	}
 
-	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite))."#!#".$summa;
+	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite));
 
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>\n";
 
@@ -214,6 +214,7 @@
 				}
 
 				$maara = 0;
+
 				foreach ($excelrivi as $erivi) {
 					foreach ($erivi as $e => $eriv) {
 
@@ -278,8 +279,8 @@
 				}
 
 				//	Lisätään vielä 2 tyhjää riviä loppuun
-				$maara+=2;
-
+				$maara += 2;
+				$gokfrom = "filesisaan";
 			}
 			else {
 
@@ -307,12 +308,23 @@
  			// Käsitelläänkö rivi??
 			if (strlen($itili[$i]) > 0 or strlen($isumma[$i]) > 0) {
 
-				$isumma[$i] = str_replace ( ",", ".", $isumma[$i]);
+				$isumma[$i] = str_replace (",", ".", $isumma[$i]);
 
 				// Oletussummalla korvaaminen mahdollista
 				if ($turvasumma_valuutassa > 0) {
 					// Summan vastaluku käyttöön
-					if ($isumma[$i] == '-') {
+					if (substr($isumma[$i], -1) == "%") {
+
+						$isummanumeric = preg_replace("/[^0-9\.]/", "", $isumma[$i]);
+
+						if ($isumma[$i]{0} == '-') {
+							$isumma[$i] = round(-1 * ($turvasumma_valuutassa * ($isummanumeric/100)), 2);
+						}
+						else {
+							$isumma[$i] = round(1 * ($turvasumma_valuutassa * ($isummanumeric/100)), 2);
+						}
+					}
+					elseif ($isumma[$i] == '-') {
 						$isumma[$i] = -1 * $turvasumma_valuutassa;
 					}
 					elseif ($isumma[$i] == '+') {
@@ -634,6 +646,18 @@
 
 		// Uusi tosite
 		// Tehdään haluttu määrä tiliöintirivejä
+		$tilmaarat = array("3","5","9","13","17","21","25","29","33","41","51","101","151", "201", "301", "401", "501");
+
+		if (isset($gokfrom) and $gokfrom != "") {
+			// Valitaan sopiva tiliöintimäärä kun tullaan palkkatositteelta
+			foreach ($tilmaarat as $tilmaara) {
+				if ($tilmaara > $maara) {
+					$maara = $tilmaara;
+					break;
+				}
+			}
+		}
+
 		$sel = array();
 		$sel[$maara] = "selected";
 
@@ -641,18 +665,13 @@
 			<tr>
 			<th>".t("Tiliöintirivien määrä")."</th>
 			<td>
-			<select name='maara' onchange='submit();'>
-			<option $sel[3] value='3'>2</option>
-			<option $sel[5] value='5'>4</option>
-			<option $sel[9] value='9'>8</option>
-			<option $sel[17] value='17'>16</option>
-			<option $sel[33] value='33'>32</option>
-			<option $sel[151] value='151'>150</option>
-			<option $sel[201] value='201'>200</option>
-			<option $sel[301] value='301'>300</option>
-			<option $sel[401] value='401'>400</option>
-			<option $sel[501] value='501'>500</option>
-			</select></td>";
+			<select name='maara' onchange='submit();'>";
+
+		foreach ($tilmaarat as $tilmaara) {
+			echo "<option ".$sel[$tilmaara]." value='$tilmaara'>".($tilmaara-1)."</option>";
+		}
+
+		echo "</select></td>";
 
 		echo "<th nowrap>".t("Liitä toimittaja")."</th>";
 		echo "<td>";

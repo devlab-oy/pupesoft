@@ -7,38 +7,43 @@
 
 	if ($tee != '') {
 
-		$query = "	SELECT tunnus, nimi, ytunnus, toimitusehto, kuljetusmuoto,
-					round(summa + rahti + (rahti_etu * if(maksu_kurssi=0, vienti_kurssi, maksu_kurssi)) + rahti_huolinta,2) arvo,
-					round((summa + rahti + (rahti_etu * if(maksu_kurssi=0, vienti_kurssi, maksu_kurssi)) + rahti_huolinta) * 1.10,2) vakarvo,
-					round(((summa + rahti + (rahti_etu * if(maksu_kurssi=0, vienti_kurssi, maksu_kurssi)) + rahti_huolinta) * 1.10) * 0.001114 ,2) fenarvo
+		$query = "	SELECT tunnus, laskunro, nimi, ytunnus, toimitusehto, kuljetusmuoto,
+					summa,
+					rahti,
+					rahti_etu,
+					rahti_huolinta,
+					saldo_maksettu,
+					vienti_kurssi,
+					mapvm
 					FROM lasku
-					WHERE yhtio='$kukarow[yhtio]'
-					and tapvm >='$vva-$kka-$ppa 00:00:00'
-					and tapvm <='$vvl-$kkl-$ppl 23:59:59'
-					and tila in ('H','Y','M','P','Q','K')
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tapvm >= '$vva-$kka-$ppa 00:00:00'
+					and tapvm <= '$vvl-$kkl-$ppl 23:59:59'
+					and tila = 'K'
 					and vienti in ('C','F','I')
-					and kuljetusmuoto='$kuljetusmuoto'";
+					and kuljetusmuoto = '$kuljetusmuoto'
+					order by laskunro";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>
-				<th>".t("Tilaus")."</th>
+				<th>".t("Keikka")."</th>
 				<th>".t("Toimittaja")."</th>
 				<th>".t("Ytunnus")."</th>
 				<th>".t("Toimitusehto")."</th>
 				<th>".t("Kuljetusmuoto")."</th>
-				<th>".t("Arvo")."</th>
-				<th>".t("Vakuutusarvo")."</th>
-				<th>".t("Fennia-arvo")."</th>";
+				<th>".t("Arvo")."<br>$yhtiorow[valkoodi]</th>
+				<th>".t("Vak").".".t("Arvo")."<br>(".t("Arvo")." * 1,10)</th>
+				<th>".t("Fennia-arvo")."<br>(".t("Vak").".".t("Arvo")." * 0,001114)</th>";
 		echo "</tr>";
 
-		$arvo	 = 0;
-		$vakarvo = 0;
-		$fenarvo = 0;
+		$yarvo	  = 0;
+		$yvakarvo = 0;
+		$yfenarvo = 0;
+		
+		while ($row = mysql_fetch_assoc($result)) {
 
-		while ($row = mysql_fetch_array($result)) {
-
-			echo "<tr>";
-			echo "<td>$row[tunnus]</td>";
+			echo "<tr class='aktiivi'>";
+			echo "<td><a href='asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$row[tunnus]&lopetus=$PHP_SELF////tee=$tee//kuljetusmuoto=$kuljetusmuoto//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl'>$row[laskunro]</a></td>";
 			echo "<td>$row[nimi]</td>";
 			echo "<td>$row[ytunnus]</td>";
 			echo "<td>$row[toimitusehto]</td>";
@@ -47,24 +52,42 @@
 			$kmrow = mysql_fetch_array($kmresult);
 
 			echo "<td>$kmrow[selite] - $kmrow[selitetark]</td>";
+			
+			if ($row["mapvm"] != "0000-00-00") {
+				// Jos virallinen varastonarvolaskenta on tehty
+				$rahtikulut = $row['saldo_maksettu'] + round($row['rahti_etu'] * $row['vienti_kurssi'], 2);
+			}
+			else {
+				// Jos ollaan annettu t‰lle batchille kulusumma, k‰ytet‰‰nkin vaan sit‰!
+				if ($row["rahti_huolinta"] != 0) {
+					$rahtikulut = $row["rahti_huolinta"];
+				}
+				else {
+					$rahtikulut = round($row['summa'] * $row['vienti_kurssi'] * ($row['rahti'] / 100), 2);
+				}
+			}
 
-			echo "<td>$row[arvo]</td>";
-			echo "<td>$row[vakarvo]</td>";
-			echo "<td>$row[fenarvo]</td>";
+			$arvo    = $rahtikulut + ($row['summa'] * $row['vienti_kurssi']);
+			$vakarvo = $arvo * 1.10;
+			$fenarvo = $vakarvo * 0.001114;
+
+			echo "<td align='right'>".sprintf('%.2f', $arvo)."</td>";
+			echo "<td align='right'>".sprintf('%.2f', $vakarvo)."</td>";
+			echo "<td align='right'>".sprintf('%.2f', $fenarvo)."</td>";
 			echo "</tr>";
 
 
-			$arvo	 += $row["arvo"];
-			$vakarvo += $row["vakarvo"];
-			$fenarvo += $row["fenarvo"];
+			$yarvo	 += $arvo;
+			$yvakarvo += $vakarvo;
+			$yfenarvo += $fenarvo;
 		}
 
 		echo "<tr>";
 		echo "<td class='back' colspan='4'></td>";
-		echo "<th>".t("Yhteens‰")."</th>";
-		echo "<th>$arvo</th>";
-		echo "<th>$vakarvo</th>";
-		echo "<th>$fenarvo</th>";
+		echo "<td class='tumma'>".t("Yhteens‰")."</th>";
+		echo "<td class='tumma' align='right'>".sprintf('%.2f', $yarvo)."</th>";
+		echo "<td class='tumma' align='right'>".sprintf('%.2f', $yvakarvo)."</th>";
+		echo "<td class='tumma' align='right'>".sprintf('%.2f', $yfenarvo)."</th>";
 		echo "</tr>";
 
 		echo "</table>";
@@ -96,7 +119,7 @@
 					<select NAME='kuljetusmuoto'>";
 
 	$result = t_avainsana("KM");
-	
+
 	while($row = mysql_fetch_array($result)){
 		$sel = '';
 		if($row["selite"] == $kuljetusmuoto) {

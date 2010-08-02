@@ -9,12 +9,12 @@
 
 	// Synkronoidaan kahden firman menut
 	if (isset($synkronoi) and count($syncyhtiot) > 1) {
-		
+
 		foreach ($syncyhtiot as $yhtio) {
 			$yht .= "'$yhtio',";
 		}
 		$yht = substr($yht,0,-1);
-	
+
 		if ($sovellus != '') {
 			$lisa = " and sovellus = '$sovellus' ";
 		}
@@ -95,25 +95,25 @@
 			$adalan 		= $row["alanimi"];
 		}
 	}
-	
+
 	if (isset($synkronoireferenssi) and count($syncyhtiot) > 0) {
-		
+
 		$file = fopen("http://www.devlab.fi/softa/referenssivalikot.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
 		$rivi = fgets($file);
 		$lask = 0;
 		$rows = array();
-			
+
 		while (!feof($file)) {
-			
+
 			$rivi = fgets($file);
-						
+
 			// luetaan rivi tiedostosta..
 			$rivi = explode("\t", trim($rivi));
-			
-			if ($sovellus == '' or strtoupper($sovellus) == strtoupper($rivi[0])) {	
-			
-				$row = array();			
-				$row["sovellus"] 	= $rivi[0]; 
+
+			if ($sovellus == '' or strtoupper($sovellus) == strtoupper($rivi[0])) {
+
+				$row = array();
+				$row["sovellus"] 	= $rivi[0];
 				$row["nimi"] 		= $rivi[1];
 				$row["alanimi"] 	= $rivi[2];
 				$row["nimitys"] 	= $rivi[3];
@@ -121,23 +121,23 @@
 				$row["jarjestys2"] 	= (int) $rivi[5];
 				$row["hidden"] 		= $rivi[6];
 				$row["tunnus"] 		= $rivi[7];
-								
+
 				$rows[$row["sovellus"].$row["nimi"].$row["alanimi"]] = $row;
-			}			
+			}
 		}
-		
+
 		foreach($syncyhtiot as $yhtio) {
 			$yht .= "'$yhtio',";
 		}
 		$yht = substr($yht,0,-1);
-		
+
 		if ($sovellus != '') {
 			$lisa = " and sovellus	= '$sovellus' ";
 		}
 		else {
 			$lisa = "";
 		}
-		
+
 		$query = "	SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys)-1 jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
 					FROM oikeu
 					WHERE yhtio in ($yht)
@@ -146,13 +146,13 @@
 					GROUP BY sovellus, nimi, alanimi
 					ORDER BY sovellus, jarjestys, jarjestys2";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		while ($row = mysql_fetch_array($result)) {
-			if (!array_key_exists($row["sovellus"].$row["nimi"].$row["alanimi"], $rows)) {								
-				$rows[$row["sovellus"].$row["nimi"].$row["alanimi"]] = $row;				
+			if (!array_key_exists($row["sovellus"].$row["nimi"].$row["alanimi"], $rows)) {
+				$rows[$row["sovellus"].$row["nimi"].$row["alanimi"]] = $row;
 			}
 		}
-		
+
 		// Sortataan array niin että omat privaatit lisäykset tulee sopivaan rakoon referenssiin nähden
 		$jarj0 = $jarj1 = $jarj2 = array();
 		foreach ($rows as $key => $row) {
@@ -164,15 +164,15 @@
 		array_multisort($jarj0, SORT_ASC, $jarj1, SORT_ASC, $jarj2, SORT_ASC, $rows);
 
 		$jarj  = 0;
-		$jarj2 = 0;	
-			
-		foreach($rows as $row) {		
-									
+		$jarj2 = 0;
+
+		foreach($rows as $row) {
+
 			if ($edsovellus != $row["sovellus"]) {
 				$jarj  = 0;
 				$jarj2 = 0;
 			}
-						
+
 			if ($row["jarjestys"] != $edjarjoikea or (($row["nimi"] != $ednimi or $row["alanimi"] != $edalan) and $row["jarjestys2"] == 0 )) {
 				$jarj += 10;
 				$jarj2 = 0;
@@ -184,9 +184,9 @@
 
 			if ($row["jarjestys2"] != 0 and $row["jarjestys"] == $edjarjoikea) {
 				$jarj2 += 10;
-			}	
-							
-			foreach($syncyhtiot as $yhtio) {												
+			}
+
+			foreach($syncyhtiot as $yhtio) {
 				$query = "	SELECT *
 							FROM oikeu
 							WHERE yhtio 	= '$yhtio'
@@ -195,9 +195,9 @@
 							and nimi		= '$row[nimi]'
 							and alanimi		= '$row[alanimi]'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($result) == 0) {
-					
+
 					$query = "	INSERT into oikeu
 								SET
 								kuka		= '',
@@ -210,9 +210,9 @@
 								jarjestys2	= '$jarj2',
 								hidden		= '$row[hidden]',
 								yhtio		= '$yhtio'";
-					$insresult = mysql_query($query) or pupe_error($query);							
+					$insresult = mysql_query($query) or pupe_error($query);
 				}
-				
+
 				//päivitettän käyttäjien oikeudet
 				$query = "	UPDATE oikeu
 							SET nimitys		= '$row[nimitys]',
@@ -224,19 +224,62 @@
 							and alanimi		= '$row[alanimi]'";
 				$updresult = mysql_query($query) or pupe_error($query);
 			}
-			
+
 			$edsovellus 	= $row["sovellus"];
 			$edjarjoikea 	= $row["jarjestys"];
 			$ednimi 		= $row["nimi"];
-			$adalan 		= $row["alanimi"];	
+			$adalan 		= $row["alanimi"];
 		}
+	}
+
+
+	if ($tee == "PAIVITAJARJETYS") {
+		foreach ($jarjestys as $tun => $jarj) {
+
+			$query  = "	SELECT *
+						FROM oikeu
+						WHERE tunnus='$tun'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 1) {
+
+				$row = mysql_fetch_array($result);
+
+				//päivitetään uudet menun tiedot kaikille käyttäjille
+				$query = "	UPDATE oikeu
+							SET jarjestys = '$jarj', jarjestys2 = '$jarjestys2[$tun]'
+							WHERE yhtio		= '$row[yhtio]'
+							and sovellus	= '$row[sovellus]'
+							and nimi		= '$row[nimi]'
+							and alanimi		= '$row[alanimi]'
+							and nimitys		= '$row[nimitys]'
+							and jarjestys	= '$row[jarjestys]'
+							and jarjestys2	= '$row[jarjestys2]'
+							and hidden		= '$row[hidden]'";
+				$result = mysql_query($query) or pupe_error($query);
+				$num1 = mysql_affected_rows();
+			}
+		}
+
+		echo "<font class='message'>".t("Järjestykset päivitetty")."!<br><br></font>";
+
+
+		$yhtiot = array();
+		$yht = str_replace("'","", $yht);
+		$yht = explode(",", $yht);
+
+		foreach($yht as $yhtio) {
+			$yhtiot[$yhtio] = $yhtio;
+		}
+
+		$tee = "";
 	}
 
 	if ($tee == "PAIVITA") {
 		if ($kopioi == 'on') {
 			$tunnus = '';
 		}
-		
+
 		if ($tunnus != '')	{		// haetaan muutettavan rivin alkuperäiset tiedot
 			$query  = "	SELECT *
 						FROM oikeu
@@ -283,7 +326,7 @@
 
 			foreach($yht as $yhtio) {
 				$yhtiot[$yhtio] = $yhtio;
-				
+
 				if ($yhtio != "REFERENSSI") {
 					$query = "INSERT into oikeu (kuka, sovellus, nimi, alanimi, nimitys, jarjestys, jarjestys2, yhtio, hidden)
 								values ('', '$sove', '$nimi', '$alanimi', '$nimitys', '$jarjestys', '$jarjestys2', '$yhtio', '$hidden')";
@@ -306,8 +349,8 @@
 		echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 
 		if ($tunnus > 0) {
-			$query  = "	SELECT * 
-						from oikeu 
+			$query  = "	SELECT *
+						from oikeu
 						where tunnus='$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($result);
@@ -338,15 +381,15 @@
 				<tr><th>".t("Nimitys")."</th><td><input type='text' name='nimitys' value='$nimitys'></td></tr>
 				<tr><th>".t("Järjestys")."</th><td><input type='text' name='jarjestys' value='$jarjestys'></td></tr>
 				<tr><th>".t("Järjestys2")."</th><td><input type='text' name='jarjestys2' value='$jarjestys2'></td></tr>";
-				
+
 		if ($hidden != '') {
 			$chk = "CHECKED";
 		}
 		else {
 			$chk = "";
 		}
-				
-		echo "	<tr><th>".t("Piilossa")."</th><td><input type='checkbox' name='hidden' value='H' $chk></td></tr>				
+
+		echo "	<tr><th>".t("Piilossa")."</th><td><input type='checkbox' name='hidden' value='H' $chk></td></tr>
 				<tr><th>".t("Kopioi")."</th><td><input type='checkbox' name='kopioi'></td></tr>
 				</table>
 				<br>
@@ -366,8 +409,8 @@
 
 	if ($tee == 'POISTA') {
 		// haetaan poistettavan rivin alkuperäiset tiedot
-		$query  = "	SELECT * 
-					from oikeu 
+		$query  = "	SELECT *
+					from oikeu
 					where tunnus='$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -426,16 +469,16 @@
 			echo "<tr><th>".t("Näytä yhtiö").":</th><td><input type='checkbox' name='yhtiot[$prow[yhtio]]' value='$prow[yhtio]' $chk onclick='submit();'> $prow[nimi]</td></tr>";
 			$sovyhtiot .= "'$prow[yhtio]',";
 		}
-		
+
 		if($yhtiot["REFERENSSI"] != "") {
 			$chk = "CHECKED";
 		}
 		else {
 			$chk = "";
 		}
-		
+
 		echo "<tr><th>".t("Näytä referenssivalikot").":</th><td><input type='checkbox' name='yhtiot[REFERENSSI]' value='REFERENSSI' $chk onclick='submit();'></td></tr>";
-		
+
 		$sovyhtiot = substr($sovyhtiot,0,-1);
 
 		$query = "	SELECT distinct sovellus
@@ -462,9 +505,9 @@
 		if (count($yhtiot) > 1) {
 			echo "<tr><th>".t("Synkronoi").":</th><td><input type='submit' name='synkronoi' value='".t("Synkronoi")."'></td></tr>";
 		}
-		
+
 		echo "<tr><th>".t("Synkronoi referenssiin").":</th><td><input type='submit' name='synkronoireferenssi' value='".t("Synkronoi")."'></td></tr>";
-		
+
 		echo "</form>";
 
 
@@ -486,31 +529,31 @@
 
 		echo "</table><br>";
 		echo "<table><tr>";
-			
+
 		if (count($yhtiot) > 0) {
-			
+
 			$dirikka = getcwd();
-			
-			foreach($yhtiot as $yhtio) {
+
+			foreach ($yhtiot as $yhtio) {
 				echo "<td class='back' valign='top'>";
-				
+
 				$rows = array();
-				
+
 				if ($yhtio == "REFERENSSI") {
 					$file = fopen("http://www.devlab.fi/softa/referenssivalikot.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
 					$rivi = fgets($file);
-					
+
 					$lask = 0;
-					
+
 					while (!feof($file)) {
-						
+
 						$rivi = fgets($file);
-						
+
 						// luetaan rivi tiedostosta..
 						$rivi	 = explode("\t", trim($rivi));
-				
-						if ($sovellus == '' or strtoupper($sovellus) == strtoupper($rivi[0])) {							
-							$rows[$lask]["sovellus"] 	= $rivi[0]; 
+
+						if ($sovellus == '' or strtoupper($sovellus) == strtoupper($rivi[0])) {
+							$rows[$lask]["sovellus"] 	= $rivi[0];
 							$rows[$lask]["nimi"] 		= $rivi[1];
 							$rows[$lask]["alanimi"] 	= $rivi[2];
 							$rows[$lask]["nimitys"] 	= $rivi[3];
@@ -524,9 +567,15 @@
 					}
 				}
 				else {
+
+					echo "<form method='post' action='$PHP_SELF'>	";
+					echo "<input type='hidden' name='tee' value='PAIVITAJARJETYS'>";
+					echo "<input type='hidden' name='sovellus' value='$sovellus'>";
+					echo "<input type='hidden' name='yht' value='$yht'>";
+
 					$query	= "	SELECT sovellus, nimi, alanimi, nimitys, jarjestys, jarjestys2, hidden, tunnus
 								from oikeu
-								where kuka = '' 
+								where kuka = ''
 								and yhtio = '$yhtio'";
 
 					if ($sovellus != '') {
@@ -535,11 +584,11 @@
 
 					$query .= " order by sovellus, jarjestys, jarjestys2";
 					$result = mysql_query($query) or pupe_error($query);
-					
-					$lask = 0; 
-					
+
+					$lask = 0;
+
 					while ($prow = mysql_fetch_array($result)) {
-						$rows[$lask]["sovellus"] 	= $prow["sovellus"]; 
+						$rows[$lask]["sovellus"] 	= $prow["sovellus"];
 						$rows[$lask]["nimi"] 		= $prow["nimi"];
 						$rows[$lask]["alanimi"] 	= $prow["alanimi"];
 						$rows[$lask]["nimitys"] 	= $prow["nimitys"];
@@ -547,17 +596,16 @@
 						$rows[$lask]["jarjestys2"] 	= $prow["jarjestys2"];
 						$rows[$lask]["hidden"] 		= $prow["hidden"];
 						$rows[$lask]["tunnus"] 		= $prow["tunnus"];
-						
+
 						$lask++;
 					}
 				}
-				
-				
+
 				echo "<table>";
 
 				$vsove = "";
 
-				foreach($rows as $row) {
+				foreach ($rows as $row) {
 					$tunnus 	= $row['tunnus'];
 					$sove		= $row['sovellus'];
 					$nimi		= $row['nimi'];
@@ -587,51 +635,45 @@
 					else {
 						echo "<td colspan='2' nowrap>";
 					}
-					
-					
-					if(!file_exists($dirikka."/".$nimi)) {
+
+					if (!file_exists($dirikka."/".$nimi)) {
 						$mordor1 = "<font class='error'>";
 						$mordor2 = "</font>";
 					}
 					else {
-						$mordor1 = $mordor2 = "";	
+						$mordor1 = $mordor2 = "";
 					}
-										
-					if ($yhtio == "REFERENSSI") {						
+
+					if ($yhtio == "REFERENSSI") {
 							echo "$mordor1$nimi$mordor2</td>";
 							echo "<td nowrap>$alanimi</td>";
-							echo "<td nowrap>".t($nimitys)."</td>";					
+							echo "<td nowrap>".t($nimitys)."</td>";
 							echo "<td nowrap><input type='text' size='4' value='$jarjestys' DISABLED></td>";
 							echo "<td nowrap><input type='text' size='4' value='$jarjestys2' DISABLED></td>";
 							echo "<td nowrap>$hidden</td></tr>\n";
 							echo "</form>";
 					}
 					else {
-						echo "<form method='post' action='$PHP_SELF'>	";
-						echo "<input type='hidden' name='tee' value='PAIVITA'>";
-						echo "<input type='hidden' name='sovellus' value='$sovellus'>";
-						echo "<input type='hidden' name='yht' value='$yht'>";
-						echo "<input type='hidden' name='tunnus' value='$tunnus'>";					
-						echo "<input type='hidden' name='sove' value='$sove'>";
-						echo "<input type='hidden' name='nimi' value='$nimi'>";
-						echo "<input type='hidden' name='alanimi' value='$alanimi'>";
-						echo "<input type='hidden' name='nimitys' value='$nimitys'>";
-						echo "<input type='hidden' name='hidden' value='$hidden'>";
 						echo "<a href='$PHP_SELF?tee=MUUTA&tunnus=$tunnus&yht=$yht&sovellus=$sovellus'>$mordor1$nimi$mordor2</a></td>";
 						echo "<td nowrap>$alanimi</td>";
-						echo "<td nowrap>".t($nimitys)."</td>";					
-						echo "<td nowrap><input type='text' size='4' name='jarjestys' value='$jarjestys'></td>";
-						echo "<td nowrap><input type='text' size='4' name='jarjestys2' value='$jarjestys2'></td>";
-						echo "<td nowrap>$hidden</td></tr>\n";
-						echo "</form>";
+						echo "<td nowrap>".t($nimitys)."</td>";
+						echo "<td nowrap><input type='text' size='4' name='jarjestys[$tunnus]' value='$jarjestys'></td>";
+						echo "<td nowrap><input type='text' size='4' name='jarjestys2[$tunnus]' value='$jarjestys2'></td>";
+						echo "<td nowrap>$hidden</td>";
 					}
-					
+
 					$vsove = $sove;
 				}
+
 				echo "</table>";
 
+				if ($yhtio != "REFERENSSI") {
+					echo "<input type='submit' value='".t("Päivitä järjestykset")."'>\n";
+					echo "</form>";
+				}
+
 				echo "</td>";
-			}		
+			}
 		}
 		echo "</tr></table>";
 	}

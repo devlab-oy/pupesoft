@@ -280,7 +280,7 @@
 
 				// Tehdään query
 				$query = "SELECT $select";
-				
+
 				// Katotaan mistä kohtaa queryä alkaa varsinaiset numerosarakkeet (HUOM: toi ', ' pilkkuspace erottaa sarakket toisistaan)
 				if ($kuukausittain == "SARAKE") {
 					$MONTH_ARRAY  	= array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
@@ -302,6 +302,15 @@
 						//Ostoed
 						if ($piiloed == "") {
 							$query .= " sum(if($pvmvar >= '$alku_ed'  and $pvmvar <= '$loppu_ed', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Ostot")."', ";
+						}
+
+						if ($piilota_kappaleet == "") {
+							$query .= "	sum(if($pvmvar >= '$alku'  and $pvmvar <= '$loppu', tilausrivi.kpl,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Ostokpl")."', ";
+
+							//KPLED
+							if ($piiloed == "") {
+								$query .= "	sum(if($pvmvar >= '$alku_ed' and $pvmvar <= '$loppu_ed',tilausrivi.kpl,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Ostokpl")."', ";
+							}
 						}
 
 						$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));

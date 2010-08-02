@@ -64,7 +64,7 @@ echo "<tr><th>".t("Tilikausi");
 $query = "	SELECT *
 			FROM tilikaudet
 			WHERE yhtio = '$kukarow[yhtio]'
-			ORDER BY tilikausi_alku";
+			ORDER BY tilikausi_alku desc";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "</td><td><select name='tkausi'>";
@@ -74,7 +74,7 @@ while ($vrow=mysql_fetch_array($vresult)) {
 	if ($tkausi == $vrow['tunnus']) {
 		$sel = "selected";
 	}
-	echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
+	echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"])."</option>";
 }
 
 echo "</select></th></tr>";
@@ -148,9 +148,10 @@ echo "<input type='submit' VALUE='".t("Näytä/Tallenna")."'>";
 echo "</table>";
 
 if (isset($tkausi)) {
-	$query = "SELECT *
-			FROM tilikaudet
-			WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+	$query = "	SELECT *
+				FROM tilikaudet
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus = '$tkausi'";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($vresult) == 1)

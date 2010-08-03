@@ -291,7 +291,7 @@
 
 			require('tulosta_ostotilaus.inc');
 
-			$query = "UPDATE lasku SET alatila='A', lahetepvm = now() WHERE tunnus='$kukarow[kesken]'";
+			$query = "UPDATE lasku SET alatila = 'A', lahetepvm = now() WHERE tunnus='$kukarow[kesken]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if ($toim == "HAAMU") {
@@ -650,13 +650,13 @@
 			echo "<tr><th colspan='4'>".t("Toimitusosoite")."</th></tr>";
 			echo "<tr><td colspan='4'>$laskurow[toim_nimi] $laskurow[toim_nimitark]<br>$laskurow[toim_osoite] $laskurow[toim_postino] $laskurow[toim_postitp]</td></tr>";
 
-			echo "<tr><th>".t("Tila")."</th><th>".t("Toimaika")."</th><th>".t("Tilausnumero")."</th<th>".t("Valuutta")."</th><td class='back'></td></tr>";
+			echo "<tr><th>".t("Tilausnumero")."</th><th>".t("Laadittu")."</th><th>".t("Toimaika")."</th><th>".t("Valuutta")."</th><td class='back'></td></tr>";
+			echo "<tr><td>$laskurow[tunnus]</td><td>".tv1dateconv($laskurow["luontiaika"])."</td><td>".tv1dateconv($laskurow["toimaika"])."</td><td>{$laskurow["valkoodi"]}</td></tr>";
 
-			echo "<tr><td>$laskurow[tila]</td>
-				<td>".tv1dateconv($laskurow["toimaika"])."</td><td>$laskurow[tunnus]</td>
-				<td>{$laskurow["valkoodi"]}</td>
-				</tr>
-				<tr><th>".t("Fakta")."</th><td colspan='3'>$faktarow[fakta]&nbsp;</td></tr>";
+			if ($faktarow["fakta"] != "") {
+				echo "<tr><th>".t("Fakta")."</th><td colspan='3'>$faktarow[fakta]&nbsp;</td></tr>";
+			}
+
 			echo "</table><br>";
 
 			//anntetaan mahdollisuus syottaa uusi/muokata tilausrivi/korjata virhelliset rivit
@@ -695,7 +695,7 @@
 						$sel = "SELECTED";
 					}
 
-					$menuset .= "<option value='haku' $sel>Tuotehaku</option>";
+					$menuset .= "<option value='haku' $sel>".t("Tuotehaku")."</option>";
 					$menuset .= "</select>";
 
 					//	Tehd‰‰n paikka menusetille
@@ -708,7 +708,7 @@
 									<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
 								<table>
 									<tr>
-										<td class='back' align = 'left'><b>".t("Lis‰‰ rivi").":</b> </td><td class='back' align = 'left'>$menuset</td>
+										<td class='back' align = 'left'><font class='head'>".t("Lis‰‰ rivi").": </font></td><td class='back' align = 'left'>$menuset</td>
 									</tr>
 								</table><hr>
 								</form>";
@@ -743,14 +743,13 @@
 					elseif ($menutila != "haku" and $menutila != "") {
 						echo "HUOM! Koitettiin hakea ostomenua '$menutila' jota ei ollut m‰‰ritelty!<br>";
 					}
-
 				}
 				else {
 					echo "HUOM! Koitettiin hakea ostomenuja, mutta tiedot olivat puutteelliset.<br>";
 				}
 			}
 			else {
-				echo "<b>".t("Lis‰‰ rivi").": </b><hr>";
+				echo "<font class='head'>".t("Lis‰‰ rivi").": </font><hr>";
 			}
 
 
@@ -761,7 +760,7 @@
 				$huomio = '';
 			}
 
-			echo "<b>".t("Tilausrivit").":</b><hr>";
+			echo "<font class='head'>".t("Tilausrivit").": </font><hr>";
 
 			if (!isset($toim_nimitykset)) {
 				$toim_nimitykset = "ME";
@@ -777,7 +776,7 @@
 			echo "</font></form>";
 
 			// katotaan onko joku rivi jo liitetty johonkin keikkaan ja jos on niin annetaan mahdollisuus piilottaa lukitut rivit
-			$query = "select * from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$laskurow[tunnus]' and uusiotunnus != 0";
+			$query = "SELECT * from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$laskurow[tunnus]' and uusiotunnus != 0";
 			$kaunisres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($kaunisres) != 0) {
@@ -790,7 +789,7 @@
 					$sel_ky = "CHECKED";
 					$sel_ei = "";
 				}
-				echo "<br><form action='$PHP_SELF' method='post'><font class='info'>";
+				echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<form action='$PHP_SELF' method='post'><font class='info'>";
 				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 				echo "<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>";
 				echo "<input type='hidden' name='tee' value='Y'>";

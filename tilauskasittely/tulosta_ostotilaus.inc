@@ -570,7 +570,7 @@
 					$rarres = mysql_query($query) or pupe_error($query);
 					$toimirow = mysql_fetch_array($rarres);
 
-					//Oikea sarake
+					// Oikea sarake
 					$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
 					$pdf->draw_rectangle(800, 420, 779, 580, $thispage, $rectparam);
 					$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
@@ -625,20 +625,24 @@
 					$myyresult = mysql_query($query) or pupe_error($query);
 					$myyrow = mysql_fetch_array($myyresult);
 
-					$pdf->draw_text(310, 740, $myyrow["nimi"], 							$thispage, $norm);
+					list($ff_string, $ff_font) = pdf_fontfit($myyrow["nimi"], 105, $pdf, $norm);
+					$pdf->draw_text(310, 740, $ff_string, 								$thispage, $ff_font);
+
 
 					$pdf->draw_text(430, 750, t("Toimitusaika", $kieli),				$thispage, $pieni);
-					$pdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), 		$thispage, $norm);
-
+					$pdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), 		$thispage, $boldi);
 
 					$pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);
 					$pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
 
 					$pdf->draw_text(310, 729, t("Yhteyshenkilö", $kieli),				$thispage, $pieni);
-					$pdf->draw_text(310, 719, $laskurow["tilausyhteyshenkilo"], 		$thispage, $norm);
 
-					$pdf->draw_text(430, 729, t("Kuljetus", $kieli), 					$thispage, $pieni);
-					$pdf->draw_text(430, 719, $laskurow["kuljetus"],	 				$thispage, $norm);
+					list($ff_string, $ff_font) = pdf_fontfit($laskurow["tilausyhteyshenkilo"], 105, $pdf, $norm);
+					$pdf->draw_text(310, 719, $ff_string, 								$thispage, $ff_font);
+
+
+					$pdf->draw_text(430, 729, t("Laadittu", $kieli), 					$thispage, $pieni);
+					$pdf->draw_text(430, 719, tv1dateconv($laskurow["luontiaika"]),		$thispage, $norm);
 
 
 					$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
@@ -646,25 +650,39 @@
 					$pdf->draw_text(310, 698, $laskurow["toimitusehto"], 				$thispage, $norm);
 
 					$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
-					$pdf->draw_text(310, 687, t("Huolitsija", $kieli), 					$thispage, $pieni);
-					$pdf->draw_text(310, 677, $laskurow["huolitsija"], 					$thispage, $norm);
+					$pdf->draw_text(310, 687, t("Maksuehto", $kieli), 					$thispage, $pieni);
+					$pdf->draw_text(310, 677, $laskurow["maksuteksti"], 				$thispage, $norm);
 
-					$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);
-					$pdf->draw_text(310, 666, t("Maksuehto", $kieli), 					$thispage, $pieni);
-					$pdf->draw_text(310, 656, $laskurow["maksuteksti"], 				$thispage, $norm);
+					$lakork = 674;
 
-					$pdf->draw_rectangle(653, 300, 632, 580, $thispage, $rectparam);
-					$pdf->draw_text(310, 645, t("Jakelu", $kieli), 						$thispage, $pieni);
-					$pdf->draw_text(310, 635, $laskurow["jakelu"], 						$thispage, $norm);
+					if ($laskurow["kuljetus"] != "") {
+						$pdf->draw_rectangle($lakork, 300, $lakork-21, 580, $thispage, $rectparam);
+						$pdf->draw_text(310, $lakork-8, t("Kuljetus", $kieli), 			$thispage, $pieni);
+						$pdf->draw_text(310, $lakork-18, $laskurow["kuljetus"], 		$thispage, $norm);
+						$lakork -= 21;
+					}
 
-					$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
-					$pdf->draw_text(310, 624, t("Tilausviite", $kieli), 				$thispage, $pieni);
-					$pdf->draw_text(310, 614, $laskurow["viesti"], 						$thispage, $norm);
+					if ($laskurow["huolitsija"] != "") {
+						$pdf->draw_rectangle($lakork, 300, $lakork-21, 580, $thispage, $rectparam);
+						$pdf->draw_text(310, $lakork-8, t("Huolitsija", $kieli), 			$thispage, $pieni);
+						$pdf->draw_text(310, $lakork-18, $laskurow["huolitsija"], 		$thispage, $norm);
+						$lakork -= 21;
+					}
 
-					$pdf->draw_text(310, 600, t("Olkaa hyvä ja kirjoittakaa tilausnumero lähetteeseen, laskuun ja kirjeisiin", $kieli).".", $thispage, $pieni);
+					if ($laskurow["jakelu"] != "") {
+						$pdf->draw_rectangle($lakork, 300, $lakork-21, 580, $thispage, $rectparam);
+						$pdf->draw_text(310, $lakork-8, t("Jakelu", $kieli), 			$thispage, $pieni);
+						$pdf->draw_text(310, $lakork-18, $laskurow["jakelu"], 		$thispage, $norm);
+						$lakork -= 21;
+					}
+
+					$pdf->draw_text(310, $lakork-10, t("Olkaa hyvä ja kirjoittakaa tilausnumero lähetteeseen, laskuun ja kirjeisiin", $kieli).".", $thispage, $pieni);
 
 					$komm = "";
 
+					if (trim($laskurow['viesti']) != '') {
+						$komm .= "\n".t("Tilausviite", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['viesti']), 90, "\n###");
+					}
 					if (trim($laskurow['sisviesti1']) != '') {
 						$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
 					}
@@ -700,7 +718,7 @@
 								$pdf->draw_text(35, $pohja, trim($kommentti), $thispage, $norm);
 							}
 
-							$pohja = $pohja - 10;
+							$pohja = $pohja - 12;
 						}
 
 						$kala = $pohja - 25;

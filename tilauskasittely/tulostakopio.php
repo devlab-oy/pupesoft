@@ -650,7 +650,7 @@
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
-			$use = " use index (yhtio_tila_luontiaika) ";			
+			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "YLLAPITOSOPIMUS") {
 			//myyntitilaus.
@@ -1373,14 +1373,8 @@
 					if ($toim == 'PROFORMA') {
 						$laskurow["tapvm"] = date("Y-m-d");
 
-						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-							$hinta_riv = "(tilausrivi.hinta/$laskurow[vienti_kurssi])";
-						}
-						else {
-							$hinta_riv = "tilausrivi.hinta";
-						}
-
-						$lisa = " 	$hinta_riv / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
+						$lisa = " 	tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
+									(tilausrivi.hinta/$laskurow[vienti_kurssi]) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta_valuutassa,
 									(tilausrivi.varattu+tilausrivi.kpl) kpl, ";
 					}
 					else {
@@ -1600,7 +1594,7 @@
 				require_once ("tyomaarays/tulosta_tyomaarays.inc");
 
 				$otunnus = $laskurow["tunnus"];
-				
+
 				$sorttauskentta = generoi_sorttauskentta($asrow["tyomaarayksen_jarjestys"]);
 				$order_sorttaus = $asrow["tyomaarayksen_jarjestys_suunta"];
 

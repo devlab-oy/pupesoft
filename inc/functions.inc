@@ -70,7 +70,7 @@ if (!function_exists("tv1dateconv")) {
 }
 
 if (!function_exists("lopetus")) {
-	function lopetus($lopetus, $meta="") {
+	function lopetus($lopetus, $meta="", $palautavainurli=FALSE) {
 		global $kukarow, $palvelin2;
 
 		$lopetukset = explode("/SPLIT/", $lopetus);
@@ -156,7 +156,8 @@ if (!function_exists("lopetus")) {
 
 					$row["nimitys"] = trim(str_ireplace("UUSI", "", $row["nimitys"]));
 
-					if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]$nlisa</a><br>";
+					if ($palautavainurli) return $lopetus;
+					else if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]$nlisa</a><br>";
 					else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
 
 					$edlopetus = $lopetus_clean;
@@ -8761,7 +8762,7 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 
 				foreach ($invoice_ei_loydy as $ei_loydy) {
 					// esim. kuljetusvakuutuksella ei ole tilattuam‰‰r‰‰
-					// huono tsekkaus! Miten erotetaan paremmin kuljetusvakuutukset ja runkoveloitukset?								
+					// huono tsekkaus! Miten erotetaan paremmin kuljetusvakuutukset ja runkoveloitukset?
 					if ($ei_loydy['tilattumaara'] == 0) {
 
 						// oletetaan ett‰ t‰m‰ on kuljetusvakuutus, joten laitetaan se "lˆytyviin" ett‰ vertailu-check hyv‰ksyy n‰m‰ OK:na
@@ -9175,6 +9176,6 @@ if (!function_exists("tarkista_rfviite")) {
 		return TRUE;
 	}
 
-}
+	}
 
 ?>

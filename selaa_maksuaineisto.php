@@ -109,7 +109,7 @@
 		if ($yhtiorow["pankkitiedostot"] == "E") {
 			$query = "	SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
 						lasku.popvm aika,
-						kuka.nimi kukanimi,
+						ifnull(kuka.nimi, lasku.maksaja) kukanimi,
 						lasku.olmapvm,
 						CONCAT(yriti.nimi, ' ', yriti.tilino) maksu_tili,
 						COUNT(*) kpl,
@@ -120,7 +120,8 @@
 						LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tila in ('P', 'Q', 'Y')
-						AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00' and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
+						AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00'
+						and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
 						$lisa
 						GROUP BY tyyppi, aika, kukanimi, olmapvm, maksu_tili
 						ORDER BY tyyppi ASC, aika DESC";
@@ -128,7 +129,7 @@
 		else {
 			$query = "	SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
 						lasku.popvm aika,
-						kuka.nimi kukanimi,
+						ifnull(kuka.nimi, lasku.maksaja) kukanimi,
 						group_CONCAT(distinct yriti.nimi, ' ', yriti.tilino separator '<br>') maksu_tili,
 						COUNT(*) kpl,
 						GROUP_CONCAT(lasku.tunnus) tunnukset,
@@ -138,11 +139,12 @@
 						LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tila in ('P', 'Q', 'Y')
-						AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00' and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
+						AND lasku.popvm >= '$alkuvv-$alkukk-$alkupp 00:00:00'
+						and lasku.popvm <= '$loppuvv-$loppukk-$loppupp 23:59:59'
 						$lisa
 						GROUP BY tyyppi, aika, kukanimi
 						ORDER BY tyyppi ASC, aika DESC";
-			
+
 		}
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -193,10 +195,11 @@
 	if ($tee == 'selaa') {
 
 		$lisa = '';
-
+	
 		if ($tunnukset) $lisa .= " and lasku.tunnus in ($tunnukset) ";
 
-		$query = "	SELECT lasku.nimi,
+		$query = "	SELECT lasku.tunnus,
+					lasku.nimi,
 					lasku.nimitark,
 					lasku.maksaja,
 					lasku.maksuaika,
@@ -204,7 +207,7 @@
 					lasku.summa,
 					if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) poimittusumma,
 					lasku.valkoodi,
-					kuka.nimi kukanimi,
+					ifnull(kuka.nimi, lasku.maksaja) kukanimi,
 					lasku.popvm,
 					lasku.tapvm,
 					lasku.olmapvm,
@@ -226,7 +229,7 @@
 		if (mysql_num_rows($result) > 0) {
 
 			echo "<br />";
-			echo "<a hreF='{$palvelin2}selaa_maksuaineisto.php?&alkuvv={$alkuvv}&alkukk={$alkukk}&alkupp={$alkupp}&loppuvv={$loppuvv}&loppukk={$loppukk}&loppupp={$loppupp}'>&laquo; ",t("Takaisin"),"</a>";
+			echo "<a href='{$palvelin2}selaa_maksuaineisto.php?&alkuvv={$alkuvv}&alkukk={$alkukk}&alkupp={$alkupp}&loppuvv={$loppuvv}&loppukk={$loppukk}&loppupp={$loppupp}'>&laquo; ",t("Takaisin"),"</a>";
 			echo "<br />";
 			echo "<br />";
 
@@ -264,12 +267,26 @@
 			$poimittu_summa = 0;
 			$summa = 0;
 			$laskuja = 0;
+			
+			if (tarkista_oikeus("muutosite.php")) {
+				$toslink = TRUE;
+			}
+			else {
+				$toslink = FALSE;
+			}
 
 			while ($row = mysql_fetch_assoc($result)) {
 				echo "<tr class='aktiivi'>";
 				echo "<td>{$row['nimi']} {$row['nimitark']}</td>";
 				echo "<td align='right'>{$row['laskunro']}</td>";
-				echo "<td valign='top'>",tv1dateconv($row['tapvm']),"</td>";
+			
+				echo "<td>";
+
+				if ($toslink) echo "<a href='muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$PHP_SELF////tee=$tee//alkuvv=$alkuvv//alkukk=$alkukk//alkupp=$alkupp//loppuvv=$loppuvv//loppukk=$loppukk//loppupp=$loppupp//tunnukset=$tunnukset'>".tv1dateconv($row["tapvm"])."</a>";
+				else echo tv1dateconv($row["tapvm"]);
+
+				echo "</td>";
+					
 				echo "<td valign='top'>",tv1dateconv($row['erpcm']),"</td>";
 				echo "<td valign='top'>",tv1dateconv($row['olmapvm']),"</td>";
 				echo "<td valign='top'>",tv1dateconv($row['mapvm']),"</td>";

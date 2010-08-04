@@ -267,9 +267,9 @@
 				$verorow = mysql_fetch_array ($verores);
 
 				echo "<table>";
-				echo "<tr><td>",t("Tili")," $yhtiorow[alv] ",t("yhteensä"),"</td><td align='right'>".sprintf('%.2f',$verorow['vero'])."</td></tr>";
-				echo "<tr><td>",t("Maksettava alv"),"</td><td align='right'>".sprintf('%.2f',$fi308)."</td></tr>";
-				echo "<tr><td>",t("Erotus"),"</td><td align='right'>".sprintf('%.2f',$verorow['vero'] - $fi308)."</td></tr>";
+				echo "<tr><th>",t("Tili")," $yhtiorow[alv] ",t("yhteensä"),"</th><td align='right'>".sprintf('%.2f', abs($verorow['vero']))."</td></tr>";
+				echo "<tr><th>",t("Maksettava alv"),"</th><td align='right'>".sprintf('%.2f', abs($fi308))."</td></tr>";
+				echo "<tr><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', abs($verorow['vero']) - abs($fi308))."</td></tr>";
 				echo "</table><br>";
 
 				if (strpos($_SERVER['SCRIPT_NAME'], "viranomaisilmoitukset.php") !== FALSE) {

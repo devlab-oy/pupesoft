@@ -86,9 +86,9 @@ if ($tee == 'G') {
 }
 
 // Tositeselailu
-if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == '≈' or $tee == 'ƒ') {
+if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == '≈' or $tee == 'ƒ' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia') {
 
-	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == '≈' or $tee == 'ƒ') {
+	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == '≈' or $tee == 'ƒ' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia') {
 
 		// Etsit‰‰n virheet vain kuluvalta tilikaudelta!
 		if ($tee == 'Z') {
@@ -214,6 +214,47 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						ORDER by lasku.laskunro";
 		}
 
+		if ($tee == 'automaattikirjauksia_muutettu') {
+			$query = "	SELECT lasku.tunnus ltunnus, lasku.tapvm, lasku.summa, lasku.ytunnus, lasku.nimi, 'n/a'
+						FROM tiliointi use index (yhtio_tapvm_tilino)
+						JOIN lasku use index (PRIMARY) ON (lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tiliointi.ltunnus and lasku.tila in ('H','Y','M','P','Q','U'))
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.korjattu != ''
+						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
+						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						GROUP BY lasku.tunnus
+						ORDER BY lasku.tapvm, lasku.ytunnus";
+			$viivatut = "on";
+		}
+
+		if ($tee == 'kasintehtyja_alvkirjauksia') {
+			// tutkitaan ollaanko jossain toimipaikassa alv-rekisterˆity
+			$query = "	SELECT ifnull(group_concat(DISTINCT concat(\"'\", toim_alv, \"'\")), '') tilino
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$kukarow[yhtio]'
+						and maa != ''
+						and vat_numero != ''
+						and toim_alv != ''";
+			$alhire = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_assoc($alhire);
+
+			$tilino_alv = "'$yhtiorow[alv]'";
+
+			if ($vrow["tilino"] != "") {
+				$tilino_alv .= ",$vrow[tilino]";
+			}
+
+			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
+						FROM tiliointi use index (yhtio_tapvm_tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.korjattu = ''
+						and tiliointi.aputunnus = 0
+						AND tiliointi.tilino in ($tilino_alv)
+						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
+						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						GROUP BY ltunnus, tapvm
+						ORDER BY ltunnus, tapvm";
+		}
 	}
 	else {
 
@@ -285,8 +326,8 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		$query = "	SELECT tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, tili.tilino,
 					tili.nimi, vero, selite $slisa
 					FROM tiliointi use index (yhtio_tapvm_tilino), tili
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' 
-					and tili.yhtio = tiliointi.yhtio 
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+					and tili.yhtio = tiliointi.yhtio
 					and tili.tilino = tiliointi.tilino
 					$plisa
 					$vlisa
@@ -301,12 +342,16 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		$tyhja = 1;
 	}
 	else {
+
+		// Tehd‰‰n lopetusmuuttuja kaikkiin urleihin
+		$lopetus = "${palvelin2}muutosite.php////tee=$tee";
+
 		echo "<table><tr>";
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
 			echo "<th>".t(mysql_field_name($result,$i))."</th>";
 		}
 		echo "</tr>";
-		echo "<tr>";
+		echo "<tr class='aktiivi'>";
 
 		while ($trow = mysql_fetch_array ($result)) {
 			// Ei anneta t‰m‰n h‰m‰t‰ meit‰!
@@ -318,10 +363,10 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 
 				// Tosite vaihtui
 				if ($trow[0] != $edtunnus) {
-					echo "<tr><th height='10' colspan='".mysql_num_fields($result)."'></th></tr><tr>";
+					echo "</tr><tr><th style='padding:3px;' colspan='".mysql_num_fields($result)."'></th></tr><tr class='aktiivi'>";
 				}
 				else {
-					echo "</tr><tr>";
+					echo "</tr><tr class='aktiivi'>";
 				}
 			}
 
@@ -332,7 +377,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 					if (mysql_field_name($result,$i) == 'tapvm') {
 						$trow[$i] = tv1dateconv($trow[$i]);
 					}
-					echo "<td><a href = '$PHP_SELF?tee=E&tunnus=$edtunnus&viivatut=$viivatut'>$trow[$i]</td>";
+					echo "<td><a href = '$PHP_SELF?tee=E&tunnus=$edtunnus&viivatut=$viivatut&lopetus=$lopetus'>$trow[$i]</td>";
 				}
 				elseif (is_numeric($trow[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
 					echo "<td align='right'>$trow[$i]</td>";
@@ -1200,49 +1245,63 @@ if (strlen($tee) == 0) {
 		  	<td><input type='checkbox' name='viivatut'></td>
 		  	<td><input type = 'submit' value = '".t("Etsi")."'></form></td></tr>
 
-		  	<tr>
+		  	<tr class='aktiivi'>
 		  	<td>".t("Etsi virhett‰")."</td>
 		  	<td>".t("n‰yt‰ tositteet, jotka eiv‰t t‰sm‰‰")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=Z' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 
-			<tr>
+			<tr class='aktiivi'>
+		  	<td></td>
+		  	<td>".t("n‰yt‰ tositteet, joilla on manuaalisia alv kirjauksia")."</td>
+		  	<td></td>
+		  	<td><form action = '$PHP_SELF?tee=kasintehtyja_alvkirjauksia' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	</tr>
+
+			<tr class='aktiivi'>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joilta puuttuu kustannuspaikka")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=X' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 
-			<tr>
+			<tr class='aktiivi'>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden ostovelat ei t‰sm‰‰")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=W' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 
-			<tr>
+			<tr class='aktiivi'>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden tila tuntuu v‰‰r‰lt‰")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=T' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 
-			<tr>
+			<tr class='aktiivi'>
+		  	<td></td>
+		  	<td>".t("n‰yt‰ tositteet, joiden automaattikirjauksia on muutettu")."</td>
+		  	<td></td>
+		  	<td><form action = '$PHP_SELF?tee=automaattikirjauksia_muutettu' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+		  	</tr>
+
+			<tr class='aktiivi'>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden myyntisaamiset ovat v‰‰rin")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=S' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
 
-			<tr>
+			<tr class='aktiivi'>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden marginaaliverotiliˆinnit ovat v‰‰rin")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=≈' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
 
-			<tr>
+			<tr class='aktiivi'>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ maksetut laskut, joilla on myyntisaamisia")."</td>
 		  	<td></td>

@@ -299,7 +299,23 @@
 			echo "<tr><td class='message'>",t("Vertailukelpoista laskua ja tilausta ei löytynyt"),"!</tr>";
 		}
 
-		echo "</table>";
+		echo "</table><br><br>";
+
+		if (tarkista_oikeus("hyvak.php")) {
+			echo "<form action = 'hyvak.php' method='post'>
+					<input type='hidden' name = 'tunnus' value='$lasku_row[tunnus]'>
+					<input type='hidden' name = 'tee' value='H'>
+					<td class='back'><input type='Submit' value='".t("Hyväksy lasku")."'></td>
+					</form><br><br><br>";
+
+
+			echo "<form action = 'hyvak.php' method='post'>
+					<input type='hidden' name='tee' value='Z'>
+					<input type='hidden' name='tunnus' value='$lasku_row[tunnus]'>
+					<td class='back'><input type='Submit' value='".t("Pysäytä laskun käsittely")."'></td>
+					</form>";
+		}
+
 
 	}
 	else {

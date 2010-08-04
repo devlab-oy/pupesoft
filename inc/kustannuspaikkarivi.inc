@@ -26,6 +26,31 @@
                 $ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "isa_tarkenne") {
+		$query = "	SELECT tunnus, koodi, nimi
+					FROM kustannuspaikka
+					WHERE yhtio  = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					ORDER BY koodi+0, nimi";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+		
+		$ulos .= "<option value = ''></option>";
+		
+		while ($vrow = mysql_fetch_assoc($vresult)) {
+			$sel="";
+			
+			if ($trow[$i] == $vrow["tunnus"]) {
+				$sel = "selected";
+			}
+
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
+		}
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 
  	if (mysql_field_name($result, $i) == "kaytossa") { //ei käytössä
 	

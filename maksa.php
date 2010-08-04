@@ -375,18 +375,20 @@
 		}
 
 		if ($eipankkiin == 'on') {
-			$tila = 'Q';
+			$tila	 = 'Q';
+			$poppari = ", maksaja = 'Ohitettu', popvm = '".date("Y-m-d")." 12:00:00' ";
 		}
 		else {
-			$tila = 'P';
+			$tila	 = 'P';
+			$poppari = ", maksaja = '$kukarow[kuka]' ";
 		}
 
 		$query = "	UPDATE lasku set
-					maksaja = '$kukarow[kuka]',
 					maksuaika = now(),
 					maksu_kurssi = '$trow[0]',
 					maksu_tili = '$tili',
 					tila = '$tila'
+					$poppari
 					$muutamaksupaiva
 					$alatila
 					WHERE tunnus='$tunnus' and yhtio = '$kukarow[yhtio]' and tila='M'";

@@ -1732,27 +1732,36 @@
 								}
 
 								if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-									// Rivihinta
-									if ($yhtiorow["alv_kasittely"] == '') {
-										$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100) / (1+$tilrow["alv"]/100), 2);
-									}
-									else {
-										$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100), 2);
-									}
-									// Yksikköhinta
-									$tilrow["hinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"]), 2);
+									// Veroton rivihinta valuutassa
+									$tilrow["rivihinta"] = $tilrow["rivihinta_valuutassa"];
+
+									// Yksikköhinta valuutassa
+									$tilrow["hinta"] = laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"]);
 								}
 
-								$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);
-								$totalvat  = round($tilrow['rivihinta']+$vatamount, 2);
+								// Verollinen Rivihinta. Lasketaan saman kaavan mukaan kuin laskutus.inc:ssä, eli pyöristetään kaikki kerralla lopuksi!
+								$totalvat = $tilrow["hinta"] * (1 - $tilrow["ale"] / 100) * $tilrow["kpl"];
+
+								if ($yhtiorow["alv_kasittely"] != '') {
+									$totalvat = $totalvat * (1 + ($tilrow["alv"] / 100));
+								}
+
+								// Yksikköhinta on laskulla aina veroton
+								if ($yhtiorow["alv_kasittely"] == '') {
+									$tilrow["hinta"] = $tilrow["hinta"] / (1 + $tilrow["alv"] / 100);
+								}
+
+								// Veron määrä
+								$vatamount = $tilrow['rivihinta'] * $tilrow['alv'] / 100;
+
+								// Pyöristetään ja formatoidaan lopuksi
+								$tilrow["hinta"] 	 = sprintf("%.".$yhtiorow["hintapyoristys"]."f", round($tilrow["hinta"], $yhtiorow["hintapyoristys"]));
+								$tilrow["rivihinta"] = sprintf("%.".$yhtiorow["hintapyoristys"]."f", round($tilrow["rivihinta"], $yhtiorow["hintapyoristys"]));
+								$totalvat			 = sprintf("%.".$yhtiorow["hintapyoristys"]."f", round($totalvat, $yhtiorow["hintapyoristys"]));
+								$vatamount 			 = sprintf("%.".$yhtiorow["hintapyoristys"]."f", round($vatamount, $yhtiorow["hintapyoristys"]));
 
 								$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#", "/")."]/", " ", $tilrow['kommentti']);
 								$tilrow['nimitys'] 	 = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#", "/")."]/", " ", $tilrow['nimitys']);
-
-								// yksikköhinta pitää olla veroton
-								if ($yhtiorow["alv_kasittely"] == '') {
-									$tilrow["hinta"] = round($tilrow["hinta"] / (1 + $tilrow["alv"] / 100), 2);
-								}
 
 								if ($lasrow["chn"] == "111") {
 
@@ -2194,7 +2203,7 @@
 								include_once("inc/generoi_laskun_saate.inc");
 
 								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
-								
+
 								// Jos asiakkaalla on laskutussähköposti tai jos $yhtiorow['lasku_tulostin'] != -99 niin silloin lasku menee kukarow[email]:iin jos $komento == ""
 								if ($komento != "" or $yhtiorow['lasku_tulostin'] != -99) {
 									// otetaan tämä talteen jotta saadaan vientierittely

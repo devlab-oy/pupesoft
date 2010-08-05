@@ -317,11 +317,11 @@
 		else {
 			$linkurl = $rakirrow['rahtikirjanro'];
 		}
-	
+
 		echo "<tr><th colspan='4'>".t("Toimitustapa")." / ".t("Rahtikirjanro")."</th><th colspan='2'>".t("Toimitusehto")."</th></tr>";
 		echo "<tr><td colspan='4'>$laskurow[toimitustapa] / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td></tr>";
 	}
-	
+
 	if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extranet"] == "") {
 
 		$query = "	SELECT
@@ -356,7 +356,7 @@
 				<td>".tv1dateconv($laskurow["laskutettu"], "P", "")."</td>
 			</tr>";
 	}
-	
+
 	$komm = "";
 
 	if ($laskurow['myyja'] > 0) {
@@ -471,7 +471,7 @@
 	}
 
 	// Katsotaan onko liitetiedostoja
-	$liitequery = "	SELECT tunnus
+	$liitequery = "	SELECT tunnus, selite
 					FROM liitetiedostot USE INDEX (yhtio_liitos_liitostunnus)
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND liitos = 'lasku'
@@ -481,8 +481,9 @@
 	if (mysql_num_rows($liiteres) > 0) {
 		$liitemaara = 1;
 		echo "<tr><th>".t("Liitetiedosto")."</th><td colspan='5'>";
+
 		while ($liiterow = mysql_fetch_array($liiteres)) {
-			echo "<a href='".$palvelin2."view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara</a> ";
+			echo "<a href='".$palvelin2."view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara $liiterow[selite]</a> ";
 			$liitemaara++;
 		}
 		echo "</td></tr>";

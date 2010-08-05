@@ -2359,7 +2359,7 @@ if ($tee == '') {
 			}
 
 			// Katsotaan onko liitetiedostoja
-			$liitequery = "	SELECT tunnus, selite, kayttotarkoitus
+			$liitequery = "	SELECT tunnus, selite
 							FROM liitetiedostot USE INDEX (yhtio_liitos_liitostunnus)
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND liitos = 'lasku'
@@ -2370,7 +2370,7 @@ if ($tee == '') {
 				$liitemaara = 1;
 
 				echo "<tr>$jarjlisa<th>".t("Liitetiedostot").":</th><td colspan='3'>";
-				
+
 				while ($liiterow = mysql_fetch_array($liiteres)) {
 					echo "<a href='".$palvelin2."view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara $liiterow[selite]</a> ";
 					$liitemaara++;
@@ -3709,7 +3709,7 @@ if ($tee == '') {
 
 			if (mysql_num_rows($viimhintares) != 0) {
 				$viimhinta = mysql_fetch_assoc($viimhintares);
-				
+
 				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Viimeisin hinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $viimhinta["hinta"])." $yhtiorow[valkoodi]</td></tr>";
 				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Viimeisin alennus")."</th><td align='right'>$viimhinta[ale] %</td></tr>";
 				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Tilausnumero")."</th><td align='right'><a href='{$palvelin2}raportit/asiakkaantilaukset.php?tee=NAYTA&toim=MYYNTI&tunnus=$viimhinta[tunnus]&lopetus=".$palvelin2."tilauskasittely/tilaus_myynti.php////toim=$toim//tee=AKTIVOI//from=LASKUTATILAUS//tilausnumero=$kukarow[kesken]'>$viimhinta[otunnus]</a></td></tr>";

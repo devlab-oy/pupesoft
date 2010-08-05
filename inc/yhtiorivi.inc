@@ -21,7 +21,7 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$query  = "show columns from sanakirja";
+		$query  = "SHOW columns from sanakirja";
 		$fields =  mysql_query($query);
 
 		while ($apurow = mysql_fetch_array($fields)) {
@@ -52,7 +52,7 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
 
-		while ($vrow=mysql_fetch_array($vresult)) {
+		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";
 			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
 				$sel = "selected";
@@ -65,19 +65,21 @@
 	}
 
 	if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
-		$query = "SELECT nimi, tunnus
-	                       FROM valuu
-	                  WHERE yhtio = '$kukarow[yhtio]'
-	                  ORDER BY jarjestys";
-	        $vresult = mysql_query($query) or pupe_error($query);
-	        $ulos = "<td><select name='$nimi'>";
-	        while ($vrow=mysql_fetch_array($vresult)) {
-		        $sel="";
-		        if ($trow[$i] == $vrow['nimi']) {
-		                $sel = "selected";
-		        }
-	        	$ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]";
+		$query = "	SELECT nimi, tunnus
+	                FROM valuu
+	                WHERE yhtio = '$kukarow[yhtio]'
+	                ORDER BY jarjestys";
+	   	$vresult = mysql_query($query) or pupe_error($query);
+	    $ulos = "<td><select name='$nimi'>";
+	
+	    while ($vrow=mysql_fetch_array($vresult)) {
+	        $sel="";
+	        if ($trow[$i] == $vrow['nimi']) {
+	                $sel = "selected";
 	        }
+        	$ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]";
+        }
+		
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -225,6 +227,27 @@
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
+		}
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "tilikauden_tulos") {
+
+		$tpque = "	SELECT tunnus, tilino, nimi
+					from tili
+					where yhtio = '$kukarow[yhtio]'
+					and LEFT(tilino, 1) = BINARY '2'";
+		$vresult = mysql_query($tpque) or pupe_error($tpque);
+
+		$ulos = "<td><select name='$nimi'><option value=''>".t("Ei valintaa")."</option>";
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow["tunnus"]) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[tilino] $vrow[nimi]</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

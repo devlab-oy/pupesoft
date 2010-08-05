@@ -2359,7 +2359,7 @@ if ($tee == '') {
 			}
 
 			// Katsotaan onko liitetiedostoja
-			$liitequery = "	SELECT tunnus
+			$liitequery = "	SELECT tunnus, selite, kayttotarkoitus
 							FROM liitetiedostot USE INDEX (yhtio_liitos_liitostunnus)
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND liitos = 'lasku'
@@ -2370,8 +2370,9 @@ if ($tee == '') {
 				$liitemaara = 1;
 
 				echo "<tr>$jarjlisa<th>".t("Liitetiedostot").":</th><td colspan='3'>";
+				
 				while ($liiterow = mysql_fetch_array($liiteres)) {
-					echo "<a href='".$palvelin2."view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara</a> ";
+					echo "<a href='".$palvelin2."view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara $liiterow[selite]</a> ";
 					$liitemaara++;
 				}
 				echo "</td></tr>";

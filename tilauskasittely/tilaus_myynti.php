@@ -3695,21 +3695,23 @@ if ($tee == '') {
 			}
 
 			//haetaan viimeisin hinta millä asiakas on tuotetta ostanut
-			$query =	"	SELECT tilausrivi.hinta, tilausrivi.ale, tilausrivi.otunnus, tilausrivi.laskutettuaika
+			$query =	"	SELECT tilausrivi.hinta, tilausrivi.ale, tilausrivi.otunnus, tilausrivi.laskutettuaika, lasku.tunnus
 							FROM tilausrivi
 					   		JOIN lasku ON lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tilausrivi.otunnus and lasku.ytunnus = '$laskurow[ytunnus]' and lasku.ovttunnus = '$laskurow[ovttunnus]' and lasku.alatila = 'X'
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi = 'L'
+							and tilausrivi.kpl != 0
 							and tilausrivi.tuoteno = '$tuoteno_lisa'
 							ORDER BY tilausrivi.tunnus desc
 							LIMIT 1";
 			$viimhintares = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($viimhintares)!=0) {
+			if (mysql_num_rows($viimhintares) != 0) {
 				$viimhinta = mysql_fetch_assoc($viimhintares);
-				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Viimeisin hinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $viimhinta[hinta])." $yhtiorow[valkoodi]</td></tr>";
+				
+				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Viimeisin hinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $viimhinta["hinta"])." $yhtiorow[valkoodi]</td></tr>";
 				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Viimeisin alennus")."</th><td align='right'>$viimhinta[ale] %</td></tr>";
-				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Tilausnumero")."</th><td align='right'>$viimhinta[otunnus]</td></tr>";
+				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Tilausnumero")."</th><td align='right'><a href='{$palvelin2}raportit/asiakkaantilaukset.php?tee=NAYTA&toim=MYYNTI&tunnus=$viimhinta[tunnus]&lopetus=".$palvelin2."tilauskasittely/tilaus_myynti.php////toim=$toim//tee=AKTIVOI//from=LASKUTATILAUS//tilausnumero=$kukarow[kesken]'>$viimhinta[otunnus]</a></td></tr>";
 				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Laskutettu")."</th><td align='right'>".tv1dateconv($viimhinta["laskutettuaika"])."</td></tr>";
 			}
 

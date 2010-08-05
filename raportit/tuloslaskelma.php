@@ -713,7 +713,11 @@
 			$tilioinnit = array();
 			$sarakkeet  = array();
 
+
 			while ($tilirow = mysql_fetch_assoc($tilires)) {
+
+				if (!isset($firstgroup)) $firstgroup = (string) $tilirow["groupsarake"];
+
 				// Otetaan kaikki distinct sarakkeet
 				$sarakkeet[(string) $tilirow["groupsarake"]] = (string) $tilirow["groupsarake"];
 
@@ -724,8 +728,6 @@
 			if ($tyyppi == "T" or $tyyppi == "2") {
 
 				$tulokset = array();
-
-				#$tulosquery = str_ireplace(".summa", ".summa * -1", $alkuquery1);
 
 				// Haetaan firman tulos
 				$query = "	SELECT $groupsarake groupsarake, $alkuquery1
@@ -814,6 +816,9 @@
 					}
 					elseif (isset($budjetit[(string) $tasorow["taso"]])) {
 						$tilirow_summat = $budjetit[(string) $tasorow["taso"]];
+					}
+					elseif ($toim == "TASOMUUTOS") {
+						$tilirow_summat = array("$firstgroup" => 0);
 					}
 
 					foreach ($tilirow_summat as $sarake => $tilirow_sum) {

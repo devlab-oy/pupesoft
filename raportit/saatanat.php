@@ -459,10 +459,10 @@
 							JOIN maksuehto ON (maksuehto.yhtio = asiakas.yhtio and maksuehto.tunnus = asiakas.maksuehto and maksuehto.kaytossa = '' and maksuehto.jv != '')
 							WHERE asiakas.yhtio = '$saatavat_yhtio'
 							AND asiakas.ytunnus = '$sytunnus'
+							AND asiakas.laji != 'P'
 							$eta_asiakaslisa
 							LIMIT 1";
 				$maksuehto_chk_res = mysql_query($query) or pupe_error($query);
-
 				$maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
 
 				if ($maksuehto_chk_row['jv'] != '') {

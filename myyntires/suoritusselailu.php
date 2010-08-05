@@ -592,16 +592,13 @@
 					if ($kukarow["yhtio"] == "atarv") {
 						// ARWI special
 						$suoritustunnukset_kaikki[] = $maksurow["tunnus"];
-
 						echo "<input type='hidden' name='tila' value='siirrasuoritus1702tilille'>";
 						echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
 						echo "<input type='submit' value='Siirrä 1702-tilille'>";
 					}
-					else {
-						echo "<input type='hidden' name='tila' value='siirrasuoritus'>";
-						echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
-						echo "<input type='submit' value='".t("Siirrä selvittelytilille")."' onClick='return verify1();'>";
-					}
+					echo "<input type='hidden' name='tila' value='siirrasuoritus'>";
+					echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
+					echo "<input type='submit' value='".t("Siirrä selvittelytilille")."' onClick='return verify1();'>";
 				}
 				else {
 					echo "<input type='hidden' name='tila' value='poistasuoritus'>";

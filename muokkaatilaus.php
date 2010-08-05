@@ -1135,11 +1135,22 @@
 			echo "<table>";
 			echo "<tr>";
 
-			for ($i=0; $i < mysql_num_fields($result)-$miinus; $i++) {
+			$ii = 0;
+			for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
 				echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
 
-				if(isset($workbook)) {
-					$worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+				if (isset($workbook)) {
+					
+					if (mysql_field_name($result,$i) == "asiakas") {
+						$worksheet->write($excelrivi, $ii, t("Ytunnus"), $format_bold);
+						$ii++;
+						$worksheet->write($excelrivi, $ii, t("Asiakas"), $format_bold);
+						$ii++;
+					}
+					else {
+						$worksheet->write($excelrivi, $ii, ucfirst(t(mysql_field_name($result,$i))), $format_bold);	
+						$ii++;
+					}										
 				}
 			}
 			$excelrivi++;
@@ -1308,7 +1319,8 @@
 
 					echo "<tr class='aktiivi'>";
 
-					for ($i=0; $i<mysql_num_fields($result)-$miinus; $i++) {
+					$ii = 0;
+					for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
 
 						$fieldname = mysql_field_name($result,$i);
 
@@ -1403,11 +1415,26 @@
 						}
 
 						if (isset($workbook)) {
-							if (mysql_field_type($result,$i) == 'real') {
-								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f", $row[$fieldname]));
+							
+							if ($fieldname == "asiakas") {
+								$nimiosat = explode("<br>", $row[$fieldname]);
+								
+								$ytunnari = trim(array_shift($nimiosat));
+								$lopnimit = trim(implode("\n", $nimiosat));
+								
+								$worksheet->writeString($excelrivi, $ii, $ytunnari);
+								$ii++;
+								$worksheet->writeString($excelrivi, $ii, $lopnimit);
+								$ii++;
+								
+							}
+							elseif (mysql_field_type($result,$i) == 'real') {
+								$worksheet->writeNumber($excelrivi, $ii, sprintf("%.02f", $row[$fieldname]));
+								$ii++;
 							}
 							else {
-								$worksheet->writeString($excelrivi, $i, $row[$fieldname]);
+								$worksheet->writeString($excelrivi, $ii, $row[$fieldname]);
+								$ii++;
 							}
 						}
 					}
@@ -1416,17 +1443,17 @@
 						if ($jtok == 0) {
 							echo "<td class='$class' valign='top'><font style='color:#00FF00;'>".t("Voidaan toimittaa")."</font></td>";
 
-							if(isset($workbook)) {
-								$worksheet->writeString($excelrivi, $i, "Voidaan toimittaa");
-								$i++;
+							if (isset($workbook)) {
+								$worksheet->writeString($excelrivi, $ii, "Voidaan toimittaa");
+								$ii++;
 							}
 						}
 						else {
 							echo "<td class='$class' valign='top'><font style='color:#FF0000;'>".t("Ei voida toimittaa")."</font></td>";
 
-							if(isset($workbook)) {
-								$worksheet->writeString($excelrivi, $i, t("Ei voida toimittaa"));
-								$i++;
+							if (isset($workbook)) {
+								$worksheet->writeString($excelrivi, $ii, t("Ei voida toimittaa"));
+								$ii++;
 							}
 						}
 					}
@@ -1464,9 +1491,9 @@
 
 						echo "<td class='$class' valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";
 
-						if(isset($workbook)) {
-							$worksheet->writeString($excelrivi, $i, t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila");
-							$i++;
+						if (isset($workbook)) {
+							$worksheet->writeString($excelrivi, $ii, t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila");
+							$ii++;
 						}
 					}
 

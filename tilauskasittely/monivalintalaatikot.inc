@@ -1273,24 +1273,49 @@
 
 		if ($monivalintalaatikko == "KUSTP") {
 
-			$query = "	SELECT tunnus, nimi, koodi
+			echo "<script language='javascript'>
+					function kustannuspaikkaselect(klikattu) {
+
+						var sel = document.getElementById(klikattu);
+						var mul = document.getElementById('mul_kustp[]');
+						var len = klikattu.length;
+
+						var cli = 0;
+						if (sel.selected) {
+							for (var i = 0; i < mul.options.length; i++) {
+							    if (mul.options[i].id.substring(0,len) == klikattu && mul.options[i].id != klikattu) {
+									mul.options[i].selected = 1;
+								}
+							}
+						}
+					}
+				</script> ";
+
+			$query = "	SELECT tunnus, nimi, koodi, isa_tarkenne
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]'
 						and kaytossa != 'E'
 						and tyyppi = 'K'
-						ORDER BY nimi";
+						ORDER BY isa_tarkenne, nimi";
 			$sresult = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($sresult) > 0) {
-				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
-				echo "<tr><th>",t("Kustannuspaikka"),"</th></tr>";
-				echo "<tr>";
+			$kustparray = array();
 
-				echo "<td nowrap style='padding:0px'><select name='mul_kustp[]' multiple='multiple' size='7' $autosubmit>";
-				echo "<option value=''>".t("Ei valintaa")."</option>";
+			while ($sxrow = mysql_fetch_array ($sresult)){
+				$kustparray[$sxrow["isa_tarkenne"]][$sxrow["tunnus"]] = $sxrow;
+			}
 
-				while($sxrow = mysql_fetch_array ($sresult)){
+			function lapsitasot ($isataso, $sisennys, $tunnukset) {
+				GLOBAL $kustparray, $mul_kustp;
+
+				$sisennys++;
+
+				$tunnukset_save = $tunnukset;
+
+				foreach ($kustparray[$isataso] as $lapsitaso => $sxrow) {
+
 					$sel = '';
+					$tunnukset .= "$sxrow[tunnus],";
 
 					if (count($mul_kustp) > 0) {
 						if (in_array(trim($sxrow['tunnus']), $mul_kustp)) {
@@ -1298,8 +1323,28 @@
 						}
 					}
 
-					echo "<option value='$sxrow[tunnus]' $sel>$sxrow[koodi] $sxrow[nimi]</option>";
+					echo "<option value='$sxrow[tunnus]' id='$tunnukset' name='$tunnukset' $sel onclick='javascript:kustannuspaikkaselect(\"$tunnukset\");'>";
+
+					for ($i = 0; $i < $sisennys; $i++) echo "&raquo;";
+
+					echo "$sxrow[koodi] $sxrow[nimi]</option>";
+
+					lapsitasot($sxrow["tunnus"], $sisennys, $tunnukset);
+
+					$tunnukset = $tunnukset_save;
 				}
+			}
+
+			if (mysql_num_rows($sresult) > 0) {
+				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+				echo "<tr><th>",t("Kustannuspaikka"),"</th></tr>";
+				echo "<tr>";
+
+				echo "<td nowrap style='padding:0px'><select id='mul_kustp[]' name='mul_kustp[]' multiple='multiple' size='7' $autosubmit>";
+				echo "<option value=''>".t("Ei valintaa")."</option>";
+
+				lapsitasot(0, -1, "0,");
+
 				echo "</select></td>";
 				echo "</tr></table></div>";
 			}
@@ -1320,7 +1365,7 @@
 				echo "<tr><th>",t("Kohde"),"</th></tr>";
 				echo "<tr>";
 
-				echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' size='7' $autosubmit>";
+				echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' $tunnukset_save $autosubmit>";
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				while($sxrow = mysql_fetch_array ($sresult)){

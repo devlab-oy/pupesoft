@@ -1668,6 +1668,7 @@
 							<input type='hidden' name='asiakasid' value='$asiakasid'>
 							<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 							<input type='hidden' name='tunnus' value='$row[tilaus]'>
+							<input type='hidden' name='tunnukset' value='$laskurow[tunnusnippu]'>
 							<input type='hidden' name='otunnus' value='$laskurow[tunnusnippu]'>
 							<input type='hidden' name='nippu' value='$laskurow[tunnusnippu]'>
 							<input type='hidden' name='nimi' value='$nimi'>

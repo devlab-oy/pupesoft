@@ -207,7 +207,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "taso" :
-				$pakolliset = array("TYYPPI", "LAJI", "TASO", "NIMI");
+				$pakolliset = array("TYYPPI", "TASO", "NIMI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "etaisyydet" :

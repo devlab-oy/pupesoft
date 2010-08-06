@@ -22,16 +22,4 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "laji") {
-
-		$sel = array();
-		$sel[$trow[$i]] = "SELECTED";
-
-		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value = 'O' $sel[O]>".t("Normaali")."</option>";
-		$ulos .= "<option value = 'N' $sel[N]>".t("Tasoa ei nollata")."</option>";
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
 ?>

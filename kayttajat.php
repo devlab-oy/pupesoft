@@ -276,7 +276,11 @@
 
 			//poistetaan käyttäjän vanhat profiilioikeudet
 			$query = "	DELETE FROM oikeu
-						WHERE yhtio='$yhtio' and kuka='$ktunnus' and kuka!='' and profiili='' and lukittu=''";
+						WHERE yhtio = '$yhtio'
+						AND kuka = '$ktunnus'
+						AND kuka != ''
+						AND profiili = ''
+						AND lukittu = ''";
 			$pres = mysql_query($query) or pupe_error($query);
 
 			if (count($profiilit) > 0 and $profiilit[0] !='') {
@@ -286,13 +290,15 @@
 
 					$query = "	SELECT *
 								FROM oikeu
-								WHERE yhtio='$yhtio' and kuka='$prof' and profiili='$prof'";
+								WHERE yhtio = '$yhtio'
+								AND kuka = '$prof'
+								AND profiili = '$prof'";
 					$pres = mysql_query($query) or pupe_error($query);
 
 					while ($trow = mysql_fetch_array($pres)) {
 						//joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
 						//voi olla esim jos se on lukittuna annettu
-						$query = "	SELECT yhtio
+						$query = "	SELECT yhtio, paivitys
 									FROM oikeu
 									WHERE kuka		= '$ktunnus'
 									and sovellus	= '$trow[sovellus]'
@@ -304,10 +310,10 @@
 									and hidden		= '$trow[hidden]'
 									and yhtio		= '$yhtio'";
 						$tarkesult = mysql_query($query) or pupe_error($query);
+						$tarkesultrow = mysql_fetch_array($tarkesult);
 
 						if (mysql_num_rows($tarkesult) == 0) {
-							$query = "	INSERT into oikeu
-										SET
+							$query = "	INSERT into oikeu SET
 										kuka		= '$ktunnus',
 										sovellus	= '$trow[sovellus]',
 										nimi		= '$trow[nimi]',
@@ -318,6 +324,19 @@
 										jarjestys2	= '$trow[jarjestys2]',
 										hidden		= '$trow[hidden]',
 										yhtio		= '$yhtio'";
+							$rresult = mysql_query($query) or pupe_error($query);
+						}
+						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
+							$query = "	UPDATE oikeu SET paivitys = '1'
+										WHERE kuka		= '$ktunnus'
+										AND sovellus	= '$trow[sovellus]'
+										AND nimi		= '$trow[nimi]'
+										AND alanimi 	= '$trow[alanimi]'
+										AND nimitys		= '$trow[nimitys]'
+										AND jarjestys 	= '$trow[jarjestys]'
+										AND jarjestys2	= '$trow[jarjestys2]'
+										AND hidden		= '$trow[hidden]'
+										AND yhtio		= '$yhtio'";
 							$rresult = mysql_query($query) or pupe_error($query);
 						}
 					}
@@ -430,7 +449,7 @@
 						muuttaja						= '$kukarow[kuka]',
 						muutospvm						= now()
 						WHERE kuka	= '$kuka'
-						and yhtio	= '$yhtio'";
+						AND yhtio	= '$yhtio'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$query = "	SELECT nimi, kuka, tunnus
@@ -446,10 +465,10 @@
 			//poistetaan käyttäjän vanhat profiilioikeudet
 			$query = "	DELETE FROM oikeu
 						WHERE yhtio = '$kukarow[yhtio]'
-						and kuka = '$kuka'
-						and kuka != ''
-						and profiili = ''
-						and lukittu = ''";
+						AND kuka = '$kuka'
+						AND kuka != ''
+						AND profiili = ''
+						AND lukittu = ''";
 			$pres = mysql_query($query) or pupe_error($query);
 
 			if (count($profiilit) > 0 and $profiilit[0] != '') {
@@ -458,25 +477,25 @@
 					$query = "	SELECT *
 								FROM oikeu
 								WHERE yhtio = '$kukarow[yhtio]'
-								and kuka = '$prof'
-								and profiili = '$prof'";
+								AND kuka = '$prof'
+								AND profiili = '$prof'";
 					$pres = mysql_query($query) or pupe_error($query);
 
 					while ($trow = mysql_fetch_array($pres)) {
 						//joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
 						//voi olla esim jos se on lukittuna annettu
-						$query = "	SELECT yhtio
+						$query = "	SELECT yhtio, paivitys
 									FROM oikeu
 									WHERE yhtio		= '$kukarow[yhtio]'
-									and kuka		= '$kuka'
-									and sovellus	= '$trow[sovellus]'
-									and nimi		= '$trow[nimi]'
-									and alanimi 	= '$trow[alanimi]'";
+									AND kuka		= '$kuka'
+									AND sovellus	= '$trow[sovellus]'
+									AND nimi		= '$trow[nimi]'
+									AND alanimi 	= '$trow[alanimi]'";
 						$tarkesult = mysql_query($query) or pupe_error($query);
+						$tarkesultrow = mysql_fetch_array($tarkesult);
 
 						if (mysql_num_rows($tarkesult) == 0) {
-							$query = "	INSERT into oikeu
-										SET
+							$query = "	INSERT into oikeu SET
 										kuka		= '$kuka',
 										sovellus	= '$trow[sovellus]',
 										nimi		= '$trow[nimi]',
@@ -487,6 +506,15 @@
 										jarjestys2	= '$trow[jarjestys2]',
 										hidden		= '$trow[hidden]',
 										yhtio		= '$kukarow[yhtio]'";
+							$rresult = mysql_query($query) or pupe_error($query);
+						}
+						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
+							$query = "	UPDATE oikeu SET paivitys = '1'
+										WHERE yhtio		= '$kukarow[yhtio]'
+										AND kuka		= '$kuka'
+										AND sovellus	= '$trow[sovellus]'
+										AND nimi		= '$trow[nimi]'
+										AND alanimi 	= '$trow[alanimi]'";
 							$rresult = mysql_query($query) or pupe_error($query);
 						}
 					}

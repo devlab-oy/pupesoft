@@ -190,8 +190,51 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "vienti") {
+
+			// Katsotaan, ettei ole sekaisin plussia ja miinuksia
 			if ($t[$i] != '' and strpos($t[$i], "+") !== FALSE and strpos($t[$i], "-") !== FALSE) {
-				$virhe[$i] = t("Laita samanaikaisesti vain + tai - maakoodeja!");
+				$virhe[$i] = t("Laita samanaikaisesti vain + tai - maakoodeja!")."<br>";
+			}
+			elseif ($t[$i] != '') {
+
+				// Käyttäjät voi erotella myös maat pilkuilla, joten vaihdetaan ne tässä spaceiksi, trimmataan ja uppercasetaan
+				$t[$i] = str_replace(",", " ", strtoupper(trim($t[$i])));
+
+				// Poistetaan ylimääräiset spacet (kaksi tai enemmän spaceja yhdeksi spaceksi)
+				$t[$i] = preg_replace("/ {2,}/", " ", $t[$i]);
+
+				// Käydään läpi syötetyt arvot, splitataan välilyönnistä
+				$apu_vientikiellot = explode(" ", $t[$i]);
+
+				foreach ($apu_vientikiellot as $apu_vientikielto) {
+
+					// varmistetaan, että löytyy plus tai miinusmerkki
+					if (strpos($apu_vientikielto, "+") === FALSE and strpos($apu_vientikielto, "-") === FALSE) {
+						$virhe[$i] .= t("Maakoodi virheellisessä muodossa").": '$apu_vientikielto'<br>";
+					}
+					// varmistetaan, että plus tai miinus on eka merkki
+					elseif (strpos($apu_vientikielto, "+") != 0 or strpos($apu_vientikielto, "-") != 0) {
+						$virhe[$i] .= t("Maakoodi virheellisessä muodossa").": '$apu_vientikielto'<br>";
+					}
+					else {
+						// Otetaan eka +/- pois
+						$apu_vientikielto = substr($apu_vientikielto, 1);
+
+						// Katsotaan löytyykö annettu maakoodi
+						$query = "	SELECT distinct koodi
+									FROM maat
+									WHERE koodi = '$apu_vientikielto'";
+						$vientikielto_result = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($vientikielto_result) == 0) {
+							$virhe[$i] .= "Virheellinen maakoodi $apu_vientikielto!<br>";
+						}
+					}
+				}
+			}
+
+			if ($virhe[$i] != "") {
+				$virhe[$i] .= t("Syötä tieto muodossa +MAAKOODI tai -MAAKOODI ja erottele maat välilyönnillä.");
 			}
 		}
 

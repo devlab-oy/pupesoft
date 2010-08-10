@@ -569,7 +569,7 @@ if (!function_exists('rivi_otsikot')) {
 
 if (!function_exists('rivi')) {
 	function rivi ($thispage) {
-		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $page, $rectparam, $norm, $pieni, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala, $asiakasrow;
+		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $page, $rectparam, $norm, $pieni, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala, $asiakasrow, $summa, $arvo;
 
 		if (isset($asiakasrow['laskutyyppi']) and $asiakasrow['laskutyyppi'] != -9) {
 			$laskutyyppi = $asiakasrow['laskutyyppi'];

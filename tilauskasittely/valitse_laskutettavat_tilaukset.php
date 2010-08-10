@@ -786,31 +786,7 @@
 			$ketjutus_group = "";
 		}
 
-		//	Tarkistetaan voisimmeko joitain laskuja s‰hkˆisesti!
-		$query = "	SELECT lasku.tunnus, asiakas.chn
-					FROM lasku use index (tila_index)
-					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
-					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
-					JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.chn ='010'
-					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
-					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila = 'L'
-					and lasku.chn	IN ('100','666','')
-					$alatilat
-					$vientilisa
-					$muutlisa
-					$haku";
-		$asres = mysql_query($query) or pupe_error($query);
-		if(mysql_num_rows($asres) == 1) {
-			$asrow = mysql_fetch_array($asres);
-			$query = "	UPDATE lasku SET
-			 				chn				= '$asrow[chn]',
-							verkkotunnus	= ''
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$asrow[tunnus]'";
-			$upres = mysql_query($query) or pupe_error($query);
-		}
-
-		// GROUP BY pit‰‰‰ olla sama kun verkkolasku.php:ss‰ rivill‰†536
+		// GROUP BY pit‰‰ olla sama kun verkkolasku.php:ss‰ rivill‰†536
 		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maksuehto, lasku.chn,
@@ -827,10 +803,10 @@
 					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
-					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
+					LEFT JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
-					and lasku.chn	!= '999'
+					and lasku.chn != '999'
 					$alatilat
 					$vientilisa
 					$muutlisa

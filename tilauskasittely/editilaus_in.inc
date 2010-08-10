@@ -113,6 +113,7 @@ $editilaus_eilahetetta	= "";
 $editilaus_sisainen		= "";
 $editilaus_kassalipas	= "";
 $editilaus_rivihinta	= "";
+$til_vienti				= "";
 
 // nollataan kaikki rivin muuttujat (n‰m‰ samat pit‰‰ tehd‰ tuote insertin j‰lkeen)
 $tuoteerror      = 1; // oletetaan aina ettei  tuotetta lˆydy
@@ -798,16 +799,16 @@ while (!feof ($fd)) {
 				if ($ketjutus != "") {
 					$arow["ketjutus"] = $ketjutus;
 				}
-				
+
 				$edimyyja = "";
-				
+
 				// Haetaan viel‰ myyyj‰numero
 				$query = "	SELECT tunnus
 							FROM kuka
 							WHERE yhtio = '$kukarow[yhtio]'
 							and kuka 	= 'EDI'";
 				$meapu = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($meapu) == 1) {
 					$apuro = mysql_fetch_array($meapu);
 					$edimyyja = $apuro['tunnus'];
@@ -818,19 +819,21 @@ while (!feof ($fd)) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and myyja 	= '$arow[myyjanro]'";
 					$meapu = mysql_query($query) or pupe_error($query);
-					
+
 					if (mysql_num_rows($meapu) == 1) {
 						$apuro = mysql_fetch_array($meapu);
 						$edimyyja = $apuro['tunnus'];
 					}
 				}
-			
+
 				if ($yhtiorow["splittauskielto"] == "E") {
 					$splittauskielto = "E";
 				}
 				else {
 					$splittauskielto = "";
 				}
+
+				$til_vienti = $arow["vienti"];
 
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
@@ -901,7 +904,7 @@ while (!feof ($fd)) {
 							valkoodi		   					= '$yhtiorow[valkoodi]',
 							varasto 							= '',
 							verkkotunnus	   					= '$arow[verkkotunnus]',
-							vienti			   					= '$arow[vienti]',
+							vienti			   					= '$til_vienti',
 							vienti_kurssi						= '1',
 							viesti 			   					= '$viite',
 							viikorkopros 						= '$yhtiorow[viivastyskorko]',
@@ -1369,17 +1372,20 @@ while (!feof ($fd)) {
 
 						$tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
 
-						// Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi
+						$vielisa = "";
+						if ($til_vienti == "") $vielisa = "chn = '999', ";
+
+						// Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
 						$query = "	UPDATE lasku SET
-									mapvm = now(),
-									tila = 'N',
-									alatila = 'A',
-									chn = '999',
-									varasto = '$varasto_row[tunnus]',
-									sisviesti2 = 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
-									tulostusalue = '$tulostusalue'
+									mapvm 			= now(),
+									tila 			= 'N',
+									alatila 		= 'A',
+									$vielisa
+									varasto 		= '$varasto_row[tunnus]',
+									sisviesti2 		= 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
+									tulostusalue 	= '$tulostusalue'
 									WHERE yhtio = '$kukarow[yhtio]'
-									AND tunnus = '$editilaus_lasku_tunnus'";
+									AND tunnus  = '$editilaus_lasku_tunnus'";
 						$magento_maksettu_res = mysql_query($query) or pupe_error($query);
 
 						// haetaan tilauksen tiedot

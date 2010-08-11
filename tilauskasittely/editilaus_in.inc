@@ -406,7 +406,7 @@ while (!feof ($fd)) {
 			}
 
 			if (!is_array($arow)) {
-				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
+				$edi_ulos .= t("Tilaava asiakas")." $tunnus: $tieto -> ";
 
 				$query = "	SELECT *
 							FROM asiakas
@@ -439,7 +439,7 @@ while (!feof ($fd)) {
 				}
 			}
 
-			if (!is_array($arow)) {
+			if (($tunnus == "ONADBY_RF" or $tunnus == "OSTOTIL.OT_ASIAKASNRO") and !is_array($arow)) {
 				$query = "	SELECT *
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -453,9 +453,10 @@ while (!feof ($fd)) {
 					$vastaustapa .= $arow['tilausvahvistus'];
 					$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
 				}
-				else {
-					$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
-				}
+			}
+
+			if (!is_array($arow)) {
+				$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
 			}
 
 			// otetaan talteen kaikki eri arowt, valitaan paras lopuksi.

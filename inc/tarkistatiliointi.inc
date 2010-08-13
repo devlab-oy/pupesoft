@@ -36,7 +36,7 @@
 
 		if ($ok == 0 and strlen($tili) > 0) {
 
-			$query = "	SELECT tilino, toiminto
+			$query = "	SELECT tilino, toiminto, kustp, kohde, projekti
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$tili'";
@@ -56,6 +56,25 @@
 				$virhe = t("Tositteeseen on liitettävä asiakas tai toimittaja")."!";
 				$ok = 1;
 			}
+			
+			if ($xrow['kustp'] != 0 and isset($kustp) and $kustp == 0) {
+				$virhe = t("Pakollinen kustannuspaikka puuttui")."!";
+				$ok = 1;
+				$kustp = $xrow['kustp'];
+			}
+
+			if ($xrow['kohde'] != 0 and isset($kohde) and $kohde == 0) {
+				$virhe = t("Pakollinen kohde puuttui")."!";
+				$ok = 1;
+				$kohde = $xrow['kohde'];
+			}
+
+			if ($xrow['projekti'] != 0 and isset($projekti) and $projekti == 0) {
+				$virhe = t("Pakollinen projekti puuttui")."!";
+				$ok = 1;
+				$projekti = $xrow['projekti'];
+			}
+
 		}
 	}
 

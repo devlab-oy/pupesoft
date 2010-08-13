@@ -20,9 +20,9 @@
 			}
 			</script>";
 
-	if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or ($kukarow["yhtio"] == "atarv" and $tila == "siirrasuoritus1702tilille")) {
+	if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or ($kukarow["yhtio"] == "atarv" and $tila == "siirrasuoritus16113tilille")) {
 
-		if ($tila == "siirrasuoritus1702tilille" and isset($suoritustunnukset_kaikki) and $suoritustunnukset_kaikki != "") {
+		if ($tila == "siirrasuoritus16113tilille" and isset($suoritustunnukset_kaikki) and $suoritustunnukset_kaikki != "") {
 			$suoritustunnukset = $suoritustunnukset_kaikki;
 		}
 
@@ -66,25 +66,27 @@
 			$tiliointi1_res = mysql_query($query) or pupe_error($query);
 			$tiliointi1_row = mysql_fetch_assoc($tiliointi1_res);
 
-			// Haetaan suorituksen pankkitili-tiliöinti
-			$query = "	SELECT tilino
-						FROM tiliointi
-						WHERE yhtio 	= '$kukarow[yhtio]'
-						and ltunnus 	= '$tiliointi1_row[ltunnus]'
-						and tilino 		= '$yriti_row[oletus_rahatili]'
-						and summa 		=  $tiliointi1_row[summa] * -1
-						and korjattu 	= ''
-						LIMIT 1";
-			$tiliointi2_res = mysql_query($query) or pupe_error($query);
-			$tiliointi2_row = mysql_fetch_assoc($tiliointi2_res);
-
+			if (mysql_num_rows($tiliointi1_res) == 1) {
+				// Haetaan suorituksen pankkitili-tiliöinti
+				$query = "	SELECT tilino
+							FROM tiliointi
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and ltunnus 	= '$tiliointi1_row[ltunnus]'
+							and tilino 		= '$yriti_row[oletus_rahatili]'
+							and summa 		=  $tiliointi1_row[summa] * -1
+							and korjattu 	= ''
+							LIMIT 1";
+				$tiliointi2_res = mysql_query($query) or pupe_error($query);
+				$tiliointi2_row = mysql_fetch_assoc($tiliointi2_res);
+			}
+			
 			// Jos kaikki löytyy, niin ok. Else majorkäk
 			if (mysql_num_rows($yriti_res) == 1 and mysql_num_rows($tiliointi1_res) == 1 and mysql_num_rows($tiliointi2_res) == 1 and $tiliointi2_row["tilino"] != "" and (int) $tiliointi1_row["ltunnus"] > 0 and $yhtiorow["selvittelytili"] != "") {
 
-				if ($kukarow["yhtio"] == "atarv" and $tila == 'siirrasuoritus1702tilille') {
-					$stili  = "1702";
+				if ($kukarow["yhtio"] == "atarv" and $tila == 'siirrasuoritus16113tilille') {
+					$stili  = "16113";
 					$tapvm  = $tiliointi1_row["tapvm"];
-					$selite = 'Suoritus siirretty tilille 1702';
+					$selite = 'Suoritus siirretty tilille 16113';
 				}
 				elseif ($tila == 'siirrasuoritus') {
 					$stili  = $yhtiorow["selvittelytili"];
@@ -592,9 +594,9 @@
 					if ($kukarow["yhtio"] == "atarv") {
 						// ARWI special
 						$suoritustunnukset_kaikki[] = $maksurow["tunnus"];
-						echo "<input type='hidden' name='tila' value='siirrasuoritus1702tilille'>";
+						echo "<input type='hidden' name='tila' value='siirrasuoritus16113tilille'>";
 						echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
-						echo "<input type='submit' value='Siirrä 1702-tilille'>";
+						echo "<input type='submit' value='Siirrä 16113-tilille'>";
 					}
 					echo "<input type='hidden' name='tila' value='siirrasuoritus'>";
 					echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
@@ -620,9 +622,9 @@
 		if (($kukarow['taso'] == 2 or $kukarow['taso'] == 3) and $kukarow["yhtio"] == "atarv" and count($suoritustunnukset_kaikki) > 0) {
 			// ARWI special
 			echo "<br><br><form method='post' action='$PHP_SELF?$ulisa'>";
-			echo "<input type='hidden' name='tila' value='siirrasuoritus1702tilille'>";
+			echo "<input type='hidden' name='tila' value='siirrasuoritus16113tilille'>";
 			echo "<input type='hidden' name='suoritustunnukset_kaikki' value='".implode(",", $suoritustunnukset_kaikki)."'>";
-			echo "<input type='submit' value='Siirrä kaikki suoritukset 1702-tilille' onClick='return verify3();'>";
+			echo "<input type='submit' value='Siirrä kaikki suoritukset 16113-tilille' onClick='return verify3();'>";
 			echo "</form>";
 		}
 	}

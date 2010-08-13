@@ -720,7 +720,7 @@
 	$lisa  = "";
 	$lisa2 = "";
 
-	if ($ostotilaus_haku != "") {
+	if (isset($ostotilaus_haku) and $ostotilaus_haku != "") {
 		if (is_numeric($ostotilaus_haku)) {
 			if ($ostotilaus_haku == 0) {
 				$lisa .= " and lasku_osto.tunnus is null ";
@@ -734,7 +734,7 @@
 		}
 	}
 
-	if ($myyntitilaus_haku != "") {
+	if (isset($myyntitilaus_haku) and $myyntitilaus_haku != "") {
 		if (is_numeric($myyntitilaus_haku)) {
 			if ($myyntitilaus_haku == 0) {
 				$lisa .= " and (lasku_myynti.tunnus is null or lasku_myynti.tila = 'T') and sarjanumeroseuranta.myyntirivitunnus != -1 ";
@@ -748,27 +748,27 @@
 		}
 	}
 
-	if ($lisatieto_haku != "") {
+	if (isset($lisatieto_haku) and $lisatieto_haku != "") {
 		$lisa .= " and sarjanumeroseuranta.lisatieto like '%$lisatieto_haku%' ";
 	}
 
-	if ($tuoteno_haku != "") {
+	if (isset($tuoteno_haku) and $tuoteno_haku != "") {
 		$lisa .= " and sarjanumeroseuranta.tuoteno like '%$tuoteno_haku%' ";
 	}
 
-	if ($sarjanumero_haku != "") {
+	if (isset($sarjanumero_haku) and $sarjanumero_haku != "") {
 		$lisa .= " and sarjanumeroseuranta.sarjanumero like '%$sarjanumero_haku%' ";
 	}
 
-	if ($varasto_haku != "") {
+	if (isset($varasto_haku) and $varasto_haku != "") {
 		$lisa .= " and varastopaikat.nimitys like '%$varasto_haku%' ";
 	}
 
-	if ($tervetuloa_haku != "") {
+	if (isset($tervetuloa_haku) and $tervetuloa_haku != "") {
 		$lisa .= " and (lasku_osto.laatija='$kukarow[kuka]' or lasku_myynti.laatija='$kukarow[kuka]' or lasku_myynti.myyja='$kukarow[tunnus]')";
 	}
 
-	if ($nimitys_haku != "") {
+	if (isset($nimitys_haku) and $nimitys_haku != "") {
 		$lisa2 = " HAVING nimitys like '%$nimitys_haku%' ";
 	}
 
@@ -778,8 +778,8 @@
 
 	if ($lisa == "") {
 		$lisa = " and sarjanumeroseuranta.myyntirivitunnus != -1 ";
-		
-		if ($ostonhyvitysrivi != "ON") {
+
+		if (isset($ostonhyvitysrivi) and $ostonhyvitysrivi != "ON") {
 			$lisa .= " and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') ";
 		}
 	}

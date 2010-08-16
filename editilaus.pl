@@ -119,5 +119,8 @@ if (!-f $tmpfile) {
 	} # end readdir while
 
 	system("rm -f $tmpfile");
+	
+	# siivotaan yli 180 p‰iv‰‰ vanhat aineistot
+	system("find $dirri2 -mtime +180 -delete");
 
 } # end temp if

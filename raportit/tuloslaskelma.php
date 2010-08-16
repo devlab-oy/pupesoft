@@ -864,10 +864,9 @@
 				$alkukausi = 0;
 			}
 
-			//	Laajempi pdf käsittel
-			require_once('pdflib/pupepdf.class.php');
+			require_once('pdflib/phppdflib.class.php');
 
-			$pdf = new pdf;
+			$pdf = new pdffile;
 			$pdf->set_default('margin', 0);
 			$pdf->set_default('margin-left', 5);
 			$rectparam["width"] = 0.3;

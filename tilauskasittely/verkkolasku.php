@@ -760,20 +760,24 @@
 										WHERE yhtio = '$kukarow[yhtio]'
 										AND tuoteno = '$yhtiorow[jalkivaatimus_tuoteno]'";
 							$rhire = mysql_query($query) or pupe_error($query);
-							$trow  = mysql_fetch_array($rhire);
 
-							$hinta = $tjvrow['jvkulu']; // jv kulu
-							$nimitys = "Jälkivaatimuskulu";
-							$kommentti = "";
+							// jos tuotenumero löytyy
+							if (mysql_num_rows($rhire) == 1) {
+								$trow  = mysql_fetch_array($rhire);
 
-							list($jvhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+								$hinta = $tjvrow['jvkulu']; // jv kulu
+								$nimitys = "Jälkivaatimuskulu";
+								$kommentti = "";
 
-							$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-										values ('$jvhinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
-							$addtil = mysql_query($query) or pupe_error($query);
+								list($jvhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-							if ($silent == "") {
-								$tulos_ulos .= "<tr><td>".t("Lisättiin jv-kulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$jvhinta</td><td>$yhtiorow[valkoodi]</td></tr>\n";
+								$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+											values ('$jvhinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+								$addtil = mysql_query($query) or pupe_error($query);
+
+								if ($silent == "") {
+									$tulos_ulos .= "<tr><td>".t("Lisättiin jv-kulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$jvhinta</td><td>$yhtiorow[valkoodi]</td></tr>\n";
+								}
 							}
 						}
 						elseif (mysql_num_rows($otsre) != 1 and $silent == "") {
@@ -858,23 +862,15 @@
 							$rahtihinta = $rahtihinta_ale = 0;
 						}
 
-						if ($rahtihinta != 0 and $virhe == 0) {
+						$query = "	SELECT *
+									FROM tuote
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+						$rhire = mysql_query($query) or pupe_error($query);
 
-							// kirjoitetaan hintarivi ekalle otsikolle
-							if (trim($yhtiorow["rahti_tuotenumero"]) == "") {
-								$tuotska = t("Rahtikulu");
-							}
-							else {
-								$tuotska = $yhtiorow["rahti_tuotenumero"];
-							}
+						if ($rahtihinta != 0 and $virhe == 0 and mysql_num_rows($rhire) == 1) {
 
-							$query = "	SELECT *
-										from tuote
-										where yhtio='$kukarow[yhtio]'
-										and tuoteno='$tuotska'";
-							$rhire = mysql_query($query) or pupe_error($query);
-							$trow  = mysql_fetch_array($rhire);
-
+							$trow		= mysql_fetch_array($rhire);
 							$otunnus	= $laskurow['tunnus'];
 							$hinta		= $rahtihinta;
 							$nimitys	= "$pvm $laskurow[toimitustapa]";

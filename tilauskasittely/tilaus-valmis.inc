@@ -471,15 +471,16 @@ else {
 						$rahtihinta = $rahtihinta_ale = 0;
 					}
 
-					//lisätään rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivejä on ilmeisesti turha lisätä
-					if ($rahtihinta != 0) {
+					// haetaan rahtituotteen tiedot
+					$query = "	SELECT *
+								FROM tuote
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+					$rhire = mysql_query($query) or pupe_error($query);
 
-						// haetaan rahtituotteen tiedot
-						$query = "	SELECT *
-									FROM tuote
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
-						$rhire = mysql_query($query) or pupe_error($query);
+					//lisätään rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivejä on ilmeisesti turha lisätä (ja rahtikulutuote löytyy)
+					if ($rahtihinta != 0 and mysql_num_rows($rhire) == 1) {
+
 						$trow  = mysql_fetch_assoc($rhire);
 
 						$otunnus	 = $laskurow['tunnus'];
@@ -515,14 +516,15 @@ else {
 								AND tuoteno = '$yhtiorow[jalkivaatimus_tuoteno]'";
 					$result = mysql_query($query) or pupe_error($query);
 
-					// lisätään jälkivaatimuskulu
-					if (mysql_num_rows($result) == 0 and $torow["jvkulu"] != 0 and $maksuehtorow["jv"] != "") {
+					$query = "	SELECT *
+								FROM tuote
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tuoteno = '$yhtiorow[jalkivaatimus_tuoteno]'";
+					$rhire = mysql_query($query) or pupe_error($query);
 
-						$query = "	SELECT *
-									FROM tuote
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND tuoteno = '$yhtiorow[jalkivaatimus_tuoteno]'";
-						$rhire = mysql_query($query) or pupe_error($query);
+					// lisätään jälkivaatimuskulu jos sitä ei ole tilauksella ja tuote löytyy
+					if (mysql_num_rows($rhire) == 1 and mysql_num_rows($result) == 0 and $torow["jvkulu"] != 0 and $maksuehtorow["jv"] != "") {
+
 						$trow = mysql_fetch_assoc($rhire);
 
 						$otunnus	 = $laskurow['tunnus'];

@@ -14,9 +14,9 @@ $query  = "UPDATE lasku set vanhatunnus=tunnus where yhtio='$kukarow[yhtio]' and
 $oldtur = mysql_query($query) or pupe_error($query);
 
 // Katsotaan onko asiakas myyntikiellossa
-$query  = "	SELECT * 
-			FROM asiakas 
-			WHERE yhtio = '$kukarow[yhtio]' 
+$query  = "	SELECT *
+			FROM asiakas
+			WHERE yhtio = '$kukarow[yhtio]'
 			AND tunnus = '$laskurow[liitostunnus]'";
 $tilausvalmis_asiakas_res = mysql_query($query) or pupe_error($query);
 $tilausvalmis_asiakas_row = mysql_fetch_assoc($tilausvalmis_asiakas_res);
@@ -502,23 +502,43 @@ else {
 						$hinta = money_format('%.2n', $hinta);
 
 						$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin rahtikulua").": $hinta $laskurow[valkoodi]<br>";
+					}
 
-						if ($torow["jvkulu"] != 0 and $maksuehtorow["jv"] != "") {
-							$otunnus	 = $laskurow['tunnus'];
-							$hinta		 = $torow["jvkulu"]; // jvkulu
-							$trow["alv"] = $laskurow["alv"];
-							$nimitys	 = t("J‰lkivaatimuskulu");
+					if ($yhtiorow["jalkivaatimus_tuoteno"] == "") {
+						$yhtiorow["jalkivaatimus_tuoteno"] = $yhtiorow["rahti_tuotenumero"];
+					}
 
-							list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+					$query = "	SELECT tunnus
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND otunnus = '$laskurow[tunnus]'
+								AND tuoteno = '$yhtiorow[jalkivaatimus_tuoteno]'";
+					$result = mysql_query($query) or pupe_error($query);
 
-							$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-										values (now(), '$hinta', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
-							$addtil = mysql_query($query) or pupe_error($query);
+					// lis‰t‰‰n j‰lkivaatimuskulu
+					if (mysql_num_rows($result) == 0 and $torow["jvkulu"] != 0 and $maksuehtorow["jv"] != "") {
 
-							$hinta = money_format('%.2n', $hinta);
+						$query = "	SELECT *
+									FROM tuote
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tuoteno = '$yhtiorow[jalkivaatimus_tuoteno]'";
+						$rhire = mysql_query($query) or pupe_error($query);
+						$trow = mysql_fetch_assoc($rhire);
 
-							$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin j‰lkivaatimuskulua").": $hinta $laskurow[valkoodi]<br>";
-						}
+						$otunnus	 = $laskurow['tunnus'];
+						$hinta		 = $torow["jvkulu"]; // jvkulu
+						$trow["alv"] = $laskurow["alv"];
+						$nimitys	 = t("J‰lkivaatimuskulu");
+
+						list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+
+						$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+									values (now(), '$hinta', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+						$addtil = mysql_query($query) or pupe_error($query);
+
+						$hinta = money_format('%.2n', $hinta);
+
+						$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin j‰lkivaatimuskulua").": $hinta $laskurow[valkoodi]<br>";
 					}
 				}
 			}

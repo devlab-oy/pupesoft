@@ -684,101 +684,105 @@
 				//vika pilkku pois
 				$tunnukset = substr($tunnukset,0,-1);
 
-				//rahtien ja jälkivaatimuskulujen muuttujia
-				$rah 	 = 0;
-				$jvhinta = 0;
-				$rahinta = 0;
+				// Lasketaan rahtikulut ja jälkivaatimuskulut vain jos niitä ei olla laskettu jo tilausvaiheessa.
+				if ($yhtiorow["rahti_hinnoittelu"] == "") {
 
-				// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per päivä
-				// jälkivaatimukset omalle riville ja tutkitaan tarvimmeko lisäillä JV-kuluja
-				if ($silent == "") {
-					$tulos_ulos .= "<br>\n".t("Jälkivaatimuskulut").":<br>\n";
-				}
+					//rahtien ja jälkivaatimuskulujen muuttujia
+					$rah 	 = 0;
+					$jvhinta = 0;
+					$rahinta = 0;
 
-				$query   = "SELECT group_concat(distinct lasku.tunnus) tunnukset
-							FROM lasku, rahtikirjat, maksuehto
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.tunnus in ($tunnukset)
-							and lasku.yhtio = rahtikirjat.yhtio
-							and lasku.tunnus = rahtikirjat.otsikkonro
-							and lasku.yhtio = maksuehto.yhtio
-							and lasku.maksuehto	= maksuehto.tunnus
-							and maksuehto.jv != ''
-							GROUP BY date_format(rahtikirjat.tulostettu, '%Y-%m-%d'), lasku.ytunnus, lasku.toimitustapa";
-				$result  = mysql_query($query) or pupe_error($query);
+					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per päivä
+					// jälkivaatimukset omalle riville ja tutkitaan tarvimmeko lisäillä JV-kuluja
+					if ($silent == "") {
+						$tulos_ulos .= "<br>\n".t("Jälkivaatimuskulut").":<br>\n";
+					}
 
-				$yhdista = array();
+					$query = "	SELECT group_concat(distinct lasku.tunnus) tunnukset
+								FROM lasku, rahtikirjat, maksuehto
+								WHERE lasku.yhtio = '$kukarow[yhtio]'
+								AND lasku.tunnus in ($tunnukset)
+								AND lasku.yhtio = rahtikirjat.yhtio
+								AND lasku.tunnus = rahtikirjat.otsikkonro
+								AND lasku.yhtio = maksuehto.yhtio
+								AND lasku.maksuehto	= maksuehto.tunnus
+								AND maksuehto.jv != ''
+								GROUP BY date_format(rahtikirjat.tulostettu, '%Y-%m-%d'), lasku.ytunnus, lasku.toimitustapa";
+					$result = mysql_query($query) or pupe_error($query);
 
-				while ($row = mysql_fetch_array($result)) {
-					$yhdista[] = $row["tunnukset"];
-				}
+					$yhdista = array();
 
-				if (count($yhdista) == 0 and $silent == "") {
-					$tulos_ulos .= t("Ei jälkivaatimuksia")."!<br>\n";
-				}
+					while ($row = mysql_fetch_array($result)) {
+						$yhdista[] = $row["tunnukset"];
+					}
 
-				if ($silent == "") $tulos_ulos .= "<table>";
+					if (count($yhdista) == 0 and $silent == "") {
+						$tulos_ulos .= t("Ei jälkivaatimuksia")."!<br>\n";
+					}
 
-				foreach ($yhdista as $otsikot) {
+					if ($silent == "") $tulos_ulos .= "<table>";
 
-					// lisätään näille tilauksille jvkulut
-					$virhe=0;
+					foreach ($yhdista as $otsikot) {
 
-					//haetaan ekan otsikon tiedot
-					$query = "	SELECT lasku.*, maksuehto.jv
-								FROM lasku, maksuehto
-								WHERE lasku.yhtio='$kukarow[yhtio]'
-								and lasku.tunnus in ($otsikot)
-								and lasku.yhtio = maksuehto.yhtio
-								and lasku.maksuehto	= maksuehto.tunnus
-								order by lasku.tunnus
-								limit 1";
-					$otsre = mysql_query($query) or pupe_error($query);
-					$laskurow = mysql_fetch_array($otsre);
+						// lisätään näille tilauksille jvkulut
+						$virhe = 0;
 
-					if (mysql_num_rows($otsre)!=1) $virhe++;
+						//haetaan ekan otsikon tiedot
+						$query = "	SELECT lasku.*, maksuehto.jv
+									FROM lasku, maksuehto
+									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									AND lasku.tunnus in ($otsikot)
+									AND lasku.yhtio = maksuehto.yhtio
+									AND lasku.maksuehto	= maksuehto.tunnus
+									ORDER BY lasku.tunnus
+									LIMIT 1";
+						$otsre = mysql_query($query) or pupe_error($query);
+						$laskurow = mysql_fetch_array($otsre);
 
-					if (mysql_num_rows($otsre)==1 and $virhe==0) {
+						if (mysql_num_rows($otsre) != 1) $virhe++;
 
-						// kirjoitetaan jv kulurivi ekalle otsikolle
-						$query = "	SELECT jvkulu
-									FROM toimitustapa
-									WHERE yhtio='$kukarow[yhtio]'
-									and selite='$laskurow[toimitustapa]'";
-						$tjvres = mysql_query($query) or pupe_error($query);
-						$tjvrow = mysql_fetch_array($tjvres);
+						if (mysql_num_rows($otsre) == 1 and $virhe == 0) {
 
-						$query = "	SELECT *
-									FROM tuote
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tuoteno = '$yhtiorow[rahti_tuotenumero]'";
-						$rhire = mysql_query($query) or pupe_error($query);
-						$trow  = mysql_fetch_array($rhire);
+							// kirjoitetaan jv kulurivi ekalle otsikolle
+							$query = "	SELECT jvkulu
+										FROM toimitustapa
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND selite = '$laskurow[toimitustapa]'";
+							$tjvres = mysql_query($query) or pupe_error($query);
+							$tjvrow = mysql_fetch_array($tjvres);
 
-						$hinta		        = $tjvrow['jvkulu']; // jv kulu
-						$nimitys            = "Jälkivaatimuskulu";
-						$kommentti          = "";
+							if ($yhtiorow["jalkivaatimus_tuoteno"] == "") {
+								$yhtiorow["jalkivaatimus_tuoteno"] = $yhtiorow["rahti_tuotenumero"];
+							}
 
-						list($jvhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+							$query = "	SELECT *
+										FROM tuote
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND tuoteno = '$yhtiorow[jalkivaatimus_tuoteno]'";
+							$rhire = mysql_query($query) or pupe_error($query);
+							$trow  = mysql_fetch_array($rhire);
 
-						$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-									values ('$jvhinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
-						$addtil = mysql_query($query) or pupe_error($query);
+							$hinta = $tjvrow['jvkulu']; // jv kulu
+							$nimitys = "Jälkivaatimuskulu";
+							$kommentti = "";
 
-						if ($silent == "") {
-							$tulos_ulos .= "<tr><td>".t("Lisättiin jv-kulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$jvhinta</td><td>$yhtiorow[valkoodi]</td></tr>\n";
+							list($jvhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+
+							$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+										values ('$jvhinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+							$addtil = mysql_query($query) or pupe_error($query);
+
+							if ($silent == "") {
+								$tulos_ulos .= "<tr><td>".t("Lisättiin jv-kulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$jvhinta</td><td>$yhtiorow[valkoodi]</td></tr>\n";
+							}
+						}
+						elseif (mysql_num_rows($otsre) != 1 and $silent == "") {
+							$tulos_ulos .= "<tr><td>".t("Jälkivaatimuskulua ei löydy!")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td></tr>\n";
+						}
+						elseif ($silent == "") {
+							$tulos_ulos .= "<tr><td>".t("Jälkivaatimuskulua ei osattu lisätä!")." $virhe</td><td>$otsikot</td><td>$laskurow[toimitustapa]</td></tr>\n";
 						}
 					}
-					elseif (mysql_num_rows($otsre) != 1 and $silent == "") {
-						$tulos_ulos .= "<tr><td>".t("Jälkivaatimuskulua ei löydy!")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td></tr>\n";
-					}
-					elseif ($silent == "") {
-						$tulos_ulos .= "<tr><td>".t("Jälkivaatimuskulua ei osattu lisätä!")." $virhe</td><td>$otsikot</td><td>$laskurow[toimitustapa]</td></tr>\n";
-					}
-				}
-
-				// Lasketaan rahtikulut vain jos ne eivät ole laskettu jo tilausvaiheessa.
-				if ($yhtiorow["rahti_hinnoittelu"] == "") {
 
 					if ($silent == "") {
 						$tulos_ulos .= "<br>\n".t("Rahtikulut").":<br>\n<table>";

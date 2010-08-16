@@ -20,28 +20,29 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			}
 		}
 
-		//	TODO ale ja ennakkomaksutuotteet voisi tarkastaa vain jos tarpeellista
-		if (mysql_field_name($result, $i) == "maksuehto_tuotenumero" or
-		    mysql_field_name($result, $i) == "rahti_tuotenumero" or
-		    mysql_field_name($result, $i) == "alennus_tuotenumero" or
+		if (mysql_field_name($result, $i) == "maksuehto_tuotenumero" OR
+		    mysql_field_name($result, $i) == "rahti_tuotenumero" OR
+		    mysql_field_name($result, $i) == "jalkivaatimus_tuoteno" OR
+		    mysql_field_name($result, $i) == "lisakulu_tuotenumero" OR
+		    mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero" OR		
+		    mysql_field_name($result, $i) == "alennus_tuotenumero" OR
 			mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero") {
 
-			$tuote = trim($t[$i]);
+			$tuote = mysql_real_escape_string(trim($t[$i]));
 
-			// katotaan löytyykö tällänen saldoton tuote
 			if ($tuote != "") {
-
-				$query = "	select *
-							from tuote
-							where yhtio	= '$kukarow[yhtio]'
-							and tuoteno = '$tuote'
-							and ei_saldoa != ''";
+				// katotaan löytyykö tällänen saldoton tuote
+				$query = "	SELECT tunnus
+							FROM tuote
+							WHERE yhtio	= '$kukarow[yhtio]'
+							AND tuoteno = '$tuote'
+							AND tuoteno != ''
+							AND ei_saldoa != ''";
 				$xyresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($xyresult) == 0) {
 					$virhe[$i] = t("Tuotetta ei löydy!")." / ".t("Tuote pitää olla saldoton!");
 				}
-
 			}
 		}
 

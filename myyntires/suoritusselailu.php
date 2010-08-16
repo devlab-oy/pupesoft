@@ -587,28 +587,34 @@
 			if ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) {
 				// tehd‰‰n nappi suorituksen poistamiseen
 				echo "<td valign='top' class='back'>";
-				echo "<form method='post' action='$PHP_SELF?$ulisa'>";
-
-
+				
 				if (trim($maksurow["viite"]) != "") {
 					if ($kukarow["yhtio"] == "atarv") {
 						// ARWI special
 						$suoritustunnukset_kaikki[] = $maksurow["tunnus"];
+						
+						echo "<form method='post' action='$PHP_SELF?$ulisa'>";
 						echo "<input type='hidden' name='tila' value='siirrasuoritus16113tilille'>";
 						echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
 						echo "<input type='submit' value='Siirr‰ 16113-tilille'>";
+						echo "</form>";
 					}
+					
+					echo "<form method='post' action='$PHP_SELF?$ulisa'>";
 					echo "<input type='hidden' name='tila' value='siirrasuoritus'>";
 					echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
 					echo "<input type='submit' value='".t("Siirr‰ selvittelytilille")."' onClick='return verify1();'>";
+					echo "</form>";
 				}
-				else {
+				else {					
+					echo "<form method='post' action='$PHP_SELF?$ulisa'>";
 					echo "<input type='hidden' name='tila' value='poistasuoritus'>";
 					echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
 					echo "<input type='submit' value='".t("Poista suoritus")."' onClick='return verify2();'>";
+					echo "</form>";
 				}
 
-				echo "</form>";
+				
 				echo "</td>";
 			}
 

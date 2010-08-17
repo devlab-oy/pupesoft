@@ -115,7 +115,7 @@
 		$ulos .= "<option value = '6' $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
 		$ulos .= "<option value = '7' $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi)")."</option>";
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
-		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
+		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");
 		$ulos .= "</select></td>";
 
@@ -165,9 +165,7 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = '0' $sel[0]>".t("Normaali tilausvahvistuspohja");
-		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty tilausvahvistuspohja 2 (Tuoteperheet yhdistetty)");
-
-
+		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty tilausvahvistuspohja 2 (Tuoteperheet yhdistetty)");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -211,9 +209,7 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = '0' $sel[0]>".t("Normaali ostotilauspohja");
-		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty ostotilauspohja");
-
-
+		#$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty ostotilauspohja");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -905,12 +901,12 @@
 
 			$ulos .= "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
 		}
-		
+
 		if ($trow[$i] == -99) $select = 'SELECTED';
 		else $select = '';
-		
+
 		$ulos .= "<option value='-99' $select>".t("Asiakkaan s‰hkˆpostiin")."</option>";
-		
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2337,6 +2333,21 @@
 
 		$ulos .= "<option value = ''>".t("Ei tarkenteita velka-/saatavat-tileille")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Lis‰t‰‰n velka-/saatavat-tileille suurimman velan/saatavan tarkenteet")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "vaihda_asiakas_hintapaiv") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksen hinnat (paitsi nettohinnat) p‰ivitet‰‰n kun vaihdetaan tilauksen asiakas")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("Myyntitilauksen hinnat (paitsi nettohinnat) p‰ivitet‰‰n vain jos uudella asiakkaalla on asiakashinta/-alennus kun vaihdetaan tilauksen asiakas")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

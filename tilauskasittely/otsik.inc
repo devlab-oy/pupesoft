@@ -2,8 +2,11 @@
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
-	// toimehtoTarkenne javascript funktio
+	// ToimehtoTarkenne javascript funktio
 	js_toimehtoTarkenne();
+
+	// Voidaan esim. luoda lennossa uusia yhteyshenkilöitä
+	js_open_yllapito();
 
 	//tässä joko tehdään uutta otsikkoa tai muutetaan olemassa olevaa
 	if ($tee == '' or $kopioitava_otsikko != 0) {
@@ -181,7 +184,7 @@
 			unset($jatka);
 		}
 
-		if ($yhtiorow["tilauksen_yhteyshenkilot"] == 'P' and ($tilausyhteyshenkilo == '' and $seltilausyhteyshenkilo == '') and in_array($toim, array("PROJEKTI", "TARJOUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "RIVISYOTTO", "REKLAMAATIO"))) {
+		if ($yhtiorow["tilauksen_yhteyshenkilot"] == 'P' and ($tilausyhteyshenkilo == '' and $yhteyshenkilo_tilaus == '') and in_array($toim, array("PROJEKTI", "TARJOUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "RIVISYOTTO", "REKLAMAATIO"))) {
 			echo "<font class='error'>".t("VIRHE: Anna tilaukselle yhteyshenkilö")."!</font><br>";
 			$tee = "OTSIK";
 			$tila = "";
@@ -231,7 +234,7 @@
 			}
 
 		}
-	} 
+	}
 
 	//	Tarkastetaan käsinsyötetty viite
 	if (isset($jatka) and $kasinsyotetty_viite != "" and $yhtiorow["viitteen_kasinsyotto"] != "") {
@@ -1260,8 +1263,8 @@
 
 			//	Jos halutaan niin voidaan liittää hieman yhteyshenkilöitä
 			if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
-				echo "<tr><td>".t("Yhteyshenkilö").":</td>
-				<td><select id='yhteyshenkilo_tekninen' name='yhteyshenkilo_tekninen' onchange=\"yllapito('yhteyshenkilo&lukitse_avaimeen=$srow[liitostunnus]&yhtyyppi=asiakas',this.id)\">";
+				echo "<tr><td>".t("Tekninen yhteyshenkilö").":</td>
+				<td><select id='yhteyshenkilo_tekninen' name='yhteyshenkilo_tekninen'>";
 
 				$query = "	SELECT tunnus, if (titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
 							FROM yhteyshenkilo
@@ -1269,26 +1272,18 @@
 							ORDER BY nimi";
 				$yhresult = mysql_query($query) or pupe_error($query);
 
-				//duusaan näihin javascript handlerin myöhemmin
-				echo "	<option value=''>".t("Ei teknistä yhteyshenkilöä")."</option>";
+				echo "<option value=''>".t("Ei teknistä yhteyshenkilöä")."</option>";
 
-				$optlisa="";
 				while($row = mysql_fetch_assoc($yhresult)) {
 					$sel = "";
 					if ($row["tunnus"] == $srow["yhteyshenkilo_tekninen"]) {
 						$sel = 'selected';
-						$optlisa = "<option value='muokkaa#$srow[yhteyshenkilo_tekninen]'>".t("Muokkaa yhteyshenkilöä")."</option>";
 					}
 					echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
 				}
 
-				echo "	<optgroup label='".t("Toiminto")."'>
-							<option value='uusi'>".t("Luo uusi yhteyshenkilö")."</option>
-							$optlisa
-						</optgroup>";
-
-				echo "</select>";
-
+				echo "</select> ";
+				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tekninen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/database-option-add.png'>".t("Uusi yhteyshenkilö")."</a>";
 				echo "</td>";
 
 				echo "<td>".t("Projektipaallikko").":</td>
@@ -1314,29 +1309,22 @@
 
 				echo "</td></tr>";
 
-				echo "<tr><td>".t("Asiakkaan kaupallinen käsittelijä").":</td>
-				<td><select id='yhteyshenkilo_kaupallinen' name='yhteyshenkilo_kaupallinen' onchange=\"yllapito('yhteyshenkilo&lukitse_avaimeen=$srow[liitostunnus]&yhtyyppi=asiakas',this.id)\">";
+				echo "<tr><td>".t("Kaupallinen yhteyshenkilö").":</td>
+				<td><select id='yhteyshenkilo_kaupallinen' name='yhteyshenkilo_kaupallinen'>";
 
 				echo "	<option value=''>".t("Ei kaupallista käsittelijää")."</option>";
 				mysql_data_seek($yhresult,0);
 
-				$optlisa="";
 				while($row = mysql_fetch_assoc($yhresult)) {
 					$sel = "";
 					if ($row["tunnus"] == $srow["yhteyshenkilo_kaupallinen"]) {
 						$sel = 'selected';
-						$optlisa = "<option value='muokkaa#$srow[yhteyshenkilo_kaupallinen]'>Muokkaa yhteyshenkilöä</option>";
 					}
 					echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
 				}
 
-				//duusaan näihin javascript handlerin myöhemmin
-				echo "	<optgroup label='".t("Toiminto")."'>
-							<option value='uusi'>".t("Luo uusi yhteyshenkilö")."</option>
-							$optlisa
-						</optgroup>";
-
-				echo "</select>";
+				echo "</select> ";
+				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_kaupallinen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/database-option-add.png'>".t("Uusi yhteyshenkilö")."</a>";
 				echo "</td>";
 
 			}
@@ -1349,28 +1337,18 @@
 				$kohderesult = mysql_query($query) or pupe_error($query);
 
 				echo "<td>".t("Kohde").":</td>
-					<td><select id='asiakkaan_kohde' name='asiakkaan_kohde' onchange=\"yllapito('asiakkaan_kohde&lukitse_avaimeen=$srow[liitostunnus]',this.id)\">";
+					<td><select id='asiakkaan_kohde' name='asiakkaan_kohde'>";
 
 				echo "<option value=''>".t("Asiakkaalla ei ole kohdetta")."</option>";
 
-				$optlisa="";
-				while($row = mysql_fetch_assoc($kohderesult)) {
+				while ($row = mysql_fetch_assoc($kohderesult)) {
 					$sel = "";
 					if ($row["tunnus"] == $srow["asiakkaan_kohde"]) {
 						$sel = 'selected';
-						$optlisa = "<option value='muokkaa#$srow[asiakkaan_kohde]'>".t("Muokkaa kohdetta")."</option>";
 					}
 					echo "<option value='$row[tunnus]' $sel>$row[tunnus] - $row[kohde]</option>";
 				}
-
-				//duusaan näihin javascript handlerin myöhemmin
-				echo "	<optgroup label='".t("Toiminto")."'>
-							<option value='uusi'>".t("Luo uusi asiakkaan kohde")."</option>
-							$optlisa
-						</optgroup>";
-
 				echo "</select>";
-
 				echo "</td></tr>";
 
 			}
@@ -2171,35 +2149,37 @@
 				echo "<tr><th colspan='3'>".t("Tilauksen kommentit").":</th></tr>";
 			}
 
-			if ($yhtiorow["tilauksen_yhteyshenkilot"] != "K") {
-				echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
+			echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
 
-				$yhteysquery = "SELECT * FROM yhteyshenkilo where yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]' and tyyppi = 'A' and tilausyhteyshenkilo != ''";
-				$yhteysresult = mysql_query($yhteysquery) or pupe_error($yhteysquery);
+			$yhteysquery = "SELECT *
+							FROM yhteyshenkilo
+							where yhtio = '$kukarow[yhtio]'
+							and liitostunnus = '$srow[liitostunnus]'
+							and tyyppi = 'A'
+							and tilausyhteyshenkilo != ''";
+			$yhteysresult = mysql_query($yhteysquery) or pupe_error($yhteysquery);
 
-				if (mysql_num_rows($yhteysresult) > 0) {
-					echo "<td colspan = '1'><select name='seltilausyhteyshenkilo'>";
-					echo "<option value = ''>".t("Ei valintaa")."</option>";
+			echo "<td><input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'><br>";
 
-					while ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
+			echo "<select id='yhteyshenkilo_tilaus' name='yhteyshenkilo_tilaus'>";
+			echo "<option value = ''>".t("Ei valintaa")."</option>";
 
-						$sela = "";
+			while ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
 
-						if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"]) {
-							$sela = "SELECTED";
-							$srow["tilausyhteyshenkilo"] = "";
-						}
+				$sela = "";
 
-						echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
-					}
-
-					echo "</select>";
-					echo "<input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
+				if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"]) {
+					$sela = "SELECTED";
+					$srow["tilausyhteyshenkilo"] = "";
 				}
-				else {
-					echo "<td colspan = '1'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
-				}
+
+				echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
 			}
+
+			echo "</select> ";
+			echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/database-option-add.png'>".t("Uusi yhteyshenkilö")."</a>";
+			echo "</td>";
+			echo "<td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 
 			echo "<tr><td>".t("Asiakkaan tilausnumero").":</td><td colspan = '1'><input type='text' size='43' name='asiakkaan_tilausnumero' value='$srow[asiakkaan_tilausnumero]'><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 
@@ -2248,7 +2228,6 @@
 			}
 
 			echo "</tr></table>";
-
 		}
 
 		$formi  = "paaformi";
@@ -2299,12 +2278,24 @@
 				// Ei esim jos vain alvi tai vientikenttää muutetaan
 				if (($from == 'vaihdaasiakas' or $apuro["liitostunnus"] != $asiakasid) and $asiakasid > 0) {
 
-					if ($row['netto'] == "") {
+					$paivitetaanko = TRUE;
+
+					// hinnat päivitetään vain jos asiakkaalla on asiakashinta tai asiakasalennus
+					if ($yhtiorow["vaihda_asiakas_hintapaiv"] == "A") {
+						$hinnat = alehinta($laskurow, $trow, $row['tilkpl'], '', '', '', "hinta,hintaperuste,aleperuste,ale");
+
+						// Asiakkaalla ei ole asiakashintaa tai alennusta, eli rivi' ei päivitetä
+						if (($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] === FALSE)) {
+							$paivitetaanko = FALSE;
+						}
+					}
+
+					if ($row['netto'] == "" and $paivitetaanko) {
 						$hinta 	= '';
 						$ale	= '';
 					}
 					else {
-						//Alvihinta korjataan vain jos yhtiölla on verolliset myyntihinnat
+						//Alvihinta korjataan vain jos yhtiöllä on verolliset myyntihinnat
 						if ($row["alv"] != '' and $row["alv"] < 500 and $yhtiorow["alv_kasittely"] == "" ) {
 							$hinta = sprintf('%.'.$yhtiorow["hintapyoristys"].'f', $row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100));
 						}
@@ -2501,8 +2492,8 @@
 			$laskutus_maa 		= $maa;
 		}
 
-		if ($tilausyhteyshenkilo == '' and $seltilausyhteyshenkilo != '') {
-			$tilausyhteyshenkilo = $seltilausyhteyshenkilo;
+		if ($tilausyhteyshenkilo == '' and $yhteyshenkilo_tilaus != '') {
+			$tilausyhteyshenkilo = $yhteyshenkilo_tilaus;
 		}
 
 		// haetaan maksuehdoen tiedot tarkastuksia varten
@@ -2620,7 +2611,6 @@
 				$yhtiotoimipaikka	= $apualvrow["tunnus"]; // ylikirjoitetaan myös käyttäjän oletustoimipaikka
 				$yhtioalv_tilino	= $apualvrow["toim_alv"];
 			}
-
 		}
 
 		//Otetaan valuutan kurssi
@@ -3048,7 +3038,6 @@
 				svnOpenNew($kukarow["kesken"], $toim);
 			}
 		}
-
 	}
 
 	unset($alv);

@@ -101,12 +101,13 @@
 		or mysql_field_name($result, $i) == "mallitarkenne") {
 
 		$sresult = t_avainsana(mysql_field_name($result, $i));
+		$sarnimi = mysql_field_name($result, $i);
 
 		// jos avainsanoja on perustettu tehd‰‰n dropdown
 		if (mysql_num_rows($sresult) > 0) {
-			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+			$ulos = "<td><select id='$sarnimi' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-			$ulos .= "<option id='option_$nimi' value = ''>".t("Ei valintaa")."</option>";
+			$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
 
 			while ($srow = mysql_fetch_array($sresult)) {
 				$sel = '';
@@ -118,17 +119,9 @@
 			}
 
 			$ulos .= "</select>";
-			$ulos .= " <a href='#' onclick=\"teeostry('iframe_$nimi','".mysql_field_name($result, $i)."');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi")." ".t(mysql_field_name($result, $i))."</a><div id='iframe_$nimi' style='display: inline;'></div></td>";
+			$ulos .= " <a href='#' onclick=\"js_open_yllapito('$sarnimi','toim=avainsana&lukitse_laji=$sarnimi');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi")." ".t(mysql_field_name($result, $i))."</a></td>";
 
-			echo "
-			<script LANGUAGE='JavaScript'>
-				function teeostry(tdid, lukitse_laji){
-					var currenttd = document.getElementById(tdid);
-					currenttd.innerHTML = \"<br><br><iframe id='avainsana_iframe' name='avainsana_iframe' src='yllapito.php?toim=avainsana&uusi=1&lukitse_laji=\"+lukitse_laji+\"&laji=\"+tdid+\"&from=yllapito&ohje=off' style='width: 500px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>\";
-				}
-			</script>";
-
-			$ulos .= "</select></td>";
+			$ulos .= "</td>";
 			$jatko = 0;
 		}
 	}
@@ -257,14 +250,15 @@
 	}
 
 	if (mysql_field_name($result, $i) == "aleryhma") {
+
 		$query = "	SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
 					FROM perusalennus
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY ryhma";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-		$ulos .= "<option id='option_$nimi' value = ''>".t("Ei ryhm‰‰")."</option>";
+		$ulos = "<td><select id='aleryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value = ''>".t("Ei ryhm‰‰")."</option>";
 
 		while ($srow = mysql_fetch_array($vresult)) {
 			$sel = '';
@@ -275,15 +269,7 @@
 		}
 
 		$ulos .= "</select>";
-		$ulos .= " <a href='#' onclick=\"teekentta('iframe_$nimi');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi ryhm‰")."</a><div id='iframe_$nimi' style='display: inline;'></div></td>";
-
-		echo "
-		<script LANGUAGE='JavaScript'>
-			function teekentta(tdid){
-				var currenttd = document.getElementById(tdid);
-				currenttd.innerHTML = \"<br><br><iframe id='perusalennus_iframe' name='perusalennus_iframe' src='yllapito.php?toim=perusalennus&uusi=1&laji=\"+tdid+\"&from=yllapito&ohje=off' style='width: 400px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>\";
-			}
-		</script>";
+		$ulos .= " <a href='#' onclick=\"js_open_yllapito('aleryhma','toim=perusalennus');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi ryhm‰")."</a></td>";
 
 		$jatko = 0;
 	}
@@ -352,7 +338,7 @@
 	}
 
 
-	if (mysql_field_name($result, $i) == "suoratoimitus") { 
+	if (mysql_field_name($result, $i) == "suoratoimitus") {
 		$sele = "";
 
 		if ($trow[$i] == 'S') {

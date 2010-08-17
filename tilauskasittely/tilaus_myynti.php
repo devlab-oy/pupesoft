@@ -9,15 +9,8 @@ if ($livesearch_tee == "TUOTEHAKU") {
 	exit;
 }
 
-if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K" or $yhtiorow["asiakkaan_kohde"] == "K" or $yhtiorow["livetuotehaku_tilauksella"] == "K") {
+if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 	enable_ajax();
-}
-
-if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K" or $yhtiorow["asiakkaan_kohde"] == "K") {
-	js_yllapito();
-	js_popup();
-	js_showhide();
-	js_liveSearch();
 }
 
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {

@@ -19,46 +19,6 @@
 		require ("inc/parametrit.inc");
 	}
 
-	if (!function_exists("vaihtoehdot")) {
-		function vaihtoehdot($i, $taulu, $value, $text, $selected, $opts="") {
-			global  $yhtiorow, $kukarow;
-
-			if ($opts["where"] != "") {
-				$where = " and ".$opts["where"];
-			}
-
-			if ($opts["perustauusi"] != "") {
-				$pretext = t("Valitse jo perustettu listalta").":<br>";
-				$posttext = "<br><br>".t("Tai perusta uusi").":<br><input type='text' name='t[{$i}_uusi]' value=''>";
-			}
-
-			$ulos = "$pretext<select name='t[$i]'>
-						<option value=''>".t("Ei valintaa")."</option>";
-
-
-			$query = "	SELECT distinct $value value, $text text
-						FROM $taulu
-						WHERE yhtio='$kukarow[yhtio]' and ($value != '' or $text != '') $where";
-			$result = mysql_query($query) or pupe_error($query);
-			if (mysql_num_rows($result)>0) {
-				while($row = mysql_fetch_array($result)) {
-					if ($selected == $row["value"]) {
-						$sel = "SELECTED";
-					}
-					else {
-						$sel = "";
-					}
-
-					$ulos .= "<option value='$row[value]' $sel>$row[text]</option>\n\t";
-				}
-			}
-
-			$ulos .= "</select>$posttext";
-
-			return $ulos;
-		}
-	}
-
 	//Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
 	$aputoim = $toim;
 	list($toim, $alias_set, $rajattu_nakyma) = explode('!!!', $toim);
@@ -108,6 +68,9 @@
 	if ($otsikko_lisatiedot != "") {
 		echo $otsikko_lisatiedot;
 	}
+
+	// Kun tehdään päivityksiä omasta ikkunasta
+	js_open_yllapito();
 
 	if ($from == "yllapito") {
 		echo "
@@ -255,8 +218,8 @@
 			$query = "	SELECT *
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji='MYSQLALIAS'
-						and selite='$toim.$al_nimi'
+						and laji = 'MYSQLALIAS'
+						and selite = '$toim.$al_nimi'
 						$al_lisa";
 			$al_res = mysql_query($query) or pupe_error($query);
 
@@ -554,36 +517,6 @@
 				lopetus($lopetus, "META");
 			}
 
-			if ($ajax_menu_yp != "") {
-				$suljeYllapito = $ajax_menu_yp;
-			}
-
-			if (substr($suljeYllapito, 0, 15) == "asiakkaan_kohde") {
-				$query = "SELECT kohde from asiakkaan_kohde where tunnus = $tunnus";
-				$result = mysql_query($query) or pupe_error($query);
-				$aburow = mysql_fetch_array($result);
-				js_yllapito();
-				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[kohde]');</SCRIPT>";
-				exit;
-			}
-
-			if (substr($suljeYllapito, 0, 17) == "asiakkaan_positio") {
-				$query = "SELECT positio from asiakkaan_positio where tunnus = $tunnus";
-				$result = mysql_query($query) or pupe_error($query);
-				$aburow = mysql_fetch_array($result);
-				js_yllapito();
-				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[positio]');</SCRIPT>";
-				exit;
-			}
-
-			if (substr($suljeYllapito, 0, 13) == "yhteyshenkilo") {
-				$query = "SELECT nimi from yhteyshenkilo where tunnus = $tunnus";
-				$result = mysql_query($query) or pupe_error($query);
-				$aburow = mysql_fetch_array($result);
-				js_yllapito();
-				die("<script LANGUAGE='JavaScript'>suljeYllapito('$wanha$suljeYllapito','$tunnus','$aburow[nimi]', '$ajax_menu_yp');</script></body></html>");
-			}
-
 			$uusi = 0;
 
 			if (isset($yllapitonappi) and $lukossa != "ON" or isset($paluunappi)) {
@@ -616,10 +549,10 @@
 		}
 	}
 
-	if ($errori == "" and ($del == 1 or $del == 2 or $upd == 1) and substr($laji, 0, 7) == "iframe_") {
+	if ($errori == "" and ($del == 1 or $del == 2 or $upd == 1) and isset($js_open_yp) and $js_open_yp != "") {
 
 		if ($toim == "perusalennus") {
-			$query = "	SELECT ryhma value, selite text
+			$query = "	SELECT ryhma value, concat_ws(' - ', ryhma, selite) text
 						FROM perusalennus
 						WHERE tunnus = '$tmp_tuote_tunnus'
 						and yhtio 	 = '$kukarow[yhtio]'";
@@ -627,8 +560,16 @@
 			$otsikrow = mysql_fetch_assoc($otsikres);
 		}
 		elseif ($toim == "avainsana") {
-			$query = "	SELECT selite value, concat_ws(' - ', selite, selitetark) text
+			$query = "	SELECT selite value, concat_ws(' ', selite, selitetark) text
 						FROM avainsana
+						WHERE tunnus = '$tmp_tuote_tunnus'
+						and yhtio 	 = '$kukarow[yhtio]'";
+			$otsikres = mysql_query($query) or pupe_error($query);
+			$otsikrow = mysql_fetch_assoc($otsikres);
+		}
+		elseif ($toim == "yhteyshenkilo") {
+			$query = "	SELECT nimi value, nimi text
+						FROM yhteyshenkilo
 						WHERE tunnus = '$tmp_tuote_tunnus'
 						and yhtio 	 = '$kukarow[yhtio]'";
 			$otsikres = mysql_query($query) or pupe_error($query);
@@ -638,23 +579,46 @@
 			$otsikrow = array("value" => "", "text" => "");
 		}
 
-		if(substr($lopetus,0, 4) == "AJAX") {
-			list($lopetusTargetDiv, $lopetusRequest) = explode("XXXX", substr($lopetus, 4));
-			//urlissa & merkit korvattu // merkeillä jne, parsitaan oikeanlainen urli kokoon palautusta varten
-			$lopetusRequest = str_replace('////','?',               $lopetusRequest);
-			$lopetusRequest = preg_replace('/([^:])\/\/\//','\\1#', $lopetusRequest);
-			$lopetusRequest = preg_replace('/([^:])\/\//','\\1&',   $lopetusRequest);
+		echo "	<script LANGUAGE='JavaScript'>
 
-			echo "	<script LANGUAGE='JavaScript'>
-						sndReq('$lopetusTargetDiv', '$lopetusRequest', false, false);
-						document.body.removeChild(document.getElementById('yllapitoDivpopUP'));
-					</script>";
-		}
+				//	Paivitetaan ja valitaan select option
+				var elementti = \"$js_open_yp\";
+				var elementit = new Array();
+				var ele;
+				var newOpt;
 
-		echo "<script LANGUAGE='JavaScript'>
-				window.parent.document.getElementById('option_".substr($laji, 7)."').value = \"".$otsikrow["value"]."\";
-				window.parent.document.getElementById('option_".substr($laji, 7)."').text = \"".$otsikrow["text"]."\";
-				window.parent.document.getElementById('iframe_".substr($laji, 7)."').innerHTML = \"\";
+				// Yhetyshekiloilla spessujuttu
+				if (elementti.substring(0,14) == \"yhteyshenkilo_\") {
+					elementit[0] = \"yhteyshenkilo_tekninen\";
+					elementit[1] = \"yhteyshenkilo_kaupallinen\";
+					elementit[2] = \"yhteyshenkilo_tilaus\";
+				}
+				else {
+					elementit[0] = elementti;
+				}
+
+				for (ele in elementit) {
+					newOpt = window.opener.document.createElement('option');
+					newOpt.text = \"".$otsikrow["text"]."\";
+					newOpt.value = \"".$otsikrow["value"]."\";
+
+					sel = window.opener.document.getElementById(elementit[ele]);
+
+					try {
+						sel.add(newOpt, sel.options[1]);
+					}
+					catch(ex) {
+						sel.add(newOpt, 1);
+					}
+
+					if (elementit[ele] == elementti) {
+						//	Valitaan uusi arvo
+						sel.selectedIndex = 1;
+					}
+				}
+
+				window.close();
+
 				</script>";
 	}
 
@@ -841,7 +805,7 @@
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+					<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 					<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
@@ -853,7 +817,7 @@
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+					<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 					<input type = 'hidden' name = 'limit' value = 'NO'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 					<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
@@ -865,19 +829,19 @@
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+					<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = 'YES'>
 					<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("Näytä poistetut")."'></form>";
 		}
-		
+
 		if ($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+					<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 					<input type = 'hidden' name = 'limit' value = 'NO'>
 					<input type = 'hidden' name = 'nayta_eraantyneet' value = 'YES'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
@@ -904,7 +868,7 @@
 
 			echo "<form action = 'yllapito.php' method = 'post'>";
 			echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
-			echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
+			echo "<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>";
 			echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 			echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
 			echo "<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>";
@@ -926,7 +890,7 @@
 
 			echo "<form action = 'yllapito.php' method = 'post'>";
 			echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
-			echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
+			echo "<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>";
 			echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 			echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
 			echo "<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>";
@@ -943,7 +907,7 @@
 				<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+				<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
@@ -987,7 +951,7 @@
 			echo "<tr><form action='yllapito.php?ojarj=$ojarj$ulisa' name='ruksaus' method='post' onSubmit = 'return verifyMulti()'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+					<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 					<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
@@ -1106,13 +1070,6 @@
 			echo "<b>".t("Sinulla ei ole oikeuksia päivittää tätä tietoa")."</b><br>";
 		}
 
-		if ($ajax_menu_yp!="") {
-			$ajax_post="ajaxPost('mainform', '{$palvelin2}yllapito.php?ojarj=$ojarj$ulisa#$tunnus' , 'ajax_menu_yp'); return false;";
-		}
-		elseif ($ajax_menu_yp!="" or substr($lopetus, 0, 4) == "AJAX") {
-			$ajax_post="ajaxPost('mainform', '{$palvelin2}yllapito.php?ojarj=$ojarj$ulisa#$tunnus' , 'yllapitoDivpopUP'); return false;";
-		}
-
 		if ($from == "") {
 			$ankkuri = "#$tunnus";
 		}
@@ -1120,9 +1077,9 @@
 			$ankkuri = "";
 		}
 
-		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa$ankkuri' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data' onSubmit=\"$ajax_post\">";
+		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa$ankkuri' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
-		echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
+		echo "<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 		echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
 		echo "<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>";
@@ -1327,12 +1284,7 @@
 			$nimi = t("Päivitä $otsikko_nappi");
 		}
 
-		if ($ajax_menu_yp!="") {
-			echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi' onClick=\"$ajax_post\">";
-		}
-		else {
-			echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
-		}
+		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 
 		if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {
 			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
@@ -1479,7 +1431,7 @@
 					echo "<br><br>
 						<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()' enctype='multipart/form-data'>
 						<input type = 'hidden' name = 'toim' value = '$aputoim'>
-						<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+						<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 						<input type = 'hidden' name = 'limit' value = '$limit'>
 						<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 						<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
@@ -1501,7 +1453,7 @@
 				if ($liitostunnus) echo "&liitostunnus=$liitostunnus";
 				echo "' method = 'post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
-				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+				<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>

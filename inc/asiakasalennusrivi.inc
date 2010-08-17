@@ -9,16 +9,16 @@
 	}
 
 	if (mysql_field_name($result, $i) == "ryhma") {
-		
+
 		$query = "	SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
 					FROM perusalennus
 					WHERE yhtio='$kukarow[yhtio]'
 					ORDER BY ryhma";
 		$sresult = mysql_query($query) or pupe_error($query);
-		
-		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option id='option_$nimi' value = ''>".t("Ei ryhm‰‰")."</option>";
-				
+
+		$ulos = "<td><select id='ryhma' name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Ei ryhm‰‰")."</option>";
+
 		while ($srow = mysql_fetch_array($sresult)) {
 			$sel = '';
 			if ($trow[$i] == $srow["ryhma"]) {
@@ -26,18 +26,9 @@
 			}
 			$ulos .= "<option value='$srow[ryhma]' $sel>$srow[selitetark]</option>";
 		}
-		
-		$ulos .= "</select>";
-		$ulos .= " <a href='#' onclick=\"teekentta('iframe_$nimi');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi ryhm‰")."</a><div id='iframe_$nimi' style='display: inline;'></div></td>";
-		
-		echo "
-		<script LANGUAGE='JavaScript'>
-			function teekentta(tdid){
-				var currenttd = document.getElementById(tdid);
-				currenttd.innerHTML = \"<br><br><iframe id='perusalennus_iframe' name='perusalennus_iframe' src='yllapito.php?toim=perusalennus&uusi=1&laji=\"+tdid+\"&from=yllapito&ohje=off' style='width: 500px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>\";
-			}
-		</script>";
 
+		$ulos .= "</select>";
+		$ulos .= " <a href='#' onclick=\"js_open_yllapito('ryhma','toim=perusalennus');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi ryhm‰")."</a></td>";
 		$jatko = 0;
 	}
 

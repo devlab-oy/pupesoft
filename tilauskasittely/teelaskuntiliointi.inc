@@ -20,7 +20,7 @@ $query = "	SELECT tilausrivi.alv alv,
 			sum(tilausrivi.rivihinta) summa,
 			sum(tilausrivi.rivihinta_valuutassa) summa_valuutassa,
 			sum(tilausrivi.kate) kate,
-			sum(if(tuote.ei_saldoa = '', tilausrivi.rivihinta-tilausrivi.kate, 0)) varmuutos,
+			sum(if(tuote.ei_saldoa = '', tilausrivi.rivihinta - tilausrivi.kate, 0)) varmuutos,
 			GROUP_CONCAT(tilausrivi.tunnus SEPARATOR ',') tunnukset
 			FROM tilausrivi
 			JOIN lasku on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
@@ -53,14 +53,16 @@ else {
 	// Tehdaan myynnin kirjaukset
 	while ($xrow = mysql_fetch_array($xresult)) {
 
-		$lukko 					= "";
-		$tunnus 				= $lasku['tunnus'];
-		$tapvm					= $lasku['tapvm'];
-		$loppusumma				= $lasku['summa'];
-		$loppusumma_valuutassa	= $lasku['summa_valuutassa'];
-		$tilino					= 0;
-		$tilino_eu				= 0;
-		$tilino_ei_eu			= 0;
+		$lukko 							= "";
+		$tunnus 						= $lasku['tunnus'];
+		$tapvm							= $lasku['tapvm'];
+		$loppusumma						= $lasku['summa'];
+		$loppusumma_valuutassa			= $lasku['summa_valuutassa'];
+		$laskun_pyoristys				= $lasku['pyoristys'];
+		$laskun_pyoristys_valuutassa	= $lasku['pyoristys_valuutassa'];
+		$tilino							= 0;
+		$tilino_eu						= 0;
+		$tilino_ei_eu					= 0;
 
 		// kustannuspaikkaa, kohde ja projekti
 		$kustp 		= $xrow["kustp"];
@@ -346,6 +348,9 @@ else {
 				$myysaatili = $yhtiorow['kassa'];
 			}
 		}
+
+		$loppusumma = $loppusumma - $laskun_pyoristys;
+		$loppusumma_valuutassa = $loppusumma_valuutassa - $laskun_pyoristys_valuutassa;
 
 		$apusumma = $loppusumma;
 		$apusumma_valuutassa = $loppusumma_valuutassa;

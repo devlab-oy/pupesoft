@@ -1062,8 +1062,8 @@
 					}
 				}
 
-				//Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
-				//Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
+				// Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
+				// Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
 				$query = "	SELECT *
 							FROM lasku
 							WHERE tunnus in ($tilausnumeroita)
@@ -1073,7 +1073,7 @@
 
 				while ($laskurow = mysql_fetch_assoc($lasresult)) {
 
-					if ($valittu_tulostin != "" and $yhtiorow['pakkaamolokerot'] == '') {
+					if ($valittu_tulostin != "") {
 						//haetaan lähetteen tulostuskomento
 						$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_tulostin'";
 						$kirres  = mysql_query($query) or pupe_error($query);
@@ -1081,7 +1081,7 @@
 						$komento = $kirrow['komento'];
 					}
 
-					if ($valittu_oslapp_tulostin != "" and $yhtiorow['pakkaamolokerot'] == '') {
+					if ($valittu_oslapp_tulostin != "") {
 						//haetaan osoitelapun tulostuskomento
 						$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_oslapp_tulostin'";
 						$kirres = mysql_query($query) or pupe_error($query);
@@ -1089,7 +1089,7 @@
 						$oslapp = $kirrow['komento'];
 					}
 
-					if ($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0 and $yhtiorow['pakkaamolokerot'] == '') {
+					if ($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) {
 
 						$otunnus = $laskurow["tunnus"];
 
@@ -1127,9 +1127,6 @@
 
 						if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 							require_once ("tulosta_lahete_alalasku.inc");
-						}
-						elseif (substr($lahetetyyppi, 0, 23) == 'tulosta_lahete_simppeli') {
-							require_once ($lahetetyyppi);
 						}
 						else {
 							require_once ("tulosta_lahete.inc");
@@ -1326,7 +1323,7 @@
 					}
 
 					// Tulostetaan osoitelappu
-					if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0 and $yhtiorow['pakkaamolokerot'] == '') {
+					if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
 						$tunnus = $laskurow["tunnus"];
 
 						if ($oslappkpl > 1) {

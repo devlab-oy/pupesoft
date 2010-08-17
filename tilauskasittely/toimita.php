@@ -255,9 +255,6 @@
 					if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 						require_once ("tulosta_lahete_alalasku.inc");
 					}
-					elseif (substr($lahetetyyppi, 0, 23) == 'tulosta_lahete_simppeli') {
-						require_once ($lahetetyyppi);
-					}
 					else {
 						require_once ("tulosta_lahete.inc");
 						$utuotteet_mukaan = 1;

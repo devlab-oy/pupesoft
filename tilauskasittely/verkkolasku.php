@@ -2055,197 +2055,192 @@
 						$maksuehto = $masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
 						$kateistyyppi = $masrow["kateinen"];
 
-						if ($yhtiorow['laskutyyppi'] == 3) {
+						$varakieli = $kieli;
 
-							require_once("tulosta_lasku_simppeli.inc");
+						if ($kieli == '') {
+							$kieli = $laskun_kieli;
+						}
 
-							if (in_array($laskurow["laskunro"], $tulostettavat_email) and $valittu_tulostin == "") {
-								include_once("inc/generoi_laskun_saate.inc");
-								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
+						require_once("tulosta_lasku.inc");
 
-								//	Falseback oma maili
-								if ($komento == "") $komento = "email";
+						// katotaan miten halutaan sortattavan
+						// haetaan asiakkaan tietojen takaa sorttaustiedot
+						$order_sorttaus = '';
 
-								//	Kaapataan output..
-								ob_start();
-								tulosta_lasku($laskurow["tunnus"], $komento, $laskun_kieli, "", "", $content_subject, $content_body);
-								$tulos_ulos .= ob_get_contents();
-								ob_end_clean();
+						$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta
+												FROM asiakas
+												WHERE yhtio = '$kukarow[yhtio]'
+												and tunnus = '$laskurow[liitostunnus]'";
+						$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+
+						if (mysql_num_rows($asiakas_apu_res) == 1) {
+							$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+							$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"]);
+							$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"];
+						}
+						else {
+							$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
+							$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
+						}
+
+						if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+						else $pjat_sortlisa = "";
+
+						// haetaan tilauksen kaikki rivit
+						$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys,
+									$sorttauskentta,
+									if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
+									FROM tilausrivi
+									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+									LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+									WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+									and tilausrivi.yhtio		 = '$kukarow[yhtio]'
+									and tilausrivi.tyyppi		 = 'L'
+									and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+									and tilausrivi.kpl != 0
+									ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+						$result = mysql_query($query) or pupe_error($query);
+
+						$sivu 	= 1;
+						$summa 	= 0;
+						$arvo 	= 0;
+
+						unset($pdf);
+						unset($page);
+
+						// aloitellaan laskun teko
+						$page[$sivu] = alku();
+
+						$varasto = 0;
+
+						while ($row = mysql_fetch_array($result)) {
+
+							// Rivin toimitusaika
+							if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' and $row["keratty"] == "saldoton") {
+								$row["toimitettuaika"] = $row["toimaika"];
+							}
+							elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+								$row["toimitettuaika"] = $row["toimaika"];
 							}
 							else {
-								$querykieli = "	SELECT *
-												from kirjoittimet
-												where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
-								$kires = mysql_query($querykieli) or pupe_error($querykieli);
-								$kirow = mysql_fetch_array($kires);
+								$row["toimitettuaika"] = $row["toimitettuaika"];
+							}
 
-								tulosta_lasku($laskurow["tunnus"], $kirow["komento"], $laskun_kieli, $toim, $tee);
+							rivi($page[$sivu]);
+
+							//Tutkitaan mihin printteriin tämän laskun voisi tulostaa
+							if (($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA" or $valittu_tulostin == "AUTOMAAGINEN_VALINTA") and $varasto == 0) {
+								//otetaan varastopaikat talteen
+								$query = "	SELECT *
+											FROM tuote
+											WHERE tuoteno='$row[tuoteno]' and yhtio='$kukarow[yhtio]'";
+								$tresult = mysql_query($query) or pupe_error($query);
+								$tuoterow = mysql_fetch_array($tresult);
+
+								if ($tuoterow["ei_saldoa"] == '') {
+									$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"], "");
+								}
+							}
+						}
+
+						alvierittely ($page[$sivu]);
+
+						$query = "	SELECT kassa_alepros
+									FROM maksuehto
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$laskurow['maksuehto']}'";
+						$maksuehtores = mysql_query($query) or pupe_error($query);
+						$maksuehtorow_kassa_ale = mysql_fetch_assoc($maksuehtores);
+
+						if ($maksuehtorow_kassa_ale['kassa_alepros'] > 0) {
+							alvierittely($page[$sivu], $maksuehtorow_kassa_ale['kassa_alepros']);
+						}
+
+						$kieli = $varakieli;
+
+						//keksitään uudelle failille joku varmasti uniikki nimi:
+						list($usec, $sec) = explode(' ', microtime());
+						mt_srand((float) $sec + ((float) $usec * 100000));
+						$pdffilenimi = "/tmp/Lasku_Ajo-".md5(uniqid(mt_rand(), true)).".pdf";
+
+						//kirjoitetaan pdf faili levylle..
+						$fh = fopen($pdffilenimi, "w");
+						if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+						fclose($fh);
+
+						// jos tämä haluttiin suoraan asiakkaalle sähköpostiin
+						if ($yhtiorow['lasku_tulostin'] == -99 or in_array($laskurow["laskunro"], $tulostettavat_email)) {
+							// generoidaan laskun saatekirje, joka haetaan avainsanoista
+							include_once("inc/generoi_laskun_saate.inc");
+
+							list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
+
+							// Jos asiakkaalla on laskutussähköposti tai jos $yhtiorow['lasku_tulostin'] != -99 niin silloin lasku menee kukarow[email]:iin jos $komento == ""
+							if ($komento != "" or $yhtiorow['lasku_tulostin'] != -99) {
+								// otetaan tämä talteen jotta saadaan vientierittely
+								$vientierittelymail = $komento;
+
+								// lähetetään meili
+								$kutsu = t("lasku", $kieli)." $lasku";
+								$liite = $pdffilenimi;
+
+								// lähetetään cc aina postittaja osoitteeseen
+								$sahkoposti_cc = $yhtiorow["postittaja_email"];
+
+								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
 							}
 						}
 						else {
-
-							$varakieli = $kieli;
-
-							if ($kieli == '') {
-								$kieli = $laskun_kieli;
-							}
-
-							require_once("tulosta_lasku.inc");
-
-							// katotaan miten halutaan sortattavan
-							// haetaan asiakkaan tietojen takaa sorttaustiedot
-							$order_sorttaus = '';
-
-							$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta
-													FROM asiakas
-													WHERE yhtio = '$kukarow[yhtio]'
-													and tunnus = '$laskurow[liitostunnus]'";
-							$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
-
-							if (mysql_num_rows($asiakas_apu_res) == 1) {
-								$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
-								$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"]);
-								$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"];
-							}
-							else {
-								$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
-								$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
-							}
-
-							if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
-							else $pjat_sortlisa = "";
-
-							// haetaan tilauksen kaikki rivit
-							$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys,
-										$sorttauskentta,
-										if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
-										FROM tilausrivi
-										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-										LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-										WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
-										and tilausrivi.yhtio		 = '$kukarow[yhtio]'
-										and tilausrivi.tyyppi		 = 'L'
-										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-										and tilausrivi.kpl != 0
-										ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
-							$result = mysql_query($query) or pupe_error($query);
-
-							$sivu 	= 1;
-							$summa 	= 0;
-							$arvo 	= 0;
-
-							unset($pdf);
-							unset($page);
-
-							// aloitellaan laskun teko
-							$page[$sivu] = alku();
-
-							$varasto = 0;
-
-							while ($row = mysql_fetch_array($result)) {
-
-								// Rivin toimitusaika
-								if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' and $row["keratty"] == "saldoton") {
-									$row["toimitettuaika"] = $row["toimaika"];
-								}
-								elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
-									$row["toimitettuaika"] = $row["toimaika"];
+							//haetaan varaston tiedot
+							if ($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA" or $valittu_tulostin == "AUTOMAAGINEN_VALINTA") {
+								if ($varasto != 0) {
+									$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto' order by alkuhyllyalue,alkuhyllynro";
 								}
 								else {
-									$row["toimitettuaika"] = $row["toimitettuaika"];
+									$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' order by alkuhyllyalue,alkuhyllynro limit 1";
 								}
+								$prires= mysql_query($query) or pupe_error($query);
+								$prirow= mysql_fetch_array($prires);
+								$yhtiorow['lasku_tulostin'] = $prirow["printteri5"];
 
-								rivi($page[$sivu]);
-
-								//Tutkitaan mihin printteriin tämän laskun voisi tulostaa
-								if (($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA" or $valittu_tulostin == "AUTOMAAGINEN_VALINTA") and $varasto == 0) {
-									//otetaan varastopaikat talteen
-									$query = "	SELECT *
-												FROM tuote
-												WHERE tuoteno='$row[tuoteno]' and yhtio='$kukarow[yhtio]'";
-									$tresult = mysql_query($query) or pupe_error($query);
-									$tuoterow = mysql_fetch_array($tresult);
-
-									if ($tuoterow["ei_saldoa"] == '') {
-										$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"], "");
-									}
-								}
+								if ($silent == "") $tulos_ulos .= t("Lasku tulostuu varastoon").": $prirow[nimitys]<br>\n";
 							}
 
-							alvierittely ($page[$sivu]);
-
-							$query = "	SELECT kassa_alepros
-										FROM maksuehto
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$laskurow['maksuehto']}'";
-							$maksuehtores = mysql_query($query) or pupe_error($query);
-							$maksuehtorow_kassa_ale = mysql_fetch_assoc($maksuehtores);
-
-							if ($maksuehtorow_kassa_ale['kassa_alepros'] > 0) {
-								alvierittely($page[$sivu], $maksuehtorow_kassa_ale['kassa_alepros']);
+							if (isset($valittu_tulostin) and $valittu_tulostin != "AUTOMAAGINEN_VALINTA") {
+								$yhtiorow["lasku_tulostin"] = $valittu_tulostin;
 							}
 
-							$kieli = $varakieli;
+							$querykieli = "	SELECT *
+											from kirjoittimet
+											where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
+							$kires = mysql_query($querykieli) or pupe_error($querykieli);
+							$kirow = mysql_fetch_array($kires);
 
-							//keksitään uudelle failille joku varmasti uniikki nimi:
-							list($usec, $sec) = explode(' ', microtime());
-							mt_srand((float) $sec + ((float) $usec * 100000));
-							$pdffilenimi = "/tmp/Lasku_Ajo-".md5(uniqid(mt_rand(), true)).".pdf";
+							if ($silent == "") $tulos_ulos .= t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
 
-							//kirjoitetaan pdf faili levylle..
-							$fh = fopen($pdffilenimi, "w");
-							if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-							fclose($fh);
-
-							// jos tämä haluttiin suoraan asiakkaalle sähköpostiin
-							if ($yhtiorow['lasku_tulostin'] == -99 or in_array($laskurow["laskunro"], $tulostettavat_email)) {
-								// generoidaan laskun saatekirje, joka haetaan avainsanoista
-								include_once("inc/generoi_laskun_saate.inc");
-
-								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
-
-								// Jos asiakkaalla on laskutussähköposti tai jos $yhtiorow['lasku_tulostin'] != -99 niin silloin lasku menee kukarow[email]:iin jos $komento == ""
-								if ($komento != "" or $yhtiorow['lasku_tulostin'] != -99) {
-									// otetaan tämä talteen jotta saadaan vientierittely
-									$vientierittelymail = $komento;
-
-									// lähetetään meili
-									$kutsu = t("lasku", $kieli)." $lasku";
-									$liite = $pdffilenimi;
-
-									// lähetetään cc aina postittaja osoitteeseen
-									$sahkoposti_cc = $yhtiorow["postittaja_email"];
-
-									include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
-								}
+							if ($kirow["komento"] != "email") {
+								// itse print komento...
+								$line = exec("$kirow[komento] $pdffilenimi");
 							}
-							else {
-								//haetaan varaston tiedot
-								if ($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA" or $valittu_tulostin == "AUTOMAAGINEN_VALINTA") {
-									if ($varasto != 0) {
-										$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto' order by alkuhyllyalue,alkuhyllynro";
-									}
-									else {
-										$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' order by alkuhyllyalue,alkuhyllynro limit 1";
-									}
-									$prires= mysql_query($query) or pupe_error($query);
-									$prirow= mysql_fetch_array($prires);
-									$yhtiorow['lasku_tulostin'] = $prirow["printteri5"];
+							elseif ($kukarow["eposti"] != '') {
+								// lähetetään meili
+								$komento 			= "";
+								$kutsu 				= t("Lasku", $kieli)." $lasku";
+								$liite 				= $pdffilenimi;
+								$sahkoposti_cc 		= "";
+								$content_subject 	= "";
+								$content_body 		= "";
+								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
+							}
 
-									if ($silent == "") $tulos_ulos .= t("Lasku tulostuu varastoon").": $prirow[nimitys]<br>\n";
-								}
-
-								if (isset($valittu_tulostin) and $valittu_tulostin != "AUTOMAAGINEN_VALINTA") {
-									$yhtiorow["lasku_tulostin"] = $valittu_tulostin;
-								}
-
+							if ($valittu_kopio_tulostin != '') {
 								$querykieli = "	SELECT *
 												from kirjoittimet
-												where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
+												where yhtio='$kukarow[yhtio]' and tunnus='$valittu_kopio_tulostin'";
 								$kires = mysql_query($querykieli) or pupe_error($querykieli);
 								$kirow = mysql_fetch_array($kires);
 
-								if ($silent == "") $tulos_ulos .= t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
+								if ($silent == "") $tulos_ulos .= t("Laskukopio tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
 
 								if ($kirow["komento"] != "email") {
 									// itse print komento...
@@ -2261,39 +2256,15 @@
 									$content_body 		= "";
 									include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
 								}
-
-								if ($valittu_kopio_tulostin != '') {
-									$querykieli = "	SELECT *
-													from kirjoittimet
-													where yhtio='$kukarow[yhtio]' and tunnus='$valittu_kopio_tulostin'";
-									$kires = mysql_query($querykieli) or pupe_error($querykieli);
-									$kirow = mysql_fetch_array($kires);
-
-									if ($silent == "") $tulos_ulos .= t("Laskukopio tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
-
-									if ($kirow["komento"] != "email") {
-										// itse print komento...
-										$line = exec("$kirow[komento] $pdffilenimi");
-									}
-									elseif ($kukarow["eposti"] != '') {
-										// lähetetään meili
-										$komento 			= "";
-										$kutsu 				= t("Lasku", $kieli)." $lasku";
-										$liite 				= $pdffilenimi;
-										$sahkoposti_cc 		= "";
-										$content_subject 	= "";
-										$content_body 		= "";
-										include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
-									}
-								}
 							}
-
-							//poistetaan tmp file samantien kuleksimasta...
-							system("rm -f $pdffilenimi");
-
-							unset($pdf);
-							unset($page);
 						}
+
+						//poistetaan tmp file samantien kuleksimasta...
+						system("rm -f $pdffilenimi");
+
+						unset($pdf);
+						unset($page);
+
 
 						if ($laskurow["vienti"] == "E" and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
 							$uusiotunnus = $laskurow["tunnus"];

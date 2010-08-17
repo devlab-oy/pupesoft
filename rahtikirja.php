@@ -731,9 +731,6 @@
 				if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 					require_once ("tilauskasittely/tulosta_lahete_alalasku.inc");
 				}
-				elseif (strpos($lahetetyyppi,'simppeli') !== FALSE) {
-					require_once ("tilauskasittely/$lahetetyyppi");
-				}
 				else {
 					require_once ("tilauskasittely/tulosta_lahete.inc");
 					$utuotteet_mukaan = 1;

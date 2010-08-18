@@ -4633,13 +4633,13 @@ if (!function_exists("js_open_yllapito")) {
 		?>
 		<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
 			function js_open_yllapito(tdid, parametrit){
-				
+
 				var posX, posY;
 				var offsetX=30, offsetY=30;
-				
+
 				if (typeof window.screenLeft != "undefined"){ //IE
 					posX = window.screenLeft + offsetX;
-					posY = window.screenTop + offsetY; 
+					posY = window.screenTop + offsetY;
 				}
 				else if (typeof window.screenX != "undefined"){ //NS/Moz
 					posX = window.screenX + offsetX;
@@ -4649,7 +4649,7 @@ if (!function_exists("js_open_yllapito")) {
 					posX = screen.availWidth/2 - w/2;
 					posY = screen.availHeight/2 - h/2;
 				}
-								
+
 				newwindow=window.open('<?php echo $palvelin2; ?>yllapito.php?'+parametrit+'&js_open_yp='+tdid+'&uusi=1&ohje=off', 'Pupesoft_popup', 'width=800, height=600, top='+posY+', left='+posX+', scrollbars=no, resizable=yes');
 			}
 		</SCRIPT>
@@ -7672,6 +7672,15 @@ if (!function_exists("progress_bar")) {
 if (!function_exists("pupesoft_cleanstring")) {
 	function pupesoft_cleanstring($string) {
 		return mysql_real_escape_string(str_replace(array("\"","'","<",">","\\", ";"), "", trim($string)));
+	}
+}
+
+if (!function_exists("pupesoft_cleannumber")) {
+	function pupesoft_cleannumber($string) {
+		$string = str_replace(",", ".", trim($string));
+		$string = preg_replace("/[^0-9\.\-]/", "", $string);
+
+		return (float) $string;
 	}
 }
 

@@ -16,11 +16,11 @@ if ($tee != "CHECK" or $tiliote != 'Z') {
 
 //Tultiinko tiliotteelta ja olisiko tämä jo viety?
 if ($tiliote == 'Z' and $ytunnus != '' and $asiakasid != '') {
-	$query = "	SELECT tunnus 
-				FROM suoritus 
-				WHERE yhtio = '$kukarow[yhtio]' 
-				AND asiakas_tunnus = '$asiakasid' 
-				AND summa = '$summa' 
+	$query = "	SELECT tunnus
+				FROM suoritus
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND asiakas_tunnus = '$asiakasid'
+				AND summa = '$summa'
 				AND kirjpvm = '$vva-$kka-$ppa'";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -153,7 +153,7 @@ if ($tee == "SYOTTO") {
 	$result = mysql_query($query) or pupe_error($query);
 
 	if ($row = mysql_fetch_array($result)) {
-		$asiakas_nimi = $row[0];
+		$asiakas_nimi = pupesoft_cleanstring($row[0]);
 		$asiakasstr = substr($row[0], 0, 12);
 	}
 
@@ -167,6 +167,8 @@ if ($tee == "SYOTTO") {
 		die ("Kysely ei onnistu $query");
 	}
 	$ltunnus = mysql_insert_id($link);
+
+	$selite = pupesoft_cleanstring($selite);
 
 	// Myyntisaamiset
 	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, lukko)
@@ -539,7 +541,7 @@ if ($tee == "" and $ytunnus == "") {
 	echo "<form action = '$PHP_SELF' method='post' name='maksaja'>";
 	echo livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300, $maksaja_haku);
 	echo "<input type='hidden' name='tee' value='ETSI'>";
-	echo "<input type='hidden' name='lopetus' value='$lopetus'>";	
+	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='muutparametrit' value='$summa#$ppa#$kka#$vva#$mtili#$selite'>";
 	echo "<br>";
 	echo "<input type='submit' value='".t("Etsi")."'>";

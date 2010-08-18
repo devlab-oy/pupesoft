@@ -418,7 +418,7 @@
 		else {
 			// jos on iiiiso näyttö niin näytetään myös viite
 			if ($kukarow['resoluutio'] == 'I') {
-				$query = "	SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.viesti, lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+				$query = "	SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.viesti tilausviite, lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
 							FROM lasku use index (yhtio_tila_luontiaika)
 							$yhtioekojoin
 							WHERE lasku.$logistiikka_yhtiolisa ";
@@ -454,7 +454,9 @@
 			echo "<br><table>";
 			echo "<tr>";
 			for ($i=0; $i < mysql_num_fields($result)-8; $i++) {
-				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=".mysql_field_name($result,$i)."'>".t(mysql_field_name($result,$i))."</a></th>";
+				echo "<th align='left'>";
+				echo "<a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=".mysql_field_name($result,$i)."'>".t(mysql_field_name($result,$i))."</a>";
+				echo "</th>";
 			}
 			echo "<th align='left'>".t("Tyyppi")."</th>";
 			echo "</tr>";
@@ -543,7 +545,7 @@
 						echo "<a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tilaus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim'>$row[$i]</a>";
 						echo "</$ero>";
 					}
-					elseif (is_numeric($row[$i])) {
+					elseif (is_numeric(trim($row[$i])) and mysql_field_name($result,$i) != 'tilausviite') {
 						echo "<$ero valign='top' nowrap align='right' $class>$row[$i]</$ero>";
 					}
 					else {

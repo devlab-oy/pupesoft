@@ -513,7 +513,14 @@
 					$tiliointirow = mysql_fetch_array($result);
 					$oletuskust = $tiliointirow['kustp'];
 
-					if (trim($tiliointirow['hyvak1']) != '') {
+					if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
+						$hyvak[1] = "";
+						$hyvak[2] = "";
+						$hyvak[3] = "";
+						$hyvak[4] = "";
+						$hyvak[5] = "";
+					}
+					elseif (trim($tiliointirow['hyvak1']) != '') {
 						$hyvak[1] = $tiliointirow['hyvak1'];
 						$hyvak[2] = $tiliointirow['hyvak2'];
 						$hyvak[3] = $tiliointirow['hyvak3'];
@@ -548,7 +555,14 @@
 					$tiliointirow = mysql_fetch_array($result);
 					$oletuskust = $tiliointirow['kustp'];
 
-					if (trim($tiliointirow['hyvak1']) != '') {
+					if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
+						$hyvak[1] = "";
+						$hyvak[2] = "";
+						$hyvak[3] = "";
+						$hyvak[4] = "";
+						$hyvak[5] = "";
+					}
+					elseif (trim($tiliointirow['hyvak1']) != '') {
 						$hyvak[1] = $tiliointirow['hyvak1'];
 						$hyvak[2] = $tiliointirow['hyvak2'];
 						$hyvak[3] = $tiliointirow['hyvak3'];
@@ -572,7 +586,14 @@
 						$tiliointirow = mysql_fetch_array($result);
 						$oletuskust = $tiliointirow['kustp'];
 
-						if (trim($tiliointirow['hyvak1']) != '') {
+						if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
+							$hyvak[1] = "";
+							$hyvak[2] = "";
+							$hyvak[3] = "";
+							$hyvak[4] = "";
+							$hyvak[5] = "";
+						}
+						elseif (trim($tiliointirow['hyvak1']) != '') {
 							$hyvak[1] = $tiliointirow['hyvak1'];
 							$hyvak[2] = $tiliointirow['hyvak2'];
 							$hyvak[3] = $tiliointirow['hyvak3'];
@@ -597,7 +618,14 @@
 						$tiliointirow = mysql_fetch_array($result);
 						$oletuskust = $tiliointirow['kustp'];
 
-						if (trim($tiliointirow['hyvak1']) != '') {
+						if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
+							$hyvak[1] = "";
+							$hyvak[2] = "";
+							$hyvak[3] = "";
+							$hyvak[4] = "";
+							$hyvak[5] = "";
+						}
+						elseif (trim($tiliointirow['hyvak1']) != '') {
 							$hyvak[1] = $tiliointirow['hyvak1'];
 							$hyvak[2] = $tiliointirow['hyvak2'];
 							$hyvak[3] = $tiliointirow['hyvak3'];

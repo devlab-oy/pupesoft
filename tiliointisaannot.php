@@ -366,9 +366,16 @@
 										AND kuka = '".mysql_real_escape_string($hyvaksyja)."'
 										and hyvaksyja = 'o'";
 							$kuka_chk_res = mysql_query($query) or pupe_error($query);
-							$kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
-
-							echo t("Hyväksyjä")." {$xxx}: {$kuka_chk_row['nimi']}<br/>";
+							
+							if (mysql_num_rows($kuka_chk_res) == 1) {
+								$kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
+								$hnimi = $kuka_chk_row['nimi'];
+							}
+							else {
+								$hnimi = $hyvaksyja;
+							}
+							
+							echo t("Hyväksyjä")." {$xxx}: $hnimi<br/>";
 						}
 
 						$xxx++;
@@ -457,7 +464,11 @@
 						ORDER BY nimi";
 			$hyvak_result = mysql_query($query) or pupe_error($query);
 
-			echo "<td nowrap>",t("Hyväksyjä")," 1: <select name='hyvak1'><option value=''>",t("Oletus"),"</option>";
+			echo "<td nowrap>",t("Hyväksyjä")," 1: <select name='hyvak1'>";
+			echo "<option value=''>",t("Oletus"),"</option>";
+			
+			$sel = (isset($hyvak1) and $hyvak1 == "MAKSUUN") ? $sel = ' SELECTED' : '';
+			echo "<option value='MAKSUUN' $sel>",t("Suoraan maksuvalmiiksi"),"</option>";
 
 			while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
 				$sel = (isset($hyvak1) and $hyvak1 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';

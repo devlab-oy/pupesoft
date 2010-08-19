@@ -89,7 +89,7 @@ echo "<tr><th>".t("Tarkka haku")."</th><td><input type='checkbox' name='tarkkaha
 echo "<td class='back'><input name='nappi1' type='submit' value='".t("Hae")."'></td></tr>";
 echo "</table><br>";
 
-if (isset($paivita) and $maxtunnus > 0) {
+if ($maxtunnus > 0) {
 	// k‰yd‰‰n l‰pi mahdolliset kielet
 	foreach ($sanakirja_kielet as $sanakirja_kieli) {
 		for ($i=0; $i<=$maxtunnus; $i++) {

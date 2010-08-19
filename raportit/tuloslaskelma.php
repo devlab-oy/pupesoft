@@ -931,9 +931,7 @@
 							echo t("Logokuvavirhe");
 						}
 						else {
-							list($height, $width, $scale) = $pdf->scaleImage("$isizelogo[1]x$isizelogo[0]", "40x80");
-
-	                        $placement = $pdf->image_place($image, ($bottom+$height-30), 10, $firstpage, array("scale" => $scale));
+	                        $placement = $pdf->image_place($image, ($bottom+10), 10, $firstpage, array("scale" => 0.9));
 						}
 					}
 					else {

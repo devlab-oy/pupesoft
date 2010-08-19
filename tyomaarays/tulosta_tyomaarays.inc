@@ -190,7 +190,7 @@ if (!function_exists('alku')) {
 		$kala  = 575;
 
 		//Täysin dynaaminen osio
-		$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != '' and avainsana.nakyvyys in ('','K','L')");
+		$al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('','K','L')");
 
 		$al_lask = 35;
 		$al_fask = 0;
@@ -505,7 +505,7 @@ if (!function_exists('rivi_otsikot')) {
 
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  $thispage, 		$rectparam);
 			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 120, $thispage, 		$rectparam);
-			$pdf->draw_rectangle($kala+30, 120, $kala+10, 520, $thispage, 		$rectparam);			
+			$pdf->draw_rectangle($kala+30, 120, $kala+10, 520, $thispage, 		$rectparam);
 			$pdf->draw_rectangle($kala+30, 520, $kala+10, 580, $thispage, 		$rectparam);
 
 			$pdf->draw_text(25,  $kala+15, "#",									$thispage, $norm);
@@ -517,7 +517,7 @@ if (!function_exists('rivi_otsikot')) {
 
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  $thispage, 		$rectparam);
 			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 180, $thispage, 		$rectparam);
-			$pdf->draw_rectangle($kala+30, 180, $kala+10, 520, $thispage, 		$rectparam);			
+			$pdf->draw_rectangle($kala+30, 180, $kala+10, 520, $thispage, 		$rectparam);
 			$pdf->draw_rectangle($kala+30, 520, $kala+10, 580, $thispage, 		$rectparam);
 
 			$pdf->draw_text(25,  $kala+15, "#",									$thispage, $norm);
@@ -678,7 +678,7 @@ if (!function_exists('rivi')) {
 				$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
 				$pdf->draw_text(515-$oikpos, $kala, ($row["ale"]*1)."%", 							$thispage, $norm);
 			}
-			
+
 			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
 			$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 			$thispage, $norm);
 
@@ -699,19 +699,19 @@ if (!function_exists('rivi')) {
 			$pdf->draw_text(125, $kala, $row["nimitys"], 										$thispage, $norm);
 		}
 		else {
-			
+
 			list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 130, $pdf, $norm);
 
 			$pdf->draw_text(42, $kala, $ff_string, $thispage, $ff_font);
-			
+
 			list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 330, $pdf, $norm);
 
 			$pdf->draw_text(185, $kala, $ff_string, $thispage, $ff_font);
-						
+
 			$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
 			$oikpos = $pdf->strlen($row['tilkpl']." ".$omyks, $norm);
-			$pdf->draw_text(575-$oikpos, $kala, $row['tilkpl']." ".$omyks, $thispage, $norm);			
+			$pdf->draw_text(575-$oikpos, $kala, $row['tilkpl']." ".$omyks, $thispage, $norm);
 		}
 
 		$kala = $kala - $rivinkorkeus;

@@ -141,7 +141,7 @@ if (!function_exists('alku_tarjous')) {
 
 		$pdf_tarjous->draw_rectangle(737, 300, 716, 580, $page_tarjous, $rectparam);
 		$pdf_tarjous->draw_text(310, 729, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), 		$page_tarjous, $pieni);
-		
+
 		//etsitään löytyykö rahtisopimusta
 		$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
 		$pdf_tarjous->draw_text(310, 719, $laskurow["toimitustapa"]." ".$rahtirow["rahtisopimus"],	 	$page_tarjous, $norm);
@@ -189,9 +189,7 @@ if (!function_exists('alku_tarjous')) {
 
 				while ($tyomrow = mysql_fetch_array($tyomres)) {
 
-					#$komm .= "\n".t("Työmääräys", $kieli). ":###$tyomrow[otunnus]";
-
-					$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
+					$al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
 
 					while ($al_row = mysql_fetch_array($al_res)) {
 
@@ -833,8 +831,8 @@ if (!function_exists('loppu_tarjous')) {
 			$pdf_tarjous->draw_text(30,  144, $veroteksti." ".t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous, $norm);
 
 			$pdf_tarjous->draw_text(30,  132, t("Tavarat ovat %s:n omaisuutta kunnes ne ovat kokonaisuudessaan maksettu.", $kieli, $yhtiorow["nimi"]), $page_tarjous, $norm);
-			
-			
+
+
 			if ($laskurow["olmapvm"] != "" and $laskurow["olmapvm"] != "0000-00-00") {
 				$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));
 				$tkka = date("m",mktime(0, 0, 0, substr($laskurow["olmapvm"],5,2), substr($laskurow["olmapvm"],8,2), substr($laskurow["olmapvm"],0,4)));

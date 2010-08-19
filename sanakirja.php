@@ -43,7 +43,6 @@ else {
 	$sel2 = 'CHECKED';
 }
 
-
 echo "<th>".t("Näytä kaikki lauseet")."</th>";
 echo "<td><input type='radio' name='show' value='all' $sel1></td>";
 echo "</tr><tr>";
@@ -79,28 +78,25 @@ foreach ($sanakirja_kielet as $sanakirja_kieli) {
 
 echo "</select></td>";
 echo "</tr>";
-echo "<tr><th>Hakusana</th><td><textarea name='hakusana' rows='5' cols='25'>$hakusana</textarea></td></tr>";
+echo "<tr><th>".t("Hakusana")."</th><td><textarea name='hakusana' rows='5' cols='25'>$hakusana</textarea></td></tr>";
 
 if ($tarkkahaku != "") {
 	$tahas = "CHECKED";
 }
 
-echo "<tr><th>Tarkka haku</th><td><input type='checkbox' name='tarkkahaku' value='ON' $tahas></td>";
+echo "<tr><th>".t("Tarkka haku")."</th><td><input type='checkbox' name='tarkkahaku' value='ON' $tahas></td>";
 
 echo "<td class='back'><input name='nappi1' type='submit' value='".t("Hae")."'></td></tr>";
-echo "</table></form><br>";
+echo "</table><br>";
 
-
-
-if ($maxtunnus > 0) {
-
+if (isset($paivita) and $maxtunnus > 0) {
 	// käydään läpi mahdolliset kielet
 	foreach ($sanakirja_kielet as $sanakirja_kieli) {
 		for ($i=0; $i<=$maxtunnus; $i++) {
 			// eli etsitään kielen nimisesta arraysta indexillä $i
 			if (${$sanakirja_kieli}[$i] != "") {
 				$value = addslashes(trim(${$sanakirja_kieli}[$i])); // spacella pystyy tyhjentämään kentän, mutta ei tallenneta sitä
-				$query = "update sanakirja set $sanakirja_kieli='$value', muuttaja='$kukarow[kuka]', muutospvm=now() where tunnus='$i'";
+				$query = "UPDATE sanakirja set $sanakirja_kieli='$value', muuttaja='$kukarow[kuka]', muutospvm=now() where tunnus='$i'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -110,9 +106,8 @@ if ($maxtunnus > 0) {
 	$tee = "";
 }
 
-
 // jos meillä on onnistuneesti valittu kieli
-if (sizeof($kieli) > 0) {
+if (count($kieli) > 0) {
 
 	$query  = "select tunnus, fi ";
 
@@ -128,16 +123,16 @@ if (sizeof($kieli) > 0) {
 	}
 
 	if ($etsi_kieli != '') {
-		
+
 		if (isset($hakusana) and $hakusana != '') {
 			$sanat = explode("\n", $hakusana);
-			
+
 			$query .= " (";
-			
+
 			$sanarajaus = "";
 			foreach($sanat as $sana) {
 				if (trim($sana) != '') {
-					
+
 					if ($tarkkahaku == "") {
 						$query .= " $etsi_kieli like '%".trim($sana)."%' or ";
 					}
@@ -146,9 +141,9 @@ if (sizeof($kieli) > 0) {
 					}
 				}
 			}
-			
+
 			$query = substr($query, 0, -3).") ";
-		}		
+		}
 	}
 
 	if ($show == "empty") {
@@ -168,11 +163,7 @@ if (sizeof($kieli) > 0) {
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
-		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
-		echo "<input type='hidden' name='tee' value='paivita'>";
-
 		echo "<table>";
-
 		echo "<tr>";
 		for ($i=1; $i<mysql_num_fields($result); $i++) echo "<th>".mysql_field_name($result, $i)."</th>";
 		echo "</tr>";
@@ -195,10 +186,9 @@ if (sizeof($kieli) > 0) {
 		}
 
 		echo "<tr><th colspan='".mysql_num_rows($result)."'>".t("Yhteensä")." $laskkaannos ".t("riviä")."</th></tr>";
-
 		echo "</table>";
 		echo "<input type='hidden' name='maxtunnus' value='$maxtunnus'>";
-		echo "<br><input name='nappi2' type='submit' value='".t("Päivitä")."'>";
+		echo "<br><input type='submit' name='paivita' value='".t("Päivitä")."'>";
 	}
 	else {
 		echo "<font class='message'>".t("Haulla ei löytynyt yhtään riviä!")."</font>";

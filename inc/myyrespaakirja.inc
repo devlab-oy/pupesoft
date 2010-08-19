@@ -2,25 +2,31 @@
 
 	echo "<font class='head'>".t("Suorituspäiväkirja")."</font><hr>";
 
+	if (!isset($alvk)) $alvk = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($alvp)) $alvp = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($alvv)) $alvv = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+
+	$ksel = array();
+	$psel = array();
+	$vsel = array();
+
+	$ksel[$alvk] = "SELECTED";
+	$psel[$alvp] = "SELECTED";
+	$vsel[$alvv] = "SELECTED";
+
 	echo "	<form name = 'valinta' action = 'raportit.php' method='post'>
 			<input type = 'hidden' name = 'toim' value = 'myyrespaakirja'>
 			<input type = 'hidden' name = 'tee' value = '1'>
+
 			<table>
+			<tr>
 			<th>".t("Ajalta")."</th>
 			<td><select name='alvv'>
 			";
 
 	for ($i = date("Y")+2; $i >= date("Y")-4; $i--) {
-		if ($i == date("Y")) $sel = "selected";
-		else $sel = "";
-		echo "<option value='$i' $sel>$i</option>";
+		echo "<option value='$i' $vsel[$i]>$i</option>";
 	}
-
-	$ksel = array();
-	$psel = array();
-
-	$ksel[$alvk] = "SELECTED";
-	$psel[$alvp] = "SELECTED";
 
 	echo "
 		</select>
@@ -73,15 +79,48 @@
 		<option value = '30' $psel[30]>30</option>
 		<option value = '31' $psel[31]>31</option>
 		</select></td>
+		</tr>
+		<tr>";
+
+		// haetaan kaikki yrityksen rahatilit mysql muodossa
+		$query  = "	SELECT oletus_rahatili, nimi, tilino
+					FROM yriti
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND kaytossa = ''
+					AND oletus_rahatili != ''";
+		$ratire = mysql_query($query) or pupe_error($query);
+
+		echo "<th>".t("Pankkitili")."</th>";
+		echo "<td>";
+		echo "<select name='rahatili'>";
+		echo "<option value=''>".t("Kaikki")."</option>";
+
+		$psel = array();
+		$psel[$rahatili] = "SELECTED";
+
+		while ($ratiro = mysql_fetch_array($ratire)) {
+			$rahatilisel = $ratiro["oletus_rahatili"];
+			echo "<option value='$ratiro[oletus_rahatili]' $psel[$rahatilisel]>$ratiro[nimi] ($ratiro[tilino])</option>";
+		}
+
+		echo "
+		</td>
       	<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td></tr></table></form><br><br>";
 
 	if ($tee == "1") {
 
+		if ($rahatili != "") {
+			$rahatili_lisa = " and oletus_rahatili = '$rahatili' ";
+		}
+		else {
+			$rahatili_lisa = "";
+		}
 		// haetaan kaikki yrityksen rahatilit mysql muodossa
 		$query  = "	SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
 					FROM yriti
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kaytossa = ''
+					$rahatili_lisa
 					and oletus_rahatili != ''";
 		$ratire = mysql_query($query) or pupe_error($query);
 		$ratiro = mysql_fetch_array($ratire);

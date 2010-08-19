@@ -239,6 +239,7 @@ if(!function_exists("asiakashintatarkista")) {
 			$dsresult = mysql_query($aquery) or pupe_error($aquery);
 
 			if (mysql_num_rows($dsresult) > 0) {
+				// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
 				$virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: Näillä tiedoilla on jo asiakashinta järjestelmässä!");
 			}
 		}

@@ -257,6 +257,7 @@ if(!function_exists("tuotetarkista")) {
 		if (mysql_field_name($result, $i) == "tunnus") {
 
 			if ($tem_kehahin != "" and $tem_eisaldoa == "") {
+				// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
 				$virhe[$i] = $virhe[$tem_kehahin_ind] = t("Saldollisen tuotteen hankintahintaa ei voi muuttaa")."!";
 			}
 

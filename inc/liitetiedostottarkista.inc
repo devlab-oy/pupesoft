@@ -50,8 +50,9 @@ if(!function_exists("liitetiedostottarkista")) {
 				$retval = tarkasta_liite("liite_data");
 
 				if ($retval !== TRUE) {
-					$virhe[$liite_datai]	= $retval;
-					$errori 				= 1;
+					// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
+					$virhe[$i] = $virhe[$liite_datai] = $retval;
+					$errori = 1;
 				}
 
 				//	Onko meillä jokin kuvatyyppi?
@@ -83,7 +84,8 @@ if(!function_exists("liitetiedostottarkista")) {
 				if (mysql_num_rows($result) > 0) {
 					$checkrow = mysql_fetch_array($result);
 
-					$virhe[$liite_datai] = t("VIRHE! Tiedosto %s %s löytyy jo tuotteelle", $kieli, $file_name, $checkrow['kayttotarkoitus']);
+					// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
+					$virhe[$i] = $virhe[$liite_datai] = t("VIRHE! Tiedosto %s %s löytyy jo tuotteelle", $kieli, $file_name, $checkrow['kayttotarkoitus']);
 					$errori = 1;
 				}
 				else {

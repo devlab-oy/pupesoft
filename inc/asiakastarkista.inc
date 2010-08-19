@@ -230,15 +230,15 @@ if(!function_exists("asiakastarkista")) {
 			if (isset($t[$i]) and trim($t[$i]) != '') {
 				// jos ollaan valittu sähköposti niin lasku_email pitää syöttää!
 				if (trim($t[$i]) == '666' and $apulasku_email == "") {
-					$virhe[$i] = "".t("Olet valinnut laskutustavaksi sähköpostin ja lasku_email on tyhjä! Laskutus ei onnistu")."!";
-					$virhe[$apulasku_emaili] = "".t("Olet valinnut laskutustavaksi sähköpostin ja lasku_email on tyhjä! Laskutus ei onnistu")."!";
+					// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
+					$virhe[$i] = $virhe[$apulasku_emaili] = t("Olet valinnut laskutustavaksi sähköpostin ja lasku_email on tyhjä! Laskutus ei onnistu")."!";
 					$errori = 1;
 				}
 
 				// jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pitää syöttää!
 				if (trim($t[$i]) != '999' and trim($t[$i]) != '112' and trim($t[$i]) != '666' and trim($t[$i]) != '667' and trim($t[$i]) != '100' and $apuverkkotunnus == "") {
-					$virhe[$i] = "".t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
-					$virhe[$apuverkkotunnusi] = "".t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
+					// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
+					$virhe[$i] = $virhe[$apuverkkotunnusi] = t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
 					$errori = 1;
 				}
 			}
@@ -302,7 +302,8 @@ if(!function_exists("asiakastarkista")) {
 				require ("tarkistaytunnus.inc");
 
 				if ($ok == 0) {
-					$virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
+					// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
+					$virhe[$i] = $virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
 					$errori = 1;
 				}
 				else {
@@ -310,7 +311,8 @@ if(!function_exists("asiakastarkista")) {
 				}
 			}
 			elseif ($yhtiorow["maa"] == 'FI' and strtoupper($t[$i]) == 'SE' and strtoupper(substr($t[$ytunnus_tunnus], 0, 2)) != "SE" and $asiak_laji != "H") {
-				$virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! Laskutusosoite ruotsissa. Ytunnus pitää alkaa SE!";
+				// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
+				$virhe[$i] = $virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! Laskutusosoite ruotsissa. Ytunnus pitää alkaa SE!";
 				$errori = 1;
 			}
 		}

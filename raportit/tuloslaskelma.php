@@ -931,7 +931,7 @@
 							echo t("Logokuvavirhe");
 						}
 						else {
-	                        $placement = $pdf->image_place($image, ($bottom+10), 10, $firstpage, array("scale" => 0.9));
+							tulosta_logo_pdf($pdf, $firstpage, "", 0, 0, 25, 120);
 						}
 					}
 					else {

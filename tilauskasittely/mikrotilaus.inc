@@ -1,4 +1,17 @@
 <?php
+
+	/* FILEFORMAATTI:
+	Tuoteno (pakollinen)
+	Määrä (pakollinen)
+	Arvioitu toimituspäivä vvvv-kk-pp
+	Hinta
+	Ale
+	Netto
+	Var
+	Kommentti
+	*/
+	
+	
 	if ($tee == "file") {
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$timeparts = explode(" ",microtime());

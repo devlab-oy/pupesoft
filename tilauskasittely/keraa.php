@@ -341,9 +341,17 @@
 						$otsikko = mysql_fetch_assoc($result);
 
 						//Haetaan otsikon kaikki tiedot
-						$query1 = "	SELECT *
+						$query1 = "	SELECT lasku.*,
+									laskun_lisatiedot.laskutus_nimi,
+									laskun_lisatiedot.laskutus_nimitark,
+									laskun_lisatiedot.laskutus_osoite,
+									laskun_lisatiedot.laskutus_postino,
+									laskun_lisatiedot.laskutus_postitp,
+									laskun_lisatiedot.laskutus_maa
 									FROM lasku
-									WHERE tunnus = '$otsikko[otunnus]' and yhtio='$kukarow[yhtio]'";
+									LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+									WHERE lasku.tunnus = '$otsikko[otunnus]'
+									and lasku.yhtio = '$kukarow[yhtio]'";
 						$result = mysql_query($query1) or pupe_error($query1);
 						$otsikkorivi = mysql_fetch_assoc($result);
 
@@ -462,16 +470,17 @@
 											, jt			= 0
 											, varattu		= 0";
 							}
-							elseif ($maara[$apui] >= 0 and $maara[$apui] < $tilrivirow['varattu'] and ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS' or $otsikkorivi['clearing'] == 'JT-TILAUS')) {
-								// Jos t‰m‰ on toimitettava ennakkotilaus tai jt-tilaus
+							elseif ((!isset($poikkeama_kasittely[$apui]) or $poikkeama_kasittely[$apui] == "") and $maara[$apui] >= 0 and $maara[$apui] < $tilrivirow['varattu'] and ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS' or $otsikkorivi['clearing'] == 'JT-TILAUS')) {
+								// Jos t‰m‰ on toimitettava ennakkotilaus tai jt-tilaus niin yritet‰‰n laittaa poikkeama jollekin sopivalle otsikolle
+								// T‰h‰n haaraan ei menn‰ jos poikkeamat ohjataan manuaalisesti
+
 								$query .= ", varattu='".$maara[$apui]."'";
 
 								if ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS') {
 
 									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Siirrettiin takaisin ennakkotilaukselle.";
 
-									$ejttila    = "('E')";
-									$ejtalatila = "('A')";
+									$ejttila    = "((tila='E' and alatila='A') or (tila='D' and alatila='E'))";
 
 									$rotunnus	= 0;
 									$rtyyppi	= "E";
@@ -488,8 +497,7 @@
 
 									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Siirrettiin takaisin JT-tilaukselle.";
 
-									$ejttila    = "('N','L')";
-									$ejtalatila = "('T','X')";
+									$ejttila    = "(lasku.tila != 'N' or lasku.alatila != '')";
 
 									$rotunnus	= 0;
 									$rtyyppi	= "L";
@@ -510,37 +518,69 @@
 									$rkomm 		= $tilrivirow["kommentti"];
 								}
 
-								//Etsit‰‰n ennakko/jt-otsikko jolle rivi laitetaan
-								$query1 = "	SELECT tunnus
+								// Etsit‰‰n sopiva otsikko jolle rivi laitetaan
+								// Samat ehdot kuin tee_jt_tilaus.inc:ss‰ rivill‰ ~180
+								$query1 = "	SELECT lasku.yhtio, lasku.tunnus, lasku.tila, lasku.alatila
 											FROM lasku
-											WHERE tila		in $ejttila
-											and alatila		in $ejtalatila
-											and yhtio		= '$kukarow[yhtio]'
-											and ytunnus		= '$otsikkorivi[ytunnus]' and
-											nimi 			= '$otsikkorivi[nimi]' and
-											nimitark 		= '$otsikkorivi[nimitark]' and
-											osoite 			= '$otsikkorivi[osoite]' and
-											postino			= '$otsikkorivi[postino]' and
-											postitp 		= '$otsikkorivi[postitp]' and
-											toim_nimi		= '$otsikkorivi[toim_nimi]' and
-											toim_nimitark	= '$otsikkorivi[toim_nimitark]' and
-											toim_osoite 	= '$otsikkorivi[toim_osoite]' and
-											toim_postino 	= '$otsikkorivi[toim_postino]' and
-											toim_postitp 	= '$otsikkorivi[toim_postitp]' and
-											toimitustapa 	= '$otsikkorivi[toimitustapa]' and
-											maksuehto 		= '$otsikkorivi[maksuehto]' and
-											vienti	 		= '$otsikkorivi[vienti]' and
-											alv		 		= '$otsikkorivi[alv]' and
-											ketjutus 		= '$otsikkorivi[ketjutus]' and
-											kohdistettu		= '$otsikkorivi[kohdistettu]' and
-											toimitusehto	= '$otsikkorivi[toimitusehto]'";
+											LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+											WHERE $ejttila
+											and lasku.yhtio			= '$otsikkorivi[yhtio]'
+											and lasku.ytunnus		= '$otsikkorivi[ytunnus]'
+											and lasku.nimi 			= '$otsikkorivi[nimi]'
+											and lasku.nimitark 		= '$otsikkorivi[nimitark]'
+											and lasku.osoite 		= '$otsikkorivi[osoite]'
+											and lasku.postino		= '$otsikkorivi[postino]'
+											and lasku.postitp 		= '$otsikkorivi[postitp]'
+											and lasku.toim_nimi		= '$otsikkorivi[toim_nimi]'
+											and lasku.toim_nimitark	= '$otsikkorivi[toim_nimitark]'
+											and lasku.toim_osoite 	= '$otsikkorivi[toim_osoite]'
+											and lasku.toim_postino 	= '$otsikkorivi[toim_postino]'
+											and lasku.toim_postitp 	= '$otsikkorivi[toim_postitp]'
+											and lasku.toimitustapa 	= '$otsikkorivi[toimitustapa]'
+											and lasku.maksuehto 	= '$otsikkorivi[maksuehto]'
+											and lasku.vienti	 	= '$otsikkorivi[vienti]'
+											and lasku.alv		 	= '$otsikkorivi[alv]'
+											and lasku.ketjutus 		= '$otsikkorivi[ketjutus]'
+											and lasku.kohdistettu	= '$otsikkorivi[kohdistettu]'
+											and lasku.toimitusehto	= '$otsikkorivi[toimitusehto]'
+											and lasku.valkoodi 		= '$otsikkorivi[valkoodi]'
+											and lasku.vienti_kurssi	= '$otsikkorivi[vienti_kurssi]'
+											and lasku.erikoisale	= '$otsikkorivi[erikoisale]'
+											and lasku.eilahetetta	= '$otsikkorivi[suoraan_laskutukseen]'
+											and lasku.piiri			= '$otsikkorivi[piiri]'
+											and laskun_lisatiedot.laskutus_nimi 	= '$otsikkorivi[laskutus_nimi]'
+											and laskun_lisatiedot.laskutus_nimitark = '$otsikkorivi[laskutus_nimitark]'
+											and laskun_lisatiedot.laskutus_osoite 	= '$otsikkorivi[laskutus_osoite]'
+											and laskun_lisatiedot.laskutus_postino 	= '$otsikkorivi[laskutus_postino]'
+											and laskun_lisatiedot.laskutus_postitp 	= '$otsikkorivi[laskutus_postitp]'
+											and laskun_lisatiedot.laskutus_maa 		= '$otsikkorivi[laskutus_maa]'
+											ORDER BY tunnus desc
+											LIMIT 1";
 								$stresult = mysql_query($query1) or pupe_error($query1);
 
 								// Sopiva otsikko lˆytyi
 								if (mysql_num_rows($stresult) > 0) {
 									$strow = mysql_fetch_assoc($stresult);
 
-									$rotunnus	= $strow["tunnus"];
+									// Sopivin otsikko oli dellattu, elvytet‰‰n se!
+									if ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS' and $strow["tila"] == "D") {
+
+										// E, A - Ennakkotilaus lep‰‰m‰ss‰
+										$ukysx  = "UPDATE lasku SET tila = 'E', alatila = 'A', comments = '' WHERE yhtio = '$strow[yhtio]' and tunnus = '$strow[tunnus]'";
+										$ukysxres  = mysql_query($ukysx) or pupe_error($ukysx);
+									}
+									elseif ($otsikkorivi['clearing'] == 'JT-TILAUS' and $strow["tila"] == "D") {
+
+										// N, T - Myyntitilaus odottaa JT-tuotteita
+										$ukysx  = "UPDATE lasku SET tila = 'N', alatila = 'T', comments = '' WHERE yhtio = '$strow[yhtio]' and tunnus = '$strow[tunnus]'";
+										$ukysxres  = mysql_query($ukysx) or pupe_error($ukysx);
+									}
+
+									$rotunnus = $strow["tunnus"];
+								}
+								else {
+									// Laitetaan t‰lle otsikolle, voi menn‰ solmuun, mutta ei katoa ainakaan kokonaan
+									$rotunnus = $tilrivirow['otunnus'];
 								}
 							}
 							elseif ($tilrivirow["var"] != 'J' and $tilrivirow["var"] != 'P') {

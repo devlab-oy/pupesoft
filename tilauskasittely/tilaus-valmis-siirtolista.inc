@@ -704,8 +704,8 @@
 
 					if (mysql_num_rows($asiakas_apu_res) == 1) {
 						$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
-						$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["lahetteen_jarjestys"]);
-						$order_sorttaus = $asiakas_apu_row["lahetteen_jarjestys_suunta"];
+						$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["lahetteen_jarjestys"] != "" ? $asiakas_apu_row["lahetteen_jarjestys"] : $yhtiorow["lahetteen_jarjestys"]);
+						$order_sorttaus = $asiakas_apu_row["lahetteen_jarjestys_suunta"] != "" ? $asiakas_apu_row["lahetteen_jarjestys_suunta"] : $yhtiorow["lahetteen_jarjestys_suunta"];
 					}
 					else {
 						$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);

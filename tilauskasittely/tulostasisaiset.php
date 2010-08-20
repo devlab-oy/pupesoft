@@ -99,8 +99,8 @@
 
 			if (mysql_num_rows($asiakas_apu_res) == 1) {
 				$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
-				$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"]);
-				$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"];
+				$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"] != "" ? $asiakas_apu_row["laskun_jarjestys"] : $yhtiorow["laskun_jarjestys"]);
+				$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"] != "" ? $asiakas_apu_row["laskun_jarjestys_suunta"] : $yhtiorow["laskun_jarjestys_suunta"];
 			}
 			else {
 				$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);

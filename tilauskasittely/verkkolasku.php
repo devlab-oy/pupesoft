@@ -958,7 +958,7 @@
 						$ketjutus_group = "";
 					}
 
-					// tehdään ketjutus (group by PITÄÄ OLLA sama kun alhaalla) rivi ~1009
+					// Tehdään ketjutus (group by PITÄÄ OLLA sama kun alhaalla) rivi ~1100
 					$query = "	SELECT group_concat(lasku.tunnus) tunnukset
 								FROM lasku
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)

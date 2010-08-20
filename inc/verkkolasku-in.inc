@@ -1213,34 +1213,40 @@
 					$ebid 	= $kuvalaskurow['ebid'];
 					$selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
 
+					// Tallennetaan laskun XML liitetiedostoksi
+					$filesize = strlen($xmlstr);
+					$filename = array_pop(explode("/", $file));
+					$xmlstr   = mysql_real_escape_string($xmlstr);
+
 					if ($ebid == "FINVOICEXML") {
-
-						$filesize = strlen($xmlstr);
-						$filename = array_pop(explode("/", $file));
-						$xmlstr   = mysql_real_escape_string($xmlstr);
-
-						$query = "	INSERT INTO liitetiedostot SET
-									yhtio    			= '$kukarow[yhtio]',
-									liitos   			= 'lasku',
-									liitostunnus 		= '$tunnus',
-									data     			= '$xmlstr',
-									selite   			= '$selite',
-									kieli				= '$yhtiorow[kieli]',
-									filename 			= '$filename',
-									filesize 			= '$filesize',
-									filetype 			= 'text/xml',
-									image_width			= '',
-									image_height		= '',
-									image_bits			= '',
-									image_channels		= '',
-									kayttotarkoitus		= 'FINVOICE',
-									jarjestys			= '1',
-									laatija				= '$kukarow[kuka]',
-									luontiaika			= now()";
-						$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
-
+						$kayttotarkoitus = 'FINVOICE';
 					}
 					else {
+						$kayttotarkoitus = 'INVOIC.D.96A';
+					}
+
+					$query = "	INSERT INTO liitetiedostot SET
+								yhtio    			= '$kukarow[yhtio]',
+								liitos   			= 'lasku',
+								liitostunnus 		= '$tunnus',
+								data     			= '$xmlstr',
+								selite   			= '$selite',
+								kieli				= '$yhtiorow[kieli]',
+								filename 			= '$filename',
+								filesize 			= '$filesize',
+								filetype 			= 'text/xml',
+								image_width			= '',
+								image_height		= '',
+								image_bits			= '',
+								image_channels		= '',
+								kayttotarkoitus		= '$kayttotarkoitus',
+								jarjestys			= '1',
+								laatija				= '$kukarow[kuka]',
+								luontiaika			= now()";
+					$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+					// Haetaan verkkolaskun visualisoitu versio
+					if ($ebid != "FINVOICEXML") {
 						$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
 						$salasana		   = $yhtiorow['verkkosala_vas'];
 

@@ -3879,7 +3879,13 @@ if (!function_exists('ebid')) {
 
 			$out = "<a href='$url' target='Attachment'>". t('Näytä lasku')."</a> ";
 
-			$query = "SELECT tunnus from liitetiedostot where liitostunnus='$laskurow[tunnus]' and liitos='lasku' and yhtio='$kukarow[yhtio]'";
+			// Ei näytetä INVOIC.D.96A xml-linkkiä
+			$query = "	SELECT tunnus
+						from liitetiedostot
+						where liitostunnus = '$laskurow[tunnus]'
+						and liitos = 'lasku'
+						and kayttotarkoitus != 'INVOIC.D.96A'
+						and yhtio='$kukarow[yhtio]'";
 			$res = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_assoc($res)) {
@@ -3899,7 +3905,11 @@ if (!function_exists('ebid')) {
 			elseif ($laskurow['chn'] == '666') $out = t("Sähköposti")."-".t("lasku");
 			elseif ($laskurow['chn'] == '667') $out = t("Sisäinen")."-".t("lasku");
 
-			$query = "SELECT tunnus from liitetiedostot where liitostunnus='$laskurow[tunnus]' and liitos='lasku' and yhtio='$kukarow[yhtio]'";
+			$query = "	SELECT tunnus
+						from liitetiedostot
+						where liitostunnus = '$laskurow[tunnus]'
+						and liitos = 'lasku'
+						and yhtio = '$kukarow[yhtio]'";
 			$res = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_assoc($res)) {
@@ -3910,7 +3920,11 @@ if (!function_exists('ebid')) {
 	    }
 		else {
 
-			$query = "SELECT tunnus from liitetiedostot where liitostunnus='$laskurow[tunnus]' and liitos='lasku' and yhtio='$kukarow[yhtio]'";
+			$query = "	SELECT tunnus
+						from liitetiedostot
+						where liitostunnus = '$laskurow[tunnus]'
+						and liitos = 'lasku'
+						and yhtio = '$kukarow[yhtio]'";
 			$res = mysql_query($query) or pupe_error($query);
 
 			if ($url_only) {

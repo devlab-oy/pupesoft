@@ -32,7 +32,7 @@
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
 	}
 	else {
-		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E') ";
+		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
 	}
 
 	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {

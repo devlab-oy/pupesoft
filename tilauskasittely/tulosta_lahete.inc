@@ -800,7 +800,7 @@ if (!function_exists('rivi_otsikot_lahete')) {
 			$pdf->draw_text(330, $kala+15, t("Toimitus", $kieli),		$thispage, $boldi);
 			$pdf->draw_text(380, $kala+15, t("Määrä", $kieli),			$thispage, $boldi);
 			$pdf->draw_text(425, $kala+15, t("Yksikkö", $kieli),		$thispage, $boldi);
-			$pdf->draw_text(473, $kala+15, t("Hinta alv. ".($laskurow["alv"]*1)."%", $kieli), $thispage, $boldi);
+			$pdf->draw_text(473, $kala+15, t("Hinta alv.", $kieli), $thispage, $boldi);
 
 			if (($laskurow['alv']*1) > 0) {
 				$pdf->draw_text(473, $kala+5, t("Verollinen", $kieli), $thispage, $boldi);

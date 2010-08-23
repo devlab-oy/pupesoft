@@ -1,5 +1,14 @@
 <?php
 
+	if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
+		$_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
+	}
+
+	if ($_REQUEST["tee"] == 'NAYTATILAUS' or $_POST["tee"] == 'NAYTATILAUS' or $_GET["tee"] == 'NAYTATILAUS') {
+		$nayta_pdf = 1; //Generoidaan .pdf-file
+		$ohje = 'off';
+	}
+
 	require ("inc/parametrit.inc");
 
 	if (!isset($asiakasnimi)) $asiakasnimi = '';
@@ -13,9 +22,9 @@
 	if (!isset($kkl)) $kkl = date("m");
 	if (!isset($vvl)) $vvl = date("Y");
 
-	if ((isset($tee) and $tee == 'TULOSTA') or (isset($teekoontitarjous) and isset($otunnukset_array) and count($otunnukset_array) > 1)) {
+	if ((isset($tee) and $tee == 'TULOSTA') or (isset($otunnukset_array) and $otunnukset_array != '')) {
 
-		$tee = 'TULOSTA';
+		$tee = isset($tee) ? $tee : 'TULOSTA';
 
 		$tulostimet[0] = 'Tarjous';
 		if ($kappaleet > 0) {

@@ -833,11 +833,6 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 			$pdf_tarjous->draw_text(150, $kala, $row["nimitys"], $page_tarjous, $norm);
 
 			$kala = $kala - $rivinkorkeus;
-
-			if ($row["kommentti"] != '') {
-				$pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 150, 60, 300, $row["kommentti"],	$page_tarjous, $norm);
-				$kala = $pohja - $rivinkorkeus;
-			}
 		}
 		else {
 			$kala = $kala - $rivinkorkeus;

@@ -512,6 +512,19 @@
 					<th colspan='3'><font class='error'>".t("Laskutettavana")." ".$osuus."% : $tot $yhtiorow[valkoodi]<br>".t("Muuta jotain positiota")." $osuusvippaus% : $summavippaus $yhtiorow[valkoodi]</th>";
 				echo "</tr>";
 			}
+
+			if (round($tot,2) == $jaksotettavaa) {
+
+				echo "<form method='post'>";
+				echo "<input type='hidden' name='toim' value='{$toim}'>";
+				echo "<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>";
+				echo "<input type='hidden' name='tulosta_maksusopimus' value='{$laskurow['jaksotettu']}'>";
+				echo "<input type='hidden' name='tunnus' value='{$laskurow['tunnus']}'>";
+				echo "<tr><th colspan='5'><input type='submit' value='",t("Positiot PDF-muotoon"),"'></th></tr>";
+				echo "</form>";
+
+			}
+
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $tot)."</td></tr>";
 
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä")." ".t("veroton").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput_veroton)."</td></tr>";

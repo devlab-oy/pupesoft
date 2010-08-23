@@ -2353,4 +2353,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tarjoustyyppi") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = '0' $sel[0]>".t("Normaali tarjouspohja");
+		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty tarjouspohja");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

@@ -1,8 +1,21 @@
 <?php
 
+if (isset($_REQUEST['tulosta_maksusopimus']) and is_numeric(trim($_REQUEST['tulosta_maksusopimus']))) {
+	$nayta_pdf = 1;
+	$ohje = 'off';
+}
+
 if (@include("../inc/parametrit.inc"));
 elseif (@include("parametrit.inc"));
 else exit;
+
+if (isset($tulosta_maksusopimus) and is_numeric(trim($tulosta_maksusopimus))) {
+	require('tulosta_maksusopimus.inc');
+
+	tulosta_maksusopimus($kukarow, $yhtiorow, $laskurow, $kieli);
+
+	exit;
+}
 
 if ($livesearch_tee == "TUOTEHAKU") {
 	livesearch_tuotehaku();

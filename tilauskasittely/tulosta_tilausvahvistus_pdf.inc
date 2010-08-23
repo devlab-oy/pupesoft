@@ -19,6 +19,9 @@
 	elseif ($naytatvale == 5) {
 		$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
 	}
+	elseif ($naytatvale == 6) {
+		$lahetetyyppi = "tulosta_lahete_custom.inc";
+	}
 	else {
 		$lahetetyyppi = "tulosta_lahete.inc";
 	}
@@ -158,7 +161,7 @@
 		$total+= $row["rivihinta"];
 	}
 
-	loppu_lahete($page[$sivu], 1);
+	loppu_lahete($page[$sivu], 1, $toim);
 
 	if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 		$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".pdf";

@@ -59,7 +59,10 @@ elseif ($laskurow["tilaustyyppi"] == 'E') {
 	//
 	// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
 
-	if (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
+	if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
+		$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+	}
+	elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
 		$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
 	}
 	elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
@@ -1006,7 +1009,10 @@ else {
 				//
 				// T‰ss‰ haarassa tulostetaan tilausvahvistus KOKO tilauksesta
 
-				if (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
+				if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
+					$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+				}
+				elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
 					$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
 				}
 				elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
@@ -1111,7 +1117,10 @@ else {
 					//
 					// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
 
-					if (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
+					if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
+						$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+					}
+					elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
 						$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
 					}
 					elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {

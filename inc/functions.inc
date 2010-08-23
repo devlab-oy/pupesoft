@@ -6863,7 +6863,10 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		global $asrow, $boldi, $iso, $jtid, $kala, $kala, $kateinen, $kateistyyppi, $kieli, $kukarow, $kukarow, $lahetetyyppi, $laskurow, $norm, $p, $page, $page, $pdf, $perheid, $pieni, $pieni_boldi, $rectparam, $returnvalue, $rivinkorkeus, $rivinkorkeus, $rivinumerot, $row, $sivu, $summa, $tee, $toim, $useita, $viite, $yhtiorow, $yhtiorow, $futurtilvahhost, $futurtilvahuser, $futurtilvahpass, $tilvahhost, $tilvahuser, $tilvahpass, $tilvahpath, $faxhost, $faxuser, $faxpass, $faxpath;
 
 		// LÄHETETÄÄN TILAUSVAHVISTUS
-		if (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
+		if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
+			$naytatvale = 6; // jos meillä on tilausvahvistuksessa kutonen, niin tehdään customoitu tilausvahvistus
+		}
+		elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
 			$naytatvale = 5; // jos mellä on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {

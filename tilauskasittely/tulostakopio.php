@@ -1483,7 +1483,10 @@
 					$laskurow['tilausvahvistus'] = $seltvtyyppi;
 				}
 
-				if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
+				if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
+					$naytatvale = 6; // jos meillä on tilausvahvistuksessa kutonen, niin tehdään mefa customoitu tilausvahvistus
+				}
+				elseif ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 					$naytatvale = 2;
 				}
 				elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
@@ -2000,7 +2003,7 @@
 					$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
 					$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
 
-					loppu_lahete($page[$sivu], 1);
+					loppu_lahete($page[$sivu], 1, $lah_tyyppi);
 
 					//katotaan onko laskutus nouto
 					$query = "  SELECT toimitustapa.nouto, maksuehto.kateinen

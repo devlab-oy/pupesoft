@@ -52,7 +52,8 @@
 		<input type='hidden' name='sorttauskentan_jarjestys2' value='$sorttauskentan_jarjestys2'>
 		<input type='hidden' name='sorttauskentan_jarjestys3' value='$sorttauskentan_jarjestys3'>
 		<input type='hidden' name='sorttauskentan_jarjestys4' value='$sorttauskentan_jarjestys4'>
-		<input type='hidden' name='kertakassa' value='$kertakassa'>";
+		<input type='hidden' name='kertakassa' value='$kertakassa'>
+		<input type='hidden' name='otunnukset_array' value='$otunnukset_array'>";
 
 	if ($nappikeikalle == 'menossa') {
 		echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";

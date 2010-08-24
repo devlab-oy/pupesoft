@@ -274,7 +274,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "kuvaus" or mysql_field_name($result, $i) == "lyhytkuvaus" or mysql_field_name($result, $i) == "mainosteksti") {
+	if (mysql_field_name($result, $i) == "kuvaus" or mysql_field_name($result, $i) == "lyhytkuvaus" or mysql_field_name($result, $i) == "mainosteksti" or mysql_field_name($result, $i) == "tilausrivi_kommentti") {
 		$ulos = "<td><textarea cols='35' rows='7' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}

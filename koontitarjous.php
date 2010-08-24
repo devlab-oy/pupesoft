@@ -140,7 +140,7 @@
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.liitostunnus = '{$asiakasrow['tunnus']}'
 						AND lasku.tila = 'T'
-						AND lasku.alatila = ''
+						AND lasku.alatila IN ('', 'A')
 						$tarjouslisa
 						GROUP BY lasku.tunnus
 						LIMIT 100";

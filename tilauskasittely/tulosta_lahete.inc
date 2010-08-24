@@ -1336,7 +1336,7 @@ if (!function_exists('rivi_custom_lahete')) {
 
 		$pdf->draw_text(330, $kala, t("Vko", $kieli)." $vko", $thispage, $norm);
 
-		$pdf->draw_text(380, $kala, $row["tilkpl"], $thispage, $norm);
+		$pdf->draw_text(385, $kala, $row["tilkpl"], $thispage, $norm);
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 		$pdf->draw_text(425, $kala, $omyks, $thispage, $norm);
@@ -1348,11 +1348,12 @@ if (!function_exists('rivi_custom_lahete')) {
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
 		$pdf->draw_text(473, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 			$thispage, $norm);
 
-		if ($pdf->strlen($row["nimitys"], $norm) >= 130) {
+		if ($pdf->strlen($row["nimitys"], $norm) > 190) {
 			$kala = $kala - $rivinkorkeus;
 		}
 
-		$pdf->draw_text(150, $kala, $row["nimitys"]." $arvo", $thispage, $norm);
+		list ($ff_string, $ff_font) = pdf_fontfit($row['nimitys'], 170, $pdf, $norm);
+		$pdf->draw_text(150, $kala, $ff_string, $thispage, $ff_font);
 
 		$kala = $kala - $rivinkorkeus;
 

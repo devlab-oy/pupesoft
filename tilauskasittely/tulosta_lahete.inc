@@ -1324,7 +1324,7 @@ if (!function_exists('rivi_custom_lahete')) {
 		list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $boldi);
 		$pdf->draw_text(50, $kala, $ff_string, $thispage, $ff_font);
 
-		list($vv, $kk, $pp) = explode("-", $laskurow["toimaika"]);
+		list($vv, $kk, $pp) = explode("-", $row["toimaika"]);
 		$vko = date("W", mktime(0, 0, 0, $kk, $pp, $vv));
 
 		if ($vko == date("W", mktime(0, 0, 0, 12, 31, $vv))) {

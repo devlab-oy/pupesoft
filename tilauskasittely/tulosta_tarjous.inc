@@ -787,7 +787,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 		if ($yhtiorow['tarjoustyyppi'] == 1) {
 			$pdf_tarjous->draw_text(50, $kala, $row["tuoteno"], $page_tarjous, $boldi);
 
-			list($vv, $kk, $pp) = explode("-", $laskurow["toimaika"]);
+			list($vv, $kk, $pp) = explode("-", $row["toimaika"]);
 
 			$vko = date("W", mktime(0, 0, 0, $kk, $pp, $vv));
 

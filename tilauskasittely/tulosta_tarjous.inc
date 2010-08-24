@@ -830,7 +830,8 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 
 
 		if ($yhtiorow['tarjoustyyppi'] == 1) {
-			$pdf_tarjous->draw_text(150, $kala, $row["nimitys"], $page_tarjous, $norm);
+			list ($ff_string, $ff_font) = pdf_fontfit($row['nimitys'], 170, $pdf_tarjous, $norm);
+			$pdf_tarjous->draw_text(150, $kala, $ff_string, $page_tarjous, $ff_font);
 
 			$kala = $kala - $rivinkorkeus;
 		}

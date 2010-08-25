@@ -28,3 +28,4 @@ cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO rivia
 cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO myynti
 cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kate
 cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kpl
+cd ${POLKU}/raportit/; php abc_tuote_aputaulun_rakennus.php $YHTIO kulutus

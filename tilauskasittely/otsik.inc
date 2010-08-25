@@ -83,18 +83,21 @@
 	if (($nimi != '' and !isset($jatka) and $asiakasid == 0 and !isset($vaihdatoim_asiakas)) or ($tnimi != '' and !isset($jatka) and isset($vaihdatoim_asiakas))) {
 
 		//tehd‰‰n asiakashaku yhteensopivuus
-		$ytunnus 	= $nimi;
+		$ytunnus 		= $nimi;
 		$muutparametrit = 0;
-		$kutsuja    = "otsik.inc";
+		$kutsuja 		= "otsik.inc";
 
 		if (isset($vaihdatoim_asiakas) and $tnimi != "") {
-			$ytunnus = $tnimi;
-			$tila = "vaihdatoim_asiakas";
+			$ytunnus 		= $tnimi;
+			$osoite 		= $tosoite;
+			$postitp 		= $tpostitp;
+			$postino		= $tpostino;		
+			$tila 			= "vaihdatoim_asiakas";
 			$muutparametrit = $asiakasid;
-			$kutsuja = "";
+			$kutsuja 		= "";
 		}
 
-		$asiakasid	= "";
+		$asiakasid	= "";		
 		$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO";
 		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
@@ -1724,7 +1727,7 @@
 				$rchk = "";
 				if ($srow["rivihintoja_ei_nayteta"] != '') $rchk = 'CHECKED';
 				echo "<td>".t("Rivihintoja ei n‰ytet‰")."</td><td><input type='checkbox' value='X' name='rivihintoja_ei_nayteta' $rchk></td>";
-
+				echo "</tr>";
 			}
 
 			echo "<tr>";

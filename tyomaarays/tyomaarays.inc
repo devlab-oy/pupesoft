@@ -17,6 +17,14 @@
 			echo "<font class='head'>$tulostimet[0]:</font><hr>";
 			require("inc/valitse_tulostin.inc");
 		}
+		elseif ($kappaleet > 0) {
+			if ($toim != "REKLAMAATIO") {
+				$komento["Työmääräys"] .= " -# $kappaleet ";
+			}
+			else {
+				$komento["Keräyslista"] .= " -# $kappaleet ";
+			}									
+		}
 
 		if ($laskurow["tila"] == 'U') {
 			$where = " uusiotunnus='$laskurow[tunnus]' ";
@@ -131,7 +139,7 @@
 		else {
 			loppu_kerayslista($page[$sivu], 1);
 		}
-
+		
 		//tulostetaan sivu
 		if ($toim != "REKLAMAATIO") {
 			print_pdf($komento[$tulostimet[0]]);

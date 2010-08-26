@@ -821,6 +821,7 @@
 						$worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
 						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
+						$tuotesarake = $excelsarake;
 						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
 						$excelsarake++;
@@ -863,6 +864,38 @@
 						$worksheet->writeString($excelrivi, $excelsarake, $kehalisa);
 
 						$excelrivi++;
+
+						// Kun otetaan tuotteittain niin ekotetaan laitteet!
+						if ($summaustaso == "T" and $row["sarjanumeroseuranta"] == "S") {
+
+							$query	= "	SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.era_kpl era_kpl, tilausrivi_osto.nimitys, sarjanumeroseuranta.sarjanumero
+										FROM sarjanumeroseuranta
+										JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
+																and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
+																and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
+																$mistavarastosta)
+										LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON (tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus = sarjanumeroseuranta.myyntirivitunnus)
+										LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus)
+										WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+										and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+										and sarjanumeroseuranta.myyntirivitunnus != -1
+										$summaus_lisa
+										and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00' or tilausrivi_myynti.laskutettuaika > '$vv-$kk-$pp')
+										and tilausrivi_osto.laskutettuaika > '0000-00-00'
+										and tilausrivi_osto.laskutettuaika <= '$vv-$kk-$pp'";
+							$vararvores = mysql_query($query) or pupe_error($query);
+
+							while ($vararvorow = mysql_fetch_array($vararvores)) {
+
+								$sarjanumeronarvo = sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"]);
+
+								$worksheet->writeString($excelrivi, $tuotesarake, $vararvorow["sarjanumero"]);
+								$worksheet->writeString($excelrivi, $tuotesarake+1, $vararvorow["nimitys"]);
+								$worksheet->writeNumber($excelrivi, $tuotesarake+2, sprintf("%.02f",$sarjanumeronarvo));
+								$excelrivi++;
+							}
+						}
+
 						$excelsarake = 0;
 					}
 

@@ -88,7 +88,7 @@ if ($tee == 'YHTEENVETO') {
 		$summasql  = " sum(if(tilausrivi.tyyppi='L', tilausrivi.rivihinta, 0)) ";
 		$katesql   = " sum(if(tilausrivi.tyyppi='L', tilausrivi.kate, 0)) ";
 
-		$riviwhere = " (tilausrivi.tyyppi in ('L','O') and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl') or 
+		$riviwhere = " (tilausrivi.tyyppi in ('L','O') and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl') or
 					   (tilausrivi.tyyppi = 'L' and tilausrivi.var = 'P' and tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59') ";
 	}
 
@@ -116,7 +116,7 @@ if ($tee == 'YHTEENVETO') {
 		}
 	}
 	else {
-		echo t("ABC-parametrit puuttuu. ABC-aputaulua ei voida rakentaa!")."\n";
+		echo t("ABC-parametrit puuttuu. ABC-aputaulua ei voida rakentaa!")." ($kukarow[yhtio])\n";
 		exit;
 	}
 

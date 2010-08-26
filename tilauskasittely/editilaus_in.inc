@@ -200,61 +200,66 @@ while (!feof ($fd)) {
 		case 'OSTOTIL.OT_TOIMITTAJANRO':
 		case 'OSTOTIL.OT_OVTTUNNUS':
 		//Tilauksen vastaanottaja
-
-			// Arwidson häkki Arwidson Automotivea varten
-			if ($tieto == "003701066781") $tieto = "003707495288";
-
-			$edi_ulos .= t("Tilaus yritykselle")." '" . $tieto .  "' ";
-
-			$query = "SELECT * FROM yhtio WHERE ovttunnus='$tieto' and ovttunnus != ''";
-			$result = mysql_query($query) or die($query);
-
-			if (mysql_num_rows($result) != 1) {
-				// kokeillaan vääntää luvusta ytunnus
-				$tieto2 = substr($tieto, 4, 8);     // etunollilla
-				$tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
-
-				// Arwidson häkki Arwidson Baltia varten
-				if ($tieto == 0) $tieto = "07495288";
+			// Vähintään ytunnus ilman etunollaa
+			if (strlen($tieto) >= 7) {
 				// Arwidson häkki Arwidson Automotivea varten
-				if ($tieto == 1066781) $tieto = "07495288";
-				// Arwidson häkki Örumia varten
-				if ((int) $tieto == 7495288) $tieto = "20428100";
+				if ($tieto == "003701066781") $tieto = "003707495288";
 
-				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
+				$edi_ulos .= t("Tilaus yritykselle")." '" . $tieto .  "' ";
+
+				$query = "SELECT * FROM yhtio WHERE ovttunnus='$tieto' and ovttunnus != ''";
 				$result = mysql_query($query) or die($query);
-			}
 
-			if (mysql_num_rows($result) != 1) {
-				$edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
-				echo $edi_ulos;
-				exit;
-			}
+				if (mysql_num_rows($result) != 1) {
+					// kokeillaan vääntää luvusta ytunnus
+					$tieto2 = substr($tieto, 4, 8);     // etunollilla
+					$tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
 
-			$yhtiorow = mysql_fetch_array($result);
+					// Arwidson häkki Arwidson Baltia varten
+					if ($tieto == 0) $tieto = "07495288";
+					// Arwidson häkki Arwidson Automotivea varten
+					if ($tieto == 1066781) $tieto = "07495288";
+					// Arwidson häkki Örumia varten
+					if ((int) $tieto == 7495288) $tieto = "20428100";
 
-			$query = "	SELECT *
-						FROM yhtion_parametrit
-						WHERE yhtio='$yhtiorow[yhtio]'";
-			$result = mysql_query($query)
-					or die ("Kysely ei onnistu yhtio $query");
-
-			if (mysql_num_rows($result) == 1) {
-				$yhtion_parametritrow = mysql_fetch_array($result);
-				// lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
-				foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
-					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
+					$query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
+					$result = mysql_query($query) or die($query);
 				}
+
+				if (mysql_num_rows($result) != 1) {
+					$edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
+					echo $edi_ulos;
+					exit;
+				}
+
+				$yhtiorow = mysql_fetch_array($result);
+
+				$query = "	SELECT *
+							FROM yhtion_parametrit
+							WHERE yhtio='$yhtiorow[yhtio]'";
+				$result = mysql_query($query)
+						or die ("Kysely ei onnistu yhtio $query");
+
+				if (mysql_num_rows($result) == 1) {
+					$yhtion_parametritrow = mysql_fetch_array($result);
+					// lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
+					foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
+						$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
+					}
+				}
+
+				$kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
+				$kukarow['kuka'] = $edi_laatija;
+
+				// nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
+				$argv = array();
+				$argv[1] = $kukarow["yhtio"];
+
+				$edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
 			}
-
-			$kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
-			$kukarow['kuka'] = $edi_laatija;
-
-			// nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
-			$argv = array();
-			$argv[1] = $kukarow["yhtio"];
-
-			$edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
+			else {
+				$edi_ulos .= "\n$tunnus: ".t("kentässä liian lyhyt tieto")." '$tieto'\n";
+			}
 			break;
 
 		case 'ONADBY_DO' :

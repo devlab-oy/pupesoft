@@ -1547,7 +1547,7 @@ if (!function_exists("generoi_sorttauskentta")) {
 			$sorttauskentta = " if ((tilausrivi.perheid=0 or tilausrivi.perheid=tilausrivi.tunnus),
 									ifnull((SELECT tlt2.jarjestys FROM tilausrivin_lisatiedot tlt2 WHERE tlt2.yhtio=tilausrivi.yhtio and tlt2.tilausrivitunnus=tilausrivi.tunnus LIMIT 1), tilausrivi.tunnus),
 									if (tilausrivi.perheid >0 ,
-										ifnull((SELECT tlt2.jarjestys FROM tilausrivin_lisatiedot tlt2 WHERE tlt2.yhtio=tilausrivi.yhtio and tlt2.tilausrivitunnus=tilausrivi.perheid LIMIT 1), tilausrivi.perheid),
+										ifnull((SELECT tlt3.jarjestys FROM tilausrivin_lisatiedot tlt3 WHERE tlt3.yhtio=tilausrivi.yhtio and tlt3.tilausrivitunnus=tilausrivi.perheid LIMIT 1), tilausrivi.perheid),
 										tilausrivi.tunnus
 										)
 									) as sorttauskentta";

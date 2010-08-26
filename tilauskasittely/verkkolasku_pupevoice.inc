@@ -102,17 +102,17 @@ if (!function_exists('pupevoice_otsik')) {
 
 		xml_add("SellerAccountName1", 					$pankkitiedot['pankkinimi1'],						$tootxml);
 		xml_add("SellerAccountID1", 					$pankkitiedot['pankkitili1'],						$tootxml);
-		xml_add("SellerAccountIBAN1", 					$pankkitiedot["pankkiiban1"],						$tootxml);
+		xml_add("SellerAccountIBAN1", 					str_replace(" ", "", $pankkitiedot["pankkiiban1"]),	$tootxml);
 		xml_add("SellerAccountBIC1", 					$pankkitiedot["pankkiswift1"],						$tootxml);
 
 		xml_add("SellerAccountName2", 					$pankkitiedot['pankkinimi2'],						$tootxml);
 		xml_add("SellerAccountID2", 					$pankkitiedot['pankkitili2'],						$tootxml);
-		xml_add("SellerAccountIBAN2", 					$pankkitiedot["pankkiiban2"],						$tootxml);
+		xml_add("SellerAccountIBAN2", 					str_replace(" ", "", $pankkitiedot["pankkiiban2"]),	$tootxml);
 		xml_add("SellerAccountBIC2", 					$pankkitiedot["pankkiswift2"],						$tootxml);
 
 		xml_add("SellerAccountName3", 					$pankkitiedot['pankkinimi3'],						$tootxml);
 		xml_add("SellerAccountID3", 					$pankkitiedot['pankkitili3'],						$tootxml);
-		xml_add("SellerAccountIBAN3", 					$pankkitiedot["pankkiiban3"],						$tootxml);
+		xml_add("SellerAccountIBAN3", 					str_replace(" ", "", $pankkitiedot["pankkiiban3"]),	$tootxml);
 		xml_add("SellerAccountBIC3", 					$pankkitiedot["pankkiswift3"],						$tootxml);
 
 		xml_add("SellerVatRegistrationText", 			t("Alv.Rek"), 										$tootxml);

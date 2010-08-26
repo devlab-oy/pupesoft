@@ -763,7 +763,7 @@ while ($date != $whileloppu) {
 //kalenterin taulukko alkaa tästä
 echo "<table width='100%'>";
 
-$tyyppi = $toim == 'TYOMAARAYS_ASENTAJA' ? $tyyppi = "'kalenteri'" : "'kalenteri', 'asennuskalenteri'";
+$tyyppi = $toim == 'TYOMAARAYS_ASENTAJA' ? "'kalenteri'" : "'kalenteri', 'asennuskalenteri'";
 
 $kello_nyt	= '';
 list($whalkt, $whalkm) = explode(":", $AIKA_ARRAY[0]);

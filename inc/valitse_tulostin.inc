@@ -128,6 +128,13 @@
 		echo "</select></td></tr>";
 	}
 
+	if ($toim == "TARJOUS" or $toim == "TILAUSVAHVISTUS") {
+		echo "<tr><td>",t("Näytetäänkö rivihinta"),"</td><td><select name='naytetaanko_rivihinta'>";
+		echo "<option value=''>",t("Näytetään rivihinta"),"</option>";
+		echo "<option value='ei_rivihintaa'>",t("Ei näytetä rivihintaa"),"</option>";
+		echo "</select></td></tr>";
+	}
+
 	echo "<tr><td>".t("Kpl")."</td><td><input type='text' name='kappaleet' size='3'></td></tr>";
 
 	echo "<tr><td>".t("Valitse kieli")."</td>";

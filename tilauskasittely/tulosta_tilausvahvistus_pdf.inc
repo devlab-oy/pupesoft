@@ -154,14 +154,14 @@
 	$total = 0;
 
 	// Aloitellaan lähetteen teko
-	$page[$sivu] = alku_lahete($toim);
+	$page[$sivu] = alku_lahete($toim, $naytetaanko_rivihinta);
 
 	while ($row = mysql_fetch_assoc($riresult)) {
-		rivi_lahete($page[$sivu], $toim);
+		rivi_lahete($page[$sivu], $toim, $naytetaanko_rivihinta);
 		$total+= $row["rivihinta"];
 	}
 
-	loppu_lahete($page[$sivu], 1, $toim);
+	loppu_lahete($page[$sivu], 1, $toim, $naytetaanko_rivihinta);
 
 	if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 		$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".pdf";

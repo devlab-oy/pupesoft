@@ -896,10 +896,15 @@ if (!function_exists('tarjous_rivi_custom')) {
 
 			$kommentit = explode("\n", trim($row['kommentti']));
 
+			$ed_akey = 0;
+			$rpit1 = 390;
+			$rpit2 = 380;
+
 			foreach ($kommentit as $akey => $kommentti) {
 
-				$rpit1 = 370;
-				$rpit2 = 370;
+				if ($akey != 0 and $akey != $ed_akey) {
+					$kala -= 5;
+				}
 
 				// Jos rivikommentti on pitkä niin rivitämme sen
 				if ($pdf_tarjous->strlen($kommentti, $pieni) > $rpit1) {
@@ -912,6 +917,7 @@ if (!function_exists('tarjous_rivi_custom')) {
 					$lause = "";
 
 					foreach ($sanat as $sana) {
+
 						if ($pdf_tarjous->strlen($lause, $pieni) > $rpit2) {
 
 							if ($kala <= 110) {
@@ -924,15 +930,21 @@ if (!function_exists('tarjous_rivi_custom')) {
 							}
 
 							$pdf_tarjous->draw_text(150, $kala, $lause, $page_tarjous[$sivu], $pieni);
-							$kala  = $kala - 10;
+							$kala  -= 10;
 							$lause = "";
+
 						}
 
 						$lause .= $sana;
 					}
 
-					$kommentti = $lause;
+					if ($pdf_tarjous->strlen($lause, $pieni) <= $rpit2) {
+						$pdf_tarjous->draw_text(150, $kala, $lause, $page_tarjous[$sivu], $pieni);
+						$kala  -= 10;
+					}
 				}
+
+				$ed_akey = $akey;
 			}
 		}
 

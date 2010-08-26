@@ -288,7 +288,7 @@ if (!$asiakasid) {
 					FROM rahtikirjat
 					where yhtio = '$kukarow[yhtio]'
 					and otsikkonro < 0
-					and tulostettu >= date_sub(now(), INTERVAL 30 DAY)
+					and tulostettu >= date_sub(now(), INTERVAL 180 DAY)
 					GROUP BY rahtikirjanro
 					ORDER BY tulostettu desc";
 		$kirres = mysql_query($query) or pupe_error($query);
@@ -320,7 +320,7 @@ if (!$asiakasid) {
 					echo "<tr>";
 					echo "<td>$rakir_row[rahtikirjanro]</td>";
 					echo "<td>".tv1dateconv($rakir_row["tulostettu"], "P")."</td>";
-					echo "<td>$osoitelappurow[nimi] $osoitelappurow[nimitark]</td>";
+					echo "<td>$osoitelappurow[toim_nimi] $osoitelappurow[toim_snimitark]</td>";
 					echo "<td>$osoitelappurow[toim_osoite]</td>";
 					echo "<td>$osoitelappurow[toim_postino] $osoitelappurow[toim_postitp]</td>";
 					echo "<td style='text-align: right;'>" . round($rakir_row['paino'], 2) . "</td>";

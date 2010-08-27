@@ -256,41 +256,33 @@ if(!function_exists("tuotetarkista")) {
 		//tehdään nää jutut tässä koska tämä on aina viimeinen sarake
 		if (mysql_field_name($result, $i) == "tunnus") {
 
-			if (isset($tem_kehahin) and $tem_kehahin != "" and isset($tem_eisaldoa) and $tem_eisaldoa == "") {
+			if ($tem_kehahin != "" and $tem_kehahin != $trow["kehahin"] and $tem_eisaldoa == "") {
 				// Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
 				$virhe[$i] = $virhe[$tem_kehahin_ind] = t("Saldollisen tuotteen hankintahintaa ei voi muuttaa")."!";
 			}
 
-			if (count($virhe) == 0 and isset($tem_kehahin) and $tem_kehahin != "" and isset($tem_eisaldoa) and $tem_eisaldoa == "" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
-				$query  = "	SELECT kehahin
-							FROM tuote
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$tem_tuoteno'";
+			if ($tem_kehahin != "" and $tem_kehahin != $trow["kehahin"] and $tem_eisaldoa == "" and count($virhe) == 0 and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
+
+				$tem_kehahin = sprintf("%.6f", $tem_kehahin);
+
+				$query = "	INSERT into tapahtuma set
+							yhtio 		= '$kukarow[yhtio]',
+							tuoteno 	= '$tem_tuoteno',
+							kpl 		= '0',
+							kplhinta	= '$tem_kehahin',
+							hinta 		= '$tem_kehahin',
+							laji 		= 'tulo',
+							hyllyalue	= '',
+							hyllynro 	= '',
+							hyllyvali	= '',
+							hyllytaso	= '',
+							selite 		= '".t("Tuotteen kehahinta vaihdettiin")." $trow[kehahin] --> $tem_kehahin',
+							laatija 	= '$kukarow[kuka]',
+							laadittu 	= now()";
 				$chkressires = mysql_query($query) or pupe_error($query);
-				$chkressirow = mysql_fetch_assoc($chkressires);
-
-				$tem_kehahin = sprintf("%.6f", str_replace(",", ".", $tem_kehahin));
-
-				if ($tem_kehahin != $chkressirow["kehahin"]) {
-					$query = "	INSERT into tapahtuma set
-								yhtio 		= '$kukarow[yhtio]',
-								tuoteno 	= '$tem_tuoteno',
-								kpl 		= '0',
-								kplhinta	= '$tem_kehahin',
-								hinta 		= '$tem_kehahin',
-								laji 		= 'tulo',
-								hyllyalue	= '',
-								hyllynro 	= '',
-								hyllyvali	= '',
-								hyllytaso	= '',
-								selite 		= '".t("Tuotteen kehahinta vaihdettiin")." $chkressirow[kehahin] --> $tem_kehahin',
-								laatija 	= '$kukarow[kuka]',
-								laadittu 	= now()";
-					$chkressires = mysql_query($query) or pupe_error($query);
-				}
 			}
 
-			if (count($virhe) == 0 and isset($tem_eisaldoa) and $tem_eisaldoa == "" and $yhtiorow["tuotteen_oletuspaikka"] != "") {
+			if (count($virhe) == 0 and $tem_eisaldoa == "" and $yhtiorow["tuotteen_oletuspaikka"] != "") {
 
 				$query = "	SELECT *
 							FROM tuotepaikat

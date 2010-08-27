@@ -2234,7 +2234,7 @@ if (!function_exists('alvierittely')) {
 			$where = " uusiotunnus = '$laskurow[tunnus]' ";
 		}
 
-		$tyyppilisa = str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc" ? " and tilausrivi.tyyppi = 'T' " : " and tilausrivi.tyyppi = 'L' ";
+		$tyyppilisa = str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc" ? " and tilausrivi.tyyppi in ('L', 'T') " : " and tilausrivi.tyyppi = 'L' ";
 
 		//Haetaan kaikki alvikannat riveiltä
 		$alvquery = "	SELECT distinct alv

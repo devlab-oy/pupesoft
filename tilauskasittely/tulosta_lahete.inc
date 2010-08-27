@@ -2234,15 +2234,19 @@ if (!function_exists('alvierittely')) {
 			$where = " uusiotunnus = '$laskurow[tunnus]' ";
 		}
 
+		$tyyppilisa = str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc" ? " and tilausrivi.tyyppi = 'T' " : " and tilausrivi.tyyppi = 'L' ";
+
 		//Haetaan kaikki alvikannat riveiltä
 		$alvquery = "	SELECT distinct alv
 						FROM tilausrivi
 						WHERE $where
 						and yhtio	= '$kukarow[yhtio]'
-						and tyyppi	= 'L'
+						$tyyppilisa
 						ORDER BY alv";
 		$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
 		$kala -= 10;
+
+		$veron_maara = 0;
 
 		while ($alvrow = mysql_fetch_assoc($alvresult)) {
 
@@ -2253,7 +2257,7 @@ if (!function_exists('alvierittely')) {
 							sum(round(tilausrivi.rivihinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1),2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
+							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' $tyyppilisa ";
 			}
 			elseif ($alvrow["alv"] >= 500) {
 				$aquery = "	SELECT
@@ -2261,7 +2265,7 @@ if (!function_exists('alvierittely')) {
 							sum(round((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) * tilausrivi.varattu * (1 - tilausrivi.ale / 100),2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
+							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' $tyyppilisa ";
 			}
 			elseif ($alvrow["alv"] < 500 and $toim != 'PROFORMA' and trim(strtoupper($laskurow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
 				$aquery = "	SELECT
@@ -2269,7 +2273,7 @@ if (!function_exists('alvierittely')) {
 							sum(round(tilausrivi.hinta $kassa_ale_lisa / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl+tilausrivi.jt) * (1-tilausrivi.ale/100),2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
+							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' $tyyppilisa ";
 			}
 			elseif ($alvrow["alv"] < 500 and $toim != 'PROFORMA' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 				$aquery = "	SELECT
@@ -2277,7 +2281,7 @@ if (!function_exists('alvierittely')) {
 							sum(round((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * (1-tilausrivi.ale/100),2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
+							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' $tyyppilisa ";
 			}
 			else {
 				$aquery = "	SELECT
@@ -2285,10 +2289,12 @@ if (!function_exists('alvierittely')) {
 							sum(round((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
+							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' $tyyppilisa ";
 			}
 			$aresult = mysql_query($aquery) or pupe_error($aquery);
 			$arow = mysql_fetch_assoc($aresult);
+
+			$veron_maara += $arow['alvrivihinta'];
 
 			$pdf->draw_text(150, $kala, t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."): ",	$thispage, $boldi);
 			$oikpos = $pdf->strlen(sprintf('%.2f', $arow["alvrivihinta"]), $boldi);
@@ -2302,6 +2308,18 @@ if (!function_exists('alvierittely')) {
 			}
 
 			$kala -= 10;
+		}
+
+		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
+			$kala -= 20;
+
+			#$yhtiorow['alv_kasittely'] == '' 				- Verolliset myyntihinnat
+			#$yhtiorow['alv_kasittely'] != '' 				- Verottomat myyntihinnat
+
+			if ($yhtiorow['alv_kasittely'] != '') {
+				$summa += $veron_maara;
+			}
+
 		}
 
 		$pdf->draw_text(150, $kala, t("Lasku Yhteensä", $kieli).":",							$thispage, $boldi);
@@ -2364,6 +2382,14 @@ if (!function_exists('alvierittely')) {
 				$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $summa - $pyoristys), 		$thispage, $boldi);
 				$pdf->draw_text(473, $kala, $laskurow["valkoodi"], 								$thispage, $boldi);
 			}
+		}
+
+		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
+			$pdf->draw_text(150, $kala+20, t("Verollinen arvo Yhteensä", $kieli).":", $thispage, $boldi);
+
+			$oikpos = $pdf->strlen(sprintf('%.2f', $summa), $boldi);
+			$pdf->draw_text(470-$oikpos, $kala+20, sprintf('%.2f', $summa), $thispage, $boldi);
+			$pdf->draw_text(473, $kala+20, $laskurow['valkoodi'], $thispage, $boldi);
 		}
 
 		return $thispage;

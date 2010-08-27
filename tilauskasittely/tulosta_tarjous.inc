@@ -1639,11 +1639,9 @@ if (!function_exists('alvierittely')) {
 
 		$pdf_tarjous->draw_text(500, $varakala, $laskurow["valkoodi"], $page_tarjous, $boldi);
 
-		$kala -= 20;
-
-		$pdf_tarjous->draw_text(150, $kala, t("Lasku Yhteensä", $kieli).":", $page_tarjous, $boldi);
-
 		if ($yhtiorow['tarjoustyyppi'] == 1) {
+			$kala -= 20;
+
 			#$yhtiorow['alv_kasittely'] == '' 				- Verolliset myyntihinnat
 			#$yhtiorow['alv_kasittely'] != '' 				- Verottomat myyntihinnat
 			#$yhtiorow['tarjouksen_alv_kasittely'] == ''	- Yhtiön oletus
@@ -1676,6 +1674,8 @@ if (!function_exists('alvierittely')) {
 				$total_uudet += $veron_maara;
 			}
 		}
+
+		$pdf_tarjous->draw_text(150, $kala, t("Lasku Yhteensä", $kieli).":", $page_tarjous, $boldi);
 
 		if ($toim == 'PROFORMA') {
 			$summa = $kassa_ale != '' ? $summa * (1-$kassa_ale/100) : $summa;

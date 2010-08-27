@@ -3,7 +3,7 @@
 if(!function_exists("yhtion_parametrittarkista")) {
 	function yhtion_parametrittarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $tiedostopaate;
-				
+
 		if (mysql_field_name($result, $i) == "admin_email" or
 			mysql_field_name($result, $i) == "alert_email" or
 			mysql_field_name($result, $i) == "postittaja_email") {
@@ -22,9 +22,9 @@ if(!function_exists("yhtion_parametrittarkista")) {
 
 		if (mysql_field_name($result, $i) == "maksuehto_tuotenumero" OR
 		    mysql_field_name($result, $i) == "rahti_tuotenumero" OR
-		    mysql_field_name($result, $i) == "jalkivaatimus_tuoteno" OR
+		    mysql_field_name($result, $i) == "jalkivaatimus_tuotenumero" OR
 		    mysql_field_name($result, $i) == "lisakulu_tuotenumero" OR
-		    mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero" OR		
+		    mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero" OR
 		    mysql_field_name($result, $i) == "alennus_tuotenumero" OR
 			mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero") {
 
@@ -75,8 +75,8 @@ if(!function_exists("yhtion_parametrittarkista")) {
 				$sallitut=array("asiakas","toimi","avainsana","tuote","tuotteen_toimittajat");
 				$sallitut_avainsana=array("TRY","OSASTO");
 
-				if(count($taulut)>0) {			
-					foreach($taulut as $taulu) {				
+				if(count($taulut)>0) {
+					foreach($taulut as $taulu) {
 
 						if(strpos($taulu,"avainsana")!==false) {
 							$taululisat = explode("|",substr($taulu,10));
@@ -89,7 +89,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
 										}
 										$virhe[$i] .= t("Lisätieto ei kelpaa")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
 									}
-								}						
+								}
 							}
 							else {
 								if($virhe[$i]!="") {
@@ -108,7 +108,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
 							$virhe[$i] .= t("Taulu ei kelpaa")." '$taulu' ".t("sallitut kentät ovat")." ".implode(",", $sallitut);
 						}
 					}
-				}					
+				}
 			}
 		}
 

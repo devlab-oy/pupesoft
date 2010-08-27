@@ -508,21 +508,21 @@ else {
 						$tilaus_valmis_ulos .= t("Tilaukselle lisättiin rahtikulua").": $hinta $laskurow[valkoodi]<br>";
 					}
 
-					if ($yhtiorow["jalkivaatimus_tuoteno"] == "") {
-						$yhtiorow["jalkivaatimus_tuoteno"] = $yhtiorow["rahti_tuotenumero"];
+					if ($yhtiorow["jalkivaatimus_tuotenumero"] == "") {
+						$yhtiorow["jalkivaatimus_tuotenumero"] = $yhtiorow["rahti_tuotenumero"];
 					}
 
 					$query = "	SELECT tunnus
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus = '$laskurow[tunnus]'
-								AND tuoteno = '$yhtiorow[jalkivaatimus_tuoteno]'";
+								AND tuoteno = '$yhtiorow[jalkivaatimus_tuotenumero]'";
 					$result = mysql_query($query) or pupe_error($query);
 
 					$query = "	SELECT *
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
-								AND tuoteno = '$yhtiorow[jalkivaatimus_tuoteno]'";
+								AND tuoteno = '$yhtiorow[jalkivaatimus_tuotenumero]'";
 					$rhire = mysql_query($query) or pupe_error($query);
 
 					// lisätään jälkivaatimuskulu jos sitä ei ole tilauksella ja tuote löytyy

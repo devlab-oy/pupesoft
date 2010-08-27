@@ -751,14 +751,14 @@
 							$tjvres = mysql_query($query) or pupe_error($query);
 							$tjvrow = mysql_fetch_array($tjvres);
 
-							if ($yhtiorow["jalkivaatimus_tuoteno"] == "") {
-								$yhtiorow["jalkivaatimus_tuoteno"] = $yhtiorow["rahti_tuotenumero"];
+							if ($yhtiorow["jalkivaatimus_tuotenumero"] == "") {
+								$yhtiorow["jalkivaatimus_tuotenumero"] = $yhtiorow["rahti_tuotenumero"];
 							}
 
 							$query = "	SELECT *
 										FROM tuote
 										WHERE yhtio = '$kukarow[yhtio]'
-										AND tuoteno = '$yhtiorow[jalkivaatimus_tuoteno]'";
+										AND tuoteno = '$yhtiorow[jalkivaatimus_tuotenumero]'";
 							$rhire = mysql_query($query) or pupe_error($query);
 
 							// jos tuotenumero löytyy
@@ -1556,7 +1556,9 @@
 								$masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
 							}
 
-							$query = "	SELECT min(date_format(toimitettuaika, '%Y-%m-%d')) mint, max(date_format(toimitettuaika, '%Y-%m-%d')) maxt
+							$query = "	SELECT
+										min(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')) mint,
+										max(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')) maxt
 										FROM tilausrivi
 										WHERE yhtio = '$kukarow[yhtio]'
 										and otunnus in ($tunnukset)

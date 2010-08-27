@@ -270,7 +270,8 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
-		echo "<font class='error'>Näilla laskuilla laskunpvm ja maksupvm ovat samat. Tämä aiheuttaa ongelmia siirrossa.</font>";
+
+		echo "<font class='error'>Näillä laskuilla laskunpvm ja maksupvm ovat samat. Tämä aiheuttaa ongelmia siirrossa.</font>";
 
 		echo "<table>";
 		echo "<tr>";
@@ -318,7 +319,7 @@
 
 		while ($trow=mysql_fetch_array ($result)) {
 			echo "<tr>";
-			for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
+			for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
 				echo "<td>$trow[$i]</td>";
 			}
 			echo "<td><a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>Korjaa</a></td>";
@@ -333,11 +334,14 @@
 	//mapvm:n tilioinnit puuttuvat?
 	$query  = "	SELECT lasku.tapvm, nimi, lasku.summa, lasku.tunnus, count(*) kpl
 				FROM lasku
-				LEFT JOIN tiliointi ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tapvm = lasku.mapvm and korjattu = '')
+				LEFT JOIN tiliointi ON (lasku.yhtio = tiliointi.yhtio 
+					AND lasku.tunnus = tiliointi.ltunnus 
+					AND tiliointi.tapvm = lasku.mapvm 
+					AND korjattu = '')
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and ((left(lasku.tapvm, 7) = '$kausi') or (left(lasku.tapvm, 7) = '$kausi'))
-				and lasku.mapvm != '0000-00-00'
-				and lasku.tila IN ('H','M','P','Q','Y','U')
+				AND ((left(lasku.tapvm, 7) = '$kausi') or (left(lasku.tapvm, 7) = '$kausi'))
+				AND lasku.mapvm != '0000-00-00'
+				AND lasku.tila IN ('H','M','P','Q','Y','U')
 				GROUP BY 1,2,3,4
 				HAVING kpl < 2";
 	$result = mysql_query($query) or pupe_error($query);
@@ -388,10 +392,14 @@
 				tiliointi.tilino, tiliointi.kustp, tiliointi.projekti, tiliointi.summa,
 				tiliointi.selite, lasku.ytunnus, tiliointi.ltunnus, lasku.mapvm, tiliointi.tunnus, lasku.laskunro, lasku.nimi, tiliointi.tapvm tapvmclean
 				FROM tiliointi
-				JOIN lasku ON tiliointi.yhtio = lasku.yhtio and lasku.tunnus = tiliointi.ltunnus  and lasku.tila = 'U' and lasku.tapvm = tiliointi.tapvm and left(lasku.tapvm, 7) = '$kausi'
+				JOIN lasku ON tiliointi.yhtio = lasku.yhtio 
+					AND lasku.tunnus = tiliointi.ltunnus  
+					AND lasku.tila = 'U' 
+					AND lasku.tapvm = tiliointi.tapvm 
+					AND left(lasku.tapvm, 7) = '$kausi'
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-				and tiliointi.korjattu = ''
-				and tiliointi.tosite = ''
+				AND tiliointi.korjattu = ''
+				AND tiliointi.tosite = ''
 				ORDER BY tiliointi.ltunnus, tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.projekti";
 	$result_ms = mysql_query($query) or pupe_error($query);
 
@@ -405,10 +413,14 @@
 				tiliointi.tilino, tiliointi.kustp, tiliointi.projekti, tiliointi.summa,
 				tiliointi.selite, lasku.ytunnus, tiliointi.ltunnus, lasku.mapvm, tiliointi.tunnus, lasku.laskunro, lasku.nimi, tiliointi.tapvm tapvmclean
 				FROM tiliointi
-				JOIN lasku ON tiliointi.yhtio = lasku.yhtio and lasku.tunnus = tiliointi.ltunnus  and lasku.tila in ('H','M','P','Q','Y') and lasku.tapvm = tiliointi.tapvm and left(lasku.tapvm, 7) = '$kausi'
+				JOIN lasku ON tiliointi.yhtio = lasku.yhtio 
+					AND lasku.tunnus = tiliointi.ltunnus  
+					AND lasku.tila in ('H','M','P','Q','Y') 
+					AND lasku.tapvm = tiliointi.tapvm 
+					AND left(lasku.tapvm, 7) = '$kausi'
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-				and tiliointi.tosite = ''
-				and tiliointi.korjattu = ''
+				AND tiliointi.tosite = ''
+				AND tiliointi.korjattu = ''
 				ORDER BY tiliointi.ltunnus, tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.projekti";
 	$result_ov = mysql_query($query) or pupe_error($query);
 
@@ -422,10 +434,14 @@
 				tiliointi.tilino, tiliointi.kustp, tiliointi.projekti, tiliointi.summa,
 				tiliointi.selite, lasku.ytunnus, tiliointi.ltunnus, lasku.mapvm, tiliointi.tunnus, lasku.laskunro, lasku.nimi, tiliointi.tapvm tapvmclean
 				FROM tiliointi
-				JOIN lasku ON tiliointi.yhtio = lasku.yhtio and lasku.tunnus = tiliointi.ltunnus and ((lasku.tila in ('H','M','P','Q','Y','U') and lasku.tapvm != tiliointi.tapvm and left(tiliointi.tapvm, 7) = '$kausi') or (lasku.tila = 'X' and left(tiliointi.tapvm, 7) = '$kausi'))
+				JOIN lasku ON (tiliointi.yhtio = lasku.yhtio 
+					AND lasku.tunnus = tiliointi.ltunnus 
+					AND ((lasku.tila in ('H','M','P','Q','Y','U') 
+					AND lasku.tapvm != tiliointi.tapvm 
+					AND left(tiliointi.tapvm, 7) = '$kausi') or (lasku.tila = 'X' and left(tiliointi.tapvm, 7) = '$kausi')))
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-				and tiliointi.tosite = ''
-				and tiliointi.korjattu = ''
+				AND tiliointi.tosite = ''
+				AND tiliointi.korjattu = ''
 				ORDER BY tiliointi.ltunnus, tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.projekti";
 	$result_mrt = mysql_query($query) or pupe_error($query);
 
@@ -543,4 +559,5 @@
 	echo "</table><br><br>";
 
 	require "inc/footer.inc";
+	
 ?>

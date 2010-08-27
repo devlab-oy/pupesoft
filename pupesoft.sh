@@ -2,7 +2,7 @@
 
 # Pupesoft asennuksen tiedot
 POLKU="/var/www/html/pupesoft/"
-YHTIO="demo"
+YHTIO="joni"
 
 # Pupesoft varmistuksen tiedot
 BACKUPDIR="/backup/pupe-backup"
@@ -13,7 +13,7 @@ BACKUPSAVEDAYS="30"
 
 # Komennot
 sh ${POLKU}pupe-cron.sh $YHTIO
-sh ${POLKU}pupe-cron-server.sh
+sh ${POLKU}pupe-cron-server.sh $BACKUPSAVEDAYS
 sh ${POLKU}pupe-backup.sh $BACKUPDIR $BACKUPDB $BACKUPUSER $BACKUPPASS $BACKUPSAVEDAYS
 
 # Jos haluat seurata hitaita kyselyitä

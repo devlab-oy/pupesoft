@@ -13,4 +13,4 @@ cd ${POLKU};php hae_valuutat_cron.php
 
 # Siivotaan dataout dirikasta vanhat failit pois
 touch ${POLKU}/dataout
-find ${POLKU}/dataout -mtime +30 -not -path '*/.svn*' -delete
+find ${POLKU}/dataout -mtime +${BACKUPSAVEDAYS} -not -path '*/.svn*' -delete

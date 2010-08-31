@@ -1689,7 +1689,7 @@
 
 		$ulos .= "<option value = ''>".t("Myyntitilauksesta ei voi tehdä osatoimitusta käsin")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksesta voi tehdä osatoimituksia käsin")."</option>";
-		$ulos .= "<option value = 'E' $sel[E]>".t("Tilausksia ei osatoimiteta")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Tilauksia ei osatoimiteta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -249,7 +249,7 @@ if ($tila == 'tee_kohdistus') {
 
 		// $lasku_tunnukset[]
 		if (is_array($lasku_tunnukset)){
-			for ($i=0;$i<sizeof($lasku_tunnukset);$i++) {
+			for ($i=0;$i<count($lasku_tunnukset);$i++) {
 				if ($i!=0) $laskutunnukset=$laskutunnukset . ",";
 				$laskutunnukset=$laskutunnukset . "$lasku_tunnukset[$i]";
 			}
@@ -260,7 +260,7 @@ if ($tila == 'tee_kohdistus') {
 
 		// $lasku_tunnukset_kale[]
 		if (is_array($lasku_tunnukset_kale)) {
-			for ($i=0;$i<sizeof($lasku_tunnukset_kale);$i++) {
+			for ($i=0;$i<count($lasku_tunnukset_kale);$i++) {
 				if ($i!=0) $laskutunnuksetkale=$laskutunnuksetkale . ",";
 				$laskutunnuksetkale=$laskutunnuksetkale . "$lasku_tunnukset_kale[$i]";
 			}
@@ -279,14 +279,14 @@ if ($tila == 'tee_kohdistus') {
 		}
 
 		if ($osasuoritus == 1) {
-			if (sizeof($lasku_tunnukset) != 1) {
+			if (count($lasku_tunnukset) != 1) {
 				echo "<font class='error'>".t("Jos osasuoritus, pit‰‰ valita vain ja ainoastaan yksi lasku")."</font><br><br>";
 
 				$tila 	= 'kohdistaminen';
 				$query 	= "UNLOCK TABLES";
 				$result = mysql_query($query) or pupe_error($query);
 			}
-			if (sizeof($lasku_tunnukset_kale) > 0) {
+			if (count($lasku_tunnukset_kale) > 0) {
 				echo "<font class='error'>".t("Jos osasuoritus, ei voi valita kassa-alennusta")."</font><br><br>";
 
 				$tila 	= 'kohdistaminen';
@@ -345,7 +345,7 @@ if ($tila == 'tee_kohdistus') {
 
 		$query = "	SELECT *
 					FROM yriti
-					WHERE yhtio = '$errorrow[yhtio]' 
+					WHERE yhtio = '$errorrow[yhtio]'
 					and tilino = '$errorrow[tilino]'
 					and yriti.kaytossa = ''";
 		$result = mysql_query($query) or pupe_error($query);
@@ -448,7 +448,8 @@ if ($tila == 'tee_kohdistus') {
 	$apukustp = $apurow["kustp"];
 
 	// haetaan laskujen tiedot
-	$laskujen_summa=0;
+	$laskujen_summa = 0;
+	$laskut = array();
 
 	if ($osasuoritus == 1) {
 		//*** T‰ss‰ yritet‰‰n hoitaa osasuoritus mahdollisimman elegantisti ***
@@ -598,8 +599,8 @@ if ($tila == 'tee_kohdistus') {
 						and mapvm = '0000-00-00'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($result) != sizeof($lasku_tunnukset)) {
-				echo "<font class='error'>".t("Joku laskuista katosi (joku maksoi sen sinua ennen?)")." '".mysql_num_rows($result)."' '".sizeof($lasku_tunnukset)."'</font><br>";
+			if (mysql_num_rows($result) != count($lasku_tunnukset)) {
+				echo "<font class='error'>".t("Joku laskuista katosi (joku maksoi sen sinua ennen?)")." '".mysql_num_rows($result)."' '".count($lasku_tunnukset)."'</font><br>";
 
 				$query = "UNLOCK TABLES";
 				$result = mysql_query($query) or pupe_error($query);
@@ -638,8 +639,8 @@ if ($tila == 'tee_kohdistus') {
 						and mapvm = '0000-00-00'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($result) != sizeof($lasku_tunnukset_kale)) {
-				echo "<font class='error'>".t("Joku laskuista katosi (joku maksoi sen sinua ennen?)")." '".mysql_num_rows($result)."' '".sizeof($lasku_tunnukset_kale)."'</font><br>";
+			if (mysql_num_rows($result) != count($lasku_tunnukset_kale)) {
+				echo "<font class='error'>".t("Joku laskuista katosi (joku maksoi sen sinua ennen?)")." '".mysql_num_rows($result)."' '".count($lasku_tunnukset_kale)."'</font><br>";
 				exit;
 			}
 
@@ -683,7 +684,7 @@ if ($tila == 'tee_kohdistus') {
 		}
 
 		// Tiliˆid‰‰n myyntisaamiset
-		if (is_array($laskut)) {
+		if (is_array($laskut) and count($laskut) > 0) {
 
 			$kassaan = 0;
 			$kassaan_valuutassa = 0;

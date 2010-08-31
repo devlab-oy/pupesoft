@@ -7,7 +7,7 @@ if (!isset($kk)) $kk = '';
 if (!isset($vv)) $vv = '';
 
 if ($tee == "lataa_tiedosto") {
-	echo file_get_contents("dataout/".$filenimi);
+	echo file_get_contents("$pupe_root_polku/dataout/".$filenimi);
 	exit;
 }
 
@@ -52,7 +52,7 @@ if ($tee == "VSRALVYV") {
 				<option value = ''>".t('Valitse kohdekausi')."</option>";
 
 	for ($i=1; $i<$kausia; $i++) {
-		
+
 		if ($kohdekausi == $kvarttaali."/".$vuosi) {
 			$sel = "SELECTED";
 		}
@@ -99,7 +99,7 @@ if ($tee == "VSRALVYV") {
 				<option value = ''>".t('Valitse kohdekuukausi')."</option>";
 
 	for ($i=1; $i<$kausia; $i++) {
-		
+
 		$kuukausi = str_pad((int)$kuukausi, 2, 0, STR_PAD_LEFT);
 
 		if ($kohdekuukausi == $kuukausi."/".$vuosi) {
@@ -125,7 +125,7 @@ if ($tee == "VSRALVYV") {
 
 	}
 	echo "</select></form></td></tr></table>";
-	
+
 	if (strtoupper($yhtiorow["maa"])== 'FI') {
 		//muutetaan ytunnus takas oikean näköseks
 		$ytunpit = 8-strlen($yhtiorow["ytunnus"]);
@@ -181,7 +181,7 @@ if ($tee == "VSRALVYV") {
 			$alkupvm = "$vuosi-$kuukausi-01";
 			$loppupvm = date("Y-m-d", mktime(0, 0, 0, $kuukausi+1, 1, $vuosi));
 		}
-		
+
 		echo "<br><hr>";
 
 		if ($ytunnus != "") {
@@ -198,7 +198,7 @@ if ($tee == "VSRALVYV") {
 			else {
 				echo "<font class='error'>".t("Syötetty maa on väärin")."</font><br>";
 			}
-			
+
 		}
 
 		$query = "SELECT group_concat(distinct(koodi) SEPARATOR '\',\'') from maat where eu != '' and koodi != 'FI'";
@@ -209,23 +209,23 @@ if ($tee == "VSRALVYV") {
 		$query = "	SELECT
 		 			tuote.tuotetyyppi,
 					if(tuote.tuotetyyppi in ('','R'), 'JOO', 'EI') tav_pal,
-					lasku.ytunnus, 
-					asiakas.nimi, 
-					if(lasku.maa='', asiakas.maa, lasku.maa) as maa,					
-					if(lasku.maa='','X','') asiakkaan_maa,				
-					round(sum(rivihinta),2) summa, 
-					round(sum(rivihinta)*100,0) arvo, 
-					count(distinct(lasku.tunnus)) laskuja										
+					lasku.ytunnus,
+					if(lasku.maa='', asiakas.maa, lasku.maa) as maa,
+					if(lasku.maa='','X','') asiakkaan_maa,
+					max(asiakas.nimi) nimi,
+					round(sum(rivihinta),2) summa,
+					round(sum(rivihinta)*100,0) arvo,
+					count(distinct(lasku.tunnus)) laskuja
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
 					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
 					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]')
 					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and lasku.liitostunnus = asiakas.tunnus)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' 
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'U'
-					and lasku.tapvm >= '$alkupvm' 
+					and lasku.tapvm >= '$alkupvm'
 					and lasku.tapvm < '$loppupvm'
 					and lasku.vienti = 'E'
-					GROUP BY 1,2,3,4,5,6
+					GROUP BY 1,2,3,4,5
 					ORDER BY tav_pal DESC, tuote.tuotetyyppi, lasku.ytunnus, asiakas.nimi ";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -236,30 +236,30 @@ if ($tee == "VSRALVYV") {
 			$arvo 		= 0;
 			$summa_tav	= 0;
 			$summa_pal	= 0;
-			
+
 			$osatiedot 	= "";
 			$i			= 0;
 			$edtav_pal	= "XXX";
-			
+
 			echo "<table>";
-			
+
 			$ttyyppi = array('A' => t("Päiväraha"), 'B' => t("Muu kulu"), ''  => t("Normaali / Valmiste"), 'R' => t("Raaka-aine"), 'K' => t("Palvelu"), 'M' => t("Muu/Informatiivinen"));
-			
+
 			while ($row = mysql_fetch_array($result)) {
-				
+
 				if ($row["tav_pal"] != $edtav_pal or $edtav_pal == "XXX") {
-					
+
 					if ($edtav_pal != "XXX") echo "<tr><th colspan='4'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_tav)."</th><th></th></tr>";
-					
+
 					if ($edtav_pal != "XXX") {
 						echo "<tr><td class='back' colspan='6'><br><br><br>Palvelutuotteet (ei ilmoiteta verottajalle):</td></tr>";
 					}
-					
+
 					echo "<tr><th>".t("Tuotetyyppi")."</th><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";
 				}
-				
+
 				$edtav_pal = $row["tav_pal"];
-				
+
 				if ($row["maa"] == "") {
 					$query = "	SELECT distinct koodi, nimi
 								FROM maat
@@ -295,13 +295,13 @@ if ($tee == "VSRALVYV") {
 					echo "<tr><td>".$ttyyppi[strtoupper($row["tuotetyyppi"])]."</td><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td></tr>";
 				}
 
-				if ($row["maa"] != "") {										
+				if ($row["maa"] != "") {
 					if ($row["tav_pal"] == "JOO") {
 						$i++;
-						
+
 						$arvo+=$row["arvo"];
 						$summa_tav+=$row["summa"];
-						
+
 						$osatiedot .= "102:$row[maa]\n";
 						$osatiedot .= "103:".sprintf("%012.12s",str_replace(array($row["maa"],"-","_"), "", $row["ytunnus"]))."\n";
 						$osatiedot .= "210:$row[arvo]\n";
@@ -310,10 +310,10 @@ if ($tee == "VSRALVYV") {
 					}
 					else {
 						$summa_pal+=$row["summa"];
-					}						
+					}
 				}
 			}
-			
+
 			echo "<tr><th colspan='4'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_pal)."</th><th></th></tr>";
 			echo "<tr><th colspan='4'></th><td class='tumma' align='right'>".sprintf("%.2f", ($summa_tav+$summa_pal))."</th><th></th></tr>";
 			echo "</table>";
@@ -335,8 +335,8 @@ if ($tee == "VSRALVYV") {
 				$file .= "999:1\n";
 
 				$filenimi = "VSRALVYV-$kvarttaali$vuosi	".date("dmy-His").".txt";
-				$fh = fopen("/tmp/".$filenimi, "w");
-				
+				$fh = fopen("$pupe_root_polku/dataout/".$filenimi, "w");
+
 				if (fwrite($fh, $file) === FALSE) die("Kirjoitus epäonnistui $filenimi");
 				fclose($fh);
 
@@ -344,8 +344,8 @@ if ($tee == "VSRALVYV") {
 						<input type='hidden' name='tee' value='lataa_tiedosto'>
 						<input type='hidden' name='kausi' value='$kausi'>
 						<input type='hidden' name='lataa_tiedosto' value='1'>
-						<input type='hidden' name='kaunisnimi' value='".t("Arvonlisaveron_yhteenvetoilmoitus-$kvarttaali$vuosi")."'>
-						<input type='hidden' name='tmpfilenimi' value='$filenimi'>
+						<input type='hidden' name='kaunisnimi' value='".t("Arvonlisäveron_yhteenvetoilmoitus")."-$kvarttaali$vuosi.txt'>
+						<input type='hidden' name='filenimi' value='$filenimi'>
 						<input type='submit' name='tallenna' value='".t("Tallenna tiedosto")."'></form>";
 			}
 			else {

@@ -763,12 +763,14 @@
 					if (lasku.tapvm = '0000-00-00', left(lasku.luontiaika,10), lasku.tapvm) pvm,
 					lasku.toimaika,
 					if (kuka.nimi !='' and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija,
-					if (lasku.summa=0, (SELECT round(sum(hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi not in ('D','V')), lasku.summa) summa,
-					toimaika Toimitusaika,
+					lasku.summa,
+					lasku.toimaika Toimitusaika,
 					lasku.tila,
 					lasku.alatila,
 					lasku.yhtio,
-					lasku.yhtio_nimi
+					lasku.yhtio_nimi,
+					lasku.erikoisale,
+					lasku.liitostunnus
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
 					WHERE $where1 $where2 $where3
@@ -869,7 +871,31 @@
 				echo "<$ero valign='top'>$row[laatija]</$ero>";
 
 				if ($kukarow['hinnat'] == 0) {
-					echo "<$ero valign='top' align='right'>$row[summa]</$ero>";
+					if ($toim != "LASKU" and $row["summa"] == 0) {
+						
+						if ($toim == "OSTO") {
+							$kerroinlisa1 = " * if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) ";
+							$kerroinlisa2 = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$row[liitostunnus]' ";
+						}
+						else {
+							$kerroinlisa1 = "";
+							$kerroinlisa2 = "";
+						}
+						
+						$query = "  SELECT round(sum(tilausrivi.hinta $kerroinlisa1 * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$row[erikoisale]-(tilausrivi.ale*$row[erikoisale]/100))/100))), 2) summa
+									FROM tilausrivi 
+									$kerroinlisa2
+									WHERE tilausrivi.yhtio = '$row[yhtio]'
+									and tilausrivi.otunnus = '$row[tunnus]'
+									and tilausrivi.tyyppi not in ('D','V')";
+						$sumres = mysql_query($query) or pupe_error($query);
+						$sumrow = mysql_fetch_assoc($sumres);
+						
+						echo "<$ero valign='top' align='right'>$sumrow[summa]</$ero>";
+					}
+					else {
+						echo "<$ero valign='top' align='right'>$row[summa]</$ero>";
+					}					
 				}
 
 				$laskutyyppi = $row["tila"];

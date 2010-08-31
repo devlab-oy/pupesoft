@@ -415,7 +415,6 @@ if ($tee == 'MONISTA') {
 					case 'yhtio_kotipaikka':
 					case 'yhtio_toimipaikka':
 					case 'verkkotunnus':
-					case 'maksuehto':
 					case 'myyja':
 					case 'kassalipas':
 					case 'ovttunnus':
@@ -427,6 +426,53 @@ if ($tee == 'MONISTA') {
 						}
 						else {
 							$values .= ", '".$monistarow[$i]."'";
+						}
+					break;
+					case 'maksuehto':
+
+						$query = "	SELECT tunnus, jv
+									FROM maksuehto
+									WHERE yhtio = '$kukarow[yhtio]'
+									and kaytossa = ''
+									and (sallitut_maat = '' or sallitut_maat like '%$monistarow[maa]%')
+									and tunnus = '$monistarow[$i]'";
+						$abures = mysql_query($query) or pupe_error($query);
+
+						$maksuehto_ok = TRUE;
+
+						if (mysql_num_rows($abures) == 1) {
+							$aburow = mysql_fetch_assoc($abures);
+
+							if ($kumpi == 'HYVITA' and $aburow["jv"] != "") {
+								// Ei laiteta jälkivaatimusta hyvityslaskulle
+								$maksuehto_ok = FALSE;
+							}
+						}
+						else {
+							// Maksuehtoa ei enää löydy
+							$maksuehto_ok = FALSE;
+						}
+
+						if ($maksuehto_ok) {
+							$values .= ", '".$monistarow[$i]."'";
+						}
+						else {
+							// Otetaan firman eka maksuehto
+							$query = "	SELECT tunnus
+										FROM maksuehto
+										WHERE yhtio = '$kukarow[yhtio]'
+										and kaytossa = ''
+										and (sallitut_maat = '' or sallitut_maat like '%$monistarow[maa]%')
+										and kateinen = ''
+										and jv = ''
+										and jaksotettu = ''
+										and erapvmkasin = ''
+										order by jarjestys, teksti, tunnus
+										LIMIT 1";
+							$abures = mysql_query($query) or pupe_error($query);
+							$aburow = mysql_fetch_assoc($abures);
+
+							$values .= ", '$aburow[tunnus]'";
 						}
 					break;
 					case 'toimaika':
@@ -552,7 +598,7 @@ if ($tee == 'MONISTA') {
 						if ($alvik == "on") {
 							$squery = "	SELECT *
 										FROM asiakas
-										WHERE yhtio='$monistarow[yhtio]' and tunnus = '$monistarow[liitostunnus]'";
+										WHERE yhtio='$kukarow[yhtio]' and tunnus = '$monistarow[liitostunnus]'";
 							$asiakres = mysql_query($squery) or pupe_error($squery);
 							$asiakrow = mysql_fetch_array($asiakres);
 
@@ -611,7 +657,7 @@ if ($tee == 'MONISTA') {
 						else {
 							$vquery = "	SELECT kurssi
 										FROM valuu
-										WHERE yhtio = '$monistarow[yhtio]'
+										WHERE yhtio = '$kukarow[yhtio]'
 										and nimi	= '$monistarow[valkoodi]'";
 							$vresult = mysql_query($vquery) or pupe_error($vquery);
 							$valrow = mysql_fetch_array($vresult);
@@ -639,7 +685,7 @@ if ($tee == 'MONISTA') {
 			//	Päivitetään myös tunnusnippu jotta tätä voidaan versioida..
 			if ($toim == "TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") {
 				$kysely  = "UPDATE lasku SET
-								tunnusnippu = tunnus
+							tunnusnippu = tunnus
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$utunnus'";
 				$updres  = mysql_query($kysely) or pupe_error($kysely);
 			}

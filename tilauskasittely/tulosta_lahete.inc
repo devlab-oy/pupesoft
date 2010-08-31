@@ -647,7 +647,7 @@ if (!function_exists('uusi_sivu_lahete')) {
 
 if (!function_exists('rivi_otsikot_lahete')) {
 	function rivi_otsikot_lahete($thispage, $naytetaanko_rivihinta = '') {
-		global $pdf, $kieli, $lahetetyyppi, $norm, $rectparam, $kala, $extranet_tilausvahvistus, $boldi, $laskurow;
+		global $pdf, $kieli, $lahetetyyppi, $norm, $rectparam, $kala, $extranet_tilausvahvistus, $boldi, $laskurow, $yhtiorow;
 
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
 			// tulosta_lahete.inc
@@ -816,7 +816,7 @@ if (!function_exists('rivi_otsikot_lahete')) {
 			if (trim($naytetaanko_rivihinta) == '') {
 				$pdf->draw_text(473, $kala+15, t("Hinta alv.", $kieli), $thispage, $boldi);
 
-				if (($laskurow['alv']*1) > 0) {
+				if ($yhtiorow['alv_kasittely'] == '') {
 					$pdf->draw_text(473, $kala+5, t("Verollinen", $kieli), $thispage, $boldi);
 				}
 				else {

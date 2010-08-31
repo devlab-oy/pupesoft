@@ -1,8 +1,8 @@
 <?php
 
 if (!function_exists('finvoice_otsik')) {
-	function finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent) {
-		global $yhtiorow, $err_finvoice, $tulos_ulos;
+	function finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap = "") {
+		global $yhtiorow, $err_finvoice, $tulos_ulos, $palvelin2;
 
 		//	Koitetaan ollaanko virheettˆmi‰
 		//	Jos tapahtuu virhe, eli tietoja puuttuu niin tuota loppua ei saa tehd‰ tai koko aineisto voi menn‰ virheelliseksi!
@@ -66,51 +66,53 @@ if (!function_exists('finvoice_otsik')) {
 				}
 			}
 
-			// 	Tehd‰‰n SOAP
-			fputs ($tootfinvoice, "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:eb=\"http://www.oasis-open.org/committees/ebxml-msg/schema/msg-header-2_0.xsd\">\r\n");
-			fputs ($tootfinvoice, "<SOAP-ENV:Header>\r\n");
-			fputs ($tootfinvoice, "<eb:MessageHeader xmlns:eb=\"http://www.oasis-open.org/committees/ebxml-msg/schema/msg-header-2_0.xsd\" SOAP-ENV:mustUnderstand=\"1\" eb:version=\"2.0\">\r\n");
+			// 	Tehd‰‰n SOAP, paitsi jos halutaan vain katsoa ruudulla
+			if ($nosoap == "") {
+				fputs ($tootfinvoice, "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:eb=\"http://www.oasis-open.org/committees/ebxml-msg/schema/msg-header-2_0.xsd\">\r\n");
+				fputs ($tootfinvoice, "<SOAP-ENV:Header>\r\n");
+				fputs ($tootfinvoice, "<eb:MessageHeader xmlns:eb=\"http://www.oasis-open.org/committees/ebxml-msg/schema/msg-header-2_0.xsd\" SOAP-ENV:mustUnderstand=\"1\" eb:version=\"2.0\">\r\n");
 
-			fputs ($tootfinvoice, "<eb:From>\r\n");
-			xml_add("eb:PartyId", $senderpartyid ,								$tootfinvoice);
-			xml_add("eb:Role", "Sender", 										$tootfinvoice);
-			fputs ($tootfinvoice, "</eb:From>\r\n");
+				fputs ($tootfinvoice, "<eb:From>\r\n");
+				xml_add("eb:PartyId", $senderpartyid ,								$tootfinvoice);
+				xml_add("eb:Role", "Sender", 										$tootfinvoice);
+				fputs ($tootfinvoice, "</eb:From>\r\n");
 
-			fputs ($tootfinvoice, "<eb:From>\r\n");
-			xml_add("eb:PartyId", $senderintermediator ,						$tootfinvoice);
-			xml_add("eb:Role", "Intermediator",									$tootfinvoice);
-			fputs ($tootfinvoice, "</eb:From>\r\n");
+				fputs ($tootfinvoice, "<eb:From>\r\n");
+				xml_add("eb:PartyId", $senderintermediator ,						$tootfinvoice);
+				xml_add("eb:Role", "Intermediator",									$tootfinvoice);
+				fputs ($tootfinvoice, "</eb:From>\r\n");
 
-			fputs ($tootfinvoice, "<eb:To>\r\n");
-			xml_add("eb:PartyId", $receiverpartyid ,							$tootfinvoice);
-			xml_add("eb:Role", "Receiver",										$tootfinvoice);
-			fputs ($tootfinvoice, "</eb:To>\r\n");
+				fputs ($tootfinvoice, "<eb:To>\r\n");
+				xml_add("eb:PartyId", $receiverpartyid ,							$tootfinvoice);
+				xml_add("eb:Role", "Receiver",										$tootfinvoice);
+				fputs ($tootfinvoice, "</eb:To>\r\n");
 
-			fputs ($tootfinvoice, "<eb:To>\r\n");
-			xml_add("eb:PartyId", $receiverintermediator ,						$tootfinvoice);
-			xml_add("eb:Role", "Intermediator",									$tootfinvoice);
-			fputs ($tootfinvoice, "</eb:To>\r\n");
+				fputs ($tootfinvoice, "<eb:To>\r\n");
+				xml_add("eb:PartyId", $receiverintermediator ,						$tootfinvoice);
+				xml_add("eb:Role", "Intermediator",									$tootfinvoice);
+				fputs ($tootfinvoice, "</eb:To>\r\n");
 
-			xml_add("eb:CPAId", "yoursand-mycpa", 								$tootfinvoice); //	Ei ilmeisesti juuri merkitt‰v‰
-			xml_add("eb:ConversationId", "nnnnn", 								$tootfinvoice);	// 	Ei ilmeisesti juuri merkitt‰v‰
-			xml_add("eb:Service", "Routing",									$tootfinvoice); //	Ei ilmeisesti juuri merkitt‰v‰
-			xml_add("eb:Action", "ProcessInvoice",								$tootfinvoice);
-			fputs ($tootfinvoice, "<eb:MessageData>\r\n");
-			xml_add("eb:MessageId", $mid									, 	$tootfinvoice);
-			xml_add("eb:Timestamp", date("Y-m-d")."T".date("H:i:s")."+02", 		$tootfinvoice);
-			fputs ($tootfinvoice, "<eb:RefToMessageId/>\r\n");
-			fputs ($tootfinvoice, "</eb:MessageData>\r\n");
-			fputs ($tootfinvoice, "</eb:MessageHeader>\r\n");
-			fputs ($tootfinvoice, "</SOAP-ENV:Header>\r\n");
-			fputs ($tootfinvoice, "<SOAP-ENV:Body>\r\n");
-			fputs ($tootfinvoice, "<eb:Manifest eb:id=\"Manifest\" eb:version=\"2.0\">\r\n");
-			fputs ($tootfinvoice, "<eb:Reference eb:id=\"Finvoice\" xlink:href=\"$mid\">\r\n");
-			fputs ($tootfinvoice, "<eb:schema eb:location=\"http://www.pankkiyhdistys.fi/verkkolasku/finvoice/finvoice.xsd\" eb:version=\"2.0\"/>\r\n");
-			fputs ($tootfinvoice, "</eb:Reference>\r\n");
-			fputs ($tootfinvoice, "</eb:Manifest>\r\n");
-			fputs ($tootfinvoice, "</SOAP-ENV:Body>\r\n");
-			fputs ($tootfinvoice, "</SOAP-ENV:Envelope>\r\n");
-
+				xml_add("eb:CPAId", "yoursand-mycpa", 								$tootfinvoice); //	Ei ilmeisesti juuri merkitt‰v‰
+				xml_add("eb:ConversationId", "nnnnn", 								$tootfinvoice);	// 	Ei ilmeisesti juuri merkitt‰v‰
+				xml_add("eb:Service", "Routing",									$tootfinvoice); //	Ei ilmeisesti juuri merkitt‰v‰
+				xml_add("eb:Action", "ProcessInvoice",								$tootfinvoice);
+				fputs ($tootfinvoice, "<eb:MessageData>\r\n");
+				xml_add("eb:MessageId", $mid									, 	$tootfinvoice);
+				xml_add("eb:Timestamp", date("Y-m-d")."T".date("H:i:s")."+02", 		$tootfinvoice);
+				fputs ($tootfinvoice, "<eb:RefToMessageId/>\r\n");
+				fputs ($tootfinvoice, "</eb:MessageData>\r\n");
+				fputs ($tootfinvoice, "</eb:MessageHeader>\r\n");
+				fputs ($tootfinvoice, "</SOAP-ENV:Header>\r\n");
+				fputs ($tootfinvoice, "<SOAP-ENV:Body>\r\n");
+				fputs ($tootfinvoice, "<eb:Manifest eb:id=\"Manifest\" eb:version=\"2.0\">\r\n");
+				fputs ($tootfinvoice, "<eb:Reference eb:id=\"Finvoice\" xlink:href=\"$mid\">\r\n");
+				fputs ($tootfinvoice, "<eb:schema eb:location=\"http://www.pankkiyhdistys.fi/verkkolasku/finvoice/finvoice.xsd\" eb:version=\"2.0\"/>\r\n");
+				fputs ($tootfinvoice, "</eb:Reference>\r\n");
+				fputs ($tootfinvoice, "</eb:Manifest>\r\n");
+				fputs ($tootfinvoice, "</SOAP-ENV:Body>\r\n");
+				fputs ($tootfinvoice, "</SOAP-ENV:Envelope>\r\n");
+			}
+			
 			// jos meill‰ on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
 			if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
 
@@ -170,8 +172,15 @@ if (!function_exists('finvoice_otsik')) {
 
 			//laitetaan setit kuntoon..
 			fputs($tootfinvoice, "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\r\n");
-			fputs($tootfinvoice, "<!DOCTYPE Finvoice SYSTEM \"Finvoice.dtd\">\r\n");
-			fputs($tootfinvoice, "<?xml-stylesheet type=\"text/xsl\" href=\"Finvoice.xsl\"?>\r\n");
+			
+			if ($nosoap == "NOSOAP") {
+				fputs($tootfinvoice, "<!DOCTYPE Finvoice SYSTEM \"{$palvelin2}datain/Finvoice.dtd\">\r\n");
+				fputs($tootfinvoice, "<?xml-stylesheet type=\"text/xsl\" href=\"{$palvelin2}datain/Finvoice.xsl\"?>\r\n");
+			}
+			else {
+				fputs($tootfinvoice, "<!DOCTYPE Finvoice SYSTEM \"Finvoice.dtd\">\r\n");
+				fputs($tootfinvoice, "<?xml-stylesheet type=\"text/xsl\" href=\"Finvoice.xsl\"?>\r\n");
+			}			
 
 			//t‰st‰ l‰htee Finvoice koodi
 			fputs($tootfinvoice, "<Finvoice Version=\"1.2\">\r\n");

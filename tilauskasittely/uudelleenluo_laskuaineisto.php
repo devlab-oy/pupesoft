@@ -1,11 +1,14 @@
 <?php
 
-	if (isset($_POST["tee"])) {
-		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	if (isset($_REQUEST["tee"])) {
+		if($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+		if($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
 	}
+		
+	if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") $no_head = "yes";
 
 	require("../inc/parametrit.inc");
+
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("$pupe_root_polku/dataout/".basename($filenimi));
@@ -13,9 +16,9 @@
 	}
 	else {
 
-		echo "<font class='head'>".t("Luo laskutusaineisto")."</font><hr>\n";
+		if (!isset($tee) or $tee != "NAYTATILAUS") echo "<font class='head'>".t("Luo laskutusaineisto")."</font><hr>\n";
 
-		if (isset($tee) and $tee == "GENEROI" and $laskunumerot!='') {
+		if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumerot != '') {
 			if (!function_exists("xml_add")) {
 				function xml_add ($joukko, $tieto, $handle) {
 					global $yhtiorow, $lasrow;
@@ -131,7 +134,7 @@
 			}
 
 			//Timestamppi EDI-failiin alkuu ja loppuun
-			$timestamppi=gmdate("YmdHis");
+			$timestamppi = gmdate("YmdHis");
 
 			//Hetaan laskut jotka laitetaan aineistoon
 			$query = "	SELECT *
@@ -144,9 +147,11 @@
 
 			$lkm = count(explode(',', $laskunumerot));
 
-			echo "<br><font class='message'>".t("Syˆtit")." $lkm ".t("laskua").".</font><br>";
-			echo "<font class='message'>".t("Aineistoon lis‰t‰‰n")." ".mysql_num_rows($res)." ".t("laskua").".</font><br><br>";
-
+			if (!isset($tee) or $tee != "NAYTATILAUS") {
+				echo "<br><font class='message'>".t("Syˆtit")." $lkm ".t("laskua").".</font><br>";
+				echo "<font class='message'>".t("Aineistoon lis‰t‰‰n")." ".mysql_num_rows($res)." ".t("laskua").".</font><br><br>";
+			}
+			
 			while ($lasrow = mysql_fetch_array($res)) {
 				// Haetaan maksuehdon tiedot
 				$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
@@ -390,8 +395,10 @@
 						//K‰‰nnet‰‰n maksuehto
 						$masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
 					}
-
-					$query = "	SELECT min(date_format(toimitettuaika, '%Y-%m-%d')) mint, max(date_format(toimitettuaika, '%Y-%m-%d')) maxt
+					
+					$query = "	SELECT 
+								min(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')) mint, 
+								max(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')) maxt
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and uusiotunnus = '$lasrow[tunnus]'
@@ -413,8 +420,8 @@
 					elseif ($lasrow["chn"] == "112") {
 						finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
 					}
-					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
-						finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {						
+						finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "NOSOAP");
 					}
 					else {
 						pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);
@@ -673,70 +680,80 @@
 			$query = "UNLOCK TABLES";
 			$locre = mysql_query($query) or pupe_error($query);
 
-			if (file_exists(realpath($nimixml))) {
-				//siirretaan laskutiedosto operaattorille
-				$ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
-				$ftpuser = $yhtiorow['verkkotunnus_lah'];
-				$ftppass = $yhtiorow['verkkosala_lah'];
-				$ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
-				$ftpfile = realpath($nimixml);
+			if ($tee == "NAYTATILAUS") {
+				header("Content-type: text/xml");
+				header("Content-length: ".(filesize($nimifinvoice)));
+				header("Content-Disposition: inline; filename=$nimifinvoice");
+				header("Content-Description: Lasku");
 
-				// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
-				echo "<pre>ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile</pre>";
-
-				echo "<table>";
-				echo "<tr><th>".t("Tallenna pupevoice-aineisto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimixml)."'>";
-				echo "<input type='hidden' name='filenimi' value='".basename($nimixml)."'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table>";
+				readfile($nimifinvoice);
 			}
+			else {
+				if (file_exists(realpath($nimixml))) {
+					//siirretaan laskutiedosto operaattorille
+					$ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
+					$ftpuser = $yhtiorow['verkkotunnus_lah'];
+					$ftppass = $yhtiorow['verkkosala_lah'];
+					$ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
+					$ftpfile = realpath($nimixml);
+
+					// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
+					echo "<pre>ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile</pre>";
+
+					echo "<table>";
+					echo "<tr><th>".t("Tallenna pupevoice-aineisto").":</th>";
+					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+					echo "<input type='hidden' name='kaunisnimi' value='".basename($nimixml)."'>";
+					echo "<input type='hidden' name='filenimi' value='".basename($nimixml)."'>";
+					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+					echo "</table>";
+				}
 
 
-			if (file_exists(realpath($nimifinvoice))) {
-				//siirretaan laskutiedosto operaattorille
-				$ftphost = "ftp.itella.net";
-				$ftpuser = $yhtiorow['verkkotunnus_lah'];
-				$ftppass = $yhtiorow['verkkosala_lah'];
-				$ftppath = "out/finvoice/data/";
-				$ftpfile = realpath($nimifinvoice);
-				$renameftpfile = $nimifinvoice_delivered;
+				if (file_exists(realpath($nimifinvoice))) {
+					//siirretaan laskutiedosto operaattorille
+					$ftphost = "ftp.itella.net";
+					$ftpuser = $yhtiorow['verkkotunnus_lah'];
+					$ftppass = $yhtiorow['verkkosala_lah'];
+					$ftppath = "out/finvoice/data/";
+					$ftpfile = realpath($nimifinvoice);
+					$renameftpfile = $nimifinvoice_delivered;
 
-				// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
-				echo "<pre>mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."</pre>";
+					// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
+					echo "<pre>mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."</pre>";
 
-				echo "<table>";
-				echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
-				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table>";
-			}
+					echo "<table>";
+					echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
+					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+					echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
+					echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
+					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+					echo "</table>";
+				}
 
-			if (file_exists(realpath($nimiedi))) {
-				echo "<table>";
-				echo "<tr><th>".t("Tallenna Elmaedi-aineisto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimiedi)."'>";
-				echo "<input type='hidden' name='filenimi' value='".basename($nimiedi)."'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table>";
-			}
+				if (file_exists(realpath($nimiedi))) {
+					echo "<table>";
+					echo "<tr><th>".t("Tallenna Elmaedi-aineisto").":</th>";
+					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+					echo "<input type='hidden' name='kaunisnimi' value='".basename($nimiedi)."'>";
+					echo "<input type='hidden' name='filenimi' value='".basename($nimiedi)."'>";
+					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+					echo "</table>";
+				}
 
-			if (file_exists(realpath($nimisisainenfinvoice))) {
-				echo "<table>";
-				echo "<tr><th>".t("Tallenna Pupesoft-Finvoice-aineisto").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimisisainenfinvoice)."'>";
-				echo "<input type='hidden' name='filenimi' value='".basename($nimisisainenfinvoice)."'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table>";
+				if (file_exists(realpath($nimisisainenfinvoice))) {
+					echo "<table>";
+					echo "<tr><th>".t("Tallenna Pupesoft-Finvoice-aineisto").":</th>";
+					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+					echo "<input type='hidden' name='kaunisnimi' value='".basename($nimisisainenfinvoice)."'>";
+					echo "<input type='hidden' name='filenimi' value='".basename($nimisisainenfinvoice)."'>";
+					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+					echo "</table>";
+				}
 			}
 		}
 		else {
@@ -752,6 +769,6 @@
 		$query = "UNLOCK TABLES";
 		$locre = mysql_query($query) or pupe_error($query);
 
-		require("../inc/footer.inc");
+		if (!isset($tee) or $tee != "NAYTATILAUS") require("../inc/footer.inc");
 	}
 ?>

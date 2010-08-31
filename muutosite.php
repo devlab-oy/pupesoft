@@ -1133,6 +1133,21 @@ if ($tee == 'E' or $tee == 'F') {
 				<input type='hidden' name='toim' value='LASKU'>
 				<input type='hidden' name='tee' value='NAYTATILAUS'>
 				<input type='submit' value='".t("Näytä laskun PDF")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$tunnus', ''); return false;\"></form>";
+				
+		$query  = "	SELECT *
+					FROM maksuehto
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tunnus = '$trow[maksuehto]'";
+		$masres = mysql_query($query) or pupe_error($query);
+		$masrow = mysql_fetch_assoc($masres);
+				
+				
+		if (($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") and ($trow["vienti"] == "" or ($trow["vienti"] == "E" and $trow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $trow["sisainen"] == "" and $masrow["kateinen"] == "" and $trow["chn"] != '666' and $trow["chn"] != '667' and abs($trow["summa"]) != 0) {
+			echo "<form id='finvoice_$tunnus' name='finvoice_$tunnus' method='post' action='".$palvelin2."tilauskasittely/uudelleenluo_laskuaineisto.php' autocomplete='off'>
+					<input type='hidden' name='laskunumerot' value='$trow[laskunro]'>					
+					<input type='hidden' name='tee' value='NAYTATILAUS'>	
+					<input type='submit' value='".t("Näytä Finvoice")."' onClick=\"js_openFormInNewWindow('finvoice_$tunnus', ''); return false;\"></form>";		
+		}
 
 		if ($trow['viesti'] == 'Korkolasku') {
 			echo "<form action = '$PHP_SELF' method='post'>

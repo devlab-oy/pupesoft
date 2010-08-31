@@ -387,6 +387,7 @@ else {
 			$kaikkiyhteensa = 0;
 		}
 
+		// $kaikkiyhteensa tulee vain tilaus_myynnistä, eli kaikissa muissa tapauksissa yämä feilaa....
 		if ($kaikkiyhteensa > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
 			$tilaus_valmis_ulos .= t("Tilauksen arvo ylitti rahtivapaasumman! Merkattiin tilaus rahtivapaaksi.")."<br>";
 

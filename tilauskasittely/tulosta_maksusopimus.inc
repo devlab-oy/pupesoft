@@ -165,8 +165,7 @@
 
 				$pdf->draw_line($x, $y, $page, $rectparam);
 
-				// $kala -= 5;
-				$kala -= 15;
+				$kala -= 5;
 
 				$i++;
 				mysql_data_seek($sresult, 0);

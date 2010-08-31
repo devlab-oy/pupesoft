@@ -171,6 +171,7 @@
 				</style>
 			</head>
 			<body>
+				<div style="height:100%; overflow:auto;">
 				<h2>
 					<xsl:call-template name="OutputTitle">
 						<xsl:with-param name="invoiceTypeText" select="InvoiceDetails/InvoiceTypeText"/>
@@ -1311,6 +1312,7 @@
 					</tr>
 				</table>
 				</p>
+			</div>
 			</body>
 		</html>
 	</xsl:template>

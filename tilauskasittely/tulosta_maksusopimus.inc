@@ -53,11 +53,36 @@
 
 			tulosta_logo_pdf($pdf, $page, $laskurow);
 
-			$query = "	SELECT osuus, summa, lisatiedot, ohje, erpcm 
+			$query = "	SELECT *
 						FROM maksupositio
-						WHERE yhtio = '{$kukarow['yhtio']}' and otunnus = '{$laskurow['jaksotettu']}' 
-						ORDER BY erpcm ASC";
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						and otunnus = '{$laskurow['jaksotettu']}' 
+						and uusiotunnus = 0
+						ORDER BY tunnus";
+			$posres = mysql_query($query) or pupe_error($query);
+
+			// Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
+			// ja lisätään ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
+			$query = "	SELECT
+						sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) jaksotettavaa
+						FROM lasku
+						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu
+						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
+						and lasku.jaksotettu  	= '{$laskurow['jaksotettu']}'
+						GROUP by lasku.jaksotettu";
 			$result = mysql_query($query) or pupe_error($query);
+			$sumrow = mysql_fetch_array($result);
+
+			$query = "	SELECT 
+						sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) summa,
+						if (tilausrivi.alv>=500, 0, tilausrivi.alv) alv
+						FROM lasku
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu)
+						WHERE lasku.yhtio 		= '{$kukarow['yhtio']}'
+						and lasku.jaksotettu  	= '{$laskurow['jaksotettu']}'
+						GROUP BY lasku.jaksotettu, alv";
+			$sresult = mysql_query($query) or pupe_error($query);
+			$tot = 0;
 
 			$otsikko_len = $pdf->strlen(t("Tilauksen {$laskurow['tunnus']} maksupositiot", $kieli), $iso);
 			$pdf->draw_text((595 / 2) - ($otsikko_len / 2), 750, t("Tilauksen", $kieli)." {$laskurow['tunnus']} ".t("maksupositiot", $kieli), $page, $iso);
@@ -75,7 +100,21 @@
 			$kala = 680;
 			$rivikorkeus = 15;
 
-			while ($row = mysql_fetch_assoc($result)) {
+			while ($posrow = mysql_fetch_assoc($posres)) {
+
+				$summa = 0;
+
+				while ($row = mysql_fetch_assoc($sresult)) {
+
+					$posrow_valisumma = 0;
+
+					if ($yhtiorow['alv_kasittely'] != '') {
+						$posrow_valisumma = ($row['summa'] * (1 + ($row['alv'] / 100)) - $row['summa']) * ($posrow['osuus'] / 100);
+					}
+
+					// $summa on verollinen tai veroton riippuen yhtiön myyntihinnoista
+					$summa += ($row["summa"] / $sumrow["jaksotettavaa"] * $posrow["summa"]) + $posrow_valisumma;
+				}
 
 				if ($kala < 150) {
 					$page = $pdf->new_page("a4");
@@ -96,27 +135,27 @@
 					$kala = 680;
 				}
 
-				$pdf->draw_text(30, $kala, $i.'. '.tv1dateconv($row['erpcm']), $page, $norm);
-				$pdf->draw_text(100, $kala, $row['summa'].' '.$laskurow['valkoodi'], $page, $norm);
-				$pdf->draw_text(160, $kala, round($row['osuus'], 2).' %', $page, $norm);
+				$pdf->draw_text(30, $kala, $i.'. '.tv1dateconv($posrow['erpcm']), $page, $norm);
+				$pdf->draw_text(100, $kala, round($summa, $yhtiorow['hintapyoristys']).' '.$laskurow['valkoodi'], $page, $norm);
+				$pdf->draw_text(160, $kala, round($posrow['osuus'], 2).' %', $page, $norm);
 
 				$valekala = $kala;
 
-				if ($pdf->strlen($row['lisatiedot'], $norm) > 175) {
-					$pohja = $pdf->draw_paragraph($kala+$norm['height']+2, 210, 60, 385, $row["lisatiedot"], $page, $norm);			    
+				if ($pdf->strlen($posrow['lisatiedot'], $norm) > 175) {
+					$pohja = $pdf->draw_paragraph($kala+$norm['height']+2, 210, 60, 385, $posrow["lisatiedot"], $page, $norm);			    
 					$valekala = $pohja - $rivikorkeus;
 				}
 				else {
-					$pdf->draw_text(210, $kala, $row['lisatiedot'], $page, $norm);
+					$pdf->draw_text(210, $kala, $posrow['lisatiedot'], $page, $norm);
 				}
 
-				if ($pdf->strlen($row['ohje'], $norm) > 170) {
-					$pohja = $pdf->draw_paragraph($kala+$norm['height']+2, 390, 60, 560, $row["ohje"], $page, $norm);
-
+				if ($pdf->strlen($posrow['ohje'], $norm) > 170) {
+					$pohja = $pdf->draw_paragraph($kala+$norm['height']+2, 390, 60, 560, $posrow["ohje"], $page, $norm);
+				
 					$kala = $valekala < ($pohja - $rivikorkeus) ? $valekala : ($pohja - $rivikorkeus);
 				}
 				else {
-					$pdf->draw_text(390, $kala, $row['ohje'], $page, $norm);
+					$pdf->draw_text(390, $kala, $posrow['ohje'], $page, $norm);
 					$kala -= $rivikorkeus;
 				}
 
@@ -126,9 +165,11 @@
 
 				$pdf->draw_line($x, $y, $page, $rectparam);
 
-				$kala -= 5;
+				// $kala -= 5;
+				$kala -= 15;
 
 				$i++;
+				mysql_data_seek($sresult, 0);
 			}
 
 			$kala -= 30;

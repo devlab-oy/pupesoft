@@ -1687,8 +1687,9 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
 
-		$ulos .= "<option value = ''>".t("Myyntitilausta ei voi splitata käsin")."</option>";
-		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksen voi splitata käsin")."</option>";
+		$ulos .= "<option value = ''>".t("Myyntitilauksesta ei voi tehdä osatoimitusta käsin")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksesta voi tehdä osatoimituksia käsin")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Tilausksia ei osatoimiteta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

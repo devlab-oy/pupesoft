@@ -1899,7 +1899,7 @@ if (!function_exists("synkronoi")) {
 						//	Melkein kaikki tiedot pitää stemmata!
 						$query = "	SELECT tunnus
 									from maksuehto
-									where yhtio='$kohderow[yhtio]'
+									where yhtio				= '$kohderow[yhtio]'
 									and abs_pvm				= '$aburow[abs_pvm]'
 									and erapvmkasin			= '$aburow[erapvmkasin]'
 									and factoring			= '$aburow[factoring]'
@@ -6509,12 +6509,11 @@ if (!function_exists("hae_rahtimaksu")) {
 		// rahtimaksujen hinnoitteluun otetaan vain tuotteet joita ei myydä erikoisvarastoista (etävarastot joista ei myydä automaattisesti eli tyyppi = E). Tällöin on täpätty erikoistoimitus_myynti on 0 eli false.
 		// erikoisvarastoista myydyt tuotteet ovat aina rahtivapaita ja lähettäjä maksaa rahdin.
 		if ($yhtiorow["rahti_hinnoittelu"] == 'P') {
-			$query  = "	SELECT sum(tuotemassa * (varattu + kpl + jt)) massa
+			// Jos hyvitysrivi ja tuotteen paino on nolla niin laitetaan tuotteen painoksi yksi gramma, muuten hyvärillekin saattaa tulla rahtia jos kaikkien tuotteiden painot on nolla.
+			$query  = "	SELECT sum(if((varattu + kpl + jt) < 0 and tuotemassa = 0, 0.001, tuotemassa) * (varattu + kpl + jt)) massa
 						FROM tilausrivi
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.erikoistoimitus_myynti = 0)
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-							AND tuote.tuoteno = tilausrivi.tuoteno
-							AND tuote.ei_saldoa = '')
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						AND tilausrivi.tyyppi in ('L', 'E')
 						AND tilausrivi.otunnus in ($otsikot)";

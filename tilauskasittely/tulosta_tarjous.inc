@@ -560,9 +560,12 @@ if (!function_exists('rivi_tarjous')) {
 		// Trimmataan
 		$row["kommentti"] = trim($row["kommentti"]);
 
-		// Tilaajan rivinumero
-		if ($row["tilaajanrivinro"] != 0) {
-			$row["kommentti"] .= "\n".t("Rivinumero", $kieli).": ".$row["tilaajanrivinro"].". ";
+
+		if ($yhtiorow['tarjoustyyppi'] != 1) {
+			// Tilaajan rivinumero
+			if ($row["tilaajanrivinro"] != 0) {
+				$row["kommentti"] .= "\n".t("Rivinumero", $kieli).": ".$row["tilaajanrivinro"].". ";
+			}
 		}
 
 		$row["perhe_kommentti"] = "";
@@ -869,7 +872,7 @@ if (!function_exists('tarjous_rivi_custom')) {
 
 		$kala = $kala - $rivinkorkeus;
 
-		if (trim($page_tarjous) != '' and trim($row['kommentti']) != '') {
+		if (is_array($page_tarjous) and trim($row['kommentti']) != '') {
 
 			$kommentit = explode("\n", trim($row['kommentti']));
 
@@ -919,6 +922,10 @@ if (!function_exists('tarjous_rivi_custom')) {
 						$pdf_tarjous->draw_text(150, $kala, $lause, $page_tarjous[$sivu], $pieni);
 						$kala  -= 10;
 					}
+				}
+				elseif ($pdf_tarjous->strlen($lause, $pieni) <= $rpit2) {
+					$pdf_tarjous->draw_text(150, $kala, $kommentti, $page_tarjous[$sivu], $pieni);
+					$kala  -= 10;
 				}
 
 				$ed_akey = $akey;
@@ -1368,7 +1375,7 @@ if (!function_exists('tulosta_tarjous')) {
 
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["tarjouksen_jarjestys"]);
 
-		if ($yhtiorow["tarjouksen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+		if ($yhtiorow["tarjouksen_palvelutjatuottet"] == "E" and $yhtiorow['tarjoustyyppi'] != 1) $pjat_sortlisa = "tuotetyyppi,";
 		else $pjat_sortlisa = "";
 
 		$query = "	SELECT tilausrivi.*,
@@ -1428,7 +1435,7 @@ if (!function_exists('tulosta_tarjous')) {
 			// Mahtuuko rivi t‰lle sivulle
 			$kala_nyt = $kala;
 
-			if ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and $edtuotetyyppi != $tuotetyyppi) {
+			if ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and $edtuotetyyppi != $tuotetyyppi and $yhtiorow['tarjoustyyppi'] != 1) {
 				$kala -= 30;
 			}
 
@@ -1437,7 +1444,7 @@ if (!function_exists('tulosta_tarjous')) {
 			}
 
 			// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-			if ($kala <= 60) {
+			if ($kala <= 80) {
 				loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous[$sivu], 0, $verolliset_verottomat_hinnat);
 
 				$sivu++;
@@ -1450,7 +1457,7 @@ if (!function_exists('tulosta_tarjous')) {
 				$kala = $kala_nyt;
 			}
 
-			if ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and $edtuotetyyppi != $tuotetyyppi) {
+			if ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and $edtuotetyyppi != $tuotetyyppi and $yhtiorow['tarjoustyyppi'] != 1) {
 				$kala -= 30;
 				$kala = tarjous_rivi_otsikot($pdf_tarjous, $page_tarjous[$sivu], $kieli, $kala, $tuotetyyppi, $verolliset_verottomat_hinnat, $naytetaanko_rivihinta);
 			}

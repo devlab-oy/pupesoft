@@ -269,7 +269,7 @@ if (!function_exists('alku_lahete')) {
 		}
 
 		//etsitään myyjän nimi
-		$query  = "	SELECT nimi, kuka
+		$query  = "	SELECT nimi, kuka, puhno, eposti
 					from kuka
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 		$myyresult = mysql_query($query) or pupe_error($query);
@@ -283,17 +283,17 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_text(150, 717, tulosta_ytunnus(str_replace("0037", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
 
 			$pdf->draw_text(50, 704, t("Nimi", $kieli), $thispage, $boldi);
-			$pdf->draw_text(150, 704, $kukarow['nimi'], $thispage, $norm);
+			$pdf->draw_text(150, 704, $yhtiorow["nimi"], $thispage, $norm);
 
 			$pdf->draw_text(50, 691, t("Osoite", $kieli), $thispage, $boldi);
 			$pdf->draw_text(150, 691, $yhtiorow['osoite'], $thispage, $norm);
 			$pdf->draw_text(150, 678, $yhtiorow['postino'].' '.$yhtiorow['postitp'], $thispage, $norm);
 
 			$pdf->draw_text(50, 665, t("Puhelin", $kieli), $thispage, $boldi);
-			$pdf->draw_text(150, 665, $kukarow['puhno'], $thispage, $norm);
+			$pdf->draw_text(150, 665, $myyrow['puhno'], $thispage, $norm);
 
 			$pdf->draw_text(50, 652, t("Sähköposti", $kieli), $thispage, $boldi);
-			$pdf->draw_text(150, 652, $kukarow['eposti'], $thispage, $norm);
+			$pdf->draw_text(150, 652, $myyrow['eposti'], $thispage, $norm);
 		}
 		else {
 			list($ff_string, $ff_font) = pdf_fontfit($myyrow["nimi"], 105, $pdf, $norm);

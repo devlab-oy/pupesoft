@@ -82,94 +82,29 @@
 			$yht_row = mysql_fetch_assoc($yht_res);
 
 			if ($error == 0) {
-				$row = mysql_fetch_array($result);
-				$query = "	UPDATE yhtio SET
-							konserni = '',
-							ytunnus = '$row[ytunnus]',
-							ovttunnus = '$row[ovttunnus]',
-							kotipaikka = '$row[kotipaikka]',
-							osoite = '$row[osoite]',
-							postino = '$row[postino]',
-							postitp = '$row[postitp]',
-							maa = '$row[maa]',
-							laskutus_nimi = '$row[laskutus_nimi]',
-							laskutus_osoite = '$row[laskutus_osoite]',
-							laskutus_postino = '$row[laskutus_postino]',
-							laskutus_postitp = '$row[laskutus_postitp]',
-							laskutus_maa = '$row[laskutus_maa]',
-							kieli = '$row[kieli]',
-							valkoodi = '$row[valkoodi]',
-							fax = '$row[fax]',
-							puhelin = '$row[puhelin]',
-							email = '$row[email]',
-							www = '$row[www]',
-							ean = '$row[ean]',
-							pankkinimi1 = '$row[pankkinimi1]',
-							pankkitili1 = '$row[pankkitili1]',
-							pankkiiban1 = '$row[pankkiiban1]',
-							pankkiswift1 = '$row[pankkiswift1]',
-							pankkinimi2 = '$row[pankkinimi2]',
-							pankkitili2 = '$row[pankkitili2]',
-							pankkiiban2 = '$row[pankkiiban2]',
-							pankkiswift2 = '$row[pankkiswift2]',
-							pankkinimi3 = '$row[pankkinimi3]',
-							pankkitili3 = '$row[pankkitili3]',
-							pankkiiban3 = '$row[pankkiiban3]',
-							pankkiswift3 = '$row[pankkiswift3]',
-							kassa = '$row[kassa]',
-							pankkikortti = '$row[pankkikortti]',
-							luottokortti = '$row[luottokortti]',
-							kassaerotus = '$row[kassaerotus]',
-							kateistilitys = '$row[kateistilitys]',
-							myynti = '$row[myynti]',
-							myynti_eu = '$row[myynti_eu]',
-							myynti_ei_eu = '$row[myynti_ei_eu]',
-							myynti_marginaali = '$row[myynti_marginaali]',
-							osto_marginaali = '$row[osto_marginaali]',
-							myyntisaamiset = '$row[myyntisaamiset]',
-							luottotappiot = '$row[luottotappiot]',
-							factoringsaamiset = '$row[factoringsaamiset]',
-							konsernimyyntisaamiset = '$row[konsernimyyntisaamiset]',
-							ostovelat = '$row[ostovelat]',
-							konserniostovelat = '$row[konserniostovelat]',
-							valuuttaero = '$row[valuuttaero]',
-							myynninvaluuttaero = '$row[myynninvaluuttaero]',
-							kassaale = '$row[kassaale]',
-							myynninkassaale = '$row[myynninkassaale]',
-							muutkulut = '$row[muutkulut]',
-							pyoristys = '$row[pyoristys]',
-							varasto = '$row[varasto]',
-							raaka_ainevarasto = '$row[raaka_ainevarasto]',
-							varastonmuutos = '$row[varastonmuutos]',
-							raaka_ainevarastonmuutos = '$row[raaka_ainevarastonmuutos]',
-							varastonmuutos_valmistuksesta = '$row[varastonmuutos_valmistuksesta]',
-							matkalla_olevat = '$row[matkalla_olevat]',
-							alv = '$row[alv]',
-							siirtosaamiset = '$row[siirtosaamiset]',
-							siirtovelka = '$row[siirtovelka]',
-							konsernisaamiset = '$row[konsernisaamiset]',
-							konsernivelat = '$row[konsernivelat]',
-							selvittelytili = '$row[selvittelytili]',
-							tilikausi_alku = '$row[tilikausi_alku]',
-							tilikausi_loppu = '$row[tilikausi_loppu]',
-							ostoreskontrakausi_alku = '$row[ostoreskontrakausi_alku]',
-							ostoreskontrakausi_loppu = '$row[ostoreskontrakausi_loppu]',
-							myyntireskontrakausi_alku = '$row[myyntireskontrakausi_alku]',
-							myyntireskontrakausi_loppu = '$row[myyntireskontrakausi_loppu]',
-							tullin_asiaknro = '$row[tullin_asiaknro]',
-							tullin_lupanro = '$row[tullin_lupanro]',
-							tullikamari = '$row[tullikamari]',
-							tullipaate = '$row[tullipaate]',
-							tulli_vahennettava_era = '$row[tulli_vahennettava_era]',
-							tulli_lisattava_era = '$row[tulli_lisattava_era]',
-							kotitullauslupa = '$row[kotitullauslupa]',
-							tilastotullikamari = '$row[tilastotullikamari]',
-							intrastat_sarjanro = '$row[intrastat_sarjanro]',
-							int_koodi = '$row[int_koodi]',
-							viivastyskorko = '$row[viivastyskorko]',
-							karhuerapvm = '$row[karhuerapvm]',
-							kuluprosentti = '$row[kuluprosentti]'
-							WHERE tunnus = '$yht_row[tunnus]'
+				$row = mysql_fetch_assoc($result);
+
+				$query = "	UPDATE yhtio SET ";
+
+				$alakopsaa = array(	"tunnus",
+									"yhtio",
+									"konserni",
+									"nimi",
+									"laatija",
+									"luontiaika",
+									"muuttaja",
+									"muutospvm");
+
+				foreach ($row as $ind => $val) {
+
+					if (!in_array($ind, $alakopsaa)) {
+						$query .= "$ind = '$val',";
+					}
+				}
+
+				$query = substr($query, 0, -1);
+
+				$query .= "	WHERE tunnus = '$yht_row[tunnus]'
 							AND yhtio = '$yhtio'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
@@ -182,152 +117,48 @@
 				$error = 1;
 			}
 
+			$query = "	SELECT tunnus
+						FROM yhtion_parametrit
+						WHERE yhtio = '$yhtio'";
+			$yht_res = mysql_query($query) or pupe_error($query);
+			$yht_row = mysql_fetch_assoc($yht_res);
+
 			if ($error == 0) {
-				$row = mysql_fetch_array($result);
-				$query = "	UPDATE yhtion_parametrit SET
-							admin_email = '$row[admin_email]',
-							alert_email = '$row[alert_email]',
-							varauskalenteri_email = '$row[varauskalenteri_email]',
-							tuotekopio_email = '$row[tuotekopio_email]',
-							verkkolasku_lah = '$row[verkkolasku_lah]',
-							finvoice_senderpartyid = '$row[finvoice_senderpartyid]',
-							finvoice_senderintermediator = '$row[finvoice_senderintermediator]',
-							verkkotunnus_vas = '$row[verkkotunnus_vas]',
-							verkkotunnus_lah = '$row[verkkotunnus_lah]',
-							verkkosala_vas = '$row[verkkosala_vas]',
-							verkkosala_lah = '$row[verkkosala_lah]',
-							lasku_tulostin = '$row[lasku_tulostin]',
-							pankkitiedostot = '$row[pankkitiedostot]',
-							kuvapankki_polku = '$row[kuvapankki_polku]',
-							postittaja_email = '$row[postittaja_email]',
-							lahetteen_tulostustapa = '$row[lahetteen_tulostustapa]',
-							lahetteen_jarjestys = '$row[lahetteen_jarjestys]',
-							lahetteen_jarjestys_suunta = '$row[lahetteen_jarjestys_suunta]',
-							lahetteen_palvelutjatuottet = '$row[lahetteen_palvelutjatuottet]',
-							laskun_jarjestys = '$row[laskun_jarjestys]',
-							laskun_jarjestys_suunta = '$row[laskun_jarjestys_suunta]',
-							laskun_palvelutjatuottet = '$row[laskun_palvelutjatuottet]',
-							tilauksen_jarjestys = '$row[tilauksen_jarjestys]',
-							tilauksen_jarjestys_suunta = '$row[tilauksen_jarjestys_suunta]',
-							kerayslistan_jarjestys = '$row[kerayslistan_jarjestys]',
-							kerayslistan_jarjestys_suunta = '$row[kerayslistan_jarjestys_suunta]',
-							kerayslistan_palvelutjatuottet = '$row[kerayslistan_palvelutjatuottet]',
-							valmistus_kerayslistan_jarjestys = '$row[valmistus_kerayslistan_jarjestys]',
-							valmistus_kerayslistan_jarjestys_suunta = '$row[valmistus_kerayslistan_jarjestys_suunta]',
-							valmistus_kerayslistan_palvelutjatuottet = '$row[valmistus_kerayslistan_palvelutjatuottet]',
-							ostotilauksen_jarjestys = '$row[ostotilauksen_jarjestys]',
-							ostotilauksen_jarjestys_suunta = '$row[ostotilauksen_jarjestys_suunta]',
-							tarjouksen_jarjestys = '$row[tarjouksen_jarjestys]',
-							tarjouksen_jarjestys_suunta = '$row[tarjouksen_jarjestys_suunta]',
-							tarjouksen_palvelutjatuottet = '$row[tarjouksen_palvelutjatuottet]',
-							tyomaarayksen_jarjestys = '$row[tyomaarayksen_jarjestys]',
-							tyomaarayksen_jarjestys_suunta = '$row[tyomaarayksen_jarjestys_suunta]',
-							tyomaarayksen_palvelutjatuottet = '$row[tyomaarayksen_palvelutjatuottet]',
-							pakkaamolokerot = '$row[pakkaamolokerot]',
-							lahete_nouto_allekirjoitus = '$row[lahete_nouto_allekirjoitus]',
-							lahete_tyyppi_tulostus = '$row[lahete_tyyppi_tulostus]',
-							laskutyyppi = '$row[laskutyyppi]',
-							viivakoodi_laskulle = '$row[viivakoodi_laskulle]',
-							koontilaskut_yhdistetaan = '$row[koontilaskut_yhdistetaan]',
-							tilausvahvistustyyppi = '$row[tilausvahvistustyyppi]',
-							tilausvahvistus_lahetys = '$row[tilausvahvistus_lahetys]',
-							tilausvahvistus_tallenna = '$row[tilausvahvistus_tallenna]',
-							varastosiirto_tilausvahvistus = '$row[varastosiirto_tilausvahvistus]',
-							ostotilaustyyppi = '$row[ostotilaustyyppi]',
-							ostotilaukseen_toimittajan_toimaika = '$row[ostotilaukseen_toimittajan_toimaika]',
-							tyomaaraystyyppi = '$row[tyomaaraystyyppi]',
-							viivakoodi_purkulistaan = '$row[viivakoodi_purkulistaan]',
-							laskutuskielto = '$row[laskutuskielto]',
-							rahti_hinnoittelu = '$row[rahti_hinnoittelu]',
-							rahti_tuotenumero = '$row[rahti_tuotenumero]',
-							kasittelykulu_tuotenumero = '$row[kasittelykulu_tuotenumero]',
-							maksuehto_tuotenumero = '$row[maksuehto_tuotenumero]',
-							ennakkomaksu_tuotenumero = '$row[ennakkomaksu_tuotenumero]',
-							alennus_tuotenumero = '$row[alennus_tuotenumero]',
-							lisakulu_tuotenumero = '$row[lisakulu_tuotenumero]',
-							lisakulu_prosentti = '$row[lisakulu_prosentti]',
-							lisakulun_lisays = '$row[lisakulun_lisays]',
-							tuotteen_oletuspaikka = '$row[tuotteen_oletuspaikka]',
-							alv_kasittely = '$row[alv_kasittely]',
-							asiakashinta_netto = '$row[asiakashinta_netto]',
-							puute_jt_oletus = '$row[puute_jt_oletus]',
-							puute_jt_kerataanko = '$row[puute_jt_kerataanko]',
-							kerataanko_jos_vain_puute_jt = '$row[kerataanko_jos_vain_puute_jt]',
-							jt_automatiikka = '$row[jt_automatiikka]',
-							jt_rahti = '$row[jt_rahti]',
-							jt_rivien_kasittely = '$row[jt_rivien_kasittely]',
-							suoratoim_automaatio = '$row[suoratoim_automaatio]',
-							kerayslistojen_yhdistaminen = '$row[kerayslistojen_yhdistaminen]',
-							karayksesta_rahtikirjasyottoon = '$row[karayksesta_rahtikirjasyottoon]',
-							rahtikirjojen_esisyotto = '$row[rahtikirjojen_esisyotto]',
-							rahtikirjan_kollit_ja_lajit = '$row[rahtikirjan_kollit_ja_lajit]',
-							laskunsummapyoristys = '$row[laskunsummapyoristys]',
-							hintapyoristys = '$row[hintapyoristys]',
-							viitteen_kasinsyotto = '$row[viitteen_kasinsyotto]',
-							suoratoim_ulkomaan_alarajasumma = '$row[suoratoim_ulkomaan_alarajasumma]',
-							erikoisvarastomyynti_alarajasumma = '$row[erikoisvarastomyynti_alarajasumma]',
-							erikoisvarastomyynti_alarajasumma_rivi = '$row[erikoisvarastomyynti_alarajasumma_rivi]',
-							rahtivapaa_alarajasumma = '$row[rahtivapaa_alarajasumma]',
-							logo = '',
-							lasku_logo = '',
-							lasku_logo_positio = '',
-							lasku_logo_koko = '',
-							naytetaan_katteet_tilauksella = '$row[naytetaan_katteet_tilauksella]',
-							tilauksen_yhteyshenkilot = '$row[tilauksen_yhteyshenkilot]',
-							tilauksen_seuranta = '$row[tilauksen_seuranta]',
-							tilauksen_kohteet = '$row[tilauksen_kohteet]',
-							tarjouksen_voi_versioida = '$row[tarjouksen_voi_versioida]',
-							dokumentaatiohallinta = '$row[dokumentaatiohallinta]',
-							nimityksen_muutos_tilauksella = '$row[nimityksen_muutos_tilauksella]',
-							poistuvat_tuotteet = '$row[poistuvat_tuotteet]',
-							automaattinen_tuotehaku = '$row[automaattinen_tuotehaku]',
-							jyvita_alennus = '$row[jyvita_alennus]',
-							salli_jyvitys_myynnissa = '$row[salli_jyvitys_myynnissa]',
-							rivinumero_syotto = '$row[rivinumero_syotto]',
-							tee_osto_myyntitilaukselta = '$row[tee_osto_myyntitilaukselta]',
-							automaattinen_jt_toimitus = '$row[automaattinen_jt_toimitus]',
-							dynaaminen_kassamyynti = '$row[dynaaminen_kassamyynti]',
-							kerayspoikkeama_kasittely = '$row[kerayspoikkeama_kasittely]',
-							kerayspoikkeamaviestin_lahetys = '$row[kerayspoikkeamaviestin_lahetys]',
-							oletus_toimitusehto = '$row[oletus_toimitusehto]',
-							oletus_toimitusehto2 = '$row[oletus_toimitusehto2]',
-							sad_lomake_tyyppi = '$row[sad_lomake_tyyppi]',
-							tarjouksen_voimaika = '$row[tarjouksen_voimaika]',
-							tarjouksen_tuotepaikat = '$row[tarjouksen_tuotepaikat]',
-							tarjouksen_alv_kasittely = '$row[tarjouksen_alv_kasittely]',
-							splittauskielto = '$row[splittauskielto]',
-							rekursiiviset_reseptit = '$row[rekursiiviset_reseptit]',
-							rekursiiviset_tuoteperheet = '$row[rekursiiviset_tuoteperheet]',
-							valmistusten_yhdistaminen = '$row[valmistusten_yhdistaminen]',
-							valmistuksen_etusivu = '$row[valmistuksen_etusivu]',
-							rahtikirjan_kopiomaara = '$row[rahtikirjan_kopiomaara]',
-							kerataanko_saldottomat = '$row[kerataanko_saldottomat]',
-							saldo_kasittely = '$row[saldo_kasittely]',
-							ytunnus_tarkistukset = '$row[ytunnus_tarkistukset]',
-							vienti_erittelyn_tulostus = '$row[vienti_erittelyn_tulostus]',
-							epakur_kehahin_paivitys = '$row[epakur_kehahin_paivitys]',
-							oletus_lahetekpl = '$row[oletus_lahetekpl]',
-							oletus_oslappkpl = '$row[oletus_oslappkpl]',
-							oletus_rahtikirja_lahetekpl = '$row[oletus_rahtikirja_lahetekpl]',
-							oletus_rahtikirja_oslappkpl = '$row[oletus_rahtikirja_oslappkpl]',
-							oslapp_rakir_logo = '$row[oslapp_rakir_logo]',
-							rahti_ja_kasittelykulut_kasin = '$row[rahti_ja_kasittelykulut_kasin]',
-							synkronoi = '$row[synkronoi]',
-							myyntitilaus_osatoimitus = '$row[myyntitilaus_osatoimitus]',
-							myyntitilaus_asiakasmemo = '$row[myyntitilaus_asiakasmemo]',
-							myyntitilauksen_liitteet = '$row[myyntitilauksen_liitteet]',
-							varastopaikan_lippu = '$row[varastopaikan_lippu]',
-							varaako_jt_saldoa = '$row[varaako_jt_saldoa]',
-							korvaavan_hinta_ylaraja = '$row[korvaavan_hinta_ylaraja]',
-							korvaavat_hyvaksynta = '$row[korvaavat_hyvaksynta]',
-							monikayttajakalenteri = '$row[monikayttajakalenteri]',
-							automaattinen_asiakasnumerointi = '$row[automaattinen_asiakasnumerointi]',
-							asiakasnumeroinnin_aloituskohta = '$row[asiakasnumeroinnin_aloituskohta]',
-							asiakkaan_tarkenne = '$row[asiakkaan_tarkenne]',
-							haejaselaa_konsernisaldot = '$row[haejaselaa_konsernisaldot]',
-							viikkosuunnitelma = '$row[viikkosuunnitelma]',
-							kalenterimerkinnat = '$row[kalenterimerkinnat]',
-							variaatiomyynti = '$row[variaatiomyynti]'";
+				$row = mysql_fetch_assoc($result);
+				$query = "	UPDATE yhtion_parametrit SET ";
+
+				$alakopsaa = array(	"tunnus",
+									"yhtio",
+									"finvoice_senderpartyid",
+									"finvoice_senderintermediator",
+									"verkkotunnus_vas",
+									"verkkotunnus_lah",
+									"verkkosala_vas",
+									"verkkosala_lah",
+									"lasku_tulostin",
+									"logo",
+									"lasku_logo",
+									"lasku_logo_positio",
+									"lasku_logo_koko",
+									"laatija",
+									"luontiaika",
+									"muutospvm",
+									"muuttaja",
+									"css",
+									"css_extranet",
+									"css_verkkokauppa",
+									"css_pieni");
+
+				foreach ($row as $ind => $val) {
+					if (!in_array($ind, $alakopsaa)) {
+						$query .= "$ind = '$val',";
+					}
+				}
+
+				$query = substr($query, 0, -1);
+
+				$query .= "	WHERE tunnus = '$yht_row[tunnus]'
+							AND yhtio = '$yhtio'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -394,7 +225,8 @@
 								jarjestys 	= '$trow[jarjestys]',
 								jarjestys2	= '$trow[jarjestys2]',
 								profiili	= '$trow[profiili]',
-								yhtio		= '$yhtio'";
+								yhtio		= '$yhtio',
+								hidden		= '$trow[hidden]'";
 					$rresult = mysql_query($query) or pupe_error($query);
 				}
 			}
@@ -479,7 +311,8 @@
 										nimitys		= '$trow[nimitys]',
 										jarjestys 	= '$trow[jarjestys]',
 										jarjestys2	= '$trow[jarjestys2]',
-										yhtio		= '$yhtio'";
+										yhtio		= '$yhtio',
+										hidden		= '$trow[hidden]'";
 							$rresult = mysql_query($query) or pupe_error($query);
 						}
 					}
@@ -497,7 +330,8 @@
 			$kukar = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
-				$query = "INSERT into tili (nimi, sisainen_taso, tilino, ulkoinen_taso, alv_taso, yhtio) values ('$row[nimi]','$row[sisainen_taso]','$row[tilino]','$row[ulkoinen_taso]', '$row[alv_taso]', '$yhtio')";
+				$query = "	INSERT into tili (nimi, sisainen_taso, tilino, ulkoinen_taso, alv_taso, kustp, kohde, projekti, toiminto, yhtio)
+							values ('$row[nimi]','$row[sisainen_taso]','$row[tilino]','$row[ulkoinen_taso]', '$row[alv_taso]', '$row[kustp]','$row[kohde]','$row[projekti]','$row[toiminto]','$yhtio')";
 				$upres = mysql_query($query) or pupe_error($query);
 			}
 
@@ -505,7 +339,8 @@
 			$kukar = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
-				$query = "INSERT into taso (tyyppi, laji, taso, nimi, yhtio) values ('$row[tyyppi]','$row[laji]','$row[taso]','$row[nimi]','$yhtio')";
+				$query = "	INSERT into taso (tyyppi, summattava_taso, taso, nimi, yhtio)
+							values ('$row[tyyppi]','$row[summattava_taso]','$row[taso]','$row[nimi]','$yhtio')";
 				$upres = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -516,7 +351,7 @@
 			foreach($avainsanat as $avain) {
 				$query = "	SELECT *
 							FROM avainsana
-							WHERE yhtio='$fromyhtio' and laji='$avain'";
+							WHERE yhtio = '$fromyhtio' and laji = '$avain'";
 				$pres = mysql_query($query) or pupe_error($query);
 				while ($trow = mysql_fetch_array($pres)) {
 					$query = "	INSERT into avainsana
@@ -570,29 +405,29 @@
 
 			while ($row = mysql_fetch_array($kukar)) {
 				$query = "	INSERT INTO maksuehto SET
-							yhtio = '$yhtio',
-							teksti = '$row[teksti]',
-							rel_pvm = '$row[rel_pvm]',
-							abs_pvm = '$row[abs_pvm]',
-							kassa_relpvm = '$row[kassa_relpvm]',
-							kassa_abspvm = '$row[kassa_abspvm]',
-							kassa_alepros = '$row[kassa_alepros]',
-							osamaksuehto1 = '$row[osamaksuehto1]',
-							osamaksuehto2 = '$row[osamaksuehto2]',
-							summanjakoprososa2 = '$row[summanjakoprososa2]',
-							jv = '$row[jv]',
-							kateinen = '$row[kateinen]',
-							suoraveloitus = '$row[suoraveloitus]',
-							factoring = '$row[factoring]',
-							pankkiyhteystiedot = '$row[pankkiyhteystiedot]',
-							itsetulostus = '$row[itsetulostus]',
-							jaksotettu = '$row[jaksotettu]',
-							erapvmkasin = '$row[erapvmkasin]',
-							sallitut_maat = '$row[sallitut_maat]',
-							kaytossa 	= '$row[kaytossa]',
-							jarjestys 	= '$row[jarjestys]',
-							laatija 	= '$kukarow[kuka]',
-							luontiaika 	= now()";
+							yhtio 				= '$yhtio',
+							teksti 				= '$row[teksti]',
+							rel_pvm 			= '$row[rel_pvm]',
+							abs_pvm 			= '$row[abs_pvm]',
+							kassa_relpvm 		= '$row[kassa_relpvm]',
+							kassa_abspvm 		= '$row[kassa_abspvm]',
+							kassa_alepros 		= '$row[kassa_alepros]',
+							osamaksuehto1 		= '$row[osamaksuehto1]',
+							osamaksuehto2 		= '$row[osamaksuehto2]',
+							summanjakoprososa2 	= '$row[summanjakoprososa2]',
+							jv 					= '$row[jv]',
+							kateinen 			= '$row[kateinen]',
+							suoraveloitus 		= '$row[suoraveloitus]',
+							factoring 			= '$row[factoring]',
+							pankkiyhteystiedot 	= '$row[pankkiyhteystiedot]',
+							itsetulostus 		= '$row[itsetulostus]',
+							jaksotettu 			= '$row[jaksotettu]',
+							erapvmkasin 		= '$row[erapvmkasin]',
+							sallitut_maat 		= '$row[sallitut_maat]',
+							kaytossa 			= '$row[kaytossa]',
+							jarjestys 			= '$row[jarjestys]',
+							laatija 			= '$kukarow[kuka]',
+							luontiaika 			= now()";
 				$upres = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -605,45 +440,45 @@
 
 			while ($row = mysql_fetch_array($kukar)) {
 				$query = "	INSERT INTO toimitustapa SET
-							yhtio = '$yhtio',
-							selite = '$row[selite]',
-							tulostustapa = '$row[tulostustapa]',
-							rahtikirja = '$row[rahtikirja]',
-							osoitelappu = '$row[osoitelappu]',
-							rahdinkuljettaja = '$row[rahdinkuljettaja]',
-							sopimusnro = '$row[sopimusnro]',
-							jvkulu = '$row[jvkulu]',
-							jvkielto = '$row[jvkielto]',
-							vak_kielto = '$row[vak_kielto]',
-							nouto = '$row[nouto]',
-							lauantai = '$row[lauantai]',
-							kuljyksikko = '$row[kuljyksikko]',
-							merahti = '$row[merahti]',
-							multi_jv = '$row[multi_jv]',
-							extranet = '$row[extranet]',
-							ei_pakkaamoa = '$row[ei_pakkaamoa]',
-							kuluprosentti = '$row[kuluprosentti]',
-							toim_nimi = '$row[toim_nimi]',
-							toim_nimitark = '$row[toim_nimitark]',
-							toim_osoite = '$row[toim_osoite]',
-							toim_postino = '$row[toim_postino]',
-							toim_postitp = '$row[toim_postitp]',
-							toim_maa = '$row[toim_maa]',
-							maa_maara = '$row[maa_maara]',
-							sisamaan_kuljetus = '$row[sisamaan_kuljetus]',
+							yhtio 					= '$yhtio',
+							selite 					= '$row[selite]',
+							tulostustapa 			= '$row[tulostustapa]',
+							rahtikirja 				= '$row[rahtikirja]',
+							osoitelappu 			= '$row[osoitelappu]',
+							rahdinkuljettaja 		= '$row[rahdinkuljettaja]',
+							sopimusnro 				= '$row[sopimusnro]',
+							jvkulu 					= '$row[jvkulu]',
+							jvkielto 				= '$row[jvkielto]',
+							vak_kielto 				= '$row[vak_kielto]',
+							nouto 					= '$row[nouto]',
+							lauantai 				= '$row[lauantai]',
+							kuljyksikko 			= '$row[kuljyksikko]',
+							merahti 				= '$row[merahti]',
+							multi_jv 				= '$row[multi_jv]',
+							extranet 				= '$row[extranet]',
+							ei_pakkaamoa 			= '$row[ei_pakkaamoa]',
+							kuluprosentti 			= '$row[kuluprosentti]',
+							toim_nimi 				= '$row[toim_nimi]',
+							toim_nimitark 			= '$row[toim_nimitark]',
+							toim_osoite 			= '$row[toim_osoite]',
+							toim_postino 			= '$row[toim_postino]',
+							toim_postitp 			= '$row[toim_postitp]',
+							toim_maa 				= '$row[toim_maa]',
+							maa_maara 				= '$row[maa_maara]',
+							sisamaan_kuljetus 		= '$row[sisamaan_kuljetus]',
 							sisamaan_kuljetus_kansallisuus = '$row[sisamaan_kuljetus_kansallisuus]',
-							sisamaan_kuljetusmuoto = '$row[sisamaan_kuljetusmuoto]',
-							kontti = '$row[kontti]',
-							aktiivinen_kuljetus = '$row[aktiivinen_kuljetus]',
+							sisamaan_kuljetusmuoto 	= '$row[sisamaan_kuljetusmuoto]',
+							kontti 					= '$row[kontti]',
+							aktiivinen_kuljetus 	= '$row[aktiivinen_kuljetus]',
 							aktiivinen_kuljetus_kansallisuus = '$row[aktiivinen_kuljetus_kansallisuus]',
 							kauppatapahtuman_luonne = '$row[kauppatapahtuman_luonne]',
-							kuljetusmuoto = '$row[kuljetusmuoto]',
+							kuljetusmuoto			= '$row[kuljetusmuoto]',
 							poistumistoimipaikka_koodi = '$row[poistumistoimipaikka_koodi]',
-							ulkomaanlisa = '$row[ulkomaanlisa]',
-							sallitut_maat = '$row[sallitut_maat]',
-							jarjestys = '$row[jarjestys]',
-							laatija 	= '$kukarow[kuka]',
-							luontiaika	= now()";
+							ulkomaanlisa 			= '$row[ulkomaanlisa]',
+							sallitut_maat 			= '$row[sallitut_maat]',
+							jarjestys 				= '$row[jarjestys]',
+							laatija 				= '$kukarow[kuka]',
+							luontiaika				= now()";
 				$upres = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -658,40 +493,40 @@
 			$kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 
 			$query = "	INSERT INTO varastopaikat SET
-						yhtio = '$yhtio',
-						alkuhyllyalue = 'A00',
-						alkuhyllynro = '00',
-						loppuhyllyalue = 'Z99',
-						loppuhyllynro = '99',
-						printteri0 = '$kirjoitin_row[tunnus]',
-						printteri1 = '$kirjoitin_row[tunnus]',
-						printteri2 = '$kirjoitin_row[tunnus]',
-						printteri3 = '$kirjoitin_row[tunnus]',
-						printteri4 = '$kirjoitin_row[tunnus]',
-						printteri5 = '$kirjoitin_row[tunnus]',
-						printteri6 = '$kirjoitin_row[tunnus]',
-						printteri7 = '$kirjoitin_row[tunnus]',
-						nimitys = '$varasto',
-						tyyppi = '',
-						nimi = '$varasto',
-						nimitark = '',
-						osoite = '',
-						postino = '',
-						postitp = '',
-						maa = 'FI',
-						maa_maara = '',
+						yhtio 			= '$yhtio',
+						alkuhyllyalue 	= 'A00',
+						alkuhyllynro 	= '00',
+						loppuhyllyalue 	= 'Z99',
+						loppuhyllynro 	= '99',
+						printteri0 		= '$kirjoitin_row[tunnus]',
+						printteri1 		= '$kirjoitin_row[tunnus]',
+						printteri2 		= '$kirjoitin_row[tunnus]',
+						printteri3 		= '$kirjoitin_row[tunnus]',
+						printteri4 		= '$kirjoitin_row[tunnus]',
+						printteri5 		= '$kirjoitin_row[tunnus]',
+						printteri6 		= '$kirjoitin_row[tunnus]',
+						printteri7 		= '$kirjoitin_row[tunnus]',
+						nimitys 		= '$varasto',
+						tyyppi 			= '',
+						nimi 			= '$varasto',
+						nimitark 		= '',
+						osoite 			= '',
+						postino 		= '',
+						postitp 		= '',
+						maa 			= 'FI',
+						maa_maara 		= '',
 						sisamaan_kuljetus = '',
 						sisamaan_kuljetus_kansallisuus = '',
 						sisamaan_kuljetusmuoto = 0,
-						kontti = 0,
+						kontti 			= 0,
 						aktiivinen_kuljetus = '',
 						aktiivinen_kuljetus_kansallisuus = '',
 						kauppatapahtuman_luonne = 0,
-						kuljetusmuoto = 0,
+						kuljetusmuoto	= 0,
 						poistumistoimipaikka_koodi = '',
-						sallitut_maat = '',
-						laatija 	= '$kukarow[kuka]',
-						luontiaika	= now()";
+						sallitut_maat 	= '',
+						laatija 		= '$kukarow[kuka]',
+						luontiaika		= now()";
 			$upres = mysql_query($query) or pupe_error($query);
 		}
 		unset($tila);

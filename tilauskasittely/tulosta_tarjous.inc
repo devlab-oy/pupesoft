@@ -101,7 +101,7 @@ if (!function_exists('alku_tarjous')) {
 			$pdf_tarjous->draw_text(50, 730, t("Myyjä", $kieli), $page_tarjous, $boldi);
 
 			//etsitään myyjän nimi
-			$query  = "	SELECT nimi
+			$query  = "	SELECT nimi, kuka, puhno, eposti
 						from kuka
 						where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 			$myyresult = mysql_query($query) or pupe_error($query);
@@ -114,17 +114,17 @@ if (!function_exists('alku_tarjous')) {
 			$pdf_tarjous->draw_text(150, 717, tulosta_ytunnus(str_replace("0037", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $page_tarjous, $norm);
 
 			$pdf_tarjous->draw_text(50, 704, t("Nimi", $kieli), $page_tarjous, $boldi);
-			$pdf_tarjous->draw_text(150, 704, $kukarow['nimi'], $page_tarjous, $norm);
+			$pdf_tarjous->draw_text(150, 704, $yhtiorow['nimi'], $page_tarjous, $norm);
 
 			$pdf_tarjous->draw_text(50, 691, t("Osoite", $kieli), $page_tarjous, $boldi);
 			$pdf_tarjous->draw_text(150, 691, $yhtiorow['osoite'], $page_tarjous, $norm);
 			$pdf_tarjous->draw_text(150, 678, $yhtiorow['postino'].' '.$yhtiorow['postitp'], $page_tarjous, $norm);
 
 			$pdf_tarjous->draw_text(50, 665, t("Puhelin", $kieli), $page_tarjous, $boldi);
-			$pdf_tarjous->draw_text(150, 665, $kukarow['puhno'], $page_tarjous, $norm);
+			$pdf_tarjous->draw_text(150, 665, $myyrow['puhno'], $page_tarjous, $norm);
 
 			$pdf_tarjous->draw_text(50, 652, t("Sähköposti", $kieli), $page_tarjous, $boldi);
-			$pdf_tarjous->draw_text(150, 652, $kukarow['eposti'], $page_tarjous, $norm);
+			$pdf_tarjous->draw_text(150, 652, $myyrow['eposti'], $page_tarjous, $norm);
 
 		}
 		else {

@@ -64,6 +64,11 @@ if ($tee == "ALOITAKOROTUS") {
 		$asiakaslisa = " and asiakas.ytunnus >= '$syot_ytunnus' ";
 	}
 
+	if (isset($vienti) and is_array($vienti)) {
+		array_walk($vienti, 'mysql_real_escape_string');
+		$asiakaslisa .= " and asiakas.vienti in ('".implode("','", $vienti)."') ";
+	}
+
 	$query = "	SELECT
 				GROUP_CONCAT(distinct lasku.tunnus) korotettavat,
 				round(sum(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500),2) korkosumma
@@ -73,7 +78,7 @@ if ($tee == "ALOITAKOROTUS") {
 						round(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500,2) korkosumma2,
 						maksuehto.jv
 						FROM lasku use index (yhtio_tila_mapvm)
-						JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus)
+						JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus $asiakaslisa)
 						JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
 						LEFT JOIN maksuehto on (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
 						WHERE lasku.yhtio 	= '$kukarow[yhtio]'
@@ -82,15 +87,13 @@ if ($tee == "ALOITAKOROTUS") {
 						and lasku.mapvm 	<='$vvl-$kkl-$ppl'
 						and lasku.summa		!= 0
 						and lasku.olmapvm	= '0000-00-00'
-						$asiakaslisa
 						$konslisa
-						HAVING ika > $min_myoh and korkosumma2 > $minimisumma and (maksuehto.jv is null or maksuehto.jv = '')
+						HAVING ika > $min_myoh and abs(korkosumma2) > abs($minimisumma) and (maksuehto.jv is null or maksuehto.jv = '')
 						ORDER BY asiakas.ytunnus) as laskut
-				JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus)
+				JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus $asiakaslisa)
 				JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
 				WHERE lasku.tunnus = laskut.tunnus
 				$konslisa
-				$asiakaslisa
 				GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
 				HAVING korkosumma > 0 $korkolisa
 				ORDER BY asiakas.ytunnus";
@@ -202,7 +205,8 @@ if ($tee == "KOROTA")  {
 		echo "</td><td>";
 
 		if ($lasku["laskunro"] != $edlasku) {
-			echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' checked>";
+			$chk = $lasku['korkosumma'] < 0 ? '' : ' checked';
+			echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]'{$chk}>";
 		}
 
 		$edlasku = $lasku["laskunro"];
@@ -322,6 +326,21 @@ if ($tee == "") {
 
 	echo "<tr><th>".t("Korkolaskun maksuehto").":</th>";
 	echo "<td colspan='3'>$ulos</td></tr>";
+
+	$vienti_sel = array();
+
+	if (isset($vienti) and is_array($vienti)) {
+		foreach ($vienti as $v) {
+			$vienti_sel[$v] = ' selected';
+		}
+	}
+
+	echo "<tr><th>",t("Vienti"),":</th>";
+	echo "<td colspan='3'><select name='vienti[]' multiple size='3'>";
+	echo "<option value=''{$vienti_sel['']}>",t("Kotimaa"),"</option>";
+	echo "<option value='E'{$vienti_sel['E']}>",t("Vienti EU"),"</option>";
+	echo "<option value='K'{$vienti_sel['K']}>",t("Vienti ei-EU"),"</option>";
+	echo "</select></td></tr>";
 
 	echo "<tr><th>".t("Minimi korkosumma").":</th>";
 	echo "<td colspan='3'><input type='text' name='korkosumma' value='$korkosumma'></td></tr>";

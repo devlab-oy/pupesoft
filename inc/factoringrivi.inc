@@ -83,5 +83,22 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	
+	if (mysql_field_name($result, $i) == "viitetyyppi") {
+
+		$sel = "";
+		
+		if ($trow[$i] != '') {
+			$sel = "SELECTED";
+		}
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''> ".t("Laskun viite muodostetaan sopimusnumerosta, välimerkistä ja laskunumerosta")."</option>";
+		$ulos .= "<option value='X' $sel> ".t("Laskun viite muodostetaan laskunumerosta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

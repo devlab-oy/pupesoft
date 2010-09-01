@@ -633,7 +633,7 @@
 		}
 
 		// katotaan mikä viivästyskorko laitetaan
-		$viivastyskorko = $yhtiorow['viivastyskorko'];
+		$viivastyskorko = $orow['viikorkopros'] == 0 ? 0 : $yhtiorow['viivastyskorko'];
 
 		if (isset($korkolasku) and $korkolasku == "kylla") {
 			$viivastyskorko = $orow['viivastyskorko'];

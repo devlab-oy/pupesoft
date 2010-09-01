@@ -56,7 +56,7 @@
 			$query = "	SELECT *
 						FROM maksupositio
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						and otunnus = '{$laskurow['jaksotettu']}' 
+						and otunnus = '{$laskurow['jaksotettu']}'
 						and uusiotunnus = 0
 						ORDER BY tunnus";
 			$posres = mysql_query($query) or pupe_error($query);
@@ -73,7 +73,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$sumrow = mysql_fetch_array($result);
 
-			$query = "	SELECT 
+			$query = "	SELECT
 						sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) summa,
 						if (tilausrivi.alv>=500, 0, tilausrivi.alv) alv
 						FROM lasku
@@ -136,13 +136,18 @@
 				}
 
 				$pdf->draw_text(30, $kala, $i.'. '.tv1dateconv($posrow['erpcm']), $page, $norm);
-				$pdf->draw_text(100, $kala, round($summa, $yhtiorow['hintapyoristys']).' '.$laskurow['valkoodi'], $page, $norm);
-				$pdf->draw_text(160, $kala, round($posrow['osuus'], 2).' %', $page, $norm);
+
+				$oikpos = $pdf->strlen(sprintf("%.2f", $summa).' '.$laskurow['valkoodi'], $norm);
+				$pdf->draw_text(150-$oikpos, $kala, sprintf("%.2f", $summa).' '.$laskurow['valkoodi'], $page, $norm);
+
+
+				$oikpos = $pdf->strlen(round($posrow['osuus'], 2).' %', $norm);
+				$pdf->draw_text(195-$oikpos, $kala, round($posrow['osuus'], 2).' %', $page, $norm);
 
 				$valekala = $kala;
 
 				if ($pdf->strlen($posrow['lisatiedot'], $norm) > 175) {
-					$pohja = $pdf->draw_paragraph($kala+$norm['height']+2, 210, 60, 385, $posrow["lisatiedot"], $page, $norm);			    
+					$pohja = $pdf->draw_paragraph($kala+$norm['height']+2, 210, 60, 385, $posrow["lisatiedot"], $page, $norm);
 					$valekala = $pohja - $rivikorkeus;
 				}
 				else {
@@ -151,7 +156,7 @@
 
 				if ($pdf->strlen($posrow['ohje'], $norm) > 170) {
 					$pohja = $pdf->draw_paragraph($kala+$norm['height']+2, 390, 60, 560, $posrow["ohje"], $page, $norm);
-				
+
 					$kala = $valekala < ($pohja - $rivikorkeus) ? $valekala : ($pohja - $rivikorkeus);
 				}
 				else {

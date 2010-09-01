@@ -217,7 +217,7 @@
 	}
 
 	if ($tila == "poista") {
-				
+
 		$query = "	DELETE
 					FROM maksupositio
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -243,7 +243,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and jaksotettu = '$laskurow[jaksotettu]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			$laskurow["jaksotettu"] = 0;
 
 			$query = "	UPDATE tilausrivi USE INDEX (yhtio_otunnus)
@@ -288,7 +288,7 @@
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
 				</form><br><br>";
-		
+
 		$tot = 0;
 
 		$query	= "	SELECT *
@@ -362,7 +362,7 @@
 			$osuus	= 0;
 			$i		= 0;
 
-			while($row=mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_array($result)) {
 
 				$osuus += $row["osuus"];
 				$tot   += $row["summa"];
@@ -469,7 +469,7 @@
 
 					echo "<br>$row[kuvaus]</td>";
 					echo "<td>$row[lisatiedot]<br>$row[ohje]</td>";
-					echo "<td align ='right'>$row[summa]</td></tr>";
+					echo "<td align ='right'><a target='_blank' href = '{$palvelin2}tilauskasittely/tulostakopio.php?toim=LASKU&tee=NAYTATILAUS&otunnus=$row[uusiotunnus]'>$row[summa]</a></td></tr>";
 				}
 
 				$erpcmpp = "";
@@ -513,14 +513,18 @@
 				echo "</tr>";
 			}
 
-			if (round($tot,2) == $jaksotettavaa) {
+			if (round($tot, 2) == $jaksotettavaa) {
 
-				echo "<form method='post'>";
+				// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
+				js_openFormInNewWindow();
+
+				echo "<form method='post' id='tulosta_maksusopimus' name='tulosta_maksusopimus'>";
 				echo "<input type='hidden' name='toim' value='{$toim}'>";
+				echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
 				echo "<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>";
 				echo "<input type='hidden' name='tulosta_maksusopimus' value='{$laskurow['jaksotettu']}'>";
 				echo "<input type='hidden' name='tunnus' value='{$laskurow['tunnus']}'>";
-				echo "<tr><th colspan='5'><input type='submit' value='",t("Positiot PDF-muotoon"),"'></th></tr>";
+				echo "<tr><th colspan='5'><input type='submit' value='",t("Positiot PDF-muotoon"),"' onClick=\"js_openFormInNewWindow('tulosta_maksusopimus', ''); return false;\"></th></tr>";
 				echo "</form>";
 
 			}

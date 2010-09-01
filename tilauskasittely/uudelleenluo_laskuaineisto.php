@@ -4,7 +4,7 @@
 		if($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
 		if($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
 	}
-		
+
 	if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") $no_head = "yes";
 
 	require("../inc/parametrit.inc");
@@ -19,6 +19,14 @@
 		if (!isset($tee) or $tee != "NAYTATILAUS") echo "<font class='head'>".t("Luo laskutusaineisto")."</font><hr>\n";
 
 		if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumerot != '') {
+
+			if ($tee == "NAYTATILAUS") {
+				$nosoap = "NOSOAP";
+			}
+			else {
+				$nosoap = "";
+			}
+
 			if (!function_exists("xml_add")) {
 				function xml_add ($joukko, $tieto, $handle) {
 					global $yhtiorow, $lasrow;
@@ -151,7 +159,7 @@
 				echo "<br><font class='message'>".t("Syˆtit")." $lkm ".t("laskua").".</font><br>";
 				echo "<font class='message'>".t("Aineistoon lis‰t‰‰n")." ".mysql_num_rows($res)." ".t("laskua").".</font><br><br>";
 			}
-			
+
 			while ($lasrow = mysql_fetch_array($res)) {
 				// Haetaan maksuehdon tiedot
 				$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
@@ -395,9 +403,9 @@
 						//K‰‰nnet‰‰n maksuehto
 						$masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
 					}
-					
-					$query = "	SELECT 
-								min(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')) mint, 
+
+					$query = "	SELECT
+								min(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')) mint,
 								max(date_format(if('$yhtiorow[tilausrivien_toimitettuaika]' = 'X', toimaika, if('$yhtiorow[tilausrivien_toimitettuaika]' = 'K' and keratty = 'saldoton', toimaika, toimitettuaika)), '%Y-%m-%d')) maxt
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -418,10 +426,10 @@
 						elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
 					}
 					elseif ($lasrow["chn"] == "112") {
-						finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+						finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap);
 					}
-					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {						
-						finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "NOSOAP");
+					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
+						finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap);
 					}
 					else {
 						pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);

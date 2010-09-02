@@ -71,7 +71,7 @@
 	                ORDER BY jarjestys";
 	   	$vresult = mysql_query($query) or pupe_error($query);
 	    $ulos = "<td><select name='$nimi'>";
-	
+
 	    while ($vrow=mysql_fetch_array($vresult)) {
 	        $sel="";
 	        if ($trow[$i] == $vrow['nimi']) {
@@ -79,7 +79,7 @@
 	        }
         	$ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]";
         }
-		
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -126,7 +126,14 @@
 			$jatko = 0;
 		}
 		else {
-			$ulos = "<td nowrap valign='top'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+			$ulos = "<td nowrap valign='top'>";
+
+			if ($trow[$i] != "") {
+				$ulos .= "<input type = 'hidden' name = '$nimi' value = '$trow[$i]'>$trow[$i] - ";
+			}
+			else {
+				$ulos .= "<input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+			}
 
 			$query = "	SELECT nimi
 						FROM tili
@@ -141,7 +148,6 @@
 				$query = "	SELECT tilino, nimi
 							FROM tili
 							WHERE yhtio='$kukarow[yhtio]'";
-
 
 				if (mysql_field_name($result, $i) == "kassa") 								$query .= " and nimi regexp '(kassa|k.teis)' ";
 				elseif (mysql_field_name($result, $i) == "pankkikortti") 					$query .= " and nimi regexp 'pankki.*kortti' ";
@@ -231,7 +237,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tilikauden_tulos") {
 
 		$tpque = "	SELECT tunnus, tilino, nimi

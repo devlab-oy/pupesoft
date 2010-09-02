@@ -346,7 +346,14 @@
 						ORDER BY tunnus
 						LIMIT 1";
 			$posres = mysql_query($query) or pupe_error($query);
-			$posrow = mysql_fetch_array($posres);
+				
+			if (mysql_num_rows($posres) == 1) {
+				$posrow = mysql_fetch_array($posres);
+			}
+			else {
+				echo "<font class='error'>".t("VIRHE: Viimeinen maksupositio puuttuu! Loppulaskutus ei onnistu.")."</font><br><br>";
+				return 0;
+			}
 
 			if ($debug==1) echo t("Löydettiin maksupositio")." $posrow[tunnus], $posrow[osuus] %, $posrow[maksuehto]<br>";
 
@@ -364,23 +371,29 @@
 
 			// varmistetaan että laskutus näyttäisi olevan OK!!
 			if ($aburow["yhteensa"] - $aburow["laskutettu"] > 1) {
-				echo "<font class='error'>".t("VIRHE: Koitetaan loppulaskuttaa mutta positioita on jäljellä enemmän kuin yksi!")."</font><br><br>";
+				echo "<font class='error'>".t("VIRHE: Loppulaskutus ei onnistu koska positioita on jäljellä enemmän kuin yksi!")."</font><br><br>";
 				return 0;
 			}
 
 			//	Tarkastetaan että meillä on ok maksuehto loppulaskutukseen!!!
 			$apuqu = "	SELECT *
 						from maksuehto
-						where yhtio='$kukarow[yhtio]' and tunnus='$posrow[maksuehto]' and jaksotettu=''";
+						where yhtio='$kukarow[yhtio]' 
+						and tunnus='$posrow[maksuehto]' 
+						and jaksotettu=''";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 
-			if (mysql_num_rows($meapu) > 0) {
+			if (mysql_num_rows($meapu) == 1) {
 				$meapurow = mysql_fetch_array($meapu);
-
-				if ($meapurow["erapvmkasin"] != "" and $posrow["erpcm"] == "0000-00-00") {
-					echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehdon eräpäivä puuttuu")."!!!</font><br><br>";
-					return 0;
-				}
+			}
+			else {
+				echo "<font class='error'>".t("VIRHE: Maksuposition maksuehto puuttuu!")."</font><br><br>";
+				return 0;
+			}
+						
+			if ($meapurow["erapvmkasin"] != "" and $posrow["erpcm"] == "0000-00-00") {
+				echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehdon eräpäivä puuttuu")."!!!</font><br><br>";
+				return 0;
 			}
 			else {
 				$apuqu = "	SELECT erpcm
@@ -394,7 +407,6 @@
 					return 0;
 				}
 			}
-
 
 			echo "<font class = 'message'>".t("Loppulaskutetaan tilaus")." $tunnus<br></font><br>";
 
@@ -423,7 +435,7 @@
 				$rivikommentti .= "\n ".$posrow["lisatiedot"];
 			}
 
-			while($row = mysql_fetch_array($sresult)) {
+			while ($row = mysql_fetch_array($sresult)) {
 
 				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu)
 							values  ('$row[laskutettu]', 'N', '-1', '-1', '$vikatunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";

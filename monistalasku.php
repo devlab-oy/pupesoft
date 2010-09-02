@@ -22,6 +22,9 @@ if ($vain_monista == "") {
 	elseif ($toim == 'TILAUS') {
 		echo "<font class='head'>".t("Monista tilaus")."</font><hr>";
 	}
+	elseif ($toim == 'OSTOTILAUS') {
+		echo "<font class='head'>".t("Monista ostotilaus")."</font><hr>";
+	}
 	else {
 		echo "<font class='head'>".t("Monista lasku")."</font><hr>";
 	}
@@ -57,8 +60,16 @@ else {
 }
 
 if ($tee == '') {
-	if ($ytunnus != '') {
-		require ("inc/asiakashaku.inc");
+	
+	if ($toim == 'OSTOTILAUS') {
+		if ($ytunnus != '') {
+			require ("inc/kevyt_toimittajahaku.inc");
+		}
+	}
+	else {
+		if ($ytunnus != '') {
+			require ("inc/asiakashaku.inc");
+		}
 	}
 
 	if ($ytunnus != '') {
@@ -150,6 +161,10 @@ if ($tee == "ETSILASKU") {
 			$where 	= " tila in ('N','L') and tunnus = '$otunnus' ";
 			$use 	= " ";
 		}
+		elseif ($toim == 'OSTOTILAUS') {
+			$where 	= " tila = 'O' and tunnus = '$otunnus' ";
+			$use 	= " ";
+		}
 		else {
 			if ($larow["laskunro"] > 0) {
 				$where 	= " tila = 'U' and laskunro = '$larow[laskunro]' ";
@@ -180,6 +195,11 @@ if ($tee == "ETSILASKU") {
 		elseif ($toim == 'TILAUS') {
 			$where 	= " tila in ('N','L')
 						and lasku.liitostunnus = '$asiakasid' ";
+			$use 	= " ";
+		}
+		elseif ($toim == 'OSTOTILAUS') {
+			$where 	= " tila = 'O'
+						and lasku.liitostunnus = '$toimittajaid' ";
 			$use 	= " ";
 		}
 		else {
@@ -372,6 +392,9 @@ if ($tee == 'MONISTA') {
 		elseif ($toim == 'TILAUS') {
 			echo "$kklkm ".t("tilaus(ta)").".<br><br>";
 		}
+		elseif ($toim == 'OSTOTILAUS') {
+			echo "$kklkm ".t("ostotilaus(ta)").".<br><br>";
+		}
 		else {
 			echo "$kklkm ".t("lasku(a)").".<br><br>";
 		}
@@ -476,7 +499,7 @@ if ($tee == 'MONISTA') {
 						}
 					break;
 					case 'toimaika':
-						if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+						if (($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') and $toim != 'OSTOTILAUS') {
 							$values .= ", '$monistarow[$i]'";
 						}
 						else {
@@ -508,14 +531,17 @@ if ($tee == 'MONISTA') {
 						elseif ($toim == 'TYOMAARAYS' or $koptyom == 'on') {
 							$values .= ", 'A'";
 						}
+						elseif ($toim == 'OSTOTILAUS') {
+							$values .= ", 'O'";
+						}
 						else {
 							$values .= ", 'N'";
 						}
 						break;
 					case 'tilaustyyppi':
 						if ($kumpi == 'REKLAMA') {
-								$values .= ", 'R'";
-								break;
+							$values .= ", 'R'";
+							break;
 						}
 						elseif ($toim == 'TYOMAARAYS' or $koptyom == 'on') {
 							$values .= ", 'A'";
@@ -809,7 +835,7 @@ if ($tee == 'MONISTA') {
 				$insres2 = mysql_query($kysely) or pupe_error($kysely);
 			}
 
-			if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS') {
+			if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS') {
 				$query = "	SELECT *
 							from tilausrivi
 							where otunnus = '$lasku'
@@ -866,7 +892,7 @@ if ($tee == 'MONISTA') {
 
 					switch (mysql_field_name($rivires,$i)) {
 						case 'toimaika':
-							if ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+							if ($yhtiorow["tilausrivien_toimitettuaika"] == 'X' and $toim != 'OSTOTILAUS') {
 								$rvalues .= ", '".$rivirow[$i]."'";
 							}
 							else {
@@ -893,7 +919,7 @@ if ($tee == 'MONISTA') {
 							$rvalues .= ", ''";
 							break;
 						case 'kommentti':
-							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS') {
+							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS') {
 								$rvalues .= ", '$rivirow[kommentti]'";
 							}
 							else {
@@ -1237,7 +1263,18 @@ if ($tee == '' and $vain_monista == "") {
 	echo "<br><table>";
 	echo "<form action = '$PHP_SELF' method = 'post'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
-	echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
+	echo "<tr>";
+	
+	if ($toim == 'OSTOTILAUS') {
+		echo "<th>".t("Toimittajan nimi")."</th>";
+	}
+	else {
+		echo "<th>".t("Asiakkaan nimi")."</th>";
+	}
+	
+	echo "<td><input type='text' size='10' name='ytunnus'></td></tr>";
+	
+	
 	echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
 
 	if ($toim == '') {

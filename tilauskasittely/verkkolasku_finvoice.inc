@@ -450,8 +450,17 @@ if (!function_exists('finvoice_alvierittely')) {
 			xml_add("VatRatePercent",												pp($alvrow[0]), 	   	$tootfinvoice);
 			xml_add("VatRateAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow[2]), 	   	$tootfinvoice);
 			xml_add("VatFreeText",													"",					   	$tootfinvoice);
-			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
+			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");								
+		}
+	}
+}
 
+if (!function_exists('finvoice_otsikko_loput')) {
+	function finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow) {
+		global $err_finvoice, $yhtiorow;
+
+		if ($err_finvoice == 0)	{
+			
 			#Tää sit ku otetaan Finvoice 1.3 käyttöön
 			#
 			#$InvoiceFreeTexts = explode("|", trim($lasrow["sisviesti1"]));
@@ -464,16 +473,8 @@ if (!function_exists('finvoice_alvierittely')) {
 			#	}
 			#}
 			
-			xml_add("InvoiceFreeText", substr(str_replace("|", " ## ", trim($lasrow["sisviesti1"])), 0, 512), $tootfinvoice);						
-		}
-	}
-}
-
-if (!function_exists('finvoice_otsikko_loput')) {
-	function finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow) {
-		global $err_finvoice, $yhtiorow;
-
-		if ($err_finvoice == 0)	{
+			xml_add("InvoiceFreeText", substr(str_replace("|", " ## ", trim($lasrow["sisviesti1"])), 0, 512), 								$tootfinvoice);
+			
 			fputs($tootfinvoice, "<PaymentTermsDetails>\r\n");
 			xml_add("PaymentTermsFreeText",       											pp($masrow['teksti']),						  	$tootfinvoice);
 			xml_add("InvoiceDueDate Format=\"CCYYMMDD\"",               					pp(vlas_dateconv($lasrow['erpcm'])),   	      	$tootfinvoice);

@@ -78,17 +78,15 @@ if ($tee == "VSRALVYV") {
 	echo "<tr><th>".t("Arvonlisäveron yhteenvetoilmoitus kuukaudelta").":</th>";
 
 	//	Haetaan alkupiste
-	$query = "SELECT ((month(now())-month(min(tilikausi_alku)))*12), month(now()) from tilikaudet where tilikausi_alku != '0000-00-00' and yhtio='$kukarow[yhtio]'";
+	$query = "SELECT (abs(month(now())-month(min(tilikausi_alku)))*12), month(now()) from tilikaudet where tilikausi_alku != '0000-00-00' and yhtio='$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$row = mysql_fetch_array($result);
-
-	// $ytunnus = 'P'.str_pad((int)$users_row['id'], 6, "0", STR_PAD_LEFT);
 
 	$kausia = $row[0] + $row[1] + 1;
 	$kuukausi = str_pad((int)$row[1], 2, 0, STR_PAD_LEFT);
 	$vuosi = date("Y");
 
-	//	Ei näytetä ihan kaikeka
+	//	Ei näytetä ihan kaikkea
 	if ($kausia > 24) $kausia = 24;
 
 	echo "<td>";

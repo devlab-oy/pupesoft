@@ -579,6 +579,7 @@
 					$worksheet->writeFormula($excelrivi, 5, "=sum(F2:F$excelrivi)");
 					$worksheet->write($excelrivi, 6, "");
 					$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
+					$worksheet->writeFormula($excelrivi, 8, "=sum(I2:I$excelrivi)");
 				}
 				else {
 

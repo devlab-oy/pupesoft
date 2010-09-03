@@ -155,8 +155,8 @@
 										toim_postitp 		= '$toim_postitp',
 										toim_maa 			= '$toim_maa',
 										verkkotunnus		= '$myytilrow[liitostunnus]',
-										toimaika 			= now(),
-										kerayspvm 			= now(),
+										toimaika 			= '$myytilrow[toimaika]',
+										kerayspvm 			= '$myytilrow[kerayspvm]',
 										luontiaika			= now(),
 										ketjutus			= '1',
 										maksuehto 			= '$tiltoi[maksuehto]',
@@ -211,8 +211,8 @@
 
 							// lis‰t‰‰n ostotilausrivi
 							$query = "	INSERT INTO tilausrivi
-										(perheid2, hinta, ale, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, kommentti, toimaika, hyllyalue, hyllynro, hyllyvali, hyllytaso, laatija, laadittu) values
-										('$pid','$osstu[ostohinta]','$osstu[alennus]','$tilrivirow[nimitys]','$tilrivirow[tuoteno]', '$tilrivirow[kpl]', '$tilrivirow[kpl]', '$tunnus', '$kukarow[yhtio]', 'O','$tilrivirow[kommentti]', '$tilrivirow[toimaika]', '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]', '$kukarow[kuka]', now())";
+										(perheid2, hinta, ale, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, kommentti, toimaika, kerayspvm, hyllyalue, hyllynro, hyllyvali, hyllytaso, laatija, laadittu) values
+										('$pid','$osstu[ostohinta]','$osstu[alennus]','$tilrivirow[nimitys]','$tilrivirow[tuoteno]', '$tilrivirow[kpl]', '$tilrivirow[kpl]', '$tunnus', '$kukarow[yhtio]', 'O','$tilrivirow[kommentti]', '$tilrivirow[toimaika]', '$tilrivirow[kerayspvm]', '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]', '$kukarow[kuka]', now())";
 							$updre = mysql_query($query) or pupe_error($query);
 							$lisatty_tun = mysql_insert_id();
 

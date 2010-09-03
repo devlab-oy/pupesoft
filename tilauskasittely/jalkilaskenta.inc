@@ -718,11 +718,18 @@ if ($tuoteno != '') {
 										if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 										$invupd = mysql_query($query) or pupe_error($query);
 
+										if ($yhtiorow["varastonmuutos_inventointi"] != "") {
+											$varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+										}
+										else {
+											$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+										}
+
 										// kirjotetaan uudet tiliönnit
 										$query = "	INSERT INTO tiliointi SET
 													yhtio    = '$kukarow[yhtio]',
 													ltunnus  = '$invrow[ltunnus]',
-													tilino   = '$yhtiorow[varastonmuutos]',
+													tilino   = '$varastonmuutos_tili',
 													kustp    = 0,
 													tapvm    = '$invrow[tapvm]',
 													summa    = $trow[kpl] * $uusikehahin * -1,

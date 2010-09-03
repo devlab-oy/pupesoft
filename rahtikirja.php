@@ -121,8 +121,7 @@
 
 	js_popup();
 
-	if (strpos($toim,'_') !== false) {
-		$toim = substr($toim,0,strpos($toim,'_'));
+	if (strpos($toim, '_') !== FALSE) {
 		$tila = 'G';
 	}
 	else {
@@ -958,7 +957,6 @@
 						}
 					}
 				}
-
 			}
 
 			echo "<br><br>";
@@ -966,7 +964,7 @@
 	}
 
 	// meillä ei ole valittua tilausta
-	if ($toim == 'lisaa' and $id == 0 and (string) $id != 'dummy') {
+	if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id != 'dummy') {
 
 		if ($lasku_yhtio_originaali != '' and $kukarow['yhtio'] != $lasku_yhtio_originaali) {
 			$logistiikka_yhtio = $konsernivarasto_yhtiot;

@@ -24,17 +24,6 @@
 		    $format_bold->setBold();
 		    $excelrivi = 0;
 		    $i = 0;
-
-			if (isset($workbook)) {
-				echo "<font class='message'>".t("Tallenna raportti (xls)").": </font>";
-				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='hinnastoraportti.xls'>";
-				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-				echo "<input type='submit' value='".t("Tallenna")."'>";
-				echo "</form>";
-				echo "<br><br>";
-			}
 		}
 
 		$productquery = "	SELECT tuoteno, try, nimitys, kehahin, myyntihinta, eankoodi
@@ -44,17 +33,32 @@
 							and tuotetyyppi not in ('A','B')";
 		$productqueryresult = mysql_query($productquery) or pupe_error($productquery);
 
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>".t("Tuoteno")."</th>";
-		echo "<th>".t("Nimitys")."</th>";
-		if ($kehahinnat != "") echo "<th>".t("Kehahin")."</th>";
-		echo "<th>".t("Myyntihinta")."</th>";
-		echo "<th>".t("Saldo")."</th>";
-		echo "<th>".t("Tryno")."</th>";		
-		echo "<th>".t("Try")."</th>";
-		echo "<th>".t("Ean")."</th>";
-		echo "</tr>";
+		$showprod = TRUE;
+
+		if (mysql_num_rows($productqueryresult) > 4000) {
+			echo t("Tuotteita ei näytetä ruudulla, koska niitä on yli")." 4000.";
+			
+			require_once ('inc/ProgressBar.class.php');
+			$bar = new ProgressBar();
+			$elements = mysql_num_rows($productqueryresult); // total number of elements to process
+			$bar->initialize($elements); // print the empty bar
+			
+			$showprod = FALSE;
+		}
+
+		if ($showprod) {
+			echo "<table>";
+			echo "<tr>";
+			echo "<th>".t("Tuoteno")."</th>";
+			echo "<th>".t("Nimitys")."</th>";
+			if ($kehahinnat != "") echo "<th>".t("Kehahin")."</th>";
+			echo "<th>".t("Myyntihinta")."</th>";
+			echo "<th>".t("Saldo")."</th>";
+			echo "<th>".t("Tryno")."</th>";
+			echo "<th>".t("Try")."</th>";
+			echo "<th>".t("Ean")."</th>";
+			echo "</tr>";
+		}
 
 		if (isset($workbook)) {
 		    $worksheet->write($excelrivi, $i, t('Tuoteno'), $format_bold);
@@ -83,6 +87,7 @@
 	    while ($productrow = mysql_fetch_array($productqueryresult)) {
 
 			list(,,$apu_myytavissa) = saldo_myytavissa($productrow["tuoteno"]);
+			
 			$sresult = t_avainsana("TRY", "", "and avainsana.selite  = '$productrow[try]'");
 			$srow = mysql_fetch_array($sresult);
 
@@ -111,23 +116,37 @@
 					$excelrivi++;
 				}
 
-				echo "<tr class='aktiivi'>";
-				echo "<td>$productrow[tuoteno]</td>";
-				echo "<td>$productrow[nimitys]</td>";
-				if ($kehahinnat != "") echo "<td align='right'>$productrow[kehahin]</td>";
-				echo "<td align='right'>$productrow[myyntihinta]</td>";
-				echo "<td align='right'>$apu_myytavissa</td>";
-				echo "<td>$productrow[try]</td>";
-				echo "<td>$srow[selitetark]</td>";
-				echo "<td>$productrow[eankoodi]</td>";
-				echo "</tr>";
+				if ($showprod) {
+					echo "<tr class='aktiivi'>";
+					echo "<td>$productrow[tuoteno]</td>";
+					echo "<td>$productrow[nimitys]</td>";
+					if ($kehahinnat != "") echo "<td align='right'>$productrow[kehahin]</td>";
+					echo "<td align='right'>$productrow[myyntihinta]</td>";
+					echo "<td align='right'>$apu_myytavissa</td>";
+					echo "<td>$productrow[try]</td>";
+					echo "<td>$srow[selitetark]</td>";
+					echo "<td>$productrow[eankoodi]</td>";
+					echo "</tr>";
+				}
+				else {
+					$bar->increase();
+				}
 			}
 	    }
 
-		echo "</table>";
+		if ($showprod) echo "</table><br><br>";
 
 		if (isset($workbook)) {
 		    $workbook->close();
+
+			echo "<font class='message'>".t("Tallenna raportti (xls)").": </font>";
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='hinnastoraportti.xls'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<input type='submit' value='".t("Tallenna")."'>";
+			echo "</form>";
+			echo "<br><br>";
 		}
 	}
 

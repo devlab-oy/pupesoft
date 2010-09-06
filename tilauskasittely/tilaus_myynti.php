@@ -6234,11 +6234,23 @@ if ($tee == '') {
 					$tyomresres = mysql_query($queryoik) or pupe_error($queryoik);
 
 					$tarjouslisa = "<font class='message'>".t("Perusta tilauksesta").":</font><br>
-									<select name='perusta_tilaustyyppi'>
-									<option value=''>".t("Normaalitilaus")."</option>";
+									<select name='perusta_tilaustyyppi'>";
 
-					if (mysql_num_rows($projresres) > 0) $tarjouslisa .= "<option value='PROJEKTI'>".t("Projekti")."</option>";
-					if (mysql_num_rows($tyomresres) > 0) $tarjouslisa .= "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
+					$tarjouslisa_normi = $tarjouslisa_projekti = $tarjouslisa_tyomaarays = "";
+
+					$tarjouslisa_normi .= "<option value=''>".t("Normaalitilaus")."</option>";
+					if (mysql_num_rows($projresres) > 0) $tarjouslisa_projekti .= "<option value='PROJEKTI'>".t("Projekti")."</option>";
+					if (mysql_num_rows($tyomresres) > 0) $tarjouslisa_tyomaarays .= "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
+
+					if ($yhtiorow["hyvaksy_tarjous_tilaustyyppi"] == "T") {
+						$tarjouslisa .= $tarjouslisa_tyomaarays.$tarjouslisa_normi.$tarjouslisa_projekti;
+					}
+					elseif ($yhtiorow["hyvaksy_tarjous_tilaustyyppi"] == "P") {
+						$tarjouslisa .= $tarjouslisa_projekti.$tarjouslisa_normi.$tarjouslisa_tyomaarays;
+					}
+					else {
+						$tarjouslisa .= $tarjouslisa_normi.$tarjouslisa_projekti.$tarjouslisa_tyomaarays;
+					}
 
 					$tarjouslisa .= "</select><br><br>";
 				}
@@ -6400,7 +6412,6 @@ if ($tee == '') {
 
 					echo "</select>";
 				}
-
 
 				echo "</form>";
 			}

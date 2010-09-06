@@ -35,8 +35,8 @@
 
 		$showprod = TRUE;
 
-		if (mysql_num_rows($productqueryresult) > 4000) {
-			echo t("Tuotteita ei näytetä ruudulla, koska niitä on yli")." 4000.";
+		if (mysql_num_rows($productqueryresult) > 2000) {
+			echo t("Tuotteita ei näytetä ruudulla, koska niitä on yli")." 2000.";
 
 			require_once ('inc/ProgressBar.class.php');
 			$bar = new ProgressBar();

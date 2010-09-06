@@ -2368,5 +2368,21 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "hyvaksy_tarjous_tilaustyyppi") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Hyväksytystä tarjouksesta luodaan oletuksena myyntitilaus");
+		$ulos .= "<option value = 'T' $sel[T]>".t("Hyväksytystä tarjouksesta luodaan oletuksena työmääräys");
+		$ulos .= "<option value = 'P' $sel[P]>".t("Hyväksytystä tarjouksesta luodaan oletuksena projekti");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

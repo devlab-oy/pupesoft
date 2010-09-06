@@ -115,6 +115,16 @@
 		$tee = "";
 	}
 
+	if ($tee == 'delkesken') {
+		$query = "UPDATE kuka SET kesken=0 WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<b>".t("Käyttäjän")." $selkuka ".t("keskenoleva tilaus vapautettu")."!</b><br>";
+
+		$selkuka = $kukarow['tunnus'];
+		$tee = "";
+	}
+
 	if ($tee == 'deloikeu') {
 		$query = "	UPDATE kuka
 					SET profiilit 	= '',
@@ -1191,24 +1201,30 @@
 
 				echo "<form action='$PHP_SELF' method='post'>
 					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
-					<input type='hidden' name='tee' value='delpsw'>
-					<input type='submit' value='* ".t("Poista käyttäjän")." $selkukarow[nimi] ".t("salasana")." *'>
+					<input type='hidden' name='tee' value='delkesken'>
+					<input type='submit' value='* ".t("Vapauta käyttäjän")." $selkukarow[nimi] ".t("keskenoleva tilaus")." *'>
 					</form>";
+				echo "</td><td class='back'>";
 
+				echo "<form action='$PHP_SELF' method='post'>
+					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
+					<input type='hidden' name='tee' value='delpsw'>
+					<input type='submit' value='** ".t("Poista käyttäjän")." $selkukarow[nimi] ".t("salasana")." **'>
+					</form>";
 				echo "</td><td class='back'>";
 
 				echo "<form action='$PHP_SELF' method='post'>
 					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
 					<input type='hidden' name='tee' value='deloikeu'>
-					<input type='submit' value='** ".t("Poista käyttäjän")." $selkukarow[nimi] ".t("käyttöoikeudet")." **'>
+					<input type='submit' value='*** ".t("Poista käyttäjän")." $selkukarow[nimi] ".t("käyttöoikeudet")." ***'>
 					</form>";
+				echo "</td><td class='back'>";
 
 				echo "<form action='$PHP_SELF' method='post'>
 					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
 					<input type='hidden' name='tee' value='deluser'>
-					<input type='submit' value='*** ".t("Poista käyttäjä")." $selkukarow[nimi] ***'>
+					<input type='submit' value='**** ".t("Poista käyttäjä")." $selkukarow[nimi] ****'>
 					</form>";
-
 				echo "</td></tr></table>";
 			}
 		}

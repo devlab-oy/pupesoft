@@ -699,6 +699,21 @@
 					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui eräpvm. Tarkista asia laskulta!<br>" . $komm;
 				}
 
+				if (trim($laskun_numero) != '' and trim($trow['tunnus']) != '') {
+					$query = "	SELECT *
+								FROM lasku
+								WHERE yhtio = '{$yhtio}'
+								AND tila IN ('H','M','P','Q','Y')
+								AND laskunro = '{$laskun_numero}' 
+								AND tapvm >= date_sub(now(), INTERVAL 12 MONTH)
+								AND liitostunnus = '{$trow['tunnus']}'";
+					$duplikaattilasku_check_res = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
+						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>".$komm;
+					}
+				}
+
 				if ($err > 0) {
 					$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk,$tpp+$err,$tpv));
 					$erp = (int) substr($newer, 8, 2);

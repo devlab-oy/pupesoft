@@ -37,12 +37,12 @@
 
 		if (mysql_num_rows($productqueryresult) > 4000) {
 			echo t("Tuotteita ei näytetä ruudulla, koska niitä on yli")." 4000.";
-			
+
 			require_once ('inc/ProgressBar.class.php');
 			$bar = new ProgressBar();
 			$elements = mysql_num_rows($productqueryresult); // total number of elements to process
 			$bar->initialize($elements); // print the empty bar
-			
+
 			$showprod = FALSE;
 		}
 
@@ -87,7 +87,7 @@
 	    while ($productrow = mysql_fetch_array($productqueryresult)) {
 
 			list(,,$apu_myytavissa) = saldo_myytavissa($productrow["tuoteno"]);
-			
+
 			$sresult = t_avainsana("TRY", "", "and avainsana.selite  = '$productrow[try]'");
 			$srow = mysql_fetch_array($sresult);
 
@@ -134,11 +134,12 @@
 			}
 	    }
 
-		if ($showprod) echo "</table><br><br>";
+		if ($showprod) echo "</table>";
 
 		if (isset($workbook)) {
 		    $workbook->close();
 
+			echo "<br><br>";
 			echo "<font class='message'>".t("Tallenna raportti (xls)").": </font>";
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";

@@ -400,38 +400,9 @@
 					$ylikolkyt	+= $row["cc"];
 					$ylikolkyt 	+= $row["dd"];
 					$ylikolkyt 	+= $row["ee"];
-					$ylikolkyt 	+= $row["ff"];
+					$ylikolkyt 	+= $row["ff"]; 
 					$rivilask++;
 				}
-			}
-
-			//Listataan vielä kohdistamattomat
-			$query = "	SELECT asiakas.tunnus, asiakas.ytunnus, nimi_maksaja, viite, kirjpvm, '', '',  tiliointi.summa avoinsaldo, round(suoritus.summa*if(suoritus.kurssi=0, 1, kurssi),2)*-1 avoinsaldo2
-				  		FROM suoritus
-						JOIN tiliointi on tiliointi.tunnus = suoritus.ltunnus and tiliointi.tilino='$tili' and tiliointi.korjattu = ''
-				  		LEFT JOIN asiakas on suoritus.yhtio=asiakas.yhtio and suoritus.asiakas_tunnus=asiakas.tunnus
-				  		WHERE suoritus.yhtio = '$saatavat_yhtio'
-						and kirjpvm <= '$savvl-$sakkl-$sappl'
-						and kohdpvm  = '0000-00-00'
-						$lisa2
-				  		ORDER BY ytunnus";
-			$result = mysql_query($query) or pupe_error($query);
-
-			while ($trow = mysql_fetch_array ($result)) {
-
-					$summa += $trow["avoinsaldo"];
-
-					echo "<tr>$jarjlisa";
-					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti&lopetus=$PHP_SELF////tee=$tee//sytunnus=$sytunnus//sanimi=$sanimi//yli=$yli//grouppaus=$grouppaus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//ylilimiitin=$ylilimiitin///$trow[tunnus]'>$trow[ytunnus]</a></td>";
-					echo "<td>$trow[nimi_maksaja]</td>";
-					echo "<td>$trow[viite]</td>";
-					echo "<td>".tv1dateconv($trow["kirjpvm"])."</td>";
-					echo "<td></td>";
-					echo "<td></td>";
-					echo "<td align='right'><font class='error'>$trow[avoinsaldo]</font></td>";
-					if ($trow["avoinsaldo"] != $trow["avoinsaldo2"]) echo "<td><font class='error'>/$trow[avoinsaldo2]</font></td><td class='back'> VIRHE: Kirjanpito/Suoritus! Summat heittävät!</td>";
-					echo "</tr>";
-
 			}
 
 			if ($eiliittymaa != 'ON' or $rivilask >= 1) {

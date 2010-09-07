@@ -1116,7 +1116,7 @@
 					echo t("Paperilasku");
 				}
 				foreach ($lasku_urlit as $lasku_url) {
-					echo "<a href='$lasku_url' target='Attachment'>Näytä liite</a><br>";
+					echo "<a href='$lasku_url' target='Attachment'>".t("Näytä liite")."</a><br>";
 				}
 				echo "</td>";
 

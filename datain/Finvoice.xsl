@@ -168,10 +168,14 @@
 					#subRowStyle { font-size:small; font-weight:bold; background-color:rgb(243,243,243) }
 					#sellerDetailsStyle { font-size:xx-small }
 					#preStyle { border-style:solid none solid none; border-top-width:thin; border-bottom-width:thin; margin:0px; padding-top:2px; padding-bottom:2px }
+					#pupediv {height:100%; overflow:auto;}
 				</style>
+				<style type="text/css" media="print">
+					#pupediv {overflow: visible; height: auto;}
+				</style>				
 			</head>
 			<body>
-				<div style="height:100%; overflow:auto;">
+				<div id="pupediv">
 				<h2>
 					<xsl:call-template name="OutputTitle">
 						<xsl:with-param name="invoiceTypeText" select="InvoiceDetails/InvoiceTypeText"/>

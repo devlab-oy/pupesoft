@@ -1086,12 +1086,8 @@ if (!function_exists('loppu_tarjous')) {
 				$pdf_tarjous->draw_text(50, $kala-25, t("Toimitustapa"), $page_tarjous, $boldi);
 				$pdf_tarjous->draw_text(200, $kala-25, $laskurow['toimitustapa'], $page_tarjous, $norm);
 
-				$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-				$masresult = mysql_query($query) or pupe_error($query);
-				$masrow = mysql_fetch_array($masresult);
-
 				$pdf_tarjous->draw_text(50, $kala-38, t("Maksuehto", $kieli), $page_tarjous, $boldi);
-				$pdf_tarjous->draw_text(200, $kala-38, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli), $page_tarjous, $norm);
+				$pdf_tarjous->draw_text(200, $kala-38, t($laskurow['maksuehto'], $kieli), $page_tarjous, $norm);
 
 				$pdf_tarjous->draw_text(50, $kala-51, t("Myynti- ja toimitusehdot", $kieli), $page_tarjous, $boldi);
 				$pdf_tarjous->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli), $page_tarjous, $norm);

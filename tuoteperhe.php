@@ -15,7 +15,6 @@
 	}
 	elseif ($toim == "LISAVARUSTE") {
 		echo "<font class='head'>".t("Tuotteen lis‰varusteet")."</font><hr>";
-		//$hakutyyppi = "'LT','LO','LR','LW'";
 		$hakutyyppi = "L";
 	}
 	else {
@@ -64,13 +63,13 @@
 
 				echo ": </th><td>".livesearch_kentta("valinta", "TUOTEHAKU", "kop_isatuo", 140, $kop_isatuo, 'X')."</td>";
 
-				foreach($kop_tuoteno as $tuoteno) {
-
-					echo "<input type='hidden' name='kop_tuoteno[$tuoteno]' value='$kop_tuoteno[$tuoteno]'>";
-					echo "<input type='hidden' name='kop_kerroin[$tuoteno]' value='$kop_kerroin[$tuoteno]'>";
-					echo "<input type='hidden' name='kop_hinkerr[$tuoteno]' value='$kop_hinkerr[$tuoteno]'>";
-					echo "<input type='hidden' name='kop_alekerr[$tuoteno]' value='$kop_alekerr[$tuoteno]'>";
-					echo "<input type='hidden' name='kop_fakta[$tuoteno]' value='$kop_fakta[$tuoteno]'>";
+				foreach ($kop_tuoteno as $kop_index => $tuoteno) {
+					echo "<input type='hidden' name='kop_tuoteno[$kop_index]' value='$kop_tuoteno[$kop_index]'>";
+					echo "<input type='hidden' name='kop_kerroin[$kop_index]' value='$kop_kerroin[$kop_index]'>";
+					echo "<input type='hidden' name='kop_hinkerr[$kop_index]' value='$kop_hinkerr[$kop_index]'>";
+					echo "<input type='hidden' name='kop_alekerr[$kop_index]' value='$kop_alekerr[$kop_index]'>";
+					#echo "<input type='hidden' name='kop_rivikom[$kop_index]' value='$kop_rivikom[$kop_index]'>";
+					echo "<input type='hidden' name='kop_fakta[$kop_index]' value='$kop_fakta[$kop_index]'>";
 				}
 
 				echo "<td><input type='submit' value='".t("Kopioi")."'></td></tr>";
@@ -89,20 +88,20 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 1) {
-
-				foreach($kop_tuoteno as $tuoteno) {
+				foreach ($kop_tuoteno as $kop_index => $tuoteno) {
 					if ($tuoteno != $kop_isatuo) {
 						$query = "	INSERT into	tuoteperhe set
-									isatuoteno	= '$kop_isatuo',
-									tuoteno 	= '$kop_tuoteno[$tuoteno]',
-									kerroin 	= '$kop_kerroin[$tuoteno]',
-									hintakerroin= '$kop_hinkerr[$tuoteno]',
-									alekerroin 	= '$kop_alekerr[$tuoteno]',
-									fakta	 	= '$kop_fakta[$tuoteno]',
-									yhtio 		= '$kukarow[yhtio]',
-									laatija		= '$kukarow[kuka]',
-									luontiaika	= now(),
-									tyyppi 		= '$hakutyyppi'";
+									isatuoteno		= '$kop_isatuo',
+									tuoteno 		= '$kop_tuoteno[$kop_index]',
+									kerroin 		= '$kop_kerroin[$kop_index]',
+									hintakerroin	= '$kop_hinkerr[$kop_index]',
+									alekerroin 		= '$kop_alekerr[$kop_index]',
+									#rivikommentti	= '$kop_rivikom[$kop_index]',
+									fakta	 		= '$kop_fakta[$kop_index]',
+									yhtio 			= '$kukarow[yhtio]',
+									laatija			= '$kukarow[kuka]',
+									luontiaika		= now(),
+									tyyppi 			= '$hakutyyppi'";
 						$result = mysql_query($query) or pupe_error($query);
 					}
 				}
@@ -167,29 +166,6 @@
 		}
 
 		echo "<td>".livesearch_kentta($formi, "TUOTEHAKU", "hakutuoteno", 210)."</td>";
-
-		//	Haetaan tuotetta jos sellainen on annettu
-		if ($hakutuoteno == "JUPPE") {
-
-			echo "<tr><td class='back'><br></td></tr>";
-
-			if ($tee != 'LISAA') {
-				$tuoteno = $hakutuoteno;
-			}
-
-			$kutsuja="tuoteperhe.php";
-			require_once "inc/tuotehaku.inc";
-
-			//on vaan lˆytynyt 1 muuten tulis virhett‰ ja ulosta
-			if ($varaosavirhe != "") {
-				echo "<tr><td colspan='2'>$varaosavirhe</td></tr>";
-				$tee="SKIPPAA";
-			}
-			elseif($ulos != "") {
-				echo "<tr><td class='back' colspan='2'>$ulos</td><td class='back'><input type='submit' value='".("valitse")."'</td>";
-			}
-		}
-
 		echo "<td class='back'><input type='Submit' value='".t("Jatka")."'></td>";
 		echo "</table></form>";
 	}
@@ -201,7 +177,7 @@
 		if (trim($isatuoteno) != trim($tuoteno)) {
 			$ok = 1;
 
-			$query  = "	select *
+			$query  = "	SELECT *
 						from tuoteperhe
 						where isatuoteno 	= '$isatuoteno'
 						and yhtio 			= '$kukarow[yhtio]'
@@ -210,7 +186,7 @@
 
 			if (mysql_num_rows($result) > 0) {
 				//katsotaan ettei t‰m‰ isa/lapsi kombinaatio ole jo olemassa
-				$query  = "	select *
+				$query  = "	SELECT *
 							from tuoteperhe
 							where isatuoteno 	= '$isatuoteno'
 							and tuoteno 		= '$tuoteno'
@@ -218,10 +194,15 @@
 							and tyyppi 			= '$hakutyyppi'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				//Jostunnus on erisuuri kuin tyhj‰ niin ollan p‰ivitt‰m‰ss‰ olemassa olevaaa kombinaatiota
+				//Jos tunnus on erisuuri kuin tyhj‰ niin ollan p‰ivitt‰m‰ss‰ olemassa olevaaa kombinaatiota
 				if (mysql_num_rows($result) > 0 and $tunnus == "") {
-					echo "<font class='message'>".t("T‰m‰ tuoteperhekombinaatio on jo olemassa, sit‰ ei voi lis‰t‰ toiseen kertaan")."</font><br>";
-					$ok = 0;
+					if ($yhtiorow["tuoteperhe_kasittely"] == "") {
+						echo "<font class='error'>".t("T‰m‰ tuoteperhekombinaatio on jo olemassa, sit‰ ei voi lis‰t‰ toiseen kertaan")."</font><br>";
+						$ok = 0;
+					}
+					else {
+						echo "<font class='message'>".t("HUOM: T‰m‰ tuoteperhekombinaatio on jo olemassa, laspsituote lˆytyy t‰st‰ perheest‰ %s kertaa", "", (mysql_num_rows($result)+1))."!</font><br>";
+					}
 				}
 			}
 
@@ -229,11 +210,11 @@
 				//tarkistetaan tuotteiden olemassaolo
 				$error = '';
 
-				$query = "select * from tuote where tuoteno='$isatuoteno' and yhtio='$kukarow[yhtio]'";
+				$query = "SELECT * from tuote where tuoteno='$isatuoteno' and yhtio='$kukarow[yhtio]'";
 				$res   = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($res)==0) $error .= "<font class='error'>".t("Tuotenumero")." $isatuoteno ".t("ei ole tuoterekisteriss‰, rivi‰ ei voida lis‰t‰")."!</font><br>";
 
-				$query = "select * from tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+				$query = "SELECT * from tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 				$res   = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($res)==0) $error .= "<font class='error'>".t("Tuotenumero")." $tuoteno ".t("ei ole tuoterekisteriss‰, rivi‰ ei voida lis‰t‰")."!</font><br>";
 
@@ -266,15 +247,16 @@
 					}
 
 					$query  .= "	tuoteperhe set
-									isatuoteno	= '$isatuoteno',
-									tuoteno 	= '$tuoteno',
-									kerroin 	= '$kerroin',
-									omasivu		= '$kpl2',
-									hintakerroin= '$hintakerroin',
-									alekerroin 	= '$alekerroin',
-									yhtio 		= '$kukarow[yhtio]',
-									tyyppi 		= '$hakutyyppi',
-									ei_nayteta	= '$ei_nayteta'
+									isatuoteno		= '$isatuoteno',
+									tuoteno 		= '$tuoteno',
+									kerroin 		= '$kerroin',
+									omasivu			= '$kpl2',
+									hintakerroin	= '$hintakerroin',
+									alekerroin 		= '$alekerroin',
+									#rivikommentti 	= '$rivikommentti',
+									yhtio 			= '$kukarow[yhtio]',
+									tyyppi 			= '$hakutyyppi',
+									ei_nayteta		= '$ei_nayteta'
 									$postq";
 					$result = mysql_query($query) or pupe_error($query);
 
@@ -344,7 +326,9 @@
 				}
 
 				echo "<table>";
-				echo "<th>".t("Tuoteno")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Hintakerroin")."</th><th>".t("Alennuskerroin")."</th><td class='back'></td></tr>";
+				echo "<th>".t("Tuoteno")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Hintakerroin")."</th><th>".t("Alennuskerroin")."</th>";
+				#echo "<th>".t("Rivikommentti")."</th>";
+				echo "<td class='back'></td></tr>";
 
 				echo "	<form action='$PHP_SELF' method='post' name='lisaa' autocomplete='off'>
 						<input type='hidden' name='toim' value='$toim'>
@@ -358,8 +342,9 @@
 				echo "<tr><td>".livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", 140, '', 'X')."</td>
 						<td><input type='text' name='kerroin' size='20'></td>
 						<td><input type='text' name='hintakerroin' size='20'></td>
-						<td><input type='text' name='alekerroin' size='20'></td>
-						<td class='back'><input type='submit' value='".t("Lis‰‰ rivi")."'></td></form></tr>";
+						<td><input type='text' name='alekerroin' size='20'></td>";
+				#echo "	<td><input type='text' name='rivikommentti' size='20'></td>";
+				echo "	<td class='back'><input type='submit' value='".t("Lis‰‰ rivi")."'></td></form></tr>";
 				echo "</table>";
 			}
 			elseif (mysql_num_rows($result) == 1) {
@@ -371,11 +356,11 @@
 				$query = "SELECT * from tuote where tuoteno='$isatuoteno' and yhtio='$kukarow[yhtio]'";
 				$res   = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($res)==0) {
-					echo "<font class='error'>".t("Tuote ei en‰‰ rekisteriss‰")."!)</font><br>";
+				if (mysql_num_rows($res) == 0) {
+					echo "<font class='error'>".t("Tuote ei en‰‰ rekisteriss‰")."!</font><br>";
 				}
 				else {
-					$isarow=mysql_fetch_array($res);
+					$isarow = mysql_fetch_array($res);
 				}
 
 				echo "<br><table>";
@@ -422,7 +407,7 @@
 				$ressu = mysql_query($query) or pupe_error($query);
 				$faktarow = mysql_fetch_array($ressu);
 
-				if($toim == "RESEPTI") {
+				if ($toim == "RESEPTI") {
 					if($faktarow["omasivu"] != "") {
 						$sel1 = "";
 						$sel2 = "SELECTED";
@@ -493,7 +478,9 @@
 				echo "<table><tr>";
 
 				if ($toim == "PERHE") {
-					echo "<th>".t("Lapset")."</th><th>".t("Nimitys")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Hintakerroin")."</th><th>".t("Alennuskerroin")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
+					echo "<th>".t("Lapset")."</th><th>".t("Nimitys")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Hintakerroin")."</th><th>".t("Alennuskerroin")."</th>";
+					#echo "<th>".t("Rivikommentti")."</th>";
+					echo "<th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
 
 				}
 				elseif ($toim == "LISAVARUSTE") {
@@ -513,11 +500,13 @@
 
 				$resyht = 0;
 
+				$kop_index   = 0;
 				$kop_tuoteno = array();
 				$kop_kerroin = array();
 				$kop_hinkerr = array();
 				$kop_alekerr = array();
-				$kop_fakta = array();
+				$kop_rivikom = array();
+				$kop_fakta   = array();
 
 				if ($tunnus == "") {
 					echo "	<form action='$PHP_SELF' method='post' name='lisaa' autocomplete='off'>
@@ -536,6 +525,7 @@
 					if ($toim == "PERHE") {
 						echo "<td><input type='text' name='hintakerroin' size='10'></td>
 								<td><input type='text' name='alekerroin' size='10'></td>";
+						#echo "<td><input type='text' name='rivikommentti' size='10'></td>";
 					}
 					elseif ($toim != "LISAVARUSTE") {
 						echo "<td></td>";
@@ -561,11 +551,14 @@
 						$tuoterow = mysql_fetch_array($res1);
 
 						//Tehd‰‰n muuttujat jotta voidaan tarvittaessa kopioida resepti
-						$kop_tuoteno[$tuoterow['tuoteno']] = $prow['tuoteno'];
-						$kop_kerroin[$tuoterow['tuoteno']] = $prow['kerroin'];
-						$kop_hinkerr[$tuoterow['tuoteno']] = $prow['hintakerroin'];
-						$kop_alekerr[$tuoterow['tuoteno']] = $prow['alekerroin'];
-						$kop_fakta[$tuoterow['tuoteno']] = $prow['fakta'];
+						$kop_tuoteno[$kop_index] = $prow['tuoteno'];
+						$kop_kerroin[$kop_index] = $prow['kerroin'];
+						$kop_hinkerr[$kop_index] = $prow['hintakerroin'];
+						$kop_alekerr[$kop_index] = $prow['alekerroin'];
+						#$kop_rivikom[$kop_index] = $prow['rivikommentti'];
+						$kop_fakta[$kop_index]   = $prow['fakta'];
+
+						$kop_index++;
 					}
 
 					$lapsiyht = $tuoterow['kehahin']*$prow['kerroin'];
@@ -580,6 +573,7 @@
 
 						if ($toim == "PERHE") {
 							echo"<td align='right'>$prow[hintakerroin]</td><td align='right'>$prow[alekerroin]</td>";
+							#echo "<td align='right'>$prow[rivikommentti]</td>";
 						}
 
 
@@ -645,6 +639,7 @@
 						if ($toim == "PERHE") {
 							echo "	<td><input type='text' name='hintakerroin' size='10' value='$zrow[hintakerroin]'></td>
 									<td><input type='text' name='alekerroin' size='10' value='$zrow[alekerroin]'></td>";
+							#echo "	<td><input type='text' name='rivikommentti' size='10' value='$zrow[rivikommentti]'></td>";
 						}
 
 						echo "<td>$tuoterow[kehahin]</td><td>".round($lapsiyht,6)."</td>";
@@ -652,7 +647,7 @@
 						if($toim == "RESEPTI") {
 							$sel1=$sel2="";
 
-							if($prow["omasivu"] != "") {
+							if ($prow["omasivu"] != "") {
 								$sel2 = "SELECTED";
 							}
 							else {
@@ -679,11 +674,11 @@
 						echo "<td class='back'></td>";
 					}
 					if ($toim == "PERHE") {
-						echo "<td class='back' colspan='2'></td>";
+						echo "<td class='back' colspan='3'></td>";
 					}
 
 					echo "<th align='right'>".t("Yhteens‰").":</th>
-							<th align='right'>".round($resyht,6)."</th></tr>";
+							<td class='tumma' align='right'>".round($resyht,6)."</td></tr>";
 				}
 
 				echo "</table>";
@@ -695,13 +690,13 @@
 						<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
 
 
-				foreach ($kop_tuoteno as $tuoteno) {
-
-					echo "<input type='hidden' name='kop_tuoteno[$tuoteno]' value='$kop_tuoteno[$tuoteno]'>";
-					echo "<input type='hidden' name='kop_kerroin[$tuoteno]' value='$kop_kerroin[$tuoteno]'>";
-					echo "<input type='hidden' name='kop_hinkerr[$tuoteno]' value='$kop_hinkerr[$tuoteno]'>";
-					echo "<input type='hidden' name='kop_alekerr[$tuoteno]' value='$kop_alekerr[$tuoteno]'>";
-					echo "<input type='hidden' name='kop_fakta[$tuoteno]' value='$kop_fakta[$tuoteno]'>";
+				foreach ($kop_tuoteno as $kop_index => $tuoteno) {
+					echo "<input type='hidden' name='kop_tuoteno[$kop_index]' value='$kop_tuoteno[$kop_index]'>";
+					echo "<input type='hidden' name='kop_kerroin[$kop_index]' value='$kop_kerroin[$kop_index]'>";
+					echo "<input type='hidden' name='kop_hinkerr[$kop_index]' value='$kop_hinkerr[$kop_index]'>";
+					echo "<input type='hidden' name='kop_alekerr[$kop_index]' value='$kop_alekerr[$kop_index]'>";
+					#echo "<input type='hidden' name='kop_rivikom[$kop_index]' value='$kop_rivikom[$kop_index]'>";
+					echo "<input type='hidden' name='kop_fakta[$kop_index]' value='$kop_fakta[$kop_index]'>";
 				}
 
 				echo "<input type='submit' value='".t("Kopioi")."'>";
@@ -712,7 +707,7 @@
 				echo "<table>";
 
 				while($row = mysql_fetch_array($result)) {
-					$query = "	select *
+					$query = "	SELECT *
 								from tuoteperhe
 								where isatuoteno = '$row[isatuoteno]'
 								and yhtio = '$kukarow[yhtio]'
@@ -733,6 +728,57 @@
 		}
 		else {
 			echo "<br><font class='error'>".t("Tuotenumeroa")." $tchk ".t("ei lˆydy")."!</font><br>";
+		}
+	}
+	elseif ($tee == "") {
+
+		$lisa1 = "";
+
+		if ($isatuoteno_haku != '') {
+			$lisa1 .= " and tuoteperhe.isatuoteno like '%$isatuoteno_haku%' ";
+		}
+
+		if ($tuoteno_haku != '') {
+			$lisa1 .= " and tuoteperhe.tuoteno like '%$tuoteno_haku%' ";
+		}
+
+		$query  = "	SELECT tuoteperhe.isatuoteno, ti.nimitys,
+					group_concat(concat(tuoteperhe.tuoteno, ' ' , tl.nimitys) order by tuoteperhe.tuoteno, tuoteperhe.tunnus separator '<br>') tuotteet
+					from tuoteperhe
+					join tuote ti on ti.yhtio=tuoteperhe.yhtio and ti.tuoteno=tuoteperhe.isatuoteno
+					join tuote tl on tl.yhtio=tuoteperhe.yhtio and tl.tuoteno=tuoteperhe.tuoteno
+					where tuoteperhe.yhtio = '$kukarow[yhtio]'
+					and tuoteperhe.tyyppi = '$hakutyyppi'
+					$lisa1
+					group by tuoteperhe.isatuoteno
+					order by tuoteperhe.isatuoteno, tuoteperhe.tuoteno";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 0) {
+
+			// Piirrell‰‰n formi
+			// Kursorinohjaus
+			$formi	= "haku";
+			$kentta = "isatuoteno_haku";
+
+			echo "<form name='haku' action='$PHP_SELF' method='post'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
+
+			echo "<br><br><table>";
+			echo "<tr><th>".t("Tuoteperhe")."</th><th>".t("Tuotteet")."</th></tr>";
+
+			echo "<tr>";
+			echo "<td><input type='text' size='20' name='isatuoteno_haku' value='$isatuoteno_haku'></td>";
+			echo "<td><input type='text' size='20' name='tuoteno_haku' value='$tuoteno_haku'></td>";
+			echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
+			echo "</tr>";
+
+			while ($prow = mysql_fetch_array($result)) {
+				echo "<tr class='aktiivi'><td><a href='$PHP_SELF?toim=$toim&isatuoteno=".urlencode($prow["isatuoteno"])."&hakutuoteno=".urlencode($prow["isatuoteno"])."'>$prow[isatuoteno] $prow[nimitys]</a></td><td>$prow[tuotteet] $prow[nimitykset]</td></tr>";
+			}
+
+			echo "</table>";
+			echo "</form>";
 		}
 	}
 

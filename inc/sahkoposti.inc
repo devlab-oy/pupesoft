@@ -77,8 +77,8 @@
 			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key]."\"\n\n";
 		}
 		elseif ($ctype[$key] == "excel") {
-			if ($liitenimi == '') {
-				$liitenimi = basename($liite[$key]);
+			if (count($liitenimi) == 0) {
+				$liitenimi[$key] = basename($liite[$key]);
 			}
 
 			$content .= "Content-Type: application/excel; name=\"".$liitenimi[$key]."\"\n" ;

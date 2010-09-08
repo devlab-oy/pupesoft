@@ -74,6 +74,21 @@ elseif ($laskurow["tilaustyyppi"] == 'E') {
 	elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
 		$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 	}
+	elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
+		$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+	}
+	elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
+		$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+	}
+	elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
+		$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+	}
+	elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
+		$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+	}
+	elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
+		$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+	}
 	else {
 		$naytatvale = 1; // halutaan n‰h‰ alet
 	}
@@ -1025,6 +1040,21 @@ else {
 				elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
 					$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 				}
+				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
+					$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+				}
+				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
+					$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+				}
+				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
+					$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+				}
+				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
+					$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+				}
+				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
+					$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+				}
 				else {
 					$naytatvale = 1; // halutaan n‰h‰ alet
 				}
@@ -1131,6 +1161,21 @@ else {
 						$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
 					}
 					elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
+						$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+					}
+					elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
+						$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+					}
+					elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
+						$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+					}
+					elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
+						$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+					}
+					elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
+						$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+					}
+					elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
 						$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 					}
 					else {

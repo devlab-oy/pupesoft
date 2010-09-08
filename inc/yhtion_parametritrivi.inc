@@ -158,18 +158,19 @@
 
 	if (mysql_field_name($result, $i) == "tilausvahvistustyyppi") {
 
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+			$vresult = t_avainsana("TV");
 
-		$apu = $trow[$i];
-		$sel = array();
-		$sel[$apu] = "selected";
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value=' '>".t("Ei vahvistusta")."</option>";
 
-		$ulos .= "<option value = '0' $sel[0]>".t("Normaali tilausvahvistuspohja");
-		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty tilausvahvistuspohja 2 (Tuoteperheet yhdistetty)");
-		$ulos .= "</select></td>";
+			while($row = mysql_fetch_array($vresult)) {
+				$sel = "";
+				if ($row["selite"] == $trow[$i]) $sel = 'selected';
+				$ulos .= "<option value='$row[selite]' $sel>$row[selitetark]</option>";
+			}
 
-		$jatko = 0;
-	}
+			$ulos .= "</select></td>";
+			$jatko = 0;
+	} //Jamppa s‰‰t‰‰
 
 	if (mysql_field_name($result, $i) == "tilausvahvistus_lahetys") {
 

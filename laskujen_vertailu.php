@@ -1,16 +1,80 @@
 <?php
 
+	if (isset($_REQUEST["tee"])) {
+		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+	}
+
 	require ("inc/parametrit.inc");
+
+	if (isset($tee) and $tee == "laheta_tiedosto") {
+
+		$sanitized_email = filter_var($asiakasemail, FILTER_SANITIZE_EMAIL);
+
+		if (filter_var($sanitized_email, FILTER_VALIDATE_EMAIL)) {
+
+			$asiakasemail = 'asiakasemail'.$sanitized_email;
+
+			$liite = array();
+			$kutsu = array();
+			$ctype = array();
+			
+			$liite[0] = "/tmp/$tmpfilenimi";
+			$kutsu[0] = t("Laskujen")."_".t("vertailu")."_".t("raportti").".xls";
+			$ctype[0] = "excel";
+
+			$liitenimi[0] = t("Laskujen")."_".t("vertailu")."_".t("raportti").".xls";
+
+			$subject = $yhtiorow['nimi']." - ".t("Laskujen täsmäytysraportti");
+
+			require('inc/sahkoposti.inc');
+			
+			system("rm -f /tmp/$excelnimi");
+
+			if ($boob) {
+				echo "<font class='message'>",t("Lähetettiin sähköposti osoitteeseen")," {$sanitized_email}.</font><br /><br />";
+			}
+		}
+	}
 
 	echo "<font class='head'>",t("Laskun ja tilauksen vertailu"),"</font><hr>";
 
 	if (!isset($laskunro)) $laskunro = '';
+	if (!isset($hyvaksyja)) $hyvaksyja = '';
+	if (!isset($app)) $app = date('d', strtotime('-1 month'));
+	if (!isset($akk)) $akk = date('m', strtotime('-1 month'));
+	if (!isset($avv)) $avv = date('Y', strtotime('-1 month'));
+	if (!isset($lpp)) $lpp = date('d');
+	if (!isset($lkk)) $lkk = date('m');
+	if (!isset($lvv)) $lvv = date('Y');
 
 	js_popup();
 
 	echo "<br><table>";
 	echo "<form method='post' action=''>";
-	echo "<tr><th>",t("Laskunumero"),"</th><td><input type='text' name='laskunro' value='{$laskunro}' /></td><td class='back'><input type='submit' value='",t("Hae"),"' /></td></tr>";
+	echo "<tr><th>",t("Laskunumero"),"</th><td><input type='text' name='laskunro' value='{$laskunro}' /></td><td class='back'>&nbsp;</td></tr>";
+
+	$query = "	SELECT kuka, nimi
+				FROM kuka
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND hyvaksyja != ''
+				AND extranet = ''
+				ORDER BY nimi";
+	$hyvaksyja_result = mysql_query($query) or pupe_error($query);
+
+	echo "<tr><th>",t("Hyväksyjä"),"</th>";
+	echo "<td><select name='hyvaksyja' onchange='submit();'><option value=''>",t("Valitse hyväksyjä"),"</option>";
+
+	while ($hyvaksyja_row = mysql_fetch_assoc($hyvaksyja_result)) {
+
+		$sel = $hyvaksyja == $hyvaksyja_row['kuka'] ? ' selected' : '';
+
+		echo "<option value='{$hyvaksyja_row['kuka']}'{$sel}>{$hyvaksyja_row['nimi']}</option>";
+	}
+
+	echo "</select></td><td class='back'>&nbsp;</td></tr>";
+	echo "<tr><th>",t("Alkupäivämäärä"),"</th><td><input type='text' name='app' size='3' maxlength='2' value='{$app}' />&nbsp;<input type='text' name='akk' size='3' maxlength='2' value='{$akk}' />&nbsp;<input type='text' name='avv' size='5' maxlength='4' value='{$avv}' /></td><td class='back'>&nbsp;</td></tr>";
+	echo "<tr><th>",t("Loppupäivämäärä"),"</th><td><input type='text' name='lpp' size='3' maxlength='2' value='{$lpp}' />&nbsp;<input type='text' name='lkk' size='3' maxlength='2' value='{$lkk}' />&nbsp;<input type='text' name='lvv' size='5' maxlength='4' value='{$lvv}' /></td>";
+	echo "<td class='back'><input type='submit' value='",t("Hae"),"' /></td></tr>";
 	echo "</form>";
 	echo "</table>";
 
@@ -47,6 +111,132 @@
 		list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $lasku_row["tunnus"]);
 
 		if ($invoice !== FALSE and (count($invoice_ei_loydy) > 0 or count($loytyy_kummastakin) > 0)) {
+
+			if (!@include('Spreadsheet/Excel/Writer.php')) {
+				echo "<font class='error'>",t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta."),"</font><br>";
+				exit;
+			}
+
+			//keksitään failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+
+			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+			$workbook->setVersion(8);
+			$worksheet =& $workbook->addWorksheet('Sheet 1');
+
+			$format_bold =& $workbook->addFormat();
+			$format_bold->setBold();
+
+			$workbook->setCustomColor(12, 255, 0, 0); // red
+			$workbook->setCustomColor(13, 0, 180, 15); // green
+			$workbook->setCustomColor(14, 255, 255, 255); // white
+
+			$format_text_error =& $workbook->addFormat();
+			$format_text_error->setFgColor(14);
+			$format_text_error->setColor(12);
+			$format_text_error->setBold();
+			$format_text_error->setPattern(1);
+			
+			$format_text_ok =& $workbook->addFormat();
+			$format_text_ok->setFgColor(14);
+			$format_text_ok->setColor(13);
+			$format_text_ok->setBold();
+			$format_text_ok->setPattern(1);
+
+			$format_summa =& $workbook->addFormat();
+			$format_summa->setBold();
+			$format_summa->setHAlign('right');
+
+			$format_tuoteno =& $workbook->addFormat();
+			$format_tuoteno->setHAlign('left');
+
+			$format_ale =& $workbook->addFormat();
+			$format_ale->setHAlign('right');
+
+			$excelrivi 	 = 0;
+			$excelsarake = 0;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Tapvm")."\n".t("Erpvm"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Nimi"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Postitp"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Summa"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Laskunro"), $format_bold);
+			$excelsarake++;
+
+			$excelsarake = 0;
+			$excelrivi++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($lasku_row["tapvm"])."\n".tv1dateconv($lasku_row["erpcm"]));
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, $lasku_row['ytunnus']);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, $lasku_row['nimi']);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, $lasku_row['postitp']);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, $lasku_row['summa'].' '.$lasku_row['valkoodi']);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, $lasku_row['laskunro']);
+			$excelsarake++;
+
+			$excelsarake = 0;
+			$excelrivi += 2;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Tilattumäärä"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Bruttohinta"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Ale"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Nettohinta"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Ero kpl"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Ero hinta"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Tilattumäärä"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->writeString($excelrivi, $excelsarake, t("Nettohinta"), $format_bold);
+
+			$excelsarake = 0;
+			$excelrivi++;
 
 			echo "<input type='hidden' id='sort_direction' name='sort_direction' value='desc'>";
 
@@ -116,20 +306,41 @@
 					echo ">";
 
 					echo "<td valign='top'>{$tuoteno}</td>";
+
+					$worksheet->write($excelrivi, $excelsarake, $tuoteno, $format_tuoteno);
+					$excelsarake++;
+
 					echo "<td valign='top'>",utf8_decode($invoice[$tuoteno]['nimitys']),"</td>";
+
+					$worksheet->write($excelrivi, $excelsarake, utf8_decode($invoice[$tuoteno]['nimitys']));
+					$excelsarake++;
 
 					$error = $invoice[$tuoteno]['tilattumaara'] == $purchaseorder[$tuoteno]['tilattumaara'] ? "ok" : "error";
 					echo "<td valign='top' style='text-align: right;'><font class='{$error}'>{$invoice[$tuoteno]['tilattumaara']}</font></td>";
 
+					$worksheet->write($excelrivi, $excelsarake, $invoice[$tuoteno]['tilattumaara'], ${'format_text_'.$error});
+					$excelsarake++;
+
 					echo "<td valign='top' style='text-align: right;'>{$invoice[$tuoteno]['bruttohinta']}</td>";
+
+					$worksheet->write($excelrivi, $excelsarake, $invoice[$tuoteno]['bruttohinta']);
+					$excelsarake++;
 
 					echo "<td valign='top' style='text-align: right;'>";
 
+					$exceli_ale = '';
+
 					if (isset($invoice[$tuoteno]['ale'])) {
+
 						foreach ($invoice[$tuoteno]['ale'] as $k => $ale) {
 							echo $ale;
 
-							if (current($invoice[$tuoteno]['ale']) != end($invoice[$tuoteno]['ale'])) echo "<br />";
+							$exceli_ale .= $ale;
+
+							if (current($invoice[$tuoteno]['ale']) != end($invoice[$tuoteno]['ale'])) {
+								echo "<br />";
+								$exceli_ale .= "\n";
+							}
 						}
 					}
 					else {
@@ -137,6 +348,9 @@
 					}
 
 					echo "</td>";
+
+					$worksheet->write($excelrivi, $excelsarake, $exceli_ale, $format_ale);
+					$excelsarake++;
 
 					if (trim($invoice[$tuoteno]['tilattumaara']) != '') {
 						$invoice_summa += $invoice_nettohinta;
@@ -148,41 +362,74 @@
 
 					echo "<td valign='top' style='text-align: right;'><font class='{$error}'>",sprintf('%.02f', $invoice_nettohinta),"</font></td>";
 
+					$worksheet->write($excelrivi, $excelsarake, sprintf('%.02f', $invoice_nettohinta), ${'format_text_'.$error});
+					$excelsarake++;
+
 					echo "<td class='back'>&nbsp;</td>";
 
 					if (trim($invoice[$tuoteno]['tilattumaara']) != '' and trim($purchaseorder[$tuoteno]['tilattumaara']) != '') {
 						if ($invoice[$tuoteno]['tilattumaara'] - $purchaseorder[$tuoteno]['tilattumaara'] != 0) {
 							echo "<td valign='top' style='text-align: right;'>",abs($invoice[$tuoteno]['tilattumaara'] - $purchaseorder[$tuoteno]['tilattumaara']),"</td>";
+
+							$worksheet->write($excelrivi, $excelsarake, abs($invoice[$tuoteno]['tilattumaara'] - $purchaseorder[$tuoteno]['tilattumaara']));
+							$excelsarake++;
 						}
 						else {
 							echo "<td>&nbsp;</td>";
+
+							$worksheet->write($excelrivi, $excelsarake, '');
+							$excelsarake++;
 						}
 
 						if ($invoice_nettohinta - $purchaseorder_nettohinta != 0) {
 							echo "<td valign='top' style='text-align: right;'>",abs(sprintf('%.02f', ($invoice_nettohinta - $purchaseorder_nettohinta))),"</td>";
+
+							$worksheet->write($excelrivi, $excelsarake, abs(sprintf('%.02f', ($invoice_nettohinta - $purchaseorder_nettohinta))));
+							$excelsarake++;
 						}
 						else {
 							echo "<td>&nbsp;</td>";
+
+							$worksheet->write($excelrivi, $excelsarake, '');
+							$excelsarake++;
 						}
 					}
 					else {
 						echo "<td>&nbsp;</td>";
 						echo "<td>&nbsp;</td>";
+
+						$worksheet->write($excelrivi, $excelsarake, '');
+						$excelsarake++;
+
+						$worksheet->write($excelrivi, $excelsarake, '');
+						$excelsarake++;
 					}
 
 					echo "<td class='back'>&nbsp;</td>";
 
 					if (array_key_exists($tuoteno, $invoice)) {
 						echo "<td valign='top'>{$tuoteno}</td>";
+
+						$worksheet->write($excelrivi, $excelsarake, $tuoteno, $format_tuoteno);
+						$excelsarake++;
 					}
 					else {
 						echo "<td valign='top'></td>";
+
+						$worksheet->write($excelrivi, $excelsarake, '');
+						$excelsarake++;
 					}
 
 					echo "<td valign='top'>{$purchaseorder[$tuoteno]['nimitys']}</td>";
 
+					$worksheet->write($excelrivi, $excelsarake, $purchaseorder[$tuoteno]['nimitys']);
+					$excelsarake++;
+
 					$error = $invoice[$tuoteno]['tilattumaara'] == $purchaseorder[$tuoteno]['tilattumaara'] ? "ok" : "error";
 					echo "<td valign='top' style='text-align: right;'><font class='{$error}'>{$purchaseorder[$tuoteno]['tilattumaara']}</font></td>";
+
+					$worksheet->write($excelrivi, $excelsarake, $purchaseorder[$tuoteno]['tilattumaara'], ${'format_text_'.$error});
+					$excelsarake++;
 
 					$purchaseorder_summa += $purchaseorder_nettohinta;
 
@@ -191,15 +438,24 @@
 						$error = $invoice_nettohinta == $purchaseorder_nettohinta ? "ok" : "error";
 
 						echo "<td valign='top' style='text-align: right;'><font class='{$error}'>",sprintf('%.02f', $purchaseorder_nettohinta),"</font></td>";
+
+						$worksheet->write($excelrivi, $excelsarake, $purchaseorder_nettohinta, ${'format_text_'.$error});
+						$excelsarake++;
 					}
 					else {
 						$error = '';
 						echo "<td valign='top' style='text-align: right;'>&nbsp;</td>";
+
+						$worksheet->write($excelrivi, $excelsarake, '');
+						$excelsarake++;
 					}
 
 					echo "</tr>";
 
 					$i++;
+
+					$excelsarake = 0;
+					$excelrivi++;
 				}
 
 				echo "	<script type='text/javascript'>
@@ -240,31 +496,59 @@
 				echo "<tr class='aktiivi'>";
 				echo "<td>{$tuoteno}</td>";
 
+				$excelsarake = 0;
+
+				$worksheet->write($excelrivi, $excelsarake, $tuoteno, $format_tuoteno);
+				$excelsarake++;
+
 				foreach ($tuote as $key => $val) {
 
 					if (is_array($val)) {
 						echo "<td>";
 
+						$exceli_ale = '';
+
 						foreach ($val as $k => $v) {
 							echo $v;
-							if (current($val) != end($val)) echo "<br/>";
+
+							$exceli_ale .= $v;
+
+							if (current($val) != end($val)) {
+								echo "<br/>";
+								$exceli_ale .= "\n";
+							}
 						}
 
 						echo "</td>";
+
+						$worksheet->write($excelrivi, $excelsarake, $exceli_ale, $format_ale);
 					}
 					else {
 						if ($key == 'nettohinta' or $key == 'bruttohinta') {
+
 							if ($key == 'nettohinta') $invoice_summa += $val;
+
 							echo "<td valign='top' style='text-align: right;'>",sprintf('%.02f', $val),"</td>";
+
+							$worksheet->write($excelrivi, $excelsarake, $val);
 						}
 						elseif ($key == 'tilattumaara') {
 							echo "<td valign='top' style='text-align: right;'>{$val}</td>";
+
+							$worksheet->write($excelrivi, $excelsarake, $val);
 						}
 						else {
 							echo "<td valign='top'>{$val}</td>";
+
+							$worksheet->write($excelrivi, $excelsarake, $val);
 						}
 					}
+
+					$excelsarake++;				
 				}
+
+				$worksheet->write($excelrivi, 9, t("Ei löydy tilaukselta").'!', $format_text_error);
+				$excelrivi++;
 
 				echo "<td class='back'>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td><td>&nbsp;</td><td><font class='error'>",t("Ei löydy tilaukselta"),"!</font></td><td>&nbsp;</td><td>&nbsp;</td>";
 				echo "</tr>";
@@ -274,26 +558,88 @@
 				echo "<tr class='aktiivi'>";
 				echo "<td>&nbsp;</td><td><font class='error'>",t("Ei löydy laskulta"),"!</font></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td>";
 
+				$worksheet->write($excelrivi, 1, t("Ei löydy laskulta").'!', $format_text_error);
+
 				echo "<td>{$tuoteno}</td>";
+
+				$excelsarake = 8;
+
+				$worksheet->write($excelrivi, $excelsarake, $tuoteno, $format_tuoteno);
+				$excelsarake++;
 
 				foreach ($tuote as $key => $val) {
 
 					if ($key == 'nettohinta' or $key == 'bruttohinta') {
+
 						if ($key == 'nettohinta') $purchaseorder_summa += $val;
+
 						echo "<td valign='top' style='text-align: right;'>",sprintf('%.02f', $val),"</td>";
+
+						$worksheet->write($excelrivi, $excelsarake, $val);
 					}
 					elseif ($key == 'tilattumaara') {
 						echo "<td valign='top' style='text-align: right;'>{$val}</td>";
+
+						$worksheet->write($excelrivi, $excelsarake, $val);
 					}
 					else {
 						echo "<td valign='top'>{$val}</td>";
+
+						$worksheet->write($excelrivi, $excelsarake, $val);
 					}
+
+					$excelsarake++;
 				}
+
+				$excelrivi++;
 
 				echo "</tr>";
 			}
 
 			echo "<tr id='tr_summa'><th colspan='5'>",t("Summa"),"</th><th valign='top' style='text-align: right;'>{$invoice_summa} {$lasku_row['valkoodi']}</th><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><th colspan='3'>",t("Summa"),"</th><th valign='top' style='text-align: right;'>{$purchaseorder_summa} {$lasku_row['valkoodi']}</th></tr>";
+
+			$excelrivi++;
+			$excelsarake = 4;
+
+			$worksheet->write($excelrivi, $excelsarake, t("Summa"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->write($excelrivi, $excelsarake, str_replace(".", ",", $invoice_summa)." ".$lasku_row['valkoodi'], $format_summa);
+
+			$excelsarake = 10;
+
+			$worksheet->write($excelrivi, $excelsarake, t("Summa"), $format_bold);
+			$excelsarake++;
+
+			$worksheet->write($excelrivi, $excelsarake, str_replace(".", ",", $purchaseorder_summa)." ".$lasku_row['valkoodi'], $format_summa);
+
+			$workbook->close();
+
+			echo "<br /><form method='post'>";
+			echo "<table>";
+			echo "<tr><th>",t("Lähetä raportti käyttäjälle"),":</th>";
+			echo "<input type='hidden' name='tee' value='laheta_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Laskujen_vertailu_raportti.xls'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+
+			$query = "	SELECT nimi, eposti
+						FROM kuka
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND eposti != ''
+						AND extranet = ''";
+			$eposti_result = mysql_query($query) or pupe_error($query);
+
+			echo "<td><select name='asiakasemail'><option value='",t("Valitse vastaanottaja"),"</option>";
+
+			while ($eposti_row = mysql_fetch_assoc($eposti_result)) {
+				echo "<option value='{$eposti_row['eposti']}'>{$eposti_row['nimi']}</option>";
+			}
+
+			echo "</td>";
+
+			echo "<td class='back'><input type='submit' value='",t("Lähetä"),"' /></td></tr>";
+
+			echo "</table></form>";
 		}
 		else {
 			echo "<tr><td class='message'>",t("Vertailukelpoista laskua ja tilausta ei löytynyt"),"!</tr>";
@@ -303,53 +649,67 @@
 
 		if (tarkista_oikeus("hyvak.php")) {
 			echo "<form action = 'hyvak.php' method='post'>
-					<input type='hidden' name = 'tunnus' value='$lasku_row[tunnus]'>
+					<input type='hidden' name = 'tunnus' value='{$lasku_row['tunnus']}'>
 					<input type='hidden' name = 'tee' value='H'>
-					<td class='back'><input type='Submit' value='".t("Hyväksy lasku")."'></td>
+					<td class='back'><input type='Submit' value='",t("Hyväksy lasku"),"'></td>
 					</form><br><br><br>";
 
 
 			echo "<form action = 'hyvak.php' method='post'>
 					<input type='hidden' name='tee' value='Z'>
-					<input type='hidden' name='tunnus' value='$lasku_row[tunnus]'>
-					<td class='back'><input type='Submit' value='".t("Pysäytä laskun käsittely")."'></td>
+					<input type='hidden' name='tunnus' value='{$lasku_row['tunnus']}'>
+					<td class='back'><input type='Submit' value='",t("Pysäytä laskun käsittely"),"'></td>
 					</form>";
 		}
-
-
 	}
 	else {
 		// Summaus hyväksynnässä olevista laskuista
-		echo "<br><br>";
+		echo "<br /><br />";
+
+		$hyvaksyjalisa = '';
+
+		if (isset($hyvaksyja) and trim($hyvaksyja) != '') {
+			$hyvaksyja = (string) $hyvaksyja;
+			$hyvaksyjalisa = " and lasku.hyvaksyja_nyt = '{$hyvaksyja}' ";
+		}
+
+		$pvmlisa = '';
+
+		if (isset($app) and is_numeric($app) and isset($akk) and is_numeric($akk) and isset($avv) and is_numeric($avv) and isset($lpp) and is_numeric($lpp) and isset($lkk) and is_numeric($lkk) and isset($lvv) and is_numeric($lvv)) {
+			$pvmlisa = " and lasku.tapvm >= '".(int) $avv."-".(int) $akk."-".(int) $app."' and lasku.tapvm <= '".(int) $lvv."-".(int) $lkk."-".(int) $lpp."' ";
+		}
 
 		$query = "	SELECT lasku.laskunro,
 					if(kuka.nimi is not null, kuka.nimi, lasku.hyvaksyja_nyt) hyvaknimi,
 					lasku.nimi,
 					round(lasku.summa *lasku.vienti_kurssi, 2) kotisumma,
-					lasku.tunnus
+					lasku.tunnus, lasku.tila
 					FROM lasku
 					JOIN liitetiedostot ON (liitetiedostot.yhtio = lasku.yhtio and liitetiedostot.liitos = 'lasku' AND liitetiedostot.liitostunnus = lasku.tunnus AND liitetiedostot.kayttotarkoitus IN ('FINVOICE', 'EDI'))
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
-					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila = 'H'
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					and lasku.tila IN ('H', 'M')
+					and lasku.alatila != 'H'
+					$hyvaksyjalisa
+					$pvmlisa
 					GROUP BY 1,2,3,4,5";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>".t("Laskunumero")."</th>";
-		echo "<th>".t("Hyväksyjä")."</th>";
-		echo "<th>".t("Toimittaja")."</th>";
-		echo "<th>".t("Summa")."</th>";
-		echo "<th>".t("Vertailu")."</th>";
+		echo "<th>",t("Laskunumero"),"</th>";
+		echo "<th>",t("Hyväksyjä"),"</th>";
+		echo "<th>",t("Toimittaja"),"</th>";
+		echo "<th>",t("Summa"),"</th>";
+		echo "<th>",t("Vertailu"),"</th>";
 		echo "</tr>";
 
 		while ($trow = mysql_fetch_array($result)) {
 			echo "<tr class='aktiivi'>";
-			echo "<td>$trow[laskunro]</td>";
-			echo "<td>$trow[hyvaknimi]</td>";
-			echo "<td>$trow[nimi]</td>";
-			echo "<td align='right'>$trow[kotisumma]</td>";
+			echo "<td>{$trow['laskunro']}</td>";
+			echo "<td>{$trow['hyvaknimi']}</td>";
+			echo "<td>{$trow['nimi']}</td>";
+			echo "<td align='right'>{$trow['kotisumma']}</td>";
 
 			echo "<td valign='top'>";
 
@@ -361,18 +721,18 @@
 
 					foreach ($loytyy_kummastakin as $tuoteno => $null) {
 						if ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or abs($invoice[$tuoteno]['nettohinta'] - $purchaseorder[$tuoteno]['nettohinta']) > 1) {
-							echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=$PHP_SELF////'>",t("Eroja"),"</a>";
+							echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}'>",t("Eroja"),"</a>";
 							$ok = '';
 							break;
 						}
 					}
 
 					if ($ok == 'ok') {
-						echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=$PHP_SELF////'><font class='ok'>",t("OK"),"</font></a>";
+						echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}'><font class='ok'>",t("OK"),"</font></a>";
 					}
 				}
 				else {
-					echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=$PHP_SELF////'>",t("Eroja"),"</a>";
+					echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}'>",t("Eroja"),"</a>";
 				}
 			}
 			elseif ($invoice == 'ei_loydy_edia') {
@@ -385,7 +745,7 @@
 			echo "</td>";
 			echo "</tr>";
 		}
-		echo "</table><br>";
+		echo "</table><br />";
 	}
 
 	require ("inc/footer.inc");

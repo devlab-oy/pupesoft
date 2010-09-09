@@ -149,6 +149,24 @@
 					WHERE tunnus='$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 
+		// Jos poistamme ifamesta tietoja niin p‰ivitet‰‰n varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, ett‰ tietoja on muutettu
+		if ($lukitse_avaimeen != "") {
+			if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
+				$query = "	UPDATE tuote
+							SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$lukitse_avaimeen'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "liitetiedostot" and $lukitse_laji == "tuote") {
+				$query = "	UPDATE tuote
+							SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = '$lukitse_avaimeen'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+		}
+
 		synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 
 		//	Jos poistetaan perheen osa palataan perheelle
@@ -501,6 +519,24 @@
 									and tunnus			= '$laskuorow[tunnus]'";
 						$updaresult = mysql_query($query) or pupe_error($query);
 					}
+				}
+			}
+
+			// Jos p‰ivit‰mme ifamesta tietoja niin p‰ivitet‰‰n varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, ett‰ tietoja on muutettu
+			if ($lukitse_avaimeen != "") {
+				if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
+					$query = "	UPDATE tuote
+								SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$lukitse_avaimeen'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
+				elseif ($toim == "liitetiedostot" and $lukitse_laji == "tuote") {
+					$query = "	UPDATE tuote
+								SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = '$lukitse_avaimeen'";
+					$result = mysql_query($query) or pupe_error($query);
 				}
 			}
 

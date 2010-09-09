@@ -148,8 +148,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value = '' $sel1>".t("Asiakkaan laskutusosoitteella");
-		$ulos .= "<option value = 'T' $sel2>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella");
+		$ulos .= "<option value = '' $sel1>".t("Asiakkaan laskutusosoitteella")."</option>";
+		$ulos .= "<option value = 'T' $sel2>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella")."</option>";
 
 		$ulos .= "</select></td>";
 
@@ -158,15 +158,18 @@
 
 	if (mysql_field_name($result, $i) == "tilausvahvistustyyppi") {
 
-			$vresult = t_avainsana("TV");
-
 			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value=' '>".t("Ei vahvistusta")."</option>";
 
-			while($row = mysql_fetch_array($vresult)) {
-				$sel = "";
-				if ($row["selite"] == $trow[$i]) $sel = 'selected';
-				$ulos .= "<option value='$row[selite]' $sel>$row[selitetark]</option>";
-			}
+			$apu = $trow[$i];
+			$sel = array();
+			$sel[$apu] = "selected";
+
+			$ulos .= "<option value = '1' $sel[1]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus")."</option>";
+			$ulos .= "<option value = '2' $sel[2]>".t("N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰")."</option>";
+			$ulos .= "<option value = '3' $sel[3]>".t("Ei n‰ytet‰ hintoja eik‰ alennuksia")."</option>";
+			$ulos .= "<option value = '4' $sel[4]>".t("N‰ytet‰‰n asiakkaan hinta")."</option>";
+			#$ulos .= "<option value = '5' $sel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
+			$ulos .= "<option value = '6' $sel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
 
 			$ulos .= "</select></td>";
 			$jatko = 0;

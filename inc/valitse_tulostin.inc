@@ -105,18 +105,57 @@
 		$vresult2 = mysql_query($query2) or pupe_error($query2);
 		$row2 = mysql_fetch_array($vresult2);
 
-		$vresult = t_avainsana("TV", "", " and avainsana.selite like '%K%'");
+		$naytatvale = "";
 
-		echo "<tr><td>".t("Tulosta")."</td><td><select name='seltvtyyppi'>";
-		echo "<option value=''>".t("Oletus")."</option>";
-
-		while($row = mysql_fetch_array($vresult)) {
-			$sel = "";
-			if ($row["selite"] == $row2["tilausvahvistus"]) $sel = 'selected';
-
-			echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
+		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
+			$naytatvale = 2;
 		}
 
+		if ($naytatvale == "" and $row2["tilausvahvistus"] != "") {
+			if (strpos($row2['tilausvahvistus'], '6') !== FALSE) {
+				$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n mefa customoitu tilausvahvistus
+			}
+			elseif (strpos($row2['tilausvahvistus'], '5') !== FALSE) {
+				$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+			}
+			elseif (strpos($row2['tilausvahvistus'], '4') !== FALSE) {
+				$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+			}
+			elseif (strpos($row2['tilausvahvistus'], '3') !== FALSE) {
+				$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+			}
+			elseif (strpos($row2['tilausvahvistus'], '2') !== FALSE) {
+				$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+			}
+		}
+
+		if ($naytatvale == "" and $yhtiorow['tilausvahvistustyyppi'] != "") {
+			if (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
+				$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+			}
+			elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
+				$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+			}
+			elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
+				$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+			}
+			elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
+				$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+			}
+			elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
+				$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+			}
+		}
+
+		$tvsel[$naytatvale] = "SELECTED";
+
+		echo "<tr><td>".t("Tyyppi")."</td><td><select name='seltvtyyppi'>";
+		echo "<option value = '1' $tvsel[1]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus")."</option>";
+		echo "<option value = '2' $tvsel[2]>".t("N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰")."</option>";
+		echo "<option value = '3' $tvsel[3]>".t("Ei n‰ytet‰ hintoja eik‰ alennuksia")."</option>";
+		echo "<option value = '4' $tvsel[4]>".t("N‰ytet‰‰n asiakkaan hinta")."</option>";
+		echo "<option value = '5' $tvsel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
+		echo "<option value = '6' $tvsel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
 		echo "</select></td></tr>";
 	}
 
@@ -238,7 +277,7 @@
 
 		if ($tulostin == 'Tyˆm‰‰r‰ys' and $kukarow['hinnat'] == 0) {
 
-			echo "<tr><td rowspan='2'>".t("Tyˆm‰‰r‰ystyyppi")."</td><td>";			
+			echo "<tr><td rowspan='2'>".t("Tyˆm‰‰r‰ystyyppi")."</td><td>";
 			echo "<select name='tyomtyyppi'>";
 
 			$sel = array();
@@ -246,7 +285,7 @@
 
 			echo "<option value = 'A'>".t("Tuotetiedot, hinnat ja alennukset");
 			echo "<option value = 'O' $sel[O]>".t("Tuotetiedot");
-			echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");          
+			echo "<option value = 'P' $sel[P]>".t("Tuotetiedot ja varastopaikka");
 			echo "</select>";
 			echo "</td></tr>";
 		}

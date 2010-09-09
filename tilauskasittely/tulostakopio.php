@@ -1711,8 +1711,6 @@
 
 			if ($toim == "VALMISTUS") {
 
-				require_once ("tulosta_valmistus.inc");
-
 				// katotaan miten halutaan sortattavan
 				// haetaan asiakkaan tietojen takaa sorttaustiedot
 				$order_sorttaus = '';

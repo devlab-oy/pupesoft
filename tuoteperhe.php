@@ -421,8 +421,6 @@
 						$sel2 = "SELECTED";
 					}
 
-					//echo "faktarow".$faktarow["omasivu"];
-
 					echo "<tr><th>".t("Reseptin tulostus").": </th></tr>";
 					echo "<tr><td>";
 					echo "	<select name='omasivu'>
@@ -453,7 +451,14 @@
 					echo "<th>".t("Reseptin faktat").": </th></tr>";
 				}
 
-				$query = "SELECT fakta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' and fakta != '' ORDER BY isatuoteno, tuoteno LIMIT 1";
+				$query = "	SELECT fakta
+							FROM tuoteperhe
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tyyppi = '$hakutyyppi'
+							and isatuoteno = '$isatuoteno'
+							and trim(fakta) != ''
+							ORDER BY LENGTH(fakta) desc
+							LIMIT 1";
 				$ressu = mysql_query($query) or pupe_error($query);
 				$faktarow = mysql_fetch_array($ressu);
 
@@ -461,7 +466,14 @@
 
 				if ($toim == "RESEPTI") {
 
-					$query = "SELECT fakta2 FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' and fakta2 != '' ORDER BY isatuoteno, tuoteno LIMIT 1";
+					$query = "	SELECT fakta2
+								FROM tuoteperhe
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi = '$hakutyyppi'
+								and isatuoteno = '$isatuoteno'
+								and trim(fakta2) != ''
+								ORDER BY LENGTH(fakta2) desc
+								LIMIT 1";
 					$ressu = mysql_query($query) or pupe_error($query);
 					$faktarow = mysql_fetch_array($ressu);
 

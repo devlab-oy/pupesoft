@@ -425,30 +425,32 @@ if (!function_exists('rivi_valm')) {
 		$x[1] = 580;
 		$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
 		$uusisivu = "";
-		if(($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"]) and $tyyppi != "ETUSIVU") {
+
+		if ($tyyppi != "ETUSIVU" and ($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"])) {
 			//	Tulostetaanko aina uusi sivu?
 			$query = "SELECT tunnus FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '$row[tuoteno]' and omasivu != ''";
 			$pres = mysql_query($query) or pupe_error($query);
 
-			if(mysql_num_rows($pres) > 0) {
+			if (mysql_num_rows($pres) > 0) {
 
 				//	Uusi sivu
-				if(isset($perheid) and isset($perheid2)) {
+				if (isset($perheid) and isset($perheid2)) {
 					$page[$sivu] 	= uusi_sivu_valm($tyyppi);
 					$thispage    	= $page[$sivu];
 				}
-				$uusisivu 		= "KOHTA";
+
+				$uusisivu = "KOHTA";
 			}
 		}
 
-		if ((($perheid == 0 and $perheid2 == 0) or $perheid != $row["perheid"] or $perheid2 != $row["perheid2"]) and isset($perheid) and isset($perheid2)) {
-			if($uusisivu == "JOO") {
+		if (isset($perheid) and isset($perheid2) and (($perheid == 0 and $perheid2 == 0) or $perheid != $row["perheid"] or $perheid2 != $row["perheid2"])) {
+			if ($uusisivu == "JOO") {
 				//	Uusi sivu
 				$page[$sivu]	= uusi_sivu_valm($tyyppi);
 				$thispage  		= $page[$sivu];
 				$uusisivu 		= "";
 			}
-			elseif($uusisivu == "KOHTA") {
+			elseif ($uusisivu == "KOHTA") {
 				$uusisivu 		= "JOO";
 			}
 			else {
@@ -550,8 +552,8 @@ if (!function_exists('rivi_valmistus')) {
 						WHERE yhtio 	= '$kukarow[yhtio]'
 						and tyyppi 		= 'R'
 						and isatuoteno 	= '$row[tuoteno]'
-						and fakta is not null
-						ORDER BY isatuoteno, tuoteno
+						and trim(fakta) != ''
+						ORDER BY LENGTH(fakta) desc
 						LIMIT 1";
 			$ressu = mysql_query($query) or pupe_error($query);
 
@@ -562,9 +564,8 @@ if (!function_exists('rivi_valmistus')) {
 
 				$faktarow["fakta"] = t("Työohje:", $kieli)."\n".$faktarow["fakta"];
 
-
 				foreach(explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
-					$pdf->draw_text(125,  $kala, $kommentti,	$thispage, $p);
+					$pdf->draw_text(125,  $kala, $kommentti, $thispage, $p);
 					$kala = $kala - $rivinkorkeus;
 					$lask_valm++;
 				}
@@ -574,7 +575,7 @@ if (!function_exists('rivi_valmistus')) {
 				$lask_valm++;
 			}
 
-			if($tyyppi != "ETUSIVU") {
+			if ($tyyppi != "ETUSIVU") {
 				$pdf->draw_text(35,  $kala, "Raaka-aineet:",	$thispage, $p);
 			}
 		}

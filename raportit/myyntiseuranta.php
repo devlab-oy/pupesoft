@@ -435,10 +435,7 @@
 							$select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
 							$order  .= "tuote.tuoteno,";
 							$gluku++;
-						}
-						if ($sarjanumerot != '') {
-							$select .= "group_concat(concat(tilausrivi.tunnus,'#',tilausrivi.kpl)) sarjanumero, ";
-						}
+						}						
 						if ($varastonarvo != '') {
 							$select .= "0 varastonarvo, 0 kierto, 0 varastonkpl, ";
 						}
@@ -446,8 +443,8 @@
 						if ($rajaus[$i] != "") {
 							$lisa .= " and tuote.tuoteno='$rajaus[$i]' ";
 						}
-					}
-
+					}										
+					
 					if ($mukaan == "tuotemyyja") {
 						if ($group!="") $group .= ",tuote.myyjanro";
 						else $group  .= "tuote.myyjanro";
@@ -578,6 +575,10 @@
 						$kantaasiakasjoin	= " JOIN laskun_lisatiedot lasklisa ON (lasklisa.yhtio = lasku.yhtio AND lasklisa.otunnus = lasku.tunnus) ";
 						$kantaasiakasjoin  .= " JOIN asiakkaan_avainsanat kantaasiakas ON (kantaasiakas.yhtio = lasku.yhtio AND kantaasiakas.laji = 'kantaasiakastunnus' AND kantaasiakas.liitostunnus = lasku.liitostunnus AND kantaasiakas.avainsana = lasklisa.kantaasiakastunnus) ";						
 					}
+				}
+				
+				if ($sarjanumerot != '') {
+					$select .= "group_concat(concat(tilausrivi.tunnus,'#',tilausrivi.kpl)) sarjanumero, ";
 				}
 
 				if ($order != "") {
@@ -1327,7 +1328,6 @@
 									foreach($sarjat as $sarja) {
 										list($s,$k) = explode("#", $sarja);
 
-
 										$query = "	SELECT osto_vai_hyvitys
 													FROM tilausrivin_lisatiedot
 													WHERE yhtio in ($yhtio)
@@ -1350,10 +1350,17 @@
 
 										if (mysql_num_rows($osre) > 0) {
 											$osrow = mysql_fetch_array($osre);
-											$row[$i] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."'>".$osrow['sarjanumero']."</a><br>";
+											$row[$i] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='_top'>".$osrow['sarjanumero']."</a><br>";
 										}
 									}
 									$row[$i] = substr($row[$i], 0, -4);
+								}
+								
+								// jos kyseessa on varastonarvo
+								if (mysql_field_name($result, $i) == "laskunumero") {
+									list($laskalk, $lasklop) = explode(":", $row[$i]);
+																		
+									$row[$i] = $laskalk.":<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=&laskunro=$lasklop' target='_top'>$lasklop</a>";
 								}
 
 								// jos kyseessa on varastonarvo
@@ -2206,7 +2213,7 @@
 				<th>".t("Näytä sarjanumerot")."</th>
 				<td><input type='checkbox' name='sarjanumerot' $sarjachk></td>
 				<td></td>
-				<td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
+				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>".t("Näytä vain myydyt sarjanumerot")."</th>

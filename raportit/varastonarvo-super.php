@@ -406,7 +406,7 @@
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Kiertonopeus 12kk"), 	$format_bold);
 				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Viimeisin laskutus"), 	$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Viimeisin laskutus")."/".t("kulutus"), 	$format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 25%"), 	$format_bold);
 				$excelsarake++;
@@ -754,7 +754,7 @@
 					}
 
 					// haetaan tuotteen myydyt kappaleet
-					$query  = "	SELECT ifnull(sum(tilausrivi.kpl),0) kpl, max(tilausrivi.laskutettuaika) laskutettuaika
+					$query  = "	SELECT ifnull(sum(tilausrivi.kpl),0) kpl, date_format(max(tilausrivi.laskutettuaika),'%Y%m%d') laskutettuaika
 								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 								JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 														and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
@@ -770,7 +770,7 @@
 					$xmyyrow = mysql_fetch_array($xmyyres);
 
 					// haetaan tuotteen kulutetut kappaleet
-					$query  = "	SELECT ifnull(sum(tilausrivi.kpl),0) kpl
+					$query  = "	SELECT ifnull(sum(tilausrivi.kpl),0) kpl, date_format(max(tilausrivi.toimitettuaika),'%Y%m%d') kulutettuaika
 								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 								JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 														and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
@@ -838,7 +838,18 @@
 
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($xmyyrow["laskutettuaika"]));
+
+						if ((int) $xmyyrow["laskutettuaika"] > (int) $xkulrow["kulutettuaika"]) {
+							$vikamykupaiva = substr($xmyyrow["laskutettuaika"],0,4)."-".substr($xmyyrow["laskutettuaika"],4,2)."-".substr($xmyyrow["laskutettuaika"],6,2);
+						}
+						elseif ((int) $xkulrow["kulutettuaika"])  {
+							$vikamykupaiva = substr($xkulrow["kulutettuaika"],0,4)."-".substr($xkulrow["kulutettuaika"],4,2)."-".substr($xkulrow["kulutettuaika"],6,2);
+						}
+						else {
+							$vikamykupaiva = "";
+						}
+
+						$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($vikamykupaiva));
 						$excelsarake++;
 
 						if ($row['epakurantti25pvm'] != '0000-00-00') {

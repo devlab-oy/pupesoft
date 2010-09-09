@@ -90,18 +90,18 @@
 	else {
 		echo "<td colspan='2'>
 				$laskurow[toim_nimi] $laskurow[toim_nimitark]<br> $laskurow[toim_osoite]<br> $laskurow[toim_postino] $laskurow[toim_postitp]<br> ".maa($laskurow["toim_maa"])."</td>";
-
-		if (trim($laskurow['laskutus_nimi']) == '') {
-			$laskurow['laskutus_nimi'] 		= $laskurow['nimi'];
-			$laskurow['laskutus_nimitark'] 	= $laskurow['nimitark'];
-			$laskurow['laskutus_osoite'] 	= $laskurow['osoite'];
-			$laskurow['laskutus_postino'] 	= $laskurow['postino'];
-			$laskurow['laskutus_postitp'] 	= $laskurow['postitp'];
-			$laskurow['laskutus_maa'] 		= $laskurow['maa'];
-		}
-
-		echo "<td>$laskurow[laskutus_nimi] $laskurow[laskutus_nimitark]<br>$laskurow[laskutus_osoite]<br>$laskurow[laskutus_postino] $laskurow[laskutus_postitp]<br>",maa($laskurow['laskutus_maa']),"</td>";
 	}
+	
+	if (trim($laskurow['laskutus_nimi']) == '') {
+		$laskurow['laskutus_nimi'] 		= $laskurow['nimi'];
+		$laskurow['laskutus_nimitark'] 	= $laskurow['nimitark'];
+		$laskurow['laskutus_osoite'] 	= $laskurow['osoite'];
+		$laskurow['laskutus_postino'] 	= $laskurow['postino'];
+		$laskurow['laskutus_postitp'] 	= $laskurow['postitp'];
+		$laskurow['laskutus_maa'] 		= $laskurow['maa'];
+	}
+
+	echo "<td>$laskurow[laskutus_nimi] $laskurow[laskutus_nimitark]<br>$laskurow[laskutus_osoite]<br>$laskurow[laskutus_postino] $laskurow[laskutus_postitp]<br>",maa($laskurow['laskutus_maa']),"</td>";
 
 	if ($laskurow["tila"] == "O") {
 		echo "<td>$laskurow[rahti_etu]</td>";

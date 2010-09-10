@@ -61,7 +61,7 @@
 		$query = "	SELECT asiakas.* $selectilisa
 					FROM asiakas
 					$joinilisa
-					WHERE asiakas.yhtio = '$kukarow[yhtio]' 
+					WHERE asiakas.yhtio = '$kukarow[yhtio]'
 					and asiakas.tunnus in ($otunnus)";
 		$res = mysql_query($query) or pupe_error($query);
 	    
@@ -272,6 +272,7 @@
 		$query = "	SELECT nimi, osoite, postino, postitp, maa, osasto, ryhma, piiri, flag_1, flag_2, flag_3, flag_4, tunnus
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]' 
+					and laji != 'P'
 					and nimi != '' 
 					$lisa
 					ORDER BY $jarjestys

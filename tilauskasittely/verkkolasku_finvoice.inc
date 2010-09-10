@@ -112,7 +112,7 @@ if (!function_exists('finvoice_otsik')) {
 				fputs ($tootfinvoice, "</SOAP-ENV:Body>\r\n");
 				fputs ($tootfinvoice, "</SOAP-ENV:Envelope>\r\n");
 			}
-			
+
 			// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
 			if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
 
@@ -172,7 +172,7 @@ if (!function_exists('finvoice_otsik')) {
 
 			//laitetaan setit kuntoon..
 			fputs($tootfinvoice, "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\r\n");
-			
+
 			if ($nosoap == "NOSOAP") {
 				fputs($tootfinvoice, "<!DOCTYPE Finvoice SYSTEM \"{$palvelin2}datain/Finvoice.dtd\">\r\n");
 				fputs($tootfinvoice, "<?xml-stylesheet type=\"text/xsl\" href=\"{$palvelin2}datain/Finvoice.xsl\"?>\r\n");
@@ -180,7 +180,7 @@ if (!function_exists('finvoice_otsik')) {
 			else {
 				fputs($tootfinvoice, "<!DOCTYPE Finvoice SYSTEM \"Finvoice.dtd\">\r\n");
 				fputs($tootfinvoice, "<?xml-stylesheet type=\"text/xsl\" href=\"Finvoice.xsl\"?>\r\n");
-			}			
+			}
 
 			//tästä lähtee Finvoice koodi
 			fputs($tootfinvoice, "<Finvoice Version=\"1.2\">\r\n");
@@ -450,7 +450,7 @@ if (!function_exists('finvoice_alvierittely')) {
 			xml_add("VatRatePercent",												pp($alvrow[0]), 	   	$tootfinvoice);
 			xml_add("VatRateAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow[2]), 	   	$tootfinvoice);
 			xml_add("VatFreeText",													"",					   	$tootfinvoice);
-			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");								
+			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
 		}
 	}
 }
@@ -460,7 +460,7 @@ if (!function_exists('finvoice_otsikko_loput')) {
 		global $err_finvoice, $yhtiorow;
 
 		if ($err_finvoice == 0)	{
-			
+
 			#Tää sit ku otetaan Finvoice 1.3 käyttöön
 			#
 			#$InvoiceFreeTexts = explode("|", trim($lasrow["sisviesti1"]));
@@ -472,9 +472,9 @@ if (!function_exists('finvoice_otsikko_loput')) {
 			#		xml_add("InvoiceFreeText", $InvoiceFreeText, $tootfinvoice);
 			#	}
 			#}
-			
+
 			xml_add("InvoiceFreeText", substr(str_replace("|", " ## ", trim($lasrow["sisviesti1"])), 0, 512), 								$tootfinvoice);
-			
+
 			fputs($tootfinvoice, "<PaymentTermsDetails>\r\n");
 			xml_add("PaymentTermsFreeText",       											pp($masrow['teksti']),						  	$tootfinvoice);
 			xml_add("InvoiceDueDate Format=\"CCYYMMDD\"",               					pp(vlas_dateconv($lasrow['erpcm'])),   	      	$tootfinvoice);
@@ -515,7 +515,7 @@ if (!function_exists('finvoice_otsikko_loput')) {
 
 if (!function_exists('finvoice_rivi')) {
 	function finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat) {
-		global $err_finvoice, $yhtiorow;
+		global $err_finvoice, $yhtiorow, $kukarow;
 
 		if ($err_finvoice == 0) {
 			fputs($tootfinvoice, "<InvoiceRow>\r\n");
@@ -530,11 +530,15 @@ if (!function_exists('finvoice_rivi')) {
 			#xml_add("StartDate Format=\"CCYYMMDD\"", 											"", 							$tootfinvoice);
 			#xml_add("EndDate Format=\"CCYYMMDD\"", 											"", 							$tootfinvoice);
 			xml_add("UnitPriceAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['hinta'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);
-			xml_add("RowIdentifier",                                    						$tilrow['tilaajanrivinro'], 	$tootfinvoice);
-			xml_add("RowIdentifierUrlText", 													$tilrow['otunnus'],				$tootfinvoice);
+
+			if ($tilrow['tilaajanrivinro'] != 0) {
+				xml_add("RowIdentifier",                                   						$tilrow['tilaajanrivinro'], 	$tootfinvoice);
+			}
+
+			#xml_add("RowIdentifierUrlText", 													"",								$tootfinvoice);
 			xml_add("RowIdentifierDate Format=\"CCYYMMDD\"", 						vlas_dateconv($tilrow['laadittu']), 		$tootfinvoice);
 			#xml_add("OriginalInvoiceNumber", 													"", 							$tootfinvoice);
-			#xml_add("RowDeliveryIdentifier", 													"", 							$tootfinvoice);
+			xml_add("RowDeliveryIdentifier", 													$tilrow['otunnus'],				$tootfinvoice);
 			#xml_add("RowDeliveryIdentifierUrlText", 											"", 							$tootfinvoice);
 			xml_add("RowDeliveryDate Format=\"CCYYMMDD\"", 							vlas_dateconv($tilrow['toimitettuaika']),	$tootfinvoice);
 			#xml_add("RowQuotationIdentifier", 													"", 							$tootfinvoice);
@@ -563,7 +567,71 @@ if (!function_exists('finvoice_rivi')) {
 			#xml_add("RowAccountDimensionText", 												"", 							$tootfinvoice);
 			#xml_add("RowSellerAccountText", 													"", 							$tootfinvoice);
 
-			$RowFreeTexts = explode("|", trim($tilrow["kommentti"]));
+			if ($tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
+				$lisakomm = "";
+
+				// Laitetaan tilausviite tähän
+				if ($tilrow["laskuviesti"] != "") {
+					$lisakomm .= $tilrow["laskuviesti"];
+				}
+
+				// Tämä on tilauksen vika rivi, laitetaan työmäärystiedot tähän
+				$query = "	SELECT tyomaarays.*
+							FROM lasku
+							JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.tilaustyyppi = 'A'
+							and lasku.tunnus = '$tilrow[otunnus]'";
+				$tyomres = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($tyomres) > 0) {
+					while ($tyomrow = mysql_fetch_array($tyomres)) {
+
+						$lisakomm .= "|".t("Työmääräys", $kieli). ": $tyomrow[otunnus]";
+
+						$al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
+
+						while ($al_row = mysql_fetch_array($al_res)) {
+
+							$kentta = $al_row["selite"];
+
+							if (((!is_numeric($tyomrow[$kentta]) and trim($tyomrow[$kentta]) != '') or (is_numeric($tyomrow[$kentta]) and $tyomrow[$kentta] != 0)) and trim($tyomrow[$kentta]) != '0000-00-00') {
+								if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
+									$lisakomm .= "|$al_row[selitetark]: ".$tyomrow[$kentta];
+								}
+								else {
+									if (strtoupper($al_row["selitetark_2"]) == "DATE") {
+										$tyomrow[$kentta] = tv1dateconv($tyomrow[$kentta]);
+									}
+									elseif ($kentta == "suorittaja") {
+										$query = "	SELECT nimi
+													FROM kuka
+													WHERE yhtio = '$kukarow[yhtio]'
+													and kuka  	= '".$tyomrow[$kentta]."'";
+										$yresult = mysql_query($query) or pupe_error($query);
+										$row = mysql_fetch_array($yresult);
+
+										$tyomrow[$kentta] = $row["nimi"];
+									}
+									elseif ($kentta == "merkki") {
+										$yresult = t_avainsana("SARJANUMERON_LI", $kieli, "and avainsana.selite = 'MERKKI' and avainsana.selitetark = '".$tyomrow[$kentta]."'");
+
+										if (mysql_num_rows($yresult) > 0) {
+											$row = mysql_fetch_array($yresult);
+
+											$tyomrow[$kentta] = $row["selitetark_2"];
+										}
+									}
+
+									$lisakomm .= "|$al_row[selitetark]: ".$tyomrow[$kentta];
+								}
+							}
+						}
+					}
+				}
+			}
+
+			$RowFreeTexts = explode("|", trim(trim($lisakomm)."\n".trim($tilrow["kommentti"])));
 
 			foreach ($RowFreeTexts as $RowFreeText) {
 				if (trim($RowFreeText) != "") {

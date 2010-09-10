@@ -191,6 +191,7 @@ if (!function_exists('pupevoice_alvierittely')) {
 
 if (!function_exists('pupevoice_rivi')) {
 	function pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat) {
+		global $yhtiorow, $kukarow;
 
 		fputs($tootxml, "<Row>\n");
 		xml_add("OrderIdentifier",					$tilrow['otunnus'], 						$tootxml); // tämä on tilauksen numero meillä, ei kuulu standardiin mutta se on pakko lisätä
@@ -217,7 +218,77 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("RowVatAmount",						$vatamount, 								$tootxml); // veron määrä
 		xml_add("RowTotalVatExcludedAmount",		$tilrow['rivihinta'],		 				$tootxml); // veroton rivihinta
 		xml_add("RowTotalVatIncludedAmount",		$totalvat, 									$tootxml); // verollinen rivihinta
-		xml_add("RowFreeText",						substr($tilrow['kommentti'], 0, 512),		$tootxml);
+
+		// Jos tämä on tän tilauksen vika rivi
+		if ($tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
+			$lisakomm = "";
+
+			// Laitetaan tilausviite tähän
+			if ($tilrow["laskuviesti"] != "") {
+				$lisakomm .= $tilrow["laskuviesti"];
+			}
+
+			// Tämä on tilauksen vika rivi, laitetaan työmäärystiedot tähän
+			$query = "	SELECT tyomaarays.*
+						FROM lasku
+						JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tilaustyyppi = 'A'
+						and lasku.tunnus = '$tilrow[otunnus]'";
+			$tyomres = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($tyomres) > 0) {
+				while ($tyomrow = mysql_fetch_array($tyomres)) {
+
+					$lisakomm .= "|".t("Työmääräys", $kieli). ": $tyomrow[otunnus]";
+
+					$al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
+
+					while ($al_row = mysql_fetch_array($al_res)) {
+
+						$kentta = $al_row["selite"];
+
+						if (((!is_numeric($tyomrow[$kentta]) and trim($tyomrow[$kentta]) != '') or (is_numeric($tyomrow[$kentta]) and $tyomrow[$kentta] != 0)) and trim($tyomrow[$kentta]) != '0000-00-00') {
+							if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
+								$lisakomm .= "|$al_row[selitetark]: ".$tyomrow[$kentta];
+							}
+							else {
+								if (strtoupper($al_row["selitetark_2"]) == "DATE") {
+									$tyomrow[$kentta] = tv1dateconv($tyomrow[$kentta]);
+								}
+								elseif ($kentta == "suorittaja") {
+									$query = "	SELECT nimi
+												FROM kuka
+												WHERE yhtio = '$kukarow[yhtio]'
+												and kuka  	= '".$tyomrow[$kentta]."'";
+									$yresult = mysql_query($query) or pupe_error($query);
+									$row = mysql_fetch_array($yresult);
+
+									$tyomrow[$kentta] = $row["nimi"];
+								}
+								elseif ($kentta == "merkki") {
+									$yresult = t_avainsana("SARJANUMERON_LI", $kieli, "and avainsana.selite = 'MERKKI' and avainsana.selitetark = '".$tyomrow[$kentta]."'");
+
+									if (mysql_num_rows($yresult) > 0) {
+										$row = mysql_fetch_array($yresult);
+
+										$tyomrow[$kentta] = $row["selitetark_2"];
+									}
+								}
+
+								$lisakomm .= "|$al_row[selitetark]: ".$tyomrow[$kentta];
+							}
+						}
+					}
+				}
+			}
+
+			if (trim($lisakomm) != "") {
+				$tilrow["kommentti"] = trim($lisakomm)."|".trim($tilrow["kommentti"]);
+			}
+		}
+
+		xml_add("RowFreeText", substr(trim($tilrow["kommentti"]), 0, 512),		$tootxml);
 		fputs($tootxml, "</Row>\n");
 	}
 }

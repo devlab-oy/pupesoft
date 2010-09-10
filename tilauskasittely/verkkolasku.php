@@ -1479,61 +1479,6 @@
 								$komm .= "\n".t("Kommentti").": ".$lasrow['sisviesti1'];
 							}
 
-							$query = "	SELECT tyomaarays.*
-										FROM lasku
-										JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
-										WHERE lasku.yhtio = '$kukarow[yhtio]'
-										and lasku.tilaustyyppi = 'A'
-										and lasku.laskunro = '$lasrow[laskunro]'";
-							$tyomres = mysql_query($query) or pupe_error($query);
-
-							if (mysql_num_rows($tyomres) > 0) {
-
-								while ($tyomrow = mysql_fetch_array($tyomres)) {
-
-									$komm .= "\n".t("Tyˆm‰‰r‰ys", $kieli). ": $tyomrow[otunnus]";
-
-									$al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
-
-									while ($al_row = mysql_fetch_array($al_res)) {
-
-										$kentta = $al_row["selite"];
-
-										if (((!is_numeric($tyomrow[$kentta]) and trim($tyomrow[$kentta]) != '') or (is_numeric($tyomrow[$kentta]) and $tyomrow[$kentta] != 0)) and trim($tyomrow[$kentta]) != '0000-00-00') {
-											if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
-												$komm .= "\n$al_row[selitetark]: ".$tyomrow[$kentta];
-											}
-											else {
-												if (strtoupper($al_row["selitetark_2"]) == "DATE") {
-													$tyomrow[$kentta] = tv1dateconv($tyomrow[$kentta]);
-												}
-												elseif ($kentta == "suorittaja") {
-													$query = "	SELECT nimi
-																FROM kuka
-																WHERE yhtio = '$kukarow[yhtio]'
-																and kuka  	= '".$tyomrow[$kentta]."'";
-													$yresult = mysql_query($query) or pupe_error($query);
-													$row = mysql_fetch_array($yresult);
-
-													$tyomrow[$kentta] = $row["nimi"];
-												}
-												elseif ($kentta == "merkki") {
-													$yresult = t_avainsana("SARJANUMERON_LI", $kieli, "and avainsana.selite = 'MERKKI' and avainsana.selitetark = '".$tyomrow[$kentta]."'");
-
-													if (mysql_num_rows($yresult) > 0) {
-														$row = mysql_fetch_array($yresult);
-
-														$tyomrow[$kentta] = $row["selitetark_2"];
-													}
-												}
-
-												$komm .= "\n$al_row[selitetark]: ".$tyomrow[$kentta];
-											}
-										}
-									}
-								}
-							}
-
 							if (trim($komm) != '') {
 								$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", trim($komm));
 							}
@@ -1672,7 +1617,7 @@
 							else $pjat_sortlisa = "";
 
 							// Kirjoitetaan rivitietoja tilausriveilt‰
-							$query = "	SELECT tilausrivi.*, tuote.eankoodi, lasku.vienti_kurssi,
+							$query = "	SELECT tilausrivi.*, tuote.eankoodi, lasku.vienti_kurssi, lasku.viesti laskuviesti,
 										if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika,
 										if (tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,
 										$sorttauskentta,
@@ -1688,6 +1633,8 @@
 							$tilres = mysql_query($query) or pupe_error($query);
 
 							$rivinumerot = array(0 => 0);
+							$rivilaskuri = 0;
+							$rivimaara   = mysql_num_rows($tilres);
 
 							while ($tilrow = mysql_fetch_array($tilres)) {
 
@@ -1768,6 +1715,16 @@
 								$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#", "/")."]/", " ", $tilrow['kommentti']);
 								$tilrow['nimitys'] 	 = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#", "/")."]/", " ", $tilrow['nimitys']);
 
+								// Otetaan seuraavan rivin otunnus
+								if ($rivilaskuri < $rivimaara) {
+									$tilrow_seuraava = mysql_fetch_assoc($tilres);
+									mysql_data_seek($tilres, $rivilaskuri);
+									$tilrow['seuraava_otunnus'] = $tilrow_seuraava["otunnus"];
+								}
+								else {
+									$tilrow['seuraava_otunnus'] = 0;
+								}
+
 								if ($lasrow["chn"] == "111") {
 
 									if ((int) substr(sprintf("%06s", $tilrow["tilaajanrivinro"]), -6) > 0 and !in_array((int) substr(sprintf("%06s", $tilrow["tilaajanrivinro"]), -6), $rivinumerot)) {
@@ -1788,6 +1745,8 @@
 								else {
 									pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat);
 								}
+
+								$rivilaskuri++;
 							}
 
 							//Lopetetaan lasku

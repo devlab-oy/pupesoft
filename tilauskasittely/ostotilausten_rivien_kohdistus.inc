@@ -674,7 +674,7 @@ if ($tila == '') {
 
 	// jos kysessä on kotimainen vaihto-omaisuuslasku, pitää lisätä tuotteen hintaan alvi
 	if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
-		
+
 		$simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1),2);
 
 		if (in_array($simualv, array(8,12,17,22))) {
@@ -684,7 +684,7 @@ if ($tila == '') {
 		else {
 			$alvit = "tuote.alv";
 		}
-		
+
 		if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 			// tutkitaan ollaanko siellä alv-rekisteröity
 			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
@@ -1258,31 +1258,24 @@ if ($tila == '') {
 			echo "<$td $classeka valign='top'>x</$td>";
 		}
 		else {
-			echo "<$td $classeka valign='top'>KALA</$td>";
+			echo "<$td $classeka valign='top'></$td>";
 		}
 
 		echo "<$td $class valign='top'>$rivirow[otunnus]</$td>";
 		echo "<$td $class valign='top' nowrap>";
 
 		// tehdään pop-up divi jos keikalla on kommentti...
-		// jos riviä ei ole vielä viety varastoon niin riviä voi muokata
-		if ($rivirow["varastossa_kpl"] == 0) {
-			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($rivirow["tuoteno"]);
-			$pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
+		list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($rivirow["tuoteno"]);
+		$pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
 
-			echo "<div id='div_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
-			echo "<ul>";
-			echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyssä").": $hyllyssa $pop_yks</li><li>".t("Myytävissä").": $myytavissa $pop_yks</li>";
-			echo "<li>".t("Tilattu").": $rivirow[tilattu] $pop_yks</li><li>".t("Varattu").": $rivirow[varattu] $pop_yks</li>";
-			echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
-			echo "</ul>";
-			echo "</div>";
-			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi' class='tooltip' id='$rivirow[rivitunnus]'>$rivirow[tuoteno]</a>";
-		}
-		else {
-			echo "$rivirow[tuoteno]";
-		}
-
+		echo "<div id='div_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
+		echo "<ul>";
+		echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyssä").": $hyllyssa $pop_yks</li><li>".t("Myytävissä").": $myytavissa $pop_yks</li>";
+		echo "<li>".t("Tilattu").": $rivirow[tilattu] $pop_yks</li><li>".t("Varattu").": $rivirow[varattu] $pop_yks</li>";
+		echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
+		echo "</ul>";
+		echo "</div>";
+		echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"])."&lopetus=$PHP_SELF////toiminto=kohdista//toimittajaid=$toimittajaid//tee=K//otunnus=$otunnus//alku=$alku//nayta_kohdistetut=$nayta_kohdistetut//nayta_kaikki=$nayta_kaikki//suoratoimitukset=$suoratoimitukset//tila=$tila//ojarj=$ojarj$ulisa//riviid=$rivirow[rivitunnus]///$rivirow[rivitunnus]' class='tooltip' id='$rivirow[rivitunnus]'>$rivirow[tuoteno]</a>";
 		echo "<br>$rivirow[toim_tuoteno]";
 
 		$query = "	SELECT sarjanumeroseuranta
@@ -1404,6 +1397,10 @@ if ($tila == '') {
 		$lisaresult = mysql_query($query) or pupe_error($query);
 
 		echo "<$td $classlisa valign='top'>";
+
+		if ($rivirow["varastossa_kpl"] == 0) {
+			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png'></a><br>";
+		}
 
 		if ($rivirow["rivitunnus"] == $rivirow["perheid2"] and mysql_num_rows($lisaresult) > 0) {
 			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&lisaa_lisavarusteita=$rivirow[rivitunnus]'>".t("Lisävarusteet")."</a><br>";

@@ -4,6 +4,11 @@ if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 	require ("../inc/parametrit.inc");
 }
 
+if ($livesearch_tee == "TUOTEHAKU") {
+	livesearch_tuotehaku();
+	exit;
+}
+
 if (!function_exists("tsekit")) {
 	function tsekit($row, $kaikkivarastossayhteensa) {
 
@@ -186,6 +191,10 @@ if (!function_exists("tsekit")) {
 }
 
 echo "<font class='head'>".t("Saapuva keikka")."</font><hr>";
+
+if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+	enable_ajax();
+}
 
 // scripti balloonien tekemiseen
 js_popup();

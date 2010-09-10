@@ -45,7 +45,14 @@
 		}
 		else {
 			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
-				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200)."</td>";
+					
+				$nosubmitti = "";
+				
+				if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
+					$nosubmitti = "EISUBMIT";
+				}
+				
+				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, '', $nosubmitti)."</td>";
 			}
 			else {
 				echo "<td><input type='text' size='18' name='tuoteno' value = '$tuoteno'></td>";

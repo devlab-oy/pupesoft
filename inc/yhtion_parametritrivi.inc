@@ -158,7 +158,7 @@
 
 	if (mysql_field_name($result, $i) == "tilausvahvistustyyppi") {
 
-			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value=' '>".t("Ei vahvistusta")."</option>";
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 			$apu = $trow[$i];
 			$sel = array();

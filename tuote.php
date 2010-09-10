@@ -128,6 +128,7 @@
 	echo "<tr>";
 	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
+	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
 	echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 	echo "<th style='vertical-align:middle;'>".t("Tuotehaku")."</th>";
@@ -139,6 +140,7 @@
 	echo "<tr>";
 	echo "<form action='$PHP_SELF' method='post' name='formi2' autocomplete='off'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
+	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
 	echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 
@@ -160,6 +162,7 @@
 	if ($ulos == '' and $tee == 'Z') {
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='E'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -171,6 +174,7 @@
 
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tee' value='N'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -576,7 +580,7 @@
 						if ($yhtrow["tyyppi"] == "HA") $yhttoim = "";
 						else $yhttoim = $yhtrow["tyyppi"];
 
-						echo "<form action='yhteensopivuus_tuote.php' method='post'>";						
+						echo "<form action='yhteensopivuus_tuote.php' method='post'>";
 						echo "<input type='hidden' name='tee' value='etsi'>";
                         echo "<input type='hidden' name='lopetus' value='".$palvelin2."tuote.php////tuoteno=$tuoteno//tee=Z'>";
 						echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -616,7 +620,7 @@
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
 					echo "<tr>";
-					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
+					echo "<td><a href='$PHP_SELF?toim=$toim&lopetus=$lopetus&tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
 					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
 					echo "</tr>";
 				}
@@ -846,9 +850,9 @@
 
 				// Varastosaldot ja paikat
 				echo "<font class='message'>".t("Tuotteen tilaukset")."</font><hr>";
-				
+
 				$myyta = $kokonaismyytavissa;
-				
+
 				// Avoimet rivit
 				echo "<table>";
 
@@ -950,7 +954,7 @@
 
 					echo "<tr>
 							<td>$jtrow[nimi]</td>
-							<td><a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]'>$jtrow[tunnus]</a>$keikka</td>
+							<td><a href='$PHP_SELF?toim=$toim&lopetus=$lopetus&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]'>$jtrow[tunnus]</a>$keikka</td>
 							<td>$tyyppi</td>
 							<td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
@@ -968,7 +972,7 @@
 
 				echo "</table><br>";
 			}
-			
+
 			if ($toim != "TYOMAARAYS_ASENTAJA") {
 				if(!isset($raportti)) {
 					if($tuoterow["tuotetyyppi"] == "R") $raportti="KULUTUS";
@@ -980,6 +984,7 @@
 
 				echo "<form action='$PHP_SELF#Raportit' method='post'>
 					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='tuoteno' value='$tuoteno'>
 					<input type='hidden' name='tee' value='Z'>
 					<input type='hidden' name='historia' value='$historia'>
@@ -1293,7 +1298,7 @@
 					echo "<td class='tumma' title='$muutos'>".number_format($gt, 2, ',', ' ')."</td><tr></table><br><br>";
 				}
 			}
-		
+
 			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow["sarjanumeroseuranta"] == "V" or $tuoterow['sarjanumeroseuranta'] == 'T') {
 
 				$query	= "	SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
@@ -1440,13 +1445,14 @@
 					echo "</table><br>";
 				}
 			}
-			
+
 			if ($toim != "TYOMAARAYS_ASENTAJA") {
 				// Varastotapahtumat
 				echo "<font class='message'>".t("Tuotteen tapahtumat")."</font><hr>";
 				echo "<table>";
-				echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";								
+				echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
+				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<input type='hidden' name='tee' value='Z'>";
 				echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 				echo "<input type='hidden' name='raportti' value='$raportti'>";
@@ -1492,14 +1498,14 @@
 				}
 
 				echo "</th><th colspan='";
-				
+
 				if ($tilalehinta != '') {
 					echo 6;
 				}
 				else {
 					echo 5;
 				}
-				
+
 				echo "'>".t("Tapahtumalaji").": ";
 				echo "<select name='tapahtumalaji' onchange='submit();'>'";
 				echo "<option value=''>".t("Näytä kaikki")."</option>";
@@ -1730,6 +1736,7 @@
 	if ($ulos != "") {
 			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
+			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='tee' value='Z'>";
 			echo "<table><tr>";
 			echo "<th>".t("Valitse listasta").":</th>";

@@ -12,7 +12,7 @@
 
 		if (filter_var($sanitized_email, FILTER_VALIDATE_EMAIL)) {
 
-			$asiakasemail = 'asiakasemail'.$sanitized_email;
+			$komento = 'asiakasemail'.$sanitized_email;
 
 			$liite = array();
 			$kutsu = array();

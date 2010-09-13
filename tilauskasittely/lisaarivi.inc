@@ -42,14 +42,13 @@
 
 			//Haetaan tuoteperheen lapset ja lis‰t‰‰n ne $tuoteperhe ja $kaikkituotteet arraysiin
 			$query = "	SELECT tuoteperhe.*
-						FROM tuoteperhe, tuote
-						WHERE tuoteperhe.yhtio = tuote.yhtio
-						and tuoteperhe.tuoteno = tuote.tuoteno
-						and isatuoteno = '$isatuoteno'
-						and tuoteperhe.yhtio = '$kukarow[yhtio]'
+						FROM tuoteperhe
+						JOIN tuote ON tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno
+						WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
+						and tuoteperhe.isatuoteno = '$isatuoteno'
 						$perhelisa
 						$kieltolisa
-						ORDER by tuoteno";
+						ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
 			$perheresult = mysql_query($query) or pupe_error($query);
 
 			while ($perherow = mysql_fetch_array($perheresult)) {
@@ -80,16 +79,15 @@
 			else {
 				$isat_array[] = $tuoteno;
 
-				//Haetaan tuoteperheen lapset ja lis‰t‰‰n ne $isa_array arrayseen
+				// Haetaan tuoteperheen lapset ja lis‰t‰‰n ne $isa_array arrayseen
 				$query = "	SELECT tuoteperhe.*
-							FROM tuoteperhe, tuote
-							WHERE tuoteperhe.yhtio 		= tuote.yhtio
-							and tuoteperhe.tuoteno 		= tuote.tuoteno
-							and tuoteperhe.isatuoteno 	= '$tuoteno'
-							and tuoteperhe.yhtio 		= '$kukarow[yhtio]'
+							FROM tuoteperhe
+							JOIN tuote ON tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno
+							WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
+							and tuoteperhe.isatuoteno = '$tuoteno'
 							$perhelisa
 							$kieltolisa
-							ORDER by tuoteno";
+							ORDER BY tuoteperhe.tuoteno, tuoteperhe.tunnus";
 				$perheresult = mysql_query($query) or pupe_error($query);
 
 				while ($perherow = mysql_fetch_assoc($perheresult)) {
@@ -108,7 +106,7 @@
 					$perherow["kerroin"] = 1;
 
 					// Lasketaan kerroin rekursiivisesti taaksep‰in
-					foreach($tmp_kerroin_array as $ke_ind => $ke_kerr) {
+					foreach ($tmp_kerroin_array as $ke_ind => $ke_kerr) {
 						list($ker_isa, $ke_ker) = explode("#!°!#", $ke_kerr);
 
 						if ($ke_ker <= 0) {
@@ -619,7 +617,7 @@
 					if ($lisaarivi_debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $tuoteno: $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Er‰: $zrow[era]) PVM: $saldoaikalisa<br>";
 
 					// Tutkitaan myyd‰‰nkˆ tietty‰ jo varattua lis‰varustetta, silloin annetaan AINA riitt‰v‰ saldo
-					if ($perheid2 > 0 and $perheid2!=$rivitunnus and strtoupper($zrow["hyllyalue"]."#".$zrow["hyllynro"]."#".$zrow["hyllyvali"]."#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
+					if ($perheid2 > 0 and $perheid2 != $rivitunnus and strtoupper($zrow["hyllyalue"]."#".$zrow["hyllynro"]."#".$zrow["hyllyvali"]."#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
 						$myytavissa = $toimittamatta;
 					}
 
@@ -722,23 +720,23 @@
 					}
 
 					// Jos tuotteella on tuotepaikkoja
-					foreach($zzrow as $zrow) {
+					foreach ($zzrow as $zrow) {
 
 						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $jalkivaatimusmehto == 1 and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
 							if ($lisaarivi_debug==1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
 
 							// lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
-							$myy_tuoteno[$i] = strtoupper($tuoteno);
-							$myy_kpl[$i] = $zrow["myytavissa"];
+							$myy_tuoteno[$i]   = strtoupper($tuoteno);
+							$myy_kpl[$i]       = $zrow["myytavissa"];
 							$myy_hyllyalue[$i] = $zrow["hyllyalue"];
-							$myy_hyllynro[$i] = $zrow["hyllynro"];
+							$myy_hyllynro[$i]  = $zrow["hyllynro"];
 							$myy_hyllyvali[$i] = $zrow["hyllyvali"];
 							$myy_hyllytaso[$i] = $zrow["hyllytaso"];
-							$myy_varasto[$i] = $zrow["varasto"];
-							$myy_era[$i] 	 = $zrow["era"];
+							$myy_varasto[$i]   = $zrow["varasto"];
+							$myy_era[$i] 	   = $zrow["era"];
 
-							if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
+							if (!in_array(strtoupper($tuoteno), $tuoteperhe)) {
 								$myy_tyyppi[$i] = "NORMAALI";
 								$saldoyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien isien saldoa yhteens‰.
 							}
@@ -765,14 +763,14 @@
 
 					if ($lisaarivi_debug==1) echo "Tuotteella $tuoteno ei ole yht‰‰n tuotepaikkaa! Myyd‰‰n silti koska saldoista ei nyt piitata!<br>";
 
-					$myy_tuoteno[$i] = strtoupper($tuoteno);
-					$myy_kpl[$i] = 99999999;
+					$myy_tuoteno[$i]   = strtoupper($tuoteno);
+					$myy_kpl[$i]       = 99999999;
 					$myy_hyllyalue[$i] = "";
-					$myy_hyllynro[$i] = "";
+					$myy_hyllynro[$i]  = "";
 					$myy_hyllyvali[$i] = "";
 					$myy_hyllytaso[$i] = "";
-					$myy_varasto[$i] = "";
-					$myy_era[$i] 	 = "";
+					$myy_varasto[$i]   = "";
+					$myy_era[$i] 	   = "";
 
 					if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
 						$myy_tyyppi[$i] = "NORMAALI";
@@ -790,14 +788,14 @@
 			else {
 				// Saldottomat tuotteet
 				// lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
-				$myy_tuoteno[$i] = strtoupper($tuoteno);
-				$myy_kpl[$i] = 99999999;
+				$myy_tuoteno[$i]   = strtoupper($tuoteno);
+				$myy_kpl[$i]       = 99999999;
 				$myy_hyllyalue[$i] = "";
-				$myy_hyllynro[$i] = "";
+				$myy_hyllynro[$i]  = "";
 				$myy_hyllyvali[$i] = "";
 				$myy_hyllytaso[$i] = "";
-				$myy_varasto[$i] = "";
-				$myy_era[$i] 	 = "";
+				$myy_varasto[$i]   = "";
+				$myy_era[$i] 	   = "";
 
 				if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
 					$myy_tyyppi[$i] = "NORMAALI";
@@ -835,7 +833,7 @@
 			// nyt meill‰ on $myy_ arrayperheess‰ kaikki tuotteet ja varastopaikat jolta voidaan myyd‰ jotain..
 			// loopataan kaikki tuotteet l‰pi
 
-			//Myyd‰‰n tietylt‰ paikalta
+			// Myyd‰‰n tietylt‰ paikalta
 			if ($paikka != '') {
 				$paikat = explode('#',$paikka);
 
@@ -848,7 +846,7 @@
 
 						//Otetaan t‰m‰
 						$myy_tuoteno 	= array();
-						$myy_kpl 	= array();
+						$myy_kpl 		= array();
 						$myy_hyllyalue 	= array();
 						$myy_hyllynro 	= array();
 						$myy_hyllytaso 	= array();
@@ -857,10 +855,10 @@
 						$myy_kpl_myyty 	= array();
 						$myy_era		= array();
 
-						$myy_tuoteno[] = strtoupper($tuoteno);
-						$myy_kpl[] = $toimittamatta;
+						$myy_tuoteno[]   = strtoupper($tuoteno);
+						$myy_kpl[] 		 = $toimittamatta;
 						$myy_hyllyalue[] = $paikat[0];
-						$myy_hyllynro[] = $paikat[1];
+						$myy_hyllynro[]  = $paikat[1];
 						$myy_hyllyvali[] = $paikat[2];
 						$myy_hyllytaso[] = $paikat[3];
 						$myy_era[] 		 = $paikat[4];
@@ -935,7 +933,7 @@
 							$kerroin_array 	= array($tuoteno."#!°!#1");
 							$perhearray 	= array();
 
-							for($isa=0; $isa < $riikoko; $isa++) {
+							for ($isa = 0; $isa < $riikoko; $isa++) {
 								list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array);
 								$perhearray	= array_merge($perhearray, $perherow);
 
@@ -944,12 +942,13 @@
 								}
 							}
 
-							foreach($perhearray as $perherow) {
+							foreach ($perhearray as $perherow) {
 
 								$lapsitoimittamatta = $perherow["kerroin"]*$myy_kpl[$i];
 
 								foreach ($myy_tuoteno as $j => $lapsituoteno) {
-									if (strtoupper($lapsituoteno) == strtoupper($perherow["tuoteno"]) and $myy_tyyppi[$j] == "LAPSITUOTE") {
+									// Tuoteperheiss‰ voi olla samaa tuotetta monta kertaa, siksi and !isset($myy_hintakerr[$j]), muuten tuote on jo k‰sitelty...
+									if (strtoupper($lapsituoteno) == strtoupper($perherow["tuoteno"]) and $myy_tyyppi[$j] == "LAPSITUOTE" and !isset($myy_hintakerr[$j])) {
 
 										// laitetaan lasten kertoimet kuntoon
 										$myy_hintakerr[$j] = $perherow["hintakerroin"];
@@ -1104,37 +1103,37 @@
 								}
 
 								$query = "	INSERT into tilausrivi set
-											hyllyalue = '$myy_hyllyalue[$indeksi]',
-											hyllynro = '$myy_hyllynro[$indeksi]',
-											hyllytaso = '$myy_hyllytaso[$indeksi]',
-											hyllyvali = '$myy_hyllyvali[$indeksi]',
+											hyllyalue 		= '$myy_hyllyalue[$indeksi]',
+											hyllynro 		= '$myy_hyllynro[$indeksi]',
+											hyllytaso 		= '$myy_hyllytaso[$indeksi]',
+											hyllyvali 		= '$myy_hyllyvali[$indeksi]',
 											tilaajanrivinro = '$rivinumero',
-											laatija 	= '$kukarow[kuka]',
-											laadittu 	= $vanharivilaadittu,
-											yhtio 		= '$kukarow[yhtio]',
-											tuoteno 	= '$myy_tuoteno[$indeksi]',
-											varattu 	= '$varattu',
-											yksikko 	= '$trow[yksikko]',
-											kpl 		= '0',
-											kpl2		= '$kpl2',
-											tilkpl 		= '$tilattu',
-											ale 		= '$lis_ale',
-											alv 		= '$lis_alv',
-											netto		= '$lis_netto',
-											hinta 		= '$lis_hinta',
-											kerayspvm 	= '$kerayspvm',
-											otunnus 	= '$kukarow[kesken]',
-											tyyppi 		= '$rivityyppi',
-											toimaika 	= '$toimaika',
-											kommentti 	= '$kommentti',
-											var 		= '',
-											try			= '$trow[try]',
-											osasto		= '$trow[osasto]',
-											perheid		= '$perheid',
-											perheid2	= '$perheid2',
-											tunnus 		= '$rivitunnus',
-											nimitys 	= '$trow[nimitys]',
-											jaksotettu	= '$jaksotettu'";
+											laatija 		= '$kukarow[kuka]',
+											laadittu 		= $vanharivilaadittu,
+											yhtio 			= '$kukarow[yhtio]',
+											tuoteno 		= '$myy_tuoteno[$indeksi]',
+											varattu 		= '$varattu',
+											yksikko 		= '$trow[yksikko]',
+											kpl 			= '0',
+											kpl2			= '$kpl2',
+											tilkpl 			= '$tilattu',
+											ale 			= '$lis_ale',
+											alv 			= '$lis_alv',
+											netto			= '$lis_netto',
+											hinta 			= '$lis_hinta',
+											kerayspvm 		= '$kerayspvm',
+											otunnus 		= '$kukarow[kesken]',
+											tyyppi 			= '$rivityyppi',
+											toimaika 		= '$toimaika',
+											kommentti 		= '$kommentti',
+											var 			= '',
+											try				= '$trow[try]',
+											osasto			= '$trow[osasto]',
+											perheid			= '$perheid',
+											perheid2		= '$perheid2',
+											tunnus 			= '$rivitunnus',
+											nimitys 		= '$trow[nimitys]',
+											jaksotettu		= '$jaksotettu'";
 
 								if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
 									$query .= ", keratty = 'saldoton', kerattyaika = now()";

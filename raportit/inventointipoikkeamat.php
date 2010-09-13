@@ -2,31 +2,104 @@
 
 	require ("../inc/parametrit.inc");
 
-	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-		<!--
-
-		function toggleAll(toggleBox) {
-
-			var currForm = toggleBox.form;
-			var isChecked = toggleBox.checked;
-			var nimi = toggleBox.name;
-
-			for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
-				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi && currForm.elements[elementIdx].value != '".t("Ei valintaa")."') {
-					currForm.elements[elementIdx].checked = isChecked;
-				}
-			}
-		}
-
-		//-->
-		</script>";
-
 	if ($toim == "SUPER") {
 		echo "<font class='head'>".t("Inventointien korjaus").":</font><hr>";
 	}
 	else {
 		echo "<font class='head'>".t("Inventointipoikkeamat").":</font><hr>";
 	}
+
+	if (!isset($kka))
+		$kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($vva))
+		$vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($ppa))
+		$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+
+	if (!isset($kkl))
+		$kkl = date("m");
+	if (!isset($vvl))
+		$vvl = date("Y");
+	if (!isset($ppl))
+		$ppl = date("d");
+
+	// piirrell‰‰n formi
+	echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<input type='hidden' name='tee' value='Y'>
+			<input type='hidden' name='toim' value='$toim'>";
+
+	echo "<table>";
+
+	$seltul = "";
+
+	if (isset($tila) and $tila == "tulosta") {
+		$seltul = "SELECTED";
+	}
+
+	echo "<tr><th>".t("Valitse toiminto")."</th><td colspan='3'>
+			<select name='tila'>
+			<option value='inventoi'>".t("N‰yt‰ ruudulla")."</option>
+			<option value='tulosta' $seltul>".t("Tulosta inventointipoikkeamalista")."</option>
+			</select></td></tr>";
+
+	echo "<tr><th valign='top'>".t('Rajaus')."</th>";
+	echo "<td colspan='3'>";
+
+	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
+	$noautosubmit = TRUE;
+
+	require ("tilauskasittely/monivalintalaatikot.inc");
+
+	echo "</td></tr>";
+
+	$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+	$vares = mysql_query($query) or pupe_error($query);
+
+	echo "<tr><th valign='top'>".t('Varastot')."<br /><br />(".t('Saat kaikki varastot jos et valitse yht‰‰n').")</th>";
+	echo "<td colspan='3'>";
+
+	$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+
+    while ($varow = mysql_fetch_array($vares)) {
+		$sel = '';
+		if (in_array($varow['tunnus'], $varastot)) {
+			$sel = 'checked';
+		}
+
+		echo "<input type='checkbox' name='varastot[]' value='$varow[tunnus]' $sel>$varow[nimitys]<br>\n";
+	}
+	echo "</td></tr>";
+
+	echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
+			<td><input type='text' name='kka' value='$kka' size='3'></td>
+			<td><input type='text' name='vva' value='$vva' size='5'></td>
+			</tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
+			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
+			<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
+
+
+	echo "<tr><th>".t("Listaa tuotteet joilla poikkeamaprosentti on v‰hint‰‰n")."</th>
+			<td colspan='3'><input type='text' size='15' name='prosmuutos' value='$prosmuutos' size='3'> ".t("prosenttia")."</td><td class='back'>".t("Lis‰tyt tuotteet + merkill‰ ja v‰hennetyt tuotteet - merkill‰, tai absoluuttinen.")."</td></tr>";
+
+	echo "<tr><th>".t("Listaa tuotteet joiden kappalem‰‰r‰ on muuttunut v‰hint‰‰n")."</th>
+			<td colspan='3'><input type='text' size='15' name='kplmuutos' value='$kplmuutos' size='3'> ".t("kappaletta")."</td></tr>";
+
+	echo "<tr><th>".t("Listaa vain sarjanumerolliset tuotteet")."</th>
+			<td colspan='3'><input type='checkbox' name='sarjat' $sel></td></tr>";
+
+	echo "<tr><th>".t("Listaa vain varastonarvoon vaikuttaneet inventoinnit")."</th>
+			<td colspan='3'><input type='checkbox' name='vararvomuu' $sel></td></tr>";
+
+	if ($naytanimitys != '') {
+		$naytanimitys = 'checked';
+	}
+
+	echo "<tr><th>".t("N‰yt‰ tuotteen nimitys ja arvonmuutos tulosteella")."</th>
+			<td colspan='3'><input type='checkbox' name='naytanimitys' $naytanimitys></td></tr>";
+
+	echo "<tr><td class='back'><br><input type='submit' value='".t("Aja raportti")."'></td></tr></form></table><br><br><br>";
 
 	if ($tee == 'KORJAA') {
 
@@ -184,18 +257,15 @@
 
 			if (isset($rajaus)) {
 				$rajaus = unserialize(urldecode($rajaus));
-				$mul_osasto 	= $rajaus[0];
-				$mul_try 		= $rajaus[1];
-				$mul_tmr		= $rajaus[2];
-				$varastot		= $rajaus[3];
-				$prosmuutos		= $rajaus[4];
-				$kplmuutos		= $rajaus[5];
-				$sarjat			= $rajaus[6];
-				$vararvomuu		= $rajaus[7];
-				$naytanimitys	= $rajaus[8];
+				$varastot		= $rajaus[0];
+				$prosmuutos		= $rajaus[1];
+				$kplmuutos		= $rajaus[2];
+				$sarjat			= $rajaus[3];
+				$vararvomuu		= $rajaus[4];
+				$naytanimitys	= $rajaus[5];
 			}
 
-			$rajaus = array($mul_osasto, $mul_try, $mul_tmr, $varastot, $prosmuutos, $kplmuutos, $sarjat, $vararvomuu, $naytanimitys);
+			$rajaus = array($varastot, $prosmuutos, $kplmuutos, $sarjat, $vararvomuu, $naytanimitys);
 			$rajaus = urlencode(serialize($rajaus));
 
 			if (count($komento) == 0) {
@@ -203,18 +273,18 @@
 			}
 		}
 
-		//$prosmuutos   = (int) $prosmuutos;
 		$kplmuutos = (int) $kplmuutos;
+
 		if ((int) $prosmuutos == 0 and $kplmuutos == 0) {
 			$kplmuutos = 1;
 		}
 
 		if ((int) $prosmuutos <> 0 or $kplmuutos <> 0) {
 
-			$lisa = "";
-			$tuote_lisa = "";
-			$tapahtuma_lisa = "";
-			$tuotepaikat_lisa = "";
+			$lisa_vamu 			= "";
+			$tuote_lisa 		= "";
+			$tapahtuma_lisa 	= "";
+			$tuotepaikat_lisa	= "";
 			$varastopaikat_lisa = "";
 
 			if ((int) $prosmuutos < 0 and substr($prosmuutos,0,1) == '-') {
@@ -238,25 +308,12 @@
 				$tuote_lisa .= "and tuote.sarjanumeroseuranta = 'S' ";
 			}
 
-			if (count($mul_osasto) > 0) {
-				$sel_osasto = "('".str_replace(',','\',\'',implode(",", $mul_osasto))."')";
-				$tuote_lisa .= "and tuote.osasto in $sel_osasto ";
-			}
-			if (count($mul_try) > 0) {
-				$sel_tuoteryhma = "('".str_replace(',','\',\'',implode(",", $mul_try))."')";
-				$tuote_lisa .= "and tuote.try in $sel_tuoteryhma ";
-			}
-			if (count($mul_tmr) > 0) {
-				$sel_tuotemerkki = "('".str_replace(',','\',\'',implode(",", $mul_tmr))."')";
-				$tuote_lisa .= "and tuote.tuotemerkki in $sel_tuotemerkki ";
-			}
-
 			if (!empty($varastot)) {
 				$varastopaikat_lisa .= "and varastopaikat.tunnus IN (" . implode(', ', $varastot) . ") ";
 	        }
 
 			if ($vararvomuu != "") {
-				$lisa = "HAVING arvo != 0";
+				$lisa_vamu = "HAVING arvo != 0";
 			}
 
 			$query = "	SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko,
@@ -286,8 +343,9 @@
 												$varastopaikat_lisa)
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.ei_saldoa = ''
-						$tuote_lisa
 						$lisa
+						$tuote_lisa
+						$lisa_vamu
 						ORDER BY tuote.tuoteno, sorttauskentta";
 			$saldoresult = mysql_query($query) or pupe_error($query);
 
@@ -298,7 +356,6 @@
 			}
 			elseif ($tila != 'tulosta'){
 				echo "<table>";
-
 				echo "<tr>";
 				echo "<th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("M‰‰r‰")."</th><th>".t("Poikkeamaprosentti")." %</th>";
 				echo "</tr>";
@@ -338,7 +395,7 @@
 
 					if ($toim == "SUPER") {
 						echo "<tr><td>".t("Korjaa inventointi").": </td><td colspan='4'>";
-						echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+						echo "<form action='$PHP_SELF?$ulisa' method='post' autocomplete='off'>";
 						echo "<input type='hidden' name='tila'			value='$tila'>";
 						echo "<input type='hidden' name='toim' 			value='$toim'>";
 						echo "<input type='hidden' name='ppa' 			value='$ppa'>";
@@ -364,7 +421,7 @@
 
 					if ($toim == "SUPER" and $tuoterow["sarjanumeroseuranta"] == "S" and mysql_num_rows($sarjares) == abs($tuoterow["kpl"])) {
 						echo "<tr><td>".t("Peru inventointi").": </td><td colspan='4'>";
-						echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+						echo "<form action='$PHP_SELF?$ulisa' method='post' autocomplete='off'>";
 						echo "<input type='hidden' name='tila'			value='$tila'>";
 						echo "<input type='hidden' name='toim' 			value='$toim'>";
 						echo "<input type='hidden' name='ppa' 			value='$ppa'>";
@@ -393,7 +450,7 @@
 
 					echo "<tr style='height: 5px;'></tr>";
 				}
-				echo "</table>";
+				echo "</table><br><br><br>";
 			}
 
 		}
@@ -410,6 +467,7 @@
 
 	if ($tee == "TULOSTA") {
 		if (mysql_num_rows($saldoresult) > 0 ) {
+
 			if ($prosmuutos == 0) {
 				$muutos = $kplmuutos;
 				$yks = t("yks");
@@ -418,6 +476,7 @@
 				$muutos = $prosmuutos;
 				$yks = "%";
 			}
+
 			//kirjoitetaan  faili levylle..
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
@@ -491,215 +550,32 @@
 
 			fclose($fh);
 
+			$line = exec("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=115 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
+
 			//itse print komento...
 			if ($komento["Inventointipoikkeamat"] == 'email') {
-				$liite = $filenimi;
-				$ctype = "TEXT";
-				$kutsu = "inventointipoikkeamat-".date("Y-m-d").".txt";
+
+				$line = exec("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
+
+				$liite = $filenimi.".pdf";
+				$ctype = "PDF";
+				$kutsu = "inventointipoikkeamat-".date("Y-m-d");
 				require("inc/sahkoposti.inc");
+
+				system("rm -f ".$filenimi.".pdf");
 			}
 			else {
 				//k‰‰nnet‰‰n kaunniksi
-				$line = exec("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=105 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
 				$line2 = exec("$komento[Inventointipoikkeamat] ".$filenimi.".ps");
-				system("rm -f ".$filenimi.".ps");
+
 			}
 
 			echo "<br>".t("Inventointipoikkeamalista tulostuu")."!<br><br>";
 
-			$tee = '';
-
 			//poistetaan tmp file samantien kuleksimasta...
+			system("rm -f ".$filenimi.".ps");
 			system("rm -f $filenimi");
 		}
-	}
-
-	if ($tee == '') {
-		if (!isset($kka))
-			$kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-		if (!isset($vva))
-			$vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-		if (!isset($ppa))
-			$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-
-		if (!isset($kkl))
-			$kkl = date("m");
-		if (!isset($vvl))
-			$vvl = date("Y");
-		if (!isset($ppl))
-			$ppl = date("d");
-
-		// piirrell‰‰n formi
-		echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
-		echo "	<input type='hidden' name='tee' value='Y'>
-				<input type='hidden' name='toim' value='$toim'>";
-
-		echo "<table>";
-		echo "<tr><th colspan='1'>".t("Valitse toiminto")."</th><td colspan='2'>
-				<select name='tila'>
-				<option value='inventoi'>".t("N‰yt‰ ruudulla")."</option>
-				<option value='tulosta'>".t("Tulosta inventointipoikkeamalista")."</option>
-				</select></td></tr>";
-
-		echo "<input type='hidden' name='supertee' value='RAPORTOI'>";
-
-		echo "<tr valign='top'><td><table><tr><td class='back'>";
-
-		// n‰ytet‰‰n soveltuvat osastot
-		// tehd‰‰n avainsana query
-		$res2 = t_avainsana("OSASTO");
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265px;overflow:auto;'>";
-		}
-
-		echo "<table>";
-		echo "<tr><th colspan='2'>".t("Tuoteosasto").":</th></tr>";
-		echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
-
-		while ($rivi = mysql_fetch_array($res2)) {
-			$mul_check = '';
-			if ($mul_osasto!="") {
-				if (in_array($rivi['selite'],$mul_osasto)) {
-					$mul_check = 'CHECKED';
-				}
-			}
-
-			echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
-		}
-
-		echo "</table>";
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "</div>";
-		}
-
-		echo "</table>";
-		echo "</td>";
-
-		echo "<td><table><tr><td valign='top' class='back'>";
-
-		// n‰ytet‰‰n soveltuvat tryt
-		// tehd‰‰n avainsana query
-		$res2 = t_avainsana("TRY");
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265px;overflow:auto;'>";
-		}
-
-		echo "<table>";
-		echo "<tr><th colspan='2'>".t("Tuoterym‰").":</th></tr>";
-		echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
-
-		while ($rivi = mysql_fetch_array($res2)) {
-			$mul_check = '';
-			if ($mul_try!="") {
-				if (in_array($rivi['selite'],$mul_try)) {
-					$mul_check = 'CHECKED';
-				}
-			}
-
-			echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
-		}
-
-		echo "</table>";
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "</div>";
-		}
-
-		echo "</table>";
-		echo "</td>";
-
-		echo "<td><table><tr><td valign='top' class='back'>";
-
-		// n‰ytet‰‰n soveltuvat tuotemerkit
-		$query = "	SELECT distinct tuotemerkki FROM tuote use index (yhtio_tuotemerkki) WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != '' ORDER BY tuotemerkki";
-		$res2  = mysql_query($query) or die($query);
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265px;overflow:auto;'>";
-		}
-
-		echo "<table>";
-		echo "<tr><th colspan='2'>".t("Tuotemerkki").":</th></tr>";
-		echo "<tr><td><input type='checkbox' name='mul_tmr' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
-
-		while ($rivi = mysql_fetch_array($res2)) {
-			$mul_check = '';
-			if ($mul_tmr!="") {
-				if (in_array($rivi['tuotemerkki'], $mul_tmr)) {
-					$mul_check = 'CHECKED';
-				}
-			}
-
-			echo "<tr><td><input type='checkbox' name='mul_tmr[]' value='$rivi[tuotemerkki]' $mul_check></td><td> $rivi[tuotemerkki] </td></tr>";
-		}
-
-		echo "</table>";
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "</div>";
-		}
-
-		echo "</table>";
-		echo "</td>";
-
-		echo "</tr>";
-		echo "</table>";
-
-		echo "<table>";
-
-		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
-		$vares = mysql_query($query) or pupe_error($query);
-
-		echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"
-			. t('Saat kaikki varastot jos et valitse yht‰‰n')
-			. "</span></th>
-		    <td colspan='3'>";
-
-		$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
-
-	    while ($varow = mysql_fetch_array($vares)) {
-			$sel = '';
-			if (in_array($varow['tunnus'], $varastot)) {
-				$sel = 'checked';
-			}
-
-			echo "<input type='checkbox' name='varastot[]' value='$varow[tunnus]' $sel>$varow[nimitys]<br>\n";
-		}
-		echo "</td></tr>";
-
-		echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-				<td><input type='text' name='ppa' value='$ppa' size='3'></td>
-				<td><input type='text' name='kka' value='$kka' size='3'></td>
-				<td><input type='text' name='vva' value='$vva' size='5'></td>
-				</tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-				<td><input type='text' name='ppl' value='$ppl' size='3'></td>
-				<td><input type='text' name='kkl' value='$kkl' size='3'></td>
-				<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
-
-
-		echo "<tr><th>".t("Listaa tuotteet joilla poikkeamaprosentti on v‰hint‰‰n")."</th>
-				<td colspan='3'><input type='text' size='15' name='prosmuutos' value='$prosmuutos' size='3'> ".t("prosenttia")."</td><td class='back'>".t("Lis‰tyt tuotteet + merkill‰ ja v‰hennetyt tuotteet - merkill‰, tai absoluuttinen.")."</td></tr>";
-
-		echo "<tr><th>".t("Listaa tuotteet joiden kappalem‰‰r‰ on muuttunut v‰hint‰‰n")."</th>
-				<td colspan='3'><input type='text' size='15' name='kplmuutos' value='$kplmuutos' size='3'> ".t("kappaletta")."</td></tr>";
-
-		echo "<tr><th>".t("Listaa vain sarjanumerolliset tuotteet")."</th>
-				<td colspan='3'><input type='checkbox' name='sarjat' $sel></td></tr>";
-
-		echo "<tr><th>".t("Listaa vain varastonarvoon vaikuttaneet inventoinnit")."</th>
-				<td colspan='3'><input type='checkbox' name='vararvomuu' $sel></td></tr>";
-
-		if ($naytanimitys != '') {
-			$naytanimitys = 'checked';
-		}
-
-		echo "<tr><th>".t("N‰yt‰ tuotteen nimitys ja arvonmuutos tulosteella")."</th>
-				<td colspan='3'><input type='checkbox' name='naytanimitys' $naytanimitys></td></tr>";
-
-		echo "<tr><td class='back'><br><input type='submit' value='".t("Aja raportti")."'></td></tr></form></table>";
 	}
 
 	require ("../inc/footer.inc");

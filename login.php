@@ -191,25 +191,25 @@ else {
 echo "</td><td><font class='head'>".t("Sisäänkirjautuminen", $browkieli)."</font><br><br>";
 
 if (isset($usea) and $usea == 1) {
-	$query = "	SELECT yhtio.nimi, yhtio.yhtio
-				FROM kuka, yhtio
-				WHERE kuka.kuka		= '$user'
-				and yhtio.yhtio		= kuka.yhtio
-				and kuka.extranet	= ''
-				ORDER BY nimi";
+	$query = "	SELECT yhtio.nimi, yhtio.yhtio, if(yhtio.jarjestys=0, 9999, yhtio.jarjestys) jarj
+				FROM kuka
+				JOIN yhtio ON yhtio.yhtio = kuka.yhtio
+				WHERE kuka.kuka	= '$user'				
+				and kuka.extranet = ''
+				ORDER BY jarj, yhtio.nimi";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
-		echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä",$browkieli)."!";
+		echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä", $browkieli)."!";
 		exit;
 	}
 
 	echo "<table class='login'>";
-	echo "<tr><td colspan='2'><font class='menu'>".t("Valitse käsiteltävä yritys",$browkieli).":</font></td></tr>";
+	echo "<tr><td colspan='2'><font class='menu'>".t("Valitse käsiteltävä yritys", $browkieli).":</font></td></tr>";
 	echo "<tr>";
 
-	while ($yrow=mysql_fetch_array ($result)) {
-		for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
+	while ($yrow = mysql_fetch_array($result)) {
+		for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
 			echo "<td><font class='menu'>$yrow[$i]</font></td>";
 		}
 		echo "<form action = 'login.php' method='post'>";

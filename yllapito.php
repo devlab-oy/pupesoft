@@ -1112,8 +1112,22 @@
 		else {
 			$ankkuri = "";
 		}
+		
+		if ($toim == "lasku" or $toim == "laskun_lisatiedot") {
+			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
+						function verify(){
+								msg = '".t("Oletko varma, että haluat muuttaa kirjanpitoaineiston tietoja jälkikäteen")."?';
+								return confirm(msg);
+						}
+				</SCRIPT>";
+				
+			$javalisasubmit = "onSubmit = 'return verify()'";	
+		}
+		else {
+			$javalisasubmit = "";
+		}
 
-		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa$ankkuri' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data'>";
+		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa$ankkuri' name='mainform' id='mainform' method = 'post' autocomplete='off' $javalisasubmit enctype='multipart/form-data'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
@@ -1316,7 +1330,7 @@
 		if ($uusi == 1) {
 			$nimi = t("Perusta $otsikko_nappi");
 		}
-		else {
+		else {						
 			$nimi = t("Päivitä $otsikko_nappi");
 		}
 
@@ -1346,6 +1360,11 @@
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhtio") {
 			require ("inc/yhtion_toimipaikat.inc");
+		}
+		
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "lasku") {
+					
+			echo "<iframe id='laskun_lisatiedot_iframe' name='laskun_lisatiedot_iframe' src='yllapito.php?toim=laskun_lisatiedot&from=yllapito&ohje=off&haku[1]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "asiakas") {
@@ -1506,7 +1525,11 @@
 	else {
 		$jcsmaxheigth = "";
 	}
-
+	
+	if ($from == "yllapito" and $toim == "laskun_lisatiedot") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('laskun_lisatiedot_iframe' $jcsmaxheigth);</script>";
+	}
+	
 	if ($from == "yllapito" and $toim == "yhteyshenkilo") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhteyshenkilo_iframe' $jcsmaxheigth);</script>";
 	}

@@ -1,5 +1,11 @@
 <?php
 	$otsikko = 'Laskut';
-	$kentat = 'tunnus, tapvm, kapvm, erpcm, olmapvm, nimi, summa, valkoodi, hyvak1, hyvak2';
-	$jarjestys = 'tunnus';
+	$otsikko_nappi = 'lasku';
+
+	$kentat = 'tunnus, laskunro, tapvm, ytunnus, nimi, summa, valkoodi';
+	$jarjestys = 'laskunro DESC';
+
+	$uusilukko = "LUKOSSA";
+
+	$rajauslisa = " and lasku.tila = 'U' and lasku.alatila='X' and lasku.tapvm >= '$yhtiorow[tilikausi_alku]' and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]' ";
 ?>

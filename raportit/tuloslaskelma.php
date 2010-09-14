@@ -1040,32 +1040,31 @@
 
 				// tulostaan rivi vain jos se kuuluu rajaukseen
 				if (strlen($key) <= $rtaso or $rtaso == "TILI") {
-
-					if ($bottom < 20) {
-						alku();
-					}
-
+					
 					$class = "";
 
 					// laitetaan ykkˆs ja kakkostason rivit tummalla selkeyden vuoksi
 					if (strlen($key) < 3 and $rtaso > 2) $class = "tumma";
 
-					$rivi  = "<tr class='aktiivi'>";
+					$rivi	  = "<tr class='aktiivi'>";
+					$rivi_pdf = "";
 
 					if ($toim == "TASOMUUTOS") {
 						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&tee=muuta&lopetus=$lopetus'>$key</a></td>";
 						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>".t("Lis‰‰ taso tasoon")." $key</a></td>";
 					}
 
-					$tilirivi = "";
+					$tilirivi 	  = "";
+					$tilirivi_pdf = "";
 
 					if ($rtaso == "TILI") {
 
 						$class = "tumma";
 
 						foreach ($tilisumma[$key] as $tilitiedot => $tilisumkau) {
-							$tilirivi2	= "";
-							$tulos 		= 0;
+							$tilirivi2		= "";
+							$tilirivi2_pdf	= "";
+							$tulos			= 0;
 
 							for ($i = $alkukausi; $i < count($kaudet); $i++) {
 								foreach ($sarakkeet as $sarake) {
@@ -1073,6 +1072,7 @@
 									if ($apu == 0) $apu = "";
 
 									$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
+									$tilirivi2_pdf .= number_format($apu, $desi, ',', ' ')."#SARAKE#";
 
 									if ($tilisumkau[$kaudet[$i]][(string) $sarake] != 0) {
 										$tulos++;
@@ -1084,12 +1084,14 @@
 
 								list($tnumero, $tnimi) = explode("###", $tilitiedot);
 
-								$tilirivi .= "<tr>";
+								$tilirivi	  .= "<tr>";
+								$tilirivi_pdf .= "";
 
 								if ($toim == "TASOMUUTOS") {
 									$tilirivi .= "<td class='back' nowrap>$key</td>";
 									$tilirivi .= "<td class='back' nowrap><input type='checkbox' name='tiliarray[]' value=\"'$tnumero'\"></td>";
 								}
+
 								$tilirivi .= "<td nowrap>";
 
 								if ($paakirjalink) {
@@ -1100,11 +1102,13 @@
 								}
 
 								$tilirivi .= "</td>$tilirivi2</tr>";
+								$tilirivi_pdf .= "$tnumero - $tnimi#SARAKE#".$tilirivi2_pdf."#RIVI#";
 							}
 						}
 					}
 
-					$rivi .= "<th nowrap>$value</th>";
+					$rivi		.= "<th nowrap>$value</th>";
+					$rivi_pdf	.= $value."#SARAKE#";
 
 					$tulos = 0;
 
@@ -1135,7 +1139,8 @@
 								$tulos++; // summaillaan t‰t‰ jos meill‰ oli rivill‰ arvo niin osataan tulostaa
 							}
 
-							$rivi .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
+							$rivi	  .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
+							$rivi_pdf .= number_format($apu, $desi,  ',', ' ')."#SARAKE#";
 						}
 					}
 
@@ -1148,45 +1153,57 @@
 					// kakkostason j‰lkeen aina yks tyhj‰ rivi.. paitsi jos otetaan vain kakkostason raportti
 					if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
 						$rivi .= "<tr><td class='back'>&nbsp;</td></tr>";
+						$rivi_pdf .= "#RIVI#";
 					}
 
 					if (strlen($key) == 1 and ($rtaso > 1 or $rtaso == "TILI")) {
 						$rivi .= "<tr><td class='back'><br><br></td></tr>";
+						$rivi_pdf .= "#RIVI##RIVI#";
 					}
 
 					// jos jollain kaudella oli summa != 0 niin tulostetaan rivi
 					if ($tulos > 0 or $toim == "TASOMUUTOS") {
 
 						echo $tilirivi, $rivi;
-
-						$left = 10+(strlen($key)-1)*3;
-
-						list($ff_string, $ff_font) = pdf_fontfit($value, $vaslev-$left, $pdf, $b);
-
-						$pdf->draw_text($left, $bottom, $ff_string, $firstpage, $ff_font);
-
-						$left = $vaslev;
-
-						for ($i = $alkukausi; $i < count($kaudet); $i++) {
-							foreach ($sarakkeet as $sarake) {
-								$oikpos = $pdf->strlen(number_format($summa[$kaudet[$i]][$key][(string) $sarake] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $p);
-
-								if ($i+1 == count($kaudet) and $eiyhteensa == "") {
-									$lev = $yhteensasaraklev;
+												
+						if (trim($tilirivi_pdf.$rivi_pdf) != "") {
+							foreach (explode("#RIVI#", $tilirivi_pdf.$rivi_pdf) as $pdfrivi) {
+								// Vika #SARAKE# pois
+								$pdfrivi = substr($pdfrivi, 0, -8);
+																				    				
+								$pdfsarake_array = explode("#SARAKE#", $pdfrivi);
+							
+								if ($bottom < 20) {
+									alku();
 								}
-								else {
-									$lev = $saraklev;
+							
+								for ($pi = 0; $pi < count($pdfsarake_array); $pi++) {
+                        
+									if ($pi == 0) {
+										$left = 10+(strlen($key)-1)*3;
+									
+										list($ff_string, $ff_font) = pdf_fontfit($pdfsarake_array[$pi], $vaslev-$left, $pdf, $b);
+                        
+										$pdf->draw_text($left, $bottom, $ff_string, $firstpage, $ff_font);
+									
+										$left = $vaslev;
+									}
+									else {									
+										if ($pi+1 == count($pdfsarake_array) and $eiyhteensa == "") {
+											$lev = $yhteensasaraklev;
+										}
+										else {
+											$lev = $saraklev;
+										}
+									
+										$oikpos = $pdf->strlen($pdfsarake_array[$pi], $p);
+										$pdf->draw_text($left-$oikpos+$lev, $bottom, $pdfsarake_array[$pi], $firstpage, $p);
+										$left += $saraklev;
+									}								
 								}
-
-								$pdf->draw_text($left-$oikpos+$lev, $bottom, number_format($summa[$kaudet[$i]][$key][(string) $sarake] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $firstpage, $p);
-								$left += $saraklev;
+                        
+								$bottom -= $rivikork;
 							}
-						}
-
-						$bottom -= $rivikork;
-
-						if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
-							$bottom -= $rivikork;
 						}
 					}
 				}

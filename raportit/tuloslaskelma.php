@@ -879,22 +879,37 @@
 			if (count($kaudet) > 10 and $kaikkikaudet != "") {
 				$p["height"]--;
 				$b["height"]--;
+
 				$saraklev 			= 49;
 				$yhteensasaraklev 	= 66;
-				$vaslev 			= 150;
 				$rivikork 			= 13;
 			}
 			else {
 				$saraklev 			= 60;
 				$yhteensasaraklev 	= 70;
-				$vaslev 			= 160;
 				$rivikork 			= 15;
+			}
+
+			if ((count($kaudet) > 5 and $kaikkikaudet != "") or count($sarakkeet) > 2) {
+				$vaslev = 802;
+			}
+			else {
+				$vaslev = 545;
+			}
+
+			for ($i = $alkukausi; $i < count($kaudet); $i++) {
+				foreach ($sarakkeet as $sarake) {
+					$vaslev -= $saraklev;
+				}
+			}
+
+			if ($vaslev > 300) {
+				$vaslev = 300;
 			}
 
 			if (!function_exists("alku")) {
 				function alku () {
-					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev, $sarakkeet,
-					$asiakasosastot, $asiakasryhmat, $kustannuspaikat, $kohteet, $projektit;
+					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $kaikkikaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev, $sarakkeet;
 
 					if ((count($kaudet) > 5 and $kaikkikaudet != "") or count($sarakkeet) > 2) {
 						$firstpage = $pdf->new_page("842x595");
@@ -927,7 +942,7 @@
 					if ($data) {
 						$image = $pdf->jfif_embed($data);
 
-						if(!$image) {
+						if (!$image) {
 							echo t("Logokuvavirhe");
 						}
 						else {
@@ -1145,7 +1160,11 @@
 						echo $tilirivi, $rivi;
 
 						$left = 10+(strlen($key)-1)*3;
-						$pdf->draw_text($left,  $bottom, $value, $firstpage, $b);
+
+						list($ff_string, $ff_font) = pdf_fontfit($value, $vaslev-$left, $pdf, $b);
+
+						$pdf->draw_text($left, $bottom, $ff_string, $firstpage, $ff_font);
+
 						$left = $vaslev;
 
 						for ($i = $alkukausi; $i < count($kaudet); $i++) {
@@ -1178,7 +1197,7 @@
 			echo "</table>";
 
 			//	Projektikalenterilla ei sallita PDF tulostusta
-			if($from != "PROJEKTIKALENTERI") {
+			if ($from != "PROJEKTIKALENTERI") {
 
 				if ($toim == "TASOMUUTOS") {
 					echo "<br><input type='submit' value='".t("Anna tileille taso")."'></form><br><br>";

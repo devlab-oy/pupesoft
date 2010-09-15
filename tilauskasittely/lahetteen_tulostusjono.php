@@ -77,7 +77,7 @@
 			$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		}
 	}
-
+	
 	if ($tee2 == 'TULOSTA') {
 
 		unset($tilausnumerorypas);
@@ -265,14 +265,18 @@
 				else {
 					echo "<font class='head'>".t("Tulosta keräyslista").":</font><hr>";
 				}
-
-
+				
+				echo "<form method='post' action='$PHP_SELF'>";				
+				echo "<input type='hidden' name='toim' 			value='$toim'>";
+				echo "<input type='hidden' name='jarj' 			value='$jarj'>";
+				echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
+				echo "<input type='hidden' name='tumaa' 		value='$tumaa'>";
+				echo "<input type='hidden' name='tutyyppi' 		value='$tutyyppi'>";
+				echo "<input type='hidden' name='tutoimtapa'	value='$tutoimtapa'>";
+				echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";				
+				echo "<input type='hidden' name='tee2' 			value='TULOSTA'>";
+				
 				echo "<table>";
-
-				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='toim' value='$toim'>";
-				echo "<input type='hidden' name='tee2' value='TULOSTA'>";
-
 				echo "<tr>";
 				if ($logistiikka_yhtio != '') {
 					echo "<th>",t("Yhtiö"),"</th>";
@@ -447,7 +451,7 @@
 
 				echo "<tr>";
 				echo "<th>",t("Tulostin"),"</th>";
-				echo "<td><form method='post' action='$PHP_SELF'>";
+				echo "<td>";
 
 				$query = "	SELECT *
 							FROM kirjoittimet
@@ -469,8 +473,6 @@
 					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 				}
 				echo "</select></td></tr>";
-
-
 				echo "</table><br><br>";
 				echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
 				echo "<input type='submit' name='tila' value='".t("Tulosta")."'></form>";
@@ -907,13 +909,18 @@
 						echo "<$ero valign='top'></$ero>";
 					}
 
-					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<form method='post' action='$PHP_SELF'>";					
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
-					echo "<input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>";
-					echo "<input type='hidden' name='tee2' 			value='VALITSE'>
-							<input type='hidden' name='tilaukset'	value='$tilrow[otunnus]'>
-							<$ero valign='top'><input type='submit' name='tila' 	value='".t("Valitse")."'></form></$ero>";
-
+					echo "<input type='hidden' name='jarj' 			value='$jarj'>";
+					echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
+					echo "<input type='hidden' name='tumaa' 		value='$tumaa'>";
+					echo "<input type='hidden' name='tutyyppi' 		value='$tutyyppi'>";
+					echo "<input type='hidden' name='tutoimtapa' 	value='$tutoimtapa'>";
+					echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";									
+					echo "<input type='hidden' name='lasku_yhtio' 	value='$tilrow[yhtio]'>";
+					echo "<input type='hidden' name='tee2' 			value='VALITSE'>";
+					echo "<input type='hidden' name='tilaukset'		value='$tilrow[otunnus]'>";
+					echo "<$ero valign='top'><input type='submit' name='tila' 	value='".t("Valitse")."'></form></$ero>";
 					echo "<$ero valign='top'></$ero>";
 					echo "</tr>";
 				}
@@ -980,29 +987,31 @@
 
 					echo "</select></$ero>";
 
-					echo "<input type='hidden' name='toim' value='$toim'>";
-					echo "<input type='hidden' name='jarj' value='$jarj'>";
-					echo "<input type='hidden' name='tuvarasto' value='$tuvarasto'>";
-					echo "<input type='hidden' name='tumaa' 	value='$tumaa'>";
-					echo "<input type='hidden' name='tutyyppi' value='$tutyyppi'>";
-					echo "<input type='hidden' name='tutoimtapa' value='$tutoimtapa'>";
-					echo "<input type='hidden' name='tee2' value='TULOSTA'>";
+					echo "<input type='hidden' name='toim' 			value='$toim'>";
+					echo "<input type='hidden' name='jarj' 			value='$jarj'>";
+					echo "<input type='hidden' name='tuvarasto'		value='$tuvarasto'>";
+					echo "<input type='hidden' name='tumaa' 		value='$tumaa'>";
+					echo "<input type='hidden' name='tutyyppi'		value='$tutyyppi'>";
+					echo "<input type='hidden' name='tutoimtapa'	value='$tutoimtapa'>";
+					echo "<input type='hidden' name='karajaus'		value='$karajaus'>";
+					echo "<input type='hidden' name='tee2' 			value='TULOSTA'>";
 					echo "<input type='hidden' name='tulostukseen[]' value='$tilrow[otunnus]'>";
-					echo "<input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>";
-					echo "<$ero valign='top'><input type='submit' value='".t("Tulosta")."'></form></$ero>";
+					echo "<input type='hidden' name='lasku_yhtio' 	value='$tilrow[yhtio]'>";
+					echo "<$ero valign='top'><input type='submit' 	value='".t("Tulosta")."'></form></$ero>";
 
 					echo "<form method='post' action='$PHP_SELF'>";
-					echo "<input type='hidden' name='toim' value='$toim'>";
-					echo "<input type='hidden' name='jarj' value='$jarj'>";
-					echo "<input type='hidden' name='tuvarasto' value='$tuvarasto'>";
-					echo "<input type='hidden' name='tumaa' 	value='$tumaa'>";
-					echo "<input type='hidden' name='tutyyppi' value='$tutyyppi'>";
-					echo "<input type='hidden' name='tutoimtapa' value='$tutoimtapa'>";
-					echo "<input type='hidden' name='etsi' value='$etsi'>";
-					echo "<input type='hidden' name='tee2' value='NAYTATILAUS'>";
-					echo "<input type='hidden' name='vanha_tee2' value=''>";
-					echo "<input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>";
-					echo "<input type='hidden' name='tunnus' value='$tilrow[otunnus]'>";
+					echo "<input type='hidden' name='toim' 			value='$toim'>";
+					echo "<input type='hidden' name='jarj' 			value='$jarj'>";
+					echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
+					echo "<input type='hidden' name='tumaa' 		value='$tumaa'>";
+					echo "<input type='hidden' name='tutyyppi' 		value='$tutyyppi'>";
+					echo "<input type='hidden' name='tutoimtapa'	value='$tutoimtapa'>";
+					echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";
+					echo "<input type='hidden' name='etsi' 			value='$etsi'>";
+					echo "<input type='hidden' name='tee2' 			value='NAYTATILAUS'>";
+					echo "<input type='hidden' name='vanha_tee2' 	value=''>";
+					echo "<input type='hidden' name='lasku_yhtio' 	value='$tilrow[yhtio]'>";
+					echo "<input type='hidden' name='tunnus' 		value='$tilrow[otunnus]'>";
 					echo "<$ero valign='top'><input type='submit' value='".t("Näytä")."'></form></$ero>";
 
 					echo "</tr>";
@@ -1062,10 +1071,15 @@
 				echo "</select></td>";
 
 				$tulostakaikki_tun = urlencode(serialize($tulostakaikki_tun));
-
-				echo "<input type='hidden' name='toim' value='$toim'>";
-				echo "<input type='hidden' name='jarj' value='$jarj'>";
-				echo "<input type='hidden' name='tee2' value='TULOSTA'>";
+				
+				echo "<input type='hidden' name='toim' 			value='$toim'>";
+				echo "<input type='hidden' name='jarj' 			value='$jarj'>";
+				echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
+				echo "<input type='hidden' name='tumaa' 		value='$tumaa'>";
+				echo "<input type='hidden' name='tutyyppi' 		value='$tutyyppi'>";
+				echo "<input type='hidden' name='tutoimtapa'	value='$tutoimtapa'>";
+				echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";
+				echo "<input type='hidden' name='tee2' 			value='TULOSTA'>";
 				echo "<input type='hidden' name='tulostukseen_kaikki' value='$tulostakaikki_tun'>";
 				echo "<td><input type='submit' value='".t("Tulosta kaikki")."'></td></tr></form>";
 

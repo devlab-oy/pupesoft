@@ -1169,10 +1169,11 @@
 
 								if ($sarjarow['laskutettuaika'] == '0000-00-00' or $sarjarow["myyntitunnus"] != 0) {
 									if ($sarjarow['laskutettuaika'] == '0000-00-00') {
-										echo "<input type='hidden' size='5' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
+										echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
 										echo "<font class='message'>**",t("UUSI"),"**</font>";
 									}
 									else {
+										echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
 										echo "<font class='message'>",t("Tilauksella")," $sarjarow[myyntitunnus] $sarjarow[myyntikpl]</font>";
 									}
 								}

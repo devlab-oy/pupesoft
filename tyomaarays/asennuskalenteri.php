@@ -3,12 +3,13 @@
 	// Parametrit
 	require('../inc/parametrit.inc');
 
-
-	$query 	= "	SELECT *
-				FROM lasku
-				WHERE tunnus = '$liitostunnus' and yhtio = '$kukarow[yhtio]'";
-	$result = mysql_query($query) or pupe_error($query);
-	$laskurow = mysql_fetch_array($result);
+	if ((int) $liitostunnus > 0) {
+		$query 	= "	SELECT *
+					FROM lasku
+					WHERE tunnus = '$liitostunnus' and yhtio = '$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$laskurow = mysql_fetch_array($result);
+	}
 
 	// scripti balloonien tekemiseen
 	js_popup();
@@ -22,12 +23,29 @@
 
 	$lis = "";
 
-	if ($tyojono != '') {
-		$lis = " and (avainsana.selite = '' or avainsana.selite = '$tyojono') ";
-	}
-
 	if (!isset($tyojono) and $toim == 'TYOMAARAYS_ASENTAJA') {
 		$lis .= " and avainsana.selitetark = '$kukarow[kuka]' ";
+	}
+
+	if (!isset($tyojono)) {
+		// Onko käyttäjällä oletustyöjono
+		$query = "	SELECT selite
+					FROM avainsana
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					and laji		= 'TYOM_TYOLINJA'
+					and selitetark	= '$kukarow[kuka]'
+					and selite     != ''";
+		$yres = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($yres) > 0) {
+			$yrow = mysql_fetch_array($yres);
+
+			$tyojono = $yrow["selite"];
+		}
+	}
+
+	if (isset($tyojono) and $tyojono != '') {
+		$lis .= " and (avainsana.selite = '' or avainsana.selite = '$tyojono') ";
 	}
 
 	$kires = t_avainsana("TYOM_TYOLINJA", "", $lis." ORDER BY jarjestys, selitetark_2");
@@ -577,8 +595,8 @@
 							tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus, kalenteri.konserni, a2.selitetark_2 tyostatusvari
 							FROM kalenteri
 							LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
-							LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and lasku.tunnus=kalenteri.liitostunnus
-							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+							LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and lasku.tunnus=kalenteri.liitostunnus and lasku.tunnus > 0
+							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus  and tyomaarays.otunnus > 0
 							LEFT JOIN avainsana a2 ON a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus
 							WHERE kalenteri.yhtio = '$kukarow[yhtio]'
 							and kalenteri.tyyppi in ($tyyppilisa)

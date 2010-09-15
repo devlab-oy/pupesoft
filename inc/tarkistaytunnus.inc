@@ -3,7 +3,7 @@
 $tulo    = 0;
 
 // sallitaan vain numerot 0-9
-$ytunnus = ereg_replace("[^0-9]","",$ytunnus);
+$ytunnus = preg_replace("/[^0-9]/", "", $ytunnus);
 
 // tehdään kaheksen merkkiä pitkäksi
 $ytunnus = sprintf("%08.8s",$ytunnus);

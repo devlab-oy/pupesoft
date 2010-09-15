@@ -346,7 +346,7 @@
 						ORDER BY tunnus
 						LIMIT 1";
 			$posres = mysql_query($query) or pupe_error($query);
-				
+
 			if (mysql_num_rows($posres) == 1) {
 				$posrow = mysql_fetch_array($posres);
 			}
@@ -378,10 +378,12 @@
 			//	Tarkastetaan ett‰ meill‰ on ok maksuehto loppulaskutukseen!!!
 			$apuqu = "	SELECT *
 						from maksuehto
-						where yhtio='$kukarow[yhtio]' 
-						and tunnus='$posrow[maksuehto]' 
-						and jaksotettu=''";
+						where yhtio    = '$kukarow[yhtio]'
+						and tunnus     = '$posrow[maksuehto]'
+						and jaksotettu = ''";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+
+			$erlisa = "";
 
 			if (mysql_num_rows($meapu) == 1) {
 				$meapurow = mysql_fetch_array($meapu);
@@ -390,22 +392,13 @@
 				echo "<font class='error'>".t("VIRHE: Maksuposition maksuehto puuttuu!")."</font><br><br>";
 				return 0;
 			}
-						
+
 			if ($meapurow["erapvmkasin"] != "" and $posrow["erpcm"] == "0000-00-00") {
 				echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehdon er‰p‰iv‰ puuttuu")."!!!</font><br><br>";
 				return 0;
 			}
-			else {
-				$apuqu = "	SELECT erpcm
-							from lasku
-							where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
-				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
-				$meapurow = mysql_fetch_array($meapu);
-
-				if ($meapurow["erpcm"] == "0000-00-00") {
-					echo "<font class='error'>".t("VIRHE: Loppulaskun er‰p‰iv‰ puuttuu")."!!!</font><br><br>";
-					return 0;
-				}
+			elseif ($meapurow["erapvmkasin"] != "") {
+				$erlisa = " erpcm = '$posrow[erpcm]',";
 			}
 
 			echo "<font class = 'message'>".t("Loppulaskutetaan tilaus")." $tunnus<br></font><br>";
@@ -447,13 +440,6 @@
 			// P‰ivitet‰‰n positiolle laskutustunnus
 			$query = "UPDATE maksupositio set uusiotunnus='$vikatunnus' where tunnus = '$posrow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
-
-			if ($posrow["erpcm"] != "0000-00-00" and $posrow["erpcm"] != "") {
-				$erlisa = " erpcm = '$posrow[erpcm]',";
-			}
-			else {
-				$erlisa = "";
-			}
 
 			// Alkuper‰inen tilaus/tilaukset menee laskutukseen
 			$query = "	UPDATE lasku

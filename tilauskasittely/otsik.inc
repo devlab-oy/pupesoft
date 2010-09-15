@@ -91,13 +91,13 @@
 			$ytunnus 		= $tnimi;
 			$osoite 		= $tosoite;
 			$postitp 		= $tpostitp;
-			$postino		= $tpostino;		
+			$postino		= $tpostino;
 			$tila 			= "vaihdatoim_asiakas";
 			$muutparametrit = $asiakasid;
 			$kutsuja 		= "";
 		}
 
-		$asiakasid	= "";		
+		$asiakasid	= "";
 		$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO";
 		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
@@ -939,10 +939,11 @@
 						FROM maksupositio
 						WHERE yhtio ='$kukarow[yhtio]'
 						and otunnus ='$srow[jaksotettu]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$maposres = mysql_query($query) or pupe_error($query);
+
 			echo "<tr><td>".t("Maksuehto").":</td>";
 
-			if (mysql_num_rows($result) > 0) {
+			if (mysql_num_rows($maposres) > 0) {
 				echo "<td>".t("Maksusopimus")."</td>";
 				echo "<input type='hidden' name='maksuehto' value = '$srow[maksuehto]'>";
 			}
@@ -990,7 +991,7 @@
 			echo "<tr><td>".t("Eräpäivä").":</td>
 				<td>";
 
-			if ($toim == "YLLAPITO") {
+			if ($toim == "YLLAPITO" or mysql_num_rows($maposres) > 0) {
 				echo t("Ei käytössä");
 			}
 			else {

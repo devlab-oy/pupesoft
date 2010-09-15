@@ -3,19 +3,19 @@
 if(!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
-		
+
 		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift;
-		
-		if ((mysql_field_name($result, $i) == "nimi") or 
-			(mysql_field_name($result, $i) == "maa") or 
-			(mysql_field_name($result, $i) == "ytunnus") or 
-			(mysql_field_name($result, $i) == "oletus_hyvak1") or 
+
+		if ((mysql_field_name($result, $i) == "nimi") or
+			(mysql_field_name($result, $i) == "maa") or
+			(mysql_field_name($result, $i) == "ytunnus") or
+			(mysql_field_name($result, $i) == "oletus_hyvak1") or
 			(mysql_field_name($result, $i) == "oletus_valkoodi")) {
-			
+
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
-			
+
 			if (mysql_field_name($result, $i) == "maa") {
 				$t[$i] = strtoupper($t[$i]);
 				$tmp_maakoodi = $t[$i];
@@ -58,6 +58,7 @@ if(!function_exists("toimitarkista")) {
 
 		if (mysql_field_name($result, $i) == "tilinumero") {
 			$t[$i] = trim($t[$i]);
+
 			if ($tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
 				if ((int)trim($t[$i]) != 0) {
 					$pankkitili = $t[$i];
@@ -106,7 +107,7 @@ if(!function_exists("toimitarkista")) {
 				$hetu = $ytunnus; // hetu talteen
 				require ("tarkistaytunnus.inc");
 
-				if ($ok==0) {
+				if ($ok == 0) {
 
 					// katotaan oliko kyseessä hetu
 					require ("tarkistahetu.inc");
@@ -124,20 +125,21 @@ if(!function_exists("toimitarkista")) {
 			else { // ulkomaalainen saa olla mitä se haluaa
 				$t[$i] = $ytunnus;
 			}
-			$tmp_ytunnus=$t[$i];
-		
+
+			$tmp_ytunnus = $t[$i];
+
 			// Jos ytunnus vaihtuu niin korjataan myös tuotteiden toimittajat
-			if (trim($t[$i]) != "" and $trow[$i] != $t[$i] and $errori != 1 and (int) $tunnus > 0) {				
+			if (trim($t[$i]) != "" and $trow[$i] != $t[$i] and $errori != 1 and (int) $tunnus > 0) {
 				$query = "	UPDATE tuotteen_toimittajat
 							SET toimittaja = '$t[$i]'
 							WHERE tuotteen_toimittajat.yhtio		= '$kukarow[yhtio]'
-							and tuotteen_toimittajat.liitostunnus 	= $tunnus"; 
+							and tuotteen_toimittajat.liitostunnus 	= $tunnus";
 				$vres = mysql_query($query) or pupe_error($query);
-			}							
+			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "ohjeitapankille") {
-		
+
 			if ($tmp_maakoodi=='FI' and strlen($t[$i]) != '') {
 				$virhe[$i] = t("Käytössä vain ulkomaisille toimittajille");
 			}
@@ -148,31 +150,25 @@ if(!function_exists("toimitarkista")) {
 				}
 			}
 		}
-			
+
 		if (mysql_field_name($result, $i) == "ovttunnus") {
 			if ($tmp_maakoodi=='FI') {
-				
-				if (trim($t[$i])=='') {
+
+				if (trim($t[$i]) == '') {
 					// täytetään ovttunnus jos sitä ei ole
-					$t[$i] = "0037". sprintf("%08.0f",$tmp_ytunnus);
+					$t[$i] = "0037".sprintf("%08d", preg_replace("/[^0-9]/", "", $tmp_ytunnus));
 				}
 
-				$query   = "SELECT ytunnus, tunnus 
-							from toimi 
-							where yhtio		= '$kukarow[yhtio]' 
+				$query = "	SELECT ytunnus, tunnus
+							FROM toimi
+							WHERE yhtio		= '$kukarow[yhtio]'
 							and ovttunnus	= '$t[$i]'
 							and tyyppi 	   != 'P'";
 				$sresult = mysql_query($query) or pupe_error($query);
 
-				if ($tunnus == "") { // ollaan lisäämässä uutta
-					$raja=0;
-				}
-				else {
-					$raja=1;
-				}
-
 				if (mysql_num_rows($sresult)>0) {
-					$srowapu = mysql_fetch_array($sresult);
+					$srowapu = mysql_fetch_assoc($sresult);
+
 					// ei löydetty itteämme
 					if ($srowapu['tunnus'] != $tunnus) {
 						$virhe[$i] = t("Samalla ytunnuksella '$tmp_ytunnus' on useita toimittajia! Lisää tarkenne ovt-tunnkseen.");
@@ -220,53 +216,53 @@ if(!function_exists("toimitarkista")) {
 
 			if ($toimtyyppi == "L" and $tunnus > 0 and $errori != 1) {
 				// injisoidaan tuotteen_toimittajat kaikille tuotteille
-				$query = "	INSERT into tuotteen_toimittajat (yhtio, tuoteno, toim_tuoteno, toimittaja, liitostunnus, valuutta, alkuperamaa, tuotekerroin, laatija, luontiaika) 
-							SELECT yhtio, tuoteno, tuoteno, '$tmp_ytunnus', '$tunnus', '$tmp_valkoodi', '$tmp_maakoodi', 1, '$kukarow[kuka]', now() 
-							FROM tuote 
-							WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.ei_saldoa='' and tuote.status != 'P'  
-							ON DUPLICATE KEY UPDATE 
+				$query = "	INSERT into tuotteen_toimittajat (yhtio, tuoteno, toim_tuoteno, toimittaja, liitostunnus, valuutta, alkuperamaa, tuotekerroin, laatija, luontiaika)
+							SELECT yhtio, tuoteno, tuoteno, '$tmp_ytunnus', '$tunnus', '$tmp_valkoodi', '$tmp_maakoodi', 1, '$kukarow[kuka]', now()
+							FROM tuote
+							WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.ei_saldoa='' and tuote.status != 'P'
+							ON DUPLICATE KEY UPDATE
 							tuotteen_toimittajat.liitostunnus 	= $tunnus,
-							tuotteen_toimittajat.toimittaja		= '$tmp_ytunnus', 
-							tuotteen_toimittajat.valuutta		= '$tmp_valkoodi', 
-							tuotteen_toimittajat.alkuperamaa	= '$tmp_maakoodi'"; 
+							tuotteen_toimittajat.toimittaja		= '$tmp_ytunnus',
+							tuotteen_toimittajat.valuutta		= '$tmp_valkoodi',
+							tuotteen_toimittajat.alkuperamaa	= '$tmp_maakoodi'";
 				$vres = mysql_query($query) or pupe_error($query);
 			}
-			
+
 			if ($toimtyyppi == "PP" and $tunnus > 0 and $errori != 1) {
 				// poistetaan tuotteen_toimittajat kaikille tuotteille
-				$query = "	SELECT lasku.yhtio, group_concat(DISTINCT tilausrivi.otunnus) tilaukset 
-							from lasku 
+				$query = "	SELECT lasku.yhtio, group_concat(DISTINCT tilausrivi.otunnus) tilaukset
+							from lasku
 							join tilausrivi on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' and tilausrivi.varattu != 0
-							where lasku.yhtio		= '$kukarow[yhtio]' 
+							where lasku.yhtio		= '$kukarow[yhtio]'
 							and lasku.liitostunnus	= '$tunnus'
 							and lasku.tila = 'O'
-							group by 1";																				
+							group by 1";
 				$tyychkre1 = mysql_query($query) or pupe_error($query);
-								
-				$query = "	SELECT lasku.yhtio, group_concat(DISTINCT lasku.laskunro) tilaukset 
-							from lasku 
+
+				$query = "	SELECT lasku.yhtio, group_concat(DISTINCT lasku.laskunro) tilaukset
+							from lasku
 							where lasku.yhtio		= '$kukarow[yhtio]'
 							and lasku.liitostunnus	= '$tunnus'
 							and lasku.tila 	= 'K'
 							and lasku.alatila != 'X'
 							and lasku.vanhatunnus = 0
-							group by 1";																				
+							group by 1";
 				$tyychkre2 = mysql_query($query) or pupe_error($query);
-								
+
 				if (mysql_num_rows($tyychkre1) == 0 and mysql_num_rows($tyychkre2) == 0) {
-			
+
 					$query = "	DELETE FROM tuotteen_toimittajat
 								WHERE tuotteen_toimittajat.yhtio		= '$kukarow[yhtio]'
-								and tuotteen_toimittajat.liitostunnus 	= $tunnus"; 
+								and tuotteen_toimittajat.liitostunnus 	= $tunnus";
 					$vres = mysql_query($query) or pupe_error($query);
 				}
 				else {
 					$tyychkro1 = mysql_fetch_array($tyychkre1);
 					$tyychkro2 = mysql_fetch_array($tyychkre2);
-					
-					$virhe[$i] = "Tuotteen toimittajia ei voitu poistaa!<br>Tilaukset: ($tyychkro1[tilaukset]) ovat auki.<br>Keikat: ($tyychkro2[tilaukset]) ovat auki.";	
+
+					$virhe[$i] = "Tuotteen toimittajia ei voitu poistaa!<br>Tilaukset: ($tyychkro1[tilaukset]) ovat auki.<br>Keikat: ($tyychkro2[tilaukset]) ovat auki.";
 				}
-			}			
+			}
 		}
 	}
 }

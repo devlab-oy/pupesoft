@@ -872,7 +872,7 @@
 
 				if ($kukarow['hinnat'] == 0) {
 					if ($toim != "LASKU" and $row["summa"] == 0) {
-						
+
 						if ($toim == "OSTO") {
 							$kerroinlisa1 = " * if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) ";
 							$kerroinlisa2 = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$row[liitostunnus]' ";
@@ -881,21 +881,21 @@
 							$kerroinlisa1 = "";
 							$kerroinlisa2 = "";
 						}
-						
+
 						$query = "  SELECT round(sum(tilausrivi.hinta $kerroinlisa1 * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$row[erikoisale]-(tilausrivi.ale*$row[erikoisale]/100))/100))), 2) summa
-									FROM tilausrivi 
+									FROM tilausrivi
 									$kerroinlisa2
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
 									and tilausrivi.otunnus = '$row[tunnus]'
 									and tilausrivi.tyyppi not in ('D','V')";
 						$sumres = mysql_query($query) or pupe_error($query);
 						$sumrow = mysql_fetch_assoc($sumres);
-						
+
 						echo "<$ero valign='top' align='right'>$sumrow[summa]</$ero>";
 					}
 					else {
 						echo "<$ero valign='top' align='right'>$row[summa]</$ero>";
-					}					
+					}
 				}
 
 				$laskutyyppi = $row["tila"];
@@ -2000,6 +2000,13 @@
 
 						//generoidaan lähetteelle ja keräyslistalle rivinumerot
 						if ($tunrow["tunnukset"] != "") {
+
+							$toimitettulisa = "";
+
+							if ($laskurow["clearing"] == "ENNAKKOTILAUS" or $laskurow["clearing"] == "JT-TILAUS") {
+								$toimitettulisa = " and tilausrivi.toimitettu = '' ";
+							}
+
 							$query = "  SELECT tilausrivi.*,
 										round(if (tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 										round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
@@ -2012,6 +2019,7 @@
 										WHERE tilausrivi.otunnus in ('$tunrow[tunnukset]')
 										and tilausrivi.yhtio = '$kukarow[yhtio]'
 										$tyyppilisa
+										$toimitettulisa
 										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 										ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 							$riresult = mysql_query($query) or pupe_error($query);

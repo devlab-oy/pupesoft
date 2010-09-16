@@ -374,6 +374,13 @@
 
 							//generoidaan lähetteelle ja keräyslistalle rivinumerot
 							if ($tunrow["tunnukset"] != "") {
+
+								$toimitettulisa = "";
+
+								if ($laskurow["clearing"] == "ENNAKKOTILAUS" or $laskurow["clearing"] == "JT-TILAUS") {
+									$toimitettulisa = " and tilausrivi.toimitettu = '' ";
+								}
+
 								$query = "  SELECT tilausrivi.*,
 											round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 											round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
@@ -386,10 +393,12 @@
 											WHERE tilausrivi.otunnus in ('$tunrow[tunnukset]')
 											and tilausrivi.yhtio = '$kukarow[yhtio]'
 											$tyyppilisa
+											$toimitettulisa
 											ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 								$riresult = mysql_query($query) or pupe_error($query);
 
 								while ($row = mysql_fetch_array($riresult)) {
+
 									if ($row['toimitettu'] == '') {
 										$row['kommentti'] .= "\n*******".t("Toimitetaan erikseen",$kieli).".*******";
 									}

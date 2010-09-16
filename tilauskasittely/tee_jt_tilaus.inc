@@ -130,7 +130,8 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus = '$isarivirow[otunnus]'";
 					$lisatiedot_result = mysql_query($query) or pupe_error($query);
-
+					$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
+					
 					if ($debug==1) echo t("Perusotsikko lˆytyi")." $otsikkorivi[nimi] $isarivirow[otunnus]<br>";
 
 					$erpcmlisa1 = "";
@@ -149,7 +150,7 @@
 
 						//Jos alkuper‰isell‰ tilauksella on er‰p‰iv‰m‰‰r‰ syˆtetty k‰sin niin huomioidaan se nyt rivien poiminnassa
 						if ($meapurow["erapvmkasin"] != "" and checkdate($erpcmkk, $erpcmpp, $erpcmvv) and $erp > $nyt) {
-							$erpcmlisa1 = " and erpcm = '$otsikkorivi[erpcm]' ";
+							$erpcmlisa1 = " and lasku.erpcm = '$otsikkorivi[erpcm]' ";
 							$erpcmlisa2 = " erpcm = '$otsikkorivi[erpcm]', ";
 						}
 
@@ -168,44 +169,51 @@
 					// Vain saman alkuper‰isen tilauksen rivej‰ samalle otsikolle
 					if ($otsikkorivi['jtkielto'] == "Y") {
 						// v‰‰rink‰ytet‰‰n hyvaksyja_nyt kentt‰‰...
-						$yhdlisa = " and hyvaksyja_nyt = '$otsikkorivi[tunnus]' ";
+						$yhdlisa = " and lasku.hyvaksyja_nyt = '$otsikkorivi[tunnus]' ";
 					}
 					else {
 						$yhdlisa = "";
 					}
 
 					// Tarvitsemmeko uuden otsikon?
-					$query = "	SELECT *
+					$query = "	SELECT lasku.*
 								FROM lasku
-								WHERE yhtio		= '$kukarow[yhtio]' and
-								laatija			= '$kukarow[kuka]' and
-								alatila			= '$alatila' and
-								tila 			= '$tila' and
-								myyja			= '$otsikkorivi[myyja]' and
-								ytunnus			= '$otsikkorivi[ytunnus]' and
-								nimi 			= '$otsikkorivi[nimi]' and
-								nimitark 		= '$otsikkorivi[nimitark]' and
-								osoite 			= '$otsikkorivi[osoite]' and
-								postino			= '$otsikkorivi[postino]' and
-								postitp 		= '$otsikkorivi[postitp]' and
-								toim_nimi		= '$otsikkorivi[toim_nimi]' and
-								toim_nimitark	= '$otsikkorivi[toim_nimitark]' and
-								toim_osoite 	= '$otsikkorivi[toim_osoite]' and
-								toim_postino 	= '$otsikkorivi[toim_postino]' and
-								toim_postitp 	= '$otsikkorivi[toim_postitp]' and
-								toimitustapa 	= '$otsikkorivi[toimitustapa]' and
-								maksuehto 		= '$otsikkorivi[maksuehto]' and
-								vienti	 		= '$otsikkorivi[vienti]' and
-								alv		 		= '$otsikkorivi[alv]' and
-								ketjutus 		= '$otsikkorivi[ketjutus]' and
-								kohdistettu		= '$otsikkorivi[kohdistettu]' and
-								toimitusehto	= '$otsikkorivi[toimitusehto]' and
-								valkoodi 		= '$otsikkorivi[valkoodi]' and
-								vienti_kurssi	= '$otsikkorivi[vienti_kurssi]' and
-								erikoisale		= '$otsikkorivi[erikoisale]' and
-								eilahetetta		= '$isarivirow[suoraan_laskutukseen]' and
-								tunnusnippu		= '$otsikkorivi[tunnusnippu]' and
-								piiri			= '$otsikkorivi[piiri]'
+								JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
+								WHERE lasku.yhtio		= '$kukarow[yhtio]'
+								and lasku.laatija		= '$kukarow[kuka]'
+								and lasku.alatila		= '$alatila'
+								and lasku.tila 			= '$tila'
+								and lasku.myyja			= '$otsikkorivi[myyja]'
+								and lasku.ytunnus		= '$otsikkorivi[ytunnus]'
+								and lasku.nimi 			= '$otsikkorivi[nimi]'
+								and lasku.nimitark 		= '$otsikkorivi[nimitark]'
+								and lasku.osoite 		= '$otsikkorivi[osoite]'
+								and lasku.postino		= '$otsikkorivi[postino]'
+								and lasku.postitp 		= '$otsikkorivi[postitp]'
+								and lasku.toim_nimi		= '$otsikkorivi[toim_nimi]'
+								and lasku.toim_nimitark	= '$otsikkorivi[toim_nimitark]'
+								and lasku.toim_osoite 	= '$otsikkorivi[toim_osoite]'
+								and lasku.toim_postino 	= '$otsikkorivi[toim_postino]'
+								and lasku.toim_postitp 	= '$otsikkorivi[toim_postitp]'
+								and lasku.toimitustapa 	= '$otsikkorivi[toimitustapa]'
+								and lasku.maksuehto 	= '$otsikkorivi[maksuehto]'
+								and lasku.vienti	 	= '$otsikkorivi[vienti]'
+								and lasku.alv		 	= '$otsikkorivi[alv]'
+								and lasku.ketjutus 		= '$otsikkorivi[ketjutus]'
+								and lasku.kohdistettu	= '$otsikkorivi[kohdistettu]'
+								and lasku.toimitusehto	= '$otsikkorivi[toimitusehto]'
+								and lasku.valkoodi 		= '$otsikkorivi[valkoodi]'
+								and lasku.vienti_kurssi	= '$otsikkorivi[vienti_kurssi]'
+								and lasku.erikoisale	= '$otsikkorivi[erikoisale]'
+								and lasku.eilahetetta	= '$isarivirow[suoraan_laskutukseen]'
+								and lasku.tunnusnippu	= '$otsikkorivi[tunnusnippu]'
+								and lasku.piiri			= '$otsikkorivi[piiri]'
+								and laskun_lisatiedot.laskutus_nimi 	= '$lisatiedot_row[laskutus_nimi]'
+								and laskun_lisatiedot.laskutus_nimitark = '$lisatiedot_row[laskutus_nimitark]'
+								and laskun_lisatiedot.laskutus_osoite 	= '$lisatiedot_row[laskutus_osoite]'
+								and laskun_lisatiedot.laskutus_postino 	= '$lisatiedot_row[laskutus_postino]'
+								and laskun_lisatiedot.laskutus_postitp 	= '$lisatiedot_row[laskutus_postitp]'
+								and laskun_lisatiedot.laskutus_maa 		= '$lisatiedot_row[laskutus_maa]'
 								$erpcmlisa1
 								$yhdlisa";
 					$stresult = mysql_query($query) or pupe_error($query);
@@ -424,9 +432,7 @@
 					$query = substr($query,0,-1);
 
 					$stresult = mysql_query($query) or pupe_error($query);
-					$id = mysql_insert_id();
-
-					$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
+					$id = mysql_insert_id();					
 
 					$query = "INSERT INTO laskun_lisatiedot SET ";
 
@@ -576,7 +582,13 @@
 
 							if (trim($orig_laskurow['tunnus']) != "" and $otsikkorivi["osatoimitus"] == "" and strpos($kommentti, t("Tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
 								if (trim($kommentti) != "") $kommentti .= " / ";
-								$kommentti .= t("Tilaus").": ".trim($orig_laskurow['tunnus']);
+								
+								if ($toim == "ENNAKKO") {
+									$kommentti .= t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus']);
+								}
+								else {
+									$kommentti .= t("Tilaus").": ".trim($orig_laskurow['tunnus']);
+								}																
 							}
 
 							if (trim($orig_laskurow['asiakkaan_tilausnumero']) != "" and $otsikkorivi["osatoimitus"] == "") {

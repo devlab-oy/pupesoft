@@ -901,7 +901,13 @@ if (!function_exists('rivi_lahete')) {
 
 		// Trimmataan
 		$row["kommentti"] = trim($row["kommentti"]);
-
+		
+		//Kommentissa voi olla jotain sanoja jotka pit‰‰ k‰‰‰nt‰‰:
+		if ($kieli != $yhtiorow["kieli"]) {
+			$row["kommentti"] = str_replace("Ennakkotilaus:", t("Ennakkotilaus", $kieli).":", $row["kommentti"]);
+			$row["kommentti"] = str_replace("Tilaus:", t("Tilaus", $kieli).":", $row["kommentti"]);
+		}
+		
 		// Tilaajan rivinumero
 		if ($row["tilaajanrivinro"] != 0) {
 			$row["kommentti"] .= "\n".t("Rivinumero", $kieli).": ".$row["tilaajanrivinro"].". ";

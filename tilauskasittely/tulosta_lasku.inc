@@ -767,6 +767,12 @@ if (!function_exists('rivi_original')) {
 
 		$komm = trim($komm);
 
+		//Kommentissa voi olla jotain sanoja jotka pit‰‰ k‰‰‰nt‰‰:
+		if ($kieli != $yhtiorow["kieli"]) {
+			$komm = str_replace("Ennakkotilaus:", t("Ennakkotilaus", $kieli).":", $komm);
+			$komm = str_replace("Tilaus:", t("Tilaus", $kieli).":", $komm);
+		}
+
 		// Jos ALV no yli 500 niin tied‰mme ett‰ t‰m‰ on marginaaliverotusta
 		if ($row["alv"] >= 500) {
 			$komm .= "\n".t("Ei sis‰ll‰ v‰hennett‰v‰‰ veroa", $kieli).".";

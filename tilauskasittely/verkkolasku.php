@@ -1633,7 +1633,7 @@
 							$tilres = mysql_query($query) or pupe_error($query);
 
 							$rivinumerot = array(0 => 0);
-							$rivilaskuri = 0;
+							$rivilaskuri = 1;
 							$rivimaara   = mysql_num_rows($tilres);
 
 							while ($tilrow = mysql_fetch_array($tilres)) {

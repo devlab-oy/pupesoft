@@ -82,7 +82,7 @@
 			$tiednimi = "asiakaslista.xls";
 		}
 		else {
-			$query = "	SELECT tunnus, nimi, asiakasnro, ytunnus,  if(toim_postitp!='',toim_postitp,postitp) postitp, if(toim_postino!=00000,toim_postino,postino) postino, yhtio, myyjanro, email, puhelin
+			$query = "	SELECT tunnus, IF(nimi != toim_nimi, CONCAT(nimi, '<br />', toim_nimi), nimi) nimi, asiakasnro, ytunnus,  if(toim_postitp!='',toim_postitp,postitp) postitp, if(toim_postino!=00000,toim_postino,postino) postino, yhtio, myyjanro, email, puhelin
 						FROM asiakas 
 						WHERE $konsernit 
 						$lisa";

@@ -113,7 +113,7 @@
 		$tpp += 0;
 		$tpv += 0;
 
-		if (isset($gokfrom) and $gokfrom == "palkkatosite") {
+		if (isset($gokfrom) and ($gokfrom == "palkkatosite" or $gokfrom == "avaavatase")) {
 			$gok = 1;
 		}
 
@@ -458,6 +458,14 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$tunnus = mysql_insert_id ($link);
 
+		if (isset($avaavatase) and $avaavatase == 'joo') {
+			$query = "	UPDATE tilikaudet SET
+						avaava_tase = '$tunnus'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tilikausi}'";
+			$avaavatase_result = mysql_query($query) or pupe_error($query);
+		}
+
 		if ($kuva) {
 			// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
 			$query = "UPDATE liitetiedostot set liitostunnus='$tunnus', selite='$selite $summa' where tunnus='$kuva'";
@@ -643,6 +651,11 @@
 
 		echo "<form name='tosite' action='tosite.php' method='post' enctype='multipart/form-data' onSubmit = 'return verify()' autocomplete='off'>\n";
 		echo "<input type='hidden' name='tee' value='I'>\n";
+
+		if ((isset($gokfrom) and $gokfrom == 'avaavatase') or (isset($tilikausi) and is_numeric($tilikausi))) {
+			echo "<input type='hidden' name='avaavatase' value='joo' />";
+			echo "<input type='hidden' name='tilikausi' value='$tilikausi' />";
+		}
 
 		// Uusi tosite
 		// Tehd‰‰n haluttu m‰‰r‰ tiliˆintirivej‰

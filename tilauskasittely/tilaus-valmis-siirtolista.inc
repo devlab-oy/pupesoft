@@ -599,23 +599,26 @@
 
 				// Keräyslistan rivit
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
+					
+					$sorttauskentta = str_replace("as sorttauskentta", "", $sorttauskentta);
+					
 					$querysel = "	tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
 									sum(tilausrivi.tilkpl) tilkpl,
 									sum(tilausrivi.varattu) varattu,
 									sum(tilausrivi.jt) jt,
-									group_concat(tilausrivi.tunnus) tunnus, ";
+									group_concat(tilausrivi.tunnus) tunnus, 
+									min($sorttauskentta) as sorttauskentta, ";
 
 					$lisa = "	and tilausrivi.tyyppi in ($tvs_tyyppi)
-								GROUP BY tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys, sorttauskentta, tuotetyyppi";
+								GROUP BY tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys, tuotetyyppi";
 				}
 				else {
-					$querysel = " tilausrivi.*, ";
+					$querysel = " tilausrivi.*, $sorttauskentta,";
 					$lisa = " ";
 				}
 
 				$query = "	SELECT
 							$querysel
-							$sorttauskentta,
 							if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
 							FROM tilausrivi use index (yhtio_otunnus)
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno

@@ -777,7 +777,7 @@
 	// Nyt selataan
 	if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
-		if ($toim == "asiakasalennus" or $toim == "asiakashinta") {
+		if (($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") and $oikeurow['paivitys'] == 1) {
 			print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 				<!--
 
@@ -974,7 +974,7 @@
 				}
 			}
 
-			if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
+			if (($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") and $oikeurow['paivitys'] == 1) {
 				echo "<th valign='top'>".t("Poista")."</th>";
 			}
 
@@ -983,7 +983,7 @@
 
 		}
 
-		if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
+		if (($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") and $oikeurow['paivitys'] == 1) {
 			echo "<tr><form action='yllapito.php?ojarj=$ojarj$ulisa' name='ruksaus' method='post' onSubmit = 'return verifyMulti()'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1079,14 +1079,14 @@
 				}
 			}
 
-			if ($from == "" and ($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
+			if ($from == "" and ($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") and $oikeurow['paivitys'] == 1) {
 				echo "<td><input type = 'checkbox' name = 'poista_check[]' value = '$trow[0]'></td>";
 			}
 
 			echo "</tr>";
 		}
 
-		if ($from == "" and ($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
+		if ($from == "" and ($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") and $oikeurow['paivitys'] == 1) {
 			$span = mysql_num_fields($result)-2;
 			echo "<tr>";
 			echo "<td class='back'><input type = 'submit' value = '".t("Poista ruksatut tietueet")."'></td>";

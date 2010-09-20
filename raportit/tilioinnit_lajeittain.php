@@ -92,11 +92,8 @@
 
 		$query = "	SELECT tiliointi.tilino, tili.nimi, sum(tiliointi.summa) summa
 					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
-					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio
-						AND lasku.tunnus = tiliointi.ltunnus
-						$laskurajaus)
-					LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio
-						AND tili.tilino = tiliointi.tilino)
+					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus $laskurajaus)
+					LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tili.tilino = tiliointi.tilino)
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 					AND tiliointi.tapvm >= '$vv-$kk-$pp'
 					AND tiliointi.tapvm <= '$lvv-$lkk-$lpp'
@@ -119,7 +116,7 @@
 				echo "<tr class='aktiivi'>";
 				echo "<td>$row[tilino]</td>";
 				echo "<td>$row[nimi]</td>";
-				echo "<td align='right'>". number_format($row[summa], 2, ',', ' ')."</td>";
+				echo "<td align='right'>". number_format($row["summa"], 2, ',', ' ')."</td>";
 				echo "</tr>";
 				$summa += $row["summa"];
 			}
@@ -137,63 +134,69 @@
 		$laskutiedot = "";
 
 		if ($laji == "myynti") {
-			$laskurajaus = "AND lasku.tila = 'U'";
-
-			$laskutiedot = "lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi, vienti";
-		}
-
-		if ($laji == "osto") {
-			$laskurajaus = "AND lasku.tila in ('H','Y','M','P','Q')";
-			$laskutiedot = "concat_ws('<br>', lasku.viesti, lasku.viite) laskunro, lasku.nimi, lasku.tapvm, lasku.summa, lasku.valkoodi";
-		}
-
-		if ($laji == "tosite") {
-			$laskurajaus = "AND lasku.tila = 'X'";
-			$laskutiedot = "group_concat(tiliointi.tilino SEPARATOR '<br>') laskunro, group_concat(tiliointi.selite SEPARATOR '<br>') nimi, group_concat(tiliointi.tapvm SEPARATOR '<br>') tapvm, sum(tiliointi.summa) summa, group_concat(tiliointi.summa SEPARATOR '<br>') valkoodi";
-		}
-
-		if ($laskurajaus != "") {
-
-			$query = "	SELECT lasku.tunnus, $laskutiedot
+			$query = "	SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi, vienti
 						FROM lasku
-						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
-							AND tiliointi.ltunnus = lasku.tunnus
-							and tiliointi.korjattu = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tapvm >= '$vv-$kk-$pp'
 						AND lasku.tapvm <= '$lvv-$lkk-$lpp'
-						$laskurajaus
+						AND lasku.tila = 'U'
+						ORDER BY lasku.tapvm, lasku.tunnus";
+		}
+
+		if ($laji == "osto") {
+			$query = "	SELECT lasku.tunnus, concat_ws('<br>', lasku.viesti, lasku.viite) laskunro, lasku.nimi, lasku.tapvm, lasku.summa, lasku.valkoodi
+						FROM lasku
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						AND lasku.tapvm >= '$vv-$kk-$pp'
+						AND lasku.tapvm <= '$lvv-$lkk-$lpp'
+						AND lasku.tila in ('H','Y','M','P','Q')
+						ORDER BY lasku.tapvm, lasku.tunnus";
+		}
+
+		if ($laji == "tosite") {
+			$query = "	SELECT lasku.tunnus, group_concat(tiliointi.tilino SEPARATOR '<br>') laskunro, group_concat(tiliointi.selite SEPARATOR '<br>') nimi, group_concat(tiliointi.tapvm SEPARATOR '<br>') tapvm, sum(tiliointi.summa) summa, group_concat(tiliointi.summa SEPARATOR '<br>') valkoodi
+						FROM lasku
+						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = '')
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						AND lasku.tapvm >= '$vv-$kk-$pp'
+						AND lasku.tapvm <= '$lvv-$lkk-$lpp'
+						AND lasku.tila = 'X'
 						GROUP BY lasku.tunnus
-						ORDER BY tapvm, lasku.tunnus";
+						ORDER BY lasku.tapvm, lasku.tunnus";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+
+		if ($laji == "myynti" or $laji == "osto" or $laji == "tosite") {
+
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<br><table width = '1000px'>";
+				echo "<br><table>";
 				echo "<tr>";
 				echo "<th>#</th>";
 				echo "<th>".t("Nimi")."</th>";
 				echo "<th>".t("Tapvm")."</th>";
 				echo "<th>".t("Summa")."</th>";
-				echo "<th>".t("vienti")."</th>";
 				echo "<th>".t("Valuutta")."</th>";
-				if($laji == "myynti") {
-					$query = "	SELECT selite
-								FROM avainsana
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND laji = 'ALV'
-								ORDER by jarjestys, selite";
-					$alv_result = mysql_query($query) or pupe_error($query);
+				echo "<th>".t("Vienti")."</th>";
 
-					while ($alv_row = mysql_fetch_array($alv_result)) {
-						echo "<th>".t("Alv")." $alv_row[selite]%</th>";
-					}
+				$query = "	SELECT selite
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND laji = 'ALV'
+							ORDER by jarjestys, selite";
+				$alv_result = mysql_query($query) or pupe_error($query);
 
+				while ($alv_row = mysql_fetch_array($alv_result)) {
+					echo "<th>".t("Alv")." $alv_row[selite]%</th>";
 				}
+
 				echo "</tr>";
 
 				$summa = 0;
 
 				while ($row = mysql_fetch_array($result)) {
+
 					if(in_array($row["vienti"], array("", "A", "B", "C", "J"))) {
 						$row["vienti"] = t("Kotimaa");
 					}
@@ -210,12 +213,12 @@
 					echo "<td nowrap valign='top'>$row[tapvm]</td>";
 					echo "<td nowrap valign='top' align='right'>".number_format($row["summa"], 2, ',', ' ')."</td>";
 					echo "<td nowrap valign='top' align='right'>$row[valkoodi]</td>";
-					echo "<td nowrap valign='top' align='right'>$row[vienti]</td>";
+					echo "<td nowrap valign='top'>$row[vienti]</td>";
+
+					// alvikannat alkuun
+					mysql_data_seek($alv_result, 0);
 
 					if ($laji == "myynti") {
-
-						// alvikannat alkuun
-						mysql_data_seek($alv_result, 0);
 
 						$query = "SELECT ";
 
@@ -230,18 +233,37 @@
 									WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$row[tunnus]'";
 						$alvres = mysql_query($query) or pupe_error($query);
 						$alvrow = mysql_fetch_array($alvres);
+					}
+					else {
 
-						// alvikannat alkuun
-						mysql_data_seek($alv_result, 0);
+						$query = "SELECT ";
 
 						while ($alv_row = mysql_fetch_array($alv_result)) {
-							$verokanta = $alv_row["selite"];
-							echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv$verokanta"], 2, ',', ' ')."</td>";
-							$alvsumma[$verokanta] += $alvrow["alv$verokanta"];
+							$query .= " sum(if(t1.vero=$alv_row[selite], t2.summa, 0)) alv$alv_row[selite], ";
 						}
+
+						// Haetaan  kaikki verotiliöinnit
+						$query .= "	'dummy'
+									FROM tiliointi t1
+									JOIN tiliointi t2 ON t1.yhtio=t2.yhtio and t1.ltunnus=t2.ltunnus and t1.tunnus=t2.aputunnus and t2.korjattu = ''
+									where t1.yhtio	= '$kukarow[yhtio]'
+									and t1.ltunnus	= '$row[tunnus]'
+									and t1.korjattu = ''
+									and t1.vero    != 0";
+						$alvres = mysql_query($query) or pupe_error($query);
+						$alvrow = mysql_fetch_array($alvres);
 					}
 
-					if($laji == "myynti") {
+					// alvikannat alkuun
+					mysql_data_seek($alv_result, 0);
+
+					while ($alv_row = mysql_fetch_array($alv_result)) {
+						$verokanta = $alv_row["selite"];
+						echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv$verokanta"], 2, ',', ' ')."</td>";
+						$alvsumma[$verokanta] += $alvrow["alv$verokanta"];
+					}
+
+					if ($laji == "myynti") {
 						echo "<td nowrap valign='top' class='back'><a href='../tilauskasittely/tulostakopio.php?otunnus=$row[tunnus]&toim=LASKU&tee=NAYTATILAUS'>".t("Näytä lasku")."</a></td>";
 					}
 					else {
@@ -255,26 +277,21 @@
 				echo "<tr>";
 				echo "<th colspan='3'>".t("Yhteensä")."</th>";
 				echo "<th style='text-align:right;' nowrap>". number_format($summa, 2, ',', ' ')."</th>";
-				if($laji == "myynti") {
-					echo "<th style='text-align:right;'></th>";
-					echo "<th style='text-align:right;'></th>";
+				echo "<th></th>";
+				echo "<th></th>";
 
-					// alvikannat alkuun
-					mysql_data_seek($alv_result, 0);
+				// alvikannat alkuun
+				mysql_data_seek($alv_result, 0);
 
-					while ($alv_row = mysql_fetch_array($alv_result)) {
-						echo "<th style='text-align:right;' nowrap>".number_format($alvsumma[$alv_row["selite"]], 2, ',', ' ')."</th>";
-					}
+				while ($alv_row = mysql_fetch_array($alv_result)) {
+					echo "<th style='text-align:right;' nowrap>".number_format($alvsumma[$alv_row["selite"]], 2, ',', ' ')."</th>";
 				}
 				echo "</tr>";
-
 				echo "</table>";
 			}
-
 		}
-
 	}
 
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 
 ?>

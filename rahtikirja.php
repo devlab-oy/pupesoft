@@ -579,7 +579,7 @@
 
 			if (mysql_num_rows($result) == 1) {
 
-				$row = mysql_fetch_assoc($result);
+				$row = $toimitustaparow = mysql_fetch_assoc($result);
 
 				// Säilytetään tämä
 				$laskurow_rakirsyotto_original = $laskurow;
@@ -630,8 +630,9 @@
 			}
 
 			// Katotaan haluttiinko osoitelappuja tai lähetteitä
-			$oslappkpl = (int) $oslappkpl;
-			$lahetekpl = (int) $lahetekpl;
+			$oslappkpl 		= (int) $oslappkpl;
+			$termoslappkpl 	= (int) $termoslappkpl;
+			$lahetekpl 		= (int) $lahetekpl;
 
 			//tulostetaan faili ja valitaan sopivat printterit
 			if ($laskurow['pakkaamo'] > 0 and $laskurow['varasto'] != '' and $laskurow['tulostusalue'] != '') {
@@ -680,18 +681,22 @@
 				}
 
 				//haetaan lähetteen tulostuskomento
-				$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+				$query   = "SELECT * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$apuprintteri'";
 				$kirres  = mysql_query($query) or pupe_error($query);
 				$kirrow  = mysql_fetch_assoc($kirres);
 				$komento = $kirrow['komento'];
 
-				$apuprintteri = $rakirsyotto_oslapp_tulostin;
-
 				//haetaan osoitelapun tulostuskomento
-				$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+				$query  = "SELECT * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$rakirsyotto_oslapp_tulostin'";
 				$kirres = mysql_query($query) or pupe_error($query);
 				$kirrow = mysql_fetch_assoc($kirres);
 				$oslapp = $kirrow['komento'];
+
+				//haetaan terminaaliosoitelapun tulostuskomento
+				$query  = "SELECT * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$rakirsyotto_termoslapp_tulostin'";
+				$kirres = mysql_query($query) or pupe_error($query);
+				$kirrow = mysql_fetch_assoc($kirres);
+				$termoslapp = $kirrow['komento'];
 			}
 
 			if ($rakirsyotto_lahete_tulostin != '' and $komento != "" and $lahetekpl > 0) {
@@ -938,14 +943,6 @@
 					$oslaput_email = $oslappkpl;
 				}
 
-				$tiedot = "";
-
-				$query = "	SELECT *
-							FROM toimitustapa
-							WHERE yhtio = '$kukarow[yhtio]' AND selite = '$laskurow[toimitustapa]'";
-				$result = mysql_query($query) or pupe_error($query);
-				$toimitustaparow = mysql_fetch_assoc($result);
-
 				for ($i = 0; $i < $oslaput_email; $i++) {
 					if ($toimitustaparow['osoitelappu'] == 'intrade') {
 						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
@@ -953,17 +950,30 @@
 					else {
 						require ("tilauskasittely/osoitelappu_pdf.inc");
 					}
+				}
+			}
 
-					if (($toimitustaparow["tulostustapa"] == "L" or $toimitustaparow["tulostustapa"] == "K") and $toimitustaparow["toim_nimi"] != '') {
+			// Tulostetaan osoitelappu
+			if ($rakirsyotto_termoslapp_tulostin != "" and $termoslapp != '' and $termoslappkpl > 0) {
+				$tunnus = $laskurow["tunnus"];
 
-						$tiedot = "toimitusta";
+				$oslaput_email = 1;
 
-						if ($toimitustaparow['osoitelappu'] == 'intrade') {
-							require('tilauskasittely/osoitelappu_intrade_pdf.inc');
-						}
-						else {
-							require ("tilauskasittely/osoitelappu_pdf.inc");
-						}
+				if ($termoslappkpl > 0 and $termoslappkpl != '' and $termoslapp != 'email') {
+					$termoslapp .= " -#$termoslappkpl ";
+				}
+				elseif ($termoslappkpl > 0 and $termoslappkpl != '' and $termoslapp == 'email') {
+					$oslaput_email = $termoslappkpl;
+				}
+
+				$tiedot = "toimitusta";
+
+				for ($i = 0; $i < $oslaput_email; $i++) {
+					if ($toimitustaparow['osoitelappu'] == 'intrade') {
+						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+					}
+					else {
+						require ("tilauskasittely/osoitelappu_pdf.inc");
 					}
 				}
 			}
@@ -2011,6 +2021,8 @@
 
 			echo "<th align='left'>".t("Toimitustapa")."</th><td>\n";
 
+			$toitarow = array();
+
 			echo "<select name='toimitustapa' onchange='submit()'>\n";
 
 			while ($row = mysql_fetch_assoc($result)) {
@@ -2018,11 +2030,13 @@
 					$tulostustapa 	= $row['tulostustapa'];
 					$select 		= 'selected';
 					$toimitustapa 	= $row['selite'];
+					$toitarow		= $row;
 				}
 				elseif ($toimitustapa == $row['selite']) {
 					$tulostustapa 	= $row['tulostustapa'];
 					$select 		= 'selected';
 					$toimitustapa 	= $row['selite'];
+					$toitarow		= $row;
 				}
 				else $select = '';
 
@@ -2086,12 +2100,14 @@
 						ORDER BY tyyppi, nimitys";
 			$result = mysql_query($query) or pupe_error($query);
 
+			echo "<tr><th align='left'>".t("Varasto")."</th>";
+
 			// jos löytyy enemmän kuin yksi, tehdään varasto popup..
 			if (mysql_num_rows($result) > 1) {
-				echo "<tr><th align='left'>".t("Varasto")."</th><td>";
-				echo "<select name='tulostuspaikka'>";
 
-				$query = "select tulostuspaikka from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$id' limit 1";
+				echo "<td><select name='tulostuspaikka'>";
+
+				$query = "SELECT tulostuspaikka from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$id' limit 1";
 				$rarrr = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($rarrr)==1) {
@@ -2116,7 +2132,7 @@
 
 				$tulostuspaikka = $row["tunnus"];
 
-				echo "<input type='hidden' name='tulostuspaikka' value='$row[tunnus]'>";
+				echo "<td><input type='hidden' name='tulostuspaikka' value='$row[tunnus]'>$row[nimitys]</td>";
 			}
 
 			if (strtoupper($tulostustapa) == 'H' or strtoupper($tulostustapa) == 'K') {
@@ -2141,11 +2157,6 @@
 
 				$pres  = mysql_query($query) or pupe_error($query);
 				$print = mysql_fetch_assoc($pres);
-
-				// haetaan toimitustavan tiedot
-				$query    = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
-				$toitares = mysql_query($query) or pupe_error($query);
-				$toitarow = mysql_fetch_assoc($toitares);
 
 				// haetaan rahtikirjan tyyppi
 				$query    = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
@@ -2541,13 +2552,13 @@
 
 					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 				}
+				mysql_data_seek($kirre, 0);
 
 				echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></td></tr>";
-
-				mysql_data_seek($kirre, 0);
 			}
 
-			$oslappkpl 	= $yhtiorow['oletus_rahtikirja_oslappkpl'];
+			$oslappkpl = $yhtiorow['oletus_rahtikirja_oslappkpl'];
+			$termoslappkpl = 0;
 
 			echo "<tr><th>".t("Osoitelappu").":</th><td>";
 			echo "<select name='rakirsyotto_oslapp_tulostin'>";
@@ -2561,8 +2572,27 @@
 
 				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 			}
+			mysql_data_seek($kirre, 0);
 
 			echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></td></tr>";
+
+			if (($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") and $toitarow["toim_nimi"] != '') {
+				echo "<tr><th>".t("Terminaaliosoitelappu").":</th><td>";
+				echo "<select name='rakirsyotto_termoslapp_tulostin'>";
+				echo "<option value=''>".t("Ei tulosteta")."</option>";
+
+				while ($kirrow = mysql_fetch_assoc($kirre)) {
+					$sel = "";
+					if ($kirrow['tunnus'] == $oslappu_printteri) {
+						$sel = "SELECTED";
+					}
+
+					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+				}
+				mysql_data_seek($kirre, 0);
+
+				echo "</select> ".t("Kpl").": <input type='text' size='4' name='termoslappkpl' value='$termoslappkpl'></td></tr>";
+			}
 
 			if ($vakrow['vaktuotteet'] != '') {
 		    	echo "<tr><td class='back'><font class='info'>",t("Tulosta myös yleisrahtikirja"),"<br/>",t("VAK-postipaketille"),":</font></td>";

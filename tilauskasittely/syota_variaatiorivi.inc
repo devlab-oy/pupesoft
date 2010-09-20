@@ -23,7 +23,7 @@
 		// haetaan kaikki tuotteet, jotka kuuluu t‰h‰n rypp‰‰seen
 		$query = "	SELECT *
 					FROM tuotteen_avainsanat
-					JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno)
+					JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno and tuote.status not in ('P','X'))
 					WHERE tuotteen_avainsanat.yhtio = '$kukarow[yhtio]'
 					AND tuotteen_avainsanat.laji = 'parametri_variaatio'
 					AND tuotteen_avainsanat.kieli = '$kukarow[kieli]'
@@ -167,7 +167,7 @@
 		// haetaan kaikki tuotteet, jotka halutaan n‰h‰
 		$query = "	SELECT distinct tuote.tuoteno, tuote.nimitys
 					FROM tuotteen_avainsanat
-					JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno)
+					JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno and tuote.status not in ('P','X'))
 					$variaatio_hakulisa
 					WHERE tuotteen_avainsanat.yhtio = '$kukarow[yhtio]'
 					AND tuotteen_avainsanat.laji = 'parametri_variaatio'

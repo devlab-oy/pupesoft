@@ -46,7 +46,6 @@ if (!function_exists("pakolliset_sarakkeet")) {
 					else {
 						$wherelliset = array("YTUNNUS", "ASIAKASNRO");
 					}
-
 				}
 				else {
 					$pakolliset = array("YTUNNUS");
@@ -145,44 +144,45 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$wherelliset = array("TYYPPI", "ATUNNUS", "TUOTENO");
 				break;
 			case "tuotteen_orginaalit" :
-				$pakolliset = array("TUOTENO", "ORIG_TUOTENO");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$pakolliset  = array("TUOTENO", "ORIG_TUOTENO");
+				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("TUOTENO", "ORIG_TUOTENO");
 				break;
 			case "autodata" :
 				$pakolliset = array("AUTODATAID");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$kielletyt  = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "autodata_tuote" :
 				$pakolliset = array("TUOTERYHMA", "OP_REF");
-				$kielletyt = array();
+				$kielletyt  = array();
 				break;
 			case "rekisteritiedot" :
 				$pakolliset = array("REKNO", "MAA");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$kielletyt  = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "sanakirja" :
 				$pakolliset = array("FI");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-				$eiyhtiota = "TRIP";
+				$kielletyt  = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$eiyhtiota  = "TRIP";
 				break;
 			case "tuotteen_toimittajat" :
-				$pakolliset = array("TUOTENO", "TOIMITTAJA");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$pakolliset  = array("TUOTENO", "TOIMITTAJA");
+				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("TUOTENO", "TOIMITTAJA");
 				$joinattavat = array("TUOTENO" => "tuote");
 				break;
 			case "kuka" :
 				$pakolliset = array("KUKA");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$kielletyt  = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "todo" :
 				$pakolliset = array("KUVAUS", "PRIORITEETTI", "PYYTAJA");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$kielletyt  = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "hinnasto" :
-				$pakolliset = array("TUOTENO", "HINTA");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$pakolliset  = array("TUOTENO", "HINTA");
+				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("LAJI", "MAA", "VALKOODI");
 				$joinattavat = array("TUOTENO" => "tuote");
 				break;
 			case "rahtisopimukset" :

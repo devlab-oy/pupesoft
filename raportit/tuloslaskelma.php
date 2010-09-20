@@ -64,9 +64,7 @@
 					<option $sel[2] value='2'>".t("Vastattavaa")." (".t("Velat").")</option>
 					</select>";
 
-			echo "</td>
-					</tr>";
-
+			echo "</td></tr>";
 
 			if (!isset($plvv)) {
 				$query = "	SELECT *
@@ -248,7 +246,9 @@
 			echo "<tr><th valign='top'>".t("Raportointitaso")."</th>
 					<td><select name='rtaso'>";
 
-			$query = "SELECT max(length(taso)) taso from taso where yhtio = '$kukarow[yhtio]'";
+			$query = "	SELECT max(length(taso)) taso
+						from taso
+						where yhtio = '$kukarow[yhtio]'";
 			$vresult = mysql_query($query) or pupe_error($query);
 			$vrow = mysql_fetch_assoc($vresult);
 
@@ -800,7 +800,8 @@
 				$query = "	SELECT tilino, nimi, tunnus
 						 	FROM tili
 							WHERE yhtio = '$kukarow[yhtio]'
-							and $tilikarttataso = BINARY '$tasorow[taso]'";
+							and $tilikarttataso = BINARY '$tasorow[taso]'
+							ORDER BY tilino";
 				$tilires = mysql_query($query) or pupe_error($query);
 
 				while ($tilirow = mysql_fetch_assoc($tilires)) {
@@ -1040,7 +1041,7 @@
 
 				// tulostaan rivi vain jos se kuuluu rajaukseen
 				if (strlen($key) <= $rtaso or $rtaso == "TILI") {
-					
+
 					$class = "";
 
 					// laitetaan ykkös ja kakkostason rivit tummalla selkeyden vuoksi
@@ -1165,43 +1166,43 @@
 					if ($tulos > 0 or $toim == "TASOMUUTOS") {
 
 						echo $tilirivi, $rivi;
-												
+
 						if (trim($tilirivi_pdf.$rivi_pdf) != "") {
 							foreach (explode("#RIVI#", $tilirivi_pdf.$rivi_pdf) as $pdfrivi) {
 								// Vika #SARAKE# pois
 								$pdfrivi = substr($pdfrivi, 0, -8);
-																				    				
+
 								$pdfsarake_array = explode("#SARAKE#", $pdfrivi);
-							
+
 								if ($bottom < 20) {
 									alku();
 								}
-							
+
 								for ($pi = 0; $pi < count($pdfsarake_array); $pi++) {
-                        
+
 									if ($pi == 0) {
 										$left = 10+(strlen($key)-1)*3;
-									
+
 										list($ff_string, $ff_font) = pdf_fontfit($pdfsarake_array[$pi], $vaslev-$left, $pdf, $b);
-                        
+
 										$pdf->draw_text($left, $bottom, $ff_string, $firstpage, $ff_font);
-									
+
 										$left = $vaslev;
 									}
-									else {									
+									else {
 										if ($pi+1 == count($pdfsarake_array) and $eiyhteensa == "") {
 											$lev = $yhteensasaraklev;
 										}
 										else {
 											$lev = $saraklev;
 										}
-									
+
 										$oikpos = $pdf->strlen($pdfsarake_array[$pi], $p);
 										$pdf->draw_text($left-$oikpos+$lev, $bottom, $pdfsarake_array[$pi], $firstpage, $p);
 										$left += $saraklev;
-									}								
+									}
 								}
-                        
+
 								$bottom -= $rivikork;
 							}
 						}

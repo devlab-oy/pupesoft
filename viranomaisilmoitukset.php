@@ -205,7 +205,6 @@ if ($tee == "VSRALVYV") {
 		$eumaat = $row[0];
 
 		$query = "	SELECT
-		 			tuote.tuotetyyppi,
 					if(tuote.tuotetyyppi in ('','R'), 'JOO', 'EI') tav_pal,
 					lasku.ytunnus,
 					if(lasku.maa='', asiakas.maa, lasku.maa) as maa,
@@ -223,7 +222,7 @@ if ($tee == "VSRALVYV") {
 					and lasku.tapvm >= '$alkupvm'
 					and lasku.tapvm < '$loppupvm'
 					and lasku.vienti = 'E'
-					GROUP BY 1,2,3,4,5
+					GROUP BY 1,2,3,4
 					ORDER BY tav_pal DESC, tuote.tuotetyyppi, lasku.ytunnus, asiakas.nimi ";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -240,20 +239,19 @@ if ($tee == "VSRALVYV") {
 			$edtav_pal	= "XXX";
 
 			echo "<table>";
-
-			$ttyyppi = array('A' => t("Päiväraha"), 'B' => t("Muu kulu"), ''  => t("Normaali / Valmiste"), 'R' => t("Raaka-aine"), 'K' => t("Palvelu"), 'M' => t("Muu/Informatiivinen"));
+			echo "<tr><td class='back' colspan='5'><br>Normaalit, Valmisteet ja Raaka-Aineet (ilmoitetaan verottajalle):</td></tr>";
 
 			while ($row = mysql_fetch_array($result)) {
 
 				if ($row["tav_pal"] != $edtav_pal or $edtav_pal == "XXX") {
 
-					if ($edtav_pal != "XXX") echo "<tr><th colspan='4'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_tav)."</th><th></th></tr>";
+					if ($edtav_pal != "XXX") echo "<tr><th colspan='3'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_tav)."</th><th></th></tr>";
 
 					if ($edtav_pal != "XXX") {
-						echo "<tr><td class='back' colspan='6'><br><br><br>Palvelutuotteet (ei ilmoiteta verottajalle):</td></tr>";
+						echo "<tr><td class='back' colspan='5'><br><br><br>Palvelutuotteet (ei ilmoiteta verottajalle):</td></tr>";
 					}
 
-					echo "<tr><th>".t("Tuotetyyppi")."</th><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";
+					echo "<tr><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";
 				}
 
 				$edtav_pal = $row["tav_pal"];
@@ -287,10 +285,10 @@ if ($tee == "VSRALVYV") {
 					$ok = 1;
 				}
 				elseif($row["maa"] != "" and $row["asiakkaan_maa"] == "X") {
-					echo "<tr><td>".$ttyyppi[strtoupper($row["tuotetyyppi"])]."</td><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maa haettu asiakkaan tiedoista")."</font></td></tr>";
+					echo "<tr><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maa haettu asiakkaan tiedoista")."</font></td></tr>";
 				}
 				else {
-					echo "<tr><td>".$ttyyppi[strtoupper($row["tuotetyyppi"])]."</td><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td></tr>";
+					echo "<tr><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td></tr>";
 				}
 
 				if ($row["maa"] != "") {
@@ -312,8 +310,8 @@ if ($tee == "VSRALVYV") {
 				}
 			}
 
-			echo "<tr><th colspan='4'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_pal)."</th><th></th></tr>";
-			echo "<tr><th colspan='4'></th><td class='tumma' align='right'>".sprintf("%.2f", ($summa_tav+$summa_pal))."</th><th></th></tr>";
+			echo "<tr><th colspan='3'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_pal)."</th><th></th></tr>";
+			echo "<tr><th colspan='3'></th><td class='tumma' align='right'>".sprintf("%.2f", ($summa_tav+$summa_pal))."</th><th></th></tr>";
 			echo "</table>";
 
 			if ($ok == 0) {

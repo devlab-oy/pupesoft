@@ -229,7 +229,9 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	$salres = mysql_query($query) or pupe_error($query);
 	$salrow = mysql_fetch_array($salres);
 
-	$query  = "	SELECT tuote.*, if(tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin
+	$query  = "	SELECT tuote.*, 
+				if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) alv,
+				if(tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin
 				from tuote
 				LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
 				where tuote.yhtio	= '$kukarow[yhtio]'

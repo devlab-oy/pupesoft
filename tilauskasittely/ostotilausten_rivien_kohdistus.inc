@@ -670,7 +670,7 @@ if ($tila == '') {
 	// jos ollaan liitetty jo vaihto-omaisuuslasku, käytetään sen vientikenttää
 	if ($kulurow["vienti"] != "") $laskurow["vienti"] = $kulurow["vienti"];
 
-	$alvti = " tuote.alv ";
+	$alvti = " if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) ";
 
 	// jos kysessä on kotimainen vaihto-omaisuuslasku, pitää lisätä tuotteen hintaan alvi
 	if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
@@ -682,7 +682,7 @@ if ($tila == '') {
 			$alvit = $simualv;
 		}
 		else {
-			$alvit = "tuote.alv";
+			$alvit = "if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv)";
 		}
 
 		if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
@@ -700,7 +700,7 @@ if ($tila == '') {
 	else {
 		$alvit = 0;
 	}
-
+	
 	$query = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale *
 				(1+(if ((SELECT max(kaytetty) kaytetty
 						FROM sarjanumeroseuranta

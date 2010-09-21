@@ -908,7 +908,7 @@ document.getElementById('toimnapit').innerHTML = nappikeikka;
 </SCRIPT>";
 
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 }
 
 ?>

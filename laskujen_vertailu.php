@@ -40,9 +40,9 @@
 
 	if (!isset($laskunro)) $laskunro = '';
 	if (!isset($hyvaksyja)) $hyvaksyja = '';
-	if (!isset($app)) $app = date('d', strtotime('-1 month'));
-	if (!isset($akk)) $akk = date('m', strtotime('-1 month'));
-	if (!isset($avv)) $avv = date('Y', strtotime('-1 month'));
+	if (!isset($app)) $app = date('d', strtotime('-1 day'));
+	if (!isset($akk)) $akk = date('m', strtotime('-1 day'));
+	if (!isset($avv)) $avv = date('Y', strtotime('-1 day'));
 	if (!isset($lpp)) $lpp = date('d');
 	if (!isset($lkk)) $lkk = date('m');
 	if (!isset($lvv)) $lvv = date('Y');
@@ -704,18 +704,19 @@
 		echo "<th>",t("Vertailu"),"</th>";
 		echo "</tr>";
 
-		while ($trow = mysql_fetch_array($result)) {
-			echo "<tr class='aktiivi'>";
-			echo "<td>{$trow['laskunro']}</td>";
-			echo "<td>{$trow['hyvaknimi']}</td>";
-			echo "<td>{$trow['nimi']}</td>";
-			echo "<td align='right'>{$trow['kotisumma']}</td>";
-
-			echo "<td valign='top'>";
-
+		while ($trow = mysql_fetch_assoc($result)) {
 			list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $trow['tunnus']);
 
 			if ($invoice != FALSE and $invoice != 'ei_loydy_edia') {
+
+				echo "<tr class='aktiivi'>";
+				echo "<td>{$trow['laskunro']}</td>";
+				echo "<td>{$trow['hyvaknimi']}</td>";
+				echo "<td>{$trow['nimi']}</td>";
+				echo "<td align='right'>{$trow['kotisumma']}</td>";
+
+				echo "<td valign='top'>";
+
 				if (count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
 					$ok = 'ok';
 
@@ -734,16 +735,13 @@
 				else {
 					echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}'>",t("Eroja"),"</a>";
 				}
+
+				echo "</td>";
+				echo "</tr>";
 			}
 			elseif ($invoice == 'ei_loydy_edia') {
 				echo "<font class='error'>".t("Tilaus ei löydy")."</font>";
 			}
-			else {
-				echo "&nbsp;";
-			}
-
-			echo "</td>";
-			echo "</tr>";
 		}
 		echo "</table><br />";
 	}

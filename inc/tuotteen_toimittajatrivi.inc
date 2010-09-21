@@ -71,16 +71,43 @@
 					FROM valuu
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY jarjestys";
-	        $vresult = mysql_query($query) or pupe_error($query);
-	        $ulos = "<td><select name='$nimi'>";
-	        while ($vrow=mysql_fetch_array($vresult)) {
-		        $sel="";
-		        if ($trow[$i] == $vrow[0]) {
-		                $sel = "selected";
-		        }
-	        	$ulos .= "<option value = '$vrow[0]' $sel>$vrow[0]</option>";
-	        }
+		$vresult = mysql_query($query) or pupe_error($query);
+		$ulos = "<td><select name='$nimi'>";
+
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[0]</option>";
+		}
+		
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "osto_alv") {
+		$query = "	SELECT distinct selite
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and laji = 'ALV'
+					ORDER BY selite+0, laji, jarjestys, selite";
+		$vresult = mysql_query($query) or pupe_error($query);
+		$ulos = "<td><select name='$nimi'>";
+		
+		$ulos .= "<option value = '-1'>".t("Tuotteen oletus")."</option>";
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
+			}
+			
+			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[0] %</option>";
+		}
+		
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
 ?>

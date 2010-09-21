@@ -1,6 +1,6 @@
 <?php
 
-	/* FILEFORMAATTI:
+	/* FILEFORMAATTI: (ilman sarakeotsikoita)
 	Tuoteno (pakollinen)
 	M‰‰r‰ (pakollinen)
 	Arvioitu toimitusp‰iv‰ vvvv-kk-pp
@@ -10,8 +10,19 @@
 	Var
 	Kommentti
 	*/
-	
-	
+
+	/* VAIHTOEHTOINEN FILEFORMAATTI: (sarakeotsikoilla)
+	Tuoteno (pakollinen)
+	M‰‰r‰ (pakollinen)
+	Arvioitu toimitusp‰iv‰ vvvv-kk-pp
+	Nimitys
+	Hinta
+	Ale
+	Netto
+	Var
+	Kommentti
+	*/
+
 	if ($tee == "file") {
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$timeparts = explode(" ",microtime());
@@ -45,12 +56,12 @@
 			}
 
 			// luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
-			$excelrivi[][] = array();
+			$excelrivi = array();
 
 			if (strtoupper($ext) == "XLS") {
 				for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {
 					for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-						$excelrivi[$excei-1][$excej] = $data->sheets[0]['cells'][$excei][$excej];
+						$excelrivi[$excei][$excej] = $data->sheets[0]['cells'][$excei][$excej];
 					}
 				}
 			}
@@ -73,13 +84,71 @@
 				fclose($file);
 			}
 
+			$filetyyppi = "";
+			$rivilask1 = 1;
+
 			foreach ($excelrivi as $rivi) {
 
 				$tila 	 = '';
 				$valinta = '';
 
-				$tuoteno = trim($rivi[0]);
-				$kpl	 = str_replace(",", ".", $rivi[1]);
+				//Detektoidaan tiedostomuoto
+				if ($filetyyppi == ""
+					and stripos($rivi[0], "tuote") !== FALSE
+					and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
+					and stripos($rivi[2], "p‰iv‰") !== FALSE
+					and stripos($rivi[3], "nimi") !== FALSE) {
+
+					$filetyyppi = "KAKKONEN";
+
+					$ind_Tuoteno 	= 0;
+					$ind_Maara 		= 1;
+					$ind_Arvioitu 	= 2;
+					$ind_Hinta 		= 4;
+					$ind_Ale 		= 5;
+					$ind_Netto 		= 6;
+					$ind_Var 		= 7;
+					$ind_Kommentti	= 8;
+
+					// Skipataan otsikot
+					continue;
+				}
+				elseif ($filetyyppi == ""
+					and stripos($rivi[0], "tuote") !== FALSE
+					and (stripos($rivi[1], "kpl") !== FALSE or stripos($rivi[1], "m‰‰r‰") !== FALSE)
+					and stripos($rivi[2], "p‰iv‰") !== FALSE
+					and stripos($rivi[3], "hinta") !== FALSE) {
+
+					$filetyyppi = "YKSPISTEVITONEN";
+
+					$ind_Tuoteno 	= 0;
+					$ind_Maara 		= 1;
+					$ind_Arvioitu 	= 2;
+					$ind_Hinta 		= 3;
+					$ind_Ale 		= 4;
+					$ind_Netto 		= 5;
+					$ind_Var 		= 6;
+					$ind_Kommentti	= 7;
+
+					// Skipataan otsikot
+					continue;
+				}
+				elseif ($filetyyppi == "") {
+
+					$filetyyppi = "YKK÷NEN";
+
+					$ind_Tuoteno 	= 0;
+					$ind_Maara 		= 1;
+					$ind_Arvioitu 	= 2;
+					$ind_Hinta 		= 3;
+					$ind_Ale 		= 4;
+					$ind_Netto 		= 5;
+					$ind_Var 		= 6;
+					$ind_Kommentti	= 7;
+				}
+
+				$tuoteno = trim($rivi[$ind_Tuoteno]);
+				$kpl	 = str_replace(",", ".", $rivi[$ind_Maara]);
 
 				$toimaika			= "";
 				$kerayspvm			= "";
@@ -98,20 +167,20 @@
 				$jtkielto 		 	= $laskurow['jtkielto'];
 
 				if ($kukarow["extranet"] == "") {
-					$toimaika 	= $rivi[2];
-					$hinta		= str_replace(",", ".", $rivi[3]);
-					$ale	  	= str_replace(",", ".", $rivi[4]);
-					$netto 	  	= strtoupper(trim($rivi[5]));
-					$var  		= strtoupper(trim($rivi[6]));
-					$kommentti	= trim($rivi[7]);
+					$toimaika 	= $rivi[$ind_Arvioitu];
+					$hinta		= str_replace(",", ".", $rivi[$ind_Hinta]);
+					$ale	  	= str_replace(",", ".", $rivi[$ind_Ale]);
+					$netto 	  	= strtoupper(trim($rivi[$ind_Netto]));
+					$var  		= strtoupper(trim($rivi[$ind_Var]));
+					$kommentti	= trim($rivi[$ind_Kommentti]);
 
 					if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
-						echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: P, J ja H").".<br>";
+						echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: P, J ja H").". ".t("Rivill‰").": $rivilask1. '$var'<br>";
 						$var = '';
 					}
 
 					if ($netto != '' and $netto != 'N') {
-						echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N")."<br>";
+						echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N").". ".t("Rivill‰").": $rivilask1. '$netto'<br>";
 						$netto = '';
 					}
 				}
@@ -190,6 +259,9 @@
 						echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
 					}
 				}
+
+
+				$rivilask1++;
 			}
 
 			$tuoteno	= '';

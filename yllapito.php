@@ -1440,13 +1440,21 @@
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			
+			// Jamppa s‰‰t‰‰
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_alkio' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
+			$res = mysql_query($queryoik) or pupe_error($queryoik);
+
+			if (mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_alkio_iframe' name='tuotteen_alkio_iframe' src='yllapito.php?toim=tuotteen_alkio&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; height: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			// JAMPAN s‰‰tˆ loppuu
 		}
 
 		echo "</td></tr>";
 		echo "</table>";
 
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
-		if ($toim == "avainsana" or
+		if ($toim == "tuotteen_alkio" or
+			$toim == "avainsana" or
 			$toim == "tili" or
 			$toim == "taso" or
 			$toim == "asiakasalennus" or

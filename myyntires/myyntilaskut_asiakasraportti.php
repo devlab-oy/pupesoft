@@ -59,24 +59,25 @@
 			$html = t("Myöhässä maksettuja laskuja").": ".sprintf('%.0f', $maksunopeus)."%";
 			$kuvaurl = "<img valign='bottom' src='${palvelin2}pics/$kuva'>";
 
-			return array ($kuvaurl, $html);
+			return array($kuvaurl, $html);
 		}
 
 		echo "<font class='head'>".t("Asiakasraportit myyntilaskuista")."</font><hr>";
 
 		if ($ytunnus != '' and (int) $asiakasid == 0) {
 			$tila = "tee_raportti";
-			$lopetus = "${palvelin2}myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//tee=";
+
 			require ("inc/asiakashaku.inc");
-			$tunnus = $asiakasid;
-			if ($ytunnus == "") exit;
+
+			if ($ytunnus == "") {
+				$tila = "";
+			}
 		}
 
 		if ($tila == 'tee_raportti') {
 
-			if ((int) $tunnus != 0) {
-				$tunnus = (int) $tunnus;
-				$haku_sql = "tunnus='$tunnus'";
+			if ((int) $asiakasid > 0) {
+				$haku_sql = "tunnus='$asiakasid'";
 			}
 			else {
 				$ytunnus = mysql_real_escape_string($ytunnus);
@@ -93,19 +94,29 @@
 
 				$asiakasrow = mysql_fetch_array($result);
 
-				$query = "	SELECT group_concat(tunnus) tunnukset, count(*) kpl
-							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]'
-							and ytunnus = '$asiakasrow[ytunnus]'";
-				$result = mysql_query($query) or pupe_error($query);
-				$asiakasrow2 = mysql_fetch_array($result);
+				// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
+				js_openFormInNewWindow();
 
-			  	$tunnus 	= $asiakasrow['tunnus'];
+				$asiakasid 	= $asiakasrow['tunnus'];
 			  	$ytunnus 	= $asiakasrow['ytunnus'];
-				$tunnukset 	= $asiakasrow2['tunnukset'];
-				$nimet		= $asiakasrow2['kpl'];
 
-				//kaatotilin saldo
+				if ($alatila == "T") {
+					$tunnukset 	= $asiakasid;
+					$nimet		= 1;
+				}
+				else {
+					$query = "	SELECT group_concat(tunnus) tunnukset, count(*) kpl
+								FROM asiakas
+								WHERE yhtio = '$kukarow[yhtio]'
+								and ytunnus = '$asiakasrow[ytunnus]'";
+					$result = mysql_query($query) or pupe_error($query);
+					$asiakasrow2 = mysql_fetch_array($result);
+
+					$tunnukset 	= $asiakasrow2['tunnukset'];
+					$nimet		= $asiakasrow2['kpl'];
+				}
+
+				// Kaatotilin saldo
 				if ($savalkoodi != "") {
 					$savalkoodi = mysql_real_escape_string($savalkoodi);
 					$salisa = " and valkoodi='$savalkoodi' ";
@@ -164,10 +175,16 @@
 						}
 					}
 				}
+				
+				$asinfolisa = "";
 
+				if ($alatila == "T") {
+					$asinfolisa = "&asiakasid=$asiakasid";
+				}
+				
 				echo "<table>
 					<tr>
-					<th rowspan='$riveja'><a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$ytunnus'>$asiakasrow[nimi]</a></td>
+					<th rowspan='$riveja'><a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$ytunnus$asinfolisa&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>$asiakasrow[nimi]</a></td>
 					<td rowspan='$riveja'>".t("Kaatotilillä")."</td>";
 
 				if (mysql_num_rows($kaatoresult) > 1) { // Valuuttasummia
@@ -188,9 +205,7 @@
 						echo "<td align='right'>$kaato[summa]</td>";
 					}
 				}
-
-
-
+				
 				if (mysql_num_rows($result) > 1) {
 					$riveja = mysql_num_rows($result) + 1;
 				}
@@ -205,13 +220,13 @@
 					}
 				}
 
-				echo "
-					<tr>
+				echo "<tr>
 					<th rowspan='$riveja'>$ytunnus ($nimet)</td>
 					<td rowspan='$riveja'>".t("Myöhässä olevia laskuja yhteensä")."</td>";
 
 				if (mysql_num_rows($result) > 1) { // Valuuttasummia
 					$kotisumma = 0;
+					
 					while ($kok = mysql_fetch_array($result)) {
 						echo "<td align='right'>$kok[eraantynytsumma_valuutassa]</td><td>$kok[valkoodi]</td></tr>";
 						$kotisumma += $kok['eraantynytsumma'];
@@ -220,6 +235,7 @@
 				}
 				else {
 					$kok = mysql_fetch_array($result);
+					
 					if ($riveja == 2) {
 						echo "<td align='right'>$kok[eraantynytsumma_valuutassa]</td><td>$kok[valkoodi]</td></tr>";
 						echo "<tr><td align='right'>$kok[eraantynytsumma]</td><td>$yhtiorow[valkoodi]</td></tr>";
@@ -230,6 +246,7 @@
 				}
 
 				if (mysql_num_rows($result) > 0) mysql_data_seek($result,0);
+				
 				echo "
 					<tr>
 					<th rowspan='$riveja'>$asiakasrow[osoite]</td>
@@ -237,6 +254,7 @@
 
 				if (mysql_num_rows($result) > 1) { // Valuuttasummia
 					$kotisumma = 0;
+
 					while ($kok = mysql_fetch_array($result)) {
 						echo "<td align='right'>$kok[avoinsumma_valuutassa]</td><td>$kok[valkoodi]</td></tr>";
 						$kotisumma += $kok['avoinsumma'];
@@ -245,6 +263,7 @@
 				}
 				else {
 					$kok = mysql_fetch_array($result);
+
 					if ($riveja == 2) {
 						echo "<td align='right'>$kok[avoinsumma_valuutassa]</td><td>$kok[valkoodi]</td></tr>";
 						echo "<tr><td align='right'>$kok[avoinsumma]</td><td>$yhtiorow[valkoodi]</td></tr>";
@@ -257,8 +276,9 @@
 				echo "<tr>
 					<th>$asiakasrow[postino] $asiakasrow[postitp]</td>
 					<td colspan='2'></td></tr>";
+
 				echo "<tr>
-					<th></th><td colspan='2'><a href='".$palvelin2."raportit/asiakasinfo.php?ytunnus=$ytunnus'>".t("Asiakkaan myyntitiedot")."</a></td>
+					<th></th><td colspan='2'><a href='".$palvelin2."raportit/asiakasinfo.php?ytunnus=$ytunnus$asinfolisa&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>".t("Asiakkaan myyntitiedot")."</a></td>
 					</tr>";
 
 				echo "<table><tr><td class='back'>";
@@ -306,11 +326,13 @@
 				list ($naama, $nopeushtml) = laskeMaksunopeus($ytunnus, $kukarow["yhtio"]);
 
 				echo "<br>$naama<br>$nopeushtml</td>";
-				echo "<form action='' method='post'><td class='back'>
-				<input type='hidden' name='lopetus' value='$lopetus'>
-				<input type='hidden' name = 'tiliote' value='1'>
-				<input type='hidden' name = 'ytunnus' value='$ytunnus'>
-				<input type='submit' value='".t("Tulosta tiliote")."'></td></form>";
+				echo "<td class='back'><form id='tulosta_tiliote' name='tulosta_tiliote' method='post'>
+						<input type='hidden' name = 'tee' value = 'NAYTATILAUS'>
+						<input type='hidden' name = 'tiliote' value = '1'>
+						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
+						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
+						<input type='hidden' name = 'alatila' value = '$alatila'>
+						<input type='submit' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\"></form></td>";
 				echo "</tr></table><br>";
 
 				//avoimet laskut
@@ -379,6 +401,7 @@
 							FROM lasku
 							WHERE yhtio ='$kukarow[yhtio]'
 							and tila = 'U'
+							and alatila = 'X'
 							and liitostunnus in ($tunnukset)
 							$mapvmlisa
 							$lisa
@@ -388,8 +411,11 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				echo "<table>";
-				echo "<form action = '$PHP_SELF?tila=$tila&tunnus=$tunnus&ojarj=".$ojarj.$ulisa."' method = 'post'>";
-				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+				echo "<form action = '$PHP_SELF?ojarj=".$ojarj.$ulisa."' method = 'post'>
+						<input type='hidden' name = 'tila' value='$tila'>
+						<input type='hidden' name = 'asiakasid' value='$asiakasid'>
+						<input type='hidden' name = 'alatila' value='$alatila'>
+						<input type='hidden' name='lopetus' value='$lopetus'>";
 				echo "<tr>
 						<th>".t("Näytä").":</th>
 						<td>
@@ -431,19 +457,27 @@
 				echo "</form>";
 				echo "</table><br>";
 
-				echo "<table cellpadding='2'>";
+				echo "<table>";
 				echo "<tr>";
-				echo "<form action = '$PHP_SELF?tila=$tila&tunnus=$tunnus&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&lopetus=$lopetus' method = 'post'>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=0".$ulisa."&lopetus=$lopetus'>".t("Laskunro")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=1".$ulisa."&lopetus=$lopetus'>".t("Pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=2".$ulisa."&lopetus=$lopetus'>".t("Eräpäivä")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=3".$ulisa."&lopetus=$lopetus'>".t("Summa")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("summa")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6".$ulisa."&lopetus=$lopetus'>".t("Maksu")."<br>".t("pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=7".$ulisa."&lopetus=$lopetus'>".t("Ikä")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=8".$ulisa."&lopetus=$lopetus'>".t("Korko")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9".$ulisa."&lopetus=$lopetus'>".t("Korkolasku")."<br>".t("pvm")."</a></th>";
+				echo "<form action = '$PHP_SELF' method = 'post'>
+						<input type='hidden' name = 'tila' value='$tila'>
+						<input type='hidden' name = 'asiakasid' value='$asiakasid'>
+						<input type='hidden' name = 'valintra' value='$valintra'>
+						<input type='hidden' name = 'valuutassako' value='$valuutassako'>
+						<input type='hidden' name = 'savalkoodi' value='$savalkoodi'>
+						<input type='hidden' name = 'alatila' value='$alatila'>
+						<input type='hidden' name='lopetus' value='$lopetus'>";
+
+				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=0".$ulisa."&lopetus=$lopetus'>".t("Laskunro")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=1".$ulisa."&lopetus=$lopetus'>".t("Pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=2".$ulisa."&lopetus=$lopetus'>".t("Eräpäivä")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=3".$ulisa."&lopetus=$lopetus'>".t("Summa")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("summa")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6".$ulisa."&lopetus=$lopetus'>".t("Maksu")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=7".$ulisa."&lopetus=$lopetus'>".t("Ikä")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=8".$ulisa."&lopetus=$lopetus'>".t("Korko")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9".$ulisa."&lopetus=$lopetus'>".t("Korkolasku")."<br>".t("pvm")."</a></th>";
 				echo "<th valign='top'>".t("Osasuoritukset")."</th>";
 
 				echo "<td class='back'></td></tr>";
@@ -470,7 +504,7 @@
 				while ($maksurow = mysql_fetch_array ($result)) {
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tunnus=$tunnus//tila=tee_raportti//lopetus=$lopetus'>$maksurow[laskunro]</a></td>";
+					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>$maksurow[laskunro]</a></td>";
 
 					echo "<td align='right'>".tv1dateconv($maksurow["tapvm"])."</td>";
 					echo "<td align='right'>".tv1dateconv($maksurow["erpcm"])."</td>";
@@ -570,12 +604,24 @@
 			$formi = 'haku';
 			$kentta = 'ytunnus';
 
+			js_popup(-100);
+
 			/* hakuformi */
 			echo "<br><form name='$formi' action='$PHP_SELF' method='GET'>";
-			echo t("Etsi asiakasta nimellä tai y-tunnuksella").": ";
 			echo "<input type='hidden' name='alatila' value='etsi'>";
-			echo "<input type='text' name='ytunnus' value='$asiakas->ytunnus'>";
-			echo "<input type='submit' value='".t("Etsi")."'>";
+			echo "<table>";
+			echo "<tr><th>".t("Etsi asiakasta").":</th>";
+			echo "<td><input type='text' name='ytunnus'> ",asiakashakuohje(),"</td>";
+			echo "<td class='back'></td></tr>";
+
+			echo "<tr><th>".t("Asiakasraportin rajaus").":</th>";
+			echo "<td><select name='alatila'>
+				<option value='Y'>".t("Ytunnuksella")."</option>
+				<option value='T' $sel[T]>".t("Asiakkaalla")."</option>
+				</select></td>";
+			echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
+
+			echo "</table>";
 			echo "</form>";
 		}
 	}

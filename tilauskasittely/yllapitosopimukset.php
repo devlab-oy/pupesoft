@@ -38,7 +38,7 @@
 		$laskuta_message = "";
 
 		foreach ($laskutapvm as $pointteri => $tapahtumapvm) {
-			
+
 			$edtapvmpp = "";
 			$edtapvmkk = "";
 			$edtapvmvv = "";
@@ -46,12 +46,12 @@
 			$setapvmpp = "";
 			$setapvmkk = "";
 			$setapvmvv = "";
-			
+
 			unset($ipp);
 			unset($edipp);
 			unset($seikk);
 			unset($seipp);
-			
+
 			$tilausnumero = $laskutatun[$pointteri];
 			list($tapvmvv,$tapvmkk,$tapvmpp) = explode("-", $tapahtumapvm);
 
@@ -69,7 +69,7 @@
 			$ipp = array_search( (int) $tapvmpp, $sopimus_pp);
 			$ikk = array_search( (int) $tapvmkk, $sopimus_kk);
 
-			
+
 			//	Ratkaistaan edellinen kausi
 			if($ipp > 0) {
 				$edipp = $ipp-1;
@@ -102,12 +102,12 @@
 			else {
 				$seipp = $ipp+1;
 				$setapvmpp = $sopimus_pp[$seipp];
-				$setapvmkk = $sopimus_kk[$ikk];										
+				$setapvmkk = $sopimus_kk[$ikk];
 			}
-			
+
 			//	Onko edellinen kuukausi viimevuodelta?
 			if($edtapvmkk > $tapvmkk) {
- 				$edtapvmvv = $tapvmvv - 1; 
+ 				$edtapvmvv = $tapvmvv - 1;
 			}
 			else {
 				$edtapvmvv = $tapvmvv;
@@ -115,55 +115,55 @@
 
 			//	Onko seuraava kuukausi ensivuodella?
 			if($setapvmkk < $tapvmkk) {
- 				$setapvmvv = $tapvmvv + 1; 
+ 				$setapvmvv = $tapvmvv + 1;
 			}
 			else {
 				$setapvmvv = $tapvmvv;
 			}
-			
+
 			//	Katsotaan, ett‰ t‰m‰ aika ei ole ennen tai j‰lkeen sopimuksen voimassaoloajan..
 			$edstamp	= strtotime("$edtapvmvv-$edtapvmkk-$edtapvmpp");
 			$sestamp	= strtotime("$setapvmvv-$setapvmkk-$setapvmpp");
-			
-			
+
+
 			if($edstamp <= $soprow["sopimus_alkupvm"]) {
 				$edtapvmpp = date("d", $soprow["sopimus_alkupvm"]);
 				$edtapvmkk = date("m", $soprow["sopimus_alkupvm"]);
-				$edtapvmvv = date("Y", $soprow["sopimus_alkupvm"]);			
+				$edtapvmvv = date("Y", $soprow["sopimus_alkupvm"]);
 			}
-			
+
 			if($sestamp >= $soprow["sopimus_loppupvm"] and $soprow["sopimus_loppupvm"] > 0) {
 				$setapvmpp = date("d", $soprow["sopimus_loppupvm"]);
 				$setapvmkk = date("m", $soprow["sopimus_loppupvm"]);
-				$setapvmvv = date("Y", $soprow["sopimus_loppupvm"]);			
+				$setapvmvv = date("Y", $soprow["sopimus_loppupvm"]);
 			}
-			
+
 			unset($from);
 			unset($to);
-			
+
 			//	Korjataan kommentti
 			$from[]	= "/%ed/";
 			$to[]	= "$edtapvmpp.$edtapvmkk.$edtapvmvv - ".date("d.m.Y", strtotime("$tapvmvv-$tapvmkk-".($tapvmpp-1)));
 
 			$from[]	= "/%se/";
 			$to[]	= "$tapvmpp.$tapvmkk.$tapvmvv - ".date("d.m.Y", strtotime("$setapvmvv-$setapvmkk-".($setapvmpp-1)));
-			
+
 			//	Jos ei kirjoiteta oikein, poistetaan muuttuja
 			$from[]	= "/%[\w]{2}/";
 			$to[]	= "";
-						
+
 			// monistetaan soppari
 			$ok = kopioi_tilaus($tilausnumero, array(	"viesti" => array("from" => $from, "to" => $to),
 														"comments" => array("from" => $from, "to" => $to),
 														"sisviesti1" => array("from" => $from, "to" => $to),
 														"sisviesti2" => array("from" => $from, "to" => $to),
-													),	
+													),
 												array(	"kommentti" => array("from" => $from, "to" => $to)
 												));
-						
+
 			if ($ok !== FALSE) {
 
-				$laskuta_message .= "<font class='message'>Monistetaan sopimus $tilausnumero ($tapvmpp.$tapvmkk.$tapvmvv)";
+				$laskuta_message .= "<font class='message'>".t("Monistetaan sopimus")." $tilausnumero ($tapvmpp.$tapvmkk.$tapvmvv)";
 
 				// p‰ivitet‰‰n sopparipohjalle, ett‰ sit‰ on jo k‰yettty
 				$query  = "	UPDATE lasku
@@ -234,11 +234,11 @@
 					$laskutakaikki 	= "KYLLA";
 					$silent		 	= "KYLLA";
 
-					$laskuta_message .= ", laskutetaan tilaus $ok p‰iv‰lle ".date("d.m.Y").".</font><br>";
-					require("verkkolasku.php");					
+					$laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("p‰iv‰lle")." ".date("d.m.Y").".</font><br>";
+					require("verkkolasku.php");
 				}
 				else {
-					$laskuta_message .= ", lasku j‰tettiin avoimeksi.</font><br>";
+					$laskuta_message .= ", ".t("lasku j‰tettiin avoimeksi").".</font><br>";
 				}
 			}
 		}
@@ -248,7 +248,7 @@
 	}
 
 	// n‰ytet‰‰n sopparit
-	$query = "	SELECT *, 
+	$query = "	SELECT *,
 				concat_ws('<br>', lasku.ytunnus, concat_ws(' ',lasku.nimi,lasku.nimitark), if(lasku.nimi!=lasku.toim_nimi, concat_ws(' ',lasku.toim_nimi,lasku.toim_nimitark), NULL), if(lasku.postitp!=lasku.toim_postitp, lasku.toim_postitp, NULL)) nimi,
 				lasku.tunnus laskutunnus,
 				round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
@@ -306,16 +306,16 @@
 		echo "<br><table>";
 
 		echo "<tr>";
-		echo "<th>sopimus</th>";
-		echo "<th>ytunnus</th>";
-		echo "<th>nimi</th>";
-		echo "<th>alkupvm</th>";
-		echo "<th>loppupvm</th>";
-		echo "<th>kk</th>";
-		echo "<th>pv</th>";
-		echo "<th>arvo</th>";
-		echo "<th>laskutettu (laskunro)</th>";
-		echo "<th>laskuttamatta</th>";
+		echo "<th>".t("sopimus")."</th>";
+		echo "<th>".t("ytunnus")."</th>";
+		echo "<th>".t("nimi")."</th>";
+		echo "<th>".t("alkupvm")."</th>";
+		echo "<th>".t("loppupvm")."</th>";
+		echo "<th>".t("kk")."</th>";
+		echo "<th>".t("pv")."</th>";
+		echo "<th>".t("arvo")."</th>";
+		echo "<th>".t("laskutettu")." (laskunro)</th>";
+		echo "<th>".t("laskuttamatta")."</th>";
 		echo "</tr>";
 
 		$pointteri = 0; // pointteri
@@ -334,7 +334,7 @@
 			echo "<td valign='top'>";
 			// kaunistelua
 			if ($row["sopimus_loppupvm"] == '0000-00-00') {
-				echo "Toistaiseksi";
+				echo t("Toistaiseksi");
 			}
 			else {
 				echo tv1dateconv($row["sopimus_loppupvm"]);
@@ -380,7 +380,7 @@
 					// katotaan ollaanko t‰m‰ lasku laskutettu
 					$query = "	SELECT *
 								FROM lasku
-								WHERE yhtio  	 = '$kukarow[yhtio]' 
+								WHERE yhtio  	 = '$kukarow[yhtio]'
 								and liitostunnus = '$row[liitostunnus]'
 								and tila         = 'L'
 								and alatila      in ('X','D')
@@ -428,7 +428,7 @@
 			echo "</tr>";
 		}
 
-		echo "<tr><th colspan='9'>Valitse kaikki</th><th><input type='checkbox' name='lasku' onclick='toggleAll(this);'></th></tr>";
+		echo "<tr><th colspan='9'>".t("Valitse kaikki")."</th><th><input type='checkbox' name='lasku' onclick='toggleAll(this);'></th></tr>";
 
 		echo "</table>";
 
@@ -441,12 +441,12 @@
 
 		echo "<br>".t("ƒl‰ aja laskutusta").": <input type='checkbox' name='jatakesken' value='JOO'>";
 
-		echo "<br><input type='submit' value='Laskuta'>";
+		echo "<br><input type='submit' value='".t("Laskuta")."'>";
 		echo "</form>";
 
 	}
 	else {
-		echo "Ei yll‰pitosopimuksia.";
+		echo t("Ei yll‰pitosopimuksia").".";
 	}
 
 	// jos tullaan t‰‰lt‰ itsest‰ niin n‰ytet‰‰n footer

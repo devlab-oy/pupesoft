@@ -1445,7 +1445,7 @@
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_alkio' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-			if (mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_alkio_iframe' name='tuotteen_alkio_iframe' src='yllapito.php?toim=tuotteen_alkio&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; height: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			if (mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_alkio_iframe' name='tuotteen_alkio_iframe' src='yllapito.php?toim=tuotteen_alkio&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&toim2=tuote' style='width: 600px; height: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			// JAMPAN säätö loppuu
 		}
 

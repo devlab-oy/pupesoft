@@ -72,7 +72,7 @@ if (is_numeric($asiakasid) and $asiakasid > 0) {
 }
 elseif ($ytunnus != '') {
 	if (substr($ytunnus,0,1) == "£") {
-		// jos eka merkki £ etsitään laskun tunnuksella
+		// jos eka merkki £ etsitään tilausnumerolla
 		// eka merkki pois alusta
 		$ytunnus = substr($ytunnus, 1);
 
@@ -88,7 +88,7 @@ elseif ($ytunnus != '') {
 	}
 
 	if (substr($ytunnus,0,1) == "*") {
-		// jos eka merkki on * etsitään laskuilta asiakastietoja
+		// jos eka merkki on * etsitään laskuilta asiakastietoja nimellä
 
 		// eka merkki pois alusta
 		$ytunnus = substr($ytunnus, 1);

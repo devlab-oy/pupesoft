@@ -47,7 +47,7 @@ if (isset($KatNimi) AND trim($KatNimi) AND $tee == 'paakat' AND isset($laji) AND
 // lis‰t‰‰n kategorialle lapsi    
 if (isset($Lnimi) AND trim($Lnimi) AND isset($laji) AND trim($laji)){
 	LisaaLapsi($ISI,$laji, $kukarow, $Lnimi,$plft, $subd,$koodi);
-	$tee = '';
+	$tee = ''; 
 } 
 // poistaa ja upgradettaa alemmat lapset isommaksi.
 if (isset($tee) and $tee == 'poista' and isset($ISI) AND trim($laji)){
@@ -127,29 +127,36 @@ if (isset($ISI) AND trim($ISI) != "" AND isset($tee) and $tee == 'taso') {
 if (isset($laji) AND trim($laji) == '' ) {
 	unset($tee);
 }
-
-if (!isset($tee)) {
+// Tarkistetaan ett‰ toim muuttujan sis‰ltˆ tulee t‰nne saakka ja haetaan tarkka lajinimi kannasta.
+if(isset($toim)) {
+	
+	$toimiq = "select selite from avainsana where laji='dynaaminen_puu' AND selite like '$toim%' AND yhtio='$kukarow[yhtio]'";
+	$toimir = mysql_query($toimiq) or pupe_error($toimiq);
+	$toimirow = mysql_fetch_assoc($toimir);
+	$laji = $toimirow['selite'];
+}	
+/*
+if (!isset($tee) AND !isset($toim)) {
 	
 	$avainsanaresult = t_avainsana('dynaaminen_puu');
 	
 	echo "<form method='POST'>";
 	echo "<table><tr><th>",t('Valitse p‰‰luokka'),"</th>";
 	echo "<td>";
-	
+
 	echo "<select name='laji'><option value='' >",t('Valitse Kategoriasi'),"</option>";
 	while ($rou = mysql_fetch_assoc($avainsanaresult)) {
-		echo "<option value='{$rou['selite']}'>{$rou['selitetark']}</option>";
+		echo "<option value='{$rou['selite']}'>{$rou['selite']}</option>";
 	} 
 	echo "</select>";
-	
+
 	echo "</td></tr>";
 	echo "<tr><td></td><td><input type='submit' value='",t('HAE'),"' /></td></tr>";
 	echo "<input type='hidden' name='tee' value='haetaa' />";
 	echo "</table></form>";	
-	
 }
-
-else {
+*/
+if (isset($toim)){
 	
 $query = "SELECT
 			node.lft AS lft,
@@ -182,11 +189,12 @@ $query = "SELECT
 	if (mysql_num_rows($result) == 0) {
 				
 		echo "<form method='POST'>";
-		echo "<table><tr><th>",t('Anna P‰‰luokan : '.$laji.' <br />vaihtoehtoinen nimi'),"</th>";
-		echo "<td><input type='text' size='30' name='KatNimi' value='$laji'/></td></tr>";
-		echo "<tr><td></td><td><input type='submit' value='",t('Tallenna P‰‰kategoria'),"' /></td></tr>";
+		echo "<table><tr><th>",t('Perusta '),"</th><th> $laji </th>";
+		echo "<input type='hidden' size='30' name='KatNimi' value='$laji'/></tr>";
+		echo "<tr><td></td><td><input type='submit' value='",t('Perusta kategoria'),"' /></td></tr>";
 		echo "<input type='hidden' name='tee' value='paakat' />";
 		echo "<input type='hidden' name='laji' value='$laji' />";
+		echo "<input type='hidden' name='toim' value='$toim' />";
 		echo "</table></form>";	
 		
 	} 
@@ -232,6 +240,7 @@ $query = "SELECT
 			echo "<input type='hidden' name='tuoteno' value='".$tuoteno."' />";
 			echo "<input type='hidden' name='tee' value='valitse' />";
 			echo "<input type='hidden' name='ttunnus' value='".$ttunnus."' />";
+			echo "<input type='hidden' name='toim' value='".$toim."' />";
 			echo "<input type='submit' name='valitse' value='",t('Tallenna valinnat tuotteelle'),"'>";
 			echo "</form>";
 	}
@@ -250,23 +259,23 @@ $query = "SELECT
 
 			if ($row['plft'] == 1) {
 				echo "\n<td nowrap rowspan='",lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow)+2,"'>{$row['node_nimi']}";
-				echo "\n<br /><a href='?laji=$laji&ISI=".$row['node_nimi']."&tee=lisaa&plft=".$row['plft']."&subd=".$row['sub_dee']."'><img src='{$palvelin2}pics/lullacons/doc-option-add.png' alt='",t('Lis‰‰ lapsikategoria'),"'/></a>";
-			 	echo "\n&nbsp;<a href='?laji=$laji&ISI=".$row['node_nimi']."&tee=poista&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/doc-option-remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";	
-			 	echo "\n&nbsp;<a href='?laji=$laji&ISI=".$row['node_nimi']."&tee=muokkaa&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
-				echo "\n&nbsp;<a href='?laji=$laji&ISI=".$row['node_nimi']."&tee=taso&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/database-option-add.png' alt='",t('Lis‰‰ taso'),"'/></a>";
-				echo "</td></tr>\n";
+				echo "\n<br /><a href='?toim=$toim&laji=$laji&ISI=".$row['node_nimi']."&tee=lisaa&plft=".$row['plft']."&subd=".$row['sub_dee']."'><img src='{$palvelin2}pics/lullacons/doc-option-add.png' alt='",t('Lis‰‰ lapsikategoria'),"'/></a>";
+			 	echo "\n&nbsp;<a href='?toim=$toim&laji=$laji&ISI=".$row['node_nimi']."&tee=poista&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/doc-option-remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";	
+			 	echo "\n&nbsp;<a href='?toim=$toim&laji=$laji&ISI=".$row['node_nimi']."&tee=muokkaa&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
+				echo "\n&nbsp;<a href='?toim=$toim&laji=$laji&ISI=".$row['node_nimi']."&tee=taso&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/database-option-add.png' alt='",t('Lis‰‰ taso'),"'/></a>";
+				echo "</td></tr>\n";    
 				echo "\n<tr><td class='back'>&nbsp;</td></tr>";
 				// tulostaa p‰‰kategorian viereen tyhj‰n ruuduun niin nˆytt‰‰ paremmalta.
 			}
 			else {
 				if ($row['node_koodi'] == 0) {$row['node_koodi']='';}
 				echo "\n<td nowrap rowspan='",lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow)+1,"'>",$row['node_koodi'] ,' ',str_replace(' # ', '<br />',  ucwords(strtolower(str_replace('/', ' # ', $row['node_nimi']))));
-				echo "\n<br /><a href='?koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=lisaa&plft=".$row['plft']."&subd=".$row['sub_dee']."'><img src='{$palvelin2}pics/lullacons/doc-option-add.png' alt='",t('Lis‰‰ lapsikategoria'),"'/></a>";
-			 	echo "\n&nbsp;<a href='?koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=poista&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/doc-option-remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";	
-			 	echo "\n&nbsp;<a href='?koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=muokkaa&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
+				echo "\n<br /><a href='?toim=$toim&koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=lisaa&plft=".$row['plft']."&subd=".$row['sub_dee']."'><img src='{$palvelin2}pics/lullacons/doc-option-add.png' alt='",t('Lis‰‰ lapsikategoria'),"'/></a>";
+			 	echo "\n&nbsp;<a href='?toim=$toim&koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=poista&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/doc-option-remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";	
+			 	echo "\n&nbsp;<a href='?toim=$toim&koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=muokkaa&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
 		
 				if (lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow) > 0) {
-					echo "\n&nbsp;<a href='?koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=taso&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/database-option-add.png' alt='",t('Lis‰‰ taso'),"'/></a>";
+					echo "\n&nbsp;<a href='?toim=$toim&koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=taso&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/database-option-add.png' alt='",t('Lis‰‰ taso'),"'/></a>";
 				}
 				echo "</td></tr>";
 			

@@ -9,4 +9,6 @@ $kentat = 'tunnus, tuoteno, kieli, laji, selite';
 
 $jarjestys = 'tuoteno, laji, kieli, selite';
 
+$ulisa .= "&toim2=$toim2";
+
 ?>

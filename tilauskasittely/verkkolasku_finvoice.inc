@@ -631,13 +631,13 @@ if (!function_exists('finvoice_rivi')) {
 				}
 			}
 
-			$RowFreeTexts = explode("|", trim(trim($lisakomm)."\n".trim($tilrow["kommentti"])));
+			$RowFreeTexts = explode("|", trim(trim($lisakomm)."|".trim($tilrow["kommentti"])));
 
 			foreach ($RowFreeTexts as $RowFreeText) {
 				if (trim($RowFreeText) != "") {
-					$RowFreeText = wordwrap($RowFreeText, 512, "</RowFreeText>\r\n<RowFreeText>");
-
-					xml_add("RowFreeText", $RowFreeText, $tootfinvoice);
+					foreach (explode("|", wordwrap($RowFreeText, 512, "|")) as $RowFreeT) {
+						xml_add("RowFreeText", $RowFreeT, $tootfinvoice);
+					}
 				}
 			}
 

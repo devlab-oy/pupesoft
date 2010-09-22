@@ -1706,7 +1706,7 @@ if (!function_exists("synkronoi")) {
 			//	Tehd‰‰n kysely
 			$where = "";
 
-			if(is_array($wherelliset)) {
+			if (is_array($wherelliset)) {
 				$indeksi = array_merge($wherelliset, $pakolliset);
 				$indeksi = array_unique($indeksi);
 			}
@@ -2197,7 +2197,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 		$tee 			 = "VALMISTA";
 
 		$query = "	SELECT lasku.tunnus,
-					sum(if(tilausrivi.tyyppi in ('V','W'), 1, 0)) valmistusriveja,
+					sum(if (tilausrivi.tyyppi in ('V','W'), 1, 0)) valmistusriveja,
 					GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat
 					from tilausrivi, lasku
 					where tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -4589,11 +4589,11 @@ if (!function_exists("js_selectAllCheckboxesByName")) {
 		<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
 			function selectAllCheckboxesByName(suunta, name) {
 				list=document.getElementsByTagName("input")
-				if(list.length > 0) {
+				if (list.length > 0) {
 
 					for(i=0;i<=list.length;i++){
-						if(list[i].type == "checkbox") {
-							if(list[i].name.substr(0, name.length) == name) {
+						if (list[i].type == "checkbox") {
+							if (list[i].name.substr(0, name.length) == name) {
 								list[i].checked=suunta;
 							}
 						}
@@ -4752,7 +4752,7 @@ function show(layer_ref, type) {
 
 if (!function_exists("js_alasvetoMaxWidth")) {
 	function js_alasvetoMaxWidth($id, $leveys) {
-		return "id = \"$id\" style=\"max-width: $leveys; width: expression(if(parseInt(document.getElementById('$id').clientWidth) > $leveys) { $leveys });\" onmousedown=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0) {document.getElementById('$id').style.width = 'auto';}\" onblur=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0 && $leveys > 0) {cwidth = document.getElementById('$id').clientWidth; if (cwidth > $leveys) { document.getElementById('$id').style.width = '$leveys'+'px';} else {document.getElementById('$id').style.width = 'auto';}}\"";
+		return "id = \"$id\" style=\"max-width: $leveys; width: expression(if (parseInt(document.getElementById('$id').clientWidth) > $leveys) { $leveys });\" onmousedown=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0) {document.getElementById('$id').style.width = 'auto';}\" onblur=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0 && $leveys > 0) {cwidth = document.getElementById('$id').clientWidth; if (cwidth > $leveys) { document.getElementById('$id').style.width = '$leveys'+'px';} else {document.getElementById('$id').style.width = 'auto';}}\"";
 	}
 }
 
@@ -4885,7 +4885,7 @@ if (!function_exists("js_popup")) {
 				toolTipShow(e, x, y);
 
 	            //update the content
-	            if(allowHtml) {
+	            if (allowHtml) {
 	                toolTip.html(content);
 				}
 	            else {
@@ -4896,7 +4896,7 @@ if (!function_exists("js_popup")) {
 	            toolTip.removeClass();
 
 	            //set class if specified
-	            if(className) {
+	            if (className) {
 					toolTip.addClass(className);
 				}
 			});
@@ -6325,7 +6325,7 @@ if (!function_exists("livesearch_asiakashaku")) {
 				$haku_query .= " or asiakas.laskutus_nimi like ('%$haku%') or asiakas.laskutus_nimitark like ('%$haku%') or asiakas.laskutus_postitp like ('%$haku%')) ";
 			}
 
-			$query = "	SELECT *, if(toim_nimi != nimi and toim_nimi != '', concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat(nimi, ' ', nimitark)) asiakkaan_tieto
+			$query = "	SELECT *, if (toim_nimi != nimi and toim_nimi != '', concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat(nimi, ' ', nimitark)) asiakkaan_tieto
 						FROM asiakas
 						WHERE asiakas.yhtio = '$kukarow[yhtio]'
 						$haku_query";
@@ -6510,7 +6510,7 @@ if (!function_exists("hae_rahtimaksu")) {
 		// erikoisvarastoista myydyt tuotteet ovat aina rahtivapaita ja l‰hett‰j‰ maksaa rahdin.
 		if ($yhtiorow["rahti_hinnoittelu"] == 'P') {
 			// Jos hyvitysrivi ja tuotteen paino on nolla niin laitetaan tuotteen painoksi yksi gramma, muuten hyv‰rillekin saattaa tulla rahtia jos kaikkien tuotteiden painot on nolla.
-			$query  = "	SELECT sum(if((varattu + kpl + jt) < 0 and tuotemassa = 0, 0.001, tuotemassa) * (varattu + kpl + jt)) massa
+			$query  = "	SELECT sum(if ((varattu + kpl + jt) < 0 and tuotemassa = 0, 0.001, tuotemassa) * (varattu + kpl + jt)) massa
 						FROM tilausrivi
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.erikoistoimitus_myynti = 0)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
@@ -7116,7 +7116,7 @@ if (!function_exists("t_avainsana")) {
 		}
 
 		$query = "	SELECT DISTINCT avainsana.*,
-					IFNULL((SELECT if(avainsana_kieli.$kielilisa = '', NULL, avainsana_kieli.$kielilisa)
+					IFNULL((SELECT if (avainsana_kieli.$kielilisa = '', NULL, avainsana_kieli.$kielilisa)
 					FROM avainsana as avainsana_kieli
 					WHERE avainsana_kieli.yhtio = avainsana.yhtio
 					and avainsana_kieli.laji = avainsana.laji
@@ -7389,7 +7389,7 @@ if (!function_exists("liite_popup")) {
 						image_width,
 						image_height,
 						kayttotarkoitus,
-						if(kayttotarkoitus='TK', 0, if(kayttotarkoitus='MU', 1, 2)) sorttaus,
+						if (kayttotarkoitus='TK', 0, if (kayttotarkoitus='MU', 1, 2)) sorttaus,
 						jarjestys
 						FROM liitetiedostot
 						WHERE yhtio 		= '$kukarow[yhtio]'
@@ -7456,7 +7456,7 @@ if (!function_exists("liite_popup")) {
 								image_width,
 								image_height,
 								kayttotarkoitus,
-								if(kayttotarkoitus='TK', 0, if(kayttotarkoitus='MU', 1, 2)) sorttaus,
+								if (kayttotarkoitus='TK', 0, if (kayttotarkoitus='MU', 1, 2)) sorttaus,
 								jarjestys
 								FROM liitetiedostot
 								WHERE yhtio		 = '$kukarow[yhtio]'
@@ -7526,7 +7526,7 @@ if (!function_exists("liite_popup")) {
 								image_width,
 								image_height,
 								kayttotarkoitus,
-								if(kayttotarkoitus='TK', 0, if(kayttotarkoitus='MU', 1, 2)) sorttaus,
+								if (kayttotarkoitus='TK', 0, if (kayttotarkoitus='MU', 1, 2)) sorttaus,
 								jarjestys,
 								(	select tunnus
 									from liitetiedostot l
@@ -8172,24 +8172,27 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 
 			foreach ($invoice_obj->InvoiceRow as $row) {
 
-				$invoice[(string) $row->ArticleIdentifier]['nimitys'] = $row->ArticleName;
-				$invoice[(string) $row->ArticleIdentifier]['tilattumaara'] = (float) str_replace(",", ".", $row->OrderedQuantity);
-				$invoice[(string) $row->ArticleIdentifier]['bruttohinta'] = (float) str_replace(",", ".", $row->UnitPriceAmount);
+				if (trim($row->ArticleIdentifier) != "") $ai_tuoteno = (string) trim($row->ArticleIdentifier);
+				else $ai_tuoteno = (string) $row->ArticleName;
+
+				$invoice[$ai_tuoteno]['nimitys'] = $row->ArticleName;
+				$invoice[$ai_tuoteno]['tilattumaara'] = (float) str_replace(",", ".", $row->OrderedQuantity);
+				$invoice[$ai_tuoteno]['bruttohinta'] = (float) str_replace(",", ".", $row->UnitPriceAmount);
 
 				// voi olla monta alennusta
 				foreach ($row as $child => $value) {
 					if ($child == 'RowDiscountPercent') {
-						$invoice[(string) $row->ArticleIdentifier]['ale'][] = (float) str_replace(",", ".", $value);
+						$invoice[$ai_tuoteno]['ale'][] = (float) str_replace(",", ".", $value);
 					}
 				}
 
-				if (!isset($invoice[(string) $row->ArticleIdentifier]['ale'])) $invoice[(string) $row->ArticleIdentifier]['ale'] = '';
+				if (!isset($invoice[$ai_tuoteno]['ale'])) $invoice[$ai_tuoteno]['ale'] = '';
 
 				if ($row->RowAmount) {
-					$invoice[(string) $row->ArticleIdentifier]['nettohinta'] = (float) str_replace(",", ".", $row->RowAmount);
+					$invoice[$ai_tuoteno]['nettohinta'] = (float) str_replace(",", ".", $row->RowAmount);
 				}
 				else {
-					$invoice[(string) $row->ArticleIdentifier]['nettohinta'] = 0;
+					$invoice[$ai_tuoteno]['nettohinta'] = 0;
 				}
 			}
 
@@ -8204,7 +8207,6 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 
 			// jos yksi rivi ei m‰ts‰‰ (esim. kuljetusvakuutus)
 			if (count($invoice_ei_loydy) == 1) {
-
 				foreach ($invoice_ei_loydy as $ei_loydy) {
 					// esim. kuljetusvakuutuksella ei ole tilattuam‰‰r‰‰
 					// huono tsekkaus! Miten erotetaan paremmin kuljetusvakuutukset ja runkoveloitukset?
@@ -8226,7 +8228,6 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 						// lˆytyi ero
 						$erot = 'joo';
 					}
-
 				}
 
 				// jos eroavaisuutta ei lˆydy, tyhjennet‰‰n "lˆytyi kummastakin", ett‰ laskujen hyv‰ksynt‰ osaa n‰ytt‰‰ "OK"
@@ -8302,7 +8303,7 @@ if (!function_exists('liita_tilaus_laskun_liitetiedostoksi')) {
 	}
 }
 
-if(!function_exists("luoiban")) {
+if (!function_exists("luoiban")) {
 	function luoiban ($tilino) {
 		include ("inc/pankkitiedot.inc");
 
@@ -8322,7 +8323,7 @@ if(!function_exists("luoiban")) {
 	}
 }
 
-if(!function_exists("tarkista_sepa")) {
+if (!function_exists("tarkista_sepa")) {
 	function tarkista_sepa($maa) {
 
 		// SEPA (Single Euro Payments Area) maat ja niiden IBAN tilinumeron pituus
@@ -8389,7 +8390,7 @@ if(!function_exists("tarkista_sepa")) {
 	}
 }
 
-if(!function_exists("tarkista_iban")) {
+if (!function_exists("tarkista_iban")) {
 	function tarkista_iban($tilino) {
 
 		// Calculating and validating IBAN checksums:
@@ -8452,7 +8453,7 @@ if(!function_exists("tarkista_iban")) {
 	}
 }
 
-if(!function_exists("tarkista_oikeus")) {
+if (!function_exists("tarkista_oikeus")) {
 	function tarkista_oikeus($ohjelma, $alanimi = '') {
 
 		global $kukarow;
@@ -8481,7 +8482,7 @@ if(!function_exists("tarkista_oikeus")) {
 	}
 }
 
-if(!function_exists("tarkista_viite")) {
+if (!function_exists("tarkista_viite")) {
 	function tarkista_viite($viite) {
 
 		// otetaan sis‰‰n $viite muuttuja
@@ -8620,199 +8621,226 @@ if (!function_exists("tarkista_rfviite")) {
 		// Viite on oikein!
 		return TRUE;
 	}
+}
 
+if (!function_exists("asiakashakuohje")) {
+	function asiakashakuohje() {
+		global $palvelin2;
+
+		echo "<div id='div_asiakashakuohje' class='popup' style='width: 300px'>
+			<table>
+			<tr><th>".t("Asiakasta voi etsi‰").":</th></tr>
+			<tr><td>".t("Nimell‰")."</td></tr>
+			<tr><td>".t("Nimitarkenteella")."</td></tr>
+			<tr><td>".t("Toimitusosoitteen nimell‰")."</td></tr>
+			<tr><td>".t("Toimitusosoitteen nimitarkenteella")."</td></tr>
+			<tr><td>".t("Ytunnuksella")."</td></tr>
+			<tr><td>".t("Asiakasnumerolla")."</td></tr>
+			<tr><td>".t("OVT-tunnuksella")."</td></tr>
+			<tr><td>".t("Toimitusosoitteen OVT-tunnuksella")."</td></tr>
+			<tr><td>".t("Kantaasiakastunnuksella")."</td></tr>
+			</table>
+			</div>";
+
+		// jos eka merkki on # etsit‰‰n toimitusnimen perusteella
+		// jos eka merkki on * etsit‰‰n laskuilta asiakastietoja nimell‰
+		// jos eka merkki £ etsit‰‰n tilausnumerolla
+
+		echo "<img class='tooltip' id='asiakashakuohje' src='{$palvelin2}pics/lullacons/info.png'>";
 	}
+}
 
 /// Jampan Neste funkkareita t‰st‰ eteenp‰in
-
 // T‰m‰ funkkari lis‰‰ tuotteenalkion dynaamiseen puuhun..
-function TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji, $ttunnus) {
-	
-	if ($ttunnus == '' OR trim($ttunnus) == '') {
-		$qi = "INSERT INTO tuotteen_alkio(yhtio, tuoteno,laji, selite, laatija, luontiaika) values ('$kukarow[yhtio]','$tuoteno','$laji','$selitekenttaan','$kukarow[kuka]',now())";
-	} 
-	else {
-		$qi = "UPDATE tuotteen_alkio SET selite = '$selitekenttaan', muuttaja = '$kukarow[kuka]', muutospvm = now() where laji='$laji' AND tuoteno='$tuoteno' and tunnus='$ttunnus' and yhtio='$kukarow[yhtio]'";
-}
-	$r = mysql_query($qi) or pupe_error($qi);
-	
-}
+if (!function_exists("TuotteenAlkiot")) {
+	function TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji, $ttunnus) {
 
-/// tˆmˆ funkkari mahdollistaa lis‰‰m‰‰n tason mihin tahansa v‰liin, toivottavasti :) 
-function LisaaTaso($isinimi, $tasonimi ,$lft, $laji,$kukarow, $tkoodi) {
-	
-	$q1 = "LOCK TABLE dynaaminen_puu WRITE";
-	$r = mysql_query($q1) or pupe_error($q1);
-	
-	$q2 = 	"SELECT @myRight := rgt, @myLeft := lft  FROM dynaaminen_puu WHERE nimi = '{$isinimi}' AND lft='{$lft}' AND laji='".$laji."' AND yhtio='{$kukarow[yhtio]}'";
-	$r = mysql_query($q2) or pupe_error($q2);
+		if ($ttunnus == '' OR trim($ttunnus) == '') {
+			$qi = "INSERT INTO tuotteen_alkio(yhtio, tuoteno,laji, selite, laatija, luontiaika) values ('$kukarow[yhtio]','$tuoteno','$laji','$selitekenttaan','$kukarow[kuka]',now())";
+		}
+		else {
+			$qi = "UPDATE tuotteen_alkio SET selite = '$selitekenttaan', muuttaja = '$kukarow[kuka]', muutospvm = now() where laji='$laji' AND tuoteno='$tuoteno' and tunnus='$ttunnus' and yhtio='$kukarow[yhtio]'";
+		}
 
-	$q3 =	"UPDATE dynaaminen_puu set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE rgt = @myRight  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-	$r = mysql_query($q3) or pupe_error($q3);
-	
-	$q4 =	"UPDATE dynaaminen_puu set lft = lft + 1, rgt = rgt +1, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft > @myLeft  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-	$r = mysql_query($q4) or pupe_error($q4);
-	
-	$q4 =	"UPDATE dynaaminen_puu set lft = lft + 1, rgt = rgt + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft > @myRight  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-	$r = mysql_query($q4) or pupe_error($q4);
-	
-	$qroot = "UPDATE dynaaminen_puu set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft = 1  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-	$rroot = mysql_query($qroot) or pupe_error($qroot);
-
-	$q5 =	"INSERT INTO dynaaminen_puu(yhtio,koodi,nimi, lft, rgt, laji,laatija,luontiaika) values ('$kukarow[yhtio]','{$tkoodi}','{$tasonimi}',@myLeft + 1 , @myRight + 1,'$laji','$kukarow[kuka]',now())";
-	$r = mysql_query($q5) or pupe_error($q5);
-//	echo $q5;
-
-	$q6 = "UNLOCK TABLES";
-	$r = mysql_query($q6) or pupe_error($q6);
-
-}
-
-
-function LisaaPaaKat($kukarow,$KatNimi, $laji)
-{
-	$q = "INSERT INTO dynaaminen_puu(yhtio,nimi,lft,rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]','$KatNimi',1,2,'$laji','$kukarow[kuka]',now())";
-//	echo $q;
-	$r = mysql_query($q) or pupe_error($q);
-}
-
-function LisaaLapsi($isi, $laji, $kukarow, $Lnimi, $pleft, $subd,$koodi) { 
-	$apu = $apu2 = $apu3  = $apu4 ="";
-	
-	if($pleft ==1) 
-	{
-		$apu 	= " where rgt >= @myRight";
-		$apu2 	= "@myRight , @myRight + 1";
-		$apu3 	= "@myRight := rgt ";
-		$apu4 	= " WHERE lft > @myRight";
-	} // mik‰li is‰ on root, niin lis‰t‰‰n sille alakat
-	
-	elseif($subd >= 1)
-	{
-		$apu 	= " where rgt > @myLeft";
-		$apu2 	= "@myLeft +1 , @myLeft + 2";
-		$apu3 	= "@myLeft := lft ";
-		$apu4 	= "WHERE lft > @myLeft";
-	} // lis‰t‰‰n alakategorialle lapsi
-	
-	else
-	{
-		$apu 	= "WHERE rgt > @myRight"; 
-		$apu2 	= "@myRight + 1, @myRight + 2";
-		$apu3 	= "@myRight := rgt ";
-		$apu4 	= " WHERE lft > @myRight";
-	} //alakat lapsen lis‰ys
-	
-	$q1 = "LOCK TABLE dynaaminen_puu WRITE";
-	$r = mysql_query($q1) or pupe_error($q1);
-	$q2 = "SELECT ".$apu3." FROM dynaaminen_puu WHERE nimi = '".$isi."' AND laji='".$laji."' AND yhtio='{$kukarow[yhtio]}'";
-	$r = mysql_query($q2) or pupe_error($q2);
-	$q3 = "UPDATE dynaaminen_puu SET rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' ".$apu." AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-//	echo $q3;
-	$r = mysql_query($q3) or pupe_error($q3);
-	$q4 = "UPDATE dynaaminen_puu SET lft = lft + 2,muutospvm = now(), muuttaja = '$kukarow[kuka]' ".$apu4. " AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-	$r = mysql_query($q4) or pupe_error($q4);
-//	echo "<br />".$q4;
-	$q5 = "INSERT INTO dynaaminen_puu(yhtio, nimi, koodi, lft, rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]','$Lnimi','$koodi', ".$apu2 .",'$laji','$kukarow[kuka]',now())";
-//	echo "<br />".$q5;
-	$r = mysql_query($q5) or pupe_error($q5);
-	$q6 = "UNLOCK TABLES";
-	$r = mysql_query($q6) or pupe_error($q6);
-
-}	
-
-
-function PoistaLapset($lapsi, $plft, $laji, $kukarow) {
-	if ($plft == 1) {
-		echo "<p><font class='error'>",t('Et Voi poistaa p‰‰kategoriaa')," !!!</font></p>";
+		$r = mysql_query($qi) or pupe_error($qi);
 	}
-	else {
- 		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
- 		$r = mysql_query($q1) or pupe_error($q1);
- 		$q2 = "SELECT @myLeft := lft, @myRight := rgt, @myWidth := rgt - lft + 1 FROM dynaaminen_puu WHERE nimi = '".$lapsi."' AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
- 		$r = mysql_query($q2) or pupe_error($q2);
- 		$q3 = "DELETE FROM dynaaminen_puu WHERE lft = @myLeft  AND laji='$laji' and yhtio='{$kukarow[yhtio]}'";
- 		$r = mysql_query($q3) or pupe_error($q3);	
- 		$q4 = "UPDATE dynaaminen_puu SET rgt = rgt -1, lft = lft -1,muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft between @myLeft and @myRight  AND laji='$laji'";
- 		$r = mysql_query($q4) or pupe_error($q4);
- 		$q5 = "UPDATE dynaaminen_puu SET rgt = rgt - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE rgt > @myRight  AND laji='$laji'";
- 		$r = mysql_query($q5) or pupe_error($q5);
- 		$q7 = "UPDATE dynaaminen_puu SET lft = lft - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'  WHERE lft > @myRight  AND laji='$laji'";
- 		$r = mysql_query($q7) or pupe_error($q7);
-		
+}
+
+/// tˆmˆ funkkari mahdollistaa lis‰‰m‰‰n tason mihin tahansa v‰liin, toivottavasti :)
+if (!function_exists("LisaaTaso")) {
+	function LisaaTaso($isinimi, $tasonimi ,$lft, $laji,$kukarow, $tkoodi) {
+
+		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
+		$r = mysql_query($q1) or pupe_error($q1);
+
+		$q2 = 	"SELECT @myRight := rgt, @myLeft := lft  FROM dynaaminen_puu WHERE nimi = '{$isinimi}' AND lft='{$lft}' AND laji='".$laji."' AND yhtio='{$kukarow[yhtio]}'";
+		$r = mysql_query($q2) or pupe_error($q2);
+
+		$q3 =	"UPDATE dynaaminen_puu set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE rgt = @myRight  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
+		$r = mysql_query($q3) or pupe_error($q3);
+
+		$q4 =	"UPDATE dynaaminen_puu set lft = lft + 1, rgt = rgt +1, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft > @myLeft  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
+		$r = mysql_query($q4) or pupe_error($q4);
+
+		$q4 =	"UPDATE dynaaminen_puu set lft = lft + 1, rgt = rgt + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft > @myRight  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
+		$r = mysql_query($q4) or pupe_error($q4);
+
+		$qroot = "UPDATE dynaaminen_puu set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft = 1  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
+		$rroot = mysql_query($qroot) or pupe_error($qroot);
+
+		$q5 =	"INSERT INTO dynaaminen_puu(yhtio,koodi,nimi, lft, rgt, laji,laatija,luontiaika) values ('$kukarow[yhtio]','{$tkoodi}','{$tasonimi}',@myLeft + 1 , @myRight + 1,'$laji','$kukarow[kuka]',now())";
+		$r = mysql_query($q5) or pupe_error($q5);
+
+		$q6 = "UNLOCK TABLES";
+		$r = mysql_query($q6) or pupe_error($q6);
+
+	}
+}
+
+if (!function_exists("LisaaPaaKat")) {
+	function LisaaPaaKat($kukarow,$KatNimi, $laji) {
+		$q = "INSERT INTO dynaaminen_puu(yhtio,nimi,lft,rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]','$KatNimi',1,2,'$laji','$kukarow[kuka]',now())";
+		$r = mysql_query($q) or pupe_error($q);
+	}
+}
+
+if (!function_exists("LisaaLapsi")) {
+	function LisaaLapsi($isi, $laji, $kukarow, $Lnimi, $pleft, $subd,$koodi) {
+		$apu = $apu2 = $apu3  = $apu4 ="";
+
+		if ($pleft == 1) {
+			$apu 	= " where rgt >= @myRight";
+			$apu2 	= "@myRight , @myRight + 1";
+			$apu3 	= "@myRight := rgt ";
+			$apu4 	= " WHERE lft > @myRight";
+		} // mik‰li is‰ on root, niin lis‰t‰‰n sille alakat
+
+		elseif ($subd >= 1) {
+			$apu 	= " where rgt > @myLeft";
+			$apu2 	= "@myLeft +1 , @myLeft + 2";
+			$apu3 	= "@myLeft := lft ";
+			$apu4 	= "WHERE lft > @myLeft";
+		} // lis‰t‰‰n alakategorialle lapsi
+
+		else {
+			$apu 	= "WHERE rgt > @myRight";
+			$apu2 	= "@myRight + 1, @myRight + 2";
+			$apu3 	= "@myRight := rgt ";
+			$apu4 	= " WHERE lft > @myRight";
+		} //alakat lapsen lis‰ys
+
+		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
+		$r = mysql_query($q1) or pupe_error($q1);
+
+		$q2 = "SELECT ".$apu3." FROM dynaaminen_puu WHERE nimi = '".$isi."' AND laji='".$laji."' AND yhtio='{$kukarow[yhtio]}'";
+		$r = mysql_query($q2) or pupe_error($q2);
+
+		$q3 = "UPDATE dynaaminen_puu SET rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' ".$apu." AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
+		$r = mysql_query($q3) or pupe_error($q3);
+
+		$q4 = "UPDATE dynaaminen_puu SET lft = lft + 2,muutospvm = now(), muuttaja = '$kukarow[kuka]' ".$apu4. " AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
+		$r = mysql_query($q4) or pupe_error($q4);
+
+		$q5 = "INSERT INTO dynaaminen_puu(yhtio, nimi, koodi, lft, rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]','$Lnimi','$koodi', ".$apu2 .",'$laji','$kukarow[kuka]',now())";
+		$r = mysql_query($q5) or pupe_error($q5);
+
 		$q6 = "UNLOCK TABLES";
 		$r = mysql_query($q6) or pupe_error($q6);
 	}
+}
 
-/* 	Mik‰li koetetaan poistaa p‰‰kategoriaa niin ohjelma herjaa, muussa tapauksessa
-	ohjelma poistaa valitun kategorian ja nostaa sen alakategoriat yhden isommalle tasolle.
-*/ 
-	
-}	
-	
-function lapset($isi, $plft, $laji,$kukarow) {
-	$dump = 	"SELECT (COUNT(node.nimi)-1) as Lapsi
-				FROM dynaaminen_puu AS node , dynaaminen_puu AS parent 
-				WHERE node.lft BETWEEN parent.lft AND parent.rgt 
-				AND parent.nimi='$isi' AND parent.lft = '$plft' AND parent.laji='{$laji}' AND node.laji='{$laji}' AND node.yhtio='{$kukarow[yhtio]}' GROUP BY parent.nimi ORDER BY node.lft";
+if (!function_exists("PoistaLapset")) {
+	function PoistaLapset($lapsi, $plft, $laji, $kukarow) {
+		if ($plft == 1) {
+			echo "<p><font class='error'>",t('Et Voi poistaa p‰‰kategoriaa')," !!!</font></p>";
+		}
+		else {
+	 		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
+	 		$r = mysql_query($q1) or pupe_error($q1);
+	 		$q2 = "SELECT @myLeft := lft, @myRight := rgt, @myWidth := rgt - lft + 1 FROM dynaaminen_puu WHERE nimi = '".$lapsi."' AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
+	 		$r = mysql_query($q2) or pupe_error($q2);
+	 		$q3 = "DELETE FROM dynaaminen_puu WHERE lft = @myLeft  AND laji='$laji' and yhtio='{$kukarow[yhtio]}'";
+	 		$r = mysql_query($q3) or pupe_error($q3);
+	 		$q4 = "UPDATE dynaaminen_puu SET rgt = rgt -1, lft = lft -1,muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft between @myLeft and @myRight  AND laji='$laji'";
+	 		$r = mysql_query($q4) or pupe_error($q4);
+	 		$q5 = "UPDATE dynaaminen_puu SET rgt = rgt - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE rgt > @myRight  AND laji='$laji'";
+	 		$r = mysql_query($q5) or pupe_error($q5);
+	 		$q7 = "UPDATE dynaaminen_puu SET lft = lft - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'  WHERE lft > @myRight  AND laji='$laji'";
+	 		$r = mysql_query($q7) or pupe_error($q7);
 
-	$dumm = mysql_query($dump) or pupe_error($dump);
-	$rivi =  mysql_fetch_assoc($dumm);
+			$q6 = "UNLOCK TABLES";
+			$r = mysql_query($q6) or pupe_error($q6);
+		}
 
-	return $rivi['Lapsi'];
-} // funktio joka palauttaa valitun kategorian alakategorioiden lukum‰‰r‰n, k‰ytet‰‰n syvyyden m‰‰rittelyss‰
-	
-function paivitakat($isi, $uusinimi, $laji, $kukarow,$koodi) {
-	
-	if (trim($koodi) == '') {
-	
-		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
-		$r = mysql_query($q1) or pupe_error($q1);
-		$q2 = "UPDATE dynaaminen_puu set nimi='{$uusinimi}', muutospvm = now(), muuttaja = '$kukarow[kuka]' where nimi='{$isi}' AND laji='{$laji}' AND yhtio='{$kukarow[yhtio]}'";
-		//echo $q2;
-		$r = mysql_query($q2) or pupe_error($q2);
-		$q6 = "UNLOCK TABLES";
-		$r = mysql_query($q6) or pupe_error($q6);
+		/*
+		Mik‰li koetetaan poistaa p‰‰kategoriaa niin ohjelma herjaa, muussa tapauksessa
+		ohjelma poistaa valitun kategorian ja nostaa sen alakategoriat yhden isommalle tasolle.
+		*/
 	}
-	else
-	{
-		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
-		$r = mysql_query($q1) or pupe_error($q1);
-		$q2 = "UPDATE dynaaminen_puu set nimi='{$uusinimi}', muutospvm = now(), muuttaja = '$kukarow[kuka]', koodi='{$koodi}' where nimi='{$isi}' AND laji='{$laji}' AND yhtio='{$kukarow[yhtio]}'";
-		//echo $q2;
-		$r = mysql_query($q2) or pupe_error($q2);
-		$q6 = "UNLOCK TABLES";
-		$r = mysql_query($q6) or pupe_error($q6);	
+}
+
+// funktio joka palauttaa valitun kategorian alakategorioiden lukum‰‰r‰n, k‰ytet‰‰n syvyyden m‰‰rittelyss‰
+if (!function_exists("lapset")) {
+	function lapset($isi, $plft, $laji,$kukarow) {
+		$dump = 	"SELECT (COUNT(node.nimi)-1) as Lapsi
+					FROM dynaaminen_puu AS node , dynaaminen_puu AS parent
+					WHERE node.lft BETWEEN parent.lft AND parent.rgt
+					AND parent.nimi='$isi' AND parent.lft = '$plft' AND parent.laji='{$laji}' AND node.laji='{$laji}' AND node.yhtio='{$kukarow[yhtio]}' GROUP BY parent.nimi ORDER BY node.lft";
+
+		$dumm = mysql_query($dump) or pupe_error($dump);
+		$rivi =  mysql_fetch_assoc($dumm);
+
+		return $rivi['Lapsi'];
 	}
-	// Yksinkertainen funktio joka p‰ivitt‰‰ valitun kategorian valitulle nimelle
-}	
-	
-function kukaisi($lapsi,$valinta) {
-	$query =   "SELECT T_SN.C_PARENT_NODENO as isi, T_SN_DESIG.C_TEXT as selite
-				FROM T_SN
-				JOIN T_SN_DESIG ON (T_SN_DESIG.C_FK=T_SN.C_PK)
-				WHERE T_SN.C_TREETYPE_VALKEY='PC'
-				AND C_LNG='FI' and T_SN.C_NODENO=". $lapsi;			
-	
-	$result = mysql_query($query) or pupe_error($query);
-	$row = mysql_fetch_assoc($result);
+}
 
-	if ($valinta == 1) {
-		$selite = $row['selite'];
+// Yksinkertainen funktio joka p‰ivitt‰‰ valitun kategorian valitulle nimelle
+if (!function_exists("paivitakat")) {
+	function paivitakat($isi, $uusinimi, $laji, $kukarow,$koodi) {
+
+		if (trim($koodi) == '') {
+
+			$q1 = "LOCK TABLE dynaaminen_puu WRITE";
+			$r = mysql_query($q1) or pupe_error($q1);
+
+			$q2 = "UPDATE dynaaminen_puu set nimi='{$uusinimi}', muutospvm = now(), muuttaja = '$kukarow[kuka]' where nimi='{$isi}' AND laji='{$laji}' AND yhtio='{$kukarow[yhtio]}'";
+			$r = mysql_query($q2) or pupe_error($q2);
+
+			$q6 = "UNLOCK TABLES";
+			$r = mysql_query($q6) or pupe_error($q6);
+		}
+		else {
+			$q1 = "LOCK TABLE dynaaminen_puu WRITE";
+			$r = mysql_query($q1) or pupe_error($q1);
+
+			$q2 = "UPDATE dynaaminen_puu set nimi='{$uusinimi}', muutospvm = now(), muuttaja = '$kukarow[kuka]', koodi='{$koodi}' where nimi='{$isi}' AND laji='{$laji}' AND yhtio='{$kukarow[yhtio]}'";
+			$r = mysql_query($q2) or pupe_error($q2);
+
+			$q6 = "UNLOCK TABLES";
+			$r = mysql_query($q6) or pupe_error($q6);
+		}
 	}
-	else {
-		$selite = $row['isi'];
+}
+
+// palauttaa Isin
+if (!function_exists("kukaisi")) {
+	function kukaisi($lapsi,$valinta) {
+		$query =   "SELECT T_SN.C_PARENT_NODENO as isi, T_SN_DESIG.C_TEXT as selite
+					FROM T_SN
+					JOIN T_SN_DESIG ON (T_SN_DESIG.C_FK=T_SN.C_PK)
+					WHERE T_SN.C_TREETYPE_VALKEY='PC'
+					AND C_LNG='FI' and T_SN.C_NODENO=". $lapsi;
+		$result = mysql_query($query) or pupe_error($query);
+		$row = mysql_fetch_assoc($result);
+
+		if ($valinta == 1) {
+			$selite = $row['selite'];
+		}
+		else {
+			$selite = $row['isi'];
+		}
+		return $selite;
 	}
-return $selite;
-} // palauttaa Isin
-
-/// End of Jampan Funkkarit
-
-
-
-
-
-
-
+}
 
 ?>

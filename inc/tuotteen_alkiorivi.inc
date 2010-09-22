@@ -17,23 +17,37 @@ if (mysql_field_name($result, $i) == "yhtio") {
 }
 
 if (mysql_field_name($result, $i) == "laji") {
-
-	$sel = array($trow[$i] => "SELECTED");
-
-	$ulos = "<td><select name='$nimi' onchange='submit();'>";
-
+	//echo $toim2. " ja ". $toim;
 	$sresult = t_avainsana("DYNAAMINEN_PUU");
-	
-	$ulos .= "<option value=''>".t('Valitse p‰‰kategoria')."</option>";
-	
-	while ($srow = mysql_fetch_array($sresult)) {
-		$ulos .= "<option value='$srow[selite]' ".$sel[$srow["selite"]].">$srow[selite] $srow[selitetark]</option>";
-	}
-	
-	$ulos .= "</select>";
-	
-	$apu['laji'] = $trow[$i];
+
+		if (isset ($toim2) AND strtolower(trim($toim2)) == 'tuote') {
+			while ($srow = mysql_fetch_array($sresult)) {
+					
+					if (strtolower(trim($toim2)) == strtolower(trim($srow['selite']))) {
+						$ulos = "<td>".$srow['selite']."<input type='hidden' value='$srow[selite]' name='$nimi' />";
+						$apu['laji'] = $srow['selite'];
+					}
+				
+			}//while
+			mysql_data_seek($sresult,0);
+		} // if isset
+		else {
+			$sel = array($trow[$i] => "SELECTED");
+
+			$ulos = "<td><select name='$nimi' onchange='submit();'>";
+
+			$ulos .= "<option value=''>".t('Valitse p‰‰kategoria')."</option>";
+
+				while ($srow = mysql_fetch_array($sresult)) {
+					$ulos .= "<option value='$srow[selite]' ".$sel[$srow["selite"]].">$srow[selite] $srow[selitetark]</option>";
+				}
+
+			$ulos .= "</select>";
+			$apu['laji'] = $trow[$i];
+		}
+		
 	$jatko = 0;
+		
 }
 
 if (mysql_field_name($result, $i) == "tuoteno") {
@@ -56,7 +70,7 @@ if (mysql_field_name($result, $i) == "selite") {
 	}
 	else {
 		
-		$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno={$lukitse_avaimeen}&selite={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}' ";
+		$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno={$lukitse_avaimeen}&selite={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=tuote' ";
 		$ulos .= "target='main'> ".t('Valitse t‰h‰n puuhun sopivat segmentit')." </a><br />";
 		$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]}</td>";
 	}

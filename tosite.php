@@ -185,7 +185,7 @@
 				}
 
 				// luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
-				$excelrivi[][] = array();
+				$excelrivi = array();
 
 				if (strtoupper($ext) == "XLS") {
 					for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {

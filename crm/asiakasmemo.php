@@ -21,11 +21,14 @@
 		}
 
 	    if ($ytunnus == '' and (int) $asiakasid == 0) {
+			
+			js_popup(-100);
+		
 			echo "<br><table>";
 			echo "<tr>
 					<th>".t("Asiakkaan nimi").": </th>
 					<form action = '$PHP_SELF' method = 'post'>
-					<td><input type='text' size='30' name='ytunnus'></td>
+					<td><input type='text' size='30' name='ytunnus'> ",asiakashakuohje(),"</td>
 					<td class='back'><input type='submit' value='".t("Jatka")."'></td>
 					</tr>";
 			echo "</form>";

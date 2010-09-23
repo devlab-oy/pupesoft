@@ -5489,7 +5489,7 @@ if ($tee == '') {
 			}
 
 			if ($kukarow['hinnat'] != -1 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
-				// Laskeskellaan tilauksen loppusummaa
+				// Laskeskellaan tilauksen loppusummaa (mitätöidyt ja raaka-aineet eivät kuulu jengiin)
 				$alvquery = "	SELECT if (isnull(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
 								FROM tilausrivi
 								LEFT JOIN varastopaikat ON varastopaikat.yhtio = if (tilausrivi.var='S', if ((SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro)!='', (SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro), tilausrivi.yhtio), tilausrivi.yhtio)
@@ -5497,6 +5497,7 @@ if ($tee == '') {
 			                    and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi in ($tilrivity)
+								and tilausrivi.tyyppi not in ('D','V')
 								$tunnuslisa
 								GROUP BY 1
 								ORDER BY 1";

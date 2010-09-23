@@ -715,7 +715,7 @@ if (!function_exists("saldo_myytavissa")) {
 			$tyyppi = "";
 		}
 
-		if (is_array($varasto)) {
+		if (is_array($varasto) and count($varasto) > 0) {
 			$varasto_apu = '';
 			foreach ($varasto as $varasto_tunnus) {
 				$varasto_apu .= (int) $varasto_tunnus.",";
@@ -821,7 +821,7 @@ if (!function_exists("saldo_myytavissa")) {
 			}
 
 			// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
-			if ($varasto != 0) {
+			if ((is_numeric($varasto) and $varasto > 0) or (!is_numeric($varasto) and $varasto != "")) {
 				$valinta1 = " varastopaikat.tunnus in ($varasto) and ";
 				$valinta2 = "";
 				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
@@ -1171,7 +1171,7 @@ if (!function_exists("saldo_myytavissa")) {
 				$ennresult = mysql_query($query) or die($query);
 				$ennrow = mysql_fetch_assoc($ennresult);
 
-				if ($varasto == 0 and $hyllyalue == "" and $hyllynro == "") {
+				if (is_numeric($varasto) and $varasto == 0 and $hyllyalue == "" and $hyllynro == "") {
 
 					$orposaldomyytavissa = 0;
 
@@ -6653,9 +6653,7 @@ if (!function_exists("hae_rahtimaksu")) {
 		else {
 			return 0;
 		}
-
 	}
-
 }
 
 if (!function_exists("pakkaamo")) {

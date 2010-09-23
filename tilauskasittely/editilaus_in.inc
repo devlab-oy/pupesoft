@@ -5,7 +5,6 @@ $edi_ulos = "\n";
 
 // jos meill‰ ei ole sessiota ja meill‰ on komentoriviparametri annettuna
 if (trim($argv[1]) != '') {
-
 	if ($argc == 0) die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
 
 	// otetaan tietokanta connect
@@ -114,6 +113,8 @@ $editilaus_sisainen		= "";
 $editilaus_kassalipas	= "";
 $editilaus_rivihinta	= "";
 $til_vienti				= "";
+$verkkokauppavarasto	= "";
+$verkkokauppavarasto_li	= "";
 
 // nollataan kaikki rivin muuttujat (n‰m‰ samat pit‰‰ tehd‰ tuote insertin j‰lkeen)
 $tuoteerror      = 1; // oletetaan aina ettei  tuotetta lˆydy
@@ -1125,8 +1126,24 @@ while (!feof ($fd)) {
 					$varasto 				= array();
 					$laskurow["varasto"]	= "";
 
-					if ($edi_tyyppi == "magento" and is_array($verkkokauppa_sallitutvarastot)) {
-						$varasto = $verkkokauppa_sallitutvarastot;
+					if ($edi_tyyppi == "magento") {
+						// N‰m‰ ovat ainoat varastot joista verkkokauppa saa myyd‰
+						if ($verkkokauppavarasto == "") {
+							$query	= "	SELECT GROUP_CONCAT(tunnus) tunnukset
+										FROM varastopaikat
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND prioriteetti > 0";
+							$pres = mysql_query($query) or pupe_error($query);
+							$prow = mysql_fetch_assoc($pres);
+
+							if ($prow["tunnukset"] != "") {
+								$verkkokauppavarasto 	= explode(",", $prow["tunnukset"]);
+								$verkkokauppavarasto_li = " and varastopaikat.tunnus in ($prow[tunnukset]) ";
+								$laskurow["varasto"] 	= $verkkokauppavarasto[0];
+							}
+						}
+
+						$varasto = $verkkokauppavarasto;
 					}
 					elseif ($olinvarasto != "") {
 						$varasto = $olinvarasto;
@@ -1157,17 +1174,20 @@ while (!feof ($fd)) {
 					// Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
 					// Jos tilattu kpl-m‰‰r‰ on suurempi kuin myyt‰viss‰ oleva kpl-m‰‰r‰, niin pakotetaan rivi hyv‰ksytyksi
 					if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
-						list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno);
+
+						list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
 
 						// jos saldo ei riit‰ normivarastoista, pit‰‰ katsoa miss‰ varastossa riitt‰‰ ja myyd‰‰n sielt‰ (koska jossain riitt‰‰, muuten tilaus ei olisi edes tullu t‰nne asti)
-						if ($chk_myytavissa <= $kpl) {
+						if ($chk_myytavissa < $kpl) {
+
 							$query = "	SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
 										FROM tuotepaikat
 										JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
 											AND varastopaikat.tyyppi != ''
 											AND varastopaikat.prioriteetti > 0
 											AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-											AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')))
+											AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+											$verkkokauppavarasto_li)
 										WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 										AND tuotepaikat.tuoteno = '$tuoteno'
 										ORDER BY prioriteetti";
@@ -1178,6 +1198,7 @@ while (!feof ($fd)) {
 
 							while ($erikoisasaldo_row = mysql_fetch_assoc($sres)) {
 								list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, '', $erikoisasaldo_row["varasto"]);
+
 								if ($chk_myytavissa >= $kpl) {
 									$erikoisvarastojen_saldot[$erikois_i]["varasto"] = (int) $erikoisasaldo_row["varasto"];
 									$erikoisvarastojen_saldot[$erikois_i]["myytavissa"] = (float) $chk_myytavissa;

@@ -143,7 +143,7 @@
 		unset($varasto);
 	}
 
-	if (isset($varasto) and $lisaarivi_debug == 1) echo "Myyd‰‰n varastoista: ".var_dump($varasto)."<br>";
+	if (isset($varasto) and $lisaarivi_debug == 1) echo "Myyd‰‰n varastoista: ",var_dump($varasto),"<br>";
 
 	//	Katsotaan onko t‰ll‰ tuotteella joku oletusvalinta
 	if ((int) $rivitunnus == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS", "PROJEKTI"))) {

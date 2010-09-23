@@ -4,46 +4,51 @@
 
 	echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";
 
-	if($tee == 'etsi') {
+	if ($tee == 'etsi') {
 		echo "<table>";	
 		
-		if($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != ''){
+		if ($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != ''){
 			$muu1 = "lasku.luontiaika >= '$vva-$kka-$ppa' and lasku.luontiaika <= ";
 			$muu2 = "$vvl-$kkl-$ppl";
 		}
-		if($nimi != ''){
+		
+		if ($nimi != ''){
 			$muu1 = "lasku.nimi LIKE ";  
 			$muu2 = "%".$nimi."%";
 		}
-		if($rekno != ''){
+		
+		if ($rekno != ''){
 			$muu1 = "tyomaarays.rekno LIKE ";  
 			$muu2 = "%".$rekno."%";
 		}
-		if($eid != ''){
+		
+		if ($eid != ''){
 			$muu1 = "lasku.tunnus = ";  
 			$muu2 = $eid;
 		}
-		if($asno != ''){
-			$muu1 = "lasku.ytunnus = ";
+		
+		if ($asno != ''){
+			$muu1 = "asiakas.asiakasnro = ";
 			$muu2 = $asno;
 		}
-		if($valmno != ''){
+		
+		if ($valmno != ''){
 			$muu1 = "tyomaarays.valmnro = ";
 			$muu2 = $valmno;
 		}
 		
-		$squery = "	SELECT *, lasku.tunnus laskutunnus
-					FROM lasku, tyomaarays
-					WHERE lasku.yhtio='$kukarow[yhtio]'
-					and tyomaarays.yhtio=lasku.yhtio 
-					and tyomaarays.otunnus=lasku.tunnus
+		$squery = "	SELECT lasku.*, tyomaarays.*, lasku.tunnus laskutunnus
+					FROM lasku
+					JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+					JOIN asiakas ON asiakas.yhtio = tyomaarays.yhtio and asiakas.tunnus = lasku.liitostunnus
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila in ('A','L','N')
 					and lasku.tilaustyyppi = 'A'
 					and $muu1 '$muu2'
 					ORDER BY lasku.tunnus desc";
 		$sresult = mysql_query($squery) or pupe_error($query);
 			
-		if(mysql_num_rows($sresult) > 0){
+		if (mysql_num_rows($sresult) > 0){
 			echo "<tr>
 					<th>".t("Työmääräys").":</th>
 					<th>".t("Nimi").":</th>

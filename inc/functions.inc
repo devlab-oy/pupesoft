@@ -8135,7 +8135,7 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 
 				// tää on futurikeisi
 				if (substr($tietue,0,1) != '*') {
-					if (strpos($tietue, ":") !== FALSE) list($tunnus, $tieto)  = explode(':',$tietue);
+					if (strpos($tietue, ":") !== FALSE) list($tunnus, $tieto)  = explode(':', $tietue);
 				}
 				else {
 					$tunnus = $tietue;
@@ -8174,7 +8174,7 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 				else $ai_tuoteno = (string) $row->ArticleName;
 
 				$invoice[$ai_tuoteno]['nimitys'] = $row->ArticleName;
-				$invoice[$ai_tuoteno]['tilattumaara'] = (float) str_replace(",", ".", $row->OrderedQuantity);
+				$invoice[$ai_tuoteno]['tilattumaara'] = (float) str_replace(",", ".", $row->DeliveredQuantity);
 				$invoice[$ai_tuoteno]['bruttohinta'] = (float) str_replace(",", ".", $row->UnitPriceAmount);
 
 				// voi olla monta alennusta
@@ -8227,14 +8227,6 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 						$erot = 'joo';
 					}
 				}
-
-				// jos eroavaisuutta ei löydy, tyhjennetään "löytyi kummastakin", että laskujen hyväksyntä osaa näyttää "OK"
-				// tämä siksi, koska lisättiin esim. kuljetusvakuutus tähän arrayhin ja silloin hyväksynnän checkit ei mätsää.
-				if ($erot == '') {
-					unset($loytyy_kummastakin);
-					$loytyy_kummastakin = array();
-				}
-
 			}
 
 			return array($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero);

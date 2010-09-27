@@ -47,7 +47,7 @@
 			//Otsikko
 			$pdf->draw_text(310, 815, t("Maksukehotus", $kieli), $firstpage, $iso);
 			$pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
-						
+
 			tulosta_logo_pdf($pdf, $firstpage, "");
 
 			if (isset($_POST['ekirje_laheta']) === false) {
@@ -156,7 +156,7 @@
 	            $rivit = explode("\n", $viesti);
 				$rivit[] = '';
 				$rivit[] = t("Yhteyshenkilömme", $kieli) . ": $yrow[nimi] / $yrow[eposti] / $yrow[puhno]";
-	            
+
 				foreach ($rivit as $rivi) {
 					// laitetaan
 	                $pdf->draw_text(80, $kala, $rivi, $firstpage, $norm);
@@ -257,9 +257,9 @@
 */
 			if ($karhut_samalle_laskulle == 1 or $karhukertanro != "") {
 				$pdf->draw_text(380, 118,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
-				
+
 				$oikpos = $pdf->strlen(sprintf("%.2f", $summa), $norm);
-				$pdf->draw_text(500-$oikpos, 118, sprintf("%.2f", $summa)." ".$laskutiedot["valkoodi"],		$firstpage, $norm);				
+				$pdf->draw_text(500-$oikpos, 118, sprintf("%.2f", $summa)." ".$laskutiedot["valkoodi"],		$firstpage, $norm);
 			}
 
 			$pankkitiedot = array();
@@ -391,7 +391,7 @@
 
 	$pieni["height"] 	= 8;
 	$pieni["font"] 		= "Times-Roman";
-	
+
 	$iso["height"] 		= 14;
 	$iso["font"] 		= "Helvetica-Bold";
 
@@ -420,7 +420,7 @@
 					AND ktunnus <= $karhutunnus";
 		$karhukertares = mysql_query($query) or pupe_error($query);
 		$karhukertarow = mysql_fetch_array($karhukertares);
-		
+
 		$karhukertanro = $karhukertarow[0];
 		$ikalaskenta = " TO_DAYS(kk.pvm) - TO_DAYS(l.erpcm) as ika, ";
 	}
@@ -431,13 +431,13 @@
 	}
 
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
-				l.summa-l.saldo_maksettu summa, 
-				l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa, 
+				l.summa-l.saldo_maksettu summa,
+				l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa,
 				l.erpcm, l.laskunro, l.viite,
 				l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa,
 				$ikalaskenta
-				max(kk.pvm) as kpvm, 
-				count(distinct kl.ktunnus) as karhuttu				
+				max(kk.pvm) as kpvm,
+				count(distinct kl.ktunnus) as karhuttu
 				FROM lasku l
 				LEFT JOIN karhu_lasku kl on (l.tunnus = kl.ltunnus $kjoinlisa)
 				LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus AND kk.tyyppi = '')
@@ -526,7 +526,7 @@
 					GROUP BY ltunnus;";
 		$res = mysql_query($query) or pupe_error();
 		$r = 0;
-		
+
 		while ($a = mysql_fetch_array($res)) {
 			$r += $a[0];
 		}
@@ -534,12 +534,16 @@
 		//	Tämä on mikä on karhujen keskimääräinen kierroskerta
 		$avg = floor(($r/mysql_num_rows($res))+1);
 
+		if ($tee_pdf == 'tulosta_karhu') {
+			$avg--;
+		}
+
 		// Etsitään asiakkaan kielellä:
 		$query = "	SELECT tunnus
 					FROM avainsana
 					WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$kieli'";
 		$res = mysql_query($query) or pupe_error();
-		
+
 		if (mysql_num_rows($res) == 0) {
 
 			$query = "	SELECT tunnus
@@ -559,7 +563,7 @@
 				$res = mysql_query($query) or pupe_error();
 			}
 		}
-		
+
 		// Etsitään yhtiön kielellä:
 		if (mysql_num_rows($res) == 0) {
 			$query = "	SELECT tunnus
@@ -592,14 +596,14 @@
 		$karhuviesti = $kv["tunnus"];
 	}
 
-	$query = "	SELECT selitetark 
-				FROM avainsana 
+	$query = "	SELECT selitetark
+				FROM avainsana
 				WHERE tunnus='$karhuviesti' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'";
 	$res = mysql_query($query) or pupe_error();
 	$viestit = mysql_fetch_array($res);
 
     $karhuviesti = $viestit["selitetark"];
-	
+
 	$firstpage = alku($karhuviesti, $karhutunnus);
 
 	$summa=0.0;

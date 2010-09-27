@@ -1,7 +1,16 @@
 <?php
 	require("inc/parametrit.inc");
 
-	if (($tee == 'N') or ($tee == 'E')) {
+	if ($livesearch_tee == "TUOTEHAKU") {
+		livesearch_tuotehaku();
+		exit;
+	}
+
+	// Enaboidaan ajax kikkare
+	enable_ajax();
+
+	if ($tee == 'N' or $tee == 'E') {
+
 		if ($tee == 'N') {
 			$oper='>';
 			$suun='';
@@ -11,14 +20,12 @@
 			$suun='desc';
 		}
 
-		$query = "	SELECT tuote.tuoteno, sum(saldo) saldo, status
-					FROM tuote
-					LEFT JOIN tuotepaikat ON tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.yhtio=tuote.yhtio
+		$query = "	SELECT tuote.tuoteno
+					FROM tuote use index (tuoteno_index)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
-					and tuote.tuoteno " . $oper . " '$tuoteno'
-					GROUP BY tuote.tuoteno
-					HAVING status NOT IN ('P','X') or saldo > 0
-					ORDER BY tuote.tuoteno " . $suun . "
+					and tuote.tuoteno $oper '$tuoteno'
+					and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+					ORDER BY tuote.tuoteno $suun
 					LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -33,6 +40,7 @@
 			$tee='Y';
 		}
 	}
+
 
 	echo "<font class='head'>".t("Tuotekysely")."</font><hr>";
 
@@ -86,34 +94,47 @@
 
 	if ($tee=='Y') echo "<font class='error'>$varaosavirhe</font>";
 
-	 //syotetaan tuotenumero
-	$formi  = 'formi';
-	$kentta = 'tuoteno';
+	echo "<br>";
+	echo "<table>";
 
-	echo "<table><tr>";;
-	echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+	echo "<tr>";
+	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
+	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+	echo "<input type='hidden' name='tee' value='Z'>";
+	echo "<th style='vertical-align:middle;'>".t("Tuotehaku")."</th>";
+	echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 300)."</td>";
+	echo "<td class='back'>";
+	echo "<input type='Submit' value='".t("Hae")."'></form></td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<form action='$PHP_SELF' method='post' name='formi2' autocomplete='off'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
+	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
 
-	echo "<td class='back'><select name='tyyppi'>";
-	echo "<option value=''>".t("Tuotenumero").":</option>";
-	echo "<option value='TOIMTUOTENO'>".t("Toimittajan tuotenumero").":</option>";
+	echo "<th style='vertical-align:middle;'>";
+	echo "<input type='hidden' name='tyyppi' value='TOIMTUOTENO'>";
+	echo t("Toimittajan tuotenumero");
+	echo "</th>";
 
-	$vresult = t_avainsana("TUOTEULK");
+	echo "<td>";
+	echo "<input type='text' name='tuoteno' value='' style='width:300px;'>";
+	echo "</td>";
 
-	while ($vrow = mysql_fetch_array($vresult)) {
-		echo "<option value='$vrow[selite]'>$vrow[selitetark]:</option>";
-	}
-
-	echo "</select></th>";
-	echo "<td class='back'><input type='text' name='tuoteno' value=''></td>";
-	echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+	echo "<td class='back'>";
+	echo "<input type='Submit' value='".t("Hae")."'>";
 	echo "</form>";
+	echo "</td>";
 
 	//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
-	if (($ulos=='') and ($tee=='Z')) {
+	if ($ulos == '' and $tee == 'Z') {
 		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='E'>";
-		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
+		echo "<input type='hidden' name='tyyppi' value=''>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 		echo "<td class='back'>";
 		echo "<input type='Submit' value='".t("Edellinen")."'>";
@@ -121,7 +142,9 @@
 		echo "</form>";
 
 		echo "<form action='$PHP_SELF' method='post'>";
-		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<input type='hidden' name='tyyppi' value=''>";
 		echo "<input type='hidden' name='tee' value='N'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 		echo "<td class='back'>";
@@ -129,8 +152,8 @@
 		echo "</td>";
 		echo "</form>";
 	}
-	echo "</tr></table><br>";
 
+	echo "</tr></table><br>";
 
 	//tuotteen varastostatus
 	if ($tee == 'Z') {
@@ -428,6 +451,7 @@
 		}
 		$tee = '';
 	}
+
 	if ($tee == "Y") {
 			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='Z'>";
@@ -440,4 +464,5 @@
 	}
 
 	require ("inc/footer.inc");
+
 ?>

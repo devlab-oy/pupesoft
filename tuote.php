@@ -164,7 +164,7 @@
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='E'>";
-		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
+		echo "<input type='hidden' name='tyyppi' value=''>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<td class='back'>";
@@ -175,7 +175,7 @@
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
+		echo "<input type='hidden' name='tyyppi' value=''>";
 		echo "<input type='hidden' name='tee' value='N'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";

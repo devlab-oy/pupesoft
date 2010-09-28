@@ -84,10 +84,12 @@
 			echo "<pre>$result</pre>";
 		}
 		elseif (trim($result) != "") {
-			$rivit = explode("\n", trim($result));
+			$rivit = explode(";", trim($result));
 
 			foreach ($rivit as $rivi) {
-				echo "echo \"$rivi\" | mysql -u $dbuser --password=$dbpass $dbkanta;\n";
+				$rivi = str_replace("\n", " ", $rivi);
+
+				echo "echo \"$rivi;\" | mysql -u $dbuser --password=$dbpass $dbkanta;\n";
 			}
 		}
 

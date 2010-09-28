@@ -73,6 +73,31 @@
 			else {
 				echo "<tr><th>".t("Asiakas").":</th><td><input type='text' name='ytunnus' size='15' value='$ytunnus'></td></tr>";
 			}
+
+			echo "<tr><th>".t("Kieli").":</th><td><select name='hinkieli'>";
+
+			$query  = "SHOW columns from sanakirja";
+			$fields =  mysql_query($query);
+
+			while ($apurow = mysql_fetch_array($fields)) {
+				if (strlen($apurow[0]) == 2) {
+					$sel = "";
+
+					if ($hinkieli == $apurow[0]) {
+						$sel = "SELECTED";
+					}
+					elseif ($asiakasrow["kieli"] == $apurow[0] and $hinkieli == "") {
+						$sel = "SELECTED";
+					}
+
+					echo "<option value='$apurow[0]' $sel>$apurow[0] - ".maa($apurow[0])."</option>";
+				}
+			}
+
+			echo "</select></td></tr>";
+		}
+		else {
+			$hinkieli = $kukarow["kieli"];
 		}
 
 		// Monivalintalaatikot (osasto, try tuotemerkki...)
@@ -145,24 +170,24 @@
 			}
 
 			if (isset($workbook)) {
-				$worksheet->writeString($excelrivi,  0, t("Ytunnus").": $ytunnus", $format_bold);
+				$worksheet->writeString($excelrivi,  0, t("Ytunnus", $hinkieli).": $ytunnus", $format_bold);
 				$excelrivi++;
 
-				$worksheet->writeString($excelrivi,  0, t("Asiakas").": $asiakasrow[nimi] $asiakasrow[nimitark]", $format_bold);
+				$worksheet->writeString($excelrivi,  0, t("Asiakas", $hinkieli).": $asiakasrow[nimi] $asiakasrow[nimitark]", $format_bold);
 				$excelrivi++;
 
-				$worksheet->writeString($excelrivi,  0, t("Tuotenumero"), $format_bold);
-				$worksheet->writeString($excelrivi,  1, t("EAN-koodi"), $format_bold);
-				$worksheet->writeString($excelrivi,  2, t("Osasto"), $format_bold);
-				$worksheet->writeString($excelrivi,  3, t("Tuoteryhmä"), $format_bold);
-				$worksheet->writeString($excelrivi,  4, t("Nimitys"), $format_bold);
-				$worksheet->writeString($excelrivi,  5, t("Yksikkö"), $format_bold);
-				$worksheet->writeString($excelrivi,  6, t("Aleryhmä"), $format_bold);
-				$worksheet->writeString($excelrivi,  7, t("Veroton Myyntihinta"), $format_bold);
-				$worksheet->writeString($excelrivi,  8, t("Verollinen Myyntihinta"), $format_bold);
-				$worksheet->writeString($excelrivi,  9, t("Alennus"), $format_bold);
-				$worksheet->writeString($excelrivi, 10, t("Sinun veroton hinta"), $format_bold);
-				$worksheet->writeString($excelrivi, 11, t("Sinun verollinen hinta"), $format_bold);
+				$worksheet->writeString($excelrivi,  0, t("Tuotenumero", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi,  1, t("EAN-koodi", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi,  2, t("Osasto", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi,  3, t("Tuoteryhmä", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi,  4, t("Nimitys", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi,  5, t("Yksikkö", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi,  6, t("Aleryhmä", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi,  7, t("Veroton Myyntihinta", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi,  8, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi,  9, t("Alennus", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi, 10, t("Sinun veroton hinta", $hinkieli), $format_bold);
+				$worksheet->writeString($excelrivi, 11, t("Sinun verollinen hinta", $hinkieli), $format_bold);
 				$excelrivi++;
 			}
 
@@ -244,14 +269,14 @@
 					$worksheet->writeString($excelrivi, 1, $rrow["eankoodi"]);
 					$worksheet->writeString($excelrivi, 2, $rrow["osasto"]);
 					$worksheet->writeString($excelrivi, 3, $rrow["try"]);
-					$worksheet->writeString($excelrivi, 4, $rrow["nimitys"]);
-					$worksheet->writeString($excelrivi, 5, t_avainsana("Y", "", "and avainsana.selite='$rrow[yksikko]'", "", "", "selite"));
+					$worksheet->writeString($excelrivi, 4, t_tuotteen_avainsanat($rrow, 'nimitys', $hinkieli));
+					$worksheet->writeString($excelrivi, 5, t_avainsana("Y", $hinkieli, "and avainsana.selite='$rrow[yksikko]'", "", "", "selite"));
 					$worksheet->writeString($excelrivi, 6, $rrow["aleryhma"]);
 					$worksheet->writeNumber($excelrivi, 7, $veroton);
 					$worksheet->writeNumber($excelrivi, 8, $verollinen);
 
 					if ($netto != "") {
-						$worksheet->writeString($excelrivi, 9, t("Netto"));
+						$worksheet->writeString($excelrivi, 9, t("Netto", $hinkieli));
 					}
 					else {
 						$worksheet->writeNumber($excelrivi, 9, sprintf('%.2f',$ale));
@@ -272,7 +297,7 @@
 				echo "<tr><th>".t("Tallenna hinnasto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee_lataa' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xls'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".t("Asiakashinnasto").".xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table><br>";

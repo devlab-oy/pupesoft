@@ -744,16 +744,22 @@
 			}
 		}
 		else {
-			$lisa .= " and match (lasku_myynti.nimi) against ('$myyntitilaus_haku*' IN BOOLEAN MODE) ";
+			$lisa .= " 	and match (lasku_myynti.nimi) against ('$myyntitilaus_haku*' IN BOOLEAN MODE)
+						and (lasku_myynti.tila is null or lasku_myynti.tila != 'D')
+					  	and (lasku_osto.tila is null or lasku_osto.tila != 'D')";
 		}
 	}
 
 	if (isset($lisatieto_haku) and $lisatieto_haku != "") {
-		$lisa .= " and sarjanumeroseuranta.lisatieto like '%$lisatieto_haku%' ";
+		$lisa .= " 	and sarjanumeroseuranta.lisatieto like '%$lisatieto_haku%'
+					and (lasku_myynti.tila is null or lasku_myynti.tila != 'D')
+				  	and (lasku_osto.tila is null or lasku_osto.tila != 'D')";
 	}
 
 	if (isset($tuoteno_haku) and $tuoteno_haku != "") {
-		$lisa .= " and sarjanumeroseuranta.tuoteno like '%$tuoteno_haku%' ";
+		$lisa .= " 	and sarjanumeroseuranta.tuoteno like '%$tuoteno_haku%'
+					and (lasku_myynti.tila is null or lasku_myynti.tila != 'D')
+			  		and (lasku_osto.tila is null or lasku_osto.tila != 'D') ";
 	}
 
 	if (isset($sarjanumero_haku) and $sarjanumero_haku != "") {
@@ -761,11 +767,15 @@
 	}
 
 	if (isset($varasto_haku) and $varasto_haku != "") {
-		$lisa .= " and varastopaikat.nimitys like '%$varasto_haku%' ";
+		$lisa .= " 	and varastopaikat.nimitys like '%$varasto_haku%'
+					and (lasku_myynti.tila is null or lasku_myynti.tila != 'D')
+				  	and (lasku_osto.tila is null or lasku_osto.tila != 'D')";
 	}
 
 	if (isset($tervetuloa_haku) and $tervetuloa_haku != "") {
-		$lisa .= " and (lasku_osto.laatija='$kukarow[kuka]' or lasku_myynti.laatija='$kukarow[kuka]' or lasku_myynti.myyja='$kukarow[tunnus]')";
+		$lisa .= " 	and (lasku_osto.laatija='$kukarow[kuka]' or lasku_myynti.laatija='$kukarow[kuka]' or lasku_myynti.myyja='$kukarow[tunnus]')
+					and (lasku_myynti.tila is null or lasku_myynti.tila != 'D')
+				  	and (lasku_osto.tila is null or lasku_osto.tila != 'D')";
 	}
 
 	if (isset($nimitys_haku) and $nimitys_haku != "") {
@@ -777,7 +787,9 @@
 	}
 
 	if ($lisa == "") {
-		$lisa = " and sarjanumeroseuranta.myyntirivitunnus != -1 ";
+		$lisa = " and sarjanumeroseuranta.myyntirivitunnus != -1
+				  and (lasku_myynti.tila is null or lasku_myynti.tila != 'D')
+				  and (lasku_osto.tila is null or lasku_osto.tila != 'D') ";
 
 		if (isset($ostonhyvitysrivi) and $ostonhyvitysrivi != "ON") {
 			$lisa .= " and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') ";

@@ -718,34 +718,6 @@
 						$kantasum	= 0.0;
 					}
 
-					$kalepros = 0;
-
-					// Onko kassa-alea?
-					$query = "	SELECT sum(summa) summa
-								FROM tiliointi
-								WHERE yhtio  = '$kukarow[yhtio]'
-								and ltunnus  in ($trow[ltunnus])
-								and tilino   = '$yhtiorow[myynninkassaale]'
-								and korjattu = ''";
-					$kaleres = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($kaleres) > 0) {
-						$kalerow = mysql_fetch_array($kaleres);
-
-						// Laskujen kokonaisummat
-						$query = "	SELECT sum(arvo) arvo
-									FROM lasku
-									WHERE yhtio  = '$kukarow[yhtio]'
-									and tunnus  in ($trow[ltunnus])";
-						$kalelasres = mysql_query($query) or pupe_error($query);
-						$kalelasrow = mysql_fetch_array($kalelasres);
-
-						$trow["bruttosumma"] 			= $trow["bruttosumma"] * (1-($kalerow["summa"]/$kalelasrow["arvo"]));
-						$trow["bruttosumma_valuutassa"] = $trow["bruttosumma_valuutassa"] * (1-($kalerow["summa"]/$kalelasrow["arvo"]));
-						$trow['verot'] 					= $trow["verot"] * (1-($kalerow["summa"]/$kalelasrow["arvo"]));
-						$trow['verot_valuutassa'] 		= $trow["verot_valuutassa"] * (1-($kalerow["summa"]/$kalelasrow["arvo"]));
-					}
-
 					$query = "	SELECT group_concat(distinct tili.tilino) tilino, group_concat(distinct tili.nimi) nimi
 								FROM tiliointi
 								JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
@@ -786,6 +758,58 @@
 					$kantatot += $trow['bruttosumma'];
 					$edvero    = $trow["vero"];
 					$edmaa 	   = $trow["maa"];
+
+					// Onko kassa-alea?
+					$query = "	SELECT sum(summa) summa
+								FROM tiliointi
+								WHERE yhtio  = '$kukarow[yhtio]'
+								and ltunnus  in ($trow[ltunnus])
+								and tilino   = '$yhtiorow[myynninkassaale]'
+								and korjattu = ''";
+					$kaleres = mysql_query($query) or pupe_error($query);
+					$kalerow = mysql_fetch_array($kaleres);
+
+					if ($kalerow["summa"] != 0) {
+
+						// Laskujen kokonaisummat
+						$query = "	SELECT sum(arvo*-1) arvo
+									FROM lasku
+									WHERE yhtio  = '$kukarow[yhtio]'
+									and tunnus  in ($trow[ltunnus])";
+						$kalelasres = mysql_query($query) or pupe_error($query);
+						$kalelasrow = mysql_fetch_array($kalelasres);
+
+						$trow["bruttosumma"] 			= $trow["bruttosumma"] * ($kalerow["summa"]/$kalelasrow["arvo"]);
+						$trow["bruttosumma_valuutassa"] = $trow["bruttosumma_valuutassa"] * ($kalerow["summa"]/$kalelasrow["arvo"]);
+						$trow['verot'] 					= $trow["verot"] * ($kalerow["summa"]/$kalelasrow["arvo"]);
+						$trow['verot_valuutassa'] 		= $trow["verot_valuutassa"] * ($kalerow["summa"]/$kalelasrow["arvo"]);
+
+
+						echo "<tr>";
+						echo "<td valign='top'>$trow[maa]</td>";
+						echo "<td valign='top'>$trow[valuutta]</td>";
+						echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
+						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$yhtiorow[myynninkassaale]</a></td>";
+						echo "<td valign='top'>".t("Kassa-alennus")."</td>";
+						echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";
+						echo "<td valign='top' align='right' nowrap>$trow[verot]</td>";
+
+						if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {
+							echo "<td valign='top' align='right' nowrap>$trow[bruttosumma_valuutassa]</td>";
+							echo "<td valign='top' align='right' nowrap>$trow[verot_valuutassa]</td>";
+						}
+						else {
+							echo "<td valign='top' align='right'></td>";
+							echo "<td valign='top' align='right'></td>";
+						}
+
+						echo "</tr>";
+
+						$verosum  += $trow['verot'];
+						$verotot  += $trow['verot'];
+						$kantasum += $trow['bruttosumma'];
+						$kantatot += $trow['bruttosumma'];
+					}
 				}
 
 				echo "<tr><td colspan='5' align='right' class='spec'>".t("Yhteensä").":</td>

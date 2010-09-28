@@ -212,7 +212,8 @@ if ($tee == "VSRALVYV") {
 					max(asiakas.nimi) nimi,
 					round(sum(rivihinta),2) summa,
 					round(sum(rivihinta)*100,0) arvo,
-					count(distinct(lasku.tunnus)) laskuja
+					count(distinct(lasku.tunnus)) laskuja,
+					group_concat(DISTINCT lasku.tunnus) ltunnus
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
 					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
 					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]')
@@ -243,12 +244,36 @@ if ($tee == "VSRALVYV") {
 
 			while ($row = mysql_fetch_array($result)) {
 
+				// Onko kassa-alea?
+				$query = "	SELECT sum(summa) summa
+							FROM tiliointi
+							WHERE yhtio  = '$kukarow[yhtio]'
+							and ltunnus  in ($row[ltunnus])
+							and tilino   = '$yhtiorow[myynninkassaale]'
+							and korjattu = ''";
+				$kaleres = mysql_query($query) or pupe_error($query);
+				$kalerow = mysql_fetch_array($kaleres);
+
+				if ($kalerow["summa"] != 0) {
+
+					// Laskujen kokonaisummat
+					$query = "	SELECT sum(arvo) arvo
+								FROM lasku
+								WHERE yhtio  = '$kukarow[yhtio]'
+								and tunnus  in ($row[ltunnus])";
+					$kalelasres = mysql_query($query) or pupe_error($query);
+					$kalelasrow = mysql_fetch_array($kalelasres);
+
+					$row["arvo"]  = $row["arvo"] * (1-($kalerow["summa"]/$kalelasrow["arvo"]));
+					$row["summa"] = $row["summa"] * (1-($kalerow["summa"]/$kalelasrow["arvo"]));
+				}
+
 				if ($row["tav_pal"] != $edtav_pal or $edtav_pal == "XXX") {
 
 					if ($edtav_pal != "XXX") echo "<tr><th colspan='3'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_tav)."</th><th></th></tr>";
 
 					if ($edtav_pal != "XXX") {
-						echo "<tr><td class='back' colspan='5'><br><br><br>Palvelutuotteet (ei ilmoiteta verottajalle):</td></tr>";
+						echo "<tr><td class='back' colspan='5'><br><br><br>Palvelutuotteet (ilmoitetaan verottajalle):</td></tr>";
 					}
 
 					echo "<tr><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";

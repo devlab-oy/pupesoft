@@ -20,6 +20,11 @@
 		if (!isset($tkausi)) $tkausi = '';
 		if (!isset($ytunnus)) $ytunnus = '';
 
+		if (isset($tee) and $tee == 'file') {
+			if (isset($mul_osasto) and $mul_osasto != '') $mul_osasto = unserialize(urldecode($mul_osasto));
+			if (isset($mul_try) and $mul_try != '') $mul_try = unserialize(urldecode($mul_try));
+		}
+
 		if (is_array($luvut)) {
 			$paiv = 0;
 			$lisaa = 0;
@@ -414,6 +419,8 @@
 			echo "<input type='hidden' name='submit_button' value='joo' />";
 			echo "<input type='hidden' name='tkausi' value='$tkausi' />";
 			echo "<input type='hidden' name='ytunnus' value='$ytunnus' />";
+			echo "<input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>";
+			echo "<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>";
 
 			if (isset($muutparametrit) and strlen($muutparametrit) > 1) {
 				echo "<input type='hidden' name='muutparametrit' value='$muutparametrit' />";

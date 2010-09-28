@@ -239,6 +239,9 @@
 			$excelrivi 	 = 0;
 			$excelsarake = 0;
 
+			$worksheet->write($excelrivi, $excelsarake, t("Tuoteno"), $format_bold);
+			$excelsarake++;
+
 			$worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
 			$excelsarake++;
 
@@ -260,7 +263,7 @@
 			$lisajoin = '';
 
 			if (trim($kaikki_tunnukset) != '') {
-				$query = "	SELECT DISTINCT tuote.tuoteno
+				$query = "	SELECT DISTINCT tuote.tuoteno, tuote.nimitys
 							FROM tuotteen_alkio
 							JOIN tuote ON (tuote.yhtio = tuotteen_alkio.yhtio AND tuote.tuoteno = tuotteen_alkio.tuoteno AND tuote.status != 'P')
 							WHERE tuotteen_alkio.yhtio = '{$kukarow['yhtio']}'
@@ -268,7 +271,7 @@
 							AND tuotteen_alkio.selite IN ($kaikki_tunnukset)";
 			}
 			else {
-				$query = "	SELECT tuoteno
+				$query = "	SELECT tuoteno, nimitys
 							FROM tuote
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND status != 'P'
@@ -280,7 +283,7 @@
 			echo "<br />";
 			echo "<table>";
 
-			echo "<tr><th>",t("Nimi"),"</th>";
+			echo "<tr><th>",t("Tuoteno"),"</th><th>",t("Nimi"),"</th>";
 
 			$raja = '0000-00';
 			$rajataulu = array();
@@ -320,13 +323,16 @@
 				$worksheet->write($excelrivi, $excelsarake, $row['tuoteno']);
 				$excelsarake++;
 
-				echo "<tr><td>$row[tuoteno]</td>";
+				$worksheet->write($excelrivi, $excelsarake, $row['nimitys']);
+				$excelsarake++;
+
+				echo "<tr><td>$row[tuoteno]</td><td>$row[nimitys]</td>";
 
 				for ($k = 0; $k < $j; $k++) {
 					$ik = $rajataulu[$k];
 
 					if (is_array($taulunrivit) and $taulunrivit[$xx][0] == $row['tuoteno']) {
-						$nro = trim($taulunrivit[$xx][$k+1]);
+						$nro = trim($taulunrivit[$xx][$k+2]);
 					}
 					else {
 

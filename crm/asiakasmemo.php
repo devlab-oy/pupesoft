@@ -56,18 +56,20 @@
 			list($email, $ekuka) = explode("###", $email);
 			
 			// Haetaan muistiinpano
-			$query = "	SELECT kalenteri.*, asiakas.nimi
+			$query = "	SELECT kalenteri.*, asiakas.nimi, asiakas.nimitark, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.asiakasnro
 						FROM kalenteri
 						LEFT JOIN asiakas ON (kalenteri.yhtio = asiakas.yhtio and kalenteri.liitostunnus = asiakas.tunnus)
 						WHERE kalenteri.tunnus = '$tunnus'";
 			$res = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($res);
 
-			$meili = "\n$kukarow[nimi] l‰hetti sinulle asiakasmemon.\n\n\n";
-			$meili .= "Tapa:\n$row[tapa]\n\n";
-			$meili .= "Asiakas:\n$row[asiakas] $row[nimi]\n\n";
-			$meili .= "P‰v‰m‰‰r‰:\n".tv1dateconv($row["pvmalku"])."\n\n";
-			$meili .= "Viesti:\n".str_replace("\r\n","\n", $row["kentta01"])."\n\n";
+			$meili = "\n$kukarow[nimi] ".t("l‰hetti sinulle asiakasmemon").".\n\n\n";
+			$meili .= t("Tapa").": $row[tapa]\n\n";
+			$meili .= t("Ytunnus").": $row[asiakas]\n";
+			$meili .= t("Asiakasnumero").": $row[asiakasnro]\n";
+			$meili .= t("Asiakas").": $row[nimi] $row[nimitark] $row[toim_nimi] $row[toim_nimitark]\n";
+			$meili .= t("P‰v‰m‰‰r‰").": ".tv1dateconv($row["pvmalku"])."\n\n";
+			$meili .= t("Viesti").":\n".str_replace("\r\n","\n", $row["kentta01"])."\n\n";
 			$meili .= "-----------------------\n\n";
 			
 			$tulos = mail($email, "Asiakasmemo $yhtiorow[nimi]", $meili,"From: ".$kukarow["nimi"]."<".$kukarow["eposti"].">\nReply-To: ".$kukarow["nimi"]."<".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");

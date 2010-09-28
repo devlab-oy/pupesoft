@@ -414,8 +414,6 @@
 			echo "<input type='hidden' name='submit_button' value='joo' />";
 			echo "<input type='hidden' name='tkausi' value='$tkausi' />";
 			echo "<input type='hidden' name='ytunnus' value='$ytunnus' />";
-//			echo "<input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>";
-//			echo "<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>";
 
 			if (isset($muutparametrit) and strlen($muutparametrit) > 1) {
 				echo "<input type='hidden' name='muutparametrit' value='$muutparametrit' />";

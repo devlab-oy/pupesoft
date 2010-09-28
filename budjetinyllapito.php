@@ -19,82 +19,13 @@ else {
 		$paiv = 0;
 		$lisaa = 0;
 
-		foreach ($luvut as $rind => $rivi) {
+		foreach ($luvut as $u_taso => $rivit) {
+			foreach ($rivit as $u_tili => $solut) {
+				foreach ($solut as $u_kausi => $solu) {
 
-			foreach ($rivi as $sind => $solu) {
+					$solu = str_replace (",", ".", $solu);
 
-				$solu = str_replace ( ",", ".", $solu);
-
-				if ($solu == '!' or $solu = (float) $solu) {
-
-					if ($solu == '!') $solu = 0;
-
-					$solu = (float) $solu;
-
-					$query = "	SELECT summa
-								FROM budjetti
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND kausi = '$sind'
-								AND taso = '$rind'
-								AND tili = ''
-								AND kustp = '$vkustp'
-								AND kohde = '$vkohde'
-								AND projekti = '$vproj'";
-					$result = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($result) == 1) {
-
-						$budjrow = mysql_fetch_assoc($result);
-
-						if ($budjrow['summa'] != $solu) {
-
-							if ($solu == 0.00) {
-								$query = "	DELETE FROM budjetti
-											WHERE yhtio = '$kukarow[yhtio]'
-											AND kausi = '$sind'
-											AND taso = '$rind'
-											AND tili = ''
-											AND kustp = '$vkustp'
-											AND kohde = '$vkohde'
-											AND projekti = '$vproj'";
-							}
-							else {
-								$query	= "	UPDATE budjetti SET
-											summa = $solu
-											WHERE yhtio = '$kukarow[yhtio]'
-											AND kausi = '$sind'
-											AND taso = '$rind'
-											AND tili = ''
-											AND kustp = '$vkustp'
-											AND kohde = '$vkohde'
-											AND projekti = '$vproj'";
-							}
-							$result = mysql_query($query) or pupe_error($query);
-							$paiv++;
-						}
-					}
-					else {
-						$query = "	INSERT INTO budjetti SET
-									summa = $solu,
-									yhtio = '$kukarow[yhtio]',
-									kausi = '$sind',
-									taso = '$rind',
-									tili = '',
-									kustp = '$vkustp',
-									kohde = '$vkohde',
-									projekti = '$vproj'";
-						$result = mysql_query($query) or pupe_error($query);
-						$lisaa++;
-					}
-				}
-			}
-
-			foreach ($tilien_luvut[$rind] as $tind => $rivi) {
-				foreach ($rivi as $sind => $solu) {
-
-					$solu = str_replace ( ",", ".", $solu);
-
-					if ($solu == '!' or $solu = (float) $solu) {
+					if ($solu == '!' or (float) $solu != 0) {
 
 						if ($solu == '!') $solu = 0;
 
@@ -102,12 +33,12 @@ else {
 
 						$query = "	SELECT summa
 									FROM budjetti
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND kausi = '$sind'
-									AND taso = '$rind'
-									AND tili = '$tind'
-									AND kustp = '$vkustp'
-									AND kohde = '$vkohde'
+									WHERE yhtio  = '$kukarow[yhtio]'
+									AND kausi 	 = '$u_kausi'
+									AND taso 	 = '$u_taso'
+									AND tili 	 = '$u_tili'
+									AND kustp 	 = '$vkustp'
+									AND kohde 	 = '$vkohde'
 									AND projekti = '$vproj'";
 						$result = mysql_query($query) or pupe_error($query);
 
@@ -117,41 +48,45 @@ else {
 
 							if ($budjrow['summa'] != $solu) {
 
-								if ($solu == 0.00) {
+								if ($solu == 0) {
 									$query = "	DELETE FROM budjetti
-												WHERE yhtio = '$kukarow[yhtio]'
-												AND kausi = '$sind'
-												AND taso = '$rind'
-												AND tili = '$tind'
-												AND kustp = '$vkustp'
-												AND kohde = '$vkohde'
+												WHERE yhtio  = '$kukarow[yhtio]'
+												AND kausi 	 = '$u_kausi'
+												AND taso 	 = '$u_taso'
+												AND tili 	 = '$u_tili'
+												AND kustp 	 = '$vkustp'
+												AND kohde 	 = '$vkohde'
 												AND projekti = '$vproj'";
 								}
 								else {
 									$query	= "	UPDATE budjetti SET
-												summa = $solu
-												WHERE yhtio = '$kukarow[yhtio]'
-												AND kausi = '$sind'
-												AND taso = '$rind'
-												AND tili = '$tind'
-												AND kustp = '$vkustp'
-												AND kohde = '$vkohde'
+												summa = $solu,
+												muuttaja = '$kukarow[kuka]',
+												muutospvm = now()
+												WHERE yhtio  = '$kukarow[yhtio]'
+												AND kausi 	 = '$u_kausi'
+												AND taso 	 = '$u_taso'
+												AND tili 	 = '$u_tili'
+												AND kustp 	 = '$vkustp'
+												AND kohde 	 = '$vkohde'
 												AND projekti = '$vproj'";
 								}
 								$result = mysql_query($query) or pupe_error($query);
 								$paiv++;
 							}
 						}
-						else {
+						elseif ($solu != 0) {
 							$query = "	INSERT INTO budjetti SET
-										summa = $solu,
-										yhtio = '$kukarow[yhtio]',
-										kausi = '$sind',
-										taso = '$rind',
-										tili = '$tind',
-										kustp = '$vkustp',
-										kohde = '$vkohde',
-										projekti = '$vproj'";
+										summa 		= $solu,
+										yhtio 		= '$kukarow[yhtio]',
+										kausi 		= '$u_kausi',
+										taso 		= '$u_taso',
+										tili 		= '$u_tili',
+										kustp 		= '$vkustp',
+										kohde 		= '$vkohde',
+										projekti 	= '$vproj',
+										laatija 	= '$kukarow[kuka]',
+										luontiaika  = now()";
 							$result = mysql_query($query) or pupe_error($query);
 							$lisaa++;
 						}
@@ -159,7 +94,8 @@ else {
 				}
 			}
 		}
-		echo "<font class='message'>".t("Päivitin ").$paiv.t(" Lisäsin ").$lisaa."</font><br><br>";
+
+		echo "<font class='message'>".t("Päivitin")." $paiv. ".t("Lisäsin")." $lisaa</font><br><br>";
 	}
 
 	if (isset($tyyppi)) {
@@ -175,9 +111,11 @@ else {
 		}
 	}
 
+	echo "<form method='post'>";
+
 	echo "<table>";
-	echo "<form method='post'>
-			<table><tr>
+
+	echo "	<tr>
 			<th>".t("Tyyppi")."</th>
 			<td><select name = 'tyyppi'>
 			<option value='4' $sel4>".t("Tuloslaskelma")."
@@ -185,6 +123,7 @@ else {
 			<option value='1' $sel1>".t("Vastaavaa")."
 			</select></td></tr>
 			<tr>";
+
 	echo "<tr><th>".t("Tilikausi");
 
 	$query = "	SELECT *
@@ -195,7 +134,7 @@ else {
 
 	echo "</th><td><select name='tkausi'>";
 
-	while ($vrow=mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($tkausi == $vrow['tunnus']) {
 			$sel = "selected";
@@ -214,14 +153,14 @@ else {
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
-	echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
+	echo "<td><select name='kustp'><option value='0'>".t("Ei valintaa")."</option>";
 
-	while ($vrow=mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($kustp == $vrow['tunnus']) {
 			$sel = "selected";
 		}
-		echo "<option value = '$vrow[tunnus]' $sel>$vrow[tunnus] $vrow[nimi]";
+		echo "<option value = '$vrow[tunnus]' $sel>$vrow[tunnus] $vrow[nimi]</option>";
 	}
 	echo "</select></td>";
 	echo "</tr>";
@@ -235,14 +174,14 @@ else {
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
-	echo "<td><select name='kohde'><option value=' '>Ei valintaa";
+	echo "<td><select name='kohde'><option value='0'>".t("Ei valintaa")."</option>";
 
-	while ($vrow=mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($kohde == $vrow['tunnus']) {
 			$sel = "selected";
 		}
-		echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
+		echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
 	}
 
 	echo "</select></td>";
@@ -257,17 +196,40 @@ else {
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
-	echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
+	echo "<td><select name='proj'><option value='0'>".t("Ei valintaa")."</option>";
 
-	while ($vrow=mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($proj == $vrow['tunnus']) {
 			$sel = "selected";
 		}
-		echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
+		echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
 	}
 
-	echo "</select></td></tr></table>";
+	echo "</select></td></tr>";
+
+
+	$sel = array();
+	$sel[$rtaso] = "SELECTED";
+
+	echo "<tr><th valign='top'>".t("Budjetointitaso")."</th>
+			<td><select name='rtaso'>";
+
+	$query = "	SELECT max(length(taso)) taso
+				from taso
+				where yhtio = '$kukarow[yhtio]'";
+	$vresult = mysql_query($query) or pupe_error($query);
+	$vrow = mysql_fetch_assoc($vresult);
+
+	echo "<option value='TILI'>".t("Tili taso")."</option>\n";
+
+	for ($i=$vrow["taso"]-1; $i >= 0; $i--) {
+		echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s",'',$i+1)."</option>\n";
+	}
+
+	echo "</select></td></tr>";
+
+	echo "</table>";
 	echo t("Budjettiluvun voi poistaa huutomerkillä (!)")."<br><br>";
 	echo "<input type='submit' VALUE='".t("Näytä/Tallenna")."'>";
 
@@ -280,8 +242,9 @@ else {
 					and tunnus = '$tkausi'";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($vresult) == 1)
-			$tilikaudetrow=mysql_fetch_array($vresult);
+		if (mysql_num_rows($vresult) == 1) {
+			$tilikaudetrow = mysql_fetch_array($vresult);
+		}
 	}
 
 	if (is_array($tilikaudetrow)) {
@@ -311,33 +274,18 @@ else {
 			$data->setRowColOffset(0);
 			$data->read($_FILES['userfile']['tmp_name']);
 
-			echo "<br /><br /><font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
+			echo "<br /><br /><font class='message'>".t("Luetaan lähetetty tiedosto")."...<br><br></font>";
 
 			$headers = array();
-			$taulunotsikot	= array();
 			$taulunrivit	= array();
 
-			for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-				$headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
-			}
-
-			for ($excej = 3; $excej = (count($headers)-1); $excej--) {
-				if ($headers[$excej] != "") {
-					break;
-				}
-				else {
-					unset($headers[$excej]);
-				}
-			}
-
 			for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
-				for ($excej = 0; $excej < count($headers); $excej++) {
+				for ($excej = 3; $excej < 20; $excej++) {
 
-					$taulunrivit[$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
+					$nro = trim($data->sheets[0]['cells'][$excei][$excej]);
 
-					// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
-					foreach ($taulunotsikot as $taulu => $joinit) {
-						$taulunrivit[$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
+					if ((float) $nro != 0 or $nro == "!") {
+						$taulunrivit[$data->sheets[0]['cells'][$excei][0]][$data->sheets[0]['cells'][$excei][1]][$excej-3] = $nro;
 					}
 				}
 			}
@@ -345,7 +293,7 @@ else {
 		else {
 			unset($taulunrivit);
 		}
-			
+
 		if (!@include('Spreadsheet/Excel/Writer.php')) {
 			echo "<font class='error'>",t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta."),"</font><br>";
 			exit;
@@ -369,24 +317,23 @@ else {
 		$worksheet->writeString($excelrivi, $excelsarake, t("Tili / Taso"), $format_bold);
 		$excelsarake++;
 
-		$worksheet->writeString($excelrivi, $excelsarake, t("Tilinumero / Tasonumero"), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake, t("Nro"), $format_bold);
 		$excelsarake++;
 
-		$worksheet->writeString($excelrivi, $excelsarake, t("Tilin / Tason nimi"), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake, t("Nimi"), $format_bold);
 		$excelsarake++;
 
 		//Parametrit mihin tämä taulukko liittyy
-		echo "<input type='hidden' name = 'vkustp' value='$kustp'>";
-		echo "<input type='hidden' name = 'vkohde' value='$kohde'>";
-		echo "<input type='hidden' name = 'vproj' value='$proj'>";
 		echo "<table>";
 		echo "<tr><td class='back'></td>";
 
+		$j = 0;
 		$raja = '0000-00';
 		$rajataulu = array();
-		$j = 0;
+		$budjetit = array();
 
 		while ($raja < substr($tilikaudetrow['tilikausi_loppu'], 0, 7)) {
+
 			$vuosi = substr($tilikaudetrow['tilikausi_alku'], 0, 4);
 			$kk = substr($tilikaudetrow['tilikausi_alku'], 5, 2);
 			$kk += $j;
@@ -406,7 +353,22 @@ else {
 
 			$worksheet->writeString($excelrivi, $excelsarake, $raja, $format_bold);
 			$excelsarake++;
+
+			// Haetaan budjetit
+			$query = "	SELECT *
+						from budjetti
+						where yhtio		= '$kukarow[yhtio]'
+						and kausi 		= '$vuosi$kk'
+						and kustp		= '$kustp'
+						and kohde		= '$kohde'
+						and projekti	= '$proj'";
+			$xresult = mysql_query($query) or pupe_error($query);
+
+			while ($brow = mysql_fetch_array($xresult)) {
+				$budjetit[(string) $brow["taso"]][(string) $brow["tili"]][(string) $brow["kausi"]] = $brow["summa"];
+			}
 		}
+
 		echo "</tr>";
 
 		$excelsarake = 0;
@@ -421,144 +383,143 @@ else {
 			$tilityyppi = "sisainen_taso";
 		}
 
-		$query = "	SELECT taso.*
+		// Haetaan kaikki tasot ja rakennetaan tuloslaskelma-array
+		$query = "	SELECT *
 					FROM taso
-					WHERE taso.yhtio = '$kukarow[yhtio]'
-					AND taso.taso LIKE '$tyyppi%'
-					AND taso.tyyppi = '$tasotyyppi'";
-		$vresult = mysql_query($query) or pupe_error($query);
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi 	= '$tasotyyppi'
+					and LEFT(taso, 1) in (BINARY '$tyyppi')
+					and taso != ''
+					ORDER BY taso";
+		$tasores = mysql_query($query) or pupe_error($query);
 
-		$xx = 0;
-		$z = 0;
+		while ($tasorow = mysql_fetch_assoc($tasores)) {
 
-		while ($tasorow = mysql_fetch_array($vresult)) {
+			// millä tasolla ollaan (1,2,3,4,5,6)
+			$tasoluku = strlen($tasorow["taso"]);
 
-			$worksheet->writeString($excelrivi, $excelsarake, "TASO");
-			$excelsarake++;
+			// tasonimi talteen (rightpäddätään Ö:llä, niin saadaan oikeaan järjestykseen)
+			$apusort = str_pad($tasorow["taso"], 20, "Ö");
+			$tasonimi[$apusort] = $tasorow["nimi"];
 
-			$worksheet->writeString($excelrivi, $excelsarake, $tasorow['taso']);
-			$excelsarake++;
-
-			$worksheet->writeString($excelrivi, $excelsarake, $tasorow['nimi']);
-			$excelsarake++;
-
-			echo "<tr><td>$tasorow[taso] $tasorow[nimi]</td>";
-
-			for ($k = 0; $k < $j; $k++) {
-				$itaso = $tasorow['taso'];
-				$ik = $rajataulu[$k];
-
-				if (is_array($taulunrivit) and $taulunrivit[$xx][0] == "TASO" and $taulunrivit[$xx][1] == $tasorow['taso'] and $taulunrivit[$xx][2] == $tasorow['nimi']) {
-					$nro = trim($taulunrivit[$xx][$k+3]);
-				}
-				else {
-					$query = "	SELECT *
-								from budjetti
-								where yhtio			= '$kukarow[yhtio]'
-								and kausi 			= '$ik'
-								and taso 			= '$itaso'
-								and tili			= ''
-								and kustp			= '$kustp'
-								and kohde			= '$kohde'
-								and projekti		= '$proj'";
-					$xresult = mysql_query($query) or pupe_error($query);
-
-					$nro='';
-
-					if (mysql_num_rows($xresult) == 1) {
-						$brow = mysql_fetch_array($xresult);
-						$nro = $brow['summa'];
-					}
-				}
-
-				echo "<td><input type='text' name = 'luvut[$itaso][$ik]' value='$nro' size='8'></td>";
-
-				$worksheet->write($excelrivi, $excelsarake, $nro);
-				$excelsarake++;
+			// pilkotaan taso osiin
+			$taso = array();
+			for ($i = 0; $i < $tasoluku; $i++) {
+				$taso[$i] = substr($tasorow["taso"], 0, $i+1);
 			}
-			echo "</tr>";
+		}
 
-			$excelsarake = 0;
-			$excelrivi++;
+		// sortataan array indexin (tason) mukaan
+		ksort($tasonimi);
 
-			$query = "	SELECT tilino, nimi
-						FROM tili
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND $tilityyppi = '$tasorow[taso]'
-						group by 1,2";
-			$tiliresult = mysql_query($query) or pupe_error($query);
+		// loopataan tasot läpi
+		foreach ($tasonimi as $key_c => $value) {
 
-			$yy = $xx + 1;
+			$key = str_replace("Ö", "", $key_c); // Ö-kirjaimet pois
 
-			while ($tilirow = mysql_fetch_assoc($tiliresult)) {
+			// tulostaan rivi vain jos se kuuluu rajaukseen
+			if (strlen($key) <= $rtaso or $rtaso == "TILI") {
 
-				$worksheet->writeString($excelrivi, $excelsarake, "TILI");
-				$excelsarake++;
+				$class = "";
 
-				$worksheet->writeString($excelrivi, $excelsarake, $tilirow['tilino']);
-				$excelsarake++;
+				// laitetaan ykkös ja kakkostason rivit tummalla selkeyden vuoksi
+				if (strlen($key) < 3 and $rtaso > 2) $class = "tumma";
 
-				$worksheet->writeString($excelrivi, $excelsarake, $tilirow['nimi']);
-				$excelsarake++;
+				if ($rtaso == "TILI") {
 
-				echo "<tr><td>$tilirow[tilino] $tilirow[nimi]</td>";
+					$class = "tumma";
 
-				for ($k=0; $k < $j; $k++) {
-					$itaso = $tasorow['taso'];
-					$ik = $rajataulu[$k];
+					$query = "	SELECT tilino, nimi
+								FROM tili
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND $tilityyppi = '$key'
+								ORDER BY 1,2";
+					$tiliresult = mysql_query($query) or pupe_error($query);
 
-					if (is_array($taulunrivit) and $taulunrivit[$yy][0] == "TILI" and $taulunrivit[$yy][1] == $tilirow['tilino'] and $taulunrivit[$yy][2] == $tilirow['nimi']) {
-						$nro = trim($taulunrivit[$yy][$k+3]);
-					}
-					else {
-						$query = "	SELECT *
-									from budjetti
-									where yhtio		= '$kukarow[yhtio]'
-									and kausi 		= '$ik'
-									and taso 		= '$itaso'
-									and tili		= '$tilirow[tilino]'
-									and kustp		= '$kustp'
-									and kohde		= '$kohde'
-									and projekti	= '$proj'";
-						$xresult = mysql_query($query) or pupe_error($query);
-						$nro='';
+					while ($tilirow = mysql_fetch_assoc($tiliresult)) {
 
-						if (mysql_num_rows($xresult) == 1) {
-							$brow = mysql_fetch_array($xresult);
-							$nro = $brow['summa'];
+						$worksheet->writeString($excelrivi, $excelsarake, "TILI");
+						$excelsarake++;
+
+						$worksheet->writeString($excelrivi, $excelsarake, $tilirow['tilino']);
+						$excelsarake++;
+
+						$worksheet->writeString($excelrivi, $excelsarake, $tilirow['nimi']);
+						$excelsarake++;
+
+						echo "<tr><th nowrap>$tilirow[tilino] - $tilirow[nimi]</th>";
+
+						for ($k = 0; $k < $j; $k++) {
+
+							$nro = "";
+
+							if (isset($taulunrivit["TILI"][$tilirow["tilino"]][$k])) {
+								$nro = $taulunrivit["TILI"][$tilirow["tilino"]][$k];
+							}
+							elseif (isset($budjetit[$key][$tilirow["tilino"]][$rajataulu[$k]])) {
+								$nro = $budjetit[$key][$tilirow["tilino"]][$rajataulu[$k]];
+							}
+
+							echo "<td align='right' nowrap><input type='text' name = 'luvut[$key][$tilirow[tilino]][$rajataulu[$k]]' value='$nro' size='10'></td>";
+
+							$worksheet->write($excelrivi, $excelsarake, $nro);
+							$excelsarake++;
 						}
+
+						echo "</tr>";
+
+						$excelsarake = 0;
+						$excelrivi++;
 					}
-					echo "<td><input type='text' name = 'tilien_luvut[$itaso][$tilirow[tilino]][$ik]' value='$nro' size='8'></td>";
+				}
+
+				$worksheet->writeString($excelrivi, $excelsarake, "TASO");
+				$excelsarake++;
+
+				$worksheet->writeString($excelrivi, $excelsarake, $key);
+				$excelsarake++;
+
+				$worksheet->writeString($excelrivi, $excelsarake, $value);
+				$excelsarake++;
+
+				echo "<tr><th nowrap>$key - $value</th>";
+
+				for ($k = 0; $k < $j; $k++) {
+
+					$nro = "";
+
+					if (isset($taulunrivit["TASO"][$key][$k])) {
+						$nro = $taulunrivit["TASO"][$key][$k];
+					}
+					elseif (isset($budjetit[$key]["0"][$rajataulu[$k]])) {
+						$nro = $budjetit[$key]["0"][$rajataulu[$k]];
+					}
+
+					echo  "<td class='$class' align='right' nowrap><input type='text' name = 'luvut[$key][0][$rajataulu[$k]]' value='$nro' size='10'></td>";
 
 					$worksheet->write($excelrivi, $excelsarake, $nro);
 					$excelsarake++;
 				}
 
-				echo "</tr>";
+				echo "</tr>\n";
 
 				$excelsarake = 0;
-				$excelrivi++;				
+				$excelrivi++;
 
-				$yy++;
+				// kakkostason jälkeen aina yks tyhjä rivi.. paitsi jos otetaan vain kakkostason raportti
+				if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
+					echo "<tr><td class='back'>&nbsp;</td></tr>";
+				}
+
+				if (strlen($key) == 1 and ($rtaso > 1 or $rtaso == "TILI")) {
+					echo "<tr><td class='back'><br><br></td></tr>";
+				}
 			}
 
-			$query = "	SELECT SUM(IF(tilino != '', 1, 0)) rivit
-						FROM tili
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND $tilityyppi = '$tasorow[taso]'";
-			$tiliresult = mysql_query($query) or pupe_error($query);
-			$tilicount = mysql_fetch_assoc($tiliresult);
-
-			if (trim($tilicount['rivit']) != '') {
-				$xx = $xx + $tilicount['rivit'];
-			}
-
-			$xx++;
-
-			$excelsarake = 0;
+			$edkey = $key;
 		}
 
-		echo "</form></table>";
+		echo "</form></table><br>";
 
 		$workbook->close();
 
@@ -567,7 +528,7 @@ else {
 		echo "<input type='hidden' name='kaunisnimi' value='Budjettimatriisi.xls'>";
 		echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 		echo "<table>";
-		echo "<tr><th>",t("Tallenna raportti (xls)"),":</th>";
+		echo "<tr><th>",t("Tallenna budjetti (xls)"),":</th>";
 		echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr>";
 		echo "</table></form><br />";
 
@@ -578,8 +539,9 @@ else {
 		echo "<input type='hidden' name='vproj' value='$proj'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tkausi' value='$tkausi'>";
+		echo "<input type='hidden' name='rtaso' value='$rtaso'>";
 		echo "<table>";
-		echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td><input type='submit' value='",t("Lähetä"),"' /></td></tr>";
+		echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='",t("Lähetä"),"' /></td></tr>";
 		echo "</table>";
 		echo "</form>";
 
@@ -587,4 +549,5 @@ else {
 
 	require ("inc/footer.inc");
 }
+
 ?>

@@ -139,7 +139,10 @@
 
 				$stresult = mysql_query($query) or pupe_error($query);
 				$id = mysql_insert_id();
-
+				
+				//	Tämä funktio tekee myös oikeustarkistukset!
+				synkronoi($kukarow["yhtio"], "tuote", $id, "", "");
+				
 				$query = "	SELECT *
 							FROM tuotteen_toimittajat
 							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
@@ -148,7 +151,7 @@
 				if (mysql_num_rows($stresult) != 0 ) {
 					while ($otsikkorivi = mysql_fetch_array($stresult)) {
 						// tehdään vanhoista tuotteen_toimittajista 1:1 kopio...
-						$query = "insert into tuotteen_toimittajat set ";
+						$query = "INSERT into tuotteen_toimittajat set ";
 						for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
 							// tuotenumeroksi tietenkin uustuoteno
@@ -164,6 +167,8 @@
 
 						$astresult = mysql_query($query) or pupe_error($query);
 						$id2 = mysql_insert_id();
+						
+						synkronoi($kukarow["yhtio"], "tuotteen_toimittajat", $id2, "", "");
 					}
 				}
 
@@ -174,11 +179,11 @@
 				$rivi = mysql_fetch_array($result);
 
 				//	Lähetetään mailia tästä eteenpäin jos meillä on vastaanottajia
-				if($yhtiorow["tuotekopio_email"] != "") {
+				if ($yhtiorow["tuotekopio_email"] != "") {
 					$header  = "From: <$yhtiorow[postittaja_email]>\n";
 					$header .= "MIME-Version: 1.0\n" ;
 
-					$query = "select * from yhtio where yhtio='$hakyhtio'";
+					$query = "SELECT * from yhtio where yhtio='$hakyhtio'";
 					$yres = mysql_query($query) or pupe_error($query);
 					$yrow = mysql_fetch_array($yres);
 

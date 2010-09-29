@@ -20,7 +20,7 @@
 			}
 			</script>";
 
-	if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or ($kukarow["yhtio"] == "atarv" and $tila == "siirrasuoritus16113tilille")) {
+	if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or ($kukarow["yhtio"] == "atarv" and ($tila == "siirrasuoritus16113tilille" or $tila == "siirrasuoritus18705tilille"))) {
 
 		if ($tila == "siirrasuoritus16113tilille" and isset($suoritustunnukset_kaikki) and $suoritustunnukset_kaikki != "") {
 			$suoritustunnukset = $suoritustunnukset_kaikki;
@@ -45,7 +45,7 @@
 					and kohdpvm	= '0000-00-00'
 					$suorilisa";
 		$suoritus_res = mysql_query($query) or pupe_error($query);
-				
+
 		while ($suoritus_row = mysql_fetch_assoc($suoritus_res)) {
 
 			// Haetaan suorituksen pankkitili
@@ -79,7 +79,7 @@
 				$tiliointi2_res = mysql_query($query) or pupe_error($query);
 				$tiliointi2_row = mysql_fetch_assoc($tiliointi2_res);
 			}
-			
+
 			// Jos kaikki lˆytyy, niin ok. Else majork‰k
 			if (mysql_num_rows($yriti_res) == 1 and mysql_num_rows($tiliointi1_res) == 1 and mysql_num_rows($tiliointi2_res) == 1 and $tiliointi2_row["tilino"] != "" and (int) $tiliointi1_row["ltunnus"] > 0 and $yhtiorow["selvittelytili"] != "") {
 
@@ -87,6 +87,11 @@
 					$stili  = "16113";
 					$tapvm  = $tiliointi1_row["tapvm"];
 					$selite = 'Suoritus siirretty tilille 16113';
+				}
+				elseif ($kukarow["yhtio"] == "atarv" and $tila == 'siirrasuoritus18705tilille') {
+					$stili  = "18705";
+					$tapvm  = $tiliointi1_row["tapvm"];
+					$selite = 'Suoritus siirretty tilille 18705';
 				}
 				elseif ($tila == 'siirrasuoritus') {
 					$stili  = $yhtiorow["selvittelytili"];
@@ -112,7 +117,7 @@
 
 			}
 		}
-		
+
 		$tila = '';
 	}
 
@@ -131,9 +136,9 @@
 	if ($tila == 'tulostakuitti') {
 
 		//Haetaan kirjoitin
-		$query  = "	SELECT komento 
-					FROM kirjoittimet 
-					WHERE yhtio = '$kukarow[yhtio]' 
+		$query  = "	SELECT komento
+					FROM kirjoittimet
+					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus = '$kukarow[kirjoitin]'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -144,9 +149,9 @@
 			$kirjoitinrow = mysql_fetch_array($result);
 			$tulostakuitti = $kirjoitinrow["komento"];
 
-			$query = "	SELECT * 
-						FROM asiakas 
-						WHERE yhtio = '$kukarow[yhtio]' 
+			$query = "	SELECT *
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '$asiakas_tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$asiakasrow = mysql_fetch_array($result);
@@ -587,26 +592,32 @@
 			if ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) {
 				// tehd‰‰n nappi suorituksen poistamiseen
 				echo "<td valign='top' class='back'>";
-				
+
 				if (trim($maksurow["viite"]) != "") {
 					if ($kukarow["yhtio"] == "atarv") {
 						// ARWI special
 						$suoritustunnukset_kaikki[] = $maksurow["tunnus"];
-						
+
 						echo "<form method='post' action='$PHP_SELF?$ulisa'>";
 						echo "<input type='hidden' name='tila' value='siirrasuoritus16113tilille'>";
 						echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
 						echo "<input type='submit' value='Siirr‰ 16113-tilille'>";
 						echo "</form>";
+
+						echo "<form method='post' action='$PHP_SELF?$ulisa'>";
+						echo "<input type='hidden' name='tila' value='siirrasuoritus18705tilille'>";
+						echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
+						echo "<input type='submit' value='Siirr‰ 18705-tilille'>";
+						echo "</form>";
 					}
-					
+
 					echo "<form method='post' action='$PHP_SELF?$ulisa'>";
 					echo "<input type='hidden' name='tila' value='siirrasuoritus'>";
 					echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
 					echo "<input type='submit' value='".t("Siirr‰ selvittelytilille")."' onClick='return verify1();'>";
 					echo "</form>";
 				}
-				else {					
+				else {
 					echo "<form method='post' action='$PHP_SELF?$ulisa'>";
 					echo "<input type='hidden' name='tila' value='poistasuoritus'>";
 					echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
@@ -614,7 +625,7 @@
 					echo "</form>";
 				}
 
-				
+
 				echo "</td>";
 			}
 

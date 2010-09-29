@@ -3,7 +3,7 @@
 	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto,$excel) = explode("/",$muutparametrit);
 
 	echo "<font class=head>".t("Avoimet laskut")."</font><hr>";
-	
+
 	// scripti balloonien tekemiseen
 	js_popup();
 
@@ -113,20 +113,18 @@
 	               	ORDER BY jarjestys";
 	$vresult = mysql_query($query) or pupe_error($query);
 
-		echo "	<tr>
-			<th>" . t('N‰yt‰ vain valuutta') .":</th>
-			<td colspan=3><select name='savalkoodi'>";
-		echo "<option value = ''>".t("Kaikki")."</option>";
+	echo "<tr><th>".t('N‰yt‰ vain valuutta') .":</th><td colspan=3><select name='savalkoodi'>";
+	echo "<option value = ''>".t("Kaikki")."</option>";
 
 	while ($vrow = mysql_fetch_array($vresult)) {
 		$sel="";
 	 	if (strtoupper($vrow['nimi']) == strtoupper($savalkoodi)) {
 	 		$sel = "selected";
 	 	}
-			echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
-		}
+		echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
+	}
 
-		echo "</select></td>";
+	echo "</select></td>";
 	echo "</tr>";
 
 	$sel1 = '';
@@ -188,6 +186,19 @@
 	else $exsel = "";
 
 	echo "<tr><th>".t("Tee Excel")."</th><td colspan='3'><input type='checkbox' name='excel' value = 'YES' $exsel></td></tr>";
+
+
+	$sel1 = '';
+
+	if ($asitoimittain == 'AT') {
+		$sel1 = "SELECTED";
+	}
+
+	echo "<tr><th>".t("Summaustaso").":</th>";
+	echo "<td colspan=3><select name='asitoimittain'>";
+	echo "<option value = ''>".t("Lasku")."</option>";
+	echo "<option value = 'AT' $sel1>".t("Asiakas")."</option>";
+	echo "</select></td></tr>";
 
 	echo "</table><br>";
 	echo "<input type = 'submit' value = '".t("Aja raportti")."'>";
@@ -256,13 +267,49 @@
 			elseif ($laji == 'OK') 	$tili = "'".$yhtiorow['konserniostovelat']."'";
 			else 					$tili = "'".$yhtiorow['ostovelat']."'";
 
-			$query = "	SELECT lasku.liitostunnus, lasku.*, concat_ws(' ', viite, viesti) maksutieto, tiliointi.summa * -1 avoinsaldo, round(lasku.summa * lasku.vienti_kurssi, 2) laskun_summa, if(lasku.laskunro = 0, '', laskunro) laskunro
-						FROM lasku use index (yhtio_tila_tapvm)
-						JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio
-						and lasku.tunnus	= tiliointi.ltunnus
-						and lasku.tapvm		= tiliointi.tapvm
-						and tilino		   IN ($tili)
-						and korjattu		= ''
+			if ($asitoimittain == "AT") {
+				$query = "	SELECT
+							lasku.liitostunnus,
+							lasku.ytunnus,
+							lasku.valkoodi,
+							group_concat(lasku.comments) comments,
+							concat_ws(' - ', min(lasku.erpcm), max(lasku.erpcm)) erpcm,
+							concat_ws(' - ', min(lasku.mapvm), max(lasku.mapvm)) mapvm,
+							max(lasku.nimi) nimi,
+							concat_ws(' - ', min(lasku.olmapvm), max(lasku.olmapvm)) olmapvm,
+							concat_ws(' - ', min(lasku.laskunro), max(lasku.laskunro)) laskunro,
+							concat_ws(' - ', min(lasku.tapvm), max(lasku.tapvm)) tapvm,
+							max(lasku.tunnus) tunnus,
+							concat_ws(' - ', min(concat_ws(' ', viite, viesti)), max(concat_ws(' ', viite, viesti))) maksutieto,
+							sum(tiliointi.summa * -1) avoinsaldo,
+							sum(round(lasku.summa * lasku.vienti_kurssi, 2)) laskun_summa,
+							sum(lasku.summa) summa";
+
+				$groupby = "GROUP BY 1,2,3";
+			}
+			else {
+				$query = "	SELECT
+							lasku.ytunnus,
+							lasku.valkoodi,
+							lasku.comments,
+							lasku.erpcm,
+							lasku.mapvm,
+							lasku.nimi,
+							lasku.olmapvm,
+							if(lasku.laskunro = 0, '', laskunro) laskunro,
+							lasku.tapvm,
+							lasku.tunnus,
+							concat_ws(' ', viite, viesti) maksutieto,
+							tiliointi.summa * -1 avoinsaldo,
+							round(lasku.summa * lasku.vienti_kurssi, 2) laskun_summa,
+							lasku.summa";
+
+				$groupby = "";
+			}
+
+
+			$query .= "	FROM lasku use index (yhtio_tila_tapvm)
+						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio=tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tapvm = tiliointi.tapvm and tiliointi.tilino IN ($tili) and tiliointi.korjattu = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and (mapvm > '$pvm' or mapvm = '0000-00-00')
 						and lasku.tapvm <= '$pvm'
@@ -270,6 +317,7 @@
 						and tila in ('H','Y','M','P','Q')
 						$lisa
 						$valkoodi1
+						$groupby
 						ORDER BY $jarj";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -336,10 +384,26 @@
 
 					echo "</td>";
 					echo "<td>$trow[laskunro]</td>";
-					echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
-					echo "<td>".tv1dateconv($trow["mapvm"])."</td>";
-					echo "<td>".tv1dateconv($trow["olmapvm"])."</td>";
-					echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
+
+					if ($asitoimittain == "AT") {
+						list($ap,$lp) = explode(" - ", $trow["tapvm"]);
+						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
+
+						list($ap,$lp) = explode(" - ", $trow["mapvm"]);
+						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
+
+						list($ap,$lp) = explode(" - ", $trow["olmapvm"]);
+						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
+
+						list($ap,$lp) = explode(" - ", $trow["erpcm"]);
+						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
+					}
+					else {
+						echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
+						echo "<td>".tv1dateconv($trow["mapvm"])."</td>";
+						echo "<td>".tv1dateconv($trow["olmapvm"])."</td>";
+						echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
+					}
 
 					if ($valuutassako == "V") {
 						// Laskun valuutassa
@@ -356,7 +420,7 @@
 					if ($onkotanaan == "" and abs($trow["avoinsaldo"] - $trow["laskun_summa"]) >= 0.02) {
 						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito heitt‰‰!</font> $trow[avoinsaldo] / $trow[laskun_summa]</td>";
 					}
-					
+
 					echo "</tr>";
 
 					if (isset($workbook)) {
@@ -460,23 +524,50 @@
 			elseif ($laji == 'MMK') $tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
 			else 					$tili = "'$yhtiorow[myyntisaamiset]'";
 
-			$query = "	SELECT lasku.*,
-						lasku.laskunro maksutieto,
-						lasku.tunnus laskutunnus,
-						lasku.summa-lasku.saldo_maksettu laskuavoinsaldo,
-						lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa,
-						lasku.summa laskusumma,
-						lasku.summa_valuutassa laskusumma_valuutassa,
-						sum(tiliointi.summa) tiliointiavoinsaldo,
+			if ($asitoimittain == "AT") {
+				$query = "	SELECT
+							lasku.liitostunnus,
+							lasku.ytunnus,
+							lasku.valkoodi,
+							max(lasku.tunnus) tunnus,
+							concat_ws(' - ', min(lasku.erpcm), max(lasku.erpcm)) erpcm,
+							max(lasku.liitostunnus) liitostunnus,
+							concat_ws(' - ', min(lasku.mapvm), max(lasku.mapvm)) mapvm,
+							max(concat_ws('<br>', concat(lasku.nimi,' ',lasku.nimitark), concat(lasku.toim_nimi,' ',lasku.toim_nimitark))) nimi,
+							concat_ws(' - ', min(lasku.tapvm), max(lasku.tapvm)) tapvm,
+							concat_ws(' - ', min(lasku.laskunro), max(lasku.laskunro)) maksutieto,
+							sum(lasku.summa-lasku.saldo_maksettu) laskuavoinsaldo,
+							sum(lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa) laskuavoinsaldo_valuutassa,
+							sum(lasku.summa) laskusumma,
+							sum(lasku.summa_valuutassa) laskusumma_valuutassa,";
+
+				$groupby = "GROUP BY 1,2,3";
+			}
+			else {
+				$query = "	SELECT
+							lasku.ytunnus,
+							lasku.valkoodi,
+							lasku.tunnus,
+							lasku.erpcm,
+							lasku.liitostunnus,
+							lasku.mapvm,
+							lasku.nimi,
+							lasku.tapvm,
+							lasku.laskunro maksutieto,
+							lasku.summa-lasku.saldo_maksettu laskuavoinsaldo,
+							lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa,
+							lasku.summa laskusumma,
+							lasku.summa_valuutassa laskusumma_valuutassa,";
+
+				$groupby = "GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13";
+			}
+
+			$query .= "	sum(tiliointi.summa) tiliointiavoinsaldo,
 						sum(tiliointi.summa_valuutassa) tiliointiavoinsaldo_valuutassa,
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 						FROM lasku $indeksi
-						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio
-						and lasku.tunnus		= tiliointi.ltunnus
-						and tiliointi.tilino	in ($tili)
-						and tiliointi.korjattu	= ''
-						and tiliointi.tapvm		<= '$pvm')
+						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$pvm')
 				  		WHERE lasku.yhtio		= '$kukarow[yhtio]'
 						and (lasku.mapvm		> '$pvm' or lasku.mapvm = '0000-00-00')
 						and lasku.tapvm			<= '$pvm'
@@ -486,7 +577,7 @@
 						$lisa1
 						$valkoodi
 						$maa
-						GROUP BY lasku.tunnus
+						$groupby
 						ORDER BY $jarj, lasku.laskunro";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -539,9 +630,22 @@
 					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[liitostunnus]&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>$trow[ytunnus]</a></td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maksutieto]</td>";
-					echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
-					echo "<td>".tv1dateconv($trow["mapvm"])."</td>";
-					echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
+
+					if ($asitoimittain == "AT") {
+						list($ap,$lp) = explode(" - ", $trow["tapvm"]);
+						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
+
+						list($ap,$lp) = explode(" - ", $trow["mapvm"]);
+						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
+
+						list($ap,$lp) = explode(" - ", $trow["erpcm"]);
+						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
+					}
+					else {
+						echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
+						echo "<td>".tv1dateconv($trow["mapvm"])."</td>";
+						echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
+					}
 
 					$summatotal += $trow['tiliointiavoinsaldo'];
 
@@ -560,7 +664,7 @@
 
 					// jos ollaan ajettu t‰lle p‰iv‰lle voidaan echota errori avoimesta saldosta
 					if ($onkotanaan == "" and abs($trow["tiliointiavoinsaldo"] - $trow["laskuavoinsaldo"]) >= 0.05) {
-						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito heitt‰‰!</font> $trow[laskuavoinsaldo] / <a href='muutosite.php?tee=E&tunnus=$trow[laskutunnus]'>$trow[tiliointiavoinsaldo]</a></td>";
+						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito heitt‰‰!</font> $trow[laskuavoinsaldo] / <a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>$trow[tiliointiavoinsaldo]</a></td>";
 					}
 
 					echo "</tr>";

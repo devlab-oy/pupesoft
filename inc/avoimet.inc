@@ -197,7 +197,7 @@
 	echo "<tr><th>".t("Summaustaso").":</th>";
 	echo "<td colspan=3><select name='asitoimittain'>";
 	echo "<option value = ''>".t("Lasku")."</option>";
-	echo "<option value = 'AT' $sel1>".t("Asiakas")."</option>";
+	echo "<option value = 'AT' $sel1>".t("Asiakas/Toimittaja")."</option>";
 	echo "</select></td></tr>";
 
 	echo "</table><br>";

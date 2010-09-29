@@ -22,8 +22,13 @@
 
 	// Tehdään kaikki tapahtumat samalle tositteelle!
 	$tapahtumat_samalle_tositteelle = "kylla";
-	$laskuid = 0;
+	$laskuid 		= 0;
 	$komentorivilta = "ON";
+	$kaikkiepakur	= "";
+
+	if (isset($argv[2]) and in_array($argv[2], array("25paalle", "puolipaalle", "75paalle", "paalle"))) {
+		$kaikkiepakur = $argv[2];
+	}
 
 	// Haetaan kaikki saldolliset tuotteet
 	$query  = "	SELECT tuote.tuoteno,
@@ -44,72 +49,80 @@
 
 	while ($epakurantti_row = mysql_fetch_assoc($epakurantti_result)) {
 
-		// Haetaan tuotteen viimeisin tulo
-		$query  = "	SELECT laadittu
-					FROM tapahtuma
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tuoteno = '$epakurantti_row[tuoteno]'
-					AND laji = 'tulo'
-					ORDER BY laadittu DESC
-					LIMIT 1;";
-		$tapres = mysql_query($query) or pupe_error($query);
+		if ($kaikkiepakur != "") {
+			$tee = $kaikkiepakur;
+			$tuoteno = $epakurantti_row["tuoteno"];
+			
+			require("epakurantti.inc");
 
-		if (!$tulorow = mysql_fetch_assoc($tapres)) {
-			// Jos ei löydy tuloa, laitetaan jotain vanhaa
-			$tulorow = array("laadittu" => "1970-01-01");
+			echo "Tuotteen $epakurantti_row[tuoteno], laitetaan $tee epakurantiksi. Varastonmuutos $muutos $yhtiorow[valkoodi].\n";
 		}
+		else {
+			// Haetaan tuotteen viimeisin tulo
+			$query  = "	SELECT laadittu
+						FROM tapahtuma
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tuoteno = '$epakurantti_row[tuoteno]'
+						AND laji = 'tulo'
+						ORDER BY laadittu DESC
+						LIMIT 1;";
+			$tapres = mysql_query($query) or pupe_error($query);
 
-		// Haetaan tuotteen viimeisin laskutus
-		$query  = "	SELECT laadittu
-					FROM tapahtuma
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tuoteno = '$epakurantti_row[tuoteno]'
-					AND laji = 'laskutus'
-					ORDER BY laadittu DESC
-					LIMIT 1;";
-		$tapres = mysql_query($query) or pupe_error($query);
+			if (!$tulorow = mysql_fetch_assoc($tapres)) {
+				// Jos ei löydy tuloa, laitetaan jotain vanhaa
+				$tulorow = array("laadittu" => "1970-01-01");
+			}
 
-		if (!$laskutusrow = mysql_fetch_assoc($tapres)) {
-			// Jos ei löydy laskua, laitetaan jotain vanhaa
-			$laskutusrow = array("laadittu" => "1970-01-01");
+			// Haetaan tuotteen viimeisin laskutus
+			$query  = "	SELECT laadittu
+						FROM tapahtuma
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tuoteno = '$epakurantti_row[tuoteno]'
+						AND laji = 'laskutus'
+						ORDER BY laadittu DESC
+						LIMIT 1;";
+			$tapres = mysql_query($query) or pupe_error($query);
+
+			if (!$laskutusrow = mysql_fetch_assoc($tapres)) {
+				// Jos ei löydy laskua, laitetaan jotain vanhaa
+				$laskutusrow = array("laadittu" => "1970-01-01");
+			}
+
+			list($vv1, $kk1, $pp1) = explode("-", $tulorow["laadittu"]);
+			list($vv2, $kk2, $pp2) = explode("-", $laskutusrow["laadittu"]);
+
+			$today = (int) date("U");
+			$viimeinen_tulo = (int) date("U", mktime(0, 0, 0, $kk1, $pp1, $vv1));
+			$viimeinen_laskutus = (int) date("U", mktime(0, 0, 0, $kk2, $pp2, $vv2));
+
+			// Lasketaan monta päivää on kulunut viimeisestä tulosta / laskutuksesta
+			$tulo = ($today - $viimeinen_tulo) / 60 / 60 / 24;
+			$lasku = ($today - $viimeinen_laskutus) / 60 / 60 / 24;
+
+			$tuoteno = $epakurantti_row["tuoteno"];
+			$tee = "";
+
+			// jos yli 30 kuukautta --> 100% epäkurantiksi
+			if ($tulo > 913 and $lasku > 913 and $epakurantti_row["epakurantti100pvm"] == "0000-00-00") {
+				$tee = "paalle";
+				require ("epakurantti.inc");
+
+				echo "Tuotteen $epakurantti_row[tuoteno] viimeinen tapahtuma on yli 30kk vanha, laitetaan 100% epakurantiksi. Varastonmuutos $muutos $yhtiorow[valkoodi].\n";
+			}
+			// jos yli 24 kuukautta --> 50% epäkurantiksi
+			elseif ($tulo > 730 and $lasku > 730 and $epakurantti_row["epakurantti50pvm"] == "0000-00-00") {
+				$tee = "puolipaalle";
+				require ("epakurantti.inc");
+
+				echo "Tuotteen $epakurantti_row[tuoteno] viimeinen tapahtuma on yli 24kk vanha, laitetaan 50% epakurantiksi. Varastonmuutos $muutos $yhtiorow[valkoodi].\n";
+			}
+			// jos yli 18 kuukautta --> 25% epäkurantiksi
+			elseif ($tulo > 547 and $lasku > 547 and $epakurantti_row["epakurantti25pvm"] == "0000-00-00") {
+				$tee = "25paalle";
+				require ("epakurantti.inc");
+
+				echo "Tuotteen $epakurantti_row[tuoteno] viimeinen tapahtuma on yli 18kk vanha, laitetaan 25% epakurantiksi. Varastonmuutos $muutos $yhtiorow[valkoodi].\n";
+			}
 		}
-
-		list($vv1, $kk1, $pp1) = explode("-", $tulorow["laadittu"]);
-		list($vv2, $kk2, $pp2) = explode("-", $laskutusrow["laadittu"]);
-
-		$today = (int) date("U");
-		$viimeinen_tulo = (int) date("U", mktime(0, 0, 0, $kk1, $pp1, $vv1));
-		$viimeinen_laskutus = (int) date("U", mktime(0, 0, 0, $kk2, $pp2, $vv2));
-
-		// Lasketaan monta päivää on kulunut viimeisestä tulosta / laskutuksesta
-		$tulo = ($today - $viimeinen_tulo) / 60 / 60 / 24;
-		$lasku = ($today - $viimeinen_laskutus) / 60 / 60 / 24;
-
-		$tuoteno = $epakurantti_row["tuoteno"];
-		$tee = "";
-
-		// jos yli 30 kuukautta --> 100% epäkurantiksi
-		if ($tulo > 913 and $lasku > 913 and $epakurantti_row["epakurantti100pvm"] == "0000-00-00") {
-			$tee = "paalle";
-			require ("epakurantti.inc");
-
-			echo "Tuotteen $epakurantti_row[tuoteno] viimeinen tapahtuma on yli 30kk vanha, laitetaan 100% epakurantiksi. Varastonmuutos $muutos $yhtiorow[valkoodi].\n";
-		}
-		// jos yli 24 kuukautta --> 50% epäkurantiksi
-		elseif ($tulo > 730 and $lasku > 730 and $epakurantti_row["epakurantti50pvm"] == "0000-00-00") {
-			$tee = "puolipaalle";
-			require ("epakurantti.inc");
-
-			echo "Tuotteen $epakurantti_row[tuoteno] viimeinen tapahtuma on yli 24kk vanha, laitetaan 50% epakurantiksi. Varastonmuutos $muutos $yhtiorow[valkoodi].\n";
-		}
-		// jos yli 18 kuukautta --> 25% epäkurantiksi
-		elseif ($tulo > 547 and $lasku > 547 and $epakurantti_row["epakurantti25pvm"] == "0000-00-00") {
-			$tee = "25paalle";
-			require ("epakurantti.inc");
-
-			echo "Tuotteen $epakurantti_row[tuoteno] viimeinen tapahtuma on yli 18kk vanha, laitetaan 25% epakurantiksi. Varastonmuutos $muutos $yhtiorow[valkoodi].\n";
-		}
-
 	}
-
 ?>

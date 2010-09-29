@@ -2,7 +2,7 @@
 	require "inc/parametrit.inc";
 	echo "<font class='head'>".t("Kopioi toimittaja").":</font><hr>";
 	if ($tee == "write") {
-	
+
 		// Luodaan puskuri, jotta saadaan taulukot kuntoon
 		$query = "	SELECT *
 					FROM toimi
@@ -28,22 +28,26 @@
 				$query .= ",'" . $t[$i] . "'";
 			}
 			$query .= ")";
-			
+
 			$result = mysql_query($query) or pupe_error($query);
-			
+			$uusiidee = mysql_insert_id();
+
+			//	Tämä funktio tekee myös oikeustarkistukset!
+			synkronoi($kukarow["yhtio"], "toimi", $uusiidee, "", "");
+
 			$tee = '';
 		}
 		else {
 			$tee = 'edit';
 		}
 	}
-	
+
 	if ($tee == "edit") {
-		
+
 		echo "<form action = '$PHP_SELF' method = 'post'>";
 		echo "<input type = 'hidden' name = 'tee' value ='write'>";
 		echo "<input type = 'hidden' name = 'id' value ='$id'>";
-		
+
 		// Kokeillaan geneeristä
 		$query = "	SELECT *
 					FROM toimi
@@ -51,20 +55,20 @@
 		$result = mysql_query($query) or die ("Kysely ei onnistu $query");
 		$trow = mysql_fetch_array($result);
 		echo "<table>";
-		
+
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
 			$nimi = "t[$i]";
 
 			require "inc/toimirivi.inc";
-			
+
 			if 	(mysql_field_len($result,$i)>10) $size='35';
 			elseif	(mysql_field_len($result,$i)<5)  $size='5';
 			else	$size='10';
-		 	
+
 			if ($tyyppi > 0) {
 				echo "<tr>";
 			}
-			
+
 			if ($tyyppi > 0) {
 		 		echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
 			}
@@ -99,35 +103,35 @@
 
 				echo "</td>";
 			}
-			
+
 			if ($tyyppi > 0) {
 				echo "<td class='back'><font class='error'>$virhe[$i]</font></td></tr>\n";
 			}
 		}
 		echo "</table>";
-		
+
 		echo "<input type = 'submit' value = '".t("Perusta")."'>";
 		echo "</form>";
 	}
-	
+
 	if($tee == ''){
-		
+
 		$kentat = 'tunnus, ytunnus, nimi, postitp, maa, oletus_valkoodi';
 		$jarjestys = 'selaus';
-		
+
 		$array = explode(",", $kentat);
         $count = count($array);
-		
+
         for ($i=0; $i<=$count; $i++) {
 			if (strlen($haku[$i]) > 0) {
 					$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-					$ulisa .= "&haku[" . $i . "]=" . $haku[$i]; 
+					$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 			}
         }
-        if (strlen($ojarj) > 0) {  
+        if (strlen($ojarj) > 0) {
 			$jarjestys = $ojarj;
-        }       
-                
+        }
+
         $query = "SELECT $kentat FROM toimi WHERE yhtio = '$kukarow[yhtio]' $lisa ";
         $query .= "$ryhma ORDER BY $jarjestys LIMIT 100";
 
@@ -136,15 +140,15 @@
 
 		echo "	<table><tr>
 				<form action = '$PHP_SELF' method = 'post'>";
-	
+
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
-			echo "<th valign='top' align='left'><a href = '$PHP_SELF?ojarj=".$array[$i].$ulisa ."'> 
+			echo "<th valign='top' align='left'><a href = '$PHP_SELF?ojarj=".$array[$i].$ulisa ."'>
 					" . t(mysql_field_name($result,$i)) . "</a>";
 			echo "<br><input type='text' name = 'haku[" . $i . "]' value = '$haku[$i]'>";
 			echo "</th>";
 		}
 		echo "<td valign='bottom' class='back'><input type='Submit' value = '".t("Etsi")."'></td></form></tr>";
-	
+
 		while ($trow=mysql_fetch_array($result)) {
 			echo "<tr>";
 			for ($i=1; $i<mysql_num_fields($result); $i++) {
@@ -159,6 +163,6 @@
 		}
 		echo "</table>";
 	}
-	
+
 	require ("inc/footer.inc");
 ?>

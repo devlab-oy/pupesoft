@@ -1022,7 +1022,7 @@
 					$pknum 		= 0;
 					$borderlask = 0;
 
-					if ($row["kommentti"] != "" or ($GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
+					if ($row["kommentti"] != "") {
 						echo "<td valign='top' rowspan = '2' $class>$echorivino</td>";
 					}
 					else {
@@ -1050,7 +1050,7 @@
 
 				echo "<tr>";
 
-				if ($row["kommentti"] != "" or ($GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
+				if ($row["kommentti"] != "") {
 					echo "<td $class rowspan = '2' valign='top'>$echorivino";
 				}
 				elseif ($tilauksen_jarjestys == '1' and $row['perheid'] != 0) {

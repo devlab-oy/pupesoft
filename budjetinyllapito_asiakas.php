@@ -19,6 +19,7 @@
 		if (!isset($submit_button)) $submit_button = '';
 		if (!isset($tkausi)) $tkausi = '';
 		if (!isset($ytunnus)) $ytunnus = '';
+		if (!isset($asiakasid)) $asiakasid = '';
 
 		if (isset($tee) and $tee == 'file') {
 			if (isset($mul_osasto) and $mul_osasto != '') $mul_osasto = unserialize(urldecode($mul_osasto));
@@ -127,6 +128,7 @@
 		}
 
 		echo "<form method='post'><table>";
+		echo "<input type='hidden' name='asiakasid' value='$asiakasid' />";
 
 		echo "<tr><th>",t("Asiakas"),"</th><td><input type='text' name='ytunnus' value='$ytunnus' /></td></tr>";
 

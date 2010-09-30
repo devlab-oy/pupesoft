@@ -10,7 +10,7 @@
 
 		// hmm.. jännää
 		$kukarow['yhtio'] = $argv[1];
-		
+
 		$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
 		$yhtiores = mysql_query($query) or pupe_error($query);
 
@@ -30,12 +30,12 @@
 					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
 				}
 			}
-			
+
 		}
 		else {
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");
 		}
-		
+
 		$query = "	SELECT lasku.laatija, kuka.eposti, tilausrivi.otunnus, lasku.nimi, lasku.ytunnus, count(*) kpl
 					FROM tilausrivi
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '')
@@ -53,30 +53,30 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		while ($trow = mysql_fetch_array($result)) {
-			
+
 			if ($trow['eposti'] != $veposti) {
 				if ($veposti != '') {
 					$meili = t("Sinulla on vahvistamatta seuraavien ostotilauksien rivit:").":\n\n" . $meili;
-					$tulos = mail($veposti, t("Muistutus vahvistamattomista ostotilausriveistä")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\n", "-f $yhtiorow[postittaja_email]");
+					$tulos = mail($veposti, t("Muistutus vahvistamattomista ostotilausriveistä")."", $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					$maara++;
 				}
 				$meili = '';
 				$veposti = $trow['eposti'];
 			}
 
-			
+
 			$meili .= "Ostotilaus: " . $trow['otunnus'] . "\n";
 			$meili .= "Toimittaja: " . $trow['nimi'] . "\n";
 			$meili .= "Vahvistamattomia rivejä: " . $trow['kpl'] . "\n\n";
-			
+
 		}
-		
+
 		if ($meili != '') {
 			$meili = t("Sinulla on vahvistamatta seuraavien ostotilauksien rivit:").":\n\n" . $meili;
-			$tulos = mail($veposti, t("Muistutus vahvistamattomista ostotilausriveistä")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"]. ">\n", "-f $yhtiorow[postittaja_email]");
+			$tulos = mail($veposti, t("Muistutus vahvistamattomista ostotilausriveistä")."", $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 			$maara++;
 		}
-		
+
 	}
-	
+
 ?>

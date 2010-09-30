@@ -139,10 +139,10 @@
 
 				$stresult = mysql_query($query) or pupe_error($query);
 				$id = mysql_insert_id();
-				
+
 				//	Tämä funktio tekee myös oikeustarkistukset!
 				synkronoi($kukarow["yhtio"], "tuote", $id, "", "");
-				
+
 				$query = "	SELECT *
 							FROM tuotteen_toimittajat
 							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
@@ -167,7 +167,7 @@
 
 						$astresult = mysql_query($query) or pupe_error($query);
 						$id2 = mysql_insert_id();
-						
+
 						synkronoi($kukarow["yhtio"], "tuotteen_toimittajat", $id2, "", "");
 					}
 				}
@@ -180,7 +180,7 @@
 
 				//	Lähetetään mailia tästä eteenpäin jos meillä on vastaanottajia
 				if ($yhtiorow["tuotekopio_email"] != "") {
-					$header  = "From: <$yhtiorow[postittaja_email]>\n";
+					$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 					$header .= "MIME-Version: 1.0\n" ;
 
 					$query = "SELECT * from yhtio where yhtio='$hakyhtio'";

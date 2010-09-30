@@ -1,17 +1,17 @@
 <?php
 
 	//käyttöliittymä
-	if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  !== FALSE) {	
+	if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
-		
+
 		echo "<font class='head'>".t("Muistuta käyttäjiä hyväksynnässä olevista ostolaskuista")."</font><hr>";
 	}
 
-	if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  === FALSE or $tee == "LAHETA") {	
-		
+	if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  === FALSE or $tee == "LAHETA") {
+
 		$maara = 0;
 		$laskuja = 0;
-		
+
 		echo "<br>".t("Lähetetään käyttäjille muistutukset hyväksynnästä")."...<br>";
 
 		$query = "	SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(summa * valuu.kurssi,2) summa, kuka.eposti
@@ -28,7 +28,7 @@
 			if ($trow['eposti'] != $veposti) {
 				if ($veposti != '') {
 					$meili = t("Sinulla on hyväksyttävänä seuraavat laskut").":\n\n" . $meili;
-					$tulos = mail($veposti, t("Muistutus laskujen hyväksynnästä")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\n", "-f $yhtiorow[postittaja_email]");
+					$tulos = mail($veposti, t("Muistutus laskujen hyväksynnästä")."", $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					$maara++;
 				}
 				$meili = '';
@@ -42,23 +42,23 @@
 		}
 		if ($meili != '') {
 			$meili = t("Sinulla on hyväksyttävänä seuraavat laskut").":\n\n" . $meili;
-			$tulos = mail($veposti, t("Muistutus laskujen hyväksynnästä")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"]. ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\n", "-f $yhtiorow[postittaja_email]");
+			$tulos = mail($veposti, t("Muistutus laskujen hyväksynnästä")."", $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 			$maara++;
 		}
-	
+
 		echo "<br><br><font class='message'>".t("Lähetettiin")." $maara ".t("muistutusta. Muistutettuja laskuja")." $laskuja ".t("kappaletta").".</font><hr>";
 	}
-	
+
 	//käyttöliittymä
 	if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  !== FALSE) {
-		
+
 		echo "	<br><br>
 				<form method='post' action='$PHP_SELF'>
 				<input type='hidden' name='tee' value='LAHETA'>
 				<input type='submit' value='".t("Lähetä muistutukset hyväksynnässä olevista ostolaskuista")."'>
 				</form>";
-		
-			
+
+
 		require ("inc/footer.inc");
 	}
 ?>

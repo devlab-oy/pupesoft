@@ -110,17 +110,17 @@
 						if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,
-						tullinimike.su_vientiilmo su,						
+						tullinimike.su_vientiilmo su,
 						'Keikka' as tapa,
 						$vainnimikelisa2
 						max(lasku.laskunro) laskunro,
-						max(tuote.tuoteno) tuoteno,												
+						max(tuote.tuoteno) tuoteno,
 						round(sum(tilausrivi.kpl),0) kpl,
 						if (round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0) > 0.5, round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0), 1) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
-						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet						
+						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet
 						FROM lasku use index (yhtio_tila_mapvm)
 						JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
 						JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
@@ -136,11 +136,11 @@
 						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
 						HAVING $maalisa)";
 		}
-		
+
 		if ($tapahtumalaji == "kaikki") {
 			$query .= "	UNION";
 		}
-		
+
 		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "lasku") {
 			$query .= "	(SELECT
 						tuote.tullinimike1,
@@ -154,7 +154,7 @@
 						$vainnimikelisa2
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
-						round(sum(tilausrivi.kpl),0) kpl,						
+						round(sum(tilausrivi.kpl),0) kpl,
 						if (round(sum((if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0) > 0.5, round(sum((if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
@@ -174,11 +174,11 @@
 						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
 						HAVING $maalisa)";
 		}
-		
+
 		if ($tapahtumalaji == "kaikki") {
 			$query .= "	UNION";
 		}
-		
+
 		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "siirtolista") {
 			$query .= "	(SELECT
 						tuote.tullinimike1,
@@ -187,11 +187,11 @@
 						if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,
-						tullinimike.su_vientiilmo su,												
+						tullinimike.su_vientiilmo su,
 						'Siirtolista' as tapa,
-						$vainnimikelisa2	
+						$vainnimikelisa2
 						max(lasku.tunnus) laskunro,
-						max(tuote.tuoteno) tuoteno,											
+						max(tuote.tuoteno) tuoteno,
 						round(sum(tilausrivi.kpl),0) kpl,
 						if (count(tilausrivi.tunnus) = count(if (tuote.tuotemassa > 0,1,0)),if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) = 0,1,round(sum(tilausrivi.kpl*tuote.tuotemassa),0)),if (round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -212,7 +212,7 @@
 						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
 						HAVING $maalisa)";
 		}
-		
+
 		$query .= "	ORDER BY tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -630,7 +630,7 @@
 
 			$bound = uniqid(time()."_") ;
 
-			$header  = "From: <$yhtiorow[postittaja_email]>\n";
+			$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 			$header .= "MIME-Version: 1.0\n";
 			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n";
 

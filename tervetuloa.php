@@ -204,9 +204,9 @@ if (!isset($tee) or $tee == '') {
 	$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 	if (mysql_num_rows($res) == 1) {
-		$tapvm = date("Y-m-d", mktime(0, 0, 0, date("m"), 0, date("Y")));
+		$days = floor((time() - strtotime("2010-09-30")) / 86400);
 
-		$days = floor((time() - strtotime("2010-09-01")) / 86400)."<br>";
+		if ($days == 0) $days = 1;
 
 		$ulos = '';
 

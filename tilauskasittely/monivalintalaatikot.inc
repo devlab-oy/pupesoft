@@ -1247,7 +1247,7 @@
 											FROM dynaaminen_puu AS node,
 											dynaaminen_puu AS parent
 											WHERE node.lft between parent.lft AND parent.rgt
-											AND node.tunnus IN (".implode(",", ${'mul_'.$tree.($treerow['sub_dee'] - 1)}).")
+											AND node.tunnus IN ('".implode("','", ${'mul_'.$tree.($treerow['sub_dee'] - 1)})."')
 											AND node.yhtio = '{$kukarow['yhtio']}' AND node.laji = '{$tree}'
 											AND parent.yhtio = '{$kukarow['yhtio']}' AND parent.laji='{$tree}'
 											GROUP BY node.nimi
@@ -1318,6 +1318,10 @@
 							if ((count(${"mul_".$tree.$treerow['sub_dee']}) > 0 and in_array(strtolower(trim(${$tree."row"}["node_tunnus"])), ${"mul_".$tree.$treerow['sub_dee']})) or
 								(isset($kaikki_tunnukset) and trim($kaikki_tunnukset) != '' and in_array(${$tree."row"}["node_tunnus"], explode(",", $kaikki_tunnukset)) and $submit_button != '')) {
 								$sel = 'SELECTED';
+
+								if (count(${'mul_'.$tree.$treerow['sub_dee']}) == 0 or !in_array(${$tree.'row'}['node_tunnus'], ${'mul_'.$tree.$treerow['sub_dee']})) {
+									${'mul_'.$tree.$treerow['sub_dee']}[] = ${$tree.'row'}['node_tunnus'];
+								}
 							}
 
 							echo "<option value='".${$tree."row"}['node_tunnus']."' {$sel}>".utf8_decode(${$tree."row"}['node_nimi'])."</option>";

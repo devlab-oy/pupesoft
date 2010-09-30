@@ -917,8 +917,8 @@
 					$rivit .= "</tr>";
 				}
 
-				$header = "From: <$yhtiorow[postittaja_email]>\n";
-				$header = "Content-type: text/html; charset=\"iso-8859-1\"\n";
+				$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+				$header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
 
 				$ulos  = "<html>\n<head>\n";
 				$ulos .= "<style type='text/css'>$css</style>\n";
@@ -997,6 +997,10 @@
 					$boob = mail($laskurow["kukamail"], $subject, $ulos, $header, "-f $yhtiorow[postittaja_email]");
 					if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 				}
+
+				unset($subject);
+				unset($ulos);
+				unset($header);
 			}
 		}
 
@@ -1388,7 +1392,6 @@
 						else {
 							require ("osoitelappu_pdf.inc");
 						}
-
 					}
 
 					echo "<br><br>";

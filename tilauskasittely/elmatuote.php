@@ -194,7 +194,7 @@ if ($aja=='run') {
 		while ($korow = mysql_fetch_array($kores)) {
 			// lähetetään yhteenvetomeili
 			$bound = uniqid(time()."_") ;
-			$header  = "From: <$yhtiorow[postittaja_email]>\n";
+			$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 			$header .= "MIME-Version: 1.0\n" ;
 			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -206,7 +206,7 @@ if ($aja=='run') {
 			$mail .= chunk_split(base64_encode($sisalto));
 			$mail .= "\n" ;
 
-			$boob = mail($korow["email"], "Varastotilanne - $yhtiorow[nimi]", $mail, $header);
+			$boob = mail($korow["email"], "Varastotilanne - $yhtiorow[nimi]", $mail, $header, "-f $yhtiorow[postittaja_email]");
 			if ($boob === FALSE) $echoulos .= "Sähköpostin lähetys epäonnistui<br>";
 		}
 	}

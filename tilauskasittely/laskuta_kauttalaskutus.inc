@@ -217,6 +217,6 @@
 	}
 	else {
 		// Laitetaan maili, että virheitä oli, tilaus jäi kesken jne.
-		mail($yhtiorow['alert_email'], "Verkkolaskun kauttalaskutus epäonnistui yhtiössä $yhtiorow[nimi]", "Myyntitilaukselle: $tilausnumero ei löytynyt sopivaa asiakasta!", "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		mail($yhtiorow['alert_email'], "Verkkolaskun kauttalaskutus epäonnistui yhtiössä $yhtiorow[nimi]", "Myyntitilaukselle: $tilausnumero ei löytynyt sopivaa asiakasta!", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 	}
 ?>

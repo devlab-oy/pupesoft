@@ -3139,7 +3139,7 @@ if ($tee == '') {
 					$subject = "";
 					$content_body = "";
 
-					$header  = "From: <$yhtiorow[postittaja_email]>\n";
+					$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 					$kutsu = "Jälkitoimitus";
 					$subject = t("Jälkitoimitustuote poistettu");
 					$content_body = $yhtiorow['nimi']."\n\n";

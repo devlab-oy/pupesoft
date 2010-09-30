@@ -567,7 +567,7 @@
 		//tässa on kaikki failit jotka tarvitaan
  		$bound = uniqid(time()."_") ;
 
-		$header  = "From: <$yhtiorow[postittaja_email]>\n";
+		$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 		$header .= "MIME-Version: 1.0\n" ;
 		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -653,7 +653,7 @@
 		//Kasataan tulliin lähetettävä meili
  		$bound = uniqid(time()."_") ;
 
-		$header  = "From: <$yhtiorow[postittaja_email]>\n";
+		$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 		$header .= "MIME-Version: 1.0\n" ;
 		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 

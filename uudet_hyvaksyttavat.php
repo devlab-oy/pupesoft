@@ -7,19 +7,19 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 	// otetaan tietokanta connect
 	require ("inc/connect.inc");
 	require ("inc/functions.inc");
-	
+
 	if($argv[2] != "") {
 		$ajalta = $argv[2];
 	}
-	
+
 	//	Oletus
 	if((int) $ajalta == 0) $ajalta = 1;
-	
+
 	$query    = "select * from kuka where kuka='$argv[1]' limit 1";
 	$kukares = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($kukares) == 0) die("Karhuajaa ei löyry!\n$query\n");
 	$kukarow = mysql_fetch_array($kukares);
-	
+
 	$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
 	$yhtiores = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($yhtiores) == 0) die("Firmaa ei löyry!\n");
@@ -32,7 +32,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 
 	if (mysql_num_rows($result) == 1) {
 		$yhtion_parametritrow = mysql_fetch_array($result);
-				
+
 		// lisätään kaikki yhtiorow arrayseen
 		foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
 			$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
@@ -58,7 +58,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila = 'H' and (tilaustyyppi != 'M' or h1time != '0000-00-00 00:00:00')
 				ORDER BY kuka.eposti, tapvm";
 	$result = mysql_query($query) or pupe_error($query);
-		
+
 	while ($trow=mysql_fetch_array($result)) {
 		$muistuta = 0;
 		//	Kandeeko tästä muistuttaa?
@@ -80,13 +80,13 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 				}
 			}
 		}
-		
+
 		if($muistuta == 1) {
-						
+
 			if ($trow['eposti'] != $veposti) {
 				if ($veposti != '') {
 					$meili = t("Sinulla on seuraavat uudet laskut hyväksyttävänä").":\n\n" . $meili;
-					$tulos = mail($veposti, "=?iso-8859-1?Q?".imap_8bit("Uudet hyväksyttävät laskusi")."?=", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\n", "-f $yhtiorow[postittaja_email]");
+					$tulos = mail($veposti, "=?iso-8859-1?Q?".imap_8bit("Uudet hyväksyttävät laskusi")."?=", $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				}
 				$meili = '';
 				$veposti = $trow['eposti'];
@@ -100,7 +100,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 	}
 	if ($meili != '') {
 		$meili = t("Sinulla on seuraavat uudet laskut hyväksyttävänä").":\n\n" . $meili;
-		$tulos = mail($veposti, t("Uudet hyväksyttävät laskusi")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\n", "-f $yhtiorow[postittaja_email]");
+		$tulos = mail($veposti, t("Uudet hyväksyttävät laskusi")."", $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 	}
 }
 else {

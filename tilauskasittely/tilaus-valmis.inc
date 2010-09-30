@@ -1290,7 +1290,7 @@ else {
 
 						$jt_chk_row = mysql_fetch_assoc($jt_chk_res);
 
-						$header  = "From: <$yhtiorow[postittaja_email]>\n";
+						$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 						$kutsu = "Jälkitoimitus";
 						$subject = t("Tuotetta jätetty jälkitoimitukseen");
 						$content_body = $yhtiorow['nimi']."\n".t("Asiakas", $kieli).": $jt_chk_row[nimi] $jt_chk_row[nimitark]\n\n";

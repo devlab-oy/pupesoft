@@ -1530,7 +1530,7 @@ if ($yhtiorow["alert_email"] != "") {
 	$bound   = uniqid(time()."_") ;
 	$kutsu   = $yhtiorow["yhtio"]."-ediorder.txt";
 
-	$header  = "From: <$yhtiorow[postittaja_email]>\n";
+	$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 	$header .= "MIME-Version: 1.0\n" ;
 	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 

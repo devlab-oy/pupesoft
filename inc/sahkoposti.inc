@@ -26,7 +26,7 @@
 
 	$bound = uniqid(time()."_") ;
 
-	$header  = "From: <$yhtiorow[postittaja_email]>\n";
+	$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 
 	if ($sahkoposti_cc != "") {
 		$header .= "Cc: $sahkoposti_cc\n";
@@ -114,7 +114,15 @@
 
 	//N‰‰ muuttujat voi olla aika isoja joten unsetataan ne
 	unset($content);
+	unset($content_body);
+	unset($content_subject);
+	unset($ctype);
+	unset($komento);
+	unset($kutsu);
+	unset($liite);
+	unset($sahkoposti_cc);
 	unset($sisalto);
+	unset($subject);
 
 	if ($varaposti != '') {
 		$kukarow['eposti'] = $varaposti;

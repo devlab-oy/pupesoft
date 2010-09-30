@@ -18,7 +18,7 @@ if ($ftphost=='' or $ftpuser=='' or $ftppass=='' or $ftppath=='' or $ftpfile==''
 	$tulos_ulos_ftp .= "<font class='error'>".t("L‰hetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>";
 }
 else {
-	
+
 	//l‰hetet‰‰n tiedosto
 	$conn_id = ftp_connect($ftphost);
 
@@ -31,8 +31,8 @@ else {
 	if (substr($ftppath, -1) != "/") {
 		$ftppath .= "/";
 	}
-	
-	$cmd = "/usr/bin/ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";	
+
+	$cmd = "/usr/bin/ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";
 
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {
@@ -45,10 +45,10 @@ else {
 			ftp_pasv($conn_id, true);
 			$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
 		}
-		
+
 		if ($upload === FALSE) {
 			exec($cmd, $skit, $upload_ncftp);
-			
+
 			if ($upload_ncftp == 0) $upload = TRUE;
 		}
 
@@ -96,7 +96,7 @@ else {
 			default:
 				$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 		}
-		
+
 		$rivi  = "$PHP_SELF\n";
 		$rivi .= "\n";
 		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("l‰hetys ep‰onnistui")."!\n";
@@ -105,7 +105,7 @@ else {
 		$rivi .= "\n";
 		$rivi .= "$syy\n";
 
-		$boob = mail($yhtiorow['alert_email'], "".t("Tiedostonsiirto ep‰onnistui")."!", $rivi, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
+		$boob = mail($yhtiorow['alert_email'], t("Tiedostonsiirto ep‰onnistui")."!", $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) {
 			$tulos_ulos_ftp .= "<font class='error'>\n";
@@ -127,7 +127,7 @@ else {
 		$rivi .= "\n";
 		$rivi .= "\n";
 
-		$silari = mail($yhtiorow['alert_email'], "".t("Tiedostonsiirto onnistui")."!", $rivi, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
+		$silari = mail($yhtiorow['alert_email'], t("Tiedostonsiirto onnistui")."!", $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 	}
 }
 

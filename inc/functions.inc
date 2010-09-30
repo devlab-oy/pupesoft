@@ -33,7 +33,7 @@ if (!function_exists("pupe_error")) {
 		$puperror .= "$query\n\n";
 
 		// l‰hetet‰‰n se meilitse adminille
-		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
+		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
 		// kuollaan pois
 		exit(nl2br($puperror));
@@ -7004,7 +7004,7 @@ if (!function_exists("t")) {
 				}
 				else {
 					if ($indeksi == 'ru') {
-						$stringi = t("$stringi","EN");
+						$stringi = t($stringi,"EN");
 					}
 					else {
 						$stringi = $sanakirjarow["fi"];

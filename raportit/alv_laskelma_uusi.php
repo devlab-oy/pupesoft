@@ -12,9 +12,83 @@
 		$oletus_verokanta = 23;
 	}
 
+	enable_ajax();
+
+	if ($livesearch_tee == "TILIHAKU") {
+		livesearch_tilihaku();
+		exit;
+	}
+
+	if (isset($tee) and $tee == 'kuittaa_alv_ilmoitus') {
+
+		if (trim($maksettava_alv_tili) != '') {
+
+			$query = "	SELECT sum(tiliointi.summa) vero
+						FROM tiliointi
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.korjattu = ''
+						AND tiliointi.tilino = '$yhtiorow[alv]'
+						AND tiliointi.tapvm >= '$alkukk'
+						AND tiliointi.tapvm <= '$loppukk'";
+			$verores = mysql_query($query) or pupe_error($query);
+			$verorow = mysql_fetch_array ($verores);
+
+			$summa 				= -1 * $verorow['vero'];
+			$tili 				= $yhtiorow['alv'];
+			$kustp 				= '';
+			$selite 			= t("ALV")." $kk $vv ".t("maksuun");
+			$vero 				= 0;
+			$projekti 			= '';
+			$kohde 				= '';
+			$summa_valuutassa 	= 0;
+			$valkoodi 			= $yhtiorow['valuutta'];
+
+			list($tpv2, $tpk2, $tpp2) = explode("-", $tilikausi_loppu);
+
+			$query = "	INSERT into lasku set
+						yhtio 		= '{$kukarow['yhtio']}',
+						tapvm 		= '{$loppukk}',
+						tila 		= 'X',
+						nimi		= '{$yhtiorow['nimi']}',
+						alv_tili 	= '',
+						comments	= '',
+						laatija 	= '{$kukarow['kuka']}',
+						luontiaika 	= now()";
+			$result = mysql_query($query) or pupe_error($query);
+			$tunnus = mysql_insert_id ($link);
+
+			require("inc/teetiliointi.inc");
+
+			$summa 				= $verorow['vero'];
+			$tili 				= $maksettava_alv_tili;
+			$kustp 				= '';
+			$selite 			= t("ALV")." $kk $vv ".t("maksuun");
+			$vero 				= 0;
+			$projekti 			= '';
+			$kohde 				= '';
+			$summa_valuutassa 	= 0;
+			$valkoodi 			= $yhtiorow['valuutta'];
+
+			require("inc/teetiliointi.inc");
+
+			$tili				= '';
+			$kustp				= '';
+			$kohde				= '';
+			$projekti			= '';
+			$summa				= '';
+			$vero				= '';
+			$selite 			= '';
+			$summa_valuutassa	= '';
+			$valkoodi 			= '';
+		}
+		else {
+			echo "<font class='error'>",t("Maksettava ALV-tili ei saa olla tyhj‰"),"!</font><br />";
+		}
+	}
+
 	if (!function_exists("alv_laskelma")) {
 		function alvlaskelma ($kk,$vv) {
-			global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta;
+			global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta, $maksettava_alv_tili;
 
 			if (function_exists("laskeveroja")) die;
 
@@ -293,6 +367,52 @@
 				echo "<tr><th>",t("Maksettava alv"),"</th><td align='right'>".sprintf('%.2f', abs($fi308))."</td></tr>";
 				echo "<tr><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', abs($verorow['vero']) - abs($fi308))."</td></tr>";
 				echo "</table><br>";
+
+				// katsotaan onko k‰ytt‰j‰ll‰ oikeus muutosite.php
+				$queryoik = "SELECT tunnus from oikeu where nimi like '%muutosite.php' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]' LIMIT 1";
+				$res = mysql_query($queryoik) or pupe_error($queryoik);
+
+				if (mysql_num_rows($res) == 1) {
+					if (abs($verorow['vero']) != 0 and abs($verorow['vero']) - abs($fi308) == 0) {
+						echo "<form method='post' name='alv_ilmoituksen_kuittaus'><table>";
+						echo "<input type='hidden' name='alkukk' value='{$startmonth}' />";
+						echo "<input type='hidden' name='loppukk' value='{$endmonth}' />";
+						echo "<input type='hidden' name='vv' value='$vv' />";
+						echo "<input type='hidden' name='kk' value='$kk' />";
+						echo "<tr><th>",t("Anna maksettava ALV-tili"),"</th><td>";
+
+						if (isset($maksettava_alv_tili) and trim($maksettava_alv_tili) != '') {
+							echo livesearch_kentta("alv_ilmoituksen_kuittaus", "TILIHAKU", "maksettava_alv_tili", 200, $maksettava_alv_tili);
+							echo "<input type='hidden' name='tee' value='kuittaa_alv_ilmoitus' />";
+						}
+						else {
+							echo livesearch_kentta("alv_ilmoituksen_kuittaus", "TILIHAKU", "maksettava_alv_tili", 200);
+							echo "<input type='hidden' name='tee' value='' />";
+						}
+						
+						echo "</td><td class='back'><input type='submit' value='",t("Kuittaa ALV-ilmoitus"),"' /></td></tr>";
+						echo "</table></form><br />";
+					}
+					elseif (abs($verorow['vero']) != 0 and abs($verorow['vero']) - abs($fi308) != 0) {
+						echo "<font class='error'>",t("Tilin")," {$yhtiorow['alv']} ",t("ja maksettavan arvonlis‰veron luvut eiv‰t t‰sm‰‰"),"!</font><br /><br />";
+					}
+					elseif (trim($verorow['vero']) != '' and abs($verorow['vero']) == 0) {
+						$query = "	SELECT lasku.tunnus
+									FROM lasku
+									JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus)
+									WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+									AND lasku.tapvm = '{$endmonth}'
+									AND lasku.tila = 'X'
+									AND lasku.nimi = '{$yhtiorow['nimi']}'
+									LIMIT 1";
+						$tositelinkki_result = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($tositelinkki_result) == 1) {
+							$tositelinkki_row = mysql_fetch_assoc($tositelinkki_result);
+							echo "<a href='../muutosite.php?tee=E&tunnus={$tositelinkki_row['tunnus']}&lopetus={$palvelin2}raportit/alv_laskelma_uusi.php////kk=$kk//vv=$vv'>",t("Katso tositetta"),"</a><br /><br />";
+						}
+					}
+				}
 
 				if (strpos($_SERVER['SCRIPT_NAME'], "viranomaisilmoitukset.php") !== FALSE) {
 					$ilmoituskausi = str_replace("0", "", substr($startmonth,5,2));

@@ -191,7 +191,50 @@ if (!isset($tee) or $tee == '') {
 			echo "</tr>";
         }
         echo "</table><br>";
-}
+	}
+
+	// katsotaan onko k‰ytt‰j‰ll‰ oikeus muutosite.php ja alv_laskelma_uusi.php
+	$queryoik = "	SELECT oikeu.tunnus 
+					FROM oikeu 
+					JOIN oikeu AS oikeu2 ON (oikeu2.yhtio = oikeu.yhtio AND oikeu2.kuka = oikeu.kuka AND oikeu2.nimi LIKE '%alv_laskelma_uusi.php')
+					WHERE oikeu.nimi LIKE '%muutosite.php' 
+					AND oikeu.kuka = '{$kukarow['kuka']}' 
+					AND oikeu.yhtio = '{$yhtiorow['yhtio']}' 
+					LIMIT 1";
+	$res = mysql_query($queryoik) or pupe_error($queryoik);
+
+	if (mysql_num_rows($res) == 1) {
+		$tapvm = date("Y-m-d", mktime(0, 0, 0, date("m"), 0, date("Y")));
+
+		$days = floor((time() - strtotime("2010-09-01")) / 86400)."<br>";
+
+		$ulos = '';
+
+		// Ominaisuus laitettiin p‰‰lle 30.9.2010
+		for ($i = ceil($days/30); mktime(0, 0, 0, 8+$i, 0, 2010) < mktime(0, 0, 0, date("m"), date("d"), date("Y")); $i++) {
+			$query = "	SELECT lasku.tunnus
+						FROM lasku
+						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus)
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+						AND lasku.tapvm = '".date("Y-m-d", mktime(0, 0, 0, 8+$i, 0, 2010))."'
+						AND lasku.tila = 'X'
+						AND lasku.nimi = '{$yhtiorow['nimi']}'
+						LIMIT 1";
+			$tositelinkki_result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($tositelinkki_result) == 0) {
+				$mktime = mktime(0, 0, 0, 8+$i, 0, date("Y"));
+				$ulos .= "<tr><td><a href='{$palvelin2}raportit/alv_laskelma_uusi.php?kk=".date("n", $mktime)."&vv=".date("Y", $mktime)."'>".t("ALV")." ".date("m", $mktime)." ".date("Y", $mktime)." ".t("tosite tekem‰tt‰")."</a></td></tr>";
+			}
+		}
+
+		if (trim($ulos) != '') {
+			echo "<table>";
+			echo "<tr><th>",t("ALV-ilmoitus"),"</th></tr>";
+			echo $ulos;
+			echo "</table><br />";			
+		}
+	}
 
 	///* RUOKALISTA *///
 	$query = "	SELECT *, kalenteri.tunnus tun, year(pvmalku) vva, month(pvmalku) kka, dayofmonth(pvmalku) ppa, year(pvmloppu) vvl, month(pvmloppu) kkl, dayofmonth(pvmloppu) ppl

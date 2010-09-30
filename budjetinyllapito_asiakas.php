@@ -106,7 +106,7 @@
 		if ($ytunnus != '') {
 
 			if (!isset($muutparametrit)) {
-				$muutparametrit = $tkausi.'#'.$asiakasryhma.'#'.$kaikki_tunnukset.'#'.serialize(urlencode($mul_osasto)).'#'.serialize(urlencode($mul_try));
+				$muutparametrit = $tkausi.'#'.$asiakasryhma.'#'.$kaikki_tunnukset.'#'.urlencode(serialize($mul_osasto)).'#'.urlencode(serialize($mul_try));
 			}
 
 			require ("inc/asiakashaku.inc");
@@ -122,8 +122,8 @@
 
 		if (isset($muutparametrit) and strlen($muutparametrit) > 1) {
 			list($tkausi, $asiakasryhma, $kaikki_tunnukset, $mul_osasto, $mul_try) = explode('#', $muutparametrit);
-			$mul_osasto = urldecode(unserialize($mul_osasto));
-			$mul_try = urldecode(unserialize($mul_try));
+			$mul_osasto = unserialize(urldecode($mul_osasto));
+			$mul_try = unserialize(urldecode($mul_try));
 		}
 
 		echo "<form method='post'><table>";

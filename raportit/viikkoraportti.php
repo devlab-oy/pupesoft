@@ -49,9 +49,9 @@ echo "--------------------------------------------\n";
 
 while ($myyjarow = mysql_fetch_array ($myyre)) {
 
-	$query = "	SELECT tunnus, ytunnus, nimi 
-				from asiakas 
-				where yhtio = '$kukarow[yhtio]' 
+	$query = "	SELECT tunnus, ytunnus, nimi
+				from asiakas
+				where yhtio = '$kukarow[yhtio]'
 				and myyjanro = '$myyjarow[myyjanro]'
 				AND myyjanro > 0";
 	$asire = mysql_query($query) or die($query);
@@ -117,9 +117,9 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
 		$sivu .= "\n";
 	}
 
-	$query = "	SELECT eposti, nimi 
-				from kuka 
-				where yhtio = '$kukarow[yhtio]' 
+	$query = "	SELECT eposti, nimi
+				from kuka
+				where yhtio = '$kukarow[yhtio]'
 				and myyja = '$myyjarow[myyjanro]'
 				AND myyja > 0";
 	$kukre = mysql_query($query) or die($query);
@@ -133,7 +133,7 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
 			$nyt = date('d.m.y');
 	        $bound = uniqid(time()."_") ;
 
-	        $header   = "From: <$yhtiorow[postittaja_email]>\n";
+	        $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 	        $header  .= "MIME-Version: 1.0\n" ;
 	        $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 

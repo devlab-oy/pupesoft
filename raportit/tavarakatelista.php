@@ -45,7 +45,7 @@
 
 			$bound     = uniqid(time()."_") ;
 
-			$headeri   = "From: <$yhtiorow[postittaja_email]>\n";
+			$headeri   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 			$headeri  .= "MIME-Version: 1.0\n" ;
 			$headeri  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 

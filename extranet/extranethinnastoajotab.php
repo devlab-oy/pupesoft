@@ -5,13 +5,13 @@
 	require('parametrit.inc');
 
 	echo "<font class='head'>".t("Hinnastoajo").":</font><hr>";
-	
+
 	//Haetaan asiakkaan tunnuksella
 	$query  = "	SELECT *
 				FROM asiakas
 				WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($result) == 1) {
 		$asiakas = mysql_fetch_array($result);
 		$ytunnus = $asiakas["ytunnus"];
@@ -32,15 +32,15 @@
 			die("filen luonti epäonnistui!");
 		}
 		$lisa = '';
-		
+
 		if ($tuoteosasto != 'kaikki') {
 			$lisa = "and a.osasto = '$tuoteosasto'";
 		}
-		
+
 		if ($tuoteryhma != 'kaikki') {
 			$lisa = "and a.try = '$tuoteryhma'";
 		}
-		
+
 		$rivi = '';
 		$query = "	select a.tuoteno, a.nimitys, a.lyhytkuvaus, a.tuotemerkki, a.myyntihinta hinta_veroll, a.alv,
 					if(b.alennus is null,'0,00', alennus) 'alepros', a.aleryhma
@@ -55,7 +55,7 @@
 		if (mysql_num_rows($result) == 0) {
 			$rivi .= "".t("Valitettavasti ei löytynyt yhtään tuotetta.")."\t";
 		}
-		
+
 		$rivi .= "".t("Tuotenumero")."\t";
 		$rivi .= "".t("Nimitys")."\t";
 		$rivi .= "".t("Kuvaus")."\t";
@@ -104,7 +104,7 @@
 
 		$bound = uniqid(time()."_") ;
 
-		$header  = "From: <$yhtiorow[postittaja_email]>\n";
+		$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 		$header .= "MIME-Version: 1.0\n" ;
 		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -137,7 +137,7 @@
 	echo "<table><form method='post' action='$PHP_SELF'>";
 
 	echo "<input type='hidden' name='tee' value='kaikki'>";
-	
+
 	echo "<tr>";
 	echo "<th>".t("Valitse tuoteosasto")."</th>";
 
@@ -146,7 +146,7 @@
 
 	echo "<td><select name='tuoteosasto'>";
 	echo "<option value='kaikki' $tuoteosastosel>".t("Kaikki")."</option>";
-	
+
 	while ($row = mysql_fetch_array($result)) {
 		if ($tuoteosasto == $row["selite"]) $sel = "selected";
 		else $sel = "";
@@ -170,9 +170,9 @@
 
 	echo "</select></td>";
 	echo "</tr>";
-	
+
 	echo "<tr><td class='back'><br><input type='submit' value='".t("Lähetä")."'></td></tr></form>";
-	
+
 	echo "</table>	";
 
 	require ("footer.inc");

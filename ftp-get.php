@@ -15,7 +15,7 @@
 		$now = mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y"));
 
 		if ($now - $mode[9] > 900) {
-			mail($ftpget_email,  "VIRHE: FTP-get!", "Tilausten sis‰‰nluvussa saattaa olla ongelma. Lukkotiedosto oli yli 15 minuuttia vanha ja se poistettiin. Tutki asia!", "From: <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
+			mail($ftpget_email,  "VIRHE: FTP-get!", "Tilausten sis‰‰nluvussa saattaa olla ongelma. Lukkotiedosto oli yli 15 minuuttia vanha ja se poistettiin. Tutki asia!", "From: Pupesoft <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
 
 			system("rm -f $tmpfile");
 		}

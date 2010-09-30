@@ -2,7 +2,7 @@
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 		require ("../inc/parametrit.inc");
-	
+
 		//Jos ylläpidossa on luotu uusi asiakas
 		if ($yllapidossa == "asiakas" and $yllapidontunnus != '') {
 			$asiakasid 	= $yllapidontunnus;
@@ -10,7 +10,7 @@
 	}
 
 	echo "<font class='head'>".t("Asiakasmemo")."</font><hr>";
-	
+
 	if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 		if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "TYOMAARAYS" or $from == "TYOMAARAYS" or $from == "VALMISTAASIAKKAALLE") {
 			echo "<form method='post' action='".$palvelin2."tilauskasittely/tilaus_myynti.php'>
@@ -21,9 +21,9 @@
 		}
 
 	    if ($ytunnus == '' and (int) $asiakasid == 0) {
-			
+
 			js_popup(-100);
-		
+
 			echo "<br><table>";
 			echo "<tr>
 					<th>".t("Asiakkaan nimi").": </th>
@@ -36,10 +36,10 @@
 		}
 
 		if ($ytunnus != '' or $asiakasid > 0) {
-		
+
 			$kutsuja 	= "asiakasemo.php";
 			$ahlopetus 	= $palvelin2."crm/asiakasmemo.php////";
-		
+
 			require ("../inc/asiakashaku.inc");
 		}
 	}
@@ -52,9 +52,9 @@
 		}
 
 		if ($tee == "SAHKOPOSTI") {
-			
+
 			list($email, $ekuka) = explode("###", $email);
-			
+
 			// Haetaan muistiinpano
 			$query = "	SELECT kalenteri.*, asiakas.nimi, asiakas.nimitark, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.asiakasnro
 						FROM kalenteri
@@ -71,16 +71,16 @@
 			$meili .= t("Pävämäärä").": ".tv1dateconv($row["pvmalku"])."\n\n";
 			$meili .= t("Viesti").":\n".str_replace("\r\n","\n", $row["kentta01"])."\n\n";
 			$meili .= "-----------------------\n\n";
-			
-			$tulos = mail($email, "Asiakasmemo $yhtiorow[nimi]", $meili,"From: ".$kukarow["nimi"]."<".$kukarow["eposti"].">\nReply-To: ".$kukarow["nimi"]."<".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
-			
+
+			$tulos = mail($email, "Asiakasmemo $yhtiorow[nimi]", $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"])." <$kukarow[eposti]>\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"])." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+
 			if ($row["tyyppi"] == "Lead") {
 				$eviesti = "$kukarow[nimi] lähetti leadin osoitteeseen: $email";
 			}
 			else {
-				$eviesti = "$kukarow[nimi] lähetti memon osoitteeseen: $email";	
+				$eviesti = "$kukarow[nimi] lähetti memon osoitteeseen: $email";
 			}
-			
+
 			$kysely = "	INSERT INTO kalenteri
 						SET tapa 		= '$row[tapa]',
 						asiakas  		= '$row[asiakas]',
@@ -95,7 +95,7 @@
 						laatija			= '$kukarow[kuka]',
 						luontiaika		= now()";
 			$result = mysql_query($kysely) or pupe_error($kysely);
-			
+
 			if ($row["tyyppi"] == "Lead") {
 				$kysely = "	INSERT INTO kalenteri
 							SET tapa 		= '$row[tapa]',
@@ -119,7 +119,7 @@
 			$tee 	= "";
 			$meili 	= "";
 		}
-		
+
 		///* Allrightin asiakasanalyysi*///
 		if ($tee == "ASANALYYSI") {
 
@@ -154,24 +154,24 @@
 		else {
 			$muistutusko 	= "";
 		}
-		
+
 		if ($tee == "UUSIMEMO") {
-			
+
 			if (checkdate($mkka, $mppa, $mvva)) {
 				$pvmalku  = "'$mvva-$mkka-$mppa $mhh:$mmm:00'";
 			}
 			else {
 				$pvmalku  = "'".date("Y-m-d H:i:s")."'";
 			}
-			
+
 			if ($kuittaus == '' and ($tyyppi == "Muistutus" or $tyyppi == "Lead")) {
 				$kuittaus = 'K';
 			}
-			
+
 			if ($kuka == "") {
 				$kuka = $kukarow["kuka"];
 			}
-			
+
 			if ($korjaus == '') {
 				if ($viesti != '') {
 					$kysely = "	INSERT INTO kalenteri
@@ -192,7 +192,7 @@
 					$muist = mysql_insert_id();
 
 					if ($tyyppi == "Muistutus") {
-						
+
 						$query = "	SELECT *
 									FROM kuka
 									WHERE yhtio	= '$kukarow[yhtio]'
@@ -202,16 +202,16 @@
 
 						// Käyttäjälle lähetetään tekstiviestimuistutus
 						if ($row["puhno"] != '' and strlen($viesti) > 0 and $sms_palvelin != "" and $sms_user != "" and $sms_pass != "") {
-							
+
 							$ok = 1;
-							
+
 							$teksti = substr("Muistutus $yhtiorow[nimi]. $tapa. ".$viesti, 0, 160);
 							$teksti = urlencode($teksti);
 
 							$retval = file_get_contents("$sms_palvelin?user=$sms_user&pass=$sms_pass&numero=$row[puhno]&viesti=$teksti&not_before_date=$mvva-$mkka-$mppa&not_before=$mhh:$mmm:00&yhtio=$kukarow[yhtio]&kalenteritunnus=$muist");
 
 							if (trim($retval) == "0") $ok = 0;
-												
+
 							if ($ok == 1) {
 								echo "<font class='error'>VIRHE: Tekstiviestin lähetys epäonnistui! $retval</font><br><br>";
 							}
@@ -219,9 +219,9 @@
 							if ($ok == 0) {
 								echo "<font class='message'>Tekstiviestimuistutus lehetetään!</font><br><br>";
 							}
-						}						
+						}
 					}
-				
+
 					$tapa     			= "";
 					$viesti   			= "";
 					$tunnus   			= "";
@@ -253,7 +253,7 @@
 							muutospvm		= now()
 							WHERE tunnus = '$korjaus'";
 				$result = mysql_query($kysely) or pupe_error($kysely);
-			
+
 				$tapa     			= "";
 				$viesti   			= "";
 				$tunnus   			= "";
@@ -267,7 +267,7 @@
 				$kuittaus 			= "";
 				$myyntipaallikko 	= "";
 			}
-			
+
 			$tee = "";
 		}
 
@@ -301,7 +301,7 @@
 						tyyppi = concat('DELETED ',tyyppi)
 						WHERE tunnus		= '$tunnus'
 						and yhtio			= '$kukarow[yhtio]'
-						and asiakas			= '$ytunnus' 
+						and asiakas			= '$ytunnus'
 						and liitostunnus 	= '$asiakasid'";
 			$result = mysql_query($kysely) or pupe_error($kysely);
 
@@ -313,9 +313,9 @@
 			// Haetaan viimeisin muistiinpano
 			$query = "	SELECT *
 						FROM kalenteri
-						WHERE liitostunnus 	= '$asiakasid' 
+						WHERE liitostunnus 	= '$asiakasid'
 						and tyyppi			in ('Memo','Muistutus','Kuittaus','Lead')
-						and tapa		   != 'asiakasanalyysi' 
+						and tapa		   != 'asiakasanalyysi'
 						and yhtio			= '$kukarow[yhtio]'
 						and (perheid=0 or tunnus=perheid)
 						ORDER BY tunnus desc
@@ -331,31 +331,31 @@
 			$mvva 				= substr($korjrow["pvmalku"],0,4);
 			$mkka 				= substr($korjrow["pvmalku"],5,2);
 			$mppa 				= substr($korjrow["pvmalku"],8,2);
-			            		
+
 			$mhh 				= substr($korjrow["pvmalku"],11,2);
 			$mmm 				= substr($korjrow["pvmalku"],14,2);
-			            		
+
 			$kuka				= $korjrow["kuka"];
 			$kuittaus 			= $korjrow["kuittaus"];
 			$myyntipaallikko 	= $korjrow["myyntipaallikko"];
-			
+
 			if ($tyyppi == "Muistutus") {
 				$muistutusko 	= 'Muistutus';
 			}
-			
+
 			$tee = "";
 		}
-		
+
 		if ($tee == 'paivita_tila') {
 			$tee2 = $tee;
 			$tee = '';
-			
+
 			$query_update = "	UPDATE asiakas SET tila = '$astila'
 								WHERE yhtio	= '$kukarow[yhtio]'
                                 and ytunnus	= '$ytunnus'
                                 and tunnus	= '$asiakasid'";
 			$result_update = mysql_query($query_update) or pupe_error($query_update);
-			
+
 			echo t("Vaihdettiin asiakkaan tila")."<br/>";
 		}
 
@@ -392,7 +392,7 @@
 					else {
 						$sel = '';
 					}
-				
+
 					$yhenkilo .= "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
 				}
 				$yhenkilo .= "</select></form>";
@@ -487,7 +487,7 @@
 				else {
 					echo "<td>".t("Kalenteri")."</td>";
 				}
-			
+
 
 				echo "</tr>";
 				echo "<tr>";
@@ -544,7 +544,7 @@
 
 
 				$asosresult = t_avainsana("ASIAKASTILA");
-				
+
 				if ($tee2 == "") {
 					$astila = $asiakasrow['tila'];
 				}
@@ -569,7 +569,7 @@
 			///* Syötä memo-tietoa *///
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 				echo "<table width='620'>";
-				
+
 				echo "	<form action='$PHP_SELF' method='POST'>
 						<input type='hidden' name='tee' 		value='UUSIMEMO'>
 						<input type='hidden' name='from' 		value='$from'>
@@ -578,36 +578,36 @@
 						<input type='hidden' name='ytunnus' 	value='$ytunnus'>
 						<input type='hidden' name='asiakasid' 	value='$asiakasid'>
 						<input type='hidden' name='muistutusko' value='$muistutusko'>";
-				
+
 				if ($tyyppi == "Kuittaus") {
 					echo "<input type='hidden' name='kuka' value='$kuka'>";
 				}
-				
+
 				echo "<tr><th>".t("Lisää")."</th>";
-				
+
 				if ($yhtunnus > 0) {
 					echo "<th>".t("Yhteyshenkilö:")." $ynimi</th>";
 				}
 				else {
 					echo "<th></th>";
 				}
-								
+
 				$sel = array();
 				$sel[$tyyppi] = "SELECTED";
-																
+
 				echo "<td><select name='tyyppi' Onchange='submit();'>
 						<option value='Memo' $sel[Memo]>".t("Memo")."</option>
 						<option value='Muistutus' $sel[Muistutus]>".t("Muistutus")."</option>
 						<option value='Lead' $sel[Lead]>".t("Lead")."</option>";
-				
+
 				if ($tyyppi == "Kuittaus") {
 					echo "<option value='Kuittaus' $sel[Kuittaus]>".t("Kuittaus")."</option>";
-				}		
-						
+				}
+
 				echo "</select></td>";
 
 				echo "<tr><td colspan='3'><textarea cols='83' rows='3' name='viesti' wrap='hard'>$viesti</textarea></td></tr>";
-				
+
 				if ($tyyppi == "Muistutus") {
 					echo "	<tr>
 							<th>".t("Yhteydenottaja: ")."</th>
@@ -619,7 +619,7 @@
 								WHERE kuka.yhtio	= '$kukarow[yhtio]'
 								and oikeu.yhtio		= kuka.yhtio
 								and oikeu.kuka		= kuka.kuka
-								and oikeu.nimi		= 'crm/kalenteri.php' 
+								and oikeu.nimi		= 'crm/kalenteri.php'
 								and kuka.kuka 		<> '$kukarow[kuka]'
 								ORDER BY kuka.nimi";
 					$result = mysql_query($query) or pupe_error($query);
@@ -635,18 +635,18 @@
 						echo "<option value='$row[kuka]' $sel>$row[nimi]</option>";
 					}
 					echo "</select></td></tr>";
-				
+
 					if (!isset($mkka))
 						$mkka = date("m");
 					if (!isset($mvva))
 						$mvva = date("Y");
 					if (!isset($mppa))
-						$mppa = date("d");	
+						$mppa = date("d");
 					if (!isset($mhh))
 						$mhh = "08";
 					if (!isset($mmm))
 						$mmm = "00";
-						
+
 					echo "<tr><th>".t("Muistutuspäivämäärä (pp-kk-vvvv tt:mm)")."</th>
 							<td colspan='2'><input type='text' name='mppa' value='$mppa' size='3'>-
 							<input type='text' name='mkka' value='$mkka' size='3'>-
@@ -654,21 +654,21 @@
 							&nbsp;&nbsp;
 							<input type='text' name='mhh' value='$mhh' size='3'>:
 							<input type='text' name='mmm' value='$mmm' size='3'></td></tr>";
-				
+
 					if ($kuittaus == "E") {
 						$sel = "CHECKED";
 					}
 					else {
 						$sel = "";
 					}
-				
+
 					echo"	<tr>
 							<th>".t("Ei kuittausta:")." </th><td colspan='2'><input type='checkbox' name='kuittaus' value='E' $sel>
 							</td>
 							</tr>";
 				}
 				if ($tyyppi == "Lead") {
-					
+
 					echo "	<tr>
 							<th>".t("Leadia valvoo: ")."</th>
 							<td colspan='2'><select name='myyntipaallikko'>";
@@ -678,7 +678,7 @@
 								WHERE kuka.yhtio	= '$kukarow[yhtio]'
 								and oikeu.yhtio		= kuka.yhtio
 								and oikeu.kuka		= kuka.kuka
-								and oikeu.nimi		= 'crm/kalenteri.php' 
+								and oikeu.nimi		= 'crm/kalenteri.php'
 								and kuka.asema   like '%MP%'
 								ORDER BY kuka.nimi";
 					$result = mysql_query($query) or pupe_error($query);
@@ -694,8 +694,8 @@
 						echo "<option value='$row[kuka]' $sel>$row[nimi]</option>";
 					}
 					echo "</select></td></tr>";
-					
-					
+
+
 					echo "	<tr>
 							<th>".t("Leadia hoitaa: ")."</th>
 							<td colspan='2'><select name='kuka'>
@@ -706,7 +706,7 @@
 								WHERE kuka.yhtio	= '$kukarow[yhtio]'
 								and oikeu.yhtio		= kuka.yhtio
 								and oikeu.kuka		= kuka.kuka
-								and oikeu.nimi		= 'crm/kalenteri.php' 
+								and oikeu.nimi		= 'crm/kalenteri.php'
 								and kuka.kuka 		<> '$kukarow[kuka]'
 								ORDER BY kuka.nimi";
 					$result = mysql_query($query) or pupe_error($query);
@@ -722,22 +722,22 @@
 						echo "<option value='$row[kuka]' $sel>$row[nimi]</option>";
 					}
 					echo "</select></td></tr>";
-				
+
 					if (!isset($lkka)) $lkka = date("m",mktime(0, 0, 0, date("m"), date("d")+7, date("Y")));
 					if (!isset($lvva)) $lvva = date("Y",mktime(0, 0, 0, date("m"), date("d")+7, date("Y")));
-					if (!isset($lppa)) $lppa = date("d",mktime(0, 0, 0, date("m"), date("d")+7, date("Y")));																
+					if (!isset($lppa)) $lppa = date("d",mktime(0, 0, 0, date("m"), date("d")+7, date("Y")));
 					if (!isset($lhh))  $lhh = "10";
 					if (!isset($lmm))  $lmm = "00";
-						
+
 					echo "<tr><th>".t("Muistutuspäivämäärä (pp-kk-vvvv tt:mm)")."</th>
 							<td colspan='2'><input type='text' name='mppa' value='$lppa' size='3'>-
 							<input type='text' name='mkka' value='$lkka' size='3'>-
 							<input type='text' name='mvva' value='$lvva' size='5'>
 							&nbsp;&nbsp;
 							<input type='text' name='mhh' value='$lhh' size='3'>:
-							<input type='text' name='mmm' value='$lmm' size='3'></td></tr>";									
+							<input type='text' name='mmm' value='$lmm' size='3'></td></tr>";
 				}
-				
+
 				echo "<tr><th>".t("Tapa:")."</th>";
 
 				$vresult = t_avainsana("KALETAPA");
@@ -772,7 +772,7 @@
 						<input type='submit' name='submit' value='".t("Korjaa viimeisintä")."'>
 						</form>
 						</td></tr>";
-					
+
 				echo "</table>";
 				echo "<br>";
 			}
@@ -787,9 +787,9 @@
 				$lisadel = "";
 			}
 
-			$query = "	SELECT kalenteri.tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo, 
+			$query = "	SELECT kalenteri.tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo,
 						if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, kentta01 viesti, left(pvmalku,10) paivamaara,
-						kentta02, kentta03, kentta04, kentta05, kentta06, kentta07, kentta08, 
+						kentta02, kentta03, kentta04, kentta05, kentta06, kentta07, kentta08,
 						lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.muutospvm laskumpvm,
 						kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta
 						FROM kalenteri
@@ -806,11 +806,11 @@
 			}
 
 			$query .= "	ORDER by sorttauskentta desc, kalenteri.tunnus";
-						
+
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") === FALSE) {
 				$query .= "	LIMIT 5 ";
 			}
-			
+
 			$res = mysql_query($query) or pupe_error($query);
 
 			while ($memorow = mysql_fetch_array($res)) {
@@ -831,7 +831,7 @@
 								<th>".tv1dateconv($memorow["paivamaara"])."</th>
 								<th>".t("Tapa:")." $memorow[tapa]</th>
 								<th>".t("Yhteyshenkilö:")." $memorow[yhteyshenkilo]</th>";
-					
+
 						if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'],0,7) != 'DELETED') {
 							echo "	<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&from=$from'>Poista</a></th>";
 						}
@@ -839,26 +839,26 @@
 							echo "<th></th>";
 						}
 						echo "</tr>";
-					}	
+					}
 
 					echo "<tr><td colspan='6'>".str_replace("\n", "<br>", trim($memorow["viesti"]))."";
-					
+
 					if ($memorow["laskutunnus"] > 0) {
 						$laskutyyppi = $memorow["laskutila"];
 						$alatila	 = $memorow["laskualatila"];
 
 						//tehdään selväkielinen tila/alatila
 						require "inc/laskutyyppi.inc";
-						
-						echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").":  <a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$memorow[laskutunnus]'>$memorow[laskutunnus]</a> / ".tv1dateconv($memorow["laskumpvm"])."  ($memorow[laskumyyja])";											
+
+						echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").":  <a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$memorow[laskutunnus]'>$memorow[laskutunnus]</a> / ".tv1dateconv($memorow["laskumpvm"])."  ($memorow[laskumyyja])";
 					}
-					
+
 					if ($memorow["laskutunnus"] == 0 and $memorow["tyyppi"] == "Lead") {
 						echo "<br><br><a href='".$palvelin2."tilauskasittely/tilaus_myynti.php?toim=TARJOUS&tee=&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
 					}
-					
+
 					echo "</td></tr>";
-					
+
 					if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {
 						echo "<tr><td colspan='3' align='right'>".t("Lähetä käyttäjälle").":</td><td colspan='3'>";
 						echo "<form action='$PHP_SELF' method='POST'>";
@@ -870,18 +870,18 @@
 						echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 						echo "<select name='email' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
-						$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";			
+						$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 						$result = mysql_query($query) or pupe_error($query);
 						$konsernit = "";
 
-						while ($row = mysql_fetch_array($result)) {	
+						while ($row = mysql_fetch_array($result)) {
 							$konsernit .= " '".$row["yhtio"]."' ,";
-						}		
+						}
 						$lisa2 = " yhtio in (".substr($konsernit, 0, -1).") ";
-						
+
 						$query  = "SELECT distinct kuka, nimi, eposti FROM kuka WHERE $lisa2 and extranet='' and eposti != '' ORDER BY nimi";
 						$vares = mysql_query($query) or pupe_error($query);
-					
+
 						while ($varow = mysql_fetch_array($vares)) {
 							echo "<option value='$varow[eposti]###$varow[kuka]'>$varow[nimi]</option>";
 						}

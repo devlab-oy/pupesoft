@@ -318,6 +318,11 @@ if ($tee == 'GO') {
 					strpos($mikakieli, "ee") !== FALSE or
 					strpos($mikakieli, "no") !== FALSE or
 					strpos($mikakieli, "de") !== FALSE) {
+
+					if ($mikakieli == 'ru') {
+						$mikakieli = 'en';
+					}
+
 					$apuselite = t("Käyttöturvatiedote", $mikakieli);
 				}
 				else {
@@ -336,6 +341,11 @@ if ($tee == 'GO') {
 					strpos($mikakieli, "no") !== FALSE or
 					strpos($mikakieli, "ee") !== FALSE or
 					strpos($mikakieli, "de") !== FALSE) {
+
+					if ($mikakieli == 'ru') {
+						$mikakieli = 'en';
+					}
+
 					$apuselite = t("Info", $mikakieli);
 				}
 				else {

@@ -164,14 +164,22 @@ if(!function_exists("asiakashintatarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "minkpl") {
+
+			$t[$i] = str_replace(",", ".", $t[$i]);
+
 			$chminkpl = $t[$i];
+
 			if ($chminkpl == '') {
 				$chminkpl = 0;
 			}
 		}
 
 		if (mysql_field_name($result, $i) == "maxkpl") {
+
+			$t[$i] = str_replace(",", ".", $t[$i]);
+
 			$chmaxkpl = $t[$i];
+
 			if ($chmaxkpl == '') {
 				$chmaxkpl = 0;
 			}

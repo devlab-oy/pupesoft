@@ -105,7 +105,7 @@ if ($tee == 'T') {
 	echo "<font class='head'>$trow[nimi]".t(":n pöydällä olevat laskut")."</font><hr>";
 
 	// Tehdään popup, jolla voidaan hyväksyjä myöhemmin vaihtaa
-	$query = "	SELECT kuka.kuka, kuka.nimi
+	$query = "	SELECT DISTINCT kuka.kuka, kuka.nimi
 				FROM kuka
 				JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
 				WHERE kuka.yhtio = '$kukarow[yhtio]'

@@ -1154,10 +1154,12 @@ if ($tee == 'P' or $tee == 'E') {
 
 	echo "<tr><td valign='top'>".t("Hyväksyjät")."</td><td>";
 
-	$query = "SELECT kuka, nimi
-			  FROM kuka
-			  WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja='o'
-			  ORDER BY nimi";
+	$query = "	SELECT DISTINCT kuka.kuka, kuka.nimi
+			  	FROM kuka
+				JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
+			  	WHERE kuka.yhtio = '$kukarow[yhtio]' 
+				and kuka.hyvaksyja = 'o'
+			  	ORDER BY kuka.nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	$ulos = '';

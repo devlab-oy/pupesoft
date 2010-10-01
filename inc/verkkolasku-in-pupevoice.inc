@@ -97,7 +97,7 @@ $i			= 0;
 
 if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {
-		$lisavat[$i] = array_shift($vattieto->xpath('TAX/@eC243.5278'));
+		$lisavat[$i] = (float) array_shift($vattieto->xpath('TAX/@eC243.5278'));
 		$i++;
 	}
 }

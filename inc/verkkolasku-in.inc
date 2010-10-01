@@ -247,8 +247,8 @@
 			$yhtio = $yhtiorow['yhtio'];
 
 			// Perusta lasku
-			$summa = $laskun_summa_eur;
-			$valkoodi = 'EUR';
+			$summa		= $laskun_summa_eur;
+			$valkoodi	= 'EUR';
 
 			if ($laskun_tyyppi == "381" and $summa > 0) {
 				$summa = $summa * -1;
@@ -1078,8 +1078,9 @@
 
 							$summa = (float) $rtuoteno[$i]["rivihinta"];
 
-	 						//Hyvityslasku tai summa alle nolla
-							if ($laskun_tyyppi == "381" or $omasumma < 0) {
+	 						// Hyvityslasku tai summa alle nolla
+							// FINVOICE-laskuilla rivihinta on aina valmiiksi oikeinpäin
+							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE") {
 								$summa = $summa * -1;
 							}
 

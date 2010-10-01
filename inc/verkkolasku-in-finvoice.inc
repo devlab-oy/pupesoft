@@ -143,7 +143,7 @@ $i 			= 0;
 
 if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {
-		$lisavat[$i] = str_replace(",", ".", $vattieto->VatRatePercent);
+		$lisavat[$i] = (float) str_replace(",", ".", $vattieto->VatRatePercent);
 		$i++;
 	}
 }

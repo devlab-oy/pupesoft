@@ -433,9 +433,9 @@
 
 		while ($laskurow = mysql_fetch_array($result)) {
 
-			// Tehd‰‰n oikeellisuustarkastuksia
+			// Tehd‰‰n oikeellisuustarkastuksia			
 			if (tarkista_iban($laskurow["ultilno"]) == "" and tarkista_sepa($laskurow["maa"]) !== FALSE) {
-				echo "<font class='error'>Tilinumero $laskurow[ultilno] ei ole oikeellinen IBAN tilinumero, laskua ei voida lis‰t‰ aineistoon!</font><br>";
+				echo "<font class='error'>Laskun tilinumero ei ole oikeellinen IBAN tilinumero, laskua ei voida lis‰t‰ aineistoon! $laskurow[nimi] ($laskurow[summa] $laskurow[valkoodi]) $laskurow[ultilno] </font><br>";
 				$virheita++;
 				continue;
 			}

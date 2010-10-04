@@ -134,8 +134,9 @@ if(!function_exists("pankkitiedot")) {
 			break;
 		}
 
-		if($pankki["rahalaitos"] == "" or strlen($pankki["rahalaitos"]) != 2) {
-		 	die("Tilinumerosta $tilino ei voitu tunnistaa rahalaitoskoodia");
+		if ($pankki["rahalaitos"] == "" or strlen($pankki["rahalaitos"]) != 2) {
+		 	echo "Tilinumerosta $tilino ei voitu tunnistaa rahalaitoskoodia!\n";
+			return FALSE;
 		}
 		else {
 			return $pankki;

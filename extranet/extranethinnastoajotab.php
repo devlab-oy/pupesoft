@@ -91,10 +91,9 @@
 		$contents = fread($handle, filesize($filename));
 		fclose($handle);
 
-		$filenimi = "/tmp/".t("hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His').".zip";
+		$filenimi = "/tmp/".t("Hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His').".zip";
 
-
-		echo "".t("Lähetetään sähköposti osoitteeseen").": ";
+		echo t("Lähetetään sähköposti osoitteeseen").": ";
 		flush();
 
 		$timeparts = explode(" ",microtime());
@@ -112,13 +111,13 @@
 
 		$content .= "Content-Type: application/pgp-encrypted;\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"".t("hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His').".zip\"\n\n";
+		$content .= "Content-Disposition: attachment; filename=\"".t("Hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His').".zip\"\n\n";
 		$content .= chunk_split(base64_encode($contents));
 		$content .= "\n" ;
 
 		$content .= "--$bound\n" ;
 
-		$boob = mail($kukarow["eposti"],  "".t("hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His')."", $content, $header, "-f $yhtiorow[postittaja_email]");
+		$boob = mail($kukarow["eposti"], mb_encode_mimeheader(t("Hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His'), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) echo " - ".t("Sähköpostin lähetys epäonnistui")."!<br>";
 		else echo " $kukarow[eposti].<br>".t("Sähköposti lähetetty").".<br>";

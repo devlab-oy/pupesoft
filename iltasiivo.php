@@ -323,7 +323,7 @@
 				$header .= "MIME-Version: 1.0\n" ;
 				$subject = "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";
 
-				mail($yhtiorow["admin_email"], "Iltasiivo yhtiolle '{$yhtiorow["yhtio"]}'", $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
+				mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
 			}
 		}
 	}

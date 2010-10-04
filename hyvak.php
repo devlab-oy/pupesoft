@@ -377,7 +377,7 @@
 			echo "<font class='message'>".t('Palauttettiin lasku k‰ytt‰j‰lle')." $krow[nimi]</font><br>";
 
 			//	L‰hetet‰‰n maili virheen merkiksi!
-			mail($krow["eposti"], "Hyv‰ksym‰si lasku palautettiin", t("Hyv‰ksym‰si lasku toimittajalta %s, %s %s palautettiin korjattavaksi.\n\nSyy: %s \n\nPalauttaja:", $krow["kieli"], $lrow["nimi"], $lrow["summa"], $lrow["valkoodi"], $viesti)." $kukarow[nimi], $yhtiorow[nimi]", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+			mail($krow["eposti"], mb_encode_mimeheader("Hyv‰ksym‰si lasku palautettiin", "ISO-8859-1", "Q"), t("Hyv‰ksym‰si lasku toimittajalta %s, %s %s palautettiin korjattavaksi.\n\nSyy: %s \n\nPalauttaja:", $krow["kieli"], $lrow["nimi"], $lrow["summa"], $lrow["valkoodi"], $viesti)." $kukarow[nimi], $yhtiorow[nimi]", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 			$tunnus = "";
 			$tee = "";
 		}

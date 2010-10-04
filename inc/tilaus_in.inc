@@ -679,7 +679,7 @@ if (($tyyppi == 'yct') and ($id != '')) {
 
 			$content .= "--$bound\r\n";
 
-			$boob = mail($mailiosoite, t("tarveraportti")." ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			$boob = mail($mailiosoite, mb_encode_mimeheader(t("tarveraportti")." ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 		}
 	}
 }

@@ -106,9 +106,7 @@
 		}
 	}
 
-	$subject = mb_encode_mimeheader($subject, "ISO-8859-1", "Q");
-
-	$boob = mail($kukarow["eposti"], $subject, $content, $header, "-f $yhtiorow[postittaja_email]");
+	$boob = mail($kukarow["eposti"], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";
 

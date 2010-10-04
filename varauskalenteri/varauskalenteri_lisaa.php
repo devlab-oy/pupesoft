@@ -58,23 +58,13 @@
 			$meili .= "Vieraslukum‰‰r‰:\n$kentta08\n\n\n";
 			$meili .= "Juomatoivomus:\n$kentta10\n";
 
-			$tulos = mail("$yhtiorow[varauskalenteri_email]", "Saunavaraus", $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"])." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"])." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+			$tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavaraus", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
 		}
 		else{
 			echo "<br><br>Tarkista, ett&auml; kaikki tiedot on sy&ouml;tetty!";
 			exit;
 		}
 	}
-	if($toim == "Starcraft" || $toim == "Per‰moottori 1" || $toim == "Per‰moottori 2") {
-		$meili = "$kukarow[nimi] on varannut kohteen'".$toim."' ajalle:\n\n##################################################\n$day-$month-$year   Klo: $kello --> $lday-$lmonth-$lyear  Klo: $lkello\n##################################################\n\n\nViesti:\n$kentta05";
-		$tulos = mail("$yhtiorow[varauskalenteri_email]", $toim, $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"])." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"])." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
-	}
-
-	if($toim == "Kuorma-auto") {
-		$meili = "$kukarow[nimi] on varannut kohteen '".$toim."' ajalle:\n\n##################################################\n$day-$month-$year   Klo: $kello --> $lday-$lmonth-$lyear  Klo: $lkello\n##################################################\n\n\nViesti:\n$kentta05";
-		$tulos = mail("$yhtiorow[varauskalenteri_email]", $toim, $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"])." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"])." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
-	}
-
 
 	$query = "	INSERT into kalenteri SET
 				kuka 		= '$kukarow[kuka]',

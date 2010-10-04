@@ -684,6 +684,13 @@
 				//vika pilkku pois
 				$tunnukset = substr($tunnukset,0,-1);
 
+				if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
+					$ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
+				}
+				else {
+					$ketjutus_group = "";
+				}
+
 				// Lasketaan rahtikulut ja jälkivaatimuskulut vain jos niitä ei olla laskettu jo tilausvaiheessa.
 				if ($yhtiorow["rahti_hinnoittelu"] == "") {
 
@@ -890,9 +897,6 @@
 
 							$rah++;
 						}
-//						elseif (mysql_num_rows($rares) != 1 and $silent == "") {
-//							$tulos_ulos .= "<tr><td>".t("Rahtimaksua ei löydy!")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td></td><td></td><td>$pakka[kilot] kg</td></tr>\n";
-//						}
 						elseif ($silent == "") {
 							$tulos_ulos .= "<tr><td>".t("Rahtimaksua ei osattu lisätä!")." $virhe</td><td>$otsikot</td><td>$laskurow[toimitustapa]</td><td></td><td></td><td>$pakka[kilot] kg</td></tr>\n";
 						}
@@ -949,13 +953,6 @@
 							$lisakulun_lisays_ehto = " and lasku.toimitustapa not in (".implode(',',$lisakulu_toimitustapa).") ";
 						}
 
-					}
-
-					if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
-						$ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
-					}
-					else {
-						$ketjutus_group = "";
 					}
 
 					// Tehdään ketjutus (group by PITÄÄ OLLA sama kun alhaalla) rivi ~1100
@@ -1933,7 +1930,7 @@
 					}
 				}
 
-				if ($sisainenfoinvoice_ftphost != '' and file_exists(realpath($nimisisainenfinvoice))) {
+				if (isset($sisainenfoinvoice_ftphost) and $sisainenfoinvoice_ftphost != '' and file_exists(realpath($nimisisainenfinvoice))) {
 					if ($silent == "") {
 						$tulos_ulos .= "<br><br>\n".t("FTP-siirto Pupesoft-Finvoice:")."<br>\n";
 					}
@@ -1970,9 +1967,9 @@
 
 						$query = "	SELECT *
 									FROM lasku
-									WHERE tila = 'U' 
-									and alatila = 'X' 
-									and laskunro = '$lasku' 
+									WHERE tila = 'U'
+									and alatila = 'X'
+									and laskunro = '$lasku'
 									and yhtio = '$kukarow[yhtio]'";
 						$laresult = mysql_query($query) or pupe_error($query);
 						$laskurow = mysql_fetch_array($laresult);
@@ -2200,7 +2197,7 @@
 								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
 							}
 
-							if ($valittu_kopio_tulostin != '') {
+							if (isset($valittu_kopio_tulostin) and $valittu_kopio_tulostin != '') {
 								$querykieli = "	SELECT *
 												from kirjoittimet
 												where yhtio='$kukarow[yhtio]' and tunnus='$valittu_kopio_tulostin'";

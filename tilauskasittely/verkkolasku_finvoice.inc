@@ -567,8 +567,9 @@ if (!function_exists('finvoice_rivi')) {
 			#xml_add("RowAccountDimensionText", 												"", 							$tootfinvoice);
 			#xml_add("RowSellerAccountText", 													"", 							$tootfinvoice);
 
+			$lisakomm = "";
+
 			if ($tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
-				$lisakomm = "";
 
 				// Laitetaan tilausviite tähän
 				if ($tilrow["laskuviesti"] != "") {

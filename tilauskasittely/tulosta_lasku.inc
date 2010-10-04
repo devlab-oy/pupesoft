@@ -591,6 +591,7 @@ if (!function_exists('rivi')) {
 		$kala_nyt  = $kala;
 		$summa_nyt = $summa;
 		$arvo_nyt  = $arvo;
+		$devnull   = "";
 
 		if ($laskutyyppi == 1) {
 			rivi_plain($devnull);

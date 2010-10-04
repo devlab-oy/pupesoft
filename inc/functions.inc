@@ -3774,7 +3774,8 @@ if (!function_exists("alehinta")) {
 			$ale = 0;
 		}
 
-		//$debug = 1;
+		$debug = 0;
+
 		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: $ale ".t("% HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
 
 		if ($yhtio != '') {
@@ -7049,7 +7050,6 @@ if (!function_exists("t_avainsana")) {
 		global $kukarow, $yhtiorow;
 
 		$laji = mysql_real_escape_string($laji);
-		$limit = mysql_real_escape_string($limit);
 
 		if ($kieli == "") {
 			$kieli = $kukarow["kieli"];
@@ -7990,7 +7990,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
 		}
 
-		if ($data) {
+		if (isset($data) and $data) {
 			$image = $pdf->jfif_embed($data);
 
 			if (!$image) {

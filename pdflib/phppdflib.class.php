@@ -52,7 +52,7 @@ class pdffile
     var $x, $chart, $template,
         $packer, $import;       // extension class is instantiated here
     var $debug = 0, $dbs = '';  // Default debug level, higher = more data
-    
+
     /* Constructor function: is automatically called when the
      * object is created.  Used to set up the environment
      */
@@ -136,7 +136,7 @@ class pdffile
         }
         return true;
     }
-    
+
     function draw_rectangle($top, $left, $bottom, $right, $parent, $attrib = array())
     {
         if ($this->objects[$parent]["type"] != "page") {
@@ -215,7 +215,7 @@ class pdffile
     // draw text
     function draw_text($left, $bottom, $text, $parent, $attrib = array())
     {
-        if ($this->objects[$parent]["type"] != "page") {
+        if (!isset($this->objects[$parent]["type"]) or $this->objects[$parent]["type"] != "page") {
             $this->_push_std_error(6001);
             return false;
         }
@@ -636,7 +636,7 @@ class pdffile
                 $os .= $this->_streamify($this->_place_raw_image($liboid));
                 $os .= " endobj";
                 break;
-            
+
             case 'raw':
                 $os .= $pdfoid . " 0 obj";
                 if (isset($this->objects[$liboid]['data'])) {
@@ -663,7 +663,7 @@ class pdffile
                 $os .= $this->_makedictionary($temp);
                 $os .= " endobj";
                 break;
-                
+
             case 'value' :
             	$os .= $pdfoid . ' 0 obj ' . $this->objects[$liboid]['data'] .
                 	   ' endobj';
@@ -765,7 +765,7 @@ class pdffile
                 $pal = substr($data, 0, $n);
                 $data = substr($data, $n + 4);
                 break;
-                
+
             case 'tRNS' :
                 $t = substr($data, 0, $n);
                 if ($ct == 0)
@@ -781,15 +781,15 @@ class pdffile
                 }
                 $data = substr($data, $n + 4);
                 break;
-                
+
             case 'IDAT' :
                 $rawdata .= substr($data, 0, $n);
                 $data = substr($data, $n + 4);
                 break;
-                
+
             case 'IEND' :
                 break 2;
-            
+
             default :
                 $data = substr($data, $n + 4);
             }
@@ -914,7 +914,7 @@ class pdffile
         $this->_debug_var(10, 'Embedded image', $t);
         return $o;
     }
-    
+
     function add_raw_object($dict, $stream = '')
     {
         $o = $this->_addnewoid();
@@ -981,7 +981,7 @@ class pdffile
     {
         if ($this->needsset) {
 //            require_once(dirname(__FILE__) . '/strlen.inc.php');
-            require(dirname(__FILE__) . '/strlen.inc.php'); 
+            require(dirname(__FILE__) . '/strlen.inc.php');
         }
         if (empty($params["font"])) {
             $font = $this->default['font'];
@@ -1095,7 +1095,7 @@ class pdffile
                     $line = trim($line);
                     $l = $left + (($width - $this->strlen($line, $param)) / 2);
                     break;
-                
+
                 default :
                     $l = $left;
                 }
@@ -1187,12 +1187,12 @@ class pdffile
         case 'white' :
             $r['red'] = $r['blue'] = $r['green'] = 1;
             break;
-            
+
         case 'red' :
             $r['red'] = 1;
             $r['blue'] = $r['green'] = 0;
             break;
-            
+
         case 'blue' :
             $r['blue'] = 1;
             $r['red'] = $r['green'] = 0;
@@ -1252,14 +1252,14 @@ class pdffile
             }
         }
     }
-    
+
     function _debug($level, $string)
     {
         if ($level <= $this->debug) {
             $this->dbs .= $string . "\n";
         }
     }
-    
+
     function _resolve_mode($attrib, $mode)
     {
         $rmode = $attrib[$mode];
@@ -1302,7 +1302,7 @@ class pdffile
         }
         return $rv;
     }
-    
+
     function _push_error($num, $msg)
     {
         array_push($this->erno, $num);
@@ -1603,7 +1603,7 @@ class pdffile
      */
     function _addnewoid()
     {
-        $o = $this->oid = $this->nextoid;	
+        $o = $this->oid = $this->nextoid;
         $this->nextoid++;
         return $o;
     }

@@ -14,6 +14,7 @@
 	$viestit 				= "";
 	$comments 				= "";
 	$sisviestit1 			= "";
+	$sisviestit2 			= "";
 	$tilausyhteyshenkilo 	= "";
 	$asiakkaan_tilausnumero	= "";
 	$kohde 					= "";
@@ -63,6 +64,7 @@
 		$viestit				= $sumrow["viestit"];
 		$comments				= $sumrow["comments"];
 		$sisviestit1			= $sumrow["sisviestit1"];
+		$sisviestit2			= $sumrow["sisviestit2"];
 		$tilausyhteyshenkilo	= $sumrow["tilausyhteyshenkilo"];
 		$asiakkaan_tilausnumero	= $sumrow["asiakkaan_tilausnumero"];
 		$kohde					= $sumrow["kohde"];
@@ -70,6 +72,7 @@
 		if ($viestit == " / ") 					$viestit 				= "";
 		if ($comments == " / ") 				$comments 				= "";
 		if ($sisviestit1 == " / ") 				$sisviestit1 			= "";
+		if ($sisviestit2 == " / ") 				$sisviestit2 			= "";
 		if ($tilausyhteyshenkilo == " / ") 		$tilausyhteyshenkilo 	= "";
 		if ($asiakkaan_tilausnumero == " / ") 	$asiakkaan_tilausnumero = "";
 		if ($kohde == " / ") 					$kohde 					= "";
@@ -250,6 +253,7 @@
 	$comments 				= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $comments);
 	$viestit				= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $viestit);
 	$sisviestit1			= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $sisviestit1);
+	$sisviestit2			= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $sisviestit2);
 	$tilausyhteyshenkilo	= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $tilausyhteyshenkilo);
 	$asiakkaan_tilausnumero	= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
 	$kohde					= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $kohde);

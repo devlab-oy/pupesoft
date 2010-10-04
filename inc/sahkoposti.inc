@@ -11,11 +11,11 @@
 
 	$varaposti = '';
 
-	if (trim($subject) == '') {
+	if (!isset($subject) or trim($subject) == '') {
 		$subject = "$yhtiorow[nimi] - $kutsu";
 	}
 
-	if (trim($content_subject) != "") {
+	if (isset($content_subject) and trim($content_subject) != "") {
 		$subject = $content_subject;
 	}
 
@@ -45,6 +45,21 @@
 		}
 		$content .= "Content-Transfer-Encoding: quoted-printable\n\n";
 		$content .= "$content_body\n\n";
+	}
+
+	if (!isset($content)) {
+		$content = "";
+	}
+	if (!isset($liite)) {
+		$liite = array(0 => "");
+	}
+
+	if (!isset($kutsu)) {
+		$kutsu = array(0 => "");
+	}
+
+	if (!isset($ctype)) {
+		$ctype = array(0 => "");
 	}
 
 	$content .= "--$bound\n";

@@ -327,13 +327,13 @@ elseif ($session == '' and $login != 'yes' and $verkkokauppa == '') {
 }
 
 //	Verkkokauppamoodissa ei koskaan ohjetta!
-if ($verkkokauppa != "") $_GET["ohje"] = "off";
+if (isset($verkkokauppa) and $verkkokauppa != "") $_GET["ohje"] = "off";
 
 // jos meill‰ on sessio
-if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
+if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login != 'yes')) {
 
 	//	Kirjataan verkkokauppak‰ytt‰j‰
-	if ($verkkokauppa != "" and $session == "") {
+	if (isset($verkkokauppa) and $verkkokauppa != "" and $session == "") {
 		//	T‰‰ll‰ ei ole mit‰‰n oikeuksia
 		$oikeurow = array();
 		$kukarow["kuka"] 		= "www";
@@ -472,7 +472,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 	}
 	elseif (($phpnimi != 'index.php' and $phpnimi != 'futursoft.php') or (isset($futuvanha) and $futuvanha == '1')) {
 
-		if ($verkkokauppa != "" and $yhtiorow['css_verkkokauppa'] != "") {
+		if ((isset($verkkokauppa) and $verkkokauppa != "") and $yhtiorow['css_verkkokauppa'] != "") {
 			$css = $yhtiorow['css_verkkokauppa'];
 		}
 		elseif ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
@@ -518,7 +518,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			echo "<META Http-Equiv='Expires' Content='-1'>\n";
 			echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>\n";
 
-			if ($_GET["no_css"] != "yes") {
+			if (!isset($_GET["no_css"]) or $_GET["no_css"] != "yes") {
 				echo "<style type='text/css'>\n";
 				echo $css;
 				echo "</style>\n";
@@ -530,7 +530,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			echo "<body>\n";
 			echo "<noscript>Your browser does not support Javascript!</noscript>\n";
 
-			if (basename($phpnimi) != 'indexvas.php' and $_GET["ohje"] != "off") {
+			if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off")) {
 				if (isset($toim) and $toim != '') {
 					if (basename($phpnimi) == 'varauskalenteri.php') {
 						$urltoim = "";
@@ -577,7 +577,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		}
 
 		// Messenger-viestit (X = ei luettu)
-		if (basename($phpnimi) != 'indexvas.php' and $_GET["ohje"] != "off") {
+		if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off")) {
 
 			$message_query = "	SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.luontiaika
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)
@@ -599,7 +599,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			}
 		}
 
-		if ($lopetus != '') {
+		if (isset($lopetus) and $lopetus != '') {
 			lopetus($lopetus);
 			echo "<br>";
 		}

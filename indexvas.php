@@ -71,6 +71,7 @@ echo "</div>";
 
 // estetään errorit tyhjästä arraystä
 if (!isset($menu)) $menu = array();
+if (!isset($tultiin)) $tultiin = "";
 
 if ($kukarow["extranet"] != "") {
 	if ($tultiin == "futur") {

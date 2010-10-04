@@ -1,11 +1,21 @@
 <?php
 
 	if (isset($_POST["tee"])) {
-		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		if(isset($_POST["tee"]) and $_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+		if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	require ("../inc/parametrit.inc");
+
+	if (!isset($tee)) {
+		$tee = "";
+	}
+	if (!isset($etsi)) {
+		$etsi = "";
+	}
+	if (!isset($toim)) {
+		$toim = "";
+	}
 
 	if ($tee == "lataa_tiedosto") {
 		readfile("$pupe_root_polku/dataout/".basename($filenimi));
@@ -60,7 +70,7 @@
 		$tee = "VALITSE";
 	}
 
-	if ($tee == 'TOIMITA' and $maksutapa == 'seka') {
+	if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
 
 		echo "<table><form action='' name='laskuri' method='post'>";
 
@@ -210,7 +220,7 @@
 			require("verkkolasku.php");
 
 			// K‰yd‰‰n kaikki ruksatut maksusopimukset l‰pi
-			if (sizeof($positiotunnus) != 0) {
+			if (isset($positiotunnus) and count($positiotunnus) > 0) {
 
 				require("../maksusopimus_laskutukseen.php");
 
@@ -288,28 +298,54 @@
 
 	if ($tee == "VALITSE") {
 
-		$query = "	SELECT lasku.*,
+		$query = "	SELECT
+					lasku.tunnus,
+					lasku.luontiaika,
+					lasku.chn,
+					lasku.ytunnus,
+					lasku.nimi,
+					lasku.osoite,
+					lasku.postino,
+					lasku.postitp,
+					lasku.maa,
+					lasku.toim_nimi,
+					lasku.toim_osoite,
+					lasku.toim_postino,
+					lasku.toim_postitp,
+					lasku.toim_maa,
+					lasku.laskutusvkopv,
+					lasku.rahtivapaa,
+					lasku.toimitustapa,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
 					maksuehto.teksti meh,
 					maksuehto.itsetulostus,
 					maksuehto.kateinen,
+					ifnull(kuka.nimi, lasku.laatija) kukanimi,
+					lasku.valkoodi,
+					lasku.liitostunnus,
+					lasku.tila,
+					lasku.vienti,
+					lasku.alv,
+					lasku.kohdistettu,
+					lasku.jaksotettu,
+					lasku.verkkotunnus,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
 					FROM lasku use index (tila_index)
-					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-													AND laskun_lisatiedot.laskutus_nimi != ''
-													AND laskun_lisatiedot.otunnus = lasku.tunnus
-													AND CONCAT(laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa) != CONCAT(lasku.nimi, lasku.osoite, lasku.postino, lasku.postitp, lasku.maa))
+					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}' AND laskun_lisatiedot.laskutus_nimi != '' AND laskun_lisatiedot.otunnus = lasku.tunnus AND CONCAT(laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa) != CONCAT(lasku.nimi, lasku.osoite, lasku.postino, lasku.postitp, lasku.maa))
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
+					LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.laatija
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
 					and lasku.tunnus in ($tunnukset)
 					$alatilat
 					$vientilisa
 					$muutlisa
-					GROUP BY lasku.tunnus
+					GROUP BY lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
+					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
+					maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus
 					ORDER BY lasku.tunnus";
 		$res = mysql_query($query) or pupe_error($query);
 
@@ -412,7 +448,9 @@
 			echo "<input type='hidden' name='tee' value='TOIMITA'>";
 
 			//otetaan eka rivi ja k‰ytet‰‰n sit‰ otsikoiden tulostamiseen
-			$ekarow = mysql_fetch_array($res);
+			$ekarow = mysql_fetch_assoc($res);
+
+			$toimitusselite = "";
 
 			if ($ekarow["chn"] == '100') $toimitusselite = t("Paperilasku");
 			if ($ekarow["chn"] == '010') $toimitusselite = t("eInvoice");
@@ -439,10 +477,10 @@
 
 			echo "<th>".t("Toimita")."</th>";
 			echo "<th>".t("Tilaus")."</th>";
-			echo "<th>".t("Arvo")."</th>";
-			echo "<th>".t("Laatija")."</th>";
-			echo "<th>".t("Laadittu")."</th>";
+			echo "<th>".t("Arvo")."<br>".t("Summa")."</th>";
 			echo "<th>".t("Tyyppi")."</th>";
+			echo "<th>".t("Laatija")."<br>".t("Laadittu")."</th>";
+			echo "<th>".t("Laskutusp‰iv‰")."</th>";
 			echo "<th>".t("Maksuehto")."</th>";
 			echo "<th>".t("Toimitustapa")."</th>";
 			echo "<th>".t("Muokkaa tilausta")."</th>";
@@ -450,7 +488,7 @@
 
 			$maksu_positiot = array();
 
-			while ($row = mysql_fetch_array($res)) {
+			while ($row = mysql_fetch_assoc($res)) {
 
 				// jos yksikin on k‰teinen niin kaikki on k‰teist‰ (se hoidetaan jo ylh‰‰ll‰)
 				if ($row["kateinen"] != "") $kateinen = "X";
@@ -467,9 +505,7 @@
 				echo "<tr class='aktiivi'><td><input type='checkbox' name='tunnus[$row[tunnus]]' value='$row[tunnus]' checked></td>";
 
 				echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&toim=$toim&tunnukset=$tunnukset&tunnus=$row[tunnus]'>$row[tunnus]</a></td>";
-				echo "<td>$row[arvo]</td>";
-				echo "<td>$row[laatija]</td>";
-				echo "<td>$row[luontiaika]</td>";
+				echo "<td align='right'>$row[arvo]<br>$row[summa]</td>";
 
 				if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] == 0) {
 					$teksti = "Veloitus";
@@ -481,6 +517,21 @@
 					$teksti = "Hyvitys";
 				}
 				echo "<td>".t("$teksti")."</td>";
+
+				echo "<td>$row[kukanimi]<br>".tv1dateconv($row["luontiaika"], "P")."</td>";
+
+				if ($row["laskutusvkopv"] == "0")		$teksti = t("Kaikki");
+				elseif ($row["laskutusvkopv"] == "2")	$teksti = t("Maanantai");
+				elseif ($row["laskutusvkopv"] == "3") 	$teksti = t("Tiistai");
+				elseif ($row["laskutusvkopv"] == "4") 	$teksti = t("Keskiviikko");
+				elseif ($row["laskutusvkopv"] == "5") 	$teksti = t("Torstai");
+				elseif ($row["laskutusvkopv"] == "6") 	$teksti = t("Perjantai");
+				elseif ($row["laskutusvkopv"] == "7") 	$teksti = t("Lauantai");
+				elseif ($row["laskutusvkopv"] == "1") 	$teksti = t("Sunnuntai");
+				elseif ($row["laskutusvkopv"] == "9") 	$teksti = t("Laskut l‰hetet‰‰n vain ohittamalla laskutusvkopv");
+
+				echo "<td>$teksti</td>";
+
 				echo "<td>$row[meh]</td>";
 
 				$rahti_hinta = "";
@@ -825,6 +876,7 @@
 			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Tilauksia")."<br>".t("Rivej‰")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th><th>".t("Toimitus")."</th><th>".t("Tyyppi")."</th></tr>";
 
 			$arvoyhteensa = 0;
+			$summayhteensa = 0;
 			$tilauksiayhteensa = 0;
 
 			while ($tilrow = mysql_fetch_array($tilre)) {

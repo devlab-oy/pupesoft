@@ -45,6 +45,7 @@ else {
 
 	$varmuutos  = 0;
 	$vastasumma = 0;
+	$vastasumma_valuutassa = 0;
 	$maksimisumma = 0;
 	$maksimisumma_kustp = 0;
 	$maksimisumma_kohde = 0;
@@ -74,7 +75,7 @@ else {
 			$maksimisumma = $xrow["summa"];
 			$maksimisumma_kustp = $kustp;
 			$maksimisumma_kohde = $kohde;
-			$maksimisumma_projekti = $projekti;		
+			$maksimisumma_projekti = $projekti;
 		}
 
 		// Valitaan myyntitili, jos rivillä on alv yli 500 niin kyseessä on marginaalimyyntiä

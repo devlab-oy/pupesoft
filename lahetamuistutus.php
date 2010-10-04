@@ -28,7 +28,7 @@
 			if ($trow['eposti'] != $veposti) {
 				if ($veposti != '') {
 					$meili = t("Sinulla on hyväksyttävänä seuraavat laskut").":\n\n" . $meili;
-					$tulos = mail($veposti, t("Muistutus laskujen hyväksynnästä")."", $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					$tulos = mail($veposti, mb_encode_mimeheader(t("Muistutus laskujen hyväksynnästä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					$maara++;
 				}
 				$meili = '';
@@ -42,7 +42,7 @@
 		}
 		if ($meili != '') {
 			$meili = t("Sinulla on hyväksyttävänä seuraavat laskut").":\n\n" . $meili;
-			$tulos = mail($veposti, t("Muistutus laskujen hyväksynnästä")."", $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+			$tulos = mail($veposti, mb_encode_mimeheader(t("Muistutus laskujen hyväksynnästä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 			$maara++;
 		}
 

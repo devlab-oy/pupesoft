@@ -189,7 +189,7 @@
 
 					$content = $kukarow["nimi"]." ".t("kopioi yhtiön")." $yrow[nimi] ".t("tuotteen")." '$tuoteno' ".t("yhtiön")." $yhtiorow[nimi] ".t("tuotteeksi")." '$uustuoteno'\n\n";
 
-					mail($yhtiorow["tuotekopio_email"], t("Tuotteita kopioitu"), $content, $header, "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow["tuotekopio_email"], mb_encode_mimeheader(t("Tuotteita kopioitu"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 				}
 
 				$toim 	= 'tuote';

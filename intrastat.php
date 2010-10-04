@@ -688,11 +688,11 @@
 			// katotaan lähetetäänkö meili käyttäjälle
 			if (($lahetys == "mina" or $lahetys == "mole" or $lahetys == "test") and $kukarow["eposti"] != "") {
 				// jä lähetetään käyttäjälle
-				mail($kukarow["eposti"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[postittaja_email]");
+				mail($kukarow["eposti"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 			}
 
 			// ja aina adminille
-			mail($yhtiorow["postittaja_email"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[postittaja_email]");
+			mail($yhtiorow["admin_email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		}
 		else {

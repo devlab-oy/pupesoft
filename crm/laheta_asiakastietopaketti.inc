@@ -268,6 +268,6 @@
 		}
 
 		$to = $kukarow['eposti'];
-		mail($to, "Asiakkaan tietopaketti $row[ytunnus] $row[nimi]", $content, $header, "-f $yhtiorow[postittaja_email]");
+		mail($to, mb_encode_mimeheader(t("Asiakkaan tietopaketti")." $row[ytunnus] $row[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 	}
 ?>

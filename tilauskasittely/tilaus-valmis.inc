@@ -1308,7 +1308,7 @@ else {
 							$content_body .= t("Status").": $jt_chk_row[status]\n\n\n";
 						}
 
-						mail($yhtiorow['jt_email'],  "$subject", $content_body, $header, "-f $yhtiorow[postittaja_email]");
+						mail($yhtiorow['jt_email'], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content_body, $header, "-f $yhtiorow[postittaja_email]");
 						echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
 					}
 				}

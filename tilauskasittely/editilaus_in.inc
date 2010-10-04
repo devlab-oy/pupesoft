@@ -1552,10 +1552,7 @@ if ($yhtiorow["alert_email"] != "") {
 	$content .= "\n";
 	$content .= "--$bound--\n";
 
-	$edi_subj = mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q");
-
-	$boob = mail($yhtiorow["alert_email"], $edi_subj, $content, $header, "-f $yhtiorow[postittaja_email]");
-
+	$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 }
 
 ?>

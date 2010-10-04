@@ -72,7 +72,7 @@
 
 		$subjekti = $frow["sopimusnumero"]." ".$pdffilenimi;
 
-		if($frow["email"] == '' or !mail($frow["email"], $subjekti, $content, $header, "-f $yhtiorow[postittaja_email]")) {
+		if($frow["email"] == '' or !mail($frow["email"], mb_encode_mimeheader($subjekti, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]")) {
 			$sebfact_ulos .= sprintf(t("VIRHE: Laskutuksen factoring-sähköpostisiirtoa ei voitu suorittaa osoitteeseen: %s"),$frow["email"])."<br>\r\n";
 		}
 		else {
@@ -80,7 +80,7 @@
 		}
 
 		//lähetetään meili myös yhtiön adminille
-		mail($yhtiorow["alert_email"], $subjekti, $content, $header, "-f $yhtiorow[postittaja_email]");
+		mail($yhtiorow["alert_email"], mb_encode_mimeheader($subjekti, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		//echotaan rudulle jos kyseessä ei ole batch-ajo
 		if ($tulos_ulos == "") {

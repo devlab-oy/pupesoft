@@ -612,7 +612,7 @@
 
 		$content .= "--$bound--\n";
 
-		mail($kukarow["eposti"], t("Täydentävä vienti-ilmoitus")."", $content, $header, "-f $yhtiorow[postittaja_email]");
+		mail($kukarow["eposti"], mb_encode_mimeheader(t("Täydentävä vienti-ilmoitus"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		///* Tässä tehään täydentävä ilmoitus sähköiseen muotoon *///
 		//PGP-encryptaus atklabeli

@@ -1970,7 +1970,10 @@
 
 						$query = "	SELECT *
 									FROM lasku
-									WHERE tila='U' and alatila='X' and laskunro='$lasku' and yhtio='$kukarow[yhtio]'";
+									WHERE tila = 'U' 
+									and alatila = 'X' 
+									and laskunro = '$lasku' 
+									and yhtio = '$kukarow[yhtio]'";
 						$laresult = mysql_query($query) or pupe_error($query);
 						$laskurow = mysql_fetch_array($laresult);
 
@@ -2323,7 +2326,7 @@
 				$content .= "\n";
 				$content .= "--$bound--\n";
 
-				mail($yhtiorow["alert_email"],  "$yhtiorow[nimi] - Laskutusajo", $content, $header, "-f $yhtiorow[postittaja_email]");
+				mail($yhtiorow["alert_email"],  mb_encode_mimeheader("$yhtiorow[nimi] - Laskutusajo", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 			}
 		}
 

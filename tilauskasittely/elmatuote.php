@@ -206,7 +206,7 @@ if ($aja=='run') {
 			$mail .= chunk_split(base64_encode($sisalto));
 			$mail .= "\n" ;
 
-			$boob = mail($korow["email"], "Varastotilanne - $yhtiorow[nimi]", $mail, $header, "-f $yhtiorow[postittaja_email]");
+			$boob = mail($korow["email"], mb_encode_mimeheader("Varastotilanne - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
 			if ($boob === FALSE) $echoulos .= "Sähköpostin lähetys epäonnistui<br>";
 		}
 	}

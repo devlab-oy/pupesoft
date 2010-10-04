@@ -967,11 +967,9 @@
 				$ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."<br><br>";
 				$ulos .= "</body></html>";
 
-				$subject = mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q");
-
 				// Lähetetään keräyspoikkeama asiakkaalle
 				if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
-					$boob = mail($laskurow["email"], $subject, $ulos, $header, "-f $yhtiorow[postittaja_email]");
+					$boob = mail($laskurow["email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
 					if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 				}
 
@@ -994,11 +992,10 @@
 
 					$ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
 
-					$boob = mail($laskurow["kukamail"], $subject, $ulos, $header, "-f $yhtiorow[postittaja_email]");
+					$boob = mail($laskurow["kukamail"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
 					if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 				}
 
-				unset($subject);
 				unset($ulos);
 				unset($header);
 			}

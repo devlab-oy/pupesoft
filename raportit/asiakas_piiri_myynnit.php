@@ -232,7 +232,7 @@
 
 		$content .= "--$bound\n";
 
-		$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Piirin myynnit asiakkaittain raportti")."", $content, $header, "-f $yhtiorow[postittaja_email]");
+		$boob = mail($kukarow["eposti"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Piirin myynnit asiakkaittain raportti"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) echo "<font class='error'>".t("Email lähetys epäonnistui")."!</font><br>";
 		else echo "<font class='message'>".t("Lähetettiin osoitteeseen").": $kukarow[eposti].</font><br>";

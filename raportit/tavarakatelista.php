@@ -40,7 +40,6 @@
 
 		if ($virtu == "") {
 			// meilin infoja
-			$otsikko   = t("Tavarakatelista");
 			$failinimi = t("Tavarakatelista")."-$yhtiorow[yhtio].txt";
 
 			$bound     = uniqid(time()."_") ;
@@ -58,7 +57,7 @@
 			$content .= "\n" ;
 			$content .= "--$bound\n";
 
-			$boob     = mail($kukarow["eposti"], $otsikko, $content, $headeri, "-f $yhtiorow[postittaja_email]");
+			$boob     = mail($kukarow["eposti"], mb_encode_mimeheader(t("Tavarakatelista"), "ISO-8859-1", "Q"), $content, $headeri, "-f $yhtiorow[postittaja_email]");
 
 			echo t("Tavarakatelista lähetettiin osoitteeseen"). " $kukarow[eposti].<br><br>";
 		}

@@ -237,8 +237,7 @@ function loppu ($firstpage, $sendemail = '') {
 
 		$content .= "--$bound\n";
 
-		$boob     = mail($edemail,  $yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
-		//$boob     = mail($kukarow["eposti"],  $yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		$boob     = mail($edemail, mb_encode_mimeheader($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) {
 			echo "Meilin lähetys epäonnistui!<br>";

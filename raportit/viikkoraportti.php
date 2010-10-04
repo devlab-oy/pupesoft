@@ -129,42 +129,43 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
 		echo "Myyjällä $kukro[nimi] ($myyjarow[myyjanro]) ei ole sähköpostiosoitetta!\n";
 	}
 	else {
-	        echo "Lähetetään meili $kukro[eposti].\n";
-			$nyt = date('d.m.y');
-	        $bound = uniqid(time()."_") ;
+		echo "Lähetetään meili $kukro[eposti].\n";
 
-	        $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-	        $header  .= "MIME-Version: 1.0\n" ;
-	        $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+		$nyt = date('d.m.y');
+        $bound = uniqid(time()."_") ;
 
-	        $content  = "--$bound\n";
+        $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+        $header  .= "MIME-Version: 1.0\n" ;
+        $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-	        $content .= "Content-Type: application/vnd.ms-excel; name=\"Excel-viikkoraportti$nyt.xls\"\n" ;
-	        $content .= "Content-Transfer-Encoding: base64\n" ;
-	        $content .= "Content-Disposition: attachment; filename=\"Excel-viikkoraportti$nyt.xls\"\n\n";
+        $content  = "--$bound\n";
 
-	        $content .= chunk_split(base64_encode($sivu));
-	        $content .= "\n" ;
+        $content .= "Content-Type: application/vnd.ms-excel; name=\"Excel-viikkoraportti$nyt.xls\"\n" ;
+        $content .= "Content-Transfer-Encoding: base64\n" ;
+        $content .= "Content-Disposition: attachment; filename=\"Excel-viikkoraportti$nyt.xls\"\n\n";
 
-	        $content .= "--$bound\n";
+        $content .= chunk_split(base64_encode($sivu));
+        $content .= "\n" ;
 
-	        $content .= "Content-Type: text/x-comma-separated-values; name=\"OpenOffice-viikkoraportti$nyt.csv\"\n" ;
-	        $content .= "Content-Transfer-Encoding: base64\n" ;
-	        $content .= "Content-Disposition: attachment; filename=\"OpenOffice-viikkoraportti$nyt.csv\"\n\n";
+        $content .= "--$bound\n";
 
-	        $content .= chunk_split(base64_encode($sivu));
-	        $content .= "\n" ;
+        $content .= "Content-Type: text/x-comma-separated-values; name=\"OpenOffice-viikkoraportti$nyt.csv\"\n" ;
+        $content .= "Content-Transfer-Encoding: base64\n" ;
+        $content .= "Content-Disposition: attachment; filename=\"OpenOffice-viikkoraportti$nyt.csv\"\n\n";
 
-	        $content .= "--$bound\n";
+        $content .= chunk_split(base64_encode($sivu));
+        $content .= "\n" ;
 
-	        $boob = mail($kukro["eposti"],  "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
+        $content .= "--$bound\n";
 
-			if ($pomomail != '') {
-				$boob = mail($pomomail, "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
-			}
-			if ($pomomail2 != '') {
-				$boob = mail($pomomail2, "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
-			}
+        $boob = mail($kukro["eposti"], mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+
+		if ($pomomail != '') {
+			$boob = mail($pomomail, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		}
+		if ($pomomail2 != '') {
+			$boob = mail($pomomail2, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		}
 	}
 
 }

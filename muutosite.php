@@ -1207,38 +1207,35 @@ if (strlen($tee) == 0) {
 		$kentta = 'tap';
 	}
 
-	echo "<form name = 'valikko' action = '$PHP_SELF' method='post'><table>";
+	echo "<form name = 'valikko' action = '$PHP_SELF' method='post'>";
+	echo "<input type='hidden' name='tee' value='Y'>";
+	echo "<table>";
+	echo "<tr><th colspan='3'>".t("Etsi tositetta")."</th></tr>";	
 	echo "<tr>
-		  <td>".t("Etsi tositetta")."</td>
-		  <td>".t("tapahtumapvm")."</td>
-		  <td>
-		  	<input type='hidden' name='tee' value='Y'>
-			<input type='text' name='tap' maxlength='2' size=2>
-			<input type='text' name='tak' maxlength='2' size=2>
-			<input type='text' name='tav' maxlength='4' size=4></td>
+		  <td>".t("Pvm")."</td>
+		  <td>		  	
+		  <input type='text' name='tap' maxlength='2' size=2>
+		  <input type='text' name='tak' maxlength='2' size=2>
+		  <input type='text' name='tav' maxlength='4' size=4></td>
 		  <td></td>
 		  </tr>
 		  <tr>
-		  <td></td>
-		  <td>summa</td>
+		  <td>".t("Summa")."</td>
 		  <td><input type='text' name='summa' size=10></td>
 		  <td></td>
 		  </tr>
 		  <tr>
-		  <td></td>
-		  <td>tili</td>
+		  <td>".t("Tili")."</td>
 		  <td><input type='text' name='tilino' size=10></td>
 		  <td></td>
 		  </tr>
 		  <tr>
-		  <td></td>
-		  <td>".t("osa selitteest‰")."</td>
+		  <td>".t("Osa selitteest‰")."</td>
 		  <td><input type='text' name='selite' maxlength='15' size=10></td>
 		  <td><input type='checkbox' name='ohita' maxlength='15' size=10>".t("Ohita n‰m‰")."</td>
 		  </tr>
 		  <tr>
-		  <td></td>
-		  <td>laatija</td>
+		  <td>".t("Laatija")."</td>
 		  <td><input type='text' name='laatija' size=10></td>
 		  <td></td>
 		  </tr>";
@@ -1247,7 +1244,6 @@ if (strlen($tee) == 0) {
 	if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 		echo "
 		  <tr>
-		  <td></td>
 		  <td>".t("tositenumero")."</td>
 		  <td><input type='text' name='tositenro' size=10></td>
 		  <td></td>
@@ -1255,75 +1251,52 @@ if (strlen($tee) == 0) {
 	}
 
 	echo "<tr>
-		  	<td></td>
-		  	<td>".t("n‰yt‰ muutetut rivit")."</td>
-		  	<td><input type='checkbox' name='viivatut'></td>
-		  	<td><input type = 'submit' value = '".t("Etsi")."'></form></td></tr>
-
-		  	<tr class='aktiivi'>
-		  	<td>".t("Etsi virhett‰")."</td>
-		  	<td>".t("n‰yt‰ tositteet, jotka eiv‰t t‰sm‰‰")."</td>
-		  	<td></td>
+		  	<td>".t("N‰yt‰ muutetut rivit")."</td>
+		  	<td><input type = 'checkbox' name = 'viivatut'></td>
+		  	<td><input type = 'submit' value = '".t("Etsi")."'></td></tr>";
+		
+	echo "</table>";
+	echo "</form>";
+				
+	echo "<br><br><table>";	
+	echo "	<tr><th colspan='2'>".t("Etsi virhett‰")."</th></tr>";
+		
+	echo "	<tr class='aktiivi'>
+			<td>".t("n‰yt‰ tositteet, jotka eiv‰t t‰sm‰‰")."</td>
 		  	<td><form action = '$PHP_SELF?tee=Z' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
-
 			<tr class='aktiivi'>
-		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joilla on manuaalisia alv kirjauksia")."</td>
-		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=kasintehtyja_alvkirjauksia' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
-
 			<tr class='aktiivi'>
-		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joilta puuttuu kustannuspaikka")."</td>
-		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=X' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
-
 			<tr class='aktiivi'>
-		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden ostovelat ei t‰sm‰‰")."</td>
-		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=W' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
-
 			<tr class='aktiivi'>
-		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden tila tuntuu v‰‰r‰lt‰")."</td>
-		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=T' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
-
 			<tr class='aktiivi'>
-		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden automaattikirjauksia on muutettu")."</td>
-		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=automaattikirjauksia_muutettu' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
-
 			<tr class='aktiivi'>
-		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden myyntisaamiset ovat v‰‰rin")."</td>
-		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=S' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
-
 			<tr class='aktiivi'>
-		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden marginaaliverotiliˆinnit ovat v‰‰rin")."</td>
-		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=≈' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
-
 			<tr class='aktiivi'>
-		  	<td></td>
 		  	<td>".t("n‰yt‰ maksetut laskut, joilla on myyntisaamisia")."</td>
-		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=ƒ' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
-
-
 			</table>";
 }
 

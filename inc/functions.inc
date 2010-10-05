@@ -8157,10 +8157,10 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 						$purchaseorder[$purchaseorder_tuoteno]['nimitys'] = $tieto;
 						break;
 					case 'OSTOTILRIV.OTR_TILATTUMAARA':
-						$purchaseorder[$purchaseorder_tuoteno]['tilattumaara'] = (float) str_replace(",", ".", $tieto);
+						$purchaseorder[$purchaseorder_tuoteno]['tilattumaara'] += (float) str_replace(",", ".", $tieto);
 						break;
 					case 'OSTOTILRIV.OTR_RIVISUMMA':
-						$purchaseorder[$purchaseorder_tuoteno]['nettohinta'] = (float) str_replace(",", ".", $tieto);
+						$purchaseorder[$purchaseorder_tuoteno]['nettohinta'] += (float) str_replace(",", ".", $tieto);
 						break;
 					case 'OSTOTIL.OT_NRO':
 						$purchaseorder_tilausnumero = $tieto;
@@ -8174,8 +8174,8 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 				else $ai_tuoteno = (string) $row->ArticleName;
 
 				$invoice[$ai_tuoteno]['nimitys'] = $row->ArticleName;
-				$invoice[$ai_tuoteno]['tilattumaara'] = (float) str_replace(",", ".", $row->DeliveredQuantity);
-				$invoice[$ai_tuoteno]['bruttohinta'] = (float) str_replace(",", ".", $row->UnitPriceAmount);
+				$invoice[$ai_tuoteno]['tilattumaara'] += (float) str_replace(",", ".", $row->DeliveredQuantity);
+				$invoice[$ai_tuoteno]['bruttohinta'] += (float) str_replace(",", ".", $row->UnitPriceAmount);
 
 				// voi olla monta alennusta
 				foreach ($row as $child => $value) {
@@ -8187,7 +8187,7 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 				if (!isset($invoice[$ai_tuoteno]['ale'])) $invoice[$ai_tuoteno]['ale'] = '';
 
 				if ($row->RowAmount) {
-					$invoice[$ai_tuoteno]['nettohinta'] = (float) str_replace(",", ".", $row->RowAmount);
+					$invoice[$ai_tuoteno]['nettohinta'] += (float) str_replace(",", ".", $row->RowAmount);
 				}
 				else {
 					$invoice[$ai_tuoteno]['nettohinta'] = 0;

@@ -127,7 +127,8 @@
 							mysql_field_name($stresult,$i)=='epakurantti25pvm' or
 							mysql_field_name($stresult,$i)=='epakurantti50pvm' or
 							mysql_field_name($stresult,$i)=='epakurantti75pvm' or
-							mysql_field_name($stresult,$i)=='epakurantti100pvm') {
+							mysql_field_name($stresult,$i)=='epakurantti100pvm' or
+							mysql_field_name($stresult,$i)=='eankoodi') {
 						$query .= mysql_field_name($stresult,$i)."='',";
 					}
 					// ja kaikki muut paitsi tunnus sellaisenaan

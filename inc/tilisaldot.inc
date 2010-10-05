@@ -4,7 +4,7 @@
 
 	if ($tee == '1' and !isset($ajarappari)) {
 		$tee = "";
-	}
+	} 
 
 	if ($tee == '1') {
 		if ($tilino != '') {
@@ -149,7 +149,7 @@
 		$summa3 = 0;
 		$summa_valuutassa = array();
 
-		while ($trow=mysql_fetch_array ($result)) {
+		while ($trow = mysql_fetch_array ($result)) {
 
 			$summa  += $trow['Kumulatiivinen'];
 			$summa2 += $trow['Saldo'];
@@ -184,11 +184,9 @@
 
 				if ($tilino != '') {
 					echo "<td align='right'>".sprintf('%.2f', $summa)."</td>";
-					$summa3 = $summa;
 				}
 				else {
 					echo "<td align='right'>$trow[Kumulatiivinen]</td>";
-					$summa3 = $summa;
 				}
 
 				if ($trow['tapvm'] == '') {
@@ -263,7 +261,7 @@
 			$cspan += 3;
 		}
 
-		echo "<td class='tumma' colspan='$cspan'>".t("Summa")."</td><td align='right' class='tumma'>".sprintf('%.2f', $summa2)."</td><td align='right' class='tumma'>".sprintf('%.2f', $summa3)."</td>";
+		echo "<td class='tumma' colspan='$cspan'>".t("Summa")."</td><td align='right' class='tumma'>".sprintf('%.2f', $summa2)."</td><td align='right' class='tumma'>".sprintf('%.2f', $summa)."</td>";
 		echo "<td align='right' class='tumma'>";
 		foreach ($summa_valuutassa as $valuutta => $sum) {
 			echo sprintf('%.2f', $sum)." $valuutta<br/>";

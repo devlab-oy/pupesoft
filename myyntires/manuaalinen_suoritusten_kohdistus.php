@@ -1026,7 +1026,7 @@ if ($tila == 'suorituksenvalinta') {
 	}
 }
 
-if ($tila == 'kohdistaminen') {
+if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 
 	echo "<font class='head'>".t("Manuaalinen suoritusten kohdistaminen (laskujen valinta)")."</font><hr>";
 
@@ -1470,6 +1470,9 @@ if ($tila == 'kohdistaminen') {
 		}
 	-->
 	</script>";
+}
+elseif ($tila == 'kohdistaminen') {
+	$tila = '';
 }
 
 if ($tila == '') {

@@ -234,93 +234,95 @@
 	}
 
 	if ($tila == 'kayttaja') {
-		$query = "SELECT kuka FROM oikeu WHERE yhtio='$yhtio'";
+
+		//Tehdään käyttäjä
+		$profile = '';
+		if (is_array($profiilit)) {
+			if (count($profiilit) > 0) {
+				foreach($profiilit as $prof) {
+					$profile .= $prof.",";
+				}
+				$profile = substr($profile,0,-1);
+			}
+		}
+
+		$query = "SELECT salasana, nimi FROM kuka WHERE kuka='$kuka' limit 1";
 		$pres = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($pres) > 0) {
-			if (count($profiilit) == 0) {
-				echo "<font class='error'>Ainakin yksi profiili on valittava</font><br>";
-				$error = 1;
-			}
+			$krow = mysql_fetch_array($pres);
+			$salasana = $krow['salasana'];
+			$nimi = $krow['nimi'];
+			echo "<font class='message'>$krow[nimi] ".t("Käyttäjä löytyi muistakin yrityksistä. Tietoja kopioitiin!"),"<br></font>";
 		}
+		else $salasana = md5($salasana);
 
-		if ($error == 0) {
-			//Tehdään käyttäjä
-			$profile = '';
-			if (is_array($profiilit)) {
-				if (count($profiilit) > 0) {
-					foreach($profiilit as $prof) {
-						$profile .= $prof.",";
-					}
-					$profile = substr($profile,0,-1);
-				}
-			}
+		$query = "	INSERT into kuka SET
+					yhtio	 	= '$yhtio',
+					nimi 		= '$nimi',
+					salasana 	= '$salasana',
+					kuka  		= '$kuka',
+					profiilit 	= '$profile'";
+		$result = mysql_query($query) or pupe_error($query);
 
-			$query = "SELECT salasana, nimi FROM kuka WHERE kuka='$kuka' limit 1";
-			$pres = mysql_query($query) or pupe_error($query);
+		//Insertoidaan ainakin oikeudet käyttäjähallintaan
+		$query = "	INSERT into oikeu
+					SET
+					kuka		= '$kuka',
+					sovellus	= 'Käyttäjät ja valikot',
+					nimi		= 'suoja.php',
+					alanimi 	= '',
+					paivitys	= '1',
+					nimitys		= 'Käyttöoikeudet',
+					jarjestys 	= '30',
+					jarjestys2	= '',
+					lukittu		= '1',
+					yhtio		= '$yhtio',
+					hidden		= ''";
+		$rresult = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($pres) > 0) {
-				$krow = mysql_fetch_array($pres);
-				$salasana = $krow['salasana'];
-				$nimi = $krow['nimi'];
-				echo "<font class='message'>$krow[nimi] ".t("Käyttäjä löytyi muistakin yrityksistä. Tietoja kopioitiin!"),"<br></font>";
-			}
-			else $salasana = md5($salasana);
+		// Oikeudet
+		if (is_array($profiilit)) {
+			foreach($profiilit as $prof) {
 
-			$query = "	INSERT into kuka SET
-						yhtio	 	= '$yhtio',
-						nimi 		= '$nimi',
-						salasana 	= '$salasana',
-						kuka  		= '$kuka',
-						profiilit 	= '$profile'";
-			$result = mysql_query($query) or pupe_error($query);
+				$query = "	SELECT *
+							FROM oikeu
+							WHERE yhtio='$yhtio' and kuka='$prof' and profiili='$prof'";
+				$pres = mysql_query($query) or pupe_error($query);
 
-			//Oikeudet
-			if (is_array($profiilit)) {
-				foreach($profiilit as $prof) {
-
-					$query = "	SELECT *
+				while ($trow = mysql_fetch_array($pres)) {
+					//joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
+					//voi olla jossain toisessa profiilissa
+					$query = "	SELECT yhtio
 								FROM oikeu
-								WHERE yhtio='$yhtio' and kuka='$prof' and profiili='$prof'";
-					$pres = mysql_query($query) or pupe_error($query);
+								WHERE kuka		= '$kuka'
+								and sovellus	= '$trow[sovellus]'
+								and nimi		= '$trow[nimi]'
+								and alanimi 	= '$trow[alanimi]'
+								and paivitys	= '$trow[paivitys]'
+								and nimitys		= '$trow[nimitys]'
+								and jarjestys 	= '$trow[jarjestys]'
+								and jarjestys2	= '$trow[jarjestys2]'
+								and yhtio		= '$yhtio'";
+					$tarkesult = mysql_query($query) or pupe_error($query);
 
-					while ($trow = mysql_fetch_array($pres)) {
-						//joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
-						//voi olla jossain toisessa profiilissa
-						$query = "	SELECT yhtio
-									FROM oikeu
-									WHERE kuka		= '$kuka'
-									and sovellus	= '$trow[sovellus]'
-									and nimi		= '$trow[nimi]'
-									and alanimi 	= '$trow[alanimi]'
-									and paivitys	= '$trow[paivitys]'
-									and nimitys		= '$trow[nimitys]'
-									and jarjestys 	= '$trow[jarjestys]'
-									and jarjestys2	= '$trow[jarjestys2]'
-									and yhtio		= '$yhtio'";
-						$tarkesult = mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($tarkesult) == 0) {
-							$query = "	INSERT into oikeu
-										SET
-										kuka		= '$kuka',
-										sovellus	= '$trow[sovellus]',
-										nimi		= '$trow[nimi]',
-										alanimi 	= '$trow[alanimi]',
-										paivitys	= '$trow[paivitys]',
-										nimitys		= '$trow[nimitys]',
-										jarjestys 	= '$trow[jarjestys]',
-										jarjestys2	= '$trow[jarjestys2]',
-										yhtio		= '$yhtio',
-										hidden		= '$trow[hidden]'";
-							$rresult = mysql_query($query) or pupe_error($query);
-						}
+					if (mysql_num_rows($tarkesult) == 0) {
+						$query = "	INSERT into oikeu
+									SET
+									kuka		= '$kuka',
+									sovellus	= '$trow[sovellus]',
+									nimi		= '$trow[nimi]',
+									alanimi 	= '$trow[alanimi]',
+									paivitys	= '$trow[paivitys]',
+									nimitys		= '$trow[nimitys]',
+									jarjestys 	= '$trow[jarjestys]',
+									jarjestys2	= '$trow[jarjestys2]',
+									yhtio		= '$yhtio',
+									hidden		= '$trow[hidden]'";
+						$rresult = mysql_query($query) or pupe_error($query);
 					}
 				}
 			}
-		}
-		else {
-			$tila = 'profiilit';
 		}
 	}
 
@@ -570,7 +572,11 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow = mysql_fetch_array($result)) {
-			echo "<option value='$uusiyhtiorow[yhtio]'>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
+			
+			$selli = "";
+			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
+			 
+			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
 		}
 
 		echo "</select></td></tr>";
@@ -590,7 +596,11 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow=mysql_fetch_array($result)) {
-			echo "<option value='$uusiyhtiorow[yhtio]'>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
+			
+			$selli = "";
+			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
+			
+			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
 		}
 
 		echo "</select></td></tr>";
@@ -610,7 +620,11 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow=mysql_fetch_array($result)) {
-			echo "<option value='$uusiyhtiorow[yhtio]'>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
+			
+			$selli = "";
+			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
+			
+			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
 		}
 
 		echo "</select></td></tr>";
@@ -621,19 +635,24 @@
 		// profiilit
 		$query = "SELECT distinct profiili FROM oikeu WHERE yhtio = '$fromyhtio' and profiili != ''";
 		$result = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($result) > 0) {
+			echo "<form action = '$PHP_SELF' method='post'>
+					<input type='hidden' name = 'tila' value='profiilit'>
+					<input type='hidden' name = 'yhtio' value='$yhtio'>
+					<input type='hidden' name = 'fromyhtio' value='$fromyhtio'>
+					<table>
+					<tr><th>".t("Mitkä profiilit kopioidaan?").":</th><td></td></tr>";
 
-		echo "<form action = '$PHP_SELF' method='post'>
-				<input type='hidden' name = 'tila' value='profiilit'>
-				<input type='hidden' name = 'yhtio' value='$yhtio'>
-				<input type='hidden' name = 'fromyhtio' value='$fromyhtio'>
-				<table>
-				<tr><th>".t("Mitkä profiilit kopioidaan?").":</th><td></td></tr>";
+			while ($profiilirow=mysql_fetch_array($result)) {
+				echo "<tr><td>$profiilirow[profiili]</td><td><input type='checkbox' name = 'profiilit[]' value='$profiilirow[profiili]' checked></td></tr>";
+			}
 
-		while ($profiilirow=mysql_fetch_array($result)) {
-			echo "<tr><td>$profiilirow[profiili]</td><td><input type='checkbox' name = 'profiilit[]' value='$profiilirow[profiili]' checked></td></tr>";
+			echo "<tr><th></th><td><input type='submit' value='".t('Perusta')."'></td></tr></table></form>";
 		}
-
-		echo "<tr><th></th><td><input type='submit' value='".t('Perusta')."'></td></tr></table></form>";
+		else {
+			$tila = 'profiilit';
+		}
 	}
 
 	if ($tila == 'profiilit') {
@@ -649,6 +668,7 @@
 		echo "<form action = '$PHP_SELF' method='post'>
 				<input type='hidden' name = 'tila' value='kayttaja'>
 				<input type='hidden' name = 'yhtio' value='$yhtio'>
+				<input type='hidden' name = 'fromyhtio' value='$fromyhtio'>
 				<table>
 				<tr><th>".t("Anna käyttäjätunnus").":</th><td><input type='text' name = 'kuka' value='$kuka'></td></tr>
 				<tr><th>".t("Nimi").":</th><td><input type='text' name = 'nimi' value='$nimi'></td></tr>
@@ -660,6 +680,8 @@
 		}
 
 		echo "<tr><th></th><td><input type='submit' value='".t('Perusta')."'></td></tr></table></form>";
+		
+		echo "<br>HUOM: Uudelle käyttäjälle lisätään aina käyttöoikeudet uuden yrityksen käyttöoikeuksien hallintaan.";
 	}
 
 	if ($tila == 'kayttaja') {
@@ -675,7 +697,11 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow = mysql_fetch_array($result)) {
-			echo "<option value='$uusiyhtiorow[yhtio]'>$uusiyhtiorow[nimi]</option>";
+
+			$selli = "";
+			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
+			
+			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi]</option>";
 		}
 
 		echo "</select></td></tr>";
@@ -694,7 +720,11 @@
 				<tr><th>".t("Miltä yritykseltä kopioidaan avainsanat?").":</th><td><select name='fromyhtio'>";
 
 		while ($uusiyhtiorow=mysql_fetch_array($result)) {
-			echo "<option value='$uusiyhtiorow[yhtio]'>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
+			
+			$selli = "";
+			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
+			
+			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
 		}
 
 		echo "</select></td></tr>";
@@ -771,7 +801,11 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow=mysql_fetch_array($result)) {
-			echo "<option value='$uusiyhtiorow[yhtio]'>$uusiyhtiorow[nimi]</option>";
+			
+			$selli = "";
+			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
+			
+			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi]</option>";
 		}
 
 		echo "</select></td></tr>";
@@ -791,7 +825,11 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow=mysql_fetch_array($result)) {
-			echo "<option value='$uusiyhtiorow[yhtio]'>$uusiyhtiorow[nimi]</option>";
+
+			$selli = "";
+			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
+			
+			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi]</option>";
 		}
 
 		echo "</select></td></tr>";
@@ -811,7 +849,11 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow = mysql_fetch_array($result)) {
-			echo "<option value='$uusiyhtiorow[yhtio]'>$uusiyhtiorow[nimi]</option>";
+			
+			$selli = "";
+			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
+			
+			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi]</option>";
 		}
 
 		echo "</select></td></tr>";

@@ -311,6 +311,15 @@
 				$iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin ".mysql_affected_rows()." riviä suorituskykylokista.\n";
 			}
 		}
+						
+		// Dellataan rogue oikeudet
+		$query = "	DELETE o1.*
+					FROM oikeu o1
+					LEFT JOIN oikeu o2 ON o1.yhtio=o2.yhtio and o1.sovellus=o2.sovellus and o1.nimi=o2.nimi and o1.alanimi=o2.alanimi and o2.kuka='' 
+					WHERE o1.yhtio = '{$kukarow['yhtio']}'
+					and o1.kuka != ''
+					and o2.tunnus is null";
+		$result = mysql_query($query) or pupe_error($query);		
 
 		if ($iltasiivo != "" or trim($argv[1]) != '') {
 			echo $iltasiivo;

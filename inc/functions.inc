@@ -8613,6 +8613,21 @@ if (!function_exists("tarkista_rfviite")) {
 	}
 }
 
+if (!function_exists("tarkista_bic")) {
+	function tarkista_bic($bic) {
+
+		preg_match("/^[A-Z]{6,6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3,3}){0,1}$/", $bic, $matches);
+
+		if ($matches[0] == "") {
+			// BIC on v‰‰rin!
+			return FALSE;
+		}
+
+		// BIC on oikein!
+		return TRUE;
+	}
+}
+
 if (!function_exists("asiakashakuohje")) {
 	function asiakashakuohje() {
 		global $palvelin2;

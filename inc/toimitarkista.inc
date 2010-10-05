@@ -83,20 +83,35 @@ if(!function_exists("toimitarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "ultilno") {
-			if ($tmp_maakoodi != strtoupper($yhtiorow['maa'])) {
-				if ($t[$i] == '') {
-					$virhe[$i] = "".t("Tieto puuttuu")."";
-				}
+
+			if ($tmp_maakoodi != strtoupper($yhtiorow['maa']) and $t[$i] == '') {
+				$virhe[$i] = t("Tieto puuttuu");
 			}
+
 			if ($t[$i] == '') $t[$i] = $tmp_iban;
-			//Vaaditaan isot kirjaimet
+
+			// Vaaditaan isot kirjaimet
 			$t[$i] = strtoupper($t[$i]);
+
+			// Jos SEPA-maa, tarkistetaan IBAN
+			if (tarkista_sepa($tmp_maakoodi) and tarkista_iban($t[$i]) != $t[$i]) {
+				$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
+				$errori = 1;
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "swift") {
+
 			if ($t[$i] == '') $t[$i] = $tmp_swift;
-			//Vaaditaan isot kirjaimet
+
+			// Vaaditaan isot kirjaimet
 			$t[$i] = strtoupper($t[$i]);
+
+			// Jos SEPA-maa, tarkistetaan BIC
+			if (tarkista_sepa($tmp_maakoodi) and tarkista_bic($t[$i]) === FALSE) {
+				$virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
+				$errori = 1;
+			}
 		}
 
 		if ((mysql_field_name($result, $i) == "ytunnus") and trim($t[$i])!='') {

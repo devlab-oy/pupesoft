@@ -4,7 +4,7 @@
 	require ("inc/functions.inc");
 
 	$laskuri = 0;
-	
+
 	$query = "	SELECT ultilno, swift, tilinumero, tunnus
 				FROM toimi
 				WHERE ultilno = ''
@@ -43,6 +43,30 @@
 			$query = "	UPDATE yriti SET
 						iban = '$iban',
 						bic = '$bic'
+						WHERE tunnus = '$toimirow[tunnus]'";
+			$update = mysql_query($query) or pupe_error($query);
+			$laskuri++;
+		}
+
+	}
+
+	$query = "	SELECT ultilno, swift, tilinumero, tunnus
+				FROM lasku
+				WHERE ultilno = ''
+				AND tilinumero not in ('', 0)
+				AND tila in ('H','M','P')";
+	$result = mysql_query($query) or pupe_error($query);
+
+	while ($toimirow = mysql_fetch_array($result)) {
+
+		$vastaus = luoiban($toimirow["tilinumero"]);
+		$iban = trim($vastaus["iban"]);
+		$bic = trim($vastaus["swift"]);
+
+		if (tarkista_iban($iban) != "" and $bic != '') {
+			$query = "	UPDATE lasku SET
+						ultilno = '$iban',
+						swift = '$bic'
 						WHERE tunnus = '$toimirow[tunnus]'";
 			$update = mysql_query($query) or pupe_error($query);
 			$laskuri++;

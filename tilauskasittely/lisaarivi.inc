@@ -1640,8 +1640,19 @@
 					default :
 						echo t("VIRHE: Virheellinen arvo kentässä hyvaksy")." '$var'";
 				}
-				if (trim($var) == 'P' and $kutsuja == "EDITILAUS") {
-					$kommentti .= t("Tuote Loppu.");
+
+				if (trim($var) == 'P') {
+					$puurivires = t_avainsana("PUUTEKOMM");
+				
+					if (mysql_num_rows($puurivires) > 0) {
+						
+						$puurivirow = mysql_fetch_assoc($puurivires);
+						
+						$kommentti .= $puurivirow["selite"];
+					}
+					elseif ($kutsuja == "EDITILAUS") {
+						$kommentti .= t("Tuote Loppu.");
+					}
 				}
 			}
 			else {

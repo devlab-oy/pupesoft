@@ -347,11 +347,6 @@
 
 			if ($tunnus == '') {
 				$tunnus = mysql_insert_id();
-				$wanha = "";
-			}
-			else {
-				//	Javalla tieto että tätä muokattiin..
-				$wanha = "P_";
 			}
 
 			if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
@@ -548,7 +543,7 @@
 			}
 
 			if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
-				$lopetus .= "//yllapidossa=$toim//yllapidontunnus=$tunnus//yllapidonupdate=$wanha";
+				$lopetus .= "//yllapidossa=$toim//yllapidontunnus=$tunnus";
 
 				lopetus($lopetus, "META");
 			}

@@ -325,7 +325,7 @@ if (isset($liitaasiakasnappi) and $kukarow["extranet"] == "") {
 }
 
 //Jos ylläpidossa on luotu uusi asiakas
-if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != ''and $yllapidonupdate == "") {
+if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != '') {
 	$asiakasid 	= $yllapidontunnus;
 }
 

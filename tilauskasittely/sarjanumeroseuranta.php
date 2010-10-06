@@ -291,7 +291,19 @@
 					$nxt2 = t("EI SARJANUMEROA")."-1";
 				}
 
-				echo "<td><input type='text' size='30' name='sarjanumero' value='$muutarow[sarjanumero]'> <a onclick='document.muokkaaformi.sarjanumero.value=\"$nxt\";'><u>".t("Sarjanumero ei tiedossa")."</u></a> <a onclick='document.muokkaaformi.sarjanumero.value=\"$nxt2\";'><u>".t("Ei Sarjanumeroa")."</u></a></td></tr>";
+				echo "<td><input type='text' size='30' name='sarjanumero' value='$muutarow[sarjanumero]'> <a onclick='document.muokkaaformi.sarjanumero.value=\"$nxt\";'><u>".t("Sarjanumero ei tiedossa")."</u></a> <a onclick='document.muokkaaformi.sarjanumero.value=\"$nxt2\";'><u>".t("Ei Sarjanumeroa")."</u></a>";
+				
+				if ($muutarow["myyntirivitunnus"] > 0) {
+					if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F" or $muutarow["sarjanumeroseuranta"] == "G") {
+						echo "<br><br><font class='error'>".t("HUOM: Er‰numero on liitetty tilaukseen! Tilauksen tiedot muuttuvat jos muokkaat er‰numeroa.")."</font>";
+					}
+					else {
+						echo "<br><br><font class='error'>".t("HUOM: Sarjanumero on liitetty tilaukseen! Tilauksen tiedot muuttuvat jos muokkaat sarjanumeroa.")."</font>";
+					}										
+				}
+				
+						
+				echo "</td></tr>";
 
 				if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F" or $muutarow["sarjanumeroseuranta"] == "G") {
 					if ($muutarow["era_kpl"] >= 0 and $muutarow["myyntirivitunnus"] == 0 and ($muutarow["ostorivitunnus"] == 0 or $from == "kohdista")) {
@@ -813,6 +825,7 @@
 				DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
 				(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 				varastopaikat.nimitys								varastonimi,
+				tuote.sarjanumeroseuranta							sarjaseutyyppi,
 				concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka";
 
 	if ((($from == "riviosto" or $from == "valmistus" or $from == "VALMISTAASIAKKAALLE" or $from == "VALMISTAVARASTOON" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "REKLAMAATIO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or ($from == "KERAA" and $aputoim == "") or $from == "KORJAA") and $hyvitysrivi != "ON")) {
@@ -1211,19 +1224,19 @@
 
 			echo "<td valign='top' nowrap>";
 
-			//jos saa muuttaa niin n‰ytet‰‰n muokkaa linkki
-			if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE or $PHP_SELF == "sarjanumeroseuranta.php") {
+			//jos saa muuttaa niin n‰ytet‰‰n muokkaa linkki, Jos myyntirivi on laskutettu niin ei muokata
+			if ((strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE or $PHP_SELF == "sarjanumeroseuranta.php") and ($sarjarow["myynti_laskaika"] == "" or $sarjarow["myynti_laskaika"] == "0000-00-00")) {
 				echo "<a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=".urlencode($tuoteno_haku)."&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat'>".t("Muokkaa")."</a>";
 			}
 
-			if ($sarjarow['ostorivitunnus'] > 0 and ($from == "" or $from == "SIIRTOTYOMAARAYS") and ($sarjarow["myynti_laskaika"] == "0000-00-00" or $sarjarow["myynti_laskaika"] == "" or ($sarjarow['myynti_laskaika'] <= $yhtiorow["tilikausi_loppu"] and $sarjarow['myynti_laskaika'] >= $yhtiorow["tilikausi_alku"]))) {
+			if ($sarjarow['sarjaseutyyppi'] == "S" and $sarjarow['ostorivitunnus'] > 0 and ($from == "" or $from == "SIIRTOTYOMAARAYS") and ($sarjarow["myynti_laskaika"] == "0000-00-00" or $sarjarow["myynti_laskaika"] == "" or ($sarjarow['myynti_laskaika'] <= $yhtiorow["tilikausi_loppu"] and $sarjarow['myynti_laskaika'] >= $yhtiorow["tilikausi_alku"]))) {
 				if ($keikkarow["tunnus"] > 0) {
 					$keikkalisa = "&otunnus=$keikkarow[tunnus]";
 				}
 				else {
 					$keikkalisa = "&luouusikeikka=OK&liitostunnus=$sarjarow[tunnus]";
 				}
-
+				
 				echo "<br><a href='$PHP_SELF?toiminto=kululaskut$keikkalisa&keikanalatila=S&lopetus=$PHP_SELF////$tunnuskentta=$rivitunnus//from=$from//aputoim=$aputoim//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku//lisatieto_haku=$lisatieto_haku//muut_siirrettavat=$muut_siirrettavat'>".t("Liit‰ kululasku")."</a>";
 			}
 

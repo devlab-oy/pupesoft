@@ -692,7 +692,7 @@
 			}
 
 			// ja aina adminille
-			mail($yhtiorow["admin_email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			mail($yhtiorow["alert_email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		}
 		else {

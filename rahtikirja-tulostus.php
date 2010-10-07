@@ -127,7 +127,7 @@
 			//-->
 			</script>";
 
-	if(!isset($tee)) {
+	if (!isset($tee)) {
 		$tee = '';
 	}
 
@@ -150,7 +150,7 @@
 		if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin != 'koonti_eratulostus_pakkaustiedot' and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 
 			$linkkilisa = '';
-			
+
 			if ($sel_ltun != '') {
 
 				$linkkilisa = "&sel_ltun=";
@@ -309,6 +309,8 @@
 			echo "<font class='message'>".t("Yhtään tulostettavaa rahtikirjaa ei löytynyt").".</font><br><br>";
 		}
 
+		$kopiotulostuksen_otsikot = array();
+
 		while ($rakir_row = mysql_fetch_assoc($rakir_res)) {
 			// muutama muuttuja tarvitaan
 			$pakkaus       	= array();
@@ -385,7 +387,14 @@
 						WHERE rahtikirjat.yhtio			= '$kukarow[yhtio]' ";
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+				// Normaalisti tämä ehto estää sen, että koontirahtikirjasta ei tuu yhtä monta koioita kuin tilausten määrä koontirahtikirjalla.
 				$query .= " and rahtikirjat.tulostettu	= '0000-00-00 00:00:00' ";
+			}
+			else {
+				// Kopiotulostuksessa joudumme tekee sen näin
+				if (count($kopiotulostuksen_otsikot) > 0) {
+					$query .= " and lasku.tunnus not in (".implode(",", $kopiotulostuksen_otsikot).") ";
+				}
 			}
 
 			$query .= "	and rahtikirjat.toimitustapa	= '$toimitustapa'
@@ -398,11 +407,15 @@
 			$res   = mysql_query($query) or pupe_error($query);
 
 			while ($rivi = mysql_fetch_assoc($res)) {
-				//otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan myöhemmin hauissa
+
+				// Kopiotulostuksen tulostetut otsikot
+				$kopiotulostuksen_otsikot[$rivi["otunnus"]] = $rivi["otunnus"];
+
+				// otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan myöhemmin hauissa
 				$otunnukset   .= "'$rivi[otunnus]',";
 				$tunnukset    .= "'$rivi[rtunnus]',";
 
-				//otsikkonumerot talteen, nämä printataan paperille
+				// otsikkonumerot talteen, nämä printataan paperille
 				if (!in_array($rivi['otunnus'], $lotsikot)) {
 					$lotsikot[] 	= $rivi['otunnus'];
 					$astilnrot[]	= $rivi['asiakkaan_tilausnumero'];
@@ -446,7 +459,7 @@
 					}
 				}
 
-				//summataan kaikki painot yhteen
+				// Summataan kaikki painot yhteen
 				$query = "	SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark, sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri
 							FROM rahtikirjat
 							WHERE tunnus in ($tunnukset) and yhtio='$kukarow[yhtio]'
@@ -486,7 +499,7 @@
 					// käytetään tästä alaspäin vanhoja tunnuksia
 					$tunnukset = $vanhat_tunnukset;
 				}
-	
+
 				// merkataan tilausrivit toimitetuiksi..
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 					$query = "	UPDATE tilausrivi
@@ -582,11 +595,35 @@
 					chdir('../');
 					$tunnukset = $rivitunnukset;
 
+					// Nämä muuttujat tulevat toivottavasti ulos verkkolasku.php:stä
+					// $jvhinta jossa on jälkivaatimuskulut
+					// $rahinta jossa on rahtikulut
+					// $laskurow jossa on laskutetun laskun tiedot
+					// $viite jossa on viitenumero
+
+					$yhteensa = $laskurow['summa'];
+					$summa    = $laskurow['summa'] - $jvhinta - $rahinta;
+
+					$jvtext  = "<li>".t("Jälkivaatimuskulu").": $jvhinta $yhtiorow[valkoodi]";
+					$jvtext .= "<li>".t("Loppusumma yhteensä").": $yhteensa $yhtiorow[valkoodi]";
+
+					$aputeksti = t("JÄLKIVAATIMUS");
+				}
+				elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and $rakir_row['jv'] != '') {
 
 					// Nämä muuttujat tulevat toivottavasti ulos verkkolasku.php:stä
 					// $jvhinta jossa on jälkivaatimuskulut
 					// $rahinta jossa on rahtikulut
 					// $laskurow jossa on laskutetun laskun tiedot
+
+					$query = "	SELECT *
+								FROM lasku
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$rivi[otunnus]'";
+					$lasres = mysql_query($query) or pupe_error($query);
+					$laskurow = mysql_fetch_array($lasres);
+
+					$viite = $laskurow["viite"];
 
 					$yhteensa = $laskurow['summa'];
 					$summa    = $laskurow['summa'] - $jvhinta - $rahinta;
@@ -623,7 +660,7 @@
 						if (file_exists("tilauskasittely/rahtikirja_erittely_pdf.inc")) {
 							require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 						}
-					}					
+					}
 				}
 				else {
 					echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
@@ -645,7 +682,7 @@
 					}
 
 				}
-				
+
 				if ($rakir_row['toimitusvahvistus'] != '') {
 					if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
 						require("tilauskasittely/$rakir_row[toimitusvahvistus]");

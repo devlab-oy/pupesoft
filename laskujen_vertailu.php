@@ -17,7 +17,7 @@
 			$liite = array();
 			$kutsu = array();
 			$ctype = array();
-			
+
 			$liite[0] = "/tmp/$tmpfilenimi";
 			$kutsu[0] = t("Laskujen")."_".t("vertailu")."_".t("raportti").".xls";
 			$ctype[0] = "excel";
@@ -27,7 +27,7 @@
 			$subject = $yhtiorow['nimi']." - ".t("Laskujen täsmäytysraportti");
 
 			require('inc/sahkoposti.inc');
-			
+
 			system("rm -f /tmp/$excelnimi");
 
 			if ($boob) {
@@ -138,7 +138,7 @@
 			$format_text_error->setColor(12);
 			$format_text_error->setBold();
 			$format_text_error->setPattern(1);
-			
+
 			$format_text_ok =& $workbook->addFormat();
 			$format_text_ok->setFgColor(14);
 			$format_text_ok->setColor(13);
@@ -544,7 +544,7 @@
 						}
 					}
 
-					$excelsarake++;				
+					$excelsarake++;
 				}
 
 				$worksheet->write($excelrivi, 9, t("Ei löydy tilaukselta").'!', $format_text_error);
@@ -597,6 +597,7 @@
 			}
 
 			echo "<tr id='tr_summa'><th colspan='5'>",t("Summa"),"</th><th valign='top' style='text-align: right;'>{$invoice_summa} {$lasku_row['valkoodi']}</th><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><th colspan='3'>",t("Summa"),"</th><th valign='top' style='text-align: right;'>{$purchaseorder_summa} {$lasku_row['valkoodi']}</th></tr>";
+			echo "</table>";
 
 			$excelrivi++;
 			$excelsarake = 4;
@@ -615,7 +616,7 @@
 
 			$workbook->close();
 
-			echo "<br /><form method='post'>";
+			echo "<br /><br /><form method='post'>";
 			echo "<table>";
 			echo "<tr><th>",t("Lähetä raportti käyttäjälle"),":</th>";
 			echo "<input type='hidden' name='tee' value='laheta_tiedosto'>";
@@ -647,7 +648,7 @@
 
 		echo "</table><br><br>";
 
-		if (tarkista_oikeus("hyvak.php")) {
+		if ($lasku_row['tila'] == "H" and tarkista_oikeus("hyvak.php")) {
 			echo "<form action = 'hyvak.php' method='post'>
 					<input type='hidden' name = 'tunnus' value='{$lasku_row['tunnus']}'>
 					<input type='hidden' name = 'tee' value='H'>
@@ -721,7 +722,7 @@
 					$ok = 'ok';
 
 					foreach ($loytyy_kummastakin as $tuoteno => $null) {
-						if ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or abs($invoice[$tuoteno]['nettohinta'] - $purchaseorder[$tuoteno]['nettohinta']) > 1) {
+						if (substr($tuoteno, 0, 15) != "Ei_tuotekoodia_" and ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or abs($invoice[$tuoteno]['nettohinta'] - $purchaseorder[$tuoteno]['nettohinta']) > 1)) {
 							echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}'>",t("Eroja"),"</a>";
 							$ok = '';
 							break;

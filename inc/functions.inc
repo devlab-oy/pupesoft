@@ -8100,6 +8100,7 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 		$liite_res = mysql_query($query) or pupe_error($query);
 
 		$purchaseorder_data = $invoice_data = '';
+		$noIdentifierlask = 0;
 
 		if (mysql_num_rows($liite_res) == 0) {
 			return FALSE;
@@ -8170,8 +8171,13 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 
 			foreach ($invoice_obj->InvoiceRow as $row) {
 
-				if (trim($row->ArticleIdentifier) != "") $ai_tuoteno = (string) trim($row->ArticleIdentifier);
-				else $ai_tuoteno = (string) $row->ArticleName;
+				if (trim($row->ArticleIdentifier) != "") {
+					$ai_tuoteno = (string) trim($row->ArticleIdentifier);
+				}
+				else {
+					$ai_tuoteno = "Ei_tuotekoodia_".$noIdentifierlask;
+					$noIdentifierlask++;
+				}
 
 				$invoice[$ai_tuoteno]['nimitys'] = $row->ArticleName;
 				$invoice[$ai_tuoteno]['tilattumaara'] += (float) str_replace(",", ".", $row->DeliveredQuantity);

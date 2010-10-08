@@ -210,10 +210,6 @@
 			}
 		}
 		else {
-			
-			// Tehdään lopetusmuuttuja kaikkiin urleihin
-			$lopetus = "${palvelin2}tilioteselailu.php////mtili=$yritirow[tunnus]//tee=Z//pvm=$pvm";
-			
 			// Miksi ei tiliöity?
 			if ($kuittikoodi != ' ') {
 				echo "<font class='message'>".t("Hylätty, koska erittely tulossa")." ($kuittikoodi) </font><br>";
@@ -223,18 +219,11 @@
 					echo "<font class='message'>".t("Erittely alla").".</font><br>";
 				}
 				else {
-					$query = "	SELECT *
-								FROM tiliotedata
-								WHERE alku = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."'
-								and tilino = '$tiliotedatarow[tilino]'
-								and tyyppi = '3'
-								ORDER BY alku, tunnus";
-					$tiliointiresult = mysql_query($query) or pupe_error($query);
 
-					if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {
-						echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]&lopetus=$lopetus'>".t("Avaa viiteaineisto")."</a><br>";
-					}
-					else {
+					$erilinkkiekotus = FALSE;
+
+					if ($koodi == "702") {
+						// Luulativimmin LMP-ainesisto
 						$query = "	SELECT *
 									FROM tiliotedata
 									WHERE alku = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."'
@@ -244,11 +233,30 @@
 						$tiliointiresult = mysql_query($query) or pupe_error($query);
 
 						if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {
-							echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]&lopetus=$lopetus'>".t("Avaa LMP-erittely")."</a><br>";
+							echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=2&tilino=$tiliotedatarow[tilino]&lopetus=$lopetus/SPLIT/${palvelin2}tilioteselailu.php////tee=T//tyyppi=$lopp_tyyppi//tilino=$lopp_tilino//pvm=$lopp_pvm'>".t("Avaa LMP-erittely")."</a><br>";
+
+							$erilinkkiekotus = TRUE;
 						}
-						else {
-							echo "<font class='message'>".t("VIRHE: Erittely kateissa")."!</font><br>";
+					}
+
+					if (!$erilinkkiekotus) {
+						$query = "	SELECT *
+									FROM tiliotedata
+									WHERE alku = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."'
+									and tilino = '$tiliotedatarow[tilino]'
+									and tyyppi = '3'
+									ORDER BY alku, tunnus";
+						$tiliointiresult = mysql_query($query) or pupe_error($query);
+
+						if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {
+							echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]&lopetus=$lopetus/SPLIT/${palvelin2}tilioteselailu.php////tee=T//tyyppi=$lopp_tyyppi//tilino=$lopp_tilino//pvm=$lopp_pvm'>".t("Avaa viiteaineisto")."</a><br>";
+
+							$erilinkkiekotus = TRUE;
 						}
+					}
+
+					if (!$erilinkkiekotus) {
+						echo "<font class='message'>".t("VIRHE: Erittely kateissa")."!</font><br>";
 					}
 				}
 			}

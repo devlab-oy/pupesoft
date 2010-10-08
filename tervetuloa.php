@@ -211,19 +211,19 @@ if (!isset($tee) or $tee == '') {
 		$ulos = '';
 
 		// Ominaisuus laitettiin p‰‰lle 30.9.2010
-		for ($i = ceil($days/30); mktime(0, 0, 0, 8+$i, 0, 2010) < mktime(0, 0, 0, date("m"), date("d"), date("Y")); $i++) {
+		for ($i = ceil($days/30); mktime(0, 0, 0, 9+$i, 0, 2010) < mktime(0, 0, 0, date("m"), date("d"), date("Y")); $i++) {
 			$query = "	SELECT lasku.tunnus
 						FROM lasku
 						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND lasku.tapvm = '".date("Y-m-d", mktime(0, 0, 0, 8+$i, 0, 2010))."'
+						AND lasku.tapvm = '".date("Y-m-d", mktime(0, 0, 0, 9+$i, 0, 2010))."'
 						AND lasku.tila = 'X'
 						AND lasku.nimi = '{$yhtiorow['nimi']}'
 						LIMIT 1";
 			$tositelinkki_result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($tositelinkki_result) == 0) {
-				$mktime = mktime(0, 0, 0, 8+$i, 0, date("Y"));
+				$mktime = mktime(0, 0, 0, 9+$i, 0, date("Y"));
 				$ulos .= "<tr><td><a href='{$palvelin2}raportit/alv_laskelma_uusi.php?kk=".date("n", $mktime)."&vv=".date("Y", $mktime)."'>".t("ALV")." ".date("m", $mktime)." ".date("Y", $mktime)." ".t("tosite tekem‰tt‰")."</a></td></tr>";
 			}
 		}

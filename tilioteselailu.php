@@ -9,8 +9,6 @@
 		exit;
 	}
 
-	$lopetus = "${palvelin2}tilioteselailu.php////tee=//pp=$pp//kk=$kk//vv=$vv//tilino=$tilino//tyyppi=$tyyppi";
-	
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	if ($tee == 'T' and trim($kuitattava_tiliotedata_tunnus) != '') {
@@ -58,7 +56,7 @@
 						AND tyyppi = '1'
 						ORDER BY tunnus
 						LIMIT 1";
-			$tyyppi = 1;			
+			$tyyppi = 1;
 		}
 		elseif ($tee == 'XX') {
 			// Pyyntö edellisestä tiliotteesta
@@ -69,7 +67,7 @@
 						AND tyyppi = '1'
 						ORDER BY tunnus desc
 						LIMIT 1";
-			$tyyppi = 1;			
+			$tyyppi = 1;
 		}
 		elseif ($tee == 'XS') {
 			// Pyyntö seuraavasta viiteaineistosta
@@ -80,7 +78,7 @@
 						AND tyyppi = '3'
 						ORDER BY tunnus
 						LIMIT 1";
-			$tyyppi = 3;		
+			$tyyppi = 3;
 		}
 		elseif ($tee == 'XXS') {
 			// Pyyntö seuraavasta viiteaineistosta
@@ -91,7 +89,7 @@
 						AND tyyppi = '3'
 						ORDER BY tunnus desc
 						LIMIT 1";
-			$tyyppi = 3;	
+			$tyyppi = 3;
 		}
 
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
@@ -141,6 +139,11 @@
 		}
 
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
+
+		// Lopetusmuuttujaa varten, muuten ylikirjoittuu
+		$lopp_pvm = $pvm;
+		$lopp_tilino = $tilino;
+		$lopp_tyyppi = $tyyppi;
 
 		$txttieto = "";
 		$txtfile  = "$tilino-$pvm.txt";
@@ -286,7 +289,7 @@
 
 			echo "	<form name = 'valikko' action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='T'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='lopetus' value='${palvelin2}tilioteselailu.php////tee=//pp=$pp//kk=$kk//vv=$vv//tilino=$tilino//tyyppi=$tyyppi'>
 					<input type='hidden' name='pvm' value='$row[alku]'>
 					<input type='hidden' name='tyyppi' value='$row[tyyppi]'>
 					<input type='hidden' name='tilino' value='$row[tilino]'>

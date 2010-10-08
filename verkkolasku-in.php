@@ -1,5 +1,7 @@
 <?php
 
+	date_default_timezone_set("Europe/Helsinki");
+
 	// jos meillä on lock-file ja se on alle 15 minuuttia vanha
 	if (file_exists("/tmp/##verkkolasku-in.lock") and mktime()-filemtime("/tmp/##verkkolasku-in.lock") < 900) {
 		echo "Verkkolaskujen sisäänluku käynnissä, odota hetki!";

@@ -80,7 +80,7 @@
 
 	if (trim($laskunro) != '' and is_numeric($laskunro)) {
 
-		$query = "	SELECT tapvm, erpcm, concat(nimi, ' ', nimitark) nimi, postitp, ytunnus, summa, valkoodi, laskunro, tunnus
+		$query = "	SELECT tapvm, erpcm, concat(nimi, ' ', nimitark) nimi, postitp, ytunnus, summa, valkoodi, laskunro, tunnus, hyvaksyja_nyt
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laskunro = '{$laskunro}'";
@@ -648,7 +648,7 @@
 
 		echo "</table><br><br>";
 
-		if ($lasku_row['tila'] == "H" and tarkista_oikeus("hyvak.php")) {
+		if ($lasku_row['tila'] == "H" and $lasku_row['hyvaksyja_nyt'] == $kukarow["kuka"] and tarkista_oikeus("hyvak.php")) {
 			echo "<form action = 'hyvak.php' method='post'>
 					<input type='hidden' name = 'tunnus' value='{$lasku_row['tunnus']}'>
 					<input type='hidden' name = 'tee' value='H'>

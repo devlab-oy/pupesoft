@@ -118,7 +118,7 @@
 	}
 
 	if ($tee == 'T') {
-		$tee = 'S'; //Pvm on jo kunnossa
+		$tee = 'S'; // Pvm on jo kunnossa
 	}
 
 	if ($tee == 'S') {

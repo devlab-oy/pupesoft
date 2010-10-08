@@ -304,12 +304,23 @@
 
 	if ($tee == 'P') {
 
-		if ((int) $keraajanro == 0) $keraajanro = $keraajalist;
-
 		$tilausnumerot = array();
 		$poikkeamat = array();
 
-		$query = "SELECT * from kuka where yhtio='$kukarow[yhtio]' and keraajanro='$keraajanro'";
+		if ((int) $keraajanro > 0) {
+			$query = "	SELECT *
+						from kuka
+						where yhtio = '$kukarow[yhtio]'
+						and keraajanro = '$keraajanro'";
+
+		}
+		else {
+			$query = "	SELECT *
+						from kuka
+						where yhtio = '$kukarow[yhtio]'
+						and kuka = '$keraajalist'";
+		}
+
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result)==0) {
@@ -1855,16 +1866,25 @@
 			echo "<th>".t("Ker‰‰j‰")."</th><td><input type='text' size='5' name='keraajanro'> ".t("tai")." ";
 			echo "<select name='keraajalist'>";
 
-			if ($kukarow["keraajanro"] != 0) {
-				echo "<option value='$kukarow[keraajanro]'>$kukarow[nimi]</option>";
-			}
-
-			$query = "select * from kuka where yhtio='$kukarow[yhtio]' and keraajanro!=0";
+			$query = "	SELECT *
+						from kuka
+						where yhtio = '$kukarow[yhtio]'
+						and extranet = ''
+						and (keraajanro > 0 or kuka = '$kukarow[kuka]')";
 			$kuresult = mysql_query($query) or pupe_error($query);
 
 			while ($kurow = mysql_fetch_assoc($kuresult)) {
-				if ($kukarow['kuka']!=$kurow['kuka'])
-					echo "<option value='$kurow[keraajanro]'>$kurow[nimi]</option>";
+
+				$selker = "";
+
+				if ($keraajalist == "" and $kurow["kuka"] == $kukarow["kuka"]) {
+					$selker = "SELECTED";
+				}
+				elseif ($keraajalist == $kurow["kuka"]) {
+					$selker = "SELECTED";
+				}
+
+				echo "<option value='$kurow[kuka]' $selker>$kurow[nimi]</option>";
 			}
 			echo "</select></td>";
 

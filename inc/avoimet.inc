@@ -108,9 +108,9 @@
 			</tr>";
 
 	$query = "	SELECT nimi, tunnus
-	                FROM valuu
-	             	WHERE yhtio = '$kukarow[yhtio]'
-	               	ORDER BY jarjestys";
+				FROM valuu
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY jarjestys";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<tr><th>".t('N‰yt‰ vain valuutta') .":</th><td colspan=3><select name='savalkoodi'>";
@@ -416,8 +416,8 @@
 						echo "<td align='right'>$yhtiorow[valkoodi]</td>";
 					}
 
-					// jos ollaan ajettu t‰lle p‰iv‰lle voidaan echota errori avoimesta saldosta
-					if ($onkotanaan == "" and abs($trow["avoinsaldo"] - $trow["laskun_summa"]) >= 0.02) {
+					// jos ollaan ajettu t‰lle p‰iv‰lle laskuittain voidaan echota errori avoimesta saldosta
+					if ($asitoimittain == "" and $onkotanaan == "" and abs($trow["avoinsaldo"] - $trow["laskun_summa"]) >= 0.02) {
 						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito heitt‰‰!</font> $trow[avoinsaldo] / $trow[laskun_summa]</td>";
 					}
 
@@ -626,8 +626,10 @@
 
 				if ($trow['tiliointiavoinsaldo'] != 0) {
 
+
+
 					echo "<tr class='aktiivi'>";
-					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[liitostunnus]&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>$trow[ytunnus]</a></td>";
+					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>$trow[ytunnus]</a></td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maksutieto]</td>";
 
@@ -662,8 +664,8 @@
 						$summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
 					}
 
-					// jos ollaan ajettu t‰lle p‰iv‰lle voidaan echota errori avoimesta saldosta
-					if ($onkotanaan == "" and abs($trow["tiliointiavoinsaldo"] - $trow["laskuavoinsaldo"]) >= 0.05) {
+					// jos ollaan ajettu t‰lle p‰iv‰lle laskuittain voidaan echota errori avoimesta saldosta
+					if ($asitoimittain == "" and $onkotanaan == "" and abs($trow["tiliointiavoinsaldo"] - $trow["laskuavoinsaldo"]) >= 0.05) {
 						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito heitt‰‰!</font> $trow[laskuavoinsaldo] / <a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>$trow[tiliointiavoinsaldo]</a></td>";
 					}
 
@@ -723,7 +725,7 @@
 
 					$suoritussummatotal += $trow["suoritussumma"];
 
-					if ($trow["tunnus"] != NULL) echo "<td><a name='a_$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>$trow[ytunnus]</a></td>";
+					if ($trow["tunnus"] != NULL) echo "<td><a name='a_$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>$trow[ytunnus]</a></td>";
 					else echo "<td>*".t("ei asiakasta")."*</td>";
 
 					echo "<td>$trow[nimi_maksaja]</td>";

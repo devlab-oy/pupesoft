@@ -101,7 +101,7 @@
 		$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO";
 		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
-		require ("../inc/asiakashaku.inc");
+		require ("inc/asiakashaku.inc");
 
 		if ($asiakasid == '' and $monta > 1) {
 			//Löytyi monta sopivaa, näytetään formi, mutta ei otsikkoa

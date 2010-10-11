@@ -194,7 +194,7 @@
 				if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
 					$konserni = $yhtiorow['konserni'];
 				}
-				require ("../inc/asiakashaku.inc");
+				require ("inc/asiakashaku.inc");
 			}
 
 			if ($ytunnus == "") {
@@ -221,6 +221,9 @@
 	}
 
 	if ($tee != 'NAYTATILAUS') {
+		
+		js_popup(-100);
+		
 		//syötetään tilausnumero
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='hakuformi'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
@@ -292,7 +295,7 @@
 					echo "</tr>";
 				}
 				else {
-					echo "<th>".t("Asiakkaan nimi")."</th><td colspan='3'>$asiakasrow[nimi]<input type='hidden' name='asiakasid' value='$asiakasid'></td>";
+					echo "<th>".t("Asiakas")."</th><td colspan='3'>$asiakasrow[nimi]<input type='hidden' name='asiakasid' value='$asiakasid'></td>";
 
 					if ($kukarow["extranet"] == "") {
 						echo "<td><a href='$PHP_SELF?lopetus=$lopetus&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka'>".t("Vaihda asiakas")."</a></td>";
@@ -306,7 +309,7 @@
 					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'></td></tr>";
 				}
 				else {
-					echo "<th>".t("Asiakkaan nimi")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'></td></tr>";
+					echo "<th>".t("Asiakas")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'> ",asiakashakuohje(),"</td></tr>";
 				}
 
 				$formi  = 'hakuformi';

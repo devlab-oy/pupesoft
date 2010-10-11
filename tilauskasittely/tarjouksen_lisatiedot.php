@@ -89,14 +89,14 @@
 		
 	if ($tee == 'NAYTAHTML' or $tee == 'NAYTATILAUS') {
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
-		require ("../raportit/naytatilaus.inc");
+		require ("raportit/naytatilaus.inc");
 		echo "<br><br>";
 		$tee = "ETSILASKU";
 	}
 	
 	if ($tee == "" or $tee == 'ETSILASKU'){
 		if ($ytunnus != '') {
-			require ("../inc/asiakashaku.inc");
+			require ("inc/asiakashaku.inc");
 		}
 		if ($ytunnus != '') {
 			$tee = "ETSILASKU";

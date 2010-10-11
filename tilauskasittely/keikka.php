@@ -423,7 +423,7 @@ if ($ytunnus != "" or $toimittajaid != "") {
 		$ytunnus   = $hakutunnus;
 		$asiakasid = $hakuid;
 
-		require ("../inc/asiakashaku.inc");
+		require ("inc/asiakashaku.inc");
 
 		$toimittajaid  = $asiakasid;
 		$toimittajarow = $asiakasrow;

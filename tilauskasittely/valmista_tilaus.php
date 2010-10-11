@@ -15,7 +15,7 @@
 		}
 
 		if ($tee == 'NAYTATILAUS') {
-			require ("../raportit/naytatilaus.inc");
+			require ("raportit/naytatilaus.inc");
 			echo "<hr>";
 			$tee = "VALITSE";
 		}

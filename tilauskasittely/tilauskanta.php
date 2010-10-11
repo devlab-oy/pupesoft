@@ -10,7 +10,7 @@
 		
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 
-		require ("../raportit/naytatilaus.inc");
+		require ("raportit/naytatilaus.inc");
 		
 		$tee = 'aja';
 	}

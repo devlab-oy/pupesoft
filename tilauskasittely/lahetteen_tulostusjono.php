@@ -69,7 +69,7 @@
 			echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		}
 
-		require ("../raportit/naytatilaus.inc");
+		require ("raportit/naytatilaus.inc");
 		echo "<hr>";
 		$tee2 = $vanha_tee2;
 

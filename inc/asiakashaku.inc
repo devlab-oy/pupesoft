@@ -42,7 +42,6 @@ if (in_array($kutsuja, array("asiakasemo.php","kalenteri.php"))) {
 	}
 }
 else {
-
 	// Normaalisti prospekteja ei näytetä, mutta jos ollaan tarjouksella voidaa niitä katsoa
 	if ($myos_prospektit == "TRUE" and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {
 		$asiakasrajaus = " and asiakas.laji not in ('P') ";
@@ -56,19 +55,19 @@ else {
 }
 
 //	Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
-if($kukarow["piirit"] != "")	 {
+if ($kukarow["piirit"] != "") {
 	$asiakasrajaus .= " and asiakas.piiri IN ($kukarow[piirit]) ";
 }
 
-if (is_numeric($asiakasid) and $asiakasid > 0) {
+if (is_numeric($asiakasid) and $asiakasid > 0) {	
+	// Jos asiakaan tunnus on löydetty niin ei rajata "$asiakasrajaus":lla ollenkaan
 	$query	= "	SELECT asiakas.*, yhtio.nimi yhtionimi
 				FROM asiakas
 				JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 				WHERE asiakas.$konsyhtiot
-				and asiakas.tunnus='$asiakasid'
-				$asiakasrajaus";
+				and asiakas.tunnus = '$asiakasid'";
 	$result = mysql_query($query) or pupe_error($query);
-	$monta  = mysql_num_rows($result);
+	$monta  = mysql_num_rows($result);	
 }
 elseif ($ytunnus != '') {
 	if (substr($ytunnus,0,1) == "£") {

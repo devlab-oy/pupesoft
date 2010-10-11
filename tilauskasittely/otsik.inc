@@ -1830,6 +1830,23 @@
 				echo "	<tr>
 						<td>".t("Työjono").":</td><td>";
 
+				if (!isset($srow["tyojono"])) {
+					// Onko käyttäjällä oletustyöjono
+					$query = "	SELECT selite
+								FROM avainsana
+								WHERE yhtio 	= '$kukarow[yhtio]'
+								and laji		= 'TYOM_TYOLINJA'
+								and selitetark	= '$kukarow[kuka]'
+								and selite     != ''";
+					$yresult = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($yresult) > 0) {
+						$yrow = mysql_fetch_array($yresult);
+
+						$srow["tyojono"] = $yrow["selite"];
+					}
+				}
+
 				echo "<select name='tyojono'>";
 
 				$vresult = t_avainsana("TYOM_TYOJONO");

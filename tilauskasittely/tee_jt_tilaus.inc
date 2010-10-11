@@ -131,7 +131,7 @@
 								AND otunnus = '$isarivirow[otunnus]'";
 					$lisatiedot_result = mysql_query($query) or pupe_error($query);
 					$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
-					
+
 					if ($debug==1) echo t("Perusotsikko löytyi")." $otsikkorivi[nimi] $isarivirow[otunnus]<br>";
 
 					$erpcmlisa1 = "";
@@ -432,7 +432,7 @@
 					$query = substr($query,0,-1);
 
 					$stresult = mysql_query($query) or pupe_error($query);
-					$id = mysql_insert_id();					
+					$id = mysql_insert_id();
 
 					$query = "INSERT INTO laskun_lisatiedot SET ";
 
@@ -568,7 +568,7 @@
 							$perheid2 = $lisataanrow["perheid2"];
 
 							// Joitain tietoja alkuperäiseltä tilaukselta
-							$query = "	SELECT tunnus, asiakkaan_tilausnumero, viesti
+							$query = "	SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo
 										FROM lasku
 										WHERE tunnus = '$lisataanrow[otunnus]'";
 							$aresult = mysql_query($query) or pupe_error($query);
@@ -582,13 +582,13 @@
 
 							if (trim($orig_laskurow['tunnus']) != "" and $otsikkorivi["osatoimitus"] == "" and strpos($kommentti, t("Tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
 								if (trim($kommentti) != "") $kommentti .= " / ";
-								
+
 								if ($toim == "ENNAKKO") {
 									$kommentti .= t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus']);
 								}
 								else {
 									$kommentti .= t("Tilaus").": ".trim($orig_laskurow['tunnus']);
-								}																
+								}
 							}
 
 							if (trim($orig_laskurow['asiakkaan_tilausnumero']) != "" and $otsikkorivi["osatoimitus"] == "") {
@@ -599,6 +599,11 @@
 							if (trim($orig_laskurow['viesti']) != "" and $otsikkorivi["osatoimitus"] == "") {
 								if (trim($kommentti) != "") $kommentti .= " / ";
 								$kommentti .= t("Tilausviite").": ".trim($orig_laskurow['viesti']);
+							}
+
+							if (trim($orig_laskurow['tilausyhteyshenkilo']) != "" and $otsikkorivi["osatoimitus"] == "") {
+								if (trim($kommentti) != "") $kommentti .= " / ";
+								$kommentti .= t("Tilaaja").": ".trim($orig_laskurow['tilausyhteyshenkilo']);
 							}
 
 							if ($tilaus_on_jo == "KYLLA" and strpos($kommentti, t("Toimitettavissa oleva JT-rivi")."!") === FALSE) {

@@ -39,7 +39,7 @@ if ($tee == 'go') {
 
 	if ($ytunnus != '') {
 		if ($asosasto == '') {
-			require ("../inc/asiakashaku.inc");
+			require ("inc/asiakashaku.inc");
 		}
 		$ok++;
 	}

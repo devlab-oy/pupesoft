@@ -17,7 +17,7 @@ if ($asiakas != '' and $kukarow["extranet"] == "") {
 	 $muutparametrit = $maa."#".$asos."#".$kka."#".$ppa."#".$vva."#".$kkl."#".$ppl."#".$vvl;
 
 	 $ytunnus = $asiakas;
-	 require ("../inc/asiakashaku.inc");
+	 require ("inc/asiakashaku.inc");
 
 	if ($ytunnus != '') {
 	 	if (isset($muutparametrit)) {

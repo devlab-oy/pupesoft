@@ -26,7 +26,7 @@
 
 			echo "<br><table>";
 			echo "<tr>
-					<th>".t("Asiakkaan nimi").": </th>
+					<th>".t("Asiakas").": </th>
 					<form action = '$PHP_SELF' method = 'post'>
 					<td><input type='text' size='30' name='ytunnus'> ",asiakashakuohje(),"</td>
 					<td class='back'><input type='submit' value='".t("Jatka")."'></td>
@@ -40,7 +40,7 @@
 			$kutsuja 	= "asiakasemo.php";
 			$ahlopetus 	= $palvelin2."crm/asiakasmemo.php////";
 
-			require ("../inc/asiakashaku.inc");
+			require ("inc/asiakashaku.inc");
 		}
 	}
 

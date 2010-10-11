@@ -2153,7 +2153,7 @@
 					$ytunnus = $asiakasno;
 				}
 
-				require("../inc/asiakashaku.inc");
+				require ("inc/asiakashaku.inc");
 
 				if ($ytunnus != '') {
 					$tee = "JATKA";

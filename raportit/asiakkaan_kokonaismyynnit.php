@@ -6,7 +6,7 @@ require ("../inc/parametrit.inc");
 echo "<font class='head'>".t("Asiakkaan kokonaismyynnit")."</font><hr>";
 
 if ($ytunnus!='') {
-	require ("../inc/asiakashaku.inc");
+	require ("inc/asiakashaku.inc");
 }
 
 // jos meillä on onnistuneesti valittu asiakas

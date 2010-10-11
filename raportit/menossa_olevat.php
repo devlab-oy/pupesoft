@@ -26,7 +26,7 @@ if ($tee == 'NAYTATILAUS') {
 }
 
 if ($ytunnus != '' and $ytunnus != 'TULKAIKKI') {
-	require ("../inc/asiakashaku.inc");
+	require ("inc/asiakashaku.inc");
 }
 
 if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {

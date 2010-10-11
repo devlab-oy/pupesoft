@@ -610,7 +610,7 @@
 			echo "<br><form name='$formi' action='$PHP_SELF' method='GET'>";
 			echo "<input type='hidden' name='alatila' value='etsi'>";
 			echo "<table>";
-			echo "<tr><th>".t("Etsi asiakasta").":</th>";
+			echo "<tr><th>".t("Asiakas").":</th>";
 			echo "<td><input type='text' name='ytunnus'> ",asiakashakuohje(),"</td>";
 			echo "<td class='back'></td></tr>";
 

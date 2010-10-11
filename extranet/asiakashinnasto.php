@@ -35,7 +35,7 @@
 			$muutparametrit = array($mul_osasto, $mul_try);
 			$muutparametrit = urlencode(serialize($muutparametrit));
 
-			require("../inc/asiakashaku.inc");
+			require ("inc/asiakashaku.inc");
 
 			$asiakas = $asiakasrow["tunnus"];
 			$ytunnus = $asiakasrow["ytunnus"];

@@ -173,11 +173,11 @@
 
 	if ($ytunnus != '' and ($otunnus == '' and $laskunro == '' and $sopimus == '')) {
 		if ($cleantoim == 'MYYNTI' or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI') {
-			require ("../inc/asiakashaku.inc");
+			require ("inc/asiakashaku.inc");
 		}
 
 		if ($cleantoim == 'OSTO') {
-			require ("../inc/kevyt_toimittajahaku.inc");
+			require ("inc/kevyt_toimittajahaku.inc");
 		}
 	}
 	elseif ($otunnus > 0) {
@@ -626,7 +626,7 @@
 			echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
 		}
 		else {
-			echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
+			echo "<tr><th>".t("Asiakas")."</th><td><input type='text' size='10' name='ytunnus'> ",asiakashakuohje(),"</td></tr>";
 		}
 		if ($cleantoim == "YLLAPITO") {
 			echo "<tr><th>".t("Sopimusnumero")."</th><td><input type='text' size='10' name='sopimus'></td></tr>";

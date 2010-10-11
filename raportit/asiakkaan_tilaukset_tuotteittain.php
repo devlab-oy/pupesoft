@@ -45,7 +45,7 @@
 		$muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl."/".$tuoteno;
 
 		if ($toim == 'MYYNTI') {
-			require ("../inc/asiakashaku.inc");
+			require ("inc/asiakashaku.inc");
 		}
 		if ($toim == 'OSTO') {
 			require ("../inc/kevyt_toimittajahaku.inc");

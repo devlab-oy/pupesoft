@@ -235,7 +235,7 @@
 			if ($tee == 'go' and ($asiakasnro != '' or $ytunnus != '')) {
 				//$ytunnus = $asiakas;
 
-				require("../inc/asiakashaku.inc");
+				require ("inc/asiakashaku.inc");
 
 				if ($asiakasnro != "") {
 					$ytunnus = "";

@@ -24,7 +24,7 @@ if ($try=='' or $ytunnus=='') {
 }
 
 if ($ytunnus!='') {
-	require ("../inc/asiakashaku.inc");
+	require ("inc/asiakashaku.inc");
 }
 
 // jos meillä on onnistuneesti valittu asiakas

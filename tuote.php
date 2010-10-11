@@ -1572,6 +1572,7 @@
 							tilausrivi.tunnus trivitunn,
 							tilausrivin_lisatiedot.osto_vai_hyvitys,
 							lasku2.tunnus lasku2tunnus,
+							lasku2.laskunro lasku2laskunro,
 							concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), concat(tilausrivi.ale, ' %'), round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta
 							FROM tapahtuma use index (yhtio_tuote_laadittu)
 							LEFT JOIN tilausrivi use index (primary) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
@@ -1669,7 +1670,7 @@
 						echo "<td valign='top'>$prow[selite]";
 
 						if ($prow["laji"] == "tulo" and $prow["lasku2tunnus"] != "") {
-							echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]'>".t("Näytä keikka")."</a>";
+							echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]'>".t("Näytä keikka")." $prow[lasku2laskunro]</a>";
 						}
 
 						if (trim($prow["tapapaikka"]) != "") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";

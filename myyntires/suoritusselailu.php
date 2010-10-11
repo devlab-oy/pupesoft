@@ -362,7 +362,7 @@
 
 			echo "<tr>";
 			echo "<td valign='top'>$trow[ytunnus]</td>";
-			echo "<td valign='top'><a href='myyntilaskut_asiakasraportti.php?tila=tee_raportti&tunnus=$trow[tunnus]'>$trow[nimi] $trow[nimitark]</a><br>$trow[toim_nimi] $trow[toim_nimitark]</td>";
+			echo "<td valign='top'><a href='myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////tunnus=$tunnus//tila=tarkenna'>$trow[nimi] $trow[nimitark]</a><br>$trow[toim_nimi] $trow[toim_nimitark]</td>";
 			echo "<td valign='top'>$trow[postino]<br>$trow[toim_postino]</td>";
 			echo "<td valign='top'>$trow[postitp]<br>$trow[toim_postitp]</td>";
 

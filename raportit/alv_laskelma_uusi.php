@@ -363,9 +363,9 @@
 				$verorow = mysql_fetch_array ($verores);
 
 				echo "<table>";
-				echo "<tr><th>",t("Tili")," $yhtiorow[alv] ",t("yhteens‰"),"</th><td align='right'>".sprintf('%.2f', abs($verorow['vero']))."</td></tr>";
-				echo "<tr><th>",t("Maksettava alv"),"</th><td align='right'>".sprintf('%.2f', abs($fi308))."</td></tr>";
-				echo "<tr><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', abs($verorow['vero']) - abs($fi308))."</td></tr>";
+				echo "<tr><th>",t("Tili")," $yhtiorow[alv] ",t("yhteens‰"),"</th><td align='right'>".sprintf('%.2f', $verorow['vero'] * -1)."</td></tr>";
+				echo "<tr><th>",t("Maksettava alv"),"</th><td align='right'>".sprintf('%.2f', $fi308)."</td></tr>";
+				echo "<tr><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', (-1 * $verorow['vero']) - $fi308)."</td></tr>";
 				echo "</table><br>";
 
 				// katsotaan onko k‰ytt‰j‰ll‰ oikeus muutosite.php
@@ -373,7 +373,7 @@
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 				if (mysql_num_rows($res) == 1) {
-					if (abs($verorow['vero']) != 0 and abs($verorow['vero']) - abs($fi308) == 0) {
+					if (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $fi308, 2)) == 0) {
 						echo "<form method='post' name='alv_ilmoituksen_kuittaus'><table>";
 						echo "<input type='hidden' name='alkukk' value='{$startmonth}' />";
 						echo "<input type='hidden' name='loppukk' value='{$endmonth}' />";
@@ -393,7 +393,7 @@
 						echo "</td><td class='back'><input type='submit' value='",t("Kuittaa ALV-ilmoitus"),"' /></td></tr>";
 						echo "</table></form><br />";
 					}
-					elseif (abs($verorow['vero']) != 0 and abs($verorow['vero']) - abs($fi308) != 0) {
+					elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $fi308, 2)) != 0) {
 						echo "<font class='error'>",t("Tilin")," {$yhtiorow['alv']} ",t("ja maksettavan arvonlis‰veron luvut eiv‰t t‰sm‰‰"),"!</font><br /><br />";
 					}
 					elseif (trim($verorow['vero']) != '' and abs($verorow['vero']) == 0) {

@@ -468,13 +468,75 @@ if (isset($muut_siirrettavat)) {
 	}
 }
 
+//kohdistetaan rivej‰ laskulle
+if ($tila == 'tee_siirto') {
+
+	if ($ala_kohdista_mitaan != "") {
+		unset($rivi_siirrettavat_tunnukset);
+	}
+
+	if ($kohdista_koko_sivu != "") {
+		$rivi_siirrettavat_tunnukset = $rivi_kaikki_tunnukset;
+	}
+
+	//Siirret‰‰n rivit
+	if (is_array($rivi_siirrettavat_tunnukset)) {
+
+		$q1 = "LOCK TABLE lasku WRITE, tilausrivi WRITE";
+		$r = mysql_query($q1) or pupe_error($q1);
+
+		$keikkakesken = 0;
+
+		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+			$keikkakesken = file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock");
+		}
+
+		foreach ($rivi_siirrettavat_tunnukset as $valittu) {
+
+			list($valittutunnus, $valittuuusiotunnus) = explode("###", $valittu);
+
+			if ($valittuuusiotunnus != $keikkakesken) {
+				// Katostaan, ett‰ keikka jolta rivi siirret‰‰n ei ole loppuunlaskettu
+				$query  = "	SELECT tunnus
+							FROM lasku USE INDEX (PRIMARY)
+							WHERE tunnus = '$valittuuusiotunnus'
+							and yhtio = '$kukarow[yhtio]'
+							and tila = 'K'
+							and vanhatunnus = 0
+							and alatila = ''";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$query = "UPDATE tilausrivi USE INDEX (uusiotunnus_index) SET uusiotunnus='$otunnus', kerattyaika=now(), keratty='$kukarow[kuka]' WHERE yhtio='$kukarow[yhtio]' and uusiotunnus = '$valittuuusiotunnus' and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
+					$result = mysql_query($query) or pupe_error($query);
+
+					// Nollataan kohdistus keikalla jolta rivi siirret‰‰n
+					$query = "UPDATE lasku USE INDEX (PRIMARY) SET kohdistettu = '' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$valittuuusiotunnus' and tila = 'K'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
+				else {
+					echo "<font class='error'>".t("VIRHE: Keikka jolta rivi siirret‰‰n ei lˆydy")."</font><br>!";
+				}
+			}
+			else {
+				echo "<font class='error'>".t("VIRHE: Keikka jolta rivi siirret‰‰n on lukittu")."</font><br>!";
+			}
+		}
+
+		$q6 = "UNLOCK TABLES";
+		$r = mysql_query($q6) or pupe_error($q6);
+	}
+
+	$tila = '';
+}
+
 // jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
 if ($tila == 'tee_kohdistus' and is_array($rivi_hinta) !== FALSE and is_array($rivi_kpl) !== FALSE) {
 
 	foreach ($rivi_hinta as $tun => $hinta_chk) {
 		$loppusumma_check = $rivi_kpl[$tun] * $hinta_chk;
 
-		if (count($rivi_valitut_tunnukset) > 0 or count(rivi_kaikki_tunnukset) > 0) {
+		if (count($rivi_valitut_tunnukset) > 0 or count($rivi_kaikki_tunnukset) > 0) {
 
 			if ($kohdista_koko_sivu != "") {
 				$rivi_valitut_tunnukset = $rivi_kaikki_tunnukset;
@@ -553,8 +615,8 @@ if ($tila == 'tee_kohdistus') {
 
 	//Kohdistetaan kaikki rivit
 	if (count($rivi_kaikki_tunnukset) > 0) {
-		for ($i=0; $i<sizeof($rivi_kaikki_tunnukset); $i++) {
-				$tunnukset2 .= "'".$rivi_kaikki_tunnukset[$i]."',";
+		for ($i=0; $i<count($rivi_kaikki_tunnukset); $i++) {
+			$tunnukset2 .= "'".$rivi_kaikki_tunnukset[$i]."',";
 		}
 		$tunnukset2 = substr($tunnukset2,0,-1);
 
@@ -664,7 +726,7 @@ if ($tila == '') {
 		$erikoisale = 1-($laskurow['erikoisale']/100);
 	}
 	else {
-		$erikoisale=1;
+		$erikoisale = 1;
 	}
 
 	// jos ollaan liitetty jo vaihto-omaisuuslasku, k‰ytet‰‰n sen vientikentt‰‰
@@ -700,7 +762,7 @@ if ($tila == '') {
 	else {
 		$alvit = 0;
 	}
-	
+
 	$query = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale *
 				(1+(if ((SELECT max(kaytetty) kaytetty
 						FROM sarjanumeroseuranta
@@ -711,7 +773,7 @@ if ($tila == '') {
 				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 				LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '$toimittajaid')
 				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
-				WHERE tilausrivi.yhtio ='$kukarow[yhtio]'
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				AND tilausrivi.uusiotunnus = '$otunnus'
 				AND tilausrivi.tyyppi != 'D'";
 	$result   = mysql_query($query) or pupe_error($query);
@@ -795,26 +857,33 @@ if ($tila == '') {
 
 	$jarjestys .= ' tilausrivi.perheid2, tilausrivi.tunnus';
 
-	$limit = '';
-	$lisa2 = '';
-
-	$alku = (int) $alku;
+	$limit 		= "";
+	$lisa2 		= "";
+	$lisa3 		= " and lasku.tila in ('O','K','D') ";
+	$uusilisa 	= "";
+	$alku 		= (int) $alku;
 
 	if ($alku < 0) {
 		$alku = 0;
 	}
 
-	if ($nayta_kohdistetut == "jees") {
+	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") {
+		$uusilisa = "uusi";
+		$limit = " LIMIT $alku, 50 ";
+		$lisa3 = " and lasku.tila = 'K' and lasku.alatila = '' ";
+		$lisa2 = " and tilausrivi.uusiotunnus not in ($otunnus,0) ";
+	}
+	elseif ($nayta_kohdistetut == "jees") {
 		$limit = "";
-		$lisa2 = " and tilausrivi.uusiotunnus in ('$otunnus') ";
+		$lisa2 = " and tilausrivi.uusiotunnus in ($otunnus) ";
 	}
 	elseif ($nayta_kohdistetut == "eitod") {
 		$limit = " LIMIT $alku, 50 ";
-		$lisa2 = " and tilausrivi.uusiotunnus in ('0') ";
+		$lisa2 = " and tilausrivi.uusiotunnus in (0) ";
 	}
 	else {
 		$limit = " LIMIT $alku, 50 ";
-		$lisa2 = " and tilausrivi.uusiotunnus in ('$otunnus','0') ";
+		$lisa2 = " and tilausrivi.uusiotunnus in ($otunnus,0) ";
 	}
 
 	if ($nayta_kaikki == "kaikki") {
@@ -851,14 +920,14 @@ if ($tila == '') {
 				tuotteen_toimittajat.valuutta,
 				tilausrivi.yksikko tilyksikko,
 				tuotteen_toimittajat.toim_yksikko toimyksikko
-				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
+				FROM lasku
+				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
 				JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.liitostunnus = '$laskurow[liitostunnus]'
-				and lasku.tila in ('O','K','D')
+				$lisa3
 				GROUP BY tilausrivi.tunnus
 				$lisa1
 				ORDER BY $jarjestys
@@ -921,7 +990,7 @@ if ($tila == '') {
 	echo $hiddenit;
 	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
 
-	echo "<table cellpadding='2'>
+	echo "<table>
 	<tr>
 		<th>".t("Keikka")."</th><td>$laskurow[laskunro]</td>
 		<th>".t("Laskun summa")."</th><td style='text-align:right'>$kulurow[summa] $kulurow[valkoodi]</td>
@@ -955,12 +1024,12 @@ if ($tila == '') {
 	echo "</td>
 		<th>".t("Kohdistettava summa")."</th><td style='text-align:right'>$kohdistettava_summa $kulurow[valkoodi]</td>
 		<th>".t("N‰yt‰ vain kohdistamattomat").":</th><td><INPUT type='radio' $chk2 name='nayta_kohdistetut' value='eitod' onclick='submit()'></td>
-	</tr>
-	<tr>
+		</tr>
+		<tr>
 		<th>".t("Erikoisalennus")."</th><td>$laskurow[erikoisale]</td>
 		<th>".t("Kohdistettu summa (riv/kpl)")."</th><td style='text-align:right'>$ok $valittusumma $kulurow[valkoodi] ($kappaleetrow[rivit]/".(float) $kappaleetrow['kappaleet'].")$okend</td>
 		<th>".t("N‰yt‰ kaikki yhdell‰ sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
-	</tr>";
+		</tr>";
 
 	echo "<tr><th>".t("N‰ytet‰‰n rivit")."</th>";
 
@@ -991,48 +1060,65 @@ if ($tila == '') {
 	echo "<table>";
 	echo "<tr>";
 
-	echo "<td class='back'><input type='button' onclick='submit_tallenna();' value='".t("Tallenna muutokset")."'></td>";
-	echo "<td class='back'><input type='button' onclick='submit_kohd_kaikki();' value='".t("Kohdista kaikki rivit")."'></td>";
-	echo "<td class='back'><input type='button' onclick='submit_kohd_eimit();' value='".t("Poista kaikki kohdistukset")."'></td>";
+	echo "<td class='back'>";
 
-	echo "<form action='$PHP_SELF' method='post'>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-	echo "<input type='hidden' name='toiminto' value='kohdista'>";
-	echo "<input type='hidden' name='tila' value='uusirivi'>";
-	echo "<input type='hidden' name='tee' value='K'>";
-	echo "<input type='hidden' name='alku' value='$alku'>";
-	echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
-	echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
-	echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
-	echo $hiddenit;
-	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
-	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-	echo "<td class='back'><input type='submit' value='".t("Tee uusi rivi")."'></td></form>";
+	if (!isset($nayta_siirrettavat)) {
+		echo "<input type='button' onclick='submit_tallenna();' value='".t("Tallenna muutokset")."'>";
+		echo "<input type='button' onclick='submit_kohd_kaikki();' value='".t("Kohdista kaikki rivit")."'>";
+		echo "<input type='button' onclick='submit_kohd_eimit();' value='".t("Poista kaikki kohdistukset")."'>";
 
-	//n‰ytet‰‰n mitk‰ n‰ytet‰‰n
-	echo "<form action='$PHP_SELF' name='formi' method='post'>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-	echo "<input type='hidden' name='toiminto' value='kohdista'>";
-	echo "<input type='hidden' name='alku' value='$alku'>";
-	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-	echo "<input type='hidden' name='tee' value='$tee'>";
-	echo "<input type='hidden' name='tila' value='FAILISTA'>";
-	echo $hiddenit;
-	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
-	//echo "<th>".t("Kohdista tiedostosta").":</th><td><input type='submit' value='".t("Tee se")."'></td></tr>";
-	echo "<td class='back' colspan='2' align='right'><input type='submit' value='".t("Kohdista tiedostosta")."'></td>";
-	echo "</form>";
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+		echo "<input type='hidden' name='toiminto' value='kohdista'>";
+		echo "<input type='hidden' name='tila' value='uusirivi'>";
+		echo "<input type='hidden' name='tee' value='K'>";
+		echo "<input type='hidden' name='alku' value='$alku'>";
+		echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
+		echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
+		echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
+		echo $hiddenit;
+		echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
+		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		echo "<input type='submit' value='".t("Tee uusi rivi")."'></form>";
 
-	echo "<form action='$PHP_SELF' method='post'>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-	echo "<input type='hidden' name='toiminto' value='kohdista'>";
-	echo "<input type='hidden' name='laskunsumma' value='$laskunsumma'>";
-	echo "<input type='hidden' name='tee' value='K'>";
-	echo "<input type='hidden' name='tila' value='valmis'>";
-	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-	echo "<td class='back'><input type='submit' value='".t("Kohdistus valmis")."'></td></form>";
+		echo "<form action='$PHP_SELF' name='formi' method='post'>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+		echo "<input type='hidden' name='toiminto' value='kohdista'>";
+		echo "<input type='hidden' name='alku' value='$alku'>";
+		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		echo "<input type='hidden' name='tee' value='$tee'>";
+		echo "<input type='hidden' name='tila' value='FAILISTA'>";
+		echo $hiddenit;
+		echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
+		echo "<input type='submit' value='".t("Kohdista tiedostosta")."'>";
+		echo "</form>";
 
-	echo "</tr></table><br>";
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+		echo "<input type='hidden' name='toiminto' value='kohdista'>";
+		echo "<input type='hidden' name='tila' value=''>";
+		echo "<input type='hidden' name='nayta_siirrettavat' value='YES'>";
+		echo "<input type='hidden' name='tee' value='$tee'>";
+		echo "<input type='hidden' name='alku' value='$alku'>";
+		echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
+		echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
+		echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
+		echo $hiddenit;
+		echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
+		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		echo "<input type='submit' value='".t("Siirr‰ rivej‰ toiselta keikalta")."'></form>";
+
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+		echo "<input type='hidden' name='toiminto' value='kohdista'>";
+		echo "<input type='hidden' name='laskunsumma' value='$laskunsumma'>";
+		echo "<input type='hidden' name='tee' value='K'>";
+		echo "<input type='hidden' name='tila' value='valmis'>";
+		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		echo "<input type='submit' value='".t("Kohdistus valmis")."'></form>";
+	}
+
+	echo "</td></tr></table><br>";
 
 	echo "<table>";
 
@@ -1066,6 +1152,11 @@ if ($tila == '') {
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 	echo "<input type='hidden' name='toiminto' value='kohdista'>";
+
+	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") {
+		echo "<input type='hidden' name='nayta_siirrettavat' value='$nayta_siirrettavat'>";
+	}
+
 	echo "<input type='hidden' name='alku' value='$alku'>";
 	echo "<input type='hidden' name='tila' value='$tila'>";
 	echo "<input type='hidden' name='tee' value='$tee'>";
@@ -1087,7 +1178,6 @@ if ($tila == '') {
 	echo "<th nowrap valign='top'><a href='$href=6".$ulisa."'>$kennim_array[6]</a><br><a href='$href=6".$ulisa."'>".t("Valuutta")."</a></th>";
 	echo "<th nowrap valign='top'><a href='$href=7".$ulisa."'>$kennim_array[7]</a><br><a href='$href=8".$ulisa."'>$kennim_array[8]</a></th>";
 	echo "<th nowrap valign='top'><a href='$href=9".$ulisa."'>$kennim_array[9]</a><br><a href='$href=10".$ulisa."'>$kennim_array[10]</a></th>";
-	//echo "<th nowrap valign='top'><a href='$href=11".$ulisa."'>$kennim_array[11]</a><br><a href='$href=11".$ulisa."'>".t("Valuutta")."</a></th>";
 	echo "<th nowrap valign='top'><a href='$href=12".$ulisa."'>$kennim_array[12]</a><br><a href='$href=13".$ulisa."'>$kennim_array[13]</a></th>";
 	echo "<th></th>";
 	echo "</tr>";
@@ -1104,7 +1194,6 @@ if ($tila == '') {
 	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[6]' name='haku[6]' value='$haku[6]'></td>";
 	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[7]' name='haku[7]' value='$haku[7]'><br><input type='text' size='$kenkok_array[8]' name='haku[8]' value='$haku[8]'></td>";
 	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[9]' name='haku[9]' value='$haku[9]'><br><input type='text' size='$kenkok_array[10]' name='haku[10]' value='$haku[10]'></td>";
-	//echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[11]' name='haku[11]' value='$haku[11]'></td>";
 	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[12]' name='haku[12]' value='$haku[12]'><br><input type='text' size='$kenkok_array[13]' name='haku[13]' value='$haku[13]'></td>";
 
 
@@ -1128,6 +1217,15 @@ if ($tila == '') {
 	echo "<form name='paaformi' method='post'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "<input type='hidden' name='toiminto' value='kohdista'>";
+
+	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") {
+		echo "<input type='hidden' name='nayta_siirrettavat' value='$nayta_siirrettavat'>";
+		echo "<input type='hidden' name='tila' value='tee_siirto'>";
+	}
+	else {
+		echo "<input type='hidden' name='tila' value='tee_kohdistus'>";
+	}
+
 	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 	echo "<input type='hidden' name='alku' value='$alku'>";
 	echo "<input type='hidden' name='tee' value='K'>";
@@ -1136,7 +1234,7 @@ if ($tila == '') {
 	echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
 	echo $hiddenit;
 	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
-	echo "<input type='hidden' name='tila' value='tee_kohdistus'>\n\n";
+
 
 	$rivilask = 0;
 
@@ -1233,7 +1331,12 @@ if ($tila == '') {
 		}
 
 		// n‰ytet‰‰n vaan tsekpoksi jos rivi‰ saa viel‰ ru(n)kata...
-		if ($rivirow["varastossa_kpl"] == 0) {
+		if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") {
+			echo "<$td $classeka valign='top'>";
+			echo "<input type='checkbox' name='rivi_siirrettavat_tunnukset[]' value='$rivirow[rivitunnus]###$rivirow[uusiotunnus]' onclick='submit_juppe($rivirow[rivitunnus])'>";
+			echo "<input type='hidden'   name='rivi_kaikki_tunnukset[]'  value='$rivirow[rivitunnus]###$rivirow[uusiotunnus]'>";
+		}
+		elseif ($rivirow["varastossa_kpl"] == 0) {
 			echo "<$td $classeka valign='top'>";
 			echo "<a name='$rivirow[rivitunnus]'>";
 
@@ -1345,8 +1448,14 @@ if ($tila == '') {
 			echo "<$td $class valign='top' align='right'>". (float) $rivirow["siskpl"]."<br>". (float) $rivirow["ulkkpl"]."</$td>";
 		}
 
-		echo "<$td $class valign='top' align='right'><input size='7' type='text' name='rivi_hinta[$rivirow[rivitunnus]]' value='$rivirow[hinta]' style='text-align:right'><br>$kulurow[valkoodi]</$td>";
-		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_ale[$rivirow[rivitunnus]]' value='". (float) $rivirow["ale"]."' style='text-align:right'>";
+		if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") {
+			echo "<$td $class valign='top' align='right'>$rivirow[hinta]<br>$kulurow[valkoodi]</$td>";
+			echo "<$td $class valign='top' align='right'>". (float) $rivirow["ale"];
+		}
+		else {
+			echo "<$td $class valign='top' align='right'><input size='7' type='text' name='rivi_hinta[$rivirow[rivitunnus]]' value='$rivirow[hinta]' style='text-align:right'><br>$kulurow[valkoodi]</$td>";
+			echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_ale[$rivirow[rivitunnus]]' value='". (float) $rivirow["ale"]."' style='text-align:right'>";
+		}
 
 		if ($laskurow['vienti']=='C' or $laskurow['vienti']=='J') {
 			echo "<br>". (float) $rivirow["alv"];
@@ -1443,57 +1552,75 @@ if ($tila == '') {
 
 	echo "<table>";
 	echo "<tr>";
-	echo "<td class='back'><input type='submit' value='".t("Tallenna muutokset")."'></td>";
-	echo "<td class='back'><input type='submit' name='kohdista_koko_sivu'  value='".t("Kohdista kaikki rivit")."'></td>";
-	echo "<td class='back'><input type='submit' name='ala_kohdista_mitaan' value='".t("Poista kaikki kohdistukset")."'></td>";
-	echo "</form>";
+	echo "<td class='back'>";
+	echo "<input type='submit' value='".t("Tallenna muutokset")."'>";
+	echo "<input type='submit' name='kohdista_koko_sivu'  value='".t("Kohdista kaikki rivit")."'>";
 
-	echo "<td class='back'>
-			<form action='$PHP_SELF' method='post'>
-			<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-			<input type='hidden' name='toiminto' value='kohdista'>
-			<input type='hidden' name='tila' value='uusirivi'>
-			<input type='hidden' name='tee' value='K'>
-			<input type='hidden' name='alku' value='$alku'>
-			<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>
-			<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>
-			<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>
-			$hiddenit
-			<input type='hidden' name='ojarj' value=\"$ojarj\">
-			<input type='hidden' name='otunnus' value='$otunnus'>
-			<input type='submit' value='".t("Tee uusi rivi")."'>
-			</form>
-			</td>";
+	if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") {
+		echo "</form>";
+	}
+	else {
+		echo "<input type='submit' name='ala_kohdista_mitaan' value='".t("Poista kaikki kohdistukset")."'>";
+		echo "</form>";
 
-	echo "<td class='back' colspan='2' align='right'>
-			<form action='$PHP_SELF' name='formi' method='post'>
-			<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-			<input type='hidden' name='toiminto' value='kohdista'>
-			<input type='hidden' name='alku' value='$alku'>
-			<input type='hidden' name='otunnus' value='$otunnus'>
-			<input type='hidden' name='tee' value='$tee'>
-			<input type='hidden' name='tila' value='FAILISTA'>
-			$hiddenit
-			<input type='hidden' name='ojarj' value=\"$ojarj\">
-			<input type='submit' value='".t("Kohdista tiedostosta")."'>
-			</form>
-			</td>";
+		echo "<form action='$PHP_SELF' method='post'>
+				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+				<input type='hidden' name='toiminto' value='kohdista'>
+				<input type='hidden' name='tila' value='uusirivi'>
+				<input type='hidden' name='tee' value='K'>
+				<input type='hidden' name='alku' value='$alku'>
+				<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>
+				<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>
+				<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>
+				$hiddenit
+				<input type='hidden' name='ojarj' value=\"$ojarj\">
+				<input type='hidden' name='otunnus' value='$otunnus'>
+				<input type='submit' value='".t("Tee uusi rivi")."'>
+				</form>";
 
-	echo "<td class='back'>
-			<form action='$PHP_SELF' method='post'>
-			<input type='submit' value='".t("Kohdistus valmis")."'>
-			<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-			<input type='hidden' name='toiminto' value='kohdista'>
-			<input type='hidden' name='laskunsumma' value='$laskunsumma'>
-			<input type='hidden' name='tee' value='K'>
-			<input type='hidden' name='tila' value='valmis'>
-			<input type='hidden' name='otunnus' value='$otunnus'>
-			</form>
-			</td>";
+		echo "<form action='$PHP_SELF' name='formi' method='post'>
+				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+				<input type='hidden' name='toiminto' value='kohdista'>
+				<input type='hidden' name='alku' value='$alku'>
+				<input type='hidden' name='otunnus' value='$otunnus'>
+				<input type='hidden' name='tee' value='$tee'>
+				<input type='hidden' name='tila' value='FAILISTA'>
+				$hiddenit
+				<input type='hidden' name='ojarj' value=\"$ojarj\">
+				<input type='submit' value='".t("Kohdista tiedostosta")."'>
+				</form>";
+
+		echo "<form action='$PHP_SELF' method='post'>
+				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+				<input type='hidden' name='toiminto' value='kohdista'>
+				<input type='hidden' name='tila' value=''>
+				<input type='hidden' name='nayta_siirrettavat' value='YES'>
+				<input type='hidden' name='tee' value='$tee'>
+				<input type='hidden' name='alku' value='$alku'>
+				<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>
+				<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>
+				<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>
+				$hiddenit
+				<input type='hidden' name='ojarj' value=\"$ojarj\">
+				<input type='hidden' name='otunnus' value='$otunnus'>
+				<input type='submit' value='".t("Siirr‰ rivej‰ toiselta keikalta")."'>
+				</form>";
+
+		echo "<form action='$PHP_SELF' method='post'>
+				<input type='submit' value='".t("Kohdistus valmis")."'>
+				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+				<input type='hidden' name='toiminto' value='kohdista'>
+				<input type='hidden' name='laskunsumma' value='$laskunsumma'>
+				<input type='hidden' name='tee' value='K'>
+				<input type='hidden' name='tila' value='valmis'>
+				<input type='hidden' name='otunnus' value='$otunnus'>
+				</form>";
+	}
+
+	echo "</td>";
+	echo "</tr></table>";
 
 	$tila = "eityhja";
-
-	echo "</tr></table>";
 }
 
 ?>

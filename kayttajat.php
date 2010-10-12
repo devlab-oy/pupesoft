@@ -641,10 +641,10 @@
 
 					echo "<tr><th align='left'>".t("Hyväksyjätaso").":</th>";
 					echo "<td><select name='taso'>";
-					echo "<option value='9' $sel9>".t("Taso 9 Aloittelijahyväksyjä, tiliöintejä ei näytetä")."</option>";
-					echo "<option value='1' $sel1>".t("Taso 1 Perushyväksyjä, tiliöntejä ei voi muuttaa")."</option>";
-					echo "<option value='2' $sel2>".t("Taso 2 Tehohyväksyjä, tiliöntejä voi muuttaa")."</option>";
-					echo "<option value='3' $sel3>".t("Taso 3 Tehohyväksyjä, lukittujakin tiliöintejä voi muuttaa")."</option>";
+					echo "<option value='9' $sel9>".t("Aloittelijahyväksyjä, tiliöintejä ei näytetä")."</option>";
+					echo "<option value='1' $sel1>".t("Perushyväksyjä, tiliöntejä ei voi muuttaa")."</option>";
+					echo "<option value='2' $sel2>".t("Tehohyväksyjä, tiliöntejä voi muuttaa")."</option>";
+					echo "<option value='3' $sel3>".t("Tehohyväksyjä, lukittujakin tiliöintejä voi muuttaa")."</option>";
 					echo "</select></td></tr>";
 				}
 				else {
@@ -665,11 +665,11 @@
 					echo "<tr><th align='left'>".t("Taso").":</th>";
 
 					echo "<td><select name='taso'>";
-					echo "<option value='1' $sel1>".t("Taso 1 Tehotilaaja, tilaukset menee suoraan tomitukseen")."</option>";
-					echo "<option value='2' $sel2>".t("Taso 2 Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta")."</option>";
-					echo "<option value='3' $sel3>".t("Taso 3 Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA")."</option>";
+					echo "<option value='1' $sel1>".t("Tehotilaaja, tilaukset menee suoraan tomitukseen")."</option>";
+					echo "<option value='2' $sel2>".t("Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta")."</option>";
+					echo "<option value='3' $sel3>".t("Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA")."</option>";
 					if ($kukarow['yhtio'] == 'artr') {
-						echo "<option value='9' $sel9>".t("Taso 9 Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti")."</option>";
+						echo "<option value='9' $sel9>".t("Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti")."</option>";
 					}
 					echo "</select></td></tr>";
 				}

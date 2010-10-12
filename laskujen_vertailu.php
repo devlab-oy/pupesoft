@@ -80,7 +80,7 @@
 
 	if (trim($laskunro) != '' and is_numeric($laskunro)) {
 
-		$query = "	SELECT tapvm, erpcm, concat(nimi, ' ', nimitark) nimi, postitp, ytunnus, summa, valkoodi, laskunro, tunnus, hyvaksyja_nyt
+		$query = "	SELECT tapvm, erpcm, concat(nimi, ' ', nimitark) nimi, postitp, ytunnus, summa, valkoodi, laskunro, tunnus, hyvaksyja_nyt, tila
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laskunro = '{$laskunro}'";
@@ -269,7 +269,7 @@
 			$invoice_summa = 0;
 			$purchaseorder_summa = 0;
 
-			if (count($loytyy_kummastakin) > 0) {
+			if (is_array($loytyy_kummastakin) and count($loytyy_kummastakin) > 0) {
 
 				$i = $x = 0;
 
@@ -491,42 +491,90 @@
 							});
 						</script>";
 			}
+			
+			if (is_array($invoice_ei_loydy) and count($invoice_ei_loydy) > 0) {
+				foreach ($invoice_ei_loydy as $tuoteno => $tuote) {
+					echo "<tr class='aktiivi'>";
+					echo "<td>{$tuoteno}</td>";
 
-			foreach ($invoice_ei_loydy as $tuoteno => $tuote) {
-				echo "<tr class='aktiivi'>";
-				echo "<td>{$tuoteno}</td>";
+					$excelsarake = 0;
 
-				$excelsarake = 0;
+					$worksheet->write($excelrivi, $excelsarake, $tuoteno, $format_tuoteno);
+					$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, $tuoteno, $format_tuoteno);
-				$excelsarake++;
+					foreach ($tuote as $key => $val) {
 
-				foreach ($tuote as $key => $val) {
+						if (is_array($val)) {
+							echo "<td>";
 
-					if (is_array($val)) {
-						echo "<td>";
+							$exceli_ale = '';
 
-						$exceli_ale = '';
+							foreach ($val as $k => $v) {
+								echo $v;
 
-						foreach ($val as $k => $v) {
-							echo $v;
+								$exceli_ale .= $v;
 
-							$exceli_ale .= $v;
+								if (current($val) != end($val)) {
+									echo "<br/>";
+									$exceli_ale .= "\n";
+								}
+							}
 
-							if (current($val) != end($val)) {
-								echo "<br/>";
-								$exceli_ale .= "\n";
+							echo "</td>";
+
+							$worksheet->write($excelrivi, $excelsarake, $exceli_ale, $format_ale);
+						}
+						else {
+							if ($key == 'nettohinta' or $key == 'bruttohinta') {
+
+								if ($key == 'nettohinta') $invoice_summa += $val;
+
+								echo "<td valign='top' style='text-align: right;'>",sprintf('%.02f', $val),"</td>";
+
+								$worksheet->write($excelrivi, $excelsarake, $val);
+							}
+							elseif ($key == 'tilattumaara') {
+								echo "<td valign='top' style='text-align: right;'>{$val}</td>";
+
+								$worksheet->write($excelrivi, $excelsarake, $val);
+							}
+							else {
+								echo "<td valign='top'>{$val}</td>";
+
+								$worksheet->write($excelrivi, $excelsarake, $val);
 							}
 						}
 
-						echo "</td>";
-
-						$worksheet->write($excelrivi, $excelsarake, $exceli_ale, $format_ale);
+						$excelsarake++;
 					}
-					else {
+
+					$worksheet->write($excelrivi, 9, t("Ei löydy tilaukselta").'!', $format_text_error);
+					$excelrivi++;
+
+					echo "<td class='back'>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td><td>&nbsp;</td><td><font class='error'>",t("Ei löydy tilaukselta"),"!</font></td><td>&nbsp;</td><td>&nbsp;</td>";
+					echo "</tr>";
+				}
+			}
+			
+			if (is_array($purchaseorder_ei_loydy) and count($purchaseorder_ei_loydy) > 0) {
+				foreach ($purchaseorder_ei_loydy as $tuoteno => $tuote) {
+					echo "<tr class='aktiivi'>";
+					echo "<td>&nbsp;</td><td><font class='error'>",t("Ei löydy laskulta"),"!</font></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td>";
+
+					$worksheet->write($excelrivi, 1, t("Ei löydy laskulta").'!', $format_text_error);
+
+					echo "<td>{$tuoteno}</td>";
+
+					$excelsarake = 8;
+
+					$worksheet->write($excelrivi, $excelsarake, $tuoteno, $format_tuoteno);
+					$excelsarake++;
+
+					foreach ($tuote as $key => $val) {
+
 						if ($key == 'nettohinta' or $key == 'bruttohinta') {
 
-							if ($key == 'nettohinta') $invoice_summa += $val;
+							if ($key == 'nettohinta') $purchaseorder_summa += $val;
 
 							echo "<td valign='top' style='text-align: right;'>",sprintf('%.02f', $val),"</td>";
 
@@ -542,60 +590,16 @@
 
 							$worksheet->write($excelrivi, $excelsarake, $val);
 						}
+
+						$excelsarake++;
 					}
 
-					$excelsarake++;
+					$excelrivi++;
+
+					echo "</tr>";
 				}
-
-				$worksheet->write($excelrivi, 9, t("Ei löydy tilaukselta").'!', $format_text_error);
-				$excelrivi++;
-
-				echo "<td class='back'>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td><td>&nbsp;</td><td><font class='error'>",t("Ei löydy tilaukselta"),"!</font></td><td>&nbsp;</td><td>&nbsp;</td>";
-				echo "</tr>";
 			}
-
-			foreach ($purchaseorder_ei_loydy as $tuoteno => $tuote) {
-				echo "<tr class='aktiivi'>";
-				echo "<td>&nbsp;</td><td><font class='error'>",t("Ei löydy laskulta"),"!</font></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class='back'>&nbsp;</td>";
-
-				$worksheet->write($excelrivi, 1, t("Ei löydy laskulta").'!', $format_text_error);
-
-				echo "<td>{$tuoteno}</td>";
-
-				$excelsarake = 8;
-
-				$worksheet->write($excelrivi, $excelsarake, $tuoteno, $format_tuoteno);
-				$excelsarake++;
-
-				foreach ($tuote as $key => $val) {
-
-					if ($key == 'nettohinta' or $key == 'bruttohinta') {
-
-						if ($key == 'nettohinta') $purchaseorder_summa += $val;
-
-						echo "<td valign='top' style='text-align: right;'>",sprintf('%.02f', $val),"</td>";
-
-						$worksheet->write($excelrivi, $excelsarake, $val);
-					}
-					elseif ($key == 'tilattumaara') {
-						echo "<td valign='top' style='text-align: right;'>{$val}</td>";
-
-						$worksheet->write($excelrivi, $excelsarake, $val);
-					}
-					else {
-						echo "<td valign='top'>{$val}</td>";
-
-						$worksheet->write($excelrivi, $excelsarake, $val);
-					}
-
-					$excelsarake++;
-				}
-
-				$excelrivi++;
-
-				echo "</tr>";
-			}
-
+			
 			echo "<tr id='tr_summa'><th colspan='5'>",t("Summa"),"</th><th valign='top' style='text-align: right;'>{$invoice_summa} {$lasku_row['valkoodi']}</th><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><th colspan='3'>",t("Summa"),"</th><th valign='top' style='text-align: right;'>{$purchaseorder_summa} {$lasku_row['valkoodi']}</th></tr>";
 			echo "</table>";
 

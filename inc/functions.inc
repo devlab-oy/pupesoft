@@ -102,6 +102,8 @@ if (!function_exists("lopetus")) {
 
 					$nimet = explode("/", str_replace($palvelin2, "", $nimi[1]));
 
+					if (!isset($alanimi[1])) $alanimi[1] = "";
+
 					for($i=0; $i<count($nimet); $i++) {
 
 						$nimi = "";
@@ -147,7 +149,7 @@ if (!function_exists("lopetus")) {
 						$lopetus .= "lopetus=$edlopetus";
 					}
 
-					if ($nimilisa[1] != "") {
+					if (isset($nimilisa[1]) and $nimilisa[1] != "") {
 						$nlisa = " / ".$nimilisa[1];
 					}
 					else {
@@ -8105,7 +8107,7 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 		if (mysql_num_rows($liite_res) == 0) {
 			return FALSE;
 		}
-		elseif (mysql_num_rows($liite_row) == 1) {
+		elseif (mysql_num_rows($liite_res) == 1) {
 			return 'ei_loydy_edia';
 		}
 
@@ -8158,10 +8160,20 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 						$purchaseorder[$purchaseorder_tuoteno]['nimitys'] = $tieto;
 						break;
 					case 'OSTOTILRIV.OTR_TILATTUMAARA':
-						$purchaseorder[$purchaseorder_tuoteno]['tilattumaara'] += (float) str_replace(",", ".", $tieto);
+						if (!isset($purchaseorder[$purchaseorder_tuoteno]['tilattumaara'])) {
+							$purchaseorder[$purchaseorder_tuoteno]['tilattumaara'] = (float) str_replace(",", ".", $tieto);
+						}
+						else {
+							$purchaseorder[$purchaseorder_tuoteno]['tilattumaara'] += (float) str_replace(",", ".", $tieto);
+						}
 						break;
 					case 'OSTOTILRIV.OTR_RIVISUMMA':
-						$purchaseorder[$purchaseorder_tuoteno]['nettohinta'] += (float) str_replace(",", ".", $tieto);
+						if (!isset($purchaseorder[$purchaseorder_tuoteno]['nettohinta'])) {
+							$purchaseorder[$purchaseorder_tuoteno]['nettohinta'] = (float) str_replace(",", ".", $tieto);
+						}
+						else {
+							$purchaseorder[$purchaseorder_tuoteno]['nettohinta'] += (float) str_replace(",", ".", $tieto);
+						}
 						break;
 					case 'OSTOTIL.OT_NRO':
 						$purchaseorder_tilausnumero = $tieto;
@@ -8180,8 +8192,20 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 				}
 
 				$invoice[$ai_tuoteno]['nimitys'] = $row->ArticleName;
-				$invoice[$ai_tuoteno]['tilattumaara'] += (float) str_replace(",", ".", $row->DeliveredQuantity);
-				$invoice[$ai_tuoteno]['bruttohinta'] += (float) str_replace(",", ".", $row->UnitPriceAmount);
+
+				if (!isset($invoice[$ai_tuoteno]['tilattumaara'])) {
+					$invoice[$ai_tuoteno]['tilattumaara'] = (float) str_replace(",", ".", $row->DeliveredQuantity);
+				}
+				else {
+					$invoice[$ai_tuoteno]['tilattumaara'] += (float) str_replace(",", ".", $row->DeliveredQuantity);
+				}
+
+				if (!isset($invoice[$ai_tuoteno]['bruttohinta'])) {
+					$invoice[$ai_tuoteno]['bruttohinta'] = (float) str_replace(",", ".", $row->UnitPriceAmount);
+				}
+				else {
+					$invoice[$ai_tuoteno]['bruttohinta'] += (float) str_replace(",", ".", $row->UnitPriceAmount);
+				}
 
 				// voi olla monta alennusta
 				foreach ($row as $child => $value) {
@@ -8193,7 +8217,12 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 				if (!isset($invoice[$ai_tuoteno]['ale'])) $invoice[$ai_tuoteno]['ale'] = '';
 
 				if ($row->RowAmount) {
-					$invoice[$ai_tuoteno]['nettohinta'] += (float) str_replace(",", ".", $row->RowAmount);
+					if (!isset($invoice[$ai_tuoteno]['nettohinta'])) {
+						$invoice[$ai_tuoteno]['nettohinta'] = (float) str_replace(",", ".", $row->RowAmount);
+					}
+					else {
+						$invoice[$ai_tuoteno]['nettohinta'] += (float) str_replace(",", ".", $row->RowAmount);
+					}
 				}
 				else {
 					$invoice[$ai_tuoteno]['nettohinta'] = 0;

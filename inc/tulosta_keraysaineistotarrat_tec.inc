@@ -1,54 +1,50 @@
 <?php
-//Kun tullaan tänne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
 
-$lasktarrat = 0;
-$lisa = '';
-$alatila = '';
+//Kun tullaan tänne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
+$lasktarrat  = 0;
+$lisa 		 = '';
+$alatila 	 = '';
 $vanhatunnus = 0;
-//$debug = 1;
 
 if ($tee == 'uudet') {
 	$alatila = 'A';
 }
-elseif ($tee == 'vanhat') {
+elseif ($tee == 'vanhat' and count($vanhatunnukset) > 0) {
 	$alatila = 'X';
-	$lisa = "and laadittu >= '$vva-$kka-$ppa 00:00:00' and laadittu <= '$vvl-$kkl-$ppl 23:59:59'";
+	$lisa = "and lasku.tunnus in (".implode(",", $vanhatunnukset).") ";
 }
 
-$query =	"select ytunnus, asiakkaan_tilausnumero tiltunnus, tilkpl, sisviesti2 astunnus,
+$query = "	SELECT ytunnus, asiakkaan_tilausnumero tiltunnus, tilkpl, sisviesti2 astunnus,
 			DATE_FORMAT(laadittu, '%d-%m-%y') laadittu, tuote.eankoodi eankoodi, kommentti tuoteno,
 			aktiivinen_kuljetus suunnistus, lasku.tunnus xtunnus,
 			concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-			from lasku
-			join tilausrivi on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (tilausrivi.tunnus = tilausrivi.perheid or tilausrivi.perheid = 0)
-			left join tuote on lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-			where lasku.yhtio = '$kukarow[yhtio]' and tila = 'Z' and alatila = '$alatila' and tyyppi = 'Z'
+			FROM lasku
+			JOIN tilausrivi on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (tilausrivi.tunnus = tilausrivi.perheid or tilausrivi.perheid = 0) and tilausrivi.tyyppi = 'Z'
+			LEFT JOIN tuote on lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+			WHERE lasku.yhtio = '$kukarow[yhtio]'
+			and lasku.tila = 'Z'
+			and lasku.alatila = '$alatila'
 			$lisa
-			order by sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
+			ORDER BY sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
 $tarrares = mysql_query($query) or pupe_error($query);
-
-if ($debug == 1) {
-	echo "$query<br>";
-	echo "".mysql_num_rows($tarrares)."<br>";
-}
 
 if (mysql_num_rows($tarrares) > 0) {
 	while($tarrarow = mysql_fetch_array($tarrares)) {
 
-		$toim_nimi		=$tarrarow['toim_nimi'];
-		$tiltunnus		=ltrim($tarrarow['tiltunnus'],'0');
-		$tilkpl			=$tarrarow['tilkpl'];
-		$laadittu		=$tarrarow['laadittu'];
-		$eankoodi		=$tarrarow['eankoodi'];
-		$suunnistus		=$tarrarow['suunnistus'];
-		$xtunnus		=$tarrarow['xtunnus'];
+		$toim_nimi		= $tarrarow['toim_nimi'];
+		$tiltunnus		= ltrim($tarrarow['tiltunnus'],'0');
+		$tilkpl			= $tarrarow['tilkpl'];
+		$laadittu		= $tarrarow['laadittu'];
+		$eankoodi		= $tarrarow['eankoodi'];
+		$suunnistus		= $tarrarow['suunnistus'];
+		$xtunnus		= $tarrarow['xtunnus'];
 
 		list($tuoteno,$nimitys) = explode("#",$tarrarow['tuoteno']);
 		list($asnro,$asnimi) = explode("#",$tarrarow['astunnus']);
 
 		$asnimi = substr($asnimi,0,25);
 
-		for($kerroin = 1; $kerroin < $tilkpl+1; $kerroin++) {
+		for ($kerroin = 1; $kerroin < $tilkpl+1; $kerroin++) {
 
 			$tukpl = "1/  ".round($kerroin,0);
 
@@ -84,36 +80,30 @@ if (mysql_num_rows($tarrares) > 0) {
 	{XS;I,0001,0002C3210|}
 
 	".chr(12);
+
 			//konvertoidaan ääkköset printterin ymmärtämään muotoon
 			$from = array ('ä','å','ö','Ä','Å','Ö');
 			$to   = array (chr(132),chr(134),chr(148),chr(142),chr(143),chr(153)); // DOS charset
 			$sivu = str_replace($from, $to, $sivu);											// Tehdään käännös
 
 			$sivu = escapeshellarg($sivu);
-			if ($debug == 1) {
-				echo	"$asnimi<br>
-						$tiltunnus<br>
-						$tilkpl<br>
-						$asnro<br>
-						$laadittu<br>
-						<b>$eankoodi</b><br>
-						$nimitys<br>
-						<b>$tuoteno</b><br>
-						<b>$suunnistus</b><br><br>";
-			}
-			else {
-				$line = exec(" echo \"$sivu\" | $komento");
-			}
+
+			$line = exec(" echo \"$sivu\" | $komento");
+
 			$lasktarrat ++;
 
 			if ($xtunnus != $vanhatunnus) {
-				$query = "update lasku set alatila = 'X' where yhtio = '$kukarow[yhtio]' and tunnus = '$xtunnus'";
+				$query = "	UPDATE lasku
+							set alatila = 'X'
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus = '$xtunnus'";
 				$res = mysql_query($query) or pupe_error($query);
 				$vanhatunnus = $xtunnus;
 			}
 		}
 	}
-	echo "".t("Tulostettiin")." $lasktarrat ".t("tarraa").".<br><br>";
+
+	echo t("Tulostettiin")." $lasktarrat ".t("tarraa").".<br><br>";
 }
 else {
 	if ($tee == 'uudet') {
@@ -123,5 +113,7 @@ else {
 		echo "<font class='error'>".t("Aikavälille ei löytynyt yhtään tietuetta").".<br></font>";
 	}
 }
+
 $tee = '';
+
 ?>

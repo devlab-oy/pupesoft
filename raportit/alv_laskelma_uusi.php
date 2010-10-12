@@ -414,7 +414,7 @@
 
 						echo "<a href='../muutosite.php?tee=E&tunnus={$tositelinkki_row['tunnus']}&lopetus={$palvelin2}raportit/alv_laskelma_uusi.php////kk=$kk//vv=$vv'>",t("Katso tositetta"),"</a><br /><br />";
 					}
-					elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $fi308, 2)) <= 1) {
+					elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $fi308, 2)) <= 1 and (int) date("Ym") > (int) $vv.$kk) {
 						echo "<form method='post' name='alv_ilmoituksen_kuittaus'><table>";
 						echo "<input type='hidden' name='alkukk' value='{$startmonth}' />";
 						echo "<input type='hidden' name='loppukk' value='{$endmonth}' />";
@@ -438,7 +438,7 @@
 						echo "</td><td class='back'><input type='submit' value='",t("Kuittaa ALV-ilmoitus"),"' /></td></tr>";
 						echo "</table></form><br />";
 					}
-					elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $fi308, 2)) != 0) {
+					elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $fi308, 2)) != 0 and (int) date("Ym") > (int) $vv.$kk) {
 						echo "<font class='error'>",t("Tilin")," {$yhtiorow['alv']} ",t("ja maksettavan arvonlis‰veron luvut eiv‰t t‰sm‰‰"),"!</font><br /><br />";
 					}
 				}

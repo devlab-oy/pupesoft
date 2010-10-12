@@ -1136,7 +1136,7 @@
 			echo "</form>";
 		}
 
-		if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
+		if (($trow['tila'] == 'M' or $trow['tila'] == 'H' or $trow['tila'] == 'Y' or $trow['tila'] == 'Q') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name='tila' value='jako'>

@@ -14,7 +14,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$jaettavalasku'
-				AND tila in ('H', 'M')";
+				AND tila in ('H', 'M', 'Q', 'Y')";
 	$jaettavalaskures = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($jaettavalaskures) != 1) {

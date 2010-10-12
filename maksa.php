@@ -6,9 +6,9 @@
 	echo "<font class='head'>".t("Laskujen maksatus")."</font><hr>";
 
 	if (count($_POST) == 0) {
-		// Tarkistetaan laskujen oletusmaksupvm, eli poistetaan vanhentuneet kassa-alet. tehd‰‰n ta‰m‰ aina kun aloitetaan maksatus
+		// Tarkistetaan laskujen oletusmaksupvm, eli poistetaan vanhentuneet kassa-alet. tehd‰‰n t‰m‰ aina kun aloitetaan maksatus
 		$query = "	UPDATE lasku use index (yhtio_tila_mapvm)
-					SET olmapvm = if(kapvm < now() or kapvm > erpcm, erpcm, kapvm)
+					SET olmapvm = if(kapvm >= curdate() and kapvm < erpcm, kapvm, if(erpcm >= curdate(), erpcm, curdate()))
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tila in ('H', 'M')
 					and mapvm = '0000-00-00'";
@@ -368,10 +368,10 @@
 	if ($tee == 'H') {
 
 		if ($poikkeus == 'on') {
-			$muutamaksupaiva = ", olmapvm = now()";
+			$muutamaksupaiva = ", olmapvm = curdate()";
 		}
 		else {
-			$muutamaksupaiva = ", olmapvm = if(now()<=kapvm and kapvm < erpcm, kapvm, if(now()<=erpcm, erpcm, now()))";
+			$muutamaksupaiva = ", olmapvm = if(kapvm >= curdate() and kapvm < erpcm, kapvm, if(erpcm >= curdate(), erpcm, curdate()))";
 		}
 
 		if ($eipankkiin == 'on') {
@@ -478,7 +478,7 @@
 							maksu_tili = '',
 							tila = 'M',
 							alatila = '',
-							olmapvm = if(kapvm < now(), erpcm, kapvm)
+							olmapvm = if(kapvm >= curdate() and kapvm < erpcm, kapvm, if(erpcm >= curdate(), erpcm, curdate()))
 							WHERE tunnus='$lasku' and yhtio = '$kukarow[yhtio]' and tila='P'";
 				$updresult = mysql_query($query) or pupe_error($query);
 
@@ -510,10 +510,10 @@
 		$lisa = "";
 
 		if ($tee == "NT") {
-			$lisa = " and lasku.olmapvm = now() ";
+			$lisa = " and lasku.olmapvm = curdate() ";
 		}
 		elseif ($tee == 'NK') {
-			$lisa = " and lasku.olmapvm <= now() ";
+			$lisa = " and lasku.olmapvm <= curdate() ";
 		}
 		else {
 
@@ -535,7 +535,7 @@
 			}
 		}
 
-		$query = "	SELECT valuu.kurssi, round(if(kapvm>=now(),summa-kasumma,summa) * valuu.kurssi,2) summa, lasku.nimi, lasku.tunnus, lasku.liitostunnus
+		$query = "	SELECT valuu.kurssi, round(if(kapvm >= curdate(), summa-kasumma, summa) * valuu.kurssi,2) summa, lasku.nimi, lasku.tunnus, lasku.liitostunnus
 					FROM lasku
 					JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
 					JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus AND toimi.maksukielto = '')
@@ -571,8 +571,8 @@
 						maksu_kurssi = '$tiliointirow[kurssi]',
 						maksu_tili = '$oltilrow[tunnus]',
 						tila = 'P',
-						alatila = if(kapvm>=now(),'K',''),
-						olmapvm = if(now()<=kapvm,kapvm,if(now()<=erpcm,erpcm,now()))
+						alatila = if(kapvm >= curdate(), 'K', ''),
+						olmapvm = if(kapvm >= curdate() and kapvm < erpcm, kapvm, if(erpcm >= curdate(), erpcm, curdate()))
 						WHERE tunnus='$tiliointirow[tunnus]' and yhtio = '$kukarow[yhtio]' and tila='M'";
 			$updresult = mysql_query($query) or pupe_error($query);
 
@@ -729,16 +729,16 @@
 		echo "</td>";
 
 		// Lis‰t‰‰n t‰h‰n viel‰ mahdollisuus maksaa kaikki er‰‰ntyneet laskut tai t‰n‰‰n er‰‰ntyv‰t
-		$query = "	SELECT ifnull(sum(round(if(kapvm >= now(), summa-kasumma, summa) * kurssi, 2)), 0),
-					ifnull(sum(round(if(olmapvm = now(), if(kapvm>=now(), summa-kasumma, summa), 0) * kurssi, 2)), 0),
+		$query = "	SELECT ifnull(sum(round(if(kapvm >= curdate(), summa-kasumma, summa) * kurssi, 2)), 0),
+					ifnull(sum(round(if(olmapvm = curdate(), if(kapvm>=curdate(), summa-kasumma, summa), 0) * kurssi, 2)), 0),
 					ifnull(count(*), 0),
-					ifnull(sum(if(olmapvm = now(), 1, 0)), 0)
+					ifnull(sum(if(olmapvm = curdate(), 1, 0)), 0)
 					FROM lasku
 					JOIN valuu ON (valuu.yhtio = lasku.yhtio and valuu.nimi = lasku.valkoodi)
 					WHERE lasku.yhtio = '$yhtiorow[yhtio]'
 					and summa > 0
 					and tila = 'M'
-					and olmapvm <= now()";
+					and olmapvm <= curdate()";
 		$result = mysql_query($query) or pupe_error($query);
 		$sumrow = mysql_fetch_array($result);
 

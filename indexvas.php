@@ -180,7 +180,7 @@ while ($orow = mysql_fetch_array($result)) {
 	if (mysql_num_rows($xresult) > 1) {
 
 		// jos ykkönen niin näytetään avattu menu itemi
-		if ($menu[$mrow['nimitys']] == 1) {
+		if (isset($mrow['nimitys']) and isset($menu[$mrow['nimitys']]) and $menu[$mrow['nimitys']] == 1) {
 			echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>- ".t("$mrow[nimitys]")."</a></td></tr>";
 
 			// tehdään submenu itemit

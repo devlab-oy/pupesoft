@@ -7,7 +7,8 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	require("inc/parametrit.inc");
 
 	$session = "";
-	srand ((double) microtime() * 1000000);
+	
+	srand((double) microtime() * 1000000);
 
 	$query = "	SELECT kuka.kuka, kuka.session, kuka.salasana, kuka.yhtio
 				FROM kuka
@@ -18,14 +19,14 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	$result = mysql_query($query) or pupe_error($query);
 	$krow = mysql_fetch_array($result);
 
-	if ($salamd5!='') $vertaa = $salamd5;
-	elseif ($salasana == '') $vertaa = $salasana;
+	if (isset($salamd5) and $salamd5 != '') $vertaa = $salamd5;
+	elseif (isset($salasana) and $salasana == '') $vertaa = $salasana;
 	else $vertaa = md5(trim($salasana));
 
 	if (mysql_num_rows($result) > 0 and $vertaa == $krow['salasana']) {
 
 		// jos meillä on vaan kaks yhtiotä ja ollaan tulossa firman vaihdosta, vaihdetaan suoraan toiseen
-		if (mysql_num_rows($result) == 2 and $mikayhtio != "") {
+		if (mysql_num_rows($result) == 2 and isset($mikayhtio) and $mikayhtio != "") {
 
 			mysql_data_seek($result,0); // ressu alkuun
 
@@ -44,7 +45,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 			$usea = 1;
 		}
 
-		if (strlen(trim($uusi1)) > 0) {
+		if (isset($uusi1) and strlen(trim($uusi1)) > 0) {
 			if (trim($uusi1) != trim($uusi2)) {
 				$errormsg = t("Uudet salasanasi olivat erilaiset")."! ".t("Salasanaasi ei vaihdettu")."!";
 				$err = 1;
@@ -76,7 +77,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 		// Kaikki ok!
 		if (!isset($err) or $err != 1) {
 			// Pitääkö vielä kysyä yritystä???
-			if ($usea != 1 or strlen($yhtio) > 0) {
+			if ($usea != 1 or (isset($yhtio) and strlen($yhtio) > 0)) {
 				for ($i=0; $i<25; $i++) {
 					$session = $session . chr(rand(65,90)) ;
 				}

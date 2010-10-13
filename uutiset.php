@@ -10,6 +10,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
 	$uutinen = $uutinen_apu;
 }
 
+if(!isset($toim)) 	$toim = "";
+if(!isset($tee)) 	$tee = "";
+if(!isset($limit)) 	$limit = "";
+
 if ($toim == "") {
 	if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) echo "<font class='head'>".t("Intra Uutiset")."</font><hr>";
 	$tyyppi = "uutinen";

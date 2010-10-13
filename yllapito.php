@@ -21,7 +21,40 @@
 
 	//Jotta m‰‰ritelty rajattu n‰kym‰ olisi myˆs k‰yttˆoikeudellisesti tiukka
 	$aputoim = $toim;
-	list($toim, $alias_set, $rajattu_nakyma) = explode('!!!', $toim);
+	$toimi_array = explode('!!!', $toim);
+		
+	$toim = $toimi_array[0];
+	if (isset($toimi_array[1])) $alias_set = $toimi_array[1];
+	if (isset($toimi_array[2])) $rajattu_nakyma = $toimi_array[2];
+
+	// Setataan muuttujat
+	if(!isset($rajauslisa)) 		$rajauslisa = "";
+	if(!isset($del)) 				$del = "";
+	if(!isset($errori)) 			$errori = "";
+	if(!isset($from)) 				$from = "";
+	if(!isset($haku)) 				$haku = "";
+	if(!isset($js_open_yp)) 		$js_open_yp = "";
+	if(!isset($laji)) 				$laji = "";
+	if(!isset($limit)) 				$limit = "";
+	if(!isset($lisa)) 				$lisa = "";
+	if(!isset($lopetus)) 			$lopetus = "";
+	if(!isset($nayta_eraantyneet)) 	$nayta_eraantyneet = "";
+	if(!isset($nayta_poistetut)) 	$nayta_poistetut = "";
+	if(!isset($ojarj)) 				$ojarj = "";
+	if(!isset($oletus)) 			$oletus = "";
+	if(!isset($osuu)) 				$osuu = "";
+	if(!isset($otsikko_lisatiedot)) $otsikko_lisatiedot = "";
+	if(!isset($otsikko_nappi)) 		$otsikko_nappi = "";
+	if(!isset($prospektlisa)) 		$prospektlisa = "";
+	if(!isset($ryhma)) 				$ryhma = "";
+	if(!isset($tunnus)) 			$tunnus = "";
+	if(!isset($ulisa)) 				$ulisa = "";
+	if(!isset($upd)) 				$upd = "";
+	if(!isset($uusi)) 				$uusi = "";
+	if(!isset($uusilukko)) 			$uusilukko = "";
+	if(!isset($alias_set)) 			$alias_set = "";
+	if(!isset($rajattu_nakyma)) 	$rajattu_nakyma = "";
+	if(!isset($lukossa)) 			$lukossa = "";
 
 	// Tutkitaan v‰h‰n alias_settej‰ ja rajattua n‰kym‰‰
 	$al_lisa = " and selitetark_2 = '' ";
@@ -36,23 +69,23 @@
 	}
 
 	// pikkuh‰kki, ettei rikota css kentt‰‰
-	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucss)) {
-		$t[$cssi] = mysql_real_escape_string($apucss);
+	if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
+		if (isset($apucss)) {
+			$t[$cssi] = mysql_real_escape_string($apucss);
+		}
+		if (isset($apucsspieni)) {
+			$t[$csspienii] = mysql_real_escape_string($apucsspieni);
+		}
+		if (isset($apucssextranet)) {
+			$t[$cssextraneti] = mysql_real_escape_string($apucssextranet);
+		}
+		if (isset($apucssverkkokauppa)) {
+			$t[$cssverkkokauppa] = mysql_real_escape_string($apucssverkkokauppa);
+		}
+		if (isset($apuwebseuranta)) {
+			$t[$webseuranta] = mysql_real_escape_string($apuwebseuranta);
+		}
 	}
-	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucsspieni)) {
-		$t[$csspienii] = mysql_real_escape_string($apucsspieni);
-	}
-	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssextranet)) {
-		$t[$cssextraneti] = mysql_real_escape_string($apucssextranet);
-	}
-	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssverkkokauppa)) {
-		$t[$cssverkkokauppa] = mysql_real_escape_string($apucssverkkokauppa);
-	}
-	if ($_POST["toim"] == "yhtion_parametrit" and isset($apuwebseuranta)) {
-		$t[$webseuranta] = mysql_real_escape_string($apuwebseuranta);
-	}
-
-	$rajauslisa	= "";
 
 	require ("inc/$toim.inc");
 
@@ -664,7 +697,7 @@
 	$count = count($array);
 
 	for ($i=0; $i<=$count; $i++) {
-		if (strlen($haku[$i]) > 0) {
+		if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
 
 			if ($from == "" and ((($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') or ($toim == 'yhteyshenkilo' and trim($array[$i]) == 'liitostunnus'))) {
 
@@ -905,7 +938,6 @@
 			echo "<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>";
 			echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
-			echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";
 			echo "<input type = 'hidden' name = 'tunnus' value = '$noperow[tunnus]'>";
 			echo " <input type='submit' value='".t("Edellinen tuote")."'>";
 			echo "</form>";
@@ -927,7 +959,6 @@
 			echo "<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>";
 			echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
-			echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";
 			echo "<input type = 'hidden' name = 'tunnus' value = '$yesrow[tunnus]'>";
 			echo " <input type='submit' value='".t("Seuraava tuote")."'>";
 			echo "</form>";
@@ -962,7 +993,9 @@
 					else	$size='10';
 
 					// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
-					if (strpos(strtoupper($array[$i]), "SELECT") === FALSE) {
+					if (strpos(strtoupper($array[$i]), "SELECT") === FALSE) {						
+						if (!isset($haku[$i])) $haku[$i] = "";
+						
 						echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
 					}
 					echo "</th>";
@@ -1107,7 +1140,7 @@
 		else {
 			$ankkuri = "";
 		}
-		
+
 		if ($toim == "lasku" or $toim == "laskun_lisatiedot") {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
@@ -1115,8 +1148,8 @@
 								return confirm(msg);
 						}
 				</SCRIPT>";
-				
-			$javalisasubmit = "onSubmit = 'return verify()'";	
+
+			$javalisasubmit = "onSubmit = 'return verify()'";
 		}
 		else {
 			$javalisasubmit = "";
@@ -1131,7 +1164,6 @@
 		echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
-		echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
 
 		// Kokeillaan geneerist‰
@@ -1257,20 +1289,6 @@
 			}
 
 			if ($jatko == 0) {
-				if ($yllapito_tarkista_oikeellisuus != "") {
-					//	Tehd‰‰n tarkastuksia, T‰m‰ sallisi myˆs muiden tagien "oikeellisuuden" m‰‰rittelemisen suhteellisen helposti
-					//	Jostainsyyst‰ multiline ei toimi kunnolla?
-					$search = "/.*<(select)[^>]*>(.*)<\/select>.*/mi";
-					preg_match($search, $ulos, $matches);
-
-					if (strtolower($matches[1]) == "select") {
-						$search = "/\s+selected\s*>/i";
-						preg_match($search, $matches[2], $matches2);
-						if (count($matches2)==0) {
-							$ulos .= "<td class='back'><font class='error'>OBS!! '".$trow[$i]."'</font></td>";
-						}
-					}
-				}
 				echo $ulos;
 			}
 			elseif ($tyyppi == 1) {
@@ -1325,7 +1343,7 @@
 		if ($uusi == 1) {
 			$nimi = t("Perusta $otsikko_nappi");
 		}
-		else {						
+		else {
 			$nimi = t("P‰ivit‰ $otsikko_nappi");
 		}
 
@@ -1356,9 +1374,9 @@
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhtio") {
 			require ("inc/yhtion_toimipaikat.inc");
 		}
-		
+
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "lasku") {
-					
+
 			echo "<iframe id='laskun_lisatiedot_iframe' name='laskun_lisatiedot_iframe' src='yllapito.php?toim=laskun_lisatiedot&from=yllapito&ohje=off&haku[1]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
 
@@ -1435,7 +1453,7 @@
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
-			
+
 			// Jamppa s‰‰t‰‰
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_alkio' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
@@ -1496,7 +1514,6 @@
 						<input type = 'hidden' name = 'laji' value = '$laji'>
 						<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-						<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>
 						<input type = 'hidden' name = 'del' value ='1'>
 						<input type='hidden' name='seuraavatunnus' value = '$seuraavatunnus'>
 						<input type = 'submit' value = '".t("Poista $otsikko_nappi")."'>
@@ -1528,11 +1545,11 @@
 	else {
 		$jcsmaxheigth = "";
 	}
-	
+
 	if ($from == "yllapito" and $toim == "laskun_lisatiedot") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('laskun_lisatiedot_iframe' $jcsmaxheigth);</script>";
 	}
-	
+
 	if ($from == "yllapito" and $toim == "yhteyshenkilo") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhteyshenkilo_iframe' $jcsmaxheigth);</script>";
 	}

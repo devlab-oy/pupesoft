@@ -7,6 +7,8 @@
 	if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
 		$lis = " and lasku.liitostunnus = '$kukarow[oletus_asiakas]' ";
 	}
+	
+	if (!isset($ojarj)) $ojarj = "";
 
 	$query = "	SELECT lasku.*,
 				laskun_lisatiedot.laskutus_nimi,
@@ -246,78 +248,80 @@
 
 		$possi = strpos(strtoupper($laskurow['toimitustapa']),"DPD");
 
-		// postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
-		if (stripos($rakirrow['rahtikirjanro'],"JFI") !== FALSE) {
-			$linkurl = "";
-			$jjfi = explode("<br>", trim($rakirrow['rahtikirjanro']));
+		if (isset($rakirrow)) {
+			// postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
+			if (stripos($rakirrow['rahtikirjanro'],"JFI") !== FALSE) {
+				$linkurl = "";
+				$jjfi = explode("<br>", trim($rakirrow['rahtikirjanro']));
 
-			foreach ($jjfi as $nro) {
-				$linkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId=$nro&LOTUS_hae=Hae'>$nro</a><br>";
-			}
-
-			$linkurl = substr($linkurl,0,-4); // vika br pois
-		}
-		//luodaan ups seurantalinkki
-		elseif (stripos($rakirrow['rahtikirjanro'], 'UPS') !== FALSE) {
-			$linkurl = "";
-			$upsi = explode("<br>", trim($rakirrow['rahtikirjanro']));
-
-			foreach ($upsi as $nro) {
-
-				if (substr($nro, 0, 3) == 'UPS') {
-					$linkurl .= "<a target=newikkuna href='http://www.ups.fi/hptrack/trackDlgRequest?HTMLVersion=5.0&loc=fi_FI&Requester=UPSHome&track.x=Track&trackNums=".substr($nro, 4)."&WBPM_lid=homepage/ct1.html_pnl_trk&modal=true&'>$nro</a><br>";
+				foreach ($jjfi as $nro) {
+					$linkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId=$nro&LOTUS_hae=Hae'>$nro</a><br>";
 				}
-				else {
-					$linkurl .= "$nro<br>";
-				}
+
+				$linkurl = substr($linkurl,0,-4); // vika br pois
 			}
+			//luodaan ups seurantalinkki
+			elseif (stripos($rakirrow['rahtikirjanro'], 'UPS') !== FALSE) {
+				$linkurl = "";
+				$upsi = explode("<br>", trim($rakirrow['rahtikirjanro']));
 
-			$linkurl = substr($linkurl,0,-4); // vika br pois
-		}
-		//luodaan dpd seurantalinkk
-		elseif ($possi !== FALSE and $rakirrow['rahtikirjanro'] != '' and $dpdtun != '' and $dpdss != '') {
-			$linkurl = "";
+				foreach ($upsi as $nro) {
 
-			for ($dpdi=1; $dpdi<$rakirrow['kollit']+1; $dpdi++) {
-				$sscc = "";
-
-				if (!function_exists('tarkiste')) {
-
-					function tarkiste($sscc) {
-
-						$kerroin = 3; // kerroin aluks 3
-						$summa   = 0; // summa nolla tietty
-
-						// loopataan luvut oikeelta vasemmalle
-						for ($i = 16; $i >= 0; $i--) {
-							$summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
-							$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
-						}
-
-						$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
-
-						return $sscc;
+					if (substr($nro, 0, 3) == 'UPS') {
+						$linkurl .= "<a target=newikkuna href='http://www.ups.fi/hptrack/trackDlgRequest?HTMLVersion=5.0&loc=fi_FI&Requester=UPSHome&track.x=Track&trackNums=".substr($nro, 4)."&WBPM_lid=homepage/ct1.html_pnl_trk&modal=true&'>$nro</a><br>";
+					}
+					else {
+						$linkurl .= "$nro<br>";
 					}
 				}
 
-				$sscc = 1;
-				$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-				$sscc .= sprintf('%06.06d', substr($rakirrow['rahtikirjanro'], -6));
-				$sscc .= sprintf('%02.02d', $dpdi);
-				$loppu = tarkiste($sscc);
-				$sscc = $sscc.$loppu;
+				$linkurl = substr($linkurl,0,-4); // vika br pois
+			}
+			//luodaan dpd seurantalinkk
+			elseif ($possi !== FALSE and $rakirrow['rahtikirjanro'] != '' and $dpdtun != '' and $dpdss != '') {
+				$linkurl = "";
 
-				$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
+				for ($dpdi=1; $dpdi<$rakirrow['kollit']+1; $dpdi++) {
+					$sscc = "";
+
+					if (!function_exists('tarkiste')) {
+
+						function tarkiste($sscc) {
+
+							$kerroin = 3; // kerroin aluks 3
+							$summa   = 0; // summa nolla tietty
+
+							// loopataan luvut oikeelta vasemmalle
+							for ($i = 16; $i >= 0; $i--) {
+								$summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
+								$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
+							}
+
+							$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
+
+							return $sscc;
+						}
+					}
+
+					$sscc = 1;
+					$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
+					$sscc .= sprintf('%06.06d', substr($rakirrow['rahtikirjanro'], -6));
+					$sscc .= sprintf('%02.02d', $dpdi);
+					$loppu = tarkiste($sscc);
+					$sscc = $sscc.$loppu;
+
+					$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
+
+				}
+
+				$linkurl = substr($linkurl,0,-4); // vika br pois
 
 			}
-
-			$linkurl = substr($linkurl,0,-4); // vika br pois
-
+			else {
+				$linkurl = $rakirrow['rahtikirjanro'];
+			}
 		}
-		else {
-			$linkurl = $rakirrow['rahtikirjanro'];
-		}
-
+		
 		echo "<tr><th colspan='4'>".t("Toimitustapa")." / ".t("Rahtikirjanro")."</th><th colspan='2'>".t("Toimitusehto")."</th></tr>";
 		echo "<tr><td colspan='4'>$laskurow[toimitustapa] / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td></tr>";
 	}
@@ -1075,7 +1079,7 @@
 
 				$borderlask--;
 			}
-			elseif ($borderlask == $pkrow[1] and $pkrow[1] > 0) {
+			elseif (isset($pkrow) and $borderlask == $pkrow[1] and $pkrow[1] > 0) {
 				$classlisa = $class." style='border-top: 1px solid; border-right: 1px solid;' ";
 				$class    .= " style='border-top: 1px solid;' ";
 
@@ -1099,7 +1103,7 @@
 				$borderlask--;
 			}
 
-			if ($tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
+			if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
 
 				echo "<td $class valign='top'>";
 
@@ -1133,6 +1137,16 @@
 			}
 
 			if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $kukarow['extranet'] == '') {
+				
+				$query = "	SELECT *
+							FROM varastopaikat
+							WHERE
+							concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0')) and
+							concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0'))
+							and yhtio = '$kukarow[yhtio]'";
+				$varesult = mysql_query($query) or pupe_error($query);
+				$varow = mysql_fetch_assoc($varesult);
+				
 				if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
 					echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
 				}
@@ -1163,7 +1177,15 @@
 				echo "</td>";
 			}
 			elseif (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $kukarow['extranet'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-
+				$query = "	SELECT *
+							FROM varastopaikat
+							WHERE
+							concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0')) and
+							concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0'))
+							and yhtio = '$kukarow[yhtio]'";
+				$varesult = mysql_query($query) or pupe_error($query);
+				$varow = mysql_fetch_assoc($varesult);
+				
 				if ($varow['maa'] != '' ) {
 					echo "<td $class align='left' valign='top'><img src='".$palvelin2."flag_icons/gif/".strtolower($varow['maa']).".gif'></td>";
 				}
@@ -1398,7 +1420,7 @@
 				if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
 					$cspan++;
 				}
-				if ($tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
+				if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
 					$cspan++;
 				}
 
@@ -1439,7 +1461,7 @@
 			if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
 				$colspan++;
 			}
-			if ($tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
+			if (isset($tyyppisarake) and $tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
 				$colspan++;
 			}
 			if ($kukarow["extranet"] != "") {

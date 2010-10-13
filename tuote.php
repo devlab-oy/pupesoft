@@ -2,11 +2,18 @@
 
 	require("inc/parametrit.inc");
 
+	if (!isset($tee)) 		 	 $tee = "";
+	if (!isset($toim)) 		 	 $toim = "";
+	if (!isset($lopetus)) 	 	 $lopetus = "";
+	if (!isset($toim_kutsu)) 	 $toim_kutsu = "";
+	if (!isset($ulos)) 		 	 $ulos = "";
+	if (!isset($livesearch_tee)) $livesearch_tee = "";
+	
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
 	}
-
+	
 	// Liitetiedostot popup
 	if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
 		liite_popup("AK", $tuotetunnus, $width, $height);
@@ -193,7 +200,7 @@
 		echo "<font class='message'>".t("Tuotetiedot")."</font><hr>";
 
 		$query = "	SELECT tuote.*,
-					if(tuote.status = '', 'A', tuote.status) status,
+					if (tuote.status = '', 'A', tuote.status) status,
 					date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
 					group_concat(distinct concat(tuotteen_toimittajat.toimittaja, ' ', toimi.nimi) order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
 					group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '<br>') osto_era,
@@ -327,7 +334,7 @@
 							and valkoodi = '$hintavalrow[valkoodi]'
 							and maa = '$hintavalrow[maa]'
 							and laji = ''
-							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
 							limit 1";
 				$hintaresult = mysql_query($query) or pupe_error($query);
@@ -653,7 +660,7 @@
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
 								concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-								varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
 					 			FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -676,7 +683,7 @@
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-								varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
 					 			FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -828,8 +835,8 @@
 			}
 
 			// Tilausrivit t‰lle tuotteelle
-			$query = "	SELECT if(asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
-						if(tilausrivi.tyyppi!='O' and tilausrivi.tyyppi!='W', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm,
+			$query = "	SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
+						if (tilausrivi.tyyppi!='O' and tilausrivi.tyyppi!='W', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm,
 						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro, tilausrivi.jaksotettu, tilausrivin_lisatiedot.osto_vai_hyvitys
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -883,51 +890,51 @@
 							$keikka = " / ".$jtrow["keikkanro"];
 						}
 					}
-					elseif($jtrow["tyyppi"] == "E") {
+					elseif ($jtrow["tyyppi"] == "E") {
 						$tyyppi = t("Ennakkotilaus");
 						$merkki = "-";
 					}
-					elseif($jtrow["tyyppi"] == "G" and $jtrow["tilaustyyppi"] == "S") {
+					elseif ($jtrow["tyyppi"] == "G" and $jtrow["tilaustyyppi"] == "S") {
 						$tyyppi = t("Sis‰inen tyˆm‰‰r‰ys");
 						$merkki = "-";
 					}
-					elseif($jtrow["tyyppi"] == "G") {
+					elseif ($jtrow["tyyppi"] == "G") {
 						$tyyppi = t("Varastosiirto");
 						$merkki = "-";
 					}
-					elseif($jtrow["tyyppi"] == "V") {
+					elseif ($jtrow["tyyppi"] == "V") {
 						$tyyppi = t("Kulutus");
 						$merkki = "-";
 					}
-					elseif($jtrow["tyyppi"] == "L" and $jtrow["var"] == "J") {
+					elseif ($jtrow["tyyppi"] == "L" and $jtrow["var"] == "J") {
 						$tyyppi = t("J‰lkitoimitus");
 						$merkki = "-";
 					}
-					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] > 0 and $jtrow["osto_vai_hyvitys"] == "H") {
+					elseif ($jtrow["tyyppi"] == "L" and $jtrow["kpl"] > 0 and $jtrow["osto_vai_hyvitys"] == "H") {
 						// Marginaalioston hyvitys
 						$tyyppi = t("K‰ytetyn tavaran hyvitys");
 						$merkki = "-";
 					}
-					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] > 0) {
+					elseif ($jtrow["tyyppi"] == "L" and $jtrow["kpl"] > 0) {
 						// Normimyynti
 						$tyyppi = t("Myynti");
 						$merkki = "-";
 					}
-					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] < 0 and $jtrow["osto_vai_hyvitys"] != "O") {
+					elseif ($jtrow["tyyppi"] == "L" and $jtrow["kpl"] < 0 and $jtrow["osto_vai_hyvitys"] != "O") {
 						// Normihyvitys
 						$tyyppi = t("Hyvitys");
 						$merkki = "+";
 					}
-					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] < 0 and $jtrow["osto_vai_hyvitys"] == "O") {
+					elseif ($jtrow["tyyppi"] == "L" and $jtrow["kpl"] < 0 and $jtrow["osto_vai_hyvitys"] == "O") {
 						// Marginaaliosto
 						$tyyppi = t("K‰ytetyn tavaran osto");
 						$merkki = "+";
 					}
-					elseif(($jtrow["tyyppi"] == "W" or $jtrow["tyyppi"] == "M") and $jtrow["tilaustyyppi"] == "W") {
+					elseif (($jtrow["tyyppi"] == "W" or $jtrow["tyyppi"] == "M") and $jtrow["tilaustyyppi"] == "W") {
 						$tyyppi = t("Valmistus");
 						$merkki = "+";
 					}
-					elseif(($jtrow["tyyppi"] == "W" or $jtrow["tyyppi"] == "M") and $jtrow["tilaustyyppi"] == "V") {
+					elseif (($jtrow["tyyppi"] == "W" or $jtrow["tyyppi"] == "M") and $jtrow["tilaustyyppi"] == "V") {
 						$tyyppi = t("Asiakkaallevalmistus");
 						$merkki = "+";
 					}
@@ -974,12 +981,12 @@
 			}
 
 			if ($toim != "TYOMAARAYS_ASENTAJA") {
-				if(!isset($raportti)) {
-					if($tuoterow["tuotetyyppi"] == "R") $raportti="KULUTUS";
+				if (!isset($raportti)) {
+					if ($tuoterow["tuotetyyppi"] == "R") $raportti="KULUTUS";
 					else $raportti="MYYNTI";
 				}
 
-				if($raportti == "KULUTUS") $sele["K"] = "checked";
+				if ($raportti == "KULUTUS") $sele["K"] = "checked";
 				else $sele["M"] = "checked";
 
 				echo "<form action='$PHP_SELF#Raportit' method='post'>
@@ -1003,18 +1010,18 @@
 					$taavuosi = date('Y');
 
 					$query = "	SELECT
-								round(sum(if(laskutettuaika >= date_sub(now(),interval 30 day), rivihinta,0)), $yhtiorow[hintapyoristys])	summa30,
-								round(sum(if(laskutettuaika >= date_sub(now(),interval 30 day), kate,0)), $yhtiorow[hintapyoristys])  		kate30,
-								sum(if(laskutettuaika >= date_sub(now(),interval 30 day), kpl,0))  											kpl30,
-								round(sum(if(laskutettuaika >= date_sub(now(),interval 90 day), rivihinta,0)), $yhtiorow[hintapyoristys])	summa90,
-								round(sum(if(laskutettuaika >= date_sub(now(),interval 90 day), kate,0)), $yhtiorow[hintapyoristys])		kate90,
-								sum(if(laskutettuaika >= date_sub(now(),interval 90 day), kpl,0))											kpl90,
-								round(sum(if(YEAR(laskutettuaika) = '$taavuosi', rivihinta,0)), $yhtiorow[hintapyoristys])	summaVA,
-								round(sum(if(YEAR(laskutettuaika) = '$taavuosi', kate,0)), $yhtiorow[hintapyoristys])		kateVA,
-								sum(if(YEAR(laskutettuaika) = '$taavuosi', kpl,0))											kplVA,
-								round(sum(if(YEAR(laskutettuaika) = '$edvuosi', rivihinta,0)), $yhtiorow[hintapyoristys])	summaEDV,
-								round(sum(if(YEAR(laskutettuaika) = '$edvuosi', kate,0)), $yhtiorow[hintapyoristys])		kateEDV,
-								sum(if(YEAR(laskutettuaika) = '$edvuosi', kpl,0))											kplEDV
+								round(sum(if (laskutettuaika >= date_sub(now(),interval 30 day), rivihinta,0)), $yhtiorow[hintapyoristys])	summa30,
+								round(sum(if (laskutettuaika >= date_sub(now(),interval 30 day), kate,0)), $yhtiorow[hintapyoristys])  		kate30,
+								sum(if (laskutettuaika >= date_sub(now(),interval 30 day), kpl,0))  											kpl30,
+								round(sum(if (laskutettuaika >= date_sub(now(),interval 90 day), rivihinta,0)), $yhtiorow[hintapyoristys])	summa90,
+								round(sum(if (laskutettuaika >= date_sub(now(),interval 90 day), kate,0)), $yhtiorow[hintapyoristys])		kate90,
+								sum(if (laskutettuaika >= date_sub(now(),interval 90 day), kpl,0))											kpl90,
+								round(sum(if (YEAR(laskutettuaika) = '$taavuosi', rivihinta,0)), $yhtiorow[hintapyoristys])	summaVA,
+								round(sum(if (YEAR(laskutettuaika) = '$taavuosi', kate,0)), $yhtiorow[hintapyoristys])		kateVA,
+								sum(if (YEAR(laskutettuaika) = '$taavuosi', kpl,0))											kplVA,
+								round(sum(if (YEAR(laskutettuaika) = '$edvuosi', rivihinta,0)), $yhtiorow[hintapyoristys])	summaEDV,
+								round(sum(if (YEAR(laskutettuaika) = '$edvuosi', kate,0)), $yhtiorow[hintapyoristys])		kateEDV,
+								sum(if (YEAR(laskutettuaika) = '$edvuosi', kpl,0))											kplEDV
 								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 								WHERE yhtio='$kukarow[yhtio]'
 								and tyyppi='L'
@@ -1079,7 +1086,7 @@
 
 						$kk--;
 
-						if($kk == 0) {
+						if ($kk == 0) {
 							$kk = 12;
 							$vv--;
 						}
@@ -1129,19 +1136,19 @@
 						$alku="$vv-".sprintf("%02s",$kk)."-01 00:00:00";
 						$ed=($vv-1)."-".sprintf("%02s",$kk)."-01 00:00:00";
 
-						if($select_summa=="") {
-							$select_summa .= "	  SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
-												, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_kulutus_$kk
-												, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 ed_kpl_myynti_$kk
-												, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_kulutus_$kk
+						if ($select_summa=="") {
+							$select_summa .= "	  SUM(if (tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
+												, SUM(if (tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_kulutus_$kk
+												, SUM(if (tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 ed_kpl_myynti_$kk
+												, SUM(if (tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_kulutus_$kk
 
 												";
 						}
 						else {
-							$select_summa .= "	, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
-												, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_kulutus_$kk
-												, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 ed_kpl_myynti_$kk
-												, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_kulutus_$kk
+							$select_summa .= "	, SUM(if (tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
+												, SUM(if (tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_kulutus_$kk
+												, SUM(if (tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 ed_kpl_myynti_$kk
+												, SUM(if (tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_kulutus_$kk
 
 												";
 						}
@@ -1174,7 +1181,7 @@
 						for($y=1;$y<=12;$y++) {
 
 							$kk--;
-							if($kk == 0) {
+							if ($kk == 0) {
 								$kk = 12;
 							}
 
@@ -1183,22 +1190,22 @@
 							$muutos="";
 							$muutos_abs = $lrow[$key] - $lrow["ed_".$key];
 
-							if($lrow["ed_".$key]>0) {
+							if ($lrow["ed_".$key]>0) {
 								$muutos_suht = round((($lrow[$key] / $lrow["ed_".$key])-1)*100,2);
 							}
 							else {
 								$muutos_suht=0;
 							}
 
-							if($muutos_abs<>0) {
+							if ($muutos_abs<>0) {
 								$muutos = "edellinen: ".(int)$lrow["ed_".$key]."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."}";
 							}
 
-							if($muutos_suht<>0 and $lrow[$key]<>0 and $lrow["ed_".$key] <> 0) {
+							if ($muutos_suht<>0 and $lrow[$key]<>0 and $lrow["ed_".$key] <> 0) {
 								$muutos .= " ($muutos_suht%)";
 							}
 
-							if($lrow[$key]<>0) {
+							if ($lrow[$key]<>0) {
 								echo "<td title='$muutos'>".$lrow[$key]."</td>";
 							}
 							else {
@@ -1215,22 +1222,22 @@
 						$muutos="";
 						$muutos_abs = $summa - $ed_summa;
 
-						if($ed_summa>0) {
+						if ($ed_summa>0) {
 							$muutos_suht = round((($summa / $ed_summa)-1)*100,2);
 						}
 						else {
 							$muutos_suht=0;
 						}
 
-						if($muutos_abs<>0) {
+						if ($muutos_abs<>0) {
 							$muutos = "edellinen: ".(int)$ed_summa."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."}";
 						}
 
-						if($muutos_suht<>0 and $summa<>0 and $ed_summa<>0) {
+						if ($muutos_suht<>0 and $summa<>0 and $ed_summa<>0) {
 							$muutos .= " ($muutos_suht%)";
 						}
 
-						if($summa>0) {
+						if ($summa>0) {
 							echo "<td class='tumma' title='$muutos'>".number_format($summa, 2, ',', ' ')."</td></tr>";
 						}
 						else {
@@ -1245,29 +1252,29 @@
 					for($y=1;$y<=12;$y++) {
 
 						$kk--;
-						if($kk == 0) {
+						if ($kk == 0) {
 							$kk = 12;
 						}
 
 						$muutos="";
 						$muutos_abs = $erittely[$kk] - $ed_erittely[$kk];
 
-						if($erittely[$kk]>0) {
+						if ($erittely[$kk]>0) {
 							$muutos_suht = round((($erittely[$kk] / $erittely[$kk])-1)*100,2);
 						}
 						else {
 							$muutos_suht=0;
 						}
 
-						if($muutos_abs<>0) {
+						if ($muutos_abs<>0) {
 							$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."";
 						}
 
-						if($muutos_suht<>0 and $erittely[$kk]<>0 and $ed_erittely[$kk]<>0) {
+						if ($muutos_suht<>0 and $erittely[$kk]<>0 and $ed_erittely[$kk]<>0) {
 							$muutos .= " ($muutos_suht%)";
 						}
 
-						if($erittely[$kk]>0) {
+						if ($erittely[$kk]>0) {
 							echo "<td class='tumma' title='$muutos'>".number_format($erittely[$kk], 2, ',', ' ')."</td>";
 							$gt+=$erittely[$kk];
 						}
@@ -1280,18 +1287,18 @@
 					$muutos="";
 					$muutos_abs = $gt - $ed_gt;
 
-					if($ed_gt>0) {
+					if ($ed_gt>0) {
 						$muutos_suht = round((($gt / $ed_gt)-1)*100,2);
 					}
 					else {
 						$muutos_suht=0;
 					}
 
-					if($muutos_abs<>0) {
+					if ($muutos_abs<>0) {
 						$muutos = "edellinen: ".(int)$ed_gt."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."}";
 					}
 
-					if($muutos_suht<>0 and $gt<>0 and $ed_gt <> 0) {
+					if ($muutos_suht<>0 and $gt<>0 and $ed_gt <> 0) {
 						$muutos .= " ($muutos_suht%)";
 					}
 
@@ -1431,10 +1438,10 @@
 						echo "<td>$sarjarow[lisatieto]</td>";
 
 						//	Katsotaan jos meid‰n pit‰isi liitt‰‰ jotain infoa lis‰tiedoista
-						if(file_exists("inc/generoi_sarjanumeron_info.inc")) {
+						if (file_exists("inc/generoi_sarjanumeron_info.inc")) {
 							require("inc/generoi_sarjanumeron_info.inc");
 							$sarjainfo = generoi_sarjanumeron_info($sarjarow["sarjanumero"]);
-							if($sarjainfo!="") {
+							if ($sarjainfo!="") {
 								echo "<td class='back'>$sarjainfo</td>";
 							}
 						}
@@ -1565,7 +1572,7 @@
 				}
 
 				$query = "	SELECT tapahtuma.tuoteno, ifnull(kuka.nimi, tapahtuma.laatija) laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
-							if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus,
+							if (tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus,
 							concat_ws(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) tapapaikka,
 							concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 							round(100*tilausrivi.kate/tilausrivi.rivihinta, 2) katepros,

@@ -8,20 +8,19 @@
 	if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
 
 		$sel = array();
-		$sel[$trow[$i]] = "selected";
+		$sel[$trow[$i]] = "SELECTED";
 
 		$ulos = "<td><select name='$nimi'>";
 		
-		$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]'";
+		$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]'";
 		$kires = mysql_query($query) or pupe_error($query);
 
 		$ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-		while ($kirow=mysql_fetch_array($kires)) {
-			if ($kirow["tunnus"]==$row[$i]) $select='SELECTED';
-			else $select = '';
-
-			$ulos .= "<option value='$kirow[tunnus]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
+		while ($kirow = mysql_fetch_array($kires)) {
+			$ulos .= "<option value='$kirow[tunnus]' "; 
+			if(isset($sel[$kirow["tunnus"]])) $ulos .= $sel[$kirow["tunnus"]]; 
+			$ulos .=">$kirow[kirjoitin]</option>";
 		}
 
 		$ulos .= "</select></td>";
@@ -153,6 +152,5 @@
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
-	}
-		
+	}		
 ?>

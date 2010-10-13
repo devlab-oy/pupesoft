@@ -10,8 +10,41 @@
 	elseif (@include("parametrit.inc"));
 	else exit;
 
-	$logistiikka_yhtio = '';
-	$logistiikka_yhtiolisa = '';
+	if (!isset($logistiikka_yhtio)) 	$logistiikka_yhtio = "";
+	if (!isset($logistiikka_yhtiolisa)) $logistiikka_yhtiolisa = "";
+	if (!isset($asiakasid)) 			$asiakasid = "";
+	if (!isset($toimittajaid)) 			$toimittajaid = "";
+	if (!isset($tee)) 					$tee = "";
+	if (!isset($laskunro)) 				$laskunro = "";
+	if (!isset($ytunnus)) 				$ytunnus = "";
+	if (!isset($lopetus)) 				$lopetus = "";
+	if (!isset($toim) or $toim == "") 	$toim = "LASKU";
+	if (!isset($kieli) or $kieli == "") $kieli = $yhtiorow["kieli"];	
+	if (!isset($tila)) 					$tila = "";
+	if (!isset($tunnus)) 				$tunnus = "";
+	if (!isset($laskunroloppu)) 		$laskunroloppu = "";
+
+	if ($toim == "OSOITELAPPU") {
+		//osoitelapuille on v‰h‰n eri p‰iv‰m‰‰r‰vaatimukset kuin muilla
+		if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+		if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+		if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	}
+	elseif ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
+		//N‰iss‰ kaupoissa voi kest‰‰ v‰h‰n kauemmin
+		if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+		if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+		if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+	}
+	else {
+		if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+		if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+		if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	}
+
+	if (!isset($kkl)) $kkl = date("m");
+	if (!isset($vvl)) $vvl = date("Y");
+	if (!isset($ppl)) $ppl = date("d");
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
 		$logistiikka_yhtio = $konsernivarasto_yhtiot;
@@ -26,8 +59,6 @@
 		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
-	if ($toim == "") $toim = "LASKU";
-
 	if ($tee == 'NAYTAHTML') {
 		if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
 			echo "<font class='head'>",t("Yhtiˆn")," $yhtiorow[nimi] ",t("tilaus")," $tunnus:</font><hr>";
@@ -37,6 +68,7 @@
 		}
 
 		require ("raportit/naytatilaus.inc");
+
 		echo "<br><br>";
 		$tee = "ETSILASKU";
 	}
@@ -216,14 +248,12 @@
 		}
 	}
 
-	if (!isset($kieli) or $kieli == "") {
-		$kieli = $yhtiorow["kieli"];
-	}
+
 
 	if ($tee != 'NAYTATILAUS') {
-		
+
 		js_popup(-100);
-		
+
 		//syˆtet‰‰n tilausnumero
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='hakuformi'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
@@ -335,40 +365,6 @@
 			echo "</tr>";
 		}
 
-		if ($toim == "OSOITELAPPU") {
-			//osoitelapuille on v‰h‰n eri p‰iv‰m‰‰r‰vaatimukset kuin muilla
-			if (!isset($kka))
-				$kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-			if (!isset($vva))
-				$vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-			if (!isset($ppa))
-				$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-		}
-		elseif ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
-			//N‰iss‰ kaupoissa voi kest‰‰ v‰h‰n kauemmin
-			if (!isset($kka))
-				$kka = date("m",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-			if (!isset($vva))
-				$vva = date("Y",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-			if (!isset($ppa))
-				$ppa = date("d",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-		}
-		else {
-			if (!isset($kka))
-				$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-			if (!isset($vva))
-				$vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-			if (!isset($ppa))
-				$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-		}
-
-		if (!isset($kkl))
-			$kkl = date("m");
-		if (!isset($vvl))
-			$vvl = date("Y");
-		if (!isset($ppl))
-			$ppl = date("d");
-
 		echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
 				<td><input type='text' name='ppa' value='$ppa' size='3'></td>
 				<td><input type='text' name='kka' value='$kka' size='3'></td>
@@ -391,16 +387,18 @@
 		$where2 		= "";
 		$where3 		= "";
 
-		$wherenimi = "	and lasku.nimi			= '$asiakasrow[nimi]'
-					 	and lasku.nimitark		= '$asiakasrow[nimitark]'
-					 	and lasku.osoite		= '$asiakasrow[osoite]'
-					 	and lasku.postino		= '$asiakasrow[postino]'
-					 	and lasku.postitp		= '$asiakasrow[postitp]'
-					 	and lasku.toim_nimi		= '$asiakasrow[toim_nimi]'
-					 	and lasku.toim_nimitark	= '$asiakasrow[toim_nimitark]'
-					 	and lasku.toim_osoite	= '$asiakasrow[toim_osoite]'
-					 	and lasku.toim_postino	= '$asiakasrow[toim_postino]'
-				 	 	and lasku.toim_postitp	= '$asiakasrow[toim_postitp]' ";
+		if (isset($asiakasrow)) {
+			$wherenimi = "	and lasku.nimi			= '$asiakasrow[nimi]'
+						 	and lasku.nimitark		= '$asiakasrow[nimitark]'
+						 	and lasku.osoite		= '$asiakasrow[osoite]'
+						 	and lasku.postino		= '$asiakasrow[postino]'
+						 	and lasku.postitp		= '$asiakasrow[postitp]'
+						 	and lasku.toim_nimi		= '$asiakasrow[toim_nimi]'
+						 	and lasku.toim_nimitark	= '$asiakasrow[toim_nimitark]'
+						 	and lasku.toim_osoite	= '$asiakasrow[toim_osoite]'
+						 	and lasku.toim_postino	= '$asiakasrow[toim_postino]'
+					 	 	and lasku.toim_postitp	= '$asiakasrow[toim_postitp]' ";
+		}
 
 		if ($toim == "OSTO") {
 			//ostotilaus kyseess‰, ainoa paperi joka voidaan tulostaa on itse tilaus
@@ -505,7 +503,7 @@
 			//valmistuslista
 			$where1 .= " lasku.tila = 'V' ";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -522,7 +520,7 @@
 			//myyntilasku. T‰lle oliolle voidaan tulostaa laskun kopio
 			$where1 .= " lasku.tila = 'U' ";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -539,7 +537,7 @@
 			//myyntilasku. T‰lle oliolle voidaan tulostaa laskun kopio
 			$where1 .= " lasku.tila = 'U' and lasku.vienti = 'K' ";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -556,7 +554,7 @@
 			//myyntitilaus. Tulostetaan l‰hete.
 			$where1 .= " lasku.tila in ('L','N','V','G') ";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -574,7 +572,7 @@
 			//myyntitilaus. Tulostetaan l‰hete.
 			$where1 .= " lasku.tila in ('L','N','V') ";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -591,7 +589,7 @@
 			//myyntitilaus. Tulostetaan osoitelappuja.
 			$where1 .= " lasku.tila in ('L','G') ";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -608,7 +606,7 @@
 			//myyntitilaus. Tulostetaan vientieruttely.
 			$where1 .= " lasku.tila = 'U' and lasku.vienti != '' ";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -625,7 +623,7 @@
 			//myyntitilaus. Tulostetaan proforma.
 			$where1 .= " lasku.tila in ('L','N','V','E')";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -642,7 +640,7 @@
 			//myyntitilaus.
 			$where1 .= " lasku.tila in ('E','N','L','R','A','V')";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -659,7 +657,7 @@
 			//myyntitilaus.
 			$where1 .= " lasku.tila in ('0')";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -676,7 +674,7 @@
 			// Tulostellaan venemyyntiin liittyvi‰ osia
 			$where1 .= " lasku.tila in ('L','T','N') ";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -693,7 +691,7 @@
 			/// Tyˆm‰‰r‰ys
 			$where1 .= " lasku.tila in ('L','A','N','S','T')";
 
-			if ($ytunnus{0} == '£') {
+			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
 			}
 			elseif ($asiakasid > 0) {
@@ -857,7 +855,7 @@
 				echo "<tr>";
 
 				$ero="td";
-				if ($tunnus==$row['tunnus']) $ero="th";
+				if ($tunnus == $row['tunnus']) $ero="th";
 
 				echo "<tr>";
 				if ($logistiikka_yhtio != '') echo "<$ero valign='top'>$row[yhtio_nimi]</$ero>";

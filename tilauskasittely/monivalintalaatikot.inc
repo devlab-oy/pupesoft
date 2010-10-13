@@ -7,6 +7,9 @@
 	if (!isset($noautosubmit)) {
 		$autosubmit = " onchange='submit();' ";
 	}
+	else {
+		$autosubmit = "";
+	}
 
 	// Näytetäänkö osaston ja tuoteryhmän selitteet
 	if ($yhtiorow['naytetaanko_osaston_ja_tryn_selite'] == "K") {
@@ -378,7 +381,7 @@
 	}
 
 	// Rajataanko mitä osastoja näytetään
-	if ($monivalintarajaus != "") {
+	if (isset($monivalintarajaus) and $monivalintarajaus != "") {
 		$monivalintarajaus_osasto = " and avainsana.selite in ($monivalintarajaus)";
 
 		if (trim($lisa_haku_osasto) == '') {

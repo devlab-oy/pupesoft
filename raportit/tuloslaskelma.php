@@ -1,8 +1,8 @@
 <?php
 
 	if (isset($_POST["teetiedosto"])) {
-		if($_POST["teetiedosto"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		if ($_POST["teetiedosto"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "tuloslaskelma.php")  !== FALSE) {
@@ -13,6 +13,29 @@
 			die("<font class='error'>Älä edes yritä!</font>");
 		}
 	}
+
+	// Setataan muuttujat
+	if (!isset($from)) 			$from = "";
+	if (!isset($tltee)) 		$tltee = "";
+	if (!isset($toim)) 			$toim = "";
+	if (!isset($rtaso)) 		$rtaso = "TILI";
+	if (!isset($kaikkikaudet)) 	$kaikkikaudet = "";
+	if (!isset($vertailued)) 	$vertailued = "";
+	if (!isset($vertailubu)) 	$vertailubu = "";
+	if (!isset($ei_yhteensa)) 	$ei_yhteensa = "";
+	if (!isset($konsernirajaus))$konsernirajaus = "";
+	if (!isset($sarakebox)) 	$sarakebox = "";
+	if (!isset($tkausi)) 		$tkausi = "";
+	if (!isset($ulisa)) 		$ulisa = "";
+	if (!isset($lisa)) 			$lisa = "";
+	if (!isset($toim_tee)) 		$toim_tee = "";
+
+	if (!isset($desi) or $desi == "") $desi = "0";
+	if (!isset($tyyppi) or $tyyppi == "") $tyyppi = "4";
+	if (!isset($tarkkuus) or $tarkkuus == "") $tarkkuus = "1";
+	if (!isset($alvp) or $alvp == "") $alvp = date("d", mktime(0, 0, 0, (date("m")+1), 0, date("Y")));
+	if (!isset($alvv) or $alvv == "") $alvv = date("Y");
+	if (!isset($alvk) or $alvk == "") $alvk = date("m");
 
 	if (isset($teetiedosto)) {
 		if ($teetiedosto == "lataa_tiedosto") {
@@ -32,6 +55,53 @@
 			echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
 		}
 
+
+		if ($tltee == "aja") {
+
+			if ($tyyppi == 4) {
+				$sisulk = "sisainen";
+				$sisulk_txt = "sisäinen";
+			}
+			else {
+				$sisulk = "ulkoinen";
+				$sisulk_txt = "ulkoinen";
+			}
+
+			// Katsotaan, että kaikilla tileillä on tasot kunnossa
+			$query = "	SELECT tili.*, taso.tunnus tasotunnus
+		 	            FROM tili
+						LEFT JOIN taso ON taso.yhtio=tili.yhtio and tili.{$sisulk}_taso=taso.taso
+			            WHERE tili.yhtio = '$kukarow[yhtio]'
+						and taso.tunnus is null";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) > 0 ) {
+
+				enable_ajax();
+
+				echo "<br><font class='error'>".t("HUOM").": ".mysql_num_rows($result)." ".t("tililtä puuttuu tai on virheellinen $sisulk_txt taso")."!<br>".t("Jos näillä tielillä on tapahtumia, niin ne eivät näy laskelmassa").".</font><br><a href=\"javascript:toggleGroup('eee')\">".t("Näytä / Piilota")." ".t("tilit")."</a><br><br>";
+
+				if ($toim_tee != "") {
+					echo "<div id='eee' style='display:block'>";
+				}
+				else {
+					echo "<div id='eee' style='display:none'>";
+				}
+
+				echo "<table>";
+				echo "<tr><th>".t("Tili")."</th><th>".t("$sisulk_txt taso")."</th></tr>";
+
+				while ($vrow = mysql_fetch_assoc($result)) {
+					if ($vrow["tasotunnus"] == "") {
+						echo "<tr><td>$vrow[tilino]</td><td>$vrow[ulkoinen_taso]</td></tr>";
+					}
+				}
+
+				echo "</table>";
+				echo "</div>";
+			}
+		}
+
 		if ($tltee == "aja") {
 			if ($plvv * 12 + $plvk > $alvv * 12 + $alvk) {
 				echo "<font class='error'>".t("Alkukausi on päättymiskauden jälkeen")."</font><br>";
@@ -42,9 +112,8 @@
 		//	UI vain jos sille on tarvetta
 		if ($from != "PROJEKTIKALENTERI") {
 			// tehdään käyttöliittymä, näytetään aina
-			$sel = array();
-			if ($tyyppi == "") $tyyppi = "4";
-			$sel[$tyyppi] = "SELECTED";
+			$sel = array(4 => "", 3 => "", "T" => "", 1 => "", 2 => "");
+			if ($tyyppi != "") $sel[$tyyppi] = "SELECTED";
 
 			echo "<br>";
 			echo "	<form action = 'tuloslaskelma.php' method='post'>
@@ -87,6 +156,11 @@
 			$sel[$plvv] = "SELECTED";
 
 			for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+
+				if (!isset($sel[$i])) {
+					$sel[$i] = "";
+				}
+
 				echo "<option value='$i' $sel[$i]>$i</option>";
 			}
 
@@ -95,130 +169,83 @@
 			$sel = array();
 			$sel[$plvk] = "SELECTED";
 
-			echo "<select name='plvk'>
-					<option $sel[01] value = '01'>01</option>
-					<option $sel[02] value = '02'>02</option>
-					<option $sel[03] value = '03'>03</option>
-					<option $sel[04] value = '04'>04</option>
-					<option $sel[05] value = '05'>05</option>
-					<option $sel[06] value = '06'>06</option>
-					<option $sel[07] value = '07'>07</option>
-					<option $sel[08] value = '08'>08</option>
-					<option $sel[09] value = '09'>09</option>
-					<option $sel[10] value = '10'>10</option>
-					<option $sel[11] value = '11'>11</option>
-					<option $sel[12] value = '12'>12</option>
-					</select>";
+			echo "<select name='plvk'>";
+
+			for ($opt = 1; $opt <= 12; $opt++) {
+				$opt = sprintf("%02d", $opt);
+
+				if (!isset($sel[$opt])) {
+					$sel[$opt] = "";
+				}
+
+				echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+			}
+
+			echo "</select>";
 
 			$sel = array();
 			$sel[$plvp] = "SELECTED";
 
-			echo "<select name='plvp'>
-					<option $sel[01] value = '01'>01</option>
-					<option $sel[02] value = '02'>02</option>
-					<option $sel[03] value = '03'>03</option>
-					<option $sel[04] value = '04'>04</option>
-					<option $sel[05] value = '05'>05</option>
-					<option $sel[06] value = '06'>06</option>
-					<option $sel[07] value = '07'>07</option>
-					<option $sel[08] value = '08'>08</option>
-					<option $sel[09] value = '09'>09</option>
-					<option $sel[10] value = '10'>10</option>
-					<option $sel[11] value = '11'>11</option>
-					<option $sel[12] value = '12'>12</option>
-					<option $sel[13] value = '13'>13</option>
-					<option $sel[14] value = '14'>14</option>
-					<option $sel[15] value = '15'>15</option>
-					<option $sel[16] value = '16'>16</option>
-					<option $sel[17] value = '17'>17</option>
-					<option $sel[18] value = '18'>18</option>
-					<option $sel[19] value = '19'>19</option>
-					<option $sel[20] value = '20'>20</option>
-					<option $sel[21] value = '21'>21</option>
-					<option $sel[22] value = '22'>22</option>
-					<option $sel[23] value = '23'>23</option>
-					<option $sel[24] value = '24'>24</option>
-					<option $sel[25] value = '25'>25</option>
-					<option $sel[26] value = '26'>26</option>
-					<option $sel[27] value = '27'>27</option>
-					<option $sel[28] value = '28'>28</option>
-					<option $sel[29] value = '29'>29</option>
-					<option $sel[30] value = '30'>30</option>
-					<option $sel[31] value = '31'>31</option>
-					</select>
-					</td></tr>";
+			echo "<select name='plvp'>";
+
+			for ($opt = 1; $opt <= 31; $opt++) {
+				$opt = sprintf("%02d", $opt);
+
+				if (!isset($sel[$opt])) {
+					$sel[$opt] = "";
+				}
+
+				echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+			}
+
+			echo "</select></td></tr>";
 
 			echo "<tr>
 				<th valign='top'>".t("Loppukausi")."</th>
 				<td><select name='alvv'>";
 
 			$sel = array();
-			if ($alvv == "") $alvv = date("Y");
 			$sel[$alvv] = "SELECTED";
 
 			for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
 				echo "<option value='$i' $sel[$i]>$i</option>";
 			}
 
+			echo "</select>";
+
 			$sel = array();
-			if ($alvk == "") $alvk = date("m");
 			$sel[$alvk] = "SELECTED";
+
+			echo "<select name='alvk'>";
+
+			for ($opt = 1; $opt <= 12; $opt++) {
+				$opt = sprintf("%02d", $opt);
+
+				if (!isset($sel[$opt])) {
+					$sel[$opt] = "";
+				}
+
+				echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+			}
 
 			echo "</select>";
 
-			echo "<select name='alvk'>
-					<option $sel[01] value = '01'>01</option>
-					<option $sel[02] value = '02'>02</option>
-					<option $sel[03] value = '03'>03</option>
-					<option $sel[04] value = '04'>04</option>
-					<option $sel[05] value = '05'>05</option>
-					<option $sel[06] value = '06'>06</option>
-					<option $sel[07] value = '07'>07</option>
-					<option $sel[08] value = '08'>08</option>
-					<option $sel[09] value = '09'>09</option>
-					<option $sel[10] value = '10'>10</option>
-					<option $sel[11] value = '11'>11</option>
-					<option $sel[12] value = '12'>12</option>
-					</select>";
-
 			$sel = array();
-			if ($alvp == "") $alvp = date("d", mktime(0, 0, 0, (date("m")+1), 0, date("Y")));
 			$sel[$alvp] = "SELECTED";
 
-			echo "<select name='alvp'>
-					<option $sel[01] value = '01'>01</option>
-					<option $sel[02] value = '02'>02</option>
-					<option $sel[03] value = '03'>03</option>
-					<option $sel[04] value = '04'>04</option>
-					<option $sel[05] value = '05'>05</option>
-					<option $sel[06] value = '06'>06</option>
-					<option $sel[07] value = '07'>07</option>
-					<option $sel[08] value = '08'>08</option>
-					<option $sel[09] value = '09'>09</option>
-					<option $sel[10] value = '10'>10</option>
-					<option $sel[11] value = '11'>11</option>
-					<option $sel[12] value = '12'>12</option>
-					<option $sel[13] value = '13'>13</option>
-					<option $sel[14] value = '14'>14</option>
-					<option $sel[15] value = '15'>15</option>
-					<option $sel[16] value = '16'>16</option>
-					<option $sel[17] value = '17'>17</option>
-					<option $sel[18] value = '18'>18</option>
-					<option $sel[19] value = '19'>19</option>
-					<option $sel[20] value = '20'>20</option>
-					<option $sel[21] value = '21'>21</option>
-					<option $sel[22] value = '22'>22</option>
-					<option $sel[23] value = '23'>23</option>
-					<option $sel[24] value = '24'>24</option>
-					<option $sel[25] value = '25'>25</option>
-					<option $sel[26] value = '26'>26</option>
-					<option $sel[27] value = '27'>27</option>
-					<option $sel[28] value = '28'>28</option>
-					<option $sel[29] value = '29'>29</option>
-					<option $sel[30] value = '30'>30</option>
-					<option $sel[31] value = '31'>31</option>
-					</select>
-					</td></tr>";
+			echo "<select name='alvp'>";
+
+			for ($opt = 1; $opt <= 31; $opt++) {
+				$opt = sprintf("%02d", $opt);
+
+				if (!isset($sel[$opt])) {
+					$sel[$opt] = "";
+				}
+
+				echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+			}
+
+			echo "</select></td></tr>";
 
 			echo "<tr><th valign='top'>".t("tai koko tilikausi")."</th>";
 
@@ -232,7 +259,7 @@
 
 			while ($vrow=mysql_fetch_assoc($vresult)) {
 				$sel="";
-				if ($trow[$i] == $vrow["tunnus"]) {
+				if ($tkausi == $vrow["tunnus"]) {
 					$sel = "selected";
 				}
 				echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
@@ -260,21 +287,19 @@
 
 			echo "</select></td></tr>";
 
-			$sel = array();
-			if ($tarkkuus == "") $tarkkuus = 1;
+			$sel = array(1 => "", 1000 => "", 10000 => "", 100000 => "", 1000000 => "");
 			$sel[$tarkkuus] = "SELECTED";
 
-			echo "<tr><th valign='top'>".t("Lukujen taarkkuus")."</th>
+			echo "<tr><th valign='top'>".t("Lukujen tarkkuus")."</th>
 					<td><select name='tarkkuus'>
-						<option $sel[1]    value='1'>".t("Älä jaa lukuja")."</option>
+						<option $sel[1]   value='1'>".t("Älä jaa lukuja")."</option>
 						<option $sel[1000] value='1000'>".t("Jaa 1000:lla")."</option>
 						<option $sel[10000] value='10000'>".t("Jaa 10 000:lla")."</option>
 						<option $sel[100000] value='100000'>".t("Jaa 100 000:lla")."</option>
 						<option $sel[1000000] value='1000000'>".t("Jaa 1 000 000:lla")."</option>
 						</select>";
 
-			$sel = array();
-			if ($desi == "") $desi = "0";
+			$sel = array(0 => "", 1 => "", 2 => "");
 			$sel[$desi] = "SELECTED";
 
 			echo "<select name='desi'>
@@ -287,7 +312,7 @@
 			if ($kaikkikaudet != "") $kauchek = "SELECTED";
 			if ($vertailued != "")   $vchek = "CHECKED";
 			if ($vertailubu != "")   $bchek = "CHECKED";
-			if ($eiyhteensa != "")   $ychek = "CHECKED";
+			if ($ei_yhteensa != "")   $ychek = "CHECKED";
 
 			echo "<tr><th valign='top'>".t("Näkymä")."</th>";
 
@@ -295,7 +320,7 @@
 					<option value=''>".t("Näytä vain viimeisin kausi")."</option>
 					<option value='o' $kauchek>".t("Näytä kaikki kaudet")."</option>
 					</select>
-					<br>&nbsp;<input type='checkbox' name='eiyhteensa' $ychek> ".t("Ei yhteensäsaraketta")."
+					<br>&nbsp;<input type='checkbox' name='ei_yhteensa' $ychek> ".t("Ei yhteensäsaraketta")."
 					</td></tr>";
 
 			echo "<tr><th valign='top'>".t("Vertailu")."</th>";
@@ -306,7 +331,7 @@
 
 			echo "<tr><th valign='top'>".t("Konsernirajaus")."</th>";
 
-			$konsel = array();
+			$konsel = array("AT" => "", "T" => "", "A" => "");
 			$konsel[$konsernirajaus] = "SELECTED";
 
 			echo "<td><select name='konsernirajaus'>
@@ -319,7 +344,7 @@
 
 			echo "<tr><th valign='top'>".t("Sarakkeet")."</th>";
 
-			$bchek = array();
+			$bchek = array("KUSTP" => "", "KOHDE" => "", "PROJEKTI" => "", "ASOSASTO" => "", "ASRYHMA" => "");
 
 			if (is_array($sarakebox)) {
 				foreach ($sarakebox as $sara => $sarav) {
@@ -347,7 +372,6 @@
 		}
 
 		if ($tltee == "aja") {
-
 			// Desimaalit
 			$muoto = "%.". (int) $desi . "f";
 
@@ -452,7 +476,7 @@
 				$vertailubu = "";
 
 				// Näitä tarvitaan kun piirretään headerit
-				$query = "	SELECT tunnus, concat_ws(' - ', if(koodi='', NULL, koodi), nimi) nimi
+				$query = "	SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
 							FROM kustannuspaikka
 							WHERE yhtio = '$kukarow[yhtio]'
 							and kaytossa != 'E'
@@ -473,7 +497,7 @@
 				$vertailubu = "";
 
 				// Näitä tarvitaan kun piirretään headerit
-				$query = "	SELECT tunnus, concat_ws(' - ', if(koodi='', NULL, koodi), nimi) nimi
+				$query = "	SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
 							FROM kustannuspaikka
 							WHERE yhtio = '$kukarow[yhtio]'
 							and kaytossa != 'E'
@@ -494,7 +518,7 @@
 				$vertailubu = "";
 
 				// Näitä tarvitaan kun piirretään headerit
-				$query = "	SELECT tunnus, concat_ws(' - ', if(koodi='', NULL, koodi), nimi) nimi
+				$query = "	SELECT tunnus, concat_ws(' - ', if (koodi='', NULL, koodi), nimi) nimi
 							FROM kustannuspaikka
 							WHERE yhtio = '$kukarow[yhtio]'
 							and kaytossa != 'E'
@@ -594,7 +618,7 @@
 				$paakirjalink = FALSE;
 			}
 
-			$lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//eiyhteensa=$eiyhteensa//vertailued=$vertailued//vertailubu=$vertailubu".str_replace("&","//",$ulisa);
+			$lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//ei_yhteensa=$ei_yhteensa//vertailued=$vertailued//vertailubu=$vertailubu".str_replace("&","//",$ulisa);
 
 			$startmonth	= date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
 			$endmonth 	= date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));
@@ -630,8 +654,8 @@
 				if ($alkuquery1 != "") $alkuquery1 .= " ,";
 				if ($alkuquery2 != "") $alkuquery2 .= " ,";
 
-				$alkuquery1 .= "sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny'\n";
-				$alkuquery2 .= "sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny'\n";
+				$alkuquery1 .= "sum(if (tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny'\n";
+				$alkuquery2 .= "sum(if (tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny'\n";
 
 				$kaudet[] = $headny;
 
@@ -645,8 +669,8 @@
 
 					$headed   = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
 
-					$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
-					$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
+					$alkuquery1 .= " ,sum(if (tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
+					$alkuquery2 .= " ,sum(if (tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
 
 					$kaudet[] = $headed;
 				}
@@ -669,15 +693,15 @@
 			$vkled = date("Y/m", mktime(0, 0, 0, $alvk+1, 0, $alvv-1));
 
 			// Yhteensäotsikkomukaan
-			if ($eiyhteensa == "") {
-				$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
-				$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
+			if ($ei_yhteensa == "") {
+				$alkuquery1 .= " ,sum(if (tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
+				$alkuquery2 .= " ,sum(if (tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
 				$kaudet[] = $vka." - ".$vkl;
 
 				if ($vertailued != "") {
 
-					$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) '$vkaed - $vkled' \n";
-					$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) '$vkaed - $vkled' \n";
+					$alkuquery1 .= " ,sum(if (tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) '$vkaed - $vkled' \n";
+					$alkuquery2 .= " ,sum(if (tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) '$vkaed - $vkled' \n";
 
 					$kaudet[] = $vkaed." - ".$vkled;
 				}
@@ -690,7 +714,7 @@
 			}
 
 			if ($vertailubu != "") {
-				$tilijoini = "JOIN tili ON tiliointi.yhtio=tili.yhtio and tiliointi.tilino=tili.tilino";
+				$tilijoini = "	JOIN tili ON tiliointi.yhtio=tili.yhtio and tiliointi.tilino=tili.tilino";
 			}
 
 			// Haetaan kaikki tiliöinnit
@@ -834,14 +858,16 @@
 								// Summataan kaikkia pienempiä summaustasoja
 								for ($i = $tasoluku - 1; $i >= 0; $i--) {
 									// Summat per kausi/taso
-									$summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
+									if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
+									else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
 								}
 
 								// Summat per taso/tili/kausi
 								$i = $tasoluku - 1;
 								$summakey = $tilirow["tilino"]."###".$tilirow["nimi"];
 
-								$tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$kausi];
+								if (isset($tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake])) $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$kausi];
+								else $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$kausi];
 							}
 						}
 					}
@@ -852,7 +878,7 @@
 			if ($kaikkikaudet == "") {
 				$alkukausi = count($kaudet)-2;
 
-				if ($eiyhteensa == "") {
+				if ($ei_yhteensa == "") {
 					if ($vertailued != "") $alkukausi -= 2;
 					if ($vertailubu != "") $alkukausi -= 2;
 				}
@@ -910,7 +936,7 @@
 
 			if (!function_exists("alku")) {
 				function alku () {
-					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $kaikkikaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev, $sarakkeet;
+					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $kaikkikaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev, $sarakkeet, $ei_yhteensa;
 
 					if ((count($kaudet) > 5 and $kaikkikaudet != "") or count($sarakkeet) > 2) {
 						$firstpage = $pdf->new_page("842x595");
@@ -940,7 +966,7 @@
 						$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
 					}
 
-					if ($data) {
+					if (isset($data) and $data) {
 						$image = $pdf->jfif_embed($data);
 
 						if (!$image) {
@@ -960,8 +986,14 @@
 
 					for ($i = $alkukausi; $i < count($kaudet); $i++) {
 						foreach ($sarakkeet as $sarake) {
-							list($muuarray, $arvo) = explode("::", $sarake);
-							$sarakenimi = ${$muuarray}[$arvo];
+
+							if (strpos($sarake, "::") !== FALSE) {
+								list($muuarray, $arvo) = explode("::", $sarake);
+								$sarakenimi = ${$muuarray}[$arvo];
+							}
+							else {
+								$sarakenimi = "";
+							}
 
 							$oikpos1 = $pdf->strlen($kaudet[$i], $b);
 							$oikpos2 = $pdf->strlen($sarakenimi, $b);
@@ -973,7 +1005,7 @@
 								$oikpos = $oikpos1;
 							}
 
-							if ($i+1 == count($kaudet) and $eiyhteensa == "") {
+							if (($i+1) == count($kaudet) and $ei_yhteensa == "") {
 								$lev = $yhteensasaraklev;
 							}
 							else {
@@ -1023,8 +1055,14 @@
 
 			for ($i = $alkukausi; $i < count($kaudet); $i++) {
 				foreach ($sarakkeet as $sarake) {
-					list($muuarray, $arvo) = explode("::", $sarake);
-					$sarakenimi = ${$muuarray}[$arvo];
+
+					if (strpos($sarake, "::") !== FALSE) {
+						list($muuarray, $arvo) = explode("::", $sarake);
+						$sarakenimi = ${$muuarray}[$arvo];
+					}
+					else {
+						$sarakenimi = "";
+					}
 
 					echo "<td class='tumma' align='right' valign='bottom'>$sarakenimi<br>$kaudet[$i]</td>";
 				}
@@ -1062,48 +1100,52 @@
 
 						$class = "tumma";
 
-						foreach ($tilisumma[$key] as $tilitiedot => $tilisumkau) {
-							$tilirivi2		= "";
-							$tilirivi2_pdf	= "";
-							$tulos			= 0;
+						if (isset($tilisumma[$key])) {
+							foreach ($tilisumma[$key] as $tilitiedot => $tilisumkau) {
+								$tilirivi2		= "";
+								$tilirivi2_pdf	= "";
+								$tulos			= 0;
 
-							for ($i = $alkukausi; $i < count($kaudet); $i++) {
-								foreach ($sarakkeet as $sarake) {
-									$apu = sprintf($muoto, $tilisumkau[$kaudet[$i]][(string) $sarake] * $luku_kerroin / $tarkkuus);
-									if ($apu == 0) $apu = "";
+								for ($i = $alkukausi; $i < count($kaudet); $i++) {
+									foreach ($sarakkeet as $sarake) {
 
-									$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
-									$tilirivi2_pdf .= number_format($apu, $desi, ',', ' ')."#SARAKE#";
+										$apu = 0;
+										if (isset($tilisumkau[$kaudet[$i]][(string) $sarake])) $apu = sprintf($muoto, $tilisumkau[$kaudet[$i]][(string) $sarake] * $luku_kerroin / $tarkkuus);
+										if ($apu == 0) $apu = "";
 
-									if ($tilisumkau[$kaudet[$i]][(string) $sarake] != 0) {
-										$tulos++;
+										$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
+										$tilirivi2_pdf .= number_format($apu, $desi, ',', ' ')."#SARAKE#";
+
+										if ($tilisumkau[$kaudet[$i]][(string) $sarake] != 0) {
+											$tulos++;
+										}
 									}
 								}
-							}
 
-							if ($tulos > 0 or $toim == "TASOMUUTOS") {
+								if ($tulos > 0 or $toim == "TASOMUUTOS") {
 
-								list($tnumero, $tnimi) = explode("###", $tilitiedot);
+									list($tnumero, $tnimi) = explode("###", $tilitiedot);
 
-								$tilirivi	  .= "<tr>";
-								$tilirivi_pdf .= "";
+									$tilirivi	  .= "<tr>";
+									$tilirivi_pdf .= "";
 
-								if ($toim == "TASOMUUTOS") {
-									$tilirivi .= "<td class='back' nowrap>$key</td>";
-									$tilirivi .= "<td class='back' nowrap><input type='checkbox' name='tiliarray[]' value=\"'$tnumero'\"></td>";
+									if ($toim == "TASOMUUTOS") {
+										$tilirivi .= "<td class='back' nowrap>$key</td>";
+										$tilirivi .= "<td class='back' nowrap><input type='checkbox' name='tiliarray[]' value=\"'$tnumero'\"></td>";
+									}
+
+									$tilirivi .= "<td nowrap>";
+
+									if ($paakirjalink) {
+										$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&tili=$tnumero$ulisa$lopelinkki'>$tnumero - $tnimi</a>";
+									}
+									else {
+										$tilirivi .= "$tnumero - $tnimi";
+									}
+
+									$tilirivi .= "</td>$tilirivi2</tr>";
+									$tilirivi_pdf .= "$tnumero - $tnimi#SARAKE#".$tilirivi2_pdf."#RIVI#";
 								}
-
-								$tilirivi .= "<td nowrap>";
-
-								if ($paakirjalink) {
-									$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&tili=$tnumero$ulisa$lopelinkki'>$tnumero - $tnimi</a>";
-								}
-								else {
-									$tilirivi .= "$tnumero - $tnimi";
-								}
-
-								$tilirivi .= "</td>$tilirivi2</tr>";
-								$tilirivi_pdf .= "$tnumero - $tnimi#SARAKE#".$tilirivi2_pdf."#RIVI#";
 							}
 						}
 					}
@@ -1131,7 +1173,9 @@
 							}
 
 							// formatoidaan luku toivottuun muotoon
-							$apu = sprintf($muoto, $summa[$kaudet[$i]][$key][(string) $sarake] * $luku_kerroin / $tarkkuus);
+							$apu = 0;
+
+							if (isset($summa[$kaudet[$i]][$key][(string) $sarake])) $apu = sprintf($muoto, $summa[$kaudet[$i]][$key][(string) $sarake] * $luku_kerroin / $tarkkuus);
 
 							if ($apu == 0) {
 								$apu = ""; // nollat spaseiks
@@ -1190,7 +1234,7 @@
 										$left = $vaslev;
 									}
 									else {
-										if ($pi+1 == count($pdfsarake_array) and $eiyhteensa == "") {
+										if (($pi+1) == count($pdfsarake_array) and $ei_yhteensa == "") {
 											$lev = $yhteensasaraklev;
 										}
 										else {

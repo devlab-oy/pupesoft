@@ -4,7 +4,7 @@
 	$otsikko_nappi = "yrityksen pankkitili";
 
 	$kentat = 'tunnus, nimi, tilino, maksulimitti, oletus_kulutili, oletus_rahatili, oletus_selvittelytili, kaytossa HIDDEN_kaytossa';
-	$jarjestys = 'tunnus';
+	$jarjestys = 'nimi, tunnus';
 
 	if ($nayta_poistetut == "") {
 		$rajauslisa = " and yriti.kaytossa != 'E' ";

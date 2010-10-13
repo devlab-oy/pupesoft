@@ -54,7 +54,13 @@ if(!function_exists("yrititarkista")) {
 				$t[$i]=$pankkitili;
 			}			
 		}
-		
+
+		if (mysql_field_name($result, $i) == "bic" and $t[$i] != "") {
+			if (!tarkista_bic($t[$i])) {
+				$virhe[$i] = t("BIC on virheellinen");
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "tilino") {
 
 			if (strtoupper($yhtiorow['maa']) == 'FI') {

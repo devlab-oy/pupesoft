@@ -601,11 +601,11 @@ if ($tee == 'I') {
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila IN ('H','M','P','Q','Y')
-					AND laskunro = '$toimittajan_laskunumero' 
+					AND laskunro = '$toimittajan_laskunumero'
 					AND tapvm >= date_sub(now(), INTERVAL 12 MONTH)
 					AND liitostunnus = '{$toimittajaid}'";
 		$duplikaattilasku_check_res = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
 			$errormsg .= "<font class='error'>".t("Toimittajalle on jo perustettu lasku")." $toimittajan_laskunumero ".t("kuluvan vuoden aikana")."!</font><br />";
 			$tee = 'E';
@@ -840,22 +840,24 @@ if ($tee == 'P' or $tee == 'E') {
 			if ($trow['pankki3']!='') $pankki .= "<br>$trow[pankki3]";
 			if ($trow['pankki4']!='') $pankki .= "<br>$trow[pankki4]";
 
-			if ($trow['ultilno']=='') { //Toimittajan tilinumero puuttuu. Annetaan sen syöttö
-				echo "<tr><td>".t("Ultilino")."</td><td><input type='text' name='toitilinumero' size=10 value='$toitilinumero'></td></tr>";
-				echo "<tr><td>".t("SWIFT")."</td><td><input type='text' name='toiswift' size=10 value='$toiswift'></td></tr>";
+			if ($trow['ultilno'] == '') { //Toimittajan tilinumero puuttuu. Annetaan sen syöttö
+				echo "<tr><td>".t("Tilinumero")."</td><td><input type='text' name='toitilinumero' size=10 value='$toitilinumero'></td></tr>";
+				echo "<tr><td>".t("BIC")."</td><td><input type='text' name='toiswift' size=10 value='$toiswift'></td></tr>";
 			}
 			else {
-				echo "<tr><td>".t("Ultilino")."</td><td>$trow[ultilno]</td></tr>";
-				echo "<tr><td>".t("SWIFT")."</td><td>$trow[swift]</td></tr>";
+				echo "<tr><td>".t("Tilinumero")."</td><td>$trow[ultilno]</td></tr>";
+				echo "<tr><td>".t("BIC")."</td><td>$trow[swift]</td></tr>";
 				echo "<tr><td>".t("Pankki")."</td><td>$pankki</td></tr>";
 			}
 		}
 		else {
-			if ($trow['tilinumero']=='') { //Toimittajan tilinumero puuttuu. Annetaan sen syöttö
+			if ($trow['tilinumero'] == '') { //Toimittajan tilinumero puuttuu. Annetaan sen syöttö
 				echo "<tr><td>".t("Tilinumero")."</td><td><input type='text' name='toitilinumero' size=10 value='$toitilinumero'></td></tr>";
 			}
 			else {
 				echo "<tr><td>".t("Tilinumero")."</td><td>$trow[tilinumero]</td></tr>";
+				echo "<tr><td>".t("IBAN")."</td><td>$trow[ultilno]</td></tr>";
+				echo "<tr><td>".t("BIC")."</td><td>$trow[swift]</td></tr>";				
 			}
 		}
 		echo "</table>";
@@ -1157,7 +1159,7 @@ if ($tee == 'P' or $tee == 'E') {
 	$query = "	SELECT DISTINCT kuka.kuka, kuka.nimi
 			  	FROM kuka
 				JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
-			  	WHERE kuka.yhtio = '$kukarow[yhtio]' 
+			  	WHERE kuka.yhtio = '$kukarow[yhtio]'
 				and kuka.hyvaksyja = 'o'
 			  	ORDER BY kuka.nimi";
 	$vresult = mysql_query($query) or pupe_error($query);

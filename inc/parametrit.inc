@@ -297,7 +297,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
 }
 // jos sessionia ei ole ja ei olla loginissa, menn‰‰n login ruutuun ja exit...
-elseif ($session == '' and $login != 'yes' and $verkkokauppa == '') {
+elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkkokauppa == '')) {
 
 	if ($phpnimi != 'index.php') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";

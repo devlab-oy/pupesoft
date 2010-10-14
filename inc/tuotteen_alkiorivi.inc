@@ -51,6 +51,8 @@ if (mysql_field_name($result, $i) == "laji") {
 }
 
 if (mysql_field_name($result, $i) == "tuoteno") {
+		$apu['ttuoteno'] = $trow[$i];
+		
 	if($lukitse_avaimeen != "") {
 		$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
 		$jatko = 0;
@@ -61,8 +63,6 @@ if (mysql_field_name($result, $i) == "tuoteno") {
 	}
 }
 
-
-
 if (mysql_field_name($result, $i) == "selite") {
 
 	if ($apu['laji'] == '') {
@@ -70,9 +70,9 @@ if (mysql_field_name($result, $i) == "selite") {
 	}
 	else {
 		
-		$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno={$lukitse_avaimeen}&selite={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=tuote' ";
-		$ulos .= "target='main'> ".t('Valitse tähän puuhun sopivat segmentit')." </a><br />";
-		$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]}</td>";
+		$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno={$apu['ttuoteno']}&selite={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=tuote&mista_tulin={$toim}&toim2={$toim2}' ";
+		$ulos .= "target='main'> ".t('Valitse tähän puuhun sopivat segmentit')." </a><br />\n";
+		$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]}</td>\n";
 	}
 	$jatko = 0;
 }

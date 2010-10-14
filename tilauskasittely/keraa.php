@@ -853,6 +853,32 @@
 											nimitys 	= '$tilrivirow[nimitys]',
 											jaksotettu	= '$tilrivirow[jaksotettu]'";
 								$riviresult = mysql_query($querys) or pupe_error($querys);
+								$lisatty_tun = mysql_insert_id();
+
+								//Kopioidaan tilausrivin lisatiedot
+								$querys = "	SELECT *
+											FROM tilausrivin_lisatiedot
+											WHERE tilausrivitunnus='$tilrivirow[tunnus]' 
+											and yhtio ='$kukarow[yhtio]'";
+								$monistares2 = mysql_query($querys) or pupe_error($querys);
+
+								if (mysql_num_rows($monistares2) > 0) {
+									$monistarow2 = mysql_fetch_array($monistares2);
+
+									$querys = "	INSERT INTO tilausrivin_lisatiedot
+												SET yhtio				= '$kukarow[yhtio]',
+												positio 				= '$monistarow2[positio]',
+												tilausrivilinkki		= '$monistarow2[tilausrivilinkki]',
+												toimittajan_tunnus		= '$monistarow2[toimittajan_tunnus]',
+												ei_nayteta 				= '$monistarow2[ei_nayteta]',
+												tilausrivitunnus		= '$lisatty_tun',
+												erikoistoimitus_myynti 	= '$monistarow2[erikoistoimitus_myynti]',
+												vanha_otunnus			= '$monistarow2[vanha_otunnus]',
+												jarjestys				= '$monistarow2[jarjestys]',
+												luontiaika				= now(),
+												laatija 				= '$kukarow[kuka]'";
+									$riviresult = mysql_query($querys) or pupe_error($querys);
+								}
 
 								$queryera = "SELECT sarjanumeroseuranta FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tilrivirow[tuoteno]'";
 								$sarjares2 = mysql_query($queryera) or pupe_error($queryera);

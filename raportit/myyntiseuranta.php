@@ -410,14 +410,14 @@
 					}
 
 					if ($mukaan == "maa") {
-						if ($group!="") $group .= ",asiakas.maa";
-						else $group  .= "asiakas.maa";
-						$select .= "asiakas.maa maa, ";
-						$order  .= "asiakas.maa,";
+						if ($group!="") $group .= ",lasku.maa";
+						else $group  .= "lasku.maa";
+						$select .= "lasku.maa maa, ";
+						$order  .= "lasku.maa,";
 						$gluku++;
 
 						if ($rajaus[$i] != "") {
-							$lisa .= " and asiakas.maa='$rajaus[$i]' ";
+							$lisa .= " and lasku.maa='$rajaus[$i]' ";
 						}
 					}
 
@@ -435,7 +435,7 @@
 							$select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
 							$order  .= "tuote.tuoteno,";
 							$gluku++;
-						}						
+						}
 						if ($varastonarvo != '') {
 							$select .= "0 varastonarvo, 0 kierto, 0 varastonkpl, ";
 						}
@@ -443,8 +443,8 @@
 						if ($rajaus[$i] != "") {
 							$lisa .= " and tuote.tuoteno='$rajaus[$i]' ";
 						}
-					}										
-					
+					}
+
 					if ($mukaan == "tuotemyyja") {
 						if ($group!="") $group .= ",tuote.myyjanro";
 						else $group  .= "tuote.myyjanro";
@@ -573,10 +573,10 @@
 						}
 
 						$kantaasiakasjoin	= " JOIN laskun_lisatiedot lasklisa ON (lasklisa.yhtio = lasku.yhtio AND lasklisa.otunnus = lasku.tunnus) ";
-						$kantaasiakasjoin  .= " JOIN asiakkaan_avainsanat kantaasiakas ON (kantaasiakas.yhtio = lasku.yhtio AND kantaasiakas.laji = 'kantaasiakastunnus' AND kantaasiakas.liitostunnus = lasku.liitostunnus AND kantaasiakas.avainsana = lasklisa.kantaasiakastunnus) ";						
+						$kantaasiakasjoin  .= " JOIN asiakkaan_avainsanat kantaasiakas ON (kantaasiakas.yhtio = lasku.yhtio AND kantaasiakas.laji = 'kantaasiakastunnus' AND kantaasiakas.liitostunnus = lasku.liitostunnus AND kantaasiakas.avainsana = lasklisa.kantaasiakastunnus) ";
 					}
 				}
-				
+
 				if ($sarjanumerot != '') {
 					$select .= "group_concat(concat(tilausrivi.tunnus,'#',tilausrivi.kpl)) sarjanumero, ";
 				}
@@ -1355,11 +1355,11 @@
 									}
 									$row[$i] = substr($row[$i], 0, -4);
 								}
-								
+
 								// jos kyseessa on varastonarvo
 								if (mysql_field_name($result, $i) == "laskunumero") {
 									list($laskalk, $lasklop) = explode(":", $row[$i]);
-																		
+
 									$row[$i] = $laskalk.":<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=&laskunro=$lasklop' target='_top'>$lasklop</a>";
 								}
 

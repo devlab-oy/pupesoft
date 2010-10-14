@@ -8836,14 +8836,14 @@ if (!function_exists("lapset")) {
 
 // Yksinkertainen funktio joka p‰ivitt‰‰ valitun kategorian valitulle nimelle
 if (!function_exists("paivitakat")) {
-	function paivitakat($isi, $uusinimi, $laji, $kukarow,$koodi) {
+	function paivitakat($isi, $uusinimi, $laji, $kukarow,$koodi,$kategoriaid) {
 
 		if (trim($koodi) == '') {
 
 			$q1 = "LOCK TABLE dynaaminen_puu WRITE";
 			$r = mysql_query($q1) or pupe_error($q1);
 
-			$q2 = "UPDATE dynaaminen_puu set nimi='{$uusinimi}', muutospvm = now(), muuttaja = '$kukarow[kuka]' where nimi='{$isi}' AND laji='{$laji}' AND yhtio='{$kukarow[yhtio]}'";
+			$q2 = "UPDATE dynaaminen_puu set nimi='{$uusinimi}', muutospvm = now(), muuttaja = '$kukarow[kuka]' where nimi='{$isi}' AND tunnus='{$kategoriaid}' AND laji='{$laji}' AND yhtio='{$kukarow[yhtio]}'";
 			$r = mysql_query($q2) or pupe_error($q2);
 
 			$q6 = "UNLOCK TABLES";
@@ -8853,7 +8853,7 @@ if (!function_exists("paivitakat")) {
 			$q1 = "LOCK TABLE dynaaminen_puu WRITE";
 			$r = mysql_query($q1) or pupe_error($q1);
 
-			$q2 = "UPDATE dynaaminen_puu set nimi='{$uusinimi}', muutospvm = now(), muuttaja = '$kukarow[kuka]', koodi='{$koodi}' where nimi='{$isi}' AND laji='{$laji}' AND yhtio='{$kukarow[yhtio]}'";
+			$q2 = "UPDATE dynaaminen_puu set nimi='{$uusinimi}', muutospvm = now(), muuttaja = '$kukarow[kuka]', koodi='{$koodi}' where nimi='{$isi}' AND tunnus='{$kategoriaid}' AND laji='{$laji}' AND yhtio='{$kukarow[yhtio]}'";
 			$r = mysql_query($q2) or pupe_error($q2);
 
 			$q6 = "UNLOCK TABLES";

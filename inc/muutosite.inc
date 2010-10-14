@@ -266,8 +266,11 @@
 						maksu_tili = '',
 						tila = 'M',
 						alatila = '',
-						olmapvm = if(kapvm < now(), erpcm, kapvm)
-						WHERE tunnus='$tunnus' and yhtio = '$kukarow[yhtio]' and tila='Q'";
+						olmapvm = if(kapvm < now(), erpcm, kapvm),
+						popvm = ''
+						WHERE tunnus = '$tunnus'
+						and yhtio = '$kukarow[yhtio]'
+						and tila = 'Q'";
 			$updresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_affected_rows() != 1) { // Jotain meni pieleen
@@ -686,9 +689,9 @@
 		$query = "	UPDATE tiliointi
 					SET korjattu = '$kukarow[kuka]',
 					korjausaika = now()
-					WHERE ltunnus = '$tunnus' 
-					AND	yhtio = '$kukarow[yhtio]' 
-					AND	korjattu = '' 
+					WHERE ltunnus = '$tunnus'
+					AND	yhtio = '$kukarow[yhtio]'
+					AND	korjattu = ''
 					AND tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')";
 		$result = mysql_query($query) or pupe_error($query);
 

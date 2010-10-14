@@ -858,7 +858,7 @@
 								//Kopioidaan tilausrivin lisatiedot
 								$querys = "	SELECT *
 											FROM tilausrivin_lisatiedot
-											WHERE tilausrivitunnus='$tilrivirow[tunnus]' 
+											WHERE tilausrivitunnus='$tilrivirow[tunnus]'
 											and yhtio ='$kukarow[yhtio]'";
 								$monistares2 = mysql_query($querys) or pupe_error($querys);
 
@@ -1093,6 +1093,15 @@
 									and toimitettu  = ''
 									and tyyppi 		= 'L'";
 						$yoimresult = mysql_query($query) or pupe_error($query);
+
+						// Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
+						$query = "	UPDATE lasku SET
+									alatila = 'X'
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus = '$laskurow[tunnus]'
+									AND mapvm != '0000-00-00'
+									AND chn = '999'";
+						$yoimresult  = mysql_query($query) or pupe_error($query);
 					}
 					elseif ($laskurow["tila"] == 'G' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X" and $laskurow["nouto"] == "") {
 						$alatilak = "D";

@@ -778,9 +778,9 @@
 			$query = "	SELECT lasku.tunnus tilaus,
 						concat_ws('<br>', lasku.ytunnus, lasku.nimi, if (lasku.tilausyhteyshenkilo='', NULL, lasku.tilausyhteyshenkilo), if (lasku.viesti='', NULL, lasku.viesti), concat_ws(' ', ifnull((SELECT selitetark_2 FROM avainsana WHERE avainsana.yhtio=tyomaarays.yhtio and avainsana.laji = 'sarjanumeron_li' and avainsana.selite = 'MERKKI' and avainsana.selitetark=tyomaarays.merkki LIMIT 1), tyomaarays.merkki), tyomaarays.mallivari)) asiakas, lasku.luontiaika,
 						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, ";
-						
+
 			if ($kukarow['hinnat'] == 0) $query .= " round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa, ";
-						
+
 			$query .= "	$toimaikalisa alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
@@ -936,7 +936,7 @@
 			$miinus = 3;
 		}
 		elseif ($toim == "LASKUTUSKIELTO") {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.mapvm, lasku.alatila, lasku.tila, lasku.tunnus
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -958,7 +958,7 @@
 				   $sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == 'OSTO') {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext,
@@ -1146,7 +1146,7 @@
 				echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
 
 				if (isset($workbook)) {
-					
+
 					if (mysql_field_name($result,$i) == "asiakas") {
 						$worksheet->write($excelrivi, $ii, t("Ytunnus"), $format_bold);
 						$ii++;
@@ -1154,9 +1154,9 @@
 						$ii++;
 					}
 					else {
-						$worksheet->write($excelrivi, $ii, ucfirst(t(mysql_field_name($result,$i))), $format_bold);	
+						$worksheet->write($excelrivi, $ii, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 						$ii++;
-					}										
+					}
 				}
 			}
 			$excelrivi++;
@@ -1421,18 +1421,18 @@
 						}
 
 						if (isset($workbook)) {
-							
+
 							if ($fieldname == "asiakas") {
 								$nimiosat = explode("<br>", $row[$fieldname]);
-								
+
 								$ytunnari = trim(array_shift($nimiosat));
 								$lopnimit = trim(implode("\n", $nimiosat));
-								
+
 								$worksheet->writeString($excelrivi, $ii, $ytunnari);
 								$ii++;
 								$worksheet->writeString($excelrivi, $ii, $lopnimit);
 								$ii++;
-								
+
 							}
 							elseif (mysql_field_type($result,$i) == 'real') {
 								$worksheet->writeNumber($excelrivi, $ii, sprintf("%.02f", $row[$fieldname]));

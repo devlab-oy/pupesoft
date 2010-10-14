@@ -13,7 +13,7 @@
 
 	if (!function_exists("tee_jt_tilaus")) {
 		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka = '', $tilaus_on_jo = '', $varastosta = '', $olpaikalta = '', $varataan_saldoa = '', $alv = '') {
-			global $yhtiorow, $kukarow, $toim;
+			global $yhtiorow, $kukarow, $toim, $automaattinen_poiminta;
 
 			if ($yhtiorow["varaako_jt_saldoa"] != "") {
 				$lisavarattu = " + tilausrivi.varattu";
@@ -624,7 +624,7 @@
 								}
 							}
 
-							if ($toim != "ENNAKKO" and $tilaus_on_jo == "KYLLA" and strpos($kommentti, t("Toimitettavissa oleva JT-rivi")."!") === FALSE) {
+							if ($automaattinen_poiminta != "" and $toim != "ENNAKKO" and $tilaus_on_jo == "KYLLA" and strpos($kommentti, t("Toimitettavissa oleva JT-rivi")."!") === FALSE) {
 								if (trim($kommentti) != "") $kommentti .= " / ";
 								// Tilausrivin systeemikommentti
 								$kommentti .= t("Toimitettavissa oleva JT-rivi")."!";

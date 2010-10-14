@@ -12,7 +12,7 @@
 		$tila_query  = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tila in ('L','N')
+							AND tila in ('L','N','A','V')
 							AND tunnus = '$tunnus'";
 		$tila_result = mysql_query($tila_query) or pupe_error($tila_query);
 
@@ -29,14 +29,15 @@
 							keratty        = '',
 							kerattyaika    = '',
 							toimitettu     = '',
-							toimitettuaika = '',
-							varattu        = tilkpl,
-							jt             = 0,
-							var            = ''
-							where yhtio='$kukarow[yhtio]' and otunnus='$tunnus'";
+							toimitettuaika = ''
+							where yhtio = '$kukarow[yhtio]'
+							and otunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
-				if ($tila_row["tilaustyyppi"] == "A") {
+				if ($tila_row["tila"] == "V") {
+					$uustila = "V";
+				}
+				elseif ($tila_row["tilaustyyppi"] == "A") {
 					$uustila = "A";
 				}
 				else {
@@ -47,7 +48,8 @@
 							tila    = '$uustila',
 							alatila = '',
 							viite 	= ''
-							where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
 				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$tunnus'";
@@ -61,13 +63,24 @@
 							kerattyaika    = '',
 							toimitettu     = '',
 							toimitettuaika = ''
-							where yhtio='$kukarow[yhtio]' and otunnus='$tunnus'";
+							where yhtio = '$kukarow[yhtio]'
+							and otunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
+				if ($tila_row["tila"] == "V") {
+					$uustila = "V";
+					$uusalatila = "J";
+				}
+				else {
+					$uustila = "N";
+					$uusalatila = "A";
+				}
+
 				$query = "	UPDATE lasku set
-							tila    = 'N',
-							alatila = 'A'
-							where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+							tila    = '$uustila',
+							alatila = '$uusalatila'
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
 				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$tunnus'";
@@ -81,13 +94,22 @@
 							kerattyaika    = '',
 							toimitettu     = '',
 							toimitettuaika = ''
-							where yhtio='$kukarow[yhtio]' and otunnus='$tunnus'";
+							where yhtio = '$kukarow[yhtio]'
+							and otunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
+				if ($tila_row["tila"] == "V") {
+					$uustila = "V";
+				}
+				else {
+					$uustila = "L";
+				}
+
 				$query = "	UPDATE lasku set
-							tila    = 'L',
+							tila    = '$uustila',
 							alatila = 'A'
-							where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
 				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$tunnus'";
@@ -99,13 +121,22 @@
 				$query = "	UPDATE tilausrivi set
 							toimitettu     = '',
 							toimitettuaika = ''
-							where yhtio='$kukarow[yhtio]' and otunnus='$tunnus'";
+							where yhtio = '$kukarow[yhtio]'
+							and otunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
+				if ($tila_row["tila"] == "V") {
+					$uustila = "V";
+				}
+				else {
+					$uustila = "L";
+				}
+
 				$query = "	UPDATE lasku set
-							tila    = 'L',
+							tila    = '$uustila',
 							alatila = 'C'
-							where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
 				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$tunnus'";
@@ -117,18 +148,21 @@
 				$query = "	UPDATE tilausrivi set
 							toimitettu     = '',
 							toimitettuaika = ''
-							where yhtio='$kukarow[yhtio]' and otunnus='$tunnus'";
+							where yhtio = '$kukarow[yhtio]'
+							and otunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
 				$query = "	UPDATE lasku set
 							tila    = 'L',
 							alatila = 'B'
-							where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
 				$query = "	UPDATE rahtikirjat
 							set tulostettu = ''
-							where yhtio='$kukarow[yhtio]' and otsikkonro='$tunnus'";
+							where yhtio = '$kukarow[yhtio]'
+							and otsikkonro = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 			}
 
@@ -144,21 +178,22 @@
 							tila     = 'D',
 							alatila  = tila,
 							comments = '$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa vaihda_tila.php ".date("d.m.y @ G:i:s")."'
-				 			where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+				 			where yhtio = '$kukarow[yhtio]'
+							and tunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
 				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
 				//Nollataan sarjanumerolinkit
-			   $query    = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu
-								FROM tilausrivi
-								JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
-								WHERE tilausrivi.yhtio='$kukarow[yhtio]'
-								and tilausrivi.otunnus='$tunnus'";
+			   $query = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu
+							FROM tilausrivi
+							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+							WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+							and tilausrivi.otunnus='$tunnus'";
 			   $sres = mysql_query($query) or pupe_error($query);
 
-			   while($srow = mysql_fetch_array($sres)) {
+			   while ($srow = mysql_fetch_array($sres)) {
 			       if ($srow["varattu"] > 0) {
 			           $tunken = "myyntirivitunnus";
 			       }
@@ -174,7 +209,6 @@
 			// poistetaan lukot
 			$query = "UNLOCK TABLES";
 			$locre = mysql_query($query) or pupe_error($query);
-
 		}
 
 		$tee = "valitse";
@@ -185,7 +219,7 @@
 		$tila_query  = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tila in ('L','N', 'A')
+							AND tila in ('L','N','A','V')
 							AND tunnus = '$tunnus'";
 		$tila_result = mysql_query($tila_query) or pupe_error($tila_query);
 
@@ -194,31 +228,35 @@
 			$tila_row = mysql_fetch_array($tila_result);
 
 			// vain laskuttamattomille myyntitilaukille voi tehdä jotain
-			if (($tila_row["tila"] == "L" and $tila_row["alatila"] != "X") or ($tila_row["tila"] == "N" and in_array($tila_row["alatila"], array('A','')))) {
+			if (	($tila_row["tila"] == "L" and $tila_row["alatila"] != "X") or
+					($tila_row["tila"] == "N" and in_array($tila_row["alatila"], array('A',''))) or
+					($tila_row["tila"] == "V" and in_array($tila_row["alatila"], array('','A','J','C')))) {
+
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='parametrit' value='$parametrit'>";
 				echo "<input type='hidden' name='tee' value='vaihda'>";
 				echo "<input type='hidden' name='tunnus' value='$tila_row[tunnus]'>";
 
 				echo "<table><tr>";
-				echo "<th>Vaihda tilauksen tila: </th>";
+				echo "<th>".t("Vaihda tilauksen tila").": </th>";
 				echo "<td><select name='tila'>";
-				echo "<option value = ''>Valitse uusi tila</option>";
-				echo "<option value = '999'>Mitätöity</option>";
+				echo "<option value = ''>".t("Valitse uusi tila")."</option>";
+				echo "<option value = '999'>".t("Mitätöity")."</option>";
+
 				if ($tila_row["alatila"] != "") {
-					echo "<option value = '1'>Myyntitilaus kesken</option>";
+					echo "<option value = '1'>".t("Tilaus kesken")."</option>";
 				}
-				if ($tila_row["tila"] == "L" and in_array($tila_row["alatila"], array('A','B','C','D'))) {
-					echo "<option value = '2'>Myyntitilaus tulostusjonossa</option>";
+				if (($tila_row["tila"] == "L" or $tila_row["tila"] == "V") and in_array($tila_row["alatila"], array('A','B','C','D'))) {
+					echo "<option value = '2'>".t("Tilaus tulostusjonossa")."</option>";
 				}
 				if (in_array($tila_row["alatila"], array('B','C','D'))) {
-					echo "<option value = '3'>Lähete tulostettu</option>";
+					echo "<option value = '3'>".t("Lähete tulostettu")."</option>";
 				}
 				if (in_array($tila_row["alatila"], array('B','D'))) {
-					echo "<option value = '4'>Tilaus kerätty</option>";
+					echo "<option value = '4'>".t("Tilaus kerätty")."</option>";
 				}
 				if (in_array($tila_row["alatila"], array('D'))) {
-					echo "<option value = '5'>Rahtikirjatiedot syötetty</option>";
+					echo "<option value = '5'>".t("Rahtikirjatiedot syötetty")."</option>";
 				}
 				echo "</select></td>";
 				echo "<td class='back'><input type='submit' value='".t("Vaihda tila")."'></td>";

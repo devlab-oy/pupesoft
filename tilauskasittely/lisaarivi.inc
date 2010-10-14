@@ -485,10 +485,6 @@
 					}
 					else {
 						//Yritetään myydä korvaava tuote
-//						if ($krmyytavissa > 0) {
-//							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])"); // lisätään tuoteno kommenttin
-//						}
-
 						$korvattiin_korvaavalla = "HIIOHEI!";
 
 						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lisätään tuoteno arrayseen
@@ -1015,6 +1011,8 @@
 
 								// jos ollaan laittamassa muuta tuotetta kun mitä tilattiin, lisätään rivikommentti
 								if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"]) and $myy_tyyppi[$indeksi] == "NORMAALI") {
+
+									// Tilausrivin systeemikommentti
 									$kommentti .= " ".t("HUOM! Korvaa tuotteen")." $alkupera_trow[tuoteno]";
 
 									// oletetaan, että meillä on $edi_tyyppi muuttuja viritetty editilaus_in.inc failista
@@ -1024,6 +1022,7 @@
 								}
 
 								if ($yhtiorow['huomautetaanko_poistuvasta'] == 'K' and ($trow['status'] == 'X' or $trow['status'] == 'P')) {
+									// Tilausrivin systeemikommentti
 									$kommentti .= " ".t("HUOM!")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!");
 								}
 
@@ -1075,7 +1074,6 @@
 								}
 
 								// jos olemme saaneet tuotenimityksen syotarivistä ja sallimme nimityksen muutoksen
-
 								if (trim($tuotenimitys_force) != "") {
 									$trow["nimitys"] = addslashes($tuotenimitys_force);
 								}
@@ -1084,13 +1082,16 @@
 									$trow["nimitys"] = addslashes($tuotenimitys);
 								}
 
+								// Onko tuotteella staattinen tilausrivikommentti
 								if ($trow["tilausrivi_kommentti"] != "" and (int) $rivitunnus == 0) {
+									// Tilausrivin systeemikommentti
 									$kommentti = trim($trow["tilausrivi_kommentti"]."\n".$kommentti);
 								}
 
 								if ((int) $rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
 									if (trim($kommentti) != "")	$kommentti .= "\n";
 
+									// Tilausrivin systeemikommentti
 									$kommentti .= t("Poistuva tuote");
 								}
 
@@ -1643,14 +1644,16 @@
 
 				if (trim($var) == 'P') {
 					$puurivires = t_avainsana("PUUTEKOMM");
-				
+
 					if (mysql_num_rows($puurivires) > 0) {
-						
+
 						$puurivirow = mysql_fetch_assoc($puurivires);
-						
+
+						// Tilausrivin systeemikommentti
 						$kommentti .= $puurivirow["selite"];
 					}
 					elseif ($kutsuja == "EDITILAUS") {
+						// Tilausrivin systeemikommentti
 						$kommentti .= t("Tuote Loppu.");
 					}
 				}
@@ -1775,6 +1778,7 @@
 			}
 
 			if (!is_array($korkieltokommi) and $korkieltokommi != '') {
+				// Tilausrivin systeemikommentti
 				$kommentti .= $korkieltokommi;
 			}
 
@@ -1789,18 +1793,15 @@
 				$trow["nimitys"] = addslashes($tuotenimitys);
 			}
 
-			// JT-rivikommentti
-			if ((int) $rivitunnus == 0 and $var == "J"and strpos($kommentti, "(".t("Jälkitoimitus").":") === false) {
-				//$kommentti = "(".t("Jälkitoimitus").": ".tv1dateconv(date("Y-m-d")).") \n".$kommentti;
-			}
-
 			if ($trow["tilausrivi_kommentti"] != "" and (int) $rivitunnus == 0) {
+				// Tilausrivin systeemikommentti
 				$kommentti = $trow["tilausrivi_kommentti"]."\n".$kommentti;
 			}
 
 			if ((int) $rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
 				if (trim($kommentti) != "")	$kommentti .= "\n";
 
+				// Tilausrivin systeemikommentti
 				$kommentti .= t("Poistunut tuote");
 			}
 

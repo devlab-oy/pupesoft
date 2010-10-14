@@ -1220,6 +1220,8 @@ while (!feof ($fd)) {
 
 								$varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on pienin prioriteetti
 								$laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
+
+								// Tilausrivin systeemikommentti
 								$kommentti = t("Huom: Tuote toimitetaan erikoisvarastosta!");
 							}
 							else {
@@ -1265,9 +1267,9 @@ while (!feof ($fd)) {
 
 				} // end jos tuote on löydetty oikein
 				else {
-
 					// tuotenumero ei löytynyt, tehdään dummyrivi..
 
+					// Tilausrivin systeemikommentti
 					$kommentti = t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
 
 					$query = "	INSERT into tilausrivi set

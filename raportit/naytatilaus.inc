@@ -7,7 +7,7 @@
 	if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
 		$lis = " and lasku.liitostunnus = '$kukarow[oletus_asiakas]' ";
 	}
-	
+
 	if (!isset($ojarj)) $ojarj = "";
 
 	$query = "	SELECT lasku.*,
@@ -93,7 +93,7 @@
 		echo "<td colspan='2'>
 				$laskurow[toim_nimi] $laskurow[toim_nimitark]<br> $laskurow[toim_osoite]<br> $laskurow[toim_postino] $laskurow[toim_postitp]<br> ".maa($laskurow["toim_maa"])."</td>";
 	}
-	
+
 	if (trim($laskurow['laskutus_nimi']) == '') {
 		$laskurow['laskutus_nimi'] 		= $laskurow['nimi'];
 		$laskurow['laskutus_nimitark'] 	= $laskurow['nimitark'];
@@ -321,7 +321,7 @@
 				$linkurl = $rakirrow['rahtikirjanro'];
 			}
 		}
-		
+
 		echo "<tr><th colspan='4'>".t("Toimitustapa")." / ".t("Rahtikirjanro")."</th><th colspan='2'>".t("Toimitusehto")."</th></tr>";
 		echo "<tr><td colspan='4'>$laskurow[toimitustapa] / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td></tr>";
 	}
@@ -683,12 +683,13 @@
 						and sarjanumero != ''";
 			$sarjares = mysql_query($query) or pupe_error($query);
 
-			$prow["kommentti"] = str_replace("\n", "<br>", $prow["kommentti"]);
+			$prow["kommentti"] = str_replace("\n", "<br>", trim($prow["kommentti"]));
 
 			if ($prow["kommentti"] != '' and mysql_num_rows($sarjares) > 0){
 				$prow["kommentti"] .= "<br>";
 			}
-			while($sarjarow = mysql_fetch_array($sarjares)) {
+
+			while ($sarjarow = mysql_fetch_array($sarjares)) {
 				$prow["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($prow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a><br>";
 			}
 
@@ -1137,7 +1138,7 @@
 			}
 
 			if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $kukarow['extranet'] == '') {
-				
+
 				$query = "	SELECT *
 							FROM varastopaikat
 							WHERE
@@ -1146,7 +1147,7 @@
 							and yhtio = '$kukarow[yhtio]'";
 				$varesult = mysql_query($query) or pupe_error($query);
 				$varow = mysql_fetch_assoc($varesult);
-				
+
 				if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
 					echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
 				}
@@ -1185,7 +1186,7 @@
 							and yhtio = '$kukarow[yhtio]'";
 				$varesult = mysql_query($query) or pupe_error($query);
 				$varow = mysql_fetch_assoc($varesult);
-				
+
 				if ($varow['maa'] != '' ) {
 					echo "<td $class align='left' valign='top'><img src='".$palvelin2."flag_icons/gif/".strtolower($varow['maa']).".gif'></td>";
 				}

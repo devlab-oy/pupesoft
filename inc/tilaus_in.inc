@@ -1,6 +1,7 @@
 <?php
 
 echo "<pre>";
+
 if (!$fd = fopen($filename, "r")) die("Filen '$filename' avaus epäonnistui!");
 
 $toimpvm = date("Y")."-".date("n")."-".date("j");
@@ -148,7 +149,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0 and $tuoteno != '') {
-			echo "".t("Tuotenumeroa")." $tuoteno ".t("ei löytynyt korjaa asia muuten ei tapahdu mitään")."!";
+			echo t("Tuotenumeroa")." $tuoteno ".t("ei löytynyt korjaa asia muuten ei tapahdu mitään")."!";
 			$tilanne = '0';
 			break;
 		}
@@ -156,7 +157,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 		elseif ($tuoteno != '') {
 
 			$tilanne = '1';
-			echo "".t("Uusi rivi")." $id\t$tuoteno\t$maara\t$kplhinta\t$ale\t$rivihinta<br>";
+			echo t("Uusi rivi")." $id\t$tuoteno\t$maara\t$kplhinta\t$ale\t$rivihinta<br>";
 
 			$query = "	SELECT *
 						FROM tuote
@@ -257,7 +258,8 @@ while ((!feof ($fd)) and ($error!=1)) {
 
 					$alue = 'Y00';
 
-					echo "".t("Perustetaan tuotepaikka")." $alue-0-0-0 ".t("tuotteelle")." $trow[tuoteno]<br>";
+					echo t("Perustetaan tuotepaikka")." $alue-0-0-0 ".t("tuotteelle")." $trow[tuoteno]<br>";
+
 					$query = "	INSERT into tuotepaikat set
 								hyllyalue	= '$alue',
 								hyllynro	= '0',
@@ -267,8 +269,8 @@ while ((!feof ($fd)) and ($error!=1)) {
 								yhtio		= '$trow[yhtio]'";
 					$result = mysql_query($query) or pupe_error($query);
 				}
-
 			}
+
 			$query = "	INSERT into tilausrivi set
 						varattu 		= '$maara',
 						tilkpl 			= '$maara',
@@ -295,7 +297,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 						hinta 			= '$kplhinta',
 						nimitys 		= '$trow[nimitys]',
 						tyyppi 			= 'L',
-						kommentti 		= '$trow[kommentti]'";
+						kommentti 		= '$trow[tilausrivi_kommentti]'";
 
 			if ($trow['ei_saldoa'] != '') $query .= ", keratty = 'saldoton', kerattyaika = now()";
 
@@ -305,6 +307,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 				$query .= ", hyllytaso	= '0'";
 				$query .= ", hyllyvali	= '0'";
 			}
+
 			$rivperustettu += 1;
 
 			$result = mysql_query($query) or pupe_error($query);
@@ -315,7 +318,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 			case '1' :
 				echo "<hr>";
 				$asno = substr($tietue, 19, 6);
-				echo "".t("Tilaus").": ".t("asiakas")." '" . $asno .  "' ";
+				echo t("Tilaus").": ".t("asiakas")." '" . $asno .  "' ";
 
 				$query = "	SELECT ytunnus
 							FROM asiakas
@@ -331,6 +334,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 					$result = mysql_query($query) or pupe_error($query);
 					$aperustettu += 1;
 				}
+
 				$query = "	SELECT *
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -411,7 +415,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 							luontiaika			= now()";
 				$lisatiedot_result = mysql_query($query) or pupe_error($query);
 
-				echo "".t("nro")." $id ";
+				echo t("nro")." $id ";
 				break;
 			case '2' :
 				$tuoteno = substr($tietue, 4, 15);
@@ -473,7 +477,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 
 				$asno = substr($tietue, 19, 6);
 
-				echo "".t("Tilaus").": ".t("asiakas")." '" . $asno .  "' ";
+				echo t("Tilaus").": ".t("asiakas")." '" . $asno .  "' ";
 
 				$query = "	SELECT ytunnus
 							FROM asiakas
@@ -570,11 +574,11 @@ while ((!feof ($fd)) and ($error!=1)) {
 							luontiaika			= now()";
 				$lisatiedot_result = mysql_query($query) or pupe_error($query);
 
-				echo "".t("nro")." $id ";
+				echo t("nro")." $id ";
 				break;
 
 			default:
-				echo "".t("luotiin")." $rperustettu ".t("rivia ok")."!<br>";
+				echo t("luotiin")." $rperustettu ".t("rivia ok")."!<br>";
 		}
 	}
 }
@@ -598,16 +602,16 @@ if (($tyyppi == 'yct') and ($id != '')) {
 					AND otunnus = '$id'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "".t("Ei voitu tehdä tilausta loppuun vaan se mitätöitiin")."!";
+		echo t("Ei voitu tehdä tilausta loppuun vaan se mitätöitiin")."!";
 	}
 	else {
 		require("../tilauskasittely/tilaus-valmis.inc");
 
-		echo "".t("luotiin")." $rivperustettu ".t("rivia ok")."!<br>";
+		echo t("luotiin")." $rivperustettu ".t("rivia ok")."!<br>";
 
 		if ($mail == 'jep') {
 			$rivi = '';
-			$rivi .= "".t("Tuoteno")."\t".t("määrä")."\t".t("oletussaldo")."\t".t("hälytysraja")."\t".t("oletuspaikka")."\r\n";
+			$rivi .= t("Tuoteno")."\t".t("määrä")."\t".t("oletussaldo")."\t".t("hälytysraja")."\t".t("oletuspaikka")."\r\n";
 
 			$query = "	SELECT tuoteno, tilkpl
 						FROM tilausrivi

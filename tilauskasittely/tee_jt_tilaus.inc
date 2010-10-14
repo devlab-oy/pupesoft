@@ -407,7 +407,6 @@
 						}
 						elseif (mysql_field_name($stresult,$i)=='maksuehto') {
 							//katsotaan onko asiakkaan maksuehto muuttunut jälkivaatimukseksi
-
 							$maksuehto_query = "SELECT maksuehto.jv, maksuehto.tunnus
 												FROM asiakas
 												join maksuehto ON asiakas.yhtio = maksuehto.yhtio and asiakas.maksuehto = maksuehto.tunnus
@@ -502,8 +501,9 @@
 
 						foreach ($tunnusarray as $tunnus_nyt) {
 							if ($toim == "ENNAKKO") {
-								$query = "	SELECT tilausrivi.*, tuote.ei_saldoa
+								$query = "	SELECT tilausrivi.*, tuote.ei_saldoa, tilausrivin_lisatiedot.vanha_otunnus
 											FROM tilausrivi
+											LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 											JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
 											WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 											and tilausrivi.tunnus = '$tunnus_nyt'
@@ -511,8 +511,9 @@
 											and tilausrivi.tyyppi = 'E'";
 							}
 							else {
-								$query = "	SELECT tilausrivi.*, tilausrivi.jt $lisavarattu jt, tuote.ei_saldoa
+								$query = "	SELECT tilausrivi.*, tilausrivi.jt $lisavarattu jt, tuote.ei_saldoa, tilausrivin_lisatiedot.vanha_otunnus
 											FROM tilausrivi
+											LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 											JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
 											WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 											and tilausrivi.tunnus = '$tunnus_nyt'
@@ -567,47 +568,65 @@
 							$perheid = $lisataanrow["perheid"];
 							$perheid2 = $lisataanrow["perheid2"];
 
-							// Joitain tietoja alkuperäiseltä tilaukselta
-							$query = "	SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo
-										FROM lasku
-										WHERE tunnus = '$lisataanrow[otunnus]'";
-							$aresult = mysql_query($query) or pupe_error($query);
-							$orig_laskurow = mysql_fetch_array($aresult);
-
+							// Rivin kommentti
 							$kommentti = "";
 
 							if (trim($lisataanrow['kommentti']) != "") {
+								// Alkuperäisen rivin kommentti
 								$kommentti .= trim($lisataanrow['kommentti']);
 							}
 
-							if (trim($orig_laskurow['tunnus']) != "" and $otsikkorivi["osatoimitus"] == "" and strpos($kommentti, t("Tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
-								if (trim($kommentti) != "") $kommentti .= " / ";
-
-								if ($toim == "ENNAKKO") {
-									$kommentti .= t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus']);
+							// Joitain tietoja alkuperäiseltä tilaukselta, vain jos osatoimitus ei ole estetty
+							if ($otsikkorivi["osatoimitus"] == "") {
+								if ($lisataanrow["vanha_otunnus"] > 0) {
+									$alkupotunnus = $lisataanrow["vanha_otunnus"];
 								}
 								else {
-									$kommentti .= t("Tilaus").": ".trim($orig_laskurow['tunnus']);
+									$alkupotunnus = $lisataanrow["otunnus"];
+								}
+
+								$query = "	SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo
+											FROM lasku
+											WHERE tunnus = '$alkupotunnus'";
+								$aresult = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($aresult) > 0) {
+									$orig_laskurow = mysql_fetch_array($aresult);
+
+									if (strpos($kommentti, t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE and $toim == "ENNAKKO") {
+										if (trim($kommentti) != "") $kommentti .= " / ";
+										// Tilausrivin systeemikommentti
+										$kommentti .= t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus']);
+									}
+									elseif (strpos($kommentti, t("Tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
+										if (trim($kommentti) != "") $kommentti .= " / ";
+										// Tilausrivin systeemikommentti
+										$kommentti .= t("Tilaus").": ".trim($orig_laskurow['tunnus']);
+									}
+
+									if (trim($orig_laskurow['asiakkaan_tilausnumero']) != "" and strpos($kommentti, t("Asiakkaan tilaus").": ".trim($orig_laskurow['asiakkaan_tilausnumero'])) === FALSE) {
+										if (trim($kommentti) != "") $kommentti .= " / ";
+										// Tilausrivin systeemikommentti
+										$kommentti .= t("Asiakkaan tilaus").": ".trim($orig_laskurow['asiakkaan_tilausnumero']);
+									}
+
+									if (trim($orig_laskurow['viesti']) != "" and strpos($kommentti, t("Tilausviite").": ".trim($orig_laskurow['viesti'])) === FALSE) {
+										if (trim($kommentti) != "") $kommentti .= " / ";
+										// Tilausrivin systeemikommentti
+										$kommentti .= t("Tilausviite").": ".trim($orig_laskurow['viesti']);
+									}
+
+									if (trim($orig_laskurow['tilausyhteyshenkilo']) != "" and strpos($kommentti, t("Tilaaja").": ".trim($orig_laskurow['tilausyhteyshenkilo'])) === FALSE) {
+										if (trim($kommentti) != "") $kommentti .= " / ";
+										// Tilausrivin systeemikommentti
+										$kommentti .= t("Tilaaja").": ".trim($orig_laskurow['tilausyhteyshenkilo']);
+									}
 								}
 							}
 
-							if (trim($orig_laskurow['asiakkaan_tilausnumero']) != "" and $otsikkorivi["osatoimitus"] == "") {
+							if ($toim != "ENNAKKO" and $tilaus_on_jo == "KYLLA" and strpos($kommentti, t("Toimitettavissa oleva JT-rivi")."!") === FALSE) {
 								if (trim($kommentti) != "") $kommentti .= " / ";
-								$kommentti .= t("Asiakkaan tilaus").": ".trim($orig_laskurow['asiakkaan_tilausnumero']);
-							}
-
-							if (trim($orig_laskurow['viesti']) != "" and $otsikkorivi["osatoimitus"] == "") {
-								if (trim($kommentti) != "") $kommentti .= " / ";
-								$kommentti .= t("Tilausviite").": ".trim($orig_laskurow['viesti']);
-							}
-
-							if (trim($orig_laskurow['tilausyhteyshenkilo']) != "" and $otsikkorivi["osatoimitus"] == "") {
-								if (trim($kommentti) != "") $kommentti .= " / ";
-								$kommentti .= t("Tilaaja").": ".trim($orig_laskurow['tilausyhteyshenkilo']);
-							}
-
-							if ($tilaus_on_jo == "KYLLA" and strpos($kommentti, t("Toimitettavissa oleva JT-rivi")."!") === FALSE) {
-								if (trim($kommentti) != "") $kommentti .= " / ";
+								// Tilausrivin systeemikommentti
 								$kommentti .= t("Toimitettavissa oleva JT-rivi")."!";
 							}
 

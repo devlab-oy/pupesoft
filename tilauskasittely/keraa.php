@@ -415,8 +415,8 @@
 								}
 								else {
 									$korvataan_pois = t("Tuote Loppu.");
-								}							
-								
+								}
+
 								$query .= "	, kommentti	= replace(kommentti, '$korvataan_pois', '') ";
 
 								// PUUTE-riville tehdään osatoimitus ja loput jätetään puuteriviksi
@@ -652,17 +652,19 @@
 									$rvar		= "P";
 									$keratty	= "'$who'";
 									$kerattyaik	= "now()";
-									
+
 									$puurivires = t_avainsana("PUUTEKOMM");
 
 									if (mysql_num_rows($puurivires) > 0) {
 										$puurivirow = mysql_fetch_assoc($puurivires);
 
+										// Tilausrivin systeemikommentti
 										$rkomm = $puurivirow["selite"];
 									}
 									else {
+										// Tilausrivin systeemikommentti
 										$rkomm = t("Tuote Loppu.");
-									}																		
+									}
 								}
 								elseif ($poikkeama_kasittely[$apui] == "JT") {
 

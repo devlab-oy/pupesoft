@@ -105,46 +105,44 @@
 		$vresult2 = mysql_query($query2) or pupe_error($query2);
 		$row2 = mysql_fetch_array($vresult2);
 
-		$naytatvale = "";
-
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			$naytatvale = 2;
 		}
-
-		if ($naytatvale == "" and $row2["tilausvahvistus"] != "") {
-			if (strpos($row2['tilausvahvistus'], '6') !== FALSE) {
-				$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n mefa customoitu tilausvahvistus
-			}
-			elseif (strpos($row2['tilausvahvistus'], '5') !== FALSE) {
-				$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-			}
-			elseif (strpos($row2['tilausvahvistus'], '4') !== FALSE) {
-				$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
-			}
-			elseif (strpos($row2['tilausvahvistus'], '3') !== FALSE) {
-				$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
-			}
-			elseif (strpos($row2['tilausvahvistus'], '2') !== FALSE) {
-				$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
-			}
+		elseif (strpos($row2['tilausvahvistus'], '6') !== FALSE) {
+			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n mefa customoitu tilausvahvistus
 		}
-
-		if ($naytatvale == "" and $yhtiorow['tilausvahvistustyyppi'] != "") {
-			if (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
-				$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
-			}
-			elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
-				$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-			}
-			elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
-				$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
-			}
-			elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
-				$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
-			}
-			elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
-				$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
-			}
+		elseif (strpos($row2['tilausvahvistus'], '5') !== FALSE) {
+			$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+		}
+		elseif (strpos($row2['tilausvahvistus'], '4') !== FALSE) {
+			$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+		}
+		elseif (strpos($row2['tilausvahvistus'], '3') !== FALSE) {
+			$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+		}
+		elseif (strpos($row2['tilausvahvistus'], '2') !== FALSE) {
+			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+		}
+		elseif (strpos($row2g['tilausvahvistus'], '1') !== FALSE) {
+			$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
+		}
+		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
+			$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
+		}
+		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
+			$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+		}
+		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
+			$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+		}
+		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
+			$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+		}
+		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
+			$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+		}
+		else {
+			$naytatvale = 1; // halutaan n‰h‰ alet
 		}
 
 		$tvsel[$naytatvale] = "SELECTED";

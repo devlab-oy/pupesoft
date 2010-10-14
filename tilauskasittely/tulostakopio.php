@@ -19,7 +19,7 @@
 	if (!isset($ytunnus)) 				$ytunnus = "";
 	if (!isset($lopetus)) 				$lopetus = "";
 	if (!isset($toim) or $toim == "") 	$toim = "LASKU";
-	if (!isset($kieli) or $kieli == "") $kieli = $yhtiorow["kieli"];	
+	if (!isset($kieli) or $kieli == "") $kieli = $yhtiorow["kieli"];
 	if (!isset($tila)) 					$tila = "";
 	if (!isset($tunnus)) 				$tunnus = "";
 	if (!isset($laskunroloppu)) 		$laskunroloppu = "";
@@ -1510,11 +1510,11 @@
 					$laskurow['tilausvahvistus'] = $seltvtyyppi;
 				}
 
-				if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
-					$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n mefa customoitu tilausvahvistus
-				}
-				elseif ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
+				if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 					$naytatvale = 2;
+				}
+				elseif (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
+					$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n mefa customoitu tilausvahvistus
 				}
 				elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
 					$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
@@ -1527,6 +1527,9 @@
 				}
 				elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
 					$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+				}
+				elseif (strpos($laskurow['tilausvahvistus'], '1') !== FALSE) {
+					$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
 				}
 				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
 					$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus

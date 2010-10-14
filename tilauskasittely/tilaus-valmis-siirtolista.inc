@@ -387,8 +387,10 @@
 							// LÄHETETÄÄN TILAUSVAHVISTUS
 							//
 							// tulostetaan tässä, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
-
-							if (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
+							if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
+								$naytatvale = 6; // jos meillä on tilausvahvistuksessa kutonen, niin tehdään customoitu tilausvahvistus
+							}
+							elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
 								$naytatvale = 5; // jos mellä on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
 							}
 							elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
@@ -399,6 +401,9 @@
 							}
 							elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
 								$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
+							}
+							elseif (strpos($laskurow['tilausvahvistus'], '1') !== FALSE) {
+								$naytatvale = 1; // jos mellä on tilausvahvistuksessa ykkönen, halutaan nähä alet
 							}
 							elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
 								$naytatvale = 6; // jos meillä on tilausvahvistuksessa kutonen, niin tehdään customoitu tilausvahvistus
@@ -489,21 +494,8 @@
 						// pakotetaan tilausvanvistus PDF muodossa omaan sähköpostiin, ilman hintoja.
 						$laskurow["tilausvahvistus"] = "3OP";
 
-						if (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
-							$naytatvale = 5; // jos mellä on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-						}
-						elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
-							$naytatvale = 4; // jos mellä on tilausvahvistuksessa nelonen, ei haluta nähdä alennuksia, näytetään tilausrivin hinta ja rivihinta
-						}
-						elseif (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
-							$naytatvale = 3; // jos mellä on tilausvahvistuksessa kolmonen, ei haluta nähdä hintoja, pelkästään kpl-määrät
-						}
-						elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
-							$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
-						}
-						else {
-							$naytatvale = 1; // halutaan nähä alet
-						}
+						// jos mellä on tilausvahvistuksessa kolmonen, ei haluta nähdä hintoja, pelkästään kpl-määrät
+						$naytatvale = 3;
 
 						// LÄHETETÄÄN TILAUSVAHVISTUS
 						require("tilausvahvistus-email.inc");
@@ -599,14 +591,14 @@
 
 				// Keräyslistan rivit
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-					
+
 					$sorttauskentta = str_replace("as sorttauskentta", "", $sorttauskentta);
-					
+
 					$querysel = "	tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
 									sum(tilausrivi.tilkpl) tilkpl,
 									sum(tilausrivi.varattu) varattu,
 									sum(tilausrivi.jt) jt,
-									group_concat(tilausrivi.tunnus) tunnus, 
+									group_concat(tilausrivi.tunnus) tunnus,
 									min($sorttauskentta) as sorttauskentta, ";
 
 					$lisa = "	and tilausrivi.tyyppi in ($tvs_tyyppi)

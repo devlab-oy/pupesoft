@@ -82,7 +82,7 @@ if ($tee == 'UV') {
 		$tuoteresult = mysql_query($query) or pupe_error($query);
 	}
 
-	if(mysql_num_rows($tuoteresult) != 1) {
+	if (mysql_num_rows($tuoteresult) != 1) {
 		$tee='';
 		echo "<font class='error'>$isatuoteno ".t("Varastopaikkaa ei löydy")."</font><br>";
 	}
@@ -172,7 +172,7 @@ if ($tee == 'UV') {
 				}
 
 				//katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi
-				if(mysql_num_rows($tuoteresult) == 1) {
+				if (mysql_num_rows($tuoteresult) == 1) {
 					$trow = mysql_fetch_array($tuoteresult);
 
 					if ($valmistetaan == "TILAUKSELTA") {
@@ -519,10 +519,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 			if ((float) $kaikenkaikkiaan != (float) $isavarattu) {
 
 				if ((float) $kaikenkaikkiaan_arvot > 0) {
-					//jyvitetään $uusiarvo valmisteille kappaleiden ja kehahintojen mukaan
-					
-					echo "round($uusiarvo * (($isavarattu * $isarow[kehahin])/$kaikenkaikkiaan_arvot), 6);<br>";
-					
+					//jyvitetään $uusiarvo valmisteille kappaleiden ja kehahintojen mukaan										
 					$uusiarvo = round($uusiarvo * (($isavarattu * $isarow["kehahin"])/$kaikenkaikkiaan_arvot), 6);
 				}
 				else {

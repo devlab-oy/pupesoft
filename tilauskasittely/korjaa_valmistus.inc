@@ -164,14 +164,15 @@
 					LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<font class='message'>Valmisteen valmistusmuutos: $valmkpl.</font><br>";
+		echo "<font class='message'>".t("Valmisteen valmistusmuutos").": $valmkpl.</font><br>";
 		
 		$query = "	SELECT sum(kpl) valmistetut
 					FROM tilausrivi
-					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.otunnus = '$tilrivirow[otunnus]'
-					and tilausrivi.perheid = '$tilrivirow[perheid]'
-					and tilausrivi.tyyppi = 'D'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and otunnus = '$tilrivirow[otunnus]'
+					and perheid = '$tilrivirow[perheid]'
+					and tuoteno = '$tilrivirow[tuoteno]'
+					and tyyppi = 'D'";
 		$resisa = mysql_query($query) or pupe_error($query);
 		$rowisa = mysql_fetch_assoc($resisa);
 		
@@ -186,7 +187,8 @@
 					SET kpl=0, varattu=0
 					WHERE yhtio = '$kukarow[yhtio]'
 					and otunnus = '$tilrivirow[otunnus]'
-					and perheid = '$tilrivirow[tunnus]'
+					and perheid = '$tilrivirow[perheid]'
+					and tuoteno = '$tilrivirow[tuoteno]'
 					and tyyppi  = 'D'";
 		$updresult = mysql_query($query) or pupe_error($query);
 	}

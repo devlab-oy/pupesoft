@@ -22,7 +22,7 @@
 	//Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
 	$aputoim = $toim;
 	$toimi_array = explode('!!!', $toim);
-		
+
 	$toim = $toimi_array[0];
 	if (isset($toimi_array[1])) $alias_set = $toimi_array[1];
 	if (isset($toimi_array[2])) $rajattu_nakyma = $toimi_array[2];
@@ -993,9 +993,9 @@
 					else	$size='10';
 
 					// jos meidän kenttä ei ole subselect niin tehdään hakukenttä
-					if (strpos(strtoupper($array[$i]), "SELECT") === FALSE) {						
+					if (strpos(strtoupper($array[$i]), "SELECT") === FALSE) {
 						if (!isset($haku[$i])) $haku[$i] = "";
-						
+
 						echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
 					}
 					echo "</th>";
@@ -1186,7 +1186,9 @@
 			}
 			// Haetaan passatut oletukset arvoiksi!
 			elseif ($uusi == 1) {
-				$trow[$i] = $oletus[mysql_field_name($result, $i)];
+				if (isset($oletus[mysql_field_name($result, $i)])) {
+					$trow[$i] = $oletus[mysql_field_name($result, $i)];
+				}
 			}
 
 			if (strlen($trow[$i]) > 35) {

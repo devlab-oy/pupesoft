@@ -1050,7 +1050,7 @@
 				echo "<td valign='top'>";
 
 				// er‰p‰iv‰ punasella jos se on er‰‰ntynyt
-				if ($trow['olmapvm'] < date("Y-m-d")) {
+				if ((int) str_replace("-", "", $trow['erpcm']) < (int) date("Ymd")) {
 					echo "<font class='error'>".tv1dateconv($trow['erpcm'])."</font>";
 				}
 				else {

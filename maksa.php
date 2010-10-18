@@ -543,7 +543,7 @@
 					and lasku.summa > 0
 					and lasku.tila = 'M'
 					$lisa
-					ORDER BY lasku.olmapvm, lasku.summa desc";
+					ORDER BY lasku.olmapvm, lasku.erpcm, lasku.summa desc";
 		$result = mysql_query($query) or pupe_error($query);
 
 		while ($tiliointirow = mysql_fetch_assoc($result)) {
@@ -799,7 +799,7 @@
 					and lasku.tila = 'P'
 					and lasku.valkoodi = valuu.nimi
 					and lasku.maksaja = '$kukarow[kuka]'
-					ORDER BY olmapvm, ykasumma desc";
+					ORDER BY lasku.olmapvm, lasku.erpcm, ykasumma desc";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<br><font class='message'>".t("Maksuaineistoon poimitut laskut")."</font><hr>";
@@ -993,7 +993,7 @@
 					and lasku.valkoodi = valuu.nimi
 					and lasku.mapvm = '0000-00-00'
 					$lisa
-					ORDER BY olmapvm, ykasumma  desc";
+					ORDER BY lasku.olmapvm, lasku.erpcm, ykasumma desc";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {

@@ -241,7 +241,7 @@ else {
 		$laskurow['hyvak1'] = $kukarow["kuka"];
 	}
 
-	//p‰ivitet‰‰n tilaus valmisaika, kun painetaan ekan kerran tilaus valmiiksi
+	//p‰ivitet‰‰n tilaukselle kuka tilauksen hyv‰ksyi ja milloin
 	if ($laskurow['tila'] == "N" and $laskurow['alatila'] == "F") {
 		$query = "	UPDATE lasku
 					SET h2time = now(),

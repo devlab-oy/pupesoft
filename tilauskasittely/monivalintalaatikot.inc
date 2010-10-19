@@ -234,6 +234,7 @@
 						foreach (${"mul_".$param.$count_row['sub_dee']} as $paramx) {
 							if (trim($paramx) == '') {
 								${"mul_".$param.$count_row['sub_dee']} = array();
+								$kaikki_tunnukset = '';
 								break 2;
 							}
 							elseif (trim($paramx) == 'PUPEKAIKKIMUUT') {

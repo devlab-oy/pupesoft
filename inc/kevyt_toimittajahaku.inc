@@ -28,7 +28,7 @@ if ($monta == 0 and $ytunnus != '') {
 
 if ($monta == 0 and $ytunnus != '') {
 	// kokeillaan nimen osalla
-	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and nimi like '%$ytunnus%' and tyyppi != 'P'";
+	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and nimi like '%$ytunnus%' or nimitark like '%$ytunnus%' and tyyppi != 'P'";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }

@@ -6,10 +6,6 @@
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
-
-		// DataTables päälle
-		$pupe_DataTables = "tilaukset";
-
 		require("inc/parametrit.inc");
 	}
 
@@ -337,10 +333,25 @@
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 			// Näytetään muuten vaan sopivia tilauksia
+			echo "<br><br>
+					<form action='$PHP_SELF' method='post'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>
+					<input type='hidden' name='limit' value='$limit'>
+					<font class='head'>".t("Etsi")." $otsikko<hr></font>
+					".t("Syötä tilausnumero, nimen tai laatijan osa").":
+					<input type='text' name='etsi'>
+					<input type='Submit' value = '".t("Etsi")."'>
+					</form><br><br>";
+
 			// pvm 30 pv taaksepäin
 			$dd = date("d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 			$mm = date("m",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 			$yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
+
+			$haku='';
+			if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%')";
+			if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%')";
 
 			$seuranta = "";
 			$seurantalisa = "";
@@ -424,6 +435,7 @@
 						or (lasku.tila = 'S' and lasku.alatila in ('','A','B','J','C'))
 						or (lasku.tila in ('L','N','V') and lasku.alatila NOT in ('X','V'))
 						or (lasku.tila = 'G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'))
+						$haku
 						GROUP BY lasku.tunnus
 						ORDER BY lasku.luontiaika desc
 						$rajaus";
@@ -457,6 +469,7 @@
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'
+						$haku
 						GROUP BY lasku.tunnus
 						ORDER BY lasku.luontiaika desc
 						$rajaus";
@@ -487,6 +500,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('E','N')
 						and lasku.tilaustyyppi = 'E'
+						$haku
 						GROUP BY lasku.tunnus
 						order by lasku.luontiaika desc
 						$rajaus";
@@ -512,6 +526,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.alatila in ('','A','J')
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 			$miinus = 3;
@@ -522,6 +537,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.alatila in ('','A','B','C','D','J','T')
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 			$miinus = 3;
@@ -532,6 +548,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila in ('','A','B','J')
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -555,6 +572,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila in ('','A','B','C','J')
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -579,6 +597,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -603,6 +622,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='N' and lasku.alatila='U'
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -629,6 +649,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'V'
 						and lasku.alatila in ('','A','B','J')
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -658,6 +679,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'V'
 						and lasku.alatila in ('','A','B','C','J')
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -689,6 +711,7 @@
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and ((tila='V' and alatila in ('','A','B','J')) or (lasku.tila in ('L','N') and lasku.alatila in ('A','')))
+						$haku
 						HAVING extra = '' or extra is null
 						order by lasku.luontiaika desc
 						$rajaus";
@@ -721,6 +744,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and tila in ('L','N','V')
 						and alatila not in ('X','V')
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -764,6 +788,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' $tyomalatlat
+						$haku
 						GROUP BY lasku.tunnus
 						ORDER BY lasku.luontiaika desc
 						$rajaus";
@@ -789,6 +814,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L','N','C') and lasku.tilaustyyppi='R' and lasku.alatila in ('','A','B','C','J','D')
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -817,6 +843,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='S' and alatila in ('','A','B','J','C')
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 			$miinus = 3;
@@ -833,6 +860,7 @@
 						$seurantalisa
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A')
+						$haku
 						ORDER BY lasku.tunnus desc
 						$rajaus";
 
@@ -863,6 +891,7 @@
 						$seurantalisa
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A','X')
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -887,6 +916,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = 'F'
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -911,6 +941,7 @@
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('N','L') and lasku.alatila != 'X' and lasku.chn = '999'
+						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
 
@@ -945,6 +976,7 @@
 						and lasku.tila		= 'O'
 						and lasku.alatila	= ''
 						and lasku.tilaustyyppi	= ''
+						$haku
 						ORDER by kuka_ext, lasku.luontiaika desc
 						$rajaus";
 			$miinus = 4;
@@ -967,6 +999,7 @@
 						and tilausrivi.laskutettuaika 	= '0000-00-00'
 						and tilausrivi.uusiotunnus 		= 0
 						and lasku.tilaustyyppi			= ''
+						$haku
 						GROUP by lasku.tunnus
 						ORDER by lasku.luontiaika desc
 						$rajaus";
@@ -988,6 +1021,7 @@
 						and lasku.tila			= 'O'
 						and lasku.alatila		= ''
 						and lasku.tilaustyyppi	= 'O'
+						$haku
 						ORDER by lasku.luontiaika desc
 						$rajaus";
 			$miinus = 4;
@@ -1000,6 +1034,7 @@
 						$seurantalisa
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ('R','L','N','A') and alatila NOT IN ('X') and lasku.tilaustyyppi!='9'
+						$haku
 						ORDER by lasku.tunnusnippu desc, tunnus asc
 						$rajaus";
 			$miinus = 5;
@@ -1011,6 +1046,7 @@
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio=lasku.yhtio and kuka2.tunnus=lasku.myyja)
 						LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = '0' and alatila NOT IN ('D')
+						$haku
 						ORDER by lasku.luontiaika desc
 						$rajaus";
 
@@ -1042,6 +1078,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('L','N')
 						and lasku.alatila in ('A','')
+						$haku
 						HAVING extra = '' or extra is null
 						order by lasku.luontiaika desc
 						$rajaus";
@@ -1100,14 +1137,8 @@
 				unset($temp_row);
 				mysql_data_seek($result, 0);
 			}
-			
-			$DTsarakemaara = mysql_num_fields($result)-$miinus;
-			
-			pupe_DataTables($pupe_DataTables, $DTsarakemaara, $DTsarakemaara+1);
 
-			echo "<table class='display' id='$pupe_DataTables'>";
-
-			echo "<thead>";
+			echo "<table>";
 			echo "<tr>";
 
 			$ii = 0;
@@ -1131,18 +1162,6 @@
 			$excelrivi++;
 
 			echo "<th align='left'>".t("tyyppi")."</th><th class='back'></th></tr>";
-
-			echo "<tr>";
-			$ii = 0;
-			for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
-				echo "<td><input type='text' name='search_".mysql_field_name($result,$i)."'></td>";
-			}
-
-			echo "<td><input type='text' name='search_tyyppi'></td><td class='back'></td></tr>";
-			echo "</tr>";
-			echo "</thead>";
-
-			echo "<tbody>";
 
 			$lisattu_tunnusnippu  = array();
 
@@ -1628,7 +1647,6 @@
 				}
 			}
 
-			echo "</tbody>";
 			echo "</table>";
 
 
@@ -1662,6 +1680,7 @@
 					echo "<br>
 							<form action='$PHP_SELF' method='post'>
 							<input type='hidden' name='toim' value='$toim'>
+							<input type='hidden' name='etsi' value='$etsi'>
 							<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>
 							<input type='hidden' name='limit' value='NO'>
 							<table>

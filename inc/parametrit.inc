@@ -364,7 +364,21 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			}
 			exit;
 		}
+
 		$kukarow = mysql_fetch_assoc($result);
+
+		// Unohdetaan tallennettu state jos tullaan suoraan indexsvassista
+		if (isset($pupe_DataTables) and $pupe_DataTables != "" and isset($indexvas) and $indexvas == 1) {
+			// DataTables cookie name SpryMedia_DataTables_TAULUNID_SKRIPTIN-NIMI
+			$dtpalvelin = parse_url($palvelin, PHP_URL_PATH);
+			$dtpathparts = pathinfo($phpnimi);
+
+			if ($dtpathparts["dirname"] != "" and $dtpathparts["dirname"] != ".") {
+				$dtpalvelin .= $dtpathparts["dirname"]."/";
+			}
+
+			$bool = setcookie("SpryMedia_DataTables_".$pupe_DataTables."_".basename($phpnimi), "", time()+43200, $dtpalvelin);
+		}
 
 	 	// T‰nne p‰‰see aina!
 		if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
@@ -522,6 +536,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "<style type='text/css'>\n";
 				echo $css;
 				echo "</style>\n";
+
+				if (isset($pupe_DataTables) and $pupe_DataTables != "") {
+					echo "<style type=\"text/css\" title=\"currentStyle\">\n";
+					require("DataTables/media/css/pupe_datatables.php");
+					echo "</style>\n";
+				}
 			}
 
 			echo "<title>\n$yhtiorow[nimi]</title>\n";

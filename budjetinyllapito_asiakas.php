@@ -176,14 +176,6 @@
 
 		require ("tilauskasittely/monivalintalaatikot.inc");
 
-		if (trim($kaikki_tunnukset) != '') {
-			if (substr($kaikki_tunnukset, -1, 1) == ',') {
-				$kaikki_tunnukset = substr($kaikki_tunnukset, 0, -1);
-			}
-
-			echo "<input type='hidden' name='kaikki_tunnukset' value='$kaikki_tunnukset' />";
-		}
-
 		echo "<br />";
 		echo "<table><tr><td class='back'><input type='submit' name='submit_button' id='submit_button' value='",t("Näytä/Tallenna"),"' /></td></tr></table>";
 

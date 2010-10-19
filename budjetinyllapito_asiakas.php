@@ -170,12 +170,11 @@
 		
 			require ("tilauskasittely/monivalintalaatikot.inc");
 		}
-		else {
-			$monivalintalaatikot = array('OSASTO', 'TRY');
-			$monivalintalaatikot_normaali = array();
 
-			require ("tilauskasittely/monivalintalaatikot.inc");
-		}
+		$monivalintalaatikot = array('OSASTO', 'TRY');
+		$monivalintalaatikot_normaali = array();
+
+		require ("tilauskasittely/monivalintalaatikot.inc");
 
 		if (trim($kaikki_tunnukset) != '') {
 			if (substr($kaikki_tunnukset, -1, 1) == ',') {

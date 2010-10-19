@@ -236,6 +236,11 @@
 								${"mul_".$param.$count_row['sub_dee']} = array();
 								break 2;
 							}
+							elseif (trim($paramx) == 'PUPEKAIKKIMUUT') {
+								${"mul_".$param.$count_row['sub_dee']} = array('PUPEKAIKKIMUUT');
+								$kaikki_tunnukset = '';
+								break 2;								
+							}
 						}
 					}
 				}
@@ -1319,7 +1324,8 @@
 							$sel = '';
 
 							if ((count(${"mul_".$tree.$treerow['sub_dee']}) > 0 and in_array(strtolower(trim(${$tree."row"}["node_tunnus"])), ${"mul_".$tree.$treerow['sub_dee']})) or
-								(isset($kaikki_tunnukset) and trim($kaikki_tunnukset) != '' and in_array(${$tree."row"}["node_tunnus"], explode(",", $kaikki_tunnukset)) and $submit_button != '')) {
+								(isset($kaikki_tunnukset) and trim($kaikki_tunnukset) != '' and in_array(${$tree."row"}["node_tunnus"], explode(",", $kaikki_tunnukset)) and $submit_button != '') or
+								(isset($kaikki_tunnukset_from_kuka) and trim($kaikki_tunnukset_from_kuka) != '' and in_array(${$tree.'row'}['node_tunnus'], explode(",", $kaikki_tunnukset_from_kuka)))) {
 								$sel = 'SELECTED';
 
 								if (count(${'mul_'.$tree.$treerow['sub_dee']}) == 0 or !in_array(${$tree.'row'}['node_tunnus'], ${'mul_'.$tree.$treerow['sub_dee']})) {

@@ -129,12 +129,11 @@
 		
 			require ("tilauskasittely/monivalintalaatikot.inc");
 		}
-		else {
+		
 			$monivalintalaatikot = array('OSASTO', 'TRY');
 			$monivalintalaatikot_normaali = array();
-
 			require ("tilauskasittely/monivalintalaatikot.inc");
-		}
+		
 
 		if (trim($kaikki_tunnukset) != '') {
 			if (substr($kaikki_tunnukset, -1, 1) == ',') {
@@ -280,6 +279,7 @@
 
 			$result = mysql_query($query) or pupe_error($query);
 
+			// BUGI °°°echo "<pre>$query</pre>";
 			echo "<br />";
 			echo "<table>";
 

@@ -1,5 +1,8 @@
 <?php
 
+// DataTables p‰‰lle
+$pupe_DataTables = "luottotappiot";
+
 require ("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Myyntisaamisten kirjaus luottotappioiksi")."</font><hr>";
@@ -19,9 +22,9 @@ if ($tila == 'K') {
 
 if ($tila == 'K' and is_array($luottotappio)) {
 	//AND tiliointi.tapvm = lasku.tapvm
-	
+
 	$laskunrot = implode(",", $luottotappio);
-	
+
 	if ($laskunrot != "") {
 		$query = "	SELECT lasku.*, tiliointi.ltunnus, tiliointi.tilino, tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
 					FROM lasku
@@ -35,7 +38,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
 					and lasku.laskunro in ($laskunrot)
 					ORDER BY 1";
 		$laskuresult = mysql_query($query) or pupe_error($query);
-				
+
 		while ($lasku = mysql_fetch_array($laskuresult)) {
 
 			if ($lasku['tilino'] != $yhtiorow['myyntisaamiset'] and $lasku['tilino'] != $yhtiorow['factoringsaamiset'] and $lasku['tilino'] != $yhtiorow['konsernimyyntisaamiset']) {
@@ -173,10 +176,11 @@ if ($tila == 'N') {
 	echo "</table>";
 
 	echo "<br><font class='message'>".t("Erittely:")."</font><br>";
-	
+
 	echo "<form action = '$PHP_SELF' method = 'post' name='pvm'>";
 	echo "<input type='hidden' name='tila' value='K'>";
-	echo "<input type='hidden' name='liitostunnus' value='$liitostunnus'>";	
+	echo "<input type='hidden' name='eraantyneet' value='$eraantyneet'>";
+	echo "<input type='hidden' name='liitostunnus' value='$liitostunnus'>";
 	echo "<table><tr>";
 
 	$query = "	SELECT laskunro, tapvm, erpcm, summa-saldo_maksettu summa
@@ -203,14 +207,22 @@ if ($tila == 'N') {
 		echo "<td>".tv1dateconv($lasku["tapvm"])."</td>";
 		echo "<td>".tv1dateconv($lasku["erpcm"])."</td>";
 		echo "<td align='right'>$lasku[summa]</td>";
-		echo "<td align='center'><input type='checkbox' name='luottotappio[]' value='$lasku[laskunro]' CHECKED></td>";
+		
+		$ltchk = "";
+		
+		if ($eraantyneet != "" and (int) str_replace("-", "", $lasku['erpcm']) < (int) date("Ymd")) {
+			$ltchk = "CHECKED";
+		}
+		elseif ($eraantyneet == "")  {
+			$ltchk = "CHECKED";
+		}
+		
+		
+		echo "<td align='center'><input type='checkbox' name='luottotappio[]' value='$lasku[laskunro]' $ltchk></td>";
 		echo "</tr>";
 	}
 
 	echo "</table><br>";
-
-	
-
 
 	if (!isset($tpk)) $tpk = date("m");
 	if (!isset($tpv)) $tpv = date("Y");
@@ -237,6 +249,16 @@ if ($tila == 'N') {
 
 if ($tila == "") {
 
+	pupe_DataTables($pupe_DataTables, 4, 5);
+	
+	$lisa = "";
+	$erachk = "";
+	
+	if ($eraantyneet != "") {
+		$lisa = " and erpcm < curdate() ";
+		$erachk = "SELECTED"; 
+	}
+
 	$query = "	SELECT *, concat_ws(' ', nimi, nimitark, '<br>', osoite, '<br>', postino, postitp) asiakas, sum(summa-saldo_maksettu) summa, count(*) kpl
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
 				WHERE mapvm		= '0000-00-00'
@@ -244,41 +266,67 @@ if ($tila == "") {
 				AND alatila		= 'X'
 				AND yhtio		= '$kukarow[yhtio]'
 				AND liitostunnus != 0
+				$lisa
 				GROUP BY liitostunnus
 				ORDER BY ytunnus";
 	$result = mysql_query($query) or pupe_error($query);
-
+	
+	echo "<form action = '$PHP_SELF' method = 'post'>";
 	echo "<table>";
+	echo "<tr><th>".t("Rajaus")."</th>";
+	
+	echo "<td><select name='eraantyneet'>
+			<option value=''>".t("N‰yt‰ kaikki laskut")."</option>
+			<option value='E' $erachk>".t("N‰yt‰ vain er‰‰ntyneet laskut")."</option>
+			</select></td>										
+			<td class='back'><input type='submit' value='".t("Aja")."'></td>";
+	echo "</table>";
+	echo "</form><br>";
+	
+	echo "<table class='display' id='$pupe_DataTables'>";
 
-	echo "<tr>";
-	echo "<th>".t("ytunnus")."</th>";
-	echo "<th>".t("asiakas")."</th>";
-	echo "<th>".t("summa")."</th>";
-	echo "<th>".t("kpl")."</th>";
-	echo "<th>".t("valitse")."</th>";
-	echo "</tr>";
+	echo "<thead>
+			<tr>
+			<th>".t("ytunnus")."</th>
+			<th>".t("asiakas")."</th>
+			<th>".t("summa")."</th>
+			<th>".t("kpl")."</th>
+			<th class='back'></th>
+			</tr>
+			<tr>
+			<td><input type='text' name='search_ytunnus'></td>
+			<td><input type='text' name='search_asiakas'></td>
+			<td><input type='text' name='search_summa'></td>
+			<td><input type='text' name='search_kpl'></td>
+			<td class='back'></td>
+			</tr>
+		</thead>";
+
+	echo "<tbody>";
 
 	while ($asiakas = mysql_fetch_array ($result)) {
-
-		echo "<form action = '$PHP_SELF' method = 'post'>";
-		echo "<input type='hidden' name='tila' value='N'>";
-		echo "<input type='hidden' name='liitostunnus' value='$asiakas[liitostunnus]'>";
 
 		echo "<tr class='aktiivi'>";
 		echo "<td>$asiakas[ytunnus]</td>";
 		echo "<td>$asiakas[asiakas]</td>";
-		echo "<td>$asiakas[summa]</td>";
-		echo "<td>$asiakas[kpl]</td>";
-		echo "<td><input type='submit' value='".t("Luottotappio")."'></td>";
+		echo "<td align='right'>$asiakas[summa]</td>";
+		echo "<td align='right'>$asiakas[kpl]</td>";
+
+		echo "<td class='back'>
+				<form action = '$PHP_SELF' method = 'post'>
+	   			<input type='hidden' name='tila' value='N'>
+				<input type='hidden' name='eraantyneet' value='$eraantyneet'>	
+	   			<input type='hidden' name='liitostunnus' value='$asiakas[liitostunnus]'>
+	   			<input type='submit' value='".t("Luottotappio")."'>
+				</form>
+				</td>";
 		echo "</tr>";
-
-		echo "</form>";
-
 	}
 
+	echo "</tbody>";
 	echo "</table>";
 }
 
-require ("../inc/footer.inc");
+require ("inc/footer.inc");
 
 ?>

@@ -1,8 +1,13 @@
 <?php
+
+	// DataTables päälle
+	$pupe_DataTables = "maksalaskuja";
+
 	require ("inc/parametrit.inc");
 	require ("inc/tilinumero.inc");
 
 	js_popup();
+	
 	echo "<font class='head'>".t("Laskujen maksatus")."</font><hr>";
 
 	if (count($_POST) == 0) {
@@ -1000,24 +1005,47 @@
 		 	echo "<br><font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font><br>";
 		}
 		else {
+			
+			pupe_DataTables($pupe_DataTables, 7, 11);
+			
 			// Näytetään valitut laskut
 			echo "<br><font class='message'>".t("Maksuvalmiit laskut")."</font><hr>";
 
-			echo "<table><tr>";
-			echo "<th valign='top'>".t("Nimi")."</th>";
-			echo "<th valign='top'>".t("Tilinumero")."</th>";
-			echo "<th valign='top'>".t("Eräpvm")."</th>";
-			echo "<th valign='top' nowrap>".t("Kassa-ale")."</th>";
-			echo "<th valign='top'>".t("Summa")."</th>";
-			echo "<th valign='top'>".t("Laskunro")."</th>";
-			echo "<th valign='top'>".t("Viite")." / ".t("Viesti")."</th>";
-			echo "<th valign='top'>".t("Ebid")."</th>";
-			echo "<th valign='top'>".t("Maksatus")."</th>";
-			echo "<th valign='top'>".t("Lisätieto")."</th>";
-			echo "</tr>";
+			echo "<table class='display' id='$pupe_DataTables'>";
+			
+			echo "<thead>
+					<tr>
+					<th valign='top'>".t("Nimi")."</th>
+					<th valign='top'>".t("Tilinumero")."</th>
+					<th valign='top'>".t("Eräpvm")."</th>
+					<th valign='top' nowrap>".t("Kassa-ale")."</th>
+					<th valign='top'>".t("Summa")."</th>
+					<th valign='top'>".t("Laskunro")."</th>
+					<th valign='top'>".t("Viite")." / ".t("Viesti")."</th>
+					<th valign='top'>".t("Ebid")."</th>
+					<th valign='top'>".t("Maksatus")."</th>
+					<th valign='top'>".t("Lisätieto")."</th>
+					<th class='back'></th>
+					</tr>
+					<tr>
+					<td><input type='text' name='search_nimi'></td>
+					<td><input type='text' name='search_tilinumero'></td>
+					<td><input type='text' name='search_erpcm'></td>
+					<td><input type='text' name='search_kassaale'></td>
+					<td><input type='text' name='search_summa'></td>
+					<td><input type='text' name='search_laskunro'></td>
+					<td><input type='text' name='search_viite'></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td class='back'></td>
+					</tr>										
+				</thead>";
 
 			$dataseek = 0;
-
+			
+			echo "<tbody>";
+			
 			while ($trow = mysql_fetch_array ($result)) {
 
 		        echo "<tr class='aktiivi'>";
@@ -1098,7 +1126,9 @@
 					echo "<div id='div_$trow[tunnus]' class='popup'>";
 					printf(t("Lasku on jaettu %s osaan!"), mysql_num_rows($jaetutres));
 					echo "<br>".t("Alkuperäinen summa")." $trow[arvo] $trow[valkoodi]<br>";
+					
 					$osa = 1;
+					
 					while ($jaetutrow = mysql_fetch_array ($jaetutres)) {
 						echo "$osa: $jaetutrow[summa] $jaetutrow[valkoodi]<br>";
 						$osa++;
@@ -1122,9 +1152,7 @@
 
 				// Ok, mutta onko meillä varaa makssa kyseinen lasku???
 				if ($trow["ysumma"] <= $yritirow[2]) {
-
-					echo "<td valign='top' nowrap>";
-
+					
 					//Kikkaillaan jotta saadda seuraavan laskun tunnus
 					if ($dataseek < mysql_num_rows($result)-1) {
 						$kikkarow = mysql_fetch_array($result);
@@ -1136,7 +1164,8 @@
 					}
 
 					echo "<form action = 'maksa.php$kikkalisa' method='post'>";
-
+					echo "<td valign='top' nowrap>";
+					
 					$query = "	SELECT maksukielto
 								FROM toimi
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -1159,7 +1188,6 @@
 					}
 
 					echo "</td>";
-
 					echo "<td valign='top' nowrap>";
 
 					if ($trow["ysumma"] != $trow["ykasumma"] and $trow['ysumma'] > 0) {
@@ -1189,9 +1217,9 @@
 						echo t("Älä lähetä pankkiin");
 						echo "<br>";
 					}
-					echo "</form>";
+										
 					echo "</td>";
-
+					echo "</form>";
 
 					//Tutkitaan voidaanko lasku poistaa
 					$query = "	SELECT tunnus
@@ -1216,18 +1244,24 @@
 								</form>
 								</td>";
 					}
+					else {
+						echo "<td class='back'></td>";
+					}
 
 				}
 				else {
 					// ei ollutkaan varaa!!
-					echo "<td colspan='2' valign='top'><font class='error'>".t("Tilin limitti ei riitä")."!</td>";
+					echo "<td></td><td valign='top'><font class='error'>".t("Tilin limitti ei riitä")."!</font></td><td class='back'></td>";
 				}
+				
 				echo "</tr>";
 
 				$dataseek++;
 			}
+			
+			echo "</tbody>";									
 			echo "</table>";
-
+			
 			echo "<br><font class='message'>".t("Haetut yhteensä")."</font><hr>";
 
 			echo "<table>";
@@ -1364,7 +1398,7 @@
 		echo "</form>";
 
 		echo "<br><font class='message'>".t("Poimitut laskut")."</font><hr>";
-		echo "<table>";
+		
 		$query = "	SELECT lasku.tunnus
 					FROM lasku, valuu, yriti
 					WHERE lasku.yhtio 		= '$kukarow[yhtio]'
@@ -1376,7 +1410,8 @@
 					and lasku.valkoodi 		= valuu.nimi
 					and lasku.maksaja 		= '$kukarow[kuka]'";
 		$result = mysql_query($query) or pupe_error($query);
-
+		
+		echo "<table>";
 		echo "	<tr><th>".t("Poimitut laskut")."</th>
 				<td> ".mysql_num_rows($result)." ".t("laskua poimittu")."</td>
 				<td>
@@ -1384,9 +1419,8 @@
 				<input type='hidden' name = 'tee' value='DM'>
 				<input type='Submit' value='".t('Näytä jo poimitut laskut')."'>
 				</form>
-				</td></td>";
-
-		echo "<table>";
+				</td></tr>";
+		echo "</table>";
 
 	}
 

@@ -4793,10 +4793,10 @@ if (!function_exists("js_popup")) {
 	echo "<script type='text/javascript' language='javascript'>";
 
 	if (file_exists("inc/jquery.min.js")) {
-		require("inc/jquery.min.js");
+		require_once("inc/jquery.min.js");
 	}
 	else {
-		require("jquery.min.js");
+		require_once("jquery.min.js");
 	}
 
 	?>
@@ -8883,6 +8883,71 @@ if (!function_exists("kukaisi")) {
 			$selite = $row['isi'];
 		}
 		return $selite;
+	}
+}
+
+
+if (!function_exists("pupe_DataTables")) {
+	function pupe_DataTables($taulu, $sarakkeetVis, $sarakkeetTot, $korkeusMiinus = 250) {
+
+		$aoColumns = "";
+
+		for ($i = 1; $i <= $sarakkeetVis; $i++) {
+			$aoColumns .= " null,";
+		}
+		for ($i = $sarakkeetVis+1; $i <= $sarakkeetTot; $i++) {
+			$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false},";
+		}
+
+		$aoColumns = substr($aoColumns, 0, -1);
+
+		echo "<script type='text/javascript' language='javascript'>";
+
+		require_once("inc/jquery.min.js");
+		require_once("DataTables/media/js/jquery.dataTables.min.js");
+
+		echo "</script>";
+
+		/*
+		\"sScrollY\": w_height,
+		\"bScrollCollapse\" : true,
+		var w_height = $(window).height()-250;
+		*/
+
+		echo "<script type=\"text/javascript\" charset=\"utf-8\">
+			var asInitVals = new Array();
+
+			$(document).ready(function() {
+				var oTable = $('#$taulu').dataTable( {
+					\"bDestroy\" : true,
+					\"bPaginate\" : false,
+					\"bInfo\" : false,
+					\"bStateSave\" : true,
+					\"oLanguage\": {
+						\"sSearch\" : \"".t("Etsi").":\",
+						\"sZeroRecords\": \"".t("Ei hakuosumia")."\",
+					},
+					\"aaSorting\": [],
+					\"aoColumns\": [$aoColumns]
+				} );
+
+				$(\"thead input\").keyup( function () {
+					oTable.fnFilter( this.value, $(\"thead input\").index(this) );
+				} );
+
+				var oSettings = oTable.fnSettings();
+
+				$(\"thead input\").each(function(i){
+					if (oSettings.aoPreSearchCols[i]['sSearch']!=''){
+						$(this).val(oSettings.aoPreSearchCols[i]['sSearch']);
+					}
+				});
+
+				if (oSettings.oPreviousSearch['sSearch']!=''){
+					$('.search_field').val(oSettings.oPreviousSearch['sSearch']);
+				}
+			} );
+		</script>";
 	}
 }
 

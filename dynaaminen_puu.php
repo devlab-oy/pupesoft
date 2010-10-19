@@ -15,7 +15,7 @@ echo "</pre>";
 $Xnodet = explode(",",$selite);
 
 /// T‰m‰ lis‰‰ tiedot kantaa ja sen j‰lkeen passaa parametrej‰ yllapitoon samaan tuotteeseen mist‰ l‰hdettiin.... toivottavasti..
-if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {
+if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {+
 $v=1;	
 	// k‰ytet‰‰n apumuuttujaa vika sille ett‰ saadaan vika pilkku pois...
 	$vika = count($id);
@@ -47,6 +47,7 @@ $v=1;
 	}
 	else { $toim = $toim;}
 	
+	//$toim = 'tuote';
 		
 	require('yllapito.php');
 	exit;

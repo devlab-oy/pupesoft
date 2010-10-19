@@ -159,7 +159,7 @@ if (!function_exists("lopetus")) {
 					$row["nimitys"] = trim(str_ireplace("UUSI", "", $row["nimitys"]));
 
 					if ($palautavainurli) return $lopetus;
-					else if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]$nlisa</a><br>";
+					else if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": ".t("$row[nimitys]")."$nlisa</a><br>";
 					else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
 
 					$edlopetus = $lopetus_clean;

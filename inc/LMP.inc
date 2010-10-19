@@ -23,23 +23,24 @@
 			}
 			else {
 				$yritirow = mysql_fetch_array ($result);
-				echo "<tr><td colspan='5'><font class='message'>".t("tili löytyi")." $yritirow[4] ".t("vastuussa")." '$yritirow[0]'</font><br>";
 
-				if (strlen($yritirow[2]) == 0) { // Tarkistetaan tilit
+				echo "<tr><td colspan='5'><font class='message'>".t("tili löytyi")." $yritirow[yhtio] ".t("vastuussa")." '$yritirow[hyvak]'</font><br>";
+
+				if (strlen($yritirow["oletus_rahatili"]) == 0) { // Tarkistetaan tilit
 					echo "<font class='message'>".t("Tililtä puuttuu kulu tai rahatili")."</font>";
 					$toim = 'E';
 				}
 				else {
-					echo "<font class='message'>".t("Tilin rahatili on")." '$yritirow[2]' ".t("ja kulutili")." '$yritirow[3]'</font><br>";
+					echo "<font class='message'>".t("Tilin rahatili on")." '$yritirow[oletus_rahatili]' ".t("ja kulutili")." '$yritirow[3]'</font><br>";
 				}
 
 				$query = "	SELECT *
 							FROM yhtio
-							WHERE yhtio = '$yritirow[4]'";
+							WHERE yhtio = '$yritirow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) != 1) {
-					echo "<font class='message'>".t("Yritystä")." '$yritirow[4]' ".t("ei löytynyt")."!</font><br>";
+					echo "<font class='message'>".t("Yritystä")." '$yritirow[yhtio]' ".t("ei löytynyt")."!</font><br>";
 					$toim = 'E';
 				}
 				else {
@@ -121,9 +122,13 @@
 
 				if ($viite > 0) {
 					echo "<font class='message'>Pupesoft: ".t("maksukanditaatti viiteno")."</font><br>";
+
 					$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 								FROM lasku
-								WHERE viite = '$viite' and summa = $maara * -1 and yhtio = '$yritirow[4]' and tila = 'Q'";
+								WHERE viite = '$viite'
+								and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+								and yhtio = '$yritirow[yhtio]'
+								and tila = 'Q'";
 					$result = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($result) != 1) {
@@ -136,10 +141,68 @@
 
 				if ($loytyi == 0) {
 					echo "<font class='message'>Pupesoft: ".t("maksukanditaatti nimi & määrä")."</font><br>";
+
+					// tarkka 35 merkkiä <-> 35 merkkiä nimihaku
 					$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 								FROM lasku
-								WHERE left(nimi,35) = left('$maksaa',35) and summa = $maara * -1 and yhtio = '$yritirow[4]' and tila = 'Q'";
+								WHERE left(nimi, 35) = left('$maksaa', 35)
+								and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+								and yhtio 	= '$yritirow[yhtio]'
+								and tila 	= 'Q'";
 					$result = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($result) != 1) {
+						// tarkka 35 merkkiä <-> 35 merkkiä NIMI ja NIMITARK haku
+						$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+									FROM lasku
+									WHERE left(concat_ws(' ', nimi, nimitark), 35) = left('$maksaa', 35)
+									and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+									and yhtio 	= '$yritirow[yhtio]'
+									and tila 	= 'Q'";
+						$result = mysql_query($query) or pupe_error($query);
+					}
+
+					if (mysql_num_rows($result) != 1) {
+						// kokeillaan samalla kaavalla kun lum2 rivissä
+						$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+									FROM lasku
+									WHERE replace(left(concat_ws(' ', if(pankki_haltija != '', pankki_haltija, concat_ws(' ', nimi, if(nimitark!='', nimitark, NULL))), osoite, postitp), 30), '&', ' ') = left('$maksaa', 30)
+									and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+									and yhtio	= '$yritirow[yhtio]'
+									and tila 	= 'Q'";
+						$result = mysql_query($query) or pupe_error($query);
+					}
+
+					if (mysql_num_rows($result) != 1) {
+						// poistetaan oy:t ja ab:t
+						$maksaa = trim(preg_replace('/\b(OY|AB)\b/i', '', strtoupper($maksaa)));
+
+						$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+									FROM lasku
+									WHERE left(nimi,35) LIKE '%$maksaa%'
+									and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+									and yhtio	= '$yritirow[yhtio]'
+									and tila 	= 'Q'";
+						$result = mysql_query($query) or pupe_error($query);
+					}
+
+					if (mysql_num_rows($result) != 1) {
+						// konvertoidaan ääkköset
+						$maksaa = str_replace ("å", "a", $maksaa);
+						$maksaa = str_replace ("ä", "a", $maksaa);
+						$maksaa = str_replace ("ö", "o", $maksaa);
+						$maksaa = str_replace ("Å", "A", $maksaa);
+						$maksaa = str_replace ("Ä", "A", $maksaa);
+						$maksaa = str_replace ("Ö", "O", $maksaa);
+
+						$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+									FROM lasku
+									WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'å','a'), 'ä','a'), 'ö','o'), 'Å','A'), 'Ä','A'), 'Ö','O') LIKE '%$maksaa%'
+									and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
+									and yhtio 	= '$yritirow[yhtio]'
+									and tila 	= 'Q'";
+						$result = mysql_query($query) or pupe_error($query);
+					}
 
 					if (mysql_num_rows($result) != 1) {
 						echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua")." '$maksaa' & '$maara' ".t("ei löytynyt")."</font><br>";
@@ -176,7 +239,7 @@
 
 					if ($tiliointirow = mysql_fetch_array($tiliointiresult)) {
 						echo "<font class='message'>".t("Tapahtuma on käsitelty"). " ". tv1dateconv($tiliotedataka) ."<br>";
-						echo "".t("Alkuperäinen tiliöinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
+						echo t("Alkuperäinen tiliöinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
 
 						if ($tiliointirow['korjattu'] != "0000-00-00 00:00:00" and $tiliointirow['korjattu'] != "@0000-00-00 00:00:00") {
 							echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font><br>";

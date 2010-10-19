@@ -1327,7 +1327,7 @@
 								}
 							}
 
-							echo "<option value='".${$tree."row"}['node_tunnus']."' {$sel}>".utf8_decode(${$tree."row"}['node_nimi'])."</option>";
+							echo "<option value='".${$tree."row"}['node_tunnus']."' {$sel}>".${$tree."row"}['node_nimi']."</option>";
 
 							if ($sel != '' and $tunnukset_on_jo == '') $kaikki_tunnukset .= ${$tree."row"}['node_tunnus'].",";
 						}

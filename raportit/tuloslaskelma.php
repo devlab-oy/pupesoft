@@ -60,11 +60,24 @@
 
 			if ($tyyppi == 4) {
 				$sisulk = "sisainen";
-				$sisulk_txt = "sisäinen";
+				$sisulk_txt = "sisäinen";				
 			}
 			else {
 				$sisulk = "ulkoinen";
 				$sisulk_txt = "ulkoinen";
+			}
+			
+			if ($tyyppi == 3 or $tyyppi == 4) {
+				$tililisa = " and left(tili.tilino, 1) >= 3 ";
+			}
+			elseif ($tyyppi == 1) {
+				$tililisa = " and left(tili.tilino, 1) = 1 ";
+			}
+			elseif ($tyyppi == 2) {
+				$tililisa = " and left(tili.tilino, 1) = 2 ";
+			}
+			else {
+				$tililisa = " and left(tili.tilino, 1) <= 2 ";
 			}
 
 			// Katsotaan, että kaikilla tileillä on tasot kunnossa
@@ -72,6 +85,7 @@
 		 	            FROM tili
 						LEFT JOIN taso ON taso.yhtio=tili.yhtio and tili.{$sisulk}_taso=taso.taso
 			            WHERE tili.yhtio = '$kukarow[yhtio]'
+						$tililisa
 						and taso.tunnus is null";
 			$result = mysql_query($query) or pupe_error($query);
 

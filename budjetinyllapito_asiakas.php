@@ -46,7 +46,7 @@
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND asiakkaan_tunnus = '$asiakkaan_tunnus'
 									AND kausi = '$kausi'
-									AND dyna_puu_tunnus = '$kaikki_tunnukset'
+									AND dyna_puu_tunnus = '$query_kaikki_tunnukset'
 									AND osasto = '".implode(",", $mul_osasto)."'
 									AND try = '".implode(",", $mul_try)."'";
 						$result = mysql_query($query) or pupe_error($query);
@@ -62,7 +62,7 @@
 												WHERE yhtio = '$kukarow[yhtio]'
 												AND asiakkaan_tunnus = '$asiakkaan_tunnus'
 												AND kausi = '$kausi'
-												AND dyna_puu_tunnus = '$kaikki_tunnukset'
+												AND dyna_puu_tunnus = '$query_kaikki_tunnukset'
 												AND osasto = '".implode(",", $mul_osasto)."'
 												AND try = '".implode(",", $mul_try)."'";
 								}
@@ -74,7 +74,7 @@
 												WHERE yhtio = '$kukarow[yhtio]'
 												AND asiakkaan_tunnus = '$asiakkaan_tunnus'
 												AND kausi = '$kausi'
-												AND dyna_puu_tunnus = '$kaikki_tunnukset'
+												AND dyna_puu_tunnus = '$query_kaikki_tunnukset'
 												AND osasto = '".implode(",", $mul_osasto)."'
 												AND try = '".implode(",", $mul_try)."'";
 								}
@@ -90,7 +90,7 @@
 										asiakkaan_tunnus = '$asiakkaan_tunnus',
 										osasto = '".implode(",", $mul_osasto)."',
 										try = '".implode(",", $mul_try)."',
-										dyna_puu_tunnus = '$kaikki_tunnukset',
+										dyna_puu_tunnus = '$query_kaikki_tunnukset',
 										laatija = '$kukarow[kuka]',
 										luontiaika = now(),
 										muutospvm = now(),
@@ -175,6 +175,14 @@
 		$monivalintalaatikot_normaali = array();
 
 		require ("tilauskasittely/monivalintalaatikot.inc");
+
+		if (trim($kaikki_tunnukset) != '') {
+			if (substr($kaikki_tunnukset, -1, 1) == ',') {
+				$kaikki_tunnukset = substr($kaikki_tunnukset, 0, -1);
+			}
+		
+			echo "<input type='hidden' name='query_kaikki_tunnukset' value='$kaikki_tunnukset' />";
+		}
 
 		echo "<br />";
 		echo "<table><tr><td class='back'><input type='submit' name='submit_button' id='submit_button' value='",t("Näytä/Tallenna"),"' /></td></tr></table>";

@@ -51,7 +51,7 @@ if (mysql_field_name($result, $i) == "laji") {
 }
 
 if (mysql_field_name($result, $i) == "tuoteno") {
-		$apu['ttuoteno'] = $trow[$i];
+		$apu['ttuoteno'] = $lukitse_avaimeen;
 		
 	if($lukitse_avaimeen != "") {
 		$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";

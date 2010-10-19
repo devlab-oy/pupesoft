@@ -186,8 +186,8 @@ while ($orow = mysql_fetch_array($result)) {
 
 			// tehd‰‰n submenu itemit
 			while ($mrow = mysql_fetch_array($xresult)) {
-				echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='$mrow[nimi]";
-				if ($mrow['alanimi'] != '') echo "?toim=$mrow[alanimi]";
+				echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='$mrow[nimi]?indexvas=1";
+				if ($mrow['alanimi'] != '') echo "&toim=$mrow[alanimi]";
 				echo "' target='main'>  &bull; ".t("$mrow[nimitys]")."</a></td></tr>";
 			}
 		}
@@ -211,17 +211,17 @@ while ($orow = mysql_fetch_array($result)) {
 			$mrow["alanimi"] = "";
 		}
 
-		echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' $target href='$mrow[nimi]";
+		echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' $target href='$mrow[nimi]?indexvas=1";
 
 		if ($mrow['alanimi'] != '') {
-				echo "?toim=$mrow[alanimi]";
+				echo "&toim=$mrow[alanimi]";
 
 				if ($tultiin == "futur") {
 					echo "&ostoskori=$ostoskori&tultiin=$tultiin";
 				}
 		}
 		elseif ($mrow['alanimi'] == '' and $tultiin == "futur") {
-			echo "?ostoskori=$ostoskori&tultiin=$tultiin";
+			echo "&ostoskori=$ostoskori&tultiin=$tultiin";
 		}
 
 		echo "' target='main'>".t("$mrow[nimitys]")."</a></td></tr>";

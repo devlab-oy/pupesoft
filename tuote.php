@@ -8,12 +8,12 @@
 	if (!isset($toim_kutsu)) 	 $toim_kutsu = "";
 	if (!isset($ulos)) 		 	 $ulos = "";
 	if (!isset($livesearch_tee)) $livesearch_tee = "";
-	
+
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
 	}
-	
+
 	// Liitetiedostot popup
 	if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
 		liite_popup("AK", $tuotetunnus, $width, $height);
@@ -592,7 +592,7 @@
                         echo "<input type='hidden' name='lopetus' value='".$palvelin2."tuote.php////tuoteno=$tuoteno//tee=Z'>";
 						echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 						echo "<input type='hidden' name='toim' value='$yhttoim'>";
-						echo "<input type='submit' value='Siirry tuotteen $yhttoim yhteensopivuuksiin'>";
+						echo "<input type='submit' value='".t("Siirry tuotteen $yhttoim yhteensopivuuksiin")."'>";
 						echo "</form>";
 					}
 				}
@@ -829,7 +829,6 @@
 						}
 					}
 					echo "<tr><th>".t("Suoratoimitettavissa Yhteensä")."</th><td align='right'>".sprintf("%.02f",$kokonaissaldo)."</td></tr>";
-
 					echo "</table>";
 				}
 			}

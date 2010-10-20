@@ -5,8 +5,9 @@
 	 *
 	 */
 
-	if (empty($argv)) {
-	    die('Tämän scriptin voi ajaa ainoastaan komentoriviltä.');
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
 	$kukarow = array();

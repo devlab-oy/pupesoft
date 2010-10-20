@@ -1,7 +1,10 @@
 #!/usr/bin/php
 <?php
 
-if ($argc == 0) die ("<br><br>Tätä scriptiä voi ajaa vain komentoriviltä!");
+// Kutsutaanko CLI:stä
+if (php_sapi_name() != 'cli') {
+	die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+}
 
 require ("../inc/connect.inc");
 

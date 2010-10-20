@@ -1,8 +1,18 @@
 <?php
 
-if (isset($argv[1]) and trim($argv[1]) != '') {
+// Kutsutaanko CLI:st‰
+$php_cli = FALSE;
 
-	if ($argc == 0) die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+if (php_sapi_name() == 'cli') {
+	$php_cli = TRUE;
+}
+
+if ($php_cli) {
+
+	if (!isset($argv[1]) or $argv[1] == '') {
+		echo "Anna hytiˆ!!!\n";
+		die;
+	}
 
 	// otetaan tietokanta connect
 	require ("../inc/connect.inc");
@@ -33,13 +43,10 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 	}
 
 	$tee = "YHTEENVETO";
-	$komentorivilta = TRUE;
 }
 else {
 	require ("../inc/parametrit.inc");
 	echo "<font class='head'>".t("ABC-Aputaulun rakennus")."<hr></font>";
-
-	$komentorivilta = FALSE;
 }
 
 if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
@@ -668,12 +675,12 @@ if ($tee == 'YHTEENVETO') {
 	$optir = mysql_query($query) or pupe_error($query);
 
 
-	if (!$komentorivilta) {
+	if (!$php_cli) {
 		echo t("ABC-aputaulu rakennettu")."!<br><br>";
 	}
 }
 
-if (!$komentorivilta) {
+if (!$php_cli) {
 
 	// piirrell‰‰n formi
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";

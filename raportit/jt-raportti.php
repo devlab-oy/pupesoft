@@ -1,5 +1,7 @@
 <?php
-	if ($argc == 0) {
+
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
@@ -10,8 +12,8 @@
 	$query = "SELECT DISTINCT yhtio FROM yhtio";
 	$yhtio_result = mysql_query($query) or die($query);
 
-//	$laskuri = 1;
-	
+	//$laskuri = 1;
+
 	while ($yrow = mysql_fetch_array($yhtio_result)) {
 		$query = "SELECT * FROM yhtio WHERE yhtio='$yrow[yhtio]'";
 		$result = mysql_query($query) or die($query);
@@ -31,12 +33,12 @@
 				foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
 					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
 				}
-			}			
+			}
 		}
 
 		$toimquery = "SELECT * FROM yhtion_toimipaikat WHERE yhtio='$yhtiorow[yhtio]' AND toim_automaattinen_jtraportti != ''";
 		$toimresult = mysql_query($toimquery) or die ("Kysely ei onnistu yhtio $query");
-	
+
 		while ($toimrow = mysql_fetch_array($toimresult)) {
 			if ($toimrow["toim_automaattinen_jtraportti"] == "pv") {
 				// annetaan mennä läpi, koska ajetaan joka päivä
@@ -89,7 +91,7 @@
 				$asiakasquery = "SELECT nimi, osoite, postino, postitp, maa, ytunnus, email, kieli, tunnus FROM asiakas WHERE yhtio='{$yhtiorow['yhtio']}' AND tunnus=$liitostunnus_row[liitostunnus]";
 				$asiakasresult = mysql_query($asiakasquery) or pupe_error($asiakasquery);
 				$asiakasrow = mysql_fetch_array($asiakasresult);
-	
+
 				if ($asiakasrow["email"] != "") {
 
 					$jtquery = "	SELECT tilausrivi.nimitys, tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.laadittu, tilausrivi.tilkpl

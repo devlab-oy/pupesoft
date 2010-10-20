@@ -1,8 +1,18 @@
 <?php
 
-if (isset($argv[1]) and trim($argv[1]) != '') {
+// Kutsutaanko CLI:stä
+$php_cli = FALSE;
 
-	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+if (php_sapi_name() == 'cli') {
+	$php_cli = TRUE;
+}
+
+if ($php_cli) {
+
+	if (!isset($argv[1]) or $argv[1] == '') {
+		echo "Anna yhtiö!!!\n";
+		die;
+	}
 
 	// otetaan tietokanta connect
 	require ("../inc/connect.inc");
@@ -440,7 +450,7 @@ if ($tee == "") {
 
 }
 
-if (trim($argv[1]) == '') {
+if (!$php_cli) {
 	require ("../inc/footer.inc");
 }
 

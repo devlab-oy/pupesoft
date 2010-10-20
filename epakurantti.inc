@@ -361,7 +361,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
-			if ($komentorivilta != "ON") {
+			if (!isset($php_cli) or !$php_cli) {
 				echo "<font class='message'>";
 				echo t("Tuote")." $tuoteno ok!<br>";
 				echo t("Varastonarvoa muutettiin")." $muutos<br>";

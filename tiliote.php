@@ -1,11 +1,26 @@
 <?php
 
+	// Kutsutaanko CLI:stä
+	$php_cli = FALSE;
+
+	if (php_sapi_name() == 'cli') {
+		$php_cli = TRUE;
+	}
+
 	$ok = 0;
 
 	// tehdään tällänen häkkyrä niin voidaan scriptiä kutsua vaikka perlistä..
-	if (trim($argv[1]) == 'perl' and trim($argv[2]) != '') {
+	if ($php_cli) {
 
-		if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+		if (!isset($argv[1]) or $argv[1] != 'perl') {
+			echo "Parametri väärin!!!\n";
+			die;
+		}
+
+		if (!isset($argv[2]) or $argv[2] == '') {
+			echo "Anna tiedosto!!!\n";
+			die;
+		}
 
 		// otetaan includepath aina rootista
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
@@ -15,16 +30,12 @@
 		require ("inc/connect.inc");
 		require ("inc/functions.inc");
 
-		$komentorivilta = "ON";
-
 		$userfile	= trim($argv[2]);
 		$filenimi	= $userfile;
 		$ok 		= 1;
 	}
 	else {
 		require ("inc/parametrit.inc");
-		
-		$komentorivilta = "";
 
 		echo "<font class='head'>Tiliotteen, LMP:n, kurssien, verkkolaskujen ja viitemaksujen käsittely</font><hr><br><br>";
 	}
@@ -240,7 +251,7 @@
 		}
 	}
 
-	if ($komentorivilta != "ON") { 
+	if (!$php_cli) {
 		echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>";
 		echo "<table>";
 		echo "	<tr>

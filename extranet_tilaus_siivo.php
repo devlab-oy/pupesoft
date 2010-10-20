@@ -1,10 +1,12 @@
 <?php
 
-	// jos ollaan saatu komentoriviltä parametri
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	}
+
 	// komentoriviltä pitää tulla parametrinä yhtio
 	if (trim($argv[1]) != '') {
-
-		if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
 
 		// otetaan tietokanta connect
 		require ("inc/connect.inc");
@@ -107,7 +109,7 @@
 						}
 					}
 				}
-			}			
+			}
 		}
 
 		if ($laskuri_jt > 0 or $laskuri_norm > 0) {

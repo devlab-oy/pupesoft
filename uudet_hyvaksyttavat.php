@@ -1,28 +1,34 @@
 <?php
 
-if (isset($argv[1]) and trim($argv[1]) != '') {
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	}
 
-	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	if (!isset($argv[1]) or $argv[1] == '') {
+		echo "Anna kuka!!!\n";
+		die;
+	}
 
 	// otetaan tietokanta connect
 	require ("inc/connect.inc");
 	require ("inc/functions.inc");
 
-	if($argv[2] != "") {
+	if (isset($argv[2]) and $argv[2] != "") {
 		$ajalta = $argv[2];
 	}
 
 	//	Oletus
-	if((int) $ajalta == 0) $ajalta = 1;
+	if ((int) $ajalta == 0) $ajalta = 1;
 
-	$query    = "select * from kuka where kuka='$argv[1]' limit 1";
+	$query    = "SELECT * from kuka where kuka='$argv[1]' limit 1";
 	$kukares = mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($kukares) == 0) die("Karhuajaa ei löyry!\n$query\n");
+	if (mysql_num_rows($kukares) == 0) die("Karhuajaa ei löyry!\n$query\n");
 	$kukarow = mysql_fetch_array($kukares);
 
-	$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
+	$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
 	$yhtiores = mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($yhtiores) == 0) die("Firmaa ei löyry!\n");
+	if (mysql_num_rows($yhtiores) == 0) die("Firmaa ei löyry!\n");
 	$yhtiorow = mysql_fetch_array($yhtiores);
 
 	$query = "	SELECT *
@@ -38,7 +44,6 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 			$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
 		}
 	}
-
 
 	$query = "	SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(summa * valuu.kurssi,2) summa, kuka.eposti, lasku.hyvaksyja_nyt,
 					UNIX_TIMESTAMP(lasku.luontiaika) luontiaika,
@@ -63,25 +68,25 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 		$muistuta = 0;
 		//	Kandeeko tästä muistuttaa?
 		for($i=1;$i<=5;$i++) {
-			if($trow["hyvak$i"] == $trow["hyvaksyja_nyt"]) {
+			if ($trow["hyvak$i"] == $trow["hyvaksyja_nyt"]) {
 
 				//	Verrataan luontiaikaan..
-				if($i == 1) {
-					if($trow["luontiaika"]>=strtotime("00:00:00 -$ajalta days")) {
+				if ($i == 1) {
+					if ($trow["luontiaika"]>=strtotime("00:00:00 -$ajalta days")) {
 						$muistuta = 1;
 					}
 				}
 				//	Verrataan edelliseen hyväksyntään
 				else {
 					$e = $i-1;
-					if($trow["h{$e}time"]>=strtotime("00:00:00 -$ajalta days")) {
+					if ($trow["h{$e}time"]>=strtotime("00:00:00 -$ajalta days")) {
 						$muistuta = 1;
 					}
 				}
 			}
 		}
 
-		if($muistuta == 1) {
+		if ($muistuta == 1) {
 
 			if ($trow['eposti'] != $veposti) {
 				if ($veposti != '') {
@@ -98,13 +103,10 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 			$meili .= "Summa: " .$yhtiorow["valkoodi"]." ".$trow['summa'] . "\n\n";
 		}
 	}
+
 	if ($meili != '') {
 		$meili = t("Sinulla on seuraavat uudet laskut hyväksyttävänä").":\n\n" . $meili;
 		$tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyväksyttävät laskusi"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 	}
-}
-else {
-	echo "Tätä ei saa ajaa kuin komentoriviltä!<br>\n";
-}
 
 ?>

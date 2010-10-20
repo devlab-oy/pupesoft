@@ -1,9 +1,13 @@
 <?php
 
-	if (isset($argv[1]) and trim($argv[1]) != '') {
+	// Kutsutaanko CLI:stä
+	$php_cli = FALSE;
 
-		if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	if (php_sapi_name() == 'cli') {
+		$php_cli = TRUE;
+	}
 
+	if ($php_cli) {
 		// otetaan includepath aina rootista
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
@@ -12,8 +16,6 @@
 		// otetaan tietokanta connect
 		require("inc/connect.inc");
 		require("inc/functions.inc");
-
-		$komentorivilta = TRUE;
 	}
 	else {
 		if (isset($_POST["tee"])) {
@@ -22,8 +24,6 @@
 		}
 
 		require("inc/parametrit.inc");
-
-		$komentorivilta = FALSE;
 	}
 
 	//Hardcoodataan failin nimi /tmp diririkkaan
@@ -36,7 +36,7 @@
 		}
 	}
 	else {
-		if (!$komentorivilta) echo "<font class='head'>".t("SQL-tietokantarakenne").":</font><hr>";
+		if (!$php_cli) echo "<font class='head'>".t("SQL-tietokantarakenne").":</font><hr>";
 
 
 		$ulos = array();
@@ -50,7 +50,7 @@
 			fputs($toot, $print."\r\n");
 		}
 
-		if (!$komentorivilta) {
+		if (!$php_cli) {
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";
 			echo "<form method='post' action='$PHP_SELF'>";
@@ -80,7 +80,7 @@
 		}
 		curl_close ($ch);
 
-		if (!$komentorivilta) {
+		if (!$php_cli) {
 			echo "<pre>$result</pre>";
 		}
 		elseif (trim($result) != "") {
@@ -102,7 +102,7 @@
 		curl_setopt ($ch, CURLOPT_HEADER, FALSE);
 		$updatet = curl_exec ($ch);
 
-		if (!$komentorivilta) {
+		if (!$php_cli) {
 			echo "<pre>$updatet</pre>";
 		}
 		elseif (trim($updatet) != "") {
@@ -114,6 +114,6 @@
 			}
 		}
 
-		if (!$komentorivilta) require("inc/footer.inc");
+		if (!$php_cli) require("inc/footer.inc");
 	}
 ?>

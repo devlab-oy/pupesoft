@@ -1,8 +1,11 @@
 <?php
 
-	if (isset($argv[1]) and trim($argv[1]) != '') {
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	}
 
-		if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	if (isset($argv[1]) and trim($argv[1]) != '') {
 
 		// otetaan tietokanta connect
 		require ("inc/connect.inc");
@@ -11,7 +14,7 @@
 		// hmm.. jännää
 		$kukarow['yhtio'] = $argv[1];
 
-		$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
+		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
 		$yhtiores = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($yhtiores) == 1) {
@@ -30,7 +33,6 @@
 					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
 				}
 			}
-
 		}
 		else {
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");

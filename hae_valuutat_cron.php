@@ -1,6 +1,9 @@
 <?php
 
-	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	}
 
 	require ("inc/connect.inc");
 	require ("inc/functions.inc");

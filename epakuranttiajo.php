@@ -1,6 +1,9 @@
 <?php
 
-	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	}
 
 	if (!isset($argv[1])) {
 		die ("Anna yhtio parametriksi!");
@@ -23,7 +26,7 @@
 	// Tehdään kaikki tapahtumat samalle tositteelle!
 	$tapahtumat_samalle_tositteelle = "kylla";
 	$laskuid 		= 0;
-	$komentorivilta = "ON";
+	$php_cli 		= TRUE;
 	$kaikkiepakur	= "";
 
 	if (isset($argv[2]) and in_array($argv[2], array("25paalle", "puolipaalle", "75paalle", "paalle"))) {
@@ -52,7 +55,7 @@
 		if ($kaikkiepakur != "") {
 			$tee = $kaikkiepakur;
 			$tuoteno = $epakurantti_row["tuoteno"];
-			
+
 			require("epakurantti.inc");
 
 			echo "Tuotteen $epakurantti_row[tuoteno], laitetaan $tee epakurantiksi. Varastonmuutos $muutos $yhtiorow[valkoodi].\n";

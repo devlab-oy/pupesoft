@@ -1,5 +1,26 @@
 <?php
 
+// Kutsutaanko CLI:stä
+$php_cli = FALSE;
+
+if (php_sapi_name() == 'cli') {
+	$php_cli = TRUE;
+}
+
+if (!$php_cli) {
+	require ("inc/parametrit.inc");
+	$kyhtio = $kukarow['yhtio'];
+}
+else {
+	//tarvitaan yhtiö
+	if ($argv[1] != "") $kyhtio = trim($argv[1]);
+	else die ("Yhtiö on annettava!");
+
+	require ("/var/www/html/pupesoft/inc/connect.inc");
+	require ("/var/www/html/pupesoft/inc/functions.inc");
+	$tee = "aja";
+}
+
 function ftp_rmfiles($ftp_stream, $directory, $nodel = "", $nodelpict = "") {
 
     if (!is_resource($ftp_stream) ||
@@ -62,20 +83,6 @@ function ftp_rmfiles($ftp_stream, $directory, $nodel = "", $nodelpict = "") {
 			}
 		}
     }
-}
-
-//tarvitaan yhtiö
-if (empty($argv)) {
-	require ("inc/parametrit.inc");
-	$kyhtio = $kukarow['yhtio'];
-}
-else {
-	if ($argv[1] != "") $kyhtio = trim($argv[1]);
-	else die;
-
-	require ("/var/www/html/pupesoft/inc/connect.inc");
-	require ("/var/www/html/pupesoft/inc/functions.inc");
-	$tee = "aja";
 }
 
 if ($tee == "aja") {

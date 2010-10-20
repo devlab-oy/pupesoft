@@ -1,13 +1,19 @@
 <?php
 
-//tarvitaan yhtiö
-if (empty($argv)) {
+// Kutsutaanko CLI:stä
+$php_cli = FALSE;
+
+if (php_sapi_name() == 'cli') {
+	$php_cli = TRUE;
+}
+
+if (!$php_cli) {
 	require ("inc/parametrit.inc");
 	$kyhtio = $kukarow['yhtio'];
 }
 else {
 	if ($argv[1] != "") $kyhtio = trim($argv[1]);
-	else die;
+	else die ("Yhtiö on annettava!");
 
 	require ("/var/www/html/pupesoft/inc/connect.inc");
 	require ("/var/www/html/pupesoft/inc/functions.inc");

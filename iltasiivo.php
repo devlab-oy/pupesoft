@@ -1,18 +1,26 @@
 <?php
 
-	// jos ollaan saatu komentoriviltä parametri
-	// komentoriviltä pitää tulla parametrinä yhtio
-	if (trim($argv[1]) != '') {
+	// Kutsutaanko CLI:stä
+	$php_cli = FALSE;
 
-		if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	if (php_sapi_name() == 'cli') {
+		$php_cli = TRUE;
+	}
+
+	if ($php_cli) {
+
+		if (!isset($argv[1]) or $argv[1] == '') {
+			echo "Anna yhtiö!!!\n";
+			die;
+		}
+
+		//tarvitaan yhtiö
+		$kukarow['yhtio'] = $argv[1];
+		$kukarow['kuka'] = "crond";
 
 		// otetaan tietokanta connect
 		require ("inc/connect.inc");
 		require ("inc/functions.inc");
-
-		// hmm.. jännää
-		$kukarow['yhtio'] = $argv[1];
-		$kukarow['kuka'] = "crond";
 
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 		$aja = 'run';
@@ -311,17 +319,17 @@
 				$iltasiivo .= date("d.m.Y @ G:i:s").": Poistettiin ".mysql_affected_rows()." riviä suorituskykylokista.\n";
 			}
 		}
-						
+
 		// Dellataan rogue oikeudet
 		$query = "	DELETE o1.*
 					FROM oikeu o1
-					LEFT JOIN oikeu o2 ON o1.yhtio=o2.yhtio and o1.sovellus=o2.sovellus and o1.nimi=o2.nimi and o1.alanimi=o2.alanimi and o2.kuka='' 
+					LEFT JOIN oikeu o2 ON o1.yhtio=o2.yhtio and o1.sovellus=o2.sovellus and o1.nimi=o2.nimi and o1.alanimi=o2.alanimi and o2.kuka=''
 					WHERE o1.yhtio = '{$kukarow['yhtio']}'
 					and o1.kuka != ''
 					and o2.tunnus is null";
-		$result = mysql_query($query) or pupe_error($query);		
+		$result = mysql_query($query) or pupe_error($query);
 
-		if ($iltasiivo != "" or trim($argv[1]) != '') {
+		if ($iltasiivo != "" or $php_cli) {
 			echo $iltasiivo;
 			echo date("d.m.Y @ G:i:s").": Iltasiivo $yhtiorow[nimi]. Done!\n\n";
 		}
@@ -337,7 +345,7 @@
 		}
 	}
 
-	if (trim($argv[1]) == '') {
+	if (!$php_cli) {
 		echo "</pre>";
 		require('inc/footer.inc');
 	}

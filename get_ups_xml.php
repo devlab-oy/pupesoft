@@ -1,7 +1,8 @@
 <?php
 
-	if (empty($argv)) {
-	    die('Tämän scriptin voi ajaa ainoastaan komentoriviltä.');
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
 	require 'inc/salasanat.php';
@@ -53,7 +54,7 @@
 
 			// dellataan löydetyt *.xxx filet
 			if ($files_xxx) {
-				foreach ($files_xxx as $file) {											
+				foreach ($files_xxx as $file) {
 					ftp_delete($conn_id, $file);
 					$ups_dellattuja++;
 				}
@@ -70,7 +71,7 @@
 						$xml = simplexml_load_file('/tmp/ups_temp_file.xml');
 					}
 
-					if ($xml) {				
+					if ($xml) {
 						foreach ($xml->children() as $children) {
 
 							$reference_number = '';
@@ -113,7 +114,7 @@
 						}
 						ftp_delete($conn_id, $file);
 						$ups_dellattuja++;
-					}			
+					}
 				}
 
 				echo date("d.m.Y @ G:i:s").": Päivitettiin $ups_lisattuja rahtikirjanumeroa. Dellattiin $ups_dellattuja tiedostoa.\n";
@@ -124,7 +125,7 @@
 			}
 		}
 	}
-	
+
 	echo date("d.m.Y @ G:i:s").": UPS-rahtikirjojen paivitys. Done!\n\n";
-	
+
 ?>

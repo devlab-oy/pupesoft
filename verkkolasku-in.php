@@ -10,10 +10,15 @@
 
 		touch("/tmp/##verkkolasku-in.lock");
 
-		if (isset($argc) and $argc > 0) {
-			//Komentorivilt‰
-			$komentorivilta = TRUE;
+		// Kutsutaanko CLI:st‰
+		$php_cli = FALSE;
 
+		if (php_sapi_name() == 'cli') {
+			$php_cli = TRUE;
+		}
+
+		if ($php_cli) {
+			//Komentorivilt‰
 			// otetaan includepath aina rootista
 			ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
 			error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
@@ -42,8 +47,6 @@
 		}
 		elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolaskut_in != "" and $verkkolaskut_ok != "" and $verkkolaskut_orig != "" and $verkkolaskut_error != "") {
 			//Pupesoftista
-			$komentorivilta = FALSE;
-
 			echo "Aloitetaan verkkolaskun sis‰‰nluku...<br><br>";
 
 			$laskut     = $verkkolaskut_in;
@@ -99,14 +102,14 @@
 					$laskuvirhe = verkkolasku_in($nimi, TRUE);
 
 				    if ($laskuvirhe == "") {
-						if (!$komentorivilta)  {
+						if (!$php_cli)  {
 							echo "Verkkolasku vastaanotettu onnistuneesti!<br><br>";
 						}
 
 						rename($laskut."/".$file, $oklaskut."/".$file);
 				    }
 				    else {
-						if (!$komentorivilta)  {
+						if (!$php_cli)  {
 							echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br><pre>$laskuvirhe</pre><br>";
 						}
 

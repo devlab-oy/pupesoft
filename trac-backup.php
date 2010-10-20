@@ -1,11 +1,14 @@
 #!/usr/bin/php
 <?php
 
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	}
+
 	// tässä scp komennon host ja host dir muuttujat, muuta nämä sopiviksi muuhun ei tarvitse koskea
 	$scp_host = "root@d90.arwidson.fi";
 	$scp_dir  = "/backup/mysql-backup";
-
-	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 
 	echo date("d.m.Y @ G:i:s")." - Backup trac.\n";
 
@@ -34,6 +37,5 @@
 	system("rm -rf /tmp/tracbackup");
 
 	echo date("d.m.Y @ G:i:s")." - All done.\n";
-	
 
 ?>

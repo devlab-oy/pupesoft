@@ -631,11 +631,17 @@ if (!function_exists('rivi_tarjous')) {
 		$row["kommentti"] = trim($row["kommentti"]);
 
 		//hatetaan tuotteen myyntihinta
-		$query = "	SELECT round(if(isnull(hinnasto.hinta) or hinnasto.hinta='', round(tuote.myyntihinta/if('$laskurow[vienti_kurssi]'=0,1,'$laskurow[vienti_kurssi]'),'$yhtiorow[hintapyoristys]'), hinnasto.hinta) / (1+(if('$yhtiorow[alv_kasittely]'='',0,tuote.alv)/100)), '$yhtiorow[hintapyoristys]') myyntihinta,
+		$query = "	SELECT round(if(isnull(hinnasto.hinta) OR hinnasto.hinta = '', round(tuote.myyntihinta / if('$laskurow[vienti_kurssi]' = 0, 1, '$laskurow[vienti_kurssi]'), '$yhtiorow[hintapyoristys]'), hinnasto.hinta) / (1 + (if('$yhtiorow[alv_kasittely]' = '', 0, tuote.alv) / 100)), '$yhtiorow[hintapyoristys]') myyntihinta,
        				tuote.aleryhma
                     FROM tuote
-                    LEFT JOIN hinnasto on tuote.yhtio = hinnasto.yhtio and tuote.tuoteno = hinnasto.tuoteno and hinnasto.valkoodi = '$laskurow[valkoodi]'
-                    WHERE tuote.tuoteno='$row[tuoteno]' and tuote.yhtio='$kukarow[yhtio]'";
+                    LEFT JOIN hinnasto ON (tuote.yhtio = hinnasto.yhtio
+											AND tuote.tuoteno = hinnasto.tuoteno
+											AND hinnasto.valkoodi = '$laskurow[valkoodi]'
+											AND hinnasto.laji = '')
+                    WHERE tuote.tuoteno = '$row[tuoteno]'
+					AND tuote.yhtio = '$kukarow[yhtio]'
+					ORDER BY IFNULL(TO_DAYS(current_date) - TO_DAYS(hinnasto.alkupvm), 9999999999999), hinnasto.valkoodi DESC, hinnasto.tunnus DESC
+					LIMIT 1";
         $asresult = mysql_query($query) or pupe_error($query);
 		$asrow1 = mysql_fetch_array($asresult);
 

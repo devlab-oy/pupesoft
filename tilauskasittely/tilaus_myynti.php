@@ -5671,12 +5671,12 @@ if ($tee == '') {
 							}
 						}
 
-						$summa			+= $arow["rivihinta"]+$arow["alv"];
-						$summa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
-						$arvo			+= $arow["rivihinta"];
-						$arvo_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
-						$kotiarvo		+= $arow["kotirivihinta"];
-						$kotiarvo_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
+						$summa			+= round($arow["rivihinta"]+$arow["alv"], $yhtiorow["hintapyoristys"]);
+						$summa_eieri	+= round($arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"], $yhtiorow["hintapyoristys"]);
+						$arvo			+= round($arow["rivihinta"], $yhtiorow["hintapyoristys"]);
+						$arvo_eieri		+= round($arow["rivihinta_ei_erikoisaletta"], $yhtiorow["hintapyoristys"]);
+						$kotiarvo		+= round($arow["kotirivihinta"], $yhtiorow["hintapyoristys"]);
+						$kotiarvo_eieri	+= round($arow["kotirivihinta_ei_erikoisaletta"], $yhtiorow["hintapyoristys"]);
 						$kate			+= $rivikate;
 						$kate_eieri		+= $rivikate_eieri;
 					}

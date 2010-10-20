@@ -1,18 +1,31 @@
 <?php
 
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	}
+
 	require ("../inc/connect.inc");
 	require ("../inc/functions.inc");
-
-	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 
 	// Tarvitaan 3 parametria
 	// 1 = Yhtio
 	// 2 = Luottorajaprosentti
 	// 3 = Sähkopostiosoite
 
-	if (count($argv) < 4) {
-		echo "Syntax Error!\n";
-		exit;
+	if (!isset($argv[1]) or $argv[1] == '') {
+		echo "Anna yhtiö!!!\n";
+		die;
+	}
+
+	if (!isset($argv[2]) or $argv[2] == '') {
+		echo "Anna luottorajaprosentti!!!\n";
+		die;
+	}
+
+	if (!isset($argv[3]) or $argv[3] == '') {
+		echo "Anna sähkopostiosoite!!!\n";
+		die;
 	}
 
 	// Otetaan parametrit

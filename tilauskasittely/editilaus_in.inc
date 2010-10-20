@@ -3,10 +3,15 @@
 $debug = 0;
 $edi_ulos = "\n";
 
-// jos meillä ei ole sessiota ja meillä on komentoriviparametri annettuna
-if (trim($argv[1]) != '') {
-	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+// Kutsutaanko CLI:stä
+$php_cli = FALSE;
 
+if (php_sapi_name() == 'cli') {
+	$php_cli = TRUE;
+}
+
+// jos meillä ei ole sessiota ja meillä on komentoriviparametri annettuna
+if ($php_cli) {
 	// otetaan tietokanta connect
 	require ("../inc/connect.inc");
 	require ("../inc/functions.inc");
@@ -21,15 +26,13 @@ if (trim($argv[1]) != '') {
 	// ja toinen parametri komentoriviltä
 	$edi_tyyppi	= $argv[2];
 
-	$komentorivilta = "ON";
-
 	// laitetaan pupe-rootti ja tilauskäsittely mukaan includepathiin
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname($argv[0])).PATH_SEPARATOR.dirname($argv[0]));
 }
 
 if (!function_exists('jt_toimita_editilaus')) {
 	function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa) {
-		global $yhtiorow, $kukarow, $edi_ulos, $komentorivilta;
+		global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
 
 		$automaaginen 			= "automaaginen";
 		$tee 					= "JATKA";
@@ -253,8 +256,10 @@ while (!feof ($fd)) {
 				$kukarow['kuka'] = $edi_laatija;
 
 				// nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
-				$argv = array();
-				$argv[1] = $kukarow["yhtio"];
+				$argv 		= array();
+				$argv[0] 	= "";
+				$argv[1] 	= $kukarow["yhtio"];
+				$editil_cli = TRUE;
 
 				$edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
 			}

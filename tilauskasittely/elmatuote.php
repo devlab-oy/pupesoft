@@ -2,10 +2,15 @@
 
 $useslave = 1; // k‰ytet‰‰n slavea
 
-// jos ollaan saatu komentorivilt‰ parametri
-if (trim($argv[1])!='') {
+// Kutsutaanko CLI:st‰
+$php_cli = FALSE;
 
-	if ($argc == 0) die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+if (php_sapi_name() == 'cli') {
+	$php_cli = TRUE;
+}
+
+// jos ollaan saatu komentorivilt‰ parametri
+if ($php_cli) {
 
 	// otetaan tietokanta connect
 	require ("../inc/connect.inc");
@@ -14,7 +19,7 @@ if (trim($argv[1])!='') {
 	// hmm.. j‰nn‰‰
 	$kukarow['yhtio']=$argv[1];
 
-	$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
+	$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
 	$yhtiores = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($yhtiores)==1) {
@@ -215,7 +220,7 @@ if ($aja=='run') {
 		$echoulos .= "<font class='message'>Valmis.</font><br><br>";
 
 	// komentorivilt‰
-	if (trim($argv[1]) != '') {
+	if ($php_cli) {
 		$echoulos = strip_tags($echoulos, "<br>");
 		$echoulos = str_replace("<br>", "\n", $echoulos);
 		echo "$echoulos\n\n";

@@ -1703,8 +1703,7 @@
 								unset($lapsires);
 							}
 
-							if ($kukarow['extranet'] == '' and $komentorivilta != "ON") {
-								// $argc == 0
+							if ($kukarow['extranet'] == '' and (!isset($php_cli) or !$php_cli)) {
 								// Korvaavat tuotteet //
 								$query  = "SELECT * from korvaavat where tuoteno='$jtrow[tuoteno]' and yhtio='$kukarow[yhtio]'";
 								$korvaresult = mysql_query($query) or pupe_error($query);

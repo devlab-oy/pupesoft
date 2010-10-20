@@ -1,10 +1,14 @@
 <?php
 
-if (count($argv) != 2) die ("anna parametriksi yhtiö\n");
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	}
 
-if (isset($argv[1]) and trim($argv[1]) != '') {
-
-	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	if (!isset($argv[1]) or $argv[1] == '') {
+		echo "Anna yhtiö!!!\n";
+		die;
+	}
 
 	// otetaan tietokanta connect
 	require ("../inc/connect.inc");
@@ -53,4 +57,4 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 	$laskuta_message = str_replace("<br>", "\n", $laskuta_message);
 	echo strip_tags($laskuta_message);
 
-}
+?>

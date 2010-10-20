@@ -21,9 +21,19 @@
 
 	//$silent = '';
 
-	if (isset($argv[1]) and trim($argv[1]) != '') {
+	// Kutsutaanko CLI:st‰
+	$php_cli = FALSE;
 
-		if ($argc == 0) die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
+	if (php_sapi_name() == 'cli' or isset($editil_cli)) {
+		$php_cli = TRUE;
+	}
+
+	if ($php_cli) {
+
+		if (!isset($argv[1]) or $argv[1] == '') {
+			echo "Anna yhtiˆ!!!\n";
+			die;
+		}
 
 		// otetaan includepath aina rootista
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
@@ -80,8 +90,6 @@
 				$eiketjut = "KYLLA";
 			}
 
-			$komentorivilta = "ON";
-
 			$tee = "TARKISTA";
 		}
 		else {
@@ -117,9 +125,6 @@
 		}
 		if (!isset($kieli)) {
 			$kieli = "";
-		}
-		if (!isset($komentorivilta)) {
-			$komentorivilta = "";
 		}
 
 		if ($silent == "") {
@@ -2303,7 +2308,7 @@
 			}
 
 			// l‰hetet‰‰n meili vaan jos on jotain laskutettavaa ja ollaan tultu komentorivilt‰
-			if ($lask > 0 and $komentorivilta != "") {
+			if ($lask > 0 and $php_cli) {
 
 				//echotaan ruudulle ja l‰hetet‰‰n meili yhtiorow[admin]:lle
 				$bound = uniqid(time()."_") ;
@@ -2327,7 +2332,7 @@
 			}
 		}
 
-		if ($komentorivilta == "") {
+		if (!$php_cli) {
 			echo "$tulos_ulos";
 
 			// Annetaan mahdollisuus tallentaa finvoicetiedosto jos se on luotu..
@@ -2455,7 +2460,6 @@
 			echo "<form action = '$PHP_SELF' method = 'post' name='lasku' onSubmit = 'return verify()'>
 				<input type='hidden' name='tee' value='TARKISTA'>";
 
-
 			echo "<tr><th>".t("Laskutettavia tilauksia joilla on laskutusviikonp‰iv‰ t‰n‰‰n").":</th><td colspan='3'>$row[paiva]</td></tr>\n";
 			echo "<tr><th>".t("Laskutettavia tilauksia joiden laskutusviikonp‰iv‰ ei ole t‰n‰‰n").":</th><td colspan='3'>$row[muut]</td></tr>\n";
 			echo "<tr><th>".t("Laskutettavia tilauksia joilla EI ole laskutusviikonp‰iv‰‰").":</th><td colspan='3'>$row[normaali]</td></tr>\n";
@@ -2478,7 +2482,7 @@
 		}
 	}
 
-	if ($komentorivilta != "ON" and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
+	if (!$php_cli and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
 		require("inc/footer.inc");
 	}
 

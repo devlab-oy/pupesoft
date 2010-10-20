@@ -3,12 +3,19 @@
 	// käytetään slavea
 	$useslave = 0;
 
+	// Kutsutaanko CLI:stä
+	$php_cli = FALSE;
+
+	if (php_sapi_name() == 'cli') {
+		$php_cli = TRUE;
+	}
+
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	if (count($argv) == 0) {
+	if (!$php_cli) {
 		require("../inc/parametrit.inc");
 	}
 	else {
@@ -28,8 +35,7 @@
 	if (!function_exists("force_echo")) {
 		function force_echo($teksti) {
 			global $kukarow, $yhtiorow;
-//			ob_end_flush();
-//	    	ob_start();
+
 			echo t("$teksti<br>");
 			ob_flush();
 			flush();
@@ -42,7 +48,7 @@
 	}
 	else {
 
-		if (count($argv) == 0) {
+		if (!$php_cli) {
 			echo "<font class='head'>".t("Varastonarvo tuotteittain")."</font><hr>";
 		}
 
@@ -68,7 +74,7 @@
 		$sel_osasto 	= "";
 		$sel_tuoteryhma = "";
 
-		if (count($argv) == 0) {
+		if (!$php_cli) {
 			echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 				<!--
 
@@ -91,9 +97,9 @@
 
 		$varastot2 = array();
 
-		if ($supertee == "RAPORTOI" or ($argv[0] == 'varastonarvo-super.php' and $argv[1] != '')) {
+		if ($supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'varastonarvo-super.php' and $argv[1] != '')) {
 
-			if ($argv[0] == 'varastonarvo-super.php' and $argv[1] != '' and $argv[2] != '') {
+			if ($php_cli and $argv[0] == 'varastonarvo-super.php' and $argv[1] != '' and $argv[2] != '') {
 				$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
 
 				$query = "	SELECT *
@@ -213,7 +219,7 @@
 				$having_lisa .= "HAVING try = '0' ";
 			}
 
-			if (count($argv) == 0) {
+			if (!$php_cli) {
 				force_echo("Haetaan käsiteltävien tuotteiden varastopaikat historiasta.");
 			}
 
@@ -283,11 +289,11 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($result);
 
-			if (count($argv) == 0) {
+			if (!$php_cli) {
 				echo "Löytyi $row[0] varastopaikkaa.<br>";
 			}
 
-			if (count($argv) == 0) {
+			if (!$php_cli) {
 				force_echo("Haetaan käsiteltävien tuotteiden tiedot.");
 			}
 
@@ -343,7 +349,7 @@
 				mt_srand((float) $sec + ((float) $usec * 100000));
 				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 
-				if (count($argv) > 0) {
+				if ($php_cli and count($argv) > 0) {
 					$excelnimi = "Varastonarvo_$vv-$kk-$pp.xls";
 				}
 
@@ -423,7 +429,7 @@
 
 			$elements = mysql_num_rows($result); // total number of elements to process
 
-			if (count($argv) == 0) {
+			if (!$php_cli) {
 				echo "Löytyi $elements tietuetta.<br><br>";
 				echo "Lasketaan varastonarvo.<br>";
 
@@ -440,7 +446,7 @@
 				$varaston_arvo = 0;
 				$bruttovaraston_arvo = 0;
 
-				if (count($argv) == 0) {
+				if (!$php_cli) {
 					$bar->increase();
 				}
 
@@ -915,7 +921,7 @@
 				}
 			}
 
-			if (count($argv) == 0) {
+			if (!$php_cli) {
 				echo "<br>";
 				echo "<table>";
 				echo "<tr><th>".t("Varasto")."</th><th>".t("Varastonarvo")."</th>";
@@ -955,7 +961,7 @@
 
 		if(isset($workbook)) {
 			$workbook->close();
-			if (count($argv) == 0) {
+			if (!$php_cli) {
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Varastonarvo.xls'>";
@@ -983,7 +989,7 @@
 			}
 		}
 
-		if (count($argv) == 0) {
+		if (!$php_cli) {
 			// piirrellään formi
 			echo "<form action='$PHP_SELF' name='formi' method='post' autocomplete='OFF'>";
 			echo "<input type='hidden' name='supertee' value='RAPORTOI'>";

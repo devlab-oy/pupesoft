@@ -1,18 +1,21 @@
 <?php
 
-	if ($argc == 2 and strlen($argv[1]) < 5) {
-
-		require("../inc/connect.inc");
-
-		$yhtio = mysql_real_escape_string($argv[1]);
-
-		//	Poistetaan rivi
-		$query = "DELETE FROM tilausrivi WHERE tyyppi = 'B' and yhtio = '$yhtio'";
-		$delres = mysql_query($query) or pupe_error($query);
-
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
-	else {
-		echo "Tätä ohjelmaa voi käyttäää vain komentoriviltä. Anna parametriksi yhtiön tunnus\n";
+
+	if (!isset($argv[1]) or $argv[1] == '') {
+		echo "Anna yhtiö!!!\n";
+		die;
 	}
+
+	require("../inc/connect.inc");
+
+	$yhtio = mysql_real_escape_string($argv[1]);
+
+	//	Poistetaan rivi
+	$query = "DELETE FROM tilausrivi WHERE tyyppi = 'B' and yhtio = '$yhtio'";
+	$delres = mysql_query($query) or pupe_error($query);
 
 ?>

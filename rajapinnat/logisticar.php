@@ -1,10 +1,11 @@
 <?php
 
-	if (empty($argv)) {
-	    die('<p>Tämän scriptin voi ajaa ainoastaan komentoriviltä.</p>');
+	// Kutsutaanko CLI:stä
+	if (php_sapi_name() != 'cli') {
+		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
-	if ($argv[1] == '') {
+	if (!isset($argv[1]) or $argv[1] == '') {
 		die("Yhtiö on annettava!!");
 	}
 

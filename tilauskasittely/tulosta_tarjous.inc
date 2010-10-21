@@ -930,6 +930,15 @@ if (!function_exists('tarjous_rivi_custom')) {
 					}
 				}
 				elseif ($pdf_tarjous->strlen($lause, $pieni) <= $rpit2) {
+					if ($kala <= 110) {
+						loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous[$sivu], 0, $verolliset_verottomat_hinnat);
+
+						$sivu++;
+
+						list($page_tarjous[$sivu], $kala) = uusi_sivu_tarjous($laskurow, $asiakasrow, $kieli, $pdf_tarjous);
+						$kala = tarjous_rivi_otsikot($pdf_tarjous, $page_tarjous[$sivu], $kieli, $kala, $tuotetyyppi, $verolliset_verottomat_hinnat, $naytetaanko_rivihinta);
+					}
+
 					$pdf_tarjous->draw_text(150, $kala, $kommentti, $page_tarjous[$sivu], $pieni);
 					$kala  -= 10;
 				}

@@ -1,6 +1,10 @@
 <?php
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) {
+
+		// DataTables päälle
+		$pupe_DataTables = "maksusopparit";
+
 		require("inc/parametrit.inc");
 	}
 
@@ -542,16 +546,37 @@
 						ORDER BY jaksotettu desc";
 			$result = mysql_query($query) or pupe_error($query);
 
-			echo "<table><tr>";
+			#448169
 
-			echo "	<th>".t("Tilaus")."</th>
+			pupe_DataTables($pupe_DataTables, 7, 8);
+
+			echo "<table class='display' id='$pupe_DataTables'>";
+
+			echo "<thead>";
+			echo "<tr>
+					<th>".t("Tilaus")."</th>
 					<th>".t("Asiakas")."</th>
 					<th>".t("Erä")."</th>
 					<th>".t("Laskuttamatta")."</th>
 					<th>".t("Laskutettu")."</th>
 					<th>".t("Yhteensä")."</th>
-					<th>".t("Seuraava positio")."</th>";
-			echo "</tr>";
+					<th>".t("Seuraava positio")."</th>
+					<th class='back'></th>
+				</tr>";
+
+			echo "<tr>
+					<td><input type='text' name='search_tilaus'></td>
+					<td><input type='text' name='search_asiakas'></td>
+					<td><input type='text' name='search_era'></td>
+					<td><input type='text' name='search_laskuttamatta'></td>
+					<td><input type='text' name='search_laskutettu'></td>
+					<td><input type='text' name='search_yhteensa'></td>
+					<td><input type='text' name='search_seuraava'></td>
+					<td class='back'></td>
+				</tr>";
+
+			echo "</thead>";
+			echo "<tbody>";
 
 			while ($row = mysql_fetch_array($result)) {
 				// seuraava positio on tämä siis
@@ -583,7 +608,7 @@
 				$rahres = mysql_query($query) or pupe_error($query);
 				$laskurow2 = mysql_fetch_array($rahres);
 
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 				echo "<td valign='top'>$laskurow2[tunnukset]</td>";
 				echo "<td valign='top'>$row[nimi]</td>";
 				echo "<td valign='top'>$row[laskutettu_kpl] / $row[yhteensa_kpl]</td>";
@@ -596,7 +621,8 @@
 						<tr><td>".t("Summa").":</td><td>$posrow[summa] $laskurow[valkoodi]</td></tr>
 						<tr><td>".t("Lisätiedot").":</td><td>$posrow[lisatiedot]</td></tr>
 						<tr><td>".t("Ohje").":</td><td>$posrow[ohje]</td></tr>
-						</table>";
+						</table>
+						</td>";
 
 				// loppulaskutetaan maksusopimus
 				if ($row["yhteensa_kpl"] - $row["laskutettu_kpl"] <= 1) {
@@ -619,43 +645,49 @@
 					else {
 						$msg = t("Oletko varma, että haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
 
-						echo "	<form method='post' action='$PHP_SELF' onSubmit='return verify(\"$msg\");'>
+						echo "	<td class='back'>
+								<form method='post' action='$PHP_SELF' onSubmit='return verify(\"$msg\");'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tunnus' value='$row[jaksotettu]'>
 								<input type='hidden' name='tee' value='loppulaskuta'>
-								<td class='back'><input type='submit' name = 'submit' value='".t("Loppulaskuta")."'></td>
-								</form>";
+								<input type='submit' name = 'submit' value='".t("Loppulaskuta")."'>
+								</form>
+								</td>";
 					}
-					echo "</tr>";
 				}
 				elseif ($row["tekematta_kpl"] > 1) {
 					// muuten tämä on vain ennakkolaskutusta
 					$msg = t("Oletko varma, että haluat tehdä ennakkolaskun tilaukselle").": $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
 
-					echo "<td class='back'><form method='post' name='case' action='$PHP_SELF' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
+					echo "<td class='back'>";
+
+					echo "<form method='post' name='case' action='$PHP_SELF' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tunnus' value='$row[jaksotettu]'>
 							<input type='hidden' name='tee' value='ennakkolaskuta'>
 							<input type='submit' name = 'submit' value='".t("Laskuta")."'>
-							</form></td>";
+							</form><br>";
 
 					// muuten tämä on vain ennakkolaskutusta
 					$msg = t("Oletko varma, että haluat tehdä kaikki ennakkolaskut tilaukselle").": $row[jaksotettu]";
 
-					echo "<td class='back'><form method='post' name='case' action='$PHP_SELF' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
+					echo "<form method='post' name='case' action='$PHP_SELF' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tunnus' value='$row[jaksotettu]'>
 							<input type='hidden' name='tee' value='ennakkolaskuta_kaikki'>
 							<input type='submit' name = 'submit' value='".t("Laskuta kaikki ennakot")."'>
-							</form></td>";
+							</form>";
 
-
-					echo "</tr>";
+					echo "</td>";
 				}
 				else {
 					echo "<td class='back'><font class='error'>".t("Ei valmis")."</font></td>";
 				}
+
+				echo "</tr>";
 			}
+
+			echo "</tbody>";
 			echo "</table>";
 		}
 

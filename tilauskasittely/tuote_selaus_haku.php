@@ -238,7 +238,8 @@
 						$paikka	= "";
 					}
 
-					if ($verkkokauppa != "" and $verkkokauppa_saldotsk === FALSE) {
+					// Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa
+					if (($verkkokauppa != "" and $verkkokauppa_saldotsk === FALSE) or $laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 						$varataan_saldoa = "EI";
 					}
 

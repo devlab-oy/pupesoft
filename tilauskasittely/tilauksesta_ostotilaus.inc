@@ -60,10 +60,15 @@
 					//	Jos tehd‰‰n vaan t‰m‰ tilaus niin haetaan t‰m‰n oletustoimittaja, by default
 					if ($tyyppi == "KAIKKI" and $rivi["toimittajan_tunnus"] == 0) {
 
-						$query = "SELECT liitostunnus from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$rivi[tuoteno]' limit 1";
+						$query = "	SELECT liitostunnus, if(jarjestys = 0, 9999, jarjestys) sorttaus
+									FROM tuotteen_toimittajat
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$rivi[tuoteno]'
+									ORDER BY sorttaus
+									LIMIT 1";
 						$abures = mysql_query($query) or pupe_error($query);
 
-						if(mysql_num_rows($abures) == 1) {
+						if (mysql_num_rows($abures) == 1) {
 							$aburow = mysql_fetch_assoc($abures);
 
 							$query = "	UPDATE tilausrivin_lisatiedot

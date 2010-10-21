@@ -2556,6 +2556,192 @@ if (!function_exists("tuotteen_myyntihinta")) {
 
 }
 
+if (!function_exists("tuotteen_ostohinta")) { // jamppa säätää
+	function tuotteen_ostohinta ($laskurow, $trow, $kpl, $naytetaanko_netto = "") {
+		global $yhtiorow, $kukarow;
+		
+		
+		/** 
+		Kohta 1. Haetaan TUOTTEEN_TOIMITTAJAN omalla tuotekoodilla laskun valuutalla.
+		Kohta 2. Haetaan TUOTTEEN_TOIMITTAJAN omalla tuotekoodilla yhtion valuutalla.
+		Kohta 3. Haetaan PUPEN omalla tuotekoodilla laskun valuutalla.
+		Kohta 4. Haetaan PUPEN omalla tuotekoodilla yhtion valuutalla.
+		Kohta 5. Haetaan TUOTTEEN_TOIMITTAJAN ostohinnalla, mikäli hinnastosta ei löydy.
+		**/
+		
+		// palautetaan tuotteen SVH laskun valuutassa
+		// tämä funktion on kopsattu tuotteen_myyntihinta-funktiosta sopivilta osilta
+		$hinta 			= 0;
+		$netto			= "";
+		$valuutta		= "";
+		$lisahaku 		= "";
+
+		$prequery = "SELECT toim_tuoteno from tuotteen_toimittajat where tuoteno = '$trow[tuoteno]' limit 1"; $preres = mysql_query($prequery) or pupe_error($prequery);
+
+ 		if (mysql_num_rows($preres) != 0) { 
+			$prerow = mysql_fetch_assoc($preres); 
+			$toim_tuoteno = $prerow['toim_tuoteno']; 
+			$lisahaku = "and tuto.toim_tuoteno = '".$toim_tuoteno."'";
+
+ 			}
+
+		// 1. Laskun valuutalla, toimittajan tuoteno:lla, 
+		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT *
+						FROM hinnasto
+						JOIN tuotteen_toimittajat tuto on(tuto.tuoteno = hinnasto.tuoteno and tuto.yhtio = hinnasto.yhtio)
+						WHERE hinnasto.yhtio  = '$kukarow[yhtio]'
+						and hinnasto.tuoteno  = '$trow[tuoteno]'
+						$lisahaku
+						and hinnasto.tuoteno != ''
+						and hinnasto.laji = 'O'
+						and hinnasto.valkoodi = '$laskurow[valkoodi]'
+						and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($hresult) != 0) {
+				$hrow       	= mysql_fetch_assoc ($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$valuutta		= $hrow["valkoodi"];
+			}
+			//echo "<pre>".$query." Q1 </pre>";
+		}
+
+		// 2. yhtion valuutalla, toimittajan tuoteno
+		elseif ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT *
+						FROM hinnasto
+						JOIN tuotteen_toimittajat tuto on(tuto.tuoteno = hinnasto.tuoteno and tuto.yhtio = hinnasto.yhtio)
+						WHERE hinnasto.yhtio  = '$kukarow[yhtio]'
+						and hinnasto.tuoteno  = '$trow[tuoteno]'
+						$lisahaku
+						and hinnasto.tuoteno != ''
+						and hinnasto.laji = 'O'
+						and hinnasto.valkoodi in ('$yhtiorow[valkoodi]','')
+						and ((hinnasto.alkupvm <= current_date and if (hinnasto.loppupvm = '0000-00-00','9999-12-31',hinnasto.loppupvm) >= current_date) or (hinnasto.alkupvm='0000-00-00' and hinnasto.loppupvm='0000-00-00'))
+						and ((hinnasto.minkpl <= '$kpl' and hinnasto.maxkpl >= '$kpl') or (hinnasto.minkpl = 0 and hinnasto.maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(hinnasto.alkupvm),9999999999999), hinnasto.valkoodi DESC
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+			
+
+			
+			
+			if (mysql_num_rows($hresult) != 0) {
+				$hrow       	= mysql_fetch_assoc ($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$valuutta		= $hrow["valkoodi"];
+			}
+		//	echo "<pre>".$query." Q2 {$hinta}</pre>";
+			
+		}
+/**
+		// 15. tuote.nettohinta (tuotteen nettohinta)
+		if ($hinta == 0 and $trow['nettohinta'] > 0 and $naytetaanko_netto == "") {
+			$hinta 			= $trow['nettohinta'];
+			$netto 			= 'O';
+			$valuutta		= $yhtiorow["valkoodi"];
+		}
+**/
+		// 3. laskun valuutalla, omalla tuoteno
+		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT *
+						FROM hinnasto
+						JOIN tuotteen_toimittajat tuto on(tuto.tuoteno = hinnasto.tuoteno and tuto.yhtio = hinnasto.yhtio)
+						WHERE hinnasto.yhtio  = '$kukarow[yhtio]'
+						and hinnasto.tuoteno  = '$trow[tuoteno]'
+						and tuto.tuoteno  = '$trow[tuoteno]'
+						and hinnasto.tuoteno != ''
+						and hinnasto.laji = 'O'
+						and hinnasto.valkoodi = '$laskurow[valkoodi]'
+						and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+ 			// echo "<pre>".$query." Q3 </pre>";
+
+			if (mysql_num_rows($hresult) != 0) {
+				$hrow			= mysql_fetch_assoc ($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$valuutta		= $hrow["valkoodi"];
+			}
+		}
+
+		// 4. yhtiön valuutalla, omalla tuoteno
+		elseif ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT *
+						FROM hinnasto
+						JOIN tuotteen_toimittajat tuto on(tuto.tuoteno = hinnasto.tuoteno and tuto.yhtio = hinnasto.yhtio)
+						WHERE hinnasto.yhtio  = '$kukarow[yhtio]'
+						and hinnasto.tuoteno  = '$trow[tuoteno]'
+						and tuto.tuoteno = '$trow[tuoteno]'
+						and hinnasto.tuoteno != ''
+						and hinnasto.laji = 'O'
+						and hinnasto.valkoodi in ('$yhtiorow[valkoodi]','')
+						and ((hinnasto.alkupvm <= current_date and if (hinnasto.loppupvm = '0000-00-00','9999-12-31',hinnasto.loppupvm) >= current_date) or (hinnasto.alkupvm='0000-00-00' and hinnasto.loppupvm='0000-00-00'))
+						and ((hinnasto.minkpl <= '$kpl' and hinnasto.maxkpl >= '$kpl') or (hinnasto.minkpl = 0 and hinnasto.maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(hinnasto.alkupvm),9999999999999), hinnasto.valkoodi DESC
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+
+
+			if (mysql_num_rows($hresult) != 0) {
+				$hrow			= mysql_fetch_assoc ($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$valuutta		= $hrow["valkoodi"];
+			}
+		// echo "<pre>".$query." Q4 {$hinta}</pre>";	
+		}
+		
+		
+		if ($hinta == 0) {
+			$query = "	SELECT *
+						FROM tuotteen_toimittajat tuto
+						WHERE tuto.yhtio	= '$kukarow[yhtio]'
+						and tuto.tuoteno 	= '$trow[tuoteno]'
+						and tuto.toimittaja = '$laskurow[ytunnus]'
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+ 			//echo "<pre>".$query." Q5 </pre>";
+
+			if (mysql_num_rows($hresult) > 0) {
+				$hrow			= mysql_fetch_assoc ($hresult);
+				$hinta 			= $hrow["ostohinta"];
+				//$netto			= $hrow["laji"];
+				$valuutta		= $hrow["valkoodi"];
+			}			
+			
+		}
+
+
+		if ($valuutta == "") $valuutta = $yhtiorow["valkoodi"];
+
+		if ($laskurow["valkoodi"] != $valuutta) {
+			$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+		}
+
+		return $hinta;
+
+	}
+
+}
+
+
 if (!function_exists("alv")) {
 	function alv ($laskurow, $trow, $hinta, $alv, $alehinta_alv) {
 		global $yhtiorow, $kukarow;

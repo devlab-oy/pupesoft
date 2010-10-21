@@ -51,14 +51,20 @@ if (mysql_field_name($result, $i) == "laji") {
 }
 
 if (mysql_field_name($result, $i) == "tuoteno") {
+
+	if ($lukitse_avaimeen != "") {
 		$apu['ttuoteno'] = $lukitse_avaimeen;
-		
-	if($lukitse_avaimeen != "") {
 		$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
 		$jatko = 0;
 	}
-	elseif(isset($alasveto[$i])) {
+	elseif (isset($alasveto[$i])) {
+		$apu['ttuoteno'] = $alasveto[$i];
 		$ulos = "<td>".$alasveto[$i]."</td>";
+		$jatko = 0;
+	}
+	else {
+		$apu['ttuoteno'] = $trow[$i];
+		$ulos = "<td>".$trow[$i]."</td>";
 		$jatko = 0;
 	}
 }

@@ -436,6 +436,12 @@
 				$tuoteno_array[] = $tuoteno;
 			}
 
+			if (isset($hinta) and $hinta == "") { // jamppa säätää
+				$hinta =  tuotteen_ostohinta ($laskurow, $trow, $kpl);
+			//	echo "PIIP ".$hinta;
+			//tuotteen_ostohinta ($laskurow, $trow, $kpl, $naytetaanko_netto = "")
+			}
+			
 			//Käyttäjän syöttämä hinta ja ale ja netto, pitää säilöä jotta tuotehaussakin voidaan syöttää nämä
 			$kayttajan_hinta	= $hinta;
 			$kayttajan_ale		= $ale;

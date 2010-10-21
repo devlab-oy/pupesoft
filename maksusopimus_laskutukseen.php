@@ -546,8 +546,6 @@
 						ORDER BY jaksotettu desc";
 			$result = mysql_query($query) or pupe_error($query);
 
-			#448169
-
 			pupe_DataTables($pupe_DataTables, 7, 8);
 
 			echo "<table class='display' id='$pupe_DataTables'>";

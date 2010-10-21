@@ -3,9 +3,9 @@
 if(!function_exists("hinnastotarkista")) {
 	function hinnastotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
-		
+
 		static $chtuoteno, $chalkupvm, $chloppupvm;
-		
+
 		if (mysql_field_name($result, $i) == "hinta") {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu!");
@@ -17,12 +17,21 @@ if(!function_exists("hinnastotarkista")) {
 			if ($chtuoteno != '') {
 				$query = "	SELECT tuoteno
 							FROM tuote
-							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tuoteno = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
 			}
 
 			if (mysql_num_rows($sresult) != 1 or $chtuoteno == "") {
-				$virhe[$i] = t("Tuotenumero puuttuu tai sitä ei löydy!");
+				$query = "	SELECT tuoteno
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND toim_tuoteno = '$t[$i]'";
+				$sresult = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($sresult) == 0 or $chtuoteno == "") {
+					$virhe[$i] = t("Tuotenumero puuttuu tai sitä ei löydy!");
+				}
 			}
 
 		}

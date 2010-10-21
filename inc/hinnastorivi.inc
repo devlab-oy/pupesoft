@@ -32,20 +32,25 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
+		$chkn = $chke = $chko = "";
+
 		if ($trow[$i] == 'N') {
 			$chkn = 'SELECTED';
 		}
-		elseif($trow[$i] == "E") {
+		elseif ($trow[$i] == "E") {
 			$chke = 'SELECTED';
+		}
+		elseif ($trow[$i] == "O") {
+			$chko = 'SELECTED';
 		}
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Bruttohinta Myyntihinta")."</option>";
 		$ulos .= "<option value='N' $chkn>".t("N-Nettohinta Myyntihinta")."</option>";
 		$ulos .= "<option value='E' $chke>".t("E-Nettohinta Myyntihinta")."</option>";
-		$ulos .= "<option value='O' $chke>".t("Ostohinta")."</option>";
+		$ulos .= "<option value='O' $chko>".t("Ostohinta")."</option>";
 		$ulos .= "</select></td>";
-		$jatko = 0;		
+		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "maa") {

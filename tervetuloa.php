@@ -194,12 +194,12 @@ if (!isset($tee) or $tee == '') {
 	}
 
 	// katsotaan onko k‰ytt‰j‰ll‰ oikeus muutosite.php ja alv_laskelma_uusi.php
-	$queryoik = "	SELECT oikeu.tunnus 
-					FROM oikeu 
+	$queryoik = "	SELECT oikeu.tunnus
+					FROM oikeu
 					JOIN oikeu AS oikeu2 ON (oikeu2.yhtio = oikeu.yhtio AND oikeu2.kuka = oikeu.kuka AND oikeu2.nimi LIKE '%alv_laskelma_uusi.php')
-					WHERE oikeu.nimi LIKE '%muutosite.php' 
-					AND oikeu.kuka = '{$kukarow['kuka']}' 
-					AND oikeu.yhtio = '{$yhtiorow['yhtio']}' 
+					WHERE oikeu.nimi LIKE '%muutosite.php'
+					AND oikeu.kuka = '{$kukarow['kuka']}'
+					AND oikeu.yhtio = '{$yhtiorow['yhtio']}'
 					LIMIT 1";
 	$res = mysql_query($queryoik) or pupe_error($queryoik);
 
@@ -212,13 +212,16 @@ if (!isset($tee) or $tee == '') {
 
 		// Ominaisuus laitettiin p‰‰lle 30.9.2010
 		for ($i = ceil($days/30); mktime(0, 0, 0, 9+$i, 0, 2010) < mktime(0, 0, 0, date("m"), date("d"), date("Y")); $i++) {
+
+			$alvpvm = date("Y-m-d", mktime(0, 0, 0, 9+$i, 0, 2010));
+
 			$query = "	SELECT lasku.tunnus
 						FROM lasku
 						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-						AND lasku.tapvm = '".date("Y-m-d", mktime(0, 0, 0, 9+$i, 0, 2010))."'
+						AND lasku.tapvm = '$alvpvm'
 						AND lasku.tila = 'X'
-						AND lasku.nimi = '{$yhtiorow['nimi']}'
+						AND lasku.nimi = 'ALVTOSITEMAKSUUN$alvpvm'
 						LIMIT 1";
 			$tositelinkki_result = mysql_query($query) or pupe_error($query);
 
@@ -232,7 +235,7 @@ if (!isset($tee) or $tee == '') {
 			echo "<table>";
 			echo "<tr><th>",t("ALV-ilmoitus"),"</th></tr>";
 			echo $ulos;
-			echo "</table><br />";			
+			echo "</table><br />";
 		}
 	}
 

@@ -244,17 +244,24 @@
 		$saldoaikalisa = "";
 	}
 
-	//muutetaan pilkkuja pisteiksi
-	$kpl 	= str_replace(',','.',$kpl);
-	$hinta 	= str_replace(',','.',$hinta);
-	$ale 	= str_replace(',','.',$ale);
+	// Muutetaan pilkut pisteiksi
+	$kpl	= str_replace(',', '.', $kpl);
+	$hinta	= str_replace(',', '.', $hinta);
+	$ale	= str_replace(',', '.', $ale);
 
-	$alkupera_trow			= $trow; 				// alkuperäinen tuoterow talteen..
+	// Alkuperäiset tiedot talteen
+	$alkupera_trow	= $trow;
+	$alkupera_kpl 	= $kpl;
+	$alkupera_hinta = $hinta;
+	$alkupera_ale 	= $ale;
+	$alkupera_netto = $netto;
+	$alkupera_alv 	= $alv;
+
 	$saldoyhteensa			= 0; 					// tähän summaillaan saldoa yhteensä
 	$lapsiyhteensa			= 0;
 	$korvaavan_isaa_myyty	= 0;
 	$perheid_lisaarivi		= 0;
-	$suoratoimeikiitos 	= '';
+	$suoratoimeikiitos 		= '';
 	$lop					= "";
 	$tuoteperhe				= array(); 				// Tuoteperheiden lapset menevät tänne
 	$kaikkituotteet			= array(); 			// tähän arrayseen lisätään kaikki tuotteet ketjusta
@@ -265,17 +272,17 @@
 	$toimittamatta			= $kpl;					//Näin paljon ollaan toimittamassa
 
 	// näihin arraysiin tulee sitten myytävissä olevat tuotteet, kappaleet ja varastopaikat
-	$myy_tuoteno = array();
-	$myy_kpl = array();
-	$myy_hyllyalue = array();
-	$myy_hyllynro = array();
-	$myy_hyllytaso = array();
-	$myy_hyllyvali = array();
-	$myy_varasto = array();
+	$myy_tuoteno 	= array();
+	$myy_kpl 		= array();
+	$myy_hyllyalue 	= array();
+	$myy_hyllynro 	= array();
+	$myy_hyllytaso 	= array();
+	$myy_hyllyvali 	= array();
+	$myy_varasto 	= array();
 	$myy_erikoistoimitus = array();
-	$myy_kpl_myyty = array();
-	$myy_hintakerr = array();
-	$myy_alekerroi = array();
+	$myy_kpl_myyty 	= array();
+	$myy_hintakerr 	= array();
+	$myy_alekerroi 	= array();
 	$myy_era 		= array();
 	$myy_tyyppi		= array();
 	$myy_lapsi_ein 	= array();
@@ -1524,19 +1531,26 @@
 				}
 			}
 
-			//Käsinsyöteyt hinnat nollataan kun lisätään tuoteperheiden lapsia
-			//Ostossa splittaukset menee aina samalla hinnalla
-			if ($i > 0 and $laskurow['tila'] != 'O') {
-				$hinta		= "";
-				$ale		= "";
-				$netto		= "";
-				$alv 		= "";
+			// Jos ollaan lisäämässä alkuperäistä tuotetta niin otetaan takaisin käyttäjän syötetyt alkuperöiset hinnat
+			if ($laskurow['tila'] != 'O' and strtoupper($trow["tuoteno"]) == strtoupper($alkupera_trow["tuoteno"])) {
+				$hinta	= $alkupera_hinta;
+				$ale	= $alkupera_ale;
+				$netto	= $alkupera_netto;
+				$alv	= $alkupera_alv;
+			}
+			elseif ($laskurow['tila'] != 'O' and $i > 0) {
+				//Käsinsyöteyt hinnat nollataan kun lisätään tuoteperheiden lapsia
+				$hinta	= "";
+				$ale	= "";
+				$netto	= "";
+				$alv	= "";
 
 				if ($var != "S") {
 					$rivinumero = "";
 				}
 			}
 
+			//Ostossa splittaukset menee aina samalla hinnalla
 			if ($laskurow['tila'] == 'O' and $hinta == "") {
 				$query = "	SELECT ostohinta
 							FROM tuotteen_toimittajat

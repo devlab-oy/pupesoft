@@ -40,11 +40,12 @@
 		}
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Bruttohinta")."</option>";
-		$ulos .= "<option value='N' $chkn>".t("N-Nettohinta")."</option>";
-		$ulos .= "<option value='E' $chke>".t("E-Nettohinta")."</option>";
+		$ulos .= "<option value=''>".t("Bruttohinta Myyntihinta")."</option>";
+		$ulos .= "<option value='N' $chkn>".t("N-Nettohinta Myyntihinta")."</option>";
+		$ulos .= "<option value='E' $chke>".t("E-Nettohinta Myyntihinta")."</option>";
+		$ulos .= "<option value='O' $chke>".t("Ostohinta")."</option>";
 		$ulos .= "</select></td>";
-		$jatko = 0;
+		$jatko = 0;		
 	}
 
 	if (mysql_field_name($result, $i) == "maa") {

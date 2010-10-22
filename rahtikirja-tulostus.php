@@ -520,9 +520,8 @@
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tuote.tuoteno = tilausrivi.tuoteno
 							and tuote.yhtio = tilausrivi.yhtio
-							and vakkoodi <> '0'
-							and vakkoodi <> ' '
-							and var in ('','H')
+							and tuote.vakkoodi not in ('',' ','0')
+							and tilausrivi.var in ('','H')
 							and tilausrivi.tyyppi in ('L','G')";
 				$vres = mysql_query($query) or pupe_error($query);
 

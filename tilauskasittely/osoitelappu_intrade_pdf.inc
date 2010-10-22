@@ -14,6 +14,20 @@ if ($phpnimi != "rahtikirja_custom.php") {
 				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus'";
 	$tempr = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_assoc($tempr);
+
+	// Haetaan rahtikirjan kaikki vakkoodit arrayseen
+	$query = "	SELECT group_concat(distinct(tuote.vakkoodi) SEPARATOR ', ') vakkoodi
+				from tilausrivi, tuote
+				where tilausrivi.otunnus = '$laskurow[tunnus]'
+				and tilausrivi.yhtio = '$kukarow[yhtio]'
+				and tuote.tuoteno = tilausrivi.tuoteno
+				and tuote.yhtio = tilausrivi.yhtio
+				and tuote.vakkoodi not in ('',' ','0')
+				and tilausrivi.var in ('','H')
+				and tilausrivi.tyyppi in ('L','G')";
+	$vres = mysql_query($query) or pupe_error($query);
+	$vak = mysql_fetch_assoc($vres);
+	$vakit = $vak["vakkoodi"];
 }
 else {
 	$laskurow = $osoitelappurow;
@@ -43,7 +57,7 @@ if (!function_exists('tarkiste')) {
 		$summa   = 0; // summa nolla tietty
 
 		// loopataan luvut oikeelta vasemmalle
-		for ($i = 16; $i >= 0; $i--) { 
+		for ($i = 16; $i >= 0; $i--) {
 			$summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
 			$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
 		}
@@ -55,8 +69,8 @@ if (!function_exists('tarkiste')) {
 }
 
 // tehd‰‰n SSCC :
-// (00) 
-// 1 
+// (00)
+// 1
 // ean (8)
 // l‰hetenro (6) viimeist‰
 // kollityht (2)
@@ -126,7 +140,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	// tehd‰‰n pdf:n uusi sivu
 	$firstpage = $pdf->new_page("a5");
-	
+
 	//Duusataan viivakoodia
 	$output      = "png";
 	$width       = "220";
@@ -183,7 +197,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	else {
 		echo "object create error";
 	}
-	
+
 	//Duusataan SSCC
 	$output      = "png";
 	$width       = "500";
@@ -206,7 +220,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$obj = "";
 	$obj = new c128cobject($width, $height, $style, '00'.$sscc, 'FNC1');
 	//$obj = new c128cobject($width, $height, $style, '00100000123016093006', 'FNC1');
-	
+
 	if ($obj) {
 		$obj->SetFont($font);
 		$obj->DrawObject($xres);
@@ -243,12 +257,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	else {
 		echo "object create error 2";
 	}
-	
+
 	// sitten aletaan piirt‰m‰‰n itse PDF sis‰ltˆ‰
 	// ensin isot viivat kohilleen
 	$pdf->draw_rectangle(mm_pt(179),mm_pt(21.5),mm_pt(31),mm_pt(126.5), $firstpage, $rectparam);
 
-	unset($data);		
+	unset($data);
 	if( (int) $yhtiorow["lasku_logo"] > 0) {
 		$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
 		$data = $liite["data"];
@@ -262,10 +276,10 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$fh = fopen($filename, "r");
 		$data = fread($fh, filesize($filename));
 		fclose($fh);
-		
+
 		$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
 	}
-	
+
 	if($data) {
 		$image = $pdf->jfif_embed($data);
 
@@ -273,20 +287,20 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			echo t("Logokuvavirhe");
 		}
 		else {
-						
+
 			$logoparam = array();
-			
+
 			if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (200 / $isizelogo[0]) <= 40) {
 				$logoparam['scale'] = 200 / $isizelogo[0];
 			}
 			else {
 				$logoparam['scale'] = 40  / $isizelogo[1];
 			}
-							
+
 			$placement = $pdf->image_place($image, 580-($logoparam['scale']*$isizelogo[1]), 410-($logoparam['scale']*$isizelogo[0]), $firstpage, $logoparam);
 		}
 	}
-	
+
 	//Mist‰
 	$pdf->draw_text(mm_pt(22), mm_pt(175), "Mist‰ - FrÂn - From: ",							$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(22), mm_pt(170), $yhtiorow['nimi'],								$firstpage, $pien);
@@ -297,7 +311,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	else {
 		$pdf->draw_text(mm_pt(22), mm_pt(165), $yhtiorow['osoite'].", ".$yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']),$firstpage, $pien);
 	}
-	
+
 	$pdf->draw_text(mm_pt(100), mm_pt(175), "L‰hetyspvm",									$firstpage, $norm);
 	$pdf->draw_text(mm_pt(100), mm_pt(170), date("d.m.Y") ,									$firstpage, $norm);
 
@@ -316,22 +330,27 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(22),	mm_pt(132), $laskurow['toim_nimitark'],						$firstpage, $norm);
 	$pdf->draw_text(mm_pt(22),	mm_pt(127), $laskurow['toim_osoite'],						$firstpage, $norm);
 	$pdf->draw_text(mm_pt(22),	mm_pt(120), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $iso);
-	
-	
+
+
 	$pdf->draw_text(mm_pt(100), mm_pt(140), "Toimituspvm",									$firstpage, $norm);
 	$pdf->draw_text(mm_pt(100), mm_pt(135), date("d.m.Y") ,									$firstpage, $norm);
 
 	// Kuljetusohjeet = viivakoodi tulee t‰h‰n
 	$pdf->draw_text(mm_pt(22), mm_pt(112), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(22), mm_pt(107), "Reitti:                            Jono:                            L‰hetysehto:",	$firstpage, $otsik);
+
+	if (isset($vakit) and $vakit != "") {
+		$salakalapala -= 5;
+		$pdf->draw_text(mm_pt(22), mm_pt(102), "VAK: ".$vakit, $firstpage, $norm);
+	}
+
 	$pdf->draw_text(mm_pt(22), mm_pt(97),  "L‰mpˆtila +0....+30C",							$firstpage, $norm);
-	
-	
+
 	$pdf->draw_text(mm_pt(105), mm_pt(97),  "Kolli - Item",									$firstpage, $otsik);
 
 	//kolliluku
 	if ($rahtikirja_tulostus == "yep") {
-		$pdf->draw_text(mm_pt(105), mm_pt(92), $kollityht, $firstpage, $norm);	
+		$pdf->draw_text(mm_pt(105), mm_pt(92), $kollityht, $firstpage, $norm);
 	}
 	else {
 		$query = "	SELECT sum(kollit) kollit

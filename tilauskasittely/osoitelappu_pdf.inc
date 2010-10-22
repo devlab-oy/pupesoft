@@ -14,6 +14,20 @@ if ($phpnimi != "rahtikirja_custom.php") {
 				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus'";
 	$tempr = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($tempr);
+
+	// Haetaan rahtikirjan kaikki vakkoodit arrayseen
+	$query = "	SELECT group_concat(distinct(tuote.vakkoodi) SEPARATOR ', ') vakkoodi
+				from tilausrivi, tuote
+				where tilausrivi.otunnus = '$laskurow[tunnus]'
+				and tilausrivi.yhtio = '$kukarow[yhtio]'
+				and tuote.tuoteno = tilausrivi.tuoteno
+				and tuote.yhtio = tilausrivi.yhtio
+				and tuote.vakkoodi not in ('',' ','0')
+				and tilausrivi.var in ('','H')
+				and tilausrivi.tyyppi in ('L','G')";
+	$vres = mysql_query($query) or pupe_error($query);
+	$vak = mysql_fetch_assoc($vres);
+	$vakit = $vak["vakkoodi"];
 }
 else {
 	$laskurow = $osoitelappurow;
@@ -421,23 +435,30 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$jvlisays =  "";
 	}
 
-	$pdf->draw_text(mm_pt(20), mm_pt(65), $laskurow["toimitustapa"].$jvlisays,									$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(5), mm_pt(65), $laskurow["toimitustapa"].$jvlisays,		$firstpage, $kirj);
 
 	$salakalapala = 65;
 
-	if ($rahtikirja_tulostus == "yep") {
-		$salakalapala -= 5;
-		$pdf->draw_text(mm_pt(20), mm_pt($salakalapala), $viestirarrow["viesti"] ,					$firstpage, $kirj);
+	if ($laskurow["viesti"] != "" or $laskurow['yhteyshenkilo'] != "" or $viestirarrow["viesti"] != "") {
+		if ($rahtikirja_tulostus == "yep") {
+			$salakalapala -= 5;
+			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$viestirarrow["viesti"]),	$firstpage, $kirj);
+		}
+		else {
+			$salakalapala -= 5;
+			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), trim($laskurow['yhteyshenkilo']." ".$laskurow["viesti"]),		$firstpage, $kirj);
+		}
 	}
-	else {
+
+	if (isset($vakit) and $vakit != "") {
 		$salakalapala -= 5;
-		$pdf->draw_text(mm_pt(20), mm_pt($salakalapala), "$laskurow[viesti]" ,							$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), "VAK: ".$vakit, $firstpage, $kirj);
 	}
 
 	//kolliluku
 	if ($rahtikirja_tulostus == "yep") {
 		$salakalapala -= 5;
-		$pdf->draw_text(mm_pt(20), mm_pt($salakalapala), t("Kollim‰‰r‰").": ".$s." (".$kollityht.") ",								$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), t("Kollim‰‰r‰").": ".$s." (".$kollityht.") ", $firstpage, $kirj);
 	}
 	else {
 		$query = "	SELECT sum(kollit) kollit
@@ -448,13 +469,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 		if ((int) $pak["kollit"] > 0) {
 			$salakalapala -= 5;
-			$pdf->draw_text(mm_pt(20), mm_pt($salakalapala), t("Kollim‰‰r‰").": ".$pak["kollit"],								$firstpage, $kirj);
+			$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), t("Kollim‰‰r‰").": ".$pak["kollit"], $firstpage, $kirj);
 		}
-	}
-
-	if($laskurow['yhteyshenkilo'] != "") {
-		$salakalapala -= 5;
-		$pdf->draw_text(mm_pt(20), mm_pt($salakalapala), $laskurow['yhteyshenkilo'],										$firstpage, $kirj);
 	}
 
 	//t‰nne ohjeisiin tulee lopullisen asiakkaan tiedot jos kyseess‰ on koontikuljetus
@@ -467,7 +483,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	if ($hetirow['tulostustapa'] == 'K') {
 		$salakalapala -= 5;
-		$pdf->draw_paragraph(mm_pt($salakalapala), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
+		$pdf->draw_paragraph(mm_pt($salakalapala), mm_pt(5), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
 	}
 
 	// ylh‰‰ll‰ on "oikee" tapa tehd‰, mutta me ei tiedet‰ t‰ss‰ vaiheessa kollien m‰‰r‰‰ eik‰ painoa
@@ -480,7 +496,6 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	else {
 		$pdf->draw_text(mm_pt(50), mm_pt(30), $tilausnumeroita, $firstpage, $kirj);
 	}
-
 }
 
 //keksit‰‰n uudelle failille joku varmasti uniikki nimi:

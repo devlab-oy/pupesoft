@@ -2611,7 +2611,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
 			}
-		
+
 		}
 
 		// 2. yhtion valuutalla, toimittajan tuoteno
@@ -2636,7 +2636,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
 			}
-		
+
 		}
 
 		// 3. laskun valuutalla, omalla tuoteno
@@ -2661,7 +2661,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
 			}
-		
+
 		}
 
 		// 4. yhtiˆn valuutalla, omalla tuoteno
@@ -2686,7 +2686,6 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
 			}
-		
 		}
 
 		// 5. tuotteen toimittajan ostohinta
@@ -2695,8 +2694,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 						FROM tuotteen_toimittajat
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$trow[tuoteno]'
-						and toimittaja = '$laskurow[ytunnus]'
-						LIMIT 1";
+						and liitostunnus = '$laskurow[liitostunnus]'";
 			$hresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($hresult) > 0) {
@@ -2705,7 +2703,6 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 				$netto			= "";
 				$valuutta		= $hrow["valuutta"];
 			}
-		
 		}
 
 		if ($valuutta == "") $valuutta = $yhtiorow["valkoodi"];
@@ -2717,7 +2714,6 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 		return $hinta;
 
 	}
-
 }
 
 

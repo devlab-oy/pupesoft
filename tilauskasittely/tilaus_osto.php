@@ -434,11 +434,7 @@
 		if ($tee == 'TI' and ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array))) and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
 			if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
 				$tuoteno_array[] = $tuoteno;
-			}
-
-			if (isset($hinta) and $hinta == "") {
-				#$hinta =  tuotteen_ostohinta ($laskurow, $trow, $kpl);
-			}
+			}			
 
 			//Käyttäjän syöttämä hinta ja ale ja netto, pitää säilöä jotta tuotehaussakin voidaan syöttää nämä
 			$kayttajan_hinta	= $hinta;
@@ -520,7 +516,7 @@
 				}
 				else {
 					$alv = $kayttajan_alv;
-				}
+				}											
 
 				if ($kpl != 0) {
 					require ('lisaarivi.inc');

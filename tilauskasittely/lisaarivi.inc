@@ -1550,18 +1550,9 @@
 				}
 			}
 
-			//Ostossa splittaukset menee aina samalla hinnalla
+			// Ostossa splittaukset menee aina samalla hinnalla
 			if ($laskurow['tila'] == 'O' and $hinta == "") {
-				$query = "	SELECT ostohinta
-							FROM tuotteen_toimittajat
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$trow[tuoteno]'
-							and liitostunnus = '$laskurow[liitostunnus]'
-							LIMIT 1";
-				$rarres = mysql_query($query) or pupe_error($query);
-				$rarrow	 = mysql_fetch_array($rarres);
-
-				$lis_hinta = $rarrow["ostohinta"];
+				$lis_hinta = tuotteen_ostohinta($laskurow, $trow, $kpl);
 			}
 			elseif ($laskurow['tila'] == 'O') {
 				$lis_hinta = $hinta;

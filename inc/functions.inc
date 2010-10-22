@@ -4916,7 +4916,7 @@ function show(layer_ref, type) {
 
 if (!function_exists("js_alasvetoMaxWidth")) {
 	function js_alasvetoMaxWidth($id, $leveys) {
-		return "id = \"$id\" style=\"max-width: $leveys; width: expression(if (parseInt(document.getElementById('$id').clientWidth) > $leveys) { $leveys });\" onmousedown=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0) {document.getElementById('$id').style.width = 'auto';}\" onblur=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0 && $leveys > 0) {cwidth = document.getElementById('$id').clientWidth; if (cwidth > $leveys) { document.getElementById('$id').style.width = '$leveys'+'px';} else {document.getElementById('$id').style.width = 'auto';}}\"";
+		return "id = \"$id\" style=\"max-width: {$leveys}px; width: expression(if (parseInt(document.getElementById('$id').clientWidth) > $leveys) { {$leveys}px });\" onmousedown=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0) {document.getElementById('$id').style.width = 'auto';}\" onblur=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0 && $leveys > 0) {cwidth = document.getElementById('$id').clientWidth; if (cwidth > $leveys) { document.getElementById('$id').style.width = '$leveys'+'px';} else {document.getElementById('$id').style.width = 'auto';}}\"";
 	}
 }
 
@@ -7200,7 +7200,7 @@ if (!function_exists("t")) {
 		}
 
 		//	Palautetaan muotoiltu stringi!!!
-		if (func_num_args()>2) {
+		if (func_num_args() > 2) {
 		    $arg = func_get_args();
 			return sprintf($stringi, $arg[2],$arg[3],$arg[4],$arg[5],$arg[6]);
 		}

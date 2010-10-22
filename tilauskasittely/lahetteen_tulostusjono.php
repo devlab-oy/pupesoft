@@ -77,7 +77,7 @@
 			$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		}
 	}
-	
+
 	if ($tee2 == 'TULOSTA') {
 
 		unset($tilausnumerorypas);
@@ -265,17 +265,17 @@
 				else {
 					echo "<font class='head'>".t("Tulosta ker‰yslista").":</font><hr>";
 				}
-				
-				echo "<form method='post' action='$PHP_SELF'>";				
+
+				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='toim' 			value='$toim'>";
 				echo "<input type='hidden' name='jarj' 			value='$jarj'>";
 				echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
 				echo "<input type='hidden' name='tumaa' 		value='$tumaa'>";
 				echo "<input type='hidden' name='tutyyppi' 		value='$tutyyppi'>";
 				echo "<input type='hidden' name='tutoimtapa'	value='$tutoimtapa'>";
-				echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";				
+				echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";
 				echo "<input type='hidden' name='tee2' 			value='TULOSTA'>";
-				
+
 				echo "<table>";
 				echo "<tr>";
 				if ($logistiikka_yhtio != '') {
@@ -507,10 +507,13 @@
 		/*
 			Oletuksia
 		*/
-		if (count($_POST)==0) {
+		if (isset($indexvas) and $indexvas == 1) {
 
-			//	Selataan oletuksena vain seuraavan 3 p‰iv‰n ker‰yksi‰
-			$karajaus 	= 1;
+			$karajaus = 1;
+
+			if ($yhtiorow["keraysaikarajaus"] != "") {
+				$karajaus = $yhtiorow["keraysaikarajaus"];
+			}
 
 			//	Varastorajaus jos k‰ytt‰j‰ll‰ on joku varasto valittuna
 			if ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
@@ -694,12 +697,12 @@
 		echo "<tr><td>".t("Ker‰ysaikarajaus:")."</td>
 				<td>
 					<select name='karajaus' onchange='submit()'>
-						<option value='1' $sel[1]>".t("Huominen")."</option>
-						<option value='3' $sel[3]>".t("Seuraavat 3 p‰iv‰‰")."</option>
-						<option value='5' $sel[5]>".t("Seuraavat 5 p‰iv‰‰")."</option>
-						<option value='7' $sel[7]>".t("Seuraava viikko")."</option>
+						<option value='1'  $sel[1]>".t("Huominen")."</option>
+						<option value='3'  $sel[3]>".t("Seuraavat 3 p‰iv‰‰")."</option>
+						<option value='5'  $sel[5]>".t("Seuraavat 5 p‰iv‰‰")."</option>
+						<option value='7'  $sel[7]>".t("Seuraava viikko")."</option>
 						<option value='14' $sel[14]>".t("Seuraavat 2 viikkoa")."</option>
-						<option value='KAIKKI' $sel[KAIKKI]>".t("N‰yt‰ kaikki")."</option>
+						<option value='KK' $sel[KK]>".t("N‰yt‰ kaikki")."</option>
 					</select>
 
 				</td>";
@@ -909,14 +912,14 @@
 						echo "<$ero valign='top'></$ero>";
 					}
 
-					echo "<form method='post' action='$PHP_SELF'>";					
+					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
 					echo "<input type='hidden' name='jarj' 			value='$jarj'>";
 					echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";
 					echo "<input type='hidden' name='tumaa' 		value='$tumaa'>";
 					echo "<input type='hidden' name='tutyyppi' 		value='$tutyyppi'>";
 					echo "<input type='hidden' name='tutoimtapa' 	value='$tutoimtapa'>";
-					echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";									
+					echo "<input type='hidden' name='karajaus' 		value='$karajaus'>";
 					echo "<input type='hidden' name='lasku_yhtio' 	value='$tilrow[yhtio]'>";
 					echo "<input type='hidden' name='tee2' 			value='VALITSE'>";
 					echo "<input type='hidden' name='tilaukset'		value='$tilrow[otunnus]'>";
@@ -1071,7 +1074,7 @@
 				echo "</select></td>";
 
 				$tulostakaikki_tun = urlencode(serialize($tulostakaikki_tun));
-				
+
 				echo "<input type='hidden' name='toim' 			value='$toim'>";
 				echo "<input type='hidden' name='jarj' 			value='$jarj'>";
 				echo "<input type='hidden' name='tuvarasto' 	value='$tuvarasto'>";

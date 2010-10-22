@@ -158,7 +158,7 @@
 
 	if (mysql_field_name($result, $i) == "tilausvahvistustyyppi") {
 
-			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 			$apu = $trow[$i];
 			$sel = array();
@@ -2399,6 +2399,25 @@
 
 		$ulos .= "<option value = ''>".t("Tuoteperheiden is‰-/lapsituote kombinaatiot ovat uniikkeja");
 		$ulos .= "<option value = 'M' $sel[M]>".t("Tuoteperheisiin voi lis‰t‰ samaa tuotetta monesti");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "keraysaikarajaus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = '1'>".t("Ker‰yslistan tulostusjonossa n‰ytet‰‰n seuraavana p‰iv‰n‰ ker‰tt‰v‰t tilaukset")."</option>";
+		$ulos .= "<option value = '3' $sel[3]>".t("Ker‰yslistan tulostusjonossa n‰ytet‰‰n seuraavan %s p‰iv‰n aikana ker‰tt‰v‰t tilaukset", "", "3")."</option>";
+		$ulos .= "<option value = '5' $sel[5]>".t("Ker‰yslistan tulostusjonossa n‰ytet‰‰n seuraavan %s p‰iv‰n aikana ker‰tt‰v‰t tilaukset", "", "5")."</option>";
+		$ulos .= "<option value = '7' $sel[7]>".t("Ker‰yslistan tulostusjonossa n‰ytet‰‰n seuraavan %s p‰iv‰n aikana ker‰tt‰v‰t tilaukset", "", "7")."</option>";
+		$ulos .= "<option value = '14' $sel[14]>".t("Ker‰yslistan tulostusjonossa n‰ytet‰‰n seuraavan %s p‰iv‰n aikana ker‰tt‰v‰t tilaukset", "", "14")."</option>";
+		$ulos .= "<option value = 'KK' $sel[KK]>".t("Ker‰yslistan tulostusjonossa n‰ytet‰‰n kaikki tilaukset")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

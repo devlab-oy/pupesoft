@@ -234,7 +234,7 @@
 
 				echo "<td>";
 
-				foreach(explode(",", $trow["tapvm"]) as $a) {
+				foreach (explode(",", $trow["tapvm"]) as $a) {
 					echo tv1dateconv($a)."<br>";
 				}
 

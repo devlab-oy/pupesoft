@@ -13,12 +13,21 @@
 	$ksel[$alvk] = "SELECTED";
 	$psel[$alvp] = "SELECTED";
 	$vsel[$alvv] = "SELECTED";
+	$tsel[$laji] = "SELECTED";
 
 	echo "	<form name = 'valinta' action = 'raportit.php' method='post'>
 			<input type = 'hidden' name = 'toim' value = 'myyrespaakirja'>
 			<input type = 'hidden' name = 'tee' value = '1'>
-
 			<table>
+			<tr>
+			<th>".t("Laji")."</th>
+			<td>
+			<select name='laji'>
+			<option value = 'MY'>".t("Myynti")."</option>
+			<option value = 'OS' $tsel[OS]>".t("Osto")."</option>
+			</select>
+			</td>
+			</tr>
 			<tr>
 			<th>".t("Ajalta")."</th>
 			<td><select name='alvv'>
@@ -145,52 +154,83 @@
 				}
 			}
 
-			$orderby = "o_pvm, o_sum";
-
-			if ($order == "nimi") {
-				$orderby = "nimi, $orderby";
-			}
-			elseif ($order == "laskunro") {
-				$orderby = "laskunro, $orderby";
-			}
-			elseif ($order == "o_sum") {
-				$orderby = "o_sum, $orderby";
-			}
-
 			$summa = 0;
+
+			if ($laji == "MY") {
+				$laskulisa = " and lasku.tila = 'U' and lasku.alatila = 'X' ";
+				$etumerkki = "";
+			}
+			else {
+				$laskulisa = " and lasku.tila = 'Y' ";
+				$etumerkki = " * -1";
+			}
 
 			$query = "	SELECT
 						min(lasku.nimi) nimi,
 						min(lasku.laskunro) laskunro,
 						group_concat(tiliointi.tapvm ORDER BY tiliointi.tunnus) tapvm,
-						group_concat(tiliointi.summa ORDER BY tiliointi.tunnus) summa,
-						sum(tiliointi.summa) sum_summa,
+						group_concat(tiliointi.summa $etumerkki ORDER BY tiliointi.tunnus) summa,
+						sum(tiliointi.summa $etumerkki) sum_summa,
 						min(tiliointi.ltunnus) ltunnus,
 						min(tiliointi.tapvm) o_pvm,
-						max(tiliointi.summa) o_sum
+						max(tiliointi.summa) o_sum,
+						max(lasku.summa) laskusumma,
+						max(lasku.valkoodi) laskuvalkoodi
 						FROM tiliointi
-						JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and lasku.tila = 'U' and lasku.alatila = 'X'
+						JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus $laskulisa
 						WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
 						and tiliointi.tilino  IN ($ratiro[rahatilit])
 						and tiliointi.korjattu = ''
 						and	$lisa
 						GROUP BY lasku.tunnus
-						ORDER BY $orderby";
-
+						ORDER BY o_pvm, o_sum";
 			$result = mysql_query($query) or pupe_error($query);
 
-			echo "<table><tr>";
+			$footerCallBack = ",
+				\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
+					var summa = 0;
 
-			echo "<th><a href='${palvelin2}raportit.php?toim=myyrespaakirja&tee=$tee&alvv=$alvv&alvk=$alvk&alvp=$alvp&order=nimi'>".t("Nimi")."</a></th>";
-			echo "<th><a href='${palvelin2}raportit.php?toim=myyrespaakirja&tee=$tee&alvv=$alvv&alvk=$alvk&alvp=$alvp&order=laskunro'>".t("Laskunro")."</a></th>";
-			echo "<th><a href='${palvelin2}raportit.php?toim=myyrespaakirja&tee=$tee&alvv=$alvv&alvk=$alvk&alvp=$alvp&order=o_pvm'>".t("Pvm")."</a></th>";
-			echo "<th><a href='${palvelin2}raportit.php?toim=myyrespaakirja&tee=$tee&alvv=$alvv&alvk=$alvk&alvp=$alvp&order=o_sum'>".t("Summa")."</a></th>";
+					for (var i=iStart; i<iEnd; i++) {
+						summa += aaData[aiDisplay[i]][6]*1;
+					}
+
+					document.getElementById('yhteensa').innerHTML = summa.toFixed(2);
+				}";
+
+			pupe_DataTables($pupe_DataTables, 7, 7, $footerCallBack);
+
+			echo "<table class='display' id='$pupe_DataTables'>";
+
+			echo "<thead>";
+			echo "<tr>
+					<th>".t("Nimi")."</th>
+					<th>".t("Laskunro")."</th>
+					<th>".t("Laskusumma")."</th>
+					<th>".t("Valuutta")."</th>
+					<th>".t("Pvm")."</th>
+					<th>".t("Suoritus")." $yhtiorow[valkoodi]</th>
+					<th>".t("Yhteensä")." $yhtiorow[valkoodi]</th>
+					</tr>
+					<tr>
+					<td><input type='text' name='search_nimi'></td>
+					<td><input type='text' name='search_laskunro'></td>
+					<td><input type='text' name='search_summa'></td>
+					<td><input type='text' name='search_valuutta'></td>
+					<td><input type='text' name='search_pvm'></td>
+					<td><input type='text' name='search_summa'></td>
+					<td><input type='text' name='search_yhteensa'></td>
+				</tr>";
+			echo "</thead>";
+
+			echo "<tbody>";
 
 			while ($trow = mysql_fetch_assoc($result)) {
 
 				echo "<tr class='aktiivi'>";
 				echo "<td><a name='A_$trow[ltunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//order=$order///A_$trow[ltunnus]'>$trow[nimi]</a></td>";
 				echo "<td>$trow[laskunro]</td>";
+				echo "<td align='right'>$trow[laskusumma]</td>";
+				echo "<td>$trow[laskuvalkoodi]</td>";
 
 				echo "<td>";
 
@@ -202,20 +242,27 @@
 
 				echo "<td align='right'>";
 
-				foreach(explode(",", $trow["summa"]) as $a) {
+				foreach (explode(",", $trow["summa"]) as $a) {
 					echo $a."<br>";
 				}
 
 				echo "</td>";
+
+				echo "<td align='right'>$trow[sum_summa]</td>";
+
 				echo "</tr>";
 
 				$summa+=$trow['sum_summa'];
 			}
 
-			echo "<tr><th colspan='3'>".t("Yhteensä")."</th>";
-			echo "<th>";
-			printf("%.2f", $summa);
-			echo "</th></tr>";
+			echo "</tbody>";
+
+			echo "<tfoot>";
+			echo "<tr>
+				<td class='tumma' colspan='6'>".t("Yhteensä")."</td>
+				<td class='tumma' name='yhteensa' id='yhteensa' align='right'>".sprintf("%.2f", $summa),"</td>
+				</tr>";
+			echo "</tfoot>";
 			echo "</table><br>";
 		}
 		else {

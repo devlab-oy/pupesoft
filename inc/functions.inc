@@ -9049,7 +9049,7 @@ if (!function_exists("kukaisi")) {
 
 
 if (!function_exists("pupe_DataTables")) {
-	function pupe_DataTables($taulu, $sarakkeetVis, $sarakkeetTot, $korkeusMiinus = 250) {
+	function pupe_DataTables($taulu, $sarakkeetVis, $sarakkeetTot, $footerCallBack = "") {
 
 		$aoColumns = "";
 
@@ -9090,6 +9090,7 @@ if (!function_exists("pupe_DataTables")) {
 					},
 					\"aaSorting\": [],
 					\"aoColumns\": [$aoColumns]
+					$footerCallBack
 				} );
 
 				$(\"thead input\").keyup( function () {
@@ -9102,7 +9103,7 @@ if (!function_exists("pupe_DataTables")) {
 					if (oSettings.aoPreSearchCols[i]['sSearch']!=''){
 						$(this).val(oSettings.aoPreSearchCols[i]['sSearch']);
 					}
-				});
+				} );
 
 				if (oSettings.oPreviousSearch['sSearch']!=''){
 					$('.search_field').val(oSettings.oPreviousSearch['sSearch']);

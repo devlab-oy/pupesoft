@@ -39,6 +39,11 @@
 
 	$dynaaminen_check		 = "";
 
+	if (!isset($dynaamiset_nimet)) {
+		$dynaamiset_nimet = array();
+	}
+
+
 	foreach ($monivalintalaatikot as $monivalintalaatikko) {
 		if (strtolower(substr($monivalintalaatikko, 0, 9)) == "parametri") {
 			$param = substr($monivalintalaatikko, 10);
@@ -54,14 +59,17 @@
 						WHERE node.lft BETWEEN parent.lft AND parent.rgt
 						AND node.laji = '{$param}'
 						AND parent.laji = '{$param}'
-						AND node.yhtio = '{$kukarow[yhtio]}'
+						AND node.yhtio = '$kukarow[yhtio]'
 						AND node.lft > 1
 						GROUP BY node.lft
 						ORDER BY sub_dee";
 			$count_result = mysql_query($query) or pupe_error($query);
 
 			while ($count_row = mysql_fetch_assoc($count_result)) {
-				if (!isset(${"mul_".$param.$count_row['sub_dee']})) ${"mul_".$param.$count_row['sub_dee']} = array();
+				if (!isset(${"mul_".$param.$count_row['sub_dee']})) {
+					${"mul_".$param.$count_row['sub_dee']} = array();
+					$dynaamiset_nimet[] = "mul_".$param.$count_row['sub_dee'];
+				}
 			}
 
 			$dynaaminen_check = 'joo';
@@ -221,7 +229,7 @@
 							WHERE node.lft BETWEEN parent.lft AND parent.rgt
 							AND node.laji = '{$param}'
 							AND parent.laji = '{$param}'
-							AND node.yhtio = '{$kukarow[yhtio]}'
+							AND node.yhtio = '$kukarow[yhtio]'
 							AND node.lft > 1
 							GROUP BY node.lft
 							ORDER BY sub_dee";
@@ -1218,90 +1226,89 @@
 
 			$tree = substr($monivalintalaatikko, 11);
 
-			// dynaaminen dropdowni
-			$query = "	SELECT DISTINCT (COUNT(node.nimi) - 1) AS sub_dee
-						FROM dynaaminen_puu AS node, dynaaminen_puu AS parent
-						WHERE node.lft BETWEEN parent.lft AND parent.rgt
-						AND node.laji = '{$tree}'
-						AND parent.laji = '{$tree}'
-						AND node.yhtio = '{$kukarow[yhtio]}'
-						AND node.lft > 1
-						GROUP BY node.lft
-						ORDER BY sub_dee";
-			$sxresult = mysql_query($query) or pupe_error($query);
+			if (!isset($kaikki_tunnukset) and $submit_button == '') {
+				$kaikki_tunnukset = '';
+			}
 
-			if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
+			$laatikot_selected = array();
 
-				if (isset($kaikki_tunnukset) and trim($kaikki_tunnukset) != '' and $submit_button != '') {
-					$tunnukset_on_jo = 'joo';
+			for ($i = 1; $i < 5; $i++) {
+				if (${'mul_'.$tree.$i}[0] == 'PUPEKAIKKIMUUT' or ${'mul_'.$tree.$i}[0] == '') array_shift(${'mul_'.$tree.$i});
+
+				if (count(${'mul_'.$tree.$i}) > 0) {
+					// aina syvemmän tason monivalintalaatikko rajaa isommalla prioriteetilla, joten nollataan haettavat lapsituotteet ja otetaan viimesin valitun laatikon tunnus
+					$laatikot_selected = array();
+					$laatikot_selected[] = $kaikki_tunnukset = implode(",", ${'mul_'.$tree.$i});
+				}
+			}
+
+			if (count($laatikot_selected) == 0 and trim($kaikki_tunnukset) != '') $laatikot_selected[] = $kaikki_tunnukset;
+
+			// jos ei olla valittu mitään monivalintalaatikoista, haetaan dynaamisen puun root-kategoria
+			if (count($laatikot_selected) == 0) {
+				// haetaan dynaamisen puun root-kategorian tunnus
+				$query = "SELECT tunnus FROM dynaaminen_puu WHERE yhtio = '$kukarow[yhtio]' AND laji = '{$tree}' AND lft = 1";
+				$root_cat_res = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($root_cat_res) == 1) {
+					$root_cat_row = mysql_fetch_assoc($root_cat_res);
+					$laatikot_selected[] = $root_cat_row['tunnus'];
 				}
 				else {
-					$kaikki_tunnukset = '';
-					$tunnukset_on_jo = '';
+					// ei löydetty root-kategorian tunnusta! skipataan looppi ja dropdowni
+					continue;
+				}
+			}
+
+			# haetaan kaikki puun tunnukset, joilla on tuotteita linkattu
+			$query = "	SELECT GROUP_CONCAT(DISTINCT subnode.tunnus) tunnukset
+						FROM dynaaminen_puu AS subnode 
+						JOIN dynaaminen_puu AS subparent ON (subparent.tunnus IN (".implode(",", $laatikot_selected).")) 
+						JOIN puun_alkio ON (puun_alkio.yhtio = subnode.yhtio AND puun_alkio.puun_tunnus = subnode.tunnus AND puun_alkio.laji = subnode.laji)
+						WHERE subnode.yhtio = '$kukarow[yhtio]'
+						AND subnode.laji = '{$tree}'
+						AND subnode.lft BETWEEN subparent.lft AND subparent.rgt 
+						AND subnode.lft > 1
+						ORDER BY subnode.lft";
+			$kaikki_puun_tunnukset_res = mysql_query($query) or pupe_error($query);
+			$kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
+
+			if ($kaikki_puun_tunnukset_row['tunnukset'] != '') {
+
+				$query = "	SELECT parent.tunnus node_tunnus, parent.nimi node_nimi, 
+							(	SELECT (COUNT(subnode.nimi) - 1)
+								FROM dynaaminen_puu AS subnode 
+								JOIN dynaaminen_puu AS subparent ON (subnode.lft BETWEEN subparent.lft AND subparent.rgt AND subparent.laji = subnode.laji) 
+								WHERE subnode.laji = parent.laji
+								AND subnode.yhtio = parent.yhtio
+								AND subnode.tunnus = parent.tunnus
+							) syvyys
+							FROM dynaaminen_puu AS node
+							JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
+							WHERE node.tunnus IN ($kaikki_puun_tunnukset_row[tunnukset])
+							AND parent.lft > 1
+							GROUP BY parent.tunnus
+							ORDER BY syvyys, parent.lft";
+				$sxresult2 = mysql_query($query) or pupe_error($query);
+
+				$laatikot = array();
+				$laatikot_parent = array();
+
+				$syvyys = 0;
+
+				while ($looppirow = mysql_fetch_assoc($sxresult2)) {
+					$laatikot[$looppirow['syvyys']][$looppirow['node_tunnus']] = $looppirow['node_nimi'];
 				}
 
-				while ($treerow = mysql_fetch_assoc($sxresult)) {
+				if (count($laatikot) > 0) {
 
-					if (isset(${'mul_'.$tree.($treerow['sub_dee'] - 1)}) and count(${'mul_'.$tree.($treerow['sub_dee'] - 1)}) > 0) {
-						$query = "	SELECT node.nimi node_nimi, 
-									node.tunnus node_tunnus, 
-									(count(parent.nimi) - (sub_tree.depth + 1)) AS depth
-									FROM dynaaminen_puu AS node,
-										dynaaminen_puu AS parent,
-										dynaaminen_puu AS sub_parent,
-										(
-											SELECT node.nimi, (count(parent.nimi) - 1) AS depth
-											FROM dynaaminen_puu AS node,
-											dynaaminen_puu AS parent
-											WHERE node.lft between parent.lft AND parent.rgt
-											AND node.tunnus IN ('".implode("','", ${'mul_'.$tree.($treerow['sub_dee'] - 1)})."')
-											AND node.yhtio = '{$kukarow['yhtio']}' AND node.laji = '{$tree}'
-											AND parent.yhtio = '{$kukarow['yhtio']}' AND parent.laji='{$tree}'
-											GROUP BY node.nimi
-											ORDER BY node.lft
-										) AS sub_tree
-									WHERE node.lft BETWEEN parent.lft AND parent.rgt
-									AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
-									AND sub_parent.nimi = sub_tree.nimi
-									AND node.yhtio = '{$kukarow['yhtio']}' AND node.laji = '{$tree}'
-									AND parent.yhtio = '{$kukarow['yhtio']}' AND parent.laji='{$tree}'
-									AND sub_parent.yhtio = '{$kukarow['yhtio']}' AND sub_parent.laji = '{$tree}'
-									GROUP BY node.nimi
-									HAVING depth = 1
-									ORDER BY node.lft";
-					}
-					elseif ($treerow['sub_dee'] > 1) {
+					foreach ($laatikot as $laatikon_nro => $sisalto) {
 
-						if (isset(${'mul_'.$tree.'1'}) and count(${'mul_'.$tree.'1'}) == 0) {
-							continue;
-						}
-
-						if (count(${'mul_'.$tree.($treerow['sub_dee'] - 1)}) == 0) {
-							continue;
-						}
-
-					}
-					else {
-						$query = "	SELECT node.nimi node_nimi, node.tunnus node_tunnus, (count(parent.nimi) - 1) as depth
-									from dynaaminen_puu as node,
-									dynaaminen_puu as parent
-									where node.lft between parent.lft and parent.rgt
-									and node.yhtio = '{$kukarow['yhtio']}'
-									and parent.yhtio = '{$kukarow['yhtio']}'
-									and node.laji = '{$tree}'
-									and parent.laji = '{$tree}'
-									group by node.nimi
-									having depth = '{$treerow['sub_dee']}'
-									order by depth, node.lft";
-					}
-					$sxresult2 = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($sxresult2) > 0) {
-						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>",t("TASO")," {$treerow['sub_dee']}</th></tr>";
+						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>",t("TASO")," {$laatikon_nro}</th></tr>";
 						echo "<tr><td nowrap style='padding:0px'>";
-						echo "<select name='mul_{$tree}{$treerow['sub_dee']}[]' ";
+						echo "<select name='mul_{$tree}{$laatikon_nro}[]' ";
 
-						if (!in_array("dynaaminen_{$tree}", array_map('strtolower', $monivalintalaatikot_normaali))) {
+						if (!in_array("dynaaminen_".strtolower($tree), array_map('strtolower', $monivalintalaatikot_normaali))) {
 							echo " multiple='multiple' size='7' ";
 						}
 
@@ -1309,8 +1316,8 @@
 
 						$mul_check = '';
 
-						if (${"mul_".$tree.$treerow['sub_dee']} != "") {
-							if (in_array("PUPEKAIKKIMUUT", ${"mul_".$tree.$treerow['sub_dee']})) {
+						if (${"mul_".$tree.$laatikon_nro} != "") {
+							if (in_array("PUPEKAIKKIMUUT", ${"mul_".$tree.$laatikon_nro})) {
 								$mul_check = 'SELECTED';
 							}
 						}
@@ -1318,32 +1325,29 @@
 						echo "<option value='PUPEKAIKKIMUUT' {$mul_check}>".t("Näytä kaikki")."</option>";
 						echo "<option value=''>",t("Ei valintaa"),"</option>";
 
-						while (${$tree."row"} = mysql_fetch_assoc($sxresult2)) {
-
+						foreach ($sisalto as $tun => $nimi) {
 							$sel = '';
 
-							if ((count(${"mul_".$tree.$treerow['sub_dee']}) > 0 and in_array(strtolower(trim(${$tree."row"}["node_tunnus"])), ${"mul_".$tree.$treerow['sub_dee']})) or
-								(isset($kaikki_tunnukset) and trim($kaikki_tunnukset) != '' and in_array(${$tree."row"}["node_tunnus"], explode(",", $kaikki_tunnukset)) and $submit_button != '') or
-								(isset($kaikki_tunnukset_from_kuka) and trim($kaikki_tunnukset_from_kuka) != '' and in_array(${$tree.'row'}['node_tunnus'], explode(",", $kaikki_tunnukset_from_kuka)))) {
-								$sel = 'SELECTED';
+							if ((count(${"mul_".$tree.$laatikon_nro}) > 0 and in_array(strtolower(trim($tun)), ${"mul_".$tree.$laatikon_nro})) or
+								(isset($kaikki_tunnukset) and trim($kaikki_tunnukset) != '' and in_array($tun, explode(",", $kaikki_tunnukset)) and $submit_button != '') or
+								(isset($kaikki_tunnukset_from_kuka) and trim($kaikki_tunnukset_from_kuka) != '' and in_array($tun, explode(",", $kaikki_tunnukset_from_kuka)))) {
+								$sel = ' SELECTED';
 
-								if (count(${'mul_'.$tree.$treerow['sub_dee']}) == 0 or !in_array(${$tree.'row'}['node_tunnus'], ${'mul_'.$tree.$treerow['sub_dee']})) {
-									${'mul_'.$tree.$treerow['sub_dee']}[] = ${$tree.'row'}['node_tunnus'];
+								if (count(${'mul_'.$tree.$laatikon_nro}) == 0 or !in_array($tun, ${'mul_'.$tree.$laatikon_nro})) {
+									${'mul_'.$tree.$laatikon_nro}[] = $tun;
 								}
 							}
 
-							echo "<option value='".${$tree."row"}['node_tunnus']."' {$sel}>".${$tree."row"}['node_nimi']."</option>";
-
-							if ($sel != '' and $tunnukset_on_jo == '') $kaikki_tunnukset .= ${$tree."row"}['node_tunnus'].",";
+							echo "<option value='{$tun}'{$sel}>{$nimi}</option>";
 						}
 
 						echo "</select>";
 						echo "</td>";
 						echo "</tr></table></div>";
 					}
-					else {
-						break;
-					}
+				}
+				else {
+					break;
 				}
 			}
 		}

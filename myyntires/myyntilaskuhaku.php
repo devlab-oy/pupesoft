@@ -2,6 +2,9 @@
 
 	$useslave = 1; // k‰ytet‰‰n slavea
 
+	// DataTables p‰‰lle
+	$pupe_DataTables = "myyntilaskuhaku";
+
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Myyntilaskuhaku")."</font><hr>";
@@ -95,12 +98,35 @@
 			$tee = '';
 		}
 		else {
-			echo "<table><tr>";
 
-			for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
-				echo "<th>" . t(mysql_field_name($result,$i))."</th>";
-			}
-			echo "</tr>";
+			pupe_DataTables($pupe_DataTables, 8, 8);
+
+			echo "<table class='display' id='$pupe_DataTables'>";
+
+			echo "<thead>
+					<tr>
+					<th>".t("Pvm")."</th>
+					<th>".t("Er‰p‰iv‰")."</th>
+					<th>".t("Laskunro")."</th>
+					<th>".t("Nimi")."</th>
+					<th>".t("Summa")."</th>
+					<th>".t("Valuutta")."</th>
+					<th>".t("Ebid")."</th>
+					<th>".t("Tila")."</th>
+					</tr>
+					<tr>
+					<td><input type='text' name='search_pvm'></td>
+					<td><input type='text' name='search_erpvm'></td>
+					<td><input type='text' name='search_laskunro'></td>
+					<td><input type='text' name='search_nimi'></td>
+					<td><input type='text' name='search_summa'></td>
+					<td><input type='text' name='search_valuutta'></td>
+					<td><input type='text' name='search_ebid'></td>
+					<td><input type='text' name='search_tila'></td>
+					</tr>
+				</thead>";
+
+			echo "<tbody>";
 
 			while ($trow = mysql_fetch_array ($result)) {
 				echo "<tr class='aktiivi'>";
@@ -129,6 +155,8 @@
 				echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
 				echo "</tr>";
 			}
+
+			echo "</tbody>";
 			echo "</table><br>";
 
 			if ($alku > 0) {

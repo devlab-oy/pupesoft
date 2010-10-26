@@ -1242,8 +1242,6 @@
 				}
 			}
 
-			if (count($laatikot_selected) == 0 and trim($kaikki_tunnukset) != '') $laatikot_selected[] = $kaikki_tunnukset;
-
 			// jos ei olla valittu mit‰‰n monivalintalaatikoista, haetaan dynaamisen puun root-kategoria
 			if (count($laatikot_selected) == 0) {
 				// haetaan dynaamisen puun root-kategorian tunnus
@@ -1260,11 +1258,18 @@
 				}
 			}
 
+			$joinlisa = "";
+
+			if ($autoid != '') {
+				$joinlisa = " join yhteensopivuus_tuote_tony ON (yhteensopivuus_tuote_tony.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote_tony.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote_tony.atunnus = '$autoid') ";
+			}
+
 			# haetaan kaikki puun tunnukset, joilla on tuotteita linkattu
 			$query = "	SELECT GROUP_CONCAT(DISTINCT subnode.tunnus) tunnukset
 						FROM dynaaminen_puu AS subnode 
 						JOIN dynaaminen_puu AS subparent ON (subparent.tunnus IN (".implode(",", $laatikot_selected).")) 
 						JOIN puun_alkio ON (puun_alkio.yhtio = subnode.yhtio AND puun_alkio.puun_tunnus = subnode.tunnus AND puun_alkio.laji = subnode.laji)
+						$joinlisa
 						WHERE subnode.yhtio = '$kukarow[yhtio]'
 						AND subnode.laji = '{$tree}'
 						AND subnode.lft BETWEEN subparent.lft AND subparent.rgt 

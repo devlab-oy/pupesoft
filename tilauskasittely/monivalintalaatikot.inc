@@ -1261,7 +1261,7 @@
 			$joinlisa = "";
 
 			if ($autoid != '') {
-				$joinlisa = " join yhteensopivuus_tuote_tony ON (yhteensopivuus_tuote_tony.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote_tony.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote_tony.atunnus = '$autoid') ";
+				$joinlisa = " join yhteensopivuus_tuote ON (yhteensopivuus_tuote.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote.atunnus = '$autoid') ";
 			}
 
 			# haetaan kaikki puun tunnukset, joilla on tuotteita linkattu

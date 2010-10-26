@@ -102,7 +102,7 @@ echo "<form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>";
 echo "<input type = 'hidden' name = 'toim' value = 'laskuhaku'>";
 echo "<table>";
 
-echo "<th valign='top'>".t("Alkupvm")."</th>";
+echo "<tr><th valign='top'>".t("Alkupvm")."</th>";
 echo "<td><select name='alkuvv'>";
 
 $sel = array();
@@ -139,7 +139,7 @@ for ($i = 1; $i < 32; $i++) {
 	echo "<option value='$val' $sel[$val]>$val</option>";
 }
 
-echo "</select></td><td class='back'>&nbsp;</td>";
+echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
 
 echo "<tr>
@@ -226,18 +226,64 @@ if ($tee != '') {
 		exit;
 	}
 
-	echo "<table><tr>";
-	echo "<th>".t("Tapvm/Erpvm")."</th>";
-	echo "<th>".t("Nimi")."</th>";
-	echo "<th>".t("Summa")."</th>";
-	echo "<th>".t("Valuutta")."</th>";
-	echo "<th>".t("Laskunro")."</th>";
-	echo "<th>".t("Viite/Viesti")."</th>";
-	echo "<th>".t("EBID")."</th>";
-	echo "<th>".t("Tila/Vienti")."</th>";
-	echo "</tr>";
+	$footerCallBack = ",
+		\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
+			var summat = new Array();
+			var valuutat = new Array();
+			var valuutta = '';
 
-	$yhteensa = 0;
+			for (var i=iStart; i<iEnd; i++) {
+				valuutta = aaData[aiDisplay[i]][3];
+				valuutat[valuutta] = valuutta;
+
+				if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+				summat[valuutta] += aaData[aiDisplay[i]][2]*1;
+			}
+
+			// Tyhjennetään kaikki summat
+			$('td[name=yhteensa]').each(
+				function() {
+					$( this ).html('');
+				}
+			);
+			
+			// Ekotetaan vain ne valuutat jotka löytyy
+			for (valuutta in valuutat) {
+				if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+				$('#yhteensa_'+valuutta).html(summat[valuutta].toFixed(2));
+			}
+		}";
+
+	pupe_DataTables($pupe_DataTables, 8, 8, $footerCallBack);
+
+	echo "<table class='display' id='$pupe_DataTables'>";
+
+	echo "<thead>";
+	echo "<tr>
+			<th>".t("Tapvm/Erpvm")."</th>
+			<th>".t("Nimi")."</th>
+			<th>".t("Summa")."</th>
+			<th>".t("Valuutta")."</th>
+			<th>".t("Laskunro")."</th>
+			<th>".t("Viite/Viesti")."</th>
+			<th>".t("EBID")."</th>
+			<th>".t("Tila/Vienti")."</th>
+			</tr>
+			<tr>
+			<td><input type='text' name='search_tapvm'></td>
+			<td><input type='text' name='search_nimi'></td>
+			<td><input type='text' name='search_summa'></td>
+			<td><input type='text' name='search_valuutta'></td>
+			<td><input type='text' name='search_laskunro'></td>
+			<td><input type='text' name='search_viite'></td>
+			<td><input type='text' name='search_ebid'></td>
+			<td><input type='text' name='search_tila'></td>
+		</tr>";
+
+	echo "</thead>";
+	echo "<tbody>";
+
+	$yhteensa = array();
 
 	while ($trow = mysql_fetch_array($result)) {
 		echo "<tr class='aktiivi'>";
@@ -263,12 +309,31 @@ if ($tee != '') {
 
 		echo "<td valign='top'>".t($laskutyyppi)."<br>".ostolaskun_vienti($trow["vienti"])."</td>";
 
-		$yhteensa += $trow["summa"];
+		$yhteensa["ZZ_".$yhtiorow["valkoodi"]] += $trow["summa"];
+
+		if (strtoupper($trow["valkoodi"]) != $yhtiorow["valkoodi"]) {
+			$yhteensa[$trow["valkoodi"]] += $trow["summa"];
+		}
 
 		echo "</tr>";
 	}
 
-	echo "<tr><th colspan='2'>".t("Yhteensä")."</th><th style='text-align:right;'>$yhteensa</th><th colspan='5'></th></tr>";
+	ksort($yhteensa);
+
+	echo "</tbody>";
+	echo "<tfoot>";
+
+	foreach ($yhteensa as $val => $sum) {
+
+		if ($val == "ZZ_".$yhtiorow["valkoodi"]) $val = $yhtiorow["valkoodi"];
+
+		echo "<tr>
+				<td class='tumma' colspan='2'>".t("Yhteensä:")."</td>
+				<td class='tumma' align='right' name='yhteensa' id='yhteensa_$val'>".sprintf("%.2f", $sum)."</td>
+				<td class='tumma'>$val</td>
+				<td class='tumma' colspan='4'></td></tr>";
+	}
+	echo "</tfoot>";
 	echo "</table><br>";
 
 	if ($alku > 0) {
@@ -283,9 +348,10 @@ if ($tee != '') {
 		$siirry = $alku + 50;
 		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp'>".t("Seuraavat")."</a> ";
 	}
+
 	echo "<br><br>";
 
-	$toim="";
+ 	$toim = "";
 }
 
 ?>

@@ -21,8 +21,11 @@
 			}
 		 	$trow = mysql_fetch_array ($result);
 
-			echo "<b>$trow[ytunnus]</b> $trow[nimi] $trow[postitp]<br><br>";
-
+			echo "<table>";
+			echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Postitp")."</th></tr>";
+			echo "<tr><td>$trow[ytunnus]</td><td>$trow[nimi]</td><td>$trow[postitp]</td></tr>";
+			echo "</table>";
+			
 			$lisa='';
 
 			if (!isset($kausi)) $kausi='';
@@ -116,10 +119,15 @@
 			 	echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
 			}
 			else {
-		 		while ($trow=mysql_fetch_array ($result)) {
-					echo "<b>$trow[ytunnus]</b> $trow[nimi] $trow[postitp]<br>";
+				
+				echo "<table>";
+				echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Postitp")."</th></tr>";
+												
+		 		while ($trow = mysql_fetch_array($result)) {
+					echo "<tr><td>$trow[ytunnus]</td><td>$trow[nimi]</td><td>$trow[postitp]</td></tr>";
 				}
-
+				
+				echo "</table>";
 				echo "<br>";
 
 				echo "<a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO'>Näytä kaikki laskut</a><br><br>";
@@ -159,16 +167,62 @@
 				 	echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
 				}
 
-				echo "<table><tr>";
-				echo "<th>".t("Tapvm/Erpvm")."</th>";
-				echo "<th>".t("Summa")."</th>";
-				echo "<th>".t("Valuutta")."</th>";
-				echo "<th>".t("Laskunro")."</th>";
-				echo "<th>".t("Viite/Viesti")."</th>";
-				echo "<th>".t("Keikka")."</th>";
-				echo "<th>".t("EBID")."</th>";
-				echo "<th>".t("Tila/Vienti")."</th>";
-				echo "</tr>";
+				$footerCallBack = ",
+					\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
+						var summat = new Array();
+						var valuutat = new Array();
+						var valuutta = '';
+
+						for (var i=iStart; i<iEnd; i++) {
+							valuutta = aaData[aiDisplay[i]][2];
+							valuutat[valuutta] = valuutta;
+
+							if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+							summat[valuutta] += aaData[aiDisplay[i]][1]*1;
+						}
+						
+						// Tyhjennetään kaikki summat
+						$('td[name=yhteensa]').each(
+							function() {
+								$( this ).html('');
+							}
+						);
+
+						// Ekotetaan vain ne valuutat jotka löytyy
+						for (valuutta in valuutat) {
+							if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+							$('#yhteensa_'+valuutta).html(summat[valuutta].toFixed(2));
+						}
+					}";
+
+				pupe_DataTables($pupe_DataTables, 8, 8, $footerCallBack);
+
+				echo "<table class='display' id='$pupe_DataTables'>";
+
+				echo "<thead>";
+				echo "<tr>
+						<th>".t("Tapvm/Erpvm")."</th>
+						<th>".t("Summa")."</th>
+						<th>".t("Valuutta")."</th>
+						<th>".t("Laskunro")."</th>
+						<th>".t("Viite/Viesti")."</th>
+						<th>".t("Keikka")."</th>
+						<th>".t("EBID")."</th>
+						<th>".t("Tila/Vienti")."</th>
+						</tr>
+						<tr>
+						<td><input type='text' name='search_tapvm'></td>
+						<td><input type='text' name='search_summa'></td>
+						<td><input type='text' name='search_valuutta'></td>
+						<td><input type='text' name='search_laskunro'></td>
+						<td><input type='text' name='search_viite'></td>
+						<td><input type='text' name='search_keikka'></td>
+						<td><input type='text' name='search_ebid'></td>
+						<td><input type='text' name='search_tila'></td>
+					</tr>";
+
+				echo "</thead>";
+				echo "<tbody>";
 
 				$yhteensa = array();
 
@@ -189,6 +243,7 @@
 
 					//tehdään keikka linkki
 					echo "<td valign='top'>";
+
 					if ($trow["vienti"] != "A" and $trow["vienti"] != "D" and $trow["vienti"] != "G") {
 						$query = "	SELECT keikka.laskunro, keikka.tunnus
 									FROM lasku
@@ -211,6 +266,7 @@
 
 					$laskutyyppi = $trow["tila"];
 					require "inc/laskutyyppi.inc";
+
 					echo "<td valign='top'>".t($laskutyyppi)."<br>".ostolaskun_vienti($trow["vienti"])."</td>";
 
 					$yhteensa["ZZ_".$yhtiorow["valkoodi"]] += $trow["kotisumma"];
@@ -223,14 +279,20 @@
 				}
 
 				ksort($yhteensa);
+				echo "</tbody>";
+				echo "<tfoot>";
 
 				foreach ($yhteensa as $val => $sum) {
 
 					if ($val == "ZZ_".$yhtiorow["valkoodi"]) $val = $yhtiorow["valkoodi"];
 
-					echo "<tr><th>".t("Yhteensä:")."</th><th align='right'>".sprintf("%.2f", $sum)."</th><th>$val</th><th colspan='5'></th></tr>";
+					echo "<tr>
+							<td class='tumma'>".t("Yhteensä:")."</td>
+							<td class='tumma' align='right' name='yhteensa' id='yhteensa_$val'>".sprintf("%.2f", $sum)."</td>
+							<td class='tumma'>$val</td>
+							<td class='tumma' colspan='5'></td></tr>";
 				}
-
+				echo "</tfoot>";
 				echo "</table><br>";
 
 				if ($limit != "NO") {
@@ -250,13 +312,13 @@
 
 				}
 
-				require "footer.inc";
+				require ("footer.inc");
 				exit;
 			}
 		}
 		else {
 			echo "Virheellinen laji!";
-			require "footer.inc";
+			require ("footer.inc");
 			exit;
 		}
 	}
@@ -347,3 +409,4 @@
 		require "inc/footer.inc";
 		exit;
 	}
+?>

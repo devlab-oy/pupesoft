@@ -194,7 +194,7 @@
 						summa += aaData[aiDisplay[i]][6]*1;
 					}
 
-					document.getElementById('yhteensa').innerHTML = summa.toFixed(2);
+					$('#yhteensa').html(summa.toFixed(2));
 				}";
 
 			pupe_DataTables($pupe_DataTables, 7, 7, $footerCallBack);

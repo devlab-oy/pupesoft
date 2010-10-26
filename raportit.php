@@ -6,7 +6,12 @@ if (isset($_POST["tee"])) {
 	if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-if ((($toim != 'hyvaksynta') or ($tee != 'T')) and ($toim !='maksuvalmius')) $useslave = 1;
+if ((($_REQUEST["toim"] != 'hyvaksynta') or ($_REQUEST["tee"] != 'T')) and ($_REQUEST["toim"] !='maksuvalmius')) $useslave = 1;
+
+if ($_REQUEST["toim"] == 'toimittajahaku' or $_REQUEST["toim"] == 'laskuhaku' or $_REQUEST["toim"] == 'avoimet' or $_REQUEST["toim"] == 'myyrespaakirja') {
+	// DataTables p‰‰lle
+	$pupe_DataTables = $_REQUEST["toim"];
+}
 
 require ("inc/parametrit.inc");
 

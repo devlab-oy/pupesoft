@@ -1,7 +1,9 @@
 <?php
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
-
+	// DataTables päälle
+	$pupe_DataTables = "asiakkaantilaukset";
+	
 	require ("../inc/parametrit.inc");
 
 	if (substr($toim, 0, 8) == "KONSERNI") {
@@ -451,21 +453,36 @@
 
 		if (mysql_num_rows($result)!=0) {
 
-			echo "<br><table>";
+			pupe_DataTables($pupe_DataTables, 9, 10);
+			
+			echo "<br>";
+			echo "<table class='display' id='$pupe_DataTables'>";					
+			
+			echo "<thead>";
 			echo "<tr>";
+			
 			for ($i=0; $i < mysql_num_fields($result)-8; $i++) {
-				echo "<th align='left'>";
-				echo "<a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=".mysql_field_name($result,$i)."'>".t(mysql_field_name($result,$i))."</a>";
-				echo "</th>";
+				echo "<th>".t(mysql_field_name($result,$i))."</th>";
 			}
-			echo "<th align='left'>".t("Tyyppi")."</th>";
+			
+			echo "<th>".t("Tyyppi")."</th>
+				  <th class='back'></th>";
 			echo "</tr>";
+			
+			echo "<tr>";
+			
+			for ($i=0; $i < mysql_num_fields($result)-8; $i++) {
+				echo "<td><input type='text' name='search_".t(mysql_field_name($result,$i))."'></td>";
+			}
+			
+			echo "<td><input type='text' name='search_tyyppi'></td>
+			      <td class='back'></td>";
+			echo "</tr>";
+			echo "</thead>";
+			echo "<tbody>";
 
 			while ($row = mysql_fetch_array($result)) {
-
-				$ero = "td";
-				if ($tunnus==$row['tilaus']) $ero = "th";
-
+								
 				echo "<tr class='aktiivi'>";
 
 				// Laatikot laskujen ympärille
@@ -518,9 +535,15 @@
 
 					$borderlask--;
 				}
+				
+				if ($tunnus == $row['tilaus']) {
+					$classalku	.= " class='tumma' ";
+					$classloppu	.= " class='tumma' ";
+					$class 		.= " class='tumma' ";				
+				}
 
 				if ($row["tila"] == "U") {
-					echo "<$ero valign='top' $classalku></$ero>";
+					echo "<td valign='top' $classalku></td>";
 				}
 				else {
 					if (trim($row["hyvak2"]) != "") {
@@ -529,27 +552,27 @@
 						echo t("Tilaus valmis")." $row[hyvak1] @ ".tv1dateconv($row["h1time"], 'X')."<br>";
 						echo t("Tilaus hyväksytty")." $row[hyvak2] @ ".tv1dateconv($row["h2time"], 'X');
 						echo "</div>";
-						echo "<$ero valign='top' $classalku class='tooltip' id='kommentti$row[0]'>$row[0]</$ero>";
+						echo "<td valign='top' $classalku class='tooltip' id='kommentti$row[0]'>$row[0]</td>";
 					}
 					else {
-						echo "<$ero valign='top' $classalku>$row[0]</$ero>";
+						echo "<td valign='top' $classalku>$row[0]</td>";
 					}
 				}
 
 				for ($i=1; $i<mysql_num_fields($result)-8; $i++) {
 					if (mysql_field_name($result,$i) == 'toimaika') {
-						echo "<$ero valign='top' $class>".tv1dateconv($row[$i])."</$ero>";
+						echo "<td valign='top' $class>".tv1dateconv($row[$i])."</td>";
 					}
 					elseif (mysql_field_name($result,$i) == 'laskunro' and $row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
-						echo "<$ero valign='top' nowrap align='right' $class>";
+						echo "<td valign='top' nowrap align='right' $class>";
 						echo "<a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tilaus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim'>$row[$i]</a>";
-						echo "</$ero>";
+						echo "</td>";
 					}
 					elseif (is_numeric(trim($row[$i])) and mysql_field_name($result,$i) != 'tilausviite') {
-						echo "<$ero valign='top' nowrap align='right' $class>$row[$i]</$ero>";
+						echo "<td valign='top' nowrap align='right' $class>$row[$i]</td>";
 					}
 					else {
-						echo "<$ero valign='top' $class>$row[$i]</$ero>";
+						echo "<td valign='top' $class>$row[$i]</td>";
 					}
 				}
 
@@ -568,9 +591,10 @@
 					$fn2 = "";
 				}
 
-				echo "<$ero valign='top' $classloppu>$fn1".t($laskutyyppi)." ".t($alatila)."$fn2</$ero>";
+				echo "<td valign='top' $classloppu>$fn1".t($laskutyyppi)." ".t($alatila)."$fn2</td>";
 
-				echo "<form method='post' action='$PHP_SELF'><td class='back' valign='top'>
+				echo "<td class='back' valign='top'>
+						<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='tee' 			value = 'NAYTATILAUS'>
 						<input type='hidden' name='toim' 			value = '$toim'>
 						<input type='hidden' name='asiakasid' 		value = '$asiakasid'>
@@ -603,12 +627,15 @@
 						<input type='hidden' name='ppl' value='$ppl'>
 						<input type='hidden' name='kkl' value='$kkl'>
 						<input type='hidden' name='vvl' value='$vvl'>
-						<input type='submit' value='".t("Näytä tilaus")."'></td></form>";
+						<input type='submit' value='".t("Näytä tilaus")."'>
+						</form></td>";
 
 				echo "</tr>";
 
 				$edlaskunro = $row["laskunro"];
 			}
+			
+			echo "</tbody>";
 			echo "</table>";
 		}
 		else {

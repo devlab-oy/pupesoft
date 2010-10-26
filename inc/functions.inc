@@ -7213,7 +7213,7 @@ if (!function_exists("t")) {
 // T‰m‰ funktio hakee ja k‰‰nt‰‰ avainsanoja
 if (!function_exists("t_avainsana")) {
 	function t_avainsana($laji, $kieli = '', $where = '', $yhtio = '', $eivielakaytossa = '', $return = "") {
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $link;
 
 		$laji = mysql_real_escape_string($laji);
 
@@ -7255,7 +7255,7 @@ if (!function_exists("t_avainsana")) {
 						where $yhtiolisa
 						and laji = '$laji'
 						and kieli = '$yhtiorow[kieli]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = mysql_query($query, $link) or pupe_error($query);
 
 			$onko_numero = $onko_alpha = 0;
 
@@ -7293,7 +7293,7 @@ if (!function_exists("t_avainsana")) {
 					and avainsana.kieli in ('$yhtiorow[kieli]', '')
 					$wherelisa
 					$orderlisa";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = mysql_query($query, $link) or pupe_error($query);
 
 		if ($return != "") {
 			$row = mysql_fetch_assoc($result);
@@ -8857,16 +8857,16 @@ if (!function_exists("asiakashakuohje")) {
 /// Jampan Neste funkkareita t‰st‰ eteenp‰in
 // T‰m‰ funkkari lis‰‰ tuotteenalkion dynaamiseen puuhun..
 if (!function_exists("TuotteenAlkiot")) {
-	function TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji, $ttunnus) {
+	function TuotteenAlkiot($kukarow, $liitos, $puun_tunnus, $laji, $ttunnus = '') {
 
-		if ($ttunnus == '' OR trim($ttunnus) == '') {
-			$qi = "INSERT INTO tuotteen_alkio(yhtio, tuoteno,laji, selite, laatija, luontiaika) values ('$kukarow[yhtio]','$tuoteno','$laji','$selitekenttaan','$kukarow[kuka]',now())";
+		if (trim($ttunnus) == '') {
+			$query = "INSERT INTO puun_alkio (yhtio, liitos, laji, puun_tunnus, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$liitos', '$laji', '$puun_tunnus', '$kukarow[kuka]', now())";
 		}
 		else {
-			$qi = "UPDATE tuotteen_alkio SET selite = '$selitekenttaan', muuttaja = '$kukarow[kuka]', muutospvm = now() where laji='$laji' AND tuoteno='$tuoteno' and tunnus='$ttunnus' and yhtio='$kukarow[yhtio]'";
+			$query = "UPDATE puun_alkio SET puun_tunnus = '$puun_tunnus', muuttaja = '$kukarow[kuka]', muutospvm = now() WHERE laji = '$laji' AND liitos = '$liitos' AND tunnus = '$ttunnus' AND yhtio = '$kukarow[yhtio]'";
 		}
 
-		$r = mysql_query($qi) or pupe_error($qi);
+		$r = mysql_query($query) or pupe_error($query);
 	}
 }
 

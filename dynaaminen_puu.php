@@ -2,26 +2,20 @@
 require('inc/parametrit.inc');
 
 GLOBAL $kukarow;
-/*
-echo "<pre>";
-var_dump($_GET);
-echo "</pre>";
 
-echo "<pre>";
-var_dump($_POST);
-echo "</pre>";
-*/
 // pi‰‰ jotenkin ottaa nodesta ne arvot johonkin talteen k‰sittely‰ varten...
 $Xnodet = explode(",",$selite);
 
 /// T‰m‰ lis‰‰ tiedot kantaa ja sen j‰lkeen passaa parametrej‰ yllapitoon samaan tuotteeseen mist‰ l‰hdettiin.... toivottavasti..
-if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {+
-$v=1;	
+if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {
+
+	$v = 1;	
+
 	// k‰ytet‰‰n apumuuttujaa vika sille ett‰ saadaan vika pilkku pois...
 	$vika = count($id);
-	
-	foreach ($id as $arrayarvo) {
 
+	foreach ($id as $arrayarvo) {
+	
 		if ($v == $vika) {
 			$selitekenttaan .= $arrayarvo;
 		}
@@ -30,25 +24,29 @@ $v=1;
 		}
 		$v++;
 	}
-//	echo "Tallenna on: " . $selitekenttaan;
-// function TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji) 
-	TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji,$ttunnus);
-	
-	$q2 = "SELECT tunnus from tuote where tuoteno='$tuoteno'";
-	$r2 = mysql_query($q2) or pupe_error($q2);
-	$rivi = mysql_fetch_assoc($r2);
-	$tunnus = $rivi['tunnus'];
-	
-	//echo "<br />Paratunnus: " .$paratunnus;
-	
-	if ($mista_tulin == 'tuotteen_alkio' AND $toim2 == '') {
+
+	if ($mista_tulin == 'autodata_tuote') {
 		$toim = $mista_tulin;
-		$tunnus = ''; 
+		$tunnus = $ttunnus;
 	}
-	else { $toim = $toim;}
+	else {
+
+		TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji,$ttunnus);
+
+		$q2 = "SELECT tunnus from tuote where tuoteno='$tuoteno'";
+		$r2 = mysql_query($q2) or pupe_error($q2);
+		$rivi = mysql_fetch_assoc($r2);
+		$tunnus = $rivi['tunnus'];
+
+		if ($mista_tulin == 'puun_alkio' AND $toim2 == '') {
+			$toim = $mista_tulin;
+			$tunnus = ''; 
+		}
+		else { 
+			$toim = $toim;
+		}
+	}
 	
-	//$toim = 'tuote';
-		
 	require('yllapito.php');
 	exit;
 }

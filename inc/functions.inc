@@ -70,14 +70,14 @@ if (!function_exists("tv1dateconv")) {
 }
 
 if (!function_exists("lopetus")) {
-	function lopetus($lopetus, $meta="", $palautavainurli=FALSE) {
+	function lopetus($lopetus, $meta = "", $palautavainurli = FALSE) {
 		global $kukarow, $palvelin2;
-
+		
 		$lopetukset = explode("/SPLIT/", $lopetus);
-
+		
 		$lask = 0;
 		$edlopetus = "";
-
+		
 		foreach ($lopetukset as $lopetus) {
 			if ($lopetus != "") {
 
@@ -91,82 +91,81 @@ if (!function_exists("lopetus")) {
 				preg_match('/\/NIMILISA=(.*?)\//',$lopetus, $nimilisa);
 				$lopetus = preg_replace('/\/NIMILISA=(.*?)\//','',   $lopetus);
 
-				if ($meta != "") {
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
-					exit;
+				preg_match("/^([^\?&]*)\??/i", $lopetus, $nimi);
+				preg_match("/toim=([^&]*)&?/i", $lopetus, $alanimi);
+
+				$nimet = explode("/", str_replace($palvelin2, "", $nimi[1]));
+
+				if (!isset($alanimi[1])) $alanimi[1] = "";
+
+				for ($i=0; $i<count($nimet); $i++) {
+
+					$nimi = "";
+
+					for ($j = $i; $j<count($nimet); $j++) {
+						$nimi .= $nimet[$j]."/";
+					}
+
+					$nimi = substr($nimi,0,-1);
+
+					$query = "	SELECT nimitys
+								FROM oikeu
+								WHERE yhtio 	= '$kukarow[yhtio]'
+								and kuka 		= ''
+								and nimi		= '$nimi'
+								and alanimi		= '$alanimi[1]'
+								LIMIT 1";
+					$res = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($res) > 0) {
+						$row = mysql_fetch_assoc($res);
+						break;
+					}
 				}
-				else {
 
-					preg_match("/^([^\?&]*)\??/i", $lopetus, $nimi);
-					preg_match("/toim=([^&]*)&?/i", $lopetus, $alanimi);
+				if ($lask > 0) {
+					if (strrpos($lopetus, "#") !== FALSE) {
+						$alku = substr($lopetus, 0, strrpos($lopetus, "#"));
+						$loppu = substr($lopetus, strrpos($lopetus, "#"));
 
-					$nimet = explode("/", str_replace($palvelin2, "", $nimi[1]));
-
-					if (!isset($alanimi[1])) $alanimi[1] = "";
-
-					for($i=0; $i<count($nimet); $i++) {
-
-						$nimi = "";
-
-						for ($j = $i; $j<count($nimet); $j++) {
-							$nimi .= $nimet[$j]."/";
-						}
-
-						$nimi = substr($nimi,0,-1);
-
-						$query = "	SELECT nimitys
-									FROM oikeu
-									WHERE yhtio 	= '$kukarow[yhtio]'
-									and kuka 		= ''
-									and nimi		= '$nimi'
-									and alanimi		= '$alanimi[1]'
-									LIMIT 1";
-						$res = mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($res) > 0) {
-							$row = mysql_fetch_assoc($res);
-							break;
-						}
+						$lopetus = $alku."&lopetus=".$lopetukset[0].$loppu;
 					}
+				}
 
-					if ($lask > 0) {
-						if (strrpos($lopetus, "#") !== FALSE) {
-							$alku = substr($lopetus, 0, strrpos($lopetus, "#"));
-							$loppu = substr($lopetus, strrpos($lopetus, "#"));
-
-							$lopetus = $alku."&lopetus=".$lopetukset[0].$loppu;
-						}
-					}
-
-					if ($edlopetus != "") {
-						if (strpos($lopetus, "?") === FALSE) {
-							$lopetus .= "?";
-						}
-						else {
-							$lopetus .= "&";
-						}
-
-						$lopetus .= "lopetus=$edlopetus";
-					}
-
-					if (isset($nimilisa[1]) and $nimilisa[1] != "") {
-						$nlisa = " / ".$nimilisa[1];
+				if ($edlopetus != "") {
+					if (strpos($lopetus, "?") === FALSE) {
+						$lopetus .= "?";
 					}
 					else {
-						$nlisa = "";
+						$lopetus .= "&";
 					}
 
-					$row["nimitys"] = trim(str_ireplace("UUSI", "", $row["nimitys"]));
+					$lopetus .= "lopetus=$edlopetus";
+				}
 
+				if (isset($nimilisa[1]) and $nimilisa[1] != "") {
+					$nlisa = " / ".$nimilisa[1];
+				}
+				else {
+					$nlisa = "";
+				}
+
+				$row["nimitys"] = trim(str_ireplace("UUSI", "", $row["nimitys"]));
+								
+				if ($meta == "") {
 					if ($palautavainurli) return $lopetus;
 					else if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": ".t("$row[nimitys]")."$nlisa</a><br>";
 					else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
-
-					$edlopetus = $lopetus_clean;
 				}
-
+				
+				$edlopetus = $lopetus_clean;
 				$lask++;
 			}
+		}
+	
+		if ($meta != "") {
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
+			exit;
 		}
 	}
 }

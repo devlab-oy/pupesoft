@@ -1246,7 +1246,7 @@
 			if (count($laatikot_selected) == 0) {
 				// haetaan dynaamisen puun root-kategorian tunnus
 				$query = "SELECT tunnus FROM dynaaminen_puu WHERE yhtio = '$kukarow[yhtio]' AND laji = '{$tree}' AND lft = 1";
-				$root_cat_res = mysql_query($query) or pupe_error($query);
+				$root_cat_res = mysql_query($query, $link) or pupe_error($query);
 
 				if (mysql_num_rows($root_cat_res) == 1) {
 					$root_cat_row = mysql_fetch_assoc($root_cat_res);
@@ -1261,7 +1261,7 @@
 			$joinlisa = "";
 
 			if ($autoid != '') {
-				$joinlisa = " join yhteensopivuus_tuote ON (yhteensopivuus_tuote.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote.atunnus = '$autoid') ";
+				$joinlisa = " join yhteensopivuus_tuote ON (yhteensopivuus_tuote.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote.atunnus IN ($autoid)) ";
 			}
 
 			# haetaan kaikki puun tunnukset, joilla on tuotteita linkattu
@@ -1275,7 +1275,7 @@
 						AND subnode.lft BETWEEN subparent.lft AND subparent.rgt 
 						AND subnode.lft > 1
 						ORDER BY subnode.lft";
-			$kaikki_puun_tunnukset_res = mysql_query($query) or pupe_error($query);
+			$kaikki_puun_tunnukset_res = mysql_query($query, $link) or pupe_error($query);
 			$kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
 
 			if ($kaikki_puun_tunnukset_row['tunnukset'] != '') {
@@ -1294,7 +1294,7 @@
 							AND parent.lft > 1
 							GROUP BY parent.tunnus
 							ORDER BY syvyys, parent.lft";
-				$sxresult2 = mysql_query($query) or pupe_error($query);
+				$sxresult2 = mysql_query($query, $link) or pupe_error($query);
 
 				$laatikot = array();
 				$laatikot_parent = array();

@@ -4,7 +4,7 @@ require('inc/parametrit.inc');
 GLOBAL $kukarow;
 
 // pi‰‰ jotenkin ottaa nodesta ne arvot johonkin talteen k‰sittely‰ varten...
-$Xnodet = explode(",",$selite);
+$Xnodet = explode(",",$puun_tunnus);
 
 /// T‰m‰ lis‰‰ tiedot kantaa ja sen j‰lkeen passaa parametrej‰ yllapitoon samaan tuotteeseen mist‰ l‰hdettiin.... toivottavasti..
 if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {

@@ -65,7 +65,7 @@ if ($tee == 'M') {
 
 // Seuraava "tosite"
 if ($tee == 'G') {
-	$query = "SELECT tapvm, tunnus
+	$query = "	SELECT tapvm, tunnus
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus > '$tunnus'
@@ -314,8 +314,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 				$lisa .= " and tiliointi.tosite = '$tositenro' ";
 			}
 		}
-		$summa = "";
-
+		
 		if ($viivatut != 'on') {
 			$vlisa = "and tiliointi.korjattu=''";
 		}
@@ -344,7 +343,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 	else {
 
 		// Tehd‰‰n lopetusmuuttuja kaikkiin urleihin
-		$lopetus = "${palvelin2}muutosite.php////tee=$tee";
+		$lopetus = "${palvelin2}muutosite.php////tee=$tee//tap=$tap//tak=$tak//tav=$tav//summa=$summa//tilino=$tilino//selite=$selite//laatija=$laatija";
 
 		echo "<table><tr>";
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
@@ -1197,7 +1196,6 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<br><br>";
 		$tee = "";
 	}
-
 }
 
 if (strlen($tee) == 0) {
@@ -1298,11 +1296,6 @@ if (strlen($tee) == 0) {
 		  	<td><form action = '$PHP_SELF?tee=ƒ' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
 			</table>";
-}
-
-if ($lopetus != '') {
-	echo "<br><br>";
-	lopetus($lopetus);
 }
 
 require "inc/footer.inc";

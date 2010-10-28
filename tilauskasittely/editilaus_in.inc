@@ -197,7 +197,7 @@ while (!feof ($fd)) {
 	// tehdään kaikille tiedoille 7 -> 8 bit ääkköskonversio..
 	$from   = array ('{','}','|','[',']','\\',chr(179)); // 7bit
 	$to     = array ('ä','å','ö','Ä','Å','Ö','|'); // 8bit
-	$tieto  = str_replace($from, $to, $tieto);
+	$tieto  = str_replace($from, $to, pupesoft_cleanstring($tieto));
 
 	switch ($tunnus) {
 		case 'ICHG_RCPT':

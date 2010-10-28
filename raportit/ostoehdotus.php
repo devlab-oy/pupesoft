@@ -43,12 +43,11 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
 	// otetaan kaikki muuttujat mukaan funktioon mitä on failissakin
 	extract($GLOBALS);
 
+	$riviheaderi   = "Total";
 	$laskuntoimmaa = "";
-	$riviheaderi = "Total";
-
-	$varastotapa = " JOIN varastopaikat USE INDEX (PRIMARY) ON varastopaikat.yhtio = tilausrivi.yhtio
-						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))";
+	$varastotapa   = "	JOIN varastopaikat USE INDEX (PRIMARY) ON varastopaikat.yhtio = tilausrivi.yhtio
+					 	and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
+					 	and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))";
 
 	if ($myynti_varasto != "") {
 		$varastotapa .= " and varastopaikat.tunnus = '$myynti_varasto' ";
@@ -185,7 +184,7 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
 		if ($myynti_varasto != "") {
 			$varastotapa = " and varastopaikat.tunnus = '$myynti_varasto' ";
 
-			$query    = "select nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto'";
+			$query    = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto'";
 			$result   = mysql_query($query) or pupe_error($query);
 			$laskurow = mysql_fetch_array($result);
 			$riviheaderi = $laskurow["nimitys"];
@@ -234,41 +233,46 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 		// otetaan kaikki muuttujat mukaan funktioon mitä on failissakin
 		extract($GLOBALS);
 
-		$varastotapa = "";
 		$riviheaderi = "Total";
+		$varastotapa = " JOIN varastopaikat USE INDEX (PRIMARY) ON varastopaikat.yhtio = tilausrivi.yhtio
+						 and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
+						 and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')) ";
 
 		if ($myynti_varasto != "") {
-			$varastotapa = " and lasku.varasto = '$myynti_varasto' ";
-			$query    = "select nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto'";
+			$varastotapa .= " and varastopaikat.tunnus = '$myynti_varasto' ";
+
+			$query    = "SELECT nimitys from varastopaikat where yhtio in ($yhtiot) and tunnus = '$myynti_varasto'";
 			$result   = mysql_query($query) or pupe_error($query);
 			$laskurow = mysql_fetch_array($result);
 			$riviheaderi = $laskurow["nimitys"];
 		}
 		elseif ($erikoisvarastot != "" and $myynti_maa == "") {
-			$query    = "SELECT group_concat(tunnus) from varastopaikat where yhtio in ($yhtiot) and varastopaikat.tyyppi = ''";
+			$query    = "SELECT group_concat(tunnus) from varastopaikat where yhtio in ($yhtiot) and tyyppi = ''";
 			$result   = mysql_query($query) or pupe_error($query);
 			$laskurow = mysql_fetch_array($result);
 
 			if ($laskurow[0] != "") {
-				$varastotapa = " and lasku.varasto in ($laskurow[0]) ";
+				$varastotapa .= " and varastopaikat.tunnus in ($laskurow[0]) ";
 				$riviheaderi = $myynti_maa;
 			}
 		}
-
-		if ($myynti_maa != "") {
+		elseif ($myynti_maa != "") {
 			$query    = "SELECT group_concat(tunnus) from varastopaikat where yhtio in ($yhtiot) and maa = '$myynti_maa'";
 
 			if ($erikoisvarastot != "") {
-				$query .= " and varastopaikat.tyyppi = '' ";
+				$query .= " and tyyppi = '' ";
 			}
 
 			$result   = mysql_query($query) or pupe_error($query);
 			$laskurow = mysql_fetch_array($result);
 
 			if ($laskurow[0] != "") {
-				$varastotapa = " and lasku.varasto in ($laskurow[0]) ";
+				$varastotapa .= " and varastopaikat.tunnus in ($laskurow[0]) ";
 				$riviheaderi = $myynti_maa;
 			}
+		}
+		else {
+			$varastotapa = "";
 		}
 
 		//tilauksessa/siirtolistalla jt
@@ -276,7 +280,7 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 					sum(if (tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)) tilattu,
 					sum(if (tilausrivi.tyyppi = 'G', tilausrivi.jt $lisavarattu, 0)) siirtojt
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-					JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $varastotapa)
+					$varastotapa
 					WHERE tilausrivi.yhtio in ($yhtiot)
 					and tilausrivi.tyyppi in ('O','G')
 					and tilausrivi.tuoteno = '$row[tuoteno]'

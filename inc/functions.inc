@@ -72,12 +72,12 @@ if (!function_exists("tv1dateconv")) {
 if (!function_exists("lopetus")) {
 	function lopetus($lopetus, $meta = "", $palautavainurli = FALSE) {
 		global $kukarow, $palvelin2;
-		
+
 		$lopetukset = explode("/SPLIT/", $lopetus);
-		
+
 		$lask = 0;
 		$edlopetus = "";
-		
+
 		foreach ($lopetukset as $lopetus) {
 			if ($lopetus != "") {
 
@@ -151,18 +151,18 @@ if (!function_exists("lopetus")) {
 				}
 
 				$row["nimitys"] = trim(str_ireplace("UUSI", "", $row["nimitys"]));
-								
+
 				if ($meta == "") {
 					if ($palautavainurli) return $lopetus;
 					else if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": ".t("$row[nimitys]")."$nlisa</a><br>";
 					else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
 				}
-				
+
 				$edlopetus = $lopetus_clean;
 				$lask++;
 			}
 		}
-	
+
 		if ($meta != "") {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 			exit;
@@ -2316,6 +2316,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 				if ($prow["tyyppi"] == 'W' or $prow["tyyppi"] == 'M') {
 					// N‰m‰ ovat valmisteita
 					$valmisteet_chk[$prow["tunnus"]] = $prow["tuoteno"];
+					$tuotenumerot[$prow["tunnus"]] = $prow["tuoteno"];
 				}
 				elseif ($prow["tyyppi"] == 'D') {
 					// N‰m‰ ovat jo valmistettu
@@ -2328,8 +2329,6 @@ if (!function_exists("jalkilaske_valmistus")) {
 						$tuotenumerot[$prow["tunnus"]] = $prow["tuoteno"];
 					}
 				}
-
-				$tuotenumerot[$prow["tunnus"]] = $prow["tuoteno"];
 
 				if ($toim == "KORJAA" and  $prow["tyyppi"] == 'V') {
 					$edtilkpllat[$prow["tunnus"]] = $prow["korjataan"];
@@ -2344,17 +2343,19 @@ if (!function_exists("jalkilaske_valmistus")) {
 					$tilkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
 				}
 
-				if ($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] != "0000-00-00 00:00:00" and $toim == "KORJAA") {
+				if (($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] != "0000-00-00 00:00:00" and $toim == "KORJAA") {
+
 					//tutkitaan kuinka paljon t‰t‰ nyt oli valmistettu
 					$query = "	SELECT sum(kpl) valmistetut
 								FROM tilausrivi
 								WHERE yhtio	= '$kukarow[yhtio]'
 								and otunnus = '$prow[otunnus]'
 								and perheid = '$prow[perheid]'
+								and tuoteno = '$prow[tuoteno]'
 								and tyyppi	= 'D'
 								and toimitettuaika = '0000-00-00 00:00:00'";
 					$sumres = mysql_query($query) or pupe_error($query);
-					$sumrow = mysql_fetch_assoc($sumres);
+					$sumrow = mysql_fetch_array($sumres);
 
 					$query = "	SELECT count(*) laskuja
 								FROM lasku
@@ -2363,27 +2364,42 @@ if (!function_exists("jalkilaske_valmistus")) {
 								and tila 	= 'U'
 								and alatila	= 'X'";
 					$slres = mysql_query($query) or pupe_error($query);
-					$slrow = mysql_fetch_assoc($slres);
+					$slrow = mysql_fetch_array($slres);
 
-					if ($sumrow["valmistetut"] != 0 and $slrow["laskuja"] == 0) {
-						if ((float) $prow["valmistetaan"] > 0) {
-							$valmkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
-						}
-						else {
-							$valmkpllat[$prow["tunnus"]] = $sumrow["valmistetut"];
-						}
+					if ($prow["tunnus"] == $prow["perheid"]) {
+						if ($sumrow["valmistetut"] != 0 and $slrow["laskuja"] == 0) {
 
-						$voikokorjata++;
+							if ((float) $prow["valmistetaan"] > 0) {
+								$valmkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
+							}
+							else {
+								$valmkpllat[$prow["tunnus"]] = $sumrow["valmistetut"];
+							}
+
+							$voikokorjata++;
+						}
+						elseif ($sumrow["valmistetut"] != 0 and $slrow["laskuja"] > 0) {
+
+							if ((float) $prow["valmistetaan"] > 0) {
+								$valmkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
+							}
+							else {
+								$valmkpllat[$prow["tunnus"]] = $sumrow["valmistetut"];
+							}
+
+							$voikokorjata++;
+						}
 					}
-					elseif ($sumrow["valmistetut"] != 0 and $slrow["laskuja"] > 0) {
-						if ((float) $prow["valmistetaan"] > 0) {
-							$valmkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
-						}
-						else {
-							$valmkpllat[$prow["tunnus"]] = $sumrow["valmistetut"];
-						}
+					else {
+						if (($sumrow["valmistetut"] != 0 and $slrow["laskuja"] == 0) or ($sumrow["valmistetut"] != 0 and $slrow["laskuja"] > 0)) {
 
-						$voikokorjata++;
+							if ((float) $prow["valmistetaan"] > 0) {
+								$valmkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
+							}
+							else {
+								$valmkpllat[$prow["tunnus"]] = $sumrow["valmistetut"];
+							}
+						}
 					}
 				}
 

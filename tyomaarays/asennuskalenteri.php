@@ -592,7 +592,9 @@
 							if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus,
 							if(lasku.nimi='', kalenteri.kuka, lasku.nimi) nimi,
 							if(tyomaarays.komm1='' or tyomaarays.komm1 is null, kalenteri.kentta01, tyomaarays.komm1) komm1,
-							tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus, kalenteri.konserni, a2.selitetark_2 tyostatusvari
+							tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus, 
+							lasku.nimi, lasku.toim_nimi,
+							kalenteri.konserni, a2.selitetark_2 tyostatusvari
 							FROM kalenteri
 							LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
 							LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and lasku.tunnus=kalenteri.liitostunnus and lasku.tunnus > 0
@@ -646,12 +648,16 @@
 
 										if ($vrow["tyyppi"] == "asennuskalenteri") {
 											echo t("Työmääräys").": $vrow[liitostunnus]";
+											echo "<br>".t("Asiakas").": $vrow[nimi] $vrow[toim_nimi]";
 										}
 										else {
 											echo t("Kalenterimerkintä").": $vrow[tapa]";
 										}
 
-										echo "<br><br>",t("Tilausviite"),": $vrow[viesti]<br><br>".str_replace("\n", "<br>", t("Työn kuvaus").": ".$vrow["komm1"]."<br>".t("Toimenpiteet").": ".$vrow["komm2"]);
+										if (trim($vrow["viesti"]) != "") echo "<br><br>",t("Tilausviite"),": $vrow[viesti]";
+										if (trim($vrow["komm1"]) != "") echo "<br><br>",t("Työn kuvaus").": ".str_replace("\n", "<br>", $vrow["komm1"]);
+										if (trim($vrow["komm2"]) != "") echo "<br>".t("Toimenpiteet").": ".str_replace("\n", "<br>", $vrow["komm2"]);
+										
 										echo "</div>";
 									}
 

@@ -5024,8 +5024,8 @@ if (!function_exists("js_popup")) {
 	    this.each(function() {
 
 	        $(this).mousemove(function(e){
-				var x = getMouseX(e) + 40;
-				var y = getMouseY(e);
+				var x = getMouseX(e) + 20;
+				var y = getMouseY(e) + 20;
 
 				// get content id from element and fetch text from the div
 				var content_id = $(this).attr('id');

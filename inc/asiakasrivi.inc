@@ -618,7 +618,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "lisakulu") {
+	if (mysql_field_name($result, $i) == "laskutuslisa") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 

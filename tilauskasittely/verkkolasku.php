@@ -291,7 +291,7 @@
 			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti ep‰onnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ";
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ";
 			$locre = mysql_query($query) or pupe_error($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -916,35 +916,34 @@
 				}
 
 				// katsotaan halutaanko laskuille lis‰t‰ lis‰kulu prosentti
-				if ($yhtiorow["lisakulu_tuotenumero"] != "" and $yhtiorow["lisakulu_prosentti"] > 0 and $yhtiorow["lisakulun_lisays"] != "") {
+				if ($yhtiorow["laskutuslisa_tuotenumero"] != "" and $yhtiorow["laskutuslisa"] > 0 and $yhtiorow["laskutuslisa_tyyppi"] != "") {
 
-					$tulos_ulos .= t("Lis‰t‰‰n laskulle lis‰kulu")."<br>\n";
 					$yhdista = array();
-					$lisakulun_lisays_ehto = "";
+					$laskutuslisa_tyyppi_ehto = "";
 
 					//ei k‰teislaskuihin
-					if ($yhtiorow["lisakulun_lisays"] == 'K') {
+					if ($yhtiorow["laskutuslisa_tyyppi"] == 'B' or $yhtiorow["laskutuslisa_tyyppi"] == 'K') {
 						$query = " 	SELECT tunnus
 									FROM maksuehto
-									WHERE yhtio='$kukarow[yhtio]'
+									WHERE yhtio = '$kukarow[yhtio]'
 									and kateinen != ''";
 						$limaresult = mysql_query($query) or pupe_error($query);
 
 						$lisakulu_maksuehto = array();
+
 						while ($limaksuehtorow = mysql_fetch_array($limaresult)) {
 							$lisakulu_maksuehto[] = $limaksuehtorow["tunnus"];
 						}
 
 						if (count($lisakulu_maksuehto) > 0) {
-							$lisakulun_lisays_ehto = " and lasku.maksuehto not in (".implode(',',$lisakulu_maksuehto).") ";
+							$laskutuslisa_tyyppi_ehto = " and lasku.maksuehto not in (".implode(',',$lisakulu_maksuehto).") ";
 						}
-
 					}
-					elseif ($yhtiorow["lisakulun_lisays"] == 'N') {
+					elseif ($yhtiorow["laskutuslisa_tyyppi"] == 'C' or $yhtiorow["laskutuslisa_tyyppi"] == 'K') {
 						//ei noudolle
 						$query = " 	SELECT selite
 									FROM toimitustapa
-									WHERE yhtio='$kukarow[yhtio]'
+									WHERE yhtio = '$kukarow[yhtio]'
 									and nouto != ''";
 						$toimitusresult = mysql_query($query) or pupe_error($query);
 
@@ -955,9 +954,8 @@
 						}
 
 						if (count($lisakulu_toimitustapa) > 0) {
-							$lisakulun_lisays_ehto = " and lasku.toimitustapa not in (".implode(',',$lisakulu_toimitustapa).") ";
+							$laskutuslisa_tyyppi_ehto = " and lasku.toimitustapa not in (".implode(',',$lisakulu_toimitustapa).") ";
 						}
-
 					}
 
 					// Tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kun alhaalla) rivi ~1100
@@ -967,7 +965,7 @@
 								where lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tunnus in ($tunnukset)
 								and lasku.ketjutus = ''
-								$lisakulun_lisays_ehto
+								$laskutuslisa_tyyppi_ehto
 								GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
 								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
@@ -986,69 +984,130 @@
 								where yhtio = '$kukarow[yhtio]'
 								and tunnus in ($tunnukset)
 								and ketjutus != ''
-								$lisakulun_lisays_ehto";
+								$laskutuslisa_tyyppi_ehto";
 					$result = mysql_query($query) or pupe_error($query);
 
 					while ($row = mysql_fetch_array($result)) {
 						$yhdista[] = $row["tunnus"];
 					}
 
-					// haetaan lis‰kulu-tuotteen tiedot
+					// haetaan laskutuslisa_tuotenumero-tuotteen tiedot
 					$query = "	SELECT *
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
-								AND tuoteno = '$yhtiorow[lisakulu_tuotenumero]'";
+								AND tuoteno = '$yhtiorow[laskutuslisa_tuotenumero]'";
 					$rhire = mysql_query($query) or pupe_error($query);
 					$trow  = mysql_fetch_array($rhire);
 
 					foreach ($yhdista as $otsikot) {
-						//haetaan ekan otsikon tiedot
-						$query = "	SELECT lasku.*
-									FROM lasku
-									WHERE lasku.yhtio = '$kukarow[yhtio]'
-									AND lasku.tunnus in ($otsikot)
-									ORDER BY lasku.tunnus
-									LIMIT 1";
-						$otsre = mysql_query($query) or pupe_error($query);
-						$laskurow = mysql_fetch_array($otsre);
-
-						$query = "	SELECT *
-									FROM asiakas
+						// Tsekataan, ett‰ laskutuslis‰‰ ei ole jo lis‰tty k‰sin
+						$query = "	SELECT tunnus, hinta
+									FROM tilausrivi
 									WHERE yhtio = '$kukarow[yhtio]'
-									AND	tunnus = '$laskurow[liitostunnus]'";
-						$aslisakulres = mysql_query($query) or pupe_error($query);
-						$aslisakulrow = mysql_fetch_array($aslisakulres);
+									and otunnus in ($otsikot)
+									and tuoteno = '$trow[tuoteno]'
+									and tyyppi = 'L'";
+						$listilre = mysql_query($query) or pupe_error($query);
 
-						if (mysql_num_rows($otsre) == 1 and mysql_num_rows($rhire) == 1 and $aslisakulrow['lisakulu'] == '') {
-							// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa!)
-							$query = "	SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) *
-													if (tilausrivi.netto = 'N', (1 - tilausrivi.ale / 100), (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100))
-												) laskun_loppusumma
-										FROM tilausrivi
-										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-										and tilausrivi.tyyppi = 'L'
-										and tilausrivi.otunnus in ($otsikot)";
-							$listilre = mysql_query($query) or pupe_error($query);
-							$listilro = mysql_fetch_array($listilre);
+						if (mysql_num_rows($listilre) == 0) {
+							//haetaan ekan otsikon tiedot
+							$query = "	SELECT lasku.*
+										FROM lasku
+										WHERE lasku.yhtio = '$kukarow[yhtio]'
+										AND lasku.tunnus in ($otsikot)
+										ORDER BY lasku.tunnus
+										LIMIT 1";
+							$otsre = mysql_query($query) or pupe_error($query);
+							$laskurow = mysql_fetch_array($otsre);
 
-							$hinta = $listilro["laskun_loppusumma"] * $yhtiorow["lisakulu_prosentti"] / 100;
-							$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
-							$otunnus = $laskurow['tunnus'];
+							$query = "	SELECT *
+										FROM asiakas
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND	tunnus = '$laskurow[liitostunnus]'";
+							$aslisakulres = mysql_query($query) or pupe_error($query);
+							$aslisakulrow = mysql_fetch_array($aslisakulres);
 
-							list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
-							list($lkhinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
+							if (mysql_num_rows($otsre) == 1 and mysql_num_rows($rhire) == 1 and $aslisakulrow['laskutuslisa'] == '') {
+								if ($yhtiorow["laskutuslisa_tyyppi"] == 'L' or $yhtiorow["laskutuslisa_tyyppi"] == 'K' or $yhtiorow["laskutuslisa_tyyppi"] == 'N') {
+									// Prosentuaalinen laskutuslis‰
+									// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa!)
+									$query = "	SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * if (tilausrivi.netto = 'N', (1 - tilausrivi.ale / 100), (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100))) laskun_loppusumma
+												FROM tilausrivi
+												JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+												WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+												and tilausrivi.tyyppi = 'L'
+												and tilausrivi.otunnus in ($otsikot)";
+									$listilre = mysql_query($query) or pupe_error($query);
+									$listilro = mysql_fetch_array($listilre);
 
-							$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv)
-										VALUES ('$lkhinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$trow[nimitys]', '$kukarow[yhtio]', 'L', '$alv')";
-							$addtil = mysql_query($query) or pupe_error($query);
+									$hinta = $listilro["laskun_loppusumma"] * $yhtiorow["laskutuslisa"] / 100;
+								}
+								else {
+									// Raham‰‰r‰inen laskutulis‰
+									$hinta = $yhtiorow["laskutuslisa"];
+								}
 
-							if ($silent == "") {
-								$tulos_ulos .= t("Lis‰ttiin lis‰kuluja")." $laskurow[tunnus]: $lkhinta $laskurow[valkoodi]<br>\n";
+								$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+								list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+								list($lkhinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
+
+								// lis‰t‰‰n puuterivi
+								$query = "	INSERT into tilausrivi set
+											hyllyalue 		= '',
+											hyllynro 		= '',
+											hyllyvali 		= '',
+											hyllytaso 		= '',
+											tilaajanrivinro = '',
+											laatija 		= '$kukarow[kuka]',
+											laadittu 		= now(),
+											yhtio 			= '$kukarow[yhtio]',
+											tuoteno 		= '$trow[tuoteno]',
+											varattu 		= '1',
+											yksikko 		= '$trow[yksikko]',
+											kpl 			= '0',
+											kpl2			= '0',
+											tilkpl 			= '1',
+											jt				= '0',
+											ale 			= '0',
+											alv 			= '$alv',
+											netto			= 'N',
+											hinta 			= '$lkhinta',
+											kerayspvm 		= now(),
+											otunnus 		= '$laskurow[tunnus]',
+											tyyppi 			= 'L',
+											toimaika 		= now(),
+											kommentti 		= '',
+											var 			= '',
+											try				= '$trow[try]',
+											osasto			= '$trow[osasto]',
+											perheid			= '',
+											perheid2		= '',
+											nimitys 		= '$trow[nimitys]',
+											jaksotettu		= '',
+											kerattyaika 	= now()";
+								$addtil = mysql_query($query) or pupe_error($query);
+								$lisatty_tun = mysql_insert_id();
+
+								$query = "	INSERT INTO tilausrivin_lisatiedot
+											SET yhtio			= '$kukarow[yhtio]',
+											positio 			= '',
+											tilausrivilinkki	= '',
+											toimittajan_tunnus	= '',
+											tilausrivitunnus	= '$lisatty_tun',
+											jarjestys			= '',
+											vanha_otunnus		= '$laskurow[tunnus]',
+											ei_nayteta			= '',
+											luontiaika			= now(),
+											laatija 			= '$kukarow[kuka]'";
+								$addtil = mysql_query($query) or pupe_error($query);
+
+								if ($silent == "") {
+									$tulos_ulos .= t("Lis‰ttiin lis‰kuluja")." $laskurow[tunnus]: $lkhinta $laskurow[valkoodi]<br>\n";
+								}
 							}
-						}
-						else {
-							$tulos_ulos .= t("Lis‰kulua ei voitu lis‰t‰")." $laskurow[tunnus]!<br>\n";
+							else {
+								$tulos_ulos .= t("Lis‰kulua ei voitu lis‰t‰")." $laskurow[tunnus]!<br>\n";
+							}
 						}
 					}
 				}

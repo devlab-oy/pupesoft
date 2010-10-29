@@ -266,11 +266,11 @@ if ($tee_kululaskut == "poista") {
 if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kesken"] > 0) {
 	$query 	= "	SELECT *
 				FROM tuote
-				WHERE tuoteno = '$yhtiorow[lisakulu_tuotenumero]' and yhtio = '$kukarow[yhtio]'";
+				WHERE tuoteno = '$yhtiorow[laskutuslisa_tuotenumero]' and yhtio = '$kukarow[yhtio]'";
 	$tuoteres = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($tuoteres) != 1) {
-		echo t("VIRHE: Yhtiön lisakulu_tuotenumero ei ole määritelty")."!!<br>";
+		echo t("VIRHE: Yhtiön laskutuslisa_tuotenumero ei ole määritelty")."!!<br>";
 		$tee_kululaskut = "";
 	}
 }

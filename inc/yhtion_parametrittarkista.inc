@@ -23,7 +23,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
 		if (mysql_field_name($result, $i) == "maksuehto_tuotenumero" OR
 		    mysql_field_name($result, $i) == "rahti_tuotenumero" OR
 		    mysql_field_name($result, $i) == "jalkivaatimus_tuotenumero" OR
-		    mysql_field_name($result, $i) == "lisakulu_tuotenumero" OR
+		    mysql_field_name($result, $i) == "laskutuslisa_tuotenumero" OR
 		    mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero" OR
 		    mysql_field_name($result, $i) == "alennus_tuotenumero" OR
 			mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero") {

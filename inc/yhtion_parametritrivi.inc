@@ -1953,9 +1953,9 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-	}
+	} 
 
-	if (mysql_field_name($result, $i) == "lisakulun_lisays") {
+	if (mysql_field_name($result, $i) == "laskutuslisa_tyyppi") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -1964,10 +1964,13 @@
 		$sel[$apu] = "selected";
 
 		/*1) lis‰kulu kaikkiin laskuihin 2) kaikki paitsi k‰teinen 3) kaikki paitsi nouto.*/
-		$ulos .= "<option value = ''>".t("Ei lis‰t‰")."</option>";
-		$ulos .= "<option value = 'L' $sel[L]>".t("Lis‰kulu kaikkiin laskuihin")."</option>";
-		$ulos .= "<option value = 'K' $sel[K]>".t("Kaikkiin paitsi k‰teislaskuihin")."</option>";
-		$ulos .= "<option value = 'N' $sel[N]>".t("Kaikkiin paitsi Noutolaskuihin")."</option>";
+		$ulos .= "<option value = ''>".t("Ei laskutuslis‰‰")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("Laskutuslis‰ lis‰t‰‰n kaikkiin laskuihin")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("Laskutuslis‰ lis‰t‰‰n kaikkiin paitsi k‰teislaskuihin")."</option>";
+		$ulos .= "<option value = 'C' $sel[C]>".t("Laskutuslis‰ lis‰t‰‰n kaikkiin paitsi Noutolaskuihin")."</option>";		
+		$ulos .= "<option value = 'L' $sel[L]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin laskuihin")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin paitsi k‰teislaskuihin")."</option>";
+		$ulos .= "<option value = 'N' $sel[N]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin paitsi Noutolaskuihin")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

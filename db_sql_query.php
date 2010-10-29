@@ -90,7 +90,7 @@
 				$tuotteen_avainsanat 	= FALSE;
 				$clean_kentta 			= $kentta;
 
-				if (substr($kentta, 0, 19) == "tuotteen_avainsanat") {
+				if ($table == "tuote" and substr($kentta, 0, 19) == "tuotteen_avainsanat") {
 					$kentta 				= str_replace("tuotteen_avainsanat.", "", $kentta);
 					list($kentta, $kieli) 	= explode(":", $kentta);
 					$taulunimi 				= "tuotteen_avainsanat_{$kentta}_{$kieli}";

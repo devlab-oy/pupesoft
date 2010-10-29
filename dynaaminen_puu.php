@@ -234,18 +234,17 @@ $query = "SELECT
 					// tulostaa pääkategorian viereen tyhjän ruuduun niin nöyttää paremmalta.
 				}
 				else {
-					if ($row['node_koodi'] == 0) {$row['node_koodi']='';}
-					echo "\n<td nowrap rowspan='",lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow)+1,"'>",$row['node_koodi'] ,' ',str_replace(' # ', '<br />',  ucwords(strtolower(str_replace('/', ' # ', $row['node_nimi']))));
-
-					// jos arrayn joku sisältö vastaa vastaa node_tunnusta, tulostetaan check-boxiin rasti, muussa tapauksessa tulostetaan tyhjä boksi
+					if ($row['node_koodi'] == 0) {
+						$row['node_koodi']='';
+					}
 
 					$check = '';
-					if (in_array($row['node_tunnus'],$Xnodet)) {
+					if (in_array($row['node_tunnus'], $Xnodet)) {
 						$check = ' checked';
 					}
 
-					echo "<br /><input type='checkbox' name='id[]' value='{$row[node_tunnus]}' $check />";
-					echo "</td></tr>";
+					// jos arrayn joku sisältö vastaa vastaa node_tunnusta, tulostetaan check-boxiin rasti, muussa tapauksessa tulostetaan tyhjä boksi
+					echo "\n<td rowspan='",lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow)+1,"'><input type='checkbox' name='id[]' value='{$row[node_tunnus]}' $check />&nbsp;",$row['node_koodi'] ,' ',ucwords(strtolower(str_replace('/', ', ', $row['node_nimi']))),"</td></tr>";
 
 				}
 			}

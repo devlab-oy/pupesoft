@@ -263,11 +263,11 @@
 
 			if (trim($kaikki_tunnukset) != '') {
 				$query = "	SELECT DISTINCT tuote.tuoteno, tuote.nimitys
-							FROM tuotteen_alkio
-							JOIN tuote ON (tuote.yhtio = tuotteen_alkio.yhtio AND tuote.tuoteno = tuotteen_alkio.tuoteno AND tuote.status != 'P')
-							WHERE tuotteen_alkio.yhtio = '{$kukarow['yhtio']}'
-							AND tuotteen_alkio.laji = 'tuote'
-							AND tuotteen_alkio.selite IN ($kaikki_tunnukset)";
+							FROM puun_alkio
+							JOIN tuote ON (tuote.yhtio = puun_alkio.yhtio AND tuote.tuoteno = puun_alkio.liitos AND tuote.status != 'P')
+							WHERE puun_alkio.yhtio = '{$kukarow['yhtio']}'
+							AND puun_alkio.laji = 'tuote'
+							AND puun_alkio.puun_tunnus IN ($kaikki_tunnukset)";
 			}
 			else {
 				$query = "	SELECT tuoteno, nimitys

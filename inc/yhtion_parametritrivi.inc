@@ -1953,7 +1953,7 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-	} 
+	}
 
 	if (mysql_field_name($result, $i) == "laskutuslisa_tyyppi") {
 
@@ -1967,10 +1967,10 @@
 		$ulos .= "<option value = ''>".t("Ei laskutuslis‰‰")."</option>";
 		$ulos .= "<option value = 'A' $sel[A]>".t("Laskutuslis‰ lis‰t‰‰n kaikkiin laskuihin")."</option>";
 		$ulos .= "<option value = 'B' $sel[B]>".t("Laskutuslis‰ lis‰t‰‰n kaikkiin paitsi k‰teislaskuihin")."</option>";
-		$ulos .= "<option value = 'C' $sel[C]>".t("Laskutuslis‰ lis‰t‰‰n kaikkiin paitsi Noutolaskuihin")."</option>";		
+		$ulos .= "<option value = 'C' $sel[C]>".t("Laskutuslis‰ lis‰t‰‰n kaikkiin paitsi noutolaskuihin")."</option>";
 		$ulos .= "<option value = 'L' $sel[L]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin laskuihin")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin paitsi k‰teislaskuihin")."</option>";
-		$ulos .= "<option value = 'N' $sel[N]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin paitsi Noutolaskuihin")."</option>";
+		$ulos .= "<option value = 'N' $sel[N]>".t("Prosentuaalinen laskutuslis‰ lis‰t‰‰n kaikkiin paitsi noutolaskuihin")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

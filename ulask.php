@@ -212,55 +212,8 @@ if ($tee == 'I') {
 
 		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
 
-		$a = getimagesize($skannattu_lasku);
-
-		$data 			= mysql_real_escape_string(file_get_contents($skannatut_laskut_polku.$skannattu_lasku));
-		$filename		= mysql_real_escape_string($skannattu_lasku);
-		$filetype		= mysql_real_escape_string($a["mime"]);
-		$filesize		= mysql_real_escape_string(filesize($skannatut_laskut_polku.$skannattu_lasku));
-		$image_width 	= "";
-		$image_height 	= "";
-		$image_bits 	= "";
-		$image_channels	= "";
-		$filetype 		= "application/pdf";
-		$liitos 		= 'lasku';
-		$liitostunnus   = 0;
-		$kayttotarkoitus = '';
-
-		if ($kieli == "") {
-			$kieli = $yhtiorow["kieli"];
-		}
-
-		$query = "	SELECT max(jarjestys) jarjestys
-					FROM liitetiedostot
-					WHERE yhtio 		= '$kukarow[yhtio]'
-					and liitos   		= '$liitos'
-					and liitostunnus 	= '$liitostunnus'";
-		$result = mysql_query($query) or pupe_error($query);
-		$row = mysql_fetch_assoc($result);
-
-		$jarjestys = $row["jarjestys"]+1;
-
-		$query = "	INSERT INTO liitetiedostot SET
-				  	yhtio    		= '$kukarow[yhtio]',
-				  	liitos   		= '$liitos',
-				  	liitostunnus 	= '$liitostunnus',
-				  	data     		= '$data',
-				  	selite   		= trim('$selite'),
-					kieli			= '$kieli',
-				  	filename 		= '$filename',
-				  	filesize 		= '$filesize',
-				  	filetype 		= '$filetype',
-				  	image_width		= '$image_width',
-				  	image_height	= '$image_height',
-				  	image_bits		= '$image_bits',
-				  	image_channels	= '$image_channels',
-				  	kayttotarkoitus	= '$kayttotarkoitus',
-				  	jarjestys		= '$jarjestys',
-				  	laatija			= '$kukarow[kuka]',
-				  	luontiaika		= now()";
-		$result = mysql_query($query) or pupe_error($query);
-		$kuva = mysql_insert_id();
+		// lis‰t‰‰n kuva
+		$kuva = tallenna_liite($skannatut_laskut_polku.$skannattu_lasku, "lasku", 0, '');
 	}
 
 	if (isset($toitilinumero)) {

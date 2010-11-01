@@ -448,10 +448,24 @@
 						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
 					}
 					else {
-						echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
-						echo "<td>".tv1dateconv($trow["mapvm"])."</td>";
-						echo "<td>".tv1dateconv($trow["olmapvm"])."</td>";
-						echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
+						
+						if ($trow["tapvm"] == "0000-00-00") {
+							$trow["tapvm"] = "";
+						}
+						if ($trow["mapvm"] == "0000-00-00") {
+							$trow["mapvm"] = "";
+						}
+						if ($trow["olmapvm"] == "0000-00-00") {
+							$trow["olmapvm"] = "";
+						}
+						if ($trow["erpcm"] == "0000-00-00") {
+							$trow["erpcm"] = "";
+						}
+						
+						echo "<td>$trow[tapvm]</td>";
+						echo "<td>$trow[mapvm]</td>";
+						echo "<td>$trow[olmapvm]</td>";
+						echo "<td>$trow[erpcm]</td>";
 					}
 
 					if ($valuutassako == "V") {
@@ -744,9 +758,20 @@
 						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
 					}
 					else {
-						echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
-						echo "<td>".tv1dateconv($trow["mapvm"])."</td>";
-						echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
+						
+						if ($trow["tapvm"] == "0000-00-00") {
+							$trow["tapvm"] = "";
+						}
+						if ($trow["mapvm"] == "0000-00-00") {
+							$trow["mapvm"] = "";
+						}
+						if ($trow["erpcm"] == "0000-00-00") {
+							$trow["erpcm"] = "";
+						}
+												
+						echo "<td>$trow[tapvm]</td>";
+						echo "<td>$trow[mapvm]</td>";
+						echo "<td>$trow[erpcm]</td>";
 					}
 
 					$summatotal += $trow['tiliointiavoinsaldo'];
@@ -833,7 +858,7 @@
 
 					echo "<td>$trow[nimi_maksaja]</td>";
 					echo "<td>$trow[viite]</td>";
-					echo "<td>".tv1dateconv($trow["kirjpvm"])."</td>";
+					echo "<td>$trow[kirjpvm]</td>";
 					echo "<td></td>";
 					echo "<td></td>";
 

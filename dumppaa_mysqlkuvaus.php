@@ -89,7 +89,7 @@
 			foreach ($rivit as $rivi) {
 				$rivi = str_replace("\n", " ", $rivi);
 
-				echo "echo \"$rivi;\" | mysql -u $dbuser --password=$dbpass $dbkanta;\r\n";
+				echo "echo \"$rivi;\" | mysql -u $dbuser --password=$dbpass $dbkanta;\n";
 			}
 		}
 

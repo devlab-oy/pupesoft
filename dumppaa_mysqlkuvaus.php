@@ -87,9 +87,10 @@
 			$rivit = explode(";", trim($result));
 
 			foreach ($rivit as $rivi) {
-				$rivi = str_replace("\n", " ", $rivi);
-
-				echo "echo \"$rivi;\" | mysql -u $dbuser --password=$dbpass $dbkanta;\n";
+				$rivi = trim(str_replace("\n", " ", $rivi));
+				if ($rivi != "") {
+					echo "echo \"$rivi;\" | mysql -u $dbuser --password=$dbpass $dbkanta;\n";
+				}
 			}
 		}
 

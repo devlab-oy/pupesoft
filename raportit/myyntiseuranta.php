@@ -19,7 +19,7 @@
 		if(!aja_kysely()) {
 			unset($_POST);
 		}
-
+ 
 		// käytetään slavea
 		$useslave = 1;
 		require ("inc/connect.inc");
@@ -632,7 +632,7 @@
 				}
 
 				if ($toimittaja != "") {
-					$query = "SELECT tuoteno from tuotteen_toimittajat where yhtio in ($yhtio) and toimittaja='$toimittaja'";
+					$query = "SELECT tuoteno from tuotteen_toimittajat where yhtio in ($yhtio) and liitostunnus='$toimittajaid'";
 					$result = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($result) > 0) {

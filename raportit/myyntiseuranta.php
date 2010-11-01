@@ -496,7 +496,7 @@
 					if ($mukaan == "toimittaja") {
 						if ($group!="") $group .= ",toimittaja";
 						else $group  .= "toimittaja";
-						$select .= "(select group_concat(distinct toimittaja) from tuotteen_toimittajat use index (yhtio_tuoteno) where tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno) toimittaja, ";
+						$select .= "(select group_concat(distinct tuotteen_toimittajat.liitostunnus) from tuotteen_toimittajat use index (yhtio_tuoteno) where tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno) toimittaja, ";
 						$order  .= "toimittaja,";
 						$gluku++;
 					}
@@ -1249,9 +1249,9 @@
 								if (mysql_field_name($result, $i) == "toimittaja") {
 									// fixataan mysql 'in' muotoon
 									$toimittajat = "'".str_replace(",","','",$row[$i])."'";
-									$query = "	SELECT group_concat(concat_ws('/',ytunnus,nimi)) nimi
+									$query = "	SELECT group_concat(concat_ws(' / ',ytunnus,nimi)) nimi
 												FROM toimi
-												WHERE yhtio in ($yhtio) and ytunnus in ($toimittajat)";
+												WHERE yhtio in ($yhtio) and tunnus in ($toimittajat)";
 									$osre = mysql_query($query) or pupe_error($query);
 									if (mysql_num_rows($osre) == 1) {
 										$osrow = mysql_fetch_array($osre);

@@ -118,7 +118,7 @@ if (count($kieli) > 0) {
 	$query .= " from sanakirja ";
 
 
-	if (($etsi_kieli != '' and isset($hakusana) and $hakusana != '') or $show == 'empty') {
+	if (($etsi_kieli != '' and isset($hakusana) and trim($hakusana) != '') or $show == 'empty') {
 		$query .= " where ";
 	}
 
@@ -148,7 +148,7 @@ if (count($kieli) > 0) {
 
 	if ($show == "empty") {
 
-		if ($etsi_kieli != '') {
+		if ($etsi_kieli != '' and (isset($hakusana) and $hakusana != '')) {
 			$query .= " and ";
 		}
 

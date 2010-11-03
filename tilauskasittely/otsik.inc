@@ -2566,7 +2566,21 @@
 			$jaksres = mysql_query($jaksquery) or pupe_error($jaksquery);
 			$jaksrow = mysql_fetch_assoc($jaksres);
 
-			$maksuehto = $jaksrow["tunnus"]; // valitaan t‰‰ maksuehdoks
+			// Tutkitaan laskun maksupositio siirretty jo laskutukseen
+			$jaksotettu_check_query = "	SELECT maksuehto
+										FROM maksupositio
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND uusiotunnus = '$kukarow[kesken]'";
+			$maposres = mysql_query($jaksotettu_check_query) or pupe_error($jaksotettu_check_query);
+
+			// Jos on, t‰‰ll‰ pit‰‰ olla jo oikea maksuehto, ei 'jaksotettu' -maksuehto
+			if (mysql_num_rows($maposres) > 0) {
+				$maposrow = mysql_fetch_array($maposres);
+				$maksuehto = $maposrow["maksuehto"];
+			}
+			else {
+				$maksuehto = $jaksrow["tunnus"]; // valitaan t‰‰ maksuehdoks
+			}
 		}
 
 		// jos ollaan valittu rahdinmaksajaksi oletus, haetaan oletusmaksaja toimitustavalta

@@ -63,7 +63,7 @@
 						AND node.lft > 1
 						GROUP BY node.lft
 						ORDER BY sub_dee";
-			$count_result = mysql_query($query) or pupe_error($query);
+			$count_result = mysql_query($query, $link) or pupe_error($query);
 
 			while ($count_row = mysql_fetch_assoc($count_result)) {
 				if (!isset(${"mul_".$param.$count_row['sub_dee']})) {

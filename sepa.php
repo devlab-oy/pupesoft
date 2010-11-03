@@ -95,7 +95,12 @@
 //						$OrgId->addChild('EANGLN', '');
 //						$OrgId->addChild('USCHU', '');
 //						$OrgId->addChild('DUNS', '');
+		if ($laskurow["yriti_asiakastunnus"] != 0) {
+						$OrgId->addChild('BkPtyId', $laskurow["yriti_asiakastunnus"]);																	// BankPartyIdentification, Pakollinen kenttä (service code given by Nordea)
+		}
+		else {
 						$OrgId->addChild('BkPtyId', $yhtiorow['ytunnus']);																	// BankPartyIdentification, Pakollinen kenttä (service code given by Nordea)
+		}
 //						$OrgId->addChild('TaxIdNb', '');
 //						$PrtryId = $OrgId->addChild('PrtryId', '');
 //							$PrtryId->addChild('Id', '');
@@ -414,7 +419,7 @@
 	echo "<font class='head'>".t("SEPA-maksuaineisto")."</font><hr>";
 
 	// Haetaan poimitut maksut
-	$haku_query = "	SELECT lasku.*, yriti.iban yriti_iban, yriti.bic yriti_bic
+	$haku_query = "	SELECT lasku.*, yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
 					FROM lasku
 					JOIN valuu ON (valuu.yhtio = lasku.yhtio AND valuu.nimi = lasku.valkoodi)
 					JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
@@ -595,7 +600,7 @@
 
 		// Tehdään netotetut tapahtumat
 		foreach ($netotettava_laskut as $i => $tunnukset) {
-			$query = "	SELECT lasku.*, yriti.iban yriti_iban, yriti.bic yriti_bic
+			$query = "	SELECT lasku.*, yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
 						FROM lasku
 						JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'

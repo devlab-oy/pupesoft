@@ -95,8 +95,8 @@
 //						$OrgId->addChild('EANGLN', '');
 //						$OrgId->addChild('USCHU', '');
 //						$OrgId->addChild('DUNS', '');
-		if ($laskurow["yriti_asiakastunnus"] != 0) {
-						$OrgId->addChild('BkPtyId', $laskurow["yriti_asiakastunnus"]);																	// BankPartyIdentification, Pakollinen kenttä (service code given by Nordea)
+		if ($laskurow["yriti_asiakastunnus"] != "0" and $laskurow["yriti_asiakastunnus"] != "") {
+						$OrgId->addChild('BkPtyId', $laskurow["yriti_asiakastunnus"]);														// BankPartyIdentification, Pakollinen kenttä (service code given by Nordea)
 		}
 		else {
 						$OrgId->addChild('BkPtyId', $yhtiorow['ytunnus']);																	// BankPartyIdentification, Pakollinen kenttä (service code given by Nordea)

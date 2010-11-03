@@ -40,6 +40,22 @@ if (!function_exists("pupe_error")) {
 	}
 }
 
+// mysql queryn echotus kauniisti
+if (!function_exists("query_dump")) {
+	// otetaan parametriksi query
+	function query_dump($query) {
+
+		// trimmataan, tabit, rivinvaihdot ja tuplaspacet pois querystä..
+		$query = trim($query);
+		$query = str_replace("\t", " ",$query);
+		$query = str_replace("\n", "", $query);
+		$query = str_replace("\r", "", $query);
+		$query = ereg_replace("  +", " ", $query);
+
+		echo "\n$query;\n<br><br>";
+	}
+}
+
 if (!function_exists("tv1dateconv")) {
 	function tv1dateconv($date, $pitka = "", $lyhyt = "") {
 

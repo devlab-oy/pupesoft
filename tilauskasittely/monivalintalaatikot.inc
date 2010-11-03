@@ -1244,6 +1244,10 @@
 
 			// jos ei olla valittu mitään monivalintalaatikoista, haetaan dynaamisen puun root-kategoria
 			if (count($laatikot_selected) == 0) {
+				if ($tee_dyna != '') {
+					$kaikki_tunnukset = $kaikki_tunnukset_from_kuka = '';
+				}
+
 				// haetaan dynaamisen puun root-kategorian tunnus
 				$query = "SELECT tunnus FROM dynaaminen_puu WHERE yhtio = '$kukarow[yhtio]' AND laji = '{$tree}' AND lft = 1";
 				$root_cat_res = mysql_query($query, $link) or pupe_error($query);
@@ -1260,15 +1264,18 @@
 
 			$joinlisa = "";
 
+			if (strtolower($tree) == 'tuote') {
+				$joinlisa .= " JOIN puun_alkio ON (puun_alkio.yhtio = subnode.yhtio AND puun_alkio.puun_tunnus = subnode.tunnus AND puun_alkio.laji = subnode.laji) ";
+			}
+
 			if ($autoid != '') {
-				$joinlisa = " join yhteensopivuus_tuote ON (yhteensopivuus_tuote.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote.atunnus IN ($autoid)) ";
+				$joinlisa .= " join yhteensopivuus_tuote ON (yhteensopivuus_tuote.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote.atunnus IN ($autoid)) ";
 			}
 
 			# haetaan kaikki puun tunnukset, joilla on tuotteita linkattu
 			$query = "	SELECT GROUP_CONCAT(DISTINCT subnode.tunnus) tunnukset
 						FROM dynaaminen_puu AS subnode 
 						JOIN dynaaminen_puu AS subparent ON (subparent.tunnus IN (".implode(",", $laatikot_selected).")) 
-						JOIN puun_alkio ON (puun_alkio.yhtio = subnode.yhtio AND puun_alkio.puun_tunnus = subnode.tunnus AND puun_alkio.laji = subnode.laji)
 						$joinlisa
 						WHERE subnode.yhtio = '$kukarow[yhtio]'
 						AND subnode.laji = '{$tree}'
@@ -1293,7 +1300,7 @@
 							WHERE node.tunnus IN ($kaikki_puun_tunnukset_row[tunnukset])
 							AND parent.lft > 1
 							GROUP BY parent.tunnus
-							ORDER BY syvyys, parent.lft";
+							ORDER BY syvyys, node_nimi";
 				$sxresult2 = mysql_query($query, $link) or pupe_error($query);
 
 				$laatikot = array();

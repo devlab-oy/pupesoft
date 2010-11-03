@@ -1658,7 +1658,7 @@
 		}
 	}
 
-	if ($toim == 'muokkaa' and $id == 0 and (string) $id != 'dummy') {
+	if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) $id != 'dummy') {
 
 		echo "<font class='head'>".t("Muokkaa rahtikirjatietoja")."</font><hr>";
 

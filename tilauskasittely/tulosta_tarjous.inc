@@ -1299,7 +1299,7 @@ if (!function_exists('tulosta_tarjous')) {
 		global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista;
 
 		// Haetaan laskun tiedot
-		$query = "	SELECT *, lasku.laatija laatija, lasku.luontiaika luontiaika
+		$query = "	SELECT *, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.muutospvm muutospvm
 					FROM lasku
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'

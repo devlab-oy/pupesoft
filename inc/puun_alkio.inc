@@ -11,4 +11,11 @@ $jarjestys = 'liitos, laji, kieli, puun_tunnus';
 
 $ulisa .= "&toim2=$toim2";
 
+if ($laji == 'asiakas') {
+	$rajauslisa = " and laji = 'asiakas' ";
+}
+else {
+	$rajauslisa = " and laji = 'tuote' ";
+}
+
 ?>

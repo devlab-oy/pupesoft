@@ -17,9 +17,9 @@ if (mysql_field_name($result, $i) == "yhtio") {
 if (mysql_field_name($result, $i) == "laji") {
 
 	$sresult = t_avainsana("DYNAAMINEN_PUU");
-
-	if (isset ($toim2) and strtolower(trim($toim2)) == 'tuote') {
-
+	
+	if (isset ($toim2) and strtolower(trim($toim2)) == 'tuote' OR isset ($toim2) and strtolower(trim($toim2)) == 'asiakas' ) {
+		
 		while ($srow = mysql_fetch_array($sresult)) {
 				
 			if (strtolower(trim($toim2)) == strtolower(trim($srow['selite']))) {
@@ -32,18 +32,25 @@ if (mysql_field_name($result, $i) == "laji") {
 		mysql_data_seek($sresult,0);
 	}
 	else {
-		$sel = array($trow[$i] => "SELECTED");
 
-		$ulos = "<td><select name='$nimi' onchange='submit();'>";
+		if (isset($laji) and trim($laji) != '') {
+			$ulos .= "<td>".ucwords($laji)."<input type='hidden' value='$laji' name='$nimi' /></td>";
+		}
+		else {
+			$sel = array($trow[$i] => "SELECTED");
 
-		$ulos .= "<option value=''>".t('Valitse p‰‰kategoria')."</option>";
+			$ulos = "<td><select name='$nimi' onchange='submit();'>";
+
+			$ulos .= "<option value=''>".t('Valitse p‰‰kategoria')."</option>";
 
 			while ($srow = mysql_fetch_array($sresult)) {
 				$ulos .= "<option value='$srow[selite]' ".$sel[$srow["selite"]].">$srow[selite] $srow[selitetark]</option>";
 			}
 
-		$ulos .= "</select>";
-		$apu['laji'] = $trow[$i];
+			$ulos .= "</select>";
+		}
+
+		$apu['laji'] = (isset($laji) and trim($laji) != '') ? $laji : $trow[$i];
 	}
 		
 	$jatko = 0;
@@ -70,11 +77,21 @@ if (mysql_field_name($result, $i) == "liitos") {
 }
 
 if (mysql_field_name($result, $i) == "puun_tunnus") {
+	
 
 	if ($apu['laji'] != '') {
-		$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno={$apu['ttuoteno']}&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=tuote&mista_tulin={$toim}&toim2={$toim2}' ";
-		$ulos .= "target='main'> ".t('Valitse t‰h‰n puuhun sopivat segmentit')." </a><br />\n";
-		$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]}</td>\n";
+		if($apu['laji'] == strtolower('asiakas')) {
+			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno={$apu['ttuoteno']}&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=asiakas&mista_tulin={$toim}&toim2={$toim2}' ";
+			$ulos .= "target='main'> ".t('Valitse t‰h‰n puuhun sopivat segmentit')." </a><br />\n";
+			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]}</td>\n";
+			
+		}
+		else
+		{
+			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno={$apu['ttuoteno']}&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=tuote&mista_tulin={$toim}&toim2={$toim2}' ";
+			$ulos .= "target='main'> ".t('Valitse t‰h‰n puuhun sopivat segmentit')." </a><br />\n";
+			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]}</td>\n";
+		}
 	}
 	$jatko = 0;
 }

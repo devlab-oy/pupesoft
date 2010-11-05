@@ -6,6 +6,9 @@ GLOBAL $kukarow;
 // pi‰‰ jotenkin ottaa nodesta ne arvot johonkin talteen k‰sittely‰ varten...
 $Xnodet = explode(",",$puun_tunnus);
 
+//echo "<pre>".var_dump($_GET)."</pre>";
+
+
 /// T‰m‰ lis‰‰ tiedot kantaa ja sen j‰lkeen passaa parametrej‰ yllapitoon samaan tuotteeseen mist‰ l‰hdettiin.... toivottavasti..
 if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {
 
@@ -14,36 +17,32 @@ if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {
 	// k‰ytet‰‰n apumuuttujaa vika sille ett‰ saadaan vika pilkku pois...
 	$vika = count($id);
 
-	foreach ($id as $arrayarvo) {
-	
-		if ($v == $vika) {
-			$selitekenttaan .= $arrayarvo;
-		}
-		else {
-			$selitekenttaan .= $arrayarvo.",";
-		}
-		$v++;
-	}
-
 	if ($mista_tulin == 'autodata_tuote') {
 		$toim = $mista_tulin;
 		$tunnus = $ttunnus;
 	}
 	else {
 
-		TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji,$ttunnus);
+		foreach ($id as $selitekenttaan) {TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji,$ttunnus);}
+
+//		TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji,$ttunnus);
 
 		$q2 = "SELECT tunnus from tuote where tuoteno='$tuoteno'";
 		$r2 = mysql_query($q2) or pupe_error($q2);
 		$rivi = mysql_fetch_assoc($r2);
 		$tunnus = $rivi['tunnus'];
 
-		if ($mista_tulin == 'puun_alkio' AND $toim2 == '') {
+		if ($mista_tulin == 'puun_alkio' AND $toim2 == ''){
 			$toim = $mista_tulin;
 			$tunnus = ''; 
-		}
-		else { 
+		} 
+		elseif ($mista_tulin == 'puun_alkio' AND $toim2 == 'asiakas'){
+			$toim = $toim2;
+			$tunnus = $tuoteno;
+		//	echo "Tunnus: ". $tunnus. " ja Toim: ".$toim;
+		} else{ 
 			$toim = $toim;
+			$tunnus = $tuoteno;
 		}
 	}
 	

@@ -901,7 +901,7 @@
 					<input type = 'submit' value = '".t("Näytä poistetut")."'></form>";
 		}
 
-		if ($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") {
+		if ($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") { 
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1013,6 +1013,7 @@
 
 		if (($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") and $oikeurow['paivitys'] == 1) {
 			echo "<tr><form action='yllapito.php?ojarj=$ojarj$ulisa' name='ruksaus' method='post' onSubmit = 'return verifyMulti()'>
+					
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
@@ -1386,7 +1387,7 @@
 
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'asiakasalennus' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
-
+				
 			if (mysql_num_rows($res) > 0) echo "<iframe id='asiakasalennus_iframe' name='asiakasalennus_iframe' src='yllapito.php?toim=asiakasalennus&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'asiakashinta' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
@@ -1403,6 +1404,12 @@
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=asiakkaan_avainsanat&from=yllapito&ohje=off&haku[4]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi like 'puun_alkio%' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
+			$res = mysql_query($queryoik) or pupe_error($queryoik);
+
+			if (mysql_num_rows($res) > 0) echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=asiakas&from=yllapito&ohje=off&haku[1]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]&toim2=asiakas' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+
 		}
 
 		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimi" or $toim == "asiakas")) {

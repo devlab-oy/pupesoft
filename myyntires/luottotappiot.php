@@ -249,7 +249,7 @@ if ($tila == 'N') {
 
 if ($tila == "") {
 
-	pupe_DataTables($pupe_DataTables, 4, 5);
+	pupe_DataTables($pupe_DataTables, 5, 6);
 	
 	$lisa = "";
 	$erachk = "";
@@ -259,7 +259,7 @@ if ($tila == "") {
 		$erachk = "SELECTED"; 
 	}
 
-	$query = "	SELECT *, concat_ws(' ', nimi, nimitark, '<br>', osoite, '<br>', postino, postitp) asiakas, sum(summa-saldo_maksettu) summa, count(*) kpl
+	$query = "	SELECT *, concat_ws(' ', nimi, nimitark, '<br>', osoite, '<br>', postino, postitp) asiakas, sum(summa-saldo_maksettu) summa, count(*) kpl, group_concat(distinct laskunro SEPARATOR '<br>') laskut
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
 				WHERE mapvm		= '0000-00-00'
 				AND tila		= 'U'
@@ -291,6 +291,7 @@ if ($tila == "") {
 			<th>".t("asiakas")."</th>
 			<th>".t("summa")."</th>
 			<th>".t("kpl")."</th>
+			<th>".t("laskut")."</th>
 			<th class='back'></th>
 			</tr>
 			<tr>
@@ -298,6 +299,7 @@ if ($tila == "") {
 			<td><input type='text' name='search_asiakas'></td>
 			<td><input type='text' name='search_summa'></td>
 			<td><input type='text' name='search_kpl'></td>
+			<td><input type='text' name='search_laskut'></td>
 			<td class='back'></td>
 			</tr>
 		</thead>";
@@ -311,6 +313,7 @@ if ($tila == "") {
 		echo "<td>$asiakas[asiakas]</td>";
 		echo "<td align='right'>$asiakas[summa]</td>";
 		echo "<td align='right'>$asiakas[kpl]</td>";
+		echo "<td align='right'>$asiakas[laskut]</td>";
 
 		echo "<td class='back'>
 				<form action = '$PHP_SELF' method = 'post'>

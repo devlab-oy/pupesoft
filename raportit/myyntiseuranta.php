@@ -1,5 +1,25 @@
 <?php
 
+	// katsotaan tuleeko kaikki muuttujat GET:ssa serialisoituna
+	if (isset($_REQUEST['kaikki_parametrit_serialisoituna'])) {
+
+		$kaikki_parametrit_serialisoituna = unserialize(urldecode($_REQUEST['kaikki_parametrit_serialisoituna']));
+		$kaikki_muuttujat_array = array();
+
+		foreach ($kaikki_parametrit_serialisoituna as $parametri_key => $parametri_value) {
+			${$parametri_key} = $parametri_value;
+		
+//			echo $parametri_key.":".$parametri_value."<br>";
+
+			if ($parametri_key != "pupesoft_session" and
+				$parametri_key != "asdlajsd") {
+				$kaikki_muuttujat_array[$parametri_key] = $parametri_value;
+			}
+		}
+	
+		unset($_REQUEST['kaikki_parametrit_serialisoituna']);
+	}
+
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
@@ -16,18 +36,43 @@
 	else {
 		echo "<font class='head'>".t("Myyntiseuranta")."</font><hr>";
 
+		// tehdään kaikista raportin parametreistä yksi muuttuja serialisoimista varten
+
+	//	var_dump($kaikki_parametrit_serialisoituna);
+
+		if (!isset($kaikki_muuttujat_array)) {
+
+			$kaikki_muuttujat_array = array();
+
+			foreach ($_REQUEST as $kaikki_muuttujat_array_key => $kaikki_muuttujat_array_value) {
+				if ($kaikki_muuttujat_array_key != "pupesoft_session" and
+					$kaikki_muuttujat_array_key != "uusi_kysely" and 
+					$kaikki_muuttujat_array_key != "tallenna_muutokset" and
+					$kaikki_muuttujat_array_key != "poista_kysely" and 
+					$kaikki_muuttujat_array_key != "aja_kysely") {
+					$kaikki_muuttujat_array[$kaikki_muuttujat_array_key] = $kaikki_muuttujat_array_value;
+				}
+			}
+		}
+	/**	
+		var_dump($_REQUEST);
+		echo "<br><hr>";
+		var_dump($kaikki_muuttujat_array);
+		**/
 		if(!aja_kysely()) {
-			unset($_POST);
+			unset($_REQUEST);
 		}
  
 		// käytetään slavea
 		$useslave = 1;
 		require ("inc/connect.inc");
 
-		if(count($_POST) > 0) {
+		if(count($_REQUEST) > 0) {
 			if(!function_exists("vararvo")) {
 				function vararvo($tuoteno, $vv, $kk, $pp) {
 					global $kukarow, $yhtiorow;
+
+
 
 					$kehahin = 0;
 
@@ -626,6 +671,8 @@
 					}
 				}
 
+				//  tuote- ja asiakassegmentti ?
+
 				if (is_array($mul_kustp) and count($mul_kustp) > 0) {
 					$sel_kustp = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kustp))."')";
 					$lisa .= " and (asiakas.kustannuspaikka in $sel_kustp or tuote.kustp in $sel_kustp) ";
@@ -955,7 +1002,7 @@
 					$query = substr($query, 0 ,-2);
 				}
 
-				$query .= $tilauslisa3;
+				$query .= $tilauslisa3; /// super kysey
 				$query .= "	FROM lasku use index (yhtio_tila_tapvm)
 							JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
 							JOIN tilausrivi use index ($index) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.$ouusio=lasku.tunnus and tilausrivi.tyyppi=$tyyppi
@@ -1033,7 +1080,7 @@
 				// ja sitten ajetaan itte query
 				if ($query != "") {
 
-					//echo "<pre>$query</pre><br>";
+					//echo "<pre>SUPER ; $query</pre><br>";
 
 					$result = mysql_query($query) or pupe_error($query);
 
@@ -1141,10 +1188,16 @@
 							if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
 
 							// echotaan kenttien sisältö
+							// Jei.... Elikkäs linkkiä loppuun...
+							// testimielessä $urllisa linkitykseen...
+
+
+
 							for ($i=0; $i < mysql_num_fields($result); $i++) {
 
 								// jos kyseessa on tuote
 								if (mysql_field_name($result, $i) == "tuoteno") {
+									
 									$row[$i] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a>";
 								}
 
@@ -1153,8 +1206,51 @@
 									$osre = t_avainsana("ASIAKASOSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
 
+									if ($osrow['selitetark'] != "") {
+										 // if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
+										$kaikki_muuttujat_array["mul_oasiakasosasto"][$i] = $row[$i];
+
+										$kaikki_muuttujat_array["ruksit"][20] = "asiakasryhma";
+									//	$kaikki_muuttujat_array["ruksit"][30] = "";
+
+										if ($kaikki_muuttujat_array["ruksit"][10] == 'asiakasosasto' and isset($ruksit[20])) {
+											$row[$i] = $osrow['selitetark'];
+											
+										}
+										else {
+											$row[$i] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($kaikki_muuttujat_array))."'> ". $osrow['selitetark']."</a>";
+										}
+									}
+								}
+								
+								// jos kyseessa on asiakasryhma, haetaan sen nimi
+								if (mysql_field_name($result, $i) == "asry") {
+									$osre = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
+									$osrow = mysql_fetch_array($osre);
+
 									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
-										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+								
+										$kaikki_muuttujat_array["mul_asiakasryhma"][$i] = $row[$i];
+										$kaikki_muuttujat_array["ruksit"][10] = "asiakasosasto";
+										// $kaikki_muuttujat_array["ruksit"][30] = "piiri";
+
+										if ($ruksit[10] != '' and $ruksit[20] != '' and $ruksit[30] != '') {
+											//echo "1<br>";
+											unset($kaikki_muuttujat_array["ruksit"][30]); 
+											unset($kaikki_muuttujat_array["mul_piiri"]);
+											$kaikki_muuttujat_array["mul_piiri"] = array();										
+
+											$kaikki_muuttujat_array["ruksit"][20] = "asiakasryhma";
+											unset($kaikki_muuttujat_array["mul_asiakasryhma"]);
+											$kaikki_muuttujat_array["mul_asiakasryhma"] = array();										
+										}
+										elseif ($ruksit[10] != '' and $ruksit[20] != '') {
+											//echo "2<br>";
+											$kaikki_muuttujat_array["ruksit"][30] = "piiri";
+										}
+										
+										$row[$i] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($kaikki_muuttujat_array))."'> ". $osrow['selitetark']. "</a>";							
+
 									}
 								}
 
@@ -1164,28 +1260,27 @@
 									$osrow = mysql_fetch_array($osre);
 
 									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
-										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+										$kaikki_muuttujat_array["mul_piiri"][$i] = $row[$i];
+										
+										$row[$i] =  $osrow['selitetark'];
 									}
 								}
 
-								// jos kyseessa on asiakasryhma, haetaan sen nimi
-								if (mysql_field_name($result, $i) == "asry") {
-									$osre = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
-									$osrow = mysql_fetch_array($osre);
 
-									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
-										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-									}
-								}
 
 								// jos kyseessa on tuoteosasto, haetaan sen nimi
 								if (mysql_field_name($result, $i) == "tuos") {
 									$osre = t_avainsana("OSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
-
+									
 									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
-										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+										$kaikki_muuttujat_array["mul_try"] = "";
+										$kaikki_muuttujat_array["mul_osasto"][$i] = $row[$i];
+										$kaikki_muuttujat_array["ruksit"][50] = "tuoteryhma"; 
+										$kaikki_muuttujat_array["ruksit"][80] = "";
+										$row[$i] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($kaikki_muuttujat_array))."'> ". $osrow['selitetark']."</a>";
 									}
+
 								}
 
 								// jos kyseessa on tuoteosasto, haetaan sen nimi
@@ -1194,8 +1289,12 @@
 									$osrow = mysql_fetch_array($osre);
 
 									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
-										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+										$kaikki_muuttujat_array["mul_try"][$i] = $row[$i];
+										$kaikki_muuttujat_array["ruksit"][40] = "osasto";
+										$kaikki_muuttujat_array["ruksit"][80] = "tuote";
+										$row[$i] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($kaikki_muuttujat_array))."'> ". $osrow['selitetark']."</a>"; // linki
 									}
+
 								}
 
 								// jos kyseessa on myyjä, haetaan sen nimi
@@ -1315,7 +1414,7 @@
 
 									if (mysql_num_rows($osre) == 1) {
 										$osrow = mysql_fetch_array($osre);
-										$row[$i] = $osrow['nimi'];
+										$row[$i] = $osrow['nimi']; // voi laittaa linkkiä
 									}
 								}
 
@@ -1722,6 +1821,7 @@
 			if ($ruksit[40]  != '') 	$ruk40chk  	= "CHECKED";
 			if ($ruksit[50]  != '') 	$ruk50chk 	= "CHECKED";
 			if ($ruksit[55]  != '') 	$ruk55chk 	= "CHECKED";
+			if ($ruksit[35]  != '') 	$ruk35chk 	= "CHECKED";
 
 			if ($piirivalinta == 'lasku' or $piirivalinta == '') {
 				$laskuvalintachk  	= "CHECKED";
@@ -1734,7 +1834,8 @@
 			echo "<tr>";
 			echo "<th>".t("Valitse asiakasosastot").":</th>";
 			echo "<th>".t("Valitse asiakasryhmät").":</th>";
-			echo "<th>".t("Valitse asiakaspiirit").":</th></tr>";
+			echo "<th>".t("Valitse asiakaspiirit").":</th>";
+	//		echo "<th>".t("Valitse asiakassegmentit").":</th></tr>";
 
 			echo "<tr>";
 			echo "<td valign='top'>";
@@ -1820,22 +1921,55 @@
 			}
 
 			echo "</select>";
+
+			///***** tähän kohti mahdollisesti asiakas-segmentti
+			/**
+			echo "</td>";
+
+			echo "<td valign='top'>";
+
+			// näytetään asiakas-segmentit
+			$segquery  =  "	SELECT *
+							FROM dynaaminen_puu
+							WHERE laji = 'asiakas'
+							and yhtio = $yhtio
+							and lft > 1";
+
+			$segres = mysql_query($segquery) or pupe_error($segquery);
+
+			echo "<select name='mul_assegmentti[]' multiple='TRUE' size='10' style='width:100%;'>";
+
+			$mul_assegchk = '';
+			if ($mul_assegmentti !="") {
+				if (in_array("PUPEKAIKKIMUUT", $mul_assegmentti)) {
+					$mul_assegchk = 'SELECTED';
+				}
+			}
+			echo "<option value='PUPEKAIKKIMUUT' $mul_assegchk>".t("Ei asiakassegmenttiä")."</option>";
+
+			while ($rivi = mysql_fetch_array($segres)) {
+				$mul_check = '';
+				echo "<option value='$rivi[tunnus]' $mul_check>$rivi[koodi] - $rivi[nimi]</option>";
+			}
+
+			echo "</select>";
+						*/
 			echo "</td>";
 			echo "</tr>";
 			echo "<tr>";
 			echo "<th>".t("Prio").": <input type='text' name='jarjestys[10]' size='2' value='$jarjestys[10]'> ".t("Asiakasosastoittain")." <input type='checkbox' name='ruksit[10]' value='asiakasosasto' $ruk10chk></th>";
 			echo "<th>".t("Prio").": <input type='text' name='jarjestys[20]' size='2' value='$jarjestys[20]'> ".t("Asiakasryhmittäin")." <input type='checkbox' name='ruksit[20]' value='asiakasryhma' $ruk20chk></th>";
-			echo "<th>".t("Prio").": <input type='text' name='jarjestys[30]' size='2' value='$jarjestys[30]'> ".t("Aiakaspiireittäin")." <input type='checkbox' name='ruksit[30]' value='piiri' $ruk30chk></th><tr>";
-			echo "<th colspan='2'></th><th>".t("Piiri")." <input type='radio' name='piirivalinta' value='lasku' $laskuvalintachk>".t("Laskuilta");
-			echo "<input type='radio' name='piirivalinta' value='asiakas' $asiakasvalintachk>".t("Asiakkailta")."</th></tr>";
+			echo "<th>".t("Prio").": <input type='text' name='jarjestys[30]' size='2' value='$jarjestys[30]'> ".t("Asiakaspiireittäin")." <input type='checkbox' name='ruksit[30]' value='piiri' $ruk30chk></th>";
+		//	echo "<th>".t("Prio").": <input type='text' name='jarjestys[35]' size='2' value='$jarjestys[35]'> ".t("Asiakassegmenteittäin")." <input type='checkbox' name='ruksit[35]' value='asiakas_segmentti' $ruk35chk></th>";
+			echo "<tr><th colspan='2'></th><th>".t("Piiri")." <input type='radio' name='piirivalinta' value='lasku' $laskuvalintachk>".t("Laskuilta");
+			echo "<input type='radio' name='piirivalinta' value='asiakas' $asiakasvalintachk>".t("Asiakkailta")."</th>";
+			echo "</tr>";
 			echo "</table><br>\n";
 
-
-
 			echo "<table><tr>";
-
 			echo "<th>".t("Valitse tuoteosastot").":</th>";
-			echo "<th>".t("Valitse tuoteryhmät").":</th></tr>";
+			echo "<th>".t("Valitse tuoteryhmät").":</th>";
+		//	echo "<th>".t("Valitse tuotesegmentit").":</th>";
 
 			echo "<tr>";
 			echo "<td valign='top'>";
@@ -1897,11 +2031,46 @@
 
 			echo "</select>";
 			echo "</td>";
+
+			echo "<td valign='top'>";
+			/**
+			// näytetään asiakas-segmentit
+			$segquery  =  "	SELECT *
+							FROM dynaaminen_puu
+							WHERE dynaaminen_puu.laji = 'tuote'
+							and dynaaminen_puu.yhtio = $yhtio
+							and dynaaminen_puu.lft > 1 ";
+
+			$segres = mysql_query($segquery) or pupe_error($segquery);
+
+			echo "<select name='mul_assegmentti[]' multiple='TRUE' size='10' style='width:100%;'>";
+
+			$mul_assegchk = '';
+			if ($mul_assegmentti !="") {
+				if (in_array("PUPEKAIKKIMUUT", $mul_assegmentti)) {
+					$mul_assegchk = 'SELECTED';
+				}
+			}
+			echo "<option value='PUPEKAIKKIMUUT' $mul_assegchk>".t("Ei asiakassegmenttiä")."</option>";
+
+			while ($rivi = mysql_fetch_array($segres)) {
+				$mul_check = '';
+				echo "<option value='$rivi[tunnus]' $mul_check>$rivi[koodi] - $rivi[nimi]</option>";
+			}
+
+			echo "</select>";
+			echo "</td>";
+			echo "</tr>";
+			**/
+			echo "</td>";
 			echo "</tr>";
 
 			echo "<tr>";
 			echo "<th>".t("Prio").": <input type='text' name='jarjestys[40]' size='2' value='$jarjestys[40]'> ".t("Osastoittain")." <input type='checkbox' name='ruksit[40]' value='osasto' $ruk40chk></th>";
-			echo "<th>".t("Prio").": <input type='text' name='jarjestys[50]' size='2' value='$jarjestys[50]'> ".t("Tuoteryhmittäin")." <input type='checkbox' name='ruksit[50]' value='tuoteryhma' $ruk50chk></th></tr>";
+			echo "<th>".t("Prio").": <input type='text' name='jarjestys[50]' size='2' value='$jarjestys[50]'> ".t("Tuoteryhmittäin")." <input type='checkbox' name='ruksit[50]' value='tuoteryhma' $ruk50chk></th>";
+//			echo "<th>".t("Prio").": <input type='text' name='jarjestys[53]' size='2' value='$jarjestys[53]'> ".t("Tuotesegmenteittäin")." <input type='checkbox' name='ruksit[53]' value='tuotesegmentti' $ruk53chk></th>";
+
+			echo "</tr>";
 
 			echo "</table><br>\n";
 

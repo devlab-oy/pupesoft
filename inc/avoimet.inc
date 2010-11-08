@@ -272,14 +272,14 @@
 							lasku.ytunnus,
 							lasku.valkoodi,
 							group_concat(lasku.comments) comments,
-							concat_ws(' - ', min(lasku.erpcm), max(lasku.erpcm)) erpcm,
-							concat_ws(' - ', min(lasku.mapvm), max(lasku.mapvm)) mapvm,
+							concat_ws(' ', min(lasku.erpcm), max(lasku.erpcm)) erpcm,
+							concat_ws(' ', min(lasku.mapvm), max(lasku.mapvm)) mapvm,
 							max(lasku.nimi) nimi,
-							concat_ws(' - ', min(lasku.olmapvm), max(lasku.olmapvm)) olmapvm,
-							concat_ws(' - ', min(lasku.laskunro), max(lasku.laskunro)) laskunro,
-							concat_ws(' - ', min(lasku.tapvm), max(lasku.tapvm)) tapvm,
+							concat_ws(' ', min(lasku.olmapvm), max(lasku.olmapvm)) olmapvm,
+							concat_ws(' ', min(lasku.laskunro), max(lasku.laskunro)) laskunro,
+							concat_ws(' ', min(lasku.tapvm), max(lasku.tapvm)) tapvm,
 							max(lasku.tunnus) tunnus,
-							concat_ws(' - ', min(concat_ws(' ', viite, viesti)), max(concat_ws(' ', viite, viesti))) maksutieto,
+							concat_ws(' ', min(concat_ws(' ', viite, viesti)), max(concat_ws(' ', viite, viesti))) maksutieto,
 							sum(tiliointi.summa * -1) avoinsaldo,
 							sum(round(lasku.summa * lasku.vienti_kurssi, 2)) laskun_summa,
 							sum(lasku.summa) summa";
@@ -434,39 +434,23 @@
 					echo "</td>";
 					echo "<td>$trow[laskunro]</td>";
 
-					if ($asitoimittain == "AT") {
-						list($ap,$lp) = explode(" - ", $trow["tapvm"]);
-						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
-
-						list($ap,$lp) = explode(" - ", $trow["mapvm"]);
-						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
-
-						list($ap,$lp) = explode(" - ", $trow["olmapvm"]);
-						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
-
-						list($ap,$lp) = explode(" - ", $trow["erpcm"]);
-						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
+					if ($trow["tapvm"] == "0000-00-00" or $trow["tapvm"] == "0000-00-00 0000-00-00") {
+						$trow["tapvm"] = "";
 					}
-					else {
-						
-						if ($trow["tapvm"] == "0000-00-00") {
-							$trow["tapvm"] = "";
-						}
-						if ($trow["mapvm"] == "0000-00-00") {
-							$trow["mapvm"] = "";
-						}
-						if ($trow["olmapvm"] == "0000-00-00") {
-							$trow["olmapvm"] = "";
-						}
-						if ($trow["erpcm"] == "0000-00-00") {
-							$trow["erpcm"] = "";
-						}
-						
-						echo "<td>$trow[tapvm]</td>";
-						echo "<td>$trow[mapvm]</td>";
-						echo "<td>$trow[olmapvm]</td>";
-						echo "<td>$trow[erpcm]</td>";
+					if ($trow["mapvm"] == "0000-00-00" or $trow["mapvm"] == "0000-00-00 0000-00-00") {
+						$trow["mapvm"] = "";
 					}
+					if ($trow["olmapvm"] == "0000-00-00" or $trow["olmapvm"] == "0000-00-00 0000-00-00") {
+						$trow["olmapvm"] = "";
+					}
+					if ($trow["erpcm"] == "0000-00-00" or $trow["erpcm"] == "0000-00-00 0000-00-00") {
+						$trow["erpcm"] = "";
+					}
+					
+					echo "<td>$trow[tapvm]</td>";
+					echo "<td>$trow[mapvm]</td>";
+					echo "<td>$trow[olmapvm]</td>";
+					echo "<td>$trow[erpcm]</td>";
 
 					if ($valuutassako == "V") {
 						// Laskun valuutassa
@@ -586,12 +570,12 @@
 							lasku.ytunnus,
 							lasku.valkoodi,
 							max(lasku.tunnus) tunnus,
-							concat_ws(' - ', min(lasku.erpcm), max(lasku.erpcm)) erpcm,
+							concat_ws(' ', min(lasku.erpcm), max(lasku.erpcm)) erpcm,
 							max(lasku.liitostunnus) liitostunnus,
-							concat_ws(' - ', min(lasku.mapvm), max(lasku.mapvm)) mapvm,
+							concat_ws(' ', min(lasku.mapvm), max(lasku.mapvm)) mapvm,
 							max(concat_ws('<br>', concat(lasku.nimi,' ',lasku.nimitark), concat(lasku.toim_nimi,' ',lasku.toim_nimitark))) nimi,
-							concat_ws(' - ', min(lasku.tapvm), max(lasku.tapvm)) tapvm,
-							concat_ws(' - ', min(lasku.laskunro), max(lasku.laskunro)) maksutieto,
+							concat_ws(' ', min(lasku.tapvm), max(lasku.tapvm)) tapvm,
+							concat_ws(' ', min(lasku.laskunro), max(lasku.laskunro)) maksutieto,
 							sum(lasku.summa-lasku.saldo_maksettu) laskuavoinsaldo,
 							sum(lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa) laskuavoinsaldo_valuutassa,
 							sum(lasku.summa) laskusumma,
@@ -747,32 +731,19 @@
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maksutieto]</td>";
 
-					if ($asitoimittain == "AT") {
-						list($ap,$lp) = explode(" - ", $trow["tapvm"]);
-						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
-
-						list($ap,$lp) = explode(" - ", $trow["mapvm"]);
-						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
-
-						list($ap,$lp) = explode(" - ", $trow["erpcm"]);
-						echo "<td>".tv1dateconv($ap)." - ".tv1dateconv($lp)."</td>";
+					if ($trow["tapvm"] == "0000-00-00" or $trow["tapvm"] == "0000-00-00 0000-00-00") {
+						$trow["tapvm"] = "";
 					}
-					else {
-						
-						if ($trow["tapvm"] == "0000-00-00") {
-							$trow["tapvm"] = "";
-						}
-						if ($trow["mapvm"] == "0000-00-00") {
-							$trow["mapvm"] = "";
-						}
-						if ($trow["erpcm"] == "0000-00-00") {
-							$trow["erpcm"] = "";
-						}
-												
-						echo "<td>$trow[tapvm]</td>";
-						echo "<td>$trow[mapvm]</td>";
-						echo "<td>$trow[erpcm]</td>";
+					if ($trow["mapvm"] == "0000-00-00" or $trow["mapvm"] == "0000-00-00 0000-00-00") {
+						$trow["mapvm"] = "";
 					}
+					if ($trow["erpcm"] == "0000-00-00" or $trow["erpcm"] == "0000-00-00 0000-00-00") {
+						$trow["erpcm"] = "";
+					}
+											
+					echo "<td>$trow[tapvm]</td>";
+					echo "<td>$trow[mapvm]</td>";
+					echo "<td>$trow[erpcm]</td>";
 
 					$summatotal += $trow['tiliointiavoinsaldo'];
 

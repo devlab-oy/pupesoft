@@ -96,7 +96,10 @@
 
 		// Laskun maksutilintarkastus
 		if ($tila == 'T' and strtoupper($trow['maa']) == "FI") {
+
 			$pankkitili = $tili;
+			$ultilno = strtoupper($ultilno);
+			$swift = strtoupper($swift);
 
 			require ("inc/pankkitilinoikeellisuus.php");
 
@@ -108,16 +111,33 @@
 			else {
 				$tili=$pankkitili;
 			}
+
+			// Jos SEPA-maa, tarkistetaan IBAN
+			if (tarkista_sepa($trow['maa']) and tarkista_iban($ultilno) != $ultilno) {
+				echo "<font class='error'>".t("Virheellinen IBAN!")." $ultilno</font><br>";
+				$tee = 'E';
+				$tila = '';
+			}
+
+			// Jos SEPA-maa, tarkistetaan BIC
+			if (tarkista_sepa($trow['maa']) and tarkista_bic($swift) === FALSE) {
+				echo "<font class='error'>".t("Virheellinen BIC!")." $swift</font><br>";
+				$tee = 'E';
+				$tila = '';
+			}
+
 		}
 
 		// Jaaha p‰ivit‰mme maksutilin!
 		if ($tila == 'T') {
 
-			$kommentti = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s.'), tilinumero_print($trow['tilinumero'])) ."<br>" . $trow['comments'];
+			$kommentti = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s.'), tilinumero_print($trow['tilinumero'])." ".$ultilno) ."<br>" . $trow['comments'];
 
 			//P‰ivitet‰‰n lasku
 			$query = "	UPDATE lasku
 						SET tilinumero = '$tili',
+						ultilno = '$ultilno',
+						swift = '$swift',
 						comments = '$kommentti'
 						WHERE tunnus = '$tunnus'
 						and yhtio = '$kukarow[yhtio]'";
@@ -130,7 +150,7 @@
 		// Laskun maksutilintarkastus (ulkomaat)
 		if ($tila == 'TU') {
 
-			if (($ultilno == '') or ($swift == '')) {
+			if ($ultilno == '' or $swift == '') {
 				echo "<font class='error'>".t("IBAN & SWIFT on annettava")."</font><br>";
 				$tee='E';
 				$tila='';
@@ -142,6 +162,21 @@
 			$pankki2 		= strtoupper($pankki2);
 			$pankki3 		= strtoupper($pankki3);
 			$pankki4 		= strtoupper($pankki4);
+
+			// Jos SEPA-maa, tarkistetaan IBAN
+			if (tarkista_sepa($trow['maa']) and tarkista_iban($ultilno) != $ultilno) {
+				echo "<font class='error'>".t("Virheellinen IBAN!")." $ultilno</font><br>";
+				$tee = 'E';
+				$tila = '';
+			}
+
+			// Jos SEPA-maa, tarkistetaan BIC
+			if (tarkista_sepa($trow['maa']) and tarkista_bic($swift) === FALSE) {
+				echo "<font class='error'>".t("Virheellinen BIC!")." $swift</font><br>";
+				$tee = 'E';
+				$tila = '';
+			}
+
 		}
 
 		// Jaaha p‰ivit‰mme maksutilin! (ulkomaat)
@@ -917,7 +952,7 @@
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
 						<tr>
-						<th>".t("Muuta tapahtumapvm")."</th>
+						<th>".t("Tapahtumapvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 						<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 						<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
@@ -936,7 +971,7 @@
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
 						<tr>
-						<th>".t("Muuta tapahtumapvm")."</th>
+						<th>".t("Tapahtumapvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 						<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 						<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
@@ -958,7 +993,7 @@
 							<input type = 'hidden' name='tee' value='M'>
 							<input type = 'hidden' name='tunnus' value='$tunnus'>
 							<tr>
-							<th>".t("Muuta summa")."</th>
+							<th>".t("summa")."</th>
 							<td><input type = 'text' name = 'summa' value='$trow[summa]'></td>
 							<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 							</tr>
@@ -976,7 +1011,7 @@
 							<input type = 'hidden' name='tee' value='M'>
 							<input type = 'hidden' name='tunnus' value='$tunnus'>
 							<tr>
-							<th>".t("Muuta kassa-ale ja/tai kapvm")."</th>
+							<th>".t("kassa-ale ja/tai kapvm")."</th>
 							<td><input type = 'text' name = 'summa' value='$trow[kasumma]'>
 								<input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 								<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
@@ -997,7 +1032,7 @@
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
 						<tr>
-						<th>".t("Muuta er‰pvm")."</th>
+						<th>".t("er‰pvm")."</th>
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 						<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 						<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
@@ -1014,7 +1049,7 @@
 							<input type = 'hidden' name='tee' value='M'>
 							<input type = 'hidden' name='tunnus' value='$tunnus'>
 							<tr>
-							<th>".t("Muuta kassa-alepvm")."</th>
+							<th>".t("kassa-alepvm")."</th>
 							<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 							<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 							<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
@@ -1068,7 +1103,7 @@
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tunnus' value='$tunnus'>
 					<tr>
-					<th>".t("Muuta suorituspvm")."</th>
+					<th>".t("suorituspvm")."</th>
 					<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 					<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 					<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
@@ -1099,7 +1134,7 @@
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tunnus' value='$tunnus'>
 					<tr>
-					<th>".t("Muuta laskun tyyppi")."</th>";
+					<th>".t("laskun tyyppi")."</th>";
 
 			echo "
 					<td>
@@ -1132,7 +1167,7 @@
 			echo "<input type = 'hidden' name='tee' value='M'>";
 			echo "<input type = 'hidden' name='tunnus' value='$tunnus'>";
 			echo "<tr>";
-			echo "<th>".t("Muuta laskunumeroa")."</th>";
+			echo "<th>".t("laskunumero")."</th>";
 			echo "<td><input type='text' name='uusi_laskunumero' value='$trow[laskunro]'></td>";
 			echo "<td><input type='submit' value='".t("P‰ivit‰")."'></td>";
 			echo "</tr>";
@@ -1230,10 +1265,18 @@
 						<input type = 'hidden' name='lopetus' value='$lopetus'>
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
 						<tr>
-						<th>".t("Muuta toimittajan pankkitili‰")."</th>
+						<th>".t("Toimittajan tilinumero (kotimainen)")."</th>
 						<td><input type = 'text' name = 'tili' size='40' value = '".tilinumero_print($trow['tilinumero'])."'></td>
-						<td><input type = 'submit' value = '".t("Muuta")."'></td>
+						<td rowspan='3'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						<td class='back'>".t("Lasku siirtyy takaisin hyv‰ksynt‰‰n")."</td>
+						</tr>
+						<tr>
+						<th>".t('Toimittajan IBAN')."</th>
+						<td><input type = 'text' name = 'ultilno' size='40' value = '$trow[ultilno]'></td>
+						</tr>
+						<tr>
+						<th>".t('SWIFT')." / ".t('BIC')."</th>
+						<td><input type = 'text' name = 'swift' size='40' value = '$trow[swift]'></td>
 						</tr>
 						</form>";
 			}
@@ -1266,11 +1309,11 @@
 						<td><input type = 'text' name = 'pankki4' size='40' value = '$trow[pankki4]'></td>
 						</tr>
 						<tr>
-						<th>".t('Muuta toimittajan ulkomaanmaksutili‰')."</th>
+						<th>".t('Toimittajan tilinumero / IBAN')."</th>
 						<td><input type = 'text' name = 'ultilno' size='40' value = '$trow[ultilno]'></td>
 						</tr>
 						<tr>
-						<th>".t('SWIFT')."</th>
+						<th>".t('SWIFT')." / ".t('BIC')."</th>
 						<td><input type = 'text' name = 'swift' size='40' value = '$trow[swift]'></td>
 						</tr>
 						</form>";
@@ -1284,7 +1327,7 @@
 					<input type = 'hidden' name='lopetus' value='$lopetus'>
 					<input type = 'hidden' name='tunnus' value='$tunnus'>
 					<tr>
-					<th>".t('Muuta laskun viesti‰')."</th>
+					<th>".t('laskun viesti')."</th>
 					<td><input type = 'text' name = 'viesti' size='40' value = '$trow[viesti]'></td>
 					<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 					</tr>

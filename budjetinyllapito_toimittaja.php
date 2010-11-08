@@ -134,29 +134,14 @@
 			$mul_osasto = unserialize(urldecode($mul_osasto));
 			$mul_try = unserialize(urldecode($mul_try));
 		}
-/*
-		echo "<pre>".var_dump($_GET)."</pre>";
-		echo "<pre>".var_dump($_POST)."</pre>";
-*/
+
 		echo "<form method='post'><table>";
 		echo "<input type='hidden' name='asiakasid' value='$asiakasid' />";
 		echo "<input type='hidden' name='edellinen_mul_osasto' value='".urlencode(serialize($mul_osasto))."'>";
 		echo "<input type='hidden' name='edellinen_mul_try' value='".urlencode(serialize($mul_try))."'>";
 
 		echo "<tr><th>",t("Asiakas"),"</th><td><input type='text' name='ytunnus' value='$ytunnus' /></td></tr>";
-/*
-		$asryhma_result = t_avainsana('ASIAKASRYHMA');
 
-		echo "<tr><th>",t("Asiakasryhmä"),"</th>";
-		echo "<td><select name='asiakasryhma'><option value=''>",t("Valitse asiakasryhmä"),"</option>";
-
-		while ($asryhma_row = mysql_fetch_assoc($asryhma_result)) {
-			$sel = $asiakasryhma == $asryhma_row['selite'] ? ' selected' : '';
-			echo "<option value='$asryhma_row[selite]'$sel>$asryhma_row[selite]</option>";
-		}
-
-		echo "</select></td></tr>";
-*/
 		$query = "	SELECT *
 					FROM tilikaudet
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -177,7 +162,7 @@
 
 		$avainsana_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite='Tuote' ");
 
-		if (mysql_num_rows($avainsana_result) == 0) { // normaalisti 1
+		if (mysql_num_rows($avainsana_result) == 1) { // normaalisti 1
 			$monivalintalaatikot = array('DYNAAMINEN_TUOTE');
 			$monivalintalaatikot_normaali = array();
 		

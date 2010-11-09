@@ -8900,8 +8900,7 @@ if (!function_exists("asiakashakuohje")) {
 	}
 }
 
-/// Jampan Neste funkkareita t‰st‰ eteenp‰in
-// T‰m‰ funkkari lis‰‰ tuotteenalkion dynaamiseen puuhun..
+// Funktio lis‰‰ tuotteenalkion dynaamiseen puuhun.
 if (!function_exists("TuotteenAlkiot")) {
 	function TuotteenAlkiot($kukarow, $liitos, $puun_tunnus, $laji, $ttunnus = '') {
 
@@ -8916,7 +8915,7 @@ if (!function_exists("TuotteenAlkiot")) {
 	}
 }
 
-/// tˆmˆ funkkari mahdollistaa lis‰‰m‰‰n tason mihin tahansa v‰liin, toivottavasti :)
+/// Funktio mahdollistaa lis‰‰m‰‰n tason mihin tahansa v‰liin.
 if (!function_exists("LisaaTaso")) {
 	function LisaaTaso($isinimi, $tasonimi ,$lft, $laji,$kukarow, $tkoodi) {
 
@@ -9029,7 +9028,7 @@ if (!function_exists("PoistaLapset")) {
 	}
 }
 
-// funktio joka palauttaa valitun kategorian alakategorioiden lukum‰‰r‰n, k‰ytet‰‰n syvyyden m‰‰rittelyss‰
+// Funktio joka palauttaa valitun kategorian alakategorioiden lukum‰‰r‰n, k‰ytet‰‰n syvyyden m‰‰rittelyss‰
 if (!function_exists("lapset")) {
 	function lapset($isi, $plft, $laji,$kukarow) {
 		$dump = 	"SELECT (COUNT(node.nimi)-1) as Lapsi
@@ -9044,7 +9043,7 @@ if (!function_exists("lapset")) {
 	}
 }
 
-// Yksinkertainen funktio joka p‰ivitt‰‰ valitun kategorian valitulle nimelle
+// Funktio joka p‰ivitt‰‰ valitun kategorian valitulle nimelle
 if (!function_exists("paivitakat")) {
 	function paivitakat($isi, $uusinimi, $laji, $kukarow,$koodi,$kategoriaid) {
 
@@ -9071,28 +9070,6 @@ if (!function_exists("paivitakat")) {
 		}
 	}
 }
-
-// palauttaa Isin
-if (!function_exists("kukaisi")) {
-	function kukaisi($lapsi,$valinta) {
-		$query =   "SELECT T_SN.C_PARENT_NODENO as isi, T_SN_DESIG.C_TEXT as selite
-					FROM T_SN
-					JOIN T_SN_DESIG ON (T_SN_DESIG.C_FK=T_SN.C_PK)
-					WHERE T_SN.C_TREETYPE_VALKEY='PC'
-					AND C_LNG='FI' and T_SN.C_NODENO=". $lapsi;
-		$result = mysql_query($query) or pupe_error($query);
-		$row = mysql_fetch_assoc($result);
-
-		if ($valinta == 1) {
-			$selite = $row['selite'];
-		}
-		else {
-			$selite = $row['isi'];
-		}
-		return $selite;
-	}
-}
-
 
 if (!function_exists("pupe_DataTables")) {
 	function pupe_DataTables($taulu, $sarakkeetVis, $sarakkeetTot, $footerCallBack = "") {

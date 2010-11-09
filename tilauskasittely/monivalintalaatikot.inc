@@ -89,6 +89,8 @@
 	if (!isset($mul_kohde)) 		$mul_kohde = array();
 	if (!isset($mul_projekti)) 		$mul_projekti = array();
 
+	if (!isset($dynaaminen_ulisa_temp)) $dynaaminen_ulisa_temp = '';
+
 	// jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehd‰‰n niill‰ rajaukset muihin dropdowneihin
 	if ((count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0) or trim($dynaaminen_check) != '') {
 		if (count($mul_osasto) > 0) {
@@ -248,11 +250,19 @@
 								${"mul_".$param.$count_row['sub_dee']} = array('PUPEKAIKKIMUUT');
 								break 2;								
 							}
+							else {
+								$dynaaminen_ulisa_temp = $dynaaminen_ulisa_temp != '' ? $dynaaminen_ulisa_temp.','.$paramx : $paramx;
+							}
 						}
 					}
 				}
 			}
 		}
+	}
+
+	if (trim($dynaaminen_ulisa_temp) != '') {
+		$kaikki_tunnukset = $dynaaminen_ulisa_temp;
+		$ulisa .= "&kaikki_tunnukset=$dynaaminen_ulisa_temp";
 	}
 
 	if (count($mul_tuotemyyja) > 0) {
@@ -616,7 +626,7 @@
 				}
 
 				echo "</th></tr>";
-				echo "<tr><td nowrap style='padding:0px'><select name='mul_try[]' $autosubmit $multiple_lisa>";
+				echo "<tr><td nowrap style='padding:0px'><select name='mul_try[]' $multiple_lisa $autosubmit>";
 
 				$mul_check = '';
 				if ($mul_try != "") {
@@ -1232,8 +1242,19 @@
 
 			$laatikot_selected = array();
 
+			if (trim($monivalintarajaus_dynaaminen) != '') {
+				$laatikot_selected[] = $monivalintarajaus_dynaaminen;
+			}
+			elseif (isset($url) and $url == 'y' and $kaikki_tunnukset != '') {
+				$laatikot_selected[] = $kaikki_tunnukset;
+
+				if (trim($dynaaminen_ulisa_temp) == '') {
+					$ulisa .= "&kaikki_tunnukset=$kaikki_tunnukset";
+				}
+			}
+
 			for ($i = 1; $i < 5; $i++) {
-				if (${'mul_'.$tree.$i}[0] == 'PUPEKAIKKIMUUT' or ${'mul_'.$tree.$i}[0] == '') array_shift(${'mul_'.$tree.$i});
+				if (count(${'mul_'.$tree.$i}) > 0 and isset(${'mul_'.$tree.$i}[0]) and (${'mul_'.$tree.$i}[0] == 'PUPEKAIKKIMUUT' or ${'mul_'.$tree.$i}[0] == '')) array_shift(${'mul_'.$tree.$i});
 
 				if (count(${'mul_'.$tree.$i}) > 0) {
 					// aina syvemm‰n tason monivalintalaatikko rajaa isommalla prioriteetilla, joten nollataan haettavat lapsituotteet ja otetaan viimesin valitun laatikon tunnus
@@ -1244,7 +1265,7 @@
 
 			// jos ei olla valittu mit‰‰n monivalintalaatikoista, haetaan dynaamisen puun root-kategoria
 			if (count($laatikot_selected) == 0) {
-				if ($tee_dyna != '') {
+				if (isset($tee_dyna) and $tee_dyna != '') {
 					$kaikki_tunnukset = $kaikki_tunnukset_from_kuka = '';
 				}
 
@@ -1268,7 +1289,7 @@
 				$joinlisa .= " JOIN puun_alkio ON (puun_alkio.yhtio = subnode.yhtio AND puun_alkio.puun_tunnus = subnode.tunnus AND puun_alkio.laji = subnode.laji) ";
 			}
 
-			if ($autoid != '') {
+			if (isset($autoid) and $autoid != '') {
 				$joinlisa .= " join yhteensopivuus_tuote ON (yhteensopivuus_tuote.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote.atunnus IN ($autoid)) ";
 			}
 
@@ -1320,7 +1341,7 @@
 						echo "<tr><td nowrap style='padding:0px'>";
 						echo "<select name='mul_{$tree}{$laatikon_nro}[]' ";
 
-						if (!in_array("dynaaminen_".strtolower($tree), array_map('strtolower', $monivalintalaatikot_normaali))) {
+						if (is_array($monivalintalaatikot_normaali) and !in_array("dynaaminen_".strtolower($tree), array_map('strtolower', $monivalintalaatikot_normaali))) {
 							echo " multiple='multiple' size='7' ";
 						}
 

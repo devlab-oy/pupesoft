@@ -80,17 +80,27 @@ if (mysql_field_name($result, $i) == "puun_tunnus") {
 	
 
 	if ($apu['laji'] != '') {
+
+		$alkio_nimi = '';
+
+		if (trim($trow[$i]) != '') {
+			$query = "SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND laji = '{$apu['laji']}' AND tunnus = '{$trow[$i]}'";
+			$nimi_fetch_res = mysql_query($query) or pupe_error($query);
+			$nimi_fetch_row = mysql_fetch_assoc($nimi_fetch_res);
+			$alkio_nimi = $nimi_fetch_row['nimi'];
+		}
+
 		if($apu['laji'] == strtolower('asiakas')) {
-			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno={$apu['ttuoteno']}&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=asiakas&mista_tulin={$toim}&toim2={$toim2}' ";
+			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno=".trim($apu['ttuoteno'])."&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=asiakas&mista_tulin={$toim}&toim2={$toim2}' ";
 			$ulos .= "target='main'> ".t('Valitse tähän puuhun sopivat segmentit')." </a><br />\n";
-			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]}</td>\n";
+			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";
 			
 		}
 		else
 		{
-			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno={$apu['ttuoteno']}&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=tuote&mista_tulin={$toim}&toim2={$toim2}' ";
+			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno=".trim($apu['ttuoteno'])."&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=tuote&mista_tulin={$toim}&toim2={$toim2}' ";
 			$ulos .= "target='main'> ".t('Valitse tähän puuhun sopivat segmentit')." </a><br />\n";
-			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]}</td>\n";
+			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";
 		}
 	}
 	$jatko = 0;

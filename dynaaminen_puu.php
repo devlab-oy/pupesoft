@@ -23,7 +23,9 @@ if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {
 	}
 	else {
 
-		foreach ($id as $selitekenttaan) {TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji,$ttunnus);}
+		foreach ($id as $selitekenttaan) {
+			TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji,$ttunnus);
+		}
 
 //		TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji,$ttunnus);
 
@@ -243,7 +245,7 @@ $query = "SELECT
 					}
 
 					// jos arrayn joku sisältö vastaa vastaa node_tunnusta, tulostetaan check-boxiin rasti, muussa tapauksessa tulostetaan tyhjä boksi
-					echo "\n<td rowspan='",lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow)+1,"'><input type='checkbox' name='id[]' value='{$row[node_tunnus]}' $check />&nbsp;",$row['node_koodi'] ,' ',ucwords(strtolower(str_replace('/', ', ', $row['node_nimi']))),"</td></tr>";
+					echo "\n<td rowspan='",lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow)+1,"'><input type='checkbox' name='id[]' value='{$row[node_tunnus]}' $check />&nbsp;",$row['node_koodi'] ,' ',ucwords(strtolower(str_replace('/', ', ', $row['node_nimi'])))," ({$row['node_tunnus']})</td></tr>";
 
 				}
 			}

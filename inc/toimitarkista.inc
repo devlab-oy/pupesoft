@@ -98,6 +98,10 @@ if(!function_exists("toimitarkista")) {
 				$virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
 				$errori = 1;
 			}
+			elseif (tarkista_bban($t[$i]) === FALSE) {
+				$virhe[$i] = t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
+				$errori = 1;
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "swift") {

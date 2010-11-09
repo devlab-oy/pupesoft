@@ -8858,6 +8858,21 @@ if (!function_exists("tarkista_bic")) {
 	}
 }
 
+if (!function_exists("tarkista_bban")) {
+	function tarkista_bban($bban) {
+
+		preg_match("/^[a-zA-Z0-9]{1,30}$/", $bban, $matches);
+
+		if ($matches[0] == "") {
+			// BBAN on v‰‰rin!
+			return FALSE;
+		}
+
+		// BBAN on oikein!
+		return TRUE;
+	}
+}
+
 if (!function_exists("asiakashakuohje")) {
 	function asiakashakuohje() {
 		global $palvelin2;

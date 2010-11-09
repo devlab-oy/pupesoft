@@ -445,21 +445,26 @@
 				$virheita++;
 				continue;
 			}
+			elseif (tarkista_bban($laskurow["ultilno"]) === FALSE) {
+				echo "<font class='error'>Laskun tilinumero ei ole oikeellinen BBAN tilinumero, laskua ei voida lisätä aineistoon! $laskurow[nimi] ($laskurow[summa] $laskurow[valkoodi]) $laskurow[ultilno]</font><br>";
+				$virheita++;
+				continue;
+			}
 
 			if ($laskurow["ultilno"] == "") {
-				echo "<font class='error'>Laskulta puuttuu tilinumero, laskua ei voida lisätä aineistoon!</font><br>";
+				echo "<font class='error'>Laskulta puuttuu tilinumero, laskua ei voida lisätä aineistoon! $laskurow[nimi] ($laskurow[summa] $laskurow[valkoodi]) </font><br>";
 				$virheita++;
 				continue;
 			}
 
 			if (tarkista_iban($laskurow["yriti_iban"]) == "") {
-				echo "<font class='error'>Yrityksen pankkitili $laskurow[yriti_iban] ei ole oikeellinen IBAN tilinumero, laskua ei voida lisätä aineistoon!</font><br>";
+				echo "<font class='error'>Yrityksen pankkitili $laskurow[yriti_iban] ei ole oikeellinen IBAN tilinumero, laskua ei voida lisätä aineistoon! $laskurow[nimi] ($laskurow[summa] $laskurow[valkoodi]) </font><br>";
 				$virheita++;
 				continue;
 			}
 
 			if (tarkista_bic($laskurow["yriti_bic"]) === FALSE) {
-				echo "<font class='error'>Yrityksen pankkitilin $laskurow[yriti_iban] BIC on virheellinen, laskua ei voida lisätä aineistoon!</font><br>";
+				echo "<font class='error'>Yrityksen pankkitilin $laskurow[yriti_iban] BIC on virheellinen, laskua ei voida lisätä aineistoon! $laskurow[nimi] ($laskurow[summa] $laskurow[valkoodi]) </font><br>";
 				$virheita++;
 				continue;
 			}

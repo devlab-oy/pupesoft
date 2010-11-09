@@ -667,6 +667,33 @@
 		fwrite($toot, utf8_encode($xml->asXML()));
 		fclose($toot);
 
+		// Tehdään vielä tässä vaiheessa XML validointi, vaikka ainesto onkin jo tehty. :(
+		libxml_use_internal_errors(true);
+
+		$xml_virheet = "";
+		$xml_domdoc = new DomDocument;
+		$xml_file = $pankkitiedostot_polku.$kaunisnimi;
+		$xml_schema = "$pupe_root_polku/datain/pain.001.001.02.xsd";
+
+		$xml_domdoc->Load($xml_file);
+
+		if (!$xml_domdoc->schemaValidate($xml_schema)) {
+
+			echo "<font class='message'>SEPA-aineistosta löytyi vielä seuraavat virheet, aineisto saattaa hylkääntyä pankissa!</font><br><br>";
+
+			$all_errors = libxml_get_errors();
+
+			foreach ($all_errors as $error) {
+				echo "<font class='info'>$error->message</font><br>";
+				$xml_virheet .= "$error->message\n";
+			}
+
+			echo "<br>";
+
+			// Lähetetään viesti adminille!
+			mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SEPA Error", "ISO-8859-1", "Q"), $xml_virheet."\n", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		}
+
 		if ($tiedostonimi == "") {
 			$tiedostonimi = $kaunisnimi;
 		}

@@ -1254,14 +1254,16 @@
 			}
 
 			for ($i = 1; $i < 5; $i++) {
-				if (count(${'mul_'.$tree.$i}) > 0 and isset(${'mul_'.$tree.$i}[0]) and (${'mul_'.$tree.$i}[0] == 'PUPEKAIKKIMUUT' or ${'mul_'.$tree.$i}[0] == '')) array_shift(${'mul_'.$tree.$i});
+				if (${'mul_'.$tree.$i}[0] == 'PUPEKAIKKIMUUT' or ${'mul_'.$tree.$i}[0] == '') array_shift(${'mul_'.$tree.$i});
 
 				if (count(${'mul_'.$tree.$i}) > 0) {
 					// aina syvemm‰n tason monivalintalaatikko rajaa isommalla prioriteetilla, joten nollataan haettavat lapsituotteet ja otetaan viimesin valitun laatikon tunnus
-					$laatikot_selected = array();
-					$laatikot_selected[] = $kaikki_tunnukset = implode(",", ${'mul_'.$tree.$i});
+					$kaikki_tunnukset = implode(",", ${'mul_'.$tree.$i});
+
+					$laatikot_selected = $kaikki_tunnukset;
 				}
 			}
+
 
 			// jos ei olla valittu mit‰‰n monivalintalaatikoista, haetaan dynaamisen puun root-kategoria
 			if (count($laatikot_selected) == 0) {
@@ -1293,10 +1295,19 @@
 				$joinlisa .= " join yhteensopivuus_tuote ON (yhteensopivuus_tuote.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote.atunnus IN ($autoid)) ";
 			}
 
+			$tunn = '';
+
+			if (is_array($laatikot_selected)) {
+				$tunn = implode(",", $laatikot_selected);
+			}
+			else {
+				$tunn = $laatikot_selected;
+			}
+
 			# haetaan kaikki puun tunnukset, joilla on tuotteita linkattu
 			$query = "	SELECT GROUP_CONCAT(DISTINCT subnode.tunnus) tunnukset
 						FROM dynaaminen_puu AS subnode 
-						JOIN dynaaminen_puu AS subparent ON (subparent.tunnus IN (".implode(",", $laatikot_selected).")) 
+						JOIN dynaaminen_puu AS subparent ON (subparent.tunnus IN ($tunn)) 
 						$joinlisa
 						WHERE subnode.yhtio = '$kukarow[yhtio]'
 						AND subnode.laji = '{$tree}'

@@ -85,7 +85,7 @@ if (isset($tee) and $tee == 'muokkaa' and isset($uusinimi) and isset($ISI) AND i
 } 
 
 // Lisötään uusi taso ja tarkistetaan ettei nimi ole tyhjä.
-if (isset($tee) and $tee == 'taso' and isset($tasonimi) and isset($ISI) AND trim($laji) AND isset($tkoodi) and trim($tkoodi)) {
+if (isset($tee) and $tee == 'taso' and isset($tasonimi) and isset($ISI) AND trim($laji)) {
 	
 	if (trim($tasonimi) == "") {
 		echo "<font class='error'>", t('Et voi antaa tyhjää arvoa uudeksi tason nimeksi')," !!</font>";

@@ -1,4 +1,17 @@
 <?php
+	// katsotaan tuleeko kaikki muuttujat REQUEST:ssa serialisoituna
+	if (isset($_REQUEST['kaikki_parametrit_serialisoituna'])) {
+
+		$kaikki_parametrit_serialisoituna = unserialize(urldecode($_REQUEST['kaikki_parametrit_serialisoituna']));
+		$kaikki_muuttujat_array = array();
+
+		foreach ($kaikki_parametrit_serialisoituna as $parametri_key => $parametri_value) {
+			${$parametri_key} = $parametri_value;
+			$_REQUEST[$parametri_key] = $parametri_value;
+		}
+
+		unset($_REQUEST['kaikki_parametrit_serialisoituna']);
+	}
 
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
@@ -16,15 +29,29 @@
 	else {
 		echo "<font class='head'>".t("Myyntiseuranta")."</font><hr>";
 
-		if(!aja_kysely()) {
-			unset($_POST);
+		// tehd‰‰n kaikista raportin parametreist‰ yksi muuttuja serialisoimista varten
+		$kaikki_muuttujat_array = array();
+
+		foreach ($_REQUEST as $kaikki_muuttujat_array_key => $kaikki_muuttujat_array_value) {
+			if ($kaikki_muuttujat_array_key != "pupesoft_session" and
+				$kaikki_muuttujat_array_key != "uusi_kysely" and
+				$kaikki_muuttujat_array_key != "tallenna_muutokset" and
+				$kaikki_muuttujat_array_key != "poista_kysely" and
+				$kaikki_muuttujat_array_key != "aja_kysely") {
+				$kaikki_muuttujat_array[$kaikki_muuttujat_array_key] = $kaikki_muuttujat_array_value;
+			}
+
 		}
- 
+
+		if(!aja_kysely()) {
+			unset($_REQUEST);
+		}
+
 		// k‰ytet‰‰n slavea
 		$useslave = 1;
 		require ("inc/connect.inc");
 
-		if(count($_POST) > 0) {
+		if(count($_REQUEST) > 0) {
 			if(!function_exists("vararvo")) {
 				function vararvo($tuoteno, $vv, $kk, $pp) {
 					global $kukarow, $yhtiorow;
@@ -1153,9 +1180,29 @@
 									$osre = t_avainsana("ASIAKASOSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
 
-									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
-										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+									if ($osrow['selite'] == "") {
+										$osrow['selite'] = t("Ei asiakasosastoa");
 									}
+
+									$serialisoitavat_muuttujat = $kaikki_muuttujat_array;
+
+									// jos asiakasosostoittain ja asiakasryhmitt‰in ruksin on chekattu, osastoa klikkaamalla palataan taaksep‰in
+									if ($ruksit[10] != '' and $ruksit[20] != '') {
+										// Nollataan asiakasosasto sek‰ asiakaryhm‰valinnat
+										unset($serialisoitavat_muuttujat["mul_oasiakasosasto"]);
+										unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
+										
+										// Nollataan asiakasryhm‰ruksi sek‰ tuotettainruksi
+										$serialisoitavat_muuttujat["ruksit"][20] = "";
+										$serialisoitavat_muuttujat["ruksit"][80] = "";										
+									}
+									else {
+										// jos asiakasosostoittain ja asiakasryhmitt‰in ei ole chekattu, osastoa klikkaamalla menn‰‰n eteenp‰in
+										$serialisoitavat_muuttujat["mul_oasiakasosasto"][$i] = $row[$i];
+										$serialisoitavat_muuttujat["ruksit"][20] = "asiakasryhma";
+									}
+
+									$row[$i] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>$osrow[selite] $osrow[selitetark]</a>";
 								}
 
 								// jos kyseessa on piiri, haetaan sen nimi
@@ -1173,9 +1220,25 @@
 									$osre = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
 
-									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
-										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+									if ($osrow['selite'] == "") {
+										$osrow['selite'] = t("Ei asiakasryhm‰‰");
 									}
+
+									$serialisoitavat_muuttujat = $kaikki_muuttujat_array;
+
+									// jos asiakasosastot, asiakasryhm‰t ja tuottetain on valittu, menn‰‰n taaksep‰in
+									if ($ruksit[10] != '' and $ruksit[20] != '' and $ruksit[80] != '') {
+										unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
+										$serialisoitavat_muuttujat["ruksit"][80] = "";
+									}
+									else {
+										// jos vain asiakasosastot, asiakasryhm‰t ja tuottetain on valittu, menn‰‰n eteenp‰in
+										$serialisoitavat_muuttujat["mul_asiakasryhma"][$i] = $row[$i];
+										$serialisoitavat_muuttujat["ruksit"][20] = "asiakasryhma";										
+										$serialisoitavat_muuttujat["ruksit"][80] = "tuote";
+									}
+
+									$row[$i] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>$osrow[selite] $osrow[selitetark]</a>";
 								}
 
 								// jos kyseessa on tuoteosasto, haetaan sen nimi
@@ -1183,9 +1246,29 @@
 									$osre = t_avainsana("OSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
 
-									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
-										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+									if ($osrow['selite'] == "") {
+										$osrow['selite'] = t("Ei tuoteosastoa");
 									}
+
+									$serialisoitavat_muuttujat = $kaikki_muuttujat_array;
+
+									// jos tuoteosostoittain ja tuoteryhmitt‰in ruksin on chekattu, osastoa klikkaamalla palataan taaksep‰in
+									if ($ruksit[40] != '' and $ruksit[50] != '') {
+										// Nollataan asiakasosasto sek‰ asiakaryhm‰valinnat
+										unset($serialisoitavat_muuttujat["mul_osasto"]);
+										unset($serialisoitavat_muuttujat["mul_try"]);
+										
+										// Nollataan tuoteryhm‰ruksi sek‰ tuotettainruksi
+										$serialisoitavat_muuttujat["ruksit"][50] = "";
+										$serialisoitavat_muuttujat["ruksit"][80] = "";										
+									}
+									else {
+										// jos tuoteosostoittain ja tuoteryhmitt‰in ei ole chekattu, osastoa klikkaamalla menn‰‰n eteenp‰in
+										$serialisoitavat_muuttujat["mul_osasto"][$i] = $row[$i];
+										$serialisoitavat_muuttujat["ruksit"][50] = "tuoteryhma";
+									}
+
+									$row[$i] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>$osrow[selite] $osrow[selitetark]</a>";
 								}
 
 								// jos kyseessa on tuoteosasto, haetaan sen nimi
@@ -1193,9 +1276,26 @@
 									$osre = t_avainsana("TRY", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
 
-									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
-										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+									if ($osrow['selite'] == "") {
+										$osrow['selite'] = t("Ei tuoteryhm‰‰");
 									}
+
+									$serialisoitavat_muuttujat = $kaikki_muuttujat_array;
+
+									// jos tuoteosastot, tuoteryhm‰t ja tuottetain on valittu, menn‰‰n taaksep‰in
+									if ($ruksit[40] != '' and $ruksit[50] != '' and $ruksit[80] != '') {
+										unset($serialisoitavat_muuttujat["mul_try"]);
+										$serialisoitavat_muuttujat["ruksit"][80] = "";
+									}
+									else {
+										// jos vain tuoteosastot, tuoteryhm‰t ja tuottetain on valittu, menn‰‰n eteenp‰in
+										$serialisoitavat_muuttujat["mul_try"][$i] = $row[$i];
+										$serialisoitavat_muuttujat["ruksit"][40] = "osasto";
+										$serialisoitavat_muuttujat["ruksit"][50] = "tuoteryhma";										
+										$serialisoitavat_muuttujat["ruksit"][80] = "tuote";
+									}
+
+									$row[$i] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>$osrow[selite] $osrow[selitetark]</a>";
 								}
 
 								// jos kyseessa on myyj‰, haetaan sen nimi

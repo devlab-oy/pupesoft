@@ -221,7 +221,7 @@
 							"1kk", "3kk", "6kk", "12kk", "ke", "1x2",
 							"ostoera1", "ostoera3", "ostoera6", "ostoera12", "osthaly1", "osthaly3", "osthaly6", "osthaly12",
 							"o_era", "m_era", "kosal", "komy", "Määrä",
-							"kuvaus", "lyhytkuvaus", "tkorkeus", "tleveys", "tmassa", "tsyvyys",
+							"kuvaus", "lyhytkuvaus", "tkorkeus", "tleveys", "tmassa", "tsyvyys", "eankoodi",
 							"hinnastoon", "toimittaja", "toim_tuoteno",
 							"nimitys", "ostohinta", "myyntihinta",
 							"epa25pvm", "epa50pvm", "epa75pvm", "epa100pvm",
@@ -231,6 +231,7 @@
 							"kul1", "kul3", "kul6", "kul12",
 							"edkul1", "edkul3", "edkul6", "edkul12",
 							"enn1", "enn3", "enn6","enn12",
+							"ykpl1", "ykpl3", "ykpl6","ykpl12",
 							"e_kate1", "e_kate3", "e_kate6", "e_kate12",
 							"e_kate % 1", "e_kate % 3", "e_kate % 6", "e_kate % 12",
 							"ed1", "ed3", "ed6", "ed12",
@@ -285,6 +286,7 @@
 								"tleveys"		=> "tuoteleveys",
 								"tmassa"		=> "tuotemassa",
 								"tsyvyys"		=> "tuotesyvyys",
+								"eankoodi"		=> "eankoodi",
 								"hinnastoon"	=> "hinnastoon",
 								"toimittaja"	=> "toimittaja",
 								"toim_tuoteno"	=> "toim_tuoteno",
@@ -317,6 +319,10 @@
 								"enn3"			=> "e_kpl2",
 								"enn6"			=> "e_kpl3",
 								"enn12"			=> "e_kpl4",
+								"ykpl1"			=> "ykpl1",
+								"ykpl3"			=> "ykpl2",
+								"ykpl6"			=> "ykpl3",
+								"ykpl12"		=> "ykpl4",
 								"e_kate1"		=> "e_kate1",
 								"e_kate3"		=> "e_kate2",
 								"e_kate6"		=> "e_kate3",
@@ -735,6 +741,7 @@
 							tuote.tuoteleveys,
 							tuote.tuotemassa,
 							$splisa,
+							tuote.eankoodi,
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
 							concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali,tuotepaikat.hyllytaso) varastopaikka
@@ -780,6 +787,7 @@
 							tuote.tuoteleveys,
 							tuote.tuotemassa,
 							$splisa,
+							tuote.eankoodi,
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
 							concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali,tuotepaikat.hyllytaso) varastopaikka,
@@ -939,7 +947,9 @@
 			}
 
 			while ($row = mysql_fetch_array($res)) {
-
+				
+				$ykpl1 = $ykpl2 = $ykpl3 = $ykpl4 = 0;
+				
 				if ($paikoittain != '') {
 					$lisa = " and concat_ws(' ',hyllyalue, hyllynro, hyllyvali, hyllytaso)='$row[varastopaikka]' ";
 				}
@@ -1024,7 +1034,7 @@
 							$lisa";
 				$result   = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_array($result);
-
+				
 				$query = "	SELECT
 							sum(if (laadittu >= '$vva1-$kka1-$ppa1' and laadittu <= '$vvl1-$kkl1-$ppl1' and var='P', tilkpl,0)) puutekpl1,
 							sum(if (laadittu >= '$vva2-$kka2-$ppa2' and laadittu <= '$vvl2-$kkl2-$ppl2' and var='P', tilkpl,0)) puutekpl2,
@@ -1085,7 +1095,13 @@
 							$lisa";
 				$result   = mysql_query($query) or pupe_error($query);
 				$kulutrow = mysql_fetch_array($result);
-
+				
+				// Yhteensä kpl: myydyt normi ja ennakkorivit sekä kulutukset (lisätään laskurowiin helppouden vuoksi)
+				$laskurow["ykpl1"] = $laskurow["kpl1"] + $laskurow["e_kpl1"] + $kulutrow["kpl1"];
+				$laskurow["ykpl2"] = $laskurow["kpl2"] + $laskurow["e_kpl2"] + $kulutrow["kpl2"];
+				$laskurow["ykpl3"] = $laskurow["kpl3"] + $laskurow["e_kpl3"] + $kulutrow["kpl3"];
+				$laskurow["ykpl4"] = $laskurow["kpl4"] + $laskurow["e_kpl4"] + $kulutrow["kpl4"];
+				
 				//tilauksessa, ennakkopoistot ja jt	Huom! varastolisa määritelty jo aiemmin!
 				$query = "	SELECT
 							sum(if (tilausrivi.tyyppi='O', tilausrivi.varattu, 0)) tilattu,
@@ -1395,7 +1411,8 @@
 									$sarake == 'ed1' or $sarake == 'ed3' or $sarake == 'ed6' or $sarake == 'ed12' or
 									$sarake == 'enn1' or $sarake == 'enn3' or $sarake == 'enn6' or $sarake == 'enn12' or
 									$sarake == 'kate1' or $sarake == 'kate3' or $sarake == 'kate6' or $sarake == 'kate12' or
-									$sarake == 'e_kate1' or $sarake == 'e_kate3' or $sarake == 'e_kate6' or $sarake == 'e_kate12') {
+									$sarake == 'e_kate1' or $sarake == 'e_kate3' or $sarake == 'e_kate6' or $sarake == 'e_kate12' or
+									$sarake == 'ykpl1' or $sarake == 'ykpl3' or $sarake == 'ykpl6' or $sarake == 'ykpl12') {
 								$value = $laskurow[$sarake_keyt[$sarake]];
 								if ($sarake == 'my3' or $sarake == 'my12') {
 									$bg_color = $value >= 0 ? $bg_color = 'yellow' : $bg_color = 'yellow_text_red';
@@ -1638,8 +1655,9 @@
 							$value = trim($value);
 
 							if ($value != '') {
-								// katsotaan onko arvo numerollinen excel writerin takia (eri funkkarit)
-								if (is_numeric($value)) {
+								// katsotaan onko arvo numerollinen excel writerin takia (eri funkkarit) 
+								// Ean on numeerinen, mutta excel rikkoo sen koska on niin pitkä.
+								if (is_numeric($value) and $sarakkeet[$key] != 'eankoodi') {
 									if ($bg_color != '') {
 										$worksheet->writeNumber($excelrivi, $excelsarake, round($value, 2), ${"format_bg_".$bg_color});
 									}

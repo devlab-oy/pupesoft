@@ -239,6 +239,10 @@ if (!function_exists('alku_tarjous')) {
 			if (trim($laskurow['viesti']) != '') {
 				$komm .= "\n".t("Tilausviite", $kieli).":###".$laskurow['viesti'];
 			}
+
+			if (trim($laskurow['comments']) != '') {
+				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
+			}
 		}
 		else {
 			if (trim($laskurow['tilausyhteyshenkilo']) != '') {

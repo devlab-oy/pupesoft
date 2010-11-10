@@ -42,6 +42,11 @@ if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {
 			$toim = $toim2;
 			$tunnus = $tuoteno;
 		//	echo "Tunnus: ". $tunnus. " ja Toim: ".$toim;
+		}
+		elseif ($mista_tulin == 'puun_alkio' AND $toim2 == 'tuote'){
+			$toim = $toim2;
+			$tunnus = TuotteenTunnus($tuoteno, $kukarow);
+		//	echo "Tunnus: ". $tunnus. " ja Toim: ".$toim;
 		} else{ 
 			$toim = $toim;
 			$tunnus = $tuoteno;

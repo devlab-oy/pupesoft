@@ -388,17 +388,16 @@
 				$verores = mysql_query($query) or pupe_error($query);
 				$verorow = mysql_fetch_array ($verores);
 
-				echo "<table>";
-				echo "<tr><th>",t("Tili")," $yhtiorow[alv] ",t("yhteensä"),"</th><td align='right'>".sprintf('%.2f', $verorow['vero'] * -1)."</td></tr>";
-				echo "<tr><th>",t("Maksettava alv"),"</th><td align='right'>".sprintf('%.2f', $fi308)."</td></tr>";
-				echo "<tr><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', (-1 * $verorow['vero']) - $fi308)."</td></tr>";
-				echo "</table><br>";
+				// ei näytetä yhteensä-laatikkoa turhaan
+				if ($verorow["vero"] != 0 or (($verorow['vero'] - $fi308) * -1) != $fi308 or $fi308 == 0) {
+					echo "<table>";
+					echo "<tr><th>",t("Tili")," $yhtiorow[alv] ",t("yhteensä"),"</th><td align='right'>".sprintf('%.2f', $verorow['vero'] * -1)."</td></tr>";
+					echo "<tr><th>",t("Maksettava alv"),"</th><td align='right'>".sprintf('%.2f', $fi308)."</td></tr>";
+					echo "<tr><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', (-1 * $verorow['vero']) - $fi308)."</td></tr>";
+					echo "</table><br>";
+				}
 
-				// katsotaan onko käyttäjällä oikeus muutosite.php
-				$queryoik = "SELECT tunnus from oikeu where nimi like '%muutosite.php' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]' LIMIT 1";
-				$res = mysql_query($queryoik) or pupe_error($queryoik);
-
-				if (mysql_num_rows($res) == 1) {
+				if (tarkista_oikeus("muutosite.php")) {
 
 					$query = "	SELECT lasku.tunnus
 								FROM lasku
@@ -411,7 +410,6 @@
 
 					if (mysql_num_rows($tositelinkki_result) > 0) {
 						$tositelinkki_row = mysql_fetch_assoc($tositelinkki_result);
-
 						echo "<a href='../muutosite.php?tee=E&tunnus={$tositelinkki_row['tunnus']}&lopetus={$palvelin2}raportit/alv_laskelma_uusi.php////kk=$kk//vv=$vv'>",t("Katso tositetta"),"</a><br /><br />";
 					}
 					elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $fi308, 2)) <= 1 and (int) date("Ym") > (int) $vv.$kk) {

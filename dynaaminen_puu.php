@@ -24,10 +24,9 @@ if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {
 	else {
 
 		foreach ($id as $selitekenttaan) {
+			//function TuotteenAlkiot($kukarow, $liitos, $puun_tunnus, $laji, $ttunnus = '')
 			TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji,$ttunnus);
 		}
-
-//		TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji,$ttunnus);
 
 		$q2 = "SELECT tunnus from tuote where tuoteno='$tuoteno'";
 		$r2 = mysql_query($q2) or pupe_error($q2);
@@ -46,10 +45,9 @@ if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {
 		elseif ($mista_tulin == 'puun_alkio' AND $toim2 == 'tuote'){
 			$toim = $toim2;
 			$tunnus = TuotteenTunnus($tuoteno, $kukarow);
-		//	echo "Tunnus: ". $tunnus. " ja Toim: ".$toim;
 		} else{ 
 			$toim = $toim;
-			$tunnus = $tuoteno;
+			$tunnus = $tuoteno; 
 		}
 	}
 	

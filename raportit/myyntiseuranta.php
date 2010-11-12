@@ -1925,7 +1925,7 @@
 			echo "<tr>";
 			echo "<th>".t("Prio").": <input type='text' name='jarjestys[10]' size='2' value='$jarjestys[10]'> ".t("Asiakasosastoittain")." <input type='checkbox' name='ruksit[10]' value='asiakasosasto' $ruk10chk></th>";
 			echo "<th>".t("Prio").": <input type='text' name='jarjestys[20]' size='2' value='$jarjestys[20]'> ".t("Asiakasryhmittäin")." <input type='checkbox' name='ruksit[20]' value='asiakasryhma' $ruk20chk></th>";
-			echo "<th>".t("Prio").": <input type='text' name='jarjestys[30]' size='2' value='$jarjestys[30]'> ".t("Aiakaspiireittäin")." <input type='checkbox' name='ruksit[30]' value='piiri' $ruk30chk></th><tr>";
+			echo "<th>".t("Prio").": <input type='text' name='jarjestys[30]' size='2' value='$jarjestys[30]'> ".t("Asiakaspiireittäin")." <input type='checkbox' name='ruksit[30]' value='piiri' $ruk30chk></th><tr>";
 			echo "<th colspan='2'></th><th>".t("Piiri")." <input type='radio' name='piirivalinta' value='lasku' $laskuvalintachk>".t("Laskuilta");
 			echo "<input type='radio' name='piirivalinta' value='asiakas' $asiakasvalintachk>".t("Asiakkailta")."</th></tr>";
 			echo "</table><br>\n";

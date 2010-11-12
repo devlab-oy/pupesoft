@@ -22,10 +22,10 @@ echo "</table>";
 echo "</form>";
 
 // jos meillä on onnistuneesti valittu asiakas
-if ($submit!='' and $vv!='' and $kk!='') {
+if ($submit != '' and $vv != '' and $kk != '') {
 
 	// hardcoodataan värejä
-	$cmyynti = "#ccccff";
+	$cmyynti = "#9999ff";
 	$ckate   = "#ff9955";
 	$ckatepr = "#00dd00";
 	$maxcol  = 12; // montako columnia näyttö on
@@ -34,7 +34,7 @@ if ($submit!='' and $vv!='' and $kk!='') {
 		$where = "and osasto='$osasto'";
 	}
 	else {
-		$where = "";
+		$where = ""; 
 		$osasto = "kaikki";
 	}
 
@@ -44,30 +44,28 @@ if ($submit!='' and $vv!='' and $kk!='') {
 	// tehdään asiakkaan ostot tuoteryhmästä
 	echo "<br><font class='message'>".t("Tuoteryhmien myynnit")." $vv-$kk ".t("osastolta")." $osasto (<font color='$cmyynti'>".t("myynti")."</font>/<font color='$ckate'>".t("kate")."</font>/<font color='$ckatepr'>".t("kateprosentti")."</font>)</font><hr>";
 
-
-
-	$query  = "select
-		osasto,
-		try,
-		round(sum(rivihinta),0) myynti,
-		round(sum(kate),0) kate,
-		round(sum(kpl),0) kpl,
-		round(sum(kate)/sum(rivihinta)*100,1) katepro
-		from tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-		where
-		yhtio='$kukarow[yhtio]' and
-		tyyppi='L' and
-		laskutettuaika >= '$ayy' and
-		laskutettuaika  < '$lyy'
-		$where
-		group by osasto, try";
+	$query  = "	SELECT
+				osasto,
+				try,
+				round(sum(rivihinta), 0) myynti,
+				round(sum(kate), 0) kate,
+				round(sum(kpl), 0) kpl,
+				round(sum(kate) / sum(rivihinta) * 100, 1) katepro
+				from tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+				where yhtio = '$kukarow[yhtio]' 
+				and tyyppi = 'L'
+				and laskutettuaika >= '$ayy'
+				and laskutettuaika < '$lyy'
+				$where
+				group by osasto, try";
 	$result = mysql_query($query) or pupe_error($query);
 
 	// otetaan suurin myynti talteen
-	$maxeur=0;
+	$maxeur = 0;
+
 	while ($sumrow = mysql_fetch_array($result)) {
-		if ($sumrow['myynti']>$maxeur) $maxeur=$sumrow['myynti'];
-		if ($sumrow['kate']>$maxeur) $maxeur=$sumrow['kate'];
+		if ($sumrow['myynti'] > $maxeur) $maxeur = $sumrow['myynti'];
+		if ($sumrow['kate'] > $maxeur) $maxeur = $sumrow['kate'];
 	}
 
 	// ja kelataan resultti alkuun
@@ -92,17 +90,17 @@ if ($submit!='' and $vv!='' and $kk!='') {
 			$hmyynti = $hkate = $hkatepro = 0;
 		}
 
-		$pylvaat = "<table border='0' cellpadding='0' cellspacing='0'><tr>
-		<td valign='bottom' align='center'><img src='../pics/blue.png' height='$hmyynti' width='12' alt='".t("Myynti")." $sumrow[myynti] $yhtiorow[valkoodi]'></td>
-		<td valign='bottom' align='center'><img src='../pics/orange.png' height='$hkate' width='12' alt='".t("Kate")." $sumrow[kate] $yhtiorow[valkoodi]'></td>
-		<td valign='bottom' align='center'><img src='../pics/green.png' height='$hkatepro' width='12' alt='".t("Katepros")." $sumrow[katepro] %'></td>
+		$pylvaat = "<table><tr>
+		<td style='vertical-align:bottom;'><img src='../pics/blue.png' height='$hmyynti' width='12' alt='".t("Myynti")." $sumrow[myynti] $yhtiorow[valkoodi]'></td>
+		<td style='vertical-align:bottom;'><img src='../pics/orange.png' height='$hkate' width='12' alt='".t("Kate")." $sumrow[kate] $yhtiorow[valkoodi]'></td>
+		<td style='vertical-align:bottom;'><img src='../pics/green.png' height='$hkatepro' width='12' alt='".t("Katepros")." $sumrow[katepro] %'></td>
 		</tr></table>";
 
 		if ($sumrow['katepro']=='') $sumrow['katepro'] = '0.0';
 		echo "<td valign='bottom' class='back'>";
 
-		echo "<table width='60'>";
-		echo "<tr><td nowrap align='center' height='55' valign='bottom'>$pylvaat</td></tr>";
+		echo "<table>";
+		echo "<tr><td nowrap style='text-align:center;vertical-align:bottom;height:65px;width:80px;'>$pylvaat</td></tr>";
 		echo "<tr><td nowrap align='right'><font class='info'>$sumrow[osasto] / $sumrow[try]</font></td></tr>";
 		echo "<tr><td nowrap align='right'><font class='info'><font color='$cmyynti'>$sumrow[myynti] $yhtiorow[valkoodi]</font></font></td></tr>";
 		echo "<tr><td nowrap align='right'><font class='info'><font color='$cmyynti'>$sumrow[kpl] kpl</font></font></td></tr>";

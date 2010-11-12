@@ -60,6 +60,7 @@
 			$tuotenumero	= "";
 			$tilaus			= "";
 			$toimi			= "";
+			$ei_limiittia	= "";
 			$superit		= "";
 			$tilaus_on_jo	= "KYLLA";
 
@@ -392,6 +393,7 @@
 		echo "<input type='hidden' name='asiakasno' value='$asiakasno'>";
 		echo "<input type='hidden' name='toimittaja' value='$toimittaja'>";
 		echo "<input type='hidden' name='toimi' value='$toimi'>";
+		echo "<input type='hidden' name='ei_limiittia' value='$ei_limiittia'>";
 		echo "<input type='hidden' name='superit' value='$superit'>";
 		echo "<input type='hidden' name='suorana' value='$suorana'>";
 		echo "<input type='hidden' name='tuotenumero' value='$tuotenumero'>";
@@ -453,7 +455,7 @@
 	if ($kukarow["extranet"] == "" and $tilaus_on_jo == "" and ($tee == "" or $tee == "JATKA")) {
 
 		if (isset($muutparametrit)) {
-			list($tuotenumero, $tilaus,$jarj,$toimi,$superit,$automaaginen,$ytunnus,$asiakasno,$toimittaja,$suorana,$tuoteosasto,$tuoteryhma,$tuotemerkki,$maa) = explode('#', $muutparametrit);
+			list($tuotenumero, $tilaus,$jarj,$toimi,$ei_limiittia,$superit,$automaaginen,$ytunnus,$asiakasno,$toimittaja,$suorana,$tuoteosasto,$tuoteryhma,$tuotemerkki,$maa) = explode('#', $muutparametrit);
 
 			$varastot = explode('##', $tilausnumero);
 
@@ -462,7 +464,7 @@
 			}
 		}
 
-		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#";
+		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$ei_limiittia#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#";
 
 		if (is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -490,7 +492,7 @@
 				$tee = "";
 			}
 		}
-		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#";
+		$muutparametrit = "$tuotenumero#$tilaus#$jarj#$toimi#$ei_limiittia#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#";
 
 		if (is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -575,11 +577,11 @@
 			$laskulisa .= " and lasku.maa = '$maa' ";
 		}
 
-		if ($automaaginen == '') {
-			$limit = " LIMIT 1000 ";
+		if ($automaaginen != '' or $ei_limiittia != '') {
+			$limit = "";
 		}
 		else {
-			$limit = "";
+			$limit = " LIMIT 1000 ";
 		}
 
 		$saatanat_chk = array();
@@ -1015,6 +1017,7 @@
 										echo "<input type='hidden' name='asiakasno' value='$asiakasno'>";
 										echo "<input type='hidden' name='toimittaja' value='$toimittaja'>";
 										echo "<input type='hidden' name='toimi' value='$toimi'>";
+										echo "<input type='hidden' name='ei_limiittia' value='$ei_limiittia'>";
 										echo "<input type='hidden' name='superit' value='$superit'>";
 										echo "<input type='hidden' name='suorana' value='$suorana'>";
 										echo "<input type='hidden' name='tuotenumero' value='$tuotenumero'>";
@@ -1224,7 +1227,7 @@
 								}
 
 								if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "") {
-									echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$jtrow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&superit=$superit&suorana=$suorana&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>".($jtrow["jt"]*1)."</a><br>";
+									echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$jtrow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&ei_limiittia=$ei_limiittia&superit=$superit&suorana=$suorana&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>".($jtrow["jt"]*1)."</a><br>";
 								}
 								else {
 									echo "<td valign='top' align='right' $class>".($jtrow["jt"]*1)."<br>";
@@ -1646,7 +1649,7 @@
 									}
 
 									if ($kukarow["extranet"] == "") {
-										echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$perherow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&superit=$superit&suorana=$suorana&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>$perherow[jt]</a><br>";
+										echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$perherow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&ei_limiittia=$ei_limiittia&superit=$superit&suorana=$suorana&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>$perherow[jt]</a><br>";
 									}
 									else {
 										echo "<td valign='top' align='right' $class>$perherow[jt]<br>";
@@ -1797,7 +1800,7 @@
 
 					echo "</table>";
 
-					if ($jtseluas_rivienmaara >= 1000) {
+					if ($jtseluas_rivienmaara >= 1000 and $ei_limiittia == "") {
 						echo "<font class='error'>".t("Haun tulos liian suuri! N‰ytet‰‰n ensimm‰iset 1000 rivi‰!")."</font><br>";
 					}
 				}
@@ -2047,12 +2050,18 @@
 				</td>
 			</tr>";
 
-		$sel = '';
+		$sel = $sel2 = '';
 		if ($toimi != '') $sel = 'CHECKED';
+		if ($ei_limiittia != '') $sel2 = 'CHECKED';
 
 		echo "<tr>
 				<th>".t("N‰yt‰ vain toimitettavat rivit")."</th>
 				<td><input type='checkbox' name='toimi' $sel></td>
+			</tr>";
+			
+		echo "<tr>
+				<th>".t("N‰yt‰ kaikki rivit")." (".t("Oletus").": max 1000 ".t("rivi‰").")</th>
+				<td><input type='checkbox' name='ei_limiittia' $sel2></td>
 			</tr>";
 
 		if ($toim == "ENNAKKO") {

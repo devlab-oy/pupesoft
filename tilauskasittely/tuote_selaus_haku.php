@@ -55,8 +55,7 @@
 		// selite 		= käytetäänkö uutta vai vanhaa ulkoasua
 		// selitetark 	= näytettävät monivalintalaatikot, jos tyhjää, otetaan oletus alhaalla
 		// selitetark_2 = mitkä näytettävistä monivalintalaatikoista on normaaleja alasvetovalikoita
-		// selitetark_3 = tuotteen tehdas saldon alarajakappalemäärä
-		$query = "	SELECT selite, selitetark, selitetark_2, selitetark_3
+		$query = "	SELECT selite, selitetark, REPLACE(selitetark_2, ', ', ',') selitetark_2
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND laji = 'HAE_JA_SELAA'
@@ -649,6 +648,12 @@
 			// Oletus
 			$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "MALLI", "MALLI/MALLITARK");
 			$monivalintalaatikot_normaali = array();
+
+			$avainsana_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite='Tuote' ");
+
+			if (mysql_num_rows($avainsana_result) == 1) {
+				array_push($monivalintalaatikot, "DYNAAMINEN_TUOTE");
+			}
 		}
 
 		require ("monivalintalaatikot.inc");
@@ -719,7 +724,7 @@
 		$submit_button = '';
 	}
 
-	if ($submit_button != '' and ($lisa != '' or ($toim_kutsu != '' and $lisa != '' and $url == 'y'))) {
+	if ($submit_button != '' and ($lisa != '' or ($toim_kutsu != '' and $lisa != '' and $url == 'y') or $kaikki_tunnukset != '')) {
 
 		$tuotekyslinkki = "";
 
@@ -743,6 +748,28 @@
 			}
 		}
 
+		$joinlisa = '';
+		$selectlisa = '';
+
+		if ($kaikki_tunnukset != '') {
+			$kaikki_tunnukset = implode(",", array_unique(explode(",", $kaikki_tunnukset)));
+
+			$query = "	SELECT GROUP_CONCAT(DISTINCT subnode.tunnus) tunnukset
+						FROM dynaaminen_puu AS subnode 
+						JOIN dynaaminen_puu AS subparent ON (subparent.tunnus IN ($kaikki_tunnukset)) 
+						JOIN puun_alkio ON (puun_alkio.yhtio = subnode.yhtio AND puun_alkio.puun_tunnus = subnode.tunnus AND puun_alkio.laji = subnode.laji)
+						WHERE subnode.yhtio = '{$kukarow['yhtio']}'
+						AND subnode.laji = 'tuote'
+						AND subnode.lft BETWEEN subparent.lft AND subparent.rgt 
+						AND subnode.lft > 1
+						ORDER BY subnode.lft";
+			$kaikki_puun_tunnukset_res = mysql_query($query, $link) or pupe_error($query);
+			$kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
+
+			$joinlisa = " JOIN puun_alkio ON (puun_alkio.yhtio = tuote.yhtio AND puun_alkio.laji = 'tuote' AND puun_alkio.puun_tunnus IN (".implode(',', $kaikki_puun_tunnukset_row).") AND puun_alkio.liitos = tuote.tuoteno) ";
+			$selectlisa = ", puun_alkio.puun_tunnus ";
+		}
+
 		$query = "	SELECT
 					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
 					ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
@@ -760,7 +787,9 @@
 					(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 					tuote.sarjanumeroseuranta,
 					tuote.status
+					$selectlisa
 					FROM tuote use index (tuoteno, nimitys)
+					$joinlisa
 					$lisa_parametri
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					$kieltolisa
@@ -923,6 +952,7 @@
 			echo "<input type='hidden' name='tee' value = 'TI'>";
 			echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 			echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
+			echo "<input type='hidden' name='kaikki_tunnukset' value='{$kaikki_tunnukset}' />";
 
 			if ($tultiin == "futur") {
 				echo " <input type='hidden' name='tultiin' value='$tultiin'>";
@@ -995,6 +1025,8 @@
 				echo "<tr>";
 
 				echo "<th>&nbsp;</th>";
+
+				$ulisa .= "&kaikki_tunnukset=$kaikki_tunnukset";
 
 				echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=tuoteno$ulisa'>".t("Tuoteno")."</a>";
 

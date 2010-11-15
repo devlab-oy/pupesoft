@@ -89,8 +89,6 @@
 	if (!isset($mul_kohde)) 		$mul_kohde = array();
 	if (!isset($mul_projekti)) 		$mul_projekti = array();
 
-	if (!isset($dynaaminen_ulisa_temp)) $dynaaminen_ulisa_temp = '';
-
 	// jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehdään niillä rajaukset muihin dropdowneihin
 	if ((count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0) or trim($dynaaminen_check) != '') {
 		if (count($mul_osasto) > 0) {
@@ -250,19 +248,11 @@
 								${"mul_".$param.$count_row['sub_dee']} = array('PUPEKAIKKIMUUT');
 								break 2;								
 							}
-							else {
-								$dynaaminen_ulisa_temp = $dynaaminen_ulisa_temp != '' ? $dynaaminen_ulisa_temp.','.$paramx : $paramx;
-							}
 						}
 					}
 				}
 			}
 		}
-	}
-
-	if (trim($dynaaminen_ulisa_temp) != '') {
-		$kaikki_tunnukset = $dynaaminen_ulisa_temp;
-		$ulisa .= "&kaikki_tunnukset=$dynaaminen_ulisa_temp";
 	}
 
 	if (count($mul_tuotemyyja) > 0) {
@@ -1247,10 +1237,6 @@
 			}
 			elseif (isset($url) and $url == 'y' and $kaikki_tunnukset != '') {
 				$laatikot_selected[] = $kaikki_tunnukset;
-
-				if (trim($dynaaminen_ulisa_temp) == '') {
-					$ulisa .= "&kaikki_tunnukset=$kaikki_tunnukset";
-				}
 			}
 
 			for ($i = 1; $i < 5; $i++) {

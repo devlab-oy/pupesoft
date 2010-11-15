@@ -402,6 +402,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$chryhma 			= '';
 			$chtuoteno 			= '';
 			$chasiakas			= '';
+			$chsegmentti		= '';
+			$chkoodi			= '';
+			$chpiiri			= '';
+			$chminkpl			= '';
+			$chmaxkpl			= '';
 			$chalkupvm 			= '0000-00-00';
 			$chloppupvm 		= '0000-00-00';
 			$and 				= '';
@@ -996,6 +1001,28 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							if ($otsikko == 'LOPPUPVM' and trim($rivi[$r]) != '') {
 								$chloppupvm = $rivi[$r];
 							}
+							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '1' and trim($rivi[$r]) != '') { // 1 tarkoittaa dynaamisen puun KOODIA
+								$chkoodi = $rivi[$r];
+								$etsitunnus = " SELECT tunnus FROM dynaaminen_puu WHERE yhtio='$kukarow[yhtio]' AND laji='asiakas' AND koodi='$chkoodi'";
+								$etsiresult = mysql_query($etsitunnus) or pupe_error($etsitunnus);
+								$etsirow = mysql_fetch_assoc($etsiresult);
+								$chsegmentti = $etsirow['tunnus'];	
+							}
+							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '2' and trim($rivi[$r]) != '') { // 2 tarkoittaa dynaamisen puun TUNNUSTA
+								$chsegmentti = $rivi[$r];
+							}
+
+
+							if ($otsikko == 'PIIRI' and trim($rivi[$r]) != '') {
+								$chpiiri = $rivi[$r];
+							}
+							if ($otsikko == 'MINKPL' and trim($rivi[$r]) != '') {
+								$chminkpl = $rivi[$r];
+							}
+
+							if ($otsikko == 'MAXKPL' and trim($rivi[$r]) != '') {
+								$chmaxkpl = $rivi[$r];
+							}
 						}
 
 						//tarkistetaan kuka juttuja
@@ -1100,7 +1127,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				}
 
 				//tarkistetaan asiakasalennus ja asiakashinta keisseissä onko tällanen rivi jo olemassa
-				if ($hylkaa == 0 and ($chasiakas != '' or $chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
+				if ($hylkaa == 0 and ($chasiakas != '' or $chasiakas_ryhma != '' or $chytunnus != '' or $chpiiri != '' or $chsegmentti != '') and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
 					if ($chasiakas_ryhma != '') {
 						$and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
 					}
@@ -1116,7 +1143,19 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					if ($chtuoteno != '') {
 						$and .= " and tuoteno = '$chtuoteno'";
 					}
-
+					if ($chsegmentti != '') {
+						$and .= " and asiakas_segmentti = '$chsegmentti'";
+					}
+					if ($chpiiri != '') {
+						$and .= " and piiri = '$chpiiri'";
+					}
+					if ($chminkpl != '') {
+						$and .= " and minkpl = '$chminkpl'";
+					}
+					if ($chmaxkpl != '') {
+						$and .= " and maxkpl = '$chmaxkpl'";
+					}
+					
 					$and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
 				}
 
@@ -1152,12 +1191,19 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					$tarq .= " WHERE ".$valinta;
 				}
 				$result = mysql_query($tarq) or pupe_error($tarq);
+				
 
 				if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and mysql_num_rows($result) != 1) {
 					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Päivitettävää riviä ei löytynyt")."!</font><br>";
 				}
 				elseif (strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and mysql_num_rows($result) != 0) {
-					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska se löytyi jo järjestelmästä")."!</font><br>";
+					if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
+						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska Asiakassegmenttikoodia ei löytynyt")."!</font><br>";
+					}
+					else {
+						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska se löytyi jo järjestelmästä")."!</font><br>";
+					}
+					
 				}
 				else {
 					$tarkrow = mysql_fetch_array($result);
@@ -1327,6 +1373,15 @@ else {
 					<td><select name='ytunnustarkkuus'>
 					<option value=''>".t("Päivitetään vain, jos Ytunnuksella löytyy yksi rivi")."</option>
 					<option value='2'>".t("Päivitetään kaikki syötetyllä Ytunnuksella löytyvät asiakkaat")."</option>
+					</select></td>
+			</tr>";
+		}
+
+		if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
+			echo "<tr><td>".t("Segmentin valinta").":</td>
+					<td><select name='segmenttivalinta'>
+					<option value='1'>".t("Valitaan käytettäväksi asiakas-segmentin koodia")."</option>
+					<option value='2'>".t("Valitaan käytettäväksi asiakas-segmentin tunnusta ")."</option>
 					</select></td>
 			</tr>";
 		}

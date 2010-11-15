@@ -6,7 +6,6 @@ $otsikko_nappi 	= 'Puun Alkio';
 
 if ($laji == 'asiakas') {
 	$rajauslisa = " and laji = 'asiakas' ";
-	$laji = 'asiakas';
 }
 else {
 	$rajauslisa = " and laji = 'tuote' ";

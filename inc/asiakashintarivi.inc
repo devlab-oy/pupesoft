@@ -8,6 +8,59 @@
 		$tyyppi = 0;
 	}
 
+	
+	if (mysql_field_name($result, $i) == "piiri") {
+		//echo $toim2;
+
+		$preq = "	SELECT avainsana.selite piiri, avainsana.selitetark selitetark
+					FROM avainsana 
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
+		$preres = mysql_query($preq) or pupe_error($preq);
+		
+		$ulos = "<td><select id='piiri' name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Ei piiriä")."</option>";
+				
+		while ($srow = mysql_fetch_array($preres)) {
+			$sel = '';
+			if ($trow[$i] == $srow["piiri"]) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value='$srow[piiri]' $sel>$srow[selitetark]</option>";
+		}
+		
+		$ulos .= "</select></td>\n";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "asiakas_segmentti") {
+		//echo $toim2;
+
+		$preq = "	SELECT CONCAT( REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', node.koodi, ' - ', node.nimi) AS name, node.koodi, node.tunnus
+					FROM dynaaminen_puu AS node,
+					dynaaminen_puu AS parent
+					WHERE node.lft BETWEEN parent.lft AND parent.rgt
+					AND node.lft > 1
+					AND node.laji = 'asiakas'
+					AND parent.laji = 'asiakas'
+					GROUP BY node.tunnus
+					ORDER BY node.lft";
+		$preres = mysql_query($preq) or pupe_error($preq);
+	
+		$ulos = "<td><select id='asiakas_segmentti' name='$nimi'>";
+		$ulos .= "<option value=''>".t("Ei asiakassegmenttiä")."</option>";
+
+		while ($prerow = mysql_fetch_array($preres)) {
+			$sel = '';
+			if ($trow[$i] == $prerow["tunnus"]) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value='$prerow[tunnus]' $sel>$prerow[name]</option>";
+		}
+		$ulos .= "</select></td>\n";
+		$jatko = 0;
+	}
+
+
 	if (mysql_field_name($result, $i) == "ryhma") {
 
 		$query = "	SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark

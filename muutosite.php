@@ -132,20 +132,6 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						HAVING maara > 1 and heitto <> 0";
 		}
 
-		if ($tee == 'T') {
-			$query = "	SELECT ltunnus, count(*) maara, tila, 'n/a', 'n/a', 'n/a', selite
-						FROM tiliointi use index (yhtio_tilino_tapvm)
-						LEFT JOIN lasku ON  lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus
-						WHERE tiliointi.yhtio='$kukarow[yhtio]'
-						and korjattu=''
-						and tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
-						and tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
-						and tilino = '$yhtiorow[ostovelat]'
-						and tila < 'R'
-						GROUP BY ltunnus
-						HAVING maara > 1";
-		}
-
 		if ($tee == 'S') {
 			$query = "	SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
 						if(sum(ifnull(t1.summa, 0))=0,0,1)+if(sum(ifnull(t2.summa, 0))=0,0,1)+if(sum(ifnull(t3.summa, 0))=0,0,1) korjattu,
@@ -157,6 +143,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						WHERE lasku.yhtio	= '$kukarow[yhtio]'
 						and lasku.tila		= 'U'
 						and lasku.alatila	= 'X'
+						and lasku.mapvm		!= '0000-00-00'
 						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
 						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						GROUP BY 1,2,3,4,5,6
@@ -314,7 +301,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 				$lisa .= " and tiliointi.tosite = '$tositenro' ";
 			}
 		}
-		
+
 		if ($viivatut != 'on') {
 			$vlisa = "and tiliointi.korjattu=''";
 		}
@@ -1132,20 +1119,20 @@ if ($tee == 'E' or $tee == 'F') {
 				<input type='hidden' name='toim' value='LASKU'>
 				<input type='hidden' name='tee' value='NAYTATILAUS'>
 				<input type='submit' value='".t("N‰yt‰ laskun PDF")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$tunnus', ''); return false;\"></form>";
-				
+
 		$query  = "	SELECT *
 					FROM maksuehto
-					WHERE yhtio = '$kukarow[yhtio]' 
+					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$trow[maksuehto]'";
 		$masres = mysql_query($query) or pupe_error($query);
 		$masrow = mysql_fetch_assoc($masres);
-				
-				
+
+
 		if (($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") and ($trow["vienti"] == "" or ($trow["vienti"] == "E" and $trow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $trow["sisainen"] == "" and $masrow["kateinen"] == "" and $trow["chn"] != '666' and $trow["chn"] != '667' and abs($trow["summa"]) != 0) {
 			echo "<form id='finvoice_$tunnus' name='finvoice_$tunnus' method='post' action='".$palvelin2."tilauskasittely/uudelleenluo_laskuaineisto.php' autocomplete='off'>
-					<input type='hidden' name='laskunumerot' value='$trow[laskunro]'>					
-					<input type='hidden' name='tee' value='NAYTATILAUS'>	
-					<input type='submit' value='".t("N‰yt‰ Finvoice")."' onClick=\"js_openFormInNewWindow('finvoice_$tunnus', ''); return false;\"></form>";		
+					<input type='hidden' name='laskunumerot' value='$trow[laskunro]'>
+					<input type='hidden' name='tee' value='NAYTATILAUS'>
+					<input type='submit' value='".t("N‰yt‰ Finvoice")."' onClick=\"js_openFormInNewWindow('finvoice_$tunnus', ''); return false;\"></form>";
 		}
 
 		if ($trow['viesti'] == 'Korkolasku') {
@@ -1208,10 +1195,10 @@ if (strlen($tee) == 0) {
 	echo "<form name = 'valikko' action = '$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='tee' value='Y'>";
 	echo "<table>";
-	echo "<tr><th colspan='3'>".t("Etsi tositetta")."</th></tr>";	
+	echo "<tr><th colspan='3'>".t("Etsi tositetta")."</th></tr>";
 	echo "<tr>
 		  <td>".t("Pvm")."</td>
-		  <td>		  	
+		  <td>
 		  <input type='text' name='tap' maxlength='2' size=2>
 		  <input type='text' name='tak' maxlength='2' size=2>
 		  <input type='text' name='tav' maxlength='4' size=4></td>
@@ -1252,13 +1239,13 @@ if (strlen($tee) == 0) {
 		  	<td>".t("N‰yt‰ muutetut rivit")."</td>
 		  	<td><input type = 'checkbox' name = 'viivatut'></td>
 		  	<td><input type = 'submit' value = '".t("Etsi")."'></td></tr>";
-		
+
 	echo "</table>";
 	echo "</form>";
-				
-	echo "<br><br><table>";	
-	echo "	<tr><th colspan='2'>".t("Etsi virhett‰")."</th></tr>";
-		
+
+	echo "<br><br><table>";
+	echo "	<tr><th colspan='2'>".t("Etsi tapahtumia ajalta")." ".tv1dateconv($yhtiorow["tilikausi_alku"], "", "LYHYT")." - ".tv1dateconv($yhtiorow["tilikausi_loppu"], "", "LYHYT")."</th></tr>";
+
 	echo "	<tr class='aktiivi'>
 			<td>".t("n‰yt‰ tositteet, jotka eiv‰t t‰sm‰‰")."</td>
 		  	<td><form action = '$PHP_SELF?tee=Z' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
@@ -1276,24 +1263,20 @@ if (strlen($tee) == 0) {
 		  	<td><form action = '$PHP_SELF?tee=W' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
-		  	<td>".t("n‰yt‰ tositteet, joiden tila tuntuu v‰‰r‰lt‰")."</td>
-		  	<td><form action = '$PHP_SELF?tee=T' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
-		  	</tr>
+		  	<td>".t("n‰yt‰ tositteet, joiden myyntisaamiset ei t‰sm‰‰")."</td>
+		  	<td><form action = '$PHP_SELF?tee=S' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+			</tr>
+			<tr class='aktiivi'>
+		  	<td>".t("n‰yt‰ maksetut laskut, joilla on myyntisaamisia")."</td>
+		  	<td><form action = '$PHP_SELF?tee=ƒ' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+			</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joiden automaattikirjauksia on muutettu")."</td>
 		  	<td><form action = '$PHP_SELF?tee=automaattikirjauksia_muutettu' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
-		  	<td>".t("n‰yt‰ tositteet, joiden myyntisaamiset ovat v‰‰rin")."</td>
-		  	<td><form action = '$PHP_SELF?tee=S' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
-			</tr>
-			<tr class='aktiivi'>
 		  	<td>".t("n‰yt‰ tositteet, joiden marginaaliverotiliˆinnit ovat v‰‰rin")."</td>
 		  	<td><form action = '$PHP_SELF?tee=≈' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
-			</tr>
-			<tr class='aktiivi'>
-		  	<td>".t("n‰yt‰ maksetut laskut, joilla on myyntisaamisia")."</td>
-		  	<td><form action = '$PHP_SELF?tee=ƒ' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
 			</table>";
 }

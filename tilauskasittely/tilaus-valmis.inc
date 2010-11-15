@@ -344,9 +344,13 @@ else {
 				$result = mysql_query($query) or pupe_error($query);
 
 				if ($jaksotettu == 'X') {
-					$query = "	UPDATE lasku SET tila='L', alatila='J', lahetepvm=now()
+					$query = "	UPDATE lasku SET 
+								tila = 'L', 
+								alatila = 'J', 
+								lahetepvm = now()
 								WHERE tunnus = '$laskurow[tunnus]'
-								and yhtio = '$kukarow[yhtio]'";
+								AND yhtio = '$kukarow[yhtio]'
+								AND alatila not IN ('J', 'D')";
 					$result = mysql_query($query) or pupe_error($query);
 
 					$tilaus_valmis_ulos .= t("Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $laskurow[tunnus] $laskurow[nimi]<br>\n";
@@ -685,9 +689,13 @@ else {
 				$result = mysql_query($query) or pupe_error($query);
 
 				if ($jaksotettu == 'X') {
-					$query = "	UPDATE lasku SET tila='L', alatila='J', lahetepvm=now()
+					$query = "	UPDATE lasku SET 
+								tila = 'L', 
+								alatila = 'J', 
+								lahetepvm = now()
 								WHERE tunnus = '$laskurow[tunnus]'
-								and yhtio = '$kukarow[yhtio]'";
+								AND yhtio = '$kukarow[yhtio]'
+								AND alatila not IN ('J', 'D')";
 					$result = mysql_query($query) or pupe_error($query);
 
 					$tilaus_valmis_ulos .= t("Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $laskurow[tunnus] $laskurow[nimi]<br>\n";

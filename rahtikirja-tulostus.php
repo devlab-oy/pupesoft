@@ -698,6 +698,10 @@
 					$query = "UPDATE lasku set alatila = 'B' where tunnus in ($otunnukset) and vienti != '' and yhtio='$kukarow[yhtio]'";
 					$ures  = mysql_query($query) or pupe_error($query);
 
+					// jos laskulla on maksupositioita, menee ne alatilaan J
+					$query = "UPDATE lasku set alatila = 'J' where tunnus in ($otunnukset) and jaksotettu != 0 and yhtio='$kukarow[yhtio]'";
+					$ures  = mysql_query($query) or pupe_error($query);
+
 					// verkkolaskutettavat EU-viennit menee alatilaan D, jos niillä on tarpeeksi lisätietoja
 					$query = "	UPDATE lasku set
 								alatila = 'D',

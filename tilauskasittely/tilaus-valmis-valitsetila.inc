@@ -263,10 +263,20 @@
 							and tyyppi 	   != 'D'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query  = "	UPDATE lasku
-							set tila='L', alatila='D', lahetepvm=now()
-							where tunnus = '$laskurow[tunnus]'
-							and yhtio	 = '$kukarow[yhtio]'";
+				// Jos meill‰ on maksupositioita laskulla, tulee se siirt‰‰ alatilaan J
+				if ($laskurow['jaksotettu'] != 0) {
+					$tilaus_valmis_alataila = 'J';
+				}
+				else {
+					$tilaus_valmis_alataila = 'D';
+				}
+
+				$query  = "	UPDATE lasku SET
+							tila = 'L',
+							alatila = '$tilaus_valmis_alataila',
+							lahetepvm = now()
+							WHERE tunnus = '$laskurow[tunnus]'
+							AND yhtio = '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";

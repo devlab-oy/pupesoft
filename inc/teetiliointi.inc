@@ -7,7 +7,7 @@
 		echo "<b>".t("Lasku katosi")."</b><br>";
 		exit;
 	}
-	$laskurow=mysql_fetch_array($result);
+	$laskurow = mysql_fetch_array($result);
 
 	$summa = round($summa,2);
 
@@ -15,11 +15,12 @@
 		$alv = round($summa - $summa / (1 + ($vero / 100)),2);
 		$summa -= $alv;
 	}
-	if (($kpexport!=1) and (strtoupper($yhtiorow['maa']) == 'FI')) $tositenro=0; // Jos tätä ei tarvita
+
+	if ((!isset($kpexport) or $kpexport != 1) and strtoupper($yhtiorow['maa']) == 'FI') $tositenro = 0; // Jos tätä ei tarvita
 
 	// jos on valittu tiliointipvm popupista
-	if ($tiliointipvm != ''){
-		$laskurow['tapvm']=$tiliointipvm;
+	if (isset($tiliointipvm) and $tiliointipvm != ''){
+		$laskurow['tapvm'] = $tiliointipvm;
 	}
 
 	// jos ollaan muokkaamassa tiliöintiä ja se on ollut valuutassa

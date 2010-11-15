@@ -3,14 +3,14 @@
 
 	enable_ajax();
 
-	if ($livesearch_tee == "TILIHAKU") {
+	if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
 	}
 
 	// Talletetaan käyttäjän nimellä tositteen/liitteen kuva, jos sellainen tuli
 	// koska, jos tulee virheitä tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
-	if ($tee == 'I' and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+	if ($tee == 'I' and isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$retval = tarkasta_liite("userfile", array("PNG", "JPG", "GIF", "PDF"));
 
 		if ($retval === true) {
@@ -116,6 +116,8 @@
 		if (isset($gokfrom) and ($gokfrom == "palkkatosite" or $gokfrom == "avaavatase")) {
 			$gok = 1;
 		}
+
+		$tapvmvirhe = "";
 
 		if (!checkdate($tpk, $tpp, $tpv)) {
 			$tapvmvirhe = "<font class='error'>".t("Virheellinen tapahtumapvm")."</font>";
@@ -362,13 +364,20 @@
 				$selausnimi = "itili['.$i.']"; // Minka niminen mahdollinen popup on?
 				$vero 		= "";
 				$tositetila = "X";
-				$tositeliit = $toimasrow["tunnus"];
+
+				if ((isset($toimittajaid) and $toimittajaid > 0) or (isset($asiakasid) and $asiakasid > 0)) {
+					$tositeliit = $toimasrow["tunnus"];
+				}
+				else {
+					$tositeliit = 0;
+				}
 
 				require "inc/tarkistatiliointi.inc";
 
 				if ($vero!='') $ivero[$i]=$vero; //Jos meillä on hardkoodattuvero, otetaan se käyttöön
 
-				$ivirhe[$i] .= $virhe;
+				if (isset($ivirhe[$i])) $ivirhe[$i] .= $virhe;
+
 				$iulos[$i] = $ulos;
 
 				if ($ok == 0) { // Sieltä kenties tuli päivitys tilinumeroon
@@ -397,6 +406,7 @@
 				$gok = 1;
 				$kuittivirhe = "<font class='error'>".t("Pyysit kuittia, mutta kassatilille ei ole vientejä")."</font><br>\n";
 			}
+
 			if ($nimi == '' and $toimasrow["nimi"] == '') {
 				$gok = 1;
 				$kuittivirhe .= "<font class='error'>".t("Kuitille on annettava nimi tai asiakas tai toimittaja")."</font><br>\n";
@@ -846,11 +856,11 @@
 
 			echo "<tr>\n";
 
-			if ($iulos[$i] == '') {
+			if (!isset($iulos[$i]) or $iulos[$i] == '') {
 				//Annetaan selväkielinen nimi
 				$tilinimi = '';
 
-				if ($itili[$i] != '') {
+				if (isset($itili[$i]) and $itili[$i] != '') {
 					$query = "	SELECT nimi
 								FROM tili
 								WHERE yhtio = '$kukarow[yhtio]' and tilino = '$itili[$i]'";
@@ -882,7 +892,7 @@
 
 				while ($kustannuspaikkarow=mysql_fetch_assoc ($result)) {
 					$valittu = "";
-					if ($kustannuspaikkarow["tunnus"] == $ikustp[$i]) {
+					if (isset($ikustp[$i]) and $kustannuspaikkarow["tunnus"] == $ikustp[$i]) {
 						$valittu = "SELECTED";
 					}
 					echo "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]\n";
@@ -903,7 +913,7 @@
 
 				while ($kustannuspaikkarow=mysql_fetch_assoc ($result)) {
 					$valittu = "";
-					if ($kustannuspaikkarow["tunnus"] == $ikohde[$i]) {
+					if (isset($ikohde[$i]) and $kustannuspaikkarow["tunnus"] == $ikohde[$i]) {
 						$valittu = "SELECTED";
 					}
 					echo "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]\n";
@@ -924,7 +934,7 @@
 
 				while ($kustannuspaikkarow=mysql_fetch_assoc ($result)) {
 					$valittu = "";
-					if ($kustannuspaikkarow["tunnus"] == $iprojekti[$i]) {
+					if (isset($iprojekti[$i]) and $kustannuspaikkarow["tunnus"] == $iprojekti[$i]) {
 						$valittu = "SELECTED";
 					}
 					echo "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]\n";
@@ -935,14 +945,16 @@
 			echo "</td>\n";
 			echo "<td valign='top' align='right'><input type='text' size='13' style='text-align: right;' name='isumma[$i]' value='$isumma_valuutassa[$i]' onchange='javascript:tositesumma();' onkeyup='javascript:tositesumma();'> $valkoodi<br>&nbsp;&nbsp;$isumma[$i]&nbsp;&nbsp;$valkoodi</td>\n";
 
-			if ($hardcoded_alv != 1) {
+			if (!isset($hardcoded_alv) or $hardcoded_alv != 1) {
 				echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]) . "</td>\n";
 			}
 			else {
 				echo "<td></td>\n";
 			}
 
-			echo "<td class='back'><font class='error'>$ivirhe[$i]</font></td>\n";
+			echo "<td class='back'>";
+			if (isset($ivirhe[$i])) echo "<font class='error'>$ivirhe[$i]</font>";
+			echo "</td>\n";
 			echo "</tr>\n";
 
 			echo "<tr><td colspan='4' nowrap><input type='text' name='iselite[$i]' value='$iselite[$i]' maxlength='150' size='80' placeholder='".t("Selite")."'></td></tr>\n";

@@ -240,7 +240,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
 						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						GROUP BY ltunnus, tapvm
-						ORDER BY ltunnus, tapvm";
+						ORDER BY tapvm, ltunnus";
 		}
 
 		if ($tee == 'alvkirjauksia_ilmanalvtasoa') {
@@ -254,7 +254,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
 						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						GROUP BY ltunnus, tapvm
-						ORDER BY ltunnus, tapvm";
+						ORDER BY tapvm, ltunnus";
 		}
 
 	}

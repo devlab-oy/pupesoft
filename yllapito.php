@@ -774,6 +774,9 @@
 					$lisa .= " and " . $array[$i] . " = '" . $haku[$i] . "'";
 				}
 			}
+			elseif ($toim == 'puun_alkio' and $haku[5] != '' and $i == 5) {
+				$lisa .= " and (SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = puun_alkio.puun_tunnus AND laji = '$laji' AND nimi like '%$haku[5]%') like '%$haku[5]%' ";
+			}
 			elseif ($haku[$i]{0} == "@") {
 				$lisa .= " and " . $array[$i] . " = '" . substr($haku[$i], 1) . "'";
 			}
@@ -993,7 +996,7 @@
 					else	$size='10';
 
 					// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
-					if (strpos(strtoupper($array[$i]), "SELECT") === FALSE) {
+					if (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'puun_alkio' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
 						if (!isset($haku[$i])) $haku[$i] = "";
 
 						echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";

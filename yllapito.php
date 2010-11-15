@@ -1405,7 +1405,7 @@
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=asiakkaan_avainsanat&from=yllapito&ohje=off&haku[4]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi like 'puun_alkio%' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi like 'puun_alkio&laji=asiakas%' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=asiakas&from=yllapito&ohje=off&haku[1]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]&toim2=asiakas' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
@@ -1463,12 +1463,10 @@
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 
-			// Jamppa säätää
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='puun_alkio' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi like 'puun_alkio&laji=tuote%' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-			if (mysql_num_rows($res) > 0) echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&toim2=tuote' style='width: 600px; height: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
-			// JAMPAN säätö loppuu
+			if (mysql_num_rows($res) > 0) echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&toim2=tuote' style='width: 600px; height: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
 
 		echo "</td></tr>";

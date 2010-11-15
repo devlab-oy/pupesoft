@@ -86,9 +86,9 @@ if ($tee == 'G') {
 }
 
 // Tositeselailu
-if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia') {
+if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa') {
 
-	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia') {
+	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa') {
 
 		// Etsitään virheet vain kuluvalta tilikaudelta!
 		if ($tee == 'Z') {
@@ -242,6 +242,21 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						GROUP BY ltunnus, tapvm
 						ORDER BY ltunnus, tapvm";
 		}
+
+		if ($tee == 'alvkirjauksia_ilmanalvtasoa') {
+			// tutkitaan onko tiliöintejä tileillä ilman alv-tasoa
+			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
+						FROM tiliointi use index (yhtio_tapvm_tilino)
+						JOIN tili on (tili.yhtio = tiliointi.yhtio and tili.tilino=tiliointi.tilino and tili.alv_taso = '')
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.korjattu = ''
+						AND tiliointi.vero != 0
+						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
+						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						GROUP BY ltunnus, tapvm
+						ORDER BY ltunnus, tapvm";
+		}
+
 	}
 	else {
 
@@ -1253,6 +1268,10 @@ if (strlen($tee) == 0) {
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joilla on manuaalisia alv kirjauksia")."</td>
 		  	<td><form action = '$PHP_SELF?tee=kasintehtyja_alvkirjauksia' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	</tr>
+			<tr class='aktiivi'>
+		  	<td>".t("näytä tositteet, joilla on alv kirjauksia tileille, jotka ei ole alv-ilmoituksessa")."</td>
+		  	<td><form action = '$PHP_SELF?tee=alvkirjauksia_ilmanalvtasoa' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joilta puuttuu kustannuspaikka")."</td>

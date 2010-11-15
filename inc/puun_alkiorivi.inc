@@ -90,19 +90,19 @@ if (mysql_field_name($result, $i) == "puun_tunnus") {
 			$alkio_nimi = $nimi_fetch_row['nimi'];
 		}
 
-		if(strtolower($apu['laji']) == strtolower('asiakas')) {
-			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno=".trim($apu['ttuoteno'])."&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=asiakas&mista_tulin={$toim}&toim2={$toim2}' ";
+		if (strtolower($apu['laji']) == strtolower('asiakas')) {
+			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno=".trim($apu['ttuoteno'])."&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=asiakas&mista_tulin={$toim}&toim2={$toim2}&kieli={$apu['kieli']}' ";
 			$ulos .= "target='main'> ".t('Valitse tähän puuhun sopivat asiakassegmentit')." </a><br />\n";
 			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";
 			
 		}
-		else
-		{
-			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno=".trim($apu['ttuoteno'])."&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=tuote&mista_tulin={$toim}&toim2={$toim2}' ";
+		else {
+			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno=".trim($apu['ttuoteno'])."&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=tuote&mista_tulin={$toim}&toim2={$toim2}&kieli={$apu['kieli']}' ";
 			$ulos .= "target='main'> ".t('Valitse tähän puuhun sopivat tuotesegmentit')." </a><br />\n";
 			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";
 		}
 	}
+
 	$jatko = 0;
 }
 
@@ -127,9 +127,11 @@ if (mysql_field_name($result, $i) == "kieli") {
 			$sel = "";
 			if ($trow[$i] == $apurow[0]) {
 				$sel = "SELECTED";
+				$apu['kieli'] = $apurow[0];
 			}
 			elseif ($trow[$i] == "" and $apurow[0] == $yhtiorow["kieli"]) {
 				$sel = "SELECTED";
+				$apu['kieli'] = $apurow[0];
 			}
 			$ulos .= "<option value='$apurow[0]' $sel>$apurow[0] - ".maa($apurow[0])."</option>";
 		}

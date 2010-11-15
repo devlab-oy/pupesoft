@@ -8902,13 +8902,13 @@ if (!function_exists("asiakashakuohje")) {
 
 // Funktio lis‰‰ tuotteenalkion dynaamiseen puuhun.
 if (!function_exists("TuotteenAlkiot")) {
-	function TuotteenAlkiot($kukarow, $liitos, $puun_tunnus, $laji, $ttunnus = '') {
+	function TuotteenAlkiot($kukarow, $liitos, $puun_tunnus, $laji, $kieli, $ttunnus = '') {
 
 		if (trim($ttunnus) == '') {
-			$query = "INSERT INTO puun_alkio (yhtio, liitos, laji, puun_tunnus, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$liitos', '$laji', '$puun_tunnus', '$kukarow[kuka]', now())";
+			$query = "INSERT INTO puun_alkio (yhtio, liitos, laji, puun_tunnus, kieli, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$liitos', '$laji', '$puun_tunnus', '$kieli', '$kukarow[kuka]', now())";
 		}
 		else {
-			$query = "UPDATE puun_alkio SET puun_tunnus = '$puun_tunnus', muuttaja = '$kukarow[kuka]', muutospvm = now() WHERE laji = '$laji' AND liitos = '$liitos' AND tunnus = '$ttunnus' AND yhtio = '$kukarow[yhtio]'";
+			$query = "UPDATE puun_alkio SET puun_tunnus = '$puun_tunnus', muuttaja = '$kukarow[kuka]', muutospvm = now() WHERE laji = '$laji' AND liitos = '$liitos' AND tunnus = '$ttunnus' AND kieli = '$kieli' AND yhtio = '$kukarow[yhtio]'";
 		}
 
 		$r = mysql_query($query) or pupe_error($query);

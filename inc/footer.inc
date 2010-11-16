@@ -22,42 +22,46 @@
 		$suores = mysql_query($suoque) or pupe_error($suoque);
 	}
 
-	if ((!isset($nayta_pdf)) and (!isset($ei_kelloa) or $ei_kelloa == "") and (!isset($ohje) or $ohje != "off")) {
+	if (!isset($nayta_pdf)) {
 
-		$loppumem = memory_get_usage();
+		if ((!isset($ei_kelloa) or $ei_kelloa == "") and (!isset($ohje) or $ohje != "off")) {
 
-		echo "<br><br>";
-		echo "<font class='info'>$aika ".round((($loppumem-$alkumem)/1000000), 1)."</font>";
+			$loppumem = memory_get_usage();
 
-		if (strpos($_SERVER['SCRIPT_NAME'], "sanakirja.php") === FALSE and isset($kaannetyt_sanat) and count($kaannetyt_sanat) > 0) {
+			echo "<br><br>";
+			echo "<font class='info'>$aika ".round((($loppumem-$alkumem)/1000000), 1)."</font>";
 
-			switch (strtoupper($kukarow["kieli"])) {
-				case "EN":
-					$kieli  = "EN";
-					$kindex = 0;
-					break;
-				case "SE":
-					$kieli  = "SE";
-					$kindex = 1;
-					break;
-				case "DE":
-					$kieli  = "DE";
-					$kindex = 2;
-					break;
-				case "DK":
-					$kieli  = "DK";
-					$kindex = 3;
-					break;
-				case "EE":
-					$kieli  = "EE";
-					$kindex = 4;
-					break;
-				default:
-					$kieli  = "EN";
-					$kindex = 0;
+			if (strpos($_SERVER['SCRIPT_NAME'], "sanakirja.php") === FALSE and isset($kaannetyt_sanat) and count($kaannetyt_sanat) > 0) {
+
+				switch (strtoupper($kukarow["kieli"])) {
+					case "EN":
+						$kieli  = "EN";
+						$kindex = 0;
+						break;
+					case "SE":
+						$kieli  = "SE";
+						$kindex = 1;
+						break;
+					case "DE":
+						$kieli  = "DE";
+						$kindex = 2;
+						break;
+					case "DK":
+						$kieli  = "DK";
+						$kindex = 3;
+						break;
+					case "EE":
+						$kieli  = "EE";
+						$kindex = 4;
+						break;
+					default:
+						$kieli  = "EN";
+						$kindex = 0;
+				}
+
+				echo " <a href='".$palvelin."sanakirja.php?hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON&etsi_kieli=fi&kieli[$kindex]=$kieli&show=all'><font class='info'>".t("Sanakirja")."</font></a>";
 			}
 
-			echo " <a href='".$palvelin."sanakirja.php?hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON&etsi_kieli=fi&kieli[$kindex]=$kieli&show=all'><font class='info'>".t("Sanakirja")."</font></a>";
 		}
 
 		echo "<br><br>";

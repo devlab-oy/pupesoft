@@ -8314,27 +8314,20 @@ if (!function_exists("liite_popup")) {
 								kayttotarkoitus,
 								if (kayttotarkoitus='TK', 0, if (kayttotarkoitus='MU', 1, 2)) sorttaus,
 								jarjestys,
-								(	select tunnus
-									from liitetiedostot l
-									where l.yhtio = liitetiedostot.yhtio
-									and l.liitos = liitetiedostot.liitos
-									and l.liitostunnus = liitetiedostot.liitostunnus
-									and l.kayttotarkoitus = 'TH'
-									and l.filename = liitetiedostot.filename
-									ORDER BY l.tunnus DESC
-									LIMIT 1) peukalokuva
+								liitostunnus
 								FROM liitetiedostot
 								WHERE yhtio		 = '$kukarow[yhtio]'
 								and liitos		 = 'tuote'
 								and liitostunnus = '$tuotetunnus'
 								AND kayttotarkoitus != 'TH'
-								ORDER BY sorttaus, jarjestys, filename";
+								ORDER BY sorttaus, jarjestys, filename
+								LIMIT 1";
 			$filetype_result = mysql_query($filetype_query) or pupe_error($filetype_query);
 
 			if (mysql_num_rows($filetype_result) > 0) {
 
 				$filetype_row = mysql_fetch_assoc($filetype_result);
-
+				
 				if (in_array($filetype_row["filetype"], array("image/jpeg","image/jpg","image/gif","image/png","image/bmp"))) {
 
 					$maxwidth = $filetype_row["image_width"];
@@ -8362,26 +8355,31 @@ if (!function_exists("liite_popup")) {
 
 			if (isset($images_exist) or isset($pdf_exist)) {
 
-				if ($filetype_row["peukalokuva"] > 0) {
-					$liitteet  = "<img src='".$palvelin2."view.php?id=$filetype_row[peukalokuva]' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\"";
+				$filetype_peukalo_query = "	SELECT tunnus peukalokuva, image_width, image_height
+											FROM liitetiedostot
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND liitos = 'tuote'
+											AND liitostunnus = '$filetype_row[liitostunnus]'
+											AND kayttotarkoitus = 'TH'
+											AND filename = '$filetype_row[filename]'
+											ORDER BY tunnus DESC
+											LIMIT 1";
+				$filetype_result = mysql_query($filetype_peukalo_query) or pupe_error($filetype_peukalo_query);							
+				$filetype_peukalo_row = mysql_fetch_assoc($filetype_result);
+
+				if ($filetype_peukalo_row["peukalokuva"] > 0) {
+					$liitteet  = "<img src='".$palvelin2."view.php?id=$filetype_peukalo_row[peukalokuva]' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\"";
 
 					if (!isset($thumb_size_x) or !isset($thumb_size_y)) {
-
-						$query = "	SELECT image_width, image_height
-									FROM liitetiedostot
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND tunnus = '$filetype_row[peukalokuva]'";
-						$image_resize_chk_res = mysql_query($query) or pupe_error($query);
-						$image_resize_chk_row = mysql_fetch_assoc($image_resize_chk_res);
 
 						$uusi_h = 100;
 						$uusi_w = 100;
 
-						if ($image_resize_chk_row['image_width'] > $image_resize_chk_row['image_height']) {
-							$uusi_h = ($image_resize_chk_row['image_height'] / $image_resize_chk_row['image_width']) * 100;
+						if ($filetype_peukalo_row['image_width'] > $filetype_peukalo_row['image_height']) {
+							$uusi_h = ($filetype_peukalo_row['image_height'] / $filetype_peukalo_row['image_width']) * 100;
 						}
-						elseif ($image_resize_chk_row['image_height'] > $image_resize_chk_row['image_width']) {
-							$uusi_w = ($image_resize_chk_row['image_width'] / $image_resize_chk_row['image_height']) * 100;
+						elseif ($filetype_peukalo_row['image_height'] > $filetype_peukalo_row['image_width']) {
+							$uusi_w = ($filetype_peukalo_row['image_width'] / $filetype_peukalo_row['image_height']) * 100;
 						}
 
 						$liitteet .= " width='$uusi_w' ";

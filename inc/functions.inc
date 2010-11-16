@@ -2925,18 +2925,16 @@ if (!function_exists("alehinta")) {
 		}
 
 		// haetaan asiakkaan segmentit
-		// uusi ja paranneltu asiakkaan segmenttihaku v2.3.1.1.4
-		$query = "	SELECT group_concat(parent.tunnus) tunnukset 
-	   				FROM dynaaminen_puu AS node 
-	   				JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt) 
+		$query = "	SELECT group_concat(parent.tunnus) tunnukset
+	   				FROM dynaaminen_puu AS node
+	   				JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
 	   				JOIN puun_alkio on (puun_alkio.yhtio = node.yhtio and puun_alkio.puun_tunnus = node.tunnus)
 	   				JOIN asiakas on (asiakas.yhtio = node.yhtio and asiakas.tunnus = puun_alkio.liitos)
 	   				WHERE asiakas.tunnus ='$laskurow[liitostunnus]'
-					AND asiakas.yhtio = '$kukarow[yhtio]' 
+					AND asiakas.yhtio = '$kukarow[yhtio]'
 	   				AND node.laji = parent.laji =  puun_alkio.laji = 'asiakas'
-	   				AND parent.lft > 1 
+	   				AND parent.lft > 1
 	   				HAVING tunnukset IS NOT NULL";
-		
 		$almight = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($almight) == 1) {
@@ -3241,7 +3239,7 @@ if (!function_exists("alehinta")) {
 			//**** asiakas.segmentti tuote.tuoteno nettohinta (asiakassegmentin tuotteen hinta) laskun valuutassa
 			if ($hinta == 0 and isset($alehi_assegmenttirow["tunnukset"]) and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-				$query = "	SELECT hinta, laji  
+				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
 						    and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
@@ -3296,7 +3294,7 @@ if (!function_exists("alehinta")) {
 			//**** asiakas.segmentti tuote.tuoteno nettohinta (asiakassegmentin tuotteen hinta)
 			if ($hinta == 0 and isset($alehi_assegmenttirow["tunnukset"])) {
 
-				$query = "	SELECT hinta, laji  
+				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
@@ -3460,7 +3458,7 @@ if (!function_exists("alehinta")) {
 		   	// **** asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-				$query = "	SELECT hinta, laji  
+				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
@@ -3511,11 +3509,11 @@ if (!function_exists("alehinta")) {
 					$hintaperuste = 6;
 				}
 			}
-		  		   		
+
 		   	// **** asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta)
 			if ($hinta == 0 ) {
 
-				$query = "	SELECT hinta, laji  
+				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
@@ -3566,7 +3564,7 @@ if (!function_exists("alehinta")) {
 					$hintaperuste = 6;
 				}
 			}
-		  
+
 		 	// **** asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhmän hinta)
 			if ($hinta == 0 and isset($alehi_assegmenttirow["tunnukset"])) {
 
@@ -4363,7 +4361,7 @@ if (!function_exists("alehinta")) {
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
-						
+
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 7;
 
@@ -4420,7 +4418,7 @@ if (!function_exists("alehinta")) {
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
-					
+
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 7;
 
@@ -4429,7 +4427,7 @@ if (!function_exists("alehinta")) {
 					$aperuste .= " Asiakaspiirin tuotteen alennus";
 				}
 			}
-			
+
 			//*** asiakas.segmentti tuote.aleryhmä aleprosentti (asiakassegmentin tuotealeryhmän alennus)
 			if (!isset($ale) and isset($alehi_assegmenttirow["tunnukset"])) {
 				$query = "	SELECT alennus
@@ -4448,7 +4446,7 @@ if (!function_exists("alehinta")) {
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
-					
+
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 7;
 
@@ -4456,7 +4454,7 @@ if (!function_exists("alehinta")) {
 					$ale  = $hrow["alennus"];
 					$aperuste .= " Asiakassegmentin tuotealeryhmän alennus";
 				}
-			}						
+			}
 
 			// 8. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasaleryhmän tuotealeryhmän alennus)
 			if (!isset($ale)) {
@@ -4517,7 +4515,7 @@ if (!function_exists("alehinta")) {
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
-					
+
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 7;
 
@@ -4525,7 +4523,7 @@ if (!function_exists("alehinta")) {
 					$ale  = $hrow["alennus"];
 					$aperuste .= " Asiakassegmentin tuotealeryhmän alennus";
 				}
-			}			
+			}
 
 			// 9. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus)
 			if (!isset($ale)) {
@@ -8327,7 +8325,7 @@ if (!function_exists("liite_popup")) {
 			if (mysql_num_rows($filetype_result) > 0) {
 
 				$filetype_row = mysql_fetch_assoc($filetype_result);
-				
+
 				if (in_array($filetype_row["filetype"], array("image/jpeg","image/jpg","image/gif","image/png","image/bmp"))) {
 
 					$maxwidth = $filetype_row["image_width"];
@@ -8364,7 +8362,7 @@ if (!function_exists("liite_popup")) {
 											AND filename = '$filetype_row[filename]'
 											ORDER BY tunnus DESC
 											LIMIT 1";
-				$filetype_result = mysql_query($filetype_peukalo_query) or pupe_error($filetype_peukalo_query);							
+				$filetype_result = mysql_query($filetype_peukalo_query) or pupe_error($filetype_peukalo_query);
 				$filetype_peukalo_row = mysql_fetch_assoc($filetype_result);
 
 				if ($filetype_peukalo_row["peukalokuva"] > 0) {
@@ -9263,7 +9261,7 @@ if (!function_exists("tarkista_iban")) {
 }
 
 if (!function_exists("tarkista_oikeus")) {
-	function tarkista_oikeus($ohjelma, $alanimi = '') {
+	function tarkista_oikeus($ohjelma, $alanimi = '', $paivitys = '') {
 
 		global $kukarow;
 		$ohjelma = mysql_real_escape_string(trim($ohjelma));
@@ -9272,6 +9270,10 @@ if (!function_exists("tarkista_oikeus")) {
 
 		if ($alanimi != "") {
 			$querylisa = "AND alanimi = '$alanimi'";
+		}
+
+		if ($paivitys != "") {
+			$querylisa = "AND paivitys = '1'";
 		}
 
 		$query = "	SELECT *

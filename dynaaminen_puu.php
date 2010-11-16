@@ -5,12 +5,9 @@
 	// pi‰‰ jotenkin ottaa nodesta ne arvot johonkin talteen k‰sittely‰ varten...
 	$Xnodet = explode(",", $puun_tunnus);
 
-	$query_oikeus_chk = "SELECT tunnus FROM oikeu WHERE nimi = 'dynaaminen_puu.php' AND alanimi = 'tuote' and kuka = '$kukarow[kuka]' and yhtio = '$kukarow[yhtio]' and paivitys = '1'";
-	$oikeus_chk_res = mysql_query($query_oikeus_chk) or pupe_error($query_oikeus_chk);
-
 	$oikeus = '';
 
-	if (mysql_num_rows($oikeus_chk_res) > 0) {
+	if (tarkista_oikeus('dynaaminen_puu.php', $laji, 1)) {
 		$oikeus = 'joo';
 	}
 
@@ -156,28 +153,25 @@
 
 	if (isset($toim)) {
 
-		$query = "SELECT
-				node.lft AS lft,
-				node.rgt AS rgt,
-				lower(node.nimi) AS node_nimi,
-				node.koodi AS node_koodi,
-				node.lft AS plft,
-				(COUNT(node.nimi) - 1)AS sub_dee,
-				node.lft AS parent_lft,
-				node.tunnus AS node_tunnus
-			FROM
-				dynaaminen_puu AS node,
-				dynaaminen_puu AS parent
-			WHERE
-				node.lft BETWEEN parent.lft
-			AND parent.rgt
-			AND node.laji = '{$laji}'
-			AND parent.laji = '{$laji}'
-			AND node.yhtio = '{$kukarow[yhtio]}'
-			GROUP BY
-				node.lft
-			ORDER BY
-				node.lft";
+		$query = "	SELECT
+					node.lft AS lft,
+					node.rgt AS rgt,
+					lower(node.nimi) AS node_nimi,
+					node.koodi AS node_koodi,
+					node.lft AS plft,
+					(COUNT(node.nimi) - 1)AS sub_dee,
+					node.lft AS parent_lft,
+					node.tunnus AS node_tunnus
+					FROM dynaaminen_puu AS node, dynaaminen_puu AS parent
+					WHERE node.lft BETWEEN parent.lft
+					AND parent.rgt
+					AND node.laji = '{$laji}'
+					AND parent.laji = '{$laji}'
+					AND node.yhtio = '{$kukarow[yhtio]}'
+					GROUP BY
+					node.lft
+					ORDER BY
+					node.lft";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// Mik‰li sivulle tullaan ensimm‰isen kerran ja p‰‰kategoriaa ei ole niin t‰m‰ luo kyseisen kategorian.

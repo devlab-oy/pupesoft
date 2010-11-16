@@ -53,40 +53,45 @@ $ealvi		 = array();
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
-		// Tuotekoodi
-		$rtuoteno[$i]["tuoteno"] = array_shift($tuotetieto->xpath('LIN/@eC212.7140'));
 
-		// Veroton rivihinta
-		$rtuoteno[$i]["rivihinta"] = array_shift($tuotetieto->xpath('Group26/MOA[@eC516.5025="203"]/@eC516.5004'));
+		// Varmistetaan, että Group25 pitää sisällään tuotenumeron
+		if (array_shift($tuotetieto->xpath('LIN/@eC212.7140')) != NULL) {
 
-		$xvat[$i] = $tuotetieto->xpath('Group33/TAX[@eC241.5153="VAT"]/@eC243.5278');
+			// Tuotekoodi
+			$rtuoteno[$i]["tuoteno"] = array_shift($tuotetieto->xpath('LIN/@eC212.7140'));
 
-		if (is_array($xvat[$i])) {
-			 $xvati = (float) $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
+			// Veroton rivihinta
+			$rtuoteno[$i]["rivihinta"] = array_shift($tuotetieto->xpath('Group26/MOA[@eC516.5025="203"]/@eC516.5004'));
 
-			$rtuoteno[$i]["alv"] = $xvati;
-			$ealvi[] = $xvati;
+			$xvat[$i] = $tuotetieto->xpath('Group33/TAX[@eC241.5153="VAT"]/@eC243.5278');
+
+			if (is_array($xvat[$i])) {
+				 $xvati = (float) $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
+
+				$rtuoteno[$i]["alv"] = $xvati;
+				$ealvi[] = $xvati;
+			}
+
+			$rtuoteno[$i]["riviinfo"] = array_shift($tuotetieto-> xpath('IMD/@eC273.7008.1'));
+
+			// Laskutettu määrä
+			$rtuoteno[$i]["kpl"] = array_shift($tuotetieto-> xpath('QTY[@eC186.6063="12"]/@eC186.6060'));
+
+			// Jotkut toimittajat lähettää laskutetun määrän 47 segmentissä eikä 12 niinku kuuluis
+			if ((float) $rtuoteno[$i]["kpl"] == 0) {
+				$rtuoteno[$i]["kpl"] = array_shift($tuotetieto-> xpath('QTY[@eC186.6063="47"]/@eC186.6060'));
+			}
+
+			$rtuoteno[$i]["tilaajanrivinro"] = array_shift($tuotetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154'));
+
+			//	Viite (EuroCard)
+			$rtuoteno[$i]["riviviite"] = array_shift($tuotetieto->xpath('Group29/RFF[@eC506.1153="VN"]/@eC506.1154'));
+
+			//	Tapahtumapäivä
+			$rtuoteno[$i]["laskutettuaika"] = array_shift($tuotetieto->xpath('DTM[@eC507.2005="11"]/@eC507.2380'));
+
+			$i++;
 		}
-
-		$rtuoteno[$i]["riviinfo"] = array_shift($tuotetieto-> xpath('IMD/@eC273.7008.1'));
-
-		// Laskutettu määrä
-		$rtuoteno[$i]["kpl"] = array_shift($tuotetieto-> xpath('QTY[@eC186.6063="12"]/@eC186.6060'));
-
-		// Jotkut toimittajat lähettää laskutetun määrän 47 segmentissä eikä 12 niinku kuuluis
-		if ((float) $rtuoteno[$i]["kpl"] == 0) {
-			$rtuoteno[$i]["kpl"] = array_shift($tuotetieto-> xpath('QTY[@eC186.6063="47"]/@eC186.6060'));
-		}
-
-		$rtuoteno[$i]["tilaajanrivinro"] = array_shift($tuotetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154'));
-
-		//	Viite (EuroCard)
-		$rtuoteno[$i]["riviviite"] = array_shift($tuotetieto->xpath('Group29/RFF[@eC506.1153="VN"]/@eC506.1154'));
-
-		//	Tapahtumapäivä
-		$rtuoteno[$i]["laskutettuaika"] = array_shift($tuotetieto->xpath('DTM[@eC507.2005="11"]/@eC507.2380'));
-
-		$i++;
 	}
 }
 

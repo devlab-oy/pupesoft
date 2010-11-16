@@ -49,6 +49,9 @@
 
 	if ($ok == 1) {
 
+		// Otetaan koko aineisto muuttujaan jotta voidaan vertailla onko tämä jo koneella (koska joskus voi tulla esim kaksi LMP aineistoa samalle päivälle mutta eri sisällöllä)
+		$kokoaineisto = file_get_contents($filenimi);
+
 		$fd = fopen($filenimi, "r");
 
 		if (!($fd)) {
@@ -90,15 +93,11 @@
 
 			$xtyyppi = 0;
 			$virhe	 = 0;
+			$serc	 = array("{", "|", "}", "[", "\\", "]", "'");
+			$repl	 = array("ä", "ö", "å", "Ä", "Ö" , "Å", " ");
 
 			while (!feof($fd)) {
-				$tietue = str_replace ("{", "ä", $tietue);
-				$tietue = str_replace ("|", "ö", $tietue);
-				$tietue = str_replace ("}", "å", $tietue);
-				$tietue = str_replace ("[", "Ä", $tietue);
-				$tietue = str_replace ("\\","Ö", $tietue);
-				$tietue = str_replace ("]", "Å", $tietue);
-				$tietue = str_replace ("'", " ", $tietue);
+				$tietue = str_replace($serc, $repl, $tietue);
 
 				if (substr($tietue,0,3) == 'T00' or substr($tietue,0,3) == 'T03' or substr($tietue,0,1) == '0') {
 					// Konekielinen tiliote
@@ -112,13 +111,13 @@
 					// Laskujen maksupalvelu LMP
 					if (substr($tietue,0,3) == 'T03') {
 						$xtyyppi 	= 2;
-						$alkupvm	= substr($tietue,38,6);
+						$alkupvm	= substr($tietue, 38, 6);
 						$loppupvm 	= $alkupvm;
 						$tilino 	= substr($tietue, 9, 14);
 					}
 
 					// Saapuvat viitemaksut
-					if(substr($tietue,0,1) == '0') {
+					if (substr($tietue,0,1) == '0') {
 						$xtyyppi 	= 3;
 						$alkupvm	= "20".dateconv(substr($tietue,1,6));
 						$loppupvm 	= $alkupvm;
@@ -133,7 +132,7 @@
 					$query = "	SELECT *
 								FROM yriti
 								WHERE tilino = '$tilino'
-								and yriti.kaytossa = ''";
+								and kaytossa = ''";
 					$yritiresult = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($yritiresult) != 1) {
@@ -146,7 +145,7 @@
 					}
 
 					// Onko tämä aineisto jo ajettu?
-					$query= "	SELECT *
+					$query = "	SELECT *
 								FROM tiliotedata
 								WHERE tilino = '$tilino'
 								and alku 	 = '$alkupvm'
@@ -158,14 +157,41 @@
 						$tiliotedatarow = mysql_fetch_array($tiliotedatares);
 
 						if ($tiliotedatarow["aineisto"] == $aineistorow["aineisto"]) {
-							echo "<font class='error'>Aineisto esiintyy tiedostossa moneen kertaan.<br>Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>Tili = $tilino Ajalta $alkupvm - $loppupvm Yritystunnus $yritirow[yhtio]</font><br><br>";
+							echo "<font class='error'>Aineisto esiintyy tiedostossa moneen kertaan.<br>Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+
+							$xtyyppi=0;
+							$virhe++;
 						}
 						else {
-							echo "<font class='error'>Tämä aineisto on jo aiemmin käsitelty! Tili = $tilino Ajalta $alkupvm - $loppupvm Yritystunnus $yritirow[yhtio]</font><br><br>";
-						}
+							// OP-pankki toimittaa useita LMP aineistoja per päivä, eli tarkistetaan onko juuri tämä aineisto ajettu koneelle
+							// Koodataan tässä vaiheessa vain LMP:lle, mutta mikään ei estä etteikö saman tsekin vois tehdä myös vaikka tiliotteille jos joku pankki toimittaisi yhden päivän otteet useassa osassa.
+							if ($xtyyppi == 2) {
+								// Group concatissa tulee kaikki tän päivän LMP:t
+								$query = "	SELECT group_concat(tieto SEPARATOR '') kantaaineisto
+											FROM tiliotedata
+											WHERE tilino = '$tilino'
+											and alku 	 = '$alkupvm'
+											and loppu 	 = '$loppupvm'
+											and tyyppi 	 = $xtyyppi";
+								$tiliotedatares = mysql_query($query) or pupe_error($query);
+								$tiliotedatarow = mysql_fetch_array($tiliotedatares);
 
-						$xtyyppi=0;
-						$virhe++;
+								$kokoaineisto = str_replace($serc, $repl, $kokoaineisto);
+
+								if (strpos(trim($tiliotedatarow["kantaaineisto"]), trim($kokoaineisto)) !== FALSE) {
+									echo "<font class='error'>Tämä aineisto on jo aiemmin käsitelty!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+
+									$xtyyppi=0;
+									$virhe++;
+								}
+							}
+							else {
+								echo "<font class='error'>Tämä aineisto on jo aiemmin käsitelty!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+
+								$xtyyppi=0;
+								$virhe++;
+							}
+						}
 					}
 				}
 

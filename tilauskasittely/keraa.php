@@ -670,25 +670,17 @@
 
 									$poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "J‰tettiin JT-riviksi.";
 
-									// Riville tehd‰‰n osatoimitus ja loput j‰tet‰‰n j‰lkk‰riin (ennakkotilauksilla takaisin ennakkoon)
-									if ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS') {
-										$rvarattu	= $rtilkpl;
-										$rjt  		= 0;
-										$rvar		= "";
+									// Riville tehd‰‰n osatoimitus ja loput j‰tet‰‰n j‰lkk‰riin
+									if ($yhtiorow["varaako_jt_saldoa"] == "") {
+										$rvarattu	= 0;
+										$rjt  		= $rtilkpl;
 									}
 									else {
-										if ($yhtiorow["varaako_jt_saldoa"] == "") {
-											$rvarattu	= 0;
-											$rjt  		= $rtilkpl;
-										}
-										else {
-											$rvarattu	= $rtilkpl;
-											$rjt  		= 0;
-										}
-
-										$rvar		= "J";
+										$rvarattu	= $rtilkpl;
+										$rjt  		= 0;
 									}
 
+									$rvar		= "J";								
 									$keratty	= "''";
 									$kerattyaik	= "''";
 									$rkomm 		= $tilrivirow["kommentti"];

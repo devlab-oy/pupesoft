@@ -567,7 +567,7 @@
 						$tuoteno 		= $tilrivirow["tuoteno"];
 						$tee			= "UV";
 						$varastopaikka  = $tilrivirow["paikka"];
-						
+
 						// Perheid sen takia, että perutaan myös useat valmisteet perutaan
 						if ($perutamakorj[$tilrivirow["perheid"]] != "") {
 							$perutaan = "JOO";
@@ -1167,7 +1167,10 @@
 				$alatilat 	= " 'V', 'K', 'X' ";
 				$orderby 	= " order by lasku.tunnus desc";
 				$lisa 		= " and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') and lasku.tilaustyyppi in ('V','W') ";
-				$limit 		= " LIMIT 100 ";
+
+				if ($haku == "") {
+					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 60 DAY)";
+				}
 			}
 			elseif ($toim == "TUTKAA") {
 				$query	 	= "	SELECT lasku.ytunnus, lasku.tila, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
@@ -1179,8 +1182,11 @@
 				$ylatilat	= " 'V','L' ";
 				$alatilat 	= " 'V','K','X' ";
 				$orderby 	= " order by lasku.tunnus desc";
-				$lisa 		= " ";
-				$limit 		= " LIMIT 100 ";
+				$lisa 		= " and lasku.tilaustyyppi in ('V','W') ";
+
+				if ($haku == "") {
+					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 60 DAY)";
+				}
 			}
 			else {
 				$query	 	= "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
@@ -1193,7 +1199,10 @@
 				$alatilat 	= " 'C','B' ";
 				$orderby 	= " order by lasku.tunnus";
 				$lisa 		= " ";
-				$limit 		= " LIMIT 100 ";
+
+				if ($haku == "") {
+					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 60 DAY)";
+				}
 			}
 
 			$query .= "	FROM lasku
@@ -1205,7 +1214,7 @@
 						$haku
 						$grouppi
 						$orderby
-						$limit";
+						LIMIT 100";
 			$tilre = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($tilre) > 0) {

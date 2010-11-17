@@ -321,7 +321,7 @@
 		$rivityyppi = 'B';	// Ostoskori
 	}
 	elseif ($laskurow["tila"] == 'F') {
-		$rivityyppi = 'F';	// Tallennett web-tilaus/-tarjous
+		$rivityyppi = 'F';	// Tallennettu web-tilaus/-tarjous
 	}
 	elseif ($laskurow["tila"] == '0') {
 		$rivityyppi = '0';	// Soppari
@@ -1317,8 +1317,14 @@
 										$lisa_res = mysql_query($query) or pupe_error($query);
 										$lisa_row = mysql_fetch_array($lisa_res);
 
-										if (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"])) {
+										if ($lisatied_row["porauskuvio"] == "M" or (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"]))) {
 											$valmistetyyppi = "M";
+
+											$query = "	UPDATE tilausrivin_lisatiedot
+														SET porauskuvio	= '$valmistetyyppi'
+														WHERE yhtio			 = '$kukarow[yhtio]'
+														and tilausrivitunnus = '$perheid_lisaarivi'";
+											$result = mysql_query($query) or pupe_error($query);												
 										}
 										else {
 											$valmistetyyppi = "W";
@@ -2014,15 +2020,21 @@
 					$lisa_res = mysql_query($query) or pupe_error($query);
 					$lisa_row = mysql_fetch_array($lisa_res);
 
-					if (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"])) {
+					if ($lisatied_row["porauskuvio"] == "M" or (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"]))) {
 						$valmistetyyppi = "M";
+												
+						$query = "	UPDATE tilausrivin_lisatiedot
+									SET porauskuvio	= '$valmistetyyppi'
+									WHERE yhtio			 = '$kukarow[yhtio]'
+									and tilausrivitunnus = '$perheid_lisaarivi'";
+						$result = mysql_query($query) or pupe_error($query);												
 					}
 					else {
 						$valmistetyyppi = "W";
 					}
 
 					//jos on valmistusprosessi kyseessä niin isän tyyppi vaihdetaan W:ksi koska sen ei pidä varata saldoa!
-					$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi', tyyppi='W' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi";
+					$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi', tyyppi='$valmistetyyppi' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi";
 					$result = mysql_query($query) or pupe_error($query);
 
 					$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi' where yhtio='$kukarow[yhtio]' and tunnus=$lisatty_tun";
@@ -2037,6 +2049,7 @@
 					$result = mysql_query($query) or pupe_error($query);
 				}
 			}
+			
 			$rivitunnus			= "";
 			$kommentti 			= "";
 			$tuotenimitys 		= "";

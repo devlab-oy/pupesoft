@@ -2799,8 +2799,8 @@ if ($tee == '') {
 					and (tilausrivi.tunnus = '$rivitunnus' or (tilausrivi.perheid!=0 and tilausrivi.perheid = '$rivitunnus' and (tilausrivin_lisatiedot.ei_nayteta = 'P' or tilausrivi.tyyppi IN ('W','V'))) or (tilausrivi.perheid2!=0 and tilausrivi.perheid2 = '$rivitunnus' and (tilausrivin_lisatiedot.ei_nayteta = 'P' or tilausrivi.tyyppi IN ('W','V'))))
 					ORDER BY tunnus";
 		$lapsires = mysql_query($query) or pupe_error($query);
-		//echo $query."<br>";
-		while($lapsi = mysql_fetch_assoc($lapsires)) {
+
+		while ($lapsi = mysql_fetch_assoc($lapsires)) {
 
 			//	P‰ivitet‰‰n positio tai rivityyppi
 			$query = "	UPDATE tilausrivin_lisatiedot
@@ -3233,8 +3233,8 @@ if ($tee == '') {
 		$kayttajan_paikka	= $paikka;
 		$lisatty 			= 0;
 
-		// Valmistuksissa haetaan perheiden perheit‰ mukaan valmistukseen!!!!!!
-		if ($laskurow['tila'] == 'V' and $var != "W" and $yhtiorow["rekursiiviset_reseptit"] == "Y") {
+		// Valmistuksissa haetaan perheiden perheit‰ mukaan valmistukseen!!!!!! (vain kun rivi lis‰t‰‰n $rivitunnus == 0)
+		if ($laskurow['tila'] == 'V' and $var != "W" and $yhtiorow["rekursiiviset_reseptit"] == "Y" and (int) $rivitunnus == 0) {
 
 			$kommentti_array = array();
 			$lapsenlap_array = array();
@@ -3286,7 +3286,7 @@ if ($tee == '') {
 
 			$riikoko = count($tuoteno_array);
 
-			for($rii=0; $rii < $riikoko; $rii++) {
+			for ($rii=0; $rii < $riikoko; $rii++) {
 
 				if ($kpl != '' and !is_array($kpl_array) and $rii == 0) {
 					$kpl_array[$tuoteno_array[$rii]] = $kayttajan_kpl;

@@ -271,7 +271,8 @@
 							$query .= "laatija='$kukarow[kuka]',";
 						}
 						// ker‰ysaika ja toimitusaikaan now
-						elseif (mysql_field_name($stresult,$i)=='kerayspvm' or
+						elseif (mysql_field_name($stresult,$i)=='luontiaika' or
+								mysql_field_name($stresult,$i)=='kerayspvm' or
 								mysql_field_name($stresult,$i)=='toimaika') {
 							$query .= mysql_field_name($stresult,$i)."=now(),";
 						}
@@ -344,32 +345,36 @@
 							$query .= mysql_field_name($stresult,$i)."='$otsikkorivi[tunnus]',";
 						}
 						// n‰m‰ kent‰t tyhjennet‰‰n jos jtrivit kootaan yhdelle otsikolle (siis normikeissi)
-						elseif ($otsikkorivi['jtkielto'] != "Y" and (
-								mysql_field_name($stresult,$i)=='sisviesti1' or
-								mysql_field_name($stresult,$i)=='sisviesti2' or
-								mysql_field_name($stresult,$i)=='tilausyhteyshenkilo' or
-								mysql_field_name($stresult,$i)=='asiakkaan_tilausnumero' or
-								mysql_field_name($stresult,$i)=='kohde')) {
-							$query .= mysql_field_name($stresult,$i)."='',";
-						}
-						elseif (mysql_field_name($stresult,$i) == 'viesti') {
+						elseif (mysql_field_name($stresult,$i) == 'sisviesti1' or
+								mysql_field_name($stresult,$i) == 'tilausyhteyshenkilo' or
+								mysql_field_name($stresult,$i) == 'asiakkaan_tilausnumero' or
+								mysql_field_name($stresult,$i) == 'kohde' or
+								mysql_field_name($stresult,$i) == 'viesti') {
+
 							if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y") {
-								$query .= "viesti='".$otsikkorivi[$i]."',";
+								$query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
 							}
 							else {
-								$query .= "viesti='',";
+								$query .= mysql_field_name($stresult,$i)."='',";
 							}
 						}
 						// kommentti speciaalia
 						elseif (mysql_field_name($stresult,$i) == 'comments') {
-							if ($toim == "ENNAKKO") {
-								$query .= "comments='".t("ENNAKKOTILAUS")."',";
-							}
-							elseif ($otsikkorivi['tila'] == 'G') {
-								$query .= "comments=concat('".t("JƒLKITOIMITUS")." ', comments),";
+							if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y") {
+								if ($toim == "ENNAKKO") {
+									$query .= mysql_field_name($stresult,$i)."=trim(concat('".t("ENNAKKOTILAUS")."\n', '".$otsikkorivi[$i]."')),";
+								}
+								else {
+									$query .= mysql_field_name($stresult,$i)."=trim(concat('".t("JƒLKITOIMITUS")."\n', '".$otsikkorivi[$i]."')),";
+								}
 							}
 							else {
-								$query .= "comments='".t("JƒLKITOIMITUS")."',";
+								if ($toim == "ENNAKKO") {
+									$query .= mysql_field_name($stresult,$i)."='".t("ENNAKKOTILAUS")."',";
+								}
+								else {
+									$query .= mysql_field_name($stresult,$i)."='".t("JƒLKITOIMITUS")."',";
+								}
 							}
 						}
 						//HUOM: Laitetaan clearing kentt‰‰n jotain speciaalia
@@ -429,7 +434,6 @@
 						}
 					}
 					$query = substr($query,0,-1);
-
 					$stresult = mysql_query($query) or pupe_error($query);
 					$id = mysql_insert_id();
 
@@ -576,32 +580,29 @@
 								$kommentti .= trim($lisataanrow['kommentti']);
 							}
 
-							// Joitain tietoja alkuper‰iselt‰ tilaukselta, vain jos osatoimitus ei ole estetty
-							if ($otsikkorivi["osatoimitus"] == "") {
-								if ($lisataanrow["vanha_otunnus"] > 0) {
-									$alkupotunnus = $lisataanrow["vanha_otunnus"];
-								}
-								else {
-									$alkupotunnus = $lisataanrow["otunnus"];
-								}
 
-								$query = "	SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo
-											FROM lasku
-											WHERE tunnus = '$alkupotunnus'";
-								$aresult = mysql_query($query) or pupe_error($query);
+							if ($lisataanrow["vanha_otunnus"] > 0) {
+								$alkupotunnus = $lisataanrow["vanha_otunnus"];
+							}
+							else {
+								$alkupotunnus = $lisataanrow["otunnus"];
+							}
 
-								if (mysql_num_rows($aresult) > 0) {
-									$orig_laskurow = mysql_fetch_array($aresult);
+							$query = "	SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo
+										FROM lasku
+										WHERE tunnus = '$alkupotunnus'";
+							$aresult = mysql_query($query) or pupe_error($query);
 
-									if (strpos($kommentti, t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE and $toim == "ENNAKKO") {
+							if (mysql_num_rows($aresult) > 0) {
+								$orig_laskurow = mysql_fetch_array($aresult);
+
+								// Joitain tietoja alkuper‰iselt‰ tilaukselta, vain jos osatoimitus ei ole estetty ja jtrivit yhdistet‰‰n samalle otsikolle ja kyseess‰ ei ole ennakkotilaus
+								if ($otsikkorivi["osatoimitus"] == "" and $toim != "ENNAKKO" and $otsikkorivi['jtkielto'] != "Y") {
+
+									if (strpos($kommentti, t("Alkuper‰inen tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
 										if (trim($kommentti) != "") $kommentti .= " / ";
 										// Tilausrivin systeemikommentti
-										$kommentti .= t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus']);
-									}
-									elseif (strpos($kommentti, t("Tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
-										if (trim($kommentti) != "") $kommentti .= " / ";
-										// Tilausrivin systeemikommentti
-										$kommentti .= t("Tilaus").": ".trim($orig_laskurow['tunnus']);
+										$kommentti .= t("Alkuper‰inen tilaus").": ".trim($orig_laskurow['tunnus']);
 									}
 
 									if (trim($orig_laskurow['asiakkaan_tilausnumero']) != "" and strpos($kommentti, t("Asiakkaan tilaus").": ".trim($orig_laskurow['asiakkaan_tilausnumero'])) === FALSE) {
@@ -620,6 +621,20 @@
 										if (trim($kommentti) != "") $kommentti .= " / ";
 										// Tilausrivin systeemikommentti
 										$kommentti .= t("Tilaaja").": ".trim($orig_laskurow['tilausyhteyshenkilo']);
+									}
+								}
+								elseif ($otsikkorivi["osatoimitus"] == "" and $otsikkorivi['jtkielto'] == "Y") {
+									if (strpos($kommentti, t("Alkuper‰inen tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
+										if (trim($kommentti) != "") $kommentti .= " / ";
+										// Tilausrivin systeemikommentti
+										$kommentti .= t("Alkuper‰inen tilaus").": ".trim($orig_laskurow['tunnus']);
+									}
+								}
+								elseif ($toim == "ENNAKKO") {
+									if (strpos($kommentti, t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE and $toim == "ENNAKKO") {
+										if (trim($kommentti) != "") $kommentti .= " / ";
+										// Tilausrivin systeemikommentti
+										$kommentti .= t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus']);
 									}
 								}
 							}

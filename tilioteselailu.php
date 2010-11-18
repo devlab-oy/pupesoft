@@ -1,14 +1,19 @@
 <?php
+	
+	if (isset($_POST["tee"])) {
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	}
+	
 	require "inc/parametrit.inc";
 
-	require_once ("inc/tilinumero.inc");
-
-	if ($lataa_tiedosto == 1) {
-		$filetxt = file_get_contents($file);
-		echo $filetxt;
+	if (isset($tee) and $tee == "lataa_tiedosto") {
+		readfile("/tmp/".$tmpfilenimi);	
 		exit;
 	}
 
+	require_once ("inc/tilinumero.inc");
+	
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	if ($tee == 'T' and trim($kuitattava_tiliotedata_tunnus) != '') {
@@ -175,16 +180,15 @@
 			}
 			echo "</table>";
 
-			$filename = "/tmp/".md5(uniqid()).".txt";
-			file_put_contents($filename, $txttieto);
+			$filename = md5(uniqid()).".txt";
+			file_put_contents("/tmp/".$filename, $txttieto);
 
-			echo "<br><form>";
-			echo "<input type='hidden' name='file' value='$filename'>";
-			echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+			echo "<br>";
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='$txtfile'>";
-			echo "<input type='submit' value='Tallenna tiedosto'>";
-			echo "</form>";
-
+			echo "<input type='hidden' name='tmpfilenimi' value='$filename'>";
+			echo "<input type='submit' value='".t("Tallenna tiedosto")."'></form>";
 		}
 	}
 

@@ -36,7 +36,7 @@
 
 		if ($ok == 0 and strlen($tili) > 0) {
 
-			$query = "	SELECT tilino, toiminto, kustp, kohde, projekti
+			$query = "	SELECT tilino, toimijaliitos, kustp, kohde, projekti
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$tili'";
@@ -51,8 +51,8 @@
 				$tili = $xrow['tilino'];
 			}
 
-			//Jos muistiotosite ja tilille on liitettävä asiakas tai toimittaja
-			if ($tositetila == "X" and $xrow["toiminto"] != "" and (int) $tositeliit == 0) {
+			// Jos muistiotosite ja tilille on liitettävä asiakas tai toimittaja
+			if ($tositetila == "X" and $xrow["toimijaliitos"] != "" and (int) $tositeliit == 0) {
 				$virhe = t("Tositteeseen on liitettävä asiakas tai toimittaja")."!";
 				$ok = 1;
 			}

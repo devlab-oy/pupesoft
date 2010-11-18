@@ -130,7 +130,6 @@
 	unset($content_body);
 	unset($content_subject);
 	unset($ctype);
-	unset($komento);
 	unset($kutsu);
 	unset($liite);
 	unset($sahkoposti_cc);

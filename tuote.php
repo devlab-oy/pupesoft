@@ -1618,6 +1618,12 @@
 					echo "</tr>";
 				}
 
+				// Onko k‰ytt‰j‰ll‰ oikeus n‰hd‰ valmistuksia tai reseptej‰
+				$oikeu_t1 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAVARASTOON");
+				$oikeu_t2 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAASIAKKAALLE");
+				$oikeu_t3 = tarkista_oikeus("tilauskasittely/valmista_tilaus.php", "");
+				$oikeu_t4 = tarkista_oikeus("tuoteperhe.php", "RESEPTI");
+
 				while ($prow = mysql_fetch_array ($qresult)) {
 
 					$vararvo_nyt -= $prow["arvo"];
@@ -1643,50 +1649,55 @@
 							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
 						}
 						elseif ($prow["laji"] == "valmistus" and $prow["laskutunnus"] != "") {
-							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='$prow[trivitunn]'>";
+							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
 
-							// N‰ytet‰‰n mist‰ tuotteista t‰m‰ on valmistettu
-							echo "<div id='div_$prow[trivitunn]' class='popup' style='width:200px;'>";
-							echo "<table>";
+							// N‰ytet‰‰n t‰m‰ vain jos k‰ytt‰j‰ll‰ on oikeus tehd‰ valmistuksia tai reseptej‰
+							if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {
+								echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='$prow[trivitunn]'>";
 
-							$query = "	SELECT tilausrivi.nimitys, tilausrivi.tuoteno, tilausrivi.kpl, tapahtuma.hinta, tilausrivi.kpl*tapahtuma.hinta yhteensa
-										FROM tilausrivi
-										JOIN tapahtuma ON tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus
-										WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
-										and tilausrivi.otunnus = $prow[laskutunnus]
-										and tilausrivi.perheid = $prow[perheid]
-										and tilausrivi.tyyppi = 'V'
-										ORDER BY tilausrivi.tunnus";
-							$rresult = mysql_query($query) or pupe_error($query);
+								// N‰ytet‰‰n mist‰ tuotteista t‰m‰ on valmistettu
+								echo "<div id='div_$prow[trivitunn]' class='popup' style='width:200px;'>";
+								echo "<table>";
 
-							echo "<tr>
-									<th>".t("Nimitys")."</th>
-									<th>".t("Tuoteno")."</th>
-									<th>".t("Kpl")."</th>
-									<th>".t("Arvo")."</th>
-									<th>".t("Yhteens‰")."</th>
-									</tr>";
+								$query = "	SELECT tilausrivi.nimitys, tilausrivi.tuoteno, tilausrivi.kpl, tapahtuma.hinta, tilausrivi.kpl*tapahtuma.hinta yhteensa
+											FROM tilausrivi
+											JOIN tapahtuma ON tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus
+											WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
+											and tilausrivi.otunnus = $prow[laskutunnus]
+											and tilausrivi.perheid = $prow[perheid]
+											and tilausrivi.tyyppi = 'V'
+											ORDER BY tilausrivi.tunnus";
+								$rresult = mysql_query($query) or pupe_error($query);
 
-							$ressuyhteensa = 0;
-
-							while ($rrow = mysql_fetch_array ($rresult)) {
 								echo "<tr>
-										<td>$rrow[nimitys]</td>
-										<td>$rrow[tuoteno]</td>
-										<td align='right'>$rrow[kpl]</td>
-										<td align='right'>$rrow[hinta]</td>
-										<td align='right'>".sprintf("%.2f", $rrow["yhteensa"])."</td>
+										<th>".t("Nimitys")."</th>
+										<th>".t("Tuoteno")."</th>
+										<th>".t("Kpl")."</th>
+										<th>".t("Arvo")."</th>
+										<th>".t("Yhteens‰")."</th>
 										</tr>";
-								$ressuyhteensa += $rrow["yhteensa"];
+
+								$ressuyhteensa = 0;
+
+								while ($rrow = mysql_fetch_array ($rresult)) {
+									echo "<tr>
+											<td>$rrow[nimitys]</td>
+											<td>$rrow[tuoteno]</td>
+											<td align='right'>$rrow[kpl]</td>
+											<td align='right'>$rrow[hinta]</td>
+											<td align='right'>".sprintf("%.2f", $rrow["yhteensa"])."</td>
+											</tr>";
+									$ressuyhteensa += $rrow["yhteensa"];
+								}
+
+								echo "<tr>
+										<td class='tumma' colspan='4'></td>
+										<td class='tumma' align='right'>".sprintf("%.2f", $ressuyhteensa)."</td>
+										</tr>";
+
+								echo "</table>";
+								echo "</div>";
 							}
-
-							echo "<tr>
-									<td class='tumma' colspan='4'></td>
-									<td class='tumma' align='right'>".sprintf("%.2f", $ressuyhteensa)."</td>
-									</tr>";
-
-							echo "</table>";
-							echo "</div>";
 						}
 						else {
 							echo t("$prow[laji]");

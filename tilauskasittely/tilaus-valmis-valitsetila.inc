@@ -205,7 +205,15 @@
 
 				// Jos on vienti‰ ja vain saldottomia niin menn‰‰n suoraan toimitetuksi
 				if ($laskurow["vienti"] != '' and $rivirow["riveja"] == $rivirow["saldottomat"]) {
-					$alat = "D";
+					
+					// Jos meill‰ on maksupositioita laskulla, tulee se siirt‰‰ alatilaan J
+					if ($laskurow['jaksotettu'] != 0) {
+						$alat = "J";
+					}
+					else {
+						$alat = "D";
+					}
+					
 					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
 
 					$query  = "	UPDATE tilausrivi
@@ -237,9 +245,12 @@
 					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin ker‰tyksi."), $laskurow["tunnus"])."</font><br><br>\n";
 				}
 
-				$query  = "	UPDATE lasku set tila='L', alatila='$alat', lahetepvm=now()
-							where tunnus = '$laskurow[tunnus]'
-							and yhtio	 = '$kukarow[yhtio]'";
+				$query  = "	UPDATE lasku SET 
+							tila = 'L', 
+							alatila = '$alat', 
+							lahetepvm = now()
+							WHERE tunnus = '$laskurow[tunnus]'
+							AND yhtio = '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			else {

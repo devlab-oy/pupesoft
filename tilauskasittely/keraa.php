@@ -680,7 +680,7 @@
 										$rjt  		= 0;
 									}
 
-									$rvar		= "J";								
+									$rvar		= "J";
 									$keratty	= "''";
 									$kerattyaik	= "''";
 									$rkomm 		= $tilrivirow["kommentti"];
@@ -1059,7 +1059,8 @@
 							toimitustapa.rahtikirja,
 							toimitustapa.tulostustapa,
 							toimitustapa.nouto,
-							lasku.varasto
+							lasku.varasto,
+							lasku.jaksotettu
 							FROM lasku
 							LEFT JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite and toimitustapa.nouto=''
 							where lasku.yhtio = '$kukarow[yhtio]'
@@ -1073,7 +1074,14 @@
 				while ($laskurow = mysql_fetch_assoc($lasresult)) {
 
 					if ($laskurow["tila"] == 'L' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X" and $laskurow["nouto"] == "") {
-						$alatilak = "D";
+
+						// Jos meill‰ on maksupositioita laskulla, tulee se siirt‰‰ alatilaan J
+						if ($laskurow['jaksotettu'] != 0) {
+							$alatilak = "J";
+						}
+						else {
+							$alatilak = "D";
+						}
 
 						// P‰ivitet‰‰n myˆs rivit toimitetuiksi
 						$query = "	UPDATE tilausrivi
@@ -1096,16 +1104,22 @@
 						$yoimresult  = mysql_query($query) or pupe_error($query);
 					}
 					elseif ($laskurow["tila"] == 'G' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X" and $laskurow["nouto"] == "") {
-						$alatilak = "D";
+						// Jos meill‰ on maksupositioita laskulla, tulee se siirt‰‰ alatilaan J
+						if ($laskurow['jaksotettu'] != 0) {
+							$alatilak = "J";
+						}
+						else {
+							$alatilak = "D";
+						}
 					}
 					else {
 						$alatilak = "C";
 					}
 
-					$query  = "	UPDATE lasku
-								set alatila = '$alatilak'
-								where yhtio = '$kukarow[yhtio]'
-								and tunnus  = '$laskurow[tunnus]'";
+					$query  = "	UPDATE lasku SET
+								alatila = '$alatilak'
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  = '$laskurow[tunnus]'";
 					$result = mysql_query($query) or pupe_error($query);
 
 					if ($lask_nro == '') {

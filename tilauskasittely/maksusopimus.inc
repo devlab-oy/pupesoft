@@ -371,13 +371,13 @@
 
 				$todellinen_osuus = round($row["summa"] / $jaksotettavaa * 100, 4);
 
-				if ($row["osuus"] != $todellinen_osuus and $row["osuus"] != 0) {
+				if ($row["osuus"] != $todellinen_osuus) {
 					$maposupdate_query = "	UPDATE maksupositio SET 
 											osuus = '$todellinen_osuus' 
 											WHERE yhtio = '$kukarow[yhtio]' 
 											AND tunnus = '$row[tunnus]'";
 					$maposupdate = mysql_query($maposupdate_query) or pupe_error($maposupdate_query);
-					
+
 					$row["osuus"] = $todellinen_osuus;
 				}
 

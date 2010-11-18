@@ -301,11 +301,10 @@
 		///* Tähän mennään jos lähete tosiaan tulostetaan *///
 		if ($yhtiorow["lahetteen_tulostustapa"] != "K") {
 			$tilausnumeroita = $laskurow["tunnus"];
-
 			require("tilaus-valmis-tulostus.inc");
 		}
 		///* Tähän mennään jos lähete vain siirretään tulostusjonoon *///
-		else {
+		elseif (mysql_affected_rows() > 0) {
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s siirretty tulostusjonoon"), $laskurow["tunnus"])."!</font><br><br>\n";
 		}
 	}

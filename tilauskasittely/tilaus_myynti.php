@@ -1653,20 +1653,11 @@ if ($tee == '') {
 			}
 		}
 
-		if ($kukarow['yhtio'] == 'allr') {
-			echo "<form action='tuote_selaus_haku_vanha.php' method='post'>
-					<input type='hidden' name='toim_kutsu' value='$toim'>
-					<input type='hidden' name='tyojono' value='$tyojono'>
-					<input type='submit' value='".t("Selaa tuotteita")."'>
-					</form>";
-		}
-		else {
-			echo "<form action='tuote_selaus_haku.php' method='post'>
-					<input type='hidden' name='toim_kutsu' value='$toim'>
-					<input type='hidden' name='tyojono' value='$tyojono'>
-					<input type='submit' value='".t("Selaa tuotteita")."'>
-					</form>";
-		}
+		echo "<form action='tuote_selaus_haku.php' method='post'>
+				<input type='hidden' name='toim_kutsu' value='$toim'>
+				<input type='hidden' name='tyojono' value='$tyojono'>
+				<input type='submit' value='".t("Selaa tuotteita")."'>
+				</form>";
 
 		// aivan karseeta, mutta joskus pit‰‰ olla n‰in asiakasyst‰v‰llinen... toivottavasti ei h‰iritse ket‰‰n
 		if ($kukarow["extranet"] == "" and ($kukarow["yhtio"] == "artr" or $kukarow['yhtio'] == 'orum')) {

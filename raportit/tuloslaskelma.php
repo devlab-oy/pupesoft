@@ -30,7 +30,7 @@
 	if (!isset($lisa)) 			$lisa = "";
 	if (!isset($toim_tee)) 		$toim_tee = "";
 
-	if (!isset($desi) or $desi == "") $desi = "0";
+	if (!isset($desi) or $desi == "") $desi = "2";
 	if (!isset($tyyppi) or $tyyppi == "") $tyyppi = "4";
 	if (!isset($tarkkuus) or $tarkkuus == "") $tarkkuus = "1";
 	if (!isset($alvp) or $alvp == "") $alvp = date("d", mktime(0, 0, 0, (date("m")+1), 0, date("Y")));
@@ -317,9 +317,9 @@
 			$sel[$desi] = "SELECTED";
 
 			echo "<select name='desi'>
-					<option $sel[0] value='0'>0 ".t("desimaalia")."</option>
-					<option $sel[1] value='1'>1 ".t("desimaalia")."</option>
 					<option $sel[2] value='2'>2 ".t("desimaalia")."</option>
+					<option $sel[1] value='1'>1 ".t("desimaalia")."</option>
+					<option $sel[0] value='0'>0 ".t("desimaalia")."</option>
 					</select></td></tr>";
 
 			$kauchek = $vchek = $bchek = $ychek = "";

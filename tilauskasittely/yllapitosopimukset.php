@@ -39,103 +39,84 @@
 
 		foreach ($laskutapvm as $pointteri => $tapahtumapvm) {
 
-			$edtapvmpp = "";
-			$edtapvmkk = "";
-			$edtapvmvv = "";
-
-			$setapvmpp = "";
-			$setapvmkk = "";
-			$setapvmvv = "";
-
-			unset($ipp);
-			unset($edipp);
-			unset($seikk);
-			unset($seipp);
-
 			$tilausnumero = $laskutatun[$pointteri];
 			list($tapvmvv,$tapvmkk,$tapvmpp) = explode("-", $tapahtumapvm);
 
-			//	Haetaan se sopimuskausi ja kommentti
-			$query = "	SELECT lasku.viesti, laskun_lisatiedot.sopimus_kk, laskun_lisatiedot.sopimus_pp, UNIX_TIMESTAMP(laskun_lisatiedot.sopimus_alkupvm) sopimus_alkupvm, UNIX_TIMESTAMP(laskun_lisatiedot.sopimus_loppupvm) sopimus_loppupvm
+			//	Haetaan sopimuskausi ja kommentti
+			$query = "	SELECT lasku.viesti,
+						laskun_lisatiedot.sopimus_kk,
+						laskun_lisatiedot.sopimus_pp,
+						laskun_lisatiedot.sopimus_alkupvm,
+						laskun_lisatiedot.sopimus_loppupvm
 			 			FROM lasku
 						LEFT JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio and lasku.tunnus = laskun_lisatiedot.otunnus
-						WHERE lasku.yhtio = '{$kukarow["yhtio"]}' and lasku.tunnus = '$tilausnumero'";
+						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+						and lasku.tunnus = '$tilausnumero'";
 			$result = mysql_query($query) or pupe_error($query);
 			$soprow = mysql_fetch_array($result);
 
-			$sopimus_kk = explode(",",$soprow["sopimus_kk"]);
-			$sopimus_pp = explode(",",$soprow["sopimus_pp"]);
+			$laskutus_kk = explode(",", $soprow["sopimus_kk"]);
+			$laskutus_pp = explode(",", $soprow["sopimus_pp"]);
 
-			$ipp = array_search( (int) $tapvmpp, $sopimus_pp);
-			$ikk = array_search( (int) $tapvmkk, $sopimus_kk);
+			// Luodaan array jossa on sopimuksen t‰n vuoden kaikki laskutukset
+			$laskutuspaivat = array();
 
-
-			//	Ratkaistaan edellinen kausi
-			if($ipp > 0) {
-				$edipp = $ipp-1;
-				$edtapvmpp = $sopimus_pp[$edipp];
-				$edtapvmkk = $tapvmkk;
-			}
-			else {
-				$edtapvmpp = end($sopimus_pp);
-				if($ikk > 0) {
-					$edikk = $ikk-1;
-					$edtapvmkk = $sopimus_kk[$edikk];
-				}
-				else {
-					$edtapvmkk = end($sopimus_kk);
+			foreach ($laskutus_kk as $laskk) {
+				foreach ($laskutus_pp as $laspp) {
+					$laskutuspaivat[] = $tapvmvv."-".sprintf("%02d", $laskk)."-".sprintf("%02d", $laspp);
 				}
 			}
 
-			//	Ratkaistaan seuraava kausi
-			if(count($sopimus_pp) == $ipp+1) {
-				$setapvmpp = $sopimus_pp[0];
+			$tama_laskutus = array_search($tapahtumapvm, $laskutuspaivat);
+			$soplaskmaara = count($laskutuspaivat)-1;
 
-				$seikk = $ikk + 1;
-				if($seikk >= count($sopimus_kk)) {
-					$setapvmkk = $sopimus_kk[0];
-				}
-				else {
-					$setapvmkk = $sopimus_kk[$seikk];
-				}
+			// Onko t‰m‰ t‰n vuoden eka ja vika sopparilasku
+			if ($tama_laskutus == 0 and $tama_laskutus == $soplaskmaara) {
+				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus]);
+
+				$ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv-1));
+				$se_lopp  = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv+1));
 			}
+			// Jos t‰m‰ t‰n vuoden eka sopparilasku, niin edellinen on viime vuoden vika
+			elseif ($tama_laskutus == 0) {
+				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$soplaskmaara]);
+				$ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv-1));
+
+				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus+1]);
+				$se_lopp  = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv));
+			}
+			// Jos t‰m‰ t‰n vuoden vika sopparilasku, niin seuraava on ens vuoden eka
+			elseif ($tama_laskutus == $soplaskmaara) {
+				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus-1]);
+				$ed_alku = date("Y-m-d",mktime(0, 0, 0, $kk, $pp, $vv));
+
+				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[0]);
+				$se_lopp = date("Y-m-d",mktime(0, 0, 0, $kk, $pp-1, $vv+1));
+			}
+			// T‰m‰ ei ole t‰n vuoden eka eik‰ vika sopparilasku
 			else {
-				$seipp = $ipp+1;
-				$setapvmpp = $sopimus_pp[$seipp];
-				$setapvmkk = $sopimus_kk[$ikk];
+				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus-1]);
+				$ed_alku = date("Y-m-d",mktime(0, 0, 0, $kk, $pp, $vv));
+
+				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus+1]);
+				$se_lopp = date("Y-m-d",mktime(0, 0, 0, $kk, $pp-1, $vv));
 			}
 
-			//	Onko edellinen kuukausi viimevuodelta?
-			if($edtapvmkk > $tapvmkk) {
- 				$edtapvmvv = $tapvmvv - 1;
-			}
-			else {
-				$edtapvmvv = $tapvmvv;
-			}
+			// Edellinen kausi on siis "$ed_alku" - "$tapahtumapvm-1" ja seuraava on "$tapahtumapvm" - "$se_lopp"
+			list($vv,$kk,$pp) = explode("-", $tapahtumapvm);
+			$ed_lopp = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv));
 
-			//	Onko seuraava kuukausi ensivuodella?
-			if($setapvmkk < $tapvmkk) {
- 				$setapvmvv = $tapvmvv + 1;
-			}
-			else {
-				$setapvmvv = $tapvmvv;
+			// Onko seuraava tai edellinen sopimuskauden ulkopuolella?
+			if ($soprow["sopimus_alkupvm"] != "0000-00-00" and str_replace("-", "", $ed_alku) < str_replace("-", "", $soprow["sopimus_alkupvm"])) {
+				$ed_alku = $soprow["sopimus_alkupvm"];
 			}
 
-			//	Katsotaan, ett‰ t‰m‰ aika ei ole ennen tai j‰lkeen sopimuksen voimassaoloajan..
-			$edstamp	= strtotime("$edtapvmvv-$edtapvmkk-$edtapvmpp");
-			$sestamp	= strtotime("$setapvmvv-$setapvmkk-$setapvmpp");
-
-
-			if($edstamp <= $soprow["sopimus_alkupvm"]) {
-				$edtapvmpp = date("d", $soprow["sopimus_alkupvm"]);
-				$edtapvmkk = date("m", $soprow["sopimus_alkupvm"]);
-				$edtapvmvv = date("Y", $soprow["sopimus_alkupvm"]);
+			if ($soprow["sopimus_alkupvm"] != "0000-00-00" and str_replace("-", "", $ed_lopp) < str_replace("-", "", $soprow["sopimus_alkupvm"])) {
+				$ed_lopp = $soprow["sopimus_alkupvm"];
 			}
 
-			if($sestamp >= $soprow["sopimus_loppupvm"] and $soprow["sopimus_loppupvm"] > 0) {
-				$setapvmpp = date("d", $soprow["sopimus_loppupvm"]);
-				$setapvmkk = date("m", $soprow["sopimus_loppupvm"]);
-				$setapvmvv = date("Y", $soprow["sopimus_loppupvm"]);
+			if ($soprow["sopimus_loppupvm"] != "0000-00-00" and str_replace("-", "", $se_lopp) > str_replace("-", "", $soprow["sopimus_loppupvm"])) {
+				$se_lopp = $soprow["sopimus_loppupvm"];
 			}
 
 			unset($from);
@@ -143,10 +124,10 @@
 
 			//	Korjataan kommentti
 			$from[]	= "/%ed/";
-			$to[]	= "$edtapvmpp.$edtapvmkk.$edtapvmvv - ".date("d.m.Y", strtotime("$tapvmvv-$tapvmkk-".($tapvmpp-1)));
+			$to[]	= tv1dateconv($ed_alku)." - ".tv1dateconv($ed_lopp);
 
 			$from[]	= "/%se/";
-			$to[]	= "$tapvmpp.$tapvmkk.$tapvmvv - ".date("d.m.Y", strtotime("$setapvmvv-$setapvmkk-".($setapvmpp-1)));
+			$to[]	= tv1dateconv($tapahtumapvm)." - ".tv1dateconv($se_lopp);
 
 			//	Jos ei kirjoiteta oikein, poistetaan muuttuja
 			$from[]	= "/%[\w]{2}/";
@@ -227,7 +208,7 @@
 							and tyyppi = 'L'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				if($jatakesken != "JOO") {
+				if ($jatakesken != "JOO") {
 					// laskutetaan tilaus
 					$laskutettavat  = $ok;
 					$tee 			= "TARKISTA";
@@ -249,10 +230,10 @@
 
 	// n‰ytet‰‰n sopparit
 	$query = "	SELECT *,
-				concat_ws('<br>', lasku.ytunnus, concat_ws(' ',lasku.nimi,lasku.nimitark), if(lasku.nimi!=lasku.toim_nimi, concat_ws(' ',lasku.toim_nimi,lasku.toim_nimitark), NULL), if(lasku.postitp!=lasku.toim_postitp, lasku.toim_postitp, NULL)) nimi,
+				concat_ws('<br>', lasku.ytunnus, concat_ws(' ',lasku.nimi,lasku.nimitark), if (lasku.nimi!=lasku.toim_nimi, concat_ws(' ',lasku.toim_nimi,lasku.toim_nimitark), NULL), if (lasku.postitp!=lasku.toim_postitp, lasku.toim_postitp, NULL)) nimi,
 				lasku.tunnus laskutunnus,
-				round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
-				round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
+				round(sum(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
+				round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
 				FROM lasku
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and
 										laskun_lisatiedot.otunnus = lasku.tunnus and
@@ -409,7 +390,6 @@
 						$laskutettu_vika = "$pvmloop_pp.$pvmloop_kk.$pvmloop_vv ($chkrow[laskunro])";
 					}
 				}
-
 			}
 
 			$classname = '';
@@ -418,18 +398,19 @@
 			}
 
 			echo "<td nowrap class='$classname' id='$row[laskutunnus]'>$laskutettu_vika ";
+
 			if ($classname == 'tooltip') {
 				echo "<div id='div_$row[laskutunnus]' class='popup'>";
 				echo "$laskutettu";
 				echo "</div>";
 			}
+
 			echo "</td>";
 			echo "<td valign='top' nowrap>$laskuttamatta</td>";
 			echo "</tr>";
 		}
 
 		echo "<tr><th colspan='9'>".t("Valitse kaikki")."</th><th><input type='checkbox' name='lasku' onclick='toggleAll(this);'></th></tr>";
-
 		echo "</table>";
 
 		if ($arvoyhteensa != 0) {

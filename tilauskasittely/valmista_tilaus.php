@@ -1169,7 +1169,7 @@
 				$lisa 		= " and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') and lasku.tilaustyyppi in ('V','W') ";
 
 				if ($haku == "") {
-					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 60 DAY)";
+					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 90 DAY)";
 				}
 			}
 			elseif ($toim == "TUTKAA") {
@@ -1185,7 +1185,7 @@
 				$lisa 		= " and lasku.tilaustyyppi in ('V','W') ";
 
 				if ($haku == "") {
-					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 60 DAY)";
+					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 90 DAY)";
 				}
 			}
 			else {
@@ -1201,7 +1201,7 @@
 				$lisa 		= " ";
 
 				if ($haku == "") {
-					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 60 DAY)";
+					$lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 180 DAY)";
 				}
 			}
 

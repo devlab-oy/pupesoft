@@ -165,6 +165,10 @@
 			$otunnus = $kukarow["kesken"];
 
 			if (count($komento) == 0) {
+				// päivitetään tässä tilaus valmiiksi
+				$query = "UPDATE lasku SET alatila = 'A' WHERE tunnus='$kukarow[kesken]'";
+				$result = mysql_query($query) or pupe_error($query);
+
 				if ($toim == "HAAMU") {
 					echo "<font class='head'>".t("Työ/tarvikeosto").":</font><hr><br>";
 				}
@@ -291,11 +295,11 @@
 
 			require('tulosta_ostotilaus.inc');
 
-			$query = "UPDATE lasku SET alatila = 'A', lahetepvm = now() WHERE tunnus='$kukarow[kesken]'";
+			// päivitetään tässä tilaus tulostetuksi
+			$query = "UPDATE lasku SET lahetepvm = now() WHERE tunnus='$kukarow[kesken]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if ($toim == "HAAMU") {
-
 				$query = "UPDATE lasku SET tila='D', tilaustyyppi = 'O' WHERE tunnus='$kukarow[kesken]'";
 				$result = mysql_query($query) or pupe_error($query);
 
@@ -434,7 +438,7 @@
 		if ($tee == 'TI' and ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array))) and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
 			if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
 				$tuoteno_array[] = $tuoteno;
-			}			
+			}
 
 			//Käyttäjän syöttämä hinta ja ale ja netto, pitää säilöä jotta tuotehaussakin voidaan syöttää nämä
 			$kayttajan_hinta	= $hinta;
@@ -516,7 +520,7 @@
 				}
 				else {
 					$alv = $kayttajan_alv;
-				}											
+				}
 
 				if ($kpl != 0) {
 					require ('lisaarivi.inc');

@@ -416,7 +416,7 @@
 		$crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
 		$comments = str_replace($crlf, " ", $comments);
 		
-		if($toim == "HAAMU") {
+		if ($toim == "HAAMU") {
 			$tilaustyyppi = "O";
 		}
 		else {

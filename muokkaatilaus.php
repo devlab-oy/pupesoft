@@ -1491,7 +1491,8 @@
 
 						if ($row["varastokpl"] > 0) {
 							$varastotila = "<font class='info'><br>".t("Viety osittain varastoon")."</font>";
-						} else {
+						} 
+						else {
 							$varastotila = "";
 						}
 

@@ -157,7 +157,7 @@
 				if ($tyyppi == '' or $tyyppi != $row['tyyppi']) {
 
 					echo "<tr><td class='back'>&nbsp;</td></tr>";
-					echo "<tr><th colspan='5'>";
+					echo "<tr><th colspan='6'>";
 
 					if ($row['tyyppi'] == 1) {
 						echo t("Kotimaan maksuaineistot");
@@ -174,15 +174,31 @@
 					echo "<th>",t("Maksutili"),"</th>";
 					echo "<th>",t("Laskuja"),"</th>";
 					echo "<th>",t("Summa")," {$yhtiorow['valkoodi']}</th>";
+					echo "<th></th>";
 					echo "</tr>";
 				}
 
 				echo "<tr class='aktiivi'>";
-				echo "<td><a href='{$palvelin2}selaa_maksuaineisto.php?tee=selaa&alkuvv={$alkuvv}&alkukk={$alkukk}&alkupp={$alkupp}&loppuvv={$loppuvv}&loppukk={$loppukk}&loppupp={$loppupp}&tunnukset={$row['tunnukset']}'>{$row['aika']}</a></td>";
+				echo "<td>{$row['aika']}</td>";
 				echo "<td>{$row['kukanimi']}</td>";
 				echo "<td>{$row['maksu_tili']}</td>";
 				echo "<td align='right'>{$row['kpl']}</td>";
 				echo "<td align='right'>{$row['summa']}</td>";
+
+				echo "<td align='right'>
+						<form method='POST'>
+						<input type='hidden' name='tee' value='selaa'>
+						<input type='hidden' name='alkuvv' value='$alkuvv'>
+						<input type='hidden' name='alkukk' value='$alkukk'>
+						<input type='hidden' name='alkupp' value='$alkupp'>
+						<input type='hidden' name='loppuvv' value='$loppuvv'>
+						<input type='hidden' name='loppukk' value='$loppukk'>
+						<input type='hidden' name='loppupp' value='$loppupp'>
+						<input type='hidden' name='tunnukset' value='{$row['tunnukset']}'>
+						<input type='submit' value='".t("Näytä")."'>
+						</form>
+						</td>";
+
 				echo "</tr>";
 
 				$tyyppi = $row['tyyppi'];
@@ -195,7 +211,7 @@
 	if ($tee == 'selaa') {
 
 		$lisa = '';
-	
+
 		if ($tunnukset) $lisa .= " and lasku.tunnus in ($tunnukset) ";
 
 		$query = "	SELECT lasku.tunnus,
@@ -267,7 +283,7 @@
 			$poimittu_summa = 0;
 			$summa = 0;
 			$laskuja = 0;
-			
+
 			if (tarkista_oikeus("muutosite.php")) {
 				$toslink = TRUE;
 			}
@@ -279,14 +295,14 @@
 				echo "<tr class='aktiivi'>";
 				echo "<td>{$row['nimi']} {$row['nimitark']}</td>";
 				echo "<td align='right'>{$row['laskunro']}</td>";
-			
+
 				echo "<td>";
 
 				if ($toslink) echo "<a href='muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$PHP_SELF////tee=$tee//alkuvv=$alkuvv//alkukk=$alkukk//alkupp=$alkupp//loppuvv=$loppuvv//loppukk=$loppukk//loppupp=$loppupp//tunnukset=$tunnukset'>".tv1dateconv($row["tapvm"])."</a>";
 				else echo tv1dateconv($row["tapvm"]);
 
 				echo "</td>";
-					
+
 				echo "<td valign='top'>",tv1dateconv($row['erpcm']),"</td>";
 				echo "<td valign='top'>",tv1dateconv($row['olmapvm']),"</td>";
 				echo "<td valign='top'>",tv1dateconv($row['mapvm']),"</td>";

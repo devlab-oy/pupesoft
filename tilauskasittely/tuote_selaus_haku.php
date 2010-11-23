@@ -766,8 +766,10 @@
 			$kaikki_puun_tunnukset_res = mysql_query($query, $link) or pupe_error($query);
 			$kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
 
-			$joinlisa = " JOIN puun_alkio ON (puun_alkio.yhtio = tuote.yhtio AND puun_alkio.laji = 'tuote' AND puun_alkio.puun_tunnus IN (".implode(',', $kaikki_puun_tunnukset_row).") AND puun_alkio.liitos = tuote.tuoteno) ";
-			$selectlisa = ", puun_alkio.puun_tunnus ";
+			if (trim($kaikki_puun_tunnukset_row['tunnukset']) != '') {
+				$joinlisa = " JOIN puun_alkio ON (puun_alkio.yhtio = tuote.yhtio AND puun_alkio.laji = 'tuote' AND puun_alkio.puun_tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) AND puun_alkio.liitos = tuote.tuoteno) ";
+				$selectlisa = ", puun_alkio.puun_tunnus ";
+			}
 		}
 
 		$query = "	SELECT

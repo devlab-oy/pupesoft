@@ -1232,7 +1232,7 @@
 
 			$laatikot_selected = array();
 
-			if (trim($monivalintarajaus_dynaaminen) != '') {
+			if (isset($monivalintarajaus_dynaaminen) and trim($monivalintarajaus_dynaaminen) != '') {
 				$laatikot_selected[] = $monivalintarajaus_dynaaminen;
 			}
 			elseif (isset($url) and $url == 'y' and $kaikki_tunnukset != '') {
@@ -1240,7 +1240,7 @@
 			}
 
 			for ($i = 1; $i < 5; $i++) {
-				if (${'mul_'.$tree.$i}[0] == 'PUPEKAIKKIMUUT' or ${'mul_'.$tree.$i}[0] == '') array_shift(${'mul_'.$tree.$i});
+				if (isset(${'mul_'.$tree.$i}[0]) and (${'mul_'.$tree.$i}[0] == 'PUPEKAIKKIMUUT' or ${'mul_'.$tree.$i}[0] == '')) array_shift(${'mul_'.$tree.$i});
 
 				if (count(${'mul_'.$tree.$i}) > 0) {
 					// aina syvemmän tason monivalintalaatikko rajaa isommalla prioriteetilla, joten nollataan haettavat lapsituotteet ja otetaan viimesin valitun laatikon tunnus
@@ -1249,7 +1249,6 @@
 					$laatikot_selected = $kaikki_tunnukset;
 				}
 			}
-
 
 			// jos ei olla valittu mitään monivalintalaatikoista, haetaan dynaamisen puun root-kategoria
 			if (count($laatikot_selected) == 0) {
@@ -1308,15 +1307,17 @@
 				$query = "	SELECT parent.tunnus node_tunnus, parent.nimi node_nimi, 
 							(	SELECT (COUNT(subnode.nimi) - 1)
 								FROM dynaaminen_puu AS subnode 
-								JOIN dynaaminen_puu AS subparent ON (subnode.lft BETWEEN subparent.lft AND subparent.rgt AND subparent.laji = subnode.laji) 
+								JOIN dynaaminen_puu AS subparent ON (subparent.laji = subnode.laji AND subparent.yhtio = subnode.yhtio AND subnode.lft BETWEEN subparent.lft AND subparent.rgt) 
 								WHERE subnode.laji = parent.laji
 								AND subnode.yhtio = parent.yhtio
 								AND subnode.tunnus = parent.tunnus
 							) syvyys
 							FROM dynaaminen_puu AS node
-							JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
+							JOIN dynaaminen_puu AS parent ON (parent.laji = node.laji AND parent.yhtio = node.yhtio AND parent.lft > 1 AND node.lft BETWEEN parent.lft AND parent.rgt)
 							WHERE node.tunnus IN ($kaikki_puun_tunnukset_row[tunnukset])
-							AND parent.lft > 1
+							AND node.lft > 1
+							AND node.laji = '{$tree}'
+							AND node.yhtio = '{$kukarow['yhtio']}'
 							GROUP BY parent.tunnus
 							ORDER BY syvyys, node_nimi";
 				$sxresult2 = mysql_query($query, $link) or pupe_error($query);

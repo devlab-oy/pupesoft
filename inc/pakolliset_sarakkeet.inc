@@ -8,8 +8,8 @@
 
 // m‰‰ritell‰‰n pakolliset sarakkeet
 if (!function_exists("pakolliset_sarakkeet")) {
-	function pakolliset_sarakkeet($table, $otsikot="") {
-		global $yhtiorow;
+	function pakolliset_sarakkeet($table, $otsikot = "") {
+		global $yhtiorow, $table_tarkenne;
 
 		switch ($table) {
 			case "tuote" :
@@ -235,6 +235,22 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				}
 
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
+			case "puun_alkio" :
+				$pakolliset = array("TUNTEMATON_TAULU");
+				$kielletyt = array();
+
+				if (trim($table_tarkenne) != '') {
+
+					$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite = '$table_tarkenne' ");
+
+					if (mysql_num_rows($dynaamiset_avainsanat_result) == 1) {
+						$pakolliset = array("KIELI", "PUUN_TUNNUS", "LIITOS");
+						$kielletyt = array("LAJI", "LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+						$wherelliset = array("KIELI", "PUUN_TUNNUS", "LIITOS", "JARJESTYS");
+					}
+				}
+
 				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");

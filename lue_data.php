@@ -114,9 +114,16 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 	// Tutkitaan millä ehdoilla taulut joinataan keskenään
 	$joinattavat = array();
 
+	$table_tarkenne = '';
+
 	foreach ($unique_taulut as $utaulu) {
 		list($taulu, ) = explode(".", $utaulu);
 		$taulu = preg_replace("/__[0-9]*$/", "", $taulu);
+
+		if (substr($taulu, 0, 11) == 'puun_alkio_') {
+			$taulu = 'puun_alkio';
+			$table_tarkenne = substr($taulu, 11);
+		}
 
 		list(, , , , $joinattava) = pakolliset_sarakkeet($taulu);
 
@@ -246,10 +253,17 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 		$trows			= array();
 		$tlength		= array();
 		$apu_sarakkeet	= array();
+		$rivimaara 		= count($rivit);
+		$dynaamiset_rivit = array();
 
 		// Siivotaan joinit ja muut pois tietokannan nimestä
 		list($table_mysql, ) = explode(".", $taulu);
 		$table_mysql = preg_replace("/__[0-9]*$/", "", $table_mysql);
+
+		if (substr($table_mysql, 0, 11) == 'puun_alkio_') {
+			$table_tarkenne = substr($table_mysql, 11);
+			$table_mysql = 'puun_alkio';
+		}
 
 		// jos tullaan jotenkin hassusti, nmiin ei tehdä mitään
 		if (trim($table_mysql) == "") continue;
@@ -389,7 +403,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 		$rivilaskuri = 1;
 
-		for ($eriviindex = 0; $eriviindex < count($rivit); $eriviindex++) {
+		$puun_alkio_index_plus = 0;
+
+		for ($eriviindex = 0; $eriviindex < (count($rivit) + $puun_alkio_index_plus); $eriviindex++) {
 			$hylkaa    = 0;
 			$tila      = "";
 			$tee       = "";
@@ -481,6 +497,82 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				elseif ($table_mysql == 'tuotepaikat' and $taulunotsikot[$taulu][$j] == "OLETUS") {
 					//ei haluta tätä tänne
 				}
+				elseif ($table_mysql == 'puun_alkio') {
+
+					// voidaan vaan lisätä puun alkioita
+					if (strtolower(trim($rivi[$postoiminto])) != "lisaa") {
+						$tila = 'ohita';
+					}
+
+					if ($tila != 'ohita' and $taulunotsikot[$taulu][$j] == "PUUN_TUNNUS") {
+
+						// jos ollaan valittu koodi puun_tunnuksen sarakkeeksi, niin haetaan dynaamisesta puusta tunnus koodilla 
+						if ($dynaamisen_taulun_liitos == 'koodi') {
+
+							$query_x = "	SELECT tunnus
+											FROM dynaaminen_puu
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND laji = '{$table_tarkenne}'
+											AND koodi = '".trim($rivi[$j])."'";
+							$koodi_tunnus_res = mysql_query($query_x) or pupe_error($query_x);
+
+							// jos tunnusta ei löydy, ohitetaan kyseinen rivi
+							if (mysql_num_rows($koodi_tunnus_res) == 0) {
+								$tila = 'ohita';
+							}
+							else {
+								$koodi_tunnus_row = mysql_fetch_assoc($koodi_tunnus_res);
+								$valinta .= " and puun_tunnus = '{$koodi_tunnus_row['tunnus']}' ";
+							}
+						}
+						else {
+							$valinta .= " and puun_tunnus = '".trim($rivi[$j])."' ";
+						}
+					}
+					elseif ($tila != 'ohita' and $taulunotsikot[$taulu][$j] == "LIITOS") {
+						if ($table_tarkenne == 'asiakas' and $dynaamisen_taulun_liitos != '') {
+
+							$query = "	SELECT tunnus
+										FROM asiakas
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND laji != 'P'
+										AND $dynaamisen_taulun_liitos = '".trim($rivi[$j])."'";
+							$asiakkaan_haku_res = mysql_query($query) or pupe_error($query);
+
+							unset($rivit[$eriviindex]);
+
+							while ($asiakkaan_haku_row = mysql_fetch_assoc($asiakkaan_haku_res)) {
+
+								$rivi_array_x = array();
+
+								foreach ($taulunotsikot[$taulu] as $indexi_x => $columnin_nimi_x) {
+									switch ($columnin_nimi_x) {
+										case 'LIITOS':
+											$rivi_array_x[] = $asiakkaan_haku_row['tunnus'];
+											break;
+										default:
+											$rivi_array_x[] = $rivi[$indexi_x];
+									}
+								}
+
+								array_push($dynaamiset_rivit, $rivi_array_x);
+							}
+
+							$puun_alkio_index_plus++;
+
+							if ($rivimaara == ($eriviindex+1)) {
+								$dynaamisen_taulun_liitos = '';
+
+								foreach ($dynaamiset_rivit as $dyn_rivi) array_push($rivit, $dyn_rivi);
+							}
+
+							continue 2;
+						}
+						else {
+							$valinta .= " and liitos = '".trim($rivi[$j])."' ";
+						}
+					}
+				}
 				elseif ($table_mysql == 'asiakas' and stripos($rivi[$postoiminto], 'LISAA') !== FALSE and $taulunotsikot[$taulu][$j] == "YTUNNUS" and $rivi[$j] == "AUTOM") {
 
 					if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != "") {
@@ -550,6 +642,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				if (trim($rivi[$j]) == "" and in_array($taulunotsikot[$taulu][$j], $pakolliset)) {
 					$tila = 'ohita';
 				}
+			}
+
+			if (substr($taulu, 0, 11) == 'puun_alkio_') {
+				$valinta .= " and laji = '".substr($taulu, 11)."' ";
 			}
 
 			// jos ei ole puuttuva tieto etsitään riviä
@@ -1119,6 +1215,27 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 								$query .= ", $otsikko = '$rivi[$r]' ";
 							}
+							elseif (substr($taulu, 0, 11) == 'puun_alkio_') {
+								if ($otsikko == 'PUUN_TUNNUS') {
+									if ($dynaamisen_taulun_liitos == 'koodi') {
+										$query_x = "	SELECT tunnus
+														FROM dynaaminen_puu
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND laji = '{$table_tarkenne}'
+														AND koodi = '".trim($rivi[$r])."'";
+										$koodi_tunnus_res = mysql_query($query_x) or pupe_error($query_x);
+										$koodi_tunnus_row = mysql_fetch_assoc($koodi_tunnus_res);
+
+										$query .= ", puun_tunnus = '{$koodi_tunnus_row['tunnus']}' ";
+									}
+									else {
+										$query .= ", puun_tunnus = '{$rivi[$r]}' ";
+									}
+								}
+								else {
+									$query .= ", $otsikko = '".trim($rivi[$r])."' ";
+								}
+							}
 							elseif ($eilisataeikamuuteta == "") {
 								$query .= ", $otsikko = '$rivi[$r]' ";
 							}
@@ -1159,6 +1276,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					$and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
 				}
 
+				if (substr($taulu, 0, 11) == 'puun_alkio_') {
+					$query .= " , laji = '{$table_tarkenne}' ";
+				}
+
 				if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
 					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') and $and != "") {
 						$query .= " WHERE yhtio = '$kukarow[yhtio]'";
@@ -1192,7 +1313,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				}
 				$result = mysql_query($tarq) or pupe_error($tarq);
 				
-
 				if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and mysql_num_rows($result) != 1) {
 					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Päivitettävää riviä ei löytynyt")."!</font><br>";
 				}
@@ -1289,7 +1409,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 						// Itse lue_datan päivitysquery
 						$iresult = mysql_query($query) or pupe_error($query);
-
+						
 						// Synkronoidaan
 						if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 							$tunnus = mysql_insert_id();
@@ -1297,9 +1417,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						else {
 							$tunnus = $syncrow["tunnus"];
 						}
-
+						
 						synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
-
+						
 						// tehdään epäkunrattijutut
 						if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois") {
 							require("epakurantti.inc");
@@ -1364,8 +1484,20 @@ else {
 					<option value='yhteensopivuus_mp' $sel[yhteensopivuus_mp]>".t("Yhteensopivuus mp-mallit")."</option>
 					<option value='yhteensopivuus_tuote' $sel[yhteensopivuus_tuote]>".t("Yhteensopivuus tuotteet")."</option>
 					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
-					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>
-					</select></td>
+					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>";
+
+			$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
+			$dynaamiset_avainsanat = '';
+
+			while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
+				if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
+					$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
+				}
+
+				echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
+			}
+
+			echo "	</select></td>
 			</tr>";
 
 		if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
@@ -1375,6 +1507,24 @@ else {
 					<option value='2'>".t("Päivitetään kaikki syötetyllä Ytunnuksella löytyvät asiakkaat")."</option>
 					</select></td>
 			</tr>";
+		}
+
+		if (trim($dynaamiset_avainsanat) != '' and $table == $dynaamiset_avainsanat) {
+			echo "	<tr><td>",t("Valitse liitos"),":</td>
+					<td><select name='dynaamisen_taulun_liitos'>";
+
+			if ($table == 'puun_alkio_asiakas') {
+				echo "	<option value=''>",t("Asiakkaan tunnus"),"</option>
+						<option value='ytunnus'>",t("Asiakkaan ytunnus"),"</option>
+						<option value='toim_ovttunnus'>",t("Asiakkaan toimitusosoitteen ovttunnus"),"</option>
+						<option value='asiakasnro'>",t("Asiakkaan asiakasnumero"),"</option>";
+			}
+			else {
+				echo "	<option value=''>",t("Puun alkion tunnus"),"</option>
+						<option value='koodi'>",t("Puun alkion koodi"),"</option>";
+			}
+
+			echo "</select></td></tr>";
 		}
 
 		if (in_array($table, array("asiakasalennus", "asiakashinta"))) {

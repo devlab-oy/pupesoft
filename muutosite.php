@@ -86,16 +86,16 @@ if ($tee == 'G') {
 }
 
 // Tositeselailu
-if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa') {
+if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee = 'automaattikirjauksia_alv_muutettu') {
 
-	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa') {
+	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee = 'automaattikirjauksia_alv_muutettu') {
 
 		// Etsitään virheet vain kuluvalta tilikaudelta!
 		if ($tee == 'Z') {
 			$query = "	SELECT ltunnus, tapvm, round(sum(summa),2) summa, 'n/a', 'n/a', 'n/a', selite
 						FROM tiliointi use index (yhtio_tapvm_tilino)
 						WHERE yhtio = '$kukarow[yhtio]'
-						and korjattu=''
+						and korjattu = ''
 						and tapvm >= '$yhtiorow[tilikausi_alku]'
 						and tapvm <= '$yhtiorow[tilikausi_loppu]'
 						GROUP BY ltunnus, tapvm
@@ -106,30 +106,32 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
 						FROM tiliointi use index (yhtio_tilino_tapvm), tili use index (tili_index)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-						and tili.yhtio = '$kukarow[yhtio]'
-						and tili.sisainen_taso like '3%'
-						and tiliointi.tilino = tili.tilino
-						and tiliointi.korjattu = ''
-						and tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
-						and tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
-						and tiliointi.kustp = 0
-						and tiliointi.tilino!='$yhtiorow[myynti]'
-						and tiliointi.tilino!='$yhtiorow[myynti_ei_eu]'
-						and tiliointi.tilino!='$yhtiorow[myynti_eu]'
-						and tiliointi.tilino!='$yhtiorow[varastonmuutos]'
-						and tiliointi.tilino!='$yhtiorow[pyoristys]'";
+						AND tili.yhtio = '$kukarow[yhtio]'
+						AND tili.sisainen_taso like '3%'
+						AND tiliointi.tilino = tili.tilino
+						AND tiliointi.korjattu = ''
+						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
+						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND tiliointi.kustp = 0
+						AND tiliointi.tilino != '$yhtiorow[myynti]'
+						AND tiliointi.tilino != '$yhtiorow[myynti_ei_eu]'
+						AND tiliointi.tilino != '$yhtiorow[myynti_eu]'
+						AND tiliointi.tilino != '$yhtiorow[varastonmuutos]'
+						AND tiliointi.tilino != '$yhtiorow[pyoristys]'";
 		}
 
 		if ($tee == 'W') {
-			$query = "	SELECT ltunnus, count(*) maara, round(sum(summa),2) heitto, 'n/a', 'n/a', 'n/a', selite
+			$query = "	SELECT ltunnus, group_concat(distinct tapvm SEPARATOR '<br>') pvm,  count(*) kpl, round(sum(summa),2) heitto, group_concat(distinct selite SEPARATOR '<br>') selite
 						FROM tiliointi use index (yhtio_tilino_tapvm)
-						WHERE yhtio='$kukarow[yhtio]'
-						and korjattu=''
-						and tapvm >= '$yhtiorow[tilikausi_alku]'
-						and tapvm <= '$yhtiorow[tilikausi_loppu]'
-						and tilino = '$yhtiorow[ostovelat]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND korjattu = ''
+						AND tapvm >= '$yhtiorow[tilikausi_alku]'
+						AND tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND tilino = '$yhtiorow[ostovelat]'
 						GROUP BY ltunnus
-						HAVING maara > 1 and heitto <> 0";
+						HAVING kpl > 1
+						AND heitto <> 0
+						ORDER by pvm";
 		}
 
 		if ($tee == 'S') {
@@ -140,10 +142,10 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						LEFT JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu = '' and t1.tilino='$yhtiorow[myyntisaamiset]'
 						LEFT JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu = '' and t2.tilino='$yhtiorow[factoringsaamiset]'
 						LEFT JOIN tiliointi t3 ON lasku.yhtio=t3.yhtio and lasku.tunnus=t3.ltunnus and t3.korjattu = '' and t3.tilino='$yhtiorow[konsernimyyntisaamiset]'
-						WHERE lasku.yhtio	= '$kukarow[yhtio]'
-						and lasku.tila		= 'U'
-						and lasku.alatila	= 'X'
-						and lasku.mapvm		!= '0000-00-00'
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'U'
+						and lasku.alatila = 'X'
+						and lasku.mapvm != '0000-00-00'
 						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
 						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						GROUP BY 1,2,3,4,5,6
@@ -158,9 +160,9 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						JOIN sarjanumeroseuranta s1 ON tr1.yhtio=s1.yhtio and tr1.tunnus=s1.ostorivitunnus
 						JOIN tilausrivi tr2 ON s1.yhtio=tr2.yhtio and s1.myyntirivitunnus=tr2.tunnus
 						JOIN lasku l2 ON tr2.yhtio=l2.yhtio and tr2.uusiotunnus=l2.tunnus
-						WHERE lasku.yhtio	= '$kukarow[yhtio]'
-						and lasku.tila		= 'U'
-						and lasku.alatila	= 'X'
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'U'
+						and lasku.alatila = 'X'
 						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
 						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						HAVING (alv1 != 'MV' or alv2 != 'MV')
@@ -175,9 +177,9 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						JOIN sarjanumeroseuranta s1 ON tr1.yhtio=s1.yhtio and tr1.tunnus=s1.myyntirivitunnus
 						JOIN tilausrivi tr2 ON s1.yhtio=tr2.yhtio and s1.ostorivitunnus=tr2.tunnus
 						JOIN lasku l2 ON tr2.yhtio=l2.yhtio and tr2.uusiotunnus=l2.tunnus
-						WHERE lasku.yhtio	= '$kukarow[yhtio]'
-						and lasku.tila		= 'U'
-						and lasku.alatila	= 'X'
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila = 'U'
+						and lasku.alatila = 'X'
 						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
 						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						HAVING (alv1 != 'MV' or alv2 != 'MV')
@@ -191,11 +193,11 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						LEFT JOIN tiliointi t2 ON (lasku.yhtio = t2.yhtio and lasku.tunnus = t2.ltunnus and t2.korjattu = '' and t2.tilino = '$yhtiorow[factoringsaamiset]')
 						LEFT JOIN tiliointi t3 ON (lasku.yhtio = t3.yhtio and lasku.tunnus = t3.ltunnus and t3.korjattu = '' and t3.tilino = '$yhtiorow[konsernimyyntisaamiset]')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tila	  = 'U'
+						and lasku.tila = 'U'
 						and lasku.alatila = 'X'
-						and lasku.mapvm  != '0000-00-00'
-						and lasku.tapvm  >= '$yhtiorow[tilikausi_alku]'
-						and lasku.tapvm  <= '$yhtiorow[tilikausi_loppu]'
+						and lasku.mapvm != '0000-00-00'
+						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
+						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						GROUP BY ltunnus
 						HAVING round(sum(t1.summa),2) != 0 or round(sum(t2.summa),2) != 0 or round(sum(t3.summa),2) != 0
 						ORDER by lasku.laskunro";
@@ -209,6 +211,37 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						AND tiliointi.korjattu != ''
 						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
 						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						GROUP BY lasku.tunnus
+						ORDER BY lasku.tapvm, lasku.ytunnus";
+			$viivatut = "on";
+		}
+
+		if ($tee == 'automaattikirjauksia_alv_muutettu') {
+
+			// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity
+			$query = "	SELECT ifnull(group_concat(DISTINCT concat(\"'\", toim_alv, \"'\")), '') tilino
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$kukarow[yhtio]'
+						and maa != ''
+						and vat_numero != ''
+						and toim_alv != ''";
+			$alhire = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_assoc($alhire);
+
+			$tilino_alv = "'$yhtiorow[alv]'";
+
+			if ($vrow["tilino"] != "") {
+				$tilino_alv .= ",$vrow[tilino]";
+			}
+
+			$query = "	SELECT lasku.tunnus ltunnus, lasku.tapvm, lasku.summa, lasku.ytunnus, lasku.nimi, 'n/a'
+						FROM tiliointi use index (yhtio_tapvm_tilino)
+						JOIN lasku use index (PRIMARY) ON (lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tiliointi.ltunnus and lasku.tila in ('H','Y','M','P','Q','U'))
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.korjattu != ''
+						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
+						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND (tiliointi.vero != 0 or tiliointi.tilino in ($tilino_alv))
 						GROUP BY lasku.tunnus
 						ORDER BY lasku.tapvm, lasku.ytunnus";
 			$viivatut = "on";
@@ -1292,6 +1325,10 @@ if (strlen($tee) == 0) {
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joiden automaattikirjauksia on muutettu")."</td>
 		  	<td><form action = '$PHP_SELF?tee=automaattikirjauksia_muutettu' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	</tr>
+			<tr class='aktiivi'>
+		  	<td>".t("näytä tositteet, joiden automaattisia alv-kirjauksia on muutettu")."</td>
+		  	<td><form action = '$PHP_SELF?tee=automaattikirjauksia_alv_muutettu' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joiden marginaaliverotiliöinnit ovat väärin")."</td>

@@ -113,7 +113,7 @@
 	}
 
 	if (!function_exists("alv_laskelma")) {
-		function alvlaskelma ($kk,$vv) {
+		function alvlaskelma ($kk, $vv) {
 			global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta, $maksettava_alv_tili;
 
 			if (function_exists("laskeveroja")) die;
@@ -129,7 +129,7 @@
 					$tuotetyyppilisa = '';
 
 					if ($taso == 'fi307') {
-						$maalisa = "JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.maa in ('FI', '')";
+						$maalisa = "JOIN lasku ON lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.maa in ('FI', '')";
 					}
 
 					if ($taso == 'fi309') {
@@ -201,17 +201,16 @@
 
 							if ($tuotetyyppilisa != '') {
 								// Onko kassa-alea? (kassa-ale ei näy tilausrivillä, joten haetaan se näin)
-								$query = "	SELECT sum(summa) summa
+								$query = "	SELECT ifnull(sum(summa), 0) summa
 											FROM tiliointi
-											WHERE yhtio  = '$kukarow[yhtio]'
-											and ltunnus  = '$verorow[tunnus]'
-											and tilino   = '$yhtiorow[myynninkassaale]'
+											WHERE yhtio = '$kukarow[yhtio]'
+											and ltunnus = '$verorow[tunnus]'
+											and tilino = '$yhtiorow[myynninkassaale]'
 											and korjattu = ''";
 								$result = mysql_query($query) or pupe_error($query);
+								$kalerow = mysql_fetch_array($result);
 
-								if (mysql_num_rows($result) > 0) {
-									$kalerow = mysql_fetch_array($result);
-
+								if ($kalerow["summa"] != 0) {
 									$verorow["summa"] = $verorow["summa"] * (1-($kalerow["summa"]/$verorow["laskuarvo"]));
 								}
 							}
@@ -304,7 +303,7 @@
 				$fi306 = laskeveroja('fi306', $oletus_verokanta);
 
 				// 307 sääntö fi307
-				$fi307 = laskeveroja('fi307','veronmaara') + $fi305 + $fi306;
+				$fi307 = laskeveroja('fi307', 'veronmaara') + $fi305 + $fi306;
 
 				// 308 laskennallinen
 				$fi308 = $fi301 + $fi302 + $fi303 + $fi305 + $fi306 - $fi307;
@@ -689,7 +688,8 @@
 
 			while ($trow = mysql_fetch_array($result)) {
 
-				if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["maa"])) { // Vaihtuiko verokanta?
+				// Vaihtuiko verokanta?
+				if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["maa"])) { 
 					echo "<tr>
 							<td colspan='5' align='right' class='spec'>".t("Yhteensä").":</td>
 							<td align = 'right' class='spec'>".sprintf('%.2f', $kantasum)."</td>

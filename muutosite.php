@@ -86,9 +86,9 @@ if ($tee == 'G') {
 }
 
 // Tositeselailu
-if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee = 'automaattikirjauksia_alv_muutettu') {
+if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu') {
 
-	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee = 'automaattikirjauksia_alv_muutettu') {
+	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu') {
 
 		// Etsitään virheet vain kuluvalta tilikaudelta!
 		if ($tee == 'Z') {

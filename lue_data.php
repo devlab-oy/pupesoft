@@ -486,6 +486,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						$tila = 'ohita';
 					}
 				}
+				elseif ($table_mysql == 'yhteensopivuus_tuote' and $taulunotsikot[$taulu][$j] == "TYYPPI" and trim($rivi[$j]) == '') {
+					$tila = 'ohita';
+				}
 				elseif ($table_mysql == 'sanakirja' and $taulunotsikot[$taulu][$j] == "FI") {
 					// jos ollaan mulkkaamassa RU ni tehdään utf-8 -> latin-1 konversio FI kentällä
 					if (in_array("RU", $taulunotsikot[$taulu])) {

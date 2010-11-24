@@ -5,6 +5,22 @@
 
 	require ("../inc/parametrit.inc");
 
+	if (!isset($voipcall)) $voipcall = '';
+	if (!isset($haku)) $haku = '';
+	if (!isset($ojarj)) $ojarj = '';
+	if (!isset($asos)) $asos = '';
+	if (!isset($aspiiri)) $aspiiri = '';
+	if (!isset($asryhma)) $asryhma = '';
+	if (!isset($astila)) $astila = '';
+	if (!isset($asmyyja)) $asmyyja = '';
+	if (!isset($lisa)) $lisa = '';
+	if (!isset($kaikki_tunnukset)) $kaikki_tunnukset = '';
+	if (!isset($konserni)) $konserni = '';
+	if (!isset($tee)) $tee = '';
+	if (!isset($ryhma)) $ryhma = '';
+	if (!isset($oper)) $oper = '';
+	if (!isset($ulisa)) $ulisa = '';
+
 	if ($voipcall == "call" and $o != "" and $d != "") {
 		ob_start();
 		$retval = @readfile($VOIPURL."&o=$o&d=$d");
@@ -27,36 +43,88 @@
 
 	$array = explode("::", $kentat);
 	$count = count($array);
-	for ($i=0; $i<=$count; $i++) {
-		if (strlen($haku[$i]) > 0) {
-			$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+
+	for ($i = 0; $i <= $count; $i++) {
+		if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
+			$lisa .= " and asiakas." . $array[$i] . " like '%" . $haku[$i] . "%'";
 			$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 		}
 	}
+
 	if (strlen($ojarj) > 0) {
 		$jarjestys = $ojarj;
 	}
 
 	if ($asos != '') {
-		$lisa .= " and osasto='$asos' ";
+		$lisa .= " and asiakas.osasto = '$asos' ";
 	}
 
 	if ($aspiiri != '') {
-		$lisa .= " and piiri='$aspiiri' ";
+		$lisa .= " and asiakas.piiri = '$aspiiri' ";
 	}
 
 	if ($asryhma != '') {
-		$lisa .= " and ryhma='$asryhma' ";
+		$lisa .= " and asiakas.ryhma = '$asryhma' ";
 	}
+
 	if ($astila != '') {
-		$lisa .= " and tila='$astila' ";
+		$lisa .= " and asiakas.tila = '$astila' ";
 	}
 
 	if ($asmyyja != '') {
-		$lisa .= " and myyjanro='$asmyyja' ";
+		$lisa .= " and asiakas.myyjanro = '$asmyyja' ";
 	}
 
-	$lisa .= " and laji != 'P' ";
+	$lisa .= " and asiakas.laji != 'P' ";
+
+	if (isset($dynaamiset_nimet)) {
+		if (!is_array($dynaamiset_nimet)) {
+			$dynaamiset_nimet = unserialize(urldecode($dynaamiset_nimet));
+		}
+
+		if (count($dynaamiset_nimet) > 0) {
+
+			foreach ($dynaamiset_nimet as $nimi) {
+
+				if (!isset(${$nimi}) or ${$nimi}[0] == 'PUPEKAIKKIMUUT' or trim(${$nimi}[0]) == '') continue;
+
+				$kaikki_tunnukset = ${$nimi}[0];
+				$ulisa .= "&{$nimi}[]=".${$nimi}[0];
+				$ulisa .= "&dynaamiset_nimet[]={$nimi}";
+			}
+		}
+	}
+
+	$joinlisa = '';
+	$selectlisa = '';
+
+	if ($kaikki_tunnukset != '') {
+
+		$kaikki_tunnukset = implode(",", array_unique(explode(",", $kaikki_tunnukset)));
+
+		$query = "	SELECT GROUP_CONCAT(DISTINCT subnode.tunnus) tunnukset
+					FROM dynaaminen_puu AS subnode 
+					JOIN dynaaminen_puu AS subparent ON (subparent.tunnus IN ($kaikki_tunnukset)) 
+					JOIN puun_alkio ON (puun_alkio.yhtio = subnode.yhtio AND puun_alkio.puun_tunnus = subnode.tunnus AND puun_alkio.laji = subnode.laji)
+					WHERE subnode.yhtio = '{$kukarow['yhtio']}'
+					AND subnode.laji = 'asiakas'
+					AND (subnode.lft BETWEEN subparent.lft AND subparent.rgt)
+					AND subnode.lft > 1
+					ORDER BY subnode.lft";
+		$kaikki_puun_tunnukset_res = mysql_query($query, $link) or pupe_error($query);
+		$kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
+
+		if (trim($kaikki_puun_tunnukset_row['tunnukset']) != '') {
+			$joinlisa = " JOIN puun_alkio ON (puun_alkio.yhtio = asiakas.yhtio AND puun_alkio.laji = 'asiakas' AND puun_alkio.puun_tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) AND puun_alkio.liitos = asiakas.tunnus) ";
+			$selectlisa = ", puun_alkio.puun_tunnus ";
+		}
+		else {
+			$joinlisa = " JOIN puun_alkio ON (puun_alkio.yhtio = asiakas.yhtio AND puun_alkio.laji = 'asiakas' AND puun_alkio.puun_tunnus = asiakas.tunnus AND puun_alkio.liitos = asiakas.tunnus) ";
+			$selectlisa = ", puun_alkio.puun_tunnus ";
+		}
+
+		$ulisa .= "&kaikki_tunnukset=$kaikki_tunnukset";
+	}
 
 	if (trim($konserni) != '') {
 		$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
@@ -66,32 +134,42 @@
 		while ($row = mysql_fetch_array($result)) {
 			$konsernit .= " '".$row["yhtio"]."' ,";
 		}
-		$konsernit = " yhtio in (".substr($konsernit, 0, -1).") ";
+		$konsernit = " asiakas.yhtio in (".substr($konsernit, 0, -1).") ";
 	}
 	else {
-		$konsernit = " yhtio = '$kukarow[yhtio]' ";
+		$konsernit = " asiakas.yhtio = '$kukarow[yhtio]' ";
 	}
 
 	if ($yhtiorow['viikkosuunnitelma'] == '') {
 		if ($tee == "lahetalista") {
-			$query = "	SELECT tunnus, nimi, postitp, ytunnus, yhtio, asiakasnro, nimitark, osoite, postino, postitp, maa, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa,
-						puhelin, fax, myyjanro, email, osasto, piiri, ryhma, fakta, toimitustapa, yhtio
+			$query = "	SELECT asiakas.tunnus, asiakas.nimi, asiakas.postitp, asiakas.ytunnus, asiakas.yhtio, asiakas.asiakasnro, asiakas.nimitark, 
+						asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite, 
+						asiakas.toim_postino, asiakas.toim_postitp, asiakas.toim_maa, asiakas.puhelin, asiakas.fax, asiakas.myyjanro, asiakas.email, 
+						asiakas.osasto, asiakas.piiri, asiakas.ryhma, asiakas.fakta, asiakas.toimitustapa, asiakas.yhtio $selectlisa
 						FROM asiakas
+						$joinlisa
 						WHERE $konsernit
 						$lisa";
 			$tiednimi = "asiakaslista.xls";
 		}
 		else {
-			$query = "	SELECT tunnus, IF(nimi != toim_nimi, CONCAT(nimi, '<br />', toim_nimi), nimi) nimi, asiakasnro, ytunnus,  if(toim_postitp!='',toim_postitp,postitp) postitp, if(toim_postino!=00000,toim_postino,postino) postino, yhtio, myyjanro, email, puhelin
+			$query = "	SELECT asiakas.tunnus, IF(asiakas.nimi != asiakas.toim_nimi, CONCAT(asiakas.nimi, '<br />', asiakas.toim_nimi), asiakas.nimi) nimi, 
+						asiakas.asiakasnro, asiakas.ytunnus,  if(asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp, 
+						if(asiakas.toim_postino != 00000, asiakas.toim_postino, asiakas.postino) postino, 
+						asiakas.yhtio, asiakas.myyjanro, asiakas.email, asiakas.puhelin $selectlisa
 						FROM asiakas
+						$joinlisa
 						WHERE $konsernit
 						$lisa";
 			$tiednimi = "viikkosuunnitelma.xls";
 		}
 	}
 	else {
-		$query = "	SELECT tunnus, nimi, (SELECT concat_ws(' ',myyja,nimi) from kuka where yhtio='$kukarow[yhtio]' and myyja=myyjanro and myyja > 0 limit 1) myyja, ytunnus, asiakasnro, if(toim_postitp!='',toim_postitp,postitp) postitp, yhtio, puhelin
+		$query = "	SELECT asiakas.tunnus, asiakas.nimi, (SELECT concat_ws(' ', kuka.myyja, kuka.nimi) FROM kuka WHERE kuka.yhtio = '$kukarow[yhtio]' AND kuka.myyja = asiakas.myyjanro AND kuka.myyja > 0 LIMIT 1) myyja, 
+					asiakas.ytunnus, asiakas.asiakasnro, if(asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp, 
+					asiakas.yhtio, asiakas.puhelin $selectlisa
 					FROM asiakas
+					$joinlisa
 					WHERE $konsernit
 					$lisa";
 	}
@@ -242,8 +320,6 @@
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\n" ;
 
-
-
 		if ($tee == "lahetalista") {
 			mail($kukarow['eposti'], mb_encode_mimeheader("Asiakkaiden tiedot", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 			echo "<br><br><font class='message'>".t("Asiakkaiden tiedot sähköpostiisi")."!</font><br><br><br>";
@@ -354,7 +430,20 @@
 	}
 
 	echo "</select></td></tr>\n\n";
-	echo "</table><br><table>";
+	echo "</table><br />";
+
+	$avainsana_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite='Asiakas' ");
+
+	if (mysql_num_rows($avainsana_result) == 1) {
+		$monivalintalaatikot = array("DYNAAMINEN_ASIAKAS");
+		$monivalintalaatikot_normaali = array("DYNAAMINEN_ASIAKAS");
+
+		require ("../tilauskasittely/monivalintalaatikot.inc");
+
+		echo "<input type='hidden' name='dynaamiset_nimet' value='",urlencode(serialize($dynaamiset_nimet)),"' />";
+	}
+
+	echo "<br><table>";
 
 	echo "<tr>";
 
@@ -364,6 +453,8 @@
 		if 	(mysql_field_len($result,$i)>10) $size='20';
 		elseif	(mysql_field_len($result,$i)<5)  $size='5';
 		else	$size='10';
+
+		if (!isset($haku[$i])) $haku[$i] = '';
 
 		echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
 		echo "</th>";

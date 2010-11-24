@@ -1242,7 +1242,7 @@
 			for ($i = 1; $i < 5; $i++) {
 				if (isset(${'mul_'.$tree.$i}[0]) and (${'mul_'.$tree.$i}[0] == 'PUPEKAIKKIMUUT' or ${'mul_'.$tree.$i}[0] == '')) array_shift(${'mul_'.$tree.$i});
 
-				if (count(${'mul_'.$tree.$i}) > 0) {
+				if (count(${'mul_'.$tree.$i}) > 0 and ${'mul_'.$tree.$i}[0] !== NULL) {
 					// aina syvemmän tason monivalintalaatikko rajaa isommalla prioriteetilla, joten nollataan haettavat lapsituotteet ja otetaan viimesin valitun laatikon tunnus
 					$kaikki_tunnukset = implode(",", ${'mul_'.$tree.$i});
 

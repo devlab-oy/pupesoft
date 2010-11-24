@@ -764,26 +764,22 @@ if ($tee == 'P' or $tee == 'E') {
 			$fakta = "<br><br><font class='message'>$trow[fakta]</font>";
 		}
 
+		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+
 		echo "<table><tr><td valign='top' style='padding: 0px;'>";
-
-
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
 		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus])</td></tr>";
 		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maa]-$trow[postino] $trow[postitp], $trow[maa] $fakta</td></tr>";
-		echo "<tr><td><form action='yllapito.php?toim=toimi&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara//iframe=$iframe//skannattu_lasku=$skannattu_lasku//tultiin=$tultiin' method='post'>";
-
-		echo "<input type = 'submit' value = '".t("Muuta toimittajan tietoja")."'></form>";
-		echo "</td></tr></table>";
+		echo "<tr><td><a href='yllapito.php?toim=toimi&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara//iframe=$iframe//skannattu_lasku=$skannattu_lasku//tultiin=$tultiin'>".t("Muuta toimittajan tietoja")."</a></td></tr>";
+		echo "</table>";
 		echo "</td>";
 
 		// eri tilitiedot riippuen onko suomalainen vai ei
 		echo "<td valign='top' style='padding: 0px;'>";
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Tilitiedot")."</th></tr>";
-
-		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
-		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 		if (strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) {
 
@@ -810,7 +806,7 @@ if ($tee == 'P' or $tee == 'E') {
 			else {
 				echo "<tr><td>".t("Tilinumero")."</td><td>$trow[tilinumero]</td></tr>";
 				echo "<tr><td>".t("IBAN")."</td><td>$trow[ultilno]</td></tr>";
-				echo "<tr><td>".t("BIC")."</td><td>$trow[swift]</td></tr>";				
+				echo "<tr><td>".t("BIC")."</td><td>$trow[swift]</td></tr>";
 			}
 		}
 		echo "</table>";
@@ -905,7 +901,6 @@ if ($tee == 'P' or $tee == 'E') {
 			echo "
 				<font class='message'>".t("Kotimaisen toimittajan tiedot")."</font>
 				<input type='hidden' name = 'trow[maa]' value = ".strtoupper($yhtiorow['maa']).">
-
 				<table>
 				<tr><th>".t("ytunnus")."</th>	<td><input type='text' name='trow[ytunnus]'    maxlength='8'  size=10 value='$trow[ytunnus]'></td></tr>
 				<tr><th>".t("nimi")."</th>		<td><input type='text' name='trow[nimi]'       maxlength='45' size=45 value='$trow[nimi]'></td></tr>
@@ -915,8 +910,7 @@ if ($tee == 'P' or $tee == 'E') {
 				<tr><th>".t("postino")."</th>	<td><input type='text' name='trow[postino]'    maxlength='5'  size=10 value='$trow[postino]'></td></tr>
 				<tr><th>".t("postitp")."</th>	<td><input type='text' name='trow[postitp]'    maxlength='45' size=45 value='$trow[postitp]'></td></tr>
 				<tr><th>".t("Tilinumero")."</th>	<td><input type='text' name='trow[tilinumero]' maxlength='45' size=45 value='$trow[tilinumero]'></td></tr>
-				</table>
-				";
+				</table>";
 		}
 
 		echo "<br>";
@@ -926,10 +920,11 @@ if ($tee == 'P' or $tee == 'E') {
 	$formi = 'lasku';
 	$kentta = 'tpp';
 
-	echo "	<table cellpadding='3' cellspacing='0' border='0'>
+	echo "	<table>
 			<tr>
 			<td>".t("Laskun päiväys")."</td>
-			<td><input type='text' name='tpp' maxlength='2' size=2 value='$tpp'>
+			<td>
+			<input type='text' name='tpp' maxlength='2' size=2 value='$tpp'>
 			<input type='text' name='tpk' maxlength='2' size=2 value='$tpk'>
 			<input type='text' name='tpv' maxlength='4' size=4 value='$tpv'> ".t("ppkkvvvv")."</td>
 			</tr>";
@@ -1060,6 +1055,8 @@ if ($tee == 'P' or $tee == 'E') {
 				and toim_alv != ''";
 	$alhire = mysql_query($query) or pupe_error($query);
 
+	$tilino_alv_hidden = "";
+
 	// ollaan alv-rekisteröity
 	if (mysql_num_rows($alhire) >= 1) {
 
@@ -1086,11 +1083,11 @@ if ($tee == 'P' or $tee == 'E') {
 	}
 	else {
 		$tilino_alv = $yhtiorow["alv"];
-		echo "<input type='hidden' name='tilino_alv' value='$tilino_alv'>";
+		$tilino_alv_hidden = "<input type='hidden' name='tilino_alv' value='$tilino_alv'>";
 	}
 
 	echo "<tr>";
-	echo "<td>".t("Laskun kuva")."</td>";
+	echo "<td>".t("Laskun kuva")."$tilino_alv_hidden</td>";
 
 	if ($kuva) {
 		echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '$kuva'></td>";
@@ -1099,8 +1096,7 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<td>".t("Kts. oikealle")."!</td>";
 	}
 	else {
-		echo "<input type='hidden' name='MAX_FILE_SIZE' value='50000000'>";
-		echo "<td><input name='userfile' type='file'></td>";
+		echo "<td><input type='hidden' name='MAX_FILE_SIZE' value='50000000'><input name='userfile' type='file'></td>";
 	}
 
 	echo "</tr>";

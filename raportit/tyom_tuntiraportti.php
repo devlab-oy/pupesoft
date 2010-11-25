@@ -7,17 +7,6 @@
 	if (!function_exists("piirra_tuntiraportti")) {
 		function piirra_tuntiraportti($asentaja = "", $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro = '', $asiakasid = '', $asiakasosasto = '', $asiakasryhma = '', $tyojono = '', $tyostatus = '', $ytunnus = '') {
 			
-			if (trim($vva) != '' and trim($kka) != '' and trim($ppa) != '' and trim($vvl) != '' and trim($kkl) != '' and trim($ppl) != ''){
-				$vva = (int) $vva;
-				$kka = (int) $kka;
-				$ppa = (int) $ppa;
-				$vvl = (int) $vvl;
-				$kkl = (int) $kkl;
-				$ppl = (int) $ppl;
-
-				$lisa = " and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00' and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59' ";
-			}
-
 			if (trim($asentaja) != "") {
 				$asentaja = mysql_real_escape_string($asentaja);
 
@@ -60,6 +49,17 @@
 			if (trim($tyostatus) != '') {
 				$tyomaarayslisa .= " and tyomaarays.tyostatus = '".mysql_real_escape_string($tyostatus)."' ";
 			}
+			
+			if (trim($tyom_nro) == '' and trim($vva) != '' and trim($kka) != '' and trim($ppa) != '' and trim($vvl) != '' and trim($kkl) != '' and trim($ppl) != ''){
+				$vva = (int) $vva;
+				$kka = (int) $kka;
+				$ppa = (int) $ppa;
+				$vvl = (int) $vvl;
+				$kkl = (int) $kkl;
+				$ppl = (int) $ppl;
+
+				$lisa = " and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00' and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59' ";
+			}
 
 			$query = "	SELECT 
 						lasku.tunnus, lasku.nimi, lasku.nimitark, lasku.ytunnus, lasku.luontiaika, 
@@ -74,12 +74,12 @@
 						LEFT JOIN kuka ON (kuka.yhtio = kalenteri.yhtio and kuka.kuka = kalenteri.kuka $asenlisa)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila IN ('A','L','N','S','C')
-						and lasku.alatila != 'X'
+						and lasku.tilaustyyppi = 'A'
 						$lisa
 						GROUP BY 1,2,3,4,5,6,7,8
 						ORDER BY lasku.tunnus";
 			$sresult = mysql_query($query) or pupe_error($query);
-		
+				
 			if (mysql_num_rows($sresult) > 0) {
 				
 				$echootsikot =  "<tr><th>".t("Työmääräys").":<br>".t("Nimi").":<br>".t("Ytunnus").":</th><th>".t("Työnjohdon työtunnit").":</th><th>".t("Asentajien työtunnit")."</th><th>".t("Työstatus").":</th><th>".t("Matkalaskut").":</th></tr>";

@@ -1,6 +1,8 @@
 #!/usr/bin/php
 <?php
 
+	date_default_timezone_set('Europe/Helsinki');
+
 	// Kutsutaanko CLI:stä
 	if (php_sapi_name() != 'cli') {
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");

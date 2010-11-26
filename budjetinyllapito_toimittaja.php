@@ -26,12 +26,6 @@
 			if (isset($mul_try) and $mul_try != '') $mul_try = unserialize(urldecode($mul_try));
 		}
 		
-		/*
-		Jos edellinen ja nykyinen on samat, ei p‰ivitet‰
-		jos edellinen ja nykyinen on eri, p‰ivitet‰‰n
-		// Jee.... Eiku soodaa
-		*/
-
 		if (is_array($luvut) and isset($submit_button) and $submit_button == 'N‰yt‰/Tallenna') {
 			$paiv = 0;
 			$lisaa = 0;

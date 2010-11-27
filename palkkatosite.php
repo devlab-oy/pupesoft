@@ -2,7 +2,7 @@
 
 	require ("inc/parametrit.inc");
 
-	if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
+	if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 		// Tämä on Pretaxin palkkaohjelmiston normaali siirtomuoto ver 2
 		// Tuetaan myös M2 matkalaskuohjelmista
@@ -267,7 +267,6 @@
 
 		exit;
 	}
-
 
 	echo "<font class='head'>".t("Palkka- ja matkalaskuaineiston sisäänluku")."</font><hr>";
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>

@@ -31,10 +31,10 @@
 
 	$otsikko   = 'Asiakaslista';
 	if ($yhtiorow['viikkosuunnitelma'] == '') {
-		$kentat    = "tunnus::nimi::asiakasnro::ytunnus::if(toim_postitp!='',toim_postitp,postitp)::postino::yhtio::myyjanro::email";
+		$kentat    = "asiakas.tunnus::asiakas.nimi::asiakas.asiakasnro::asiakas.ytunnus::if(asiakas.toim_postitp!='',asiakas.toim_postitp,asiakas.postitp)::asiakas.postino::asiakas.yhtio::asiakas.myyjanro::asiakas.email";
 	}
 	else {
-		$kentat    = "tunnus::nimi::myyjanro::ytunnus::asiakasnro::if(toim_postitp!='',toim_postitp,postitp)::yhtio";
+		$kentat    = "asiakas.tunnus::asiakas.nimi::asiakas.myyjanro::asiakas.ytunnus::asiakas.asiakasnro::if(asiakas.toim_postitp!='',asiakas.toim_postitp,asiakas.postitp)::asiakas.yhtio";
 	}
 
 	$jarjestys = 'selaus, nimi';
@@ -46,7 +46,7 @@
 
 	for ($i = 0; $i <= $count; $i++) {
 		if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
-			$lisa .= " and asiakas." . $array[$i] . " like '%" . $haku[$i] . "%'";
+			$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
 			$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 		}
 	}

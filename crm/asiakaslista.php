@@ -153,7 +153,7 @@
 			$tiednimi = "asiakaslista.xls";
 		}
 		else {
-			$query = "	SELECT asiakas.tunnus, IF(asiakas.nimi != asiakas.toim_nimi, CONCAT(asiakas.nimi, '<br />', asiakas.toim_nimi), asiakas.nimi) nimi, 
+			$query = "	SELECT asiakas.tunnus, if(asiakas.nimi != asiakas.toim_nimi, CONCAT(asiakas.nimi, '<br />', asiakas.toim_nimi), asiakas.nimi) nimi, 
 						asiakas.asiakasnro, asiakas.ytunnus,  if(asiakas.toim_postitp != '', asiakas.toim_postitp, asiakas.postitp) postitp, 
 						if(asiakas.toim_postino != 00000, asiakas.toim_postino, asiakas.postino) postino, 
 						asiakas.yhtio, asiakas.myyjanro, asiakas.email, asiakas.puhelin $selectlisa

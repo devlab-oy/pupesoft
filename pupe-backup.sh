@@ -61,6 +61,12 @@ echo " - Bzip2 done."
 # Dellataan pois tempit
 rm -rf /tmp/$DBKANTA
 
+# Backupataan Pupeasenukseen liittyvät asetuskset
+PUPEPOLKU=`dirname $0`
+FILENAME="linux-backup-${FILEDATE}.bz2"
+
+tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 /etc/ssh/sshd_config /etc/httpd/conf/ /etc/my.cnf /root/.forward /etc/hosts /etc/sysconfig/network /etc/mail/ /etc/crontab ${PUPEPOLKU}/inc/salasanat.php /etc/cron.*
+
 # Siivotaan vanhat backupit pois
 find $BACKUPDIR -mtime +$BACKUPPAIVAT -delete
 

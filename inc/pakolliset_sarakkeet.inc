@@ -252,6 +252,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				}
 
 				break;
+			case "auto_vari" :
+				$pakolliset = array("MERKKI", "VARIKOODI", "VARINIMI","VARINUMERO");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("ALKUVUOSI","LOPPUVUOSI","METALLIC","VARIAATIO");
+				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");
 				$kielletyt = array();

@@ -1487,11 +1487,15 @@ else {
 					<option value='yhteensopivuus_mp' $sel[yhteensopivuus_mp]>".t("Yhteensopivuus mp-mallit")."</option>
 					<option value='yhteensopivuus_tuote' $sel[yhteensopivuus_tuote]>".t("Yhteensopivuus tuotteet")."</option>
 					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
-					<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>
 					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>";
 
 			$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
 			$dynaamiset_avainsanat = '';
+
+		if ($kukarow['yhtio'] == 'mast') {
+			echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
+			echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
+		}
 
 			while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
 				if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {

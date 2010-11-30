@@ -638,7 +638,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='$apu_ytunnus'";
 				}
 				else {
-					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='".trim($rivi[$j])."'";
+					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='".trim(pupesoft_cleanstring($rivi[$j]))."'";
 				}
 
 				// jos pakollinen tieto puuttuu kokonaan
@@ -1201,7 +1201,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							elseif ($table_mysql=='tuotepaikat' and $otsikko == 'OLETUS') {
 								//echo t("Virhe rivillä").": $rivilaskuri Oletusta ei voi muuttaa!<br>";
 							}
-							else {
+									else {
 								if ($eilisataeikamuuteta == "") {
 									$query .= ", $otsikko = '$rivi[$r]' ";
 								}
@@ -1487,6 +1487,7 @@ else {
 					<option value='yhteensopivuus_mp' $sel[yhteensopivuus_mp]>".t("Yhteensopivuus mp-mallit")."</option>
 					<option value='yhteensopivuus_tuote' $sel[yhteensopivuus_tuote]>".t("Yhteensopivuus tuotteet")."</option>
 					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
+					<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>
 					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>";
 
 			$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");

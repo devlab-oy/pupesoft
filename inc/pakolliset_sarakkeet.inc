@@ -257,6 +257,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("ALKUVUOSI","LOPPUVUOSI","METALLIC","VARIAATIO");
 				break;
+			case "auto_vari_tuote" :
+				$pakolliset = array("VARIKOODI", "TUOTENO", "NIMITYS");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");
 				$kielletyt = array();

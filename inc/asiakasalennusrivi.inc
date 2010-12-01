@@ -33,19 +33,17 @@
 	}
 
 	if (mysql_field_name($result, $i) == "asiakas_segmentti") {
-		//echo $toim2;
 
-		$preq = "	SELECT CONCAT( REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', node.koodi, ' - ', node.nimi) AS name, node.koodi koodi, node.tunnus
-					FROM dynaaminen_puu AS node,
-					dynaaminen_puu AS parent
-					WHERE node.lft BETWEEN parent.lft AND parent.rgt
+		$preq = "	SELECT CONCAT(REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', ifnull(node.koodi, ''), ' ', node.nimi) AS name, node.koodi koodi, node.tunnus
+					FROM dynaaminen_puu AS node
+					JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt AND parent.laji = node.laji AND parent.yhtio = node.yhtio)
+					WHERE node.yhtio = '$kukarow[yhtio]'
 					AND node.lft > 1
 					AND node.laji = 'asiakas'
-					AND parent.laji = 'asiakas'
 					GROUP BY node.tunnus
 					ORDER BY node.lft";
 		$preres = mysql_query($preq) or pupe_error($preq);
-	
+
 		$ulos = "<td><select id='asiakas_segmentti' name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei asiakassegmenttiä")."</option>";
 

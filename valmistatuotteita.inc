@@ -346,7 +346,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						$query = "	SELECT era_kpl, tunnus, ostorivitunnus
 									FROM sarjanumeroseuranta
 									WHERE yhtio 			= '$kukarow[yhtio]'
-									and tuoteno				= '$perherow[tuoteno]'
+									and tuoteno				= '$perherow[tuoteno]' 
 									and ostorivitunnus 		> 0
 									and myyntirivitunnus 	= 0
 									and sarjanumero 		= '$lisa_row[sarjanumero]'
@@ -924,7 +924,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 		}
 	}
 	else {
-		valmista_isa($isarow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $isavarattu, '');
+		valmista_isa($isarow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, 1, '');
 	}
 
 	echo "<br>";

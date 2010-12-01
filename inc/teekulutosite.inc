@@ -50,9 +50,9 @@
                 laadittu = now()";
 	$result = mysql_query($query) or pupe_error($query);
 
-    $query= "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=" . mysql_insert_id ($link) . " WHERE tunnus='$tiliotedataid'";
+    $query= "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=" . mysql_insert_id ($link) . ", kuitattu = 'tiliote', kuitattuaika = now() WHERE tunnus='$tiliotedataid'";
 	$dummyresult = mysql_query($query) or pupe_error($query);
 
 	// Merkataan k‰sitellyiksi & lis‰t‰‰n linkki
-		echo "<font class='message'>*** ".t("tosite luotu")." ***</font><br>"
+	echo "<font class='message'>*** ".t("tosite luotu")." ***</font><br>"
 ?>

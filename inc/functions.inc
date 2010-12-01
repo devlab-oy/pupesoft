@@ -1645,7 +1645,7 @@ if (!function_exists("synkronoi")) {
 		$masterres = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($masterres) == 1) {
-			$masterrow = mysql_fetch_assoc($masterres) or pupe_error($query);
+			$masterrow = mysql_fetch_array($masterres) or pupe_error($query);
 
 			//	Näillä tarttetaan vähän lisätietoo
 			if ($table == "asiakasalennus" and $masterrow["alennus"] < 0) {

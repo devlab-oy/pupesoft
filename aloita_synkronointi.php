@@ -70,7 +70,7 @@ if ($tee == "SYNK") {
 					$group";
 		$abures = mysql_query($query) or pupe_error($query);
 
-		while ($aburow = mysql_fetch_assoc($abures)) {
+		while ($aburow = mysql_fetch_array($abures)) {
 			$query = "	SELECT *
 						FROM $table
 						WHERE tunnus in ($aburow[tunnukset])

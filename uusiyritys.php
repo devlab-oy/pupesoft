@@ -332,8 +332,8 @@
 			$kukar = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
-				$query = "	INSERT into tili (nimi, sisainen_taso, tilino, ulkoinen_taso, alv_taso, kustp, kohde, projekti, toiminto, yhtio)
-							values ('$row[nimi]','$row[sisainen_taso]','$row[tilino]','$row[ulkoinen_taso]', '$row[alv_taso]', '$row[kustp]','$row[kohde]','$row[projekti]','$row[toiminto]','$yhtio')";
+				$query = "	INSERT into tili (nimi, sisainen_taso, tilino, ulkoinen_taso, alv_taso, kustp, kohde, projekti, toimijaliitos, yhtio)
+							values ('$row[nimi]','$row[sisainen_taso]','$row[tilino]','$row[ulkoinen_taso]', '$row[alv_taso]', '$row[kustp]','$row[kohde]','$row[projekti]','$row[toimijaliitos]','$yhtio')";
 				$upres = mysql_query($query) or pupe_error($query);
 			}
 

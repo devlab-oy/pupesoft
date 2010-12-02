@@ -1768,13 +1768,6 @@
 				echo "</tr>";
 			}
 
-			$viivastyskorko_chk = (trim($srow['viikorkopros']) == 0 and trim($srow['viikorkopros']) != '') ? ' checked' : '';
-
-			echo "<tr>";
-			echo "<td></td><td></td>";
-			echo "<td>".t("Ei viivästyskorkoa").":</td><td><input type='checkbox' name='viikorkopros'{$viivastyskorko_chk}></td>";
-			echo "</tr>";
-
 			if ($toim == "TARJOUS" or $yhtiorow["splittauskielto"] == "E") {
 				echo "<tr>";
 			}
@@ -2676,8 +2669,6 @@
 			$voimaika_pp = "00";
 		}
 
-		$viikorkopros = trim($viikorkopros) != '' ? 0 : $yhtiorow['viivastyskorko'];
-
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
 					alatila 							= '$alatila',
@@ -2745,7 +2736,7 @@
 					vienti 								= '$vienti',
 					vienti_kurssi						= '$kurssi',
 					viesti 								= '$viesti',
-					viikorkopros 						= '$viikorkopros',
+					viikorkopros 						= '$yhtiorow[viivastyskorko]',
 					yhtio 								= '$kukarow[yhtio]',
 					yhtio_kotipaikka					= '$yhtiokotipaikka',
 					yhtio_maa							= '$yhtiomaa',

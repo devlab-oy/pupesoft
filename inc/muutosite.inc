@@ -926,6 +926,30 @@
 		$tila = 'X';
 	}
 
+	if ($tila == 'viikorkomuuta') {
+		$query = "	UPDATE lasku SET
+					viikorkopros = '$viikorkoprossa'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		// haetaan laskun tiedot uudestaan
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) != 1) {
+			echo t("Lasku")." $tunnus ".t("ei löytynytkään")."!";
+			exit;
+		}
+
+		$trow = mysql_fetch_array($result);
+		$tee = 'E';
+		$tila = 'X';
+	}
+
 	if ($tila == '') {
 
 		// katotaan onko lasku liitetty keikkaan
@@ -1361,6 +1385,46 @@
 					</tr>
 					</form>";
 		}
+
+		if ($trow["tila"] == "U") {
+			// katsotaan onko tästä laskusta tehty korkolasku
+			$korko_query = "	SELECT olmapvm, liitostunnus
+								FROM lasku
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$trow[tunnus]'
+								AND olmapvm > '0000-00-00'";
+			$korko_result = mysql_query($korko_query) or pupe_error($korko_query);
+
+			// jos ei olla niin voidaan nollata viikorkoprossa
+			if (mysql_num_rows($korko_result) == 0) {
+
+				$selviikorko = "";
+
+				if ($trow["viikorkopros"] > 0) {
+					$selviikorko = "SELECTED";
+				}
+
+				echo "<form action = '$PHP_SELF' method='post'>
+						<input type = 'hidden' name='tila' value='viikorkomuuta'>
+						<input type = 'hidden' name='tee' value='M'>
+						<input type = 'hidden' name='lopetus' value='$lopetus'>
+						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<tr>
+						<th>".t("Viivästyskorkoprosentti")."</th>
+						<td>
+						<select name='viikorkoprossa'>
+							<option value='0'>".t("Ei viivästyskorkoa")."</option>
+							<option value='$yhtiorow[viivastyskorko]' $selviikorko>".t("Viivästyskorko")." $yhtiorow[viivastyskorko]%</option>
+						</select>
+						</td>
+						<td>
+						<input type = 'submit' value = '".t("Päivitä")."'>
+						</td>
+						</tr>
+						</form>";
+			}
+		}
+
 
 		echo "</table><br><br>";
 	}

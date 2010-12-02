@@ -98,7 +98,7 @@
 				foreach ($row as $ind => $val) {
 
 					if (!in_array($ind, $alakopsaa)) {
-						$query .= "$ind = '$val',";
+						$query .= "$ind = '".mysql_real_escape_string($val)."',";
 					}
 				}
 
@@ -151,7 +151,7 @@
 
 				foreach ($row as $ind => $val) {
 					if (!in_array($ind, $alakopsaa)) {
-						$query .= "$ind = '$val',";
+						$query .= "$ind = '".mysql_real_escape_string($val)."',";
 					}
 				}
 
@@ -572,10 +572,10 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow = mysql_fetch_array($result)) {
-			
+
 			$selli = "";
 			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
-			 
+
 			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
 		}
 
@@ -596,10 +596,10 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow=mysql_fetch_array($result)) {
-			
+
 			$selli = "";
 			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
-			
+
 			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
 		}
 
@@ -620,10 +620,10 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow=mysql_fetch_array($result)) {
-			
+
 			$selli = "";
 			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
-			
+
 			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
 		}
 
@@ -635,7 +635,7 @@
 		// profiilit
 		$query = "SELECT distinct profiili FROM oikeu WHERE yhtio = '$fromyhtio' and profiili != ''";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($result) > 0) {
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name = 'tila' value='profiilit'>
@@ -680,7 +680,7 @@
 		}
 
 		echo "<tr><th></th><td><input type='submit' value='".t('Perusta')."'></td></tr></table></form>";
-		
+
 		echo "<br>HUOM: Uudelle käyttäjälle lisätään aina käyttöoikeudet uuden yrityksen käyttöoikeuksien hallintaan.";
 	}
 
@@ -700,7 +700,7 @@
 
 			$selli = "";
 			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
-			
+
 			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi]</option>";
 		}
 
@@ -720,10 +720,10 @@
 				<tr><th>".t("Miltä yritykseltä kopioidaan avainsanat?").":</th><td><select name='fromyhtio'>";
 
 		while ($uusiyhtiorow=mysql_fetch_array($result)) {
-			
+
 			$selli = "";
 			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
-			
+
 			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
 		}
 
@@ -801,10 +801,10 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow=mysql_fetch_array($result)) {
-			
+
 			$selli = "";
 			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
-			
+
 			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi]</option>";
 		}
 
@@ -828,7 +828,7 @@
 
 			$selli = "";
 			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
-			
+
 			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi]</option>";
 		}
 
@@ -849,10 +849,10 @@
 				<option value=''>".t("Ei kopioida")."</option>";
 
 		while ($uusiyhtiorow = mysql_fetch_array($result)) {
-			
+
 			$selli = "";
 			if ($fromyhtio == $uusiyhtiorow["yhtio"]) $selli = "SELECTED";
-			
+
 			echo "<option value='$uusiyhtiorow[yhtio]' $selli>$uusiyhtiorow[nimi]</option>";
 		}
 

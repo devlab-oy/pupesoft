@@ -91,6 +91,7 @@
 			$aineistores = mysql_query($query) or pupe_error($query);
 			$aineistorow = mysql_fetch_array($aineistores);
 
+			$xlmpmaa = 0;
 			$xtyyppi = 0;
 			$virhe	 = 0;
 			$serc	 = array("{", "|", "}", "[", "\\", "]", "'");
@@ -100,6 +101,7 @@
 				$tietue = str_replace($serc, $repl, $tietue);
 
 				if (substr($tietue,0,3) == 'T00' or substr($tietue,0,3) == 'T03' or substr($tietue,0,1) == '0') {
+
 					// Konekielinen tiliote
 					if (substr($tietue,0,3) == 'T00') {
 						$xtyyppi 	= 1;
@@ -114,6 +116,9 @@
 						$alkupvm	= substr($tietue, 38, 6);
 						$loppupvm 	= $alkupvm;
 						$tilino 	= substr($tietue, 9, 14);
+
+						// LMP aineistojen määrä tiedostossa
+						$xlmpmaa++;
 					}
 
 					// Saapuvat viitemaksut
@@ -156,34 +161,47 @@
 					if (mysql_num_rows($tiliotedatares) > 0) {
 						$tiliotedatarow = mysql_fetch_array($tiliotedatares);
 
-						if ($tiliotedatarow["aineisto"] == $aineistorow["aineisto"]) {
-							echo "<font class='error'>Aineisto esiintyy tiedostossa moneen kertaan.<br>Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+						// OP-pankki toimittaa useita LMP aineistoja per päivä, eli tarkistetaan onko juuri tämä aineisto ajettu koneelle
+						// Koodataan tässä vaiheessa vain LMP:lle, mutta mikään ei estä etteikö saman tsekin vois tehdä myös vaikka tiliotteille jos joku pankki toimittaisi yhden päivän otteet useassa osassa.
+						if ($xtyyppi == 2) {
+							// Group concatissa tulee kaikki tän päivän LMP:t
+							$query = "	SELECT group_concat(tieto SEPARATOR '') kantaaineisto
+										FROM tiliotedata
+										WHERE tilino = '$tilino'
+										and alku 	 = '$alkupvm'
+										and loppu 	 = '$loppupvm'
+										and tyyppi 	 = $xtyyppi";
+							$tiliotedatares = mysql_query($query) or pupe_error($query);
+							$tiliotedatarow = mysql_fetch_array($tiliotedatares);
 
-							$xtyyppi=0;
-							$virhe++;
+							// Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksissä tyhjää...)
+							$distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
+
+							if (trim($tiliotedatarow["kantaaineisto"]) != "") {
+								for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {
+									if (trim($distinct_aineistot[$xlmpmaa_i]) != "" and strpos(trim($tiliotedatarow["kantaaineisto"]), trim($distinct_aineistot[$xlmpmaa_i])) !== FALSE) {
+										echo "<font class='error'>Tämä aineisto on jo aiemmin käsitelty!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+
+										$xtyyppi=0;
+										$virhe++;
+									}
+								}
+							}
+
+							// Tutkitaan, ettei sama aineisto ole montaa kertaa tässä failissa
+							if (count($distinct_aineistot) != count(array_unique($distinct_aineistot))) {
+								echo "<font class='error'>Aineisto esiintyy tiedostossa moneen kertaan.<br>Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+
+								$xtyyppi=0;
+								$virhe++;
+							}
 						}
 						else {
-							// OP-pankki toimittaa useita LMP aineistoja per päivä, eli tarkistetaan onko juuri tämä aineisto ajettu koneelle
-							// Koodataan tässä vaiheessa vain LMP:lle, mutta mikään ei estä etteikö saman tsekin vois tehdä myös vaikka tiliotteille jos joku pankki toimittaisi yhden päivän otteet useassa osassa.
-							if ($xtyyppi == 2) {
-								// Group concatissa tulee kaikki tän päivän LMP:t
-								$query = "	SELECT group_concat(tieto SEPARATOR '') kantaaineisto
-											FROM tiliotedata
-											WHERE tilino = '$tilino'
-											and alku 	 = '$alkupvm'
-											and loppu 	 = '$loppupvm'
-											and tyyppi 	 = $xtyyppi";
-								$tiliotedatares = mysql_query($query) or pupe_error($query);
-								$tiliotedatarow = mysql_fetch_array($tiliotedatares);
+							if ($tiliotedatarow["aineisto"] == $aineistorow["aineisto"]) {
+								echo "<font class='error'>Aineisto esiintyy tiedostossa moneen kertaan.<br>Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
 
-								$kokoaineisto = str_replace($serc, $repl, $kokoaineisto);
-
-								if (strpos(trim($tiliotedatarow["kantaaineisto"]), trim($kokoaineisto)) !== FALSE) {
-									echo "<font class='error'>Tämä aineisto on jo aiemmin käsitelty!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
-
-									$xtyyppi=0;
-									$virhe++;
-								}
+								$xtyyppi=0;
+								$virhe++;
 							}
 							else {
 								echo "<font class='error'>Tämä aineisto on jo aiemmin käsitelty!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
@@ -201,8 +219,10 @@
 					$tiliotedataresult = mysql_query($query) or pupe_error($query);
 				}
 
-				$tietue = fgets($fd, 4096);
+				$tietue = fgets($fd);
 			}
+
+			fclose($fd);
 
 			//Jos meillä tuli virheitä
 			if ($virhe > 0) {
@@ -250,7 +270,6 @@
 			}
 
 			if ($xtyyppi == 1) {
-				//echo "nyt PITÄISI syntyä vastavienti<br>";
 				$tkesken = 0;
 				$maara = $vastavienti;
 				$kohdm = $vastavienti_valuutassa;
@@ -258,7 +277,7 @@
 				echo "<tr><td colspan = '6'>";
 				require("inc/teeselvittely.inc");
 				echo "</td></tr>";
-				echo "</table>";
+				echo "</table><br><br>";
 			}
 
 			if ($xtyyppi == 2) {
@@ -267,12 +286,13 @@
 				$kohdm = $vastavienti_valuutassa;
 
 				require("inc/teeselvittely.inc");
-				echo "</table>";
+				echo "</table><br><br>";
 			}
 
 			if ($xtyyppi == 3) {
 				require("inc/viitemaksut_kohdistus.inc");
 				require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
+				echo "<br><br>";
 			}
 		}
 	}

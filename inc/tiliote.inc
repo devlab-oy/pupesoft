@@ -97,7 +97,9 @@
 										and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 										and yhtio 	= '$yritirow[yhtio]'
 										and tila 	= 'Q'
-										$kohdm_valkoodilisa";
+										$kohdm_valkoodilisa
+										ORDER BY popvm
+										LIMIT 1";
 							$result = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($result) == 0) {
@@ -742,6 +744,18 @@
 				// Nimitarkenteen tiedot
 				case '09' :
 					$selite = t("Nimen tarkenne").": ".trim(substr($arvo, 0, 35));
+					break;
+				
+				// Euromaksualueen tilisiirron lisätyyppi
+				case '11' :
+									
+					$selite = t("Maksajan viite").": ".trim(substr($arvo, 0, 35)) . "<br>";
+					$selite .= t("IBAN tilinumero").": ".trim(substr($arvo, 35, 35)) . "<br>";
+					$selite .= t("BIC-koodi").": ".trim(substr($arvo, 70, 35)) . "<br>";
+					$selite .= t("Saajan nimitarkenne").": ".trim(substr($arvo, 105, 70)) . "<br>";
+					$selite .= t("Maksajan nimitarkenne").": ".trim(substr($arvo, 175, 70)) . "<br>";
+					$selite .= t("Maksajan tunniste").": ".trim(substr($arvo, 245, 35)) . "<br>";
+					$selite .= t("SEPA Arkistointitunnus").": ".trim(substr($arvo, 280, 35)) . "<br>";
 					break;
 
 				// Oletus

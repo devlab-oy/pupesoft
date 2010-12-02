@@ -7,14 +7,20 @@
 	switch ($tunnus) {
 
 		case 'T03' :
+
+			$pankkitilino = substr($tietue, 9, 14);
+
+			if (!isset($aineistojafailissa)) $aineistojafailissa = 0;
+			$aineistojafailissa++;
+			if ($aineistojafailissa > 1) echo "</table><br><br>";
+
 			echo "<table>";
 			echo "<tr><th>".t("asiakas")."</th><th>" . t("tilino") .  "</th></tr>";
-			$pankkitilino = substr($tietue, 9, 14);
 			echo "<tr><td>".substr($tietue, 147, 35)."</td><td>" . tilinumero_print($pankkitilino) . "</td></tr>";
 
 			$query = "	SELECT hyvak, nimi, oletus_rahatili, oletus_kulutili, yhtio
 						FROM yriti
-						WHERE tilino = '$tilino'";
+						WHERE tilino = '$pankkitilino'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) != 1) {
@@ -22,7 +28,7 @@
 				$toim = 'E';
 			}
 			else {
-				$yritirow = mysql_fetch_array ($result);
+				$yritirow = mysql_fetch_array($result);
 
 				echo "<tr><td colspan='5'><font class='message'>".t("tili löytyi")." $yritirow[yhtio] ".t("vastuussa")." '$yritirow[hyvak]'</font><br>";
 

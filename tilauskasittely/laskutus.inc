@@ -184,7 +184,7 @@
 												and hyllynro    		= '$trow[hyllynro]'
 												and hyllyvali   		= '$trow[hyllyvali]'
 												and hyllytaso   		= '$trow[hyllytaso]'
-												ORDER BY era_kpl DESC, tunnus 
+												ORDER BY era_kpl DESC, tunnus
 												LIMIT 1";
 									$erajaljella_res = mysql_query($query) or pupe_error($query);
 
@@ -228,7 +228,7 @@
 													and era_kpl			 = 0
 													LIMIT 1";
 										$erahakures = mysql_query($query) or pupe_error($query);
-										$erahakurow = mysql_fetch_array($erahakures);						
+										$erahakurow = mysql_fetch_array($erahakures);
 
 										// lis‰t‰‰n myyntiriville sama m‰‰r‰, ja samalla p‰ivitet‰‰n ostorivitunnus oikeaksi
 										$query = "	UPDATE sarjanumeroseuranta
@@ -253,14 +253,14 @@
 												}
 												else {
 													$query .= "'".$erahakurow[$ikentta]."',";
-												}	
+												}
 											}
 											$query .= "0)";
 
 											$lisa_res = mysql_query($query) or pupe_error($query);
 										}
 
-										// v‰hennet‰‰n luupattavaa m‰‰r‰‰ 
+										// v‰hennet‰‰n luupattavaa m‰‰r‰‰
 										$eraayht -= $eravahennetaan;
 									}
 									// Ei lˆytynyt (en‰‰n) ostettuja eri‰, eli "myyty pakkaselle" niin luodaan uusi er‰rivi jossa ostorivitunnus on nolla jonne laitetaan loppum‰‰r‰.
@@ -293,7 +293,7 @@
 													LIMIT 1";
 										$lisa_res = mysql_query($query) or pupe_error($query);
 
-										// v‰hennet‰‰n luupattavaa m‰‰r‰‰ 
+										// v‰hennet‰‰n luupattavaa m‰‰r‰‰
 										$eraayht = 0;
 
 									}
@@ -427,24 +427,24 @@
 									ORDER BY sarjanumeroseuranta.tunnus DESC
 									LIMIT 1";
 						$sarjares1 = mysql_query($query) or pupe_error($query);
-					
+
 						if (mysql_num_rows($sarjares1) == 0) {
-							// Jos sarjanumeroa ei ikin‰ olla ostettu, mutta se on myyty miinukselle ja nyt halutaan perua kaupat (Tarkistukset tehty verkkolasku.phpss‰)												
+							// Jos sarjanumeroa ei ikin‰ olla ostettu, mutta se on myyty miinukselle ja nyt halutaan perua kaupat (Tarkistukset tehty verkkolasku.phpss‰)
 							// J‰tet‰‰n t‰st‰ treissi
 							$query = "	UPDATE tilausrivi
 										SET var2 = 'EIOST'
 										WHERE tunnus = $trow[tunnus]
 										and yhtio = '$kukarow[yhtio]'";
 							$sarjaupdres = mysql_query($query) or pupe_error($query);
-						
-							$ostohinta += 0;					
+
+							$ostohinta += 0;
 						}
 						else {
-							// Normikeissi jossa sarjanumero on ostettu ja nyt kaupat hyvitet‰‰n 
+							// Normikeissi jossa sarjanumero on ostettu ja nyt kaupat hyvitet‰‰n
 							$sarjarow1 = mysql_fetch_array($sarjares1);
-						
+
 							$ostohinta += sarjanumeron_ostohinta("tunnus", $sarjarow1["tunnus"]);
-						
+
 							// Tehd‰‰n sarjanumerotauluun uusi vapaa sarjanumero-olio
 							$query = "	UPDATE sarjanumeroseuranta
 										SET myyntirivitunnus=ostorivitunnus, ostorivitunnus='$sarjarow1[ostorivitunnus]'
@@ -459,7 +459,7 @@
 							else {
 								$myritu = 0;
 							}
-						
+
 							//	Jos meill‰ on In-Out er‰ merkataan myˆs er‰n kappalem‰‰r‰
 							if($turow["sarjanumeroseuranta"] == "G") {
 								$eraKpl = $sarjarow["era_kpl"];
@@ -467,12 +467,12 @@
 							else {
 								$eraKpl = 0;
 							}
-						
+
 							$query = "	INSERT into sarjanumeroseuranta
 										(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, parasta_ennen, hyllyalue, hyllynro, hyllyvali, hyllytaso)
 										VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$myritu','$sarjarow1[kaytetty]', '$eraKpl', '$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]', '$sarjarow1[parasta_ennen]', '$sarjarow[hyllyalue]', '$sarjarow[hyllynro]', '$sarjarow[hyllyvali]', '$sarjarow[hyllytaso]')";
 							$sarjares1 = mysql_query($query) or pupe_error($query);
-						}						
+						}
 					}
 
 					// Kate = Hinta - Alkuper‰inen ostohinta
@@ -490,7 +490,7 @@
 
 					//tapahtuman otsikko
 					$tapahtumattyyppi = "laskutus";
-				}			
+				}
 
 				// tehd‰‰n tapahtuma
 				$query = "	INSERT into tapahtuma set
@@ -619,7 +619,7 @@
 				$pyorerotus_valuutassa = $loppusumma_valuutassa - $orow["hinta"];
 			}
 		}
-	
+
 		// jos halutaan pyˆrist‰‰ laskun loppusumma l‰himp‰‰n tasalukuun
 		if ($yhtiorow["laskunsummapyoristys"] != '' or $asrow["laskunsummapyoristys"] != '') {
 			// kotivaluutassa
@@ -636,7 +636,7 @@
 		$viivastyskorko = $orow['viikorkopros'] == 0 ? 0 : $yhtiorow['viivastyskorko'];
 
 		if (isset($korkolasku) and $korkolasku == "kylla") {
-			$viivastyskorko = $orow['viivastyskorko'];
+			$viivastyskorko = 0;
 		}
 
 		$query = "	UPDATE lasku

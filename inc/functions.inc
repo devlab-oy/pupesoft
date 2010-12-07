@@ -139,15 +139,6 @@ if (!function_exists("lopetus")) {
 					}
 				}
 
-				if ($lask > 0) {
-					if (strrpos($lopetus, "#") !== FALSE) {
-						$alku = substr($lopetus, 0, strrpos($lopetus, "#"));
-						$loppu = substr($lopetus, strrpos($lopetus, "#"));
-
-						$lopetus = $alku."&lopetus=".$lopetukset[0].$loppu;
-					}
-				}
-
 				if ($edlopetus != "") {
 					if (strpos($lopetus, "?") === FALSE) {
 						$lopetus .= "?";
@@ -157,6 +148,15 @@ if (!function_exists("lopetus")) {
 					}
 
 					$lopetus .= "lopetus=$edlopetus";
+				}
+
+				if ($lask > 0) {
+					if (strrpos($lopetus, "#") !== FALSE) {
+
+						preg_match("/(#.*?)[&\?\/$]/", $lopetus, $ankkurimatchi);
+						
+						$lopetus = str_replace($ankkurimatchi[1], "", $lopetus).$ankkurimatchi[1];
+					}
 				}
 
 				if (isset($nimilisa[1]) and $nimilisa[1] != "") {

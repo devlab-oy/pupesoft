@@ -2425,5 +2425,20 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "liitetiedostojen_nimeaminen") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Liitetiedostojen nimiin ei lis‰t‰ asiakkaan nime‰")."</option>";
+		$ulos .= "<option value = 'N' $sel[N]>".t("Liitetiedostojen nimiin lis‰t‰‰n asiakkaan nimi")."</option>";	
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

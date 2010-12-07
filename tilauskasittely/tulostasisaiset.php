@@ -179,7 +179,12 @@
 			// itse print komento...
 			if ($komento["Lasku"] == 'email') {
 				$liite = $pdffilenimi;
-				$kutsu = "Lasku";
+
+				$kutsu = t("Lasku", $kieli);
+
+				if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+					$kutsu .= " ".trim($laskurow["nimi"]);
+				}
 
 				require("../inc/sahkoposti.inc");
 			}

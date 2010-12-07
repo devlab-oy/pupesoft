@@ -321,7 +321,13 @@ if (!function_exists('print_pdf_lahete')) {
 		// itse print komento...
 		if ($komento == 'email') {
 			$liite = $pdffilenimi;
-			$kutsu = t("Lasku");
+
+			$kutsu = t("Lasku", $kieli);
+
+			if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+				$kutsu .= " ".trim($laskurow["nimi"]);
+			}
+
 			echo t("Lasku tulostuu")."...<br>";
 
 			if ($kukarow["extranet"] == '') {

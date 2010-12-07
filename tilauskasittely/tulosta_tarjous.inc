@@ -1246,7 +1246,7 @@ if (!function_exists('loppu_tarjous')) {
 }
 
 if (!function_exists('print_pdf_tarjous')) {
-	function print_pdf_tarjous ($pdf_tarjous, $komento, $tee) {
+	function print_pdf_tarjous ($pdf_tarjous, $laskurow, $komento, $tee) {
 		global $yhtiorow, $kukarow, $mista;
 
 		$oslapp='';
@@ -1268,7 +1268,12 @@ if (!function_exists('print_pdf_tarjous')) {
 		}
 		elseif ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
 			$liite = $pdf_tarjousfilenimi;
+
 			$kutsu = t("Tarjous", $kieli);
+
+			if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+				$kutsu .= " ".trim($laskurow["nimi"]);
+			}
 
 			echo t("Tarjous tulostuu")."...<br>";
 
@@ -1513,7 +1518,7 @@ if (!function_exists('tulosta_tarjous')) {
 		loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous[$sivu], 1, $total_uudet, $total_vanhat, $verolliset_verottomat_hinnat, $total_brutto);
 
 		// Tulostetaan sivu
-		print_pdf_tarjous ($pdf_tarjous, $komento, $tee);
+		print_pdf_tarjous ($pdf_tarjous, $laskurow, $komento, $tee);
 	}
 }
 

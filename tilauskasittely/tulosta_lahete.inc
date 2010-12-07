@@ -901,13 +901,13 @@ if (!function_exists('rivi_lahete')) {
 
 		// Trimmataan
 		$row["kommentti"] = trim($row["kommentti"]);
-		
+
 		//Kommentissa voi olla jotain sanoja jotka pit‰‰ k‰‰‰nt‰‰:
 		if ($kieli != $yhtiorow["kieli"]) {
 			$row["kommentti"] = str_replace("Ennakkotilaus:", t("Ennakkotilaus", $kieli).":", $row["kommentti"]);
 			$row["kommentti"] = str_replace("Tilaus:", t("Tilaus", $kieli).":", $row["kommentti"]);
 		}
-		
+
 		// Tilaajan rivinumero
 		if ($row["tilaajanrivinro"] != 0) {
 			$row["kommentti"] .= "\n".t("Rivinumero", $kieli).": ".$row["tilaajanrivinro"].". ";
@@ -2129,7 +2129,9 @@ if (!function_exists('print_pdf_lahete')) {
 
 			if ($tyyppi == "TILAUSVAHVISTUS") {
 				echo t("Tilausvahvistus tulostuu")."...<br>";
+
 				$kutsu = t("Tilausvahvistus %s", $kieli, $laskurow["tunnus"]);
+
 				$content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
 				$content_body .= t("Tilausnumeronne on", $kieli)." $laskurow[tunnus]\n\n";
 				$content_body .= t("T‰m‰ on automaattinen vahvistus tilauksestanne, t‰h‰n s‰hkˆpostiin ei tarvitse vastata.", $kieli)."\n\n";
@@ -2138,11 +2140,17 @@ if (!function_exists('print_pdf_lahete')) {
 			}
 			elseif ($tyyppi == "YLLAPITOSOPIMUS") {
 				echo t("Yll‰pitosopimus tulostuu")."...<br>";
+
 				$kutsu = t("Yll‰pitosopimus %s", $kieli, $laskurow["tilaus"]);
 			}
 			else {
 				echo t("L‰hete tulostuu")."...<br>";
+
 				$kutsu = t("L‰hete %s", $kieli, $laskurow["tilaus"]);
+			}
+
+			if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+				$kutsu .= " ".trim($laskurow["nimi"]);
 			}
 
 			if (@include("../inc/sahkoposti.inc"));
@@ -2181,14 +2189,14 @@ if (!function_exists('alvierittely')) {
 
 		if ($kala <= 150 + $barcode_korkeus) {
 			$sivu++;
-		
+
 			if ($kassa_ale == '') {
 				loppu_lahete($thispage, 0, $tyyppi);
 			}
-		
+
 			$page[$sivu] = uusi_sivu_lahete($toim, 'ei_otsikoita');
 			$thispage    = $page[$sivu];
-		
+
 			$sivu_vaihtui = true;
 		}
 

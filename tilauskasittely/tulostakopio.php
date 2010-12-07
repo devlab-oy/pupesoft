@@ -1273,7 +1273,12 @@
 					// itse print komento...
 					if ($komento["SAD-lomake"] == 'email') {
 						$liite = $pdffilenimi;
-						$kutsu = "SAD-lomake";
+
+						$kutsu = t("SAD-lomake", $kieli);
+
+						if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+							$kutsu .= " ".trim($laskurow["nimi"]);
+						}
 
 						require("../inc/sahkoposti.inc");
 					}
@@ -1315,7 +1320,12 @@
 				// itse print komento...
 				if ($komento["Vientierittely"] == 'email') {
 					$liite = $pdffilenimi;
-					$kutsu = "Vientierittely";
+
+					$kutsu = t("Vientierittely", $kieli);
+
+					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+						$kutsu .= " ".trim($laskurow["nimi"]);
+					}
 
 					require("../inc/sahkoposti.inc");
 				}
@@ -1474,13 +1484,16 @@
 				// itse print komento...
 				if ($komento["Lasku"] == 'email') {
 					$liite = $pdffilenimi;
+
+					$kutsu = t("Lasku", $kieli);
+
 					if ($laskurow["laskunro"] > 0) {
-						$kutsu = "Lasku $laskurow[laskunro]";
-					}
-					else {
-						$kutsu = "Lasku";
+						$kutsu .= " ".$laskurow["laskunro"];
 					}
 
+					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+						$kutsu .= " ".trim($laskurow["nimi"]);
+					}
 
 					require("../inc/sahkoposti.inc");
 				}

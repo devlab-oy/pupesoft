@@ -1,7 +1,7 @@
 <?php
 
 // Haetaan tiedot kuittia varten lasku & kassa-tiliointi
-$query = "	SELECT nimi, selite, l.tapvm, sum(t.summa) summa 
+$query = "	SELECT nimi, selite, l.tapvm, sum(t.summa) summa
 			from lasku l
 			left join tiliointi t on t.yhtio=l.yhtio and t.ltunnus=l.tunnus and tilino = '$yhtiorow[kassa]'
 			where l.yhtio='$kukarow[yhtio]' and l.tunnus = '$tunnus'
@@ -100,6 +100,10 @@ if ($kirjoitinrow["komento"] == 'email') {
 	$content_body = "";
 
 	$kutsu = t("Kuitti", $kieli);
+
+	if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+		$kutsu .= " ".trim($saaja);
+	}
 
 	if (@include("../inc/sahkoposti.inc"));
 	elseif (@include("inc/sahkoposti.inc"));

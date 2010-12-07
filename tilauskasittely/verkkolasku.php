@@ -2209,7 +2209,7 @@
 								$vientierittelymail = $komento;
 
 								// l‰hetet‰‰n meili
-								$kutsu = t("lasku", $kieli)." $lasku";
+								$kutsu = t("Lasku", $kieli)." $lasku";
 								$liite = $pdffilenimi;
 
 								// l‰hetet‰‰n cc aina postittaja osoitteeseen
@@ -2253,7 +2253,13 @@
 							elseif ($kukarow["eposti"] != '') {
 								// l‰hetet‰‰n meili
 								$komento 			= "";
-								$kutsu 				= t("Lasku", $kieli)." $lasku";
+
+								$kutsu = t("Lasku", $kieli)." $lasku";
+
+								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+									$kutsu .= " ".trim($laskurow["nimi"]);
+								}
+
 								$liite 				= $pdffilenimi;
 								$sahkoposti_cc 		= "";
 								$content_subject 	= "";
@@ -2277,7 +2283,13 @@
 								elseif ($kukarow["eposti"] != '') {
 									// l‰hetet‰‰n meili
 									$komento 			= "";
-									$kutsu 				= t("Lasku", $kieli)." $lasku";
+
+									$kutsu = t("Lasku", $kieli)." $lasku";
+
+									if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+										$kutsu .= " ".trim($laskurow["nimi"]);
+									}
+
 									$liite 				= $pdffilenimi;
 									$sahkoposti_cc 		= "";
 									$content_subject 	= "";
@@ -2318,7 +2330,12 @@
 									$komento = "";
 								}
 
-								$kutsu 				= t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
+								$kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
+
+								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+									$kutsu .= " ".trim($laskurow["nimi"]);
+								}
+
 								$liite 				= $pdffilenimi;
 								$sahkoposti_cc 		= "";
 								$content_subject 	= "";

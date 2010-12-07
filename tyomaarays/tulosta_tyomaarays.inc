@@ -998,7 +998,13 @@ if (!function_exists('print_pdf')) {
 		// itse print komento...
 		if ($komento == 'email') {
 			$liite = $pdffilenimi;
+
 			$kutsu = t("Työmääräys", $kieli);
+
+			if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+				$kutsu .= " ".trim($laskurow["nimi"]);
+			}
+
 			echo t("Työmääräys tulostuu")."...<br>";
 
 			if ($kukarow["extranet"] == '') {

@@ -4,14 +4,22 @@ if(!function_exists("avainsanatarkista")) {
 	function avainsanatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $varastot_array;
 
-		static $seliteerrori, $laji;
+		static $seliteerrori, $laji, $kieli, $selitetark, $selitetemp;
 
 		if (mysql_field_name($result, $i) == "selite" and trim($t[$i]) == '') {
 			$seliteerrori = 1;
 		}
+		
+		if (mysql_field_name($result, $i) == "selite" and trim($t[$i]) != '') {
+			$selitetemp = trim($t[$i]);
+		}
 
 		if (mysql_field_name($result, $i) == "laji") {
 			$laji = trim($t[$i]);
+		}
+		
+		if (mysql_field_name($result, $i) == "kieli") {
+			$kieli = trim($t[$i]);
 		}
 
 		if (mysql_field_name($result, $i) == "selite" and strtoupper($laji) == "ALVULK") {
@@ -54,6 +62,30 @@ if(!function_exists("avainsanatarkista")) {
 				}
 				$varastot = substr($varastot, 0, -1);
 				$t[$i] = $varastot;
+			}
+		}
+	
+		if (mysql_field_name($result, $i) == 'selitetark' and trim($t[$i]) == '') {
+			$virhe[$i] = t("Selite ja Selitetarkennus ei voi olla tyhjä")."!";
+			
+		}
+		
+		if (mysql_field_name($result, $i) == 'selite') {
+			
+			if ($kieli !='' and $selitetemp !='' and ($laji == 'TRY' or $laji == 'OSASTO')) {
+				
+				$query = "	SELECT kieli, selite, laji 
+							FROM avainsana 
+							WHERE yhtio='$kukarow[yhtio]'
+							AND kieli = '$kieli' 
+							AND laji = '$laji' 
+							AND selite = '$selitetemp'";
+				$results = mysql_query($query);
+
+				if (mysql_num_rows($results) != 0) {
+					$virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Dublikaatit ovat kiellettyjä !");
+				}
+			
 			}
 		}
 	}

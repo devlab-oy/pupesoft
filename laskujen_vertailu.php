@@ -72,6 +72,57 @@
 	}
 
 	echo "</select></td><td class='back'>&nbsp;</td></tr>";
+	
+	
+	// Tehd‰‰n kustannuspaikkapopup
+	$query = "	SELECT tunnus, nimi, koodi
+				FROM kustannuspaikka
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tyyppi = 'K'
+				and kaytossa != 'E'
+				ORDER BY nimi";
+	$vresult = mysql_query($query) or pupe_error($query);
+
+	echo "<tr><th>",t("Kustannuspaikka"),"</th>";
+
+	echo "<td valign='top'>";
+
+	if (mysql_num_rows($vresult) > 0) {
+		echo "<select name='ikustp[$i]' onchange='submit();'>";
+		echo "<option value ='0'>".t("Ei kustannuspaikkaa")."";
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel = "";
+			if ($ikustp[0] == $vrow['tunnus']) {
+				$sel = "selected";
+			}
+			echo "<option value ='$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
+		}
+
+		echo "</select><br>";
+	}
+	
+	echo "</td></tr>";
+	echo "<tr><th>".t("Eroavaisuuksia")."</th>";
+	echo "<td>";
+	$sel1='';
+	$sel2='';
+	$sel3='';
+	if ($eroa == " ") {
+		$seli1 = 'selected';
+	}
+	if ($eroa == '1') {
+		$seli2 = 'selected';
+	}
+	if ($eroa == '2') {
+		$seli3 = 'selected';
+	}
+	echo "<select name='eroa' onchange='submit();'>";
+	echo "<option value =' ' {$seli1}>".t("Ei valintaa")."</option>";
+	echo "<option value ='1' {$seli2}>Eroja</option>";
+	echo "<option value ='2' {$seli3}>Ok</option>";
+	echo "</select><br>";
+	echo "</td></tr>";
 	echo "<tr><th>",t("Alkup‰iv‰m‰‰r‰"),"</th><td><input type='text' name='app' size='3' maxlength='2' value='{$app}' />&nbsp;<input type='text' name='akk' size='3' maxlength='2' value='{$akk}' />&nbsp;<input type='text' name='avv' size='5' maxlength='4' value='{$avv}' /></td><td class='back'>&nbsp;</td></tr>";
 	echo "<tr><th>",t("Loppup‰iv‰m‰‰r‰"),"</th><td><input type='text' name='lpp' size='3' maxlength='2' value='{$lpp}' />&nbsp;<input type='text' name='lkk' size='3' maxlength='2' value='{$lkk}' />&nbsp;<input type='text' name='lvv' size='5' maxlength='4' value='{$lvv}' /></td>";
 	echo "<td class='back'><input type='submit' value='",t("Hae"),"' /></td></tr>";
@@ -672,6 +723,13 @@
 		echo "<br /><br />";
 
 		$hyvaksyjalisa = '';
+		$tiliointilisa = '';
+		if ($ikustp[0] != 0) {
+				$tiliointilisa = " JOIN tiliointi on (lasku.tunnus = tiliointi.ltunnus and tiliointi.yhtio = lasku.yhtio and tiliointi.kustp = '$ikustp[0]') ";
+		}
+		else {
+			$tiliointilisa = '';
+		}
 
 		if (isset($hyvaksyja) and trim($hyvaksyja) != '') {
 			$hyvaksyja = (string) $hyvaksyja;
@@ -691,11 +749,12 @@
 					lasku.tunnus, lasku.tila
 					FROM lasku
 					JOIN liitetiedostot ON (liitetiedostot.yhtio = lasku.yhtio and liitetiedostot.liitos = 'lasku' AND liitetiedostot.liitostunnus = lasku.tunnus AND liitetiedostot.kayttotarkoitus IN ('FINVOICE', 'EDI'))
+					$tiliointilisa
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					and lasku.tila IN ('H', 'M')
 					and lasku.alatila != 'H'
-					$hyvaksyjalisa
+					$hyvaksyjalisa					
 					$pvmlisa
 					GROUP BY 1,2,3,4,5";
 		$result = mysql_query($query) or pupe_error($query);
@@ -712,7 +771,28 @@
 		while ($trow = mysql_fetch_assoc($result)) {
 			list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $trow['tunnus']);
 
-			if ($invoice != FALSE and $invoice != 'ei_loydy_edia') {
+			if ($invoice != FALSE and $invoice != 'ei_loydy_edia' ) {
+				$ok = 'ok';
+
+				if (count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
+					foreach ($loytyy_kummastakin as $tuoteno => $null) {
+						if (substr($tuoteno, 0, 15) != "Ei_tuotekoodia_" and ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or abs($invoice[$tuoteno]['nettohinta'] - $purchaseorder[$tuoteno]['nettohinta']) > 1)) {
+							$ok = '';
+							break;
+						}
+					}
+				}
+				else {
+					$ok = '';
+				}
+
+				if ($eroa == 2 and $ok == '') {
+					continue;
+				}
+
+				if ($eroa == 1 and $ok == 'ok') {
+					continue;
+				}
 
 				echo "<tr class='aktiivi'>";
 				echo "<td>{$trow['laskunro']}</td>";
@@ -722,25 +802,16 @@
 
 				echo "<td valign='top'>";
 
-				if (count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
-					$ok = 'ok';
+				echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&ikustp[0]={$ikustp[0]}&eroa={$eroa}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}//ikustp[0]={$ikustp[0]}//eroa={$eroa}'>";
 
-					foreach ($loytyy_kummastakin as $tuoteno => $null) {
-						if (substr($tuoteno, 0, 15) != "Ei_tuotekoodia_" and ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or abs($invoice[$tuoteno]['nettohinta'] - $purchaseorder[$tuoteno]['nettohinta']) > 1)) {
-							echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}'>",t("Eroja"),"</a>";
-							$ok = '';
-							break;
-						}
-					}
-
-					if ($ok == 'ok') {
-						echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}'><font class='ok'>",t("OK"),"</font></a>";
-					}
+				if ($ok == 'ok') {
+					echo "<font class='ok'>",t("OK"),"</font>";
 				}
 				else {
-					echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}'>",t("Eroja"),"</a>";
+					echo t("Eroja");
 				}
 
+				echo "</a>";
 				echo "</td>";
 				echo "</tr>";
 			}

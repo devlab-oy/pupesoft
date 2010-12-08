@@ -72,8 +72,7 @@
 	}
 
 	echo "</select></td><td class='back'>&nbsp;</td></tr>";
-	
-	
+
 	// Tehd‰‰n kustannuspaikkapopup
 	$query = "	SELECT tunnus, nimi, koodi
 				FROM kustannuspaikka
@@ -88,27 +87,27 @@
 	echo "<td valign='top'>";
 
 	if (mysql_num_rows($vresult) > 0) {
-		echo "<select name='ikustp[$i]' onchange='submit();'>";
+		echo "<select name='kustannuspaikka' onchange='submit();'>";
 		echo "<option value ='0'>".t("Ei kustannuspaikkaa")."";
 
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel = "";
-			if ($ikustp[0] == $vrow['tunnus']) {
+			if ($kustannuspaikka == $vrow['tunnus']) {
 				$sel = "selected";
 			}
 			echo "<option value ='$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 		}
 
-		echo "</select><br>";
+		echo "</select>";
 	}
-	
+
 	echo "</td></tr>";
-	echo "<tr><th>".t("Eroavaisuuksia")."</th>";
-	echo "<td>";
+
 	$sel1='';
 	$sel2='';
 	$sel3='';
-	if ($eroa == " ") {
+
+	if ($eroa == "") {
 		$seli1 = 'selected';
 	}
 	if ($eroa == '1') {
@@ -117,12 +116,16 @@
 	if ($eroa == '2') {
 		$seli3 = 'selected';
 	}
+
+	echo "<tr><th>".t("Eroavaisuuksia")."</th>";
+	echo "<td>";
 	echo "<select name='eroa' onchange='submit();'>";
-	echo "<option value =' ' {$seli1}>".t("Ei valintaa")."</option>";
-	echo "<option value ='1' {$seli2}>Eroja</option>";
-	echo "<option value ='2' {$seli3}>Ok</option>";
-	echo "</select><br>";
+	echo "<option value = '' {$seli1}>".t("Ei valintaa")."</option>";
+	echo "<option value = '1' {$seli2}>".t("Eroja")."</option>";
+	echo "<option value = '2' {$seli3}>".t("Ok")."</option>";
+	echo "</select>";
 	echo "</td></tr>";
+
 	echo "<tr><th>",t("Alkup‰iv‰m‰‰r‰"),"</th><td><input type='text' name='app' size='3' maxlength='2' value='{$app}' />&nbsp;<input type='text' name='akk' size='3' maxlength='2' value='{$akk}' />&nbsp;<input type='text' name='avv' size='5' maxlength='4' value='{$avv}' /></td><td class='back'>&nbsp;</td></tr>";
 	echo "<tr><th>",t("Loppup‰iv‰m‰‰r‰"),"</th><td><input type='text' name='lpp' size='3' maxlength='2' value='{$lpp}' />&nbsp;<input type='text' name='lkk' size='3' maxlength='2' value='{$lkk}' />&nbsp;<input type='text' name='lvv' size='5' maxlength='4' value='{$lvv}' /></td>";
 	echo "<td class='back'><input type='submit' value='",t("Hae"),"' /></td></tr>";
@@ -542,7 +545,7 @@
 							});
 						</script>";
 			}
-			
+
 			if (is_array($invoice_ei_loydy) and count($invoice_ei_loydy) > 0) {
 				foreach ($invoice_ei_loydy as $tuoteno => $tuote) {
 					echo "<tr class='aktiivi'>";
@@ -606,7 +609,7 @@
 					echo "</tr>";
 				}
 			}
-			
+
 			if (is_array($purchaseorder_ei_loydy) and count($purchaseorder_ei_loydy) > 0) {
 				foreach ($purchaseorder_ei_loydy as $tuoteno => $tuote) {
 					echo "<tr class='aktiivi'>";
@@ -650,7 +653,7 @@
 					echo "</tr>";
 				}
 			}
-			
+
 			echo "<tr id='tr_summa'><th colspan='5'>",t("Summa"),"</th><th valign='top' style='text-align: right;'>{$invoice_summa} {$lasku_row['valkoodi']}</th><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><td class='back'>&nbsp;</td><th colspan='3'>",t("Summa"),"</th><th valign='top' style='text-align: right;'>{$purchaseorder_summa} {$lasku_row['valkoodi']}</th></tr>";
 			echo "</table>";
 
@@ -724,8 +727,9 @@
 
 		$hyvaksyjalisa = '';
 		$tiliointilisa = '';
-		if ($ikustp[0] != 0) {
-				$tiliointilisa = " JOIN tiliointi on (lasku.tunnus = tiliointi.ltunnus and tiliointi.yhtio = lasku.yhtio and tiliointi.kustp = '$ikustp[0]') ";
+
+		if ($kustannuspaikka != 0) {
+			$tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.kustp = '$kustannuspaikka') ";
 		}
 		else {
 			$tiliointilisa = '';
@@ -754,12 +758,13 @@
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					and lasku.tila IN ('H', 'M')
 					and lasku.alatila != 'H'
-					$hyvaksyjalisa					
+					$hyvaksyjalisa
 					$pvmlisa
 					GROUP BY 1,2,3,4,5";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";
+
 		echo "<tr>";
 		echo "<th>",t("Laskunumero"),"</th>";
 		echo "<th>",t("Hyv‰ksyj‰"),"</th>";
@@ -769,9 +774,11 @@
 		echo "</tr>";
 
 		while ($trow = mysql_fetch_assoc($result)) {
+
 			list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $trow['tunnus']);
 
 			if ($invoice != FALSE and $invoice != 'ei_loydy_edia' ) {
+
 				$ok = 'ok';
 
 				if (count($invoice_ei_loydy) == 0 and count($loytyy_kummastakin) > 0) {
@@ -801,8 +808,7 @@
 				echo "<td align='right'>{$trow['kotisumma']}</td>";
 
 				echo "<td valign='top'>";
-
-				echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&ikustp[0]={$ikustp[0]}&eroa={$eroa}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}//ikustp[0]={$ikustp[0]}//eroa={$eroa}'>";
+				echo "<a href='laskujen_vertailu.php?laskunro={$trow['laskunro']}&hyvaksyja={$hyvaksyja}&app={$app}&akk={$akk}&avv={$avv}&lpp={$lpp}&lkk={$lkk}&lvv={$lvv}&kustannuspaikka={$kustannuspaikka}&eroa={$eroa}&lopetus={$PHP_SELF}////hyvaksyja={$hyvaksyja}//app={$app}//akk={$akk}//avv={$avv}//lpp={$lpp}//lkk={$lkk}//lvv={$lvv}//kustannuspaikka={$kustannuspaikkag}//eroa={$eroa}'>";
 
 				if ($ok == 'ok') {
 					echo "<font class='ok'>",t("OK"),"</font>";
@@ -816,7 +822,11 @@
 				echo "</tr>";
 			}
 			elseif ($invoice == 'ei_loydy_edia') {
+				echo "<tr>";
+				echo "<td colspan='5'>";
 				echo "<font class='error'>".t("Tilaus ei lˆydy")."</font>";
+				echo "</td>";
+				echo "</tr>";
 			}
 		}
 		echo "</table><br />";

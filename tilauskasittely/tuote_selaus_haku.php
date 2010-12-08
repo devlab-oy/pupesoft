@@ -1500,7 +1500,7 @@
 							foreach ($saldot as $varasto => $myytavissa) {
 								$kokonaismyytavissa += $myytavissa;
 							}
-
+							
 							if ($kokonaismyytavissa > 0) {
 								echo "<td valign='top' class='$vari' $classrigh><font class='green'>".t("On")."</font></td>";
 							}
@@ -1648,7 +1648,8 @@
 								$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
 								if ($tulossa_row["oletus_toimaika"] > 0) {
-									$tulossalisa .= "<br/><br/>".t("TILAUSTUOTE")."<br/>".t("Arvioitu toim.aika")." ".t("%s pvä", $kieli, $tulossa_row["oletus_toimaika"]);
+									$tilaustuote = "ON";
+									$tulossalisa .= "<font color='orange'>".t("TILAUSTUOTE")."</font><br/><strong>".t("Arvioitu toim.aika")." ".t("%s pvä", $kieli, $tulossa_row["oletus_toimaika"])."</strong>";
 								}
 							}
 							else {
@@ -1689,6 +1690,9 @@
 							}
 
 							echo "</font>$tulossalisa</td>";
+						}
+						elseif ($tilaustuote != "") {
+							echo "<td valign='top' class='$vari' $classrigh>$tulossalisa</td>";
 						}
 						else {
 							echo "<td valign='top' class='$vari' $classrigh><font class='red'>".t("Ei")."</font>$tulossalisa</td>";

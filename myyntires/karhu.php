@@ -143,7 +143,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		$maa_lisa = "and lasku.maa = '$lasku_maa'";
 	}
 
-	$query = "	SELECT asiakas.ytunnus, GROUP_CONCAT(distinct lasku.tunnus) karhuttavat, sum(summa) karhuttava_summa
+	$query = "	SELECT asiakas.ytunnus, GROUP_CONCAT(distinct lasku.tunnus) karhuttavat, sum(lasku.summa-lasku.saldo_maksettu) karhuttava_summa
 				FROM lasku
 				JOIN (	SELECT lasku.tunnus,
 						maksuehto.jv,
@@ -174,10 +174,12 @@ if ($tee == "ALOITAKARHUAMINEN") {
 	if (mysql_num_rows($result) > 0) {
 		$karhuttavat = array();
 		unset($pdf);
-		while($karhuttavarow = mysql_fetch_array($result)) {
+
+		while ($karhuttavarow = mysql_fetch_array($result)) {
 			$karhuttavat[] = $karhuttavarow["karhuttavat"];
 		}
-		if($karhuakaikki != "") {
+
+		if ($karhuakaikki != "") {
 			$tee = "KARHUAKAIKKI";
 		}
 		else {
@@ -190,11 +192,11 @@ if ($tee == "ALOITAKARHUAMINEN") {
 	}
 }
 
-if($tee == "KARHUAKAIKKI") {
+if ($tee == "KARHUAKAIKKI") {
 
-	foreach($karhuttavat as $murr) {
+	foreach ($karhuttavat as $murr) {
 
-		if(strpos(",", $murr)) {
+		if (strpos(",", $murr)) {
 			$lasku_tunnus = implode(",", $murr);
 		}
 		else {
@@ -205,13 +207,15 @@ if($tee == "KARHUAKAIKKI") {
 			// koitetaan lähettää eKirje sekä tulostaa
 			require ('paperikarhu.php');
 
-		} catch (Exception $e) {
+		}
+		catch (Exception $e) {
 			$ekarhu_success = false;
 			echo "<font class='error'>Ei voitu lähettää karhua eKirjeenä, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
 		}
 
 		unset($karhuviesti);
 	}
+
 	unset($karhuttavat);
 }
 
@@ -387,23 +391,23 @@ if ($tee == 'KARHUA')  {
 	$valuutat = array();
 	while ($lasku = mysql_fetch_array($result)) {
 		echo "<tr class='aktiivi'><td>";
+
 		if ($kukarow['taso'] < 2) {
 			echo tv1dateconv($lasku["tapvm"]);
 		}
 		else {
 			echo "<a href = '../muutosite.php?tee=E&tunnus=$lasku[tunnus]'>".tv1dateconv($lasku["tapvm"])."</a>";
 		}
-		echo "</td><td>";
-		echo "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$lasku[laskunro]'>$lasku[laskunro]</a>";
-		echo "</td><td>";
-		echo $lasku["summa"];
-		echo "</td><td>";
-		echo tv1dateconv($lasku["erpcm"]);
-		echo "</td><td>";
-		echo $lasku["ika"];
-		echo "</td><td>";
-		echo $lasku["karhuttu"];
-		echo "</td><td>";
+
+		echo "</td>";
+
+		echo "<td><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$lasku[laskunro]'>$lasku[laskunro]</a></td>
+				<td align='right'>$lasku[summa]</td>
+				<td>".tv1dateconv($lasku["erpcm"])."</td>
+				<td>$lasku[ika]</td>
+				<td>$lasku[karhuttu]</td>";
+
+		echo "<td>";
 
 		if ($lasku["kpvm"] != '')
 			echo tv1dateconv($lasku["kpvm"]);
@@ -416,7 +420,6 @@ if ($tee == 'KARHUA')  {
 		else {
 			$chk = "";
 		}
-
 
 		echo "<td>";
 		echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv] ";
@@ -439,7 +442,7 @@ if ($tee == 'KARHUA')  {
 	$summmmma -= $kaatosumma;
 
 	echo "<th colspan='2'>".t("Karhuttavaa yhteensä")."</th>";
-	echo "<th>$summmmma</th>";
+	echo "<th>".sprintf('%.2f', $summmmma)."</th>";
 	echo "<td class='back'></td></tr>";
 
 	echo "</table><br>";
@@ -489,7 +492,7 @@ if ($tee == "") {
 
 	echo "<table>";
 
-	$apuqu = "	select concat(nimitys,' ', valkoodi, ' (',sopimusnumero,')') nimi, tunnus
+	$apuqu = "	SELECT concat(nimitys,' ', valkoodi, ' (',sopimusnumero,')') nimi, tunnus
 				from factoring
 				where yhtio = '$kukarow[yhtio]'";
 	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
@@ -530,9 +533,13 @@ if ($tee == "") {
 	echo "</select></td>";
 	echo "</tr>";
 
-	$apuqu = "	select kuka, nimi, puhno, eposti, tunnus
+	$apuqu = "	SELECT kuka, nimi, puhno, eposti, tunnus
 				from kuka
-				where yhtio='$kukarow[yhtio]' and nimi!='' and puhno!='' and eposti!='' and extranet=''";
+				where yhtio = '$kukarow[yhtio]'
+				and nimi    != ''
+				and puhno   != ''
+				and eposti  != ''
+				and extranet = ''";
 	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 
 	echo "<tr><th>".t("Yhteyshenkilö").":</th>";
@@ -560,6 +567,6 @@ if ($tee == "") {
 	echo "</table>";
 }
 
-require ("../inc/footer.inc");
+require ("inc/footer.inc");
 
 ?>

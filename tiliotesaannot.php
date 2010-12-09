@@ -140,7 +140,6 @@
 			for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
 				echo "<th>" . t(mysql_field_name($result,$i))."</th>";
 			}
-			if ($pvm!='') echo "<th></th>";
 			echo "</tr>";
 
 			$yritirow=mysql_fetch_array ($result);
@@ -152,16 +151,11 @@
 			echo "<font class='message'>Viiteaineistosäännöt</font><br>";
 		}
 
-		if ($pvm!='') echo "<td><form action = 'tilioteselailu.php' method='post'>
-			<input type='hidden' name=mtili value='$yritirow[tunnus]'>
-			<input type='hidden' name=tee   value='Z'>
-			<input type='hidden' name='pvm' value='$pvm'>
-			<input type='Submit' value='".t("Palaa tiliotteelle")."'></form></td>";
 		echo "</tr></table><br>";
 
-
 		echo "<font class='head'>".t("Säännöt")."</font><hr><table>";
-	// Näytetään vanhat säännöt muutosta varten (viitesäännöille himan eri pohja)
+
+		// Näytetään vanhat säännöt muutosta varten (viitesäännöille himan eri pohja)
 		if ($pankkitili != 'x') {
 			$query = "SELECT tunnus, koodi, koodiselite, nimitieto, selite, erittely, tilino, kustp, tilino2, kustp2
 				  FROM tiliotesaanto
@@ -222,10 +216,10 @@
 			}
 			echo "<td align='center'>
 					<form action = '$PHP_SELF' method='post'>
+					<input type='hidden' name='lopetus' value = '$lopetus'>
 					<input type='hidden' name='pankkitili' value = '$pankkitili'>
 					<input type='hidden' name='tunnus' value = '$tiliointirow[0]'>
 					<input type='hidden' name='tee' value = 'P'>
-					<input type='hidden' name='pvm' value = '$pvm'>
 					<input type='Submit' value = '".t("Muuta")."'>
 				</td></tr></form>";
 		}
@@ -282,9 +276,9 @@
 
 			echo "<tr>
 					<td><form action = '$PHP_SELF' method='post'>
+						<input type='hidden' name='lopetus' value = '$lopetus'>
 						<input type='hidden' name='tee' value = 'U'>
 						<input type='hidden' name='pankkitili' value = '$pankkitili'>
-						<input type='hidden' name='pvm' value = '$pvm'>
 						<input type='text' name='koodi' size='3' value = '$koodi'>
 					</td>
 					<td><input type='text' name='koodiselite' size='15' value = '$koodiselite'></td>
@@ -302,9 +296,9 @@
 		else {
 			echo "<tr>
 					<td><form action = '$PHP_SELF' method='post'>
+						<input type='hidden' name='lopetus' value = '$lopetus'>
 						<input type='hidden' name='tee' value = 'U'>
 						<input type='hidden' name='pankkitili' value = '$pankkitili'>
-						<input type='hidden' name='pvm' value = '$pvm'>
 						<input type='text' name='selite' size='15' value = '$selite'></td>
 					<td><input type='text' name='tilino' size='6' value = '$tilino'></td>
 					<td>$virhe <input type='Submit' value = '".t("Lisää")."'>
@@ -322,6 +316,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+				<input type='hidden' name='lopetus' value = '$lopetus'>
 				<table>
 				<td>
 				<select name = 'pankkitili'><option value = 'x'>".t("Viiteaineisto")."";

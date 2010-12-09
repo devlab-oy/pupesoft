@@ -3,15 +3,6 @@
 
 	echo "<font class='head'>".t("Laskujen suoritus")."</font><hr>";
 
-	// Meitä on kutsuttu tiliotteelta!
-	if ($tiliote == 'Z') {
-		echo "<form action = 'tilioteselailu.php' method='post'>
-			<input type='hidden' name=mtili value='$mtili'>
-			<input type='hidden' name=tee   value='Z'>
-			<input type='hidden' name='pvm' value='$mav-$mak-$map'>
-			<input type='Submit' value='".t("Palaa tiliotteelle")."'></form>";
-	}
-
 	if ($tee == 'V') {
 		$summa = str_replace (",", ".", $summa);
 		$summa_valuutassa = str_replace (",", ".", $summa_valuutassa);
@@ -437,21 +428,26 @@
 		echo "<br><br>";
 
 		echo "<table><tr>";
-		echo "<form action = '$PHP_SELF' method='post'>
+		echo "<td class='back'>
+				<form action = '$PHP_SELF' method='post'>
 		        <input type='hidden' name='kurssi' value='$kurssi'>
 				<input type='hidden' name='tee' value='W'>
-				<input type='hidden' name='tiliote' value='$tiliote'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='mav' value = '$mav'>
 				<input type='hidden' name='mak' value = '$mak'>
 				<input type='hidden' name='map' value = '$map'>
 				<input type='hidden' name='mtili' value = $mtili>
 				<input type='hidden' name='tunnus' value = $trow[0]>
-				<td class='back'><input type='Submit' value='".t("Suorita lisää")."'></td></form>";
+				<input type='Submit' value='".t("Suorita lisää")."'>
+				</form></td>";
 
-		echo "<form action = 'muutosite.php' method='post'>
+		echo "<td class='back'>
+				<form action = 'muutosite.php' method='post'>
 				<input type='hidden' name='tee' value='E'>
 				<input type='hidden' name='tunnus' value='$tunnus'>
-				<td class='back'><input type='Submit' value='".t("Korjaa tiliöinti")."'></td></tr></form></table>";
+				<input type='hidden' name='lopetus' value='$lopetus'>
+				<input type='Submit' value='".t("Korjaa tiliöinti")."'>
+				</form></td></tr></table>";
 	}
 
 	if ($tee == "W") {
@@ -521,11 +517,11 @@
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=nimi&jarj=$jarj'>",t("Nimi"),"</a></th>";
-		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=tapvm&jarj=$jarj'>",t("Tapvm"),"</a></th>";
-		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=erpcm&jarj=$jarj'>",t("Erpvm"),"</a></th>";
-		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=popvm&jarj=$jarj'>",t("Popvm"),"</a></th>";
-		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=olmapvm&jarj=$jarj'>",t("Olmapvm"),"</a></th>";
+		echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=nimi&jarj=$jarj'>",t("Nimi"),"</a></th>";
+		echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=tapvm&jarj=$jarj'>",t("Tapvm"),"</a></th>";
+		echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=erpcm&jarj=$jarj'>",t("Erpvm"),"</a></th>";
+		echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=popvm&jarj=$jarj'>",t("Popvm"),"</a></th>";
+		echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=olmapvm&jarj=$jarj'>",t("Olmapvm"),"</a></th>";
 		echo "<th valign='top'>",t("Laskunro"),"</th>";
 		echo "<th valign='top'>",t("Viite"),"</th>";
 		echo "<th valign='top' style='text-align:right;'>",t("Summa"),"</th>";
@@ -576,7 +572,7 @@
 
 			echo "<td valign='top'><form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='V'>
-					<input type='hidden' name='tiliote' value='$tiliote'>";
+					<input type='hidden' name='lopetus' value='$lopetus'>";
 
 			if ($trow['valkoodi'] != $yhtiorow['valkoodi']) {
 				echo "<input type='text' name='summa' value='$summa' size=8>";

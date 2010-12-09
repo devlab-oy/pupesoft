@@ -1,7 +1,7 @@
 <?php
 
-	$ulos = "";
-	$jatko = 1; // oletetaan normaali käsittely
+	$ulos   = "";
+	$jatko  = 1; // oletetaan normaali käsittely
 	$tyyppi = 1; // oletetaan rivin näkyvyys
 
 	if ($i == 0) { //yhtiötä ei näytetä
@@ -14,14 +14,23 @@
 		if ($lukitse_avaimeen != "") {
 			$trow[$i] = $perhe = $lukitse_avaimeen;
 		}
-		elseif($trow[$i] == 0) {
+		elseif ($trow[$i] == 0) {
 			$query = "	SELECT max(perhe) perhe
 			 			FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'";
 			$pres = mysql_query($query) or pupe_error($query);
 			$perse = mysql_fetch_array($pres);
-
+			
 			$trow[$i] = $perhe = ($perse["perhe"]+1);
+			
+			//Päivitetään tämä jo tässä vaiheessa
+			if ($tunnus > 0) {
+				$query = "	UPDATE avainsana
+							SET perhe = '$perhe'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = '$tunnus'";
+				$pres = mysql_query($query) or pupe_error($query);	
+			}									
 		}
 		else {
 			$perhe = $trow[$i];
@@ -29,8 +38,9 @@
 
 		$tyyppi = 4;
 	}
-
-	if (mysql_field_name($result, $i) == "selite" and $lukitse_avaimeen != "") {
+	
+	// Maksuehtojen js toimitustapojen kieliveriot
+	if (mysql_field_name($result, $i) == "selite" and $lukitse_avaimeen != "" and ($lukitse_laji == "TOIMTAPAKV" or $lukitse_laji == "MAKSUEHTOKV")) {
 		$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
 		$jatko = 0;
 	}
@@ -178,8 +188,8 @@
 		$sel  = "";
 
 		//	näytetäään vain kielet joilla on
-		if($perhe > 0) {
-			if($lukitse_laji != "") {
+		if ($perhe > 0) {
+			if ($lukitse_laji != "") {
 				$laji = $lukitse_laji;
 			}
 			else {
@@ -194,7 +204,7 @@
 			$kielet = $kilerow["kielet"];
 		}
 
-		$query  = "show columns from sanakirja";
+		$query  = "SHOW columns from sanakirja";
 		$fields =  mysql_query($query);
 
 		while ($apurow = mysql_fetch_array($fields)) {
@@ -343,7 +353,7 @@
 		$jatko  = 0;
 	}
 
-	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"]) and mysql_field_name($result, $i) == "selitetark") {
+	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark") {
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
@@ -458,7 +468,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "jarjestys") {
-		if($trow[$i] == "" and $ajarjestys != "") {
+		if ($trow[$i] == "" and $ajarjestys != "") {
 			$trow[$i] = $ajarjestys;
 		}
 	}

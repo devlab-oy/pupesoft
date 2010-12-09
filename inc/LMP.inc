@@ -80,7 +80,9 @@
 			break;
 
 		case 'T10' :
+
 			$tiliotedataid = $tiliotedatarow['tunnus'];
+			$tiliotedatape = $tiliotedatarow['perheid'];
 			$tiliotedataka = $tiliotedatarow['kasitelty'];
 			$tiliotedatatu = $tiliotedatarow['tiliointitunnus'];
 
@@ -127,7 +129,7 @@
 				echo "<td>";
 
 				if ($viite > 0) {
-					echo "<font class='message'>Pupesoft: ".t("maksukanditaatti viiteno")."</font><br>";
+					echo "<font class='message'>Pupesoft: ".t("Maksukandidaatti viiteno")."</font><br>";
 
 					$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 								FROM lasku
@@ -146,7 +148,7 @@
 				}
 
 				if ($loytyi == 0) {
-					echo "<font class='message'>Pupesoft: ".t("maksukanditaatti nimi & m‰‰r‰")."</font><br>";
+					echo "<font class='message'>Pupesoft: ".t("Maksukandidaatti nimi & m‰‰r‰")."</font><br>";
 
 					// tarkka 35 merkki‰ <-> 35 merkki‰ nimihaku
 					$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
@@ -255,7 +257,6 @@
 				}
 				echo "</td></tr>";
 			}
-			break;
+		break;
 	}
-
 ?>

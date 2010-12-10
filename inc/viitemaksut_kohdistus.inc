@@ -240,12 +240,14 @@
 
 					//Hoidetaan mahdolliset pyöristykset
 					$heitto = round($totkasumma - $alennus, 2);
+					$heitto_valuutassa = round($totkasumma_valuutassa - $alennus_valuutassa, 2);
 
 					if (abs($heitto) >= 0.01) {
 						$query = "	UPDATE tiliointi SET
-									summa = summa - $totkasumma + $alennus,
-									summa_valuutassa = summa_valuutassa - $totkasumma_valuutassa + $alennus_valuutassa
-									WHERE tunnus = '$aputunnus' and yhtio='$row[suoriyhtio]'";
+									summa = summa - $heitto,
+									summa_valuutassa = summa_valuutassa - $heitto_valuutassa
+									WHERE tunnus = '$aputunnus'
+									and yhtio = '$row[suoriyhtio]'";
 						$xresult = mysql_query($query) or pupe_error($query);
 
 						$aputunnus = 0;

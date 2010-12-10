@@ -832,8 +832,8 @@ if ($tila == 'tee_kohdistus') {
 							echo "<font class='message'>".t("Kassa-alvpyöristys")." $heitto</font><br>";
 
 							$query = "	UPDATE tiliointi SET
-										summa = summa - $totkasumma + $lasku[alennus],
-										summa_valuutassa = summa_valuutassa - $totkasumma_valuutassa + $lasku[alennus]
+										summa = summa - $heitto,
+										summa_valuutassa = summa_valuutassa - $heitto_valuutassa
 										WHERE tunnus = '$isa' and yhtio = '$kukarow[yhtio]'";
 							$xresult = mysql_query($query) or pupe_error($query);
 

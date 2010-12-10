@@ -766,14 +766,7 @@ if ($tila == 'tee_kohdistus') {
 								and yhtio 		= '$kukarow[yhtio]'
 								and tapvm 		= '$lasku[tapvm]'
 								and abs(summa) <> 0
-								and tilino	   <> '$yhtiorow[myyntisaamiset]'
-								and tilino	   <> '$yhtiorow[konsernimyyntisaamiset]'
-								and tilino	   <> '$alvtili'
-								and tilino	   <> '$yhtiorow[varasto]'
-								and tilino	   <> '$yhtiorow[varastonmuutos]'
-								and tilino	   <> '$yhtiorow[pyoristys]'
-								and tilino	   <> '$yhtiorow[myynninkassaale]'
-								and tilino	   <> '$yhtiorow[factoringsaamiset]'
+								and tilino not in ('$yhtiorow[myyntisaamiset]','$yhtiorow[konsernimyyntisaamiset]','$alvtili','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[pyoristys]','$yhtiorow[myynninkassaale]','$yhtiorow[factoringsaamiset]')
 								and korjattu 	= ''";
 					$yresult = mysql_query($query) or pupe_error($query);
 
@@ -790,13 +783,13 @@ if ($tila == 'tee_kohdistus') {
 
 						while ($tiliointirow = mysql_fetch_array($yresult)) {
 							// Kuinka paljon on tämän viennin osuus
-							$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) * -1 / $lasku["alkup_summa"] * $lasku["alennus"],2);
-							$summa_valuutassa = round($tiliointirow['summa_valuutassa'] * (1+$tiliointirow['vero']/100) * -1 / $lasku["alkup_summa_valuutassa"] * $lasku["alennus_valuutassa"],2);
+							$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) * -1 / $lasku["alkup_summa"] * $lasku["alennus"], 2);
+							$summa_valuutassa = round($tiliointirow['summa_valuutassa'] * (1+$tiliointirow['vero']/100) * -1 / $lasku["alkup_summa_valuutassa"] * $lasku["alennus_valuutassa"], 2);
 
 							if ($tiliointirow['vero'] != 0) { // Netotetaan alvi
 								//$alv:ssa on alennuksen alv:n maara
-								$alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)),2);
-								$alv_valuutassa = round($summa_valuutassa - $summa_valuutassa / (1 + ($tiliointirow['vero'] / 100)),2);
+								$alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)), 2);
+								$alv_valuutassa = round($summa_valuutassa - $summa_valuutassa / (1 + ($tiliointirow['vero'] / 100)), 2);
 
 								//$summa on alviton alennus
 								$summa -= $alv;
@@ -832,8 +825,8 @@ if ($tila == 'tee_kohdistus') {
 						}
 
 						//Hoidetaan mahdolliset pyöristykset
-						$heitto = $totkasumma - $lasku["alennus"];
-						$heitto_valuutassa = $totkasumma_valuutassa - $lasku["alennus_valuutassa"];
+						$heitto = round($totkasumma - $lasku["alennus"], 2);
+						$heitto_valuutassa = round($totkasumma_valuutassa - $lasku["alennus_valuutassa"], 2);
 
 						if (abs($heitto) >= 0.01) {
 							echo "<font class='message'>".t("Kassa-alvpyöristys")." $heitto</font><br>";

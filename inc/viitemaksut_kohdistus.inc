@@ -121,6 +121,7 @@
 
 			// Mahdollinen kassa-alennus
 			if ($alennus != 0) {
+
 				// Kassa-alessa on huomioitava alv, joka voi olla useita vientejä
 				$totkasumma = 0;
 				$totkasumma_valuutassa = 0;
@@ -132,14 +133,7 @@
 							and yhtio   	 = '$row[suoriyhtio]'
 							and tapvm   	 = '$row[tapvm]'
 							and abs(summa)  <> 0
-							and tilino 		<> '$row[myyntisaamiset]'
-							and tilino	    <> '$row[konsernimyyntisaamiset]'
-							and tilino 		<> '$row[alvtili]'
-							and tilino 		<> '$row[varasto]'
-							and tilino 		<> '$row[varastomuu]'
-							and tilino 		<> '$row[pyoristys]'
-							and tilino 		<> '$row[alennustili]'
-							and tilino		<> '$row[factoringsaamiset]'
+							and tilino not in ('$row[myyntisaamiset]','$row[konsernimyyntisaamiset]','$row[alvtili]','$row[varasto]','$row[varastomuu]','$row[pyoristys]','$row[alennustili]','$row[factoringsaamiset]')
 							and korjattu	 = ''";
 				$tilres = mysql_query($query) or pupe_error($query);
 
@@ -165,14 +159,15 @@
 					while ($tiliointirow = mysql_fetch_assoc($tilres)) {
 						$alv 	= 0;
 						$alv_valuutassa = 0;
-						$summa 	= sprintf('%.2f', $tiliointirow["summa"] * -1 * (1+$tiliointirow["vero"]/100) / $row["laskusumma"] * $alennus);
-						$summa_valuutassa = sprintf('%.2f', $tiliointirow["summa_valuutassa"] * -1 * (1+$tiliointirow["vero"]/100) / $row["laskusumma_valuutassa"] * $alennus_valuutassa);
+
+						$summa 	= round($tiliointirow["summa"] * -1 * (1+$tiliointirow["vero"]/100) / $row["laskusumma"] * $alennus, 2);
+						$summa_valuutassa = round($tiliointirow["summa_valuutassa"] * -1 * (1+$tiliointirow["vero"]/100) / $row["laskusumma_valuutassa"] * $alennus_valuutassa, 2);
 
 						if ($tiliointirow["vero"] != 0) {
 							#Netotetaan alvi
 							#$alv:ssa on alennuksen alv:n maara
-							$alv = sprintf('%.2f', $summa - $summa / (1 + ($tiliointirow["vero"] / 100)));
-							$alv_valuutassa = sprintf('%.2f', $summa_valuutassa - $summa_valuutassa / (1 + ($tiliointirow["vero"]/100)));
+							$alv = round($summa - $summa / (1 + ($tiliointirow["vero"] / 100)), 2);
+							$alv_valuutassa = round($summa_valuutassa - $summa_valuutassa / (1 + ($tiliointirow["vero"]/100)), 2);
 
 							#$summa on alviton alennus
 							$summa -= $alv;
@@ -244,7 +239,7 @@
 					}
 
 					//Hoidetaan mahdolliset pyöristykset
-					$heitto = $totkasumma - $alennus;
+					$heitto = round($totkasumma - $alennus, 2);
 
 					if (abs($heitto) >= 0.01) {
 						$query = "	UPDATE tiliointi SET

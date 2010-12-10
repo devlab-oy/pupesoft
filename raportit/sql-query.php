@@ -36,7 +36,7 @@
 		echo "<form name='sql' action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "<table>";
 		echo "<tr><th>".t("Syötä SQL kysely")."</th></tr>";
-		echo "<tr><td><textarea cols='70' rows='10' name='sqlhaku'>$sqlhaku</textarea></td></tr>";
+		echo "<tr><td><textarea cols='100' rows='15' rows='15' name='sqlhaku' style='font-family:\"Courier New\",Courier'>$sqlhaku</textarea></td></tr>";
 		echo "<tr><td class='back'><input type='submit' value='".t("Suorita")."'></td></tr>";
 		echo "</table>";
 		echo "</form>";

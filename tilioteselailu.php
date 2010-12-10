@@ -1,19 +1,62 @@
 <?php
-	
+
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-	
+
 	require "inc/parametrit.inc";
 
+	$query = "	SELECT tunnus
+				FROM tiliotedata
+				WHERE perheid > 0";
+	$tiliotedataresult = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($tiliotedataresult) == 0) {
+
+		$query = "	SELECT yhtio, tunnus, left(tieto,3) tietotyyppi
+					FROM tiliotedata
+					WHERE tyyppi != '3'
+					ORDER BY yhtio, tunnus";
+		$tiliotedataresult = mysql_query($query) or pupe_error($query);
+
+		$perheid = 0;
+
+		while ($tiliotedatarow = mysql_fetch_array($tiliotedataresult)) {
+
+			if ($tiliotedatarow["tietotyyppi"] != "T11" and $tiliotedatarow["tietotyyppi"] != "T81") {
+				$perheid = $tiliotedatarow["tunnus"];
+			}
+
+			$query = "	UPDATE tiliotedata SET perheid = $perheid
+						WHERE tunnus = $tiliotedatarow[tunnus]";
+			$kuitetaan_result = mysql_query($query) or pupe_error($query);
+		}
+
+		$query = "	SELECT yhtio, tunnus, kuitattu, kuitattuaika
+					FROM tiliotedata
+					WHERE kuitattu != ''
+					and tunnus = perheid";
+		$tiliotedataresult = mysql_query($query) or pupe_error($query);
+
+		while ($tiliotedatarow = mysql_fetch_array($tiliotedataresult)) {
+
+			$query = "	UPDATE tiliotedata
+						SET kuitattu = '$tiliotedatarow[kuitattu]',
+						kuitattuaika = '$tiliotedatarow[kuitattuaika]'
+						WHERE yhtio = '$tiliotedatarow[yhtio]'
+						and perheid = $tiliotedatarow[tunnus]";
+			$kuitetaan_result = mysql_query($query) or pupe_error($query);
+		}
+	}
+
 	if (isset($tee) and $tee == "lataa_tiedosto") {
-		readfile("/tmp/".$tmpfilenimi);	
+		readfile("/tmp/".$tmpfilenimi);
 		exit;
 	}
 
 	require_once ("inc/tilinumero.inc");
-	
+
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	if ($tee == 'T' and trim($kuitattava_tiliotedata_tunnus) != '') {
@@ -23,17 +66,17 @@
 		$query = "	UPDATE tiliotedata SET
 					$kuitataan_lisa
 					WHERE yhtio = '$kukarow[yhtio]'
-					AND tunnus = '$kuitattava_tiliotedata_tunnus'";
+					AND perheid = '$kuitattava_tiliotedata_tunnus'";
 		$kuitetaan_result = mysql_query($query) or pupe_error($query);
 	}
 
-	//Olemme tulossa takain suorituksista
+	//Olemme tulossa takasin suorituksista
 	if ($tee == 'Z' or $tiliote == 'Z') {
 		$query = "	SELECT tilino
 					FROM yriti
 					WHERE tunnus = $mtili
 					and yhtio = '$kukarow[yhtio]'
-					and yriti.kaytossa = ''";
+					and kaytossa = ''";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -136,34 +179,39 @@
 						ORDER BY tieto";
 		}
 		else {
-			$query = "	SELECT tiliotedata.*, ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi
+
+			$tjarjlista = "";
+
+			if ($tiliotejarjestys != "") {
+				$tjarjlista = "sorttauskentta,";
+			}
+
+			$query = "	SELECT tiliotedata.*, ifnull(kuka.nimi, tiliotedata.kuitattu) kukanimi, if(left(tieto,3) in ('T40','T50','T60','T70') or kuitattu!='', 2, 1) sorttauskentta
 						FROM tiliotedata
 						LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
 						WHERE alku = '$pvm' and tilino = '$tilino' and tyyppi ='$tyyppi'
-						ORDER BY tunnus";
+						ORDER BY $tjarjlista perheid, tunnus";
 		}
 
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
 
 		// Lopetusmuuttujaa varten, muuten ylikirjoittuu
-		$lopp_pvm = $pvm;
+		$lopp_pvm    = $pvm;
 		$lopp_tilino = $tilino;
 		$lopp_tyyppi = $tyyppi;
 
 		$txttieto = "";
 		$txtfile  = "$tilino-$pvm.txt";
 
-		// kuittausta varten nämä _temp muuttujat
-		$pvm_temp = $pvm;
-		$tilino_temp = $tilino;
-		$tyyppi_temp = $tyyppi;
+		$tilioterivilaskuri = 1;
+		$tilioterivimaara	= mysql_num_rows($tiliotedataresult);
 
-		if (mysql_num_rows($tiliotedataresult) == 0) {
+		if ($tilioterivimaara == 0) {
 			echo "<font class='message'>".t("Tuollaista aineistoa ei löytynyt")."! $query</font><br>";
 			$tee = '';
 		}
 		else {
-			while ($tiliotedatarow=mysql_fetch_array ($tiliotedataresult)) {
+			while ($tiliotedatarow = mysql_fetch_array($tiliotedataresult)) {
 				$tietue = $tiliotedatarow['tieto'];
 
 				if ($tiliotedatarow['tyyppi'] == 1) {
@@ -177,7 +225,9 @@
 				}
 
 				$txttieto .= $tiliotedatarow["tieto"];
+				$tilioterivilaskuri++;
 			}
+
 			echo "</table>";
 
 			$filename = md5(uniqid()).".txt";

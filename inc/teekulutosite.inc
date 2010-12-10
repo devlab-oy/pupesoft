@@ -50,7 +50,10 @@
                 laadittu = now()";
 	$result = mysql_query($query) or pupe_error($query);
 
-    $query= "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=" . mysql_insert_id ($link) . ", kuitattu = 'tiliote', kuitattuaika = now() WHERE tunnus='$tiliotedataid'";
+    $query = "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=".mysql_insert_id ($link)." WHERE tunnus='$tiliotedataid'";
+	$dummyresult = mysql_query($query) or pupe_error($query);
+
+	$query = "UPDATE tiliotedata SET kuitattu = 'tiliote', kuitattuaika = now() WHERE yhtio = '$yritirow[yhtio]' and perheid = '$tiliotedatape'";
 	$dummyresult = mysql_query($query) or pupe_error($query);
 
 	// Merkataan k‰sitellyiksi & lis‰t‰‰n linkki

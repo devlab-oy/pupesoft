@@ -61,7 +61,7 @@
 				$kanta = (float) substr($luottokuntatieto, 0, strpos($luottokuntatieto, " "));
 				$palkkio = (float) trim(substr($luottokuntatieto, -1 * strpos($luottokuntatieto, " ")));
 
-				$query = "INSERT into tiliointi set
+				$query = "	INSERT into tiliointi set
 			                yhtio = '$yritirow[yhtio]',
 			                ltunnus = '$laskuid',
 			                tilino = '$tiliointisaantorow[tilino2]',
@@ -77,7 +77,7 @@
 			                laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query = "INSERT into tiliointi set
+				$query = "	INSERT into tiliointi set
 			                yhtio = '$yritirow[yhtio]',
 			                ltunnus = '$laskuid',
 			                tilino = '$tiliointisaantorow[tilino]',
@@ -94,32 +94,30 @@
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			else {
-				$query = "INSERT into tiliointi set
-		                yhtio = '$yritirow[yhtio]',
-		                ltunnus = '$laskuid',
-		                tilino = '$tiliointisaantorow[tilino]',
-		                kustp = '$tiliointisaantorow[kustp]',
-		                tapvm = '$tpv-$tpk-$tpp',
-		                summa = $maara * -1,
-						summa_valuutassa = $kohdm * -1,
-						valkoodi = '$tilinvaluutta',
-		                vero = 0,
-		                lukko = '',
-						selite = '$vientiselite',
-		                laatija = 'tiliote',
-		                laadittu = now()";
+				$query = "	INSERT into tiliointi set
+		                	yhtio = '$yritirow[yhtio]',
+			                ltunnus = '$laskuid',
+			                tilino = '$tiliointisaantorow[tilino]',
+			                kustp = '$tiliointisaantorow[kustp]',
+			                tapvm = '$tpv-$tpk-$tpp',
+			                summa = $maara * -1,
+							summa_valuutassa = $kohdm * -1,
+							valkoodi = '$tilinvaluutta',
+			                vero = 0,
+			                lukko = '',
+							selite = '$vientiselite',
+			                laatija = 'tiliote',
+			                laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
-			$loydettiinko_sopiva_tili_lisa = '';
+	        $query = "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=".mysql_insert_id ($link)." WHERE tunnus='$tiliotedataid'";
+			$dummyresult = mysql_query($query) or pupe_error($query);
 
 			if ($loydettiinko_sopiva_tili != '') {
-				$loydettiinko_sopiva_tili_lisa = ", kuitattu = 'tiliote', kuitattuaika = now() ";
+				$query = "UPDATE tiliotedata SET kuitattu = 'tiliote', kuitattuaika = now() WHERE yhtio = '$yritirow[yhtio]' and perheid = '$tiliotedatape'";
+				$dummyresult = mysql_query($query) or pupe_error($query);
 			}
-
-	        // Merkataan t‰m‰ kirjaus tiliotteelle
-	        $query= "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=" . mysql_insert_id ($link) . " $loydettiinko_sopiva_tili_lisa WHERE tunnus='$tiliotedataid'";
-			$dummyresult = mysql_query($query) or pupe_error($query);
 
 			// Merkataan k‰sitellyiksi & lis‰t‰‰n linkki
 			$vastavienti += $maara;

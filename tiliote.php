@@ -91,11 +91,12 @@
 			$aineistores = mysql_query($query) or pupe_error($query);
 			$aineistorow = mysql_fetch_array($aineistores);
 
-			$xlmpmaa = 0;
-			$xtyyppi = 0;
-			$virhe	 = 0;
-			$serc	 = array("{", "|", "}", "[", "\\", "]", "'");
-			$repl	 = array("‰", "ˆ", "Â", "ƒ", "÷" , "≈", " ");
+			$xlmpmaa 	= 0;
+			$xtyyppi 	= 0;
+			$virhe	 	= 0;
+			$td_perheid = 0;
+			$serc	 	= array("{", "|", "}", "[", "\\", "]", "'");
+			$repl	 	= array("‰", "ˆ", "Â", "ƒ", "÷" , "≈", " ");
 
 			while (!feof($fd)) {
 				$tietue = str_replace($serc, $repl, $tietue);
@@ -217,6 +218,19 @@
 					// Kirjoitetaan tiedosto kantaan
 					$query = "INSERT into tiliotedata (yhtio, aineisto, tilino, alku, loppu, tyyppi, tieto) values ('$yritirow[yhtio]', '$aineistorow[aineisto]', '$tilino', '$alkupvm', '$loppupvm', '$xtyyppi', '$tietue')";
 					$tiliotedataresult = mysql_query($query) or pupe_error($query);
+					$tiliote_id = mysql_insert_id();
+
+					// P‰ivitet‰‰n perheid
+					if (substr($tietue, 0, 3) != "T11" and substr($tietue, 0, 3) != "T81") {
+						$td_perheid = $tiliote_id;
+					}
+
+					if ($td_perheid > 0) {
+						$query = "	UPDATE tiliotedata
+									SET perheid = $td_perheid
+									WHERE tunnus = $tiliote_id";
+						$updatekasitelty = mysql_query($query) or pupe_error($query);
+					}
 				}
 
 				$tietue = fgets($fd);
@@ -245,9 +259,12 @@
 			// K‰sitell‰‰n uudet tietueet
 			$query = "	SELECT *
 						FROM tiliotedata
-						WHERE aineisto = '$aineistorow[0]'
+						WHERE aineisto = '$aineistorow[aineisto]'
 						ORDER BY tunnus";
 			$tiliotedataresult = mysql_query($query) or pupe_error($query);
+
+			$tilioterivilaskuri = 1;
+			$tilioterivimaara	= mysql_num_rows($tiliotedataresult);
 
 			while ($tiliotedatarow = mysql_fetch_array($tiliotedataresult)) {
 				$tietue = $tiliotedatarow['tieto'];
@@ -267,6 +284,8 @@
 							SET kasitelty = now()
 							WHERE tunnus = '$tiliotedatarow[tunnus]'";
 				$updatekasitelty = mysql_query($query) or pupe_error($query);
+
+				$tilioterivilaskuri++;
 			}
 
 			if ($xtyyppi == 1) {

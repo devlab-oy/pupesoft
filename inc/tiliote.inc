@@ -1,23 +1,13 @@
 <?php
 
-	$tunnus = substr($tietue, 0,3);
+	$tunnus = substr($tietue, 0, 3);
 
-	if ($tunnus != 'T11' and $maksu == 1) {
+	if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
 
 		echo "<tr class='aktiivi'><td class='$class'></td><td class='$class'></td><td class='$class'>";
 
 		if ($tee == 'S') {
 			echo "</td><td class='$class'>";
-		}
-
-		// Tämä on case Sampo ja erittelyt onkin ilmoitettu tasoissa!
-		// eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä
-		if (substr($tietue, 187, 1) > $omataso and $tunnus == 'T10') {
-			$kuittikoodi 	= 'E';
-			$erialla 		= "E";
-		}
-		else {
-			$erialla 		= "";
 		}
 
 		// Jossain erityistapauksissa täytyy erittely käsitellä. Niille löytyy syötetyt säännöt
@@ -30,7 +20,7 @@
 			if (is_numeric($vasta_kurssi) and $vasta_kurssi != 0 and $vasta_kurssi != 1) {
 				$kurssi = 1 / $vasta_kurssi;
 			}
-			elseif($valuuttarow['kurssi'] != 0 and $valuuttarow['kurssi'] != 1) {
+			elseif ($valuuttarow['kurssi'] != 0 and $valuuttarow['kurssi'] != 1) {
 				$kurssi = $valuuttarow['kurssi'];
 			}
 			else {
@@ -63,7 +53,7 @@
 			}
 
 			if ($sisviite != 0) {
-				echo "<font class='message'> ".t("maksukanditaatti sisäinen viite & määrä")."</font><br>";
+				echo "<font class='message'> ".t("Maksukandidaatti sisäinen viite & määrä")."</font><br>";
 
 				$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 							FROM lasku
@@ -89,7 +79,7 @@
 				switch ($koodi) {
 					case '702' : // Maksettu jotain tililtä, etsitään tilinolla ja summalla....
 						if (strlen(trim($tilino)) > 0) {
-							echo "<font class='message'> ".t("maksukanditaatti tilino & määrä")."</font><br>";
+							echo "<font class='message'> ".t("Maksukandidaatti tilino & määrä")."</font><br>";
 
 							$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 										FROM lasku
@@ -124,7 +114,7 @@
 					case '720' : // Maksumääräys maksettu jotain tililtä, etsitään nimellä ja summalla....
 						if (strlen(trim($maksaa)) > 0) {
 
-							echo "<font class='message'>".t("Maksukanditaatti nimi & määrä")."</font><br>";
+							echo "<font class='message'>".t("Maksukandidaatti nimi & määrä")."</font><br>";
 
 							// tarkka 35 merkkiä <-> 35 merkkiä nimihaku
 							$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
@@ -135,7 +125,7 @@
 										and tila 	= 'Q'
 										$kohdm_valkoodilisa";
 							$result = mysql_query($query) or pupe_error($query);
-							
+
 							if (mysql_num_rows($result) != 1) {
 								// tarkka 35 merkkiä <-> 35 merkkiä NIMI ja NIMITARK haku
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
@@ -145,7 +135,7 @@
 											and yhtio 	= '$yritirow[yhtio]'
 											and tila 	= 'Q'
 											$kohdm_valkoodilisa";
-								$result = mysql_query($query) or pupe_error($query);								
+								$result = mysql_query($query) or pupe_error($query);
 							}
 
 							if (mysql_num_rows($result) != 1) {
@@ -213,7 +203,7 @@
 						$koodi = "";
 						break;
 					case '730' : // Pankin kulu
-						echo "<font class='message'>".t("Maksukanditaatti pankinkulu")."</font><br>";
+						echo "<font class='message'>".t("Maksukandidaatti pankinkulu")."</font><br>";
 						echo "<font class='ok'>".t("Rahat")." $yritirow[oletus_rahatili] ".t("kulut")." $yritirow[oletus_kulutili] ".t("summa")." $maara</font><br>";
 						require "inc/teekulutosite.inc";
 						break;
@@ -228,7 +218,6 @@
 			if ($kuittikoodi != ' ') {
 				echo "<font class='message'>".t("Hylätty, koska erittely tulossa")." ($kuittikoodi) </font><br>";
 
-
 				if ($erialla == "E") {
 					echo "<font class='message'>".t("Erittely alla").".</font><br>";
 				}
@@ -237,7 +226,7 @@
 					$erilinkkiekotus = FALSE;
 
 					if ($koodi == "702") {
-						// Luulativimmin LMP-ainesisto
+						// Luultavimmin LMP-ainesisto
 						$query = "	SELECT *
 									FROM tiliotedata
 									WHERE alku = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."'
@@ -247,7 +236,7 @@
 						$tiliointiresult = mysql_query($query) or pupe_error($query);
 
 						if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {
-							echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=2&tilino=$tiliotedatarow[tilino]&lopetus=$lopetus/SPLIT/${palvelin2}tilioteselailu.php////tee=T//tyyppi=$lopp_tyyppi//tilino=$lopp_tilino//pvm=$lopp_pvm'>".t("Avaa LMP-erittely")."</a><br>";
+							echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=2&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa LMP-erittely")."</a><br>";
 
 							$erilinkkiekotus = TRUE;
 						}
@@ -263,7 +252,7 @@
 						$tiliointiresult = mysql_query($query) or pupe_error($query);
 
 						if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {
-							echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]&lopetus=$lopetus/SPLIT/${palvelin2}tilioteselailu.php////tee=T//tyyppi=$lopp_tyyppi//tilino=$lopp_tilino//pvm=$lopp_pvm'>".t("Avaa viiteaineisto")."</a><br>";
+							echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa viiteaineisto")."</a><br>";
 
 							$erilinkkiekotus = TRUE;
 						}
@@ -286,15 +275,15 @@
 							WHERE tiliointi.tunnus = '$tiliotedatatu'";
 				$tiliointiresult = mysql_query($query) or pupe_error($query);
 
-				if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {
+				if ($tiliointirow = mysql_fetch_array($tiliointiresult)) {
 					echo "<font class='message'>".t("Tapahtuma on käsitelty")." ".tv1dateconv($tiliotedataka)."<br>";
-					echo t("Alkuperäinen tiliöinti on")." <a href='".$palvelin2."muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]&lopetus=$lopetus'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
+					echo t("Alkuperäinen tiliöinti on")." <a href='".$palvelin2."muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]&lopetus=$lopetus$lopetuslisa'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
 
 					if (($tiliointirow['korjattu'] != "0000-00-00 00:00:00") and ($tiliointirow['korjattu'] != "@0000-00-00 00:00:00")) {
 						echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font>";
 					}
 				}
-				elseif($kuittikoodi == ' ') {
+				elseif ($kuittikoodi == ' ') {
 					echo "<font class='error'>".t("VIRHE: Tiliöinti puuttuu")."!</font>";
 				}
 			}
@@ -303,7 +292,7 @@
 		echo "<td class='$class'></td><td class='$class'>";
 
 		//Jos tämä on selvittelyssä, niin annetaan mahdollisuus suorittaa!
-		if ($kuitattu_checked == '' and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00" or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) and ($kuittikoodi==' ')) {
+		if ($kuitattu_checked == '' and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00" or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) and $kuittikoodi == ' ') {
 			//Olisiko tämä meidän toimittaja
 			$tpv = substr($pvm,0,2);
 			$tpk = substr($pvm,2,2);
@@ -315,7 +304,7 @@
 			$boob = 0;
 
 			if (mysql_num_rows($suotoiresult) > 0) {
-				echo "<font class='message'><a href='".$palvelin2."suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&lopetus=$lopetus'>".t("Ostosuoritus")."</a></font><br>";
+				echo "<font class='message'><a href='".$palvelin2."suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&lopetus=$lopetus$lopetuslisa'>".t("Ostosuoritus")."</a></font><br>";
 				$boob = 1;
 			}
 
@@ -325,23 +314,23 @@
 
 			if (mysql_num_rows($suoasiresult) == 1) {
 				$suoasirow = mysql_fetch_array ($suoasiresult);
-				echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&lopetus=$lopetus'>".t("Myyntisuoritus")." ".substr($suoasirow["nimi"], 0, 34)."</a></font><br>";
+				echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&lopetus=$lopetus$lopetuslisa'>".t("Myyntisuoritus")." ".substr($suoasirow["nimi"], 0, 34)."</a></font><br>";
 				$boob = 1;
 			}
 
 			if ($boob == 0) {
-				echo "<font class='message'><a href='".$palvelin2."suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=". -1*$maara . "'>".t("Ostosuoritus")."</a></font><br>";
+				echo "<font class='message'><a href='".$palvelin2."suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&lopetus=$lopetus$lopetuslisa'>".t("Ostosuoritus")."</a></font><br>";
 			}
 
 			//	Annetaan Muu aina
-			echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku=$maksaa&lopetus=$lopetus'>".t("Myyntisuoritus muu")." </a></font>";
+			echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku=$maksaa&lopetus=$lopetus$lopetuslisa'>".t("Myyntisuoritus muu")." </a></font>";
 
 		}
 		echo "</td><td class='$class'>";
 
-		if ($kuittikoodi==' ') {
-			if ($eiselitetta==1) $selite='';
-			echo "<font class='message'><a href='".$palvelin2."tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&lopetus=$lopetus'>".t("Tee tiliotesääntö")."</a></font>";
+		if ($kuittikoodi == ' ') {
+			if ($eiselitetta == 1) $selite = '';
+			echo "<font class='message'><a href='".$palvelin2."tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&lopetus=$lopetus$lopetuslisa'>".t("Tee tiliotesääntö")."</a></font>";
 		}
 
 		echo "</td></tr>";
@@ -351,6 +340,7 @@
 	}
 
 	switch ($tunnus) {
+
 		case 'T00' :
 
 			// Meillä on entinen tili auki
@@ -374,7 +364,27 @@
 				echo "<table>";
 
 				if ($silent == "") {
-					echo "<tr><td><a href='".$palvelin2."tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XX'>&laquo; ".t("Edellinen")."</td><td></td><td><a href='".$palvelin2."tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=X'>".t("Seuraava")." &raquo;</a></td></tr>";
+
+					$seltiliotejarjestys = "";
+					if ($tiliotejarjestys != "") $seltiliotejarjestys = "SELECTED";
+
+					echo "<tr>
+							<th><a href='".$palvelin2."tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XX&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</th>
+							<th>";
+					echo "<form action='".$palvelin2."tilioteselailu.php' method='post'>";
+					echo "<input type='hidden' name='tee'     value='T'>";
+					echo "<input type='hidden' name='tyyppi'  value='$lopp_tyyppi'>";
+					echo "<input type='hidden' name='tilino'  value='$lopp_tilino'>";
+					echo "<input type='hidden' name='pvm' 	  value='$lopp_pvm'>";
+					echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+
+					echo "<select name='tiliotejarjestys' onchange='submit();'>
+							<option value=''>".t("Oletusjärjestys")."</option>
+							<option value='K' $seltiliotejarjestys>".t("Kuitattaamattomat ensin")."</option>
+							</select>
+							</form>";
+					echo " </th>
+							<th><a href='".$palvelin2."tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=X&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a></th></tr>";
 				}
 			}
 
@@ -386,14 +396,14 @@
 
 			if ($silent == "") {
 				echo "<tr>";
-				echo "<td>" . substr($tietue,182,40) . "</td>";
-				echo "<td>".t("Tiliote")." " . substr($tietue,23,3) . "</td><td></td>";
+				echo "<td>".substr($tietue,182,40)."</td>";
+				echo "<td>".t("Tiliote")." ".substr($tietue,23,3)."</td><td></td>";
 				echo "</tr>";
 
 				echo "<tr>";
-				echo "<td rowspan='2'>". substr($tietue,222,40) . "<br>". substr($tietue,262,30) ."<br>". substr($tietue,292,30) ."</td>";
+				echo "<td rowspan='2'>". substr($tietue,222,40)."<br>". substr($tietue,262,30) ."<br>". substr($tietue,292,30) ."</td>";
 				echo "<td></td>";
-				echo "<td>".t("Muodostettu")."<br>". pankkipvm(substr($tietue,38,6)) ." " . substr($tietue,44,4) ."</td>";
+				echo "<td>".t("Muodostettu")."<br>". pankkipvm(substr($tietue,38,6)) ." ".substr($tietue,44,4) ."</td>";
 				echo "</tr>";
 
 				echo "<tr>";
@@ -408,8 +418,8 @@
 				echo "</tr>";
 
 				echo "<tr>";
-				echo "<td>" . substr($tietue, 147, 18) . "</td>";
-				echo "<td>" . substr($tietue, 99, 30) . "<br>$tilinvaluutta" . tilinumero_print($pankkitilino) . "</td>";
+				echo "<td>".substr($tietue, 147, 18)."</td>";
+				echo "<td>".substr($tietue, 99, 30)."<br>$tilinvaluutta".tilinumero_print($pankkitilino)."</td>";
 
 				$tililimiitti = (int) (substr($tietue, 117, 30) / 100);
 
@@ -420,7 +430,7 @@
 					$tililimiitti =  "<br>";
 				}
 
-				echo "<td>".t("Myönnetty määrä")."<br>". $tililimiitti . "</td>";
+				echo "<td>".t("Myönnetty määrä")."<br>". $tililimiitti."</td>";
 				echo "</tr>";
 			}
 
@@ -538,15 +548,15 @@
 
 			echo "<tr><td></td><td></td><td></td><td></td>";
 			if ($tee == 'S') echo "<td></td>";
-			echo "<td>".t("Saldo")." " . pankkipvm(substr($tietue,65,6)) . "</td>";
-			echo "<td style='text-align:right;'>" . sprintf("%01.2f",((substr($tietue,71,19) / 100)-$tililimiitti)) . "</td>";
+			echo "<td>".t("Saldo")." ".pankkipvm(substr($tietue,65,6))."</td>";
+			echo "<td style='text-align:right;'>".sprintf("%01.2f",((substr($tietue,71,19) / 100)-$tililimiitti))."</td>";
 			echo "</tr>";
 
-			if($tililimiitti != "") {
+			if ($tililimiitti != "") {
 				echo "<tr><td></td><td></td><td></td><td></td>";
 				if ($tee == 'S') echo "<td></td>";
 				echo "<td>".t("Käyttövara")."</td>";
-				echo "<td style='text-align:right;'>" . (substr($tietue,71,19) / 100) . "</td>";
+				echo "<td style='text-align:right;'>".(substr($tietue,71,19) / 100)."</td>";
 				echo "</tr>";
 			}
 
@@ -559,6 +569,7 @@
 			$vasta_kurssi  = 1;
 
 			$tiliotedataid = $tiliotedatarow['tunnus'];
+			$tiliotedatape = $tiliotedatarow['perheid'];
 			$tiliotedataka = $tiliotedatarow['kasitelty'];
 			$tiliotedatatu = $tiliotedatarow['tiliointitunnus'];
 
@@ -584,7 +595,7 @@
 				$pvm = $kirjpvm;
 			}
 
-			//echo "Tunnus: '" .  substr($tietue, 48, 1) . "'<br>";
+			//echo "Tunnus: '". substr($tietue, 48, 1)."'<br>";
 			$etumerkki = substr($tietue, 87, 1);
 			$maara = substr($tietue, 88, 18) / 100;
 
@@ -594,35 +605,101 @@
 
 			$maara 		 = sprintf('%.2f', $maara);
 			$kuittikoodi = substr($tietue,106,1);
+			$erialla 	 = "";
 			$maksaa 	 = trim(substr($tietue, 108, 35));
 			$tilino 	 = substr($tietue, 144, 14);
 			$omataso 	 = substr($tietue, 187, 1);
 			$koodiselite = trim(substr($tietue, 52, 35));
 
-			echo "<tr><td class='back'><a name='kuitattu_$tiliotedatarow[tunnus]'></a></td></tr>";
+			// Tutkitaan seuraava maksu ja sen avulla laitetaan kuittikoodi ja erialla arvot kuntoon
+			$tdq = "	SELECT tiliotedata.*
+						FROM tiliotedata
+						WHERE alku = '$tiliotedatarow[alku]'
+						and tilino = '$tiliotedatarow[tilino]'
+						and tyyppi = '$tiliotedatarow[tyyppi]'
+						and tunnus > '$tiliotedatarow[tunnus]'
+						ORDER BY perheid, tunnus";
+			$tdres2peek = mysql_query($tdq) or pupe_error($tdq);
 
+			while ($tdrow2peek = mysql_fetch_assoc($tdres2peek)) {
+				$tdr2tunn = substr($tdrow2peek['tieto'], 0, 3);
+
+				if ($tdr2tunn != 'T11' and $tdr2tunn != 'T81') {
+
+					// Tämä on case Sampo ja erittelyt onkin ilmoitettu tasoissa!
+					// eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä
+					if (substr($tdrow2peek['tieto'], 187, 1) > $omataso and $tdr2tunn == 'T10') {
+						$kuittikoodi 	= "E";
+						$erialla 		= "E";
+					}
+
+					break;
+				}
+			}
+
+			if ($kuittikoodi == "E" and $tiliotedatarow["kuitattu"] == "") {
+				$query = "UPDATE tiliotedata SET kuitattu = 'tiliote', kuitattuaika = now() WHERE yhtio = '$tiliotedatarow[yhtio]' and perheid = '$tiliotedatarow[perheid]'";
+				$dummyresult = mysql_query($query) or pupe_error($query);
+
+				$tiliotedatarow["kuitattu"] = "tiliote";
+				$tiliotedatarow["kukanimi"] = "tiliote";
+				$tiliotedatarow["kuitattuaika"] = date("Y-m-d H:i:s");
+			}
+
+			echo "<tr><td class='back'><a name='kuitattu_$tiliotedatarow[tunnus]'></a></td></tr>";
 			echo "<tr class='aktiivi'>";
 
 			$class = '';
 
 			if ($tee == 'S') {
+
+				//Pidetään tallessa
+				$tiliotedatarowtunnus = $tiliotedatarow["tunnus"];
+
+				$lopetuslisa = "/SPLIT/${palvelin2}tilioteselailu.php////tee=T//tyyppi=$lopp_tyyppi//tilino=$lopp_tilino//pvm=$lopp_pvm//tiliotejarjestys=$tiliotejarjestys///kuitattu_$tiliotedatarowtunnus";
+
 				// Kuitattu checkbox
 				$kuitattu_checked = ($tiliotedatarow['kuitattu'] != '' and $tiliotedatarow['kuitattuaika'] > '0000-00-00 00:00:00') ? ' CHECKED' : '';
 
 				$class = $kuitattu_checked != '' ? 'spec' : '';
 
+				$anklinkki = $tiliotedatarow["tunnus"];
+
+				if ($tiliotejarjestys != "") {
+					// Peek ahead
+					if ($tilioterivilaskuri < $tilioterivimaara) {
+						while ($tilrow_seuraava = mysql_fetch_assoc($tiliotedataresult)) {
+							if ($tilrow_seuraava["perheid"] > $tiliotedatarow["perheid"] ) {
+								$anklinkki = $tilrow_seuraava["perheid"];
+								break;
+							}
+						}
+
+						mysql_data_seek($tiliotedataresult, $tilioterivilaskuri);
+
+					}
+					else {
+						$anklinkki = $tiliotedatarow["tunnus"];
+					}
+				}
+
 				echo "<td class='$class'>";
-				echo "<form name='kuittaus' action='".$palvelin2."tilioteselailu.php?tee=T&tyyppi=$tyyppi_temp&tilino=$tilino_temp&pvm=$pvm_temp#kuitattu_$tiliotedatarow[tunnus]' method='post'>";
+				echo "<form name='kuittaus' action='".$palvelin2."tilioteselailu.php#kuitattu_$anklinkki' method='post'>";
+				echo "<input type='hidden' name='tee' value='T'>";
+				echo "<input type='hidden' name='tyyppi' value='$lopp_tyyppi'>";
+				echo "<input type='hidden' name='tilino' value='$lopp_tilino'>";
+				echo "<input type='hidden' name='pvm' value='$lopp_pvm'>";
+				echo "<input type='hidden' name='tiliotejarjestys' value='$tiliotejarjestys'>";
 				echo "<input type='checkbox' name='kuitattu'$kuitattu_checked onchange='submit();'>";
 				echo "<input type='hidden' name='kuitattava_tiliotedata_tunnus' value='$tiliotedatarow[tunnus]'>";
 				echo "</form>";
 				echo "</td>";
 			}
 
-			echo "<td class='$class'>" . substr($tietue,12,18) . "</td>";
-			echo "<td class='$class'>" . pankkipvm($kirjpvm) . "</td>";
+			echo "<td class='$class'>".substr($tietue,12,18)."</td>";
+			echo "<td class='$class'>".pankkipvm($kirjpvm)."</td>";
 			echo "<td class='$class'>$maksaa</td>";
-			echo "<td class='$class'>" . substr($tietue, 6, 6) * 1 . "$kuittikoodi $omataso</td>";
+			echo "<td class='$class'>".(substr($tietue, 6, 6) * 1)."$kuittikoodi $omataso</td>";
 			echo "<td class='$class'>";
 
 			if ($kuitattu_checked != '') {
@@ -636,7 +713,7 @@
 			if ($tee == 'S') echo "<td class='$class'></td>";
 
 			echo "<td class='$class'>".tilinumero_print($tilino)."</td>";
-			echo "<td class='$class'>" . pankkipvm($pvm) . "</td>";
+			echo "<td class='$class'>".pankkipvm($pvm)."</td>";
 			echo "<td class='$class'>$koodi $koodiselite</td>";
 			echo "<td class='$class'></td><td class='$class'></td><td class='$class'></td>";
 			echo "</tr>";
@@ -652,6 +729,8 @@
 
 			if ($tee == 'S') echo "<td class='$class'></td>";
 
+			$selite_maksuavarten = "";
+
 			switch ($tyyppi) {
 
 				// Vapaa viesti
@@ -664,7 +743,7 @@
 				   		$osa = trim(substr($arvo, $i*35, 35));
 
 						if (strlen($osa) > 0) {
-				   			$selite .= $osa . "<br>";
+				   			$selite .= $osa."<br>";
 				   		}
 						// Luottokunnan käsittelyä varten
 						if ($i == 1) $luottokuntatieto = $osa;
@@ -677,7 +756,7 @@
 
 				// Kappalemäärätiedot
 				case '01' :
-					$selite = t("Tapahtumia").": " . substr($arvo, 0, 8) * 1;
+					$selite = t("Tapahtumia").": ".substr($arvo, 0, 8) * 1;
 					//Tällä taklataan Aktian virhettä, jossa tuo E puuttuu aineistosta
 					if ((substr($pankkitilino,0,1) == '4') and ($kuittikoodi == ' ')) $kuittikoodi='Z';
 					break;
@@ -713,7 +792,7 @@
 				// Toimeksiantajan tiedot itselleen
 				case '06' :
 					$selite = t("Oma sisäinen viite").": ";
-					$selite .= trim(substr($arvo, 0, 35)) . "<br>";
+					$selite .= trim(substr($arvo, 0, 35))."<br>";
 					$selite .= trim(substr($arvo, 35, 35));
 					$sisviite = trim(substr($arvo, 0, 35))*1;
 
@@ -730,32 +809,33 @@
 					for ($i = 0; $i < 13; $i++) {
 						$osa = trim(substr($arvo, $i*35, 35));
 						if (strlen($osa) > 0) {
-							$selite .= $osa . "<br>";
+							$selite .= $osa."<br>";
 						}
 					}
 					break;
 
 				// ?
 				case '08' :
-					$selite = t("Maksuaihekoodi").": " . substr($arvo, 0, 3) . "<br>";
-					$selite .= "Selite: " . trim(substr($arvo, 4, 31));
+					$selite = t("Maksuaihekoodi").": ".substr($arvo, 0, 3)."<br>";
+					$selite .= "Selite: ".trim(substr($arvo, 4, 31));
 					break;
 
 				// Nimitarkenteen tiedot
 				case '09' :
 					$selite = t("Nimen tarkenne").": ".trim(substr($arvo, 0, 35));
 					break;
-				
+
 				// Euromaksualueen tilisiirron lisätyyppi
 				case '11' :
-									
-					$selite = t("Maksajan viite").": ".trim(substr($arvo, 0, 35)) . "<br>";
-					$selite .= t("IBAN tilinumero").": ".trim(substr($arvo, 35, 35)) . "<br>";
-					$selite .= t("BIC-koodi").": ".trim(substr($arvo, 70, 35)) . "<br>";
-					$selite .= t("Saajan nimitarkenne").": ".trim(substr($arvo, 105, 70)) . "<br>";
-					$selite .= t("Maksajan nimitarkenne").": ".trim(substr($arvo, 175, 70)) . "<br>";
-					$selite .= t("Maksajan tunniste").": ".trim(substr($arvo, 245, 35)) . "<br>";
-					$selite .= t("SEPA Arkistointitunnus").": ".trim(substr($arvo, 280, 35)) . "<br>";
+					$selite = "";
+
+					if (trim(substr($arvo, 0,   35)) != "") $selite .= t("Maksajan viite").": ".		trim(substr($arvo, 0,   35))."<br>";
+					if (trim(substr($arvo, 35,  35)) != "") $selite .= t("IBAN tilinumero").": ".		trim(substr($arvo, 35,  35))."<br>";
+					if (trim(substr($arvo, 70,  35)) != "") $selite .= t("BIC-koodi").": ".				trim(substr($arvo, 70,  35))."<br>";
+					if (trim(substr($arvo, 105, 70)) != "") $selite .= t("Saajan nimitarkenne").": ".	trim(substr($arvo, 105, 70))."<br>";
+					if (trim(substr($arvo, 175, 70)) != "") $selite .= t("Maksajan nimitarkenne").": ".	trim(substr($arvo, 175, 70))."<br>";
+					if (trim(substr($arvo, 245, 35)) != "") $selite .= t("Maksajan tunniste").": ".		trim(substr($arvo, 245, 35))."<br>";
+					if (trim(substr($arvo, 280, 35)) != "") $selite .= t("SEPA Arkistointitunnus").": ".trim(substr($arvo, 280, 35))."<br>";
 					break;
 
 				// Oletus
@@ -777,16 +857,16 @@
 
 			if ($tee == 'S') echo "<td></td>";
 
-			echo "<td></td><td></td><td></td><td></td><td>".t("Saldo")." " . pankkipvm(substr($tietue,6,6)) . "</td>";
-			echo "<td style='text-align:right;'>" .  sprintf("%01.2f",((substr($tietue,31,19) / 100) - $tililimiitti)) . "</td></tr>";
+			echo "<td></td><td></td><td></td><td></td><td>".t("Saldo")." ".pankkipvm(substr($tietue,6,6))."</td>";
+			echo "<td style='text-align:right;'>". sprintf("%01.2f",((substr($tietue,31,19) / 100) - $tililimiitti))."</td></tr>";
 
-			if($tililimiitti != "") {
+			if ($tililimiitti != "") {
 				echo "<tr>";
 
 				if ($tee == 'S') echo "<td></td>";
 
 				echo "<td></td><td></td><td></td><td></td><td>".t("Käyttövara")."</td>";
-				echo "<td style='text-align:right;'>" . sprintf("%01.2f",substr($tietue,31,19) / 100) . "</td></tr>";
+				echo "<td style='text-align:right;'>".sprintf("%01.2f",substr($tietue,31,19) / 100)."</td></tr>";
 			}
 
 			// Päivitetään saldo yriti-tauluun, jos sellainen löytyi
@@ -797,7 +877,7 @@
 					$tilisaldo = round($tilisaldo * $valuuttarow['kurssi'],2);
 				}
 
-				$query = "UPDATE yriti SET maksulimitti = '" . round($tilisaldo / 100, 2) . "' WHERE tunnus = '$yritirow[tunnus]'";
+				$query = "UPDATE yriti SET maksulimitti = '".round($tilisaldo / 100, 2)."' WHERE tunnus = '$yritirow[tunnus]'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$query = "UPDATE tiliotedata SET kasitelty = now() WHERE tunnus='$tiliotedatarow[tunnus]'";
@@ -820,8 +900,8 @@
 			if ($silent == "") {
 				$colspan = $tee == 'S' ? 6 : 5;
 
-				echo "<tr><th colspan='$colspan'>".t("Panot")." $jakso ".t("alusta")." ".t("kpl")." " . substr($tietue,13,8) * 1 . "</th><th style='text-align:right;'>" . sprintf("%01.2f",substr($tietue,21,19) / 100) . "</th></tr>";
-				echo "<tr><th colspan='$colspan'>".t("Otot")." $jakso ".t("alusta")." kpl " . substr($tietue,40,8) * 1 . "</th><th style='text-align:right;'>" . sprintf("%01.2f",substr($tietue,48,19) / 100) . "</th></tr>";
+				echo "<tr><th colspan='$colspan'>".t("Panot")." $jakso ".t("alusta")." ".t("kpl")." ".(substr($tietue,13,8) * 1)."</th><th style='text-align:right;'>".sprintf("%01.2f",substr($tietue,21,19) / 100)."</th></tr>";
+				echo "<tr><th colspan='$colspan'>".t("Otot")." $jakso ".t("alusta")." kpl ".(substr($tietue,40,8) * 1)."</th><th style='text-align:right;'>".sprintf("%01.2f",substr($tietue,48,19) / 100)."</th></tr>";
 			}
 			break;
 		case 'T60':
@@ -829,36 +909,48 @@
 
 				$colspan = $tee == 'S' ? 7 : 6;
 
-				echo "<tr><td colspan='$colspan'>" . t("Koronlakentatiedot") . "</td></tr>";
-				echo "<tr><th colspan='$colspan'>" . t("Korkokausi") . " " . substr($tietue,11,13) . "</th></tr>";
+				echo "<tr><td colspan='$colspan'>".t("Koronlakentatiedot")."</td></tr>";
+				echo "<tr><th colspan='$colspan'>".t("Korkokausi")." ".substr($tietue,11,13)."</th></tr>";
+
 				if (substr($tietue,24,1) == '1') {
-					echo "<tr><th colspan='colspan'>" . t("Talletuksen keskisaldo") . " " . substr($tietue,25,1) . substr($tietue,26,18) / 100 . "</th></tr>";
+					echo "<tr><th colspan='colspan'>".t("Talletuksen keskisaldo")." ".(substr($tietue,25,1).substr($tietue,26,18) / 100)."</th></tr>";
 				}
 				if (substr($tietue,44,1) == '1') {
-					echo "<tr><th colspan='$colspan'>" . t("Talletuskorko") . " " . substr($tietue,45,7) / 1000 . "</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Talletuskorko")." ".(substr($tietue,45,7) / 1000)."</th></tr>";
 				}
 				if (substr($tietue,52,1) == '1') {
-					echo "<tr><th colspan='$colspan'>" . t("Luoton keskisaldo") . " " . " " . substr($tietue,53,1) . substr($tietue,54,18) / 100 . "</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Luoton keskisaldo")." ".(substr($tietue,53,1).substr($tietue,54,18) / 100)."</th></tr>";
 				}
 				if (substr($tietue,72,1) == '1') {
-					echo "<tr><th colspan='$colspan'>" . t("Luottokorko") . " " . substr($tietue,73,7) / 1000 . "</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Luottokorko")." ".(substr($tietue,73,7) / 1000)."</th></tr>";
 				}
 				if (substr($tietue,80,1) == '1') {
-					echo "<tr><th colspan='$colspan'>" . t("Limiitinkäyttöaste") . " " . substr($tietue,81,7) / 1000  . "</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Limiitinkäyttöaste")." ".(substr($tietue,81,7) / 1000)."</th></tr>";
 				}
 				if (substr($tietue,88,1) == '1') {
-					echo "<tr><th colspan='$colspan'>" . t("Pysyväsaldo") . " " . substr($tietue,89,1) . substr($tietue,90,18) / 100 . "</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Pysyväsaldo")." ".(substr($tietue,89,1).substr($tietue,90,18) / 100)."</th></tr>";
 				}
 				if (substr($tietue,108,1) == '1') {
-					echo "<tr><th colspan='$colspan'>" . t("Talletusviitekorko") . " '" . substr($tietue,109,35) . " " . substr($tietue,144,7) / 1000 . "</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Talletusviitekorko")." ".substr($tietue,109,35)." ".(substr($tietue,144,7) / 1000)."</th></tr>";
 				}
 				if (substr($tietue,151,1) == '1') {
-					echo "<tr><th colspan='$colspan'>" . t("Luottoviitekorko") . " '" . substr($tietue,152,35) . " " . substr($tietue,187,7) / 1000 . "</th></tr>";
+					echo "<tr><th colspan='$colspan'>".t("Luottoviitekorko")." ".substr($tietue,152,35)." ".(substr($tietue,187,7) / 1000)."</th></tr>";
 				}
 			}
 			else {
 				echo "<tr><td colspan='$colspan'>";
-				echo t("Tietue T60 ei ole tunnistettu pankkiryhmälle").": ". substr($tietue,6,3) . "</td></tr>";
+				echo t("Tietue T60 ei ole tunnistettu pankkiryhmälle").": ". substr($tietue,6,3)."</td></tr>";
+			}
+			break;
+		case 'T70':
+			if ($silent == "") { // Tietue sisältää tiliotteeseen liittyviä tiedotteita
+				echo "<tr><td class='back'></td></tr>";
+
+				echo "<tr>";
+
+				if ($tee == 'S') echo "<td></td>";
+
+				 echo "<td colspan='6'>". substr($tietue,9) ."</td>";
 			}
 			break;
 		case '$$E':

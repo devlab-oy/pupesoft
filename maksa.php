@@ -7,7 +7,7 @@
 	require ("inc/tilinumero.inc");
 
 	js_popup();
-	
+
 	echo "<font class='head'>".t("Laskujen maksatus")."</font><hr>";
 
 	if (count($_POST) == 0) {
@@ -553,7 +553,11 @@
 
 		while ($tiliointirow = mysql_fetch_assoc($result)) {
 
-			$query = "SELECT maksulimitti FROM yriti WHERE yhtio='$kukarow[yhtio]' and tunnus='$oltilrow[tunnus]' and yriti.kaytossa = ''";
+			$query = "	SELECT maksulimitti, tilinylitys
+						FROM yriti
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tunnus   = '$oltilrow[tunnus]'
+						and kaytossa = ''";
 			$yrires = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($yrires) != 1) {
@@ -563,11 +567,14 @@
 				exit;
 			}
 
-			$mayritirow=mysql_fetch_array ($yrires);
+			$mayritirow = mysql_fetch_array($yrires);
 
-			if ($mayritirow['maksulimitti'] < $tiliointirow['summa']) {
+			if ($mayritirow['tilinylitys'] == "" and $mayritirow['maksulimitti'] < $tiliointirow['summa']) {
 				echo "<br><font class='error'>".t("Maksutilin limitti ylittyi! Laskujen maksu keskeytettiin")."</font><br><br>";
 				break;
+			}
+			elseif ($mayritirow['tilinylitys'] != "" and $mayritirow['maksulimitti'] < $tiliointirow['summa']) {
+				echo "<br><font class='error'>".t("HUOM: Maksutilin limitti ylittyi! (Tilinylitys sallittu)")."</font><br><br>";
 			}
 
 			$query = "	UPDATE lasku set
@@ -578,7 +585,9 @@
 						tila = 'P',
 						alatila = if(kapvm >= curdate(), 'K', ''),
 						olmapvm = if(kapvm >= curdate() and kapvm < erpcm, kapvm, if(erpcm >= curdate(), erpcm, curdate()))
-						WHERE tunnus='$tiliointirow[tunnus]' and yhtio = '$kukarow[yhtio]' and tila='M'";
+						WHERE tunnus='$tiliointirow[tunnus]'
+						and yhtio = '$kukarow[yhtio]'
+						and tila='M'";
 			$updresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_affected_rows() != 1) { // Jotain meni pieleen
@@ -590,7 +599,8 @@
 
 			$query = "	UPDATE yriti set
 						maksulimitti = maksulimitti - $tiliointirow[summa]
-						WHERE tunnus = '$oltilrow[0]' and yhtio = '$kukarow[yhtio]'";
+						WHERE tunnus = '$oltilrow[0]'
+						and yhtio = '$kukarow[yhtio]'";
 			$updresult = mysql_query($query) or pupe_error($query);
 		}
 
@@ -650,12 +660,12 @@
 
 		echo "<font class='message'>".t("Valitse maksutili")."</font><hr>";
 
-		$query = "	SELECT tunnus, concat(nimi, ' (', tilino, ')') tili, maksulimitti, valkoodi
+		$query = "	SELECT tunnus, concat(nimi, ' (', tilino, ')') tili, maksulimitti, tilinylitys, valkoodi
 	               	FROM yriti
-					WHERE yriti.yhtio = '$kukarow[yhtio]'
-					and yriti.maksulimitti > 0
-					and yriti.factoring = ''
-					and yriti.kaytossa = ''";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and (maksulimitti > 0 or tilinylitys != '')
+					and factoring = ''
+					and kaytossa = ''";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -677,7 +687,11 @@
 		while ($yritirow = mysql_fetch_array ($result)) {
 			echo "<tr>";
 			echo "<td>$yritirow[tili]</td>";
-			echo "<td align='right'>$yritirow[maksulimitti]</td>";
+			
+			echo "<td align='right'>$yritirow[maksulimitti]";
+			if ($yritirow["tilinylitys"] != "") echo " ".t("Tilinylitys sallittu")."</font>";
+			echo "</td>";
+
 			echo "<td>$yritirow[valkoodi]</td>";
 			echo "<td><input type='radio' name='oltili' value='$yritirow[tunnus]'></td>";
 			echo "</tr>";
@@ -693,7 +707,7 @@
 	else {
 		// eli näytetään tili jolta maksetaan ja sen saldo
 
-		$query = "	SELECT yriti.tunnus, yriti.nimi, yriti.maksulimitti, yriti.valkoodi, round(yriti.maksulimitti * valuu.kurssi, 2) maksulimitti_koti
+		$query = "	SELECT yriti.tunnus, yriti.nimi, yriti.maksulimitti, yriti.tilinylitys, yriti.valkoodi, round(yriti.maksulimitti * valuu.kurssi, 2) maksulimitti_koti
 				 	FROM yriti
 					JOIN valuu ON (valuu.yhtio = yriti.yhtio and valuu.nimi = yriti.valkoodi)
 				 	WHERE yriti.yhtio = '$kukarow[yhtio]'
@@ -725,7 +739,18 @@
 
 		echo "<tr>";
 		echo "<td valign='top'>$yritirow[nimi]</td>";
-		echo "<td valign='top' align='right'>$yritirow[maksulimitti] $yritirow[valkoodi]$maksulimiittikoti</td>";
+		
+		$fontlisa1 = "";
+		$fontlisa2 = "";
+		
+		if ($yritirow["maksulimitti"] <= 0) {
+			$fontlisa1 = "<font class='error'>";
+			$fontlisa2 = "</font>";
+		}
+		
+		echo "<td valign='top' align='right'>$fontlisa1$yritirow[maksulimitti] $yritirow[valkoodi]$maksulimiittikoti";
+		if ($yritirow["tilinylitys"] != "") echo " (".t("Tilinylitys sallittu").")";
+		echo "$fontlisa2</td>";
 		echo "<td valign='top'>";
 		echo "<form action = 'maksa.php' method='post'>";
 		echo "<input type='hidden' name = 'tee' value='X'>";
@@ -749,17 +774,18 @@
 
 		echo "<td valign='top' align='right'>$sumrow[0] $yhtiorow[valkoodi] ($sumrow[2])";
 
-		if ($sumrow[0] > 0 and $yritirow['maksulimitti'] >= $sumrow[0]) {
+		if ($sumrow[0] > 0 and ($yritirow["tilinylitys"] != "" or $yritirow['maksulimitti'] >= $sumrow[0])) {
 			echo "<form action = 'maksa.php' method='post'>
 				<input type='hidden' name = 'tee' value='NK'>
 				<input type='hidden' name = 'tili' value='$oltilrow[0]'>
 				<input type='Submit' value='".t('Poimi kaikki erääntyneet')."'>
 				</form>";
 		}
+
 		echo "</td>";
 		echo "<td valign='top' align='right'>$sumrow[1] $yhtiorow[valkoodi] ($sumrow[3])";
 
-		if ($sumrow[1] > 0 and $yritirow['maksulimitti'] >= $sumrow[1]) {
+		if ($sumrow[1] > 0 and ($yritirow["tilinylitys"] != "" or $yritirow['maksulimitti'] >= $sumrow[1])) {
 			echo "<form action = 'maksa.php' method='post'>
 				<input type='hidden' name = 'tee' value='NT'>
 				<input type='hidden' name = 'tili' value='$oltilrow[0]'>
@@ -1005,14 +1031,14 @@
 		 	echo "<br><font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font><br>";
 		}
 		else {
-			
+
 			pupe_DataTables($pupe_DataTables, 7, 11);
-			
+
 			// Näytetään valitut laskut
 			echo "<br><font class='message'>".t("Maksuvalmiit laskut")."</font><hr>";
 
 			echo "<table class='display' id='$pupe_DataTables'>";
-			
+
 			echo "<thead>
 					<tr>
 					<th valign='top'>".t("Nimi")."</th>
@@ -1039,13 +1065,13 @@
 					<td></td>
 					<td></td>
 					<td class='back'></td>
-					</tr>										
+					</tr>
 				</thead>";
 
 			$dataseek = 0;
-			
+
 			echo "<tbody>";
-			
+
 			while ($trow = mysql_fetch_array ($result)) {
 
 		        echo "<tr class='aktiivi'>";
@@ -1126,9 +1152,9 @@
 					echo "<div id='div_$trow[tunnus]' class='popup'>";
 					printf(t("Lasku on jaettu %s osaan!"), mysql_num_rows($jaetutres));
 					echo "<br>".t("Alkuperäinen summa")." $trow[arvo] $trow[valkoodi]<br>";
-					
+
 					$osa = 1;
-					
+
 					while ($jaetutrow = mysql_fetch_array ($jaetutres)) {
 						echo "$osa: $jaetutrow[summa] $jaetutrow[valkoodi]<br>";
 						$osa++;
@@ -1151,8 +1177,8 @@
 				echo "</td>";
 
 				// Ok, mutta onko meillä varaa makssa kyseinen lasku???
-				if ($trow["ysumma"] <= $yritirow[2]) {
-					
+				if ($yritirow["tilinylitys"] != "" or $trow["ysumma"] <= $yritirow["maksulimitti"]) {
+
 					//Kikkaillaan jotta saadda seuraavan laskun tunnus
 					if ($dataseek < mysql_num_rows($result)-1) {
 						$kikkarow = mysql_fetch_array($result);
@@ -1165,7 +1191,7 @@
 
 					echo "<form action = 'maksa.php$kikkalisa' method='post'>";
 					echo "<td valign='top' nowrap>";
-					
+
 					$query = "	SELECT maksukielto
 								FROM toimi
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -1217,7 +1243,7 @@
 						echo t("Älä lähetä pankkiin");
 						echo "<br>";
 					}
-										
+
 					echo "</td>";
 					echo "</form>";
 
@@ -1253,15 +1279,15 @@
 					// ei ollutkaan varaa!!
 					echo "<td></td><td valign='top'><font class='error'>".t("Tilin limitti ei riitä")."!</font></td><td class='back'></td>";
 				}
-				
+
 				echo "</tr>";
 
 				$dataseek++;
 			}
-			
-			echo "</tbody>";									
+
+			echo "</tbody>";
 			echo "</table>";
-			
+
 			echo "<br><font class='message'>".t("Haetut yhteensä")."</font><hr>";
 
 			echo "<table>";
@@ -1275,7 +1301,7 @@
 			echo "</table>";
 
 			// jos limiitti riittää niin annetaan mahdollisuus poimia kaikki
-			if ($yritirow['maksulimitti_koti'] >= $summa) {
+			if ($yritirow["tilinylitys"] != "" or $yritirow['maksulimitti_koti'] >= $summa) {
 				echo "<br><form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name = 'tili' value='$tili'>
 					<input type='hidden' name = 'tee' value='NV'>
@@ -1398,7 +1424,7 @@
 		echo "</form>";
 
 		echo "<br><font class='message'>".t("Poimitut laskut")."</font><hr>";
-		
+
 		$query = "	SELECT lasku.tunnus
 					FROM lasku, valuu, yriti
 					WHERE lasku.yhtio 		= '$kukarow[yhtio]'
@@ -1410,7 +1436,7 @@
 					and lasku.valkoodi 		= valuu.nimi
 					and lasku.maksaja 		= '$kukarow[kuka]'";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		echo "<table>";
 		echo "	<tr><th>".t("Poimitut laskut")."</th>
 				<td> ".mysql_num_rows($result)." ".t("laskua poimittu")."</td>

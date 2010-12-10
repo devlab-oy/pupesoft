@@ -173,13 +173,35 @@
 						FROM tili
 						WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
 			$vresult = mysql_query($query) or pupe_error($query);
+
 			if (mysql_num_rows($vresult) == 1) {
-				$vrow=mysql_fetch_array($vresult);
-				$ulos .= " " . $vrow[nimi] . "</td>";
+				$vrow = mysql_fetch_array($vresult);
+				$ulos .= " $vrow[nimi]</td>";
 				$jatko = 0;
 			}
 		}
 	}
+
+	if	(mysql_field_name($result, $i) == "tilinylitys") {
+		$ulos  = "<td><select name='$nimi'>";
+
+		$chk1 = '';
+		$chk2 = '';
+
+		if ($trow[$i] == "") {
+			$chk1 = 'selected';
+		}
+		else {
+			$chk2 = 'selected';
+		}
+
+		$ulos .= "<option value=''  $chk1>".t("Tilinylitys ei sallittu")."</option>";
+		$ulos .= "<option value='o' $chk2>".t("Tilinylitys sallittu")."</option>";
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 
 	if (mysql_field_name($result, $i) == "siirtoavain" or
 		mysql_field_name($result, $i) == "kasukupolvi" or

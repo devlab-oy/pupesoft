@@ -1366,6 +1366,34 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							$funktio($t, $i, $result, $tunnus, &$virhe, $tarkrow);
 						}
 
+						if ($tassafailissa) {
+							
+							$tarkista_sarake = mysql_field_name($result, $i);
+							
+							$query = "	SELECT *
+										FROM avainsana
+										WHERE yhtio = '$kukarow[yhtio]'
+										and laji = 'MYSQLALIAS'
+										and selite = '$table_mysql.$tarkista_sarake'";
+							$al_res = mysql_query($query) or pupe_error($query);
+							$pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
+							
+							if (mysql_num_rows($al_res) != 0 and $pakollisuuden_tarkistus_rivi['selitetark_3'] == "PAKOLLINEN") {
+
+								if (mysql_field_type($result, $i) == 'real') {
+									$tarkistustieto = (float) str_replace(",", ".", $t[$i]);
+								}
+								else {
+									$tarkistustieto = trim($t[$i]);
+								}
+
+								if ($tarkistustieto == "" or $tarkistustieto == 0) {
+									$virhe[$i] .= t("Tieto on pakollinen")."!";
+									$errori = 1;
+								}
+							}
+						}
+
 						// Ignoorataan virhe jos se ei koske tässä failissa olutta saraketta
 						if ($tassafailissa and $virhe[$i] != "") {
 							switch ($table_mysql) {

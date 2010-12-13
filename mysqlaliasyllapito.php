@@ -30,6 +30,12 @@
 			
 			if ($mysqlaliasbox[$al_nimi] != "" or trim($mysqlalias[$al_nimi]) != "") {
 				
+				$pakollisuus = "";
+				
+				if ($mysqlaliaspakollisuus[$al_nimi] != "") {
+					$pakollisuus = "PAKOLLINEN";
+				}
+				
 				$xotsikko = str_replace("(BR)", "<br>", trim($mysqlalias[$al_nimi]));
 				
 				$query = "	INSERT INTO avainsana
@@ -37,7 +43,8 @@
 							laji			= 'MYSQLALIAS',
 							selite			= '$xtaulu.$al_nimi',
 							selitetark 		= '$xotsikko',
-							selitetark_2 	= '$xalias_set'";
+							selitetark_2 	= '$xalias_set',
+							selitetark_3 	= '$pakollisuus'";
 				$al_res = mysql_query($query) or pupe_error($query);				
 			}
 		}
@@ -165,6 +172,13 @@
 		
 		echo "<table><tr><td class='back' valign='top'>";
 		echo "<table>";
+		echo "<tr>";
+		echo "<th>Sarakkeen nimi</th>";
+		echo "<th>Näkyvyys</th>";
+		echo "<th>Pakollisuus</th>";
+		echo "<th>Seliteteksti</th>";
+		echo "<th>Esimerkkejä</th>";
+		echo "</tr>";
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
 
@@ -217,6 +231,13 @@
 
 				$otsikko = str_replace("<br>", "(BR)", $al_row["selitetark"]);				
 				$box = "CHECKED";
+				
+				if ($al_row['selitetark_3'] == 'PAKOLLINEN') {
+					$pakollisuusbox = "CHECKED";
+				}
+				else {
+					$pakollisuusbox = "";
+				}
 			}
 
 			// $tyyppi --> 0 riviä ei näytetä ollenkaan
@@ -232,6 +253,7 @@
 				echo "<th align='left'>".mysql_field_name($result, $i)."</th>";
 				
 				echo "<th><input type='checkbox' name='mysqlaliasbox[".mysql_field_name($result, $i)."]' $box></th>";
+				echo "<th><input type='checkbox' name='mysqlaliaspakollisuus[".mysql_field_name($result, $i)."]' $pakollisuusbox></th>";
 				
 				echo "<th align='left'><input type='text' size='30' name='mysqlalias[".mysql_field_name($result, $i)."]' value='$otsikko'></th>";
 			}

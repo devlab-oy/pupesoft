@@ -273,6 +273,7 @@
 						and selite = '$toim.$al_nimi'
 						$al_lisa";
 			$al_res = mysql_query($query) or pupe_error($query);
+			$pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
 
 			if (mysql_num_rows($al_res) == 0 and $rajattu_nakyma != '' and isset($t[$i])) {
 				$virhe[$i] = t("Sinulla ei ole oikeutta p‰ivitt‰‰ t‰t‰ kentt‰‰");
@@ -293,6 +294,21 @@
 
 			if ($virhe[$i] != "") {
 				$errori = 1;
+			}
+
+			if (mysql_num_rows($al_res) != 0 and $pakollisuuden_tarkistus_rivi['selitetark_3'] == "PAKOLLINEN") {
+
+				if (mysql_field_type($result, $i) == 'real') {
+					$tarkistustieto = (float) str_replace(",", ".", $t[$i]);
+				}
+				else {
+					$tarkistustieto = trim($t[$i]);
+				}
+
+				if ($tarkistustieto == "" or $tarkistustieto == 0) {
+					$virhe[$i] .= t("Tieto on pakollinen")."!";
+					$errori = 1;
+				}
 			}
 
 			//	Tarkastammeko liitetiedoston?

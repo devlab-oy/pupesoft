@@ -249,6 +249,10 @@
 				'$hyvak3',
 				'$hyvak4',
 				'$hyvak5',
+				'$kukarow[kuka]',
+				now(),
+				'',
+				'', 
 				'')";
 		$result = mysql_query($query) or pupe_error($query);
 	}

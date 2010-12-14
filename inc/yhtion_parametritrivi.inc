@@ -40,9 +40,13 @@
 		$sel1 = "";
 		$sel2 = "";
 		$sel3 = "";
-
+		$sel4 = "";
+		
 		if ($trow[$i] == 'iPost') {
 			$sel3 = "selected";
+		}
+		elseif ($trow[$i] == 'apix') {
+			$sel4 = "selected";
 		}
 		elseif ($trow[$i] == 'finvoice') {
 			$sel2 = "selected";
@@ -51,9 +55,10 @@
 			$sel1 = "selected";
 		}
 
-		$ulos .= "<option value = '' $sel1>".t("Pupevoice")."";
-		$ulos .= "<option value = 'finvoice' $sel2>".t("Finvoice")."";
-		$ulos .= "<option value = 'iPost' $sel3>".t("Finvoice iPost")."";
+		$ulos .= "<option value = '' $sel1>".t("Pupevoice");
+		$ulos .= "<option value = 'finvoice' $sel2>".t("Finvoice");
+		$ulos .= "<option value = 'iPost' $sel3>".t("Finvoice iPost");
+		$ulos .= "<option value = 'apix' $sel4>".t("Apix-verkkolaskut");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

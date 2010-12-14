@@ -154,7 +154,7 @@ if (!function_exists("lopetus")) {
 					if (strrpos($lopetus, "#") !== FALSE) {
 
 						preg_match("/(#.*?)[&\?\/$]/", $lopetus, $ankkurimatchi);
-						
+
 						$lopetus = str_replace($ankkurimatchi[1], "", $lopetus).$ankkurimatchi[1];
 					}
 				}
@@ -8757,14 +8757,14 @@ if (!function_exists("tulosta_logo_pdf")) {
 
 		unset($data);
 
-		if ((int) $apu_yhtiorow["lasku_logo"] > 0) {
+		if (isset($apu_yhtiorow["lasku_logo"]) and (int) $apu_yhtiorow["lasku_logo"] > 0) {
 			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
 			$isizelogo[0] = $liite["image_width"];
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif ($apu_yhtiorow["lasku_logo"] != "" and file_exists($apu_yhtiorow["lasku_logo"])) {
+		elseif (isset($apu_yhtiorow["lasku_logo"]) and $apu_yhtiorow["lasku_logo"] != "" and file_exists($apu_yhtiorow["lasku_logo"])) {
 			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
@@ -8798,7 +8798,13 @@ if (!function_exists("tulosta_logo_pdf")) {
 					$lasku_logo_positio_x = 20;
 
 					if ($yhtiorow["lasku_logo_positio"] != "") {
-						list($llp_y, $llp_x) = explode("x", trim($yhtiorow["lasku_logo_positio"]));
+						if (strpos($yhtiorow["lasku_logo_positio"], "x") !== FALSE) {
+							list($llp_y, $llp_x) = explode("x", trim($yhtiorow["lasku_logo_positio"]));
+						}
+						else {
+							$llp_y = trim($yhtiorow["lasku_logo_positio"]);
+							$llp_x = 0;
+						}
 
 						if ((int) $llp_y > 0) $lasku_logo_positio_y = (int) $llp_y;
 						if ((int) $llp_x > 0) $lasku_logo_positio_x = (int) $llp_x;

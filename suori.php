@@ -234,12 +234,16 @@
 			}
 
 			//Hoidetaan mahdolliset pyöristykset
-			if ($totkasumma != $laskurow['maksukasumma']) {
+			$heitto = round($totkasumma - $laskurow["maksukasumma"], 2);
+			$heitto_valuutassa = round($totkasumma_valuutassa - $laskurow["maksukasumma_valuutassa"], 2);
+
+			if (abs($heitto) >= 0.01) {
+
 				echo "<font class='message'>".t("Joudun pyöristämään kassa-alennusta")."</font><br>";
 
 				$query = "	UPDATE tiliointi SET
-							summa = summa - $totkasumma + $laskurow[maksukasumma],
-							summa_valuutassa = summa_valuutassa - $totkasumma_valuutassa + $laskurow[maksukasumma_valuutassa]
+							summa = summa + $heitto,
+							summa_valuutassa = summa_valuutassa + $heitto_valuutassa
 							WHERE tunnus = '$isa'
 							and yhtio 	 = '$kukarow[yhtio]'";
 				$xresult = mysql_query($query) or pupe_error($query);

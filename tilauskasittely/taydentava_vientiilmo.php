@@ -33,10 +33,6 @@
 		//atktullauksen funktiot
 		require("taydentava_vientiilmo_atktietue.inc");
 
-		//laskujen tulostuksen funktiot
-		//require('pdflib/phppdflib.class.php');
-		//require("tulosta_lasku.inc");
-
 		$query = "	SELECT *
 					FROM lasku
 					WHERE vienti	= 'K'

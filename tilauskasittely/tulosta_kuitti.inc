@@ -25,13 +25,13 @@ $lask = 1;
 $sivu = 1;
 
 if ($kieli == '') {
-	$kieli = $asiakasrow['kieli'];
+	$kieli = $asiakasrow['kieli']; 
 }
 
 // laskun alku ja loppu functiot...
 if (!function_exists('alku')) {
 	function alku () {
-		global $pdf, $asiakasrow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kutsuja, $kieli, $kateiskuitti;
+		global $pdf, $asiakasrow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kutsuja, $kieli;
 
 		$firstpage = $pdf->new_page("a4");
 		$pdf->enable('template');
@@ -46,9 +46,9 @@ if (!function_exists('alku')) {
 
 		$pdf->draw_text(50, 729, t("Asiakas", $kieli), 			$firstpage, $pieni);
 		$pdf->draw_text(50, 717, $asiakasrow["nimi"], 			$firstpage, $norm);
-		$pdf->draw_text(50, 707, $asiakasrow["osoite"], 			$firstpage, $norm);
+		$pdf->draw_text(50, 707, $asiakasrow["osoite"], 		$firstpage, $norm);
 		$pdf->draw_text(50, 697, $asiakasrow["postino"]." ".$asiakasrow["postitp"], $firstpage, $norm);
-		$pdf->draw_text(50, 687, $asiakasrow["maa"], 				$firstpage, $norm);
+		$pdf->draw_text(50, 687, $asiakasrow["maa"], 			$firstpage, $norm);
 
 		//Oikea sarake
 		$pdf->draw_rectangle(758, 300, 737, 580, 				$firstpage, $rectparam);
@@ -56,7 +56,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 750, t("Maksupäivä", $kieli), 		$firstpage, $pieni);
 		$pdf->draw_text(310, 740, date('Y-m-d'), 				$firstpage, $norm);
 		$pdf->draw_text(430, 750, t("Valuutta", $kieli), 		$firstpage, $pieni);
-		$pdf->draw_text(430, 740, $yhtiorow["valkoodi"], 						$firstpage, $norm);
+		$pdf->draw_text(430, 740, $yhtiorow["valkoodi"], 		$firstpage, $norm);
 
 		$pdf->draw_rectangle(737, 300, 716, 580, 				$firstpage, $rectparam);
 		$pdf->draw_rectangle(737, 420, 716, 580, 				$firstpage, $rectparam);
@@ -69,7 +69,7 @@ if (!function_exists('alku')) {
 		//rivien otsikkotiedot
 		//eka rivi
 		$pdf->draw_text(30,  572, t("Selite", $kieli),			$firstpage, $pieni);
-		$pdf->draw_text(470, 572, t("Summa", $kieli),		$firstpage, $pieni);
+		$pdf->draw_text(470, 572, t("Summa", $kieli),			$firstpage, $pieni);
 
 		return($firstpage);
 	}
@@ -88,7 +88,7 @@ if (!function_exists('rivi')) {
 
 if (!function_exists('loppu')) {
 	function loppu ($firstpage) {
-		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $summa, $arvo, $kutsuja, $kieli, $kassaalet;
+		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $summa, $arvo, $kutsuja, $kieli;
 
 		//yhteensärivi
 		$pdf->draw_rectangle(110, 394, 90, 580,	$firstpage, $rectparam);

@@ -290,6 +290,45 @@
 		$tee = "";
 	}
 
+	if ($tee == 'CLEANTAPAHTUMAT') {
+
+		foreach ($rivitunnus as $tunnus) {
+
+			// haetaan tilausrivi
+			$query = "	SELECT *
+						FROM tapahtuma
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus = '$tunnus'";
+ 			$presult = mysql_query($query) or pupe_error($query);
+			$rivirow = mysql_fetch_array($presult);
+
+			// haetaan oletuspaikka
+			$query = "	SELECT *
+						FROM tuotepaikat
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$rivirow[tuoteno]'
+						and oletus != ''";
+	 		$presult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($presult) == 1) {
+				$paikkarow = mysql_fetch_array($presult);
+				$query = "	UPDATE tapahtuma
+		  					SET hyllyalue = '$paikkarow[hyllyalue]',
+							hyllynro = '$paikkarow[hyllynro]',
+							hyllyvali = '$paikkarow[hyllyvali]',
+							hyllytaso = '$paikkarow[hyllytaso]'
+		 					WHERE yhtio = '$kukarow[yhtio]'
+		 					and tunnus = '$tunnus'";
+		 		$presult = mysql_query($query) or pupe_error($query);
+			}
+			else {
+				echo "Tuotteelle $rivirow[tuoteno] ei löytynyt oletuspaikkaa!<br>";
+			}
+		}
+
+		$tee = "";
+	}
+
 	if ($tee == 'LISTAAOLETUKSET') {
 
 		$query = "	SELECT tuoteno, sum(if(oletus!='', 1, 0)) oletukset
@@ -669,6 +708,58 @@
 
 	}
 
+	if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
+
+		$laskuri = 0;
+
+		// haetaan kaikki tapahtumat, joilla ei ole tuotepaikkaa tai se ei kuulu mihinkään varastoon
+		$query = "	SELECT tapahtuma.tuoteno, varastopaikat.alkuhyllyalue, tapahtuma.tunnus, concat_ws('-', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) paikka, tapahtuma.laadittu, tapahtuma.laji
+					FROM tapahtuma 
+					JOIN tuote on (tuote.yhtio = tapahtuma.yhtio and tuote.tuoteno = tapahtuma.tuoteno and tuote.ei_saldoa = '')
+					LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
+												AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
+												AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0')))					
+					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
+					AND tapahtuma.laji not in ('epäkurantti', 'uusipaikka', 'poistettupaikka')
+					HAVING varastopaikat.alkuhyllyalue IS NULL
+					ORDER BY tapahtuma.laadittu";
+		$tapahtumares = mysql_query($query) or pupe_error($query);
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Tuoteno")."</th>";
+		echo "<th>".t("Laadittu")."</th>";
+		echo "<th>".t("Laji")."</th>";
+		echo "<th>".t("Varastopaikka")."</th>";
+		echo "</tr>";
+
+		echo "<form method='POST' action='$PHP_SELF'>";
+		echo "<input type='hidden' name='tee' value='CLEANTAPAHTUMAT'>";
+
+ 		while ($tapahtumarow = mysql_fetch_array($tapahtumares)) {
+			echo "<input type='hidden' name='rivitunnus[]' value='$tapahtumarow[tunnus]'>";
+			echo "<tr>";
+			echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($tapahtumarow["tuoteno"])."'>$tapahtumarow[tuoteno]</a></td>";
+			echo "<td>$tapahtumarow[laadittu]</td>";
+			echo "<td>$tapahtumarow[laji]</td>";
+			echo "<td>$tapahtumarow[paikka]</td>";
+			echo "</tr>";
+			$laskuri++;
+		}
+
+		echo "</table>";
+
+		if ($laskuri > 0) {
+			echo "<br><input type='submit' value='".t("Päivitä tapahtumille oletuspaikka")."'>";
+		}
+		else {
+			echo t("Yhtään tuotetta ei löytynyt")."!<br><br>";
+			$tee = "";
+		}
+		echo "</form>";
+
+	}
+
 	if ($tee == "") {
 		//Käyttöliittymä
 
@@ -788,6 +879,13 @@
 		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAAVIRHEELLISETRIVIT'>";
 		echo "<tr><th>".t("Listaa tilausrivit joiden tuotepaikkoja ei löydy")."</th><td></td>";
+		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
+		echo "</form>";
+
+		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<tr><td class='back'><br></tr>";
+		echo "<input type='hidden' name='tee' value='LISTAATAPAHTUMATILMANPAIKKAA'>";
+		echo "<tr><th>".t("Listaa tapahtumat, joiden tuotepaikkoja ei löydy")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 

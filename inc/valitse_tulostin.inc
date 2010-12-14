@@ -61,11 +61,6 @@
 
 	echo "<table>";
 
-	if ($toim == "LASKU") {
-		echo "<tr><td>".t("Tulosta laskusta käteiskuitti")."</td><td><input type='checkbox' name='kateiskuitti'></td></tr>";
-		echo "<tr><td>".t("Tulosta kassa-alet")."</td><td><input type='checkbox' name='kassaalet'></td></tr>";
-	}
-
 	$mista = 'asiakas';
 
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {

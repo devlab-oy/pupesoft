@@ -185,6 +185,25 @@ if (!function_exists('finvoice_otsik')) {
 			//tästä lähtee Finvoice koodi
 			fputs($tootfinvoice, "<Finvoice Version=\"1.2\">\r\n");
 
+
+			if ($yhtiorow["verkkolasku_lah"] == "apix") {
+				fputs($tootfinvoice, "<MessageTransmissionDetails>\r\n");
+				fputs($tootfinvoice, "<MessageSenderDetails>\r\n");
+				xml_add("FromIdentifier",			$senderpartyid,							$tootfinvoice);
+				xml_add("FromIntermediator",		$senderintermediator,					$tootfinvoice);
+				fputs($tootfinvoice, "</MessageSenderDetails>\r\n");
+				fputs($tootfinvoice, "<MessageReceiverDetails>\r\n");
+				xml_add("ToIdentifier",				$receiverpartyid,						$tootfinvoice);
+				xml_add("ToIntermediator",			$receiverintermediator,					$tootfinvoice);
+				fputs($tootfinvoice, "</MessageReceiverDetails>\r\n");
+				fputs($tootfinvoice, "<MessageDetails>\r\n");
+				xml_add("MessageIdentifier",		$mid,									$tootfinvoice);
+				xml_add("MessageTimeStamp",			date("Y-m-d")."T".date("H:i:s")."+02",	$tootfinvoice);
+				xml_add("RefToMessageIdentifier",	"",										$tootfinvoice);
+				fputs($tootfinvoice, "</MessageDetails>\r\n");
+				fputs($tootfinvoice, "</MessageTransmissionDetails>\r\n");
+			}
+
 			fputs($tootfinvoice, "<SellerPartyDetails>\r\n");
 			xml_add("SellerPartyIdentifier",				tulosta_ytunnus($yhtiorow['ytunnus'], $y_maa),		$tootfinvoice);
 			#xml_add("SellerPartyIdentifierUrlText",						"", 								$tootfinvoice);
@@ -703,8 +722,14 @@ if (!function_exists('finvoice_lasku_loppu')) {
 			fputs($tootfinvoice, "</EpiPaymentInstructionDetails>\r\n");
 			fputs($tootfinvoice, "</EpiDetails>\r\n");
 
-			#xml_add("InvoiceUrlNameText", 													"", 								$tootfinvoice);
-			#xml_add("InvoiceUrlText", 														"", 								$tootfinvoice);
+			if ($yhtiorow["verkkolasku_lah"] == "apix") {
+				xml_add("InvoiceUrlNameText", 									"Invoice_$lasrow[laskunro]",					$tootfinvoice);
+				xml_add("InvoiceUrlText", 										"file://Apix_invoice_$lasrow[laskunro].pdf",	$tootfinvoice);
+			}
+			else {
+				#xml_add("InvoiceUrlNameText", 												"", 								$tootfinvoice);
+				#xml_add("InvoiceUrlText", 													"", 								$tootfinvoice);
+			}
 
 			fputs($tootfinvoice, "</Finvoice>\r\n");
 		}

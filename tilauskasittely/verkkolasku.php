@@ -113,9 +113,10 @@
 	else {
 
 		//Nollataan muuttujat
-		$tulostettavat = array();
+		$tulostettavat 		 = array();
+		$tulostettavat_apix  = array();
 		$tulostettavat_email = array();
-		$tulos_ulos = "";
+		$tulos_ulos 		 = "";
 
 		if (!isset($silent)) {
 			$silent = "";
@@ -212,7 +213,7 @@
 						$ulos .= "</".substr($joukko,0,$pos).">";
 		            }
 
-					if ($lasrow["chn"] == "112" or $yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
+					if ($lasrow["chn"] == "112" or $yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
 						//	Jos tehdään finvoicea rivinvaihto on \r\n
 						$ulos .= "\r\n";
 					}
@@ -269,6 +270,9 @@
 				$nimiipost = "-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
 				$nimifinvoice = "../dataout/TRANSFER_IPOST".$nimiipost;
 				$nimifinvoice_delivered = "DELIVERED_IPOST".$nimiipost;
+			}
+			elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
+				$nimifinvoice = "/tmp/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
 			}
 			else {
 				$nimifinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
@@ -1592,6 +1596,9 @@
 							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 								finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
 							}
+							elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
+								finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "NOSOAPAPIX");
+							}
 							else {
 								pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);
 							}
@@ -1635,7 +1642,7 @@
 								elseif ($lasrow["chn"] == "112") {
 									finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
 								}
-								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
+								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
 									finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
 								}
 								else {
@@ -1650,7 +1657,7 @@
 							elseif ($lasrow["chn"] == "112") {
 								finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow);
 							}
-							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
+							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
 								finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
 							}
 
@@ -1800,7 +1807,7 @@
 								elseif ($lasrow["chn"] == "112") {
 									finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 								}
-								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
+								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
 									finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 								}
 								else {
@@ -1819,15 +1826,19 @@
 							elseif ($lasrow["chn"] == "112") {
 								finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow);
 							}
-							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
+							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
 								finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
+
+								if ($yhtiorow["verkkolasku_lah"] == "apix") {
+									$tulostettavat_apix[] = $lasrow["tunnus"];
+								}
 							}
 							else {
 								pupevoice_lasku_loppu($tootxml);
 							}
 
 							// Otetaan talteen jokainen laskunumero joka lähetetään jotta voidaan tulostaa paperilaskut
-							$tulostettavat[] = $lasrow["laskunro"];
+							$tulostettavat[] = $lasrow["tunnus"];
 							$lask++;
 						}
 						elseif ($lasrow["sisainen"] != '') {
@@ -1835,7 +1846,7 @@
 
 							// Sisäisiä laskuja ei normaaalisti tuloseta paitsi jos meillä on valittu_tulostin
 							if ($valittu_tulostin != '') {
-								$tulostettavat[] = $lasrow["laskunro"];
+								$tulostettavat[] = $lasrow["tunnus"];
 								$lask++;
 							}
 						}
@@ -1845,7 +1856,7 @@
 							}
 
 							// Käteislaskuja ei lähetetä ulos mutta ne halutaan kuitenkin tulostaa itse
-							$tulostettavat[] = $lasrow["laskunro"];
+							$tulostettavat[] = $lasrow["tunnus"];
 							$lask++;
 						}
 						elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667') {
@@ -1865,11 +1876,11 @@
 
 							// halutaan lähettää lasku suoraan asiakkaalle sähköpostilla..
 							if ($lasrow["chn"] == "666") {
-								$tulostettavat_email[] = $lasrow["laskunro"];
+								$tulostettavat_email[] = $lasrow["tunnus"];
 							}
 
 							// Halutaan tulostaa itse
-							$tulostettavat[] = $lasrow["laskunro"];
+							$tulostettavat[] = $lasrow["tunnus"];
 							$lask++;
 						}
 						elseif ($silent == "") {
@@ -1922,6 +1933,10 @@
 			// jos laskutettiin jotain
 			if ($lask > 0) {
 
+				if (count($tulostettavat_apix) > 0 or count($tulostettavat) > 0) {
+					require_once("tilauskasittely/tulosta_lasku.inc");
+				}
+
 				if ($silent == "" or $silent == "VIENTI") {
 					$tulos_ulos .= t("Luotiin")." $lask ".t("laskua").".<br>\n";
 				}
@@ -1949,6 +1964,79 @@
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}
 				}
+				elseif ($yhtiorow["verkkolasku_lah"] == "apix" and file_exists(realpath($nimifinvoice))) {
+					if ($silent == "" or $silent == "VIENTI") {
+						$tulos_ulos .= "<br><br>\n".t("CURL-siirto APIX Finvoice:")."<br>\n";
+					}
+
+					//siirretaan laskutiedosto operaattorille
+					$url			= "https://test-api.apix.fi/invoices";
+					$transferkey	= $yhtiorow['verkkosala_lah'];
+					$transferid		= $yhtiorow['verkkotunnus_lah'];
+					$software		= "Pupesoft";
+					$version		= "3.0";
+					$timestamp		= gmdate("YmdHis");
+					$apixfinvoice 	= basename($nimifinvoice);
+					$apixzipfile	= "Apix_invoices_$timestamp.zip";
+
+					// Luodaan temppidirikka jonne työnnetään tän kiekan kaikki apixfilet
+					list($usec, $sec) = explode(' ', microtime());
+					mt_srand((float) $sec + ((float) $usec * 100000));
+					$apix_tmpdirnimi = "/tmp/apix-".md5(uniqid(mt_rand(), true));
+
+					if (mkdir($apix_tmpdirnimi)) {
+
+						// Siirretään finvoiceaineisto dirikkaan
+						if (!rename("/tmp/".$apixfinvoice, $apix_tmpdirnimi."/".$apixfinvoice)) {
+							echo "APIX finvoicemove $apixfinvoice feilas!";
+						}
+
+						// Luodaan laskupdf:ät
+						foreach ($tulostettavat_apix as $apixlasku) {
+							list($apixnumero, $apixtmpfile) = tulosta_lasku($apixlasku, $kieli, "VERKKOLASKU_APIX", "", $valittu_tulostin, $valittu_kopio_tulostin);
+
+							// Siirretään faili apixtemppiin
+							if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixnumero.pdf")) {
+								echo "APIX tmpmove Apix_invoice_$apixnumero.pdf feilas!";
+							}
+						}
+
+						// Tehdään apixzippi
+						system("cd $apix_tmpdirnimi; zip $apixzipfile *;");
+
+						$digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
+
+						$dt = substr(hash('sha256', $digest_src), 0, 64);
+
+						$real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
+
+						$data = file_get_contents($apixzipfile);
+
+						$apix_fh  = fopen('php://memory', 'rw');
+
+						fwrite($apix_fh, $data);
+						rewind($apix_fh);
+
+						$ch = curl_init($real_url);
+						curl_setopt($ch, CURLOPT_PUT, true);
+						curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
+						curl_setopt($ch, CURLOPT_INFILESIZE, strlen($data));
+						curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+						curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+						echo "Sending data $apixzipfile to\n$real_url\n";
+						echo "<pre>",htmlentities(curl_exec($ch)),"</pre>";
+						curl_close($ch);
+						fclose($apix_fh);
+					}
+					else {
+						echo "APIX tmpdir teko feilas!";
+					}
+
+					if ($silent == "" or $silent == "VIENTI") {
+						$tulos_ulos .= $tulos_ulos_ftp;
+					}
+				}
 				elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
 					if ($silent == "" or $silent == "VIENTI") {
 						$tulos_ulos .= "<br><br>\n".t("FTP-siirto iPost Finvoice:")."<br>\n";
@@ -1970,9 +2058,6 @@
 					if ($silent == "" or $silent == "VIENTI") {
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}
-				}
-				elseif ($silent == "" and !file_exists($nimifinvoice)) {
-					$tulos_ulos .= t("Verkkolaskutus ei ole käytössä")."!<br>\n";
 				}
 
 				if ($edilask > 0 and $edi_ftphost != '' and file_exists(realpath($nimiedi))) {
@@ -2016,295 +2101,23 @@
 				// jos yhtiöllä on laskuprintteri on määritelty tai halutaan jostain muusta syystä tulostella laskuja paperille
 				if ($yhtiorow['lasku_tulostin'] != 0 or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email) > 0) {
 
-					// Käsin valittu tulostin
-					if ($valittu_tulostin != "") {
-						$yhtiorow['lasku_tulostin'] = $valittu_tulostin;
-					}
-
 					if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan paperilaskuja").":<br>\n";
 
 					foreach ($tulostettavat as $lasku) {
 
 						if ($silent == "") $tulos_ulos .= t("Tulostetaan lasku").": $lasku<br>\n";
 
-						$vientierittelymail = "";
+						$vientierittelymail    = "";
+						$vientierittelykomento = "";
+
+						tulosta_lasku($lasku, $kieli, "VERKKOLASKU", "", $valittu_tulostin, $valittu_kopio_tulostin, $tulostettavat_email, $saatekirje);
 
 						$query = "	SELECT *
 									FROM lasku
-									WHERE tila = 'U'
-									and alatila = 'X'
-									and laskunro = '$lasku'
-									and yhtio = '$kukarow[yhtio]'";
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '$lasku'";
 						$laresult = mysql_query($query) or pupe_error($query);
-						$laskurow = mysql_fetch_array($laresult);
-
-						$asiakas_apu_query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-						$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
-
-						if (mysql_num_rows($asiakas_apu_res) == 1) {
-							$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
-						}
-						else {
-							$asiakas_apu_row = array();
-						}
-
-						if ($kieli != "") {
-							$laskun_kieli = trim(strtoupper($kieli));
-						}
-						elseif (trim($asiakas_apu_row["kieli"]) != "") {
-							$laskun_kieli = trim(strtoupper($asiakas_apu_row["kieli"]));
-						}
-						else {
-							$laskun_kieli = trim(strtoupper($yhtiorow["kieli"]));
-						}
-
-						// jos ei ole valittuna mitään tulostinta eikä haluta lähettää tätä laskua meillilläkään skipataan looppi
-						if ($yhtiorow['lasku_tulostin'] == 0 and $valittu_tulostin == "" and !in_array($laskurow["laskunro"], $tulostettavat_email)) {
-							continue;
-						}
-
-						$otunnus = $laskurow["tunnus"];
-
-						// haetaan maksuehdon tiedot
-						$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
-									from maksuehto
-									left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
-									where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
-						$result = mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($result) == 0) {
-							$masrow = array();
-						}
-						else {
-							$masrow = mysql_fetch_array($result);
-						}
-
-						//maksuehto tekstinä
-						$maksuehto = $masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
-						$kateistyyppi = $masrow["kateinen"];
-
-						$varakieli = $kieli;
-
-						if ($kieli == '') {
-							$kieli = $laskun_kieli;
-						}
-
-						require_once("tulosta_lasku.inc");
-
-						// katotaan miten halutaan sortattavan
-						// haetaan asiakkaan tietojen takaa sorttaustiedot
-						$order_sorttaus = '';
-
-						$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta
-												FROM asiakas
-												WHERE yhtio = '$kukarow[yhtio]'
-												and tunnus = '$laskurow[liitostunnus]'";
-						$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
-
-						if (mysql_num_rows($asiakas_apu_res) == 1) {
-							$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
-							$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"] != "" ? $asiakas_apu_row["laskun_jarjestys"] : $yhtiorow["laskun_jarjestys"]);
-							$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"] != "" ? $asiakas_apu_row["laskun_jarjestys_suunta"] : $yhtiorow["laskun_jarjestys_suunta"];
-						}
-						else {
-							$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
-							$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
-						}
-
-						if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
-						else $pjat_sortlisa = "";
-
-						// haetaan tilauksen kaikki rivit
-						$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys,
-									$sorttauskentta,
-									if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
-									FROM tilausrivi
-									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-									LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-									WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
-									and tilausrivi.yhtio		 = '$kukarow[yhtio]'
-									and tilausrivi.tyyppi		 = 'L'
-									and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-									and tilausrivi.kpl != 0
-									ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
-						$result = mysql_query($query) or pupe_error($query);
-
-						$sivu 	= 1;
-						$summa 	= 0;
-						$arvo 	= 0;
-
-						unset($pdf);
-						unset($page);
-
-						// aloitellaan laskun teko
-						$page[$sivu] = alku();
-
-						$varasto = 0;
-
-						while ($row = mysql_fetch_array($result)) {
-
-							// Rivin toimitusaika
-							if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' and $row["keratty"] == "saldoton") {
-								$row["toimitettuaika"] = $row["toimaika"];
-							}
-							elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
-								$row["toimitettuaika"] = $row["toimaika"];
-							}
-							else {
-								$row["toimitettuaika"] = $row["toimitettuaika"];
-							}
-
-							rivi($page[$sivu]);
-
-							//Tutkitaan mihin printteriin tämän laskun voisi tulostaa
-							if (($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA" or $valittu_tulostin == "AUTOMAAGINEN_VALINTA") and $varasto == 0) {
-								//otetaan varastopaikat talteen
-								$query = "	SELECT *
-											FROM tuote
-											WHERE tuoteno='$row[tuoteno]' and yhtio='$kukarow[yhtio]'";
-								$tresult = mysql_query($query) or pupe_error($query);
-								$tuoterow = mysql_fetch_array($tresult);
-
-								if ($tuoterow["ei_saldoa"] == '') {
-									$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"], "");
-								}
-							}
-						}
-
-						alvierittely ($page[$sivu]);
-
-						$query = "	SELECT kassa_alepros
-									FROM maksuehto
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$laskurow['maksuehto']}'";
-						$maksuehtores = mysql_query($query) or pupe_error($query);
-						$maksuehtorow_kassa_ale = mysql_fetch_assoc($maksuehtores);
-
-						if ($maksuehtorow_kassa_ale['kassa_alepros'] > 0) {
-							alvierittely($page[$sivu], $maksuehtorow_kassa_ale['kassa_alepros']);
-						}
-
-						$kieli = $varakieli;
-
-						//keksitään uudelle failille joku varmasti uniikki nimi:
-						list($usec, $sec) = explode(' ', microtime());
-						mt_srand((float) $sec + ((float) $usec * 100000));
-						$pdffilenimi = "/tmp/Lasku_Ajo-".md5(uniqid(mt_rand(), true)).".pdf";
-
-						//kirjoitetaan pdf faili levylle..
-						$fh = fopen($pdffilenimi, "w");
-						if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-						fclose($fh);
-
-						// jos tämä haluttiin suoraan asiakkaalle sähköpostiin
-						if ($yhtiorow['lasku_tulostin'] == -99 or in_array($laskurow["laskunro"], $tulostettavat_email)) {
-							// generoidaan laskun saatekirje, joka haetaan avainsanoista
-							include_once("inc/generoi_laskun_saate.inc");
-
-							list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
-
-							// Jos asiakkaalla on laskutussähköposti tai jos $yhtiorow['lasku_tulostin'] != -99 niin silloin lasku menee kukarow[email]:iin jos $komento == ""
-							if ($komento != "" or $yhtiorow['lasku_tulostin'] != -99) {
-								// otetaan tämä talteen jotta saadaan vientierittely
-								$vientierittelymail = $komento;
-
-								// lähetetään meili
-								$kutsu = t("Lasku", $kieli)." $lasku";
-								$liite = $pdffilenimi;
-
-								// lähetetään cc aina postittaja osoitteeseen
-								$sahkoposti_cc = $yhtiorow["postittaja_email"];
-
-								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
-							}
-						}
-						else {
-							//haetaan varaston tiedot
-							if ($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA" or $valittu_tulostin == "AUTOMAAGINEN_VALINTA") {
-								if ($varasto != 0) {
-									$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto' order by alkuhyllyalue,alkuhyllynro";
-								}
-								else {
-									$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' order by alkuhyllyalue,alkuhyllynro limit 1";
-								}
-								$prires= mysql_query($query) or pupe_error($query);
-								$prirow= mysql_fetch_array($prires);
-								$yhtiorow['lasku_tulostin'] = $prirow["printteri5"];
-
-								if ($silent == "") $tulos_ulos .= t("Lasku tulostuu varastoon").": $prirow[nimitys]<br>\n";
-							}
-
-							if (isset($valittu_tulostin) and $valittu_tulostin != "AUTOMAAGINEN_VALINTA") {
-								$yhtiorow["lasku_tulostin"] = $valittu_tulostin;
-							}
-
-							$querykieli = "	SELECT *
-											from kirjoittimet
-											where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
-							$kires = mysql_query($querykieli) or pupe_error($querykieli);
-							$kirow = mysql_fetch_array($kires);
-
-							if ($silent == "") $tulos_ulos .= t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
-
-							if ($kirow["komento"] != "email") {
-								// itse print komento...
-								$line = exec("$kirow[komento] $pdffilenimi");
-							}
-							elseif ($kukarow["eposti"] != '') {
-								// lähetetään meili
-								$komento 			= "";
-
-								$kutsu = t("Lasku", $kieli)." $lasku";
-
-								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-									$kutsu .= " ".trim($laskurow["nimi"]);
-								}
-
-								$liite 				= $pdffilenimi;
-								$sahkoposti_cc 		= "";
-								$content_subject 	= "";
-								$content_body 		= "";
-								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
-							}
-
-							if (isset($valittu_kopio_tulostin) and $valittu_kopio_tulostin != '') {
-								$querykieli = "	SELECT *
-												from kirjoittimet
-												where yhtio='$kukarow[yhtio]' and tunnus='$valittu_kopio_tulostin'";
-								$kires = mysql_query($querykieli) or pupe_error($querykieli);
-								$kirow = mysql_fetch_array($kires);
-
-								if ($silent == "") $tulos_ulos .= t("Laskukopio tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
-
-								if ($kirow["komento"] != "email") {
-									// itse print komento...
-									$line = exec("$kirow[komento] $pdffilenimi");
-								}
-								elseif ($kukarow["eposti"] != '') {
-									// lähetetään meili
-									$komento 			= "";
-
-									$kutsu = t("Lasku", $kieli)." $lasku";
-
-									if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-										$kutsu .= " ".trim($laskurow["nimi"]);
-									}
-
-									$liite 				= $pdffilenimi;
-									$sahkoposti_cc 		= "";
-									$content_subject 	= "";
-									$content_body 		= "";
-									include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
-								}
-							}
-						}
-
-						//poistetaan tmp file samantien kuleksimasta...
-						system("rm -f $pdffilenimi");
-
-						unset($pdf);
-						unset($page);
-
+						$laskurow = mysql_fetch_assoc($laresult);
 
 						if ($laskurow["vienti"] == "E" and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
 							$uusiotunnus = $laskurow["tunnus"];
@@ -2314,14 +2127,14 @@
 							//keksitään uudelle failille joku varmasti uniikki nimi:
 							list($usec, $sec) = explode(' ', microtime());
 							mt_srand((float) $sec + ((float) $usec * 100000));
-							$pdffilenimi = "/tmp/Vientierittely_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
+							$pdffilenimi = "/tmp/Vientierittely-".md5(uniqid(mt_rand(), true)).".pdf";
 
 							//kirjoitetaan pdf faili levylle..
 							$fh = fopen($pdffilenimi, "w");
 							if (fwrite($fh, $Xpdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 							fclose($fh);
 
-							if ($kirow["komento"] == 'email' or $vientierittelymail != '') {
+							if ($vientierittelykomento == "email" or $vientierittelymail != "") {
 								// lähetetään meili
 								if ($vientierittelymail != "") {
 									$komento = $vientierittelymail;
@@ -2342,9 +2155,9 @@
 								$content_body 		= "";
 								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
 							}
-							elseif ($kirow["komento"] != '' and $kirow["komento"] != 'edi') {
+							elseif ($vientierittelykomento != '' and $vientierittelykomento != 'edi') {
 								// itse print komento...
-								$line = exec("$kirow[komento] $pdffilenimi");
+								$line = exec("$vientierittelykomento $pdffilenimi");
 							}
 
 							//poistetaan tmp file samantien kuleksimasta...
@@ -2354,28 +2167,6 @@
 
 							unset($Xpdf);
 						}
-
-						// ei exhaustata muistia
-						unset($pdf);
-
-						//PDF parametrit
-						$pdf = new pdffile;
-						$pdf->set_default('margin-top', 	0);
-						$pdf->set_default('margin-bottom', 	0);
-						$pdf->set_default('margin-left', 	0);
-						$pdf->set_default('margin-right', 	0);
-						$rectparam["width"] = 0.3;
-
-						$norm["height"] = 10;
-						$norm["font"] = "Times-Roman";
-
-						$pieni["height"] = 8;
-						$pieni["font"] = "Times-Roman";
-
-						// defaultteja
-						$kala = 540;
-						$lask = 1;
-						$sivu = 1;
 					}
 				}
 			}

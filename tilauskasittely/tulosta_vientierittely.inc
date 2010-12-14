@@ -82,7 +82,6 @@ if ($Xtunnukset2 != "") {
 		echo t("Yhtään tilausriviä ei löytynyt")."!<br>";
 	}
 
-
 	// listan functiot...
 	if (!function_exists('erittely_alku')) {
 		function erittely_alku () {
@@ -95,7 +94,8 @@ if ($Xtunnukset2 != "") {
 
 			//Otsikko
 			//$Xpdf->draw_rectangle(830, 20,  800, 580, $Xfirstpage, $Xrectparam);
-			$Xpdf->draw_text(30,  815, $yhtiorow["nimi"], 			$Xfirstpage);
+			
+			tulosta_logo_pdf($Xpdf, $Xfirstpage, $laskurow);			
 			$Xpdf->draw_text(310, 815, t("Vientierittely", $kieli), $Xfirstpage);
 
 			$Xpdf->draw_text(430, 815, t("Sivu", $kieli)." ".$Xsivu, $Xfirstpage, $Xnorm);

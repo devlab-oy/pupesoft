@@ -88,35 +88,35 @@ if (!function_exists('pupevoice_otsik')) {
 		$asiakasre = mysql_query($asquery) or pupe_error($asquery);
 		$asiakasrow = mysql_fetch_array($asiakasre);
 
-		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],								$tootxml);
-		xml_add("SellerPartyDomicile", 					$y_kotipaikka,										$tootxml);
-		xml_add("SellerPartyVat", 						$y_vatnumero,										$tootxml);
-		xml_add("SellerOrganisationName", 				$y_nimi, 											$tootxml);
-		xml_add("SellerStreetName", 					$y_osoite, 											$tootxml);
-		xml_add("SellerPostCode", 						$y_postino, 										$tootxml);
-		xml_add("SellerTownName", 						$y_postitp, 										$tootxml);
-		xml_add("SellerCountryName", 					$y_maa,												$tootxml);
-		xml_add("SellerPhoneNumber", 					$y_puhelin, 										$tootxml);
-		xml_add("SellerFaxNumber", 						$y_fax, 											$tootxml);
-		xml_add("SellerEmail", 							$y_email, 											$tootxml);
+		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],													$tootxml);
+		xml_add("SellerPartyDomicile", 					$y_kotipaikka,															$tootxml);
+		xml_add("SellerPartyVat", 						tulosta_ytunnus(str_replace("0037", "", $y_vatnumero), $y_maa, "X"),	$tootxml);
+		xml_add("SellerOrganisationName", 				$y_nimi, 																$tootxml);
+		xml_add("SellerStreetName", 					$y_osoite, 																$tootxml);
+		xml_add("SellerPostCode", 						$y_postino, 															$tootxml);
+		xml_add("SellerTownName", 						$y_postitp, 															$tootxml);
+		xml_add("SellerCountryName", 					$y_maa,																	$tootxml);
+		xml_add("SellerPhoneNumber", 					$y_puhelin, 															$tootxml);
+		xml_add("SellerFaxNumber", 						$y_fax, 																$tootxml);
+		xml_add("SellerEmail", 							$y_email, 																$tootxml);
 
-		xml_add("SellerAccountName1", 					$pankkitiedot['pankkinimi1'],						$tootxml);
-		xml_add("SellerAccountID1", 					$pankkitiedot['pankkitili1'],						$tootxml);
-		xml_add("SellerAccountIBAN1", 					str_replace(" ", "", $pankkitiedot["pankkiiban1"]),	$tootxml);
-		xml_add("SellerAccountBIC1", 					$pankkitiedot["pankkiswift1"],						$tootxml);
+		xml_add("SellerAccountName1", 					$pankkitiedot['pankkinimi1'],											$tootxml);
+		xml_add("SellerAccountID1", 					$pankkitiedot['pankkitili1'],											$tootxml);
+		xml_add("SellerAccountIBAN1", 					str_replace(" ", "", $pankkitiedot["pankkiiban1"]),						$tootxml);
+		xml_add("SellerAccountBIC1", 					$pankkitiedot["pankkiswift1"],											$tootxml);
 
-		xml_add("SellerAccountName2", 					$pankkitiedot['pankkinimi2'],						$tootxml);
-		xml_add("SellerAccountID2", 					$pankkitiedot['pankkitili2'],						$tootxml);
-		xml_add("SellerAccountIBAN2", 					str_replace(" ", "", $pankkitiedot["pankkiiban2"]),	$tootxml);
-		xml_add("SellerAccountBIC2", 					$pankkitiedot["pankkiswift2"],						$tootxml);
+		xml_add("SellerAccountName2", 					$pankkitiedot['pankkinimi2'],											$tootxml);
+		xml_add("SellerAccountID2", 					$pankkitiedot['pankkitili2'],											$tootxml);
+		xml_add("SellerAccountIBAN2", 					str_replace(" ", "", $pankkitiedot["pankkiiban2"]),						$tootxml);
+		xml_add("SellerAccountBIC2", 					$pankkitiedot["pankkiswift2"],											$tootxml);
 
-		xml_add("SellerAccountName3", 					$pankkitiedot['pankkinimi3'],						$tootxml);
-		xml_add("SellerAccountID3", 					$pankkitiedot['pankkitili3'],						$tootxml);
-		xml_add("SellerAccountIBAN3", 					str_replace(" ", "", $pankkitiedot["pankkiiban3"]),	$tootxml);
-		xml_add("SellerAccountBIC3", 					$pankkitiedot["pankkiswift3"],						$tootxml);
+		xml_add("SellerAccountName3", 					$pankkitiedot['pankkinimi3'],											$tootxml);
+		xml_add("SellerAccountID3", 					$pankkitiedot['pankkitili3'],											$tootxml);
+		xml_add("SellerAccountIBAN3", 					str_replace(" ", "", $pankkitiedot["pankkiiban3"]),						$tootxml);
+		xml_add("SellerAccountBIC3", 					$pankkitiedot["pankkiswift3"],											$tootxml);
 
-		xml_add("SellerVatRegistrationText", 			t("Alv.Rek"), 										$tootxml);
-		xml_add("SellerContactPerson", 					$myyrow['nimi'],									$tootxml);
+		xml_add("SellerVatRegistrationText", 			t("Alv.Rek"), 															$tootxml);
+		xml_add("SellerContactPerson", 					$myyrow['nimi'],														$tootxml);
 
 		fputs($tootxml, "</SellerPartyInformation>\n");
 		fputs($tootxml, "<InvoiceDetails>\n");

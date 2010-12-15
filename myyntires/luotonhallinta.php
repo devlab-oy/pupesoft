@@ -108,6 +108,9 @@
 	echo "<option value='D' $raja_select[D]>".t("Näytä asiakkaat, joilla on luottoraja, mutta ei myyntiä")."</option>";
 	echo "<option value='E' $raja_select[E]>".t("Näytä asiakkaat, jotka ovat myyntikiellossa")."</option>";
 	echo "<option value='F' $raja_select[F]>".t("Näytä asiakkaat, jotka ovat ylittäneet luottorajan, mutta eivät ole myyntikiellossa")."</option>";
+	echo "<option value='G' $raja_select[G]>".t("Näytä asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin kerran")."</option>";
+	echo "<option value='H' $raja_select[H]>".t("Näytä asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin kaksi kertaa")."</option>";
+	echo "<option value='I' $raja_select[I]>".t("Näytä asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin kolme kertaa")."</option>";
 	echo "<option value='Z' $raja_select[Z]>".t("Näytä kaikki asiakkaat")."</option>";
 	echo "</select></td>";
 	echo "</tr>";
@@ -204,6 +207,12 @@
 		echo "<th>".t("Myynti")." $yhtiorow[valkoodi]</th>";
 		echo "<th>".t("Luottoraja")." $yhtiorow[valkoodi]</th>";
 		echo "<th>".t("Myyntikielto")."</th>";
+		
+		if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
+			echo "<th>".t("Karhukertoja")."</th>";
+			echo "<th>".t("Laskuja")."</th>";
+		}
+		
 		echo "</tr>";
 
 		while ($asiakasrow = mysql_fetch_array($asiakasres)) {
@@ -254,13 +263,59 @@
 				continue;
 			}
 
+			if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
+				
+				if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+					// käsitellään luottorajoja per ytunnus
+					$extraehto = " AND lasku.ytunnus = '$asiakasrow[ytunnus]'";
+				}
+				else {
+					// käsitellään luottorajoja per asiakas
+					$extraehto = " AND lasku.liitostunnus = '$asiakasrow[tunnus]'";
+				}
+			
+				if ($luottorajauksia == 'G') {
+					$having_ehto = " HAVING karhukerrat >= 1 ";
+				}
+				if ($luottorajauksia == 'H') {
+					$having_ehto = " HAVING karhukerrat >= 2 ";
+				}
+				if ($luottorajauksia == 'I') {
+					$having_ehto = " HAVING karhukerrat >= 3 ";
+				}
+				
+				// haetaan uusin karhukierros/karhukerta
+				$query = "	SELECT count(karhu_lasku.ltunnus) as karhukerrat
+							FROM lasku
+							JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
+							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '')
+							WHERE lasku.yhtio = '$kukarow[yhtio]' 
+							AND lasku.tila = 'U' 
+							AND lasku.alatila = 'X'
+							AND lasku.mapvm = '0000-00-00'
+							$extraehto
+							GROUP BY karhu_lasku.ltunnus
+							$having_ehto
+							ORDER BY karhukerrat DESC";
+				$laskures = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($laskures) > 0) {
+					$karhuttu = mysql_fetch_array($laskures);
+					$ulostulo = $karhuttu[0];		
+					$kerrat = mysql_num_rows($laskures);
+				}
+				else {
+					continue;
+				}				
+			}
+			
 			if ($asiakasrow["myyntikielto"] != "") {
 				$chk = "CHECKED";
 			}
 			else {
 				$chk = "";
 			}
-
+				
 			echo "<tr class='aktiivi'>";
 			echo "<td>$asiakasrow[tunniste]</td>";
 			echo "<td>$asiakasrow[nimi]</td>";
@@ -268,6 +323,12 @@
 			echo "<td align='right'>$myyntirow[summa]</td>";
 			echo "<td align='right'><input style='text-align:right' type='text' name='luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]' size='11'></td>";
 			echo "<td align='right'><input type='checkbox' name='myyntikielto[$asiakasrow[ytunnus]]' value='K' $chk></td>";
+			
+			if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
+				echo "<td align='right'>1 - {$ulostulo}</td>";
+				echo "<td align='right'>{$kerrat}</td>";
+			}
+			
 			echo "<td class='back'><font class='error'>".$update_message[$asiakasrow["ytunnus"]]."</font></td>";
 			echo "</tr>";
 

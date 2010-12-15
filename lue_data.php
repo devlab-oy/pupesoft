@@ -91,12 +91,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$taulu = strtolower(trim($taulu));
 
 			// Joinataanko sama taulu monta kertaa?
-			if ((isset($mul_taulut[$taulu."__".$mul_taulas[$taulu]]) and in_array($headers[$i], $mul_taulut[$taulu."__".$mul_taulas[$taulu]])) or (!isset($mul_taulut[$taulu."__".$mul_taulas[$taulu]]) and isset($mul_taulut[$taulu]) and in_array($headers[$i], $mul_taulut[$taulu]))) {
+			if ((isset($mul_taulas[$taulu]) and isset($mul_taulut[$taulu."__".$mul_taulas[$taulu]]) and in_array($headers[$i], $mul_taulut[$taulu."__".$mul_taulas[$taulu]])) or (isset($mul_taulut[$taulu]) and (!isset($mul_taulas[$taulu]) or !isset($mul_taulut[$taulu."__".$mul_taulas[$taulu]])) and in_array($headers[$i], $mul_taulut[$taulu]))) {
 				$mul_taulas[$taulu]++;
 
 				$taulu = $taulu."__".$mul_taulas[$taulu];
 			}
-			elseif (isset($mul_taulut[$taulu."__".$mul_taulas[$taulu]])) {
+			elseif (isset($mul_taulas[$taulu]) and isset($mul_taulut[$taulu."__".$mul_taulas[$taulu]])) {
 				$taulu = $taulu."__".$mul_taulas[$taulu];
 			}
 
@@ -125,7 +125,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$table_tarkenne = substr($taulu, 11);
 		}
 
-		list(, , , , $joinattava) = pakolliset_sarakkeet($taulu);
+		list(, , , , $joinattava, ) = pakolliset_sarakkeet($taulu);
 
 		// Laitetaan aina kaikkiin tauluihin
 		$joinattava["TOIMINTO"] = $table;
@@ -135,8 +135,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 	// Laitetaan jokaisen taulun otsikkorivi kuntoon
 	for ($i = 0; $i < count($headers); $i++) {
-		list($sarake1, $sarake2) = explode(".", $headers[$i]);
-		if ($sarake2 != "") $sarake1 = $sarake2;
+
+		if (strpos($headers[$i], ".") !== FALSE) {
+			list($sarake1, $sarake2) = explode(".", $headers[$i]);
+			if ($sarake2 != "") $sarake1 = $sarake2;
+		}
+		else {
+			$sarake1 = $headers[$i];
+		}
 
 		$sarake1 = strtoupper(trim($sarake1));
 
@@ -144,8 +150,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 		// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
 		foreach ($joinattavat as $taulu => $joinit) {
-			list ($etu, $taka) = explode(".", $headers[$i]);
-			if ($taka == "") $taka = $etu;
+
+			if (strpos($headers[$i], ".") !== FALSE) {
+				list ($etu, $taka) = explode(".", $headers[$i]);
+				if ($taka == "") $taka = $etu;
+			}
+			else {
+				$taka = $headers[$i];
+			}
 
 			if (isset($joinit[$taka]) and (!isset($taulunotsikot[$taulu]) or !in_array($sarake1, $taulunotsikot[$taulu]))) {
 				$taulunotsikot[$taulu][] = $sarake1;
@@ -171,8 +183,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 				// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
 				foreach ($taulunotsikot as $taulu => $joinit) {
-					list ($etu, $taka) = explode(".", $headers[$excej]);
-					if ($taka == "") $taka = $etu;
+
+					if (strpos($headers[$excej], ".") !== FALSE) {
+						list ($etu, $taka) = explode(".", $headers[$excej]);
+						if ($taka == "") $taka = $etu;
+					}
+					else {
+						$taka = $headers[$excej];
+					}
 
 					if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
 						$taulunrivit[$taulu][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
@@ -195,8 +213,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 				// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
 				foreach ($taulunotsikot as $taulu => $joinit) {
-					list ($etu, $taka) = explode(".", $headers[$excej]);
-					if ($taka == "") $taka = $etu;
+
+					if (strpos($headers[$excej], ".") !== FALSE) {
+						list ($etu, $taka) = explode(".", $headers[$excej]);
+						if ($taka == "") $taka = $etu;
+					}
+					else {
+						$taka = $headers[$excej];
+					}
 
 					if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
 						$taulunrivit[$taulu][$excei][] = trim($rivi[$excej]);
@@ -276,7 +300,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			// Pushataan arrayseen kaikki sarakenimet ja tietuetyypit
 			$trows[$table_mysql.".".strtoupper($row[0])] = $row[1];
 
-			$tlengthpit = ereg_replace("[^0-9,]", "", $row[1]);
+			$tlengthpit = preg_replace("/[^0-9,]/", "", $row[1]);
 
 			if (strpos($tlengthpit, ",") !== FALSE) {
 				$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;
@@ -311,7 +335,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 		}
 
 		// Otetaan pakolliset, kielletyt, wherelliset ja eiyhtiota tiedot
-		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, ) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
+		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, , $saakopoistaa) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
 
 		// $trows sisältää kaikki taulun sarakkeet ja tyypit tietokannasta
 		// $taulunotsikot[$taulu] sisältää kaikki sarakkeet saadusta tiedostosta
@@ -342,13 +366,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					}
 
 					if (in_array($column, $kielletyt)) {
-						// katotaan ettei kiellettyjä sarakkkeita muuteta
+						// katotaan ettei kiellettyjä sarakkeita muuteta
 						$viesti .= t("Sarake").": $column ".t("on kielletty sarake")." $table_mysql-".t("taulussa")."!<br>";
 						$kielletty++;
 					}
 
 					if (is_array($wherelliset) and in_array($column, $wherelliset)) {
-						// katotaan että määritellyt where lausekeen ehdot löytyvät
+						// katotaan että määritellyt where lausekkeen ehdot löytyvät
 						$pos = array_search($column, $taulunotsikot[$taulu]);
 						$indeksi_where[$column] = $pos;
 						$wheretarkea++;
@@ -456,12 +480,16 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				$rivi[] = "LISAA";
 			}
 
+			// Rivin toiminto
+			$rivi[$postoiminto] = strtoupper(trim($rivi[$postoiminto]));
+
 			//Sallitaan myös MUOKKAA ja LISÄÄ toiminnot
-			if (strtoupper(trim($rivi[$postoiminto])) == "LISÄÄ") $rivi[$postoiminto] = "LISAA";
-			if (strtoupper(trim($rivi[$postoiminto])) == "MUOKKAA") $rivi[$postoiminto] = "MUUTA";
-			if (strtoupper(trim($rivi[$postoiminto])) == "MUOKKAA/LISÄÄ") $rivi[$postoiminto] = "MUUTA/LISAA";
-			if (strtoupper(trim($rivi[$postoiminto])) == "MUOKKAA/LISAA") $rivi[$postoiminto] = "MUUTA/LISAA";
-			if (strtoupper(trim($rivi[$postoiminto])) == "MUUTA/LISÄÄ") $rivi[$postoiminto] = "MUUTA/LISAA";
+			if ($rivi[$postoiminto] == "LISÄÄ") $rivi[$postoiminto] = "LISAA";
+			if ($rivi[$postoiminto] == "MUOKKAA") $rivi[$postoiminto] = "MUUTA";
+			if ($rivi[$postoiminto] == "MUOKKAA/LISÄÄ") $rivi[$postoiminto] = "MUUTA/LISAA";
+			if ($rivi[$postoiminto] == "MUOKKAA/LISAA") $rivi[$postoiminto] = "MUUTA/LISAA";
+			if ($rivi[$postoiminto] == "MUUTA/LISÄÄ") $rivi[$postoiminto] = "MUUTA/LISAA";
+			if ($rivi[$postoiminto] == "POISTA") $rivi[$postoiminto] = "POISTA";
 
 			//Jos eri where-ehto array on määritelty
 			if (is_array($wherelliset)) {
@@ -503,13 +531,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				elseif ($table_mysql == 'puun_alkio') {
 
 					// voidaan vaan lisätä puun alkioita
-					if (strtolower(trim($rivi[$postoiminto])) != "lisaa") {
+					if ($rivi[$postoiminto] != "LISAA") {
 						$tila = 'ohita';
 					}
 
 					if ($tila != 'ohita' and $taulunotsikot[$taulu][$j] == "PUUN_TUNNUS") {
 
-						// jos ollaan valittu koodi puun_tunnuksen sarakkeeksi, niin haetaan dynaamisesta puusta tunnus koodilla 
+						// jos ollaan valittu koodi puun_tunnuksen sarakkeeksi, niin haetaan dynaamisesta puusta tunnus koodilla
 						if ($dynaamisen_taulun_liitos == 'koodi') {
 
 							$query_x = "	SELECT tunnus
@@ -786,7 +814,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							WHERE $valinta";
 				$fresult = mysql_query($query) or pupe_error($query);
 
-				if (strtoupper(trim($rivi[$postoiminto])) == "MUUTA/LISAA") {
+				if ($rivi[$postoiminto] == "MUUTA/LISAA") {
 					// Muutetaan jos löytyy muuten lisätään!
 					if (mysql_num_rows($fresult) == 0) {
 						$rivi[$postoiminto] = "LISAA";
@@ -795,27 +823,39 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						$rivi[$postoiminto] = "MUUTA";
 					}
 				}
-				elseif (strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and $table_mysql != $table and mysql_num_rows($fresult) != 0) {
+				elseif ($rivi[$postoiminto] == 'LISAA' and $table_mysql != $table and mysql_num_rows($fresult) != 0) {
 					// joinattaviin tauluhin tehdään muuta-operaatio jos rivi löytyy
 					$rivi[$postoiminto] = "MUUTA";
 				}
-				elseif (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and $table_mysql != $table and mysql_num_rows($fresult) == 0) {
+				elseif ($rivi[$postoiminto] == 'MUUTA' and $table_mysql != $table and mysql_num_rows($fresult) == 0) {
 					// joinattaviin tauluhin tehdään lisaa-operaatio jos riviä ei löydy
 					$rivi[$postoiminto] = "LISAA";
 				}
-				elseif (strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and mysql_num_rows($fresult) != 0) {
+				elseif ($rivi[$postoiminto] == 'LISAA' and mysql_num_rows($fresult) != 0) {
 					if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta') {
 						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE:")." ".t("Rivi on jo olemassa, ei voida perustaa uutta!")."</font> $valinta<br>";
 						$tila = 'ohita';
 					}
 				}
-				elseif (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and mysql_num_rows($fresult) == 0) {
+				elseif ($rivi[$postoiminto] == 'MUUTA' and mysql_num_rows($fresult) == 0) {
 					if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta') {
 						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei voida muuttaa, koska sitä ei löytynyt!")."</font> $valinta<br>";
 						$tila = 'ohita';
 					}
 				}
-				elseif (strtoupper(trim($rivi[$postoiminto])) != 'MUUTA' and strtoupper(trim($rivi[$postoiminto])) != 'LISAA') {
+				elseif ($rivi[$postoiminto] == 'POISTA') {
+
+					// Sallitut taulut
+					if (!$saakopoistaa) {
+						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Rivin poisto ei sallittu!")."</font> $valinta<br>";
+						$tila = 'ohita';
+					}
+					elseif (mysql_num_rows($fresult) == 0) {
+						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei voida poistaa, koska sitä ei löytynyt!")."</font> $valinta<br>";
+						$tila = 'ohita';
+					}
+				}
+				elseif ($rivi[$postoiminto] != 'MUUTA' and $rivi[$postoiminto] != 'LISAA') {
 					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei voida käsitellä koska siltä puuttuu toiminto!")."</font> $valinta<br>";
 					$tila = 'ohita';
 				}
@@ -826,7 +866,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 			// lisätään rivi
 			if ($tila != 'ohita') {
-				if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
+				if ($rivi[$postoiminto] == 'LISAA') {
 					if ($eiyhtiota == "") {
 						$query = "INSERT into $table_mysql SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 					}
@@ -835,13 +875,17 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					}
 				}
 
-				if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
+				if ($rivi[$postoiminto] == 'MUUTA') {
 					if ($eiyhtiota == "") {
 						$query = "UPDATE $table_mysql SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
 	      			}
 					elseif ($eiyhtiota == "TRIP") {
 						$query = "UPDATE $table_mysql SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 	      			}
+				}
+
+				if ($rivi[$postoiminto] == 'POISTA') {
+					$query = "DELETE FROM $table_mysql ";
 				}
 
 				foreach ($taulunotsikot[$taulu] as $r => $otsikko) {
@@ -854,7 +898,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					if ($r != $postoiminto) {
 
 						// Avainsanojen perheet kuntoon!
-						if ($table_mysql == 'avainsana' and strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and $rivi[array_search("PERHE", $taulunotsikot[$taulut[$r]])] == "AUTOM") {
+						if ($table_mysql == 'avainsana' and $rivi[$postoiminto] == 'LISAA' and $rivi[array_search("PERHE", $taulunotsikot[$taulut[$r]])] == "AUTOM") {
 
 							$mpquery = "SELECT max(perhe)+1 max
 										FROM avainsana";
@@ -1105,7 +1149,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								$etsitunnus = " SELECT tunnus FROM dynaaminen_puu WHERE yhtio='$kukarow[yhtio]' AND laji='asiakas' AND koodi='$chkoodi'";
 								$etsiresult = mysql_query($etsitunnus) or pupe_error($etsitunnus);
 								$etsirow = mysql_fetch_assoc($etsiresult);
-								$chsegmentti = $etsirow['tunnus'];	
+								$chsegmentti = $etsirow['tunnus'];
 							}
 							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '2' and trim($rivi[$r]) != '') { // 2 tarkoittaa dynaamisen puun TUNNUSTA
 								$chsegmentti = $rivi[$r];
@@ -1164,17 +1208,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						}
 
 						//muutetaan riviä, silloin ei saa päivittää pakollisia kenttiä
-						if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
+						if ($rivi[$postoiminto] == 'MUUTA' and (!in_array($otsikko, $pakolliset) or $table_mysql == 'asiakashinta' or $table_mysql == 'asiakasalennus' or ($table_mysql == "tuotepaikat" and $otsikko == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
 							///* Tässä on kaikki oikeellisuuscheckit *///
-							if ($table_mysql == 'tuotepaikat' and $otsikko == 'SALDO') {
-								if ($rivi[$r] != 0 and $rivi[$r] != '') {
-									$query .= ", $otsikko='$rivi[$r]' ";
-								}
-								elseif ($rivi[$r] == 0) {
-									echo t("Virhe rivillä").": $rivilaskuri ".t("Saldoa ei saa nollata!")."<br>";
-								}
-							}
-							elseif ($table_mysql == 'asiakashinta' and $otsikko == 'HINTA') {
+							if ($table_mysql == 'asiakashinta' and $otsikko == 'HINTA') {
 								if ($rivi[$r] != 0 and $rivi[$r] != '') {
 									$query .= ", $otsikko = '$rivi[$r]' ";
 								}
@@ -1201,7 +1237,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							elseif ($table_mysql=='tuotepaikat' and $otsikko == 'OLETUS') {
 								//echo t("Virhe rivillä").": $rivilaskuri Oletusta ei voi muuttaa!<br>";
 							}
-									else {
+							else {
 								if ($eilisataeikamuuteta == "") {
 									$query .= ", $otsikko = '$rivi[$r]' ";
 								}
@@ -1209,7 +1245,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						}
 
 						//lisätään rivi
-						if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
+						if ($rivi[$postoiminto] == 'LISAA') {
 							if ($table_mysql == 'tuotepaikat' and $otsikko == 'OLETUS' and $rivi[$r] == 'XVAIHDA') {
 								//vaihdetaan tämä oletukseksi
 								$rivi[$r] = "X"; // pakotetaan oletus
@@ -1275,7 +1311,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					if ($chmaxkpl != '') {
 						$and .= " and maxkpl = '$chmaxkpl'";
 					}
-					
+
 					$and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
 				}
 
@@ -1283,7 +1319,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					$query .= " , laji = '{$table_tarkenne}' ";
 				}
 
-				if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
+				if ($rivi[$postoiminto] == 'MUUTA') {
 					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') and $and != "") {
 						$query .= " WHERE yhtio = '$kukarow[yhtio]'";
 						$query .= $and;
@@ -1293,6 +1329,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					}
 
 					$query .= " ORDER BY tunnus";
+				}
+
+				if ($rivi[$postoiminto] == 'POISTA') {
+					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') and $and != "") {
+						$query .= " WHERE yhtio = '$kukarow[yhtio]'";
+						$query .= $and;
+					}
+					else {
+						$query .= " WHERE ".$valinta;
+					}
+
+					$query .= " LIMIT 1 ";
 				}
 
 				//	Tarkastetaan tarkistarivi.incia vastaan..
@@ -1315,18 +1363,17 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					$tarq .= " WHERE ".$valinta;
 				}
 				$result = mysql_query($tarq) or pupe_error($tarq);
-				
-				if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and mysql_num_rows($result) != 1) {
+
+				if ($rivi[$postoiminto] == 'MUUTA' and mysql_num_rows($result) != 1) {
 					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Päivitettävää riviä ei löytynyt")."!</font><br>";
 				}
-				elseif (strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and mysql_num_rows($result) != 0) {
+				elseif ($rivi[$postoiminto] == 'LISAA' and mysql_num_rows($result) != 0) {
 					if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
 						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska Asiakassegmenttikoodia ei löytynyt")."!</font><br>";
 					}
 					else {
 						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska se löytyi jo järjestelmästä")."!</font><br>";
 					}
-					
 				}
 				else {
 					$tarkrow = mysql_fetch_array($result);
@@ -1367,9 +1414,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						}
 
 						if ($tassafailissa) {
-							
+
 							$tarkista_sarake = mysql_field_name($result, $i);
-							
+
 							$query = "	SELECT *
 										FROM avainsana
 										WHERE yhtio = '$kukarow[yhtio]'
@@ -1377,7 +1424,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 										and selite = '$table_mysql.$tarkista_sarake'";
 							$al_res = mysql_query($query) or pupe_error($query);
 							$pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
-							
+
 							if (mysql_num_rows($al_res) != 0 and $pakollisuuden_tarkistus_rivi['selitetark_3'] == "PAKOLLINEN") {
 
 								if (mysql_field_type($result, $i) == 'real') {
@@ -1440,17 +1487,17 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 						// Itse lue_datan päivitysquery
 						$iresult = mysql_query($query) or pupe_error($query);
-						
+
 						// Synkronoidaan
-						if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
+						if ($rivi[$postoiminto] == 'LISAA') {
 							$tunnus = mysql_insert_id();
 						}
 						else {
 							$tunnus = $syncrow["tunnus"];
 						}
-						
+
 						synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
-						
+
 						// tehdään epäkunrattijutut
 						if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois") {
 							require("epakurantti.inc");

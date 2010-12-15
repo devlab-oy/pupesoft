@@ -20,12 +20,12 @@
 		if (!isset($tkausi)) $tkausi = '';
 		if (!isset($ytunnus)) $ytunnus = '';
 		if (!isset($asiakasid)) $asiakasid = '';
-		
+
 		if (isset($tee) and $tee == 'file') {
 			if (isset($mul_osasto) and $mul_osasto != '') $mul_osasto = unserialize(urldecode($mul_osasto));
 			if (isset($mul_try) and $mul_try != '') $mul_try = unserialize(urldecode($mul_try));
 		}
-		
+
 		if (is_array($luvut) and isset($submit_button) and $submit_button == 'Näytä/Tallenna') {
 			$paiv = 0;
 			$lisaa = 0;
@@ -97,9 +97,9 @@
 										muuttaja = '$kukarow[kuka]'";
 							$result = mysql_query($query) or pupe_error($query);
 							$lisaa++;
-				
+
 						}
-						
+
 					}
 				}
 			}
@@ -113,7 +113,7 @@
 			}
 
 			require ("inc/kevyt_toimittajahaku.inc"); // voiskohan ton muuttaa toimittajahauksi ?
-		
+
 			echo "<br />";
 			if (trim($ytunnus) == '') {
 				$submit_button = '';
@@ -159,7 +159,7 @@
 		if (mysql_num_rows($avainsana_result) == 1) { // normaalisti 1
 			$monivalintalaatikot = array('DYNAAMINEN_TUOTE');
 			$monivalintalaatikot_normaali = array();
-		
+
 			require ("tilauskasittely/monivalintalaatikot.inc");
 		}
 
@@ -192,8 +192,6 @@
 		if ($submit_button and is_array($tilikaudetrow)) {
 
 			if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-
-				require ("inc/pakolliset_sarakkeet.inc");
 
 				$path_parts = pathinfo($_FILES['userfile']['name']);
 				$ext = strtoupper($path_parts['extension']);
@@ -294,7 +292,7 @@
 			}
 
 			$query = "	SELECT tunnus toimittaja_tunnus, ytunnus, ytunnus toimittajanro, nimi, nimitark
-			 			#,IF(STRCMP(TRIM(CONCAT(toim_nimi, ' ', toim_nimitark)), TRIM(CONCAT(nimi, ' ', nimitark))) != 0, toim_nimi, '') toim_nimi, 
+			 			#,IF(STRCMP(TRIM(CONCAT(toim_nimi, ' ', toim_nimitark)), TRIM(CONCAT(nimi, ' ', nimitark))) != 0, toim_nimi, '') toim_nimi,
 						#IF(STRCMP(TRIM(CONCAT(toim_nimi, ' ', toim_nimitark)), TRIM(CONCAT(nimi, ' ', nimitark))) != 0, toim_nimitark, '') toim_nimitark
 						FROM toimi
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -374,7 +372,7 @@
 						$xresult = mysql_query($query) or pupe_error($query);
 						//echo $query;
 						$nro = '';
-						
+
 						if (mysql_num_rows($xresult) == 1) {
 							$brow = mysql_fetch_assoc($xresult);
 							$nro = $brow['summa'];
@@ -391,7 +389,7 @@
 				$xx++;
 
 				$excelsarake = 0;
-				$excelrivi++;				
+				$excelrivi++;
 			}
 
 			$workbook->close();

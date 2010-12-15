@@ -111,7 +111,7 @@ class Spreadsheet_Excel_Reader
 
     /**
      * Array of format records found
-     * 
+     *
      * @var array
      * @access public
      */
@@ -254,10 +254,10 @@ class Spreadsheet_Excel_Reader
      * Constructor
      *
      * Some basic initialisation
-     */ 
+     */
     function Spreadsheet_Excel_Reader()
     {
-        $this->_ole =& new OLERead();
+        $this->_ole = new OLERead();
         $this->setUTFEncoder('iconv');
     }
 
@@ -955,13 +955,13 @@ class Spreadsheet_Excel_Reader
     /**
      * Convert the raw Excel date into a human readable format
      *
-     * Dates in Excel are stored as number of seconds from an epoch.  On 
+     * Dates in Excel are stored as number of seconds from an epoch.  On
      * Windows, the epoch is 30/12/1899 and on Mac it's 01/01/1904
      *
      * @access private
      * @param integer The raw Excel value to convert
      * @return array First element is the converted date, the second element is number a unix timestamp
-     */ 
+     */
     function createDate($numValue)
     {
         if ($numValue > 1) {

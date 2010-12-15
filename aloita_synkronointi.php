@@ -36,7 +36,7 @@ if ($tee == "SYNK") {
 
 	require_once("inc/pakolliset_sarakkeet.inc");
 
-	list($pakolliset, $kielletyt, $wherelliset, , ) = pakolliset_sarakkeet($table);
+	list($pakolliset, $kielletyt, $wherelliset, , , ) = pakolliset_sarakkeet($table);
 
 	if(count($wherelliset) == 0 and count($pakolliset) == 0) {
 		echo "VIRHE: Pyydetty‰ taulua $table ei voida synkronoida, sit‰ ei ole m‰‰ritelty!<br>";

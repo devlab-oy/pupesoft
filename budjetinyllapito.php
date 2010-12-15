@@ -251,8 +251,6 @@ else {
 
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
-			require ("inc/pakolliset_sarakkeet.inc");
-
 			$path_parts = pathinfo($_FILES['userfile']['name']);
 			$ext = strtoupper($path_parts['extension']);
 

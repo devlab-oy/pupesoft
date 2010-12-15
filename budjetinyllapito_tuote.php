@@ -122,18 +122,18 @@
 		echo t("Budjettiluvun voi poistaa huutomerkillä (!)"),"<br /><br />";
 
 		$avainsana_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite='Tuote' ");
-		
+
 		if (mysql_num_rows($avainsana_result) == 1) {
 			$monivalintalaatikot = array('DYNAAMINEN_TUOTE');
 			$monivalintalaatikot_normaali = array();
-		
+
 			require ("tilauskasittely/monivalintalaatikot.inc");
 		}
-		
+
 			$monivalintalaatikot = array('OSASTO', 'TRY');
 			$monivalintalaatikot_normaali = array();
 			require ("tilauskasittely/monivalintalaatikot.inc");
-		
+
 
 		if (trim($kaikki_tunnukset) != '') {
 			if (substr($kaikki_tunnukset, -1, 1) == ',') {
@@ -159,8 +159,6 @@
 		if ($submit_button and is_array($tilikaudetrow)) {
 
 			if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
-
-				require ("inc/pakolliset_sarakkeet.inc");
 
 				$path_parts = pathinfo($_FILES['userfile']['name']);
 				$ext = strtoupper($path_parts['extension']);
@@ -346,7 +344,7 @@
 									and try					= '".implode(",", $mul_try)."'";
 						$xresult = mysql_query($query) or pupe_error($query);
 						$nro = '';
-						
+
 						if (mysql_num_rows($xresult) == 1) {
 							$brow = mysql_fetch_assoc($xresult);
 							$nro = $brow['summa'];
@@ -363,7 +361,7 @@
 				$xx++;
 
 				$excelsarake = 0;
-				$excelrivi++;				
+				$excelrivi++;
 			}
 
 			$workbook->close();

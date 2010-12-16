@@ -79,7 +79,7 @@
 		}
 
 		$ulos .= "</select>";
-		$ulos .= " <a href='#' onclick=\"js_open_yllapito('aleryhma','toim=perusalennus');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi ryhmä")."</a></td>";
+		$ulos .= " <a href='#' onclick=\"js_open_yllapito('aleryhma','toim=perusalennus');\"><img src='pics/lullacons/add.png'>".t("Uusi ryhmä")."</a></td>";
 		$jatko = 0;
 	}
 

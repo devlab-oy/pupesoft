@@ -86,7 +86,6 @@
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Yhtiön avainsanat")."'>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TV") 				$ulos .= "<option value='TV' $avain_sel[TV]>								".t("Tilausvahvistus")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TOIMVAHVISTUS")		$ulos .= "<option value='TOIMVAHVISTUS' $avain_sel[TOIMVAHVISTUS]>			".t("Toimitusvahvistus")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "LAHETETYYPPI") 		$ulos .= "<option value='LAHETETYYPPI' $avain_sel[LAHETETYYPPI]>			".t("Lähetetyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KALETAPA") 			$ulos .= "<option value='KALETAPA' $avain_sel[KALETAPA]>					".t("CRM yhteydenottotapa")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "MYSQLALIAS") 		$ulos .= "<option value='MYSQLALIAS' $avain_sel[MYSQLALIAS]>				".t("Tietokantasarakkeen nimialias")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TOIMITUSTAPA_OS") 	$ulos .= "<option value='TOIMITUSTAPA_OS' $avain_sel[TOIMITUSTAPA_OS]>		".t("Toimitustapa ostolle (kuljetus)")."</option>";
@@ -94,14 +93,19 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "ALVULK") 			$ulos .= "<option value='ALVULK' $avain_sel[ALVULK]>						".t("Ulkomaan ALV%")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "ALV") 				$ulos .= "<option value='ALV' $avain_sel[ALV]>								".t("ALV%")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SEURANTA") 			$ulos .= "<option value='SEURANTA' $avain_sel[SEURANTA]>					".t("Tilauksen seurantaluokka")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "pakkaus") 			$ulos .= "<option value='pakkaus' $avain_sel[pakkaus]>						".t("Pakkaus")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TOIMEHTO") 			$ulos .= "<option value='TOIMEHTO' $avain_sel[TOIMEHTO]>					".t("Toimitusehto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HENKILO_OSASTO") 	$ulos .= "<option value='HENKILO_OSASTO' $avain_sel[HENKILO_OSASTO]>		".t("Henkilöosasto")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "RAHTIKIRJA") 		$ulos .= "<option value='RAHTIKIRJA' $avain_sel[RAHTIKIRJA]>				".t("Rahtikirjatyyppi")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSLISTA") 		$ulos .= "<option value='KERAYSLISTA' $avain_sel[KERAYSLISTA]>				".t("Keräyslista")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPAKV") 		$ulos .= "<option value='TOIMTAPAKV' $avain_sel[TOIMTAPAKV]>				".t("Toimitustavan kieliversio")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KVERITTELY") 		$ulos .= "<option value='KVERITTELY' $avain_sel[KVERITTELY]>				".t("Kulunvalvonnan erittely")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KONEENOSA") 		$ulos .= "<option value='KONEENOSA' $avain_sel[KONEENOSA]>					".t("Koneenosa")."</option>";
+		if ($lukitse_laji== "") $ulos .= "</optgroup>";
+
+		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Varaston avainsanat")."'>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSLISTA") 		$ulos .= "<option value='KERAYSLISTA' $avain_sel[KERAYSLISTA]>				".t("Keräyslista")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LAHETETYYPPI") 		$ulos .= "<option value='LAHETETYYPPI' $avain_sel[LAHETETYYPPI]>			".t("Lähetetyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "pakkaus") 			$ulos .= "<option value='pakkaus' $avain_sel[pakkaus]>						".t("Pakkaus / Alusta")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "RAHTIKIRJA") 		$ulos .= "<option value='RAHTIKIRJA' $avain_sel[RAHTIKIRJA]>				".t("Rahtikirjatyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPAKV") 		$ulos .= "<option value='TOIMTAPAKV' $avain_sel[TOIMTAPAKV]>				".t("Toimitustavan kieliversio")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TERMINAALIALUE") 	$ulos .= "<option value='TERMINAALIALUE' $avain_sel[TERMINAALIALUE]>		".t("Varaston terminaalialue")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Työmääräysten avainsanat")."'>";

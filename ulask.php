@@ -273,57 +273,98 @@ if ($tee == 'I') {
 	}
 
 	// muutetaan numeroiksi
-	$tpk += 0;
-	$tpp += 0;
-	$tpv += 0;
-	if ($tpv < 1000) $tpv += 2000;
+	$tpk = (int) $tpk;
+	$tpp = (int) $tpp;
+	$tpv = (int) $tpv;
+	$vpk = (int) $vpk;
+	$vpp = (int) $vpp;
+	$vpv = (int) $vpv;
+
+	if ($tpv < 1000 and $tpv != 0) $tpv += 2000;
+
+	if ($yhtiorow['ostolaskujen_paivays'] == "1") {
+		if ($vpv < 1000 and $vpv != 0) $vpv += 2000;
+	}
 
 	if ((int) $kopioi > 12) {
 		$errormsg .= "<font class='error'>".t("Laskun voi kopioida korkeintaan 12 kertaa")."</font><br>";
 		$tee = 'E';
 	}
 
-	if (!checkdate($tpk, $tpp, $tpv)) {
-		$errormsg .= "<font class='error'>".t("Virheellinen tapahtumapvm")."</font><br>";
+	if ($yhtiorow['ostolaskujen_paivays'] == "1") {
+		if (!checkdate($vpk, $vpp, $vpv)) {
+			$errormsg .= "<font class='error'>".t("Virheellinen laskun p‰iv‰ys")."</font><br>";
+			$tee = 'E';
+		}
+		if (!checkdate($tpk, $tpp, $tpv)) {
+			$errormsg .= "<font class='error'>".t("Virheellinen kirjausp‰iv‰")."</font><br>";
+			$tee = 'E';
+		}
+	}
+	elseif (!checkdate($tpk, $tpp, $tpv)) {
+		$errormsg .= "<font class='error'>".t("Virheellinen laskun p‰iv‰ys")."</font><br>";
 		$tee = 'E';
 	}
-	else {
-		if ($err > 0) {
-			if ($erp > 0) {
-				$errormsg .= "<font class='error'>".t("Kaksi er‰pvm‰‰")."</font><br>";
-				$tee = 'E';
+
+	// jos ollaan syˆtetty relatiivinen er‰p‰iv‰
+	if ($err > 0 and $tee != 'E') {
+		if ($erp > 0) {
+			$errormsg .= "<font class='error'>".t("Kaksi er‰pvm‰‰")."</font><br>";
+			$tee = 'E';
+		}
+		else {
+			if ($yhtiorow['ostolaskujen_paivays'] == "1") {
+				$erp = date("d", mktime(0, 0, 0, $vpk, $vpp+$err, $vpv));
+				$erk = date("m", mktime(0, 0, 0, $vpk, $vpp+$err, $vpv));
+				$erv = date("Y", mktime(0, 0, 0, $vpk, $vpp+$err, $vpv));
+				$err = "";
 			}
 			else {
 				$erp = date("d", mktime(0, 0, 0, $tpk, $tpp+$err, $tpv));
 				$erk = date("m", mktime(0, 0, 0, $tpk, $tpp+$err, $tpv));
 				$erv = date("Y", mktime(0, 0, 0, $tpk, $tpp+$err, $tpv));
-				$err = 0;
+				$err = "";
 			}
 		}
+	}
 
-		if ($kar > 0) {
-			if ($kap > 0) {
-				$errormsg .= "<font class='error'>".t("Kaksi kassa-alepvm‰‰")."</font><br>";
-				$tee = 'E';
+	// ollaan syˆtetty relatiivinen kassa-alennus p‰iv‰
+	if ($kar > 0 and $tee != 'E') {
+		if ($kap > 0) {
+			$errormsg .= "<font class='error'>".t("Kaksi kassa-alepvm‰‰")."</font><br>";
+			$tee = 'E';
+		}
+		else {
+			if ($yhtiorow['ostolaskujen_paivays'] == "1") {
+				$kap = date("d", mktime(0, 0, 0, $vpk, $vpp+$kar, $vpv));
+				$kak = date("m", mktime(0, 0, 0, $vpk, $vpp+$kar, $vpv));
+				$kav = date("Y", mktime(0, 0, 0, $vpk, $vpp+$kar, $vpv));
+				$kar = "";
 			}
 			else {
 				$kap = date("d", mktime(0, 0, 0, $tpk, $tpp+$kar, $tpv));
 				$kak = date("m", mktime(0, 0, 0, $tpk, $tpp+$kar, $tpv));
 				$kav = date("Y", mktime(0, 0, 0, $tpk, $tpp+$kar, $tpv));
-				$kar = 0;
+				$kar = "";
 			}
 		}
 	}
 
 	// muutetaan numeroiksi
-	$erk += 0;
-	$erp += 0;
-	$erv += 0;
-	if ($erv < 1000) $erv += 2000;
+	$erk = (int) $erk;
+	$erp = (int) $erp;
+	$erv = (int) $erv;
+	if ($erv < 1000 and $erv != 0) $erv += 2000;
 
 	if (!checkdate($erk, $erp, $erv)) {
 		$errormsg .= "<font class='error'>".t("Virheellinen er‰pvm")."</font><br>";
 		$tee = 'E';
+
+		if ($erv == 0 and $erk == 0 and $erp == 0) {
+			$erk = "";
+			$erp = "";
+			$erv = "";
+		}
 	}
 
 	if ($kapro != 0) {
@@ -392,8 +433,8 @@ if ($tee == 'I') {
 		$tee = 'E';
 	}
 
-	if (strlen($viite) == 0 and strlen($viesti) == 0) {
-		$errormsg .= "<font class='error'>".t("Anna viite tai viesti")."</font><br>";
+	if (strlen($viite) == 0 and strlen($viesti) == 0 and strlen($toimittajan_laskunumero) == 0) {
+		$errormsg .= "<font class='error'>".t("Anna viite, viesti tai laskunumero")."</font><br>";
 		$tee = 'E';
 	}
 
@@ -567,7 +608,6 @@ if ($tee == 'I') {
 	}
 
 }
-
 
 if ($tee == 'Y') {
 
@@ -918,28 +958,69 @@ if ($tee == 'P' or $tee == 'E') {
 
 	// Kursorin oletuspaikka
 	$formi = 'lasku';
-	$kentta = 'tpp';
+	if ($yhtiorow['ostolaskujen_paivays'] == "1"){
+		$kentta = 'vpp';
+	}
+	else {
+		$kentta = 'tpp';
+	}
 
-	echo "	<table>
-			<tr>
-			<td>".t("Laskun p‰iv‰ys")."</td>
-			<td>
-			<input type='text' name='tpp' maxlength='2' size=2 value='$tpp'>
-			<input type='text' name='tpk' maxlength='2' size=2 value='$tpk'>
-			<input type='text' name='tpv' maxlength='4' size=4 value='$tpv'> ".t("ppkkvvvv")."</td>
-			</tr>";
+	echo "<table>";
 
+	if ($yhtiorow['ostolaskujen_paivays'] == "1") {
+
+		if ($tpp == '') {
+			$tpp = date('d');
+		}
+		if ($tpk == '') {
+			$tpk = date('m');
+		}
+		if ($tpv == '') {
+			$tpv = date('Y');
+		}
+
+		echo "	<tr>";
+		echo "	<td>".t("Laskun p‰iv‰ys")."</td>
+				<td>
+				<input type='text' name='vpp' maxlength='2' size=2 value='$vpp' tabindex='1'>
+				<input type='text' name='vpk' maxlength='2' size=2 value='$vpk' tabindex='2'>
+				<input type='text' name='vpv' maxlength='4' size=4 value='$vpv' tabindex='3'> ".t("ppkkvvvv")."</td>";
+		echo "	</tr>";
+		echo "	<tr>";
+		echo "	<td>".t("Kirjausp‰iv‰")."</td>";
+	}
+	else {
+		echo "	<tr>";
+		echo "	<td>".t("Laskun p‰iv‰ys")."</td>";
+	}
+
+	if ($yhtiorow['ostolaskujen_paivays'] == "1") {
+		echo "	<td>
+				<input type='text' name='tpp' maxlength='2' size=2 value='$tpp' tabindex='-1'>
+				<input type='text' name='tpk' maxlength='2' size=2 value='$tpk' tabindex='-1'>
+				<input type='text' name='tpv' maxlength='4' size=4 value='$tpv' tabindex='-1'> ".t("ppkkvvvv")."</td>";
+
+		echo "	</tr>";
+	}
+	else {
+		echo "	<td>
+				<input type='text' name='tpp' maxlength='2' size=2 value='$tpp' tabindex='1'>
+				<input type='text' name='tpk' maxlength='2' size=2 value='$tpk' tabindex='2'>
+				<input type='text' name='tpv' maxlength='4' size=4 value='$tpv' tabindex='3'> ".t("ppkkvvvv")."</td>";
+
+		echo "	</tr>";
+	}
 	echo "<tr>
-			<td>".t("Er‰pvm")."</td><td><input type='text' name='erp' maxlength='2' size=2 value='$erp'>
-			<input type='text' name='erk' maxlength='2' size=2 value='$erk'>
-			<input type='text' name='erv' maxlength='4' size=4 value='$erv'> ".t("ppkkvvvv tai")."
-			<input type='text' name='err' maxlength='3' size=2 value='$err'> ".t("p‰iv‰‰ tai suoraveloitus")."
-			<input type='checkbox' name='osuoraveloitus' $osuoraveloitus>
+			<td>".t("Er‰pvm")."</td><td><input type='text' name='erp' maxlength='2' size=2 value='$erp' tabindex='4'>
+			<input type='text' name='erk' maxlength='2' size=2 value='$erk' tabindex='5'>
+			<input type='text' name='erv' maxlength='4' size=4 value='$erv' tabindex='6'> ".t("ppkkvvvv tai")."
+			<input type='text' name='err' maxlength='3' size=2 value='$err' tabindex='7'> ".t("p‰iv‰‰ tai suoraveloitus")."
+			<input tabindex='-1' type='checkbox' name='osuoraveloitus' $osuoraveloitus>
 			</td>
 		  </tr>";
 
 	echo "<tr><td>".t("Laskun summa")."</td>";
-	echo "<td><input type='text' name='summa' value='$summa'>";
+	echo "<td><input type='text' name='summa' value='$summa' tabindex='9'>";
 
 	//Tehd‰‰n valuuttapopup, jos ulkomainen toimittaja muuten kirjoitetaan vain $yhtiorow[valkoodi]
 	if ((is_array($trow) and strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi != strtoupper($yhtiorow['maa']))) {
@@ -968,29 +1049,29 @@ if ($tee == 'P' or $tee == 'E') {
 	echo "</td></tr>";
 
 	echo "<tr>
-			<td>".t("Viite")."</td><td><input type='text'  maxlength='20' size='25' name='viite' value='$viite'>
+			<td>".t("Viite")."</td><td><input type='text'  maxlength='20' size='25' name='viite' value='$viite' tabindex='9'>
 		</tr>
 		<tr>
 			<td>".t("Kassaer‰pvm")."</td><td>
-			<input type='text' name='kap' maxlength='2' size=2 value='$kap'>
-			<input type='text' name='kak' maxlength='2' size=2 value='$kak'>
-			<input type='text' name='kav' maxlength='4' size=4 value='$kav'> ".t("ppkkvvvv tai")."
-			<input type='text' name='kar' maxlength='3' size=2 value='$kar'> ".t("p‰iv‰‰")."
+			<input type='text' name='kap' maxlength='2' size=2 value='$kap' tabindex='10'>
+			<input type='text' name='kak' maxlength='2' size=2 value='$kak' tabindex='11'>
+			<input type='text' name='kav' maxlength='4' size=4 value='$kav' tabindex='12'> ".t("ppkkvvvv tai")."
+			<input type='text' name='kar' maxlength='3' size=2 value='$kar' tabindex='13'> ".t("p‰iv‰‰")."
 			</td>
 		</tr>
 		<tr>
-			<td>".t("Kassa-alennus")."</td><td><input type='text' name='kassaale' value='$kassaale'>
-			<input type='text' name='kapro' maxlength='6' size=6 value='$kapro'>%</td>
+			<td>".t("Kassa-alennus")."</td><td><input type='text' name='kassaale' value='$kassaale' tabindex='14'>
+			<input type='text' name='kapro' maxlength='6' size=6 value='$kapro' tabindex='15'>%</td>
 		</tr>
 		<tr>
-			<td>".t("Viesti")."</td><td><input type='text' maxlength='70' size='60' name='viesti' value='$viesti'></td>
+			<td>".t("Viesti")."</td><td><input type='text' maxlength='70' size='60' name='viesti' value='$viesti' tabindex='16'></td>
 		</tr>
 
 		<tr>
-			<td>".t("Kommentti")."</td><td><input type='text' name='komm' size='60' value='$komm'></td>
+			<td>".t("Kommentti")."</td><td><input type='text' name='komm' size='60' value='$komm' tabindex='17'></td>
 		</tr>
 		<tr>
-			<td>".t("Laskunumero")."</td><td><input type='text' name='toimittajan_laskunumero' value='$toimittajan_laskunumero' size='60'></td>
+			<td>".t("Laskunumero")."</td><td><input type='text' name='toimittajan_laskunumero' value='$toimittajan_laskunumero' size='60' tabindex='18'></td>
 		</tr>";
 
 		if ((is_array($trow) and strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi != strtoupper($yhtiorow['maa']))) {
@@ -1027,7 +1108,7 @@ if ($tee == 'P' or $tee == 'E') {
 	echo "
 		<tr>
 			<td>".t("Laskun tyyppi")."</td><td>
-				<select name='vienti'>
+				<select name='vienti' tabindex='19'>
 					<option value='A' $vientia>".t("Kotimaa")."</option>
 					<option value='B' $vientib>".t("Kotimaa huolinta/rahti")."</option>
 					<option value='C' $vientic>".t("Kotimaa vaihto-omaisuus")."</option>
@@ -1066,7 +1147,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 		echo "<tr>";
 		echo "<td>".t("Alv tili")."</td><td>";
-		echo "<select name='tilino_alv'>";
+		echo "<select name='tilino_alv' tabindex='20'>";
 		echo "<option value='$yhtiorow[alv]'>$yhtiorow[alv] - $yhtiorow[nimi], $yhtiorow[kotipaikka], $yhtiorow[maa]</option>";
 
 		while ($vrow = mysql_fetch_array($alhire)) {
@@ -1096,7 +1177,7 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<td>".t("Kts. oikealle")."!</td>";
 	}
 	else {
-		echo "<td><input type='hidden' name='MAX_FILE_SIZE' value='50000000'><input name='userfile' type='file'></td>";
+		echo "<td><input type='hidden' name='MAX_FILE_SIZE' value='50000000'><input name='userfile' type='file' tabindex='-1'></td>";
 	}
 
 	echo "</tr>";
@@ -1130,7 +1211,7 @@ if ($tee == 'P' or $tee == 'E') {
 			echo "mysql_data_seek failed!";
 			exit;
 		}
-		echo "<select name='hyvak[$i]'>
+		echo "<select name='hyvak[$i]' tabindex='22'>
 			  <option value = ' '>".t("Ei kukaan")."
 			  $ulos
 			  </select>";
@@ -1138,7 +1219,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 		// Tehd‰‰n checkbox, jolla annetaan lupa muuttaa hyv‰ksynt‰listaa myˆhemmin
 		if ($i == 1) {
-			echo " ".t("Listaa saa muuttaa")." <input type='checkbox' name='ohyvaksynnanmuutos' $ohyvaksynnanmuutos>";
+			echo " ".t("Listaa saa muuttaa")." <input type='checkbox' name='ohyvaksynnanmuutos' $ohyvaksynnanmuutos tabindex='-1'>";
 		}
 		echo "<br>";
 	}
@@ -1154,8 +1235,8 @@ if ($tee == 'P' or $tee == 'E') {
 	}
 
 	echo "<hr><table>";
-	echo "<tr><td>".t("Luo uusi keikka laskulle").":</td><td><input type='checkbox' name='luouusikeikka' value='LUO' $uusiselke></td>";
-	echo "<td>".t("Kopio lasku")."</td><td><input type='input' name='kopioi' value='$kopioi' size='3' maxlength='2'></td><td>".t("kertaa")."</td></tr>";
+	echo "<tr><td>".t("Luo uusi keikka laskulle").":</td><td><input type='checkbox' name='luouusikeikka' value='LUO' $uusiselke tabindex='-1'></td>";
+	echo "<td>".t("Kopio lasku")."</td><td><input type='input' name='kopioi' value='$kopioi' size='3' maxlength='2' tabindex='-1'></td><td>".t("kertaa")."</td></tr>";
 	echo "</table>";
 	echo "</td>";
 	echo "</tr>";
@@ -1187,7 +1268,6 @@ if ($tee == 'P' or $tee == 'E') {
 		}
 	}
 
-
 	// ykkˆstasolla ei saa tehd‰ tiliˆintej‰, laitetaan oletukset
 	if ($kukarow['taso'] < '2') {
 
@@ -1214,7 +1294,8 @@ if ($tee == 'P' or $tee == 'E') {
 				<tr>
 					<th>".t("Tili")."</th>
 					<th>".t("Kustannuspaikka")."</th>
-					<th><input type='radio' name='syottotyyppi' value='summa' $syottotyyppisaldo>".t("Summa")." <input type='radio' name='syottotyyppi' value='prosentti' $syottotyyppiprosentti>".t("Prosentti")."</th>
+					<th><input type='radio' name='syottotyyppi' value='summa' $syottotyyppisaldo tabindex='-1'>".t("Summa")."
+					<input type='radio' name='syottotyyppi' value='prosentti' $syottotyyppiprosentti tabindex='-1'>".t("Prosentti")."</th>
 					<th style='text-align:right;'>".t("Vero")."</th>
 				</tr>";
 
@@ -1351,7 +1432,7 @@ if ($tee == 'P' or $tee == 'E') {
 	echo "<br>
 		<input type = 'hidden' name = 'toimittajaid' value = '$toimittajaid'>
 		<input type = 'hidden' name = 'maara' value = '$maara'>
-		<input type = 'submit' value = '".t("Perusta")."'></form>";
+		<input type = 'submit' value = '".t("Perusta")."' tabindex='-1'></form>";
 
 } // end if tee = 'P'
 
@@ -1427,11 +1508,17 @@ if ($tee == 'I') {
 		$ebid = '';
 	}
 
+	// Jos viitett‰ ei syˆtetty ja laskunumero on syˆtetty lis‰t‰‰n se viestiin
+	if ($viite == "" and $toimittajan_laskunumero != "") {
+		$viesti = $toimittajan_laskunumero." ".$viesti;
+	}
+
 	// Kirjoitetaan lasku
 	$query = "INSERT into lasku set
 			yhtio = '$kukarow[yhtio]',
 			summa = '$summa',
 			kasumma = '$kassaale',
+			lapvm = '$vpv-$vpk-$vpp',
 			erpcm = '$erv-$erk-$erp',
 			kapvm = '$kav-$kak-$kap',
 			olmapvm = '$olmapvm',

@@ -997,6 +997,9 @@ if ($tee == 'E' or $tee == 'F') {
 		if ($tee2 != 1) {
 
 			echo "<table>";
+			if ($yhtiorow['ostolaskujen_paivays'] == "1" and $trow["lapvm"] != '0000-00-00'){
+				echo "<tr><th>".t("Lapvm")."</th><td align='right'>".tv1dateconv($trow["lapvm"])."</td></tr>";
+			}
 			echo "<tr><th>".t("Tapvm")."</th><td align='right'>".tv1dateconv($trow["tapvm"])."</td></tr>";
 			echo "<tr><th>".t("Eräpvm")."</th><td align='right'>".tv1dateconv($trow["erpcm"])."</td></tr>";
 			echo "<tr><th>".t("Olmapvm")."</th><td align='right'>".tv1dateconv($trow["olmapvm"])."</td></tr>";

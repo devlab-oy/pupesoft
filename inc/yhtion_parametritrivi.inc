@@ -240,6 +240,22 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "ostolaskujen_paivays") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = (int)$trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = '' $sel[0]>".t("Ostolaskulle syˆtet‰‰n vain laskun p‰iv‰");
+		$ulos .= "<option value = '1' $sel[1]>".t("Ostolaskulle syˆtet‰‰n laskun p‰iv‰ sek‰ kirjausp‰iv‰");
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "tyomaaraystyyppi") {
 
@@ -2441,6 +2457,24 @@
 
 		$ulos .= "<option value = ''>".t("Liitetiedostojen nimiin ei lis‰t‰ asiakkaan nime‰")."</option>";
 		$ulos .= "<option value = 'N' $sel[N]>".t("Liitetiedostojen nimiin lis‰t‰‰n asiakkaan nimi")."</option>";	
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "ostoreskontra_kassaalekasittely") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = '0' $sel[0]>".t("Ostoreskontran maksatuksessa k‰ytet‰‰n automaattisesti kassa-alennus vain kassa-alennusp‰iv‰‰n menness‰");
+		$ulos .= "<option value = '1' $sel[1]>".t("Ostoreskontran maksatuksessa k‰ytet‰‰n automaattisesti kassa-alennus, vaikka kassa-alennus on er‰‰ntynyt p‰iv‰ sitten");
+		$ulos .= "<option value = '2' $sel[2]>".t("Ostoreskontran maksatuksessa k‰ytet‰‰n automaattisesti kassa-alennus, vaikka kassa-alennus on er‰‰ntynyt kaksi p‰iv‰‰ sitten");
+		$ulos .= "<option value = '3' $sel[3]>".t("Ostoreskontran maksatuksessa k‰ytet‰‰n automaattisesti kassa-alennus, vaikka kassa-alennus on er‰‰ntynyt kolme p‰iv‰‰ sitten");
+		$ulos .= "<option value = '4' $sel[4]>".t("Ostoreskontran maksatuksessa k‰ytet‰‰n automaattisesti kassa-alennus, vaikka kassa-alennus on er‰‰ntynyt nelj‰ p‰iv‰‰ sitten");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -268,8 +268,8 @@
 
 		//T‰‰ll‰ p‰ivitet‰‰n muun tositteen pvm
 		if ($tila == 'P') {
-
-			$query = "UPDATE lasku SET tapvm = '$vv-$kk-$pp' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]'";
+			
+			$query = "UPDATE lasku SET tapvm = '$vv-$kk-$pp'  WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$query = "LOCK table tiliointi WRITE";
@@ -950,6 +950,27 @@
 		$tila = 'X';
 	}
 
+	if ($tila == 'vaihda_lapvm') {
+
+		if ($vvv < 1000) $vvv += 2000;
+		$val = checkdate($vkk, $vpp, $vvv);
+
+		if (!$val) {
+			echo "<font class='error'>".t("Virheellinen tapahtumapvm")." $vvv-$vkk-$vpp</font><br>";
+			$tee = 'E';
+			$tila = '';
+		}
+		else {
+			$pvm = date("Y-m-d", mktime (0,0,0,$vkk,$vpp,$vvv));
+			$query = "UPDATE lasku SET lapvm = '$pvm' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			$tee = 'E';
+			$tila = 'X';
+		}
+		
+	}
+
 	if ($tila == '') {
 
 		// katotaan onko lasku liitetty keikkaan
@@ -968,9 +989,9 @@
 		if ($trow['tila'] == 'X') {
 
 			if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
-				$pvm=erottele($trow['tapvm']);
+				$pvm = erottele($trow['tapvm']);
 
-				echo "<form action = '$PHP_SELF' method='post'>
+				echo "	<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type = 'hidden' name='tila' value='P'>
 						<input type = 'hidden' name='tee' value='M'>
@@ -988,6 +1009,22 @@
 		else {
 			if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku'] and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
 				$pvm = erottele($trow['tapvm']);
+				$lapvm = erottele($trow['lapvm']);
+
+				if ($yhtiorow['ostolaskujen_paivays'] == "1"){
+					echo "<form action = '$PHP_SELF' method='post'>
+							<input type = 'hidden' name='lopetus' value='$lopetus'>
+							<input type = 'hidden' name='tila' value='vaihda_lapvm'>
+							<input type = 'hidden' name='tee' value='M'>
+							<input type = 'hidden' name='tunnus' value='$tunnus'>";
+					echo "<tr><th>".t("Lapvm")."</th>";
+					echo "<td><input type = 'text' name = 'vpp' maxlength='2' size='2' value = '$lapvm[pp]'>
+						  <input type = 'text' name = 'vkk' maxlength='2' size='2' value = '$lapvm[kk]'>
+						  <input type = 'text' name = 'vvv' maxlength='4' size='4' value = '$lapvm[vv]'></td>
+						  <td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+						  </tr>";
+					echo "</form>";
+				}		
 
 				echo "<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>

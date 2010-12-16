@@ -1504,6 +1504,7 @@
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
 		if ($toim == "puun_alkio" or
 			$toim == "avainsana" or
+			$toim == "pakkaus" or
 			$toim == "tili" or
 			$toim == "taso" or
 			$toim == "asiakasalennus" or

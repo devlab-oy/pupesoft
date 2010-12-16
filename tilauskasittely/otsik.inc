@@ -1287,7 +1287,7 @@
 				}
 
 				echo "</select> ";
-				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tekninen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/database-option-add.png'>".t("Uusi yhteyshenkilö")."</a>";
+				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tekninen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
 				echo "</td>";
 
 				echo "<td>".t("Projektipaallikko").":</td>
@@ -1328,7 +1328,7 @@
 				}
 
 				echo "</select> ";
-				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_kaupallinen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/database-option-add.png'>".t("Uusi yhteyshenkilö")."</a>";
+				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_kaupallinen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
 				echo "</td>";
 
 			}
@@ -2198,7 +2198,7 @@
 			}
 
 			echo "</select> ";
-			echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/database-option-add.png'>".t("Uusi yhteyshenkilö")."</a>";
+			echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
 			echo "</td>";
 			echo "<td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 

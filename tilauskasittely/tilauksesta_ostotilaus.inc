@@ -122,6 +122,19 @@
 							$toim_maa 			= $yhtiorow["maa"];
 						}
 
+						$valkoodi = $tiltoi["oletus_valkoodi"];
+
+						if ($valkoodi == '') {
+							$valkoodi = $yhtiorow["valkoodi"];
+						}
+
+						$vquery = "	SELECT nimi, kurssi, tunnus
+									FROM valuu
+									WHERE yhtio = '$kukarow[yhtio]'
+									and nimi = '$valkoodi'";
+						$vresult = mysql_query($vquery) or pupe_error($vquery);
+						$vrow = mysql_fetch_array($vresult);
+
 						$commentsit = trim(t("Myyntitilaus").": $myytilrow[tunnus] \n".t("Myyntitilauksen toimitustapa").": $myytilrow[toimitustapa] \n".$tiltoi["comments"]);
 
 						$query = "	SELECT tunnus
@@ -144,43 +157,47 @@
 						if (mysql_num_rows($jtsre) == 0) {
 
 							$query = "	INSERT INTO lasku SET
-										ytunnus				= '$tiltoi[ytunnus]',
-										ovttunnus 			= '$tiltoi[ovttunnus]',
+										alatila 			= '',
+										comments 			= '$commentsit',
+										huolitsija 			= '$tiltoi[huolitsija]',
+										jakelu 				= '$jakelu',
+										kerayspvm 			= '$myytilrow[kerayspvm]',
+										kuljetus 			= '$tiltoi[kuljetus]',
+										laatija 			= '$kukarow[kuka]',
+										liitostunnus		= '$tiltoi[tunnus]',
+										luontiaika			= now(),
+										maa 				= '$tiltoi[maa]',
+										maksuteksti 		= '$tiltoi[maksuteksti]',
+										myyja 				= '$myytilrow[myyja]',
 										nimi 				= '$tiltoi[nimi]',
 										nimitark 			= '$tiltoi[nimitark]',
 										osoite 				= '$tiltoi[osoite]',
+										ovttunnus 			= '$tiltoi[ovttunnus]',
 										postino 			= '$tiltoi[postino]',
 										postitp 			= '$tiltoi[postitp]',
-										maa 				= '$tiltoi[maa]',
-										toim_ovttunnus		= '$tiltoi[ovttunnus]',
+										sisviesti1			= '$myytilrow[sisviesti1]',
+										tila 				= 'O',
+										tilaustyyppi		= '',
+										tilausyhteyshenkilo	= '$kukarow[nimi]',
+										toimaika 			= '$myytilrow[toimaika]',
+										toimitusehto 		= '$tiltoi[toimitusehto]',
+										toimitustapa 		= '$myytilrow[toimitustapa]',
+										toim_maa 			= '$toim_maa',
 										toim_nimi 			= '$toim_nimi',
 										toim_nimitark 		= '$toim_nimitark',
 										toim_osoite 		= '$toim_osoite',
+										toim_ovttunnus		= '$tiltoi[ovttunnus]',
 										toim_postino 		= '$toim_postino',
 										toim_postitp 		= '$toim_postitp',
-										toim_maa 			= '$toim_maa',
+										valkoodi 			= '$valkoodi',
+										vanhatunnus			= '',
+										varasto 			= '',
 										verkkotunnus		= '$myytilrow[liitostunnus]',
-										toimaika 			= '$myytilrow[toimaika]',
-										kerayspvm 			= '$myytilrow[kerayspvm]',
-										luontiaika			= now(),
-										ketjutus			= '1',
-										maksuehto 			= '$tiltoi[maksuehto]',
-										toimitustapa 		= '$myytilrow[toimitustapa]',
-										toimitusehto 		= '$tiltoi[toimitusehto]',
-										laatija 			= '$kukarow[kuka]',
-										alv 				= '$tiltoi[alv]',
-										comments 			= '$commentsit',
+									 	vienti_kurssi 		= '$vrow[kurssi]',
 										viesti 				= '$myytilrow[viesti]',
-										sisviesti1			= '$myytilrow[sisviesti1]',
-										kuljetus 			= '$tiltoi[kuljetus]',
-										huolitsija 			= '$tiltoi[huolitsija]',
-										maksuteksti 		= '$tiltoi[maksuteksti]',
-										yhtio 				= '$kukarow[yhtio]',
-										tilaustyyppi		= '$tiltoi[tilaustyyppi]',
-										liitostunnus		= '$tiltoi[tunnus]',
-										valkoodi 			= '$tiltoi[valkoodi]',
 										viikorkopros 		= '$yhtiorow[viivastyskorko]',
-										tila 				= 'O'";
+										yhtio 				= '$kukarow[yhtio]',
+										ytunnus				= '$tiltoi[ytunnus]'";
 							$updre = mysql_query($query) or pupe_error($query);
 							$tunnus = (string) mysql_insert_id();
 						}

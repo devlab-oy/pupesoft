@@ -90,7 +90,7 @@ if (!function_exists('pupevoice_otsik')) {
 
 		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],													$tootxml);
 		xml_add("SellerPartyDomicile", 					$y_kotipaikka,															$tootxml);
-		xml_add("SellerPartyVat", 						tulosta_ytunnus(str_replace("0037", "", $y_vatnumero), $y_maa, "X"),	$tootxml);
+		xml_add("SellerPartyVat", 						tulosta_ytunnus(str_replace("0037", "", $y_vatnumero), $y_maa, "VATNUMERO"),	$tootxml);
 		xml_add("SellerOrganisationName", 				$y_nimi, 																$tootxml);
 		xml_add("SellerStreetName", 					$y_osoite, 																$tootxml);
 		xml_add("SellerPostCode", 						$y_postino, 															$tootxml);

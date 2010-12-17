@@ -5053,7 +5053,7 @@ if (!function_exists("paivita_toimitukset")) {
 }
 
 if (!function_exists("tulosta_ytunnus")) {
-	function tulosta_ytunnus($ytunnus, $maa="", $vienti="") {
+	function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "") {
 		global $yhtiorow, $kukarow;
 
 		if ($maa == "") {
@@ -5072,17 +5072,23 @@ if (!function_exists("tulosta_ytunnus")) {
 				$uytunnus = $ytunnus;
 
 				while ($ytunpit > 0) {
-				    $uytunnus = "0".$uytunnus; $ytunpit--;
+				    $uytunnus = "0".$uytunnus;
+					$ytunpit--;
 				}
 			}
 			else {
 				$uytunnus = $ytunnus;
 			}
 
-			$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
-
-			if ($vienti != "") {
+			if ($vienti == "VATNUMERO") {
 				$uytunnus = strtoupper($maa).$uytunnus;
+			}
+			elseif ($vienti != "") {
+				$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+				$uytunnus = strtoupper($maa).$uytunnus;
+			}
+			else {
+				$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
 			}
 		}
 		else {

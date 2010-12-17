@@ -208,7 +208,7 @@ if (!function_exists('finvoice_otsik')) {
 			xml_add("SellerPartyIdentifier",				tulosta_ytunnus($yhtiorow['ytunnus'], $y_maa),		$tootfinvoice);
 			#xml_add("SellerPartyIdentifierUrlText",						"", 								$tootfinvoice);
 			xml_add("SellerOrganisationName",							  	$y_nimi,							$tootfinvoice);
-			xml_add("SellerOrganisationTaxCode", tulosta_ytunnus(str_replace("0037", "", $y_vatnumero), $y_maa, "X"), $tootfinvoice);
+			xml_add("SellerOrganisationTaxCode", tulosta_ytunnus(str_replace("0037", "", $y_vatnumero), $y_maa, "VATNUMERO"), $tootfinvoice);
 			#xml_add("SellerOrganisationTaxCodeUrlText",					"", 								$tootfinvoice);
 
 			fputs($tootfinvoice, "<SellerPostalAddressDetails>\r\n");
@@ -313,7 +313,7 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "<BuyerPartyDetails>\r\n");
 			xml_add("BuyerPartyIdentifier",	tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']), 				$tootfinvoice);
 			xml_add("BuyerOrganisationName",        trim($lasrow['nimi']." ".$lasrow['nimitark']),    			$tootfinvoice);
-			xml_add("BuyerOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "X"),		$tootfinvoice);
+			xml_add("BuyerOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"),$tootfinvoice);
 
 			fputs($tootfinvoice, "<BuyerPostalAddressDetails>\r\n");
 			xml_add("BuyerStreetName",				$lasrow['osoite'],     										$tootfinvoice);
@@ -360,7 +360,7 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "<DeliveryPartyDetails>\r\n");
 			xml_add("DeliveryPartyIdentifier",		tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),     		$tootfinvoice);
 			xml_add("DeliveryOrganisationName",                            	trim($lasrow['toim_nimi']." ".$lasrow['toim_nimitark']), $tootfinvoice);
-			xml_add("DeliveryOrganisationTaxCode",	tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "X"),		$tootfinvoice);
+			xml_add("DeliveryOrganisationTaxCode",	tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"),$tootfinvoice);
 			fputs($tootfinvoice, "<DeliveryPostalAddressDetails>\r\n");
 			xml_add("DeliveryStreetName",                             		$lasrow['toim_osoite'],     			$tootfinvoice);
 			xml_add("DeliveryTownName",                                 	$lasrow['toim_postitp'],     			$tootfinvoice);
@@ -723,7 +723,7 @@ if (!function_exists('finvoice_lasku_loppu')) {
 			fputs($tootfinvoice, "</EpiDetails>\r\n");
 
 			if ($yhtiorow["verkkolasku_lah"] == "apix") {
-				xml_add("InvoiceUrlNameText", 									"Invoice_$lasrow[laskunro]",					$tootfinvoice);
+				xml_add("InvoiceUrlNameText", 									"APIX_PDFFILE",									$tootfinvoice);
 				xml_add("InvoiceUrlText", 										"file://Apix_invoice_$lasrow[laskunro].pdf",	$tootfinvoice);
 			}
 			else {

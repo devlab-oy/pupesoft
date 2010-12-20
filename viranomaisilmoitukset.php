@@ -205,7 +205,7 @@ if ($tee == "VSRALVYV") {
 		$eumaat = $row[0];
 
 		$query = "	SELECT
-					if(tuote.tuotetyyppi in ('','R'), 'JOO', 'EI') tav_pal,
+					if(tuote.tuotetyyppi != 'K', 'JOO', 'EI') tav_pal,
 					lasku.ytunnus,
 					if(lasku.maa='', asiakas.maa, lasku.maa) as maa,
 					if(lasku.maa='','X','') asiakkaan_maa,
@@ -291,7 +291,7 @@ if ($tee == "VSRALVYV") {
 
 					$ulos .= "<option value=''>".t("Valitse maa")."</option>";
 
-					while ($vrow=mysql_fetch_array($vresult)) {
+					while ($vrow = mysql_fetch_array($vresult)) {
 
 						$ulos .= "<option value = '".strtoupper($vrow[0])."'>".t($vrow[1])."</option>";
 					}
@@ -310,10 +310,10 @@ if ($tee == "VSRALVYV") {
 					$ok = 1;
 				}
 				elseif($row["maa"] != "" and $row["asiakkaan_maa"] == "X") {
-					echo "<tr><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maa haettu asiakkaan tiedoista")."</font></td></tr>";
+					echo "<tr class='aktiivi'><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maa haettu asiakkaan tiedoista")."</font></td></tr>";
 				}
 				else {
-					echo "<tr><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td></tr>";
+					echo "<tr class='aktiivi'><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td></tr>";
 				}
 
 				if ($row["maa"] != "") {

@@ -936,7 +936,7 @@
 						echo "<td valign='top'>$trow[maa]</td>";
 						echo "<td valign='top'>$trow[valuutta]</td>";
 						echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$yhtiorow[myynninkassaale]</a></td>";
+						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$yhtiorow[myynninkassaale]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$yhtiorow[myynninkassaale]</a></td>";
 						echo "<td valign='top'>".t("Kassa-alennus")."</td>";
 						echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";
 						echo "<td valign='top' align='right' nowrap>$trow[verot]</td>";

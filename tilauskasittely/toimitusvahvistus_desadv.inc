@@ -4,30 +4,15 @@
 	* Despatch Advice Messages
 	* DESADV D.00A
 	* Version 0.2
-	* toimitusvahvistus_stockmann.inc
 	**/
 
-	// tarvitaan tilauksien tunnukset muuttujassa $otunnukset
-	// tarvitaan tilauksen tunnus muuttujassa $tunnus
-	// printterin komento muuttujassa $oslapp
-	// $kukarow[yhtio] jostain saadaan yhtio
-	// $yhtiorow array josta saada lähettäjän tiedot
-
-	// nyt on kaikki tiedot rahtikirjaa varten haettu..
-	//
-	// arrayt:
-	// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-	// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
-	//
-	// muuttujat:
-	// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
-	// tunnukset - tälle rahtikirjalle kuuluvat tunnukset
-	// mehto sisältää maksuehdon tiedot
-	// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
-
+	// Tarvitaan $otunnukset jossa on tilauksien tunnukset
+	// Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
+	// Tarvitaan $rahtikirjanro jossa on rahtikirjan numero
+	// Tarvitaan $toitarow jossa on laskun toimitustavan tiedot
 
 	//jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
-	if ($kollityht > 0 and $desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
+	if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
 		//	Haetaan otsikkotiedot pohjalle
 		$query = "	SELECT lasku.*, laskun_lisatiedot.*,
 					lasku.tunnus laskutunnus,
@@ -60,7 +45,15 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus in ($tunnukset)";
 			$desadv_rakir_res = mysql_query($query) or pupe_error($query);
-			$desadv_rakir_row = mysql_fetch_assoc($desadv_rakir_res);
+
+			if (mysql_num_rows($desadv_rakir_res) > 0) {
+				$desadv_rakir_row = mysql_fetch_assoc($desadv_rakir_res);
+			}
+			else {
+				$desadv_rakir_row["tulostettu"] = date("Y-m-d H:i:s");
+				$desadv_rakir_row["rahtikirjanro"] = 0;
+				$desadv_rakir_row["viesti"] = "";
+			}
 
 			$desadv_message = '';
 			$error 			= '';
@@ -161,7 +154,7 @@
 			elseif ($desadv_laskurow['yhteyshenkilo_kaupallinen'] != '') {
 				$query = "	SELECT *
 							FROM yhteyshenkilo
-							WHERE yhteyshenkilo.yhtio = '$kukarow[yhtio]'
+							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus = '$desadv_laskurow[yhteyshenkilo_kaupallinen]'";
 				$yhteyshenkilo_kaupallinen_res = mysql_query($query) or pupe_error($query);
 				$yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
@@ -172,7 +165,7 @@
 			elseif ($desadv_laskurow['yhteyshenkilo_tekninen'] != '') {
 				$query = "	SELECT *
 							FROM yhteyshenkilo
-							WHERE yhteyshenkilo.yhtio = '$kukarow[yhtio]'
+							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus = '$desadv_laskurow[yhteyshenkilo_tekninen]'";
 				$yhteyshenkilo_tekninen_res = mysql_query($query) or pupe_error($query);
 				$yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
@@ -231,7 +224,6 @@
 				$error .= "Toimitustavan toim_ovt-tunnus / toim_nimi puuttui!<br>";
 			}
 
-
 			if (trim($desadv_laskurow['toimitusehto']) != '') {
 				// TOD - terms of delivery
 				$desadv_message .= "TOD+6+Z2K+".substr($desadv_laskurow['toimitusehto'], 0, 3)."'";
@@ -253,13 +245,23 @@
 			}
 
 			// PAC - number and type of packages
-			$query = "	SELECT sum(kollit) kollit
-						from rahtikirjat use index (otsikko_index)
-						where yhtio = '$kukarow[yhtio]'
-						and otsikkonro = '$desadv_laskurow[laskutunnus]'
-						and rahtikirjanro = '$rahtikirjanro'";
-			$desadv_kollitres = mysql_query($query) or pupe_error($query);
-			$desadv_kollitrow = mysql_fetch_assoc($desadv_kollitres);
+			unset($desadv_kollitres);
+
+			if ((int) $rahtikirjanro != 0) {
+				$query = "	SELECT sum(kollit) kollit
+							from rahtikirjat use index (otsikko_index)
+							where yhtio = '$kukarow[yhtio]'
+							and otsikkonro = '$desadv_laskurow[laskutunnus]'
+							and rahtikirjanro = '$rahtikirjanro'";
+				$desadv_kollitres = mysql_query($query) or pupe_error($query);
+			}
+
+			if (isset($desadv_kollitres) and mysql_num_rows($desadv_kollitres) > 0) {
+				$desadv_kollitrow = mysql_fetch_assoc($desadv_kollitres);
+			}
+			else {
+				$desadv_kollitrow["kollit"] = 0;
+			}
 
 			$desadv_message .= "PAC+$desadv_kollitrow[kollit]++PK:6'";
 			$x++;
@@ -309,7 +311,7 @@
 			$x++;
 			$desadv_message .= "UNT+$x+$desadv_laskurow[laskutunnus]'";
 
-			$filenimi = "dataout/desadv_import-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+			$filenimi = $pupe_root_polku."/dataout/desadv_import-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 
 			//kirjoitetaan faili levylle..
 			if (file_put_contents($filenimi, $desadv_message) === FALSE) {

@@ -47,7 +47,7 @@
 		if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epäonnistui!");
 
 		foreach($ulos as $print) {
-			fputs($toot, $print."\r\n");
+			fputs($toot, $print."\n");
 		}
 
 		if (!$php_cli) {

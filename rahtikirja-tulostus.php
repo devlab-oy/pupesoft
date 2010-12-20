@@ -151,16 +151,10 @@
 
 			$linkkilisa = '';
 
-			if ($sel_ltun != '') {
-
-				$linkkilisa = "&sel_ltun=";
-
+			if (count($sel_ltun) > 0) {
 				foreach ($sel_ltun as $ltun_x) {
-					$ltun_x = (int) $ltun_x;
-					$linkkilisa .= "$ltun_x,";
+					$linkkilisa .= "&sel_ltun[]=$ltun_x";
 				}
-
-				$linkkilisa = substr($linkkilisa, 0, -1);
 			}
 
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=rahtikirja.php?toim=lisaa&id=dummy&jv=$jv&komento=$komento&mista=rahtikirja-tulostus.php&toimitustapa_varasto=$toimitustapa_varasto&valittu_rakiroslapp_tulostin={$valittu_rakiroslapp_tulostin}{$linkkilisa}'>";
@@ -267,14 +261,9 @@
 		}
 
 		$ltun_querylisa = '';
-		if ($sel_ltun != '') {
-			$ltunnukset_x = '';
-			foreach ($sel_ltun as $ltun_x) {
-				$ltun_x = (int) $ltun_x;
-				$ltunnukset_x .= "'$ltun_x',";
-			}
-			$ltunnukset_x = substr($ltunnukset_x, 0, -1);
-			$ltun_querylisa = " and lasku.tunnus in ($ltunnukset_x)";
+
+		if (count($sel_ltun) > 0) {
+			$ltun_querylisa = " and lasku.tunnus in (".implode(",", $sel_ltun).")";
 		}
 
 		// haetaan kaikki distinct rahtikirjat..
@@ -642,7 +631,7 @@
 
 				$kaikki_lotsikot = substr($kaikki_lotsikot ,0 ,-2);
 
-				echo "$rahinta $jvtext";
+				echo "$rahinta $jvtext<br>";
 
 				// tarvitaan tietää, että onko kyseessä kopio
 				$tulostakopio = "";

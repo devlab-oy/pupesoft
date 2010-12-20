@@ -758,7 +758,6 @@
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ALVULK'>".t("Ulkomaan ALV%")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='ALV'>".t("ALV%")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='SEURANTA'>".t("Tilauksen seurantaluokka")."</td></tr>
-				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='pakkaus'>".t("Pakkaus")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='TOIMEHTO'>".t("Toimitusehto")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='HENKILO_OSASTO'>".t("Henkilöosasto")."</td></tr>
 				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='RAHTIKIRJA'>".t("Rahtikirjatyyppi")."</td></tr>

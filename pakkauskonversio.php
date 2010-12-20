@@ -21,10 +21,6 @@
 
 	CREATE INDEX yhtio_pakkaus_pakkauskuvaus ON pakkaus (yhtio, pakkaus,pakkauskuvaus);
 
-	insert into oikeu (kuka,sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,profiili,yhtio,hidden)
-	select kuka,sovellus,nimi,'pakkaus',paivitys,lukittu,'Pakkaustiedot','295','0',profiili,yhtio,''
-	from oikeu o2 where o2.nimi='yllapito.php' and o2.alanimi='avainsana' on duplicate key update oikeu.yhtio=o2.yhtio;
-
 	*/
 
 	require("inc/connect.inc");
@@ -66,5 +62,10 @@
 		$pakkausres = mysql_query($query) or pupe_error($query);
 
 	}
+
+	$query = "	INSERT into oikeu (kuka,sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,profiili,yhtio,hidden)
+				select kuka,sovellus,nimi,'pakkaus',paivitys,lukittu,'Pakkaustiedot','295','0',profiili,yhtio,''
+				from oikeu o2 where o2.nimi='yllapito.php' and o2.alanimi='avainsana' on duplicate key update oikeu.yhtio=o2.yhtio;";
+	$pakkausres = mysql_query($query) or pupe_error($query);
 
 ?>

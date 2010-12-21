@@ -1032,6 +1032,48 @@
 		echo "<br><table>";
 		echo "<tr>";
 
+		$avainsana_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite='Kuka' ");
+
+		// katsotaan onko k‰ytt‰jien dynaaminenpuu luotu avainsanoihin ja laskun hyv‰ksyja_nyt pit‰‰ olla k‰ytt‰j‰
+		if (mysql_num_rows($avainsana_result) == 1) {
+			if ($laskurow['hyvaksyja_nyt'] == $kukarow['kuka']) {
+				$query = "	SELECT hyvaksyja_maksimisumma, hierarkia
+				          	FROM kuka
+				          	WHERE yhtio = '$kukarow[yhtio]'
+							and hyvaksyja = 'o'
+							and kuka = '$laskurow[hyvaksyja_nyt]'
+				          	ORDER BY nimi";
+				$vresult = mysql_query($query) or pupe_error($query);
+				$hierarkiarow = mysql_fetch_assoc($vresult);
+
+				$loytyyko_esimies = '';
+				$hierarkia = $hierarkiarow['hierarkia'];
+
+				if ($hierarkiarow['hyvaksyja_maksimisumma'] > 0) {
+					for ($i = 1; $i < 5; $i++) {
+
+						if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak'.$i]) {
+
+							for ($x = ($i+1); $x < 6; $x++) {
+
+								if ($laskurow['hyvak'.$x] != '') {
+									$hyvaksyja_maksimisumma = $hierarkiarow['hyvaksyja_maksimisumma'];
+									break;
+								}
+								else {
+									unset($hyvaksyja_maksimisumma);
+								}
+							}
+						}
+					}
+				}
+				else {
+					$hyvaksyja_maksimisumma = 0;
+					$loytyyko_esimies = 'joo';
+				}
+			}
+		}
+
 		// Jos laskua hyvaksyy ensimm‰inen henkilˆ ja laskulla on annettu mahdollisuus hyvksynt‰listan muutokseen n‰ytet‰‰n se!";
 		if ($laskurow['hyvak1'] == $laskurow['hyvaksyja_nyt'] and $laskurow['h1time'] == '0000-00-00 00:00:00' and $laskurow['hyvaksynnanmuutos'] != '') {
 
@@ -1078,11 +1120,30 @@
 			for ($i=2; $i<6; $i++) {
 
 				while ($vrow=mysql_fetch_array($vresult)) {
-					$sel="";
+					$sel = "";
+
 					if ($hyvak[$i] == $vrow['kuka']) {
 						$sel = "selected";
+
+						if (isset($loytyyko_esimies) and $loytyyko_esimies == '' and isset($hyvaksyja_maksimisumma) and $hyvaksyja_maksimisumma != 0 and $hyvaksyja_maksimisumma > $laskurow['summa'] and $hierarkia != '') {
+							$query = "	SELECT parent.tunnus tunnus
+										FROM dynaaminen_puu AS node
+										JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
+										JOIN kuka ON (kuka.yhtio = node.yhtio AND kuka.hierarkia = parent.tunnus and kuka.kuka = '$vrow[kuka]')
+										WHERE node.tunnus IN ($hierarkia)
+										AND node.laji = 'kuka'
+										AND node.yhtio = '$kukarow[yhtio]'
+										AND parent.tunnus NOT IN ($hierarkia)
+										AND parent.lft > 1
+										GROUP BY parent.tunnus
+										ORDER BY parent.lft";
+							$esimies_result = mysql_query($query) or pupe_error($query);
+
+							if (mysql_num_rows($esimies_result) != 0) $loytyyko_esimies = 'joo';
+						}
 					}
-					$ulos .= "<option value ='$vrow[kuka]' $sel>$vrow[nimi]";
+
+					$ulos .= "<option value ='$vrow[kuka]' $sel>$vrow[nimi]</option>";
 				}
 
 				// K‰yd‰‰n sama data l‰pi uudestaan
@@ -1094,7 +1155,7 @@
 				}
 
 				echo "$i. <select name='hyvak[$i]'>
-				      <option value=''>".t("Ei kukaan")."
+				      <option value=''>".t("Ei kukaan")."</option>
 				      $ulos
 				      </select><br>";
 				$ulos = "";
@@ -1124,6 +1185,23 @@
 					          	ORDER BY nimi";
 					$vresult = mysql_query($query) or pupe_error($query);
 					$vrow = mysql_fetch_array($vresult);
+
+					if (isset($loytyyko_esimies) and $loytyyko_esimies == '' and isset($hyvaksyja_maksimisumma) and $hyvaksyja_maksimisumma != 0 and $hyvaksyja_maksimisumma > $laskurow['summa'] and $hierarkia != '') {
+						$query = "	SELECT parent.tunnus tunnus
+									FROM dynaaminen_puu AS node
+									JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
+									JOIN kuka ON (kuka.yhtio = node.yhtio AND kuka.hierarkia = parent.tunnus and kuka.kuka = '$vrow[kuka]')
+									WHERE node.tunnus IN ($hierarkia)
+									AND node.laji = 'kuka'
+									AND node.yhtio = '$kukarow[yhtio]'
+									AND parent.tunnus NOT IN ($hierarkia)
+									AND parent.lft > 1
+									GROUP BY parent.tunnus
+									ORDER BY parent.lft";
+						$esimies_result = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($esimies_result) != 0) $loytyyko_esimies = 'joo';
+					}
 
 					echo "<tr><td>$i. $vrow[nimi]</td><td>";
 
@@ -1245,11 +1323,17 @@
 			echo "<br><br>";
 
 			if ($ok == 1) {
-				echo "<form action = '$PHP_SELF' method='post'>
-						<input type='hidden' name = 'tunnus' value='$tunnus'>
-						<input type='hidden' name = 'tee' value='H'>
-						<input type='Submit' value='".t("Hyv‰ksy tiliˆinti ja lasku")."'>
-						</form><br>";
+
+				if (!isset($loytyyko_esimies) or (isset($loytyyko_esimies) and trim($loytyyko_esimies) != '')) {
+					echo "<form action = '$PHP_SELF' method='post'>
+							<input type='hidden' name = 'tunnus' value='$tunnus'>
+							<input type='hidden' name = 'tee' value='H'>
+							<input type='Submit' value='".t("Hyv‰ksy tiliˆinti ja lasku")."'>
+							</form><br>";
+				}
+				else {
+					echo "<font class='error'>",t("Hyv‰ksytt‰v‰n laskun summa ylitt‰‰ sallitun hyv‰ksynn‰n maksimisumman ja / tai sinun j‰lkeesi hyv‰ksyj‰listalla ei ole esimiest‰si"),"!</font><br /><br />";
+				}
 			}
 
 			if ($laskurow["h1time"] != "0000-00-00 00:00:00") {
@@ -1303,11 +1387,16 @@
 			// Kevennetyn k‰yttˆliittym‰ alkaa t‰st‰
 			echo "<table><tr>";
 
-			echo "<form action = '$PHP_SELF' method='post'>
-					<input type='hidden' name = 'tunnus' value='$tunnus'>
-					<input type='hidden' name = 'tee' value='H'>
-					<td class='back'><input type='Submit' value='".t("Hyv‰ksy lasku")."'></td>
-					</form>";
+			if (!isset($loytyyko_esimies) or (isset($loytyyko_esimies) and trim($loytyyko_esimies) != '')) {
+				echo "<form action = '$PHP_SELF' method='post'>
+						<input type='hidden' name = 'tunnus' value='$tunnus'>
+						<input type='hidden' name = 'tee' value='H'>
+						<td class='back'><input type='Submit' value='".t("Hyv‰ksy lasku")."'></td>
+						</form>";
+			}
+			else {
+				echo "<font class='error'>",t("Hyv‰ksytt‰v‰n laskun summa ylitt‰‰ sallitun hyv‰ksynn‰n maksimisumman ja sinun j‰lkeesi hyv‰ksyj‰listalla ei ole esimiest‰si"),"!</font><br />";
+			}
 
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='Z'>

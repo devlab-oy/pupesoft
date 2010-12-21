@@ -257,6 +257,8 @@
 						resoluutio						= '$resoluutio',
 						extranet						= '$extranet',
 						hyvaksyja						= '$hyvaksyja',
+						hyvaksyja_maksimisumma			= '$hyvaksyja_maksimisumma',
+						hierarkia						= '$kaikki_tunnukset',
 						lomaoikeus						= '$lomaoikeus',
 						asema							= '$asema',
 						toimipaikka						= '$toimipaikka',
@@ -267,6 +269,7 @@
 						naytetaan_tilaukset				= '$naytetaan_tilaukset',
 						profiilit 						= '$profile',
 						piirit							= '$piirit',
+						fyysinen_sijainti				= '$fyysinen_sijainti',
 						laatija							= '$kukarow[kuka]',
 						luontiaika						= now(),
 						yhtio 							= '$yhtio'";
@@ -387,6 +390,11 @@
 	$result = mysql_query($query) or pupe_error($query);
 	$selkukarow = mysql_fetch_array($result);
 
+	if (trim($tee_dyna) != '' and trim($submit_button) == '') {
+		$tee = 'MUUTA';
+		$firname = '';
+	}
+
 	//muutetaan kayttajan tietoja tai syotetaan uuden kayttajan tiedot
 	if ($tee == 'MUUTA') {
 
@@ -442,6 +450,8 @@
 						resoluutio 						= '$resoluutio',
 						extranet						= '$extranet',
 						hyvaksyja						= '$hyvaksyja',
+						hyvaksyja_maksimisumma			= '$hyvaksyja_maksimisumma',
+						hierarkia						= '$kaikki_tunnukset',
 						lomaoikeus						= '$lomaoikeus',
 						asema							= '$asema',
 						toimipaikka						= '$toimipaikka',
@@ -456,6 +466,7 @@
 						naytetaan_tilaukset				= '$naytetaan_tilaukset',
 						profiilit 						= '$profile',
 						piirit							= '$piirit',
+						fyysinen_sijainti				= '$fyysinen_sijainti',
 						muuttaja						= '$kukarow[kuka]',
 						muutospvm						= now()
 						WHERE kuka	= '$kuka'
@@ -646,6 +657,49 @@
 					echo "<option value='2' $sel2>".t("Tehohyväksyjä, tiliöntejä voi muuttaa")."</option>";
 					echo "<option value='3' $sel3>".t("Tehohyväksyjä, lukittujakin tiliöintejä voi muuttaa")."</option>";
 					echo "</select></td></tr>";
+
+					if (!isset($krow['hyvaksyja_maksimisumma'])) $krow['hyvaksyja_maksimisumma'] = 0;
+					
+					echo "<tr><th align='left'>",t("Hyväksyjän maksimisumma"),":</th>";
+					echo "<td><input type='text' name='hyvaksyja_maksimisumma' value='$krow[hyvaksyja_maksimisumma]'></td></tr>";
+
+					$avainsana_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite='Kuka' ");
+
+					if (mysql_num_rows($avainsana_result) == 1) {
+						echo "<tr><th align='left'>",t("Hierarkia ja esimiehet"),":</th><td>";
+						$monivalintalaatikot = array('DYNAAMINEN_KUKA');
+						$monivalintalaatikot_normaali = array();
+
+						if (trim($kaikki_tunnukset) == '' and isset($krow['hierarkia']) and trim($krow['hierarkia']) != '') {
+							$kaikki_tunnukset_from_kuka = $kaikki_tunnukset = $krow['hierarkia'];
+						}
+
+						require ("tilauskasittely/monivalintalaatikot.inc");
+
+						echo "<input type='hidden' name='tee_dyna' value='joo' />";
+
+						if (trim($kaikki_tunnukset) != '') {
+							echo "<input type='hidden' name='kaikki_tunnukset' value='$kaikki_tunnukset' />";
+						}
+
+						echo "</td></tr>";
+					}
+
+					$avainsana_result = t_avainsana('TERMINAALIALUE', '', " and selite != '' ");
+
+					if (mysql_num_rows($avainsana_result) > 0) {
+						echo "<tr><th align='left'>",t("Käyttäjän fyysinen sijainti"),":</th>";
+						echo "<td><select name='fyysinen_sijainti'><option value=''>",t("Ei sijaintia"),"</option>";
+
+						while ($terminaalialue_row = mysql_fetch_assoc($avainsana_result)) {
+
+							$sel = $krow['fyysinen_sijainti'] == $terminaalialue_row['selite'] ? ' selected' : '';
+
+							echo "<option value='{$terminaalialue_row['selite']}'{$sel}>{$terminaalialue_row['selitetark']}</option>";
+						}
+
+						echo "</td></tr>";
+					}
 				}
 				else {
 					$sel2 = $sel1 = "";
@@ -1192,7 +1246,7 @@
 				echo "<br><input type='submit' value='".t("Perusta uusi käyttäjä")."'></form>";
 			}
 			else {
-				echo "<br><input type='submit' value='".t("Päivitä käyttäjän")." $krow[kuka] ".t("tiedot")."'></form>";
+				echo "<br><input type='submit' name='submit_button' value='".t("Päivitä käyttäjän")." $krow[kuka] ".t("tiedot")."'></form>";
 				echo "</td></tr></table>";
 
 				echo "<br><br><br><hr>";

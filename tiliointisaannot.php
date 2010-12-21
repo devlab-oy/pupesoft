@@ -259,6 +259,38 @@
 
 	if (isset($tunnus) and $tunnus > 0) {
 		// Toimittaja on valittu ja sille annetaan sääntöjä
+		if ($tila == "XML") {
+			
+			$query = " 	SELECT data, filename, kayttotarkoitus, tunnus 
+						FROM liitetiedostot 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND liitos = 'lasku' 
+						AND tunnus = '$liitetiedosto'
+						AND kayttotarkoitus = '$kayttotyyppi'";
+			
+			$tulokset = mysql_query($query) or pupe_error($query);
+			$tulosrivi = mysql_fetch_assoc($tulokset);
+			$xmlstr = $tulosrivi['data'];
+			
+			$xml = simplexml_load_string($xmlstr);
+			
+			if ($xml === FALSE) {
+			    echo ("Tiedosto $file ei ole validi XML!\n");
+			    return ("Tiedosto $file ei ole validi XML!");
+			   }
+
+			require_once("inc/functions.inc");
+
+			// Katsotaan mitä aineistoa käpistellään
+			if ($kayttotyyppi == 'FINVOICE') {
+			    require("inc/verkkolasku-in-finvoice.inc");
+			}
+			else {
+			    require("inc/verkkolasku-in-pupevoice.inc");
+				
+			}
+		}
+		
 		$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, concat_ws(' ', postino, postitp) osoite
 					FROM toimi
 					WHERE tunnus = '$tunnus'
@@ -288,8 +320,13 @@
 
 		echo "<font class='head'>".t("Säännöt")."</font><hr>
 				<form action = '$PHP_SELF' method='post'>
-				<input type='hidden' name='tunnus' value='$tunnus'>
-				<table>
+				<input type='hidden' name='tunnus' value='$tunnus'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<input type='hidden' name='tila' value='$tila'>";
+		echo "<input type='hidden' name='liitetiedosto' value='$liitetiedosto'>";
+		echo "<input type='hidden' name='kayttotyyppi' value='$kayttotyyppi'>";
+
+		echo "	<table>
 				<tr>
 				<th>".t("Valitse tiliöintisäännön tyyppi").":</th>
 				<td><select name='tyyppi' onchange='submit();'>
@@ -397,6 +434,10 @@
 					<input type='hidden' name='rtunnus' value = '$tiliointirow[0]'>
 					<input type='hidden' name='tee' value = 'P'>
 					<input type='hidden' name='tyyppi' value = '$tyyppi'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='tila' value='$tila'>
+					<input type='hidden' name='liitetiedosto' value='$liitetiedosto'>
+					<input type='hidden' name='kayttotyyppi' value='$kayttotyyppi'>
 					<input type='Submit' value = '".t("Muuta tiliöintisääntöä")."'>
 				</td></tr></form>";
 		}
@@ -440,7 +481,11 @@
 				<form action = '$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value = 'U'>
 				<input type='hidden' name='tunnus' value = '$tunnus'>
-				<input type='hidden' name='tyyppi' value = '$tyyppi'>";
+				<input type='hidden' name='tyyppi' value = '$tyyppi'>
+				<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<input type='hidden' name='tila' value='$tila'>";
+		echo "<input type='hidden' name='liitetiedosto' value='$liitetiedosto'>";
+		echo "<input type='hidden' name='kayttotyyppi' value='$kayttotyyppi'>";
 
 		if ($tyyppi == 't') {
 			echo "	<td><input type='text' name='mintuote' size='15' value = '$mintuote'></td>
@@ -449,12 +494,27 @@
 					<td><input type='text' name='tilino' size='5' value = '$tilino'></td>";
 		}
 		elseif ($tyyppi == 'o' or $tyyppi == 'b') {
+			if ($tila == "XML" and $tyyppi == 'b') {
+				$kuvaus =   $ostaja_asiakkaantiedot["nimi"]; 	// Nimi
+				$kuvaus2 =  $ostaja_asiakkaantiedot["osoite"];	// Osoite
+				$mintuote = $ostaja_asiakkaantiedot["postino"]; // Postinumero
+				$maxtuote = $ostaja_asiakkaantiedot["postitp"]; // Postitp
+			}
+			if ($tila == "XML" and $tyyppi == 'o') {
+				$kuvaus =   $toim_asiakkaantiedot["nimi"]; 	// Nimi
+				$kuvaus2 =  $toim_asiakkaantiedot["osoite"];	// Osoite
+				$mintuote = $toim_asiakkaantiedot["postino"]; // Postinumero
+				$maxtuote = $toim_asiakkaantiedot["postitp"]; // Postitp
+			}
 			echo "	<td><input type='text' name='kuvaus' size='35' value = '$kuvaus'></td>
 					<td><input type='text' name='kuvaus2' size='35' value = '$kuvaus2'></td>
 					<td><input type='text' name='mintuote' size='15' value = '$mintuote'></td>
 					<td><input type='text' name='maxtuote' size='15' value = '$maxtuote'></td>";
 		}
 		elseif ($tyyppi == 'a') {
+			if ($tila == "XML" and $tyyppi == 'a') { 
+				$kuvaus =   $laskun_asiakastunnus; 	
+			}
 			echo "	<td><input type='text' name='kuvaus' size='15' value = '$kuvaus'></td>";
 		}
 		elseif ($tyyppi == 'k') {

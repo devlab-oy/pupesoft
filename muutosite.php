@@ -4,6 +4,8 @@ if ($_REQUEST["tee"] == 'NAYTATILAUS' or $_POST["tee"] == 'NAYTATILAUS' or $_GET
 
 require ("inc/parametrit.inc");
 
+$liitetiedosto = 0;
+
 if ($tee_pdf == 'tulosta_karhu') {
 	require ('myyntires/paperikarhu.php');
 	exit;
@@ -1052,7 +1054,7 @@ if ($tee == 'E' or $tee == 'F') {
 			}
 			echo "</td></tr>";
 			echo "</table>";
-		}
+		 }
 
 		// Lopetetaan keskisarake, aloitetaan oikea sarake
 		echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
@@ -1143,6 +1145,7 @@ if ($tee == 'E' or $tee == 'F') {
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus/SPLIT/".$palvelin2."muutosite.php////tee=E//tunnus=$tunnus'>
 				<input type = 'submit' value='" . t('Muokkaa liitteit‰')."'>
 				</form>";
+		$liitetiedosto = 1;
 	}
 
 	// N‰ytet‰‰n nappi vain jos tieoja on
@@ -1219,6 +1222,34 @@ if ($tee == 'E' or $tee == 'F') {
 			<input type = 'hidden' name = 'tunnus' value='$tunnus'>
 			<input type = 'submit' value = '".t("Seuraava")."'>
 			</form>";
+	}
+
+	// tehd‰‰n tiliˆintis‰‰ntˆnappula, mik‰li laskussa on liitettyn‰ finveoice tai pupevoice lasku
+	if ($liitetiedosto == 1) {
+		
+		// Tehd‰‰n lopetusmuuttuja kaikkiin urleihin
+		$lopetus = "${palvelin2}muutosite.php////tee=E//tunnus=$trow[tunnus]";
+		
+		$query = " 	SELECT filename, kayttotarkoitus, tunnus 
+					FROM liitetiedostot 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					AND liitos = 'lasku' 
+					AND liitostunnus = '$trow[tunnus]'
+					AND kayttotarkoitus in ('FINVOICE','INVOIC.D.96A')";
+		$tulokset = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($tulokset) >0) {
+			$ktarkoitus = mysql_fetch_assoc($tulokset);
+		
+			echo "<form method='POST' action='".$palvelin2."tiliointisaannot.php'>";
+			echo "<input type = 'hidden' name = 'tila' value = 'XML'>";
+			echo "<input type = 'hidden' name = 'tunnus' value = '$trow[liitostunnus]'>";
+			echo "<input type = 'hidden' name = 'liitetiedosto' value = '$ktarkoitus[tunnus]'>";
+			echo "<input type = 'hidden' name = 'kayttotyyppi' value = '$ktarkoitus[kayttotarkoitus]'>";
+			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+			echo "<input type = 'submit' value='" . t('Tee tiliˆintis‰‰ntˆ laskusta')."'>";
+			echo "</form>";
+		}
 	}
 
 	if ($tee == 'F') {

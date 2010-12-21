@@ -478,6 +478,8 @@
 							poistumistoimipaikka_koodi = '$row[poistumistoimipaikka_koodi]',
 							ulkomaanlisa 			= '$row[ulkomaanlisa]',
 							sallitut_maat 			= '$row[sallitut_maat]',
+							sallitut_alustat		= '$row[sallitut_alustat]',
+							virallinen_selite		= '$row[virallinen_selite]',
 							jarjestys 				= '$row[jarjestys]',
 							laatija 				= '$kukarow[kuka]',
 							luontiaika				= now()";
@@ -526,6 +528,7 @@
 						kauppatapahtuman_luonne = 0,
 						kuljetusmuoto	= 0,
 						poistumistoimipaikka_koodi = '',
+						ulkoinen_jarjestelma = '',
 						sallitut_maat 	= '',
 						laatija 		= '$kukarow[kuka]',
 						luontiaika		= now()";

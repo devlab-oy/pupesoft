@@ -34,7 +34,22 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 				$virhe[$i] = t("Tuotenumero puuttuu!");
 			}
 		}
-	
+
+		if (mysql_field_name($result, $i) == "viivakoodi") {
+			if (trim($t[$i]) != '') {
+				$query  = "	SELECT viivakoodi
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and viivakoodi = '".trim($t[$i])."'
+							and tunnus != '{$tunnus}'";
+				$chkressiresult = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($chkressiresult) > 0) {
+					$virhe[$i] = t("Viivakoodi on jo perustettu j‰rjestelm‰‰n");
+				}
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "toimittaja") {
 			if ($t[$i] != '') {
 				

@@ -119,7 +119,7 @@
 			}
 
 			$ulos .= "</select>";
-			$ulos .= " <a href='#' onclick=\"js_open_yllapito('$sarnimi','toim=avainsana&lukitse_laji=$sarnimi');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi")." ".t(mysql_field_name($result, $i))."</a></td>";
+			$ulos .= " <a href='#' onclick=\"js_open_yllapito('$sarnimi','toim=avainsana&lukitse_laji=$sarnimi');\"><img src='pics/lullacons/add.png'>".t("Uusi")." ".t(mysql_field_name($result, $i))."</a></td>";
 
 			$ulos .= "</td>";
 			$jatko = 0;
@@ -269,7 +269,7 @@
 		}
 
 		$ulos .= "</select>";
-		$ulos .= " <a href='#' onclick=\"js_open_yllapito('aleryhma','toim=perusalennus');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi ryhmä")."</a></td>";
+		$ulos .= " <a href='#' onclick=\"js_open_yllapito('aleryhma','toim=perusalennus');\"><img src='pics/lullacons/add.png'>".t("Uusi ryhmä")."</a></td>";
 
 		$jatko = 0;
 	}
@@ -595,6 +595,18 @@
 			$ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
 		}
 
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "yksin_kerailyalustalle") {
+
+		$sel = array();
+		$sel[$trow[$i]] = ' selected';
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value=''{$sel['']}>".t("Ei")."</option>";
+		$ulos .= "<option value='K'{$sel['K']}>".t("Kyllä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

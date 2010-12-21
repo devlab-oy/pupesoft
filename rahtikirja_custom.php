@@ -507,7 +507,11 @@ if (! isset($_POST['toimitustapa'])) {
 
 	echo "<table>";
 
-	$result = t_avainsana("PAKKAUS");
+	$query  = "	SELECT *
+				FROM pakkaus
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY jarjestys";
+	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";
 
@@ -515,15 +519,15 @@ if (! isset($_POST['toimitustapa'])) {
 	while ($row = mysql_fetch_array($result)) {
     	echo "<tr>
             <td>
-                <input type='hidden' name='pakkaus[$i]' value='$row[selite]'>
-    		    <input type='hidden' name='pakkauskuvaus[$i]' value='$row[selitetark]'>
+                <input type='hidden' name='pakkaus[$i]' value='$row[pakkaus]'>
+    		    <input type='hidden' name='pakkauskuvaus[$i]' value='$row[pakkauskuvaus]'>
     	        <input type='text' size='3' value='' name='kollit[$i]'>
     	    </td>
     	    <td><input type='text' size='3' value='' name='kilot[$i]'></td>
     	    <td><input type='text' size='3' value='' name='kuutiot[$i]'></td>
     	    <td><input type='text' size='3' value='' name='lavametri[$i]'></td>
-    	    <td>$row[selite]</td>
-			<td>$row[selitetark]</td>";
+    	    <td>$row[pakkaus]</td>
+			<td>$row[pakkauskuvaus]</td>";
 
 		echo "<td><input type='text' size='10' name='pakkauskuvaustark[$i]'></td>";
 

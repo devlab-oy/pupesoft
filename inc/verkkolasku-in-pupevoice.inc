@@ -35,6 +35,17 @@ $ostaja_asiakkaantiedot["osoite"] 			= trim(utf8_decode(array_shift($xml->xpath(
 $ostaja_asiakkaantiedot["postino"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3251'))));
 $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="BY"]/@e3164'))));
 
+/// Jos BY tiedot puuttuu niin otetaan IV kentistä
+if ($ostaja_asiakkaantiedot["nimi"] == '') {
+	$ostaja_asiakkaantiedot["toim_ovttunnus"]	= trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC082.3039')));
+	$ostaja_asiakkaantiedot["ytunnus"] 			= trim(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC082.3039')));
+	$ostaja_asiakkaantiedot["nimi"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC080.3036.1'))));
+	$ostaja_asiakkaantiedot["osoite"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@eC059.3042.1'))));
+	$ostaja_asiakkaantiedot["postino"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3251'))));
+	$ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3164'))));
+}
+
+
 // jos ei löytynyt EUR summaa kokeillaan ilman valkoodia
 if ($laskun_summa_eur == 0) {
 	$laskun_summa_eur = (float) array_shift($xml->xpath('Group48/MOA[@eC516.5025="9" and @eC516.6345=""]/@eC516.5004'));

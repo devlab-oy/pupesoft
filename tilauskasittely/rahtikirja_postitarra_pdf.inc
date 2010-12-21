@@ -59,11 +59,13 @@
 	if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
 		$postiennakkomaara  = "$yhteensa $postirow[valkoodi]";
 		$postiennakkotilino = "$yhtiorow[pankkitili1]";
+		$postiennakkobic	= "$yhtiorow[pankkiswift1]";
 		$postiennakkoviite  = "$viite";
 	}
 	else {
 		$postiennakkomaara  = "";
 		$postiennakkotilino = "";
+		$postiennakkobic	= "";
 		$postiennakkoviite  = "";
 	}
 
@@ -75,25 +77,31 @@
 	if ($toitarow['lauantai']!='')		$x[]='6'; // lauantaijakelu
 	if ($toitarow['kuljyksikko']!='')	$x[]='7'; // kuljetusyksikkökuljetus
 
+	$selite_chk = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
 	$keku = "16";
-	if (strpos($toitarow['selite'], "9")  !== FALSE) $keku = "9";
-	if (strpos($toitarow['selite'], "00") !== FALSE) $keku = "00";
-	if (strpos($toitarow['selite'], "14") !== FALSE) $keku = "14";
-	if (strpos($toitarow['selite'], "21") !== FALSE) $keku = "21";
+	if (strpos($selite_chk, "9")  !== FALSE) $keku = "9";
+	if (strpos($selite_chk, "00") !== FALSE) $keku = "00";
+	if (strpos($selite_chk, "14") !== FALSE) $keku = "14";
+	if (strpos($selite_chk, "21") !== FALSE) $keku = "21";
 
-
-	if ($toitarow['kuljyksikko']!='') {
-		$keltainen = "Kuljetus-";
-		$kuljetus  = "yksikkö";
+	if ($toitarow['virallinen_selite'] != '') {
+		$keltainen = str_replace($keku, '', $toitarow['virallinen_selite']);
+		$kuljetus = '';
 	}
 	else {
-		$keltainen = "Keltainen";
-		$kuljetus  = "Kuljetus";
-	}
+		if ($toitarow['kuljyksikko']!='') {
+			$keltainen = "Kuljetus-";
+			$kuljetus  = "yksikkö";
+		}
+		else {
+			$keltainen = "Keltainen";
+			$kuljetus  = "Kuljetus";
+		}
 
-	if ($keku=="00") {
-		$keltainen = "";
-		$kuljetus  = "EXP";
+		if ($keku=="00") {
+			$keltainen = "";
+			$kuljetus  = "EXP";
+		}
 	}
 
 	// konvertoidaan keku numero postin koodiksi
@@ -158,6 +166,9 @@
 	$isobold["height"] 		= 10.5;
 	$isobold["font"] 		= "Helvetica-Bold";
 
+	$isoinbold["height"] 	= 12;
+	$isoinbold["font"] 		= "Helvetica-Bold";
+
 	$huge["height"] = 20;
 	$huge["font"] = "Helvetica-Bold";
 
@@ -221,9 +232,9 @@
 		}
 
 		// sitten aletaan piirtämään itse PDF sisältöä
-		$pdf->draw_text(100,  570,  $keltainen 									,$firstpage, $isobold);
-		$pdf->draw_text(100,  560,  $kuljetus									,$firstpage, $isobold);
-		$pdf->draw_text(150,  562,  $keku	 									,$firstpage, $huge);
+		$pdf->draw_text(50,  570,  $keltainen 									,$firstpage, $isobold);
+		$pdf->draw_text(50,  560,  $kuljetus									,$firstpage, $isobold);
+		$pdf->draw_text(220, 570,  $keku	 									,$firstpage, $huge);
 
 		$pdf->draw_text(18,  540,  "Lähettäjä Avsändare From", 					$firstpage, $pieni); // x,y
 		$pdf->draw_text(18,  530, $postirow["yhtio_nimi"],	 					$firstpage, $norm);
@@ -234,7 +245,7 @@
 		$pdf->draw_text(18,  480,  $rakir_row["toim_nimi"],	 					$firstpage, $iso);
 		$pdf->draw_text(18,  470,  $rakir_row["toim_nimitark"], 				$firstpage, $iso);
 		$pdf->draw_text(18,  460,  $rakir_row["toim_osoite"],	 				$firstpage, $iso);
-		$pdf->draw_text(18,  430,  $rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"],$firstpage, $isobold);
+		$pdf->draw_text(18,  430,  strtoupper($rakir_row['toim_maa']).'-'.$rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"],$firstpage, $isobold);
 
 		if ($asiakasrow["puhelin"] != '') {
 			$pdf->draw_text(100,  490,  "p.".$asiakasrow["puhelin"],			$firstpage, $norm);
@@ -248,7 +259,7 @@
 			$pdf->draw_text(345, 510,  "EDI",		 								$firstpage, $huge); // x,y
 		}
 
-		$pdf->draw_text(250, 490,  "Jätetty postin kuljetettavaksi Överlämnat till Posten", $firstpage, $pieni); // x,y
+		$pdf->draw_text(250, 490,  "Päivämäärä Datum", $firstpage, $pieni); // x,y
 		$pdf->draw_text(250, 478,  date("d.m.Y"), 								$firstpage, $norm); // x,y
 
 		$pdf->draw_rectangle(495,245,450,245, 									$firstpage, $rectparam); // y,x,y,x pystyviiva
@@ -269,20 +280,23 @@
 		$pdf->draw_rectangle(428,280,400,280, 									$firstpage, $rectparam); // y,x,y,x pystyviiva
 		$pdf->draw_rectangle(428,110,400,110, 									$firstpage, $rectparam); // y,x,y,x pystyviiva
 		$pdf->draw_rectangle(400,220,380,220, 									$firstpage, $rectparam); // y,x,y,x pystyviiva
+		$pdf->draw_rectangle(365,300,380,300, 									$firstpage, $rectparam); // y,x,y,x pystyviiva
 		$pdf->draw_text(18,  422,  "Lisäpalvelut Tilläggstjänster",				$firstpage, $pieni); // x,y
-		$pdf->draw_text(282, 422,  "MPS",										$firstpage, $pieni); // x,y
+		$pdf->draw_text(282, 422,  "Kpl St.",									$firstpage, $pieni); // x,y
 		$pdf->draw_text(112, 422,  "Maksaja muu kuin lähettäjä Betalaren annan än avsändaren",$firstpage, $pieni); // x,y
 		$pdf->draw_text(112, 408,  "Maksajan sopimustunnus",					$firstpage, $pieni); // x,y
 		$pdf->draw_text(112, 402,  "Betalarens avtalskod",						$firstpage, $pieni); // x,y
-		$pdf->draw_text(18,  394,  "Postiennakkomäärä Postförskottsbelopp",		$firstpage, $pieni); // x,y
+		$pdf->draw_text(18,  394,  "PE-summa PF-belopp",						$firstpage, $pieni); // x,y
 		$pdf->draw_text(222, 394,  "Tilinumero Kontonummer",					$firstpage, $pieni); // x,y
-		$pdf->draw_text(18,  374,  "Viitenumero Referensnummer",				$firstpage, $pieni); // x,y
+		$pdf->draw_text(18,  374,  "Pankkiviite Bank referens",					$firstpage, $pieni); // x,y
+		$pdf->draw_text(302, 374,  "BIC",										$firstpage, $pieni); // x,y
 
 		// vähä arvoja
 		$pdf->draw_text(190, 405,  $rahdinmaksajan_nr,							$firstpage, $isobold); // x,y
 		$pdf->draw_text(18,  384,  $postiennakkomaara,							$firstpage, $iso); // x,y
 		$pdf->draw_text(222, 384,  $postiennakkotilino,							$firstpage, $iso); // x,y
 		$pdf->draw_text(112, 370,  $postiennakkoviite,							$firstpage, $iso); // x,y
+		$pdf->draw_text(303, 366,  $postiennakkobic,							$firstpage, $iso); // x,y
 		$pdf->draw_text(285, 405,  $kollityht,									$firstpage, $iso); // x,y
 
 		// lisäpalvelut laatikot
@@ -303,8 +317,8 @@
 
 		// viivakoodin alapuolella vasen laita
 		$pdf->draw_text(18,  250,  "SAAPUMISILMOITUS ANKOMSTAVI", 				$firstpage, $pienibold);
-		$pdf->draw_text(18,  242,  "Lähetys on noudettavissa Postistanne. Olkaa hyvä ja ottakaa ilmoitus mukaanne. Lisätietoja: 0200 71000, www.posti.fi", $firstpage, $pieni); // x,y
-		$pdf->draw_text(18,  234,  "Ni kan hämta försändelsen på Ert postkontor. Vänligen ta med Er denna avi. Mera information: 0200 27100, www.posti.fi", $firstpage, $pieni); // x,y
+		$pdf->draw_text(18,  242,  "Lähetys on noudettavissa Postistanne. Olkaa hyvä ja ottakaa ilmoitus mukaanne. Lisätietoja: 0200 71000, www.itella.fi", $firstpage, $pieni); // x,y
+		$pdf->draw_text(18,  234,  "Ni kan hämta försändelsen på Ert postkontor. Vänligen ta med Er denna avi. Mera information: 0200 27100, www.itella.fi", $firstpage, $pieni); // x,y
 		$pdf->draw_text(18,  226,  "Säilytysaika on 2 täyttä kalenteriviikkoa. Kvarligger 2 hela kalenderveckor.", $firstpage, $pieni); // x,y
 
 		$pdf->draw_text(18,  215,  "Lähettäjä Avsändare From", 					$firstpage, $pieni); // x,y
@@ -316,14 +330,17 @@
 		$pdf->draw_text(18,  170,  $rakir_row["toim_nimi"],	 					$firstpage, $iso);
 		$pdf->draw_text(18,  160,  $rakir_row["toim_nimitark"], 				$firstpage, $iso);
 		$pdf->draw_text(18,  150,  $rakir_row["toim_osoite"],	 				$firstpage, $iso);
-		$pdf->draw_text(18,  130,  $rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"],$firstpage, $iso);
+		$pdf->draw_text(18,  130,  strtoupper($rakir_row['toim_maa']).'-'.$rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"],$firstpage, $isobold);
 
 		if ($asiakasrow["puhelin"] != '') {
 			$pdf->draw_text(100,  180,  "p.".$asiakasrow["puhelin"],			$firstpage, $norm);
 		}
 
 		// viivakoodin alapuolella vasen laita
-		$pdf->draw_text(322, 250,  $keltainen." ".$kuljetus." ".$keku, 			$firstpage, $pienibold);
+
+		$pieni_seliteteksti = $kuljetus == '' ? $keltainen.' '.$keku : $keltainen.' '.$kuljetus.' '.$keku;
+
+		$pdf->draw_text(322, 250,  $pieni_seliteteksti, 			$firstpage, $pienibold);
 		$pdf->draw_text(250, 225,  "Lisätiedot Tilläggsuppgifter", 				$firstpage, $pieni); // x,y
 
 		$apkal = 216;
@@ -337,12 +354,13 @@
 		}
 
 		$pdf->draw_text(250, 194,  "Sisältö Innehåll", 							$firstpage, $pieni); // x,y
-		$pdf->draw_text(250, 186,  "MPS", 										$firstpage, $pieni); // x,y
+		$pdf->draw_text(250, 186,  "Kpl St.", 										$firstpage, $pieni); // x,y
 		$pdf->draw_text(340, 178,  "kg", 										$firstpage, $pieni); // x,y
 		$pdf->draw_text(352, 186,  "Pvm Datum", 								$firstpage, $pieni); // x,y
-		$pdf->draw_text(250, 168,  "Postiennakkomäärä Postförskottsbelopp", 	$firstpage, $pieni); // x,y
+		$pdf->draw_text(250, 168,  "PE-summa PF-belopp",					 	$firstpage, $pieni); // x,y
+		$pdf->draw_text(340, 168,  "BIC",									 	$firstpage, $pieni); // x,y
 		$pdf->draw_text(250, 150,  "Tilinumero Kontonummer", 					$firstpage, $pieni); // x,y
-		$pdf->draw_text(250, 130,  "Viitenumero Referensnummer", 				$firstpage, $pieni); // x,y
+		$pdf->draw_text(250, 130,  "Pankkiviite Bank referens", 				$firstpage, $pieni); // x,y
 
 		$pdf->draw_rectangle(192,250,192,400, 									$firstpage, $rectparam); // y,x,y,x vaakaviiva
 		$pdf->draw_rectangle(174,250,174,400, 									$firstpage, $rectparam); // y,x,y,x vaakaviiva
@@ -350,6 +368,7 @@
 		$pdf->draw_rectangle(136,250,136,400, 									$firstpage, $rectparam); // y,x,y,x vaakaviiva
 		$pdf->draw_rectangle(192,290,174,290, 									$firstpage, $rectparam); // y,x,y,x pystyviiva
 		$pdf->draw_rectangle(192,350,174,350, 									$firstpage, $rectparam); // y,x,y,x pystyviiva
+		$pdf->draw_rectangle(156,335,174,335, 									$firstpage, $rectparam); // y,x,y,x pystyviiva
 
 		// ja vähä arvoja
 		$pdf->draw_text(255, 205,  "",											$firstpage, $iso); // x,y // tää on pikku lisätietoja kenttä JJFI koodin alla vasemmalla
@@ -357,6 +376,7 @@
 		$pdf->draw_text(297, 178,  $kilotyht,									$firstpage, $iso); // x,y
 		$pdf->draw_text(357, 178,  date("d.m.Y"),								$firstpage, $iso); // x,y
 		$pdf->draw_text(255, 160,  $postiennakkomaara,							$firstpage, $iso); // x,y
+		$pdf->draw_text(340, 160,  $postiennakkobic,							$firstpage, $iso); // x,y
 		$pdf->draw_text(255, 140,  $postiennakkotilino,							$firstpage, $iso); // x,y
 		$pdf->draw_text(255, 122,  $postiennakkoviite,							$firstpage, $iso); // x,y
 
@@ -367,6 +387,7 @@
 		$pdf->draw_text(18, 110,  "Kuittaus ja nimen selvennys Kvittering och namnförtydligande",	$firstpage, $pieni); // x,y
 		$pdf->draw_text(40, 80,   ".               .                        klo kl.",				$firstpage, $pieni); // x,y
 		$pdf->draw_text(18, 70,   "Lisätiedot Tilläggsuppgifter",									$firstpage, $pieni); // x,y
+		$pdf->draw_text(18, 10,   t("Itella Green - ilmastoystävällinen kuljetus"),					$firstpage, $isoinbold); // x,y
 
 		$komm = "";
 
@@ -386,10 +407,75 @@
 			$kommentit = explode("\n", trim($komm));
 
 			$pohja  = 60;
+			$ed_akey = 0;
+			$rpit1 = 390;
+			$rpit2 = 380;
 
-			for ($o = 0; $o <= 5; $o++) {
-				$pdf->draw_text(18, $pohja, $kommentit[$o], $firstpage, $isobold);
-				$pohja -= 10;
+			$maxoik = 18;
+
+			foreach ($kommentit as $akey => $kommentti) {
+
+				// Jos rivikommentti on pitkä niin rivitämme sen
+				if ($pdf->strlen($kommentti, $isobold) > ($rpit1-$maxoik)) {
+
+					$kommentti = str_replace(' ' ,' ##', $kommentti);
+					$kommentti = str_replace('.' ,'.##', $kommentti);
+					$kommentti = str_replace(',' ,',##', $kommentti);
+
+					$sanat = explode('##', $kommentti);
+					$lause = "";
+
+					foreach ($sanat as $sana) {
+
+						if ($pdf->strlen($lause, $isobold) > ($rpit2-$maxoik)) {
+
+							$pdf->draw_text($maxoik, $pohja, $lause, $firstpage, $isobold);
+							$lause = "";
+							$maxoik = 18;
+							$pohja  -= 12;
+							
+							if ($pohja <= 22) {
+								break 2;
+							}
+						}
+
+						$lause .= $sana;
+					}
+
+					if ($pdf->strlen($lause, $isobold) <= ($rpit2-$maxoik)) {
+						$pdf->draw_text($maxoik, $pohja, $lause, $firstpage, $isobold);
+
+						$oikpos = $pdf->strlen($lause, $isobold) + 20;
+
+						if ($oikpos > $maxoik) {
+							$maxoik = $oikpos;
+						}
+					}
+					else {
+						$maxoik = 18;
+						$pohja -= 12;
+					}
+
+					if ($pohja <= 22) {
+						break;
+					}
+				}
+				elseif ($pdf->strlen($kommentti, $isobold) <= $rpit2) {
+					$pdf->draw_text($maxoik, $pohja, $kommentti, $firstpage, $isobold);
+
+					$oikpos = $pdf->strlen($kommentti, $isobold) + 20;
+
+					if ($oikpos > $maxoik) {
+						$maxoik = $oikpos;
+					}
+
+					if ($pohja <= 22) {
+						break;
+					}
+
+				}
+
+				$ed_akey = $akey;
 			}
 		}
 

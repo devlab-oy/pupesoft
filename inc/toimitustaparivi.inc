@@ -328,4 +328,23 @@
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == "sallitut_alustat") {
+		$ulos = "<td>";
+
+		$sel = explode(",", $trow[$i]);
+
+		$query = "SELECT tunnus, pakkaus FROM pakkaus WHERE yhtio = '{$kukarow['yhtio']}'";
+		$pakkaus_result = mysql_query($query) or pupe_error($query);
+
+		$ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
+
+		while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
+
+			$chk = in_array($pakkaus_row['tunnus'], $sel) ? 'checked' : '';
+
+			$ulos .= "<input type='checkbox' name='{$nimi}[]' value='{$pakkaus_row['tunnus']}' {$chk}/> {$pakkaus_row['pakkaus']}<br />";
+		}
+
+		$ulos .= "</td>";
+		$jatko = 0;
+	}

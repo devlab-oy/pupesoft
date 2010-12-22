@@ -730,6 +730,23 @@
 			echo "<textarea name='laskunumerot' rows='10' cols='60'></textarea>";
 			echo "<input type='submit' value='Luo aineisto'>";
 			echo "</form>";
+			
+			
+			echo "<br><br><br>";
+			
+			exec("grep -l -P \"<SellerPartyVat>FI\" $pupe_root_polku/dataout/laskutus-$yhtiorow[yhtio]*", $files, $ret);
+			
+			foreach ($files as $file) {					
+				if (trim($file) != "") {
+					$laskufile = file_get_contents($file);
+					
+					preg_match_all("/<InvoiceNumber>([0-9]*)<\/InvoiceNumber>/", $laskufile, $matsit);		
+					
+					for ($i=0; $i < count($matsit[0]); $i++) {
+						echo $matsit[1][$i].",<br>";												
+					}																					
+				}
+			}									
 		}
 
 		// poistetaan lukot

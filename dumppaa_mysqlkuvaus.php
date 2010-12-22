@@ -38,7 +38,6 @@
 	else {
 		if (!$php_cli) echo "<font class='head'>".t("SQL-tietokantarakenne").":</font><hr>";
 
-
 		$ulos = array();
 
 		///usr/bin/mysqldump --> toimii ainakin fedorassa ja ubuntussa by default
@@ -46,7 +45,7 @@
 
 		if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epäonnistui!");
 
-		foreach($ulos as $print) {
+		foreach ($ulos as $print) {
 			fputs($toot, $print."\n");
 		}
 
@@ -89,7 +88,7 @@
 			foreach ($rivit as $rivi) {
 				$rivi = trim(str_replace("\n", " ", $rivi));
 				if ($rivi != "") {
-					echo "echo \"$rivi;\" | mysql -u $dbuser --password=$dbpass $dbkanta;\n";
+					echo "echo \"$rivi;\" | mysql -u $dbuser --password=$dbpass $dbkanta;\\n";
 				}
 			}
 		}
@@ -107,11 +106,12 @@
 			echo "<pre>$updatet</pre>";
 		}
 		elseif (trim($updatet) != "") {
-			echo "\n\n";
+			echo "\\n\\n";
 			$rivit = explode("\n", trim($updatet));
 
 			foreach ($rivit as $rivi) {
-				echo "echo \"$rivi\" | mysql -u $dbuser --password=$dbpass $dbkanta;\n";
+				if (trim($rivi) != "") echo "echo \"$rivi\" | mysql -u $dbuser --password=$dbpass $dbkanta;\\n";
+				else echo "\\n";
 			}
 		}
 

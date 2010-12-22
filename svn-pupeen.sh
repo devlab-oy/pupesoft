@@ -15,7 +15,7 @@ if [ -z "${dumppi}" ]; then
 else
 	echo " Muutoksia loytyi!"
 	echo
-	echo ${dumppi}
+	echo -e ${dumppi}
 	echo
 	echo "HUOM: Tee tarvittavat tietokantamuutoket ennen kuin jatkat!"
 	echo

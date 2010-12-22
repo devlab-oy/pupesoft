@@ -284,6 +284,9 @@ if (!function_exists('pupevoice_rivi')) {
 			}
 
 			if (trim($lisakomm) != "") {
+				// Siivotaan myös lisäkommentti
+				$lisakomm = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#", "/")."]/", " ", $lisakomm);
+
 				$tilrow["kommentti"] = trim($lisakomm)."|".trim($tilrow["kommentti"]);
 			}
 		}

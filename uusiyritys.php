@@ -528,7 +528,6 @@
 						kauppatapahtuman_luonne = 0,
 						kuljetusmuoto	= 0,
 						poistumistoimipaikka_koodi = '',
-						ulkoinen_jarjestelma = '',
 						sallitut_maat 	= '',
 						laatija 		= '$kukarow[kuka]',
 						luontiaika		= now()";

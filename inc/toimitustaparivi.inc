@@ -59,6 +59,26 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "virallinen_selite") {
+
+		$sel = '';
+		if ($trow[$i] != '') $sel[$trow[$i]] = 'SELECTED';
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Ei valintaa")."</option>";
+		$ulos .= "<option value='Express City' {$sel["Express City"]}>Itella Express City</option>";
+		$ulos .= "<option value='Express Morning' {$sel["Express Morning"]}>Itella Express Morning</option>";
+		$ulos .= "<option value='Express Business Day' {$sel["Express Business Day"]}>Itella Express Business Day</option>";
+		$ulos .= "<option value='Express Point' {$sel["Express Point"]}>Itella Express Point</option>";
+		$ulos .= "<option value='Express Flex' {$sel["Express Flex"]}>Itella Express Flex</option>";
+		$ulos .= "<option value='Economy' {$sel["Economy"]}>Itella Economy</option>";
+		$ulos .= "<option value='Customer Return' {$sel["Customer Return"]}>Itella Customer Return</option>";
+		$ulos .= "<option value='Undelivered Shipment' {$sel["Undelivered Shipment"]}>Itella Undelivered Shipment</option>";
+		$ulos .= "<option value='Lisäarvokuljetus' {$sel["Lisäarvokuljetus"]}>Itella Lisäarvokuljetus</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "merahti") {
 		$sel1='';
 		$sel2='';
@@ -104,7 +124,7 @@
 	if (mysql_field_name($result, $i) == "rahtikirja") {
 
 		$vresult = t_avainsana("RAHTIKIRJA");
-		
+
 		$ulos = "<td><select name='$nimi'>";
 
 		while($row = mysql_fetch_array($vresult)) {
@@ -116,7 +136,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "osoitelappu") {
 		$sel1 = '';
 		$sel2 = '';
@@ -146,7 +166,7 @@
 		$ulos .= "<option value = '' >".t("Valitse")."</option>";
 
 		$vresult = t_avainsana("KM");
-		
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['selite']) {
@@ -225,7 +245,7 @@
 		$sel = $sela = '';
 		if ($trow[$i]!='') $sel = 'SELECTED';
 		else $sela = 'SELECTED';
-		
+
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='' $sela>".t("Toimitustavalla saa toimittaa jälkivaatimuksia")."</option>";
 		$ulos .= "<option value='o' $sel>".t("Toimitustavalla ei saa toimittaa jälkivaatimuksia")."</option>";
@@ -237,7 +257,7 @@
 
 		$sel			= array();
 		$sel[$trow[$i]]	= " selected";
-		
+
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Toimitustavalla saa toimittaa VAK-tuotteita")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Toimitustavalla ei saa toimittaa VAK-tuotteita")."</option>";
@@ -266,14 +286,14 @@
 		else {
 			$sela = 'selected';
 		}
-		
+
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='' $sela>".t("Toimitustavalla saa toimittaa erikoispakkauksia")."</option>";
 		$ulos .= "<option value='K' $sel>".t("Toimitustavalla ei saa toimittaa erikoispakkauksia")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ei_pakkaamoa") {
 
 		$ulos  = "<td><select name='$nimi'>";

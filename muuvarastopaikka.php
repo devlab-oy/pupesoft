@@ -9,14 +9,14 @@
 		$result = mysql_query($query) or pupe_error($query);
 	}
 	else {
-		
+
 		if ($livesearch_tee == "TUOTEHAKU") {
 			livesearch_tuotehaku();
 			exit;
 		}
-		
+
 		// Enaboidaan ajax kikkare
-		enable_ajax();		
+		enable_ajax();
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "muuvarastopaikka.php")  !== FALSE) {
@@ -84,9 +84,7 @@
 
 		if (mysql_num_rows($paikatresult1) > 0) {
 			while ($saldorow = mysql_fetch_array ($paikatresult1)) {
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
-
-				$saldot[$saldorow["tunnus"]] 	= $saldo;
+				$saldot[$saldorow["tunnus"]] 	= $saldorow["saldo"];
 				$hyllyalue[$saldorow["tunnus"]] = $saldorow["hyllyalue"];
 				$hyllynro[$saldorow["tunnus"]] 	= $saldorow["hyllynro"];
 				$hyllyvali[$saldorow["tunnus"]] = $saldorow["hyllyvali"];
@@ -290,7 +288,7 @@
 						AND tunnus = '$sarjano_array[0]'";
 			$siirrettava_era_res = mysql_query($query) or pupe_error($query);
 			$siirrettava_era_row = mysql_fetch_assoc($siirrettava_era_res);
-			
+
 			if (!is_array($sarjano_array) or $sarjano_kpl_array[$sarjano_array[0]] < $asaldo) {
 				echo "<font class='error'>".t("Tarkista er‰numerovalintasi")."</font><br><br>";
 				$tee = $uusitee;
@@ -371,7 +369,7 @@
 						and hyllynro 	= '$mistarow[hyllynro]'
 						and hyllyvali 	= '$mistarow[hyllyvali]'
 						and hyllytaso	= '$mistarow[hyllytaso]'";
-			$result = mysql_query($query) or die($query);
+			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 1) {
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuotteet[$iii], 'JTSPEC', '', '', $mistarow["hyllyalue"], $mistarow["hyllynro"], $mistarow["hyllyvali"], $mistarow["hyllytaso"]);
@@ -414,7 +412,7 @@
 							and hyllynro 	= '$minnerow[hyllynro]'
 							and hyllyvali 	= '$minnerow[hyllyvali]'
 							and hyllytaso	= '$minnerow[hyllytaso]'";
-				$result = mysql_query($query) or die($query);
+				$result = mysql_query($query) or pupe_error($query);
 
 				// Vastaanottavaa paikkaa ei lˆydy, perustetaan se
 				if (mysql_num_rows($result) == 0) {
@@ -428,7 +426,7 @@
 								'$tuotteet[$iii]',
 								'$kukarow[kuka]',
 								now())";
-					$result = mysql_query($query) or die($query);
+					$result = mysql_query($query) or pupe_error($query);
 					$lisatty_tun = mysql_insert_id();
 
 					// Tuotepaikka jonne lis‰varuste vied‰‰n
@@ -450,7 +448,7 @@
 								selite 		= '".t("Lis‰ttiin tuotepaikka")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso]',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
-					$result = mysql_query($query) or die($query);
+					$result = mysql_query($query) or pupe_error($query);
 
 					echo t("Uusi varastopaikka luotiin tuotteelle").": $tuotteet[$iii] ($minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso])<br>";
 				}
@@ -640,10 +638,10 @@
 									tuoteno			= '$tuoteno',
 									sarjanumero		= '$sarrr_row[sarjanumero]',
 									ostorivitunnus 	= '$sarrr_row[ostorivitunnus]',
-									era_kpl			= $asaldo,									
+									era_kpl			= $asaldo,
 									takuu_alku 		= '$sarrr_row[takuu_alku]',
 									takuu_loppu		= '$sarrr_row[takuu_loppu]',
-									parasta_ennen	= '$sarrr_row[parasta_ennen]',									
+									parasta_ennen	= '$sarrr_row[parasta_ennen]',
 									hyllyalue		= '$minnerow[hyllyalue]',
 									hyllynro 		= '$minnerow[hyllynro]',
 									hyllyvali 		= '$minnerow[hyllyvali]',
@@ -957,7 +955,7 @@
 					echo "<td nowrap>".t_tuotteen_avainsanat($sarjarow, 'nimitys')."</td>";
 					echo "<td nowrap>$sarjarow[sarjanumero]</td>";
 					echo "<td nowrap>$sarjarow[tuotepaikka]</td>";
-					
+
 					if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
 						echo "<td>$sarjarow[era_kpl] ".t_avainsana("Y", "", "and avainsana.selite='$sarjarow[yksikko]'", "", "", "selite")."</td>";
 						echo "<td>";
@@ -969,7 +967,7 @@
 					else {
 						echo "<td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td>";
 					}
-					
+
 					echo "</tr>";
 				}
 				echo "</table>";
@@ -1004,7 +1002,7 @@
 		echo "<tr><th>".t("Varastopaikka")."</th><th>".t("Saldo")."</th><th>",t("Hyllyss‰"),"</th><th>",t("Myyt‰viss‰"),"</th><th>".t("Oletuspaikka")."</th><th>".t("H‰lyraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Poista")."</th></tr>";
 
 		if (mysql_num_rows($paikatresult1) > 0) {
-			$query = "	SELECT tunnus
+			$query = "	SELECT *
 						FROM tuotepaikat
 						WHERE tuoteno = '$tuoteno'
 						and yhtio 	= '$kukarow[yhtio]'
@@ -1024,7 +1022,7 @@
 
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-				echo "<tr><td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td><td align='right'>$saldo</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
+				echo "<tr><td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td><td align='right'>$saldorow[saldo]</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
 
 				if (kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"])) {
 					echo "<td><input type = 'radio' name='oletus' value='$saldorow[tunnus]' $checked></td>
@@ -1036,12 +1034,13 @@
 				}
 
 				// Ei n‰ytet‰ boxia, jos sit‰ ei saa k‰ytt‰‰
-				if ($saldo != 0) {
+				if ($saldorow["saldo"] != 0) {
 					echo "<td></td>";
 				}
 				else {
 					echo "<td><input type = 'checkbox' name='poista[$saldorow[tunnus]]' value='$saldorow[tunnus]'></td>";
 				}
+
 				echo "</tr>";
 			}
 		}

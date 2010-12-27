@@ -1387,7 +1387,7 @@ if (!function_exists('alvierittely')) {
 			$pdf_lasku->draw_text(360, $kala, t("Kassa-alennuksella", $kieli), 		$thispage, $norm);
 			$kala -= 10;
 		}
-		
+
 		//loppusummat vain vikalle sivulle
 		$pdf_lasku->draw_text(360, $kala, t("Veroton arvo yhteens‰", $kieli).":", 		$thispage, $norm);
 
@@ -1862,7 +1862,7 @@ if (!function_exists("tulosta_lasku")) {
 				$GLOBALS['vientierittelymail'] = $komento;
 
 				// l‰hetet‰‰n meili
-				$kutsu = t("Lasku", $kieli)." $lasku";
+				$kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
 				$liite = $pdf_laskufilenimi;
 
 				// l‰hetet‰‰n cc aina postittaja osoitteeseen
@@ -1878,13 +1878,22 @@ if (!function_exists("tulosta_lasku")) {
 			//haetaan varaston tiedot
 			if ($valittu_tulostin != "" and !is_numeric($valittu_tulostin) and $valittu_tulostin == "AUTOMAAGINEN_VALINTA") {
 				if ($varasto != 0) {
-					$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto' order by alkuhyllyalue,alkuhyllynro";
+					$query = "	SELECT *
+								FROM varastopaikat
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$varasto'
+								ORDER BY alkuhyllyalue,alkuhyllynro";
 				}
 				else {
-					$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' order by alkuhyllyalue,alkuhyllynro limit 1";
+					$query = "	SELECT *
+								FROM varastopaikat
+								WHERE yhtio = '$kukarow[yhtio]'
+								ORDER BY alkuhyllyalue,alkuhyllynro
+								LIMIT 1";
 				}
 				$prires = mysql_query($query) or pupe_error($query);
 				$prirow = mysql_fetch_array($prires);
+
 				$valittu_tulostin = $prirow["printteri5"];
 
 				if ($GLOBALS['silent'] == "") $GLOBALS['tulos_ulos'] .= t("Lasku tulostuu varastoon").": $prirow[nimitys]<br>\n";
@@ -1914,7 +1923,7 @@ if (!function_exists("tulosta_lasku")) {
 				// l‰hetet‰‰n meili
 				$komento = "";
 
-				$kutsu = t("Lasku", $kieli)." $lasku";
+				$kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
 
 				if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
 					$kutsu .= " ".trim($laskurow["nimi"]);
@@ -1947,7 +1956,7 @@ if (!function_exists("tulosta_lasku")) {
 					// l‰hetet‰‰n meili
 					$komento = "";
 
-					$kutsu = t("Lasku", $kieli)." $lasku";
+					$kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
 						$kutsu .= " ".trim($laskurow["nimi"]);

@@ -37,7 +37,7 @@ FILEDATE=`date "+%Y-%m-%d"`
 FILENAME="${DBKANTA}-backup-${FILEDATE}.sql.bz2"
 
 # tehdaan mysqldump ja pakataan se
-mysqldump -u ${DBKAYTTAJA} --password=${DBSALASANA} ${DBKANTA} | pbzip2 > ${BACKUPDIR}/${FILENAME}
+mysqldump --lock-all-tables --flush-logs --master-data -u ${DBKAYTTAJA} --password=${DBSALASANA} ${DBKANTA} | pbzip2 > ${BACKUPDIR}/${FILENAME}
 
 # siivotaan yli 30pv vanhat pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete

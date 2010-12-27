@@ -1368,10 +1368,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Päivitettävää riviä ei löytynyt")."!</font><br>";
 				}
 				elseif ($rivi[$postoiminto] == 'LISAA' and mysql_num_rows($result) != 0) {
+
 					if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
-						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska Asiakassegmenttikoodia ei löytynyt")."!</font><br>";
-					}
-					else {
 						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska se löytyi jo järjestelmästä")."!</font><br>";
 					}
 				}

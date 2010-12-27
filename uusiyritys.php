@@ -500,7 +500,7 @@
 						yhtio 			= '$yhtio',
 						alkuhyllyalue 	= 'A00',
 						alkuhyllynro 	= '00',
-						loppuhyllyalue 	= 'Z99',
+						loppuhyllyalue 	= 'A99',
 						loppuhyllynro 	= '99',
 						printteri0 		= '$kirjoitin_row[tunnus]',
 						printteri1 		= '$kirjoitin_row[tunnus]',

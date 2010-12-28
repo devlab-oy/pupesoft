@@ -2501,8 +2501,8 @@
 
 	if (mysql_field_name($result, $i) == "varastopaikkojen_maarittely") {
 
-		// $tyyppi = 0;
-		// 
+		$tyyppi = 0;
+		
 		// $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 		// 
 		// $sel = array();

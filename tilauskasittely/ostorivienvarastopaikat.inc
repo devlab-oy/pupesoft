@@ -34,7 +34,9 @@ if ($tee == "valmis") {
 		}
 		else {
 
-			while($tilausrivirow = mysql_fetch_array($perheresult)) {
+			while($tilausrivirow = mysql_fetch_assoc($perheresult)) {
+
+				$query2 = '';
 
 				// Jaaha mitäs tuotepaikalle pitäisi tehdä
 				if($tilausrivirow["perheid2"] != $tilausrivirow["tunnus"] and $tilausrivirow["perheid2"] > 0 and !isset($rivivarasto[$tilausrivirow["tunnus"]])) {
@@ -47,6 +49,7 @@ if ($tee == "valmis") {
 								and hyllyvali	= '".$faijanmesta[$tilausrivirow["perheid2"]]["t3"]."'
 								and hyllytaso	= '".$faijanmesta[$tilausrivirow["perheid2"]]["t4"]."'
 								and tuoteno		= '$tilausrivirow[tuoteno]'";
+					$result = mysql_query($query) or pupe_error($query);
 					//echo "FAIJALTA: $tilausrivirow[tuoteno] $query<br><br>";
 					
 					//	Lisätään nämä paikka arrayhin
@@ -57,11 +60,82 @@ if ($tee == "valmis") {
 					
 				}
 				elseif (($rivivarasto[$tunnus] != 'x') and ($rivivarasto[$tunnus] != '')) {  //Varastopaikka vaihdettiin pop-upista, siellä on paikan tunnus
-					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
-								from tuotepaikat
-								WHERE yhtio	= '$kukarow[yhtio]'
-								and tunnus 	= '$rivivarasto[$tunnus]'
-								and tuoteno	= '$tilausrivirow[tuoteno]'";
+
+					if ($yhtiorow['varastopaikkojen_maarittely'] == 'M' and strpos($rivivarasto[$tunnus], '##') !== FALSE) {
+
+						list($oletus_paikan_tunnus, $uuden_paikan_tunnus, $montako_tuotetta_mahtuu, $paljon_pitaa_mahtua_muualle) = explode('##', $rivivarasto[$tunnus]);
+
+						$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
+									FROM tuotepaikat
+									WHERE yhtio	= '{$kukarow['yhtio']}'
+									AND tunnus 	= '{$oletus_paikan_tunnus}'
+									AND tuoteno	= '{$tilausrivirow['tuoteno']}'";
+						$result = mysql_query($query) or pupe_error($query);
+
+						// katsotaan löytyykö tuotteen uudelle paikalle jo tuotepaikka
+						$query2 = "	SELECT '{$tilausrivirow['tuoteno']}' as tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
+									FROM tuotepaikat
+									WHERE yhtio	= '{$kukarow['yhtio']}'
+									AND tunnus 	= '{$uuden_paikan_tunnus}'";
+						$result2 = mysql_query($query2) or pupe_error($query2);
+						$paikkarow2 = mysql_fetch_assoc($result2);
+
+						// JÄMÄHAARA
+						if ($paljon_pitaa_mahtua_muualle != 'kaikki') {
+							$update_query = "	UPDATE tilausrivi SET 
+												varattu = '{$montako_tuotetta_mahtuu}' 
+												WHERE yhtio = '{$kukarow['yhtio']}' 
+												AND tunnus = '{$tilausrivirow['tunnus']}'";
+							$update_res = mysql_query($update_query) or pupe_error($update_query);
+
+							$insert_query = "INSERT INTO tilausrivi SET ";
+
+							foreach ($tilausrivirow as $key => $val) {
+								switch ($key) {
+									case 'hyllyalue':
+									case 'hyllynro':
+									case 'hyllytaso':
+									case 'hyllyvali':
+										$insert_query .= "{$key}='{$paikkarow2[$key]}',";
+										break;
+									case 'varattu':
+										$insert_query .= "varattu='{$paljon_pitaa_mahtua_muualle}',";
+										break;
+									case 'laatija':
+										$insert_query .= "laatija='{$kukarow['kuka']}',";
+										break;
+									case 'laadittu':
+										$insert_query .= "laadittu=now(),";
+										break;
+									case 'tunnus':
+										break;
+									default:
+										$insert_query .= "{$key}='$val',";
+								}
+							}
+
+							$insert_query = substr($insert_query, 0, -1);
+							$insert_res = mysql_query($insert_query) or pupe_error($insert_query);
+
+							$tilausrivirow['tunnus'] = mysql_insert_id();
+						}
+
+						unset($result);
+
+						$t1[$tilausrivirow['tunnus']] = $paikkarow2['hyllyalue'];
+						$t2[$tilausrivirow['tunnus']] = $paikkarow2['hyllynro'];
+						$t3[$tilausrivirow['tunnus']] = $paikkarow2['hyllyvali'];
+						$t4[$tilausrivirow['tunnus']] = $paikkarow2['hyllytaso'];
+					}
+					else {
+						$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
+									from tuotepaikat
+									WHERE yhtio	= '$kukarow[yhtio]'
+									and tunnus 	= '$rivivarasto[$tunnus]'
+									and tuoteno	= '$tilausrivirow[tuoteno]'";
+						$result = mysql_query($query) or pupe_error($query);
+					}
+
 					//echo "VALIKKOON: $tilausrivirow[tuoteno] $query<br><br>";					
 				}
 				else {
@@ -73,10 +147,9 @@ if ($tee == "valmis") {
 								and hyllyvali	= '$t3[$tunnus]'
 								and hyllytaso	= '$t4[$tunnus]'
 								and tuoteno		= '$tilausrivirow[tuoteno]'";
+					$result = mysql_query($query) or pupe_error($query);
 					//echo "KÄSINSYÖTETTY: $tilausrivirow[tuoteno] $query<br><br>";
 				}
-
-				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) == 0) {
 
@@ -337,6 +410,7 @@ if ($tee == "") {
 	//haetaan ostorivit
 	$query = "	SELECT tilausrivi.tuoteno, tilausrivi.tunnus, tilausrivi.perheid2, 
 				tilausrivi.hyllyalue r1, tilausrivi.hyllynro r2, tilausrivi.hyllyvali r3, tilausrivi.hyllytaso r4,
+				tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa,
 				group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tilausrivi.varattu, 
 				(select kpl from tilausrivi t2 where t2.yhtio=tilausrivi.yhtio and t2.tunnus=tilausrivi.perheid2 and t2.uusiotunnus='$otunnus') isakpl
 				FROM tilausrivi
@@ -443,6 +517,8 @@ if ($tee == "") {
 				echo "<td><select name='rivivarasto[$rivirow[tunnus]]' onchange = \"if(this.options[this.selectedIndex].value=='') { document.getElementById('oletusbox_{$rivirow["tunnus"]}').checked=true;} else {document.getElementById('oletusbox_{$rivirow["tunnus"]}').checked=false;}\">";
 				echo "<option value=''>".t("Uusi paikka")." --></option>";
 
+				$virheviesti = '';
+
 				while ($paikkarow = mysql_fetch_array($paikkares)) {
 
 					$query  = "	SELECT tunnus
@@ -474,6 +550,100 @@ if ($tee == "") {
 					
 					if ($paikkarow['oletus'] != '') {
 						$ole = "(".t("oletus").")";
+
+						if ($yhtiorow['varastopaikkojen_maarittely'] == 'M') {
+
+							if ($rivirow['tuoteleveys'] == 0 or $rivirow['tuotekorkeus'] == 0 or $rivirow['tuotekorkeus'] == 0 or $rivirow['tuotemassa'] == 0) {
+								$virheviesti = "<br /><font class='error'>".t("Tuotteen mitta-/painotiedot ovat virheelliset")."!</font>";
+							}
+							else {
+								$query = "	SELECT * 
+											FROM varaston_hyllypaikat 
+											WHERE yhtio = '{$kukarow['yhtio']}' 
+											AND hyllyalue = '{$paikkarow['hyllyalue']}'
+											AND hyllynro = '{$paikkarow['hyllynro']}'
+											AND hyllyvali = '{$paikkarow['hyllyvali']}'
+											AND hyllytaso = '{$paikkarow['hyllytaso']}'";
+								$hyllypaikat_res = mysql_query($query) or pupe_error($query);
+								$hyllypaikat_row = mysql_fetch_assoc($hyllypaikat_res);
+
+								$hyllypaikat_varasto = ($varasto != 'y' and $varasto != 'x') ? $varasto : $hyllypaikat_row['varasto'];
+
+								$hyllypaikan_tilavuus 	= $hyllypaikat_row['leveys'] * $hyllypaikat_row['korkeus'] * $hyllypaikat_row['syvyys'];
+								$tuotteen_tilavuus 		= $rivirow['tuoteleveys'] * $rivirow['tuotekorkeus'] * $rivirow['tuotesyvyys'];
+
+								$paljon_hyllypaikalla_nyt 		= $tuotteen_tilavuus * $paikkarow['saldo'];
+								$paljon_hyllypaikalla_vapaata 	= $hyllypaikan_tilavuus - $paljon_hyllypaikalla_nyt;
+
+								$montako_tuotetta_mahtuu = floor($paljon_hyllypaikalla_vapaata / $tuotteen_tilavuus);
+
+								if ($montako_tuotetta_mahtuu < 0 or $rivirow['tuoteleveys'] > $hyllypaikat_row['leveys'] or $rivirow['tuotekorkeus'] > $hyllypaikat_row['korkeus'] or $rivirow['tuotesyvyys'] > $hyllypaikat_row['syvyys'] or ($montako_tuotetta_mahtuu * $rivirow['tuotemassa']) > $hyllypaikat_row['maksimitaakka']) {
+									$montako_tuotetta_mahtuu = 0;
+								}
+
+								$paljon_pitaa_mahtua_muualle = $rivirow['varattu'] - $montako_tuotetta_mahtuu;
+
+								if ($paljon_pitaa_mahtua_muualle > 0) {
+
+									// jos ii on nolla, lasketaan paikka mihin kaikki mahtuu
+									// jos ii on 1, lasketaan mihin ylijäävät kappaleet mahtuu
+									for ($ii = 0; $ii < 2; $ii++) {
+
+										// jos tuotteita mahtuu 0 nykyiselle paikalle, niin ehdotetaan vain paikkaa mihin mahtuu KAIKKI tuotteet
+										if ($ii > 0 and $montako_tuotetta_mahtuu == 0) continue;
+
+										$kpllisa = $ii == 0 ? $rivirow['varattu'] : $paljon_pitaa_mahtua_muualle;
+										$limitlisa = $ii == 0 ? "LIMIT 1" : "LIMIT 5";
+
+										$query = "	SELECT DISTINCT
+													ABS(ORD(LEFT('{$paikkarow['hyllyalue']}', 1)) - ORD(LEFT(varaston_hyllypaikat.hyllyalue, 1))) etaisyys,
+													(varaston_hyllypaikat.korkeus * varaston_hyllypaikat.leveys * varaston_hyllypaikat.syvyys) tilavuus,
+													floor(((varaston_hyllypaikat.korkeus * varaston_hyllypaikat.leveys * varaston_hyllypaikat.syvyys) / {$tuotteen_tilavuus})) paljon_mahtuu_kpl,
+													varaston_hyllypaikat.hyllyalue, 
+													varaston_hyllypaikat.hyllynro, 
+													varaston_hyllypaikat.hyllyvali, 
+													varaston_hyllypaikat.hyllytaso, 
+													tuotepaikat.tunnus
+													FROM varaston_hyllypaikat
+													JOIN tuotepaikat ON (tuotepaikat.yhtio = varaston_hyllypaikat.yhtio 
+																		AND tuotepaikat.saldo = 0 
+																		AND tuotepaikat.hyllyalue = varaston_hyllypaikat.hyllyalue 
+																		AND tuotepaikat.hyllynro = varaston_hyllypaikat.hyllynro
+																		AND tuotepaikat.hyllyvali = varaston_hyllypaikat.hyllyvali
+																		AND tuotepaikat.hyllytaso = varaston_hyllypaikat.hyllytaso
+																		AND tuotepaikat.oletus = '')
+													WHERE varaston_hyllypaikat.yhtio = '{$kukarow['yhtio']}'
+													AND varaston_hyllypaikat.varasto = '{$hyllypaikat_varasto}'
+													AND varaston_hyllypaikat.korkeus >= '{$rivirow['tuotekorkeus']}'
+													AND varaston_hyllypaikat.leveys >= '{$rivirow['tuoteleveys']}'
+													AND varaston_hyllypaikat.syvyys >= '{$rivirow['tuotesyvyys']}'
+													AND varaston_hyllypaikat.maksimitaakka >= ({$kpllisa} * {$rivirow['tuotemassa']})
+													HAVING paljon_mahtuu_kpl >= {$kpllisa}
+													ORDER BY 1,2,3,4,5,6,7
+													{$limitlisa}";
+										$loput_res = mysql_query($query) or pupe_error($query);
+
+										if (mysql_num_rows($loput_res) > 0) {
+
+											$virheviesti = '';
+
+											while ($loput_row = mysql_fetch_assoc($loput_res)) {
+												if ($ii == 0) {
+													echo "<option value='{$paikkarow['tunnus']}##{$loput_row['tunnus']}##{$rivirow['varattu']}##kaikki'>",t("Vie kaikki paikalle")," $loput_row[hyllyalue] $loput_row[hyllynro] $loput_row[hyllyvali] $loput_row[hyllytaso]</option>";
+												}
+												else {
+													echo "<option value='{$paikkarow['tunnus']}##{$loput_row['tunnus']}##{$montako_tuotetta_mahtuu}##{$paljon_pitaa_mahtua_muualle}' selected='selected'>",t("Vie")," $montako_tuotetta_mahtuu ",t("oletuspaikalle")," $paikkarow[hyllyalue] $paikkarow[hyllynro] $paikkarow[hyllyvali] $paikkarow[hyllytaso] ",t("ja loput")," $paljon_pitaa_mahtua_muualle ",t("paikalle")," $loput_row[hyllyalue] $loput_row[hyllynro] $loput_row[hyllyvali] $loput_row[hyllytaso]</option>";
+													$sel = '';
+												}
+											}
+										}
+										else {
+											$virheviesti = "<br /><font class='error'>".t("Tuotteet eivät mahdu varastoon")."! ".t("Syötä varastopaikka käsin").".</font>";
+										}
+									}
+								}
+							}
+						}
 					}
 
 					$riv = "";
@@ -485,7 +655,7 @@ if ($tee == "") {
 					echo "<option value='$paikkarow[tunnus]' $sel>$paikkarow[hyllyalue] $paikkarow[hyllynro] $paikkarow[hyllyvali] $paikkarow[hyllytaso] $ole $riv</option>";
 				}
 				
-				echo "</select></td>";
+				echo "</select>{$virheviesti}</td>";
 				
 				echo "<td>".t("Oletus").":<input type='checkbox' id='oletusbox_{$rivirow["tunnus"]}' name='oletusbox[$rivirow[tunnus]]'></td>";
 			}
@@ -509,8 +679,8 @@ if ($tee == "") {
 			echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$rivlla2' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$rivlla3' maxlength='5' size='5'></td>";
 			echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$rivlla4' maxlength='5' size='5'></td>";
-
 		}
+
 		echo "</tr><tr>";
 		echo "<td colspan='4' class='back'></td>";
 		echo "<td colspan='1' class='back'>Ruksaa kaikki:";

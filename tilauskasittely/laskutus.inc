@@ -166,7 +166,7 @@
 								// Normikeissi jossa erä on jo tuloutettu
 
 								// luodaan muuttuja jota pienennetään luupissa
-								$eraayht=$trow["varattu"];
+								$eraayht = $trow["varattu"];
 
 								// luupataan niin kauan kuin tarvitaan jotta kaikki varatut on hanskattu
 								while ($eraayht > 0) {
@@ -358,7 +358,7 @@
 										SET saldo = saldo-$trow[varattu],
 										saldo_varattu = saldo_varattu - if($trow[tunnus] != $trow[perheid2] and $trow[perheid2]>0, $trow[varattu], 0),
 										saldoaika = now(),
-										oletus = 'X'
+										oletus = ''
 										WHERE yhtio = '$kukarow[yhtio]'
 										and tuoteno	= '$trow[tuoteno]'
 										LIMIT 1";
@@ -371,9 +371,9 @@
 											VALUES ('$kukarow[yhtio]','Z','99','99','99','X','$trow[tuoteno]',$trow[varattu]*-1,now())";
 								$laskutusres = mysql_query($query) or pupe_error($query);
 							}
+							}
 						}
-					}
-				}
+						}
 
 				// lasketaan kate
 				if ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] > 0) {
@@ -547,7 +547,12 @@
 			$xrow = mysql_fetch_array($presult);
 
 			if ($xrow['abs_pvm'] == '0000-00-00' and $xrow["rel_pvm"] != 0) {
-				$erapvm = "adddate('$laskutuspvm', interval $xrow[rel_pvm] day)";
+				if ($erpcmlaskenta == "NOW") {
+					$erapvm = "adddate(curdate(), interval $xrow[rel_pvm] day)";
+				}
+				else {
+					$erapvm = "adddate('$laskutuspvm', interval $xrow[rel_pvm] day)";
+				}
 			}
 			elseif ($xrow['abs_pvm'] != '0000-00-00') {
 				$erapvm = "'$xrow[abs_pvm]'";
@@ -579,7 +584,6 @@
 			$kassa_loppusumma 				= "";
 			$kassa_loppusumma_valuutassa 	= "";
 		}
-
 
 		$pyorerotus				= 0;
 		$pyorerotus_valuutassa	= 0;

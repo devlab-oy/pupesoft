@@ -37,7 +37,7 @@ else {
 	// defaultteja
 	if (!isset($alkupvm))  $alkupvm  = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 	if (!isset($loppupvm)) $loppupvm = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-	if (!isset($taysraja)) $taysraja = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
+	if (!isset($taysraja)) $taysraja = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 	if (!isset($raja))     $raja = "0.5";
 
 	// errorcheckejä
@@ -96,7 +96,7 @@ else {
 	echo "</tr>";
 
 	echo "<tr>";
-	echo "<th>".t("Anna täysepäkuranttisuuden alaraja pvm").":</th>";
+	echo "<th>".t("Anna epäkuranttitason alaraja pvm").":</th>";
 	echo "<td colspan='2'><input type='text' name='taysraja' value='$taysraja'></td><td class='back'>(Tuote on pitänyt laittaa edelliselle epäkuranttiustasolle ennen tätä päivää, jotta ehdotetaan seuraavaan epäkuranttitasoon)</td>";
 	echo "</tr>";
 
@@ -173,17 +173,34 @@ else {
 		}
 
 		// etsitään saldolliset tuotteet
-		$query  = "	SELECT tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, tuote.status, tuote.hinnastoon,
+		$query  = "	SELECT tuote.tuoteno,
+					tuote.osasto,
+					tuote.try,
+					tuote.myyntihinta,
+					tuote.nimitys,
+					tuote.tahtituote,
+					tuote.status,
+					tuote.hinnastoon,
 					round(if(epakurantti75pvm = '0000-00-00', if(epakurantti50pvm = '0000-00-00', if(epakurantti25pvm = '0000-00-00', kehahin, kehahin * 0.75), kehahin * 0.5), kehahin * 0.25), 6) kehahin,
-					tuote.vihapvm, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, tuote.tuotemerkki, tuote.myyjanro
+					tuote.vihapvm,
+					epakurantti25pvm,
+					epakurantti50pvm,
+					epakurantti75pvm,
+					tuote.tuotemerkki,
+					tuote.myyjanro,
+					sum(saldo) saldo
 					FROM tuote
+					JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					AND tuote.ei_saldoa = ''
 					$epakuranttipvm
-					$lisa";
+					$lisa
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+					HAVING saldo != 0
+					ORDER BY tuote.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo t("Löytyi")." ".mysql_num_rows($result)." ".t("sopivaa tuotetta.. Aloitellaan laskenta.")."<br><br>";
+		echo "<font class='message'>".t("Löytyi")." ".mysql_num_rows($result)." ".t("sopivaa tuotetta. Lasketaan ehdotus.")."</font><br>";
 
 		flush();
 
@@ -246,14 +263,22 @@ else {
 			$excelsarake++;
 		}
 
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epäkurantti 25 pvm")), $format_bold);
+		$excelsarake++;
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epäkurantti 50 pvm")), $format_bold);
+		$excelsarake++;
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("epäkurantti 75 pvm")), $format_bold);
+		$excelsarake++;
+
 		if ($elements > 0) {
 			require_once ('inc/ProgressBar.class.php');
-			$bar = new ProgressBar('Lasketaan...');
+			$bar = new ProgressBar();
 			$bar->initialize($elements); // print the empty bar
 		}
 
 		$excelrivi++;
 		$excelsarake = 0;
+		$laskuri = 0;
 
 		$myyja_array = array();
 
@@ -272,17 +297,6 @@ else {
 
 			$bar->increase();
 
-			$query = "	SELECT sum(saldo) saldo 
-						FROM tuotepaikat 
-						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' 
-						and tuotepaikat.tuoteno = '$row[tuoteno]'";
-			$saldores = mysql_query($query) or pupe_error($query);
-			$saldorow = mysql_fetch_assoc($saldores);
-
-			if ($saldorow['saldo'] == 0) {
-				continue;
-			}
-
 			if ($row["epakurantti75pvm"] != "0000-00-00") {
 				$epispvm = $row["epakurantti75pvm"];
 			}
@@ -297,68 +311,70 @@ else {
 			if ($row["vihapvm"] == "0000-00-00") $row["vihapvm"] = '1970-01-01';
 
 			// haetaan eka ja vika saapumispäivä
-			$query  = "	SELECT date_format(ifnull(min(laadittu),'1970-01-01'),'%Y-%m-%d') min, date_format(ifnull(max(laadittu),'$row[vihapvm]'),'%Y-%m-%d') max 
-						FROM tapahtuma 
-						WHERE yhtio = '$kukarow[yhtio]' 
-						AND tuoteno = '$row[tuoteno]' 
+			$query  = "	SELECT date_format(ifnull(min(laadittu),'1970-01-01'),'%Y-%m-%d') min, 
+						date_format(ifnull(max(laadittu),'1970-01-01'),'%Y-%m-%d') max
+						FROM tapahtuma
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tuoteno = '$row[tuoteno]'
 						AND laji = 'Tulo'";
 			$tapres = mysql_query($query) or pupe_error($query);
 			$taprow = mysql_fetch_assoc($tapres);
 
 			// verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
-			list($vv1,$kk1,$pp1) = explode("-",$taprow["max"]); //$saapunut
-			list($vv2,$kk2,$pp2) = explode("-",$alkupvm); //$alaraja
-			list($vv3,$kk3,$pp3) = explode("-",$epispvm); //$epaku1pv
-			list($vv4,$kk4,$pp4) = explode("-",$taysraja); //$epa2raja
+			list($vv1,$kk1,$pp1) = explode("-", $taprow["max"]);	// $saapunut (viimeisen tulon pvm)
+			list($vv2,$kk2,$pp2) = explode("-", $alkupvm);			// $alaraja (myyntirajauksen alku pvm)
+			list($vv3,$kk3,$pp3) = explode("-", $epispvm);			// $epaku1pv (viimeisin epäkurantti pvm)
+			list($vv4,$kk4,$pp4) = explode("-", $taysraja);			// $epa2raja (täysepäkuranttisuuden alaraja pvm)
+
 			$saapunut = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
 			$alaraja  = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
 			$epaku1pv = (int) date('Ymd',mktime(0,0,0,$kk3,$pp3,$vv3));
 			$epa2raja = (int) date('Ymd',mktime(0,0,0,$kk4,$pp4,$vv4));
 
-			// tätä tuotetta on saapunut ennen myyntirajauksen alarajaa, joten otetaan käsittelyyn
-			if (($saapunut < $alaraja) and (($tyyppi != '25' and $epaku1pv < $epa2raja) or ($tyyppi == '25'))) {
+			// Jos tuotetta on tullut myyntirajauksen aikana, ei ehdota sitä epäkurantiksi. Lisäksi jos kyseessä on joku muu kuin 25% epäkuranttiajo, pitää viimeisin epäkuranttipvm olla pienempi kuin täysepäkuranttisuuden alaraja pvm
+ 			if (($saapunut < $alaraja) and ($epaku1pv < $epa2raja or $tyyppi == '25')) {
 
 				$query = "	SELECT group_concat(distinct tuotteen_toimittajat.toimittaja separator '/') toimittaja
-							FROM tuotteen_toimittajat 
-							WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' 
+							FROM tuotteen_toimittajat
+							WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 							and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'";
 				$toimittajares = mysql_query($query) or pupe_error($query);
 				$toimittajarow = mysql_fetch_assoc($toimittajares);
 
 				// haetaan tuotteen myydyt kappaleet
-				$query  = "	SELECT ifnull(sum(kpl),0) kpl 
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) 
-							WHERE yhtio = '$kukarow[yhtio]' 
-							and tyyppi = 'L' 
-							and tuoteno = '$row[tuoteno]' 
-							and laskutettuaika >= '$alkupvm' 
+				$query  = "	SELECT ifnull(sum(kpl),0) kpl
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tyyppi = 'L'
+							and tuoteno = '$row[tuoteno]'
+							and laskutettuaika >= '$alkupvm'
 							and laskutettuaika <= '$loppupvm'";
 				$myyres = mysql_query($query) or pupe_error($query);
 				$myyrow = mysql_fetch_assoc($myyres);
 
 				// haetaan tuotteen kulutetut kappaleet
-				$query  = "	SELECT ifnull(sum(kpl),0) kpl 
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) 
-							WHERE yhtio = '$kukarow[yhtio]' 
-							and tyyppi = 'V' 
-							and tuoteno = '$row[tuoteno]' 
-							and toimitettuaika >= '$alkupvm' 
+				$query  = "	SELECT ifnull(sum(kpl),0) kpl
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tyyppi = 'V'
+							and tuoteno = '$row[tuoteno]'
+							and toimitettuaika >= '$alkupvm'
 							and toimitettuaika <= '$loppupvm'";
 				$kulres = mysql_query($query) or pupe_error($query);
 				$kulrow = mysql_fetch_assoc($kulres);
 
 				// haetaan tuotteen ennakkopoistot
-				$query  = "	SELECT ifnull(sum(varattu),0) ennpois 
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu) 
-							WHERE yhtio = '$kukarow[yhtio]' 
-							and tuoteno = '$row[tuoteno]' 
-							and tyyppi = 'L' 
+				$query  = "	SELECT ifnull(sum(varattu),0) ennpois
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+							and tyyppi = 'L'
 							and varattu <> 0";
 				$ennres = mysql_query($query) or pupe_error($query);
 				$ennrow = mysql_fetch_assoc($ennres);
 
 				// lasketaan saldo
-				$saldo = $saldorow["saldo"] - $ennrow["ennpois"];
+				$saldo = $row["saldo"] - $ennrow["ennpois"];
 
 				// lasketaan varaston kiertonopeus
 				if ($saldo > 0) {
@@ -369,7 +385,7 @@ else {
 				}
 
 				// typecast
-				$raja = (float) str_replace(",",".",$raja);
+				$raja = (float) str_replace(",",".", $raja);
 
 				if ($yhteensopivuus_table_check) {
 					$query = "	SELECT count(yhteensopivuus_rekisteri.tunnus)
@@ -383,51 +399,65 @@ else {
 				}
 
 				// katellaan ollaanko alle rajan
-				if ($kierto < $raja) {
-					$worksheet->write($excelrivi, $excelsarake, $row['osasto']);
+				if ($kierto < $raja or ($raja == 0 and $kierto <= 0)) {
+
+					$laskuri++;
+
+					$worksheet->writeString($excelrivi, $excelsarake, $row['osasto']);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, $row['try']);
+					$worksheet->writeString($excelrivi, $excelsarake, $row['try']);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, $row['tuotemerkki']);
+					$worksheet->writeString($excelrivi, $excelsarake, $row['tuotemerkki']);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, str_replace(".",",",$myyrow['kpl']+$kulrow['kpl']));
+					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$myyrow['kpl']+$kulrow['kpl']));
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, str_replace(".",",",$saldo));
+					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$saldo));
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, str_replace(".",",",$kierto));
+					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$kierto));
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, $row['tahtituote']);
+					$worksheet->writeString($excelrivi, $excelsarake, $row['tahtituote']);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, $row['status']);
+					$worksheet->writeString($excelrivi, $excelsarake, $row['status']);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, $row['hinnastoon']);
+					$worksheet->writeString($excelrivi, $excelsarake, $row['hinnastoon']);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, $taprow['min']);
+					$worksheet->writeString($excelrivi, $excelsarake, $taprow['min']);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, $taprow['max']);
+					$worksheet->writeString($excelrivi, $excelsarake, $taprow['max']);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, str_replace(".",",",$row['myyntihinta']));
+					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$row['myyntihinta']));
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, str_replace(".",",",$row['kehahin']));
+					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$row['kehahin']));
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, $row['tuoteno']);
+					$worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno']);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
+					$worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, $toimittajarow['toimittaja']);
+					$worksheet->writeString($excelrivi, $excelsarake, $toimittajarow['toimittaja']);
 					$excelsarake++;
 
 					if ($row['myyjanro'] > 0) {
-						$worksheet->write($excelrivi, $excelsarake, $myyja_array[$row['myyjanro']]);
+						$worksheet->writeString($excelrivi, $excelsarake, $myyja_array[$row['myyjanro']]);
 					}
 					else {
-						$worksheet->write($excelrivi, $excelsarake, '');
+						$worksheet->writeString($excelrivi, $excelsarake, '');
 					}
 					$excelsarake++;
 
 					if ($yhteensopivuus_row[0] != 0) {
-						$worksheet->write($excelrivi, $excelsarake, $yhteensopivuus_row[0]);
+						$worksheet->writeString($excelrivi, $excelsarake, $yhteensopivuus_row[0]);
 					}
+
+					if ($row['epakurantti25pvm'] == '0000-00-00') $row['epakurantti25pvm'] = "";
+					if ($row['epakurantti50pvm'] == '0000-00-00') $row['epakurantti50pvm'] = "";
+					if ($row['epakurantti75pvm'] == '0000-00-00') $row['epakurantti75pvm'] = "";
+
+					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti25pvm']);
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti50pvm']);
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, $row['epakurantti75pvm']);
+					$excelsarake++;
 
 					$excelsarake = 0;
 					$excelrivi++;
@@ -437,7 +467,11 @@ else {
 
 		$workbook->close();
 
-		echo "<br/><br/>";
+		echo "<br/>";
+		echo "<font class='message'>".t("Ehdotuksessa %s tuotetta.", "", $laskuri)."</font>";
+		echo "<br/>";
+		echo "<br/>";
+
 		echo "<table>";
 		echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
 		echo "<form method='post' action='$PHP_SELF'>";

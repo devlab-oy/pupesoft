@@ -967,6 +967,8 @@
 		$ulos .= "<option value = ''>".t("Tilaukset jaetaan osiin varastoittain")."</option>";
 		$ulos .= "<option value = 'E' $sel[E]>".t("Tilauksia ei jaeta osiin")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Tilaukset jaetaan osiin keräyspäivän mukaan")."</option>";
+		// $ulos .= "<option value = 'V' $sel[V]>".t("Tilaukset jaetaan osiin tuotteen keräysvyöhykkeen mukaan")."</option>";
+		// $ulos .= "<option value = 'W' $sel[W]>".t("Tilaukset jaetaan osiin varaston hyllypaikan keräysvyöhykkeen mukaan")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2480,4 +2482,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "varastopaikkojen_maarittely") {
+
+		$tyyppi = 0;
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = " selected";
+
+		$ulos .= "<option value = ''>".t("Varastopaikkoja, ja niiden tilavuuksia, ei tarvitse määritellä etukäteen")."</option>";
+		$ulos .= "<option value = 'M'{$sel['M']}>".t("Varastopaikat, ja niiden tilavuudet, täytyy määritellä etukäteen")."</option>";	
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

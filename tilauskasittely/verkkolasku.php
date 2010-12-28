@@ -1969,12 +1969,12 @@
 						$tulos_ulos .= "<br><br>\n".t("CURL-siirto APIX Finvoice:")."<br>\n";
 					}
 
-					//siirretaan laskutiedosto operaattorille
+					// siirret‰‰n laskutiedosto operaattorille
 					$url			= "https://test-api.apix.fi/invoices";
 					$transferkey	= $yhtiorow['verkkosala_lah'];
 					$transferid		= $yhtiorow['verkkotunnus_lah'];
 					$software		= "Pupesoft";
-					$version		= "3.0";
+					$version		= "1.0";
 					$timestamp		= gmdate("YmdHis");
 					$apixfinvoice 	= basename($nimifinvoice);
 					$apixzipfile	= "Apix_invoices_$timestamp.zip";
@@ -2010,22 +2010,19 @@
 
 						$real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
 
-						$data = file_get_contents($apixzipfile);
-
-						$apix_fh  = fopen('php://memory', 'rw');
-
-						fwrite($apix_fh, $data);
-						rewind($apix_fh);
+						$apixfilesize = filesize($apix_tmpdirnimi."/".$apixzipfile);
+						$apix_fh = fopen($apix_tmpdirnimi."/".$apixzipfile, 'r');
 
 						$ch = curl_init($real_url);
 						curl_setopt($ch, CURLOPT_PUT, true);
 						curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
-						curl_setopt($ch, CURLOPT_INFILESIZE, strlen($data));
+						curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
 						curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 						curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 						echo "Sending data $apixzipfile to\n$real_url\n";
 						echo "<pre>",htmlentities(curl_exec($ch)),"</pre>";
+
 						curl_close($ch);
 						fclose($apix_fh);
 					}
@@ -2306,7 +2303,6 @@
 			echo "<br>\n<table>";
 			$today = date("w") + 1;
 
-
 			$query = "	SELECT
 						sum(if (lasku.laskutusvkopv='0',1,0)) normaali,
 						sum(if (lasku.laskutusvkopv='$today',1,0)) paiva,
@@ -2323,7 +2319,6 @@
 			$res = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($res);
 
-
 			echo "<form action = '$PHP_SELF' method = 'post' name='lasku' onSubmit = 'return verify()'>
 				<input type='hidden' name='tee' value='TARKISTA'>";
 
@@ -2337,6 +2332,14 @@
 					<td><input type='text' name='laskpp' value='' size='3'></td>
 					<td><input type='text' name='laskkk' value='' size='3'></td>
 					<td><input type='text' name='laskvv' value='' size='5'></td></tr>\n";
+
+			if ($yhtiorow["myyntilaskun_erapvmlaskenta"] == "K") {
+				echo "<tr><th>".t("Laske er‰p‰iv‰").":</th>
+						<td colspan='3'><select name='erpcmlaskenta'>";
+				echo "<option value=''>".t("Er‰p‰iv‰ lasketaan laskutusp‰iv‰st‰")."</option>";
+				echo "<option value='NOW'>".t("Er‰p‰iv‰ lasketaan t‰st‰ hetkest‰")."</option>";
+				echo "</select></td></tr>\n";
+			}
 
 			echo "<tr><th>".t("Ohita laskujen laskutusviikonp‰iv‰t").":</th><td colspan='3'><input type='checkbox' name='laskutakaikki'></td></tr>\n";
 

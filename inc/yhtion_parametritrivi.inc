@@ -41,7 +41,7 @@
 		$sel2 = "";
 		$sel3 = "";
 		$sel4 = "";
-		
+
 		if ($trow[$i] == 'iPost') {
 			$sel3 = "selected";
 		}
@@ -240,7 +240,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ostolaskujen_paivays") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2448,7 +2448,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "liitetiedostojen_nimeaminen") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2458,7 +2458,7 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = ''>".t("Liitetiedostojen nimiin ei lis‰t‰ asiakkaan nime‰")."</option>";
-		$ulos .= "<option value = 'N' $sel[N]>".t("Liitetiedostojen nimiin lis‰t‰‰n asiakkaan nimi")."</option>";	
+		$ulos .= "<option value = 'N' $sel[N]>".t("Liitetiedostojen nimiin lis‰t‰‰n asiakkaan nimi")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2482,6 +2482,23 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "myyntilaskun_erapvmlaskenta") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = "";
+
+		if ($trow[$i] != "") {
+			$sel = "selected";
+		}
+
+		$ulos .= "<option value = ''>".t("Myyntilaskun er‰p‰iv‰ lasketaan aina laskun tapahtumap‰iv‰m‰‰r‰st‰");
+		$ulos .= "<option value = 'K' $sel>".t("Myyntilaskun er‰p‰iv‰ voidaan laskea myˆs laskutushetkest‰ kun laskulle syˆtet‰‰n poikkeava tapahtumap‰iv‰m‰‰r‰");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "varastopaikkojen_maarittely") {
 
 		$tyyppi = 0;
@@ -2492,7 +2509,7 @@
 		$sel[$trow[$i]] = " selected";
 
 		$ulos .= "<option value = ''>".t("Varastopaikkoja, ja niiden tilavuuksia, ei tarvitse m‰‰ritell‰ etuk‰teen")."</option>";
-		$ulos .= "<option value = 'M'{$sel['M']}>".t("Varastopaikat, ja niiden tilavuudet, t‰ytyy m‰‰ritell‰ etuk‰teen")."</option>";	
+		$ulos .= "<option value = 'M'{$sel['M']}>".t("Varastopaikat, ja niiden tilavuudet, t‰ytyy m‰‰ritell‰ etuk‰teen")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

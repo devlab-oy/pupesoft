@@ -727,7 +727,11 @@
 
 			// Haetaan laskutussaate jos chn on sähköposti
 			if ($ekarow["chn"] == "666") {
-				$query = "SELECT * FROM avainsana WHERE yhtio = '$kukarow[yhtio]' AND laji = 'LASKUTUS_SAATE' AND kieli = '$asrow[kieli]'";
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND laji = 'LASKUTUS_SAATE'
+							AND kieli = '$asrow[kieli]'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				echo "<tr><th>".t("Valitse saatekirje").":</th>";
@@ -746,7 +750,7 @@
 
 			//tulostetaan faili ja valitaan sopivat printterit
 			if ($ekarow["varasto"] == 0) {
-				$query = "	select *
+				$query = "	SELECT *
 							from varastopaikat
 							where yhtio='$kukarow[yhtio]'
 							and printteri5 != ''
@@ -754,7 +758,7 @@
 							limit 1";
 			}
 			else {
-				$query = "	select *
+				$query = "	SELECT *
 							from varastopaikat
 							where yhtio='$kukarow[yhtio]' and tunnus='$ekarow[varasto]'
 							order by alkuhyllyalue,alkuhyllynro";
@@ -804,10 +808,18 @@
 				echo "</select></td></tr>";
 			}
 
-			echo "<tr><th>".t("Syötä poikkeava laskutuspäivämäärä (pp-kk-vvvv)")."</th>
+			echo "<tr><th>".t("Syötä poikkeava laskutuspäivämäärä (pp-kk-vvvv)").":</th>
 					<td><input type='text' name='laskpp' value='' size='3'></td>
 					<td><input type='text' name='laskkk' value='' size='3'></td>
 					<td><input type='text' name='laskvv' value='' size='5'></td></tr>\n";
+
+			if ($yhtiorow["myyntilaskun_erapvmlaskenta"] == "K") {
+				echo "<tr><th>".t("Laske eräpäivä").":</th>
+					<td colspan='3'><select name='erpcmlaskenta'>";
+				echo "<option value=''>".t("Eräpäivä lasketaan laskutuspäivästä")."</option>";
+				echo "<option value='NOW'>".t("Eräpäivä lasketaan tästä hetkestä")."</option>";
+				echo "</select></td></tr>\n";
+			}
 
 			echo "</table>";
 			echo "<br><input type='submit' value='".t("Laskuta")."'>";

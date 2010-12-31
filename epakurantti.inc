@@ -105,7 +105,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 		$tilro = mysql_fetch_array($tilre);
 
 		if ($tilro["varattu"] != 0 and $tee != "pois") {
-			echo "<font class='error'>".t("Tuotetta on tilauksessa!")." ".t("Ei voida laittaa epäkurantiksi!")."</font><br>";
+			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on tilauksessa!")." ".t("Ei voida laittaa epäkurantiksi!")."</font><br>";
 			$tee = "";
 		}
 
@@ -125,7 +125,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 
 		if (mysql_num_rows($tilre) != 0 and $tee != "pois") {
 			$tilro = mysql_fetch_array($tilre);
-			echo "<font class='error'>".t("Tuotetta on viemättä varastoon keikalla")." $tilro[laskunro]. ".t("Ei voida laittaa epäkurantiksi!")."</font><br>";
+			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on viemättä varastoon keikalla")." $tilro[laskunro]. ".t("Ei voida laittaa epäkurantiksi!")."</font><br>";
 			$tee = "";
 		}
 

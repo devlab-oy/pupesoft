@@ -467,8 +467,11 @@
 
 					if($kukarow["extranet"] != "") {
 						if ($laskurow["toim_maa"] == $alkurow["varastomaa"]) {
-							if ($yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] != 0 and $yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] < $row["hinta"]*$row["tilkpl"]*(1-$row["ale"]/100)) {
-								// jätetään puutteeksi
+							if ($yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] != 0 and $yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] > $row["hinta"]*$row["tilkpl"]*(1-$row["ale"]/100)) {
+								$varaosakommentti .= t("Tuote ainoastaan noudettavissa myymälöistä joissa varastoituna")."!<br>";
+							}
+							elseif ($yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] != 0 and $yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] < $row["hinta"]*$row["tilkpl"]*(1-$row["ale"]/100)) {
+								//jätetään puutteeksi
 							}
 						}
 

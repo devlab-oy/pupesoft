@@ -102,7 +102,6 @@
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Varaston avainsanat")."'>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSLISTA") 		$ulos .= "<option value='KERAYSLISTA' $avain_sel[KERAYSLISTA]>				".t("Keräyslista")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LAHETETYYPPI") 		$ulos .= "<option value='LAHETETYYPPI' $avain_sel[LAHETETYYPPI]>			".t("Lähetetyyppi")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "pakkaus") 			$ulos .= "<option value='pakkaus' $avain_sel[pakkaus]>						".t("Pakkaus / Alusta")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "RAHTIKIRJA") 		$ulos .= "<option value='RAHTIKIRJA' $avain_sel[RAHTIKIRJA]>				".t("Rahtikirjatyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPAKV") 		$ulos .= "<option value='TOIMTAPAKV' $avain_sel[TOIMTAPAKV]>				".t("Toimitustavan kieliversio")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TERMINAALIALUE") 	$ulos .= "<option value='TERMINAALIALUE' $avain_sel[TERMINAALIALUE]>		".t("Varaston terminaalialue")."</option>";

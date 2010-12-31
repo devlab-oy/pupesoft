@@ -2124,6 +2124,17 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 					$erikoisale = 1;
 				}
 
+				// Tarkastetaan onko taricit k‰ytˆss‰
+				$tv_kaytossa = FALSE;
+
+				$query = "SELECT count(*) kpl from taric_veroperusteet";
+				$tv_res = mysql_query($query);
+				$tv_row = mysql_fetch_array($tv_res);
+
+				if ($tv_row["kpl"] > 0) {
+					$tv_kaytossa = TRUE;
+				}
+
 				// Jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
 				$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 6);
 
@@ -2161,13 +2172,13 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 
 					$ohinta  = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu']+$rahtios,6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
-					$tulliprossa = "";
+					$tulliprossa = 0;
 
-					if ($tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
+					if ($tv_kaytossa and $tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 						// lis‰t‰‰n tulli
 						require ("tilauskasittely/taric_veroperusteet.inc");
 
-						$ohinta = $ohinta * (1+($tulliprossa/100));
+						$ohinta = $ohinta * (1 + ($tulliprossa/100));
 					}
 
 					// lis‰t‰‰n riville extra kulu, jos sellanen oli annettu

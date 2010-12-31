@@ -231,6 +231,17 @@
 			$tuoterow = array();
 		}
 
+		// Tarkastetaan onko taricit käytössä
+		$tv_kaytossa = FALSE;
+
+		$query = "SELECT count(*) kpl from taric_veroperusteet";
+		$tv_res = mysql_query($query);
+		$tv_row = mysql_fetch_array($tv_res);
+
+		if ($tv_row["kpl"] > 0) {
+			$tv_kaytossa = TRUE;
+		}
+
 		if ($tuoterow["tuoteno"] != "" and (!in_array($tuoterow["status"], array('P', 'X')) or $salro["saldo"] != 0)) {
 
 			if ($yhtiorow["saldo_kasittely"] == "T") {
@@ -345,12 +356,12 @@
 
 			}
 
-			if ($tullirow1['cn'] != '') {
-				$alkuperamaat = array();
+			if ($tv_kaytossa and $tullirow1['cn'] != '') {
+				$alkuperamaat 	= array();
 				$alkuperamaat[] = explode(',',$tuoterow['alkuperamaa']);
-				$tuorow = $tuoterow;
-				$prossat = '';
-				$prossa_str = '';
+				$tuorow 		= $tuoterow;
+				$prossat 		= '';
+				$prossa_str 	= '';
 
 				foreach ($alkuperamaat as $alkuperamaa) {
 					foreach ($alkuperamaa as $alkupmaa) {

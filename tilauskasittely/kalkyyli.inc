@@ -19,7 +19,7 @@ list(,,$kohok,,,,$lisok,,$sarjanrook,,,,,$varok) = tsekit($laskurow,0);
 if ($sarjanrook == 1 and $varok == 1) {
 	if ($tee == "varastoon") {
 		require ("varastoon.inc");
-		
+
 		// takaisin ihan alkuun
 		$toiminto 		= "dummy";
 		$ytunnus  		= "";
@@ -35,7 +35,7 @@ if ($sarjanrook == 1 and $varok == 1) {
 			$varresult = mysql_query($query) or pupe_error($query);
 
 			if (count($eitullia) > 0) {
-				foreach($eitullia as $eitul) {
+				foreach ($eitullia as $eitul) {
 					$query = "	UPDATE tilausrivi
 								SET var = 'T'
 								WHERE tunnus = '$eitul' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and kpl = 0";
@@ -44,11 +44,30 @@ if ($sarjanrook == 1 and $varok == 1) {
 			}
 
 			if (count($varastoonko) > 0) {
-				foreach($varastoonko as $varas) {
+				foreach ($varastoonko as $varas) {
 					$query = "	UPDATE tilausrivi
 								SET netto = ''
 								WHERE tunnus = '$varas' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and kpl = 0";
 					$varresult = mysql_query($query) or pupe_error($query);
+				}
+			}
+
+			if ($yhtiorow["varastoonvientipaiva"] == "K" and count($vva) > 0) {
+				foreach ($vva as $varas => $vuosi) {
+
+					$kuukausi	= $kka[$varas];
+					$paiva		= $ppa[$varas];
+
+					if (!checkdate($kuukausi, $paiva, $vuosi)) {
+						echo "<font class='error'>".t("VIRHE: Virheellinen p‰iv‰m‰‰r‰")." $vuosi-$kuukausi-$paiva</font><br>";
+					}
+					else {
+						$query = "	UPDATE tilausrivi
+									SET toimitettuaika = '$vuosi-$kuukausi-$paiva 00:00:10',
+									toimitettu = '$kukarow[kuka]'
+									WHERE tunnus = '$varas' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]'";
+						$varresult = mysql_query($query) or pupe_error($query);
+					}
 				}
 			}
 
@@ -69,12 +88,12 @@ if ($sarjanrook == 1 and $varok == 1) {
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-		
+
 		if ($nappikeikalle == 'menossa') {
 			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 			echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 		}
-		
+
 		echo "<input type='submit' value='".t("Peruuta")."'>";
 		echo "</form>";
 	}

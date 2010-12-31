@@ -29,6 +29,6 @@ if ($tuoteno != '') {
 	require("taric_veroperusteet.inc");
 }
 
-require ("../inc/footer.inc");
+require ("inc/footer.inc");
 
 ?>

@@ -2498,6 +2498,23 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "varastoonvientipaiva") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = "";
+
+		if ($trow[$i] != "") {
+			$sel = "selected";
+		}
+
+		$ulos .= "<option value = ''>".t("Tavaran varastoonvientipäivä on keikan varastoonvientipäivä");
+		$ulos .= "<option value = 'K' $sel>".t("Tavaran varastoonvientipäivä voidaan syöttää keikan varastoonviennissä");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "varastopaikkojen_maarittely") {
 

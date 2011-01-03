@@ -1536,6 +1536,7 @@ else {
 					<option value='kustannuspaikka' $sel[kustannuspaikka]>".t("Kustannuspaikat")."</option>
 					<option value='liitetiedostot' $sel[liitetiedostot]>".t("Liitetiedostot")."</option>
 					<option value='maksuehto' $sel[maksuehto]>".t("Maksuehto")."</option>
+					<option value='pakkaus' $sel[pakkaus]>".t("Pakkaustiedot")."</option>
 					<option value='perusalennus' $sel[perusalennus]>".t("Perusalennukset")."</option>
 					<option value='rahtimaksut' $sel[rahtimaksut]>".t("Rahtimaksut")."</option>
 					<option value='rahtisopimukset' $sel[rahtisopimukset]>".t("Rahtisopimukset")."</option>

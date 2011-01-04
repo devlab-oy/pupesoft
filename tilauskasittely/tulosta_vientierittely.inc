@@ -213,13 +213,13 @@ if ($Xtunnukset2 != "") {
 			$Xpdf->draw_text(30, 25, $yhtiorow["postino"]."  ".$yhtiorow["postitp"]."  ".$yhtiorow["maa"],	$Xfirstpage, $Xpieni);
 
 			$Xpdf->draw_text(217, 45, t("Puhelin", $kieli).":",				$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(247, 45, $yhtiorow["puhelin"],					$Xfirstpage, $Xpieni);
+			$Xpdf->draw_text(257, 45, $yhtiorow["puhelin"],					$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(217, 35, t("Telefax", $kieli).":",				$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(247, 35, $yhtiorow["fax"],						$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(217, 25, t("Sähköposti", $kieli).": ".$yhtiorow["email"], $Xfirstpage, $Xpieni);
 
 			$Xpdf->draw_text(404, 45, t("Y-tunnus", $kieli).":",			$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(444, 45, $yhtiorow["maa"]."-".$yhtiorow["ytunnus"],	$Xfirstpage, $Xpieni);
+			$Xpdf->draw_text(454, 45, $yhtiorow["maa"]."-".$yhtiorow["ytunnus"],	$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(404, 35, t("Kotipaikka", $kieli).":",			$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(444, 35, $yhtiorow["kotipaikka"],				$Xfirstpage, $Xpieni);
 		}

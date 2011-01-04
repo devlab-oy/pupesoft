@@ -131,7 +131,10 @@ if ($Xtunnukset2 != "") {
 			$Xpdf->draw_rectangle(758, 300, 737, 580, 				$Xfirstpage, $Xrectparam);
 			$Xpdf->draw_rectangle(758, 420, 737, 580, 				$Xfirstpage, $Xrectparam);
 			$Xpdf->draw_text(310, 750, t("Toimitusehto", $kieli), 	$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(310, 740, $laskurow["toimitusehto"], 	$Xfirstpage, $Xnorm);
+
+			list($ff_string, $ff_font) = pdf_fontfit($laskurow["toimitusehto"], 110, $Xpdf, $Xnorm);
+			$Xpdf->draw_text(310, 740, $laskurow["toimitusehto"], 	$Xfirstpage, $ff_font);
+
 			$Xpdf->draw_text(430, 750, t("Toimituspvm", $kieli), 	$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), 		$Xfirstpage, $Xnorm);
 

@@ -370,10 +370,12 @@ if (!function_exists("menu")) {
 									"liitostunnus" => $asiakasrow["tunnus"],
 									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
-						if ($hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 12) {
-							$ok = 1;
+
+						// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
+						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
+							$ok = 0;
 						}
-						if ($hinnat["aleperuste"] >= 5 or $hinnat["aleperuste"] <= 8) {
+						else {
 							$ok = 1;
 						}
 					}

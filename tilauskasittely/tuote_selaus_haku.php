@@ -755,12 +755,12 @@
 			$kaikki_tunnukset = implode(",", array_unique(explode(",", $kaikki_tunnukset)));
 
 			$query = "	SELECT GROUP_CONCAT(DISTINCT subnode.tunnus) tunnukset
-						FROM dynaaminen_puu AS subnode 
-						JOIN dynaaminen_puu AS subparent ON (subparent.tunnus IN ($kaikki_tunnukset)) 
+						FROM dynaaminen_puu AS subnode
+						JOIN dynaaminen_puu AS subparent ON (subparent.tunnus IN ($kaikki_tunnukset))
 						JOIN puun_alkio ON (puun_alkio.yhtio = subnode.yhtio AND puun_alkio.puun_tunnus = subnode.tunnus AND puun_alkio.laji = subnode.laji)
 						WHERE subnode.yhtio = '{$kukarow['yhtio']}'
 						AND subnode.laji = 'tuote'
-						AND subnode.lft BETWEEN subparent.lft AND subparent.rgt 
+						AND subnode.lft BETWEEN subparent.lft AND subparent.rgt
 						AND subnode.lft > 1
 						ORDER BY subnode.lft";
 			$kaikki_puun_tunnukset_res = mysql_query($query, $link) or pupe_error($query);
@@ -1234,8 +1234,8 @@
 
 					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', "hinta,hintaperuste,aleperuste,ale");
 
-					// jos tuote saadaan näyttää vain mikäli asiakkaalla on alehinta, niin sanotaan continue jos joku hinta/ale löytyy
-					if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] === FALSE)) {
+					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
+					if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
 						continue;
 					}
 				}
@@ -1500,7 +1500,7 @@
 							foreach ($saldot as $varasto => $myytavissa) {
 								$kokonaismyytavissa += $myytavissa;
 							}
-							
+
 							if ($kokonaismyytavissa > 0) {
 								echo "<td valign='top' class='$vari' $classrigh><font class='green'>".t("On")."</font></td>";
 							}

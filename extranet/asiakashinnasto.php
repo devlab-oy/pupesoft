@@ -228,8 +228,8 @@
 
 				list($hinta, $lis_alv) = alv($laskurow, $rrow, $hinta, '', $alehinta_alv);
 
-				// katsotaan löytyyko asiakasalennus / asikakashinta
-				if ($rrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] == false) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] == false)) {
+				// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
+				if ($rrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
 					continue;
 				}
 

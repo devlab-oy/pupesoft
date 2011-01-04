@@ -187,7 +187,8 @@ if (isset($submitnappi)) {
 
 			$hinnat = alehinta($temp_laskurowwi, $tuoterow, 1, '', '', '', "hintaperuste,aleperuste");
 
-			if ($tuoterow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] == false) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] == false)) {
+			// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
+			if ($tuoterow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
 				$ohitus = 1;
 			}
 		}

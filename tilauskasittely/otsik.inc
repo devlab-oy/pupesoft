@@ -2305,8 +2305,8 @@
 					if ($yhtiorow["vaihda_asiakas_hintapaiv"] == "A") {
 						$hinnat = alehinta($laskurow, $trow, $row['tilkpl'], '', '', '', "hinta,hintaperuste,aleperuste,ale");
 
-						// Asiakkaalla ei ole asiakashintaa tai alennusta, eli rivi' ei päivitetä
-						if (($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] === FALSE)) {
+						// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
+						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
 							$paivitetaanko = FALSE;
 						}
 					}

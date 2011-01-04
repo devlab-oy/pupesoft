@@ -94,8 +94,8 @@ if ($Xtunnukset2 != "") {
 
 			//Otsikko
 			//$Xpdf->draw_rectangle(830, 20,  800, 580, $Xfirstpage, $Xrectparam);
-			
-			tulosta_logo_pdf($Xpdf, $Xfirstpage, $laskurow);			
+
+			tulosta_logo_pdf($Xpdf, $Xfirstpage, $laskurow);
 			$Xpdf->draw_text(310, 815, t("Vientierittely", $kieli), $Xfirstpage);
 
 			$Xpdf->draw_text(430, 815, t("Sivu", $kieli)." ".$Xsivu, $Xfirstpage, $Xnorm);
@@ -145,14 +145,14 @@ if ($Xtunnukset2 != "") {
 
 			//rivien otsikkotiedot
 			$Xpdf->draw_text(30,  572, t("Nimike", $kieli),			$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(150, 572, t("Kohtelu", $kieli),		$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(200, 572, t("Tuote", $kieli),			$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(340, 572, t("Määrä", $kieli),			$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(390, 572, t("Hinta", $kieli),			$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(450, 572, t("Paino", $kieli),			$Xfirstpage, $Xpieni);
+			$Xpdf->draw_text(100, 572, t("Kohtelu", $kieli),		$Xfirstpage, $Xpieni);
+			$Xpdf->draw_text(150, 572, t("Tuote", $kieli),			$Xfirstpage, $Xpieni);
+			$Xpdf->draw_text(370, 572, t("Määrä", $kieli),			$Xfirstpage, $Xpieni);
+			$Xpdf->draw_text(430, 572, t("Hinta", $kieli),			$Xfirstpage, $Xpieni);
+			$Xpdf->draw_text(470, 572, t("Paino", $kieli),			$Xfirstpage, $Xpieni);
 
 			if ($yhtiorow["vienti_erittelyn_tulostus"] != "I") {
-				$Xpdf->draw_text(500, 572, t("Alkuperämaa", $kieli),	$Xfirstpage, $Xpieni);
+				$Xpdf->draw_text(520, 572, t("Alkuperämaa", $kieli),	$Xfirstpage, $Xpieni);
 			}
 
 			return($Xfirstpage);
@@ -171,14 +171,24 @@ if ($Xtunnukset2 != "") {
 			}
 
 			$Xpdf->draw_text(30,  $Xkala, $Xrow["tullinimike1"],	$Xfirstpage, $Xnorm);
-			$Xpdf->draw_text(150, $Xkala, $Xrow["tullikohtelu"], 	$Xfirstpage, $Xnorm);
-			$Xpdf->draw_text(200, $Xkala, $Xrow["tuoteno"], 		$Xfirstpage, $Xnorm);
-			$Xpdf->draw_text(340, $Xkala, $Xrow["kpl"], 			$Xfirstpage, $Xnorm);
-			$Xpdf->draw_text(390, $Xkala, $Xrow["summa"], 			$Xfirstpage, $Xnorm);
-			$Xpdf->draw_text(450, $Xkala, $Xrow["paino"],			$Xfirstpage, $Xnorm);
+			$Xpdf->draw_text(100, $Xkala, $Xrow["tullikohtelu"], 	$Xfirstpage, $Xnorm);
+
+			list($ff_string, $ff_font) = pdf_fontfit($Xrow["tuoteno"], 200, $Xpdf, $Xnorm);
+			$Xpdf->draw_text(150, $Xkala, $ff_string, 				$Xfirstpage, $ff_font);
+
+			$oikpos = $Xpdf->strlen($Xrow["kpl"], $Xnorm);
+			$Xpdf->draw_text(390-$oikpos, $Xkala, $Xrow["kpl"], 	$Xfirstpage, $Xnorm);
+
+			$Xrow["summa"] = sprintf("%.2f", $Xrow["summa"]);
+
+			$oikpos = $Xpdf->strlen($Xrow["summa"], $Xnorm);
+			$Xpdf->draw_text(450-$oikpos, $Xkala, $Xrow["summa"], 	$Xfirstpage, $Xnorm);
+
+
+			$Xpdf->draw_text(470, $Xkala, $Xrow["paino"],			$Xfirstpage, $Xnorm);
 
 			if ($yhtiorow["vienti_erittelyn_tulostus"] != "I") {
-				$Xpdf->draw_text(500, $Xkala, $Xrow["alkuperamaa"],		$Xfirstpage, $Xnorm);
+				$Xpdf->draw_text(520, $Xkala, $Xrow["alkuperamaa"],	$Xfirstpage, $Xnorm);
 			}
 
 			$Xkala = $Xkala - 13;

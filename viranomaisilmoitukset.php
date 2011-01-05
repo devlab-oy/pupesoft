@@ -33,11 +33,14 @@ if ($tee == "VSRALVYV") {
 	echo "<tr><th>".t("Arvonlisäveron yhteenvetoilmoitus kaudelta").":</th>";
 
 	//	Haetaan alkupiste
-	$query = "SELECT ((year(now())-year(min(tilikausi_alku)))*4), quarter(now()) from tilikaudet where tilikausi_alku != '0000-00-00' and yhtio='$kukarow[yhtio]'";
+	$query = "	SELECT ((year(now())-year(min(tilikausi_alku)))*4), quarter(now())
+				from tilikaudet
+				where tilikausi_alku != '0000-00-00'
+				and yhtio='$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$row = mysql_fetch_array($result);
 
-	$kausia = $row[0]+$row[1]+1;
+	$kausia = $row[0] + $row[1] + 1;
 	$kvarttaali = $row[1];
 	$vuosi = date("Y");
 
@@ -71,23 +74,15 @@ if ($tee == "VSRALVYV") {
 		else {
 			$kvarttaali--;
 		}
-
 	}
 	echo "</select></form></td></tr>";
 
 	echo "<tr><th>".t("Arvonlisäveron yhteenvetoilmoitus kuukaudelta").":</th>";
 
 	//	Haetaan alkupiste
-	$query = "SELECT (abs(month(now())-month(min(tilikausi_alku)))*12), month(now()) from tilikaudet where tilikausi_alku != '0000-00-00' and yhtio='$kukarow[yhtio]'";
-	$result = mysql_query($query) or pupe_error($query);
-	$row = mysql_fetch_array($result);
-
-	$kausia = $row[0] + $row[1] + 1;
-	$kuukausi = str_pad((int)$row[1], 2, 0, STR_PAD_LEFT);
+	$kausia = 24;
+	$kuukausi = date("m");
 	$vuosi = date("Y");
-
-	//	Ei näytetä ihan kaikkea
-	if ($kausia > 24) $kausia = 24;
 
 	echo "<td>";
 	echo "	<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
@@ -98,7 +93,7 @@ if ($tee == "VSRALVYV") {
 
 	for ($i=1; $i<$kausia; $i++) {
 
-		$kuukausi = str_pad((int)$kuukausi, 2, 0, STR_PAD_LEFT);
+		$kuukausi = str_pad((int) $kuukausi, 2, 0, STR_PAD_LEFT);
 
 		if ($kohdekuukausi == $kuukausi."/".$vuosi) {
 			$sel = "SELECTED";
@@ -202,6 +197,7 @@ if ($tee == "VSRALVYV") {
 		$query = "SELECT group_concat(distinct(koodi) SEPARATOR '\',\'') from maat where eu != '' and koodi != 'FI'";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
+
 		$eumaat = $row[0];
 
 		$query = "	SELECT

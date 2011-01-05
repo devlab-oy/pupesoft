@@ -1988,7 +1988,7 @@
 
 						// Siirret‰‰n finvoiceaineisto dirikkaan
 						if (!rename("/tmp/".$apixfinvoice, $apix_tmpdirnimi."/".$apixfinvoice)) {
-							echo "APIX finvoicemove $apixfinvoice feilas!";
+							$tulos_ulos .= "APIX finvoicemove $apixfinvoice feilas!";
 						}
 
 						// Luodaan laskupdf:‰t
@@ -1997,13 +1997,14 @@
 
 							// Siirret‰‰n faili apixtemppiin
 							if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixnumero.pdf")) {
-								echo "APIX tmpmove Apix_invoice_$apixnumero.pdf feilas!";
+								$tulos_ulos .= "APIX tmpmove Apix_invoice_$apixnumero.pdf feilas!";
 							}
 						}
 
 						// Tehd‰‰n apixzippi
-						system("cd $apix_tmpdirnimi; zip $apixzipfile *;");
+						$zip = exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
 
+						// Siirret‰‰n aineisto APIXiin
 						$digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
 
 						$dt = substr(hash('sha256', $digest_src), 0, 64);
@@ -2020,14 +2021,14 @@
 						curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 						curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-						echo "Sending data $apixzipfile to\n$real_url\n";
-						echo "<pre>",htmlentities(curl_exec($ch)),"</pre>";
+						$tulos_ulos .= "Sending data $apixzipfile to $url<br>";
+						#$tulos_ulos .= htmlentities(curl_exec($ch));
 
 						curl_close($ch);
 						fclose($apix_fh);
 					}
 					else {
-						echo "APIX tmpdir teko feilas!";
+						$tulos_ulos .= "APIX tmpdirrin teko feilas!<br>";
 					}
 
 					if ($silent == "" or $silent == "VIENTI") {

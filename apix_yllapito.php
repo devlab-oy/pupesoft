@@ -73,7 +73,8 @@
 
 		$xmlfile = utf8_encode($xmlfile);
 
-		$url = "https://test-api.apix.fi/registration";
+		#$url = "https://test-api.apix.fi/registration";
+		$url = "https://api.apix.fi/registration";
 
 		$real_url = "$url?id=$yhtiorow[ytunnus]&idq=y-tunnus";
 
@@ -103,7 +104,9 @@
 
 		echo "Apix RetrieveTransferID:<br>";
 
-		$url		= "https://test-api.apix.fi/app-transferID";
+		#$url		= "https://test-api.apix.fi/app-transferID";
+		$url		= "https://api.apix.fi/app-transferID";
+		
 		$timestamp	= gmdate("YmdHis");
 		$pw_digest	= substr(hash('sha256', $password), 0, 64);
 		$digest_src = $yhtiorow["ytunnus"]."+y-tunnus+".$username."+".$timestamp."+".$pw_digest;

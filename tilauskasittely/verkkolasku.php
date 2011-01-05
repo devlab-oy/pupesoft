@@ -1965,12 +1965,13 @@
 					}
 				}
 				elseif ($yhtiorow["verkkolasku_lah"] == "apix" and file_exists(realpath($nimifinvoice))) {
+					// siirret‰‰n laskutiedosto operaattorille
 					if ($silent == "" or $silent == "VIENTI") {
 						$tulos_ulos .= "<br><br>\n".t("CURL-siirto APIX Finvoice:")."<br>\n";
 					}
 
-					// siirret‰‰n laskutiedosto operaattorille
-					$url			= "https://test-api.apix.fi/invoices";
+					#$url			= "https://test-api.apix.fi/invoices";
+					$url			= "https://api.apix.fi/invoices";
 					$transferkey	= $yhtiorow['verkkosala_lah'];
 					$transferid		= $yhtiorow['verkkotunnus_lah'];
 					$software		= "Pupesoft";

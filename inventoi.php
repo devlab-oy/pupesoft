@@ -1431,7 +1431,7 @@
 			echo "<font class='message'>".t("Avoimet inventointilistat").":</font><br>";
 			echo "<table>";
 			echo "<tr>";
-			echo "<th>".t("Nro")."</th>";
+			echo "<th>".t("Numero")."</th>";
 			echo "<th>".t("Luontiaika")."</th>";
 			echo "<th colspan='2'></th>";
 			echo "</tr>";
@@ -1440,7 +1440,7 @@
 
 				echo "<tr>
 						<td>$lrow[inventointilista]</td>
-						<td>".tv1dateconv($lrow["inventointilista_aika"])."</td>
+						<td>".tv1dateconv($lrow["inventointilista_aika"], "PITKA")."</td>
 						<td>
 							<form action='inventoi.php' method='post'>
 							<input type='hidden' name='tee' value='INVENTOI'>

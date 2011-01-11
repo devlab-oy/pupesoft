@@ -40,6 +40,8 @@ if (!function_exists('finvoice_otsik')) {
 			case '003710948874':
 			$tulostuspalvelu	= "EKIRJE";
 				break;
+			case '003723327487':
+			$tulostuspalvelu	= "TULOSTUSPALVELU";
 			default:
 			$tulostuspalvelu	= "";
 				break;

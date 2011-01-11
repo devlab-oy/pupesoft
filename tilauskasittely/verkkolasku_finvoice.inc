@@ -42,6 +42,7 @@ if (!function_exists('finvoice_otsik')) {
 				break;
 			case '003723327487':
 			$tulostuspalvelu	= "TULOSTUSPALVELU";
+				break;
 			default:
 			$tulostuspalvelu	= "";
 				break;

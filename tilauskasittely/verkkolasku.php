@@ -1966,10 +1966,6 @@
 				}
 				elseif ($yhtiorow["verkkolasku_lah"] == "apix" and file_exists(realpath($nimifinvoice))) {
 					// siirret‰‰n laskutiedosto operaattorille
-					if ($silent == "" or $silent == "VIENTI") {
-						$tulos_ulos .= "<br><br>\n".t("CURL-siirto APIX Finvoice:")."<br>\n";
-					}
-
 					#$url			= "https://test-api.apix.fi/invoices";
 					$url			= "https://api.apix.fi/invoices";
 					$transferkey	= $yhtiorow['verkkosala_lah'];
@@ -1978,7 +1974,7 @@
 					$version		= "1.0";
 					$timestamp		= gmdate("YmdHis");
 					$apixfinvoice 	= basename($nimifinvoice);
-					$apixzipfile	= "Apix_invoices_$timestamp.zip";
+					$apixzipfile	= "Apix_".$yhtiorow['yhtio']."_invoices_$timestamp.zip";
 
 					// Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki apixfilet
 					list($usec, $sec) = explode(' ', microtime());
@@ -2003,7 +1999,13 @@
 						}
 
 						// Tehd‰‰n apixzippi
-						$zip = exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
+						exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
+
+						// Aineisto dataouttiin
+						exec("cp $apix_tmpdirnimi/$apixzipfile $pupe_root_polku/dataout/");
+
+						// Poistetaan apix-tmpdir
+						exec("rm -rf $apix_tmpdirnimi");
 
 						// Siirret‰‰n aineisto APIXiin
 						$digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
@@ -2012,8 +2014,8 @@
 
 						$real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
 
-						$apixfilesize = filesize($apix_tmpdirnimi."/".$apixzipfile);
-						$apix_fh = fopen($apix_tmpdirnimi."/".$apixzipfile, 'r');
+						$apixfilesize = filesize("$pupe_root_polku/dataout/$apixzipfile");
+						$apix_fh = fopen("$pupe_root_polku/dataout/$apixzipfile", 'r');
 
 						$ch = curl_init($real_url);
 						curl_setopt($ch, CURLOPT_PUT, true);
@@ -2022,11 +2024,27 @@
 						curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 						curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-						$tulos_ulos .= "Sending data $apixzipfile to $url<br>";
-						#$tulos_ulos .= htmlentities(curl_exec($ch));
+						$tulos_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>";
+						$response = curl_exec($ch);
 
 						curl_close($ch);
 						fclose($apix_fh);
+
+						$xml = simplexml_load_string($response);
+
+						if ($xml->Status == "OK") {
+							$tulos_ulos .= "L‰hetys onnistui!";
+						}
+						else {
+							$tulos_ulos .= "L‰hetys ep‰onnistui:<br>";
+
+							$tulos_ulos .= "Tila: ".$xml->Status."<br>";
+							$tulos_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
+
+							foreach ($xml->FreeText as $teksti) {
+								$tulos_ulos .= "Tilaviesti: ".$teksti."<br>";
+							}
+						}
 					}
 					else {
 						$tulos_ulos .= "APIX tmpdirrin teko feilas!<br>";

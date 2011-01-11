@@ -181,6 +181,8 @@ if (!function_exists("lopetus")) {
 
 		if ($meta != "") {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
+
+			require("inc/footer.inc");
 			exit;
 		}
 	}
@@ -8326,6 +8328,7 @@ if (!function_exists("liite_popup")) {
 
 			echo "<br><center><input type='button' value='".t("Sulje ikkuna")."' onClick=\"javascript:window.close();\"></center>";
 
+			require("inc/footer.inc");
 			exit;
 		}
 		elseif ($toiminto == "TN") {

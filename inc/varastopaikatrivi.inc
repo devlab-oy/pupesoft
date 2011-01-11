@@ -4,22 +4,22 @@
 	$jatko = 1; // oletetaan normaali k‰sittely
 	$tyyppi = 1; // oletetaan rivin n‰kyvyys
 
-	
+
 	if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
 
 		$sel = array();
 		$sel[$trow[$i]] = "SELECTED";
 
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]'";
 		$kires = mysql_query($query) or pupe_error($query);
 
 		$ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
 
 		while ($kirow = mysql_fetch_array($kires)) {
-			$ulos .= "<option value='$kirow[tunnus]' "; 
-			if(isset($sel[$kirow["tunnus"]])) $ulos .= $sel[$kirow["tunnus"]]; 
+			$ulos .= "<option value='$kirow[tunnus]' ";
+			if(isset($sel[$kirow["tunnus"]])) $ulos .= $sel[$kirow["tunnus"]];
 			$ulos .=">$kirow[kirjoitin]</option>";
 		}
 
@@ -27,13 +27,13 @@
 
 		$jatko=0;
 	}
-	
+
 	if (mysql_field_name($result,$i) == 'tyyppi') {
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
 
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$ulos .= "<option value=''>".t("Normaalivarasto josta kaikki myyv‰t")."</option>";
 		$ulos .= "<option value='V' $sel[V]>".t("Erikoisvarasto josta voi myyd‰")."</option>";
 		$ulos .= "<option value='E' $sel[E]>".t("Erikoisvarasto josta automaattisesti ei myyd‰")."</option>";
@@ -43,7 +43,25 @@
 
 		$jatko=0;
 	}
-	
+
+	if (mysql_field_name($result, $i) == "nouto") {
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Valitse")."</option>";
+
+		$chk = '';
+
+		if ($trow[$i] == 1) {
+			$chk = 'selected';
+		}
+
+		$ulos .= "<option value='0'>".t("Ei n‰ytet‰ Extranetin Hae ja selaa-ohjelmassa noutovarastona")."</option>";
+		$ulos .= "<option value='1' $chk>".t("N‰ytet‰‰n Extranetin Hae ja selaa-ohjelmassa noutovarastona")."</option>";
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "maa") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
@@ -65,12 +83,12 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tunnus" or
 	    mysql_field_name($result, $i) == "yhtio") {
 		$tyyppi = 0;
 	}
-		
+
 	if (mysql_field_name($result, $i) == "tuoteno" and $uusi != 0) {
 		$tyyppi = 1;
 	}
@@ -81,7 +99,7 @@
 		$ulos .= "<option value = '' >".t("Valitse")."</option>";
 
 		$vresult = t_avainsana("KM");
-		
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['selite']) {
@@ -93,7 +111,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kontti") {
 
 		$ulos  = "<td><select name='$nimi'>";
@@ -152,5 +170,5 @@
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
-	}		
+	}
 ?>

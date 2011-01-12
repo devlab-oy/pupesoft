@@ -1465,10 +1465,14 @@
 				$urilisa = "&haku[7]=@$la_tunnus";
 			}
 
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'avainsana' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
+			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot")) {
+				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=$tunnus&lukitse_laji=$laji&ohje=off&lukitse_avaimeen=$la_tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 
-			if (mysql_num_rows($res) > 0) echo "<iframe id='avainsana_iframe' name='avainsana_iframe' src='yllapito.php?toim=avainsana&from=yllapito&lukitse_laji=$laji&ohje=off&haku[2]=@$laji$urilisa&lukitse_avaimeen=$la_tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			if (tarkista_oikeus("yllapito.php", "avainsana")) {
+				echo "<iframe id='avainsana_iframe' name='avainsana_iframe' src='yllapito.php?toim=avainsana&from=yllapito&lukitse_laji=$laji&ohje=off&haku[2]=@$laji$urilisa&lukitse_avaimeen=$la_tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+			
 		}
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana")) {
@@ -1482,20 +1486,19 @@
 
 			$lukitse_avaimeen = urlencode($tuoteno);
 
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_toimittajat' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
-
-			if (mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=tuotteen_toimittajat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
-
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_avainsanat' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
-
-			if (mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			if (tarkista_oikeus("yllapito.php", "tuotteen_toimittajat")) {
+				echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=tuotteen_toimittajat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+			if (tarkista_oikeus("yllapito.php", "tuotteen_avainsanat")) {
+				echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi like 'puun_alkio&laji=tuote%' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-			if (mysql_num_rows($res) > 0) echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&toim2=tuote' style='width: 600px; height: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			if (mysql_num_rows($res) > 0) {
+				echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&toim2=tuote' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 		}
 
 		echo "</td></tr>";
@@ -1503,6 +1506,7 @@
 
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
 		if ($toim == "puun_alkio" or
+			$toim == "toimitustavan_lahdot" or
 			$toim == "avainsana" or
 			$toim == "pakkaus" or
 			$toim == "tili" or
@@ -1630,6 +1634,15 @@
 	if ($from == "yllapito" and $toim == "avainsana") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('avainsana_iframe' $jcsmaxheigth);</script>";
 	}
+
+	if ($from == "yllapito" and $toim == "toimitustavan_lahdot") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimitustavan_lahdot_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "puun_alkio") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('puun_alkio_iframe' $jcsmaxheigth);</script>";
+	}
+
 	elseif ($from != "yllapito") {
 		require ("inc/footer.inc");
 	}

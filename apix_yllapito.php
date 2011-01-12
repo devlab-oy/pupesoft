@@ -2,27 +2,8 @@
 
 	require ("inc/parametrit.inc");
 
-	echo "<font class='head'>".t("APIX Ylläpitoa")."</font><hr>";
-	echo "<br><br>";
-
-	echo "<form action = '$PHP_SELF' method = 'post'>
-			<input type='hidden' name='tee' value='SendRegistrationInfo'>";
-
-	echo "<table>";
-	echo "<tr><th>Läheta yhtiön info APIX:lle:</th></tr>";
-	echo "<tr><td><input type='submit' value='1. SendRegistrationInfo'></td></tr>";
-	echo "</table>";
-	echo "</form><br><br>";
-
-	echo "<form action = '$PHP_SELF' method = 'post'>
-			<input type='hidden' name='tee' value='RetrieveTransferID'>";
-	echo "<table>";
-	echo "<tr><th colspan='2'>Nouda verkkotunnus ja salasana APIX:sta:</th></tr>";
-	echo "<tr><th>USERID</th><td><input type='text' size='30' name='username' value=''></td></tr>";
-	echo "<tr><th>PASSWORD</th><td><input type='text' size='30' name='password' value=''></td></tr>";
-	echo "<tr><td colspan='2'><input type='submit' value='2. RetrieveTransferID'></td></tr>";
-	echo "</table>";
-	echo "</form><br><br>";
+	$status_message1 = "";
+	$status_message2 = "";
 
 	if ($tee != "") {
 		$yhtiorow["ytunnus"] = tulosta_ytunnus($yhtiorow["ytunnus"]);
@@ -30,8 +11,6 @@
 	}
 
 	if ($tee == "SendRegistrationInfo") {
-
-		echo "Apix SendRegistrationInfo:<br>";
 
 		$xmlfile = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
 					<Request version=\"1.0\">
@@ -95,23 +74,30 @@
 		curl_close($ch);
 		fclose($tempfile);
 
-		$response = preg_replace("/<([^\/])/", "\n<$1", utf8_decode($response));
+		$xml = simplexml_load_string($response);
 
-		echo "<pre>",htmlentities($response),"</pre>";
+		$status_message1 = "<br><br>";
+
+		if ($xml->Status == "OK") {
+			$status_message1 .= "<font class='ok'>Lähetys onnistui!</font>";
+		}
+		else {
+			$status_message1 .= "<font class='error'>Lähetys epäonnistui!<br><br>";
+			foreach ($xml->FreeText as $teksti) {
+				$status_message1 .= $teksti."<br>";
+			}
+			$status_message1 .= "</font>";
+		}
 	}
 
 	if ($tee == "RetrieveTransferID") {
 
-		echo "Apix RetrieveTransferID:<br>";
-
 		#$url		= "https://test-api.apix.fi/app-transferID";
 		$url		= "https://api.apix.fi/app-transferID";
-		
 		$timestamp	= gmdate("YmdHis");
-		$pw_digest	= substr(hash('sha256', $password), 0, 64);
-		$digest_src = $yhtiorow["ytunnus"]."+y-tunnus+".$username."+".$timestamp."+".$pw_digest;
+		$pw_digest	= substr(hash('sha256', trim($password)), 0, 64);
+		$digest_src = $yhtiorow["ytunnus"]."+y-tunnus+".trim($username)."+".$timestamp."+".$pw_digest;
 		$dt 		= substr(hash("sha256", $digest_src), 0, 64);
-
 		$real_url 	= "$url?id=$yhtiorow[ytunnus]&idq=y-tunnus&uid=$username&ts=$timestamp&d=SHA-256:$dt";
 
 		$ch = curl_init($real_url);
@@ -119,13 +105,89 @@
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 		$response = curl_exec($ch);
-
 		curl_close($ch);
 
-		$response = preg_replace("/<([^\/])/", "\n<$1", utf8_decode($response));
+		$xml = simplexml_load_string($response);
 
-		echo "<pre>",htmlentities($response),"</pre>";
+		$status_message2 = "<br><br>";
+
+		if ($xml->Status == "OK") {
+
+			$transfer_id = "";
+			$transfer_key = "";
+
+			foreach ($xml->Content->Group->Value as $value) {
+				if ($value->attributes()->type == "TransferKey") {
+					$transfer_key = $value;
+				}
+				if ($value->attributes()->type == "TransferID") {
+					$transfer_id = $value;
+				}
+			}
+
+			if ($transfer_id != "" and $transfer_key != "") {
+				$status_message2 .= "<font class='ok'>Päivitys onnistui, APIX laskutus käyttöönotettu!</font>";
+
+				$query = "	UPDATE yhtion_parametrit SET
+							verkkotunnus_lah = '$transfer_id',
+							verkkosala_lah = '$transfer_key',
+							verkkolasku_lah = 'apix',
+							finvoice_senderpartyid = '$yhtiorow[ovttunnus]',
+							finvoice_senderintermediator = '003723327487'
+							WHERE yhtio = '$kukarow[yhtio]'";
+				$query = mysql_query($query) or pupe_error($query);
+			}
+			else {
+				$status_message2 .= "<font class='error'>Päivitys epäonnistui!<br><br>";
+				$status_message2 .= "<font class='error'>Asiakastiedot olivat tyhjää!<br>";
+			}
+		}
+		else {
+			$status_message2 .= "<font class='error'>Päivitys epäonnistui!<br><br>";
+			foreach ($xml->FreeText as $teksti) {
+				$status_message2 .= $teksti."<br>";
+			}
+			$status_message2 .= "</font>";
+		}
 	}
 
+	echo "<font class='head'>".t("APIX Laskutuksen käyttöönotto")."</font><hr>";
+
+	echo "<br>";
+	echo "<img src='{$palvelin2}pics/apix_logo.png'>";
+	echo "<br><br>";
+
+	echo "<font class='message'>Vaihe 1: Lähetä yhtiötiedot APIX:lle</font><hr>";
+
+	echo "<form action = '$PHP_SELF' method = 'post'>";
+	echo "<input type='hidden' name='tee' value='SendRegistrationInfo'>";
+	echo "<input type='submit' value='Lähetä yhtiötiedot klikkaamalla tästä'>";
+	echo "</form>";
+	echo $status_message1;
+	echo "<br><br>";
+
+	echo "<font class='message'>Vaihe 2: Rekisteröidy APIX asiakkaaksi ja hanki verkkopostimerkkejä heidän verkkokaupasta</font><hr>";
+	echo "<form target='top' action='https://registration.apix.fi' method='get'>";
+#	echo "<form target='top' action='https://test-registration.apix.fi' method='get'>";
+	echo "<input type='submit' value='Siirry APIX rekisteröintiin klikkaamalla tästä'>";
+	echo "</form>";
+
+	echo "<br><br>";
+
+	echo "<font class='message'>Vaihe 3: Ota APIX laskutus käyttöön Pupesoft:issa antamalla APIX käyttäjätietosi</font><hr>";
+
+	echo "<form action = '$PHP_SELF' method = 'post'>";
+	echo "<input type='hidden' name='tee' value='RetrieveTransferID'>";
+	echo "<table>";
+	echo "<tr><th>Käyttäjätunnus</th><td><input type='text' size='20' name='username' value='$username'></td></tr>";
+	echo "<tr><th>Salasana</th><td><input type='password' size='20' name='password' value='$password'></td></tr>";
+	echo "</table>";
+	echo "<br>";
+	echo "<input type='submit' value='Ota APIX laskutus käyttöön klikkaamalla tästä'>";
+	echo $status_message2;
+
+	echo "</form>";
+
 	require ("inc/footer.inc");
+
 ?>

@@ -55,6 +55,13 @@ if (!function_exists('finvoice_otsik')) {
 				$receiverpartyid = $lasrow["verkkotunnus"];
 				$receiverintermediator = "003710948874";
 			}
+			elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
+				list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+
+				if ($receiverintermediator == "") {
+					$receiverintermediator = "003723327487";
+				}
+			}
 			else {
 				list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
 			}

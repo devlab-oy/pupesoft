@@ -334,6 +334,9 @@ if (!function_exists("kuuluukovarastoon")) {
 	}
 }
 
+
+
+
 if (!function_exists("onkotulostusalueita")) {
 	function onkotulostusalueita($hyllyalue, $hyllynro, $varasto, $yhtio = '') {
 		global $kukarow, $yhtiorow;
@@ -9837,6 +9840,69 @@ if (!function_exists("pupe_DataTables")) {
 				}
 			} );
 		</script>";
+	}
+}
+
+if (!function_exists("seuraava_lahtoaika")) {
+	function seuraava_lahtoaika($ttunnus) {
+
+		global $yhtiorow, $kukarow;
+
+		// ttunnus = toimitustapa tunnus
+		// $viikonpvmnro = viikonpäivän numero-arvo
+		// 0 = sunnuntai, 1 = maanantai ... 6 = lauantai
+		// Käytetään PHP:n syntaksia date("w"), ei mysql !!!
+		// Päivämäärä array, nimellinen ilmentymä toiselle puolelle on kiva.
+
+		$viikonpaiva = date("w", time());
+
+		$pvmnimet = array();
+		$pvmnimet[1] = t("Maanantai");
+		$pvmnimet[2] = t("Tiistai");
+		$pvmnimet[3] = t("Keskiviikko");
+		$pvmnimet[4] = t("Torstai");
+		$pvmnimet[5] = t("Perjantai");
+		$pvmnimet[6] = t("Lauantai");
+		$pvmnimet[0] = t("Sunnuntai");
+
+		$query = 	"	(SELECT '1' prio, concat(curdate(), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+						FROM toimitustavan_lahdot
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND liitostunnus = '$ttunnus'
+						and viimeinen_tilausaika > curtime()
+						and lahdon_viikonpvm = '$viikonpaiva'
+						AND aktiivi != 'E')
+
+						UNION
+
+						(SELECT '2' prio, concat(adddate(curdate(), (lahdon_viikonpvm-$viikonpaiva)), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+						FROM toimitustavan_lahdot
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND liitostunnus = '$ttunnus'
+						and lahdon_viikonpvm > '$viikonpaiva'
+						AND aktiivi != 'E')
+
+						UNION
+
+						(SELECT '3' prio, concat(adddate(curdate(),  (7-$viikonpaiva+lahdon_viikonpvm)), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+						FROM toimitustavan_lahdot
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND liitostunnus = '$ttunnus'
+						AND lahdon_viikonpvm <= '$viikonpaiva'
+						AND aktiivi != 'E')
+
+						ORDER BY prio, lahdon_viikonpvm, lahdon_kellonaika
+						LIMIT 1";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 0) {
+			$rivi = mysql_fetch_assoc($result);
+			return $rivi["lahto"];
+		}
+		else {
+			return "";
+		}
+
 	}
 }
 

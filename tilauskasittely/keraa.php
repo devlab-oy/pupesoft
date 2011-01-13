@@ -1018,6 +1018,12 @@
 				$ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."<br><br>";
 				$ulos .= "</body></html>";
 
+				// korvataan poikkeamameili keräysvahvistuksella
+				if ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["kerayspoikkeama"] == 0) {
+					$vahvistusemail = $laskurow["email"];
+					$laskurow["kerayspoikkeama"] = 2;
+				}
+
 				// Lähetetään keräyspoikkeama asiakkaalle
 				if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
 					$boob = mail($laskurow["email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
@@ -1264,10 +1270,10 @@
 							// haetaan asiakkaan tietojen takaa sorttaustiedot
 							$order_sorttaus = '';
 
-							$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta
+							$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
 													FROM asiakas
-													WHERE yhtio='$kukarow[yhtio]'
-													and tunnus='$laskurow[liitostunnus]'";
+													WHERE yhtio = '$kukarow[yhtio]'
+													and tunnus = '$laskurow[liitostunnus]'";
 							$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
 							if (mysql_num_rows($asiakas_apu_res) == 1) {
@@ -1448,6 +1454,13 @@
 							if ($lahetekpl > 1 and $komento != "email") {
 								$komento .= " -#$lahetekpl ";
 							}
+
+							/*
+							if ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $vahvistusemail != "") {
+								$komento = array($komento);
+								$komento[] = "asiakasemail".$vahvistusemail;
+							}
+							*/
 
 							print_pdf_lahete($komento);
 						}

@@ -706,10 +706,10 @@
 					// haetaan asiakkaan tietojen takaa sorttaustiedot
 					$order_sorttaus = '';
 
-					$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta
+					$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
 											FROM asiakas
-											WHERE yhtio='$kukarow[yhtio]'
-											and tunnus='$laskurow[liitostunnus]'";
+											WHERE yhtio = '$kukarow[yhtio]'
+											and tunnus = '$laskurow[liitostunnus]'";
 					$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
 					if (mysql_num_rows($asiakas_apu_res) == 1) {

@@ -1575,7 +1575,7 @@
 				// haetaan asiakkaan tietojen takaa sorttaustiedot
 				$order_sorttaus = '';
 
-				$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta
+				$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
 										FROM asiakas
 										WHERE yhtio = '$kukarow[yhtio]'
 										and tunnus = '$laskurow[liitostunnus]'";
@@ -1716,7 +1716,7 @@
 					// haetaan asiakkaan tietojen takaa sorttaustiedot
 					$order_sorttaus = '';
 
-					$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta
+					$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email
 											FROM asiakas
 											WHERE yhtio = '$kukarow[yhtio]'
 											and tunnus = '$laskurow[liitostunnus]'";

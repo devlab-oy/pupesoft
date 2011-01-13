@@ -871,6 +871,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "keraysvahvistus_lahetys") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel			= array();
+		$sel[$trow[$i]]	= " selected";
+
+		$ulos .= "<option value=''>".t("Ker‰ysvahvistusta ei l‰hetet‰")."</option>";
+		$ulos .= "<option value='o' $sel[o]>".t("Ker‰ysvahvistus l‰hetet‰‰n asiakkaalle")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "oletus_toimitusehto") {
 
 		$kires = t_avainsana("TOIMEHTO");
@@ -2498,7 +2512,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "varastoonvientipaiva") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2519,16 +2533,16 @@
 	if (mysql_field_name($result, $i) == "varastopaikkojen_maarittely") {
 
 		$tyyppi = 0;
-		
+
 		// $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-		// 
+		//
 		// $sel = array();
 		// $sel[$trow[$i]] = " selected";
-		// 
+		//
 		// $ulos .= "<option value = ''>".t("Varastopaikkoja, ja niiden tilavuuksia, ei tarvitse m‰‰ritell‰ etuk‰teen")."</option>";
 		// $ulos .= "<option value = 'M'{$sel['M']}>".t("Varastopaikat, ja niiden tilavuudet, t‰ytyy m‰‰ritell‰ etuk‰teen")."</option>";
 		// $ulos .= "</select></td>";
-		// 
+		//
 		// $jatko = 0;
 	}
 

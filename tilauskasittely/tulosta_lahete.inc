@@ -2150,48 +2150,57 @@ if (!function_exists('print_pdf_lahete')) {
 		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
 		fclose($fh);
 
-		// itse print komento...
-		if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
-			$liite = $pdffilenimi;
-			$content_body = "";
+		if (!is_array($komento)) {
+			$komentoulos = array($komento);
+		}
+		else {
+			$komentoulos = $komento;
+		}
 
-			if ($tyyppi == "TILAUSVAHVISTUS") {
-				echo t("Tilausvahvistus tulostuu")."...<br>";
+		foreach ($komentoulos as $komento) {
+			// itse print komento...
+			if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
+				$liite = $pdffilenimi;
+				$content_body = "";
 
-				$kutsu = t("Tilausvahvistus %s", $kieli, $laskurow["tunnus"]);
+				if ($tyyppi == "TILAUSVAHVISTUS") {
+					echo t("Tilausvahvistus tulostuu")."...<br>";
 
-				$content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
-				$content_body .= t("Tilausnumeronne on", $kieli)." $laskurow[tunnus]\n\n";
-				$content_body .= t("Tämä on automaattinen vahvistus tilauksestanne, tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n\n";
-				$content_body .= t("Ystävällisin terveisin", $kieli).",\n";
-				$content_body .= $yhtiorow["nimi"]."\n";
+					$kutsu = t("Tilausvahvistus %s", $kieli, $laskurow["tunnus"]);
+
+					$content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
+					$content_body .= t("Tilausnumeronne on", $kieli)." $laskurow[tunnus]\n\n";
+					$content_body .= t("Tämä on automaattinen vahvistus tilauksestanne, tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n\n";
+					$content_body .= t("Ystävällisin terveisin", $kieli).",\n";
+					$content_body .= $yhtiorow["nimi"]."\n";
+				}
+				elseif ($tyyppi == "YLLAPITOSOPIMUS") {
+					echo t("Ylläpitosopimus tulostuu")."...<br>";
+
+					$kutsu = t("Ylläpitosopimus %s", $kieli, $laskurow["tilaus"]);
+				}
+				else {
+					echo t("Lähete tulostuu")."...<br>";
+
+					$kutsu = t("Lähete %s", $kieli, $laskurow["tilaus"]);
+				}
+
+				if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+					$kutsu .= " ".trim($laskurow["nimi"]);
+				}
+
+				if (@include("../inc/sahkoposti.inc"));
+				elseif (@include("inc/sahkoposti.inc"));
+				else include("sahkoposti.inc");
 			}
-			elseif ($tyyppi == "YLLAPITOSOPIMUS") {
-				echo t("Ylläpitosopimus tulostuu")."...<br>";
-
-				$kutsu = t("Ylläpitosopimus %s", $kieli, $laskurow["tilaus"]);
+			elseif ($tee == 'NAYTATILAUS') {
+				//Työnnetään tuo pdf vaan putkeen!
+				echo file_get_contents($pdffilenimi);
 			}
-			else {
+			elseif ($komento != '' and $komento != 'edi') {
 				echo t("Lähete tulostuu")."...<br>";
-
-				$kutsu = t("Lähete %s", $kieli, $laskurow["tilaus"]);
+				$line = exec("$komento $pdffilenimi", $output, $returnvalue);
 			}
-
-			if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-				$kutsu .= " ".trim($laskurow["nimi"]);
-			}
-
-			if (@include("../inc/sahkoposti.inc"));
-			elseif (@include("inc/sahkoposti.inc"));
-			else include("sahkoposti.inc");
-		}
-		elseif ($tee == 'NAYTATILAUS') {
-			//Työnnetään tuo pdf vaan putkeen!
-			echo file_get_contents($pdffilenimi);
-		}
-		elseif ($komento != '' and $komento != 'edi') {
-			echo t("Lähete tulostuu")."...<br>";
-			$line = exec("$komento $pdffilenimi", $output, $returnvalue);
 		}
 
 		unset($pdf);

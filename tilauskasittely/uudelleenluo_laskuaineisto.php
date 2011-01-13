@@ -80,42 +80,6 @@
 			$nosoapapix = "NOSOAPAPIX";
 		}
 
-		if (!function_exists("xml_add")) {
-			function xml_add ($joukko, $tieto, $handle) {
-				global $yhtiorow, $lasrow;
-
-				$ulos = "<$joukko>";
-
-				if (strlen($tieto) > 0) {
-					//K‰sitell‰‰n xml-entiteetit
-					$serc = array("&", ">", "<", "'", "\"", "¥", "`");
-					$repl = array("&amp;", "&gt;", "&lt;", "&apos;", "&quot;", " ", " ");
-					$tieto = str_replace($serc, $repl, $tieto);
-
-					$ulos .= trim($tieto);
-				}
-
-				$pos = strpos($joukko, " ");
-
-				if ($pos === FALSE) {
-					$ulos .= "</$joukko>";
-	            }
-	            else {
-					$ulos .= "</".substr($joukko,0,$pos).">";
-	            }
-
-				if ($lasrow["chn"] == "112" or $yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
-					//	Jos tehd‰‰n finvoicea rivinvaihto on \r\n
-					$ulos .= "\r\n";
-				}
-				else {
-					$ulos .= "\n";
-				}
-
-				fputs($handle, $ulos);
-			}
-		}
-
 		if (!function_exists("vlas_dateconv")) {
 			function vlas_dateconv ($date) {
 				//k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm

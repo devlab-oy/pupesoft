@@ -84,16 +84,6 @@
 		return $array[0];
 	}
 	
-	function xml_add ($joukko, $tieto, $handle)
-	{
-		$ulos = "<$joukko>";
-		if (strlen($tieto) > 0)
-			$ulos .= $tieto;
-		$ulos .= "</$joukko>\n";
-	
-		fputs($handle, $ulos);
-	}
-	
 	function dateconv ($date)
 	{
 		//k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm

@@ -9906,4 +9906,44 @@ if (!function_exists("seuraava_lahtoaika")) {
 	}
 }
 
+if (!function_exists("xml_add")) {
+	function xml_add ($joukko, $tieto, $handle, $maxpituus = '') {
+		global $yhtiorow, $lasrow;
+
+		$ulos = "<$joukko>";
+
+		if (strlen($tieto) > 0) {
+			//Käsitellään xml-entiteetit
+			$serc = array("&", ">", "<", "'", "\"", "´", "`");
+			$repl = array("&amp;", "&gt;", "&lt;", "&apos;", "&quot;", " ", " ");
+			$tieto = str_replace($serc, $repl, $tieto);
+
+			if ($maxpituus != "" and is_numeric($maxpituus)) {
+				$tieto = substr($tieto, 0, $maxpituus);
+			}
+
+			$ulos .= trim($tieto);
+		}
+
+		$pos = strpos($joukko, " ");
+
+		if ($pos === FALSE) {
+			$ulos .= "</$joukko>";
+        }
+        else {
+			$ulos .= "</".substr($joukko,0,$pos).">";
+        }
+
+		if ($lasrow["chn"] == "112" or $yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
+			//	Jos tehdään finvoicea rivinvaihto on \r\n
+			$ulos .= "\r\n";
+		}
+		else {
+			$ulos .= "\n";
+		}
+
+		fputs($handle, $ulos);
+	}
+}
+
 ?>

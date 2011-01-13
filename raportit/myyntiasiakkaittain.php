@@ -34,8 +34,14 @@
 			$ppl = date("d");
 
 		$chk = "";
-		if (trim($summaa) != '') {
+		$chk1 = "";
+
+		if (trim($summaa) == 'summaa') {
 			$chk = "CHECKED";
+		}
+
+		if (trim($summaa) == 'summaa_ytunnus') {
+			$chk1 = "CHECKED";
 		}
 
 		echo "<form method='post' action='$PHP_SELF'>";
@@ -51,7 +57,9 @@
 					<td><input type='text' name='kkl' value='$kkl' size='3'></td>
 					<td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
 
-		echo "<tr><th>".t("Summaa myynnit (yksi asiakas per rivi)").":</th><td colspan='3'><input type='checkbox' name='summaa' $chk></td></tr>";
+		echo "<tr><th>".t("Summaa myynnit per asiakas").":</th><td colspan='3'><input type='radio' name='summaa' value='summaa' $chk></td></tr>";
+		echo "<tr><th>".t("Summaa myynnit per ytunnus").":</th><td colspan='3'><input type='radio' name='summaa' value='summaa_ytunnus' $chk1></td></tr>";
+
 		echo "</table>";
 
 		// Monivalintalaatikot (osasto, try tuotemerkki...)
@@ -86,12 +94,17 @@
 				$excelrivi ++;
 			}
 
-			$select = "max(lasku.ytunnus) ytunnus, max(lasku.nimi) nimi, max(lasku.nimitark) nimitark, asiakas.piiri, tuote.aleryhma, ";
+			$select = "lasku.liitostunnus, asiakas.piiri, tuote.aleryhma, max(lasku.ytunnus) ytunnus, max(lasku.nimi) nimi, max(lasku.nimitark) nimitark, ";
 			$group  = "lasku.liitostunnus, asiakas.piiri, tuote.aleryhma";
 
-			if ($summaa != '') {
-				$select = "max(lasku.ytunnus) ytunnus, max(lasku.nimi) nimi, max(lasku.nimitark) nimitark, ";
+			if ($summaa == 'summaa') {
+				$select = "lasku.liitostunnus, max(asiakas.ytunnus) ytunnus, max(asiakas.nimi) nimi, max(asiakas.nimitark) nimitark, ";
 				$group  = "lasku.liitostunnus";
+			}
+
+			if ($summaa == 'summaa_ytunnus') {
+				$select = "lasku.ytunnus, max(asiakas.nimi) nimi, max(asiakas.nimitark) nimitark, ";
+				$group  = "lasku.ytunnus";
 			}
 
 			$query = "	SELECT $select
@@ -220,7 +233,7 @@
 
 			if (mysql_num_rows($result) < 2000) echo "</table>";
 
-			if(isset($workbook)) {
+			if (isset($workbook)) {
 				// We need to explicitly close the workbook
 				$workbook->close();
 

@@ -511,7 +511,7 @@ if (!function_exists('finvoice_otsikko_loput')) {
 			if ($lasrow['kasumma'] > 0) {
 				xml_add("CashDiscountDate Format=\"CCYYMMDD\"",               					pp(vlas_dateconv($lasrow['kapvm'])),   	    $tootfinvoice);
 				xml_add("CashDiscountBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",pp($lasrow['summa'], 2),					$tootfinvoice);
-				xml_add("CashDiscountPercent",													$masrow['kassa_alepros'],					$tootfinvoice);
+				xml_add("CashDiscountPercent",													pp($masrow['kassa_alepros']),				$tootfinvoice);
 				xml_add("CashDiscountAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($lasrow['kasumma'], 2),	  				$tootfinvoice);
 			}
 

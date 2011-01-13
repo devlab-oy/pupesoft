@@ -320,31 +320,11 @@
 									ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 						$riresult = mysql_query($query) or pupe_error($query);
 
-						//generoidaan rivinumerot
-						$rivinumerot = array();
-
-						while ($row = mysql_fetch_array($riresult)) {
-							$rivinumerot[$row["tunnus"]] = $row["tunnus"];
-						}
-
-						sort($rivinumerot);
-
-						$kal = 1;
-
-						foreach($rivinumerot as $rivino) {
-							$rivinumerot[$rivino] = $kal;
-							$kal++;
-						}
-
-						mysql_data_seek($riresult,0);
-
-
 						unset($pdf);
 						unset($page);
 
 						$sivu  = 1;
 						$total = 0;
-						$save_tyyppi =	$tyyppi;
 
 						if ($laskurow["tila"] == "G") {
 							$lah_tyyppi = "SIIRTOLISTA";
@@ -356,9 +336,43 @@
 						// Aloitellaan l‰hetteen teko
 						$page[$sivu] = alku_lahete($lah_tyyppi);
 
-						while ($row = mysql_fetch_array($riresult)) {
-							rivi_lahete($page[$sivu], $lah_tyyppi);
+						// generoidaan rivinumerot
+						$rivinumerot    = array();
+						$tuotenopituus  = 0;
+						$nimityspituus  = 0;
+						$pitkattuotteet = FALSE;
 
+						while ($row = mysql_fetch_assoc($riresult)) {
+							$rivinumerot[$row["tunnus"]] = $row["tunnus"];
+
+							$tuotenopituus += $pdf->strlen($row["tuoteno"], $norm);
+							$nimityspituus += $pdf->strlen($row["nimitys"], $norm);
+						}
+
+						// Jos tuotenumerot ovat hyvin pitk‰t
+						if (($tuotenopituus / mysql_num_rows($riresult)) > 140 or ($nimityspituus / mysql_num_rows($riresult)) > 140) {
+							#$pitkattuotteet = TRUE;
+						}
+
+						// M‰‰ritet‰‰n dynaamisesti tuoteno ja nimitys-sarakkeiden leveydet
+						$tuotenopituus = round($tuotenopituus/($tuotenopituus+$nimityspituus), 2);
+
+						sort($rivinumerot);
+
+						$kal = 1;
+
+						foreach ($rivinumerot as $rivino) {
+							$rivinumerot[$rivino] = $kal;
+							$kal++;
+						}
+
+						mysql_data_seek($riresult,0);
+
+						// Ekan sivun otsikot
+						rivi_otsikot_lahete($page[$sivu]);
+
+						while ($row = mysql_fetch_assoc($riresult)) {
+							rivi_lahete($page[$sivu], $lah_tyyppi);
 							$total+= $row["rivihinta"];
 						}
 

@@ -53,6 +53,9 @@
 
 		$kukarow['kuka']  = "crond";
 
+		//Pupeasennuksen root
+		$pupe_root_polku = dirname(dirname(__FILE__));
+
 		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
 		$yhtiores = mysql_query($query) or pupe_error($query);
 

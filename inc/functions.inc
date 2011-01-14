@@ -4670,28 +4670,29 @@ if (!function_exists("alehinta")) {
 			$laskurow['liitostunnus'] = $vanha_liitostunnus;
 		}
 
-		if ($palautus != "") {
-			$ret=array();
+		if ($trow["myyntihinta_maara"] != 0) {
+			$hinta = round($hinta / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
+		}
 
+		if ($palautus != "") {
+
+			$ret = array();
 			$a = explode(",", $palautus);
-			if (is_array($a)) {
-				foreach($a as $palauta) {
-					if (isset(${$palauta})) {
-						$ret[$palauta] = ${$palauta};
-					}
-					else {
-						echo "<font class='error'>Muuttujaa '$palauta' ei voida palauttaa!</font><br>";
-						$ret[$palauta] = false;
-					}
-				}
+
+			if (!is_array($a)) {
+				$a = array($palautus);
 			}
-			else {
-				if (isset(${$palautus})) {
-					$ret[$palautus] = ${$palautus};
+
+			foreach($a as $palauta) {
+
+				$palauta = trim($palauta);
+
+				if (isset(${$palauta})) {
+					$ret[$palauta] = ${$palauta};
 				}
 				else {
 					echo "<font class='error'>Muuttujaa '$palauta' ei voida palauttaa!</font><br>";
-					$ret[$palautus] = false;
+					$ret[$palauta] = FALSE;
 				}
 			}
 

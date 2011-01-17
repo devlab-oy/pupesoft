@@ -1651,16 +1651,16 @@
 						echo "<td nowrap valign='top'>";
 
 						if ($prow["laji"] == "laskutus" and $prow["laskutunnus"] != "") {
-							echo "<a href='raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
+							echo "<a href='raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus={$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z'>".t("$prow[laji]")."</a>";
 						}
 						elseif ($prow["laji"] == "tulo" and $prow["laskutunnus"] != "") {
-							echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
+							echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus={$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z'>".t("$prow[laji]")."</a>";
 						}
 						elseif ($prow["laji"] == "siirto" and $prow["laskutunnus"] != "") {
-							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
+							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus={$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z'>".t("$prow[laji]")."</a>";
 						}
 						elseif ($prow["laji"] == "valmistus" and $prow["laskutunnus"] != "") {
-							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
+							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus={$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z'>".t("$prow[laji]")."</a>";
 
 							// N‰ytet‰‰n t‰m‰ vain jos k‰ytt‰j‰ll‰ on oikeus tehd‰ valmistuksia tai reseptej‰
 							if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {
@@ -1745,7 +1745,7 @@
 						echo "<td valign='top'>$prow[selite]";
 
 						if ($prow["laji"] == "tulo" and $prow["lasku2tunnus"] != "") {
-							echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]'>".t("N‰yt‰ keikka")." $prow[lasku2laskunro]</a>";
+							echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus={$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z'>".t("N‰yt‰ keikka")." $prow[lasku2laskunro]</a>";
 						}
 
 						if (trim($prow["tapapaikka"]) != "") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";

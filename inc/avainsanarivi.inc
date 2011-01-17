@@ -140,6 +140,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "LUETTELO") 			$ulos .= "<option value='LUETTELO' $avain_sel[LUETTELO]>					".t("Luettelotyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TRIVITYYPPI") 		$ulos .= "<option value='TRIVITYYPPI' $avain_sel[TRIVITYYPPI]>				".t("Tilausrivin tyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LASKUTUS_SAATE")	$ulos .= "<option value='LASKUTUS_SAATE' $avain_sel[LASKUTUS_SAATE]>		".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "PALAUTUS_SAATE")	$ulos .= "<option value='PALAUTUS_SAATE' $avain_sel[PALAUTUS_SAATE]>		".t("Palautuksen sähköpostisaatekirje asiakkaalle")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO") 		$ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>			".t("Tilausvahvistuksen lisätiedot")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "INVEN_LAJI") 		$ulos .= "<option value='INVEN_LAJI' $avain_sel[INVEN_LAJI]>				".t("Inventoinnin laji")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HAE_JA_SELAA") 		$ulos .= "<option value='HAE_JA_SELAA' $avain_sel[HAE_JA_SELAA]>			".t("Hae ja selaa -ohjelman parametrit")."</option>";
@@ -366,7 +367,7 @@
 		$jatko = 0;
 	}
 
-	if ($avain_sel['LASKUTUS_SAATE'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
+	if (($avain_sel['LASKUTUS_SAATE'] == "SELECTED" or $avain_sel['PALAUTUS_SAATE'] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_2") {
 		$ulos = "<td><textarea rows=30 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}

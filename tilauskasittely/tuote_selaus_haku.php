@@ -1595,18 +1595,23 @@
 						$tilauslisa				= "";
 						$noutolisa 				= "";
 
-						if ((int) $kukarow["varasto"] > 0) {
-							$query = "	SELECT *
-										FROM varastopaikat
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND maa 	= '{$oleasrow["varastomaa"]}'
-										AND nouto 	= '1'
-										and tunnus in ({$kukarow['varasto']})";
-							$noutovarres = mysql_query($query) or pupe_error($query);
-
+						if ($verkkokauppa == "") {
+							// Listataan noutovarastot, vain extranetissä. 
+							if (!isset($noutovarres)) {
+								$query = "	SELECT *
+											FROM varastopaikat
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND maa 	= '{$oleasrow["varastomaa"]}'
+											AND nouto 	= '1'";
+								$noutovarres = mysql_query($query) or pupe_error($query);
+							}
+							else {
+								mysql_data_seek($noutovarres, 0);
+							}
+							
 							if (mysql_num_rows($noutovarres) > 0) {
 
-								while ($noutovarrow = mysql_fetch_array($noutovarres)) {
+								while ($noutovarrow = mysql_fetch_assoc($noutovarres)) {
 									list($noutosaldo, $noutohyllyssa, $noutomyytavissa) = saldo_myytavissa($row["tuoteno"], "", $noutovarrow["tunnus"], "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
 									if ($noutomyytavissa > 0) {

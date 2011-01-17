@@ -705,6 +705,27 @@
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table>";
 			}
+			elseif ($yhtiorow["verkkolasku_lah"] == "finvoice" and file_exists(realpath($nimifinvoice))) {
+				//siirretaan laskutiedosto operaattorille
+				$ftphost = "ftp.itella.net";
+				$ftpuser = $yhtiorow['verkkotunnus_lah'];
+				$ftppass = $yhtiorow['verkkosala_lah'];
+				$ftppath = "out/finvoice/data/";
+				$ftpfile = realpath($nimifinvoice);
+				$renameftpfile = $nimifinvoice_delivered;
+
+				// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
+				echo "<pre>mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."</pre>";
+
+				echo "<table>";
+				echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table>";
+			}
 			elseif ($yhtiorow["verkkolasku_lah"] == "apix" and file_exists(realpath($nimifinvoice))) {
 
 				$timestamp		= gmdate("YmdHis");

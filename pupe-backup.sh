@@ -82,7 +82,7 @@ FILENAME="linux-backup-${FILEDATE}.bz2"
 cd /
 
 # Pakataan tärkeät tiedostot
-tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 etc/ssh/sshd_config etc/httpd/conf/* etc/my.cnf root/.forward etc/hosts etc/sysconfig/network etc/mail/* etc/crontab ${PUPEPOLKU}/inc/salasanat.php etc/cron.*
+tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 etc/ssh/sshd_config etc/httpd/conf/* etc/cups/printers.conf etc/cups/lpoptions etc/my.cnf root/.forward etc/hosts etc/sysconfig/network etc/mail/* etc/crontab ${PUPEPOLKU}/inc/salasanat.php etc/cron.*
 
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete

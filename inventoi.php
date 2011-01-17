@@ -446,9 +446,9 @@
 							$cursaldo = $nykyinensaldo + $erotus;
 
 							//triggeröidään erohälytys
-							if (abs($erotus) > 10 and $lista != '') {
-								$virhe = 1;
-							}
+							// if (abs($erotus) > 10 and $lista != '') {
+							// 	$virhe = 1;
+							// }
 
 							//echo "Tuoteno: $tuoteno Saldomuutos: $saldomuutos Kerätty: $kerattymuut Syötetty: $kpl Hyllyssä: $hyllyssa Nykyinen: $nykyinensaldo Erotus: $erotus<br>";
 

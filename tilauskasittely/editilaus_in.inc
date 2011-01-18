@@ -76,6 +76,8 @@ unset($arow_viite);
 unset($arow_ostaja);
 unset($arow_toimitus);
 unset($arow_terminaali);
+$toimpvm 	 			= date("Y-m-d");
+$vastaustapa 			= "";
 $editilaus_tila       	= "N"; // laskun tila
 $editilaus_alatila		= "";
 $editilaus_tyyppi     	= "L"; // tilausrivi tyyppi
@@ -114,26 +116,28 @@ $editilaus_tilaustyyppi = "";
 $editilaus_eilahetetta	= "";
 $editilaus_sisainen		= "";
 $editilaus_kassalipas	= "";
-$editilaus_rivihinta	= "";
 $til_vienti				= "";
 $verkkokauppavarasto	= "";
 $verkkokauppavarasto_li	= "";
+$editilaus_loppuhinta	= "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
-$tuoteerror      = 1; // oletetaan aina ettei  tuotetta löydy
-$tuoteerrortxt   = "";
-$kpl             = "";
-$rivinumero      = "";
-$kommentti       = "";
-$tuoteno         = "";
-$olinsapi        = "";
-$olinvarasto     = "";
-$edi_nimitys     = "";
-$edi_sarjanumero = "";
-$edi_hinta       = "";
-$korvaavakielto  = "";
-$perhekielto     = "";
-$sallitaanjt	 = "";
+$tuoteerror      	= 1; // oletetaan aina ettei  tuotetta löydy
+$tuoteerrortxt   	= "";
+$kpl             	= "";
+$rivinumero      	= "";
+$kommentti       	= "";
+$tuoteno         	= "";
+$olinsapi        	= "";
+$olinvarasto     	= "";
+$edi_nimitys     	= "";
+$edi_sarjanumero 	= "";
+$edi_hinta       	= "";
+$korvaavakielto  	= "";
+$perhekielto     	= "";
+$sallitaanjt	 	= "";
+$editilaus_hinta	= "";
+$editilaus_alennus	= "";
 
 // fiilataan parametrejä joita tarvitaan require fileissä
 $tulos_ulos = "edi"; // tää on ftp-send.incissä
@@ -146,9 +150,6 @@ if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus epäonnistui"
 
 //jotta filenimi ei varmasti katoaisi matkalla
 $mailfile = $filename;
-
-$toimpvm 	 = date("Y-m-d");
-$vastaustapa = "";
 
 if ($edi_tyyppi == "futursoft") {
 	$edi_subj = "Sisääntuleva Futursoft-tilaus";
@@ -600,7 +601,8 @@ while (!feof ($fd)) {
 		case 'OSTOTIL.OT_MAKSETTU' :
 			// jos Magenton tilaus on jo maksettu luottokortilla niin päivitetään maksuehto
 			if ($edi_tyyppi == "magento" and $tieto == 'processing') {
-				$kukarow["kassamyyja"] = $editilaus_kassalipas = "";
+				$kukarow["kassamyyja"] = "";
+				$editilaus_kassalipas = "";
 
 				$query = "	SELECT tunnus
 							FROM maksuehto
@@ -676,6 +678,15 @@ while (!feof ($fd)) {
 				}
 			}
 			break;
+
+		case 'OSTOTIL.OT_SUMMA' :
+			// Kun tullaan magentosta ja meillä on laskun loppusumma
+			// Tallennetaan tämä laskun 'hinta'-kenttään niin jos se jää riittävän lähelle totuutta niin pupe pyöristää loppusumman tähän
+			if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
+				$editilaus_loppuhinta = (float) trim($tieto);
+			}
+			break;
+
 		//Tilaus päättyy. Aika tehdä se kantaan
 		case 'OHDR__END' :
 		case '*RE OSTOTIL' :
@@ -860,6 +871,7 @@ while (!feof ($fd)) {
 							eilahetetta							= '$editilaus_eilahetetta',
 							erikoisale		   					= '$arow[erikoisale]',
 							erpcm								= '',
+							hinta								= '$editilaus_loppuhinta',
 							huolitsija 							= '',
 							hyvaksynnanmuutos 					= '',
 							jakelu 								= '',
@@ -1082,16 +1094,23 @@ while (!feof ($fd)) {
 			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").".\n";
 			break;
 
-		case 'OSTOTILRIV.OTR_RIVISUMMA' :
+		case 'OSTOTILRIV.OTR_OSTOHINTA' :
 			// Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
 			// TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
-			if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
-				// Tämä hinta on aina verollinen lasketaan vero pois jos myyntihinnat ovat verottomia
-				$editilaus_rivihinta = (float) trim($tieto);
+			if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
+				// Tämä hinta on aina veroton, joten lasketaan vero päälle jos myyntihinnat ovat verollisia
+				$editilaus_hinta = (float) trim($tieto);
 
-				if ($yhtiorow["alv_kasittely"] != '') {
-					$editilaus_rivihinta = round($editilaus_rivihinta / (1 + $laskurow["alv"]/100), 2);
+				if ($yhtiorow["alv_kasittely"] == '') {
+					$editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
 				}
+			}
+			break;
+
+		case 'OSTOTILRIV.OTR_ALENNUS' :
+			// Kun tullaan magentosta ja meillä on alennus, niin otetaan alennus talteen jos me luotetaan verkkokaupan hintoihin.
+			if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
+				$editilaus_alennus = (float) trim($tieto);
 			}
 			break;
 
@@ -1172,8 +1191,13 @@ while (!feof ($fd)) {
 					}
 
 					// jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
-					if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $editilaus_rivihinta > 0) {
-						$hinta = $editilaus_rivihinta;
+					if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
+						$hinta = $editilaus_hinta;
+					}
+
+					// jos tullaan magentosta ja alennus on tiedossa
+					if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus > 0) {
+						$ale = $editilaus_alennus;
 					}
 
 					// Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
@@ -1295,20 +1319,22 @@ while (!feof ($fd)) {
 			}
 
 			// nollataan kaikki rivin muuttujat (nämä samat pitää tehdä filen alussa)
-			$tuoteerror      = 1; // oletetaan aina ettei  tuotetta löydy
-			$tuoteerrortxt   = "";
-			$kpl             = "";
-			$rivinumero      = "";
-			$kommentti       = "";
-			$tuoteno         = "";
-			$olinsapi        = "";
-			$olinvarasto     = "";
-			$edi_nimitys     = "";
-			$edi_sarjanumero = "";
-			$edi_hinta       = "";
-			$korvaavakielto  = "";
-			$perhekielto     = "";
-			$sallitaanjt	 = "";
+			$tuoteerror      	= 1; // oletetaan aina ettei  tuotetta löydy
+			$tuoteerrortxt   	= "";
+			$kpl             	= "";
+			$rivinumero      	= "";
+			$kommentti       	= "";
+			$tuoteno         	= "";
+			$olinsapi        	= "";
+			$olinvarasto     	= "";
+			$edi_nimitys     	= "";
+			$edi_sarjanumero 	= "";
+			$edi_hinta       	= "";
+			$korvaavakielto  	= "";
+			$perhekielto     	= "";
+			$sallitaanjt	 	= "";
+			$editilaus_hinta	= "";
+			$editilaus_alennus	= "";
 			break;
 
 		case 'OMSG__END' :
@@ -1480,7 +1506,8 @@ while (!feof ($fd)) {
 			unset($arow_ostaja);
 			unset($arow_toimitus);
 			unset($arow_terminaali);
-			$toimpvm				= date("Y-m-d");
+			$toimpvm 	 			= date("Y-m-d");
+			$vastaustapa 			= "";
 			$editilaus_tila       	= "N"; // laskun tila
 			$editilaus_alatila		= "";
 			$editilaus_tyyppi     	= "L"; // tilausrivi tyyppi
@@ -1509,22 +1536,20 @@ while (!feof ($fd)) {
 			$loposoite            	= "";
 			$ltoim_maa				= "";
 			$yhteyshenkilon_puhelin = "";
-			$edi_nimitys          	= "";
-			$olinsapi             	= "";
-			$olinvarasto          	= "";
 			$lopviesti            	= "";
-			$edi_sarjanumero      	= "";
-			$edi_hinta            	= "";
 			$ketjutus             	= "";
 			$editilaus_maksuehto	= "";
 			$editilaus_toimitustapa = "";
 			$tilaus_hyvaksyntaan	= "";
 			$editilaus_rahtivapaa	= "";
-			$editilaus_kassalipas	= "";
 			$editilaus_tilaustyyppi = "";
 			$editilaus_eilahetetta	= "";
 			$editilaus_sisainen		= "";
-			$editilaus_rivihinta 	= "";
+			$editilaus_kassalipas	= "";
+			$til_vienti				= "";
+			$verkkokauppavarasto	= "";
+			$verkkokauppavarasto_li	= "";
+			$editilaus_loppuhinta	= "";
 			break;
 	}
 }

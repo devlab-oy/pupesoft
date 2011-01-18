@@ -274,7 +274,7 @@
 								and tuote.yhtio			  = tuotepaikat.yhtio";
 					$result = mysql_query($query) or pupe_error($query);
 
-					if (mysql_num_rows($result) == 0 and $virhe == 0) {
+					if (mysql_num_rows($result) == 0 and $virhe != 1) {
 
 						if ($lisaselite == "PERUSTA" or $fileesta == "ON") {
 							// PERUSTETAAN tuotepaikka
@@ -351,7 +351,7 @@
 						}
 					}
 
-					if (mysql_num_rows($result) == 1 and $virhe == 0) {
+					if (mysql_num_rows($result) == 1 and $virhe != 1) {
 						$row = mysql_fetch_array($result);
 
 						if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
@@ -446,9 +446,9 @@
 							$cursaldo = $nykyinensaldo + $erotus;
 
 							//triggeröidään erohälytys
-							// if (abs($erotus) > 10 and $lista != '') {
-							// 	$virhe = 1;
-							// }
+							if (abs($erotus) > 10 and $lista != '') {
+							 	$virhe = 2;
+							}
 
 							//echo "Tuoteno: $tuoteno Saldomuutos: $saldomuutos Kerätty: $kerattymuut Syötetty: $kpl Hyllyssä: $hyllyssa Nykyinen: $nykyinensaldo Erotus: $erotus<br>";
 
@@ -850,7 +850,7 @@
 							}
 						}
 
-						if($fileesta == "ON") {
+						if ($fileesta == "ON") {
 							echo "<font class='message'>".t("Tuote")."   $tuoteno $hyllyalue $hyllynro $hyllyvali $hyllytaso ".t("inventoitu")."!</font><br>";
 						}
 					}
@@ -862,15 +862,15 @@
 		}
 
 		if ($virhe == 0 and $mobiili != "YES") {
-			if(isset($prev)) {
+			if (isset($prev)) {
 				$alku = $alku-$rivimaara;
 				$tee = "INVENTOI";
 			}
-			elseif(isset($next)) {
+			elseif (isset($next)) {
 				$alku = $alku+$rivimaara;
 				$tee = "INVENTOI";
 			}
-			elseif(isset($valmis)) {
+			elseif (isset($valmis)) {
 				$tee = "";
 				$tmp_tuoteno = "";
 
@@ -924,7 +924,7 @@
 				$tee='';
 			}
 		}
-		elseif($lista != "") {
+		elseif ($lista != "") {
 			///* Inventoidaan listan perusteella *///
 			$kutsu = " ".t("Inventointilista")." $lista ";
 
@@ -1028,6 +1028,7 @@
 				echo "</select>";
 				echo "<input type='hidden' name='tee' value='INVENTOI'>";
 				echo "<input type='hidden' name='lista' value='$lista'>";
+				echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
 				echo "<input type='hidden' name='alku' value='$alku'>";
 				echo "</form>";
 			}
@@ -1036,6 +1037,7 @@
 			echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='VALMIS'>";
 			echo "<input type='hidden' name='lista' value='$lista'>";
+			echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
 			echo "<input type='hidden' name='alku' value='$alku'>";
 			echo "<input type='hidden' name='rivimaara' value='$rivimaara'>";
 			echo "<input type='hidden' name='jarjestys' value='$jarjestys'>";
@@ -1142,7 +1144,7 @@
 							}
 							echo "</table>";
 						}
-						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//alku=$alku'>".t("Uusi sarjanumero")."</a>";
+						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi sarjanumero")."</a>";
 					}
 					elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E","F","G"))) {
 						if (mysql_num_rows($sarjares) > 0) {
@@ -1194,7 +1196,7 @@
 
 							echo "</table>";
 						}
-						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//alku=$alku'>".t("Uusi eränumero")."</a>";
+						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=",$palvelin2,"inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi eränumero")."</a>";
 					}
 
 					echo "</td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>";
@@ -1228,26 +1230,6 @@
 				}
 				elseif ($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $tuoterow["inventointilista"] == $lista) {
 
-					//jos invauserohälytys on triggeröity
-					$viesti = "";
-					$pv = date("Y-m-d")." 00:00:00";
-
-					$query = "	SELECT abs(kpl) kpl
-								FROM tapahtuma
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$tuoterow[tuoteno]'
-								and laadittu >= '$pv'
-								and laji='Inventointi'
-								and kpl <> 0
-								ORDER BY tunnus desc
-								LIMIT 1";
-					$tapresult = mysql_query($query) or pupe_error($query);
-					$taptrow = mysql_fetch_array ($tapresult);
-
-					if ($taptrow["kpl"] > 10) {
-						$viesti = t("HUOM: Tuotteen saldo muuttui yli 10 kappaletta! Tarkista inventointi!");
-					}
-
 					echo "<tr>";
 					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
@@ -1265,12 +1247,42 @@
 
 					echo "</td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
 
-					if ($viesti == '') {
-						echo "<td valign='top' class='green' colspan='4'>".t("Tuote on inventoitu!");
+					$query = "	SELECT *
+								FROM tapahtuma
+								WHERE yhtio 	= '$kukarow[yhtio]'
+								and tuoteno 	= '$tuoterow[tuoteno]'
+								and laji		= 'Inventointi'
+								and laadittu   >= '$lista_aika'
+								and hyllyalue 	= '$tuoterow[hyllyalue]'
+								and hyllynro 	= '$tuoterow[hyllynro] '
+								and hyllyvali 	= '$tuoterow[hyllyvali]'
+								and hyllytaso 	= '$tuoterow[hyllytaso]'
+								ORDER BY tunnus desc
+								LIMIT 1";
+					$tapresult = mysql_query($query) or pupe_error($query);
+					$taptrow = mysql_fetch_array($tapresult);
+
+					$taptrow["selite"] = preg_replace("/".t("paikalla")." .*?\-.*?\-.*?\-.*? /", "", $taptrow["selite"]);
+
+					echo "<td valign='top' class='green' colspan='4'>".t("Tuote on inventoitu!")." $taptrow[selite]";
+
+					//Jos invauserohälytys on triggeröity
+					$query = "	SELECT abs(kpl) kpl
+								FROM tapahtuma
+								WHERE yhtio   = '$kukarow[yhtio]'
+								and tuoteno   = '$tuoterow[tuoteno]'
+								and laji	  = 'Inventointi'
+								and laadittu >= '$lista_aika'
+								and kpl 	 <> 0
+								ORDER BY tunnus desc
+								LIMIT 1";
+					$tapresult = mysql_query($query) or pupe_error($query);
+					$taptrow = mysql_fetch_array ($tapresult);
+
+					if ($taptrow["kpl"] > 10) {
+						echo "<br><font class='error'>".t("HUOM: Tuotteen saldo muuttui yli 10 kappaletta! Tarkista inventointi!")."</font>";
 					}
-					else {
-						echo "<td valign='top' colspan='4'><font class='error'>$viesti</font>";
-					}
+
 					echo "</td>";
 
 					if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {
@@ -1421,7 +1433,7 @@
 		//haetaan inventointilista numero tässä vaiheessa
 		$query = "	SELECT distinct inventointilista, inventointilista_aika
 					FROM tuotepaikat
-					WHERE tuotepaikat.yhtio	= '$kukarow[yhtio]'
+					WHERE yhtio	= '$kukarow[yhtio]'
 					and inventointilista > 0
 					and inventointilista_aika > '0000-00-00 00:00:00'
 					ORDER BY inventointilista";
@@ -1437,7 +1449,6 @@
 			echo "</tr>";
 
 			while ($lrow = mysql_fetch_array($result)) {
-
 				echo "<tr>
 						<td>$lrow[inventointilista]</td>
 						<td>".tv1dateconv($lrow["inventointilista_aika"], "PITKA")."</td>
@@ -1445,6 +1456,7 @@
 							<form action='inventoi.php' method='post'>
 							<input type='hidden' name='tee' value='INVENTOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
+							<input type='hidden' name='lista_aika' value='$lrow[inventointilista_aika]'>
 							<input type='submit' value='".t("Inventoi")."'>
 							</form>
 						</td>
@@ -1452,6 +1464,7 @@
 							<form action='inventoi.php' method='post'>
 							<input type='hidden' name='tee' value='MITATOI'>
 							<input type='hidden' name='lista' value='$lrow[inventointilista]'>
+							<input type='hidden' name='lista_aika' value='$lrow[inventointilista_aika]'>
 							<input type='submit' value='".t("Mitätöi lista")."'>
 							</form>
 						</td>";

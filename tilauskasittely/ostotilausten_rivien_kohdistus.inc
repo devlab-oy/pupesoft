@@ -80,7 +80,7 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
 
 	$query = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta
 				FROM tilausrivi use index (PRIMARY)
-				LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+				LEFT JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 				WHERE tilausrivi.tunnus = '$riviid'
 				and tilausrivi.yhtio	= '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -319,11 +319,13 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
 	$kayttajan_kpl		= $kpl;
 	$kayttajan_alv		= $alv;
 
-	foreach($tuoteno_array as $tuoteno) {
+	foreach ($tuoteno_array as $tuoteno) {
 
 		$query	= "	SELECT *
-					from tuote
-					where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+					FROM tuote
+					WHERE tuoteno = '$tuoteno' 
+					and yhtio = '$kukarow[yhtio]'
+					and ei_saldoa = ''";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -689,7 +691,8 @@ if ($tila == 'tee_kohdistus') {
 								FROM tuote
 								LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus='$toimittajaid'
 								where tuote.yhtio = '$kukarow[yhtio]'
-								and tuote.tuoteno = '$tuoteno'";
+								and tuote.tuoteno = '$tuoteno'
+							 	and tuote.ei_saldoa = ''";
 					$lisaresult = mysql_query($query) or pupe_error($query);
 					$lisarow = mysql_fetch_array($lisaresult);
 
@@ -868,7 +871,7 @@ if ($tila == '') {
 						and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno
 						and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100))) hinta
 				FROM tilausrivi use index (uusiotunnus_index)
-				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
 				LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '$toimittajaid')
 				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -1069,7 +1072,7 @@ if ($tila == '') {
 				tuotteen_toimittajat.toim_yksikko toimyksikko
 				FROM lasku
 				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
-				JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno  and tuote.ei_saldoa = '')
 				LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -1539,7 +1542,8 @@ if ($tila == '') {
 		$query = "	SELECT sarjanumeroseuranta
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tuoteno = '$rivirow[tuoteno]'";
+					and tuoteno = '$rivirow[tuoteno]'
+					and ei_saldoa = ''";
 		$sarjares = mysql_query($query) or pupe_error($query);
 		$sarjarow = mysql_fetch_array($sarjares);
 
@@ -1655,7 +1659,7 @@ if ($tila == '') {
 		//Tutkitaan tuotteiden lisävarusteita
 		$query  = "	SELECT tuote.tuoteno, tuote.nimitys, tuotteen_toimittajat.toim_tuoteno
 					FROM tuoteperhe
-					JOIN tuote ON tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno
+					JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno and tuote.ei_saldoa = '')
 				 	LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus='$toimittajaid'
 					where tuoteperhe.yhtio = '$kukarow[yhtio]'
 					and tuoteperhe.isatuoteno = '$rivirow[tuoteno]'

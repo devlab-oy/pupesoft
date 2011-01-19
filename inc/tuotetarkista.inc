@@ -189,7 +189,8 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "vienti") {
+		// Viranomaistuotteita ei tsekata...
+		if (mysql_field_name($result, $i) == "vienti" and $laji != "V") {
 
 			// Katsotaan, ettei ole sekaisin plussia ja miinuksia
 			if ($t[$i] != '' and strpos($t[$i], "+") !== FALSE and strpos($t[$i], "-") !== FALSE) {

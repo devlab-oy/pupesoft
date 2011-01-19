@@ -234,7 +234,8 @@
 
 		$kukaquery = "	UPDATE kuka
 						SET taso = '2'
-						WHERE taso = '3'";
+						WHERE taso = '3'
+						and extranet = ''";
 		$kukaresult = mysql_query($kukaquery) or pupe_error($kukaquery);
 
 		if (mysql_affected_rows() > 0) {

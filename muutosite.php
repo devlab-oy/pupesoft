@@ -123,17 +123,40 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		}
 
 		if ($tee == 'W') {
-			$query = "	SELECT ltunnus, group_concat(distinct tapvm SEPARATOR '<br>') pvm,  count(*) kpl, round(sum(summa),2) heitto, group_concat(distinct selite SEPARATOR '<br>') selite
-						FROM tiliointi use index (yhtio_tilino_tapvm)
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND korjattu = ''
-						AND tapvm >= '$yhtiorow[tilikausi_alku]'
-						AND tapvm <= '$yhtiorow[tilikausi_loppu]'
-						AND tilino = '$yhtiorow[ostovelat]'
-						GROUP BY ltunnus
-						HAVING kpl > 1
-						AND heitto <> 0
-						ORDER by pvm";
+			$query = "	(SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
+						count(tiliointi.tunnus) saamistilej‰,
+						round(sum(tiliointi.summa),2) heitto
+						FROM lasku
+						LEFT JOIN tiliointi ON lasku.yhtio = tiliointi.yhtio
+											and lasku.tunnus = tiliointi.ltunnus
+											and lasku.tapvm = tiliointi.tapvm
+											and abs(lasku.summa + tiliointi.summa) <= 0.02
+											and tiliointi.korjattu = ''
+											and tiliointi.tilino in ('$yhtiorow[ostovelat]','$yhtiorow[konserniostovelat]')
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila in ('H','Y','M','P','Q')
+						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
+						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						GROUP BY 1,2,3,4,5,6
+						HAVING saamistilej‰ != 1)
+
+						UNION
+
+						(SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
+						count(tiliointi.tunnus) saamistilej‰,
+						round(sum(tiliointi.summa),2) heitto
+						FROM lasku
+						LEFT JOIN tiliointi ON lasku.yhtio = tiliointi.yhtio
+											and lasku.tunnus = tiliointi.ltunnus
+											and tiliointi.korjattu = ''
+											and tiliointi.tilino in ('$yhtiorow[ostovelat]','$yhtiorow[konserniostovelat]')
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila in ('H','Y','M','P','Q')
+						and lasku.mapvm != '0000-00-00'
+						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
+						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						GROUP BY 1,2,3,4,5,6
+						HAVING saamistilej‰ > 1 and heitto <> 0)";
 		}
 
 		if ($tee == 'S') {
@@ -380,7 +403,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 	else {
 
 		// Tehd‰‰n lopetusmuuttuja kaikkiin urleihin
-		$lopetus = "${palvelin2}muutosite.php////tee=$tee//tap=$tap//tak=$tak//tav=$tav//summa=$summa//tilino=$tilino//selite=$selite//laatija=$laatija";
+		$lopetus = "{$palvelin2}muutosite.php////tee=$tee//tap=$tap//tak=$tak//tav=$tav//summa=$summa//tilino=$tilino//selite=$selite//laatija=$laatija";
 
 		echo "<table><tr>";
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
@@ -1142,7 +1165,7 @@ if ($tee == 'E' or $tee == 'F') {
 
 	if (mysql_num_rows($res) > 0) {
 		echo "<form method='POST' action='".$palvelin2."yllapito.php?toim=liitetiedostot&from=muutosite&ohje=off&haku[7]=@lasku&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=lasku'>
-				<input type = 'hidden' name = 'lopetus' value = '$lopetus/SPLIT/".$palvelin2."muutosite.php////tee=E//tunnus=$tunnus'>
+				<input type = 'hidden' name = 'lopetus' value = '$lopetus/SPLIT/{$palvelin2}muutosite.php////tee=E//tunnus=$tunnus'>
 				<input type = 'submit' value='" . t('Muokkaa liitteit‰')."'>
 				</form>";
 		$liitetiedosto = 1;
@@ -1226,27 +1249,23 @@ if ($tee == 'E' or $tee == 'F') {
 
 	// tehd‰‰n tiliˆintis‰‰ntˆnappula, mik‰li laskussa on liitettyn‰ finveoice tai pupevoice lasku
 	if ($liitetiedosto == 1) {
-		
-		// Tehd‰‰n lopetusmuuttuja kaikkiin urleihin
-		$lopetus = "${palvelin2}muutosite.php////tee=E//tunnus=$trow[tunnus]";
-		
-		$query = " 	SELECT filename, kayttotarkoitus, tunnus 
-					FROM liitetiedostot 
-					WHERE yhtio = '$kukarow[yhtio]' 
-					AND liitos = 'lasku' 
+		$query = " 	SELECT filename, kayttotarkoitus, tunnus
+					FROM liitetiedostot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND liitos = 'lasku'
 					AND liitostunnus = '$trow[tunnus]'
 					AND kayttotarkoitus in ('FINVOICE','INVOIC.D.96A')";
 		$tulokset = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($tulokset) >0) {
 			$ktarkoitus = mysql_fetch_assoc($tulokset);
-		
+
 			echo "<form method='POST' action='".$palvelin2."tiliointisaannot.php'>";
 			echo "<input type = 'hidden' name = 'tila' value = 'XML'>";
 			echo "<input type = 'hidden' name = 'tunnus' value = '$trow[liitostunnus]'>";
 			echo "<input type = 'hidden' name = 'liitetiedosto' value = '$ktarkoitus[tunnus]'>";
 			echo "<input type = 'hidden' name = 'kayttotyyppi' value = '$ktarkoitus[kayttotarkoitus]'>";
-			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+			echo "<input type='hidden' name='lopetus' value='$lopetus/SPLIT/${palvelin2}muutosite.php////tee=E//tunnus=$trow[tunnus]'>";
 			echo "<input type = 'submit' value='" . t('Tee tiliˆintis‰‰ntˆ laskusta')."'>";
 			echo "</form>";
 		}

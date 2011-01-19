@@ -1020,7 +1020,6 @@
 
 				// korvataan poikkeamameili keräysvahvistuksella
 				if ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["kerayspoikkeama"] == 0) {
-					$vahvistusemail = $laskurow["email"];
 					$laskurow["kerayspoikkeama"] = 2;
 				}
 
@@ -1185,11 +1184,12 @@
 
 				// Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
 				// Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
-				$query = "	SELECT *
+				$query = "	SELECT lasku.*, asiakas.email
 							FROM lasku
-							WHERE tunnus in ($tilausnumeroita)
-							and yhtio = '$kukarow[yhtio]'
-							and alatila in ('C','D')";
+							JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
+							WHERE lasku.tunnus in ($tilausnumeroita)
+							and lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.alatila in ('C','D')";
 				$lasresult = mysql_query($query) or pupe_error($query);
 
 				while ($laskurow = mysql_fetch_assoc($lasresult)) {
@@ -1210,7 +1210,7 @@
 						$oslapp = $kirrow['komento'];
 					}
 
-					if ($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) {
+					if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) or ($yhtiorow["keraysvahvistus_lahetys"] == "o" and $laskurow['email'] != "")) {
 
 						$otunnus = $laskurow["tunnus"];
 
@@ -1455,12 +1455,10 @@
 								$komento .= " -#$lahetekpl ";
 							}
 
-							/*
-							if ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $vahvistusemail != "") {
+							if ($yhtiorow["keraysvahvistus_lahetys"] == "o" and $laskurow['email'] != "") {
 								$komento = array($komento);
-								$komento[] = "asiakasemail".$vahvistusemail;
+								$komento[] = "asiakasemail".$laskurow['email'];
 							}
-							*/
 
 							print_pdf_lahete($komento);
 						}

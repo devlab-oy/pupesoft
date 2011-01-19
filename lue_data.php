@@ -1349,7 +1349,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				$t 		= array();
 				$virhe 	= array();
 				$poistolukko = "LUEDATA";
-
+				
+				// Jos on uusi rivi niin kaikki lukot on auki
+				if ($rivi[$postoiminto] == 'LISAA') {
+					$poistolukko = "";	
+				}
+				
 				//	Otetaan talteen query..
 				$lue_data_query = $query;
 

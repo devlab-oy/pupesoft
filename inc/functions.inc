@@ -4959,7 +4959,7 @@ if (!function_exists("remove_duplicates")) {
 
 		$group = "";
 
-		while ($fields = mysql_fetch_assoc($fieldresult)) {
+		while ($fields = mysql_fetch_array($fieldresult)) {
 			if ($fields[0] != "tunnus" and
 				$fields[0] != "laatija"	and
 				$fields[0] != "luontiaika" and

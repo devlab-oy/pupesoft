@@ -181,7 +181,7 @@
 
 		// Jaaha p‰ivit‰mme maksutilin! (ulkomaat)
 		if ($tila == 'TU') {
-			$query = "	SELECT comments, ultilno, swift, pankki_haltija, pankki1, pankki2, pankki3, pankki4
+			$query = "	SELECT comments, ultilno, swift, pankki_haltija, pankki1, pankki2, pankki3, pankki4, sisviesti1
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '$tunnus'";
@@ -192,20 +192,21 @@
 				exit;
 			}
 
-			$trow = mysql_fetch_array ($result);
+			$trow = mysql_fetch_array($result);
 
-			$kommentti = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s %s %s %s %s %s %s.'), $trow['pankki_haltija'], $trow['ultilno'], $trow['swift'], $trow['pankki1'], $trow['pankki2'], $trow['pankki3'], $trow['pankki4']) ."<br>" . $trow['comments'];
+			$kommentti = "($kukarow[kuka]@".date('Y-m-d').") ".t("Laskun maksutili muutettiin. Vanha oli").": $trow[pankki_haltija], $trow[ultilno], $trow[swift], $trow[pankki1], $trow[pankki2], $trow[pankki3], $trow[pankki4], $trow[sisviesti1].<br>$trow[comments]";
 
 			//P‰ivitet‰‰n lasku
 			$query = "UPDATE lasku SET
-			 		ultilno = '$ultilno',
-					swift = '$swift',
-					pankki_haltija = '$pankki_haltija',
-					pankki1 = '$pankki1',
-					pankki2 = '$pankki2',
-					pankki3 = '$pankki3',
-					pankki4 = '$pankki4',
-					comments = '$kommentti'
+			 		ultilno 		= '$ultilno',
+					swift 			= '$swift',
+					pankki_haltija 	= '$pankki_haltija',
+					pankki1 		= '$pankki1',
+					pankki2 		= '$pankki2',
+					pankki3 		= '$pankki3',
+					pankki4 		= '$pankki4',
+					sisviesti1		= '$ohjeitapankille',
+					comments 		= '$kommentti'
 					WHERE tunnus = '$tunnus'
 					AND yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -268,7 +269,7 @@
 
 		//T‰‰ll‰ p‰ivitet‰‰n muun tositteen pvm
 		if ($tila == 'P') {
-			
+
 			$query = "UPDATE lasku SET tapvm = '$vv-$kk-$pp'  WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]'";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -968,7 +969,7 @@
 			$tee = 'E';
 			$tila = 'X';
 		}
-		
+
 	}
 
 	if ($tila == '') {
@@ -1024,7 +1025,7 @@
 						  <td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						  </tr>";
 					echo "</form>";
-				}		
+				}
 
 				echo "<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1350,7 +1351,7 @@
 						<tr>
 						<th>".t('Pankkihaltija')."</th>
 						<td><input type = 'text' name = 'pankki_haltija' size='40' value = '$trow[pankki_haltija]'></td>
-						<td rowspan='7'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+						<td rowspan='8'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						<td class='back'>".t("Lasku siirtyy takaisin hyv‰ksynt‰‰n")."</td>
 						</tr>
 						<tr>
@@ -1368,6 +1369,10 @@
 						<tr>
 						<th>".t('Pankkitili 4')."</th>
 						<td><input type = 'text' name = 'pankki4' size='40' value = '$trow[pankki4]'></td>
+						</tr>
+						<tr>
+						<th>".t('Ohjeita Pankille')."</th>
+						<td><textarea cols='35' rows='7' name='ohjeitapankille'>$trow[sisviesti1]</textarea></td>
 						</tr>
 						<tr>
 						<th>".t('Toimittajan tilinumero / IBAN')."</th>

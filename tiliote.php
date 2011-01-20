@@ -229,7 +229,7 @@
 						$query = "	UPDATE tiliotedata
 									SET perheid = $td_perheid
 									WHERE tunnus = $tiliote_id";
-						$updatekasitelty = mysql_query($query) or pupe_error($query);
+						$updateperheid = mysql_query($query) or pupe_error($query);
 					}
 				}
 

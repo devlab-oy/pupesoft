@@ -1,5 +1,5 @@
 <?php
-// Tässä on esimerkki, miten voi korjata tietokannan eheysongelmia
+ // Tässä on esimerkki, miten voi korjata tietokannan eheysongelmia
 
 	require "inc/parametrit.inc";
 	$link = mysql_pconnect ($dbhost, $dbuser, $dbpass)

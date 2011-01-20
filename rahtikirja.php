@@ -950,14 +950,6 @@
 						$komento .= " -#$lahetekpl ";
 					}
 
-					/*
-					// L‰hetet‰‰n ker‰yssvahvistus
-					if ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $asiakas_apu_row["email"] != "") {
-						$komento = array($komento);
-						$komento[] = "asiakasemail".$asemailrow["email"];
-					}
-					*/
-
 					print_pdf_lahete($komento);
 				}
 			}

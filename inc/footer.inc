@@ -13,6 +13,7 @@
 		$suoque = "	INSERT INTO suorituskykyloki
 					SET yhtio	 	= '$kukarow[yhtio]',
 					skripti      	= '".$_SERVER['SCRIPT_NAME']."',
+					iposoite		= '".$_SERVER['REMOTE_ADDR']."',
 					request			= '".mysql_real_escape_string(serialize($_REQUEST))."',
 					suoritusalku	= '".date("Y-m-d H:i:s", $starttime)."',
 					suoritusloppu	= '".date("Y-m-d H:i:s", $endtime)."',

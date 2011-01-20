@@ -25,7 +25,7 @@
 	$komento		= "";
 
 	// emuloidaan transactioita mysql LOCK komennolla
-	$query = "LOCK TABLES suorituskykyloki WRITE, liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ";
+	$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ";
 	$res   = mysql_query($query) or pupe_error($query);
 
 	$queryc = "	SELECT sum(if(tila='N' and alatila='A', 1, 0)) ok, count(*) kaikki
@@ -174,17 +174,6 @@
 			//tulostetaan sivu
 			print_pdf_kerayslista($komento);
 			$returnvalue = 0;
-
-			$suoque = "	INSERT INTO suorituskykyloki
-						SET yhtio	 	= '$kukarow[yhtio]',
-						skripti      	= '".$_SERVER['SCRIPT_NAME']."',
-						request			= 'Keräyslista: $tilausnumeroita tulostetaan. print_pdf_kerayslista(".mysql_real_escape_string($komento).")',
-						suoritusalku	= '',
-						suoritusloppu	= '',
-						suoritusaika 	= '',
-						laatija      	= '$kukarow[kuka]',
-						luontiaika   	= now()";
-			$suores = mysql_query($suoque) or pupe_error($suoque);
 		}
 		else {
 			$returnvalue = 1;
@@ -221,29 +210,6 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus in ($tilausnumeroita)";
 			$result = mysql_query($query) or pupe_error($query);
-
-			$suoque = "	INSERT INTO suorituskykyloki
-						SET yhtio	 	= '$kukarow[yhtio]',
-						skripti      	= '".$_SERVER['SCRIPT_NAME']."',
-						request			= 'Keräyslista: $tilausnumeroita päivitettiin tulostetuksi! ".mysql_real_escape_string(str_replace(array("\n","\t"), " ", $query))."',
-						suoritusalku	= '',
-						suoritusloppu	= '',
-						suoritusaika 	= '',
-						laatija      	= '$kukarow[kuka]',
-						luontiaika   	= now()";
-			$suores = mysql_query($suoque) or pupe_error($suoque);
-		}
-		else {
-			$suoque = "	INSERT INTO suorituskykyloki
-						SET yhtio	 	= '$kukarow[yhtio]',
-						skripti      	= '".$_SERVER['SCRIPT_NAME']."',
-						request			= 'Keräyslista: $tilausnumeroita EI päivitetty tulostetuksi.',
-						suoritusalku	= '',
-						suoritusloppu	= '',
-						suoritusaika 	= '',
-						laatija      	= '$kukarow[kuka]',
-						luontiaika   	= now()";
-			$suores = mysql_query($suoque) or pupe_error($suoque);
 		}
 	}
 	else {

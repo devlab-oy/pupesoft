@@ -36,13 +36,13 @@
 
 		if ($ok == 0 and strlen($tili) > 0) {
 
-			$query = "	SELECT tilino, toimijaliitos, kustp, kohde, projekti
+			$query = "	SELECT tilino, toimijaliitos, kustp, kohde, projekti,tiliointi_tarkistus
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$tili'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($result) == 0) {
+			if (mysql_num_rows($result) == 0) {		
 				$ok = 1;
 				$virhe = t("Tuntematon tili")." '$tili'";
 			}
@@ -56,6 +56,69 @@
 				$virhe = t("Tositteeseen on liitettävä asiakas tai toimittaja")."!";
 				$ok = 1;
 			}
+			
+/**
+0 = Ei pakollisia kenttiä
+1 = pakollisia kenttiä tiliöinnissä on kustannuspaikka
+2 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde
+3 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, projekti
+4 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde ja projekti
+5 = pakollisia kenttiä tiliöinnissä on kohde
+6 = pakollisia kenttiä tiliöinnissä on kohde, projekti
+7 = pakollisia kenttiä tiliöinnissä on projekti
+**/			
+			if ($xrow['tiliointi_tarkistus'] != 0) {
+				
+				if ($xrow['tiliointi_tarkistus'] == 1) {
+					if ($kustp_tark == 0 or $kustp_tark == '' ){
+						$virhe = t("Tositteeseen on liitettävä kustannuspaikka")."!";
+						$ok = 1;
+					}
+				}
+				
+				if ($xrow['tiliointi_tarkistus'] == 2) {
+					if (($kustp_tark == 0 or $kustp_tark == '' ) or ($kohde_tark == 0 or $kohde_tark == '')){
+						$virhe = t("Tositteeseen on liitettävä kustannuspaikka ja kohde")."!";
+						$ok = 1;
+					}
+				}
+				
+				if ($xrow['tiliointi_tarkistus'] == 3) {
+					if (($kustp_tark == 0 or $kustp_tark == '' ) or ($projekti_tark == 0 or $projekti_tark == '')){
+						$virhe = t("Tositteeseen on liitettävä kustannuspaikka ja projekti")."!";
+						$ok = 1;
+					}
+				}
+				
+				if ($xrow['tiliointi_tarkistus'] == 4) {
+					if (($kustp_tark == 0 or $kustp_tark == '' ) or ($kohde_tark == 0 or $kohde_tark == '') or ($projekti_tark == 0 or $projekti_tark == '')){
+						$virhe = t("Tositteeseen on liitettävä kustannuspaikka ja kohde sekä projekti")."!";
+						$ok = 1;
+					}
+				}
+				
+				if ($xrow['tiliointi_tarkistus'] == 5) {
+					if ($kohde_tark == 0 or $kohde_tark == ''){
+						$virhe = t("Tositteeseen on liitettävä kohde")."!";
+						$ok = 1;
+					}
+				}
+				
+				if ($xrow['tiliointi_tarkistus'] == 6) {
+					if (($kohde_tark == 0 or $kohde_tark == '') or ($projekti_tark == 0 or $projekti_tark == '')){
+						$virhe = t("Tositteeseen on liitettävä kohde sekä projekti")."!";
+						$ok = 1;
+					}
+				}
+				
+				if ($xrow['tiliointi_tarkistus'] == 7) {
+					if ($projekti_tark == 0 or $projekti_tark == ''){
+						$virhe = t("Tositteeseen on liitettävä projekti")."!";
+						$ok = 1;
+					}
+				}
+			}
+			
 			
 			if ($xrow['kustp'] != 0 and isset($kustp) and $kustp == 0) {
 				$virhe = t("Pakollinen kustannuspaikka puuttui")."!";

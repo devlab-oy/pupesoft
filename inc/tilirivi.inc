@@ -114,4 +114,24 @@
 		$ulos .= "</select></td>\n";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "tiliointi_tarkistus") {
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos = "<td><select name='$nimi'>\n";
+		$ulos .= "<option value = '0' $sel[0]>".t("Ei pakollisia kenttiä")."</option>\n";
+		$ulos .= "<option value = '1' $sel[1]>".t("pakollisia kenttiä tiliöinnissä on kustannuspaikka")."</option>\n";
+		$ulos .= "<option value = '2' $sel[2]>".t("pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde")."</option>\n";
+		$ulos .= "<option value = '3' $sel[3]>".t("pakollisia kenttiä tiliöinnissä on kustannuspaikka, projekti")."</option>\n";
+		$ulos .= "<option value = '4' $sel[4]>".t("pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde ja projekti")."</option>\n";
+		$ulos .= "<option value = '5' $sel[5]>".t("pakollisia kenttiä tiliöinnissä on kohde")."</option>\n";
+	 	$ulos .= "<option value = '6' $sel[6]>".t("pakollisia kenttiä tiliöinnissä on kohde, projekti")."</option>\n";
+		$ulos .= "<option value = '7' $sel[7]>".t("pakollisia kenttiä tiliöinnissä on projekti")."</option>\n";
+		$ulos .= "</select></td>\n";
+		$jatko = 0;
+	}
+	
 ?>

@@ -662,7 +662,7 @@ if (!function_exists('finvoice_rivi')) {
 			}
 
 			// Siivotaan myös lisäkommentti
-			$lisakomm = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#", "/")."]/", " ", $lisakomm);
+			$lisakomm = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
 
 			$RowFreeTexts = explode("|", trim(trim($lisakomm)."|".trim($tilrow["kommentti"])));
 

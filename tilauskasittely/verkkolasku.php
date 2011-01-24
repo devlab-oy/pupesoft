@@ -262,7 +262,7 @@
 			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti ep‰onnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ";
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ";
 			$locre = mysql_query($query) or pupe_error($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -1632,7 +1632,7 @@
 							// haetaan asiakkaan tietojen takaa sorttaustiedot
 							$order_sorttaus = '';
 
-							$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta
+							$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta, laskutyyppi
 													FROM asiakas
 													WHERE yhtio = '$kukarow[yhtio]'
 													and tunnus = '$lasrow[liitostunnus]'";
@@ -1646,6 +1646,14 @@
 							else {
 								$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 								$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
+							}
+
+							// Asiakkaan / yhtiˆn laskutyyppi
+							if (isset($asiakas_apu_row['laskutyyppi']) and $asiakas_apu_row['laskutyyppi'] != -9) {
+								$laskutyyppi = $asiakas_apu_row['laskutyyppi'];
+							}
+							else {
+								$laskutyyppi = $yhtiorow['laskutyyppi'];
 							}
 
 							if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
@@ -1718,6 +1726,27 @@
 									$tilrow["kommentti"] .= "S:nro: $sarjarow[sarjanumero] ";
 								}
 
+								if ($laskutyyppi == "7") {
+
+									if ($tilrow["eankoodi"] != "") {
+										$tilrow["kommentti"] = "EAN: $tilrow[eankoodi]|$tilrow[kommentti]";
+									}
+
+									$query = "	SELECT kommentti
+												FROM asiakaskommentti
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tuoteno = '{$tilrow['tuoteno']}'
+												AND ytunnus = '{$lasrow['ytunnus']}'
+												ORDER BY tunnus";
+									$asiakaskommentti_res = mysql_query($query) or pupe_error($query);
+
+									if (mysql_num_rows($asiakaskommentti_res) > 0) {
+										while ($asiakaskommentti_row = mysql_fetch_assoc($asiakaskommentti_res)) {
+											$tilrow["kommentti"] .= "|".$asiakaskommentti_row['kommentti'];
+										}
+									}
+								}
+
 								if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 									// Veroton rivihinta valuutassa
 									$tilrow["rivihinta"] = $tilrow["rivihinta_valuutassa"];
@@ -1747,8 +1776,8 @@
 								$totalvat			 = sprintf("%.".$yhtiorow["hintapyoristys"]."f", round($totalvat, $yhtiorow["hintapyoristys"]));
 								$vatamount 			 = sprintf("%.".$yhtiorow["hintapyoristys"]."f", round($vatamount, $yhtiorow["hintapyoristys"]));
 
-								$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#", "/")."]/", " ", $tilrow['kommentti']);
-								$tilrow['nimitys'] 	 = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#", "/")."]/", " ", $tilrow['nimitys']);
+								$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
+								$tilrow['nimitys'] 	 = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
 
 								// Otetaan seuraavan rivin otunnus
 								if ($rivilaskuri < $rivimaara) {

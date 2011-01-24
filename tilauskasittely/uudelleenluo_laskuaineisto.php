@@ -16,6 +16,19 @@
 
 	if (!isset($tee) or $tee != "NAYTATILAUS") echo "<font class='head'>".t("Luo laskutusaineisto")."</font><hr>\n";
 
+	if (isset($tee) and $tee == "pupevoice_siirto") {
+
+		$ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
+		$ftpuser = $yhtiorow['verkkotunnus_lah'];
+		$ftppass = $yhtiorow['verkkosala_lah'];
+		$ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
+		$ftpfile = $pupe_root_polku."/dataout/".basename($filenimi);
+
+		$tulos_ulos = "";
+
+		require("inc/ftp-send.inc");
+	}
+
 	if (isset($tee) and $tee == "apix_siirto") {
 
 		#$url			= "https://test-api.apix.fi/invoices";
@@ -732,6 +745,14 @@
 				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimixml)."'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimixml)."'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br><br>";
+
+				echo "<table>";
+				echo "<tr><th>".t("Lähetä pupevoice-aineisto uudestaan Itellaan").":</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='tee' value='pupevoice_siirto'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimixml)."'>";
+				echo "<td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr></form>";
 				echo "</table>";
 			}
 			elseif ($yhtiorow["verkkolasku_lah"] == "finvoice" and file_exists(realpath($nimifinvoice))) {

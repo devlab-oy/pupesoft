@@ -1350,7 +1350,9 @@
 
 			if ($toim == "LASKU" or $toim == 'PROFORMA') {
 
-				require_once("tilauskasittely/tulosta_lasku.inc");
+				if (@include_once("tilauskasittely/tulosta_lasku.inc"));
+				elseif (@include_once("tulosta_lasku.inc"));
+				else exit;
 
 				tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"]);
 

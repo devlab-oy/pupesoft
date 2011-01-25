@@ -4,6 +4,39 @@
 
 	if (isset($tee) and $tee == 'I') {
 
+		$query = "	SELECT tunnus, tilino
+					FROM tili
+					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$yhtiorow["tilikauden_tulos"]}'";
+		$tilires = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($tilires) != 1) {
+			echo  "<br><font class='error'>\n".t("VIRHE: Tiliä ei löydy").": $yhtiorow[tilikauden_tulos]</font><br>\n<br>\n";
+			$tee = "go";
+		}
+		else {
+			$tilirow = mysql_fetch_assoc($tilires);
+		}
+
+		$query = "	SELECT tunnus
+					FROM tili
+					WHERE yhtio = '{$kukarow['yhtio']}' and tilino = '{$edellisten_tilikausien_voitto_tappio}'";
+		$tilires = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($tilires) != 1) {
+			echo  "<br><font class='error'>\n".t("VIRHE: Tiliä ei löydy").": $edellisten_tilikausien_voitto_tappio</font><br>\n<br>\n";
+			$tee = "go";
+		}
+
+		$query = "	SELECT tunnus
+					FROM tili
+					WHERE yhtio = '{$kukarow['yhtio']}' and tilino = '{$tilikauden_tulos_siirto}'";
+		$tilires = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($tilires) != 1) {
+			echo  "<br><font class='error'>\n".t("VIRHE: Tiliä ei löydy").": $tilikauden_tulos_siirto</font><br>\n<br>\n";
+			$tee = "go";
+		}
+
 		$query = "	SELECT tilikausi_alku, tilikausi_loppu, avaava_tase
 					FROM tilikaudet
 					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tilikausi}'";
@@ -13,7 +46,7 @@
 			$tilikausi_alku_loppu_row = mysql_fetch_assoc($tilikausi_alku_loppu_res);
 
 			if ($tilikausi_alku_loppu_row["avaava_tase"] != 0) {
-				echo  "<br>\n".t("VIRHE: Avaava tase on jo syötetty!")."<br>\n<br>\n";
+				echo  "<br><font class='error'>\n".t("VIRHE: Avaava tase on jo syötetty!")."</font><br>\n<br>\n";
 				$tee = "go";
 			}
 
@@ -29,7 +62,7 @@
 			list($vv4,$kk4,$pp4) = explode("-", date('Y-m-d', mktime(0,0,0,$kk3,$pp3+1,$vv3)));
 
 			if ($syotetty < $tilialku or $syotetty > $tililoppu) {
-				echo  "<br>\n".t("VIRHE: Valitun tilikauden viimeinen päivä ei sisälly avoimeen tilikauteen!")."<br>\n<br>\n";
+				echo  "<br><font class='error'>\n".t("VIRHE: Valitun tilikauden viimeinen päivä ei sisälly avoimeen tilikauteen!")."</font><br>\n<br>\n";
 				$tee = "go";
 			}
 		}
@@ -58,18 +91,18 @@
 
 		$gokfrom = 'avaavatase';
 
-		$voittosumma 		= array_pop($isumma);
-		$summa				= $voittosumma*-1;
+		// Kirjataan tilikauden tulos
+		$voittosumma 		= $isumma[$maara];
+		$summa				= $voittosumma;
 		$summa_valuutassa	= 0;
-		$tili 				= array_pop($itili);
+		$tili 				= $itili[$maara];
 		$kustp 				= "";
-		$selite 			= array_pop($iselite);
-		$vero 				= array_pop($ivero);
+		$selite 			= $iselite[$maara];
+		$vero 				= $ivero[$maara];
 		$projekti 			= "";
 		$kohde 				= "";
 		$valkoodi 			= $yhtiorow['valkoodi'];
 
-		// Lasketaan tuloslaskelman loppusumma ja kirjataan se tilikauden viimeiselle päivälle (eli tulos nollataan).
 		$query = "	INSERT into lasku set
 					yhtio 		= '{$kukarow['yhtio']}',
 					tapvm 		= '{$vv3}-{$kk3}-{$pp3}',
@@ -84,18 +117,19 @@
 
 		require("inc/teetiliointi.inc");
 
-		$summa				= $voittosumma;
+		$summa				= $voittosumma*-1;
 		$summa_valuutassa	= 0;
-		$tili 				= $edellisten_tilikausien_voitto_tappio;
-		$kustp 				= '';
-		$selite 			= t("Siirretään tilikauden tulos");
+		$tili 				= $tilikauden_tulos_siirto;
+		$kustp 				= "";
+		$selite 			= $iselite[count($iselite)];
 		$vero 				= 0;
-		$projekti 			= '';
-		$kohde 				= '';
+		$projekti 			= "";
+		$kohde 				= "";
 		$valkoodi 			= $yhtiorow['valkoodi'];
 
 		require("inc/teetiliointi.inc");
 
+		// Kirjataan avaava tase
 		$summa				= '';
 		$summa_valuutassa	= '';
 		$tili				= '';
@@ -106,12 +140,22 @@
 		$kohde 				= '';
 		$valkoodi 			= '';
 
-		// Laitetaan tän tilikauden voitto/tappio mukaan kumulatiiviseen tilikausien voittoon/tappioon
-		foreach ($itili as $tseki => $tsektili) {
-			if ($tsektili == $edellisten_tilikausien_voitto_tappio) {
-				$isumma[$tseki] += $voittosumma;
-			}
-		}
+		// Korjataan tulossiirron kommentti
+		$iselite[$maara]	= $iselite[1]." / ".t("Siirretään")." ".t("Tilikauden tulos");
+
+		// Siirretään tulos
+		$itili[$maara+1]	= $itili[$maara];
+		$iselite[$maara+1]	= $iselite[$maara];
+		$isumma[$maara+1] 	= $isumma[$maara]*-1;
+		$ivero[$maara+1] 	= $ivero[$maara];
+
+		// Ja lisätään summa myös edellisten tilikausien voitto tilille
+		$itili[$maara+2]	= $edellisten_tilikausien_voitto_tappio;
+		$iselite[$maara+2] 	= $iselite[$maara];
+		$isumma[$maara+2] 	= $isumma[$maara];
+		$ivero[$maara+2] 	= $ivero[$maara];
+
+		$maara += 3;
 
 		require("tosite.php");
 		exit;
@@ -165,10 +209,17 @@
 
 	if (trim($tee) == 'go') {
 
-		if ((!isset($edellisten_tilikausien_voitto_tappio) or !isset($tilikauden_tulos)) or trim($edellisten_tilikausien_voitto_tappio) == '' or trim($tilikauden_tulos) == '') {
+		$query = "	SELECT tilino
+					FROM tili
+					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$yhtiorow["tilikauden_tulos"]}'";
+		$tilires = mysql_query($query) or pupe_error($query);
+		$tilirow = mysql_fetch_assoc($tilires);
+
+		if ((!isset($edellisten_tilikausien_voitto_tappio) or !isset($tilikauden_tulos_siirto)) or trim($edellisten_tilikausien_voitto_tappio) == '' or trim($tilikauden_tulos_siirto) == '') {
 			echo "<form method='post' name='tilisyotto'>";
 			echo "<table>";
 			echo "<tr><th colspan='2'>",t("Syötä seuraavat pakolliset tilit"),"</th><td class='back'>&nbsp;</td></tr>";
+			echo "<tr><th>",t("Tilikauden voitto/tappio"),"</th><td>$tilirow[tilino]</td><td class='back'>&nbsp;</td></tr>";
 			echo "<tr><th>",t("Edellisten tilikausien voitto/tappio"),"</th><td>";
 
 			if (isset($edellisten_tilikausien_voitto_tappio) and trim($edellisten_tilikausien_voitto_tappio) != '') {
@@ -181,11 +232,11 @@
 			echo "</td><td class='back'>&nbsp;</td></tr>";
 			echo "<tr><th>",t("Tili jolla tuloslaskelma nollataan"),"</th><td>";
 
-			if (isset($tilikauden_tulos) and trim($tilikauden_tulos) != '') {
-				echo livesearch_kentta("tilisyotto", "TILIHAKU", "tilikauden_tulos", 200, $tilikauden_tulos);
+			if (isset($tilikauden_tulos_siirto) and trim($tilikauden_tulos_siirto) != '') {
+				echo livesearch_kentta("tilisyotto", "TILIHAKU", "tilikauden_tulos_siirto", 200, $tilikauden_tulos_siirto);
 			}
 			else {
-				echo livesearch_kentta("tilisyotto", "TILIHAKU", "tilikauden_tulos", 200);
+				echo livesearch_kentta("tilisyotto", "TILIHAKU", "tilikauden_tulos_siirto", 200);
 			}
 
 			echo "</td><td class='back'><input type='submit' value='",t("Jatka"),"' /></td></tr>";
@@ -197,8 +248,9 @@
 		}
 		else {
 			echo "<table>";
+			echo "<tr><th>",t("Tilikauden voitto/tappio"),"</th><td>{$tilirow["tilino"]}</td></tr>";
 			echo "<tr><th>",t("Edellisten tilikausien voitto/tappio"),"</th><td>{$edellisten_tilikausien_voitto_tappio}</td></tr>";
-			echo "<tr><th>",t("Tili jolla tuloslaskelma nollataan"),"</th><td>{$tilikauden_tulos}</td></tr>";
+			echo "<tr><th>",t("Tili jolla tuloslaskelma nollataan"),"</th><td>{$tilikauden_tulos_siirto}</td></tr>";
 			echo "</table>";
 		}
 
@@ -243,7 +295,7 @@
 		echo "<input type='hidden' name='tee' value='I' />";
 		echo "<input type='hidden' name='tilikausi' value='{$tilikausi}' />";
 		echo "<input type='hidden' name='edellisten_tilikausien_voitto_tappio' value='{$edellisten_tilikausien_voitto_tappio}' />";
-		echo "<input type='hidden' name='tilikauden_tulos' value='{$tilikauden_tulos}' />";
+		echo "<input type='hidden' name='tilikauden_tulos_siirto' value='{$tilikauden_tulos_siirto}' />";
 
 		echo "<table><tr>";
 		echo "<th>",t("Tili"),"</font></th>";
@@ -252,14 +304,14 @@
 		echo "<th>",t("Saldo"),"</font></th>";
 		echo "</tr>";
 
-		$summa		= 0;
-		$summa2 	= 0;
-		$isumma 	= array();
-		$itili		= array();
-		$iselite	= array();
-		$ivero		= array();
-		$maara		= 1;
-		$valkoodi	= '';
+		$summa		 = 0;
+		$summa2 	 = 0;
+		$isumma 	 = array();
+		$itili		 = array();
+		$iselite	 = array();
+		$ivero		 = array();
+		$maara		 = 1;
+		$valkoodi	 = '';
 
 		$lopelink = "&lopetus=$PHP_SELF////tee=$tee//tilikausi=$tilikausi";
 		$linkkilisa = "&tkausi=$tilikausi";
@@ -287,15 +339,15 @@
 
 		echo "<tr class='aktiivi'>";
 		echo "<td></td>";
-		echo "<td>".t("Tilikauden tulos")."</td><td></td><td>{$tulosrow['summa']}</td>";
+		echo "<td>".t("Tilikauden tulos")."</td><td></td><td align='right'>{$tulosrow['summa']}</td>";
 		echo "</tr>";
 
 		$summa2 += $tulosrow['summa'];
 
-		$isumma[$maara] 	= $tulosrow['summa'];
-		$itili[$maara] 		= $tilikauden_tulos;
-		$iselite[$maara] 	= t("Tilikauden tulos")." ".tv1dateconv($tilikausi_alku_loppu_row['tilikausi_loppu']);
-		$ivero[$maara] 		= 0;
+		$isumma[$maara]  = $tulosrow['summa'];
+		$itili[$maara] 	 = $tilirow["tilino"];
+		$iselite[$maara] = t("Tilikauden tulos")." ".tv1dateconv($tilikausi_alku_loppu_row['tilikausi_loppu']);
+		$ivero[$maara] 	 = 0;
 
 		echo "<tr>";
 		echo "<td class='tumma' colspan='3'>",t("Summa"),"</td>";

@@ -189,7 +189,7 @@
 	$query = "	SELECT *
 				FROM tilikaudet
 				WHERE yhtio = '$kukarow[yhtio]'
-				ORDER BY tilikausi_alku";
+				ORDER BY tilikausi_alku DESC";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td colspan='3'><select name='tkausi'><option value='0'>".t("Ei valintaa")."</option>";

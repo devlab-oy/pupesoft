@@ -60,13 +60,13 @@
 
 			if ($tyyppi == 4) {
 				$sisulk = "sisainen";
-				$sisulk_txt = "sisäinen";				
+				$sisulk_txt = "sisäinen";
 			}
 			else {
 				$sisulk = "ulkoinen";
 				$sisulk_txt = "ulkoinen";
 			}
-			
+
 			if ($tyyppi == 3 or $tyyppi == 4) {
 				$tililisa = " and left(tili.tilino, 1) >= 3 ";
 			}
@@ -616,6 +616,16 @@
 
 		if ($tltee == "aja") {
 
+			// Haetaan yhtiön tulostili
+			$query = "	SELECT tunnus, tilino
+						FROM tili
+						WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$yhtiorow["tilikauden_tulos"]}'";
+			$tulostilires = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($tulostilires) == 1) {
+				$tulostilirow = mysql_fetch_assoc($tulostilires);
+			}
+
 			// Tehdäänkö linkit päiväkirjaan
 			$query = "	SELECT yhtio
 						FROM oikeu
@@ -751,7 +761,6 @@
 			$tilioinnit = array();
 			$sarakkeet  = array();
 
-
 			while ($tilirow = mysql_fetch_assoc($tilires)) {
 
 				if (!isset($firstgroup)) $firstgroup = (string) $tilirow["groupsarake"];
@@ -763,7 +772,7 @@
 			}
 
 			//Haetaan tulos jos ajetaan taselaskelma
-			if ($tyyppi == "T" or $tyyppi == "2") {
+			if (isset($tulostilirow) and ($tyyppi == "T" or $tyyppi == "2")) {
 
 				$tulokset = array();
 
@@ -785,7 +794,13 @@
 				$tulosres = mysql_query($query) or pupe_error($query);
 
 				while ($tulosrow = mysql_fetch_assoc($tulosres)) {
-					$tulokset[(string) $tulosrow["groupsarake"]] = $tulosrow;
+					// Jos tiliöintejä ei ole, niin laitetaan tulos suoraan tähän, muuten summataan yhteen myöhemmin
+					if (!isset($tilioinnit[(string) $tulostilirow["tilino"]][(string) $tulosrow["groupsarake"]])) {
+						$tilioinnit[(string) $tulostilirow["tilino"]][(string) $tulosrow["groupsarake"]] = $tulosrow;
+					}
+					else {
+						$tulokset[(string) $tulosrow["groupsarake"]] = $tulosrow;
+					}
 				}
 			}
 
@@ -846,11 +861,7 @@
 
 					$tilirow_summat = array();
 
-					//Onko tämä yhtiön tulostili?
-					if (($tyyppi == "T" or $tyyppi == "2") and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
-						$tilirow_summat = $tulokset;
-					}
-					elseif (isset($tilioinnit[(string) $tilirow["tilino"]])) {
+					if (isset($tilioinnit[(string) $tilirow["tilino"]])) {
 						$tilirow_summat = $tilioinnit[(string) $tilirow["tilino"]];
 					}
 					elseif (isset($budjetit[(string) $tasorow["taso"]])) {
@@ -874,6 +885,11 @@
 									// Summat per kausi/taso
 									if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
 									else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
+
+									//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
+									if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
+										$summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
+									}
 								}
 
 								// Summat per taso/tili/kausi
@@ -882,6 +898,11 @@
 
 								if (isset($tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake])) $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$kausi];
 								else $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$kausi];
+
+								//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
+								if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
+									$tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tulokset[$sarake][$kausi];
+								}
 							}
 						}
 					}
@@ -1065,7 +1086,6 @@
 			else {
 				echo "<td class='back' colspan='1'></td>";
 			}
-
 
 			for ($i = $alkukausi; $i < count($kaudet); $i++) {
 				foreach ($sarakkeet as $sarake) {

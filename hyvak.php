@@ -1509,6 +1509,7 @@
 		echo "<th>".t("Liitetty")."</th>";
 		echo "<th>".t("Tyyppi")."</th>";
 		if ($liitetaanko_editilaus_laskulle_hakemisto != '') echo "<th>",t("Vertailu"),"</th>";
+		echo "<th>".t("Kustannuspaikka")."</th>";
 		echo "</tr>";
 
 		while ($trow = mysql_fetch_array ($result)) {
@@ -1602,7 +1603,27 @@
 
 				echo "</td>";
 			}
+			
+			// kustannuspaikka näkyviin asiakkaan toiveesta..
+			$kustpq = "	SELECT kustp, 
+							(SELECT DISTINCT nimi
+							FROM kustannuspaikka 
+							WHERE kustannuspaikka.yhtio=tiliointi.yhtio AND kustannuspaikka.tunnus=tiliointi.kustp) kustp2 
+						FROM tiliointi
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND ltunnus = '$trow[tunnus]'
+						and kustp != 0
+						ORDER BY tiliointi.tunnus LIMIT 1";
 
+			$kustpres = mysql_query($kustpq) or pupe_error($kustpq);
+			$kustprivi = mysql_fetch_assoc($kustpres);
+			if (trim($kustprivi['kustp2']) =='') {
+				echo "<td>".t("Kustannuspaikkaa ei ole syötetty")."</td>";
+			}
+			else {
+				echo "<td>".$kustprivi['kustp2']."</td>";
+			}
+					
 			echo "<td class='back' valign='top'>
 					<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tunnus' value='$trow[tunnus]'>

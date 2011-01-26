@@ -22,23 +22,6 @@
 		$hakutyyppi = "R";
 	}
 
-	if ($tee == 'TALLENNAFAKTA') {
-		$query = "UPDATE tuoteperhe SET fakta = '', fakta2 = '', omasivu = '' WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		$query = "UPDATE tuoteperhe SET fakta = '$fakta', fakta2 = '$fakta2', omasivu = '$omasivu'  WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
-		$result = mysql_query($query) or pupe_error($query);
-
-		echo "<br><br><font class='message'>".t("Reseptin tiedot tallennettu")."!</font><br>";
-
-		$query = "UPDATE tuoteperhe SET ei_nayteta = '$ei_nayteta' WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		echo "<br><br><font class='message'>".t("Esitysmuoto tallennettu")."!</font><br>";
-
-		$tee = '';
-	}
-
 	if ($tee == "KOPIOI") {
 
 		if ($kop_isatuo == "") {
@@ -276,11 +259,61 @@
 	}
 
 	if ($tee == 'POISTA') {
+		// Varmistetaan, että faktat ei mene rikki
+		$query = "	SELECT
+					group_concat(distinct if(fakta = '', null, fakta)) fakta,
+					group_concat(distinct if(fakta2 = '', null, fakta2)) fakta2,
+					group_concat(distinct if(omasivu = '', null, omasivu)) omasivu
+					FROM tuoteperhe
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$hakutyyppi'
+					and isatuoteno = '$isatuoteno'";
+		$result = mysql_query($query) or pupe_error($query);
+		$fakrow = mysql_fetch_array($result);
+
+		$fakta 		= $fakrow["fakta"];
+		$fakta2 	= $fakrow["fakta2"];
+		$omasivu 	= $fakrow["omasivu"];
+		$tee 		= "TALLENNAFAKTA";
+
 		//poistetaan rivi..
-		$query  = "delete from tuoteperhe where tunnus='$tunnus' and yhtio='$kukarow[yhtio]' and tyyppi='$hakutyyppi'";
+		$query  = "	DELETE from tuoteperhe
+					where tunnus = '$tunnus'
+					and yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$hakutyyppi'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tunnus = '';
-		$tee = "";
+	}
+
+	if ($tee == 'TALLENNAFAKTA') {
+		$query = "	UPDATE tuoteperhe
+					SET fakta = '', fakta2 = '', omasivu = ''
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$hakutyyppi'
+					and isatuoteno = '$isatuoteno'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		$query = "	UPDATE tuoteperhe
+					SET fakta = '$fakta', fakta2 = '$fakta2', omasivu = '$omasivu'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$hakutyyppi'
+					and isatuoteno = '$isatuoteno'
+					ORDER BY isatuoteno, tuoteno
+					LIMIT 1";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<br><br><font class='message'>".t("Reseptin tiedot tallennettu")."!</font><br>";
+
+		$query = "	UPDATE tuoteperhe
+					SET ei_nayteta = '$ei_nayteta'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$hakutyyppi'
+					and isatuoteno = '$isatuoteno'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<font class='message'>".t("Esitysmuoto tallennettu")."!</font><br>";
+
+		$tee = '';
 	}
 
 	if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {

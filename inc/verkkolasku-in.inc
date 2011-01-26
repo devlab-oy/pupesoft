@@ -487,8 +487,8 @@
 				$selite         = $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
 				$laskun_numero	= preg_replace("/[^0-9]/", "", $laskun_numero);
 
-				// Onko tälle toimitusasiakkaalle erityinen kustannuspaikka?
-				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5
+				// Onko tälle toimitusasiakkaalle erityinen kustannuspaikka?  //
+				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
 							FROM tiliointisaanto
 							WHERE ttunnus 	= '$trow[tunnus]'
 							and yhtio 		= '$yhtio'
@@ -513,6 +513,10 @@
 					$tiliointirow = mysql_fetch_array($result);
 					$oletuskust = $tiliointirow['kustp'];
 
+					if ($tiliointirow['vienti'] != '') {
+						$trow['oletus_vienti'] = $tiliointirow['vienti'];
+					}
+
 					if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
 						$hyvak[1] = "";
 						$hyvak[2] = "";
@@ -530,7 +534,7 @@
 				}
 
 				// Onko tälle ostajatiedoille erityinen kustannuspaikka?
-				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5
+				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
 							FROM tiliointisaanto
 							WHERE ttunnus 	= '$trow[tunnus]'
 							and yhtio 		= '$yhtio'
@@ -555,6 +559,10 @@
 					$tiliointirow = mysql_fetch_array($result);
 					$oletuskust = $tiliointirow['kustp'];
 
+					if ($tiliointirow['vienti'] != '') {
+						$trow['oletus_vienti'] = $tiliointirow['vienti'];
+					}
+
 					if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
 						$hyvak[1] = "";
 						$hyvak[2] = "";
@@ -573,7 +581,7 @@
 
 				if (mysql_num_rows($result) == 0) {
 					// Onko tälle asiakastunnukselle erityinen kustannuspaikka?
-					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5
+					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
 								FROM tiliointisaanto
 								WHERE ttunnus 	= '$trow[tunnus]'
 								and tyyppi 		= 'a'
@@ -585,6 +593,10 @@
 					if (mysql_num_rows($result) != 0) {
 						$tiliointirow = mysql_fetch_array($result);
 						$oletuskust = $tiliointirow['kustp'];
+
+						if ($tiliointirow['vienti'] != '') {
+							$trow['oletus_vienti'] = $tiliointirow['vienti'];
+						}
 
 						if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
 							$hyvak[1] = "";
@@ -605,7 +617,7 @@
 
 				if (mysql_num_rows($result) == 0) {
 					// Onko tämä kauttalaskutusta?
-					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5
+					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
 								FROM tiliointisaanto
 								WHERE ttunnus 	= '$trow[tunnus]'
 								and tyyppi 		= 'k'
@@ -617,6 +629,10 @@
 					if (mysql_num_rows($result) != 0) {
 						$tiliointirow = mysql_fetch_array($result);
 						$oletuskust = $tiliointirow['kustp'];
+
+						if ($tiliointirow['vienti'] != '') {
+							$trow['oletus_vienti'] = $tiliointirow['vienti'];
+						}
 
 						if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
 							$hyvak[1] = "";

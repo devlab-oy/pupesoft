@@ -88,6 +88,7 @@
 		$hyvak3		= $tiliointirow['hyvak3'];
 		$hyvak4		= $tiliointirow['hyvak4'];
 		$hyvak5		= $tiliointirow['hyvak5'];
+		$vienti		= $tiliointirow['vienti'];
 		$ok 		= 1;
 
 		$query = "DELETE from tiliointisaanto WHERE tunnus = '$rtunnus' and yhtio = '$kukarow[yhtio]'";
@@ -249,10 +250,11 @@
 				'$hyvak3',
 				'$hyvak4',
 				'$hyvak5',
+				'$vienti',
 				'$kukarow[kuka]',
 				now(),
 				'',
-				'', 
+				'',
 				'')";
 		$result = mysql_query($query) or pupe_error($query);
 	}
@@ -260,20 +262,20 @@
 	if (isset($tunnus) and $tunnus > 0) {
 		// Toimittaja on valittu ja sille annetaan s‰‰ntˆj‰
 		if ($tila == "XML") {
-			
-			$query = " 	SELECT data, filename, kayttotarkoitus, tunnus 
-						FROM liitetiedostot 
-						WHERE yhtio = '$kukarow[yhtio]' 
-						AND liitos = 'lasku' 
+
+			$query = " 	SELECT data, filename, kayttotarkoitus, tunnus
+						FROM liitetiedostot
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND liitos = 'lasku'
 						AND tunnus = '$liitetiedosto'
 						AND kayttotarkoitus = '$kayttotyyppi'";
-			
+
 			$tulokset = mysql_query($query) or pupe_error($query);
 			$tulosrivi = mysql_fetch_assoc($tulokset);
 			$xmlstr = $tulosrivi['data'];
-			
+
 			$xml = simplexml_load_string($xmlstr);
-			
+
 			if ($xml === FALSE) {
 			    echo ("Tiedosto $file ei ole validi XML!\n");
 			    return ("Tiedosto $file ei ole validi XML!");
@@ -287,10 +289,10 @@
 			}
 			else {
 			    require("inc/verkkolasku-in-pupevoice.inc");
-				
+
 			}
 		}
-		
+
 		$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, concat_ws(' ', postino, postitp) osoite
 					FROM toimi
 					WHERE tunnus = '$tunnus'
@@ -342,9 +344,25 @@
 				</form><br><br>
 				<table>";
 
+		// Pakko resetoida t‰‰ll‰kin, tai laskun-tyyppi-valikko voi heitt‰‰ h‰r‰npylly‰
+		$vientidefault = '';
+		$vientia = '';
+		$vientib = '';
+		$vientic = '';
+		$vientid = '';
+		$vientie = '';
+		$vientif = '';
+		$vientig = '';
+		$vientih = '';
+		$vientii = '';
+		$vientij = '';
+		$vientik = '';
+		$vientil = '';
+
+
 		// N‰ytet‰‰n vanhat s‰‰nnˆt muutosta varten
 		if ($tyyppi == 't') {
-			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus, concat(tili.tilino,'/',tili.nimi) tilinumero, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
+			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus, concat(tili.tilino,'/',tili.nimi) tilinumero, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN tili ON tili.yhtio = tiliointisaanto.yhtio and tili.tilino = tiliointisaanto.tilino
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
@@ -354,7 +372,9 @@
 						order by tiliointisaanto.mintuote";
 		}
 		elseif ($tyyppi == 'o' or $tyyppi == 'b') {
-			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Nimi, tiliointisaanto.kuvaus2 Osoite, tiliointisaanto.mintuote Postino, tiliointisaanto.maxtuote Postitp, concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
+			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Nimi, tiliointisaanto.kuvaus2 Osoite,
+						tiliointisaanto.mintuote Postino, tiliointisaanto.maxtuote Postitp,
+						concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -363,7 +383,8 @@
 						order by tiliointisaanto.kuvaus";
 		}
 		elseif ($tyyppi == 'a') {
-			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Asiakastunnus, concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
+			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Asiakastunnus,
+						concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -372,7 +393,8 @@
 						and tiliointisaanto.tilino 		= 0";
 		}
 		elseif ($tyyppi == 'k') {
-			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Kauttalaskutus, concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp
+			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Kauttalaskutus,
+						concat(tiliointisaanto.hyvak1, '#', tiliointisaanto.hyvak2, '#', tiliointisaanto.hyvak3, '#', tiliointisaanto.hyvak4, '#', tiliointisaanto.hyvak5) Hyvak, kustannuspaikka.nimi Kustannuspaikka, tiliointisaanto.kustp, tiliointisaanto.vienti
 						FROM tiliointisaanto
 						LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
@@ -384,14 +406,16 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<tr>";
-		for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
+		for ($i = 1; $i < mysql_num_fields($result)-2; $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i))."</th>";
 		}
+		if ($tyyppi !='t') echo "<th>".t("Laskun tyyppi")."</th>";
 		echo "</tr>";
 
 		while ($tiliointirow = mysql_fetch_array($result)) {
 			echo "<tr>";
-			for ($i = 1; $i<mysql_num_fields($result)-1; $i++) {
+
+			for ($i = 1; $i<mysql_num_fields($result)-2; $i++) {
 
 				if ($tyyppi != 't' and mysql_field_name($result, $i) == 'Hyvak') {
 					echo "<td>";
@@ -407,7 +431,7 @@
 										AND kuka = '".mysql_real_escape_string($hyvaksyja)."'
 										and hyvaksyja = 'o'";
 							$kuka_chk_res = mysql_query($query) or pupe_error($query);
-							
+
 							if (mysql_num_rows($kuka_chk_res) == 1) {
 								$kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
 								$hnimi = $kuka_chk_row['nimi'];
@@ -415,7 +439,7 @@
 							else {
 								$hnimi = $hyvaksyja;
 							}
-							
+
 							echo t("Hyv‰ksyj‰")." {$xxx}: $hnimi<br/>";
 						}
 
@@ -428,6 +452,52 @@
 					echo "<td>$tiliointirow[$i]</td>";
 				}
 			}
+			if ($tyyppi != 't') {
+				echo "<td>";
+
+				if ($tiliointirow[vienti] == '')  {
+					echo t("Toimittajan oletus");
+				}
+				if ($tiliointirow[vienti] == 'A') {
+					echo t("Kotimaa");
+				}
+				if ($tiliointirow[vienti] == 'B') {
+					echo t("Kotimaa huolinta/rahti");
+				}
+				if ($tiliointirow[vienti] == 'C') {
+					echo t("Kotimaa vaihto-omaisuus");
+				}
+				if ($tiliointirow[vienti] == 'D') {
+					echo t("EU");
+				}
+				if ($tiliointirow[vienti] == 'E') {
+					echo t("EU huolinta/rahti");
+				}
+				if ($tiliointirow[vienti] == 'F') {
+					echo t("EU vaihto-omaisuus");
+				}
+				if ($tiliointirow[vienti] == 'G') {
+					echo t("ei-EU");
+				}
+				if ($tiliointirow[vienti] == 'H') {
+					echo t("ei-EU huolinta/rahti");
+				}
+				if ($tiliointirow[vienti] == 'I') {
+					echo t("ei-EU vaihto-omaisuus");
+				}
+				if ($tiliointirow[vienti] == 'J') {
+					echo t("Kotimaa raaka-aine");
+				}
+				if ($tiliointirow[vienti] == 'K') {
+					echo t("EU raaka-aine");
+				}
+				if ($tiliointirow[vienti] == 'L') {
+					echo t("ei-EU raaka-aine");
+				}
+				echo "</td>";
+			}
+
+
 			echo "<td class='back'>
 					<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tunnus' value = '$tunnus'>
@@ -456,6 +526,7 @@
 			$hyvak3		= '';
 			$hyvak4		= '';
 			$hyvak5		= '';
+			$vienti		= '';
 		}
 
 		$query = "	SELECT tunnus, nimi
@@ -512,8 +583,8 @@
 					<td><input type='text' name='maxtuote' size='15' value = '$maxtuote'></td>";
 		}
 		elseif ($tyyppi == 'a') {
-			if ($tila == "XML" and $tyyppi == 'a') { 
-				$kuvaus =   $laskun_asiakastunnus; 	
+			if ($tila == "XML" and $tyyppi == 'a') {
+				$kuvaus =   $laskun_asiakastunnus;
 			}
 			echo "	<td><input type='text' name='kuvaus' size='15' value = '$kuvaus'></td>";
 		}
@@ -530,7 +601,7 @@
 
 			echo "<td nowrap>",t("Hyv‰ksyj‰")," 1: <select name='hyvak1'>";
 			echo "<option value=''>",t("Oletus"),"</option>";
-			
+
 			$sel = (isset($hyvak1) and $hyvak1 == "MAKSUUN") ? $sel = ' SELECTED' : '';
 			echo "<option value='MAKSUUN' $sel>",t("Suoraan maksuvalmiiksi"),"</option>";
 
@@ -582,7 +653,60 @@
 			echo "</select></td>";
 		}
 
-		echo "<td>$ulos</td><td class='back'><input type='Submit' value = '".t("Lis‰‰ tiliˆintis‰‰ntˆ")."'>$virhe</td>";
+		echo "<td>$ulos</td>";
+
+		if ($tyyppi != 't') {
+
+			$vientidefault = '';
+			$vientia = '';
+			$vientib = '';
+			$vientic = '';
+			$vientid = '';
+			$vientie = '';
+			$vientif = '';
+			$vientig = '';
+			$vientih = '';
+			$vientii = '';
+			$vientij = '';
+			$vientik = '';
+			$vientil = '';
+
+			if ($vienti == '') $vientidefault = 'SELECTED';
+			if ($vienti == 'A') $vientia = 'selected';
+			if ($vienti == 'B') $vientib = 'selected';
+			if ($vienti == 'C') $vientic = 'selected';
+			if ($vienti == 'D') $vientid = 'selected';
+			if ($vienti == 'E') $vientie = 'selected';
+			if ($vienti == 'F') $vientif = 'selected';
+			if ($vienti == 'G') $vientig = 'selected';
+			if ($vienti == 'H') $vientih = 'selected';
+			if ($vienti == 'I') $vientii = 'selected';
+			if ($vienti == 'J') $vientij = 'selected';
+			if ($vienti == 'K') $vientik = 'selected';
+			if ($vienti == 'L') $vientil = 'selected';
+
+			echo "<td>
+						<select name='vienti'>
+						<option value='' $vientidefault>".t("Ei valintaa")."</option>
+						<option value='A' $vientia>".t("Kotimaa")."</option>
+						<option value='B' $vientib>".t("Kotimaa huolinta/rahti")."</option>
+						<option value='C' $vientic>".t("Kotimaa vaihto-omaisuus")."</option>
+						<option value='J' $vientij>".t("Kotimaa raaka-aine")."</option>
+
+						<option value='D' $vientid>".t("EU")."</option>
+						<option value='E' $vientie>".t("EU huolinta/rahti")."</option>
+						<option value='F' $vientif>".t("EU vaihto-omaisuus")."</option>
+						<option value='K' $vientik>".t("EU raaka-aine")."</option>
+
+						<option value='G' $vientig>".t("ei-EU")."</option>
+						<option value='H' $vientih>".t("ei-EU huolinta/rahti")."</option>
+						<option value='I' $vientii>".t("ei-EU vaihto-omaisuus")."</option>
+						<option value='L' $vientil>".t("ei-EU raaka-aine")."</option>
+						</select>
+					</td>";
+			}
+
+		echo "<td class='back'><input type='Submit' value = '".t("Lis‰‰ tiliˆintis‰‰ntˆ")."'>$virhe</td>";
 		echo "</tr></form></table>";
 	}
 	else {

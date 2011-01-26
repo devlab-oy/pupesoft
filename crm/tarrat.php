@@ -47,7 +47,7 @@
 		$selectilisa = "";
 
 		if ($as_yht_tiedot == 'on') {
-			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli ";
+			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email ";
 			$joinilisa = " LEFT JOIN yhteyshenkilo yht on yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus ";
 		}
 
@@ -125,6 +125,9 @@
 
 				$worksheet->write($excelrivi, $excelsarake, t("Maa"), $format_bold);
 				$excelsarake++;
+
+				$worksheet->write($excelrivi, $excelsarake, t("Sähköpostiosoite"), $format_bold);
+				$excelsarake++;
 				$excelrivi++;
 			}
 		}
@@ -192,6 +195,16 @@
 
 				$worksheet->write($excelrivi, $excelsarake, $row["maa"]);
 				$excelsarake++;
+
+				if ($as_yht_tiedot == 'on') {
+					$worksheet->write($excelrivi, $excelsarake, $row["yht_email"]);
+					$excelsarake++;
+				}
+				else {
+					$worksheet->write($excelrivi, $excelsarake, $row["email"]);
+					$excelsarake++;
+				}
+
 				$excelrivi++;
 			}
 			else {

@@ -14,7 +14,7 @@ if ($tee == "muokkaa") {
 	$query  = "SELECT * from todo where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	$rivi   = mysql_fetch_array($result);
-	
+
 	echo "<form method='post' action='todo.php?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=$sort&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>
 		<input type='hidden' name='tee' value='paivita'>
 		<input type='hidden' name='tunnus' value='$rivi[tunnus]'>
@@ -28,7 +28,7 @@ if ($tee == "muokkaa") {
 			<th>aika-tot.</th>
 			<th>deadline</th>
 			<th>projekti</th>
-			<th>prio</th>			
+			<th>prio</th>
 		</tr>
 		<tr><td>";
 
@@ -68,7 +68,7 @@ if ($tee == "muokkaa") {
 	}
 
 	echo "</select></td>";
-	
+
 	${"prio_sel_".$rivi["prioriteetti"]} = "SELECTED";
 
 	echo "<td><input name='kesto_arvio' type='text' size='6' value='$rivi[kesto_arvio]'></td>
@@ -267,25 +267,25 @@ if ($tee == "") {
 	if (!isset($tekija_valittu)) $tekija_valittu = $kukarow["tunnus"];
 
 	if ($kuvaus_haku != "") {
-		$lisa .= " and kuvaus like '%$kuvaus_haku%' ";
+		$lisa .= " and todo.kuvaus like '%$kuvaus_haku%' ";
 	}
 	if ($pyytaja_haku != "") {
-		$lisa .= " and (pyytaja like '%$pyytaja_haku%' or asiakas.nimi like '%$pyytaja_haku%') ";
+		$lisa .= " and (todo.pyytaja like '%$pyytaja_haku%' or asiakas.nimi like '%$pyytaja_haku%') ";
 	}
 	if ($projekti_haku != "") {
-		$lisa .= " and projekti like '%$projekti_haku%' ";
+		$lisa .= " and todo.projekti like '%$projekti_haku%' ";
 	}
 	if ($aika_haku != "") {
-		$lisa .= " and kesto_arvio = '$aika_haku' ";
+		$lisa .= " and todo.kesto_arvio = '$aika_haku' ";
 	}
 	if ($deadline_haku != "") {
-		$lisa .= " and deadline like '%$deadline_haku%' ";
+		$lisa .= " and todo.deadline like '%$deadline_haku%' ";
 	}
 	if ($luonti_haku != "") {
 		$lisa .= " and todo.luontiaika like '%$luonti_haku%' ";
 	}
 	if ($prioriteetti_haku != "") {
-		$lisa .= " and prioriteetti = '$prioriteetti_haku' ";
+		$lisa .= " and todo.prioriteetti = '$prioriteetti_haku' ";
 	}
 	if ($tekija_haku != "") {
 		$lisa .= " and kuka.nimi like '%$tekija_haku%' ";
@@ -351,10 +351,10 @@ if ($tee == "") {
 				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
 				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
 				WHERE todo.yhtio  = '$kukarow[yhtio]'
-				and kuittaus != ''
-				and aika >= date_sub(now(), interval 30 day)
+				and todo.kuittaus != ''
+				and todo.aika >= date_sub(now(), interval 30 day)
 				$lisa
-				ORDER BY aika DESC";
+				ORDER BY todo.aika DESC";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {

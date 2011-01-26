@@ -881,7 +881,8 @@ if ($asiakasid > 0) {
 							$tuotejoin
 							WHERE perusalennus.yhtio = '$asiakas_yhtio'
 							and perusalennus.ryhma != ''
-							and perusalennus.alennus >= 0
+							# Huom. perualennus > 0
+							and perusalennus.alennus > 0
 							and perusalennus.alennus <= 100
 							$tuotewhere
 							$tuotegroup

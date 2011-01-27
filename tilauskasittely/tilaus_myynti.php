@@ -6219,12 +6219,7 @@ if ($tee == '') {
 
 			if (mysql_num_rows($optiotarkres) == 0) {
 
-				if ($laskurow["tunnusnippu"] > 0) {
-					$queryoik = "SELECT tunnus from oikeu where nimi like '%tilaus_myynti.php' and alanimi = 'PROJEKTI' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
-					$projresres = mysql_query($queryoik) or pupe_error($queryoik);
-
-					$queryoik = "SELECT tunnus from oikeu where nimi like '%tilaus_myynti.php' and alanimi = 'TYOMAARAYS' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
-					$tyomresres = mysql_query($queryoik) or pupe_error($queryoik);
+				if ($laskurow["tunnusnippu"] > 0 and (tarkista_oikeus("tilaus_myynti.php", "PROJEKTI") or tarkista_oikeus("tilaus_myynti.php", "TYOMAARAYS"))) {
 
 					$tarjouslisa = "<font class='message'>".t("Perusta tilauksesta").":</font><br>
 									<select name='perusta_tilaustyyppi'>";
@@ -6232,8 +6227,14 @@ if ($tee == '') {
 					$tarjouslisa_normi = $tarjouslisa_projekti = $tarjouslisa_tyomaarays = "";
 
 					$tarjouslisa_normi .= "<option value=''>".t("Normaalitilaus")."</option>";
-					if (mysql_num_rows($projresres) > 0) $tarjouslisa_projekti .= "<option value='PROJEKTI'>".t("Projekti")."</option>";
-					if (mysql_num_rows($tyomresres) > 0) $tarjouslisa_tyomaarays .= "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
+
+					if (tarkista_oikeus("tilaus_myynti.php", "PROJEKTI")) {
+						$tarjouslisa_projekti .= "<option value='PROJEKTI'>".t("Projekti")."</option>";
+					}
+
+					if (tarkista_oikeus("tilaus_myynti.php", "TYOMAARAYS")) {
+						$tarjouslisa_tyomaarays .= "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
+					}
 
 					if ($yhtiorow["hyvaksy_tarjous_tilaustyyppi"] == "T") {
 						$tarjouslisa .= $tarjouslisa_tyomaarays.$tarjouslisa_normi.$tarjouslisa_projekti;
@@ -6369,7 +6370,7 @@ if ($tee == '') {
 					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." & ".t("Tee tilauksesta ostotilaus")."'> ";
 				}
 
-				if ($kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
+				if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
 
 					if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kukarow["kassamyyja"] == "") {
 						echo "<br><br>".t("Valitse kassalipas").":<br><select name='kertakassa'><option value=''>".t("Ei kassamyyntiä")."</option>";

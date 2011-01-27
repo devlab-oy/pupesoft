@@ -710,7 +710,9 @@
 				$ealisa = "asiakas";
 			}
 
-			echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
+			if (tarkista_oikeus("yllapito.php", $ealisa, "X")) {
+				echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
+			}
 		}
 
 		if ($templ > 0 and $asiakasid == '') {
@@ -1287,7 +1289,9 @@
 				}
 
 				echo "</select> ";
-				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tekninen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
+				if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
+					echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tekninen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
+				}
 				echo "</td>";
 
 				echo "<td>".t("Projektipaallikko").":</td>
@@ -1328,7 +1332,9 @@
 				}
 
 				echo "</select> ";
-				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_kaupallinen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
+				if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
+					echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_kaupallinen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
+				}
 				echo "</td>";
 
 			}
@@ -1406,7 +1412,6 @@
 
 				//Jos kyseessä on myyntitili niin laitetaan tilaustyypiksi M
 				echo "<input type='hidden' name='tilaustyyppi' value='M'>";
-
 
 				$query = "	SELECT tunnus
 							FROM varastopaikat
@@ -2198,7 +2203,9 @@
 			}
 
 			echo "</select> ";
-			echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
+			if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
+				echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
+			}
 			echo "</td>";
 			echo "<td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 

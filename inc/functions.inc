@@ -9386,11 +9386,11 @@ if (!function_exists("tarkista_oikeus")) {
 		$querylisa = "";
 
 		if ($alanimi != "") {
-			$querylisa = "AND alanimi = '$alanimi'";
+			$querylisa .= "AND alanimi = '$alanimi'";
 		}
 
 		if ($paivitys != "") {
-			$querylisa = "AND paivitys = '1'";
+			$querylisa .= "AND paivitys = '1'";
 		}
 
 		$query = "	SELECT *

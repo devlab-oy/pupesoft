@@ -815,7 +815,7 @@ if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $k
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='kateinen' value='$kateinen'>";
 			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
-			echo "<td><input type='submit' value='Seka'></td>";
+			echo "<td><input type='submit' value='".t("Useita maksutapoja")."'></td>";
 			echo "</form>";
 
 			echo "<form action='' method='post'>";
@@ -827,7 +827,7 @@ if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $k
 			echo "<input type='hidden' name='kateinen' value='$kateinen'>";
 			echo "<input type='hidden' name='kateisohitus' value='X'>";
 			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
-			echo "<td><input type='submit' value='Ohitus'></td>";
+			echo "<td><input type='submit' value='".t("Ei vielä laskuteta, siirrä tilaus keräykseen")."'></td>";
 			echo "</form></tr>";
 
 			echo "</table>";

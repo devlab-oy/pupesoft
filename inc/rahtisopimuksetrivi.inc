@@ -33,12 +33,20 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
+	if (mysql_field_name($result, $i) == "ytunnus" and $lukitse_avaimeen != "") {
+		$tyyppi = 4;
+	}
+	elseif (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "asiakas" and isset($alasveto[$i])) {
+	if (mysql_field_name($result, $i) == "asiakas" and $lukitse_avaimeen != "") {
+		$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
+		$tyyppi = 4;
+		$jatko = 0;
+	}
+	elseif (mysql_field_name($result, $i) == "asiakas" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
 	}

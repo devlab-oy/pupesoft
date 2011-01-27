@@ -1401,30 +1401,29 @@
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "asiakas") {
 
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'asiakasalennus' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
+			if (tarkista_oikeus("yllapito.php", "asiakasalennus")) {
+				echo "<iframe id='asiakasalennus_iframe' name='asiakasalennus_iframe' src='yllapito.php?toim=asiakasalennus&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 
-			if (mysql_num_rows($res) > 0) echo "<iframe id='asiakasalennus_iframe' name='asiakasalennus_iframe' src='yllapito.php?toim=asiakasalennus&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			if (tarkista_oikeus("yllapito.php", "asiakashinta")) {
+				echo "<iframe id='asiakashinta_iframe' name='asiakashinta_iframe' src='yllapito.php?toim=asiakashinta&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'asiakashinta' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
+			if (tarkista_oikeus("yllapito.php", "asiakaskommentti")) {
+				echo "<iframe id='asiakaskommentti_iframe' name='asiakaskommentti_iframe' src='yllapito.php?toim=asiakaskommentti&from=yllapito&ohje=off&haku[1]=$trow[ytunnus]&lukitse_avaimeen=$trow[ytunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 
-			if (mysql_num_rows($res) > 0) echo "<iframe id='asiakashinta_iframe' name='asiakashinta_iframe' src='yllapito.php?toim=asiakashinta&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			if (tarkista_oikeus("yllapito.php", "asiakkaan_avainsanat")) {
+				echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=asiakkaan_avainsanat&from=yllapito&ohje=off&haku[4]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'asiakaskommentti' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
+			if (tarkista_oikeus("yllapito.php", "puun_alkio&laji=asiakas%")) {
+				echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=asiakas&from=yllapito&ohje=off&haku[1]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]&toim2=asiakas' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 
-			if (mysql_num_rows($res) > 0) echo "<iframe id='asiakaskommentti_iframe' name='asiakaskommentti_iframe' src='yllapito.php?toim=asiakaskommentti&from=yllapito&ohje=off&haku[1]=$trow[ytunnus]&lukitse_avaimeen=$trow[ytunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
-
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'asiakkaan_avainsanat' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
-
-			if (mysql_num_rows($res) > 0) echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=asiakkaan_avainsanat&from=yllapito&ohje=off&haku[4]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
-
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi like 'puun_alkio&laji=asiakas%' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
-
-			if (mysql_num_rows($res) > 0) echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=asiakas&from=yllapito&ohje=off&haku[1]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]&toim2=asiakas' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			if (tarkista_oikeus("yllapito.php", "rahtisopimukset")) {
+				echo "<iframe id='rahtisopimukset_iframe' name='rahtisopimukset_iframe' src='yllapito.php?toim=rahtisopimukset&from=yllapito&ohje=off&haku[1]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 
 		}
 
@@ -1530,6 +1529,7 @@
 			$toim == "tuotteen_toimittajat" or
 			$toim == "extranet_kayttajan_lisatiedot" or
 			$toim == "asiakkaan_avainsanat" or
+			$toim == "rahtisopimukset" or
 			$toim == "tilikaudet" or
 			($toim == "liitetiedostot" and $poistolukko == "") or
 			($toim == "tuote" and $poistolukko == "") or
@@ -1629,6 +1629,10 @@
 
 	if ($from == "yllapito" and $toim == "asiakkaan_avainsanat") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('asiakkaan_avainsanat_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "rahtisopimukset") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('rahtisopimukset_iframe' $jcsmaxheigth);</script>";
 	}
 
 	if ($from == "yllapito" and $toim == "avainsana") {

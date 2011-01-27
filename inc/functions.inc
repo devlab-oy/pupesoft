@@ -9385,7 +9385,10 @@ if (!function_exists("tarkista_oikeus")) {
 		$alanimi = mysql_real_escape_string(trim($alanimi));
 		$querylisa = "";
 
-		if ($alanimi != "") {
+		if (strpos($alanimi, "%") !== FALSE) {
+			$querylisa .= "AND alanimi like '$alanimi'";
+		}
+		elseif ($alanimi != "") {
 			$querylisa .= "AND alanimi = '$alanimi'";
 		}
 

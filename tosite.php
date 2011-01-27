@@ -562,15 +562,15 @@
 
 						for (var i=0; i<document.tosite.elements.length; i++) {
 				         	if (document.tosite.elements[i].type == 'text' && document.tosite.elements[i].name.substring(0,6) == 'isumma') {
-
+							
 								if (document.tosite.elements[i].value == '+') {
-									summa+=1.0*document.tosite.summa.value;
+									summa+=1.0*document.tosite.summa.value.replace(',','.');
 								}
 								else if (document.tosite.elements[i].value == '-') {
-									summa-=1.0*document.tosite.summa.value;
+									summa-=1.0*document.tosite.summa.value.replace(',','.');
 								}
 								else {
-									summa+=1.0*document.tosite.elements[i].value;
+									summa+=1.0*document.tosite.elements[i].value.replace(',','.');
 								}
 							}
 				    	}

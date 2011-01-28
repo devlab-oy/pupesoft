@@ -1324,7 +1324,7 @@
 														SET porauskuvio	= '$valmistetyyppi'
 														WHERE yhtio			 = '$kukarow[yhtio]'
 														and tilausrivitunnus = '$perheid_lisaarivi'";
-											$result = mysql_query($query) or pupe_error($query);												
+											$result = mysql_query($query) or pupe_error($query);
 										}
 										else {
 											$valmistetyyppi = "W";
@@ -1562,6 +1562,11 @@
 			}
 			elseif ($laskurow['tila'] == 'O') {
 				$lis_hinta = $hinta;
+			}
+
+			// jos käytössä on hintakertoimet, niin muutetaan yksikkö kuntoon
+			if ($laskurow["tila"] == 'O' and $trow["myyntihinta_maara"] != 0 and $lis_hinta != 0) {
+				$lis_hinta = round($lis_hinta / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
 			}
 
 			if ($laskurow['tila'] == 'O' and $ale == "") {
@@ -2022,12 +2027,12 @@
 
 					if ($lisatied_row["porauskuvio"] == "M" or (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"]))) {
 						$valmistetyyppi = "M";
-												
+
 						$query = "	UPDATE tilausrivin_lisatiedot
 									SET porauskuvio	= '$valmistetyyppi'
 									WHERE yhtio			 = '$kukarow[yhtio]'
 									and tilausrivitunnus = '$perheid_lisaarivi'";
-						$result = mysql_query($query) or pupe_error($query);												
+						$result = mysql_query($query) or pupe_error($query);
 					}
 					else {
 						$valmistetyyppi = "W";
@@ -2049,7 +2054,7 @@
 					$result = mysql_query($query) or pupe_error($query);
 				}
 			}
-			
+
 			$rivitunnus			= "";
 			$kommentti 			= "";
 			$tuotenimitys 		= "";

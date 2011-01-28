@@ -1,5 +1,5 @@
 <?php
-	
+
 	$riviok = 0;
 	$saako_hyvaksya = 0;
 	$varaosavirhe = "";
@@ -52,8 +52,11 @@
 		$tilausok++;
 		$saako_hyvaksya++;
 	}
-	
-	
+
+	if ($trow["myyntihinta_maara"] != 0 and $prow["hinta"] != 0) {
+		$prow["hinta"] = round($prow["hinta"] * $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
+	}
+
 	if ((float) $prow["hinta"] != (float) $trow['ostohinta'] and ($prow["var"] == "" or $toiminto == 'kohdista') and $trow["toimittaja"] != "" and $riviok == 0) {
 
 		$paiv_hinta = (float) $paiv_hinta;
@@ -135,46 +138,46 @@
 								<input type='submit' name='JOPA' value='".t("Päivitä")."'> <input type='submit' name='ALPA' value='".t("Älä päivitä")."'></form>";
 		}
 	}
-	
+
 	//toimitusajan päivitys toimittajan toimitusaikaan
-	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE and ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '1' or $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '2') and $ei_aikatarkistusta != "JOO") {	
-		
+	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE and ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '1' or $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '2') and $ei_aikatarkistusta != "JOO") {
+
 		if ($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') {
 			$ehdotus_pvm = date('Y-m-d',time() + $trow["toimitusaika"] * 24 * 60 * 60);
 		}
 		elseif ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '') {
 			$ehdotus_pvm = date('Y-m-d',time() + $trow["oletus_toimaika"] * 24 * 60 * 60);
 		}
-				
+
 		if ($paivitatoimaika == "ON" and $prow["tunnus"] == $paiv_rivitunnus and $JOPATO != '') {
-			
+
 			if ($JOPATO != '') {
-				$paivita_toimaika = "	UPDATE tilausrivi 
+				$paivita_toimaika = "	UPDATE tilausrivi
 										SET toimaika = '$paiv_toimaika'
 										WHERE yhtio = '$kukarow[yhtio]'
 										and tunnus	= '$paiv_rivitunnus'
 										and otunnus = '$kukarow[kesken]'";
 				$paivita_res = mysql_query($paivita_toimaika) or pupe_error($paivita_toimaika);
-				
-				
+
+
 			}
 			$varaosavirhe .= "<font class='message'>".t("Päivitettiin tuotteen")." $trow[tuoteno] ".t("toimitusaika").": ".tv1dateconv($prow[toimaika])." -> ".tv1dateconv($ehdotus_pvm)."</font>";
 			$paivitetty_ok = "YES";
 			$JOPATO = "";
 		}
-		elseif ($ehdotus_pvm == $prow["toimaika"]) {			
-			$paivitetty_ok = "SAMA";			
+		elseif ($ehdotus_pvm == $prow["toimaika"]) {
+			$paivitetty_ok = "SAMA";
 		}
 		else {
 			$paivitetty_ok = "";
 		}
-		
+
 		if ($ehdotus_pvm != $prow["toimaika"] and $paivitetty_ok == "") {
-			
+
 			if ($varaosavirhe != "") {
 				$varaosavirhe .= "<br>";
 			}
-			
+
 			$varaosavirhe .= "	<form name='tilaus' action='$PHP_SELF#$rivitunnus' method='post' autocomplete='off'>
 								<input type='hidden' name='toiminto' value='$toiminto'>
 								<input type='hidden' name='tee' value='Y'>
@@ -185,12 +188,12 @@
 								<input type='hidden' name='paivitatoimaika' value='ON'>
 								<input type='hidden' name='paiv_toimaika' value='$ehdotus_pvm'>
 								<input type='hidden' name='paiv_rivitunnus' value='$prow[tunnus]'>";
-			
+
 			$varaosavirhe .= "	<font class='message'>
 								".t("Haluatko muuttaa toimitusajan")." ".tv1dateconv($prow[toimaika])." ".t("tuotteen toimittajan toimitusaikaan")." ".tv1dateconv($ehdotus_pvm)."!</font><br>
 								<input type='submit' name='JOPATO' value='".t("Päivitä")."'></form>";
 		}
-		
+
 	}
 
 	if ($toiminto != "kohdista") {
@@ -213,7 +216,7 @@
 
 		if (mysql_num_rows($kres) > 0) {
 			$superrow = mysql_fetch_array($kres);
-			
+
 			$query = "	select yhtio.yhtio, yhtio.tunnus,sum(saldo) saldo
 						from tuotepaikat
 						join yhtio on yhtio.yhtio=tuotepaikat.yhtio

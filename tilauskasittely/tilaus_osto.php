@@ -328,7 +328,7 @@
 
 		// Olemassaolevaa riviä muutetaan, joten poistetaan se ja annetaan perustettavaksi
 		if ($tee == 'PV') {
-			$query = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta
+			$query = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta, tuote.myyntihinta_maara
 						FROM tilausrivi use index (PRIMARY)
 						LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 						WHERE tilausrivi.tunnus = '$rivitunnus'
@@ -376,6 +376,11 @@
 			$rivitunnus 	= $tilausrivirow["tunnus"];
 			$automatiikka 	= "ON";
 			$tee 			= "Y";
+
+			if ($tilausrivirow["myyntihinta_maara"] != 0 and $hinta != 0) {
+				$hinta = round($hinta * $tilausrivirow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
+			}
+
 		}
 
 		// Tyhjennetään tilausrivikentät näytöllä

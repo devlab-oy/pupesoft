@@ -3659,10 +3659,16 @@ if ($tee == '') {
 
 			if ($tuote["nettohinta"] != 0) {
 				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Nettohinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['nettohinta'])." $yhtiorow[valkoodi]</td></tr>";
+				if ($tuote["myyntihinta_maara"] != 0) {
+					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Nettohinta")." $tuote[myyntihinta_maara] $tuote[yksikko]</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['nettohinta'] * $tuote["myyntihinta_maara"])." $yhtiorow[valkoodi]</td></tr>";
+				}
 			}
 
 			if ($tuote["myymalahinta"] != 0) {
 				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Myymalahinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['myymalahinta'])." $yhtiorow[valkoodi]</td></tr>";
+				if ($tuote["myyntihinta_maara"] != 0) {
+					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Myymalahinta")." $tuote[myyntihinta_maara] $tuote[yksikko]</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['myymalahinta'] * $tuote["myyntihinta_maara"])." $yhtiorow[valkoodi]</td></tr>";
+				}
 			}
 
 			if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
@@ -3691,6 +3697,10 @@ if ($tee == '') {
 				}
 
 				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Keskihankintahinta")." $epakurpantti</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['kehahin'])." $yhtiorow[valkoodi]</td></tr>";
+
+				if ($tuote["myyntihinta_maara"] != 0) {
+					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Keskihankintahinta")." $epakurpantti $tuote[myyntihinta_maara] $tuote[yksikko]</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['kehahin'] * $tuote["myyntihinta_maara"])." $yhtiorow[valkoodi]</td></tr>";
+				}
 			}
 
 			//haetaan viimeisin hinta millä asiakas on tuotetta ostanut

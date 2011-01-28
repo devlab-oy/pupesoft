@@ -459,11 +459,17 @@
 			//3
 			echo "<tr>";
 			echo "<th>".t("Toimtuoteno")."</th>";
-			echo "<th>".t("Myyntihinta")."</th>";
+			echo "<th>".t("Myyntihinta");
+
+			if ($tuoterow["myyntihinta_maara"] != 0) {
+				echo " $tuoterow[myyntihinta_maara] $tuoterow[yksikko]";
+			}
+
+			echo "</th>";
 			echo "<th>".t("Netto/Ovh")."</th>";
 			echo "<th>".t("Ostohinta")." / ".t("Alennus")."</th>";
 			echo "<th>".t("Kehahinta")."</th>";
-			echo "<th>".t("Vihahinta")."</th>";
+			echo "<th>".t("Vihahinta")." ".tv1dateconv($tuoterow["vihapvm"])."</th>";
 			echo "</tr>";
 
 			echo "<tr>";
@@ -477,8 +483,24 @@
 			}
 
 			echo "</td>";
-			echo "<td valign='top' align='right'>$tuoterow[kehahin]</td>";
-			echo "<td valign='top' align='right'>$tuoterow[vihahin] ".tv1dateconv($tuoterow["vihapvm"])."</td>";
+			echo "<td valign='top' align='right'>$tuoterow[kehahin]";
+
+			if ($tuoterow["myyntihinta_maara"] != 0) {
+				echo " $tuoterow[yksikko]<br>";
+				echo sprintf("%.".$yhtiorow['hintapyoristys']."f", round($tuoterow["kehahin"] * $tuoterow["myyntihinta_maara"] , $yhtiorow['hintapyoristys']));
+				echo " $tuoterow[myyntihinta_maara] $tuoterow[yksikko]";
+			}
+
+			echo "</td>";
+			echo "<td valign='top' align='right'>$tuoterow[vihahin]";
+
+			if ($tuoterow["myyntihinta_maara"] != 0) {
+				echo " $tuoterow[yksikko]<br>";
+				echo sprintf("%.".$yhtiorow['hintapyoristys']."f", round($tuoterow["vihahin"] * $tuoterow["myyntihinta_maara"] , $yhtiorow['hintapyoristys']));
+				echo " $tuoterow[myyntihinta_maara] $tuoterow[yksikko]";
+			}
+
+			echo "</td>";
 			echo "</tr>";
 
 			//4

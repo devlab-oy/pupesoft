@@ -317,7 +317,6 @@ $hinta	= str_replace(',','.',$hinta);
 $ale 	= str_replace(',','.',$ale);
 $kpl 	= str_replace(',','.',$kpl);
 
-
 //Ei olla pikatilauksella, mutta ollaan jostain syystä kuitenkin ilman asiakasta ja halutaan nyt liittää se
 if (isset($liitaasiakasnappi) and $kukarow["extranet"] == "") {
 	$tee  = "OTSIK";
@@ -411,7 +410,6 @@ if ((int) $kukarow["kesken"] != 0) {
 
 	if ($laskurow["toim_maa"] == "") $laskurow["toim_maa"] = $yhtiorow['maa'];
 }
-
 
 if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
 	// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
@@ -742,7 +740,6 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 		lopetus($lopetus, "META");
 	}
 }
-
 
 //Tyhjenntään syöttökentät
 if (isset($tyhjenna)) {
@@ -1422,7 +1419,6 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 		$tee 		= "";
 	}
 }
-
 
 // näytetään tilaus-ruutu...
 if ($tee == '') {
@@ -3033,6 +3029,11 @@ if ($tee == '') {
 
 			if ($tsek_alehinta_alv > 0) {
 				$tuoterow["alv"] = $tsek_alehinta_alv;
+			}
+
+			// jos käytössä on myyntihinnan poikkeava määrä, kerrotaan hinta takaisin kuntoon.
+			if ($tuoterow["myyntihinta_maara"] != 0) {
+				$tilausrivi["hinta"] = $tilausrivi["hinta"] * $tuoterow["myyntihinta_maara"];
 			}
 
 			if ($tuoterow["alv"] != $tilausrivi["alv"] and $yhtiorow["alv_kasittely"] == "" and $tilausrivi["alv"] < 500) {

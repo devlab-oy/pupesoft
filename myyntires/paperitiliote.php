@@ -1,19 +1,17 @@
 <?php
 
 	function alku () {
-		global $pdf, $asiakastiedot, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli;
+		global $pdf, $asiakastiedot, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kieli, $tito_pvm;
 
 		$firstpage = $pdf->new_page("a4");
 
 		tulosta_logo_pdf($pdf, $firstpage, "");
 
 		//Otsikko
-		//$pdf->draw_rectangle(830, 20,  800, 580, $firstpage, $rectparam);
 		$pdf->draw_text(280, 815, t("TILIOTE", $kieli), $firstpage);
 		$pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
 
 		//Vasen sarake
-		//$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
 		$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$firstpage, $pieni);
 		$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 		$firstpage, $norm);
 		$pdf->draw_text(50, 707, $asiakastiedot["nimitark"], 	$firstpage, $norm);
@@ -21,61 +19,60 @@
 		$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
 		$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
 
-		$pdf->draw_rectangle(737, 300, 716, 580, $firstpage, $rectparam);
-		$pdf->draw_text(310, 729, t("Ytunnus/Asiakasnumero", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(310, 717, $asiakastiedot["ytunnus"], 			$firstpage, $norm);
-
-
 		//Oikea sarake
 		$pdf->draw_rectangle(800, 300, 779, 580, 				$firstpage, $rectparam);
 		$pdf->draw_rectangle(800, 420, 779, 580, 				$firstpage, $rectparam);
-		$pdf->draw_text(310, 792, t("Päivämäärä", $kieli), 		$firstpage, $pieni);
-		$pdf->draw_text(310, 782, tv1dateconv(date('Y-m-d')), 				$firstpage, $norm);
+		$pdf->draw_text(310, 792, t("Tulostettu", $kieli), 		$firstpage, $pieni);
+		$pdf->draw_text(310, 782, tv1dateconv(date('Y-m-d')), 	$firstpage, $norm);
 		$pdf->draw_text(430, 792, t("Asiaa hoitaa", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(430, 782, $kukarow["nimi"], 				$firstpage, $norm);
+		$pdf->draw_text(430, 782, $kukarow["nimi"], 			$firstpage, $norm);
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
-/*		$pdf->draw_text(310, 771, t("Eräpäivä", $kieli), $firstpage, $pieni);
-
-		$paiva	   = date("j");
-		$kuu   	   = date("n");
-		$year  	   = date("Y");
-		$seurday   = date("j",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-		$seurmonth = date("n",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-		$seuryear  = date("Y",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-		$pdf->draw_text(310, 761, $seuryear."-".$seurmonth."-".$seurday, $firstpage, $norm);
-*/
+		
+		$pdf->draw_text(310, 771, t("Päivämäärä", $kieli), 		$firstpage, $pieni);
+		$pdf->draw_text(310, 761, tv1dateconv($tito_pvm), 	$firstpage, $norm);
+		
 		$pdf->draw_text(430, 771, t("Puhelin", $kieli), $firstpage, $pieni);
 		$pdf->draw_text(430, 761, $kukarow["puhno"], 		$firstpage, $norm);
 
 		$pdf->draw_rectangle(758, 300, 737, 580, $firstpage, $rectparam);
 		$pdf->draw_rectangle(758, 420, 737, 580, $firstpage, $rectparam);
-//		$pdf->draw_text(310, 750, t("Viivästykorko", $kieli), 	$firstpage, $pieni);
-//		$pdf->draw_text(310, 740, $yhtiorow["viivastyskorko"], 	$firstpage, $norm);
+
+		$pdf->draw_text(310, 750, t("Ytunnus/Asiakasnumero", $kieli), 	$firstpage, $pieni);
+		$pdf->draw_text(310, 740, $asiakastiedot["ytunnus"], 			$firstpage, $norm);
+
 		$pdf->draw_text(430, 750, t("Sähköposti", $kieli), 		$firstpage, $pieni);
 		$pdf->draw_text(430, 740,  $kukarow["eposti"],				$firstpage, $norm);
 
 		//Rivit alkaa täsä kohtaa
 		$kala = 620;
 
-		//Laskurivien otsikkotiedot
 		//eka rivi
 		$pdf->draw_text(30,  $kala, t("Laskunro", $kieli),			$firstpage, $pieni);
 		$pdf->draw_text(100, $kala, t("Pvm", $kieli),				$firstpage, $pieni);
 		$pdf->draw_text(180, $kala, t("Eräpvm", $kieli),			$firstpage, $pieni);
+		
+		$pdf->draw_text(300, $kala, t("Valuutta", $kieli),			$firstpage, $pieni);
+		
 		$oikpos = $pdf->strlen(t("Summa", $kieli), $pieni);
-		$pdf->draw_text(400-$oikpos, $kala, t("Summa", $kieli),			$firstpage, $pieni);
+		$pdf->draw_text(400-$oikpos, $kala, t("Summa", $kieli),		$firstpage, $pieni);
+		
 		$oikpos = $pdf->strlen(t("Avoinsumma", $kieli), $pieni);
-		$pdf->draw_text(480-$oikpos, $kala, t("Avoinsumma", $kieli),		$firstpage, $pieni);
-
+		$pdf->draw_text(480-$oikpos, $kala, t("Avoinsumma", $kieli),$firstpage, $pieni);
+		
+		if ($tito_pvm != date('Y-m-d')) {
+			$pdf->draw_text(510, $kala, t("Maksettu", $kieli),		$firstpage, $pieni);
+		}
+		
+		
 		$kala -= 15;
 
 		return($firstpage);
 	}
 
 	function rivi ($tyyppi, $firstpage, $summa, $row) {
-		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $yhtiorow;
+		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $yhtiorow, $tito_pvm;
 
 		if ($lask == 39) {
 			$sivu++;
@@ -93,24 +90,28 @@
 			$pdf->draw_text(300, $kala, $row["valkoodi"], 				$firstpage, $norm);
 
 			if ($row['valkoodi'] == $yhtiorow['valkoodi']) {
-				$oikpos = $pdf->strlen($row["avoinsumma"], $norm);
-				$pdf->draw_text(480-$oikpos, $kala, $row["avoinsumma"], $firstpage, $norm);
-				$oikpos = $pdf->strlen($row["summa"], $norm);
-				$pdf->draw_text(400-$oikpos, $kala, $row["summa"],		$firstpage, $norm);
+				$oikpos = $pdf->strlen($row["laskuavoinsaldo"], $norm);
+				$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo"], $firstpage, $norm);
+				$oikpos = $pdf->strlen($row["laskusumma"], $norm);
+				$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma"],		$firstpage, $norm);
 			}
 			else {
-				$oikpos = $pdf->strlen($row["avoinsummavaluutassa"], $norm);
-				$pdf->draw_text(480-$oikpos, $kala, $row["avoinsummavaluutassa"],	$firstpage, $norm);
-				$oikpos = $pdf->strlen($row["summa_valuutassa"], $norm);
-				$pdf->draw_text(400-$oikpos, $kala, $row["summa_valuutassa"],		$firstpage, $norm);
+				$oikpos = $pdf->strlen($row["laskuavoinsaldovaluutassa"], $norm);
+				$pdf->draw_text(480-$oikpos, $kala, $row["laskuavoinsaldo_valuutassa"],	$firstpage, $norm);
+				$oikpos = $pdf->strlen($row["laskusumma_valuutassa"], $norm);
+				$pdf->draw_text(400-$oikpos, $kala, $row["laskusumma_valuutassa"],		$firstpage, $norm);
+			}
+			
+			if ($tito_pvm != date('Y-m-d')) {
+				$pdf->draw_text(510, $kala, tv1dateconv($row["mapvm"]), 	$firstpage, $norm);
 			}
 		}
 		else {
 			$pdf->draw_text(30,  $kala, t("Kohdistamaton suoritus"),	$firstpage, $norm);
 			$pdf->draw_text(180, $kala, tv1dateconv($row["tapvm"]), 	$firstpage, $norm);
 			$pdf->draw_text(300, $kala, $row["valkoodi"], 				$firstpage, $norm);
-			$oikpos = $pdf->strlen($row["summa"], $norm);
-			$pdf->draw_text(480-$oikpos, $kala, $row["summa"], 			$firstpage, $norm);
+			$oikpos = $pdf->strlen($row["laskusumma"], $norm);
+			$pdf->draw_text(480-$oikpos, $kala, $row["laskusumma"], 			$firstpage, $norm);
 		}
 		$kala = $kala - 13;
 		$lask++;
@@ -121,7 +122,7 @@
 
 		global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $lask, $kala;
 
-		if (sizeof($summat) > 1 and  $lask > 35) { //Valuuttaerittely ei mahdu! Rekursio! IIK!
+		if (count($summat) > 1 and  $lask > 35) { //Valuuttaerittely ei mahdu! Rekursio! IIK!
 			$sivu++;
 			loppu($firstpage, array());
 			$firstpage = alku();
@@ -130,8 +131,6 @@
 		}
 
 		//yhteensärivi
-		$pdf->draw_rectangle(110, 20, 90, 580,	$firstpage, $rectparam);
-		$pdf->draw_rectangle(110, 207, 90, 580,	$firstpage, $rectparam);
 		$pdf->draw_rectangle(110, 394, 90, 580,	$firstpage, $rectparam);
 		$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
 
@@ -191,7 +190,7 @@
 
 	}
 
-	require('../pdflib/phppdflib.class.php');
+	require('pdflib/phppdflib.class.php');
 
 	//echo "<font class='message'>Tiliote tulostuu...</font>";
 	flush();
@@ -229,27 +228,36 @@
 		$tunnukset 	= $asiakasrow2['tunnukset'];
 	}
 
-	$query = "	SELECT tapvm,
-				liitostunnus,
-				summa - saldo_maksettu - pyoristys avoinsumma,
-				summa_valuutassa - saldo_maksettu_valuutassa - pyoristys_valuutassa  avoinsummavaluutassa,
-				summa,
-				summa_valuutassa,
-				valkoodi,
-				erpcm,
-				laskunro
-				FROM lasku
-				WHERE yhtio ='$kukarow[yhtio]'
-				and tila = 'U'
-				and mapvm = '0000-00-00'
-				and liitostunnus in ($tunnukset)";
-	$result = mysql_query($query) or pupe_error($query);
+	if (!checkdate($kk, $pp, $vv)) {
+		$tito_pvm = date("Y-m-d");
+	}
+	else {
+		$tito_pvm = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv));
+	}
+	
+	$query = "	SELECT lasku.ytunnus, lasku.valkoodi, lasku.tunnus, lasku.erpcm, lasku.liitostunnus, lasku.mapvm, lasku.nimi, lasku.tapvm, lasku.laskunro, 				
+				lasku.summa-lasku.saldo_maksettu laskuavoinsaldo, 
+				lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa, 				
+				lasku.summa laskusumma, 
+				lasku.summa_valuutassa laskusumma_valuutassa					
+				FROM lasku use index (yhtio_tila_liitostunnus_tapvm) 
+				WHERE lasku.yhtio = '$kukarow[yhtio]' 
+				and (lasku.mapvm > '$tito_pvm' or lasku.mapvm = '0000-00-00') 
+				and lasku.tapvm <= '$tito_pvm' 
+				and lasku.tapvm > '0000-00-00' 
+				and lasku.tila = 'U' 
+				and lasku.alatila = 'X' 
+				and lasku.liitostunnus in ($tunnukset)
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13 
+				ORDER BY lasku.ytunnus, lasku.laskunro";
+	$result = mysql_query($query) or pupe_error($query);	
 	$laskutiedot = mysql_fetch_array($result);
 
 	//otetaan asiakastiedot ekalta laskulta
 	$query = "	SELECT *
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$laskutiedot[liitostunnus]'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus = '$laskutiedot[liitostunnus]'";
 	$asiakasresult = mysql_query($query) or pupe_error($query);
 	$asiakastiedot = mysql_fetch_array($asiakasresult);
 
@@ -278,10 +286,10 @@
 		$firstpage = rivi(1, $firstpage, $summa, $row);
 
 		if ($row['valkoodi'] == $yhtiorow['valkoodi']) {
-			$totaali[$row['valkoodi']] += $row['avoinsumma'];
+			$totaali[$row['valkoodi']] += $row['laskuavoinsaldo'];
 		}
 		else {
-			$totaali[$row['valkoodi']] += $row['avoinsummavaluutassa'];
+			$totaali[$row['valkoodi']] += $row['laskuavoinsaldo_valuutassa'];
 		}
 	}
 
@@ -289,8 +297,6 @@
 		$firstpage = rivi(2, $firstpage, $summa, $row);
 		$totaali[$row['valkoodi']] += $row['summa'];
 	}
-
-	//$loppusumma = sprintf('%.2f', $summa+$kaatosumma); Multivaluutta versioon 2!!!
 
 	loppu($firstpage,$totaali);
 

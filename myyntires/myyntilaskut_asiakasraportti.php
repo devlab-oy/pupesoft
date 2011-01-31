@@ -84,7 +84,7 @@
 				$haku_sql = "ytunnus='$ytunnus'";
 			}
 
-			$query = "	SELECT tunnus, ytunnus, nimi, osoite, postino, postitp
+			$query = "	SELECT tunnus, ytunnus, nimi, osoite, postino, postitp, maa
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
 						and $haku_sql";
@@ -184,7 +184,7 @@
 				
 				echo "<table>
 					<tr>
-					<th rowspan='$riveja'><a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$ytunnus$asinfolisa&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>$asiakasrow[nimi]</a></td>
+					<th rowspan='$riveja'><a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$ytunnus$asinfolisa&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>$asiakasrow[nimi]</a></th>
 					<td rowspan='$riveja'>".t("Kaatotilillä")."</td>";
 
 				if (mysql_num_rows($kaatoresult) > 1) { // Valuuttasummia
@@ -221,7 +221,7 @@
 				}
 
 				echo "<tr>
-					<th rowspan='$riveja'>$ytunnus ($nimet)</td>
+					<th rowspan='$riveja'>$ytunnus ($nimet)</th>
 					<td rowspan='$riveja'>".t("Myöhässä olevia laskuja yhteensä")."</td>";
 
 				if (mysql_num_rows($result) > 1) { // Valuuttasummia
@@ -249,7 +249,7 @@
 				
 				echo "
 					<tr>
-					<th rowspan='$riveja'>$asiakasrow[osoite]</td>
+					<th rowspan='$riveja'>$asiakasrow[osoite]</th>
 					<td rowspan='$riveja'>".t("Avoimia laskuja yhteensä")."</td>";
 
 				if (mysql_num_rows($result) > 1) { // Valuuttasummia
@@ -274,13 +274,35 @@
 				}
 
 				echo "<tr>
-					<th>$asiakasrow[postino] $asiakasrow[postitp]</td>
+					<th>$asiakasrow[postino] $asiakasrow[postitp]</th>
 					<td colspan='2'></td></tr>";
 
 				echo "<tr>
-					<th></th><td colspan='2'><a href='".$palvelin2."raportit/asiakasinfo.php?ytunnus=$ytunnus$asinfolisa&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>".t("Asiakkaan myyntitiedot")."</a></td>
+					<th>$asiakasrow[maa]</th><td colspan='2'><a href='".$palvelin2."raportit/asiakasinfo.php?ytunnus=$ytunnus$asinfolisa&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//tila=tee_raportti//lopetus=$lopetus'>".t("Asiakkaan myyntitiedot")."</a></td>
 					</tr>";
-
+				
+				echo "<tr><td colspan='3' class='back'><br></td></tr>";
+				
+				if (!isset($vv)) $vv = date("Y");
+				if (!isset($kk)) $kk = date("n");
+				if (!isset($pp)) $pp = date("j");
+										
+				echo "<tr><th>".t("Tiliote päivälle").":</th>
+						<td colspan='2'>
+						<form id='tulosta_tiliote' name='tulosta_tiliote' method='post'>
+						<input type='hidden' name = 'tee' value = 'NAYTATILAUS'>
+						<input type='hidden' name = 'tiliote' value = '1'>
+						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
+						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
+						<input type='hidden' name = 'alatila' value = '$alatila'>						
+						<input type = 'text' name = 'pp' value='$pp' size=2>
+						<input type = 'text' name = 'kk' value='$kk' size=2>
+						<input type = 'text' name = 'vv' value='$vv' size=4>																								
+						<input type='submit' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\"></form>
+						</td></tr>";	
+				
+				echo "</table>";
+				
 				echo "<table><tr><td class='back'>";
 
 				// ikäanalyysi
@@ -325,14 +347,7 @@
 				//visuaalinen esitys maksunopeudesta (hymynaama)
 				list ($naama, $nopeushtml) = laskeMaksunopeus($ytunnus, $kukarow["yhtio"]);
 
-				echo "<br>$naama<br>$nopeushtml</td>";
-				echo "<td class='back'><form id='tulosta_tiliote' name='tulosta_tiliote' method='post'>
-						<input type='hidden' name = 'tee' value = 'NAYTATILAUS'>
-						<input type='hidden' name = 'tiliote' value = '1'>
-						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
-						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
-						<input type='hidden' name = 'alatila' value = '$alatila'>
-						<input type='submit' value='",t("Tulosta tiliote"),"' onClick=\"js_openFormInNewWindow('tulosta_tiliote', ''); return false;\"></form></td>";
+				echo "<br>$naama<br>$nopeushtml</td>";				
 				echo "</tr></table><br>";
 
 				//avoimet laskut
@@ -410,15 +425,16 @@
 							ORDER BY $jarjestys";
 				$result = mysql_query($query) or pupe_error($query);
 
-				echo "<table>";
 				echo "<form action = '$PHP_SELF?ojarj=".$ojarj.$ulisa."' method = 'post'>
 						<input type='hidden' name = 'tila' value='$tila'>
 						<input type='hidden' name = 'asiakasid' value='$asiakasid'>
 						<input type='hidden' name = 'alatila' value='$alatila'>
 						<input type='hidden' name='lopetus' value='$lopetus'>";
+
+				echo "<table>";				
 				echo "<tr>
 						<th>".t("Näytä").":</th>
-						<td>
+						<td>																		
 						<select name='valintra' onchange='submit();'>
 						<option value='' $chk1>".t("Avoimet laskut")."</option>
 						<option value='eraantyneet' $chk4>".t("Erääntyneet laskut")."</option>
@@ -439,8 +455,7 @@
 
 				if (mysql_num_rows($aasres) > 0) {
 
-					echo "	<th>".t("Valuutta").":</th>
-							<td><select name='savalkoodi' onchange='submit();'>";
+					echo "<th>".t("Valuutta").":</th><td><select name='savalkoodi' onchange='submit();'>";
 					echo "<option value = ''>".t("Kaikki")."</option>";
 
 					while ($aasrow = mysql_fetch_array($aasres)) {
@@ -450,15 +465,11 @@
 						}
 						echo "<option value = '$aasrow[valuutat]' $sel>$aasrow[valuutat]</option>";
 					}
-
 				}
 
-				echo "</tr>";
-				echo "</form>";
-				echo "</table><br>";
+				echo "</tr>";				
+				echo "</table></form><br>";
 
-				echo "<table>";
-				echo "<tr>";
 				echo "<form action = '$PHP_SELF' method = 'post'>
 						<input type='hidden' name = 'tila' value='$tila'>
 						<input type='hidden' name = 'asiakasid' value='$asiakasid'>
@@ -467,7 +478,9 @@
 						<input type='hidden' name = 'savalkoodi' value='$savalkoodi'>
 						<input type='hidden' name = 'alatila' value='$alatila'>
 						<input type='hidden' name='lopetus' value='$lopetus'>";
-
+						
+				echo "<table>";
+				echo "<tr>";				
 				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=0".$ulisa."&lopetus=$lopetus'>".t("Laskunro")."</a></th>";
 				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=1".$ulisa."&lopetus=$lopetus'>".t("Pvm")."</a></th>";
 				echo "<th valign='top'><a href='$PHP_SELF?asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=2".$ulisa."&lopetus=$lopetus'>".t("Eräpäivä")."</a></th>";
@@ -488,8 +501,7 @@
 				}
 
 				echo "<td></td><td class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
-				echo "</form>";
-
+			
 				$summa = 0;
 
 				// haetaan kaikki yrityksen rahatilit mysql muodossa
@@ -579,7 +591,8 @@
 				}
 
 				echo "<tr><th colspan='3'>".t("Yhteensä")."</th><th style='text-align:right'>";
-				if (sizeof($totaali) == 1 and isset($totaali[$yhtiorow['valkoodi']])) {
+				
+				if (count($totaali) == 1 and isset($totaali[$yhtiorow['valkoodi']])) {
 					echo $totaali[$yhtiorow['valkoodi']];
 					echo " ".$yhtiorow["valkoodi"];
 				}
@@ -594,7 +607,7 @@
 				}
 				echo "</th><th colspan='7'></th></tr>";
 				echo "</table>";
-
+				echo "</form>";
 				echo "<script LANGUAGE='JavaScript'>document.forms[0][0].focus()</script>";
 			}
 

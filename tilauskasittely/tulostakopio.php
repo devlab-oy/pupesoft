@@ -4,7 +4,9 @@
 		$_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
 	}
 
-	if ($_REQUEST["tee"] == 'NAYTATILAUS' or $_POST["tee"] == 'NAYTATILAUS' or $_GET["tee"] == 'NAYTATILAUS') $nayta_pdf = 1; //Generoidaan .pdf-file
+	if ((isset($_REQUEST["tee"]) and $_REQUEST["tee"] == 'NAYTATILAUS') or
+		(isset($_POST["tee"]) and $_POST["tee"] == 'NAYTATILAUS') or
+		(isset($_GET["tee"]) and $_GET["tee"] == 'NAYTATILAUS')) $nayta_pdf = 1; //Generoidaan .pdf-file
 
 	if (@include("../inc/parametrit.inc"));
 	elseif (@include("parametrit.inc"));

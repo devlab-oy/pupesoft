@@ -15,7 +15,7 @@
 		else {
 			$lefti = "LEFT";
 		}
-		
+
 		if (!empty($varastot)) {
 			$lisa = " and varastopaikat.tunnus IN (" . implode(', ', $varastot) . ")";
         }
@@ -35,21 +35,24 @@
 						sum(if(tilausrivi.var  = 'P', 1, 0)) puutteet,
 						sum(if(tilausrivi.var != 'P' and tilausrivi.tyyppi='L', 1, 0)) kappaleet,
 						sum(if(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
+						round(sum(if(tilausrivi.var != 'P', tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl, 0)), 2) kerkappaleet,
+						round(sum(if(tilausrivi.var != 'P', (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl)*tuote.tuotemassa, 0)), 2) kerkilot,
 						count(*) yht
 						FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
 						JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-						$lefti JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = tilausrivi.keratty)						
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+						$lefti JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = tilausrivi.keratty)
 						LEFT JOIN varastopaikat ON (varastopaikat.yhtio=tilausrivi.yhtio and
 		                concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) and
-		                concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))												
+		                concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.kerattyaika >= '$vva-$kka-$ppa 00:00:00'
 						and tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl 23:59:59'
 						and tilausrivi.var in ('','H','P')
 						and tilausrivi.tyyppi in ('L','G')
 						$lisa
-						GROUP BY keratty, otunnus
-						ORDER BY keratty, kerattyaika";
+						GROUP BY tilausrivi.keratty, tilausrivi.otunnus
+						ORDER BY tilausrivi.keratty, tilausrivi.kerattyaika";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "	<table><tr>
@@ -63,6 +66,8 @@
 					<th norwap>".t("Siirrot")."</th>
 					<th nowrap>".t("Kerätyt")."</th>
 					<th nowrap>".t("Yhteensä")."</th>
+					<th nowrap>".t("Kappaleet")."<br>".t("Yhteensä")."</th>
+					<th nowrap>".t("Kilot")."<br>".t("Yhteensä")."</th>
 					</tr>";
 
 			$lask		= 0;
@@ -81,6 +86,8 @@
 							<td class='tumma' align='right'>$ssumma</td>
 							<td class='tumma' align='right'>$ksumma</td>
 							<td class='tumma' align='right'>$summa</td>
+							<td class='tumma' align='right'>$kapsu</td>
+							<td class='tumma' align='right'>$kilsu</td>
 							</tr>";
 					echo "<tr><td class='back'><br></td></tr>";
 
@@ -95,12 +102,16 @@
 							<th norwap>".t("Siirrot")."</th>
 							<th nowrap>".t("Kerätyt")."</th>
 							<th nowrap>".t("Yhteensä")."</th>
+							<th nowrap>".t("Yhteensä")."<br>".t("kappaleet")."</th>
+							<th nowrap>".t("Yhteensä")."<br>".t("kilot")."</th>
 							</tr>";
 
 					$psumma	= 0;
 					$ksumma	= 0;
 					$ssumma	= 0;
 					$summa	= 0;
+					$kapsu	= 0;
+					$kilsu	= 0;
 				}
 
 				echo "<tr>
@@ -114,18 +125,24 @@
 						<td align='right'>$row[siirrot]</td>
 						<td align='right'>$row[kappaleet]</td>
 						<td align='right'>$row[yht]</td>
+						<td align='right'>$row[kerkappaleet]</td>
+						<td align='right'>$row[kerkilot]</td>
 					</tr>";
 
 				$psumma	+= $row["puutteet"];
 				$ksumma	+= $row["kappaleet"];
 				$ssumma	+= $row["siirrot"];
 				$summa	+= $row["yht"];
+				$kapsu	+= $row["kerkappaleet"];
+				$kilsu	+= $row["kerkilot"];
 
 				// yhteensä
 				$psummayht	+= $row["puutteet"];
 				$ksummayht	+= $row["kappaleet"];
 				$ssummayht	+= $row["siirrot"];
 				$summayht	+= $row["yht"];
+				$kapsuyht	+= $row["kerkappaleet"];
+				$kilsuyht	+= $row["kerkilot"];
 
 				$lask++;
 				$edkeraaja = $row["keratty"];
@@ -138,6 +155,8 @@
 						<td class='tumma' align='right'>$ssumma</td>
 						<td class='tumma' align='right'>$ksumma</td>
 						<td class='tumma' align='right'>$summa</td>
+						<td class='tumma' align='right'>$kapsu</td>
+						<td class='tumma' align='right'>$kilsu</td>
 					</tr>";
 				echo "<tr><td class='back'><br></td></tr>";
 			}
@@ -149,6 +168,8 @@
 					<td class='tumma' align='right'>$ssummayht</td>
 					<td class='tumma' align='right'>$ksummayht</td>
 					<td class='tumma' align='right'>$summayht</td>
+					<td class='tumma' align='right'>$kapsuyht</td>
+					<td class='tumma' align='right'>$kilsuyht</td>
 					</tr>";
 
 			echo "</table><br>";
@@ -162,10 +183,10 @@
 			else {
 				$vvaa = $vva;
 			}
-			
+
 			$grp = 'pvm';
                         if ($tapa == 'kerkk') $grp = 'left(kerattyaika, 7)';
-                        
+
 			$query = "	SELECT date_format(left(tilausrivi.kerattyaika,10), '%j') pvm,
 						left(tilausrivi.kerattyaika,10) kerattyaika,
 						sum(if(tilausrivi.var  = 'P', 1, 0)) puutteet,

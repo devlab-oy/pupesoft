@@ -115,6 +115,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset  = array("ISATUOTENO", "TUOTENO", "TYYPPI");
 				$wherelliset = array("ISATUOTENO", "TUOTENO", "TYYPPI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			case "rahtimaksut" :
 				$pakolliset = array("TOIMITUSTAPA", "KILOTALKU", "KILOTLOPPU", "KMALKU", "KMLOPPU");

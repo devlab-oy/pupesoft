@@ -55,7 +55,6 @@
 			echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
 		}
 
-
 		if ($tltee == "aja") {
 
 			if ($tyyppi == 4) {
@@ -372,6 +371,15 @@
 			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[PROJEKTI]' $bchek[PROJEKTI]> ".t("Projekteittain");
 			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASOSASTO]' $bchek[ASOSASTO]> ".t("Asiakasosastoittain");
 			echo "<br>&nbsp;<input type='checkbox' name='sarakebox[ASRYHMA]' $bchek[ASRYHMA]> ".t("Asiakasryhmittäin");
+			echo "</td></tr>";
+
+			if ($teepdf != "") $vchek = "CHECKED";
+			if ($teexls != "") $bchek = "CHECKED";
+
+			echo "<tr><th valign='top'>".t("Tulostus")."</th>";
+			echo "<td>";
+			echo "&nbsp;<input type='checkbox' name='teepdf' value='OK' $vchek> ".t("Tee PDF");
+			echo "<br>&nbsp;<input type='checkbox' name='teexls' value='OK' $bchek> ".t("Tee Excel");
 			echo "</td></tr>";
 
 			echo "</table><br>";
@@ -926,140 +934,6 @@
 				$alkukausi = 0;
 			}
 
-			require_once('pdflib/phppdflib.class.php');
-
-			$pdf = new pdffile;
-			$pdf->set_default('margin', 0);
-			$pdf->set_default('margin-left', 5);
-			$rectparam["width"] = 0.3;
-
-			$p["height"] 	= 10;
-			$p["font"]	 	= "Times-Roman";
-	        $b["height"]	= 8;
-			$b["font"] 		= "Times-Bold";
-
-			if (count($kaudet) > 10 and $kaikkikaudet != "") {
-				$p["height"]--;
-				$b["height"]--;
-
-				$saraklev 			= 49;
-				$yhteensasaraklev 	= 66;
-				$rivikork 			= 13;
-			}
-			else {
-				$saraklev 			= 60;
-				$yhteensasaraklev 	= 70;
-				$rivikork 			= 15;
-			}
-
-			if ((count($kaudet) > 5 and $kaikkikaudet != "") or count($sarakkeet) > 2) {
-				$vaslev = 802;
-			}
-			else {
-				$vaslev = 545;
-			}
-
-			for ($i = $alkukausi; $i < count($kaudet); $i++) {
-				foreach ($sarakkeet as $sarake) {
-					$vaslev -= $saraklev;
-				}
-			}
-
-			if ($vaslev > 300) {
-				$vaslev = 300;
-			}
-
-			if (!function_exists("alku")) {
-				function alku () {
-					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $kaikkikaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev, $sarakkeet, $ei_yhteensa;
-
-					if ((count($kaudet) > 5 and $kaikkikaudet != "") or count($sarakkeet) > 2) {
-						$firstpage = $pdf->new_page("842x595");
-						$bottom = "535";
-					}
-					else {
-						$firstpage = $pdf->new_page("a4");
-						$bottom = "782";
-					}
-
-					unset($data);
-
-					if ((int) $yhtiorow["lasku_logo"] > 0) {
-						$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
-						$data = $liite["data"];
-						$isizelogo[0] = $liite["image_width"];
-						$isizelogo[1] = $liite["image_height"];
-						unset($liite);
-					}
-					elseif (file_exists($yhtiorow["lasku_logo"])) {
-						$filename = $yhtiorow["lasku_logo"];
-
-						$fh = fopen($filename, "r");
-						$data = fread($fh, filesize($filename));
-						fclose($fh);
-
-						$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-					}
-
-					if (isset($data) and $data) {
-						$image = $pdf->jfif_embed($data);
-
-						if (!$image) {
-							echo t("Logokuvavirhe");
-						}
-						else {
-							tulosta_logo_pdf($pdf, $firstpage, "", 0, 0, 25, 120);
-						}
-					}
-					else {
-						$pdf->draw_text(10, ($bottom+30),  $yhtiorow["nimi"], $firstpage);
-					}
-
-					$pdf->draw_text(200,  ($bottom+30), $otsikko, $firstpage);
-
-					$left = $vaslev;
-
-					for ($i = $alkukausi; $i < count($kaudet); $i++) {
-						foreach ($sarakkeet as $sarake) {
-
-							if (strpos($sarake, "::") !== FALSE) {
-								list($muuarray, $arvo) = explode("::", $sarake);
-								$sarakenimi = ${$muuarray}[$arvo];
-							}
-							else {
-								$sarakenimi = "";
-							}
-
-							$oikpos1 = $pdf->strlen($kaudet[$i], $b);
-							$oikpos2 = $pdf->strlen($sarakenimi, $b);
-
-							if ($oikpos2 > $oikpos1) {
-								$oikpos = $oikpos2;
-							}
-							else {
-								$oikpos = $oikpos1;
-							}
-
-							if (($i+1) == count($kaudet) and $ei_yhteensa == "") {
-								$lev = $yhteensasaraklev;
-							}
-							else {
-								$lev = $saraklev;
-							}
-
-							$pdf->draw_text($left-$oikpos+$lev,  $bottom+8, $sarakenimi, $firstpage, $b);
-							$pdf->draw_text($left-$oikpos+$lev,  $bottom, $kaudet[$i], $firstpage, $b);
-
-							$left += $saraklev;
-						}
-					}
-
-					$bottom -= $rivikork;
-				}
-			}
-
-			alku();
-
 			echo "<table>";
 
 			// printataan headerit
@@ -1089,7 +963,6 @@
 
 			for ($i = $alkukausi; $i < count($kaudet); $i++) {
 				foreach ($sarakkeet as $sarake) {
-
 					if (strpos($sarake, "::") !== FALSE) {
 						list($muuarray, $arvo) = explode("::", $sarake);
 						$sarakenimi = ${$muuarray}[$arvo];
@@ -1101,13 +974,19 @@
 					echo "<td class='tumma' align='right' valign='bottom'>$sarakenimi<br>$kaudet[$i]</td>";
 				}
 			}
+
 			echo "</tr>\n";
 
 			// sortataan array indexin (tason) mukaan
 			ksort($tasonimi);
 
+			$rivit_px = array();
+			$px = 0;
+
 			// loopataan tasot läpi
 			foreach ($tasonimi as $key_c => $value) {
+
+				$px++;
 
 				$key = str_replace("Ö", "", $key_c); // Ö-kirjaimet pois
 
@@ -1119,16 +998,15 @@
 					// laitetaan ykkös ja kakkostason rivit tummalla selkeyden vuoksi
 					if (strlen($key) < 3 and $rtaso > 2) $class = "tumma";
 
-					$rivi	  = "<tr class='aktiivi'>";
-					$rivi_pdf = "";
+					$rivi = "<tr class='aktiivi'>";
 
 					if ($toim == "TASOMUUTOS") {
 						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&tee=muuta&lopetus=$lopetus'>$key</a></td>";
 						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>".t("Lisää taso tasoon")." $key</a></td>";
 					}
 
-					$tilirivi 	  = "";
-					$tilirivi_pdf = "";
+					$tilirivi	 = "";
+					$tilirivi_px = array();
 
 					if ($rtaso == "TILI") {
 
@@ -1137,7 +1015,7 @@
 						if (isset($tilisumma[$key])) {
 							foreach ($tilisumma[$key] as $tilitiedot => $tilisumkau) {
 								$tilirivi2		= "";
-								$tilirivi2_pdf	= "";
+								$tilirivi2_px	= array();
 								$tulos			= 0;
 
 								for ($i = $alkukausi; $i < count($kaudet); $i++) {
@@ -1148,7 +1026,7 @@
 										if ($apu == 0) $apu = "";
 
 										$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
-										$tilirivi2_pdf .= number_format($apu, $desi, ',', ' ')."#SARAKE#";
+										$tilirivi2_px[] = $apu;
 
 										if ($tilisumkau[$kaudet[$i]][(string) $sarake] != 0) {
 											$tulos++;
@@ -1160,8 +1038,7 @@
 
 									list($tnumero, $tnimi) = explode("###", $tilitiedot);
 
-									$tilirivi	  .= "<tr>";
-									$tilirivi_pdf .= "";
+									$tilirivi .= "<tr>";
 
 									if ($toim == "TASOMUUTOS") {
 										$tilirivi .= "<td class='back' nowrap>$key</td>";
@@ -1178,14 +1055,16 @@
 									}
 
 									$tilirivi .= "</td>$tilirivi2</tr>";
-									$tilirivi_pdf .= "$tnumero - $tnimi#SARAKE#".$tilirivi2_pdf."#RIVI#";
+
+									$rivit_px[$px] = array_merge(array($key, $tnumero, $tnimi), $tilirivi2_px);
+									$px++;
 								}
 							}
 						}
 					}
 
 					$rivi		.= "<th nowrap>$value</th>";
-					$rivi_pdf	.= $value."#SARAKE#";
+					$rivit_px[$px] = array($key, "", $value);
 
 					$tulos = 0;
 
@@ -1218,8 +1097,9 @@
 								$tulos++; // summaillaan tätä jos meillä oli rivillä arvo niin osataan tulostaa
 							}
 
-							$rivi	  .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
-							$rivi_pdf .= number_format($apu, $desi,  ',', ' ')."#SARAKE#";
+							$rivi .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
+
+							$rivit_px[$px] = array_merge($rivit_px[$px], array($apu));
 						}
 					}
 
@@ -1232,65 +1112,261 @@
 					// kakkostason jälkeen aina yks tyhjä rivi.. paitsi jos otetaan vain kakkostason raportti
 					if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
 						$rivi .= "<tr><td class='back'>&nbsp;</td></tr>";
-						$rivi_pdf .= "#RIVI#";
+
+						if ($tulos > 0) {
+							$px++;
+							$rivit_px[$px] = "";
+						}
 					}
 
 					if (strlen($key) == 1 and ($rtaso > 1 or $rtaso == "TILI")) {
 						$rivi .= "<tr><td class='back'><br><br></td></tr>";
-						$rivi_pdf .= "#RIVI##RIVI#";
+
+						if ($tulos > 0) {
+							$px++;
+							$rivit_px[$px] = "";
+
+							$px++;
+							$rivit_px[$px] = "";
+						}
 					}
 
 					// jos jollain kaudella oli summa != 0 niin tulostetaan rivi
 					if ($tulos > 0 or $toim == "TASOMUUTOS") {
-
 						echo $tilirivi, $rivi;
-
-						if (trim($tilirivi_pdf.$rivi_pdf) != "") {
-							foreach (explode("#RIVI#", $tilirivi_pdf.$rivi_pdf) as $pdfrivi) {
-								// Vika #SARAKE# pois
-								$pdfrivi = substr($pdfrivi, 0, -8);
-
-								$pdfsarake_array = explode("#SARAKE#", $pdfrivi);
-
-								if ($bottom < 20) {
-									alku();
-								}
-
-								for ($pi = 0; $pi < count($pdfsarake_array); $pi++) {
-
-									if ($pi == 0) {
-										$left = 10+(strlen($key)-1)*3;
-
-										list($ff_string, $ff_font) = pdf_fontfit($pdfsarake_array[$pi], $vaslev-$left, $pdf, $b);
-
-										$pdf->draw_text($left, $bottom, $ff_string, $firstpage, $ff_font);
-
-										$left = $vaslev;
-									}
-									else {
-										if (($pi+1) == count($pdfsarake_array) and $ei_yhteensa == "") {
-											$lev = $yhteensasaraklev;
-										}
-										else {
-											$lev = $saraklev;
-										}
-
-										$oikpos = $pdf->strlen($pdfsarake_array[$pi], $p);
-										$pdf->draw_text($left-$oikpos+$lev, $bottom, $pdfsarake_array[$pi], $firstpage, $p);
-										$left += $saraklev;
-									}
-								}
-
-								$bottom -= $rivikork;
-							}
-						}
+					}
+					elseif (isset($rivit_px[$px])) {
+						unset($rivit_px[$px]);
 					}
 				}
 
 				$edkey = $key;
 			}
 
-			echo "</table>";
+			echo "</table><br><br>";
+
+			// Excel-koodia
+			if (isset($teexls) and $teexls == "OK") {
+				if (include('Spreadsheet/Excel/Writer.php')) {
+
+					//keksitään failille joku varmasti uniikki nimi:
+					list($usec, $sec) = explode(' ', microtime());
+					mt_srand((float) $sec + ((float) $usec * 100000));
+					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+
+					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+					$workbook->setVersion(8);
+					$worksheet = $workbook->addWorksheet('Sheet 1');
+
+					$format_bold = $workbook->addFormat();
+					$format_bold->setBold();
+
+					$excelrivi = 0;
+					$excelhist = 0;
+				}
+
+				$pi = 1;
+
+				for ($i = $alkukausi; $i < count($kaudet); $i++) {
+					foreach ($sarakkeet as $sarake) {
+						if (strpos($sarake, "::") !== FALSE) {
+							list($muuarray, $arvo) = explode("::", $sarake);
+							$sarakenimi = ${$muuarray}[$arvo]."\n";
+						}
+						else {
+							$sarakenimi = "";
+						}
+
+						$worksheet->writeString(0, $pi, $sarakenimi.$kaudet[$i], $format_bold);
+						$pi++;
+					}
+				}
+			}
+
+			// PDF-koodia
+			if (isset($teepdf) and $teepdf == "OK") {
+				require_once('pdflib/phppdflib.class.php');
+
+				$pdf = new pdffile;
+				$pdf->set_default('margin', 0);
+				$pdf->set_default('margin-left', 5);
+				$rectparam["width"] = 0.3;
+
+				$p["height"] 	= 10;
+				$p["font"]	 	= "Times-Roman";
+		        $b["height"]	= 8;
+				$b["font"] 		= "Times-Bold";
+
+				if (count($kaudet) > 10 and $kaikkikaudet != "") {
+					$p["height"]--;
+					$b["height"]--;
+
+					$saraklev 			= 49;
+					$yhteensasaraklev 	= 66;
+					$rivikork 			= 13;
+				}
+				else {
+					$saraklev 			= 60;
+					$yhteensasaraklev 	= 70;
+					$rivikork 			= 15;
+				}
+
+				if ((count($kaudet) > 5 and $kaikkikaudet != "") or count($sarakkeet) > 2) {
+					$vaslev = 802;
+				}
+				else {
+					$vaslev = 545;
+				}
+
+				for ($i = $alkukausi; $i < count($kaudet); $i++) {
+					foreach ($sarakkeet as $sarake) {
+						$vaslev -= $saraklev;
+					}
+				}
+
+				if ($vaslev > 300) {
+					$vaslev = 300;
+				}
+
+				if (!function_exists("alku")) {
+					function alku () {
+						global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $kaikkikaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev, $sarakkeet, $ei_yhteensa, $leveysarray;
+
+						if ((count($kaudet) > 5 and $kaikkikaudet != "") or count($sarakkeet) > 2) {
+							$firstpage = $pdf->new_page("842x595");
+							$bottom = "535";
+						}
+						else {
+							$firstpage = $pdf->new_page("a4");
+							$bottom = "782";
+						}
+
+						unset($data);
+
+						if ((int) $yhtiorow["lasku_logo"] > 0) {
+							$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+							$data = $liite["data"];
+							$isizelogo[0] = $liite["image_width"];
+							$isizelogo[1] = $liite["image_height"];
+							unset($liite);
+						}
+						elseif (file_exists($yhtiorow["lasku_logo"])) {
+							$filename = $yhtiorow["lasku_logo"];
+
+							$fh = fopen($filename, "r");
+							$data = fread($fh, filesize($filename));
+							fclose($fh);
+
+							$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+						}
+
+						if (isset($data) and $data) {
+							$image = $pdf->jfif_embed($data);
+
+							if (!$image) {
+								echo t("Logokuvavirhe");
+							}
+							else {
+								tulosta_logo_pdf($pdf, $firstpage, "", 0, 0, 25, 120);
+							}
+						}
+						else {
+							$pdf->draw_text(10, ($bottom+30), $yhtiorow["nimi"], $firstpage);
+						}
+
+						$pdf->draw_text(200, ($bottom+30), $otsikko, $firstpage);
+
+						$leveysarray = array();
+						$left = $vaslev;
+
+						for ($i = $alkukausi; $i < count($kaudet); $i++) {
+							foreach ($sarakkeet as $sarake) {
+
+								if (strpos($sarake, "::") !== FALSE) {
+									list($muuarray, $arvo) = explode("::", $sarake);
+									$sarakenimi = $GLOBALS[$muuarray][$arvo];
+								}
+								else {
+									$sarakenimi = "";
+								}
+
+								$oikpos1 = $pdf->strlen($kaudet[$i], $b);
+								$oikpos2 = $pdf->strlen($sarakenimi, $b);
+
+								if ($oikpos2 > $oikpos1) {
+									$oikpos = $oikpos2;
+								}
+								else {
+									$oikpos = $oikpos1;
+								}
+
+								if (($i+1) == count($kaudet) and $ei_yhteensa == "") {
+									$lev = $yhteensasaraklev;
+								}
+								else {
+									$lev = $saraklev;
+								}
+
+								// Tallentaan sarakkeiden kohdat...
+								$leveysarray[] = $left+$lev;
+
+								$pdf->draw_text($left-$oikpos2+$lev,  $bottom+8, $sarakenimi, $firstpage, $b);
+								$pdf->draw_text($left-$oikpos1+$lev,  $bottom, $kaudet[$i], $firstpage, $b);
+
+								$left += $saraklev;
+							}
+						}
+
+						$bottom -= $rivikork;
+					}
+				}
+
+				alku();
+			}
+
+			// Kirjoitetaan exceli ja/tai pdf:ä
+			if ((isset($teepdf) and $teepdf == "OK") or (isset($teexls) and $teexls == "OK")) {
+
+				$excelrivi = 1;
+
+				foreach ($rivit_px as $sarakkeet_px) {
+
+					if (isset($teepdf) and $teepdf == "OK" and $bottom < 20) alku();
+
+					$pi = 0;
+
+					foreach ($sarakkeet_px as $arvo) {
+						if ($pi == 0) {
+							$sisennys = 10+(strlen($arvo)-1)*3;
+
+							if ($sarakkeet_px[1] != "") {
+								$nimi = $sarakkeet_px[1]." - ".$sarakkeet_px[2];
+							}
+							else {
+								$nimi = $sarakkeet_px[2];
+							}
+
+							if (isset($teexls) and $teexls == "OK") $worksheet->writeString($excelrivi, $pi, $nimi, $format_bold);
+							if (isset($teepdf) and $teepdf == "OK") $pdf->draw_text($sisennys, $bottom, $nimi, $firstpage, $b);
+						}
+						elseif ($pi > 2) {
+							$arvo = number_format($arvo, $desi, '.', '');
+
+							if (isset($teexls) and $teexls == "OK") $worksheet->writeNumber($excelrivi, $pi-2, $arvo);
+
+							if (isset($teepdf) and $teepdf == "OK") {
+								$oikpos = $pdf->strlen($arvo, $p);
+								$pdf->draw_text($leveysarray[$pi-3]-$oikpos, $bottom, $arvo, $firstpage, $p);
+							}
+						}
+
+						$pi++;
+					}
+
+					if (isset($teexls) and $teexls == "OK") $excelrivi++;
+					if (isset($teepdf) and $teepdf == "OK") $bottom -= $rivikork;
+				}
+			}
 
 			//	Projektikalenterilla ei sallita PDF tulostusta
 			if ($from != "PROJEKTIKALENTERI") {
@@ -1299,28 +1375,46 @@
 					echo "<br><input type='submit' value='".t("Anna tileille taso")."'></form><br><br>";
 				}
 
-				//keksitään uudelle failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$pdffilenimi = "Tuloslaskelma-".md5(uniqid(mt_rand(), true)).".pdf";
+				if (isset($teepdf) and $teepdf == "OK") {
+					//keksitään uudelle failille joku varmasti uniikki nimi:
+					list($usec, $sec) = explode(' ', microtime());
+					mt_srand((float) $sec + ((float) $usec * 100000));
+					$pdffilenimi = "Tuloslaskelma-".md5(uniqid(mt_rand(), true)).".pdf";
 
-				//kirjoitetaan pdf faili levylle..
-				$fh = fopen("/tmp/".$pdffilenimi, "w");
-				if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
-				fclose($fh);
+					//kirjoitetaan pdf faili levylle..
+					$fh = fopen("/tmp/".$pdffilenimi, "w");
+					if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
+					fclose($fh);
+
+					echo "<br><table>";
+					echo "<tr><th>".t("Tallenna pdf").":</th>";
+					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<input type='hidden' name='toim' value='$toim'>";
+					echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
+					echo "<input type='hidden' name='kaunisnimi' value='$otsikko.pdf'>";
+					echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
+					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+					echo "</table><br>";
+				}
+			}
+
+			if (isset($teexls) and $teexls == "OK" and isset($workbook)) {
+
+				// We need to explicitly close the workbook
+				$workbook->close();
 
 				echo "<br><table>";
-				echo "<tr><th>".t("Tallenna pdf").":</th>";
+				echo "<tr><th>".t("Tallenna excel-tulos").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".urlencode($otsikko).".pdf'>";
-				echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
+				echo "<input type='hidden' name='kaunisnimi' value='$otsikko.xls'>";
+				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table><br>";
 			}
 		}
 
-		require("../inc/footer.inc");
+		require("inc/footer.inc");
 	}
 ?>

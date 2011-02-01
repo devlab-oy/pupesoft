@@ -365,6 +365,12 @@ if (!function_exists('alku_lahete')) {
 			if (trim($laskurow['viesti']) != '') {
 				$komm .= "\n".t("Tilausviite", $kieli)."###".$laskurow['viesti'];
 			}
+			if (trim($laskurow['tilausyhteyshenkilo']) != '') {
+				$komm .= "\n".t("Tilausyhteyshenkilö", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
+			}
+			if (trim($laskurow['comments']) != '') {
+				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
+			}
 		}
 		else {
 			if (trim($laskurow['tilausyhteyshenkilo']) != '') {
@@ -420,7 +426,9 @@ if (!function_exists('alku_lahete')) {
 
 					if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
 						$pdf->draw_text(50, $pohja, trim($o), $thispage, $boldi);
-						$pdf->draw_text(50+$maxoik+55, $pohja, trim($v), $thispage, $norm);
+						//$pdf->draw_text(50+$maxoik+55, $pohja, trim($v), $thispage, $norm);
+						$pdf->draw_text(50+$maxoik+12, $pohja, trim($v), $thispage, $norm);
+
 					}
 					else {
 						$pdf->draw_text(35, $pohja, trim($o), $thispage, $boldi);

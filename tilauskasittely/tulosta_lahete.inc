@@ -426,7 +426,6 @@ if (!function_exists('alku_lahete')) {
 
 					if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
 						$pdf->draw_text(50, $pohja, trim($o), $thispage, $boldi);
-						//$pdf->draw_text(50+$maxoik+55, $pohja, trim($v), $thispage, $norm);
 						$pdf->draw_text(50+$maxoik+12, $pohja, trim($v), $thispage, $norm);
 
 					}

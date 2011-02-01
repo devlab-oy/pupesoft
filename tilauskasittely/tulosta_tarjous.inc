@@ -359,7 +359,6 @@ if (!function_exists('alku_tarjous')) {
 					if ($yhtiorow['tarjoustyyppi'] == 1)  {
 						$pdf_tarjous->draw_text(50, $pohja, trim($o), $page_tarjous, $boldi);
 						$pdf_tarjous->draw_text(50+$maxoik+12, $pohja, trim($v), $page_tarjous, $norm);
-						//ORIGINAL $pdf_tarjous->draw_text(50+$maxoik+55, $pohja, trim($v), $page_tarjous, $norm);
 					}
 					else {
 						$pdf_tarjous->draw_text(35, $pohja, trim($o), $page_tarjous, $boldi);

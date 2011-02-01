@@ -243,6 +243,10 @@ if (!function_exists('alku_tarjous')) {
 			if (trim($laskurow['comments']) != '') {
 				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
 			}
+			
+			if (trim($laskurow['tilausyhteyshenkilo']) != '') {
+				$komm .= "\n".t("Tilausyhteyshenkilö", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
+			}
 		}
 		else {
 			if (trim($laskurow['tilausyhteyshenkilo']) != '') {
@@ -354,7 +358,8 @@ if (!function_exists('alku_tarjous')) {
 
 					if ($yhtiorow['tarjoustyyppi'] == 1)  {
 						$pdf_tarjous->draw_text(50, $pohja, trim($o), $page_tarjous, $boldi);
-						$pdf_tarjous->draw_text(50+$maxoik+55, $pohja, trim($v), $page_tarjous, $norm);
+						$pdf_tarjous->draw_text(50+$maxoik+12, $pohja, trim($v), $page_tarjous, $norm);
+						//ORIGINAL $pdf_tarjous->draw_text(50+$maxoik+55, $pohja, trim($v), $page_tarjous, $norm);
 					}
 					else {
 						$pdf_tarjous->draw_text(35, $pohja, trim($o), $page_tarjous, $boldi);

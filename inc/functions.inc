@@ -8825,7 +8825,9 @@ if (!function_exists("tulosta_logo_pdf")) {
 		elseif ((int) $laskurow["yhtio_toimipaikka"] > 0) {
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus = '$laskurow[yhtio_toimipaikka]'
+						and lasku_logo != ''";
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
@@ -9782,6 +9784,49 @@ if (!function_exists("paivitakat")) {
 	}
 }
 
+if (!function_exists("laskutuspaiva")) {
+	function laskutuspaiva ($mika, $arki = FALSE, $seuraava_kk = 0) {
+
+		$seuraavalaskutus = date('Y-m-d');
+
+		if ($mika == 'eka') {
+			// Eka
+			$ekapaiva = date('N', mktime(0,0,0,(date('m')+$seuraava_kk),1,date('Y')));
+
+			if ($arki and $ekapaiva > 5) {
+				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+$seuraava_kk),(1+(8-$ekapaiva)),date('Y')));
+			}
+			else {
+				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+$seuraava_kk),1,date('Y')));
+			}
+		}
+		elseif ($mika == 'keski') {
+			// Keskimmäinen
+			$keskipaiva = date('N', mktime(0,0,0,date('m'), round(date('t')/2), date('Y')));
+
+			if ($arki and $keskipaiva > 5) {
+				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,date('m'), round(date('t')/2)+(8-$keskipaiva), date('Y')));
+			}
+			else {
+				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,date('m'), round(date('t')/2), date('Y')));
+			}
+		}
+		elseif ($mika == 'vika') {
+			// Vika
+			$vikapaiva = date('N', mktime(0,0,0,(date('m')+1),0,date('Y')));
+
+			if ($arki and $vikapaiva > 5) {
+				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+1), 0-(8-$ekapaiva), date('Y')));
+			}
+			else {
+				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+1),0,date('Y')));
+			}
+		}
+
+		return $seuraavalaskutus;
+	}
+}
+
 if (!function_exists("pupe_DataTables")) {
 	function pupe_DataTables($taulu, $sarakkeetVis, $sarakkeetTot, $footerCallBack = "", $paginate = false, $info = false) {
 
@@ -9859,13 +9904,13 @@ if (!function_exists("pupe_DataTables")) {
 
 							var suuntalavan_tunnus = $('#suuntalava_'+rivi_ja_otsikko+' option:selected').val();
 
-							$.post('{$_SERVER['SCRIPT_NAME']}', 
-								{ 	otunnus: otunnus, 
-									ajax_toiminto: 'kohdista_rivi', 
-									valittu: this.value, 
+							$.post('{$_SERVER['SCRIPT_NAME']}',
+								{ 	otunnus: otunnus,
+									ajax_toiminto: 'kohdista_rivi',
+									valittu: this.value,
 									suuntalavan_tunnus: suuntalavan_tunnus,
-									no_head: 'yes', 
-									ohje: 'off' }, 
+									no_head: 'yes',
+									ohje: 'off' },
 								function(return_value) {
 									$('.'+rivi_ja_otsikko[0]+' td').addClass('tumma');
 
@@ -9896,14 +9941,14 @@ if (!function_exists("pupe_DataTables")) {
 									}
 								}
 							);
-						} 
+						}
 						else {
-							$.post('{$_SERVER['SCRIPT_NAME']}', 
-								{ 	otunnus: 0, 
-									ajax_toiminto: 'kohdista_rivi', 
-									valittu: this.value, 
-									no_head: 'yes', 
-									ohje: 'off' }, 
+							$.post('{$_SERVER['SCRIPT_NAME']}',
+								{ 	otunnus: 0,
+									ajax_toiminto: 'kohdista_rivi',
+									valittu: this.value,
+									no_head: 'yes',
+									ohje: 'off' },
 								function() {
 									$('.'+rivi_ja_otsikko[0]+' td').removeClass('tumma');
 
@@ -9965,7 +10010,7 @@ if (!function_exists("pupe_DataTables")) {
 						oTable.fnFilter(tun, kohde);
 						$('input[name=\"search_'+searchbox+'\"]').val(tun);
 					});
-					
+
 					// JOS PAINETAAN 'TALLENNA SIVUN MUUTOKSET'-NAPPIA
 					$('#submit_tallenna').live('click', function(){
 
@@ -9988,14 +10033,14 @@ if (!function_exists("pupe_DataTables")) {
 							else {
 								// PÄIVITETÄÄN KPL TIETOKANTAAN (toiminnallisuudet löytyvät tiedostosta keikan_toiminnot.inc)
 								if (parseInt(rivi_kpl_alkuperainen) != parseInt(kpl)) {
-									$.post('{$_SERVER['SCRIPT_NAME']}', 
-										{ 	otunnus: otunnus, 
-											tunnus: tun, 
-											ajax_toiminto: 'rivi_kpl', 
-											kpl: kpl, 
-											no_head: 'yes', 
-											ohje: 'off', 
-											suoratoimitukset: suoratoimitukset }, 
+									$.post('{$_SERVER['SCRIPT_NAME']}',
+										{ 	otunnus: otunnus,
+											tunnus: tun,
+											ajax_toiminto: 'rivi_kpl',
+											kpl: kpl,
+											no_head: 'yes',
+											ohje: 'off',
+											suoratoimitukset: suoratoimitukset },
 										function(return_value) {
 											var data = jQuery.parseJSON(return_value);
 											$('#hinnat_'+tun).html(data.rivihinta+'<br>'+data.alerivihinta);
@@ -10007,14 +10052,14 @@ if (!function_exists("pupe_DataTables")) {
 									if (rivi_kpl_alkuperainen > 1 && parseInt(rivi_kpl_alkuperainen) > parseInt(kpl)) {
 										var uuden_rivin_kpl = rivi_kpl_alkuperainen - kpl;
 
-										$.post('{$_SERVER['SCRIPT_NAME']}', 
-											{ 	otunnus: otunnus, 
-												tunnus: tun, 
-												ajax_toiminto: 'rivi_kpl_splittaus', 
-												no_head: 'yes', 
-												ohje: 'off', 
-												uuden_rivin_kpl: uuden_rivin_kpl, 
-												suoratoimitukset: suoratoimitukset }, 
+										$.post('{$_SERVER['SCRIPT_NAME']}',
+											{ 	otunnus: otunnus,
+												tunnus: tun,
+												ajax_toiminto: 'rivi_kpl_splittaus',
+												no_head: 'yes',
+												ohje: 'off',
+												uuden_rivin_kpl: uuden_rivin_kpl,
+												suoratoimitukset: suoratoimitukset },
 											function(return_value) {
 
 												var data = jQuery.parseJSON(return_value);
@@ -10068,7 +10113,7 @@ if (!function_exists("pupe_DataTables")) {
 										$('#rivi_kpl_alkuperainen_'+tun).val(kpl);
 									}
 								}
-							}						
+							}
 						});
 
 						$('input[name^=\"rivi_ale\"]').each(function(){
@@ -10079,14 +10124,14 @@ if (!function_exists("pupe_DataTables")) {
 							var rivi_ale_alkup		= $('#rivialealkuperainen_'+tun).val();
 
 							if (rivi_ale_alkup != this.value) {
-								$.post('{$_SERVER['SCRIPT_NAME']}', 
-									{ 	otunnus: otunnus, 
-										tunnus: tun, 
-										ajax_toiminto: 'rivi_ale', 
-										ale: this.value, 
-										no_head: 'yes', 
-										ohje: 'off', 
-										suoratoimitukset: suoratoimitukset }, 
+								$.post('{$_SERVER['SCRIPT_NAME']}',
+									{ 	otunnus: otunnus,
+										tunnus: tun,
+										ajax_toiminto: 'rivi_ale',
+										ale: this.value,
+										no_head: 'yes',
+										ohje: 'off',
+										suoratoimitukset: suoratoimitukset },
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 										$('#hinnat_'+tun).html(data.rivihinta+'<br>'+data.alerivihinta);
@@ -10108,14 +10153,14 @@ if (!function_exists("pupe_DataTables")) {
 								alert(virhe);
 							}
 							else if (rivi_hinta_alkup != this.value) {
-								$.post('{$_SERVER['SCRIPT_NAME']}', 
-									{ 	otunnus: otunnus, 
-										tunnus: tun, 
-										ajax_toiminto: 'rivi_hinta', 
-										hinta: this.value, 
-										no_head: 'yes', 
-										ohje: 'off', 
-										suoratoimitukset: suoratoimitukset }, 
+								$.post('{$_SERVER['SCRIPT_NAME']}',
+									{ 	otunnus: otunnus,
+										tunnus: tun,
+										ajax_toiminto: 'rivi_hinta',
+										hinta: this.value,
+										no_head: 'yes',
+										ohje: 'off',
+										suoratoimitukset: suoratoimitukset },
 									function(return_value) {
 										var data = jQuery.parseJSON(return_value);
 										$('#rivin_hinta_'+tun).html(data.hinta);
@@ -10139,12 +10184,12 @@ if (!function_exists("pupe_DataTables")) {
 						$('input[name^=\"rivi_valitut_tunnukset\"]').each(function(){
 							rivi_ja_otsikko = this.value.split(\"###\", 2);
 
-							$.post('{$_SERVER['SCRIPT_NAME']}', 
-								{ 	otunnus: otunnus, 
-									tunnus: rivi_ja_otsikko[0], 
-									ajax_toiminto: 'kohdista_koko_sivu', 
-									valittu: this.value, 
-									no_head: 'yes', 
+							$.post('{$_SERVER['SCRIPT_NAME']}',
+								{ 	otunnus: otunnus,
+									tunnus: rivi_ja_otsikko[0],
+									ajax_toiminto: 'kohdista_koko_sivu',
+									valittu: this.value,
+									no_head: 'yes',
 									ohje: 'off' }
 							);
 
@@ -10179,12 +10224,12 @@ if (!function_exists("pupe_DataTables")) {
 						$('input[name^=\"rivi_valitut_tunnukset\"]').each(function(){
 							rivi_ja_otsikko = this.value.split(\"###\", 2);
 
-							$.post('{$_SERVER['SCRIPT_NAME']}', 
-								{ 	otunnus: otunnus, 
-									tunnus: rivi_ja_otsikko[0], 
-									ajax_toiminto: 'ala_kohdista_mitaan', 
-									valittu: this.value, 
-									no_head: 'yes', 
+							$.post('{$_SERVER['SCRIPT_NAME']}',
+								{ 	otunnus: otunnus,
+									tunnus: rivi_ja_otsikko[0],
+									ajax_toiminto: 'ala_kohdista_mitaan',
+									valittu: this.value,
+									no_head: 'yes',
 									ohje: 'off' }
 							);
 
@@ -10245,7 +10290,7 @@ if (!function_exists('hae_suuntalava')) {
 					if (suuntalavat.loppuhyllyalue != '', concat(rpad(upper(suuntalavat.loppuhyllyalue),  5, '0'),lpad(upper(suuntalavat.loppuhyllynro),  5, '0'),lpad(upper(suuntalavat.loppuhyllyvali),  5, '0'),lpad(upper(suuntalavat.loppuhyllytaso),  5, '0')), '') loppuhyllypaikka
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio 
+					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio
 										AND suuntalavat.keraysvyohyke = tuote.keraysvyohyke
 										AND (suuntalavat.keikkatunnus = {$otunnus} or suuntalavat.keikkatunnus = 0)
 										AND suuntalavat.tila = ''

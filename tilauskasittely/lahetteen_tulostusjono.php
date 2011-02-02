@@ -70,7 +70,7 @@
 		}
 
 		require ("raportit/naytatilaus.inc");
-		echo "<hr>";
+		echo "<br><br><br>";
 		$tee2 = $vanha_tee2;
 
 		if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {

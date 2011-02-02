@@ -1563,7 +1563,13 @@
 				echo "<tr><th>",t("Kustannuspaikka"),"</th></tr>";
 				echo "<tr>";
 
-				echo "<td nowrap style='padding:0px'><select id='mul_kustp[]' name='mul_kustp[]' multiple='multiple' size='7' $autosubmit>";
+				$multiple_lisa = " multiple='multiple' size='7' ";
+
+				if (in_array("kustp", array_map('strtolower', $monivalintalaatikot_normaali))) {
+					$multiple_lisa = "";
+				}
+
+				echo "<td nowrap style='padding:0px'><select id='mul_kustp[]' name='mul_kustp[]' $multiple_lisa $autosubmit>";
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				lapsitasot(0, -1, "0,");
@@ -1587,8 +1593,14 @@
 				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 				echo "<tr><th>",t("Kohde"),"</th></tr>";
 				echo "<tr>";
+				
+				$multiple_lisa = " multiple='multiple' size='7' ";
 
-				echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' $tunnukset_save $autosubmit>";
+				if (in_array("kohde", array_map('strtolower', $monivalintalaatikot_normaali))) {
+					$multiple_lisa = "";
+				}
+
+				echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' $multiple_lisa $tunnukset_save $autosubmit>";
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				while($sxrow = mysql_fetch_array ($sresult)){
@@ -1622,7 +1634,13 @@
 				echo "<tr><th>",t("Projekti"),"</th></tr>";
 				echo "<tr>";
 
-				echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' size='7' $autosubmit>";
+				$multiple_lisa = " multiple='multiple' size='7' ";
+
+				if (in_array("projekti", array_map('strtolower', $monivalintalaatikot_normaali))) {
+					$multiple_lisa = "";
+				}
+
+				echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' $multiple_lisa $autosubmit>";
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				while($sxrow = mysql_fetch_array ($sresult)){

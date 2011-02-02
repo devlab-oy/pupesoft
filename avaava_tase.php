@@ -91,43 +91,58 @@
 
 		$gokfrom = 'avaavatase';
 
-		// Kirjataan tilikauden tulos
-		$voittosumma 		= $isumma[$maara];
-		$summa				= $voittosumma;
-		$summa_valuutassa	= 0;
-		$tili 				= $itili[$maara];
-		$kustp 				= "";
-		$selite 			= $iselite[$maara];
-		$vero 				= $ivero[$maara];
-		$projekti 			= "";
-		$kohde 				= "";
-		$valkoodi 			= $yhtiorow['valkoodi'];
-
-		$query = "	INSERT into lasku set
-					yhtio 		= '{$kukarow['yhtio']}',
-					tapvm 		= '{$vv3}-{$kk3}-{$pp3}',
-					tila 		= 'X',
-					nimi		= '{$yhtiorow['nimi']}',
-					alv_tili 	= '',
-					comments	= '{$selite}',
-					laatija 	= '{$kukarow['kuka']}',
-					luontiaika 	= now()";
+		// Onko tulos jo kirjattu
+		$query = "	SELECT tunnus
+					FROM lasku
+					WHERE yhtio 	= '{$kukarow['yhtio']}'
+					and tapvm 		= '{$vv3}-{$kk3}-{$pp3}'
+					and tila 		= 'X'
+					and nimi		= '{$yhtiorow['nimi']}'
+					and alv_tili 	= ''
+					and comments	= '{$iselite[$maara]}'";
 		$result = mysql_query($query) or pupe_error($query);
-		$tunnus = mysql_insert_id($link);
 
-		require("inc/teetiliointi.inc");
+		if (mysql_num_rows($result) == 0) {
+			// Kirjataan tilikauden tulos
+			$voittosumma 		= $isumma[$maara];
+			$summa				= $voittosumma;
+			$summa_valuutassa	= 0;
+			$tili 				= $itili[$maara];
+			$kustp 				= "";
+			$selite 			= $iselite[$maara];
+			$vero 				= $ivero[$maara];
+			$projekti 			= "";
+			$kohde 				= "";
+			$valkoodi 			= $yhtiorow['valkoodi'];
 
-		$summa				= $voittosumma*-1;
-		$summa_valuutassa	= 0;
-		$tili 				= $tilikauden_tulos_siirto;
-		$kustp 				= "";
-		$selite 			= $iselite[count($iselite)];
-		$vero 				= 0;
-		$projekti 			= "";
-		$kohde 				= "";
-		$valkoodi 			= $yhtiorow['valkoodi'];
+			$query = "	INSERT into lasku set
+						yhtio 		= '{$kukarow['yhtio']}',
+						tapvm 		= '{$vv3}-{$kk3}-{$pp3}',
+						tila 		= 'X',
+						nimi		= '{$yhtiorow['nimi']}',
+						alv_tili 	= '',
+						comments	= '{$selite}',
+						laatija 	= '{$kukarow['kuka']}',
+						luontiaika 	= now()";
+			$result = mysql_query($query) or pupe_error($query);
+			$tunnus = mysql_insert_id($link);
 
-		require("inc/teetiliointi.inc");
+			require("inc/teetiliointi.inc");
+
+			$summa				= $voittosumma*-1;
+			$summa_valuutassa	= 0;
+			$tili 				= $tilikauden_tulos_siirto;
+			$kustp 				= "";
+			$selite 			= $iselite[count($iselite)];
+			$vero 				= 0;
+			$projekti 			= "";
+			$kohde 				= "";
+			$valkoodi 			= $yhtiorow['valkoodi'];
+
+			require("inc/teetiliointi.inc");
+
+			echo t("Tilikauden tulos kirjattu")."!<br><br>";
+		}
 
 		// Kirjataan avaava tase
 		$summa				= '';
@@ -365,7 +380,7 @@
 				echo "<tr><td class='back' colspan='5'><font class='message'>",t("Summat eiv‰t t‰sm‰‰"),"!</font>$summa2</td></tr>";
 			}
 			else {
-				echo "<tr><th colspan='5'><input type='submit' value='",t("Tee tosite"),"' /></th></tr>";
+				echo "<tr><th colspan='5'><input type='submit' value='",t("Jatka"),"' /></th></tr>";
 			}
 		}
 		else {

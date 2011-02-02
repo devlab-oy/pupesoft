@@ -1,4 +1,4 @@
-	<?php
+<?php
 	if (!isset($link)) require "inc/parametrit.inc";
 
 	enable_ajax();
@@ -346,7 +346,7 @@
 				if (strlen($selite) > 0 and strlen($iselite[$i]) == 0) { // Siirretään oletusselite tiliöinneille
 					$iselite[$i] = $selite;
 				}
-				
+
 				if (strlen($iselite[$i]) == 0 and strlen($comments) == 0) { // Selite ja kommentti puuttuu
 					$ivirhe[$i] = t('Riviltä puuttuu selite').'<br>';
 					$gok = 1;
@@ -368,22 +368,22 @@
 				$kustp_tark		= $ikustp[$i];		// nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
 				$kohde_tark		= $ikohde[$i];      // nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
 				$projekti_tark	= $iprojekti[$i];   // nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
-				
+
 				if ((isset($toimittajaid) and $toimittajaid > 0) or (isset($asiakasid) and $asiakasid > 0)) {
 					$tositeliit = $toimasrow["tunnus"];
 				}
 				else {
 					$tositeliit = 0;
 				}
-				
+
 				require "inc/tarkistatiliointi.inc";
 
 				if ($vero!='') $ivero[$i]=$vero; //Jos meillä on hardkoodattuvero, otetaan se käyttöön
 
-				if (isset($ivirhe[$i]))	{ 
+				if (isset($ivirhe[$i]))	{
 					$ivirhe[$i] .= $virhe;
 				}
-				
+
 				if (!isset($ivirhe[$i]) and strlen($virhe) > 0) {
 					$ivirhe[$i] = $virhe;
 				}
@@ -440,7 +440,10 @@
 
  		// Jossain tapahtui virhe
 		if ($gok == 1) {
-			echo "<br><font class='error'>".t("HUOM").": ".t("Jossain oli virheitä/muutoksia")."!</font><br>\n";
+			if ($gokfrom == "") {
+				echo "<br><font class='error'>".t("HUOM").": ".t("Jossain oli virheitä/muutoksia")."!</font><br>\n";
+			}
+
 			$tee = '';
 		}
 
@@ -562,7 +565,7 @@
 
 						for (var i=0; i<document.tosite.elements.length; i++) {
 				         	if (document.tosite.elements[i].type == 'text' && document.tosite.elements[i].name.substring(0,6) == 'isumma') {
-							
+
 								if (document.tosite.elements[i].value == '+') {
 									summa+=1.0*document.tosite.summa.value.replace(',','.');
 								}
@@ -581,9 +584,9 @@
 
 		echo "	<script language='javascript'>
 					function selitejs() {
-						
+
 						var selitetxt = document.tosite.selite.value;
-						
+
 						for (var i=0; i<document.tosite.elements.length; i++) {
 				         	if (document.tosite.elements[i].type == 'text' && document.tosite.elements[i].name.substring(0,7) == 'iselite') {
 								document.tosite.elements[i].value=selitetxt;

@@ -222,7 +222,7 @@
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 				and tiliointi.ltunnus = '$tunnus'
 				$lisa
-				ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.laadittu";
+				ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.laadittu, tiliointi.tunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {

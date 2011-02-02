@@ -1466,7 +1466,7 @@
 				$urilisa = "&haku[7]=@$la_tunnus";
 			}
 
-			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot")) {
+			   if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot") and $toim == 'toimitustapa') {
 				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=$tunnus&lukitse_laji=$laji&ohje=off&lukitse_avaimeen=$la_tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 

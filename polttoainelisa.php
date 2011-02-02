@@ -3,32 +3,28 @@
 	require("inc/parametrit.inc");
 
 	echo "<font class='head'>",t("Rahtimaksujen polttoainelisä"),"</font><hr>";
-	echo "<form action='$PHP_SELF' method='post'>";
-	echo "<table>";
 
-	if (isset($lisaa) and isset($polttoainelisa) and trim($polttoainelisa) != '') {
+	if (isset($lisaa) and isset($polttoainelisa) and isset($toimitustapa)) {
 
-		$polttoainelisa = str_replace(",",".",trim($polttoainelisa));
-		if ($polttoainelisa == '0' or (float) $polttoainelisa == '0') {
-			echo "<font class='error'>",t("Polttoainelisä ei saa olla nolla"),"!</font><br/><br/>";
+		$polttoainelisa = (float) str_replace(",", ".", trim($polttoainelisa));
+		$toimitustapa = mysql_real_escape_string($toimitustapa);
+
+		if ($polttoainelisa == 0) {
+			echo "<font class='error'>",t("Polttoainelisän hintakerroin on syötettävä"),"!</font><br/><br/>";
 		}
 		else {
-
-			$toimitustapa = mysql_real_escape_string($toimitustapa);
-
 			$query = "	SELECT *
 						FROM rahtimaksut
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND rahtihinta != ''
+						AND rahtihinta != 0
 						AND toimitustapa = '$toimitustapa'";
 			$rahtimaksut_res = mysql_query($query) or pupe_error($query);
 
-			$rahtimaksu = '';
-
 			while ($rahtimaksut_row = mysql_fetch_assoc($rahtimaksut_res)) {
-				$rahtimaksu = $rahtimaksut_row['rahtihinta'] * $polttoainelisa;
-				
-				$query = "	UPDATE rahtimaksut SET 
+
+				$rahtimaksu = round($rahtimaksut_row['rahtihinta'] * $polttoainelisa, 2);
+
+				$query = "	UPDATE rahtimaksut SET
 							rahtihinta = '$rahtimaksu',
 							muutospvm = now(),
 							muuttaja = '{$kukarow['kuka']}'
@@ -37,12 +33,8 @@
 				$update_res = mysql_query($query) or pupe_error($query);
 			}
 
-			echo "<font class='message'>",t("Toimitustavan")," $toimitustapa ",t("rahtihinnat kerrottiin kertoimella")," $polttoainelisa</font><br/><br/>";
+			echo "<font class='message'>",t("Toimitustavan")," $toimitustapa ",t("rahtihinnat kerrottiin kertoimella")," $polttoainelisa.</font><br/><br/>";
 		}
-	}
-
-	if (isset($lisaa) and $lisaa != '' and isset($polttoainelisa) and trim($polttoainelisa) == '') {
-		echo "<font class='error'>",t("Polttoainelisä ei saa olla tyhjä"),"!</font><br/><br/>";
 	}
 
 	$query = "	SELECT DISTINCT rahtimaksut.toimitustapa
@@ -52,19 +44,34 @@
 				AND rahtimaksut.rahtihinta != ''
 				ORDER BY rahtimaksut.toimitustapa ASC";
 	$toimitustapa_res = mysql_query($query) or pupe_error($query);
-	echo "<tr><th>",t("Toimitustapa"),":</th><td class='back'>";
-	echo "<select name='toimitustapa' id='toimitustapa'>";
 
-	while ($toimitustapa_row = mysql_fetch_array($toimitustapa_res)) {
-		echo "<option value='{$toimitustapa_row["toimitustapa"]}'>{$toimitustapa_row["toimitustapa"]}</option>";
+	if (mysql_num_rows($toimitustapa_res) == 0) {
+		echo "<font class='error'>",t("Yhdelläkään toimitustavalla ei ole rahtimaksuja"),"!</font>";
 	}
+	else {
 
-	echo "</select></td></tr>";
-	
-	echo "<tr><th>",t("Polttoainelisän hintakerroin"),":</th><td class='back'><input type='text' name='polttoainelisa' id='polttoainelisa' value='' size='5'><input type='submit' name='lisaa' id='lisaa' value='",t("Lisää"),"'></td></tr>";
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>",t("Toimitustapa"),":</th>";
+		echo "<td><select name='toimitustapa' id='toimitustapa'>";
 
-	echo "</table>";
-	echo "</form>";
+		while ($toimitustapa_row = mysql_fetch_array($toimitustapa_res)) {
+			echo "<option value='{$toimitustapa_row["toimitustapa"]}'>{$toimitustapa_row["toimitustapa"]}</option>";
+		}
+
+		echo "</select></td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>",t("Polttoainelisän hintakerroin"),":</th>";
+		echo "<td><input type='text' name='polttoainelisa' id='polttoainelisa' value='' size='5'></td>";
+		echo "<td class='back'><input type='submit' name='lisaa' id='lisaa' value='",t("Lisää"),"'></td>";
+		echo "</tr>";
+
+		echo "</table>";
+		echo "</form>";
+	}
 
 	require("inc/footer.inc");
 

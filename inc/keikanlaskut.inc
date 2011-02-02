@@ -191,15 +191,16 @@
 	echo "<font class='head'>".t("Rahtilaskut joita ei ole liitetty kokonaan keikkoihin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
-				sum(tiliointi.summa) 'varastossa',
+				(SELECT summa
+					FROM tiliointi
+					WHERE tiliointi.yhtio = lasku.yhtio
+					AND	tiliointi.ltunnus = lasku.tunnus
+					AND	tiliointi.tilino in ('$yhtiorow[varasto]','$yhtiorow[raaka_ainevarasto]')
+					AND	tiliointi.korjattu = '') varastossa,
 				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
 				round(sum(lasku2.arvo*lasku2.vienti_kurssi),2) 'kohdistettu'
 				FROM lasku
 				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
-				LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio and
-										tiliointi.ltunnus = lasku.tunnus and
-										tiliointi.tilino in ('$yhtiorow[varasto]','$yhtiorow[raaka_ainevarasto]') and
-										tiliointi.korjattu = '')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
 				lasku.tila in ('H','Y','M','P','Q') and
 				lasku.vienti in ('B','J','E','K','H','L') and

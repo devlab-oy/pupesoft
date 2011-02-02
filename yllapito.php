@@ -434,7 +434,6 @@
 							$otsikrow["toim_maa"]		= $otsikrow["maa"];
 						}
 
-
 						$query = "	UPDATE lasku
 									SET ytunnus			= '$otsikrow[ytunnus]',
 									ovttunnus			= '$otsikrow[ovttunnus]',
@@ -453,7 +452,8 @@
 									toim_osoite    		= '$otsikrow[toim_osoite]',
 									toim_postino  		= '$otsikrow[toim_postino]',
 									toim_postitp 		= '$otsikrow[toim_postitp]',
-									toim_maa    		= '$otsikrow[toim_maa]'
+									toim_maa    		= '$otsikrow[toim_maa]',
+									laskutusvkopv    	= '$otsikrow[laskutusvkopv]'
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and tunnus			= '$laskuorow[tunnus]'";
 						$updaresult = mysql_query($query) or pupe_error($query);
@@ -592,9 +592,11 @@
 			}
 
 			if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
-				$lopetus .= "//yllapidossa=$toim//yllapidontunnus=$tunnus";
-
-				lopetus($lopetus, "META");
+				//unohdetaan tämä jos loopatan takaisin yllapito.php:seen, eli silloin metasta ei ole mitään hyötyä
+				if (strpos($lopetus, "yllapito.php") === FALSE) {
+					$lopetus .= "//yllapidossa=$toim//yllapidontunnus=$tunnus";
+					lopetus($lopetus, "META");
+				}
 			}
 
 			$uusi = 0;
@@ -1471,7 +1473,7 @@
 			if (tarkista_oikeus("yllapito.php", "avainsana")) {
 				echo "<iframe id='avainsana_iframe' name='avainsana_iframe' src='yllapito.php?toim=avainsana&from=yllapito&lukitse_laji=$laji&ohje=off&haku[2]=@$laji$urilisa&lukitse_avaimeen=$la_tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
-			
+
 		}
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana")) {

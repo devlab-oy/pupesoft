@@ -388,15 +388,20 @@
 
 			$ulos = "<td>
 				<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
-				<option value='0' $sel[0]>".t("Ei laskutuspäivää")."</option>
-				<option value='2' $sel[2]>".t("Maanantai")."</option>
-				<option value='3' $sel[3]>".t("Tiistai")."</option>
-				<option value='4' $sel[4]>".t("Keskiviikko")."</option>
-				<option value='5' $sel[5]>".t("Torstai")."</option>
-				<option value='6' $sel[6]>".t("Perjantai")."</option>
-				<option value='7' $sel[7]>".t("Lauantai")."</option>
-				<option value='1' $sel[1]>".t("Sunnuntai")."</option>
-				<option value='9' $sel[9]>".t("Laskut lähetetään vain ohittamalla laskutusvkopv")."</option>
+				<option value='0'  {$sel[0]}>".t("Kaikki päivät")."</option>
+				<option value='2'  {$sel[2]}>".t("Maanantai")."</option>
+				<option value='3'  {$sel[3]}>".t("Tiistai")."</option>
+				<option value='4'  {$sel[4]}>".t("Keskiviikko")."</option>
+				<option value='5'  {$sel[5]}>".t("Torstai")."</option>
+				<option value='6'  {$sel[6]}>".t("Perjantai")."</option>
+				<option value='7'  {$sel[7]}>".t("Lauantai")."</option>
+				<option value='1'  {$sel[1]}>".t("Sunnuntai")."</option>
+				<option value='-1' {$sel[-1]}>".t("Kuukauden viimeinen päivä")."</option>
+				<option value='-2' {$sel[-2]}>".t("Kuukauden ensimmäinen päivä")."</option>
+				<option value='-3' {$sel[-3]}>".t("Kuukauden keskimmäinen päivä")."</option>
+				<option value='-4' {$sel[-4]}>".t("Kuukauden keskimmäinen ja viimeinen päivä")."</option>
+				<option value='-5' {$sel[-5]}>".t("Kuukauden ensimmäinen ja keskimmäinen päivä")."</option>
+				<option value='9'  {$sel[9]}>".t("Laskut lähetetään vain ohittamalla laskutusvkopv")."</option>
 				</select></td>";
 			$jatko = 0;
 	}

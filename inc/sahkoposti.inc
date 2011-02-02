@@ -91,6 +91,31 @@
 			$content .= "Content-Transfer-Encoding: base64\n" ;
 			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key]."\"\n\n";
 		}
+		elseif ($ctype[$key] == "jpg" or $ctype[$key] == "JPG" or $ctype[$key] == "jpeg" or $ctype[$key] == "JPEG") {
+			$content .= "Content-Type: image/jpeg; name=\"".$kutsu[$key]."\"\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key]."\"\n\n";
+		}
+		elseif ($ctype[$key] == "png" or $ctype[$key] == "PNG") {
+			$content .= "Content-Type: image/png; name=\"".$kutsu[$key]."\"\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key]."\"\n\n";
+		}
+		elseif ($ctype[$key] == "gif" or $ctype[$key] == "GIF") {
+			$content .= "Content-Type: image/gif; name=\"".$kutsu[$key]."\"\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key]."\"\n\n";
+		}
+		elseif ($ctype[$key] == "tif" or $ctype[$key] == "TIF" or $ctype[$key] == "tiff" or $ctype[$key] == "TIFF") {
+			$content .= "Content-Type: image/tiff; name=\"".$kutsu[$key]."\"\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key]."\"\n\n";
+		}
+		elseif ($ctype[$key] == "bmp" or $ctype[$key] == "BMP") {
+			$content .= "Content-Type: image/bmp; name=\"".$kutsu[$key]."\"\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key]."\"\n\n";
+		}
 		elseif ($ctype[$key] == "excel") {
 			if (count($liitenimi) == 0) {
 				$liitenimi[$key] = basename($liite[$key]);
@@ -105,7 +130,7 @@
 			$content .= "Content-Transfer-Encoding: base64\n" ;
 			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key].".pdf\"\n\n";
 		}
-
+			
 		$handle  = fopen($liite[$key], "r");
 		$sisalto = fread($handle, filesize($liite[$key]));
 		fclose($handle);

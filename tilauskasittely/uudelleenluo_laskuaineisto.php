@@ -126,8 +126,6 @@
 			}
 		}
 
-		$today = date("w") + 1; // mik‰ viikonp‰iv‰ t‰n‰‰n on 1-7.. 1=sunnuntai, 2=maanantai, jne...
-
 		//Tiedostojen polut ja nimet
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 		$nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";

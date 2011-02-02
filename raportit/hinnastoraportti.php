@@ -30,6 +30,7 @@
 							FROM tuote
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND hinnastoon != 'E'
+							and (tuote.status != ('P') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 							and tuotetyyppi not in ('A','B')";
 		$productqueryresult = mysql_query($productquery) or pupe_error($productquery);
 

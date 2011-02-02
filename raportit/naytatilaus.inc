@@ -8,6 +8,13 @@
 		$lis = " and lasku.liitostunnus = '$kukarow[oletus_asiakas]' ";
 	}
 
+	// Varastossa ei näytetä hintoja eikä katteita
+	if (strpos($_SERVER['SCRIPT_NAME'], "lahetteen_tulostusjono.php") !== FALSE) {
+		$kukarow["naytetaan_katteet_tilauksella"] = "";
+		$yhtiorow["naytetaan_katteet_tilauksella"] = "";
+		$kukarow['hinnat'] = "-1";
+	}
+
 	if (!isset($ojarj)) $ojarj = "";
 
 	$query = "	SELECT lasku.*,

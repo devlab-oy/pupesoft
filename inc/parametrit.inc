@@ -177,6 +177,7 @@ unset($verkkokauppa_tuotemerkit);
 unset($verkkokauppa_hinnatedifailista);
 unset($verkkokauppa_sallitutvarastot);
 
+unset($verkkolaskut_out);
 unset($verkkolaskut_in);
 unset($verkkolaskut_ok);
 unset($verkkolaskut_orig);

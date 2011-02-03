@@ -270,6 +270,7 @@
 	$var					= strtoupper($var); 	// varri isoks
 	$netto					= strtoupper($netto); 	// netto isoks
 	$toimittamatta			= $kpl;					//N‰in paljon ollaan toimittamassa
+	$myy_erikoistoim_ok		= TRUE;
 
 	// n‰ihin arraysiin tulee sitten myyt‰viss‰ olevat tuotteet, kappaleet ja varastopaikat
 	$myy_tuoteno 	= array();
@@ -430,6 +431,34 @@
 	}
 
 	if ($laskurow['tila'] != "O" and trim($var) == "" and $trow["tuoteno"] != "") {
+
+		// Katsotaan onko maksuehto j‰lkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
+		if (!isset($jvtsekres)) {
+			$apuqu = "	SELECT tunnus
+						FROM maksuehto
+						WHERE yhtio	= '$kukarow[yhtio]'
+						AND tunnus	= '$laskurow[maksuehto]'
+						AND jv 	   != ''";
+			$jvtsekres = mysql_query($apuqu) or pupe_error($apuqu);
+
+			if (mysql_num_rows($jvtsekres) > 0) {
+				$myy_erikoistoim_ok = FALSE;
+			}
+		}
+
+		// Vientiasiakkaille ei myyd‰ erikoisvarastoista jos toimitustapa on nouto
+		if (!isset($tntsekres)) {
+			$apuqu = "	SELECT tunnus
+						FROM toimitustapa
+						WHERE yhtio	= '$kukarow[yhtio]'
+						AND selite	= '$laskurow[toimitustapa]'
+						AND nouto  != ''";
+			$tntsekres = mysql_query($apuqu) or pupe_error($apuqu);
+
+			if (mysql_num_rows($tntsekres) > 0) {
+				$myy_erikoistoim_ok = FALSE;
+			}
+		}
 
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
 
@@ -715,17 +744,10 @@
 
 				if (count($zzrow) > 0) {
 
-					// Katsotaan onko maksuehto j‰lkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
-					if (!isset($jalkivaatimusmehto)) {
-						$apuqu = "SELECT tunnus from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]' and jv = ''";
-						$jalkivaatimusmehtores = mysql_query($apuqu) or pupe_error($apuqu);
-						$jalkivaatimusmehto = mysql_num_rows($jalkivaatimusmehtores);
-					}
-
 					// Jos tuotteella on tuotepaikkoja
 					foreach ($zzrow as $zrow) {
 
-						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $jalkivaatimusmehto == 1 and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
+						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
 							if ($lisaarivi_debug==1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
 
@@ -749,7 +771,7 @@
 							}
 
 							// jos halutaan myyd‰ erikoisvarastosta ja alarajasumma on syˆtetty ja tuotteen myyntihinta ylitt‰‰ alarajasumman
-							if ($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $jalkivaatimusmehto == 1 and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) {
+							if ($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) {
 								$myy_erikoistoimitus[$i] = true;
 							}
 							else {

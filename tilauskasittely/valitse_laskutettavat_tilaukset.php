@@ -473,9 +473,21 @@
 
 			mysql_data_seek($res,0);
 
-			echo t("Valitse toimitettavat tilaukset").":<br><table>";
+			// Onko yht‰‰n jaksotettua tilausta
+			$jaksotettuja = FALSE;
 
-			echo "<th>".t("Toimita")."</th>";
+			while ($row = mysql_fetch_assoc($res)) {
+				if ($row["jaksotettu"] > 0) {
+					$jaksotettuja = TRUE;
+					break;
+				}
+			}
+
+			mysql_data_seek($res,0);
+
+			echo t("Valitse laskutettavat tilaukset").":<br><table>";
+
+			echo "<th>".t("Laskuta")."</th>";
 			echo "<th>".t("Tilaus")."</th>";
 			echo "<th>".t("Arvo")."<br>".t("Summa")."</th>";
 			echo "<th>".t("Tyyppi")."</th>";
@@ -484,7 +496,7 @@
 			echo "<th>".t("Maksuehto")."</th>";
 			echo "<th>".t("Toimitustapa")."</th>";
 			echo "<th>".t("Muokkaa tilausta")."</th>";
-			echo "<th>".t("Laskuta kaikki positiot")."</th>";
+			if ($jaksotettuja) echo "<th>".t("Laskuta kaikki positiot")."</th>";
 
 			$maksu_positiot = array();
 
@@ -520,15 +532,65 @@
 
 				echo "<td>$row[kukanimi]<br>".tv1dateconv($row["luontiaika"], "P")."</td>";
 
-				if ($row["laskutusvkopv"] == "0")		$teksti = t("Kaikki");
-				elseif ($row["laskutusvkopv"] == "2")	$teksti = t("Maanantai");
-				elseif ($row["laskutusvkopv"] == "3") 	$teksti = t("Tiistai");
-				elseif ($row["laskutusvkopv"] == "4") 	$teksti = t("Keskiviikko");
-				elseif ($row["laskutusvkopv"] == "5") 	$teksti = t("Torstai");
-				elseif ($row["laskutusvkopv"] == "6") 	$teksti = t("Perjantai");
-				elseif ($row["laskutusvkopv"] == "7") 	$teksti = t("Lauantai");
-				elseif ($row["laskutusvkopv"] == "1") 	$teksti = t("Sunnuntai");
-				elseif ($row["laskutusvkopv"] == "9") 	$teksti = t("Laskut l‰hetet‰‰n vain ohittamalla laskutusvkopv");
+				if ($row["laskutusvkopv"] == 0)		$teksti = t("Kaikki");
+				elseif ($row["laskutusvkopv"] == 2)	$teksti = t("Maanantai");
+				elseif ($row["laskutusvkopv"] == 3) $teksti = t("Tiistai");
+				elseif ($row["laskutusvkopv"] == 4) $teksti = t("Keskiviikko");
+				elseif ($row["laskutusvkopv"] == 5) $teksti = t("Torstai");
+				elseif ($row["laskutusvkopv"] == 6) $teksti = t("Perjantai");
+				elseif ($row["laskutusvkopv"] == 7) $teksti = t("Lauantai");
+				elseif ($row["laskutusvkopv"] == 1) $teksti = t("Sunnuntai");
+				elseif ($row["laskutusvkopv"] == 9) $teksti = t("Laskut l‰hetet‰‰n vain ohittamalla laskutusvkopv");
+				elseif ($row["laskutusvkopv"] < 0) {
+
+					if ($row["laskutusvkopv"] == -1) {
+						// Kuukauden viimeinen arkip‰iv‰
+						$laskutusvkopv = laskutuspaiva("vika", TRUE);
+					}
+					elseif ($row["laskutusvkopv"] == -2) {
+						// Kuukauden ensimm‰inen arkip‰iv‰
+						$laskutusvkopv = laskutuspaiva("eka", TRUE);
+
+						// Jos mentiin ohi, niin otetaan seuraavan kuun eka arkip‰iv‰
+						if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
+							$laskutusvkopv = laskutuspaiva("eka", TRUE, 1);
+						}
+					}
+					elseif ($row["laskutusvkopv"] == -3) {
+						// Kuukauden keskimm‰inen arkip‰iv‰
+						$laskutusvkopv = laskutuspaiva("keski", TRUE);
+
+						// Jos mentiin ohi, niin otetaan seuraavan kuun keskimm‰inen arkip‰iv‰
+						if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
+							$laskutusvkopv = laskutuspaiva("keski", TRUE, 1);
+						}
+					}
+					elseif ($row["laskutusvkopv"] == -4) {
+						// Kuukauden keskimm‰inen ja viimeinen arkip‰iv‰
+						$laskutusvkopv = laskutuspaiva("keski", TRUE);
+
+						// Jos keskimm‰inen meni ohi, niin otetaan kuun vika arkip‰iv‰
+						if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
+							$laskutusvkopv = laskutuspaiva("vika", TRUE);
+						}
+					}
+					elseif ($row["laskutusvkopv"] == -5) {
+						// Kuukauden ensimm‰inen ja keskimm‰inen arkip‰iv‰
+						$laskutusvkopv = laskutuspaiva("eka", TRUE);
+
+						// Jos eka meni ohi, niin otetaan kuun keskimm‰inen arkip‰iv‰
+						if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
+							$laskutusvkopv = laskutuspaiva("keski", TRUE);
+						}
+
+						// Jos keskimm‰inen meni ohi, niin otetaan seuraavan kuun eka arkip‰iv‰
+						if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
+							$laskutusvkopv = laskutuspaiva("eka", TRUE, 1);
+						}
+					}
+
+					$teksti = tv1dateconv($laskutusvkopv);
+				}
 
 				echo "<td>$teksti</td>";
 
@@ -570,37 +632,39 @@
 
 				echo "<td>$row[toimitustapa] $rahti_hinta</td>";
 
-				echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$row[tunnus]'>".t("Pikatilaukseen")."</a></td>";
+				echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$row[tunnus]'>".t("Muokkaa")."</a></td>";
 
 				//Tsekataan voidaanko antaa mahdollisuus laskuttaa kaikki maksupotitiot kerralla
-				if ($row["jaksotettu"] > 0) {
-					$query = "	SELECT
-								sum(if(lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
-								sum(if(tilausrivi.toimitettu='',1,0)) toimittamatta,
-								count(*) toimituksia
-								FROM lasku
-								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi = 'L' and tilausrivi.var != 'P'
-								WHERE lasku.yhtio 		= '$kukarow[yhtio]'
-								and lasku.jaksotettu 	= '$row[jaksotettu]'
-								GROUP BY lasku.jaksotettu";
-					$tarkres = mysql_query($query) or pupe_error($query);
-					$tarkrow = mysql_fetch_array($tarkres);
-				}
+				if ($jaksotettuja) {
+					if ($row["jaksotettu"] > 0) {
+						$query = "	SELECT
+									sum(if(lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
+									sum(if(tilausrivi.toimitettu='',1,0)) toimittamatta,
+									count(*) toimituksia
+									FROM lasku
+									JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi = 'L' and tilausrivi.var != 'P'
+									WHERE lasku.yhtio 		= '$kukarow[yhtio]'
+									and lasku.jaksotettu 	= '$row[jaksotettu]'
+									GROUP BY lasku.jaksotettu";
+						$tarkres = mysql_query($query) or pupe_error($query);
+						$tarkrow = mysql_fetch_array($tarkres);
+					}
 
-				if ($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] == 0 and $tarkrow["toimituksia"] > 0 and !in_array($row["jaksotettu"], $maksu_positiot)) {
-					//Pidet‰‰n muistissa mitk‰ maksusopparit me ollaan jo tulostettu ruudulle
-					$maksu_positiot[] = $row["jaksotettu"];
+					if ($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] == 0 and $tarkrow["toimituksia"] > 0 and !in_array($row["jaksotettu"], $maksu_positiot)) {
+						//Pidet‰‰n muistissa mitk‰ maksusopparit me ollaan jo tulostettu ruudulle
+						$maksu_positiot[] = $row["jaksotettu"];
 
-					echo "<td>".t("Sopimus")." $row[jaksotettu]: <input type='checkbox' name='positiotunnus[$row[jaksotettu]]' value='$row[jaksotettu]'></td>";
-				}
-				elseif($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] == 0 and $tarkrow["toimituksia"] > 0 and in_array($row["jaksotettu"], $maksu_positiot)) {
-					echo "<td>".t("Kuuluu sopimukseen")." $row[jaksotettu]</td>";
-				}
-				elseif($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] > 0) {
-					echo "<td>".t("Ei valmis")."</td>";
-				}
-				else {
-					echo "<td>".t("Ei positioita")."</td>";
+						echo "<td>".t("Sopimus")." $row[jaksotettu]: <input type='checkbox' name='positiotunnus[$row[jaksotettu]]' value='$row[jaksotettu]'></td>";
+					}
+					elseif($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] == 0 and $tarkrow["toimituksia"] > 0 and in_array($row["jaksotettu"], $maksu_positiot)) {
+						echo "<td>".t("Kuuluu sopimukseen")." $row[jaksotettu]</td>";
+					}
+					elseif($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] > 0) {
+						echo "<td>".t("Ei valmis")."</td>";
+					}
+					else {
+						echo "<td>".t("Ei positioita")."</td>";
+					}
 				}
 
 				if ($hyvrow["nollarivi"] > 0) {
@@ -849,8 +913,9 @@
 			$ketjutus_group = "";
 		}
 
-		// GROUP BY pit‰‰ olla sama kun verkkolasku.php:ss‰ rivill‰†536
-		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
+		// GROUP BY pit‰‰ olla sama kun verkkolasku.php:ss‰ rivi ~1150
+		// HUOM LISƒKSI laskutusviikonp‰iv‰ mukaan GROUP BY:hin!!!!
+		$query = "	SELECT lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maksuehto, lasku.chn,
 					lasku.tila, lasku.alatila,
@@ -874,7 +939,7 @@
 					$vientilisa
 					$muutlisa
 					$haku
-					GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+					GROUP BY lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
 					lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 					lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
@@ -885,7 +950,14 @@
 
 		if (mysql_num_rows($tilre) > 0) {
 			echo "<table>";
-			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Tilauksia")."<br>".t("Rivej‰")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th><th>".t("Toimitus")."</th><th>".t("Tyyppi")."</th></tr>";
+			echo "<tr>
+					<th>".t("Tilaukset")."</th>
+					<th>".t("Asiakas")."</th>
+					<th>".t("Tilauksia")."<br>".t("Rivej‰")."</th>
+					<th>".t("Arvo")."</th>
+					<th>".t("Maksuehto")."</th>
+					<th>".t("Laskutusp‰iv‰")."<br>".t("Toimitus")."</th>
+					<th>".t("Tila")."</th></tr>";
 
 			$arvoyhteensa = 0;
 			$summayhteensa = 0;
@@ -897,25 +969,7 @@
 				$alatila		= $tilrow["alatila"];
 
 				//tehd‰‰n selv‰kielinen tila/alatila
-				require "../inc/laskutyyppi.inc";
-
-				$tarkenne = " ";
-
-				if ($tilrow["tila"] == "V" and $tilrow["tilaustyyppi"] == "V") {
-					$tarkenne = " (".t("Asiakkaalle").") ";
-				}
-				elseif ($tilrow["tila"] == "V" and  $tilrow["tilaustyyppi"] == "W") {
-					$tarkenne = " (".t("Varastoon").") ";
-				}
-				elseif(($tilrow["tila"] == "N" or $tilrow["tila"] == "L") and $tilrow["tilaustyyppi"] == "R") {
-					$tarkenne = " (".t("Reklamaatio").") ";
-				}
-				elseif(($tilrow["tila"] == "N" or $tilrow["tila"] == "L") and $tilrow["tilaustyyppi"] == "A") {
-					$laskutyyppi = "Tyˆm‰‰r‰ys";
-				}
-				elseif($tilrow["tila"] == "N" and $tilrow["tilaustyyppi"] == "E") {
-					$laskutyyppi = "Ennakkotilaus kesken";
-				}
+				require "inc/laskutyyppi.inc";
 
 				$toimitusselite = "";
 				if ($tilrow["chn"] == '100') $toimitusselite = t("Paperilasku, tulostuspalvelu");
@@ -927,15 +981,76 @@
 				if ($tilrow["chn"] == '667') $toimitusselite = t("Sis‰inen, k‰sitell‰‰n manuaalisesti");
 				if ($tilrow["chn"] == '999') $toimitusselite = t("Laskutuskielto, laskutusta ei tehd‰");
 
+				$teksti = "";
+
+				if ($tilrow["laskutusvkopv"] == 0)		$teksti = t("Kaikki");
+				elseif ($tilrow["laskutusvkopv"] == 2)	$teksti = t("Maanantai");
+				elseif ($tilrow["laskutusvkopv"] == 3) $teksti = t("Tiistai");
+				elseif ($tilrow["laskutusvkopv"] == 4) $teksti = t("Keskiviikko");
+				elseif ($tilrow["laskutusvkopv"] == 5) $teksti = t("Torstai");
+				elseif ($tilrow["laskutusvkopv"] == 6) $teksti = t("Perjantai");
+				elseif ($tilrow["laskutusvkopv"] == 7) $teksti = t("Lauantai");
+				elseif ($tilrow["laskutusvkopv"] == 1) $teksti = t("Sunnuntai");
+				elseif ($tilrow["laskutusvkopv"] == 9) $teksti = t("Laskut l‰hetet‰‰n vain ohittamalla laskutusvkopv");
+				elseif ($tilrow["laskutusvkopv"] < 0) {
+
+					if ($tilrow["laskutusvkopv"] == -1) {
+						// Kuukauden viimeinen arkip‰iv‰
+						$laskutusvkopv = laskutuspaiva("vika", TRUE);
+					}
+					elseif ($tilrow["laskutusvkopv"] == -2) {
+						// Kuukauden ensimm‰inen arkip‰iv‰
+						$laskutusvkopv = laskutuspaiva("eka", TRUE);
+
+						// Jos mentiin ohi, niin otetaan seuraavan kuun eka arkip‰iv‰
+						if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
+							$laskutusvkopv = laskutuspaiva("eka", TRUE, 1);
+						}
+					}
+					elseif ($tilrow["laskutusvkopv"] == -3) {
+						// Kuukauden keskimm‰inen arkip‰iv‰
+						$laskutusvkopv = laskutuspaiva("keski", TRUE);
+
+						// Jos mentiin ohi, niin otetaan seuraavan kuun keskimm‰inen arkip‰iv‰
+						if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
+							$laskutusvkopv = laskutuspaiva("keski", TRUE, 1);
+						}
+					}
+					elseif ($tilrow["laskutusvkopv"] == -4) {
+						// Kuukauden keskimm‰inen ja viimeinen arkip‰iv‰
+						$laskutusvkopv = laskutuspaiva("keski", TRUE);
+
+						// Jos keskimm‰inen meni ohi, niin otetaan kuun vika arkip‰iv‰
+						if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
+							$laskutusvkopv = laskutuspaiva("vika", TRUE);
+						}
+					}
+					elseif ($tilrow["laskutusvkopv"] == -5) {
+						// Kuukauden ensimm‰inen ja keskimm‰inen arkip‰iv‰
+						$laskutusvkopv = laskutuspaiva("eka", TRUE);
+
+						// Jos eka meni ohi, niin otetaan kuun keskimm‰inen arkip‰iv‰
+						if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
+							$laskutusvkopv = laskutuspaiva("keski", TRUE);
+						}
+
+						// Jos keskimm‰inen meni ohi, niin otetaan seuraavan kuun eka arkip‰iv‰
+						if (date("Ymd") > (int) str_replace("-", "", $laskutusvkopv)) {
+							$laskutusvkopv = laskutuspaiva("eka", TRUE, 1);
+						}
+					}
+
+					$teksti = tv1dateconv($laskutusvkopv);
+				}
+
 				echo "	<tr class='aktiivi'>
 						<td valign='top'>$tilrow[tunnukset_ruudulle]</td>
-						<td valign='top'>$tilrow[ytunnus]</td>
-						<td valign='top'>$tilrow[nimi] $tilrow[nimitark]</td>
+						<td valign='top'>$tilrow[ytunnus]<br>$tilrow[nimi] $tilrow[nimitark]</td>
 						<td valign='top'>$tilrow[tilauksia]<br>$tilrow[riveja]</td>
 						<td valign='top' align='right' nowrap>$tilrow[arvo]</td>
 						<td valign='top'>$tilrow[meh]</td>
-						<td valign='top'>$toimitusselite</td>
-						<td valign='top'>".t($laskutyyppi)."$tarkenne".t($alatila)."</td>";
+						<td valign='top'>$teksti<br>$toimitusselite</td>
+						<td valign='top'>".t($alatila)."</td>";
 
 				echo "	<td class='back' valign='top'>
 						<form method='post' action='$palvelin2"."tilauskasittely/valitse_laskutettavat_tilaukset.php'>

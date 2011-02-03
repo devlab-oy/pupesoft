@@ -426,13 +426,15 @@ if (!function_exists('rivi_valm')) {
 		$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
 		$uusisivu = "";
 
+		$pdf->draw_line($x, $y, $thispage, $rectparam);
+
 		if ($tyyppi != "ETUSIVU" and ($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"])) {
 			//	Tulostetaanko aina uusi sivu?
 			$query = "SELECT tunnus FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '$row[tuoteno]' and omasivu != ''";
 			$pres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($pres) > 0) {
-
+		
 				//	Uusi sivu
 				if (isset($perheid) and isset($perheid2)) {
 					$page[$sivu] 	= uusi_sivu_valm($tyyppi);

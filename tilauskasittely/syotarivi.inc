@@ -3,7 +3,7 @@
 	$debug = 0;
 
 	if ($debug == 1) {
-		echo " kukarow[extranet] = $kukarow[extranet] | toim = $toim | miniliittyma = $miniliittyma | syotarivi = $syotarivi | rivinumero = $rivinumero<br>";
+		echo " kukarow[extranet] = $kukarow[extranet] | toim = $toim | miniliittyma = $miniliittyma | syotarivi = $syotarivi | rivinumero = $rivinumero | tila = $tila | tapa = $tapa<br>";
 	}
 
 	$variaaritorivi = FALSE;
@@ -289,8 +289,11 @@
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<td valign='top'></td>";
 		}
-
-		echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+		
+		
+		echo "<td valign='top' class='back'>";
+		echo "<input type='hidden' name='aputapa' value='$tapa'>";
+		echo "<input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		echo "<tr>$jarjlisa";
 

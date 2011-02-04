@@ -248,7 +248,7 @@
 	$kpl	= str_replace(',', '.', $kpl);
 	$hinta	= str_replace(',', '.', $hinta);
 	$ale	= str_replace(',', '.', $ale);
-
+	
 	// Alkuperäiset tiedot talteen
 	$alkupera_trow	= $trow;
 	$alkupera_kpl 	= $kpl;
@@ -256,7 +256,7 @@
 	$alkupera_ale 	= $ale;
 	$alkupera_netto = $netto;
 	$alkupera_alv 	= $alv;
-
+	
 	$saldoyhteensa			= 0; 					// tähän summaillaan saldoa yhteensä
 	$lapsiyhteensa			= 0;
 	$korvaavan_isaa_myyty	= 0;
@@ -269,7 +269,7 @@
 	$isa_array 				= array();
 	$var					= strtoupper($var); 	// varri isoks
 	$netto					= strtoupper($netto); 	// netto isoks
-	$toimittamatta			= $kpl;					//Näin paljon ollaan toimittamassa
+	$myyntierahuomatus 		= FALSE;
 	$myy_erikoistoim_ok		= TRUE;
 
 	// näihin arraysiin tulee sitten myytävissä olevat tuotteet, kappaleet ja varastopaikat
@@ -290,6 +290,7 @@
 	$lisatyt_rivit1 = array();
 	$lisatyt_rivit2 = array();
 	$korkieltokommi = array();
+	$myyntierahuom	= array();
 
 	// debuggia varten, laita 1 jos haluut messuja
 	$lisaarivi_debug = 0;
@@ -330,6 +331,26 @@
 	else {
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
+	
+	if ($kpl > 0 and $trow['myynti_era'] > 0 and $rivityyppi = 'L' and (int) $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
+
+		if ($kpl < $trow['myynti_era']) {
+			$kpl = $trow['myynti_era'];
+		}
+		else {
+			(int) $kokonaisluku = number_format($kpl / $trow['myynti_era'],0);
+			(float) $jakojaannos = fmod($kpl,$trow['myynti_era']);
+
+			$test = $kokonaisluku * $trow['myynti_era'];
+			if ($kpl > $test) {
+				$test = ($kokonaisluku + 1) * $trow['myynti_era'];
+			}
+			$kpl = (float) $test;
+		}
+		$myyntierahuomatus = TRUE;
+	}
+	
+	$toimittamatta			= $kpl; //Näin paljon ollaan toimittamassa
 
 	// Jos kyseessä on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
 	if (substr($paikka,0,3) == "¡¡¡") {
@@ -1232,6 +1253,9 @@
 								}
 
 								$lisatyt_rivit1[] = $lisatty_tun;
+								if ($myyntierahuomatus) {
+									$myyntierahuom[] = $lisatty_tun;
+								}
 
 								if ($myy_tyyppi[$indeksi] == "NORMAALI") {
 									// lapsille oikea perheid
@@ -1969,7 +1993,11 @@
 				$lisatyt_rivit1[] = $lisatty_tun;
 			}
 			else {
-				$lisatyt_rivit2[] = $lisatty_tun;
+				$lisatyt_rivit2[] = $lisatty_tun;	
+			}
+
+			if ($myyntierahuomatus) {
+				$myyntierahuom[] = $lisatty_tun;
 			}
 
 			if ($i == 0) {

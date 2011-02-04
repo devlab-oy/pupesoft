@@ -1050,8 +1050,8 @@
 						ORDER BY jarjestys,selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 
-			if ($laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
-				echo "<option value='$laskurow[toimitustapa]'>$laskurow[toimitustapa] - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."</option>";
+			if (isset($laskurow["toimitustavan_lahto"]) and $laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
+				echo "<option value='$laskurow[toimitustapa]'>$laskurow[toimitustapa] - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."    $laskurow[toimitustavan_lahto]</option>";
 			}
 
 			while($row = mysql_fetch_assoc($tresult)) {

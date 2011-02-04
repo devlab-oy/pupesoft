@@ -411,7 +411,6 @@ if (!function_exists('rivi_otsikot_valm')) {
 		$pdf->draw_text(405, $kala+15, t("Kerroin", $kieli),		$thispage, $norm);
 		$pdf->draw_text(465, $kala+15, t("Valmistetaan", $kieli),	$thispage, $norm);
 		$pdf->draw_text(525, $kala+15, t("Valmistettu", $kieli),	$thispage, $norm);
-		$pdf->draw_line(525, $kala+1, $thispage, $rectparam);
 		
 		$kala -= 3;
 	}
@@ -421,28 +420,31 @@ if (!function_exists('rivi_valm')) {
 	function rivi_valm($thispage, $tyyppi="") {
 		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $uusisivu;
 
+		static $tuoteperhe_omallesivulle = "";
+
 		// viivat rivien v‰liin...
 		$x[0] = 20;
 		$x[1] = 580;
 		$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
 		$uusisivu = "";
-
-		$pdf->draw_line($x, $y, $thispage, $rectparam);
-
+	
 		if ($tyyppi != "ETUSIVU" and ($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"])) {
 			//	Tulostetaanko aina uusi sivu?
 			$query = "SELECT tunnus FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '$row[tuoteno]' and omasivu != ''";
 			$pres = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($pres) > 0) {
-		
+			if (mysql_num_rows($pres) > 0) {	
 				//	Uusi sivu
 				if (isset($perheid) and isset($perheid2)) {
 					$page[$sivu] 	= uusi_sivu_valm($tyyppi);
 					$thispage    	= $page[$sivu];
 				}
 
+				$tuoteperhe_omallesivulle = "KYLLA";
 				$uusisivu = "KOHTA";
+			}
+			else {
+				$tuoteperhe_omallesivulle = "";
 			}
 		}
 
@@ -460,6 +462,9 @@ if (!function_exists('rivi_valm')) {
 				$pdf->draw_line($x, $y, $thispage, $rectparam);
 			}
 		}
+		elseif ($tuoteperhe_omallesivulle == "KYLLA") {
+			$pdf->draw_line($x, $y, $thispage, $rectparam);
+		}
 
 		// Mahtuuko rivi t‰lle sivulle
 		$kala_nyt = $kala;
@@ -467,7 +472,7 @@ if (!function_exists('rivi_valm')) {
 		rivi_valmistus($devnull);
 
 		// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-		if ($kala <= 50) {
+		if ($kala <= 65) {
 			$sivu++;
 
 			loppu_valm($thispage, 0);

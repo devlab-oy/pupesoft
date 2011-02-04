@@ -35,7 +35,7 @@
 
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
-
+	
 	if (!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet) {
 			global $kukarow, $perhelisa, $kieltolisa, $lisaarivi_debug;
@@ -332,7 +332,7 @@
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 	
-	if ($kpl > 0 and $trow['myynti_era'] > 0 and $rivityyppi = 'L' and (int) $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
+	if ($kpl > 0 and $trow['myynti_era'] > 0 and $rivityyppi = 'L' and (int) $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
 
 		if ($kpl < $trow['myynti_era']) {
 			$kpl = $trow['myynti_era'];

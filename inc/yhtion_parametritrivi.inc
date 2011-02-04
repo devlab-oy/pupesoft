@@ -2546,4 +2546,23 @@
 		// $jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "myyntiera_pyoristys" ) {
+		
+		$sela = $selb = "";
+
+		if ($trow[$i] == 'K') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ' ' $sela>".t("Myyntiriveillä ei käytetä pyöristystä seuraavaan täyteen myyntierään")."</option>
+					<option value = 'K' $selb>".t("Myyntiriveillä käytetään pyöristystä seuraavaan täyteen myyntierään")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

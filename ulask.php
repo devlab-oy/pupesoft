@@ -11,6 +11,24 @@ if ($livesearch_tee == "TILIHAKU") {
 	exit;
 }
 
+function poistalaskuserverilta($skanlasku) {
+	
+	GLOBAL $kukarow, $yhtiorow;
+	$path_parts = pathinfo($skanlasku);
+	$ctype = $path_parts['extension'];
+	
+	$liite 	= $skanlasku;
+	$komento = 'email';
+	$kutsu	=	t("Poistettu lasku");
+	$content_body = t("Liitteenä Pupesoftista poistettu skannattulasku");
+	$liite = "skannaus/".$liite;
+	
+	if ($skanlasku !='') {
+		include("inc/sahkoposti.inc");
+	}
+	return $boob;
+}
+
 function listdir($start_dir = '.') {
 
 	$files = array();
@@ -110,6 +128,48 @@ if (trim($muutparametrit) != '') {
 
 echo "<font class='head'>".t("Uuden laskun perustus")."</font><hr>";
 
+if ($tee == 'poistalasku') {
+	
+	$boob = poistalaskuserverilta($skannattu_lasku);
+	$tee = '';
+	
+	if ($boob === FALSE) {
+		echo t("Virhe: Sinulta puuttuu sähköpostiosoite. Ei poisteta skannattua laskua");
+	}
+	else {
+		unlink($skannatut_laskut_polku.$skannattu_lasku);
+
+		$silent = 'ei näytetä käyttöliittymää';
+		$skannattu_lasku = hae_skannattu_lasku($kukarow, $yhtiorow);
+
+		if ($skannattu_lasku !== FALSE) {
+			list($micro, $timestamp) = explode(" ", microtime());
+
+			$kukarow['kesken'] = substr($timestamp.substr(($micro * 10), 0, 1), 2);
+
+			$query = "	UPDATE kuka SET
+						kesken = '$kukarow[kesken]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND kuka = '$kukarow[kuka]'";
+			$kesken_upd_res = mysql_query($query) or pupe_error($query);
+
+			$path_parts = pathinfo($skannattu_lasku);
+
+			if (!rename($skannatut_laskut_polku.$skannattu_lasku, $skannatut_laskut_polku.$kukarow['kesken'].".".$path_parts['extension'])) {
+				echo t("Ei pystytä nimeämään tiedostoa")."<br>";
+			}
+
+			$skannattu_lasku = $kukarow['kesken'].".".$path_parts['extension'];
+		}
+		else {
+			$skannattu_lasku = '';
+			$iframe = '';
+			$tultiin = '';
+			echo "<br/>",t("Skannatut laskut loppuivat"),".<br/><br/>";
+		}
+	}
+}
+
 if ($tee == 'VIIVA') {
 
 	// tällästä on laskun viivakoodi:
@@ -140,7 +200,7 @@ if ($tee == 'VIIVA') {
 			$tilino = $pankkitili;
 		}
 
-		$query = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and tilinumero='$tilino'";
+		$query = "SELECT tunnus FROM toimi WHERE yhtio='$kukarow[yhtio]' and tilinumero='$tilino'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -2137,7 +2197,8 @@ if (strlen($tee) == 0) {
 		<option value ='16'>15
 		<option value ='31'>30
 		</select></td>
-		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
+		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr>";
+	echo "</form>";
 
 	if ($toimittajaid > 0) {
 		$query = "	SELECT nimi
@@ -2194,6 +2255,14 @@ if (strlen($tee) == 0) {
 	}
 
 	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
+		
+		echo "<table><tr><td class='back'>";
+		echo "<form method='post'>";
+		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
+		echo "<input type='hidden' name='skannatut_laskut_polku' value='$skannatut_laskut_polku'>";
+		echo "<input type='hidden' name='tee' value='poistalasku'>";
+		echo "<input type='submit' value='poista skannattu lasku' name='Poista'/></form></td><tr></table>";
+		
 		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
 
 		echo "</td><td class='back' width='100%'><font class='message'>",t("Skannattu lasku"),"</font>";

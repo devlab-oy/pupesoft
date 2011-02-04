@@ -152,7 +152,9 @@
 				unset($jatka);
 			}
 		}
-
+		
+		list($toimitustapa,$eitarvitatassa) = explode("#",$toimitustapa);
+		
 		if ($toimitustapa == "") {
 			echo "<font class='error'>".t("VIRHE: Toimitustapaa ei löydy kyseiselle maalle").".<br>".t("Tarkista toimitusosoitteen maa")."!</font><br>";
 			$tee = "OTSIK";
@@ -1048,12 +1050,27 @@
 						ORDER BY jarjestys,selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 
+			if ($laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
+				echo "<option value='$laskurow[toimitustapa]'>$laskurow[toimitustapa] - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."</option>";
+			}
+
 			while($row = mysql_fetch_assoc($tresult)) {
+
 				$sel = "";
-				if ($row["selite"] == $srow["toimitustapa"]) {
+				if ($row["selite"] == $srow["toimitustapa"] and $laskurow["toimitustavan_lahto"] == '0000-00-00 00:00:00') {
 					$sel = 'selected';
 				}
-				echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
+
+				$toimitustava_lahto = seuraava_lahtoaika($row['tunnus']);
+
+				echo "<option value='$row[selite]#$toimitustava_lahto' $sel>";
+				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
+
+				if ($toimitustava_lahto != "") {
+					echo " - ".t("Lähtö")." ".tv1dateconv($toimitustava_lahto, "PITKA");
+				}
+
+				echo "</option>";
 			}
 			echo "</select></td>";
 

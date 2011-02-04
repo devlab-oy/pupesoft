@@ -332,7 +332,7 @@
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 	
-	if ($kpl > 0 and $trow['myynti_era'] > 0 and $rivityyppi = 'L' and (int) $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+	if ($kpl > 0 and $trow['myynti_era'] > 0 and $rivityyppi == 'L' and (int) $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
 
 		if ($kpl < $trow['myynti_era']) {
 			$kpl = $trow['myynti_era'];

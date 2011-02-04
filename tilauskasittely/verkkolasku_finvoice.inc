@@ -674,8 +674,8 @@ if (!function_exists('finvoice_rivi')) {
 				}
 			}
 
-			xml_add("RowDiscountPercent",                                    					pp($tilrow['ale'], 2),           $tootfinvoice);
-			xml_add("RowVatRatePercent",                                    					pp($tilrow['alv'], $yhtiorow["hintapyoristys"], 5, 2),           	$tootfinvoice);
+			xml_add("RowDiscountPercent",                                    					pp($tilrow['ale'], 2),												$tootfinvoice);
+			xml_add("RowVatRatePercent",                                    					pp($tilrow['alv'], 2, 5, 2),           								$tootfinvoice);
 			xml_add("RowVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",          	pp($vatamount, $yhtiorow["hintapyoristys"], 5, 2),      			$tootfinvoice);	// veron m‰‰r‰
 			xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",  	pp($tilrow['rivihinta'], $yhtiorow["hintapyoristys"], 5, 2),      	$tootfinvoice);	// veroton rivihinta
 			xml_add("RowAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",             	pp($totalvat, $yhtiorow["hintapyoristys"], 5, 2),     				$tootfinvoice);	// verollinen rivihinta

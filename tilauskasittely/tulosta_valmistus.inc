@@ -411,7 +411,8 @@ if (!function_exists('rivi_otsikot_valm')) {
 		$pdf->draw_text(405, $kala+15, t("Kerroin", $kieli),		$thispage, $norm);
 		$pdf->draw_text(465, $kala+15, t("Valmistetaan", $kieli),	$thispage, $norm);
 		$pdf->draw_text(525, $kala+15, t("Valmistettu", $kieli),	$thispage, $norm);
-
+		$pdf->draw_line(525, $kala+1, $thispage, $rectparam);
+		
 		$kala -= 3;
 	}
 }
@@ -530,7 +531,7 @@ if (!function_exists('rivi_valmistus')) {
 			$oikpos = $pdf->strlen($row['varattu'], $pb);
 			$pdf->draw_text(575-$oikpos, $kala, $row['varattu'], 			$thispage, $pb);
 		}
-
+			
 		$kala = $kala - $rivinkorkeus+3;
 		$lask_valm++;
 

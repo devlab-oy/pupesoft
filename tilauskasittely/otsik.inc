@@ -1039,7 +1039,7 @@
 						</tr>";
 			}
 
-			echo "<tr><td>".t("Toimitustapa").":</td>";
+			echo "<tr><td>".t("Toimitustapa").":</td>"; 
 			echo "<td><select name='toimitustapa'>";
 
 			$query = "	SELECT tunnus, selite
@@ -1057,7 +1057,7 @@
 			while($row = mysql_fetch_assoc($tresult)) {
 
 				$sel = "";
-				if ($row["selite"] == $srow["toimitustapa"] and $laskurow["toimitustavan_lahto"] == '0000-00-00 00:00:00') {
+				if ($row["selite"] == $srow["toimitustapa"] and $laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
 					$sel = 'selected';
 				}
 

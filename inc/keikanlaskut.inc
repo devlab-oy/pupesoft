@@ -90,8 +90,11 @@
 
 	echo "<br><font class='head'>".t("Laskut joita ei ole liitetty keikkoihin")."</font><hr>";
 
-	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
-				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur', if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
+				lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
+				lasku.alv,
+				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
+				if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
 				FROM lasku
 				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -99,7 +102,7 @@
 				lasku.vienti in ('B','C','J','E','F','K','H','I','L') and
 				lasku.tapvm >= '$avv-$akk-$app' and
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
-				GROUP by lasku.tunnus
+				GROUP BY 1,2,3,4,5,6,7,8,9
 				HAVING lasku2.tunnus IS NULL
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 	$result = mysql_query($query) or pupe_error($query);
@@ -120,15 +123,45 @@
 		echo "<th>".t("Nimi")."</th>";
 		echo "<th>".t("Summa valuutassa")."</th>";
 		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Veroton summa")."</th>";
 		echo "<th>".t("Laskunro")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
 		echo "<th>".t("Tyyppi")."</th>";
 		echo "</tr>";
 
-		$yhteesa = 0;
+		$yhteesa_ve = 0;
+		$yhteesa_eive = 0;
 		$edellinen = 0;
 
 		while ($trow = mysql_fetch_array($result)) {
+
+			// jos meillä on hyvityslasku niin haetaan vaan negatiivisiä alvikirjauksia (en tiedä ollenkaan onko tämä futureprooof) :(
+			if ($trow["summaeur"] < 0) {
+				$alvilisa = "and summa < 0";
+			}
+			else {
+				$alvilisa = "and summa > 0";
+			}
+
+			// Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
+			$query = "	SELECT sum(summa) summa
+						from tiliointi
+						where yhtio	= '$kukarow[yhtio]'
+						and ltunnus	= '$trow[latunnus]'
+						and tilino  = '$yhtiorow[alv]'
+						$alvilisa
+						and korjattu = ''";
+			$alvires = mysql_query($query) or pupe_error($query);
+			$alvirow = mysql_fetch_array($alvires);
+
+			// Ostoreskontralaskun veroton arvo
+			$alvisumma = $alvirow["summa"];
+
+			if (strtoupper($trow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
+				$alvisumma = $alvirow["summa"] / $oslasrow["vienti_kurssi"];
+			}
+
+			$trow["arvo"] = round((float) $trow["summaeur"] - (float) $alvisumma, 2);
 
 			$vienti = $trow["vienti"];
 			if ($trow["vienti"] == 'A') $vienti = t('Kotimaa');
@@ -149,6 +182,7 @@
 			echo "<td>$trow[nimi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["arvo"])." $yhtiorow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>$trow[laskunro]</td>";
 			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
 			echo "<td>$vienti</td>";
@@ -173,12 +207,14 @@
 			echo "</tr>";
 
 			$edellinen = $trow["latunnus"];
-			$yhteesa += $trow["summaeur"];
+			$yhteesa_ve += $trow["summaeur"];
+			$yhteesa_eive += $trow["arvo"];
 		}
 
 		echo "<tr>";
 		echo "<th colspan='3'>".t("Yhteensä")."</th>";
-		echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+		echo "<th style='text-align: right;'>".round($yhteesa_ve,2)." $yhtiorow[valkoodi]</th>";
+		echo "<th style='text-align: right;'>".round($yhteesa_eive,2)." $yhtiorow[valkoodi]</th>";
 		echo "<th colspan='3'></th>";
 		echo "</tr>";
 		echo "</table><br>";

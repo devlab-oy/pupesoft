@@ -8,10 +8,7 @@
 		$tyyppi = 0;
 	}
 
-	
 	if (mysql_field_name($result, $i) == "piiri") {
-		//echo $toim2;
-
 		$preq = "	SELECT avainsana.selite piiri, avainsana.selitetark selitetark
 					FROM avainsana 
 					WHERE  avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";

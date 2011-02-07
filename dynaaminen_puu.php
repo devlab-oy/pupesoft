@@ -202,10 +202,10 @@
 						$check = 'checked';
 					}
 
-					echo "\n<br /><input type='checkbox' name='id[]' value='{$row["node_tunnus"]}' $check />";
+					echo "\n<input type='checkbox' name='id[]' value='{$row["node_tunnus"]}' $check />";
 				}
 				elseif ($oikeus != '') {
-					echo "\n<br /><a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&syvyys={$row['syvyys']}&tee=lisaa'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lisää lapsikategoria'),"'/></a>";
+					echo "\n<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&syvyys={$row['syvyys']}&tee=lisaa'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lisää lapsikategoria'),"'/></a>";
 				 	if ($row['lft'] > 1) echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&tee=poista'><img src='{$palvelin2}pics/lullacons/remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";
 				 	echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&koodi={$row['node_koodi']}&lft={$row['lft']}&tee=muokkaa&kategoriaid={$row['node_tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
 

@@ -1049,15 +1049,18 @@
 						and (extranet in ('','M') or selite = '$srow[toimitustapa]')
 						ORDER BY jarjestys,selite";
 			$tresult = mysql_query($query) or pupe_error($query);
-
+			
+			$lahtoseleted = FALSE;
+			
 			if (isset($laskurow["toimitustavan_lahto"]) and $laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
 				echo "<option value='$laskurow[toimitustapa]'>$laskurow[toimitustapa] - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."    $laskurow[toimitustavan_lahto]</option>";
+				$lahtoseleted = TRUE;
 			}
 
 			while($row = mysql_fetch_assoc($tresult)) {
 
 				$sel = "";
-				if ($row["selite"] == $srow["toimitustapa"] and $laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
+				if ($row["selite"] == $srow["toimitustapa"] and !$lahtoseleted) {
 					$sel = 'selected';
 				}
 

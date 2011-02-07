@@ -29,7 +29,7 @@ if(!function_exists("avainsanatarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "selite" and strlen($t[$i]) > 3 and $laji == 'Y') {
-			$virhe[$i] = t("Selite on liian pitkä, maksimiputuus on kolme merkkiä")."!";
+			$virhe[$i] = t("Selite on liian pitkä, maksimipituus on kolme merkkiä")."!";
 		}
 
 		if (mysql_field_name($result, $i) == "selite" and !is_numeric($t[$i]) and in_array($laji, array("TRY", "OSASTO", "PIIRI"))) {

@@ -722,10 +722,10 @@ if (!function_exists('rivi_kerayslista')) {
 
 			$kala = $kala - $rivinkorkeus + 5;
 
-			$pdf->draw_text(125, $kala, $row["nimitys"], 											$thispage, $norm);
-
+			$pdf->draw_text(125, $kala, $row["nimitys"], $thispage, $norm);
+			
 			if ($tyyppi == "SIIRTOLISTA") {
-				$pdf->draw_text(465-$oikpos, $kala, $kohde_hyllyssa, 								$thispage, $norm);
+				$pdf->draw_text(465-$oikpos, $kala, $kohde_hyllyssa, 	$thispage, $norm);
 			}
 
 			if($trow["tuotemassa"] > 0) {
@@ -738,7 +738,11 @@ if (!function_exists('rivi_kerayslista')) {
 			}
 
 			$kala = $kala - $rivinkorkeus;
-
+			// Tulostataan myyntiera
+			
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 475, 60, 580, round(($row['varattu']+$row['kpl'])/$trow['myynti_era'],2)." myyntierää",	$thispage, $norm);
+			$kala = $pohja - 5;
+			
 			if ($row["sarjanumeroseuranta"] != "") {
 
 				if ($tyyppi == "SIIRTOLISTA") {
@@ -773,7 +777,7 @@ if (!function_exists('rivi_kerayslista')) {
 			$row["kommentti"] = trim($row["kommentti"]);
 
 			if ($row["kommentti"] != '') {
-				$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 125, 60, 580, $row["kommentti"],	$thispage, $norm);
+				$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 125, 60, 470, $row["kommentti"],	$thispage, $norm);
 				$kala = $pohja - $rivinkorkeus;
 			}
 

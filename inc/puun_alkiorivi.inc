@@ -16,102 +16,64 @@ if (mysql_field_name($result, $i) == "yhtio") {
 
 if (mysql_field_name($result, $i) == "laji") {
 
-	$sresult = t_avainsana("DYNAAMINEN_PUU");
-	
-	if (isset ($toim2) and strtolower(trim($toim2)) == 'tuote' OR isset ($toim2) and strtolower(trim($toim2)) == 'asiakas' ) {
-		
-		while ($srow = mysql_fetch_array($sresult)) {
-				
-			if (strtolower(trim($toim2)) == strtolower(trim($srow['selite']))) {
-				$ulos = "<td>".$srow['selite']."<input type='hidden' value='$srow[selite]' name='$nimi' />";
-				$apu['laji'] = $srow['selite'];
-			}
-			
-		}
+	$apu['laji'] = $laji;
 
-		mysql_data_seek($sresult,0);
-	}
-	else {
-
-		if (isset($laji) and trim($laji) != '') {
-			$ulos .= "<td>".ucwords($laji)."<input type='hidden' value='$laji' name='$nimi' /></td>";
-		}
-		else {
-			$sel = array($trow[$i] => "SELECTED");
-
-			$ulos = "<td><select name='$nimi' onchange='submit();'>";
-
-			$ulos .= "<option value=''>".t('Valitse p‰‰kategoria')."</option>";
-
-			while ($srow = mysql_fetch_array($sresult)) {
-				$ulos .= "<option value='$srow[selite]' ".$sel[$srow["selite"]].">$srow[selite] $srow[selitetark]</option>";
-			}
-
-			$ulos .= "</select>";
-		}
-
-		$apu['laji'] = (isset($laji) and trim($laji) != '') ? $laji : $trow[$i];
-	}
-		
+	$ulos .= "<td>".ucwords($laji)."<input type='hidden' name='$nimi' value='$laji'></td>";
 	$jatko = 0;
-		
 }
 
 if (mysql_field_name($result, $i) == "liitos") {
 
 	if ($lukitse_avaimeen != "") {
-		$apu['ttuoteno'] = $lukitse_avaimeen;
+		$apu['liitos'] = $lukitse_avaimeen;
 		$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
-		$jatko = 0;
 	}
 	elseif (isset($alasveto[$i])) {
-		$apu['ttuoteno'] = $alasveto[$i];
+		$apu['liitos'] = $alasveto[$i];
 		$ulos = "<td>".$alasveto[$i]."</td>";
-		$jatko = 0;
 	}
 	else {
-		$apu['ttuoteno'] = $trow[$i];
+		$apu['liitos'] = $trow[$i];
 		$ulos = "<td>".$trow[$i]."</td>";
-		$jatko = 0;
 	}
+	$jatko = 0;
 }
 
 if (mysql_field_name($result, $i) == "puun_tunnus") {
-	
+
 	if ($apu['laji'] != '') {
 
 		$alkio_nimi = '';
 
 		if (trim($trow[$i]) != '') {
-			$query = "SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND laji = '{$apu['laji']}' AND tunnus = '{$trow[$i]}'";
-			$nimi_fetch_res = mysql_query($query) or pupe_error($query);
-			$nimi_fetch_row = mysql_fetch_assoc($nimi_fetch_res);
-			$alkio_nimi = $nimi_fetch_row['nimi'];
+			$query = "	SELECT nimi
+						FROM dynaaminen_puu
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND laji 	= '{$apu['laji']}'
+						AND tunnus 	= '{$trow[$i]}'";
+			$vres = mysql_query($query) or pupe_error($query);
+			$nimirow = mysql_fetch_assoc($vres);
+			$alkio_nimi = $nimirow['nimi'];
 		}
 
-		if (strtolower($apu['laji']) == strtolower('asiakas')) {
-			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno=".trim($apu['ttuoteno'])."&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=asiakas&mista_tulin={$toim}&toim2={$toim2}&kieli={$apu['kieli']}' ";
-			$ulos .= "target='main'> ".t('Valitse t‰h‰n puuhun sopivat asiakassegmentit')." </a><br />\n";
-			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";			
-		}
-		elseif (strtolower($apu['laji']) == strtolower('tuote')) {
-			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno=".trim($apu['ttuoteno'])."&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim=tuote&mista_tulin={$toim}&toim2={$toim2}&kieli={$apu['kieli']}' ";
-			$ulos .= "target='main'> ".t('Valitse t‰h‰n puuhun sopivat tuotesegmentit')." </a><br />\n";
-			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";
-		}
-		else {
-			$apu['laji'] = strtolower($apu['laji']);
-			$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?laji={$apu['laji']}&tee=tuotteet&tuoteno=".trim($apu['ttuoteno'])."&puun_tunnus={$trow[$i]}&yhtio={$kukarow[yhtio]}&ttunnus={$tunnus}&toim={$apu['laji']}&mista_tulin={$toim}&toim2={$toim2}&kieli={$apu['kieli']}' ";
-			$ulos .= "target='main'> ".t('Valitse t‰h‰n puuhun sopivat segmentit')." </a><br />\n";
-			$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";			
-		}
+		$query = "	SELECT group_concat(distinct puun_tunnus) nodet
+					FROM puun_alkio
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					and liitos	= '{$apu["liitos"]}'
+					and kieli	= '{$apu["kieli"]}'
+					and laji	= '{$apu["laji"]}'";
+		$vres = mysql_query($query) or pupe_error($query);
+		$vrow = mysql_fetch_array($vres);
+
+		$ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?toim={$apu['laji']}&tee=valitsesegmentti&mista={$apu['laji']}&liitos={$apu['liitos']}&puun_tunnus={$vrow["nodet"]}&kieli={$apu['kieli']}' target='main'>".t('Valitse segmentit')."</a><br />\n";
+		$ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";
 	}
 
 	$jatko = 0;
 }
 
 if (mysql_field_name($result, $i) == "kieli") {
-	
+
 	$ulos = "<td><select name='$nimi'>";
 	$sel  = "";
 

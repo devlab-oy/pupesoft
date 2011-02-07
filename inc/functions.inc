@@ -9615,172 +9615,268 @@ if (!function_exists("asiakashakuohje")) {
 
 // Funktio lis‰‰ tuotteenalkion dynaamiseen puuhun.
 if (!function_exists("TuotteenAlkiot")) {
-	function TuotteenAlkiot($kukarow, $liitos, $puun_tunnus, $laji, $kieli, $ttunnus = '') {
+	function TuotteenAlkiot($laji, $liitos, $puun_tunnus, $kieli) {
+		global $kukarow;
 
-		if (trim($ttunnus) == '') {
-			$query = "INSERT INTO puun_alkio (yhtio, liitos, laji, puun_tunnus, kieli, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$liitos', '$laji', '$puun_tunnus', '$kieli', '$kukarow[kuka]', now())";
-		}
-		else {
-			$query = "UPDATE puun_alkio SET puun_tunnus = '$puun_tunnus', muuttaja = '$kukarow[kuka]', muutospvm = now() WHERE laji = '$laji' AND liitos = '$liitos' AND tunnus = '$ttunnus' AND kieli = '$kieli' AND yhtio = '$kukarow[yhtio]'";
-		}
-
+		$query = "	INSERT INTO puun_alkio
+					SET yhtio	= '$kukarow[yhtio]',
+					liitos 		= '$liitos',
+					laji 		= '$laji',
+					puun_tunnus = '$puun_tunnus',
+					kieli 		= '$kieli',
+					laatija 	= '$kukarow[kuka]',
+					luontiaika 	= now()
+					ON DUPLICATE KEY UPDATE
+					muuttaja = '$kukarow[kuka]',
+					muutospvm = now()";
 		$r = mysql_query($query) or pupe_error($query);
 	}
 }
 
-/// Funktio mahdollistaa lis‰‰m‰‰n tason mihin tahansa v‰liin.
 if (!function_exists("LisaaTaso")) {
-	function LisaaTaso($isinimi, $tasonimi ,$lft, $laji,$kukarow, $tkoodi) {
+	function LisaaTaso($laji, $left, $koodi ,$nimi) {
+		global $kukarow;
 
-		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
-		$r = mysql_query($q1) or pupe_error($q1);
+		// Funktio mahdollistaa lis‰‰m‰‰n tason mihin tahansa v‰liin.
+		$qu = "LOCK TABLE dynaaminen_puu WRITE";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q2 = 	"SELECT @myRight := rgt, @myLeft := lft  FROM dynaaminen_puu WHERE nimi = '{$isinimi}' AND lft='{$lft}' AND laji='".$laji."' AND yhtio='{$kukarow[yhtio]}'";
-		$r = mysql_query($q2) or pupe_error($q2);
+		// Haetaan valitun tason tiedot
+		$q2 = "	SELECT @myRight := rgt, @myLeft := lft
+				FROM dynaaminen_puu
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji 	= '$laji'
+				AND lft 	= '$left'";
+		$re = mysql_query($q2) or pupe_error($q2);
 
-		$q3 =	"UPDATE dynaaminen_puu set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE rgt = @myRight  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-		$r = mysql_query($q3) or pupe_error($q3);
+		// P‰vitet‰‰n kaikki nodet, jotka on uuden noden oikealla puolella kaksi pyk‰l‰‰ oikealle (vasen puoli)
+		$qu = "	UPDATE dynaaminen_puu
+				set lft = lft + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				WHERE yhtio	= '{$kukarow["yhtio"]}'
+				AND laji	= '$laji'
+				AND lft 	> @myRight
+				ORDER BY lft desc";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q4 =	"UPDATE dynaaminen_puu set lft = lft + 1, rgt = rgt +1, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft > @myLeft  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-		$r = mysql_query($q4) or pupe_error($q4);
+		// P‰vitet‰‰n kaikki nodet joiden oikea laita on uuden noden oikealla puolella kaksi pyk‰l‰‰ oikealle (oikea puoli)
+		$qu = "	UPDATE dynaaminen_puu
+				set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				WHERE yhtio	= '{$kukarow["yhtio"]}'
+				AND laji	= '$laji'
+				AND rgt    >= @myRight
+				ORDER BY rgt desc";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q4 =	"UPDATE dynaaminen_puu set lft = lft + 1, rgt = rgt + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft > @myRight  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-		$r = mysql_query($q4) or pupe_error($q4);
+		// P‰ivitet‰‰n valitun tason leftit pyk‰l‰‰ oikealle, jotta uusi taso mahtuu mukaan
+		$qu = "	UPDATE dynaaminen_puu
+				set lft = lft + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				WHERE yhtio	= '{$kukarow["yhtio"]}'
+				AND laji	= '$laji'
+				AND lft 	> @myLeft
+				AND lft 	< @myRight
+				ORDER BY lft desc";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$qroot = "UPDATE dynaaminen_puu set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft = 1  AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-		$rroot = mysql_query($qroot) or pupe_error($qroot);
+		// P‰ivitet‰‰n valitun tason rightit pyk‰l‰‰ oikealle, jotta uusi taso mahtuu mukaan
+		$qu = "	UPDATE dynaaminen_puu
+				set rgt = rgt + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				WHERE yhtio	= '{$kukarow["yhtio"]}'
+				AND laji	= '$laji'
+				AND lft 	> @myLeft
+				AND lft 	< @myRight
+				ORDER BY rgt desc";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q5 =	"INSERT INTO dynaaminen_puu(yhtio,koodi,nimi, lft, rgt, laji,laatija,luontiaika) values ('$kukarow[yhtio]','{$tkoodi}','{$tasonimi}',@myLeft + 1 , @myRight + 1,'$laji','$kukarow[kuka]',now())";
-		$r = mysql_query($q5) or pupe_error($q5);
+		$qu = "INSERT INTO dynaaminen_puu(yhtio,koodi,nimi, lft, rgt, laji,laatija,luontiaika) values ('$kukarow[yhtio]', '{$koodi}', '{$nimi}', @myLeft + 1 , @myRight + 1, '$laji', '$kukarow[kuka]', now())";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q6 = "UNLOCK TABLES";
-		$r = mysql_query($q6) or pupe_error($q6);
+		$qu = "UNLOCK TABLES";
+		$re = mysql_query($qu) or pupe_error($qu);
 
 	}
 }
 
 if (!function_exists("LisaaPaaKat")) {
-	function LisaaPaaKat($kukarow,$KatNimi, $laji) {
-		$q = "INSERT INTO dynaaminen_puu(yhtio,nimi,lft,rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]','$KatNimi',1,2,'$laji','$kukarow[kuka]',now())";
+	function LisaaPaaKat($laji, $nimi) {
+		global $kukarow;
+
+		$q = "INSERT INTO dynaaminen_puu(yhtio,nimi,lft,rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]', '$nimi', 1, 2, '$laji', '$kukarow[kuka]', now())";
 		$r = mysql_query($q) or pupe_error($q);
 	}
 }
 
 if (!function_exists("LisaaLapsi")) {
-	function LisaaLapsi($isi, $laji, $kukarow, $Lnimi, $pleft, $subd,$koodi) {
-		$apu = $apu2 = $apu3  = $apu4 ="";
+	function LisaaLapsi($laji, $left, $syvyys, $koodi, $nimi) {
+		global $kukarow;
 
-		if ($pleft == 1) {
-			$apu 	= " where rgt >= @myRight";
-			$apu2 	= "@myRight , @myRight + 1";
-			$apu3 	= "@myRight := rgt ";
-			$apu4 	= " WHERE lft > @myRight";
-		} // mik‰li is‰ on root, niin lis‰t‰‰n sille alakat
-
-		elseif ($subd >= 1) {
-			$apu 	= " where rgt > @myLeft";
-			$apu2 	= "@myLeft +1 , @myLeft + 2";
-			$apu3 	= "@myLeft := lft ";
-			$apu4 	= "WHERE lft > @myLeft";
-		} // lis‰t‰‰n alakategorialle lapsi
-
+		if ($left == 1) {
+			// mik‰li is‰ on root, niin lis‰t‰‰n sille alakat
+			$apu 	= " and rgt >= @myRight";
+			$apu2 	= " @myRight , @myRight + 1";
+			$apu3 	= " @myRight := rgt ";
+			$apu4 	= " and lft > @myRight";
+		}
+		elseif ($syvyys >= 1) {
+			// lis‰t‰‰n alakategorialle lapsi
+			$apu 	= " and rgt > @myLeft";
+			$apu2 	= " @myLeft +1 , @myLeft + 2";
+			$apu3 	= " @myLeft := lft ";
+			$apu4 	= " and lft > @myLeft";
+		}
 		else {
-			$apu 	= "WHERE rgt > @myRight";
-			$apu2 	= "@myRight + 1, @myRight + 2";
-			$apu3 	= "@myRight := rgt ";
-			$apu4 	= " WHERE lft > @myRight";
-		} //alakat lapsen lis‰ys
+			//alakat lapsen lis‰ys
+			$apu 	= " and rgt > @myRight";
+			$apu2 	= " @myRight + 1, @myRight + 2";
+			$apu3 	= " @myRight := rgt ";
+			$apu4 	= " and lft > @myRight";
+		}
 
-		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
-		$r = mysql_query($q1) or pupe_error($q1);
+		$qu = "LOCK TABLE dynaaminen_puu WRITE";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q2 = "SELECT ".$apu3." FROM dynaaminen_puu WHERE nimi = '".$isi."' AND laji='".$laji."' AND yhtio='{$kukarow[yhtio]}'";
-		$r = mysql_query($q2) or pupe_error($q2);
+		$qu = "	SELECT $apu3
+				FROM dynaaminen_puu
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji 	= '$laji'
+				AND lft 	= '$left'";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q3 = "UPDATE dynaaminen_puu SET rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' ".$apu." AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-		$r = mysql_query($q3) or pupe_error($q3);
+		$qu = "	UPDATE dynaaminen_puu
+				SET rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				WHERE yhtio	= '{$kukarow["yhtio"]}'
+				AND laji 	= '$laji'
+				$apu
+				ORDER BY rgt desc";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q4 = "UPDATE dynaaminen_puu SET lft = lft + 2,muutospvm = now(), muuttaja = '$kukarow[kuka]' ".$apu4. " AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-		$r = mysql_query($q4) or pupe_error($q4);
+		$qu = "	UPDATE dynaaminen_puu
+				SET lft = lft + 2,muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji 	= '$laji'
+				$apu4
+				ORDER BY lft desc";
+		$re = mysql_query($q4) or pupe_error($q4);
 
-		$q5 = "INSERT INTO dynaaminen_puu(yhtio, nimi, koodi, lft, rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]','$Lnimi','$koodi', ".$apu2 .",'$laji','$kukarow[kuka]',now())";
-		$r = mysql_query($q5) or pupe_error($q5);
+		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, '$laji', '$kukarow[kuka]', now())";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q6 = "UNLOCK TABLES";
-		$r = mysql_query($q6) or pupe_error($q6);
+		$qu = "UNLOCK TABLES";
+		$re = mysql_query($qu) or pupe_error($qu);
 	}
 }
 
 if (!function_exists("PoistaLapset")) {
-	function PoistaLapset($lapsi, $plft, $laji, $kukarow) {
-		if ($plft == 1) {
+	function PoistaLapset($laji, $left) {
+		global $kukarow;
+
+		if ($left == 1) {
 			echo "<p><font class='error'>",t('Et Voi poistaa p‰‰kategoriaa')," !!!</font></p>";
 		}
 		else {
-	 		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
-	 		$r = mysql_query($q1) or pupe_error($q1);
-	 		$q2 = "SELECT @myLeft := lft, @myRight := rgt, @myWidth := rgt - lft + 1 FROM dynaaminen_puu WHERE nimi = '".$lapsi."' AND laji='$laji' AND yhtio='{$kukarow[yhtio]}'";
-	 		$r = mysql_query($q2) or pupe_error($q2);
-	 		$q3 = "DELETE FROM dynaaminen_puu WHERE lft = @myLeft  AND laji='$laji' and yhtio='{$kukarow[yhtio]}'";
-	 		$r = mysql_query($q3) or pupe_error($q3);
-	 		$q4 = "UPDATE dynaaminen_puu SET rgt = rgt -1, lft = lft -1,muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE lft between @myLeft and @myRight  AND laji='$laji'";
-	 		$r = mysql_query($q4) or pupe_error($q4);
-	 		$q5 = "UPDATE dynaaminen_puu SET rgt = rgt - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]' WHERE rgt > @myRight  AND laji='$laji'";
-	 		$r = mysql_query($q5) or pupe_error($q5);
-	 		$q7 = "UPDATE dynaaminen_puu SET lft = lft - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'  WHERE lft > @myRight  AND laji='$laji'";
-	 		$r = mysql_query($q7) or pupe_error($q7);
+	 		$qu = "LOCK TABLE dynaaminen_puu WRITE";
+	 		$re = mysql_query($qu) or pupe_error($qu);
 
-			$q6 = "UNLOCK TABLES";
-			$r = mysql_query($q6) or pupe_error($q6);
+			// Haetaan poistettavan noden tiedot
+			$qu = "	SELECT @myLeft := lft, @myRight := rgt, @myWidth := rgt - lft + 1
+					FROM dynaaminen_puu
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND laji	= '$laji'
+					AND lft 	= '$left'";
+	 		$re = mysql_query($qu) or pupe_error($qu);
+
+			// Poistetaan se
+			$qu = "	DELETE FROM dynaaminen_puu
+					WHERE yhtio	= '{$kukarow["yhtio"]}'
+					AND laji	= '$laji'
+					and lft 	= @myLeft";
+	 		$re = mysql_query($qu) or pupe_error($qu);
+
+			// P‰ivitet‰‰n poistettavan noden lapset pyk‰l‰‰ vasemmalle
+			$qu = "	UPDATE dynaaminen_puu
+					SET rgt = rgt - 1
+					WHERE yhtio	= '{$kukarow["yhtio"]}'
+					AND laji = '$laji'
+					AND lft between @myLeft and @myRight
+					ORDER BY rgt";
+	 		$re = mysql_query($qu) or pupe_error($qu);
+
+			// P‰ivitet‰‰n poistettavan noden lapset pyk‰l‰‰ vasemmalle
+			$qu = "	UPDATE dynaaminen_puu
+					SET lft = lft - 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+					WHERE yhtio	= '{$kukarow["yhtio"]}'
+					AND laji = '$laji'
+					AND lft between @myLeft and @myRight
+					ORDER BY lft";
+	 		$re = mysql_query($qu) or pupe_error($qu);
+
+			// P‰ivitet‰‰n poistetun noden oikealta puolelta lˆytyv‰t nodet vasemalle
+			$qu = "	UPDATE dynaaminen_puu
+					SET rgt = rgt - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+					WHERE yhtio	= '{$kukarow["yhtio"]}'
+					AND laji = '$laji'
+					AND rgt > @myRight
+					ORDER BY rgt";
+	 		$re = mysql_query($qu) or pupe_error($qu);
+
+			// P‰ivitet‰‰n poistetun noden oikealta puolelta lˆytyv‰t nodet vasemalle
+			$qu = "	UPDATE dynaaminen_puu
+					SET lft = lft - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+					WHERE yhtio	= '{$kukarow["yhtio"]}'
+					AND laji = '$laji'
+					AND lft > @myRight
+					ORDER BY lft";
+	 		$re = mysql_query($qu) or pupe_error($qu);
+
+			$qu = "UNLOCK TABLES";
+			$re = mysql_query($qu) or pupe_error($qu);
 		}
-
-		/*
-		Mik‰li koetetaan poistaa p‰‰kategoriaa niin ohjelma herjaa, muussa tapauksessa
-		ohjelma poistaa valitun kategorian ja nostaa sen alakategoriat yhden isommalle tasolle.
-		*/
 	}
 }
 
 // Funktio joka palauttaa valitun kategorian alakategorioiden lukum‰‰r‰n, k‰ytet‰‰n syvyyden m‰‰rittelyss‰
 if (!function_exists("lapset")) {
-	function lapset($isi, $plft, $laji,$kukarow) {
-		$dump = 	"SELECT (COUNT(node.nimi)-1) as Lapsi
-					FROM dynaaminen_puu AS node , dynaaminen_puu AS parent
-					WHERE node.lft BETWEEN parent.lft AND parent.rgt
-					AND parent.nimi='$isi' AND parent.lft = '$plft' AND parent.laji='{$laji}' AND node.laji='{$laji}' AND node.yhtio='{$kukarow[yhtio]}' GROUP BY parent.nimi ORDER BY node.lft";
+	function lapset($laji, $left) {
+		global $kukarow;
 
-		$dumm = mysql_query($dump) or pupe_error($dump);
-		$rivi =  mysql_fetch_assoc($dumm);
+		$qu = "	SELECT node.nimi, (COUNT(parent.tunnus) - (sub_tree.depth + 1)) AS depth
+					FROM dynaaminen_puu AS node
+					JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND node.lft BETWEEN parent.lft AND parent.rgt)
+					JOIN (	SELECT node.tunnus, (COUNT(parent.tunnus) - 1) AS depth
+							FROM dynaaminen_puu AS node
+							JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND node.lft BETWEEN parent.lft AND parent.rgt)
+							WHERE node.yhtio = '{$kukarow["yhtio"]}'
+							AND node.laji 	 = '$laji'
+							AND node.lft 	 = '$left'
+							GROUP BY node.tunnus
+							ORDER BY node.lft) AS sub_tree
+					JOIN dynaaminen_puu AS sub_parent ON (sub_parent.yhtio = node.yhtio AND sub_parent.laji = node.laji AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt AND sub_parent.tunnus = sub_tree.tunnus)
+					WHERE node.yhtio = '{$kukarow["yhtio"]}'
+					AND node.laji 	= '$laji'
+					GROUP BY node.nimi
+					ORDER BY node.lft";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		return $rivi['Lapsi'];
+		return mysql_num_rows($re);
 	}
 }
 
 // Funktio joka p‰ivitt‰‰ valitun kategorian valitulle nimelle
 if (!function_exists("paivitakat")) {
-	function paivitakat($isi, $uusinimi, $laji, $kukarow,$koodi,$kategoriaid) {
+	function paivitakat($laji, $koodi, $nimi, $kategoriaid) {
+		global $kukarow;
 
-		if (trim($koodi) == '') {
+		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
+		$r = mysql_query($q1) or pupe_error($q1);
 
-			$q1 = "LOCK TABLE dynaaminen_puu WRITE";
-			$r = mysql_query($q1) or pupe_error($q1);
+		$q2 = "	UPDATE dynaaminen_puu
+				set nimi='{$nimi}', koodi='{$koodi}', muutospvm = now(), muuttaja = '$kukarow[kuka]'
+				where yhtio	= '{$kukarow["yhtio"]}'
+				AND laji	= '{$laji}'
+				AND tunnus	= '{$kategoriaid}'";
+		$r = mysql_query($q2) or pupe_error($q2);
 
-			$q2 = "UPDATE dynaaminen_puu set nimi='{$uusinimi}', muutospvm = now(), muuttaja = '$kukarow[kuka]' where nimi='{$isi}' AND tunnus='{$kategoriaid}' AND laji='{$laji}' AND yhtio='{$kukarow[yhtio]}'";
-			$r = mysql_query($q2) or pupe_error($q2);
-
-			$q6 = "UNLOCK TABLES";
-			$r = mysql_query($q6) or pupe_error($q6);
-		}
-		else {
-			$q1 = "LOCK TABLE dynaaminen_puu WRITE";
-			$r = mysql_query($q1) or pupe_error($q1);
-
-			$q2 = "UPDATE dynaaminen_puu set nimi='{$uusinimi}', muutospvm = now(), muuttaja = '$kukarow[kuka]', koodi='{$koodi}' where nimi='{$isi}' AND tunnus='{$kategoriaid}' AND laji='{$laji}' AND yhtio='{$kukarow[yhtio]}'";
-			$r = mysql_query($q2) or pupe_error($q2);
-
-			$q6 = "UNLOCK TABLES";
-			$r = mysql_query($q6) or pupe_error($q6);
-		}
+		$q6 = "UNLOCK TABLES";
+		$r = mysql_query($q6) or pupe_error($q6);
 	}
 }
 
@@ -10282,7 +10378,6 @@ if (!function_exists("pupe_DataTables")) {
 
 if (!function_exists('hae_suuntalava')) {
 	function hae_suuntalava($otunnus, $tunnus) {
-
 		global $kukarow;
 
 		$query = "	SELECT suuntalavat.tunnus,

@@ -2,153 +2,142 @@
 
 	require('inc/parametrit.inc');
 
-	// pi‰‰ jotenkin ottaa nodesta ne arvot johonkin talteen k‰sittely‰ varten...
-	$Xnodet = explode(",", $puun_tunnus);
+	if ($toim == "ASIAKAS") {
+		echo "<font class='head'>".t("Asiakaspuu")."</font><hr><br>";
+	}
+	else {
+		echo "<font class='head'>".t("Tuotepuu")."</font><hr><br>";
+	}
 
 	$oikeus = '';
 
-	if (tarkista_oikeus('dynaaminen_puu.php', $laji, 1)) {
+	if (tarkista_oikeus('dynaaminen_puu.php', $toim, 1)) {
 		$oikeus = 'joo';
 	}
 
-	/// T‰m‰ lis‰‰ tiedot kantaa ja sen j‰lkeen passaa parametrej‰ yllapitoon samaan tuotteeseen mist‰ l‰hdettiin.... toivottavasti..
-	if (isset($tee) AND $tee == 'valitse' AND isset($laji) AND isset($tuoteno)) {
+	// T‰m‰ lis‰‰ tiedot kantaa ja sen j‰lkeen passaa parametrej‰ yllapitoon samaan tuotteeseen mist‰ l‰hdettiin.... toivottavasti..
+	if (isset($tee) AND $tee == 'valitse' AND isset($toim) AND isset($liitos)) {
 
-		if ($mista_tulin == 'autodata_tuote') {
-			$toim = $mista_tulin;
+		if ($mista == 'autodata_tuote') {
 			$tunnus = $ttunnus;
 		}
 		else {
 
-			foreach ($id as $selitekenttaan) {
-				TuotteenAlkiot($kukarow, $tuoteno, $selitekenttaan, $laji, $kieli, $ttunnus);
+			foreach ($id as $node) {
+				TuotteenAlkiot($toim, $liitos, $node, $kieli);
 			}
 
-			$q2 = "	SELECT tunnus
-					FROM tuote
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tuoteno = '$tuoteno'";
-			$r2 = mysql_query($q2) or pupe_error($q2);
-			$rivi = mysql_fetch_assoc($r2);
-			$tunnus = $rivi['tunnus'];
+			if ($mista == "tuote") {
+				$q = "	SELECT tunnus
+						FROM tuote
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tuoteno = '$liitos'";
+				$r = mysql_query($q) or pupe_error($q);
+				$rivi = mysql_fetch_assoc($r);
 
-			if ($mista_tulin == 'puun_alkio' AND $toim2 == ''){
-				$toim = $mista_tulin;
-				$tunnus = '';
-			}
-			elseif ($mista_tulin == 'puun_alkio' AND $toim2 == 'asiakas'){
-				$toim = $toim2;
-				$tunnus = $tuoteno;
-			}
-			elseif ($mista_tulin == 'puun_alkio' AND $toim2 == 'tuote'){
-				$toim = $toim2;
+				$tunnus = $rivi['tunnus'];
 			}
 			else {
-				$toim = $toim;
-				$tunnus = $tuoteno;
+				$tunnus = $liitos;
 			}
 		}
+
+		$toim = $mista;
 
 		require('yllapito.php');
 		exit;
 	}
 
 	// T‰m‰ luo p‰‰kategorian
-	if (isset($KatNimi) AND trim($KatNimi) AND $tee == 'paakat' AND isset($laji) AND trim($laji)) {
-		LisaaPaaKat($kukarow,$KatNimi, $laji);
-		$tee = '';
-	}
-
-	// lis‰t‰‰n kategorialle lapsi
-	if (isset($Lnimi) AND trim($Lnimi) AND isset($laji) AND trim($laji)){
-		LisaaLapsi($ISI,$laji, $kukarow, $Lnimi,$plft, $subd,$koodi);
+	if (isset($KatNimi) AND trim($KatNimi) != '' AND $tee == 'paakat' AND isset($toim) AND trim($toim)) {
+		LisaaPaaKat($toim, $KatNimi);
 		$tee = '';
 	}
 
 	// poistaa ja upgradettaa alemmat lapset isommaksi.
-	if (isset($tee) and $tee == 'poista' and isset($ISI) AND trim($laji)){
-		PoistaLapset($ISI, $plft, $laji,$kukarow);
+	if (isset($tee) and $tee == 'poista' and isset($lft) AND trim($lft) != ''){
+		PoistaLapset($toim, $lft);
 		$tee = '';
 	}
 
-	// muutetaan kategorian nime‰ uusiksi
-	if (isset($tee) and $tee == 'muokkaa' and isset($uusinimi) and isset($ISI) AND isset($laji) AND trim($laji)) {
+	// lis‰t‰‰n kategorialle lapsi
+	if (isset($tee) and $tee == 'lisaa' AND isset($uusi_nimi) AND trim($uusi_nimi) != "" AND isset($toim) AND trim($toim) != "") {
 
-		if (trim($uusinimi) == "") {
-			echo "<font class='error'>", t('Et voi laittaa tyhj‰‰ arvoa uudeksi arvoksi')," !</font>";
-		}
-		else {
-			paivitakat($ISI, $uusinimi,$laji,$kukarow,$koodi, $kategoriaid);
-		}
-		$tee = '';
-	}
-
-	// Lisˆt‰‰n uusi taso ja tarkistetaan ettei nimi ole tyhj‰.
-	if (isset($tee) and $tee == 'taso' and isset($tasonimi) and isset($ISI) AND trim($laji)) {
-
-		if (trim($tasonimi) == "") {
+		if (trim($uusi_nimi) == "") {
 			echo "<font class='error'>", t('Et voi antaa tyhj‰‰ arvoa uudeksi tason nimeksi')," !!</font>";
 		}
 		else {
-			LisaaTaso($ISI, $tasonimi ,$plft, $laji,$kukarow, $tkoodi);
+			LisaaLapsi($toim, $lft, $syvyys, $uusi_koodi, $uusi_nimi);
 		}
+
 		$tee = '';
 	}
 
 	//  T‰m‰ luo lomakkeen alikategorian lis‰‰miseen
-	if (isset($ISI) AND trim($ISI) != "" AND isset($tee) and $tee == 'lisaa') {
-
+	if (isset($nimi) AND trim($nimi) != "" AND isset($tee) and $tee == 'lisaa') {
 		echo "<form method='POST' autocomplete='off'>";
-		echo "<table><tr><th>",t('Ylemm‰n Kategorian nimi'),":</th><td>".$ISI."</td></tr>";
-		echo "<tr><th>",t('Kirjoita kategorian nimi'),":</th><td><input type='text' size='30' name='Lnimi' /></td></tr>";
-		echo "<tr><th>",t('Kirjoita alakategorian koodi'),":</th><td><input type='text' size='30' name='koodi' /></td></tr>";
-		echo "<tr><td><input type='submit' value='",t('Tallenna Alakategoria'),"' /></td></tr></table>";
-		echo "<input type='hidden' name='tee' value='lisaa' />";
-		echo "<input type='hidden' name='laji' value='$laji' />";
-		echo "<input type='hidden' name='plft' value='".$plft."' />";
-		echo "</form><br />";
+		echo "<table><tr><th>",t('Ylemm‰n Kategorian nimi'),":</th><td>$nimi</td></tr>";
+		echo "<tr><th>",t('Alakategorian nimi'),":</th><td><input type='text' size='30' name='uusi_nimi' /></td></tr>";
+		echo "<tr><th>",t('Alakategorian koodi'),":</th><td><input type='text' size='30' name='uusi_koodi' /></td></tr>";
+		echo "</table><br>";
+		echo "<input type='hidden' name='tee'    value='lisaa' />";
+		echo "<input type='hidden' name='lft'    value='$lft' />";
+		echo "<input type='hidden' name='syvyys' value='$syvyys' />";
+		echo "<input type='submit' value='",t('Tallenna Alakategoria'),"' />";
+		echo "</form><br><br>";
 	}
 
-	// t‰m‰ tulostaa nimen-muutos lomakkeen
-	if (isset($ISI) AND trim($ISI) != "" AND isset($tee) and $tee == 'muokkaa') {
+	// Lisˆt‰‰n uusi taso ja tarkistetaan ettei nimi ole tyhj‰.
+	if (isset($tee) and $tee == 'taso' AND isset($uusi_nimi) AND trim($uusi_nimi) != "" AND isset($toim) AND trim($toim) != "") {
 
-		echo "<form method='POST' autocomplete='off'>";
-		echo "<table><tr><th>",t('Kategorian nimi'),":</th><td>".$ISI."</td></tr>";
-		echo "<tr><th>",t('Kirjoita kategorian uusinimi'),":</th><td><input type='text' size='30' name='uusinimi' /></td></tr>";
-		echo "<tr><th>",t('Muokkaa kategorian koodia'),":</th><td><input type='text' size='30' name='koodi' value='".$koodi."'/></td></tr>";
-		echo "<tr><td><input type='submit' value='",t('Tallenna Alakategoria'),"' /></td></tr></table>";
-		echo "<input type='hidden' name='tee' value='muokkaa' />";
-		echo "<input type='hidden' name='ISI' value='".$ISI."' />";
-		echo "<input type='hidden' name='laji' value='".$laji."' />";
-		echo "<input type='hidden' name='kategoriaid' value='".$kategoriaid."' />";
-		echo "</form><br />";
+		if (trim($uusi_nimi) == "") {
+			echo "<font class='error'>", t('Et voi antaa tyhj‰‰ arvoa uudeksi tason nimeksi')," !!</font>";
+		}
+		else {
+			LisaaTaso($toim, $lft, $uusi_koodi, $uusi_nimi);
+		}
+
+		$tee = '';
 	}
 
 	// t‰m‰ tulostaa Tason-lis‰ys lomakkeen
-	if (isset($ISI) AND trim($ISI) != "" AND isset($tee) and $tee == 'taso') {
-
+	if (isset($nimi) AND trim($nimi) != "" AND isset($tee) and $tee == 'taso') {
 		echo "<form method='POST' autocomplete='off'>";
-		echo "<table><tr><th>",t('Kategorian nimi'),":</th><td>".$ISI."</td></tr>";
-		echo "<tr><th>",t('Kirjoita uusi tason nimi'),":</th><td><input type='text' size='30' name='tasonimi' /></td></tr>";
-		echo "<tr><th>",t('Kirjoita tason koodi'),":</th><td><input type='text' size='30' name='tkoodi' /></td></tr>";
-		echo "<tr><td><input type='submit' value='",t('Tallenna taso'),"' /></td></tr></table>";
+		echo "<table>";
+		echo "<tr><th>",t('Kategorian nimi'),":</th><td>$nimi</td></tr>";
+		echo "<tr><th>",t('Uuden kategorian nimi'),":</th><td><input type='text' size='30' name='uusi_nimi' /></td></tr>";
+		echo "<tr><th>",t('Uuden kategorian koodi'),":</th><td><input type='text' size='30' name='uusi_koodi' /></td></tr>";
+		echo "</table><br>";
 		echo "<input type='hidden' name='tee' value='taso' />";
-		echo "<input type='hidden' name='ISI' value='".$ISI."' />";
-		echo "<input type='hidden' name='plft' value='".$plft."' />";
-		echo "<input type='hidden' name='laji' value='".$laji."' />";
-		echo "</form><br />";
+		echo "<input type='hidden' name='lft' value='".$lft."' />";
+		echo "<input type='submit' value='",t('Tallenna taso'),"' />";
+		echo "</form><br><br>";
 	}
 
-	if (isset($laji) AND trim($laji) == '' ) {
-		unset($tee);
+	// muutetaan kategorian nime‰ uusiksi
+	if (isset($tee) and $tee == 'muokkaa' and isset($uusi_nimi) AND trim($uusi_nimi) != "" AND isset($toim) AND trim($toim) != "") {
+
+		if (trim($uusi_nimi) == "") {
+			echo "<font class='error'>", t('Et voi laittaa tyhj‰‰ arvoa uudeksi arvoksi')," !</font>";
+		}
+		else {
+			paivitakat($toim, $uusi_koodi, $uusi_nimi, $kategoriaid);
+		}
+		$tee = '';
 	}
 
-	// Tarkistetaan ett‰ toim muuttujan sis‰ltˆ tulee t‰nne saakka ja haetaan tarkka lajinimi kannasta.
-	if (isset($toim)) {
-		$toimiq = "select selite from avainsana where laji='dynaaminen_puu' AND selite like '$toim%' AND yhtio='$kukarow[yhtio]'";
-		$toimir = mysql_query($toimiq) or pupe_error($toimiq);
-		$toimirow = mysql_fetch_assoc($toimir);
-		$laji = $toimirow['selite'];
+	// t‰m‰ tulostaa nimen-muutos lomakkeen
+	if (isset($nimi) AND trim($nimi) != "" AND isset($tee) and $tee == 'muokkaa') {
+		echo "<form method='POST' autocomplete='off'>";
+		echo "<table><tr><th>",t('Kategorian nimi'),":</th><td>$nimi</td></tr>";
+		echo "<tr><th>",t('Kategorian nimi'),":</th><td><input type='text' size='30' name='uusi_nimi' value='$nimi'/></td></tr>";
+		echo "<tr><th>",t('Kategorian koodi'),":</th><td><input type='text' size='30' name='uusi_koodi' value='$koodi'/></td></tr>";
+		echo "</table><br>";
+		echo "<input type='hidden' name='tee' value='muokkaa' />";
+		echo "<input type='hidden' name='laji' value='$toim' />";
+		echo "<input type='hidden' name='kategoriaid' value='$kategoriaid' />";
+		echo "<input type='submit' value='",t('Tallenna kategoria'),"' />";
+		echo "</form><br><br>";
 	}
 
 	if (isset($toim)) {
@@ -156,135 +145,92 @@
 		$query = "	SELECT
 					node.lft AS lft,
 					node.rgt AS rgt,
-					lower(node.nimi) AS node_nimi,
+					node.nimi AS node_nimi,
 					node.koodi AS node_koodi,
-					node.lft AS plft,
-					(COUNT(node.nimi) - 1)AS sub_dee,
-					node.lft AS parent_lft,
-					node.tunnus AS node_tunnus
-					FROM dynaaminen_puu AS node, dynaaminen_puu AS parent
-					WHERE node.lft BETWEEN parent.lft
-					AND parent.rgt
-					AND node.laji = '{$laji}'
-					AND parent.laji = '{$laji}'
-					AND node.yhtio = '{$kukarow[yhtio]}'
-					GROUP BY
-					node.lft
-					ORDER BY
-					node.lft";
+					node.tunnus AS node_tunnus,
+					(COUNT(node.tunnus) - 1) AS syvyys
+					FROM dynaaminen_puu AS node
+					JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
+					WHERE node.yhtio = '{$kukarow["yhtio"]}'
+					AND node.laji = '{$toim}'
+					GROUP BY node.lft
+					ORDER BY node.lft";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// Mik‰li sivulle tullaan ensimm‰isen kerran ja p‰‰kategoriaa ei ole niin t‰m‰ luo kyseisen kategorian.
 		if (mysql_num_rows($result) == 0) {
-
 			echo "<form method='POST'>";
-			echo "<table><tr><th>",t('Perusta '),"</th><th> $laji </th>";
-			echo "<input type='hidden' size='30' name='KatNimi' value='$laji'/></tr>";
+			echo "<table><tr><th>",t('Perusta'),"</th><th>$toim</th>";
+			echo "<input type='hidden' size='30' name='KatNimi' value='$toim'/></tr>";
 			echo "<tr><td></td><td><input type='submit' value='",t('Perusta kategoria'),"' /></td></tr>";
 			echo "<input type='hidden' name='tee' value='paakat' />";
-			echo "<input type='hidden' name='laji' value='$laji' />";
 			echo "<input type='hidden' name='toim' value='$toim' />";
-			echo "<input type='hidden' name='toim2' value='$toim2' />";
-			echo "<input type='hidden' name='mista_tulin' value='$mista_tulin' />";
 			echo "</table></form>";
 
 		}
-		elseif ($tee == 'tuotteet') {
-
-				echo "<form method='GET'>";
-				echo "<table>";
-
-				while ($row = mysql_fetch_assoc($result)) {
-
-					echo "\n<tr>";
-
-					for ($i = 0; $i < $row['sub_dee']; $i++) {
-						echo "\n<td width='0' class='back'>&nbsp;</td>"; // tulostaa taulun syvyytt‰
-					}
-
-					if ($row['plft'] == 1) {
-						echo "\n<td nowrap rowspan='",lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow)+2,"'>{$row['node_nimi']}";
-
-						echo "</td></tr>\n";
-						echo "\n<tr><td class='back'>&nbsp;</td></tr>";
-						// tulostaa p‰‰kategorian viereen tyhj‰n ruuduun niin nˆytt‰‰ paremmalta.
-					}
-					else {
-						if ($row['node_koodi'] == 0) {
-							$row['node_koodi']='';
-						}
-
-						$check = '';
-						if (in_array($row['node_tunnus'], $Xnodet)) {
-							$check = ' checked';
-						}
-
-						// jos arrayn joku sis‰ltˆ vastaa vastaa node_tunnusta, tulostetaan check-boxiin rasti, muussa tapauksessa tulostetaan tyhj‰ boksi
-						echo "\n<td rowspan='",lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow)+1,"'><input type='checkbox' name='id[]' value='{$row[node_tunnus]}' $check />&nbsp;",$row['node_koodi'] ,' ',ucwords(strtolower(str_replace('/', ', ', $row['node_nimi'])))," ({$row['node_tunnus']})</td></tr>";
-
-					}
-				}
-
-				echo "</table><br /><br />";
-				echo "<input type='hidden' name='laji' value='".$laji."' />";
-				echo "<input type='hidden' name='kieli' value='".$kieli."' />";
-				echo "<input type='hidden' name='yhtio' value='".$kukarow['yhtio']."' />";
-				echo "<input type='hidden' name='tuoteno' value='".$tuoteno."' />";
-				echo "<input type='hidden' name='tee' value='valitse' />";
-				echo "<input type='hidden' name='ttunnus' value='".$ttunnus."' />";
-				echo "<input type='hidden' name='toim' value='".$toim."' />";
-				echo "<input type='hidden' name='kategoriaid' value='".$row['node_tunnus']."' />";
-				echo "<input type='hidden' name='mista_tulin' value='$mista_tulin' />";
-				echo "<input type='hidden' name='toim2' value='$toim2' />";
-				echo "<input type='submit' name='valitse' value='",t('Tallenna valinnat tuotteelle'),"'>";
-				echo "</form>";
-		}
-
 		else {
+
+			if ($tee == 'valitsesegmentti') {
+				echo "<form method='POST'>";
+			}
 
 			echo "<table>";
 
 			while ($row = mysql_fetch_assoc($result)) {
-
 				echo "\n<tr>";
 
-				for ($i = 0; $i < $row['sub_dee']; $i++) {
+				for ($i = 0; $i < $row['syvyys']; $i++) {
 					echo "\n<td width='0' class='back'>&nbsp;</td>"; // tulostaa taulun syvyytt‰
 				}
 
-				if ($row['plft'] == 1) {
-					echo "\n<td nowrap rowspan='",lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow)+2,"'>{$row['node_nimi']}";
+				if ($row['node_koodi'] == 0) $row['node_koodi'] = '';
 
-					if ($oikeus != '') {
-						echo "\n<br /><a href='?toim=$toim&laji=$laji&ISI=".$row['node_nimi']."&tee=lisaa&plft=".$row['plft']."&subd=".$row['sub_dee']."'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰ lapsikategoria'),"'/></a>";
-					 	echo "\n&nbsp;<a href='?toim=$toim&laji=$laji&ISI=".$row['node_nimi']."&tee=poista&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";	
-					 	echo "\n&nbsp;<a href='?toim=$toim&laji=$laji&ISI=".$row['node_nimi']."&tee=muokkaa&plft=".$row['plft']."&kategoriaid=".$row['node_tunnus']."'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
-						echo "\n&nbsp;<a href='?toim=$toim&laji=$laji&ISI=".$row['node_nimi']."&tee=taso&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/folder-new.png' alt='",t('Lis‰‰ taso'),"'/></a>";
-					}
+				$lastenmaara = lapset($toim, $row['lft']);
 
-					echo "</td></tr>\n";    
-					echo "\n<tr><td class='back'>&nbsp;</td></tr>";
-					// tulostaa p‰‰kategorian viereen tyhj‰n ruuduun niin nˆytt‰‰ paremmalta.
+				if ($row['lft'] == 1) {
+					$rowspan = $lastenmaara+1;
 				}
 				else {
-					if ($row['node_koodi'] == 0) {$row['node_koodi']='';}
-					echo "\n<td rowspan='",lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow)+1,"'>",$row['node_koodi'] ,' ',ucwords(strtolower(str_replace('/', ', ', $row['node_nimi'])))," ($row[node_tunnus])";
-
-					if ($oikeus != '') {
-						echo "\n<br /><a href='?toim=$toim&koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=lisaa&plft=".$row['plft']."&subd=".$row['sub_dee']."'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰ lapsikategoria'),"'/></a>";
-					 	echo "\n&nbsp;<a href='?toim=$toim&koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=poista&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";	
-					 	echo "\n&nbsp;<a href='?toim=$toim&koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=muokkaa&plft=".$row['plft']."&kategoriaid=".$row['node_tunnus']."'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
-					}
-
-					if ($oikeus != '' and lapset($row['node_nimi'],$row['parent_lft'],$laji,$kukarow) > 0) {
-						echo "\n&nbsp;<a href='?toim=$toim&koodi=".$row['node_koodi']."&laji=$laji&ISI=".$row['node_nimi']."&tee=taso&plft=".$row['plft']."'><img src='{$palvelin2}pics/lullacons/folder-new.png' alt='",t('Lis‰‰ taso'),"'/></a>";
-					}
-					echo "</td></tr>";
-
+					$rowspan = $lastenmaara;
 				}
+
+				echo "\n<td rowspan='$rowspan'>",$row['node_koodi'] ,' ',ucwords(strtolower(str_replace('/', ', ', $row['node_nimi'])))," ($row[node_tunnus])<hr>";
+
+				if ($tee == "valitsesegmentti") {
+					$check = '';
+					if (in_array($row['node_tunnus'], explode(",", $puun_tunnus))) {
+						$check = 'checked';
+					}
+
+					echo "\n<br /><input type='checkbox' name='id[]' value='{$row["node_tunnus"]}' $check />";
+				}
+				elseif ($oikeus != '') {
+					echo "\n<br /><a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&syvyys={$row['syvyys']}&tee=lisaa'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰ lapsikategoria'),"'/></a>";
+				 	if ($row['lft'] > 1) echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&tee=poista'><img src='{$palvelin2}pics/lullacons/remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";
+				 	echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&koodi={$row['node_koodi']}&lft={$row['lft']}&tee=muokkaa&kategoriaid={$row['node_tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
+
+					if ($lastenmaara > 1) {
+						echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&tee=taso'><img src='{$palvelin2}pics/lullacons/folder-new.png' alt='",t('Lis‰‰ taso'),"'/></a>";
+					}
+				}
+
+				echo "</td></tr>";
+
+				if ($row['lft'] == 1) echo "\n<tr><td class='back'>&nbsp;</td></tr>";
 			}
 
 			echo "</table><br /><br />";
+
+			if ($tee == 'valitsesegmentti') {
+				echo "<input type='hidden' name='toim' 		value='$toim' />";
+				echo "<input type='hidden' name='tee' 		value='valitse' />";
+				echo "<input type='hidden' name='kieli' 	value='$kieli' />";
+				echo "<input type='hidden' name='liitos'	value='$liitos' />";
+				echo "<input type='hidden' name='ttunnus'	value='$ttunnus' />";
+				echo "<input type='hidden' name='mista' 	value='$mista' />";
+				echo "<input type='submit' name='valitse'	value='",t('Tallenna valinnat'),"'>";
+				echo "</form>";
+			}
 		}
 	}
 

@@ -341,6 +341,20 @@
 			break;
 		case "C":
 			$laskutyyppi = "Reklamaatio";
+			switch($alatila) {
+				case "A":
+					$alatila = "Odottaa tuotteita";
+					break;
+				case "B":
+					$alatila = "Reklamaatio vastaanotettu";
+					break;
+				case "C":
+					$alatila = "Reklamaatio hyllytet‰‰n";
+					break;
+				case "X":
+					$alatila = "Reklamaatio valmis laskutettavaksi";
+					break;
+			}
 			break;
 		case "0":
 			$laskutyyppi = "Yll‰pitosopimus";

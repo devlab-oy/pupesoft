@@ -659,7 +659,7 @@
 					echo "</select></td></tr>";
 
 					if (!isset($krow['hyvaksyja_maksimisumma'])) $krow['hyvaksyja_maksimisumma'] = 0;
-					
+
 					echo "<tr><th align='left'>",t("Hyv‰ksyj‰n maksimisumma"),":</th>";
 					echo "<td><input type='text' name='hyvaksyja_maksimisumma' value='$krow[hyvaksyja_maksimisumma]'></td></tr>";
 
@@ -1065,26 +1065,17 @@
 					if ($krow['naytetaan_katteet_tilauksella'] == "") {
 						$sel1 = "SELECTED";
 						$sel2 = "";
-						$sel3 = ""; 
-						$sel4 = "";
+						$sel3 = "";
 					}
 					if ($krow['naytetaan_katteet_tilauksella'] == "Y") {
 						$sel1 = "";
 						$sel2 = "SELECTED";
-						$sel3 = ""; 
-						$sel4 = "";
+						$sel3 = "";
 					}
 					if ($krow['naytetaan_katteet_tilauksella'] == "N") {
 						$sel1 = "";
 						$sel2 = "";
-						$sel3 = "SELECTED";  
-						$sel4 = "";
-					}   
-					if ($krow['naytetaan_katteet_tilauksella'] == "O") {
-						$sel1 = "";
-						$sel2 = "";
-						$sel3 = ""; 
-						$sel4 = "SELECTED";
+						$sel3 = "SELECTED";
 					}
 
 					echo "<tr><th align='left'>".t("Katteet n‰ytet‰‰n tilauksentekovaiheessa").":</th>
@@ -1092,7 +1083,6 @@
 							<option value=''  $sel1>".t("Oletus")."</option>
 							<option value='Y' $sel2>".t("Kate n‰ytet‰‰n")."</option>
 							<option value='N' $sel3>".t("Katetta ei n‰ytet‰")."</option>
-							<option value='O' $sel4>".t("N‰ytet‰‰n ostohinta")."</option> 
 							</select></td></tr>";
 
 					echo "<tr><th align='left'>".t("Lomaoikeus").":</th>

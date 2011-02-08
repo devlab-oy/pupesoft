@@ -46,6 +46,22 @@
 			else {
 				$ruksaa = array_merge($pakolliset,$wherelliset);
 			}
+
+			// Oletusaliakset ja onko niissä pakollisia
+			$query = "	SELECT distinct selite
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji = 'MYSQLALIAS'
+						and selite like '{$table}.%'
+						and selitetark_2 = ''
+						and selitetark_3 = 'PAKOLLINEN'";
+			$al_res = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($al_res) > 0) {
+				while ($pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res)) {
+					$ruksaa[] = strtoupper(str_replace("$table.", "", $pakollisuuden_tarkistus_rivi["selite"]));
+				}
+			}
 		}
 
 		if ($kysely != $edkysely) {

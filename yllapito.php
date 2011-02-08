@@ -264,7 +264,7 @@
 			}
 
 			// Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
-			$al_nimi   = mysql_field_name($result, $i);
+			$al_nimi = mysql_field_name($result, $i);
 
 			$query = "	SELECT *
 						FROM avainsana
@@ -295,17 +295,10 @@
 			if ($virhe[$i] != "") {
 				$errori = 1;
 			}
-
-			if (mysql_num_rows($al_res) != 0 and $pakollisuuden_tarkistus_rivi['selitetark_3'] == "PAKOLLINEN") {
-
-				if (mysql_field_type($result, $i) == 'real') {
-					$tarkistustieto = (float) str_replace(",", ".", $t[$i]);
-				}
-				else {
-					$tarkistustieto = trim($t[$i]);
-				}
-
-				if ($tarkistustieto == "" or $tarkistustieto == 0) {
+			
+			if (mysql_num_rows($al_res) != 0 and strtoupper($pakollisuuden_tarkistus_rivi['selitetark_3']) == "PAKOLLINEN") {
+				if (((mysql_field_type($result, $i) == 'real' or  mysql_field_type($result, $i) == 'int') and (float) str_replace(",", ".", $t[$i]) == 0) or
+				     (mysql_field_type($result, $i) != 'real' and mysql_field_type($result, $i) != 'int' and trim($t[$i]) == "")) {
 					$virhe[$i] .= t("Tieto on pakollinen")."!";
 					$errori = 1;
 				}
@@ -1245,8 +1238,8 @@
 			$query = "	SELECT *
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						and laji='MYSQLALIAS'
-						and selite='$toim.$al_nimi'
+						and laji = 'MYSQLALIAS'
+						and selite = '$toim.$al_nimi'
 						$al_lisa";
 			$al_res = mysql_query($query) or pupe_error($query);
 

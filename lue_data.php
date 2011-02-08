@@ -1349,12 +1349,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				$t 		= array();
 				$virhe 	= array();
 				$poistolukko = "LUEDATA";
-				
+
 				// Jos on uusi rivi niin kaikki lukot on auki
 				if ($rivi[$postoiminto] == 'LISAA') {
-					$poistolukko = "";	
+					$poistolukko = "";
 				}
-				
+
 				//	Otetaan talteen query..
 				$lue_data_query = $query;
 
@@ -1420,24 +1420,19 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 							$tarkista_sarake = mysql_field_name($result, $i);
 
+							// Oletusaliakset
 							$query = "	SELECT *
 										FROM avainsana
 										WHERE yhtio = '$kukarow[yhtio]'
 										and laji = 'MYSQLALIAS'
-										and selite = '$table_mysql.$tarkista_sarake'";
+										and selite = '$table_mysql.$tarkista_sarake'
+										and selitetark_2 = ''";
 							$al_res = mysql_query($query) or pupe_error($query);
 							$pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
 
-							if (mysql_num_rows($al_res) != 0 and $pakollisuuden_tarkistus_rivi['selitetark_3'] == "PAKOLLINEN") {
-
-								if (mysql_field_type($result, $i) == 'real') {
-									$tarkistustieto = (float) str_replace(",", ".", $t[$i]);
-								}
-								else {
-									$tarkistustieto = trim($t[$i]);
-								}
-
-								if ($tarkistustieto == "" or $tarkistustieto == 0) {
+							if (mysql_num_rows($al_res) != 0 and strtoupper($pakollisuuden_tarkistus_rivi['selitetark_3']) == "PAKOLLINEN") {
+								if (((mysql_field_type($result, $i) == 'real' or  mysql_field_type($result, $i) == 'int') and (float) str_replace(",", ".", $t[$i]) == 0) or
+								     (mysql_field_type($result, $i) != 'real' and mysql_field_type($result, $i) != 'int' and trim($t[$i]) == "")) {
 									$virhe[$i] .= t("Tieto on pakollinen")."!";
 									$errori = 1;
 								}

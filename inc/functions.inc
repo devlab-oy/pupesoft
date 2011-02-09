@@ -9838,24 +9838,24 @@ if (!function_exists("lapset")) {
 	function lapset($laji, $left) {
 		global $kukarow;
 
-		$qu = "	SELECT node.nimi, (COUNT(parent.tunnus) - (sub_tree.depth + 1)) AS depth
-					FROM dynaaminen_puu AS node
-					JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND node.lft BETWEEN parent.lft AND parent.rgt)
-					JOIN (	SELECT node.tunnus, (COUNT(parent.tunnus) - 1) AS depth
-							FROM dynaaminen_puu AS node
-							JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND node.lft BETWEEN parent.lft AND parent.rgt)
-							WHERE node.yhtio = '{$kukarow["yhtio"]}'
-							AND node.laji 	 = '$laji'
-							AND node.lft 	 = '$left'
-							GROUP BY node.tunnus
-							ORDER BY node.lft) AS sub_tree
-					JOIN dynaaminen_puu AS sub_parent ON (sub_parent.yhtio = node.yhtio AND sub_parent.laji = node.laji AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt AND sub_parent.tunnus = sub_tree.tunnus)
-					WHERE node.yhtio = '{$kukarow["yhtio"]}'
-					AND node.laji 	= '$laji'
-					GROUP BY node.nimi
-					ORDER BY node.lft";
+		$qu = "	SELECT node.tunnus, (COUNT(parent.tunnus) - (sub_tree.depth + 1)) AS depth
+				FROM dynaaminen_puu AS node
+				JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND node.lft BETWEEN parent.lft AND parent.rgt)
+				JOIN (	SELECT node.tunnus AS tunnus, (COUNT(parent.tunnus) - 1) AS depth
+						FROM dynaaminen_puu AS node
+						JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND node.lft BETWEEN parent.lft AND parent.rgt)
+						WHERE node.yhtio = '{$kukarow["yhtio"]}'
+						AND node.laji 	 = '$laji'
+						AND node.lft 	 = '$left'
+						GROUP BY node.tunnus
+						ORDER BY node.lft) AS sub_tree
+				JOIN dynaaminen_puu AS sub_parent ON (sub_parent.yhtio = node.yhtio AND sub_parent.laji = node.laji AND sub_parent.tunnus = sub_tree.tunnus AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt)
+				WHERE node.yhtio = '{$kukarow["yhtio"]}'
+				AND node.laji 	= '$laji'
+				GROUP BY node.tunnus
+				ORDER BY node.lft";
 		$re = mysql_query($qu) or pupe_error($qu);
-
+		
 		return mysql_num_rows($re);
 	}
 }

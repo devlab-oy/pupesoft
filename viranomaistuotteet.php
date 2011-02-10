@@ -64,7 +64,7 @@ if ($tee == 'PERUSTA') {
 
 if ($tee == 'POISTA') {
 	
-	$edellisetvuodet = $annettuvuosipoista-2000; // jos tahdotaan kuluvavuosi niin arvoksi 2000 
+	$edellisetvuodet = $annettuvuosipoista-2001;  
 	
 	$query = "	SELECT group_concat(tunnus) tunnus FROM tuote where yhtio = '$kukarow[yhtio]' and tuoteno like 'PR-%-$edellisetvuodet' and status !='P' and tuotetyyppi in('A','B')";
 	$result =	mysql_query($query) or pupe_error($query);
@@ -75,7 +75,7 @@ if ($tee == 'POISTA') {
 		$updatesql = "	UPDATE tuote set status = 'P' where yhtio = '$kukarow[yhtio]' and tunnus in ($rivi[tunnus])";
 		$result =	mysql_query($updatesql) or pupe_error($updatesql);
 		
-		echo "<br>".t("Poistettiin käytöstä vuoden ennen"). $annettuvuosipoista .t(" olevat päivärahat käytöstä")."<br>";
+		echo "<br>".t("Poistettiin käytöstä vuoden ennen "). $annettuvuosipoista .t(" olevat päivärahat käytöstä")."<br>";
 		unset($tee);
 	}
 	else {
@@ -288,6 +288,61 @@ if ($tee == 'LUO' and (trim($tilinumero) == '' or trim($annettuvuosi) == '')) {
 	unset($tee);
 }
 
+if ($tee == "synkronoi") {
+
+	$ok = FALSE;
+
+	if ($file = fopen("http://www.devlab.fi/softa/referenssiviranomaistuotteet.sql","r")) {
+		$ok = TRUE;
+	}
+	elseif ($file = fopen("http://10.0.1.2/referenssiviranomaistuotteet.sql","r")) {
+		$ok = TRUE;
+	}
+
+	if (!$ok) {
+		echo t("Tiedoston avaus epäonnistui")."!";
+		require ("inc/footer.inc");
+		exit;
+	}
+
+	echo "<br><br>";
+	echo t("Poistetaan vanhat päivärahat")."...<br>";
+
+	// Poistetaan nykyiset nimikkeet....
+	$query  = "	DELETE FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuotetyyppi in('A','B')";
+	$result = mysql_query($query) or pupe_error($query);
+
+	// Eka rivi roskikseen
+	$rivi = fgets($file);
+
+	echo t("Lisätään uudet päivärahat tietokantaan")."...<br>";
+
+	while ($rivi = fgets($file)) {
+		list($tuoteno, $nimitys, $alv, $kommentoitava, $kuvaus, $myyntihinta, $tuotetyyppi, $vienti) = explode("\t", trim($rivi));
+
+		$query  = "	INSERT INTO tuote SET 
+					tuoteno			= '$tuoteno',
+					nimitys         = '$nimitys',
+					alv             = '$alv',
+					kommentoitava   = '$kommentoitava',
+					kuvaus          = '$kuvaus',
+					myyntihinta     = '$myyntihinta',
+					tuotetyyppi     = '$tuotetyyppi',
+					vienti          = '$vienti',
+					yhtio			= '$kukarow[yhtio]',
+					laatija			= '$kukarow[kuka]',
+					luontiaika		= now()";
+		$result = mysql_query($query) or pupe_error($query);
+	
+	}
+
+	fclose($file);
+
+	echo t("Päivitys referenssistä valmis")."...<br><br><hr>";
+	unset($tee);
+	echo "<br>";
+}
+
 
 
 if ($tee == '') {
@@ -307,9 +362,17 @@ if ($tee == '') {
 
 	echo "<form method='post' action='$PHP_SELF'>";
 	echo "<table>";
-	echo "<tr><th>".t("Poista edelliset ennen vuotta")." ".date('Y')." ".t("ulkomaanpäivärahat käytöstä")."</th>";
+	echo "<tr><th>".t("Poista ennen vuotta")." ".date('Y')." ".t("ulkomaanpäivärahat käytöstä")."</th>";
 	echo "<td><input type='submit' value='".t("Poista")."'></td>";
 	echo "<input type='hidden' name='tee' value='POISTA'><input type='hidden' name='annettuvuosipoista' value='".date('Y')."' size='4'><tr>";
+	echo "</table>";
+	echo "</form>";
+	
+	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<table>";
+	echo "<tr><th>".t("Synkronoidaan referenssistä")."</th>";
+	echo "<td><input type='submit' value='".t("Synkronoi")."'></td>";
+	echo "<input type='hidden' name='tee' value='synkronoi'><tr>";
 	echo "</table>";
 	echo "</form>";
 

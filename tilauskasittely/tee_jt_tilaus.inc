@@ -579,7 +579,6 @@
 								$kommentti .= trim($lisataanrow['kommentti']);
 							}
 
-
 							if ($lisataanrow["vanha_otunnus"] > 0) {
 								$alkupotunnus = $lisataanrow["vanha_otunnus"];
 							}
@@ -659,11 +658,16 @@
 							else {
 								$hinta = $lisataanrow["hinta"];
 							}
+							
+							// jos käytössä on myyntihinnan poikkeava määrä, kerrotaan hinta takaisin kuntoon.
+							if ($trow["myyntihinta_maara"] != 0) {
+								$hinta = $hinta * $trow["myyntihinta_maara"];
+							}
 
 							if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 								//Käytetään alkuperäisen JT-rivin otsikon valuuttakurssia
 								$hinta = laskuval($hinta, $isarivirow["vienti_kurssi"]);
-							}
+							}							
 
 							require("lisaarivi.inc");
 

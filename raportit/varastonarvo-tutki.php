@@ -217,40 +217,87 @@
 		while ($trow = mysql_fetch_array ($result)) {
 
 			// haetaan kaikki keikkaan liitetyt vaihto-omaisuus ja rahtilaskut
-			$query = "	SELECT ifnull(group_concat(vanhatunnus), 0) ostolaskut, group_concat(concat(lasku.ytunnus, ' ', lasku.nimi, ' ', lasku.tapvm, ' ', lasku.summa, ' ', lasku.valkoodi, ' = ', round(lasku.summa*lasku.vienti_kurssi,2), ' EUR<br>') SEPARATOR '') laskut
+			$query = "	SELECT
+						sum(if(vienti in ('B','E','H'), summa, 0)) rahtilaskusumma,
+						group_concat(if(vienti in ('B','E','H'), vanhatunnus, NULL)) rahtilaskut,
+						group_concat(if(vienti in ('C','J','F','K','I','L'), vanhatunnus, NULL)) ostolaskut,
+						group_concat(concat(ytunnus, ' ', nimi, ' ', tapvm, ' ', summa, ' ', valkoodi, ' = ', round(summa*vienti_kurssi,2), ' EUR<br>') SEPARATOR '') laskut
 						from lasku
 						where yhtio = '$kukarow[yhtio]'
-						and lasku.laskunro = '$trow[laskunro]'
-						and lasku.tila = 'K'
-						and lasku.vanhatunnus != 0";
+						and laskunro = '$trow[laskunro]'
+						and tila = 'K'
+						and vanhatunnus != 0";
 			$keikres = mysql_query($query) or pupe_error($query);
 			$keekrow = mysql_fetch_array($keikres);
 
-			// haetaan liitettyjen laskujen laskujen varastonmuutos kirjanpidosta
-			$query = "	SELECT sum(tiliointi.summa) varastonmuutos
-						FROM tiliointi
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-						and tiliointi.ltunnus in ($keekrow[ostolaskut])
-						and tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
-						and tiliointi.korjattu = ''";
-			$kpres = mysql_query($query) or pupe_error($query);
-			$kprow = mysql_fetch_array($kpres);
-			$kpmuutos += $kprow["varastonmuutos"];
+			// Nollataan nämä
+			$kprow = array();
+			$k2prow = array();
+			
+			$kprow["varastonmuutos"] = 0;
+			$k2prow["varastonmuutosrahti"] = 0;
 
-			// haetaan keikan arvo tapahtumilta
+			// haetaan liitettyjen tavara-laskujen laskujen varastonmuutos kirjanpidosta
+			if ($keekrow["ostolaskut"] != "") {
+				$query = "	SELECT sum(summa) varastonmuutos
+							FROM tiliointi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and ltunnus in ($keekrow[ostolaskut])
+							and tilino in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
+							and korjattu = ''";
+				$kpres = mysql_query($query) or pupe_error($query);
+				$kprow = mysql_fetch_array($kpres);
+
+				$kpmuutos += $kprow["varastonmuutos"];
+			}
+
+			// haetaan liitettyjen rahti-laskujen varastonmuutos kirjanpidosta
+			// suuntaa-antava, koska rahtilaskusta on voitu liittää vain osa tähän keikkaan
+			if ($keekrow["rahtilaskut"] != "") {
+				$query = "	SELECT sum(summa) rahtilaskusummakokonaan
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus in ($keekrow[rahtilaskut])";
+				$k2pres = mysql_query($query) or pupe_error($query);
+				$k2prow = mysql_fetch_array($k2pres);
+
+				// Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
+				$query = "	SELECT sum(summa) summa
+							from tiliointi
+							where yhtio	= '$kukarow[yhtio]'
+							and ltunnus in ($keekrow[rahtilaskut])
+							and tilino  = '$yhtiorow[alv]'
+							and korjattu = ''";
+				$alvires = mysql_query($query) or pupe_error($query);
+				$alvirow = mysql_fetch_array($alvires);
+
+				$rahtipros = $keekrow["rahtilaskusumma"] / ($k2prow["rahtilaskusummakokonaan"]-$alvirow["summa"]);
+
+				$query = "	SELECT round(sum(summa) * $rahtipros, 2) varastonmuutosrahti
+							FROM tiliointi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and ltunnus in ($keekrow[rahtilaskut])
+							and tilino in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
+							and korjattu = ''";
+				$k2pres = mysql_query($query) or pupe_error($query);
+				$k2prow = mysql_fetch_array($k2pres);
+
+				$kpmuutos += $k2prow["varastonmuutosrahti"];
+			}
+
+			// Haetaan keikan arvo tapahtumilta
 			$query  = "	SELECT sum(tapahtuma.kplhinta * tapahtuma.kpl) logistiikkasumma, sum(tilausrivi.rivihinta) tilausrivisumma
-						FROM tilausrivi, tapahtuma
+						FROM tilausrivi
+						JOIN tapahtuma ON tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus and tapahtuma.laji = 'tulo'
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.uusiotunnus = '$trow[tunnus]'
-						and tapahtuma.yhtio = tilausrivi.yhtio
-						and tapahtuma.rivitunnus = tilausrivi.tunnus
-						and tapahtuma.laji = 'tulo'";
+						and tilausrivi.uusiotunnus = '$trow[tunnus]'";
 			$lores = mysql_query($query) or pupe_error($query);
 			$lorow = mysql_fetch_array ($lores);
+
 			$lomuutos += $lorow["logistiikkasumma"];
 			$timuutos += $lorow["tilausrivisumma"];
 
-			$ero = $lorow["logistiikkasumma"] - $kprow["varastonmuutos"];
+			$ero = round($lorow["logistiikkasumma"] - ($kprow["varastonmuutos"]+$k2prow["varastonmuutosrahti"]), 2);
 
 			if (round($ero, 0) != 0) {
 				echo "<tr class='aktiivi'>";
@@ -258,9 +305,9 @@
 				echo "<td>$trow[nimi]</td>";
 				echo "<td>$trow[mapvm]</td>";
 				echo "<td>$keekrow[laskut]</td>";
-				echo "<td align='right'>".round($lorow["tilausrivisumma"],2)."</td>";
-				echo "<td align='right'>".round($lorow["logistiikkasumma"],2)."</td>";
-				echo "<td align='right'>".round($kprow["varastonmuutos"],2)."</td>";
+				echo "<td align='right'>".round($lorow["tilausrivisumma"], 2)."</td>";
+				echo "<td align='right'>".round($lorow["logistiikkasumma"], 2)."</td>";
+				echo "<td align='right'>".round($kprow["varastonmuutos"]+$k2prow["varastonmuutosrahti"], 2)."</td>";
 				echo "<td align='right'>".round($ero, 2)."</td>";
 				echo "</tr>";
 			}

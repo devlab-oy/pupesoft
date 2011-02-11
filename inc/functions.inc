@@ -9618,18 +9618,18 @@ if (!function_exists("TuotteenAlkiot")) {
 	function TuotteenAlkiot($laji, $liitos, $puun_tunnus, $kieli) {
 		global $kukarow;
 
-		$query = "	INSERT INTO puun_alkio
-					SET yhtio	= '$kukarow[yhtio]',
-					liitos 		= '$liitos',
-					laji 		= '$laji',
-					puun_tunnus = '$puun_tunnus',
-					kieli 		= '$kieli',
-					laatija 	= '$kukarow[kuka]',
-					luontiaika 	= now()
-					ON DUPLICATE KEY UPDATE
-					muuttaja = '$kukarow[kuka]',
-					muutospvm = now()";
-		$r = mysql_query($query) or pupe_error($query);
+		$qu = "	INSERT INTO puun_alkio
+				SET yhtio	= '$kukarow[yhtio]',
+				liitos 		= '$liitos',
+				laji 		= '$laji',
+				puun_tunnus = '$puun_tunnus',
+				kieli 		= '$kieli',
+				laatija 	= '$kukarow[kuka]',
+				luontiaika 	= now()
+				ON DUPLICATE KEY UPDATE
+				muuttaja = '$kukarow[kuka]',
+				muutospvm = now()";
+		$r = mysql_query($qu) or pupe_error($qu);
 	}
 }
 
@@ -9700,8 +9700,8 @@ if (!function_exists("LisaaPaaKat")) {
 	function LisaaPaaKat($laji, $nimi) {
 		global $kukarow;
 
-		$q = "INSERT INTO dynaaminen_puu(yhtio,nimi,lft,rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]', '$nimi', 1, 2, '$laji', '$kukarow[kuka]', now())";
-		$r = mysql_query($q) or pupe_error($q);
+		$qu = "INSERT INTO dynaaminen_puu(yhtio,nimi,lft,rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]', '$nimi', 1, 2, '$laji', '$kukarow[kuka]', now())";
+		$re = mysql_query($qu) or pupe_error($qu);
 	}
 }
 
@@ -9755,7 +9755,7 @@ if (!function_exists("LisaaLapsi")) {
 				AND laji 	= '$laji'
 				$apu4
 				ORDER BY lft desc";
-		$re = mysql_query($q4) or pupe_error($q4);
+		$re = mysql_query($qu) or pupe_error($qu);
 
 		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, '$laji', '$kukarow[kuka]', now())";
 		$re = mysql_query($qu) or pupe_error($qu);
@@ -9855,7 +9855,7 @@ if (!function_exists("lapset")) {
 				GROUP BY node.tunnus
 				ORDER BY node.lft";
 		$re = mysql_query($qu) or pupe_error($qu);
-		
+
 		return mysql_num_rows($re);
 	}
 }
@@ -9865,18 +9865,18 @@ if (!function_exists("paivitakat")) {
 	function paivitakat($laji, $koodi, $nimi, $kategoriaid) {
 		global $kukarow;
 
-		$q1 = "LOCK TABLE dynaaminen_puu WRITE";
-		$r = mysql_query($q1) or pupe_error($q1);
+		$qu = "LOCK TABLE dynaaminen_puu WRITE";
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q2 = "	UPDATE dynaaminen_puu
+		$qu = "	UPDATE dynaaminen_puu
 				set nimi='{$nimi}', koodi='{$koodi}', muutospvm = now(), muuttaja = '$kukarow[kuka]'
 				where yhtio	= '{$kukarow["yhtio"]}'
 				AND laji	= '{$laji}'
 				AND tunnus	= '{$kategoriaid}'";
-		$r = mysql_query($q2) or pupe_error($q2);
+		$re = mysql_query($qu) or pupe_error($qu);
 
-		$q6 = "UNLOCK TABLES";
-		$r = mysql_query($q6) or pupe_error($q6);
+		$qu = "UNLOCK TABLES";
+		$re = mysql_query($qu) or pupe_error($qu);
 	}
 }
 

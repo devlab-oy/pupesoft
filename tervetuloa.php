@@ -204,16 +204,16 @@ if (!isset($tee) or $tee == '') {
 	$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 	if (mysql_num_rows($res) == 1) {
-		$days = floor((time() - strtotime("2010-09-30")) / 86400);
-
-		if ($days == 0) $days = 1;
 
 		$ulos = '';
 
-		// Ominaisuus laitettiin p‰‰lle 30.9.2010
-		for ($i = ceil($days/30); mktime(0, 0, 0, 9+$i, 0, 2010) < mktime(0, 0, 0, date("m"), date("d"), date("Y")); $i++) {
+		for ($i = 201011; $i <= date("Ym"); $i++) {
 
-			$alvpvm = date("Y-m-d", mktime(0, 0, 0, 9+$i, 0, 2010));
+			if (substr($i, -2) == 13) {
+				$i += 88;
+			}
+
+			$alvpvm = date("Y-m-d", mktime(0, 0, 0, (substr($i,4)+1), 0, substr($i, 0, 4)));
 
 			$query = "	SELECT lasku.tunnus
 						FROM lasku
@@ -226,8 +226,10 @@ if (!isset($tee) or $tee == '') {
 			$tositelinkki_result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($tositelinkki_result) == 0) {
-				$mktime = mktime(0, 0, 0, 9+$i, 0, date("Y"));
-				$ulos .= "<tr><td><a href='{$palvelin2}raportit/alv_laskelma_uusi.php?kk=".date("n", $mktime)."&vv=".date("Y", $mktime)."'>".t("ALV")." ".date("m", $mktime)." ".date("Y", $mktime)." ".t("tosite tekem‰tt‰")."</a></td></tr>";
+
+				list($vv,$kk,$pp) = explode("-", $alvpvm);
+
+				$ulos .= "<tr><td><a href='{$palvelin2}raportit/alv_laskelma_uusi.php?kk=$kk&vv=$vv'>".t("ALV")." $kk $vv ".t("tosite tekem‰tt‰")."</a></td></tr>";
 			}
 		}
 

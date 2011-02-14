@@ -683,8 +683,8 @@ if (!function_exists('rivi_original')) {
 		if ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
 			$sarjanutunnus = "ostorivitunnus";
 		}
-		elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0) {
-			$sarjanutunnus = "myyntirivitunnus";
+		elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'U' or $row['sarjanumeroseuranta'] == 'G')) {
+			$sarjanutunnus = "myyntirivitunnus"; 
 		}
 		elseif ($row["varattu"]+$row["kpl"] < 0){
 			$sarjanutunnus = "ostorivitunnus";
@@ -1714,11 +1714,11 @@ if (!function_exists("tulosta_lasku")) {
 		}
 
 		// haetaan tilauksen kaikki rivit
-		$query = "  SELECT tilausrivi.*, $lisa tilausrivin_lisatiedot.osto_vai_hyvitys,
+		$query = "  SELECT tilausrivi.*, $lisa tilausrivin_lisatiedot.osto_vai_hyvitys, 
 					$sorttauskentta,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					tuote.ei_saldoa,
-					tuote.eankoodi
+					tuote.eankoodi, tuote.sarjanumeroseuranta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus

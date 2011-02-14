@@ -72,8 +72,8 @@
 	}
 
 	function rivi ($tyyppi, $firstpage, $summa, $row) {
-		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $yhtiorow, $tito_pvm;
-
+		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni,$kieli, $yhtiorow, $tito_pvm;
+															
 		if ($lask == 39) {
 			$sivu++;
 			loppu($firstpage, array());
@@ -269,7 +269,7 @@
 		mysql_data_seek($result, 0);
 	}
 
-	$query = "	SELECT maksupvm tapvm, summa * -1 summa, valkoodi
+	$query = "	SELECT maksupvm tapvm, summa * -1 summa, valkoodi, summa*-1 laskusumma
 				FROM suoritus
 				WHERE yhtio  = '$kukarow[yhtio]'
 				and ltunnus <> 0

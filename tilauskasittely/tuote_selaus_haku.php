@@ -370,6 +370,12 @@
 		$poischeck = "";
 	}
 
+	if ($extrapoistetut !="" and $kukarow["extranet"] != "") {
+		$extrapoischeck = "CHECKED";
+		$ulisa .= "&extrapoistetut=checked";
+		$poislisa  		 	= "";
+	}
+
 	if (!isset($lisatiedot)) {
 		$lisatiedot = '';
 	}
@@ -599,6 +605,11 @@
 				echo "<th>".t("Poistetut")."</th>";
 			}
 			echo "<td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td>";
+
+			if ($kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
+				echo "<th>".t("Näytä poistetut")."</th><td><input type='checkbox' name='extrapoistetut' id='extrapoistetut' $extrapoischeck>";
+			}
+			echo "</td>";
 			echo "</tr>";
 
 			echo "<tr><th>".t("Nimitys")."</th><td><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td>";
@@ -1596,7 +1607,7 @@
 						$noutolisa 				= "";
 
 						if ($verkkokauppa == "") {
-							// Listataan noutovarastot, vain extranetissä. 
+							// Listataan noutovarastot, vain extranetissä.
 							if (!isset($noutovarres)) {
 								$query = "	SELECT *
 											FROM varastopaikat
@@ -1608,7 +1619,7 @@
 							else {
 								mysql_data_seek($noutovarres, 0);
 							}
-							
+
 							if (mysql_num_rows($noutovarres) > 0) {
 
 								while ($noutovarrow = mysql_fetch_assoc($noutovarres)) {

@@ -1021,6 +1021,16 @@
 							<option value=''>".t("N‰ytet‰‰n kaikki tilaukset")."</option>
 							<option value='O' $sel[O]>".t("N‰ytet‰‰n vain omat tilaukset")."</option>
 							</select></td></tr>";
+					
+					$sel=array();
+					$sel[$krow["asema"]] = "SELECTED";
+
+					echo "<tr><th align='left'>".t("N‰ytet‰‰nkˆ poistetut tuotteet extranetiss‰").":</th>
+							<td><select name='asema'>
+							<option value=''>".t("Ei n‰ytet‰ extranetiss‰")."</option>
+							<option value='NE' $sel[NE]>".t("N‰ytet‰‰n extranetiss‰")."</option>
+							</select></td></tr>";
+					
 				}
 
 				if ($toim != 'extranet') {

@@ -82,7 +82,7 @@ if ($tee == 'LISAA') {
 		}
 		else {
 			$kuva = tallenna_liite("userfile", "kalenteri", 0, $selite);
-		} 
+		}
 
 		$uutinen = nl2br(strip_tags($uutinen, '<a>'));
 		$otsikko = nl2br(strip_tags($otsikko, '<a>'));
@@ -566,7 +566,7 @@ if ($tee == '') {
 
 						$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-						passthru("/usr/bin/convert -resize 130x -quality 80 +profile \"*\" ".$nimi1." ".$nimi2, $palautus);
+						passthru("/usr/bin/convert -resize 130x -quality 80 -strip $nimi1 $nimi2", $palautus);
 
 						// Tallennetaa skeilattu kuva
 						$ltsc = tallenna_liite($nimi2, "kalenteri", 0, $lisatietorow["selite"], '', $lisatietorow["tunnus"]);

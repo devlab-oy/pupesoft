@@ -370,7 +370,7 @@
 		$poischeck = "";
 	}
 
-	if ($extrapoistetut !="" and $kukarow["extranet"] != "") {
+	if ($extrapoistetut != "" and $kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
 		$extrapoischeck = "CHECKED";
 		$ulisa .= "&extrapoistetut=checked";
 		$poislisa  		 	= "";
@@ -607,9 +607,9 @@
 			echo "<td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td>";
 
 			if ($kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
-				echo "<th>".t("Näytä poistetut")."</th><td><input type='checkbox' name='extrapoistetut' id='extrapoistetut' $extrapoischeck>";
+				echo "<th>".t("Näytä poistetut")."</th><td><input type='checkbox' name='extrapoistetut' id='extrapoistetut' $extrapoischeck></td>";
 			}
-			echo "</td>";
+			
 			echo "</tr>";
 
 			echo "<tr><th>".t("Nimitys")."</th><td><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td>";

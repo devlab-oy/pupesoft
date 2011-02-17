@@ -8,9 +8,9 @@
 			$asiakasid 	= $yllapidontunnus;
 		}
 	}
-	
+
 	echo "<font class='head'>".t("Asiakasmemo")."</font><hr>";
-	
+
 	if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 		if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "TYOMAARAYS" or $from == "TYOMAARAYS" or $from == "VALMISTAASIAKKAALLE") {
 			echo "<form method='post' action='".$palvelin2."tilauskasittely/tilaus_myynti.php'>
@@ -271,7 +271,7 @@
 
 			$tee = "";
 		}
-		
+
 		// tallenetaan uutena ominaisuutena liitetiedostoja memolle.
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
@@ -281,9 +281,9 @@
 			else {
 				$liitostunnus = $korjaus;
 			}
-			
+
 			$tallennustring = "Liitetiedosto ".$aputyyppi;
-			
+
 			$id = tallenna_liite("userfile", $aputyyppi, $liitostunnus, $tallennustring);
 
 		}
@@ -323,11 +323,13 @@
 			$result = mysql_query($kysely) or pupe_error($kysely);
 
 			$kysely = "	UPDATE liitetiedostot
-						SET
-						liitos = concat('DELETED ',liitos)
-						WHERE liitostunnus 	= '$tunnus'";
+						SET 	liitos = concat('DELETED ',liitos)
+						WHERE 	liitostunnus 	= '$tunnus'
+						AND 	liitos			= '$liitostyyppi'
+						and 	yhtio			= '$kukarow[yhtio]'";
+
 			$result = mysql_query($kysely) or pupe_error($kysely);
-			
+
 			$tee = '';
 		}
 
@@ -628,16 +630,16 @@
 				}
 
 				echo "</select></td>";
-				
+
 				echo "	<tr><th>Tallenna tiedosto liitteeksi</th>";
-				echo "	<td class='back' colspan='2'><input type = 'file' name = 'userfile' />";
+				echo "	<td colspan='2'><input type = 'file' name = 'userfile' />";
 				echo "	<input type='hidden' name='teeliite'	value='tallenna_pdf'>";
 				echo "  <input type='hidden' name='from' 		value='$from'>
 						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
 						<input type='hidden' name='ytunnus' 	value='$ytunnus'>
 						<input type='hidden' name='asiakasid' 	value='$asiakasid'>";
 				echo "	</td></tr>";
-				
+
 				echo "<tr><td colspan='3'><textarea cols='83' rows='3' name='viesti' wrap='hard'>$viesti</textarea></td></tr>";
 
 				if ($tyyppi == "Muistutus") {
@@ -792,7 +794,7 @@
 						<input type='submit' value='".t("Tallenna")."'>
 						</form>
 						</td></tr>";
-				
+
 				echo "	<td colspan='3' align='right' class='back'>
 						<form action='$PHP_SELF' method='POST'>
 						<input type='hidden' name='tee' 		value='KORJAAMEMO'>
@@ -814,29 +816,22 @@
 			if ($naytapoistetut == '') {
 				$lisadel = " and left(kalenteri.tyyppi,7) != 'DELETED'";
 			}
-			else {
-				$lisadel = "";
-			}
 
 			$query = "	SELECT kalenteri.tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo,
 						if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, kentta01 viesti, left(pvmalku,10) paivamaara,
 						kentta02, kentta03, kentta04, kentta05, kentta06, kentta07, kentta08,
 						lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.muutospvm laskumpvm,
-						kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta,
-						group_concat(liitetiedostot.filename,'##') as liitetiedostot, 
-						group_concat(liitetiedostot.tunnus, '##') as liitetunnus
+						kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta
 						FROM kalenteri
 						LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus
 						LEFT JOIN kuka ON kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka
 						LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
 						LEFT JOIN kuka kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						LEFT JOIN liitetiedostot ON (kalenteri.yhtio = liitetiedostot.yhtio and kalenteri.tunnus = liitetiedostot.liitostunnus and kalenteri.tyyppi = liitetiedostot.liitos)
 						WHERE kalenteri.liitostunnus = '$asiakasid'
 						$lisadel
-						and kalenteri.yhtio = '$kukarow[yhtio]'
-						group by kalenteri.tunnus";
+						and kalenteri.yhtio = '$kukarow[yhtio]' ";
 
-			if($yhtunnus != '0') {
+			if ($yhtunnus > 0) {
 				$query .= " and henkilo='$yhtunnus'";
 			}
 
@@ -867,7 +862,7 @@
 								<th>".t("Yhteyshenkilö:")." $memorow[yhteyshenkilo]</th>";
 
 						if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'],0,7) != 'DELETED') {
-							echo "	<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&from=$from'>Poista</a></th>";
+							echo "	<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&from=$from&liitostyyppi=$memorow[tyyppi]'>Poista</a></th>";
 						}
 						else {
 							echo "<th></th>";
@@ -890,7 +885,7 @@
 					if ($memorow["laskutunnus"] == 0 and $memorow["tyyppi"] == "Lead") {
 						echo "<br><br><a href='".$palvelin2."tilauskasittely/tilaus_myynti.php?toim=TARJOUS&tee=&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
 					}
-			
+
 					if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {
 						echo "<tr><td colspan='3' align='right'>".t("Lähetä käyttäjälle").":</td><td colspan='3'>";
 						echo "<form action='$PHP_SELF' method='POST'>";
@@ -923,20 +918,25 @@
 						echo "</td></tr>";
 					}
 				}
-				
+
 				echo "</td></tr>";
-				echo "<tr><th colspan='2'>liitetiedosto</th><td colspan='4'>".listaaliitetiedostot($memorow['liitetunnus'],$memorow['liitetiedostot'])."</td></tr>";
+
+				$liitetiedostot = listaaliitetiedostot($memorow['tunnus'],$memorow['tyyppi']);
+
+				if ($liitetiedostot != '') {
+					echo "<tr><th colspan='2'>".t("Liitetiedosto")."</th><td colspan='4'>".$liitetiedostot."</td></tr>";
+				}
 			}
 
 			echo "</table>";
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $naytapoistetut == "") {
 				echo "<br>";
-				echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus'>Näytä poistetut</a>";
+				echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus'>Näytä poistetut muistiinpanot</a>";
 			}
 			else {
 				echo "<br>";
-				echo "<a href='$PHP_SELF?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus'>Näytä normaalit</a>";
+				echo "<a href='$PHP_SELF?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus'>Näytä aktiiviset muistiinpanot</a>";
 			}
 		}
    	}
@@ -944,32 +944,23 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 		require ("../inc/footer.inc");
 	}
-	
-	function listaaliitetiedostot($lista,$filut) {
-		GLOBAL $palvelin2;
-		
-		$puhdas = substr($lista,0,-2);
-		$puhdas = str_replace("##","",$puhdas);
-		$lista  = array();
-		$lista  = explode(',',$puhdas);
-	
-		$puhdas2 = substr($filut,0,-2);
-		$puhdas2 = str_replace("##","",$puhdas2);
-		$nimet  = array();
-		$nimet  = explode(',',$puhdas2);	
-		
-		
+
+	function listaaliitetiedostot($kalenteritunnus,$tyyppi) {
+		GLOBAL $palvelin2,$kukarow;
 		$out = "";
-		$i = 0;
-		
-		foreach ($lista as $arvo) {
-			if ($arvo != "") {
-				$out .= "<a $target href='".$palvelin2."view.php?id=$arvo' target='Attachment'>". t('Näytä liite') ."</a> ".$nimet[$i]."<br>\n";
-				$i++;
-			}
+
+		$query = "	SELECT tunnus, filename
+					FROM liitetiedostot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND liitostunnus = '$kalenteritunnus'
+					AND liitos = '$tyyppi'";
+		$res = mysql_query($query) or pupe_error($query);
+
+		while ($row = mysql_fetch_array($res)) {
+			$out .= "<a href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä liite') ."</a> ".$row['filename']."<br>\n";
 		}
-		if ($out !="") {
-			return $out;
-		}
+
+		return $out;
+
 	}
 ?>

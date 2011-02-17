@@ -78,11 +78,14 @@
 	if ($toitarow['kuljyksikko']!='')	$x[]='7'; // kuljetusyksikkökuljetus
 
 	$selite_chk = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
+
 	$keku = "16";
-	if (strpos($selite_chk, "9")  !== FALSE) $keku = "9";
-	if (strpos($selite_chk, "00") !== FALSE) $keku = "00";
-	if (strpos($selite_chk, "14") !== FALSE) $keku = "14";
-	if (strpos($selite_chk, "21") !== FALSE) $keku = "21";
+
+	if (strpos($selite_chk, "9")  !== FALSE) 	$keku = "9";
+	if (strpos($selite_chk, "00") !== FALSE) 	$keku = "00";
+	if (strpos($selite_chk, "14") !== FALSE) 	$keku = "14";
+	if (strpos($selite_chk, "21") !== FALSE) 	$keku = "21";
+	if (strpos($selite_chk, "00/16") !== FALSE) $keku = "00/16";
 
 	if ($toitarow['virallinen_selite'] != '') {
 		$keltainen = str_replace($keku, '', $toitarow['virallinen_selite']);

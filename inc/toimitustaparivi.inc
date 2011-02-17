@@ -66,12 +66,12 @@
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei valintaa")."</option>";
-		$ulos .= "<option value='Express City' {$sel["Express City"]}>Itella Express City</option>";
-		$ulos .= "<option value='Express Morning' {$sel["Express Morning"]}>Itella Express Morning</option>";
-		$ulos .= "<option value='Express Business Day' {$sel["Express Business Day"]}>Itella Express Business Day</option>";
-		$ulos .= "<option value='Express Point' {$sel["Express Point"]}>Itella Express Point</option>";
-		$ulos .= "<option value='Express Flex' {$sel["Express Flex"]}>Itella Express Flex</option>";
-		$ulos .= "<option value='Economy' {$sel["Economy"]}>Itella Economy</option>";
+		$ulos .= "<option value='Express City 00' {$sel["Express City 00"]}>Itella Express City 00</option>";
+		$ulos .= "<option value='Express Morning 9' {$sel["Express Morning 9"]}>Itella Express Morning 9</option>";
+		$ulos .= "<option value='Express Business Day 14' {$sel["Express Business Day 14"]}>Itella Express Business Day 14</option>";
+		$ulos .= "<option value='Express Point 00/16' {$sel["Express Point 00/16"]}>Itella Express Point 00/16</option>";
+		$ulos .= "<option value='Express Flex 21' {$sel["Express Flex 21"]}>Itella Express Flex 21</option>";
+		$ulos .= "<option value='Economy 16' {$sel["Economy 16"]}>Itella Economy 16</option>";
 		$ulos .= "<option value='Customer Return' {$sel["Customer Return"]}>Itella Customer Return</option>";
 		$ulos .= "<option value='Undelivered Shipment' {$sel["Undelivered Shipment"]}>Itella Undelivered Shipment</option>";
 		$ulos .= "<option value='Lisäarvokuljetus' {$sel["Lisäarvokuljetus"]}>Itella Lisäarvokuljetus</option>";

@@ -453,7 +453,22 @@
 
 		if (mysql_num_rows($result)!=0) {
 
-			pupe_DataTables($pupe_DataTables, 9, 10);
+			if ($kukarow['resoluutio'] == 'I') {
+				if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+					pupe_DataTables($pupe_DataTables, 10, 11);
+				}
+				else {
+					pupe_DataTables($pupe_DataTables, 9, 10);
+				}
+			}
+			else {
+				if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+					pupe_DataTables($pupe_DataTables, 9, 10);
+				}
+				else {
+					pupe_DataTables($pupe_DataTables, 8, 9);
+				}
+			}
 			
 			echo "<br>";
 			echo "<table class='display' id='$pupe_DataTables'>";					

@@ -258,7 +258,7 @@
 						$taso 			 = 'fi305';
 						$cleantaso 		 = 'fi313';
 					}
-					elseif ($taso == 'fi313') {
+					elseif ($taso == 'fi314') {
 						$taso 			 = 'fi306';
 						$cleantaso 		 = 'fi314';
 					}

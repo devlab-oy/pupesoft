@@ -6851,20 +6851,18 @@ if (!function_exists('hae_liite')) {
 
 if (!function_exists("tarvitaanko_intrastat")) {
 	function tarvitaanko_intrastat($maa_lahetys, $maa_maara) {
+		global $yhtiorow;
 
 		// otetaan sisään lähetysmaan ja määrämaan maakoodi
-
 		// palautetaan:
 		// tyhjää = ei tarvita intrastatata
 		// -1 = kuuluu vienti-ilmoitukseen
 		// -2 = kuuluu tuonti-ilmoitukseen
 
-		global $yhtiorow;
-
-		$maa_lahetys = strtoupper(trim($maa_lahetys));
-		$maa_maara = strtoupper(trim($maa_maara));
-		$yhtiorow_maa = strtoupper($yhtiorow["maa"]);
-		$ultilno = "";
+		$maa_lahetys 	= strtoupper(trim($maa_lahetys));
+		$maa_maara 		= strtoupper(trim($maa_maara));
+		$yhtiorow_maa 	= strtoupper($yhtiorow["maa"]);
+		$ultilno 		= "";
 
 		// kokeillaan arpoa intrastat käsittelyä, molemmat maat pitää olla EU maita
 		if ($maa_lahetys != "" and $maa_maara != "") {
@@ -6884,6 +6882,108 @@ if (!function_exists("tarvitaanko_intrastat")) {
 		return $ultilno;
 	}
 }
+
+if (!function_exists("palauta_intrastat_tiedot")) {
+	function palauta_intrastat_tiedot($laskurow, $varasto, $teeupdate = FALSE) {
+		global $yhtiorow, $kukarow;
+
+		if ($varasto > 0) {
+			$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
+			$varaston_res = mysql_query($query) or pupe_error($query);
+			$varaston_row = mysql_fetch_assoc($varaston_res);
+		}
+
+		if (!isset($varaston_row["maa"]) or $varaston_row["maa"] == "") {
+			$varaston_row = array();
+			$varaston_row["maa"] = $yhtiorow["maa"];
+		}
+
+		$laskurow["ultilno"] = tarvitaanko_intrastat($varaston_row["maa"], $laskurow["toim_maa"]);
+
+		$laskurow["maa_maara"] = $laskurow["toim_maa"];
+		$laskurow["maa_lahetys"] = $varaston_row["maa"];
+
+		if ($laskurow["ultilno"] == '-1') {
+			// vienti-ilmoitus
+			// katotaan onko jotain oletuksia asiakkaan takaa
+			$query  = "	SELECT *
+						from asiakas
+						where yhtio = '$kukarow[yhtio]'
+						and tunnus  = '$laskurow[liitostunnus]'";
+			$toiresult = mysql_query($query) or pupe_error($query);
+			$aputoimirow = mysql_fetch_assoc($toiresult);
+
+			$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
+			$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
+			$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
+			$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
+			$laskurow["kontti"]								= $aputoimirow["kontti"];
+			$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
+			$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
+			$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
+			$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
+			$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
+			$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
+			$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
+			$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
+		}
+		elseif ($laskurow["ultilno"] == '-2') {
+			// tuonti-ilmoitus
+			// katotaan onko jotain oletuksia toimitustavan takana
+			$query  = "	SELECT *
+						from toimitustapa
+						where yhtio = '$kukarow[yhtio]'
+						and selite = '$laskurow[toimitustapa]'";
+			$toiresult = mysql_query($query) or pupe_error($query);
+			$aputoimirow = mysql_fetch_assoc($toiresult);
+
+			$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
+			$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
+			$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
+			$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
+			$laskurow["kontti"]								= $aputoimirow["kontti"];
+			$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
+			$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
+			$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
+			$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
+			$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
+			$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
+			$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
+			$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
+		}
+		elseif ($varaston_row["maa"] == $laskurow["toim_maa"] and $laskurow["toim_maa"] != "") {
+			// intrastattia ei lähetetä tulliin kun varasto ja toimitusosoite on samassa maassa
+			$laskurow["kauppatapahtuman_luonne"] = '999';
+		}
+		
+		if ($teeupdate) {
+			$query = "	UPDATE lasku set
+						ultilno 							= '$laskurow[ultilno]',
+						aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
+						aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',
+						bruttopaino 						= '$laskurow[bruttopaino]',
+						kauppatapahtuman_luonne 			= '$laskurow[kauppatapahtuman_luonne]',
+						kontti								= '$laskurow[kontti]',
+						kuljetusmuoto						= '$laskurow[kuljetusmuoto]',
+						lisattava_era 						= '$laskurow[lisattava_era]',
+						maa_lahetys							= '$laskurow[maa_lahetys]',
+						maa_maara							= '$laskurow[maa_maara]',
+						poistumistoimipaikka 				= '$laskurow[poistumistoimipaikka]',
+						poistumistoimipaikka_koodi 			= '$laskurow[poistumistoimipaikka_koodi]',
+						sisamaan_kuljetus					= '$laskurow[sisamaan_kuljetus]',
+						sisamaan_kuljetusmuoto  			= '$laskurow[sisamaan_kuljetusmuoto]',
+						sisamaan_kuljetus_kansallisuus		= '$laskurow[sisamaan_kuljetus_kansallisuus]',
+						vahennettava_era 					= '$laskurow[vahennettava_era]'
+						where yhtio = '$kukarow[yhtio]'
+						and tunnus  = '$laskurow[tunnus]'";
+			$varresult = mysql_query($query) or pupe_error($query);
+		}
+		
+		return $laskurow;
+	}
+}
+
+
 
 if (!function_exists("livesearch_tilihaku")) {
 	function livesearch_tilihaku() {
@@ -9381,8 +9481,8 @@ if (!function_exists("tarkista_iban")) {
 
 if (!function_exists("tarkista_oikeus")) {
 	function tarkista_oikeus($ohjelma, $alanimi = '', $paivitys = '') {
-
 		global $kukarow;
+
 		$ohjelma = mysql_real_escape_string(trim($ohjelma));
 		$alanimi = mysql_real_escape_string(trim($alanimi));
 		$querylisa = "";

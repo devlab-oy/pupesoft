@@ -162,7 +162,7 @@
 				}
 				$varastontunnukset .= ")";
 
-				if ($summaustaso == "T") {
+				if ($summaustaso == "T" or $summaustaso == "TRY") {
 					$order_lisa = "osasto, try, tuoteno";
 				}
 				else {
@@ -299,7 +299,7 @@
 
 			$varastolisa = " varastopaikat.nimitys varastonnimi, varastopaikat.tunnus varastotunnus, ";
 
-			if ($summaustaso == 'T') {
+			if ($summaustaso == 'T' or $summaustaso == 'TRY') {
 				$varastolisa = "";
 			}
 
@@ -308,6 +308,8 @@
 						$varastolisa
 						ifnull(atry.selite, 0) try,
 						ifnull(aosa.selite, 0) osasto,
+						ifnull(atry.selitetark, 0) trynimi,
+						ifnull(aosa.selitetark, 0) osastonimi,
 						tmp_tuotepaikat.tuoteno,
 						tmp_tuotepaikat.tuotemerkki,
 						tmp_tuotepaikat.nimitys,
@@ -343,7 +345,7 @@
 			$varvo  = 0; // tähän summaillaan
 			$bvarvo = 0; // bruttovarastonarvo
 
-			if(@include('Spreadsheet/Excel/Writer.php')) {
+			if (@include('Spreadsheet/Excel/Writer.php')) {
 				//keksitään failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
 				mt_srand((float) $sec + ((float) $usec * 100000));
@@ -363,10 +365,10 @@
 				$excelrivi = 0;
 			}
 
-			if(isset($workbook)) {
+			if (isset($workbook)) {
 				$excelsarake = 0;
 
-				if ($summaustaso != "T") {
+				if ($summaustaso != "T" and $summaustaso != "TRY") {
 					$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 		$format_bold);
 					$excelsarake++;
 				}
@@ -450,7 +452,7 @@
 					$bar->increase();
 				}
 
-				if ($summaustaso == 'T') {
+				if ($summaustaso == 'T' or $summaustaso == 'TRY') {
 					$mistavarastosta = $varastontunnukset;
 				}
 				else {
@@ -801,7 +803,7 @@
 
 					if (isset($workbook)) {
 
-						if ($summaustaso != "T") {
+						if ($summaustaso != "T" and $summaustaso != "TRY") {
 							$worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"], 	$format_bold);
 							$excelsarake++;
 						}
@@ -916,25 +918,51 @@
 						$excelsarake = 0;
 					}
 
-					$varastot2[$row["varastonnimi"]]["netto"] += $muutoshinta;
-					$varastot2[$row["varastonnimi"]]["brutto"] += $bmuutoshinta;
+					if ($summaustaso == 'TRY') {
+
+						$tryosind = "$row[osasto] - $row[osastonimi]###$row[try] - $row[trynimi]";
+
+						$varastot2[$tryosind]["netto"] += $muutoshinta;
+						$varastot2[$tryosind]["brutto"] += $bmuutoshinta;
+					}
+					else {
+						$varastot2[$row["varastonnimi"]]["netto"] += $muutoshinta;
+						$varastot2[$row["varastonnimi"]]["brutto"] += $bmuutoshinta;
+					}
 				}
 			}
 
 			if (!$php_cli) {
 				echo "<br>";
 				echo "<table>";
-				echo "<tr><th>".t("Varasto")."</th><th>".t("Varastonarvo")."</th>";
+				echo "<tr>";
+
+				if ($summaustaso == 'TRY') {
+					echo "<th>".t("Osasto")."</th>";
+					echo "<th>".t("Ryhmä")."</th>";
+				}
+				else {
+					echo "<th>".t("Varasto")."</th>";
+				}
+
+				echo "<th>".t("Varastonarvo")."</th>";
 				echo "<th>".t("Bruttovarastonarvo")."</th></tr>";
 
 				ksort($varastot2);
 
 				foreach ($varastot2 AS $varasto => $arvot) {
-					if ($summaustaso == 'T') {
-						echo "<tr><td>Varastot</td>";
+					echo "<tr>";
+
+					if ($summaustaso == 'TRY') {
+						list($osai, $tryi) = explode("###", $varasto);
+						echo "<td>$osai</td>";
+						echo "<td>$tryi</td>";
+					}
+					elseif ($summaustaso == 'T') {
+						echo "<td>".t("Varastot")."</td>";
 					}
 					else {
-						echo "<tr><td>$varasto</td>";
+						echo "<td>$varasto</td>";
 					}
 
 					foreach ($arvot AS $arvo) {
@@ -947,9 +975,15 @@
 					}
 					echo "</tr>";
 				}
-
-				echo "<tr><th>".t("Pvm")."</th><th colspan='2'>".t("Yhteensä")."</th></tr>";
-				echo "<tr><td>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td>";
+				
+				$cspan = 2;
+				
+				if ($summaustaso == 'TRY') {
+					$cspan = 3;
+				}
+				
+				echo "<tr><th>".t("Pvm")."</th><th colspan='$cspan'>".t("Yhteensä")."</th></tr>";
+				echo "<tr><td colspan='".($cspan-1)."'>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td>";
 				echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
 				echo "</table><br>";
 
@@ -1184,21 +1218,25 @@
 			if ($summaustaso == "S") {
 				$sel1 = "SELECTED";
 			}
-			elseif($summaustaso == "P") {
+			elseif ($summaustaso == "P") {
 				$sel2 = "SELECTED";
 			}
-			elseif($summaustaso == "T") {
+			elseif ($summaustaso == "T") {
 				$sel3 = "SELECTED";
+			}
+			elseif ($summaustaso == "TRY") {
+				$sel4 = "SELECTED";
 			}
 
 			echo "<tr>";
-			echo "<th>Summaustaso:</th>";
+			echo "<th>".t("Summaustaso").":</th>";
 
 			echo "<td>
 					<select name='summaustaso'>
-					<option value='S' $sel1>".t("Varastonarvo varastoittain")."</option>
-					<option value='P' $sel2>".t("Varastonarvo varastopaikoittain")."</option>
-					<option value='T' $sel3>".t("Varastonarvo tuotteittain")."</option>
+					<option value='S'   $sel1>".t("Varastonarvo varastoittain")."</option>
+					<option value='P'   $sel2>".t("Varastonarvo varastopaikoittain")."</option>
+					<option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
+					<option value='TRY' $sel4>".t("Varastonarvo tuoteryhmittäin")."</option>
 					</select>
 					</td>";
 			echo "</tr>";
@@ -1246,8 +1284,8 @@
 			echo "</tr>";
 
 			echo "<tr>";
-			echo "<th valign='top'>Varastonarvorajaus:</th>";
-			echo "<td>Alaraja: <input type='text' name='alaraja' size='7' value='$alaraja'><br>Yläraja: <input type='text' name='ylaraja' size='7' value='$ylaraja'></td>";
+			echo "<th valign='top'>".t("Varastonarvorajaus").":</th>";
+			echo "<td>".t("Alaraja").": <input type='text' name='alaraja' size='7' value='$alaraja'><br>".t("Yläraja").": <input type='text' name='ylaraja' size='7' value='$ylaraja'></td>";
 			echo "</tr>";
 
 			echo "<tr><th valign='top'>".t("Tuotelista")."</th><td><textarea name='tuotteet_lista' rows='5' cols='35'>$tuotteet_lista</textarea></td></tr>";
@@ -1255,7 +1293,7 @@
 			echo "</table>";
 			echo "<br>";
 
-			if($valitaan_useita == '') {
+			if ($valitaan_useita == '') {
 				echo "<input type='submit' value='Laske varastonarvot'>";
 			}
 			else {
@@ -1267,4 +1305,5 @@
 			require ("../inc/footer.inc");
 		}
 	}
+
 ?>

@@ -14,11 +14,11 @@
 		if ($laskuid == 0) {
 
 			$query = "	INSERT into lasku set
-						yhtio = '$yritirow[yhtio]',
-						tapvm = '$tpv-$tpk-$tpp',
-						tila = 'X',
-						laatija = 'tiliote',
-						luontiaika = now()";
+						yhtio 		= '$yritirow[yhtio]',
+						tapvm 		= '$tpv-$tpk-$tpp',
+						tila 		= 'X',
+						laatija 	= 'tiliote',
+						luontiaika 	= now()";
 			$result = mysql_query($query) or pupe_error($query);
 			$laskuid = mysql_insert_id ($link);
 			echo "<font class='message'>*** ".t("Tositteen otsikko luotu")." ***</font><br>";
@@ -27,19 +27,19 @@
 		// Tehd‰‰n vastakirjaus
 		if ($tkesken == 0 and $laskuid != 0) {
 			$query = "	INSERT into tiliointi set
-		                yhtio = '$yritirow[yhtio]',
-		                ltunnus = '$laskuid',
-		                tilino = '$yritirow[oletus_rahatili]',
-		                kustp = 0,
-		                tapvm = '$tpv-$tpk-$tpp',
-		                summa = '$vastavienti',
-						summa_valuutassa = '$vastavienti_valuutassa',
-						valkoodi = '$tilinvaluutta',
-		                vero = 0,
-		                lukko = '',
-						selite = 'Vastavienti rahatilille',
-		                laatija = 'tiliote',
-		                laadittu = now()";
+		                yhtio 				= '$yritirow[yhtio]',
+		                ltunnus 			= '$laskuid',
+		                tilino 				= '$yritirow[oletus_rahatili]',
+		                kustp 				= 0,
+		                tapvm 				= '$tpv-$tpk-$tpp',
+		                summa 				= '$vastavienti',
+						summa_valuutassa	= '$vastavienti_valuutassa',
+						valkoodi 			= '$tilinvaluutta',
+		                vero 				= 0,
+		                lukko 				= '',
+						selite 				= 'Vastavienti rahatilille',
+		                laatija 			= 'tiliote',
+		                laadittu 			= now()";
 			$result = mysql_query($query) or pupe_error($query);
 			$vastavienti = 0;
 			$vastavienti_valuutassa = 0;
@@ -58,56 +58,60 @@
 
 				$luottokuntatieto = str_replace(".", "",  $luottokuntatieto);
 				$luottokuntatieto = str_replace(",", ".", $luottokuntatieto);
+
+				// Kantaluku: alusta ekaan spaceen
 				$kanta = (float) substr($luottokuntatieto, 0, strpos($luottokuntatieto, " "));
-				$palkkio = (float) trim(substr($luottokuntatieto, -1 * strpos($luottokuntatieto, " ")));
+
+				// Palkkio: vikasta spacesta loppuun
+				$palkkio = (float) substr($luottokuntatieto, (strrpos($luottokuntatieto, " ") + 1));
 
 				$query = "	INSERT into tiliointi set
-			                yhtio = '$yritirow[yhtio]',
-			                ltunnus = '$laskuid',
-			                tilino = '$tiliointisaantorow[tilino2]',
-			                kustp = '$tiliointisaantorow[kustp2]',
-			                tapvm = '$tpv-$tpk-$tpp',
-			                summa = $palkkio * -1,
-							summa_valuutassa = round($palkkio * $kurssi * -1, 2),
-							valkoodi = '$tilinvaluutta',
-			                vero = 0,
-			                lukko = '',
-							selite = '$vientiselite',
-			                laatija = 'tiliote',
-			                laadittu = now()";
+			                yhtio 				= '$yritirow[yhtio]',
+			                ltunnus 			= '$laskuid',
+			                tilino 				= '$tiliointisaantorow[tilino2]',
+			                kustp 				= '$tiliointisaantorow[kustp2]',
+			                tapvm 				= '$tpv-$tpk-$tpp',
+			                summa 				= $palkkio * -1,
+							summa_valuutassa 	= round($palkkio * $kurssi * -1, 2),
+							valkoodi 			= '$tilinvaluutta',
+			                vero 				= 0,
+			                lukko 				= '',
+							selite 				= '$vientiselite',
+			                laatija 			= 'tiliote',
+			                laadittu 			= now()";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$query = "	INSERT into tiliointi set
-			                yhtio = '$yritirow[yhtio]',
-			                ltunnus = '$laskuid',
-			                tilino = '$tiliointisaantorow[tilino]',
-			                kustp = '$tiliointisaantorow[kustp]',
-			                tapvm = '$tpv-$tpk-$tpp',
-			                summa = $kanta * -1,
-							summa_valuutassa = round($kanta * $kurssi * -1, 2),
-							valkoodi = '$tilinvaluutta',
-			                vero = 0,
-			                lukko = '',
-							selite = '$vientiselite',
-			                laatija = 'tiliote',
-			                laadittu = now()";
+			                yhtio 				= '$yritirow[yhtio]',
+			                ltunnus 			= '$laskuid',
+			                tilino 				= '$tiliointisaantorow[tilino]',
+			                kustp 				= '$tiliointisaantorow[kustp]',
+			                tapvm 				= '$tpv-$tpk-$tpp',
+			                summa 				= $kanta * -1,
+							summa_valuutassa	= round($kanta * $kurssi * -1, 2),
+							valkoodi 			= '$tilinvaluutta',
+			                vero 				= 0,
+			                lukko 				= '',
+							selite 				= '$vientiselite',
+			                laatija 			= 'tiliote',
+			                laadittu 			= now()";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			else {
 				$query = "	INSERT into tiliointi set
-		                	yhtio = '$yritirow[yhtio]',
-			                ltunnus = '$laskuid',
-			                tilino = '$tiliointisaantorow[tilino]',
-			                kustp = '$tiliointisaantorow[kustp]',
-			                tapvm = '$tpv-$tpk-$tpp',
-			                summa = $maara * -1,
-							summa_valuutassa = $kohdm * -1,
-							valkoodi = '$tilinvaluutta',
-			                vero = 0,
-			                lukko = '',
-							selite = '$vientiselite',
-			                laatija = 'tiliote',
-			                laadittu = now()";
+		                	yhtio 				= '$yritirow[yhtio]',
+			                ltunnus 			= '$laskuid',
+			                tilino 				= '$tiliointisaantorow[tilino]',
+			                kustp 				= '$tiliointisaantorow[kustp]',
+			                tapvm 				= '$tpv-$tpk-$tpp',
+			                summa 				= $maara * -1,
+							summa_valuutassa 	= $kohdm * -1,
+							valkoodi 			= '$tilinvaluutta',
+			                vero 				= 0,
+			                lukko 				= '',
+							selite 				= '$vientiselite',
+			                laatija 			= 'tiliote',
+			                laadittu 			= now()";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 

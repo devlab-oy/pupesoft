@@ -534,7 +534,7 @@ if ($tee == '') {
 
 		echo "<table width='600'>";
 
-		while($uutinen = mysql_fetch_array($result)) {
+		while ($uutinen = mysql_fetch_array($result)) {
 
 			/*
 			toimittaja = kuka
@@ -566,7 +566,7 @@ if ($tee == '') {
 
 						$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-						passthru("/usr/bin/convert -resize 130x -quality 80 -strip $nimi1 $nimi2", $palautus);
+						passthru("nice -n 20 convert -resize 130x -quality 90 -colorspace sRGB -strip $nimi1 $nimi2", $palautus);
 
 						// Tallennetaa skeilattu kuva
 						$ltsc = tallenna_liite($nimi2, "kalenteri", 0, $lisatietorow["selite"], '', $lisatietorow["tunnus"]);

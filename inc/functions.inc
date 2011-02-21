@@ -6559,13 +6559,13 @@ if (!function_exists('muuta_kuvan_koko')) {
 				$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
 
 				// skaalataan kuva oikenakokoiseksi y:n mukaan
-		    	exec("nice -n 20 convert -resize x$ykoko -quality 80 $filetsu[tmp_name] $upfilesgh", $output);
+		    	exec("nice -n 20 convert -resize x$ykoko -quality 90 -colorspace sRGB -strip $filetsu[tmp_name] $upfilesgh", $output);
 		    }
 			elseif ($xkoko > 0 and $leve > $xkoko) {
 				$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
 
 				// skaalataan kuva oikenakokoiseksi x:n mukaan
-		  		exec("nice -n 20 convert -resize $xkoko -quality 80 $filetsu[tmp_name] $upfilesgh", $output);
+		  		exec("nice -n 20 convert -resize $xkoko -quality 90 -colorspace sRGB -strip $filetsu[tmp_name] $upfilesgh", $output);
 		    }
 			else {
 				return $upfile1;
@@ -6955,7 +6955,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 			// intrastattia ei lähetetä tulliin kun varasto ja toimitusosoite on samassa maassa
 			$laskurow["kauppatapahtuman_luonne"] = '999';
 		}
-		
+
 		if ($teeupdate) {
 			$query = "	UPDATE lasku set
 						ultilno 							= '$laskurow[ultilno]',
@@ -6978,7 +6978,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 						and tunnus  = '$laskurow[tunnus]'";
 			$varresult = mysql_query($query) or pupe_error($query);
 		}
-		
+
 		return $laskurow;
 	}
 }
@@ -8744,7 +8744,7 @@ if (!function_exists("viivakoodi")) {
 		$lisa = $teksti != "" ? "" : "-n";
 
 		ob_start();
-		passthru("barcode -b $viivakoodi -e $encoding -u mm -g $leveys".x."$korkeus -E $lisa | convert -fill white ps:- jpg:-", $return);
+		passthru("barcode -b $viivakoodi -e $encoding -u mm -g {$leveys}x{$korkeus} -E $lisa | convert -fill white ps:- jpg:-", $return);
 		$barcode = ob_get_contents();
 		ob_end_clean();
 

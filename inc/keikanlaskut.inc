@@ -227,7 +227,7 @@
 	echo "<font class='head'>".t("Rahtilaskut joita ei ole liitetty kokonaan keikkoihin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
-				(SELECT summa
+				(	SELECT sum(summa) summa
 					FROM tiliointi
 					WHERE tiliointi.yhtio = lasku.yhtio
 					AND	tiliointi.ltunnus = lasku.tunnus

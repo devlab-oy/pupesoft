@@ -408,8 +408,12 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel1="";
-		$sel2="";
+		$sel1 = "";
+		$sel2 = "";
+		$sel3 = "";
+		$sel4 = "";
+		$sel5 = "";
+		$sel6 = "";
 
 		if ($trow[$i] == "") {
 			$sel1 = "selected";
@@ -2547,7 +2551,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "myyntiera_pyoristys" ) {
-		
+
 		$sela = $selb = "";
 
 		if ($trow[$i] == 'K') {
@@ -2562,6 +2566,45 @@
 					<option value = 'K' $selb>".t("Myyntiriveill‰ k‰ytet‰‰n pyˆristyst‰ seuraavaan t‰yteen myyntier‰‰n")."</option>
 				</select></td>";
 
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "reklamaation_kasittely") {
+
+		$sela = $selb = "";
+
+		if ($trow[$i] == 'U') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ' ' $sela>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n nopeaa tapaa")."</option>
+					<option value = 'U' $selb>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n uutta hitaanpaa tapaa")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "reklamaation_vastaanottovarasto" ) {
+		$query = "	SELECT tunnus, nimitys
+					FROM varastopaikat
+					WHERE yhtio='$kukarow[yhtio]'";
+		$sresult = mysql_query($query) or pupe_error($query);
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value=' '>".t("Ei oletusvarastoa valittu")."</option>";
+
+		while ($srow = mysql_fetch_array($sresult)) {
+			$sel = '';
+			if ($trow[$i] == $srow['tunnus']) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value='$srow[tunnus]' $sel>".$srow['nimitys']."</option>";
+		}
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 

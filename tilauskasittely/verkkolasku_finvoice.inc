@@ -397,7 +397,8 @@ if (!function_exists('finvoice_otsik')) {
 			xml_add("DeliveryMethodText",                                   $lasrow['toimitustapa'],          		$tootfinvoice, 512);
 			xml_add("DeliveryTermsText",									$lasrow['toimitusehto'],          		$tootfinvoice, 512);
 
-			if ($lasrow["chn"] == "112") {
+			// Kauttalaskutus
+			if ($lasrow["chn"] == "112" and $asiakasrow["osasto"] == "6" and $lasrow["yhtio"] == "artr") {
 				xml_add("TerminalAddressText",								"KAUTTALASKUTUS",	     				$tootfinvoice);
 			}
 

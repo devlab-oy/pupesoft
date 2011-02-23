@@ -153,7 +153,9 @@ elseif ($laskurow["tilaustyyppi"] == 'E') {
 		$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnus'], t('Myyntilaskun tilausvahvistus'));
 
 		//poistetaan tmp file samantien kuleksimasta...
-		system("rm -f ".basename($tilausvahvistus_tallenna));
+		unlink("/tmp/".basename($tilausvahvistus_tallenna));
+
+		$tilausvahvistus_tallenna = "";
 	}
 }
 elseif ($laskurow["tilaustyyppi"] == '0') {
@@ -344,9 +346,9 @@ else {
 				$result = mysql_query($query) or pupe_error($query);
 
 				if ($jaksotettu == 'X') {
-					$query = "	UPDATE lasku SET 
-								tila = 'L', 
-								alatila = 'J', 
+					$query = "	UPDATE lasku SET
+								tila = 'L',
+								alatila = 'J',
 								lahetepvm = now()
 								WHERE tunnus = '$laskurow[tunnus]'
 								AND yhtio = '$kukarow[yhtio]'
@@ -641,7 +643,7 @@ else {
 			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 				require("tilausvahvistus-email.inc");
 			}
-			
+
 			// Laitetaan t‰ss‰kin haarassa Intrastat-tiedot kuntoon, muuten laskujen ketjutus ei onnaa. (varasto = 0 ,eli menn‰‰n yhtiˆn oletusmaalla)
 			$laskurow = palauta_intrastat_tiedot($laskurow, 0, TRUE);
 
@@ -692,9 +694,9 @@ else {
 				$result = mysql_query($query) or pupe_error($query);
 
 				if ($jaksotettu == 'X') {
-					$query = "	UPDATE lasku SET 
-								tila = 'L', 
-								alatila = 'J', 
+					$query = "	UPDATE lasku SET
+								tila = 'L',
+								alatila = 'J',
 								lahetepvm = now()
 								WHERE tunnus = '$laskurow[tunnus]'
 								AND yhtio = '$kukarow[yhtio]'
@@ -780,10 +782,10 @@ else {
 
 				// Mihin varastoon
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
-				
+
 				// Mik‰ tulostusalue
 				$tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
-				
+
 				// Intrastat-tiedot
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
@@ -885,7 +887,7 @@ else {
 				else {
 					$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o' " : '';
 
-					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu														
+					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
 					$query = "	UPDATE lasku set
 								varasto 							= '$varasto',
 								tulostusalue						= '$tulostusalue',
@@ -1080,7 +1082,9 @@ else {
 					$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnusnippu'], t('Myyntilaskun tilausvahvistus'));
 
 					//poistetaan tmp file samantien kuleksimasta...
-					system("rm -f ".basename($tilausvahvistus_tallenna));
+					unlink("/tmp/".basename($tilausvahvistus_tallenna));
+
+					$tilausvahvistus_tallenna = "";
 				}
 				///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///
 
@@ -1206,7 +1210,9 @@ else {
 						$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnus'], t('Myyntilaskun tilausvahvistus'));
 
 						//poistetaan tmp file samantien kuleksimasta...
-						system("rm -f ".basename($tilausvahvistus_tallenna));
+						unlink("/tmp/".basename($tilausvahvistus_tallenna));
+
+						$tilausvahvistus_tallenna = "";
 					}
 
 					// takaisin k‰yttˆˆn

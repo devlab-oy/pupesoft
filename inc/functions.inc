@@ -7948,7 +7948,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
 			$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnus'], t('Myyntilaskun tilausvahvistus'));
 
 			//poistetaan tmp file samantien kuleksimasta...
-			system("rm -f ".basename($tilausvahvistus_tallenna));
+			unlink("/tmp/".basename($tilausvahvistus_tallenna));
+
+			$tilausvahvistus_tallenna = "";
 		}
 	}
 }

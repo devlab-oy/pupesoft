@@ -377,7 +377,11 @@
 					$kpitores = mysql_query($query) or pupe_error($query);
 					$kpitorow = mysql_fetch_array($kpitores);
 
-					echo "<tr><td>".t("Varastonmuutos").": ".sprintf('%.2f', $tuoterow["kpl"]*$tuoterow["hinta"])."</td><td colspan='4'>".t("Kirjanpito").": ".sprintf('%.2f', $kpitorow["summa"])."</td></tr>";
+					preg_match("/ \(([0-9\.\-]*?)\) /", $tuoterow["selite"], $invkpl);
+
+					$vararvo_ennen = round((float) $invkpl[1] * $tuoterow["hinta"],2);
+
+					echo "<tr><td>".t("Varastonarvo ennen inventointia").": $vararvo_ennen</td><td>".t("Varastonmuutos").": ".sprintf('%.2f', $tuoterow["kpl"]*$tuoterow["hinta"])."</td><td colspan='3'>".t("Kirjanpito").": ".sprintf('%.2f', $kpitorow["summa"])."</td></tr>";
 
 					if ($tuoterow["sarjanumeroseuranta"] == "S") {
 						$query = "	SELECT *

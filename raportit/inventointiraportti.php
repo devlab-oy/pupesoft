@@ -263,6 +263,10 @@
 					$lisa .= " and tapahtuma.laatija in $sel_invaaja";
 				}
 
+				if ($kaikkirivit != "" and $vararvoennen != "") {
+					$select .= "tapahtuma.hinta 'vararvoennen', ";
+				}
+
 				// Jos ei olla valittu mit‰‰n
 				if ($group == "") {
 					$select = "tuote.yhtio, ";
@@ -300,7 +304,7 @@
 
 					$rivilimitti = 1000;
 
-					if($vain_excel != "") {
+					if ($vain_excel != "") {
 						echo "<font class='error'>".t("Tallenna/avaa tulos exceliss‰")."!</font><br><br>";
 						$rivilimitti = 0;
 					}
@@ -352,7 +356,7 @@
 						if (mysql_num_rows($result) <= $rivilimitti) echo "<th>".t(mysql_field_name($result,$i))."</th>";
 					}
 
-					if(isset($workbook)) {
+					if (isset($workbook)) {
 						for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 						$excelrivi++;
 					}
@@ -465,6 +469,12 @@
 									}
 								}
 
+								// Parseroidaan varastonarvo ennen invausta
+								if (mysql_field_name($result, $i) == "vararvoennen") {
+									preg_match("/ \(([0-9\.\-]*?)\) /", $row["selite"], $invkpl);
+
+									$row[$i] = round((float) $invkpl[1] * $row[$i],2);
+								}
 
 								// Jos gruupataan enemm‰n kuin yksi taso niin tehd‰‰n v‰lisumma
 								if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {
@@ -977,6 +987,7 @@
 			if ($ruksit[90]  != '') $ruk90chk 			= "CHECKED";
 			if ($nimitykset != '')  $nimchk   			= "CHECKED";
 			if ($kaikkirivit != '')  $kaikkirivitchk	= "CHECKED";
+			if ($vararvoennen != '')  $vararvoennenchk	= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -1005,6 +1016,12 @@
 				<td><input type='checkbox' name='kaikkirivit' $kaikkirivitchk></td>
 				<td></td>
 				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>".t("N‰yt‰ varastonarvo ennen inventointia")."</th>
+				<td><input type='checkbox' name='vararvoennen' $vararvoennenchk></td>
+				<td></td>
+				<td class='back'>".t("(Toimii vain kun listataan jokainen inventointi ja sen selite)")."</td>
 				</tr>";
 			echo "</table><br>";
 

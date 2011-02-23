@@ -181,7 +181,7 @@ elseif ($ytunnus != '') {
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
 						and asiakas.asiakasnro = '$ytunnus'
-						and asiakas.asiakasnro!=0
+						and asiakas.asiakasnro not in (0,'')
 						$lajilisa $asiakasrajaus)
 					UNION
 					(SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
@@ -307,6 +307,17 @@ elseif ($ytunnus != '') {
 						$osoite_toim_lisa
 						$postitp_toim_lisa
 						$postino_toim_lisa
+						$lajilisa $asiakasrajaus)
+					UNION
+					(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.asiakasnro like '%$ytunnus2%'
+						and asiakas.asiakasnro not in (0,'')
+						$osoitelisa
+						$postitplisa
+						$postinolisa
 						$lajilisa $asiakasrajaus)
 					UNION
 					(SELECT asiakas.*, yhtio.nimi yhtionimi

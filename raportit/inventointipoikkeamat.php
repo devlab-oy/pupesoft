@@ -492,7 +492,7 @@
 			$kk = date('m');
 			$vv = date('Y');
 
-			$ots  = "".t("Inventointipoikkeamalista, poikkeama ")." $muutos $yks $pp.$kk.$vv $yhtiorow[nimi]\n\n";
+			$ots  = t("Inventointipoikkeamalista, poikkeama ")." $muutos $yks $pp.$kk.$vv $yhtiorow[nimi]\n\n";
 			$ots .= sprintf ('%-14.14s', 	t("Paikka"));
 			$ots .= sprintf ('%-21.21s', 	t("Tuoteno"));
 			$ots .= sprintf ('%-21.21s', 	t("Toim.Tuoteno"));
@@ -536,10 +536,17 @@
 				$prn .= sprintf ('%-16.16s', 	$row["inventointiaika"]);
 
 				if ($naytanimitys != '') {
-					$prn .= "\n".sprintf ('%-50.50s', 		$row["nimitys"]);
-					$prn .= "  ".t("Arvonmuutos").": ".sprintf ('%-21.21s',	$row["arvo"]);
+
+					preg_match("/ \(([0-9\.\-]*?)\) /", $row["selite"], $invkpl);
+
+					$vararvo_ennen = round((float) $invkpl[1] * $row["hinta"],2);
+
+					$prn .= "\n".sprintf ('%-54.54s', 		$row["nimitys"]);
+					$prn .= "  ".t("Varastonarvo ennen inventointia").": ".sprintf ('%-21.21s',	$vararvo_ennen);
+					$prn .= "\n".sprintf ('%-54.54s', 		"");
+					$prn .= "  ".t("Arvonmuutos").": ".sprintf ('%-21.21s',	round($row["arvo"],2));
 					$arvoyht += $row["arvo"];
-					$rivit = $rivit+0.5;
+					$rivit++;
 				}
 
 				$prn .= "\n-------------------------------------------------------------------------------------------------------\n";
@@ -548,7 +555,7 @@
 			}
 
 			if ($naytanimitys != '') {
-				$prn .= t("Arvonmuutos yhteens‰").": ".sprintf ('%-21.21s',$arvoyht);
+				$prn = t("Arvonmuutos yhteens‰").": ".sprintf ('%-21.21s', round($arvoyht,2));
 				fwrite($fh, $prn);
 			}
 
@@ -571,7 +578,6 @@
 			else {
 				//k‰‰nnet‰‰n kaunniksi
 				$line2 = exec("$komento[Inventointipoikkeamat] ".$filenimi.".ps");
-
 			}
 
 			echo "<br>".t("Inventointipoikkeamalista tulostuu")."!<br><br>";

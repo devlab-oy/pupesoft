@@ -171,7 +171,8 @@
 					JOIN tuote ON (tapahtuma.yhtio = tuote.yhtio and tapahtuma.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 					and tapahtuma.laji = 'inventointi'
-					and tapahtuma.laadittu >= '2010-01-01 00:00:00'
+					and tapahtuma.laadittu >= '$vv-$kk-$pp 00:00:00'
+					and tapahtuma.laadittu <= '$vv1-$kk1-$pp1 23:59:59'
 					ORDER BY tapahtuma.laadittu";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -291,7 +292,8 @@
 					JOIN tuote ON (tapahtuma.yhtio = tuote.yhtio and tapahtuma.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
 					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 					and tapahtuma.laji = 'laskutus'
-					and tapahtuma.laadittu >= '2010-01-01 00:00:00'
+					and tapahtuma.laadittu >= '$vv-$kk-$pp 00:00:00'
+					and tapahtuma.laadittu <= '$vv1-$kk1-$pp1 23:59:59'
 					ORDER BY tapahtuma.laadittu";
 		$result = mysql_query($query) or pupe_error($query);
 

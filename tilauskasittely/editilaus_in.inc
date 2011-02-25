@@ -452,10 +452,11 @@ while (!feof ($fd)) {
 			}
 
 			if (($tunnus == "ONADBY_RF" or $tunnus == "OSTOTIL.OT_ASIAKASNRO") and !is_array($arow)) {
+
 				$query = "	SELECT *
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
-							and asiakasnro = '$tieto'
+							and asiakasnro = 'arw-$tieto'
 							and asiakasnro not in ('','0')
 							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
@@ -464,6 +465,21 @@ while (!feof ($fd)) {
 					$arow = mysql_fetch_array($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
 					$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
+				}
+				else {
+					$query = "	SELECT *
+								FROM asiakas
+								WHERE yhtio = '$kukarow[yhtio]'
+								and asiakasnro = '$tieto'
+								and asiakasnro not in ('','0')
+								and laji not in ('R','P')";
+					$result = mysql_query($query) or die($query);
+
+					if (mysql_num_rows($result) == 1) {
+						$arow = mysql_fetch_array($result);
+						$vastaustapa .= $arow['tilausvahvistus'];
+						$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
+					}
 				}
 			}
 

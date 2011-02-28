@@ -65,7 +65,7 @@ if(!function_exists("toimitarkista")) {
 					if ($tmp_maakoodi == 'FI') {
 						require 'pankkitilinoikeellisuus.php';
 						if ($pankkitili == '') {
-							$virhe[$i] = t("Pankkitili '$pankkitili' on virheellinen");
+							$virhe[$i] = t("Pankkitili '%s' on virheellinen", "", $pankkitili);
 						}
 						else {
 							$t[$i]=$pankkitili;

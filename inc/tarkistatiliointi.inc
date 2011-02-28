@@ -6,50 +6,58 @@
 	$ulos 	= "";
 
 	if ($summa != 0 or strlen($tili) > 0) {
-
-		// Onko tilinumero alphaa ja pitäisi muuttaa nimi numeroksi?
-		if (strlen($tili) > 0 and !is_numeric($tili)) {
-
-			$query = "	SELECT tilino, nimi
-						FROM tili
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND nimi LIKE '%$tili%'";
-			$result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($result) == 0) {
-				$ok = 1;
-				$virhe = t("Yksikään tili ei sovi");
-			}
-			else {
-				$ok = 1;
-				$virhe = t("Useita tilejä löytyi");
-				$ulos = "<select name='$selausnimi'>";
-
-				while ($xrow = mysql_fetch_array($result)) {
-					$ulos .= "<option value='$xrow[tilino]'>$xrow[tilino] $xrow[nimi]</option>";
-				}
-
-				$ulos .= "<option value=''>".t("Ei valintaa")."</option>";
-				$ulos .= "</select>";
-			}
-		}
-
-		if ($ok == 0 and strlen($tili) > 0) {
-
-			$query = "	SELECT tilino, toimijaliitos, kustp, kohde, projekti,tiliointi_tarkistus
+				
+		if (strlen($tili) > 0) {
+			
+			// Onko suoraan tilinumero 
+			$query = "	SELECT tilino, toimijaliitos, kustp, kohde, projekti,tiliointi_tarkistus, nimi
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$tili'";
 			$result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($result) == 0) {		
+						
+			if (mysql_num_rows($result) == 0) {
+				
 				$ok = 1;
-				$virhe = t("Tuntematon tili")." '$tili'";
+				
+				// Kokeillaan nimihakua
+				$query = "	SELECT tilino, toimijaliitos, kustp, kohde, projekti,tiliointi_tarkistus, nimi
+							FROM tili
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND nimi LIKE '%$tili%'";
+				$result = mysql_query($query) or pupe_error($query);
+								
+				if (mysql_num_rows($result) == 0) {
+					$virhe = t("Yksikään tili ei sovi");
+				}
+				elseif (mysql_num_rows($result) == 1) {
+					$ok = 0;
+					$xrow = mysql_fetch_array($result);
+				}
+				else {					
+					$virhe = t("Useita tilejä löytyi");
+					$ulos = "<select name='$selausnimi'>";
+
+					while ($xrow = mysql_fetch_array($result)) {
+						$ulos .= "<option value='$xrow[tilino]'>$xrow[tilino] $xrow[nimi]</option>";
+					}
+
+					$ulos .= "<option value=''>".t("Ei valintaa")."</option>";
+					$ulos .= "</select>";
+				}
+			}
+			elseif (mysql_num_rows($result) == 1) {
+				$ok = 0;
+				$xrow = mysql_fetch_array($result);
 			}
 			else {
-				$xrow = mysql_fetch_array($result);
-				$tili = $xrow['tilino'];
+				$ok = 1;
 			}
+		}
+
+		if ($ok == 0 and strlen($tili) > 0) {
+			
+			$tili = $xrow['tilino'];
 
 			// Jos muistiotosite ja tilille on liitettävä asiakas tai toimittaja
 			if ($tositetila == "X" and $xrow["toimijaliitos"] != "" and (int) $tositeliit == 0) {
@@ -57,16 +65,17 @@
 				$ok = 1;
 			}
 			
-/**
-0 = Ei pakollisia kenttiä
-1 = pakollisia kenttiä tiliöinnissä on kustannuspaikka
-2 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde
-3 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, projekti
-4 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde ja projekti
-5 = pakollisia kenttiä tiliöinnissä on kohde
-6 = pakollisia kenttiä tiliöinnissä on kohde, projekti
-7 = pakollisia kenttiä tiliöinnissä on projekti
-**/			
+			/*
+			0 = Ei pakollisia kenttiä
+			1 = pakollisia kenttiä tiliöinnissä on kustannuspaikka
+			2 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde
+			3 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, projekti
+			4 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde ja projekti
+			5 = pakollisia kenttiä tiliöinnissä on kohde
+			6 = pakollisia kenttiä tiliöinnissä on kohde, projekti
+			7 = pakollisia kenttiä tiliöinnissä on projekti
+			*/			
+			
 			if ($xrow['tiliointi_tarkistus'] != 0) {
 				
 				if ($xrow['tiliointi_tarkistus'] == 1) {

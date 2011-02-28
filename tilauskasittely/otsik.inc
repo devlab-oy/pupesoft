@@ -152,9 +152,9 @@
 				unset($jatka);
 			}
 		}
-		
+
 		list($toimitustapa,$eitarvitatassa) = explode("#",$toimitustapa);
-		
+
 		if ($toimitustapa == "") {
 			echo "<font class='error'>".t("VIRHE: Toimitustapaa ei löydy kyseiselle maalle").".<br>".t("Tarkista toimitusosoitteen maa")."!</font><br>";
 			$tee = "OTSIK";
@@ -398,6 +398,9 @@
 		elseif ($toim == "REKLAMAATIO") {
 			echo "<font class='head'>".t("Reklamaatio otsikko")."</font><hr>";
 		}
+		elseif ($toim == "EXTRANET_REKLAMAATIO") {
+			echo "<font class='head'>".t("Extranet-Reklamaatio otsikko")."</font><hr>";
+		}
 		elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
 			echo "<font class='head'>".t("Valmistuksen otsikko")."</font><hr>";
 		}
@@ -519,7 +522,7 @@
 					$puhlisa = "";
 				}
 
-				$squery = "	SELECT asiakas.*, $puhlisa asiakas.tunnus liitostunnus, 'O' kohdistettu, '' kohde
+				$squery = "	SELECT asiakas.*, $puhlisa asiakas.tunnus liitostunnus, 'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne
 							FROM asiakas
 							WHERE tunnus = '$asiakasid'";
 			}
@@ -756,13 +759,10 @@
 					<input type='hidden' name='projekti'						 value = '$srow[projekti]'>
 					<input type='hidden' name='jaksotettu'	 					 value = '$srow[jaksotettu]'>
 					<input type='hidden' name='tunnusnippu_tarjous' 			 value = '$srow[tunnusnippu_tarjous]'>
-					<input type='hidden' name='asentaja' 						 value ='$asentaja'>
-					<input type='hidden' name='tyojono' 						 value ='$tyojono'>
+					<input type='hidden' name='kauppatapahtuman_luonne' 		 value = '$srow[kauppatapahtuman_luonne]'>
+					<input type='hidden' name='asentaja' 						 value = '$asentaja'>
+					<input type='hidden' name='tyojono' 						 value = '$tyojono'>
 					<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
-
-// 					<input type='hidden' name='toim_maa' 						 value = '$srow[toim_maa]'>
-//					<input type='hidden' name='maa' 							 value = '$srow[maa]'>
-
 
 			echo "<td valign='top' style='padding:0px;'>";
 			echo "<table>";
@@ -913,6 +913,9 @@
 			elseif ($toim == "REKLAMAATIO") {
 				echo "<tr><th colspan='4'>".t("Reklamaation tiedot").":</th></tr>";
 			}
+			elseif ($toim == "EXTRANET_REKLAMAATIO") {
+				echo "<tr><th colspan='4'>".t("EXtranet-Reklamaation tiedot").":</th></tr>";
+			}
 			elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
 				echo "<tr><th colspan='4'>".t("Valmistuksen tiedot").":</th></tr>";
 
@@ -1039,7 +1042,7 @@
 						</tr>";
 			}
 
-			echo "<tr><td>".t("Toimitustapa").":</td>"; 
+			echo "<tr><td>".t("Toimitustapa").":</td>";
 			echo "<td><select name='toimitustapa'>";
 
 			$query = "	SELECT tunnus, selite
@@ -1049,9 +1052,9 @@
 						and (extranet in ('','M') or selite = '$srow[toimitustapa]')
 						ORDER BY jarjestys,selite";
 			$tresult = mysql_query($query) or pupe_error($query);
-			
+
 			$lahtoseleted = FALSE;
-			
+
 			if (isset($laskurow["toimitustavan_lahto"]) and $laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
 				echo "<option value='$laskurow[toimitustapa]'>$laskurow[toimitustapa] - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."    $laskurow[toimitustavan_lahto]</option>";
 				$lahtoseleted = TRUE;
@@ -1402,6 +1405,15 @@
 				echo "<input type='hidden' name='tilaustyyppi' value='R'>";
 
 				echo "<td>".t("Reklamaatio")."</td>";
+			}
+
+			elseif ($toim == "EXTRANET_REKLAMAATIO") {
+				echo "<tr><td>".t("Tilaustyyppi").":</td>";
+
+				//Jos kyseessä on työmääräys
+				echo "<input type='hidden' name='tilaustyyppi' value='R'>";
+
+				echo "<td>".t("Extranet-Reklamaatio")."</td>";
 			}
 			elseif ($toim == "TARJOUS") {
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
@@ -2176,6 +2188,9 @@
 			elseif ($toim == "REKLAMAATIO") {
 				echo "<tr><th colspan='3'>".t("Valmistuksen kommentit").":</th></tr>";
 			}
+			elseif ($toim == "EXTRANET_REKLAMAATIO") {
+				echo "<tr><th colspan='3'>".t("Reklamaation kommentit").":</th></tr>";
+			}
 			elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
 				echo "<tr><th colspan='3'>".t("Valmistuksen kommentit").":</th></tr>";
 			}
@@ -2714,7 +2729,7 @@
 					jaksotettu							= '$jaksotettu',
 					jtkielto							= '$jtkielto',
 					kassalipas							= '$kassalipas',
-					kauppatapahtuman_luonne				= '',
+					kauppatapahtuman_luonne				= '$kauppatapahtuman_luonne',
 					kerayspvm 							= '$kervv-$kerkk-$kerpp',
 					keraysvko 							= '$keraysvko',
 					ketjutus 							= '$ketjutus',
@@ -2794,6 +2809,12 @@
 			$tee = "";
 		}
 		elseif ($toim == "REKLAMAATIO") {
+			if ($ylatila=='') {
+				$ylatila='C';
+			}
+			$tee = "";
+		}
+		elseif ($toim == "EXTRANET_REKLAMAATIO") {
 			if ($ylatila=='') {
 				$ylatila='C';
 			}
@@ -3014,7 +3035,7 @@
 				}
 			}
 
-			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
+			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
 				//otetaan kantaa pyörän malliin
 				if ($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;
@@ -3050,7 +3071,7 @@
 				$result = mysql_query($query2) or pupe_error($query2);
 			}
 
-			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "ENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS"))) {
+			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "ENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS","EXTRANET_REKLAMAATIO"))) {
 
 				$sopimus_kk = implode(",", $yllapito_kk);
 				$sopimus_pp = implode(",", $yllapito_pp);

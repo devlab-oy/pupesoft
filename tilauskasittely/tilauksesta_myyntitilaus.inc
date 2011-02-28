@@ -182,7 +182,7 @@
 					$tunnusnippu=$utunnus;
 				}
 
-				$query = "update lasku set tunnusnippu = '$tunnusnippu' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$utunnus'";
+				$query = "UPDATE lasku set tunnusnippu = '$tunnusnippu' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$utunnus'";
 				$updres = mysql_query($query) or pupe_error($query);
 			}
 
@@ -233,8 +233,9 @@
 				$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($pvalues)";
 				$insres2 = mysql_query($kysely) or pupe_error($kysely);
 
-				if($yhtiorow["dokumentaatiohallinta"] != "") {
+				if ($yhtiorow["dokumentaatiohallinta"] != "") {
 					svnOpenNew($ptunnus, "PROJEKTI");
+					
 					if(svnProjectsQuotationSubDir) {
 						$svnKansio = svnQuotationDirectory($otunnus);
 						if($svnKansio != "") {
@@ -245,7 +246,7 @@
 			}
 
 			//	Projektin maksusuunnitelma kuuluu projektiotsikolle, ei tilaukselle
-			if($ptunnus>0) {
+			if ($ptunnus > 0) {
 				$mtunnus = $ptunnus;
 			}
 			else {
@@ -384,6 +385,11 @@
 				}
 				else {
 					$hinta 	= $coprivirow['hinta'];
+				}
+				
+				// jos käytössä on myyntihinnan poikkeava määrä, kerrotaan hinta takaisin kuntoon.
+				if ($tuoterow["myyntihinta_maara"] != 0) {
+					$hinta = $hinta * $tuoterow["myyntihinta_maara"];
 				}
 
 				$netto		= $coprivirow['netto'];

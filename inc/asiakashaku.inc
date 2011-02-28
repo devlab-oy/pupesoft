@@ -59,7 +59,7 @@ if ($kukarow["piirit"] != "") {
 	$asiakasrajaus .= " and asiakas.piiri IN ($kukarow[piirit]) ";
 }
 
-if (is_numeric($asiakasid) and $asiakasid > 0) {	
+if (is_numeric($asiakasid) and $asiakasid > 0) {
 	// Jos asiakaan tunnus on löydetty niin ei rajata "$asiakasrajaus":lla ollenkaan
 	$query	= "	SELECT asiakas.*, yhtio.nimi yhtionimi
 				FROM asiakas
@@ -67,7 +67,7 @@ if (is_numeric($asiakasid) and $asiakasid > 0) {
 				WHERE asiakas.$konsyhtiot
 				and asiakas.tunnus = '$asiakasid'";
 	$result = mysql_query($query) or pupe_error($query);
-	$monta  = mysql_num_rows($result);	
+	$monta  = mysql_num_rows($result);
 }
 elseif ($ytunnus != '') {
 	if (substr($ytunnus,0,1) == "£") {
@@ -181,7 +181,7 @@ elseif ($ytunnus != '') {
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
 						and asiakas.asiakasnro = '$ytunnus'
-						and asiakas.asiakasnro not in (0,'')
+						and asiakas.asiakasnro not in ('0','')
 						$lajilisa $asiakasrajaus)
 					UNION
 					(SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
@@ -314,7 +314,7 @@ elseif ($ytunnus != '') {
 						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 						WHERE asiakas.$konsyhtiot
 						and asiakas.asiakasnro like '%$ytunnus2%'
-						and asiakas.asiakasnro not in (0,'')
+						and asiakas.asiakasnro not in ('0','')
 						$osoitelisa
 						$postitplisa
 						$postinolisa
@@ -337,7 +337,7 @@ elseif ($ytunnus != '') {
 							FROM asiakas
 							JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 							WHERE asiakas.$konsyhtiot
-							and asiakas.postitp like '%$postitp2%' 
+							and asiakas.postitp like '%$postitp2%'
 							and asiakas.postitp!=''
 							$osoitelisa
 							$postinolisa
@@ -352,9 +352,9 @@ elseif ($ytunnus != '') {
 elseif ($asiakasnro != '') {
 	$query = "	SELECT asiakas.*, yhtio.nimi yhtionimi
 				FROM asiakas
-				JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+				JOIN yhtio on asiakas.yhtio = yhtio.yhtio
 				WHERE asiakas.$konsyhtiot
-		 		AND asiakas.asiakasnro='$asiakasnro'
+		 		AND asiakas.asiakasnro = '$asiakasnro'
 				$asiakasrajaus";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);

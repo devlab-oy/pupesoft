@@ -10602,4 +10602,112 @@ if (!function_exists("xml_add")) {
 	}
 }
 
+if (!function_exists("alvilmo_kassa_ale_erittely")) {
+	function alvilmo_kassa_ale_erittely ($alkupvm, $loppupvm, $maalisa, $tiliointilisa, $ryhma, $oletus_verokanta, $yhteenvetolilmo = FALSE) {
+		global $yhtiorow, $kukarow;
+
+		$kakerroinlisa  = 1;
+		$kerroin 		= '';
+
+		if ($ryhma == 'fi313') {
+			// Tavaraostot muista EU-maista
+			$ryhma = 'fi305';
+		}
+		elseif ($ryhma == 'fi314') {
+			// Palveluostot muista EU-maista
+			$ryhma = 'fi306';
+		}
+
+		if ($ryhma == 'fi311' or $ryhma == 'fi312') {
+			$kerroin = " * -1 ";
+		}
+
+		if ($ryhma == 'fi305' or $ryhma == 'fi306') {
+			// Hetaan yhteisöostot joilla on kassa-aletta
+			$query = "	SELECT
+						group_concat(DISTINCT tiliointi.tunnus) tilioinnit
+						FROM tiliointi
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+						JOIN tiliointi tiliointi2 ON (lasku.yhtio = tiliointi2.yhtio AND lasku.tunnus = tiliointi2.ltunnus)
+						JOIN tili ON (tili.yhtio = tiliointi2.yhtio and tili.tilino = tiliointi2.tilino AND tili.alv_taso like '%$ryhma%')
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.korjattu = ''
+						AND tiliointi.tapvm >= '$alkupvm'
+						AND tiliointi.tapvm <= '$loppupvm'
+						AND tiliointi.tilino = '$yhtiorow[kassaale]'";
+			$ktres = mysql_query($query) or pupe_error($query);
+		}
+		else {
+			// Hetaan yhteisömyynti, palvelut ja tuotteet erikseen jotta osataan splitata kassa-alennus tavaramyyntiin ja palvelumyyntIin
+			$query = "	SELECT
+						sum(if(tuote.tuotetyyppi='K',  tilausrivi.rivihinta, 0)) palvelut,
+						sum(if(tuote.tuotetyyppi!='K', tilausrivi.rivihinta, 0)) tavarat,
+						sum(tilausrivi.rivihinta) yhteensa,
+						group_concat(DISTINCT tiliointi.tunnus) tilioinnit
+						FROM tiliointi
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus and lasku.vienti = 'E')
+						JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]')
+						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.korjattu = ''
+						AND tiliointi.tapvm >= '$alkupvm'
+						AND tiliointi.tapvm <= '$loppupvm'
+						$maalisa
+						$tiliointilisa
+						AND tiliointi.tilino = '$yhtiorow[myynninkassaale]'";
+			$ktres = mysql_query($query) or pupe_error($query);
+		}
+
+		if (mysql_num_rows($ktres) == 1) {
+			$ktrow = mysql_fetch_assoc($ktres);
+
+			if ($ktrow["tilioinnit"] != "" and ($ryhma == 'fi305' or $ryhma == 'fi306' or $ktrow["yhteensa"] != 0)) {
+
+				// Palvelut ja tuotteet erikseen
+				if ($ryhma == 'fi311') {
+					$kakerroinlisa = $ktrow["tavarat"]/$ktrow["yhteensa"];
+				}
+				elseif ($ryhma == 'fi312') {
+					$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
+				}
+
+				$selec = "	if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
+							tiliointi.vero vero,
+							tiliointi.tilino tilino,
+							tili.nimi nimi,";
+				$group = "	maa, valuutta, vero, tilino, nimi";
+
+				if ($yhteenvetolilmo) {
+					$selec = "	lasku.ytunnus ytunnus,
+								if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+								max(lasku.nimi) laskunimi, ";
+					$group = "	ytunnus, maa";
+				}
+
+				$query = "	SELECT
+							$selec
+							sum(round(tiliointi.summa * (1 + ($oletus_verokanta / 100)), 2)) $kerroin bruttosumma,
+							sum(round(tiliointi.summa * ($oletus_verokanta / 100), 2)) $kerroin verot,
+							sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + ($oletus_verokanta / 100)), 2)) $kerroin bruttosumma_valuutassa,
+							sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * ($oletus_verokanta / 100), 2)) $kerroin verot_valuutassa,
+							count(*) kpl
+							FROM tiliointi
+							JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+							LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
+							WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+							AND tiliointi.tunnus in ($ktrow[tilioinnit])
+							GROUP BY $group
+							ORDER BY $group";
+				$ttres = mysql_query($query) or pupe_error($query);
+
+				return array($kakerroinlisa, $ttres);
+			}
+			return array(NULL, NULL);
+		}
+		return array(NULL, NULL);
+	}
+}
+
 ?>

@@ -112,103 +112,6 @@
 		}
 	}
 
-	if (!function_exists("kassa_ale_erittely")) {
-		function kassa_ale_erittely ($alkupvm, $loppupvm, $maalisa, $tiliointilisa, $ryhma, $oletus_verokanta) {
-			global $yhtiorow, $kukarow;
-
-			$kakerroinlisa  = 1;
-			$kerroin 		= '';
-
-			if ($ryhma == 'fi313') {
-				// Tavaraostot muista EU-maista
-				$ryhma = 'fi305';
-			}
-			elseif ($ryhma == 'fi314') {
-				// Palveluostot muista EU-maista
-				$ryhma = 'fi306';
-			}
-			
-			if ($ryhma == 'fi311' or $ryhma == 'fi312') {
-				$kerroin = " * -1 ";
-			}
-						
-			if ($ryhma == 'fi305' or $ryhma == 'fi306') {
-				// Hetaan yhteisö-ostolaskut joilla on kassa-aletta
-				$query = "	SELECT
-							group_concat(DISTINCT tiliointi.tunnus) tilioinnit
-							FROM tiliointi
-							JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
-							JOIN tiliointi tiliointi2 ON (lasku.yhtio = tiliointi2.yhtio AND lasku.tunnus = tiliointi2.ltunnus)
-							JOIN tili ON (tili.yhtio = tiliointi2.yhtio and tili.tilino = tiliointi2.tilino AND tili.alv_taso like '%$ryhma%')
-							WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-							AND tiliointi.korjattu = ''
-							AND tiliointi.tapvm >= '$alkupvm'
-							AND tiliointi.tapvm <= '$loppupvm'
-							AND tiliointi.tilino = '$yhtiorow[kassaale]'";
-				$ktres = mysql_query($query) or pupe_error($query);
-			}
-			else {
-				// Hetaan yhteysmyynti, palvelut ja tuotteet erikseen jotta osataan splitata kassa-alennus tavaramyyntiin ja palvelumyyntIin
-				$query = "	SELECT
-							sum(if(tuote.tuotetyyppi='K',  tilausrivi.rivihinta, 0)) palvelut,
-							sum(if(tuote.tuotetyyppi!='K', tilausrivi.rivihinta, 0)) tavarat,
-							sum(tilausrivi.rivihinta) yhteensa,
-							group_concat(DISTINCT tiliointi.tunnus) tilioinnit
-							FROM tiliointi
-							JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus and lasku.vienti = 'E')
-							JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
-							JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]')
-							LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
-							WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-							AND tiliointi.korjattu = ''
-							AND tiliointi.tapvm >= '$alkupvm'
-							AND tiliointi.tapvm <= '$loppupvm'
-							$maalisa
-							$tiliointilisa
-							AND tiliointi.tilino = '$yhtiorow[myynninkassaale]'";
-				$ktres = mysql_query($query) or pupe_error($query);
-			}
-
-			if (mysql_num_rows($ktres) == 1) {
-				$ktrow = mysql_fetch_assoc($ktres);
-
-				if ($ktrow["tilioinnit"] != "" and ($ryhma == 'fi305' or $ryhma == 'fi306' or $ktrow["yhteensa"] != 0)) {
-
-					// Palvelut ja tuotteet erikseen
-					if ($ryhma == 'fi311') {
-						$kakerroinlisa = $ktrow["tavarat"]/$ktrow["yhteensa"];
-					}
-					elseif ($ryhma == 'fi312') {
-						$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
-					}
-
-					$query = "	SELECT if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
-								if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
-								tiliointi.vero,
-								tiliointi.tilino,
-								tili.nimi,
-								sum(round(tiliointi.summa * (1 + ($oletus_verokanta / 100)), 2)) $kerroin bruttosumma,
-								sum(round(tiliointi.summa * ($oletus_verokanta / 100), 2)) $kerroin verot,
-								sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + ($oletus_verokanta / 100)), 2)) $kerroin bruttosumma_valuutassa,
-								sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * ($oletus_verokanta / 100), 2)) $kerroin verot_valuutassa,
-								count(*) kpl
-								FROM tiliointi
-								JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
-								LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
-								WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-								AND tiliointi.tunnus in ($ktrow[tilioinnit])
-								GROUP BY 1, 2, 3, 4, 5
-								ORDER BY maa, valuutta, vero, tilino, nimi";
-					$ttres = mysql_query($query) or pupe_error($query);
-
-					return array($kakerroinlisa, $ttres);
-				}
-				return array(NULL, NULL);
-			}
-			return array(NULL, NULL);
-		}
-	}
-
 	if (!function_exists("alv_laskelma")) {
 		function alvlaskelma ($kk, $vv) {
 			global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta, $maksettava_alv_tili;
@@ -315,7 +218,7 @@
 
 					if ($cleantaso == "fi305" or $cleantaso == "fi306") {
 						// Vähennetään kassa-alennuksien laskennaliset verot Tavara/Palveluaostot muista EU-maista
-						list($kakerroinlisa, $ttres) = kassa_ale_erittely($startmonth, $endmonth, "", "", $cleantaso, $oletus_verokanta);
+						list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($startmonth, $endmonth, "", "", $cleantaso, $oletus_verokanta);
 
 						if (is_resource($ttres)) {
 							while ($trow = mysql_fetch_assoc($ttres)) {
@@ -326,7 +229,7 @@
 
 					if ($cleantaso == "fi313" or $cleantaso == "fi314") {
 						// Vähennetään kassa-alennukset Tavara/Palveluaostot muista EU-maista
-						list($kakerroinlisa, $ttres) = kassa_ale_erittely($startmonth, $endmonth, "", "", $cleantaso, 0);
+						list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($startmonth, $endmonth, "", "", $cleantaso, 0);
 
 						if (is_resource($ttres)) {
 							while ($trow = mysql_fetch_assoc($ttres)) {
@@ -337,7 +240,7 @@
 
 					if ($cleantaso == 'fi312' or $cleantaso == 'fi311') {
 						// Vähennetään kassa-alennukset Tavaran/palveluiden myynnistä muihin EU-maihin
-						list($kakerroinlisa, $ttres) = kassa_ale_erittely($startmonth, $endmonth, $maalisa, $vainveroton, $cleantaso, 0);
+						list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($startmonth, $endmonth, $maalisa, $vainveroton, $cleantaso, 0);
 
 						if (is_resource($ttres)) {
 							while ($trow = mysql_fetch_assoc($ttres)) {
@@ -688,7 +591,7 @@
 
 		if ($ryhma == 'fi307') {
 			// Kohdekuukauden vähennettävä vero
-			$maalisa = " and lasku.maa in ('FI', '') ";			
+			$maalisa = " and lasku.maa in ('FI', '') ";
 		}
 
 		if ($ryhma == 'fi309') {
@@ -750,7 +653,7 @@
 		$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit300,
 					ifnull(group_concat(if(alv_taso not like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
 					FROM tili
-					WHERE yhtio = '$kukarow[yhtio]' 
+					WHERE yhtio = '$kukarow[yhtio]'
 					and (alv_taso like '%$taso%' $_309lisa)";
 		$tilires = mysql_query($query) or pupe_error($query);
 		$tilirow = mysql_fetch_assoc($tilires);
@@ -879,13 +782,13 @@
 
 				// Tälle kuukaudelle tiliöidyt kassa alennukset
 				if ($ryhma == "fi305" or $ryhma == "fi306") {
-					list($kakerroinlisa, $ttres) = kassa_ale_erittely($alkupvm, $loppupvm, "", "", $ryhma, $oletus_verokanta);
+					list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", $ryhma, $oletus_verokanta);
 				}
 				elseif ($ryhma == "fi313" or $ryhma == "fi314") {
-					list($kakerroinlisa, $ttres) = kassa_ale_erittely($alkupvm, $loppupvm, "", "", $ryhma, 0);
+					list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", $ryhma, 0);
 				}
 				else {
-					list($kakerroinlisa, $ttres) = kassa_ale_erittely($alkupvm, $loppupvm, $maalisa, $tiliointilisa, $ryhma, 0);
+					list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, $maalisa, $tiliointilisa, $ryhma, 0);
 				}
 
 				if (is_resource($ttres)) {
@@ -964,25 +867,25 @@
 					while ($verorow = mysql_fetch_assoc ($verores)) {
 						$vero += $verorow['veronmaara'];
 					}
-					
+
 					// Kassa-alennukset
-					list($kakerroinlisa, $ttres) = kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi305", $oletus_verokanta);
-					
+					list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi305", $oletus_verokanta);
+
 					if (is_resource($ttres)) {
 						while ($trow = mysql_fetch_assoc($ttres)) {
 							$vero += $trow['verot'];
 						}
 					}
-					
+
 					// Kassa-alennukset
-					list($kakerroinlisa, $ttres) = kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi306", $oletus_verokanta);
-					
+					list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi306", $oletus_verokanta);
+
 					if (is_resource($ttres)) {
 						while ($trow = mysql_fetch_assoc($ttres)) {
 							$vero += $trow['verot'];
 						}
-					}					
-					
+					}
+
 					echo "<tr><td colspan='5' align='right' class='spec'>".t("Vero tavaraostoista muista EU-maista").":</td>
 							<td class='spec'></td>
 							<td align = 'right' class='spec'>".sprintf('%.2f', $vero)."</td>

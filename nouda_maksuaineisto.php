@@ -59,7 +59,7 @@
 		echo "<font class='head'>".t("Nouda tallennettu maksuaineisto")."</font><hr><br>";
 
 		if ($kotimaa == "FI") {
-			echo "<font class='message'>Kotimaan LM03-maksuaineisto:</font><br>";
+			echo "<font class='message'>".t("Kotimaan LM03-maksuaineisto").":</font><br>";
 		}
 		else {
 			echo "<font class='message'>Betalningsuppdrang via Bankgirot - Inrikesbetalningar:</font><hr>";
@@ -81,11 +81,11 @@
 			echo "<input type='submit' value='".t("Tallenna")."'></form><br>";
 		}
 		else {
-			echo "<font class='message'>Ei aineistoja.</font><br>";
+			echo "<font class='message'>".t("Ei aineistoja").".</font><br><br>";
 		}
 
 		if ($kotimaa == "FI") {
-			echo "<font class='message'>Ulkomaan LUM2-maksuaineisto:</font><br>";
+			echo "<font class='message'>".t("Ulkomaan LUM2-maksuaineisto").":</font><br>";
 		}
 		else {
 			echo "<font class='message'>Betalningsuppdrang via Bankgirot - Utlandsbetalningar:</font><hr>";
@@ -107,14 +107,36 @@
 			echo "<input type='submit' value='".t("Tallenna")."'></form>";
 		}
 		else {
-			echo "<font class='message'>Ei aineistoja.</font><br>";
+			echo "<font class='message'>".t("Ei aineistoja").".</font><br><br>";
 		}
+
+		echo "<font class='message'>".t("SEPA-maksuaineisto").":</font><br>";
+
+		$valinta = "";
+		for ($i=0; $i < count($lista); $i++) {
+			if (substr($lista[$i],0, 5+strlen($kukarow["yhtio"])) == "SEPA-$kukarow[yhtio]") {
+				$valinta .= "<option value='$lista[$i]' $sel>$lista[$i]</option>";
+			}
+		}
+
+		if ($valinta != "") {
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<select name='pankkifilenimi' multiple='FALSE' size='10'>";
+			echo $valinta;
+			echo "</select>";
+			echo "<input type='submit' value='".t("Tallenna")."'></form><br>";
+		}
+		else {
+			echo "<font class='message'>".t("Ei aineistoja").".</font><br><br>";
+		}
+
 
 		echo "<br><br>";
 		echo "<font class='head'>".t("Poista tallennettu maksuaineisto")."</font><hr><br>";
 
 		if ($kotimaa == "FI") {
-			echo "<font class='message'>Kotimaan LM03-maksuaineisto:</font><br>";
+			echo "<font class='message'>".t("Kotimaan LM03-maksuaineisto").":</font><br>";
 		}
 		else {
 			echo "<font class='message'>Betalningsuppdrang via Bankgirot - Inrikesbetalningar:</font><hr>";
@@ -136,11 +158,11 @@
 			echo "<input type='submit' value='".t("Poista")."'></form><br>";
 		}
 		else {
-			echo "<font class='message'>Ei aineistoja.</font><br>";
+			echo "<font class='message'>".t("Ei aineistoja").".</font><br><br>";
 		}
 
 		if ($kotimaa == "FI") {
-			echo "<font class='message'>Ulkomaan LUM2-maksuaineisto:</font><br>";
+			echo "<font class='message'>".t("Ulkomaan LUM2-maksuaineisto").":</font><br>";
 		}
 		else {
 			echo "<font class='message'>Betalningsuppdrang via Bankgirot - Utlandsbetalningar:</font><hr>";
@@ -162,7 +184,28 @@
 			echo "<input type='submit' value='".t("Poista")."'></form>";
 		}
 		else {
-			echo "<font class='message'>Ei aineistoja.</font><br>";
+			echo "<font class='message'>".t("Ei aineistoja").".</font><br><br>";
+		}
+
+		echo "<font class='message'>".t("SEPA-maksuaineisto").":</font><br>";
+
+		$valinta = "";
+		for ($i=0; $i < count($lista); $i++) {
+			if (substr($lista[$i],0, 5+strlen($kukarow["yhtio"])) == "SEPA-$kukarow[yhtio]") {
+				$valinta .= "<option value='$lista[$i]' $sel>$lista[$i]</option>";
+			}
+		}
+
+		if ($valinta != "") {
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='tee' value='poista_tiedosto'>";
+			echo "<select name='pankkifilenimi' multiple='FALSE' size='10'>";
+			echo $valinta;
+			echo "</select>";
+			echo "<input type='submit' value='".t("Poista")."'></form>";
+		}
+		else {
+			echo "<font class='message'>".t("Ei aineistoja").".</font><br><br>";
 		}
 
 		require ("inc/footer.inc");

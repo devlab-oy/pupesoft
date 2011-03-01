@@ -120,7 +120,13 @@
 		elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $laskurow["tila"] != "K" and $toim_kutsu != "") {
 
 			if ($kukarow["extranet"] != "") {
-				$toim_kutsu 	 = "EXTRANET";
+				if ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO') {
+					$toim_kutsu = "EXTRANET_REKLAMAATIO";
+				}
+				else {
+					$toim_kutsu = "EXTRANET";
+				}
+
 				$tilauskasittely = "";
 			}
 			else {
@@ -199,7 +205,11 @@
 
 			$kpl = str_replace(',', '.', $kpl);
 
-			if ((float) $kpl > 0 or ($kukarow["extranet"] == "" and (float) $kpl < 0)) {
+			if ((float) $kpl > 0 or ($kukarow["extranet"] == "" and (float) $kpl < 0) or ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO' and (float) $kpl !=0)) {
+
+				if ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO') {
+					$kpl = abs($kpl)*-1;
+				}
 
 				// haetaan tuotteen tiedot
 				$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tiltuoteno[$yht_i]'";
@@ -609,7 +619,7 @@
 			if ($kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
 				echo "<th>".t("Näytä poistetut")."</th><td><input type='checkbox' name='extrapoistetut' id='extrapoistetut' $extrapoischeck></td>";
 			}
-			
+
 			echo "</tr>";
 
 			echo "<tr><th>".t("Nimitys")."</th><td><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td>";
@@ -669,14 +679,8 @@
 		}
 		else {
 			// Oletus
-			$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "MALLI", "MALLI/MALLITARK");
+			$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "MALLI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE");
 			$monivalintalaatikot_normaali = array();
-
-			$avainsana_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite='Tuote' ");
-
-			if (mysql_num_rows($avainsana_result) == 1) {
-				array_push($monivalintalaatikot, "DYNAAMINEN_TUOTE");
-			}
 		}
 
 		require ("monivalintalaatikot.inc");
@@ -747,20 +751,13 @@
 		$submit_button = '';
 	}
 
-	if (!isset($kaikki_tunnukset)) {
-		$kaikki_tunnukset = '';
-	}
-
-	if ($submit_button != '' and ($lisa != '' or ($toim_kutsu != '' and $lisa != '' and $url == 'y') or $kaikki_tunnukset != '')) {
+	if ($submit_button != '' and ($lisa != '' or $lisa_dynaaminen != '' or $lisa_parametri != '')) {
 
 		if (!function_exists("tuoteselaushaku_tuoteperhe")) {
 			function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaikki_array, $rows) {
 				global $kukarow, $kieltolisa, $poislisa;
 
-				if (in_array($tuoteno, $isat_array)) {
-					//echo "FUULI! TEET IKUISEN LUUPIN!!!!!!!!<br>";
-				}
-				else {
+				if (!in_array($tuoteno, $isat_array)) {
 					$isat_array[] = $tuoteno;
 
 					$query = "	SELECT
@@ -824,30 +821,6 @@
 			}
 		}
 
-		$joinlisa = '';
-		$selectlisa = '';
-
-		if ($kaikki_tunnukset != '') {
-			$kaikki_tunnukset = implode(",", array_unique(explode(",", $kaikki_tunnukset)));
-
-			$query = "	SELECT GROUP_CONCAT(DISTINCT subnode.tunnus) tunnukset
-						FROM dynaaminen_puu AS subnode
-						JOIN dynaaminen_puu AS subparent ON (subparent.tunnus IN ($kaikki_tunnukset))
-						JOIN puun_alkio ON (puun_alkio.yhtio = subnode.yhtio AND puun_alkio.puun_tunnus = subnode.tunnus AND puun_alkio.laji = subnode.laji)
-						WHERE subnode.yhtio = '{$kukarow['yhtio']}'
-						AND subnode.laji = 'tuote'
-						AND subnode.lft BETWEEN subparent.lft AND subparent.rgt
-						AND subnode.lft > 1
-						ORDER BY subnode.lft";
-			$kaikki_puun_tunnukset_res = mysql_query($query, $link) or pupe_error($query);
-			$kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
-
-			if (trim($kaikki_puun_tunnukset_row['tunnukset']) != '') {
-				$joinlisa = " JOIN puun_alkio ON (puun_alkio.yhtio = tuote.yhtio AND puun_alkio.laji = 'tuote' AND puun_alkio.puun_tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) AND puun_alkio.liitos = tuote.tuoteno) ";
-				$selectlisa = ", puun_alkio.puun_tunnus ";
-			}
-		}
-
 		$query = "	SELECT
 					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
 					ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
@@ -865,10 +838,9 @@
 					(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 					tuote.sarjanumeroseuranta,
 					tuote.status
-					$selectlisa
 					FROM tuote use index (tuoteno, nimitys)
-					$joinlisa
 					$lisa_parametri
+					$lisa_dynaaminen
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					$kieltolisa
 					$lisa
@@ -984,7 +956,6 @@
 			echo "<input type='hidden' name='tee' value = 'TI'>";
 			echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 			echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
-			echo "<input type='hidden' name='kaikki_tunnukset' value='{$kaikki_tunnukset}' />";
 
 			if ($tultiin == "futur") {
 				echo " <input type='hidden' name='tultiin' value='$tultiin'>";
@@ -1058,31 +1029,29 @@
 
 				echo "<th>&nbsp;</th>";
 
-				$ulisa .= "&kaikki_tunnukset=$kaikki_tunnukset";
-
-				echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=tuoteno$ulisa'>".t("Tuoteno")."</a>";
+				echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=tuoteno$ulisa'>".t("Tuoteno")."</a>";
 
 				if ($lisatiedot != "") {
-					echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=toim_tuoteno$ulisa'>".t("Toim Tuoteno");
+					echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=toim_tuoteno$ulisa'>".t("Toim Tuoteno");
 				}
 
 				echo "</th>";
 
-				echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=nimitys$ulisa'>".t("Nimitys")."</th>";
-				echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=osasto$ulisa'>".t("Osasto")."<br><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=try$ulisa'>".t("Try")."</th>";
+				echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=nimitys$ulisa'>".t("Nimitys")."</th>";
+				echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=osasto$ulisa'>".t("Osasto")."<br><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=try$ulisa'>".t("Try")."</th>";
 
 				if ($kukarow['hinnat'] >= 0) {
-					echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=hinta$ulisa'>".t("Hinta");
+					echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=hinta$ulisa'>".t("Hinta");
 
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-					echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=nettohinta$ulisa'>".t("Nettohinta");
+					echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=nettohinta$ulisa'>".t("Nettohinta");
 				}
 
 					echo "</th>";
 				}
 
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-					echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=aleryhma$ulisa'>".t("Aleryhmä")."<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=status$ulisa'>".t("Status")."</th>";
+					echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=aleryhma$ulisa'>".t("Aleryhmä")."<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=status$ulisa'>".t("Status")."</th>";
 				}
 
 				echo "<th>".t("Myytävissä")."</th>";
@@ -1422,7 +1391,7 @@
 					echo "<td valign='top' class='$vari' $classleft>$row[tuoteno] $linkkilisa ";
 				}
 				else {
-					echo "<td valign='top' class='$vari' $classleft><a href='../$tuotekyslinkki?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////submit_button=1//toim_kutsu=$toim_kutsu//url=y//sort=$edsort//ojarj=$ojarj".str_replace("&","//",$ulisa)."'>$row[tuoteno]</a>$linkkilisa ";
+					echo "<td valign='top' class='$vari' $classleft><a href='../$tuotekyslinkki?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////submit_button=1//toim_kutsu=$toim_kutsu//sort=$edsort//ojarj=$ojarj".str_replace("&","//",$ulisa)."'>$row[tuoteno]</a>$linkkilisa ";
 				}
 
 				if ($lisatiedot != "" and $verkkokauppa == "") {

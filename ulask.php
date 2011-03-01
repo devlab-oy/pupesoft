@@ -12,17 +12,17 @@ if ($livesearch_tee == "TILIHAKU") {
 }
 
 function poistalaskuserverilta($skanlasku) {
-	
+
 	GLOBAL $kukarow, $yhtiorow;
 	$path_parts = pathinfo($skanlasku);
 	$ctype = $path_parts['extension'];
-	
+
 	$liite 	= $skanlasku;
 	$komento = 'email';
 	$kutsu	=	t("Poistettu lasku");
 	$content_body = t("Liitteenä Pupesoftista poistettu skannattulasku");
 	$liite = "skannaus/".$liite;
-	
+
 	if ($skanlasku !='') {
 		include("inc/sahkoposti.inc");
 	}
@@ -129,10 +129,10 @@ if (trim($muutparametrit) != '') {
 echo "<font class='head'>".t("Uuden laskun perustus")."</font><hr>";
 
 if ($tee == 'poistalasku') {
-	
+
 	$boob = poistalaskuserverilta($skannattu_lasku);
 	$tee = '';
-	
+
 	if ($boob === FALSE) {
 		echo t("Virhe: Sinulta puuttuu sähköpostiosoite. Ei poisteta skannattua laskua");
 	}
@@ -540,7 +540,7 @@ if ($tee == 'I') {
 	}
 
 	if ((is_array($trow) and strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi == strtoupper($yhtiorow['maa']))) {
-		$ohjeitapankille='';
+		$ohjeitapankille = '';
 	}
 	else {
 		if (strlen($ohjeitapankille) > 350) {
@@ -619,26 +619,33 @@ if ($tee == 'I') {
 	}
 
 	// Kotimainen toimittaja
-	if (strtoupper($tyyppi) == strtoupper($yhtiorow['maa']) or strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
+	if (strtoupper($trow['maa']) == "FI" or $tyyppi == strtoupper($yhtiorow['maa'])) {
 
-		if (strlen($trow['tilinumero']) < 6) {
-			$errormsg .= "<font class='error'>".t("Pankkitili puuttuu tai liian lyhyt")."</font><br>";
-			$tee = 'E';
+		// Onko IBAN syötetty
+		if (strlen($trow['tilinumero']) < 6 and strlen($trow['ultilno']) > 6) {
+			$trow['tilinumero'] = substr($trow['ultilno'], 4);
 		}
-		else {
+
+		if ((int) trim($trow['tilinumero']) != 0) {
 			$pankkitili = $trow['tilinumero'];
 
-			if (strtoupper($yhtiorow['maa']) == 'FI') {
-				require "inc/pankkitilinoikeellisuus.php";
-			}
+			require 'inc/pankkitilinoikeellisuus.php';
 
-			if ($pankkitili == "") {
-				$errormsg .= "<font class='error'>".t("Pankkitili on virheellinen")."</font><br>";
+			if ($pankkitili == '') {
+				$errormsg .= "<font class='error'>".t("Pankkitili '%s' on virheellinen", "", $trow['tilinumero'])."</font><br>";
 				$tee = 'E';
 			}
 			else {
+				$vastaus = luoiban($pankkitili);
+
 				$trow['tilinumero'] = $pankkitili;
+				$trow['ultilno'] = $vastaus['iban'];
+				$trow['swift'] = $vastaus['swift'];
 			}
+		}
+		else {
+			$errormsg .= "<font class='error'>".t("Pankkitili puuttuu tai liian lyhyt")."</font><br>";
+			$tee = 'E';
 		}
 	}
 	else {
@@ -646,6 +653,20 @@ if ($tee == 'I') {
 		if (strlen($trow['ultilno']) == 0) {
 			$errormsg .= "<font class='error'>".t("Ulkomainenpankkitili puuttuu")."</font><br>";
 			$tee = 'E';
+		}
+		else {
+			// Vaaditaan isot kirjaimet
+			$trow['ultilno'] = strtoupper($trow['ultilno']);
+
+			// Jos SEPA-maa, tarkistetaan IBAN
+			if (tarkista_sepa($trow['maa']) and tarkista_iban($trow['ultilno']) != $trow['ultilno']) {
+				$errormsg .= "<font class='error'>".t("Virheellinen IBAN!")."</font><br>";
+				$tee = 'E';
+			}
+			elseif (tarkista_bban($trow['ultilno']) === FALSE) {
+				$errormsg .= "<font class='error'>".t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9")."</font><br>";
+				$tee = 'E';
+			}
 		}
 	}
 
@@ -664,9 +685,7 @@ if ($tee == 'I') {
 			$errormsg .= "<font class='error'>".t("Toimittajalle on jo perustettu lasku")." $toimittajan_laskunumero ".t("kuluvan vuoden aikana")."!</font><br />";
 			$tee = 'E';
 		}
-
 	}
-
 }
 
 if ($tee == 'Y') {
@@ -986,9 +1005,9 @@ if ($tee == 'P' or $tee == 'E') {
 				</td><td class='back'>
 
 				<table>
-				<tr><th>".t("maa")."</th>	<td><input type='text' name='trow[maa]' maxlength='2'  size=4  value='$trow[maa]'></td></tr>
-				<tr><th>".t("Ultilino")."</th>	<td><input type='text' name='trow[ultilno]'  maxlength='35' size=45 value='$trow[ultilno]'></td></tr>
-				<tr><th>".t("SWIFT")."</th>		<td><input type='text' name='trow[swift]'    maxlength='11' size=45 value='$trow[swifth]'></td></tr>
+				<tr><th>".t("maa")."</th>		<td><input type='text' name='trow[maa]' maxlength='2'  size=4  value='$trow[maa]'></td></tr>
+				<tr><th>".t("IBAN")."</th>		<td><input type='text' name='trow[ultilno]'  maxlength='35' size=45 value='$trow[ultilno]'></td></tr>
+				<tr><th>".t("SWIFT")."</th>		<td><input type='text' name='trow[swift]'    maxlength='11' size=45 value='$trow[swift]'></td></tr>
 				<tr><th>".t("pankki1")."</th>	<td><input type='text' name='trow[pankki1]'  maxlength='35' size=45 value='$trow[pankki1]'></td></tr>
 				<tr><th>".t("pankki2")."</th>	<td><input type='text' name='trow[pankki2]'  maxlength='35' size=45 value='$trow[pankki2]'></td></tr>
 				<tr><th>".t("pankki3")."</th>	<td><input type='text' name='trow[pankki3]'  maxlength='35' size=45 value='$trow[pankki3]'></td></tr>
@@ -1010,6 +1029,8 @@ if ($tee == 'P' or $tee == 'E') {
 				<tr><th>".t("postino")."</th>	<td><input type='text' name='trow[postino]'    maxlength='5'  size=10 value='$trow[postino]'></td></tr>
 				<tr><th>".t("postitp")."</th>	<td><input type='text' name='trow[postitp]'    maxlength='45' size=45 value='$trow[postitp]'></td></tr>
 				<tr><th>".t("Tilinumero")."</th>	<td><input type='text' name='trow[tilinumero]' maxlength='45' size=45 value='$trow[tilinumero]'></td></tr>
+				<tr><th>".t("IBAN")."</th>		<td><input type='text' name='trow[ultilno]'  maxlength='35' size=45 value='$trow[ultilno]'></td></tr>
+				<tr><th>".t("SWIFT")."</th>		<td><input type='text' name='trow[swift]'    maxlength='11' size=45 value='$trow[swift]'></td></tr>
 				</table>";
 		}
 
@@ -1134,23 +1155,11 @@ if ($tee == 'P' or $tee == 'E') {
 			<td>".t("Laskunumero")."</td><td><input type='text' name='toimittajan_laskunumero' value='$toimittajan_laskunumero' size='60' tabindex='18'></td>
 		</tr>";
 
-		if ((is_array($trow) and strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi != strtoupper($yhtiorow['maa']))) {
-
-			echo "
-			<tr>
-				<td>".t("Ohjeita pankille")."</td><td><textarea name='ohjeitapankille' rows='2' cols='58'>$ohjeitapankille</textarea></td>
-			</tr>";
-
-		}
-
-/*
+	if ((is_array($trow) and strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi != strtoupper($yhtiorow['maa']))) {
 		echo "<tr>
-			<td>".t("Sisäinen tieto1")."</td><td><input type='text' maxlength='20' name='sis1' value='$sis1'></td>
-		</tr>
-		<tr>
-			<td>".t("Sisäinen tieto2")."</td><td><input type='text' maxlength='20' name='sis2' value='$sis2'></td>
-		</tr>";
-*/
+				<td>".t("Ohjeita pankille")."</td><td><textarea name='ohjeitapankille' rows='2' cols='58'>$ohjeitapankille</textarea></td>
+			 </tr>";
+	}
 
 	if ($vienti == 'A') $vientia = 'selected';
 	if ($vienti == 'B') $vientib = 'selected';
@@ -2255,14 +2264,14 @@ if (strlen($tee) == 0) {
 	}
 
 	if (trim($iframe) != '' and $skannattu_lasku !== FALSE and trim($skannattu_lasku) != '' and $tultiin == 'skannatut_laskut' and $yhtiorow['skannatut_laskut_polku'] != '') {
-		
+
 		echo "<table><tr><td class='back'>";
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='skannattu_lasku' value='$skannattu_lasku'>";
 		echo "<input type='hidden' name='skannatut_laskut_polku' value='$skannatut_laskut_polku'>";
 		echo "<input type='hidden' name='tee' value='poistalasku'>";
 		echo "<input type='submit' value='poista skannattu lasku' name='Poista'/></form></td><tr></table>";
-		
+
 		$skannatut_laskut_polku = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $yhtiorow['skannatut_laskut_polku'].'/' : $yhtiorow['skannatut_laskut_polku'];
 
 		echo "</td><td class='back' width='100%'><font class='message'>",t("Skannattu lasku"),"</font>";

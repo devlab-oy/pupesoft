@@ -34,21 +34,19 @@ if ($tee == 'M') {
 
 // S = Etsit‰‰n summaa laskulta
 if ($tee == 'S') {
-	$summa1 = str_replace( ",", ".", $summa1);
-	$summa2 = str_replace( ",", ".", $summa2);
-
+	
 	if (strlen($summa2) == 0) {
 		$summa2 = $summa1;
 	}
-
-	$summa1 += 0;
-	$summa2 += 0;
+	
+	$summa1 = (float) str_replace( ",", ".", $summa1);
+	$summa2 = (float) str_replace( ",", ".", $summa2);
 
 	$ehto = "tila in ('H','Y','M','P','Q') and ";
 	$index = " use index (yhtio_tila_summa)";
 
 	if ($summa1 == $summa2) {
-		$ehto .= "summa = " . $summa1;
+		$ehto .= "summa in ($summa1, ".($summa1*-1).") ";	
 		$jarj = "tapvm desc";
 	}
 	else {

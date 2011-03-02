@@ -14,21 +14,19 @@
 
 	// VS = Etsit‰‰n valuuttasummaa laskulta
 	if ($tee == 'VS') {
-		$summa1 = str_replace( ",", ".", $summa1);
-		$summa2 = str_replace( ",", ".", $summa2);
-
+		
 		if (strlen($summa2) == 0) {
 			$summa2 = $summa1;
 		}
-
-		$summa1 += 0;
-		$summa2 += 0;
-
+		
+		$summa1 = (float) str_replace( ",", ".", $summa1);
+		$summa2 = (float) str_replace( ",", ".", $summa2);
+		
 		$ehto = "tila = 'U' and ";
 		$index = " use index (yhtio_tila_summavaluutassa) ";
 
-		if ($summa1 == $summa2) {
-			$ehto .= "summa_valuutassa = " . $summa1;
+		if ($summa1 == $summa2) {						
+			$ehto .= "summa_valuutassa in ($summa1, ".($summa1*-1).") ";
 			$jarj = "tapvm desc";
 		}
 		else {
@@ -39,21 +37,19 @@
 
 	// S = Etsit‰‰n summaa laskulta
 	if ($tee == 'S') {
-		$summa1 = str_replace( ",", ".", $summa1);
-		$summa2 = str_replace( ",", ".", $summa2);
-
+		
 		if (strlen($summa2) == 0) {
 			$summa2 = $summa1;
 		}
-
-		$summa1 += 0;
-		$summa2 += 0;
+		
+		$summa1 = (float) str_replace(",", ".", $summa1);
+		$summa2 = (float) str_replace(",", ".", $summa2);
 
 		$ehto = "tila = 'U' and ";
 		$index = " use index (yhtio_tila_summa) ";
 
 		if ($summa1 == $summa2) {
-			$ehto .= "summa = " . $summa1;
+			$ehto .= "summa in ($summa1, ".($summa1*-1).") ";
 			$jarj = "tapvm desc";
 		}
 		else {

@@ -226,8 +226,6 @@
 				}
 			}
 
-			$today = date("w") + 1; // mik‰ viikonp‰iv‰ t‰n‰‰n on 1-7.. 1=sunnuntai, 2=maanantai, jne...
-
 			//Tiedostojen polut ja nimet
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			$nimixml = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
@@ -276,7 +274,26 @@
 			// tarkistetaan t‰ss‰ tuleeko laskutusviikonp‰iv‰t ohittaa
 			// ohitetaan jos ruksi on ruksattu tai poikkeava laskutusp‰iv‰m‰‰r‰ on syˆtetty
 			if (!isset($laskutakaikki) or $laskutakaikki == "") {
-				$lasklisa .= " and (lasku.laskutusvkopv = '0' or lasku.laskutusvkopv = '$today')";
+
+				// Mik‰ viikonp‰iv‰ t‰n‰‰n on 1-7.. 1=sunnuntai, 2=maanantai, jne...
+				$today = date("w") + 1;
+
+				// Kuukauden eka p‰iv‰
+				$eka_pv = laskutuspaiva("eka");
+
+				// Kuukauden keskimm‰inen p‰iv‰
+				$keski_pv = laskutuspaiva("keski");
+
+				// Kuukauden viimeinen p‰iv‰
+				$vika_pv = laskutuspaiva("vika");
+
+				$lasklisa .= " and (lasku.laskutusvkopv = 0 or
+								   (lasku.laskutusvkopv = $today) or
+								   (lasku.laskutusvkopv = -1 and curdate() = '$vika_pv') or
+								   (lasku.laskutusvkopv = -2 and curdate() = '$eka_pv') or
+								   (lasku.laskutusvkopv = -3 and curdate() = '$keski_pv') or
+								   (lasku.laskutusvkopv = -4 and curdate() in ('$keski_pv','$vika_pv')) or
+								   (lasku.laskutusvkopv = -5 and curdate() in ('$eka_pv','$keski_pv'))) ";
 			}
 
 			// katotaan halutaanko laskuttaa vaan laskut joita *EI SAA* ketjuttaa
@@ -929,7 +946,7 @@
 						}
 					}
 
-					// Tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kun alhaalla) rivi ~1100
+					// Tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kun alhaalla) rivi ~1150
 					$query = "  SELECT group_concat(lasku.tunnus) tunnukset
 								FROM lasku
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
@@ -2122,7 +2139,11 @@
 				}
 
 				// jos yhtiˆll‰ on laskuprintteri on m‰‰ritelty tai halutaan jostain muusta syyst‰ tulostella laskuja paperille
-				if ($yhtiorow['lasku_tulostin'] != 0 or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email) > 0) {
+				if ($yhtiorow['lasku_tulostin'] > 0 or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email) > 0) {
+
+					if ((!isset($valittu_tulostin) or $valittu_tulostin == "") and $yhtiorow['lasku_tulostin'] > 0) {
+						$valittu_tulostin = $yhtiorow['lasku_tulostin'];
+					}
 
 					if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan paperilaskuja").":<br>\n";
 
@@ -2327,13 +2348,31 @@
 
 
 			echo "<br>\n<table>";
+			
+			// Mik‰ viikonp‰iv‰ t‰n‰‰n on 1-7.. 1=sunnuntai, 2=maanantai, jne...
 			$today = date("w") + 1;
 
+			// Kuukauden eka p‰iv‰
+			$eka_pv = laskutuspaiva("eka");
+
+			// Kuukauden keskimm‰inen p‰iv‰
+			$keski_pv = laskutuspaiva("keski");
+
+			// Kuukauden viimeinen p‰iv‰
+			$vika_pv = laskutuspaiva("vika");
+
+			$lasklisa .= "
+							    ";
+
 			$query = "  SELECT
-						sum(if (lasku.laskutusvkopv='0',1,0)) normaali,
-						sum(if (lasku.laskutusvkopv='$today',1,0)) paiva,
-						sum(if (lasku.laskutusvkopv!='$today' and lasku.laskutusvkopv!='0',1,0)) muut,
-						sum(if (maksuehto.factoring!='',1,0)) factoroitavat,
+						sum(if (lasku.laskutusvkopv = '0', 1, 0)) normaali,						
+						sum(if (((lasku.laskutusvkopv = $today) or
+						   		 (lasku.laskutusvkopv = -1 and curdate() = '$vika_pv') or
+						   		 (lasku.laskutusvkopv = -2 and curdate() = '$eka_pv') or
+						   		 (lasku.laskutusvkopv = -3 and curdate() = '$keski_pv') or
+						   		 (lasku.laskutusvkopv = -4 and curdate() in ('$keski_pv','$vika_pv')) or
+						   		 (lasku.laskutusvkopv = -5 and curdate() in ('$eka_pv','$keski_pv'))), 1, 0)) paiva,												
+						sum(if (maksuehto.factoring != '', 1, 0)) factoroitavat,
 						count(lasku.tunnus) kaikki
 						from lasku
 						LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
@@ -2349,7 +2388,7 @@
 				<input type='hidden' name='tee' value='TARKISTA'>";
 
 			echo "<tr><th>".t("Laskutettavia tilauksia joilla on laskutusviikonp‰iv‰ t‰n‰‰n").":</th><td colspan='3'>$row[paiva]</td></tr>\n";
-			echo "<tr><th>".t("Laskutettavia tilauksia joiden laskutusviikonp‰iv‰ ei ole t‰n‰‰n").":</th><td colspan='3'>$row[muut]</td></tr>\n";
+			echo "<tr><th>".t("Laskutettavia tilauksia joiden laskutusviikonp‰iv‰ ei ole t‰n‰‰n").":</th><td colspan='3'>".($row["kaikki"]-$row["normaali"]-$row["paiva"])."</td></tr>\n";
 			echo "<tr><th>".t("Laskutettavia tilauksia joilla EI ole laskutusviikonp‰iv‰‰").":</th><td colspan='3'>$row[normaali]</td></tr>\n";
 			echo "<tr><th>".t("Laskutettavia tilauksia jotka siirret‰‰n rahoitukseen").":</th><td colspan='3'>$row[factoroitavat]</td></tr>\n";
 			echo "<tr><th>".t("Laskutettavia tilauksia kaikkiaan").":</th><td colspan='3'>$row[kaikki]</td></tr>\n";

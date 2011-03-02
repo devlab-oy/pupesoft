@@ -684,7 +684,7 @@ if (!function_exists('rivi_original')) {
 			$sarjanutunnus = "ostorivitunnus";
 		}
 		elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'U' or $row['sarjanumeroseuranta'] == 'G')) {
-			$sarjanutunnus = "myyntirivitunnus"; 
+			$sarjanutunnus = "myyntirivitunnus";
 		}
 		elseif ($row["varattu"]+$row["kpl"] < 0){
 			$sarjanutunnus = "ostorivitunnus";
@@ -1714,7 +1714,7 @@ if (!function_exists("tulosta_lasku")) {
 		}
 
 		// haetaan tilauksen kaikki rivit
-		$query = "  SELECT tilausrivi.*, $lisa tilausrivin_lisatiedot.osto_vai_hyvitys, 
+		$query = "  SELECT tilausrivi.*, $lisa tilausrivin_lisatiedot.osto_vai_hyvitys,
 					$sorttauskentta,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					tuote.ei_saldoa,
@@ -1903,7 +1903,7 @@ if (!function_exists("tulosta_lasku")) {
 				$komento = $valittu_tulostin;
 			}
 
-			if ($komento == "" and $valittu_tulostin > 0) {
+			if ($komento == "" and (int) $valittu_tulostin > 0) {
 				$querykieli = "	SELECT *
 								from kirjoittimet
 								where yhtio = '$kukarow[yhtio]'

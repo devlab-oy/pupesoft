@@ -47,7 +47,6 @@
 					toim_postino  		= '',
 					toim_postitp 		= '',
 					toim_maa    		= '',
-					tilausyhteyshenkilo	= '',
 					laskutusvkopv		= '',
 					chn					= '',
 					verkkotunnus		= ''
@@ -469,7 +468,6 @@
 							toim_postino  		= '$assrow[toim_postino]',
 							toim_postitp 		= '$assrow[toim_postitp]',
 							toim_maa    		= '$assrow[toim_maa]',
-							tilausyhteyshenkilo	= '',
 							laskutusvkopv		= '$assrow[laskutusvkopv]',
 							chn					= '$assrow[chn]',
 							verkkotunnus		= '$assrow[verkkotunnus]'

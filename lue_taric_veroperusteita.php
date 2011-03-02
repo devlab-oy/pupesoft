@@ -10,14 +10,17 @@ echo "TARIC Veroperusteet\n\n";
 require ("/var/www/html/pupesoft/inc/connect.inc");
 require ("/var/www/html/pupesoft/inc/functions.inc");
 
-for($a = 1; $a < count($argv); $a++) {
+#require("/Users/juppe/Sites/Devlab/pupesoft/inc/connect.inc");
+#require("/Users/juppe/Sites/Devlab/pupesoft/inc/functions.inc");
 
-	system("rm -f /tmp/opt/taric/data/*");
+for ($a = 1; $a < count($argv); $a++) {
+
+	system("rm -f /tmp/opt/taric3/trctuota/data/*");
 	chdir("/tmp/");
 	system("unzip -o $argv[$a]");
-	chdir("/tmp/opt/taric/data/");
+	chdir("/tmp/opt/taric3/trctuota/data/");
 
-	$handle=opendir('/tmp/opt/taric/data/');
+	$handle = opendir('/tmp/opt/taric3/trctuota/data/');
 
 	while ($tiedosto = readdir($handle)) {
 
@@ -96,7 +99,6 @@ for($a = 1; $a < count($argv); $a++) {
 					if ($laji == 'tp_l.dat') {
 						//echo "Lisättiin: $laji, $kala tietuetta. toimenpide_id='$toimenpide_id' and voim_alkupvm='$vva-$kka-$ppa' and duty_expr_id='$duty_expr_id'\n";
 					}
-
 				}
 
 				//Muutetaan toimenpidettä
@@ -158,7 +160,6 @@ for($a = 1; $a < count($argv); $a++) {
 					else {
 						//echo "Päivitettiin: $laji, $kala tietuetta. toimenpide_id='$toimenpide_id' and voim_alkupvm='$vva-$kka-$ppa' and duty_expr_id='$duty_expr_id'\n";
 					}
-
 				}
 
 				//Poistetaan toimenpide
@@ -186,8 +187,6 @@ for($a = 1; $a < count($argv); $a++) {
 					else {
 						//echo "Poistettiin: $laji, $kala tietuetta. toimenpide_id='$toimenpide_id' and voim_alkupvm='$vva-$kka-$ppa//' and duty_expr_id='$duty_expr_id'\n";
 					}
-
-
 				}
 
 				//Lisätään nimiketietue
@@ -209,8 +208,6 @@ for($a = 1; $a < count($argv); $a++) {
 					$kkl					= substr($voim_loppupvm,4,2);
 					$ppl					= substr($voim_loppupvm,6,2);
 
-
-
 					$query = "	INSERT INTO taric_veroperusteet
 								SET laji 		= 'nim.dat',
 								nimike 			= '$nimike',
@@ -220,9 +217,7 @@ for($a = 1; $a < count($argv); $a++) {
 					$kala = mysql_affected_rows();
 
 					// echo "Lisättiin: $laji, $kala tietuetta.\n";
-
 				}
-
 
 				//Lisätään poissuljettujen maiden tietue
 				if ($laji == 'exc.dat') {
@@ -237,7 +232,6 @@ for($a = 1; $a < count($argv); $a++) {
 					$kala = mysql_affected_rows();
 
 					// echo "Lisättiin: $laji, $kala tietuetta.\n";
-
 				}
 
 
@@ -270,8 +264,7 @@ for($a = 1; $a < count($argv); $a++) {
 
 	fclose($file);
 
-	system("rm -f /tmp/opt/taric/data/*");
-
+	system("rm -f /tmp/opt/taric3/trctuota/data/*");
 }
 
 ?>

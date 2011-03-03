@@ -31,7 +31,7 @@
 					<input type='hidden' name='otunnus'  value='$otunnus'>";
 
 			require('syotarivi.inc');
-			require('../inc/footer.inc');
+			require('inc/footer.inc');
 			exit;
 		}
 
@@ -344,14 +344,12 @@
 
 						if ($valmkpl < 0 or $tilrivirow["varattu"] < 0) {
 							echo "<font class='error'>".t("VIRHE: Negatiivista kappalemäärää ei voi valmistaa")."!</font><br>";
-							$virheitaoli 	= "JOO";
-							$tee 			= "VALMISTA";
+							$tee = "VALMISTA";
 						}
 						elseif (($tilrivirow["sarjanumeroseuranta"] == "S" or $tilrivirow["sarjanumeroseuranta"] == "U") and $valmkpl != (int) $valmkpl) {
 							//	Tarkastetaan, että sarjanumeroseurattuja tuotteita valmistetaan tasamäärä.
 							echo "<font class='error'>".t("VIRHE: Sarjanumeroseurattua tuotetta ei voi valmistaa vain osittain!")."</font><br>";
-							$virheitaoli 	= "JOO";
-							$tee 			= "VALMISTA";
+							$tee = "VALMISTA";
 						}
 						elseif (($valmkpl > 0 and $valmkpl <= $tilrivirow["varattu"]) or ($kokopros > 0 and $kokopros <= 100) or isset($kokovalmistus)) {
 
@@ -394,15 +392,14 @@
 
 										if ($varataankpl < 0) {
 											echo "<font class='error'>".t("VIRHE: Raaka-aineen")." ".$perherow["tuoteno"]." ".t("kulutus ei voi olla negatiivinen")."!</font><br>";
-											$virheitaoli 	= "JOO";
-											$tee 			= "VALMISTA";
+											$tee = "VALMISTA";
 										}
 
 										//katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi
 										if ($vakisinhyvaksy == '' and $saldot_valm[$perherow["tuoteno"]] < $varataankpl) {
 											echo "<font class='error'>Saldo ".$saldot[$perherow["tuoteno"]]." ei riitä! Tuotetta $perherow[tuoteno] kulutetaan $varataankpl ".t_avainsana("Y", $kieli, "and avainsana.selite='$perherow[yksikko]'", "", "", "selite").".</font><br>";
-											$virheitaoli 	= "JOO";
-											$tee 			= "VALMISTA";
+											$virheitaoli = "JOO";
+											$tee = "VALMISTA";
 										}
 
 										// Tän verran saldoa käytetään
@@ -410,8 +407,7 @@
 
 										//	Tarkistetaan sarjanumerot
 										if (tarkistaSarjanumerot(0, $perherow["tunnus"], "ostorivitunnus") > 0) {
-											$virheitaoli 	= "JOO";
-											$tee 			= "VALMISTA";
+											$tee = "VALMISTA";
 										}
 									}
 								}
@@ -419,8 +415,7 @@
 						}
 						elseif ($valmkpl > 0) {
 							echo "<font class='error'>VIRHE: Syötit liian ison kappalemäärän!</font><br>";
-							$virheitaoli 	= "JOO";
-							$tee 			= "VALMISTA";
+							$tee = "VALMISTA";
 						}
 					}
 				}
@@ -613,6 +608,7 @@
 				}
 
 				echo "<br><br><font class='message'>Valmistus korjattu!</font><br>";
+				$tee = "";
 			}
 			else {
 				foreach ($valmkpllat as $rivitunnus => $valmkpl) {
@@ -668,7 +664,7 @@
 							$varastopaikka  = $tilrivirow["paikka"];
 							$jaljella_tot	= 0;
 
-							require ("../valmistatuotteita.inc");
+							require ("valmistatuotteita.inc");
 
 							//jos valmistus meni ok, niin palautuu $tee == UV
 							if (round($jaljella_tot, 2) == 0 and $tee == "UV") {
@@ -690,12 +686,12 @@
 							}
 						}
 						elseif ($valmkpl == 0 or $valmkpl == "") {
-							$virhe[$rivitunnus] = "<font class='message'>Kappalemäärä ei syötetty!</font>";
+							$virhe[$rivitunnus] = "<font class='message'>".t("Kappalemäärä ei syötetty")."!</font>";
 							$tee = "VALMISTA";
 							$valmkpllat2[$rivitunnus] = $valmkpl;
 						}
 						else {
-							$virhe[$rivitunnus] = "<font class='error'>VIRHE: Syötit liian ison kappalemäärän!</font>";
+							$virhe[$rivitunnus] = "<font class='error'>".t("VIRHE: Syötit liian ison kappalemäärän")."!</font>";
 							$tee = "VALMISTA";
 							$valmkpllat2[$rivitunnus] = $valmkpl;
 						}
@@ -703,10 +699,8 @@
 				}
 
 				//katotaan onko enää mitään valmistettavaa
-				onkokaikkivalmistettu ($valmkpllat);
+				onkokaikkivalmistettu($valmkpllat);
 			}
-
-			$tee = "";
 		}
 	}
 
@@ -1265,6 +1259,6 @@
 			}
 		}
 
-		require "../inc/footer.inc";
+		require "inc/footer.inc";
 	}
 ?>

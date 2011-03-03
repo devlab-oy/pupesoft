@@ -37,7 +37,8 @@
 	if ($kukarow["extranet"] != "") {
 		$query  = "	SELECT *
 					FROM asiakas
-					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$kukarow[oletus_asiakas]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 1) {
@@ -146,12 +147,52 @@
 						AND tila = 'N'";
 		}
 		else {
-			$query  = "	SELECT *
+
+			// "Osatoimitus kielletty"-tilauksella, mutta nyt kaikki JT-rivit on poimittu, joten laitetaan tilaus eteenpäin
+			$query = "	SELECT lasku.tunnus tilaus,
+						count(tilausrivi.tunnus) tot_riveja,
+						sum(if(tilausrivi.var != 'J',1,0)) toimitettavia_riveja
+						FROM lasku use index (tila_index)
+						JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and tilausrivi.tyyppi='L'
+						WHERE lasku.yhtio 	= '$kukarow[yhtio]'
+						AND lasku.tila 		= 'N'
+						AND lasku.alatila 	= 'U'
+						GROUP BY lasku.tunnus
+						HAVING tot_riveja = toimitettavia_riveja";
+			$stresult = mysql_query($query) or pupe_error($query);
+
+			$ostok = "";
+
+			while ($osatoimrow = mysql_fetch_assoc($stresult)) {
+				$ostok .= $osatoimrow["tilaus"].",";
+			}
+
+			$ostok = substr($ostok, 0, -1);
+
+			if ($ostok != "") {
+				$ostok = "	UNION
+							(SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							and lasku.tunnus in ($ostok))";
+			}
+
+			$query = "	(SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND laatija = '$kukarow[kuka]'
-						AND ((alatila = 'J' and tila = 'N') or (alatila = 'P' and tila = 'G'))";
+						and tila 	= 'N'
+						and alatila = 'J'
+						and laatija = '$kukarow[kuka]')
+						UNION
+						(SELECT *
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tila 	= 'G'
+						and alatila = 'P'
+						and laatija = '$kukarow[kuka]')
+						$ostok";
 		}
+
 		$jtrest = mysql_query($query) or pupe_error($query);
 
 		while ($laskurow = mysql_fetch_array($jtrest)) {
@@ -182,6 +223,7 @@
 			$kukarow["kesken"] = $laskurow["tunnus"];
 
 			$kateisohitus = "X";
+
 			if ($laskurow['tila']== 'G') {
 				$vanhatoim = $toim;
 				$toim = "SIIRTOLISTA";
@@ -274,15 +316,57 @@
 		if ($toim == "ENNAKKO") {
 			$query = "	SELECT *
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and laatija='$kukarow[kuka]' and alatila='E' and tila = 'N'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laatija	= '$kukarow[kuka]'
+						and alatila	= 'E'
+						and tila 	= 'N'";
 		}
 		else {
-			$query = "	SELECT *
-						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and laatija='$kukarow[kuka]' and ((alatila = 'J' and tila = 'N') or (alatila = 'P' and tila = 'G'))";
-		}
-		$stresult = mysql_query($query) or pupe_error($query);
+			// "Osatoimitus kielletty"-tilauksella, mutta nyt kaikki JT-rivit on poimittu, joten laitetaan tilaus eteenpäin
+			$query = "	SELECT lasku.tunnus tilaus,
+						count(tilausrivi.tunnus) tot_riveja,
+						sum(if(tilausrivi.var != 'J',1,0)) toimitettavia_riveja
+						FROM lasku use index (tila_index)
+						JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and tilausrivi.tyyppi='L'
+						WHERE lasku.yhtio 	= '$kukarow[yhtio]'
+						AND lasku.tila 		= 'N'
+						AND lasku.alatila 	= 'U'
+						GROUP BY lasku.tunnus
+						HAVING tot_riveja = toimitettavia_riveja";
+			$stresult = mysql_query($query) or pupe_error($query);
 
+			$ostok = "";
+
+			while ($osatoimrow = mysql_fetch_assoc($stresult)) {
+				$ostok .= $osatoimrow["tilaus"].",";
+			}
+
+			$ostok = substr($ostok, 0, -1);
+
+			if ($ostok != "") {
+				$ostok = "	UNION
+							(SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							and lasku.tunnus in ($ostok))";
+			}
+
+			$query = "	(SELECT *
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tila 	= 'N'
+						and alatila = 'J'
+						and laatija = '$kukarow[kuka]')
+						UNION
+						(SELECT *
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tila 	= 'G'
+						and alatila = 'P'
+						and laatija = '$kukarow[kuka]')
+						$ostok";
+		}
+				
 		if (mysql_num_rows($stresult) > 0) {
 			echo "	<form name='valinta' action='$PHP_SELF' method='post'>
 					<input type='hidden' name='toim' value='$toim'>
@@ -2058,7 +2142,7 @@
 				<th>".t("Näytä vain toimitettavat rivit")."</th>
 				<td><input type='checkbox' name='toimi' $sel></td>
 			</tr>";
-			
+
 		echo "<tr>
 				<th>".t("Näytä kaikki rivit")." (".t("Oletus").": max 1000 ".t("riviä").")</th>
 				<td><input type='checkbox' name='ei_limiittia' $sel2></td>

@@ -637,7 +637,7 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value='' $sel1>".t("Lisätään")."</option>";
+		$ulos .= "<option value='' $sel1>".t("Yhtiön oletus")."</option>";
 		$ulos .= "<option value='o' $sel2>".t("Ei lisätä")."</option>";
 		$ulos .= "</select></td>";
 

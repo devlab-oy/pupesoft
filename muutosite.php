@@ -88,9 +88,9 @@ if ($tee == 'G') {
 }
 
 // Tositeselailu
-if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu') {
+if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu' or $tee == 'KP') {
 
-	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu') {
+	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu' or $tee == 'KP') {
 
 		// Etsitään virheet vain kuluvalta tilikaudelta!
 		if ($tee == 'Z') {
@@ -315,6 +315,25 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						ORDER BY tapvm, ltunnus";
 		}
 
+		if ($tee == 'KP') {
+			// tutkitaan saldoja kirjanpidon ja pankkisaldon välillä
+			$query = "	SELECT
+						tiliotedata.aineisto,
+						tiliotedata.alku,
+						tiliotedata.tilino,
+						tiliotedata.tieto tiliote,
+						group_concat(t1.tiliointitunnus) kirjanpito,
+						'' ero,
+						'' muutetut_tositteet
+						FROM tiliotedata
+						LEFT JOIN tiliotedata as t1 on (tiliotedata.yhtio=t1.yhtio and tiliotedata.tyyppi = t1.tyyppi and tiliotedata.aineisto = t1.aineisto and t1.tiliointitunnus > 0)
+						WHERE tiliotedata.yhtio = '$kukarow[yhtio]'
+						AND tiliotedata.alku between '$yhtiorow[tilikausi_alku]' and '$yhtiorow[tilikausi_loppu]'
+						and tiliotedata.tyyppi = 1
+						and left(tiliotedata.tieto,3) = 'T50'
+						and SUBSTRING(tiliotedata.tieto, 7, 1) = 1
+						GROUP BY 1,2,3,4";
+		}
 	}
 	else {
 
@@ -393,7 +412,6 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 					$lisa
 					ORDER BY tiliointi.ltunnus desc, tiliointi.tunnus";
 	}
-
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -405,12 +423,22 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		// Tehdään lopetusmuuttuja kaikkiin urleihin
 		$lopetus = "{$palvelin2}muutosite.php////tee=$tee//tap=$tap//tak=$tak//tav=$tav//summa=$summa//tilino=$tilino//selite=$selite//laatija=$laatija";
 
+		$miinusta = 0;
+
+		if ($tee == 'KP') {
+			$miinusta = 0;
+		}
+
 		echo "<table><tr>";
-		for ($i = 1; $i < mysql_num_fields($result); $i++) {
+
+		for ($i = 1; $i < mysql_num_fields($result)+$miinusta; $i++) {
 			echo "<th>".t(mysql_field_name($result,$i))."</th>";
 		}
+
 		echo "</tr>";
 		echo "<tr class='aktiivi'>";
+		
+		$ero = 0;
 
 		while ($trow = mysql_fetch_array ($result)) {
 			// Ei anneta tämän hämätä meitä!
@@ -418,11 +446,10 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 			if ($trow[7] == '0000-00-00 00:00:00') $trow[7] = '';
 
 			//Laitetaan linkki tuonne pvm:ään, näin voimme avata tositteita tab:eihin
-			if (strlen($edtunnus) > 0) {
-
+			if (strlen($edtunnus) > 0 and ($tee != 'KP' or $ero != 0)) {
 				// Tosite vaihtui
 				if ($trow[0] != $edtunnus) {
-					echo "</tr><tr><th style='padding:3px;' colspan='".mysql_num_fields($result)."'></th></tr><tr class='aktiivi'>";
+					echo "</tr><tr><th style='padding:3px;' colspan='".(mysql_num_fields($result)+$miinusta)."'></th></tr><tr class='aktiivi'>";
 				}
 				else {
 					echo "</tr><tr class='aktiivi'>";
@@ -431,12 +458,24 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 
 			$edtunnus = $trow[0];
 
-			for ($i=1; $i < mysql_num_fields($result); $i++) {
+			for ($i=1; $i < mysql_num_fields($result)+$miinusta; $i++) {
 				if ($i == 1) {
-					if (mysql_field_name($result,$i) == 'tapvm') {
-						$trow[$i] = tv1dateconv($trow[$i]);
+					if (mysql_field_name($result,$i) == 'tapvm' or (mysql_field_name($result,$i) == 'alku' and $tee == 'KP')) {
+						$orgpvm 	= $trow[$i];
+						$trow[$i] 	= tv1dateconv($trow[$i]);
+						
+						// Ei tiedetä vielä näytetäänkö
+						if ($tee == 'KP') {
+							ob_start();
+						}
 					}
-					echo "<td><a href = '$PHP_SELF?tee=E&tunnus=$edtunnus&viivatut=$viivatut&lopetus=$lopetus'>$trow[$i]</td>";
+
+					if ($tee !='KP') {
+						echo "<td><a href = '$PHP_SELF?tee=E&tunnus=$edtunnus&viivatut=$viivatut&lopetus=$lopetus'>$trow[$i]</td>"; // orkkis
+					}
+					else {
+						echo "<td><a href = '".$palvelin2."tilioteselailu.php?tilino=$trow[tilino]&pvm=$orgpvm&tyyppi=1&tee=T&lopetus=$lopetus'>$trow[$i]</td>";
+					}
 				}
 				elseif (is_numeric($trow[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
 					echo "<td align='right'>$trow[$i]</td>";
@@ -444,13 +483,121 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 				elseif (mysql_field_name($result, $i) == "tapvm") {
 					echo "<td>".tv1dateconv($trow[$i])."</td>";
 				}
+				elseif (mysql_field_name($result, $i) == "tiliote" and $tee == 'KP') {
+					$pano = sprintf("%.2f",substr($trow[$i],21,19) / 100);
+					$otto = sprintf("%.2f",substr($trow[$i],48,19) / 100);
+
+					$saldo = sprintf("%.2f", $pano + $otto);
+
+					if ($saldo > 0) {
+						$psaldo = "<font class='ok'>".$saldo."</font>";
+					}
+					else {
+						$psaldo = "<font class='error'>".$saldo."</font>";
+					}
+
+					echo "<td align='right'>".t("Panot")." <font class='ok'>".$pano."</font><br>";
+					echo t("Otot")." <font class='error'>".$otto."</font><br>";
+					echo t("Yhteensä")." ".$psaldo."</td>";
+				}
+				elseif (mysql_field_name($result, $i) == "kirjanpito" and $tee == 'KP') {
+
+					$huom 	= "";
+					$linkki = "";
+
+					$orgpvm_pankki = substr(str_replace("-", "", $orgpvm), 2);
+
+					//viiteaineistom summa, sen tiliöinnit ovat suoraan myyntilaskuilla, joten niitä ei oikein tähän saa haettua
+					$subq = "	SELECT sum(substring(tieto, 78, 10)/100) aineistosumma
+								FROM tiliotedata
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi = 3
+								and substr(tieto, 16, 6) = '$orgpvm_pankki'
+								and left(tieto, 1) = '3'";
+					$subr = mysql_query($subq) or pupe_error($subq);
+					$asumma = mysql_fetch_assoc($subr);										
+					
+					if ($trow[$i] != "") {
+						// Haetaan tositteet
+						$subq = "	SELECT group_concat(distinct ltunnus) ltunnus
+									FROM tiliointi
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus IN ($trow[$i])";
+						$subr = mysql_query($subq) or pupe_error($subq);
+						$ltunnukset = mysql_fetch_assoc($subr);
+																								
+						$subq = "	SELECT oletus_rahatili
+									FROM yriti
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tilino = '$trow[tilino]'";
+						$subr = mysql_query($subq) or pupe_error($subq);
+						$oratil = mysql_fetch_assoc($subr);
+												
+						$subquery = "	SELECT sum(summa) as tiliointisumma
+										FROM tiliointi
+										WHERE yhtio = '$kukarow[yhtio]'
+										and ltunnus in ($ltunnukset[ltunnus])
+										and laatija = 'tiliote'
+										and korjattu = ''																										
+										and tilino != '$oratil[oletus_rahatili]'										
+										and tapvm = '$orgpvm'";
+						$subres = mysql_query($subquery) or pupe_error($subquery);
+						$tsumma = mysql_fetch_assoc($subres);
+											
+						$kpito = sprintf("%.2f", $asumma["aineistosumma"]-$tsumma["tiliointisumma"]);
+						
+						echo "<td align='right'><br><br>$kpito<br></td>";
+					}
+					else {
+						$kpito = sprintf("%.2f", $asumma["aineistosumma"]);
+						echo "<td><br><br>".t("Ei tiliöintejä")."</td>";
+					}
+				}
+				elseif (mysql_field_name($result, $i) == "ero" and $tee == 'KP') {					
+					$ero = sprintf("%.2f", $saldo-$kpito);
+					
+					echo "<td align='right'><br><br>$ero<br></td>";																			
+				}
+				elseif (mysql_field_name($result, $i) == "muutetut_tositteet" and $tee == 'KP') {
+					if ($ero != 0) { 
+						
+						$subquery = "	SELECT distinct ltunnus, tapvm
+										FROM tiliointi
+										WHERE yhtio = '$kukarow[yhtio]'
+										and ltunnus in ($ltunnukset[ltunnus])
+										and laatija = 'tiliote'
+										and korjattu != ''																										
+										and tilino != '$oratil[oletus_rahatili]'										
+										and tapvm = '$orgpvm'";
+						$subres = mysql_query($subquery) or pupe_error($subquery);
+						
+						echo "<td>";
+						
+						while ($tpoistetut = mysql_fetch_assoc($subres)) {
+							echo "<a href = '$PHP_SELF?tee=E&tunnus=$tpoistetut[ltunnus]&viivatut=on&lopetus=$lopetus'>".tv1dateconv($tpoistetut["tapvm"])."<br>";
+						}
+						
+						echo "</td>";
+						
+						$kala = ob_get_contents();						
+					}
+					
+					ob_end_clean();	
+					
+					if ($ero != 0) { 
+						echo $kala;					
+					}
+				}
 				else {
 					echo "<td>$trow[$i]</td>";
 				}
 			}
 		}
 	}
-	echo "</tr></table><br><br>";
+
+	echo "</tr>";
+	echo "</table><br><br>";
+
 	$tee = "";
 }
 
@@ -1386,6 +1533,10 @@ if (strlen($tee) == 0) {
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joiden marginaaliverotiliöinnit ovat väärin")."</td>
 		  	<td><form action = '$PHP_SELF?tee=Å' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+			</tr>
+			<tr class='aktiivi'>
+		  	<td>näytä saldo pankin tiliotteen ja kirjanpidon välillä</td>
+		  	<td><form action = '$PHP_SELF?tee=KP' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
 			</tr>
 			</table>";
 }

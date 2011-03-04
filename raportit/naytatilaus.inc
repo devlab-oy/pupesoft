@@ -334,7 +334,8 @@
 					min(tilausrivi.toimitettuaika) toimitettuaika
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					AND tilausrivi.otunnus = '$laskurow[tunnus]'";
+					AND tilausrivi.otunnus = '$laskurow[tunnus]'
+					AND tilausrivi.tyyppi != 'D'";
 		$aikares = mysql_query($query) or pupe_error($query);
 		$aikarow = mysql_fetch_assoc($aikares);
 

@@ -271,6 +271,7 @@
 	$netto					= strtoupper($netto); 	// netto isoks
 	$myyntierahuomatus 		= FALSE;
 	$myy_erikoistoim_ok		= TRUE;
+	$org_kpl				= "";
 
 	// näihin arraysiin tulee sitten myytävissä olevat tuotteet, kappaleet ja varastopaikat
 	$myy_tuoteno 	= array();
@@ -333,7 +334,7 @@
 	}
 	
 	if ($kpl > 0 and $trow['myynti_era'] > 0 and $rivityyppi == 'L' and (int) $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
-
+		$org_kpl = $kpl;
 		if ($kpl < $trow['myynti_era']) {
 			$kpl = $trow['myynti_era'];
 		}

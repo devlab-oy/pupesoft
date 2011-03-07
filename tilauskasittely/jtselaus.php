@@ -366,7 +366,9 @@
 						and laatija = '$kukarow[kuka]')
 						$ostok";
 		}
-				
+
+		$stresult = mysql_query($query) or pupe_error($query);
+
 		if (mysql_num_rows($stresult) > 0) {
 			echo "	<form name='valinta' action='$PHP_SELF' method='post'>
 					<input type='hidden' name='toim' value='$toim'>

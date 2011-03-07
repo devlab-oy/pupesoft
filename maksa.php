@@ -302,7 +302,7 @@
 								yhtio 		= '$kukarow[yhtio]',
 								ltunnus 	= '$laskurow[tunnus]',
 								tilino 		= '$yhtiorow[kassaale]',
-								tapvm 		= '$maksupvm',
+								tapvm 		= '$trow[olmapvm]',
 								summa 		= $summa * -1,
 								vero 		= '$tiliointirow[vero]',
 								selite 		= '$selite',
@@ -317,7 +317,7 @@
 									yhtio 		= '$kukarow[yhtio]',
 									ltunnus 	= '$laskurow[tunnus]',
 									tilino 		= '$yhtiorow[alv]',
-									tapvm 		= '$maksupvm',
+									tapvm 		= '$trow[olmapvm]',
 									summa 		= $alv * -1,
 									vero 		= 0,
 									selite 		= '$selite',
@@ -344,7 +344,7 @@
 						yhtio 		= '$kukarow[yhtio]',
 						ltunnus 	= '$laskurow[tunnus]',
 						tilino 		= '$yhtiorow[ostovelat]',
-						tapvm 		= '$maksupvm',
+						tapvm 		= '$trow[olmapvm]',
 						summa 		= '$laskurow[vietysumma]',
 						vero 		= 0,
 						selite 		= '$selite',
@@ -358,7 +358,7 @@
 						yhtio 		= '$kukarow[yhtio]',
 						ltunnus 	= '$laskurow[tunnus]',
 						tilino 		= '$yhtiorow[selvittelytili]',
-						tapvm 		= '$maksupvm',
+						tapvm 		= '$trow[olmapvm]',
 						summa 		= -1 * ($laskurow[maksusumma] - $laskurow[maksukasumma]),
 						vero 		= 0,
 						selite 		= '$selite',
@@ -369,7 +369,7 @@
 
 			$query = "	UPDATE lasku set
 						tila 		 = 'Y',
-						mapvm 		 = '$maksupvm',
+						mapvm 		 = '$trow[olmapvm]',
 						maksu_kurssi = $kurssi
 						WHERE tunnus = '$laskurow[tunnus]'";
 			$xresult = mysql_query($query) or pupe_error($query);
@@ -1241,6 +1241,7 @@
 						echo t("Maksetaan heti");
 						echo "<br>";
 					}
+					#  T‰ss‰ ei taida olla mit‰‰n j‰rke‰ en‰‰ SEPA:ssa
 					elseif (strtoupper($trow['maa']) != 'FI') {
 						echo "<input type='checkbox' DISABLED CHECKED> ";
 						echo "<input type='hidden' name='poikkeus' value='on'>";

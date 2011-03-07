@@ -130,7 +130,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						LEFT JOIN tiliointi ON lasku.yhtio = tiliointi.yhtio
 											and lasku.tunnus = tiliointi.ltunnus
 											and lasku.tapvm = tiliointi.tapvm
-											and abs(lasku.summa + tiliointi.summa) <= 0.02
+											and abs(lasku.summa*lasku.vienti_kurssi + tiliointi.summa) <= 0.02
 											and tiliointi.korjattu = ''
 											and tiliointi.tilino in ('$yhtiorow[ostovelat]','$yhtiorow[konserniostovelat]')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -156,7 +156,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
 						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						GROUP BY 1,2,3,4,5,6
-						HAVING saamistilejä > 1 and heitto <> 0)";
+						HAVING heitto <> 0)";
 		}
 
 		if ($tee == 'S') {

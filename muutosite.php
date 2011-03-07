@@ -512,6 +512,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 								FROM tiliotedata
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tyyppi = 3
+								and tilino = '$trow[tilino]'
 								and substr(tieto, 16, 6) = '$orgpvm_pankki'
 								and left(tieto, 1) = '3'";
 					$subr = mysql_query($subq) or pupe_error($subq);
@@ -561,15 +562,17 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 				elseif (mysql_field_name($result, $i) == "muutetut_tositteet" and $tee == 'KP') {
 					if ($ero != 0) { 
 						
-						$subquery = "	SELECT distinct ltunnus, tapvm
-										FROM tiliointi
-										WHERE yhtio = '$kukarow[yhtio]'
-										and ltunnus in ($ltunnukset[ltunnus])
-										and laatija = 'tiliote'
-										and korjattu != ''																										
-										and tilino != '$oratil[oletus_rahatili]'										
-										and tapvm = '$orgpvm'";
-						$subres = mysql_query($subquery) or pupe_error($subquery);
+						if ($ltunnukset["ltunnus"] != "") {
+							$subquery = "	SELECT distinct ltunnus, tapvm
+											FROM tiliointi
+											WHERE yhtio = '$kukarow[yhtio]'
+											and ltunnus in ($ltunnukset[ltunnus])
+											and laatija = 'tiliote'
+											and korjattu != ''																										
+											and tilino != '$oratil[oletus_rahatili]'										
+											and tapvm = '$orgpvm'";
+							$subres = mysql_query($subquery) or pupe_error($subquery);
+						}
 						
 						echo "<td>";
 						

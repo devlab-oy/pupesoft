@@ -532,7 +532,7 @@ if (!function_exists('rivi_otsikot')) {
 
 if (!function_exists('rivi')) {
 	function rivi($thispage, $tyyppi="") {
-		global $pdf, $page, $lahetetyyppi, $edtuotetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $toim;
+		global $pdf, $page, $lahetetyyppi, $edtuotetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $toim;
 
 		// viivat rivien väliin...
 		$x[0] = 20;
@@ -770,7 +770,7 @@ if (!function_exists('rivi')) {
 
 if (!function_exists('loppu')) {
 	function loppu($thispage, $tots) {
-		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $rectparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page, $paino;
+		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $rectparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page;
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
 		$pdf->draw_rectangle(70, 20, 20, 580,	$thispage, $rectparam);
@@ -827,12 +827,6 @@ if (!function_exists('loppu')) {
 		}
 
 		if ($tots == 1) {
-			if ($paino != 0) {
-				$pdf->draw_text(440, 25, t("Tilauksen paino", $kieli).":",	$thispage, $norm);
-				$oikpos = $pdf->strlen($paino." kg", $boldi);
-				$pdf->draw_text(575-$oikpos, 25, $paino." kg",				$thispage, $boldi);
-			}
-
 			// viivat rivien väliin...
 			$x[0] = 20;
 			$x[1] = 580;
@@ -849,7 +843,7 @@ if (!function_exists('loppu')) {
 
 if (!function_exists('loppu_lisarivit')) {
 	function loppu_lisarivit($thispage, $tots) {
-		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $rectparam, $lineparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page, $paino;
+		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $rectparam, $lineparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page;
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
 		$pdf->draw_rectangle(70, 20, 20, 580,	$thispage, $rectparam);
@@ -906,12 +900,6 @@ if (!function_exists('loppu_lisarivit')) {
 		}
 
 		if ($tots == 1) {
-			if ($paino != 0) {
-				$pdf->draw_text(440, 25, t("Tilauksen paino", $kieli).":",	$thispage, $norm);
-				$oikpos = $pdf->strlen($paino." kg", $boldi);
-				$pdf->draw_text(575-$oikpos, 25, $paino." kg",				$thispage, $boldi);
-			}
-
 			// viivat rivien väliin...
 			$x[0] = 20;
 			$x[1] = 580;

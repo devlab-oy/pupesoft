@@ -48,8 +48,13 @@
 
 	for ($i = 0; $i <= $count; $i++) {
 		if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
-			$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-			$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+			if ($array[$i] == "asiakas.nimi") {
+				$lisa .= " and (asiakas.nimi like '%".$haku[$i]."%' or asiakas.toim_nimi like '%".$haku[$i]."%')";
+			}
+			else {
+				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+			}
 		}
 	}
 
@@ -106,7 +111,6 @@
 					WHERE $konsernit
 					$lisa";
 	}
-
 	if ($lisa == "" and ($tee != 'laheta' or $tee != 'lahetalista')) {
 		$limit = " LIMIT 200 ";
 	}

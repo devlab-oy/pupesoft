@@ -569,7 +569,7 @@
 							$lisasalker
 							$lisa
 							ORDER BY $pjat_sortlisa sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
-				$result = mysql_query($query) or pupe_error($query);
+				$riresult = mysql_query($query) or pupe_error($query);
 
 				$tilausnumeroita = $laskurow["tunnus"];
 
@@ -578,18 +578,12 @@
 
 				$kal = 1;
 
-				while ($row = mysql_fetch_array($result)) {
+				while ($row = mysql_fetch_array($riresult)) {
 					$rivinumerot[$row["tunnus"]] = $kal;
 					$kal++;
 				}
 
-				mysql_data_seek($result,0);
-
-				unset($pdf);
-				unset($page);
-
-				$sivu  = 1;
-				$paino = 0;
+				mysql_data_seek($riresult,0);
 
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 					$tyyppi = "";
@@ -598,32 +592,62 @@
 					$tyyppi = "SIIRTOLISTA";
 				}
 
-				// Aloitellaan lähetteen teko
-				$page[$sivu] = alku_kerayslista($tyyppi);
+				$params_kerayslista = array(
+				'asrow'           	=> $asrow,
+				'boldi'           	=> $boldi,
+				'iso'             	=> $iso,
+				'kala'            	=> 0,
+				'kieli'           	=> $kieli,
+				'komento'			=> '',
+				'laskurow'        	=> $laskurow,
+				'norm'            	=> $norm,
+				'page'            	=> '',
+				'paino'           	=> 0,
+				'pdf'             	=> NULL,
+				'perheid'         	=> 0,
+				'perheid2'        	=> 0,
+				'pieni'           	=> $pieni,
+				'pieni_boldi'     	=> $pieni_boldi,
+				'rectparam'       	=> $rectparam,
+				'rivinkorkeus'    	=> $rivinkorkeus,
+				'rivinumerot'    	=> $rivinumerot,
+				'row'             	=> NULL,
+				'sivu'            	=> 1,
+				'tee'             	=> $tee,
+				'thispage'			=> NULL,
+				'tilausnumeroita' 	=> $tilausnumeroita,
+				'toim'            	=> $toim,
+				'tots'            	=> 0,
+				'tyyppi'		  	=> $tyyppi);
 
-				while ($row = mysql_fetch_array($result)) {
-					rivi_kerayslista($page[$sivu], $tyyppi);
+				// Aloitellaan keräyslistan teko
+				$params_kerayslista = alku_kerayslista($params_kerayslista);
+
+				while ($row = mysql_fetch_assoc($riresult)) {
+					$params_kerayslista["row"] = $row;
+					$params_kerayslista = rivi_kerayslista($params_kerayslista);
 				}
 
-				loppu_kerayslista($page[$sivu], 1);
+				$params_kerayslista["tots"] = 1;
+				$params_kerayslista = loppu_kerayslista($params_kerayslista);
 
 				//tulostetaan failit ja valitaan sopivat printterit
 				if ($laskurow["varasto"] == '') {
-					$query = "	select *
+					$query = "	SELECT *
 								from varastopaikat
 								where yhtio='$kukarow[yhtio]'
 								order by alkuhyllyalue,alkuhyllynro
 								limit 1";
 				}
 				else {
-					$query = "	select *
+					$query = "	SELECT *
 								from varastopaikat
 								where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
 								order by alkuhyllyalue,alkuhyllynro";
 				}
 				$prires = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($prires)>0) {
+				if (mysql_num_rows($prires) > 0) {
 					$prirow = mysql_fetch_array($prires);
 
 					if ($valittu_tulostin == "oletukselle") {
@@ -634,14 +658,15 @@
 					}
 
 					//haetaan lähetteen tulostuskomento
-					$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+					$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 					$kirres= mysql_query($query) or pupe_error($query);
 					$kirrow= mysql_fetch_array($kirres);
 					$komento=$kirrow['komento'];
 				}
 
 				//tulostetaan sivu
-				print_pdf_kerayslista($komento);
+				$params_kerayslista["komento"] = $komento;
+				print_pdf_kerayslista($params_kerayslista);
 
 				if ($returnvalue != 0) {
 					echo "<font class='error'>$komento".t("Keräyslistan tulostus epäonnistui")."! ".t("Tilaus $laskurow[tunnus]")." ".t("siirrettiin tulostusjonoon").".

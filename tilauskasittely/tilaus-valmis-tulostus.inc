@@ -28,10 +28,18 @@
 	$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ";
 	$res   = mysql_query($query) or pupe_error($query);
 
-	$queryc = "	SELECT sum(if(tila='N' and alatila='A', 1, 0)) ok, count(*) kaikki
-				FROM lasku
-				WHERE tunnus in ($tilausnumeroita)
-				and yhtio	= '$kukarow[yhtio]'";
+	if ($toim == 'REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+		$queryc = "	SELECT sum(if(tila='C' and alatila='B', 1, 0)) ok, count(*) kaikki
+					FROM lasku
+					WHERE tunnus in ($tilausnumeroita)
+					and yhtio	= '$kukarow[yhtio]'";
+	}
+	else {
+		$queryc = "	SELECT sum(if(tila='N' and alatila='A', 1, 0)) ok, count(*) kaikki
+					FROM lasku
+					WHERE tunnus in ($tilausnumeroita)
+					and yhtio	= '$kukarow[yhtio]'";
+	}
 	$chk_result = mysql_query($queryc) or pupe_error($queryc);
 	$chk_row = mysql_fetch_array($chk_result);
 
@@ -43,19 +51,21 @@
 		//keräyslistan tulostusta varten
 		require_once ("tulosta_lahete_kerayslista.inc");
 
-		//hatetaan asiakkaan tiedot
+		//haetaan asiakkaan tiedot
 		$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$riresult = mysql_query($query) or pupe_error($query);
 		$asrow = mysql_fetch_array($riresult);
 
+		$select_lisa 	= "";
+		$where_lisa 	= "";
+		$lisa1 			= "";
+		$pjat_sortlisa 	= "";
+
 		// keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
 		if ($yhtiorow["kerataanko_saldottomat"] == '') {
 			$lisa1 = " and tuote.ei_saldoa = '' ";
-		}
-		else {
-			$lisa1 = " ";
 		}
 
 		if ($laskurow["tila"] == "V") {
@@ -63,25 +73,27 @@
 			$order_sorttaus = $yhtiorow["valmistus_kerayslistan_jarjestys_suunta"];
 
 			if ($yhtiorow["valmistus_kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
-			else $pjat_sortlisa = "";
+
+			// Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+			if ($yhtiorow["valmistus_kerayslistan_jarjestys"] == "S") {
+				$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
+				$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
+			}
 		}
 		else {
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
 			$order_sorttaus = $yhtiorow["kerayslistan_jarjestys_suunta"];
 
 			if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
-			else $pjat_sortlisa = "";
+
+			// Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+			if ($yhtiorow["kerayslistan_jarjestys"] == "S") {
+				$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
+				$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
+			}
 		}
 
-		$select_lisa = $where_lisa = "";
-
-		// Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
-		if ($yhtiorow[$sorttaus] == "S") {
-			$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
-			$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
-		}
-
-		// generoidaan keräyslistalle rivinumerot
+		//keräyslistan rivit
 		$query = "	SELECT tilausrivi.*,
 					tuote.sarjanumeroseuranta,
 					$select_lisa
@@ -108,20 +120,46 @@
 
 		mysql_data_seek($riresult,0);
 
-		unset($pdf);
-		unset($page);
+		$tyyppi = "";
 
-		$sivu  = 1;
-		$paino = 0;
+		$params_kerayslista = array(
+		'asrow'           	=> $asrow,
+		'boldi'           	=> $boldi,
+		'iso'             	=> $iso,
+		'kala'            	=> 0,
+		'kieli'           	=> $kieli,
+		'komento'			=> '',
+		'laskurow'        	=> $laskurow,
+		'norm'            	=> $norm,
+		'page'            	=> '',
+		'paino'           	=> 0,
+		'pdf'             	=> NULL,
+		'perheid'         	=> 0,
+		'perheid2'        	=> 0,
+		'pieni'           	=> $pieni,
+		'pieni_boldi'     	=> $pieni_boldi,
+		'rectparam'       	=> $rectparam,
+		'rivinkorkeus'    	=> $rivinkorkeus,
+		'rivinumerot'    	=> $rivinumerot,
+		'row'             	=> NULL,
+		'sivu'            	=> 1,
+		'tee'             	=> $tee,
+		'thispage'			=> NULL,
+		'tilausnumeroita' 	=> $tilausnumeroita,
+		'toim'            	=> $toim,
+		'tots'            	=> 0,
+		'tyyppi'		  	=> $tyyppi);
 
-		// Aloitellaan lähetteen teko
-		$page[$sivu] = alku_kerayslista();
+		// Aloitellaan keräyslistan teko
+		$params_kerayslista = alku_kerayslista($params_kerayslista);
 
-		while ($row = mysql_fetch_array($riresult)) {
-			rivi_kerayslista($page[$sivu]);
+		while ($row = mysql_fetch_assoc($riresult)) {
+			$params_kerayslista["row"] = $row;
+			$params_kerayslista = rivi_kerayslista($params_kerayslista);
 		}
 
-		loppu_kerayslista($page[$sivu], 1);
+		$params_kerayslista["tots"] = 1;
+		$params_kerayslista = loppu_kerayslista($params_kerayslista);
 
 		//tulostetaan faili ja valitaan sopivat printterit
 		if ($laskurow["varasto"] == 0) {
@@ -172,7 +210,9 @@
 
 		if ($komento != "") {
 			//tulostetaan sivu
-			print_pdf_kerayslista($komento);
+			$params_kerayslista["komento"] = $komento;
+			print_pdf_kerayslista($params_kerayslista);
+
 			$returnvalue = 0;
 		}
 		else {
@@ -202,13 +242,25 @@
 				$ei_pakkaamoa_lisaviesti = ", sisviesti2 = concat(sisviesti2, ' $kukarow[kuka] ".t("halusi tilauksen pakkaamolokeroihin")." ".tv1dateconv(date("Y-m-d H:i:s"))."')";
 			}
 
-			$query = "	UPDATE lasku SET
-						tila = 'L',
-						lahetepvm = now(),
-						kerayslista = '$kerayslistatunnus'
-						$ei_pakkaamoa_lisaviesti
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tunnus in ($tilausnumeroita)";
+			if ($toim =='REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+				$query = "	UPDATE lasku SET
+							alatila = 'C',
+							lahetepvm = now(),
+							kerayslista = '$kerayslistatunnus'
+							$ei_pakkaamoa_lisaviesti
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tila = 'C' and alatila = 'B'
+							and tunnus in ($tilausnumeroita)";
+			}
+			else {
+				$query = "	UPDATE lasku SET
+							tila = 'L',
+							lahetepvm = now(),
+							kerayslista = '$kerayslistatunnus'
+							$ei_pakkaamoa_lisaviesti
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus in ($tilausnumeroita)";
+				}
 			$result = mysql_query($query) or pupe_error($query);
 		}
 	}
@@ -217,6 +269,7 @@
 	}
 
 	// poistetaan lukot
-	$query ="UNLOCK TABLES";
+	$query = "UNLOCK TABLES";
 	$res   = mysql_query($query) or pupe_error($query);
+
 ?>

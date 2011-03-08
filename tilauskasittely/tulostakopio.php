@@ -153,6 +153,9 @@
 	if ($toim == "REKISTERIILMOITUS") {
 		$fuse = t("Rekisteröinti-ilmoitus");
 	}
+	if ($toim == "REKLAMAATIO") {
+		$fuse = t("Reklamaatio/Purkulista");
+	}
 
 	if (isset($muutparametrit) and $muutparametrit != '') {
 		$muut = explode('/',$muutparametrit);
@@ -402,6 +405,29 @@
 					 	 	and lasku.toim_postitp	= '$asiakasrow[toim_postitp]' ";
 		}
 
+		if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'U') {
+			$where1 .= " lasku.tila in ('C','L') ";
+
+			$where2 .= " and lasku.alatila in('C','D','X')";
+
+			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'
+						 and lasku.ytunnus = '$ytunnus'";
+
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			$use = " use index (yhtio_tila_luontiaika) ";
+		}
+		if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == '') {						 			
+			$where1 .= " lasku.tila in ('L','N','C') and lasku.tilaustyyppi = 'R' ";
+
+			$where2 .= " and lasku.alatila in ('','A','B','C','J','D') ";
+
+			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			$use = " use index (yhtio_tila_luontiaika) ";
+		}
 		if ($toim == "OSTO") {
 			//ostotilaus kyseessä, ainoa paperi joka voidaan tulostaa on itse tilaus
 			$where1 .= " lasku.tila = 'O' ";
@@ -1152,7 +1178,12 @@
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 		}
-
+		if ($toim == "REKLAMAATIO") {
+			$tulostimet[0] = 'Keräyslista';
+			if ($kappaleet > 0 and $komento["Keräyslista"] != 'email') {
+				$komento["Keräyslista"] .= " -# $kappaleet ";
+			}
+		}
 		if (isset($tulostukseen)) {
 			$tilausnumero = implode(",", $tulostukseen);
 		}
@@ -1956,25 +1987,28 @@
 				$tee = '';
 			}
 
-			if ($toim == "KERAYSLISTA" or $toim == "SIIRTOLISTA") {
+			if ($toim == "KERAYSLISTA" or $toim == "SIIRTOLISTA" or $toim == "REKLAMAATIO") {
 
 				require_once ("tulosta_lahete_kerayslista.inc");
 
 				$otunnus = $laskurow["tunnus"];
+				$tilausnumeroita = $otunnus;
 
-				//hatetaan asiakkaan tiedot
+				//haetaan asiakkaan tiedot
 				$query = "  SELECT lahetetyyppi, luokka, puhelin, if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_assoc($result);
 
+				$select_lisa 	= "";
+				$where_lisa 	= "";
+				$lisa1 			= "";
+				$pjat_sortlisa 	= "";
+
 				// keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
 				if ($yhtiorow["kerataanko_saldottomat"] == '') {
 					$lisa1 = " and tuote.ei_saldoa = '' ";
-				}
-				else {
-					$lisa1 = " ";
 				}
 
 				if ($laskurow["tila"] == "V") {
@@ -1982,29 +2016,31 @@
 					$order_sorttaus = $yhtiorow["valmistus_kerayslistan_jarjestys_suunta"];
 
 					if ($yhtiorow["valmistus_kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
-					else $pjat_sortlisa = "";
+
+					// Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+					if ($yhtiorow["valmistus_kerayslistan_jarjestys"] == "S") {
+						$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
+						$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
+					}
 				}
 				else {
 					$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
 					$order_sorttaus = $yhtiorow["kerayslistan_jarjestys_suunta"];
 
 					if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
-					else $pjat_sortlisa = "";
-				}
 
-				$select_lisa = $where_lisa = "";
-
-				//	 Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
-				if ($yhtiorow[$sorttaus] == "S") {
-					$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
-					$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
+					// Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+					if ($yhtiorow["kerayslistan_jarjestys"] == "S") {
+						$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
+						$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
+					}
 				}
 
 				//keräyslistan rivit
-				$query = "  SELECT tilausrivi.*, $select_lisa
+				$query = "  SELECT tilausrivi.*,
 							tuote.sarjanumeroseuranta,
-							$sorttauskentta,
-							if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
+							$select_lisa
+							$sorttauskentta
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 							WHERE tilausrivi.otunnus = '$otunnus'
@@ -2012,50 +2048,80 @@
 							$lisa1
 							$where_lisa
 							ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
-				$result = mysql_query($query) or pupe_error($query);
-
-				$tilausnumeroita = $otunnus;
+				$riresult = mysql_query($query) or pupe_error($query);
 
 				//generoidaan rivinumerot
 				$rivinumerot = array();
 
 				$kal = 1;
 
-				while ($row = mysql_fetch_assoc($result)) {
+				while ($row = mysql_fetch_assoc($riresult)) {
 					$rivinumerot[$row["tunnus"]] = $kal;
 					$kal++;
 				}
 
-				mysql_data_seek($result,0);
-
-				unset($pdf);
-				unset($page);
-
-				$sivu  = 1;
-				$paino = 0;
+				mysql_data_seek($riresult,0);
 
 				if ($toim == "SIIRTOLISTA") {
 					$tyyppi = "SIIRTOLISTA";
 				}
-
-				// Aloitellaan lähetteen teko
-				$page[$sivu] = alku_kerayslista($tyyppi);
-
-				while ($row = mysql_fetch_assoc($result)) {
-					rivi_kerayslista($page[$sivu], $tyyppi);
-				}
-
-				loppu_kerayslista($page[$sivu], 1);
-
-				if ($toim == "SIIRTOLISTA") {
-					print_pdf_kerayslista($komento["Siirtolista"]);
-					$tee = '';
+				elseif ($toim == "REKLAMAATIO") {
+					$tyyppi = "REKLAMAATIO";
 				}
 				else {
-					//tulostetaan sivu
-					print_pdf_kerayslista($komento["Keräyslista"]);
-					$tee = '';
+					$tyyppi = "";
 				}
+
+				$params_kerayslista = array(
+				'asrow'           	=> $asrow,
+				'boldi'           	=> $boldi,
+				'iso'             	=> $iso,
+				'kala'            	=> 0,
+				'kieli'           	=> $kieli,
+				'komento'			=> '',
+				'laskurow'        	=> $laskurow,
+				'norm'            	=> $norm,
+				'page'            	=> '',
+				'paino'           	=> 0,
+				'pdf'             	=> NULL,
+				'perheid'         	=> 0,
+				'perheid2'        	=> 0,
+				'pieni'           	=> $pieni,
+				'pieni_boldi'     	=> $pieni_boldi,
+				'rectparam'       	=> $rectparam,
+				'rivinkorkeus'    	=> $rivinkorkeus,
+				'rivinumerot'    	=> $rivinumerot,
+				'row'             	=> NULL,
+				'sivu'            	=> 1,
+				'tee'             	=> $tee,
+				'thispage'			=> NULL,
+				'tilausnumeroita' 	=> $tilausnumeroita,
+				'toim'            	=> $toim,
+				'tots'            	=> 0,
+				'tyyppi'		  	=> $tyyppi);
+
+				// Aloitellaan keräyslistan teko
+				$params_kerayslista = alku_kerayslista($params_kerayslista);
+
+				while ($row = mysql_fetch_assoc($riresult)) {
+					$params_kerayslista["row"] = $row;
+					$params_kerayslista = rivi_kerayslista($params_kerayslista);
+				}
+
+				$params_kerayslista["tots"] = 1;
+				$params_kerayslista = loppu_kerayslista($params_kerayslista);
+
+				if ($toim == "SIIRTOLISTA" and isset($komento["Siirtolista"])) {
+					$params_kerayslista["komento"] = $komento["Siirtolista"];
+				}
+				elseif (isset($komento["Keräyslista"])) {
+					$params_kerayslista["komento"] = $komento["Keräyslista"];
+				}
+
+				//tulostetaan sivu
+				print_pdf_kerayslista($params_kerayslista);
+
+				$tee = '';
 			}
 
 			if ($toim == "OSOITELAPPU") {

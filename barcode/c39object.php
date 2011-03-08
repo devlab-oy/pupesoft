@@ -119,7 +119,7 @@ Contact author at: barcode@mribti.com
  	 $StopSize  = BCD_C39_NARROW_BAR * $xres * 6 + BCD_C39_WIDE_BAR * $xres * 3;
 	 $CharSize  = BCD_C39_NARROW_BAR * $xres * 6 + BCD_C39_WIDE_BAR * $xres * 3; /* Same for all chars */
 	  
-	  return $CharSize * $len + $StarSize + $StopSize + /* Space between chars */ BCD_C39_NARROW_BAR * $xres * ($len-1);
+	  return $CharSize * $len + $StartSize + $StopSize + /* Space between chars */ BCD_C39_NARROW_BAR * $xres * ($len-1);
    }
    
    function DrawStart($DrawPos, $yPos, $ySize, $xres)

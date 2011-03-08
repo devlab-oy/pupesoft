@@ -2,14 +2,14 @@
 
 	if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 		//tulostetaan tilaus kun se on valmis
-		$otunnus = $kukarow["kesken"];
+		$otunnus = $laskurow["tunnus"];
 
 		if ($toim != "REKLAMAATIO") {
 			$tulostimet[0] = "Työmääräys";
 			require_once ("tyomaarays/tulosta_tyomaarays.inc");
 		}
 		else {
-			$tulostimet[0] = "Keräyslista";
+			$tulostimet[0] = "Purkulista";
 			require_once ("tilauskasittely/tulosta_lahete_kerayslista.inc");
 		}
 
@@ -23,7 +23,7 @@
 			}
 			else {
 				$komento["Keräyslista"] .= " -# $kappaleet ";
-			}									
+			}
 		}
 
 		if ($laskurow["tila"] == 'U') {
@@ -32,8 +32,6 @@
 		else {
 			$where = " otunnus='$laskurow[tunnus]' ";
 		}
-
-		$otunnus = $laskurow["tunnus"];
 
 		//hatetaan asiakkaan tiedot
 		$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
@@ -73,7 +71,7 @@
 					and tilausrivi.yhtio 	= tuote.yhtio
 					and tilausrivi.tuoteno  = tuote.tuoteno
 					ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
-		$result = mysql_query($query) or pupe_error($query);
+		$riresult = mysql_query($query) or pupe_error($query);
 
 		$tilausnumeroita = $otunnus;
 
@@ -82,70 +80,98 @@
 
 		$kal = 1;
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_array($riresult)) {
 			$rivinumerot[$row["tunnus"]] = $kal;
 			$kal++;
 		}
 
-		mysql_data_seek($result,0);
-
-		unset($pdf);
-		unset($page);
-
-		$sivu  = 1;
-		$paino = 0;
-
-		if ($toim == "SIIRTOTYOMAARAYS") {
-			$tyyppi = "SISAINEN";
-		}
-		elseif ($tyomtyyppi == "O" or $kukarow['hinnat'] != 0) {
-			$tyyppi = "O";
-		}
-		elseif ($tyomtyyppi == "P") {
-			$tyyppi = "P";
-		}
-		elseif ($tyomtyyppi == "A") {
-			$tyyppi = "";
-		}
-		else {
-			$tyyppi = $yhtiorow["tyomaaraystyyppi"];
-		}
+		mysql_data_seek($riresult,0);
 
 		// Aloitellaan lähetteen teko
 		if ($toim != "REKLAMAATIO") {
-			$page[$sivu] = alku($tyyppi);
-		}
-		else {
-			$page[$sivu] = alku_kerayslista($tyyppi);
-		}
+			unset($pdf);
+			unset($page);
 
-		while ($row = mysql_fetch_array($result)) {
-			if ($toim != "REKLAMAATIO") {
-				rivi($page[$sivu], $tyyppi);
+			$sivu  = 1;
+
+			if ($toim == "SIIRTOTYOMAARAYS") {
+				$tyyppi = "SISAINEN";
+			}
+			elseif ($tyomtyyppi == "O" or $kukarow['hinnat'] != 0) {
+				$tyyppi = "O";
+			}
+			elseif ($tyomtyyppi == "P") {
+				$tyyppi = "P";
+			}
+			elseif ($tyomtyyppi == "A") {
+				$tyyppi = "";
 			}
 			else {
-				rivi_kerayslista($page[$sivu], $tyyppi);
+				$tyyppi = $yhtiorow["tyomaaraystyyppi"];
 			}
-		}
 
-		if ($toim != "REKLAMAATIO") {
+			$page[$sivu] = alku($tyyppi);
+
+			while ($row = mysql_fetch_array($riresult)) {
+				rivi($page[$sivu], $tyyppi);
+			}
+
 			if (($toim == 'TYOMAARAYS_ASENTAJA' or $toim == 'TYOMAARAYS') and $yhtiorow['tyomaarays_tulostus_lisarivit'] == 'L') {
 				loppu_lisarivit($page[$sivu], 1);
 			}
 			else {
 				loppu($page[$sivu], 1);
 			}
-		}
-		else {
-			loppu_kerayslista($page[$sivu], 1);
-		}
-		
-		//tulostetaan sivu
-		if ($toim != "REKLAMAATIO") {
+
+			//tulostetaan sivu
 			print_pdf($komento[$tulostimet[0]]);
 		}
 		else {
-			print_pdf_kerayslista($komento[$tulostimet[0]]);
+			$tyyppi = "REKLAMAATIO";
+
+			$params_kerayslista = array(
+			'asrow'           	=> $asrow,
+			'boldi'           	=> $boldi,
+			'iso'             	=> $iso,
+			'kala'            	=> 0,
+			'kieli'           	=> $kieli,
+			'komento'			=> '',
+			'laskurow'        	=> $laskurow,
+			'norm'            	=> $norm,
+			'page'            	=> '',
+			'paino'           	=> 0,
+			'pdf'             	=> NULL,
+			'perheid'         	=> 0,
+			'perheid2'        	=> 0,
+			'pieni'           	=> $pieni,
+			'pieni_boldi'     	=> $pieni_boldi,
+			'rectparam'       	=> $rectparam,
+			'rivinkorkeus'    	=> $rivinkorkeus,
+			'rivinumerot'    	=> $rivinumerot,
+			'row'             	=> NULL,
+			'sivu'            	=> 1,
+			'tee'             	=> $tee,
+			'thispage'			=> NULL,
+			'tilausnumeroita' 	=> $tilausnumeroita,
+			'toim'            	=> $toim,
+			'tots'            	=> 0,
+			'tyyppi'		  	=> $tyyppi);
+
+
+			// Aloitellaan keräyslistan teko
+			$params_kerayslista = alku_kerayslista($params_kerayslista);
+
+			while ($row = mysql_fetch_assoc($riresult)) {
+				$params_kerayslista["row"] = $row;
+				$params_kerayslista = rivi_kerayslista($params_kerayslista);
+			}
+
+			$params_kerayslista["tots"] = 1;
+			$params_kerayslista = loppu_kerayslista($params_kerayslista);
+
+			//tulostetaan sivu
+			$params_kerayslista["komento"] = $komento[$tulostimet[0]];
+			print_pdf_kerayslista($params_kerayslista);
 		}
 	}
 
@@ -192,10 +218,10 @@
 
 	if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
 		$query  = "	UPDATE lasku
-					SET tila='L'
+					SET tila = 'L'
 					WHERE tunnus='$laskurow[tunnus]'
-					and tila='C'
-					and yhtio='$kukarow[yhtio]'";
+					and tila = 'C'
+					and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Katotaan löytyykö tilausrivejä
@@ -203,12 +229,12 @@
 		$keres = mysql_query($query) or pupe_error($query);
 
 		//Yhtään riviä ei ole
-		if(mysql_num_rows($keres) == 0) {
+		if (mysql_num_rows($keres) == 0) {
 			$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// tilaus ei enää kesken...
-			$query	= "update kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+			$query	= "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		else {
@@ -230,7 +256,7 @@
 		$keres = mysql_query($query) or pupe_error($query);
 
 		//Yhtään riviä ei ole
-		if(mysql_num_rows($keres) == 0) {
+		if (mysql_num_rows($keres) == 0) {
 			$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 			$result = mysql_query($query) or pupe_error($query);
 

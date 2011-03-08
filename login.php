@@ -7,6 +7,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	require("inc/parametrit.inc");
 
 	$session = "";
+	$usea 	 = 0;
 	
 	srand((double) microtime() * 1000000);
 
@@ -78,15 +79,17 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 		if (!isset($err) or $err != 1) {
 			// Pitääkö vielä kysyä yritystä???
 			if ($usea != 1 or (isset($yhtio) and strlen($yhtio) > 0)) {
+				
 				for ($i=0; $i<25; $i++) {
 					$session = $session . chr(rand(65,90)) ;
 				}
+				
 				$query = "	UPDATE kuka
 							SET session = '$session',
 							lastlogin = now()
 							WHERE kuka = '$user'";
 
-				if (strlen($yhtio) > 0) $query .= " and yhtio = '$yhtio'";
+				if (isset($yhtio) and strlen($yhtio) > 0) $query .= " and yhtio = '$yhtio'";
 				else $query .= " and yhtio = '$krow[yhtio]'";
 
 				$result = mysql_query($query) or pupe_error($query);

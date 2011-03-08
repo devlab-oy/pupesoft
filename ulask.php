@@ -670,22 +670,6 @@ if ($tee == 'I') {
 		}
 	}
 
-	if (is_numeric(trim($toimittajan_laskunumero)) and trim($toimittajan_laskunumero) != "") {
-
-		$query = "	SELECT *
-					FROM lasku
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND tila IN ('H','M','P','Q','Y')
-					AND laskunro = '$toimittajan_laskunumero'
-					AND tapvm >= date_sub(now(), INTERVAL 12 MONTH)
-					AND liitostunnus = '{$toimittajaid}'";
-		$duplikaattilasku_check_res = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
-			$errormsg .= "<font class='error'>".t("Toimittajalle on jo perustettu lasku")." $toimittajan_laskunumero ".t("kuluvan vuoden aikana")."!</font><br />";
-			$tee = 'E';
-		}
-	}
 }
 
 if ($tee == 'Y') {

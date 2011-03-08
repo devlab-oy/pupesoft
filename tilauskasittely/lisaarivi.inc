@@ -1900,7 +1900,12 @@
 				$p_hyllynro		= "";
 				$p_hyllytaso	= "";
 			}
-
+			
+			// jos tuote on poistettu niin sit‰ ei voi laittaa j‰lkitoimitukseen
+			if ($var == 'J' and ($trow["status"] == "P" or $trow["status"] == "X")) {
+				$var = 'P';
+			}
+			
 			// lis‰t‰‰n puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue 	= '$p_hyllyalue',

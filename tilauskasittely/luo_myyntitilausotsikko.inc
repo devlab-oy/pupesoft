@@ -240,6 +240,9 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		if ($toim == "TARJOUS") {
 			$tilaustyyppi = 'T';
 		}
+		if ($toim == "EXTRANET_REKLAMAATIO") {
+			$tilaustyyppi = 'R';
+		}
 
 		$jatka	= "JATKA";
 		$tee	= "OTSIK";

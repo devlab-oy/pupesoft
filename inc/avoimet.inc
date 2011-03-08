@@ -425,14 +425,20 @@
 					echo "<td>$trow[maksutieto]";
 
 					if ($trow["comments"] != "" and $naytetaankokommentit == "") {
-						echo "<a class='tooltip' id='$trow[tunnus]'><img src='{$palvelin2}pics/lullacons/info.png'></a>";
+						echo " <a class='tooltip' id='$trow[tunnus]'><img src='{$palvelin2}pics/lullacons/info.png'></a>";
 						echo "<div id='div_$trow[tunnus]' class='popup' style='width:500px;'>";
 						echo $trow["comments"];
 						echo "</div>";
 					}
 
 					echo "</td>";
-					echo "<td>$trow[laskunro]</td>";
+
+					if ($asitoimittain == "") {
+						echo "<td><a name='$trow[tunnus]' href='".$palvelin2."muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=".$palvelin2."raportit.php////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>$trow[laskunro]</a></td>";
+					}
+					else {
+						echo "<td>$trow[laskunro]</td>";
+					}
 
 					if ($trow["tapvm"] == "0000-00-00" or $trow["tapvm"] == "0000-00-00 0000-00-00") {
 						$trow["tapvm"] = "";
@@ -446,7 +452,7 @@
 					if ($trow["erpcm"] == "0000-00-00" or $trow["erpcm"] == "0000-00-00 0000-00-00") {
 						$trow["erpcm"] = "";
 					}
-					
+
 					echo "<td>$trow[tapvm]</td>";
 					echo "<td>$trow[mapvm]</td>";
 					echo "<td>$trow[olmapvm]</td>";
@@ -740,7 +746,7 @@
 					if ($trow["erpcm"] == "0000-00-00" or $trow["erpcm"] == "0000-00-00 0000-00-00") {
 						$trow["erpcm"] = "";
 					}
-											
+
 					echo "<td>$trow[tapvm]</td>";
 					echo "<td>$trow[mapvm]</td>";
 					echo "<td>$trow[erpcm]</td>";

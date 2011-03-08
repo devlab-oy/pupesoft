@@ -51,7 +51,7 @@
 
 			$result = mysql_query($sqlhaku) or die ("<font class='error'>".mysql_error()."</font>");
 			
-			if (mysql_num_rows($result) < 5000) {
+			if (mysql_num_rows($result) < 65000) {
 				
 				if(include('Spreadsheet/Excel/Writer.php')) {
 				

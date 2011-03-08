@@ -531,11 +531,11 @@ if ($tuoteno != '') {
 
 			if (mysql_num_rows($result) > 0) {
 
-				$trow = mysql_fetch_assoc ($result);
+				$trow = mysql_fetch_assoc($result);
 
 				// epäkuranttisuutta ei osata poistaa --> We are fucked!
 				if ($trow['epaku'] > 0) {
-					echo "<font class='error'>".t("Tuotteella on epäkuranntisuuden muutos. Emme osaa toimia!")."</font><br>";
+					echo "<font class='error'>".t("Tuotteella on epäkuranttisuuden muutos. Emme osaa toimia!")."</font><br>";
 					$jlerror=1;
 				}
 
@@ -602,6 +602,7 @@ if ($tuoteno != '') {
 								and kpl <> 0
 								ORDER BY laadittu";
 					$result = mysql_query($query) or pupe_error($query);
+
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
 					if (mysql_num_rows($result) > 0) {
@@ -644,7 +645,6 @@ if ($tuoteno != '') {
 									if ($jalkilaskenta_debug >= 1) {
 										$jalkilaskenta_debug_text .= " = $uusikehahin</font><br>";
 									}
-
 								}
 								else {
 									// jos saldo on nolla ennen tuloa tai tulon jälkeen niin kehari on ostari
@@ -683,6 +683,7 @@ if ($tuoteno != '') {
 
 							// jos kyseessä on inventointi ja ollaan löydetty jo eka tulo
 							if ($trow['laji'] == 'Inventointi' and $eka == 0) {
+
 								// etsitään tuotteen tiliöinti
 								$query = "	SELECT *
 											from lasku use index (yhtio_tila_tapvm)
@@ -766,6 +767,9 @@ if ($tuoteno != '') {
 									$invapuluku = $trow["kpl"] * $uusikehahin;
 									echo "<font class='error'>".t("Törmättiin inventointitapahtumaan, mutta ei osattu korjata sen tiliöintejä! Korjaa tiliöinti käsin!")." ".t("Inventoitu").": $trow[tuoteno] @ $trow[laadittu] ".t("Summa").": $trow[kpl] * $uusikehahin = $invapuluku</font><br>";
 								}
+
+								// summaillaan uutta saldoa
+								$uusisaldo += $trow['kpl'];
 							}
 
 							// jos kyseessä on kulutus ja ollaan löydetty jo eka tulo
@@ -830,6 +834,9 @@ if ($tuoteno != '') {
 
 									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>".t("Törmättiin kulutustapahtumaan, valmistus pitäisi laskea uudestaan").": $invrow[otunnus]!</font><br>";
 								}
+
+								// summaillaan uutta saldoa
+								$uusisaldo += $trow['kpl'];
 							}
 
 							// jos ollaa löydetty eka tulo voidaan aina päivitetään tapahtuma jos se on tulo, valmistus, laskutus, inventointi, kulutus tai siirto
@@ -857,7 +864,6 @@ if ($tuoteno != '') {
 							if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan! Saldo: $uusisaldo Keskihinta: $uusikehahin Alku: $vlaadittu Loppu: 3000-01-01 Case: 2</font><br>";
 							$mitenkavi = korjaalaskut($tuoteno, $uusikehahin, $vlaadittu, '3000-01-01 00:00:00', 0);
 						}
-
 					} // end if numrows > 0
 
 					// päivitetään lopulta tuotteelle uusi kehahin ja vihahin

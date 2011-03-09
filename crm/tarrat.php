@@ -14,29 +14,48 @@
 
 	echo "<font class='head'>".t("Tulosta osoitetarrat")."</font><hr>";
 
-	if ($tee == "TULOSTA" and count($otunnus) > 0) {
+	if ($tee == "TULOSTA" and count($otunnus) == 0) {
+		$tee = "";
+	}
+
+	if ($tee == "TULOSTA") {
 		$tulostimet[0] = 'Tarrat';
 
 		if (is_array($otunnus)) {
-			$otunnu = "";
-
-			foreach($otunnus as $otun) {
-				$otunnu .= $otun.",";
-			}
-
-			$otunnus = substr($otunnu, 0, -1);
+			$otunnus = implode(",", $otunnus);
 		}
 
 		if (isset($rajaus)) {
-			$rajaus 			= unserialize(urldecode($rajaus));
-			$arvomatikka 		= $rajaus[0];
-			$tarra_aineisto 	= $rajaus[1];
-			$raportti			= $rajaus[2];
-			$toimas				= $rajaus[3];
-			$as_yht_tiedot		= $rajaus[4];
+			$rajaus = unserialize(urldecode($rajaus));
+
+			foreach ($rajaus as $a => $b) {
+				if (substr($a, 0, 5) == "haku_") {
+					$a = str_replace("haku_", "", $a);
+
+					${"haku"}[$a] = $b;
+				}
+				else {
+					${$a} = $b;
+				}
+			}
 		}
 
-		$rajaus = array($arvomatikka, $tarra_aineisto, $raportti, $toimas, $as_yht_tiedot);
+		$rajaus = array();
+		$rajaus["asmemo_viesti"] 	= $asmemo_viesti;
+		$rajaus["tarra_aineisto"] 	= $tarra_aineisto;
+		$rajaus["raportti"] 		= $raportti;
+		$rajaus["toimas"] 			= $toimas;
+		$rajaus["as_yht_tiedot"] 	= $as_yht_tiedot;
+		$rajaus["limitti"] 			= $limitti;
+		$rajaus["negaatio_haku"] 	= $negaatio_haku;
+		$rajaus["lisaraj_haku"] 	= $lisaraj_haku;
+		$rajaus["ojarj"] 			= $ojarj;
+
+		foreach ($haku as $a => $b) {
+			$ind = "haku_$a";
+			$rajaus[$ind] = $b;
+		}
+
 		$rajaus = urlencode(serialize($rajaus));
 
 		if ($raportti != "EX" and count($komento) == 0) {
@@ -143,7 +162,7 @@
 							yhtio    		= '$kukarow[yhtio]',
 							tyyppi   		= 'Memo',
 							pvmalku  		= now(),
-							kentta01 		= '$kukarow[nimi] tulosti osoitetarrat.\n$arvomatikka',
+							kentta01 		= '$kukarow[nimi] tulosti osoitetarrat.\n$asmemo_viesti',
 							laatija			= '$kukarow[kuka]',
 							luontiaika		= now()";
 				$result = mysql_query($kysely) or pupe_error($kysely);
@@ -335,7 +354,8 @@
 
 		$array = explode(",", $kentat);
         $count = count($array);
-        for ($i=0; $i<=$count; $i++) {
+
+		for ($i=0; $i<=$count; $i++) {
 			if (strlen($haku[$i]) > 0) {
 
 				if (isset($negaatio_haku) and $negaatio_haku == 'on') {
@@ -356,12 +376,16 @@
 			$jarjestys = 'asiakas.nimi';
 		}
 
+		$limit = "";
+
 		if ($tarra_aineisto != "") {
 			$lisa .= " and tunnus in ($tarra_aineisto) ";
-			$limit = "";
+		}
+		elseif (isset($limitti) and $limitti != "KAIKKI") {
+			$limit = " LIMIT $limitti ";
 		}
 		else {
-			$limit = "LIMIT 1000";
+			$limit = " LIMIT 1000 ";
 		}
 
 		//haetaan omat asiakkaat
@@ -376,20 +400,23 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<form action = '$PHP_SELF' method = 'post'>
-			<input type='hidden' name='arvomatikka' value='$arvomatikka'>
+			<input type='hidden' name='asmemo_viesti' value='$asmemo_viesti'>
 			<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
 			<input type='hidden' name='raportti' value='$raportti'>
 			<input type='hidden' name='toimas' value='$toimas'>
 			<input type='hidden' name='as_yht_tiedot' value='$as_yht_tiedot'>";
 
-		echo "<table><tr>";
-		echo "<th></th>";
+		$lim = "";
+		$lim[$limitti] = "SELECTED";
 
-		for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-			echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_table($result,$i).".".mysql_field_name($result,$i).$ulisa."&raportti=$raportti&tarra_aineisto=$tarra_aineisto&arvomatikka=$arvomatikka&toimas=$toimas&negaatio_haku=$negaatio_haku'>".t(mysql_field_name($result,$i))."</a>";
-
-			echo "<br><input type='text' size='10' name = 'haku[$i]' value = '$haku[$i]'></th>";
-		}
+		echo "<table>";
+		echo "<tr><th>".t("Rivim‰‰r‰rajaus").":</th>
+				<td><select name='limitti'>
+				<option value='1000'   $lim[1000]>1000</option>
+				<option value='5000'   $lim[5000]>5000</option>
+				<option value='10000'  $lim[10000]>10000</option>
+				<option value='KAIKKI' $lim[KAIKKI]>".t("Ei rajaa")."</option>
+				</select></td></tr>";
 
 		$neg_chk = '';
 
@@ -397,34 +424,83 @@
 			$neg_chk = ' checked';
 		}
 
-		echo "<th valign='bottom'>".t("Negaatio")."<br><input type='checkbox' name='negaatio_haku'$neg_chk></th>";
-		echo "<th valign='bottom'><input type='Submit' value = '".t("Etsi")."'></th></tr>";
+		echo "<tr><th valign='bottom'>".t("Hakuehtojen negaatio")."</th><td><input type='checkbox' name='negaatio_haku' $neg_chk></th></tr>";
+
+		$lis_chk = '';
+
+		if (isset($lisaraj_haku) and $lisaraj_haku == 'on') {
+			$lis_chk = ' checked';
+		}
+
+		echo "<tr><th valign='bottom'>".t("N‰yt‰ lis‰rajaukset")."</th><td><input type='checkbox' name='lisaraj_haku' $lis_chk></th></tr>";
+
+		echo "</table><br>";
+
+		echo "<table><tr>";
+		echo "<th></th>";
+
+		$urllisa = "&asmemo_viesti=$asmemo_viesti&tarra_aineisto=$tarra_aineisto&raportti=$raportti&toimas=$toimas&as_yht_tiedot=$as_yht_tiedot&limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku".$ulisa;
+
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=nimi$urllisa'>".t("Nimi")."</a>";
+		echo "<br><input type='text' size='10' name = 'haku[0]'  value = '$haku[0]'></th>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=osoite$urllisa'>".t("Osoite")."</a>";
+		echo "<br><input type='text' size='10' name = 'haku[1]'  value = '$haku[1]'></th>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=postino$urllisa'>".t("Postino")."</a>";
+		echo "<br><input type='text' size='7' name = 'haku[2]'  value = '$haku[2]'></th>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=postitp$urllisa'>".t("Postitp")."</a>";
+		echo "<br><input type='text' size='10' name = 'haku[3]'  value = '$haku[3]'></th>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=maa$urllisa'>".t("Maa")."</a>";
+		echo "<br><input type='text' size='3' name = 'haku[4]'  value = '$haku[4]'></th>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=osasto$urllisa'>".t("Osasto")."</a>";
+		echo "<br><input type='text' size='3' name = 'haku[5]'  value = '$haku[5]'></th>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=ryhma$urllisa'>".t("Ryhma")."</a>";
+		echo "<br><input type='text' size='3' name = 'haku[6]'  value = '$haku[6]'></th>";
+		echo "<th nowrap><a href='$PHP_SELF?ojarj=piiri$urllisa'>".t("Piiri")."</a>";
+		echo "<br><input type='text' size='3' name = 'haku[7]'  value = '$haku[7]'></th>";
+
+		if (isset($lisaraj_haku) and $lisaraj_haku == 'on') {
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_1$urllisa'>".t("Muuta 1")."</a>";
+			echo "<br><input type='text' size='3' name = 'haku[8]'  value = '$haku[8]'></th>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_2$urllisa'>".t("Muuta 2")."</a>";
+			echo "<br><input type='text' size='3' name = 'haku[9]'  value = '$haku[9]'></th>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_3$urllisa'>".t("Muuta 3")."</a>";
+			echo "<br><input type='text' size='3' name = 'haku[10]' value = '$haku[10]'></th>";
+			echo "<th nowrap><a href='$PHP_SELF?ojarj=flag_4$urllisa'>".t("Muuta 4")."</a>";
+			echo "<br><input type='text' size='3' name = 'haku[11]' value = '$haku[11]'></th>";
+		}
+
+		echo "<td class='back' valign='bottom'><input type='Submit' value = '".t("Etsi")."'></td></tr>";
 		echo "</form>";
 
-
-		echo "<form action = '$PHP_SELF' method = 'post'>
+		echo "<form action = '$PHP_SELF?limitti=$limitti&negaatio_haku=$negaatio_haku&lisaraj_haku=$lisaraj_haku$ulisa' method = 'post'>
 				<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
-				<input type='hidden' name='tee' value='TULOSTA'>
-				<input type='hidden' name='as_yht_tiedot' value='$as_yht_tiedot'>";
+				<input type='hidden' name='tee' value='TULOSTA'>";
 
-		while ($trow = mysql_fetch_array ($result)) {
+		while ($trow = mysql_fetch_assoc($result)) {
 
 			echo "<tr>";
 			echo "<td><input type='checkbox' name = 'otunnus[]' value = '$trow[tunnus]' CHECKED></td>";
+			echo "<td>$trow[nimi]</td>";
+			echo "<td>$trow[osoite]</td>";
+			echo "<td>$trow[postino]</td>";
+			echo "<td>$trow[postitp]</td>";
+			echo "<td>$trow[maa]</td>";
+			echo "<td>$trow[osasto]</td>";
+			echo "<td>$trow[ryhma]</td>";
+			echo "<td>$trow[piiri]</td>";
 
-			for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
-				if(strlen($trow[$i]) <= 40){
-					echo "<td nowrap>$trow[$i]</td>";
-				}
-				else {
-					echo "<td nowrap>".substr($trow[$i],0,39)."...</td>";
-				}
+
+			if (isset($lisaraj_haku) and $lisaraj_haku == 'on') {
+				echo "<td>$trow[flag_1]</td>";
+				echo "<td>$trow[flag_2]</td>";
+				echo "<td>$trow[flag_3]</td>";
+				echo "<td>$trow[flag_4]</td>";
 			}
+
 			echo "</tr>";
 		}
 
-
-		echo "<tr><td><input type='checkbox' name='otunnu' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
+		echo "<tr><td class='back'><input type='checkbox' name='otunnu' onclick='toggleAll(this);'></td><td class='back'>".t("Ruksaa kaikki")."</td></tr>";
 
 		echo "</table>";
 		echo "<br><br>";
@@ -446,8 +522,9 @@
 		$sel[$raportti] = "SELECTED";
 
 		echo "<table>";
+
 		if ($yhtiorow['kalenterimerkinnat'] == '') {
-			echo "<tr><th>".t("Asiakasmemon viesti").":</th><td><input type='text' size='20' name='arvomatikka' value='$arvomatikka'></td></tr>";
+			echo "<tr><th>".t("Asiakasmemon viesti").":</th><td><input type='text' size='20' name='asmemo_viesti' value='$asmemo_viesti'></td></tr>";
 		}
 
 		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on' $tck></td></tr>";
@@ -458,9 +535,9 @@
 				<option value='24' $sel[24]>24 ".t("Tarraa")."</option>
 				<option value='EX' $sel[EX]>".t("Excel-tiedosto")."</option>
 				</select></td></tr>";
-
 		echo "<tr><td class='back'><input type='Submit' value = '".t("Tulosta")."'></td><td class='back'></td></tr></table></form>";
 	}
 
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
+
 ?>

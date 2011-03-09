@@ -88,7 +88,7 @@
 								FROM lasku
 								WHERE yhtio	= '$kukarow[yhtio]' and
 								tunnus		= '$kukarow[kesken]' and
-								tila        in ('N', 'L', 'E', 'G')";
+								tila        in ('N', 'L', 'E', 'G', 'C')";
 					$stresult = mysql_query($query) or pupe_error($query);
 
 					$query = "	SELECT *
@@ -116,7 +116,7 @@
 					// tila pit‰‰ olla l‰hete, tilaus, ennakko tai siirtolista
 					$query = "	SELECT *
 								FROM lasku
-								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$isarivirow[otunnus]' and tila in ('N', 'L', 'E', 'G')";
+								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$isarivirow[otunnus]' and tila in ('N', 'L', 'E', 'G', 'C')";
 					$stresult = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($stresult) == 0) {
@@ -658,7 +658,7 @@
 							else {
 								$hinta = $lisataanrow["hinta"];
 							}
-							
+
 							// jos k‰ytˆss‰ on myyntihinnan poikkeava m‰‰r‰, kerrotaan hinta takaisin kuntoon.
 							if ($trow["myyntihinta_maara"] != 0) {
 								$hinta = $hinta * $trow["myyntihinta_maara"];
@@ -667,7 +667,7 @@
 							if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 								//K‰ytet‰‰n alkuper‰isen JT-rivin otsikon valuuttakurssia
 								$hinta = laskuval($hinta, $isarivirow["vienti_kurssi"]);
-							}							
+							}
 
 							require("lisaarivi.inc");
 

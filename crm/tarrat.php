@@ -381,10 +381,10 @@
 		if ($tarra_aineisto != "") {
 			$lisa .= " and tunnus in ($tarra_aineisto) ";
 		}
-		elseif (isset($limitti) and $limitti != "KAIKKI") {
+		elseif (isset($limitti) and $limitti != "KAIKKI" and (int) $limitti > 0) {
 			$limit = " LIMIT $limitti ";
 		}
-		else {
+		elseif (!isset($limitti)) {
 			$limit = " LIMIT 1000 ";
 		}
 
@@ -398,7 +398,7 @@
 					ORDER BY $jarjestys
 					$limit";
 		$result = mysql_query($query) or pupe_error($query);
-
+		
 		echo "<form action = '$PHP_SELF' method = 'post'>
 			<input type='hidden' name='asmemo_viesti' value='$asmemo_viesti'>
 			<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
@@ -411,7 +411,7 @@
 
 		echo "<table>";
 		echo "<tr><th>".t("Rivim‰‰r‰rajaus").":</th>
-				<td><select name='limitti'>
+				<td><select name='limitti' onchange='submit();'>
 				<option value='1000'   $lim[1000]>1000</option>
 				<option value='5000'   $lim[5000]>5000</option>
 				<option value='10000'  $lim[10000]>10000</option>

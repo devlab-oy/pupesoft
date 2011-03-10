@@ -23,7 +23,7 @@
 		$suores = mysql_query($suoque) or pupe_error($suoque);
 	}
 
-	if (!isset($nayta_pdf)) {
+	if (!isset($nayta_pdf) and !isset($no_head)) {
 
 		if ((!isset($ei_kelloa) or $ei_kelloa == "") and (!isset($ohje) or $ohje != "off")) {
 

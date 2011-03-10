@@ -7,20 +7,23 @@
 	$eankoodires = mysql_query($query) or pupe_error($query);
 	$eankoodirow = mysql_fetch_assoc($eankoodires);
 
-	require("pdflib/phppdflib.class.php");
+	require_once("pdflib/phppdflib.class.php");
 
 	//PDF parametrit
-	$pdf = new pdffile;
-	$pdf->set_default('margin-top', 	0);
-	$pdf->set_default('margin-bottom', 	0);
-	$pdf->set_default('margin-left', 	0);
-	$pdf->set_default('margin-right', 	0);
+	if (!isset($pdf)) {
+		$pdf = new pdffile;
+		$pdf->set_default('margin-top', 	0);
+		$pdf->set_default('margin-bottom', 	0);
+		$pdf->set_default('margin-left', 	0);
+		$pdf->set_default('margin-right', 	0);
+	}
+
 	$rectparam["width"] = 0.3;
-	
+
 	//fontit
 	$norm["height"] = 8;
 	$norm["font"] = "Helvetica";
-	
+
 	// tehdään pdf:n uusi sivu
 	$firstpage = $pdf->new_page("a4");
 
@@ -63,7 +66,7 @@
 				$pdf->draw_text(mm_pt($x), mm_pt($y - 4), $nimitys1, $firstpage, $ff_font);
 			}
 			else {
-				$pdf->draw_text(mm_pt($x), mm_pt($y), $nimitys1, $firstpage, $ff_font);		
+				$pdf->draw_text(mm_pt($x), mm_pt($y), $nimitys1, $firstpage, $ff_font);
 			}
 
 			if ($pdf->strlen($nimitys2, $norm) >= mm_pt($mm_pt)) {
@@ -76,7 +79,7 @@
 		}
 		else {
 			list($ff_string, $ff_font) = pdf_fontfit($eankoodirow['nimitys'], mm_pt($mm_pt), $pdf, $norm);
-			$pdf->draw_text(mm_pt($x), mm_pt($y), $ff_string, $firstpage, $ff_font);		
+			$pdf->draw_text(mm_pt($x), mm_pt($y), $ff_string, $firstpage, $ff_font);
 			$pdf->draw_text(mm_pt($x), mm_pt($y - 4), t("Tuotenumero")." $eankoodirow[tuoteno]", $firstpage, $norm);
 		}
 
@@ -119,15 +122,15 @@
 	list($usec, $sec) = explode(' ', microtime());
 	mt_srand((float) $sec + ((float) $usec * 100000));
 	$pdffilenimi = "/tmp/tuotetarrat_ean_pdf-".md5(uniqid(mt_rand(), true)).".pdf";
-	
+
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
-	
+
 	//Työnnetään tuo pdf vaan putkeen!
 	echo file_get_contents($pdffilenimi);
-	
+
 	//poistetaan tmp file samantien kuleksimasta...
 	system("rm -f $pdffilenimi");
 

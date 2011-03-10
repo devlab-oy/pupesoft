@@ -290,14 +290,13 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
 		// refreshataan vain jos ei ole ostoskoria mukana
 		if ($ostoskori == 0) {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2$phpnimi'>";
 			exit;
 		}
 	}
 	else {
 		die ("Sis‰‰nkirjaus ep‰onnistui!");
 	}
-
 }
 // jos sessionia ei ole ja ei olla loginissa, menn‰‰n login ruutuun ja exit...
 elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkkokauppa == '')) {

@@ -105,11 +105,11 @@
 	// jos meillä on useita toimitusosoitteita, niin ei kirjoiteta vain ekaa siihen otsikolle. se on sekavaa.. kijotetaan vain "useita"
 	if (mysql_num_rows($uusiuresult) != 1) {
 		$lasrow["toim_nimi"]     = t("Useita", $kielirow["kieli"]);
-		$lasrow["toim_nimitark"] = "";
-		$lasrow["toim_osoite"]   = "";
-		$lasrow["toim_postino"]  = "";
-		$lasrow["toim_postitp"]  = "";
-		$lasrow["toim_maa"]      = "";
+		$lasrow["toim_nimitark"] = t("Useita", $kielirow["kieli"]);
+		$lasrow["toim_osoite"]   = t("Useita", $kielirow["kieli"]);
+		$lasrow["toim_postino"]  = t("Useita", $kielirow["kieli"]);
+		$lasrow["toim_postitp"]  = t("Useita", $kielirow["kieli"]);
+		$lasrow["toim_maa"]      = $lasrow["maa"];
 	}
 
 	// haetaan maksuehdon tiedot, jotta osataan tiliöidä käteismyynti kassaan

@@ -7,17 +7,6 @@
 	$eankoodires = mysql_query($query) or pupe_error($query);
 	$eankoodirow = mysql_fetch_assoc($eankoodires);
 
-	require_once("pdflib/phppdflib.class.php");
-
-	//PDF parametrit
-	if (!isset($pdf)) {
-		$pdf = new pdffile;
-		$pdf->set_default('margin-top', 	0);
-		$pdf->set_default('margin-bottom', 	0);
-		$pdf->set_default('margin-left', 	0);
-		$pdf->set_default('margin-right', 	0);
-	}
-
 	$rectparam["width"] = 0.3;
 
 	//fontit
@@ -117,21 +106,4 @@
 			}
 		}
 	}
-
-	//keksitään uudelle failille joku varmasti uniikki nimi:
-	list($usec, $sec) = explode(' ', microtime());
-	mt_srand((float) $sec + ((float) $usec * 100000));
-	$pdffilenimi = "/tmp/tuotetarrat_ean_pdf-".md5(uniqid(mt_rand(), true)).".pdf";
-
-	//kirjoitetaan pdf faili levylle..
-	$fh = fopen($pdffilenimi, "w");
-	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-	fclose($fh);
-
-	//Työnnetään tuo pdf vaan putkeen!
-	echo file_get_contents($pdffilenimi);
-
-	//poistetaan tmp file samantien kuleksimasta...
-	system("rm -f $pdffilenimi");
-
 ?>

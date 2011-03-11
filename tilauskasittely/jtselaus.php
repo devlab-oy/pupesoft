@@ -12,7 +12,7 @@
 			echo "<font class='head'>".t("JT rivit")."</font><hr>";
 		}
 	}
-	
+
 	if(!isset($asiakasid))          $asiakasid = "";
 	if(!isset($asiakasmaa)) 		$asiakasmaa = "";
 	if(!isset($asiakasno))	 		$asiakasno = "";
@@ -46,7 +46,7 @@
 	if(!isset($vain_rivit))         $vain_rivit = "";
 	if(!isset($varastosta))  		$varastosta = "";
 	if(!isset($ytunnus)) 	 		$ytunnus = "";
-	
+
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
 	if (isset($_POST['korvataanko']) and $_POST['korvataanko'] == 'KORVAA') {
@@ -59,7 +59,7 @@
 		$tee = 'JATKA';
 		$_POST['korvataanko'] = '';
 	}
-	
+
 	if ($tee != "JT_TILAUKSELLE" and $vainvarastosta != "") {
 		$varastosta = array();
 		$varastosta[$vainvarastosta] = $vainvarastosta;
@@ -339,7 +339,7 @@
 				}
 			}
 		}
-		
+
 		if ($from_varastoon_inc == "") $tee = '';
 	}
 
@@ -832,8 +832,10 @@
 							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
-							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
+							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi,
+							tilausrivin_lisatiedot.tilausrivilinkki
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (lasku.tila != 'N' or lasku.alatila != '') $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
@@ -862,37 +864,22 @@
 					//tutkitaan onko tämä suoratoimitusrivi
 					$onkosuper = "";
 
-					if ($jtrow["tilaajanrivinro"] != 0) {
-						$query = "	SELECT *
-									FROM toimi
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus  = '$jtrow[tilaajanrivinro]'";
+					if ($jtrow["tilausrivilinkki"] > 0) {
+						$query = "	SELECT tunnus
+					   				FROM tilausrivi
+					   				WHERE yhtio = '$kukarow[yhtio]'
+									and tyyppi  = 'O'
+					   				and tunnus  = '$jtrow[tilausrivilinkki]'";
 						$sjtres = mysql_query($query) or pupe_error($query);
 
-						if (mysql_num_rows($sjtres) == 1) {
-							$sjtrow = mysql_fetch_array($sjtres);
-
-							// Tutkitaan onko tätä tuotetta jollain ostotilauksella auki tällä toimittajalla
-							// jos on niin tiedetään, että tämä on suoratoimitusrivi
-							$query = "	SELECT *
-										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus = '$sjtrow[tunnus]' and lasku.tila='O')
-										WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
-										and tilausrivi.otunnus 		= lasku.tunnus
-										and tilausrivi.tyyppi 		= 'O'
-										and tilausrivi.uusiotunnus 	= 0
-										and tilausrivi.varattu 		!= 0
-										and tilausrivi.tuoteno 		= '$jtrow[tuoteno]'";
-							$sjtres = mysql_query($query) or pupe_error($query);
-
-							if (mysql_num_rows($sjtres) > 0) {
-								$onkosuper = "ON";
-							}
+						if (mysql_num_rows($sjtres) > 0) {
+							$onkosuper = "ON";
 						}
 					}
 
 					// ei näytetä suoratoimitusrivejä, ellei $superit ole ruksattu, sillon näytetään pelkästään suoratoimitukset
-					if (($onkosuper == "" and $superit == "") or ($onkosuper == "ON" and $superit != "")) {
+					// Jos $vain_rivit muuttuja on setattu niin huomioidaan sekä normit etä suoratoimit
+					if (($onkosuper == "" and $superit == "") or ($onkosuper == "ON" and $superit != "") or $vain_rivit != "") {
 
 						$kokonaismyytavissa = 0;
 
@@ -1221,14 +1208,14 @@
 
 									echo "<tr class='aktiivi'><td valign='top' rowspan='$pknum' style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$jt_rivilaskuri</td>";
 								}
-								elseif ($jtrow["perheid"] == 0 and $jtrow["perheid2"] == 0) {									
-									$pkrow = array(0);							
+								elseif ($jtrow["perheid"] == 0 and $jtrow["perheid2"] == 0) {
+									$pkrow = array(0);
 									$pknum 		= $pkrow[0];
 									$borderlask = $pkrow[0];
-									
+
 									echo "<tr class='aktiivi'><td valign='top'>$jt_rivilaskuri</td>";
 								}
-																
+
 								$classlisa 	= "";
 								$class 		= "";
 
@@ -1432,7 +1419,7 @@
 								if (isset($loput[$tunnukset]) and $loput[$tunnukset] == 'VAKISIN') {
 									$mita_check = 'checked';
 								}
-								
+
 								if (!isset($kpl[$tunnukset])) $kpl[$tunnukset] = "";
 
 								// Riittää kaikille
@@ -1478,7 +1465,7 @@
 
 											echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI' $kaikki_check></td>";
 
-											if ($jtrow["osatoimitus"] == "") {																																				
+											if ($jtrow["osatoimitus"] == "") {
 												echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4' value='{$kpl[$tunnukset]}'></td>";
 												echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>";
 												echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>";
@@ -2189,13 +2176,13 @@
 					</SCRIPT>";
 		}
 
-		#$sel = '';
-		#if ($superit != '') $sel = 'CHECKED';
-        #
-		#echo "	<tr>
-		#		<th>".t("Näytä vain suoratoimitusrivit")."</th>
-		#		<td><input type='checkbox' name='superit' $sel></td><td class='back'>".t("Älä toimita suoratoimituksia, ellet ole 100% varma että voit niin tehdä")."!</td>
-		#		</tr>";
+		$sel = '';
+		if ($superit != '') $sel = 'CHECKED';
+
+		echo "	<tr>
+				<th>".t("Näytä vain suoratoimitusrivit")."</th>
+				<td><input type='checkbox' name='superit' $sel></td><td class='back'>".t("Älä toimita suoratoimituksia, ellet ole 100% varma että voit niin tehdä")."!</td>
+				</tr>";
 
 		echo "</table>
 

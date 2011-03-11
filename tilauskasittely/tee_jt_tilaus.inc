@@ -652,6 +652,11 @@
 								$trow["alv"] = $tsek_alehinta_alv;
 							}
 
+							// jos isärivi oli käänteinen alvi, niin laitetaan tämäkin rivi käänteiseksi
+							if ($isarivirow["alv"] >= 600) {
+								$alv = $trow["alv"] + 600;
+							}
+
 							if ($yhtiorow["alv_kasittely"] == "" and $trow["alv"] != $lisataanrow["alv"] and $lisataanrow["alv"] < 500) {
 								$hinta = sprintf('%.2f',round($lisataanrow["hinta"] / (1+$lisataanrow['alv']/100) * (1+$trow["alv"]/100), $yhtiorow['hintapyoristys']));
 							}

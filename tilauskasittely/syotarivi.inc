@@ -1,5 +1,16 @@
 <?php
 
+	if (!isset($alv)) $alv = "";
+	if (!isset($kentta)) $kentta = "";
+	if (!isset($kommentti)) $kommentti = "";
+	if (!isset($netto)) $netto = "";
+	if (!isset($perheid2)) $perheid2 = "";
+	if (!isset($rivinumero)) $rivinumero = "";
+	if (!isset($rivitunnus)) $rivitunnus = "";
+	if (!isset($toimaika)) $toimaika = "";
+	if (!isset($var)) $var = "";
+	if (!isset($varaosavirhe)) $varaosavirhe = "";
+
 	$debug = 0;
 
 	if ($debug == 1) {
@@ -164,7 +175,7 @@
 						<td valign='top' colspan='6'><input type='text' maxlength='100' size='50' name='tuotenimitys' value = '$tuotenimitys'></td></tr>";
 			}
 
-			//Jos emillä on marginaalimyyntiä niin pitää muistaa ja kertoa se myös lisääriville
+			//Jos meillä on marginaalimyyntiä/käänteinen alv niin pitää muistaa ja kertoa se myös lisääriville
 			if (isset($alv) and $alv >= 500) {
 				echo "<input type='hidden' name='alv' value='$alv'>";
 			}
@@ -278,8 +289,17 @@
 		echo "<option value='E' $chke>".t("E-Netto")."</option>";
 		echo "</select></td>";
 
+		//Jos meillä on marginaalimyyntiä/käänteinen alv 
 		if (isset($alv) and $alv >= 500) {
-			echo "<td valign='top'>".t("M.V.")."</td>";
+			echo "<td valign='top'>";
+
+			if ($alv >= 600) {
+				echo t("K.V.");
+			}
+			else {
+				echo t("M.V.");
+			}
+			echo "</td>";
 			echo "<input type='hidden' name='alv' value='$alv'>";
 		}
 		else {
@@ -289,8 +309,8 @@
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<td valign='top'></td>";
 		}
-		
-		
+
+
 		echo "<td valign='top' class='back'>";
 		echo "<input type='hidden' name='aputapa' value='$tapa'>";
 		echo "<input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";

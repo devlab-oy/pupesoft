@@ -1394,8 +1394,11 @@
 				$classx = $class;
 			}
 
-			if ($row["alv"] >= 500) {
-				echo "<td $classx align='right' valign='top' nowrap>".t("MV")."</td>";
+			if ($row["alv"] >= 600) {
+				echo "<td $classx align='right' valign='top' nowrap>".t("K.V.")."</td>";
+			}
+			elseif ($row["alv"] >= 500) {
+				echo "<td $classx align='right' valign='top' nowrap>".t("M.V.")."</td>";
 			}
 			else {
 				echo "<td $classx align='right' valign='top' nowrap>".($row["alv"] * 1)."</td>";
@@ -1509,7 +1512,10 @@
 				$aresult = mysql_query($aquery) or pupe_error($aquery);
 				$arow = mysql_fetch_array($aresult);
 
-				if ($alvrow["alv"] >= 500) {
+				if ($alvrow["alv"] >= 600) {
+					$alvi = t("K.V.");
+				}
+				elseif ($alvrow["alv"] >= 500) {
 					$alvi = t("M.V.");
 				}
 				else {
@@ -1570,7 +1576,10 @@
 					$aresult = mysql_query($aquery) or pupe_error($aquery);
 					$arow = mysql_fetch_array($aresult);
 
-					if ($alvrow["alv"] >= 500) {
+					if ($alvrow["alv"] >= 600) {
+						$alvi = t("K.V.");
+					}
+					elseif ($alvrow["alv"] >= 500) {
 						$alvi = t("M.V.");
 					}
 					else {

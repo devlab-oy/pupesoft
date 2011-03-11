@@ -248,7 +248,17 @@
 
 			if ($toim != "PIKATILAUS") {
 				if (isset($alv) and $alv >= 500) {
-					echo "<td valign='top'>".t("M.V.")."</td>";
+					
+					echo "<td valign='top'>";
+					
+					if ($alv >= 600) {
+						echo t("K.V.");						
+					}
+					else {
+						echo t("M.V.");
+					}
+
+					echo "</td>";
 					echo "<input type='hidden' name='alv' value='".$alv_array[$varirow["tuoteno"]]."'>";
 				}
 				else {

@@ -93,6 +93,7 @@
 		(mysql_field_name($result, $i) == "myynti_eu") or
 		(mysql_field_name($result, $i) == "myynti_ei_eu") or
 		(mysql_field_name($result, $i) == "myynti_marginaali") or
+		(mysql_field_name($result, $i) == "myynti_kaanteinen") or
 		(mysql_field_name($result, $i) == "osto_marginaali") or
 		(mysql_field_name($result, $i) == "myyntisaamiset") or
 		(mysql_field_name($result, $i) == "luottotappiot") or
@@ -158,6 +159,7 @@
 				elseif (mysql_field_name($result, $i) == "myynti_eu") 						$query .= " and nimi regexp 'yhteis' and nimi regexp 'myyn' ";
 				elseif (mysql_field_name($result, $i) == "myynti_ei_eu") 					$query .= " and nimi regexp 'yhteis' and nimi regexp 'myyn' ";
 				elseif (mysql_field_name($result, $i) == "myynti_marginaali") 				$query .= " and nimi regexp '(k.ytet|taide)' and nimi regexp 'myyn' ";
+				elseif (mysql_field_name($result, $i) == "myynti_kaanteinen") 				$query .= " and nimi regexp 'nteinen' and nimi regexp 'myyn' ";
 				elseif (mysql_field_name($result, $i) == "osto_marginaali") 				$query .= " and nimi regexp '(k.ytet|taide)' and nimi regexp '(osto|hankin)' ";
 				elseif (mysql_field_name($result, $i) == "myyntisaamiset") 					$query .= " and nimi regexp 'myyn' and nimi regexp 'saam' ";
 				elseif (mysql_field_name($result, $i) == "luottotappiot") 					$query .= " and nimi regexp 'luotto' and nimi regexp 'tapp' ";

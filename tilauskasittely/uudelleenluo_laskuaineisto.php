@@ -426,7 +426,7 @@
 				while ($alvrow1 = mysql_fetch_array($alvresult)) {
 
 					if ($alvrow1["alv"] >= 500) {
-						$aquery = "	SELECT tilausrivi.alv,
+						$aquery = "	SELECT '0' alv,
 									round(sum(tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
 									round(sum(0),2) alvrivihinta
 									FROM tilausrivi
@@ -541,8 +541,12 @@
 						$tilrow["toimitettuaika"] = $tilrow["toimitettuaika"];
 					}
 
-					//K‰ytetyn tavaran myynti
-					if ($tilrow["alv"] >= 500) {
+					//K‰‰nteinen arvonlis‰verovelvollisuus ja K‰ytetyn tavaran myynti
+					if ($tilrow["alv"] >= 600) {
+						$tilrow["alv"] = 0;
+						$tilrow["kommentti"] .= " K‰‰nnetty arvonlis‰verovelvollisuus.";
+					}
+					elseif ($tilrow["alv"] >= 500) {
 						$tilrow["alv"] = 0;
 						$tilrow["kommentti"] .= " Ei sis‰ll‰ v‰hennett‰v‰‰ veroa.";
 					}

@@ -10,7 +10,7 @@
 	$suoratoim_totaali = 0;
 	$suortoimvarastolisa = "";
 
-	if ($varastoista != "") {
+	if (isset($varastoista) and $varastoista != "") {
 		$suortoimvarastolisa = " AND varastopaikat.tunnus IN ($varastoista)";
 	}
 

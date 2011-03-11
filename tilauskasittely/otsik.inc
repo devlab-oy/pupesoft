@@ -2,6 +2,56 @@
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
+	if (!isset($alatila)) $alatila = "";
+	if (!isset($alehinta_alv)) $alehinta_alv = "";
+	if (!isset($alv_velvollisuus)) $alv_velvollisuus = "";
+	if (!isset($asentaja)) $asentaja = "";
+	if (!isset($asiakkaan_kohde)) $asiakkaan_kohde = "";
+	if (!isset($clearing)) $clearing = "";
+	if (!isset($eilahe)) $eilahe = "";
+	if (!isset($ercpmkk)) $ercpmkk = "";
+	if (!isset($erpcmkk)) $erpcmkk = "";
+	if (!isset($erpcmpp)) $erpcmpp = "";
+	if (!isset($erpcmvv)) $erpcmvv = "";
+	if (!isset($huolitsija)) $huolitsija = "";
+	if (!isset($jakelu)) $jakelu = "";
+	if (!isset($kantaasiakastunnus)) $kantaasiakastunnus = "";
+	if (!isset($kasinsyotetty_viite)) $kasinsyotetty_viite = "";
+	if (!isset($kasitoimehto2)) $kasitoimehto2 = "";
+	if (!isset($ketjutus)) $ketjutus = "";
+	if (!isset($kolm_nimi)) $kolm_nimi = "";
+	if (!isset($kolm_nimitark)) $kolm_nimitark = "";
+	if (!isset($kolm_osoite)) $kolm_osoite = "";
+	if (!isset($kolm_postino)) $kolm_postino = "";
+	if (!isset($kolm_postitp)) $kolm_postitp = "";
+	if (!isset($kopioitava_otsikko)) $kopioitava_otsikko = "";
+	if (!isset($kuljetus)) $kuljetus = "";
+	if (!isset($laskutuskielto)) $laskutuskielto = "";
+	if (!isset($maksuehto)) $maksuehto = "";
+	if (!isset($maksuteksti)) $maksuteksti = "";
+	if (!isset($myynti_kommentti1)) $myynti_kommentti1 = "";
+	if (!isset($netto)) $netto = "";
+	if (!isset($nimi)) $nimi = "";
+	if (!isset($oletus)) $oletus = "";
+	if (!isset($otsikolta)) $otsikolta = "";
+	if (!isset($rahtivapaa)) $rahtivapaa = "";
+	if (!isset($rivihintoja_ei_nayteta)) $rivihintoja_ei_nayteta = "";
+	if (!isset($saate)) $saate = "";
+	if (!isset($seuranta)) $seuranta = "";
+	if (!isset($sisainen)) $sisainen = "";
+	if (!isset($tnimi)) $tnimi = "";
+	if (!isset($toimitusehto2)) $toimitusehto2 = "";
+	if (!isset($voimaika_vv)) $voimaika_vv = "";
+	if (!isset($ylatila)) $ylatila = "";
+	if (!isset($yllapito_alkukk)) $yllapito_alkukk = "";
+	if (!isset($yllapito_alkupp)) $yllapito_alkupp = "";
+	if (!isset($yllapito_alkuvv)) $yllapito_alkuvv = "";
+	if (!isset($yllapito_kk)) $yllapito_kk = "";
+	if (!isset($yllapito_loppukk)) $yllapito_loppukk = "";
+	if (!isset($yllapito_loppupp)) $yllapito_loppupp = "";
+	if (!isset($yllapito_loppuvv)) $yllapito_loppuvv = "";
+	if (!isset($yllapito_pp)) $yllapito_pp = "";
+
 	// ToimehtoTarkenne javascript funktio
 	js_toimehtoTarkenne();
 
@@ -264,6 +314,9 @@
 		$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 		$meapurow = mysql_fetch_assoc($meapu);
+	}
+	else {
+		$meapurow = array("erapvmkasin" => "");
 	}
 
 	if ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {
@@ -603,18 +656,18 @@
 		}
 
 		// jos meillä on jo alatila ja tila ei muokkailla niitä!
-		if ($alatila == '') {
-			if ($srow['alatila'] != '') $alatila=$srow['alatila'];
+		if ($alatila == '' and isset($srow['alatila']) and $srow['alatila'] != '') {
+			$alatila = $srow['alatila'];
 		}
-		if ($ylatila == '') {
-			if ($srow['tila'] != '')    $ylatila=$srow['tila'];
+		if ($ylatila == '' and isset($srow['tila']) and $srow['tila'] != '') {
+			$ylatila = $srow['tila'];
 		}
 
 		// katsotaan miten vienti ja ALV käsitellään
 		$alv_velvollisuus = "";
 
 		// jos meillä on lasku menossa ulkomaille
-		if ($srow["maa"] != "" and $srow["maa"] != $yhtiorow["maa"]) {
+		if (isset($srow["maa"]) and $srow["maa"] != "" and $srow["maa"] != $yhtiorow["maa"]) {
 			// tutkitaan ollaanko siellä alv-rekisteröity
 			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$srow[maa]' and vat_numero != ''";
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
@@ -655,6 +708,17 @@
 				$extra_asiakas = mysql_fetch_assoc($result);
 				$srow["nimi"]  = $extra_asiakas["ytunnus"];
 			}
+		}
+
+		if (!isset($srow)) {
+			$srow = array(
+				"nimi" => "",
+				"nimitark" => "",
+				"osoite" => "",
+				"postino" => "",
+				"postitp" => "",
+				"liitostunnus" => 0,
+			);
 		}
 
 		echo "<table>";
@@ -725,7 +789,7 @@
 		echo "</table>";
 		echo "</td>";
 
-		if ($srow["liitostunnus"] == 0) {
+		if (!isset($srow["liitostunnus"]) or $srow["liitostunnus"] == 0) {
 			echo "</table><br>";
 			if (is_array($oletus)){
 				foreach($oletus as $o => $a) {
@@ -1016,6 +1080,8 @@
 				$apu_rahdinmaksaja = $apuro['merahti'];
 			}
 
+			$sel = array("K" => "", "V" => "");
+
 			if ($apu_rahdinmaksaja == "") $apu_rahdinmaksaja = "V";
 			$sel[$apu_rahdinmaksaja] = "selected";
 
@@ -1094,13 +1160,13 @@
 				if (isset($srow)) {
 					if ($srow['alv'] == 0) {
 						$sel_veroton 	= 'selected';
-						$sel_verollinen ='';
+						$sel_verollinen = '';
 					}
 					if ($srow['alv'] == $wtrow["selite"]) {
 						$sel_verollinen = 'selected';
 						$sel_veroton 	= '';
 					}
-				}
+					}
 
 				echo " <td>
 						<select name='alv'>
@@ -1736,6 +1802,7 @@
 			echo "</select>";
 			echo "</td>";
 
+			$jtksel = array("Y" => "", "o" => "");
 			$jtksel[$srow["jtkielto"]] = "SELECTED";
 
 			echo "<td>".t("JT-käsittely").":</td><td>
@@ -2260,7 +2327,7 @@
 
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
 
-			if ($srow["myynti_kommentti1"] != "") {
+			if (isset($srow["myynti_kommentti1"]) and $srow["myynti_kommentti1"] != "") {
 				echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[myynti_kommentti1] $srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 			}
 			else {
@@ -3071,8 +3138,19 @@
 
 			if (in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "TARJOUS", "ENNAKKO", "EXTRANET", "YLLAPITO", "MYYNTITILI", "VALMISTAASIAKKAALLE", "WEBTILAUSTARJOUS","EXTRANET_REKLAMAATIO"))) {
 
-				$sopimus_kk = implode(",", $yllapito_kk);
-				$sopimus_pp = implode(",", $yllapito_pp);
+				if (is_array($yllapito_kk)) {
+					$sopimus_kk = implode(",", $yllapito_kk);
+				}
+				else {
+					$sopimus_kk = "";
+				}
+
+				if (is_array($yllapito_pp)) {
+					$sopimus_pp = implode(",", $yllapito_pp);
+				}
+				else {
+					$sopimus_pp = "";
+				}
 
 				$query3 .= "laskun_lisatiedot SET
 							yhtio						= '$kukarow[yhtio]',

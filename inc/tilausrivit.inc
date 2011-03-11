@@ -9,7 +9,7 @@
 			}
 			
 			
-			$query = "	SELECT nimitys, tuoteno, tilkpl tilattu, kpl toimitettu, if(var='J', jt $lisavarattu, 0) jälkitoimitus, hinta, ale, rivihinta, if(alv>=500, '".t("M.V.")."', alv) alv, toimaika, kerayspvm
+			$query = "	SELECT nimitys, tuoteno, tilkpl tilattu, kpl toimitettu, if(var='J', jt $lisavarattu, 0) jälkitoimitus, hinta, ale, rivihinta, if(alv>=600, '".t("K.V.")."', if(alv>=500, '".t("M.V.")."', alv)) alv, toimaika, kerayspvm
 						FROM tilausrivi
 						WHERE uusiotunnus = '$tunnus' and yhtio='$kukarow[yhtio]'
 						ORDER BY toimaika, tunnus";
@@ -37,7 +37,7 @@
 				$lisavarattu = "";
 			}
 			
-			$query = "	SELECT nimitys, tuoteno, tilkpl tilattu, varattu toimitettu, if(var='J', jt $lisavarattu, 0) jälkitoimitus, hinta, ale, round((varattu+jt)*hinta*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, if(alv>=500, '".t("M.V.")."', alv) alv, toimaika, kerayspvm
+			$query = "	SELECT nimitys, tuoteno, tilkpl tilattu, varattu toimitettu, if(var='J', jt $lisavarattu, 0) jälkitoimitus, hinta, ale, round((varattu+jt)*hinta*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, if(alv>=600, '".t("K.V.")."', if(alv>=500, '".t("M.V.")."', alv)) alv, toimaika, kerayspvm
 						FROM tilausrivi
 						WHERE otunnus = '$tunnus' and yhtio='$kukarow[yhtio]'
 						ORDER BY toimaika, tunnus";	

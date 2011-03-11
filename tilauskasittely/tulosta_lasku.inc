@@ -584,6 +584,7 @@ if (!function_exists('rivi_original')) {
 			// Onko marginaaliverotusta
 			$laskalv = $row["alv"];
 
+			// Jos meillä on marginaalimyyntiä/käänteinen alv
 			if ($row["alv"] >= 500) {
 				$laskalv = 0;
 			}
@@ -619,7 +620,10 @@ if (!function_exists('rivi_original')) {
 		}
 
 		//Arvonlisävero
-		if ($row["alv"] >= 500) {
+		if ($row["alv"] >= 600) {
+			$pdf_lasku->draw_text(550, $kala, t("K.V.", $kieli), $thispage, $norm);
+		}
+		elseif ($row["alv"] >= 500) {
 			$pdf_lasku->draw_text(550, $kala, t("M.V.", $kieli), $thispage, $norm);
 		}
 		else {
@@ -674,8 +678,11 @@ if (!function_exists('rivi_original')) {
 			$komm = str_replace("Tilaus:", t("Tilaus", $kieli).":", $komm);
 		}
 
-		// Jos ALV no yli 500 niin tiedämme että tämä on marginaaliverotusta
-		if ($row["alv"] >= 500) {
+		// Jos meillä on marginaalimyyntiä/käänteinen alv
+		if ($row["alv"] >= 600) {
+			$komm .= "\n".t("Käänteinen arvonlisäverovelvollisuus", $kieli).".";
+		}
+		elseif ($row["alv"] >= 500) {
 			$komm .= "\n".t("Ei sisällä vähennettävää veroa", $kieli).".";
 		}
 
@@ -791,8 +798,7 @@ if (!function_exists('rivi_original')) {
 
 		$arvo += sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
 
-
-		// Onko marginaaliverotusta
+		// Jos meillä on marginaalimyyntiä/käänteinen alv
 		$laskalv = $row["alv"];
 
 		if ($row["alv"] >= 500) {
@@ -839,7 +845,7 @@ if (!function_exists('rivi_plain')) {
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
 
-			// Onko marginaaliverotusta
+			// Jos meillä on marginaalimyyntiä/käänteinen alv
 			$laskalv = $row["alv"];
 
 			if ($row["alv"] >= 500) {
@@ -886,7 +892,7 @@ if (!function_exists('rivi_plain')) {
 
 		$arvo += sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
 
-		// Onko marginaaliverotusta
+		// Jos meillä on marginaalimyyntiä/käänteinen alv
 		$laskalv = $row["alv"];
 
 		if ($row["alv"] >= 500) {
@@ -951,7 +957,7 @@ if (!function_exists('rivi_plain_2')) {
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
 
-			// Onko marginaaliverotusta
+			// Jos meillä on marginaalimyyntiä/käänteinen alv
 			$laskalv = $row["alv"];
 
 			if ($row["alv"] >= 500) {
@@ -998,7 +1004,7 @@ if (!function_exists('rivi_plain_2')) {
 
 		$arvo += sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
 
-		// Onko marginaaliverotusta
+		// Jos meillä on marginaalimyyntiä/käänteinen alv
 		$laskalv = $row["alv"];
 
 		if ($row["alv"] >= 500) {
@@ -1480,7 +1486,10 @@ if (!function_exists('alvierittely')) {
 			$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $arow["alvrivihinta"]), $norm);
 			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arow["alvrivihinta"]), 		$thispage, $norm);
 
-			if ($alvrow["alv"] >= 500) {
+			if ($alvrow["alv"] >= 600) {
+				$pdf_lasku->draw_text(550, $kala, t("K.V.", $kieli), 									$thispage, $norm);
+			}
+			elseif ($alvrow["alv"] >= 500) {
 				$pdf_lasku->draw_text(550, $kala, t("M.V.", $kieli), 									$thispage, $norm);
 			}
 			else {

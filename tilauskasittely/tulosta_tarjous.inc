@@ -1635,7 +1635,10 @@ if (!function_exists('alvierittely')) {
 			$oikpos = $pdf_tarjous->strlen(sprintf('%.2f', $arow["alvrivihinta"]), $boldi);
 			$pdf_tarjous->draw_text(498-$oikpos, $kala, sprintf('%.2f', $arow["alvrivihinta"]), $page_tarjous, $boldi);
 
-			if ($alvrow["alv"] >= 500) {
+			if ($alvrow["alv"] >= 600) {
+				$pdf_tarjous->draw_text(500, $kala, t("K.V.", $kieli), $page_tarjous, $boldi);
+			}
+			elseif ($alvrow["alv"] >= 500) {
 				$pdf_tarjous->draw_text(500, $kala, t("M.V.", $kieli), $page_tarjous, $boldi);
 			}
 			else {

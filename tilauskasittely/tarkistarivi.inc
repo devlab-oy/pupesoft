@@ -321,7 +321,7 @@
 			$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 						tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 						concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, tuote.vakkoodi
+						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, tuote.vakkoodi, '' era
 			 			FROM tuote
 						JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -331,6 +331,7 @@
 						and tuote.tuoteno = '$row[tuoteno]'
 						ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 		}
+
 		$omavarastores = mysql_query($query) or pupe_error($query);
 
 		//Tutkitaan voidaanko t‰t‰ rivi suoratoimittaa mist‰‰n varastosta

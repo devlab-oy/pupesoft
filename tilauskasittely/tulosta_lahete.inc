@@ -2358,7 +2358,10 @@ if (!function_exists('alvierittely')) {
 			$oikpos = $pdf->strlen(sprintf('%.2f', $arow["alvrivihinta"]), $boldi);
 			$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $arow["alvrivihinta"]), 		$thispage, $boldi);
 
-			if ($alvrow["alv"] >= 500) {
+			if ($alvrow["alv"] >= 600) {
+				$pdf->draw_text(473, $kala, t("K.V.", $kieli), 									$thispage, $boldi);
+			}
+			elseif ($alvrow["alv"] >= 500) {
 				$pdf->draw_text(473, $kala, t("M.V.", $kieli), 									$thispage, $boldi);
 			}
 			else {

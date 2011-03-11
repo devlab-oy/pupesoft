@@ -2775,11 +2775,11 @@ if (!function_exists("alv")) {
 		// $laskurow[ytunnus]   		--> Laskunsaajan y-tunnus
 		// $laskurow[tila]      		--> Laskun tila O=osto, muut tilat on myyntiä
 		// $laskurow[alv]       		--> Laskun otsikolla oleva alv
-		// $laskurow["valkoodi"]		--> Laskun valuutta
+		// $laskurow[valkoodi]			--> Laskun valuutta
 
 		///* Ulos *///
-		// $alv                			--> Uusi lakettu ALV
-		// $hinta           			--> Uusi lakettu kappalehinta
+		// $alv                			--> Uusi laskettu ALV
+		// $hinta           			--> Uusi laskettu kappalehinta
 
 		//yhtiön oletusalvi!
 		$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
@@ -2800,6 +2800,15 @@ if (!function_exists("alv")) {
 			}
 
 			$alv = 0; //ostotilaus --> ei alvia riveille
+		}
+		elseif ($alv >= 600) {
+			//Tässä keississä on käänteisen verotuksen
+			if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 600;											// Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
+			if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0) $alv = $trow["alv"]+600;								// Otsikolla on valittu verollinen kotimaan myynti
+			if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 600; 										// EU-vienti ytunnuksella --> alviton
+			if ($laskurow["vienti"] == "K") $alv = 600; 																	// Vienti eu:n ulkopuolelle on aina verotonta
+
+			$alv = (float) $alv;
 		}
 		elseif ($alv >= 500) {
 			//Tässä keississä on marginaalimyyntiä
@@ -8801,10 +8810,19 @@ if (!function_exists("alv_popup")) {
 			$ulos = "<select name='$nimi'>";
 			while ($vrow = mysql_fetch_array($vresult)) {
 				$sel = "";
+
 				if ($oletus == $vrow['selite']) {
 					$sel = "selected";
 				}
-				$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] %</option>";
+
+				if ($vrow["selite"] >= 600) {
+					$selite = "K.V.";
+				}
+				else {
+					$selite = "$vrow[selite] %";
+				}
+
+				$ulos .= "<option value = '$vrow[selite]' $sel>$selite</option>";
 			}
 			$ulos .= "</select>";
 		}
@@ -8870,14 +8888,22 @@ if (!function_exists("alv_popup_oletus")) {
 			if ($oletus == '') {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '' $sel>".t("Oletus");
+			$ulos .= "<option value = '' $sel>".t("Oletus")."</option>";
 
 			while ($vrow = mysql_fetch_array($vresult)) {
 				$sel = "";
 				if ($oletus == $vrow['selite']) {
 					$sel = "selected";
 				}
-				$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] %";
+				
+				if ($vrow["selite"] >= 600) {
+					$selite = "K.V.";
+				}
+				else {
+					$selite = "$vrow[selite] %";
+				}
+				
+				$ulos .= "<option value = '$vrow[selite]' $sel>$selite</option>";
 			}
 			$ulos .= "</select>";
 		}

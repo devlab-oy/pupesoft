@@ -278,7 +278,10 @@ if (!function_exists('alvierittely_lahete')) {
 			$pdf->draw_text(360, $kala, t("Arvonlisävero", $kieli)." ($arow[rivihinta]): ",	$thispage, $norm);
 			$pdf->draw_text(470, $kala, $arow["alvrivihinta"],								$thispage, $norm);
 
-			if ($alvrow["alv"] >= 500) {
+			if ($alvrow["alv"] >= 600) {
+				$pdf->draw_text(550, $kala, t("K.V."), 											$thispage, $norm);
+			}
+			elseif ($alvrow["alv"] >= 500) {
 				$pdf->draw_text(550, $kala, t("M.V."), 											$thispage, $norm);
 			}
 			else {

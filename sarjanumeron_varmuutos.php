@@ -64,7 +64,10 @@
 								if (mysql_num_rows($sarjares) == 1) {
 									$sarjarow = mysql_fetch_array($sarjares);
 
-									if($sarjarow["alv"] >= 500) {
+									if ($sarjarow["alv"] >= 600) {
+										$sarjarow["alv"] -= 600;
+									}
+									elseif ($sarjarow["alv"] >= 500) {
 										$sarjarow["alv"] -= 500;
 									}
 

@@ -36,6 +36,14 @@
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 	
+	if (!isset($rivitunnus)) $rivitunnus = "";
+	if (!isset($rivilaadittu)) $rivilaadittu = "";
+	if (!isset($kommentti)) $kommentti = "";
+	if (!isset($jaksotettu)) $jaksotettu = "";	
+	if (!isset($korvaavakielto)) $korvaavakielto = "";
+	if (!isset($orvoteikiinnosta)) $orvoteikiinnosta = "";
+	if (!isset($jtspec)) $jtspec = "";
+	
 	if (!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet) {
 			global $kukarow, $perhelisa, $kieltolisa, $lisaarivi_debug;
@@ -226,11 +234,19 @@
 	// Päivämäärien oikeellisuustsekki
 	list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $toimaika);
 
+	$aikatsk_k = (int) $aikatsk_k;
+	$aikatsk_p = (int) $aikatsk_p;
+	$aikatsk_v = (int) $aikatsk_v;
+
 	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$toimaika = date("Y-m-d");
 	}
 
 	list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $kerayspvm);
+
+	$aikatsk_k = (int) $aikatsk_k;
+	$aikatsk_p = (int) $aikatsk_p;
+	$aikatsk_v = (int) $aikatsk_v;
 
 	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$kerayspvm = date("Y-m-d");
@@ -562,7 +578,7 @@
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhjä niin vaihdetaan vain jonkun tuotteen paikkaa eikä päivitetä tuoteperheitä
 		// Tai jos muokataan tuoteperheen lasta ei mennä uudestaan tähän haaraan
-		if ($paikka == "" and $perheid == "" and $perhekielto == "") {
+		if (isset($paikka) and isset($perheid) and isset($perhekielto) and $paikka == "" and $perheid == "" and $perhekielto == "") {
 			foreach ($kaikkituotteet as $isatuoteno) {
 				$riikoko = 1;
 				$isa_array[] = $isatuoteno;
@@ -637,14 +653,14 @@
 
 					$limit = "";
 
-					if (!is_array($varasto) and $rivityyppi == 'E') {
+					if (isset($varasto) and !is_array($varasto) and $rivityyppi == 'E') {
 						$limit = " LIMIT 1 ";
 					}
 
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
+								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, '' era
 					 			FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -916,7 +932,7 @@
 			}
 
 			// Myydään tietystä varastosta
-			if (is_array($varasto) and $paikka == '') {
+			if (isset($varasto) and is_array($varasto) and $paikka == '') {
 
 				if ($lisaarivi_debug==1) echo "Halutaan myydä varastoista ", var_dump($varasto).".<br>";
 
@@ -963,7 +979,9 @@
 							$myy_kpl[$i] = $toimittamatta; // jos tällä paikalla on saldoa enemmän kun tarvitaan, otetaan sitten vaan tarvittava määrä
 						}
 
-						$myy_kpl_myyty[$i] += $myy_kpl[$i];
+						if (isset($myy_kpl_myyty[$i]) and $myy_kpl[$i]) {
+							$myy_kpl_myyty[$i] += $myy_kpl[$i];
+						}
 
 						// Status on lisätään isä ja perhe jos virheitä ei tule
 						$perheok 	= 0;
@@ -1202,6 +1220,8 @@
 								$result = mysql_query($query) or die($query.mysql_error());
 								$lisatty_tun = mysql_insert_id();
 
+								$trivtyrow = array("selite" => "");
+								
 								@include("trivityyppivalinta.inc");
 
 								$query = "	SELECT *
@@ -1209,6 +1229,14 @@
 											WHERE yhtio			 = '$kukarow[yhtio]'
 											and tilausrivitunnus = '$lisatty_tun'";
 								$lisatied_res = mysql_query($query) or pupe_error($query);
+
+								if (!isset($myy_erikoistoimitus[$indeksi])) {
+									$myy_erikoistoimitus[$indeksi] = "";
+								}
+
+								if (!isset($myy_lapsi_ein[$indeksi])) {
+									$myy_lapsi_ein[$indeksi] = "";
+								}
 
 								if (mysql_num_rows($lisatied_res) > 0) {
 									$lisatied_row = mysql_fetch_array($lisatied_res);
@@ -1393,7 +1421,7 @@
 										$result = mysql_query($query) or pupe_error($query);
 									}
 								}
-
+								
 								$rivitunnus			= "";
 								$kommentti 			= "";
 								$tuotenimitys 		= "";

@@ -28,6 +28,7 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "myynti_eu") or
 			(mysql_field_name($result, $i) == "myynti_ei_eu") or
 			(mysql_field_name($result, $i) == "myynti_marginaali") or
+			(mysql_field_name($result, $i) == "myynti_kaanteinen") or
 			(mysql_field_name($result, $i) == "osto_marginaali") or
 			(mysql_field_name($result, $i) == "myyntisaamiset") or
 			(mysql_field_name($result, $i) == "luottotappiot") or
@@ -68,6 +69,7 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "myynti_eu") or
 			(mysql_field_name($result, $i) == "myynti_ei_eu") or
 			(mysql_field_name($result, $i) == "myynti_marginaali") or
+			(mysql_field_name($result, $i) == "myynti_kaanteinen") or
 			(mysql_field_name($result, $i) == "osto_marginaali") or
 			(mysql_field_name($result, $i) == "myyntisaamiset") or
 			(mysql_field_name($result, $i) == "luottotappiot") or

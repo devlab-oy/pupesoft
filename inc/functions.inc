@@ -8895,14 +8895,14 @@ if (!function_exists("alv_popup_oletus")) {
 				if ($oletus == $vrow['selite']) {
 					$sel = "selected";
 				}
-				
+
 				if ($vrow["selite"] >= 600) {
 					$selite = "K.V.";
 				}
 				else {
 					$selite = "$vrow[selite] %";
 				}
-				
+
 				$ulos .= "<option value = '$vrow[selite]' $sel>$selite</option>";
 			}
 			$ulos .= "</select>";
@@ -10733,6 +10733,29 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 			return array(NULL, NULL);
 		}
 		return array(NULL, NULL);
+	}
+}
+
+if (!function_exists("hintapyoristys")) {
+	function hintapyoristys($luku) {
+
+		global $yhtiorow;
+
+		// k‰‰nnet‰‰n luku desimaaliluvuksi parametrin mukaisesti
+		$luku = sprintf("%.".$yhtiorow['hintapyoristys']."f", round($luku, $yhtiorow['hintapyoristys']));
+
+		// poistetaan nollat lopusta
+		$luku = rtrim($luku, "0");
+
+		// katotaan montako desimaalia luvussa on
+		$desimaaleja = strlen($luku) - strpos($luku, ".") - 1;
+
+		// jos alle kaksi desimaalia, niin n‰ytet‰‰n silti kaksi
+		if ($desimaaleja < 2) {
+			$luku = sprintf("%.02f", $luku);
+		}
+
+		return $luku;
 	}
 }
 

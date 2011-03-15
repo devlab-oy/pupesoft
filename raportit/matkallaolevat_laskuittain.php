@@ -6,28 +6,27 @@
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Matkallaolevat laskuittain")."</font><hr>";
-	
+
 	$llisa = "";
 	$alisa = "";
-	
-	if ($vv != "") { 
+
+	if ($vv != "") {
 		if (!checkdate($kk, $pp, $vv)) {
-			echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")."!</font><br><br>";	
+			echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")."!</font><br><br>";
 		}
-		else {	
-	 		$alisa = " AND tiliointi.tapvm >= '$vv-$kk-$pp' ";
+		else {
+	 		$alisa = " AND lasku.tapvm >= '$vv-$kk-$pp' ";
 		}
 	}
-	
-	if ($lvv != "") { 	
+
+	if ($lvv != "") {
 		if (!checkdate($lkk, $lpp, $lvv)) {
 			echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")."!</font><br><br>";
 		}
 		else {
-			$llisa = " AND tiliointi.tapvm < '$lvv-$lkk-$lpp' ";	
+			$llisa = " AND lasku.tapvm < '$lvv-$lkk-$lpp' ";
 		}
 	}
-	
 
 	echo "<form method='post' action='$PHP_SELF'>";
 	echo "<table>";
@@ -45,55 +44,59 @@
 
 	echo "</form>";
 	echo "<br><br>";
-	
-	
 
-	$query = "	SELECT lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, tiliointi.tapvm, sum(tiliointi.summa) matkalla 
-				from lasku 
-				join tiliointi on tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tilino = '$yhtiorow[matkalla_olevat]' and korjattu=''
-				where lasku.yhtio = '$kukarow[yhtio]' 
-				and lasku.tila in ('H', 'Y', 'M', 'P', 'Q', 'X') 
-				$alisa
-				$llisa
-				group by 1, 2, 3, 4
-				having matkalla != 0 
-				order by lasku.nimi, lasku.tapvm, lasku.summa";
-	$result = mysql_query($query) or pupe_error($query);
+	if ($alisa != "" and $llisa != "") {
 
-	if (mysql_num_rows($result) > 0) {
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>".t("Nimi")."</th>";
-		echo "<th>".t("Pvm")."</th>";
-		echo "<th>".t("Summa")."</th>";
-		echo "<th>".t("Valuutta")."</th>";					
-		echo "<th>".t("Matkalla")."</th>";
-		echo "<th>".t("Valuutta")."</th>";
-		echo "</tr>";
+		$query = "	SELECT lasku.tunnus, if(lasku.tila = 'X', '".t("Tosite")."', lasku.nimi) nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, sum(tiliointi.summa) matkalla
+					FROM lasku
+					JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = '$yhtiorow[matkalla_olevat]' and tiliointi.korjattu = '')
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND lasku.tila in ('H', 'Y', 'M', 'P', 'Q', 'X')
+					$alisa
+					$llisa
+					GROUP BY lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm
+					HAVING matkalla != 0
+					ORDER BY lasku.nimi, lasku.tapvm, lasku.summa";
+		$result = mysql_query($query) or pupe_error($query);
 
-		$summa = 0;
-		$alvsumma=array();
-		while ($row = mysql_fetch_array($result)) {
-			echo "<tr class='aktiivi'>";
-			echo "<td>$row[nimi]</td>";
-			echo "<td>".tv1dateconv($row["tapvm"])."</td>";
-			echo "<td align='right'>$row[summa]</td>";		
-			echo "<td align='right'>$row[valkoodi]</td>";				
-			echo "<td align='right'><a href='$palvelin2","muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$palvelin2","raportit/matkallaolevat_laskuittain.php'>$row[matkalla]</a></td>";
-			echo "<td align='right'>$yhtiorow[valkoodi]</td>";
+		if (mysql_num_rows($result) > 0) {
+
+			echo "<table>";
+			echo "<tr>";
+			echo "<th>".t("Nimi")."</th>";
+			echo "<th>".t("Tapvm")."</th>";
+			echo "<th>".t("Summa")."</th>";
+			echo "<th>".t("Valuutta")."</th>";
+			echo "<th>".t("Matkalla")."</th>";
+			echo "<th>".t("Valuutta")."</th>";
 			echo "</tr>";
-			$summa += $row["matkalla"];
+
+			$summa = 0;
+			$alvsumma = array();
+
+			while ($row = mysql_fetch_array($result)) {
+				echo "<tr class='aktiivi'>";
+				echo "<td>$row[nimi]</td>";
+				echo "<td>".tv1dateconv($row["tapvm"])."</td>";
+				echo "<td align='right'>$row[summa]</td>";
+				echo "<td align='right'>$row[valkoodi]</td>";
+				echo "<td align='right'><a href='$palvelin2","muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$palvelin2","raportit/matkallaolevat_laskuittain.php'>$row[matkalla]</a></td>";
+				echo "<td align='right'>$yhtiorow[valkoodi]</td>";
+				echo "</tr>";
+				$summa += $row["matkalla"];
+			}
+
+			echo "<tr>";
+			echo "<th colspan='4'>".t("Yhteens‰")."</th>";
+			echo "<th style='text-align:right;'>". sprintf("%.02f", $summa)."</td>";
+			echo "<th></th>";
+			echo "</tr>";
+
+			echo "</table>";
 		}
 
-		echo "<tr>";
-		echo "<th colspan='4'>".t("Yhteens‰")."</th>";
-		echo "<th style='text-align:right;'>". sprintf("%.02f", $summa)."</td>";
-		echo "<th></th>";
-		echo "</tr>";
-
-		echo "</table>";
 	}
-	
+
 	require ("../inc/footer.inc");
 
 ?>

@@ -5,12 +5,12 @@
 	if (!isset($konserni)) 	$konserni = '';
 	if (!isset($tee)) 		$tee = '';
 	if (!isset($oper)) 		$oper = '';
-	
+
 	echo "<font class='head'>".t("Yhdistä asiakkaita")."</font><hr>";
 
 	if ($tee == 'YHDISTA' and $jataminut != '' and count($yhdista) != '') {
 
-		// tässä on jätettävän asiakkaan tiedot kannasta. ei saa koskea kirveellä
+		// tässä on jätettävän asiakkaan tiedot
 		$jquery	= "	SELECT *
 					FROM asiakas
 					where yhtio = '$kukarow[yhtio]'
@@ -22,6 +22,8 @@
 
 		// Otetaan jätettävä pois poistettavista jos se on sinne ruksattu
 		unset($yhdista[$jataminut]);
+
+		$historia = t("Asiakkaaseen").": ". $jrow["nimi"].", ". t("ytunnus").": ". $jrow["ytunnus"].", ".t("asiakasnro").": ". $asrow["asiakasnro"] ." ".t("liitettiin seuraavat asiakkaat").": \\n";
 
 		foreach ($yhdista as $haettava) {
 
@@ -36,229 +38,607 @@
 				echo "<br>".t("Yhdistetään").": $asrow[ytunnus] $asrow[nimi] ".$asrow['osoite']." ".$asrow['postino']." ".$asrow['postitp']."<br>";
 
 				// haetaan asiakashinta ensin Ytunnuksella.
-				$hquery = "	SELECT * FROM asiakashinta WHERE ytunnus = '$asrow[ytunnus]' AND yhtio ='$kukarow[yhtio]'";
+				$hquery = "	SELECT *
+							FROM asiakashinta
+							WHERE ytunnus = '$asrow[ytunnus]'
+							AND asiakas = 0
+							AND yhtio ='$kukarow[yhtio]'";
 				$hresult = mysql_query($hquery) or pupe_error($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
-					echo t("Ei asiakashintoja y-tunnuksella").".<br>";
+					echo "<font class='error'>".t("Ei asiakashintoja y-tunnuksella")."</font><br>";
 				}
 				else {
+					echo "<font class='ok'>".t("Löytyi asiakashintoja y-tunnuksella")."</font><br>";
 					while ($ahrow = mysql_fetch_assoc($hresult)) {
-						$ahinsert = "INSERT INTO asiakashinta SET
-									yhtio         		= '$kukarow[yhtio]',
-									tuoteno          	= '$ahrow[tuoteno]',
-									ryhma            	= '$ahrow[ryhma]',
-									asiakas          	= '',
-									ytunnus          	= '$jrow[ytunnus]',
-									asiakas_ryhma    	= '$ahrow[asiakas_ryhma]',
-									asiakas_segmentti	= '$ahrow[asiakas_segmentti]',
-									piiri            	= '$ahrow[piiri]',
-									hinta            	= '$ahrow[hinta]',
-									valkoodi         	= '$ahrow[valkoodi]',
-									minkpl           	= '$ahrow[minkpl]',
-									maxkpl           	= '$ahrow[maxkpl]',
-									alkupvm          	= '$ahrow[alkupvm]',
-									loppupvm         	= '$ahrow[loppupvm]',
-									laji             	= '$ahrow[laji]',
-									laatija          	= '$kukarow[kuka]',
-									luontiaika       	= now()";
-						$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+
+						$tarksql = "SELECT *
+									FROM asiakashinta
+									where yhtio        		= '$kukarow[yhtio]'
+									and tuoteno          	= '$ahrow[tuoteno]'
+									and ryhma            	= '$ahrow[ryhma]'
+									and asiakas          	= 0
+									and ytunnus          	= '$jrow[ytunnus]'
+									and asiakas_ryhma    	= '$ahrow[asiakas_ryhma]'
+									and asiakas_segmentti	= '$ahrow[asiakas_segmentti]'
+									and piiri            	= '$ahrow[piiri]'
+									and hinta            	= '$ahrow[hinta]'
+									and valkoodi         	= '$ahrow[valkoodi]'
+									and minkpl           	= '$ahrow[minkpl]'
+									and maxkpl           	= '$ahrow[maxkpl]'
+									and alkupvm          	= '$ahrow[alkupvm]'
+									and loppupvm         	= '$ahrow[loppupvm]'
+									and laji				= '$ahrow[laji]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$ahinsert = "INSERT INTO asiakashinta SET
+										yhtio         		= '$kukarow[yhtio]',
+										tuoteno          	= '$ahrow[tuoteno]',
+										ryhma            	= '$ahrow[ryhma]',
+										asiakas          	= 0,
+										ytunnus          	= '$jrow[ytunnus]',
+										asiakas_ryhma    	= '$ahrow[asiakas_ryhma]',
+										asiakas_segmentti	= '$ahrow[asiakas_segmentti]',
+										piiri            	= '$ahrow[piiri]',
+										hinta            	= '$ahrow[hinta]',
+										valkoodi         	= '$ahrow[valkoodi]',
+										minkpl           	= '$ahrow[minkpl]',
+										maxkpl           	= '$ahrow[maxkpl]',
+										alkupvm          	= '$ahrow[alkupvm]',
+										loppupvm         	= '$ahrow[loppupvm]',
+										laji             	= '$ahrow[laji]',
+										laatija          	= '$kukarow[kuka]',
+										luontiaika       	= now()";
+							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+						}
 					}
 				}
 
 				// haetaan asiakashinta sitten asiakastunnuksella.
-				$hquery = "	SELECT * FROM asiakashinta WHERE asiakas = '$asrow[tunnus]' AND yhtio ='$kukarow[yhtio]'";
+				$hquery = "	SELECT *
+							FROM asiakashinta
+							WHERE asiakas = '$asrow[tunnus]'
+							#AND ytunnus = ''
+							AND yhtio ='$kukarow[yhtio]'";
 				$hresult = mysql_query($hquery) or pupe_error($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
-					echo t("Ei asiakashintoja asiakastunnuksella").".<br>";
+					echo "<font class='error'>".t("Ei asiakashintoja asiakastunnuksella")."</font><br>";
 				}
 				else {
+					echo "<font class='ok'>".t("Löytyi asiakashintoja asiakastunnuksella")."</font><br>";
 					while ($ahrow = mysql_fetch_assoc($hresult)) {
-						$ahinsert = "INSERT INTO asiakashinta SET
-									yhtio         		= '$kukarow[yhtio]',
-									tuoteno          	= '$ahrow[tuoteno]',
-									ryhma            	= '$ahrow[ryhma]',
-									asiakas          	= '$jrow[tunnus]',
-									ytunnus          	= '',
-									asiakas_ryhma    	= '$ahrow[asiakas_ryhma]',
-									asiakas_segmentti	= '$ahrow[asiakas_segmentti]',
-									piiri            	= '$ahrow[piiri]',
-									hinta            	= '$ahrow[hinta]',
-									valkoodi         	= '$ahrow[valkoodi]',
-									minkpl           	= '$ahrow[minkpl]',
-									maxkpl           	= '$ahrow[maxkpl]',
-									alkupvm          	= '$ahrow[alkupvm]',
-									loppupvm         	= '$ahrow[loppupvm]',
-									laji             	= '$ahrow[laji]',
-									laatija          	= '$kukarow[kuka]',
-									luontiaika       	= now()";
 
-						$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+						// Ytunnus voi olla myös setattu, mutta ei huomioida sitä tässä...
+						$tarksql = "SELECT *
+									FROM asiakashinta
+									where yhtio        		= '$kukarow[yhtio]'
+									and tuoteno          	= '$ahrow[tuoteno]'
+									and ryhma            	= '$ahrow[ryhma]'
+									and asiakas          	= '$jrow[tunnus]'
+									#and ytunnus          	= ''
+									and asiakas_ryhma    	= '$ahrow[asiakas_ryhma]'
+									and asiakas_segmentti	= '$ahrow[asiakas_segmentti]'
+									and piiri            	= '$ahrow[piiri]'
+									and hinta            	= '$ahrow[hinta]'
+									and valkoodi         	= '$ahrow[valkoodi]'
+									and minkpl           	= '$ahrow[minkpl]'
+									and maxkpl           	= '$ahrow[maxkpl]'
+									and alkupvm          	= '$ahrow[alkupvm]'
+									and loppupvm         	= '$ahrow[loppupvm]'
+									and laji				= '$ahrow[laji]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$ahinsert = "INSERT INTO asiakashinta SET
+										yhtio         		= '$kukarow[yhtio]',
+										tuoteno          	= '$ahrow[tuoteno]',
+										ryhma            	= '$ahrow[ryhma]',
+										asiakas          	= '$jrow[tunnus]',
+										ytunnus          	= '',
+										asiakas_ryhma    	= '$ahrow[asiakas_ryhma]',
+										asiakas_segmentti	= '$ahrow[asiakas_segmentti]',
+										piiri            	= '$ahrow[piiri]',
+										hinta            	= '$ahrow[hinta]',
+										valkoodi         	= '$ahrow[valkoodi]',
+										minkpl           	= '$ahrow[minkpl]',
+										maxkpl           	= '$ahrow[maxkpl]',
+										alkupvm          	= '$ahrow[alkupvm]',
+										loppupvm         	= '$ahrow[loppupvm]',
+										laji             	= '$ahrow[laji]',
+										laatija          	= '$kukarow[kuka]',
+										luontiaika       	= now()";
+							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+						}
 					}
 				}
 
-				// haetaan asiakasALENNUS ensin Ytunnuksella.
-				$hquery = "	SELECT * FROM asiakasalennus WHERE ytunnus = '$asrow[ytunnus]' AND yhtio ='$kukarow[yhtio]'";
+				// haetaan asiakasalennus ensin Ytunnuksella.
+				$hquery = "	SELECT *
+							FROM asiakasalennus
+							WHERE ytunnus = '$asrow[ytunnus]'
+							AND asiakas = 0
+							AND yhtio ='$kukarow[yhtio]'";
 				$hresult = mysql_query($hquery) or pupe_error($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
-					echo t("Ei asiakasalennuksia y-tunnuksella").".<br>";
+					echo "<font class='error'>".t("Ei asiakasalennuksia y-tunnuksella")."</font><br>";
 				}
 				else {
+					echo "<font class='ok'>".t("Löytyi asiakasalennuksia y-tunnuksella")."</font><br>";
 					while ($alrow = mysql_fetch_assoc($hresult)) {
-						$alinsert = "INSERT INTO asiakashinta SET
+
+						$tarksql = "SELECT * FROM asiakasalennus
+									where yhtio        		= '$kukarow[yhtio]'
+									and tuoteno          	= '$alrow[tuoteno]'
+									and ryhma            	= '$alrow[ryhma]'
+									and asiakas          	= 0
+									and ytunnus          	= '$jrow[ytunnus]'
+									and asiakas_ryhma    	= '$alrow[asiakas_ryhma]'
+									and asiakas_segmentti	= '$alrow[asiakas_segmentti]'
+									and piiri            	= '$alrow[piiri]'
+									and alennus            	= '$alrow[alennus]'
+									and minkpl           	= '$alrow[minkpl]'
+									and maxkpl           	= '$alrow[maxkpl]'
+									and alkupvm          	= '$alrow[alkupvm]'
+									and loppupvm         	= '$alrow[loppupvm]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$alinsert = "INSERT INTO asiakasalennus SET
 									yhtio         		= '$kukarow[yhtio]',
 									tuoteno          	= '$alrow[tuoteno]',
 									ryhma            	= '$alrow[ryhma]',
-									asiakas          	= '',
+									asiakas          	= 0,
 									ytunnus          	= '$jrow[ytunnus]',
 									asiakas_ryhma    	= '$alrow[asiakas_ryhma]',
 									asiakas_segmentti	= '$alrow[asiakas_segmentti]',
 									piiri            	= '$alrow[piiri]',
-									hinta            	= '$alrow[hinta]',
-									valkoodi         	= '$alrow[valkoodi]',
+									alennus            	= '$alrow[alennus]',
 									minkpl           	= '$alrow[minkpl]',
 									maxkpl           	= '$alrow[maxkpl]',
 									alkupvm          	= '$alrow[alkupvm]',
 									loppupvm         	= '$alrow[loppupvm]',
-									laji             	= '$alrow[laji]',
 									laatija          	= '$kukarow[kuka]',
 									luontiaika       	= now()";
-
-						$alinsertresult = mysql_query($alinsert) or pupe_error($alinsert);
+							$alinsertresult = mysql_query($alinsert) or pupe_error($alinsert);
+						}
 					}
 				}
 
-				// haetaan asiakasALENNUS sitten asiakastunnuksella.
-				$hquery = "	SELECT * FROM asiakasalennus WHERE asiakas = '$asrow[tunnus]' AND yhtio ='$kukarow[yhtio]'";
+				// haetaan asiakasalennus sitten asiakastunnuksella.
+				$hquery = "	SELECT *
+							FROM asiakasalennus
+							WHERE asiakas = '$asrow[tunnus]'
+							#AND ytunnus = ''
+							AND yhtio ='$kukarow[yhtio]'";
 				$hresult = mysql_query($hquery) or pupe_error($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
-					echo t("Ei asiakashintoja asiakastunnuksella").".<br>";
+					echo "<font class='error'>".t("Ei asiakasalennuksia asiakastunnuksella")."</font><br>";
 				}
 				else {
+					echo "<font class='ok'>".t("Löytyi asiakasalennuksia asiakastunnuksella")."</font><br>";
 					while ($alrow = mysql_fetch_assoc($hresult)) {
-						$alinsert = "INSERT INTO asiakashinta SET
-									yhtio         		= '$kukarow[yhtio]',
-									tuoteno          	= '$alrow[tuoteno]',
-									ryhma            	= '$alrow[ryhma]',
-									asiakas          	= '$jrow[tunnus]',
-									ytunnus          	= '',
-									asiakas_ryhma    	= '$alrow[asiakas_ryhma]',
-									asiakas_segmentti	= '$alrow[asiakas_segmentti]',
-									piiri            	= '$alrow[piiri]',
-									hinta            	= '$alrow[hinta]',
-									valkoodi         	= '$alrow[valkoodi]',
-									minkpl           	= '$alrow[minkpl]',
-									maxkpl           	= '$alrow[maxkpl]',
-									alkupvm          	= '$alrow[alkupvm]',
-									loppupvm         	= '$alrow[loppupvm]',
-									laji             	= '$alrow[laji]',
-									laatija          	= '$kukarow[kuka]',
-									luontiaika       	= now()";
-						$alinsertresult = mysql_query($alinsert) or pupe_error($alinsert);
+						// Ytunnus voi olla myös setattu, mutta ei huomioida sitä tässä...
+						$tarksql = "SELECT * FROM asiakasalennus
+									where yhtio        		= '$kukarow[yhtio]'
+									and tuoteno          	= '$alrow[tuoteno]'
+									and ryhma            	= '$alrow[ryhma]'
+									and asiakas          	= '$jrow[tunnus]'
+									#and ytunnus          	= ''
+									and asiakas_ryhma    	= '$alrow[asiakas_ryhma]'
+									and asiakas_segmentti	= '$alrow[asiakas_segmentti]'
+									and piiri            	= '$alrow[piiri]'
+									and alennus            	= '$alrow[alennus]'
+									and minkpl           	= '$alrow[minkpl]'
+									and maxkpl           	= '$alrow[maxkpl]'
+									and alkupvm          	= '$alrow[alkupvm]'
+									and loppupvm         	= '$alrow[loppupvm]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$alinsert = "INSERT INTO asiakasalennus SET
+										yhtio         		= '$kukarow[yhtio]',
+										tuoteno          	= '$alrow[tuoteno]',
+										ryhma            	= '$alrow[ryhma]',
+										asiakas          	= '$jrow[tunnus]',
+										ytunnus          	= '',
+										asiakas_ryhma    	= '$alrow[asiakas_ryhma]',
+										asiakas_segmentti	= '$alrow[asiakas_segmentti]',
+										piiri            	= '$alrow[piiri]',
+										alennus            	= '$alrow[alennus]',
+										minkpl           	= '$alrow[minkpl]',
+										maxkpl           	= '$alrow[maxkpl]',
+										alkupvm          	= '$alrow[alkupvm]',
+										loppupvm         	= '$alrow[loppupvm]',
+										laatija          	= '$kukarow[kuka]',
+										luontiaika       	= now()";
+							$alinsertresult = mysql_query($alinsert) or pupe_error($alinsert);
+						}
 					}
 				}
 
+				// !!!!!!!! ASIAKASKOMMENTTI OSIO !!!!!!!!!!!!
+				$hquery = "	SELECT *
+							FROM asiakaskommentti
+							WHERE yhtio ='$kukarow[yhtio]'
+							AND ytunnus = '$asrow[ytunnus]'";
+				$hresult = mysql_query($hquery) or pupe_error($hquery);
+
+				if (mysql_num_rows($hresult) == 0) {
+					echo "<font class='error'>".t("Ei löytynyt asiakaskommentteja asiakkaalta")."</font><br>";
+				}
+				else {
+					echo "<font class='ok'>".t("Löytyi asiakaskommentteja asiakkaalta")."</font><br>";
+					while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+						$tarksql = "SELECT *
+									FROM asiakaskommentti
+									where yhtio     = '$kukarow[yhtio]'
+									and	kommentti 	= '$ahrow[kommentti]'
+									and	tuoteno   	= '$ahrow[tuoteno]'
+									and	ytunnus   	= '$jrow[ytunnus]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$ahinsert = "INSERT INTO asiakaskommentti SET
+										yhtio       = '$kukarow[yhtio]',
+									 	kommentti 	= '$ahrow[kommentti]',
+									 	tuoteno   	= '$ahrow[tuoteno]',
+									 	ytunnus   	= '$jrow[ytunnus]',
+									 	laatija     = '$kukarow[kuka]',
+										luontiaika  = now()";
+							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+						}
+					}
+				}
+
+				// !!!!!!!! RAHTISOPIMUS OSIO !!!!!!!!!!!!
+				$hquery = "	SELECT *
+							FROM rahtisopimukset
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND asiakas = 0
+							AND ytunnus = '$asrow[ytunnus]'";
+				$hresult = mysql_query($hquery) or pupe_error($hquery);
+
+				if (mysql_num_rows($hresult) == 0) {
+					echo "<font class='error'>".t("Ei löytynyt rahtisopimuksia y-tunnuksella")."</font><br>";
+				}
+				else {
+					echo "<font class='ok'>".t("Löytyi rahtisopimuksia y-tunnuksella")."</font><br>";
+					while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+						$tarksql = "SELECT *
+									FROM rahtisopimukset
+									where yhtio     	= '$kukarow[yhtio]'
+									and toimitustapa	= '$ahrow[toimitustapa]'
+									and asiakas			= 0
+									and ytunnus			= '$jrow[ytunnus]'
+									and rahtisopimus	= '$ahrow[rahtisopimus]'
+									and selite			= '$ahrow[selite]'
+									and muumaksaja		= '$ahrow[muumaksaja]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$ahinsert = "INSERT INTO rahtisopimukset SET
+										yhtio       	= '$kukarow[yhtio]',
+										toimitustapa	= '$ahrow[toimitustapa]',
+										asiakas			= 0,
+										ytunnus			= '$jrow[ytunnus]',
+										rahtisopimus	= '$ahrow[rahtisopimus]',
+										selite			= '$ahrow[selite]',
+										muumaksaja		= '$ahrow[muumaksaja]',
+									 	laatija     	= '$kukarow[kuka]',
+										luontiaika  	= now()";
+							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+						}
+					}
+				}
+
+				$hquery = "	SELECT *
+							FROM rahtisopimukset
+							WHERE yhtio ='$kukarow[yhtio]'
+							#AND ytunnus = ''
+							AND asiakas = '$asrow[tunnus]'";
+				$hresult = mysql_query($hquery) or pupe_error($hquery);
+
+				if (mysql_num_rows($hresult) == 0) {
+					echo "<font class='error'>".t("Ei löytynyt rahtisopimuksia asiakastunnuksella")."</font><br>";
+				}
+				else {
+					echo "<font class='ok'>".t("Löytyi rahtisopimuksia asiakastunnuksella")."</font><br>";
+					while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+						$tarksql = "SELECT *
+									FROM rahtisopimukset
+									where yhtio     	= '$kukarow[yhtio]'
+									and toimitustapa	= '$ahrow[toimitustapa]'
+									and asiakas			= '$jrow[tunnus]'
+									#and ytunnus		= ''
+									and rahtisopimus	= '$ahrow[rahtisopimus]'
+									and selite			= '$ahrow[selite]'
+									and muumaksaja		= '$ahrow[muumaksaja]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$ahinsert = "INSERT INTO rahtisopimukset SET
+										yhtio       	= '$kukarow[yhtio]',
+										toimitustapa	= '$ahrow[toimitustapa]',
+										asiakas			= '$jrow[tunnus]',
+										ytunnus			= '',
+										rahtisopimus	= '$ahrow[rahtisopimus]',
+										selite			= '$ahrow[selite]',
+										muumaksaja		= '$ahrow[muumaksaja]',
+									 	laatija     	= '$kukarow[kuka]',
+										luontiaika  	= now()";
+							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+						}
+					}
+				}
+
+				// !!!!!!!! YHTEYSHENKILÖ OSIO !!!!!!!!!!!!
+				$hquery = "	SELECT *
+							FROM yhteyshenkilo
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND liitostunnus = '$asrow[tunnus]'
+							and tyyppi != 'T'";
+				$hresult = mysql_query($hquery) or pupe_error($hquery);
+
+				if (mysql_num_rows($hresult) == 0) {
+					echo "<font class='error'>".t("Ei löytynyt yhteyshenkilöitä asiakkaalta")."</font><br>";
+				}
+				else {
+					echo "<font class='ok'>".t("Löytyi yhteyshenkilöitä asiakkaalta")."</font><br>";
+					while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+						$tarksql = "SELECT *
+									FROM yhteyshenkilo
+									where yhtio     		= '$kukarow[yhtio]'
+									and tyyppi 				= '$ahrow[tyyppi]'
+									and liitostunnus		= '$jrow[tunnus]'
+									and nimi				= '$ahrow[nimi]'
+									and titteli				= '$ahrow[titteli]'
+									and rooli				= '$ahrow[rooli]'
+									and suoramarkkinointi	= '$ahrow[suoramarkkinointi]'
+									and email				= '$ahrow[email]'
+									and puh					= '$ahrow[puh]'
+									and gsm					= '$ahrow[gsm]'
+									and fax					= '$ahrow[fax]'
+									and www					= '$ahrow[www]'
+									and fakta				= '$ahrow[fakta]'
+									and tilausyhteyshenkilo	= '$ahrow[tilausyhteyshenkilo]'
+									and oletusyhteyshenkilo	= '$ahrow[oletusyhteyshenkilo]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$ahinsert = "INSERT INTO yhteyshenkilo SET
+										yhtio       		= '$kukarow[yhtio]',
+										tyyppi 				= '$ahrow[tyyppi]',
+										liitostunnus		= '$jrow[tunnus]',
+										nimi				= '$ahrow[nimi]',
+										titteli				= '$ahrow[titteli]',
+										rooli				= '$ahrow[rooli]',
+										suoramarkkinointi	= '$ahrow[suoramarkkinointi]',
+										email				= '$ahrow[email]',
+										puh					= '$ahrow[puh]',
+										gsm					= '$ahrow[gsm]',
+										fax					= '$ahrow[fax]',
+										www					= '$ahrow[www]',
+										fakta				= '$ahrow[fakta]',
+										tilausyhteyshenkilo	= '$ahrow[tilausyhteyshenkilo]',
+										oletusyhteyshenkilo	= '$ahrow[oletusyhteyshenkilo]',
+										laatija     		= '$kukarow[kuka]',
+										luontiaika  		= now()";
+							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+						}
+					}
+				}
+
+				// !!!!!!!! ASIAKKAAN_AVAINSANA OSIO !!!!!!!!!!!!
+				$hquery = "	SELECT *
+							FROM asiakkaan_avainsanat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND liitostunnus = '$asrow[tunnus]'";
+				$hresult = mysql_query($hquery) or pupe_error($hquery);
+
+				if (mysql_num_rows($hresult) == 0) {
+					echo "<font class='error'>".t("Ei löytynyt avainsanoja asiakkaalta")."</font><br>";
+				}
+				else {
+					echo "<font class='ok'>".t("Löytyi avainsanoja asiakkaalta")."</font><br>";
+					while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+						$tarksql = "SELECT *
+									FROM asiakkaan_avainsanat
+									where yhtio     	= '$kukarow[yhtio]'
+									and liitostunnus 	= '$jrow[tunnus]'
+									and kieli    		= '$ahrow[kieli]'
+									and laji  			= '$ahrow[laji]'
+									and avainsana		= '$ahrow[avainsana]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$ahinsert = "INSERT INTO asiakkaan_avainsanat SET
+										yhtio			= '$kukarow[yhtio]',
+										liitostunnus 	= '$jrow[tunnus]',
+										kieli    		= '$ahrow[kieli]',
+										laji  			= '$ahrow[laji]',
+										avainsana		= '$ahrow[avainsana]',
+										laatija     	= '$kukarow[kuka]',
+										luontiaika  	= now()";
+							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+						}
+					}
+				}
+
+				// !!!!!!!! ASIAKASLIITE OSIO !!!!!!!!!!!!
+				$hquery = "	SELECT *
+							FROM liitetiedostot
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND liitos = 'asiakas'
+							AND liitostunnus = '$asrow[tunnus]'";
+				$hresult = mysql_query($hquery) or pupe_error($hquery);
+
+				if (mysql_num_rows($hresult) == 0) {
+					echo "<font class='error'>".t("Ei löytynyt liitteitä asiakkaalta")."</font><br>";
+				}
+				else {
+					echo "<font class='ok'>".t("Löytyi liitteitä asiakkaalta")."</font><br>";
+					while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+						$tarksql = "SELECT *
+									FROM liitetiedostot
+									where yhtio     	= '$kukarow[yhtio]'
+									and liitos 			= '$ahrow[liitos]'
+									and liitostunnus 	= '$jrow[tunnus]'
+									and data 			= '".mysql_real_escape_string($ahrow["data"])."'
+									and selite 			= '$ahrow[selite]'
+									and kieli 			= '$ahrow[kieli]'
+									and filename 		= '$ahrow[filename]'
+									and filesize 		= '$ahrow[filesize]'
+									and filetype 		= '$ahrow[filetype]'
+									and image_width 	= '$ahrow[image_width]'
+									and image_height 	= '$ahrow[image_height]'
+									and image_bits 		= '$ahrow[image_bits]'
+									and image_channels 	= '$ahrow[image_channels]'
+									and kayttotarkoitus = '$ahrow[kayttotarkoitus]'
+									and jarjestys 		= '$ahrow[jarjestys]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$ahinsert = "INSERT INTO liitetiedostot SET
+										yhtio			= '$kukarow[yhtio]',
+										liitos 			= '$ahrow[liitos]',
+										liitostunnus 	= '$jrow[tunnus]',
+										data 			= '".mysql_real_escape_string($ahrow["data"])."',
+										selite 			= '$ahrow[selite]',
+										kieli 			= '$ahrow[kieli]',
+										filename 		= '$ahrow[filename]',
+										filesize 		= '$ahrow[filesize]',
+										filetype 		= '$ahrow[filetype]',
+										image_width 	= '$ahrow[image_width]',
+										image_height 	= '$ahrow[image_height]',
+										image_bits 		= '$ahrow[image_bits]',
+										image_channels 	= '$ahrow[image_channels]',
+										kayttotarkoitus = '$ahrow[kayttotarkoitus]',
+										jarjestys 		= '$ahrow[jarjestys]',
+										laatija     	= '$kukarow[kuka]',
+										luontiaika  	= now()";
+							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+						}
+					}
+				}
+
+				// !!!!!!!! PUUN_ALKIO OSIO !!!!!!!!!!!!
+				$hquery = "	SELECT *
+							FROM puun_alkio
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND laji = 'Asiakas'
+							AND liitos = '$asrow[tunnus]'";
+				$hresult = mysql_query($hquery) or pupe_error($hquery);
+
+				if (mysql_num_rows($hresult) == 0) {
+					echo "<font class='error'>".t("Ei löytynyt dynaamisen puun liitoksia asiakkaalta")."</font><br>";
+				}
+				else {
+					echo "<font class='ok'>".t("Löytyi dynaamisen puun liitoksia asiakkaalta")."</font><br>";
+					while ($ahrow = mysql_fetch_assoc($hresult)) {
+
+						$tarksql = "SELECT *
+									FROM puun_alkio
+									where yhtio		= '$kukarow[yhtio]'
+									and liitos 		= '$jrow[tunnus]'
+									and kieli 		= '$ahrow[kieli]'
+									and laji 		= '$ahrow[laji]'
+									and puun_tunnus = '$ahrow[puun_tunnus]'
+									and jarjestys 	= '$ahrow[jarjestys]'";
+						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$ahy = mysql_num_rows($tarkesult);
+
+						if ($ahy == 0) {
+							$ahinsert = "INSERT INTO puun_alkio SET
+										yhtio		= '$kukarow[yhtio]',
+										liitos 		= '$jrow[tunnus]',
+										kieli 		= '$ahrow[kieli]',
+										laji 		= '$ahrow[laji]',
+										puun_tunnus = '$ahrow[puun_tunnus]',
+										jarjestys 	= '$ahrow[jarjestys]',
+										laatija     = '$kukarow[kuka]',
+										luontiaika  = now()";
+							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+						}
+					}
+				}
+
+				// !!!!!! Asiakasmemot, kalenterit, siellä olevat liitetiedostot menee kalenterintunnuksen mukaan, joten niiitä ei tarvitse erikseen päivittää
+				$memohaku = "	SELECT liitostunnus, asiakas
+								FROM kalenteri
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND liitostunnus = '$asrow[tunnus]'";
+				$memores = mysql_query($memohaku) or pupe_error($memohaku);
+				$ahy = mysql_num_rows($memores);
+
+				if ($ahy != 0) {
+					echo "<font class='ok'>".t("Päivitettiin CRM-tiedot asiakkaalta")."</font><br>";
+
+					$memosql = "UPDATE kalenteri
+								SET asiakas = '$jrow[ytunnus]', liitostunnus = '$jrow[tunnus]'
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND liitostunnus = '$asrow[tunnus]'";
+					$memores = mysql_query($memosql) or pupe_error($memosql);
+				}
+				else {
+					echo "<font class='error'>".t("Ei löytynyt CRM-tietoja asiakkaalta")."</font><br>";
+				}
+
 				// !!!!!!!! LASKUTUS OSIO !!!!!!!!!!!!
-				$lquery = "	SELECT group_concat(tunnus) tunnukset FROM lasku WHERE yhtio ='$kukarow[yhtio]' AND liitostunnus = '$asrow[tunnus]' AND tila not IN ('h','y','m','p','q','x')";
+				$lquery = "	SELECT group_concat(tunnus) tunnukset FROM lasku WHERE yhtio ='$kukarow[yhtio]' AND liitostunnus = '$asrow[tunnus]' AND tila not IN ('G','O','K','H','Y','M','P','Q','X')";
 				$lresult = mysql_query($lquery) or pupe_error($lquery);
 				$lrow = mysql_fetch_assoc($lresult);
 
 				if (trim($lrow['tunnukset']) != "") {
 					$lupdate = "UPDATE lasku SET liitostunnus = '$jrow[tunnus]' WHERE yhtio ='$kukarow[yhtio]' and liitostunnus='$asrow[tunnus]' AND tunnus IN ($lrow[tunnukset])";
 					$lupdateresult = mysql_query($lupdate) or pupe_error($lupdate);
+					echo "<font class='ok'>".t("Asiakkaan laskut päivitettiin")."</font><br>";
 				}
 				else {
-					echo t("Ei löytynyt laskuja asiakkaalta").".<br>";
+					echo "<font class='error'>".t("Ei löytynyt laskuja asiakkaalta")."</font><br>";
 				}
 
-				// !!!!!!!! RAHTISOPIMUS OSIO !!!!!!!!!!!!
-				$rquery = "	SELECT group_concat(tunnus) tunnukset FROM rahtisopimukset WHERE yhtio ='$kukarow[yhtio]' AND asiakas = '$asrow[tunnus]'";
-				$rresult = mysql_query($rquery) or pupe_error($rquery);
-				$rrow = mysql_fetch_assoc($rresult);
-
-				if (trim($rrow['tunnukset']) != "") {
-					$rupdate = "UPDATE rahtisopimukset SET asiakas = '$jrow[tunnus]' WHERE yhtio ='$kukarow[yhtio]' and asiakas='$asrow[tunnus]' AND tunnus IN ($rrow[tunnukset])";
-					$rupdateresult = mysql_query($rupdate) or pupe_error($rupdate);
-				}
-				else {
-					echo t("Ei löytynyt rahtisopimuksia asiakkaalta").".<br>";
-				}
-
-				// !!!!!!!! YHTEYSHENKILÖ OSIO !!!!!!!!!!!!
-				$yquery = "	SELECT group_concat(tunnus) tunnukset FROM yhteyshenkilo WHERE yhtio ='$kukarow[yhtio]' AND liitostunnus = '$asrow[tunnus]'";
-				$yresult = mysql_query($yquery) or pupe_error($yquery);
-				$yrow = mysql_fetch_assoc($yresult);
-
-				if (trim($yrow['tunnukset']) != "") {
-					$yupdate = "UPDATE yhteyshenkilo SET liitostunnus = '$jrow[tunnus]' WHERE yhtio ='$kukarow[yhtio]' and liitostunnus='$asrow[tunnus]' AND tunnus IN ($yrow[tunnukset])";
-					$yupdateresult = mysql_query($yupdate) or pupe_error($yupdate);
-				}
-				else {
-					echo t("Ei löytynyt rahtisopimuksia asiakkaalta").".<br>";
-				}
-
-				// !!!!!!!! ASIAKASKOMMENTTI OSIO !!!!!!!!!!!!
-				$akquery = "	SELECT group_concat(tunnus) tunnukset FROM asiakaskommentti WHERE yhtio ='$kukarow[yhtio]' AND ytunnus = '$asrow[ytunnus]'";
-				$akresult = mysql_query($akquery) or pupe_error($akquery);
-				$akrow = mysql_fetch_assoc($akresult);
-
-				if (trim($akrow['tunnukset']) != "") {
-					$akupdate = "UPDATE asiakaskommentti SET ytunnus = '$jrow[ytunnus]' WHERE yhtio ='$kukarow[yhtio]' and ytunnus='$asrow[ytunnus]' AND tunnus IN ($akrow[tunnukset])";
-					$akupdateresult = mysql_query($akupdate) or pupe_error($akupdate);
-				}
-				else {
-					echo t("Ei löytynyt asiakaskommentteja asiakkaalta").".<br>";
-				}
-
-				// !!!!!!!! ASIAKASLIITE OSIO !!!!!!!!!!!!
-				$liitequery = "	SELECT group_concat(tunnus) tunnukset FROM liitetiedostot WHERE yhtio ='$kukarow[yhtio]' AND liitos='asiakas' AND liitostunnus = '$asrow[tunnus]'";
-				$liiteresult = mysql_query($liitequery) or pupe_error($liitequery);
-				$liitteet = mysql_fetch_assoc($liiteresult);
-
-				if (trim($liitteet['tunnukset']) != "") {
-					$liiteupdate = "UPDATE liitetiedostot SET liitostunnus = '$jrow[tunnus]' WHERE yhtio ='$kukarow[yhtio]' and liitos='asiakas' and tunnus IN ($liitteet[tunnukset])";
-					$liiteupdateresult = mysql_query($liiteupdate) or pupe_error($liiteupdate);
-				}
-				else {
-					echo t("Ei löytynyt liitteitä asiakkaalta").".<br>";
-				}
-
-				// !!!!!!!! ASIAKKAAN_AVAINSANA OSIO !!!!!!!!!!!!
-				$avainquery = "	SELECT group_concat(tunnus) tunnukset FROM asiakkaan_avainsanat WHERE yhtio ='$kukarow[yhtio]' AND liitostunnus = '$asrow[tunnus]'";
-				$avainresult = mysql_query($avainquery) or pupe_error($avainquery);
-				$avaimet = mysql_fetch_assoc($avainresult);
-
-				if (trim($avaimet['tunnukset']) != "") {
-					$avainupdate = "UPDATE asiakkaan_avainsanat SET liitostunnus = '$jrow[tunnus]' WHERE yhtio ='$kukarow[yhtio]' AND liitostunnus = '$asrow[tunnus]' and tunnus IN ($avaimet[tunnukset])";
-					$avainupdateresult = mysql_query($avainupdate) or pupe_error($avainupdate);
-				}
-				else {
-					echo t("Ei löytynyt avainsanoja asiakkaalta").".<br>";
-				}
-
-				// !!!!!!!! PUUN_ALKI OSIO !!!!!!!!!!!!
-				$paquery = "	SELECT group_concat(tunnus) tunnukset FROM puun_alkio WHERE yhtio ='$kukarow[yhtio]' AND liitos = '$asrow[tunnus]'";
-				$paresult = mysql_query($paquery) or pupe_error($paquery);
-				$puut = mysql_fetch_assoc($paresult);
-
-				if (trim($puut['tunnukset']) != "") {
-					$avainupdate = "UPDATE puun_alkio SET liitos = '$jrow[tunnus]' WHERE yhtio ='$kukarow[yhtio]' AND liitos = '$asrow[tunnus]' and tunnus IN ($puut[tunnukset])";
-					$avainupdateresult = mysql_query($avainupdate) or pupe_error($avainupdate);
-				}
-				else {
-					echo t("Ei löytynyt dynaamisen puun liitoksia asiakkaalta").".<br>";
-				}
-
-				// Muutetaan asiakkaan laji = 'P'
+				// Muutetaan asiakkaan laji = 'P', jätetään varmuudeksi talteen, toistaiseksi.
 				$paivitys = "UPDATE asiakas set laji='P' where yhtio ='$kukarow[yhtio]' AND tunnus = '$asrow[tunnus]'";
 				$pairesult = mysql_query($paivitys) or pupe_error($paivitys);
+
+				$historia .= "+ ".t("Asiakas").": ".$asrow["nimi"] .", ".t("ytunnus").": ".$asrow["ytunnus"] .", ".t("asiakasnro").": ". $asrow["asiakasnro"] ."\\n";
 			}
 		}
+		$kysely = "	INSERT INTO kalenteri
+					SET tapa 		= '".t("Muu syy (muista selite!)")."',
+					asiakas  		= '$jrow[ytunnus]',
+					liitostunnus 	= '$jrow[tunnus]',
+					kuka     		= '$kukarow[kuka]',
+					yhtio    		= '$kukarow[yhtio]',
+					tyyppi   		= 'Memo',
+					kentta01 		= '$historia',
+					pvmalku  		= now(),
+					laatija			= '$kukarow[kuka]',
+					luontiaika		= now()";
+		$result = mysql_query($kysely) or pupe_error($kysely);
+		$historia = "";
 	}
-	
+
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='tee' value='YHDISTA'>";
 
@@ -348,7 +728,7 @@
 	}
 
 	echo "</table><br><br>";
-	
+
 	echo "<input type='submit' value='".t("Yhdistä asiakkaat")."'>";
 	echo "</form>";
 

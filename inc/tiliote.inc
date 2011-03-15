@@ -78,6 +78,10 @@
 			else {
 				switch ($koodi) {
 					case '702' : // Maksettu jotain tililtä, etsitään tilinolla ja summalla....
+					case '720' : // Maksumääräys maksettu jotain tililtä, etsitään nimellä ja summalla....
+
+						$tehdaanselvittelytosite = TRUE;
+
 						if (strlen(trim($tilino)) > 0) {
 							echo "<font class='message'> ".t("Maksukandidaatti tilino & määrä")."</font><br>";
 
@@ -92,26 +96,16 @@
 										LIMIT 1";
 							$result = mysql_query($query) or pupe_error($query);
 
-							if (mysql_num_rows($result) == 0) {
-								echo "<font class='error'>".t("Sopivaa maksua")." $tilino & $kohdm $tilinvaluutta ".t("ei löytynyt")."!</font><br>";
-								echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
-								require "inc/teeselvittely.inc";
-							}
-							else {
-								$trow = mysql_fetch_array ($result);
+							if (mysql_num_rows($result) == 1) {
+								$trow = mysql_fetch_array($result);
 								echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>";
+
+								$tehdaanselvittelytosite = FALSE;
+
 								require "inc/teemaksutosite.inc";
 							}
 						}
-						else {
-							echo "<font class='error'>".t("Meillä ei ole tietoa millä tämä tapahtuma voidaan kohdistaa")."</font><br>";
-							echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
 
-							require "inc/teeselvittely.inc";
-						}
-						$koodi = "";
-						break;
-					case '720' : // Maksumääräys maksettu jotain tililtä, etsitään nimellä ja summalla....
 						if (strlen(trim($maksaa)) > 0) {
 
 							echo "<font class='message'>".t("Maksukandidaatti nimi & määrä")."</font><br>";
@@ -186,15 +180,14 @@
 							if (mysql_num_rows($result) == 1) {
 								$trow = mysql_fetch_array ($result);
 								echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>";
+
+								$tehdaanselvittelytosite = FALSE;
+
 								require "inc/teemaksutosite.inc";
 							}
-							else {
-								echo "<font class='error'>".t("Sopivaa maksua")." $maksaa $kohdm $tilinvaluutta ".t("ei löytynyt")."</font><br>";
-								echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
-								require "inc/teeselvittely.inc";
-							}
 						}
-						else {
+
+						if ($tehdaanselvittelytosite) {
 							echo "<font class='error'>".t("Meillä ei ole tietoa millä tämä tapahtuma voidaan kohdistaa")."</font><br>";
 							echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
 							require "inc/teeselvittely.inc";

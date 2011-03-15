@@ -92,6 +92,8 @@
 										laatija          	= '$kukarow[kuka]',
 										luontiaika       	= now()";
 							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+
+							synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
 						}
 					}
 				}
@@ -152,6 +154,8 @@
 										laatija          	= '$kukarow[kuka]',
 										luontiaika       	= now()";
 							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+
+							synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
 						}
 					}
 				}
@@ -206,6 +210,8 @@
 									laatija          	= '$kukarow[kuka]',
 									luontiaika       	= now()";
 							$alinsertresult = mysql_query($alinsert) or pupe_error($alinsert);
+
+							synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
 						}
 					}
 				}
@@ -260,6 +266,8 @@
 										laatija          	= '$kukarow[kuka]',
 										luontiaika       	= now()";
 							$alinsertresult = mysql_query($alinsert) or pupe_error($alinsert);
+
+							synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
 						}
 					}
 				}
@@ -296,6 +304,8 @@
 									 	laatija     = '$kukarow[kuka]',
 										luontiaika  = now()";
 							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+
+							synkronoi($kukarow["yhtio"], "asiakaskommentti", mysql_insert_id(), "", "");
 						}
 					}
 				}
@@ -339,6 +349,8 @@
 									 	laatija     	= '$kukarow[kuka]',
 										luontiaika  	= now()";
 							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+
+							synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id(), "", "");
 						}
 					}
 				}
@@ -381,6 +393,8 @@
 									 	laatija     	= '$kukarow[kuka]',
 										luontiaika  	= now()";
 							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+
+							synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id(), "", "");
 						}
 					}
 				}
@@ -440,6 +454,8 @@
 										laatija     		= '$kukarow[kuka]',
 										luontiaika  		= now()";
 							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+
+							synkronoi($kukarow["yhtio"], "yhteyshenkilo", mysql_insert_id(), "", "");
 						}
 					}
 				}
@@ -478,6 +494,8 @@
 										laatija     	= '$kukarow[kuka]',
 										luontiaika  	= now()";
 							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+
+							synkronoi($kukarow["yhtio"], "asiakkaan_avainsanat", mysql_insert_id(), "", "");
 						}
 					}
 				}
@@ -620,6 +638,8 @@
 				// Muutetaan asiakkaan laji = 'P', j‰tet‰‰n varmuudeksi talteen, toistaiseksi.
 				$paivitys = "UPDATE asiakas set laji='P' where yhtio ='$kukarow[yhtio]' AND tunnus = '$asrow[tunnus]'";
 				$pairesult = mysql_query($paivitys) or pupe_error($paivitys);
+
+				synkronoi($kukarow["yhtio"], "asiakas", $asrow["tunnus"], $asrow, "");
 
 				$historia .= "+ ".t("Asiakas").": ".$asrow["nimi"] .", ".t("ytunnus").": ".$asrow["ytunnus"] .", ".t("asiakasnro").": ". $asrow["asiakasnro"] ."\\n";
 			}

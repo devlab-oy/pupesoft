@@ -1437,7 +1437,7 @@
 			if (mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[6]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
 
-		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or ($toim == "avainsana" and $from != "yllapito" and $from != "positioselain"))) {
+		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito" and $from != "positioselain"))) {
 
 			if (isset($perhe) and $perhe > 0) {
 				$la_tunnus = $perhe;
@@ -1454,19 +1454,24 @@
 				$laji = "MAKSUEHTOKV";
 				$urilisa = "&haku[3]=@$tunnus";
 			}
+			elseif ($toim == "pakkaus") {
+				$laji = "PAKKAUSKV";
+				$urilisa = "&haku[3]=@$tunnus";
+			}
 			else {
 				$laji = $al_laji;
 				$urilisa = "&haku[7]=@$la_tunnus";
 			}
 
-			   if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot") and $toim == 'toimitustapa') {
-				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=$tunnus&lukitse_laji=$laji&ohje=off&lukitse_avaimeen=$la_tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
-			}
-
 			if (tarkista_oikeus("yllapito.php", "avainsana")) {
 				echo "<iframe id='avainsana_iframe' name='avainsana_iframe' src='yllapito.php?toim=avainsana&from=yllapito&lukitse_laji=$laji&ohje=off&haku[2]=@$laji$urilisa&lukitse_avaimeen=$la_tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
-
+		}
+		
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {			
+			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot") and $toim == 'toimitustapa') {
+				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
 		}
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana")) {

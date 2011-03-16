@@ -141,8 +141,9 @@
 				$suuntalava_querylisa = ", suuntalava = $suuntalavan_tunnus ";
 			}
 			else {
-				$suuntalava = hae_suuntalava($otunnus, $valittutunnus);
-				$suuntalava_querylisa = ", suuntalava = $suuntalava ";
+				// toistaiseksi ei päivitetä suuntalavaa tilausriville kohdistuksen yhteydessä automaattisesti
+				// $suuntalava = hae_suuntalava($otunnus, $valittutunnus);
+				// $suuntalava_querylisa = ", suuntalava = $suuntalava ";
 			}
 		}
 
@@ -163,11 +164,12 @@
 				echo json_encode($data);
 			}
 			else {
-				$data = array('suuntalava' => $suuntalava);
+				// toistaiseksi ei setata suuntalavaa dropdowniin kohdistuksen yhteydessä automaattisesti
+				// $data = array('suuntalava' => $suuntalava);
+				$data = array('suuntalava' => 0);
 				echo json_encode($data);
 			}
 		}
-
 	}
 	elseif ($_POST['ajax_toiminto'] == 'kohdista_koko_sivu' or $_POST['ajax_toiminto'] == 'ala_kohdista_mitaan') {
 

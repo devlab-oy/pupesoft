@@ -47,13 +47,17 @@
 
 				while ($rivi = mysql_fetch_assoc($result)) {
 
-					// saldottomat tuotteet laitetaan jälkkäriin ja skipataan loopissa
 					if ($rivi['ei_saldoa'] != '' and $rivi['perheid'] == $rivi['rivitunnus']) {
+						// saldottomat tuotteet laitetaan jälkkäriin jos ne on tuoteperheen isiä ja skipataan loopissa
 						$query = "	UPDATE tilausrivi
 									SET var = 'J'
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$rivi[rivitunnus]'";
 						$ei_saldoa_res = mysql_query($query) or pupe_error($query);
+						continue;
+					}
+					elseif ($rivi['ei_saldoa'] != '') {
+						// saldottomat tuotteet, jotka ei ole perheiden isiä, skipataan kokonaan
 						continue;
 					}
 

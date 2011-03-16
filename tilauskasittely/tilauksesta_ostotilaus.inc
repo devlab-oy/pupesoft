@@ -278,7 +278,7 @@
 
 					// tehd‰‰n rivist‰ tavallinen JT jos meill‰ oli joku tilattava rivi
 					if ($tyyppi == "KAIKKI" or $rivi["var"] == "T" or $rivi["var"] == "U") {
-						$query = "UPDATE tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tunnus]'";
+						$query = "UPDATE tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$rivi[rivitunnus]'";
 						$updre = mysql_query($query) or pupe_error($query);
 					}
 				}

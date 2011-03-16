@@ -1213,6 +1213,13 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				//	Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
 				if ($tee_osto != "") {
 					$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'KAIKKI');
+
+					// P‰ivitet‰‰n tilaukselle, ett‰ sit‰ ei osatoimiteta jos koko tilauksesta tehtiin ostotilaus
+					$query  = "	UPDATE lasku set
+								osatoimitus = 'o'
+								where yhtio = '$kukarow[yhtio]'
+								and tunnus = '$kukarow[kesken]'";
+					$result = mysql_query($query) or pupe_error($query);
 				}
 				else {
 					$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'T');

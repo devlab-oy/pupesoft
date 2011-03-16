@@ -171,4 +171,20 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
+		$ulos = "<td>";
+
+		$sel = array();
+		$sel[$trow[$i]] = " selected";
+
+		$ulos .= "<select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
+		$ulos .= "<option value='K'{$sel['K']}>".t("Kardex")."</option>";
+		$ulos .= "<option value='V'{$sel['V']}>".t("Vocollect")."</option>";
+		$ulos .= "</select>";
+
+		$ulos .= "</td>";
+		$jatko = 0;
+	}
 ?>

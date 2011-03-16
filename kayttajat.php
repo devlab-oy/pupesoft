@@ -230,6 +230,17 @@
 				$varasto = implode(",", $varasto);
 			}
 
+			if (count($keraysvyohyke) > 0) {
+				if (count($keraysvyohyke) == 1 and $keraysvyohyke[0] == 'default') {
+					unset($keraysvyohyke);
+					$keraysvyohyke = '';
+				}
+				else {
+					unset($keraysvyohyke[0]);
+					$keraysvyohyke = implode(",", $keraysvyohyke);
+				}
+			}
+
 			$query = "	INSERT into kuka
 						SET nimi 						= '$firname',
 						kuka 							= '$ktunnus',
@@ -270,6 +281,7 @@
 						profiilit 						= '$profile',
 						piirit							= '$piirit',
 						fyysinen_sijainti				= '$fyysinen_sijainti',
+						keraysvyohyke					= '$keraysvyohyke',
 						laatija							= '$kukarow[kuka]',
 						luontiaika						= now(),
 						yhtio 							= '$yhtio'";
@@ -429,6 +441,17 @@
 				$varasto = implode(",", $varasto);
 			}
 
+			if (count($keraysvyohyke) > 0) {
+				if (count($keraysvyohyke) == 1 and $keraysvyohyke[0] == 'default') {
+					unset($keraysvyohyke);
+					$keraysvyohyke = '';
+				}
+				else {
+					unset($keraysvyohyke[0]);
+					$keraysvyohyke = implode(",", $keraysvyohyke);
+				}
+			}
+
 			$query = "	UPDATE kuka
 						SET nimi 						= '$firname',
 						puhno 							= '$phonenum',
@@ -467,6 +490,7 @@
 						profiilit 						= '$profile',
 						piirit							= '$piirit',
 						fyysinen_sijainti				= '$fyysinen_sijainti',
+						keraysvyohyke					= '$keraysvyohyke',
 						muuttaja						= '$kukarow[kuka]',
 						muutospvm						= now()
 						WHERE kuka	= '$kuka'
@@ -695,11 +719,31 @@
 
 							$sel = $krow['fyysinen_sijainti'] == $terminaalialue_row['selite'] ? ' selected' : '';
 
-							echo "<option value='{$terminaalialue_row['selite']}'{$sel}>{$terminaalialue_row['selitetark']}</option>";
+							echo "<option value='{$terminaalialue_row['selite']}'{$sel}>{$terminaalialue_row['selite']}</option>";
+						}
+
+						echo "</td></tr>";
+					}		
+
+					$query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
+					$keraysvyohyke_result = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($keraysvyohyke_result) > 0) {
+
+						echo "<tr><th align='left'>",t("Keräysvyöhyke"),":</th><td>";
+
+						echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
+
+						while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
+
+							$checked = in_array($keraysvyohyke_row['tunnus'], explode(",", $krow['keraysvyohyke'])) ? ' checked' : '';
+
+							echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$checked}>{$keraysvyohyke_row['nimitys']}<br />";
 						}
 
 						echo "</td></tr>";
 					}
+
 				}
 				else {
 					$sel2 = $sel1 = "";

@@ -2536,20 +2536,32 @@
 
 	if (mysql_field_name($result, $i) == "varastopaikkojen_maarittely") {
 
-		$tyyppi = 0;
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		// $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-		//
-		// $sel = array();
-		// $sel[$trow[$i]] = " selected";
-		//
-		// $ulos .= "<option value = ''>".t("Varastopaikkoja, ja niiden tilavuuksia, ei tarvitse m‰‰ritell‰ etuk‰teen")."</option>";
-		// $ulos .= "<option value = 'M'{$sel['M']}>".t("Varastopaikat, ja niiden tilavuudet, t‰ytyy m‰‰ritell‰ etuk‰teen")."</option>";
-		// $ulos .= "</select></td>";
-		//
-		// $jatko = 0;
+		$sel = array();
+		$sel[$trow[$i]] = " selected";
+		
+		$ulos .= "<option value = ''>".t("Varastopaikkoja, ja niiden tilavuuksia, ei tarvitse m‰‰ritell‰ etuk‰teen")."</option>";
+		$ulos .= "<option value = 'M'{$sel['M']}>".t("Varastopaikat, ja niiden tilavuudet, t‰ytyy m‰‰ritell‰ etuk‰teen")."</option>";
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "suuntalavat") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = " selected";
+
+		$ulos .= "<option value = ''>".t("Suuntalavoja ei k‰ytet‰ tuloutuksessa")."</option>";
+		$ulos .= "<option value = 'S'{$sel['S']}>".t("Suuntalavoja k‰ytet‰‰n tuloutuksessa")."</option>";	
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "myyntiera_pyoristys" ) {
 
 		$sela = $selb = "";

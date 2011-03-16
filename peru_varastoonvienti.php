@@ -286,9 +286,19 @@
 					$korjres = mysql_query($query) or pupe_error($query);
 
 					if(mysql_num_rows($korjres) == 0) {
+
+						if ($yhtiorow['suuntalavat'] == 'S' and $rivirow['suuntalava'] > 0) {
+							// otetaan suuntalava pois purettu-tilasta
+							$query = "	UPDATE suuntalavat SET
+										tila = ''
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$rivirow['suuntalava']}'";
+							$suuntalava_korjres = mysql_query($query) or pupe_error($query);
+						}
+
 						// P‰ivitet‰‰n alkuper‰inen ostorivi
 						$query = "	UPDATE tilausrivi
-									set varattu=kpl, kpl=0, laskutettuaika='0000-00-00'
+									set varattu=kpl, kpl=0, laskutettuaika='0000-00-00', suuntalava=0
 									where yhtio = '$kukarow[yhtio]'
 									and tunnus = '$rivirow[tunnus]'";
 						$korjres = mysql_query($query) or pupe_error($query);

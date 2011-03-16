@@ -33,8 +33,7 @@
 	if (mysql_field_name($result, $i) == "keraysjarjestys") {
 		$ulos = "<td>";
 
-		$sel = array();
-		$sel[$trow[$i]] = " selected";
+		$sel = array_merge(array('P' => '', 'V' => '', 'I' => ''), array_fill_keys(explode(",", $trow[$i]), " selected"));
 
 		$ulos .= "<select name='{$nimi}'>";
 		$ulos .= "<option value='P'{$sel['P']}>".t("Tuotteen paino")."</option>";
@@ -49,15 +48,16 @@
 	if (mysql_field_name($result, $i) == "terminaalialue") {
 		$ulos = "<td>";
 
-		$sel = array();
-		$sel[$trow[$i]] = " selected";
-
+		$sel = '';
 		$ulos .= "<select name='{$nimi}'>";
 
 		$terminaalialue_result = t_avainsana("TERMINAALIALUE");
 
 		while ($terminaalialue_row = mysql_fetch_assoc($terminaalialue_result)) {
-			$ulos .= "<option value='{$terminaalialue_row['selite']}'{$sel[$terminaalialue_row['selite']]}>{$terminaalialue_row['selite']}</option>";
+
+			$sel = $terminaalialue_row['selite'] != $trow[$i] ? '' : ' selected';
+
+			$ulos .= "<option value='{$terminaalialue_row['selite']}'{$sel}>{$terminaalialue_row['selite']}</option>";
 		}
 
 		$ulos .= "</select></td>";
@@ -67,8 +67,7 @@
 	if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
 		$ulos = "<td>";
 
-		$sel = array();
-		$sel[$trow[$i]] = " selected";
+		$sel = array_merge(array('K' => '', 'V' => ''), array_fill_keys(explode(",", $trow[$i]), " selected"));
 
 		$ulos .= "<select name='{$nimi}'>";
 		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
@@ -83,15 +82,34 @@
 	if (mysql_field_name($result, $i) == "yhdistelysaanto") {
 		$ulos = "<td>";
 
-		$sel = array();
-		$sel[$trow[$i]] = " selected";
+		$sel = array_merge(array('S' => '', 'K' => '', 'P' => ''), array_fill_keys(explode(",", $trow[$i]), " checked='checked'"));
 
-		$ulos .= "<select name='{$nimi}'>";
-		$ulos .= "<option value=''>".t("Saa olla useita asiakkaita")."</option>";
-		$ulos .= "<option value='K'{$sel['K']}>".t("Keräyserän alustoja voi olla useissa lähdöissä")."</option>";
-		$ulos .= "<option value='P'{$sel['P']}>".t("Alustoissa voi olla useita prioriteettejä")."</option>";
-		$ulos .= "</select>";
+		$ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
+
+		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='S'{$sel['S']}>".t("Saa olla useita asiakkaita")."<br />";
+		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='K'{$sel['K']}>".t("Keräyserän alustoja voi olla useissa lähdöissä")."<br />";
+		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='P'{$sel['P']}>".t("Alustoissa voi olla useita prioriteettejä")."<br />";
 
 		$ulos .= "</td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "varasto") {
+		$ulos = "<td><select name='{$nimi}'>";
+	
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'";
+		$varasto_res = mysql_query($query) or pupe_error($query);
+	
+		while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
+	
+			$sel = $varasto_row['tunnus'] == $trow[$i] ? ' selected' : '';
+	
+			$ulos .= "<option value='{$varasto_row['tunnus']}'{$sel}>{$varasto_row['nimitys']}</option>";
+		}
+	
+		$ulos .= "</select></td>";
+	
 		$jatko = 0;
 	}

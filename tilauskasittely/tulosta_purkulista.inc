@@ -188,6 +188,24 @@
 		$mitkalisa = "";
 	}
 
+	if ($yhtiorow['suuntalavat'] == 'S' and is_array($suuntalavat) and count($suuntalavat) > 0) {
+		$selectlisa = ", suuntalavat.sscc ";
+		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus IN (".implode(",", $suuntalavat).") AND suuntalavat.tunnus = tilausrivi.suuntalava)
+		 					JOIN varaston_hyllypaikat ON (	varaston_hyllypaikat.yhtio = tilausrivi.yhtio 
+															AND varaston_hyllypaikat.hyllyalue = tilausrivi.hyllyalue 
+															AND varaston_hyllypaikat.hyllynro = tilausrivi.hyllynro
+															AND varaston_hyllypaikat.hyllyvali = tilausrivi.hyllyvali
+															AND varaston_hyllypaikat.hyllytaso = tilausrivi.hyllytaso)";
+		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus IN (".implode(",", $suuntalavat).") AND suuntalavat.tunnus = tilausrivi.suuntalava) ";
+		$orderlisa = " suuntalavat.sscc, varaston_hyllypaikat.indeksi, ";
+		$orderlisa = " suuntalavat.sscc, ";
+	}
+	else {
+		$selectlisa = "";
+		$suuntalavajoin = "";
+		$orderlisa = "";
+	}
+
 	if ($mista == "vastaanota" and $vainlistaus == '') {
 		$query = "	SELECT tuote.tuoteno, tuote.sarjanumeroseuranta, tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso,
 					tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta,
@@ -212,18 +230,20 @@
 					ORDER BY sorttauskentta, tuote.tuoteno";
 	}
 	else {
-		$query = "	SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, hyllyalue, hyllynro, hyllyvali, tuote.sarjanumeroseuranta,
-					hyllytaso, tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta, if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin,
+		$query = "	SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tuote.sarjanumeroseuranta,
+					tilausrivi.hyllytaso, tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta, if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin,
 					round(if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(tilausrivi.varattu+tilausrivi.kpl),2) toimmaara,
 					tuote.nimitys, tilausrivi.perheid2, tilausrivi.kommentti, tilausrivi.otunnus, tilausrivi.tunnus,
 					$sorttauskentta
+					$selectlisa
 					FROM tilausrivi
+					$suuntalavajoin
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno $eanlisa
 					JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 					WHERE tilausrivi.uusiotunnus = '$otunnus'
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					$mitkalisa
-					ORDER BY sorttauskentta, tilausrivi.tunnus";
+					ORDER BY $orderlisa sorttauskentta, tilausrivi.tunnus";
 	}
 
 	$result = mysql_query($query) or pupe_error($query);
@@ -234,16 +254,56 @@
 	$sumarum	= 0;
 	$apukala 	= 0;
 	$ekakala	= '';
+	$edellinen_sscc = '';
 
 	$firstpage = alku_purku();
 
+	if ($yhtiorow['suuntalavat'] == 'S' and trim($suuntalavajoin) != '') {
+
+		$row = mysql_fetch_assoc($result);
+
+		$p["height"] = 10;
+		$p["font"] = "Times-Roman";
+
+		$pieni["height"] = 8;
+		$pieni["font"] = "Times-Roman";
+
+		$pdf->draw_text(185, 545, "SSCC-".t("koodi", $kieli), 					$firstpage, $pieni);
+		$pdf->draw_text(185, 535, $row['sscc'], 								$firstpage, $p);
+
+		$edellinen_sscc = $row['sscc'];
+
+		mysql_data_seek($result, 0);
+	}
+
 	while ($row = mysql_fetch_array($result)) {
 
-		if ($yhtiorow['viivakoodi_purkulistaan'] == 'K' and $mista != "vastaanota") {
+		if ($yhtiorow['suuntalavat'] == 'S' and $edellinen_sscc != $row['sscc']) {
+			$pdf->draw_text(185, 545, "SSCC-".t("koodi", $kieli), 					$firstpage, $pieni);
+			$pdf->draw_text(185, 535, $edellinen_sscc, 								$firstpage, $p);
+
+			$sivu++;
+			$firstpage = alku_purku();
+			$kala = 500;
+
+			$pdf->draw_text(185, 545, "SSCC-".t("koodi", $kieli), 					$firstpage, $pieni);
+			$pdf->draw_text(185, 535, $row['sscc'], 								$firstpage, $p);
+		}
+		elseif ($yhtiorow['viivakoodi_purkulistaan'] == 'K' and $mista != "vastaanota") {
 			if ($kala < 50) {
+				if ($yhtiorow['suuntalavat'] == 'S' and $edellinen_sscc == $row['sscc']) {
+					$pdf->draw_text(185, 545, "SSCC-".t("koodi", $kieli), 					$firstpage, $pieni);
+					$pdf->draw_text(185, 535, $row['sscc'], 								$firstpage, $p);
+				}
+
 				$sivu++;
 				$firstpage = alku_purku();
 				$kala = 500;
+
+				if ($yhtiorow['suuntalavat'] == 'S') {
+					$pdf->draw_text(185, 545, "SSCC-".t("koodi", $kieli), 					$firstpage, $pieni);
+					$pdf->draw_text(185, 535, $row['sscc'], 								$firstpage, $p);
+				}
 			}
 		}
 		else {
@@ -253,7 +313,6 @@
 				$kala = 500;
 			}
 		}
-
 
 		$query = "	SELECT saldo, hyllyalue, hyllynro, hyllyvali, hyllytaso
 					FROM tuotepaikat
@@ -499,6 +558,8 @@
 		}
 
 		$kala -= 7;
+
+		$edellinen_sscc = $row['sscc'];
 
 		$sumarum += $row["varattu"];
 		$total   += $row["hinta"];

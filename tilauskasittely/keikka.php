@@ -1,7 +1,13 @@
 <?php
 
+$pupe_DataTables = 'keikka';
+
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 	require ("../inc/parametrit.inc");
+}
+
+if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
+	require ("../inc/keikan_toiminnot.inc");
 }
 
 if ($livesearch_tee == "TUOTEHAKU") {
@@ -292,19 +298,60 @@ if ($toiminto == "tulosta") {
 	if (count($komento) == 0) {
 		$tulostimet = array('Purkulista','Tuotetarrat','Tariffilista');
 
+		if ($yhtiorow['suuntalavat'] == 'S' and $otunnus != '') {
+			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND uusiotunnus = '{$otunnus}'
+						AND tyyppi = 'O'
+						AND suuntalava != 0
+						AND kpl != 0";
+			$check_result = mysql_query($query) or pupe_error($query);
+			$check_row = mysql_fetch_assoc($check_result);
+
+			if (trim($check_row['tunnukset']) != '') {
+				$tulostimet[] = "Vastaanottoraportti";
+			}
+
+			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND uusiotunnus = '{$otunnus}'
+						AND tyyppi = 'O'
+						AND suuntalava != 0
+						AND kpl = 0";
+			$check_result = mysql_query($query) or pupe_error($query);
+			$check_row = mysql_fetch_assoc($check_result);
+
+			if (trim($check_row['tunnukset']) != '') {
+				$tulostimet[] = "Tavaraetiketti";
+			}
+		}
+
 		echo "<font class='message'>".t("Keikka")." $laskurow[laskunro] $laskurow[nimi]</font><br><br>";
 
 		require('../inc/valitse_tulostin.inc');
 	}
 
-	if ($komento["Purkulista"] != '')
-		require('tulosta_purkulista.inc');
+	if ($komento["Purkulista"] != '') {
+		require('tulosta_purkulista.inc');		
+	}
 
-	if ($komento["Tuotetarrat"] != '')
+	if ($komento["Tuotetarrat"] != '') {
 		require('tulosta_tuotetarrat.inc');
+	}
 
-	if ($komento["Tariffilista"] != '')
+	if ($komento["Tariffilista"] != '') {
 		require('tulosta_tariffilista.inc');
+	}
+
+	if ($komento["Vastaanottoraportti"] != '') {
+		require('tulosta_vastaanottoraportti.inc');
+	}
+
+	if ($komento["Tavaraetiketti"] != '') {
+		require('tulosta_tavaraetiketti.inc');
+	}
 
 	// takaisin selaukseen
 	$toiminto = "";
@@ -328,6 +375,62 @@ if ($toiminto == "kululaskut") {
 	require('kululaskut.inc');
 }
 
+if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' and trim($suuntalavan_tunnus) != '' and trim($koko_suuntalava) == 'X') {
+	if ((isset($suuntalavan_hyllyalue) and trim($suuntalavan_hyllyalue) == '') or (isset($suuntalavan_hyllypaikka) and trim($suuntalavan_hyllypaikka) == '')) {
+		echo "<font class='error'>",t("Hyllyalue oli tyhjä"),"!</font><br />";
+		$toiminto = 'suuntalavat';
+		$tee = 'vie_koko_suuntalava';
+	}
+	else {
+		$vietiinko_koko_suuntalava = '';
+
+		if (trim($suuntalavan_hyllypaikka) != '') {
+			list($suuntalavan_hyllyalue, $suuntalavan_hyllynro, $suuntalavan_hyllyvali, $suuntalavan_hyllytaso) = explode("#", $suuntalavan_hyllypaikka);
+		}
+
+		$suuntalavan_hyllyalue = mysql_real_escape_string($suuntalavan_hyllyalue);
+		$suuntalavan_hyllynro = mysql_real_escape_string($suuntalavan_hyllynro);
+		$suuntalavan_hyllyvali = mysql_real_escape_string($suuntalavan_hyllyvali);
+		$suuntalavan_hyllytaso = mysql_real_escape_string($suuntalavan_hyllytaso);
+
+		$query = "	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso
+					FROM tilausrivi
+					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.uusiotunnus = '{$otunnus}'
+					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.kpl = 0
+					AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
+		$koko_suuntalava_result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($koko_suuntalava_result) > 0) {
+			$query = "	UPDATE tilausrivi 
+						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
+						SET tilausrivi.hyllyalue = '{$suuntalavan_hyllyalue}',
+						tilausrivi.hyllynro = '{$suuntalavan_hyllynro}',
+						tilausrivi.hyllyvali = '{$suuntalavan_hyllyvali}',
+						tilausrivi.hyllytaso = '{$suuntalavan_hyllytaso}'
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.uusiotunnus = '{$otunnus}'
+						AND tilausrivi.tyyppi = 'O'
+						AND tilausrivi.kpl = 0
+						AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
+			$koko_suuntalava_result = mysql_query($query) or pupe_error($query);
+
+			echo "<br />",t("Päivitettiin suuntalavan tuotteet paikalle")," {$suuntalavan_hyllyalue} {$suuntalavan_hyllynro} {$suuntalavan_hyllyvali} {$suuntalavan_hyllytaso}<br />";
+			$vietiinko_koko_suuntalava = 'joo';
+		}
+	}
+}
+
+if ($toiminto == 'suuntalavat') {
+	require('suuntalavat.inc');
+}
+
+if ($toiminto == 'tulosta_sscc') {
+	require('tulosta_sscc.inc');
+}
+
 // tehdään errorichekkejä jos on varastoonvienti kyseessä
 if ($toiminto == "kaikkiok" or $toiminto == "kalkyyli") {
 	$query = "	SELECT nimi
@@ -347,6 +450,23 @@ if ($toiminto == "kaikkiok" or $toiminto == "kalkyyli") {
 			echo "<font class='error'>".t("VIRHE: Keikkaa ei voi viedä varastoon.")." ".sprintf(t("Käyttäjällä %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
 		}
 		$varastoerror = 1;
+	}
+
+ 	if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S') {
+		$query = "	SELECT GROUP_CONCAT(suuntalava) suuntalavat
+					FROM tilausrivi
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND uusiotunnus = '{$otunnus}'
+					AND tyyppi = 'O'
+					AND kpl = 0
+					AND suuntalava != 0";
+		$suuntalavat_chk_result = mysql_query($query) or pupe_error($query);
+		$suuntalavat_chk_row = mysql_fetch_assoc($suuntalavat_chk_result);
+
+		if (trim($suuntalavat_chk_row['suuntalavat']) == '') {
+			echo "<font class='error'>",t("VIRHE: Keikkaa ei voi viedä varastoon.")," ",t("Suuntalava on pakollinen"),"!</font><br />";
+			$varastoerror = 1;
+		}
 	}
 
 	if ($varastoerror != 0) {
@@ -450,6 +570,66 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	echo "<td><input type='text' name='keikka' value='$keikka'></td>";
 	echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 	echo "</tr>";
+
+	if ($yhtiorow['varastopaikkojen_maarittely'] == 'M') {
+
+		$query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
+		$keraysvyohyke_result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($keraysvyohyke_result) > 0) {
+			echo "<tr>";
+			echo "<th>",t("Rajaa laatijaa keräysvyöhykkeellä"),"</th>";
+			echo "<td><select name='keraysvyohyke' onchange='submit();'>";
+			echo "<option value=''>",t("Valitse"),"</option>";
+
+			while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
+
+				$sel = $keraysvyohyke_row['tunnus'] == $keraysvyohyke ? ' selected' : '';
+
+				echo "<option value='{$keraysvyohyke_row['tunnus']}'{$sel}>{$keraysvyohyke_row['nimitys']}</option>";
+			}
+
+			echo "</select></td>";
+			echo "</tr>";
+		}
+
+		echo "<tr>";
+		echo "<th>",t("Etsi keikan laatijalla"),"</th>";
+
+		$kukalisa = trim($keraysvyohyke) != '' ? " and keraysvyohyke = '{$keraysvyohyke}' " : '';
+
+		$query = "	SELECT kuka, nimi
+					FROM kuka
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND extranet = ''
+					$kukalisa
+					ORDER BY nimi";
+		$keikan_laatija_res = mysql_query($query) or pupe_error($query);
+	
+		echo "<td><select name='keikan_laatija' onchange='submit();'>";
+		echo "<option value=''>",t("Valitse"),"</option>";
+
+		while ($keikan_laatija_row = mysql_fetch_assoc($keikan_laatija_res)) {
+
+			$sel = $keikan_laatija_row['kuka'] == $keikan_laatija ? ' selected' : '';
+
+			echo "<option value='{$keikan_laatija_row['kuka']}'{$sel}>{$keikan_laatija_row['nimi']} ({$keikan_laatija_row['kuka']})</option>";
+		}
+
+		echo "</select></td>";
+		echo "</tr>";
+	}
+
+	if ($yhtiorow['suuntalavat'] == 'S') {
+		echo "<tr>";
+		echo "<th>",t("Näytä vain keikat, joilla on siirtovalmiita suuntalavoja"),"</th>";
+
+		$chk = trim($nayta_siirtovalmiit_suuntalavat) != '' ? ' checked' : '';
+
+		echo "<td><input type='checkbox' name='nayta_siirtovalmiit_suuntalavat' {$chk} onchange='submit();'></td>";
+		echo "</tr>";
+	}
+
 	echo "</form>";
 	echo "</table>";
 
@@ -462,15 +642,30 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	$vaihtoomaisuuslaskujayhteensa = 0;
 	$kululaskujayhteensa = 0;
 
+	$laatijalisa = '';
+
+	if (trim($keikan_laatija) != '') {
+		$laatijalisa = " and lasku.laatija = '$keikan_laatija' ";
+	}
+
+	$suuntalavajoin = '';
+
+	if ($yhtiorow['suuntalavat'] == 'S' and trim($nayta_siirtovalmiit_suuntalavat) != '') {
+		$suuntalavajoin = " JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S') ";
+	}
+
 	// näytetään millä toimittajilla on keskeneräisiä keikkoja
 	$query = "	SELECT ytunnus, nimi, nimitark, osoite, postitp, swift, group_concat(distinct if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(distinct lasku.tunnus) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat,
 				round(sum(tilausrivi.rivihinta),2) varastossaarvo, lasku.laskunro
-				FROM lasku
+				FROM lasku USE INDEX (yhtio_tila_mapvm)
 				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
-				WHERE lasku.yhtio = '$kukarow[yhtio]' and
-				lasku.tila = 'K' and
-				lasku.alatila = '' and
-				lasku.vanhatunnus = 0
+				$suuntalavajoin
+				WHERE lasku.yhtio = '$kukarow[yhtio]' 
+				and lasku.tila = 'K' 
+				and lasku.alatila = '' 
+				and lasku.vanhatunnus = 0 
+				and lasku.mapvm = '0000-00-00'
+				$laatijalisa
 				GROUP BY liitostunnus, ytunnus, nimi, osoite, postitp, swift
 				ORDER BY nimi, nimitark, ytunnus";
 	$result = mysql_query($query) or pupe_error($query);
@@ -787,6 +982,10 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 					echo "<option value='poista'>"       .t("Poista keikka")."</option>";
 				}
 
+				if ($yhtiorow['suuntalavat'] == 'S') {
+					echo "<option value='suuntalavat'>",t("Suuntalavat"),"</option>";
+				}
+
 				// jos on kohdistettuja rivejä niin saa tehdä näitä
 				if ($kplyhteensa > 0) {
 					echo "<option value='varastopaikat'>".t("Varastopaikat")."</option>";
@@ -795,7 +994,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 				// jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
 				if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1) {
-					echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
+					if ($yhtiorow['suuntalavat'] != 'S') {
+						echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
+					}
 				}
 
 				// jos lisätiedot, kohdistus ja paikat on ok sekä kaikki rivit on viety varastoon, ja kaikki liitetyt laskut on hyväksytty (kukarow.taso 3 voi ohittaa tämän), niin saadaan laskea virallinen varastonarvo
@@ -840,7 +1041,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($tsekkirow,$kaikkivarastossayhteensa);
 
 	$formalku =  "<td class='back'>";
-	$formalku .= "<form action='$PHP_SELF' method='post'>";
+	$formalku .= "<form action='$PHP_SELF?indexvas=1' method='post'>";
 	$formalku .= "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	$formalku .= "<input type='hidden' name='otunnus' value='$tsekkirow[tunnus]'>";
 	$formalku .= "<input type='hidden' name='ytunnus' value='$ytunnus'>";
@@ -894,7 +1095,16 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1) {
 		$nappikeikka .= "$formalku";
 		$nappikeikka .= "<input type='hidden' name='toiminto' value='kalkyyli'>";
-		$nappikeikka .= "<input type='submit' value='".t("Vie varastoon")."'>";
+		if ($yhtiorow['suuntalavat'] != 'S') {
+			$nappikeikka .= "<input type='submit' value='".t("Vie varastoon")."'>";
+		}
+		$nappikeikka .= "$formloppu";
+	}
+
+	if ($yhtiorow['suuntalavat'] == 'S') {
+		$nappikeikka .= "$formalku";
+		$nappikeikka .= "<input type='hidden' name='toiminto' value='suuntalavat'>";
+		$nappikeikka .= "<input type='submit' value='".t("Suuntalavat")."'>";
 		$nappikeikka .= "$formloppu";
 	}
 

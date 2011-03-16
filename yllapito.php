@@ -1506,6 +1506,7 @@
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
 		if ($toim == "puun_alkio" or
 			$toim == "toimitustavan_lahdot" or
+			$toim == "keraysvyohyke" or
 			$toim == "avainsana" or
 			$toim == "pakkaus" or
 			$toim == "tili" or

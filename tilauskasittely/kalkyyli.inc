@@ -16,7 +16,8 @@ else {
 
 list(,,$kohok,,,,$lisok,,$sarjanrook,,,,,$varok) = tsekit($laskurow,0);
 
-if ($sarjanrook == 1 and $varok == 1) {
+if ($vietiinko_koko_suuntalava == 'joo' or ($sarjanrook == 1 and $varok == 1)) {
+
 	if ($tee == "varastoon") {
 		require ("varastoon.inc");
 
@@ -81,6 +82,23 @@ if ($sarjanrook == 1 and $varok == 1) {
 		echo "<input type='hidden' name='toiminto' value='kalkyyli'>";
 		echo "<input type='hidden' name='tee' value='varastoon'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavan_tunnus}' />";
+
+		if ($yhtiorow['suuntalavat'] == 'S' and $tee == '' and trim($suuntalavan_tunnus) != '' and trim($koko_suuntalava) == 'X') {
+
+			if (trim($suuntalavan_hyllypaikka) != '') {
+				echo "<input type='hidden' name='suuntalavan_hyllypaikka' value='{$suuntalavan_hyllypaikka}' />";
+			}
+			else {
+				echo "<input type='hidden' name='suuntalavan_hyllyalue' value='{$suuntalavan_hyllyalue}' />";
+				echo "<input type='hidden' name='suuntalavan_hyllynro' value='{$suuntalavan_hyllynro}' />";
+				echo "<input type='hidden' name='suuntalavan_hyllyvali' value='{$suuntalavan_hyllyvali}' />";
+				echo "<input type='hidden' name='suuntalavan_hyllytaso' value='{$suuntalavan_hyllytaso}' />";
+			}
+			echo "<input type='hidden' name='koko_suuntalava' value='X' />";
+			echo "<input type='hidden' name='vietiinko_koko_suuntalava' value='{$vietiinko_koko_suuntalava}' />";
+		}
+
 		echo "<input type='submit' value='".t("Hyvältä näyttää, vie varastoon!")."'>";
 		echo "</form>";
 

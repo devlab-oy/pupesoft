@@ -410,7 +410,7 @@ if ($tee == "") {
 	//haetaan ostorivit
 	$query = "	SELECT tilausrivi.tuoteno, tilausrivi.tunnus, tilausrivi.perheid2, 
 				tilausrivi.hyllyalue r1, tilausrivi.hyllynro r2, tilausrivi.hyllyvali r3, tilausrivi.hyllytaso r4,
-				tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa,
+				tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.tuotemassa, tuote.keraysvyohyke, 
 				group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tilausrivi.varattu, 
 				(select kpl from tilausrivi t2 where t2.yhtio=tilausrivi.yhtio and t2.tunnus=tilausrivi.perheid2 and t2.uusiotunnus='$otunnus') isakpl
 				FROM tilausrivi
@@ -595,7 +595,7 @@ if ($tee == "") {
 										$kpllisa = $ii == 0 ? $rivirow['varattu'] : $paljon_pitaa_mahtua_muualle;
 										$limitlisa = $ii == 0 ? "LIMIT 1" : "LIMIT 5";
 
-										$query = "	SELECT DISTINCT
+										$query2 = "	SELECT DISTINCT
 													ABS(ORD(LEFT('{$paikkarow['hyllyalue']}', 1)) - ORD(LEFT(varaston_hyllypaikat.hyllyalue, 1))) etaisyys,
 													(varaston_hyllypaikat.korkeus * varaston_hyllypaikat.leveys * varaston_hyllypaikat.syvyys) tilavuus,
 													floor(((varaston_hyllypaikat.korkeus * varaston_hyllypaikat.leveys * varaston_hyllypaikat.syvyys) / {$tuotteen_tilavuus})) paljon_mahtuu_kpl,
@@ -614,14 +614,19 @@ if ($tee == "") {
 																		AND tuotepaikat.oletus = '')
 													WHERE varaston_hyllypaikat.yhtio = '{$kukarow['yhtio']}'
 													AND varaston_hyllypaikat.varasto = '{$hyllypaikat_varasto}'
-													AND varaston_hyllypaikat.korkeus >= '{$rivirow['tuotekorkeus']}'
-													AND varaston_hyllypaikat.leveys >= '{$rivirow['tuoteleveys']}'
-													AND varaston_hyllypaikat.syvyys >= '{$rivirow['tuotesyvyys']}'
+													AND varaston_hyllypaikat.korkeus >= '{$hyllypaikat_row['korkeus']}'
+													AND varaston_hyllypaikat.leveys >= '{$hyllypaikat_row['leveys']}'
+													AND varaston_hyllypaikat.syvyys >= '{$hyllypaikat_row['syvyys']}'
+													AND varaston_hyllypaikat.minimi_korkeus <= '{$rivirow['tuotekorkeus']}'
+													AND varaston_hyllypaikat.minimi_leveys <= '{$rivirow['tuoteleveys']}'
+													AND varaston_hyllypaikat.minimi_syvyys <= '{$rivirow['tuotesyvyys']}'
 													AND varaston_hyllypaikat.maksimitaakka >= ({$kpllisa} * {$rivirow['tuotemassa']})
+													AND varaston_hyllypaikat.keraysvyohyke = '{$rivirow['keraysvyohyke']}'
+													GROUP BY 1,2,3,4,5,6,7
 													HAVING paljon_mahtuu_kpl >= {$kpllisa}
 													ORDER BY 1,2,3,4,5,6,7
 													{$limitlisa}";
-										$loput_res = mysql_query($query) or pupe_error($query);
+										$loput_res = mysql_query($query2) or pupe_error($query2);
 
 										if (mysql_num_rows($loput_res) > 0) {
 
@@ -632,8 +637,7 @@ if ($tee == "") {
 													echo "<option value='{$paikkarow['tunnus']}##{$loput_row['tunnus']}##{$rivirow['varattu']}##kaikki'>",t("Vie kaikki paikalle")," $loput_row[hyllyalue] $loput_row[hyllynro] $loput_row[hyllyvali] $loput_row[hyllytaso]</option>";
 												}
 												else {
-													echo "<option value='{$paikkarow['tunnus']}##{$loput_row['tunnus']}##{$montako_tuotetta_mahtuu}##{$paljon_pitaa_mahtua_muualle}' selected='selected'>",t("Vie")," $montako_tuotetta_mahtuu ",t("oletuspaikalle")," $paikkarow[hyllyalue] $paikkarow[hyllynro] $paikkarow[hyllyvali] $paikkarow[hyllytaso] ",t("ja loput")," $paljon_pitaa_mahtua_muualle ",t("paikalle")," $loput_row[hyllyalue] $loput_row[hyllynro] $loput_row[hyllyvali] $loput_row[hyllytaso]</option>";
-													$sel = '';
+													echo "<option value='{$paikkarow['tunnus']}##{$loput_row['tunnus']}##{$montako_tuotetta_mahtuu}##{$paljon_pitaa_mahtua_muualle}'>",t("Vie")," $montako_tuotetta_mahtuu ",t("oletuspaikalle")," $paikkarow[hyllyalue] $paikkarow[hyllynro] $paikkarow[hyllyvali] $paikkarow[hyllytaso] ",t("ja loput")," $paljon_pitaa_mahtua_muualle ",t("paikalle")," $loput_row[hyllyalue] $loput_row[hyllynro] $loput_row[hyllyvali] $loput_row[hyllytaso]</option>";
 												}
 											}
 										}

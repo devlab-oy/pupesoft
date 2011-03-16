@@ -605,8 +605,27 @@
 		$sel[$trow[$i]] = ' selected';
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
-		$ulos .= "<option value=''{$sel['']}>".t("Ei")."</option>";
+		$ulos .= "<option value=''>".t("Ei")."</option>";
 		$ulos .= "<option value='K'{$sel['K']}>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "keraysvyohyke") {
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value=''>".t("Ei kuulu keräysvyöhykkeeseen")."</option>";
+
+		$query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
+		$keraysvyohyke_result = mysql_query($query) or pupe_error($query);
+
+		while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
+
+			$selected = $keraysvyohyke_row['tunnus'] == $trow[$i] ? ' selected' : '';
+
+			$ulos .= "<option value='{$keraysvyohyke_row['tunnus']}'{$selected}>{$keraysvyohyke_row['nimitys']}</option>";
+		}
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

@@ -19,6 +19,7 @@
 		<input type='hidden' name='try' value='$try'>
 		<input type='hidden' name='osasto' value='$osasto'>
 		<input type='hidden' name='toiminto' value='$toiminto'>
+		<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 		<input type='hidden' name='arvomatikka' value='$arvomatikka'>
 		<input type='hidden' name='naytainvtuot' value='$naytainvtuot'>
 		<input type='hidden' name='tuoteno' value='$tuoteno'>
@@ -240,6 +241,17 @@
 	echo "</select></td></tr>";
 
 	foreach($tulostimet as $tulostin) {
+
+		if ($tulostin == 'Purkulista' and $yhtiorow['suuntalavat'] == 'S') {
+			$query = "	SELECT tunnus, sscc 
+						FROM suuntalavat 
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tila = 'S'";
+			$suuntalavat_res = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($suuntalavat_res) == 0) continue;
+		}
+
 		echo "<tr><td>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</td>";
 		echo "<td><select name='komento[$tulostin]'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
@@ -284,8 +296,34 @@
 		}
 
 		if ($tulostin == 'Purkulista') {
-			echo "<tr><td rowspan='3'>".t("Järjestele purkulista")."</td><td><input type='radio' name='sorttaus' value='tuote'> ".t("tuotenumeron mukaan")."</td></tr>";
-			echo "<tr><td><input type='radio' name='sorttaus' value='toim_tuote' CHECKED> ".t("toimittajan tuotenumeron mukaan")."</td></tr>";
+
+			$colspanni = 3;
+
+			if ($yhtiorow['suuntalavat'] == 'S') {
+				echo "<tr><td>",t("Valitse suuntalavat"),"</td><td>";
+
+				while ($suuntalavat_row = mysql_fetch_assoc($suuntalavat_res)) {
+					echo "<input type='checkbox' name='suuntalavat[]' value='{$suuntalavat_row['tunnus']}' /> {$suuntalavat_row['sscc']}<br />";
+				}
+
+				echo "</td></tr>";
+
+				$colspanni = 4;
+			}
+
+			echo "<tr><td rowspan='$colspanni'>".t("Järjestele purkulista")."</td>";
+
+			if ($yhtiorow['suuntalavat'] == 'S') {
+				echo "<td><input type='radio' name='sorttaus' value='indeksi' checked='checked' />",t("hyllypaikan indeksin mukaan"),"</td></tr><tr>";
+				$checked = '';
+			}
+			else {
+				$checked = " checked='checked'";
+			}
+
+			echo "<td><input type='radio' name='sorttaus' value='tuote'> ".t("tuotenumeron mukaan")."</td></tr>";
+
+			echo "<tr><td><input type='radio' name='sorttaus' value='toim_tuote' {$checked}> ".t("toimittajan tuotenumeron mukaan")."</td></tr>";
 			echo "<tr><td><input type='radio' name='sorttaus' value='paikka'> ".t("varastopaikan mukaan")."</td></tr>";
 
 			if ($yhtiorow['viivakoodi_purkulistaan'] == 'K') {

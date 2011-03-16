@@ -9,13 +9,13 @@
 
 			$tilauksesta_ostotilaus = "";
 
-			if($tyyppi == "T") {
+			if ($tyyppi == "T") {
 				$vars = " and tilausrivi.var  = 'T' ";
 			}
-			elseif($tyyppi == "U") {
+			elseif ($tyyppi == "U") {
 				$vars = " and tilausrivi.var  = 'U' ";
 			}
-			elseif($tyyppi == "KAIKKI") {
+			elseif ($tyyppi == "KAIKKI") {
 				$vars = " and tilausrivi.var != 'P' ";
 			}
 			else {
@@ -33,14 +33,14 @@
 			//otetaan ensin vain lis‰varusteettomat tuotteet tai lis‰varusteperheiden is‰t
 			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, tuote.ei_saldoa
 						FROM tilausrivi
-						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.otunnus	='$otunnus'
+						and tilausrivi.otunnus = '$otunnus'
 						and tilausrivi.tyyppi != 'D'
 						$vars
 						and (tilausrivi.perheid2 = tilausrivi.tunnus or tilausrivi.perheid2 = 0)
-						order by tilausrivi.perheid2, tilausrivi.tunnus";
+						ORDER BY tilausrivi.perheid2, tilausrivi.tunnus";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
@@ -48,9 +48,9 @@
 				while ($rivi = mysql_fetch_assoc($result)) {
 
 					// saldottomat tuotteet laitetaan j‰lkk‰riin ja skipataan loopissa
-					if ($rivi['ei_saldoa'] != '') {
-						$query = "	UPDATE tilausrivi SET
-									var = 'J'
+					if ($rivi['ei_saldoa'] != '' and $rivi['perheid'] == $rivi['rivitunnus']) {
+						$query = "	UPDATE tilausrivi
+									SET var = 'J'
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$rivi[rivitunnus]'";
 						$ei_saldoa_res = mysql_query($query) or pupe_error($query);
@@ -59,8 +59,7 @@
 
 					//	Jos tehd‰‰n vaan t‰m‰ tilaus niin haetaan t‰m‰n oletustoimittaja, by default
 					if ($tyyppi == "KAIKKI" and $rivi["toimittajan_tunnus"] == 0) {
-
-						$query = "	SELECT liitostunnus, if(jarjestys = 0, 9999, jarjestys) sorttaus
+						$query = "	SELECT liitostunnus, if (jarjestys = 0, 9999, jarjestys) sorttaus
 									FROM tuotteen_toimittajat
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$rivi[tuoteno]'
@@ -247,7 +246,7 @@
 							$updres = mysql_query($query) or pupe_error($query);
 
 							// myyntirivin lis‰tiedot
-							if($rivi["var"] == "U") {
+							if ($rivi["var"] == "U") {
 								$suoraan_laskutukseen = "o";
 							}
 							else {
@@ -266,7 +265,7 @@
 
 							$tilauksesta_ostotilaus .= "<font class='message'>Tuote: $tilrivirow[tuoteno] $tilrivirow[kpl] kpl lis‰tty ostotilaukselle: $tunnus</font><br>";
 
-							if($tilrivirow["tunnus"] == $tilrivirow["perheid2"] and mysql_num_rows($tilrivires) > 1) {
+							if ($tilrivirow["tunnus"] == $tilrivirow["perheid2"] and mysql_num_rows($tilrivires) > 1) {
 								$pid = $lisatty_tun;
 
 								$query = "	UPDATE tilausrivi
@@ -278,7 +277,7 @@
 					}
 
 					// tehd‰‰n rivist‰ tavallinen JT jos meill‰ oli joku tilattava rivi
-					if($rivi["var"]=="T" or $rivi["var"]=="U") {
+					if ($tyyppi == "KAIKKI" or $rivi["var"] == "T" or $rivi["var"] == "U") {
 						$query = "UPDATE tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tunnus]'";
 						$updre = mysql_query($query) or pupe_error($query);
 					}

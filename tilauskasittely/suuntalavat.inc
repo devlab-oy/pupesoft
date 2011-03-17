@@ -506,11 +506,11 @@
 		echo "</select>{$virheviesti['keraysvyohyke']}</td></tr>";
 
 		$sel_y = $kaytettavyys == 'Y' ? ' selected' : '';
-		$sel_l = $kaytettavyys == 'L' ? ' selected' : '';
+		// $sel_l = $kaytettavyys == 'L' ? ' selected' : '';
 
 		echo "<tr><th>",t("Käytettävyys"),"</th><td><select name='kaytettavyys'><option value=''>",t("Valitse"),"</option>";
 		echo "<option value='Y'{$sel_y}>",t("Yksityinen"),"</option>";
-		echo "<option value='L'{$sel_l}>",t("Yleinen"),"</option>";
+		// echo "<option value='L'{$sel_l}>",t("Yleinen"),"</option>";
 		echo "</select>{$virheviesti['kaytettavyys']}</td></tr>";
 
 		echo "<tr><th>",t("Terminaalialue"),"</th><td><select name='terminaalialue'><option value=''>",t("Valitse"),"</option>";

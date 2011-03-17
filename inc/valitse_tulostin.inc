@@ -242,7 +242,7 @@
 
 	foreach($tulostimet as $tulostin) {
 
-		if ($tulostin == 'Purkulista' and $yhtiorow['suuntalavat'] == 'S') {
+		if ($tulostin == 'Purkulista' and $yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
 			$query = "	SELECT tunnus, sscc 
 						FROM suuntalavat 
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -299,7 +299,7 @@
 
 			$colspanni = 3;
 
-			if ($yhtiorow['suuntalavat'] == 'S') {
+			if ($yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
 				echo "<tr><td>",t("Valitse suuntalavat"),"</td><td>";
 
 				while ($suuntalavat_row = mysql_fetch_assoc($suuntalavat_res)) {
@@ -313,7 +313,7 @@
 
 			echo "<tr><td rowspan='$colspanni'>".t("Järjestele purkulista")."</td>";
 
-			if ($yhtiorow['suuntalavat'] == 'S') {
+			if ($yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
 				echo "<td><input type='radio' name='sorttaus' value='indeksi' checked='checked' />",t("hyllypaikan indeksin mukaan"),"</td></tr><tr>";
 				$checked = '';
 			}

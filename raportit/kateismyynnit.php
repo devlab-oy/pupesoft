@@ -503,6 +503,12 @@
 				$account_check = array();
 
 				while ($row = mysql_fetch_array($result)) {
+
+					if ($row['kassa'] == '' or $row['pankkikortti'] == '' or $row['luottokortti'] == '' or $row['kateistilitys'] == '' or $row['kassaerotus'] == '' or $row['kateisotto'] == '') {
+						echo "<font class='error'>".t("Kassalippaan")." $row[nimi] ".t("tiedot ovat puutteelliset").".</font><br>";
+						$tee = '';
+					}
+
 					$account_check["luottokortti"][] = $row["luottokortti"];
 					$account_check["pankkikortti"][] = $row["pankkikortti"];
 				}
@@ -593,7 +599,7 @@
 			$ktunnukset = substr($ktunnukset, 0, -1);
 		}
 
-		$query = "INSERT INTO lasku SET
+		$query = "	INSERT INTO lasku SET
 					yhtio      = '$kukarow[yhtio]',
 					tapvm      = '$vv-$kk-$pp',
 					tila       = 'X',
@@ -663,12 +669,15 @@
 				list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
 
 				// Haetaan kassalipastiedot tietokannasta
-				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND pankkikortti = '$tilino'";
+				$query = "SELECT * FROM kassalipas WHERE yhtio = '$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
 				$result = mysql_query($query) or pupe_error($query);
-				$kassalipasrow = mysql_fetch_array($result);
 
-				$tilino = $kassalipasrow["pankkikortti"];
 				$kustp = "";
+
+				if (mysql_num_rows($result) == 1) {
+					$kassalipasrow = mysql_fetch_array($result);
+					$tilino = $kassalipasrow["pankkikortti"];
+				}
 			}
 			elseif (stristr($arvo, "luottokortti")) {
 				$maksutapa = t("Luottokortti");
@@ -676,12 +685,15 @@
 				list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
 
 				// Haetaan kassalipastiedot tietokannasta
-				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND luottokortti = '$tilino'";
+				$query = "SELECT * FROM kassalipas WHERE yhtio = '$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
 				$result = mysql_query($query) or pupe_error($query);
-				$kassalipasrow = mysql_fetch_array($result);
 
-				$tilino = $kassalipasrow["luottokortti"];
 				$kustp = "";
+
+				if (mysql_num_rows($result) == 1) {
+					$kassalipasrow = mysql_fetch_array($result);
+					$tilino = $kassalipasrow["luottokortti"];
+				}
 			}
 			elseif (stristr($arvo, "kateinen")) {
 				$maksutapa = t("Käteinen");
@@ -689,17 +701,16 @@
 				list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
 
 				// Haetaan kassalipastiedot tietokannasta
-				if ($tilino == "") {
-					$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
-				}
-				else {
-					$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND kassa = '$tilino' AND nimi = '$kassalipas'";
-				}
+				$query = "SELECT * FROM kassalipas WHERE yhtio = '$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
 				$result = mysql_query($query) or pupe_error($query);
-				$kassalipasrow = mysql_fetch_array($result);
 
-				$tilino = $kassalipasrow["kassa"];
-				$kustp = $kassalipasrow["kustp"];
+				$kustp = "";
+
+				if (mysql_num_rows($result) == 1) {
+					$kassalipasrow = mysql_fetch_array($result);
+					$tilino = $kassalipasrow["kassa"];
+					$kustp = $kassalipasrow["kustp"];
+				}
 			}
 
 			// Tarkistetaan ettei arvo ole nolla ja jos kentän nimi on joko solu tai erotus
@@ -710,7 +721,7 @@
 				$arvo = str_replace(",",".",$arvo);
 
 				// Aletaan rakentaa inserttiä
-				$query = "INSERT INTO tiliointi SET
+				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',";
 
@@ -1650,10 +1661,9 @@
 								<th>$yhtiorow[valkoodi]</th></tr>";
 
 						if ($vaiht == 1) {
-							$prn = "\n";
-							$prn .= sprintf ("%-'.84s", $edkassanimi." ".t("yhteensä")." ");
+							$prn = sprintf ("%-'.84s", $edkassanimi." ".t("yhteensä")." ");
 							$prn .= sprintf ("%'.10s", " ".str_replace(".", ",", sprintf('%.2f', $kassayhteensa)));
-							$prn .= "\n\n";
+							$prn .= "\n\n\n";
 
 							fwrite($fh, $prn);
 							$rivit++;
@@ -1850,7 +1860,8 @@
 		}
 
 		if ($tasmays == '' and $vaiht == 1) {
-			$prn = sprintf ("%-'.84s", t("Yhteensä")." ");
+			$prn = "\n";
+			$prn .= sprintf ("%-'.84s", t("Yhteensä")." ");
 			$prn .= sprintf ("%'.10s", " ".str_replace(".",",", sprintf('%.2f', $yhteensa)));
 			$prn .= "\n";
 			fwrite($fh, $prn);

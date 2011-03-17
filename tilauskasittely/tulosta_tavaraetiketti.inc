@@ -60,7 +60,7 @@
 		$viivakoodi2 .= substr($row['sscc'],1);
 
 		$sivu = "*** ETIKETIN KOKO ***
-            	 {D1500,1040,1470|}
+            	 {D1530,1040,1470|}
                  {AX;+000,+000,+00|}
                  {AY;+05,0|}
                  {C|}

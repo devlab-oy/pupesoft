@@ -51,7 +51,7 @@
 				// TODO pit‰‰ tehd‰ locktable ettei vaan saada kahta samaa SSCC-koodia
 
 				$sivu = "*** ETIKETIN KOKO ***
-		                 {D1520,1040,1470|}
+		                 {D1530,1040,1470|}
 		                 {AX;+000,+000,+00|}
 		                 {AY;+05,0|}
 		                 {C|}

@@ -1556,6 +1556,7 @@ else {
 					<option value='tuotteen_avainsanat' $sel[tuotteen_avainsanat]>".t("Tuotteen avainsanat")."</option>
 					<option value='tuotteen_orginaalit' $sel[tuotteen_orginaalit]>".t("Tuotteiden originaalit")."</option>
 					<option value='tuotteen_toimittajat' $sel[tuotteen_toimittajat]>".t("Tuotteen toimittajat")."</option>
+					<option value='vak' $sel[vak]>".t("VAK-tietoja")."</option>
 					<option value='yhteensopivuus_auto' $sel[yhteensopivuus_auto]>".t("Yhteensopivuus automallit")."</option>
 					<option value='yhteensopivuus_auto_2' $sel[yhteensopivuus_auto_2]>".t("Yhteensopivuus automallit 2")."</option>
 					<option value='yhteensopivuus_mp' $sel[yhteensopivuus_mp]>".t("Yhteensopivuus mp-mallit")."</option>

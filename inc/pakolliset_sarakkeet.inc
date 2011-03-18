@@ -275,6 +275,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("VARIKOODI", "TUOTENO", "NIMITYS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
+			case "vak" :
+				$pakolliset = array("YK_NRO");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("NIMI_JA_KUVAUS", "LUOKKA", "LUOKITUSKOODI", "PAKKAUSRYHMA", "LIPUKKEET", "ERITYISMAARAYKSET");
+				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");
 				$kielletyt = array();

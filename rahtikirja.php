@@ -2440,8 +2440,8 @@
 			echo "<td><input type='text' size='7' value='$kilot[$i]' name='kilot[$i]'></td>
 				<td><input type='text' size='7' value='$kuutiot[$i]' name='kuutiot[$i]'></td>
 				<td><input type='text' size='7' value='$lavametri[$i]' name='lavametri[$i]'></td>
-				<td>$row[pakkaus]</td>
-				<td>$row[pakkauskuvaus]</td>
+				<td>".t_tunnus_avainsanat($row, "pakkaus", "PAKKAUSKV")."</td>
+				<td>".t_tunnus_avainsanat($row, "pakkauskuvaus", "PAKKAUSKV")."</td>
 				<td><input type='text' size='10' name='pakkauskuvaustark[$i]' value='$pakkauskuvaustark[$i]'></td>";
 
 			echo "</tr>";

@@ -353,7 +353,9 @@
 
 		$sel = explode(",", $trow[$i]);
 
-		$query = "SELECT tunnus, pakkaus FROM pakkaus WHERE yhtio = '{$kukarow['yhtio']}'";
+		$query = "	SELECT *
+					FROM pakkaus
+					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$pakkaus_result = mysql_query($query) or pupe_error($query);
 
 		$ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
@@ -362,7 +364,7 @@
 
 			$chk = in_array($pakkaus_row['tunnus'], $sel) ? 'checked' : '';
 
-			$ulos .= "<input type='checkbox' name='{$nimi}[]' value='{$pakkaus_row['tunnus']}' {$chk}/> {$pakkaus_row['pakkaus']}<br />";
+			$ulos .= "<input type='checkbox' name='{$nimi}[]' value='{$pakkaus_row['tunnus']}' {$chk}/> ".t_tunnus_avainsanat($pakkaus_row, "pakkaus", "PAKKAUSKV")." ".t_tunnus_avainsanat($pakkaus_row, "pakkauskuvaus", "PAKKAUSKV")."<br />";
 		}
 
 		$ulos .= "</td>";

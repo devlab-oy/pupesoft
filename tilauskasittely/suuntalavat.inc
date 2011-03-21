@@ -21,15 +21,15 @@
 				});
 			</script>";
 
-	$virheviesti = array('sscc' => '', 
-						'alkuhyllyalue' => '', 
-						'alkuhyllynro' => '', 
-						'alkuhyllyvali' => '', 
-						'alkuhyllytaso' => '', 
-						'loppuhyllyalue' => '', 
-						'loppuhyllynro' => '', 
-						'loppuhyllyvali' => '', 
-						'loppuhyllytaso' => '', 
+	$virheviesti = array('sscc' => '',
+						'alkuhyllyalue' => '',
+						'alkuhyllynro' => '',
+						'alkuhyllyvali' => '',
+						'alkuhyllytaso' => '',
+						'loppuhyllyalue' => '',
+						'loppuhyllynro' => '',
+						'loppuhyllyvali' => '',
+						'loppuhyllytaso' => '',
 						'tyyppi' => '',
 						'keraysvyohyke' => '',
 						'kaytettavyys' => '',
@@ -140,7 +140,7 @@
 			// if (trim($alkuhyllynro) == '') $virheviesti['alkuhyllynro'] = $error;
 			// if (trim($alkuhyllyvali) == '') $virheviesti['alkuhyllyvali'] = $error;
 			// if (trim($alkuhyllytaso) == '') $virheviesti['alkuhyllytaso'] = $error;
-			
+
 			$tee = 'uusi';
 		}
 
@@ -149,7 +149,7 @@
 			// if (trim($loppuhyllynro) == '') $virheviesti['loppuhyllynro'] = $error;
 			// if (trim($loppuhyllyvali) == '') $virheviesti['loppuhyllyvali'] = $error;
 			// if (trim($loppuhyllytaso) == '') $virheviesti['loppuhyllytaso'] = $error;
-			
+
 			$tee = 'uusi';
 		}
 
@@ -214,7 +214,7 @@
 				// t‰m‰n j‰lkeen koitetaan p‰ivitt‰‰ suuntalavan tunnus uudestaan k‰ytt‰en apuna uutta valittua ker‰ysvyˆhykett‰
 				if ($keraysvyohyke_chk_row['keraysvyohyke'] != $keraysvyohyke) {
 
-					$query = "	UPDATE tilausrivi 
+					$query = "	UPDATE tilausrivi
 								SET tilausrivi.suuntalava = 0
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.uusiotunnus = '{$otunnus}'
@@ -223,9 +223,9 @@
 								AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
 					$suuntalava_upd_res = mysql_query($query) or pupe_error($query);
 
-					// $query = "	UPDATE tilausrivi 
+					// $query = "	UPDATE tilausrivi
 					// 			JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke_chk_row['keraysvyohyke']}')
-					// 			SET tilausrivi.suuntalava = '{$suuntalavan_tunnus}' 
+					// 			SET tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
 					// 			WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					// 			AND tilausrivi.uusiotunnus = '{$otunnus}'
 					// 			AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
@@ -286,7 +286,7 @@
 				$uusi_suuntalavan_tunnus = mysql_insert_id();
 
 				// p‰ivitet‰‰n suuntalava automaattisesti niille riveille mihin se m‰ts‰‰
-				// $query = "	UPDATE tilausrivi 
+				// $query = "	UPDATE tilausrivi
 				// 			JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
 				// 			SET tilausrivi.suuntalava = '{$uusi_suuntalavan_tunnus}'
 				// 			WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -338,9 +338,9 @@
 
 			$query = "	SELECT suuntalavat.korkeus, pakkaus.leveys, pakkaus.syvyys, (suuntalavat.paino + pakkaus.paino) massa, keraysvyohyke.varasto, keraysvyohyke.tunnus as ker_tunnus
 						FROM suuntalavat
-						JOIN pakkaus ON (pakkaus.yhtio = suuntalavat.yhtio AND pakkaus.tunnus = suuntalavat.tyyppi) 
+						JOIN pakkaus ON (pakkaus.yhtio = suuntalavat.yhtio AND pakkaus.tunnus = suuntalavat.tyyppi)
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = suuntalavat.yhtio AND keraysvyohyke.tunnus = suuntalavat.keraysvyohyke)
-						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}' 
+						WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
 						AND suuntalavat.tunnus = '{$suuntalavan_tunnus}'";
 			$pakkaus_res = mysql_query($query) or pupe_error($query);
 			$pakkaus_row = mysql_fetch_assoc($pakkaus_res);
@@ -352,15 +352,15 @@
 						ABS(ORD(LEFT('{$hyllyalue_chk_row['hyllyalue']}', 1)) - ORD(LEFT(varaston_hyllypaikat.hyllyalue, 1))) etaisyys,
 						(varaston_hyllypaikat.korkeus * varaston_hyllypaikat.leveys * varaston_hyllypaikat.syvyys) tilavuus,
 						floor((varaston_hyllypaikat.korkeus * varaston_hyllypaikat.leveys * varaston_hyllypaikat.syvyys) / {$suuntalavan_tilavuus}) paljon_mahtuu_kpl,
-						varaston_hyllypaikat.hyllyalue, 
-						varaston_hyllypaikat.hyllynro, 
-						varaston_hyllypaikat.hyllyvali, 
-						varaston_hyllypaikat.hyllytaso, 
+						varaston_hyllypaikat.hyllyalue,
+						varaston_hyllypaikat.hyllynro,
+						varaston_hyllypaikat.hyllyvali,
+						varaston_hyllypaikat.hyllytaso,
 						tuotepaikat.tunnus
 						FROM varaston_hyllypaikat
-						JOIN tuotepaikat ON (tuotepaikat.yhtio = varaston_hyllypaikat.yhtio 
-											AND tuotepaikat.saldo = 0 
-											AND tuotepaikat.hyllyalue = varaston_hyllypaikat.hyllyalue 
+						JOIN tuotepaikat ON (tuotepaikat.yhtio = varaston_hyllypaikat.yhtio
+											AND tuotepaikat.saldo = 0
+											AND tuotepaikat.hyllyalue = varaston_hyllypaikat.hyllyalue
 											AND tuotepaikat.hyllynro = varaston_hyllypaikat.hyllynro
 											AND tuotepaikat.hyllyvali = varaston_hyllypaikat.hyllyvali
 											AND tuotepaikat.hyllytaso = varaston_hyllypaikat.hyllytaso
@@ -479,7 +479,9 @@
 		echo "<tr><th>",t("Varastopaikkav‰li alku"),"</th><td><input type='text' name='alkuhyllyalue' size='6' maxlength='5' value='{$alkuhyllyalue}' />{$virheviesti['alkuhyllyalue']} <input type='text' name='alkuhyllynro' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllynro']} <input type='text' name='alkuhyllyvali' size='6' maxlength='5' value='{$alkuhyllynro}' />{$virheviesti['alkuhyllyvali']} <input type='text' name='alkuhyllytaso' size='6' maxlength='5' value='{$alkuhyllytaso}' />{$virheviesti['alkuhyllytaso']}</td></tr>";
 		echo "<tr><th>",t("Varastopaikkav‰li loppu"),"</th><td><input type='text' name='loppuhyllyalue' size='6' maxlength='5' value='{$loppuhyllyalue}' />{$virheviesti['loppuhyllyalue']} <input type='text' name='loppuhyllynro' size='6' maxlength='5' value='{$loppuhyllynro}' />{$virheviesti['loppuhyllynro']} <input type='text' name='loppuhyllyvali' size='6' maxlength='5' value='{$loppuhyllyvali}' />{$virheviesti['loppuhyllyvali']} <input type='text' name='loppuhyllytaso' size='6' maxlength='5' value='{$loppuhyllytaso}' />{$virheviesti['loppuhyllytaso']}</td></tr>";
 
-		$query = "SELECT tunnus, pakkaus FROM pakkaus WHERE yhtio = '{$kukarow['yhtio']}'";
+		$query = "	SELECT *
+					FROM pakkaus
+					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$pakkaus_result = mysql_query($query) or pupe_error($query);
 
 		echo "<tr><th>",t("Tyyppi"),"</th><td><select name='tyyppi'><option value=''>",t("Valitse"),"</option>";
@@ -487,7 +489,7 @@
 		while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
 			$sel = $tyyppi == $pakkaus_row['tunnus'] ? ' selected' : '';
 
-			echo "<option value='{$pakkaus_row['tunnus']}'{$sel}>{$pakkaus_row['pakkaus']}</option>";
+			echo "<option value='{$pakkaus_row['tunnus']}'{$sel}>".t_tunnus_avainsanat($pakkaus_row, "pakkaus", "PAKKAUSKV")." ".t_tunnus_avainsanat($pakkaus_row, "pakkauskuvaus", "PAKKAUSKV")."</option>";
 		}
 
 		echo "</select>{$virheviesti['tyyppi']}</td></tr>";
@@ -496,13 +498,13 @@
 
 		$query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
 		$keraysvyohyke_result = mysql_query($query) or pupe_error($query);
-	
+
 		while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
 			$sel = $keraysvyohyke == $keraysvyohyke_row['tunnus'] ? ' selected' : '';
 
 			echo "<option value='{$keraysvyohyke_row['tunnus']}'{$sel}>{$keraysvyohyke_row['nimitys']}</option>";
 		}
-	
+
 		echo "</select>{$virheviesti['keraysvyohyke']}</td></tr>";
 
 		$sel_y = $kaytettavyys == 'Y' ? ' selected' : '';
@@ -615,7 +617,7 @@
 		echo "<tr><th>SSCC-",t("koodi"),"</th><th>",t("Varastopaikkav‰li"),"</th><th>",t("Tyyppi"),"</th><th>",t("Ker‰ysvyohyke"),"</th><th>",t("K‰ytettavyys"),"</th><th>",t("Terminaalialue"),"</th><th>",t("Korkeus"),"</th><th>",t("Paino"),"</th><th>",t("Tila"),"</th></tr>";
 
 		$query = "	SELECT *, if(kaytettavyys = 'Y', 'Yksityinen', 'Yleinen') kaytettavyys, if(tila = '', 0, if(tila = 'S', 1, 2)) sorttaus
-					FROM suuntalavat 
+					FROM suuntalavat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tila != 'P'
 					AND ((kaytettavyys = 'Y' AND keikkatunnus = '{$otunnus}') OR (kaytettavyys = 'L'))
@@ -639,11 +641,14 @@
 			echo "</td>";
 			echo "<td>";
 
-			$query = "SELECT pakkaus FROM pakkaus WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavat_row['tyyppi']}'";
+			$query = "	SELECT *
+						FROM pakkaus
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$suuntalavat_row['tyyppi']}'";
 			$pakkaus_result = mysql_query($query) or pupe_error($query);
 			$pakkaus_row = mysql_fetch_assoc($pakkaus_result);
 
-			echo $pakkaus_row['pakkaus'];
+			echo t_tunnus_avainsanat($pakkaus_row, "pakkaus", "PAKKAUSKV")." ".t_tunnus_avainsanat($pakkaus_row, "pakkauskuvaus", "PAKKAUSKV");
 			echo "</td>";
 			echo "<td>";
 

@@ -14,7 +14,9 @@
 
 		$sel = explode(",", $trow[$i]);
 
-		$query = "SELECT tunnus, pakkaus FROM pakkaus WHERE yhtio = '{$kukarow['yhtio']}'";
+		$query = "	SELECT *
+					FROM pakkaus
+					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$pakkaus_result = mysql_query($query) or pupe_error($query);
 
 		$ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
@@ -23,13 +25,13 @@
 
 			$chk = in_array($pakkaus_row['tunnus'], $sel) ? 'checked' : '';
 
-			$ulos .= "<input type='checkbox' name='{$nimi}[]' value='{$pakkaus_row['tunnus']}' {$chk}/> {$pakkaus_row['pakkaus']}<br />";
+			$ulos .= "<input type='checkbox' name='{$nimi}[]' value='{$pakkaus_row['tunnus']}' {$chk}/> ".t_tunnus_avainsanat($pakkaus_row, "pakkaus", "PAKKAUSKV")." ".t_tunnus_avainsanat($pakkaus_row, "pakkauskuvaus", "PAKKAUSKV")."<br />";
 		}
 
 		$ulos .= "</td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "keraysjarjestys") {
 		$ulos = "<td>";
 
@@ -44,7 +46,7 @@
 		$ulos .= "</td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "terminaalialue") {
 		$ulos = "<td>";
 
@@ -96,20 +98,20 @@
 
 	if (mysql_field_name($result, $i) == "varasto") {
 		$ulos = "<td><select name='{$nimi}'>";
-	
+
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$varasto_res = mysql_query($query) or pupe_error($query);
-	
+
 		while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
-	
+
 			$sel = $varasto_row['tunnus'] == $trow[$i] ? ' selected' : '';
-	
+
 			$ulos .= "<option value='{$varasto_row['tunnus']}'{$sel}>{$varasto_row['nimitys']}</option>";
 		}
-	
+
 		$ulos .= "</select></td>";
-	
+
 		$jatko = 0;
 	}

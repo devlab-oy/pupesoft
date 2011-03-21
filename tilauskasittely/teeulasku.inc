@@ -192,17 +192,23 @@
 					FROM rahtikirjat
 					WHERE otsikkonro in ($tunnukset)
 					and yhtio = '$kukarow[yhtio]'
-					group by pakkaus, pakkauskuvaus, pakkauskuvaustark
-					having kollit > 0";
+					GROUP BY pakkaus, pakkauskuvaus, pakkauskuvaustark
+					HAVING kollit > 0";
 		$rahtiresult = mysql_query($query) or pupe_error($query);
 
 		while ($rahtirow = mysql_fetch_array($rahtiresult)) {
 
-			$rahtirow_pakkaus = t_avainsana("PAKKAUS", $kielirow["kieli"], "and avainsana.selite  = '$rahtirow[pakkaus]' and avainsana.selitetark  = '$rahtirow[pakkauskuvaus]'", "", "", "selite");
+			// Haetaan pakkauksen tiedot
+			$query = "	SELECT *
+						from pakkaus
+						WHERE yhtio = '$kukarow[yhtio]'
+						and pakkaus = '$rahtirow[pakkaus]'
+					 	and pakkauskuvaus = '$rahtirow[pakkauskuvaus]'";
+			$spakkausresult = mysql_query($query) or pupe_error($query);
+			$spakkausrow = mysql_fetch_assoc($spakkausresult);
 
-			if ($rahtirow["pakkauskuvaus"] != "") {
-				$rahtirow_pakkauskuvaus = t_avainsana("PAKKAUS", $kielirow["kieli"], "and avainsana.selite  = '$rahtirow[pakkaus]' and avainsana.selitetark  = '$rahtirow[pakkauskuvaus]'", "", "", "selitetark");
-			}
+			$rahtirow_pakkaus = t_tunnus_avainsanat($spakkausrow, "pakkaus", "PAKKAUSKV", $kielirow["kieli"]);
+			$rahtirow_pakkauskuvaus = t_tunnus_avainsanat($spakkausrow, "pakkauskuvaus", "PAKKAUSKV", $kielirow["kieli"]);
 
 			if ($rahtirow_pakkaus != $rahtirow_pakkauskuvaus) {
 				$rahtirow_pakkaus .= " ".$rahtirow_pakkauskuvaus;

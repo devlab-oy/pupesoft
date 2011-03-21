@@ -8179,7 +8179,12 @@ if (!function_exists('t_tunnus_avainsanat')) {
 		if (mysql_num_rows($result) == 1) {
 			$row = mysql_fetch_assoc($result);
 			// jos löydettiin käännös palautetaan se
-			return $row["selitetark"];
+			if ($laji == "pakkauskuvaus") {
+				return $row["selitetark_2"];
+			}
+			else {
+				return $row["selitetark"];
+			}
 		}
 
 		// muuten palautetaan se mitä kysyttiin

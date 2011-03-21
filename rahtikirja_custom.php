@@ -516,7 +516,7 @@ if (! isset($_POST['toimitustapa'])) {
 	echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";
 
 	$i = 0;
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
     	echo "<tr>
             <td>
                 <input type='hidden' name='pakkaus[$i]' value='$row[pakkaus]'>
@@ -526,8 +526,8 @@ if (! isset($_POST['toimitustapa'])) {
     	    <td><input type='text' size='3' value='' name='kilot[$i]'></td>
     	    <td><input type='text' size='3' value='' name='kuutiot[$i]'></td>
     	    <td><input type='text' size='3' value='' name='lavametri[$i]'></td>
-    	    <td>$row[pakkaus]</td>
-			<td>$row[pakkauskuvaus]</td>";
+    	    <td>".t_tunnus_avainsanat($row, "pakkaus", "PAKKAUSKV")."</td>
+			<td>".t_tunnus_avainsanat($row, "pakkauskuvaus", "PAKKAUSKV")."</td>";
 
 		echo "<td><input type='text' size='10' name='pakkauskuvaustark[$i]'></td>";
 

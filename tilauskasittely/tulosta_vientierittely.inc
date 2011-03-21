@@ -37,22 +37,17 @@ $Xtunnukset2 = substr($Xtunnukset2,0,-1);
 // varmistetaan vielä, että löyty tilauksia
 if ($Xtunnukset2 != "") {
 
+	$Xkilot  = 0;
+
 	//haetaan kollimäärä ja bruttopaino
-	$Xquery = "	SELECT *
+	$Xquery = "	SELECT sum(kilot) kilot
 				FROM rahtikirjat
 				WHERE otsikkonro in ($Xtunnukset2) and yhtio='$kukarow[yhtio]'";
 	$Xrahtiresult = mysql_query($Xquery) or pupe_error($Xquery);
+	$Xrahtirow = mysql_fetch_array($Xrahtiresult);
 
-	$Xkilot  = 0;
-	$Xkollit = 0;
-
-	while($Xrahtirow = mysql_fetch_array($Xrahtiresult)) {
-		if ($Xkilot == 0 and $Xkollit == 0) {
-			$Xpakkaus = $Xrahtirow["pakkaus"];
-			$Xpakkauskuvaus = $Xrahtirow["pakkauskuvaus"];
-		}
-		$Xkilot  += $Xrahtirow["kilot"];
-		$Xkollit += $Xrahtirow["kollit"];
+	if ($Xrahtirow["kilot"] > 0) {
+		$Xkilot = $Xrahtirow["kilot"];
 	}
 
 	$Xquery = "	SELECT

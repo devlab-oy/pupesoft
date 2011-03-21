@@ -817,37 +817,37 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 
 //Tyhjenntään syöttökentät
 if (isset($tyhjenna)) {
-	$ale = "";
-	$ale_array = "";
-	$alv = "";
-	$alv_array = "";
-	$hinta = "";
-	$hinta_array = "";
-	$kayttajan_ale = "";
-	$kayttajan_alv = "";
-	$kayttajan_hinta = "";
-	$kayttajan_kpl = "";
-	$kayttajan_netto = "";
-	$kayttajan_var = "";
-	$kerayspvm = "";
-	$kommentti = "";
-	$kpl = "";
-	$kpl_array = "";
-	$netto = "";
-	$netto_array = "";
-	$paikat = "";
-	$paikka = "";
-	$paikka_array = "";
-	$perheid = "";
-	$perheid2 = "";
-	$rivinumero = "";
-	$rivitunnus = "";
-	$toimaika = "";
-	$tuotenimitys = "";
-	$tuoteno = "";
-	$var = "";
-	$variaatio_tuoteno = "";
-	$var_array = "";
+	$ale 				= "";
+	$ale_array 			= "";
+	$alv 				= "";
+	$alv_array 			= "";
+	$hinta 				= "";
+	$hinta_array 		= "";
+	$kayttajan_ale 		= "";
+	$kayttajan_alv 		= "";
+	$kayttajan_hinta 	= "";
+	$kayttajan_kpl 		= "";
+	$kayttajan_netto 	= "";
+	$kayttajan_var 		= "";
+	$kerayspvm 			= "";
+	$kommentti 			= "";
+	$kpl 				= "";
+	$kpl_array 			= "";
+	$netto 				= "";
+	$netto_array 		= "";
+	$paikat 			= "";
+	$paikka 			= "";
+	$paikka_array 		= "";
+	$perheid 			= 0;
+	$perheid2 			= 0;
+	$rivinumero 		= "";
+	$rivitunnus 		= 0;
+	$toimaika 			= "";
+	$tuotenimitys 		= "";
+	$tuoteno 			= "";
+	$var 				= "";
+	$variaatio_tuoteno 	= "";
+	$var_array 			= "";
 }
 
 if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kertakassa != '')) and $kukarow['extranet'] == '') {
@@ -3164,7 +3164,7 @@ if ($tee == '') {
 
 			// useamman valmisteen reseptit...
 			if ($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) {
-				$perheid2 = "W";
+				$perheid2 = -100;
 			}
 
 			if ($tilausrivi['hinta'] == '0.00') $hinta = '';
@@ -3240,20 +3240,20 @@ if ($tee == '') {
 					echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
 				}
 
-				$tuoteno	= '';
-				$kpl		= '';
-				$var		= '';
-				$hinta		= '';
-				$netto		= '';
-				$ale		= '';
-				$rivitunnus	= '';
-				$kommentti	= '';
-				$kerayspvm	= '';
-				$toimaika	= '';
-				$paikka		= '';
-				$alv		= '';
-				$perheid	= '';
-				$perheid2	= '';
+				$tuoteno			= '';
+				$kpl				= '';
+				$var				= '';
+				$hinta				= '';
+				$netto				= '';
+				$ale				= '';
+				$rivitunnus			= 0;
+				$kommentti			= '';
+				$kerayspvm			= '';
+				$toimaika			= '';
+				$paikka				= '';
+				$alv				= '';
+				$perheid			= 0;
+				$perheid2			= 0;
 				$tilausrivilinkki	= '';
 				$toimittajan_tunnus	= '';
 			}
@@ -3294,8 +3294,9 @@ if ($tee == '') {
 			$presult = mysql_query($query) or pupe_error($query);
 			$perheid = $isatunnus;
 		}
-
-		$perheid2 = "W";
+		
+		// useamman valmisteen reseptit...
+		$perheid2 = -100;
 	}
 
 	if ($tuoteno != '') {
@@ -3588,37 +3589,37 @@ if ($tee == '') {
 			$updres = mysql_query($query) or pupe_error($query);
 		}
 
-		$ale = "";
-		$ale_array = "";
-		$alv = "";
-		$alv_array = "";
-		$hinta = "";
-		$hinta_array = "";
-		$kayttajan_ale = "";
-		$kayttajan_alv = "";
-		$kayttajan_hinta = "";
-		$kayttajan_kpl = "";
-		$kayttajan_netto = "";
-		$kayttajan_var = "";
-		$kerayspvm = "";
-		$kommentti = "";
-		$kpl = "";
-		$kpl_array = "";
-		$netto = "";
-		$netto_array = "";
-		$paikat = "";
-		$paikka = "";
-		$paikka_array = "";
-		$perheid = "";
-		$perheid2 = "";
-		$rivinumero = "";
-		$rivitunnus = "";
-		$toimaika = "";
-		$tuotenimitys = "";
-		$tuoteno = "";
-		$var = "";
+		$ale 				= "";
+		$ale_array 			= "";
+		$alv 				= "";
+		$alv_array 			= "";
+		$hinta 				= "";
+		$hinta_array 		= "";
+		$kayttajan_ale 		= "";
+		$kayttajan_alv 		= "";
+		$kayttajan_hinta	= "";
+		$kayttajan_kpl 		= "";
+		$kayttajan_netto 	= "";
+		$kayttajan_var 		= "";
+		$kerayspvm 			= "";
+		$kommentti 			= "";
+		$kpl 				= "";
+		$kpl_array 			= "";
+		$netto 				= "";
+		$netto_array 		= "";
+		$paikat 			= "";
+		$paikka 			= "";
+		$paikka_array 		= "";
+		$perheid 			= 0;
+		$perheid2	 		= 0;
+		$rivinumero 		= "";
+		$rivitunnus 		= 0;
+		$toimaika 			= "";
+		$tuotenimitys 		= "";
+		$tuoteno 			= "";
+		$var 				= "";		
+		$var_array 			= "";
 		if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
-		$var_array = "";
 	}
 
 	//Syöttörivi

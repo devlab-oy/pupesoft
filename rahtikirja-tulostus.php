@@ -20,112 +20,9 @@
 		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
-	echo "<font class='head'>",t("Rahtikirjojen tulostus"),"</font><hr>";
+	if (!isset($nayta_pdf)) echo "<font class='head'>",t("Rahtikirjojen tulostus"),"</font><hr>";
 
 	$laskutettu = "";
-
-	if ($tee == 'tulosta' and $laskukomento == '' and $jv != 'eijv') {
-		//	ehkä ei halutakkaan aina tulostaa.. who knows.
-		//	echo "<font class='error'>Valitse laskujen tulostuspaikka! Tai ruksaa 'Älä tulosta jälkivaatimuksia'!</font><br><br>";
-		//	$tee = "";
-	}
-
-	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-			<!--
-			function disableEnterKey(e)
-			{
-				var key;
-
-				if (window.event) {
-					key = window.event.keyCode;     //IE
-				}
-				else {
-					key = e.which;     //firefox
-				}
-
-				if (key == 13) {
-					document.getElementById('etsi_button').focus();
-					return false;
-				}
-				else {
-					return true;
-				}
-			}
-
-			function untoggleAll(toggleBox, param) {
-
-				var currForm = toggleBox.form;
-				var isChecked = toggleBox.checked;
-				var selectMenu = document.getElementById('toimitustapa_varasto');
-				var chosenOption = selectMenu.options[selectMenu.selectedIndex];
-				var chosenOptionValue = chosenOption.value;
-				var tableObject = document.getElementById('toim_table');
-				var edOpt = document.getElementById('edOpt');
-
-				for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
-					if (currForm.elements[elementIdx].type == 'checkbox') {
-						currForm.elements[elementIdx].checked = false;
-					}
-
-					if (currForm.elements[elementIdx].name == 'toimitustapa_varasto') {
-						var value = chosenOptionValue.substr(0,chosenOptionValue.indexOf('!!!!'));
-						value = value.replace(/^\s*/, '').replace(/\s*$/, '');
-						if (edOpt.value != value) {
-							document.getElementById(edOpt.value).style.display='none';
-						}
-						document.getElementById('nayta_rahtikirjat').checked = false;
-					}
-				}
-			}
-
-			function naytaTunnukset(data) {
-				var currForm = data.form;
-				var selectMenu = document.getElementById('toimitustapa_varasto');
-				var chosenOption = selectMenu.options[selectMenu.selectedIndex];
-				var chosenOptionValue = chosenOption.value;
-
-				for (var elementIdx = 0; elementIdx < currForm.elements.length; elementIdx++) {
-					if (currForm.elements[elementIdx].name == 'toimitustapa_varasto') {
-						var value = chosenOptionValue.substr(0,chosenOptionValue.indexOf('!!!!'));
-						value = value.replace(/^\s*/, '').replace(/\s*$/, '');
-						document.getElementById(value).style.display='inline';
-						document.getElementById('edOpt').value = value;
-					}
-				}
-			}
-
-			function showNumber(data) {
-				var currForm = data.form;
-				var etsi_value = currForm.etsi_nro.value;
-				var nro_etsi = 'nro_'+etsi_value;
-
-				if (etsi_value != '') {
-					for (var elementIdx = 0; elementIdx < currForm.elements.length; elementIdx++) {
-						if (currForm.elements[elementIdx].name == 'div_nro') {
-							if (currForm.elements[elementIdx].value == etsi_value) {
-								document.getElementById(nro_etsi).style.display = 'inline';
-							}
-							else {
-								document.getElementById('nro_'+currForm.elements[elementIdx].value).style.display = 'none';
-							}
-						}
-					}
-				}
-			}
-
-			function showNumbers(data) {
-				var currForm = data.form;
-				document.getElementById('etsi_nro').value = '';
-
-				for (var elementIdx = 0; elementIdx < currForm.elements.length; elementIdx++) {
-					if (currForm.elements[elementIdx].name == 'div_nro') {
-						document.getElementById('nro_'+currForm.elements[elementIdx].value).style.display = 'inline';
-					}
-				}
-			}
-
-			//-->
-			</script>";
 
 	if (!isset($tee)) {
 		$tee = '';
@@ -194,7 +91,10 @@
 		$pres  = mysql_query($query) or pupe_error($query);
 		$print = mysql_fetch_assoc($pres);
 
-		if ($komento != "") {
+		if ($komento == "PDF_RUUDULLE") {
+			$kirjoitin = "PDF_RUUDULLE";
+		}
+		elseif ($komento != "") {
 			$kirjoitin_tunnus = (int) $komento; // jos ollaan valittu oma printteri
 		}
 		elseif ($avainrow["selitetark_2"] == "1") {
@@ -216,14 +116,17 @@
 			$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
 		}
 
-		// haetaan printterille tulostuskomento
-		$query = "SELECT * from kirjoittimet where tunnus = '$kirjoitin_tunnus'";
-		$pres  = mysql_query($query) or pupe_error($query);
-		$print = mysql_fetch_assoc($pres);
+		if ($komento != "PDF_RUUDULLE") {
+			// haetaan printterille tulostuskomento
+			$query = "SELECT * from kirjoittimet where tunnus = '$kirjoitin_tunnus'";
+			$pres  = mysql_query($query) or pupe_error($query);
+			$print = mysql_fetch_assoc($pres);
 
-		$kirjoitin = $print['komento'];
-		$merkisto  = $print['merkisto'];
-		$pvm       = date("j.n.Y");
+			$kirjoitin = $print['komento'];
+			$merkisto  = $print['merkisto'];
+		}
+
+		$pvm = date("j.n.Y");
 
 		if ($valittu_rakiroslapp_tulostin != '') {
 			//haetaan osoitelapun tulostuskomento
@@ -237,22 +140,22 @@
 
 		if ($kirjoitin == '') die (t("Valitsemallesi varastolle ole ole määritelty tarvittavaa rahtikirja-tulostinta")." ($mika)!");
 
-		echo "<font class='message'>".t("Tulostetaan rahtikirjat toimitustavalle").": $toimitustapa<br>".t("Kirjoitin").": $print[kirjoitin]</font><hr>";
+		if (!isset($nayta_pdf)) echo "<font class='message'>".t("Tulostetaan rahtikirjat toimitustavalle").": $toimitustapa<br>".t("Kirjoitin").": $print[kirjoitin]</font><hr>";
 
 		// emuloidaan transactioita mysql LOCK komennolla
 		$query = "LOCK TABLES liitetiedostot READ, rahtikirjat WRITE, tilausrivi WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tuotepaikat WRITE, sanakirja WRITE, rahtisopimukset READ, rahtimaksut READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka READ, avainsana READ, avainsana as a READ, avainsana as b READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, etaisyydet READ, laskun_lisatiedot READ, yhteyshenkilo READ, toimitustapa READ, avainsana as avainsana_kieli READ, varaston_tulostimet READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ";
 		$res   = mysql_query($query) or pupe_error($query);
 
 		if ($jv == 'vainjv') {
-			echo t("Vain jälkivaatimukset").".";
+			if (!isset($nayta_pdf)) echo t("Vain jälkivaatimukset").".";
 			$jvehto = " having jv!='' ";
 		}
 		elseif ($jv == 'eivj') {
-			echo t("Ei jälkivaatimuksia").".";
+			if (!isset($nayta_pdf)) echo t("Ei jälkivaatimuksia").".";
 			$jvehto = " having jv='' ";
 		}
 		elseif ($jv == 'vainvak') {
-			echo t("Vain VAK").". ";
+			if (!isset($nayta_pdf)) echo t("Vain VAK").". ";
 			$vainvakilliset = " JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
 							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi != '') ";
 		}
@@ -269,7 +172,8 @@
 		// haetaan kaikki distinct rahtikirjat..
 		$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja, asiakas.toimitusvahvistus
+					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
+					asiakas.toimitusvahvistus, if(asiakas.gsm != '', asiakas.gsm, if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, if(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
 					FROM rahtikirjat
 					JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') ";
 
@@ -295,7 +199,7 @@
 		$rakir_res = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($rakir_res) == 0) {
-			echo "<font class='message'>".t("Yhtään tulostettavaa rahtikirjaa ei löytynyt").".</font><br><br>";
+			if (!isset($nayta_pdf)) echo "<font class='message'>".t("Yhtään tulostettavaa rahtikirjaa ei löytynyt").".</font><br><br>";
 		}
 
 		$kopiotulostuksen_otsikot = array();
@@ -622,19 +526,16 @@
 					$aputeksti = t("JÄLKIVAATIMUS");
 				}
 
-				echo "<font class='message'>".t("Asiakas")." $rakir_row[toim_nimi]</font><li>".t("Yhdistetään tilaukset").": ";
+				if (!isset($nayta_pdf)) echo "<font class='message'>".t("Asiakas")." $rakir_row[toim_nimi]</font><li>".t("Yhdistetään tilaukset").": ";
 
 				foreach($lotsikot as $doit) {
-					echo "$doit ";
+					if (!isset($nayta_pdf)) echo "$doit ";
 					$kaikki_lotsikot .= $doit.", ";
 				}
 
 				$kaikki_lotsikot = substr($kaikki_lotsikot ,0 ,-2);
 
-				echo "$rahinta $jvtext<br>";
-
-				// tarvitaan tietää, että onko kyseessä kopio
-				$tulostakopio = "";
+				if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
 				// tulostetaan toimitustavan määrittelemä rahtikirja
 				if (file_exists("tilauskasittely/$toitarow[rahtikirja]")) {
@@ -651,7 +552,7 @@
 					}
 				}
 				else {
-					echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
+					if (!isset($nayta_pdf)) echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
 				}
 
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
@@ -743,14 +644,17 @@
 					}
 				}
 			}
-			echo "<br>";
+			if (!isset($nayta_pdf)) echo "<br>";
 		} // end while haetaan kaikki distinct rahtikirjat..
 
 		// poistetaan lukko
 		$query = "UNLOCK TABLES";
 		$res   = mysql_query($query) or pupe_error($query);
 
-		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+		if (isset($nayta_pdf)) {
+			$tee = "SKIPPAA";
+		}
+		elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 			if ($toitarow['tulostustapa'] == 'H' or $toitarow['tulostustapa'] == 'K') {
 				$tee = 'XXX';
 			}
@@ -759,7 +663,7 @@
 			}
 		}
 
-		echo "<br>";
+		if (!isset($nayta_pdf)) echo "<br>";
 
 	} // end tee==tulosta
 
@@ -768,6 +672,103 @@
 	}
 
 	if ($tee == '') {
+
+		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+				<!--
+				function disableEnterKey(e)
+				{
+					var key;
+
+					if (window.event) {
+						key = window.event.keyCode;     //IE
+					}
+					else {
+						key = e.which;     //firefox
+					}
+
+					if (key == 13) {
+						document.getElementById('etsi_button').focus();
+						return false;
+					}
+					else {
+						return true;
+					}
+				}
+
+				function untoggleAll(toggleBox, param) {
+
+					var currForm = toggleBox.form;
+					var isChecked = toggleBox.checked;
+					var selectMenu = document.getElementById('toimitustapa_varasto');
+					var chosenOption = selectMenu.options[selectMenu.selectedIndex];
+					var chosenOptionValue = chosenOption.value;
+					var tableObject = document.getElementById('toim_table');
+					var edOpt = document.getElementById('edOpt');
+
+					for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+						if (currForm.elements[elementIdx].type == 'checkbox') {
+							currForm.elements[elementIdx].checked = false;
+						}
+
+						if (currForm.elements[elementIdx].name == 'toimitustapa_varasto') {
+							var value = chosenOptionValue.substr(0,chosenOptionValue.indexOf('!!!!'));
+							value = value.replace(/^\s*/, '').replace(/\s*$/, '');
+							if (edOpt.value != value) {
+								document.getElementById(edOpt.value).style.display='none';
+							}
+							document.getElementById('nayta_rahtikirjat').checked = false;
+						}
+					}
+				}
+
+				function naytaTunnukset(data) {
+					var currForm = data.form;
+					var selectMenu = document.getElementById('toimitustapa_varasto');
+					var chosenOption = selectMenu.options[selectMenu.selectedIndex];
+					var chosenOptionValue = chosenOption.value;
+
+					for (var elementIdx = 0; elementIdx < currForm.elements.length; elementIdx++) {
+						if (currForm.elements[elementIdx].name == 'toimitustapa_varasto') {
+							var value = chosenOptionValue.substr(0,chosenOptionValue.indexOf('!!!!'));
+							value = value.replace(/^\s*/, '').replace(/\s*$/, '');
+							document.getElementById(value).style.display='inline';
+							document.getElementById('edOpt').value = value;
+						}
+					}
+				}
+
+				function showNumber(data) {
+					var currForm = data.form;
+					var etsi_value = currForm.etsi_nro.value;
+					var nro_etsi = 'nro_'+etsi_value;
+
+					if (etsi_value != '') {
+						for (var elementIdx = 0; elementIdx < currForm.elements.length; elementIdx++) {
+							if (currForm.elements[elementIdx].name == 'div_nro') {
+								if (currForm.elements[elementIdx].value == etsi_value) {
+									document.getElementById(nro_etsi).style.display = 'inline';
+								}
+								else {
+									document.getElementById('nro_'+currForm.elements[elementIdx].value).style.display = 'none';
+								}
+							}
+						}
+					}
+				}
+
+				function showNumbers(data) {
+					var currForm = data.form;
+					document.getElementById('etsi_nro').value = '';
+
+					for (var elementIdx = 0; elementIdx < currForm.elements.length; elementIdx++) {
+						if (currForm.elements[elementIdx].name == 'div_nro') {
+							document.getElementById('nro_'+currForm.elements[elementIdx].value).style.display = 'inline';
+						}
+					}
+				}
+
+				//-->
+				</script>";
 
 		$wherelisa = '';
 

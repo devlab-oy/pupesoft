@@ -1,5 +1,9 @@
 <?php
 
+	if (isset($_REQUEST["komento"]) and $_REQUEST["komento"] == "PDF_RUUDULLE") {
+		$nayta_pdf = 1;
+	}
+
 	require("inc/parametrit.inc");
 
 	$logistiikka_yhtio = '';
@@ -19,10 +23,10 @@
 		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
-	echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
+	if (!isset($nayta_pdf)) echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
 
 	if ($tee == 'tulosta' and (!isset($rtunnukset) or count($rtunnukset) == 0)) {
-		echo "<font class='error'>",t("Et valinnut yht‰‰n rahtikirjaa"),"!</font><br>";
+		if (!isset($nayta_pdf)) echo "<font class='error'>",t("Et valinnut yht‰‰n rahtikirjaa"),"!</font><br>";
 		$tee = "";
 	}
 
@@ -112,9 +116,14 @@
 			require ("rahtikirja-tulostus.php");
 		}
 
-		$tee = '';
-		echo "<br>";
 
+		if (!isset($nayta_pdf)) {
+			echo "<br>";
+			$tee = '';
+		}
+		else {
+			$tee = 'SKIPPAA';
+		}
 	}
 
 	if ($tee == 'valitse') {
@@ -242,6 +251,7 @@
 				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
 			}
 
+			echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 			echo "</select><br><br>";
 
 
@@ -290,7 +300,7 @@
 			<input type='text' name='vv' value='$vv' size='5'></td>
 			</tr>";
 
-			$query  = "SELECT * FROM toimitustapa WHERE nouto='' and $logistiikka_yhtiolisa order by jarjestys, selite";			
+			$query  = "SELECT * FROM toimitustapa WHERE nouto='' and $logistiikka_yhtiolisa order by jarjestys, selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<tr><th>".t("Valitse toimitustapa").":</th>";
@@ -342,4 +352,5 @@
 	}
 
 	require("inc/footer.inc");
+
 ?>

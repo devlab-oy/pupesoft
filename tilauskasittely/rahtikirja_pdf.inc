@@ -14,7 +14,7 @@
 	// tulostetaan rahtikirja
 
 	//	Jos tämä on osa "kokonaistoimitusta", merkataan alkuperäinen tilausnumero alkuun
-	if($rakir_row["tunnusnippu"]>0) {
+	if ($rakir_row["tunnusnippu"]>0) {
 		foreach ($lotsikot as &$o) {
 			if($o <> $rakir_row["tunnusnippu"]) {
 				$o = "$rakir_row[tunnusnippu]/$o";
@@ -291,11 +291,7 @@
 		if(isset($data) !== FALSE and $yhtiorow["oslapp_rakir_logo"] == '') {
 			$image = $pdf->jfif_embed($data);
 
-			if(!$image) {
-				echo t("Logokuvavirhe");
-			}
-			else {
-
+			if ($image) {			
 				$logoparam = array();
 
 				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 50) {
@@ -653,6 +649,10 @@
 		$kutsu = "PDF-rahtikirja";
 		require("inc/sahkoposti.inc");
 
+	}
+	elseif ($kirjoitin == 'PDF_RUUDULLE') {
+		//Työnnetään tuo pdf vaan putkeen!
+		echo file_get_contents($pdffilenimi);
 	}
 	else {
 		//itse print komento...

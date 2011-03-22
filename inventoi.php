@@ -81,7 +81,7 @@
 
 					if ($tuo != '' and $hyl != '' and $maa != '') {
 						$hylp = explode("-", $hyl);
-						$tuote[] = $tuo."#".$hylp[0]."#".$hylp[1]."#".$hylp[2]."#".$hylp[3];
+						$tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
 						$maara[] = $maa;
 					}
 				}
@@ -99,7 +99,7 @@
 
 					if ($tuo != '' and $hyl != '' and $maa != '') {
 						$hylp = explode("-", $hyl);
-						$tuote[] = $tuo."#".$hylp[0]."#".$hylp[1]."#".$hylp[2]."#".$hylp[3];
+						$tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
 						$maara[] = $maa;
 					}
 				}
@@ -127,7 +127,7 @@
 		if (count($tuote) > 0) {
 			foreach($tuote as $i => $tuotteet) {
 
-				$tuotetiedot = explode("#", $tuotteet);
+				$tuotetiedot = explode("###", $tuotteet);
 
 				//näitä muuttujia me tarvitaan
 				$tuoteno 	= $tuotetiedot[0];
@@ -1209,7 +1209,7 @@
 					}
 
 					echo "<input type='hidden' name='hyllyssa[$tuoterow[tptunnus]]' value='$tuoterow[saldo]'>";
-					echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]#$tuoterow[hyllyalue]#$tuoterow[hyllynro]#$tuoterow[hyllyvali]#$tuoterow[hyllytaso]'>";
+					echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]###$tuoterow[hyllyalue]###$tuoterow[hyllynro]###$tuoterow[hyllyvali]###$tuoterow[hyllytaso]'>";
 					echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
 
 					if (in_array($tuoterow["sarjanumeroseuranta"], array("S","T","U","V"))) {

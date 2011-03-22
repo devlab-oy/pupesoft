@@ -114,6 +114,9 @@
 	if ($toim == "LAHETE") {
 		$fuse = t("Lähete");
 	}
+	if ($toim == "DGD") {
+		$fuse = "DGD - Multimodal Dangerous Goods Form";
+	}
 	if ($toim == "PAKKALISTA") {		//	Tämä on about yhdistetty vienti-erittely ja lähete
 		$fuse = t("Pakkalista");
 	}
@@ -417,7 +420,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
-		if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == '') {						 			
+		if ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == '') {
 			$where1 .= " lasku.tila in ('L','N','C') and lasku.tilaustyyppi = 'R' ";
 
 			$where2 .= " and lasku.alatila in ('','A','B','C','J','D') ";
@@ -578,7 +581,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
-		if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
+		if ($toim == "LAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
 			//myyntitilaus. Tulostetaan lähete.
 			$where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -1092,6 +1095,12 @@
 			$tulostimet[0] = 'Lähete';
 			if ($kappaleet > 0 and $komento["Lähete"] != 'email') {
 				$komento["Lähete"] .= " -# $kappaleet ";
+			}
+		}
+		if ($toim == "DGD") {
+			$tulostimet[0] = 'DGD';
+			if ($kappaleet > 0 and $komento["DGD"] != 'email') {
+				$komento["DGD"] .= " -# $kappaleet ";
 			}
 		}
 		if ($toim == "PAKKALISTA") {
@@ -1700,7 +1709,7 @@
 
 				$lahetetyyppi = "";
 
-				if ($sellahetetyyppi != '') {
+				if (isset($sellahetetyyppi) and $sellahetetyyppi != '') {
 					$lahetetyyppi = $sellahetetyyppi;
 				}
 				elseif ($asrow["lahetetyyppi"] != '') {
@@ -1721,15 +1730,7 @@
 					}
 				}
 
-				$utuotteet_mukaan = 0;
-
-				if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
-					require_once ("tulosta_lahete_alalasku.inc");
-				}
-				else {
-					require_once ("tulosta_lahete.inc");
-					$utuotteet_mukaan = 1;
-				}
+				require_once ("tulosta_lahete.inc");
 
 				//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
 				if (function_exists("tulosta_lahete")) {
@@ -1795,112 +1796,60 @@
 								ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$riresult = mysql_query($query) or pupe_error($query);
 
-					unset($pdf);
-					unset($page);
-
-					$sivu  = 1;
-					$total = 0;
+					$params_lahete = array(
+					'arvo'						=> 0,
+					'asrow'						=> $asrow,
+					'boldi'						=> $boldi,
+					'ei_otsikoita'				=> '',
+					'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+					'iso'						=> $iso,
+					'jtid'						=> '',
+					'kala'						=> 0,
+					'kassa_ale'					=> '',
+					'kieli'						=> $kieli,
+					'lahetetyyppi'				=> $lahetetyyppi,
+					'laskurow'					=> $laskurow,
+					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+					'norm'						=> $norm,
+					'page'						=> NULL,
+					'pdf'						=> NULL,
+					'perheid'					=> 0,
+					'pieni'						=> $pieni,
+					'pieni_boldi'				=> $pieni_boldi,
+					'pitkattuotteet'			=> FALSE,
+					'rectparam'					=> $rectparam,
+					'riviresult'				=> $riresult,
+					'rivinkorkeus'				=> $rivinkorkeus,
+					'rivinumerot'				=> "",
+					'row'						=> NULL,
+					'sivu'						=> 1,
+					'summa'						=> 0,
+					'tee'						=> $tee,
+					'thispage'					=> NULL,
+					'toim'						=> $toim,
+					'tots'						=> 0,
+					'tuotenopituus'				=> '',
+					'tyyppi'					=> '',
+					'useita'					=> '',
+					);
 
 					if ($laskurow["tila"] == "G") {
-						$lah_tyyppi = "SIIRTOLISTA";
-					}
-					else {
-						$lah_tyyppi = "";
+						$params_lahete["tyyppi"] = "SIIRTOLISTA";
 					}
 
 					// Aloitellaan lähetteen teko
-					$page[$sivu] = alku_lahete($lah_tyyppi);
+					$params_lahete = alku_lahete($params_lahete);
 
-					// generoidaan rivinumerot
-					$rivinumerot    = array();
-					$tuotenopituus  = 0;
-					$nimityspituus  = 0;
-					$pitkattuotteet = FALSE;
-
-					while ($row = mysql_fetch_assoc($riresult)) {
-						$rivinumerot[$row["tunnus"]] = $row["tunnus"];
-
-						$tuotenopituus += $pdf->strlen($row["tuoteno"], $norm);
-						$nimityspituus += $pdf->strlen($row["nimitys"], $norm);
-					}
-
-					// Jos tuotenumerot ovat hyvin pitkät
-					if (($tuotenopituus / mysql_num_rows($riresult)) > 140 or ($nimityspituus / mysql_num_rows($riresult)) > 140) {
-						#$pitkattuotteet = TRUE;
-					}
-
-					// Määritetään dynaamisesti tuoteno ja nimitys-sarakkeiden leveydet
-					$tuotenopituus = round($tuotenopituus/($tuotenopituus+$nimityspituus), 2);
-
-					sort($rivinumerot);
-
-					$kal = 1;
-
-					foreach ($rivinumerot as $rivino) {
-						$rivinumerot[$rivino] = $kal;
-						$kal++;
-					}
-
+					// Piirretään rivit
 					mysql_data_seek($riresult,0);
 
-					// Ekan sivun otsikot
-					rivi_otsikot_lahete($page[$sivu]);
-
 					while ($row = mysql_fetch_assoc($riresult)) {
-						rivi_lahete($page[$sivu], $lah_tyyppi);
-						$total+= $row["rivihinta"];
-					}
-
-					// Haetaan vielä jälkkärissä olevat tuotteet EI VIELÄ KÄYTÖSSÄ
-					if (1 == 2 and $laskurow["clearing"] == "JT-TILAUS") {
-						$query = "  SELECT group_concat(distinct vanha_otunnus) alkuptilaukset
-									FROM tilausrivi
-									JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-									WHERE tilausrivi.otunnus = '$otunnus'
-									and tilausrivi.yhtio = '$kukarow[yhtio]'
-									$tyyppilisa";
-						$rires = mysql_query($query) or pupe_error($query);
-						$rirow = mysql_fetch_assoc($rires);
-
-						//generoidaan lähetteelle ja keräyslistalle rivinumerot
-						if ($rirow["alkuptilaukset"] != "") {
-							$query = "  SELECT tilausrivi.*,
-										round(if (tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
-										round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
-										$sorttauskentta,
-										if(tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
-										tilausrivin_lisatiedot.vanha_otunnus
-										FROM tilausrivi
-										JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-										JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-										LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-										WHERE tilausrivi.otunnus in ($rirow[alkuptilaukset])
-										and tilausrivi.yhtio = '$kukarow[yhtio]'
-										and tilausrivi.varattu + tilausrivi.jt != 0
-										and tilausrivi.var = 'J'
-										and tilausrivi.toimitettu = ''
-										$tyyppilisa
-										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-										ORDER BY jtsort, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
-							$riresult = mysql_query($query) or pupe_error($query);
-
-							while ($row = mysql_fetch_assoc($riresult)) {
-
-								$row['kommentti'] .= "\n******* ".t("Tilaukselta", $kieli).": $row[vanha_otunnus] ".t("vielä jälkitoimituksessa", $kieli).". *******";
-
-								$row['rivihinta'] 	= "";
-								$row['varattu'] 	= "";
-								$row['kpl']			= "";
-								$row['jt'] 			= "";
-								$row['d_erikseen'] 	= "JOO";
-
-								rivi_lahete($page[$sivu], $lah_tyyppi);
-							}
-						}
+						$params_lahete["row"] = $row;
+						$params_lahete = rivi_lahete($params_lahete);
 					}
 
 					//Haetaan erikseen toimitettavat tuotteet
-					if ($laskurow["vanhatunnus"] != 0 and $utuotteet_mukaan == 1) {
+					if ($laskurow["vanhatunnus"] != 0) {
 						$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
 									FROM lasku use index (yhtio_vanhatunnus)
 									WHERE yhtio		= '$kukarow[yhtio]'
@@ -1950,18 +1899,15 @@
 								$row['jt'] 			= "";
 								$row['d_erikseen'] 	= "JOO";
 
-								rivi_lahete($page[$sivu], $lah_tyyppi);
+								$params_lahete["row"] = $row;
+								$params_lahete = rivi_lahete($params_lahete);
 							}
 						}
 					}
 
-					//Vikan rivin loppuviiva
-					$x[0] = 20;
-					$x[1] = 580;
-					$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
-					$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
-
-					loppu_lahete($page[$sivu], 1, $lah_tyyppi);
+					// Loppulaatikot
+					$params_lahete["tots"] = 1;
+					$params_lahete = loppu_lahete($params_lahete);
 
 					//katotaan onko laskutus nouto
 					$query = "  SELECT toimitustapa.nouto, maksuehto.kateinen
@@ -1973,16 +1919,78 @@
 					$kures = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($kures) > 0 and $yhtiorow["lahete_nouto_allekirjoitus"] != "") {
-						kuittaus_lahete();
+						$params_lahete = kuittaus_lahete($params_lahete);
 					}
 
-					if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
-						alvierittely_lahete($page[$sivu]);
-					}
+					if (isset($komento["Lähete"])) $params_lahete["komento"] = $komento["Lähete"];
 
 					//tulostetaan sivu
-					print_pdf_lahete($komento["Lähete"]);
+					print_pdf_lahete($params_lahete);
 				}
+
+				$tee = '';
+			}
+
+			if ($toim == "DGD") {
+
+				$otunnus = $laskurow["tunnus"];
+
+				require_once("tulosta_dgd.inc");
+
+				if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
+					$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
+				}
+				else {
+					$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
+				}
+
+				$query = "  SELECT tuote.vakkoodi,
+							if(tuote.myynti_era > 0,tuote.myynti_era , 1) era,
+							tuote.vakmaara tilavuus,
+							tuote.pakkausmateriaali materiaali,
+							sum(tilausrivi.kpl) kpl
+							FROM tilausrivi
+							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+							WHERE tilausrivi.otunnus = '$otunnus'
+							and tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tuote.vakkoodi != ''
+							GROUP BY 1,2,3,4
+							ORDER BY 1,2,3,4";
+				$riresult1 = mysql_query($query) or pupe_error($query);
+
+				$query = "  SELECT r1.*
+							FROM rahtikirjat r1
+							LEFT JOIN rahtikirjat r2 ON (r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro)
+							WHERE r1.otsikkonro = '$otunnus'
+							and r1.yhtio = '$kukarow[yhtio]'";
+				$riresult2 = mysql_query($query) or pupe_error($query);
+
+				$params_dgd = array(
+				'kieli'						=> $kieli,
+				'laskurow'					=> $laskurow,
+				'page'						=> NULL,
+				'pdf'						=> NULL,
+				'row'						=> NULL,
+				'sivu'						=> 0,
+				'tee'						=> $tee,
+				'toim'						=> $toim,
+				'norm'						=> $norm,
+				);
+
+				// Aloitellaan lähetteen teko
+				$params_dgd = alku_dgd($params_dgd);
+
+				$params_dgd["riresult1"] = $riresult1;
+				$params_dgd["riresult2"] = $riresult2;
+
+				$params_dgd = rivi_dgd($params_dgd);
+				$params_dgd = loppu_dgd($params_dgd);
+
+				//tulostetaan sivu
+				$params_dgd["komento"] = $komento["DGD"];
+				print_pdf_dgd($params_dgd);
 
 				$tee = '';
 			}
@@ -2081,7 +2089,7 @@
 				'komento'			=> '',
 				'laskurow'        	=> $laskurow,
 				'norm'            	=> $norm,
-				'page'            	=> '',
+				'page'            	=> NULL,
 				'paino'           	=> 0,
 				'pdf'             	=> NULL,
 				'perheid'         	=> 0,

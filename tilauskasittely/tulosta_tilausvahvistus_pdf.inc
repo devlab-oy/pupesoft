@@ -129,56 +129,57 @@
 
 	$riresult = mysql_query($query) or pupe_error($query);
 
-	unset($pdf);
-	unset($page);
-
-	$sivu  = 1;
-	$total = 0;
+	$params_lahete = array(
+	'arvo'						=> 0,
+	'asrow'						=> $asrow,
+	'boldi'						=> $boldi,
+	'ei_otsikoita'				=> '',
+	'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+	'iso'						=> $iso,
+	'jtid'						=> '',
+	'kala'						=> 0,
+	'kassa_ale'					=> '',
+	'kieli'						=> $kieli,
+	'lahetetyyppi'				=> $lahetetyyppi,
+	'laskurow'					=> $laskurow,
+	'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+	'norm'						=> $norm,
+	'page'						=> NULL,
+	'pdf'						=> NULL,
+	'perheid'					=> 0,
+	'pieni'						=> $pieni,
+	'pieni_boldi'				=> $pieni_boldi,
+	'pitkattuotteet'			=> FALSE,
+	'rectparam'					=> $rectparam,
+	'riviresult'				=> $riresult,
+	'rivinkorkeus'				=> $rivinkorkeus,
+	'rivinumerot'				=> "",
+	'row'						=> NULL,
+	'sivu'						=> 1,
+	'summa'						=> 0,
+	'tee'						=> $tee,
+	'thispage'					=> NULL,
+	'toim'						=> $toim,
+	'tots'						=> 0,
+	'tuotenopituus'				=> '',
+	'tyyppi'					=> 'TILAUSVAHVISTUS',
+	'useita'					=> '',
+	);
 
 	// Aloitellaan lähetteen teko
-	$page[$sivu] = alku_lahete($toim);
+	$params_lahete = alku_lahete($params_lahete);
 
-	// generoidaan rivinumerot
-	$rivinumerot    = array();
-	$tuotenopituus  = 0;
-	$nimityspituus  = 0;
-	$pitkattuotteet = FALSE;
-
-	while ($row = mysql_fetch_assoc($riresult)) {
-		$rivinumerot[$row["tunnus"]] = $row["tunnus"];
-
-		$tuotenopituus += $pdf->strlen($row["tuoteno"], $norm);
-		$nimityspituus += $pdf->strlen($row["nimitys"], $norm);
-	}
-
-	// Jos tuotenumerot ovat hyvin pitkät
-	if (($tuotenopituus / mysql_num_rows($riresult)) > 140 or ($nimityspituus / mysql_num_rows($riresult)) > 140) {
-		#$pitkattuotteet = TRUE;
-	}
-
-	// Määritetään dynaamisesti tuoteno ja nimitys-sarakkeiden leveydet
-	$tuotenopituus = round($tuotenopituus/($tuotenopituus+$nimityspituus), 2);
-
-	sort($rivinumerot);
-
-	$kal = 1;
-
-	foreach ($rivinumerot as $rivino) {
-		$rivinumerot[$rivino] = $kal;
-		$kal++;
-	}
-
+	// Piirretään rivit
 	mysql_data_seek($riresult,0);
 
-	// Ekan sivun otsikot
-	rivi_otsikot_lahete($page[$sivu], $naytetaanko_rivihinta);
-
 	while ($row = mysql_fetch_assoc($riresult)) {
-		rivi_lahete($page[$sivu], $toim, $naytetaanko_rivihinta);
-		$total+= $row["rivihinta"];
+		$params_lahete["row"] = $row;
+		$params_lahete = rivi_lahete($params_lahete);
 	}
 
-	loppu_lahete($page[$sivu], 1, $toim, $naytetaanko_rivihinta);
+	// Loppulaatikot
+	$params_lahete["tots"] = 1;
+	$params_lahete = loppu_lahete($params_lahete);
 
 	if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 		$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".pdf";
@@ -193,6 +194,8 @@
 		$tilausvahvistus_tallenna = "";
 	}
 
+	$params_lahete["komento"] = $komento["Tilausvahvistus"];
+
 	//tulostetaan sivu
-	print_pdf_lahete($komento["Tilausvahvistus"], $toim);
+	print_pdf_lahete($params_lahete);
 ?>

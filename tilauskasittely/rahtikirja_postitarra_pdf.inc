@@ -363,7 +363,7 @@
 		$pdf->draw_rectangle(0, 0,  598, 418, $firstpage, $rectparam);
 
 		//l‰hetet‰‰n postin edisanoma
-		if ($tulostakopio == "") {
+		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 			require("postiedi.inc");
 		}
 	}

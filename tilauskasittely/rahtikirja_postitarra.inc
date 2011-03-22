@@ -343,7 +343,7 @@
 		}
 
 		//l‰hetet‰‰n postin edisanoma
-		if ($tulostakopio == "") {
+		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 			require("postiedi.inc");
 		}
 	}

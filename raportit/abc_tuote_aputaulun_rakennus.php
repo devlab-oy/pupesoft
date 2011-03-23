@@ -397,7 +397,7 @@ if ($tee == 'YHTEENVETO') {
 				sum(tuotepaikat.saldo) * if(epakurantti100pvm = '0000-00-00',if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25), 0) vararvo
 				FROM tuotepaikat USE INDEX (tuote_index)
 				JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-				LEFT JOIN abc_aputaulu USE INDEX (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuotepaikat.yhtio and abc_aputaulu.tuoteno = tuotepaikat.tuoteno and tyyppi = '$abcchar')
+				LEFT JOIN abc_aputaulu USE INDEX (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuotepaikat.yhtio and abc_aputaulu.tuoteno = tuotepaikat.tuoteno and abc_aputaulu.tyyppi = '$abcchar')
 				WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 				HAVING saldo > 0 and luokka is null";

@@ -1102,13 +1102,6 @@
 			$yht_i 		= 0;
 			$alask 		= 0;
 
-			// Käyttäjän sallitut varastot
-			$sallitut_varastot_lisa = 0;
-
-			if ((int) $kukarow["varasto"] > 0) {
-				$sallitut_varastot_lisa = explode(",", $kukarow['varasto']);
-			}
-
 			if ($verkkokauppa == "") {
 				foreach ($rows as $ind => $row) {
 					// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
@@ -1492,7 +1485,8 @@
 					if ($row["tuoteperhe"] == $row["tuoteno"] and $row["sarjanumeroseuranta"] != "S") {
 						// Extranet ja verkkokauppa
 						if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-							$saldot = tuoteperhe_myytavissa($row["tuoteno"], "KAIKKI", $sallitut_varastot_lisa, 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+
+							$saldot = tuoteperhe_myytavissa($row["tuoteno"], "KAIKKI", "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
 							$kokonaismyytavissa = 0;
 
@@ -1601,7 +1595,7 @@
 							}
 						}
 
-						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", $sallitut_varastot_lisa, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
 						if ($verkkokauppa == "" and $row['status'] == 'A' and $myytavissa <= 0) {
 							$tulossa_query = " 	SELECT DATE_ADD(MIN(tilausrivi.toimaika), INTERVAL (toimi.oletus_toimaika+toimi.oletus_tilausvali) DAY) paivamaara, sum(varattu) tilattu

@@ -546,15 +546,15 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 			$yhtio = $kukarow["yhtio"];
 		}
 
-		if (is_array($varasto)) {
-			$varasto_apu = '';
-			foreach ($varasto as $varasto_tunnus) {
-				$varasto_apu .= (int) $varasto_tunnus.",";
-			}
-			$varasto = substr($varasto_apu, 0, -1);
+		if (is_array($varasto) and count($varasto) > 0) {
+			$varasto = implode(",", $varasto);
 		}
 		else {
 			$varasto = (int) $varasto;
+
+			if ($kukarow["extranet"] != "" and $varasto == 0 and (int) $kukarow["varasto"] > 0) {
+				$varasto = $kukarow['varasto'];
+			}
 		}
 
 		$valinta1 = ""; // varaston tyyppi
@@ -597,10 +597,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 
 		if (!function_exists("tuoteperhe_myytavissa_reku")) {
 			function tuoteperhe_myytavissa_reku($yhtio, $tuoteno, $tuotteet, $tuotteet_str, $isat_array, $kaikki_array, $kerroin_array) {
-				if (in_array($tuoteno, $isat_array)) {
-					//echo "FUULI! TEET IKUISEN LUUPIN!!!!!!!!<br>";
-				}
-				else {
+				if (!in_array($tuoteno, $isat_array)) {
 					$isat_array[] = $tuoteno;
 
 					$query = " 	SELECT distinct tuote.tuoteno, tuoteperhe.kerroin, tuote.ei_saldoa
@@ -665,7 +662,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 		$kaikki_array 	= array($tuoteno);
 		$kerroin_array 	= array($tuoteno."#!¡!#1");
 
-		for($isa=0; $isa < $riikoko; $isa++) {
+		for ($isa=0; $isa < $riikoko; $isa++) {
 			list($isat_array, $kaikki_array, $tuotteet, $tuotteet_str, $kerroin_array) = tuoteperhe_myytavissa_reku($yhtio, $kaikki_array[$isa], $tuotteet, $tuotteet_str, $isat_array, $kaikki_array, $kerroin_array);
 
 			if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y") {
@@ -701,7 +698,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 				$perhe_myytavissa = array();
 			}
 
-			foreach($tuotteet as $tuoteno => $kerroin) {
+			foreach ($tuotteet as $tuoteno => $kerroin) {
 
 				list(,,$myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $saldorow["tunnus"], $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era);
 				$perhe_myytavissa[$tuoteno] += round($myytavissa/$kerroin, 2);
@@ -738,14 +735,14 @@ if (!function_exists("saldo_myytavissa")) {
 		}
 
 		if (is_array($varasto) and count($varasto) > 0) {
-			$varasto_apu = '';
-			foreach ($varasto as $varasto_tunnus) {
-				$varasto_apu .= (int) $varasto_tunnus.",";
-			}
-			$varasto = substr($varasto_apu, 0, -1);
+			$varasto = implode(",", $varasto);
 		}
 		else {
 			$varasto = (int) $varasto;
+
+			if ($kukarow["extranet"] != "" and $varasto == 0 and (int) $kukarow["varasto"] > 0) {
+				$varasto = $kukarow['varasto'];
+			}
 		}
 
 		$query  = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";

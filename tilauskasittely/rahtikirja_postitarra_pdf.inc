@@ -17,6 +17,12 @@
 
 	require_once("pdflib/phppdflib.class.php");
 
+	// jos php-gd on installoitu niin loidataab barcode library
+	if (in_array("gd", get_loaded_extensions())) {
+		if (@include_once("viivakoodi/Barcode.php"));
+		else include_once("Barcode.php");
+	}
+
 	//PDF parametrit
 	$pdf = new pdffile;
 	$pdf->set_default('margin-top', 	0);

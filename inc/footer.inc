@@ -36,31 +36,31 @@
 
 				switch (strtoupper($kukarow["kieli"])) {
 					case "EN":
-						$kieli  = "EN";
+						$kieli  = "en";
 						$kindex = 0;
 						break;
 					case "SE":
-						$kieli  = "SE";
+						$kieli  = "se";
 						$kindex = 1;
 						break;
 					case "DE":
-						$kieli  = "DE";
+						$kieli  = "de";
 						$kindex = 2;
 						break;
 					case "DK":
-						$kieli  = "DK";
+						$kieli  = "dk";
 						$kindex = 3;
 						break;
 					case "EE":
-						$kieli  = "EE";
+						$kieli  = "ee";
 						$kindex = 4;
 						break;
 					default:
-						$kieli  = "EN";
+						$kieli  = "en";
 						$kindex = 0;
 				}
 
-				echo " <a href='".$palvelin."sanakirja.php?hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON&etsi_kieli=fi&kieli[$kindex]=$kieli&show=all'><font class='info'>".t("Sanakirja")."</font></a>";
+				echo " <a href='".$palvelin2."sanakirja.php?kieli[$kindex]=$kieli&show=all&etsi_kieli=fi&hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON'><font class='info'>".t("Sanakirja")."</font></a>";
 			}
 
 		}

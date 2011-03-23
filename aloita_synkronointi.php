@@ -4,6 +4,8 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Alkusynkronointi")."</font><hr>";
 
+if (!isset($tee)) $tee = "";
+
 if ($tee == "SYNK") {
 
 	//	Onko mahdollista synkronoida?
@@ -46,11 +48,16 @@ if ($tee == "SYNK") {
 		//	Tehdään kysely
 		$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
 					FROM yhtio
-					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-					where konserni	 = '$yhtiorow[konserni]'
-					and (synkronoi = '$table' or synkronoi like '$table,%' or synkronoi like '%,$table,%' or synkronoi like '%,$table')";
+					JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = yhtio.yhtio)
+					WHERE konserni = '$yhtiorow[konserni]'
+					AND (synkronoi = '$table' or synkronoi like '$table,%' or synkronoi like '%,$table,%' or synkronoi like '%,$table' or synkronoi like '%,$table|%' or synkronoi like '$table|%')";
 		$kohderes = mysql_query($query) or pupe_error($query);
 		$kohderow = mysql_fetch_array($kohderes);
+
+		if (strlen($kohderow["yhtiot"]) == 0) {
+			echo "VIRHE: Pyydettyä taulua $table ei voida synkronoida, yhtiö ei löydy!<br>$query";
+			exit;
+		}
 
 		$group = " group by ";
 

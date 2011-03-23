@@ -1584,33 +1584,33 @@ if (!function_exists("generoi_sorttauskentta")) {
 	}
 }
 
+if (!function_exists("synclog")) {
+	function synclog($yhtio, $table, $viesti, $tunnus) {
+		global $yhtiorow, $kukarow;
+
+		if ($kukarow["yhtio"] == $yhtio) {
+			$tapa = "MASTER";
+		}
+		else {
+			$tapa = "TARGET";
+		}
+
+		$query = "	INSERT INTO synclog SET
+					yhtio		= '$yhtio',
+					taulu		= '$table',
+					tauluntunnus= '$tunnus',
+					tapa		= '$tapa',
+					viesti		= '".addslashes($viesti)."',
+					laatija		= '$kukarow[kuka]',
+					luontiaika	= now()";
+		$insres = mysql_query($query) or pupe_error($query);
+	}
+}
+
 // Konserniyhtiöiden tietueiden synkronointi
 if (!function_exists("synkronoi")) {
 	function synkronoi($yhtio, $table, $tunnus, $orig = "", $force = "") {
 		global $yhtiorow, $kukarow;
-
-		if (!function_exists("synclog")) {
-			function synclog($yhtio, $table, $viesti, $tunnus) {
-				global $yhtiorow, $kukarow;
-
-				if ($kohde == $yhtio) {
-					$tapa = "MASTER";
-				}
-				else {
-					$tapa = "TARGET";
-				}
-
-				$query = "	INSERT INTO synclog SET
-							yhtio		= '$yhtio',
-							taulu		= '$table',
-							tauluntunnus= '$tunnus',
-							tapa		= '$tapa',
-							viesti		= '".addslashes($viesti)."',
-							laatija		= '$kukarow[kuka]',
-							luontiaika	= now()";
-				$insres = mysql_query($query) or pupe_error($query);
-			}
-		}
 
 		//	Onko mahdollista synkronoida?
 		if (strpos($yhtiorow["synkronoi"], $table) === false) {
@@ -1891,7 +1891,7 @@ if (!function_exists("synkronoi")) {
 						}
 
 						// Tarkastetaan että hinnat eivät mene aivan päin metsää..
-						$query = "select tunnus from yhtion_parametrit where yhtio='$kohderow[yhtio]' and alv_kasittely!='$yhtion_parametrit[alv_kasittely]'";
+						$query = "select tunnus from yhtion_parametrit where yhtio='$kohderow[yhtio]' and alv_kasittely!='$yhtiorow[alv_kasittely]'";
 						$abures = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($abures)!=0 and $masterrow["alv"] > 0) {

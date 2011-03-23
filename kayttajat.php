@@ -1,7 +1,8 @@
 <?php
+
 	require ("inc/parametrit.inc");
 
-	if ($livesearch_tee == "KAYTTAJAHAKU") {
+	if (isset($livesearch_tee) and $livesearch_tee == "KAYTTAJAHAKU") {
 		livesearch_kayttajahaku($toim);
 		exit;
 	}
@@ -9,15 +10,26 @@
 	enable_ajax();
 
 	echo "<font class='head'>";
-	if ($toim == 'extranet') {
+
+	if (!isset($toim)) 				$toim = "";
+	if (!isset($tee)) 				$tee = "";
+	if (!isset($ytunnus_oa)) 		$ytunnus_oa = "";
+	if (!isset($ytunnus_oat)) 		$ytunnus_oat = "";
+	if (!isset($firname)) 			$firname = "";
+	if (!isset($generoitupass)) 	$generoitupass = "";
+	if (!isset($kumpi)) 			$kumpi = "";
+	if (!isset($oletus_asiakas)) 	$oletus_asiakas = "";
+
+	if (isset($toim) and $toim == 'extranet') {
 		echo "Extranet-";
 	}
+
 	echo t("K‰ytt‰j‰hallinta"),":</font><hr>";
 
 	// t‰‰ on t‰ll‰n‰n kikka.. ‰lk‰‰ seotko.. en jaksa pyˆritt‰‰ toimia joka formista vaikka pit‰s..
-	$PHP_SELF = $PHP_SELF."?toim=$toim";
+	if (isset($toim)) $PHP_SELF = $PHP_SELF."?toim=$toim";
 
-	if ($generatepass != "") {
+	if (isset($generatepass) and $generatepass != "") {
 		$generoitupass = trim(shell_exec("openssl rand -base64 12"));
 		$tee = "MUUTA";
 		$firname = "";
@@ -59,7 +71,7 @@
 			$tee = "eimit‰‰n";
 		}
 	}
-	elseif ($ytunnus_oa == '0') {
+	elseif (isset($ytunnus_oa) and $ytunnus_oa == '0') {
 		// Nollalla saa poistettua aletus_asiakkaan
 		$krow["oletus_asiakas"] = "";
 		$oletus_asiakas = "";
@@ -90,7 +102,7 @@
 			$tee = "eimit‰‰n";
 		}
 	}
-	elseif ($ytunnus_oat == '0') {
+	elseif (isset($ytunnus_oat) and $ytunnus_oat == '0') {
 		// Nollalla saa poistettua aletus_asiakkaan
 		$krow["oletus_asiakastiedot"] = "";
 		$oletus_asiakastiedot = "";
@@ -153,6 +165,22 @@
 
 		echo "<b>".t("K‰ytt‰j‰n")." $selkuka ".t("salasana poistettu")."!</b><br>";
 		$selkuka=$kukarow['tunnus'];
+	}
+
+	// Otetaan valitut organisaatiosegementit
+	if (isset($dynaaminenkukamaxsyvyys)) {
+		$hierarkia = array();
+
+		for ($muli = 1; $muli <= $dynaaminenkukamaxsyvyys; $muli++) {
+			if (isset(${"mul_kuka".$muli}) and count(${"mul_kuka".$muli}) > 0) {
+				$hierarkia[] = implode(",", ${"mul_kuka".$muli});
+			}
+		}
+
+		$hierarkia = implode(",", $hierarkia);
+	}
+	else {
+		$hierarkia = "";
 	}
 
 	// Perustetaan uusi k‰ytt‰j‰
@@ -269,7 +297,7 @@
 						extranet						= '$extranet',
 						hyvaksyja						= '$hyvaksyja',
 						hyvaksyja_maksimisumma			= '$hyvaksyja_maksimisumma',
-						hierarkia						= '$kaikki_tunnukset',
+						hierarkia						= '$hierarkia',
 						lomaoikeus						= '$lomaoikeus',
 						asema							= '$asema',
 						toimipaikka						= '$toimipaikka',
@@ -392,7 +420,7 @@
 	}
 
 	// Muutetaanko jonkun muun oikeuksia??
-	if ($selkuka != '') {
+	if (isset($selkuka) and $selkuka != '') {
 		$query = "SELECT * FROM kuka WHERE tunnus='$selkuka'";
 	}
 	else {
@@ -402,17 +430,12 @@
 	$result = mysql_query($query) or pupe_error($query);
 	$selkukarow = mysql_fetch_array($result);
 
-	if (trim($tee_dyna) != '' and trim($submit_button) == '') {
-		$tee = 'MUUTA';
-		$firname = '';
-	}
-
 	//muutetaan kayttajan tietoja tai syotetaan uuden kayttajan tiedot
 	if ($tee == 'MUUTA') {
 
 		$yhtio = $kukarow['yhtio'];
 
-		if (strlen($firname) > 0) {
+		if (strlen($firname) > 0 and isset($submit_button)) {
 
 			if (count($profiili) > 0) {
 				foreach($profiili as $prof) {
@@ -474,7 +497,7 @@
 						extranet						= '$extranet',
 						hyvaksyja						= '$hyvaksyja',
 						hyvaksyja_maksimisumma			= '$hyvaksyja_maksimisumma',
-						hierarkia						= '$kaikki_tunnukset',
+						hierarkia						= '$hierarkia',
 						lomaoikeus						= '$lomaoikeus',
 						asema							= '$asema',
 						toimipaikka						= '$toimipaikka',
@@ -687,27 +710,18 @@
 					echo "<tr><th align='left'>",t("Hyv‰ksyj‰n maksimisumma"),":</th>";
 					echo "<td><input type='text' name='hyvaksyja_maksimisumma' value='$krow[hyvaksyja_maksimisumma]'></td></tr>";
 
-					$avainsana_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite='Kuka' ");
+					echo "<tr><th align='left'>",t("Hierarkia ja esimiehet"),":</th><td>";
 
-					if (mysql_num_rows($avainsana_result) == 1) {
-						echo "<tr><th align='left'>",t("Hierarkia ja esimiehet"),":</th><td>";
-						$monivalintalaatikot = array('DYNAAMINEN_KUKA');
-						$monivalintalaatikot_normaali = array();
+					$monivalintalaatikot = array('DYNAAMINEN_KUKA');
+					$monivalintalaatikot_normaali = array();
 
-						if (trim($kaikki_tunnukset) == '' and isset($krow['hierarkia']) and trim($krow['hierarkia']) != '') {
-							$kaikki_tunnukset_from_kuka = $kaikki_tunnukset = $krow['hierarkia'];
-						}
-
-						require ("tilauskasittely/monivalintalaatikot.inc");
-
-						echo "<input type='hidden' name='tee_dyna' value='joo' />";
-
-						if (trim($kaikki_tunnukset) != '') {
-							echo "<input type='hidden' name='kaikki_tunnukset' value='$kaikki_tunnukset' />";
-						}
-
-						echo "</td></tr>";
+					if (!isset($dynaaminenkukamaxsyvyys) and isset($krow['hierarkia']) and trim($krow['hierarkia']) != '') {
+						$monivalintarajaus_dynaaminen = $krow['hierarkia'];
 					}
+
+					require ("tilauskasittely/monivalintalaatikot.inc");
+
+					echo "</td></tr>";
 
 					$avainsana_result = t_avainsana('TERMINAALIALUE', '', " and selite != '' ");
 
@@ -723,7 +737,7 @@
 						}
 
 						echo "</td></tr>";
-					}		
+					}
 
 					$query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
 					$keraysvyohyke_result = mysql_query($query) or pupe_error($query);
@@ -1065,7 +1079,7 @@
 							<option value=''>".t("N‰ytet‰‰n kaikki tilaukset")."</option>
 							<option value='O' $sel[O]>".t("N‰ytet‰‰n vain omat tilaukset")."</option>
 							</select></td></tr>";
-					
+
 					$sel=array();
 					$sel[$krow["asema"]] = "SELECTED";
 
@@ -1074,7 +1088,7 @@
 							<option value=''>".t("Ei n‰ytet‰ extranetiss‰")."</option>
 							<option value='NE' $sel[NE]>".t("N‰ytet‰‰n extranetiss‰")."</option>
 							</select></td></tr>";
-					
+
 				}
 
 				if ($toim != 'extranet') {
@@ -1368,8 +1382,9 @@
 		echo "<optgroup label='".t("Aktiiviset k‰ytt‰j‰t")."'>";
 
 		$edakt = 0;
+		$poislisa = "";
 
-		while ($kurow=mysql_fetch_array($kukares)) {
+		while ($kurow = mysql_fetch_assoc($kukares)) {
 			if ($selkukarow["tunnus"] == $kurow["tunnus"]) $sel = "selected";
 			else $sel = "";
 
@@ -1384,7 +1399,6 @@
 		}
 
 		echo "</optgroup></select></td><td><input type='submit' value='".t("Muokkaa k‰ytt‰j‰n tietoja")."'></td></tr></form>";
-
 
 		echo "<form action='$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='MUUTA'>

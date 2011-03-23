@@ -22,13 +22,13 @@
 	if (!isset($mulselprefix) or $mulselprefix == "") {
 		$mulselprefix = "tuote";
 	}
-	
+
 	// trimmataan ja strtoloweroidaan array
 	$monivalintalaatikot = array_map('trim', $monivalintalaatikot);
 	$monivalintalaatikot = array_map('strtolower', $monivalintalaatikot);
 	$monivalintalaatikot_normaali = array_map('trim', $monivalintalaatikot_normaali);
 	$monivalintalaatikot_normaali = array_map('strtolower', $monivalintalaatikot_normaali);
-	
+
 	// Setataan muuttujat
 	$lisa_haku_osasto 		 = "";
 	$lisa_haku_try 			 = "";
@@ -235,7 +235,7 @@
 					}
 
 					$paramit = substr($paramit, 0, -1);
-					
+
 					if (trim($paramit) != '') {
 						${"lisa_haku_".$param} = " and t_av_$param.selite in ($paramit) ";
 						$lisa_parametri .= " JOIN tuotteen_avainsanat t_av_$param ON (t_av_$param.yhtio = tuote.yhtio and t_av_$param.tuoteno = tuote.tuoteno and t_av_$param.laji = 'parametri_$param' and t_av_$param.selite in ($paramit)) ";
@@ -243,7 +243,7 @@
 				}
 			}
 		}
-	}	
+	}
 
 	foreach ($monivalintalaatikot as $monivalintalaatikko) {
 		$monivalintalaatikko = strip_tags($monivalintalaatikko);
@@ -569,7 +569,7 @@
 				            FROM avainsana
 				            WHERE avainsana.yhtio = '$kukarow[yhtio]'
 				            and avainsana.laji = 'OSASTO'
-				            and avainsana.kieli in ('$yhtiorow[kieli]', '')							
+				            and avainsana.kieli in ('$yhtiorow[kieli]', '')
 				            $avainlisa
 				            $orderlisa";
 			}
@@ -1231,108 +1231,93 @@
 
 			$tree = substr($monivalintalaatikko, 11);
 
-			$laatikot_selected = array();
-
-			if (isset($monivalintarajaus_dynaaminen) and trim($monivalintarajaus_dynaaminen) != '') {
-				$laatikot_selected[] = $monivalintarajaus_dynaaminen;
+			if ($tree == "asiakas") {
+				$mul_otsik = t("Asiakaskategoria");
+			}
+			elseif ($tree == "tuote") {
+				$mul_otsik = t("Tuotekategoria");
+			}
+			elseif ($tree == "kuka") {
+				$mul_otsik = t("Organisaatiotaso");
+			}
+			else {
+				$mul_otsik = t(ucfirst($tree)).t("segmentti");
 			}
 
-			for ($i = 1; $i < 5; $i++) {								
-				// Jos ollaan klikattu "N‰yt‰ kaikki" tai ei olla valittu mit‰‰n
-				if (isset(${'mul_'.$tree.$i}[0]) and (${'mul_'.$tree.$i}[0] == 'PUPEKAIKKIMUUT' or ${'mul_'.$tree.$i}[0] == '')) {
-					array_shift(${'mul_'.$tree.$i});
+			$joinlisa = "";
+			$nodelisa = "";
+
+			# haetaan vain ne puun tunnukset, joille on tehty linkkauksia
+			if ($tree != "kuka") {
+
+				if (isset($autoid) and $autoid != '') {
+					$joinlisa .= " JOIN yhteensopivuus_tuote ON (yhteensopivuus_tuote.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote.atunnus IN ($autoid)) ";
 				}
 
-				// Jos ollaan valittu jotain
-				if (count(${'mul_'.$tree.$i}) > 0 and ${'mul_'.$tree.$i}[0] !== NULL) {
-					// aina syvemm‰n tason monivalintalaatikko rajaa isommalla prioriteetilla, 
-					// joten nollataan haettavat lapsituotteet ja otetaan viimesin valitun laatikon tunnus
-					$laatikot_selected = implode(",", ${'mul_'.$tree.$i});
-				}
-			}
+				$query = "	SELECT GROUP_CONCAT(DISTINCT puun_tunnus) tunnukset
+							FROM puun_alkio
+							$joinlisa
+							WHERE puun_alkio.yhtio = '{$kukarow['yhtio']}'
+							AND puun_alkio.laji = '{$tree}'";
+				$kaikki_puun_tunnukset_res = mysql_query($query, $link) or pupe_error($query);
+				$kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
 
-			// jos ei olla valittu mit‰‰n monivalintalaatikoista, niin haetaan dynaamisen puun root-kategoria
-			if (count($laatikot_selected) == 0) {
-				
-				if (isset($tee_dyna) and $tee_dyna != '') {
-					$kaikki_tunnukset_from_kuka = '';
-				}
-
-				// haetaan dynaamisen puun root-kategorian tunnus
-				$query = "SELECT tunnus FROM dynaaminen_puu WHERE yhtio = '$kukarow[yhtio]' AND laji = '{$tree}' AND lft = 1";
-				$root_cat_res = mysql_query($query, $link) or pupe_error($query);
-
-				if (mysql_num_rows($root_cat_res) == 1) {
-					$root_cat_row = mysql_fetch_assoc($root_cat_res);
-					$laatikot_selected[] = $root_cat_row['tunnus'];
+				if (strlen($kaikki_puun_tunnukset_row["tunnukset"]) > 0) {
+					$nodelisa = " AND node.tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) ";
 				}
 				else {
-					// ei lˆydetty root-kategorian tunnusta! skipataan looppi ja dropdowni
 					continue;
 				}
 			}
-						
-			$joinlisa = "";
 
-			if (isset($autoid) and $autoid != '') {
-				$joinlisa = " JOIN yhteensopivuus_tuote ON (yhteensopivuus_tuote.yhtio = puun_alkio.yhtio AND yhteensopivuus_tuote.tuoteno = puun_alkio.liitos and yhteensopivuus_tuote.atunnus IN ($autoid)) ";
-			}
-
-			if (is_array($laatikot_selected)) {
-				$tunn = implode(",", $laatikot_selected);
-			}
-			else {
-				$tunn = $laatikot_selected;
-			}
-
-			# haetaan kaikki puun tunnukset, joille on tehty linkkauksia
-			$query = "	SELECT GROUP_CONCAT(DISTINCT node.tunnus) tunnukset
+			// Haetaan koko hierarkia
+			$query = "	SELECT DISTINCT parent.tunnus node_tunnus, parent.nimi node_nimi,
+						(	SELECT (COUNT(subnode.tunnus) - 1)
+							FROM dynaaminen_puu AS subnode
+							JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subnode.lft BETWEEN subparent.lft AND subparent.rgt)
+							WHERE subnode.laji = parent.laji
+							AND subnode.yhtio = parent.yhtio
+							AND subnode.tunnus = parent.tunnus
+						) syvyys,
+						parent.lft,
+						parent.rgt
 						FROM dynaaminen_puu AS node
-						JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.tunnus IN ($tunn))
-						JOIN puun_alkio ON (puun_alkio.yhtio = node.yhtio AND puun_alkio.puun_tunnus = node.tunnus AND puun_alkio.laji = node.laji)
-						$joinlisa
+						JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.lft > 1)
 						WHERE node.yhtio = '{$kukarow['yhtio']}'
 						AND node.laji = '{$tree}'
 						AND node.lft > 1
-						ORDER BY node.lft";
-			$kaikki_puun_tunnukset_res = mysql_query($query, $link) or pupe_error($query);
-			$kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
-			
-			// Haetaan koko hierarkia valittujen laatikoiden perusteella
-			if ($kaikki_puun_tunnukset_row['tunnukset'] != '') {
-				$query = "	SELECT parent.tunnus node_tunnus, parent.nimi node_nimi,
-							(	SELECT (COUNT(subnode.tunnus) - 1)
-								FROM dynaaminen_puu AS subnode
-								JOIN dynaaminen_puu AS subparent ON (subparent.yhtio = subnode.yhtio AND subparent.laji = subnode.laji AND subnode.lft BETWEEN subparent.lft AND subparent.rgt)
-								WHERE subnode.laji = parent.laji
-								AND subnode.yhtio = parent.yhtio
-								AND subnode.tunnus = parent.tunnus
-							) syvyys
-							FROM dynaaminen_puu AS node
-							JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.lft > 1)
-							WHERE node.tunnus IN ($kaikki_puun_tunnukset_row[tunnukset])
-							AND node.lft > 1
-							AND node.laji = '{$tree}'
-							AND node.yhtio = '{$kukarow['yhtio']}'
-							GROUP BY parent.tunnus
-							ORDER BY syvyys, node_nimi";
-				$sxresult2 = mysql_query($query, $link) or pupe_error($query);
-				
-				$laatikot = array();
-				$laatikot_parent = array();
+						$nodelisa
+						ORDER BY syvyys, node_nimi";
+			$sxresult2 = mysql_query($query, $link) or pupe_error($query);
 
-				$syvyys = 0;
+			if (mysql_num_rows($sxresult2) > 0) {
+				$edsyvyys = 0;
+				$sallitut_valit = array();
 
 				while ($looppirow = mysql_fetch_assoc($sxresult2)) {
-					$laatikot[$looppirow['syvyys']][$looppirow['node_tunnus']] = $looppirow['node_nimi'];
-				}
 
-				if (count($laatikot) > 0) {
-					foreach ($laatikot as $laatikon_nro => $sisalto) {
+					// Suljetaan selectboxi ja tehd‰‰n seuraava kun taso vaihtuu
+					if ($looppirow["syvyys"] != $edsyvyys) {
 
-						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>".t(ucfirst($tree)).t("segmentti")." {$laatikon_nro}</th></tr>";
+						if ($edsyvyys > 0) {
+							echo "</select></td>";
+							echo "</tr>";
+
+							if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+								$ruksitchk = "";
+
+								if ($ruksit["dynaaminen_".$tree."_".$edsyvyys] != "") {
+									$ruksitchk = "CHECKED";
+								}
+
+								echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[dynaaminen_".$tree."_".$edsyvyys."]' size='2' value='".$jarjestys["dynaaminen_".$tree."_".$edsyvyys]."'> ".t(ucfirst($tree)).t("segmenteitt‰in")." {$edsyvyys} <input type='checkbox' name='ruksit[dynaaminen_".$tree."_".$edsyvyys."]' value='dynaaminen_".$tree."_".$edsyvyys."' $ruksitchk></th></tr>";
+							}
+							echo "</table></div>";
+						}
+
+						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>$mul_otsik {$looppirow['syvyys']}</th></tr>";
 						echo "<tr><td nowrap style='padding:0px'>";
-						echo "<select name='mul_{$tree}{$laatikon_nro}[]' ";
+						echo "<select name='mul_{$tree}{$looppirow['syvyys']}[]' ";
 
 						if (is_array($monivalintalaatikot_normaali) and !in_array("dynaaminen_".$tree, $monivalintalaatikot_normaali)) {
 							echo " multiple='multiple' size='7' style='width: 100%;' ";
@@ -1342,49 +1327,79 @@
 
 						$mul_check = '';
 
-						if (${"mul_".$tree.$laatikon_nro} != "") {
-							if (in_array("PUPEKAIKKIMUUT", ${"mul_".$tree.$laatikon_nro})) {
+						if (${"mul_".$tree.$looppirow['syvyys']} != "") {
+							if (in_array("PUPEKAIKKIMUUT", ${"mul_".$tree.$looppirow['syvyys']})) {
 								$mul_check = 'SELECTED';
 							}
 						}
 
 						echo "<option value='PUPEKAIKKIMUUT' {$mul_check}>".t("N‰yt‰ kaikki")."</option>";
 						echo "<option value=''>",t("Ei valintaa"),"</option>";
+					}
 
-						foreach ($sisalto as $tun => $nimi) {
-							$sel = '';
+					$show_node = FALSE;
 
-							if ((count(${"mul_".$tree.$laatikon_nro}) > 0 and in_array($tun, ${"mul_".$tree.$laatikon_nro})) or
-								(isset($kaikki_tunnukset_from_kuka) and trim($kaikki_tunnukset_from_kuka) != '' and in_array($tun, explode(",", $kaikki_tunnukset_from_kuka)))) {
-								$sel = ' SELECTED';
+					// Skipataanko vai n‰ytet‰‰nkˆ
+					if (count($sallitut_valit) > 0) {
 
-								if (count(${'mul_'.$tree.$laatikon_nro}) == 0 or !in_array($tun, ${'mul_'.$tree.$laatikon_nro})) {
-									${'mul_'.$tree.$laatikon_nro}[] = $tun;
+						$raj_syvyys = 0;
+
+						// Otetaan tiukin rajaus, eli mahd oikealta (as in oikea tai vasen)
+						for ($syv = $looppirow['syvyys']-1; $syv >= 1; $syv--) {
+							if (isset($sallitut_valit[$syv]) and count($sallitut_valit[$syv]) > 0) {
+								$raj_syvyys = $syv;
+								break;
+							}
+						}
+
+						// L‰hin vasemmanpuolinen rajaava taso
+						if ($raj_syvyys > 0) {
+							foreach ($sallitut_valit[$raj_syvyys] as $lft_rgt) {
+								if ($looppirow['lft'] > $lft_rgt[0] and $looppirow['rgt'] < $lft_rgt[1]) {
+									$show_node = TRUE;
+									break;
 								}
 							}
-
-							echo "<option value='{$tun}'{$sel}>{$nimi}</option>";
 						}
-
-						echo "</select></td>";
-						echo "</tr>";
-
-						if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
-							$ruksitchk = "";
-
-							if ($ruksit["dynaaminen_".$tree."_".$laatikon_nro] != "") {
-								$ruksitchk = "CHECKED";
-							}
-
-							echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[dynaaminen_".$tree."_".$laatikon_nro."]' size='2' value='".$jarjestys["dynaaminen_".$tree."_".$laatikon_nro]."'> ".t(ucfirst($tree)).t("segmenteitt‰in")." {$laatikon_nro} <input type='checkbox' name='ruksit[dynaaminen_".$tree."_".$laatikon_nro."]' value='dynaaminen_".$tree."_".$laatikon_nro."' $ruksitchk></th></tr>";
+						else {
+							$show_node = TRUE;
 						}
-
-						echo "</table></div>";
 					}
+					else {
+						$show_node = TRUE;
+					}
+
+					if ($show_node) {
+
+						$sel = '';
+
+						if ((count(${"mul_".$tree.$looppirow['syvyys']}) > 0 and in_array($looppirow['node_tunnus'], ${"mul_".$tree.$looppirow['syvyys']})) or (isset($monivalintarajaus_dynaaminen) and in_array($looppirow['node_tunnus'], explode(",", $monivalintarajaus_dynaaminen)))) {
+							$sel = ' SELECTED';
+
+							// T‰m‰ rajaa tulevia tasoja/nodeja
+							$sallitut_valit[$looppirow['syvyys']][] = array($looppirow['lft'], $looppirow['rgt']);
+						}
+
+						echo "<option value='{$looppirow['node_tunnus']}'{$sel}>{$looppirow['node_nimi']}</option>";
+					}
+
+					$edsyvyys = $looppirow["syvyys"];
 				}
-				else {
-					break;
+
+				// Suljetaan viel‰ vika selectboxi
+				echo "</select><input type='hidden' name='dynaaminen{$tree}maxsyvyys' value='$edsyvyys'></td>";
+				echo "</tr>";
+
+				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+					$ruksitchk = "";
+
+					if ($ruksit["dynaaminen_".$tree."_".$edsyvyys] != "") {
+						$ruksitchk = "CHECKED";
+					}
+
+					echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[dynaaminen_".$tree."_".$edsyvyys."]' size='2' value='".$jarjestys["dynaaminen_".$tree."_".$edsyvyys]."'> ".t(ucfirst($tree)).t("segmenteitt‰in")." {$edsyvyys} <input type='checkbox' name='ruksit[dynaaminen_".$tree."_".$edsyvyys."]' value='dynaaminen_".$tree."_".$edsyvyys."' $ruksitchk></th></tr>";
 				}
+				echo "</table></div>";
 			}
 		}
 

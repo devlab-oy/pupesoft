@@ -13,136 +13,291 @@
 	}
 	else {
 
-		echo "<font class='head'>".t("Budjetin ylläpito asiakas")."</font><hr>";
-
-		if (!isset($asiakasryhma)) $asiakasryhma = '';
-		if (!isset($submit_button)) $submit_button = '';
+		if (!isset($toim)) $toim = '';
 		if (!isset($tkausi)) $tkausi = '';
 		if (!isset($ytunnus)) $ytunnus = '';
-		if (!isset($asiakasid)) $asiakasid = '';
+		if (!isset($asiakasid)) $asiakasid = 0;
+		if (!isset($toimittajaid)) $toimittajaid = 0;
+		if (!isset($submit_button)) $submit_button = '';
+		if (!isset($liitostunnukset)) $liitostunnukset = '';
+		if (!isset($budj_taulunrivit)) $budj_taulunrivit = array();
 
-		if (isset($tee) and $tee == 'file') {
-			if (isset($mul_osasto) and $mul_osasto != '') $mul_osasto = unserialize(urldecode($mul_osasto));
-			if (isset($mul_try) and $mul_try != '') $mul_try = unserialize(urldecode($mul_try));
+		if (isset($vaihdaasiakas)) {
+			$ytunnus 		 = "";
+			$asiakasid 		 = 0;
+			$toimittajaid	 = 0;
+			$liitostunnukset = "";
 		}
 
-		if (is_array($luvut)) {
-			$paiv = 0;
+		if ($toim == "TOIMITTAJA") {
+			echo "<font class='head'>".t("Budjetin ylläpito toimittaja")."</font><hr>";
+
+			$budj_taulu = "budjetti_toimittaja";
+			$budj_sarak = "toimittajan_tunnus";
+		}
+		else {
+			echo "<font class='head'>".t("Budjetin ylläpito asiakas")."</font><hr>";
+
+			$budj_taulu = "budjetti_asiakas";
+			$budj_sarak = "asiakkaan_tunnus";
+		}
+
+		if (isset($muutparametrit)) {
+			foreach (explode("##", $muutparametrit) as $muutparametri) {
+				list($a, $b) = explode("=", $muutparametri);
+
+				if (strpos($a, "[") !== FALSE) {
+					$i = substr($a, strpos($a, "[")+1, strpos($a, "]")-(strpos($a, "[")+1));
+					$a = substr($a, 0, strpos($a, "["));
+
+					${$a}[$i] = $b;
+				}
+				else {
+					${$a} = $b;
+				}
+			}
+		}
+
+		if (isset($luvut) and count($toim) > 0 and $submit_button != '') {
+			$paiv  = 0;
 			$lisaa = 0;
 
-			foreach ($luvut as $asiakkaan_tunnus => $rivi) {
+			foreach ($luvut as $liitostunnus => $rivi) {
+				foreach ($rivi as $kausi => $solut) {
+					foreach ($solut as $try => $solu) {
 
-				foreach ($rivi as $kausi => $solu) {
-					$solu = str_replace ( ",", ".", $solu);
-
-					if ($solu == '!' or $solu = (float) $solu) {
-
-						if ($solu == '!') $solu = 0;
-
-						$solu = (float) $solu;
-
-						$query = "	SELECT summa
-									FROM budjetti_asiakas
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND asiakkaan_tunnus = '$asiakkaan_tunnus'
-									AND kausi = '$kausi'
-									AND dyna_puu_tunnus = '$query_kaikki_tunnukset'
-									AND osasto = '".implode(",", $mul_osasto)."'
-									AND try = '".implode(",", $mul_try)."'";
-						$result = mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($result) == 1) {
-
-							$budjrow = mysql_fetch_assoc($result);
-
-							if ($budjrow['summa'] != $solu) {
-
-								if ($solu == 0.00) {
-									$query = "	DELETE FROM budjetti_asiakas
-												WHERE yhtio = '$kukarow[yhtio]'
-												AND asiakkaan_tunnus = '$asiakkaan_tunnus'
-												AND kausi = '$kausi'
-												AND dyna_puu_tunnus = '$query_kaikki_tunnukset'
-												AND osasto = '".implode(",", $mul_osasto)."'
-												AND try = '".implode(",", $mul_try)."'";
-								}
-								else {
-									$query	= "	UPDATE budjetti_asiakas SET
-												summa = $solu,
-												muuttaja = '$kukarow[kuka]',
-												muutospvm = now()
-												WHERE yhtio = '$kukarow[yhtio]'
-												AND asiakkaan_tunnus = '$asiakkaan_tunnus'
-												AND kausi = '$kausi'
-												AND dyna_puu_tunnus = '$query_kaikki_tunnukset'
-												AND osasto = '".implode(",", $mul_osasto)."'
-												AND try = '".implode(",", $mul_try)."'";
-								}
-								$result = mysql_query($query) or pupe_error($query);
-								$paiv++;
-							}
+						if ($tuoteryhmittain == "") {
+							$try = "";
 						}
-						else {
-							$query = "	INSERT INTO budjetti_asiakas SET
-										summa = $solu,
-										yhtio = '$kukarow[yhtio]',
-										kausi = '$kausi',
-										asiakkaan_tunnus = '$asiakkaan_tunnus',
-										osasto = '".implode(",", $mul_osasto)."',
-										try = '".implode(",", $mul_try)."',
-										dyna_puu_tunnus = '$query_kaikki_tunnukset',
-										laatija = '$kukarow[kuka]',
-										luontiaika = now(),
-										muutospvm = now(),
-										muuttaja = '$kukarow[kuka]'";
+
+						$solu = str_replace(",", ".", $solu);
+
+						if ($solu == '!' or $solu = (float) $solu) {
+
+							if ($solu == '!') $solu = 0;
+
+							$solu = (float) $solu;
+
+							$query = "	SELECT summa
+										FROM $budj_taulu
+										WHERE yhtio 			= '$kukarow[yhtio]'
+										AND $budj_sarak		 	= '$liitostunnus'
+										AND kausi 				= '$kausi'
+										AND dyna_puu_tunnus 	= ''
+										AND osasto 				= ''
+										AND try 				= '$try'";
 							$result = mysql_query($query) or pupe_error($query);
-							$lisaa++;
+
+							if (mysql_num_rows($result) > 0) {
+
+								$budjrow = mysql_fetch_assoc($result);
+
+								if ($budjrow['summa'] != $solu) {
+
+									if ($solu == 0.00) {
+										$query = "	DELETE FROM $budj_taulu
+													WHERE yhtio 			= '$kukarow[yhtio]'
+													AND $budj_sarak		 	= '$liitostunnus'
+													AND kausi 				= '$kausi'
+													AND dyna_puu_tunnus 	= ''
+													AND osasto 				= ''
+													AND try 				= '$try'";
+									}
+									else {
+										$query	= "	UPDATE $budj_taulu SET
+													summa = $solu,
+													muuttaja = '$kukarow[kuka]',
+													muutospvm = now()
+													WHERE yhtio 			= '$kukarow[yhtio]'
+													AND $budj_sarak		 	= '$liitostunnus'
+													AND kausi 				= '$kausi'
+													AND dyna_puu_tunnus 	= ''
+													AND osasto 				= ''
+													AND try 				= '$try'";
+									}
+									$result = mysql_query($query) or pupe_error($query);
+									$paiv++;
+								}
+							}
+							else {
+								$query = "	INSERT INTO $budj_taulu SET
+											summa 				= $solu,
+											yhtio 				= '$kukarow[yhtio]',
+											kausi 				= '$kausi',
+											$budj_sarak		 	= '$liitostunnus',
+											osasto 				= '',
+											try 				= '$try',
+											dyna_puu_tunnus 	= '',
+											laatija 			= '$kukarow[kuka]',
+											luontiaika 			= now(),
+											muutospvm 			= now(),
+											muuttaja 			= '$kukarow[kuka]'";
+								$result = mysql_query($query) or pupe_error($query);
+								$lisaa++;
+							}
 						}
 					}
 				}
 			}
-			echo "<font class='message'>".t("Päivitin ").$paiv.t(" Lisäsin ").$lisaa."</font><br /><br />";
+			echo "<font class='message'>".t("Päivitin")." $paiv. ".t("Lisäsin")." $lisaa.</font><br /><br />";
 		}
 
-		if ($ytunnus != '') {
+		if ($toim == "TOIMITTAJA" and $ytunnus != '' and $toimittajaid == 0) {
 
-			if (!isset($muutparametrit)) {
-				$muutparametrit = $tkausi.'#'.$asiakasryhma.'#'.$kaikki_tunnukset.'#'.urlencode(serialize($mul_osasto)).'#'.urlencode(serialize($mul_try));
+			$muutparametrit = "";
+
+			unset($_POST["toimittajaid"]);
+
+			foreach ($_POST as $key => $value) {
+				if (is_array($value)) {
+					foreach ($value as $a => $b) {
+						$muutparametrit .= $key."[".$a."]=".$b."##";
+					}
+				}
+				else {
+					$muutparametrit .= $key."=".$value."##";
+				}
 			}
 
-			require ("inc/asiakashaku.inc");
-		
+			require ("inc/kevyt_toimittajahaku.inc");
+
 			echo "<br />";
+
 			if (trim($ytunnus) == '') {
 				$submit_button = '';
 			}
 			else {
-				$submit_button = 'asdf';
+				$submit_button = 'OK';
+			}
+		}
+		elseif ($toim == "" and $ytunnus != '' and $asiakasid == 0) {
+
+			$muutparametrit = "";
+
+			unset($_POST["asiakasid"]);
+
+			foreach ($_POST as $key => $value) {
+				if (is_array($value)) {
+					foreach ($value as $a => $b) {
+						$muutparametrit .= $key."[".$a."]=".$b."##";
+					}
+				}
+				else {
+					$muutparametrit .= $key."=".$value."##";
+				}
+			}
+
+			require ("inc/asiakashaku.inc");
+
+			echo "<br />";
+
+			if (trim($ytunnus) == '') {
+				$submit_button = '';
+			}
+			else {
+				$submit_button = 'OK';
 			}
 		}
 
-		if (isset($muutparametrit) and strlen($muutparametrit) > 1) {
-			list($tkausi, $asiakasryhma, $kaikki_tunnukset, $mul_osasto, $mul_try) = explode('#', $muutparametrit);
-			$mul_osasto = unserialize(urldecode($mul_osasto));
-			$mul_try = unserialize(urldecode($mul_try));
+		if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+
+			$path_parts = pathinfo($_FILES['userfile']['name']);
+			$ext = strtoupper($path_parts['extension']);
+
+			if ($ext != "XLS") {
+				die ("<font class='error'><br>".t("Ainoastaan .xls tiedostot sallittuja")."!</font>");
+			}
+
+			if ($_FILES['userfile']['size'] == 0) {
+				die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
+			}
+
+			require_once ('excel_reader/reader.php');
+
+			// ExcelFile
+			$data = new Spreadsheet_Excel_Reader();
+
+			// Set output Encoding.
+			$data->setOutputEncoding('CP1251');
+			$data->setRowColOffset(0);
+			$data->read($_FILES['userfile']['tmp_name']);
+
+			echo "<br /><br /><font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
+
+			$headers	 		= array();
+			$budj_taulunrivit 	= array();
+			$liitostunnukset 	= "";
+
+			for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
+				$headers[] = trim($data->sheets[0]['cells'][0][$excej]);
+			}
+
+			for ($excej = (count($headers)-1); $excej > 0 ; $excej--) {
+				if ($headers[$excej] != "") {
+					break;
+				}
+				else {
+					unset($headers[$excej]);
+				}
+			}
+
+			// Huomaa nämä jos muutat excel-failin sarakkeita!!!!
+			if ($toim == "TOIMITTAJA") {
+				$lukualku = 3;				
+			}
+			else {
+				$lukualku = 4;
+			}
+			
+			if ($headers[$lukualku] == "Tuoteryhmä") {
+				$lukualku++;
+				$tuoteryhmittain = "on";
+			}
+			
+			for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
+
+				$liitun = $data->sheets[0]['cells'][$excei][0];
+
+				$liitostunnukset .= $liitun.",";
+
+				if ($tuoteryhmittain != "") {
+					$try = $data->sheets[0]['cells'][$excei][$lukualku-1];
+				}
+				else {
+					$try = "";
+				}
+
+				for ($excej = $lukualku; $excej < count($headers); $excej++) {
+					$kasiind = str_replace("-", "", $headers[$excej]);
+
+					$budj_taulunrivit[$liitun][$kasiind][$try] = trim($data->sheets[0]['cells'][$excei][$excej]);
+				}
+			}
+
+			$liitostunnukset = substr($liitostunnukset, 0, -1);
+		}
+		
+		#echo "<pre>",var_dump($budj_taulunrivit),"</pre>";
+
+		if ($asiakasid > 0 or $toimittajaid > 0 or $liitostunnukset != "") {
+			if ($toim == "TOIMITTAJA") {
+				echo "<form method='post'>
+						<input type='hidden' name='toim' value='$toim'>
+						<input type='submit' name='vaihdaasiakas' value='",t("Vaihda tomittaja / nollaa excelrajaus"),"' />
+						</form><br><br>";
+			}
+			else {
+				echo "<form method='post'>
+						<input type='hidden' name='toim' value='$toim'>
+						<input type='submit' name='vaihdaasiakas' value='",t("Vaihda asiakas / nollaa excelrajaus"),"' />
+						</form><br><br>";
+			}
 		}
 
-		echo "<form method='post'><table>";
-		echo "<input type='hidden' name='asiakasid' value='$asiakasid' />";
+		echo "<form method='post' enctype='multipart/form-data'>
+				<input type='hidden' name='toim' value='$toim'>";
 
-		echo "<tr><th>",t("Asiakas"),"</th><td><input type='text' name='ytunnus' value='$ytunnus' /></td></tr>";
-
-		$asryhma_result = t_avainsana('ASIAKASRYHMA');
-
-		echo "<tr><th>",t("Asiakasryhmä"),"</th>";
-		echo "<td><select name='asiakasryhma'><option value=''>",t("Valitse asiakasryhmä"),"</option>";
-
-		while ($asryhma_row = mysql_fetch_assoc($asryhma_result)) {
-			$sel = $asiakasryhma == $asryhma_row['selite'] ? ' selected' : '';
-			echo "<option value='$asryhma_row[selite]'$sel>$asryhma_row[selite]</option>";
-		}
-
-		echo "</select></td></tr>";
+		echo "<table>";
 
 		$query = "	SELECT *
 					FROM tilikaudet
@@ -158,104 +313,105 @@
 		}
 
 		echo "</select></td></tr>";
-		echo "</table>";
 
-		echo t("Budjettiluvun voi poistaa huutomerkillä (!)"),"<br /><br />";
-
-		$avainsana_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite='Tuote' ");
-
-		if (mysql_num_rows($avainsana_result) == 1) {
-			$monivalintalaatikot = array('DYNAAMINEN_TUOTE');
-			$monivalintalaatikot_normaali = array();
-		
-			require ("tilauskasittely/monivalintalaatikot.inc");
+		if ($liitostunnukset != "") {
+			echo "<tr><th>",t("Rajaus"),"</th><td>".t("Excel-tiedostosta")."</td>";
+			echo "<input type='hidden' name='liitostunnukset' value='$liitostunnukset'>";
 		}
+		else {
+			if ($toim == "TOIMITTAJA") {
+				echo "<tr><th>",t("Valitse toimittaja"),"</th>";
 
-		$monivalintalaatikot = array('OSASTO', 'TRY');
-		$monivalintalaatikot_normaali = array();
+				if ($toimittajaid > 0) {
+					$query = "	SELECT *
+								from toimi
+								where yhtio = '$kukarow[yhtio]'
+								and tunnus = '$toimittajaid'";
+					$result = mysql_query($query) or pupe_error($query);
+					$toimirow = mysql_fetch_assoc($result);
 
-		require ("tilauskasittely/monivalintalaatikot.inc");
-
-		if (trim($kaikki_tunnukset) != '') {
-			if (substr($kaikki_tunnukset, -1, 1) == ',') {
-				$kaikki_tunnukset = substr($kaikki_tunnukset, 0, -1);
+					echo "<td>$toimirow[nimi] $toimirow[nimitark]<br>
+							$toimirow[toim_nimi] $toimirow[toim_nimitark]
+							<input type='hidden' name='toimittajaid' value='$toimittajaid' /></td>";
+				}
+				else {
+					echo "<td><input type='text' name='ytunnus' value='$ytunnus' /></td></tr>";
+				}
 			}
-		
-			echo "<input type='hidden' name='query_kaikki_tunnukset' value='$kaikki_tunnukset' />";
+			else {
+				echo "<tr><th>",t("Valitse asiakas"),"</th>";
+
+				if ($asiakasid > 0) {
+					$query = "	SELECT *
+								from asiakas
+								where yhtio = '$kukarow[yhtio]'
+								and tunnus = '$asiakasid'";
+					$result = mysql_query($query) or pupe_error($query);
+					$asiakasrow = mysql_fetch_assoc($result);
+
+					echo "<td>$asiakasrow[nimi] $asiakasrow[nimitark]<br>
+							$asiakasrow[toim_nimi] $asiakasrow[toim_nimitark]
+							<input type='hidden' name='asiakasid' value='$asiakasid' /></td>";
+				}
+				else {
+					echo "<td><input type='text' name='ytunnus' value='$ytunnus' /></td></tr>";
+				}
+
+				echo "<tr><th>".t("tai rajaa asiakaskategorialla")."</th><td>";
+
+				$monivalintalaatikot = array('DYNAAMINEN_ASIAKAS', '<br>ASIAKASOSASTO', 'ASIAKASRYHMA');
+				$monivalintalaatikot_normaali = array();
+
+				require ("tilauskasittely/monivalintalaatikot.inc");
+
+				echo "</td></tr>";
+			}
 		}
+
+		$chk = "";
+
+		if ($tuoteryhmittain != "") {
+			$chk = "CHECKED";
+		}
+
+		echo "<tr><th>",t("Tuoteryhmittäin"),"</th><td><input type='checkbox' name='tuoteryhmittain' $chk></td></tr>";
+		echo "<tr><th>",t("Lue budjettiluvut tiedostosta"),"</th><td><input type='file' name='userfile' /></td>";
+		echo "</table><br>";
+
+		echo t("Budjettiluvun voi poistaa huutomerkillä (!)"),"<br />";
 
 		echo "<br />";
-		echo "<table><tr><td class='back'><input type='submit' name='submit_button' id='submit_button' value='",t("Näytä/Tallenna"),"' /></td></tr></table>";
+		echo "<input type='submit' name='submit_button' id='submit_button' value='",t("Näytä/Tallenna"),"' /><br>";
+
+		if (!isset($lisa)) {
+			$lisa = "";
+		}
+		if (!isset($lisa_dynaaminen)) {
+			$lisa_dynaaminen = "";
+		}
+		if (!isset($lisa_parametri)) {
+			$lisa_parametri = "";
+		}
 
 		if (trim($tkausi) != '') {
 			$query = "	SELECT *
 						FROM tilikaudet
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tunnus = '$tkausi'";
+						and tunnus  = '$tkausi'";
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vresult) == 1) $tilikaudetrow = mysql_fetch_array($vresult);
 		}
 
-		if ($submit_button and is_array($tilikaudetrow)) {
+		if ($toimittajaid > 0) {
+			$lisa .= " and toimi.tunnus = $toimittajaid ";
+		}
 
-			if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+		if ($asiakasid > 0) {
+			$lisa .= " and asiakas.tunnus = $asiakasid ";
+		}
 
-				$path_parts = pathinfo($_FILES['userfile']['name']);
-				$ext = strtoupper($path_parts['extension']);
-
-				if ($ext != "XLS") {
-					die ("<font class='error'><br>".t("Ainoastaan .xls tiedostot sallittuja")."!</font>");
-				}
-
-				if ($_FILES['userfile']['size'] == 0) {
-					die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
-				}
-
-				require_once ('excel_reader/reader.php');
-
-				// ExcelFile
-				$data = new Spreadsheet_Excel_Reader();
-
-				// Set output Encoding.
-				$data->setOutputEncoding('CP1251');
-				$data->setRowColOffset(0);
-				$data->read($_FILES['userfile']['tmp_name']);
-
-				echo "<br /><br /><font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
-
-				$headers = array();
-				$taulunotsikot	= array();
-				$taulunrivit	= array();
-
-				for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-					$headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
-				}
-
-				for ($excej = 1; $excej = (count($headers)-1); $excej--) {
-					if ($headers[$excej] != "") {
-						break;
-					}
-					else {
-						unset($headers[$excej]);
-					}
-				}
-
-				for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
-					for ($excej = 0; $excej < count($headers); $excej++) {
-
-						$taulunrivit[$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
-
-						// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
-						foreach ($taulunotsikot as $taulu => $joinit) {
-							$taulunrivit[$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
-						}
-					}
-				}
-			}
-			else {
-				unset($taulunrivit);
-			}
+		if ($submit_button != "" and ($asiakasid > 0 or $toimittajaid > 0 or $lisa != "" or $lisa_parametri != "" or $lisa_dynaaminen != "" or $liitostunnukset != "") and is_array($tilikaudetrow)) {
 
 			if (!@include('Spreadsheet/Excel/Writer.php')) {
 				echo "<font class='error'>",t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta."),"</font><br>";
@@ -277,49 +433,88 @@
 			$excelrivi 	 = 0;
 			$excelsarake = 0;
 
-			$worksheet->write($excelrivi, $excelsarake, t("Asiakkaan tunnus"), $format_bold);
-			$excelsarake++;
+			if ($toim == "TOIMITTAJA") {
+				$worksheet->write($excelrivi, $excelsarake, t("Toimittajan tunnus"), $format_bold);
+				$excelsarake++;
+			}
+			else {
+				$worksheet->write($excelrivi, $excelsarake, t("Asiakkaan tunnus"), $format_bold);
+				$excelsarake++;
+			}
 
 			$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
 			$excelsarake++;
 
-			$worksheet->write($excelrivi, $excelsarake, t("Asiakasnro"), $format_bold);
-			$excelsarake++;
-
+			if ($toim == "") {
+				$worksheet->write($excelrivi, $excelsarake, t("Asiakasnro"), $format_bold);
+				$excelsarake++;
+			}
+			
 			$worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
 			$excelsarake++;
 
-			$lisa = '';
+			if ($liitostunnukset != "") {
+				// Excelistä tulleet asiakkaat ylikirjaavaat muut rajaukset
+				if ($toim == "TOIMITTAJA") {
+					$lisa = " and toimi.tunnus in ($liitostunnukset) ";
+				}
+				else {
+					$lisa = " and asiakas.tunnus in ($liitostunnukset) ";
+				}
 
-			if (trim($asiakasryhma) != '') {
-				$lisa .= " and asiakas.ryhma = '".(string) $asiakasryhma."' ";
+				$lisa_parametri = "";
+				$lisa_dynaaminen = "";
 			}
 
-			if ($ytunnus != '') {
-				$lisa .= " and asiakas.ytunnus = '$ytunnus' ";
+			if ($toim == "TOIMITTAJA") {
+				$query = "	SELECT toimi.tunnus toimittajan_tunnus, toimi.ytunnus, toimi.ytunnus toimittajanro, toimi.nimi, toimi.nimitark
+				 			#,IF(STRCMP(TRIM(CONCAT(toim_nimi, ' ', toim_nimitark)), TRIM(CONCAT(nimi, ' ', nimitark))) != 0, toim_nimi, '') toim_nimi,
+							#IF(STRCMP(TRIM(CONCAT(toim_nimi, ' ', toim_nimitark)), TRIM(CONCAT(nimi, ' ', nimitark))) != 0, toim_nimitark, '') toim_nimitark
+							FROM toimi
+							$lisa_parametri
+							$lisa_dynaaminen
+							WHERE toimi.yhtio = '$kukarow[yhtio]'
+							$lisa";
+			}
+			else {
+				$query = "	SELECT asiakas.tunnus asiakkaan_tunnus, asiakas.ytunnus, asiakas.asiakasnro, asiakas.nimi, asiakas.nimitark,
+							IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimi, '') toim_nimi,
+							IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimitark, '') toim_nimitark
+							FROM asiakas
+							$lisa_parametri
+							$lisa_dynaaminen
+							WHERE asiakas.yhtio = '$kukarow[yhtio]'
+							$lisa";
 			}
 
-			$query = "	SELECT tunnus asiakkaan_tunnus, ytunnus, asiakasnro, nimi, nimitark, 
-						IF(STRCMP(TRIM(CONCAT(toim_nimi, ' ', toim_nimitark)), TRIM(CONCAT(nimi, ' ', nimitark))) != 0, toim_nimi, '') toim_nimi, 
-						IF(STRCMP(TRIM(CONCAT(toim_nimi, ' ', toim_nimitark)), TRIM(CONCAT(nimi, ' ', nimitark))) != 0, toim_nimitark, '') toim_nimitark
-						FROM asiakas
-						WHERE yhtio = '$kukarow[yhtio]'
-						$lisa";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<br />";
 			echo "<table>";
 
-			echo "<tr><th>",t("Ytunnus"),"</th><th>",t("Asiakasnro"),"</th><th>",t("Nimi"),"</th>";
+			if ($toim == "TOIMITTAJA") {
+				echo "<tr><th>",t("Toimittaja"),"</th>";
+			}
+			else {
+				echo "<tr><th>",t("Asiakas"),"</th>";
+			}
 
-			$raja = '0000-00';
-			$rajataulu = array();
-			$j = 0;
+			if ($tuoteryhmittain != "") {
+				echo "<th>",t("Tuoteryhmä"),"</th>";
+
+				$worksheet->write($excelrivi, $excelsarake, t("Tuoteryhmä"), $format_bold);
+				$excelsarake++;
+			}
+
+			$raja 		= '0000-00';
+			$rajataulu 	= array();
+			$sarakkeet	= 0;
 
 			while ($raja < substr($tilikaudetrow['tilikausi_loppu'], 0, 7)) {
-				$vuosi = substr($tilikaudetrow['tilikausi_alku'], 0, 4);
-				$kk = substr($tilikaudetrow['tilikausi_alku'], 5, 2);
-				$kk += $j;
+
+				$vuosi 	= substr($tilikaudetrow['tilikausi_alku'], 0, 4);
+				$kk 	= substr($tilikaudetrow['tilikausi_alku'], 5, 2);
+				$kk += $sarakkeet;
 
 				if ($kk > 12) {
 					$vuosi++;
@@ -328,11 +523,12 @@
 
 				if ($kk < 10) $kk = '0'.$kk;
 
+				$rajataulu[$sarakkeet] = $vuosi.$kk;
+				$sarakkeet++;
+
 				$raja = $vuosi."-".$kk;
-				$rajataulu[$j] = $vuosi.$kk;
 
 			 	echo "<th>$raja</th>";
-			 	$j++;
 
 				$worksheet->write($excelrivi, $excelsarake, $raja, $format_bold);
 				$excelsarake++;
@@ -340,63 +536,107 @@
 
 			echo "</tr>";
 
-			$excelsarake = 0;
 			$excelrivi++;
-
 			$xx = 0;
 
-			while ($row = mysql_fetch_assoc($result)) {
+			function piirra_budj_rivi ($row, $tryrow = "") {
+				global $kukarow, $toim, $worksheet, $excelrivi, $budj_taulu, $rajataulu, $budj_taulunrivit, $xx, $budj_sarak, $sarakkeet;
 
-				$worksheet->write($excelrivi, $excelsarake, $row['asiakkaan_tunnus']);
+				$excelsarake = 0;
+
+				$worksheet->writeNumber($excelrivi, $excelsarake, $row[$budj_sarak]);
 				$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, $row['ytunnus']);
+				$worksheet->writeString($excelrivi, $excelsarake, $row['ytunnus']);
 				$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, $row['asiakasnro']);
+				if ($toim == "") {
+					$worksheet->writeString($excelrivi, $excelsarake, $row['asiakasnro']);
+					$excelsarake++;
+				}
+			
+				$worksheet->writeString($excelrivi, $excelsarake, $row['nimi'].' '.$row['nimitark']);
 				$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, $row['nimi'].' '.$row['nimitark']);
-				$excelsarake++;
+				echo "<tr><td>$row[ytunnus] $row[asiakasnro]<br>$row[nimi] $row[nimitark]<br>$row[toim_nimi] $row[toim_nimitark]</td>";
 
-				echo "<tr><td>$row[ytunnus]</td><td>$row[asiakasnro]</td><td>$row[nimi] $row[nimitark]<br />$row[toim_nimi] $row[toim_nimitark]</td>";
+				if (is_array($tryrow)) {
+					echo "<td>$tryrow[selite] $tryrow[selitetark]</td>";
 
-				for ($k = 0; $k < $j; $k++) {
+					$worksheet->write($excelrivi, $excelsarake, $tryrow["selite"]);
+					$excelsarake++;
+
+					$try = $tryrow["selite"];
+					$try_ind = $try;
+				}
+				else {
+					$try = "";
+					$try_ind = 0;
+				}
+
+				for ($k = 0; $k < $sarakkeet; $k++) {
 					$ik = $rajataulu[$k];
 
-					if (is_array($taulunrivit) and $taulunrivit[$xx][0] == $row['asiakkaan_tunnus']) {
-						$nro = trim($taulunrivit[$xx][$k+4]);
+					if (isset($budj_taulunrivit[$row[$budj_sarak]][$ik][$try_ind])) {
+						$nro = (float) trim($budj_taulunrivit[$row[$budj_sarak]][$ik][$try_ind]);
 					}
 					else {
-
 						$query = "	SELECT *
-									FROM budjetti_asiakas
+									FROM $budj_taulu
 									WHERE yhtio				= '$kukarow[yhtio]'
 									and kausi		 		= '$ik'
-									and asiakkaan_tunnus	= '$row[asiakkaan_tunnus]'
-									and dyna_puu_tunnus		= '$kaikki_tunnukset'
-									and osasto				= '".implode(",", $mul_osasto)."'
-									and try					= '".implode(",", $mul_try)."'";
+									and $budj_sarak			= '$row[$budj_sarak]'
+									and dyna_puu_tunnus		= ''
+									and osasto				= ''
+									and try					= '$try'";
 						$xresult = mysql_query($query) or pupe_error($query);
 						$nro = '';
-						
+
 						if (mysql_num_rows($xresult) == 1) {
 							$brow = mysql_fetch_assoc($xresult);
 							$nro = $brow['summa'];
 						}
 					}
 
-					echo "<td><input type='text' name = 'luvut[{$row['asiakkaan_tunnus']}][{$ik}]' value='{$nro}' size='8'></td>";
+					echo "<td>";
 
-					$worksheet->write($excelrivi, $excelsarake, $nro);
+					if (is_array($tryrow)) {
+						echo "<input type='text' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$tryrow["selite"]}]' value='{$nro}' size='8'></td>";
+					}
+					else {
+						echo "<input type='text' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
+					}
+
+					echo "</td>";
+
+					$worksheet->writeNumber($excelrivi, $excelsarake, $nro);
 					$excelsarake++;
 				}
 
 				echo "</tr>";
-				$xx++;
 
-				$excelsarake = 0;
-				$excelrivi++;				
+				$xx++;
+				$excelrivi++;
+			}
+
+
+			if ($tuoteryhmittain != "") {
+				// Haetaan tuoteryhmät
+				$res = t_avainsana("TRY");
+
+
+				while ($tryrow = mysql_fetch_assoc($res)) {
+					while ($row = mysql_fetch_assoc($result)) {
+						piirra_budj_rivi($row, $tryrow);
+					}
+
+					mysql_data_seek($result, 0);
+				}
+			}
+			else {
+				while ($row = mysql_fetch_assoc($result)) {
+					piirra_budj_rivi($row);
+				}
 			}
 
 			$workbook->close();
@@ -412,24 +652,6 @@
 			echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr>";
 			echo "</table></form><br />";
 
-			echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
-			echo "<input type='hidden' name='tee' value='file' />";
-			echo "<input type='hidden' name='asiakasryhma' value='$asiakasryhma' />";
-			echo "<input type='hidden' name='submit_button' value='joo' />";
-			echo "<input type='hidden' name='tkausi' value='$tkausi' />";
-			echo "<input type='hidden' name='ytunnus' value='$ytunnus' />";
-			echo "<input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>";
-			echo "<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>";
-
-			if (isset($muutparametrit) and strlen($muutparametrit) > 1) {
-				echo "<input type='hidden' name='muutparametrit' value='$muutparametrit' />";
-			}
-
-			echo "<input type='hidden' name='kaikki_tunnukset' value='$kaikki_tunnukset' />";
-			echo "<table>";
-			echo "<tr><th>",t("Valitse tiedosto"),"</th><td><input type='file' name='userfile' /></td><td><input type='submit' value='",t("Lähetä"),"' /></td></tr>";
-			echo "</table>";
-			echo "</form>";
 		}
 		else {
 			echo "</form>";

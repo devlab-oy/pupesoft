@@ -221,10 +221,8 @@
 
 	$paikat	= "";
 
-	if ($kpl_st > 0 and $trow['myynti_era'] > 0 and $row["tyyppi"] == 'L' and in_array($row['tunnus'], $myyntierahuom) and $yhtiorow['myyntiera_pyoristys'] == 'K' and $kpl_st != $org_kpl) {
+	if ($yhtiorow['myyntiera_pyoristys'] == 'K' and in_array($row['tunnus'], $myyntierahuom) and $kpl_st != $org_kpl) {
 		$varaosavirhe .= t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on").": $trow[myynti_era]<br>";
-		$riviok++;
-		$tilausok++;
 	}
 
 	//Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille, eikä tuoteperheen saldollisille lapsille jos koko perhe suoratoimitetaan

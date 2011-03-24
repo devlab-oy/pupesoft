@@ -290,12 +290,12 @@
 	$suoratoimeikiitos 		= '';
 	$lop					= "";
 	$tuoteperhe				= array(); 				// Tuoteperheiden lapset menevät tänne
-	$kaikkituotteet			= array(); 			// tähän arrayseen lisätään kaikki tuotteet ketjusta
+	$kaikkituotteet			= array(); 				// tähän arrayseen lisätään kaikki tuotteet ketjusta
 	$kaikkituotteet[]		= strtoupper($tuoteno); // ekaksi lisätään ketjuun kysytty tuote
 	$isa_array 				= array();
 	$var					= strtoupper($var); 	// varri isoks
 	$netto					= strtoupper($netto); 	// netto isoks
-	$myyntierahuomatus = FALSE;
+	$myyntierahuomatus 		= FALSE;
 	$myy_erikoistoim_ok		= TRUE;
 	$org_kpl				= "";
 
@@ -359,8 +359,9 @@
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 
-	if ($kpl > 0 and $trow['myynti_era'] > 0 and $rivityyppi == 'L' and $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+	if ($kpl > 0 and $trow['myynti_era'] > 0 and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
 		$org_kpl = $kpl;
+		
 		if ($kpl < $trow['myynti_era']) {
 			$kpl = $trow['myynti_era'];
 		}
@@ -1298,6 +1299,7 @@
 								}
 
 								$lisatyt_rivit1[] = $lisatty_tun;
+								
 								if ($myyntierahuomatus) {
 									$myyntierahuom[] = $lisatty_tun;
 								}

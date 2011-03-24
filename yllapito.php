@@ -1181,7 +1181,7 @@
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
-
+		
 		// Kokeillaan geneeristä
 		$query = "	SELECT *
 					FROM $toim
@@ -1467,6 +1467,13 @@
 				echo "<iframe id='avainsana_iframe' name='avainsana_iframe' src='yllapito.php?toim=avainsana&from=yllapito&lukitse_laji=$laji&ohje=off&haku[2]=@$laji$urilisa&lukitse_avaimeen=$la_tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
+
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhteensopivuus_tuote") {	
+			if (tarkista_oikeus("yllapito.php", "yhteensopivuus_tuote_lisatiedot") and $toim == 'yhteensopivuus_tuote') {
+				echo "<iframe id='yhteensopivuus_tuote_lisatiedot_iframe' name='yhteensopivuus_tuote_lisatiedot_iframe' src='yllapito.php?toim=yhteensopivuus_tuote_lisatiedot&from=yllapito&haku[4]=$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
 		
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {			
 			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot") and $toim == 'toimitustapa') {
@@ -1515,6 +1522,7 @@
 			$toim == "asiakashinta" or
 			$toim == "perusalennus" or
 			$toim == "yhteensopivuus_tuote" or
+			$toim == "yhteensopivuus_tuote_lisatiedot" or
 		   ($toim == "toimitustapa" and $poistolukko == "") or
 			$toim == "kirjoittimet" or
 			$toim == "hinnasto" or
@@ -1647,6 +1655,11 @@
 	if ($from == "yllapito" and $toim == "puun_alkio") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('puun_alkio_iframe' $jcsmaxheigth);</script>";
 	}
+
+	if ($from == "yllapito" and $toim == "yhteensopivuus_tuote_lisatiedot") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhteensopivuus_tuote_lisatiedot_iframe' $jcsmaxheigth);</script>";
+	}
+
 
 	elseif ($from != "yllapito") {
 		require ("inc/footer.inc");

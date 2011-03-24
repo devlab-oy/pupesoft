@@ -28,7 +28,7 @@ if ($monta == 0 and $ytunnus != '') {
 
 if ($monta == 0 and $ytunnus != '') {
 	// kokeillaan nimen osalla
-	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and nimi like '%$ytunnus%' or nimitark like '%$ytunnus%' and tyyppi != 'P'";
+	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and (nimi like '%$ytunnus%' or nimitark like '%$ytunnus%') and tyyppi != 'P'";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }
@@ -49,7 +49,7 @@ if ($monta > 1 and $monta <= $limit) {
 	//tämä vain otsik.php:tä varten
 	echo $lause;
 
-	echo "<table border='0'>";
+	echo "<table>";
 	echo "<tr>
 			<th>".t("Ytunnus")."</th>
 			<th>".t("Nimi")."</th>
@@ -60,8 +60,8 @@ if ($monta > 1 and $monta <= $limit) {
 
 	while ($toimittaja = mysql_fetch_array($result)) {
 
-		if     ($toimittaja['ytunnus']!='')    $numero=trim($toimittaja['ytunnus']);
-		else    die("VIRHE: Toimittajalla ei ole ytunnusta! Korjaa asia!");
+		if ($toimittaja['ytunnus'] != '') $numero = trim($toimittaja['ytunnus']);
+		else die("VIRHE: Toimittajalla ei ole ytunnusta! Korjaa asia!");
 
 		echo "<tr class='aktiivi'>
 				<td>$toimittaja[ytunnus]</td>
@@ -69,14 +69,14 @@ if ($monta > 1 and $monta <= $limit) {
 				<td>$toimittaja[osoite]</td>
 				<td>$toimittaja[postino]</td>
 				<td>$toimittaja[postitp]</td>";
-				
+
 		if (strtoupper($toimittaja['maa']) != strtoupper($yhtiorow['maa'])) {
 			echo "<td>$toimittaja[ultilno]</td>";
 		}
 		else {
-			echo "<td>$toimittaja[tilinumero]</td>";	
+			echo "<td>$toimittaja[tilinumero]</td>";
 		}
-			
+
 		echo "<td class='back'>";
 		echo "<form id='toimittaja_$toimittaja[tunnus]' name='toimittaja_$toimittaja[tunnus]' action=\"$PHP_SELF\" method='post'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
@@ -84,11 +84,11 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 		echo "<input type='hidden' name='tee' value='$tee'>";
 		echo "<input type='hidden' name='tila' value='$tila'>";
-		echo "<input type='hidden' name='maara' value='$maara'>";	
+		echo "<input type='hidden' name='maara' value='$maara'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='nayta_rivit' value='$nayta_rivit'>";
 		echo "<input type='hidden' name='tunnus' value='$tunnus'>";
-		echo "<input type='hidden' name='keikalla' value='$keikalla'>";		
+		echo "<input type='hidden' name='keikalla' value='$keikalla'>";
 		echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 		echo "<input type='hidden' name='ytunnus' value='$numero'>";
@@ -103,7 +103,7 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "<input type='submit' value='".t("Valitse")."' onclick=\"this.form.id='kevyt_toimittajahaku';\">";
 		echo "</form>";
 		echo "</td></tr>";
-		
+
 	}
 	echo "</table><br>";
 	$ytunnus = "";

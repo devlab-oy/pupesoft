@@ -1491,7 +1491,37 @@ if ($tee == 'P' or $tee == 'E') {
 
 if ($tee == 'I') {
 
-	$query = "SELECT kurssi FROM valuu WHERE nimi = '$valkoodi' and yhtio = '$kukarow[yhtio]'";
+	// Kurssiksi halutaan tämän päivän kurssi
+	if ($yhtiorow["ostolaskujen_kurssipaiva"] == 0) {
+		$query = "SELECT kurssi FROM valuu WHERE nimi = '$valkoodi' AND yhtio = '$kukarow[yhtio]'";
+	}
+	else {
+		// Jos käytetään kirjauksessa laskun päiväystä sekä kirjauspäivää
+		if ($yhtiorow['ostolaskujen_paivays'] == 1) {
+			// Kurssiksi halutaan kirjauspäivä
+			if ($yhtiorow["ostolaskujen_kurssipaiva"] == 1) {
+				$ostolaskun_valuuttalaskujen_kurssipaiva = "$tpv-$tpk-$tpp";
+			}
+			// Kurssiksi halutaan laskun päivä
+			else {
+				$ostolaskun_valuuttalaskujen_kurssipaiva = "$vpv-$vpk-$vpp";
+			}
+		}
+		else {
+			// Kurssiksi halutaan laskunpäivä (tai ehkä halutaan kirjauspäivä, mutta käytössä ei ole erillisiä laskun kirjauspäivä/laskunpäivä)
+			$ostolaskun_valuuttalaskujen_kurssipaiva = "$tpv-$tpk-$tpp";
+		}
+
+		// koitetaan hakea oikean päivän kurssi
+		$query = "	SELECT *
+					FROM valuu_historia
+					WHERE kotivaluutta = '$yhtiorow[valkoodi]'
+					AND valuutta = '$valkoodi'
+					AND kurssipvm <= '$ostolaskun_valuuttalaskujen_kurssipaiva'
+					ORDER BY kurssipvm DESC
+					LIMIT 1";
+	}
+
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 1) {

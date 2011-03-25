@@ -257,6 +257,24 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "ostolaskujen_kurssipaiva") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = (int) $trow[$i];
+		$sel = array("0" => "", "1" => "", "2" => "");
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = '0'  $sel[0]>".t("Ostolaskun valuuttakurssi syˆttˆp‰iv‰m‰‰r‰n mukaan");
+		$ulos .= "<option value = '1' $sel[1]>".t("Ostolaskun valuuttakurssi kirjausp‰iv‰m‰‰r‰n mukaan");
+		$ulos .= "<option value = '2' $sel[2]>".t("Ostolaskun valuuttakurssi laskun p‰iv‰yksen mukaan");
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+
 	if (mysql_field_name($result, $i) == "tyomaaraystyyppi") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2540,11 +2558,11 @@
 
 		$sel = array();
 		$sel[$trow[$i]] = " selected";
-		
+
 		$ulos .= "<option value = ''>".t("Varastopaikkoja, ja niiden tilavuuksia, ei tarvitse m‰‰ritell‰ etuk‰teen")."</option>";
 		$ulos .= "<option value = 'M'{$sel['M']}>".t("Varastopaikat, ja niiden tilavuudet, t‰ytyy m‰‰ritell‰ etuk‰teen")."</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
 
@@ -2556,12 +2574,12 @@
 		$sel[$trow[$i]] = " selected";
 
 		$ulos .= "<option value = ''>".t("Suuntalavoja ei k‰ytet‰ tuloutuksessa")."</option>";
-		$ulos .= "<option value = 'S'{$sel['S']}>".t("Suuntalavoja k‰ytet‰‰n tuloutuksessa")."</option>";	
+		$ulos .= "<option value = 'S'{$sel['S']}>".t("Suuntalavoja k‰ytet‰‰n tuloutuksessa")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "myyntiera_pyoristys" ) {
 
 		$sela = $selb = "";

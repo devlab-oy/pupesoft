@@ -61,7 +61,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
 		}
 
-		for ($excej = 0; $excej = (count($headers)-1); $excej--) {
+		for ($excej = (count($headers)-1); $excej > 0 ; $excej--) {
 			if ($headers[$excej] != "") {
 				break;
 			}
@@ -230,6 +230,25 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$excei++;
 		}
 		fclose($file);
+	}
+
+	// Korjataan spessujoini yhteensopivuus_tuote_lisatiedot/yhteensopivuus_tuote
+	if (in_array("yhteensopivuus_tuote", $taulut) and in_array("yhteensopivuus_tuote_lisatiedot", $taulut)) {
+
+		foreach ($taulunotsikot["yhteensopivuus_tuote_lisatiedot"] as $key => $column) {
+			if ($column == "TUOTENO") {
+				$joinsarake = $key;
+				break;
+			}
+		}
+
+		// Vaihdetaan otsikko
+		$taulunotsikot["yhteensopivuus_tuote_lisatiedot"][$joinsarake] = "YHTEENSOPIVUUS_TUOTE_TUNNUS";
+
+		// Tyhjennetään arvot
+		foreach ($taulunrivit["yhteensopivuus_tuote_lisatiedot"] as $ind => $rivit) {
+			$taulunrivit["yhteensopivuus_tuote_lisatiedot"][$ind][$joinsarake] = "";
+		}
 	}
 
 	/*
@@ -514,9 +533,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						$tila = 'ohita';
 					}
 				}
-				elseif ($table_mysql == 'yhteensopivuus_tuote' and $taulunotsikot[$taulu][$j] == "TYYPPI" and trim($rivi[$j]) == '') {
-					$tila = 'ohita';
-				}
 				elseif ($table_mysql == 'sanakirja' and $taulunotsikot[$taulu][$j] == "FI") {
 					// jos ollaan mulkkaamassa RU ni tehdään utf-8 -> latin-1 konversio FI kentällä
 					if (in_array("RU", $taulunotsikot[$taulu])) {
@@ -527,6 +543,24 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				}
 				elseif ($table_mysql == 'tuotepaikat' and $taulunotsikot[$taulu][$j] == "OLETUS") {
 					//ei haluta tätä tänne
+				}
+				elseif ($table_mysql == 'yhteensopivuus_tuote_lisatiedot' and $taulunotsikot[$taulu][$j] == "YHTEENSOPIVUUS_TUOTE_TUNNUS" and $taulunrivit[$taulu][$eriviindex][$j] == "") {
+					// Hetaan liitostunnus yhteensopivuus_tuote-taulusta
+					$apusql = "	SELECT tunnus
+								FROM yhteensopivuus_tuote
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tyyppi  = '{$taulunrivit["yhteensopivuus_tuote"][$eriviindex][array_search("TYYPPI", $taulunotsikot["yhteensopivuus_tuote"])]}'
+								and atunnus = '{$taulunrivit["yhteensopivuus_tuote"][$eriviindex][array_search("ATUNNUS", $taulunotsikot["yhteensopivuus_tuote"])]}'
+								and tuoteno = '{$taulunrivit["yhteensopivuus_tuote"][$eriviindex][array_search("TUOTENO", $taulunotsikot["yhteensopivuus_tuote"])]}'";
+					$apures = mysql_query($apusql) or pupe_error($apusql);
+
+					if (mysql_num_rows($apures) == 1) {
+						$apurivi = mysql_fetch_assoc($apures);
+
+						$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = $apurivi["tunnus"];
+
+						$valinta .= " and ".$taulunotsikot[$taulu][$j]."='$apurivi[tunnus]'";
+					}
 				}
 				elseif ($table_mysql == 'puun_alkio') {
 
@@ -674,7 +708,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					$tila = 'ohita';
 				}
 			}
-
 			if (substr($taulu, 0, 11) == 'puun_alkio_') {
 				$valinta .= " and laji = '".substr($taulu, 11)."' ";
 			}
@@ -1561,6 +1594,7 @@ else {
 					<option value='yhteensopivuus_auto_2' $sel[yhteensopivuus_auto_2]>".t("Yhteensopivuus automallit 2")."</option>
 					<option value='yhteensopivuus_mp' $sel[yhteensopivuus_mp]>".t("Yhteensopivuus mp-mallit")."</option>
 					<option value='yhteensopivuus_tuote' $sel[yhteensopivuus_tuote]>".t("Yhteensopivuus tuotteet")."</option>
+					<option value='yhteensopivuus_tuote_lisatiedot' $sel[yhteensopivuus_tuote_lisatiedot]>".t("Yhteensopivuus tuotteet lisätiedot")."</option>
 					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
 					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>";
 

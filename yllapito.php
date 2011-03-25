@@ -1470,7 +1470,7 @@
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhteensopivuus_tuote") {	
 			if (tarkista_oikeus("yllapito.php", "yhteensopivuus_tuote_lisatiedot") and $toim == 'yhteensopivuus_tuote') {
-				echo "<iframe id='yhteensopivuus_tuote_lisatiedot_iframe' name='yhteensopivuus_tuote_lisatiedot_iframe' src='yllapito.php?toim=yhteensopivuus_tuote_lisatiedot&from=yllapito&haku[4]=$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='yhteensopivuus_tuote_lisatiedot_iframe' name='yhteensopivuus_tuote_lisatiedot_iframe' src='yllapito.php?toim=yhteensopivuus_tuote_lisatiedot&from=yllapito&haku[5]=$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
 

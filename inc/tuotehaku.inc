@@ -3,7 +3,7 @@
 	$enarimatch = FALSE;
 
 	// Etsitän enarilla jos kappaleita ei ole syötetty eikä hakuja käytetty
-	if ((!isset($kpl) or $kpl == "") and !isset($kpl_array) and substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#') {
+	if ((!isset($kpl) or $kpl == "") and !is_array($kpl_array) and substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#') {
 
 		$query = "	SELECT *
 					FROM tuote

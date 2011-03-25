@@ -68,14 +68,14 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
 
 	if ($ykoko > 0 and $ykoko < $kork and ($kork >= $leve or $xkoko == 0)) {
 		// skaalataan kuva oikenakokoiseksi y:n mukaan
-    	exec("nice -n 20 convert -resize x$ykoko -quality 90 -colorspace sRGB -strip $upfile1 $upfilesgh", $output, $error);
+    	exec("nice -n 20 convert -resize x$ykoko -quality 90 -colorspace sRGB -strip \"$upfile1\" \"$upfilesgh\"", $output, $error);
     }
 	elseif ($xkoko > 0 and $xkoko < $leve and ($leve > $kork or $ykoko == 0)) {
 		// skaalataan kuva oikenakokoiseksi x:n mukaan
-  		exec("nice -n 20 convert -resize $xkoko -quality 90 -colorspace sRGB -strip $upfile1 $upfilesgh", $output, $error);
+  		exec("nice -n 20 convert -resize $xkoko -quality 90 -colorspace sRGB -strip \"$upfile1\" \"$upfilesgh\"", $output, $error);
     }
 	else {
-		exec("mv -f $upfile1 $upfilesgh");
+		exec("mv -f \"$upfile1\" \"$upfilesgh\"");
 		$error = 0;
     }
 

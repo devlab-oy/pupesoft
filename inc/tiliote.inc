@@ -30,7 +30,7 @@
 			//Muutetaan määrät oikeaan valuuttaan
 			if ($valuuttatili == "" and $kurssi != 1) {
 				// Määrä valuutassa
-				$kohdm = round($maara * $kurssi, 2);
+				$kohdm = round($maara / $kurssi, 2);
 				$kohdm_valkoodilisa = "";
 			}
 			elseif ($valuuttatili == "ON" and $kurssi != 1) {
@@ -556,10 +556,10 @@
 			break;
 
 		case 'T10' :
-			$maksu 		   = 1;
-			$sisviite 	   = 0;
-			$vasta_arvo	   = 0;
-			$vasta_kurssi  = 1;
+			$maksu			= 1;
+			$sisviite		= 0;
+			$vasta_arvo		= 0;
+			$vasta_kurssi	= 1;
 
 			$tiliotedataid = $tiliotedatarow['tunnus'];
 			$tiliotedatape = $tiliotedatarow['perheid'];
@@ -775,7 +775,7 @@
 				// ?
 				case '05' :
 					$vasta_arvo	= sprintf('%.2f', substr($arvo, 0, 19)/100);
-					$vasta_kurssi	= substr($arvo, 24, 11) * 1 / 10000000;
+					$vasta_kurssi = substr($arvo, 24, 11) * 1 / 10000000;
 
 					$selite  = t("Vasta-arvo").": ".sprintf('%.2f', substr($arvo, 0, 19)/100)."<br>";
 					$selite .= t("Valuutta").": ".substr($arvo, 20, 3)."<br>";

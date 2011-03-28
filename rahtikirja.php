@@ -25,7 +25,7 @@
 		}
 		elseif ($jv == 'vainvak') {
 			$vainvakilliset = " JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi != '') ";
+								JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi not in ('','0')) ";
 		}
 		else {
 			$jvehto = " ";
@@ -183,7 +183,7 @@
 
 	$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
 					FROM tilausrivi
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi not in ('','0'))
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					AND tilausrivi.otunnus = '$otsikkonro'
 					AND tilausrivi.tyyppi = 'L'

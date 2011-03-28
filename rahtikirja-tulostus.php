@@ -143,7 +143,7 @@
 		if (!isset($nayta_pdf)) echo "<font class='message'>".t("Tulostetaan rahtikirjat toimitustavalle").": $toimitustapa<br>".t("Kirjoitin").": $print[kirjoitin]</font><hr>";
 
 		// emuloidaan transactioita mysql LOCK komennolla
-		$query = "LOCK TABLES liitetiedostot READ, rahtikirjat WRITE, tilausrivi WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tuotepaikat WRITE, sanakirja WRITE, rahtisopimukset READ, rahtimaksut READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka READ, avainsana READ, avainsana as a READ, avainsana as b READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, etaisyydet READ, laskun_lisatiedot READ, yhteyshenkilo READ, toimitustapa READ, avainsana as avainsana_kieli READ, varaston_tulostimet READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ";
+		$query = "LOCK TABLES liitetiedostot READ, rahtikirjat WRITE, tilausrivi WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tuotepaikat WRITE, sanakirja WRITE, rahtisopimukset READ, rahtimaksut READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka READ, avainsana READ, avainsana as a READ, avainsana as b READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, etaisyydet READ, laskun_lisatiedot READ, yhteyshenkilo READ, toimitustapa READ, avainsana as avainsana_kieli READ, varaston_tulostimet READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, vak READ";
 		$res   = mysql_query($query) or pupe_error($query);
 
 		if ($jv == 'vainjv') {
@@ -157,7 +157,7 @@
 		elseif ($jv == 'vainvak') {
 			if (!isset($nayta_pdf)) echo t("Vain VAK").". ";
 			$vainvakilliset = " JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi != '') ";
+								JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi not in ('','0')) ";
 		}
 		else {
 			$jvehto = " ";
@@ -405,21 +405,33 @@
 								and tyyppi 	 	= 'L'";
 					$ures  = mysql_query($query) or pupe_error($query);
 				}
+				
+				// Käytetäänkö VAK-tietokantaa
+				if ($yhtiorow["vak_kasittely"] != "") {
+					$vakselect = "concat_ws(' ', concat('UN',yk_nro), nimi_ja_kuvaus, lipukkeet, pakkausryhma)";
+					$vakjoin   = "JOIN vak ON tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus";
+				}
+				else {
+					$vakselect = "tuote.vakkoodi";
+					$vakjoin   = "";
+				}
 
-				//haetaan rahtikirjan kaikki vakkoodit arrayseen
-				$query = "	SELECT distinct(vakkoodi) vakkoodi
-							from tilausrivi,tuote
-							where otunnus in ($otunnukset)
+				// Haetaan kaikki vakkoodit arrayseen
+				$query = "	SELECT distinct $vakselect vakkoodi
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
+							$vakjoin
+							where tilausrivi.otunnus in ($otunnukset)
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tuote.tuoteno = tilausrivi.tuoteno
-							and tuote.yhtio = tilausrivi.yhtio
-							and tuote.vakkoodi not in ('',' ','0')
 							and tilausrivi.var in ('','H')
-							and tilausrivi.tyyppi in ('L','G')";
+							and tilausrivi.tyyppi in ('L','G')
+							ORDER BY tuote.vakkoodi";
 				$vres = mysql_query($query) or pupe_error($query);
 
-				while ($vak = mysql_fetch_assoc($vres)) {
-					$vakit[] = $vak["vakkoodi"];
+				if (mysql_num_rows($vres) > 0) {
+					while ($vak = mysql_fetch_assoc($vres)) {
+						$vakit[] = $vak["vakkoodi"];
+					}
 				}
 
 				// nyt on kaikki tiedot rahtikirjaa varten haettu..

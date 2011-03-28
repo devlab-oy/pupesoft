@@ -1944,25 +1944,36 @@
 					$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
 				}
 
-				$query = "  SELECT tuote.vakkoodi,
+				// Käytetäänkö VAK-tietokantaa
+				if ($yhtiorow["vak_kasittely"] != "") {
+					$vakselect = "concat_ws(' ', concat('UN',yk_nro), nimi_ja_kuvaus, lipukkeet, pakkausryhma)";
+					$vakjoin   = "JOIN vak ON tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus";
+				}
+				else {
+					$vakselect = "tuote.vakkoodi";
+					$vakjoin   = "";
+				}
+
+				$query = "  SELECT $vakselect,
 							if(tuote.myynti_era > 0,tuote.myynti_era , 1) era,
 							tuote.vakmaara tilavuus,
 							tuote.pakkausmateriaali materiaali,
 							sum(tilausrivi.kpl) kpl
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+							$vakjoin
 							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 							WHERE tilausrivi.otunnus = '$otunnus'
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tuote.vakkoodi != ''
+							and tuote.vakkoodi not in ('','0')
 							GROUP BY 1,2,3,4
 							ORDER BY 1,2,3,4";
 				$riresult1 = mysql_query($query) or pupe_error($query);
 
-				$query = "  SELECT r1.*
+				$query = "  SELECT distinct r1.tunnus, r1.pakkaus, r1.pakkauskuvaus, r1.kollit, round(r1.kilot,1) kilot
 							FROM rahtikirjat r1
-							LEFT JOIN rahtikirjat r2 ON (r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro)
+							LEFT JOIN rahtikirjat r2 ON (r1.yhtio = r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro != 0)
 							WHERE r1.otsikkonro = '$otunnus'
 							and r1.yhtio = '$kukarow[yhtio]'";
 				$riresult2 = mysql_query($query) or pupe_error($query);

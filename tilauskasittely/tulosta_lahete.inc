@@ -400,26 +400,25 @@ if (!function_exists('alku_lahete')) {
 			}
 		}
 
-		/*
-		Vielä off
+		if ($yhtiorow["vak_kasittely"] != "" and $tyyppi != "TILAUSVAHVISTUS") {
 
-		if ($tyyppi != "TILAUSVAHVISTUS") {
 			// Otetaan VAK-tiedot
-			$query = "  SELECT tuote.vakkoodi,
+			$query = "  SELECT concat_ws(' ', concat('UN',yk_nro), nimi_ja_kuvaus, lipukkeet, pakkausryhma) vakkoodi,
 						if(tuote.myynti_era > 0,tuote.myynti_era , 1) era,
 						tuote.vakmaara tilavuus,
 						tuote.pakkausmateriaali materiaali,
 						sum(tilausrivi.kpl+tilausrivi.varattu) kpl
 						FROM tilausrivi
 						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+						JOIN vak ON tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus
 						WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
 						and tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tuote.vakkoodi != ''
+						and tuote.vakkoodi not in ('','0')
 						GROUP BY 1,2,3,4
 						ORDER BY 1,2,3,4";
 			$riresult1 = mysql_query($query) or pupe_error($query);
 
-			$query = "  SELECT r1.pakkaus, r1.pakkauskuvaus, r1.kollit, round(r1.kilot,1) kilot
+			$query = "  SELECT distinct r1.tunnus, r1.pakkaus, r1.pakkauskuvaus, r1.kollit, round(r1.kilot,1) kilot
 						FROM rahtikirjat r1
 						LEFT JOIN rahtikirjat r2 ON (r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro != 0)
 						WHERE r1.otsikkonro = '$laskurow[tunnus]'
@@ -428,7 +427,7 @@ if (!function_exists('alku_lahete')) {
 
 			$vaktiedot = "";
 
-			if (mysql_num_rows($riresult2)) {
+			if (mysql_num_rows($riresult2) > 0) {
 				while ($row = mysql_fetch_assoc($riresult2)) {
 
 					$query = "	SELECT *
@@ -441,11 +440,11 @@ if (!function_exists('alku_lahete')) {
 
 					$pakkaus_en = t_tunnus_avainsanat($srow, "pakkaus", "PAKKAUSKV", $kieli);
 
-					$vaktiedot .= "$row[kollit] $pakkaus_en (".t("Bruttopaino", $kieli)." $row[kilot] kg) ".t("sisältäen", $kieli).":\n";
+					$vaktiedot .= "###$row[kollit] $pakkaus_en (".t("Bruttopaino", $kieli)." $row[kilot] kg) ".t("sisältäen", $kieli).":\n";
 				}
 			}
 
-			if (mysql_num_rows($riresult1)) {
+			if (mysql_num_rows($riresult1) > 0) {
 
 				$edvakkoodi = "";
 
@@ -453,23 +452,22 @@ if (!function_exists('alku_lahete')) {
 
 					$eramaara = round($row["kpl"]/$row["era"],1);
 
-					$vaktiedot .= "###$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." $row[era] x $row[tilavuus] ($row[materiaali])\n";
+					$vaktiedot .= "###$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." $row[era] x $row[tilavuus] (".t($row["materiaali"], $kieli).")\n";
 
 					if ($row["vakkoodi"] != $edvakkoodi and $edvakkoodi != "") {
-						$vaktiedot .= "###$edvakkoodi\n\n";
+						$vaktiedot .= "###".wordwrap($edvakkoodi, 90, "\n###")."\n\n";
 					}
 
 					$edvakkoodi = $row["vakkoodi"];
 				}
 
-				$vaktiedot .= "###$edvakkoodi\n";
+				$vaktiedot .= "###".wordwrap($edvakkoodi, 90, "\n###")."\n";
 			}
 
 			if ($vaktiedot != "") {
-				$komm .= "\n".t("VAK-tiedot", $kieli).":###".$vaktiedot;
+				$komm .= "\n".t("VAK-tiedot", $kieli).":".$vaktiedot;
 			}
 		}
-		*/
 
 		// Tulostetaan laskun kommentti
 		if (trim($komm) != '') {
@@ -484,7 +482,7 @@ if (!function_exists('alku_lahete')) {
 
 			$maxoik = 0;
 
-			foreach($kommentit as $kommentti) {
+			foreach ($kommentit as $kommentti) {
 				if (strpos($kommentti, "###") !== FALSE) {
 					list($o, $v) = explode("###", $kommentti);
 
@@ -496,7 +494,7 @@ if (!function_exists('alku_lahete')) {
 				}
 			}
 
-			foreach($kommentit as $kommentti) {
+			foreach ($kommentit as $kommentti) {
 
 				if (strpos($kommentti, "###") !== false) {
 					list($o, $v) = explode("###", $kommentti);

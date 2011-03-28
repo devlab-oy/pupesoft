@@ -174,7 +174,7 @@ if (!function_exists('rivi_dgd')) {
 
 			$eramaara = $row["kpl"]/$row["era"];
 
-			$pdf->pages[$sivu]->drawText("$eramaara ctns each $row[era] x $row[tilavuus] ($row[materiaali])", mm_pt(45), mm_pt($kala), 'LATIN1');
+			$pdf->pages[$sivu]->drawText("$eramaara ctns each $row[era] x $row[tilavuus] (".t($row["materiaali"], "en").")", mm_pt(45), mm_pt($kala), 'LATIN1');
 			$kala-=5;
 
 			if ($row["vakkoodi"] != $edvakkoodi and $edvakkoodi != "") {

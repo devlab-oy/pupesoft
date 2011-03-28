@@ -3294,7 +3294,7 @@ if ($tee == '') {
 			$presult = mysql_query($query) or pupe_error($query);
 			$perheid = $isatunnus;
 		}
-		
+
 		// useamman valmisteen reseptit...
 		$perheid2 = -100;
 	}
@@ -3617,7 +3617,7 @@ if ($tee == '') {
 		$toimaika 			= "";
 		$tuotenimitys 		= "";
 		$tuoteno 			= "";
-		$var 				= "";		
+		$var 				= "";
 		$var_array 			= "";
 		if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
 	}
@@ -4011,11 +4011,11 @@ if ($tee == '') {
 
 			$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
 							FROM tilausrivi
-							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi not in ('','0'))
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.otunnus = '$laskurow[tunnus]'
 							AND tilausrivi.tyyppi = 'L'
-							AND tilausrivi.var NOT IN ('P', 'J')";
+							AND tilausrivi.var NOT IN ('P','J')";
 			$vakresult = mysql_query($vakquery) or pupe_error($vakquery);
 			$vakrow = mysql_fetch_assoc($vakresult);
 

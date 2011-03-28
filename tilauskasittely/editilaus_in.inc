@@ -1360,16 +1360,16 @@ while (!feof ($fd)) {
 			if ($editilaus_otsikko_ok == "KYLLA") {
 				//tarkistetaan toimitustapa vakin takia
 				$query = " 	SELECT *
-				  			from tilausrivi
-							join tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != ''
-							where tilausrivi.yhtio = '$kukarow[yhtio]'
+				  			FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.otunnus = '$id'";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) > 0) {
 					$query = "	SELECT vak_kielto
-								from toimitustapa
-								where yhtio = '$kukarow[yhtio]'
+								FROM toimitustapa
+								WHERE yhtio = '$kukarow[yhtio]'
 								and selite = '$laskurow[toimitustapa]'";
 					$result = mysql_query($query) or die($query);
 					$toimtapatmp = mysql_fetch_array($result);

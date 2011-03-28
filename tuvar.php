@@ -173,7 +173,7 @@
 			$tuoterow = mysql_fetch_array($result);
 
 			//saldot per varastopaikka
-			$query = "select * from tuotepaikat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+			$query = "SELECT * from tuotepaikat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 			$sresult = mysql_query($query) or pupe_error($query);
 
 			//saldolaskentaa tulevaisuuteen
@@ -204,7 +204,20 @@
 			echo "<tr><td>$tuoterow[tuoteno]</td><td colspan='5'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td></tr>";
 
 			echo "<tr><th>".t("Osasto/Try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th colspan='2'>".t("VAK")."</th></tr>";
-			echo "<td>$tuoterow[osasto] - ".t_avainsana("OSASTO", "", "and avainsana.selite='$tuoterow[osasto]'", "", "", "selitetark")."<br>$tuoterow[try] - ".t_avainsana("TRY", "", "and avainsana.selite='$tuoterow[try]'", "", "", "selitetark")."</td><td>$tuoterow[toimittaja]</td><td>$tuoterow[aleryhma]</td><td>$tuoterow[tahtituote]</td><td colspan='2'>$tuoterow[vakkoodi]</td></tr>";
+			echo "<td>$tuoterow[osasto] - ".t_avainsana("OSASTO", "", "and avainsana.selite='$tuoterow[osasto]'", "", "", "selitetark")."<br>$tuoterow[try] - ".t_avainsana("TRY", "", "and avainsana.selite='$tuoterow[try]'", "", "", "selitetark")."</td>";
+
+			if ($yhtiorow["vak_kasittely"] != "" and $tuoterow["vakkoodi"] != "" and $tuoterow["vakkoodi"] != "0") {
+				$query = "	SELECT tunnus, concat_ws(' / ', concat('UN',yk_nro), nimi_ja_kuvaus, luokka, luokituskoodi, pakkausryhma, lipukkeet) vakkoodi
+							FROM vak
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							and tunnus  = '{$tuoterow['vakkoodi']}'";
+				$vak_res = mysql_query($query) or pupe_error($query);
+				$vak_row = mysql_fetch_assoc($vak_res);
+
+				$tuoterow["vakkoodi"] = $vak_row["vakkoodi"];
+			}
+
+			echo "<td>$tuoterow[toimittaja]</td><td>$tuoterow[aleryhma]</td><td>$tuoterow[tahtituote]</td><td colspan='2'>$tuoterow[vakkoodi]</td></tr>";
 
 			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Nettohinta")."</th><th colspan='3'>".t("Viimeksi tullut")."</th>";
 			echo "<tr><td>$tuoterow[toim_tuoteno]</td><td>";

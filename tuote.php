@@ -453,6 +453,18 @@
 			echo "<td>$tuoterow[aleryhma]</td>";
 			echo "<td>$tuoterow[tahtituote]</td>";
 			echo "<td>$peralrow[alennus]%</td>";
+
+			if ($yhtiorow["vak_kasittely"] != "" and $tuoterow["vakkoodi"] != "" and $tuoterow["vakkoodi"] != "0") {
+				$query = "	SELECT tunnus, concat_ws(' / ', concat('UN',yk_nro), nimi_ja_kuvaus, luokka, luokituskoodi, pakkausryhma, lipukkeet) vakkoodi
+							FROM vak
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							and tunnus  = '{$tuoterow['vakkoodi']}'";
+				$vak_res = mysql_query($query) or pupe_error($query);
+				$vak_row = mysql_fetch_assoc($vak_res);
+
+				$tuoterow["vakkoodi"] = $vak_row["vakkoodi"];
+			}
+
 			echo "<td>$tuoterow[vakkoodi]</td>";
 			echo "</tr>";
 

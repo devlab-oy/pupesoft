@@ -610,6 +610,31 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "vakkoodi" and $yhtiorow["vak_kasittely"] != "") {
+
+		$sel = array();
+		$sel[$trow[$i]] = ' selected';
+		
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		
+		$query = "	SELECT tunnus, concat_ws(' / ', yk_nro, substring(nimi_ja_kuvaus,1,70), luokka, luokituskoodi, pakkausryhma, lipukkeet, erityismaaraykset) nimi
+					FROM vak  
+					WHERE yhtio = '{$kukarow['yhtio']}'";
+		$vak_res = mysql_query($query) or pupe_error($query);
+		
+		$ulos .= "<option value=''>".t("Valitse")."</option>";
+		
+		while ($vak_row = mysql_fetch_assoc($vak_res)) {
+
+			$selected = $vak_row['tunnus'] == $trow[$i] ? ' selected' : '';
+
+			$ulos .= "<option value='{$vak_row['tunnus']}'{$selected}>{$vak_row['nimi']}</option>";
+		}
+		
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "keraysvyohyke") {
 

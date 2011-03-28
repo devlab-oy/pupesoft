@@ -2611,8 +2611,24 @@
 		}
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value = ' ' $sela>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n nopeaa tapaa")."</option>
-					<option value = 'U' $selb>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n uutta hitaanpaa tapaa")."</option>
+					<option value = '' $sela>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n nopeaa tapaa")."</option>
+					<option value = 'U' $selb>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n uutta hitaampaa tapaa")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "vak_kasittely") {
+
+		$sel = "";
+
+		if ($trow[$i] != '') {
+			$sel = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ''>".t("Normaali VAK-k‰sittely")."</option>
+					<option value = 'P' $sel>".t("K‰ytet‰‰n VAK-tietokantaa ja DGD-lomaketta")."</option>
 				</select></td>";
 
 		$jatko = 0;

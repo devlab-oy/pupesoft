@@ -95,19 +95,9 @@
 										ORDER BY popvm
 										LIMIT 1";
 							$result = mysql_query($query) or pupe_error($query);
-
-							if (mysql_num_rows($result) == 1) {
-								$trow = mysql_fetch_array($result);
-								echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>";
-
-								$tehdaanselvittelytosite = FALSE;
-
-								require "inc/teemaksutosite.inc";
-							}
 						}
 
-						if (strlen(trim($maksaa)) > 0) {
-
+						if (mysql_num_rows($result) != 1 and strlen(trim($maksaa)) > 0) {
 							echo "<font class='message'>".t("Maksukandidaatti nimi & määrä")."</font><br>";
 
 							// tarkka 35 merkkiä <-> 35 merkkiä nimihaku
@@ -176,15 +166,15 @@
 											$kohdm_valkoodilisa";
 								$result = mysql_query($query) or pupe_error($query);
 							}
+						}
 
-							if (mysql_num_rows($result) == 1) {
-								$trow = mysql_fetch_array ($result);
-								echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>";
+						if (mysql_num_rows($result) == 1) {
+							$trow = mysql_fetch_array ($result);
+							echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>";
 
-								$tehdaanselvittelytosite = FALSE;
+							$tehdaanselvittelytosite = FALSE;
 
-								require "inc/teemaksutosite.inc";
-							}
+							require "inc/teemaksutosite.inc";
 						}
 
 						if ($tehdaanselvittelytosite) {

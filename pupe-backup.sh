@@ -81,8 +81,8 @@ FILENAME="linux-backup-${FILEDATE}.bz2"
 # Siirryt‰‰n roottiin, koska tar ei tallenna absoluuttisia polkuja
 cd /
 
-# Pakataan t‰rke‰t tiedostot
-tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 etc/ssh/sshd_config etc/httpd/conf/* etc/cups/printers.conf etc/cups/lpoptions etc/my.cnf root/.forward etc/hosts etc/sysconfig/network etc/mail/* etc/crontab ${PUPEPOLKU}/inc/salasanat.php etc/cron.*
+# Pakataan t‰rke‰t tiedostot 
+tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 etc/ssh/sshd_config etc/httpd/conf/* etc/rc.local etc/dhcp/dhcpd.conf etc/vtund.conf etc/samba/smb.conf etc/cups/printers.conf etc/cups/lpoptions etc/my.cnf root/.forward etc/hosts etc/sysconfig/network etc/mail/* etc/crontab ${PUPEPOLKU}/inc/salasanat.php etc/cron.*
 
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete

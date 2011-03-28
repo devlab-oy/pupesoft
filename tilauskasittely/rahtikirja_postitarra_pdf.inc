@@ -84,10 +84,10 @@
 		// tehdään pdf:n uusi sivu
 		$firstpage = $pdf->new_page("a5");
 
-		//tehdään JJFI viivakoodi
-		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
-
 		if (class_exists("Image_Barcode")) {
+			//tehdään JJFI viivakoodi
+			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+			
 			imagejpeg(Image_Barcode::draw($viiva1, 'code128', 'jpg', false, 3, 170), $nimi);
 
 			$fh = fopen($nimi, "r");
@@ -283,9 +283,12 @@
 		if ($rahdinmaksaja != "") {
 			$komm .= "MAKSAJA MUU KUIN LÄHETTÄJÄ.\n";
 		}
+		
 		if (is_array($vakit)) {
+			$komm .= "\n";
+			
 			foreach($vakit as $vak) {
-				$komm .= "$vak\n";
+				$komm .= "$vak.\n";
 			}
 		}
 

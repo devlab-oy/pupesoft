@@ -11,23 +11,37 @@ if ($phpnimi != "rahtikirja_custom.php") {
 				FROM lasku
 				LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
 				LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen
-				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus'";
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				and lasku.tunnus = '$tunnus'";
 	$tempr = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_assoc($tempr);
 
-	// Haetaan rahtikirjan kaikki vakkoodit arrayseen
-	$query = "	SELECT group_concat(distinct(tuote.vakkoodi) SEPARATOR ', ') vakkoodi
-				from tilausrivi, tuote
+	// Käytetäänkö VAK-tietokantaa
+	if ($yhtiorow["vak_kasittely"] != "") {
+		$vakselect = "concat_ws(' ', concat('UN',yk_nro), nimi_ja_kuvaus, lipukkeet, pakkausryhma)";
+		$vakjoin   = "JOIN vak ON tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus";
+	}
+	else {
+		$vakselect = "tuote.vakkoodi";
+		$vakjoin   = "";
+	}
+
+	// Haetaan kaikki vakkoodit arrayseen
+	$query = "	SELECT group_concat(distinct $vakselect SEPARATOR ', ') vakkoodi
+				FROM tilausrivi
+				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
+				$vakjoin
 				where tilausrivi.otunnus = '$laskurow[tunnus]'
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
-				and tuote.tuoteno = tilausrivi.tuoteno
-				and tuote.yhtio = tilausrivi.yhtio
-				and tuote.vakkoodi not in ('',' ','0')
 				and tilausrivi.var in ('','H')
-				and tilausrivi.tyyppi in ('L','G')";
+				and tilausrivi.tyyppi in ('L','G')
+				ORDER BY tuote.vakkoodi";
 	$vres = mysql_query($query) or pupe_error($query);
-	$vak = mysql_fetch_assoc($vres);
-	$vakit = $vak["vakkoodi"];
+
+	if (mysql_num_rows($vres) > 0) {
+		$vak = mysql_fetch_assoc($vres);
+		$vakit = $vak["vakkoodi"];
+	}
 }
 else {
 	$laskurow = $osoitelappurow;
@@ -50,9 +64,7 @@ if (mysql_num_rows($pres) > 0) {
 }
 
 if (!function_exists('tarkiste')) {
-
 	function tarkiste($sscc) {
-
 		$kerroin = 3; // kerroin aluks 3
 		$summa   = 0; // summa nolla tietty
 
@@ -77,6 +89,7 @@ if (!function_exists('tarkiste')) {
 // tarkiste (1)
 
 $apu_kollityht = $kollityht;
+
 if ($kollityht > 100) {
 	$apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkkiä
 }
@@ -96,13 +109,13 @@ $loppu = tarkiste($sscc);
 $sscc = $sscc.$loppu;
 
 //PDF:n luonti ja defaultit
-define (__TRACE_ENABLED__, false);
-define (__DEBUG_ENABLED__, false);
-require_once("barcode/barcode.php");
-require_once("barcode/debug.php");
-require_once("barcode/c39object.php");
-require_once("barcode/c128cobject.php");
 require_once("pdflib/phppdflib.class.php");
+
+// jos php-gd on installoitu niin loidataab barcode library
+if (in_array("gd", get_loaded_extensions())) {
+	if (@include_once("viivakoodi/Barcode.php"));
+	else include_once("Barcode.php");
+}
 
 //PDF parametrit
 $pdf = new pdffile;
@@ -141,122 +154,46 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	// tehdään pdf:n uusi sivu
 	$firstpage = $pdf->new_page("a5");
 
-	//Duusataan viivakoodia
-	$output      = "png";
-	$width       = "220";
-	//$height      = "50";
-	$height      = mm_pt("25");
-	$xres        = "1";
-	$font        = "2";
-	$drawtext    = "off";
-	$border      = "on";
-	$stretchtext = "off";
-	$style    = BCS_ALIGN_CENTER;
-	$style   |= ($output     == "png" ) ? BCS_IMAGE_PNG      : 0;
-	$style   |= ($output     == "jpeg") ? BCS_IMAGE_JPEG     : 0;
-	$style   |= ($border     == "on"  ) ? BCS_BORDER         : 0;
-	$style   |= ($drawtext   == "on"  ) ? BCS_DRAW_TEXT      : 0;
-	$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
-	$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
+	if (class_exists("Image_Barcode")) {
+		//luodaan viivakoodiolio kuljetusohjeelle = postino
+		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-	//luodaan viivakoodiolio kuljetusohjeelle = postino
-	$obj = "";
-	$obj = new c128cobject($width, $height, $style, '400'.$laskurow['asiakkaan_tilausnumero'], 'FNC1');
+		imagejpeg(Image_Barcode::draw('400'.$laskurow['asiakkaan_tilausnumero'], 'code128', 'jpg', false, 3, 170), $nimi);
 
-	if ($obj) {
-		$obj->SetFont($font);
-		$obj->DrawObject($xres);
+		$fh = fopen($nimi, "r");
+		$data = fread($fh, filesize($nimi));
+		fclose($fh);
 
-		//flushataan barcode ja saadaam filenimi johon se tallennettiin
-		$nimi1 = $obj->FlushObject();
+		$image = $pdf->jfif_embed($data);
 
-		//keksitään uudelle failille joku varmasti uniikki nimi:
-		$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
+		$logoparam['scale'] = 102/282;
+		$pdf->image_place($image, mm_pt(72), mm_pt(24), $firstpage, $logoparam);
+		system("rm -f $nimi");
 
-		passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
+		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-		if ($fh = @fopen($nimi2, "r")) {
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
+		imagejpeg(Image_Barcode::draw('00'.$sscc, 'code128', 'jpg', false, 3, 170), $nimi);
 
-			if ($image) {
-				// piirretään viivakoodi paprulle
-				$pdf->image_place($image, mm_pt(70), mm_pt(30), $firstpage); // Y, X
-			}
-		}
+		$fh = fopen($nimi, "r");
+		$data = fread($fh, filesize($nimi));
+		fclose($fh);
 
-		$pdf->draw_text(mm_pt(22), mm_pt(65), "Asiakastilaus: ",	$firstpage, $norm);
-		$pdf->draw_text(mm_pt(50), mm_pt(65), "(400) $laskurow[asiakkaan_tilausnumero]",	$firstpage, $iso);
+		$image = $pdf->jfif_embed($data);
 
-		unset($obj);
-
-		//dellataan tmp filet kuleksimasta
-		system("rm -f $nimi1 $nimi2");
-	}
-	else {
-		echo "object create error";
+		$logoparam['scale'] = 102/282;
+		$pdf->image_place($image, mm_pt(40), mm_pt(24), $firstpage, $logoparam);
+		system("rm -f $nimi");
 	}
 
-	//Duusataan SSCC
-	$output      = "png";
-	$width       = "500";
-	//$height      = "50";
-	$height      = mm_pt("25");
-	$xres        = "1";
-	$font        = "2";
-	$drawtext    = "off";
-	$border      = "on";
-	$stretchtext = "off";
-	$style    = BCS_ALIGN_CENTER;
-	$style   |= ($output     == "png" ) ? BCS_IMAGE_PNG      : 0;
-	$style   |= ($output     == "jpeg") ? BCS_IMAGE_JPEG     : 0;
-	$style   |= ($border     == "on"  ) ? BCS_BORDER         : 0;
-	$style   |= ($drawtext   == "on"  ) ? BCS_DRAW_TEXT      : 0;
-	$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
-	$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
+	$pdf->draw_text(mm_pt(22), mm_pt(65), "Asiakastilaus: ",	$firstpage, $norm);
+	$pdf->draw_text(mm_pt(50), mm_pt(65), "(400) $laskurow[asiakkaan_tilausnumero]",	$firstpage, $iso);
 
-	//luodaan viivakoodiolio kuljetusohjeelle = postino
-	$obj = "";
-	$obj = new c128cobject($width, $height, $style, '00'.$sscc, 'FNC1');
-	//$obj = new c128cobject($width, $height, $style, '00100000123016093006', 'FNC1');
+	//tehää tästä vielä kaunis kattella
+	$sscc = substr($sscc,0,4).substr($sscc,4,1).substr($sscc,5,8).substr($sscc,13,8).substr($sscc,21,1);
 
-	if ($obj) {
-		$obj->SetFont($font);
-		$obj->DrawObject($xres);
-
-		//flushataan barcode ja saadaam filenimi johon se tallennettiin
-		$nimi1 = $obj->FlushObject();
-
-		//keksitään uudelle failille joku varmasti uniikki nimi:
-		$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
-
-		passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-		if ($fh = @fopen($nimi2, "r")) {
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
-
-			if ($image) {
-				$pdf->image_place($image, mm_pt(38), mm_pt(-15), $firstpage); // Y, X
-			}
-		}
-
-		//tehää tästä vielä kaunis kattella
-		$sscc = substr($sscc,0,4).substr($sscc,4,1).substr($sscc,5,8).substr($sscc,13,8).substr($sscc,21,1);
-
-		// piirretään viivakoodi paprulle
-		$pdf->draw_text(mm_pt(22), mm_pt(33), "Kolli - Item ID.: ", $firstpage, $otsik);
-		$pdf->draw_text(mm_pt(45), mm_pt(33), "(00) $sscc", $firstpage, $iso);
-		unset($obj);
-
-		//dellataan tmp filet kuleksimasta
-		system("rm -f $nimi1 $nimi2");
-	}
-	else {
-		echo "object create error 2";
-	}
+	// piirretään viivakoodi paprulle
+	$pdf->draw_text(mm_pt(22), mm_pt(33), "Kolli - Item ID.: ", $firstpage, $otsik);
+	$pdf->draw_text(mm_pt(45), mm_pt(33), "(00) $sscc", $firstpage, $iso);
 
 	// sitten aletaan piirtämään itse PDF sisältöä
 	// ensin isot viivat kohilleen
@@ -340,7 +277,6 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(22), mm_pt(107), "Reitti:                            Jono:                            Lähetysehto:",	$firstpage, $otsik);
 
 	if (isset($vakit) and $vakit != "") {
-		$salakalapala -= 5;
 		$pdf->draw_text(mm_pt(22), mm_pt(102), "VAK: ".$vakit, $firstpage, $norm);
 	}
 
@@ -390,6 +326,6 @@ elseif ($oslapp != '' and $oslapp != 'edi') {
 
 //poistetaan tmp file samantien kuleksimasta...
 system("rm -f $pdffilenimi");
-$pdffilenimi='';
+$pdffilenimi = '';
 
 ?>

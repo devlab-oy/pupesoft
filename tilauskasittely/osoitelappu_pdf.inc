@@ -5,32 +5,63 @@
 // $kukarow[yhtio] jostain saadaan yhtio
 // $yhtiorow array josta saada lähettäjän tiedot
 
+if ($toim == 'EXTRANET_REKLAMAATIO' and $tunnus == '') {
+	$tunnus = $kukarow['kesken'];
+}
+
 if ($phpnimi != "rahtikirja_custom.php") {
 	//Tulostetaan standardi kolliosoitelappu
 	$query = "	SELECT lasku.*, if(yhteyshenkilo.nimi!='',concat_ws(' / ', yhteyshenkilo.nimi,if(yhteyshenkilo.gsm!='',yhteyshenkilo.gsm,if(yhteyshenkilo.puh!='',yhteyshenkilo.puh,NULL))),'') yhteyshenkilo
 				FROM lasku
 				LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
 				LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen
-				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus'";
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				and lasku.tunnus = '$tunnus'";
 	$tempr = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($tempr);
 
-	// Haetaan rahtikirjan kaikki vakkoodit arrayseen
-	$query = "	SELECT group_concat(distinct(tuote.vakkoodi) SEPARATOR ', ') vakkoodi
-				from tilausrivi, tuote
+	// Käytetäänkö VAK-tietokantaa
+	if ($yhtiorow["vak_kasittely"] != "") {
+		$vakselect = "concat_ws(' ', concat('UN',yk_nro), nimi_ja_kuvaus, lipukkeet, pakkausryhma)";
+		$vakjoin   = "JOIN vak ON tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus";
+	}
+	else {
+		$vakselect = "tuote.vakkoodi";
+		$vakjoin   = "";
+	}
+
+	// Haetaan kaikki vakkoodit arrayseen
+	$query = "	SELECT group_concat(distinct $vakselect SEPARATOR ', ') vakkoodi
+				FROM tilausrivi
+				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
+				$vakjoin
 				where tilausrivi.otunnus = '$laskurow[tunnus]'
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
-				and tuote.tuoteno = tilausrivi.tuoteno
-				and tuote.yhtio = tilausrivi.yhtio
-				and tuote.vakkoodi not in ('',' ','0')
 				and tilausrivi.var in ('','H')
-				and tilausrivi.tyyppi in ('L','G')";
+				and tilausrivi.tyyppi in ('L','G')
+				ORDER BY tuote.vakkoodi";
 	$vres = mysql_query($query) or pupe_error($query);
-	$vak = mysql_fetch_assoc($vres);
-	$vakit = $vak["vakkoodi"];
+
+	if (mysql_num_rows($vres) > 0) {
+		$vak = mysql_fetch_assoc($vres);
+		$vakit = $vak["vakkoodi"];
+	}
+
+	$query = "	SELECT *
+				from asiakas
+				where yhtio = '$kukarow[yhtio]'
+				and tunnus  = '$laskurow[liitostunnus]'";
+	$tempr = mysql_query($query) or pupe_error($query);
+	$asiakasrow = mysql_fetch_array($tempr);
 }
 else {
 	$laskurow = $osoitelappurow;
+}
+
+if ($toim == 'EXTRANET_REKLAMAATIO' and $yhtiorow['reklamaation_vastaanottovarasto'] != 0) {
+	if ($yhtiorow['reklamaation_vastaanottovarasto'] !='') {
+		$laskurow['varasto'] = $yhtiorow['reklamaation_vastaanottovarasto'];
+	}
 }
 
 // haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
@@ -51,6 +82,15 @@ if ($postirow_varasto["nimi"] != "") {
 	$laskurow["yhtio_maa"]      = $postirow_varasto["maa"];
 }
 
+if ($toim == 'EXTRANET_REKLAMAATIO' and $yhtiorow['reklamaation_vastaanottovarasto'] == 0) {
+	$query = "	SELECT nimi, osoite, postino, postitp, maa
+				FROM yhtio
+				WHERE yhtio = '$yhtiorow[yhtio]'";
+	$tempr = mysql_query($query) or pupe_error($query);
+	$postirow_varasto = mysql_fetch_array($tempr);
+}
+
+
 $prikomento = explode('-#', $oslapp);
 
 // haetaan printterin osoitetiedot
@@ -70,11 +110,8 @@ if ($print["nimi"] != "") {
 	$laskurow["yhtio_postitp"] = $print["postitp"];
 }
 
-
 if (!function_exists('tarkiste')) {
-
 	function tarkiste($sscc) {
-
 		$kerroin = 3; // kerroin aluks 3
 		$summa   = 0; // summa nolla tietty
 
@@ -101,7 +138,6 @@ if (!function_exists('tarkiste')) {
 $apu_kollityht = $kollityht;
 if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkkiä
 
-//$prefix = "(00)"; // tää on turha
 $sscc = 1;
 $sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
 $sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
@@ -110,16 +146,13 @@ $loppu = tarkiste($sscc);
 $sscc = $sscc.$loppu;
 
 //PDF:n luonti ja defaultit
-define (__TRACE_ENABLED__, false);
-define (__DEBUG_ENABLED__, false);
-
-if (in_array("gd", get_loaded_extensions())) {
-	require_once("barcode/barcode.php");
-	require_once("barcode/debug.php");
-	require_once("barcode/c39object.php");
-	require_once("barcode/c128aobject.php");
-}
 require_once("pdflib/phppdflib.class.php");
+
+// jos php-gd on installoitu niin loidataab barcode library
+if (in_array("gd", get_loaded_extensions())) {
+	if (@include_once("viivakoodi/Barcode.php"));
+	else include_once("Barcode.php");
+}
 
 //PDF parametrit
 $pdf = new pdffile;
@@ -149,118 +182,53 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	// tehdään pdf:n uusi sivu
 	$firstpage = $pdf->new_page("a5");
 
-	//Duusataan viivakoodia
-	$output      = "png";
-	$width       = "220";
-	$height      = "50";
-	$xres        = "1";
-	$font        = "2";
-	$drawtext    = "off";
-	$border      = "on";
-	$stretchtext = "off";
-	$style    = BCS_ALIGN_CENTER;
-	$style   |= ($output     == "png" ) ? BCS_IMAGE_PNG      : 0;
-	$style   |= ($output     == "jpeg") ? BCS_IMAGE_JPEG     : 0;
-	$style   |= ($border     == "on"  ) ? BCS_BORDER         : 0;
-	$style   |= ($drawtext   == "on"  ) ? BCS_DRAW_TEXT      : 0;
-	$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
-	$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
-
-	if (class_exists("c39object")) {
+	if (class_exists("Image_Barcode")) {
 		//luodaan viivakoodiolio kuljetusohjeelle = postino
-		$obj = "";
-		$obj = new c39object($width, $height, $style, $laskurow['toim_postino']);
+		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
-
-			//flushataan barcode ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
-
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
-
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-			if ($fh = @fopen($nimi2, "r")) {
-				$data = fread($fh, filesize($nimi2));
-				fclose($fh);
-				$image = $pdf->png_embed($data);
-
-				if ($image) {
-					// piirretään viivakoodi paprulle
-					$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
-				}
-			}
-
-			$pdf->draw_text(mm_pt(5), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
-
-			unset($obj);
-
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
-	}
-
-	//Duusataan SSCC
-	$output      = "png";
-	$width       = "500";
-	$height      = "50";
-	$xres        = "1";
-	$font        = "2";
-	$drawtext    = "off";
-	$border      = "on";
-	$stretchtext = "off";
-	$style    = BCS_ALIGN_CENTER;
-	$style   |= ($output     == "png" ) ? BCS_IMAGE_PNG      : 0;
-	$style   |= ($output     == "jpeg") ? BCS_IMAGE_JPEG     : 0;
-	$style   |= ($border     == "on"  ) ? BCS_BORDER         : 0;
-	$style   |= ($drawtext   == "on"  ) ? BCS_DRAW_TEXT      : 0;
-	$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
-	$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
-
-	if (class_exists("c128aobject")) {
-		//luodaan viivakoodiolio kuljetusohjeelle = postino
-		$obj = "";
-		$obj = new c128aobject($width, $height, $style, $sscc);
-
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
-
-			//flushataan barcode ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
-
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
-
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-			if ($fh = @fopen($nimi2, "r")) {
-				$data = fread($fh, filesize($nimi2));
-				fclose($fh);
-				$image = $pdf->png_embed($data);
-
-				if ($image) {
-					// piirretään viivakoodi paprulle
-					$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
-				}
-			}
-
-			//tehää tästä vielä kaunis kattella
-			$sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
-
-			$pdf->draw_text(mm_pt(5), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
-			unset($obj);
-
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
+		if ($toim == 'EXTRANET_REKLAMAATIO') {
+			imagejpeg(Image_Barcode::draw($postirow_varasto['postino'], 'code128', 'jpg', false, 3, 170), $nimi);
 		}
 		else {
-			echo "object create error 2";
+			imagejpeg(Image_Barcode::draw($laskurow['toim_postino'], 'code128', 'jpg', false, 3, 170), $nimi);
 		}
+
+		$fh = fopen($nimi, "r");
+		$data = fread($fh, filesize($nimi));
+		fclose($fh);
+
+		$image = $pdf->jfif_embed($data);
+
+		$logoparam['scale'] = 90/282;
+		$pdf->image_place($image, mm_pt(80), mm_pt(5), $firstpage, $logoparam);
+		system("rm -f $nimi");
+
+		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+
+		imagejpeg(Image_Barcode::draw($sscc, 'code128', 'jpg', false, 3, 170), $nimi);
+
+		$fh = fopen($nimi, "r");
+		$data = fread($fh, filesize($nimi));
+		fclose($fh);
+
+		$image = $pdf->jfif_embed($data);
+
+		$logoparam['scale'] = 90/282;
+		$pdf->image_place($image, mm_pt(9), mm_pt(5), $firstpage, $logoparam);
+		system("rm -f $nimi");
 	}
+
+	if ($toim == 'EXTRANET_REKLAMAATIO') {
+		$pdf->draw_text(mm_pt(5), mm_pt(75), "Postinro - Postnr - Postal Code: $postirow_varasto[postino]",	$firstpage, $otsik);
+	}
+	else {
+		$pdf->draw_text(mm_pt(5), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
+	}
+
+	//tehää tästä vielä kaunis kattella
+	$sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
+
+	$pdf->draw_text(mm_pt(5), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
 
 	$apu_yhtiorow = array();
 
@@ -328,11 +296,21 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	}
 
 	//Mistä
-	$pdf->draw_text(mm_pt(5), mm_pt(200), "Mistä - Från - From: ",							$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(5), mm_pt(195), $laskurow['yhtio_nimi'],							$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(5), mm_pt(190), $laskurow['yhtio_nimitark'],						$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(5), mm_pt(185), $laskurow['yhtio_osoite'],						$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(5), mm_pt(180), $laskurow['yhtio_postino']." ".strtoupper($laskurow['yhtio_postitp']),	$firstpage, $kirj);
+	if ($toim == 'EXTRANET_REKLAMAATIO') {
+
+		$pdf->draw_text(mm_pt(5), mm_pt(200), "Mistä - Från - From: ",							$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(5), mm_pt(195), $laskurow['nimi'],							$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(5), mm_pt(190), $laskurow['nimitark'],						$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(5), mm_pt(185), $laskurow['osoite'],						$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(5), mm_pt(180), $laskurow['postino']." ".strtoupper($laskurow['postitp']),	$firstpage, $kirj);
+	}
+	else {
+		$pdf->draw_text(mm_pt(5), mm_pt(200), "Mistä - Från - From: ",							$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(5), mm_pt(195), $laskurow['yhtio_nimi'],							$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(5), mm_pt(190), $laskurow['yhtio_nimitark'],						$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(5), mm_pt(185), $laskurow['yhtio_osoite'],						$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(5), mm_pt(180), $laskurow['yhtio_postino']." ".strtoupper($laskurow['yhtio_postitp']),	$firstpage, $kirj);
+	}
 
 	//kolliluku
 	if ($rahtikirja_tulostus == "yep" and $toimitustaparow['osoitelappu'] == 'tiivistetty') {
@@ -351,10 +329,16 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	}
 
 	$pdf->draw_text(mm_pt(5), mm_pt(175), "Puh -Tel - Tel: ",								$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(5), mm_pt(170), $yhtiorow['puhelin'],								$firstpage, $kirj);
+	if ($toim == 'EXTRANET_REKLAMAATIO') {
+		$pdf->draw_text(mm_pt(5), mm_pt(170), $asiakasrow['puhelin'],								$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(70), mm_pt(175), "Läh.pvm. - Avs.dat. -  Desp.Date: ",			$firstpage, $otsik);
+	}
+	else {
+		$pdf->draw_text(mm_pt(5), mm_pt(170), $yhtiorow['puhelin'],								$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(70), mm_pt(175), "Läh.pvm. - Avs.dat. -  Desp.Date: ",			$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(70), mm_pt(170), date("d.m.Y") ,									$firstpage, $kirj);
 
-	$pdf->draw_text(mm_pt(70), mm_pt(175), "Läh.pvm. - Avs.dat. -  Desp.Date: ",			$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(70), mm_pt(170), date("d.m.Y") ,									$firstpage, $kirj);
+	}
 
 	$pdf->draw_text(mm_pt(5), mm_pt(165), "Lähettäjä - Avsändare - Sender: ",				$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(5), mm_pt(160), "$kukarow[nimi]" ,								$firstpage, $kirj);
@@ -396,23 +380,31 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	}
 
 	$pdf->draw_text(mm_pt(15),	mm_pt(145), "Minne - Till - To: " ,							$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(15),	mm_pt(140), $laskurow['toim_nimi'],							$firstpage, $iso);
-	$pdf->draw_text(mm_pt(15),	mm_pt(133), $laskurow['toim_nimitark'],						$firstpage, $iso);
-	$pdf->draw_text(mm_pt(15),	mm_pt(126), $laskurow['toim_osoite'],						$firstpage, $iso);
-	$pdf->draw_text(mm_pt(15),	mm_pt(119), $laskurow['toim_maa']."-".$laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $huge);
 
-	$query = "	SELECT *
-				from asiakas
-				where yhtio = '$kukarow[yhtio]'
-				and tunnus  = '$laskurow[liitostunnus]'";
-	$tempr = mysql_query($query) or pupe_error($query);
-	$asiakasrow = mysql_fetch_array($tempr);
+	if ($toim == 'EXTRANET_REKLAMAATIO') {
+		$pdf->draw_text(mm_pt(15),	mm_pt(140), $postirow_varasto['nimi'],					$firstpage, $iso);
+		$pdf->draw_text(mm_pt(15),	mm_pt(133), $postirow_varasto['nimitark'],				$firstpage, $iso);
+		$pdf->draw_text(mm_pt(15),	mm_pt(126), $postirow_varasto['osoite'],				$firstpage, $iso);
+		$pdf->draw_text(mm_pt(15),	mm_pt(119), $postirow_varasto['maa']."-".$postirow_varasto['postino']." ".$postirow_varasto['postitp'],	$firstpage, $huge);
+	}
+	else {
+		$pdf->draw_text(mm_pt(15),	mm_pt(140), $laskurow['toim_nimi'],						$firstpage, $iso);
+		$pdf->draw_text(mm_pt(15),	mm_pt(133), $laskurow['toim_nimitark'],					$firstpage, $iso);
+		$pdf->draw_text(mm_pt(15),	mm_pt(126), $laskurow['toim_osoite'],					$firstpage, $iso);
+		$pdf->draw_text(mm_pt(15),	mm_pt(119), $laskurow['toim_maa']."-".$laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $huge);
+	}
 
 	$pdf->draw_text(mm_pt(15),	mm_pt(112),  "Puh -Tel - Tel: ",		$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(38),	mm_pt(112), substr($asiakasrow['puhelin'],0,15),		$firstpage, $kirj);
 
-	$pdf->draw_text(mm_pt(65), mm_pt(112), "Toimitustapa:",				$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(87), mm_pt(112), pdf_substr($laskurow["toimitustapa"], mm_pt(55), $pdf, $kirj),	$firstpage, $kirj);
+	if ($toim == 'EXTRANET_REKLAMAATIO') {
+		$pdf->draw_text(mm_pt(38),	mm_pt(112), substr($yhtiorow['puhelin'],0,15),		$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(75), mm_pt(112), "Toimitustapa:",							$firstpage, $otsik);
+	}
+	else {
+		$pdf->draw_text(mm_pt(38),	mm_pt(112), substr($asiakasrow['puhelin'],0,15),		$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(75), mm_pt(112), "Toimitustapa:",				$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(97), mm_pt(112), pdf_substr($laskurow["toimitustapa"], mm_pt(65), $pdf, $kirj),	$firstpage, $kirj);
+	}
 
 	$pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(110),mm_pt(10),		$firstpage, $rectparam);
 	$pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(115),mm_pt(5),		$firstpage, $rectparam);
@@ -435,7 +427,9 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$jvlisays =  "";
 	}
 
-	$pdf->draw_text(mm_pt(5), mm_pt(65), $laskurow["toimitustapa"].$jvlisays,		$firstpage, $kirj);
+	if ($toim != 'EXTRANET_REKLAMAATIO') {
+		$pdf->draw_text(mm_pt(5), mm_pt(65), $laskurow["toimitustapa"].$jvlisays,		$firstpage, $kirj);
+	}
 
 	$salakalapala = 65;
 
@@ -518,7 +512,15 @@ if ($oslapp == 'email') {
 	$liite = $pdffilenimi;
 	$kutsu = "Osoitelappu";
 
-	require("inc/sahkoposti.inc");
+	if ($toim == 'EXTRANET_REKLAMAATIO') {
+		include_once("generoi_laskun_saate.inc");
+		list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $kieli,$toim);
+		$content_subject .= " ".$laskurow['tunnus'];
+		require("sahkoposti.inc");
+	}
+	else {
+		require("inc/sahkoposti.inc");
+	}
 }
 elseif ($tee == 'NAYTATILAUS') {
 	//Työnnetään tuo pdf vaan putkeen!

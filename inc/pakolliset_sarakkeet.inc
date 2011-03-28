@@ -153,7 +153,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$wherelliset = array("TYYPPI", "ATUNNUS", "TUOTENO");
 				break;
 			case "yhteensopivuus_tuote_lisatiedot" :
-				$pakolliset  = array("YHTEENSOPIVUUS_TUOTE_TUNNUS", "OTSIKKO", "KIELI");
+				$pakolliset  = array("YHTEENSOPIVUUS_TUOTE_TUNNUS", "OTSIKKO", "ARVO", "KIELI");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");				
 				// HUOM: tässä hieman fuulataan joinattavia. Tsekkaa koodi lue_datassa, tämä on spessukeissi....
 				$joinattavat = array("TUOTENO" => "yhteensopivuus_tuote");

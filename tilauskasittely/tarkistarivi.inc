@@ -443,7 +443,7 @@
 						// jos toimitetaan erikoisvarastosta, niin käyttäjän pitää hyväksyä se
 						if ($alkurow['varasto'] != $laskurow["varasto"] and $tm_toimitustaparow["nouto"] == "" and $sel != '' and $row['var2'] != 'OK' and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
 
-							if ($alkurow['vakkoodi'] != '') {
+							if ($alkurow['vakkoodi'] != '' and $alkurow['vakkoodi'] != '0') {
 								$varaosavirhe .= t("HUOM: VAK-tuotteita ei toimiteta erikoisvarastosta")."!<br/>";
 							}
 							else {

@@ -27,7 +27,7 @@ if (!function_exists("kopioitiliointi")) {
 			echo "Tiliöintirivi kateissa Systeemivirhe!";
 		}
 		else {
-			$tiliointirow = mysql_fetch_assoc($result);
+			$tiliointirow = mysql_fetch_array($result);
 
 			$query = "INSERT into tiliointi set ";
 
@@ -498,8 +498,8 @@ if ($tuoteno != '') {
 			$pvm = $tapahtuma["laadittu"]; // kääntöpisteen tarkka aika talteen
 
 			// verrataan vähän aikoja
-			list($tkvv,$tkkk,$tkpp) = explode("-",$yhtiorow["tilikausi_alku"]);
-			list($klvv,$klkk,$klpp) = explode("-",$tapahtuma["laadittu"]);
+			list($tkvv,$tkkk,$tkpp) = explode("-", $yhtiorow["tilikausi_alku"]);
+			list($klvv,$klkk,$klpp) = explode("-", substr($tapahtuma["laadittu"], 0, 10));
 
 			$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
 			$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
@@ -708,10 +708,10 @@ if ($tuoteno != '') {
 									// katotaan saadaanko tehdä tiliöintejä
 									// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
 									list($tkvv,$tkkk,$tkpp) = explode("-",$yhtiorow["tilikausi_alku"]);
-									list($klvv,$klkk,$klpp) = explode("-",$trow["laadittu"]);
+									list($klvv,$klkk,$klpp) = explode("-", substr($trow["laadittu"], 0, 10));
 
-									$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
-									$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
+									$tilikausi_alku = (int) date('Ymd',mktime(0,0,0, $tkkk, $tkpp, $tkvv));
+									$korjaus_alku   = (int) date('Ymd',mktime(0,0,0, $klkk, $klpp, $klvv));
 
 									// yritetään korjata jotain joka on lukitulla tilikaudella.. estetään se
 									if ($korjaus_alku < $tilikausi_alku) {

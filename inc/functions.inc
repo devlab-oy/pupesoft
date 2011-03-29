@@ -10083,6 +10083,7 @@ if (!function_exists("pupe_DataTables")) {
 		*/
 
 		$paginationtype = $paginate != 'false' ? "\"sPaginationType\": \"full_numbers\"," : '';
+		$lengthmenu = $paginate != 'false' ? "\"aLengthMenu\": [[10, 25, 50, 100, 250, 500, -1], [10, 25, 50, 100, 250, 500, \"".t("Kaikki")."\"]]," : '';
 
 		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
 		preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
@@ -10097,6 +10098,7 @@ if (!function_exists("pupe_DataTables")) {
 					\"bDestroy\" : true,
 					\"bPaginate\" : {$paginate},
 					{$paginationtype}
+					{$lengthmenu}
 					\"bInfo\" : {$info},
 					\"bStateSave\" : true,
 					\"iDisplayLength\" : 10,
@@ -10521,7 +10523,7 @@ if (!function_exists('hae_suuntalava')) {
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_assoc($result);
 
-		$suuntalava = mysql_num_rows($result) == 1 ? $row['tunnus'] : 0;
+		$suuntalava = (trim($row['tunnus']) != '' and trim($row['tunnus']) > 0) ? $row['tunnus'] : 0;
 
 		return $suuntalava;
 	}

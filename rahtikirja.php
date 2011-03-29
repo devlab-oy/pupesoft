@@ -158,7 +158,7 @@
 		$id=0;
 	}
 
-	if ($id == '') $id=0;
+	if ($id == '') $id = 0;
 
 	// jos ollaan lisäämässä rahtikirjaa, niin katsotaan onko valitulla toimitustavalla erikoispakkauskielto
 	if (count($erikoispakkaus) > 0) {
@@ -181,46 +181,50 @@
 		}
 	}
 
-	$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
-					FROM tilausrivi
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi not in ('','0'))
-					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					AND tilausrivi.otunnus = '$otsikkonro'
-					AND tilausrivi.tyyppi = 'L'
-					AND tilausrivi.var NOT IN ('P', 'J')";
-	$vakresult = mysql_query($vakquery) or pupe_error($vakquery);
-	$vakrow = mysql_fetch_assoc($vakresult);
+	if ($id > 0) {
+		$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
+						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi not in ('','0'))
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						AND tilausrivi.otunnus = '$id'
+						AND tilausrivi.tyyppi = 'L'
+						AND tilausrivi.var NOT IN ('P', 'J')";
+		$vakresult = mysql_query($vakquery) or pupe_error($vakquery);
+		$vakrow = mysql_fetch_assoc($vakresult);
 
-	if ($vakrow['vaktuotteet'] != '') {
-		$query = "	SELECT *
-					FROM toimitustapa
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND selite = '$toimitustapa'";
-		$toimitustapa_res = mysql_query($query) or pupe_error($query);
-		$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+		if ($vakrow['vaktuotteet'] != '') {
+			$query = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite = '$toimitustapa'";
+			$toimitustapa_res = mysql_query($query) or pupe_error($query);
+			$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
 
-		if ($toimitustapa_row['vak_kielto'] != '' and $toimitustapa_row['vak_kielto'] != 'K') {
-			echo "<font class='message'>",t("Toimituksella on VAK-tuotteita ja toimitustavalla")," $toimitustapa ",t("on VAK-kielto"),"</font><br/>";
-			echo "<font class='message'>$toimitustapa ",t("VAK-tuotteet toimitetaan toimitustavalla")," $toimitustapa_row[vak_kielto]</font><br/>";
-			$toimitustapa = mysql_real_escape_string($toimitustapa_row['vak_kielto']);
-			$tee = '';
-		}
-		elseif ($toimitustapa_row['vak_kielto'] == 'K') {
-			echo "<br><font class='error'>".t("VIRHE: Tämä toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
-			$tee = '';
+			if ($toimitustapa_row['vak_kielto'] != '' and $toimitustapa_row['vak_kielto'] != 'K') {
+				echo "<font class='message'>",t("Toimituksella on VAK-tuotteita ja toimitustavalla")," $toimitustapa ",t("on VAK-kielto"),"</font><br/>";
+				echo "<font class='message'>$toimitustapa ",t("VAK-tuotteet toimitetaan toimitustavalla")," $toimitustapa_row[vak_kielto]</font><br/>";
+				$toimitustapa = mysql_real_escape_string($toimitustapa_row['vak_kielto']);
+				$tee = '';
+			}
+			elseif ($toimitustapa_row['vak_kielto'] == 'K') {
+				echo "<br><font class='error'>".t("VIRHE: Tämä toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
+				$tee = '';
+			}
 		}
 	}
 
-	$vak_toim_query = "	SELECT tunnus
-						FROM toimitustapa
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND selite = '$toimitustapa'
-						AND jvkielto != ''";
-	$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
+	if ($toimitustapa != "") {
+		$vak_toim_query = "	SELECT tunnus
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND selite = '$toimitustapa'
+							AND jvkielto != ''";
+		$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
 
-	if (mysql_num_rows($vak_toim_result) > 0 and $marow["jv"] != "") {
-		echo "<br><font class='error'>".t("VIRHE: Tämä toimitustapa ei salli jälkivaatimuksia")."!</font><br>";
-		$tee = '';
+		if (mysql_num_rows($vak_toim_result) > 0 and $marow["jv"] != "") {
+			echo "<br><font class='error'>".t("VIRHE: Tämä toimitustapa ei salli jälkivaatimuksia")."!</font><br>";
+			$tee = '';
+		}
 	}
 
 	// jos ollaan rahtikirjan esisyötössä niin tehdään lisäys vähän helpommin
@@ -279,7 +283,7 @@
 
 	//lisätään syötetty kama rahtikirja-tauluun
 	if ($tee == 'add') {
-		$apu=0; //apumuuttuja
+		$apu = 0; //apumuuttuja
 		$tutkimus = 0; // tänne tulee luku
 
 		// katotaan ollaanko syötetty jotain
@@ -639,6 +643,7 @@
 			$oslappkpl 		= (int) $oslappkpl;
 			$termoslappkpl 	= (int) $termoslappkpl;
 			$lahetekpl 		= (int) $lahetekpl;
+			$dgdkpl			= (int) $dgdkpl;
 
 			//tulostetaan faili ja valitaan sopivat printterit
 			if ($laskurow['pakkaamo'] > 0 and $laskurow['varasto'] != '' and $laskurow['tulostusalue'] != '') {
@@ -661,14 +666,14 @@
 			elseif ($laskurow["varasto"] == '') {
 				$query = "	SELECT *
 							from varastopaikat
-							where yhtio='$kukarow[yhtio]'
+							where yhtio = '$kukarow[yhtio]'
 							order by alkuhyllyalue,alkuhyllynro
 							limit 1";
 			}
 			else {
 				$query = "	SELECT *
 							from varastopaikat
-							where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
+							where yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
 							order by alkuhyllyalue,alkuhyllynro";
 			}
 			$prires = mysql_query($query) or pupe_error($query);
@@ -703,6 +708,12 @@
 				$kirres = mysql_query($query) or pupe_error($query);
 				$kirrow = mysql_fetch_assoc($kirres);
 				$termoslapp = $kirrow['komento'];
+
+				//haetaan DGD-lomakkeen tulostuskomento
+				$query  = "SELECT * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$rakirsyotto_dgd_tulostin'";
+				$kirres = mysql_query($query) or pupe_error($query);
+				$kirrow = mysql_fetch_assoc($kirres);
+				$dgdkomento = $kirrow['komento'];
 			}
 
 			if ($rakirsyotto_lahete_tulostin != '' and $komento != "" and $lahetekpl > 0) {
@@ -985,8 +996,40 @@
 				}
 			}
 
+			// Tulostetaan DGD
+			if ($rakirsyotto_dgd_tulostin != "" and $dgdkomento != '' and $dgdkpl > 0) {
+				$tunnus = $laskurow["tunnus"];
+
+				if ($dgdkpl > 0 and $dgdkpl != '' and $dgdkomento != 'email') {
+					$dgdkomento .= " -#$dgdkpl ";
+				}
+
+				require ("tilauskasittely/tulosta_dgd.inc");
+
+				$params_dgd = array(
+				'kieli'			=> 'en',
+				'laskurow'		=> $laskurow,
+				'page'			=> NULL,
+				'pdf'			=> NULL,
+				'row'			=> NULL,
+				'sivu'			=> 0,
+				'tee'			=> $tee,
+				'toim'			=> $toim,
+				'norm'			=> $norm,
+				);
+
+				// Aloitellaan lähetteen teko
+				$params_dgd = alku_dgd($params_dgd);
+				$params_dgd = rivi_dgd($params_dgd);
+				$params_dgd = loppu_dgd($params_dgd);
+
+				//tulostetaan sivu
+				$params_dgd["komento"] = $dgdkomento;
+				print_pdf_dgd($params_dgd);
+			}
+
 			echo "<br><br>";
-		} // end if apu>0
+		}
 	}
 
 	// meillä ei ole valittua tilausta
@@ -2619,14 +2662,33 @@
 			}
 
 			if ($vakrow['vaktuotteet'] != '') {
-		    	echo "<tr><td class='back'><font class='info'>",t("Tulosta myös yleisrahtikirja"),"<br/>",t("VAK-postipaketille"),":</font></td>";
+
+				echo "<tr><th>".t("DGD-lomake").":</th><td>";
+				echo "<select name='rakirsyotto_dgd_tulostin'>";
+				echo "<option value=''>".t("Ei tulosteta")."</option>";
+
+				while ($kirrow = mysql_fetch_assoc($kirre)) {
+					$sel = "";
+					if ($kirrow['tunnus'] == $rakirsyotto_dgd_tulostin) {
+						$sel = "SELECTED";
+					}
+
+					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+				}
+				mysql_data_seek($kirre, 0);
+
+				if (!isset($dgdkpl)) $dgdkpl = 1;
+
+				echo "</select> ".t("Kpl").": <input type='text' size='4' name='dgdkpl' value='$dgdkpl'></td></tr>";
+
+				echo "<tr><td class='back'><font class='info'>",t("Tulosta myös yleisrahtikirja"),"<br/>",t("VAK-postipaketille"),":</font></td>";
 			    echo "<td class='back'><input type='checkbox' name='tulosta_vak_yleisrahtikirja' id='tulosta_vak_yleisrahtikirja'></td></tr>";
 			}
 		}
 
 		echo "</table>";
 
-		if ($tee=='change' or $tee=='add') {
+		if ($tee == 'change' or $tee == 'add') {
 			echo "<input type='hidden' name='muutos' value='yes'>";
 		}
 

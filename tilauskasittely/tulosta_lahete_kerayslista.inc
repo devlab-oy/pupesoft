@@ -174,8 +174,9 @@ if (!function_exists('alku_kerayslista')) {
 
 		//etsitään myyjän nimi
 		$query  = "	SELECT nimi, kuka
-					from kuka
-					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
+					FROM kuka
+					WHERE tunnus='$laskurow[myyja]' AND yhtio='$kukarow[yhtio]'";
+
 		$myyresult = mysql_query($query) or pupe_error($query);
 		$myyrow = mysql_fetch_assoc($myyresult);
 
@@ -661,7 +662,11 @@ if (!function_exists('rivi_kerayslista')) {
 			$tresult = mysql_query($query) or pupe_error($query);
 			$trow	 = mysql_fetch_assoc($tresult);
 
-
+			// lisätään tuotteen takaata kommenni kerääjälle, tämä tulostuu vain keräyslistaan ja purkulistaan.
+			if (trim($trow['kerayskommentti']) !="") {
+				$row['kommentti'] .= "\n".$trow['kerayskommentti'];
+			}
+			
 			$pdf->draw_text(330, $kala, pdf_substr($trow["toim_tuoteno"], 80, $pdf, $norm), $thispage, $norm);
 
 			$rivipaikkahyllyssa  = 0;
@@ -832,7 +837,6 @@ if (!function_exists('rivi_kerayslista')) {
 
 			if ($row["kommentti"] != '') {
 				$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 125, 60, 470, $row["kommentti"],	$thispage, $norm);
-			//	$pohja = $pdf->draw_paragraph($kala+($norm["height"]+22), 125, 60, 470, $row["kommentti"],	$thispage, $norm);
 				$kala = $pohja - $rivinkorkeus;
 			}
 			elseif ($trow['myynti_era'] > 1) {

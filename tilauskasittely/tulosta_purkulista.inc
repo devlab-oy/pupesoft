@@ -210,7 +210,8 @@
 		$query = "	SELECT tuote.tuoteno, tuote.sarjanumeroseuranta, tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso,
 					tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta,
 					tuote.nimitys, tilausrivi.perheid2, tilausrivi.kommentti, tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue trhyllyalue, tilausrivi.hyllynro trhyllynro, tilausrivi.hyllyvali trhyllyvali, tilausrivi.hyllytaso trhyllytaso,
-					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
+					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta, 
+					tuote.purkukommentti
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					JOIN tapahtuma ON tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus and tapahtuma.kpl > 0 and laji = 'siirto'
@@ -222,7 +223,8 @@
 		$query = "	SELECT tuote.tuoteno, tuote.sarjanumeroseuranta,
 					tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta,
 					tuote.nimitys, tilausrivi.perheid2, tilausrivi.kommentti, tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue trhyllyalue, tilausrivi.hyllynro trhyllynro, tilausrivi.hyllyvali trhyllyvali, tilausrivi.hyllytaso trhyllytaso,
-					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
+					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta, 
+					tuote.purkukommentti
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					WHERE tilausrivi.otunnus = '$otunnus'
@@ -234,6 +236,7 @@
 					tilausrivi.hyllytaso, tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta, if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin,
 					round(if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(tilausrivi.varattu+tilausrivi.kpl),2) toimmaara,
 					tuote.nimitys, tilausrivi.perheid2, tilausrivi.kommentti, tilausrivi.otunnus, tilausrivi.tunnus,
+					tuote.purkukommentti,
 					$sorttauskentta
 					$selectlisa
 					FROM tilausrivi
@@ -526,6 +529,10 @@
 				}
 			}
 		}
+		
+		if (trim($row['purkukommentti']) !="") {
+			$row["kommentti"] .= " \n".$row['purkukommentti'];
+		}
 
 		if ($yhtiorow['viivakoodi_purkulistaan'] == 'K' and $mista != "vastaanota") {
 			if (class_exists("Image_Barcode")) {
@@ -553,7 +560,7 @@
 		$row["kommentti"] = trim($row["kommentti"]);
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$p["height"]+5, 160, 5, 440, $row["kommentti"],	$firstpage, $p);
+			$pohja = $pdf->draw_paragraph($kala+$p["height"]+5, 280, 5, 740, $row["kommentti"],	$firstpage, $p);
 			$kala = $pohja - 10;
 		}
 

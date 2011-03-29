@@ -455,7 +455,7 @@
 			echo "<td>$peralrow[alennus]%</td>";
 
 			if ($yhtiorow["vak_kasittely"] != "" and $tuoterow["vakkoodi"] != "" and $tuoterow["vakkoodi"] != "0") {
-				$query = "	SELECT tunnus, concat_ws(' / ', concat('UN',yk_nro), nimi_ja_kuvaus, luokka, luokituskoodi, pakkausryhma, lipukkeet) vakkoodi
+				$query = "	SELECT tunnus, concat_ws(' / ', concat('UN',yk_nro), nimi_ja_kuvaus, luokka, luokituskoodi, pakkausryhma, lipukkeet, rajoitetut_maarat_ja_poikkeusmaarat_1) vakkoodi
 							FROM vak
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							and tunnus  = '{$tuoterow['vakkoodi']}'";

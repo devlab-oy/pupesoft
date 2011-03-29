@@ -2,56 +2,6 @@
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
-	if (!isset($alatila)) $alatila = "";
-	if (!isset($alehinta_alv)) $alehinta_alv = "";
-	if (!isset($alv_velvollisuus)) $alv_velvollisuus = "";
-	if (!isset($asentaja)) $asentaja = "";
-	if (!isset($asiakkaan_kohde)) $asiakkaan_kohde = "";
-	if (!isset($clearing)) $clearing = "";
-	if (!isset($eilahe)) $eilahe = "";
-	if (!isset($ercpmkk)) $ercpmkk = "";
-	if (!isset($erpcmkk)) $erpcmkk = "";
-	if (!isset($erpcmpp)) $erpcmpp = "";
-	if (!isset($erpcmvv)) $erpcmvv = "";
-	if (!isset($huolitsija)) $huolitsija = "";
-	if (!isset($jakelu)) $jakelu = "";
-	if (!isset($kantaasiakastunnus)) $kantaasiakastunnus = "";
-	if (!isset($kasinsyotetty_viite)) $kasinsyotetty_viite = "";
-	if (!isset($kasitoimehto2)) $kasitoimehto2 = "";
-	if (!isset($ketjutus)) $ketjutus = "";
-	if (!isset($kolm_nimi)) $kolm_nimi = "";
-	if (!isset($kolm_nimitark)) $kolm_nimitark = "";
-	if (!isset($kolm_osoite)) $kolm_osoite = "";
-	if (!isset($kolm_postino)) $kolm_postino = "";
-	if (!isset($kolm_postitp)) $kolm_postitp = "";
-	if (!isset($kopioitava_otsikko)) $kopioitava_otsikko = "";
-	if (!isset($kuljetus)) $kuljetus = "";
-	if (!isset($laskutuskielto)) $laskutuskielto = "";
-	if (!isset($maksuehto)) $maksuehto = "";
-	if (!isset($maksuteksti)) $maksuteksti = "";
-	if (!isset($myynti_kommentti1)) $myynti_kommentti1 = "";
-	if (!isset($netto)) $netto = "";
-	if (!isset($nimi)) $nimi = "";
-	if (!isset($oletus)) $oletus = "";
-	if (!isset($otsikolta)) $otsikolta = "";
-	if (!isset($rahtivapaa)) $rahtivapaa = "";
-	if (!isset($rivihintoja_ei_nayteta)) $rivihintoja_ei_nayteta = "";
-	if (!isset($saate)) $saate = "";
-	if (!isset($seuranta)) $seuranta = "";
-	if (!isset($sisainen)) $sisainen = "";
-	if (!isset($tnimi)) $tnimi = "";
-	if (!isset($toimitusehto2)) $toimitusehto2 = "";
-	if (!isset($voimaika_vv)) $voimaika_vv = "";
-	if (!isset($ylatila)) $ylatila = "";
-	if (!isset($yllapito_alkukk)) $yllapito_alkukk = "";
-	if (!isset($yllapito_alkupp)) $yllapito_alkupp = "";
-	if (!isset($yllapito_alkuvv)) $yllapito_alkuvv = "";
-	if (!isset($yllapito_kk)) $yllapito_kk = "";
-	if (!isset($yllapito_loppukk)) $yllapito_loppukk = "";
-	if (!isset($yllapito_loppupp)) $yllapito_loppupp = "";
-	if (!isset($yllapito_loppuvv)) $yllapito_loppuvv = "";
-	if (!isset($yllapito_pp)) $yllapito_pp = "";
-
 	// ToimehtoTarkenne javascript funktio
 	js_toimehtoTarkenne();
 

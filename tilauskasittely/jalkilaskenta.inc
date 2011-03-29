@@ -686,11 +686,11 @@ if ($tuoteno != '') {
 
 								// etsitään tuotteen tiliöinti
 								$query = "	SELECT *
-											from lasku use index (yhtio_tila_tapvm)
-											where yhtio	= '$kukarow[yhtio]'
-											and tila 	= 'X'
-											and tapvm  >= '".substr($trow["laadittu"], 0, 10)."'
-											and viite 	= '$trow[tunnus]'";
+											FROM lasku use index (yhtio_tila_tapvm)
+											WHERE yhtio	= '$kukarow[yhtio]'
+											AND tila 	= 'X'
+											AND tapvm  >= '".substr($trow["laadittu"], 0, 10)."'
+											AND viite 	= '$trow[tunnus]'";
 								$invresult = mysql_query($query) or pupe_error($query);
 
 								if (mysql_num_rows($invresult) == 1) {
@@ -700,7 +700,12 @@ if ($tuoteno != '') {
 									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjattiin tiliöinti! ".t("Inventoitu").": $trow[tuoteno] @ $trow[laadittu]</font><br>";
 
 									// haetaan varastotiliöinti
-									$query = "SELECT * from tiliointi WHERE yhtio='$kukarow[yhtio]' and ltunnus='$invrow[tunnus]' and tilino='$yhtiorow[varasto]' and korjattu=''";
+									$query = "	SELECT *
+												FROM tiliointi
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND ltunnus = '$invrow[tunnus]'
+												AND tilino = '$yhtiorow[varasto]'
+												and korjattu = ''";
 									if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 									$invupd = mysql_query($query) or pupe_error($query);
 									$invrow = mysql_fetch_assoc($invupd);
@@ -713,54 +718,101 @@ if ($tuoteno != '') {
 									$tilikausi_alku = (int) date('Ymd',mktime(0,0,0, $tkkk, $tkpp, $tkvv));
 									$korjaus_alku   = (int) date('Ymd',mktime(0,0,0, $klkk, $klpp, $klvv));
 
+									// Lasketaan onko luku muuttunut
+									$inventoinnin_varastonmuutos = round($trow["kpl"] * $uusikehahin - $invrow['summa'], 2);
+
 									// yritetään korjata jotain joka on lukitulla tilikaudella.. estetään se
 									if ($korjaus_alku < $tilikausi_alku) {
 										echo "<font class='error'>".t("Korjauksia tiliöinteihin ei voida tehdä, koska tapahtuma on lukitulla tilikaudella")."! (".t("Inventointi").": $trow[laadittu])</font><br>";
 									}
-									else {
-										// yliviivataan kaikki tositteen aktiivit tiliöinnit
-										$query = "UPDATE tiliointi SET korjattu='$kukarow[kuka]', korjausaika=now() WHERE yhtio='$kukarow[yhtio]' and ltunnus='$invrow[ltunnus]' and korjattu=''";
-										if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+									elseif ($inventoinnin_varastonmuutos != 0) {
+										// Tehdään muutoksia vaan jos summa muuttuu
+										$query = "	SELECT count(*) luku
+													FROM tiliointi WHERE yhtio = '$kukarow[yhtio]'
+													AND ltunnus = '$invrow[ltunnus]'
+													AND korjattu = ''";
 										$invupd = mysql_query($query) or pupe_error($query);
+										$invcount = mysql_fetch_assoc($invupd);
 
-										if ($yhtiorow["varastonmuutos_inventointi"] != "") {
-											$varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+										// jos tähän tositteeseen ei olla koskettu pahemmin, niin korjataan koko tosite (voi olla esim omaan käyttöönottoa tms)
+										if ($invcount['luku'] == 2) {
+											// yliviivataan kaikki tositteen aktiivit tiliöinnit
+											$query = "	UPDATE tiliointi
+														SET korjattu = '$kukarow[kuka]', korjausaika=now()
+														WHERE yhtio = '$kukarow[yhtio]'
+														AND ltunnus = '$invrow[ltunnus]'
+														AND korjattu = ''";
+											if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+											$invupd = mysql_query($query) or pupe_error($query);
+
+											if ($yhtiorow["varastonmuutos_inventointi"] != "") {
+												$varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+											}
+											else {
+												$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+											}
+
+											// kirjotetaan uudet tiliönnit
+											$query = "	INSERT INTO tiliointi SET
+														yhtio    = '$kukarow[yhtio]',
+														ltunnus  = '$invrow[ltunnus]',
+														tilino   = '$varastonmuutos_tili',
+														kustp    = 0,
+														tapvm    = '$invrow[tapvm]',
+														summa    = $trow[kpl] * $uusikehahin * -1,
+														vero     = 0,
+														lukko    = '',
+														selite   = '$invrow[selite]',
+														laatija  = '$kukarow[kuka]',
+														laadittu = now()";
+											if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+											$invupd = mysql_query($query) or pupe_error($query);
+
+											// kirjotetaan uudet tiliönnit
+											$query = "	INSERT INTO tiliointi SET
+														yhtio    = '$kukarow[yhtio]',
+														ltunnus  = '$invrow[ltunnus]',
+														tilino   = '$yhtiorow[varasto]',
+														kustp    = 0,
+														tapvm    = '$invrow[tapvm]',
+														summa    = $trow[kpl] * $uusikehahin,
+														vero     = 0,
+														lukko    = '',
+														selite   = '$invrow[selite]',
+														laatija  = '$kukarow[kuka]',
+														laadittu = now()";
+											if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+											$invupd = mysql_query($query) or pupe_error($query);
 										}
-										else {
-											$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+										elseif ($invcount['luku'] > 2) {
+											// jos kirjauksia on enemmän, korjataan vaan VARASTO kirjaus, niin tosite jää heittämään ja sen löytää helposti
+
+											// yliviivataan varastotiliöinti
+											$query = "	UPDATE tiliointi
+														SET korjattu = '$kukarow[kuka]', korjausaika=now()
+														WHERE yhtio = '$kukarow[yhtio]'
+														AND ltunnus = '$invrow[ltunnus]'
+														AND korjattu = ''
+														AND tilino = '$yhtiorow[varasto]'";
+											if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+											$invupd = mysql_query($query) or pupe_error($query);
+
+											// kirjotetaan uudet tiliönnit
+											$query = "	INSERT INTO tiliointi SET
+														yhtio    = '$kukarow[yhtio]',
+														ltunnus  = '$invrow[ltunnus]',
+														tilino   = '$yhtiorow[varasto]',
+														kustp    = 0,
+														tapvm    = '$invrow[tapvm]',
+														summa    = $trow[kpl] * $uusikehahin,
+														vero     = 0,
+														lukko    = '',
+														selite   = '$invrow[selite]',
+														laatija  = '$kukarow[kuka]',
+														laadittu = now()";
+											if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
+											$invupd = mysql_query($query) or pupe_error($query);
 										}
-
-										// kirjotetaan uudet tiliönnit
-										$query = "	INSERT INTO tiliointi SET
-													yhtio    = '$kukarow[yhtio]',
-													ltunnus  = '$invrow[ltunnus]',
-													tilino   = '$varastonmuutos_tili',
-													kustp    = 0,
-													tapvm    = '$invrow[tapvm]',
-													summa    = $trow[kpl] * $uusikehahin * -1,
-													vero     = 0,
-													lukko    = '',
-													selite   = '$invrow[selite]',
-													laatija  = '$kukarow[kuka]',
-													laadittu = now()";
-										if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-										$invupd = mysql_query($query) or pupe_error($query);
-
-										// kirjotetaan uudet tiliönnit
-										$query = "	INSERT INTO tiliointi SET
-													yhtio    = '$kukarow[yhtio]',
-													ltunnus  = '$invrow[ltunnus]',
-													tilino   = '$yhtiorow[varasto]',
-													kustp    = 0,
-													tapvm    = '$invrow[tapvm]',
-													summa    = $trow[kpl] * $uusikehahin,
-													vero     = 0,
-													lukko    = '',
-													selite   = '$invrow[selite]',
-													laatija  = '$kukarow[kuka]',
-													laadittu = now()";
-										if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-										$invupd = mysql_query($query) or pupe_error($query);
 									}
 								}
 								else {

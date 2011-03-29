@@ -637,7 +637,7 @@
 		
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 		
-		$query = "	SELECT tunnus, concat_ws(' / ', yk_nro, substring(nimi_ja_kuvaus,1,70), luokka, luokituskoodi, pakkausryhma, lipukkeet, erityismaaraykset) nimi
+		$query = "	SELECT tunnus, concat_ws(' / ', yk_nro, substring(nimi_ja_kuvaus,1,70), luokka, luokituskoodi, pakkausryhma, lipukkeet, erityismaaraykset, rajoitetut_maarat_ja_poikkeusmaarat_1) nimi
 					FROM vak  
 					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$vak_res = mysql_query($query) or pupe_error($query);

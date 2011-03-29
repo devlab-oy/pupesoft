@@ -38,7 +38,7 @@ if (!function_exists('alku_dgd')) {
 
 		//PDF parametrit
 		if ($pdf === NULL) {
-			$pdf = Zend_Pdf::load("DGDpohja.pdf");
+			$pdf = Zend_Pdf::load($GLOBALS["pupe_root_polku"]."/tilauskasittely/DGDpohja.pdf");
 		}
 
 		// Fontit
@@ -113,7 +113,7 @@ if (!function_exists('uusi_sivu_dgd')) {
 		}
 
 		// Loadataan lisäsivun pohja omaan olioon
-		$pdf2 = Zend_Pdf::load("DGDpohja_lisasivu.pdf");
+		$pdf2 = Zend_Pdf::load($GLOBALS["pupe_root_polku"]."/tilauskasittely/DGDpohja_lisasivu.pdf");
 
 		// Kloonataan sivu jotta saadaan se liitettyä alkuperäiseen dokumenttiin
 		$pdf->pages[] = clone $pdf2->pages[0];
@@ -146,45 +146,22 @@ if (!function_exists('rivi_dgd')) {
 
 		$kala = 175;
 
-		$pdf->pages[$sivu]->setFont($norm, 10);
+		$pdf->pages[$sivu]->setFont($norm, 8);
 
-		while ($row = mysql_fetch_assoc($riresult2)) {
+		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['tunnus'], $kieli, "DGD");
 
-			$query = "	SELECT *
-						from pakkaus
-						WHERE yhtio = '$kukarow[yhtio]'
-						and pakkaus = '$row[pakkaus]'
-					 	and pakkauskuvaus = '$row[pakkauskuvaus]'";
-			$sresult = mysql_query($query) or pupe_error($query);
-			$srow = mysql_fetch_assoc($sresult);
+		foreach ($vakrakirtiedot as $vakrakirrivi) {
 
-			$pakkaus_en = t_tunnus_avainsanat($srow, "pakkaus", "PAKKAUSKV", "en");
+			list($teksti, $kilot) = explode("###", $vakrakirrivi);
 
-			$pdf->pages[$sivu]->drawText("$row[kollit] $pakkaus_en containing:", mm_pt(45), mm_pt($kala), 'LATIN1');
-
-			#$oikpos = widthForStringUsingFontSize($row["kilot"], $norm, 10);
-			$pdf->pages[$sivu]->drawText($row["kilot"], mm_pt(145), mm_pt($kala), 'LATIN1');
+			$pdf->pages[$sivu]->drawText($teksti, mm_pt(45), mm_pt($kala), 'LATIN1');
+			$pdf->pages[$sivu]->drawText($kilot, mm_pt(145), mm_pt($kala), 'LATIN1');
 			$kala-=5;
 		}
 
-		$edvakkoodi = "";
-		$pdf->pages[$sivu]->setFont($norm, 8);
+		foreach ($vaktuotetiedot as $vaktuoterivi) {
 
-		while ($row = mysql_fetch_assoc($riresult1)) {
-
-			$eramaara = $row["kpl"]/$row["era"];
-
-			$pdf->pages[$sivu]->drawText("$eramaara ctns each $row[era] x $row[tilavuus] (".t($row["materiaali"], "en").")", mm_pt(45), mm_pt($kala), 'LATIN1');
-			$kala-=5;
-
-			if ($row["vakkoodi"] != $edvakkoodi and $edvakkoodi != "") {
-				$pdf->pages[$sivu]->setFont($norm, 10);
-				$pdf->pages[$sivu]->drawText($edvakkoodi, mm_pt(45), mm_pt($kala), 'LATIN1');
-				$pdf->pages[$sivu]->setFont($norm, 8);
-				$kala-=5;
-			}
-
-			if ($kala < 125) {
+			if ($kala < 120) {
 
 				$pdf->pages[$sivu]->drawText("Continues....", mm_pt(45), mm_pt($kala), 'LATIN1');
 
@@ -208,11 +185,11 @@ if (!function_exists('rivi_dgd')) {
 				$pdf->pages[$sivu]->setFont($norm, 8);
 			}
 
-			$edvakkoodi = $row["vakkoodi"];
-		}
+			$eramaara = $row["kpl"]/$row["era"];
 
-		$pdf->pages[$sivu]->setFont($norm, 10);
-		$pdf->pages[$sivu]->drawText($edvakkoodi, mm_pt(45), mm_pt($kala), 'LATIN1');
+			$pdf->pages[$sivu]->drawText($vaktuoterivi, mm_pt(45), mm_pt($kala), 'LATIN1');
+			$kala-=5;
+		}
 
 		// Luodaan palautettavat
 		$return = array();
@@ -264,7 +241,39 @@ if (!function_exists('print_pdf_dgd')) {
 			${$key} = $val;
 		}
 
-		echo $pdf->render();
+		if ($tee == 'NAYTATILAUS') {
+			//Työnnetään tuo pdf vaan putkeen!
+			echo $pdf->render();
+		}
+		else {
+
+			//keksitään uudelle failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$pdffilenimi = "/tmp/DGD-".md5(uniqid(mt_rand(), true)).".pdf";
+
+			$pdf->save($pdffilenimi);
+
+			if ($komento == 'email') {
+				$liite = $pdffilenimi;
+				$content_body = "";
+
+				echo t("DGD tulostuu")."...<br>";
+
+				$kutsu = t("DGD %s", $kieli, $laskurow["tunnus"]);
+
+				if (@include("../inc/sahkoposti.inc"));
+				elseif (@include("inc/sahkoposti.inc"));
+				else include("sahkoposti.inc");
+			}
+			elseif ($komento != '' and $komento != 'edi') {
+				echo t("DGD tulostuu")."...<br>";
+				$line = exec("$komento $pdffilenimi", $output, $returnvalue);
+			}
+
+			// poistetaan tmp file
+			unlink($pdffilenimi);
+		}
 	}
 }
 

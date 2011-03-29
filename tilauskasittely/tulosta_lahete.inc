@@ -402,70 +402,20 @@ if (!function_exists('alku_lahete')) {
 
 		if ($yhtiorow["vak_kasittely"] != "" and $tyyppi != "TILAUSVAHVISTUS") {
 
-			// Otetaan VAK-tiedot
-			$query = "  SELECT concat_ws(' ', concat('UN',yk_nro), nimi_ja_kuvaus, lipukkeet, pakkausryhma) vakkoodi,
-						if(tuote.myynti_era > 0,tuote.myynti_era , 1) era,
-						tuote.vakmaara tilavuus,
-						tuote.pakkausmateriaali materiaali,
-						sum(tilausrivi.kpl+tilausrivi.varattu) kpl
-						FROM tilausrivi
-						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-						JOIN vak ON tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus
-						WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-						and tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tuote.vakkoodi not in ('','0')
-						GROUP BY 1,2,3,4
-						ORDER BY 1,2,3,4";
-			$riresult1 = mysql_query($query) or pupe_error($query);
-
-			$query = "  SELECT distinct r1.tunnus, r1.pakkaus, r1.pakkauskuvaus, r1.kollit, round(r1.kilot,1) kilot
-						FROM rahtikirjat r1
-						LEFT JOIN rahtikirjat r2 ON (r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro != 0)
-						WHERE r1.otsikkonro = '$laskurow[tunnus]'
-						and r1.yhtio = '$kukarow[yhtio]'";
-			$riresult2 = mysql_query($query) or pupe_error($query);
-
 			$vaktiedot = "";
 
-			if (mysql_num_rows($riresult2) > 0) {
-				while ($row = mysql_fetch_assoc($riresult2)) {
+			list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['tunnus'], $kieli);
 
-					$query = "	SELECT *
-								from pakkaus
-								WHERE yhtio = '$kukarow[yhtio]'
-								and pakkaus = '$row[pakkaus]'
-							 	and pakkauskuvaus = '$row[pakkauskuvaus]'";
-					$sresult = mysql_query($query) or pupe_error($query);
-					$srow = mysql_fetch_assoc($sresult);
-
-					$pakkaus_en = t_tunnus_avainsanat($srow, "pakkaus", "PAKKAUSKV", $kieli);
-
-					$vaktiedot .= "###$row[kollit] $pakkaus_en (".t("Bruttopaino", $kieli)." $row[kilot] kg) ".t("sisältäen", $kieli).":\n";
-				}
+			foreach ($vakrakirtiedot as $vakrakirrivi) {
+				$vaktiedot .= "###".$vakrakirrivi."\n";
 			}
 
-			if (mysql_num_rows($riresult1) > 0) {
-
-				$edvakkoodi = "";
-
-				while ($row = mysql_fetch_assoc($riresult1)) {
-
-					$eramaara = round($row["kpl"]/$row["era"],1);
-
-					$vaktiedot .= "###$eramaara ".t("pakkausta", $kieli).", ".t("kukin", $kieli)." $row[era] x $row[tilavuus] (".t($row["materiaali"], $kieli).")\n";
-
-					if ($row["vakkoodi"] != $edvakkoodi and $edvakkoodi != "") {
-						$vaktiedot .= "###".wordwrap($edvakkoodi, 90, "\n###")."\n\n";
-					}
-
-					$edvakkoodi = $row["vakkoodi"];
-				}
-
-				$vaktiedot .= "###".wordwrap($edvakkoodi, 90, "\n###")."\n";
+			foreach ($vaktuotetiedot as $vaktuoterivi) {
+				$vaktiedot .= "###".$vaktuoterivi."\n";
 			}
 
 			if ($vaktiedot != "") {
-				$komm .= "\n".t("VAK-tiedot", $kieli).":".$vaktiedot;
+				$komm .= "\n\n".t("VAK-tiedot", $kieli).":".$vaktiedot;
 			}
 		}
 

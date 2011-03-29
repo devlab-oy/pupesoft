@@ -785,8 +785,14 @@
 			$where4 = "";
 		}
 
+		$joinlisa = "";
+
+		if ($toim == "DGD") {
+			$joinlisa = "JOIN rahtikirjat ON (rahtikirjat.yhtio = lasku.yhtio and rahtikirjat.otsikkonro=lasku.tunnus)";
+		}
+
 		// Etsitään muutettavaa tilausta
-		$query = "  SELECT
+		$query = "  SELECT distinct
 					lasku.tunnus,
 					if (lasku.laskunro=0, '', lasku.laskunro) laskunro,
 					lasku.ytunnus,
@@ -805,6 +811,7 @@
 					lasku.liitostunnus
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
+					$joinlisa
 					WHERE $where1 $where2 $where3
 					and lasku.$logistiikka_yhtiolisa
 					$where4
@@ -1935,67 +1942,22 @@
 
 				$otunnus = $laskurow["tunnus"];
 
-				require_once("tulosta_dgd.inc");
-
-				if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
-					$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
-				}
-				else {
-					$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
-				}
-
-				// Käytetäänkö VAK-tietokantaa
-				if ($yhtiorow["vak_kasittely"] != "") {
-					$vakselect = "concat_ws(' ', concat('UN',yk_nro), nimi_ja_kuvaus, lipukkeet, pakkausryhma)";
-					$vakjoin   = "JOIN vak ON tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus";
-				}
-				else {
-					$vakselect = "tuote.vakkoodi";
-					$vakjoin   = "";
-				}
-
-				$query = "  SELECT $vakselect,
-							if(tuote.myynti_era > 0,tuote.myynti_era , 1) era,
-							tuote.vakmaara tilavuus,
-							tuote.pakkausmateriaali materiaali,
-							sum(tilausrivi.kpl) kpl
-							FROM tilausrivi
-							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-							$vakjoin
-							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-							WHERE tilausrivi.otunnus = '$otunnus'
-							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tuote.vakkoodi not in ('','0')
-							GROUP BY 1,2,3,4
-							ORDER BY 1,2,3,4";
-				$riresult1 = mysql_query($query) or pupe_error($query);
-
-				$query = "  SELECT distinct r1.tunnus, r1.pakkaus, r1.pakkauskuvaus, r1.kollit, round(r1.kilot,1) kilot
-							FROM rahtikirjat r1
-							LEFT JOIN rahtikirjat r2 ON (r1.yhtio = r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro != 0)
-							WHERE r1.otsikkonro = '$otunnus'
-							and r1.yhtio = '$kukarow[yhtio]'";
-				$riresult2 = mysql_query($query) or pupe_error($query);
+				require_once("tilauskasittely/tulosta_dgd.inc");
 
 				$params_dgd = array(
-				'kieli'						=> $kieli,
-				'laskurow'					=> $laskurow,
-				'page'						=> NULL,
-				'pdf'						=> NULL,
-				'row'						=> NULL,
-				'sivu'						=> 0,
-				'tee'						=> $tee,
-				'toim'						=> $toim,
-				'norm'						=> $norm,
+				'kieli'			=> $kieli,
+				'laskurow'		=> $laskurow,
+				'page'			=> NULL,
+				'pdf'			=> NULL,
+				'row'			=> NULL,
+				'sivu'			=> 0,
+				'tee'			=> $tee,
+				'toim'			=> $toim,
+				'norm'			=> $norm,
 				);
 
 				// Aloitellaan lähetteen teko
 				$params_dgd = alku_dgd($params_dgd);
-
-				$params_dgd["riresult1"] = $riresult1;
-				$params_dgd["riresult2"] = $riresult2;
-
 				$params_dgd = rivi_dgd($params_dgd);
 				$params_dgd = loppu_dgd($params_dgd);
 

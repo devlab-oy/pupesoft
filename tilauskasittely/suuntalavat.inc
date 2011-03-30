@@ -223,15 +223,17 @@
 								AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
 					$suuntalava_upd_res = mysql_query($query) or pupe_error($query);
 
-					// $query = "	UPDATE tilausrivi
-					// 			JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke_chk_row['keraysvyohyke']}')
-					// 			SET tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
-					// 			WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					// 			AND tilausrivi.uusiotunnus = '{$otunnus}'
-					// 			AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
-					// 			AND tilausrivi.kpl = 0
-					// 			AND tilausrivi.tyyppi = 'O'";
-					// $keraysvyohyke_upd_res = mysql_query($query) or pupe_error($query);
+					if (trim($automaattinen_paivitys) == 'K') {
+						$query = "	UPDATE tilausrivi
+									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke_chk_row['keraysvyohyke']}')
+									SET tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivi.uusiotunnus = '{$otunnus}'
+									AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'
+									AND tilausrivi.kpl = 0
+									AND tilausrivi.tyyppi = 'O'";
+						$keraysvyohyke_upd_res = mysql_query($query) or pupe_error($query);
+					}
 				}
 
 				$query = "	UPDATE suuntalavat SET
@@ -286,15 +288,17 @@
 				$uusi_suuntalavan_tunnus = mysql_insert_id();
 
 				// p‰ivitet‰‰n suuntalava automaattisesti niille riveille mihin se m‰ts‰‰
-				// $query = "	UPDATE tilausrivi
-				// 			JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
-				// 			SET tilausrivi.suuntalava = '{$uusi_suuntalavan_tunnus}'
-				// 			WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-				// 			AND tilausrivi.uusiotunnus = '{$otunnus}'
-				// 			AND tilausrivi.suuntalava = 0
-				// 			AND tilausrivi.kpl = 0
-				// 			AND tilausrivi.tyyppi = 'O'";
-				// $tilausrivi_res = mysql_query($query) or pupe_error($query);
+				if (trim($automaattinen_paivitys) == 'K') {
+					$query = "	UPDATE tilausrivi
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
+								SET tilausrivi.suuntalava = '{$uusi_suuntalavan_tunnus}'
+								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+								AND tilausrivi.uusiotunnus = '{$otunnus}'
+								AND tilausrivi.suuntalava = 0
+								AND tilausrivi.kpl = 0
+								AND tilausrivi.tyyppi = 'O'";
+					$tilausrivi_res = mysql_query($query) or pupe_error($query);
+				}
 			}
 
 			if ($paino == 0 and (trim($suuntalavan_tunnus) != '' or trim($uusi_suuntalavan_tunnus) != '')) {
@@ -529,6 +533,15 @@
 
 		echo "<tr><th>",t("Korkeus"),"</th><td><input type='text' name='korkeus' value='{$korkeus}' />{$virheviesti['korkeus']}</td></tr>";
 		echo "<tr><th>",t("Paino"),"</th><td><input type='text' name='paino' value='{$paino}' />{$virheviesti['paino']}<br/><font class='info'>",t("Paino lasketaan automaattisesti tuotteiden takaa, jos paino j‰tet‰‰n nollaksi"),".</font></td></tr>";
+
+		echo "<tr><th>",t("Automaattinen p‰ivitys"),"</th>";
+		echo "<td><select name='automaattinen_paivitys'>";
+		echo "<option value=''>",t("Ei"),"</option>";
+		echo "<option value='K'>",t("Kyll‰"),"</option>";
+		echo "</select>";
+		echo "<br/><font class='info'>",t("P‰ivitet‰‰n suuntalava automaattisesti niille riveille mihin se kohdistuu"),".</font>";
+		echo "</td></tr>";
+
 		echo "<tr><td class='back' colspan='2'><input type='submit' value='",t("Lis‰‰ suuntalava"),"' /></td></tr>";
 		echo "</table>";
 		echo "</form>";

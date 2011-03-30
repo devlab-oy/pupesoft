@@ -1,9 +1,8 @@
 <?php
 
 	$teccom_editulaus = "../dataout/teccom-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
-	$teccom_editulaus = "/Users/jamppa/Desktop/teccom/teccom-order-$laskurow[tunnus]-".date("Ymd").".txt";
 
-	if (!$toot = fopen($teccom_editulaus, "w")) die("Filen $tiedosto luonti epaonnistui!");
+	if (!$toot = fopen($teccom_editulaus, "w")) die("Filen $teccom_editulaus luonti epaonnistui!");
 
 	$query = "  SELECT tilausrivi.tunnus,
 				tilausrivi.varattu,
@@ -27,7 +26,7 @@
 
 		// Otsikkoa
 		$out = sprintf("%-10.10s", "000ORDH");						// VAKIOALKU
-		$out .= sprintf("%-9.9s", $toimirow['herminator']);			// Toimittajan numero 6 merkkiä
+		$out .= sprintf("%-9.9s", $toimirow['toimittajanro']);		// Toimittajan numero 6 merkkiä
 		$out .= sprintf("%-20.20s", $laskurow['nimi']);				// Toimittajan nimi 20 merkkiä
 		$out .= sprintf("%-20.20s", $yhtiorow['nimi']);				// Lähettäjän nimi 20 merkkiä
 		$out .= sprintf("%08.8s", $laskurow['tunnus']);				// Ostotilauksen numero 8 merkkiä
@@ -39,7 +38,7 @@
 			$out = sprintf("%-7.7s", "000ORDI");							// VAKIOALKU
 			$out .= sprintf("%-11.11s", $tilausrivirow['tunnus']);			// Tilausrivin numero 11 merkkiä
 			$out .= sprintf("%-60.60s", $tilausrivirow['toim_tuoteno']);	// Toimittajan Tuoteno 60 merkkiä
-			$out .= sprintf("%-6.6s", $toimirow['herminator']);				// toimittajan numero 6 merkkiä
+			$out .= sprintf("%-6.6s", $toimirow['toimittajanro']);			// toimittajan numero 6 merkkiä
 			$out .= sprintf("%05.0f", $tilausrivirow['varattu']);			// tilausmäärä 5 merkkiä
 			$out .= sprintf("%03.3s",$tilausrivirow['yksikko']); 			// yksikkö 3 merkkiä
 			fwrite($toot, $out . "\n"); 

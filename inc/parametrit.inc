@@ -193,6 +193,7 @@ unset($VOIPURL);
 unset($liitetaanko_editilaus_laskulle_hakemisto);
 
 unset($siirrasuoritustilille);
+unset($ohjewiki_url);
 
 require("salasanat.php");
 
@@ -569,7 +570,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 					$urltoim = "/EXTRANET";
 				}
 
-				$hreffi = "http://www.devlab.fi/wiki/index.php/Ohjeet:".basename($phpnimi).$urltoim;
+				if (isset($ohjewiki_url)) {
+					$hreffi = $ohjewiki_url."/Ohjeet:".basename($phpnimi).$urltoim;
+				}
+				else {
+					$hreffi = "http://www.devlab.fi/wiki/index.php/Ohjeet:".basename($phpnimi).$urltoim;
+				}
 
 				echo "<div style='text-align:right; vertical-align:top;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
 			}

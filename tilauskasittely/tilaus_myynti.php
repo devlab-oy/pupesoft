@@ -349,42 +349,6 @@ if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"
 if ($toim == "") {
 	$toim = "RIVISYOTTO";
 }
-elseif ($toim == "EXTRANET") {
-	$otsikko = t("Extranet-Tilaus");
-}
-elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
-	$otsikko = t("Työmääräys");
-}
-elseif ($toim == "REKLAMAATIO") {
-	$otsikko = t("Reklamaatio");
-}
-elseif ($toim == "VALMISTAVARASTOON") {
-	$otsikko = t("Varastoonvalmistus");
-}
-elseif ($toim == "SIIRTOLISTA") {
-	$otsikko = t("Varastosiirto");
-}
-elseif ($toim == "SIIRTOTYOMAARAYS") {
-	$otsikko = t("Sisäinen työmääräys");
-}
-elseif ($toim == "MYYNTITILI") {
-	$otsikko = t("Myyntitili");
-}
-elseif ($toim == "VALMISTAASIAKKAALLE") {
-	$otsikko = t("Asiakkaallevalmistus");
-}
-elseif ($toim == "TARJOUS") {
-	$otsikko = t("Tarjous");
-}
-elseif ($toim == "PROJEKTI") {
-	$otsikko = t("Projekti");
-}
-elseif ($toim == "YLLAPITO") {
-	$otsikko = t("Ylläpitosopimus");
-}
-else {
-	$otsikko = t("Myyntitilaus");
-}
 
 //korjataan hintaa ja aleprossaa
 $hinta	= str_replace(',','.',$hinta);
@@ -488,6 +452,46 @@ if ((int) $kukarow["kesken"] != 0) {
 if ($toim == "TARJOUS" or (isset($laskurow["tilaustyyppi"]) and $laskurow["tilaustyyppi"] == "T") or $toim == "PROJEKTI") {
 	// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 	js_openFormInNewWindow();
+}
+
+if ($toim == "EXTRANET") {
+	$otsikko = t("Extranet-Tilaus");
+}
+elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
+	$otsikko = t("Työmääräys");
+}
+elseif ($toim == "REKLAMAATIO") {
+	$otsikko = t("Reklamaatio");
+}
+elseif ($toim == "VALMISTAVARASTOON") {
+	$otsikko = t("Varastoonvalmistus");
+}
+elseif ($toim == "SIIRTOLISTA") {
+	$otsikko = t("Varastosiirto");
+}
+elseif ($toim == "SIIRTOTYOMAARAYS") {
+	$otsikko = t("Sisäinen työmääräys");
+}
+elseif ($toim == "MYYNTITILI") {
+	$otsikko = t("Myyntitili");
+}
+elseif ($toim == "VALMISTAASIAKKAALLE") {
+	$otsikko = t("Asiakkaallevalmistus");
+}
+elseif ($toim == "TARJOUS") {
+	$otsikko = t("Tarjous");
+}
+elseif ($toim == "PROJEKTI") {
+	$otsikko = t("Projekti");
+}
+elseif ($toim == "YLLAPITO") {
+	$otsikko = t("Ylläpitosopimus");
+}
+elseif ($toim == "ENNAKKO" or $laskurow["tilaustyyppi"] == "E") {
+	$otsikko = t("Ennakkotilaus");
+}
+else {
+	$otsikko = t("Myyntitilaus");
 }
 
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)

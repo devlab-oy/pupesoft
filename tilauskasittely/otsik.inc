@@ -421,6 +421,9 @@
 		elseif ($toim == "YLLAPITO") {
 			echo "<font class='head'>".t("Ylläpitosopimuksen otsikko")."</font><hr>";
 		}
+		elseif ($toim == "ENNAKKO" or $srow["tilaustyyppi"] == 'E' or $laskurow["tilaustyyppi"] == 'E') {
+			echo "<font class='head'>".t("Ennakkotilauksen otsikko")."</font><hr>";
+		}
 		else {
 			echo "<font class='head'>".t("Myyntitilauksen otsikko")."</font><hr>";
 		}

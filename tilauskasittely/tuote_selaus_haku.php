@@ -1598,20 +1598,37 @@
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
 						if ($verkkokauppa == "" and $row['status'] == 'A' and $myytavissa <= 0) {
-							$tulossa_query = " 	SELECT DATE_ADD(MIN(tilausrivi.toimaika), INTERVAL (toimi.oletus_toimaika+toimi.oletus_tilausvali) DAY) paivamaara, sum(varattu) tilattu
+
+							$tulossa_query = " 	SELECT min(toimaika) paivamaara
 							 					FROM tilausrivi
-												JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-												JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
-												WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-												AND tilausrivi.tuoteno = '$row[tuoteno]'
-												AND tilausrivi.varattu > 0
-												AND tilausrivi.tyyppi = 'O'";
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND tuoteno = '$row[tuoteno]'
+												AND varattu > 0
+												AND tyyppi = 'O'
+												AND toimaika >= curdate()";
 							$tulossa_result = mysql_query($tulossa_query) or pupe_error($tulossa_query);
 							$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
-							if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] >= date("Y-m-d") and $tulossa_row['tilattu'] > 0) {
+							if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
 								$tulossalisa .= "<br/><br/>".t("TULOSSA")."<br/>";
 								$tulossalisa .= t("Arvioitu saapumispäivä")." ".tv1dateconv($tulossa_row['paivamaara']);
+							}
+							else {
+								$tulossa_query = " 	SELECT DATE_ADD(curdate(), INTERVAL (if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika)+if(tuotteen_toimittajat.tilausvali > 0, tuotteen_toimittajat.tilausvali, toimi.oletus_tilausvali)) DAY) paivamaara,
+													if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
+								 					FROM tuotteen_toimittajat
+													JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+													WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+													AND tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
+													ORDER BY sorttaus
+													LIMIT 1";
+								$tulossa_result = mysql_query($tulossa_query) or pupe_error($tulossa_query);
+								$tulossa_row = mysql_fetch_assoc($tulossa_result);
+
+								if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
+									$tulossalisa .= "<br/><br/>".t("TULOSSA")."<br/>";
+									$tulossalisa .= t("Arvioitu saapumispäivä")." ".tv1dateconv($tulossa_row['paivamaara']);
+								}
 							}
 						}
 						elseif ($verkkokauppa == "" and $row['status'] == 'T' and $myytavissa <= 0) {
@@ -1838,20 +1855,44 @@
 						}
 
 						if ($row['status'] == 'A' and !$loytyko) {
-							$tulossa_query = " 	SELECT DATE_ADD(MIN(tilausrivi.toimaika), INTERVAL (toimi.oletus_toimaika+toimi.oletus_tilausvali) DAY) paivamaara, sum(varattu) tilattu
+							$tulossa_query = " 	SELECT jaksotettu, min(toimaika) paivamaara, sum(varattu) tilattu
 							 					FROM tilausrivi
-												JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-												JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
-												WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-												AND tilausrivi.tuoteno = '$row[tuoteno]'
-												AND tilausrivi.varattu > 0
-												AND tilausrivi.tyyppi = 'O'";
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND tuoteno = '$row[tuoteno]'
+												AND varattu > 0
+												AND tyyppi = 'O'
+												AND toimaika >= curdate()
+												GROUP BY jaksotettu
+												ORDER BY jaksotettu";
 							$tulossa_result = mysql_query($tulossa_query) or pupe_error($tulossa_query);
-							$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
-							if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] >= date("Y-m-d") and $tulossa_row['tilattu'] > 0) {
-								echo "<tr><td class='$vari' align='left' nowrap>",t("TULOSSA"),"</td><td class='$vari' nowrap align='right'>$tulossa_row[tilattu] ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
-								echo "<tr><td class='$vari' colspan='2'>",t("Arvioitu saapumispäivä")," ".tv1dateconv($tulossa_row['paivamaara'])."</td></tr>";
+							if (mysql_num_rows($tulossa_result) > 0) {
+								while ($tulossa_row = mysql_fetch_assoc($tulossa_result)) {
+
+									echo "<tr><td class='$vari' align='left' nowrap>",t("TULOSSA"),"</td><td class='$vari' nowrap align='right'>$tulossa_row[tilattu] ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
+
+									if ($tulossa_row["jaksotettu"] == '1') $tarkkuus = "Vahvistettu";
+									else $tarkkuus = "Arvioitu";
+
+									echo "<tr><td class='$vari' colspan='2'>",t("$tarkkuus saapumispäivä")," ".tv1dateconv($tulossa_row['paivamaara'])."</td></tr>";
+								}
+							}
+							else {
+								$tulossa_query = " 	SELECT DATE_ADD(curdate(), INTERVAL (if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika)+if(tuotteen_toimittajat.tilausvali > 0, tuotteen_toimittajat.tilausvali, toimi.oletus_tilausvali)) DAY) paivamaara,
+													if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
+								 					FROM tuotteen_toimittajat
+													JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+													WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+													AND tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
+													ORDER BY sorttaus
+													LIMIT 1";
+								$tulossa_result = mysql_query($tulossa_query) or pupe_error($tulossa_query);
+								$tulossa_row = mysql_fetch_assoc($tulossa_result);
+
+								if (mysql_num_rows($tulossa_result) > 0) {
+									echo "<tr><td class='$vari' align='left' nowrap>",t("TULOSSA"),"</td><td class='$vari' nowrap align='right'></td></tr>";
+									echo "<tr><td class='$vari' colspan='2'>",t("Arvioitu saapumispäivä")," ".tv1dateconv($tulossa_row['paivamaara'])."</td></tr>";
+								}
 							}
 						}
 						elseif ($row['status'] == 'T' and !$loytyko) {

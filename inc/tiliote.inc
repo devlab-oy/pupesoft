@@ -81,6 +81,7 @@
 					case '720' : // Maksumääräys maksettu jotain tililtä, etsitään nimellä ja summalla....
 
 						$tehdaanselvittelytosite = TRUE;
+						unset($result);
 
 						if (strlen(trim($tilino)) > 0) {
 							echo "<font class='message'> ".t("Maksukandidaatti tilino & määrä")."</font><br>";
@@ -168,8 +169,8 @@
 							}
 						}
 
-						if (mysql_num_rows($result) == 1) {
-							$trow = mysql_fetch_array ($result);
+						if (isset($result) and mysql_num_rows($result) == 1) {
+							$trow = mysql_fetch_array($result);
 							echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>";
 
 							$tehdaanselvittelytosite = FALSE;

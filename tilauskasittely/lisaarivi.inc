@@ -359,7 +359,7 @@
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 
-	if ($kpl > 0 and $trow['myynti_era'] > 0 and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+	if ($kpl > 0 and $trow['myynti_era'] > 0 and ($rivityyppi == 'L' or $rivityyppi == 'E') and $rivitunnus == 0 and $yhtiorow['myyntiera_pyoristys'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'EXTRANET')) {
 		$org_kpl = $kpl;
 		
 		if ($kpl < $trow['myynti_era']) {

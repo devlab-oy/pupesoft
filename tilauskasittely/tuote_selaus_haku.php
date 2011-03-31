@@ -1620,6 +1620,8 @@
 													JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 													WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 													AND tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
+													AND (tuotteen_toimittajat.toimitusaika+toimi.oletus_toimaika) > 0
+													AND (tuotteen_toimittajat.tilausvali+toimi.oletus_tilausvali) > 0
 													ORDER BY sorttaus
 													LIMIT 1";
 								$tulossa_result = mysql_query($tulossa_query) or pupe_error($tulossa_query);
@@ -1884,6 +1886,8 @@
 													JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 													WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 													AND tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
+													AND (tuotteen_toimittajat.toimitusaika+toimi.oletus_toimaika) > 0
+													AND (tuotteen_toimittajat.tilausvali+toimi.oletus_tilausvali) > 0
 													ORDER BY sorttaus
 													LIMIT 1";
 								$tulossa_result = mysql_query($tulossa_query) or pupe_error($tulossa_query);

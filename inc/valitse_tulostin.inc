@@ -119,7 +119,7 @@
 		elseif (strpos($row2['tilausvahvistus'], '2') !== FALSE) {
 			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
 		}
-		elseif (strpos($row2g['tilausvahvistus'], '1') !== FALSE) {
+		elseif (strpos($row2['tilausvahvistus'], '1') !== FALSE) {
 			$naytatvale = 1; // jos mellä on tilausvahvistuksessa ykkönen, halutaan nähä alet
 		}
 		elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {

@@ -57,7 +57,7 @@ if (!file_exists($tilvahvfilenimi)) {
 
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi,
 				tilausrivi.tuoteno, tilausrivi.varattu, tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv, tilausrivi.nimitys,
-				tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
+				tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro, tilausrivi.yksikko
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -187,7 +187,7 @@ if (!file_exists($tilvahvfilenimi)) {
 	}
 }
 
-if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
+if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and $yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 	$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
 	file_put_contents($tilausvahvistus_tallenna, $ulos);
 }

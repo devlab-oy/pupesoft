@@ -3,7 +3,8 @@
 	//hatetaan asiakkaan lähetetyyppi
 	$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 				FROM asiakas
-				WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+				WHERE tunnus = '$laskurow[liitostunnus]'
+				and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$asrow = mysql_fetch_assoc($result);
 
@@ -181,13 +182,12 @@
 	$params_lahete["tots"] = 1;
 	$params_lahete = loppu_lahete($params_lahete);
 
-	if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
+	if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and $yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 		$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".pdf";
 
 		//kirjoitetaan pdf faili levylle..
-		$apu_pdf = $pdf; // otetaan globaali käyttöön..
 		$fh_liite = fopen($tilausvahvistus_tallenna, "w");
-		if (fwrite($fh_liite, $apu_pdf->generate()) === FALSE) die("PDF create error $tilausvahvistus_tallenna");
+		if (fwrite($fh_liite, $params_lahete["pdf"]->generate()) === FALSE) die("PDF create error $tilausvahvistus_tallenna");
 		fclose($fh_liite);
 	}
 	else {

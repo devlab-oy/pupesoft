@@ -7854,13 +7854,23 @@ if (!function_exists("pakkaamo")) {
 }
 
 if (!function_exists("laheta_tilausvahvistus")) {
-	function laheta_tilausvahvistus($laskurow) {
+	function laheta_tilausvahvistus($params) {
+		global $kukarow, $yhtiorow;
 
-		// globaaliin pitää laittaa kaikki mitä tulosta_lahete.incissäkin.. :(
-		global $asrow, $boldi, $iso, $jtid, $kala, $kala, $kateinen, $kateistyyppi, $kieli, $kukarow, $kukarow, $lahetetyyppi, $laskurow, $norm, $p, $page, $page, $pdf, $perheid, $pieni, $pieni_boldi, $rectparam, $returnvalue, $rivinkorkeus, $rivinkorkeus, $rivinumerot, $row, $sivu, $summa, $tee, $toim, $useita, $viite, $yhtiorow, $yhtiorow, $futurtilvahhost, $futurtilvahuser, $futurtilvahpass, $tilvahhost, $tilvahuser, $tilvahpass, $tilvahpath, $faxhost, $faxuser, $faxpass, $faxpath;
+		// Luodaan muuttujat
+		foreach ($params as $key => $val) {
+			${$key} = $val;
+		}
 
+		//
 		// LÄHETETÄÄN TILAUSVAHVISTUS
-		if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
+		//
+		//
+
+		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
+			$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
+		}
+		elseif (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
 			$naytatvale = 6; // jos meillä on tilausvahvistuksessa kutonen, niin tehdään customoitu tilausvahvistus
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
@@ -7897,45 +7907,47 @@ if (!function_exists("laheta_tilausvahvistus")) {
 			$naytatvale = 1; // halutaan nähä alet
 		}
 
-		if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
-			require("tilausvahvistus-edi.inc");
+		if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") !== FALSE) {
+			require("tulosta_tilausvahvistus_pdf.inc");
 		}
+		else {
+			if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
+				require("tilausvahvistus-edi.inc");
+			}
 
-		if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
-			require("tilausvahvistus-email.inc");
-		}
+			if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
+				require("tilausvahvistus-email.inc");
+			}
 
-		if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
-			require("tilausvahvistus-fax.inc");
-		}
+			if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
+				require("tilausvahvistus-fax.inc");
+			}
 
-		if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-			require("tilausvahvistus-email.inc");
-		}
+			if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
+				require("tilausvahvistus-futursoft.inc");
+			}
 
-		if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
-			require("tilausvahvistus-futursoft.inc");
-		}
+			if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
+				$query = "	SELECT komento
+							FROM kirjoittimet
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = '$kukarow[kirjoitin]'";
+				$tilvares = mysql_query($query) or pupe_error($query);
 
-		if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
-			$query = "	SELECT komento
-						FROM kirjoittimet
-						WHERE yhtio = '$kukarow[yhtio]' and
-						tunnus = '$kukarow[kirjoitin]'";
-			$tilvares = mysql_query($query) or pupe_error($query);
+				if ($tilvakir = mysql_fetch_assoc($tilvares)) {
+					$komento["Tilausvahvistus"] = $tilvakir["komento"];
 
-			if ($tilvakir = mysql_fetch_assoc($tilvares)) {
-				$komento["Tilausvahvistus"] = $tilvakir["komento"];
+					$toim_save = $toim;
+					if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
 
-				$toim_save = $toim;
-				if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
-
-				require("tulosta_tilausvahvistus_pdf.inc");
-				$toim = $toim_save;
+					require("tulosta_tilausvahvistus_pdf.inc");
+					$toim = $toim_save;
+				}
 			}
 		}
 
-		if ($yhtiorow['tilausvahvistus_tallenna'] == 'K' and $tilausvahvistus_tallenna != '') {
+		if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and $yhtiorow['tilausvahvistus_tallenna'] == 'K' and isset($tilausvahvistus_tallenna) and $tilausvahvistus_tallenna != '') {
+
 			if (stristr(basename($tilausvahvistus_tallenna), ".pdf")) {
 				$liite_tyyppi = "application/pdf";
 			}

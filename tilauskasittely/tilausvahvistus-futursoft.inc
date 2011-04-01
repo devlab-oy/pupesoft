@@ -172,7 +172,7 @@ if (!file_exists($tilvahvfilenimi)) {
 	} // end rivejä löytyi
 }
 
-if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
+if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and $yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 	$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".dat";
 	file_put_contents($tilausvahvistus_tallenna, $ulos);
 }

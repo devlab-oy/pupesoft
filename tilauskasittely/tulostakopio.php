@@ -1413,51 +1413,21 @@
 
 			if ($toim == "TILAUSVAHVISTUS" or $toim == "YLLAPITOSOPIMUS") {
 
-				if ($seltvtyyppi != "") {
+				if (isset($seltvtyyppi) and $seltvtyyppi != "") {
 					$laskurow['tilausvahvistus'] = $seltvtyyppi;
 				}
-
-				if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
-					$naytatvale = 2;
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
-					$naytatvale = 6; // jos meillä on tilausvahvistuksessa kutonen, niin tehdään mefa customoitu tilausvahvistus
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
-					$naytatvale = 5; // jos mellä on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
-					$naytatvale = 4; // jos mellä on tilausvahvistuksessa nelonen, ei haluta nähdä alennuksia, näytetään tilausrivin hinta ja rivihinta
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
-					$naytatvale = 3; // jos mellä on tilausvahvistuksessa kolmonen, ei haluta nähdä hintoja, pelkästään kpl-määrät
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
-					$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '1') !== FALSE) {
-					$naytatvale = 1; // jos mellä on tilausvahvistuksessa ykkönen, halutaan nähä alet
-				}
-				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
-					$naytatvale = 6; // jos meillä on tilausvahvistuksessa kutonen, niin tehdään customoitu tilausvahvistus
-				}
-				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
-					$naytatvale = 5; // jos mellä on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-				}
-				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
-					$naytatvale = 4; // jos mellä on tilausvahvistuksessa nelonen, ei haluta nähdä alennuksia, näytetään tilausrivin hinta ja rivihinta
-				}
-				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
-					$naytatvale = 3; // jos mellä on tilausvahvistuksessa kolmonen, ei haluta nähdä hintoja, pelkästään kpl-määrät
-				}
-				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
-					$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
-				}
-				else {
-					$naytatvale = 1; // halutaan nähä alet
-				}
-
-				require_once ("tulosta_tilausvahvistus_pdf.inc");
+				
+				$params_tilausvahvistus = array(
+				'tee'						=> $tee,
+				'toim'						=> $toim,
+				'kieli'						=> $kieli,
+				'komento'					=> $komento,
+				'laskurow'					=> $laskurow,
+				'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+				'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+				);
+								
+				laheta_tilausvahvistus($params_tilausvahvistus);
 
 				$tee = '';
 			}

@@ -3,7 +3,7 @@
 // tarvitaan $laskurow array
 // tarvitaan $yhtiorow array
 
-$query         = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+$query         = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 $tilvahresult  = mysql_query($query) or pupe_error($query);
 $tilvahasiakas = mysql_fetch_array($tilvahresult);
 
@@ -16,7 +16,7 @@ if ($tilvahasiakas['fax'] == '') {
 		$tilvah_nimi .= " / ".$tilvahasiakas["toim_nimi"];
 	}
 
-	if ($silent == "") {
+	if (!isset($silent) or $silent == "") {
 		echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalta puuttuu faxinumero")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
 	}
 }
@@ -258,7 +258,7 @@ else {
 
 } // end email löytyi
 
-if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
+if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and $yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 	$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
 	file_put_contents($tilausvahvistus_tallenna, $ulos);
 }

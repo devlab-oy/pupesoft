@@ -171,7 +171,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		}
 
 		if ($useita == "JOO") {
-			$laskurow["toimaika"] = t("Useita", $kieli);
+			$taika = t("Useita", $kieli);
 		}
 		elseif ($laskurow["toimvko"] != '') {
 			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
@@ -181,14 +181,12 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
 			}
-
-			$laskurow["toimaika"] = $taika;
 		}
 		else {
-			$laskurow["toimaika"] = tv1dateconv($laskurow["toimaika"]);
+			$taika = tv1dateconv($laskurow["toimaika"]);
 		}
 
-		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])		.t("Toimitusaika", $kieli).": ".$laskurow['toimaika']."\n";
+		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])		.t("Toimitusaika", $kieli).": ".$taika."\n";
 		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$laskurow['tunnus'])			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
 		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])	.t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
 		$ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])					.t("Myyjä", $kieli).": ".$krow['nimi']."\n";
@@ -242,7 +240,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 		$liite .= "\n";
 
-		while ($tvtilausrivirow=mysql_fetch_array($tilvahresult)) {
+		while ($tvtilausrivirow = mysql_fetch_array($tilvahresult)) {
 			$rivino++;
 
 			$tvtilausrivirow['nimitys'] = t_tuotteen_avainsanat($tvtilausrivirow, 'nimitys', $kieli);
@@ -279,7 +277,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 			// näytetään valkoodi kaikilla muilla paitsi kolmosella, koska kolmosella ei näytetä mitään hintoja
 			if ($naytatvale != 3) {
-				$ulos .= sprintf("%3.s"  	,$laskurow['valkoodi'])." ";
+				$ulos .= sprintf("%3.s", $laskurow['valkoodi'])." ";
 			}
 
 			if ($naytatvale == 3 or $naytatvale == 4) {
@@ -318,7 +316,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			if ($naytatvale == 3 or $naytatvale == 4) {
 				// kolmosella ei haluta näyttää myöskään ale:a
 			}
-			else if ($naytatvale==2) {
+			else if ($naytatvale == 2) {
 				$liite .= $tvtilausrivirow['aleryhma'];
 			}
 			else {
@@ -330,7 +328,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		$ulos .= "\n\n";
 		$ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n";
 
-		if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
+		if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and $yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 			$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
 			file_put_contents($tilausvahvistus_tallenna, $ulos);
 		}

@@ -337,23 +337,23 @@
 		$asirow = mysql_fetch_array($tresult);
 
 		if ($asirow['toimitusvahvistus'] != '') {
-			
+
 			// haetaan toimitustavan tiedot
 			$query    = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
 			$toitares = mysql_query($query) or pupe_error($query);
 			$toitarow = mysql_fetch_assoc($toitares);
-			
+
 			$otunnukset		= $laskurow["tunnus"];
 			$tunnukset		= 0;
 			$rahtikirjanro	= 0;
-			
+
 			if (@include("tilauskasittely/$asirow[toimitusvahvistus]")) {
 				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksesta %s lähetettiin toimitusvahvistus."), $laskurow["tunnus"])."</font><br><br>\n";
 			}
 		}
 	}
 
-	if ($silent == "") {
+	if (!isset($silent) or $silent == "") {
 		echo $tilaus_valmis_message;
 	}
 

@@ -58,105 +58,17 @@ elseif ($laskurow["tilaustyyppi"] == 'E') {
 	// LƒHETETƒƒN TILAUSVAHVISTUS
 	//
 	// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
+	$params_tilausvahvistus = array(
+	'tee'						=> $tee,
+	'toim'						=> $toim,
+	'kieli'						=> $kieli,
+	'komento'					=> $komento,
+	'laskurow'					=> $laskurow,
+	'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+	'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+	);
 
-	if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
-		$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
-	}
-	elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
-		$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-	}
-	elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
-		$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
-	}
-	elseif (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
-		$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
-	}
-	elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
-		$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
-	}
-	elseif (strpos($laskurow['tilausvahvistus'], '1') !== FALSE) {
-		$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
-	}
-	elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
-		$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
-	}
-	elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
-		$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-	}
-	elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
-		$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
-	}
-	elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
-		$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
-	}
-	elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
-		$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
-	}
-	else {
-		$naytatvale = 1; // halutaan n‰h‰ alet
-	}
-
-	if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
-		require("tilausvahvistus-edi.inc");
-	}
-
-	if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
-		require("tilausvahvistus-email.inc");
-	}
-
-	if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
-		require("tilausvahvistus-fax.inc");
-	}
-
-	if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-		require("tilausvahvistus-email.inc");
-	}
-
-	if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
-		require("tilausvahvistus-futursoft.inc");
-	}
-
-	if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
-		$query = "	SELECT komento
-					FROM kirjoittimet
-					WHERE yhtio = '$kukarow[yhtio]' and
-					tunnus = '$kukarow[kirjoitin]'";
-		$tilvares = mysql_query($query) or pupe_error($query);
-
-		if ($tilvakir = mysql_fetch_assoc($tilvares)) {
-			$komento["Tilausvahvistus"] = $tilvakir["komento"];
-
-			$toim_save = $toim;
-			if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
-
-			require("tulosta_tilausvahvistus_pdf.inc");
-			$toim = $toim_save;
-		}
-	}
-
-	if ($yhtiorow['tilausvahvistus_tallenna'] == 'K' and $tilausvahvistus_tallenna != '') {
-		if (stristr(basename($tilausvahvistus_tallenna), ".pdf")) {
-			$liite_tyyppi = "application/pdf";
-		}
-		else {
-			$liite_tyyppi = "text/plain";
-		}
-
-		$file["name"] 		= basename($tilausvahvistus_tallenna);
-		$file["type"] 		= $liite_tyyppi;
-		$file["tmp_name"] 	= $tilausvahvistus_tallenna;
-		$file["error"] 		= 0;
-		$file["size"] 		= filesize($tilausvahvistus_tallenna);
-
-		$_FILES['tilvah_liite'] = $file;
-
-		$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnus'], t('Myyntilaskun tilausvahvistus'));
-
-		//poistetaan tmp file samantien kuleksimasta...
-		unlink("/tmp/".basename($tilausvahvistus_tallenna));
-
-		$tilausvahvistus_tallenna = "";
-	}
+	laheta_tilausvahvistus($params_tilausvahvistus);
 }
 elseif ($laskurow["tilaustyyppi"] == '0') {
 		// Yll‰pitosopimus
@@ -641,7 +553,17 @@ else {
 
 			// vaikka laitetaan sis‰iseen laskutukseen tai ei haluttu l‰hetett‰, mutta annetaan mahdollisuus l‰hett‰‰ tilausvahvistus omaan s‰hkˆpostiin
 			if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-				require("tilausvahvistus-email.inc");
+				$params_tilausvahvistus = array(
+				'tee'						=> $tee,
+				'toim'						=> $toim,
+				'kieli'						=> $kieli,
+				'komento'					=> $komento,
+				'laskurow'					=> $laskurow,
+				'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+				'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+				);
+
+				laheta_tilausvahvistus($params_tilausvahvistus);
 			}
 
 			// Laitetaan t‰ss‰kin haarassa Intrastat-tiedot kuntoon, muuten laskujen ketjutus ei onnaa. (varasto = 0 ,eli menn‰‰n yhtiˆn oletusmaalla)
@@ -986,106 +908,18 @@ else {
 				// LƒHETETƒƒN TILAUSVAHVISTUS
 				//
 				// T‰ss‰ haarassa tulostetaan tilausvahvistus KOKO tilauksesta
+				$params_tilausvahvistus = array(
+				'tee'						=> $tee,
+				'toim'						=> $toim,
+				'kieli'						=> $kieli,
+				'komento'					=> $komento,
+				'laskurow'					=> $laskurow,
+				'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+				'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+				);
 
-				if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
-					$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
-					$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
-					$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
-					$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
-					$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
-				}
-				elseif (strpos($laskurow['tilausvahvistus'], '1') !== FALSE) {
-					$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
-				}
-				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
-					$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
-				}
-				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
-					$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-				}
-				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
-					$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
-				}
-				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
-					$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
-				}
-				elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
-					$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
-				}
-				else {
-					$naytatvale = 1; // halutaan n‰h‰ alet
-				}
+				laheta_tilausvahvistus($params_tilausvahvistus);
 
-				if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
-					require("tilausvahvistus-edi.inc");
-				}
-
-				if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
-					require("tilausvahvistus-email.inc");
-				}
-
-				if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
-					require("tilausvahvistus-fax.inc");
-				}
-
-				if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-					require("tilausvahvistus-email.inc");
-				}
-
-				if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
-					require("tilausvahvistus-futursoft.inc");
-				}
-
-				if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
-					$query = "	SELECT komento
-								FROM kirjoittimet
-								WHERE yhtio = '$kukarow[yhtio]' and
-								tunnus = '$kukarow[kirjoitin]'";
-					$tilvares = mysql_query($query) or pupe_error($query);
-
-					if ($tilvakir = mysql_fetch_assoc($tilvares)) {
-						$komento["Tilausvahvistus"] = $tilvakir["komento"];
-
-						$toim_save = $toim;
-						if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
-
-						require("tulosta_tilausvahvistus_pdf.inc");
-						$toim = $toim_save;
-					}
-				}
-
-				if ($yhtiorow['tilausvahvistus_tallenna'] == 'K' and $tilausvahvistus_tallenna != '') {
-
-					if (stristr(basename($tilausvahvistus_tallenna), ".pdf")) {
-						$liite_tyyppi = "application/pdf";
-					}
-					else {
-						$liite_tyyppi = "text/plain";
-					}
-
-					$file["name"] 		= basename($tilausvahvistus_tallenna);
-					$file["type"] 		= $liite_tyyppi;
-					$file["tmp_name"] 	= $tilausvahvistus_tallenna;
-					$file["error"] 		= 0;
-					$file["size"] 		= filesize($tilausvahvistus_tallenna);
-
-					$_FILES['tilvah_liite'] = $file;
-
-					$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnusnippu'], t('Myyntilaskun tilausvahvistus'));
-
-					//poistetaan tmp file samantien kuleksimasta...
-					unlink("/tmp/".basename($tilausvahvistus_tallenna));
-
-					$tilausvahvistus_tallenna = "";
-				}
 				///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///
 
 				//	Ja rullataan kaikki tilaukset l‰pi
@@ -1114,109 +948,17 @@ else {
 					// LƒHETETƒƒN TILAUSVAHVISTUS
 					//
 					// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
+					$params_tilausvahvistus = array(
+					'tee'						=> $tee,
+					'toim'						=> $toim,
+					'kieli'						=> $kieli,
+					'komento'					=> $komento,
+					'laskurow'					=> $laskurow,
+					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+					'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+					);
 
-					if (strpos($laskurow['tilausvahvistus'], '6') !== FALSE) {
-						$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
-					}
-					elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
-						$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-					}
-					elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
-						$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
-					}
-					elseif (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
-						$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
-					}
-					elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
-						$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
-					}
-					elseif (strpos($laskurow['tilausvahvistus'], '1') !== FALSE) {
-						$naytatvale = 1; // jos mell‰ on tilausvahvistuksessa ykkˆnen, halutaan n‰h‰ alet
-					}
-					elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '6') !== FALSE) {
-						$naytatvale = 6; // jos meill‰ on tilausvahvistuksessa kutonen, niin tehd‰‰n customoitu tilausvahvistus
-					}
-					elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '5') !== FALSE) {
-						$naytatvale = 5; // jos mell‰ on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
-					}
-					elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '4') !== FALSE) {
-						$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
-					}
-					elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '3') !== FALSE) {
-						$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
-					}
-					elseif (strpos($yhtiorow['tilausvahvistustyyppi'], '2') !== FALSE) {
-						$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
-					}
-					else {
-						$naytatvale = 1; // halutaan n‰h‰ alet
-					}
-
-					if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
-						require("tilausvahvistus-edi.inc");
-					}
-
-					if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
-						require("tilausvahvistus-email.inc");
-					}
-
-					if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
-						require("tilausvahvistus-fax.inc");
-					}
-
-					if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-						require("tilausvahvistus-email.inc");
-					}
-
-					if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
-						require("tilausvahvistus-futursoft.inc");
-					}
-
-					if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
-						$query = "	SELECT komento
-									FROM kirjoittimet
-									WHERE yhtio = '$kukarow[yhtio]' and
-									tunnus = '$kukarow[kirjoitin]'";
-						$tilvares = mysql_query($query) or pupe_error($query);
-
-						if ($tilvakir = mysql_fetch_assoc($tilvares)) {
-							$komento["Tilausvahvistus"] = $tilvakir["komento"];
-
-							$toim_save = $toim;
-							if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
-
-							require("tulosta_tilausvahvistus_pdf.inc");
-							$toim = $toim_save;
-						}
-					}
-
-					if ($yhtiorow['tilausvahvistus_tallenna'] == 'K' and $tilausvahvistus_tallenna != '') {
-
-						if (stristr(basename($tilausvahvistus_tallenna), ".pdf")) {
-							$liite_tyyppi = "application/pdf";
-						}
-						else {
-							$liite_tyyppi = "text/plain";
-						}
-
-						$file["name"] 		= basename($tilausvahvistus_tallenna);
-						$file["type"] 		= $liite_tyyppi;
-						$file["tmp_name"] 	= $tilausvahvistus_tallenna;
-						$file["error"] 		= 0;
-						$file["size"] 		= filesize($tilausvahvistus_tallenna);
-
-						$_FILES['tilvah_liite'] = $file;
-
-						$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnus'], t('Myyntilaskun tilausvahvistus'));
-
-						//poistetaan tmp file samantien kuleksimasta...
-						unlink("/tmp/".basename($tilausvahvistus_tallenna));
-
-						$tilausvahvistus_tallenna = "";
-					}
-
-					// takaisin k‰yttˆˆn
-					$laskurow = $laskurow_tvorig;
+					laheta_tilausvahvistus($params_tilausvahvistus);
 
 					///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///
 					$kutsuja = "tilaus-valmis.inc";
@@ -1295,7 +1037,7 @@ $hinta = '';
 $query	= "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 $result = mysql_query($query) or pupe_error($query);
 
-if ($silent == "") {
+if (!isset($silent) or $silent == "") {
 	echo $tilaus_valmis_ulos;
 }
 

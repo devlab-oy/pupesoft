@@ -1,7 +1,7 @@
 <?php
 
 	//luodaan korkolasku
-	
+
 	//sis‰‰n otetaan $liitostunnus. $liitostunnus tulee paperikorkolasku.php-failista
 	//ja maksuehdon tunnus $vmehto
 	//ja $loppusumma jossa on maksettavan koron m‰‰r‰. $loppusumma tulee paperikorkolasku.php-failista
@@ -9,7 +9,7 @@
 	//Haetaan asiakkaan tiedot
 	$query = "SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$liitostunnus'";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($result) != 1) {
 		printf ("<font class='error'>".t("Oho, asiakas katosi (%d)")."</font><br>",$ytunnus);
 		exit;
@@ -19,7 +19,7 @@
 	//Etsit‰‰n t‰m‰ t‰ss‰ tilanteessa k‰ytett‰v‰ maksuehto
 	$apuqu = "SELECT * FROM maksuehto WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$vmehto'";
 	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
-	
+
 	if (mysql_num_rows($meapu) != 1) {
 		printf ("<font class='error'>".t("Oho, maksuehto katosi (%d)")."</font><br>",$vmehto);
 		exit;
@@ -30,7 +30,10 @@
 	$comments = str_replace($crlf, " ", $comments);
 
 	//Haetaan tuotteen tiedot
-	$query = "SELECT * FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno = 'Korko'";
+	$query = "	SELECT *
+				FROM tuote
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tuoteno = 'Korko'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 1) {
@@ -45,10 +48,10 @@
 						and kurssi > 0
 						LIMIT 1";
 			$vres = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($vres) == 1) {
 				$vrow = mysql_fetch_array($vres);
-				
+
 				$valkoodi	= $vrow["nimi"];
 				$kurssi 	= $vrow["kurssi"];
 			}
@@ -166,7 +169,7 @@
 		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
-		
+
 		if ($yhtiorow["kasittelykulu_tuotenumero"] != '') {
 
 			$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[kasittelykulu_tuotenumero]'";
@@ -191,13 +194,13 @@
 			$korvaavakielto	 = "";
 			$varataan_saldoa = "";
 			$jtkielto 		 = $laskurow['jtkielto'];
-			
+
 
 			require ("tilauskasittely/lisaarivi.inc");
 		}
-				
+
 		$valittu_tulostin = $kukarow["kirjoitin"];
-		
+
 		require ("../tilauskasittely/tilaus-valmis.inc");
 	}
 	else {

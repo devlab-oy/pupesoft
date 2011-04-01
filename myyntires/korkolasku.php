@@ -9,7 +9,25 @@ echo "<font class='head'>".t("Korkolaskut")."</font><hr>";
 $min_myoh = 3;
 
 if ($kukarow["kirjoitin"] == 0) {
-	echo "<font class='error'>".t("Sinulla pitää olla henkilökohtainen tulostin valittuna, että voit tulostaa trattoja").".</font><br>";
+	echo "<font class='error'>".t("Sinulla pitää olla henkilökohtainen tulostin valittuna, jotta voit tulostaa korkolaskuja").".</font><br>";
+	$tee = "";
+}
+
+$query = "	SELECT tuoteno
+			FROM tuote
+			WHERE yhtio = '$kukarow[yhtio]'
+			AND tuoteno = 'Korko'";
+$result = mysql_query($query) or pupe_error($query);
+
+if (mysql_num_rows($result) != 1) {
+	echo "<font class='error'>".t("Tuoterekisteristä ei löydy 'KORKO'-tuotetta")."!</font><br>";
+	$tee = "";
+}
+
+$kasittelykulu = str_replace(',','.', $kasittelykulu);
+
+if (($yhtiorow["kasittelykulu_tuotenumero"] != '') and (!is_numeric($kasittelykulu) or $kasittelykulu < 0)) {
+	echo "<font class='error'>".t("Käsittelykulu summa on syötettävä")."!</font><br>";
 	$tee = "";
 }
 
@@ -31,13 +49,6 @@ if ($tee == 'LAHETA') {
 	$tee = "KOROTA";
 }
 
-$kasittelykulu = str_replace(',','.', $kasittelykulu);
-
-if (($yhtiorow["kasittelykulu_tuotenumero"] != '') and (!is_numeric($kasittelykulu) or $kasittelykulu < 0)) {
-	echo "<font class='error'>".t("Käsittelykulu summa on syötettävä")."!</font><br>";
-	$tee = "";
-}
-
 if ($tee == "ALOITAKOROTUS") {
 
 	$korkolisa = "";
@@ -45,7 +56,7 @@ if ($tee == "ALOITAKOROTUS") {
 		$korkosumma = str_replace(',','.',$korkosumma);
 		$korkolisa = " and korkosumma > $korkosumma ";
 	}
-	
+
 	$minimisumma = (float) $minimisumma;
 
 	$query = "	SELECT GROUP_CONCAT(distinct ovttunnus) konsrernyhtiot

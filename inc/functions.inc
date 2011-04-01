@@ -1611,7 +1611,6 @@ if (!function_exists("synkronoi")) {
 
 		//	Onko mahdollista synkronoida?
 		if (strpos($yhtiorow["synkronoi"], $table) === false) {
-			echo "<font class='virhe'>Taulua $table ei voida synkronoida!</font><br>";
 			return false;
 		}
 

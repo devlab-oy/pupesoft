@@ -15,10 +15,18 @@ if ($tee == "laheta" and $tunnukset != "") {
 
 			echo t("Uudelleenl‰hetet‰‰n tilausvahvistus")." ($laskurow[tilausvahvistus]): $laskurow[nimi]<br>";
 
-			chdir("tilauskasittely");
-
 			// LƒHETETƒƒN TILAUSVAHVISTUS
-			laheta_tilausvahvistus($laskurow);
+			$params_tilausvahvistus = array(
+			'tee'						=> $tee,
+			'toim'						=> $toim,
+			'kieli'						=> $kieli,
+			'komento'					=> $komento,
+			'laskurow'					=> $laskurow,
+			'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+			'extranet_tilausvahvistus'	=> $extranet_tilausvahvistus,
+			);
+
+			laheta_tilausvahvistus($params_tilausvahvistus);
 		}
 
 	}

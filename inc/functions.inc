@@ -1611,16 +1611,19 @@ if (!function_exists("synkronoi")) {
 
 		//	Onko mahdollista synkronoida?
 		if (strpos($yhtiorow["synkronoi"], $table) === false) {
+			echo "<font class='virhe'>Taulua $table ei voida synkronoida!</font><br>";
 			return false;
 		}
 
 		$muutokset = array();
+		$avainsanalajilisa = "";
 
 		//	N‰ill‰ tarttetaan v‰h‰n lis‰tietoo
 		if ($table == "avainsana") {
-			$abulisa = ereg(",(avainsana\|*([\|a-zA-Z_\-]*)),*", $yhtiorow["synkronoi"], $regs);
+			$abulisa = preg_match("/(^|,)(avainsana\|*([\|a-zA-Z_\-]*))($|,)/i", $yhtiorow["synkronoi"], $regs);
 
-			$lajit = explode("|",strtolower($regs[2]));
+			$avainsanalajilisa = "|".$regs[3];
+			$lajit = explode("|",strtolower($regs[3]));
 
 			//	saadaanko juuri t‰t‰ lajia synkronoida?
 			if (is_array($orig) and count($orig) > 0) {
@@ -1752,13 +1755,13 @@ if (!function_exists("synkronoi")) {
 		$query = "	SELECT yhtio.yhtio
 					from yhtio
 					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-					where yhtio.konserni	 		= '$yhtiorow[konserni]'
-					and (yhtion_parametrit.synkronoi = '$table' or yhtion_parametrit.synkronoi like '$table,%' or yhtion_parametrit.synkronoi like '%,$table,%' or yhtion_parametrit.synkronoi like '%,$table')
+					where yhtio.konserni	 		 = '$yhtiorow[konserni]'
+					and (yhtion_parametrit.synkronoi = '$table$avainsanalajilisa' or yhtion_parametrit.synkronoi like '$table$avainsanalajilisa,%' or yhtion_parametrit.synkronoi like '%,$table$avainsanalajilisa,%' or yhtion_parametrit.synkronoi like '%,$table$avainsanalajilisa')
 					and yhtio.yhtio					!= '$yhtio'";
 		$kohderes = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($kohderes) > 0) {
-			while($kohderow = mysql_fetch_assoc($kohderes)) {
+			while ($kohderow = mysql_fetch_assoc($kohderes)) {
 
 				$vanhatunnus = $utunnus="";
 				$override	 = array();
@@ -1774,20 +1777,20 @@ if (!function_exists("synkronoi")) {
 				//	Osa tauluista vaatii v‰h‰n k‰pistely‰!
 				if ($table == "yhteyshenkilo") {
 					if ($abuhaku["tyyppi"] == "A") {
-						$query = "select * from asiakas where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
+						$query = "SELECT * from asiakas where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
 						$abures = mysql_query($query) or pupe_error($query);
 						$aburow = mysql_fetch_assoc($abures);
 
 						//	Etsit‰‰n oikea asiakas, jotta saadaan oikea liitostunnus
-						$tarkquery = "select tunnus from asiakas where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]' and toim_ovttunnus='$aburow[toim_ovttunnus]'";
+						$tarkquery = "SELECT tunnus from asiakas where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]' and toim_ovttunnus='$aburow[toim_ovttunnus]'";
 					}
 					else {
-						$query = "select * from toimi where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
+						$query = "SELECT * from toimi where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
 						$abures = mysql_query($query) or pupe_error($query);
 						$aburow = mysql_fetch_assoc($abures);
 
 						//	Etsit‰‰n oikea toimittaja, jotta saadaan oikea liitostunnus
-						$tarkquery = "select tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
+						$tarkquery = "SELECT tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
 					}
 					$tarkres = mysql_query($tarkquery) or pupe_error($tarkquery);
 
@@ -1806,17 +1809,17 @@ if (!function_exists("synkronoi")) {
 				}
 				elseif ($table == "tuotteen_toimittajat") {
 
-					$query = "select * from tuote where yhtio='$yhtio' and tuoteno='$abuhaku[tuoteno]'";
+					$query = "SELECT * from tuote where yhtio='$yhtio' and tuoteno='$abuhaku[tuoteno]'";
 					$abures = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($abures) == 1) {
 
-						$query = "select * from toimi where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
+						$query = "SELECT * from toimi where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
 						$abures = mysql_query($query) or pupe_error($query);
 						$aburow = mysql_fetch_assoc($abures);
 
 						//	Etsit‰‰n oikea toimittaja jotta saadaan oikea liitostunnus
-						$tarkquery = "select tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
+						$tarkquery = "SELECT tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
 						$tarkres = mysql_query($tarkquery) or pupe_error($tarkquery);
 
 						if (mysql_num_rows($tarkres)==1) {

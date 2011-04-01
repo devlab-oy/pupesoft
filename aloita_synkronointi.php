@@ -9,16 +9,16 @@ if (!isset($tee)) $tee = "";
 if ($tee == "SYNK") {
 
 	//	Onko mahdollista synkronoida?
-	if(substr($table, 0, 9) == "avainsana") {
-		if(strpos($yhtiorow["synkronoi"], substr($table, 0, 9)) === false) {
+	if (substr($table, 0, 9) == "avainsana") {
+		if (strpos($yhtiorow["synkronoi"], substr($table, 0, 9)) === false) {
 			echo "VIRHE: Pyydetty‰ taulua $table ei voida synkronoida, sit‰ ei ole m‰‰ritelty!";
 			exit;
 		}
 
 		$table = substr($table, 0, 9);
 
-		$abulisa = ereg("(avainsana\|*([\|a-zA-Z_\-]*)),*", $yhtiorow["synkronoi"], $regs);
-		$la = explode("|",$regs[2]);
+		$abulisa = preg_match("/(^|,)(avainsana\|*([\|a-zA-Z_\-]*))($|,)/i", $yhtiorow["synkronoi"], $regs);
+		$la = explode("|", $regs[3]);
 
 		$lajit  = " and laji in (";
 
@@ -26,6 +26,7 @@ if ($tee == "SYNK") {
 			$lajit .= "'$l',";
 		}
 		$lajit = substr($lajit, 0, -1);
+
 		$lajit .= ")";
 	}
 	else {
@@ -109,8 +110,6 @@ if ($tee == "") {
 	echo "</select><br><br>";
 	echo "<input type='submit' value='".t("Synkronoi")."'></form><br><br>";
 }
-
-
 
 require ("inc/footer.inc");
 

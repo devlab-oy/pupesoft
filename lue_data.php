@@ -1114,6 +1114,16 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							$tpres = mysql_query($tpque) or pupe_error($tpque);
 
 							if (mysql_num_rows($tpres) != 1) {
+								$tpque = "	SELECT tunnus
+											from toimi
+											where yhtio	= '$kukarow[yhtio]'
+											and toimittajanro = '$rivi[$r]'
+											and toimittajanro != ''
+											and tyyppi != 'P'";
+								$tpres = mysql_query($tpque) or pupe_error($tpque);
+							}
+
+							if (mysql_num_rows($tpres) != 1) {
 								echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '$rivi[$r]' ".t("ei löydy! Tai samalla ytunnuksella löytyy useita toimittajia! Lisää toimittajan tunnus LIITOSTUNNUS-sarakkeeseen. Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>";
 								$hylkaa++; // ei päivitetä tätä riviä
 							}

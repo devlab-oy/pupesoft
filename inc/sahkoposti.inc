@@ -28,14 +28,14 @@
 
 	$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 
-	if ($sahkoposti_cc != "") {
+	if (isset($sahkoposti_cc) and $sahkoposti_cc != "") {
 		$header .= "Cc: $sahkoposti_cc\n";
 	}
 
 	$header .= "MIME-Version: 1.0\n" ;
 	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-	if ($content_body != "") {
+	if (isset($content_body) and $content_body != "") {
 		$content .= "--$bound\n";
 		if ($ctype == "html") {
 			$content .= "Content-type: text/html; charset=\"iso-8859-1\"\n";

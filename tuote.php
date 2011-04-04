@@ -682,6 +682,23 @@
 
 			if ($tuoterow["ei_saldoa"] == '') {
 
+				$yhtiot = array();
+				$yhtiot[] = $kukarow["yhtio"];
+
+				// Halutaanko saldot koko konsernista?
+				if ($yhtiorow["haejaselaa_konsernisaldot"] == "S") {
+					$query = "	SELECT *
+								FROM yhtio
+								WHERE konserni = '$yhtiorow[konserni]' 
+								AND konserni != ''
+								AND yhtio != '$kukarow[yhtio]'";
+					$result = mysql_query($query) or pupe_error($query);
+
+					while ($row = mysql_fetch_assoc($result)) {
+						$yhtiot[] = $row["yhtio"];
+					}
+				}
+
 				// Varastosaldot ja paikat
 				echo "<font class='message'>".t("Varastopaikat")."</font><hr>";
 
@@ -719,7 +736,7 @@
 								and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
 								and sarjanumeroseuranta.myyntirivitunnus = 0
 								and sarjanumeroseuranta.era_kpl != 0
-								WHERE tuote.yhtio = '$kukarow[yhtio]'
+								WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
 								and tuote.tuoteno = '$tuoteno'
 								GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
@@ -734,7 +751,7 @@
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 								and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 								and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-								WHERE tuote.yhtio = '$kukarow[yhtio]'
+								WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
 								and tuote.tuoteno = '$tuoteno'
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				}
@@ -743,7 +760,7 @@
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_array ($sresult)) {
 
-						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
 
 						//summataan kokonaissaldoa
 						$kokonaissaldo += $saldo;

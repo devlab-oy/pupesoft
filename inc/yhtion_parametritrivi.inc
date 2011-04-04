@@ -1955,6 +1955,7 @@
 
 		$ulos .= "<option value = ''>".t("Konserniyhtiöiden saldoja EI näytetä Hae ja Selaa-ohjelmassa")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Konserniyhtiöiden saldot näytetään Hae ja Selaa-ohjelmassa")."</option>";
+		$ulos .= "<option value = 'S' $sel[S]>".t("Konserniyhtiöiden saldot näytetään Hae ja Selaa-ohjelmassa sekä tuotekyselyssä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

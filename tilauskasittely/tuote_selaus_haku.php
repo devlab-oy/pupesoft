@@ -718,7 +718,7 @@
 				WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($result) > 0 and $yhtiorow["haejaselaa_konsernisaldot"] == "K") {
+	if (mysql_num_rows($result) > 0 and $yhtiorow["haejaselaa_konsernisaldot"] != "") {
 		$yhtiot = array();
 
 		while ($row = mysql_fetch_assoc($result)) {

@@ -23,46 +23,89 @@
 		$suores = mysql_query($suoque) or pupe_error($suoque);
 	}
 
-	if (!isset($nayta_pdf) and !isset($no_head)) {
+	$lopeta_body = TRUE;
+	$piirra_kello = TRUE;
+	$piirra_sanakirja = TRUE;
 
-		if ((!isset($ei_kelloa) or $ei_kelloa == "") and (!isset($ohje) or $ohje != "off")) {
+	// Piilotetaan koko body
+	if (isset($nayta_pdf) and $nayta_pdf == "1") {
+		$lopeta_body = FALSE;
+		$piirra_kello = FALSE;
+		$piirra_sanakirja = FALSE;
+	}
 
+	// Piilotetaan koko body
+	if (isset($no_head) and $no_head == "yes") {
+		$lopeta_body = FALSE;
+		$piirra_kello = FALSE;
+		$piirra_sanakirja = FALSE;
+	}
+
+	// Piilotetaan kello ja sanakirja
+	if (isset($ei_kelloa) and $ei_kelloa != "") {
+		$piirra_kello = FALSE;
+		$piirra_sanakirja = FALSE;
+	}
+
+	// Piilotetaan kello ja sanakirja
+	if (isset($ohje) and $ohje == "off") {
+		$piirra_kello = FALSE;
+		$piirra_sanakirja = FALSE;
+	}
+
+	// Piilotetaan aika
+	if (stripos($kukarow['profiilit'], "admin") === FALSE) {
+		$piirra_kello = FALSE;
+	}
+
+	// Piilotetaan sanakirja
+	if (strpos($_SERVER['SCRIPT_NAME'], "sanakirja.php") !== FALSE or !isset($kaannetyt_sanat) or count($kaannetyt_sanat) == 0 or !tarkista_oikeus("sanakirja.php", '', '1')) {
+		$piirra_sanakirja = FALSE;
+	}
+
+	if ($lopeta_body) {
+
+		if ($piirra_kello) {
 			$loppumem = memory_get_usage();
-
 			echo "<br><br>";
 			echo "<font class='info'>$aika ".round((($loppumem-$alkumem)/1000000), 1)."</font>";
+		}
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "sanakirja.php") === FALSE and isset($kaannetyt_sanat) and count($kaannetyt_sanat) > 0) {
-
-				switch (strtoupper($kukarow["kieli"])) {
-					case "EN":
-						$kieli  = "en";
-						$kindex = 0;
-						break;
-					case "SE":
-						$kieli  = "se";
-						$kindex = 1;
-						break;
-					case "DE":
-						$kieli  = "de";
-						$kindex = 2;
-						break;
-					case "DK":
-						$kieli  = "dk";
-						$kindex = 3;
-						break;
-					case "EE":
-						$kieli  = "ee";
-						$kindex = 4;
-						break;
-					default:
-						$kieli  = "en";
-						$kindex = 0;
-				}
-
-				echo " <a href='".$palvelin2."sanakirja.php?kieli[$kindex]=$kieli&show=all&etsi_kieli=fi&hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON'><font class='info'>".t("Sanakirja")."</font></a>";
+		if ($piirra_sanakirja) {
+			switch (strtoupper($kukarow["kieli"])) {
+				case "EN":
+					$kieli  = "en";
+					$kindex = 0;
+					break;
+				case "SE":
+					$kieli  = "se";
+					$kindex = 1;
+					break;
+				case "DE":
+					$kieli  = "de";
+					$kindex = 2;
+					break;
+				case "DK":
+					$kieli  = "dk";
+					$kindex = 3;
+					break;
+				case "EE":
+					$kieli  = "ee";
+					$kindex = 4;
+					break;
+				default:
+					$kieli  = "en";
+					$kindex = 0;
 			}
 
+			echo "<form name='sanakirjaform' method='post' action='${palvelin2}sanakirja.php'>";
+			echo "<input type='hidden' name='kieli[$kindex]' value='$kieli'>";
+			echo "<input type='hidden' name='show' value='all'>";
+			echo "<input type='hidden' name='etsi_kieli' value='fi'>";
+			echo "<input type='hidden' name='tarkkahaku' value='ON'>";
+			echo "<input type='hidden' name='hakusana' value='".implode("\n", $kaannetyt_sanat)."'>";
+			echo " <a style='cursor:pointer' onclick='sanakirjaform.submit()'><font class='info'>".t("Sanakirja")."</font></a>";
+			echo "</form>";
 		}
 
 		echo "<br><br>";

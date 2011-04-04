@@ -19,6 +19,9 @@ a.puhdas:hover {
 	text-decoration: none;
 	background-color: transparent;
 }
+form {
+	margin:0px 0px 10px 8px;
+}
 </style>";
 
 unset($isizelogo);
@@ -113,7 +116,7 @@ if (mysql_num_rows($result) > 1) {
 	}
 
 	echo "	<form action='$PHP_SELF' name='vaihdaSovellus' method='POST'>
-			<select name='sovellus' onchange='submit()' style='margin:0px 0px 10px 8px'>"; // top right bottom left
+			<select name='sovellus' onchange='submit()' ".js_alasvetoMaxWidth("sovellus", 140)." >"; // top right bottom left
 
 	$sovellukset = array();
 
@@ -135,7 +138,7 @@ if (mysql_num_rows($result) > 1) {
 		if ($sovellus == '') $sovellus = $key;
 	}
 
-	echo "</select></form><br>";
+	echo "</select></form><br><br>";
 }
 else {
 	// löytyi vaan yksi sovellus, otetaan se

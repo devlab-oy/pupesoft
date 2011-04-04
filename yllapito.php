@@ -889,7 +889,7 @@
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 					<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
-					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
+					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";				
 		}
 
 		if (mysql_num_rows($result) >= 350) {
@@ -1458,9 +1458,9 @@
 				$laji = "PAKKAUSKV";
 				$urilisa = "&haku[3]=@$tunnus";
 			}
-			else {
+			elseif ($toim == "avainsana") {
 				$laji = $al_laji;
-				$urilisa = "&haku[7]=@$la_tunnus";
+				$urilisa = "&haku[8]=@$la_tunnus";
 			}
 
 			if (tarkista_oikeus("yllapito.php", "avainsana")) {
@@ -1585,7 +1585,7 @@
 				<input type = 'hidden' name = 'laji' value = '$laji'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name = 'uusi' value = '1'>
-				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
+				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";				
 	}
 
 

@@ -588,7 +588,7 @@
 				 			and tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
 							$summaus_lisa
 							GROUP BY tapahtuma.laadittu
-							ORDER BY tapahtuma.laadittu DESC";
+							ORDER BY tapahtuma.laadittu DESC, tapahtuma.tunnus desc";
 				$muutosres = mysql_query($query) or pupe_error($query);
 
 				$muutoskpl 		= $kpl;
@@ -713,7 +713,7 @@
 										and tuoteno = '$row[tuoteno]'
 										and laadittu <= '$vv-$kk-$pp 23:59:59'
 										and laji NOT IN ('poistettupaikka','uusipaikka')
-										ORDER BY laadittu desc
+										ORDER BY laadittu desc, tunnus desc
 										LIMIT 1";
 							$ares = mysql_query($query) or pupe_error($query);
 
@@ -732,7 +732,7 @@
 											and tuoteno = '$row[tuoteno]'
 											and laadittu > '$vv-$kk-$pp 23:59:59'
 											and laji NOT IN ('poistettupaikka','uusipaikka')
-											ORDER BY laadittu
+											ORDER BY laadittu, tunnus
 											LIMIT 1";
 								$ares = mysql_query($query) or pupe_error($query);
 

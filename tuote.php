@@ -1652,7 +1652,8 @@
 							WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 							and tapahtuma.tuoteno = '$tuoteno'
 							$ehto
-							ORDER BY tapahtuma.laadittu desc $maara";
+							ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc
+							$maara";
 				$qresult = mysql_query($query) or pupe_error($query);
 
 				// jos joku in-out varastonarvo

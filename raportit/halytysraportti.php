@@ -145,6 +145,8 @@
 		$sarakkeet["SARAKE1"] 	= t("osasto")."\t";
 		$sarakkeet["SARAKE2"] 	= t("tuoteryhma")."\t";
 		$sarakkeet["SARAKE3"] 	= t("tuotemerkki")."\t";
+		$sarakkeet["SARAKE3B"] 	= t("malli")."\t";
+		$sarakkeet["SARAKE3C"] 	= t("mallitarkenne")."\t";
 		$sarakkeet["SARAKE4"] 	= t("tahtituote")."\t";
 		$sarakkeet["SARAKE4B"] 	= t("status")."\t";
 		$sarakkeet["SARAKE4C"] 	= t("abc")."\t";
@@ -154,6 +156,7 @@
 		$sarakkeet["SARAKE5"] 	= t("saldo")."\t";
 		$sarakkeet["SARAKE6"] 	= t("halytysraja")."\t";
 		$sarakkeet["SARAKE7"] 	= t("tilauksessa")."\t";
+		$sarakkeet["SARAKE7B"] 	= t("valmistuksessa")."\t";
 		$sarakkeet["SARAKE8"] 	= t("ennpois")."\t";
 		$sarakkeet["SARAKE9"] 	= t("jt")."\t";
 
@@ -299,30 +302,36 @@
 
 		//	Haetaan kaikki varastot ja luodaan kysely paljonko ko. varastoon on tilattu tavaraa..
 		$varastolisa = "";
+
 		if ($valitut["OSTOTVARASTOITTAIN"] != "") {
 
-			$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]'";
+			$query = "	SELECT *
+						FROM varastopaikat
+						where yhtio = '$kukarow[yhtio]'";
 			$osvres = mysql_query($query) or pupe_error($query);
 
 			$abuArray=array();
 
-			while($vrow = mysql_fetch_array($osvres)) {
-				$varastolisa .= ", sum(if (tyyppi='O' and
+			while ($vrow = mysql_fetch_array($osvres)) {
+				$varastolisa .= ", sum(if(tyyppi='O' and
 									concat(rpad(upper('$vrow[alkuhyllyalue]'),  5, '0'),lpad(upper('$vrow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) and
 									concat(rpad(upper('$vrow[loppuhyllyalue]'), 5, '0'),lpad(upper('$vrow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 								, varattu, 0)) tilattu_$vrow[tunnus] ";
+
 				$sarakkeet["SARAKE65#".$vrow["tunnus"]] = t("tilattu kpl - $vrow[nimitys]")."\t";
 				$abuArray["SARAKE65#".$vrow["tunnus"]] = "SARAKE65#".$vrow["tunnus"];
 			}
 
 			// Liitetään oletus jotta summat voisi täsmätä..
-			$varastolisa .= ", sum(if (tyyppi='O' and hyllyalue = '' , varattu, 0)) tilattu_oletus ";
+			$varastolisa .= ", sum(if(tyyppi='O' and hyllyalue = '', varattu, 0)) tilattu_oletus ";
+
 			$sarakkeet["SARAKE65#oletus"] = t("tilattu kpl - varastoa ei annettu")."\t";
 			$abuArray["SARAKE65#oletus"] = "SARAKE65#oletus";
 
 			//	karseeta haetaan offset valitut arrayksi jotta osataan siirtää nämä tiedot oikeaan paikkaan..
 			$i = 0;
-			foreach($valitut as $key => $value) {
+
+			foreach ($valitut as $key => $value) {
 				if (in_array($key, array("SARAKE56","SARAKE57","SARAKE58","SARAKE59","SARAKE60","SARAKE61","SARAKE62","SARAKE63"))) {
 					$offset = $i;
 					echo "löydettiin offset ($offset)<br>";
@@ -571,7 +580,7 @@
 
 			//Ajetaan raportti tuotteittain
 			if ($paikoittain == '') {
-				$query = "	select
+				$query = "	SELECT
 							tuote.yhtio,
 							tuote.tuoteno,
 							tuote.halytysraja,
@@ -586,6 +595,8 @@
 							tuote.epakurantti75pvm,
 							tuote.epakurantti100pvm,
 							tuote.tuotemerkki,
+							tuote.malli,
+							tuote.mallitarkenne,
 							tuote.osasto,
 							tuote.try,
 							tuote.aleryhma,
@@ -612,7 +623,7 @@
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
 			else {
-				$query = "	select
+				$query = "	SELECT
 							tuote.yhtio,
 							tuote.tuoteno,
 							tuotepaikat.halytysraja,
@@ -627,6 +638,8 @@
 							tuote.epakurantti75pvm,
 							tuote.epakurantti100pvm,
 							tuote.tuotemerkki,
+							tuote.malli,
+							tuote.mallitarkenne,
 							tuote.osasto,
 							tuote.try,
 							tuote.aleryhma,
@@ -886,7 +899,7 @@
 							sum(if (toimitettuaika >= '$vva4ed-$kka4ed-$ppa4ed' and toimitettuaika <= '$vvl4ed-$kkl4ed-$ppl4ed' ,kpl,0)) EDkpl4
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laadittu)
 							WHERE yhtio = '$row[yhtio]'
-							and tyyppi='V'
+							and tyyppi = 'V'
 							and tuoteno = '$row[tuoteno]'
 							and ((toimitettuaika >= '$apvm' and toimitettuaika <= '$lpvm') or toimitettuaika = '0000-00-00')
 							$lisa";
@@ -895,19 +908,20 @@
 
 				//tilauksessa, ennakkopoistot ja jt	Huom! varastolisa määritelty jo aiemmin!
 				$query = "	SELECT
-							sum(if (tilausrivi.tyyppi='O', tilausrivi.varattu, 0)) tilattu,
-							sum(if ((tilausrivi.tyyppi='L' or tilausrivi.tyyppi='V') and tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
-							sum(if ((tilausrivi.tyyppi='L' or tilausrivi.tyyppi='G') and tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0)) jt
+							sum(if(tyyppi in ('W','M'), varattu, 0)) valmistuksessa,
+							sum(if(tyyppi = 'O', varattu, 0)) tilattu,
+							sum(if(tyyppi = 'E', varattu, 0)) ennakot, # toimittamattomat ennakot
+							sum(if(tyyppi in ('L','V') and var not in ('P','J','S'), varattu, 0)) ennpois,
+							sum(if(tyyppi in ('L','G') and var in ('J','S'), jt $lisavarattu, 0)) jt
 							$varastolisa
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 							WHERE yhtio = '$row[yhtio]'
-		 					and tyyppi in ('L','V','O','G')
+		 					and tyyppi in ('L','V','O','G','E','W','M')
 							and tuoteno = '$row[tuoteno]'
 							and laskutettuaika = '0000-00-00'
 							and (varattu+jt > 0)";
 				$result = mysql_query($query) or pupe_error($query);
 				$ennp   = mysql_fetch_array($result);
-
 
 				if ($paikoittain == '') {
 					// Kaikkien valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
@@ -934,8 +948,8 @@
 					// Ajetaan varastopaikoittain eli tässä on just tän paikan saldo
 					$query = "	SELECT saldo
 								from tuotepaikat
-								where yhtio='$row[yhtio]'
-								and tuoteno='$row[tuoteno]'
+								where yhtio = '$row[yhtio]'
+								and tuoteno = '$row[tuoteno]'
 								$lisa";
 					$result = mysql_query($query) or pupe_error($query);
 					$saldo = mysql_fetch_array($result);
@@ -944,9 +958,9 @@
 				// oletuspaikan saldo ja hyllypaikka
 				$query = "	SELECT sum(saldo) osaldo, hyllyalue, hyllynro, hyllyvali, hyllytaso
 							from tuotepaikat
-							where yhtio='$row[yhtio]'
-							and tuoteno='$row[tuoteno]'
-							and oletus='X'
+							where yhtio = '$row[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+							and oletus  = 'X'
 							group by hyllyalue, hyllynro, hyllyvali, hyllytaso";
 				$result = mysql_query($query) or pupe_error($query);
 				$osaldo = mysql_fetch_array($result);
@@ -983,11 +997,15 @@
 					$ehd_kausi3	= $lo;
 				}
 
-				$ostettava1kk  = ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi1) - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
-				$ostettava3kk  = ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi2) - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
-				$ostettava4kk  = ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi3) - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
+				// Laskentakaava:
+				// (((myynti + kulutus) / valitun_kauden_pituus_kuukauksissa * varastointitarve_kuukauksissa) - (saldo + tilattu + valmistuksessa - varatut - jt)) / osto_era
+				// echo "$row[tuoteno]: ((({$laskurow[$indeksi]} + {$kulutrow[$indeksi]}) / $ero * $ehd_kausi1) - ({$saldo['saldo']} + {$ennp['tilattu']} + {$ennp['valmistuksessa']} - {$ennp['ennpois']} - {$ennp['jt']})) / {$row['osto_era']}<br>";
 
-				$ostettavahaly = ($row['halytysraja'] - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
+				$ostettava1kk  = ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi1) - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['valmistuksessa'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
+				$ostettava3kk  = ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi2) - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['valmistuksessa'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
+				$ostettava4kk  = ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi3) - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['valmistuksessa'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
+
+				$ostettavahaly = ($row['halytysraja'] - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['valmistuksessa'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
 
 				// jos tuotteella on joku ostoerä pyöristellään ylospäin, että tilataan aina toimittajan haluama määrä
 				if ($ostettava1kk > 0)	$ostettava1kk = ceil($ostettava1kk) * $row['osto_era'];
@@ -1001,17 +1019,6 @@
 
 				if ($ostettavahaly > 0)	$ostettavahaly = ceil($ostettavahaly) * $row['osto_era'];
 				else 					$ostettavahaly = 0;
-
-
-				//ennakkotilauksessa
-				$query  = "	SELECT sum(tilkpl) tilkpl
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-							WHERE yhtio='$row[yhtio]'
-							and tyyppi='E'
-							and tuoteno='$row[tuoteno]'
-							and laskutettuaika = '0000-00-00'";
-				$ennaresult = mysql_query($query) or pupe_error($query);
-				$ennarow = mysql_fetch_array($ennaresult);
 
 				//asiakkaan ostot
 				if ($asiakasosasto != '') {
@@ -1036,6 +1043,7 @@
 					$asosresult = mysql_query($query) or pupe_error($query);
 					$asosrow = mysql_fetch_array($asosresult);
 				}
+
 				if ($asiakasid != '') {
 					$query  = "	SELECT sum(if (t.laskutettuaika >= '$vva1-$kka1-$ppa1' and t.laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,t.kpl,0)) kpl1,
 								sum(if (t.laskutettuaika >= '$vva2-$kka2-$ppa2' and t.laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,t.kpl,0)) kpl2,
@@ -1097,6 +1105,24 @@
 
 						if (isset($workbook)) {
 							$worksheet->writeString($excelrivi, $excelsarake, $row["tuotemerkki"]);
+							$excelsarake++;
+						}
+					}
+
+					if ($valitut["SARAKE3B"] != '') {
+						$rivi .= "\"$row[malli]\"\t";
+
+						if (isset($workbook)) {
+							$worksheet->writeString($excelrivi, $excelsarake, $row["malli"]);
+							$excelsarake++;
+						}
+					}
+
+					if ($valitut["SARAKE3C"] != '') {
+						$rivi .= "\"$row[mallitarkenne]\"\t";
+
+						if (isset($workbook)) {
+							$worksheet->writeString($excelrivi, $excelsarake, $row["mallitarkenne"]);
 							$excelsarake++;
 						}
 					}
@@ -1180,6 +1206,15 @@
 
 						if (isset($workbook)) {
 							$worksheet->writeNumber($excelrivi, $excelsarake, $ennp["tilattu"]);
+							$excelsarake++;
+						}
+					}
+
+					if ($valitut["SARAKE7B"] != '') {
+						$rivi .= str_replace(".",",",$ennp['valmistuksessa'])."\t";
+
+						if (isset($workbook)) {
+							$worksheet->writeNumber($excelrivi, $excelsarake, $ennp["valmistuksessa"]);
 							$excelsarake++;
 						}
 					}
@@ -1704,10 +1739,10 @@
 					}
 
 					if ($valitut["SARAKE46"] != '') {
-						$rivi .= str_replace(".",",",$ennarow['tilkpl'])."\t";
+						$rivi .= str_replace(".",",",$ennp["ennakot"])."\t";
 
 						if (isset($workbook)) {
-							$worksheet->writeNumber($excelrivi, $excelsarake, $ennarow["tilkpl"]);
+							$worksheet->writeNumber($excelrivi, $excelsarake, $ennp["ennakot"]);
 							$excelsarake++;
 						}
 					}
@@ -1864,12 +1899,12 @@
 					}
 
 					if ($valitut["SARAKE64"] != '') {
-						$query = "	select count(*) kpl
-									from yhteensopivuus_tuote
-									join yhteensopivuus_rekisteri on (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio and yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
-									where yhteensopivuus_tuote.yhtio='$kukarow[yhtio]'
+						$query = "	SELECT count(*) kpl
+									FROM yhteensopivuus_tuote
+									JOIN yhteensopivuus_rekisteri on (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio and yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
+									WHERE yhteensopivuus_tuote.yhtio='$kukarow[yhtio]'
 									and yhteensopivuus_tuote.tuoteno in ('$row[tuoteno]' $korvaavat_tunrot)
-									 and yhteensopivuus_tuote.tyyppi='HA'";
+									and yhteensopivuus_tuote.tyyppi='HA'";
 						$asresult = mysql_query($query) or pupe_error($query);
 						$kasrow = mysql_fetch_array($asresult);
 
@@ -1885,7 +1920,7 @@
 					if (is_resource($osvres)) {
 						mysql_data_seek($osvres, 0);
 
-						while($vrow = mysql_fetch_array($osvres)) {
+						while ($vrow = mysql_fetch_array($osvres)) {
 							$rivi .= str_replace(".",",",$ennp["tilattu_".$vrow["tunnus"]])."\t";
 
 							if (isset($workbook)) {
@@ -1930,13 +1965,13 @@
 
 							// Saldolaskentaa tulevaisuuteen
 							$query = "	SELECT
-										sum(if (tyyppi='O', varattu, 0)) tilattu,
-										sum(if (tyyppi='L' or tyyppi='V', varattu, 0)) varattu
+										sum(if(tyyppi in ('O','W','M'), varattu, 0)) tilattu,
+										sum(if(tyyppi in ('L','V'), varattu, 0)) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										WHERE yhtio='$row[yhtio]'
-										and tyyppi in ('O','L','V')
-										and tuoteno='$korvarow[tuoteno]'
-										and varattu>0";
+										WHERE yhtio = '$row[yhtio]'
+										and tyyppi in ('L','V','O','W','M')
+										and tuoteno = '$korvarow[tuoteno]'
+										and varattu > 0";
 							$presult = mysql_query($query) or pupe_error($query);
 							$prow = mysql_fetch_array($presult);
 
@@ -2312,7 +2347,6 @@
 					</form>";
 
 		}
-
 
 		if ($tee == "JATKA" or $tee == "RAPORTOI") {
 			if ($ostoehdotus == "1")

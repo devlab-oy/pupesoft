@@ -64,7 +64,7 @@
 		$tilausok++;
 	}
 
-	if (($row["jt"] < 0 and in_array($row["var"], array('J','S','U','T'))) or ($row["varattu"] < 0 and $row["tyyppi"] == "E")) {
+	if (($row["jt"] < 0 and in_array($row["var"], array('J','S','U','T'))) or ($row["varattu"] < 0 and $row["tyyppi"] == "E") or ($row["varattu"] < 0 and ($row["tyyppi"] == "V" or $row["tyyppi"] == "W" or $row["tyyppi"] == "M"))) {
 		$varaosavirhe .= t("VIRHE: Määrä ei saa olla negatiivinen!")."<br>";
 		$riviok++;
 		$tilausok++;
@@ -386,8 +386,8 @@
 						$lisa_res = mysql_query($query) or pupe_error($query);
 						$lisa_row = mysql_fetch_assoc($lisa_res);
 					}
-
-					if (in_array($yhtiorow["puute_jt_oletus"], array('H','O')) or
+					
+					if ((in_array($yhtiorow["puute_jt_oletus"], array('H','O')) and $row["tyyppi"] != 'V') or
 						$myytavissa >= $kpl_st or
 						($row["var"] != "P" and $toim != "TARJOUS" and
 						(($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"] and $trow["sarjanumeroseuranta"] != "E" and $trow["sarjanumeroseuranta"] != "F" and $trow["sarjanumeroseuranta"] != "G") or

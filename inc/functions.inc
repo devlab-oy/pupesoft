@@ -195,6 +195,13 @@ if (!function_exists("tv2dateconv")) {
 	}
 }
 
+if (!function_exists("tv3dateconv")) {
+	function tv3dateconv($date) {
+		//k‰‰nt‰‰ vvvvkkpp muodon muotoon vvvv-kk-pp
+		return substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2)." 00:00:00";
+	}
+}
+
 if (!function_exists("dateconv")) {
 	function dateconv ($date) {
 		//k‰‰nt‰‰ vvkkmm muodon muotoon vv-kk-mm
@@ -6621,7 +6628,7 @@ if (!function_exists('tallenna_liite')) {
 			$kieli = $yhtiorow["kieli"];
 		}
 
-		if (is_array($_FILES[$userfile])) {
+		if (isset($_FILES[$userfile]) and is_array($_FILES[$userfile])) {
 			$file = $_FILES[$userfile];
 		}
 		elseif (file_exists($userfile)) {
@@ -6659,9 +6666,7 @@ if (!function_exists('tallenna_liite')) {
 		}
 
 		//	Onko meill‰ jokin kuvatyyppi?
-		list($type, $crap) = explode("/", $filetype);
-
-		if ($type == "image") {
+		if (substr($filetype, 0, 5) == "image") {
 			$size = getimagesize($file["tmp_name"], $imageinfo);
 			$image_width 	= $size[0];
 			$image_height 	= $size[1];

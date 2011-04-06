@@ -516,6 +516,8 @@
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.tunnus = '$asiakasid'";
+
+				$srow_from = "LASKU";
 			}
 			elseif ($asiakasid != "" and $tiedot_laskulta == "") {
 				// asiakashaussa pitää olla vakio columni kohdistettu, jonka arvo on O että saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydessä
@@ -529,6 +531,8 @@
 				$squery = "	SELECT asiakas.*, $puhlisa asiakas.tunnus liitostunnus, 'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne
 							FROM asiakas
 							WHERE tunnus = '$asiakasid'";
+
+				$srow_from = "ASIAKAS";
 			}
 			elseif ($kopioitava_otsikko > 0) {
 				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
@@ -536,6 +540,8 @@
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.tunnus = '$kopioitava_otsikko'";
+
+				$srow_from = "LASKU";
 			}
 			else {
 				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
@@ -543,6 +549,8 @@
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.tunnus = '$kukarow[kesken]'";
+
+				$srow_from = "LASKU";
 			}
 			$sresult = mysql_query($squery) or pupe_error($squery);
 			$srow = mysql_fetch_assoc($sresult);
@@ -609,10 +617,11 @@
 		}
 
 		// jos meillä on jo alatila ja tila ei muokkailla niitä!
-		if ($alatila == '' and isset($srow['alatila']) and $srow['alatila'] != '') {
+		if ($alatila == '' and isset($srow['alatila']) and $srow['alatila'] != '' and $srow_from == "LASKU") {
 			$alatila = $srow['alatila'];
 		}
-		if ($ylatila == '' and isset($srow['tila']) and $srow['tila'] != '') {
+
+		if ($ylatila == '' and isset($srow['tila']) and $srow['tila'] != '' and $srow_from == "LASKU") {
 			$ylatila = $srow['tila'];
 		}
 
@@ -1073,7 +1082,7 @@
 			$lahtoseleted = FALSE;
 
 			if (isset($laskurow["toimitustavan_lahto"]) and $laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
-				echo "<option value='$laskurow[toimitustapa]'>$laskurow[toimitustapa] - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."    $laskurow[toimitustavan_lahto]</option>";
+				echo "<option value='$laskurow[toimitustapa]'>".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."    $laskurow[toimitustavan_lahto]</option>";
 				$lahtoseleted = TRUE;
 			}
 

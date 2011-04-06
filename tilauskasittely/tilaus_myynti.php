@@ -5771,8 +5771,8 @@ if ($tee == '') {
 							$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - (kehahin($arow["tuoteno"])*$arow["varattu"]);
 						}
 
-						if ($arow['ei_saldoa'] == '' and $arow['varattu'] > 0) {
-							if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
+						if ($arow['varattu'] > 0) {
+							if ($arow['ei_saldoa'] != '' or trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
 								$summa_kotimaa			+= $arow["rivihinta"]+$arow["alv"];
 								$summa_kotimaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
 								$arvo_kotimaa			+= $arow["rivihinta"];
@@ -5781,7 +5781,6 @@ if ($tee == '') {
 								$kotiarvo_kotimaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
 								$kate_kotimaa			+= $rivikate;
 								$kate_kotimaa_eieri		+= $rivikate_eieri;
-
 							}
 							else {
 								$summa_ulkomaa			+= $arow["rivihinta"]+$arow["alv"];

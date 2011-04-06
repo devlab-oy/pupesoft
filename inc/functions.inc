@@ -8170,17 +8170,40 @@ if (!function_exists('t_tunnus_avainsanat')) {
 		$laji = mysql_real_escape_string(trim($laji));
 		$kieli = mysql_real_escape_string(trim($kieli));
 
-		// Jos tyhj‰‰ niin unohdetaan koko juttu
-		if (!isset($row["tunnus"]) or $laji == "") {
-			return;
-		}
-
 		if ($kieli == "") $kieli = $kukarow["kieli"];
 		if ($kieli == "") $kieli = $yhtiorow["kieli"];
 
 		//	Jos kielet matchaa niin palautetaan suoraan vastaus
 		if (strtoupper($kieli) == strtoupper($yhtiorow["kieli"])) {
-			return $row[$laji];
+			if (is_array($row)) {
+				return $row[$laji];
+			}
+			else {
+				return $row;
+			}
+		}
+
+		// Jos tyhj‰‰ niin unohdetaan koko juttu
+		if ($laji == "" or (is_array($row) and !isset($row["tunnus"]))) {
+			return;
+		}
+
+		// Jos tunnusta ei tule niin koklataan oisko t‰m‰ suoraan se k‰‰nnett‰v‰ stringi
+		if (!is_array($row)) {
+			if ($avainsanalaji == "TOIMTAPAKV") {
+				$query = "	SELECT *
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]'
+							and selite = '$row'";
+				$sresult = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($sresult) == 1) {
+					$row = mysql_fetch_assoc($sresult);
+				}
+				else {
+					return $row;
+				}
+			}
 		}
 
 		// Tutkitaan onko meill‰ k‰‰nnˆs

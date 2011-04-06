@@ -238,7 +238,7 @@
 				}
 
 				if ($netto == "") {
-					$asiakashinta = round($hinta * (1-($ale/100)), $yhtiorow['hintapyoristys']);
+					$asiakashinta = hintapyoristys($hinta * (1-($ale/100)));
 				}
 				else {
 					$asiakashinta = $hinta;
@@ -282,8 +282,8 @@
 						$worksheet->writeNumber($excelrivi, 9, sprintf('%.2f',$ale));
 					}
 
-					$worksheet->writeNumber($excelrivi, 10, sprintf("%.".$yhtiorow['hintapyoristys']."f", $asiakashinta_veroton));
-					$worksheet->writeNumber($excelrivi, 11, sprintf("%.".$yhtiorow['hintapyoristys']."f", $asiakashinta_verollinen));
+					$worksheet->writeNumber($excelrivi, 10, hintapyoristys($asiakashinta_veroton));
+					$worksheet->writeNumber($excelrivi, 11, hintapyoristys($asiakashinta_verollinen));
 					$excelrivi++;
 				}
 			}

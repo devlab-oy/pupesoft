@@ -277,7 +277,7 @@ if ($tee == '') {
 							$ashinta = "";
 						}
 
-						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=".urlencode($m[1])."'>$trow[tuoteno]</a> $trow[nimitys] $ashinta (".t("ovh").". ".sprintf("%.".$yhtiorow['hintapyoristys']."f", $hintarow["hinta"])." $hintarow[valkoodi])";
+						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=".urlencode($m[1])."'>$trow[tuoteno]</a> $trow[nimitys] $ashinta (".t("ovh").". ".hintapyoristys($hintarow["hinta"])." $hintarow[valkoodi])";
 					}
 				}
 

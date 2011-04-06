@@ -351,7 +351,7 @@
 				$hintaresult = mysql_query($query) or pupe_error($query);
 
 				while ($hintarow = mysql_fetch_array($hintaresult)) {
-					$valuuttalisa .= "<br>$hintarow[maa]: ".sprintf("%.".$yhtiorow['hintapyoristys']."f", $hintarow["hinta"])." $hintarow[valkoodi]";
+					$valuuttalisa .= "<br>$hintarow[maa]: ".hintapyoristys($hintarow["hinta"])." $hintarow[valkoodi]";
 				}
 
 			}
@@ -486,8 +486,8 @@
 
 			echo "<tr>";
 			echo "<td valign='top' >$tuoterow[toim_tuoteno]</td>";
-			echo "<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>";
-			echo "<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["nettohinta"])."/".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myymalahinta"])."</td>";
+			echo "<td valign='top' align='right'>".hintapyoristys($tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>";
+			echo "<td valign='top' align='right'>".hintapyoristys($tuoterow["nettohinta"])."/".hintapyoristys($tuoterow["myymalahinta"])."</td>";
 			echo "<td valign='top' align='right'>";
 
 			if ($tuoterow["ostohinta"][0] != '/') {
@@ -499,7 +499,7 @@
 
 			if ($tuoterow["myyntihinta_maara"] != 0) {
 				echo " $tuoterow[yksikko]<br>";
-				echo sprintf("%.".$yhtiorow['hintapyoristys']."f", round($tuoterow["kehahin"] * $tuoterow["myyntihinta_maara"] , $yhtiorow['hintapyoristys']));
+				echo hintapyoristys($tuoterow["kehahin"] * $tuoterow["myyntihinta_maara"]);
 				echo " $tuoterow[myyntihinta_maara] $tuoterow[yksikko]";
 			}
 
@@ -508,7 +508,7 @@
 
 			if ($tuoterow["myyntihinta_maara"] != 0) {
 				echo " $tuoterow[yksikko]<br>";
-				echo sprintf("%.".$yhtiorow['hintapyoristys']."f", round($tuoterow["vihahin"] * $tuoterow["myyntihinta_maara"] , $yhtiorow['hintapyoristys']));
+				echo hintapyoristys($tuoterow["vihahin"] * $tuoterow["myyntihinta_maara"]);
 				echo " $tuoterow[myyntihinta_maara] $tuoterow[yksikko]";
 			}
 
@@ -689,7 +689,7 @@
 				if ($yhtiorow["haejaselaa_konsernisaldot"] == "S") {
 					$query = "	SELECT *
 								FROM yhtio
-								WHERE konserni = '$yhtiorow[konserni]' 
+								WHERE konserni = '$yhtiorow[konserni]'
 								AND konserni != ''
 								AND yhtio != '$kukarow[yhtio]'";
 					$result = mysql_query($query) or pupe_error($query);
@@ -1769,7 +1769,7 @@
 						echo "</td>";
 
 						echo "<td nowrap align='right' valign='top'>$prow[kpl]</td>";
-						echo "<td nowrap align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f",$prow["kplhinta"])."</td>";
+						echo "<td nowrap align='right' valign='top'>".hintapyoristys($prow["kplhinta"])."</td>";
 						echo "<td nowrap align='right' valign='top'>$prow[hinta]</td>";
 
 						if ($prow["laji"] == "laskutus") {

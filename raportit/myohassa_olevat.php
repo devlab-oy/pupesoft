@@ -466,7 +466,7 @@
 				echo "<td>$tulrow[nimitys]</td>";
 				echo "<td align='right'>$tulrow[myydyt]</td>";
 				echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tulrow[yksikko]'", "", "", "selite")."</td>";
-				echo "<td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"])."</td>";
+				echo "<td align='right'>".hintapyoristys($tulrow["arvo"])."</td>";
 				if ($yhtiorow['saldo_kasittely'] != '') {
 					echo "<td align='right'>$myytavissa ($myytavissa_tul)</td>";
 				}
@@ -503,7 +503,7 @@
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, t_avainsana("Y", "", "and avainsana.selite='$tulrow[yksikko]'", "", "", "selite"), $format_bold);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"]), $format_bold);
+					$worksheet->write($excelrivi, $excelsarake, hintapyoristys($tulrow["arvo"]), $format_bold);
 					$excelsarake++;
 					if ($yhtiorow['saldo_kasittely'] != '') {
 						$worksheet->write($excelrivi, $excelsarake, $myytavissa ."(".$myytavissa_tul.")", $format_bold);

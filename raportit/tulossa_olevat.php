@@ -13,17 +13,17 @@ if ($tee == 'NAYTATILAUS') {
 }
 
 if ($vahvistus != '' or $myohassa != '') {
-	$muutparametrit = $vahvistus."#".$myohassa;	
+	$muutparametrit = $vahvistus."#".$myohassa;
 }
 
 
-if ($ytunnus != '' and $ytunnus != 'TULKAIKKI') {	
-	
-	require ("../inc/kevyt_toimittajahaku.inc");	
+if ($ytunnus != '' and $ytunnus != 'TULKAIKKI') {
+
+	require ("../inc/kevyt_toimittajahaku.inc");
 }
 
 if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
-	
+
 	echo "<table><tr>";
 	echo "<th>".t("tilno")."</th>";
 	echo "<th>".t("ytunnus")."</th>";
@@ -34,7 +34,7 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 	echo "<th>".t("arvo")."</th>";
 	echo "<th>".t("valuutta")."</th>";
 	echo "</tr>";
-	
+
 	if ($ytunnus != 'TULKAIKKI') {
 		$lisa = " and lasku.ytunnus = '$toimittajarow[ytunnus]' ";
 		$sorttaus = "lasku.tunnus,";
@@ -42,38 +42,38 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 	else {
 		$lisa = " ";
 		$sorttaus = "";
-	}	
-	
+	}
+
 	list($vahvistus, $myohassa) = explode("#",$muutparametrit);
-	
-	
+
+
 	if ($vahvistus != '') {
 		$lisa .= "and tilausrivi.jaksotettu = '$vahvistus' ";
 	}
-	
+
 	if ($myohassa == 0 and $myohassa != '') {
 		$lisa .= "and tilausrivi.toimaika >= CURDATE() ";
 	}
 	elseif ($myohassa == 1) {
 		$lisa .= "and tilausrivi.toimaika < CURDATE() ";
 	}
-	
-	
+
+
 
 	$query = "	SELECT lasku.tunnus, lasku.nimi, tilausrivi.tuoteno, tilausrivi.toimaika, lasku.valkoodi,
 				count(*) maara, sum(tilausrivi.varattu) tilattu, sum(tilausrivi.varattu * tilausrivi.hinta) arvo
 				from tilausrivi
 				JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-				where tilausrivi.yhtio	= '$kukarow[yhtio]' 
-				and tilausrivi.varattu 	> '0' 
-				and tilausrivi.tyyppi 	= 'O' 
+				where tilausrivi.yhtio	= '$kukarow[yhtio]'
+				and tilausrivi.varattu 	> '0'
+				and tilausrivi.tyyppi 	= 'O'
 				$lisa
 				group by 1,2,3,4,5
 				order by $sorttaus lasku.nimi, tilausrivi.tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
-	
-	
-	
+
+
+
 	$lastunnus = "";
 	$edellinen = "";
 	while ($tulrow = mysql_fetch_array($result)) {
@@ -84,23 +84,23 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 		echo "<td>".tv1dateconv($tulrow["toimaika"])."</td>";
 		echo "<td align='right'>$tulrow[maara]</td>";
 		echo "<td align='right'>$tulrow[tilattu]</td>";
-		echo "<td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"])."</td>";
+		echo "<td align='right'>".hintapyoristys($tulrow["arvo"])."</td>";
 		echo "<td>$tulrow[valkoodi]</td>";
 		echo "</tr>";
-		
+
 		if ($edellinen == "" or $edellinen != $tulrow["tunnus"]) {
 			$lastunnus .= $tulrow["tunnus"].",";
 			$edellinen = $tulrow["tunnus"];
-		}		
+		}
 	}
 
 	$lastunnus = rtrim($lastunnus, ",");
 
 	echo "</table>";
 
-	
-	if ($ytunnus != 'TULKAIKKI' and $vahvistus == 0 and $vahvistus != '') {		
-	
+
+	if ($ytunnus != 'TULKAIKKI' and $vahvistus == 0 and $vahvistus != '') {
+
 		echo "<br><form name=asiakas action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "<td><input type='hidden' name='otunnus' value='$lastunnus'></td>";
 		echo "<td><input type='hidden' name='komento' value='email'></td>";
@@ -108,7 +108,7 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 		echo "<tr><td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr>";
 		echo "</form>";
 	}
-		
+
 	$ytunnus = '';
 }
 

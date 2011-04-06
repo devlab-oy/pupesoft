@@ -146,11 +146,11 @@ function rivi ($firstpage, $laji = '') {
 	$oikpos = $pdf->strlen(sprintf("%.0f", $row["kpled"]), $norm);
 	$pdf->draw_text(380-$oikpos, $kala, sprintf("%.0f", $row["kpled"]), 		$firstpage, $norm);
 
-	$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["va"]), $norm);
-	$pdf->draw_text(460-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["va"]),			$firstpage, $norm);
+	$oikpos = $pdf->strlen(hintapyoristys($row["va"]), $norm);
+	$pdf->draw_text(460-$oikpos, $kala, hintapyoristys($row["va"]),			$firstpage, $norm);
 
-	$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["ed"]), $norm);
-	$pdf->draw_text(530-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["ed"]), 		$firstpage, $norm);
+	$oikpos = $pdf->strlen(hintapyoristys($row["ed"]), $norm);
+	$pdf->draw_text(530-$oikpos, $kala, hintapyoristys($row["ed"]), 		$firstpage, $norm);
 
 	$oikpos = $pdf->strlen($indexi, $norm);
 	$pdf->draw_text(575-$oikpos, $kala, $indexi, $firstpage, $norm);
@@ -173,11 +173,11 @@ function loppu ($firstpage, $sendemail = '') {
 	$oikpos = $pdf->strlen(sprintf("%.0f", $sumkpled), $norm);
 	$pdf->draw_text(380-$oikpos, $kala, sprintf("%.0f", $sumkpled), 		$firstpage, $norm);
 
-	$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumva), $norm);
-	$pdf->draw_text(460-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumva),			$firstpage, $norm);
+	$oikpos = $pdf->strlen(hintapyoristys($sumva), $norm);
+	$pdf->draw_text(460-$oikpos, $kala, hintapyoristys($sumva),			$firstpage, $norm);
 
-	$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumed), $norm);
-	$pdf->draw_text(530-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumed), 		$firstpage, $norm);
+	$oikpos = $pdf->strlen(hintapyoristys($sumed), $norm);
+	$pdf->draw_text(530-$oikpos, $kala, hintapyoristys($sumed), 		$firstpage, $norm);
 
 	if ($sumed != 0) {
 		$sumindexi = round($sumva/$sumed,2)*100;

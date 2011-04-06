@@ -211,7 +211,7 @@ if (!function_exists('alku')) {
 		$pdf_lasku->draw_rectangle(674, 420, 653, 580, $thispage, $rectparam);
 		$pdf_lasku->draw_text(310, 666, t("Toimitustapa", $kieli), 	$thispage, $pieni);
 
-		$pdf_lasku->draw_text(310, 656, pdf_substr($laskurow["toimitustapa"], 110, $pdf_lasku, $norm), 	$thispage, $norm);
+		$pdf_lasku->draw_text(310, 656, pdf_substr(t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), 110, $pdf_lasku, $norm), $thispage, $norm);
 
 		$pdf_lasku->draw_text(430, 666, t("Toimituspvm", $kieli), 	$thispage, $pieni);
 

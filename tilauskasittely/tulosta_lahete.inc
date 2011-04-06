@@ -335,7 +335,7 @@ if (!function_exists('alku_lahete')) {
 				$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
 
 				$pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
-				$pdf->draw_text(310, 698, $laskurow["toimitustapa"]." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
+				$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],	 $thispage, $boldi);
 			}
 
 			$pdf->draw_text(310, 687, t("Toimitusehto", $kieli), 		$thispage, $pieni);
@@ -2369,18 +2369,18 @@ if (!function_exists('loppu_lahete')) {
 				}
 
 				$pdf->draw_text(50, $kala-25, t("Toimitustapa"), $thispage, $boldi);
-				$pdf->draw_text(200, $kala-25, $laskurow['toimitustapa'], $thispage, $norm);
+				$pdf->draw_text(200, $kala-25, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $thispage, $norm);
 
-				$pdf->draw_text(50, $kala-38, t("Maksuehto", $kieli), $thispage, $boldi);
+				$pdf->draw_text(50,  $kala-38, t("Maksuehto", $kieli), $thispage, $boldi);
 				$pdf->draw_text(200, $kala-38, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli), $thispage, $norm);
 
-				$pdf->draw_text(50, $kala-51, t("Myynti- ja toimitusehdot", $kieli), $thispage, $boldi);
+				$pdf->draw_text(50,  $kala-51, t("Myynti- ja toimitusehdot", $kieli), $thispage, $boldi);
 				$pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli), $thispage, $norm);
 
-				$pdf->draw_text(50, $kala-66, t("Liitteet", $kieli), $thispage, $boldi);
+				$pdf->draw_text(50,  $kala-66, t("Liitteet", $kieli), $thispage, $boldi);
 				$pdf->draw_text(200, $kala-66, "________", $thispage, $norm);
 
-				$pdf->draw_text(50, $kala-77, t("Vakuutus", $kieli), $thispage, $boldi);
+				$pdf->draw_text(50,  $kala-77, t("Vakuutus", $kieli), $thispage, $boldi);
 				$pdf->draw_text(200, $kala-77, t("Tilaaja ottaa kustannuksellaan kohteeseen työaikaisen rakennustyövakuutuksen ennen", $kieli).' ', $thispage, $norm);
 				$pdf->draw_text(200, $kala-90, t("töiden alkamista ja toimittaa vakuutuskirjan", $kieli)." {$yhtiorow['nimi']}".t(":lle", $kieli), $thispage, $norm);
 

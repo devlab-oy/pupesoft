@@ -165,7 +165,7 @@ if (!function_exists('alku')) {
 
 		$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 708, t("Toimitustapa", $kieli), 		$thispage, $pieni);
-		$pdf->draw_text(310, 698, $laskurow["toimitustapa"], 		$thispage, $boldi);
+		$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $thispage, $boldi);
 
 		$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 687, t("Toimitusehto", $kieli), 	$thispage, $pieni);

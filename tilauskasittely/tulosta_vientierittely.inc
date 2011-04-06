@@ -135,7 +135,7 @@ if ($Xtunnukset2 != "") {
 
 			$Xpdf->draw_rectangle(737, 300, 716, 580, 				$Xfirstpage, $Xrectparam);
 			$Xpdf->draw_text(310, 729, t("Toimitustapa", $kieli),	$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(310, 719, $laskurow["toimitustapa"], 	$Xfirstpage, $Xnorm);
+			$Xpdf->draw_text(310, 719, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), 	$Xfirstpage, $Xnorm);
 
 			$Xpdf->draw_rectangle(716, 300, 695, 580, 				$Xfirstpage, $Xrectparam);
 			$Xpdf->draw_text(310, 708, t("Kommentti", $kieli), 		$Xfirstpage, $Xpieni);

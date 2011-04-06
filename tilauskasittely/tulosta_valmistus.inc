@@ -145,8 +145,8 @@ if (!function_exists('alku_valm')) {
 			$pdf->draw_text(430, 719, tv1dateconv($laskurow["luontiaika"], "pitka"), 		$thispage, $norm);
 
 			$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
-			$pdf->draw_text(310, 708, t("Toimitustapa", $kieli), 		$thispage, $pieni);
-			$pdf->draw_text(310, 698, $laskurow["toimitustapa"], 		$thispage, $boldi);
+			$pdf->draw_text(310, 708, t("Toimitustapa", $kieli), $thispage, $pieni);
+			$pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $thispage, $boldi);
 
 			$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
 			$pdf->draw_text(310, 687, t("Toimitusehto", $kieli), 	$thispage, $pieni);
@@ -411,7 +411,7 @@ if (!function_exists('rivi_otsikot_valm')) {
 		$pdf->draw_text(405, $kala+15, t("Kerroin", $kieli),		$thispage, $norm);
 		$pdf->draw_text(465, $kala+15, t("Valmistetaan", $kieli),	$thispage, $norm);
 		$pdf->draw_text(525, $kala+15, t("Valmistettu", $kieli),	$thispage, $norm);
-		
+
 		$kala -= 3;
 	}
 }
@@ -427,13 +427,13 @@ if (!function_exists('rivi_valm')) {
 		$x[1] = 580;
 		$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
 		$uusisivu = "";
-	
+
 		if ($tyyppi != "ETUSIVU" and ($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"])) {
 			//	Tulostetaanko aina uusi sivu?
 			$query = "SELECT tunnus FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '$row[tuoteno]' and omasivu != ''";
 			$pres = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($pres) > 0) {	
+			if (mysql_num_rows($pres) > 0) {
 				//	Uusi sivu
 				if (isset($perheid) and isset($perheid2)) {
 					$page[$sivu] 	= uusi_sivu_valm($tyyppi);
@@ -536,7 +536,7 @@ if (!function_exists('rivi_valmistus')) {
 			$oikpos = $pdf->strlen($row['varattu'], $pb);
 			$pdf->draw_text(575-$oikpos, $kala, $row['varattu'], 			$thispage, $pb);
 		}
-			
+
 		$kala = $kala - $rivinkorkeus+3;
 		$lask_valm++;
 

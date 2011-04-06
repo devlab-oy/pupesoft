@@ -323,7 +323,7 @@
 		}
 
 		echo "<tr><th colspan='4'>".t("Toimitustapa")." / ".t("Rahtikirjanro")."</th><th colspan='2'>".t("Toimitusehto")."</th></tr>";
-		echo "<tr><td colspan='4'>$laskurow[toimitustapa] / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td></tr>";
+		echo "<tr><td colspan='4'>".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV")." / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td></tr>";
 	}
 
 	if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extranet"] == "") {

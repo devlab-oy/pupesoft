@@ -128,7 +128,7 @@ if (!function_exists('text_alku')) {
 
 		$sisalto .= "\r\n";
 		$sisalto .= sprintf('%-35.35s', '');
-		$sisalto .= sprintf('%-25.25s', $laskurow["toimitustapa"]);
+		$sisalto .= sprintf('%-25.25s', t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli));
 
 		//	Onko meill‰ monta toimitusp‰iv‰‰ vai ei?
 		if ($laskurow["tila"] == 'U') {

@@ -94,7 +94,7 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "TILVAHV.TLV_TOIM_KATUOSOITE:" . $laskurow['toim_osoite'] . "\n";
 		$ulos .= "TILVAHV.TLV_TOIM_POSTIOSOITE:" . $laskurow['toim_postino'] . " " . $laskurow['toim_postitp'] . "\n";
 
-		$ulos .= "TILVAHV.TLV_TOIMITUSTAPA:" . $laskurow['toimitustapa'] . "\n";
+		$ulos .= "TILVAHV.TLV_TOIMITUSTAPA:".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)."\n";
 		$ulos .= "TILVAHV.TLV_SUMMA:" . $laskurow['summa'] . "\n";
 		$ulos .= "TILVAHV.TLV_SISALTOKOODI:29\n";
 		$ulos .= "*RE TILVAHV " . $laskurow['tunnus'] . "\n";

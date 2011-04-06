@@ -97,7 +97,7 @@ if (!function_exists('alku_lahete')) {
 		$pdf->draw_rectangle(758, 300, 737, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(758, 420, 737, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 750, "Toimitustapa", $thispage, $pieni);
-		$pdf->draw_text(310, 740, $laskurow["toimitustapa"], $thispage, $norm);
+		$pdf->draw_text(310, 740, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $thispage, $norm);
 		$pdf->draw_text(430, 750, "Toimituspvm", $thispage, $pieni);
 		$pdf->draw_text(430, 740, $laskurow["toimaika"], $thispage, $norm);
 

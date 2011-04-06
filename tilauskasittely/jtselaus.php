@@ -481,14 +481,14 @@
 		}
 
 		if ($tuoterow["alv"] != $trow["alv"] and $yhtiorow["alv_kasittely"] == "" and $trow["alv"] < 500) {
-			$hinta 		= round($trow["hinta"] / (1+$trow['alv']/100) * (1+$tuoterow['alv']/100), $yhtiorow['hintapyoristys']);
+			$hinta 		= hintapyoristys($trow["hinta"] / (1+$trow['alv']/100) * (1+$tuoterow['alv']/100));
 		}
 		else {
 			$hinta		= $trow["hinta"];
 		}
 
 		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$hinta  = round(laskuval($hinta, $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
+			$hinta  = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
 		}
 
 		$ale 			= $trow["ale"];
@@ -1344,10 +1344,10 @@
 								}
 
 								if ($jtrow["valkoodi"] != '' and trim(strtoupper($jtrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-									$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) laskuval($jtrow["hinta"], $jtrow["vienti_kurssi"]))." ".$jtrow["valkoodi"];
+									$hinta	= hintapyoristys(laskuval($jtrow["hinta"], $jtrow["vienti_kurssi"]))." ".$jtrow["valkoodi"];
 								}
 								else {
-									$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", $jtrow["hinta"])." ".$jtrow["valkoodi"];
+									$hinta	= hintapyoristys($jtrow["hinta"])." ".$jtrow["valkoodi"];
 								}
 
 								echo "$hinta<br>$jtrow[ale]%</td>";
@@ -1752,10 +1752,10 @@
 
 
 									if ($perherow["valkoodi"] != '' and trim(strtoupper($perherow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-										$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) laskuval($perherow["hinta"], $perherow["vienti_kurssi"]))." ".$perherow["valkoodi"];
+										$hinta	= hintapyoristys(laskuval($perherow["hinta"], $perherow["vienti_kurssi"]))." ".$perherow["valkoodi"];
 									}
 									else {
-										$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", $perherow["hinta"])." ".$perherow["valkoodi"];
+										$hinta	= hintapyoristys($perherow["hinta"])." ".$perherow["valkoodi"];
 									}
 
 									echo $hinta."<br>$perherow[ale]%</td>";

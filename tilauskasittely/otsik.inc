@@ -2378,7 +2378,7 @@
 					else {
 						//Alvihinta korjataan vain jos yhtiöllä on verolliset myyntihinnat
 						if ($row["alv"] != '' and $row["alv"] < 500 and $yhtiorow["alv_kasittely"] == "" ) {
-							$hinta = sprintf('%.'.$yhtiorow["hintapyoristys"].'f', $row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100));
+							$hinta = hintapyoristys($row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100));
 						}
 						else {
 							$hinta = $row['hinta'];
@@ -2410,7 +2410,7 @@
 				else {
 					//Asiakas ei vaihtunut hinnat pysyvät samoina, alvia joudumme ehkä korjaamaan
 					if ($row["alv"] != '' and $row["alv"] < 500 and $yhtiorow["alv_kasittely"] == "") {
-						$uusihinta = sprintf('%.'.$yhtiorow["hintapyoristys"].'f', $row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100));
+						$uusihinta = hintapyoristys($row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100));
 					}
 					else {
 						$uusihinta = $row['hinta'];

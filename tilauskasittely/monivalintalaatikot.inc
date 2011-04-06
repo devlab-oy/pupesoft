@@ -115,11 +115,9 @@
 
 			foreach ($mul_osasto as $osx) {
 				if (trim($osx) != '') {
-					if (trim($osx) != "PUPEKAIKKIMUUT") {
-						$osx = trim(mysql_real_escape_string($osx));
-						$osastot .= "'$osx',";
-						$ulisa .= "&mul_osasto[]=".rawurlencode($osx);
-					}
+					$osx = trim(mysql_real_escape_string($osx));
+					$osastot .= "'$osx',";
+					$ulisa .= "&mul_osasto[]=".rawurlencode($osx);
 				}
 			}
 
@@ -136,11 +134,9 @@
 
 			foreach ($mul_try as $tryx) {
 				if (trim($tryx) != '') {
-					if (trim($tryx) != "PUPEKAIKKIMUUT") {
-						$tryx = trim(mysql_real_escape_string($tryx));
-						$tryt .= "'$tryx',";
-						$ulisa .= "&mul_try[]=".rawurlencode($tryx);
-					}
+					$tryx = trim(mysql_real_escape_string($tryx));
+					$tryt .= "'$tryx',";
+					$ulisa .= "&mul_try[]=".rawurlencode($tryx);
 				}
 			}
 
@@ -157,11 +153,9 @@
 
 			foreach ($mul_tme as $tmex) {
 				if (trim($tmex) != '') {
-					if (trim($tmex) != "PUPEKAIKKIMUUT") {
-						$tmex = trim(mysql_real_escape_string($tmex));
-						$tmet .= "'$tmex',";
-						$ulisa .= "&mul_tme[]=".rawurlencode($tmex);
-					}
+					$tmex = trim(mysql_real_escape_string($tmex));
+					$tmet .= "'$tmex',";
+					$ulisa .= "&mul_tme[]=".rawurlencode($tmex);
 				}
 			}
 
@@ -178,11 +172,9 @@
 
 			foreach ($mul_malli as $mallix) {
 				if (trim($mallix) != '') {
-					if (trim($mallix) != "PUPEKAIKKIMUUT") {
-						$mallix = trim(mysql_real_escape_string($mallix));
-						$mallit .= "'$mallix',";
-						$ulisa .= "&mul_malli[]=".rawurlencode($mallix);
-					}
+					$mallix = trim(mysql_real_escape_string($mallix));
+					$mallit .= "'$mallix',";
+					$ulisa .= "&mul_malli[]=".rawurlencode($mallix);
 				}
 			}
 
@@ -199,11 +191,9 @@
 
 			foreach ($mul_mallitarkenne as $mallitarkennex) {
 				if (trim($mallitarkennex) != '') {
-					if (trim($mallitarkennex) != "PUPEKAIKKIMUUT") {
-						$mallitarkennex = trim(mysql_real_escape_string($mallitarkennex));
-						$mallitarkenteet .= "'$mallitarkennex',";
-						$ulisa .= "&mul_mallitarkenne[]=".rawurlencode($mallitarkennex);
-					}
+					$mallitarkennex = trim(mysql_real_escape_string($mallitarkennex));
+					$mallitarkenteet .= "'$mallitarkennex',";
+					$ulisa .= "&mul_mallitarkenne[]=".rawurlencode($mallitarkennex);
 				}
 			}
 
@@ -226,11 +216,9 @@
 
 					foreach (${"mul_".$param} as $paramx) {
 						if (trim($paramx) != '') {
-							if (trim($paramx) != "PUPEKAIKKIMUUT") {
-								$paramx = trim(mysql_real_escape_string($paramx));
-								$paramit .= "'$paramx',";
-								$ulisa .= "&mul_{$param}[]=".rawurlencode($paramx);
-							}
+							$paramx = trim(mysql_real_escape_string($paramx));
+							$paramit .= "'$paramx',";
+							$ulisa .= "&mul_{$param}[]=".rawurlencode($paramx);
 						}
 					}
 
@@ -268,11 +256,9 @@
 
 					foreach (${"mul_".$param.$count_row['syvyys']} as $dynaaminenx) {
 						if (trim($dynaaminenx) != '') {
-							if (trim($dynaaminenx) != 'PUPEKAIKKIMUUT') {
-								$dynaaminenx = trim(mysql_real_escape_string($dynaaminenx));
-								$dynaamiset .= "'$dynaaminenx',";
-								$ulisa .= "&mul_".$param.$count_row['syvyys']."[]=".rawurlencode($dynaaminenx);
-							}
+							$dynaaminenx = trim(mysql_real_escape_string($dynaaminenx));
+							$dynaamiset .= "'$dynaaminenx',";
+							$ulisa .= "&mul_".$param.$count_row['syvyys']."[]=".rawurlencode($dynaaminenx);
 						}
 					}
 
@@ -610,15 +596,6 @@
 
 				echo "</th></tr>";
 				echo "<tr><td nowrap style='padding:0px'><select name='mul_osasto[]' $multiple_lisa $autosubmit>";
-
-				$mul_check = "";
-				if ($mul_try != "") {
-					if (in_array("PUPEKAIKKIMUUT", $mul_osasto)) {
-						$mul_check = 'SELECTED';
-					}
-				}
-
-				echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				while ($sxrow = mysql_fetch_assoc($sresult)) {
@@ -751,14 +728,6 @@
 
 				echo "</th></tr>";
 				echo "<tr><td nowrap style='padding:0px'><select name='mul_try[]' $multiple_lisa $autosubmit>";
-
-				$mul_check = '';
-				if ($mul_try != "") {
-					if (in_array("PUPEKAIKKIMUUT", $mul_try)) {
-						$mul_check = 'SELECTED';
-					}
-				}
-				echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
 				echo "<option value=''>".t("Ei valintaa")."</option>";
 
 				while ($srow = mysql_fetch_assoc($sresult)) {
@@ -896,15 +865,6 @@
 				}
 
 				echo "<select name='mul_tme[]' $multiple_lisa $autosubmit>";
-
-
-				$mul_check = '';
-				if ($mul_tme != "") {
-					if (in_array("PUPEKAIKKIMUUT", $mul_tme)) {
-						$mul_check = 'SELECTED';
-					}
-				}
-				echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
 				echo "<option value=''>",t("Ei valintaa"),"</option>";
 
 				while ($srow = mysql_fetch_assoc($tmsresult)) {
@@ -937,7 +897,7 @@
 		if ($monivalintalaatikko == "malli/mallitark" or $monivalintalaatikko == "malli") {
 			unset($sxresult);
 
-			if (($lisa_haku_osasto != "" or $lisa_haku_try != "") or ($lisa_haku_osasto != "" and in_array("PUPEKAIKKIMUUT", $mul_try))) {
+			if (($lisa_haku_osasto != "" or $lisa_haku_try != "")) {
 
 				if (($lisa_haku_tme != '' or $lisa_haku_try != '') and ($monivalintalaatikko == "malli" or (!in_array("malli", $monivalintalaatikot) and $monivalintalaatikko == 'malli/mallitark'))) {
 					// malli dropdown
@@ -1041,14 +1001,6 @@
 						}
 
 						echo "<select name='mul_malli[]' $multiple_lisa $autosubmit>";
-
-						$mul_check = '';
-						if ($mul_malli != "") {
-							if (in_array("PUPEKAIKKIMUUT", $mul_malli)) {
-								$mul_check = 'SELECTED';
-							}
-						}
-						echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
 						echo "<option value=''>",t("Ei valintaa"),"</option>";
 
 						while ($mallirow = mysql_fetch_assoc($sxresult)) {
@@ -1186,15 +1138,6 @@
 						}
 
 						echo "<select name='mul_mallitarkenne[]' $multiple_lisa $autosubmit>";
-
-
-						$mul_check = '';
-						if ($mul_mallitarkenne != "") {
-							if (in_array("PUPEKAIKKIMUUT", $mul_mallitarkenne)) {
-								$mul_check = 'SELECTED';
-							}
-						}
-						echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
 						echo "<option value=''>",t("Ei valintaa"),"</option>";
 
 						while ($mallitarkennerow = mysql_fetch_assoc($sxresult)) {
@@ -1324,16 +1267,6 @@
 						}
 
 						echo "{$autosubmit}>";
-
-						$mul_check = '';
-
-						if (${"mul_".$tree.$looppirow['syvyys']} != "") {
-							if (in_array("PUPEKAIKKIMUUT", ${"mul_".$tree.$looppirow['syvyys']})) {
-								$mul_check = 'SELECTED';
-							}
-						}
-
-						echo "<option value='PUPEKAIKKIMUUT' {$mul_check}>".t("Näytä kaikki")."</option>";
 						echo "<option value=''>",t("Ei valintaa"),"</option>";
 					}
 
@@ -1496,16 +1429,6 @@
 					}
 
 					echo "$autosubmit>";
-
-					$mul_check = '';
-
-					if (${"mul_".$parametri} != "") {
-						if (in_array("PUPEKAIKKIMUUT", ${"mul_".$parametri})) {
-							$mul_check = 'SELECTED';
-						}
-					}
-
-					echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
 					echo "<option value=''>",t("Ei valintaa"),"</option>";
 
 					while (${$parametri."row"} = mysql_fetch_assoc($sxresult)) {

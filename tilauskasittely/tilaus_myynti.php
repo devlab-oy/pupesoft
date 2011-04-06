@@ -5772,7 +5772,7 @@ if ($tee == '') {
 						}
 
 						if ($arow['varattu'] > 0) {
-							if ($arow['ei_saldoa'] != '' or trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
+							if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
 								$summa_kotimaa			+= $arow["rivihinta"]+$arow["alv"];
 								$summa_kotimaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
 								$arvo_kotimaa			+= $arow["rivihinta"];

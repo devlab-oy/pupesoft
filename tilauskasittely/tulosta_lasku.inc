@@ -680,7 +680,7 @@ if (!function_exists('rivi_original')) {
 
 		// Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv
 		if ($row["alv"] >= 600) {
-			$komm .= "\n".t("K‰‰nteinen arvonlis‰verovelvollisuus", $kieli).".";
+			$komm .= "\n".t("Rakennusalan k‰‰nnetty verovelvollisuus", $kieli).".";
 		}
 		elseif ($row["alv"] >= 500) {
 			$komm .= "\n".t("Ei sis‰ll‰ v‰hennett‰v‰‰ veroa", $kieli).".";

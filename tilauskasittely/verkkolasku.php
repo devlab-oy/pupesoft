@@ -1717,7 +1717,7 @@
 								// K‰‰nnetty arvonlis‰verovelvollisuus ja k‰ytetyn tavaran myynti
 								if ($tilrow["alv"] >= 600) {
 									$tilrow["alv"] = 0;
-									$tilrow["kommentti"] .= " K‰‰nnetty arvonlis‰verovelvollisuus.";
+									$tilrow["kommentti"] .= " Rakennusalan k‰‰nnetty verovelvollisuus.";
 								}
 								elseif ($tilrow["alv"] >= 500) {
 									$tilrow["alv"] = 0;
@@ -2352,7 +2352,7 @@
 
 
 			echo "<br>\n<table>";
-			
+
 			// Mik‰ viikonp‰iv‰ t‰n‰‰n on 1-7.. 1=sunnuntai, 2=maanantai, jne...
 			$today = date("w") + 1;
 
@@ -2369,13 +2369,13 @@
 							    ";
 
 			$query = "  SELECT
-						sum(if (lasku.laskutusvkopv = '0', 1, 0)) normaali,						
+						sum(if (lasku.laskutusvkopv = '0', 1, 0)) normaali,
 						sum(if (((lasku.laskutusvkopv = $today) or
 						   		 (lasku.laskutusvkopv = -1 and curdate() = '$vika_pv') or
 						   		 (lasku.laskutusvkopv = -2 and curdate() = '$eka_pv') or
 						   		 (lasku.laskutusvkopv = -3 and curdate() = '$keski_pv') or
 						   		 (lasku.laskutusvkopv = -4 and curdate() in ('$keski_pv','$vika_pv')) or
-						   		 (lasku.laskutusvkopv = -5 and curdate() in ('$eka_pv','$keski_pv'))), 1, 0)) paiva,												
+						   		 (lasku.laskutusvkopv = -5 and curdate() in ('$eka_pv','$keski_pv'))), 1, 0)) paiva,
 						sum(if (maksuehto.factoring != '', 1, 0)) factoroitavat,
 						count(lasku.tunnus) kaikki
 						from lasku

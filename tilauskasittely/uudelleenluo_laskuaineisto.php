@@ -544,7 +544,7 @@
 					//Käänteinen arvonlisäverovelvollisuus ja Käytetyn tavaran myynti
 					if ($tilrow["alv"] >= 600) {
 						$tilrow["alv"] = 0;
-						$tilrow["kommentti"] .= " Käännetty arvonlisäverovelvollisuus.";
+						$tilrow["kommentti"] .= " Rakennusalan käännetty verovelvollisuus.";
 					}
 					elseif ($tilrow["alv"] >= 500) {
 						$tilrow["alv"] = 0;

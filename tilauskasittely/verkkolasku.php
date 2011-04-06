@@ -1792,10 +1792,10 @@
 								$vatamount = $tilrow['rivihinta'] * $tilrow['alv'] / 100;
 
 								// Pyˆristet‰‰n ja formatoidaan lopuksi
-								$tilrow["hinta"]     = sprintf("%.".$yhtiorow["hintapyoristys"]."f", round($tilrow["hinta"], $yhtiorow["hintapyoristys"]));
-								$tilrow["rivihinta"] = sprintf("%.".$yhtiorow["hintapyoristys"]."f", round($tilrow["rivihinta"], $yhtiorow["hintapyoristys"]));
-								$totalvat            = sprintf("%.".$yhtiorow["hintapyoristys"]."f", round($totalvat, $yhtiorow["hintapyoristys"]));
-								$vatamount           = sprintf("%.".$yhtiorow["hintapyoristys"]."f", round($vatamount, $yhtiorow["hintapyoristys"]));
+								$tilrow["hinta"]     = hintapyoristys($tilrow["hinta"]);
+								$tilrow["rivihinta"] = hintapyoristys($tilrow["rivihinta"]);
+								$totalvat            = hintapyoristys($totalvat);
+								$vatamount           = hintapyoristys($vatamount);
 
 								$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
 								$tilrow['nimitys']   = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);

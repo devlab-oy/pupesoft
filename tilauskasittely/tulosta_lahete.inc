@@ -1134,9 +1134,9 @@ if (!function_exists('rivi_lahete')) {
 				$row["rivihinta"] = $row["hinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"]) * (1-($row["ale"]+$laskurow["erikoisale"]-($row["ale"]*$laskurow["erikoisale"]/100))/100);
 			}
 
-			$row["rivihinta"] = round(laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
-			$row["hinta"] 	  = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
-			$row["ovhhinta"]  = round(laskuval($row["ovhhinta"], $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
+			$row["rivihinta"] = hintapyoristys(laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]));
+			$row["hinta"] 	  = hintapyoristys(laskuval($row["hinta"], $laskurow["vienti_kurssi"]));
+			$row["ovhhinta"]  = hintapyoristys(laskuval($row["ovhhinta"], $laskurow["vienti_kurssi"]));
 		}
 
 		$perheid 	 = $row["perheid"];
@@ -1490,8 +1490,8 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
 
-		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), $norm);
-		$pdf->draw_text(465-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), $thispage, $norm);
+		$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
+		$pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
 
 
 		list($ff_string, $ff_font) = pdf_fontfit(($row["ale"]*1)."%", 25, $pdf, $norm);
@@ -1507,8 +1507,8 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 		$pdf->draw_text(520-$oikpos, $kala, ($row["alv"]*1)."%", 							$thispage, $norm);
 
 		if (trim($naytetaanko_rivihinta) == '') {
-			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
-			$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $thispage, $norm);
+			$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
+			$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 		}
 
 		if ($pitkattuotteet) {
@@ -1575,8 +1575,8 @@ if (!function_exists('rivi_custom_lahete')) {
 		}
 
 		if (trim($naytetaanko_rivihinta) == '') {
-			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
-			$pdf->draw_text(473, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 			$thispage, $norm);
+			$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
+			$pdf->draw_text(473, $kala, hintapyoristys($row["rivihinta"]), 			$thispage, $norm);
 		}
 
 		if ($pdf->strlen($row["nimitys"], $norm) > 190) {
@@ -1631,8 +1631,8 @@ if (!function_exists('rivi_brutto_lahete')) {
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(515-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
 
-		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["ovhhinta"]), $norm);
-		$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["ovhhinta"]), 				$thispage, $norm);
+		$oikpos = $pdf->strlen(hintapyoristys($row["ovhhinta"]), $norm);
+		$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["ovhhinta"]), 				$thispage, $norm);
 
 		if ($pdf->strlen($row["nimitys"], $norm) >= 270) {
 			$kala = $kala - $rivinkorkeus;
@@ -1746,8 +1746,8 @@ if (!function_exists('rivi_eialeja_lahete')) {
 		$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
 
 
-		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"]), $norm);
-		$pdf->draw_text(465-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"]), 							$thispage, $norm);
+		$oikpos = $pdf->strlen(hintapyoristys($row["myyntihinta"]), $norm);
+		$pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["myyntihinta"]), 							$thispage, $norm);
 
 		if ($extranet_tilausvahvistus != 1) {
 			list($ff_string, $ff_font) = pdf_fontfit($row["aleryhma"], 50, $pdf, $norm);
@@ -1755,8 +1755,8 @@ if (!function_exists('rivi_eialeja_lahete')) {
 		}
 
 		if (trim($naytetaanko_rivihinta) == '') {
-			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["brutto_rivihinta"]), $norm);
-			$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["brutto_rivihinta"]), 		$thispage, $norm);
+			$oikpos = $pdf->strlen(hintapyoristys($row["brutto_rivihinta"]), $norm);
+			$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["brutto_rivihinta"]), 		$thispage, $norm);
 		}
 
 		if ($pdf->strlen($row["nimitys"], $norm) >= 135) {
@@ -1815,8 +1815,8 @@ if (!function_exists('rivi_eialehintoja_lahete')) {
 		if (trim($naytetaanko_rivihinta) == '') {
 			$rivihinta = $row['hinta'] * $row['tilkpl'];
 
-			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $rivihinta), $norm);
-			$pdf->draw_text(515-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $rivihinta), 		$thispage, $norm);
+			$oikpos = $pdf->strlen(hintapyoristys($rivihinta), $norm);
+			$pdf->draw_text(515-$oikpos, $kala, hintapyoristys($rivihinta), 		$thispage, $norm);
 		}
 
 		if ($pdf->strlen($row["nimitys"], $norm) >= 135) {
@@ -1878,8 +1878,8 @@ if (!function_exists('rivi_hae_hinnat_lahete')) {
 
 		list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $row["varattu"], '', '', '', '', $GLOBALS['eta_yhtio']);
 
-		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $lis_hinta), $norm);
-		$pdf->draw_text(465-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $lis_hinta), 				$thispage, $norm);
+		$oikpos = $pdf->strlen(hintapyoristys($lis_hinta), $norm);
+		$pdf->draw_text(465-$oikpos, $kala, hintapyoristys($lis_hinta), 				$thispage, $norm);
 
 		list($ff_string, $ff_font) = pdf_fontfit(($lis_ale*1)."%", 25, $pdf, $norm);
 
@@ -1896,8 +1896,8 @@ if (!function_exists('rivi_hae_hinnat_lahete')) {
 		if (trim($naytetaanko_rivihinta) == '') {
 			$rivihinta = $lis_hinta * (1-($lis_ale/100)) * $row['varattu_orig'];
 
-			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $rivihinta), $norm);
-			$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $rivihinta), 			$thispage, $norm);
+			$oikpos = $pdf->strlen(hintapyoristys($rivihinta), $norm);
+			$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($rivihinta), 			$thispage, $norm);
 		}
 
 		if ($pdf->strlen($row["nimitys"], $norm) >= 130) {
@@ -2110,8 +2110,8 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 
 		$as_hinta = $row["hinta"] * (1 - $row["ale"] / 100);
 
-		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $as_hinta), $norm);
-		$pdf->draw_text(475-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $as_hinta), 			$thispage, $norm);
+		$oikpos = $pdf->strlen(hintapyoristys($as_hinta), $norm);
+		$pdf->draw_text(475-$oikpos, $kala, hintapyoristys($as_hinta), 			$thispage, $norm);
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
@@ -2565,13 +2565,13 @@ if (!function_exists('alvierittely_lahete')) {
 		$pdf->draw_text(473, $kala, $laskurow["valkoodi"], $thispage, $boldi);
 
 		$tyyppilisa = str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc" ? " and tilausrivi.tyyppi in ('L', 'T') " : " and tilausrivi.tyyppi = 'L' ";
-		
+
 		$jtlisa = "";
-		
+
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_custom.inc") {
 			$jtlisa = "+tilausrivi.jt";
 		}
-		
+
 		// Haetaan kaikki alvikannat riveiltä
 		$alvquery = "	SELECT distinct alv
 						FROM tilausrivi

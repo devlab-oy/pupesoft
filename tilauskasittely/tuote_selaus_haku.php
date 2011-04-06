@@ -1403,17 +1403,17 @@
 
 				if ($kukarow['hinnat'] >= 0 and ($verkkokauppa == "" or $kukarow["kuka"] != "www")) {
 
-					$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"]). " $yhtiorow[valkoodi]";
+					$myyntihinta = hintapyoristys($row["myyntihinta"]). " $yhtiorow[valkoodi]";
 
 					if ($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
 						// haetaan tuotteen tiedot
-						$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $hinnat["hinta"] * (1-($hinnat["ale"]/100)))." $laskurow[valkoodi]";
+						$myyntihinta = hintapyoristys($hinnat["hinta"] * (1-($hinnat["ale"]/100)))." $laskurow[valkoodi]";
 					}
 					elseif ($kukarow["extranet"] != "") {
 						// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
 						if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
 
-							$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"])." $yhtiorow[valkoodi]";
+							$myyntihinta = hintapyoristys($row["myyntihinta"])." $yhtiorow[valkoodi]";
 
 							$query = "	SELECT *
 										from hinnasto
@@ -1428,10 +1428,10 @@
 
 							if (mysql_num_rows($olhires) == 1) {
 								$olhirow = mysql_fetch_assoc($olhires);
-								$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $olhirow["hinta"])." $olhirow[valkoodi]";
+								$myyntihinta = hintapyoristys($olhirow["hinta"])." $olhirow[valkoodi]";
 							}
 							elseif ($olhirow["kurssi"] != 0) {
-								$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", yhtioval($row["myyntihinta"], $olhirow["kurssi"])). " $oleasrow[valkoodi]";
+								$myyntihinta = hintapyoristys(yhtioval($row["myyntihinta"], $olhirow["kurssi"])). " $oleasrow[valkoodi]";
 							}
 						}
 					}
@@ -1460,7 +1460,7 @@
 							$hintaresult = mysql_query($query) or pupe_error($query);
 
 							while ($hintarow = mysql_fetch_assoc($hintaresult)) {
-								$myyntihinta .= "<br>$hintarow[maa]: ".sprintf("%.".$yhtiorow['hintapyoristys']."f", $hintarow["hinta"])." $hintarow[valkoodi]";
+								$myyntihinta .= "<br>$hintarow[maa]: ".hintapyoristys($hintarow["hinta"])." $hintarow[valkoodi]";
 							}
 						}
 					}
@@ -1468,7 +1468,7 @@
 					echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>$myyntihinta";
 
 					if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-						echo "<br>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["nettohinta"])." $yhtiorow[valkoodi]";
+						echo "<br>".hintapyoristys($row["nettohinta"])." $yhtiorow[valkoodi]";
 					}
 
 					echo "</td>";

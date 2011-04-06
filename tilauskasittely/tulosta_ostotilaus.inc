@@ -390,16 +390,16 @@
 				$oikpos = $pdf->strlen(($row["varattu"]*1)." ".$omyks, $norm);
 				$pdf->draw_text(415-$oikpos, $kala, ($row["varattu"]*1)." ".$omyks, $thispage, $norm);
 
-				$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), $norm);
-				$pdf->draw_text(475-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), 					$thispage, $norm);
+				$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
+				$pdf->draw_text(475-$oikpos, $kala, hintapyoristys($row["hinta"]), 					$thispage, $norm);
 
 				if ($row["ale"] != 0) {
 					$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
 					$pdf->draw_text(510-$oikpos, $kala, ($row["ale"]*1)."%", 						$thispage, $norm);
 				}
 
-				$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["rivihinta"]), $norm);
-				$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["rivihinta"]), 				$thispage, $norm);
+				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
+				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), 				$thispage, $norm);
 
 	            if ($nimitykset != "") {
 

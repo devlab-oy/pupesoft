@@ -378,7 +378,7 @@
 			$tee 			= "Y";
 
 			if ($tilausrivirow["myyntihinta_maara"] != 0 and $hinta != 0) {
-				$hinta = round($hinta * $tilausrivirow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
+				$hinta = hintapyoristys($hinta * $tilausrivirow["myyntihinta_maara"]);
 			}
 
 		}
@@ -1013,7 +1013,7 @@
 
 					echo "<td valign='top' $class>$prow[toim_tuoteno]</td>";
 					echo "<td valign='top' $class align='right'>$prow[tilattu]</td>";
-					echo "<td valign='top' $class align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $prow["hinta"])."</td>";
+					echo "<td valign='top' $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
 					echo "<td valign='top' $class align='right'>".((float) $prow["ale"])."</td>";
 					echo "<td valign='top' $class align='right'>".((float) $prow["alv"])."</td>";
 					echo "<td valign='top' $classlisa align='right'>$prow[rivihinta]</td>";

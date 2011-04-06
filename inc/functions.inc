@@ -10761,21 +10761,24 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 if (!function_exists("hintapyoristys")) {
 	function hintapyoristys($luku) {
-
 		global $yhtiorow;
+
+		$luku = (float) $luku;
 
 		// k‰‰nnet‰‰n luku desimaaliluvuksi parametrin mukaisesti
 		$luku = sprintf("%.".$yhtiorow['hintapyoristys']."f", round($luku, $yhtiorow['hintapyoristys']));
 
-		// poistetaan nollat lopusta
-		$luku = rtrim($luku, "0");
+		if ($yhtiorow["hintapyoristys_loppunollat"] == "P") {
+			// poistetaan nollat lopusta
+			$luku = rtrim($luku, "0");
 
-		// katotaan montako desimaalia luvussa on
-		$desimaaleja = strlen($luku) - strpos($luku, ".") - 1;
+			// katotaan montako desimaalia luvussa on
+			$desimaaleja = strlen($luku) - strpos($luku, ".") - 1;
 
-		// jos alle kaksi desimaalia, niin n‰ytet‰‰n silti kaksi
-		if ($desimaaleja < 2) {
-			$luku = sprintf("%.02f", $luku);
+			// jos alle kaksi desimaalia, niin n‰ytet‰‰n silti kaksi
+			if ($desimaaleja < 2) {
+				$luku = sprintf("%.02f", $luku);
+			}
 		}
 
 		return $luku;

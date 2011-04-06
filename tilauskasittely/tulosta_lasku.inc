@@ -601,7 +601,7 @@ if (!function_exists('rivi_original')) {
 		}
 
 		// A-hinta
-		$pdf_lasku->draw_text(390, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
+		$pdf_lasku->draw_text(390, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
 
 		//Alennus
 		if ($row["ale"] != 0) {
@@ -610,13 +610,13 @@ if (!function_exists('rivi_original')) {
 
 		if ($kurssi != 1) {
 			//Veroton Rivihinta Valuutassa
-			$oikpos = $pdf_lasku->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta_valuutassa"]), $norm);
-			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta_valuutassa"]), $thispage, $norm);
+			$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"]), $norm);
+			$pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"]), $thispage, $norm);
 		}
 		else {
 			// Veroton Rivihinta
-			$oikpos = $pdf_lasku->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
-			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $thispage, $norm);
+			$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"]), $norm);
+			$pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 		}
 
 		//Arvonlis‰vero
@@ -657,8 +657,8 @@ if (!function_exists('rivi_original')) {
 				$verollrivi = $verollrivi * (1 + ($row["alv"] / 100));
 			}
 
-			$oikpos = $pdf_lasku->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $verollrivi), $pieni);
-			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $verollrivi), $thispage, $pieni);
+			$oikpos = $pdf_lasku->strlen(hintapyoristys($verollrivi), $pieni);
+			$pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($verollrivi), $thispage, $pieni);
 		}
 
 		$komm = $row["kommentti"];
@@ -796,7 +796,7 @@ if (!function_exists('rivi_original')) {
 
 		$kala = $kala - 15;
 
-		$arvo += sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
+		$arvo += hintapyoristys($row["rivihinta"]);
 
 		// Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv
 		$laskalv = $row["alv"];
@@ -805,7 +805,7 @@ if (!function_exists('rivi_original')) {
 			$laskalv = 0;
 		}
 
-		$summa += sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
+		$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
 
 		return array($thispage, $kala, $summa, $arvo);
 	}
@@ -864,8 +864,8 @@ if (!function_exists('rivi_plain')) {
 		}
 
 		// A-hinta
-		$oikpos = $pdf_lasku->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)), $norm);
-		$pdf_lasku->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
+		$oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($veroton_hinta, $kurssi)), $norm);
+		$pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
 
 		//Alennus
 		if ($row["ale"] != 0) {
@@ -875,13 +875,13 @@ if (!function_exists('rivi_plain')) {
 
 		if ($kurssi != 1) {
 			//Veroton Rivihinta Valuutassa
-			$oikpos = $pdf_lasku->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta_valuutassa"]), $norm);
-			$pdf_lasku->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta_valuutassa"]), $thispage, $norm);
+			$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"]), $norm);
+			$pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"]), $thispage, $norm);
 		}
 		else {
 			// Veroton Rivihinta
-			$oikpos = $pdf_lasku->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
-			$pdf_lasku->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $thispage, $norm);
+			$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"]), $norm);
+			$pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 		}
 
 		$kala = $kala - 10;
@@ -890,7 +890,7 @@ if (!function_exists('rivi_plain')) {
 
 		$kala = $kala - 15;
 
-		$arvo += sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
+		$arvo += hintapyoristys($row["rivihinta"]);
 
 		// Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv
 		$laskalv = $row["alv"];
@@ -899,7 +899,7 @@ if (!function_exists('rivi_plain')) {
 			$laskalv = 0;
 		}
 
-		$summa += sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
+		$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
 
 		return array($thispage, $kala, $summa, $arvo);
 	}
@@ -976,8 +976,8 @@ if (!function_exists('rivi_plain_2')) {
 		}
 
 		// A-hinta
-		$oikpos = $pdf_lasku->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)), $norm);
-		$pdf_lasku->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)), $thispage, $norm);
+		$oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($veroton_hinta, $kurssi)), $norm);
+		$pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)), $thispage, $norm);
 
 		//Alennus
 		if ($row["ale"] != 0) {
@@ -987,13 +987,13 @@ if (!function_exists('rivi_plain_2')) {
 
 		if ($kurssi != 1) {
 			//Veroton Rivihinta Valuutassa
-			$oikpos = $pdf_lasku->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta_valuutassa"]), $norm);
-			$pdf_lasku->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta_valuutassa"]), $thispage, $norm);
+			$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"]), $norm);
+			$pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"]), $thispage, $norm);
 		}
 		else {
 			// Veroton Rivihinta
-			$oikpos = $pdf_lasku->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
-			$pdf_lasku->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $thispage, $norm);
+			$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"]), $norm);
+			$pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
 		}
 
 		$kala = $kala - 10;
@@ -1002,7 +1002,7 @@ if (!function_exists('rivi_plain_2')) {
 
 		$kala = $kala - 15;
 
-		$arvo += sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
+		$arvo += hintapyoristys($row["rivihinta"]);
 
 		// Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv
 		$laskalv = $row["alv"];
@@ -1011,7 +1011,7 @@ if (!function_exists('rivi_plain_2')) {
 			$laskalv = 0;
 		}
 
-		$summa += sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
+		$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
 
 		return array($thispage, $kala, $summa, $arvo);
 	}

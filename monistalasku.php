@@ -60,7 +60,7 @@ else {
 }
 
 if ($tee == '') {
-	
+
 	if ($toim == 'OSTOTILAUS') {
 		if ($ytunnus != '') {
 			require ("inc/kevyt_toimittajahaku.inc");
@@ -1183,7 +1183,7 @@ if ($tee == 'MONISTA') {
 					$vanhahinta = $rivirow["hinta"];
 
 					if ($yhtiorow["alv_kasittely"] == "") {
-						$uusihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f",round($rivirow['hinta'] / (1+$rivirow['alv']/100) * (1+$trow["alv"]/100),$yhtiorow['hintapyoristys']));
+						$uusihinta = hintapyoristys($rivirow['hinta'] / (1+$rivirow['alv']/100) * (1+$trow["alv"]/100));
 					}
 					else {
 						$uusihinta = $rivirow['hinta'];
@@ -1264,17 +1264,17 @@ if ($tee == '' and $vain_monista == "") {
 	echo "<form action = '$PHP_SELF' method = 'post'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<tr>";
-	
+
 	if ($toim == 'OSTOTILAUS') {
 		echo "<th>".t("Toimittajan nimi")."</th>";
 	}
 	else {
 		echo "<th>".t("Asiakkaan nimi")."</th>";
 	}
-	
+
 	echo "<td><input type='text' size='10' name='ytunnus'></td></tr>";
-	
-	
+
+
 	echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
 
 	if ($toim == '') {

@@ -792,9 +792,26 @@
 			$sel1 = "selected";
 		}
 
-		$ulos .= "<option value='2' $sel1>".t("Hinta pyöristetään kahteen desimaaliin")."</option>";
-		$ulos .= "<option value='4' $sel2>".t("Hinta pyöristetään neljään desimaaliin")."</option>";
-		$ulos .= "<option value='6' $sel3>".t("Hinta pyöristetään kuuteen desimaaliin")."</option>";
+		$ulos .= "<option value='2' $sel1>".t("Yksikkö- ja rivihinnat pyöristetään kahteen desimaaliin")."</option>";
+		$ulos .= "<option value='4' $sel2>".t("Yksikkö- ja rivihinnat pyöristetään neljään desimaaliin")."</option>";
+		$ulos .= "<option value='6' $sel3>".t("Yksikkö- ja rivihinnat pyöristetään kuuteen desimaaliin")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "hintapyoristys_loppunollat") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel1="";
+		
+		if ($trow[$i] != "") {
+			$sel1 = "selected";
+		}
+
+		$ulos .= "<option value=''>".t("Yksikkö- ja rivihinnan kaikki desimaalit näytetään")."</option>";
+		$ulos .= "<option value='P' $sel1>".t("Yksikkö- ja rivihinnoista poistetaan merkityksettömät loppunollat")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

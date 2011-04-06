@@ -2,20 +2,20 @@
 
 function hinnastorivi($tuote, $laskurow) {
     global $kukarow, $yhtiorow, $kl_alenimi;
-    
+
     static $rivi = 1;
-    
+
 	//haetaan aleryhmän tunnus
 	$query = "	SELECT b.tunnus, b.ryhma
 				FROM tuote a
 				LEFT JOIN perusalennus b ON a.yhtio = b.yhtio and a.aleryhma = b.ryhma
-				WHERE a.tuoteno = '$tuote[tuoteno]' 
+				WHERE a.tuoteno = '$tuote[tuoteno]'
 				and a.yhtio = '$kukarow[yhtio]'";
 	$aleresult = mysql_query($query) or pupe_error($query);
 	$alerow = mysql_fetch_array($aleresult);
 
 	if ($kl_alenimi == "") {
-		$aletun = $alerow['ryhma'];		
+		$aletun = $alerow['ryhma'];
 	}
 	else {
 		$aletun = $alerow['tunnus'];
@@ -58,8 +58,8 @@ function hinnastorivi($tuote, $laskurow) {
 			$seuraava	= $korvaavat[$koti+1];
 		}
 	}
-	
-	$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", tuotteen_myyntihinta($laskurow, $tuote, 1, "ei"));
+
+	$myyntihinta = hintapyoristys(tuotteen_myyntihinta($laskurow, $tuote, 1, "ei"));
 
 	$out  = sprintf('%-20.20s'	,$tuote["tuoteno"]);
 	$out .= sprintf('%-60.60s'	,t_tuotteen_avainsanat($tuote, 'nimitys'));

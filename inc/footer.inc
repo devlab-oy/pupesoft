@@ -65,9 +65,12 @@
 
 	if ($lopeta_body) {
 
+		if ($piirra_kello or $piirra_sanakirja) {
+			echo "<br><br>";
+		}
+
 		if ($piirra_kello) {
 			$loppumem = memory_get_usage();
-			echo "<br><br>";
 			echo "<font class='info'>$aika ".round((($loppumem-$alkumem)/1000000), 1)."</font>";
 		}
 

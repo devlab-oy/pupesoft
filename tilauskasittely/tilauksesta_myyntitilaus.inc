@@ -235,7 +235,7 @@
 
 				if ($yhtiorow["dokumentaatiohallinta"] != "") {
 					svnOpenNew($ptunnus, "PROJEKTI");
-					
+
 					if(svnProjectsQuotationSubDir) {
 						$svnKansio = svnQuotationDirectory($otunnus);
 						if($svnKansio != "") {
@@ -381,12 +381,12 @@
 				}
 
 				if ($tuoterow["alv"] != $coprivirow["alv"] and $yhtiorow["alv_kasittely"] == "" and $coprivirow["alv"] < 500) {
-					$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", $coprivirow["hinta"] / (1+$coprivirow['alv']/100) * (1+$tuoterow["alv"]/100));
+					$hinta	= hintapyoristys($coprivirow["hinta"] / (1+$coprivirow['alv']/100) * (1+$tuoterow["alv"]/100));
 				}
 				else {
 					$hinta 	= $coprivirow['hinta'];
 				}
-				
+
 				// jos käytössä on myyntihinnan poikkeava määrä, kerrotaan hinta takaisin kuntoon.
 				if ($tuoterow["myyntihinta_maara"] != 0) {
 					$hinta = $hinta * $tuoterow["myyntihinta_maara"];
@@ -451,7 +451,7 @@
 								and tunnus = '".$isaok[$coprivirow['perheid2']]."'";
 					$aresult = mysql_query($query) or pupe_error($query);
 					$paikkarow = mysql_fetch_assoc($aresult);
-					
+
 					$paikka = $paikkarow["paikka"];
 				}
 

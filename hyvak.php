@@ -15,7 +15,7 @@
 		exit;
 	}
 
-	$lopetus = "${palvelin2}hyvak.php////kutsuja=";
+	$lopetus = "{$palvelin2}hyvak.php////kutsuja=";
 
 	require_once ("inc/tilinumero.inc");
 
@@ -38,13 +38,13 @@
 				$hakutunnus = $ytunnus;
 				$hakuid		= $toimittajaid;
 
-				$PHP_SELF = "javascript:ajaxPost('kevyt_toimittajahaku', 'hyvak.php', 'keikka', '', '', '', post');";
+				$PHP_SELF = "javascript:ajaxPost('kevyt_toimittajahaku', '{$palvelin2}hyvak.php?', 'keikka', '', '', '', 'post');";
 
-				require ("inc/kevyt_toimittajahaku.inc");
+				require ("inc/kevyt_toimittajahaku.inc"); 
 			}
 
 			if ($toimittajaid != "") {
-				echo "<table><tr><th>".t("Valittu toimittaja")."</th><td>$toimittajarow[nimi] $toimittajarow[osoite] $toimittajarow[postino] $toimittajarow[postitp] ($toimittajarow[ytunnus])</td><td class='back'><a href = 'javascript:sndReq(\"keikka\", \"hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus&toimittajaid=\");'>Vaihda toimittaja</a></td></tr></table><br>";
+				echo "<table><tr><th>".t("Valittu toimittaja")."</th><td>$toimittajarow[nimi] $toimittajarow[osoite] $toimittajarow[postino] $toimittajarow[postitp] ($toimittajarow[ytunnus])</td><td class='back'><a href = 'javascript:sndReq(\"keikka\", \"{$palvelin2}hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus&toimittajaid=\");'>Vaihda toimittaja</a></td></tr></table><br>";
 
 				//	Listataan keikat
 				$query = "	SELECT comments, lasku.tunnus otunnus, lasku.laskunro keikka, sum(tilausrivi.rivihinta) varastossaarvo, count(distinct tilausrivi.tunnus) kpl, sum(if (kpl = 0, 0, 1)) varastossa
@@ -112,7 +112,7 @@
 				}
 			}
 			else {
-				echo "<form id='toimi' name = 'toimi' action='javascript:ajaxPost(\"toimi\", \"hyvak.php?tee=$tee\", \"keikka\", \"\", \"\", \"\", \"post\");' method='post' autocomplete='off'>";
+				echo "<form id='toimi' name = 'toimi' action='javascript:ajaxPost(\"toimi\", \"{$palvelin2}hyvak.php?tee=$tee\", \"keikka\", \"\", \"\", \"\", \"post\");' method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
 				echo "<input type='hidden' name='keikalla' value = 'on'>";
 				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
@@ -1290,7 +1290,7 @@
 					$toimilisa = "";
 				}
 
-				$lisa = "<a id='uusi' href='javascript:sndReq(\"keikka\", \"hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus$toimilisa\");'>".t("Liitä keikkaan")."</a>";
+				$lisa = "<a id='uusi' href='javascript:sndReq(\"keikka\", \"{$palvelin2}hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus$toimilisa\");'>".t("Liitä keikkaan")."</a>";
 			}
 			else {
 				$lisa = "";

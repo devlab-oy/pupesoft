@@ -1261,6 +1261,14 @@ if (!function_exists('rivi_lahete')) {
 			$row["varattu"] = "";
 		}
 
+		// Jos meillä on marginaalimyyntiä/käänteinen alv
+		if ($row["alv"] >= 600) {
+			$row["kommentti"] .= "\n".t("Rakennusalan käännetty verovelvollisuus", $kieli).".";
+		}
+		elseif ($row["alv"] >= 500) {
+			$row["kommentti"] .= "\n".t("Ei sisällä vähennettävää veroa", $kieli).".";
+		}
+
 		//Haetan sarjanumeron tiedot
 		if ($tyyppi == "SIIRTOLISTA") {
 			$sarjanutunnus = "siirtorivitunnus";
@@ -1499,12 +1507,21 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 		$oikpos = $pdf->strlen($ff_string, $ff_font);
 		$pdf->draw_text(495-$oikpos, $kala, $ff_string, $thispage, $ff_font);
 
-		if ($yhtiorow["alv_kasittely"] != '') {
-			$row["alv"] = "0";
+		if ($row["alv"] >= 600) {
+			$row["alv"] = t("K.V.", $kieli);
+		}
+		elseif ($row["alv"] >= 500) {
+			$row["alv"] = t("M.V.", $kieli);
+		}
+		elseif ($yhtiorow["alv_kasittely"] != '') {
+			$row["alv"] = "0%";
+		}
+		else {
+			$row["alv"] = ($row["alv"]*1)."%";
 		}
 
-		$oikpos = $pdf->strlen(($row["alv"]*1)."%", $norm);
-		$pdf->draw_text(520-$oikpos, $kala, ($row["alv"]*1)."%", 							$thispage, $norm);
+		$oikpos = $pdf->strlen($row["alv"], $norm);
+		$pdf->draw_text(520-$oikpos, $kala, $row["alv"], 							$thispage, $norm);
 
 		if (trim($naytetaanko_rivihinta) == '') {
 			$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
@@ -1569,10 +1586,6 @@ if (!function_exists('rivi_custom_lahete')) {
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 		$pdf->draw_text(425, $kala, $omyks, $thispage, $norm);
-
-		if ($yhtiorow["alv_kasittely"] != '') {
-			$row["alv"] = "0";
-		}
 
 		if (trim($naytetaanko_rivihinta) == '') {
 			$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
@@ -1886,12 +1899,21 @@ if (!function_exists('rivi_hae_hinnat_lahete')) {
 		$oikpos = $pdf->strlen($ff_string, $ff_font);
 		$pdf->draw_text(495-$oikpos, $kala, $ff_string, $thispage, $ff_font);
 
-		if ($yhtiorow["alv_kasittely"] != '') {
-			$row["alv"] = "0";
+		if ($row["alv"] >= 600) {
+			$row["alv"] = t("K.V.", $kieli);
+		}
+		elseif ($row["alv"] >= 500) {
+			$row["alv"] = t("M.V.", $kieli);
+		}
+		elseif ($yhtiorow["alv_kasittely"] != '') {
+			$row["alv"] = "0%";
+		}
+		else {
+			$row["alv"] = ($row["alv"]*1)."%";
 		}
 
-		$oikpos = $pdf->strlen(($row["alv"]*1)."%", $norm);
-		$pdf->draw_text(520-$oikpos, $kala, ($row["alv"]*1)."%", 							$thispage, $norm);
+		$oikpos = $pdf->strlen($row["alv"], $norm);
+		$pdf->draw_text(520-$oikpos, $kala, $row["alv"], 							$thispage, $norm);
 
 		if (trim($naytetaanko_rivihinta) == '') {
 			$rivihinta = $lis_hinta * (1-($lis_ale/100)) * $row['varattu_orig'];

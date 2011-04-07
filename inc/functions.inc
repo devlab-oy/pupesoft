@@ -1623,20 +1623,13 @@ if (!function_exists("synkronoi")) {
 
 		$muutokset = array();
 		$avainsanalajilisa = "";
+		$lajit = "";
 
-		//	Näillä tarttetaan vähän lisätietoo
 		if ($table == "avainsana") {
 			$abulisa = preg_match("/(^|,)(avainsana\|*([\|a-zA-Z_\-]*))($|,)/i", $yhtiorow["synkronoi"], $regs);
 
 			$avainsanalajilisa = "|".$regs[3];
 			$lajit = explode("|",strtolower($regs[3]));
-
-			//	saadaanko juuri tätä lajia synkronoida?
-			if (is_array($orig) and count($orig) > 0) {
-				if (!in_array(strtolower($orig["laji"]), $lajit)) {
-					return false;
-				}
-			}
 		}
 
 		$synclog = "\nAktivoidaan synkronointi konserniyrityksiin\n";
@@ -1657,6 +1650,11 @@ if (!function_exists("synkronoi")) {
 
 		if (mysql_num_rows($masterres) == 1) {
 			$masterrow = mysql_fetch_array($masterres) or pupe_error($query);
+
+			//	Näillä tarttetaan vähän lisätietoo, saadaanko juuri tätä lajia synkronoida?
+			if ($table == "avainsana" and !in_array(strtolower($masterrow["laji"]), $lajit)) {
+				return false;
+			}
 
 			//	Näillä tarttetaan vähän lisätietoo
 			if ($table == "asiakasalennus" and $masterrow["alennus"] < 0) {

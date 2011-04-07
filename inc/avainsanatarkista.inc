@@ -13,6 +13,16 @@ if(!function_exists("avainsanatarkista")) {
 
 		if (mysql_field_name($result, $i) == "laji") {
 			$laji = trim($t[$i]);
+
+			// Synkattavien avainsanojen lajia ei saa muuttaa, muuten synkkaus menee out of sync
+			if (isset($trow["laji"]) and $trow["laji"] != $laji and stripos($yhtiorow["synkronoi"], "avainsana") !== FALSE) {
+				$abulisa = preg_match("/(^|,)(avainsana\|*([\|a-zA-Z_\-]*))($|,)/i", $yhtiorow["synkronoi"], $regs);
+				$lajit = explode("|",strtolower($regs[3]));
+
+				if (in_array(strtolower($trow["laji"]), $lajit)) {
+					$virhe[$i] = t("Synkronoitavien avainsanojen lajia ei saa muuttaa")."!";
+				}
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "kieli") {

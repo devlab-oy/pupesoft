@@ -129,7 +129,8 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 	// Lisätään tiliöinnit
 	$selite = t('Ostolaskun osasuoritus');
 
-	$aputunnukset = array();
+	$aputunnukset_vanha = array();
+	$aputunnukset_uusi  = array();
 
 	$query = "	SELECT *
 				FROM tiliointi
@@ -175,16 +176,15 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 			$uusi_id = mysql_insert_id();
 
 			// jos aputunnus ei ole tyhjä, otetaan se avaimeksi taulukkoon ja laitetaan uuden aputunnusrivin id sen alle
-			if ($tiliointirow['aputunnus'] != '') {
-				$aputunnukset[$tiliointirow['aputunnus']] = $uusi_id;
+			if ($tiliointirow['aputunnus'] > 0) {
+				$aputunnukset_vanha[$tiliointirow['aputunnus']] = $uusi_id;
 			}
 
 			// jos tiliöintirivi löytyy avaimena taulukosta
-			if (array_key_exists($tiliointirow['tunnus'], $aputunnukset)) {
-				$where_id = $aputunnukset[$tiliointirow['tunnus']];
+			if (isset($aputunnukset_vanha[$tiliointirow['tunnus']])) {
 				$query = "	UPDATE tiliointi SET
 							aputunnus = $uusi_id
-							WHERE tunnus = $where_id";
+							WHERE tunnus = {$aputunnukset_vanha[$tiliointirow['tunnus']]}";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
@@ -212,15 +212,14 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 			$uusi_id = mysql_insert_id();
 
 			if ($tiliointirow['aputunnus'] != '') {
-				$aputunnukset[$tiliointirow['aputunnus']] = $uusi_id;
+				$aputunnukset_uusi[$tiliointirow['aputunnus']] = $uusi_id;
 			}
 
 			// laitetaan aputunnus pointtaaman takaisin oikeeseen tiliöintiin
-			if (array_key_exists($tiliointirow['tunnus'], $aputunnukset)) {
-				$where_id = $aputunnukset[$tiliointirow['tunnus']];
+			if (isset($aputunnukset_uusi[$tiliointirow['tunnus']])) {
 				$query = "	UPDATE tiliointi SET
 							aputunnus = $uusi_id
-							WHERE tunnus = $where_id";
+							WHERE tunnus = {$aputunnukset_uusi[$tiliointirow['tunnus']]}";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}

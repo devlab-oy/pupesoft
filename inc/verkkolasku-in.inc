@@ -34,13 +34,16 @@
 			if (strpos($file, "finvoice-") !== false) {
 				require("inc/verkkolasku-in-finvoice.inc");
 			}
+			elseif (strpos($file, "_invoice") !== false){
+				require("inc/verkkolasku-in-teccom.inc");
+			}
 			else {
 				require("inc/verkkolasku-in-pupevoice.inc");
 			}
 
 
 			// Nämä muuttujat kuuluisi olla setattuna:
-			/*
+/*			
 			echo "\n\nLASKUNTIEDOT:\n";
 			echo "01: ".$yhtio."\n";
 			echo "02: ".$verkkotunnus_vas."\n";
@@ -57,19 +60,40 @@
 			echo "13: ".$laskun_summa_eur."\n";
 			echo "14: ".$laskun_tilausviite."\n";
 			echo "15: ".$kauttalaskutus."\n";
-			echo "16: ".$toim_asiakkaantiedot["toim_ovttunnus"]."\n";
-			echo "17: ".$toim_asiakkaantiedot["ytunnus"]."\n";
-			echo "18: ".$toim_asiakkaantiedot["nimi"]."\n";
-			echo "19: ".$toim_asiakkaantiedot["osoite"]."\n";
-			echo "20: ".$toim_asiakkaantiedot["postino"]."\n";
-			echo "21: ".$toim_asiakkaantiedot["postitp"]."\n";
-			echo "22: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."\n";
-			echo "23: ".$ostaja_asiakkaantiedot["ytunnus"]."\n";
-			echo "24: ".$ostaja_asiakkaantiedot["nimi"]."\n";
-			echo "25: ".$ostaja_asiakkaantiedot["osoite"]."\n";
-			echo "26: ".$ostaja_asiakkaantiedot["postino"]."\n";
-			echo "27: ".$ostaja_asiakkaantiedot["postitp"]."\n";
-			*/
+			echo "16: ".$laskun_asiakkaan_tilausnumero."\n";
+			echo "17: ".$toim_asiakkaantiedot["toim_ovttunnus"]."\n";
+			echo "18: ".$toim_asiakkaantiedot["ytunnus"]."\n";
+			echo "19: ".$toim_asiakkaantiedot["nimi"]."\n";
+			echo "20: ".$toim_asiakkaantiedot["osoite"]."\n";
+			echo "21: ".$toim_asiakkaantiedot["postino"]."\n";
+			echo "22: ".$toim_asiakkaantiedot["postitp"]."\n";
+			echo "23: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."\n";
+			echo "24: ".$ostaja_asiakkaantiedot["ytunnus"]."\n";
+			echo "25: ".$ostaja_asiakkaantiedot["nimi"]."\n";
+			echo "26: ".$ostaja_asiakkaantiedot["osoite"]."\n";
+			echo "27: ".$ostaja_asiakkaantiedot["postino"]."\n";
+			echo "28: ".$ostaja_asiakkaantiedot["postitp"]."\n";
+			echo "29: teccom-only ".$laskuttajan_toimittajanumero."\n";
+
+			Nämä muuttujat ovat valinnaisia:
+
+			RIVINTIEDOT:
+			$rtuoteno[]["ale"]
+			$rtuoteno[]["alv"]
+			$rtuoteno[]["hinta"]
+			$rtuoteno[]["kauttalaskutus"]
+			$rtuoteno[]["kommentti"]
+			$rtuoteno[]["kpl"]
+			$rtuoteno[]["laskutettuaika"]
+			$rtuoteno[]["nimitys"]
+			$rtuoteno[]["rivihinta"]
+			$rtuoteno[]["riviinfo"]
+			$rtuoteno[]["riviviite"]
+			$rtuoteno[]["tilaajanrivinro"]
+			$rtuoteno[]["tuoteno"]
+			$rtuoteno[]["yksikko"]
+
+*/
 
 			// generic error messagen alku
 			$return  = "Tiedosto: $file\n";
@@ -208,10 +232,12 @@
 
 			if (!isset($yhtiorow) and $luolasku === TRUE) {
 				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin admineille!
-				$query = "SELECT distinct alert_email, postittaja_email FROM yhtion_parametrit WHERE alert_email != '' and postittaja_email != ''";
+				$query = "SELECT distinct yhtio nimi, alert_email, postittaja_email FROM yhtion_parametrit WHERE alert_email != '' and postittaja_email != ''";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-				$return .= "\nEpäonnistumisen syy: Laskun vastaanottajaa ei löytynyt järjestelmästä $_SERVER[SERVER_ADDR]!\n\n";
+				$hostname = exec('hostname');
+
+				$return .= "\nEpäonnistumisen syy: Laskun vastaanottajaa ei löytynyt järjestelmästä $hostname!\n\n";
 				$return .= "Etsittiin tiedoilla:\n";
 				$return .= "Verkkotunnus: $verkkotunnus_vas\n";
 				$return .= "Ovt: $yhtio $oyhtio1 $oyhtio2\n";
@@ -253,10 +279,10 @@
 			if ($laskun_tyyppi == "381" and $summa > 0) {
 				$summa = $summa * -1;
 			}
-
 			$tpp = (int) substr($laskun_paiva,6,2);
 			$tpk = (int) substr($laskun_paiva,4,2);
 			$tpv = (int) substr($laskun_paiva,0,4);
+		
 			$erp = (int) substr($laskun_erapaiva,6,2);
 			$erk = (int) substr($laskun_erapaiva,4,2);
 			$erv = (int) substr($laskun_erapaiva,0,4);
@@ -270,9 +296,11 @@
 			// $laskuttajan_ovt --> voi olla ovttunnus, ytunnus, tai vatnumero
 			// $laskuttajan_vat --> voisi olla vatnumero
 			// $laskuttajan_nimi --> voisi olla laskuttajan nimi
+			// $laskuttajan_toimittajanumero --> toimittajanumero
 			$laskuttajan_ovt  = trim($laskuttajan_ovt);
 			$laskuttajan_vat  = trim($laskuttajan_vat);
 			$laskuttajan_nimi = trim($laskuttajan_nimi);
+			$laskuttajan_toimittajanumero = trim($laskuttajan_toimittajanumero);
 
 			if (!isset($trow) and stripos($laskuttajan_nimi, "rum Oy Ab / ARW") !== FALSE) {
 				// 0 eleganttia
@@ -393,6 +421,20 @@
 							WHERE yhtio = '$yhtio'
 							and nimi = '$laskuttajan_nimi'
 							and nimi not in ('','0')
+							and tyyppi != 'P'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+				if (mysql_num_rows($result) == 1) {
+					$trow = mysql_fetch_array($result);
+				}
+			}
+			
+			if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
+				// 8 etsitään toimittaja teccomi-specific
+				$query = "	SELECT *
+							FROM toimi
+							WHERE yhtio = '$yhtio'
+							and toimittajanro = '$laskuttajan_toimittajanumero'
 							and tyyppi != 'P'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
@@ -1254,6 +1296,15 @@
 					if ($ebid == "FINVOICEXML") {
 						$kayttotarkoitus = 'FINVOICE';
 					}
+					elseif ($ebid == "TECCOM-INVOICE") {
+						$kayttotarkoitus = 'TECCOM-INVOICE';
+						/*
+						Tiedoston alkuun pitää lisätä nämä tiedot, kun saadaan xsl ja dtd
+						<?xml version="1.0" encoding="utf-8"?>
+						<!DOCTYPE Finvoice SYSTEM "datain/teccom.dtd">
+						<?xml-stylesheet type="text/xsl" href="datain/teccom.xsl"?>
+						*/
+					}
 					else {
 						$kayttotarkoitus = 'INVOIC.D.96A';
 					}
@@ -1279,7 +1330,7 @@
 					$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
 
 					// Haetaan verkkolaskun visualisoitu versio
-					if ($ebid != "FINVOICEXML") {
+					if ($kayttotarkoitus == "INVOIC.D.96A") {
 						$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
 						$salasana		   = $yhtiorow['verkkosala_vas'];
 

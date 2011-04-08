@@ -1,7 +1,7 @@
 <?php
 
-	if (!isset($variaatio_tuoteno) and $tuoteno != "")  $variaatio_tuoteno = $tuoteno;
-	if (!isset($variaatio_tuoteno) and $tuoteno_array[0] != "")  $variaatio_tuoteno = $tuoteno_array[0];
+	if ((!isset($variaatio_tuoteno) or $variaatio_tuoteno == "") and isset($tuoteno) and trim($tuoteno) != "")  $variaatio_tuoteno = $tuoteno;
+	if ((!isset($variaatio_tuoteno) or $variaatio_tuoteno == "") and isset($tuoteno_array[0]) and trim($tuoteno_array[0]) != "")  $variaatio_tuoteno = $tuoteno_array[0];
 
 	$variaatio_hakulisa = "";
 	$variaatio_i = 1;
@@ -21,14 +21,18 @@
 
 	if ($variaatio_tuoteno != "") {
 		// haetaan kaikki tuotteet, jotka kuuluu tähän ryppääseen
-		$query = "	SELECT *
+		$query = "	SELECT tuote.tuoteno,
+					if(t2.jarjestys = 0 or t2.jarjestys is null, t2.selite, t2.jarjestys) t2j2,
+					if(t3.jarjestys = 0 or t3.jarjestys is null, t3.selite, t3.jarjestys) t3j3
 					FROM tuotteen_avainsanat
 					JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno and tuote.status not in ('P','X'))
+					LEFT JOIN tuotteen_avainsanat t2 on tuote.yhtio = t2.yhtio and tuote.tuoteno = t2.tuoteno and t2.laji = 'parametri_vari' and t2.kieli = 'fi'
+					LEFT JOIN tuotteen_avainsanat t3 on tuote.yhtio = t3.yhtio and tuote.tuoteno = t3.tuoteno and t3.laji = 'parametri_koko' and t3.kieli = 'fi'
 					WHERE tuotteen_avainsanat.yhtio = '$kukarow[yhtio]'
 					AND tuotteen_avainsanat.laji = 'parametri_variaatio'
 					AND tuotteen_avainsanat.kieli = '$kukarow[kieli]'
 					AND tuotteen_avainsanat.selite = '$variaatio_tuoteno'
-					ORDER BY tuotteen_avainsanat.tuoteno";
+					ORDER BY t2j2, t3j3, tuotteen_avainsanat.tuoteno";
 		$variaatiores = mysql_query($query) or pupe_error($query);
 	}
 
@@ -44,8 +48,8 @@
 					and kieli = '$kukarow[kieli]'
 					and tuoteno = '$variaatiorow[tuoteno]'";
 		$parametrit_res = mysql_query($query) or pupe_error($query);
-
 		$variaatio_check = array();
+
 		while ($parametritrivi = mysql_fetch_array($parametrit_res)) {
 			$parametririvi_key = substr($parametritrivi["laji"], 10); // poistetaan "parametri_" -stringi alusta
 			$parametririvi_val = trim($parametritrivi["selite"]);
@@ -83,8 +87,8 @@
 							and kieli = '$kukarow[kieli]'
 							and tuoteno = '$variaatiorow[tuoteno]'";
 				$parametrit_res = mysql_query($query) or pupe_error($query);
-
 				$this_parametrit = array();
+
 				while ($parametritrivi = mysql_fetch_array($parametrit_res)) {
 					$parametririvi_key = substr($parametritrivi["laji"], 10); // poistetaan "parametri_" -stringi alusta
 					$parametririvi_val = trim($parametritrivi["selite"]);
@@ -95,7 +99,7 @@
 			}
 
 			echo "<td><select name='variaatio_valinta[$variaatiot[$vi]]' onchange='submit();'>";
-			echo "<option value=''>Näytä kaikki</option>";
+			echo "<option value=''>".t("Näytä kaikki")."</option>";
 
 			foreach ($thisvariaatio as $ekavar) {
 				if ($ekavar == $variaatio_valinta[$variaatiot[$vi]]) $sel = "SELECTED";
@@ -165,15 +169,19 @@
 		$varilask = 0;
 
 		// haetaan kaikki tuotteet, jotka halutaan nähä
-		$query = "	SELECT distinct tuote.tuoteno, tuote.nimitys
+		$query = "	SELECT distinct tuote.tuoteno, tuote.nimitys,
+					if(t2.jarjestys = 0 or t2.jarjestys is null, t2.selite, t2.jarjestys) t2j2,
+					if(t3.jarjestys = 0 or t3.jarjestys is null, t3.selite, t3.jarjestys) t3j3
 					FROM tuotteen_avainsanat
 					JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio and tuote.tuoteno = tuotteen_avainsanat.tuoteno and tuote.status not in ('P','X'))
+					LEFT JOIN tuotteen_avainsanat t2 on tuote.yhtio = t2.yhtio and tuote.tuoteno = t2.tuoteno and t2.laji = 'parametri_vari' and t2.kieli = 'fi'
+					LEFT JOIN tuotteen_avainsanat t3 on tuote.yhtio = t3.yhtio and tuote.tuoteno = t3.tuoteno and t3.laji = 'parametri_koko' and t3.kieli = 'fi'
 					$variaatio_hakulisa
 					WHERE tuotteen_avainsanat.yhtio = '$kukarow[yhtio]'
 					AND tuotteen_avainsanat.laji = 'parametri_variaatio'
 					AND tuotteen_avainsanat.kieli = '$kukarow[kieli]'
 					AND tuotteen_avainsanat.selite = '$variaatio_tuoteno'
-					ORDER BY tuotteen_avainsanat.tuoteno";
+					ORDER BY t2j2, t3j3, tuotteen_avainsanat.tuoteno";
 		$variaatiores = mysql_query($query) or pupe_error($query);
 
 		while ($varirow = mysql_fetch_assoc($variaatiores)) {
@@ -209,7 +217,7 @@
 					echo "<option value='H' $selh>".t("Hyväksy")."</option>";
 					echo "<option value='P' $selp>".t("Puute")."</option>";
 
-					if($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
+					if ($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
 						echo "<option value='W' $selw>".t("Varastosta")."</option>";
 					}
 
@@ -248,11 +256,11 @@
 
 			if ($toim != "PIKATILAUS") {
 				if (isset($alv) and $alv >= 500) {
-					
+
 					echo "<td valign='top'>";
-					
+
 					if ($alv >= 600) {
-						echo t("K.V.");						
+						echo t("K.V.");
 					}
 					else {
 						echo t("M.V.");

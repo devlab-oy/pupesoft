@@ -716,49 +716,68 @@ if (!function_exists('rivi')) {
 
 		$kala = $kala - $rivinkorkeus;
 
+		//Haetan sarjanumeron tiedot
 		if ($row["sarjanumeroseuranta"] != "") {
-
 			if ($tyyppi == "SISAINEN") {
-				$tunken = "siirtorivitunnus";
+				$sarjanutunnus = "siirtorivitunnus";
+			}
+			elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
+				$sarjanutunnus = "ostorivitunnus";
+			}
+			elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'U' or $row['sarjanumeroseuranta'] == 'G')) {
+				$sarjanutunnus = "myyntirivitunnus";
+			}
+			elseif ($row["varattu"]+$row["kpl"] < 0){
+				$sarjanutunnus = "ostorivitunnus";
 			}
 			else {
-				$tunken = "myyntirivitunnus";
+				$sarjanutunnus = "myyntirivitunnus";
 			}
 
-			$query	= "	SELECT sarjanumero, parasta_ennen
-	   					FROM sarjanumeroseuranta
-	   					WHERE yhtio = '$kukarow[yhtio]'
+			$query = "	SELECT DISTINCT sarjanumero, parasta_ennen
+						FROM sarjanumeroseuranta
+						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$row[tuoteno]'
-	   					and $tunken = '$row[tunnus]'";
-	   		$sarjares = mysql_query($query) or pupe_error($query);
+						and $sarjanutunnus='$row[tunnus]'
+						and sarjanumero != ''
+						ORDER BY sarjanumero";
+			$sarjares = mysql_query($query) or pupe_error($query);
 
-			while ($sarjarow = mysql_fetch_array($sarjares)) {
-				if ($row["sarjanumeroseuranta"] == "S") {
-					$row["kommentti"] .= " \n".t("S:nro", $kieli).": ".$sarjarow["sarjanumero"];
+			if (mysql_num_rows($sarjares) > 0) {
+				if ($row["kommentti"] != '') {
+					$row["kommentti"] .= "\n";
 				}
-				elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "G") {
-					$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"];
+
+				if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
+					$row["kommentti"] .= t("E:nro", $kieli).": ";
 				}
-				elseif ($row["sarjanumeroseuranta"] == "F") {
-					$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]);
+				else {
+					$row["kommentti"] .= t("S:nro", $kieli).": ";
 				}
+
+				while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+					if ($row["sarjanumeroseuranta"] == "F") {
+						$row["kommentti"] .= $sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]).", ";
+					}
+					else {
+						$row["kommentti"] .= $sarjarow["sarjanumero"].", ";
+					}
+				}
+
+				$row["kommentti"] = substr($row["kommentti"], 0, -2);
 			}
 		}
 
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);
 
-		if ($tyyppi == "") {
-			if ($row["kommentti"] != '') {
-				$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 45, 80, 580, $row["kommentti"],	$thispage, $norm);
-				$kala = $pohja - $rivinkorkeus;
-			}
+		if (($tyyppi == "" or $tyyppi == "O") and $row["kommentti"] != '') {
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 45, 80, 480, $row["kommentti"],	$thispage, $norm);
+			$kala = $pohja - $rivinkorkeus;
 		}
-		else {
-			if ($row["kommentti"] != '') {
-				$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 125, 80, 580, $row["kommentti"],	$thispage, $norm);
-				$kala = $pohja - $rivinkorkeus;
-			}
+		elseif ($row["kommentti"] != '') {
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 125, 80, 580, $row["kommentti"],	$thispage, $norm);
+			$kala = $pohja - $rivinkorkeus;
 		}
 
 		$perheid  = $row["perheid"];

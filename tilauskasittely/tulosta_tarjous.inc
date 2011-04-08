@@ -737,26 +737,52 @@ if (!function_exists('rivi_tarjous')) {
 		$kpl_rivilla 	= ($row["kpl"]+$row["varattu"]+$row["jt"]);
 
 		//Haetan sarjanumeron tiedot
-		if ($row["varattu"]+$row["kpl"] < 0){
-			$sarjanutunnus = "ostorivitunnus";
-		}
-		else {
-			$sarjanutunnus = "myyntirivitunnus";
-		}
+		if ($row["sarjanumeroseuranta"] != "") {
+			if ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
+				$sarjanutunnus = "ostorivitunnus";
+			}
+			elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'U' or $row['sarjanumeroseuranta'] == 'G')) {
+				$sarjanutunnus = "myyntirivitunnus";
+			}
+			elseif ($row["varattu"]+$row["kpl"] < 0){
+				$sarjanutunnus = "ostorivitunnus";
+			}
+			else {
+				$sarjanutunnus = "myyntirivitunnus";
+			}
 
-		$query = "	SELECT distinct sarjanumero
-					from sarjanumeroseuranta
-					where yhtio = '$kukarow[yhtio]'
-					and tuoteno = '$row[tuoteno]'
-					and $sarjanutunnus='$row[tunnus]'
-					and sarjanumero != ''";
-		$sarjares = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT DISTINCT sarjanumero, parasta_ennen
+						FROM sarjanumeroseuranta
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$row[tuoteno]'
+						and $sarjanutunnus='$row[tunnus]'
+						and sarjanumero != ''
+						ORDER BY sarjanumero";
+			$sarjares = mysql_query($query) or pupe_error($query);
 
-		if ($row["kommentti"] != '' and mysql_num_rows($sarjares) > 0){
-			$row["kommentti"] .= "\n";
-		}
-		while($sarjarow = mysql_fetch_array($sarjares)) {
-			$row["kommentti"] .= t("S:nro", $kieli).": $sarjarow[sarjanumero]\n";
+			if (mysql_num_rows($sarjares) > 0) {
+				if ($row["kommentti"] != '') {
+					$row["kommentti"] .= "\n";
+				}
+
+				if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
+					$row["kommentti"] .= t("E:nro", $kieli).": ";
+				}
+				else {
+					$row["kommentti"] .= t("S:nro", $kieli).": ";
+				}
+
+				while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+					if ($row["sarjanumeroseuranta"] == "F") {
+						$row["kommentti"] .= $sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]).", ";
+					}
+					else {
+						$row["kommentti"] .= $sarjarow["sarjanumero"].", ";
+					}
+				}
+
+				$row["kommentti"] = substr($row["kommentti"], 0, -2);
+			}
 		}
 
 		if ($piilotarivi == "") {
@@ -781,7 +807,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 		$rivinkorkeus = 12;
 
 		if (trim($row["perhe_kommentti"]) != '') {
-			$pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 45, 60, 300, $row["perhe_kommentti"],	$page_tarjous[$sivu], $norm);
+			$pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],	$page_tarjous[$sivu], $norm);
 			$kala = $pohja - $rivinkorkeus;
 		}
 
@@ -836,7 +862,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 45, 60, 300, $row["kommentti"], $page_tarjous[$sivu], $norm);
+			$pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 45, 60, 480, $row["kommentti"], $page_tarjous[$sivu], $norm);
 			$kala = $pohja - $rivinkorkeus;
 		}
 
@@ -853,7 +879,7 @@ if (!function_exists('tarjous_rivi_custom')) {
 		$rivinkorkeus = 12;
 
 		if (trim($row["perhe_kommentti"]) != '') {
-			$pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 300, $row["perhe_kommentti"],	$page_tarjous[$sivu], $norm);
+			$pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],	$page_tarjous[$sivu], $norm);
 			$kala = $pohja - $rivinkorkeus;
 		}
 
@@ -1423,7 +1449,9 @@ if (!function_exists('tulosta_tarjous')) {
 					round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,
 					tilausrivin_lisatiedot.positio,
 					$sorttauskentta,
-					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
+					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
+					tuote.sarjanumeroseuranta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus

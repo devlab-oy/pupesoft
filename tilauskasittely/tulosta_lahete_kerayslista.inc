@@ -781,7 +781,9 @@ if (!function_exists('rivi_kerayslista')) {
 
 			$kala = $kala - $rivinkorkeus + 5;
 
-			$pdf->draw_text(125, $kala, $row["nimitys"], $thispage, $norm);
+
+			list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 350, $pdf, $norm);
+			$pdf->draw_text(125, $kala, $ff_string, $thispage, $ff_font);
 
 			if ($tyyppi == "SIIRTOLISTA") {
 				$pdf->draw_text(465-$oikpos, $kala, $kohde_hyllyssa, 	$thispage, $norm);
@@ -804,33 +806,55 @@ if (!function_exists('rivi_kerayslista')) {
 				$pdf->draw_text(520-$oikpos, $kala+5, round(($row['varattu']+$row['kpl'])/$trow['myynti_era'],2)." me",	$thispage, $norm);
 			}
 
+			//Haetan sarjanumeron tiedot
 			if ($row["sarjanumeroseuranta"] != "") {
-
 				if ($tyyppi == "SIIRTOLISTA") {
-					$tunken = "siirtorivitunnus";
+					$sarjanutunnus = "siirtorivitunnus";
+				}
+				elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
+					$sarjanutunnus = "ostorivitunnus";
+				}
+				elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'U' or $row['sarjanumeroseuranta'] == 'G')) {
+					$sarjanutunnus = "myyntirivitunnus";
+				}
+				elseif ($row["varattu"]+$row["kpl"] < 0){
+					$sarjanutunnus = "ostorivitunnus";
 				}
 				else {
-					$tunken = "myyntirivitunnus";
+					$sarjanutunnus = "myyntirivitunnus";
 				}
 
-				$query	= "	SELECT sarjanumero, parasta_ennen
-		   					FROM sarjanumeroseuranta
-		   					WHERE yhtio = '$kukarow[yhtio]'
+				$query = "	SELECT DISTINCT sarjanumero, parasta_ennen
+							FROM sarjanumeroseuranta
+							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$row[tuoteno]'
-		   					and $tunken = '$row[tunnus]'";
-		   		$sarjares = mysql_query($query) or pupe_error($query);
+							and $sarjanutunnus='$row[tunnus]'
+							and sarjanumero != ''
+							ORDER BY sarjanumero";
+				$sarjares = mysql_query($query) or pupe_error($query);
 
-				while ($sarjarow = mysql_fetch_assoc($sarjares)) {
-
-					if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "G") {
-						$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"];
+				if (mysql_num_rows($sarjares) > 0) {
+					if ($row["kommentti"] != '') {
+						$row["kommentti"] .= "\n";
 					}
-					elseif ($row["sarjanumeroseuranta"] == "F") {
-						$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]);
+
+					if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
+						$row["kommentti"] .= t("E:nro", $kieli).": ";
 					}
 					else {
-						$row["kommentti"] .= " \n".t("S:nro", $kieli).": ".$sarjarow["sarjanumero"];
+						$row["kommentti"] .= t("S:nro", $kieli).": ";
 					}
+
+					while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+						if ($row["sarjanumeroseuranta"] == "F") {
+							$row["kommentti"] .= $sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]).", ";
+						}
+						else {
+							$row["kommentti"] .= $sarjarow["sarjanumero"].", ";
+						}
+					}
+
+					$row["kommentti"] = substr($row["kommentti"], 0, -2);
 				}
 			}
 

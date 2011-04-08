@@ -97,7 +97,10 @@
 		$query = "	SELECT tilausrivi.*,
 					tuote.sarjanumeroseuranta,
 					$select_lisa
-					$sorttauskentta
+					$sorttauskentta,
+					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
+					tuote.sarjanumeroseuranta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					WHERE tilausrivi.otunnus in ($tilausnumeroita)

@@ -74,7 +74,8 @@
 
 		$tyyppi = 0;
 	}
-	elseif (mysql_field_name($result, $i) == "nimi" or
+
+	if (mysql_field_name($result, $i) == "nimi" or
 		mysql_field_name($result, $i) == "nimitark" or
 		mysql_field_name($result, $i) == "osoite" or
 		mysql_field_name($result, $i) == "osoitetark" or
@@ -89,12 +90,17 @@
 		mysql_field_name($result, $i) == "ytunnus" or
 		mysql_field_name($result, $i) == "verkkotunnus" or
 		mysql_field_name($result, $i) == "ovttunnus" or
-		mysql_field_name($result, $i) == "sisviesti1" or
 		mysql_field_name($result, $i) == "toim_ovttunnus") {
 
 		$tyyppi = 1;
 	}
-	elseif (mysql_field_name($result, $i) == "maa" or
+
+	if (mysql_field_name($result, $i) == "sisviesti1") {
+		$ulos = "<td><textarea cols='45' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "maa" or
 		mysql_field_name($result, $i) == "toim_maa") {
 
 		$query = "	SELECT distinct koodi, nimi

@@ -11037,4 +11037,28 @@ if (!function_exists("palauta_vak_tiedot")) {
 	}
 }
 
+if (!function_exists("tarkista_email")) {
+	function tarkista_email($email) {
+
+		// meillä jos on useampi meiliosoite
+		if (strpos($email, ",") !== FALSE) {
+			$sahkopostit = explode(",", $email);
+		}
+		else {
+			$sahkopostit = array($email);
+		}
+
+		foreach ($sahkopostit as $email) {
+			// katotaan löytyykö email osoitteen domain...
+			list($nimi, $domain) = explode("@", trim($email));
+
+			if (!(checkdnsrr($domain,"MX") or checkdnsrr($domain, "A"))) {
+				return $domain;
+			}
+		}
+
+		return "";
+	}
+}
+
 ?>

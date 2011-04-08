@@ -210,16 +210,12 @@ if(!function_exists("toimitarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "email" and trim($t[$i]) != '') {
-			// katotaan löytyykö email osoitteen domain...
-			list($nimi, $domain) = explode("@", trim($t[$i]));
+			// Tarkistetaan sähköpostiosoite
+			$email_virhe = tarkista_email($t[$i]);
 
-	 		$domain = trim($domain);
-			if ($domain != "") {
-				exec("host -t MX $domain | grep \"not found\"", $output);
-			}
-
-			if (count($output) > 0 or $domain == "") {
-				$virhe[$i] = t("Sähköpostin domain ei löydy")."! ($domain)";
+			if ($email_virhe != "") {
+				$virhe[$i] = t("Sähköpostin domain ei löydy")."! ($email_virhe)";
+				$errori = 1;
 			}
 		}
 

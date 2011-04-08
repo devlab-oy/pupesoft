@@ -246,15 +246,11 @@ if(!function_exists("asiakastarkista")) {
 
 		if ((mysql_field_name($result, $i) == "email" or mysql_field_name($result, $i) == "lasku_email") and trim($t[$i]) != '') {
 
-			// katotaan löytyykö email osoitteen domain...
-			list($nimi, $domain) = explode("@", trim($t[$i]));
+			// Tarkistetaan sähköpostiosoite
+			$email_virhe = tarkista_email($t[$i]);
 
-			if ($domain != "") {
-				exec("host -t MX $domain | grep \"not found\"", $output);
-			}
-
-			if (count($output) > 0 or $domain == "") {
-				$virhe[$i] = t("Sähköpostin domain ei löydy")."! ($domain)";
+			if ($email_virhe != "") {
+				$virhe[$i] = t("Sähköpostin domain ei löydy")."! ($email_virhe)";
 				$errori = 1;
 			}
 

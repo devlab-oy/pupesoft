@@ -219,7 +219,7 @@
 				$rahtirow_pakkaus .= ", ".$rahtirow["pakkauskuvaustark"];
 			}
 
-			$lisa_comments .= "$rahtirow[kollit] x $rahtirow_pakkaus $rahtirow[kilot] kg. \n";
+			$lisa_comments .= "$rahtirow[kollit] x ".trim($rahtirow_pakkaus).", ".t("yhteensä", $kielirow["kieli"])." $rahtirow[kilot] kg. \n";
 		}
 	}
 

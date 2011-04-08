@@ -1,8 +1,8 @@
 <?php
 
-	$teccom_editulaus = "../dataout/teccom-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+	$teccom_editilaus = "../dataout/teccom-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 
-	if (!$toot = fopen($teccom_editulaus, "w")) die("Filen $teccom_editulaus luonti epaonnistui!");
+	if (!$toot = fopen($teccom_editilaus, "w")) die("Filen $teccom_editilaus luonti epaonnistui!");
 
 	$query = "  SELECT tilausrivi.tunnus,
 				tilausrivi.varattu,
@@ -52,15 +52,22 @@
 		$ftpuser = $toimirow['edi_kayttaja'];
 		$ftppass = $toimirow['edi_salasana'];
 		$ftppath = $toimirow['edi_polku'];
-		$ftpfile = realpath($teccom_editulaus);
+		$ftpfile = realpath($teccom_editilaus);
 
 		require ("inc/ftp-send.inc");
 
-		if ($palautus == 0) echo "<font class='message'>".t("Tilaus lähetettiin onnistuneesti")."!</font><br>";
+		if ($palautus == 0) {
+			echo "<font class='message'>".t("Tilaus lähetettiin onnistuneesti")."!</font><br>";
+			$sqlquery = "	UPDATE lasku SET 
+							kirjoitin = 'edi' 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND tunnus = '$laskurow[tunnus]'";
+			$result = mysql_query($sqlquery) or pupe_error($sqlquery);
+		}
 
 	}
 
-	$teccom_editulaus = "";
+	$teccom_editilaus = "";
 	$out = "";
 
 ?>

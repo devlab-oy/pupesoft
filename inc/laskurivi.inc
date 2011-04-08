@@ -89,6 +89,7 @@
 		mysql_field_name($result, $i) == "ytunnus" or
 		mysql_field_name($result, $i) == "verkkotunnus" or
 		mysql_field_name($result, $i) == "ovttunnus" or
+		mysql_field_name($result, $i) == "sisviesti1" or
 		mysql_field_name($result, $i) == "toim_ovttunnus") {
 
 		$tyyppi = 1;

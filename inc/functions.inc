@@ -341,9 +341,6 @@ if (!function_exists("kuuluukovarastoon")) {
 	}
 }
 
-
-
-
 if (!function_exists("onkotulostusalueita")) {
 	function onkotulostusalueita($hyllyalue, $hyllynro, $varasto, $yhtio = '') {
 		global $kukarow, $yhtiorow;
@@ -2601,10 +2598,13 @@ if (!function_exists("tuotteen_myyntihinta")) {
 			$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
 		}
 
+		if ($trow["myyntihinta_maara"] != 0) {
+			$hinta = round($hinta / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
+		}
+
 		return $hinta;
 
 	}
-
 }
 
 if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
@@ -6994,8 +6994,6 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 	}
 }
 
-
-
 if (!function_exists("livesearch_tilihaku")) {
 	function livesearch_tilihaku() {
 		global $yhtiorow, $kukarow, $palvelin2;
@@ -10539,7 +10537,6 @@ if (!function_exists("pupe_DataTables")) {
 		</script>";
 	}
 }
-
 
 if (!function_exists('hae_suuntalava')) {
 	function hae_suuntalava($otunnus, $tunnus) {

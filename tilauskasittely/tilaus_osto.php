@@ -1198,10 +1198,11 @@
 			echo "<br><br><table width='100%'><tr>";
 
 			if ($rivienmaara > 0 and $laskurow["liitostunnus"] != '' and $tilausok == 0) {
-				echo "	<td class='back' align='left'>
-						<form action = '$PHP_SELF' method='post'>
-							<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					echo "	<td class='back' align='left'>
+							<form action = '$PHP_SELF' method='post'>";
+					echo "	<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 							<input type='hidden' name='toim' value='$toim'>
+							<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>
 							<input type='hidden' name='tee' value='valmis'><input type='Submit' value='".t("Tilaus valmis")."'>
 						</form></td>";
 

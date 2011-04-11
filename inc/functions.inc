@@ -4760,7 +4760,7 @@ if (!function_exists('ebid')) {
 		$res = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_assoc($res);
 
-		if ($laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML") {
+		if ($laskurow['ebid'] != "" and $laskurow['ebid'] == "INVOIC.D.96A") {
 			$ebid = $laskurow['ebid'];
 
 			$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];

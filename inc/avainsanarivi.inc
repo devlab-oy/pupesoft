@@ -81,6 +81,8 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "PIIRI") 			$ulos .= "<option value='PIIRI' $avain_sel[PIIRI]>							".t("Asiakkaan piiri")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "ASAVAINSANA") 		$ulos .= "<option value='ASAVAINSANA' $avain_sel[ASAVAINSANA]>				".t("Asiakkaan avainsanojen laji")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "EXTASAVAINSANA") 	$ulos .= "<option value='EXTASAVAINSANA' $avain_sel[EXTASAVAINSANA]>		".t("Extranet-asiakkaan avainsanojen laji")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LAANI") 			$ulos .= "<option value='LAANI' $avain_sel[LAANI]>							".t("L‰‰ni")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KUNTA") 			$ulos .= "<option value='KUNTA' $avain_sel[KUNTA]>							".t("Kunta")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Yhtiˆn avainsanat")."'>";

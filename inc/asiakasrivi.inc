@@ -1038,5 +1038,35 @@
 
 		$jatko = 0;
 	}
+	
+
+	if (mysql_field_name($result, $i) == "laani" or 
+		mysql_field_name($result, $i) == "kunta") {
+	
+		$sresult = t_avainsana(mysql_field_name($result, $i));
+		$sarnimi = mysql_field_name($result, $i);
+
+		// jos avainsanoja on perustettu tehdään dropdown
+		if (mysql_num_rows($sresult) > 0) {
+			$ulos = "<td><select id='$sarnimi' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+			$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
+
+			while ($srow = mysql_fetch_array($sresult)) {
+				$sel = '';
+				if ($trow[$i] == $srow["selite"] and $srow["selite"] != "") {
+					$sel = "selected";
+				}
+
+				$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+			}
+
+			$ulos .= "</select>";
+			$ulos .= " <a href='#' onclick=\"js_open_yllapito('$sarnimi','toim=avainsana&lukitse_laji=$sarnimi');\"><img src='pics/lullacons/add.png'>".t("Uusi")." ".t(mysql_field_name($result, $i))."</a></td>";
+
+			$ulos .= "</td>";
+			$jatko = 0;
+		}
+	}
 
 ?>

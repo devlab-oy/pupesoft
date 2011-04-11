@@ -64,7 +64,9 @@
 							AND tunnus = '$laskurow[tunnus]'";
 			$result = mysql_query($sqlquery) or pupe_error($sqlquery);
 		}
-
+		else {
+			echo "<font class='error'>".t("Tilauksen lähetys epäonnistui")."!</font><br>";			
+		}
 	}
 
 	$teccom_editilaus = "";

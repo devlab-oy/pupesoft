@@ -75,9 +75,16 @@ else {
 	$ftppath = $toimirow['edi_polku'];
 	$ftpfile = realpath($nimi);
 
-	require ("../inc/ftp-send.inc");
+	require ("inc/ftp-send.inc");
 
-	if ($palautus == 0) echo "<font class='message'>Tilaus lähetettiin onnistuneesti!</font><br>";
+	if ($palautus == 0) {
+		echo "<font class='message'>Tilaus lähetettiin onnistuneesti!</font><br>";
+		$sqlquery = "	UPDATE lasku set kirjoitin='edi' where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
+		$result = mysql_query($sqlquery) or pupe_error($sqlquery);
+	}
+	else {
+		echo "<font class='error'>".t("Tilauksen lähetys epäonnistui")."!</font><br>";		
+	}
 
 }
 

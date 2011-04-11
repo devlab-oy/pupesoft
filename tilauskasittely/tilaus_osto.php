@@ -811,15 +811,22 @@
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
 			//Listataan tilauksessa olevat tuotteet
-			$query = "	SELECT tilausrivi.nimitys, concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
-						tilausrivi.tuoteno, toim_tuoteno, toim_nimitys, concat_ws('/',tilkpl,round(tilkpl*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu',
-						round((varattu+jt)*tilausrivi.hinta*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),'$yhtiorow[hintapyoristys]') rivihinta,
-						tilausrivi.alv, toimaika, kerayspvm, uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hinta, tilausrivi.ale, tilausrivi.varattu varattukpl, tilausrivi.kommentti,
+			$query = "	SELECT tilausrivi.nimitys,
+						concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+						tilausrivi.tuoteno,
+						tuotteen_toimittajat.toim_tuoteno,
+						tuotteen_toimittajat.toim_nimitys,
+						tuotteen_toimittajat.valuutta,
+						tilausrivi.tilkpl tilattu,
+						round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) tilattu_ulk,
+						round((tilausrivi.varattu+tilausrivi.jt)*tilausrivi.hinta*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+						tilausrivi.alv, tilausrivi.toimaika, tilausrivi.kerayspvm, tilausrivi.uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hinta, tilausrivi.ale, tilausrivi.varattu varattukpl, tilausrivi.kommentti,
 						$sorttauskentta,
 						tilausrivi.var,
 						tilausrivi.var2,
 						tilausrivi.jaksotettu,
 						tilausrivi.yksikko,
+						tuote.tuotemassa,
 						tuote.kehahin keskihinta,
 						tuotteen_toimittajat.ostohinta,
 						tuotteen_toimittajat.valuutta
@@ -827,8 +834,8 @@
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 						WHERE otunnus = '$kukarow[kesken]'
-						and tilausrivi.yhtio='$kukarow[yhtio]'
-						and tilausrivi.tyyppi='O'
+						and tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.tyyppi = 'O'
 						ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
 			$presult = mysql_query($query) or pupe_error($query);
 
@@ -836,19 +843,20 @@
 
 			echo "<table border='0' cellspacing='1' cellpadding='2'><tr>";
 			echo "<th>#</th>";
-
 			echo "<th align='left'>".t("Nimitys")."</th>";
 			echo "<th align='left'>".t("Paikka")."</th>";
 			echo "<th align='left'>".t("Tuote")."</th>";
 			echo "<th align='left'>".t("Toim Tuote")."</th>";
-			echo "<th align='left'>".t("M‰‰r‰")."</th>";
-			echo "<th align='left'>".t("Ostohinta")."</th>";
+			echo "<th align='left'>".t("M‰‰r‰")."<br>".t("M‰‰r‰/Ulk")."</th>";
+			echo "<th align='left'>".t("Hinta")."</th>";
 			echo "<th align='left'>".t("Ale")."</th>";
 			echo "<th align='left'>".t("Alv")."</th>";
 			echo "<th align='left'>".t("Rivihinta")."</th>";
+			echo "<th align='left'>".t("Valuutta")."</th>";
 			echo "</tr>";
 
 			$yhteensa 		= 0;
+			$paino_yhteensa = 0;
 			$nettoyhteensa 	= 0;
 			$eimitatoi 		= '';
 			$lask 			= mysql_num_rows($presult);
@@ -857,6 +865,8 @@
 			while ($prow = mysql_fetch_array ($presult)) {
 
 				$yhteensa += $prow["rivihinta"];
+				$paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);
+
 				$class = "";
 
 				if ($prow["uusiotunnus"] == 0 or $naytetaankolukitut != "EI") {
@@ -957,7 +967,6 @@
 						echo "<td valign='top' $class>{$prow["kommentti"]}</td>";
 					}
 
-
 					echo "<td valign='top' $class>$prow[paikka]</td>";
 
 					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$prow[tuoteno]'";
@@ -1009,15 +1018,13 @@
 					}
 
 					echo "</td>";
-
-
 					echo "<td valign='top' $class>$prow[toim_tuoteno]</td>";
-					echo "<td valign='top' $class align='right'>$prow[tilattu]</td>";
+					echo "<td valign='top' $class align='right'>".($prow["tilattu"]*1)."<br>".($prow["tilattu_ulk"]*1)."</td>";
 					echo "<td valign='top' $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
 					echo "<td valign='top' $class align='right'>".((float) $prow["ale"])."</td>";
 					echo "<td valign='top' $class align='right'>".((float) $prow["alv"])."</td>";
-					echo "<td valign='top' $classlisa align='right'>$prow[rivihinta]</td>";
-
+					echo "<td valign='top' $class align='right'>".hintapyoristys($prow["rivihinta"])."</td>";
+					echo "<td valign='top' $classlisa align='right'>$prow[valuutta]</td>";
 
 					if ($prow["uusiotunnus"] == 0) {
 
@@ -1152,7 +1159,9 @@
 						}
 					}
 
-					echo "<td colspan='8' $kommclass1>".t("Kommentti").": $prow[kommentti]</td></tr>";
+					echo "<td colspan='9' $kommclass1>";
+					if (trim($prow["kommentti"]) != "") echo t("Kommentti").": $prow[kommentti]";
+					echo "</td></tr>";
 				}
 			}
 
@@ -1177,12 +1186,19 @@
 					<input type='submit' value='".t("N‰yt‰")."' onClick=\"js_openFormInNewWindow('tulostaform_tosto', 'tulosta_osto'); return false;\">
 					<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tosto', 'samewindow'); return false;\">
 					</form>
-				</td>
-				<td class='back' colspan='2'></td>
+					</td>
+					<td class='back' colspan='2'></td>
+					<td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
+					<td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
+					<td class='spec'>$laskurow[valkoodi]</td>
+					</tr>";
 
-				<td colspan='3' class='spec'>Tilauksen arvo:</td>
-				<td align='right' class='spec'>".sprintf("%.2f",$yhteensa)."</td>
-				</tr>";
+			echo "	<tr>
+					<td class='back' colspan='6'></td>
+					<td colspan='3' class='spec'>".t("Tilauksen paino").":</td>
+					<td align='right' class='spec'>".sprintf("%.2f", $paino_yhteensa)."</td>
+					<td class='spec'>kg</td>
+					</tr>";
 
 			echo "</table>";
 

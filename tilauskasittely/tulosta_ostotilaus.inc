@@ -359,11 +359,17 @@
 					$pdf->draw_text(45, $kala, $row["tuoteno"],							$thispage, $norm);
 				}
 				else {
-					$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],					$thispage, $norm);
+
+					if ($row["toim_tuoteno"] != "") {
+						$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],				$thispage, $norm);
+					}
+					else {
+						$pdf->draw_text(45,  $kala, $row["tuoteno"],				$thispage, $norm);
+					}
 
 					if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"])) {
 						$oikpos = $pdf->strlen("(".$row["tuoteno"].")", $pieni);
-						$pdf->draw_text(290-$oikpos, $kala, "(".$row["tuoteno"].")",		$thispage, $pieni);
+						$pdf->draw_text(290-$oikpos, $kala, "(".$row["tuoteno"].")",	$thispage, $pieni);
 					}
 				}
 
@@ -380,7 +386,7 @@
 				$rarrow	 = mysql_fetch_array($rarres);
 
 				//	Jos toimittajalla on yksikkö ohitetaan tuotteen yksikkö
-				if ($rarrow["toim_yksikko"]!= "") {
+				if ($rarrow["toim_yksikko"] != "") {
 					$omyks = $rarrow["toim_yksikko"];
 				}
 				else {

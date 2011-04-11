@@ -479,4 +479,35 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "hintojenpaivityssykli") {
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='0'  $sel[0] >".t("Ei muistuteta tuotepäälliköitä hintapäivityksistä")."</option>";
+		$ulos .= "<option value='1'  $sel[1] >".t("Tuotepäälliköitä muistutetaan hintapäivityksistä kerran vuodessa")."</option>";
+		$ulos .= "<option value='2'  $sel[2] >".t("Tuotepäälliköitä muistutetaan hintapäivityksistä 2 kertaa vuodessa")."</option>";
+		$ulos .= "<option value='3'  $sel[3] >".t("Tuotepäälliköitä muistutetaan hintapäivityksistä 3 kertaa vuodessa")."</option>";
+		$ulos .= "<option value='4'  $sel[4] >".t("Tuotepäälliköitä muistutetaan hintapäivityksistä 4 kertaa vuodessa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "edi_kuvaus") {
+
+		$path_parts = pathinfo($trow[$i]);
+		$apu = $path_parts['filename'];
+		$sel[$apu] = "selected";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Ei käytössä<")."/option>";
+		$ulos .= "<option value='editilaus_out_elma.inc' $sel[editilaus_out_elma]>".t("Elma-editilaus")."</option>";
+		$ulos .= "<option value='editilaus_out_teccom.inc' $sel[editilaus_out_teccom]>".t("TecCom-editilaus")."</option>";
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
+	
 ?>

@@ -16,6 +16,11 @@ $taulut 		= '';
 $error 			= 0;
 $failista		= "";
 $uusi_on_jo		= "";
+$vanmyyntihinta	= "";
+$vankehahin    	= "";
+$vanvihahin    	= "";
+$vanvihapvm    	= "";
+$vanyksikko	   	= "";
 
 if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file") {
 	//Tuotenumerot tulevat tiedostosta
@@ -61,7 +66,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file
 			}
 			else {
 				$error++;
-				echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";
+				echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";				
 			}
 		}
 		else {
@@ -130,7 +135,7 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
 	}
 	else {
 		$error++;
-		echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";
+		echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";		
 	}
 
 	$failista 	= "EI";
@@ -141,7 +146,7 @@ if ($error == 0 and $tee == "file") {
 	echo "<font class='message'>".t("Syötetyt tiedot ovat ok")."</font><br><br>";
 	flush();
 
-	echo "<font class='message'>".t("Aloitellaan päivitys, tämä voi kestää hetken").".<br></font>";
+	echo "<font class='message'>".t("Aloitellaan päivitys, tämä voi kestää hetken").".	<br></font>";
 	flush();
 
 	$tulos = array();
@@ -198,15 +203,14 @@ if ($error == 0 and $tee == "file") {
 
 	if ($failista == "JOO") {
 		$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
-		$rivi = fgets($file, 4096);
-		$lask_kaks = 0;
 	}
 	else {
-		$rivi = "$vantuoteno	$uustuoteno";
-		$lask_kaks = 0;
+		$tmpfname = tempnam("/tmp", "Vaihdatuoteno");
+		file_put_contents($tmpfname, "$vantuoteno	$uustuoteno");
+		$file = fopen($tmpfname,"r") or die (t("Tiedoston avaus epäonnistui")."!");
 	}
 
-	while (!feof($file) and $lask_kaks == 0) {
+	while ($rivi = fgets($file)) {
 		// luetaan rivi tiedostosta..
 		$poista	  = array("'", "\\","\"");
 		$rivi	  = str_replace($poista,"",$rivi);
@@ -219,11 +223,27 @@ if ($error == 0 and $tee == "file") {
 
 			$vantuoteno = strtoupper(trim($rivi[0]));
 			$uustuoteno = strtoupper(trim($rivi[1]));
-
-			$query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
+			
+			$query  = "	SELECT tunnus, myyntihinta, kehahin, vihahin, vihapvm,yksikko,tuotepaallikko 
+						FROM tuote 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tuoteno = '$vantuoteno'";
 			$tuoteresult = mysql_query($query) or pupe_error($query);
-
+			
 			if (mysql_num_rows($tuoteresult) == 1) {
+
+				$trivi = mysql_fetch_assoc($tuoteresult);
+
+				$vanmyyntihinta 	= $trivi['myyntihinta'];
+				$vankehahin     	= $trivi['kehahin'];
+				$vanvihahin     	= $trivi['vihahin'];
+				$vanvihapvm     	= $trivi['vihapvm'];
+				$vanyksikko			= $trivi['yksikko'];
+				$vantuotepaallikko	= $trivi['tuotepaallikko'];
+
+				if ($vantuotepaallikko > 0 and $muistutus == "KYLLA") {
+					$postit[$vantuotepaallikko][] = $vantuoteno."###".$uustuoteno;
+				}
 
 				$query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
 				$tuoteuresult = mysql_query($query) or pupe_error($query);
@@ -381,11 +401,11 @@ if ($error == 0 and $tee == "file") {
 										SET
 										tuoteno 		= '$vantuoteno',
 										nimitys			= '-->--> $uustuoteno',
-										osasto			= '9',
-										try				= '999',
+										osasto			= '999999',
+										try				= '999999',
 										alv				= '$alv',
-										status			= 'P',
-										hinnastoon		= 'E',
+										status			= '$status',
+										hinnastoon		= '$hinnastoon',
 										yhtio			= '$kukarow[yhtio]'";
 							$result3 = mysql_query($query) or pupe_error($query);
 						}
@@ -431,21 +451,55 @@ if ($error == 0 and $tee == "file") {
 				echo t("VANHAA TUOTENUMEROA EI LÖYDY")." $vantuoteno<br>";
 			}
 		}
-
+		
 		$unlokki = "UNLOCK TABLES";
 		$res     = mysql_query($unlokki) or pupe_error($unlokki);
+	}
+	
+	if (count($postit) > 0 and $muistutus == "KYLLA") {
+		
+		$vva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
+		$kka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
+		$ppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 
-		if ($failista == "JOO") {
-			$rivi = fgets($file, 4096);
-		}
-		else {
-			$lask_kaks++;
+		foreach ($postit as $key => $values) {
+			$lista = "";
+
+			foreach ($values as $tuote => $value) {
+				$apu = explode("###", $value);
+				$lista .= "\n- Tuote (".$apu[0]. ") tuotenumero on vaihdettu/korvattu tuotteella (".$apu[1]."), tarkista asiakkaiden alennukset ja hinnat varmuudeksi";
+				$lista  .= "\n Linkki tuotteen asiakashintoihin: {$palvelin2}yllapito.php?toim=asiakashinta&indexvas=1&haku[6]=$apu[0] (".$apu[0].")"; 
+				$lista  .= "\n Linkki tuotteen myynninseurantaan: {$palvelin2}raportit/myyntiseuranta.php?ruksit[70]=checked&ruksit[80]=checked&nimitykset=checked&ppa=$ppa&kka=$kka&vva=$vva&tuotteet_lista=$apu[0]\n";
+			}
+
+			// Haetaan tuotepäälliköiden sähköpostiosoitteet esille.
+			$postisql  = "	SELECT kuka, nimi, eposti 
+							FROM kuka 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND myyja = '$key'";
+			$resuposti = mysql_query($postisql) or pupe_error($postisql);
+
+			while ($posti = mysql_fetch_assoc($resuposti)) {
+
+				$meili = t("Tuotteiden tuotenumerot on vaihtuneet")."\n";
+				$meili .= "\nTervehdys $posti[nimi] \n";
+				$meili .= "\nKäyttäjä $kukarow[nimi] on vaihtanut tuotteiden tuotenumeroita\n";
+				$meili .= t("Pyyntö").":\n".str_replace("\r\n","\n","Tarkista seuraavilta tuotteilta hinnat ja asiakasalennukset\n");
+				$meili .= $lista;
+
+				if ($posti['eposti'] == "") {
+					$email_osoite = $yhtiorow['alert_email'];
+				}
+				else {
+					$email_osoite = $posti['eposti'];
+				}
+
+				$tulos = mail($email_osoite, mb_encode_mimeheader(t("Tuotteiden tuotenumerot on vaihtuneet")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["postittaja_email"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+			}
 		}
 	}
 
-	if ($failista == "JOO") {
-		fclose($file);
-	}
+	fclose($file);
 
 	echo "<br><font class='message'>".t("Valmis, muutettiin")." $lask ".t("tuotetta")."!<br><br><br></font>";
 	$tee = "";
@@ -457,38 +511,86 @@ elseif ($tee == "file") {
 
 
 if ($tee == "") {
-	echo	"<font class='message'>".t("Tiedostomuoto").":</font><br>
-			<table>
-			<tr><th colspan='2'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
-			<tr><td>".t("VANHA tuotenumero")."</td><td>".t("UUSI tuotenumero")."</td></tr>";
 
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+
+			<table>
+	
+			<tr>
+				<td class='back' colspan='2'><br><font class='message'>".t("Sisäänlue tiedostosta")."</font><hr></td>
+			</tr>
+	
+			<tr>
+				<th colspan='2'>".t("Tabulaattorilla eroteltu tekstitiedosto").". ".t("Tiedoston sarakkeet").":</th>
+			</tr>
+			
+			<tr>
+				<td>".t("VANHA tuotenumero")."</td>
+				<td>".t("UUSI tuotenumero")."</td>
+			</tr>
+
 			<tr>
 				<th>".t("Valitse tiedosto").":</th>
 				<td><input name='userfile' type='file'></td>
 			</tr>
+
 			<tr>
-				<td class='back'><br></td>
-			</tr>
-				<th colspan='2'>".t("Tai syöta tuotenumerot").":</th>
+				<td class='back' colspan='2'><br><font class='message'>".t("Tai syöta tuotenumerot")."</font><hr></td>
 			</tr>
 
 			<tr>
 				<th>".t("Vanha tuotenumero").":</th>
 				<td><input type='text' name='vantuoteno' size='25'></td>
 			</tr>
+			
 			<tr>
 				<th>".t("Uusi tuotenumero").":</th>
 				<td><input type='text' name='uustuoteno' size='25'></td>
 			</tr>
+
 			<tr>
-				<td class='back'><br></td>
+				<td class='back' colspan='2'><br><font class='message'>".t("Lisävalinnat")."</font><hr></td>
 			</tr>
+
 			<tr>
-				<th>".t("Jätetäänkö vanha ja lisätään korvaavuus")."?</th>
+				<th>".t("Jätä vanha tuotenumero uuden tuotteen korvaavaksi tuotteeksi")."</th>
 				<td><input type='checkbox' name='jatavanha' value='jatavanha'</td>
 			</tr>
-			</table>
+
+			<tr>
+				<th>".t("Valitse vanhan tuotteen status")."</th>
+				<td><select name='status'>";
+
+	$vresult = t_avainsana("S");
+	while ($vrow = mysql_fetch_array($vresult)) {
+		$sel="";
+		if ($vrow["selite"] == 'P') {
+			$sel="SELECTED";
+			echo "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
+		}
+		if ($vrow["selite"] == 'A') {
+			echo "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
+		}
+
+	}
+	echo "</select></td>";
+	echo "</tr>";
+	
+	echo "	<tr><th>".t("Valitse vanhan tuotteen näkyvyys")."</th>";
+	echo "<td><select name='hinnastoon' ".js_alasvetoMaxWidth("hinnastoon", 200).">";
+	echo "	<option value='E'>".t("Tuotetta ei näytetä hinnastossa, eikä verkkokaupassa")."</option>
+   			<option value=''>".t("Tuote näytetään hinnastossa, mutta ei verkkokaupassa")."</option>
+   			<option value='W'>".t("Tuote näkyy hinnastossa ja verkkokaupassa")."</option>
+   			<option value='V'>".t("Tuote näkyy hinnastossa sekä verkkokaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>";
+
+	echo "	</select></td></tr>";
+	
+	echo "	<tr>
+			<th>".t("Lähetä sähköposti tuotepäällikköille muutoksista")."</th>";
+	echo "	<td><input type='checkbox' name='muistutus' value='KYLLA'></td>";
+	echo "	</tr>";
+	
+	echo "  </table>
 			<br>
 			<input type='hidden' name='tee' value='file'>
 			<input type='submit' value='".t("Siirrä tuotteen historia")."'>

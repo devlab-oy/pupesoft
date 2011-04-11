@@ -122,6 +122,7 @@
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
 		#$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");
+		$ulos .= "<option value = '8' $sel[8]>".t("Ruotsin laskupohja")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -799,13 +800,13 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "hintapyoristys_loppunollat") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel1="";
-		
+
 		if ($trow[$i] != "") {
 			$sel1 = "selected";
 		}

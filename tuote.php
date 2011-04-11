@@ -586,7 +586,7 @@
 			echo "<td colspan='5'>".wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>")."</td>";
 			echo "</tr>";
 
-			echo "</table><br>";
+			echo "</table>";
 
 			// Onko liitetiedostoja
 			$liitteet = liite_popup("TN", $tuoterow["tunnus"]);
@@ -641,10 +641,10 @@
 						echo "</form>";
 					}
 				}
-				echo "<br><br>";
+				echo "<br>";
 			}
 			elseif ($liitteet != "") {
-				echo "<br><br>";
+				echo "<br>";
 			}
 
 			//korvaavat tuotteet
@@ -677,6 +677,30 @@
 					echo "</tr>";
 				}
 
+				echo "</table><br>";
+			}
+
+			//Tuotemuutoksia halutaan näyttää, mikäli niitä on.
+			$lista = hae_tuotemuutokset($tuoteno);
+
+			if (count($lista) > 0) {
+				// tuotemuutoksia.
+				echo "<font class='message'>".t("Tuotenumeromuutoksia")."</font><hr>";
+
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>".t("Vanha tuotenumero")."</th>";
+				echo "<th>".t("Muutospvm")."</th>";
+				echo "<th>".t("Muuttaja")."</th>";
+				echo "</tr>";
+
+				foreach ($lista as $muuttunut_tuote) {
+					echo "<tr>";
+					echo "<td>{$muuttunut_tuote["tuoteno"]}</td>";
+					echo "<td>".tv1dateconv($muuttunut_tuote['muutospvm'], 'X')."</td>";
+					echo "<td>{$muuttunut_tuote["kuka"]}</td>";
+					echo "</tr>";
+				}
 				echo "</table><br>";
 			}
 

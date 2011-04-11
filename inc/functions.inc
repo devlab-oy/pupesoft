@@ -11061,4 +11061,58 @@ if (!function_exists("tarkista_email")) {
 	}
 }
 
+if (!function_exists("hae_tuotemuutokset")) {
+	function hae_tuotemuutokset($tuoteno, $pvm = '') {
+
+		global $kukarow;
+
+		$lask = 0;
+		$lista = array();
+		$muutos = "";
+		$validaattori = TRUE;
+
+		while ($validaattori === TRUE) {
+
+			$lisa = "";
+
+			if ($muutos != "") {
+				$lisa = " AND tuote_muutokset.muutospvm < '$muutos' ORDER BY tuote_muutokset.muutospvm DESC";
+			}
+
+			if ($pvm != "") {
+				$lisa .= " AND tuote_muutokset.muutospvm > '$pvm'";
+			}
+
+			$query = "	SELECT tuote_muutokset.alkup_tuoteno, tuote_muutokset.muutospvm, ifnull(kuka.nimi, tuote_muutokset.kuka) kuka
+						FROM tuote_muutokset
+						LEFT JOIN kuka on (kuka.yhtio = tuote_muutokset.yhtio AND kuka.kuka = tuote_muutokset.kuka)
+						WHERE tuote_muutokset.yhtio = '$kukarow[yhtio]'
+						AND tuote_muutokset.tuoteno = '$tuoteno'
+						$lisa
+						LIMIT 1";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) > 0) {
+				$row = mysql_fetch_assoc($result);
+				$muutos = $row['muutospvm'];
+				$tuoteno = $row['alkup_tuoteno'];
+				$lista[$lask]['tuoteno'] = $tuoteno;
+				$lista[$lask]['muutospvm'] = $muutos;
+				$lista[$lask]['kuka'] = $row["kuka"];
+			}
+			else {
+				$validaattori = FALSE;
+			}
+
+			$lask++;
+
+			// laitetaan maksimiarvo jonka jälkeen se hyppää pois ettei jää ikuiseen looppiin
+			if ($lask == 60) break;
+		}
+
+		return $lista;
+	}
+
+}
+
 ?>

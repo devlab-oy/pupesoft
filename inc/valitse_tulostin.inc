@@ -63,10 +63,17 @@
 	echo "<table>";
 
 	$mista = 'asiakas';
-
+	$valittu = "";
+	
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 		echo "<tr><td>".t("Tulosta nimitykset ostotilaukselle")."</td><td><input type='checkbox' name='nimitykset'></td></tr>";
 		$mista = 'toimi';
+		$editsql = "	SELECT * 
+						FROM toimi 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tunnus = '$toimittajaid'";
+		$edires = mysql_query($editsql) or pupe_error($editsql);
+		$editoimrow = mysql_fetch_assoc($edires);
 	}
 
 	if ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus != '') {
@@ -260,17 +267,29 @@
 		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS') and $asrow['email'] != '') {
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
 		}
+		
+		if (isset($editoimrow) and $editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != '' and $editoimrow["edi_kuvaus"] != '') {
+			$rajaus = "";
+			$valittu = "edi";
+		}
+		else {
+			$rajaus = " and komento != 'edi' ";
+		}
 
 		$querykieli = "	SELECT *
 						from kirjoittimet
 						where yhtio='$kukarow[yhtio]'
+						$rajaus
 						ORDER BY kirjoitin";
 		$kires = mysql_query($querykieli) or pupe_error($querykieli);
 
 		while ($kirow=mysql_fetch_array($kires)) {
 
 			$sel = "";
-			if ($kirow["tunnus"] == $kukarow["kirjoitin"]) {
+			if ($kirow["tunnus"] == $kukarow["kirjoitin"] and $valittu != "edi") {
+				$sel = "SELECTED";
+			}
+			if ($kirow["komento"] == "edi" and $valittu == "edi") {
 				$sel = "SELECTED";
 			}
 
@@ -340,6 +359,10 @@
 				echo "<tr><td><input type='radio' name='mitkarivit' value='koodittomat'> ".t("Viivakoodittomat rivit")."</td></tr>";
 			}
 		}
+	}
+	
+	if ($laskurow['kirjoitin'] == "edi") {
+		echo "<tr><td colspan='2' class='back'><font class='error'>".t("Huom! EDI-tiedosto on jo kerran lähetetty toimittajalle")."!</font></td><tr>";
 	}
 
 	echo "</table><br><input type='submit' name='tulosta' value='".t("Tulosta")."'></form>";

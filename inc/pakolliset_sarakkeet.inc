@@ -277,10 +277,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("MERKKI", "VARIKOODI", "VARINIMI","VARINUMERO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("ALKUVUOSI","LOPPUVUOSI","METALLIC","VARIAATIO");
+				$saakopoistaa = TRUE;
 				break;
 			case "auto_vari_tuote" :
 				$pakolliset = array("VARIKOODI", "TUOTENO", "NIMITYS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
 				break;
 			case "vak" :
 				$pakolliset = array("YK_NRO");

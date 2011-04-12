@@ -1874,6 +1874,7 @@
 		$ulos .= "<option value = '80' $sel[80]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "80%")."</option>";
 		$ulos .= "<option value = '90' $sel[90]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "90%")."</option>";
 		$ulos .= "<option value = '100' $sel[100]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "100%")."</option>";
+		$ulos .= "<option value = 'MIN' $sel[MIN]>".sprintf(t('Korvaava tuote myyd‰‰n aina halvemman tuotteen hinnalla, mik‰li tuote on loppu'))."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -3,30 +3,6 @@
 require_once ('Zend/Pdf.php');
 require_once ('Zend/Barcode.php');
 
-/**
-* Returns the total width in points of the string using the specified font and
-* size.
-*
-* @param string $string
-* @param Zend_Pdf_Resource_Font $font
-* @param float $fontSize Font size in points
-* @return float
-*/
-function widthForStringUsingFontSize($string, $font, $fontSize) {
-	$drawingString = iconv('UTF-8', 'UTF-16BE//IGNORE', $string);
-	$characters = array();
-
-	for ($i = 0; $i < strlen($drawingString); $i++) {
-		$characters[] = (ord($drawingString[$i++]) << 8) | ord($drawingString[$i]);
-	}
-
-	$glyphs = $font->cmap->glyphNumbersForCharacters($characters);
-	$widths = $font->widthsForGlyphs($glyphs);
-	$stringWidth = (array_sum($widths) / $font->getUnitsPerEm()) * $fontSize;
-
-	return $stringWidth;
-}
-
 if (!function_exists('alku_dgd')) {
 	function alku_dgd ($params) {
 		global $kukarow, $yhtiorow;
@@ -159,6 +135,8 @@ if (!function_exists('rivi_dgd')) {
 			$kala-=5;
 		}
 
+		$kala-=2;
+
 		foreach ($vaktuotetiedot as $vaktuoterivi) {
 
 			if ($kala < 120) {
@@ -188,7 +166,7 @@ if (!function_exists('rivi_dgd')) {
 			$eramaara = $row["kpl"]/$row["era"];
 
 			$pdf->pages[$sivu]->drawText($vaktuoterivi, mm_pt(45), mm_pt($kala), 'LATIN1');
-			$kala-=5;
+			$kala-=4;
 		}
 
 		// Luodaan palautettavat

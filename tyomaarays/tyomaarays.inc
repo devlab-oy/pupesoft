@@ -9,7 +9,7 @@
 			require_once ("tyomaarays/tulosta_tyomaarays.inc");
 		}
 		else {
-			$tulostimet[0] = "Purkulista";
+			$tulostimet[0] = "Reklamaatio";
 			require_once ("tilauskasittely/tulosta_lahete_kerayslista.inc");
 		}
 
@@ -22,7 +22,7 @@
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
 			else {
-				$komento["Keräyslista"] .= " -# $kappaleet ";
+				$komento["Reklamaatio"] .= " -# $kappaleet ";
 			}
 		}
 
@@ -221,7 +221,7 @@
 	if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
 		$query  = "	UPDATE lasku
 					SET tila = 'L'
-					WHERE tunnus='$laskurow[tunnus]'
+					WHERE tunnus = '$laskurow[tunnus]'
 					and tila = 'C'
 					and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);

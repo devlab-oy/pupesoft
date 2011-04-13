@@ -695,19 +695,15 @@
 					echo "<input type='submit' value='",t("Tulosta purkulista"),"' />";
 					echo "</form>";
 
-					list(,,,,,,,,$sarjanrook,,,,,$varok) = tsekit($laskurow,0);
-
-					if ($sarjanrook == 1 and $varok == 1) {
-						echo "<br /><form action='' method='post'>";
-						echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
-						echo "<input type='hidden' name='toiminto' value='kalkyyli'>";
-						echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
-						echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
-						echo "<input type='hidden' name='tee' value='' />";
-						echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
-						echo "<input type='submit' value='",t("Vie varastoon"),"' />";
-						echo "</form>";
-					}
+					echo "<br /><form action='' method='post'>";
+					echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";
+					echo "<input type='hidden' name='toiminto' value='kalkyyli'>";
+					echo "<input type='hidden' name='otunnus' value='{$otunnus}'>";
+					echo "<input type='hidden' name='ytunnus' value='{$laskurow['ytunnus']}'>";
+					echo "<input type='hidden' name='tee' value='' />";
+					echo "<input type='hidden' name='suuntalavan_tunnus' value='{$suuntalavat_row['tunnus']}' />";
+					echo "<input type='submit' value='",t("Vie varastoon"),"' />";
+					echo "</form>";
 
 					echo "<br /><form action='' method='post'>";
 					echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>";

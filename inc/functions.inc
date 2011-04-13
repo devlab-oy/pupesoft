@@ -10972,7 +10972,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 
 					$vakecho = "";
 					if (trim($edrow["lipukkeet"]) != "") $vakecho .= t("Luokka", $kieli)." $edrow[lipukkeet]";
-					if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkaus", $kieli)." $edrow[pakkausryhma]";
+					if (trim($edrow["pakkausryhma"]) != "") $vakecho .= ", ".t("Pakkausryhmä", $kieli)." $edrow[pakkausryhma]";
 
 					// Limited Quantity jos kaikki pakkaukset ovat riittävän pieniä
 					if ($edrow["limited_qty"] != "" and isset($limited_qty[$edrow["limited_qty"]]) and $max_ltq_til > 0 and $max_ltq_til <= $limited_qty[$edrow["limited_qty"]]) {
@@ -11096,7 +11096,7 @@ if (!function_exists('tulosta_sscc')) {
 			$max_perhe_res = mysql_query($query) or pupe_error($query);
 			$max_perhe_row = mysql_fetch_assoc($max_perhe_res);
 
-			$query = "	INSERT INTO avainsana SET 
+			$query = "	INSERT INTO avainsana SET
 						yhtio = '{$kukarow['yhtio']}',
 						perhe = '{$max_perhe_row['perhe']}',
 						kieli = '{$kukarow['kieli']}',
@@ -11470,14 +11470,14 @@ if (!function_exists("fitting")) {
 				// 	if ($debug) {
 				// 		echo "Tosin pakkaus ylittää keräyserän maksimipinta-alan. Ei käytetä sitä. Keräyserä on nyt valmis!<br>";
 				// 	}
-				// 
+				//
 				// 	$era_valmis = true;
-				// 
+				//
 				// 	return array(3, $all_in_one, $era_valmis, $asiakkaan_pakkaukset, $kaytettavat_pakkaukset, $eran_koko, $erat, $juokseva_pakkausnro, $ed_juokseva, $sopiva_pakkaus, $pakkaukset);
 				// }
 
 				$sopiva_pakkaus = array();
-				
+
 				$sopiva_pakkaus[$key] = $taulukko;
 
 				for ($x = 0; $x < $vapaa_chk_x; $x += $resoluutio) {

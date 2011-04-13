@@ -11034,6 +11034,614 @@ if (!function_exists("palauta_vak_tiedot")) {
 	}
 }
 
+if (!function_exists('tulosta_sscc')) {
+	function tulosta_sscc($komento) {
+		global $kukarow, $yhtiorow;
+
+		$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+		$result = mysql_query($query) or pupe_error($query);
+		$row = mysql_fetch_assoc($result);
+
+		$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
+
+		$nimi = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
+
+		$viivakoodi  = ">6";
+		$viivakoodi .= substr($sscc,0,1);
+		$viivakoodi .= ">5";
+		$viivakoodi .= substr($sscc,1);
+
+		$sivu = "*** ETIKETIN KOKO ***
+                 {D1530,1040,1470|}
+                 {AX;+000,+000,+00|}
+                 {AY;+05,0|}
+                 {C|}
+
+				 *** YHTIÖN NIMI ***
+				 {PC001;0100,0100,1,1,J,00,B|}
+	             {RC001;$nimi|}
+
+				 {LC;0050,0130,1000,0130,0,2|}
+
+				 {PC002;0100,0180,05,05,J,00,B|}
+	             {RC002;SSCC|}
+
+				 {PC003;0100,0260,1,1,J,00,B|}
+	             {RC003;$sscc|}
+
+				 {LC;0050,0310,1000,0310,0,2|}
+
+                 {XB00;0100,0350,A,3,04,0,0350,+0000000000,000,0,00|}
+                 {RB00;$viivakoodi|}
+
+				 *** TULOSTUS  ***
+             	 {XS;I,0001,0002C3210|}
+             	 ".chr(12);
+
+		$sivu = escapeshellarg($sivu);
+
+		if ($komento == "email") {
+			echo t("SSCC-tarraa ei voida tulostaa sähköpostiin"),"<br>";
+		}
+		else {
+			$line = exec(" echo \"$sivu\" | $komento");
+		}
+
+		if (trim($row['selite']) == '') {
+
+			// haetaan aluksi max perhe
+			$query = "	SELECT max(perhe)+1 perhe
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'";
+			$max_perhe_res = mysql_query($query) or pupe_error($query);
+			$max_perhe_row = mysql_fetch_assoc($max_perhe_res);
+
+			$query = "	INSERT INTO avainsana SET 
+						yhtio = '{$kukarow['yhtio']}',
+						perhe = '{$max_perhe_row['perhe']}',
+						kieli = '{$kukarow['kieli']}',
+						laji = 'SSCC',
+						nakyvyys = '',
+						selite = '{$sscc}',
+						selitetark = '',
+						selitetark_2 = '',
+						selitetark_3 = '',
+						jarjestys = 0,
+						laatija = '{$kukarow['kuka']}',
+						luontiaika = now(),
+						muutospvm = now(),
+						muuttaja = '{$kukarow['kuka']}'";
+			$insert_res = mysql_query($query) or pupe_error($query);
+		}
+		else {
+			$query = "UPDATE avainsana SET selite = '{$sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
+			$update_res = mysql_query($query) or pupe_error($query);
+		}
+
+		return $sscc;
+	}
+}
+
+if (!function_exists("fetchFreeSlot")) {
+	function fetchFreeSlot($params) {
+
+		// Luodaan muuttujat
+		foreach ($params as $key => $val) {
+			${$key} = $val;
+		}
+
+		$kokeillaan_x = false;
+		$kokeillaan_y = true;
+		$kokeillaan_z = false;
+
+		$tmp_haystack = $haystack;
+
+		// otetaan pakkauksen maksimimitat talteen
+		$pakkauksen_max_x = $pakkauksen_max_y = $pakkauksen_max_z = 0;
+
+		foreach ($tmp_haystack as $key => $val) {
+			if (end($tmp_haystack)) $pakkauksen_max_x = $key;
+		}
+
+		foreach ($tmp_haystack as $zarr) {
+			foreach ($zarr as $key => $val) {
+				if (end($zarr)) {
+					$pakkauksen_max_y = key($zarr);
+					break 2;
+				}
+			}
+		}
+
+		foreach ($tmp_haystack as $farr) {
+			foreach ($farr as $garr) {
+				foreach ($garr as $key => $val) {
+					if (end($garr)) {
+						$pakkauksen_max_z = key($garr);
+						break 3;
+					}
+				}
+			}
+		}
+
+		## LOGIIIKKA:
+		###############################
+		## 1. katsotaan löytyykö sopiva paikka y-akselilta [0][y][0]
+		## 2. katsotaan löytyykö sopiva paikka z-akselilta [0][0][z]
+		## 3. katsotaan löytyykö sopiva paikka y- ja z-akseleilta [0][y][z]
+		## 3.1 ---> Katsotaan ensiksi löytyykö z-akselilta paikkaa
+		## 3.2 ---> Jos löytyy, käytetään sitä z-akselilla ja etsitään sille sopiva paikka y-akselilta
+		## 4. Katsotaan löytyisikö muualta x-akselilta paikkaa [x][0][0] tai [x][0][z]
+		## 5. Etsitään paikkaa muualta kuin 0-pisteistä ja kaikilta akseleilta [x][y][z]
+
+		list($xx, $yy, $zz) = array_values($index);
+
+		// katsotaan löytyykö sopiva paikka y-akselilta [0][y][0]
+		if ($kokeillaan_y) {
+			for ($y = 0; $y <= $pakkauksen_max_y; $y=$y+$resoluutio) {
+				if (isset($haystack[0][$y][0]) and $haystack[0][$y][0] === $needle and isset($haystack[$xx][$y+$yy][$zz]) and $haystack[$xx][$y+$yy][$zz] === $needle) {
+
+					$return_params = array(
+						'vapaa_x' 		=> 0,
+						'vapaa_y' 		=> $y,
+						'vapaa_z' 		=> 0,
+						'vapaa_chk_x'	=> $xx,
+						'vapaa_chk_y'	=> $y+$yy,
+						'vapaa_chk_z'	=> $zz
+					);
+
+					// echo "Löytyi sopiva paikka y-akselilta. (needle: $needle)<br>";
+					// echo "<pre>",var_dump($return_params),"</pre>";
+
+					return $return_params;
+				}
+			}
+
+			$kokeillaan_z = true;
+		}
+
+		// katsotaan löytyykö sopiva paikka z-akselilta [0][0][z]
+		if ($kokeillaan_z) {
+			for ($z = 0; $z <= $pakkauksen_max_z; $z=$z+$resoluutio) {
+				if (isset($haystack[0][0][$z]) and $haystack[0][0][$z] === $needle and isset($haystack[$xx][$yy][$z+$zz-$resoluutio]) and $haystack[$xx][$yy][$z+$zz-$resoluutio] === $needle) {
+
+					$return_params = array(
+						'vapaa_x' 		=> 0,
+						'vapaa_y' 		=> 0,
+						'vapaa_z' 		=> $z,
+						'vapaa_chk_x'	=> $xx,
+						'vapaa_chk_y'	=> $yy,
+						'vapaa_chk_z'	=> $z+$zz-$resoluutio
+					);
+
+					// echo "Löytyi sopiva paikka z-akselilta (needle: $needle).<br>";
+					// echo "<pre>",var_dump($return_params),"</pre>";
+
+					return $return_params;
+				}
+			}
+		}
+
+		// katsotaan löytyykö sopiva paikka y- ja z-akseleilta [0][y][z]
+		if ($kokeillaan_z and $kokeillaan_y) {
+
+			$break = false;
+
+			// Katsotaan ensiksi löytyykö z-akselilta paikkaa
+			for ($z = $zz + $resoluutio; $z <= $pakkauksen_max_z; $z = $z + $resoluutio) {
+
+				if (isset($haystack[0][$yy+$resoluutio][$z]) and $haystack[0][$yy+$resoluutio][$z] === $needle and isset($haystack[0][$yy+$resoluutio][$z+$zz-$resoluutio]) and $haystack[0][$yy+$resoluutio][$z+$zz-$resoluutio] === $needle) {
+					// echo "Löytyi Z-akselilta paikka! [0][".($yy+$resoluutio)."][$z] - [0][".($yy+$resoluutio)."][".($z+$zz-$resoluutio)."]<br>";
+					$break = true;
+					break;
+				}
+			}
+
+			// echo "y = $yy + $resoluutio; y <= $pakkauksen_max_y; y = y + $resoluutio<br>";
+
+			for ($y = $yy + $resoluutio, $kpl = 1; $y <= $pakkauksen_max_y; $y = $y + $resoluutio, $kpl++) {
+
+				if (!$break) {
+
+					// echo "[0][".($y+$yy+$resoluutio)."][".($z-$zz)."] - [0][".(($yy*$kpl)+$y+$resoluutio)."][".($z-$resoluutio)."]   OAAAA: ".((($yy*$kpl)+$y)-($y+$yy))." == $yy<br>";
+
+					if (isset($haystack[0][$y+$yy+$resoluutio][$z-$zz]) and $haystack[0][$y+$yy+$resoluutio][$z-$zz] === $needle and isset($haystack[0][($yy*$kpl)+$y+$resoluutio][$z-$resoluutio]) and $haystack[0][($yy*$kpl)+$y+$resoluutio][$z-$resoluutio] === $needle and (($yy*$kpl)+$y)-($y+$yy) == $yy) {
+
+						$return_params = array(
+							'vapaa_x' 		=> 0,
+							'vapaa_y' 		=> $yy+$y+$resoluutio,
+							'vapaa_z' 		=> $z-$zz,
+							'vapaa_chk_x'	=> $xx,
+							'vapaa_chk_y'	=> ($yy*$kpl)+$y+$resoluutio,
+							'vapaa_chk_z'	=> $z-$resoluutio
+						);
+
+						// echo "Löytyi sopiva paikka y-akselilta ja z-akselilta (needle: $needle)<br>";
+						// echo "<pre>",var_dump($return_params),"</pre>";
+
+						return $return_params;
+					}
+				}
+				else {
+					// Jos löytyy, käytetään sitä z-akselilla ja etsitään sille sopiva paikka y-akselilta
+					if (isset($haystack[0][$yy+$resoluutio][$z]) and $haystack[0][$yy+$resoluutio][$z] === $needle and isset($haystack[0][$y+$yy][$z+$zz-$resoluutio]) and $haystack[0][$y+$yy][$z+$zz-$resoluutio] === $needle) {
+
+						$return_params = array(
+							'vapaa_x' 		=> 0,
+							'vapaa_y' 		=> $yy+$resoluutio,
+							'vapaa_z' 		=> $z,
+							'vapaa_chk_x'	=> $xx,
+							'vapaa_chk_y'	=> $yy+$y,
+							'vapaa_chk_z'	=> $z+$zz-$resoluutio
+						);
+
+						// echo "Löytyi sopiva paikka y-akselilta ja z-akselilta. Löytyi sopiva paikka ensiksi z-akselilta ja käytettiin sitä tässä. (needle: $needle)<br>";
+						// echo "<pre>",var_dump($return_params),"</pre>";
+
+						return $return_params;
+					}
+				}
+			}
+
+			$kokeillaan_x = true;
+		}
+
+		// Katsotaan löytyisikö muualta x-akselilta paikkaa [x][0][0] tai [x][0][z]
+		if ($kokeillaan_x) {
+			for ($x = $xx + $resoluutio; $x <= $pakkauksen_max_x; $x = $x + $resoluutio) {
+
+				for ($z = $zz + $resoluutio; $z < $pakkauksen_max_z; $z = $z + $resoluutio) {
+					if (isset($haystack[$x][0][0]) and $haystack[$x][0][0] === $needle and isset($haystack[$x+$xx-$resoluutio][$yy][$zz]) and $haystack[$x+$xx-$resoluutio][$yy][$zz] === $needle) {
+
+						$return_params = array(
+							'vapaa_x' 		=> $x,
+							'vapaa_y' 		=> 0,
+							'vapaa_z' 		=> 0,
+							'vapaa_chk_x'	=> $x+$xx-$resoluutio,
+							'vapaa_chk_y'	=> $yy,
+							'vapaa_chk_z'	=> $zz
+						);
+
+						// echo "Löytyi sopiva paikka x-akselilta. (needle: $needle)<br>";
+						// echo "<pre>",var_dump($return_params),"</pre>";
+
+						return $return_params;
+					}
+
+					// echo "[$x][0][$z] - [".($x+$xx-$resoluutio)."][".($yy)."][".($z+$zz-$resoluutio)."]<br>";
+
+					// !!!!! and lisätty
+					if (isset($haystack[$x][0][$z]) and $haystack[$x][0][$z] === $needle and isset($haystack[$x+$xx-$resoluutio][$yy][$z+$zz-$resoluutio]) and $haystack[$x+$xx-$resoluutio][$yy][$z+$zz-$resoluutio] === $needle
+						and isset($haystack[$x][0][$z+$zz-$resoluutio]) and $haystack[$x][0][$z+$zz-$resoluutio] === $needle) {
+
+						$return_params = array(
+							'vapaa_x' 		=> $x,
+							'vapaa_y' 		=> 0,
+							'vapaa_z' 		=> $z,
+							'vapaa_chk_x'	=> $x+$xx-$resoluutio,
+							'vapaa_chk_y'	=> $yy,
+							'vapaa_chk_z'	=> $z+$zz-$resoluutio
+						);
+
+						// echo "Löytyi sopiva paikka x-akselilta ja z-akselilta (needle: $needle)<br>";
+						// echo "<pre>",var_dump($return_params),"</pre>";
+
+						return $return_params;
+					}
+				}
+			}
+		}
+
+		// Etsitään paikkaa muualta kuin 0-pisteistä ja kaikilta akseleilta [x][y][z]
+		if ($kokeillaan_x and $kokeillaan_y and $kokeillaan_z) {
+			$break = false;
+
+			for ($x = $xx + $resoluutio, $y = $yy + $resoluutio; $x < $pakkauksen_max_x, $y < $pakkauksen_max_y; $x = $x + $resoluutio, $y = $y + $resoluutio) {
+				if (isset($haystack[$x][$y][0]) and $haystack[$x][$y][0] === $needle and isset($haystack[$x+$xx-$resoluutio][$y+$yy][$zz]) and $haystack[$x+$xx-$resoluutio][$y+$yy][$zz] === $needle) {
+					$break = true;
+					break;
+				}
+			}
+
+			if ($break) {
+
+				$return_params = array(
+					'vapaa_x' 		=> $x,
+					'vapaa_y' 		=> $y,
+					'vapaa_z' 		=> 0,
+					'vapaa_chk_x'	=> $x+$xx-$resoluutio,
+					'vapaa_chk_y'	=> $y+$yy,
+					'vapaa_chk_z'	=> $zz
+				);
+
+				// echo "Löytyi sopiva paikka x-akselilta, y-akselilta ja z-akselilta (needle: $needle)<br>";
+				// echo "<pre>",var_dump($return_params),"</pre>";
+
+				return $return_params;
+			}
+			else {
+
+				for ($x = $xx + $resoluutio, $kpl = 1; $x <= $pakkauksen_max_x; $x = $x + $resoluutio, $kpl++) {
+					for ($y = $yy + $resoluutio; $y <= $pakkauksen_max_y; $y = $y + $resoluutio) {
+						for ($z = 0; $z <= $pakkauksen_max_z; $z = $z + $resoluutio) {
+
+							// echo "[$x][$y][$z] - [".($x+$xx-$resoluutio)."][".($y+$yy)."][".($z+$zz)."]<br>";
+
+							// !!!!! and lisätty
+							if (isset($haystack[$x][$y][$z]) and $haystack[$x][$y][$z] !== false and $haystack[$x][$y][$z] === $needle and isset($haystack[$x+$xx-$resoluutio][$y+$yy][$z+$zz]) and $haystack[$x+$xx-$resoluutio][$y+$yy][$z+$zz] === $needle
+							and isset($haystack[$x][$y+$yy][$z+$zz]) and $haystack[$x][$y+$yy][$z+$zz] === $needle) {
+
+								$return_params = array(
+									'vapaa_x' 		=> $x,
+									'vapaa_y' 		=> $y,
+									'vapaa_z' 		=> $z,
+									'vapaa_chk_x'	=> $x+$xx-$resoluutio,
+									'vapaa_chk_y'	=> $y+$yy,
+									'vapaa_chk_z'	=> $z+$zz
+								);
+
+								// echo "Löytyi sopiva paikka y-akselilta ja z-akselilta (needle: $needle)<br>";
+								// echo "<pre>",var_dump($return_params),"</pre>";
+
+								return $return_params;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		$return_params = array(
+			'vapaa_x' 		=> false,
+			'vapaa_y' 		=> false,
+			'vapaa_z' 		=> false,
+			'vapaa_chk_x'	=> false,
+			'vapaa_chk_y'	=> false,
+			'vapaa_chk_z'	=> false
+		);
+
+	    return $return_params;
+	}
+}
+
+if (!function_exists("ceiling")) {
+	function ceiling($number, $significance = 1) {
+		return ( is_numeric($number) && is_numeric($significance) ) ? (ceil($number / $significance) * $significance) : false;
+	}
+}
+
+if (!function_exists("checkPackage")) {
+	function checkPackage($pakkaukset, $max_keraysera_pintaala, $eran_koko, $debug) {
+		foreach ($pakkaukset as $pakkauksen_tunnus => $aarr) {
+			if ($max_keraysera_pintaala >= ($eran_koko + ($aarr['leveys'] * $aarr['syvyys']))) {
+				if ($debug) {
+					echo "Mahtuu vielä pakkaus [$pakkauksen_tunnus]<br>";
+				}
+			}
+			else {
+				if ($debug) {
+					echo "Pakkaus [$pakkauksen_tunnus] ei mahdu enää erään! ($eran_koko + ".($aarr['leveys'] * $aarr['syvyys'])." / $max_keraysera_pintaala)<br>";
+					echo "Poistetaan pakkaus käytettävistä pakkauksista.<br>";
+				}
+
+				unset($pakkaukset[$pakkauksen_tunnus]);
+			}
+		}
+
+		return $pakkaukset;
+	}
+}
+
+if (!function_exists("fitting")) {
+	function fitting($params) {
+
+		foreach ($params as $k => $v) {
+			${$k} = $v;
+		}
+
+		$all_in_one = true;
+
+		foreach ($taulukot as $key => $taulukko) {
+			$vapaa_chk_x = (float) ceiling($tuoterow['tuoteleveys'] * $tuoterow['y_maara'], $resoluutio);
+			$vapaa_chk_y = (float) ceiling($tuoterow['tuotekorkeus'] * $tuoterow['y_maara'], $resoluutio);
+			$vapaa_chk_z = (float) ceiling($tuoterow['tuotesyvyys'] * $tuoterow['y_maara'], $resoluutio);
+
+			$tuote_leveys 	= (float) ceiling($tuoterow['tuoteleveys'] * 1, $resoluutio);
+			$tuote_korkeus 	= (float) ceiling($tuoterow['tuotekorkeus'] * 1, $resoluutio);
+			$tuote_syvyys 	= (float) ceiling($tuoterow['tuotesyvyys'] * 1, $resoluutio);
+
+			if (!isset($taulukko["$vapaa_chk_x"]["$vapaa_chk_y"]["$vapaa_chk_z"]) and !isset($taulukko["$tuote_leveys"]["$tuote_korkeus"]["$vapaa_chk_z"])) {
+				$all_in_one = false;
+
+				if ($debug) {
+					echo "kaikki tuotteet eivät mahtuneet yhteen pakkaukseen [$key] $vapaa_chk_x ($tuote_leveys) x $vapaa_chk_y ($tuote_korkeus) x $vapaa_chk_z<br>";
+				}
+			}
+			else {
+
+				$ed_juokseva = $juokseva_pakkausnro;
+				$juokseva_pakkausnro++;
+
+				if ($debug) {
+					echo "kaikki tuotteet mahtuvat yhteen pakkaukseen [$key] ($juokseva_pakkausnro) $vapaa_chk_x x $vapaa_chk_y x $vapaa_chk_z<br>";
+					echo "käytetään sitä!<br>";
+				}
+
+				// if (($eran_koko + ($pakkaukset[$key]['leveys'] * $pakkaukset[$key]['syvyys'])) > $max_keraysera_pintaala) {
+				// 	if ($debug) {
+				// 		echo "Tosin pakkaus ylittää keräyserän maksimipinta-alan. Ei käytetä sitä. Keräyserä on nyt valmis!<br>";
+				// 	}
+				// 
+				// 	$era_valmis = true;
+				// 
+				// 	return array(3, $all_in_one, $era_valmis, $asiakkaan_pakkaukset, $kaytettavat_pakkaukset, $eran_koko, $erat, $juokseva_pakkausnro, $ed_juokseva, $sopiva_pakkaus, $pakkaukset);
+				// }
+
+				$sopiva_pakkaus = array();
+				
+				$sopiva_pakkaus[$key] = $taulukko;
+
+				for ($x = 0; $x < $vapaa_chk_x; $x += $resoluutio) {
+					for ($y = 0; $y < $vapaa_chk_y; $y += $resoluutio) {
+						for ($z = 0; $z < $vapaa_chk_z; $z += $resoluutio) {
+							$sopiva_pakkaus[$key]["$x"]["$y"]["$z"] = false;
+						}
+					}
+				}
+
+				$asiakkaan_pakkaukset[$key][$juokseva_pakkausnro] = $sopiva_pakkaus[$key];
+				$eran_koko += $pakkaukset[$key]['leveys'] * $pakkaukset[$key]['syvyys'];
+
+				if ($debug) {
+					echo "Pakkaus käytetty ({$pakkaukset[$key]['leveys']} x {$pakkaukset[$key]['syvyys']}): ".($pakkaukset[$key]['leveys'] * $pakkaukset[$key]['syvyys'])." (resoluutio: $resoluutio) / $max_keraysera_pintaala<br>";
+					echo "Erän koko nyt: $eran_koko<br>";
+				}
+
+				// $pakkaukset = checkPackage($pakkaukset, $max_keraysera_pintaala, $eran_koko, $debug);
+
+				$erat['tilaukset'][$tuoterow['otunnus']] = $tuoterow['otunnus'];
+
+				$all_in_one = true;
+				$kaytettavat_pakkaukset[$key][$row['liitostunnus']][$juokseva_pakkausnro][$tuoterow['tunnus']] = $tuoterow['y_maara'];
+
+				$params_return = array(
+					'breikki' 					=> 0,
+					'all_in_one' 				=> $all_in_one,
+					'era_valmis' 				=> $era_valmis,
+					'asiakkaan_pakkaukset' 		=> $asiakkaan_pakkaukset,
+					'kaytettavat_pakkaukset' 	=> $kaytettavat_pakkaukset,
+					'eran_koko'					=> $eran_koko,
+					'erat'						=> $erat,
+					'juokseva_pakkausnro'		=> $juokseva_pakkausnro,
+					'ed_juokseva'				=> $ed_juokseva,
+					'sopiva_pakkaus'			=> $sopiva_pakkaus,
+					'pakkaukset'				=> $pakkaukset
+				);
+
+				return $params_return;
+			}
+		}
+
+		$params_return = array(
+			'breikki' 					=> 0,
+			'all_in_one' 				=> $all_in_one,
+			'era_valmis' 				=> $era_valmis,
+			'asiakkaan_pakkaukset' 		=> $asiakkaan_pakkaukset,
+			'kaytettavat_pakkaukset' 	=> $kaytettavat_pakkaukset,
+			'eran_koko'					=> $eran_koko,
+			'erat'						=> $erat,
+			'juokseva_pakkausnro'		=> $juokseva_pakkausnro,
+			'ed_juokseva'				=> $ed_juokseva,
+			'sopiva_pakkaus'			=> $sopiva_pakkaus,
+			'pakkaukset'				=> $pakkaukset
+		);
+
+		return $params_return;
+	}
+}
+
+if (!function_exists('tulosta_reittietiketti')) {
+	function tulosta_reittietiketti($params) {
+		global $kukarow, $yhtiorow;
+
+		extract($params);
+
+		$y_nimi 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
+		$y_osoite 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['osoite']);
+		$y_postino 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['postino']);
+		$y_postitp 	= str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['postitp']);
+
+		$viivakoodi1  = ">6";
+		$viivakoodi1 .= substr($tilriv,0,2);
+		$viivakoodi1 .= ">5";
+		$viivakoodi1 .= substr($tilriv,2);
+
+		$viivakoodi2  = ">6";
+		$viivakoodi2 .= substr($sscc,0,1);
+		$viivakoodi2 .= ">5";
+		$viivakoodi2 .= substr($sscc,1);
+
+		$sivu = "	*** ETIKETIN KOKO ***
+					{D2280,1040,2250|}
+					{AX;+000,+000,+00|}
+					{AY;+10,0|}
+					{C|}
+
+				 	*** YHTIÖN NIMI ***
+				 	{PC000;0850,0260,3,3,M,00,B|}
+					{RC000;{$pakkaus_kirjain}|}
+
+				 	{PC001;0100,0100,1,1,J,00,B|}
+			 		{RC001;{$y_nimi}|}
+
+				 	{PC002;0100,0150,05,05,J,00,B|}
+			 		{RC002;{$y_osoite}|}
+
+				 	{PC003;0100,0190,05,05,J,00,B|}
+			 		{RC003;{$y_postino} {$y_postitp}|}
+
+				 	{PC004;0600,0050,07,07,H,00,B|}
+			 		{RC004;".date("d.m.Y")."|}
+
+				 	{PC005;0100,0340,1,1,H,00,B|}
+			 		{RC005;{$toimitustapa}|}
+
+				 	{PC006;0100,0390,05,05,J,00,B|}
+			 		{RC006;Keraaja: {$kukarow['nimi']}|}
+
+				 	{PC007;0100,0430,05,05,J,00,B|}
+			 		{RC007;Til.nro: {$tilriv}|}
+
+				 	{PC008;0100,0470,05,05,J,00,B|}
+			 		{RC008;Rivit: {$rivit}|}
+
+				 	{PC009;0300,0470,05,05,J,00,B|}
+			 		{RC009;Paino: {$paino} kg|}
+
+				 	{PC010;0650,0470,05,05,J,00,B|}
+			 		{RC010;Tilavuus: {$tilavuus} m3|}
+
+				 	*** VAAKAVIIVAT ***
+				 	{LC;0100,0570,1000,0570,0,2|}
+				 	{LC;0100,0900,1000,0900,0,2|}
+
+				 	*** PYSTYVIIVAT ***
+				 	{LC;0100,0570,0100,0900,0,2|}
+				 	{LC;1000,0570,1000,0900,0,2|}
+
+				 	{PC011;0120,0660,1,1,H,00,B|}
+			 		{RC011;{$lask_nimi}|}
+
+				 	{PC012;0120,0720,1,1,H,00,B|}
+			 		{RC012;{$lask_nimitark}|}
+
+				 	{PC013;0120,0780,1,1,H,00,B|}
+			 		{RC013;{$lask_osoite}|}
+
+				 	{PC014;0120,0840,1,1,H,00,B|}
+			 		{RC014;{$lask_postino} {$lask_postitp}|}
+
+				 	{PC015;0100,0980,1,1,H,00,B|}
+			 		{RC015;Viite: {$lask_viite}|}
+
+				 	{PC016;0100,1040,1,1,H,00,B|}
+			 		{RC016;Merkki: {$lask_merkki}|}
+
+			     	{XB00;0100,1100,A,3,04,0,0150,+0000000000,000,1,00|}
+			     	{RB00;{$viivakoodi1}|}
+
+			     	{XB01;0100,1320,A,3,04,0,0150,+0000000000,000,1,00|}
+			     	{RB01;{$viivakoodi2}|}
+
+				 	*** TULOSTUS  ***
+					{XS;I,0001,0002C3210|}
+					".chr(12);
+
+		if (trim($komento_reittietiketti) != '') {
+			$line = exec(" echo \"$sivu\" | $komento_reittietiketti");
+		}
+	}
+}
+
 if (!function_exists("tarkista_email")) {
 	function tarkista_email($email) {
 

@@ -30,106 +30,33 @@
 
 		if (is_numeric($kappalemaara) and $kappalemaara > 0 and trim($komento) != '') {
 
+			// emuloidaan transactioita mysql LOCK komennolla
+			$query = "LOCK TABLES avainsana WRITE";
+			$res   = mysql_query($query) or pupe_error($query);
+
 			// koko korkeus 92mm
 			// printin korkeus 73mm
 			// leveys 105mm
 
 			for ($i = 0; $i < $kappalemaara; $i++) {
-				$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-				$result = mysql_query($query) or pupe_error($query);
-				$row = mysql_fetch_assoc($result);
-
-				$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
-
-				$nimi = str_replace(array('Ä','ä','Ö','ö'), array('A','a','O','o'), $yhtiorow['nimi']);
-
-				$viivakoodi  = ">6";
-				$viivakoodi .= substr($sscc,0,1);
-				$viivakoodi .= ">5";
-				$viivakoodi .= substr($sscc,1);
-
-				// TODO pitää tehdä locktable ettei vaan saada kahta samaa SSCC-koodia
-
-				$sivu = "*** ETIKETIN KOKO ***
-		                 {D1530,1040,1470|}
-		                 {AX;+000,+000,+00|}
-		                 {AY;+05,0|}
-		                 {C|}
-
-						 *** YHTIÖN NIMI ***
-						 {PC001;0100,0100,1,1,J,00,B|}
-			             {RC001;$nimi|}
-
-						 {LC;0050,0130,1000,0130,0,2|}
-
-						 {PC002;0100,0180,05,05,J,00,B|}
-			             {RC002;SSCC|}
-
-						 {PC003;0100,0260,1,1,J,00,B|}
-			             {RC003;$sscc|}
-
-						 {LC;0050,0310,1000,0310,0,2|}
-
-		                 {XB00;0100,0350,A,3,04,0,0350,+0000000000,000,0,00|}
-		                 {RB00;$viivakoodi|}
-
-						 *** TULOSTUS  ***
-	                 	 {XS;I,0001,0002C3210|}
-	                 	 ".chr(12);
-
-				$sivu = escapeshellarg($sivu);
-
-				if ($komento == "email") {
-					echo t("SSCC-tarraa ei voida tulostaa sähköpostiin")."<br>";
-				}
-				else {
-					$line = exec(" echo \"$sivu\" | $komento");
-				}
-
-				if (trim($row['selite']) == '') {
-
-					// haetaan aluksi max perhe
-					$query = "	SELECT max(perhe)+1 perhe
-								FROM avainsana
-								WHERE yhtio = '{$kukarow['yhtio']}'";
-					$max_perhe_res = mysql_query($query) or pupe_error($query);
-					$max_perhe_row = mysql_fetch_assoc($max_perhe_res);
-
-					$query = "	INSERT INTO avainsana SET 
-								yhtio = '{$kukarow['yhtio']}',
-								perhe = '{$max_perhe_row['perhe']}',
-								kieli = '{$kukarow['kieli']}',
-								laji = 'SSCC',
-								nakyvyys = '',
-								selite = '{$sscc}',
-								selitetark = '',
-								selitetark_2 = '',
-								selitetark_3 = '',
-								jarjestys = 0,
-								laatija = '{$kukarow['kuka']}',
-								luontiaika = now(),
-								muutospvm = now(),
-								muuttaja = '{$kukarow['kuka']}'";
-					$insert_res = mysql_query($query) or pupe_error($query);
-				}
-				else {
-					$query = "UPDATE avainsana SET selite = '{$sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-					$update_res = mysql_query($query) or pupe_error($query);
-				}
+				$sscc = tulosta_sscc($komento);
 			}
+
+			// poistetaan lukko
+			$query = "UNLOCK TABLES";
+			$res   = mysql_query($query) or pupe_error($query);
 
 			$tee = $lopetus = '';
 
 			echo "<font class='message'>",t("Käytettävä SSCC-koodi"),": $sscc</font><br /><br />";
 
 			require('suuntalavat.inc');
-			require('../inc/footer.inc');
+			require('inc/footer.inc');
 			exit;
 		}
 		else {
 			$tee = '';
 		}
-
 	}
 
 	if ($tee == '') {

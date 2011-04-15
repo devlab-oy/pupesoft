@@ -80,6 +80,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("HINTA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA", "ASIAKAS");
+				$saakopoistaa = TRUE;
 				break;
 			case "asiakaskommentti" :
 				$pakolliset = array("YTUNNUS", "TUOTENO");
@@ -89,6 +90,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("ALENNUS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA", "ASIAKAS");
+				$saakopoistaa = TRUE;
 				break;
 			case "perusalennus" :
 				$pakolliset = array("RYHMA");
@@ -154,11 +156,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "yhteensopivuus_tuote_lisatiedot" :
 				$pakolliset  = array("YHTEENSOPIVUUS_TUOTE_TUNNUS", "OTSIKKO", "ARVO", "KIELI");
-				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");				
+				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				// HUOM: tässä hieman fuulataan joinattavia. Tsekkaa koodi lue_datassa, tämä on spessukeissi....
 				$joinattavat = array("TUOTENO" => "yhteensopivuus_tuote");
 				$saakopoistaa = TRUE;
-				break;				
+				break;
 			case "tuotteen_orginaalit" :
 				$pakolliset  = array("TUOTENO", "ORIG_TUOTENO");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");

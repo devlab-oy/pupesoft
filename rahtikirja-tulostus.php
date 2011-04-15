@@ -405,10 +405,10 @@
 								and tyyppi 	 	= 'L'";
 					$ures  = mysql_query($query) or pupe_error($query);
 				}
-				
+
 				// Käytetäänkö VAK-tietokantaa
 				if ($yhtiorow["vak_kasittely"] != "") {
-					$vakselect = "concat_ws(' ', concat('UN',yk_nro), nimi_ja_kuvaus, lipukkeet, pakkausryhma)";
+					$vakselect = "concat_ws(', ', concat('UN',yk_nro), nimi_ja_kuvaus, if(trim(lipukkeet)='', NULL, lipukkeet), if(trim(pakkausryhma)='', NULL, pakkausryhma), if(trim(luokituskoodi)='', NULL, luokituskoodi), if(trim(Rajoitetut_maarat_ja_poikkeusmaarat_1)='', NULL, Rajoitetut_maarat_ja_poikkeusmaarat_1))";
 					$vakjoin   = "JOIN vak ON tuote.yhtio = vak.yhtio and tuote.vakkoodi = vak.tunnus";
 				}
 				else {

@@ -1578,7 +1578,7 @@ if ($tee == "MUOKKAA") {
 					$cols = 5;
 				}
 
-				echo "<th>".t("Kustannuspaikka")."</th><th>".t("Kohdemaa")."</th><th>".t("Kpl")."</th><th>".t("Hinta")."</th><th>".t("Alv")."</th>$lisa</tr>";
+				echo "<th>".t("Kustannuspaikka")."</th><th>".t("Kohdemaa")."</th><th>".t("M‰‰r‰")."</th><th>".t("Hinta")."</th><th>".t("Alv")."</th>$lisa</tr>";
 				echo "<tr><td>";
 
 				if ($kustannuspaikka != "") {

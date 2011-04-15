@@ -10085,7 +10085,7 @@ if (!function_exists("laskutuspaiva")) {
 			$vikapaiva = date('N', mktime(0,0,0,(date('m')+1),0,date('Y')));
 
 			if ($arki and $vikapaiva > 5) {
-				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+1), 0-(8-$ekapaiva), date('Y')));
+				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+1), 0-(8-$vikapaiva), date('Y')));
 			}
 			else {
 				$seuraavalaskutus = date('Y-m-d', mktime(0,0,0,(date('m')+1),0,date('Y')));

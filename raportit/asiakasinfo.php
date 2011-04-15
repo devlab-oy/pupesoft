@@ -1600,11 +1600,6 @@ if ($asiakasid > 0) {
 	}
 }
 
-if ($lopetus != '') {
-	echo "<br><br>";
-	lopetus($lopetus);
-}
-
 // kursorinohjausta
 $formi  = "asiakas";
 $kentta = "ytunnus";

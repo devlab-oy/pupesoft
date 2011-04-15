@@ -12,14 +12,6 @@
 	echo "<font class='head'>".t("Asiakasmemo")."</font><hr>";
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
-		if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "TYOMAARAYS" or $from == "TYOMAARAYS" or $from == "VALMISTAASIAKKAALLE") {
-			echo "<form method='post' action='".$palvelin2."tilauskasittely/tilaus_myynti.php'>
-				<input type='hidden' name='toim' value='$from'>
-				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
-				<input type='submit' value='".t("Takaisin tilaukselle")."'>
-				</form><br><br>";
-		}
-
 	    if ($ytunnus == '' and (int) $asiakasid == 0) {
 
 			js_popup(-100);
@@ -36,12 +28,18 @@
 		}
 
 		if ($ytunnus != '' or $asiakasid > 0) {
-
 			$kutsuja 	= "asiakasemo.php";
-			$ahlopetus 	= $palvelin2."crm/asiakasmemo.php////";
+			$ahlopetus 	= "{$palvelin2}crm/asiakasmemo.php////";
 
 			require ("inc/asiakashaku.inc");
 		}
+	}
+
+	$asmemo_lopetus = "{$palvelin2}crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid";
+
+	if ($lopetus != "") {
+		// Lisätään tämä lopetuslinkkiin
+		$asmemo_lopetus = $lopetus."/SPLIT/".$asmemo_lopetus;
 	}
 
 	///* Asiakas on valittu *///
@@ -395,7 +393,6 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				$yhenkilo = "<form action='$PHP_SELF' method='POST'>
-							<input type='hidden' name='from' value='$from'>
 							<input type='hidden' name='ytunnus' value='$ytunnus'>
 							<input type='hidden' name='asiakasid' value='$asiakasid'>
 							<select name='yhtunnus' Onchange='submit();'>
@@ -466,9 +463,8 @@
 							and alanimi = 'asiakas'";
 				$result = mysql_query($query) or pupe_error($query);
 
-
 				if (mysql_num_rows($result) > 0) {
-					echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=".$palvelin2."crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Luo uusi yhteyshenkilö")."</a></td>";
+					echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkilö")."</a></td>";
 				}
 				else {
 					echo "<td>".t("(Luo uusi yhteyshenkilö)")."</td>";
@@ -480,7 +476,7 @@
 
 
 				if (mysql_num_rows($result) > 0 and $yhtunnus != '') {
-					echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=".$palvelin2."crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Muuta yhteyshenkilön tietoja")."</a></td>";
+					echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Muuta yhteyshenkilön tietoja")."</a></td>";
 				}
 				else {
 					echo "<td></td>";
@@ -507,7 +503,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
-					echo "<td><a href='kalenteri.php?lopetus=".$palvelin2."crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Kalenteri")."</a></td>";
+					echo "<td><a href='{$palvelin2}crm/kalenteri.php?lopetus=$asmemo_lopetus'>".t("Kalenteri")."</a></td>";
 				}
 				else {
 					echo "<td>".t("Kalenteri")."</td>";
@@ -528,7 +524,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
-					echo "<td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=".$palvelin2."crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Myynninseuranta")."</a></td>";
+					echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=$asmemo_lopetus'>".t("Myynninseuranta")."</a></td>";
 				}
 				else {
 					echo "<td>".t("Myynninseuranta")."</td>";
@@ -551,7 +547,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
-					echo "<td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=".$palvelin2."crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Näytä alennustaulukko")."</a></td>";
+					echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=$asmemo_lopetus'>".t("Näytä alennustaulukko")."</a></td>";
 				}
 				else {
 					echo "<td><u>".t("(Näytä alennustaulukko)")."</u></td>";
@@ -560,10 +556,9 @@
 				echo "</tr>";
 				echo "<tr><td colspan='2'></td><td>".t("Tila").": ";
 				echo "<form action='$PHP_SELF' method='POST'>";
-				echo "<input type='hidden' name='from' value='$from'>
-					<input type='hidden' name='ytunnus' value='$ytunnus'>
-					<input type='hidden' name='asiakasid' value='$asiakasid'>
-					<input type='hidden' name='tee' value='paivita_tila'>";
+				echo "<input type='hidden' name='ytunnus' value='$ytunnus'>
+						<input type='hidden' name='asiakasid' value='$asiakasid'>
+						<input type='hidden' name='tee' value='paivita_tila'>";
 				echo "<select name='astila' Onchange='submit();'>";
 				echo "<option value=''>".t("Ei tilaa")."</option>";
 
@@ -597,7 +592,6 @@
 
 				echo "	<form action='$PHP_SELF' method='POST' enctype='multipart/form-data'>
 						<input type='hidden' name='tee' 		value='UUSIMEMO'>
-						<input type='hidden' name='from' 		value='$from'>
 						<input type='hidden' name='korjaus' 	value='$tunnus'>
 						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
 						<input type='hidden' name='ytunnus' 	value='$ytunnus'>
@@ -634,8 +628,7 @@
 				echo "	<tr><th>Tallenna tiedosto liitteeksi</th>";
 				echo "	<td colspan='2'><input type = 'file' name = 'userfile' />";
 				echo "	<input type='hidden' name='teeliite'	value='tallenna_pdf'>";
-				echo "  <input type='hidden' name='from' 		value='$from'>
-						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
+				echo "  <input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
 						<input type='hidden' name='ytunnus' 	value='$ytunnus'>
 						<input type='hidden' name='asiakasid' 	value='$asiakasid'>";
 				echo "	</td></tr>";
@@ -798,7 +791,6 @@
 				echo "	<td colspan='3' align='right' class='back'>
 						<form action='$PHP_SELF' method='POST'>
 						<input type='hidden' name='tee' 		value='KORJAAMEMO'>
-						<input type='hidden' name='from' 		value='$from'>
 						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
 						<input type='hidden' name='ytunnus' 	value='$ytunnus'>
 						<input type='hidden' name='asiakasid' 	value='$asiakasid'>
@@ -862,7 +854,7 @@
 								<th>".t("Yhteyshenkilö:")." $memorow[yhteyshenkilo]</th>";
 
 						if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'],0,7) != 'DELETED') {
-							echo "	<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&from=$from&liitostyyppi=$memorow[tyyppi]'>Poista</a></th>";
+							echo "<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&liitostyyppi=$memorow[tyyppi]&lopetus=$lopetus'>".t("Poista")."</a></th>";
 						}
 						else {
 							echo "<th></th>";
@@ -879,18 +871,17 @@
 						//tehdään selväkielinen tila/alatila
 						require "inc/laskutyyppi.inc";
 
-						echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").":  <a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$memorow[laskutunnus]'>$memorow[laskutunnus]</a> / ".tv1dateconv($memorow["laskumpvm"])."  ($memorow[laskumyyja])";
+						echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").":  <a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$memorow[laskutunnus]&lopetus=$asmemo_lopetus'>$memorow[laskutunnus]</a> / ".tv1dateconv($memorow["laskumpvm"])."  ($memorow[laskumyyja])";
 					}
 
 					if ($memorow["laskutunnus"] == 0 and $memorow["tyyppi"] == "Lead") {
-						echo "<br><br><a href='".$palvelin2."tilauskasittely/tilaus_myynti.php?toim=TARJOUS&tee=&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
+						echo "<br><br><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TARJOUS&tee=&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
 					}
 
 					if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {
 						echo "<tr><td colspan='3' align='right'>".t("Lähetä käyttäjälle").":</td><td colspan='3'>";
 						echo "<form action='$PHP_SELF' method='POST'>";
 						echo "<input type='hidden' name='tee' value='SAHKOPOSTI'>";
-						echo "<input type='hidden' name='from' value='$from'>";
 						echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
 						echo "<input type='hidden' name='yhtunnus' value='$yhtunnus'>";
 						echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
@@ -932,11 +923,11 @@
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $naytapoistetut == "") {
 				echo "<br>";
-				echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus'>Näytä poistetut muistiinpanot</a>";
+				echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä poistetut muistiinpanot")."</a>";
 			}
 			else {
 				echo "<br>";
-				echo "<a href='$PHP_SELF?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus'>Näytä aktiiviset muistiinpanot</a>";
+				echo "<a href='$PHP_SELF?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä aktiiviset muistiinpanot")."</a>";
 			}
 		}
    	}
@@ -957,7 +948,7 @@
 		$res = mysql_query($query) or pupe_error($query);
 
 		while ($row = mysql_fetch_array($res)) {
-			$out .= "<a href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä liite') ."</a> ".$row['filename']."<br>\n";
+			$out .= "<a href='{$palvelin2}view.php?id=$row[tunnus]' target='Attachment'>".t('Näytä liite')."</a> ".$row['filename']."<br>\n";
 		}
 
 		return $out;

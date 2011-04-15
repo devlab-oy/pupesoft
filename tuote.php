@@ -9,6 +9,13 @@
 	if (!isset($ulos)) 		 	 $ulos = "";
 	if (!isset($livesearch_tee)) $livesearch_tee = "";
 
+	$tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z";
+
+	if ($lopetus != "") {
+		// Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+		$tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
+	}
+
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
@@ -120,7 +127,7 @@
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
 				</form><br><br>";
 	}
-	elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $laskurow["tila"] != "K" and $toim_kutsu != "") {
+	elseif (strpos($lopetus, "tilaus_myynti.php") === FALSE and $kukarow["kuka"] != "" and $laskurow["tila"] != "" and $laskurow["tila"] != "K" and $toim_kutsu != "") {
 		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_myynti.php'>
 				<input type='hidden' name='toim' value='$toim_kutsu'>
 				<input type='hidden' name='aktivoinnista' value='true'>
@@ -634,7 +641,7 @@
 
 						echo "<form action='yhteensopivuus_tuote.php' method='post'>";
 						echo "<input type='hidden' name='tee' value='etsi'>";
-                        echo "<input type='hidden' name='lopetus' value='".$palvelin2."tuote.php////tuoteno=$tuoteno//tee=Z'>";
+                        echo "<input type='hidden' name='lopetus' value='$tkysy_lopetus'>";
 						echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 						echo "<input type='hidden' name='toim' value='$yhttoim'>";
 						echo "<input type='submit' value='".t("Siirry tuotteen $yhttoim yhteensopivuuksiin")."'>";
@@ -672,7 +679,7 @@
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
 					echo "<tr>";
-					echo "<td><a href='$PHP_SELF?toim=$toim&lopetus=$lopetus&tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
+					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
 					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
 					echo "</tr>";
 				}
@@ -1046,7 +1053,7 @@
 
 					echo "<tr>
 							<td>$jtrow[nimi]</td>
-							<td><a href='$PHP_SELF?toim=$toim&lopetus=$lopetus&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]'>$jtrow[tunnus]</a>$keikka</td>
+							<td><a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka</td>
 							<td>$tyyppi</td>
 							<td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
@@ -1727,16 +1734,16 @@
 						echo "<td nowrap valign='top'>";
 
 						if ($prow["laji"] == "laskutus" and $prow["laskutunnus"] != "") {
-							echo "<a href='raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus={$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z'>".t("$prow[laji]")."</a>";
+							echo "<a href='raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus'>".t("$prow[laji]")."</a>";
 						}
 						elseif ($prow["laji"] == "tulo" and $prow["laskutunnus"] != "") {
-							echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus={$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z'>".t("$prow[laji]")."</a>";
+							echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus'>".t("$prow[laji]")."</a>";
 						}
 						elseif ($prow["laji"] == "siirto" and $prow["laskutunnus"] != "") {
-							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus={$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z'>".t("$prow[laji]")."</a>";
+							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$lopetus'>".t("$prow[laji]")."</a>";
 						}
 						elseif ($prow["laji"] == "valmistus" and $prow["laskutunnus"] != "") {
-							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus={$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z'>".t("$prow[laji]")."</a>";
+							echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$lopetus'>".t("$prow[laji]")."</a>";
 
 							// N‰ytet‰‰n t‰m‰ vain jos k‰ytt‰j‰ll‰ on oikeus tehd‰ valmistuksia tai reseptej‰
 							if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {
@@ -1821,7 +1828,7 @@
 						echo "<td valign='top'>$prow[selite]";
 
 						if ($prow["laji"] == "tulo" and $prow["lasku2tunnus"] != "") {
-							echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus={$palvelin2}tuote.php////tuoteno=$tuoteno//tee=Z'>".t("N‰yt‰ keikka")." $prow[lasku2laskunro]</a>";
+							echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("N‰yt‰ keikka")." $prow[lasku2laskunro]</a>";
 						}
 
 						if (trim($prow["tapapaikka"]) != "") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";

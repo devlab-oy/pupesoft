@@ -493,7 +493,7 @@
 		echo "<tr><th>".t("Liitetiedosto")."</th><td colspan='5'>";
 
 		while ($liiterow = mysql_fetch_array($liiteres)) {
-			echo "<a href='".$palvelin2."view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara $liiterow[selite]</a> ";
+			echo "<a href='{$palvelin2}view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara $liiterow[selite]</a> ";
 			$liitemaara++;
 		}
 		echo "</td></tr>";
@@ -528,7 +528,7 @@
 
 					$laskakak = 1;
 
-					echo $laskakak.": <a href='".$palvelin2."raportit.php?toim=laskuhaku&tee=T&summa1=$muutkeikrow[tunnus]'>$muutkeikrow[summa]</a> ".ebid($muutkeikrow['tunnus'])."<br>";
+					echo $laskakak.": <a href='{$palvelin2}raportit.php?toim=laskuhaku&tee=T&summa1=$muutkeikrow[tunnus]&lopetus=$lopetus'>$muutkeikrow[summa]</a> ".ebid($muutkeikrow['tunnus'])."<br>";
 				}
 
 				echo "</td></tr>";
@@ -617,10 +617,10 @@
 		echo "<table><tr>";
 
 		if ($nippu > 0) {
-			$linkkilisa = "$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&nippu=$nippu&otunnus=$nippu";
+			$linkkilisa = "$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&nippu=$nippu&otunnus=$nippu&lopetus=$lopetus";
 		}
 		else {
-			$linkkilisa = "$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&ytunnus=$ytunnus&nimi=$nimi&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl";
+			$linkkilisa = "$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&ytunnus=$ytunnus&nimi=$nimi&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&lopetus=$lopetus";
 		}
 
 		echo "<th align='left'><a href = '{$linkkilisa}&ojarj=1'>" .t("Tilaus")."</a></th>";
@@ -649,7 +649,7 @@
 			echo "<td valign='top'>$prow[tilaus]</td>";
 			echo "<td valign='top'>$prow[nimitys]</td>";
 			echo "<td valign='top'>$prow[paikka]</td>";
-			echo "<td valign='top'><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."'>$prow[tuoteno]</a></td>";
+			echo "<td valign='top'><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$lopetus'>$prow[tuoteno]</a></td>";
 			echo "<td valign='top'>$prow[toim_tuoteno]</td>";
 			echo "<td align='right' valign='top'>".($prow["tilattu_sis"]*1)."<br>".($prow["tilattu_ulk"]*1)."</td>";
 			echo "<td align='right' valign='top'>".($prow["tulossa_sis"]*1)."<br>".($prow["tulossa_ulk"]*1)."</td>";
@@ -701,7 +701,7 @@
 			}
 
 			while ($sarjarow = mysql_fetch_array($sarjares)) {
-				$prow["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($prow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a><br>";
+				$prow["kommentti"] .= "# <a href='{$palvelin2}tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($prow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."&lopetus=$lopetus'>$sarjarow[sarjanumero]</a><br>";
 			}
 
 			if ($prow["kommentti"] != '') {
@@ -945,7 +945,7 @@
 
 			while ($sarjarow = mysql_fetch_array($sarjares)) {
 				if ($kukarow['extranet'] == '') {
-					$row["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($row["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a><br>";
+					$row["kommentti"] .= "# <a href='{$palvelin2}tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($row["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."&lopetus=$lopetus'>$sarjarow[sarjanumero]</a><br>";
 				}
 				else {
 					$row["kommentti"] .= "# $sarjarow[sarjanumero]<br>";
@@ -1161,7 +1161,7 @@
 				$varow = mysql_fetch_assoc($varesult);
 
 				if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-					echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
+					echo "<td $class align='left' valign='top'><font class='error'><img src='{$palvelin2}pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
 				}
 				elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
 					echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
@@ -1200,7 +1200,7 @@
 				$varow = mysql_fetch_assoc($varesult);
 
 				if ($varow['maa'] != '' ) {
-					echo "<td $class align='left' valign='top'><img src='".$palvelin2."flag_icons/gif/".strtolower($varow['maa']).".gif'></td>";
+					echo "<td $class align='left' valign='top'><img src='{$palvelin2}pics/flag_icons/gif/".strtolower($varow['maa']).".gif'></td>";
 				}
 				else {
 					echo "<td $class align='left' valign='top'></td>";
@@ -1208,7 +1208,7 @@
 			}
 
 			if ($kukarow['extranet'] == '') {
-				echo "<td $class valign='top'><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
+				echo "<td $class valign='top'><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
 			}
 			else {
 				echo "<td $class valign='top'>$row[tuoteno]</td>";

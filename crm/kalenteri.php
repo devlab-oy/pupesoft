@@ -106,14 +106,14 @@ if ($tee == 'LISAA') {
 		if (!isset($muutparametrit)) {
 			$muutparametrit	= 	$valitut."!¡!".$kenelle."!¡!".$asyhtio."!¡!".$kello."!¡!".$year."!¡!".$kuu."!¡!".$paiva."!¡!".$tunnus."!¡!".$konserni."!¡!".$lkello."!¡!".$lyear."!¡!".$lkuu."!¡!".$lpaiva."!¡!".$tapa."!¡!".$lopetus."!¡!".$viesti."!¡!".$tyomaarays;
 		}
-				
+
 		echo "<br><font class='message'>".t("Valitse asiakas").":</font><br><br>";
 
 		$kutsuja = 'kalenteri.php';
 		$ahlopetus 	= $palvelin2."crm/kalenteri.php////tee=LISAA//ytunnus=$ytunnus//muutparametrit=$muutparametrit";
-			
+
 		require ("inc/asiakashaku.inc");
-		
+
 		if ($ytunnus == '') {
 			exit;
 		}
@@ -121,7 +121,7 @@ if ($tee == 'LISAA') {
 
 	if ($ytunnus != '') {
 		$muut = explode('!¡!', $muutparametrit);
-				
+
 		$valitut 	= $muut[0];
 		$kenelle 	= $muut[1];
 		$asyhtio	= $muut[2];
@@ -921,11 +921,6 @@ echo "</tr>";
 //kalenterivalinta end
 echo "</table>";
 
-if ($lopetus != '') {
-	echo "<br><br>";
-	lopetus($lopetus);
-}
-
-require ("../inc/footer.inc");
+require ("inc/footer.inc");
 
 ?>

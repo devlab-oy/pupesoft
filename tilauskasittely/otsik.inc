@@ -97,7 +97,7 @@
 		}
 
 		$asiakasid	= "";
-		$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO";
+		$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO";
 		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
 		require ("inc/asiakashaku.inc");
@@ -436,6 +436,7 @@
 		echo "<input type='hidden' name='projektilla' value='$projektilla'>";
 		echo "<input type='hidden' name='from' value='$from'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+		echo "<input type='hidden' name='mista' value='$mista'>";
 
 		if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
 
@@ -740,7 +741,7 @@
 			}
 
 			if (tarkista_oikeus("yllapito.php", $ealisa, "X")) {
-				echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
+				echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
 			}
 		}
 
@@ -2313,6 +2314,7 @@
 				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<input type='hidden' name='projektilla' value='$projektilla'>";
 				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+				echo "<input type='hidden' name='mista' value='$mista'>";
 				echo "<input type='hidden' name='tila' value='vaihdaasiakas'>";
 				echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'></td></form>";
 			}

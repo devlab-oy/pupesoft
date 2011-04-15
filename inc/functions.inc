@@ -118,7 +118,7 @@ if (!function_exists("lopetus")) {
 
 					$nimi = "";
 
-					for ($j = $i; $j<count($nimet); $j++) {
+					for ($j = $i; $j < count($nimet); $j++) {
 						$nimi .= $nimet[$j]."/";
 					}
 
@@ -174,7 +174,12 @@ if (!function_exists("lopetus")) {
 					else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
 				}
 
-				$edlopetus = $lopetus_clean;
+				if ($edlopetus != "") {
+					$edlopetus .= "/SPLIT/";
+				}
+
+				$edlopetus .= $lopetus_clean;
+
 				$lask++;
 			}
 		}

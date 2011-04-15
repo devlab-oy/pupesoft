@@ -460,12 +460,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$chytunnus 			= '';
 			$chryhma 			= '';
 			$chtuoteno 			= '';
-			$chasiakas			= '';
-			$chsegmentti		= '';
-			$chkoodi			= '';
+			$chasiakas			= 0;
+			$chsegmentti		= 0;
 			$chpiiri			= '';
-			$chminkpl			= '';
-			$chmaxkpl			= '';
+			$chminkpl			= 0;
+			$chmaxkpl			= 0;
 			$chalkupvm 			= '0000-00-00';
 			$chloppupvm 		= '0000-00-00';
 			$and 				= '';
@@ -1164,7 +1163,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								$chryhma = $rivi[$r];
 							}
 
-							if ($otsikko == 'ASIAKAS' and $rivi[$r] != '') {
+							if ($otsikko == 'ASIAKAS' and (int) $rivi[$r] > 0) {
 								$chasiakas = $rivi[$r];
 							}
 
@@ -1180,34 +1179,36 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								$chytunnus = $rivi[$r];
 							}
 
-							if ($otsikko == 'ALKUPVM' and trim($rivi[$r]) != '') {
+							if ($otsikko == 'ALKUPVM' and $rivi[$r] != '') {
 								$chalkupvm = $rivi[$r];
 							}
 
-							if ($otsikko == 'LOPPUPVM' and trim($rivi[$r]) != '') {
+							if ($otsikko == 'LOPPUPVM' and $rivi[$r] != '') {
 								$chloppupvm = $rivi[$r];
 							}
-							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '1' and trim($rivi[$r]) != '') { // 1 tarkoittaa dynaamisen puun KOODIA
-								$chkoodi = $rivi[$r];
-								$etsitunnus = " SELECT tunnus FROM dynaaminen_puu WHERE yhtio='$kukarow[yhtio]' AND laji='asiakas' AND koodi='$chkoodi'";
+
+							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '1' and (int) $rivi[$r] > 0) { // 1 tarkoittaa dynaamisen puun KOODIA
+								$etsitunnus = " SELECT tunnus FROM dynaaminen_puu WHERE yhtio='$kukarow[yhtio]' AND laji='asiakas' AND koodi='$rivi[$r]'";
 								$etsiresult = mysql_query($etsitunnus) or pupe_error($etsitunnus);
 								$etsirow = mysql_fetch_assoc($etsiresult);
+
 								$chsegmentti = $etsirow['tunnus'];
 							}
-							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '2' and trim($rivi[$r]) != '') { // 2 tarkoittaa dynaamisen puun TUNNUSTA
+
+							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '2' and (int) $rivi[$r] > 0) { // 2 tarkoittaa dynaamisen puun TUNNUSTA
 								$chsegmentti = $rivi[$r];
 							}
 
-
-							if ($otsikko == 'PIIRI' and trim($rivi[$r]) != '') {
+							if ($otsikko == 'PIIRI' and $rivi[$r] != '') {
 								$chpiiri = $rivi[$r];
 							}
-							if ($otsikko == 'MINKPL' and trim($rivi[$r]) != '') {
-								$chminkpl = $rivi[$r];
+
+							if ($otsikko == 'MINKPL' and (int) $rivi[$r] > 0) {
+								$chminkpl = (int) $rivi[$r];
 							}
 
-							if ($otsikko == 'MAXKPL' and trim($rivi[$r]) != '') {
-								$chmaxkpl = $rivi[$r];
+							if ($otsikko == 'MAXKPL' and (int) $rivi[$r] > 0) {
+								$chmaxkpl = (int) $rivi[$r];
 							}
 						}
 
@@ -1326,7 +1327,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				}
 
 				//tarkistetaan asiakasalennus ja asiakashinta keisseiss‰ onko t‰llanen rivi jo olemassa
-				if ($hylkaa == 0 and ($chasiakas != '' or $chasiakas_ryhma != '' or $chytunnus != '' or $chpiiri != '' or $chsegmentti != '') and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
+				if ($hylkaa == 0 and ($chasiakas != 0 or $chasiakas_ryhma != '' or $chytunnus != '' or $chpiiri != '' or $chsegmentti != 0) and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
 					if ($chasiakas_ryhma != '') {
 						$and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
 					}
@@ -1336,22 +1337,22 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					if ($chryhma != '') {
 						$and .= " and ryhma = '$chryhma'";
 					}
-					if ($chasiakas != '') {
+					if ($chasiakas > 0) {
 						$and .= " and asiakas = '$chasiakas'";
 					}
 					if ($chtuoteno != '') {
 						$and .= " and tuoteno = '$chtuoteno'";
 					}
-					if ($chsegmentti != '') {
+					if ($chsegmentti > 0) {
 						$and .= " and asiakas_segmentti = '$chsegmentti'";
 					}
 					if ($chpiiri != '') {
 						$and .= " and piiri = '$chpiiri'";
 					}
-					if ($chminkpl != '') {
+					if ($chminkpl != 0) {
 						$and .= " and minkpl = '$chminkpl'";
 					}
-					if ($chmaxkpl != '') {
+					if ($chmaxkpl != 0) {
 						$and .= " and maxkpl = '$chmaxkpl'";
 					}
 
@@ -1388,10 +1389,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 				//	Tarkastetaan tarkistarivi.incia vastaan..
 				//	Generoidaan oikeat arrayt
-				$errori = "";
-				$t 		= array();
-				$virhe 	= array();
-				$poistolukko = "LUEDATA";
+				$errori 		= "";
+				$t 				= array();
+				$virhe 			= array();
+				$poistolukko	= "LUEDATA";
 
 				// Jos on uusi rivi niin kaikki lukot on auki
 				if ($rivi[$postoiminto] == 'LISAA') {
@@ -1424,6 +1425,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				else {
 					$tarkrow = mysql_fetch_array($result);
 					$tunnus = $tarkrow["tunnus"];
+
+					// Teghd‰‰n pari injektiota tarkrow-arrayseen
+					$tarkrow["luedata_from"] = "LUEDATA";
+					$tarkrow["luedata_toiminto"] = $rivi[$postoiminto];
 
 					// Tehd‰‰n oikeellisuustsekit
 					for ($i=1; $i < mysql_num_fields($result); $i++) {

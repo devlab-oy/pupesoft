@@ -15,20 +15,24 @@ if(!function_exists("asiakashintatarkista")) {
 		if (mysql_field_name($result, $i) == "ytunnus") {
 			$chytunnus = trim($t[$i]);
 
-			if ($chytunnus != '') {
+			// Ei tsekata turhaan kun rivi dellataan luedatasta
+			if ($chytunnus != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 				$query = "	SELECT ytunnus
 							FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]'
+							WHERE yhtio = '$kukarow[yhtio]'
 							and laji != 'P'
 							and ytunnus = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($sresult) == 0) {
+				if (mysql_num_rows($sresult) != 1) {
 
 					$ytunnus 		= $chytunnus;
 					$kutsuja 		= "yllapito.php";
 					$ulos 			= "";
-					require("asiakashaku.inc");
+
+					if ($ytunnus != "" and $ytunnus != "0") {
+						require("asiakashaku.inc");
+					}
 
 					if ($ulos != "" and $ytunnus == "") {
 						$alasveto[$i] = "<select name='t[$i]'><option value=''>".t("Valitse asiakas")."</option>".$ulos."</select>";
@@ -48,15 +52,12 @@ if(!function_exists("asiakashintatarkista")) {
 		if (mysql_field_name($result, $i) == "asiakas") {
 			$chastunn = trim($t[$i]);
 
-			if ((int) $chastunn == 0) {
-				$chastunn = "";
-			}
-
-			if ($chastunn != '') {
+			// Ei tsekata turhaan kun rivi dellataan luedatasta
+			if ($chastunn != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 
 				unset($result);
 
-				if (is_numeric($chastunn)) {
+				if (is_numeric($chastunn) and $chastunn > 0) {
 					$query	= "	SELECT *
 								FROM asiakas
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -70,7 +71,10 @@ if(!function_exists("asiakashintatarkista")) {
 					$ytunnus 		= $chastunn;
 					$kutsuja 		= "yllapito.php";
 					$ulos2 			= "";
-					require("asiakashaku.inc");
+
+					if ($ytunnus != "" and $ytunnus != "0") {
+						require("asiakashaku.inc");
+					}
 
 					if ($ulos2 != "" and $ytunnus == "") {
 						$alasveto[$i] = "<select name='t[$i]'><option value=''>".t("Valitse asiakas")."</option>".$ulos2."</select>";
@@ -90,7 +94,8 @@ if(!function_exists("asiakashintatarkista")) {
 		if (mysql_field_name($result, $i) == "asiakas_ryhma") {
 			$chasiakas_ryhma = trim($t[$i]);
 
-			if ($chasiakas_ryhma != '') {
+			// Ei tsekata turhaan kun rivi dellataan luedatasta
+			if ($chasiakas_ryhma != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 				$sresult = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite = '$chasiakas_ryhma'");
 
 				if (mysql_num_rows($sresult) == 0) {
@@ -103,7 +108,8 @@ if(!function_exists("asiakashintatarkista")) {
 			$chtuoteno = $t[$i];
 			$chtuoteno_ind = $i;
 
-			if ($chtuoteno != '') {
+			// Ei tsekata turhaan kun rivi dellataan luedatasta
+			if ($chtuoteno != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 				$query = "	SELECT tuoteno
 							FROM tuote
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
@@ -130,7 +136,9 @@ if(!function_exists("asiakashintatarkista")) {
 
 		if (mysql_field_name($result, $i) == "ryhma") {
 			$chryhma = $t[$i];
-			if ($chryhma != '') {
+
+			// Ei tsekata turhaan kun rivi dellataan luedatasta
+			if ($chryhma != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 				$query = "	SELECT tunnus
 							FROM perusalennus
 							WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
@@ -144,9 +152,10 @@ if(!function_exists("asiakashintatarkista")) {
 
 		if (mysql_field_name($result, $i) == "asiakas_segmentti") {
 
-			$chsegmentti = $t[$i];
-			
-			if ($chsegmentti != '') {
+			$chsegmentti = (int) $t[$i];
+
+			// Ei tsekata turhaan kun rivi dellataan luedatasta
+			if ($chsegmentti > 0 and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 				$preq = "SELECT * FROM dynaaminen_puu where yhtio='$kukarow[yhtio]' and laji='asiakas' and tunnus='$chsegmentti'";
 				$preres = mysql_query($preq) or pupe_error($preq);
 
@@ -157,11 +166,13 @@ if(!function_exists("asiakashintatarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "piiri") {
-						
+
 			$chpiiri = $t[$i];
-			if ($chpiiri != '') {
-				$preq = "	SELECT avainsana.selite, avainsana.selitetark 
-							FROM avainsana 
+
+			// Ei tsekata turhaan kun rivi dellataan luedatasta
+			if ($chpiiri != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
+				$preq = "	SELECT avainsana.selite, avainsana.selitetark
+							FROM avainsana
 							WHERE avainsana.selite='{$chpiiri}' AND avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
 				$preres = mysql_query($preq) or pupe_error($preq);
 
@@ -171,16 +182,19 @@ if(!function_exists("asiakashintatarkista")) {
 			}
 		}
 
-		$rajlask = 0;
-		if ($chasiakas_ryhma != '') $rajlask++;
-		if ($chytunnus != '') $rajlask++;
-		if ($chpiiri != '') $rajlask++;
-		if ($chsegmentti != '') $rajlask++;
-		if ((int) $chastunn > 0) $rajlask++;
+		if (mysql_field_name($result, $i) == 'piiri') {
 
+			$rajlask = 0;
 
-		if (($rajlask > 1 or $rajlask == 0) and mysql_field_name($result, $i) == 'piiri') {
-			$virhe[$i] = t("Valitse vain asiakas, ytunnus, asiakasryhmä, asiakassegmentti tai piiri!");
+			if ($chasiakas_ryhma != '') $rajlask++;
+			if ($chytunnus != '') $rajlask++;
+			if ($chpiiri != '') $rajlask++;
+			if ($chsegmentti > 0) $rajlask++;
+			if ($chastunn > 0) $rajlask++;
+
+			if ($rajlask > 1 or $rajlask == 0) {
+				$virhe[$i] = t("Valitse vain asiakas, ytunnus, asiakasryhmä, asiakassegmentti tai piiri!");
+			}
 		}
 
 		if ($chryhma == '' and $chtuoteno == '' and mysql_field_name($result, $i) == 'ryhma') {
@@ -188,25 +202,13 @@ if(!function_exists("asiakashintatarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "minkpl") {
-
 			$t[$i] = str_replace(",", ".", $t[$i]);
-
-			$chminkpl = $t[$i];
-
-			if ($chminkpl == '') {
-				$chminkpl = 0;
-			}
+			$chminkpl = (int) $t[$i];
 		}
 
 		if (mysql_field_name($result, $i) == "maxkpl") {
-
 			$t[$i] = str_replace(",", ".", $t[$i]);
-
-			$chmaxkpl = $t[$i];
-
-			if ($chmaxkpl == '') {
-				$chmaxkpl = 0;
-			}
+			$chmaxkpl = (int) $t[$i];
 		}
 
 		if (mysql_field_name($result, $i) == "alkupvm") {
@@ -215,7 +217,9 @@ if(!function_exists("asiakashintatarkista")) {
 			if ($chalkupvm == '') {
 				$chalkupvm = '0000-00-00';
 			}
-			elseif ($chalkupvm != '0000-00-00') {
+
+			// Ei tsekata turhaan kun rivi dellataan luedatasta
+			if ($chalkupvm != '0000-00-00' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 				$pp = substr($chalkupvm, 8, 2);
 				$kk = substr($chalkupvm, 5, 2);
 				$vv = substr($chalkupvm, 0, 4);
@@ -232,7 +236,9 @@ if(!function_exists("asiakashintatarkista")) {
 			if ($chloppupvm == '') {
 				$chloppupvm = '0000-00-00';
 			}
-			elseif ($chloppupvm != '0000-00-00') {
+
+			// Ei tsekata turhaan kun rivi dellataan luedatasta
+			if ($chloppupvm != '0000-00-00' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 				$pp = substr($chloppupvm, 8, 2);
 				$kk = substr($chloppupvm, 5, 2);
 				$vv = substr($chloppupvm, 0, 4);
@@ -243,7 +249,7 @@ if(!function_exists("asiakashintatarkista")) {
 			}
 		}
 
-		if (($chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'tunnus') {
+		if (($chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'tunnus' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 
 			$and = '';
 			if ($chasiakas_ryhma != '') {

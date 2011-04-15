@@ -2,6 +2,7 @@
 
 	$ulos = "";
 	$jatko = 1; // oletetaan normaali käsittely
+	$tyyppi = 2;
 
 	if (mysql_field_name($result, $i) == "yhtio" or
 		mysql_field_name($result, $i) == "pankki_haltija" or
@@ -70,10 +71,14 @@
 		mysql_field_name($result, $i) == "factoringsiirtonumero" or
 		mysql_field_name($result, $i) == "tunnusnippu" or
 		mysql_field_name($result, $i) == "olmapvm" or
+		mysql_field_name($result, $i) == "varasto" or
+		mysql_field_name($result, $i) == "tulostusalue" or
+		mysql_field_name($result, $i) == "kirjoitin" or
 		mysql_field_name($result, $i) == "vanhatunnus") {
 
 		$tyyppi = 0;
 	}
+
 
 	if (mysql_field_name($result, $i) == "nimi" or
 		mysql_field_name($result, $i) == "nimitark" or
@@ -126,7 +131,8 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	elseif (mysql_field_name($result, $i) == "chn") {
+
+	if (mysql_field_name($result, $i) == "chn") {
 
 		$sel = array();
 		$apu = $trow[$i];
@@ -145,9 +151,6 @@
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
-	}
-	else {
-		$tyyppi = 2;
 	}
 
 ?>

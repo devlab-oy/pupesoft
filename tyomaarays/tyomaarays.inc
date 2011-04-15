@@ -18,10 +18,10 @@
 			require("inc/valitse_tulostin.inc");
 		}
 		elseif ($kappaleet > 0) {
-			if ($toim != "REKLAMAATIO") {
+			if ($toim != "REKLAMAATIO" and $komento["Työmääräys"] != "email") {
 				$komento["Työmääräys"] .= " -# $kappaleet ";
 			}
-			else {
+			elseif ($komento["Reklamaatio"] != "email") {
 				$komento["Reklamaatio"] .= " -# $kappaleet ";
 			}
 		}

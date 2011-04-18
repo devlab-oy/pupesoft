@@ -853,10 +853,10 @@
 				$laskurow = mysql_fetch_array($result);
 
 				$query = "	SELECT
-							sum(if (laadittu >= '$vva1-$kka1-$ppa1' and laadittu <= '$vvl1-$kkl1-$ppl1' and var='P', tilkpl,0)) puutekpl1,
-							sum(if (laadittu >= '$vva2-$kka2-$ppa2' and laadittu <= '$vvl2-$kkl2-$ppl2' and var='P', tilkpl,0)) puutekpl2,
-							sum(if (laadittu >= '$vva3-$kka3-$ppa3' and laadittu <= '$vvl3-$kkl3-$ppl3' and var='P', tilkpl,0)) puutekpl3,
-							sum(if (laadittu >= '$vva4-$kka4-$ppa4' and laadittu <= '$vvl4-$kkl4-$ppl4' and var='P', tilkpl,0)) puutekpl4
+							sum(if (laadittu >= '$vva1-$kka1-$ppa1 00:00:00' and laadittu <= '$vvl1-$kkl1-$ppl1 23:59:59' and var='P', tilkpl,0)) puutekpl1,
+							sum(if (laadittu >= '$vva2-$kka2-$ppa2 00:00:00' and laadittu <= '$vvl2-$kkl2-$ppl2 23:59:59' and var='P', tilkpl,0)) puutekpl2,
+							sum(if (laadittu >= '$vva3-$kka3-$ppa3 00:00:00' and laadittu <= '$vvl3-$kkl3-$ppl3 23:59:59' and var='P', tilkpl,0)) puutekpl3,
+							sum(if (laadittu >= '$vva4-$kka4-$ppa4 00:00:00' and laadittu <= '$vvl4-$kkl4-$ppl4 23:59:59' and var='P', tilkpl,0)) puutekpl4
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laadittu)
 							WHERE yhtio = '$row[yhtio]'
 							and tyyppi='L'
@@ -889,14 +889,14 @@
 
 				///* Kulutetut kappaleet *///
 				$query = "	SELECT
-							sum(if (toimitettuaika >= '$vva1-$kka1-$ppa1' and toimitettuaika <= '$vvl1-$kkl1-$ppl1' ,kpl,0)) kpl1,
-							sum(if (toimitettuaika >= '$vva2-$kka2-$ppa2' and toimitettuaika <= '$vvl2-$kkl2-$ppl2' ,kpl,0)) kpl2,
-							sum(if (toimitettuaika >= '$vva3-$kka3-$ppa3' and toimitettuaika <= '$vvl3-$kkl3-$ppl3' ,kpl,0)) kpl3,
-							sum(if (toimitettuaika >= '$vva4-$kka4-$ppa4' and toimitettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4,
-							sum(if (toimitettuaika >= '$vva1ed-$kka1ed-$ppa1ed' and toimitettuaika <= '$vvl1ed-$kkl1ed-$ppl1ed' ,kpl,0)) EDkpl1,
-							sum(if (toimitettuaika >= '$vva2ed-$kka2ed-$ppa2ed' and toimitettuaika <= '$vvl2ed-$kkl2ed-$ppl2ed' ,kpl,0)) EDkpl2,
-							sum(if (toimitettuaika >= '$vva3ed-$kka3ed-$ppa3ed' and toimitettuaika <= '$vvl3ed-$kkl3ed-$ppl3ed' ,kpl,0)) EDkpl3,
-							sum(if (toimitettuaika >= '$vva4ed-$kka4ed-$ppa4ed' and toimitettuaika <= '$vvl4ed-$kkl4ed-$ppl4ed' ,kpl,0)) EDkpl4
+							sum(if (toimitettuaika >= '$vva1-$kka1-$ppa1 00:00:00' and toimitettuaika <= '$vvl1-$kkl1-$ppl1 23:59:59' ,kpl,0)) kpl1,
+							sum(if (toimitettuaika >= '$vva2-$kka2-$ppa2 00:00:00' and toimitettuaika <= '$vvl2-$kkl2-$ppl2 23:59:59' ,kpl,0)) kpl2,
+							sum(if (toimitettuaika >= '$vva3-$kka3-$ppa3 00:00:00' and toimitettuaika <= '$vvl3-$kkl3-$ppl3 23:59:59' ,kpl,0)) kpl3,
+							sum(if (toimitettuaika >= '$vva4-$kka4-$ppa4 00:00:00' and toimitettuaika <= '$vvl4-$kkl4-$ppl4 23:59:59' ,kpl,0)) kpl4,
+							sum(if (toimitettuaika >= '$vva1ed-$kka1ed-$ppa1ed 00:00:00' and toimitettuaika <= '$vvl1ed-$kkl1ed-$ppl1ed 23:59:59' ,kpl,0)) EDkpl1,
+							sum(if (toimitettuaika >= '$vva2ed-$kka2ed-$ppa2ed 00:00:00' and toimitettuaika <= '$vvl2ed-$kkl2ed-$ppl2ed 23:59:59' ,kpl,0)) EDkpl2,
+							sum(if (toimitettuaika >= '$vva3ed-$kka3ed-$ppa3ed 00:00:00' and toimitettuaika <= '$vvl3ed-$kkl3ed-$ppl3ed 23:59:59' ,kpl,0)) EDkpl3,
+							sum(if (toimitettuaika >= '$vva4ed-$kka4ed-$ppa4ed 00:00:00' and toimitettuaika <= '$vvl4ed-$kkl4ed-$ppl4ed 23:59:59' ,kpl,0)) EDkpl4
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laadittu)
 							WHERE yhtio = '$row[yhtio]'
 							and tyyppi = 'V'

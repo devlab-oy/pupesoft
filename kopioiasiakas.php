@@ -1,4 +1,7 @@
 <?php
+
+	$pupe_DataTables = "asiakaslista";
+
 	require "inc/parametrit.inc";
 	require "inc/asiakas.inc";
 
@@ -166,62 +169,64 @@
 		echo "</form>";
 	}
 
-	if($tee == ''){
+	if ($tee == '') {
 
-		if ($yhtiorow["asiakkaan_tarkenne"] == "A") {
-			$kentat = 'tunnus, nimi, nimitark, postitp, ytunnus, asiakasnro, ovttunnus';
-		}
-		else {
-			$kentat = 'tunnus, nimi, nimitark, postitp, ytunnus, ovttunnus';
-		}
+		enable_ajax();
+	    pupe_DataTables($pupe_DataTables, 7, 7, '', 'true');
 
-		$jarjestys = 'selaus, nimi';
+        $query = "	SELECT
+					asiakas.tunnus,
+					concat(if(asiakas.nimi='', '**N/A**', asiakas.nimi), '<br>', asiakas.toim_nimi) nimi,
+					concat(asiakas.nimitark, '<br>', asiakas.toim_nimitark) nimitark,
+					concat(asiakas.postitp, '<br>', asiakas.toim_postitp) postitp,
+					concat(asiakas.ytunnus) ytunnus,
+					concat(asiakas.ovttunnus, '<br>', asiakas.toim_ovttunnus) ovttunnus,
+					asiakas.asiakasnro
+					FROM asiakas
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND laji != 'P'
+					ORDER by nimi";
+		$result = mysql_query ($query) or pupe_error("Kysely ei onnistu $query");
 
-		$array = explode(",", $kentat);
-        $count = count($array);
+		echo "<table class='display' id='$pupe_DataTables'>";
+		echo "<thead>";
+		echo "<tr>";
+		echo "<th>".t("Nimi")."</th>";
+		echo "<th>".t("Nimitark")."</th>";
+		echo "<th>".t("Postitp")."</th>";
+		echo "<th>".t("Ytunnus")."</th>";
+		echo "<th>".t("Ovttunnus")."</th>";
+		echo "<th>".t("Asiakasnro")."</th>";
+		echo "<th>".t("Asiakastunnus")."</th>";
+		echo "</tr>";
+		echo "<tr>";
+		echo "<td><input type='text' name='search_nimi'></td>";
+		echo "<td><input type='text' name='search_nimitark'></td>";
+		echo "<td><input type='text' name='search_postitp'></td>";
+		echo "<td><input type='text' name='search_ytunnus'></td>";
+		echo "<td><input type='text' name='search_ovttunnus'></td>";
+		echo "<td><input type='text' name='search_asiakasnro'></td>";
+		echo "<td><input type='text' name='search_tunnus'></td>";
+		echo "</tr>";
+		echo "</thead>";
+		echo "<tbody>";
 
-        for ($i=0; $i<=$count; $i++) {
-			if (strlen($haku[$i]) > 0) {
-					$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-					$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
-			}
-        }
-        if (strlen($ojarj) > 0) {
-			$jarjestys = $ojarj;
-        }
-
-        $query = "SELECT $kentat FROM asiakas WHERE yhtio = '$kukarow[yhtio]' $lisa ";
-        $query .= "$ryhma ORDER BY $jarjestys LIMIT 100";
-
-		$result = mysql_query ($query)
-				or die ("Kysely ei onnistu $query");
-
-		echo "	<table><tr>
-				<form action = '$PHP_SELF' method = 'post'>";
-
-		for ($i = 1; $i < mysql_num_fields($result); $i++) {
-			echo "<th valign='top' align='left'><a href = '$PHP_SELF?ojarj=".$array[$i].$ulisa ."'>
-					" . t(mysql_field_name($result,$i)) . "</a>";
-			echo "<br><input type='text' name = 'haku[" . $i . "]' value = '$haku[$i]'>";
-			echo "</th>";
-		}
-		echo "<td valign='bottom' class='back'><input type='Submit' value = '".t("Etsi")."'></td></form></tr>";
-
-		while ($trow=mysql_fetch_array($result)) {
-			echo "<tr>";
-			for ($i=1; $i<mysql_num_fields($result); $i++) {
-				if ($i == 1) {
-					echo "<td><a href='$PHP_SELF?id=$trow[tunnus]&tee=edit'>$trow[$i]</a></td>";
-				}
-				else {
-					echo "<td>$trow[$i]</td>";
-				}
-			}
+		while ($row = mysql_fetch_array($result)) {
+			echo "<tr class='aktiivi'>";
+			echo "<td><a href='$PHP_SELF?id=$row[tunnus]&tee=edit'>$row[nimi]</a></td>";
+			echo "<td>$row[nimitark]</td>";
+			echo "<td>$row[postitp]</td>";
+			echo "<td>$row[ytunnus]</td>";
+			echo "<td>$row[ovttunnus]</td>";
+			echo "<td>$row[asiakasnro]</td>";
+			echo "<td>$row[tunnus]</td>";
 			echo "</tr>";
 		}
+
+		echo "</tbody>";
 		echo "</table>";
 	}
 
-	require "inc/footer.inc";
+	require ("inc/footer.inc");
 
 ?>

@@ -2362,7 +2362,11 @@
 
 			$vlask = 0;
 
-			echo "<tr><th rowspan='".mysql_num_rows($vtresult)."'>".t("Varastot:")."</th><th>".t("Huomioi varaston saldo ostoehdotuksen laskennassa")."</th><th>".t("Näytä myös varaston saldo")."</th>";
+			echo "<tr>";
+			echo "<th rowspan='".(mysql_num_rows($vtresult)+1)."'>".t("Varastot:")."</th>";
+			echo "<th>".t("Huomioi varaston saldo ostoehdotuksen laskennassa")."</th>";
+			echo "<th>".t("Näytä myös varaston saldo")."</th>";
+			echo "</tr>";
 
 			while ($vrow = mysql_fetch_array($vtresult)) {
 				$chk = "";
@@ -2376,7 +2380,7 @@
 					$chk2 = " checked";
 				}
 
-				echo "<tr><td class='back'></td>";
+				echo "<tr>";
 				echo "<td><input type='checkbox' name='valitut[VARASTO##$vrow[tunnus]]' value='VARASTO##$vrow[tunnus]'$chk> $vrow[nimitys] ($vrow[yhtio])</td>";
 				echo "<td><input type='checkbox' name='valitut[VARASTO2##$vrow[tunnus]]' value='VARASTO2##$vrow[tunnus]'$chk2> $vrow[nimitys] ($vrow[yhtio])</td>";
 				echo "</tr>";

@@ -14,7 +14,7 @@ if (trim($konserni) != '') {
 	}
 	else {
 		$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$konsyhtiot = "";
 
 		while ($row = mysql_fetch_array($result)) {
@@ -66,7 +66,7 @@ if (is_numeric($asiakasid) and $asiakasid > 0) {
 				JOIN yhtio on asiakas.yhtio=yhtio.yhtio
 				WHERE asiakas.$konsyhtiot
 				and asiakas.tunnus = '$asiakasid'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$monta  = mysql_num_rows($result);
 }
 elseif ($ytunnus != '') {
@@ -82,7 +82,7 @@ elseif ($ytunnus != '') {
 					JOIN yhtio on lasku.yhtio=yhtio.yhtio
 					WHERE lasku.$konsyhtiot
 					and lasku.tunnus = '$ytunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
 	}
 
@@ -103,7 +103,7 @@ elseif ($ytunnus != '') {
 					and match (lasku.nimi) against ('$ytunnus*' IN BOOLEAN MODE)
 					GROUP BY 1,2,3,4,5,6,7,8,9,10
 					ORDER BY 1";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
 
 		if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
@@ -126,7 +126,7 @@ elseif ($ytunnus != '') {
 					and match (lasku.toim_nimi) against ('$ytunnus*' IN BOOLEAN MODE)
 					GROUP BY 1,2,3,4,5,6,7,8,9,10
 					ORDER BY 1";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
 
 		if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
@@ -145,7 +145,7 @@ elseif ($ytunnus != '') {
 					GROUP BY 1,2,3,4,5,6,7,8,9,10
 					ORDER BY 1
 					LIMIT 50";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
 
 		if ($monta == 0) {
@@ -161,7 +161,7 @@ elseif ($ytunnus != '') {
 						GROUP BY 1,2,3,4,5,6,7,8,9,10
 						ORDER BY 1
 						LIMIT 50";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$monta  = mysql_num_rows($result);
 		}
 	}
@@ -209,7 +209,7 @@ elseif ($ytunnus != '') {
 						and asiakkaan_avainsanat.avainsana!=''
 						$lajilisa $asiakasrajaus)
 					ORDER BY nimi";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
 	}
 
@@ -224,7 +224,7 @@ elseif ($ytunnus != '') {
 					$lajilisa
 					$asiakasrajaus
 					ORDER BY asiakas.nimi";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
 	}
 
@@ -345,7 +345,7 @@ elseif ($ytunnus != '') {
 						ORDER BY nimi";
 		}
 
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$monta  = mysql_num_rows($result);
 	}
 }
@@ -356,7 +356,7 @@ elseif ($asiakasnro != '') {
 				WHERE asiakas.$konsyhtiot
 		 		AND asiakas.asiakasnro = '$asiakasnro'
 				$asiakasrajaus";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$monta  = mysql_num_rows($result);
 }
 
@@ -455,7 +455,7 @@ if ($monta == 1) {
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND laji = 'kantaasiakastunnus'
 					AND liitostunnus = '$asiakasid'";
-		$kantaasiakastunnus_result = mysql_query($query) or pupe_error($query);
+		$kantaasiakastunnus_result = pupe_query($query);
 		$kantaasiakastunnus_row = mysql_fetch_assoc($kantaasiakastunnus_result);
 
 		$kantaasiakastunnus = $kantaasiakastunnus_row['avainsana'];
@@ -668,7 +668,7 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kale
 				and nimi	= 'yllapito.php'
 				and alanimi = 'asiakas!!!VAHITTAISMYYNTI!!!true&laji=H'
 				and paivitys != ''";
-	$oikeuresult1 = mysql_query($query) or pupe_error($query);
+	$oikeuresult1 = pupe_query($query);
 
 	$query = "	SELECT yhtio
 				FROM oikeu
@@ -677,7 +677,7 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kale
 				and nimi	= 'yllapito.php'
 				and alanimi = 'asiakas'
 				and paivitys != ''";
-	$oikeuresult2 = mysql_query($query) or pupe_error($query);
+	$oikeuresult2 = pupe_query($query);
 
 	if ($monta != 1 and (mysql_num_rows($oikeuresult1) > 0 or mysql_num_rows($oikeuresult2) > 0)) {
 

@@ -1751,7 +1751,7 @@
 						$rivi .= "\"$row[aleryhma]\"\t";
 
 						if (isset($workbook)) {
-							$worksheet->writeString($excelrivi, $excelsarake, $laskurow["aleryhma"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["aleryhma"]);
 							$excelsarake++;
 						}
 					}

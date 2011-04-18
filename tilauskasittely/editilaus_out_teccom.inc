@@ -8,11 +8,11 @@
 				tilausrivi.varattu,
 				tilausrivi.yksikko,
 				ifnull(tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno) toim_tuoteno
-				FROM tilausrivi 
-				LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio 
-					AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno 
+				FROM tilausrivi
+				LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+					AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
 					AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]')
-				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				AND tilausrivi.tyyppi = 'O'
 				AND otunnus = '$laskurow[tunnus]'
 				AND varattu > 0
@@ -33,15 +33,15 @@
 		$out .= sprintf("%4.4s", "");								// Toimitustapa 4 merkkiä, ei käytössä
 		$out .= sprintf("%-1.1s", "2");								// Tilaustapa, 1 = Pikatilaus, 2 = Normaalitilaus
 		fwrite($toot, $out . "\n");
-	
-		while ($tilausrivirow = mysql_fetch_array($result)) {	
+
+		while ($tilausrivirow = mysql_fetch_array($result)) {
 			$out = sprintf("%-7.7s", "000ORDI");							// VAKIOALKU
 			$out .= sprintf("%-11.11s", $tilausrivirow['tunnus']);			// Tilausrivin numero 11 merkkiä
 			$out .= sprintf("%-60.60s", $tilausrivirow['toim_tuoteno']);	// Toimittajan Tuoteno 60 merkkiä
 			$out .= sprintf("%-6.6s", $toimirow['toimittajanro']);			// toimittajan numero 6 merkkiä
 			$out .= sprintf("%05.0f", $tilausrivirow['varattu']);			// tilausmäärä 5 merkkiä
 			$out .= sprintf("%03.3s",$tilausrivirow['yksikko']); 			// yksikkö 3 merkkiä
-			fwrite($toot, $out . "\n"); 
+			fwrite($toot, $out . "\n");
 		}
 
 		fclose ($toot);
@@ -58,14 +58,14 @@
 
 		if ($palautus == 0) {
 			echo "<font class='message'>".t("Tilaus lähetettiin onnistuneesti")."!</font><br>";
-			$sqlquery = "	UPDATE lasku SET 
-							kirjoitin = 'edi' 
-							WHERE yhtio = '$kukarow[yhtio]' 
+			$sqlquery = "	UPDATE lasku SET
+							kirjoitin = 'edi'
+							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus = '$laskurow[tunnus]'";
 			$result = mysql_query($sqlquery) or pupe_error($sqlquery);
 		}
 		else {
-			echo "<font class='error'>".t("Tilauksen lähetys epäonnistui")."!</font><br>";			
+			echo "<font class='error'>".t("Tilauksen lähetys epäonnistui")."!</font><br>";
 		}
 	}
 

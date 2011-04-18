@@ -5,6 +5,9 @@
 		die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 	}
 
+	error_reporting(E_ALL);
+	ini_set("display_errors", 1);
+
 	require ("inc/connect.inc");
 	require ("inc/functions.inc");
 
@@ -16,35 +19,32 @@
 		$kukarow["yhtio"] = $argv[1];
 	}
 
-	error_reporting(E_ALL);
-	ini_set("display_errors", 1);
+	$kansio 		= "/Users/jamppa/Desktop/teccom-ainetot";			// muuta näiden polut oikeiksi
+	$kansio_valmis 	= "/Users/jamppa/Desktop/teccom-ainetot/valmis";	// muuta näiden polut oikeiksi
+	$kansio_error 	= "/Users/jamppa/Desktop/teccom-ainetot/error";		// muuta näiden polut oikeiksi
 
-	$kansio 		= "/Users/jamppa/Sites/devlab/pupesoft/teccom";		   // muuta näiden polut oikeiksi
-	$kansio_valmis 	= "/Users/jamppa/Sites/devlab/pupesoft/teccom/valmis"; // muuta näiden polut oikeiksi
-	$kansio_error 	= "/Users/jamppa/Sites/devlab/pupesoft/teccom/error";  // muuta näiden polut oikeiksi
-	 
 	// setataan käytetyt muuttujat:
-	$tiedosto_sisalto = "";
-	$pakkauslista 	= "";
-	$tuotteet		= "";
-	$tuote			= "";
-	$kplt			= "";
-	$kpl			= "";
-	$rivilla		= "";
-	$positio		= "";
-	$tilausnumerot	= "";
-	$tilnro			= "";
-	$asn_numero		= "";
-	$toimituspvm	= "";
-	$vastaanottaja	= "";
-	$laatikonnumerot = "";
-	$laatikkoind	= "";
-	$suba			= "";
-	$subb			= "";
-	$tavarantoimittajanumero = "";
-	$poikkeukset = array("123001", "123067", "123310", "123312", "123342", "123108", "123035", "123049", "123317","123441");
-	$kukarow["kuka"]	= "crond";
-	
+	$asn_numero					= "";
+	$kpl						= "";
+	$kplt						= "";
+	$kukarow["kuka"] 			= "crond";
+	$laatikkoind				= "";
+	$laatikonnumerot			= "";
+	$pakkauslista 				= "";
+	$poikkeukset 				= array("123001", "123067", "123310", "123312", "123342", "123108", "123035", "123049", "123317","123441");
+	$positio					= "";
+	$rivilla					= "";
+	$suba						= "";
+	$subb						= "";
+	$tavarantoimittajanumero 	= "";
+	$tiedosto_sisalto			= "";
+	$tilausnumerot				= "";
+	$tilnro						= "";
+	$toimituspvm				= "";
+	$tuote						= "";
+	$tuotteet					= "";
+	$vastaanottaja				= "";
+
 	if ($handle = opendir($kansio)) {
 
 		while (($file = readdir($handle)) !== FALSE) {
@@ -61,11 +61,11 @@
 
 				 	$lisays = array();
 					$tilausnumerot = "";
-					
+
 					// $tavarantoimittajanumero ja $asn_numero arvoa pitää olla tai ei tule toimimaan.
 					$tavarantoimittajanumero = (string) $xml->DesAdvHeader->SellerParty->PartyNumber;
 					$tavarantoimittajanumero = utf8_decode($tavarantoimittajanumero);
-					
+
 					if (strtoupper($tavarantoimittajanumero) == "ELRING") {
 						$tavarantoimittajanumero = "123312";
 					}
@@ -77,11 +77,11 @@
 					}
 					elseif ($tavarantoimittajanumero == "112") {
 						$tavarantoimittajanumero = "123442";
-					}					
-					
+					}
+
 					$asn_numero  = (string) $xml->DesAdvHeader->DesAdvId;
 					$asn_numero = utf8_decode($asn_numero);
-					
+
 					$toimituspvm = tv3dateconv($xml->DesAdvHeader->DeliveryDate->Date);
 					$vastaanottaja = (string) $xml->DesAdvHeader->DeliveryParty->PartyNumber." , ".$xml->DesAdvHeader->DeliveryParty->Address->Name1;
 					$vastaanottaja = utf8_decode($vastaanottaja);
@@ -121,7 +121,7 @@
 						if ($tavarantoimittajanumero == "123312" and trim($paketti->PkgNumber) == 1) {
 							$lisays[$p][$c]['ProductId'] = "";
 						}
-						
+
 						foreach ($paketti->PkgItem as $xxx) {
 							$tuote = (string) $xxx->ProductId->ProductNumber;
 							$tuote = utf8_decode($tuote);
@@ -132,13 +132,13 @@
 								$suba = substr($tuote,0,3);
 								$subb = substr($tuote,4);
 								$tuote = $suba."-".$subb;
- 							}						
+ 							}
 							$lisays[$p][$c]['ProductId'] = $tuote;
 							$c++;
 						}
 						$p++;
 						$c=1;
-						
+
 					}
 
 					$p=1; $c=1;
@@ -147,11 +147,11 @@
 						if (!isset($paketti2->PkgItem->DeliveredQuantity->Quantity) and $tavarantoimittajanumero != "123312") {
 							$paketti2 = $paketti2->Package;
 						}
-						
+
 						if ($tavarantoimittajanumero == "123312" and trim($paketti2->PkgNumber) == 1) {
 							$lisays[$p][$c]['DeliveredQuantity'] = "";
 						}
-						
+
 						foreach ($paketti2->PkgItem as $yyy) {
 							$kpl = (float) $yyy->DeliveredQuantity -> Quantity;
 							$lisays[$p][$c]['DeliveredQuantity'] = $kpl;
@@ -167,11 +167,11 @@
 						if (!isset($paketti3->PkgItem->PositionNumber) and $tavarantoimittajanumero != "123312") {
 							$paketti3 = $paketti3->Package;
 						}
-						
+
 						if ($tavarantoimittajanumero == "123312" and trim($paketti3->PkgNumber) == 1) {
 							$lisays[$p][$c]['PositionNumber'] = "";
 						}
-						
+
 						foreach ($paketti3->PkgItem as $zzz) {
 							$positio = (string) $zzz->PositionNumber;
 							$positio = utf8_decode($positio);
@@ -188,11 +188,11 @@
 						if (!isset($tuotteelta_tilausno->PkgItem->OrderRef->BuyerOrderNumber) and $tavarantoimittajanumero != "123312") {
 							$tuotteelta_tilausno = $tuotteelta_tilausno->Package;
 						}
-						
+
 						if ($tavarantoimittajanumero == "123312" and trim($tuotteelta_tilausno->PkgNumber) == 1) {
 							$lisays[$p][$c]['BuyerOrderNumber'] = "";
 						}
-						
+
 						foreach ($tuotteelta_tilausno->PkgItem as $www) {
 							$tilnro = (int) $www->OrderRef->BuyerOrderNumber;
 							$lisays[$p][$c]['BuyerOrderNumber'] = $tilnro;
@@ -203,7 +203,7 @@
 					}
 
 					// tarvitaan pakkauksen "PkgIdentNumber"
-					// on poikkeuksia ja poikkeuksen poikkeuksia			
+					// on poikkeuksia ja poikkeuksen poikkeuksia
 					$p=1; $c=1;
 					foreach ($xml->Package as $laatikosta) {
 						if (($laatikosta->PkgId->PkgIdentNumber == "" or $laatikosta->PkgId->PkgIdentNumber == "0") and $tavarantoimittajanumero != "123312") {
@@ -213,7 +213,7 @@
 							foreach ($laatikosta->PkgId as $ident) {
 								$laatikkoind = (string) $ident->PkgIdentNumber;
 								$laatikkoind = utf8_decode($laatikkoind);
-								
+
 								if ($tavarantoimittajanumero == "123085") {
 									$laatikkoind = "0".$laatikkoind;
 								}
@@ -271,28 +271,31 @@
 								}
 
 								foreach ($lisays[$i] as $value) {
-									$sqlinsert =  "		INSERT INTO asn_sanomat SET
-														yhtio 				= '$kukarow[yhtio]',
-														toimittajanro 		= '$tavarantoimittajanumero', 
-														asn_numero			= '$asn_numero',
-														saapumispvm 		= '$toimituspvm',
-														vastaanottaja 		= '$vastaanottaja',
-														tilausnumero 		= '$value[BuyerOrderNumber]', 
-														paketinnumero		= '$i',
-														paketintunniste 	= '$laatikkoid',
-														lahetyslistannro 	= '$pakkauslista',
-														toimittajan_tuoteno	= '$value[ProductId]',
-														kappalemaara		= '$value[DeliveredQuantity]', 
-														tilausrivinpositio	= '$value[PositionNumber]',
-														laatija 			= '$kukarow[kuka]',
-														luontiaika 			= now()";
-									$result = mysql_query($sqlinsert) or pupe_error($sqlinsert);
-									$eka_insert[] = mysql_insert_id(); // Otetaan insertin ensimmäinen tunnus talteen. tätä käytetään liitetiedostoissa liitostunnuksena.
+
+									if ($laatikkoid != "TOTAL PACKS") { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
+		 								$sqlinsert =  "		INSERT INTO asn_sanomat SET
+		 													yhtio 				= '$kukarow[yhtio]',
+		 													toimittajanro 		= '$tavarantoimittajanumero',
+		 													asn_numero			= '$asn_numero',
+		 													saapumispvm 		= '$toimituspvm',
+		 													vastaanottaja 		= '$vastaanottaja',
+		 													tilausnumero 		= '$value[BuyerOrderNumber]',
+		 													paketinnumero		= '$i',
+		 													paketintunniste 	= '$laatikkoid',
+		 													lahetyslistannro 	= '$pakkauslista',
+		 													toimittajan_tuoteno	= '$value[ProductId]',
+		 													kappalemaara		= '$value[DeliveredQuantity]',
+		 													tilausrivinpositio	= '$value[PositionNumber]',
+		 													laatija 			= '$kukarow[kuka]',
+		 													luontiaika 			= now()";
+		 								$result = mysql_query($sqlinsert) or pupe_error($sqlinsert);
+		 								$eka_insert[] = mysql_insert_id(); // Otetaan insertin ensimmäinen tunnus talteen. tätä käytetään liitetiedostoissa liitostunnuksena.
+									}
 								}
 							}
-							
+
 							$filesize = strlen($tiedosto_sisalto);
-							
+
 							$tecquery = "	INSERT INTO liitetiedostot SET
 											yhtio    			= '$kukarow[yhtio]',
 											liitos   			= 'asn_sanomat',
@@ -309,12 +312,12 @@
 											kayttotarkoitus		= 'TECCOM-ASN',
 											jarjestys			= '1',
 											laatija				= '$kukarow[kuka]',
-											luontiaika			= now()";											
+											luontiaika			= now()";
 							$Xresult = mysql_query($tecquery) or die ("$tecquery\n\n".mysql_error());
 
 							rename($kansio."/".$file, $kansio_valmis."/".$file);
 						}
-	
+
 						unset($eka_insert); // unsetataan tämä arvo aina kierroksen lopussa koska halutaan seuraavan kierrokselta ensimmäisen insertin Id talteen
 						unset($lisays);
 						unset($tilausnumerot);
@@ -333,6 +336,10 @@
 				}
 			}
 		}
+
+		require ("inc/asn_kohdistus.inc");
+		asn_kohdistus();
+
 	}
 	else {
 		echo "Hakemistoa $kansio ei löydy\n";

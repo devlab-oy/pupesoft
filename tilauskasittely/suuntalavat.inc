@@ -12,14 +12,16 @@
 		exit;
 	}
 
-	echo "	<script type=\"text/javascript\" charset=\"utf-8\">
-				$(document).ready(function() {
-					if ('$tee' == 'uusi') {
-						// valitaan sscc-kenttä heti kun ollaan muokkaamassa, jotta voidaan lukea viivakoodi heti ilman klikkailuja
-						$('#sscc').focus().select();
-					}
-				});
-			</script>";
+	if (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_kayttoliittymaa != "KYLLA") {
+		echo "	<script type=\"text/javascript\" charset=\"utf-8\">
+					$(document).ready(function() {
+						if ('$tee' == 'uusi') {
+							// valitaan sscc-kenttä heti kun ollaan muokkaamassa, jotta voidaan lukea viivakoodi heti ilman klikkailuja
+							$('#sscc').focus().select();
+						}
+					});
+				</script>";
+	}
 
 	$virheviesti = array('sscc' => '',
 						'alkuhyllyalue' => '',
@@ -323,6 +325,11 @@
 
 			$suuntalavan_tunnus = '';
 		}
+		
+		if ($suuntalavat_ei_kayttoliittymaa == "KYLLA") {
+			$tee = "eihalutamitäänkäyttöliittymääpliis";
+		}
+		
 	}
 
 	if ($tee == 'vie_koko_suuntalava') {

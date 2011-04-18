@@ -1,5 +1,7 @@
 <?php
-
+	
+	$pupe_DataTables = "asiakaslista";
+	
 	require ("inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Kopioi asiakkaan alennuksia")."</font><hr>";
@@ -144,7 +146,7 @@
 	if ($tee == '') {
 
 		enable_ajax();
-	    pupe_DataTables('asiakaslista', 7, 7);
+	    pupe_DataTables($pupe_DataTables, 7, 7);
 
         $query = "	(SELECT DISTINCT
 					asiakas.tunnus,
@@ -181,7 +183,7 @@
 					ORDER BY 2";
 		$result = mysql_query ($query) or pupe_error("Kysely ei onnistu $query");
 
-		echo "<table class='display' id='asiakaslista'>";
+		echo "<table class='display' id='$pupe_DataTables'>";
 		echo "<thead>";
 		echo "<tr>";
 		echo "<th>".t("Nimi")."</th>";

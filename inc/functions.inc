@@ -11013,7 +11013,9 @@ if (!function_exists("palauta_vak_tiedot")) {
 				$edrow = $row;
 			}
 
-			$nimitykset = explode("###", wordwrap($edrow["nimitys"], 90, "###"));
+			if ($tyyppi == "DGD") $nimitykset = explode("###", wordwrap($edrow["nimitys"], 50, "###"));
+			else $nimitykset = explode("###", wordwrap($edrow["nimitys"], 90, "###"));
+
 			$vaktuotetiedot[] = "$edrow[yk_nro], $nimitykset[0]";
 
 			for ($i = 1; $i<count($nimitykset); $i++) {

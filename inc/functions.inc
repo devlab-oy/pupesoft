@@ -1,5 +1,18 @@
 <?php
 
+if (!function_exists("pupe_query")) {
+	function pupe_query($query, $link = NULL) {
+		if (is_resource($link)) {
+			$res = mysql_query($query, $link) or pupe_error($query);
+		}
+		else {
+			$res = mysql_query($query) or pupe_error($query);
+		}
+
+		return $res;
+	}
+}
+
 // n‰in kuollaan mysql errorista...
 if (!function_exists("pupe_error")) {
 	// otetaan parametriksi query
@@ -131,7 +144,7 @@ if (!function_exists("lopetus")) {
 								and nimi		= '$nimi'
 								and alanimi		= '$alanimi[1]'
 								LIMIT 1";
-					$res = mysql_query($query) or pupe_error($query);
+					$res = pupe_query($query);
 
 					if (mysql_num_rows($res) > 0) {
 						$row = mysql_fetch_assoc($res);
@@ -230,7 +243,7 @@ if (!function_exists("avoin_kori")) {
 			$query = "	SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and tila = 'N' and tunnus = '$kukarow[kesken]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$laskurow = mysql_fetch_assoc($result);
@@ -238,7 +251,7 @@ if (!function_exists("avoin_kori")) {
 				$query = "	SELECT round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),$yhtiorow[hintapyoristys]) summa
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi != 'D'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$row = mysql_fetch_assoc($result);
 
 				$linkki = "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$osasto&try=$try')\"><strong>".t("Ostoskori: Tilaus %s%s, yhteens‰ %s %s", $kieli, $laskurow["tunnus"], " ".$laskurow["viesti"], number_format($row["summa"], 2, ',', ' '), $laskurow["valkoodi"])."</strong></a><br><br>";
@@ -256,7 +269,7 @@ if (!function_exists("maa")) {
 		global $yhtiorow, $kukarow, $useslave, $link, $verkkokauppa;
 
 		$query = sprintf("SELECT nimi FROM maat where koodi = '%s' LIMIT 1", mysql_real_escape_string(substr($code, 0 ,2)));
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 		$maa = mysql_fetch_assoc($res);
 
 		// otetaan pois maa koodi
@@ -281,7 +294,7 @@ if (!function_exists("alias")) {
 		$hakustringi = $taulu.".".$stringi;
 
 		$aliasquery  = "SELECT selitetark FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and selitetark_2 = '$setti' and selite = '$hakustringi'";
-		$aliasresult = mysql_query($aliasquery) or pupe_error($aliasquery);
+		$aliasresult = pupe_query($aliasquery);
 
 		if (mysql_num_rows($aliasresult) > 0) {
 			$aliasrow = mysql_fetch_assoc($aliasresult);
@@ -311,7 +324,7 @@ if (!function_exists("kuuluukovarastoon")) {
 			$query	= "	SELECT GROUP_CONCAT(distinct yhtio) yhtiot
 						from yhtio
 						where yhtio='$kukarow[yhtio]' or (konserni = '$yhtiorow[konserni]' and konserni != '')";
-			$pres = mysql_query($query) or pupe_error($query);
+			$pres = pupe_query($query);
 			$prow = mysql_fetch_assoc($pres);
 
 			$yhtiot = explode(",", $prow["yhtiot"]);
@@ -334,7 +347,7 @@ if (!function_exists("kuuluukovarastoon")) {
 					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) and
 					yhtio = '$yhtiolisa'
 					$varastolisa";
-		$varcheckres = mysql_query($query) or pupe_error($query);
+		$varcheckres = pupe_query($query);
 
 		if (mysql_num_rows($varcheckres) == 0) {
 			return 0;
@@ -362,7 +375,7 @@ if (!function_exists("onkotulostusalueita")) {
 			$query	= "	SELECT GROUP_CONCAT(distinct yhtio) yhtiot
 						from yhtio
 						where yhtio='$kukarow[yhtio]' or (konserni = '$yhtiorow[konserni]' and konserni != '')";
-			$pres = mysql_query($query) or pupe_error($query);
+			$pres = pupe_query($query);
 			$prow = mysql_fetch_assoc($pres);
 
 			$yhtiot = explode(",", $prow["yhtiot"]);
@@ -384,7 +397,7 @@ if (!function_exists("onkotulostusalueita")) {
 					and	concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0'))
 					and	yhtio = '$yhtiolisa'
 					and varasto ='$varasto'";
-		$varcheckres = mysql_query($query) or pupe_error($query);
+		$varcheckres = pupe_query($query);
 
 		if (mysql_num_rows($varcheckres) == 0) {
 			return "";
@@ -479,24 +492,24 @@ if (!function_exists("vapauta_sarjanumerot")) {
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.otunnus = '$kukarow[kesken]'
 					$lisa ";
-		$sres = mysql_query($query) or pupe_error($query);
+		$sres = pupe_query($query);
 
 		while ($srow = mysql_fetch_assoc($sres)) {
 
 			if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 				// merktaan siirtolistatunnus nollaks
 				$query = "UPDATE sarjanumeroseuranta set siirtorivitunnus = 0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
-				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjares = pupe_query($query);
 			}
 			elseif ($srow["varattu"] < 0) {
 				// dellataan koko rivi jos sit‰ ei ole viel‰ myyty
 				$query = "DELETE from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
-				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjares = pupe_query($query);
 
 				if (mysql_affected_rows() == 0) {
 					// merkataan osorivitunnus nollaksi
 					$query = "UPDATE sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
-					$sarjares = mysql_query($query) or pupe_error($query);
+					$sarjares = pupe_query($query);
 				}
 			}
 			else {
@@ -506,7 +519,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$srow[tuoteno]'
 								and myyntirivitunnus = '$srow[tunnus]'";
-					$sarjares = mysql_query($query) or pupe_error($query);
+					$sarjares = pupe_query($query);
 				}
 				else {
 					$query = "	UPDATE sarjanumeroseuranta
@@ -514,7 +527,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$srow[tuoteno]'
 								and myyntirivitunnus = '$srow[tunnus]'";
-					$sarjares = mysql_query($query) or pupe_error($query);
+					$sarjares = pupe_query($query);
 				}
 			}
 
@@ -526,7 +539,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 							and tunnus  	= '$srow[tilausrivilinkki]'
 							and tyyppi 		= 'O'
 							and uusiotunnus = 0";
-				$siirtores = mysql_query($query) or pupe_error($query);
+				$siirtores = pupe_query($query);
 			}
 		}
 	}
@@ -601,7 +614,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 					from tuote
 					where tuote.yhtio = '$yhtio'
 					and tuote.tuoteno = '$tuoteno'";
-		$asires = mysql_query($query) or pupe_error($query);
+		$asires = pupe_query($query);
 		$asirow = mysql_fetch_assoc($asires);
 
 		if (!function_exists("tuoteperhe_myytavissa_reku")) {
@@ -615,7 +628,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 								where tuoteperhe.yhtio = '$yhtio'
 								and isatuoteno = '$tuoteno'
 								and tyyppi in ('','P')";
-					$isiresult = mysql_query($query) or pupe_error($query);
+					$isiresult = pupe_query($query);
 
 					while ($isirow = mysql_fetch_assoc($isiresult)) {
 
@@ -693,7 +706,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 					and tuote.tuoteno != ''
 					$valinta3
 					ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys";
-		$varresult = mysql_query($query) or pupe_error($query);
+		$varresult = pupe_query($query);
 
 		$varasto_myytavissa = array();
 
@@ -774,7 +787,7 @@ if (!function_exists("saldo_myytavissa")) {
 				$query	= "	SELECT GROUP_CONCAT(distinct yhtio) yhtiot
 							from yhtio
 							where yhtio='$kukarow[yhtio]' or (konserni = '$yhtiorow[konserni]' and konserni != '')";
-				$pres = mysql_query($query) or pupe_error($query);
+				$pres = pupe_query($query);
 				$prow = mysql_fetch_assoc($pres);
 
 				$yhtiot = explode(",", $prow["yhtiot"]);
@@ -794,7 +807,7 @@ if (!function_exists("saldo_myytavissa")) {
 								and toimi.edi_salasana != ''
 								and toimi.edi_polku    != ''
 								and toimi.oletus_vienti in ('C','F','I')";
-					$superjtres  = mysql_query($query) or pupe_error($query);
+					$superjtres  = pupe_query($query);
 
 					if (mysql_num_rows($superjtres) > 0) {
 						$superrow = mysql_fetch_assoc($superjtres);
@@ -1276,7 +1289,7 @@ if (!function_exists("lpr")) {
 						yhtio = '$kukarow[yhtio]' and
 						tunnus = '$prn'
 						ORDER by kirjoitin";
-			$kirre = mysql_query($query) or pupe_error($query);
+			$kirre = pupe_query($query);
 
 			if (mysql_num_rows($kirre) != 1) {
 				echo "printer not found";
@@ -1373,7 +1386,7 @@ if (!function_exists("kehahin")) {
 		$query = "SELECT round(if (epakurantti100pvm='0000-00-00', if (epakurantti75pvm='0000-00-00', if (epakurantti50pvm='0000-00-00', if (epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25), 0),6) kehahin
 				  FROM tuote
 				  WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		if (mysql_num_rows($result) > 0) {
 			$row = mysql_fetch_assoc($result);
 			return $row["kehahin"];
@@ -1609,7 +1622,7 @@ if (!function_exists("synclog")) {
 					viesti		= '".addslashes($viesti)."',
 					laatija		= '$kukarow[kuka]',
 					luontiaika	= now()";
-		$insres = mysql_query($query) or pupe_error($query);
+		$insres = pupe_query($query);
 	}
 }
 
@@ -1648,7 +1661,7 @@ if (!function_exists("synkronoi")) {
 					FROM $table
 					WHERE yhtio	= '$yhtio'
 					and tunnus	= $tunnus";
-		$masterres = mysql_query($query) or pupe_error($query);
+		$masterres = pupe_query($query);
 
 		if (mysql_num_rows($masterres) == 1) {
 			$masterrow = mysql_fetch_array($masterres) or pupe_error($query);
@@ -1764,7 +1777,7 @@ if (!function_exists("synkronoi")) {
 					where yhtio.konserni	 		 = '$yhtiorow[konserni]'
 					and (yhtion_parametrit.synkronoi = '$table$avainsanalajilisa' or yhtion_parametrit.synkronoi like '$table$avainsanalajilisa,%' or yhtion_parametrit.synkronoi like '%,$table$avainsanalajilisa,%' or yhtion_parametrit.synkronoi like '%,$table$avainsanalajilisa')
 					and yhtio.yhtio					!= '$yhtio'";
-		$kohderes = mysql_query($query) or pupe_error($query);
+		$kohderes = pupe_query($query);
 
 		if (mysql_num_rows($kohderes) > 0) {
 			while ($kohderow = mysql_fetch_assoc($kohderes)) {
@@ -1784,7 +1797,7 @@ if (!function_exists("synkronoi")) {
 				if ($table == "yhteyshenkilo") {
 					if ($abuhaku["tyyppi"] == "A") {
 						$query = "SELECT * from asiakas where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
-						$abures = mysql_query($query) or pupe_error($query);
+						$abures = pupe_query($query);
 						$aburow = mysql_fetch_assoc($abures);
 
 						//	Etsit‰‰n oikea asiakas, jotta saadaan oikea liitostunnus
@@ -1792,13 +1805,13 @@ if (!function_exists("synkronoi")) {
 					}
 					else {
 						$query = "SELECT * from toimi where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
-						$abures = mysql_query($query) or pupe_error($query);
+						$abures = pupe_query($query);
 						$aburow = mysql_fetch_assoc($abures);
 
 						//	Etsit‰‰n oikea toimittaja, jotta saadaan oikea liitostunnus
 						$tarkquery = "SELECT tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
 					}
-					$tarkres = mysql_query($tarkquery) or pupe_error($tarkquery);
+					$tarkres = pupe_query($tarkquery);
 
 					if (mysql_num_rows($tarkres)==1) {
 						//	Ylikirjoitetaan liitostunnus
@@ -1816,17 +1829,17 @@ if (!function_exists("synkronoi")) {
 				elseif ($table == "tuotteen_toimittajat") {
 
 					$query = "SELECT * from tuote where yhtio='$yhtio' and tuoteno='$abuhaku[tuoteno]'";
-					$abures = mysql_query($query) or pupe_error($query);
+					$abures = pupe_query($query);
 
 					if (mysql_num_rows($abures) == 1) {
 
 						$query = "SELECT * from toimi where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
-						$abures = mysql_query($query) or pupe_error($query);
+						$abures = pupe_query($query);
 						$aburow = mysql_fetch_assoc($abures);
 
 						//	Etsit‰‰n oikea toimittaja jotta saadaan oikea liitostunnus
 						$tarkquery = "SELECT tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
-						$tarkres = mysql_query($tarkquery) or pupe_error($tarkquery);
+						$tarkres = pupe_query($tarkquery);
 
 						if (mysql_num_rows($tarkres)==1) {
 							//	Ylikirjoitetaan liitostunnus
@@ -1898,7 +1911,7 @@ if (!function_exists("synkronoi")) {
 
 						// Tarkastetaan ett‰ hinnat eiv‰t mene aivan p‰in mets‰‰..
 						$query = "select tunnus from yhtion_parametrit where yhtio='$kohderow[yhtio]' and alv_kasittely!='$yhtiorow[alv_kasittely]'";
-						$abures = mysql_query($query) or pupe_error($query);
+						$abures = pupe_query($query);
 
 						if (mysql_num_rows($abures)!=0 and $masterrow["alv"] > 0) {
 
@@ -1921,7 +1934,7 @@ if (!function_exists("synkronoi")) {
 
 						//	koitetaan hakea oikean maksuehdon tunnus..
 						$query = "SELECT * from maksuehto where yhtio='$yhtio' and tunnus='$masterrow[maksuehto]'";
-						$abures = mysql_query($query) or pupe_error($query);
+						$abures = pupe_query($query);
 						$aburow = mysql_fetch_assoc($abures);
 
 						//	Melkein kaikki tiedot pit‰‰ stemmata!
@@ -1944,7 +1957,7 @@ if (!function_exists("synkronoi")) {
 									and summanjakoprososa2	= '$aburow[summanjakoprososa2]'
 									and suoraveloitus		= '$aburow[suoraveloitus]'
 									LIMIT 1";
-						$tarkres = mysql_query($query) or pupe_error($query);
+						$tarkres = pupe_query($query);
 
 						if (mysql_num_rows($tarkres) == 1) {
 							$tarkrow = mysql_fetch_assoc($tarkres);
@@ -1956,7 +1969,7 @@ if (!function_exists("synkronoi")) {
 
 						//	koitetaan hakea oikean toimitustavan tunnus..
 						$query = "SELECT * from toimitustapa where yhtio='$yhtio' and tunnus='$masterrow[toimitustapa]'";
-						$abures = mysql_query($query) or pupe_error($query);
+						$abures = pupe_query($query);
 						$aburow = mysql_fetch_assoc($abures);
 
 						//	Melkein kaikki tiedot pit‰‰ stemmata!
@@ -1970,7 +1983,7 @@ if (!function_exists("synkronoi")) {
 									and nouto			= '$aburow[nouto]'
 									and sallitut_maat	= '$aburow[sallitut_maat]'
 									";
-						$tarkres=mysql_query($query) or pupe_error($query);
+						$tarkres=pupe_query($query);
 						if (mysql_num_rows($tarkres) == 1) {
 							$tarkrow=mysql_fetch_assoc($tarkres);
 							$override["toimitustapa"] = $tarkrow["tunnus"];
@@ -2019,7 +2032,7 @@ if (!function_exists("synkronoi")) {
 						}
 
 						$query = $query." ".$query2;
-						$updres = mysql_query($query) or pupe_error($query);
+						$updres = pupe_query($query);
 
 						if (mysql_affected_rows() > 0) {
 
@@ -2042,7 +2055,7 @@ if (!function_exists("synkronoi")) {
 							else {
 								//	Annetaan aikaleima t‰ss‰, koska muuten affected row ei koskaan toimi oikein!
 								$query = "UPDATE $table SET yhtio='$kohderow[yhtio]', muuttaja='$yhtio', muutospvm=now() WHERE yhtio='$kohderow[yhtio]' and tunnus=$vanhatunnus";
-								$updres = mysql_query($query) or pupe_error($query);
+								$updres = pupe_query($query);
 
 								synclog($kohderow["yhtio"], $table, "Tietue ($vanhatunnus) p‰ivitetty.".$muutos.$erot, $utunnus);
 								$synclog .= "Yhtiˆlle '$kohderow[yhtio]' p‰ivitettiin tietue ($vanhatunnus)\n";
@@ -2080,7 +2093,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 					where tunnus = '$otunnus'
 					and yhtio	 = '$kukarow[yhtio]'
 					and ((tila='K' and alatila = 'X') or (tila='U' and alatila = 'X') or (tila='K' and alatila = 'I'))";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$laskurow = mysql_fetch_assoc($result);
@@ -2091,7 +2104,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 							FROM tilausrivi
 							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 							and tilausrivi.tunnus = $rivitunnus";
-				$presult = mysql_query($query) or pupe_error($query);
+				$presult = pupe_query($query);
 				$tilrivirow = mysql_fetch_assoc($presult);
 
 				return $tilrivirow["ohinta"];
@@ -2102,7 +2115,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 							FROM tilausrivi
 							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 							and tilausrivi.tunnus = $rivitunnus";
-				$presult = mysql_query($query) or pupe_error($query);
+				$presult = pupe_query($query);
 				$tilrivirow = mysql_fetch_assoc($presult);
 
 				return $tilrivirow["ohinta"];
@@ -2120,7 +2133,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							and	tilausrivi.tyyppi = 'O'
 							and tilausrivi.tunnus = $rivitunnus";
-				$presult = mysql_query($query) or pupe_error($query);
+				$presult = pupe_query($query);
 
 				// Tsekataan viel‰ laskun valuttakurssi
 				if ($laskurow["vienti_kurssi"] == 0) {	//t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
@@ -2156,7 +2169,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 								LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
 								where tuote.yhtio	= '$kukarow[yhtio]'
 								and tuote.tuoteno	= '$tilrivirow[tuoteno]'";
-					$tuores = mysql_query($query) or pupe_error($query);
+					$tuores = pupe_query($query);
 					$tuorow = mysql_fetch_assoc($tuores);
 
 					if ($tuorow['tuotekerroin'] <= 0) $tuorow['tuotekerroin'] = 1;
@@ -2248,7 +2261,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 					and lasku.tunnus = '$valmistettava_tilaus'
 					GROUP BY lasku.tunnus
 					HAVING valmistusriveja > 0";
-		$tilre = mysql_query($query) or pupe_error($query);
+		$tilre = pupe_query($query);
 		$tilrow = mysql_fetch_assoc($tilre);
 
 		$valmistettavat = $tilrow["valmistettavat"];
@@ -2265,7 +2278,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 						and	tilausrivi.tunnus in ($valmistettavat)
 						and lasku.tunnus=tilausrivi.otunnus
 						and lasku.yhtio=tilausrivi.yhtio";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Yht‰‰n tilausta ei lˆytynyt")."</font><br>";
@@ -2289,7 +2302,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 						and tunnus  in ($row[Tilaus])
 						and tila	in ('V','L')
 						and alatila in ('V','X')";
-			$chkresult4 = mysql_query($query) or pupe_error($query);
+			$chkresult4 = pupe_query($query);
 
 			$korjataan = " and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') ";
 
@@ -2331,7 +2344,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 						and tyyppi in ('V','W','M','L','D')
 						$korjataan
 						ORDER BY perheid desc, tyyppi in ('W','M','L','D','V'), tunnus";
-			$presult = mysql_query($query) or pupe_error($query);
+			$presult = pupe_query($query);
 			$riveja = mysql_num_rows($presult);
 
 			$rivkpl = mysql_num_rows($presult);
@@ -2392,7 +2405,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 								and tuoteno = '$prow[tuoteno]'
 								and tyyppi	= 'D'
 								and toimitettuaika = '0000-00-00 00:00:00'";
-					$sumres = mysql_query($query) or pupe_error($query);
+					$sumres = pupe_query($query);
 					$sumrow = mysql_fetch_array($sumres);
 
 					$query = "	SELECT count(*) laskuja
@@ -2401,7 +2414,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 								and tunnus 	= '$prow[laskutettu]'
 								and tila 	= 'U'
 								and alatila	= 'X'";
-					$slres = mysql_query($query) or pupe_error($query);
+					$slres = pupe_query($query);
 					$slrow = mysql_fetch_array($slres);
 
 					if ($prow["tunnus"] == $prow["perheid"]) {
@@ -2497,7 +2510,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
 						LIMIT 1";
-			$hresult = mysql_query($query) or pupe_error($query);
+			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow       	= mysql_fetch_assoc ($hresult);
@@ -2522,7 +2535,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
 						LIMIT 1";
-			$hresult = mysql_query($query) or pupe_error($query);
+			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow       	= mysql_fetch_assoc ($hresult);
@@ -2554,7 +2567,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
 						LIMIT 1";
-			$hresult = mysql_query($query) or pupe_error($query);
+			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow			= mysql_fetch_assoc ($hresult);
@@ -2579,7 +2592,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
 						LIMIT 1";
-			$hresult = mysql_query($query) or pupe_error($query);
+			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow			= mysql_fetch_assoc ($hresult);
@@ -2638,7 +2651,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 						WHERE tuoteno = '$trow[tuoteno]'
 						AND tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 						LIMIT 1";
-		$preres = mysql_query($prequery) or pupe_error($prequery);
+		$preres = pupe_query($prequery);
 
  		if (mysql_num_rows($preres) > 0) {
 			$prerow = mysql_fetch_assoc($preres);
@@ -2659,7 +2672,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
 						LIMIT 1";
-			$hresult = mysql_query($query) or pupe_error($query);
+			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) != 0) {
 				$hrow       	= mysql_fetch_assoc ($hresult);
@@ -2684,7 +2697,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 						and ((hinnasto.minkpl <= '$kpl' and hinnasto.maxkpl >= '$kpl') or (hinnasto.minkpl = 0 and hinnasto.maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(hinnasto.alkupvm),9999999999999), hinnasto.valkoodi DESC
 						LIMIT 1";
-			$hresult = mysql_query($query) or pupe_error($query);
+			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) != 0) {
 				$hrow       	= mysql_fetch_assoc ($hresult);
@@ -2709,7 +2722,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
 						LIMIT 1";
-			$hresult = mysql_query($query) or pupe_error($query);
+			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) != 0) {
 				$hrow			= mysql_fetch_assoc ($hresult);
@@ -2734,7 +2747,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 						and ((hinnasto.minkpl <= '$kpl' and hinnasto.maxkpl >= '$kpl') or (hinnasto.minkpl = 0 and hinnasto.maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(hinnasto.alkupvm),9999999999999), hinnasto.valkoodi DESC
 						LIMIT 1";
-			$hresult = mysql_query($query) or pupe_error($query);
+			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) != 0) {
 				$hrow			= mysql_fetch_assoc ($hresult);
@@ -2751,7 +2764,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa s‰‰t‰‰
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$trow[tuoteno]'
 						and liitostunnus = '$laskurow[liitostunnus]'";
-			$hresult = mysql_query($query) or pupe_error($query);
+			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow			= mysql_fetch_assoc ($hresult);
@@ -2792,7 +2805,7 @@ if (!function_exists("alv")) {
 
 		//yhtiˆn oletusalvi!
 		$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
-		$wtres  = mysql_query($wquery) or pupe_error($wquery);
+		$wtres  = pupe_query($wquery);
 		$wtrow  = mysql_fetch_assoc($wtres);
 
 		// jos meill‰ on tuotteelta tuleva poikkeava tuotteen alv, k‰ytet‰‰n sit‰
@@ -2914,7 +2927,7 @@ if (!function_exists("alehinta")) {
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND ytunnus = '{$laskurow['ytunnus']}'
 						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'";
-			$asiakas_tunnus_res = mysql_query($query) or pupe_error($query);
+			$asiakas_tunnus_res = pupe_query($query);
 			$asiakas_tunnus_row = mysql_fetch_assoc($asiakas_tunnus_res);
 
 			$vanha_liitostunnus = $laskurow['liitostunnus'];
@@ -2932,12 +2945,12 @@ if (!function_exists("alehinta")) {
 
 			// tutkitaan ollaanko siell‰ alv-rekisterˆity
 			$query = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
-			$alhire = mysql_query($query) or pupe_error($query);
+			$alhire = pupe_query($query);
 
 			// ollaan alv-rekisterˆity, haetaan tuotteelle oikea ALV
 			if (mysql_num_rows($alhire) == 1) {
 				$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$trow[tuoteno]' limit 1";
-				$alhire = mysql_query($query) or pupe_error($query);
+				$alhire = pupe_query($query);
 
 				// ei lˆytynyt alvia, se on pakko lˆyty‰
 				if (mysql_num_rows($alhire) == 0) {
@@ -2955,7 +2968,7 @@ if (!function_exists("alehinta")) {
 
 		// haetaan asiakkaan tiedot
 		$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-		$alhire = mysql_query($query) or pupe_error($query);
+		$alhire = pupe_query($query);
 
 		if (mysql_num_rows($alhire) == 1) {
 			$alehi_asrow = mysql_fetch_assoc($alhire);
@@ -2976,7 +2989,7 @@ if (!function_exists("alehinta")) {
 	   				AND node.laji = parent.laji =  puun_alkio.laji = 'asiakas'
 	   				AND parent.lft > 1
 	   				HAVING tunnukset IS NOT NULL";
-		$almight = mysql_query($query) or pupe_error($query);
+		$almight = pupe_query($query);
 		$alehi_assegmenttirow = mysql_fetch_assoc($almight);
 
 		if ($alehi_assegmenttirow["tunnukset"] == "") {
@@ -3034,7 +3047,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 							ORDER BY prio, minkpl desc, aika, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3098,7 +3111,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 							ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3161,7 +3174,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 							ORDER BY prio, minkpl desc, aika, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3225,7 +3238,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 							ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3279,7 +3292,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3334,7 +3347,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc,tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3388,7 +3401,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3443,7 +3456,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3497,7 +3510,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc,tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3552,7 +3565,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),hinta asc, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3606,7 +3619,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc,tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3661,7 +3674,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc,tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3715,7 +3728,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3770,7 +3783,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3824,7 +3837,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc,tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3879,7 +3892,7 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc,tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_assoc ($hresult);
@@ -3947,7 +3960,7 @@ if (!function_exists("alehinta")) {
 
 							ORDER BY prio, minkpl desc, aika, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 
@@ -4009,7 +4022,7 @@ if (!function_exists("alehinta")) {
 							and (alennus < 0 or left(alennus,1) = '-')
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 
@@ -4072,7 +4085,7 @@ if (!function_exists("alehinta")) {
 							and (alennus < 0 or left(alennus,1) = '-')
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 
@@ -4135,7 +4148,7 @@ if (!function_exists("alehinta")) {
 							and (alennus < 0 or left(alennus,1) = '-')
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 
@@ -4206,7 +4219,7 @@ if (!function_exists("alehinta")) {
 
 							ORDER BY prio, minkpl desc, aika, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 
@@ -4214,7 +4227,7 @@ if (!function_exists("alehinta")) {
 
 					//Jos aleprossa  = 999.99 haetaan tuotteen myym‰l‰hinta myyntihinnan tilalle
 					$query = "SELECT myymalahinta, alv FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]'";
-					$myymresult = mysql_query($query) or pupe_error($query);
+					$myymresult = pupe_query($query);
 					$myymrow = mysql_fetch_assoc ($myymresult);
 
 					if ($alehinta_alv != "") $myymrow["alv"] = $alehinta_alv;
@@ -4249,7 +4262,7 @@ if (!function_exists("alehinta")) {
 							and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow       	= mysql_fetch_assoc ($hresult);
@@ -4276,7 +4289,7 @@ if (!function_exists("alehinta")) {
 							and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow       	= mysql_fetch_assoc($hresult);
@@ -4312,7 +4325,7 @@ if (!function_exists("alehinta")) {
 							and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow			= mysql_fetch_assoc ($hresult);
@@ -4339,7 +4352,7 @@ if (!function_exists("alehinta")) {
 							and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow			= mysql_fetch_assoc($hresult);
@@ -4415,7 +4428,7 @@ if (!function_exists("alehinta")) {
 						and alennus <= 100)
 						ORDER BY prio, minkpl desc, aika, tunnus desc
 						LIMIT 1";
-			$hresult = mysql_query($query) or pupe_error($query);
+			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
 				$aleperuste = 5;
@@ -4453,7 +4466,7 @@ if (!function_exists("alehinta")) {
 							and alennus <= 100)
 							ORDER BY prio, minkpl desc, aika, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 6;
@@ -4481,7 +4494,7 @@ if (!function_exists("alehinta")) {
 							and alennus <= 100
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 7;
@@ -4510,7 +4523,7 @@ if (!function_exists("alehinta")) {
 							and alennus <= 100
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 8;
@@ -4538,7 +4551,7 @@ if (!function_exists("alehinta")) {
 							and alennus <= 100
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 9;
@@ -4566,7 +4579,7 @@ if (!function_exists("alehinta")) {
 							and alennus <= 100
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 10;
@@ -4605,7 +4618,7 @@ if (!function_exists("alehinta")) {
 								and alennus <= 100
 								ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 								LIMIT 1";
-					$hresult = mysql_query($query) or pupe_error($query);
+					$hresult = pupe_query($query);
 
 					if (mysql_num_rows($hresult) > 0) {
 						$aleperuste = 11;
@@ -4635,7 +4648,7 @@ if (!function_exists("alehinta")) {
 							and alennus <= 100
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
 							LIMIT 1";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 12;
@@ -4656,7 +4669,7 @@ if (!function_exists("alehinta")) {
 							and ryhma != ''
 							and alennus >= 0
 							and alennus <= 100";
-				$hresult = mysql_query($query) or pupe_error($query);
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 13;
@@ -4728,7 +4741,7 @@ if (!function_exists("kalenteritapahtuma")) {
 
 		if (trim($asentaja) == '') {
 			$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$asrow = mysql_fetch_assoc($result);
 		}
 		else {
@@ -4753,7 +4766,7 @@ if (!function_exists("kalenteritapahtuma")) {
 			$kysely .= ", kentta02 = '$liitostunnus', pvmloppu = $pvmloppu ";
 		}
 
- 		$result = mysql_query($kysely) or pupe_error($kysely);
+ 		$result = pupe_query($kysely);
 	}
 }
 
@@ -4762,7 +4775,7 @@ if (!function_exists('ebid')) {
 		global $kukarow, $yhtiorow, $palvelin2;
 
 		$query = "SELECT * from lasku where tunnus=" . (int) $lasku_tunnus . " and yhtio='$kukarow[yhtio]'";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 		$laskurow = mysql_fetch_assoc($res);
 
 		if ($laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML" and $laskurow['ebid'] != "TECCOM-INVOICE") {
@@ -4792,7 +4805,7 @@ if (!function_exists('ebid')) {
 						and liitos = 'lasku'
 						and kayttotarkoitus != 'INVOIC.D.96A'
 						and yhtio='$kukarow[yhtio]'";
-			$res = mysql_query($query) or pupe_error($query);
+			$res = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($res)) {
 				$out .= " <a $target href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('N‰yt‰ liite') ."</a> ";
@@ -4816,7 +4829,7 @@ if (!function_exists('ebid')) {
 						where liitostunnus = '$laskurow[tunnus]'
 						and liitos = 'lasku'
 						and yhtio = '$kukarow[yhtio]'";
-			$res = mysql_query($query) or pupe_error($query);
+			$res = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($res)) {
 				$out .= " <a $target href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('N‰yt‰ liite') ."</a> ";
@@ -4831,7 +4844,7 @@ if (!function_exists('ebid')) {
 						where liitostunnus = '$laskurow[tunnus]'
 						and liitos = 'lasku'
 						and yhtio = '$kukarow[yhtio]'";
-			$res = mysql_query($query) or pupe_error($query);
+			$res = pupe_query($query);
 
 			if ($url_only) {
 				$out = array();
@@ -4887,7 +4900,7 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 					JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					and sarjanumeroseuranta.$kentta = '$arvo'";
-		$otsores = mysql_query($query) or pupe_error($query);
+		$otsores = pupe_query($query);
 		$ostorow = mysql_fetch_assoc($otsores);
 
 		if ($ostorow["tunnukset"] != '') {
@@ -4897,7 +4910,7 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 						FROM tilausrivi
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tunnus  IN ($ostorow[tunnukset])";
-			$sarjares = mysql_query($query) or pupe_error($query);
+			$sarjares = pupe_query($query);
 			$sarjarow = mysql_fetch_assoc($sarjares);
 
 			$ostohinta = (float) $sarjarow["ostosumma"] / $ostorow["tunnukset_kpl"];
@@ -4914,7 +4927,7 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 							JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
 							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 							and sarjanumeroseuranta.$kentta = '$arvo'";
-				$keikkares = mysql_query($query) or pupe_error($query);
+				$keikkares = pupe_query($query);
 
 				while($kulukeikkarow = mysql_fetch_assoc($keikkares)) {
 					// Haetaan kaikki keikkaan liitettyjen laskujen summa
@@ -4925,7 +4938,7 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 								and laskunro 	= '$kulukeikkarow[laskunro]'
 								and vanhatunnus <> 0
 								and vienti in ('B','E','H')";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 					$kulukulurow = mysql_fetch_assoc($result);
 
 					$ostohinta	+= $kulukulurow["kulusumma"];
@@ -4949,7 +4962,7 @@ if (!function_exists("liitettyjen_kululaskujen_summa")) {
 					and ytunnus			= '$otunnus'
 					and tila 			= 'K'
 					and alatila 		= 'T'";
-		$keikkares = mysql_query($query) or pupe_error($query);
+		$keikkares = pupe_query($query);
 
 		while($kulukeikkarow = mysql_fetch_assoc($keikkares)) {
 			// Haetaan kaikki keikkaan liitettyjen laskujen summa
@@ -4959,7 +4972,7 @@ if (!function_exists("liitettyjen_kululaskujen_summa")) {
 						and tila 		IN ('K','X')
 						and laskunro 	= '$kulukeikkarow[laskunro]'
 						and vanhatunnus <> 0";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$kulukulurow = mysql_fetch_assoc($result);
 
 			$ostohinta	+= $kulukulurow["kulusumma"];
@@ -4973,7 +4986,7 @@ if (!function_exists("remove_duplicates")) {
 	function remove_duplicates($table, $yhtio) {
 
 		$query  = "describe $table";
-		$fieldresult = mysql_query($query) or pupe_error($query);
+		$fieldresult = pupe_query($query);
 
 		$group = "";
 
@@ -4995,11 +5008,11 @@ if (!function_exists("remove_duplicates")) {
 					WHERE yhtio = '$yhtio'
 					GROUP BY $group
 					HAVING countkpltahti > 1";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		while ($row = mysql_fetch_assoc($result)) {
 			$query = "DELETE FROM $table WHERE yhtio = '$yhtio' and tunnus in ($row[tunnukset]) LIMIT ".($row["countkpltahti"]-1);
-			$delresult = mysql_query($query) or pupe_error($query);
+			$delresult = pupe_query($query);
 		}
 	}
 }
@@ -5104,7 +5117,7 @@ if (!function_exists("paivita_toimitukset")) {
 			$query = "	SELECT *
 						FROM $taulu
 						WHERE yhtio = '$kukarow[yhtio]' $where";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			if (mysql_num_rows($result) == 1) {
 				$uusirow = mysql_fetch_assoc($result);
 
@@ -5132,7 +5145,7 @@ if (!function_exists("paivita_toimitukset")) {
 									JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
 									WHERE lasku.yhtio = '$kukarow[yhtio]' and tunnusnippu = '$otunnus' and tila IN ('L','N') and alatila != 'X' and tunnusnippu > 0";
 					}
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) > 0) {
 
@@ -5155,14 +5168,14 @@ if (!function_exists("paivita_toimitukset")) {
 										$query = "	UPDATE tilausrivi
 													SET $col = '$value'
 													WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$row[tunnus]' and $col = '".$originaali[$taulu][$col]."'";
-										$res = mysql_query($query) or pupe_error($query);
+										$res = pupe_query($query);
 									}
 								}
 							}
 
 							if ($updquery != "") {
 								$query = "UPDATE $taulu SET $updquery WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]'";
-								$updres = mysql_query($query) or pupe_error($query);
+								$updres = pupe_query($query);
 							}
 						}
 					}
@@ -6222,7 +6235,7 @@ if (!function_exists("tallenna_muisti")) {
 					data		= '$data',
 					laatija		= '$kukarow[kuka]',
 					luontiaika  = now()";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		return true;
 	}
@@ -6242,7 +6255,7 @@ if (!function_exists("hae_muisti")) {
 					and nimitys = '$nimitys'
 					and kuka = '$kuka'
 					and sovellus = '$_SERVER[SCRIPT_NAME]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$row = mysql_fetch_assoc($result);
@@ -6278,7 +6291,7 @@ if (!function_exists("muistiin")) {
 					and haku = '$muisti'
 					and kuka = '$kukarow[kuka]'
 					and nimi = '$nimi'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		foreach ($muistettava as $key => $value) {
 
@@ -6305,7 +6318,7 @@ if (!function_exists("muistiin")) {
 							laatija		= '$kukarow[kuka]',
 							muokattu	= now(),
 							muokannut	= '$kukarow[kuka]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 
@@ -6323,7 +6336,7 @@ if (!function_exists("muistista")) {
 					and haku = '$muisti'
 					and kuka = '$kukarow[kuka]'
 					and nimi = '$nimi'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			return false;
@@ -6388,7 +6401,7 @@ if (!function_exists("aja_kysely")) {
 				$query = "	DELETE
 							FROM muisti
 							WHERE yhtio='$kukarow[yhtio]' and haku = '$hakukysely' and kuka = '$kukarow[kuka]' and (nimi = '$uusi_kysely' or nimi = 'tmpquery')";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				//	T‰ll‰iset arvot skipataan aina
 				$exclude[] = "uusi_kysely";
@@ -6429,7 +6442,7 @@ if (!function_exists("aja_kysely")) {
 										laatija		= '$kukarow[kuka]',
 										muokattu	= now(),
 										muokannut	= '$kukarow[kuka]'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 
 						//	Tallennetaan viimeisin haku
 						if ($aja_kysely != "tmpquery") {
@@ -6445,7 +6458,7 @@ if (!function_exists("aja_kysely")) {
 											laatija		= '$kukarow[kuka]',
 											muokattu	= now(),
 											muokannut	= '$kukarow[kuka]'";
-							$result = mysql_query($query) or pupe_error($query);
+							$result = pupe_query($query);
 						}
 					}
 				}
@@ -6463,7 +6476,7 @@ if (!function_exists("aja_kysely")) {
 			$query = "	DELETE
 						FROM muisti
 						WHERE yhtio='$kukarow[yhtio]' and haku = '$hakukysely' and kuka = '$kukarow[kuka]' and nimi = '$aja_kysely'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			echo "<font class='message'>".t("Poistettiin kysely")." $aja_kysely</font>";
 
@@ -6475,7 +6488,7 @@ if (!function_exists("aja_kysely")) {
 			$query = "	SELECT *
 						FROM muisti
 						WHERE yhtio='$kukarow[yhtio]' and haku = '$hakukysely' and kuka = '$kukarow[kuka]' and nimi = '$aja_kysely'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			if (mysql_num_rows($result)>0) {
 				while($row = mysql_fetch_assoc($result)) {
 					global ${$row["var"]};
@@ -6520,7 +6533,7 @@ if (!function_exists("nayta_kyselyt")) {
 		$query = "	SELECT distinct nimi
 					FROM muisti
 					WHERE yhtio='$kukarow[yhtio]' and haku = '$haku' and kuka = '$kukarow[kuka]' and nimi != 'tmpquery'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		if (mysql_num_rows($result)>0) {
 			while($row = mysql_fetch_assoc($result)) {
 				$ulos .= "<option value='$row[nimi]'>$row[nimi]</option>\n";
@@ -6661,7 +6674,7 @@ if (!function_exists('tallenna_liite')) {
 		//	Tarkastetaan, ett‰ kuvatunnus on oikea..
 		if ($tunnus > 0) {
 			$query = "	SELECT tunnus FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				$tunnus = 0;
@@ -6729,7 +6742,7 @@ if (!function_exists('tallenna_liite')) {
 						laatija			= '$kukarow[kuka]',
 						luontiaika		= now()
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$id = $tunnus;
 		}
 		else {
@@ -6739,7 +6752,7 @@ if (!function_exists('tallenna_liite')) {
 							WHERE yhtio 		= '$kukarow[yhtio]'
 							and liitos   		= '$liitos'
 							and liitostunnus 	= '$liitostunnus'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$row = mysql_fetch_assoc($result);
 
 				$jarjestys = $row["jarjestys"]+1;
@@ -6763,7 +6776,7 @@ if (!function_exists('tallenna_liite')) {
 					  	jarjestys		= '$jarjestys',
 					  	laatija			= '$kukarow[kuka]',
 					  	luontiaika		= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$id = mysql_insert_id();
 		}
 
@@ -6801,7 +6814,7 @@ if (!function_exists('tarkasta_liite')) {
 
 			//	Paketti riitt‰v‰n pieni mysql:lle
 			$query = "SHOW variables like 'max_allowed_packet'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$varirow = mysql_fetch_row($result);
 
 			if ($file["size"] < $varirow[1]) {
@@ -6850,7 +6863,7 @@ if (!function_exists('hae_liite')) {
 		global $kukarow, $yhtiorow;
 
 		$query = "select * from liitetiedostot where tunnus='$tunnus' and liitos = '$liitos'";
-		$liiteres = mysql_query($query) or pupe_error($query);
+		$liiteres = pupe_query($query);
 
 		if (mysql_num_rows($liiteres) > 0) {
 			$liiterow = mysql_fetch_assoc($liiteres);
@@ -6883,7 +6896,7 @@ if (!function_exists("tarvitaanko_intrastat")) {
 		// kokeillaan arpoa intrastat k‰sittely‰, molemmat maat pit‰‰ olla EU maita
 		if ($maa_lahetys != "" and $maa_maara != "") {
 			$query = "SELECT DISTINCT koodi FROM maat WHERE koodi in ('$maa_lahetys','$maa_maara') AND eu = 'ON'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 2) {
 				if ($maa_lahetys == $yhtiorow_maa and $maa_maara != $yhtiorow_maa) {
@@ -6905,7 +6918,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 
 		if ($varasto > 0) {
 			$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
-			$varaston_res = mysql_query($query) or pupe_error($query);
+			$varaston_res = pupe_query($query);
 			$varaston_row = mysql_fetch_assoc($varaston_res);
 		}
 
@@ -6926,7 +6939,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 						from asiakas
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$laskurow[liitostunnus]'";
-			$toiresult = mysql_query($query) or pupe_error($query);
+			$toiresult = pupe_query($query);
 			$aputoimirow = mysql_fetch_assoc($toiresult);
 
 			$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
@@ -6950,7 +6963,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 						from toimitustapa
 						where yhtio = '$kukarow[yhtio]'
 						and selite = '$laskurow[toimitustapa]'";
-			$toiresult = mysql_query($query) or pupe_error($query);
+			$toiresult = pupe_query($query);
 			$aputoimirow = mysql_fetch_assoc($toiresult);
 
 			$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
@@ -6992,7 +7005,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 						vahennettava_era 					= '$laskurow[vahennettava_era]'
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$laskurow[tunnus]'";
-			$varresult = mysql_query($query) or pupe_error($query);
+			$varresult = pupe_query($query);
 		}
 
 		return $laskurow;
@@ -7029,7 +7042,7 @@ if (!function_exists("livesearch_tilihaku")) {
 						FROM tili
 						WHERE tili.yhtio = '$kukarow[yhtio]'
 						$haku_query";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$limit = 0;
 			if (mysql_num_rows($result) > 0) {
@@ -7120,7 +7133,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 							FROM lasku
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus  = '$kukarow[kesken]'";
-				$vieres = mysql_query($query) or pupe_error($query);
+				$vieres = pupe_query($query);
 				$vierow = mysql_fetch_array($vieres);
 			}
 			elseif ($verkkokauppa != "") {
@@ -7158,7 +7171,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 						and tuote.status != 'P'
 						$kieltolisa
 						$haku_query";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$limit = 0;
 			if (mysql_num_rows($result) > 0) {
@@ -7254,7 +7267,7 @@ if (!function_exists("livesearch_kayttajahaku")) {
 						$haku_join
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
 						$haku_query";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$limit = 0;
 			if (mysql_num_rows($result) > 0) {
@@ -7337,7 +7350,7 @@ if (!function_exists("livesearch_asiakashaku")) {
 						FROM asiakas
 						WHERE asiakas.yhtio = '$kukarow[yhtio]'
 						$haku_query";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$limit = 0;
 			if (mysql_num_rows($result) > 0) {
@@ -7472,7 +7485,7 @@ if (!function_exists("hae_rahtisopimusnumero")) {
 
 					ORDER BY prio
 					LIMIT 1";
-		$rares = mysql_query($query) or pupe_error($query);
+		$rares = pupe_query($query);
 		$rarow = mysql_fetch_assoc($rares);
 
  		return $rarow;
@@ -7498,7 +7511,7 @@ if (!function_exists("hae_rahtimaksu")) {
 					AND tunnus IN ($otsikot)
 					ORDER BY tunnus
 					LIMIT 1";
-		$otsre = mysql_query($query) or pupe_error($query);
+		$otsre = pupe_query($query);
 		$laskurow = mysql_fetch_assoc($otsre);
 
 		$kyht = 0;
@@ -7525,7 +7538,7 @@ if (!function_exists("hae_rahtimaksu")) {
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						AND tilausrivi.tyyppi in ('L', 'E')
 						AND tilausrivi.otunnus in ($otsikot)";
-			$painoresult = mysql_query($query) or pupe_error($query);
+			$painoresult = pupe_query($query);
 			$painorow = mysql_fetch_assoc($painoresult);
 			$kyht = $painorow['massa'];
 		}
@@ -7548,7 +7561,7 @@ if (!function_exists("hae_rahtimaksu")) {
 							AND tilausrivi.tyyppi in ('L', 'E')
 							AND tilausrivi.otunnus in ($otsikot)";
 			}
-			$presult = mysql_query($query) or pupe_error($query);
+			$presult = pupe_query($query);
 
 			$nyht = 0;
 			$myht = 0;
@@ -7589,7 +7602,7 @@ if (!function_exists("hae_rahtimaksu")) {
 						FROM rahtikirjat
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND otsikkonro in ($otsikot)";
-			$pakre = mysql_query($query) or pupe_error($query);
+			$pakre = pupe_query($query);
 			$pakka = mysql_fetch_assoc($pakre);
 			$kyht = $pakka["kilot"];
 		}
@@ -7603,7 +7616,7 @@ if (!function_exists("hae_rahtimaksu")) {
 					AND etaisyydet.postino <= '$laskurow[toim_postino]'
 					ORDER BY postino DESC
 					LIMIT 1";
-		$varastoresult = mysql_query($query) or pupe_error($query);
+		$varastoresult = pupe_query($query);
 
 		// jos saadaan joku kilometrim‰‰r‰ niin laitetaan se muuttujaan talteen
 		if (mysql_num_rows($varastoresult) == 1) {
@@ -7625,7 +7638,7 @@ if (!function_exists("hae_rahtimaksu")) {
 					AND ((kmalku <= '$km' and kmloppu >= '$km') or (kmalku = 0 and kmloppu = 0))
 					ORDER BY kmloppu DESC, kmalku DESC
 					LIMIT 1";
-		$rares = mysql_query($query) or pupe_error($query);
+		$rares = pupe_query($query);
 
 		if (mysql_num_rows($rares) == 1) {
 			$hirow = mysql_fetch_assoc($rares);
@@ -7636,7 +7649,7 @@ if (!function_exists("hae_rahtimaksu")) {
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND selite = '$laskurow[toimitustapa]'
 						AND rahti_tuotenumero != ''";
-			$rahti_tuoteno_result = mysql_query($query) or pupe_error($query);
+			$rahti_tuoteno_result = pupe_query($query);
 
 			$ale = 0;
 
@@ -7648,7 +7661,7 @@ if (!function_exists("hae_rahtimaksu")) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND asiakas = '$laskurow[liitostunnus]'
 							AND tuoteno = '$rahti_tuoteno_row[rahti_tuotenumero]'";
-				$rahti_alennus_result = mysql_query($query) or pupe_error($query);
+				$rahti_alennus_result = pupe_query($query);
 
 				if (mysql_num_rows($rahti_alennus_result) > 0) {
 					$rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result);
@@ -7689,7 +7702,7 @@ if (!function_exists("pakkaamo")) {
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND ((tila in ('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila in ('J','A','C')))
 						AND tunnus in ($tilausnumero)";
-			$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
+			$ei_pakkaamoa_res = pupe_query($query);
 			return 0;
 		}
 
@@ -7709,7 +7722,7 @@ if (!function_exists("pakkaamo")) {
 					AND lasku.tunnus in ($tilausnumero)
 					ORDER BY tunnus
 					LIMIT 1";
-		$varastotark_res = mysql_query($query) or pupe_error($query);
+		$varastotark_res = pupe_query($query);
 		$varastotark_row = mysql_fetch_assoc($varastotark_res);
 
 		//katsotaan onko jo annettu pakkaamolokero vastaavalle SIIRTOLISTALLE, niit‰ saa/pit‰‰ yhdist‰‰
@@ -7733,7 +7746,7 @@ if (!function_exists("pakkaamo")) {
 					AND lasku.alatila in ('A','C')
 					ORDER BY pakkaamo.pakkaamon_prio, pakkaamo.prio
 					LIMIT 1";
-		$vanhat_res = mysql_query($query) or pupe_error($query);
+		$vanhat_res = pupe_query($query);
 
 		if (mysql_num_rows($vanhat_res) > 0) {
 			$split_pakkaamo_row = mysql_fetch_assoc($vanhat_res);
@@ -7743,7 +7756,7 @@ if (!function_exists("pakkaamo")) {
 							pakkaamo = '$split_pakkaamo_row[pakkaamo]'
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus in ($tilausnumero)";
-				$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
+				$pakkaamo_insert_res = pupe_query($query);
 			}
 
 			return $split_pakkaamo_row['pakkaamo'];
@@ -7769,7 +7782,7 @@ if (!function_exists("pakkaamo")) {
 					$pakkaamotark_wherelisa
 					ORDER BY pakkaamo.pakkaamon_prio, pakkaamo.prio
 					LIMIT 1";
-		$pakkaamotark_res = mysql_query($query) or pupe_error($query);
+		$pakkaamotark_res = pupe_query($query);
 
 		if (mysql_num_rows($pakkaamotark_res) == 1) {
 			$split_pakkaamo_row = mysql_fetch_assoc($pakkaamotark_res);
@@ -7779,7 +7792,7 @@ if (!function_exists("pakkaamo")) {
 							pakkaamo = '$split_pakkaamo_row[tunnus]'
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus in ($tilausnumero)";
-				$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
+				$pakkaamo_insert_res = pupe_query($query);
 			}
 
 			return $split_pakkaamo_row['tunnus'];
@@ -7794,7 +7807,7 @@ if (!function_exists("pakkaamo")) {
 						AND pakkaamo.nimi = varaston_tulostimet.pakkaamo
 						GROUP BY lokero, nimi
 						ORDER BY pakkaamon_prio ASC, prio ASC";
-			$etsitaan_pakkaamo_res = mysql_query($query) or pupe_error($query);
+			$etsitaan_pakkaamo_res = pupe_query($query);
 
 			$pienin_maara = 99999;
 			$pienin_maara_tunnus = '';
@@ -7818,7 +7831,7 @@ if (!function_exists("pakkaamo")) {
 								WHERE lasku.$logistiikka_yhtiolisa
 								AND ((lasku.tila in ('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in ('J','A','C')))
 								AND lasku.pakkaamo in ($etsitaan_pakkaamo_row[tunnus])";
-					$paljon_laskuja_lokerossa_res = mysql_query($query) or pupe_error($query);
+					$paljon_laskuja_lokerossa_res = pupe_query($query);
 					$paljon_laskuja_lokerossa_row = mysql_fetch_assoc($paljon_laskuja_lokerossa_res);
 
 					// otetaan talteen pienin kpl m‰‰r‰ll‰ oleva lokero
@@ -7841,7 +7854,7 @@ if (!function_exists("pakkaamo")) {
 							FROM pakkaamo
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus in ($pienin_maara_tunnus)";
-				$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
+				$pakkaamo_insert_res = pupe_query($query);
 				$pakkaamo_insert_row = mysql_fetch_assoc($pakkaamo_insert_res);
 
 				if (isset($update) and $update != '') {
@@ -7850,7 +7863,7 @@ if (!function_exists("pakkaamo")) {
 								pakkaamo = '$pakkaamo_insert_row[tunnus]'
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus in ($tilausnumero)";
-					$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
+					$pakkaamo_insert_res = pupe_query($query);
 				}
 
 				return $pakkaamo_insert_row['tunnus'];
@@ -7940,7 +7953,7 @@ if (!function_exists("laheta_tilausvahvistus")) {
 							FROM kirjoittimet
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$kukarow[kirjoitin]'";
-				$tilvares = mysql_query($query) or pupe_error($query);
+				$tilvares = pupe_query($query);
 
 				if ($tilvakir = mysql_fetch_assoc($tilvares)) {
 					$komento["Tilausvahvistus"] = $tilvakir["komento"];
@@ -8017,7 +8030,7 @@ if (!function_exists("t")) {
 
 		if ($indeksi != 'fi') {
 			$sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi'";
-			$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
+			$sanakirjaresult = pupe_query($sanakirjaquery, $link);
 
 			if (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) $kaannetyt_sanat[] = $stringi;
 
@@ -8039,12 +8052,12 @@ if (!function_exists("t")) {
 				//P‰ivitet‰‰n aikaleima
 				if ($verkkokauppa == "") {
 					$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
-					$sanakirjaresultupd = mysql_query($sanakirjaqueryupd, $link) or pupe_error($sanakirjaqueryupd);
+					$sanakirjaresultupd = pupe_query($sanakirjaqueryupd, $link);
 				}
 			}
 			elseif ($verkkokauppa == "") {
 				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
-				$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
+				$sanakirjaresult = pupe_query($sanakirjaquery, $link);
 			}
 		}
 		elseif (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) {
@@ -8113,7 +8126,7 @@ if (!function_exists("t_avainsana")) {
 						where $yhtiolisa
 						and laji = '$laji'
 						and kieli = '$yhtiorow[kieli]'";
-			$result = mysql_query($query, $link) or pupe_error($query);
+			$result = pupe_query($query, $link);
 
 			$onko_numero = $onko_alpha = 0;
 
@@ -8151,7 +8164,7 @@ if (!function_exists("t_avainsana")) {
 					and avainsana.kieli in ('$yhtiorow[kieli]', '')
 					$wherelisa
 					$orderlisa";
-		$result = mysql_query($query, $link) or pupe_error($query);
+		$result = pupe_query($query, $link);
 
 		if ($return != "") {
 			$row = mysql_fetch_assoc($result);
@@ -8196,7 +8209,7 @@ if (!function_exists('t_tunnus_avainsanat')) {
 							FROM toimitustapa
 							WHERE yhtio = '$kukarow[yhtio]'
 							and selite = '$row'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) == 1) {
 					$row = mysql_fetch_assoc($sresult);
@@ -8214,7 +8227,7 @@ if (!function_exists('t_tunnus_avainsanat')) {
 					and kieli = '$kieli'
 					and laji = '$avainsanalaji'
 					and selite = '$row[tunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$row = mysql_fetch_assoc($result);
@@ -8261,7 +8274,7 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 					and kieli = '$kieli'
 					and laji = '$laji'
 					and tuoteno = '$tuoterow[tuoteno]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$row = mysql_fetch_assoc($result);
@@ -8336,7 +8349,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 						FROM yhtio
 						JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = yhtio.yhtio)
 						WHERE (yhtio.konserni = '$yhtiorow[konserni]' and yhtio.konserni != '') or (yhtio.yhtio = '$yhtiorow[yhtio]')";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($result)) {
 				$konserni_yhtiot .= " '".$row["yhtio"]."' ,";
@@ -8447,7 +8460,7 @@ if (!function_exists("liite_popup")) {
 						AND liitostunnus	= '$tuotetunnus'
 						AND kayttotarkoitus != 'TH'
 						ORDER BY sorttaus, jarjestys, filename";
-			$kuvares = mysql_query($query) or pupe_error($query);
+			$kuvares = pupe_query($query);
 
 			echo "<table $maxi>";
 
@@ -8515,7 +8528,7 @@ if (!function_exists("liite_popup")) {
 								and liitostunnus = '$tuotetunnus'
 								AND kayttotarkoitus != 'TH'
 								ORDER BY sorttaus, jarjestys, filename";
-			$filetype_result = mysql_query($filetype_query) or pupe_error($filetype_query);
+			$filetype_result = pupe_query($filetype_query);
 
 			if (mysql_num_rows($filetype_result) > 0) {
 
@@ -8587,7 +8600,7 @@ if (!function_exists("liite_popup")) {
 								AND kayttotarkoitus != 'TH'
 								ORDER BY sorttaus, jarjestys, filename
 								LIMIT 1";
-			$filetype_result = mysql_query($filetype_query) or pupe_error($filetype_query);
+			$filetype_result = pupe_query($filetype_query);
 
 			if (mysql_num_rows($filetype_result) > 0) {
 
@@ -8629,7 +8642,7 @@ if (!function_exists("liite_popup")) {
 											AND filename = '$filetype_row[filename]'
 											ORDER BY tunnus DESC
 											LIMIT 1";
-				$filetype_result = mysql_query($filetype_peukalo_query) or pupe_error($filetype_peukalo_query);
+				$filetype_result = pupe_query($filetype_peukalo_query);
 				$filetype_peukalo_row = mysql_fetch_assoc($filetype_result);
 
 				if ($filetype_peukalo_row["peukalokuva"] > 0) {
@@ -8724,7 +8737,7 @@ if (!function_exists("lue_kurssit")) {
 						muuttaja = '{$kukarow['kuka']}'
 						WHERE yhtio = '{$kukarow['yhtio']}' AND
 						nimi = '$valuutta'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// t‰m‰ valuutta on nyt p‰ivitetty!
 			$valuutat[] = $valuutta;
@@ -8736,7 +8749,7 @@ if (!function_exists("lue_kurssit")) {
 			$query = "	INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
 						VALUES ('$vastavaluutta', '$valuutta', round(1 / $kurssi, 9), '$kurssipvm')
 			  			ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 		}
 	}
@@ -8830,7 +8843,7 @@ if (!function_exists("alv_popup")) {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and maa != ''
 					and vat_numero != ''";
-		$alhire = mysql_query($query) or pupe_error($query);
+		$alhire = pupe_query($query);
 
 		// ollaan alv-rekisterˆity, haetaan oikea ALV-kanta
 		if (mysql_num_rows($alhire) == 1) {
@@ -8846,7 +8859,7 @@ if (!function_exists("alv_popup")) {
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji in ($laji) $lisa
 					ORDER BY selite+0, laji, jarjestys, selite";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		if (mysql_num_rows($vresult) == 0) {
 			echo "<font class = 'error'>".t("Yrityksen ALV%tit puuttuu!")."'$kukarow[yhtio]'</font>";
@@ -8901,7 +8914,7 @@ if (!function_exists("alv_popup_oletus")) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND maa = '$maa'
 							AND vat_numero != ''";
-				$alhire = mysql_query($query) or pupe_error($query);
+				$alhire = pupe_query($query);
 
 				// ollaan alv-rekisterˆity, haetaan oikea ALV-kanta
 				if (mysql_num_rows($alhire) == 1) {
@@ -8915,7 +8928,7 @@ if (!function_exists("alv_popup_oletus")) {
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' $lisa
 					ORDER BY selite+0, jarjestys, selite";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		if (mysql_num_rows($vresult) == 0) {
 			if ($tapa == "lista") {
@@ -8963,7 +8976,7 @@ if (!function_exists("alv_oletus")) {
 		$query = "	SELECT selite
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark != ''";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		if (mysql_num_rows($vresult) != 1) {
 			echo "<font class = 'error'>".t("Yrityksen oletusALV%tit puuttuu tai niit‰ on monta!")."</font>";
@@ -9173,7 +9186,7 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 					AND liitetiedostot.liitos = 'lasku'
 					AND liitetiedostot.kayttotarkoitus IN ('EDI', 'FINVOICE')
 					AND liitetiedostot.liitostunnus = '$tunnus'";
-		$liite_res = mysql_query($query) or pupe_error($query);
+		$liite_res = pupe_query($query);
 
 		$purchaseorder_data = $invoice_data = '';
 		$noIdentifierlask = 0;
@@ -9577,7 +9590,7 @@ if (!function_exists("tarkista_oikeus")) {
 					AND kuka = '$kukarow[kuka]'
 					AND nimi LIKE '%$ohjelma'
 					$querylisa";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		if (mysql_num_rows($res) > 0) {
 			return TRUE;
@@ -9802,7 +9815,7 @@ if (!function_exists("TuotteenAlkiot")) {
 				ON DUPLICATE KEY UPDATE
 				muuttaja = '$kukarow[kuka]',
 				muutospvm = now()";
-		$r = mysql_query($qu) or pupe_error($qu);
+		$r = pupe_query($qu);
 	}
 }
 
@@ -9812,7 +9825,7 @@ if (!function_exists("LisaaTaso")) {
 
 		// Funktio mahdollistaa lis‰‰m‰‰n tason mihin tahansa v‰liin.
 		$qu = "LOCK TABLE dynaaminen_puu WRITE";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		// Haetaan valitun tason tiedot
 		$q2 = "	SELECT @myRight := rgt, @myLeft := lft
@@ -9820,7 +9833,7 @@ if (!function_exists("LisaaTaso")) {
 				WHERE yhtio = '{$kukarow["yhtio"]}'
 				AND laji 	= '$laji'
 				AND lft 	= '$left'";
-		$re = mysql_query($q2) or pupe_error($q2);
+		$re = pupe_query($q2);
 
 		// P‰vitet‰‰n kaikki nodet, jotka on uuden noden oikealla puolella kaksi pyk‰l‰‰ oikealle (vasen puoli)
 		$qu = "	UPDATE dynaaminen_puu
@@ -9829,7 +9842,7 @@ if (!function_exists("LisaaTaso")) {
 				AND laji	= '$laji'
 				AND lft 	> @myRight
 				ORDER BY lft desc";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		// P‰vitet‰‰n kaikki nodet joiden oikea laita on uuden noden oikealla puolella kaksi pyk‰l‰‰ oikealle (oikea puoli)
 		$qu = "	UPDATE dynaaminen_puu
@@ -9838,7 +9851,7 @@ if (!function_exists("LisaaTaso")) {
 				AND laji	= '$laji'
 				AND rgt    >= @myRight
 				ORDER BY rgt desc";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		// P‰ivitet‰‰n valitun tason leftit pyk‰l‰‰ oikealle, jotta uusi taso mahtuu mukaan
 		$qu = "	UPDATE dynaaminen_puu
@@ -9848,7 +9861,7 @@ if (!function_exists("LisaaTaso")) {
 				AND lft 	> @myLeft
 				AND lft 	< @myRight
 				ORDER BY lft desc";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		// P‰ivitet‰‰n valitun tason rightit pyk‰l‰‰ oikealle, jotta uusi taso mahtuu mukaan
 		$qu = "	UPDATE dynaaminen_puu
@@ -9858,13 +9871,13 @@ if (!function_exists("LisaaTaso")) {
 				AND lft 	> @myLeft
 				AND lft 	< @myRight
 				ORDER BY rgt desc";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		$qu = "INSERT INTO dynaaminen_puu(yhtio,koodi,nimi, lft, rgt, laji,laatija,luontiaika) values ('$kukarow[yhtio]', '{$koodi}', '{$nimi}', @myLeft + 1 , @myRight + 1, '$laji', '$kukarow[kuka]', now())";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		$qu = "UNLOCK TABLES";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 	}
 }
@@ -9874,7 +9887,7 @@ if (!function_exists("LisaaPaaKat")) {
 		global $kukarow;
 
 		$qu = "INSERT INTO dynaaminen_puu(yhtio,nimi,lft,rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]', '$nimi', 1, 2, '$laji', '$kukarow[kuka]', now())";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 	}
 }
 
@@ -9905,14 +9918,14 @@ if (!function_exists("LisaaLapsi")) {
 		}
 
 		$qu = "LOCK TABLE dynaaminen_puu WRITE";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		$qu = "	SELECT $apu3
 				FROM dynaaminen_puu
 				WHERE yhtio = '{$kukarow["yhtio"]}'
 				AND laji 	= '$laji'
 				AND lft 	= '$left'";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		$qu = "	UPDATE dynaaminen_puu
 				SET rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
@@ -9920,7 +9933,7 @@ if (!function_exists("LisaaLapsi")) {
 				AND laji 	= '$laji'
 				$apu
 				ORDER BY rgt desc";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		$qu = "	UPDATE dynaaminen_puu
 				SET lft = lft + 2,muutospvm = now(), muuttaja = '$kukarow[kuka]'
@@ -9928,13 +9941,13 @@ if (!function_exists("LisaaLapsi")) {
 				AND laji 	= '$laji'
 				$apu4
 				ORDER BY lft desc";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		$qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, '$laji', '$kukarow[kuka]', now())";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		$qu = "UNLOCK TABLES";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 	}
 }
 
@@ -9947,7 +9960,7 @@ if (!function_exists("PoistaLapset")) {
 		}
 		else {
 	 		$qu = "LOCK TABLE dynaaminen_puu WRITE";
-	 		$re = mysql_query($qu) or pupe_error($qu);
+	 		$re = pupe_query($qu);
 
 			// Haetaan poistettavan noden tiedot
 			$qu = "	SELECT @myLeft := lft, @myRight := rgt, @myWidth := rgt - lft + 1
@@ -9955,14 +9968,14 @@ if (!function_exists("PoistaLapset")) {
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					AND laji	= '$laji'
 					AND lft 	= '$left'";
-	 		$re = mysql_query($qu) or pupe_error($qu);
+	 		$re = pupe_query($qu);
 
 			// Poistetaan se
 			$qu = "	DELETE FROM dynaaminen_puu
 					WHERE yhtio	= '{$kukarow["yhtio"]}'
 					AND laji	= '$laji'
 					and lft 	= @myLeft";
-	 		$re = mysql_query($qu) or pupe_error($qu);
+	 		$re = pupe_query($qu);
 
 			// P‰ivitet‰‰n poistettavan noden lapset pyk‰l‰‰ vasemmalle
 			$qu = "	UPDATE dynaaminen_puu
@@ -9971,7 +9984,7 @@ if (!function_exists("PoistaLapset")) {
 					AND laji = '$laji'
 					AND lft between @myLeft and @myRight
 					ORDER BY rgt";
-	 		$re = mysql_query($qu) or pupe_error($qu);
+	 		$re = pupe_query($qu);
 
 			// P‰ivitet‰‰n poistettavan noden lapset pyk‰l‰‰ vasemmalle
 			$qu = "	UPDATE dynaaminen_puu
@@ -9980,7 +9993,7 @@ if (!function_exists("PoistaLapset")) {
 					AND laji = '$laji'
 					AND lft between @myLeft and @myRight
 					ORDER BY lft";
-	 		$re = mysql_query($qu) or pupe_error($qu);
+	 		$re = pupe_query($qu);
 
 			// P‰ivitet‰‰n poistetun noden oikealta puolelta lˆytyv‰t nodet vasemalle
 			$qu = "	UPDATE dynaaminen_puu
@@ -9989,7 +10002,7 @@ if (!function_exists("PoistaLapset")) {
 					AND laji = '$laji'
 					AND rgt > @myRight
 					ORDER BY rgt";
-	 		$re = mysql_query($qu) or pupe_error($qu);
+	 		$re = pupe_query($qu);
 
 			// P‰ivitet‰‰n poistetun noden oikealta puolelta lˆytyv‰t nodet vasemalle
 			$qu = "	UPDATE dynaaminen_puu
@@ -9998,10 +10011,10 @@ if (!function_exists("PoistaLapset")) {
 					AND laji = '$laji'
 					AND lft > @myRight
 					ORDER BY lft";
-	 		$re = mysql_query($qu) or pupe_error($qu);
+	 		$re = pupe_query($qu);
 
 			$qu = "UNLOCK TABLES";
-			$re = mysql_query($qu) or pupe_error($qu);
+			$re = pupe_query($qu);
 		}
 	}
 }
@@ -10027,7 +10040,7 @@ if (!function_exists("lapset")) {
 				AND node.laji 	= '$laji'
 				GROUP BY node.tunnus
 				ORDER BY node.lft";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		return mysql_num_rows($re);
 	}
@@ -10039,17 +10052,17 @@ if (!function_exists("paivitakat")) {
 		global $kukarow;
 
 		$qu = "LOCK TABLE dynaaminen_puu WRITE";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		$qu = "	UPDATE dynaaminen_puu
 				set nimi='{$nimi}', koodi='{$koodi}', muutospvm = now(), muuttaja = '$kukarow[kuka]'
 				where yhtio	= '{$kukarow["yhtio"]}'
 				AND laji	= '{$laji}'
 				AND tunnus	= '{$kategoriaid}'";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 
 		$qu = "UNLOCK TABLES";
-		$re = mysql_query($qu) or pupe_error($qu);
+		$re = pupe_query($qu);
 	}
 }
 
@@ -10562,7 +10575,7 @@ if (!function_exists('hae_suuntalava')) {
 					AND tilausrivi.tunnus = '{$tunnus}'
 					ORDER BY alkuhyllypaikka
 					LIMIT 1";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
 		$suuntalava = (trim($row['tunnus']) != '' and trim($row['tunnus']) > 0) ? $row['tunnus'] : 0;
@@ -10621,7 +10634,7 @@ if (!function_exists("seuraava_lahtoaika")) {
 
 						ORDER BY prio, lahdon_viikonpvm, lahdon_kellonaika
 						LIMIT 1";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$rivi = mysql_fetch_assoc($result);
@@ -10707,7 +10720,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 						AND tiliointi.tapvm >= '$alkupvm'
 						AND tiliointi.tapvm <= '$loppupvm'
 						AND tiliointi.tilino = '$yhtiorow[kassaale]'";
-			$ktres = mysql_query($query) or pupe_error($query);
+			$ktres = pupe_query($query);
 		}
 		else {
 			// Hetaan yhteisˆmyynti, palvelut ja tuotteet erikseen jotta osataan splitata kassa-alennus tavaramyyntiin ja palvelumyyntIin
@@ -10728,7 +10741,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 						$maalisa
 						$tiliointilisa
 						AND tiliointi.tilino = '$yhtiorow[myynninkassaale]'";
-			$ktres = mysql_query($query) or pupe_error($query);
+			$ktres = pupe_query($query);
 		}
 
 		if (mysql_num_rows($ktres) == 1) {
@@ -10772,7 +10785,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 							AND tiliointi.tunnus in ($ktrow[tilioinnit])
 							GROUP BY $group
 							ORDER BY $group";
-				$ttres = mysql_query($query) or pupe_error($query);
+				$ttres = pupe_query($query);
 
 				return array($kakerroinlisa, $ttres);
 			}
@@ -10858,14 +10871,14 @@ if (!function_exists("palauta_vak_tiedot")) {
 					and (tilausrivi.varattu+tilausrivi.kpl) > 0
 					GROUP BY 1,2,3,4,5,6,7,8,9
 					ORDER BY 1,2,3,4,5,6,7,8,9";
-		$riresult1 = mysql_query($query) or pupe_error($query);
+		$riresult1 = pupe_query($query);
 
 		$query = "  SELECT distinct r1.tunnus, r1.pakkaus, r1.pakkauskuvaus, r1.kollit, round(r1.kilot,1) kilot
 					FROM rahtikirjat r1
 					LEFT JOIN rahtikirjat r2 ON (r1.yhtio = r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro != 0)
 					WHERE r1.otsikkonro = '$otunnus'
 					and r1.yhtio = '$kukarow[yhtio]'";
-		$riresult2 = mysql_query($query) or pupe_error($query);
+		$riresult2 = pupe_query($query);
 
 		//* Limited Quantity tiedot *//
 		//Inner packagings placed in shrink-wrapped or stretch-wrapped trays a Maximum net quantity
@@ -10945,7 +10958,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and pakkaus = '$row[pakkaus]'
 						 	and pakkauskuvaus = '$row[pakkauskuvaus]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 				$srow = mysql_fetch_assoc($sresult);
 
 				$pakkaus_en = t_tunnus_avainsanat($srow, "pakkaus", "PAKKAUSKV", $kieli);
@@ -11046,7 +11059,7 @@ if (!function_exists('tulosta_sscc')) {
 		global $kukarow, $yhtiorow;
 
 		$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
 
 		$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
@@ -11100,7 +11113,7 @@ if (!function_exists('tulosta_sscc')) {
 			$query = "	SELECT max(perhe)+1 perhe
 						FROM avainsana
 						WHERE yhtio = '{$kukarow['yhtio']}'";
-			$max_perhe_res = mysql_query($query) or pupe_error($query);
+			$max_perhe_res = pupe_query($query);
 			$max_perhe_row = mysql_fetch_assoc($max_perhe_res);
 
 			$query = "	INSERT INTO avainsana SET
@@ -11118,11 +11131,11 @@ if (!function_exists('tulosta_sscc')) {
 						luontiaika = now(),
 						muutospvm = now(),
 						muuttaja = '{$kukarow['kuka']}'";
-			$insert_res = mysql_query($query) or pupe_error($query);
+			$insert_res = pupe_query($query);
 		}
 		else {
 			$query = "UPDATE avainsana SET selite = '{$sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-			$update_res = mysql_query($query) or pupe_error($query);
+			$update_res = pupe_query($query);
 		}
 
 		return $sscc;
@@ -11702,7 +11715,7 @@ if (!function_exists("hae_tuotemuutokset")) {
 						AND tuote_muutokset.tuoteno = '$tuoteno'
 						$lisa
 						LIMIT 1";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
 				$row = mysql_fetch_assoc($result);

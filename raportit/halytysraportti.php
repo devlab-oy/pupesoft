@@ -861,8 +861,8 @@
 							WHERE yhtio = '$row[yhtio]'
 							and tyyppi='L'
 							and tuoteno = '$row[tuoteno]'
-							and laadittu >= '$apvm'
-							and laadittu <= '$lpvm'
+							and laadittu >= '$apvm 00:00:00'
+							and laadittu <= '$lpvm 23:59:59'
 							$lisa";
 				$result   = mysql_query($query) or pupe_error($query);
 				$puuterow = mysql_fetch_array($result);
@@ -901,7 +901,7 @@
 							WHERE yhtio = '$row[yhtio]'
 							and tyyppi = 'V'
 							and tuoteno = '$row[tuoteno]'
-							and ((toimitettuaika >= '$apvm' and toimitettuaika <= '$lpvm') or toimitettuaika = '0000-00-00')
+							and ((toimitettuaika >= '$apvm 00:00:00' and toimitettuaika <= '$lpvm 23:59:59') or toimitettuaika = '0000-00-00 00:00:00')
 							$lisa";
 				$result   = mysql_query($query) or pupe_error($query);
 				$kulutrow = mysql_fetch_array($result);

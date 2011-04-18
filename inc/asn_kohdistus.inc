@@ -64,6 +64,7 @@
 				$checkres = mysql_query($query) or pupe_error($query);
 				$tilausrivirow = mysql_fetch_array($checkres);
 
+
 				// Tarkistetaan kappaleet ja splitataan ostotilausrivi, jos kappaleita on asn-sanomalla VƒHEMMƒN kuin tilausrivill‰, vanhan tilausrivin tunnus j‰‰ j‰ljell‰
 				if (mysql_num_rows($checkres) == 0 or $row["kappalemaara"] > $tilausrivirow["varattu"]) {
 					// Tuli enemm‰n, t‰m‰ on virhe
@@ -84,7 +85,7 @@
 					$query = "	UPDATE tilausrivi SET
 								varattu = '$row[kappalemaara]'
 								WHERE yhtio = '$kukarow[yhtio]'
-								AND tunnus = '$tilausrivirow[tunnus]";
+								AND tunnus = '$tilausrivirow[tunnus]'";
 					$upres = mysql_query($query) or pupe_error($query);
 
 					// Tehd‰‰n uusi rivi, jossa on j‰ljelle j‰‰neet kappaleet
@@ -195,7 +196,7 @@
 								postitp      			= '$toimittajarow[postitp]',
 								maa			 			= '$toimittajarow[maa]',
 								maa_lahetys 			= '$maa_lahetys',
-								comments				= '$asn_numero',
+								comments				= '$edellinen_asn_numero',
 								kauppatapahtuman_luonne	= '$toimittajarow[kauppatapahtuman_luonne]',
 								kuljetusmuoto			= '$toimittajarow[kuljetusmuoto]',
 								rahti					= '$toimittajarow[oletus_kulupros]',

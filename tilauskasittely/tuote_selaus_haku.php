@@ -1856,30 +1856,54 @@
 							}
 						}
 
-						if ($row['status'] == 'A' and !$loytyko) {
-							$tulossa_query = " 	SELECT jaksotettu, toimaika paivamaara, sum(varattu) tilattu
+						if (($row['status'] == 'A' or $row['status'] == 'T') and !$loytyko) {
+							$tulossa_query = " 	SELECT
+												t_myy.otunnus,
+												tli_myy.suoraan_laskutukseen,
+												l_myy.nimi,
+												tilausrivi.jaksotettu,
+												tilausrivi.toimaika paivamaara,
+												sum(tilausrivi.varattu) tilattu
 							 					FROM tilausrivi
-												WHERE yhtio = '$kukarow[yhtio]'
-												AND tuoteno = '$row[tuoteno]'
-												AND varattu > 0
-												AND tyyppi = 'O'
-												AND toimaika >= curdate()
-												GROUP BY jaksotettu, toimaika
-												ORDER BY jaksotettu, toimaika";
+												LEFT JOIN tilausrivin_lisatiedot tli_myy ON (tilausrivi.yhtio=tli_myy.yhtio AND tli_myy.tilausrivilinkki=tilausrivi.tunnus)
+												LEFT JOIN tilausrivi t_myy ON (t_myy.yhtio = tli_myy.yhtio and t_myy.tunnus = tli_myy.tilausrivitunnus)
+												LEFT JOIN lasku l_myy ON (t_myy.yhtio = l_myy.yhtio and t_myy.otunnus = l_myy.tunnus)
+												WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+												AND tilausrivi.tuoteno = '$row[tuoteno]'
+												AND tilausrivi.varattu > 0
+												AND tilausrivi.tyyppi = 'O'
+												AND tilausrivi.toimaika >= curdate()
+												GROUP BY 1,2,3,4,5
+												ORDER BY 1,2,3,4,5";
 							$tulossa_result = pupe_query($tulossa_query);
 
 							if (mysql_num_rows($tulossa_result) > 0) {
 								while ($tulossa_row = mysql_fetch_assoc($tulossa_result)) {
+									echo "<tr><td class='$vari' align='left' nowrap>";
 
-									echo "<tr><td class='$vari' align='left' nowrap>",t("TULOSSA"),"</td><td class='$vari' nowrap align='right'>$tulossa_row[tilattu] ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
+									if ($tulossa_row["nimi"] != '') {
+										if ($tulossa_row["suoraan_laskutukseen"] != "") {
+											echo t("Suoratoimitus asiakkaalle").":<br>$tulossa_row[nimi]";
+										}
+										else {
+											echo t("Tilattu asiakkaalle").":<br>$tulossa_row[nimi]";
+										}
+									}
+									else {
+										echo t("TULOSSA");
+									}
+
+									echo "</td>";
+									echo "<td class='$vari' nowrap align='right'>$tulossa_row[tilattu] ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
 
 									if ($tulossa_row["jaksotettu"] == '1') $tarkkuus = "Vahvistettu";
 									else $tarkkuus = "Arvioitu";
 
-									echo "<tr><td class='$vari' colspan='2'>",t("$tarkkuus saapumisp‰iv‰")," ".tv1dateconv($tulossa_row['paivamaara'])."</td></tr>";
+									echo "<tr><td class='$vari' colspan='2'>",t("$tarkkuus saapumisp‰iv‰")," ".tv1dateconv($tulossa_row['paivamaara'])."<hr></td></tr>";
 								}
 							}
-							else {
+
+							if ($row['status'] == 'A' and mysql_num_rows($tulossa_result) == 0) {
 								$tulossa_query = " 	SELECT DATE_ADD(curdate(), INTERVAL (if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika)+if(tuotteen_toimittajat.tilausvali > 0, tuotteen_toimittajat.tilausvali, toimi.oletus_tilausvali)) DAY) paivamaara,
 													if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
 								 					FROM tuotteen_toimittajat
@@ -1895,11 +1919,12 @@
 
 								if (mysql_num_rows($tulossa_result) > 0) {
 									echo "<tr><td class='$vari' align='left' nowrap>",t("TULOSSA"),"</td><td class='$vari' nowrap align='right'></td></tr>";
-									echo "<tr><td class='$vari' colspan='2'>",t("Arvioitu saapumisp‰iv‰")," ".tv1dateconv($tulossa_row['paivamaara'])."</td></tr>";
+									echo "<tr><td class='$vari' colspan='2'>",t("Arvioitu saapumisp‰iv‰")," ".tv1dateconv($tulossa_row['paivamaara'])."<hr></td></tr>";
 								}
 							}
 						}
-						elseif ($row['status'] == 'T' and !$loytyko) {
+
+						if ($row['status'] == 'T' and !$loytyko) {
 							$query = "	SELECT if(tuotteen_toimittajat.tehdas_saldo_toimaika != 0, tuotteen_toimittajat.tehdas_saldo_toimaika, if (tuotteen_toimittajat.toimitusaika != 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika)) toimaika,
 										if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
 										FROM tuotteen_toimittajat
@@ -1913,7 +1938,7 @@
 
 							if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["toimaika"] > 0) {
 								echo "<tr><td class='$vari' align='left' nowrap><font color='orange'>",t("TILAUSTUOTE"),"</font></td><td class='$vari' nowrap align='right'>&nbsp;</td></tr>";
-								echo "<tr><td class='$vari' colspan='2'>",t("Arvioitu toimitusaika")," {$tulossa_row["toimaika"]} ".t("p‰iv‰‰")."</td></tr>";
+								echo "<tr><td class='$vari' colspan='2'>",t("Arvioitu toimitusaika")," {$tulossa_row["toimaika"]} ".t("p‰iv‰‰")."<hr></td></tr>";
 							}
 						}
 
@@ -1932,7 +1957,7 @@
 
 							while ($tehdassaldo_row = mysql_fetch_assoc($tehdassaldo_res)) {
 								echo "<tr><td class='$vari' valign='top' align='left'>",t("Tehtaalla"),"</td><td class='$vari' nowrap align='right'>",sprintf("%.2f", $tehdassaldo_row['tehdas_saldo'])," ",t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite"),"</td></tr>";
-								echo "<tr><td class='$vari' colspan='2'>",t("Arvioitu toimitusaika")," {$tehdassaldo_row['toimaika']} ".t("p‰iv‰‰"),"</td></tr>";
+								echo "<tr><td class='$vari' colspan='2'>",t("Arvioitu toimitusaika")," {$tehdassaldo_row['toimaika']} ".t("p‰iv‰‰"),"<hr></td></tr>";
 							}
 						}
 

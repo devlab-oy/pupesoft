@@ -175,12 +175,12 @@
 		$query = "	SELECT *
 					FROM $toim
 					WHERE tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$trow = mysql_fetch_array($result);
 
 		$query = "	DELETE from $toim
 					WHERE tunnus='$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		// Jos poistamme ifamesta tietoja niin päivitetään varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, että tietoja on muutettu
 		if ($lukitse_avaimeen != "") {
@@ -189,14 +189,14 @@
 							SET muuttaja = '$kukarow[kuka]', muutospvm=now()
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$lukitse_avaimeen'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 			elseif ($toim == "liitetiedostot" and $lukitse_laji == "tuote") {
 				$query = "	UPDATE tuote
 							SET muuttaja = '$kukarow[kuka]', muutospvm=now()
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$lukitse_avaimeen'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 
@@ -215,12 +215,12 @@
 				$query = "	SELECT *
 							FROM $toim
 							WHERE tunnus = '$poista_tunnus'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$trow = mysql_fetch_array($result);
 
 				$query = "	DELETE from $toim
 							WHERE tunnus='$poista_tunnus'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 			}
@@ -234,7 +234,7 @@
 		$query = "	SELECT *
 					FROM $toim
 					WHERE tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$trow = mysql_fetch_array($result);
 
 		//	Tehdään muuttujista linkit jolla luomme otsikolliset avaimet!
@@ -272,7 +272,7 @@
 						and laji = 'MYSQLALIAS'
 						and selite = '$toim.$al_nimi'
 						$al_lisa";
-			$al_res = mysql_query($query) or pupe_error($query);
+			$al_res = pupe_query($query);
 			$pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
 
 			if (mysql_num_rows($al_res) == 0 and $rajattu_nakyma != '' and isset($t[$i])) {
@@ -385,7 +385,7 @@
 				$query .= " where yhtio='$kukarow[yhtio]' and tunnus = $tunnus";
 			}
 
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if ($tunnus == '') {
 				$tunnus = mysql_insert_id();
@@ -397,7 +397,7 @@
 							FROM asiakas
 							WHERE tunnus = '$tunnus'
 							and yhtio 	 = '$kukarow[yhtio]'";
-				$otsikres = mysql_query($query) or pupe_error($query);
+				$otsikres = pupe_query($query);
 
 				if (mysql_num_rows($otsikres) == 1) {
 					$otsikrow = mysql_fetch_array($otsikres);
@@ -414,7 +414,7 @@
 									)
 								and liitostunnus = '$otsikrow[tunnus]'
 								and tapvm = '0000-00-00'";
-					$laskuores = mysql_query($query) or pupe_error($query);
+					$laskuores = pupe_query($query);
 
 					while ($laskuorow = mysql_fetch_array($laskuores)) {
 
@@ -449,7 +449,7 @@
 									laskutusvkopv    	= '$otsikrow[laskutusvkopv]'
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and tunnus			= '$laskuorow[tunnus]'";
-						$updaresult = mysql_query($query) or pupe_error($query);
+						$updaresult = pupe_query($query);
 
 						$query = "	UPDATE laskun_lisatiedot
 									SET kolm_ovttunnus	= '$otsikrow[kolm_ovttunnus]',
@@ -467,7 +467,7 @@
 									laskutus_maa    	= '$otsikrow[laskutus_maa]'
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and otunnus			= '$laskuorow[tunnus]'";
-						$updaresult = mysql_query($query) or pupe_error($query);
+						$updaresult = pupe_query($query);
 
 					}
 				}
@@ -479,7 +479,7 @@
 							FROM yhtio
 							WHERE tunnus = '$tunnus'
 							and yhtio 	 = '$kukarow[yhtio]'";
-				$otsikres = mysql_query($query) or pupe_error($query);
+				$otsikres = pupe_query($query);
 
 				if (mysql_num_rows($otsikres) == 1) {
 					$otsikrow = mysql_fetch_array($otsikres);
@@ -495,7 +495,7 @@
 										(tila IN ('A','0'))
 									)
 								and tapvm = '0000-00-00'";
-					$laskuores = mysql_query($query) or pupe_error($query);
+					$laskuores = pupe_query($query);
 
 					while ($laskuorow = mysql_fetch_array($laskuores)) {
 
@@ -511,7 +511,7 @@
 						if ($laskuorow["maa"] != "" and $laskuorow["maa"] != $otsikrow["maa"]) {
 							// tutkitaan ollaanko siellä alv-rekisteröity
 							$alhqur = "SELECT vat_numero from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskuorow[maa]' and vat_numero != ''";
-							$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+							$alhire = pupe_query($alhqur);
 
 							// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
 							if (mysql_num_rows($alhire) == 1) {
@@ -519,13 +519,13 @@
 
 								// haetaan maan oletusalvi
 								$query = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$laskuorow[maa]'";
-								$alhire = mysql_query($query) or pupe_error($query);
+								$alhire = pupe_query($query);
 
 								if (mysql_num_rows($alhire) == 1) {
 
 									// haetaan sen yhteystiedot
 									$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$maa' and vat_numero = '$alhiro[vat_numero]'";
-									$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+									$alhire = pupe_query($alhqur);
 
 									if (mysql_num_rows($alhire) == 1) {
 										$apualvrow  = mysql_fetch_assoc($alhire);
@@ -554,7 +554,7 @@
 									alv_tili			= '$upda_yhtioalv_tilino'
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and tunnus			= '$laskuorow[tunnus]'";
-						$updaresult = mysql_query($query) or pupe_error($query);
+						$updaresult = pupe_query($query);
 					}
 				}
 			}
@@ -566,14 +566,14 @@
 								SET muuttaja = '$kukarow[kuka]', muutospvm=now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$lukitse_avaimeen'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 				elseif ($toim == "liitetiedostot" and $lukitse_laji == "tuote") {
 					$query = "	UPDATE tuote
 								SET muuttaja = '$kukarow[kuka]', muutospvm=now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$lukitse_avaimeen'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 			}
 
@@ -627,7 +627,7 @@
 						FROM perusalennus
 						WHERE tunnus = '$tmp_tuote_tunnus'
 						and yhtio 	 = '$kukarow[yhtio]'";
-			$otsikres = mysql_query($query) or pupe_error($query);
+			$otsikres = pupe_query($query);
 			$otsikrow = mysql_fetch_assoc($otsikres);
 		}
 		elseif ($toim == "avainsana") {
@@ -635,7 +635,7 @@
 						FROM avainsana
 						WHERE tunnus = '$tmp_tuote_tunnus'
 						and yhtio 	 = '$kukarow[yhtio]'";
-			$otsikres = mysql_query($query) or pupe_error($query);
+			$otsikres = pupe_query($query);
 			$otsikrow = mysql_fetch_assoc($otsikres);
 		}
 		elseif ($toim == "yhteyshenkilo") {
@@ -643,7 +643,7 @@
 						FROM yhteyshenkilo
 						WHERE tunnus = '$tmp_tuote_tunnus'
 						and yhtio 	 = '$kukarow[yhtio]'";
-			$otsikres = mysql_query($query) or pupe_error($query);
+			$otsikres = pupe_query($query);
 			$otsikrow = mysql_fetch_assoc($otsikres);
 		}
 		else {
@@ -711,7 +711,7 @@
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
 					$ashak = "SELECT group_concat(tunnus) tunnukset FROM asiakas WHERE yhtio='$kukarow[yhtio]' and nimi like '%" . $haku[$i] . "%'";
-					$ashakres = mysql_query($ashak) or pupe_error($ashak);
+					$ashakres = pupe_query($ashak);
 					$ashakrow = mysql_fetch_array($ashakres);
 
 					if ($ashakrow["tunnukset"] != "") {
@@ -748,7 +748,7 @@
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
 					$ashak = "SELECT group_concat(concat(\"'\",ytunnus,\"'\")) tunnukset FROM toimi WHERE yhtio='$kukarow[yhtio]' and nimi like '%" . $haku[$i] . "%'";
-					$ashakres = mysql_query($ashak) or pupe_error($ashak);
+					$ashakres = pupe_query($ashak);
 					$ashakrow = mysql_fetch_array($ashakres);
 
 					if ($ashakrow["tunnukset"] != "") {
@@ -767,7 +767,7 @@
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
 					$ashak = "SELECT group_concat(distinct concat('\'',ytunnus,'\'')) tunnukset FROM asiakas WHERE yhtio='$kukarow[yhtio]' and (nimi like '%" . $haku[$i] . "%' or ytunnus like '%" . $haku[$i] . "%')";
-					$ashakres = mysql_query($ashak) or pupe_error($ashak);
+					$ashakres = pupe_query($ashak);
 					$ashakrow = mysql_fetch_array($ashakres);
 
 					if ($ashakrow["tunnukset"] != "") {
@@ -875,7 +875,7 @@
 
 		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa";
         $query .= "$ryhma ORDER BY $jarjestys $limiitti";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
@@ -932,7 +932,7 @@
 			$query = "	SELECT *
 						FROM tuote
 						WHERE tunnus = '$tmp_tuote_tunnus'";
-			$nykyinenresult = mysql_query($query) or pupe_error($query);
+			$nykyinenresult = pupe_query($query);
 			$nykyinentuote = mysql_fetch_array($nykyinenresult);
 
 			$query = "	SELECT tunnus
@@ -941,7 +941,7 @@
 						and tuote.tuoteno		< '$nykyinentuote[tuoteno]'
 						ORDER BY tuoteno desc
 						LIMIT 1";
-			$noperes = mysql_query($query) or pupe_error($query);
+			$noperes = pupe_query($query);
 			$noperow = mysql_fetch_array($noperes);
 
 
@@ -963,7 +963,7 @@
 						and tuote.tuoteno		> '$nykyinentuote[tuoteno]'
 						ORDER BY tuoteno
 						LIMIT 1";
-			$yesres = mysql_query($query) or pupe_error($query);
+			$yesres = pupe_query($query);
 			$yesrow = mysql_fetch_array($yesres);
 
 			echo "<form action = 'yllapito.php' method = 'post'>";
@@ -1186,7 +1186,7 @@
 		$query = "	SELECT *
 					FROM $toim
 					WHERE tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$trow = mysql_fetch_array($result);
 
 		echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
@@ -1241,7 +1241,7 @@
 						and laji = 'MYSQLALIAS'
 						and selite = '$toim.$al_nimi'
 						$al_lisa";
-			$al_res = mysql_query($query) or pupe_error($query);
+			$al_res = pupe_query($query);
 
 			if (mysql_num_rows($al_res) > 0) {
 				$al_row = mysql_fetch_array($al_res);
@@ -1432,7 +1432,7 @@
 			}
 
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'yhteyshenkilo' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
+			$res = pupe_query($queryoik);
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[6]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
@@ -1483,7 +1483,7 @@
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana")) {
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
+			$res = pupe_query($queryoik);
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=liitetiedostot&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
@@ -1500,7 +1500,7 @@
 			}
 
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi like 'puun_alkio&laji=tuote%' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
+			$res = pupe_query($queryoik);
 
 			if (mysql_num_rows($res) > 0) {
 				echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=tuote&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";

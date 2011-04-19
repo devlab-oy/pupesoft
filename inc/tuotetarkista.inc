@@ -16,7 +16,7 @@ if(!function_exists("tuotetarkista")) {
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '".trim($t[$i])."'";
-					$chkressiresult = mysql_query($query) or pupe_error($query);
+					$chkressiresult = pupe_query($query);
 
 					if (mysql_num_rows($chkressiresult) > 0) {
 						$virhe[$i] = t("Tuotenumero on jo perustettu järjestelmään");
@@ -27,11 +27,11 @@ if(!function_exists("tuotetarkista")) {
 			if ($poistolukko != "LUEDATA") {
 				// Tuotteen saa poistaa mikäli sillä ei ole yhtään tapahtumaa
 				$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$t[$i]' LIMIT 1";
-				$sdtres = mysql_query($query) or pupe_error($query);
+				$sdtres = pupe_query($query);
 
 				if (mysql_num_rows($sdtres) == 0) {
 					$query = "SELECT yhtio FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$t[$i]' and tyyppi IN ('B','E','G','L','O','V','W','F','N','M','Z','0','T') and laadittu > '0000-00-00 00:00:00' LIMIT 1";
-					$sdtres = mysql_query($query) or pupe_error($query);
+					$sdtres = pupe_query($query);
 
 					if (mysql_num_rows($sdtres) == 0) {
 						$poistolukko = "";
@@ -54,7 +54,7 @@ if(!function_exists("tuotetarkista")) {
 						and tyyppi = '$kptyyppi'
 						and kaytossa != 'E'
 						and tunnus = '$t[$i]'";
-			$tpres = mysql_query($tpque) or pupe_error($tpque);
+			$tpres = pupe_query($tpque);
 
 			if (mysql_num_rows($tpres) == 0) {
 				$virhe[$i] .= t("Kustannuspaikkaa ei löydy")."!";
@@ -64,11 +64,11 @@ if(!function_exists("tuotetarkista")) {
 		if ((mysql_field_name($result, $i) == "osasto" or mysql_field_name($result, $i) == "try" or mysql_field_name($result, $i) == "tuotemerkki" or mysql_field_name($result, $i) == "malli" or mysql_field_name($result, $i) == "mallitarkenne") and trim($t[$i]) != '') {
 
 			$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".mysql_field_name($result, $i)."'";
-			$tpres = mysql_query($tpque) or pupe_error($tpque);
+			$tpres = pupe_query($tpque);
 
 			if (mysql_num_rows($tpres) > 0) {
 				$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".mysql_field_name($result, $i)."' and SELITE = '$t[$i]'";
-				$tpres = mysql_query($tpque) or pupe_error($tpque);
+				$tpres = pupe_query($tpque);
 
 				if (mysql_num_rows($tpres) == 0) {
 					$virhe[$i] .= t("Avainsanaa ei löydy")."!";
@@ -96,7 +96,7 @@ if(!function_exists("tuotetarkista")) {
 			$query = "	SELECT nimi
 						FROM tili
 						WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) != 1) {
 				$virhe[$i] = t("Tili puuttuu tai sitä ei loydy");
@@ -111,7 +111,7 @@ if(!function_exists("tuotetarkista")) {
 			$query = "	SELECT cn
 						FROM tullinimike
 						WHERE cn = '$t[$i]' and kieli = '$yhtiorow[kieli]'";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) != 1) {
 				$virhe[$i] = t("Virheellinen tullinimike");
@@ -134,7 +134,7 @@ if(!function_exists("tuotetarkista")) {
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tuoteno = '$tem_tuoteno'
 								LIMIT 1";
-					$tapahtuma_chk_res = mysql_query($query) or pupe_error($query);
+					$tapahtuma_chk_res = pupe_query($query);
 
 					if (mysql_num_rows($tapahtuma_chk_res) == 1) {
 						$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
@@ -150,7 +150,7 @@ if(!function_exists("tuotetarkista")) {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tem_tuoteno'
 						and saldo  != 0";
-			$vresult = mysql_query($query) or pupe_error($query);
+			$vresult = pupe_query($query);
 			$vrow = mysql_fetch_array($vresult);
 
 			if ($poistolukko != "" and $t[$i] != $trow["sarjanumeroseuranta"]) {
@@ -173,7 +173,7 @@ if(!function_exists("tuotetarkista")) {
 				$query = "	SELECT *
 							FROM tuotepaikat
 							WHERE tuoteno = '$tem_tuoteno' and yhtio = '$kukarow[yhtio]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if ($t[$i] != '') {
 					if (mysql_num_rows($sresult) != 0) {
@@ -225,7 +225,7 @@ if(!function_exists("tuotetarkista")) {
 						$query = "	SELECT distinct koodi
 									FROM maat
 									WHERE koodi = '$apu_vientikielto'";
-						$vientikielto_result = mysql_query($query) or pupe_error($query);
+						$vientikielto_result = pupe_query($query);
 
 						if (mysql_num_rows($vientikielto_result) == 0) {
 							$virhe[$i] .= "Virheellinen maakoodi $apu_vientikielto!<br>";
@@ -246,7 +246,7 @@ if(!function_exists("tuotetarkista")) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and eankoodi = '".trim($t[$i])."'
 							and tuoteno != '$tem_tuoteno'";
-				$chkressiresult = mysql_query($query) or pupe_error($query);
+				$chkressiresult = pupe_query($query);
 
 				if (mysql_num_rows($chkressiresult) > 0) {
 					$virhe[$i] = t("EAN-koodi on jo perustettu järjestelmään");
@@ -280,7 +280,7 @@ if(!function_exists("tuotetarkista")) {
 							selite 		= '".t("Tuotteen kehahinta vaihdettiin")." $trow[kehahin] --> $tem_kehahin',
 							laatija 	= '$kukarow[kuka]',
 							laadittu 	= now()";
-				$chkressires = mysql_query($query) or pupe_error($query);
+				$chkressires = pupe_query($query);
 			}
 
 			if (count($virhe) == 0 and $tem_eisaldoa == "" and $yhtiorow["tuotteen_oletuspaikka"] != "") {
@@ -288,7 +288,7 @@ if(!function_exists("tuotetarkista")) {
 				$query = "	SELECT *
 							FROM tuotepaikat
 							WHERE tuoteno = '$tem_tuoteno' and yhtio = '$kukarow[yhtio]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) == 0) {
 					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
@@ -319,7 +319,7 @@ if(!function_exists("tuotetarkista")) {
 											laatija			= '$kukarow[kuka]',
 											muutospvm		= now(),
 											muuttaja		= '$kukarow[kuka]'";
-					$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
+					$tuotepaikka_result = pupe_query($tuotepaikka_query);
 				}
 			}
 		}

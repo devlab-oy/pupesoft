@@ -1274,25 +1274,24 @@
 
 									if (!isset($saatanat_chk[$jtrow['ytunnus']])) {
 
-										$sytunnus 	 = $jtrow['ytunnus'];
-										$eiliittymaa = 'ON';
-
+										$sytunnus 	 	 = $jtrow['ytunnus'];
+										$eiliittymaa 	 = 'ON';
 										$luottorajavirhe = '';
-										$jvvirhe = '';
-										$ylikolkyt = '';
-										$trattavirhe = '';
+										$jvvirhe 		 = '';
+										$ylivito 		 = '';
+										$trattavirhe 	 = '';
 
 										ob_start();
 										require ("raportit/saatanat.php");
 										ob_end_clean();
 
-										$saatanat_chk[$sytunnus] = array($luottorajavirhe, $jvvirhe, $ylikolkyt, $trattavirhe);
+										$saatanat_chk[$sytunnus] = array($luottorajavirhe, $jvvirhe, $ylivito, $trattavirhe);
 									}
 									else {
-										list($luottorajavirhe, $jvvirhe, $ylikolkyt, $trattavirhe) = $saatanat_chk[$jtrow['ytunnus']];
+										list($luottorajavirhe, $jvvirhe, $ylivito, $trattavirhe) = $saatanat_chk[$jtrow['ytunnus']];
 									}
 
-									if ($luottorajavirhe != '' or $jvvirhe != '' or $ylikolkyt > 0 or $trattavirhe != '') {
+									if ($luottorajavirhe != '' or $jvvirhe != '' or $ylivito > 0 or $trattavirhe != '') {
 										echo "<br/>";
 									}
 
@@ -1306,7 +1305,7 @@
 										echo "<font class='message'>",t("T‰m‰ on j‰lkivaatimusasiakas"),"</font>";
 									}
 
-									if ($ylikolkyt > 0) {
+									if ($ylivito > 0) {
 										echo "<br/>";
 										echo "<font class='message'>".t("Yli 15 pv sitten er‰‰ntyneit‰ laskuja")."</font>";
 									}

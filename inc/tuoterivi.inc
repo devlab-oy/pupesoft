@@ -19,7 +19,7 @@
 						FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and laji in ('epäkurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
-						and tuoteno = '$tuoteno'						
+						and tuoteno = '$tuoteno'
 						LIMIT 1";
 			$sdtres = pupe_query($query);
 
@@ -46,6 +46,17 @@
 			// Jos on uusi tuote niin kaikki lukot on auki
 			$poistolukko = "";
 		}
+	}
+
+	if (mysql_field_name($result, $i) == "tilino" or
+		mysql_field_name($result, $i) == "tilino_eu" or
+		mysql_field_name($result, $i) == "tilino_ei_eu" or
+		mysql_field_name($result, $i) == "tilino_kaanteinen" or
+		mysql_field_name($result, $i) == "tilino_marginaali" or
+		mysql_field_name($result, $i) == "tilino_osto_marginaali") {
+
+		$ulos = "<td>".livesearch_kentta("mainform", "TILIHAKU", $nimi, 270, $trow[$i], "EISUBMIT")."</td>";
+		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "nimitys") {

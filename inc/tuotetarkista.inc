@@ -91,15 +91,17 @@ if(!function_exists("tuotetarkista")) {
 			mysql_field_name($result, $i) == "tilino_eu" or
 			mysql_field_name($result, $i) == "tilino_ei_eu" or
 			mysql_field_name($result, $i) == "tilino_marginaali" or
-			mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != 0) {
+			mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != "") {
 
-			$query = "	SELECT nimi
+			$query = "	SELECT yhtio
 						FROM tili
-						WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tilino = '$t[$i]'";
 			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) != 1) {
-				$virhe[$i] = t("Tili puuttuu tai sitä ei loydy");
+				$virhe[$i] = t("Tiliä ei löydy");
+				$errori = 1;
 			}
 		}
 

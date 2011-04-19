@@ -25,7 +25,7 @@ if(!function_exists("asiakastarkista")) {
 							JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
 							where konserni	 = '$yhtiorow[konserni]'
 							and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 				$srowapu = mysql_fetch_array($sresult);
 
 				if ($srowapu["yhtiot"] != "") {
@@ -36,7 +36,7 @@ if(!function_exists("asiakastarkista")) {
 				}
 
 				$query   = "select tunnus from asiakas where yhtio in ($tarkyhtio) and ytunnus='$ytunnus_select' and tunnus != '$tunnus'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) > 0) {
 					if ($alias_set == "VAHITTAISMYYNTI") {
@@ -73,7 +73,7 @@ if(!function_exists("asiakastarkista")) {
 			if (mysql_field_name($result, $i) == 'piiri') 	$kptyyppi = "PIIRI";
 
 			$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$kptyyppi' and SELITE = '$t[$i]'";
-			$tpres = mysql_query($tpque) or pupe_error($tpque);
+			$tpres = pupe_query($tpque);
 
 			if (mysql_num_rows($tpres) == 0) {
 				$virhe[$i] .= t("Avainsanaa ei löydy")."!";
@@ -89,7 +89,7 @@ if(!function_exists("asiakastarkista")) {
 							JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
 							where konserni	 = '$yhtiorow[konserni]'
 							and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 				$srowapu = mysql_fetch_array($sresult);
 
 				if ($srowapu["yhtiot"] != "") {
@@ -107,7 +107,7 @@ if(!function_exists("asiakastarkista")) {
 				}
 
 				$query   = "SELECT tunnus from asiakas where yhtio in ($tarkyhtio) and asiakasnro='$asiakasnro_select' and tunnus != '$tunnus'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) > 0) {
 					$virhe[$i] = t("Valitsemasi asiakasnumero ei ollutkaan vapaa.");
@@ -128,7 +128,7 @@ if(!function_exists("asiakastarkista")) {
 				}
 
 				$query   = "select tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakasnro='$asiakas_numero' and tunnus != '$tunnus'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) > 0) {
 
@@ -152,7 +152,7 @@ if(!function_exists("asiakastarkista")) {
 		if (mysql_field_name($result, $i) == "toim_ovttunnus" and $yhtiorow['asiakkaan_tarkenne'] == '') {
 
 			$query   = "select tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and ovttunnus='$ovttunnus' and toim_ovttunnus='$t[$i]' and tunnus != '$tunnus'";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) > 0) {
 				if ($alias_set == "VAHITTAISMYYNTI") {
@@ -184,45 +184,15 @@ if(!function_exists("asiakastarkista")) {
 			mysql_field_name($result, $i) == "tilino_marginaali" or
 			mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != '') {
 
-			$query = "	SELECT nimi
+			$query = "	SELECT yhtio
 						FROM tili
-						WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
-			$sresult = mysql_query($query) or pupe_error($query);
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tilino = '$t[$i]'";
+			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) != 1) {
-				//Olisiko siellä nimi
-				if ($t[$i] != '') {
-					$query = "	SELECT nimi, tilino
-								FROM tili
-								WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
-								ORDER BY tilino";
-					$sresult = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($sresult) > 0) {
-						$ulosarray[$i] = "<td><select name='t[$i]'><option value = '' $sel>".t("Ei valintaa")."</option>";
-
-						while ($vrow = mysql_fetch_array($sresult)) {
-							$sel = "";
-							if ($trow[$i] == $vrow[0]) {
-								$sel = "selected";
-							}
-							$ulosarray[$i] .= "<option value = '$vrow[tilino]' $sel>$vrow[tilino] $vrow[nimi]</option>";
-						}
-
-						$ulosarray[$i] .= "</select></td>";
-						$virhe[$i] = t("Valitse tili");
-						$errori = 1;
-					}
-					else {
-						$virhe[$i] = t("Tili puuttuu tai sitä ei loydy");
-						$errori = 1;
-					}
-
-				}
-				if ($virhe[$i] == '') {
-					$virhe[$i] = t("Tiliä ei löydy");
-					$errori = 1;
-				}
+				$virhe[$i] = t("Tiliä ei löydy");
+				$errori = 1;
 			}
 		}
 
@@ -263,7 +233,7 @@ if(!function_exists("asiakastarkista")) {
 						where yhtio='$kukarow[yhtio]'
 						and tunnus='$t[$i]'
 						and (sallitut_maat = '' or sallitut_maat like '%$apu_maa%')";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) == 0) {
 				$virhe[$i] = t("Tätä maksuehtoa ei saa käyttää asiakkaalla tässä maassa.");
@@ -277,7 +247,7 @@ if(!function_exists("asiakastarkista")) {
 						from toimitustapa
 						where yhtio='$kukarow[yhtio]' and selite='$t[$i]'
 						and (sallitut_maat = '' or sallitut_maat like '%$apu_toim_maa%')";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) == 0) {
 				$virhe[$i] = t("Tätä toimitustapaa ei saa käyttää asiakkaalla tässä maassa.");

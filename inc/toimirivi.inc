@@ -9,22 +9,8 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tilino") {
-		if ($ulosarray[$i] != '') {
-			$ulos=$ulosarray[$i];
-			$jatko = 0;
-		}
-		else {
-			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
-			$query = "	SELECT nimi
-						FROM tili
-						WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
-			$vresult = mysql_query($query) or pupe_error($query);
-			if (mysql_num_rows($vresult) == 1) {
-				$vrow=mysql_fetch_array($vresult);
-				$ulos .= " " . $vrow["nimi"] . "</td>";
-				$jatko = 0;
-			}
-		}
+		$ulos = "<td>".livesearch_kentta("mainform", "TILIHAKU", $nimi, 270, $trow[$i], "EISUBMIT")."</td>";
+		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti
@@ -37,13 +23,13 @@
 					FROM yriti
 					WHERE yhtio  = '$kukarow[yhtio]'
 					and kaytossa = ''";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$sel="";
 		if((int)$trow[$i] == 0) {
 			$sel="selected";
 		}
-		$ulos = "<td><select name='$nimi'><option value = '0' $sel>".t("Ei suoriteta automaattisesti")."";
+		$ulos = "<td><select name='$nimi'><option value = '0' $sel>".t("Ei suoriteta automaattisesti");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 
@@ -86,7 +72,7 @@
 					FROM valuu
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY jarjestys";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi'>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -112,7 +98,7 @@
 					FROM kuka
 					WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
 					ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$sel="";
 		if (trim($trow[$i]) == "") {
@@ -139,7 +125,7 @@
 					AND extranet = ''
 					AND hyvaksyja = 'o'
 					ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$sel="";
 		if (trim($trow[$i]) == "") {
@@ -165,7 +151,7 @@
 					and kaytossa != 'E'
 					and tyyppi = 'K'
 					ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$sel="";
 		if (trim($trow[$i]) == "") {
@@ -192,7 +178,7 @@
 						WHERE yhtio = '$kukarow[yhtio]' and
 						tyyppi = 'O'
 						ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$sel="";
 		if (trim($trow[$i]) == "") {
@@ -219,7 +205,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and
 					tyyppi = 'P'
 					ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$sel="";
 		if (trim($trow[$i]) == "") {
@@ -316,7 +302,7 @@
 					FROM maat
 					WHERE nimi != ''
 					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi'>";
 
 		$ulos .= "<option value = '' ></option>";
@@ -390,7 +376,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "laskun_erittely") {
 
 		$selo = $sels = "";
@@ -438,7 +424,7 @@
 					and maa != ''
 					and vat_numero != ''
 					and toim_alv != ''";
-		$alhire = mysql_query($query) or pupe_error($query);
+		$alhire = pupe_query($query);
 
 		// ollaan alv-rekisteröity
 		if (mysql_num_rows($alhire) >= 1) {
@@ -479,7 +465,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "hintojenpaivityssykli") {
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
@@ -494,7 +480,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "edi_kuvaus") {
 
 		$path_parts = pathinfo($trow[$i]);
@@ -506,8 +492,8 @@
 		$ulos .= "<option value='editilaus_out_elma.inc' $sel[editilaus_out_elma]>".t("Elma-editilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_teccom.inc' $sel[editilaus_out_teccom]>".t("TecCom-editilaus")."</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
-	
+
 ?>

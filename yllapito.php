@@ -18,6 +18,15 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}
+	
+	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote") {
+		enable_ajax();
+	}
+	
+	if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
+		livesearch_tilihaku();
+		exit;
+	}
 
 	//Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
 	$aputoim = $toim;

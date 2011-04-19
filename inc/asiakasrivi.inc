@@ -15,22 +15,8 @@
 		mysql_field_name($result, $i) == "tilino_marginaali" or
 		mysql_field_name($result, $i) == "tilino_osto_marginaali") {
 
-		if ($ulosarray[$i] != '') {
-			$ulos = $ulosarray[$i];
-			$jatko = 0;
-		}
-		else {
-			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
-			$query = "	SELECT nimi
-						FROM tili
-						WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
-			$vresult = mysql_query($query) or pupe_error($query);
-			if (mysql_num_rows($vresult) == 1) {
-				$vrow=mysql_fetch_array($vresult);
-				$ulos .= " " . $vrow["nimi"] . "</td>";
-				$jatko = 0;
-			}
-		}
+		$ulos = "<td>".livesearch_kentta("mainform", "TILIHAKU", $nimi, 270, $trow[$i], "EISUBMIT")."</td>";
+		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat
@@ -40,7 +26,7 @@
 					and kaytossa != 'E'
 					and tyyppi = 'K'
 					ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$sel="";
 		if (trim($trow[$i]) == "") {
@@ -68,7 +54,7 @@
 						and kaytossa != 'E'
 						and tyyppi = 'O'
 						ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$sel="";
 		if (trim($trow[$i]) == "") {
@@ -96,7 +82,7 @@
 					and kaytossa != 'E'
 					and tyyppi = 'P'
 					ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$sel="";
 		if (trim($trow[$i]) == "") {
@@ -205,7 +191,7 @@
 					WHERE yhtio  = '$kukarow[yhtio]'
 					and kaytossa = ''
 					ORDER BY jarjestys, teksti";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
@@ -245,7 +231,7 @@
 						JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
 						where konserni = '$yhtiorow[konserni]'
 						and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
-			$vresult = mysql_query($query) or pupe_error($query);
+			$vresult = pupe_query($query);
 
 			if (mysql_num_rows($vresult) > 0) {
 				// haetaan konsernifirmat
@@ -254,7 +240,7 @@
 							JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
 							where konserni = '$yhtiorow[konserni]'
 							and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
-				$vresult = mysql_query($query) or pupe_error($query);
+				$vresult = pupe_query($query);
 				$srowapu = mysql_fetch_array($vresult);
 				$tarkyhtio = $srowapu["yhtiot"];
 			}
@@ -266,7 +252,7 @@
 						FROM asiakas USE INDEX (asno_index)
 						WHERE yhtio in ($tarkyhtio)
 						AND asiakasnro+0 >= $apu_asiakasnumero";
-			$vresult = mysql_query($query) or pupe_error($query);
+			$vresult = pupe_query($query);
 			$vrow = mysql_fetch_assoc($vresult);
 
 			if ($vrow['asiakasnro'] != '') {
@@ -313,7 +299,7 @@
 					FROM maat
 					WHERE nimi != ''
 					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$ulos .= "<option value = '' ></option>";
@@ -338,7 +324,7 @@
 					FROM toimitustapa
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY jarjestys, selite";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -356,7 +342,7 @@
 
 		//yhtiˆn oletusalvi!
 		$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
-		$wtres  = mysql_query($wquery) or pupe_error($wquery);
+		$wtres  = pupe_query($wquery);
 		$wtrow  = mysql_fetch_array($wtres);
 
 		$sel_veroton 	= "";
@@ -738,7 +724,7 @@
 	if (mysql_field_name($result, $i) == "myyjanro") {
 
 		$query = "SELECT distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei myyj‰‰")."</option>";
@@ -750,7 +736,7 @@
 						WHERE yhtio='$kukarow[yhtio]'
 						and kuka = '$kukarow[kuka]'
 						and myyja > 0";
-			$myyjaresult = mysql_query($query) or pupe_error($query);
+			$myyjaresult = pupe_query($query);
 
 			if (mysql_num_rows($myyjaresult) > 0) {
 				$myyjarow  = mysql_fetch_array($myyjaresult);
@@ -854,7 +840,7 @@
 	                FROM valuu
 	             	WHERE yhtio = '$kukarow[yhtio]'
 	               	ORDER BY jarjestys";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
@@ -1038,11 +1024,11 @@
 
 		$jatko = 0;
 	}
-	
 
-	if (mysql_field_name($result, $i) == "laani" or 
+
+	if (mysql_field_name($result, $i) == "laani" or
 		mysql_field_name($result, $i) == "kunta") {
-	
+
 		$sresult = t_avainsana(mysql_field_name($result, $i));
 		$sarnimi = mysql_field_name($result, $i);
 

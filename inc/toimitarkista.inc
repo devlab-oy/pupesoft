@@ -22,37 +22,16 @@ if(!function_exists("toimitarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "tilino") {
-			if ($t[$i] != '') {
-				$query = "	SELECT nimi
-							FROM tili
-							WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+		if (mysql_field_name($result, $i) == "tilino" and $t[$i] != "") {
+			$query = "	SELECT yhtio
+						FROM tili
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tilino = '$t[$i]'";
+			$sresult = pupe_query($query);
 
-				if (mysql_num_rows($sresult) != 1) {
-					//Olisiko siellä nimi
-					if ($t[$i] != '') {
-						$query = "	SELECT nimi, tilino
-									FROM tili
-									WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
-									ORDER BY tilino";
-						$sresult = mysql_query($query) or pupe_error($query);
-						if (mysql_num_rows($sresult) > 0) {
-							$ulosarray[$i] = "<td><select name='t[$i]'><option value = '' $sel>".t("Ei valintaa")."</option>";
-							while ($vrow=mysql_fetch_array($sresult)) {
-								$sel="";
-								if ($trow[$i] == $vrow[0]) {
-									$sel = "selected";
-								}
-								$ulosarray[$i] .= "<option value = '$vrow[tilino]' $sel>$vrow[tilino] $vrow[nimi]</option>";
-							}
-							$ulosarray[$i] .= "</select></td>";
-							$virhe[$i] = t("Valitse tili");
-						}
-
-					}
-					if ($virhe[$i] == '') $virhe[$i] = t("Tiliä ei löydy");
-				}
+			if (mysql_num_rows($sresult) != 1) {
+				$virhe[$i] = t("Tiliä ei löydy");
+				$errori = 1;
 			}
 		}
 
@@ -166,7 +145,7 @@ if(!function_exists("toimitarkista")) {
 							SET toimittaja = '$t[$i]'
 							WHERE tuotteen_toimittajat.yhtio		= '$kukarow[yhtio]'
 							and tuotteen_toimittajat.liitostunnus 	= $tunnus";
-				$vres = mysql_query($query) or pupe_error($query);
+				$vres = pupe_query($query);
 			}
 		}
 
@@ -196,7 +175,7 @@ if(!function_exists("toimitarkista")) {
 							WHERE yhtio		= '$kukarow[yhtio]'
 							and ovttunnus	= '$t[$i]'
 							and tyyppi 	   != 'P'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult)>0) {
 					$srowapu = mysql_fetch_assoc($sresult);
@@ -231,7 +210,7 @@ if(!function_exists("toimitarkista")) {
 
 			if ($toimtyyppi == "S") {
 				$query = "SELECT * from yhtio where konserni='$yhtiorow[konserni]' and yhtio='$t[$i]' and yhtio!='$kukarow[yhtio]'";
-				$tyychkre = mysql_query($query) or pupe_error($query);
+				$tyychkre = pupe_query($query);
 
 				if (mysql_num_rows($tyychkre) == 0) {
 					$virhe[$i] = "Väärä yhtiötunnus: $t[$i]!";
@@ -253,7 +232,7 @@ if(!function_exists("toimitarkista")) {
 							tuotteen_toimittajat.toimittaja		= '$tmp_ytunnus',
 							tuotteen_toimittajat.valuutta		= '$tmp_valkoodi',
 							tuotteen_toimittajat.alkuperamaa	= '$tmp_maakoodi'";
-				$vres = mysql_query($query) or pupe_error($query);
+				$vres = pupe_query($query);
 			}
 
 			if ($toimtyyppi == "PP" and $tunnus > 0 and $errori != 1) {
@@ -265,7 +244,7 @@ if(!function_exists("toimitarkista")) {
 							and lasku.liitostunnus	= '$tunnus'
 							and lasku.tila = 'O'
 							group by 1";
-				$tyychkre1 = mysql_query($query) or pupe_error($query);
+				$tyychkre1 = pupe_query($query);
 
 				$query = "	SELECT lasku.yhtio, group_concat(DISTINCT lasku.laskunro) tilaukset
 							from lasku
@@ -275,14 +254,14 @@ if(!function_exists("toimitarkista")) {
 							and lasku.alatila != 'X'
 							and lasku.vanhatunnus = 0
 							group by 1";
-				$tyychkre2 = mysql_query($query) or pupe_error($query);
+				$tyychkre2 = pupe_query($query);
 
 				if (mysql_num_rows($tyychkre1) == 0 and mysql_num_rows($tyychkre2) == 0) {
 
 					$query = "	DELETE FROM tuotteen_toimittajat
 								WHERE tuotteen_toimittajat.yhtio		= '$kukarow[yhtio]'
 								and tuotteen_toimittajat.liitostunnus 	= $tunnus";
-					$vres = mysql_query($query) or pupe_error($query);
+					$vres = pupe_query($query);
 				}
 				else {
 					$tyychkro1 = mysql_fetch_array($tyychkre1);

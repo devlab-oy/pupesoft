@@ -15,13 +15,24 @@
 			$tyyppi = 3;
 
 			// Tuotteen saa poistaa mikäli sillä ei ole yhtään tapahtumaa
-			$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and laji in ('epäkurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus') LIMIT 1";
-			$sdtres = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT yhtio
+						FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji in ('epäkurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus')
+						and tuoteno = '$tuoteno'						
+						LIMIT 1";
+			$sdtres = pupe_query($query);
 
 			if (mysql_num_rows($sdtres) == 0) {
 				// Ei saa olla myöskään yhtään tilausriviä
-				$query = "SELECT yhtio FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tyyppi != 'D' LIMIT 1";
-				$sdtres = mysql_query($query) or pupe_error($query);
+				$query = "	SELECT yhtio
+							FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tyyppi in ('0','B','E','F','G','L','M','N','O','T','V','W','Z')
+							and tuoteno = '$tuoteno'
+							and laadittu > '0000-00-00 00:00:00'
+							LIMIT 1";
+				$sdtres = pupe_query($query);
 
 				if (mysql_num_rows($sdtres) == 0) {
 					$poistolukko = "";
@@ -45,7 +56,7 @@
 	    			WHERE yhtio = '$kukarow[yhtio]'
 	    			and tuoteno = '$tuoteno'
 					and tuotetyyppi in ('A','B')";
-	    $sresult = mysql_query($query) or pupe_error($query);
+	    $sresult = pupe_query($query);
 
 		if(mysql_num_rows($sresult) != 0) {
 			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td><td class = 'back'><font class='info'>".t("Huom! Viranomaistuotteen nimiystä ei tulisi muuttaa!")."</font></td>";
@@ -131,7 +142,7 @@
 					FROM valuu
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY jarjestys";
-	        $vresult = mysql_query($query) or pupe_error($query);
+	        $vresult = pupe_query($query);
 	        $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 	        while ($vrow=mysql_fetch_array($vresult)) {
 		        $sel="";
@@ -214,7 +225,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tuoteno'
 					and saldo  != 0";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$vrow = mysql_fetch_array($vresult);
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -255,7 +266,7 @@
 					FROM perusalennus
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY ryhma";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$ulos = "<td><select id='aleryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = ''>".t("Ei ryhmää")."</option>";
@@ -299,7 +310,7 @@
 					FROM maat
 					WHERE nimi != ''
 					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$ulos .= "<option value = '' ></option>";
@@ -375,7 +386,7 @@
 	if (mysql_field_name($result, $i) == "myyjanro") {
 
 		$query = "select distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei myyjää")."</option>";
@@ -395,7 +406,7 @@
 	if (mysql_field_name($result, $i) == "ostajanro") {
 
 		$query = "SELECT distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei ostajaa")."</option>";
@@ -412,9 +423,9 @@
 		$jatko = 0;
 	}
 	if (mysql_field_name($result, $i) == "tuotepaallikko") {
-	
+
 		$query = "SELECT distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = pupe_query($query);
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei tuotepäällikköä")."</option>";
@@ -442,7 +453,7 @@
 					where yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$kptyyppi'
 					and kaytossa != 'E'";
-		$vresult = mysql_query($tpque) or pupe_error($tpque);
+		$vresult = pupe_query($tpque);
 
 		$sel="";
 		if ($trow[$i] == "") {
@@ -629,28 +640,28 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "vakkoodi" and $yhtiorow["vak_kasittely"] != "") {
 
 		$sel = array();
 		$sel[$trow[$i]] = ' selected';
-		
+
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
-		
+
 		$query = "	SELECT tunnus, concat_ws(' / ', yk_nro, substring(nimi_ja_kuvaus,1,70), luokka, luokituskoodi, pakkausryhma, lipukkeet, erityismaaraykset, rajoitetut_maarat_ja_poikkeusmaarat_1) nimi
-					FROM vak  
+					FROM vak
 					WHERE yhtio = '{$kukarow['yhtio']}'";
-		$vak_res = mysql_query($query) or pupe_error($query);
-		
+		$vak_res = pupe_query($query);
+
 		$ulos .= "<option value=''>".t("Valitse")."</option>";
-		
+
 		while ($vak_row = mysql_fetch_assoc($vak_res)) {
 
 			$selected = $vak_row['tunnus'] == $trow[$i] ? ' selected' : '';
 
 			$ulos .= "<option value='{$vak_row['tunnus']}'{$selected}>{$vak_row['nimi']}</option>";
 		}
-		
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -661,7 +672,7 @@
 		$ulos .= "<option value=''>".t("Ei kuulu keräysvyöhykkeeseen")."</option>";
 
 		$query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
-		$keraysvyohyke_result = mysql_query($query) or pupe_error($query);
+		$keraysvyohyke_result = pupe_query($query);
 
 		while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
 

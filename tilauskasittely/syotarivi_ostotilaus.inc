@@ -20,6 +20,31 @@
 
 	$variaaritorivi = FALSE;
 
+	$suoratoimitusekko = "";
+
+	if ($rivitunnus > 0) {
+		//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
+	   	$query = "	SELECT tilausrivi.tunnus, tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
+	   				FROM tilausrivin_lisatiedot
+	   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.laskutettuaika = '0000-00-00')
+					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+	   				WHERE tilausrivin_lisatiedot.yhtio = '$kukarow[yhtio]'
+	   				and tilausrivin_lisatiedot.tilausrivilinkki  = '$rivitunnus'";
+		$varastoon_result = pupe_query($query);
+
+		if ($varastoon_row = mysql_fetch_assoc($varastoon_result)) {
+			echo "<input type='hidden' name='suoratoimitus_rivitun' value='$varastoon_row[tunnus]'>";
+			echo "<input type='hidden' name='suoratoimitus_rivikpl' value='$kpl'>";
+
+			if ($varastoon_row["suoraan_laskutukseen"] != "") {
+				$suoratoimitusekko = "<tr><th colspan='7'>".t("HUOM").":</td></tr><tr><td colspan='7'>".t("Suoratoimitus asiakkaalle").": $varastoon_row[nimi], ".t("Tilaus").": $varastoon_row[otunnus]. Ostorivin muutokset tehdään myös myyntiriville!</td></tr>";
+			}
+			else {
+				$suoratoimitusekko = "<tr><th colspan='7'>".t("HUOM").":</td></tr><tr><td colspan='7'>".t("Tilattu asiakkaalle").": $varastoon_row[nimi], ".t("Tilaus").": $varastoon_row[otunnus]. Ostorivin muutokset tehdään myös myyntiriville!</td></tr>";
+			}
+		}
+	}
+
 	if ($yhtiorow['variaatiomyynti'] == "K" and $kukarow["extranet"] == '' and (is_array($tuoteno_array) or $tuoteno != "" or $variaatio_tuoteno) and $ulos == "" and $rivitunnus == "") {
 		$variaaritorivi_osto = TRUE;
 
@@ -28,14 +53,16 @@
 
 	if ($variaaritorivi === FALSE) {
 		// Annetaan mahdollisuus tehdä uusi tilausrivi tai näytetään virhe
-		echo "<table border='0' cellspacing='1' cellpadding='2'>
-				<tr><th align='left'>".t("Tuoteno")."</th>
-				<th align='left'>".t("Määrä")."</th>
-				<th align='left'>".t("Määrä")."</th>
-				<th align='left'>".t("Hinta")."</th>
-				<th align='left'>".t("Ale")."</th>
-				<th align='left'>".t("Alv")."</th>
-				<th align='left'>".t("Viestit")."</th>
+		echo "<table>
+				$suoratoimitusekko
+				<tr>
+				<th>".t("Tuoteno")."</th>
+				<th>".t("Määrä")."</th>
+				<th>".t("Määrä")."</th>
+				<th>".t("Hinta")."</th>
+				<th>".t("Ale")."</th>
+				<th>".t("Alv")."</th>
+				<th>".t("Viestit")."</th>
 				<td class='back'></td>
 				</tr>";
 
@@ -45,13 +72,13 @@
 		}
 		else {
 			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
-					
+
 				$nosubmitti = "";
-				
+
 				if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 					$nosubmitti = "EISUBMIT";
 				}
-				
+
 				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, '', $nosubmitti)."</td>";
 			}
 			else {
@@ -60,7 +87,7 @@
 		}
 
 		echo "<td>$kpl</td>
-			<td><input type='text' size='7' name='kpl' value='$kpl'></td>
+			<td><input type='text' size='7' name='kpl' value = '$kpl'></td>
 			<td><input type='text' size='7' name='hinta' value = '$hinta'></td>
 			<td><input type='text' size='5' name='ale' value = '$ale'></td>";
 
@@ -78,11 +105,11 @@
 
 		// Ostohinnan päivityskysely
 		if ($paiv == 'X') {
-			echo "	<input type='radio' name='paiv' value='K'>".t("Päivitä")."<br>";
-			echo "	<input type='radio' name='paiv' value='E' CHECKED>".t("Älä Päivitä")."<br>";
+			echo "<input type='radio' name='paiv' value='K'>".t("Päivitä")."<br>";
+			echo "<input type='radio' name='paiv' value='E' CHECKED>".t("Älä Päivitä")."<br>";
 		}
 
-		echo " $varaosavirhe</td>";
+		echo "$varaosavirhe</td>";
 		echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lisää")."'></td></tr>";
 
 		if ($toim == "HAAMU" or $tuoteno == "99" or $yhtiorow["nimityksen_muutos_tilauksella"] == "Y") {
@@ -98,7 +125,6 @@
 
 		echo "<td class='back'></td>
 				</tr>";
-
 
 		if ($toimaika == "" or $toimaika == "0000-00-00") {
 			$toimaika = $laskurow["toimaika"];

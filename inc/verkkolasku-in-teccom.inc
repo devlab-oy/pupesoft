@@ -196,12 +196,30 @@
 					$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 				}
 
+				$rtuoteno[$i]["ostotilausnro"] = (string) $tuotetieto->OrderRef->BuyerOrderNumber; // mihin tätä tarvitiin ?
+				
+				$rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->PositionNumber;
+				
+				$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->Quantity);
+				
+				if (in_array($laskuttajan_toimittajanumero, array("123007","123442","123001"))) {
+					$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount); // summa
+				}
+				else {
+					$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->TotalPrice->Amount); // summa
+				}
+
+				// jos rivihinta löytyy, niin käytetään sitä, muussa tapauksessa lasketaan
+				if (isset($tuotetieto->UnitPrice->Amount) and $tuotetieto->UnitPrice->Amount != '') {
+					$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPrice->Amount);
+				}
+				else {
+					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"] ; 
+				}
+
 				$ealvi[] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["alv"] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
-				$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->TotalValue->Amount);
-				$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPrice->Amount);
-				$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->Quantity);
 			}
 			else {
 				//	Poistetaan tämä tietue

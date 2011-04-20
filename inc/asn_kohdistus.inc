@@ -21,28 +21,24 @@
 						FROM asn_sanomat
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND status = ''
-						ORDER BY toimittajanro, asn_numero, paketinnumero";
-			$result = mysql_query($query) or pupe_error($sqltark);
+						ORDER BY toimittajanumero, asn_numero, paketinnumero";
+			$result = pupe_query($query);
 
 			// Loopataan tuoterivit läpi
 			while ($row = mysql_fetch_assoc($result)) {
 
 				// Toimittaja vaihtuu tai ASN-sanoma vaihtuu tai paketti vaihtuu ja ei ole virheitä, teidään keikka ja suuntalava sekä kohdistetaan rivit
-				if ((isset($edellinen_toimittaja) and $edellinen_toimittaja != $row["toimittajanro"]) or (isset($edellinen_asn_numero) and $edellinen_asn_numero != $row["asn_numero"]) or (isset($edellinen_paketinnumero) and $edellinen_paketinnumero != $row["paketinnumero"])) {
+				if ((isset($edellinen_toimittaja) and $edellinen_toimittaja != $row["toimittajanumero"]) or (isset($edellinen_asn_numero) and $edellinen_asn_numero != $row["asn_numero"]) or (isset($edellinen_paketinnumero) and $edellinen_paketinnumero != $row["paketinnumero"])) {
 					if ($virheet == 0) {
 						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset);
 					}
 					else {
 						$virheet = 0;
-						echo "\nVIRHE: $virhe Paketti $edellinen_paketinnumero toimittajalla $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero\n";
+						echo "VIRHE: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero\n\n";
 					}
 					$paketin_rivit = array();
 					$paketin_tunnukset = array();
 					$paketin_tuotteet = array();
-				}
-				elseif ($virheet > 0) {
-					// Meillä on jo tämän paketin sisällä virheitä, ei suotta chekkailla muita
-					continue;
 				}
 
 				// Katsotaan, löytyykö tämä rivi ostotilaukselta
@@ -52,7 +48,7 @@
 											AND lasku.tunnus = tilausrivi.otunnus)
 							JOIN toimi ON (toimi.yhtio = tilausrivi.yhtio
 											AND toimi.tunnus = lasku.liitostunnus
-											AND toimi.toimittajanro = '$row[toimittajanro]')
+											AND toimi.toimittajanro = '$row[toimittajanumero]')
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
 															AND tuotteen_toimittajat.toim_tuoteno = '$row[toimittajan_tuoteno]')
@@ -61,19 +57,18 @@
 							AND tilausrivi.uusiotunnus = 0
 							AND tilausrivi.otunnus = '$row[tilausnumero]'
 							AND (tilausrivi.tunnus = '$row[tilausrivinpositio]' OR tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]')";
-				$checkres = mysql_query($query) or pupe_error($query);
+				$checkres = pupe_query($query);
 				$tilausrivirow = mysql_fetch_array($checkres);
-
 
 				// Tarkistetaan kappaleet ja splitataan ostotilausrivi, jos kappaleita on asn-sanomalla VÄHEMMÄN kuin tilausrivillä, vanhan tilausrivin tunnus jää jäljellä
 				if (mysql_num_rows($checkres) == 0 or $row["kappalemaara"] > $tilausrivirow["varattu"]) {
 					// Tuli enemmän, tämä on virhe
 					$virheet++;
 					if (mysql_num_rows($checkres) == 0) {
-						$virhe = "Ostotilausriviä ei löydy!";
+						echo "VIRHE: Sopivaa ostotilausrivia ei loydy. Toimittaja $row[toimittajanumero] ASN-sanoma $row[asn_numero] Paketti $row[paketinnumero] Tuote $row[toimittajan_tuoteno]\n";
 					}
 					else {
-						$virhe = "Toimittaja on toimittanut enemmän tuotetta ($row[toimittajan_tuoteno]) kun on tilattu. Tilauksella $row[ostotilausnro] tilattu ($tilausrivirow[varattu]), toimitettu ($row[kappalemaara]).";
+						echo "VIRHE: Toimitettu enemman kuin tilattu. Toimittaja $row[toimittajanumero] ASN-sanoma $row[asn_numero] Paketti $row[paketinnumero] Tuote $row[toimittajan_tuoteno] Tilattu $tilausrivirow[varattu] Toimitettu $row[kappalemaara]\n";
 					}
 				}
 				elseif ($row["kappalemaara"] < $tilausrivirow["varattu"]) {
@@ -86,7 +81,7 @@
 								varattu = '$row[kappalemaara]'
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$tilausrivirow[tunnus]'";
-					$upres = mysql_query($query) or pupe_error($query);
+					$upres = pupe_query($query);
 
 					// Tehdään uusi rivi, jossa on jäljelle jääneet kappaleet
 					$query = "	INSERT INTO tilausrivi SET
@@ -109,11 +104,11 @@
 								hyllytaso = '$tilausrivirow[hyllytaso]',
 								hyllyvali = '$tilausrivirow[hyllyvali]',
 								tilaajanrivinro = '$tilausrivirow[tunnus]'";
-					$inskres = mysql_query($query) or pupe_error($query);
+					$inskres = pupe_query($query);
 				}
 
 				// Otetaan talteen tämän kierroksen tiedot
-				$edellinen_toimittaja = $row["toimittajanro"];
+				$edellinen_toimittaja = $row["toimittajanumero"];
 				$edellinen_asn_numero = $row["asn_numero"];
 				$edellinen_paketinnumero = $row["paketinnumero"];
 				$paketin_tunnukset[] = $row["tunnus"];
@@ -125,7 +120,7 @@
 				asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset);
 			}
 			elseif ($virheet != 0) {
-				echo "\nVIRHE: $virhe\nVirheellinen paketti $edellinen_paketinnumero toimittajalla $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero\n";
+				echo "VIRHE: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero\n\n";
 			}
 
 		}
@@ -143,10 +138,10 @@
 							FROM toimi
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND toimittajanro = '$edellinen_toimittaja'";
-			$checkres = mysql_query($toimhaku) or pupe_error($toimhaku);
+			$checkres = pupe_query($toimhaku);
 
 			if (mysql_num_rows($checkres) != 1) {
-				echo "\nVIRHE: Toimittajanumero: $edellinen_toimittaja ei löydy järjestelmästä!\n";
+				echo "VIRHE: Toimittajanumero: $edellinen_toimittaja ei löydy jarjestelmasta!\n";
 			}
 			else {
 				// Jos kaikki paketin rivit olivat kunnossa, tehdään suuntalava ja linkataan ostotilausrivi keikkaan sekä suuntalavaan
@@ -160,25 +155,29 @@
 							AND vanhatunnus = 0
 							AND liitostunnus = '$toimittajarow[tunnus]'
 							AND comments = '$edellinen_asn_numero'";
-				$checkres = mysql_query($query) or pupe_error($query);
+				$checkres = pupe_query($query);
 
 				// Tehdään keikka
 				if (mysql_num_rows($checkres) == 0) {
-					$query = "	SELECT max(laskunro)
-								FROM lasku
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tila = 'K'";
-					$checkres = mysql_query($query) or pupe_error($query);
-					$row = mysql_fetch_array($checkres);
-					$id = $row[0] + 1;
-
+					
 					$query = "	SELECT kurssi
 								FROM valuu
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND nimi = '$toimittajarow[oletus_valkoodi]'";
-					$checkres = mysql_query($query) or pupe_error($query);
+					$checkres = pupe_query($query);
 					$row = mysql_fetch_array($checkres);
 					$kurssi = $row["kurssi"];
+					
+					$query  = "LOCK TABLE lasku WRITE";
+					$result = pupe_query($query);
+
+					$query = "	SELECT max(laskunro)
+								FROM lasku
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tila = 'K'";
+					$checkres = pupe_query($query);
+					$row = mysql_fetch_array($checkres);
+					$id = $row[0] + 1;
 
 					$maa_lahetys = $toimittajarow['maa_lahetys'] != '' ? $toimittajarow['maa_lahetys'] : $toimittajarow['maa'];
 
@@ -205,8 +204,11 @@
 								tila         			= 'K',
 								luontiaika	 			= now(),
 								laatija		 			= '$kukarow[kuka]'";
-					$insertres = mysql_query($query) or pupe_error($query);
+					$insertres = pupe_query($query);
 					$keikan_tunnus = mysql_insert_id();
+					
+					$query  = "UNLOCK TABLE";
+					$result = pupe_query($query);
 				}
 				else {
 					$keikkarow = mysql_fetch_array($checkres);
@@ -221,7 +223,7 @@
 							GROUP BY 1
 							ORDER BY 3 DESC
 							LIMIT 1";
-				$checkres = mysql_query($query) or pupe_error($query);
+				$checkres = pupe_query($query);
 				$row = mysql_fetch_array($checkres);
 
 				// Tehdään uusi suuntalava
@@ -242,6 +244,7 @@
 				$loppuhyllynro = "";
 				$loppuhyllyvali = "";
 				$loppuhyllytaso = "";
+				$automaattinen_paivitys = "";
 				$suuntalavat_ei_kayttoliittymaa = "KYLLA";
 
 				require ("tilauskasittely/suuntalavat.inc");
@@ -252,13 +255,13 @@
 							suuntalava = '$uusi_suuntalavan_tunnus'
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.tunnus IN (".implode(",", $paketin_rivit).")";
-				$updateres = mysql_query($query) or pupe_error($query);
+				$updateres = pupe_query($query);
 
 				$query = "	UPDATE asn_sanomat SET
 							status = 'X'
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
-				$updateres = mysql_query($query) or pupe_error($query);
+				$updateres = pupe_query($query);
 			}
 
 		}

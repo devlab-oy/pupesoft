@@ -53,7 +53,7 @@
 
 				$tiedosto = $kansio."/".$file;
 
-				$xml = simplexml_load_file($tiedosto);
+				$xml = @simplexml_load_file($tiedosto);
 				$tiedosto_sisalto = file_get_contents($tiedosto);
 				$tiedosto_sisalto = mysql_real_escape_string($tiedosto_sisalto);
 
@@ -249,9 +249,9 @@
 						$tarkinsert = " SELECT tunnus
 										FROM asn_sanomat
 										WHERE yhtio = '$kukarow[yhtio]'
-										AND toimittajanro = '$tavarantoimittajanumero'
+										AND toimittajanumero = '$tavarantoimittajanumero'
 										AND asn_numero = '$asn_numero'";
-						$checkinsertresult = mysql_query($tarkinsert) or pupe_error($tarkinsert);
+						$checkinsertresult = pupe_query($tarkinsert);
 
 						if (mysql_num_rows($checkinsertresult) > 0) {
 							echo "Sanomalle $asn_numero ja toimittajalle $tavarantoimittajanumero löytyy tietokannasta jo sanomat, ei lisätä uudestaan sanomia\n";
@@ -275,7 +275,7 @@
 									if ($laatikkoid != "TOTAL PACKS") { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
 		 								$sqlinsert =  "		INSERT INTO asn_sanomat SET
 		 													yhtio 				= '$kukarow[yhtio]',
-		 													toimittajanro 		= '$tavarantoimittajanumero',
+		 													toimittajanumero	= '$tavarantoimittajanumero',
 		 													asn_numero			= '$asn_numero',
 		 													saapumispvm 		= '$toimituspvm',
 		 													vastaanottaja 		= '$vastaanottaja',
@@ -288,7 +288,7 @@
 		 													tilausrivinpositio	= '$value[PositionNumber]',
 		 													laatija 			= '$kukarow[kuka]',
 		 													luontiaika 			= now()";
-		 								$result = mysql_query($sqlinsert) or pupe_error($sqlinsert);
+		 								$result = pupe_query($sqlinsert);
 		 								$eka_insert[] = mysql_insert_id(); // Otetaan insertin ensimmäinen tunnus talteen. tätä käytetään liitetiedostoissa liitostunnuksena.
 									}
 								}
@@ -313,7 +313,7 @@
 											jarjestys			= '1',
 											laatija				= '$kukarow[kuka]',
 											luontiaika			= now()";
-							$Xresult = mysql_query($tecquery) or die ("$tecquery\n\n".mysql_error());
+							$Xresult = pupe_query($tecquery);
 
 							rename($kansio."/".$file, $kansio_valmis."/".$file);
 						}
@@ -326,12 +326,12 @@
 						unset($kplt);
 					}
 					else {
-						echo "Odottamaton virhe, tavarantoimittajan numero puuttuu sekä ASN-numero puuttuu, tai materiaali ei ole ASN-sanoma\n";
+						echo t("Virhe! Tavarantoimittajan numero puuttuu sekä ASN-numero puuttuu, tai materiaali ei ole ASN-sanoma")."\n";
 						rename($kansio."/".$file, $kansio_error."/".$file);
 					}
 				}
 				else {
-					echo "Odottamaton virhe, materiaali ei ole ASN-sanoma\n";
+					echo t("Tiedosto ei ole XML-sanoma").": $tiedosto\n\n";
 					rename($kansio."/".$file, $kansio_error."/".$file);
 				}
 			}

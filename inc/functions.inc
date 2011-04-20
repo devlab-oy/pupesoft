@@ -8111,10 +8111,6 @@ if (!function_exists("t_avainsana")) {
 
 		if ($return != "") {
 			$kielilisa = $return;
-
-			if ($return != "selite") {
-				$fallback = "";
-			}
 		}
 		else {
 			$kielilisa = "selitetark";
@@ -8122,9 +8118,9 @@ if (!function_exists("t_avainsana")) {
 
 		if (stripos($wherelisa, "ORDER BY") === FALSE) {
 			$query = "	SELECT distinct selite
-						from avainsana
-						where $yhtiolisa
-						and laji = '$laji'
+						FROM avainsana
+						WHERE $yhtiolisa
+						and laji  = '$laji'
 						and kieli = '$yhtiorow[kieli]'";
 			$result = pupe_query($query, $link);
 
@@ -8150,14 +8146,20 @@ if (!function_exists("t_avainsana")) {
 			$orderlisa = "";
 		}
 
-		$query = "	SELECT DISTINCT avainsana.*,
-					IFNULL((SELECT if (avainsana_kieli.$kielilisa = '', NULL, avainsana_kieli.$kielilisa)
-					FROM avainsana as avainsana_kieli
-					WHERE avainsana_kieli.yhtio = avainsana.yhtio
-					and avainsana_kieli.laji = avainsana.laji
-					and avainsana_kieli.perhe = avainsana.perhe
-					and avainsana_kieli.perhe > 0
-					and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.$kielilisa) $kielilisa
+		$kielisubquery = "";
+
+		//Haetaan vieraskieliset vain jos pyydetään vieraskielistä
+		if (strtoupper($kieli) != strtoupper($yhtiorow["kieli"])) {
+			$kielisubquery = ", IFNULL((SELECT if (avainsana_kieli.$kielilisa = '', NULL, avainsana_kieli.$kielilisa)
+								FROM avainsana as avainsana_kieli
+								WHERE avainsana_kieli.yhtio = avainsana.yhtio
+								and avainsana_kieli.laji = avainsana.laji
+								and avainsana_kieli.perhe = avainsana.perhe
+								and avainsana_kieli.perhe > 0
+								and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.$kielilisa) $kielilisa";
+		}
+
+		$query = "	SELECT DISTINCT avainsana.*
 					FROM avainsana
 					WHERE $yhtiolisa
 					and avainsana.laji = '$laji'
@@ -10796,15 +10798,23 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 }
 
 if (!function_exists("hintapyoristys")) {
-	function hintapyoristys($luku) {
+	function hintapyoristys($luku, $desimaalit=0) {
 		global $yhtiorow;
 
 		$luku = (float) $luku;
 
-		// käännetään luku desimaaliluvuksi parametrin mukaisesti
-		$luku = sprintf("%.".$yhtiorow['hintapyoristys']."f", round($luku, $yhtiorow['hintapyoristys']));
+		if ((int) $desimaalit > 0) {
+			$desit = (int) $desimaalit;
+		}
+		else {
+			$desit = (int) $yhtiorow['hintapyoristys'];
+		}
 
-		if ($yhtiorow["hintapyoristys_loppunollat"] == "P") {
+
+		// käännetään luku desimaaliluvuksi parametrin mukaisesti
+		$luku = sprintf("%.{$desit}f", round($luku, $desit));
+
+		if ($yhtiorow["hintapyoristys_loppunollat"] == "P" or (int) $desimaalit > 0) {
 			// poistetaan nollat lopusta
 			$luku = rtrim($luku, "0");
 
@@ -11737,7 +11747,118 @@ if (!function_exists("hae_tuotemuutokset")) {
 
 		return $lista;
 	}
+}
 
+if (!function_exists("kopioi_tilausrivi")) {
+	function kopioi_tilausrivi($tunnus, $poikkeukset = array()) {
+		global $kukarow;
+
+		$insid = 0;
+
+		$query = "	SELECT *
+					from tilausrivi
+					where yhtio = '{$kukarow["yhtio"]}'
+					and tunnus = '$tunnus'";
+		$rivires = pupe_query($query);
+
+		if (mysql_num_rows($rivires) > 0) {
+
+			$rivirow = mysql_fetch_assoc($rivires);
+
+			$rfields = "";
+			$rvalues = "";
+
+			for ($i=0; $i < mysql_num_fields($rivires)-1; $i++) {
+
+				$rfields .= mysql_field_name($rivires,$i).",";
+
+				switch (mysql_field_name($rivires, $i)) {
+					case 'muuttaja':
+					case 'muutospvm':
+						$rvalues .= "'',";
+						break;
+					case 'laatija':
+						$rvalues .= "'$kukarow[kuka]',";
+						break;
+					case 'luontiaika':
+						$rvalues .= "now(),";
+						break;
+					default:
+						$rvalues .= "'";
+
+						if (isset($poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)])) {
+							$rvalues .= $poikkeukset["tilausrivi.".mysql_field_name($rivires,$i)];
+						}
+						else {
+							$rvalues .= $rivirow[mysql_field_name($rivires,$i)];
+						}
+
+						$rvalues .= "',";
+				}
+			}
+
+			$rfields = substr($rfields, 0, -1);
+			$rvalues = substr($rvalues, 0, -1);
+
+			$kysely = "INSERT INTO tilausrivi ($rfields) VALUES ($rvalues)";
+			$insres = pupe_query($kysely);
+			$insid  = mysql_insert_id();
+
+			// Kopioidaan tilausrivin lisatiedot
+			$query = "	SELECT *
+						FROM tilausrivin_lisatiedot
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						and tilausrivitunnus = '$tunnus'";
+			$lisrivires = pupe_query($query);
+
+			if (mysql_num_rows($lisrivires) > 0) {
+				$rivirow = mysql_fetch_assoc($lisrivires);
+
+				$rfields = "";
+				$rvalues = "";
+
+				for ($i=0; $i < mysql_num_fields($lisrivires)-1; $i++) {
+
+					$rfields .= mysql_field_name($lisrivires,$i).",";
+
+					switch (mysql_field_name($lisrivires, $i)) {
+						case 'muuttaja':
+						case 'muutospvm':
+							$rvalues .= "'',";
+							break;
+						case 'laatija':
+							$rvalues .= "'$kukarow[kuka]',";
+							break;
+						case 'luontiaika':
+							$rvalues .= "now(),";
+							break;
+						case 'tilausrivitunnus':
+							$rvalues .= "'$insid',";
+							break;
+						default:
+							$rvalues .= "'";
+
+							if (isset($poikkeukset["tilausrivin_lisatiedot.".mysql_field_name($lisrivires,$i)])) {
+								$rvalues .= $poikkeukset["tilausrivin_lisatiedot.".mysql_field_name($lisrivires,$i)];
+							}
+							else {
+								$rvalues .= $rivirow[mysql_field_name($lisrivires,$i)];
+							}
+
+							$rvalues .= "',";
+					}
+				}
+
+				$rfields = substr($rfields, 0, -1);
+				$rvalues = substr($rvalues, 0, -1);
+
+				$kysely = "INSERT INTO tilausrivin_lisatiedot ($rfields) VALUES ($rvalues)";
+				$insres = pupe_query($kysely);
+			}
+		}
+
+		return $insid;
+	}
 }
 
 ?>

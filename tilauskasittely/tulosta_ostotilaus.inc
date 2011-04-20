@@ -533,9 +533,9 @@
 					// itse print komento...
 					if ($komento["Ostotilaus"] == 'email') {
 						$liite = $pdffilenimi;
-						$kutsu = "Ostotilaus $laskurow[tunnus]";
+						$kutsu = t("Ostotilaus", $kieli)." $laskurow[tunnus]";
 
-						require("../inc/sahkoposti.inc");
+						require("inc/sahkoposti.inc");
 						$tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";
 					}
 					elseif ($tee == 'NAYTATILAUS') {

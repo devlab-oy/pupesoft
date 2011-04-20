@@ -14,7 +14,7 @@
 					and lasku.tila in ('H','Y','M','P','Q')
 					and lasku.vienti in ('B','C','J','E','F','K','H','I','L')
 					and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if ($laskurow = mysql_fetch_array($result)) {
 
@@ -42,14 +42,14 @@
 							and ltunnus = '$tunnus'
 							and korjattu = ''
 							and tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')";
-				$updres = mysql_query($query) or pupe_error($query);
+				$updres = pupe_query($query);
 
 				// Päivitetään laskun tila
 				$query = "	UPDATE lasku
 							SET vienti = '$vienti'
 							where yhtio = '$kukarow[yhtio]'
 							and tunnus = '$tunnus'";
-				$updres = mysql_query($query) or pupe_error($query);
+				$updres = pupe_query($query);
 			}
 			else {
 				echo "<font class='error'>".t("Lasku on jo kululasku")."!</font><br><br>";
@@ -105,7 +105,7 @@
 				GROUP BY 1,2,3,4,5,6,7,8,9
 				HAVING lasku2.tunnus IS NULL
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0 ) {
 		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('eee')\">Näytä / Piilota</a><br><br>";
@@ -151,7 +151,7 @@
 						and tilino  = '$yhtiorow[alv]'
 						$alvilisa
 						and korjattu = ''";
-			$alvires = mysql_query($query) or pupe_error($query);
+			$alvires = pupe_query($query);
 			$alvirow = mysql_fetch_array($alvires);
 
 			// Ostoreskontralaskun veroton arvo
@@ -245,7 +245,7 @@
 				GROUP by lasku.tunnus
 				HAVING varastossa != kohdistettu
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0 ) {
 		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('kaa')\">Näytä / Piilota</a><br><br>";
@@ -327,7 +327,7 @@
 				lasku.tapvm >= '$avv-$akk-$app' and
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
 				ORDER BY tiliointi.tapvm, tiliointi.summa";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0 ) {
 		echo mysql_num_rows($result)." tiliöintiä. <a href=\"javascript:toggleGroup('koo')\">Näytä / Piilota</a><br><br>";
@@ -396,7 +396,7 @@
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
 				HAVING tiliointi1.ltunnus IS NULL or tiliointi2.ltunnus IS NULL
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0 ) {
 		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('nee')\">Näytä / Piilota</a><br><br>";
@@ -467,7 +467,7 @@
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
 				GROUP BY lasku.tunnus
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0 ) {
 		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('vii')\">Näytä / Piilota</a><br><br>";
@@ -535,7 +535,7 @@
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
 				HAVING abs(abs(summa1) - abs(summa2)) > 0.01
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0 ) {
 		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('kuu')\">Näytä / Piilota</a><br><br>";
@@ -607,7 +607,7 @@
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
 				HAVING abs(rahti) > 0.05
 				ORDER BY lasku.tapvm, lasku.rahti_etu";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0 ) {
 		echo mysql_num_rows($result)." keikkaa. <a href=\"javascript:toggleGroup('see')\">Näytä / Piilota</a><br><br>";

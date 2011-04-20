@@ -6,7 +6,7 @@ $query  = "	SELECT *
 			and yhtio		= '$kukarow[yhtio]'
 			and tila		= 'K'
 			and alatila 	= '$keikanalatila'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
 	$laskurow = mysql_fetch_array($result);
@@ -15,7 +15,7 @@ else {
 	if (substr($luouusikeikka,0,2) == "OK") {
 		// haetaan seuraava vapaa keikkaid
 		$query  = "SELECT max(laskunro)+1 from lasku where yhtio='$kukarow[yhtio]' and tila='K'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$row    = mysql_fetch_array($result);
 		$id		= $row[0];
 
@@ -38,7 +38,7 @@ else {
 					alatila      = '$keikanalatila',
 					luontiaika	 = now(),
 					laatija		 = '$kukarow[kuka]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$otunnus = mysql_insert_id();
 
@@ -48,7 +48,7 @@ else {
 					and yhtio		= '$kukarow[yhtio]'
 					and tila		= 'K'
 					and alatila     = '$keikanalatila'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$laskurow = mysql_fetch_array($result);
 	}
 	else {
@@ -59,7 +59,7 @@ else {
 
 if ($keikanalatila == "T") {
 	$query = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi LIKE '%ulask.php'";
-	$res = mysql_query($query) or pupe_error($query);
+	$res = pupe_query($query);
 
 	if (mysql_num_rows($res) > 0) {
 		echo "<font class='message'>".t("Syötä uusi lasku")." <form method='POST' action='".$palvelin2."ulask.php'>
@@ -69,7 +69,7 @@ if ($keikanalatila == "T") {
 	}
 
 	$query = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi LIKE '%matkalasku.php'";
-	$res = mysql_query($query) or pupe_error($query);
+	$res = pupe_query($query);
 
 	if (mysql_num_rows($res) > 0) {
 		echo "<font class='message'>".t("Syötä uusi matkalasku")." <form method='POST' action='".$palvelin2."matkalasku.php'>
@@ -86,7 +86,7 @@ if ($tee_kululaskut == "liita") {
 				from lasku
 				where yhtio	= '$kukarow[yhtio]'
 				and tunnus	= '$laskutunnus'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$oslasrow = mysql_fetch_array($result);
 
 	// jos meillä on hyvityslasku niin haetaan vaan negatiivisiä alvikirjauksia (en tiedä ollenkaan onko tämä futureprooof) :(
@@ -105,7 +105,7 @@ if ($tee_kululaskut == "liita") {
 				and tilino  = '$yhtiorow[alv]'
 				$alvilisa
 				and korjattu = ''";
-	$alvires = mysql_query($query) or pupe_error($query);
+	$alvires = pupe_query($query);
 	$alvirow = mysql_fetch_array($alvires);
 
 	// Ostoreskontralaskun veroton arvo
@@ -125,7 +125,7 @@ if ($tee_kululaskut == "liita") {
 				where yhtio		= '$kukarow[yhtio]'
 				and tila		= 'K'
 				and vanhatunnus	= '$laskutunnus'";
-	$apure = mysql_query($query) or pupe_error($query);
+	$apure = pupe_query($query);
 	$apurow = mysql_fetch_array($apure);
 
 	// Tämän kululaskun käytettävissä oleva summa
@@ -189,7 +189,7 @@ if ($tee_kululaskut == "liita") {
 					liitostunnus = '$oslasrow[liitostunnus]',
 					luontiaika	 = now(),
 					tila         = 'K'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if ($silent == "") echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin keikkaan")." $laskurow[laskunro].</font><br><br>";
 
@@ -204,7 +204,7 @@ if ($tee_kululaskut == "liita") {
 						kohdistettu		= ''
 						where yhtio		= '$kukarow[yhtio]'
 						and tunnus		= '$laskurow[tunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		// takasin selaukseen
@@ -218,7 +218,7 @@ if ($tee_kululaskut == "poista") {
 	if ($tunnus != "") {
 		// poistetaan liitetty ostolasku
 		$query  = "DELETE from lasku where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$laskurow[laskunro]' and summa='$poistasumma' and vanhatunnus='$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		// jos poistettiin vaihto-omaisuuslasku niin laitetaan oletukset takasin
 		if ($poistavienti == "C" or $poistavienti == "F" or $poistavienti == "I" or $poistavienti == "J" or $poistavienti == "K" or $poistavienti == "L") {
@@ -228,30 +228,30 @@ if ($tee_kululaskut == "poista") {
 						kohdistettu		= ''
 						where yhtio		= '$kukarow[yhtio]'
 						and tunnus		= '$laskurow[tunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			//katotaan jäikö keikalle enää yhtään vaihto-omaisuuslaskua
 			$query  = "	SELECT tunnus
 						from lasku
 						where yhtio='$kukarow[yhtio]' and tila='K' and alatila = '$keikanalatila' and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			//vaihto-omaisuuslasku/laskuja ei löytynyt
 			if (mysql_num_rows($result) == 0) {
 				// haetaan toimittajan tiedot uusiks
 				$query = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
-				$kurres = mysql_query($query) or pupe_error($query);
+				$kurres = pupe_query($query);
 				$asiakasrow = mysql_fetch_array($kurres);
 
 				// haetaan oletuskurssi uusiksi
 				$query  = "SELECT kurssi from valuu where nimi='$asiakasrow[oletus_valkoodi]' and yhtio='$kukarow[yhtio]'";
-				$kurres = mysql_query($query) or pupe_error($query);
+				$kurres = pupe_query($query);
 				$kurrow = mysql_fetch_array($kurres);
 				$kurssi = $kurrow["kurssi"];
 
 				// palautetaan keikalle oletusarvot
 				$query = "UPDATE lasku set vienti='$asiakasrow[oletus_vienti]', tapvm='', valkoodi='$asiakasrow[oletus_valkoodi]', vienti_kurssi='$kurssi' where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 	}
@@ -267,7 +267,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 	$query 	= "	SELECT *
 				FROM tuote
 				WHERE tuoteno = '$yhtiorow[laskutuslisa_tuotenumero]' and yhtio = '$kukarow[yhtio]'";
-	$tuoteres = mysql_query($query) or pupe_error($query);
+	$tuoteres = pupe_query($query);
 
 	if (mysql_num_rows($tuoteres) != 1) {
 		echo t("VIRHE: Yhtiön laskutuslisa_tuotenumero ei ole määritelty")."!!<br>";
@@ -281,13 +281,13 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 
 	//yhtiön oletusalvi!
 	$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
-	$wtres  = mysql_query($wquery) or pupe_error($wquery);
+	$wtres  = pupe_query($wquery);
 	$wtrow  = mysql_fetch_array($wtres);
 
 	$query 	= "	SELECT *
 				FROM lasku
 				WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$myy_laskrow = mysql_fetch_array($result);
 
 	$query  = "	SELECT distinct tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.hinta, tilausrivi.kpl, tilausrivi.kommentti, tilausrivi.nimitys
@@ -303,7 +303,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 				and matkalasku.tunnus	= $matkalasktunnus
 				and tilausrivi.kpl 		> 0
 				and tilausrivi.tyyppi  != 'D'";
-	$keikkares = mysql_query($query) or pupe_error($query);
+	$keikkares = pupe_query($query);
 
 	while ($keikkarow = mysql_fetch_array($keikkares)) {
 
@@ -315,7 +315,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 					and tilausrivi.tyyppi != 'D'
 					and tilausrivi.otunnus = '$kukarow[kesken]'
 					and tilausrivin_lisatiedot.tilausrivilinkki = '$keikkarow[tunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			// tuote löytyi ok, lisätään rivi
@@ -355,7 +355,7 @@ if ($silent == "") {
 					and lasku.vanhatunnus<>0
 					and lasku.laskunro='$laskurow[laskunro]'
 					ORDER BY lasku.tapvm desc";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 0) {
 
@@ -391,7 +391,7 @@ if ($silent == "") {
 							from lasku
 							where yhtio	= '$kukarow[yhtio]'
 							and tunnus	= '$llrow[vanhatunnus]'";
-				$osresres = mysql_query($query) or pupe_error($query);
+				$osresres = pupe_query($query);
 				$osresrow = mysql_fetch_array($osresres);
 
 				// tehdään lasku linkki
@@ -441,7 +441,7 @@ if ($silent == "") {
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilrivi.tunnus and tilausrivin_lisatiedot.tilausrivilinkki = matkarivi.tunnus
 								WHERE matkalasku.yhtio	= '$kukarow[yhtio]'
 								and matkalasku.tunnus	= $osresrow[tunnus]";
-					$mlrivires = mysql_query($query) or pupe_error($query);
+					$mlrivires = pupe_query($query);
 					$mlrivirow = mysql_fetch_assoc($mlrivires);
 
 					if ($mlrivirow["mrivi"] > 0 and $mlrivirow["mrivi"] != $mlrivirow["trivi"]) {
@@ -581,7 +581,7 @@ if ($silent == "") {
 		$query  = "	SELECT *
 					from lasku
 					where yhtio='$kukarow[yhtio]' and tila='K' and alatila = '$keikanalatila' and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$vienti 	= "";
 		$valuutta 	= "";
@@ -613,7 +613,7 @@ if ($silent == "") {
 					$aikalisa
 					HAVING tiliointi is not null
 					order by lasku.tapvm desc";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Yhtään sopivaa laskua ei löytynyt!")."</font><br><br>";
@@ -653,7 +653,7 @@ if ($silent == "") {
 							and tilino  = '$yhtiorow[alv]'
 							$alvilisa
 							and korjattu = ''";
-				$alvires = mysql_query($query) or pupe_error($query);
+				$alvires = pupe_query($query);
 				$alvirow = mysql_fetch_array($alvires);
 
 				//Tässä on ostolasku verollinen summa
@@ -674,7 +674,7 @@ if ($silent == "") {
 							where yhtio		= '$kukarow[yhtio]'
 							and tila		= 'K'
 							and vanhatunnus	= '$llrow[tunnus]'";
-				$apure = mysql_query($query) or pupe_error($query);
+				$apure = pupe_query($query);
 				$apurow = mysql_fetch_array($apure);
 
 				$summa_kaytettavissa = round(abs($verotonsumma) - abs($apurow["arvo"]),2);

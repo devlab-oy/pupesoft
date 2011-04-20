@@ -5,7 +5,7 @@
 
 		// haetaan keikkaotsikon tiedot
 		$query    = "SELECT * FROM lasku WHERE tunnus = '{$otunnus}' AND yhtio = '{$kukarow['yhtio']}'";
-		$result   = mysql_query($query) or pupe_error($query);
+		$result   = pupe_query($query);
 		$laskurow = mysql_fetch_array($result);
 
 		// jos erikoislale niin otetaan sit‰ kanssa huomioon
@@ -25,7 +25,7 @@
 					and vanhatunnus <> 0
 					and vienti in ('C','F','I','J','K','L')
 					GROUP BY valkoodi, vienti";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		// jos on, haetaan liitettyjen laskujen
 		if (mysql_num_rows($result) == 1) {
@@ -56,7 +56,7 @@
 			if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 				// tutkitaan ollaanko siell‰ alv-rekisterˆity
 				$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='{$kukarow['yhtio']}' and maa='{$laskurow['maa']}' and vat_numero != ''";
-				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+				$alhire = pupe_query($alhqur);
 
 				// ollaan alv-rekisterˆity
 				if (mysql_num_rows($alhire) == 1) {
@@ -97,7 +97,7 @@
 					and lasku.tila in ('O','K','D')
 					GROUP BY tilausrivi.tunnus
 					ORDER BY tilausrivi.perheid2, tilausrivi.tunnus";
-		$hintojen_haku_res = mysql_query($query) or pupe_error($query);
+		$hintojen_haku_res = pupe_query($query);
 		$hintojen_haku_row = mysql_fetch_assoc($hintojen_haku_res);
 
 		return $hintojen_haku_row;
@@ -111,7 +111,7 @@
 					FROM suuntalavat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$suuntalava}'";
-		$tila_chk_res = mysql_query($query) or pupe_error($query);
+		$tila_chk_res = pupe_query($query);
 		$tila_chk_row = mysql_fetch_assoc($tila_chk_res);
 
 		if ($tila_chk_row['tila'] == 'S') {
@@ -122,7 +122,7 @@
 						suuntalava = '{$suuntalava}'
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$tunnus}'";
-			$update_res = mysql_query($query) or pupe_error($query);
+			$update_res = pupe_query($query);
 
 			echo json_encode('ok');
 		}
@@ -155,7 +155,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}' 
 					AND otunnus IN ('{$valittuotunnus}','{$otunnus}') 
 					AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		// Tuotteet p‰ivitet‰‰n kohdistuksissa automaattisesti oikeille suuntalavoille, mik‰li sellainen on jo perustettu (suuntalavan m‰‰riteltyjen varastopaikkojen sek‰ ker‰ysvyˆhykkeen mukaan)
 		if ($yhtiorow['suuntalavat'] == 'S' and $otunnus > 0) {
@@ -173,28 +173,31 @@
 	}
 	elseif ($_POST['ajax_toiminto'] == 'kohdista_koko_sivu' or $_POST['ajax_toiminto'] == 'ala_kohdista_mitaan') {
 
-		$tunnus = $_POST['tunnus'];
+		if ($_POST['ajax_toiminto'] == 'ala_kohdista_mitaan') {
+			$tunnus = $_POST['tunnus'];
 
-		$query = "	UPDATE tilausrivi USE INDEX (PRIMARY) SET 
-					uusiotunnus = 0, 
-					kerattyaika = '0000-00-00 00:00:00', 
-					suuntalava = 0,
-					keratty = '' 
-					WHERE tunnus = {$tunnus} 
-					AND yhtio = '{$kukarow['yhtio']}'";
-		$result = mysql_query($query) or pupe_error($query);
+			$query = "	UPDATE tilausrivi USE INDEX (PRIMARY) SET 
+						uusiotunnus = 0, 
+						kerattyaika = '0000-00-00 00:00:00', 
+						suuntalava = 0,
+						keratty = '' 
+						WHERE tunnus = {$tunnus} 
+						AND yhtio = '{$kukarow['yhtio']}'";
+			$result = pupe_query($query);
+		}
+		else if ($_POST['ajax_toiminto'] == 'kohdista_koko_sivu') {
+			$otunnus = $_POST['otunnus'];
 
-		if ($_POST['ajax_toiminto'] == 'kohdista_koko_sivu') {
-			list($valittutunnus, $valittuotunnus) = explode("###", $valittu);
+			list($valittutunnus, $valittuotunnus) = explode("###", $_POST['valittu']);
 
 			$query = "	UPDATE tilausrivi USE INDEX (yhtio_otunnus) SET 
 						uusiotunnus = '{$otunnus}', 
 						kerattyaika = now(), 
-						keratty = '{$kukarow['kuka']}' 
+						keratty = '{$kukarow['kuka']}'
 						WHERE yhtio = '{$kukarow['yhtio']}' 
 						AND otunnus IN ('{$valittuotunnus}','{$otunnus}') 
 						AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 	}
 	elseif ($_POST['ajax_toiminto'] == 'rivi_ale') {
@@ -208,7 +211,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}' 
 					AND tunnus = '{$tunnus}' 
 					AND ale <> '{$ale}'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$hinnat = laske_hinta($otunnus, $tunnus, $suoratoimitukset);
 
@@ -226,7 +229,7 @@
 
 		// p‰ivitet‰‰n haluttu hinta tilausriville
 		$query  = "UPDATE tilausrivi set hinta='{$hinta}' where yhtio='{$kukarow['yhtio']}' and tunnus='{$tunnus}' and hinta<>'{$hinta}'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$hinnat = laske_hinta($otunnus, $tunnus, $suoratoimitukset);
 
@@ -243,7 +246,7 @@
 		$query  = "	SELECT kpl, varattu, tuoteno
 					FROM tilausrivi
 					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$rivi	= mysql_fetch_assoc($result);
 	
 		// jos t‰t‰ rivi‰ ei ole viel‰ viety varastoon ni p‰ivitet‰‰n varattu kentt‰‰
@@ -253,7 +256,7 @@
 						where yhtio = '{$kukarow['yhtio']}'
 						and tunnus = '{$tunnus}'
 						and varattu <> '{$kpl}'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 	
 		if ($rivi["kpl"] == 0 and strtoupper($kpl) == "DEL") {
@@ -261,7 +264,7 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						and tunnus = '{$tunnus}'
 						and tyyppi = 'O'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 	
 			//Nollataan sarjanumero
 			if ($rivi["varattu"] > 0) {
@@ -276,7 +279,7 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						and tuoteno = '{$rivi['tuoteno']}'
 						and {$tunken} = '{$tunnus}'";
-			$sarjares = mysql_query($query) or pupe_error($query);
+			$sarjares = pupe_query($query);
 		}
 
 		$hinnat = laske_hinta($otunnus, $tunnus, $suoratoimitukset);
@@ -297,7 +300,7 @@
 					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
 					AND tilausrivi.tunnus = '{$tunnus}'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) return false;
 
@@ -336,7 +339,7 @@
 		}
 
 		$query = substr($query, 0, -1);
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$uuden_rivin_id = mysql_insert_id();
 

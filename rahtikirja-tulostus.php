@@ -550,17 +550,14 @@
 				if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
 				// tulostetaan toimitustavan m‰‰rittelem‰ rahtikirja
-				if (file_exists("tilauskasittely/$toitarow[rahtikirja]")) {
-					require("tilauskasittely/$toitarow[rahtikirja]");
+				if (@include("tilauskasittely/$toitarow[rahtikirja]")) {
 
 					if ($tulosta_vak_yleisrahtikirja != '') {
 						require("tilauskasittely/rahtikirja_pdf.inc");
 					}
 
 					if ($toitarow['erittely'] != '') {
-						if (file_exists("tilauskasittely/rahtikirja_erittely_pdf.inc")) {
-							require("tilauskasittely/rahtikirja_erittely_pdf.inc");
-						}
+						require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 					}
 				}
 				else {

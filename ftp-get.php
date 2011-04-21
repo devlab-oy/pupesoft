@@ -8,7 +8,11 @@
 	require ("inc/salasanat.php");
 	require ("inc/functions.inc");
 
-	$tmpfile = "/tmp/ftpget-tmp.txt";										# minne tehdään lock file
+	//keksitään uudelle failille joku varmasti uniikki nimi:
+	list($usec, $sec) = explode(' ', microtime());
+	mt_srand((float) $sec + ((float) $usec * 100000));
+	$tmpfile = "/tmp/ftpget-tmp-".md5(uniqid(mt_rand(), true)).".txt";
+
 	if (!isset($ftpget_email)) $ftpget_email = "devlab@devlab.fi"; 			# kenelle meilataan jos on ongelma
 	if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "devlab@devlab.fi"; 	# millä osoitteella meili lähetetään
 
@@ -59,7 +63,9 @@
 				fwrite($filehandle, "Changing to passive mode.\n");
 			}
 
-			ftp_pasv($conn_id, true);
+			if (!isset($ftpget_ei_passive) or trim($ftpget_ei_passive) == '') {
+				ftp_pasv($conn_id, true);
+			}
 
 			fwrite($filehandle, "Trying to get the file listing...\n");
 
@@ -141,6 +147,6 @@
 			fwrite($filehandle, "Error message: $syy\n");
 		}
 
-		system("rm -f $tmpfile");
+		unlink($tmpfile);
 	}
 ?>

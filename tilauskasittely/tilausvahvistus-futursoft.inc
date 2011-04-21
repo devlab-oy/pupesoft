@@ -1,6 +1,6 @@
 <?php
 
-// tarvitaan $laskurow array
+ // tarvitaan $laskurow array
 // tarvitaan $yhtiorow array
 
 if ($kukarow['extranet'] == '') {
@@ -142,31 +142,33 @@ if (!file_exists($tilvahvfilenimi)) {
 
 		$ftpnimi = $kukarow["yhtio"].$laskurow["toim_ovttunnus"]."-".basename($tilvahvfilenimi);
 
-		if ($futurtilvahhost != "" and $futurtilvahuser != "" and $futurtilvahpass != "") {
+		if ($GLOBALS["futurtilvahhost"] != "" and $GLOBALS["futurtilvahuser"] != "" and $GLOBALS["futurtilvahpass"] != "") {
 
-			$conn_id = ftp_connect($futurtilvahhost);
+			$conn_id = ftp_connect($GLOBALS["futurtilvahhost"]); 
 
 			// jos connectio ok, kokeillaan loginata
 			if ($conn_id) {
-				$login_result = ftp_login($conn_id, $futurtilvahuser, $futurtilvahpass);
+				$login_result = ftp_login($conn_id, $GLOBALS["futurtilvahuser"], $GLOBALS["futurtilvahpass"]); 
 			}
 
 			// jos login ok kokeillaan uploadata
 			if ($login_result) {
-				$upload = ftp_put($conn_id, $ftpnimi, realpath($tilvahvfilenimi), FTP_ASCII);
+				$upload = ftp_put($conn_id, $ftpnimi, realpath($tilvahvfilenimi), FTP_ASCII); 
 			}
 
 			if ($conn_id) {
-				ftp_close($conn_id);
+				ftp_close($conn_id); 
 			}
 
 			// jos mikätahansa feilas niin palautetaan yks
 			if ($conn_id === FALSE or $login_result === FALSE or $upload === FALSE) {
 				$palautus = 1;
+				echo "Ongelma Futursoft tilausvahvistuksen lähetyksessä!<br/><br/>"; 
 			}
 		}
 		else {
 			$palautus = 1;
+			echo "Ongelma Futursoft tilausvahvistuksen lähetyksessä!<br/><br/>";
 		}
 
 	} // end rivejä löytyi

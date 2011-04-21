@@ -72,7 +72,7 @@
 						FROM toimi 
 						WHERE yhtio = '$kukarow[yhtio]' 
 						AND tunnus = '$toimittajaid'";
-		$edires = mysql_query($editsql) or pupe_error($editsql);
+		$edires = pupe_query($editsql);
 		$editoimrow = mysql_fetch_assoc($edires);
 	}
 
@@ -83,7 +83,7 @@
 					FROM lasku
 					JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$otunnus'";
-		$vresult2 = mysql_query($query2) or pupe_error($query2);
+		$vresult2 = pupe_query($query2);
 		$row2 = mysql_fetch_array($vresult2);
 
 		$vresult = t_avainsana("LAHETETYYPPI");
@@ -105,7 +105,7 @@
 		$query2 = "	SELECT tilausvahvistus
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
-		$vresult2 = mysql_query($query2) or pupe_error($query2);
+		$vresult2 = pupe_query($query2);
 		$row2 = mysql_fetch_array($vresult2);
 
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
@@ -202,7 +202,7 @@
 		}
 
 		$querykieli .= " AND yhtio ='$kukarow[yhtio]'";
-		$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
+		$resultkieli = pupe_query($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
 
 		$querykieli = "	SELECT kieli, email
@@ -210,7 +210,7 @@
 						WHERE
 						tunnus = '$asrow[liitostunnus]'
 						AND yhtio ='$kukarow[yhtio]'";
-		$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
+		$resultkieli = pupe_query($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
 
 		if ($asrow["kieli"] != '') {
@@ -226,14 +226,14 @@
 
 	$query  = "	SHOW columns
 				FROM sanakirja";
-	$fields =  mysql_query($query);
+	$fields =  pupe_query($query);
 
 	echo "<td><select name='kieli'>";
 
 	while ($apurow = mysql_fetch_array($fields)) {
 		if (strlen($apurow[0]) == 2) {
-			$query = "SELECT distinct nimi from maat where koodi='$apurow[0]'";
-			$maare = mysql_query($query);
+			$query = "SELECT DISTINCT nimi FROM maat WHERE koodi = '{$apurow[0]}'";
+			$maare = pupe_query($query);
 
 			$maaro = mysql_fetch_array($maare);
 
@@ -254,7 +254,7 @@
 						FROM suuntalavat 
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tila = 'S'";
-			$suuntalavat_res = mysql_query($query) or pupe_error($query);
+			$suuntalavat_res = pupe_query($query);
 
 			if (mysql_num_rows($suuntalavat_res) == 0) continue;
 		}
@@ -281,7 +281,7 @@
 						where yhtio='$kukarow[yhtio]'
 						$rajaus
 						ORDER BY kirjoitin";
-		$kires = mysql_query($querykieli) or pupe_error($querykieli);
+		$kires = pupe_query($querykieli);
 
 		while ($kirow=mysql_fetch_array($kires)) {
 

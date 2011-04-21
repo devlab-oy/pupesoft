@@ -14,7 +14,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 							FROM tuote
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tuoteno = '$t[$i]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) != 1) {
 
@@ -44,7 +44,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 			}
 			else {
 				$query  = "SHOW columns from sanakirja";
-				$fields =  mysql_query($query);
+				$fields =  pupe_query($query);
 
 				$loytyyko = FALSE;
 
@@ -78,7 +78,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 						and kieli	= '$kielitalteen'
 						and laji 	= '$t[$i]'
 						and tunnus != $chtunnari";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) > 0) {
 				$virhe[$i] = t("Tuotteen avainsana löytyy jo").": $t[$i]/$kielitalteen!";
@@ -93,7 +93,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 				$query = "	SELECT *
 							FROM yhtio
 							WHERE yhtio = '$t[$i]' and konserni='$yhtiorow[konserni]' and yhtio!='$kukarow[yhtio]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) == 0) {
 					$virhe[$i] = t("Yhtiötä ei löydy. Skarppaa!");
@@ -114,7 +114,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 							and kieli = '$kielitalteen'
 							and tuoteno = '$chtuoteno'
 							and tunnus != '$tunnus'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) > 0) {
 					$virhe[$i] = t("Tuotteella on jo parametri"). " ". substr($lajitalteen, 10);
@@ -132,7 +132,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 								and kieli = '$yhtiorow[kieli]'
 								and laji = 'parametri_$variaatio'
 								and tuoteno = '$chtuoteno'";
-					$sresult = mysql_query($query) or pupe_error($query);
+					$sresult = pupe_query($query);
 
 					if (mysql_num_rows($sresult) != 1) {
 						$virhe[$i] .= t("Tuotteella ei ole parametriä"). " '". $variaatio."'";

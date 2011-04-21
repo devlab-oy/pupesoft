@@ -8265,7 +8265,7 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 		if ($kieli == "") $kieli = $yhtiorow["kieli"];
 
 		//	Jos kielet matchaa niin palautetaan suoraan vastaus
-		if (strtoupper($kieli) == strtoupper($yhtiorow["kieli"])) {
+		if (strtoupper($kieli) == strtoupper($yhtiorow["kieli"]) and isset($tuoterow[$laji])) {
 			return $tuoterow[$laji];
 		}
 
@@ -8281,11 +8281,25 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 		if (mysql_num_rows($result) == 1) {
 			$row = mysql_fetch_assoc($result);
 			// jos löydettiin käännös palautetaan se
-			return $row["selite"];
+			if ($row["selitetark"] != "") {
+				$palautus = array();
+				$palautaus["selite"] = $row["selite"];
+				$palautaus["selitetark"] = $row["selitetark"];
+			}
+			else {
+				$palautaus = $row["selite"];
+			}
+			return $palautaus;
 		}
 
 		// muuten palautetaan se mitä kysyttiin
-		return $tuoterow[$laji];
+		if (isset($tuoterow[$laji])) {
+			return $tuoterow[$laji];
+		}
+		else {
+			// palautetaan laji kun mitäs muutakaan tässä tekisi
+			return $laji;
+		}
 	}
 }
 

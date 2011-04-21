@@ -61,7 +61,7 @@
 					and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 					ORDER BY tuote.tuoteno $suun
 					LIMIT 1";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$trow = mysql_fetch_array ($result);
@@ -91,7 +91,7 @@
 						and tuotteen_toimittajat.toim_tuoteno = '$tuoteno'
 						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 						ORDER BY tuote.tuoteno";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				$varaosavirhe = t("VIRHE: Tiedolla ei löytynyt tuotetta")."!";
@@ -116,7 +116,7 @@
 
 	//Paluu nappi osto/myyntitilaukselle
 	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-	$result   = mysql_query($query) or pupe_error($query);
+	$result   = pupe_query($query);
 	$laskurow = mysql_fetch_array($result);
 
 	if ($kukarow["kuka"] != "" and $laskurow["tila"] == "O") {
@@ -221,14 +221,14 @@
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and tuote.tuoteno = '$tuoteno'
 					GROUP BY tuote.tuoteno";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$query = "	SELECT sum(saldo) saldo
 					from tuotepaikat
 					where tuoteno	= '$tuoteno'
 					and saldo		> 0
 					and yhtio		= '$kukarow[yhtio]'";
-		$salre = mysql_query($query) or pupe_error($query);
+		$salre = pupe_query($query);
 		$salro = mysql_fetch_array($salre);
 
 		if (mysql_num_rows($result) == 1) {
@@ -242,7 +242,7 @@
 		$tv_kaytossa = FALSE;
 
 		$query = "SELECT count(*) kpl from taric_veroperusteet";
-		$tv_res = mysql_query($query);
+		$tv_res = pupe_query($query);
 		$tv_row = mysql_fetch_array($tv_res);
 
 		if ($tv_row["kpl"] > 0) {
@@ -271,7 +271,7 @@
 							and sarjanumeroseuranta.myyntirivitunnus != -1
 							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
-				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjares = pupe_query($query);
 
 				$kehahin = 0;
 
@@ -316,13 +316,13 @@
 			$cn3 = substr($tuoterow["tullinimike1"],0,4);
 
 			$query = "SELECT cn, dm, su from tullinimike where cn='$cn1' and kieli = '$yhtiorow[kieli]'";
-			$tulliresult1 = mysql_query($query) or pupe_error($query);
+			$tulliresult1 = pupe_query($query);
 
 			$query = "SELECT cn, dm, su from tullinimike where cn='$cn2' and kieli = '$yhtiorow[kieli]'";
-			$tulliresult2 = mysql_query($query) or pupe_error($query);
+			$tulliresult2 = pupe_query($query);
 
 			$query = "SELECT cn, dm, su from tullinimike where cn='$cn3' and kieli = '$yhtiorow[kieli]'";
-			$tulliresult3 = mysql_query($query) or pupe_error($query);
+			$tulliresult3 = pupe_query($query);
 
 			$tullirow1 = mysql_fetch_array($tulliresult1);
 			$tullirow2 = mysql_fetch_array($tulliresult2);
@@ -330,7 +330,7 @@
 
 			//perusalennus
 			$query  = "SELECT alennus from perusalennus where ryhma='$tuoterow[aleryhma]' and yhtio='$kukarow[yhtio]'";
-			$peralresult = mysql_query($query) or pupe_error($query);
+			$peralresult = pupe_query($query);
 			$peralrow = mysql_fetch_array($peralresult);
 
 			$query = "	SELECT distinct valkoodi, maa from hinnasto
@@ -338,7 +338,7 @@
 						and tuoteno = '$tuoterow[tuoteno]'
 						and laji = ''
 						order by maa, valkoodi";
-			$hintavalresult = mysql_query($query) or pupe_error($query);
+			$hintavalresult = pupe_query($query);
 
 			$valuuttalisa = "";
 
@@ -355,7 +355,7 @@
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
 							limit 1";
-				$hintaresult = mysql_query($query) or pupe_error($query);
+				$hintaresult = pupe_query($query);
 
 				while ($hintarow = mysql_fetch_array($hintaresult)) {
 					$valuuttalisa .= "<br>$hintarow[maa]: ".hintapyoristys($hintarow["hinta"])." $hintarow[valkoodi]";
@@ -407,7 +407,7 @@
 							from tuotteen_orginaalit
 							where yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$tuoterow[tuoteno]'";
-					$origresult = mysql_query($query) or pupe_error($query);
+					$origresult = pupe_query($query);
 
 				if (mysql_num_rows($origresult) > 0) {
 
@@ -439,7 +439,23 @@
 
 			//1
 			echo "<br>".t_avainsana("TUOTEMERKKI", "", " and avainsana.selite='$tuoterow[tuotemerkki]'", "", "", "selite")."</td>";
-			echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td>";
+		
+			echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
+		
+			$palautus = t_tuotteen_avainsanat($tuoterow, "pakkauskoko2");
+			if (is_array($palautus) and count($palautus) > 0) {
+				echo "<br>";
+				echo "{$palautus["selite"]} ".t_avainsana("Y", "", "and avainsana.selite='{$palautus["selitetark"]}'", "", "", "selite");
+			}
+
+			$palautus = t_tuotteen_avainsanat($tuoterow, "pakkauskoko3");
+			if (is_array($palautus) and count($palautus) > 0) {
+				echo "<br>";
+				echo "{$palautus["selite"]} ".t_avainsana("Y", "", "and avainsana.selite='{$palautus["selitetark"]}'", "", "", "selite");				
+			}
+
+			echo "</td>";
+		
 			echo "<td>$tuoterow[eankoodi]</td><td colspan='2'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
 			echo "<td>$tuoterow[hinnastoon]<br>".t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark")."</td>";
 			echo "</tr>";
@@ -466,7 +482,7 @@
 							FROM vak
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							and tunnus  = '{$tuoterow['vakkoodi']}'";
-				$vak_res = mysql_query($query) or pupe_error($query);
+				$vak_res = pupe_query($query);
 				$vak_row = mysql_fetch_assoc($vak_res);
 
 				$tuoterow["vakkoodi"] = $vak_row["vakkoodi"];
@@ -611,7 +627,7 @@
                             FROM tuoteperhe
                             WHERE yhtio = '$kukarow[yhtio]'
                             AND tuoteno = '$tuoteno'";
-                $tuoteperhe_result = mysql_query($query) or pupe_error($query);
+                $tuoteperhe_result = pupe_query($query);
 
                 if (mysql_num_rows($tuoteperhe_result) > 0) {
                     $lisa = " and tuoteno in ('$tuoteno',";
@@ -632,7 +648,7 @@
 							$lisa
 							GROUP BY 1
 							HAVING countti > 0";
-				$yhtresult = mysql_query($query) or pupe_error($query);
+				$yhtresult = pupe_query($query);
 
 				if (mysql_num_rows($yhtresult) > 0) {
 					while ($yhtrow = mysql_fetch_array($yhtresult)) {
@@ -656,7 +672,7 @@
 
 			//korvaavat tuotteet
 			$query  = "SELECT * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-			$korvaresult = mysql_query($query) or pupe_error($query);
+			$korvaresult = pupe_query($query);
 
 			if (mysql_num_rows($korvaresult) > 0) {
 				// Varastosaldot ja paikat
@@ -672,10 +688,43 @@
 				$row    = mysql_fetch_array($korvaresult);
 				$id		= $row['id'];
 
-				$query = "SELECT * from korvaavat where id='$id' and tuoteno<>'$tuoteno' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
-				$korva2result = mysql_query($query) or pupe_error($query);
+				$query = "SELECT * FROM korvaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
+				$korva2result = pupe_query($query);
 
 				while ($row = mysql_fetch_array($korva2result)) {
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+
+					echo "<tr>";
+					echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
+					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+					echo "</tr>";
+				}
+
+				echo "</table><br>";
+			}
+			
+			//vastaavat tuotteet
+			$query  = "SELECT * FROM vastaavat WHERE tuoteno='$tuoteno' AND yhtio='$kukarow[yhtio]'";
+			$vastaresult = pupe_query($query);
+
+			if (mysql_num_rows($korvaresult) > 0) {
+				// Varastosaldot ja paikat
+				echo "<font class='message'>".t("Vastaavat tuotteet")."</font><hr>";
+
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>".t("Tuotenumero")."</th>";
+				echo "<th>".t("Myytävissä")."</th>";
+				echo "</tr>";
+
+				// tuote löytyi, joten haetaan sen id...
+				$row    = mysql_fetch_array($korvaresult);
+				$id		= $row['id'];
+
+				$query = "SELECT * FROM vastaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";
+				$vasta2result = pupe_query($query);
+
+				while ($row = mysql_fetch_array($vasta2result)) {
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
 					echo "<tr>";
@@ -723,7 +772,7 @@
 								WHERE konserni = '$yhtiorow[konserni]'
 								AND konserni != ''
 								AND yhtio != '$kukarow[yhtio]'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					while ($row = mysql_fetch_assoc($result)) {
 						$yhtiot[] = $row["yhtio"];
@@ -786,7 +835,7 @@
 								and tuote.tuoteno = '$tuoteno'
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				}
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_array ($sresult)) {
@@ -851,7 +900,7 @@
 							and toimi.edi_salasana != ''
 							and toimi.edi_polku    != ''
 							and toimi.oletus_vienti in ('C','F','I')";
-				$kres  = mysql_query($query) or pupe_error($query);
+				$kres  = pupe_query($query);
 
 				if (mysql_num_rows($kres) > 0) {
 
@@ -876,7 +925,7 @@
 									and varastopaikat.tyyppi = ''
 									group by 1,2,3,4
 									order by 5";
-						$kres2  = mysql_query($query) or pupe_error($query);
+						$kres2  = pupe_query($query);
 
 						if (mysql_num_rows($kres2) > 0) {
 
@@ -890,7 +939,7 @@
 											tuoteno		= '$tuoteno'
 											and concat(rpad(upper('$krow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$krow[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
 											and concat(rpad(upper('$krow[loppuhyllyalue]') ,5,'0'),lpad(upper('$krow[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))";
-								$krtre = mysql_query($query) or pupe_error($query);
+								$krtre = pupe_query($query);
 								$krtur = mysql_fetch_array($krtre);
 
 								// sitten katotaan ollaanko me jo varattu niitä JT rivejä toimittajalta
@@ -906,7 +955,7 @@
 											and hyllynro 		= '$krow[hyllynro]'
 											and hyllyvali 		= '$krow[hyllyvali]'
 											and hyllytaso 		= '$krow[hyllytaso]'";
-								$krtre = mysql_query($query) or pupe_error($query);
+								$krtre = pupe_query($query);
 								$krtu2 = mysql_fetch_array($krtre);
 
 								// katotaan tuotteen saldo
@@ -943,7 +992,7 @@
 						and tilausrivi.varattu + tilausrivi.jt != 0
 						and tilausrivi.var != 'P'
 						ORDER BY pvm, tunnus";
-			$jtresult = mysql_query($query) or pupe_error($query);
+			$jtresult = pupe_query($query);
 
 			if (mysql_num_rows($jtresult) != 0) {
 
@@ -1119,7 +1168,7 @@
 								and tyyppi='L'
 								and tuoteno='$tuoteno'
 								and laskutettuaika >= '$edvuosi-01-01'";
-					$result3 = mysql_query($query) or pupe_error($query);
+					$result3 = pupe_query($query);
 					$lrow = mysql_fetch_array($result3);
 
 					echo "<tr>
@@ -1256,7 +1305,7 @@
 								and tapahtuma.tuoteno='$tuoteno'
 								and tapahtuma.laadittu >= '$ed'
 								and tilausrivi.tyyppi IN ('L','W','V')";
-					$result3 = mysql_query($query) or pupe_error($query);
+					$result3 = pupe_query($query);
 					$lrow = mysql_fetch_array($result3);
 
 					echo "<table><tr><th>".t("Tyyppi")."</th>$otsikkorivi<th>".t("Yhteensä")."</th></tr>";
@@ -1415,7 +1464,7 @@
 							and sarjanumeroseuranta.myyntirivitunnus != -1
 							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
-				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjares = pupe_query($query);
 
 				if (mysql_num_rows($sarjares) > 0) {
 					echo "<font class='message'>".t("Sarjanumerot")."</font><hr>";
@@ -1444,7 +1493,7 @@
 										FROM tilausrivi
 										LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
 										WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
-							$siires = mysql_query($query) or pupe_error($query);
+							$siires = pupe_query($query);
 							$siirow = mysql_fetch_array($siires);
 
 							if ($siirow["tyyppi"] == "O") {
@@ -1488,7 +1537,7 @@
 							and sarjanumeroseuranta.myyntirivitunnus = 0
 							and sarjanumeroseuranta.era_kpl != 0
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
-				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjares = pupe_query($query);
 
 				if (mysql_num_rows($sarjares) > 0) {
 					echo "<font class='message'>".t("Eränumerot")."</font><hr>";
@@ -1566,7 +1615,7 @@
 				echo "<option value='1' $chk[1]> ".t("20 viimeisintä")."</option>";
 
 				$query = "SELECT * FROM tilikaudet WHERE yhtio = '$kukarow[yhtio]' ORDER BY tilikausi_loppu DESC";
-				$tkresult = mysql_query($query) or pupe_error($query);
+				$tkresult = pupe_query($query);
 
 				while ($tkrow = mysql_fetch_array($tkresult)) {
 					$tkchk = "";
@@ -1652,7 +1701,7 @@
 				}
 				elseif (strpos($historia,'TK') !== FALSE) {
 					$query = "SELECT tilikausi_alku, tilikausi_loppu FROM tilikaudet WHERE yhtio = '$kukarow[yhtio]' and tunnus = '".substr($historia,2)."'";
-					$tkresult = mysql_query($query) or pupe_error($query);
+					$tkresult = pupe_query($query);
 					$tkrow = mysql_fetch_array($tkresult);
 
 					$maara = "";
@@ -1685,7 +1734,7 @@
 							$ehto
 							ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc
 							$maara";
-				$qresult = mysql_query($query) or pupe_error($query);
+				$qresult = pupe_query($query);
 
 				// jos joku in-out varastonarvo
 				if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow['sarjanumeroseuranta'] == 'G') {
@@ -1761,7 +1810,7 @@
 											and tilausrivi.perheid = $prow[perheid]
 											and tilausrivi.tyyppi = 'V'
 											ORDER BY tilausrivi.tunnus";
-								$rresult = mysql_query($query) or pupe_error($query);
+								$rresult = pupe_query($query);
 
 								echo "<tr>
 										<th>".t("Nimitys")."</th>
@@ -1866,7 +1915,7 @@
 										and sarjanumero != ''
 										group by sarjanumero
 										order by sarjanumero";
-							$sarjares = mysql_query($query) or pupe_error($query);
+							$sarjares = pupe_query($query);
 
 							while($sarjarow = mysql_fetch_array($sarjares)) {
 								if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F" or $tuoterow["sarjanumeroseuranta"] == "G") {

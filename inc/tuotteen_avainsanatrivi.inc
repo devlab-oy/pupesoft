@@ -23,7 +23,9 @@
 		$ulos .= "<option value='oletusvalinta' $sel[oletusvalinta]>".t("Tuotteen tilauksen oletusvalinta")."</option>";
 		$ulos .= "<option value='osasto' $sel[osasto]>".t("Tuotteen osasto")."</option>";
 		$ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhmä")."</option>";
-
+		$ulos .= "<option value='pakkauskoko2' $sel[pakkauskoko2]>".t("Tuotteen pakkauskoko 2")."</option>";
+		$ulos .= "<option value='pakkauskoko3' $sel[pakkauskoko3]>".t("Tuotteen pakkauskoko 3")."</option>";
+		
 		$sresult = t_avainsana("TUOTEULK");
 		
 		while ($srow = mysql_fetch_array($sresult)) {
@@ -82,7 +84,7 @@
 							FROM tuotteen_toimittajat
 							JOIN toimi ON toimi.yhtio=tuotteen_toimittajat.yhtio and toimi.tunnus=tuotteen_toimittajat.liitostunnus
 							WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]' and liitostunnus > 0";
-			$oltarkres = mysql_query($olquery) or pupe_error($olquery);
+			$oltarkres = pupe_query($olquery);
 			if(mysql_num_rows($oltarkres) > 0) {
 				while($olrow = mysql_fetch_array($oltarkres)) {
 					$ulos .= "
@@ -98,7 +100,7 @@
 							AND isatuoteno = '$trow[tuoteno]'
 							AND tyyppi = 'R'
 							LIMIT 1";
-			$oltarkres = mysql_query($olquery) or pupe_error($olquery);
+			$oltarkres = pupe_query($olquery);
 			if(mysql_num_rows($oltarkres) > 0) {
 				while($olrow = mysql_fetch_array($oltarkres)) {
 					$ulos .= "
@@ -116,6 +118,27 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "selitetark") {
+		
+		if ($trow["laji"] == "pakkauskoko2" or $trow["laji"] == "pakkauskoko3") {
+			$vresult = t_avainsana("Y");
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+			while ($vrow=mysql_fetch_array($vresult)) {
+				$sel="";
+				if (strtoupper($trow[$i]) == strtoupper($vrow["selite"]) and $vrow["selite"] != "") {
+					$sel = "selected";
+				}
+				$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
+			}
+			$ulos .= "</select></td>";
+			$jatko = 0;
+		}
+		else {
+			$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
+		}
+	}
 
 	if (mysql_field_name($result, $i) == "kieli") {
 
@@ -125,7 +148,7 @@
 		//	näytetäään vain kielet joita on
 		if ($perhe > 0) {
 			$query = "SELECT group_concat(distinct kieli) kielet FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and kieli != ''";
-			$res = mysql_query($query) or pupe_error($query);
+			$res = pupe_query($query);
 			$kilerow = mysql_fetch_array($res);
 			$kielet = $kilerow["kielet"];
 		}

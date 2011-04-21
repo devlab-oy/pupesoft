@@ -57,7 +57,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 	// haetaan valitun taulun sarakkeet
 	$query = "SHOW COLUMNS FROM $table";
-	$fres  = mysql_query($query) or pupe_error($query);
+	$fres  = pupe_query($query);
 
 	while ($row = mysql_fetch_array($fres)) {
 		//pushataan arrayseen kaikki sarakenimet ja tietuetyypit
@@ -69,6 +69,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 	// tuoteresepteissä käytetään tuoteperheen pakollisia sarakkeita
 	switch ($table) {
 		case "korvaavat" :
+			$pakolliset = array("TUOTENO");
+			$kielletyt = array("");
+			break;
+		case "vastaavat" :
 			$pakolliset = array("TUOTENO");
 			$kielletyt = array("");
 			break;
@@ -140,7 +144,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 		$rivi	 = explode("\t", trim($rivi));
 
 		// näin käsitellään korvaavat taulu
-		if ($table == "korvaavat") {
+		if ($table == "korvaavat" or $table == "vastaavat") {
 
 			$haku = '';
 			for ($j = 0; $j < count($rivi); $j++) {
@@ -150,15 +154,15 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$haku = substr($haku, 0, -1);
 
 			$fquery = "	SELECT distinct id
-						FROM korvaavat
+						FROM $table
 						WHERE tuoteno in ($haku) and yhtio = '{$kukarow['yhtio']}'";
-			$hresult = mysql_query($fquery) or pupe_error($fquery);
+			$hresult = pupe_query($fquery);
 
 			if (mysql_num_rows($hresult) == 0) {
 				$fquery = "	SELECT max(id)
-							FROM korvaavat
+							FROM $table
 							WHERE yhtio = '{$kukarow['yhtio']}'";
-				$fresult = mysql_query($fquery) or pupe_error($fquery);
+				$fresult = pupe_query($fquery);
 				$frow =  mysql_fetch_array($fresult);
 
 				$id = $frow[0] + 1;
@@ -177,12 +181,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 			if ($id > 0) {
 				if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
-					$alku 		= "INSERT into korvaavat SET yhtio = '{$kukarow['yhtio']}'";
+					$alku 		= "INSERT into $table SET yhtio = '{$kukarow['yhtio']}'";
 					$loppu 		= ", id='$id'";
 					$toiminto 	= "LISAA";
 				}
 				elseif (strtoupper(trim($rivi[$postoiminto])) == 'POISTA') {
-					$alku 		= "DELETE from korvaavat where yhtio = '{$kukarow['yhtio']}' ";
+					$alku 		= "DELETE from $table where yhtio = '{$kukarow['yhtio']}' ";
 					$loppu 		= " and id='$id' ";
 					$toiminto 	= "POISTA";
 				}
@@ -199,14 +203,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						$tquery = "	SELECT tuoteno
 									FROM tuote
 									WHERE tuoteno='$rivi[$j]' and yhtio = '{$kukarow['yhtio']}'";
-						$tresult = mysql_query($tquery) or pupe_error($tquery);
+						$tresult = pupe_query($tquery);
 
 						if (mysql_num_rows($tresult) > 0) {
 							//katotaan, onko tuote jo jossain ketjussa
 							$kquery = "	SELECT tuoteno
-										FROM korvaavat
+										FROM $table
 										WHERE tuoteno='$rivi[$j]' and id = '$id' and yhtio = '{$kukarow['yhtio']}'";
-							$kresult = mysql_query($kquery) or pupe_error($kquery);
+							$kresult = pupe_query($kquery);
 
 							if ((mysql_num_rows($kresult) == 0 and $toiminto != 'POISTA') or (mysql_num_rows($kresult) == 1 and $toiminto == 'POISTA')) {
 
@@ -258,7 +262,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								FROM tuote
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tuoteno = '{$rivi[$r]}'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 0) {
 						echo t("tuotetta")," {$rivi[$r]} ",t("ei löydy! rivi hylätty"),"<br>";
@@ -273,7 +277,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND isatuoteno = '{$rivi[$r]}'
 								AND tyyppi = '$tyyppi'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 0 and strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
 						echo t("tuoteperhettä ei löydy! ei voida muuttaa"),"<br>";
@@ -290,7 +294,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								FROM tuote
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tuoteno = '{$rivi[$r]}'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 0) {
 						echo t("tuotetta")," {$rivi[$r]} ",t("ei löydy! rivi hylätty"),"<br>";
@@ -309,7 +313,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND isatuoteno = '$isatuote'
 							AND tyyppi = '$tyyppi'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				for ($r = 0; $r < count($otsikot); $r++) {
 
@@ -319,7 +323,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 									isatuoteno = '$isatuote',
 									tuoteno = '{$rivi[$r]}',
 									tyyppi = '$tyyppi'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 						$lask++;
 					}
 
@@ -338,9 +342,10 @@ else {
 			<br><br>
 			<table border='0'>
 			<tr>
-				<td>",t("Valitse tietokanna taulu"),":</td>
+				<td>",t("Valitse tietokannan taulu"),":</td>
 				<td><select name='table'>
 					<option value='korvaavat'>",t("Korvaavat"),"</option>
+					<option value='vastaavat'>",t("Vastaavat"),"</option>
 					<option value='tuoteperhe'>",t("Tuoteperheet"),"</option>
 					<option value='tuoteresepti'>",t("Tuotereseptit"),"</option>
 				</select></td>

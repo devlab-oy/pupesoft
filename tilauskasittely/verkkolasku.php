@@ -2143,9 +2143,9 @@
 				}
 
 				// jos yhtiöllä on laskuprintteri on määritelty tai halutaan jostain muusta syystä tulostella laskuja paperille
-				if ($yhtiorow['lasku_tulostin'] > 0 or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email) > 0) {
+				if (($yhtiorow['lasku_tulostin'] > 0 or $yhtiorow['lasku_tulostin'] == -99) or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email) > 0) {
 
-					if ((!isset($valittu_tulostin) or $valittu_tulostin == "") and $yhtiorow['lasku_tulostin'] > 0) {
+					if ((!isset($valittu_tulostin) or $valittu_tulostin == "") and ($yhtiorow['lasku_tulostin'] > 0 or $yhtiorow['lasku_tulostin'] == -99)) {
 						$valittu_tulostin = $yhtiorow['lasku_tulostin'];
 					}
 

@@ -10988,7 +10988,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 				$pakkaus_en = t_tunnus_avainsanat($srow, "pakkaus", "PAKKAUSKV", $kieli);
 
 				if ($row["kollit"] != 0 or $row["kilot"] != 0) {
-					if ($tyyppi == "DGD") $vakrakirtiedot[] = "$row[kollit] $pakkaus_en containing:###$row[kilot]";
+					if ($tyyppi == "DGD") $vakrakirtiedot[] = "$row[kollit]###$row[kollit] $pakkaus_en containing:###$row[kilot]";
 					else $vakrakirtiedot[] = "$row[kollit] $pakkaus_en (".t("Bruttopaino", $kieli)." $row[kilot] kg) ".t("sisältäen", $kieli).":";
 				}
 			}

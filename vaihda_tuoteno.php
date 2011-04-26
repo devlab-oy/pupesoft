@@ -53,11 +53,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file
 			$uustuoteno = strtoupper(trim($rivi[1]));
 
 			$query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
-			$tuoteresult = mysql_query($query) or pupe_error($query);
+			$tuoteresult = pupe_query($query);
 
 			if (mysql_num_rows($tuoteresult) != '0') {
 				$query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-				$tuoteuresult = mysql_query($query) or pupe_error($query);
+				$tuoteuresult = pupe_query($query);
 
 				if (mysql_num_rows($tuoteuresult) != '0') {
 					$error++;
@@ -66,7 +66,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file
 			}
 			else {
 				$error++;
-				echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";				
+				echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";
 			}
 		}
 		else {
@@ -91,13 +91,13 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
 
 	//Tuotenumerot tulevat käyttöliittymästä
 	$query1  = "SELECT tunnus, kehahin, tuoteno from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
-	$tuoteresult = mysql_query($query1) or pupe_error($query1);
+	$tuoteresult = pupe_query($query1);
 
 	if (mysql_num_rows($tuoteresult) != 0) {
 		$vantuoterow = mysql_fetch_array($tuoteresult);
 
 		$query2  = "SELECT tunnus, kehahin, tuoteno from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-		$tuoteuresult = mysql_query($query2) or pupe_error($query2);
+		$tuoteuresult = pupe_query($query2);
 
 		if (mysql_num_rows($tuoteuresult) != 0) {
 			$uustuoterow = mysql_fetch_array($tuoteuresult);
@@ -114,14 +114,14 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
 							FROM tuotepaikat
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$vantuoteno'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$vansaldorow = mysql_fetch_array($result);
 
 				$query = "	SELECT sum(saldo) saldo
 							FROM tuotepaikat
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$uustuoteno'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$uussaldorow = mysql_fetch_array($result);
 
 				if (($uustuoterow["kehahin"] == 0 and $vantuoterow["kehahin"] == 0) or ($vansaldorow["saldo"] == 0 and $uussaldorow["saldo"] == 0)) {
@@ -135,7 +135,7 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
 	}
 	else {
 		$error++;
-		echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";		
+		echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";
 	}
 
 	$failista 	= "EI";
@@ -158,11 +158,11 @@ if ($error == 0 and $tee == "file") {
 
 	//$dbkanta --> tulee salasanat.php:stä
 	$query  = "SHOW TABLES FROM $dbkanta";
-	$tabresult = mysql_query($query) or pupe_error($query);
+	$tabresult = pupe_query($query);
 
 	while ($tables = mysql_fetch_array($tabresult)) {
 		$query  = "describe $tables[0]";
-		$fieldresult = mysql_query($query) or pupe_error($query);
+		$fieldresult = pupe_query($query);
 
 		while ($fields = mysql_fetch_array($fieldresult)) {
 			if ((strpos($fields[0], "tuotenumero") !== false or strpos($fields[0], "tuoteno") !== false) and $tables[0] != 'tuote_muutokset' and $fields[0] != 'toim_tuoteno') {
@@ -191,7 +191,7 @@ if ($error == 0 and $tee == "file") {
 	$tyyppi = "(";
 
 	$query  = "SELECT distinct tyyppi from tilausrivi where yhtio = '$kukarow[yhtio]' and tuoteno != ''";
-	$tyypitresult = mysql_query($query) or pupe_error($query);
+	$tyypitresult = pupe_query($query);
 
 	while ($tyypitrow = mysql_fetch_array($tyypitresult)) {
 		$tyyppi .= "'"."$tyypitrow[tyyppi]"."'".",";
@@ -219,17 +219,17 @@ if ($error == 0 and $tee == "file") {
 		if (trim($rivi[0]) != '' and trim($rivi[1]) != '') {
 
 			$lokki = "LOCK TABLES $taulut";
-			$res   = mysql_query($lokki) or pupe_error($lokki);
+			$res   = pupe_query($lokki);
 
 			$vantuoteno = strtoupper(trim($rivi[0]));
 			$uustuoteno = strtoupper(trim($rivi[1]));
-			
-			$query  = "	SELECT tunnus, myyntihinta, kehahin, vihahin, vihapvm,yksikko,tuotepaallikko 
-						FROM tuote 
-						WHERE yhtio = '$kukarow[yhtio]' 
+
+			$query  = "	SELECT tunnus, myyntihinta, kehahin, vihahin, vihapvm,yksikko,tuotepaallikko
+						FROM tuote
+						WHERE yhtio = '$kukarow[yhtio]'
 						AND tuoteno = '$vantuoteno'";
-			$tuoteresult = mysql_query($query) or pupe_error($query);
-			
+			$tuoteresult = pupe_query($query);
+
 			if (mysql_num_rows($tuoteresult) == 1) {
 
 				$trivi = mysql_fetch_assoc($tuoteresult);
@@ -246,7 +246,7 @@ if ($error == 0 and $tee == "file") {
 				}
 
 				$query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-				$tuoteuresult = mysql_query($query) or pupe_error($query);
+				$tuoteuresult = pupe_query($query);
 
 				if (mysql_num_rows($tuoteuresult) == 0 or $uusi_on_jo == "OK" or $uusi_on_jo == "SAMA") {
 
@@ -257,7 +257,7 @@ if ($error == 0 and $tee == "file") {
 								alkup_tuoteno = '$vantuoteno',
 								muutospvm = now(),
 								kuka = '$kukarow[kuka]'";
-					$result2 = mysql_query($query) or pupe_error($query);
+					$result2 = pupe_query($query);
 
 					echo "<font class='message'>".t("Vaihdetaan tuotenumero ja siirretään historiatiedot").": $vantuoteno --> $uustuoteno.</font><br>";
 					flush();
@@ -274,7 +274,7 @@ if ($error == 0 and $tee == "file") {
 										yhtio = '$kukarow[yhtio]'
 										and tyyppi in $tyyppi
 										and tuoteno	= '$vantuoteno'";
-							$result2 = mysql_query($query) or pupe_error($query);
+							$result2 = pupe_query($query);
 						}
 						elseif ($taulu == 'tuotepaikat' and $uusi_on_jo != "SAMA") {
 							// Tuotepaikat käsitellään hieman eri lailla
@@ -282,7 +282,7 @@ if ($error == 0 and $tee == "file") {
 										FROM tuotepaikat
 										WHERE yhtio = '$kukarow[yhtio]'
 										and tuoteno	= '$vantuoteno'";
-							$paires = mysql_query($query) or pupe_error($query);
+							$paires = pupe_query($query);
 
 							while ($pairow = mysql_fetch_array($paires)) {
 
@@ -295,7 +295,7 @@ if ($error == 0 and $tee == "file") {
 											and hyllynro	= '$pairow[hyllynro]'
 											and hyllyvali	= '$pairow[hyllyvali]'
 											and hyllytaso	= '$pairow[hyllytaso]'";
-								$paires2 = mysql_query($query) or pupe_error($query);
+								$paires2 = pupe_query($query);
 
 								if (mysql_num_rows($paires2) == 0) {
 									$query = "	UPDATE tuotepaikat
@@ -306,7 +306,7 @@ if ($error == 0 and $tee == "file") {
 												and hyllynro	= '$pairow[hyllynro]'
 												and hyllyvali	= '$pairow[hyllyvali]'
 												and hyllytaso	= '$pairow[hyllytaso]'";
-									$result2 = mysql_query($query) or pupe_error($query);
+									$result2 = pupe_query($query);
 								}
 								else {
 									$query = "	UPDATE tuotepaikat
@@ -317,7 +317,7 @@ if ($error == 0 and $tee == "file") {
 												and hyllynro	= '$pairow[hyllynro]'
 												and hyllyvali	= '$pairow[hyllyvali]'
 												and hyllytaso	= '$pairow[hyllytaso]'";
-									$result2 = mysql_query($query) or pupe_error($query);
+									$result2 = pupe_query($query);
 
 									$query = "	DELETE from tuotepaikat
 												WHERE yhtio 	= '$kukarow[yhtio]'
@@ -327,7 +327,7 @@ if ($error == 0 and $tee == "file") {
 												and hyllyvali	= '$pairow[hyllyvali]'
 												and hyllytaso	= '$pairow[hyllytaso]'
 												and tunnus 		= '$pairow[tunnus]'";
-									$result2 = mysql_query($query) or pupe_error($query);
+									$result2 = pupe_query($query);
 								}
 							}
 
@@ -337,7 +337,7 @@ if ($error == 0 and $tee == "file") {
 										WHERE yhtio 	= '$kukarow[yhtio]'
 										and tuoteno		= '$uustuoteno'
 										and oletus 	   != ''";
-							$paires = mysql_query($query) or pupe_error($query);
+							$paires = pupe_query($query);
 
 							if (mysql_num_rows($paires) == 0) {
 								$query = "	UPDATE tuotepaikat
@@ -346,7 +346,7 @@ if ($error == 0 and $tee == "file") {
 											and tuoteno	= '$uustuoteno'
 											ORDER BY tunnus
 											LIMIT 1";
-								$result2 = mysql_query($query) or pupe_error($query);
+								$result2 = pupe_query($query);
 							}
 							elseif (mysql_num_rows($paires) > 1) {
 								$query = "	UPDATE tuotepaikat
@@ -356,7 +356,7 @@ if ($error == 0 and $tee == "file") {
 											and oletus != ''
 											ORDER BY tunnus
 											LIMIT ".(mysql_num_rows($paires)-1);
-								$result2 = mysql_query($query) or pupe_error($query);
+								$result2 = pupe_query($query);
 							}
 						}
 						elseif ($uusi_on_jo == "" or ($uusi_on_jo == "OK" and $taulu != 'tuote') or $uusi_on_jo == "SAMA") {
@@ -366,7 +366,7 @@ if ($error == 0 and $tee == "file") {
 											WHERE yhtio = '$kukarow[yhtio]'
 											and tuoteno	= '$uustuoteno'
 											ORDER BY yhtio";
-								$result2 = mysql_query($query) or pupe_error($query);
+								$result2 = pupe_query($query);
 
 								if (mysql_num_rows($result2) > 0) {
 									$query = "	DELETE
@@ -374,7 +374,7 @@ if ($error == 0 and $tee == "file") {
 												WHERE yhtio = '$kukarow[yhtio]'
 												and tuoteno	= '$vantuoteno'
 												ORDER BY yhtio";
-									$result2 = mysql_query($query) or pupe_error($query);
+									$result2 = pupe_query($query);
 								}
 							}
 
@@ -382,14 +382,14 @@ if ($error == 0 and $tee == "file") {
 										SET $sarake	= '$uustuoteno'
 										WHERE yhtio = '$kukarow[yhtio]'
 										and $sarake	= '$vantuoteno'";
-							$result2 = mysql_query($query) or pupe_error($query);
+							$result2 = pupe_query($query);
 						}
 					}
 
 					if ($jatavanha != '' and $uusi_on_jo != "SAMA") {
 						if ($uusi_on_jo == "") {
 							$query = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark = 'o' LIMIT 1";
-							$alvresult = mysql_query($query) or pupe_error($query);
+							$alvresult = pupe_query($query);
 							$alv = '0.00';
 
 							if (mysql_num_rows($alvresult) != '0') {
@@ -407,17 +407,17 @@ if ($error == 0 and $tee == "file") {
 										status			= '$status',
 										hinnastoon		= '$hinnastoon',
 										yhtio			= '$kukarow[yhtio]'";
-							$result3 = mysql_query($query) or pupe_error($query);
+							$result3 = pupe_query($query);
 						}
 
 						$querykorv = "SELECT max(id)+1 maxi from korvaavat where yhtio = '$kukarow[yhtio]'";
-						$korvresult = mysql_query($querykorv) or pupe_error($querykorv);
+						$korvresult = pupe_query($querykorv);
 						$korvid = mysql_fetch_array($korvresult);
 
 						$loytyikorv = '';
 
 						$querykorvv  = "SELECT id maxi from korvaavat where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-						$korvvresult = mysql_query($querykorvv) or pupe_error($querykorvv);
+						$korvvresult = pupe_query($querykorvv);
 
 						if (mysql_num_rows($korvvresult) != '0') {
 							$korvid = mysql_fetch_array($korvvresult);
@@ -430,7 +430,7 @@ if ($error == 0 and $tee == "file") {
 									tuoteno 			= '$vantuoteno',
 									id					= '$korvid[maxi]',
 									yhtio				= '$kukarow[yhtio]'";
-						$result4 = mysql_query($query) or pupe_error($query);
+						$result4 = pupe_query($query);
 
 						if ($loytyikorv != '1') {
 							$query = "	INSERT INTO korvaavat
@@ -438,7 +438,7 @@ if ($error == 0 and $tee == "file") {
 										tuoteno 			= '$uustuoteno',
 										id					= '$korvid[maxi]',
 										yhtio				= '$kukarow[yhtio]'";
-							$result4 = mysql_query($query) or pupe_error($query);
+							$result4 = pupe_query($query);
 						}
 					}
 					$lask++;
@@ -451,13 +451,13 @@ if ($error == 0 and $tee == "file") {
 				echo t("VANHAA TUOTENUMEROA EI LÖYDY")." $vantuoteno<br>";
 			}
 		}
-		
+
 		$unlokki = "UNLOCK TABLES";
-		$res     = mysql_query($unlokki) or pupe_error($unlokki);
+		$res     = pupe_query($unlokki);
 	}
-	
+
 	if (count($postit) > 0 and $muistutus == "KYLLA") {
-		
+
 		$vva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 		$kka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 		$ppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
@@ -468,16 +468,16 @@ if ($error == 0 and $tee == "file") {
 			foreach ($values as $tuote => $value) {
 				$apu = explode("###", $value);
 				$lista .= "\n- Tuote (".$apu[0]. ") tuotenumero on vaihdettu/korvattu tuotteella (".$apu[1]."), tarkista asiakkaiden alennukset ja hinnat varmuudeksi";
-				$lista  .= "\n Linkki tuotteen asiakashintoihin: {$palvelin2}yllapito.php?toim=asiakashinta&indexvas=1&haku[6]=$apu[0] (".$apu[0].")"; 
+				$lista  .= "\n Linkki tuotteen asiakashintoihin: {$palvelin2}yllapito.php?toim=asiakashinta&indexvas=1&haku[6]=$apu[0] (".$apu[0].")";
 				$lista  .= "\n Linkki tuotteen myynninseurantaan: {$palvelin2}raportit/myyntiseuranta.php?ruksit[70]=checked&ruksit[80]=checked&nimitykset=checked&ppa=$ppa&kka=$kka&vva=$vva&tuotteet_lista=$apu[0]\n";
 			}
 
 			// Haetaan tuotepäälliköiden sähköpostiosoitteet esille.
-			$postisql  = "	SELECT kuka, nimi, eposti 
-							FROM kuka 
-							WHERE yhtio = '$kukarow[yhtio]' 
+			$postisql  = "	SELECT kuka, nimi, eposti
+							FROM kuka
+							WHERE yhtio = '$kukarow[yhtio]'
 							AND myyja = '$key'";
-			$resuposti = mysql_query($postisql) or pupe_error($postisql);
+			$resuposti = pupe_query($postisql);
 
 			while ($posti = mysql_fetch_assoc($resuposti)) {
 
@@ -515,15 +515,15 @@ if ($tee == "") {
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
 
 			<table>
-	
+
 			<tr>
 				<td class='back' colspan='2'><br><font class='message'>".t("Sisäänlue tiedostosta")."</font><hr></td>
 			</tr>
-	
+
 			<tr>
 				<th colspan='2'>".t("Tabulaattorilla eroteltu tekstitiedosto").". ".t("Tiedoston sarakkeet").":</th>
 			</tr>
-			
+
 			<tr>
 				<td>".t("VANHA tuotenumero")."</td>
 				<td>".t("UUSI tuotenumero")."</td>
@@ -542,7 +542,7 @@ if ($tee == "") {
 				<th>".t("Vanha tuotenumero").":</th>
 				<td><input type='text' name='vantuoteno' size='25'></td>
 			</tr>
-			
+
 			<tr>
 				<th>".t("Uusi tuotenumero").":</th>
 				<td><input type='text' name='uustuoteno' size='25'></td>
@@ -575,7 +575,7 @@ if ($tee == "") {
 	}
 	echo "</select></td>";
 	echo "</tr>";
-	
+
 	echo "	<tr><th>".t("Valitse vanhan tuotteen näkyvyys")."</th>";
 	echo "<td><select name='hinnastoon' ".js_alasvetoMaxWidth("hinnastoon", 200).">";
 	echo "	<option value='E'>".t("Tuotetta ei näytetä hinnastossa, eikä verkkokaupassa")."</option>
@@ -584,12 +584,12 @@ if ($tee == "") {
    			<option value='V'>".t("Tuote näkyy hinnastossa sekä verkkokaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>";
 
 	echo "	</select></td></tr>";
-	
+
 	echo "	<tr>
 			<th>".t("Lähetä sähköposti tuotepäällikköille muutoksista")."</th>";
 	echo "	<td><input type='checkbox' name='muistutus' value='KYLLA'></td>";
 	echo "	</tr>";
-	
+
 	echo "  </table>
 			<br>
 			<input type='hidden' name='tee' value='file'>

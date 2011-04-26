@@ -128,7 +128,13 @@ if (!function_exists('rivi_dgd')) {
 
 		foreach ($vakrakirtiedot as $vakrakirrivi) {
 
-			list($teksti, $kilot) = explode("###", $vakrakirrivi);
+			list($kollimaara, $teksti, $kilot) = explode("###", $vakrakirrivi);
+
+			$pdf->pages[$sivu]->drawText(1, mm_pt(20), mm_pt($kala), 'LATIN1');
+
+			if ($kollimaara > 1) {
+				$pdf->pages[$sivu]->drawText(" -  ".$kollimaara, mm_pt(22), mm_pt($kala), 'LATIN1');
+			}
 
 			$pdf->pages[$sivu]->drawText($teksti, mm_pt(45), mm_pt($kala), 'LATIN1');
 			$pdf->pages[$sivu]->drawText($kilot, mm_pt(145), mm_pt($kala), 'LATIN1');

@@ -707,7 +707,7 @@
 			$query  = "SELECT * FROM vastaavat WHERE tuoteno='$tuoteno' AND yhtio='$kukarow[yhtio]'";
 			$vastaresult = pupe_query($query);
 
-			if (mysql_num_rows($korvaresult) > 0) {
+			if (mysql_num_rows($vastaresult) > 0) {
 				// Varastosaldot ja paikat
 				echo "<font class='message'>".t("Vastaavat tuotteet")."</font><hr>";
 
@@ -718,7 +718,7 @@
 				echo "</tr>";
 
 				// tuote löytyi, joten haetaan sen id...
-				$row    = mysql_fetch_array($korvaresult);
+				$row    = mysql_fetch_array($vastaresult);
 				$id		= $row['id'];
 
 				$query = "SELECT * FROM vastaavat WHERE id='$id' AND tuoteno<>'$tuoteno' AND yhtio='$kukarow[yhtio]' ORDER BY jarjestys, tuoteno";

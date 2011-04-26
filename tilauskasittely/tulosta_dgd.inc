@@ -126,19 +126,23 @@ if (!function_exists('rivi_dgd')) {
 
 		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['tunnus'], $kieli, "DGD");
 
+		$kollimaara_yht = 0;
+
 		foreach ($vakrakirtiedot as $vakrakirrivi) {
 
 			list($kollimaara, $teksti, $kilot) = explode("###", $vakrakirrivi);
 
-			$pdf->pages[$sivu]->drawText(1, mm_pt(20), mm_pt($kala), 'LATIN1');
-
-			if ($kollimaara > 1) {
-				$pdf->pages[$sivu]->drawText(" -  ".$kollimaara, mm_pt(22), mm_pt($kala), 'LATIN1');
-			}
+			$kollimaara_yht += $kollimaara;
 
 			$pdf->pages[$sivu]->drawText($teksti, mm_pt(45), mm_pt($kala), 'LATIN1');
 			$pdf->pages[$sivu]->drawText($kilot, mm_pt(145), mm_pt($kala), 'LATIN1');
 			$kala-=5;
+		}
+
+		$pdf->pages[$sivu]->drawText(1, mm_pt(20), mm_pt(175), 'LATIN1');
+
+		if ($kollimaara_yht > 1) {
+			$pdf->pages[$sivu]->drawText(" -  ".$kollimaara_yht, mm_pt(22), mm_pt(175), 'LATIN1');
 		}
 
 		$kala-=2;

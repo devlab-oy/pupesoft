@@ -2901,7 +2901,7 @@ if ($tee == '') {
 	}
 
 	//Kuitataan OK-var riville
-	if (($kukarow["extranet"] == "" or $yhtiorow["korvaavat_hyvaksynta"] != "") and $tila == "OOKOOAA") {
+	if (($kukarow["extranet"] == "" or $yhtiorow["korvaavat_hyvaksynta"] != "" or $vastaavienkasittely == "kylla") and $tila == "OOKOOAA") {
 		$query = "	UPDATE tilausrivi
 					SET var2 = 'OK'
 					WHERE tunnus = '$rivitunnus'";

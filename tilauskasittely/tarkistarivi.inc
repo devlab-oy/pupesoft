@@ -758,7 +758,7 @@
 	}
 
 	if (($row["var"] == 'J' or $row["var"] == 'P') and $row['tuoteno'] != '' and $row["var2"] != 'OK') {
-
+		
 		//vastaavat tuotteet
 		$query  = "SELECT * FROM vastaavat WHERE tuoteno = '$row[tuoteno]' AND yhtio = '$kukarow[yhtio]'";
 		$vastaresult = pupe_query($query);
@@ -778,6 +778,7 @@
 								<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
 								<input type='hidden' name='menutila' 		value = '$menutila'>
 								<input type='hidden' name='tila' 			value = 'OOKOOAA'>
+								<input type='hidden' name='vastaavienkasittely' value = 'kylla'>
 								<input type='Submit' value='".t("Piilota vastaavat tuotteet")."'>
 								</form></th>";
 			$alku .= "</tr>";

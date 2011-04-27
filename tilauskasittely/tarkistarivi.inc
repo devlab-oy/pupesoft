@@ -4,8 +4,8 @@
 	$riviok 				= 0;
 	$saako_hyvaksya 		= 0;
 	$saako_jalkitoimittaa 	= 0;
+	$vastaavattuotteet		= 0;
 	$varaosavirhe 			= "";
-	$vastaavattuotteet		= "";
 	$vastaavat_html			= "";
 
 	$tquery	= "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
@@ -758,7 +758,7 @@
 	}
 
 	if (($row["var"] == 'J' or $row["var"] == 'P') and $row['tuoteno'] != '' and $row["var2"] != 'OK') {
-		
+
 		//vastaavat tuotteet
 		$query  = "SELECT * FROM vastaavat WHERE tuoteno = '$row[tuoteno]' AND yhtio = '$kukarow[yhtio]'";
 		$vastaresult = pupe_query($query);

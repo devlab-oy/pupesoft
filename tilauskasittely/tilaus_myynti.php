@@ -3286,6 +3286,23 @@ if ($tee == '') {
 				$tila		= "";
 				if (substr($paikka,0,3) != "!!!" and substr($paikka,0,3) != "∞∞∞" and substr($paikka,0,3) != "@@@") $paikka = "";
 			}
+			elseif ($tapa == "MYYVASTAAVA") {
+				// tuoteno, m‰‰r‰, muut nollataan
+				$tuoteno	= $vastaavatuoteno;
+				$var		= '';
+				$hinta		= '';
+				$netto		= '';
+				$ale		= '';
+				$rivitunnus			= 0;
+				$paikka		= '';
+				$alv		= '';
+				$perheid			= 0;
+				$perheid2			= 0;
+				$tilausrivilinkki	= '';
+				$toimittajan_tunnus	= '';
+				// laitetaan tila tyhj‰ksi ett‰ se menee suoraan tilausriviksi.
+				$tila = ""; 
+			}
 			elseif ($tapa == "POISTA") {
 
 				if ($yhtiorow['jt_email'] != '' and $tilausrivi['positio'] == 'JT') {
@@ -4563,7 +4580,7 @@ if ($tee == '') {
 						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
 					}
 
-					$query = "	SELECT sum(if(kommentti != '' or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]'),1,0)), count(*)
+					$query = "	SELECT sum(if(kommentti != '' or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or $vastaavattuotteet = 1,1,0)), count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
 								WHERE yhtio = '$kukarow[yhtio]'
 								$tunnuslisa
@@ -4677,7 +4694,7 @@ if ($tee == '') {
 
 					echo "<tr>";
 
-					if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
+					if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) or $vastaavattuotteet == 1) {
 						if ($jarjlisa != "") {
 							echo "<td rowspan = '2' width='15' class='back'>$buttonit</td>";
 						}
@@ -5672,10 +5689,10 @@ if ($tee == '') {
 					$row['kommentti'] .= "\n".t("Rivihinta").": ".hintapyoristys($lis_hinta_eta * (1-($lis_ale_eta/100)) * $kpl_ruudulle);
 				}
 
-				if ($row['kommentti'] != '') {
+				if ($row['kommentti'] != '' or $vastaavattuotteet == 1) {
 
 					echo "<tr>";
-
+					
 					if ($borderlask == 0 and $pknum > 1) {
 						$kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
 						$kommclass2 = " style='border-bottom: 1px solid;'";
@@ -5693,9 +5710,19 @@ if ($tee == '') {
 						// $cspan++; // T‰ll‰ist‰ muuttujaa ei ole koko filess‰!
 					}
 
-					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>".t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font></td>";
+					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
+					
+					if ($row['kommentti'] != '') {
+						echo t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
+					}
+					
+					// t‰h‰n se taulu
+					echo $vastaavat_html;
+					
+					echo "</td>";
 					echo "<td class='back' valign='top' nowrap></td>";
 					echo "</tr>";
+						
 				}
 			}
 

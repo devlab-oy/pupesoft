@@ -3301,7 +3301,7 @@ if ($tee == '') {
 				$tilausrivilinkki	= '';
 				$toimittajan_tunnus	= '';
 				// laitetaan tila tyhjäksi että se menee suoraan tilausriviksi.
-				$tila = ""; 
+				$tila = "";
 			}
 			elseif ($tapa == "POISTA") {
 
@@ -4037,6 +4037,7 @@ if ($tee == '') {
 					and tilausrivi.tyyppi in ($tilrivity)";
 		$ruuturesult = pupe_query($query);
 		$ruuturow = mysql_fetch_assoc($ruuturesult);
+
 		$rivilaskuri = $ruuturow["rivit"];
 
 		// Tilausrivit
@@ -4044,7 +4045,8 @@ if ($tee == '') {
 					if (tilausrivi.laskutettuaika!='0000-00-00', kpl, varattu) varattu,
 					if (tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					tuote.myyntihinta,
-					tuote.kehahin,
+					round(if(tuote.epakurantti100pvm='0000-00-00', if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0),6) kehahin,
+					tuote.kehahin kehahin_kurantti,
 					tuote.sarjanumeroseuranta,
 					tuote.vaaditaan_kpl2,
 					tuote.yksikko,
@@ -4282,7 +4284,7 @@ if ($tee == '') {
 				}
 			}
 
-			if (mysql_num_rows($ruuturesult) > 25) {
+			if ($rivilaskuri > 25) {
 
 				echo "<form action='".$palvelin2."tilauskasittely/tilaus_myynti.php' method='post'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -4297,23 +4299,22 @@ if ($tee == '') {
 
 				$ruuarray = array();
 				$ruulask1 = 0;
-				$ruulask2 = 0;
+				$ruulask2 = 1;
 				$ruulask3 = 0;
 
-				while ($ruurow = mysql_fetch_assoc($ruuturesult)) {
-					$ruuarray[] = $ruurow;
-				}
 
-				for ($ruulask1 = 0; $ruulask1<count($ruuarray); $ruulask1++) {
 
-					if ($ruulask2 >= 25 and $ruuarray[$ruulask1] != $ruuarray[$ruulask1+1]) {
+				for ($ruulask1 = 0; $ruulask1<$rivilaskuri; $ruulask1++) {
+
+					if ($ruulask2 == 25) {
 
 						if ($ruutulimit == (($ruulask3+1)."##".($ruulask1+1-$ruulask3))) $ruutusel = "SELECTED";
 						else $ruutusel = "";
 
 						echo "<option value='".($ruulask3+1)."##".($ruulask1+1-$ruulask3)."' $ruutusel>".($ruulask3+1)." - ".($ruulask1+1)."</option>";
-						$ruulask2=0;
-						$ruulask3=$ruulask1+1;
+
+						$ruulask2 = 0;
+						$ruulask3 = $ruulask1+1;
 					}
 
 					$ruulask2++;
@@ -5360,16 +5361,16 @@ if ($tee == '') {
 						elseif ($kukarow['extranet'] == '') {
 							if ($kotisumma_alviton != 0) {
 								if ($kukarow['naytetaan_katteet_tilauksella'] == 'O') {
-									$kate = hintapyoristys($trow['kehahin']);
+									$kate = hintapyoristys($row['kehahin']);
 								}
 								else {
-									$kate = sprintf('%.2f',100*($kotisumma_alviton - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
+									$kate = sprintf('%.2f',100*($kotisumma_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
 								}
 							}
-							elseif (kehahin($row["tuoteno"]) != 0 and ($row["varattu"]+$row["jt"]) > 0) {
+							elseif ($row["kehahin"] != 0 and ($row["varattu"]+$row["jt"]) > 0) {
 								$kate = "-100.00%";
 							}
-							elseif (kehahin($row["tuoteno"]) != 0 and ($row["varattu"]+$row["jt"]) < 0) {
+							elseif ($row["kehahin"] != 0 and ($row["varattu"]+$row["jt"]) < 0) {
 								$kate = "100.00%";
 							}
 						}
@@ -5694,7 +5695,7 @@ if ($tee == '') {
 				if ($row['kommentti'] != '' or $vastaavattuotteet == 1) {
 
 					echo "<tr>";
-					
+
 					if ($borderlask == 0 and $pknum > 1) {
 						$kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
 						$kommclass2 = " style='border-bottom: 1px solid;'";
@@ -5713,18 +5714,18 @@ if ($tee == '') {
 					}
 
 					echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";
-					
+
 					if ($row['kommentti'] != '') {
 						echo t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
 					}
-					
+
 					// tähän se taulu
 					echo $vastaavat_html;
-					
+
 					echo "</td>";
 					echo "<td class='back' valign='top' nowrap></td>";
 					echo "</tr>";
-						
+
 				}
 			}
 
@@ -5805,7 +5806,8 @@ if ($tee == '') {
 								tuote.sarjanumeroseuranta,
 								tuote.ei_saldoa,
 								tuote.tuoteno,
-								tuote.kehahin,
+								round(if(tuote.epakurantti100pvm='0000-00-00', if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0),6) kehahin,
+								tuote.kehahin kehahin_kurantti,
 								tilausrivi.tunnus,
 								tilausrivi.varattu+tilausrivi.jt varattu,
 								tilausrivin_lisatiedot.osto_vai_hyvitys,
@@ -5818,7 +5820,7 @@ if ($tee == '') {
 								and tilausrivi.tunnus in ($alvrow[rivit])";
 					$aresult = pupe_query($aquery);
 
-					while($arow = mysql_fetch_assoc($aresult)) {
+					while ($arow = mysql_fetch_assoc($aresult)) {
 						$rivikate 		= 0;	// Rivin kate yhtiön valuutassa
 						$rivikate_eieri	= 0;	// Rivin kate yhtiön valuutassa ilman erikoisalennusta
 
@@ -5854,7 +5856,7 @@ if ($tee == '') {
 
 								$ostohinta = 0;
 
-								while($sarjarow = mysql_fetch_assoc($sarjares)) {
+								while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 
 									// Haetaan hyvitettävien myyntirivien kautta alkuperäiset ostorivit
 									$query  = "	SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
@@ -5883,8 +5885,8 @@ if ($tee == '') {
 							}
 						}
 						else {
-							$rivikate 		= $arow["kotirivihinta"]  - (kehahin($arow["tuoteno"])*$arow["varattu"]);
-							$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - (kehahin($arow["tuoteno"])*$arow["varattu"]);
+							$rivikate 		= $arow["kotirivihinta"]  - ($arow["kehahin"]*$arow["varattu"]);
+							$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - ($arow["kehahin"]*$arow["varattu"]);
 						}
 
 						if ($arow['varattu'] > 0) {

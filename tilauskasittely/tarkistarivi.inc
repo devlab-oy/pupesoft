@@ -6,6 +6,7 @@
 	$saako_jalkitoimittaa 	= 0;
 	$varaosavirhe 			= "";
 	$vastaavattuotteet		= "";
+	$vastaavat_html			= "";
 
 	$tquery	= "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 	$tres	= pupe_query($tquery);
@@ -766,7 +767,7 @@
 			$kutsuttu = 0;
 
 			$alku = "<table width='100%'><tr><th>".t("Vastaava")." ".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Myytävissä")."</th><th>".t("Myyntihinta")."</th>";
-			$alku .= "<td align='right'><form action='$PHP_SELF' method='post' name='hyvaksy'>
+			$alku .= "<th><form action='$PHP_SELF' method='post' name='hyvaksy'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
 								<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
@@ -778,7 +779,7 @@
 								<input type='hidden' name='menutila' 		value = '$menutila'>
 								<input type='hidden' name='tila' 			value = 'OOKOOAA'>
 								<input type='Submit' value='".t("Piilota vastaavat tuotteet")."'>
-								</form></td>";
+								</form></th>";
 			$alku .= "</tr>";
 
 			if ($row['kommentti'] != "") {
@@ -809,7 +810,7 @@
 
 					list($V_hinta, $V_netto, $V_ale, $V_alehinta_alv, $V_alehinta_val) = alehinta($laskurow, $tvrow, $row['tilkpl'], '', '', '');
 
-					 $vastaavat_html .= 	"<tr>"
+					 $vastaavat_html .= 	"<tr class='aktiivi'>"
 					 			."<td>{$vrow["tuoteno"]}</td>"
 								."<td>{$tvrow["nimitys"]}</td>"
 					 			."<td align='right'>".sprintf("%.2f", $vmyytavissa)."</td>"

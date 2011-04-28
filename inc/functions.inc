@@ -6614,9 +6614,8 @@ if (!function_exists('muuta_kuvan_koko')) {
 
 			$uusnimi = $dirri.$alkuperainen_kuva["name"];
 
-			if (!copy($uusi_kuva, $uusnimi)) {
-		    	echo "Kopiointi epäonnistui $uusi_kuva -> $uusnimi<br>";
-
+			if (!rename($uusi_kuva, $uusnimi)) {
+		    	echo "Siirto epäonnistui $uusi_kuva -> $uusnimi<br>";
 				$upfileall = "";
 			}
 			else {
@@ -6632,9 +6631,6 @@ if (!function_exists('muuta_kuvan_koko')) {
 			$file["size"] 		= filesize($uusnimi);
 
 			$_FILES[$upfile1] = $file;
-
-			// poistetaan file
-			unlink($uusi_kuva);
 		}
 		else {
 			$upfileall = "";

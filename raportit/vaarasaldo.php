@@ -45,7 +45,7 @@
 							and keratty != ''
 							and laskutettu = ''
 							and varattu <> 0
-							and tyyppi in ('L','G','V')
+							and tilausrivi.tyyppi in ('L','G','V')
 							and tuotepaikat.hyllyalue = tilausrivi.hyllyalue
 							and tuotepaikat.hyllynro  = tilausrivi.hyllynro
 							and tuotepaikat.hyllyvali = tilausrivi.hyllyvali

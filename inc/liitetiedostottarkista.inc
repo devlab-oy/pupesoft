@@ -59,7 +59,7 @@ if(!function_exists("liitetiedostottarkista")) {
 				list($type, $crap) = explode("/", $_FILES["liite_data"]["type"]);
 
 				//tarkastetaan löytyykö kuva jo kannasta
-				if($liite_kayttotarkoitus == "TK" and $type == "image" and strtoupper($liite_liitos) == 'TUOTE') {
+				if ($liite_kayttotarkoitus == "TK" and $type == "image" and strtoupper($liite_liitos) == 'TUOTE') {
 					$kayttotarkoitus_lisa = " and kayttotarkoitus in ('TK','TH') ";
 				}
 				elseif ($liite_kayttotarkoitus == "TH" and $type == "image" and strtoupper($liite_liitos) == 'TUOTE') {
@@ -101,17 +101,17 @@ if(!function_exists("liitetiedostottarkista")) {
 						$thumb_size_y = 65;
 					}
 
-					//mutetaan tuotekuvan koko sopivaksi
+					// Muutetaan tuotekuvan koko sopivaksi
 					if ($liite_kayttotarkoitus == "TK" and $type == "image" and strtoupper($liite_liitos) == 'TUOTE') {
 						$temp_file = $_FILES["liite_data"];
-
+						
 						$uusi_filu = muuta_kuvan_koko($thumb_size_y, $thumb_size_x, "thumb", $liite_liitos, "liite_data");
 
 						$liite_kayttotarkoitus = "TH";
 						$uusi_tunnus = tallenna_liite("liite_data", $liite_liitos, $liite_liitostunnus, $liite_selite, $liite_kayttotarkoitus, $tunnus, $liite_jarjestys, $liite_kieli);
 
 						if ($uusi_filu != "") {
-							system("rm -f \"$uusi_filu\"");
+							unlink($uusi_filu);
 						}
 
 						$_FILES["liite_data"] = $temp_file;
@@ -121,7 +121,7 @@ if(!function_exists("liitetiedostottarkista")) {
 						$uusi_tunnus = tallenna_liite("liite_data", $liite_liitos, $liite_liitostunnus, $liite_selite, $liite_kayttotarkoitus, $tunnus, $liite_jarjestys, $liite_kieli);
 
 						if ($uusi_filu != "") {
-							system("rm -f \"$uusi_filu\"");
+							unlink($uusi_filu);
 						}
 					}
 					elseif ($liite_kayttotarkoitus == "TH" and $type == "image" and strtoupper($liite_liitos) == 'TUOTE') {
@@ -130,7 +130,7 @@ if(!function_exists("liitetiedostottarkista")) {
 						$uusi_tunnus = tallenna_liite("liite_data", $liite_liitos, $liite_liitostunnus, $liite_selite, $liite_kayttotarkoitus, $tunnus, $liite_jarjestys, $liite_kieli);
 
 						if ($uusi_filu != "") {
-							system("rm -f \"$uusi_filu\"");
+							unlink($uusi_filu);
 						}
 					}
 					else {

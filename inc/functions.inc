@@ -6567,45 +6567,55 @@ if (!function_exists('muuta_kuvan_koko')) {
 		if ($yhtiorow['kuvapankki_polku'] != "") $dirri = $yhtiorow['kuvapankki_polku']."/".$kukarow['yhtio']."/".$taulu."/".$type."/";
 		else $dirri = "/tmp/";
 
-		list($usec, $sec) = explode(" ",microtime());
+		list($usec, $sec) = explode(" ", microtime());
 
 		$nimi      = $usec+$sec; // uniikki nimi
-		$resize    = ""; // resize komento
-		$crop      = ""; // crop komento
-		$upfileall = ""; // palautus
+		$upfileall = ""; 		 // palautus
+		$identify  = array();
 
-		$filetsu = $_FILES[$upfile1];
+		$alkuperainen_kuva = $_FILES[$upfile1];
 
-		$path_parts = pathinfo($filetsu["name"]);
+		$path_parts = pathinfo($alkuperainen_kuva["name"]);
 		$ext = strtolower($path_parts['extension']);
 
-		$image = getimagesize($filetsu["tmp_name"], $imageinfo);	// lähetetty kuva
-		$leve = $image[0];
-		$kork = $image[1];
+		$image = getimagesize($alkuperainen_kuva["tmp_name"]);	// lähetetty kuva
+		$leve  = $image[0];
+		$kork  = $image[1];
 
-		// eihän molemmat (y ja x) ole nollia?!
 		if ($ykoko > 0 or $xkoko > 0) {
 			/* skaaltaanko x:n vai y:n mukaan, jos xkoko tai ykoko == 0, skaalataan != 0 mukaan */
 			if ($ykoko > 0 and $kork > $ykoko) {
-				$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
+				$uusi_kuva = strtolower("/tmp/$nimi"."1.".$ext);
+
+				// Haetaan kuvan väriprofiili
+				exec("nice -n 20 identify -format %[colorspace] $alkuperainen_kuva[tmp_name]", $identify);
+
+				$colorspace = "sRGB";
+				if ($identify[0] != "") $colorspace = $identify[0];
 
 				// skaalataan kuva oikenakokoiseksi y:n mukaan
-		    	exec("nice -n 20 convert -resize x$ykoko -quality 90 -colorspace sRGB -strip $filetsu[tmp_name] $upfilesgh", $output);
+		    	exec("nice -n 20 convert -resize x$ykoko -quality 90 -colorspace $colorspace -strip $alkuperainen_kuva[tmp_name] $uusi_kuva");
 		    }
 			elseif ($xkoko > 0 and $leve > $xkoko) {
-				$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
+				$uusi_kuva = strtolower("/tmp/$nimi"."1.".$ext);
+
+				// Haetaan kuvan väriprofiili
+				exec("nice -n 20 identify -format %[colorspace] $alkuperainen_kuva[tmp_name]", $identify);
+
+				$colorspace = "sRGB";
+				if ($identify[0] != "") $colorspace = $identify[0];
 
 				// skaalataan kuva oikenakokoiseksi x:n mukaan
-		  		exec("nice -n 20 convert -resize $xkoko -quality 90 -colorspace sRGB -strip $filetsu[tmp_name] $upfilesgh", $output);
+		  		exec("nice -n 20 convert -resize $xkoko -quality 90 -colorspace $colorspace -strip $alkuperainen_kuva[tmp_name] $uusi_kuva");
 		    }
 			else {
 				return $upfile1;
 		    }
 
-			$uusnimi = $dirri.$filetsu["name"];
+			$uusnimi = $dirri.$alkuperainen_kuva["name"];
 
-			if (!copy($upfilesgh, $uusnimi)) {
-		    	echo "Kopiointi epäonnistui $upfilesgh -> $uusnimi<br>";
+			if (!copy($uusi_kuva, $uusnimi)) {
+		    	echo "Kopiointi epäonnistui $uusi_kuva -> $uusnimi<br>";
 
 				$upfileall = "";
 			}
@@ -6624,7 +6634,7 @@ if (!function_exists('muuta_kuvan_koko')) {
 			$_FILES[$upfile1] = $file;
 
 			// poistetaan file
-			system("rm -f $upfilesgh");
+			unlink($uusi_kuva);
 		}
 		else {
 			$upfileall = "";

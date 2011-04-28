@@ -6588,25 +6588,25 @@ if (!function_exists('muuta_kuvan_koko')) {
 				$uusi_kuva = strtolower("/tmp/$nimi"."1.".$ext);
 
 				// Haetaan kuvan väriprofiili
-				exec("nice -n 20 identify -format %[colorspace] $alkuperainen_kuva[tmp_name]", $identify);
+				exec("nice -n 20 identify -format %[colorspace] \"$alkuperainen_kuva[tmp_name]\"", $identify);
 
 				$colorspace = "sRGB";
 				if ($identify[0] != "") $colorspace = $identify[0];
 
 				// skaalataan kuva oikenakokoiseksi y:n mukaan
-		    	exec("nice -n 20 convert -resize x$ykoko -quality 90 -colorspace $colorspace -strip $alkuperainen_kuva[tmp_name] $uusi_kuva");
+		    	exec("nice -n 20 convert -resize x$ykoko -quality 90 -colorspace $colorspace -strip \"$alkuperainen_kuva[tmp_name]\" \"$uusi_kuva\"");
 		    }
 			elseif ($xkoko > 0 and $leve > $xkoko) {
 				$uusi_kuva = strtolower("/tmp/$nimi"."1.".$ext);
 
 				// Haetaan kuvan väriprofiili
-				exec("nice -n 20 identify -format %[colorspace] $alkuperainen_kuva[tmp_name]", $identify);
+				exec("nice -n 20 identify -format %[colorspace] \"$alkuperainen_kuva[tmp_name]\"", $identify);
 
 				$colorspace = "sRGB";
 				if ($identify[0] != "") $colorspace = $identify[0];
 
 				// skaalataan kuva oikenakokoiseksi x:n mukaan
-		  		exec("nice -n 20 convert -resize $xkoko -quality 90 -colorspace $colorspace -strip $alkuperainen_kuva[tmp_name] $uusi_kuva");
+		  		exec("nice -n 20 convert -resize $xkoko -quality 90 -colorspace $colorspace -strip \"$alkuperainen_kuva[tmp_name]\" \"$uusi_kuva\"");
 		    }
 			else {
 				return $upfile1;

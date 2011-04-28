@@ -565,8 +565,14 @@ if ($tee == '') {
 						fclose($fh);
 
 						$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+						
+						// Haetaan kuvan väriprofiili
+						exec("nice -n 20 identify -format %[colorspace] \"$nimi1\"", $identify);
 
-						passthru("nice -n 20 convert -resize 130x -quality 90 -colorspace sRGB -strip $nimi1 $nimi2", $palautus);
+						$colorspace = "sRGB";
+						if ($identify[0] != "") $colorspace = $identify[0];
+
+						passthru("nice -n 20 convert -resize 130x -quality 90 -colorspace $colorspace -strip \"$nimi1\" \"$nimi2\"", $palautus);
 
 						// Tallennetaa skeilattu kuva
 						$ltsc = tallenna_liite($nimi2, "kalenteri", 0, $lisatietorow["selite"], '', $lisatietorow["tunnus"]);

@@ -40,11 +40,19 @@ if (!function_exists('alku_dgd')) {
 		$pdf->pages[$sivu]->drawLine(mm_pt(58), mm_pt(197), mm_pt(101), mm_pt(202));
 
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'LATIN1');
-		$pdf->pages[$sivu]->drawText($kukarow["nimi"], mm_pt(15), mm_pt(50), 'LATIN1');
+
+		$query = "	SELECT nimi
+					FROM kuka
+					WHERE yhtio	= '$kukarow[yhtio]'
+					and kuka 	= '$laskurow[laatija]'";
+		$nimires = pupe_query($query);
+		$nimirow = mysql_fetch_assoc($nimires);
+
+		$pdf->pages[$sivu]->drawText($nimirow["nimi"], mm_pt(15), mm_pt(50), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["kotipaikka"]." / ".tv1dateconv(date("Y-m-d")), mm_pt(15), mm_pt(41), 'LATIN1');
 
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(143), mm_pt(61), 'LATIN1');
-		$pdf->pages[$sivu]->drawText($kukarow["nimi"], mm_pt(143), mm_pt(50), 'LATIN1');
+		$pdf->pages[$sivu]->drawText($nimirow["nimi"], mm_pt(143), mm_pt(50), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["kotipaikka"]." / ".tv1dateconv(date("Y-m-d")), mm_pt(143), mm_pt(41), 'LATIN1');
 
 		# Viivoitin
@@ -149,6 +157,8 @@ if (!function_exists('rivi_dgd')) {
 
 		foreach ($vaktuotetiedot as $vaktuoterivi) {
 
+			list($vaktuoterivi, $vaktuotepaino) = explode("###", $vaktuoterivi);
+
 			if ($kala < 120) {
 
 				$pdf->pages[$sivu]->drawText("Continues....", mm_pt(45), mm_pt($kala), 'LATIN1');
@@ -176,6 +186,11 @@ if (!function_exists('rivi_dgd')) {
 			$eramaara = $row["kpl"]/$row["era"];
 
 			$pdf->pages[$sivu]->drawText($vaktuoterivi, mm_pt(45), mm_pt($kala), 'LATIN1');
+
+			if ($vaktuotepaino != "") {
+				$pdf->pages[$sivu]->drawText($vaktuotepaino, mm_pt(145), mm_pt($kala), 'LATIN1');
+			}
+
 			$kala-=4;
 		}
 
@@ -199,13 +214,12 @@ if (!function_exists('loppu_dgd')) {
 			${$key} = $val;
 		}
 
-		$pdf->pages[0]->setFont($norm, 10);
-
 		// Sivunumerot
 		for ($pp=0; $pp<=$sivu; $pp++) {
 			$csiv = $pp+1;
 			$tsiv = $sivu+1;
 
+			$pdf->pages[$pp]->setFont($norm, 10);
 			$pdf->pages[$pp]->drawText("$csiv       $tsiv", mm_pt(114), mm_pt(259), 'LATIN1');
 		}
 

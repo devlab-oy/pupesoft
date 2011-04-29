@@ -417,8 +417,8 @@
 				}
 
 				// Haetaan kaikki vakkoodit arrayseen
-				$query = "	SELECT $vakselect vakkoodi, 
-							round(sum(tuote.tuotemassa), 1) tuote_kilot,
+				$query = "	SELECT $vakselect vakkoodi,
+							round(sum(tuote.tuotemassa*(tilausrivi.kpl+tilausrivi.varattu)), 1) tuote_kilot,
 							sum(if(tuote.tuotemassa=0, 1, 0)) tuotemassattomat
 							FROM tilausrivi
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
@@ -433,11 +433,11 @@
 
 				if (mysql_num_rows($vres) > 0) {
 					while ($vak = mysql_fetch_assoc($vres)) {
-						
+
 						if ($vak["tuotemassattomat"] == 0) {
 							$vak["vakkoodi"] .= " ($vak[tuote_kilot] kg)";
-						}						
-						
+						}
+
 						$vakit[] = $vak["vakkoodi"];
 					}
 				}

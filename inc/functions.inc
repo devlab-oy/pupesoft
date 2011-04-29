@@ -11093,8 +11093,8 @@ if (!function_exists("palauta_vak_tiedot")) {
 				if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
 
 				if (isset($tuotepainot)) {
-					$tuotepainot += $edrow["tuotepaino"];
-					$tuotepainot_yht += $edrow["tuotepaino"];
+					$tuotepainot += $row["tuotepaino"];
+					$tuotepainot_yht += $row["tuotepaino"];
 				}
 
 				$edrow = $row;

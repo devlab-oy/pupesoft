@@ -25,7 +25,7 @@ $iso["height"] 			= 14;
 $iso["font"] 			= "Helvetica-Bold";
 
 if (!function_exists('alku')) {
-	function alku ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi) {
+	function alku ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus) {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
 		$thispage = $pdf_lasku->new_page("a4");
@@ -333,6 +333,10 @@ if (!function_exists('alku')) {
 		// Kommentit
 		$komm = "";
 
+		if ($kaanteinen_verotus) {
+			$komm .= t("AVL 8c §", $kieli).":###".wordwrap(str_replace("\n","\n###", t_avainsana("KAANTALVVIESTI", $kieli, "", "", "", "selitetark")), 90, "\n###")."\n";
+		}
+
 		if (trim($laskurow['tilausyhteyshenkilo']) != '') {
 			$komm .= "\n".t("Tilaaja", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
 		}
@@ -588,7 +592,7 @@ if (!function_exists('rivi_lasku')) {
 		if (trim($valrow['viesti']) != '' and strpos($row["kommentti"], "$valrow[viesti]\n") === FALSE and $laskutyyppi != 6) {
 			$row["kommentti"] = trim($valrow["viesti"])."\n".$row["kommentti"];
 		}
-		
+
 		if (trim($valrow['asiakkaan_tilausnumero']) != '' and strpos($row["kommentti"], "$valrow[asiakkaan_tilausnumero]\n") === FALSE and $laskutyyppi != 6) {
 			$row["kommentti"] = trim($valrow["asiakkaan_tilausnumero"])."\n".$row["kommentti"];
 		}
@@ -603,7 +607,7 @@ if (!function_exists('rivi_lasku')) {
 
 		// Jos meillä on marginaalimyyntiä/käänteinen alv
 		if ($row["alv"] >= 600) {
-			$row["kommentti"] .= "\n".t("Rakennusalan käännetty verovelvollisuus", $kieli).".";
+			$row["kommentti"] .= "\n".t("Ei lisättyä arvonlisäveroa, ostajan käännetty verovelvollisuus", $kieli).".";
 		}
 		elseif ($row["alv"] >= 500) {
 			$row["kommentti"] .= "\n".t("Ei sisällä vähennettävää veroa", $kieli).".";
@@ -1899,8 +1903,18 @@ if (!function_exists("tulosta_lasku")) {
 					ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
+		$kaanteinen_verotus = FALSE;
+
+		while ($row = mysql_fetch_assoc($result)) {
+			if ($row["alv"] >= 600) {
+				$kaanteinen_verotus = TRUE;
+				break;
+			}
+		}
+		mysql_data_seek($result, 0);
+
 		// aloitellaan laskun teko
-		list($page_lasku[$sivu], $kala) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi);
+		list($page_lasku[$sivu], $kala) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus);
 
 		while ($row = mysql_fetch_assoc($result)) {
 

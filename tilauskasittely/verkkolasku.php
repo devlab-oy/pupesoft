@@ -1512,20 +1512,33 @@
 							// Tämä merkki | eli pystyviiva on rivinvaihdon merkki laskun kommentissa elmalla
 							$komm = "";
 
+							// Onko käänteistä verotusta
+							$alvquery = "   SELECT tunnus
+											FROM tilausrivi
+											WHERE yhtio = '$kukarow[yhtio]'
+											and otunnus in ($tunnukset)
+											and tyyppi  = 'L'
+											and alv >= 600";
+							$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
+
+							if (mysql_num_rows($alvresult) > 0) {
+								$komm .= t_avainsana("KAANTALVVIESTI", $laskun_kieli, "", "", "", "selitetark");
+							}
+
 							if (trim($lasrow['tilausyhteyshenkilo']) != '') {
-								$komm .= "\n".t("Tilaaja").": ".$lasrow['tilausyhteyshenkilo'];
+								$komm .= "\n".t("Tilaaja", $laskun_kieli).": ".$lasrow['tilausyhteyshenkilo'];
 							}
 
 							if (trim($lasrow['asiakkaan_tilausnumero']) != '') {
-								$komm .= "\n".t("Tilauksenne").": ".$lasrow['asiakkaan_tilausnumero'];
+								$komm .= "\n".t("Tilauksenne", $laskun_kieli).": ".$lasrow['asiakkaan_tilausnumero'];
 							}
 
 							if (trim($lasrow['kohde']) != '') {
-								$komm .= "\n".t("Kohde").": ".$lasrow['kohde'];
+								$komm .= "\n".t("Kohde", $laskun_kieli).": ".$lasrow['kohde'];
 							}
 
 							if (trim($lasrow['sisviesti1']) != '') {
-								$komm .= "\n".t("Kommentti").": ".$lasrow['sisviesti1'];
+								$komm .= "\n".t("Kommentti", $laskun_kieli).": ".$lasrow['sisviesti1'];
 							}
 
 							if (trim($komm) != '') {
@@ -1717,7 +1730,7 @@
 								// Käännetty arvonlisäverovelvollisuus ja käytetyn tavaran myynti
 								if ($tilrow["alv"] >= 600) {
 									$tilrow["alv"] = 0;
-									$tilrow["kommentti"] .= " Rakennusalan käännetty verovelvollisuus.";
+									$tilrow["kommentti"] .= " Ei lisättyä arvonlisäveroa, ostajan käännetty verovelvollisuus.";
 								}
 								elseif ($tilrow["alv"] >= 500) {
 									$tilrow["alv"] = 0;

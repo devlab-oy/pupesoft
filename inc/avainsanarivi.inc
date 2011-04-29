@@ -138,6 +138,7 @@
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI") 		$ulos .= "<option value='VAKIOVIESTI' $avain_sel[VAKIOVIESTI]>				".t("Laskun vakioviesti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KAANTALVVIESTI")	$ulos .= "<option value='KAANTALVVIESTI' $avain_sel[KAANTALVVIESTI]>		".t("Tilauksen/Laskun k‰‰nteisen verotuksen viesti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LITETY") 			$ulos .= "<option value='LITETY' $avain_sel[LITETY]>						".t("Liitetiedostotyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TIL-LITETY") 		$ulos .= "<option value='TIL-LITETY' ".$avain_sel["TIL-LITETY"].">			".t("Tilauksen liitetiedostotyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "JAKELULISTA") 		$ulos .= "<option value='JAKELULISTA' $avain_sel[JAKELULISTA]>				".t("Email jakelulista")."</option>";
@@ -361,7 +362,7 @@
 		$jatko  = 0;
 	}
 
-	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark") {
+	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "SELECTED" or $avain_sel['KAANTALVVIESTI'] == "SELECTED") and mysql_field_name($result, $i) == "selitetark") {
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
@@ -371,7 +372,7 @@
 		$jatko = 0;
 	}
 
-	if (($avain_sel['LASKUTUS_SAATE'] == "SELECTED" or $avain_sel['PALAUTUS_SAATE'] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_2") {
+	if (($avain_sel['LASKUTUS_SAATE'] == "SELECTED" or $avain_sel['PALAUTUS_SAATE'] == "SELECTED" or $avain_sel['KAANTALVVIESTI'] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_2") {
 		$ulos = "<td><textarea rows=30 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}

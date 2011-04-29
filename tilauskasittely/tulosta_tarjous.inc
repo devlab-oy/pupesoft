@@ -43,7 +43,7 @@ $rivinkorkeus			= 15;
 
 //muutamat funktiot...
 if (!function_exists('alku_tarjous')) {
-	function alku_tarjous ($laskurow, $asiakasrow, $kieli, $pdf_tarjous) {
+	function alku_tarjous ($laskurow, $asiakasrow, $kieli, $pdf_tarjous, $kaanteinen_verotus) {
 		global $yhtiorow, $kukarow, $pieni, $norm, $boldi, $pieni_boldi, $iso, $rectparam, $useita;
 
 		$page_tarjous = $pdf_tarjous->new_page("a4");
@@ -234,6 +234,10 @@ if (!function_exists('alku_tarjous')) {
 		}
 
 		$komm = "";
+
+		if ($kaanteinen_verotus) {
+			$komm .= t("AVL 8c §", $kieli).":###".wordwrap(str_replace("\n","\n###", t_avainsana("KAANTALVVIESTI", $kieli, "", "", "", "selitetark_2")), 90, "\n###")."\n";
+		}
 
 		if ($yhtiorow['tarjoustyyppi'] == 1) {
 			if (trim($laskurow['viesti']) != '') {
@@ -847,8 +851,15 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 			$pdf_tarjous->draw_text(470-$oikpos, $kala, ($row["ale"]*1)."%", $page_tarjous[$sivu], $norm);
 		}
 
-		$oikpos = $pdf_tarjous->strlen(($alv*1)."%", $norm);
-		$pdf_tarjous->draw_text(515-$oikpos, $kala, ($alv*1)."%", $page_tarjous[$sivu], $norm);
+		if ($row["alv"] >= 600) {
+			$pdf_tarjous->draw_text(500, $kala, t("K.V.", $kieli), $page_tarjous[$sivu], $norm);
+		}
+		elseif ($row["alv"] >= 500) {
+			$pdf_tarjous->draw_text(500, $kala, t("M.V.", $kieli), $page_tarjous[$sivu], $norm);
+		}
+		else {
+			$pdf_tarjous->draw_text(500, $kala, ($row["alv"]*1)."%", $page_tarjous[$sivu], $norm);
+		}
 
 		if (trim($naytetaanko_rivihinta) == '') {
 			$oikpos = $pdf_tarjous->strlen(hintapyoristys($row["rivihinta"]), $norm);
@@ -1143,14 +1154,14 @@ if (!function_exists('loppu_tarjous')) {
 					$tppa = date("d",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
 				}
 
-				$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);             
+				$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);
 
 				$pdf_tarjous->draw_text(50, $kala-25, t("Toimitustapa"), $page_tarjous, $boldi);
 				$pdf_tarjous->draw_text(200, $kala-25, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $page_tarjous, $norm);
 
 				$pdf_tarjous->draw_text(50, $kala-38, t("Voimassa", $kieli), $page_tarjous, $boldi);
-				$pdf_tarjous->draw_text(200, $kala-38, t($voimassa, $kieli), $page_tarjous, $norm); 
-				
+				$pdf_tarjous->draw_text(200, $kala-38, t($voimassa, $kieli), $page_tarjous, $norm);
+
 				$pdf_tarjous->draw_text(50, $kala-51, t("Maksuehto", $kieli), $page_tarjous, $boldi);
 				$pdf_tarjous->draw_text(200, $kala-51, t($laskurow['maksuehto'], $kieli), $page_tarjous, $norm);
 
@@ -1429,8 +1440,6 @@ if (!function_exists('tulosta_tarjous')) {
 		$pdf_tarjous->set_default('margin-left',   0);
 		$pdf_tarjous->set_default('margin-right',  0);
 
-		list($page_tarjous[$sivu], $kala) = alku_tarjous($laskurow, $asiakasrow, $kieli, $pdf_tarjous);
-
 		// Rivit
 		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 			$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
@@ -1463,13 +1472,26 @@ if (!function_exists('tulosta_tarjous')) {
 					ORDER BY $pjat_sortlisa sorttauskentta $yhtiorow[tarjouksen_jarjestys_suunta], tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);
 
-		$row = mysql_fetch_array($riresult);
+		$row = mysql_fetch_assoc($riresult);
 		$tuotetyyppi = $row['tuotetyyppi'];
+		mysql_data_seek($riresult, 0);
+
+		$kaanteinen_verotus = FALSE;
+
+		while ($row = mysql_fetch_assoc($riresult)) {
+			if ($row["alv"] >= 600) {
+				$kaanteinen_verotus = TRUE;
+				break;
+			}
+		}
+		mysql_data_seek($riresult, 0);
+
+		list($page_tarjous[$sivu], $kala) = alku_tarjous($laskurow, $asiakasrow, $kieli, $pdf_tarjous, $kaanteinen_verotus);
 
 		$kala -= 20;
 		$kala = tarjous_rivi_otsikot($pdf_tarjous, $page_tarjous[$sivu], $kieli, $kala, $tuotetyyppi, $verolliset_verottomat_hinnat, $naytetaanko_rivihinta);
 
-		mysql_data_seek($riresult, 0);
+
 
 		$edtuotetyyppi = $tuotetyyppi;
 

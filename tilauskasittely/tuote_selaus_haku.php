@@ -380,7 +380,7 @@
 		$poischeck = "";
 	}
 
-	if ($extrapoistetut != "" and $kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
+	if (isset($extrapoistetut) and $extrapoistetut != "" and $kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
 		$extrapoischeck = "CHECKED";
 		$ulisa .= "&extrapoistetut=checked";
 		$poislisa  		 	= "";
@@ -457,7 +457,7 @@
 	if (trim($tuotenumero) != '') {
 		$tuotenumero = mysql_real_escape_string(trim($tuotenumero));
 
-		if ($alkukoodilla != "") {
+		if (isset($alkukoodilla) and $alkukoodilla != "") {
 			$lisa .= " and tuote.tuoteno like '$tuotenumero%' ";
 		}
 		else {
@@ -753,6 +753,66 @@
 
 	if ($submit_button != '' and ($lisa != '' or $lisa_dynaaminen != '' or $lisa_parametri != '')) {
 
+		$tuotekyslinkki = "";
+
+		if ($kukarow["extranet"] == "") {
+			$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='tuote.php' LIMIT 1";
+			$tarkres = pupe_query($query);
+
+			if (mysql_num_rows($tarkres) > 0) {
+				$tuotekyslinkki = "tuote.php";
+			}
+			else {
+				$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='tuvar.php' LIMIT 1";
+				$tarkres = pupe_query($query);
+
+				if (mysql_num_rows($tarkres) > 0) {
+					$tuotekyslinkki = "tuvar.php";
+				}
+				else {
+					$tuotekyslinkki = "";
+				}
+			}
+		}
+
+		if (!function_exists("tuoteselaushaku_vastaavat_korvaavat")) {
+			function tuoteselaushaku_vastaavat_korvaavat($tvk_taulu, $tvk_korvaavat, $tvk_tuoteno) {
+				global $kukarow, $kieltolisa, $poislisa;
+
+				if ($tvk_taulu != "vastaavat") $kyselylisa = " and {$tvk_taulu}.tuoteno != '$tvk_tuoteno' ";
+				else $kyselylisa = "";
+
+				$query = "	SELECT
+							'' tuoteperhe,
+							{$tvk_taulu}.id {$tvk_taulu},
+							tuote.tuoteno,
+							tuote.nimitys,
+							tuote.osasto,
+							tuote.try,
+							tuote.myyntihinta,
+							tuote.nettohinta,
+							tuote.aleryhma,
+							tuote.status,
+							tuote.ei_saldoa,
+							tuote.yksikko,
+							tuote.tunnus,
+							(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
+							tuote.sarjanumeroseuranta,
+							tuote.status
+							FROM {$tvk_taulu}
+							JOIN tuote ON tuote.yhtio={$tvk_taulu}.yhtio and tuote.tuoteno={$tvk_taulu}.tuoteno
+							WHERE {$tvk_taulu}.yhtio = '$kukarow[yhtio]'
+							and {$tvk_taulu}.id = '$tvk_korvaavat'
+							$kyselylisa
+							$kieltolisa
+							$poislisa
+							ORDER BY {$tvk_taulu}.jarjestys, {$tvk_taulu}.tuoteno";
+				$kores = pupe_query($query);
+
+				return $kores;
+			}
+		}
+
 		if (!function_exists("tuoteselaushaku_tuoteperhe")) {
 			function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaikki_array, $rows) {
 				global $kukarow, $kieltolisa, $poislisa;
@@ -763,6 +823,7 @@
 					$query = "	SELECT
 	 							'$esiisatuoteno' tuoteperhe,
 								tuote.tuoteno korvaavat,
+								tuote.tuoteno vastaavat,
 								tuote.tuoteno,
 								tuote.nimitys,
 								tuote.osasto,
@@ -799,31 +860,10 @@
 			}
 		}
 
-		$tuotekyslinkki = "";
-
-		if ($kukarow["extranet"] == "") {
-			$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='tuote.php' LIMIT 1";
-			$tarkres = pupe_query($query);
-
-			if (mysql_num_rows($tarkres) > 0) {
-				$tuotekyslinkki = "tuote.php";
-			}
-			else {
-				$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='tuvar.php' LIMIT 1";
-				$tarkres = pupe_query($query);
-
-				if (mysql_num_rows($tarkres) > 0) {
-					$tuotekyslinkki = "tuvar.php";
-				}
-				else {
-					$tuotekyslinkki = "";
-				}
-			}
-		}
-
 		$query = "	SELECT
 					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
 					ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
+					ifnull((SELECT id FROM vastaavat use index (yhtio_tuoteno) where vastaavat.yhtio=tuote.yhtio and vastaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) vastaavat,
 					tuote.tuoteno,
 					tuote.nimitys,
 					tuote.osasto,
@@ -854,57 +894,56 @@
 
 			$rows = array();
 
-			// Rakennetaan array ja laitetaan korvaavat mukaan
+			// Rakennetaan array ja laitetaan vastaavat ja korvaavat mukaan
 			while ($mrow = mysql_fetch_assoc($result)) {
-				if ($mrow["korvaavat"] != $mrow["tuoteno"]) {
-					$query = "	SELECT
-								ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
-								korvaavat.id korvaavat,
-								tuote.tuoteno,
-								tuote.nimitys,
-								tuote.osasto,
-								tuote.try,
-								tuote.myyntihinta,
-								tuote.nettohinta,
-								tuote.aleryhma,
-								tuote.status,
-								tuote.ei_saldoa,
-								tuote.yksikko,
-								tuote.tunnus,
-								(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
-								tuote.sarjanumeroseuranta,
-								tuote.status
-								FROM korvaavat
-								JOIN tuote ON tuote.yhtio=korvaavat.yhtio and tuote.tuoteno=korvaavat.tuoteno
-								WHERE korvaavat.yhtio = '$kukarow[yhtio]'
-								and korvaavat.id = '$mrow[korvaavat]'
-								and korvaavat.tuoteno != '$mrow[tuoteno]'
-								$kieltolisa
-								$poislisa
-								ORDER BY korvaavat.jarjestys, korvaavat.tuoteno";
-					$kores = pupe_query($query);
+
+				if ($mrow["vastaavat"] != $mrow["tuoteno"]) {
+
+					$kores = tuoteselaushaku_vastaavat_korvaavat("vastaavat", $mrow["vastaavat"], $mrow["tuoteno"]);
 
 					if (mysql_num_rows($kores) > 0) {
 
-						$krow = mysql_fetch_assoc($kores);
-						$ekakorva = $krow["korvaavat"];
-
-						mysql_data_seek($kores, 0);
-
-						if (!isset($rows[$ekakorva.$mrow["tuoteno"]])) $rows[$ekakorva.$mrow["tuoteno"]] = $mrow;
+						$vastaavamaara = mysql_num_rows($kores);
 
 						while ($krow = mysql_fetch_assoc($kores)) {
 
-							$krow["mikakorva"] = $mrow["tuoteno"];
+							if (isset($vastaavamaara)) {
+								$krow["vastaavamaara"] = $vastaavamaara;
+								unset($vastaavamaara);
+							}
+							else {
+								$krow["mikavastaava"] = $mrow["tuoteno"];
+							}
 
-							if (!isset($rows[$ekakorva.$krow["tuoteno"]])) $rows[$ekakorva.$krow["tuoteno"]] = $krow;
+							if (!isset($rows[$mrow["korvaavat"].$krow["tuoteno"]])) $rows[$mrow["korvaavat"].$krow["tuoteno"]] = $krow;
 						}
 					}
 					else {
 						$rows[$mrow["tuoteno"]] = $mrow;
 					}
 				}
-				else {
+
+				if ($mrow["korvaavat"] != $mrow["tuoteno"]) {
+					$kores = tuoteselaushaku_vastaavat_korvaavat("korvaavat", $mrow["korvaavat"], $mrow["tuoteno"]);
+
+					if (mysql_num_rows($kores) > 0) {
+
+						// Korvaavan isätuotetta ei listata uudestaan jos se on jo listattu vastaavaketjussa
+						if (!isset($rows[$mrow["korvaavat"].$mrow["tuoteno"]])) $rows[$mrow["korvaavat"].$mrow["tuoteno"]] = $mrow;
+
+						while ($krow = mysql_fetch_assoc($kores)) {
+
+							$krow["mikakorva"] = $mrow["tuoteno"];
+
+							if (!isset($rows[$mrow["korvaavat"].$krow["tuoteno"]])) $rows[$mrow["korvaavat"].$krow["tuoteno"]] = $krow;
+						}
+					}
+					else {
+						$rows[$mrow["tuoteno"]] = $mrow;
+					}
+				}
+
+				if ($mrow["korvaavat"] == $mrow["tuoteno"] and $mrow["vastaavat"] == $mrow["tuoteno"]) {
 					$rows[$mrow["tuoteno"]] = $mrow;
 
 					if ($mrow["tuoteperhe"] == $mrow["tuoteno"]) {
@@ -1027,6 +1066,7 @@
 				echo "<table>";
 				echo "<tr>";
 
+				echo "<td class='back'>&nbsp;</td>";
 				echo "<th>&nbsp;</th>";
 
 				echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=tuoteno$ulisa'>".t("Tuoteno")."</a>";
@@ -1098,7 +1138,6 @@
 				echo "</tr>";
 			}
 
-			$edtuoteno 	= "";
 			$yht_i 		= 0;
 			$alask 		= 0;
 
@@ -1250,6 +1289,13 @@
 				}
 
 				echo "<tr class='aktiivi'>";
+
+				if (isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0) {
+					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$row["vastaavamaara"]}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
+				}
+				elseif (!isset($row["mikavastaava"])) {
+					echo "<td class='back'></td>";
+				}
 
 				$vari = "";
 
@@ -1477,8 +1523,6 @@
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 					echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
 				}
-
-				$edtuoteno = $row["korvaavat"];
 
 				if ($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk)) {
 					// Tuoteperheen isät, mutta ei sarjanumerollisisa isiä (Normi, Extranet ja Verkkokauppa)

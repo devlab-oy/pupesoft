@@ -46,6 +46,8 @@
 	$lisa_haku_kustp		 = "";
 	$lisa_haku_kohde		 = "";
 	$lisa_haku_projekti		 = "";
+	$lisa_dynaaminen		 = "";
+	$lisa_parametri			 = "";
 
 	// Setataan muuttujat
 	if (!isset($mul_osasto)) 		$mul_osasto = array();
@@ -64,6 +66,8 @@
 	if (!isset($mul_kustp)) 		$mul_kustp = array();
 	if (!isset($mul_kohde)) 		$mul_kohde = array();
 	if (!isset($mul_projekti)) 		$mul_projekti = array();
+
+	if (!isset($poislisa_mulsel)) 	$poislisa_mulsel = "";
 
 	$dynaaminen_check = "";
 
@@ -265,7 +269,6 @@
 					$dynaamiset = substr($dynaamiset, 0, -1);
 
 					if (trim($dynaamiset) != '') {
-
 						$query = "	SELECT GROUP_CONCAT(DISTINCT node.tunnus order by node.tunnus) tunnukset
 									FROM dynaaminen_puu AS node
 									JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.tunnus IN ($dynaamiset))
@@ -293,7 +296,7 @@
 								$lisa_dynaaminen .= "kuka.kuka)\n";
 							}
 
-							$lisa_dynaaminen .= "JOIN dynaaminen_puu {$param}_puu{$count_row['syvyys']} ON ({$param}_puu{$count_row['syvyys']}.yhtio = {$param}_alkio{$count_row['syvyys']}.yhtio AND {$param}_puu{$count_row['syvyys']}.tunnus = {$param}_alkio{$count_row['syvyys']}.puun_tunnus AND {$param}_puu{$count_row['syvyys']}.laji = {$param}_alkio{$count_row['syvyys']}.laji)\n";
+							$lisa_dynaaminen .= "JOIN dynaaminen_puu dynaaminen_{$param}_{$count_row['syvyys']} ON (dynaaminen_{$param}_{$count_row['syvyys']}.yhtio = {$param}_alkio{$count_row['syvyys']}.yhtio AND dynaaminen_{$param}_{$count_row['syvyys']}.tunnus = {$param}_alkio{$count_row['syvyys']}.puun_tunnus AND dynaaminen_{$param}_{$count_row['syvyys']}.laji = {$param}_alkio{$count_row['syvyys']}.laji)\n";
 						}
 					}
 				}
@@ -584,13 +587,13 @@
 				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 				echo "<tr><th>";
 
-				if ($hae_ja_selaa_row['selite'] == 'B') {
+				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 					echo "<label>";
 				}
 
 				echo t("Osasto");
 
-				if ($hae_ja_selaa_row['selite'] == 'B') {
+				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 					echo "</label>";
 				}
 
@@ -716,13 +719,13 @@
 
 				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>";
 
-				if ($hae_ja_selaa_row['selite'] == 'B') {
+				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 					echo "<label>";
 				}
 
 				echo t("Tuoteryhm‰");
 
-				if ($hae_ja_selaa_row['selite'] == 'B') {
+				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 					echo "</label>";
 				}
 
@@ -813,7 +816,7 @@
 		        			and avainsana_kieli.perhe = avainsana.perhe
 		        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite
 							FROM tuote
-							$lisa_dynaaminen
+
 							JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' $avainlisa)
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							$lisa_haku_osasto
@@ -845,13 +848,13 @@
 			if (is_resource($tmsresult) and mysql_num_rows($tmsresult) > 0) {
 				echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>";
 
-				if ($hae_ja_selaa_row['selite'] == 'B') {
+				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 					echo "<label>";
 				}
 
 				echo t("Tuotemerkki");
 
-				if ($hae_ja_selaa_row['selite'] == 'B') {
+				if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 					echo "</label>";
 				}
 
@@ -981,13 +984,13 @@
 
 						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>";
 
-						if ($hae_ja_selaa_row['selite'] == 'B') {
+						if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 							echo "<label>";
 						}
 
 						echo t("Malli");
 
-						if ($hae_ja_selaa_row['selite'] == 'B') {
+						if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 							echo "</label>";
 						}
 
@@ -1117,13 +1120,13 @@
 						echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 						echo "<tr><th>";
 
-						if ($hae_ja_selaa_row['selite'] == 'B') {
+						if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 							echo "<label>";
 						}
 
 						echo t("Mallitarkenne");
 
-						if ($hae_ja_selaa_row['selite'] == 'B') {
+						if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 							echo "</label>";
 						}
 
@@ -1344,8 +1347,9 @@
 
 			// N‰ytet‰‰n parametrit jos ollaan valittu osasto tai  tuoteryhm‰ tai rajattu segmenteill‰
 			if ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen != "") {
+
 				if ($kukarow["extranet"] == "" and $verkkokauppa == "") {
-					if ($poistetut == '') {
+					if (!isset($poistetut) or $poistetut == '') {
 						$poislisa_mulsel = " and tuote.status != 'P' ";
 					}
 				}
@@ -1406,13 +1410,13 @@
 
 					echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'><tr><th>";
 
-					if ($hae_ja_selaa_row['selite'] == 'B') {
+					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 						echo "<label>";
 					}
 
 					echo t_avainsana("PARAMETRI", "", " and avainsana.selite='$parametri'", "", "", "selitetark");
 
-					if ($hae_ja_selaa_row['selite'] == 'B') {
+					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 						echo "</label>";
 					}
 
@@ -1424,7 +1428,7 @@
 						echo " multiple='multiple' size='7' style='width: 100%;' ";
 					}
 
-					if ($hae_ja_selaa_row['selite'] == 'B') {
+					if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
 						echo " style='width: 170px;' ";
 					}
 

@@ -1221,32 +1221,34 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							if ($otsikko == 'OLETUS_ASIAKAS' and $rivi[$r] != '') {
 								$xquery = "	SELECT tunnus
 											FROM asiakas
-											WHERE yhtio='$kukarow[yhtio]' and tunnus = '$rivi[$r]'";
+											WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$rivi[$r]'";
 								$xresult = mysql_query($xquery) or pupe_error($xquery);
 
 								if (mysql_num_rows($xresult) == 0) {
-
-									$x2query = "SELECT tunnus
+									$xquery = "	SELECT tunnus
 												FROM asiakas
-												WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$rivi[$r]'";
-									$x2result = mysql_query($x2query) or pupe_error($x2query);
+												WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$rivi[$r]'";
+									$xresult = mysql_query($xquery) or pupe_error($xquery);
+								}
 
-									if (mysql_num_rows($x2result) == 0) {
-										echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikko = $rivi[$r]<br>";
-										$hylkaa++; // ei päivitetä tätä riviä
-									}
-									elseif (mysql_num_rows($x2result) > 1) {
-										echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '$rivi[$r]' ".t("löytyi monia! Riviä ei päivitetty/lisätty")."! $otsikko = $rivi[$r]<br>";
-										$hylkaa++; // ei päivitetä tätä riviä
-									}
-									else {
-										$x2row = mysql_fetch_array($x2result);
-										$rivi[$r] = $x2row['tunnus'];
-									}
+								if (mysql_num_rows($xresult) == 0) {
+									$xquery = "	SELECT tunnus
+												FROM asiakas
+												WHERE yhtio = '$kukarow[yhtio]' and asiakasnro = '$rivi[$r]'";
+									$xresult = mysql_query($xquery) or pupe_error($xquery);
+								}
+
+								if (mysql_num_rows($xresult) == 0) {
+									echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikko = $rivi[$r]<br>";
+									$hylkaa++; // ei päivitetä tätä riviä
+								}
+								elseif (mysql_num_rows($xresult) > 1) {
+									echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '$rivi[$r]' ".t("löytyi monia! Riviä ei päivitetty/lisätty")."! $otsikko = $rivi[$r]<br>";
+									$hylkaa++; // ei päivitetä tätä riviä
 								}
 								else {
-									$xrow = mysql_fetch_array($xresult);
-									$rivi[$r] = $xrow['tunnus'];
+									$x2row = mysql_fetch_array($xresult);
+									$rivi[$r] = $x2row['tunnus'];
 								}
 							}
 						}

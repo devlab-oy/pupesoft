@@ -343,7 +343,7 @@
 				$alvquery = "   SELECT tunnus
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
-								and otunnus in ($tunnukset)
+								and otunnus in ($lasrow[tunnus])
 								and tyyppi  = 'L'
 								and alv >= 600";
 				$alvresult = mysql_query($alvquery) or pupe_error($alvquery);

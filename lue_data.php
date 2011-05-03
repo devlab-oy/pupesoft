@@ -465,6 +465,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$chpiiri			= '';
 			$chminkpl			= 0;
 			$chmaxkpl			= 0;
+			$chalennuslaji		= 0;
 			$chalkupvm 			= '0000-00-00';
 			$chloppupvm 		= '0000-00-00';
 			$and 				= '';
@@ -1210,6 +1211,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							if ($otsikko == 'MAXKPL' and (int) $rivi[$r] > 0) {
 								$chmaxkpl = (int) $rivi[$r];
 							}
+
+							if ($otsikko == 'ALENNUSLAJI' and (int) $rivi[$r] > 0) {
+								$chalennuslaji = (int) $rivi[$r];
+							}
 						}
 
 						//tarkistetaan kuka juttuja
@@ -1336,14 +1341,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					if ($chytunnus != '') {
 						$and .= " and ytunnus = '$chytunnus'";
 					}
-					if ($chryhma != '') {
-						$and .= " and ryhma = '$chryhma'";
-					}
 					if ($chasiakas > 0) {
 						$and .= " and asiakas = '$chasiakas'";
-					}
-					if ($chtuoteno != '') {
-						$and .= " and tuoteno = '$chtuoteno'";
 					}
 					if ($chsegmentti > 0) {
 						$and .= " and asiakas_segmentti = '$chsegmentti'";
@@ -1351,11 +1350,26 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					if ($chpiiri != '') {
 						$and .= " and piiri = '$chpiiri'";
 					}
+
+					if ($chryhma != '') {
+						$and .= " and ryhma = '$chryhma'";
+					}
+					if ($chtuoteno != '') {
+						$and .= " and tuoteno = '$chtuoteno'";
+					}
+
 					if ($chminkpl != 0) {
 						$and .= " and minkpl = '$chminkpl'";
 					}
 					if ($chmaxkpl != 0) {
 						$and .= " and maxkpl = '$chmaxkpl'";
+					}
+
+					if ($chalennuslaji == 0) {
+						$and .= " and alennuslaji = '1'";
+					}
+					elseif ($chalennuslaji != 0) {
+						$and .= " and alennuslaji = '$chalennuslaji'";
 					}
 
 					$and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";

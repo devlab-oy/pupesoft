@@ -10,13 +10,13 @@
 
 	if (mysql_field_name($result, $i) == "piiri") {
 		$preq = "	SELECT avainsana.selite piiri, avainsana.selitetark selitetark
-					FROM avainsana 
+					FROM avainsana
 					WHERE  avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
 		$preres = mysql_query($preq) or pupe_error($preq);
-		
+
 		$ulos = "<td><select id='piiri' name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Ei piiriä")."</option>";
-				
+
 		while ($srow = mysql_fetch_array($preres)) {
 			$sel = '';
 			if ($trow[$i] == $srow["piiri"]) {
@@ -24,7 +24,7 @@
 			}
 			$ulos .= "<option value='$srow[piiri]' $sel>$srow[selitetark]</option>";
 		}
-		
+
 		$ulos .= "</select></td>\n";
 		$jatko = 0;
 	}
@@ -144,4 +144,20 @@
 		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "alennuslaji") {
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos = "<td><select name='{$nimi}'>";
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			$ulos .= "<option value = '$alepostfix' {$sel[$alepostfix]}>".t("Alennus")." $alepostfix</option>";
+		}
+
+		$ulos .= "</select></td>\n";
+		$jatko = 0;
+	}
+
 ?>

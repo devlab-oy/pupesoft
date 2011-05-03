@@ -2,11 +2,30 @@
 
 if (!function_exists("pupe_query")) {
 	function pupe_query($query, $link = NULL) {
+
+		global $pupe_query_debug;
+
+		// Jos haluat seurata queryjä ja niiden aikoja, laita tähän aika sekunneista mitä suuremma queryt näytetään. esim: $pupe_query_debug = 0.0001
+		$pupe_query_debug = 0;
+
+		if ($pupe_query_debug > 0) {
+			$timeparts = explode(" ", microtime());
+			$starttime = $timeparts[1].substr($timeparts[0], 1);
+		}
+
 		if (is_resource($link)) {
 			$res = mysql_query($query, $link) or pupe_error($query);
 		}
 		else {
 			$res = mysql_query($query) or pupe_error($query);
+		}
+
+		if ($pupe_query_debug > 0) {
+			$timeparts = explode(" ",microtime());
+			$endtime = $timeparts[1].substr($timeparts[0], 1);
+			$aika = round($endtime-$starttime, 4);
+			$GLOBALS["aika_debug_array"][] = $aika;
+			$GLOBALS["quer_debug_array"][] = $query;
 		}
 
 		return $res;
@@ -8122,7 +8141,7 @@ if (!function_exists("t_avainsana")) {
 			$kielilisa = "selitetark";
 		}
 
-		if (stripos($wherelisa, "ORDER BY") === FALSE) {
+		if ($where == "" and stripos($wherelisa, "ORDER BY") === FALSE) {
 			$query = "	SELECT distinct selite
 						FROM avainsana
 						WHERE $yhtiolisa

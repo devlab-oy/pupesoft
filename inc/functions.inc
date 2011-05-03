@@ -11934,4 +11934,146 @@ if (!function_exists("kopioi_tilausrivi")) {
 	}
 }
 
+
+if (!function_exists("hae_hyvityshinta")) {
+	function hae_hyvityshinta($liitostunnus, $tuoteno, $kpl) {
+		global $kukarow;
+
+		$kpl = abs($kpl);
+		$laskuri = 0;
+		$palautus = array();
+		$tilausrivit = array();
+
+		// Haetaan tuotteen tiedot
+		$status =  "	SELECT *
+						FROM tuote
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tuoteno = '$tuoteno'";
+		$tuoteres = pupe_query($status);
+		$tuoterow = mysql_fetch_assoc($tuoteres);
+
+		// Haetaan asiakkaan laskutetut/toimitetut veloitusrivit + toisella queryll‰ hyvitysrivit
+		$query = "	(SELECT datediff(now(), if(tilausrivi.laskutettuaika='0000-00-00', now(), tilausrivi.laskutettuaika)) AS ika,
+					tilausrivi.hinta,
+					sum(tilausrivi.kpl + tilausrivi.varattu) kpl
+					FROM lasku
+					JOIN tilausrivi USE index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
+									AND tilausrivi.otunnus = lasku.tunnus
+									AND tilausrivi.tuoteno = '$tuoteno'
+									AND tilausrivi.varattu+tilausrivi.kpl > 0)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND lasku.liitostunnus = '$liitostunnus'
+					AND lasku.tila = 'L'
+					AND lasku.alatila IN ('D','X')
+					GROUP BY ika, hinta
+					HAVING kpl != 0)
+
+					UNION
+
+					(SELECT datediff(now(), if(tilausrivi.laskutettuaika='0000-00-00', now(), tilausrivi.laskutettuaika)) AS ika,
+					tilausrivi.hinta,
+					sum(tilausrivi.kpl  +tilausrivi.varattu) kpl
+					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_varattu)
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+						AND lasku.tunnus = tilausrivi.otunnus
+						AND lasku.liitostunnus = '$liitostunnus')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.tyyppi in ('0','L','M','V','W')
+					AND tilausrivi.tuoteno = '$tuoteno'
+					AND tilausrivi.varattu+tilausrivi.kpl < 0
+					GROUP BY ika, hinta
+					HAVING kpl != 0)
+
+					ORDER BY ika ASC, kpl ASC";
+		$viimhintares = pupe_query($query);
+
+		// Asiakas ei ole ostanut t‰t‰ tuotette -> palautuskielto
+		if (mysql_num_rows($viimhintares) == 0) {
+			$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+			return $palautus;
+		}
+
+		// echo "Syotetty: $kpl<br>";
+
+		while ($viimerow = mysql_fetch_assoc($viimhintares)) {
+
+			// Haluamme hyvitt‰‰ $kpl kappaletta
+			// Tilausrivill‰ (historiassa) on myyty $viimerow[kpl] kappaletta
+			// Asiakkaan kumulatiiviset myydyt kappaleet on $laskuri kappaletta
+
+			$laskuri += $viimerow['kpl'];
+
+			// echo "Kpl $viimerow[kpl] Kumulatiivinen_kpl $laskuri J‰ljell‰_kpl $kpl<br>";
+
+			if ($laskuri > 0 and $viimerow["kpl"] > 0) {
+
+				// Rivill‰ on v‰hemm‰n kuin halutaan hyvitt‰‰, joten hyvitet‰‰n vain rivin verra
+				if ($viimerow["kpl"] <= $kpl and $laskuri >= $kpl) {
+					$hyvitys_kpl = $viimerow["kpl"];
+				}
+				elseif ($laskuri <= $kpl) {
+					// Kumulatiivisesti on v‰hemm‰n kuin halutaan, joten hyvitet‰‰n vain kumulatiivinen arvo
+					$hyvitys_kpl = $laskuri;
+				}
+				else {
+					// Muussa tapauksessa hyvitet‰‰n niin paljon kun tarvitaan;
+					$hyvitys_kpl = $kpl;
+				}
+
+				// Lis‰t‰‰n rivi
+				$tilausrivit[] = array("ika" => $viimerow['ika'], "hinta" => $viimerow['hinta'], "kpl" => $hyvitys_kpl);
+
+				// V‰hennet‰‰n kumulatiivisesta saldosta sek‰ j‰ljell‰ olevasta m‰‰r‰tst‰ t‰m‰ rivi
+				$laskuri -= $hyvitys_kpl;
+				$kpl -= $hyvitys_kpl;
+				// echo "** Hyvitet‰‰n: $hyvitys_kpl J‰ljell‰_kpl $kpl<br>";
+			}
+
+		}
+
+		// Jos lˆytyi v‰hemm‰n myyntej‰ kun asiakas on palauttamassa -> palautuskielto
+		if ($laskuri < $kpl) {
+			$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+			// echo "** Palautuskielto: $kpl<br>";
+		}
+
+		foreach ($tilausrivit as $tilausrivi_index => $tilausrivi_arvo) {
+
+			unset($ale);
+			unset($kommentti);
+
+			$sql = "SELECT tuote_kentta, tuote_arvo, aika_ostosta, rokotusprosentti, palautuskielto, prioriteetti, rokotusselite
+					FROM hyvityssaannot
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND (aika_ostosta > '$tilausrivi_arvo[ika]' or aika_ostosta = 0)
+					ORDER BY prioriteetti, tunnus";
+			$result = pupe_query($sql);
+
+			while ($rivi = mysql_fetch_array($result)) {
+
+				if ($rivi["tuote_kentta"] == "") {
+					$ale = $rivi["rokotusprosentti"];
+					$kommentti = $rivi["rokotusselite"];
+					break;
+				}
+				elseif ($rivi["tuote_kentta"] != "" and $tuoterow[$rivi["tuote_kentta"]] == $rivi["tuote_arvo"]) {
+					$ale = $rivi["rokotusprosentti"];
+					$kommentti = $rivi["rokotusselite"];
+					break;
+				}
+			}
+
+			// Jos ei lˆytynyt yht‰‰n hyvityssaantˆj‰ -> palautuskielto
+			if (!isset($ale)) {
+				$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+			}
+			else {
+				$palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => $tilausrivi_arvo['hinta'], "ale" => $ale, "kommentti" => $kommentti, "palautuskielto" => "");
+			}
+		}
+
+		return $palautus;
+	}
+}
+
 ?>

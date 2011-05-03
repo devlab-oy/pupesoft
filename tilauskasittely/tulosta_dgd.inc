@@ -27,7 +27,7 @@ if (!function_exists('alku_dgd')) {
 		$pdf->pages[$sivu]->drawText($yhtiorow["postino"]." ".$yhtiorow["postitp"], mm_pt(15), mm_pt(254), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["maa"], mm_pt(15), mm_pt(250), 'LATIN1');
 
-		$pdf->pages[$sivu]->drawText($laskurow["nimi"], mm_pt(15), mm_pt(242), 'LATIN1');
+		$pdf->pages[$sivu]->drawText($laskurow["toim_nimi"], mm_pt(15), mm_pt(242), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($laskurow["osoite"], mm_pt(15), mm_pt(238), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($laskurow["postino"]." ".$laskurow["postitp"], mm_pt(15), mm_pt(234), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($laskurow["maa"], mm_pt(15), mm_pt(230), 'LATIN1');
@@ -44,7 +44,7 @@ if (!function_exists('alku_dgd')) {
 		$query = "	SELECT nimi
 					FROM kuka
 					WHERE yhtio	= '$kukarow[yhtio]'
-					and kuka 	= '$laskurow[myyja]'";
+					and tunnus 	= '$laskurow[myyja]'";
 		$nimires = pupe_query($query);
 		$nimirow = mysql_fetch_assoc($nimires);
 

@@ -105,7 +105,6 @@
 	$x = array();
 	if ($yhteensa != '')				$x[]='1'; // Postiennakko
 	if ($rakir_row['merahti'] != 'K')	$x[]='3'; // Maksaja muu kuin lähettäjä
-	if (count($vakit) > 0)				$x[]='4'; // Erilliskäsiteltävä
 	if ($toitarow['lauantai'] != '')	$x[]='6'; // lauantaijakelu
 	if ($toitarow['kuljyksikko'] != '')	$x[]='7'; // kuljetusyksikkökuljetus
 

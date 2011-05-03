@@ -446,7 +446,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	if (isset($vakit) and $vakit != "") {
 		$salakalapala -= 5;
-		$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), "VAK: ".$vakit, $firstpage, $kirj);
+		list($ff_string, $ff_font) = pdf_fontfit("VAK: $vakit", 400, $pdf, $otsik);
+		$pdf->draw_text(mm_pt(5), mm_pt($salakalapala), $ff_string, $firstpage, $ff_font);
 	}
 
 	//kolliluku

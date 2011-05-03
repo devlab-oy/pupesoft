@@ -2674,4 +2674,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "myynnin_alekentat") {
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos .= "<option value = '1'>".t("Myynniss‰ k‰ytet‰‰n yht‰ alennuskentt‰‰")."</option>";
+		#$ulos .= "<option value = '2'>".t("Myynniss‰ k‰ytet‰‰n kahta alennuskentt‰‰")."</option>";
+		#$ulos .= "<option value = '3'>".t("Myynniss‰ k‰ytet‰‰n kolmea alennuskentt‰‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

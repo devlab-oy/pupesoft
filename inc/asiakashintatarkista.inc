@@ -249,21 +249,18 @@ if(!function_exists("asiakashintatarkista")) {
 			}
 		}
 
-		if (($chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'tunnus' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
+		if (($chasiakas_ryhma != '' or $chytunnus != '' or $chpiiri != '' or $chsegmentti != '' or $chastunn != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'tunnus' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
 
 			$and = '';
-			if ($chasiakas_ryhma != '') {
-				$and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
-			}
-			if ($chytunnus != '') {
-				$and .= " and ytunnus = '$chytunnus'";
-			}
-			if ($chryhma != '') {
-				$and .= " and ryhma = '$chryhma'";
-			}
-			if ($chtuoteno != '') {
-				$and .= " and tuoteno = '$chtuoteno'";
-			}
+
+			if ($chasiakas_ryhma != '') $and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
+			if ($chytunnus != '') 		$and .= " and ytunnus = '$chytunnus'";
+			if ($chpiiri != '') 		$and .= " and piiri = '$chpiiri'";
+			if ($chsegmentti > 0) 		$and .= " and asiakas_segmentti = '$chsegmentti'";
+			if ($chastunn > 0) 			$and .= " and asiakas = '$chastunn'";
+
+			if ($chryhma != '') 		$and .= " and ryhma = '$chryhma'";
+			if ($chtuoteno != '') 		$and .= " and tuoteno = '$chtuoteno'";
 
 			$aquery = "	SELECT ytunnus
 						FROM asiakashinta

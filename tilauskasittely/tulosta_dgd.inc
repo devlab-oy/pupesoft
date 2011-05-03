@@ -44,7 +44,7 @@ if (!function_exists('alku_dgd')) {
 		$query = "	SELECT nimi
 					FROM kuka
 					WHERE yhtio	= '$kukarow[yhtio]'
-					and kuka 	= '$laskurow[laatija]'";
+					and kuka 	= '$laskurow[myyja]'";
 		$nimires = pupe_query($query);
 		$nimirow = mysql_fetch_assoc($nimires);
 

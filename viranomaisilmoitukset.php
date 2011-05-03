@@ -19,7 +19,6 @@ if ($tee == "VSRALVKK_VANHA" or $tee == 'VSRALVKK_VANHA_erittele') {
 }
 elseif ($tee == "VSRALVKK_UUSI" or $tee == 'VSRALVKK_UUSI_erittele') {
 	include ('raportit/alv_laskelma_uusi.php');
-	alvlaskelma($kk,$vv);
 }
 
 if ($tee == "VSRALVYV") {

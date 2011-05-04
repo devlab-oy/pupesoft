@@ -3396,14 +3396,40 @@ if ($tee == '') {
 		}
 
 		//K‰ytt‰j‰n syˆtt‰m‰ hinta ja ale ja netto, pit‰‰ s‰ilˆ‰ jotta tuotehaussakin voidaan syˆtt‰‰ n‰m‰
-		$kayttajan_hinta	= $hinta;
-		$kayttajan_ale		= $ale;
-		$kayttajan_netto 	= $netto;
-		$kayttajan_var		= $var;
-		$kayttajan_kpl		= $kpl;
-		$kayttajan_alv		= $alv;
-		$kayttajan_paikka	= $paikka;
-		$lisatty 			= 0;
+		$kayttajan_hinta					= $hinta;
+		$kayttajan_ale						= $ale;
+		$kayttajan_netto 					= $netto;
+		$kayttajan_var						= $var;
+		$kayttajan_kpl						= $kpl;
+		$kayttajan_alv						= $alv;
+		$kayttajan_paikka					= $paikka;
+		$lisatty 							= 0;
+		$hyvityssaanto_indeksi 				= 0;
+		$hyvityssaanto_hinta_array 			= "";
+		$hyvityssaanto_ale_array 			= "";
+		$hyvityssaanto_kpl_array 			= "";
+		$hyvityssaanto_kommentti_array 		= "";
+		$hyvityssaanto_palautuskielto_array	= "";
+
+		// Jos k‰ytet‰‰n reklamaatioiden hinnoittelus‰‰ntˆ‰ ja k‰ytt‰j‰ ei ole v‰kisinhyv‰ksynyt rivi‰
+		if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $kayttajan_var != "H") {			
+			$hyvityssaanto_hinta_array = array();
+			$hyvityssaanto_ale_array = array();
+			$hyvityssaanto_kpl_array = array();
+			$hyvityssaanto_kommentti_array = array();
+			$hyvityssaanto_palautuskielto_array = array();
+			
+			$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
+
+			foreach ($palautus as $index => $arvot) {
+				$tuoteno_array[] = $palautus[$index]["tuoteno"];
+				$hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];
+				$hyvityssaanto_ale_array[$index][$tuoteno] = $palautus[$index]["ale"];
+				$hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;
+				$hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];
+				$hyvityssaanto_palautuskielto_array[$index][$tuoteno] = $palautus[$index]["palautuskielto"];
+			}
+		}
 
 		// Valmistuksissa haetaan perheiden perheit‰ mukaan valmistukseen!!!!!! (vain kun rivi lis‰t‰‰n $rivitunnus == 0)
 		if ($laskurow['tila'] == 'V' and $var != "W" and $yhtiorow["rekursiiviset_reseptit"] == "Y" and (int) $rivitunnus == 0) {
@@ -3502,14 +3528,20 @@ if ($tee == '') {
 			$jtkielto = $laskurow['jtkielto'];
 
 			//Tehd‰‰n muuttujaswitchit
-			if (is_array($hinta_array)) {
+			if (is_array($hyvityssaanto_hinta_array)) {
+				$hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
+			}
+			elseif (is_array($hinta_array)) {
 				$hinta = $hinta_array[$tuoteno];
 			}
 			else {
 				$hinta = $kayttajan_hinta;
 			}
 
-			if (is_array($ale_array)) {
+			if (is_array($hyvityssaanto_ale_array)) {
+				$ale = $hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno];
+			}
+			elseif (is_array($ale_array)) {
 				$ale = $ale_array[$tuoteno];
 			}
 			else {
@@ -3530,7 +3562,10 @@ if ($tee == '') {
 				$var = $kayttajan_var;
 			}
 
-			if (is_array($kpl_array)) {
+			if (is_array($hyvityssaanto_kpl_array)) {
+				$kpl = $hyvityssaanto_kpl_array[$hyvityssaanto_indeksi][$tuoteno];
+			}
+			elseif (is_array($kpl_array)) {
 				$kpl = $kpl_array[$tuoteno];
 			}
 			else {
@@ -3550,15 +3585,28 @@ if ($tee == '') {
 			else {
 				$paikka = $kayttajan_paikka;
 			}
-
-			//Extranettaajat eiv‰t voi hyvitell‰ itselleen tuotteita
-			if ($kukarow["extranet"] != '') {
+			
+			if ($kukarow["extranet"] != '' and $toim == "EXTRANET_REKLAMAATIO") {
+				$kpl = abs($kpl)*-1;
+			}
+			elseif ($kukarow["extranet"] != '') {
 				$kpl = abs($kpl);
 			}
 
-			if (isset($kommentti_array[$tuoteno])) {
+			if (is_array($hyvityssaanto_kommentti_array)) {
+				$kommentti = $hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno];
+			}
+			elseif (isset($kommentti_array[$tuoteno])) {
 				$kommentti = $kommentti_array[$tuoteno];
 			}
+
+			if (is_array($hyvityssaanto_palautuskielto_array)) {
+				$hyvityssaannon_palautuskielto =  $hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi][$tuoteno];
+			}
+			else {
+				$hyvityssaannon_palautuskielto = "";
+			}
+
 
 			$query	= "	SELECT *
 						from tuote
@@ -3644,6 +3692,7 @@ if ($tee == '') {
 			$kpl 	= '';
 			$alv 	= '';
 			$paikka	= '';
+			$hyvityssaanto_indeksi++;
 			$lisatty++;
 		}
 

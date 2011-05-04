@@ -1549,6 +1549,7 @@
 			$toim == "asiakkaan_avainsanat" or
 			$toim == "rahtisopimukset" or
 			$toim == "tilikaudet" or
+			$toim == "hyvityssaannot" or			
 			($toim == "liitetiedostot" and $poistolukko == "") or
 			($toim == "tuote" and $poistolukko == "") or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {

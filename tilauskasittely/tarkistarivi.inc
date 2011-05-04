@@ -12,7 +12,7 @@
 	$tres	= pupe_query($tquery);
 	$trow 	= mysql_fetch_assoc($tres); // haetaan tuotteen tiedot..
 
-	if ($yhtiorow["korvaavat_hyvaksynta"] != "" and $alkupera_trow["tuoteno"] != $row["tuoteno"] and $row["var2"] != "OK" and $korvattiin_korvaavalla == "HIIOHEI!") {
+	if ($yhtiorow["korvaavat_hyvaksynta"] != "" and $alkupera_trow["tuoteno"] != $row["tuoteno"] and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
 		$varaosavirhe .= t("HUOM: tämä on korvaava tuote, haluatko hyväksyä?")."<br>";
 		$riviok++;
 		$tilausok++;
@@ -27,7 +27,13 @@
 		$tilausok++;
 	}
 
-	if ($row["hinta"] == 0 and $row["var2"] != "OK" and $row["tyyppi"] != "V" and strtoupper($trow["tuotetyyppi"]) != 'R' and strtoupper($trow["tuotetyyppi"]) != 'M' and $toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
+	if ($row["var2"] == "PK" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") AND $yhtiorow['reklamaation_hinnoittelu'] == 'K') {
+		$varaosavirhe .= t("Palautuskielto!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
+
+	if ($row["hinta"] == 0 and !in_array($row["var2"], array("OK", "PK")) and $row["tyyppi"] != "V" and strtoupper($trow["tuotetyyppi"]) != 'R' and strtoupper($trow["tuotetyyppi"]) != 'M' and $toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
 		if (($row['perheid'] == 0 and $trow['ei_saldoa'] == '') or ($row['perheid'] != 0 and $trow['ei_saldoa'] == '' and $row['perheid'] == $row['tunnus'])) {
 			$varaosavirhe .= t("HUOM: Hinta puuttuu!")."<br>";
 			$riviok++;
@@ -158,7 +164,7 @@
 		$tilausok++;
 	}
 
-	if ($kukarow["extranet"] == "" and in_array($trow["status"], array("P","X")) and $row["var2"] != "OK") {
+	if ($kukarow["extranet"] == "" and in_array($trow["status"], array("P","X")) and !in_array($row["var2"], array("OK", "PK"))) {
 		$varaosavirhe .= t("HUOM: Tämä on poistuva tuote!")."<br>";
 		$riviok++;
 	}
@@ -239,7 +245,7 @@
 		$varesult = pupe_query($query);
 		$varow = mysql_fetch_assoc($varesult);
 
-		if ($varow["tyyppi"] == "V" and $laskurow["varasto"] != $varow["tunnus"] and $row["var2"] != "OK") {
+		if ($varow["tyyppi"] == "V" and $laskurow["varasto"] != $varow["tunnus"] and !in_array($row["var2"], array("OK", "PK"))) {
 			$varaosavirhe .= "HUOM: Tuote sijaitsee erikoisvarastossa!<br>";
 			$riviok++;
 			$tilausok++;
@@ -443,7 +449,7 @@
 						$paikat .= "' $sel title='$title'>$title</option>";
 
 						// jos toimitetaan erikoisvarastosta, niin käyttäjän pitää hyväksyä se
-						if ($alkurow['varasto'] != $laskurow["varasto"] and $tm_toimitustaparow["nouto"] == "" and $sel != '' and $row['var2'] != 'OK' and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
+						if ($alkurow['varasto'] != $laskurow["varasto"] and $tm_toimitustaparow["nouto"] == "" and $sel != '' and !in_array($row["var2"], array("OK", "PK")) and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
 
 							if ($alkurow['vakkoodi'] != '' and $alkurow['vakkoodi'] != '0') {
 								$varaosavirhe .= t("HUOM: VAK-tuotteita ei toimiteta erikoisvarastosta")."!<br/>";
@@ -757,7 +763,7 @@
 		$saako_hyvaksya = 0;
 	}
 
-	if (($row["var"] == 'J' or $row["var"] == 'P') and $row['tuoteno'] != '' and $row["var2"] != 'OK') {
+	if (($row["var"] == 'J' or $row["var"] == 'P') and $row['tuoteno'] != '' and !in_array($row["var2"], array("OK", "PK"))) {
 
 		//vastaavat tuotteet
 		$query  = "SELECT * FROM vastaavat WHERE tuoteno = '$row[tuoteno]' AND yhtio = '$kukarow[yhtio]'";

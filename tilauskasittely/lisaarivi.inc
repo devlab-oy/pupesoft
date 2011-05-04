@@ -1150,12 +1150,6 @@
 									$vanharivilaadittu = "now()";
 								}
 
-								if($toim == 'EXTRANET_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
-									$varattu = abs($varattu)*-1;
-									$tilattu = abs($tilattu)*-1;
-									$kpl2	 = abs($kpl2)*-1;
-								}
-
 								$query = "	INSERT into tilausrivi set
 											hyllyalue 		= '$myy_hyllyalue[$indeksi]',
 											hyllynro 		= '$myy_hyllynro[$indeksi]',
@@ -1191,6 +1185,10 @@
 
 								if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
 									$query .= ", keratty = 'saldoton', kerattyaika = now()";
+								}
+
+								if ($yhtiorow['reklamaation_hinnoittelu'] == 'K' and ($toim == "REKLAMAATIO"  or $toim == "EXTRANET_REKLAMAATIO") and $hyvityssaannon_palautuskielto == "X") {
+									$query .= ", var2 = 'PK'";
 								}
 
 								$result = pupe_query($query);
@@ -1416,7 +1414,7 @@
 	// tai jos tullaan niin, ett‰ var-kent‰ss‰ on J tai P tai jotain
 	if ($toimittamatta > 0 or trim($var) != '' or $laskurow['tila'] == 'O') {
 
-		if ($lisaarivi_debug==1) echo "Menn‰‰n puutehaaraan: $tuoteno hinta $hinta<br>";
+		if ($lisaarivi_debug==1) echo "<br>Menn‰‰n puutehaaraan: $tuoteno hinta $hinta toimittamatta: $toimittamatta var: $var laskuntila: $laskurow[tila]<br>";
 
 		//Tyhjennet‰‰n apumuuttuja
 		if ($var == "Y")	{
@@ -1905,23 +1903,23 @@
 			// Jos ollaan tultu editilauksesta ja meill‰ on puute/jt, katsotaan onko t‰lle tuotteelle vastaavia ja pistet‰‰n ne kommenttiin
 			if ($kutsuja == "EDITILAUS" and ($var == "J" or $var == "P")) {
 				//vastaavat tuotteet
-				$query  = "	SELECT * 
-							FROM vastaavat 
+				$query  = "	SELECT *
+							FROM vastaavat
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tuoteno = '$trow[tuoteno]' 
+							AND tuoteno = '$trow[tuoteno]'
 							LIMIT 1";
 				$ediresult = pupe_query($query);
 
 				if (mysql_num_rows($ediresult) > 0) {
-					
+
 					$edivastaavattuotteet = "";
 					$vrow = mysql_fetch_array($ediresult);
 
-					$query = "	SELECT * 
-								FROM vastaavat 
-								WHERE yhtio = '$kukarow[yhtio]' 
-								AND id = '$vrow[id]' 
-								AND tuoteno <> '$trow[tuoteno]' 
+					$query = "	SELECT *
+								FROM vastaavat
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND id = '$vrow[id]'
+								AND tuoteno <> '$trow[tuoteno]'
 								ORDER BY jarjestys, tuoteno";
 					$edi2result = pupe_query($query);
 
@@ -1930,25 +1928,25 @@
 						list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"]);
 
 						if ($vmyytavissa > 0) {
-							$tvsql = "	SELECT * 
-										FROM tuote 
-										WHERE yhtio = '$kukarow[yhtio]' 
+							$tvsql = "	SELECT *
+										FROM tuote
+										WHERE yhtio = '$kukarow[yhtio]'
 										AND tuoteno = '$edirow[tuoteno]'";
 							$tvresult = pupe_query($tvsql);
 							$tvrow = mysql_fetch_assoc($tvresult);
 							$edivastaavattuotteet .= "$edirow[tuoteno] (".hintapyoristys($tvrow["myyntihinta"])." $laskurow[valkoodi] $vmyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")."), ";
 						}
 					}
-					
+
 					if ($edivastaavattuotteet != "") {
-						
+
 						if ($kommentti != "") {
 							 $edivastaavattuotteet_alku = "\n";
 						}
 						else {
 							$edivastaavattuotteet_alku = "";
 						}
-						
+
 						$edivastaavattuotteet = $edivastaavattuotteet_alku.t("Voit tilata vastaavaa tuotetta")." ".$edivastaavattuotteet;
 
 						// poistetaan viimeinen pilkku ja lis‰t‰‰n piste siisteyden lis‰‰miseksi.
@@ -2014,6 +2012,10 @@
 
 			if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
 				$query .= ", kerattyaika = now()";
+			}
+
+			if ($yhtiorow['reklamaation_hinnoittelu'] == 'K' and ($toim == "REKLAMAATIO"  or $toim == "EXTRANET_REKLAMAATIO") and $hyvityssaannon_palautuskielto == "X") {
+				$query .= ", var2 = 'PK'";
 			}
 
 			$result = pupe_query($query);

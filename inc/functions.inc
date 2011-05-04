@@ -2959,6 +2959,9 @@ if (!function_exists("alehinta")) {
 		REGEXP: if \(\$[^\[]*\["hinnastoon"\] == "V" and \(\$[^\[]*\["hintaperuste"\] > 13 or \$[^\[]*\["hintaperuste"\] === FALSE\) and \(\$[^\[]*\["aleperuste"\] > 12 or \$[^\[]*\["aleperuste"\] === FALSE\)\)
 		*/
 
+		// HUOM: VÄLIAIKAINEN TAAKSEPÄIN YHTEENSOPIVUUS!!!!!!
+		$ale = array("ale1" => $ale);
+
 		$aperuste 		= "";
 		$alehinta_alv 	= 0;
 		$hintaperuste	= FALSE;
@@ -3113,13 +3116,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3133,13 +3131,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3197,13 +3190,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3217,13 +3205,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3280,13 +3263,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3300,13 +3278,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3364,13 +3337,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3384,13 +3352,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3438,13 +3401,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3458,13 +3416,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3513,13 +3466,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3533,13 +3481,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3587,13 +3530,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3607,13 +3545,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3662,13 +3595,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3682,13 +3610,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3736,13 +3659,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3756,13 +3674,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3811,13 +3724,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3831,13 +3739,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3885,13 +3788,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3905,13 +3803,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -3960,13 +3853,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -3980,13 +3868,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -4034,13 +3917,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -4054,13 +3932,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -4109,13 +3982,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -4129,13 +3997,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -4183,13 +4046,8 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
-						}
-						else {
-							unset($ale);
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
 					}
 					else {
@@ -4203,13 +4061,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -4258,15 +4111,10 @@ if (!function_exists("alehinta")) {
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						if (is_array($ale)) {
-							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								unset($ale["ale".$alepostfix]);
-							}
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
 						}
-						else {
-							unset($ale);
-						}
-					}
+					} 
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
@@ -4278,13 +4126,8 @@ if (!function_exists("alehinta")) {
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							if (is_array($ale)) {
-								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-									unset($ale["ale".$alepostfix]);
-								}
-							}
-							else {
-								unset($ale);
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
 							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
@@ -4754,7 +4597,7 @@ if (!function_exists("alehinta")) {
 							and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
 							LIMIT 1";
-				$hresult = pupe_query($query);
+				$hresult = pupe_query($query); 
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow			= mysql_fetch_assoc($hresult);
@@ -4772,9 +4615,6 @@ if (!function_exists("alehinta")) {
 				$hintaperuste = 18;
 			}
 		}
-
-		// HUOM: VÄLIAIKAINEN TAAKSEPÄIN YHTEENSOPIVUUS!!!!!!
-		$ale = array("ale1" => $ale);
 
 		// Käydään läpi käsin syötetyt alennukset jos niitä on
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -4814,21 +4654,16 @@ if (!function_exists("alehinta")) {
 		// Jos joku aletasoista on tyhjä tai kokonaan settaamatta, niin lähdetään etsimään alennuksia
 		$jatka = FALSE;
 
-		if (is_array($ale)) {	
-			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-				if (isset($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] == '') {
-					// Jos ale on tyhjä niin unsetataan se
-					unset($ale["ale".$alepostfix]);
-					$jatka = TRUE;
-				}
-
-				if (!isset($ale["ale".$alepostfix])) {
-					$jatka = TRUE;
-				}
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			if (isset($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] == '') {
+				// Jos ale on tyhjä niin unsetataan se
+				unset($ale["ale".$alepostfix]);
+				$jatka = TRUE;
 			}
-		}
-		elseif (!isset($ale) or $ale == "") {
-			$jatka = TRUE;
+
+			if (!isset($ale["ale".$alepostfix])) {
+				$jatka = TRUE;
+			}
 		}
 
 		if ($jatka and $netto != 'N' and $netto != 'E') {

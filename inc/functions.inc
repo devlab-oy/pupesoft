@@ -3,12 +3,7 @@
 if (!function_exists("pupe_query")) {
 	function pupe_query($query, $link = NULL) {
 
-		global $pupe_query_debug;
-
-		// Jos haluat seurata queryjä ja niiden aikoja, laita tähän aika sekunneista mitä suuremma queryt näytetään. esim: $pupe_query_debug = 0.0001
-		$pupe_query_debug = 0;
-
-		if ($pupe_query_debug > 0) {
+		if ($GLOBALS["pupe_query_debug"] > 0) {
 			$timeparts = explode(" ", microtime());
 			$starttime = $timeparts[1].substr($timeparts[0], 1);
 		}
@@ -20,7 +15,7 @@ if (!function_exists("pupe_query")) {
 			$res = mysql_query($query) or pupe_error($query);
 		}
 
-		if ($pupe_query_debug > 0) {
+		if ($GLOBALS["pupe_query_debug"] > 0) {
 			$timeparts = explode(" ",microtime());
 			$endtime = $timeparts[1].substr($timeparts[0], 1);
 			$aika = round($endtime-$starttime, 4);
@@ -2381,7 +2376,7 @@ if (!function_exists("jalkilaske_valmistus")) {
 			$era_new_paikka = "";
 			unset($osatoimitus);
 
-			while ($prow = mysql_fetch_assoc ($presult)) {
+			while ($prow = mysql_fetch_assoc($presult)) {
 
 				if ($prow["tyyppi"] == 'W' or $prow["tyyppi"] == 'M') {
 					// Nämä ovat valmisteita
@@ -2532,7 +2527,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
-				$hrow       	= mysql_fetch_assoc ($hresult);
+				$hrow       	= mysql_fetch_assoc($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
@@ -2557,7 +2552,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
-				$hrow       	= mysql_fetch_assoc ($hresult);
+				$hrow       	= mysql_fetch_assoc($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
@@ -2589,7 +2584,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
-				$hrow			= mysql_fetch_assoc ($hresult);
+				$hrow			= mysql_fetch_assoc($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
@@ -2614,7 +2609,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
-				$hrow			= mysql_fetch_assoc ($hresult);
+				$hrow			= mysql_fetch_assoc($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
@@ -2644,7 +2639,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 	}
 }
 
-if (!function_exists("tuotteen_ostohinta")) { // jamppa säätää
+if (!function_exists("tuotteen_ostohinta")) {
 	function tuotteen_ostohinta ($laskurow, $trow, $kpl, $naytetaanko_netto = "") {
 		global $yhtiorow, $kukarow;
 
@@ -2694,7 +2689,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa säätää
 			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) != 0) {
-				$hrow       	= mysql_fetch_assoc ($hresult);
+				$hrow       	= mysql_fetch_assoc($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
@@ -2719,7 +2714,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa säätää
 			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) != 0) {
-				$hrow       	= mysql_fetch_assoc ($hresult);
+				$hrow       	= mysql_fetch_assoc($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
@@ -2744,7 +2739,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa säätää
 			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) != 0) {
-				$hrow			= mysql_fetch_assoc ($hresult);
+				$hrow			= mysql_fetch_assoc($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
@@ -2769,7 +2764,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa säätää
 			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) != 0) {
-				$hrow			= mysql_fetch_assoc ($hresult);
+				$hrow			= mysql_fetch_assoc($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
 				$valuutta		= $hrow["valkoodi"];
@@ -2786,7 +2781,7 @@ if (!function_exists("tuotteen_ostohinta")) { // jamppa säätää
 			$hresult = pupe_query($query);
 
 			if (mysql_num_rows($hresult) > 0) {
-				$hrow			= mysql_fetch_assoc ($hresult);
+				$hrow			= mysql_fetch_assoc($hresult);
 				$hinta 			= $hrow["ostohinta"];
 				$netto			= "";
 				$valuutta		= $hrow["valuutta"];
@@ -2896,6 +2891,40 @@ if (!function_exists("alv")) {
 	}
 }
 
+// Funkkari jolla tutkitaan onko joku ale vielä settaamatta
+if (!function_exists("jatka_ale")) {
+	function jatka_ale($ale) {
+		global $yhtiorow;
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			if (!isset($ale["ale".$alepostfix])) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+}
+
+// Funkkari jolla setataan löydetyt alennukset
+if (!function_exists("settaa_ale")) {
+	function settaa_ale($ale, $aleperuste, $aperuste, $hresult, $aleperuste_nro, $aleperuste_teksti) {
+		global $yhtiorow;
+
+		if (mysql_num_rows($hresult) > 0) {
+			while ($hrow = mysql_fetch_assoc($hresult)) {
+				if (!isset($ale["ale".$hrow["alennuslaji"]])) {
+					$aleperuste["ale".$hrow["alennuslaji"]] = $aleperuste_nro;
+					$ale["ale".$hrow["alennuslaji"]] = $hrow["alennus"];
+					$aperuste .= " $aleperuste_teksti (Aletaso: $hrow[alennuslaji]).";
+				}
+			}
+		}
+
+		return array($ale, $aleperuste, $aperuste);
+	}
+}
+
 if (!function_exists("alehinta")) {
 	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="") {
 		global $yhtiorow, $kukarow;
@@ -2907,14 +2936,14 @@ if (!function_exists("alehinta")) {
 		// $kpl tilatava määrä
 		// $netto = N jos halutaan nettohinta
 		// $hinta käyttäjän syöttämä hinta
-		// $ale käyttäjän syöttämä ale
+		// $ale käyttäjän syöttämä ale - array
 		// $debug (jos 1 niin näytetään tulos)
 		// if ($yhtiorow["asiakashinta_netto"] == "") jos kenttä on tyhjä niin asiakashinnat ovat nettohintoja, muuten ovat ei-nettohintoja
 
 		// Tulokset on:
 		// $hinta (hinta)
 		// $netto onko hinta nettohinta vai ei
-		// $ale (aleprosentti)
+		// $ale - array jossa alennuprosentteja (aleprosentti)
 		// $aperuste (selkokielinen teksti mihin päädyttiin)
 		// $alehinta_alv jos on joku erikoialv tälle hinnaston tuotteelle
 		// $alehinta_val hinnan valuutta
@@ -2927,6 +2956,7 @@ if (!function_exists("alehinta")) {
 
 		/*
 		HUOM: tarkista kaikki nämä koodit "if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {" kun muutat ale ja hintaperusteita!
+		REGEXP: if \(\$[^\[]*\["hinnastoon"\] == "V" and \(\$[^\[]*\["hintaperuste"\] > 13 or \$[^\[]*\["hintaperuste"\] === FALSE\) and \(\$[^\[]*\["aleperuste"\] > 12 or \$[^\[]*\["aleperuste"\] === FALSE\)\)
 		*/
 
 		$aperuste 		= "";
@@ -2986,7 +3016,10 @@ if (!function_exists("alehinta")) {
 		}
 
 		// haetaan asiakkaan tiedot
-		$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+		$query = "	SELECT *
+					from asiakas
+					where yhtio = '$kukarow[yhtio]'
+					and tunnus = '$laskurow[liitostunnus]'";
 		$alhire = pupe_query($query);
 
 		if (mysql_num_rows($alhire) == 1) {
@@ -3022,8 +3055,9 @@ if (!function_exists("alehinta")) {
 			// nettohinta jos netto-kentässä tulee N tai E
 			if ($netto == 'N' or $netto == 'E') {
 				$aperuste .= "Käyttäjän antama nettohinta ";
-
-				$ale = 0;
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ale["ale".$alepostfix] = 0;
+				}
 			}
 			else {
 				$aperuste .= "Käyttäjän antama hinta ";
@@ -3069,31 +3103,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3133,31 +3177,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3196,31 +3250,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3260,31 +3324,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3314,31 +3388,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3369,31 +3453,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3423,31 +3517,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3478,31 +3582,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3532,31 +3646,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3587,31 +3711,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3641,31 +3775,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3696,31 +3840,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3750,31 +3904,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3805,31 +3969,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3859,31 +4033,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -3914,31 +4098,41 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow = mysql_fetch_assoc ($hresult);
+					$hrow = mysql_fetch_assoc($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
 						$netto 	= $hrow["laji"];
-						$ale 	= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 					}
 					elseif ($hrow["laji"] == "B") {
 						$netto	= '';
-						$ale	= '';
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							unset($ale["ale".$alepostfix]);
+						}
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
 							$netto	= 'E';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 						//Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
 						elseif ($yhtiorow["asiakashinta_netto"] == "B") {
 							$netto	= '';
-							$ale	= '';
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								unset($ale["ale".$alepostfix]);
+							}
 						}
 						//Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
 						else {
 							$netto	= 'N';
-							$ale	= 0;
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale["ale".$alepostfix] = 0;
+							}
 						}
 					}
 
@@ -4005,7 +4199,9 @@ if (!function_exists("alehinta")) {
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
 						$hinta 		= 0.01;
-						$ale		= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 						$netto		= "";
 						$aperuste 	.= "Katemyyntihinta (kokoepäkurantti). ";
 						$hintaperuste = 10;
@@ -4016,7 +4212,9 @@ if (!function_exists("alehinta")) {
 						else
 							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
 
-						$ale		= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 						$netto		= "";
 						$aperuste 	.= "Katemyyntihinta. ";
 						$hintaperuste = 10;
@@ -4067,21 +4265,27 @@ if (!function_exists("alehinta")) {
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
 						$hinta 		= 0.01;
-						$ale		= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 						$netto		= "";
-						$aperuste 	.= "Asiakasryhmä Katemyyntihinta (kokoepäkurantti). ";
+						$aperuste 	.= "Asiakassegmentin Katemyyntihinta (kokoepäkurantti). ";
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
-						if ($yhtiorow['alv_kasittely']=='')
+						if ($yhtiorow['alv_kasittely'] == '') {
 							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
-							// bug ?
-						else
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
+						}
+						else {
+							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
+						}
 
-						$ale		= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
+
 						$netto		= "";
-						$aperuste 	.= "Asiakassegmentin Katemyynnin nettohinta. ";
+						$aperuste 	.= "Asiakassegmentin Katemyyntihinta. ";
 						$hintaperuste = 11;
 					}
 				}
@@ -4130,19 +4334,25 @@ if (!function_exists("alehinta")) {
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
 						$hinta 		= 0.01;
-						$ale		= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 						$netto		= "";
 						$aperuste 	.= "Asiakasryhmä Katemyyntihinta (kokoepäkurantti). ";
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
-						if ($yhtiorow['alv_kasittely']=='')
+						if ($yhtiorow['alv_kasittely'] == '') {
 							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
-						else
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
+						}
+						else {
+							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
+						}
 
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 
-						$ale		= 0;
 						$netto		= "";
 						$aperuste 	.= "Asiakasryhmä Katemyyntihinta. ";
 						$hintaperuste = 12;
@@ -4193,18 +4403,25 @@ if (!function_exists("alehinta")) {
 					// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
 					if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
 						$hinta 		= 0.01;
-						$ale		= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
 						$netto		= "";
-						$aperuste 	.= "Asiakasryhmä Katemyyntihinta (kokoepäkurantti). ";
+						$aperuste 	.= "Asiakaspiirin Katemyyntihinta (kokoepäkurantti). ";
 						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
-						if ($yhtiorow['alv_kasittely']=='')
+						if ($yhtiorow['alv_kasittely'] == '') {
 							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);
-						else
-							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
+						}
+						else {
+							$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))), $yhtiorow['hintapyoristys']);
+						}
 
-						$ale		= 0;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale".$alepostfix] = 0;
+						}
+
 						$netto		= "";
 						$aperuste 	.= "Asiakaspiirin Katemyyntihinta. ";
 						$hintaperuste = 13;
@@ -4247,7 +4464,7 @@ if (!function_exists("alehinta")) {
 					//Jos aleprossa  = 999.99 haetaan tuotteen myymälähinta myyntihinnan tilalle
 					$query = "SELECT myymalahinta, alv FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]'";
 					$myymresult = pupe_query($query);
-					$myymrow = mysql_fetch_assoc ($myymresult);
+					$myymrow = mysql_fetch_assoc($myymresult);
 
 					if ($alehinta_alv != "") $myymrow["alv"] = $alehinta_alv;
 
@@ -4259,7 +4476,11 @@ if (!function_exists("alehinta")) {
 							$hinta = $myymrow["myymalahinta"];
 						}
 					}
-					$ale		= 0;
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						$ale["ale".$alepostfix] = 0;
+					}
+
 					$netto		= "";
 					$aperuste 	.= "Myymälähinta. ";
 					$hintaperuste = 14;
@@ -4284,7 +4505,7 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow       	= mysql_fetch_assoc ($hresult);
+					$hrow       	= mysql_fetch_assoc($hresult);
 					$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
 					$netto			= $hrow["laji"];
 					$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
@@ -4325,7 +4546,9 @@ if (!function_exists("alehinta")) {
 				$hinta 			= $trow['nettohinta'];
 				$aperuste 		.= "Tuotteen nettohinta. ";
 				$netto 			= 'N';
-				$ale			= 0;
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ale["ale".$alepostfix] = 0;
+				}
 				$hintaperuste = 16;
 			}
 
@@ -4347,7 +4570,7 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$hrow			= mysql_fetch_assoc ($hresult);
+					$hrow			= mysql_fetch_assoc($hresult);
 					$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
 					$netto			= $hrow["laji"];
 					$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
@@ -4390,39 +4613,63 @@ if (!function_exists("alehinta")) {
 			}
 		}
 
-		if (substr($ale,-1) == "+") {
-			$aleperuste = 1;
+		// HUOM: VÄLIAIKAINEN TAAKSEPÄIN YHTEENSOPIVUUS!!!!!!
+		$ale = array("ale1" => $ale);
 
-			// 1. käyttäjän syöttämä EURO-määräinen alennus
-			$hinta_xxx = $hinta + substr($ale,0,-1);
-			$ale = (1 - ($hinta/$hinta_xxx))*100;
-			$hinta = $hinta_xxx;
+		// Käydään läpi käsin syötetyt alennukset jos niitä on
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			if (substr($ale["ale".$alepostfix], -1) == "+") {
+				// 1. käyttäjän syöttämä EURO-määräinen alennus
+				$aleperuste["ale".$alepostfix] = 1;
+
+				$hinta_xxx = $hinta + substr($ale["ale".$alepostfix],0,-1);
+				$ale["ale".$alepostfix] = (1 - ($hinta/$hinta_xxx))*100;
+				$hinta = $hinta_xxx;
+
+				$aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
+			}
+			elseif (substr($ale["ale".$alepostfix],-1) == "-") {
+				// 2. käyttäjän syöttämä EURO-määräinen alennus
+				$aleperuste["ale".$alepostfix] = 2;
+
+				$hinta_xxx = $hinta - substr($ale["ale".$alepostfix],0,-1);
+				$ale["ale".$alepostfix] = (1 - ($hinta_xxx/$hinta))*100;
+
+				$aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
+			}
+			elseif ($ale["ale".$alepostfix] > 0) {
+				// 3. käyttäjän syöttämä alennus
+				$aleperuste["ale".$alepostfix] = 3;
+
+				$aperuste .= " Käyttäjän syöttämä ale (Aletaso: $alepostfix)";
+			}
+			elseif (is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] == 0) {
+				// 4. käyttäjän syöttämä alennus
+				$aleperuste["ale".$alepostfix] = 4;
+
+				$aperuste .= " Ei alennusta (Aletaso: $alepostfix)";
+			}
 		}
-		elseif (substr($ale,-1) == "-") {
-			$aleperuste = 2;
 
-			// 2. käyttäjän syöttämä EURO-määräinen alennus
-			$hinta_xxx = $hinta - substr($ale,0,-1);
-			$ale = (1 - ($hinta_xxx/$hinta))*100;
+		// Jos joku aletasoista on tyhjä tai kokonaan settaamatta, niin lähdetään etsimään alennuksia
+		$jatka = FALSE;
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			if (isset($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] == '') {
+				// Jos ale on tyhjä niin unsetataan se
+				unset($ale["ale".$alepostfix]);
+				$jatka = TRUE;
+			}
+
+			if (!isset($ale["ale".$alepostfix])) {
+				$jatka = TRUE;
+			}
 		}
-		elseif ($ale > 0) {
-			$aleperuste = 3;
 
-			// 3. käyttäjän syöttämä alennus
-			$aperuste .= " Käyttäjän syöttämä ale";
-		}
-		elseif (is_numeric($ale) and $ale == 0) {
-			$aleperuste = 4;
-
-			// 4. käyttäjän syöttämä alennus
-			$aperuste .= " Ei alennusta";
-		}
-		elseif ($ale == "" and $netto != 'N' and $netto != 'E') {
-
-			unset($ale);
+		if ($jatka and $netto != 'N' and $netto != 'E') {
 
 			// 5. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus)
-			$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
+			$query = "	(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
 						FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and asiakas = '$laskurow[liitostunnus]'
@@ -4434,7 +4681,7 @@ if (!function_exists("alehinta")) {
 						and alennus >= 0
 						and alennus <= 100)
 						UNION
-						(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
+						(SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
 						FROM asiakasalennus USE INDEX (yhtio_ytunnus_tuoteno)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and ytunnus = '$laskurow[ytunnus]'
@@ -4445,22 +4692,14 @@ if (!function_exists("alehinta")) {
 						and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus >= 0
 						and alennus <= 100)
-						ORDER BY prio, minkpl desc, aika, tunnus desc
-						LIMIT 1";
+						ORDER BY alennuslaji, prio, minkpl desc, aika, alennus desc, tunnus desc";
 			$hresult = pupe_query($query);
 
-			if (mysql_num_rows($hresult) > 0) {
-				$aleperuste = 5;
-
-				$hrow = mysql_fetch_assoc ($hresult);
-				$ale  = $hrow["alennus"];
-				$aperuste .= " Asiakkaan tuotteen alennus";
-			}
+			list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 5, "Asiakkaan tuotteen alennus");
 
 			// 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
-			if (!isset($ale)) {
-
-				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
+			if (jatka_ale($ale)) {
+				$query = "	(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
 							FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
@@ -4472,7 +4711,7 @@ if (!function_exists("alehinta")) {
 							and alennus >= 0
 							and alennus <= 100)
 							UNION
-							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
+							(SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
 							FROM asiakasalennus USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
@@ -4483,22 +4722,15 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus >= 0
 							and alennus <= 100)
-							ORDER BY prio, minkpl desc, aika, tunnus desc
-							LIMIT 1";
+							ORDER BY alennuslaji, prio, minkpl desc, aika, alennus desc, tunnus desc";
 				$hresult = pupe_query($query);
 
-				if (mysql_num_rows($hresult) > 0) {
-					$aleperuste = 6;
-
-					$hrow = mysql_fetch_assoc ($hresult);
-					$ale  = $hrow["alennus"];
-					$aperuste .= " Asiakkaan tuotealeryhmän alennus";
-				}
+				list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 6, "Asiakkaan tuotealeryhmän alennus");
 			}
 
 			// 7. asiakas.segmentti tuote.tuoteno aleprosentti (asiakassegmentin tuotteen alennus)
-			if (!isset($ale) and isset($alehi_assegmenttirow["tunnukset"])) {
-				$query = "	SELECT alennus
+			if (jatka_ale($ale) and isset($alehi_assegmenttirow["tunnukset"])) {
+				$query = "	SELECT alennus, alennuslaji
 							FROM asiakasalennus
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
@@ -4511,23 +4743,15 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus >= 0
 							and alennus <= 100
-							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
-							LIMIT 1";
+							ORDER BY alennuslaji, minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc";
 				$hresult = pupe_query($query);
 
-				if (mysql_num_rows($hresult) > 0) {
-					$aleperuste = 7;
-
-					$hrow = mysql_fetch_assoc ($hresult);
-					$ale  = $hrow["alennus"];
-					$aperuste .= " Asiakassegmentin tuotealeryhmän alennus";
-				}
+				list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 7, "Asiakassegmentin tuotteen alennus");
 			}
 
-			// 8. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasaleryhmän tuotteen alennus)
-			if (!isset($ale)) {
-
-				$query = "	SELECT alennus
+			// 8. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasryhmän tuotteen alennus)
+			if (jatka_ale($ale)) {
+				$query = "	SELECT alennus, alennuslaji
 							FROM asiakasalennus
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_ryhma = '$alehi_asrow[ryhma]'
@@ -4540,22 +4764,15 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus >= 0
 							and alennus <= 100
-							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
-							LIMIT 1";
+							ORDER BY alennuslaji, minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc";
 				$hresult = pupe_query($query);
 
-				if (mysql_num_rows($hresult) > 0) {
-					$aleperuste = 8;
-
-					$hrow = mysql_fetch_assoc ($hresult);
-					$ale  = $hrow["alennus"];
-					$aperuste .= " Asiakasaleryhmän tuotteen alennus";
-				}
+				list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 8, "Asiakasryhmän tuotteen alennus");
 			}
 
 			// 9. asiakas.piiri tuote.tuoteno aleprosentti (asiakaspiirin tuotteen alennus)
-			if (!isset($ale)) {
-				$query = "	SELECT alennus
+			if (jatka_ale($ale)) {
+				$query = "	SELECT alennus, alennuslaji
 							FROM asiakasalennus
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
@@ -4568,22 +4785,15 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus >= 0
 							and alennus <= 100
-							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
-							LIMIT 1";
+							ORDER BY alennuslaji, minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc";
 				$hresult = pupe_query($query);
 
-				if (mysql_num_rows($hresult) > 0) {
-					$aleperuste = 9;
-
-					$hrow = mysql_fetch_assoc ($hresult);
-					$ale  = $hrow["alennus"];
-					$aperuste .= " Asiakaspiirin tuotteen alennus";
-				}
+				list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 9, "Asiakaspiirin tuotteen alennus");
 			}
 
 			// 10. asiakas.segmentti tuote.aleryhmä aleprosentti (asiakassegmentin tuotealeryhmän alennus)
-			if (!isset($ale) and isset($alehi_assegmenttirow["tunnukset"])) {
-				$query = "	SELECT alennus
+			if (jatka_ale($ale) and isset($alehi_assegmenttirow["tunnukset"])) {
+				$query = "	SELECT alennus, alennuslaji
 							FROM asiakasalennus
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
@@ -4596,63 +4806,36 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus >= 0
 							and alennus <= 100
-							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
-							LIMIT 1";
+							ORDER BY alennuslaji, minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc";
 				$hresult = pupe_query($query);
 
-				if (mysql_num_rows($hresult) > 0) {
-					$aleperuste = 10;
-
-					$hrow = mysql_fetch_assoc ($hresult);
-					$ale  = $hrow["alennus"];
-					$aperuste .= " Asiakassegmentin tuotealeryhmän alennus";
-				}
+				list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 10, "Asiakassegmentin tuotealeryhmän alennus");
 			}
 
-			// 11. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasaleryhmän tuotealeryhmän alennus)
-			if (!isset($ale)) {
+			// 11. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasryhmän tuotealeryhmän alennus)
+			if (jatka_ale($ale)) {
+				$query = "	SELECT alennus, alennuslaji
+							FROM asiakasalennus
+							WHERE yhtio = '$kukarow[yhtio]'
+							and asiakas_ryhma = '$alehi_asrow[ryhma]'
+							and asiakas_ryhma != ''
+							and ryhma  = '$trow[aleryhma]'
+							and ryhma != ''
+							and ytunnus = ''
+							and asiakas = 0
+							and (minkpl <= '$kpl' or minkpl = 0)
+							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							and alennus >= 0
+							and alennus <= 100
+							ORDER BY alennuslaji, minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc";
+				$hresult = pupe_query($query);
 
-				for ($aasi = strlen($trow["aleryhma"]); $aasi>0; $aasi--) {
-
-					if ($aasi == strlen($trow["aleryhma"])) {
-						$hakuavain_hae = "and ryhma  = '$trow[aleryhma]'";
-					}
-					else {
-						$hakuavain_hae = "	and right(ryhma,1) = '*'
-											and substring(ryhma, 1, char_length(ryhma)-1) = '".substr($trow["aleryhma"], 0, $aasi)."' ";
-					}
-
-					$query = "	SELECT alennus
-								FROM asiakasalennus
-								WHERE yhtio = '$kukarow[yhtio]'
-								and asiakas_ryhma = '$alehi_asrow[ryhma]'
-								and asiakas_ryhma != ''
-								$hakuavain_hae
-								and ryhma != ''
-								and ytunnus = ''
-								and asiakas = 0
-								and (minkpl <= '$kpl' or minkpl = 0)
-								and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-								and alennus >= 0
-								and alennus <= 100
-								ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
-								LIMIT 1";
-					$hresult = pupe_query($query);
-
-					if (mysql_num_rows($hresult) > 0) {
-						$aleperuste = 11;
-
-						$hrow = mysql_fetch_assoc ($hresult);
-						$ale  = $hrow["alennus"];
-						$aperuste .= " Asiakasaleryhmän tuotealeryhmän alennus";
-						break;
-					}
-				}
+				list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 11, "Asiakasryhmän tuotealeryhmän alennus");
 			}
 
 			// 12. asiakas.piiri tuote.aleryhmä aleprosentti (asiakaspiirin tuotealeryhmän alennus)
-			if (!isset($ale)) {
-				$query = "	SELECT alennus
+			if (jatka_ale($ale)) {
+				$query = "	SELECT alennus, alennuslaji
 							FROM asiakasalennus
 							WHERE yhtio = '$kukarow[yhtio]'
 							and piiri = '$alehi_asrow[piiri]'
@@ -4665,21 +4848,14 @@ if (!function_exists("alehinta")) {
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus >= 0
 							and alennus <= 100
-							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
-							LIMIT 1";
+							ORDER BY alennuslaji, minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc";
 				$hresult = pupe_query($query);
 
-				if (mysql_num_rows($hresult) > 0) {
-					$aleperuste = 12;
-
-					$hrow = mysql_fetch_assoc ($hresult);
-					$ale  = $hrow["alennus"];
-					$aperuste .= " Asiakassegmentin tuotealeryhmän alennus";
-				}
+				list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 12, "Asiakaspiirin tuotealeryhmän alennus");
 			}
 
-			// 13. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus)
-			if (!isset($ale)) {
+			// 13. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) (Vain ykköstason alennus voidaan tallentaa tähän)
+			if (jatka_ale($ale)) {
 
 				$query = "	SELECT alennus
 							FROM perusalennus
@@ -4693,26 +4869,32 @@ if (!function_exists("alehinta")) {
 				if (mysql_num_rows($hresult) > 0) {
 					$aleperuste = 13;
 
-					$hrow = mysql_fetch_assoc ($hresult);
-					$ale  = $hrow["alennus"];
-					$aperuste .= " Tuotealeryhmän perusalennus";
+					$hrow = mysql_fetch_assoc($hresult);
+					$ale["ale1"]  = $hrow["alennus"];
+					$aperuste .= " Tuotealeryhmän perusalennus (Aletaso: 1).";
 				}
 			}
 		}
 
-		if (!isset($ale)) {
-			$ale = 0;
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			if (!isset($ale["ale".$alepostfix])) {
+				$ale["ale".$alepostfix] = 0;
+			}
+
+			if ($ale["ale".$alepostfix] > 100) {
+				$ale["ale".$alepostfix] = 100;
+			}
+
+			if ($ale["ale".$alepostfix] < 0) {
+				$ale["ale".$alepostfix] = 0;
+			}
 		}
-		if ($ale > 100) {
-			$ale = 100;
-		}
-		if ($ale < 0) {
-			$ale = 0;
-		}
+
+		// HUOM: VÄLIAIKAINEN TAAKSEPÄIN YHTEENSOPIVUUS!!!!!!
+		$ale = (float) $ale["ale1"];
 
 		$debug = 0;
-
-		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: $ale ".t("% HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
+		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ",var_dump($ale)," ".t("% HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
 
 		if ($yhtio != '') {
 			$yhtiorow = hae_yhtion_parametrit($vanha_yhtio);
@@ -4733,7 +4915,7 @@ if (!function_exists("alehinta")) {
 				$a = array($palautus);
 			}
 
-			foreach($a as $palauta) {
+			foreach ($a as $palauta) {
 
 				$palauta = trim($palauta);
 

@@ -2638,6 +2638,24 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "reklamaation_hinnoittelu") {
+
+		$sela = $selb = "";
+
+		if ($trow[$i] == 'K') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = '' $sela>".t("Reklamaatiot hinnoitellaan manuaalisesti")."</option>
+					<option value = 'K' $selb>".t("Reklamaation hinnoittelusäännöt tulee tallentaa etukäteen")."</option>
+				</select></td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "vak_kasittely") {
 
 		$sel = "";

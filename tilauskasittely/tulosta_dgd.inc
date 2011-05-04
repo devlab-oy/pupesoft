@@ -41,12 +41,17 @@ if (!function_exists('alku_dgd')) {
 
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'LATIN1');
 
-		$query = "	SELECT nimi
-					FROM kuka
-					WHERE yhtio	= '$kukarow[yhtio]'
-					and tunnus 	= '$laskurow[myyja]'";
-		$nimires = pupe_query($query);
-		$nimirow = mysql_fetch_assoc($nimires);
+		if ($kukarow["yhtio"] == "mast") {
+			$nimirow = array("nimi" => "Virpi Kivelä");
+		}
+		else {
+			$query = "	SELECT nimi
+						FROM kuka
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tunnus 	= '$laskurow[myyja]'";
+			$nimires = pupe_query($query);
+			$nimirow = mysql_fetch_assoc($nimires);
+		}
 
 		$pdf->pages[$sivu]->drawText($nimirow["nimi"], mm_pt(15), mm_pt(50), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["kotipaikka"]." / ".tv1dateconv(date("Y-m-d")), mm_pt(15), mm_pt(41), 'LATIN1');

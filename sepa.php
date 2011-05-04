@@ -256,7 +256,14 @@
 //				$Nm = $CdtrAgtAcct->addChild('Nm', '');
 
 			$Cdtr = $CdtTrfTxInf->addChild('Cdtr', '');																									// Creditor
+			
+			// jos pankkihaltijan nimi on syötetty, laitetaan se nimen tilalle
+			if (trim($laskurow['pankki_haltija']) != '') {
+				$Nm = $Cdtr->addChild('Nm', sprintf("%-1.70s", $laskurow['pankki_haltija']));															// Name, Pakollinen kenttä 1-70
+			}
+			else {
 				$Nm = $Cdtr->addChild('Nm', sprintf("%-1.70s", $laskurow['nimi']));																		// Name, Pakollinen kenttä 1-70
+			}
 			 	$PstlAdr = $Cdtr->addChild('PstlAdr', '');																								// PostalAddress
 //					$AdrTp = $PstlAdr->addChild('AdrTp', '');
 			 		$AdrLine = $PstlAdr->addChild('AdrLine', sprintf("%-1.70s", $laskurow['osoite']));													// AddressLine 1-70

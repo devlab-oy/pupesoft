@@ -146,9 +146,8 @@
 	}
 
 	if (mysql_field_name($result, $i) == "alennuslaji") {
-		$apu = $trow[$i];
-		$sel = array();
-		$sel[$apu] = "selected";
+		// If you want to append array elements from the second array to the first array while not overwriting the elements from the first array and not re-indexing, use the + array union operator
+ 		$sel = array_fill_keys((array) "{$trow[$i]}", " selected") + array_fill(1, $yhtiorow['myynnin_alekentat'], '');
 
 		$ulos = "<td><select name='{$nimi}'>";
 

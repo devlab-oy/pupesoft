@@ -4114,7 +4114,7 @@ if (!function_exists("alehinta")) {
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							unset($ale["ale".$alepostfix]);
 						}
-					} 
+					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
 						if ($yhtiorow["asiakashinta_netto"] == "E") {
@@ -4597,7 +4597,7 @@ if (!function_exists("alehinta")) {
 							and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
 							LIMIT 1";
-				$hresult = pupe_query($query); 
+				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow			= mysql_fetch_assoc($hresult);
@@ -12274,6 +12274,48 @@ if (!function_exists("hae_hyvityshinta")) {
 		}
 
 		return $palautus;
+	}
+}
+
+
+if (!function_exists("tuotteen_lisatiedot")) {
+	function tuotteen_lisatiedot($tuoteno) {
+		global $kukarow;
+
+		$i = 0;
+		$parametrit = array();
+
+		// Haetaan asiakkaan laskutetut/toimitetut veloitusrivit + toisella queryllä hyvitysrivit
+		$query = "	SELECT tuotteen_avainsanat.laji, tuotteen_avainsanat.selite, avainsana.selitetark
+					FROM tuotteen_avainsanat
+					JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
+						AND avainsana.laji = 'LISATIETO'
+						AND avainsana.selite = SUBSTR(tuotteen_avainsanat.laji, 11))
+					WHERE tuotteen_avainsanat.yhtio = '$kukarow[yhtio]'
+					AND tuotteen_avainsanat.kieli = '$kukarow[kieli]'
+					AND tuotteen_avainsanat.tuoteno = '$tuoteno'
+					AND tuotteen_avainsanat.laji LIKE 'lisatieto_%'
+					AND tuotteen_avainsanat.selite != ''
+					ORDER BY tuotteen_avainsanat.selite";
+		$parares = pupe_query($query);
+
+		// Jos tuotteelle ei löydy parametrejä
+		if (mysql_num_rows($parares) == 0) {
+			return $parametrit;
+		}
+
+		while ($pararow = mysql_fetch_assoc($parares)) {
+			if ($pararow["selitetark"] == "") {
+				$parametrit[$i]["kentta"] = substr($pararow["laji"], 10);
+			}
+			else {
+				$parametrit[$i]["kentta"] = $pararow["selitetark"];
+			}
+			$parametrit[$i]["selite"] = $pararow["selite"];
+			$i++;
+		}
+
+		return $parametrit;
 	}
 }
 

@@ -814,7 +814,7 @@
 		}
 
 		if (!function_exists("tuoteselaushaku_tuoteperhe")) {
-			function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaikki_array, $rows) {
+			function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaikki_array, $rows, $tyyppi = "P") {
 				global $kukarow, $kieltolisa, $poislisa;
 
 				if (!in_array($tuoteno, $isat_array)) {
@@ -837,11 +837,12 @@
 								tuote.tunnus,
 								(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 								tuote.sarjanumeroseuranta,
-								tuote.status
+								tuoteperhe.tyyppi
 								FROM tuoteperhe
 								JOIN tuote ON tuote.yhtio = tuoteperhe.yhtio and tuote.tuoteno = tuoteperhe.tuoteno
 								WHERE tuoteperhe.yhtio 	  = '$kukarow[yhtio]'
 								and tuoteperhe.isatuoteno = '$tuoteno'
+								AND tuoteperhe.tyyppi = '$tyyppi'
 								$kieltolisa
 								$poislisa
 								ORDER BY tuoteperhe.tuoteno";
@@ -861,7 +862,8 @@
 		}
 
 		$query = "	SELECT
-					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
+					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
+					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'V' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') osaluettelo,
 					ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
 					ifnull((SELECT id FROM vastaavat use index (yhtio_tuoteno) where vastaavat.yhtio=tuote.yhtio and vastaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) vastaavat,
 					tuote.tuoteno,
@@ -952,7 +954,22 @@
 						$kaikki_array 	= array($mrow["tuoteno"]);
 
 						for ($isa=0; $isa < $riikoko; $isa++) {
-							list($isat_array, $kaikki_array, $rows) = tuoteselaushaku_tuoteperhe($mrow["tuoteno"], $kaikki_array[$isa], $isat_array, $kaikki_array, $rows);
+							list($isat_array, $kaikki_array, $rows) = tuoteselaushaku_tuoteperhe($mrow["tuoteno"], $kaikki_array[$isa], $isat_array, $kaikki_array, $rows, 'P');
+
+							if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y") {
+								$riikoko = count($kaikki_array);
+							}
+						}
+					}
+
+					if ($mrow["osaluettelo"] == $mrow["tuoteno"]) {
+						//$mrow["osaluettelo"] == $mrow["tuoteno"]
+						$riikoko 		= 1;
+						$isat_array 	= array();
+						$kaikki_array 	= array($mrow["tuoteno"]);
+
+						for ($isa=0; $isa < $riikoko; $isa++) {
+							list($isat_array, $kaikki_array, $rows) = tuoteselaushaku_tuoteperhe($mrow["tuoteno"], $kaikki_array[$isa], $isat_array, $kaikki_array, $rows, 'V');
 
 							if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y") {
 								$riikoko = count($kaikki_array);
@@ -1144,7 +1161,7 @@
 			if ($verkkokauppa == "") {
 				foreach ($rows as $ind => $row) {
 					// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
-					if ($row["sarjanumeroseuranta"] == "S" and ($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"])) {
+					if ($row["sarjanumeroseuranta"] == "S" and ($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"]) and $row["osaluettelo"] == "") {
 						$query	= "	SELECT sarjanumeroseuranta.*,
 									sarjanumeroseuranta.tunnus sarjatunnus,
 									tilausrivi_osto.tunnus osto_rivitunnus,
@@ -1312,22 +1329,24 @@
 				// Peek ahead
 				$row_seuraava = current($rows);
 
-				if ($row["tuoteperhe"] == $row["tuoteno"] and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"] and $row_seuraava["tuoteperhe"] != "") {
+				if (($row["tuoteperhe"] == $row["tuoteno"] and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"] and $row_seuraava["tuoteperhe"] != "") or
+					($row["osaluettelo"] == $row["tuoteno"] and $row["osaluettelo"] != $row_seuraava["osaluettelo"] and $row_seuraava["osaluettelo"] != "")) {
 					$classleft = "";
 					$classmidl = "";
 					$classrigh = "";
 				}
-				elseif ($row["tuoteperhe"] == $row["tuoteno"]) {
+				elseif ($row["tuoteperhe"] == $row["tuoteno"] or $row["osaluettelo"] == $row["tuoteno"]) {
 					$classleft = "style='border-top: 1px solid #555555; border-left: 1px solid #555555;' ";
 					$classmidl = "style='border-top: 1px solid #555555;' ";
 					$classrigh = "style='border-top: 1px solid #555555; border-right: 1px solid #555555;' ";
 				}
-				elseif ($row["tuoteperhe"] != "" and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"]) {
+				elseif (($row["tuoteperhe"] != "" and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"]) or
+						($row["osaluettelo"] != "" and $row["osaluettelo"] != $row_seuraava["osaluettelo"])) {
 					$classleft = "style='border-bottom: 1px solid #555555; border-left: 1px solid #555555;' ";
 					$classmidl = "style='border-bottom: 1px solid #555555;' ";
 					$classrigh = "style='border-bottom: 1px solid #555555; border-right: 1px solid #555555;' ";
 				}
-				elseif ($row["tuoteperhe"] != '') {
+				elseif ($row["tuoteperhe"] != '' or $row["osaluettelo"] != '') {
 					$classleft = "style='border-left: 1px solid #555555;' ";
 					$classmidl = "";
 					$classrigh = "style='border-right: 1px solid #555555;' ";
@@ -1350,12 +1369,21 @@
 					}
 
 					// jos ei löydetä kuvaa isätuotteelta, niin katsotaan ne lapsilta
-					if (trim($liitteet) == '' and trim($row["tuoteperhe"]) == trim($row["tuoteno"]) and $isan_kuva != '') {
+					if (trim($liitteet) == '' and (trim($row["tuoteperhe"]) == trim($row["tuoteno"]) or trim($row["osaluettelo"]) == trim($row["tuoteno"])) and $isan_kuva != '') {
+
+						if ($row["osaluettelo"] != "") {
+							$tuoteperhe_tyyppi = "V";
+						}
+						else {
+							$tuoteperhe_tyyppi = "P";
+						}
+
 						$query = "	SELECT tuote.tunnus
 									FROM tuoteperhe
 									JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio and tuote.tuoteno = tuoteperhe.tuoteno )
 									WHERE tuoteperhe.yhtio 	  = '$kukarow[yhtio]'
-									and tuoteperhe.isatuoteno = '$row[tuoteno]'";
+									and tuoteperhe.isatuoteno = '$row[tuoteno]'
+									and tuoteperhe.tyyppi = '$tuoteperhe_tyyppi'";
 						$lapsires = pupe_query($query);
 
 						while ($lapsirow = mysql_fetch_assoc($lapsires)) {
@@ -1585,7 +1613,7 @@
 						}
 					}
 					// Sarjanumerolliset tuotteet ja sarjanumerolliset isät (Normi, Extranet)
-					elseif ($verkkokauppa == "" and ($row["sarjanumeroseuranta"] == "S" and ($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"]))) {
+					elseif ($verkkokauppa == "" and ($row["sarjanumeroseuranta"] == "S" and ($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"]) and $row["osaluettelo"] == "")) {
 						if ($kukarow["extranet"] != "") {
 							echo "<td valign='top' class='$vari' $classrigh>$row[sarjanumero] ";
 						}
@@ -2022,7 +2050,7 @@
 				}
 
 				if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
-					if ($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"]) {
+					if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
 						echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
 						echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
 						echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";

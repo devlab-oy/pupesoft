@@ -457,6 +457,46 @@
 							<td class='spec'></td></tr>";
 					$verotot+=$vero;
 				}
+				
+				$query = "	SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
+							FROM tili
+							WHERE yhtio = '$kukarow[yhtio]' and alv_taso in ('fi320')";
+				$tilires = mysql_query($query) or pupe_error($query);
+				$tilirow = mysql_fetch_assoc($tilires);
+
+				$vero = 0.0;
+
+				if ($tilirow['tilit'] != '') {
+					$query = "SELECT sum(round(summa * ($oletus_verokanta / 100), 2)) veronmaara
+							FROM tiliointi
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND korjattu = ''
+							AND tilino in ($tilirow[tilit])
+							AND tapvm >= '$alkupvm'
+							AND tapvm <= '$loppupvm'";
+					$verores = mysql_query($query) or pupe_error($query);
+
+					while ($verorow = mysql_fetch_assoc ($verores)) {
+						$vero += $verorow['veronmaara'];
+					}
+
+					// Kassa-alennukset
+					list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi320", $oletus_verokanta);
+
+					if (is_resource($ttres)) {
+						while ($trow = mysql_fetch_assoc($ttres)) {
+							$vero += $trow['verot'];
+						}
+					}
+
+					echo "<tr><td colspan='5' align='right' class='spec'>".t("Vero rakentamispalveluiden ostoista").":</td>
+							<td class='spec'></td>
+							<td align = 'right' class='spec'>".sprintf('%.2f', $vero)."</td>
+							<td colspan='2' class='spec'></td>
+							<td class='spec'></td></tr>";
+					$verotot+=$vero;
+				}
+				
 			}
 
 			echo "<tr><td colspan='5' align='right' class='spec'>".t("Verokannat yhteens‰").":</td>
@@ -739,7 +779,7 @@
 				}
 			}
 
-			if ($cleantaso == "fi305" or $cleantaso == "fi306") {
+			if ($cleantaso == "fi305" or $cleantaso == "fi306" or $cleantaso == "fi320") {
 				// V‰hennet‰‰n kassa-alennuksien laskennaliset verot Tavara/Palveluaostot muista EU-maista
 				list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($startmonth, $endmonth, "", "", $cleantaso, $oletus_verokanta);
 

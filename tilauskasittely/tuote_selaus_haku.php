@@ -797,8 +797,7 @@
 							tuote.yksikko,
 							tuote.tunnus,
 							(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
-							tuote.sarjanumeroseuranta,
-							tuote.status
+							tuote.sarjanumeroseuranta
 							FROM {$tvk_taulu}
 							JOIN tuote ON tuote.yhtio={$tvk_taulu}.yhtio and tuote.tuoteno={$tvk_taulu}.tuoteno
 							WHERE {$tvk_taulu}.yhtio = '$kukarow[yhtio]'

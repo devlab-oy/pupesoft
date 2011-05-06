@@ -1365,11 +1365,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						$and .= " and maxkpl = '$chmaxkpl'";
 					}
 
-					if ($chalennuslaji == 0) {
-						$and .= " and alennuslaji = '1'";
-					}
-					elseif ($chalennuslaji != 0) {
-						$and .= " and alennuslaji = '$chalennuslaji'";
+					if ($table_mysql == 'asiakasalennus') {
+						if ($chalennuslaji == 0) {
+							$and .= " and alennuslaji = '1'";
+						}
+						elseif ($chalennuslaji != 0) {
+							$and .= " and alennuslaji = '$chalennuslaji'";
+						}
 					}
 
 					$and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";

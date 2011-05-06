@@ -243,11 +243,11 @@
 
 			$query = "	SELECT
 						sum(if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) summa,
-						if (tilausrivi.alv>=500, 0, tilausrivi.alv) alv
+						if (tilausrivi.alv >= 600 or tilausrivi.alv < 500, tilausrivi.alv, 0) alv
 						FROM lasku
-						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu
-						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
-						and lasku.jaksotettu  	= '$tunnus'
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu + tilausrivi.jt) > 0 and tilausrivi.jaksotettu = lasku.jaksotettu)
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.jaksotettu = '$tunnus'
 						GROUP BY lasku.jaksotettu, alv";
 			$sresult = mysql_query($query) or pupe_error($query);
 			$tot = 0;
@@ -273,7 +273,7 @@
 				echo "<font class = 'message'>".t("Käy tekemässä ennakkolasku manuaalisesti. Ennakkolaskulle perustetun laskun tunnus on")." $id</font><br>";
 				echo "<font class = 'message'>".t("Ennakkolaskutuksen tuotenumero on")." $yhtiorow[ennakkomaksu_tuotenumero]</font><br><br>";
 
-				$query  = "	insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
+				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
 							('0', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now())";
 				$addtil = mysql_query($query) or pupe_error($query);
 			}

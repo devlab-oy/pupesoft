@@ -1000,7 +1000,7 @@ if (!function_exists('tarjous_rivi_custom')) {
 
 if (!function_exists('loppu_tarjous')) {
 	function loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $tots, $total_uudet=0, $total_vanhat=0, $verolliset_verottomat_hinnat = '', $total_brutto = 0) {
-		global $kukarow, $yhtiorow, $boldi, $pieni, $norm, $rectparam, $kala, $sivu;
+		global $kukarow, $yhtiorow, $boldi, $pieni, $norm, $rectparam, $kala, $sivu, $kaanteinen_verotus;
 
 		// yhtiötiedot
 		$y_puhelin		= $yhtiorow['puhelin'];
@@ -1237,30 +1237,33 @@ if (!function_exists('loppu_tarjous')) {
 
 				$veroteksti = "";
 
-				if (trim($verolliset_verottomat_hinnat) == 'verolliset') {
-		        	$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli);
+				if ($kaanteinen_verotus === TRUE) {
+					$veroteksti = ""; // En keksi mitään mitä tässä tapauksessa pitäisi kirjottaa :/
+				}
+				elseif (trim($verolliset_verottomat_hinnat) == 'verolliset') {
+		        	$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
 				}
 				elseif (trim($verolliset_verottomat_hinnat) == 'verottomat') {
-		        	$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli);
+		        	$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
 				}
 				elseif ($yhtiorow['tarjouksen_alv_kasittely'] == '') {
 					if ($yhtiorow['alv_kasittely'] != '') {
-			        	$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli);
+			        	$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
 					}
 					else {
-			        	$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli);
+			        	$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
 					}
 				}
 				else {
 					if ($yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
-			        	$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli);
+			        	$veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
 					}
 					else {
-			        	$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli);
+			        	$veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
 					}
 				}
 
-				$pdf_tarjous->draw_text(30,  144, $veroteksti." ".t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous, $norm);
+				$pdf_tarjous->draw_text(30,  144, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous, $norm);
 
 				$pdf_tarjous->draw_text(30,  132, t("Tavarat ovat %s:n omaisuutta kunnes ne ovat kokonaisuudessaan maksettu.", $kieli, $yhtiorow["nimi"]), $page_tarjous, $norm);
 
@@ -1362,7 +1365,7 @@ if (!function_exists('print_pdf_tarjous')) {
 
 if (!function_exists('tulosta_tarjous')) {
 	function tulosta_tarjous ($otunnus, $komento, $kieli = "", $tee = "", $hinnat = "", $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '') {
-		global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista;
+		global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista, $kaanteinen_verotus;
 
 		// Haetaan laskun tiedot
 		$query = "	SELECT *, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.muutospvm muutospvm

@@ -482,6 +482,12 @@
 				continue;
 			}
 
+			if ($laskurow["summa"] == 0) {
+				echo "<font class='error'>Laskulta puuttuu summa, laskua ei voida lisätä aineistoon! $laskurow[nimi] ($laskurow[summa] $laskurow[valkoodi]) </font><br>";
+				$virheita++;
+				continue;
+			}
+
 		}
 
 		if (!is_dir($pankkitiedostot_polku) or !is_writable($pankkitiedostot_polku)) {

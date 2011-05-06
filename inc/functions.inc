@@ -3,7 +3,7 @@
 if (!function_exists("pupe_query")) {
 	function pupe_query($query, $link = NULL) {
 
-		if ($GLOBALS["pupe_query_debug"] > 0) {
+		if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0) {
 			$timeparts = explode(" ", microtime());
 			$starttime = $timeparts[1].substr($timeparts[0], 1);
 		}
@@ -15,7 +15,7 @@ if (!function_exists("pupe_query")) {
 			$res = mysql_query($query) or pupe_error($query);
 		}
 
-		if ($GLOBALS["pupe_query_debug"] > 0) {
+		if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0) {
 			$timeparts = explode(" ",microtime());
 			$endtime = $timeparts[1].substr($timeparts[0], 1);
 			$aika = round($endtime-$starttime, 4);

@@ -8,16 +8,15 @@
 		$tyyppi = 0;
 	}
 
-	
 	if (mysql_field_name($result, $i) == "piiri") {
 		$preq = "	SELECT avainsana.selite piiri, avainsana.selitetark selitetark
-					FROM avainsana 
+					FROM avainsana
 					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
 		$preres = mysql_query($preq) or pupe_error($preq);
-		
+
 		$ulos = "<td><select id='piiri' name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Ei piiriä")."</option>";
-				
+
 		while ($srow = mysql_fetch_array($preres)) {
 			$sel = '';
 			if ($trow[$i] == $srow["piiri"]) {
@@ -25,7 +24,7 @@
 			}
 			$ulos .= "<option value='$srow[piiri]' $sel>$srow[selitetark]</option>";
 		}
-		
+
 		$ulos .= "</select></td>\n";
 		$jatko = 0;
 	}
@@ -41,7 +40,7 @@
 					GROUP BY node.tunnus
 					ORDER BY node.lft";
 		$preres = mysql_query($preq) or pupe_error($preq);
-	
+
 		$ulos = "<td><select id='asiakas_segmentti' name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei asiakassegmenttiä")."</option>";
 
@@ -55,7 +54,6 @@
 		$ulos .= "</select></td>\n";
 		$jatko = 0;
 	}
-
 
 	if (mysql_field_name($result, $i) == "ryhma") {
 
@@ -145,6 +143,11 @@
 		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
 	}
+	elseif (mysql_field_name($result, $i) == "ytunnus") {
+		// Ei maxlength:iä koska silloin hakutoiminto ei välttämättä toimi
+		$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "asiakas" and $lukitse_avaimeen != "") {
 		$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
@@ -164,11 +167,12 @@
 			$srow = mysql_fetch_array($sresult);
 			$ssize = strlen($trow[$i])+2;
 
-			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$ssize' maxlength='$maxsize'> <table><tr><td>$srow[nimi] $srow[nimitark]</td></tr><tr><td>$srow[toim_nimi] $srow[toim_nimitark]</td></tr></table></td>";
+			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$ssize'> <table><tr><td>$srow[nimi] $srow[nimitark]</td></tr><tr><td>$srow[toim_nimi] $srow[toim_nimitark]</td></tr></table></td>";
 			$jatko = 0;
 		}
 		else {
-			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '' size='$size' maxlength='$maxsize'></td>";
+			// Ei maxlength:iä koska silloin hakutoiminto ei välttämättä toimi
+			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
 			$jatko = 0;
 		}
 	}

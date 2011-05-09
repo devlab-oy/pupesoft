@@ -108,6 +108,11 @@
 		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
 	}
+	elseif (mysql_field_name($result, $i) == "ytunnus") {
+		// Ei maxlength:iä koska silloin hakutoiminto ei välttämättä toimi
+		$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "asiakas" and $lukitse_avaimeen != "") {
 		$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
@@ -131,7 +136,8 @@
 			$jatko = 0;
 		}
 		else {
-			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '' size='$size' maxlength='$maxsize'></td>";
+			// Ei maxlength:iä koska silloin hakutoiminto ei välttämättä toimi
+			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
 			$jatko = 0;
 		}
 	}
@@ -146,8 +152,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "alennuslaji") {
-		// If you want to append array elements from the second array to the first array while not overwriting the elements from the first array and not re-indexing, use the + array union operator
- 		$sel = array_fill_keys((array) "{$trow[$i]}", " selected") + array_fill(1, $yhtiorow['myynnin_alekentat'], '');
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill(1, $yhtiorow['myynnin_alekentat'], '');
 
 		$ulos = "<td><select name='{$nimi}'>";
 

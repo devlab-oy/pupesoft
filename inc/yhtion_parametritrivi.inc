@@ -2707,4 +2707,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "myynti_asiakhin_tallenna") {
+
+		$sel = "";
+
+		if ($trow[$i] != '') {
+			$sel = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value = ''>".t("Myyntitilauksella ei voi tallentaa asiakashintoja")."</option>
+					<option value = 'K' $sel>".t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
 ?>

@@ -1491,33 +1491,49 @@ if ($tee == 'vakuutushakemus') {
 }
 
 // siirretään tilauksella olevat tuotteet asiakkaan asiakashinnoiksi
-if ($tee == "tuotteetasiakashinnastoon") {
+if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","TYOMAARAYS","PROJEKTI"))) {
 
 	$query = "	SELECT tilausrivi.*,
-				if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara
+				if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara
 				FROM tilausrivi
 				JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				AND tilausrivi.otunnus = '$tilausnumero'
-				AND tilausrivi.tyyppi  = 'T'
-				AND tilausrivi.var not in ('P')";
+				AND tilausrivi.tyyppi != 'D'
+				AND tilausrivi.var 	  != 'P'";
 	$result = pupe_query($query);
 
 	while ($tilausrivi = mysql_fetch_assoc($result)) {
-		$query = "	INSERT INTO asiakashinta SET
-					yhtio		= '$kukarow[yhtio]',
-					tuoteno		= '$tilausrivi[tuoteno]',
-					asiakas		= '$laskurow[liitostunnus]',
-					hinta		= round($tilausrivi[hinta] * $tilausrivi[myyntihinta_maara] * (1 - $tilausrivi[ale] / 100) * (1 - $laskurow[erikoisale] / 100), $yhtiorow[hintapyoristys]),
-					valkoodi	= '$laskurow[valkoodi]',
-					alkupvm		= now(),
-					laatija		= '$kukarow[kuka]',
-					luontiaika	= now(),
-					muuttaja	= '$kukarow[kuka]',
-					muutospvm	= now()";
-		$insert_result = pupe_query($query);
 
-		echo "Lisättin tuote $tilausrivi[tuoteno] asiakkaan hinnastoon hinnalla ".hintapyoristys($tilausrivi["hinta"] * (1 - $tilausrivi["ale"] / 100) * (1 - $laskurow["erikoisale"] / 100))." $laskurow[valkoodi]<br>";
+		$query = "	SELECT *
+					FROM asiakashinta
+					where yhtio	 = '$kukarow[yhtio]'
+					and tuoteno	 = '$tilausrivi[tuoteno]'
+					and asiakas	 = '$laskurow[liitostunnus]'
+					and hinta	 = round($tilausrivi[hinta] * $tilausrivi[myyntihinta_maara] * (1 - $tilausrivi[ale] / 100) * (1 - $laskurow[erikoisale] / 100), $yhtiorow[hintapyoristys])
+					and valkoodi = '$laskurow[valkoodi]'";
+		$chk_result = pupe_query($query);
+
+		if (mysql_num_rows($chk_result) == 0) {
+			$query = "	INSERT INTO asiakashinta SET
+						yhtio		= '$kukarow[yhtio]',
+						tuoteno		= '$tilausrivi[tuoteno]',
+						asiakas		= '$laskurow[liitostunnus]',
+						hinta		= round($tilausrivi[hinta] * $tilausrivi[myyntihinta_maara] * (1 - $tilausrivi[ale] / 100) * (1 - $laskurow[erikoisale] / 100), $yhtiorow[hintapyoristys]),
+						valkoodi	= '$laskurow[valkoodi]',
+						alkupvm		= now(),
+						laatija		= '$kukarow[kuka]',
+						luontiaika	= now(),
+						muuttaja	= '$kukarow[kuka]',
+						muutospvm	= now()";
+			$insert_result = pupe_query($query);
+
+			echo t("Lisättin tuote")." $tilausrivi[tuoteno] ".t("asiakkaan hinnastoon hinnalla").": ".hintapyoristys($tilausrivi["hinta"] * (1 - $tilausrivi["ale"] / 100) * (1 - $laskurow["erikoisale"] / 100))." $laskurow[valkoodi]<br>";
+		}
+		else {
+			echo t("Tuote")." $tilausrivi[tuoteno] ".t("löytyi jo asiakashinnastosta").": ".hintapyoristys($tilausrivi["hinta"] * (1 - $tilausrivi["ale"] / 100) * (1 - $laskurow["erikoisale"] / 100))." $laskurow[valkoodi]<br>";
+		}
+		echo "<br>";
 	}
 
 	$tee = "";
@@ -1926,7 +1942,7 @@ if ($tee == '') {
 			}
 		}
 
-		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T")) {
+		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow["myynti_asiakhin_tallenna"] == "K") and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","TYOMAARAYS","PROJEKTI"))) {
 			echo "<form action='$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='tuotteetasiakashinnastoon'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -3412,13 +3428,13 @@ if ($tee == '') {
 		$hyvityssaanto_palautuskielto_array	= "";
 
 		// Jos käytetään reklamaatioiden hinnoittelusääntöä ja käyttäjä ei ole väkisinhyväksynyt riviä
-		if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $kayttajan_var != "H") {			
+		if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $kayttajan_var != "H") {
 			$hyvityssaanto_hinta_array = array();
 			$hyvityssaanto_ale_array = array();
 			$hyvityssaanto_kpl_array = array();
 			$hyvityssaanto_kommentti_array = array();
 			$hyvityssaanto_palautuskielto_array = array();
-			
+
 			$palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
 
 			foreach ($palautus as $index => $arvot) {
@@ -3585,7 +3601,7 @@ if ($tee == '') {
 			else {
 				$paikka = $kayttajan_paikka;
 			}
-			
+
 			if ($kukarow["extranet"] != '' and $toim == "EXTRANET_REKLAMAATIO") {
 				$kpl = abs($kpl)*-1;
 			}

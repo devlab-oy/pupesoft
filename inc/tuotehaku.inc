@@ -352,7 +352,7 @@
 								FROM tuotteen_avainsanat
 								WHERE yhtio = '$trow[yhtio]'
 								AND laji = 'parametri_variaatio'
-								AND kieli = '$kukarow[kieli]'
+								AND kieli = '$yhtiorow[kieli]'
 								AND tuoteno = '$trow[tuoteno]'
 								LIMIT 1";
 					$parametrit_res = mysql_query($query) or pupe_error($query);

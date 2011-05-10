@@ -561,7 +561,7 @@ if ($monta > 1 and $monta <= $limit) {
 				}
 			}
 
-			echo "<input type='submit' value='".t("Valitse")."'>";
+			echo "<input type='submit' name='valitse_asiakas' value='".t("Valitse")."'>";
 			echo "</td>";
 			echo "</form>";
 			echo "</tr>";

@@ -256,8 +256,6 @@
 		}
 	}
 
-
-
 	if ($tee != 'NAYTATILAUS') {
 
 		js_popup(-100);
@@ -300,7 +298,8 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
+						WHERE yhtio = '$kukarow[yhtio]' 
+						order by nimitys";
 			$vtresult = mysql_query($query) or pupe_error($query);
 
 			echo "<select name='vastaanottava_varasto'>";
@@ -755,7 +754,7 @@
 			$laresult = mysql_query($query) or pupe_error($query);
 			$larow = mysql_fetch_assoc($laresult);
 
-			if ($larow["laskunro"] > 0) {
+			if ($larow["laskunro"] > 0 and $toim != 'DGD') {
 				$where2 .= " and lasku.laskunro = '$larow[laskunro]' ";
 
 				$where3 = "";

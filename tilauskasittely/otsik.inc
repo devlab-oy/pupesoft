@@ -1099,7 +1099,7 @@
 				echo "<option value='$row[selite]#$toimitustava_lahto' $sel>";
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
 
-				if ($toimitustava_lahto != "") {
+				if ($toimitustava_lahto != "0000-00-00 00:00:00") {
 					echo " - ".t("Lähtö")." ".tv1dateconv($toimitustava_lahto, "PITKA");
 				}
 

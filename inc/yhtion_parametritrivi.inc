@@ -2631,8 +2631,8 @@
 		}
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-					<option value = '' $sela>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n nopeaa tapaa")."</option>
-					<option value = 'U' $selb>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n uutta hitaampaa tapaa")."</option>
+					<option value = '' $sela>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n lyhyemp‰‰ prosessia")."</option>
+					<option value = 'U' $selb>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia vastaanotolla, purkulistalla ja vastaanottokuittauksella")."</option>
 				</select></td>";
 
 		$jatko = 0;

@@ -9,6 +9,11 @@
 		require("inc/parametrit.inc");
 	}
 
+	if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
+		echo "<font class='error'>".t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia")."!</font>";
+		exit;
+	}
+
 	if ($tee == 'MITATOI_TARJOUS') {
 		unset($tee);
 	}
@@ -66,6 +71,9 @@
 		}
 		elseif ($toim == "REKLAMAATIO") {
 			$otsikko = t("reklamaatiota");
+		}
+		elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
+			$otsikko = t("reklamaatio");
 		}
 		elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
 			$otsikko = t("sisäistä työmääräystä");
@@ -129,7 +137,7 @@
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
-			if ($toim == 'REKLAMAATIO') {
+			if ($toim == "VASTAANOTA_REKLAMAATIO") {
 				$otsikkoteksti = t("Vastaanota");
 			}
 			else {
@@ -157,7 +165,7 @@
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='A' and alatila='' and tilaustyyppi='A'";
 				$eresult = mysql_query($query) or pupe_error($query);
 			}
-			elseif ($toim == "REKLAMAATIO" and $aputila == 'VASTAANOTTO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+			elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]') and tila='C' and alatila = 'A' and tilaustyyppi='R'";
@@ -406,6 +414,13 @@
 			$assel1 = "CHECKED";
 			$assel2 = "";
 		}
+
+		echo "	<script language=javascript>
+				function lahetys_verify(pitaako_varmistaa) {
+					msg = pitaako_varmistaa;
+					return confirm(msg);
+				}
+			</script>";
 
 		echo "<br><form action='$PHP_SELF' method='post'>
 				<input type='hidden' name='toim' value='$toim'>
@@ -822,14 +837,12 @@
 
 			$miinus = 4;
 		}
-		elseif ($toim == "REKLAMAATIO" and $aputila == 'VASTAANOTTO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
-			// Reklamaation tila = C, alatila = A tarkoittaa että sitä ei ole vastaanotettu, B = vastaanotettu ja sitä ei näytetä vastaanottamattiomien listalla.
-
+		elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'C' and lasku.tilaustyyppi='R' and lasku.alatila in ('A')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'C' and lasku.tilaustyyppi='R' and lasku.alatila = 'A'
 						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
@@ -849,7 +862,7 @@
 
 			$miinus = 4;
 		}
-		elseif ($toim == "REKLAMAATIO" and $aputila == "" and $yhtiorow['reklamaation_kasittely'] == 'U') {
+		elseif ($toim == "REKLAMAATIO") {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -874,32 +887,6 @@
 
 			$miinus = 4;
 		}
-		elseif ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
-						FROM lasku use index (tila_index)
-						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
-						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L','N','C') and lasku.tilaustyyppi='R' and lasku.alatila in ('','A','B','C','J','D')
-						$haku
-						order by lasku.luontiaika desc
-						$rajaus";
-
-			// haetaan tilausten arvo
-			if ($kukarow['hinnat'] == 0) {
-				$sumquery = "	SELECT
-				   				round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
-						    	round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa,
-						    	count(distinct lasku.tunnus) kpl
-						    	FROM lasku use index (tila_index)
-						    	JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-						    	WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L','N','C') and lasku.tilaustyyppi='R' and lasku.alatila in ('','A','B','C','J','D')";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_assoc($sumresult);
-			}
-
-			$miinus = 4;
-		}
-
 		elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
 			$query = "	SELECT lasku.tunnus tilaus,
 						concat_ws('<br>',lasku.nimi,lasku.tilausyhteyshenkilo,lasku.viesti, concat_ws(' ', ifnull((SELECT selitetark_2 FROM avainsana WHERE avainsana.yhtio=tyomaarays.yhtio and avainsana.laji = 'sarjanumeron_li' and avainsana.selite = 'MERKKI' and avainsana.selitetark=tyomaarays.merkki LIMIT 1), tyomaarays.merkki), tyomaarays.mallivari)) asiakas,
@@ -1295,10 +1282,6 @@
 					elseif (in_array($row["tila"], array('L','N','C')) and $row["tilaustyyppi"] == 'R' and in_array($row["alatila"], array('','A','B','C','J','D'))) {
 						$whiletoim = "REKLAMAATIO";
 					}
-					elseif (in_array($row["tila"], array('C')) and $row["tilaustyyppi"] == 'R' and in_array($row["alatila"], array('A'))) {
-						$whiletoim = "REKLAMAATIO";
-					}
-
 					elseif ($row["tila"] == 'G' and in_array($row["alatila"], array('','A','J'))) {
 						$whiletoim = "SIIRTOLISTA";
 					}
@@ -1333,6 +1316,9 @@
 						$whiletoim = 'PROJEKTI';
 					}
 				}
+				elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
+					$whiletoim = "REKLAMAATIO";
+				}
 				else {
 					$whiletoim = $toim;
 				}
@@ -1352,7 +1338,7 @@
 				}
 
 				//	Nipuista vain se viimeisin jos niin halutaan
-				if ($row["tunnusnippu"] > 0 and ($whiletoim == "PROJEKTI" or $whiletoim == "TARJOUS")) {
+				if (isset($row["tunnusnippu"]) and $row["tunnusnippu"] > 0 and ($whiletoim == "PROJEKTI" or $whiletoim == "TARJOUS")) {
 
 					//	Tunnusnipuista näytetään vaan se eka!
 					// ja sillä ei ole yhtään riviä
@@ -1553,9 +1539,6 @@
 						elseif(($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "R") {
 							$tarkenne = " (".t("Reklamaatio").") ";
 						}
-						elseif($row["tila"] == "C" and $row["alatila"] == "C" and $row["tilaustyyppi"] == "R") {
-							$tarkenne = " (".t("Reklamaatio").") ";
-						}
 						elseif(($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "A") {
 							$laskutyyppi = "Työmääräys";
 						}
@@ -1563,7 +1546,7 @@
 							$laskutyyppi = "Ennakkotilaus kesken";
 						}
 
-						if ($row["varastokpl"] > 0) {
+						if (isset($row["varastokpl"]) and $row["varastokpl"] > 0) {
 							$varastotila = "<font class='info'><br>".t("Viety osittain varastoon")."</font>";
 						}
 						else {
@@ -1637,8 +1620,8 @@
 						$aputoim2 = "";
 						$lisa2 = "";
 					}
-					elseif($whiletoim=="PROJEKTI") {
-						if($row["tila"] == "A") {
+					elseif ($whiletoim == "PROJEKTI") {
+						if ($row["tila"] == "A") {
 							$aputoim1 = "TYOMAARAYS";
 						}
 						elseif($row["tila"] == "R") {
@@ -1649,6 +1632,13 @@
 						}
 
 						$lisa1 = t("Rivisyöttöön");
+					}
+					elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
+						$aputoim1 = $whiletoim;
+						$lisa1 = t("Vastaanota");
+
+						$aputoim2 = "";
+						$lisa2 = "";
 					}
 					else {
 						$aputoim1 = $whiletoim;
@@ -1669,20 +1659,15 @@
 
 					$button_disabled = "";
 
-					if (($row["tila"] == "L" or $row["tila"] == "N") and $row["mapvm"] != '0000-00-00' and $row["mapvm"] != '') {
+					if (($row["tila"] == "L" or $row["tila"] == "N") and isset($row["mapvm"]) and $row["mapvm"] != '0000-00-00' and $row["mapvm"] != '') {
 						$button_disabled = "disabled";
 					}
 
 					// tehdään alertti jos sellanen ollaan määritelty
 					$javalisa = "";
+
 					if ($pitaako_varmistaa != "") {
-						echo "	<script language=javascript>
-								function lahetys_verify() {
-									msg = '$pitaako_varmistaa';
-									return confirm(msg);
-								}
-								</script>";
-						$javalisa = "onSubmit = 'return lahetys_verify()'";
+						$javalisa = "onSubmit = \"return lahetys_verify('$pitaako_varmistaa')\"";
 					}
 
 					echo "<td class='back' nowrap>";
@@ -1698,15 +1683,14 @@
 					if ($whiletoim == "PROJEKTI") {
 						echo "	<input type='hidden' name='projektilla' value='$row[tunnusnippu]'>";
 					}
-					echo "	<input type='hidden' name='lopetus' 	value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi'>
+					echo "	<input type='hidden' name='lopetus' 	 value='{$palvelin2}muokkaatilaus.php////toim=$toim//asiakastiedot=$asiakastiedot//limit=$limit//etsi=$etsi'>
 							<input type='hidden' name='mista'		 value='muokkaatilaus'>
 							<input type='hidden' name='toim'		 value='$aputoim1'>
 							<input type='hidden' name='tee'			 value='AKTIVOI'>
 							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 
-					if ($toim == 'REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
-						echo "	<input type='hidden' name='aputila' value='$aputila'>";
-						echo "	<input type='hidden' name='vastaanotettu' value='B'";
+					if ($toim == "VASTAANOTA_REKLAMAATIO") {
+						echo "	<input type='hidden' name='mista' value='vastaanota'>";
 					}
 
 					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "EXTRANET" or $whiletoim == "ENNAKKO" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
@@ -1730,7 +1714,6 @@
 			}
 
 			echo "</table>";
-
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 				if (is_array($sumrow)) {

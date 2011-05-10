@@ -195,6 +195,10 @@ unset($liitetaanko_editilaus_laskulle_hakemisto);
 unset($siirrasuoritustilille);
 unset($ohjewiki_url);
 
+$pupe_query_debug = 0;
+$aika_debug_array = array();
+$quer_debug_array = array();
+
 require("salasanat.php");
 
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteyttä. Se on pois päältä tai käyttäjätietosi ovat virheelliset.");

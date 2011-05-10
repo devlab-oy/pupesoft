@@ -287,7 +287,7 @@ if (!function_exists("maa")) {
 		$maa = mysql_fetch_assoc($res);
 
 		// otetaan pois maa koodi
-		if ($kieli=="") {
+		if ($kieli == "" and isset($GLOBALS["kieli"])) {
 			$kieli = $GLOBALS["kieli"];
 		}
 		if (function_exists("mb_strtolower")) {
@@ -2951,7 +2951,7 @@ if (!function_exists("alehinta")) {
 		// $aleperuste  alennuksen peruste koodina
 
 		/*
-		HUOM: tarkista asiakasinfo.php kun muutat alennus ja hintalaaskentaa!
+		HUOM: tarkista asiakasinfo.php kun muutat alennus ja hintalalaskentaa!
 		*/
 
 		/*
@@ -10864,9 +10864,8 @@ if (!function_exists("seuraava_lahtoaika")) {
 			return $rivi["lahto"];
 		}
 		else {
-			return "";
+			return "0000-00-00 00:00:00";
 		}
-
 	}
 }
 

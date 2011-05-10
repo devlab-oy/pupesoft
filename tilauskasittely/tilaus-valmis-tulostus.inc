@@ -28,7 +28,7 @@
 	$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ";
 	$res   = mysql_query($query) or pupe_error($query);
 
-	if ($toim == 'REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+	if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
 		$queryc = "	SELECT sum(if(tila='C' and alatila='B', 1, 0)) ok, count(*) kaikki
 					FROM lasku
 					WHERE tunnus in ($tilausnumeroita)
@@ -123,7 +123,7 @@
 
 		mysql_data_seek($riresult,0);
 
-		$tyyppi = "";
+		if (!isset($tyyppi)) $tyyppi = "";
 
 		$params_kerayslista = array(
 		'asrow'           	=> $asrow,
@@ -223,7 +223,7 @@
 		}
 
 		if ($returnvalue != 0) {
-			echo "<br><font class='error'>Lähetteen tulostus epäonnistui! Tilaus $laskurow[tunnus] siirrettiin tulostusjonoon. Käy tulostamassa lähete <a href='lahetteen_tulostusjono.php'>tulostusjonosta</a>.</font><br><br>";
+			echo "<br><font class='error'>".t("Lähetteen tulostus epäonnistui")."! ".t("Tilaus")." $laskurow[tunnus] ".t("siirrettiin tulostusjonoon").". ".t("Käy tulostamassa lähete tulostusjonosta").": <a href='lahetteen_tulostusjono.php'>".t("Tulostusjono")."</a>.</font><br><br>";
 			$virheellinen = "X"; //Merkataan epäonnistuneeksi
 		}
 
@@ -245,7 +245,7 @@
 				$ei_pakkaamoa_lisaviesti = ", sisviesti2 = concat(sisviesti2, ' $kukarow[kuka] ".t("halusi tilauksen pakkaamolokeroihin")." ".tv1dateconv(date("Y-m-d H:i:s"))."')";
 			}
 
-			if ($toim =='REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+			if ($toim =='VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
 				$query = "	UPDATE lasku SET
 							alatila = 'C',
 							lahetepvm = now(),

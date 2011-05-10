@@ -117,7 +117,7 @@
 			echo $yhtiorow["web_seuranta"];
 		}
 
-		if ($pupe_query_debug > 0) {
+		if ($GLOBALS["pupe_query_debug"] > 0) {
 			echo "<br>";
 
 			// Jos debugataan querejä:
@@ -125,8 +125,8 @@
 
 			$querytime = 0;
 
-			for ($i=0; $i<count($aika_debug_array); $i++) {				
-				if ($aika_debug_array[$i] > $pupe_query_debug) {
+			for ($i=0; $i<count($aika_debug_array); $i++) {
+				if ($aika_debug_array[$i] > $GLOBALS["pupe_query_debug"]) {
 					echo "$aika_debug_array[$i]: ", query_dump($quer_debug_array[$i]);
 				}
 				$querytime += $aika_debug_array[$i];

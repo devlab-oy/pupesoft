@@ -1,22 +1,23 @@
 <?php
 
 	// Syötetään rivi
-	echo "	<tr><form name='rivi' action = '$PHP_SELF#$rivitunnus' method='post' autocomplete='off'>
-			<input type='hidden' name='toiminto' value='$toiminto'>
-			<input type='hidden' name='tee' value = 'TI'>
-			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-			<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-			<input type='hidden' name='rivitunnus' value='$rivitunnus'>
-			<input type='hidden' name='menutila' value = '$menutila'>
-			<input type='hidden' name='perheid2' value='$perheid2'>
-			<input type='hidden' name='muuta' value = '$muuta'>
-			<input type='hidden' name='otunnus' value = '$otunnus'>
-			<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
-			<input type='hidden' name='rivinotunnus' value = '$rivinotunnus'>
-			<input type='hidden' name='osto_sarjatunnus' value = '$osto_sarjatunnus'>
-			<input type='hidden' name='rivinvar' value = '$var'>
-			<input type='hidden' name='toim' value = '$toim'>
-			<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>";
+	echo "	<tr>
+			<form name='rivi' action = '$PHP_SELF#$rivitunnus' method='post' autocomplete='off'>
+			<input type='hidden' name='toim' 				value = '$toim'>
+			<input type='hidden' name='lopetus' 			value = '$lopetus'>
+			<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+			<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+			<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+			<input type='hidden' name='toiminto' 			value = '$toiminto'>
+			<input type='hidden' name='tee' 				value = 'TI'>
+			<input type='hidden' name='rivitunnus' 			value = '$rivitunnus'>
+			<input type='hidden' name='perheid2' 			value = '$perheid2'>
+			<input type='hidden' name='muuta' 				value = '$muuta'>
+			<input type='hidden' name='otunnus' 			value = '$otunnus'>
+			<input type='hidden' name='muut_siirrettavat' 	value = '$muut_siirrettavat'>
+			<input type='hidden' name='rivinotunnus' 		value = '$rivinotunnus'>
+			<input type='hidden' name='osto_sarjatunnus' 	value = '$osto_sarjatunnus'>
+			<input type='hidden' name='rivinvar' 			value = '$var'>";
 
 	$variaaritorivi = FALSE;
 

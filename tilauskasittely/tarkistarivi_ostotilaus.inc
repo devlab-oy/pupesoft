@@ -61,10 +61,10 @@
 
 		$paiv_hinta = (float) $paiv_hinta;
 
-		if($paivitaostohinta == 'ON' and ($ALPA != '' or $JOPA != '') and $prow["tuoteno"] == $paiv_tuoteno and $prow["tunnus"] == $paiv_rivitunnus) {
+		if ($paivitaostohinta == 'ON' and ($ALPA != '' or $JOPA != '') and $prow["tuoteno"] == $paiv_tuoteno and $prow["tunnus"] == $paiv_rivitunnus) {
 			$paok = '';
 			if ($toiminto != 'kohdista') {
-				$oshinq = "	update tilausrivi
+				$oshinq = "	UPDATE tilausrivi
 							set var		= 'O'
 							where yhtio	= '$kukarow[yhtio]'
 							and tunnus	= '$prow[tunnus]'
@@ -111,36 +111,39 @@
 
 		if (($toiminto != 'kohdista' and ($varrow['var'] != 'O' or $prow['var'] != 'O') and ($prow["tunnus"] != $paiv_rivitunnus or $paiv_rivitunnus == '')) or (($toiminto == 'kohdista' and $paok == ''))) {
 			$varaosavirhe .= "	<form name='tilaus' action='$PHP_SELF#$rivitunnus' method='post' autocomplete='off'>
-								<input type='hidden' name='toiminto' value='$toiminto'>
-								<input type='hidden' name='tee' value='Y'>
-								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-								<input type='hidden' name='toim' value='$toim'>
-								<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
-								<input type='hidden' name='rivinotunnus' value = '$rivinotunnus'>
-								<input type='hidden' name='paivitaostohinta' value='ON'>
-								<input type='hidden' name='paiv_hinta' value='$prow[hinta]'>
-								<input type='hidden' name='paiv_tuoteno' value='$prow[tuoteno]'>
-								<input type='hidden' name='paiv_rivitunnus' value='$prow[tunnus]'>
-								<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>";
+								<input type='hidden' name='toim' 				value = '$toim'>
+								<input type='hidden' name='lopetus' 			value = '$lopetus'>
+								<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+								<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+								<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+								<input type='hidden' name='toiminto' 			value = '$toiminto'>
+								<input type='hidden' name='tee' 				value = 'Y'>
+								<input type='hidden' name='muut_siirrettavat' 	value = '$muut_siirrettavat'>
+								<input type='hidden' name='rivinotunnus' 		value = '$rivinotunnus'>
+								<input type='hidden' name='paivitaostohinta' 	value = 'ON'>
+								<input type='hidden' name='paiv_hinta' 			value = '$prow[hinta]'>
+								<input type='hidden' name='paiv_tuoteno' 		value = '$prow[tuoteno]'>
+								<input type='hidden' name='paiv_rivitunnus' 	value = '$prow[tunnus]'>";
 
 			if ($toiminto == "kohdista") {
-				$varaosavirhe .= "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-				$varaosavirhe .= "<input type='hidden' name='kpl' value='$kpl'>";
-				$varaosavirhe .= "<input type='hidden' name='var' value='$var'>";
-				$varaosavirhe .= "<input type='hidden' name='hinta' value='$hinta'>";
-				$varaosavirhe .= "<input type='hidden' name='toimaika' value='$toimaika'>";
-				$varaosavirhe .= "<input type='hidden' name='alv' value='$alv'>";
-				$varaosavirhe .= "<input type='hidden' name='kommentti' value='$kommentti'>";
+				$varaosavirhe .= "<input type='hidden' name='tuoteno' 	value = '$tuoteno'>";
+				$varaosavirhe .= "<input type='hidden' name='kpl' 		value = '$kpl'>";
+				$varaosavirhe .= "<input type='hidden' name='var' 		value = '$var'>";
+				$varaosavirhe .= "<input type='hidden' name='hinta' 	value = '$hinta'>";
+				$varaosavirhe .= "<input type='hidden' name='toimaika' 	value = '$toimaika'>";
+				$varaosavirhe .= "<input type='hidden' name='alv' 		value = '$alv'>";
+				$varaosavirhe .= "<input type='hidden' name='kommentti' value = '$kommentti'>";
 			}
 
-			$varaosavirhe .= "	<font class='message'>
-								".t("P‰ivit‰ tuotteen ostohinta").":<br> $trow[ostohinta] $trow[valuutta] -> $prow[hinta] $trow[valuutta]</font><br>
-								<input type='submit' name='JOPA' value='".t("P‰ivit‰")."'> <input type='submit' name='ALPA' value='".t("ƒl‰ p‰ivit‰")."'></form>";
+			$varaosavirhe .= "	<font class='message'>".t("P‰ivit‰ tuotteen ostohinta").":<br> ".hintapyoristys($trow["ostohinta"])." $trow[valuutta] -> ".hintapyoristys($prow["hinta"])." $trow[valuutta]</font><br>
+								<input type='submit' name='JOPA' value='".t("P‰ivit‰")."'>
+								<input type='submit' name='ALPA' value='".t("ƒl‰ p‰ivit‰")."'>
+								</form>";
 		}
 	}
 
 	//toimitusajan p‰ivitys toimittajan toimitusaikaan
-	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE and ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '1' or $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '2') and $ei_aikatarkistusta != "JOO") {
+	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE and ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '1' or $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '2')) {
 
 		if ($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') {
 			$ehdotus_pvm = date('Y-m-d',time() + $trow["toimitusaika"] * 24 * 60 * 60);
@@ -161,7 +164,8 @@
 
 
 			}
-			$varaosavirhe .= "<font class='message'>".t("P‰ivitettiin tuotteen")." $trow[tuoteno] ".t("toimitusaika").": ".tv1dateconv($prow[toimaika])." -> ".tv1dateconv($ehdotus_pvm)."</font>";
+
+			$varaosavirhe .= "<font class='message'>".t("P‰ivitettiin tuotteen")." $trow[tuoteno] ".t("toimitusaika").": ".tv1dateconv($prow["toimaika"])." -> ".tv1dateconv($ehdotus_pvm)."</font>";
 			$paivitetty_ok = "YES";
 			$JOPATO = "";
 		}
@@ -179,26 +183,28 @@
 			}
 
 			$varaosavirhe .= "	<form name='tilaus' action='$PHP_SELF#$rivitunnus' method='post' autocomplete='off'>
-								<input type='hidden' name='toiminto' value='$toiminto'>
-								<input type='hidden' name='tee' value='Y'>
-								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-								<input type='hidden' name='toim' value='$toim'>
-								<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
-								<input type='hidden' name='rivinotunnus' value = '$rivinotunnus'>
-								<input type='hidden' name='paivitatoimaika' value='ON'>
-								<input type='hidden' name='paiv_toimaika' value='$ehdotus_pvm'>
-								<input type='hidden' name='paiv_rivitunnus' value='$prow[tunnus]'>";
-
-			$varaosavirhe .= "	<font class='message'>
-								".t("Haluatko muuttaa toimitusajan")." ".tv1dateconv($prow[toimaika])." ".t("tuotteen toimittajan toimitusaikaan")." ".tv1dateconv($ehdotus_pvm)."!</font><br>
-								<input type='submit' name='JOPATO' value='".t("P‰ivit‰")."'></form>";
+								<input type='hidden' name='toim' 				value = '$toim'>
+								<input type='hidden' name='lopetus' 			value = '$lopetus'>
+								<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+								<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+								<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+								<input type='hidden' name='toiminto' 			value = '$toiminto'>
+								<input type='hidden' name='tee' 				value = 'Y'>
+								<input type='hidden' name='muut_siirrettavat' 	value = '$muut_siirrettavat'>
+								<input type='hidden' name='rivinotunnus' 		value = '$rivinotunnus'>
+								<input type='hidden' name='paivitatoimaika' 	value = 'ON'>
+								<input type='hidden' name='paiv_toimaika' 		value = '$ehdotus_pvm'>
+								<input type='hidden' name='paiv_rivitunnus' 	value = '$prow[tunnus]'>
+								<font class='message'>".t("Haluatko muuttaa toimitusajan")." ".tv1dateconv($prow["toimaika"])." ".t("tuotteen toimittajan toimitusaikaan")." ".tv1dateconv($ehdotus_pvm)."!</font><br>
+								<input type='submit' name='JOPATO' value='".t("P‰ivit‰")."'>
+								</form>";
 		}
 
 	}
 
 	if ($toiminto != "kohdista") {
 		// katsotaan onko t‰m‰ sis‰inen toimittaja ja ett‰ toimittajan tiedoissa on varmasti kaikki EDI mokkulat p‰‰ll‰ ja oletusvienti on jotain vaihto-omaisuutta
-		$query = "	select tyyppi_tieto, liitostunnus
+		$query = "	SELECT tyyppi_tieto, liitostunnus
 					from tuotteen_toimittajat, toimi
 					where tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 					and tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'

@@ -47,7 +47,7 @@
 		unset($row);
 
 		if (mysql_num_rows($result) != 0) {
-			$row=mysql_fetch_array($result);
+			$row = mysql_fetch_array($result);
 		}
 
 		if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
@@ -81,6 +81,14 @@
 		if ($kukarow['kesken'] != '0') {
 			$tilausnumero=$kukarow['kesken'];
 		}
+	}
+
+	// Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
+	$tilost_lopetus = "{$palvelin2}tilauskasittely/tilaus_osto.php////toim=$toim//tilausnumero=$tilausnumero//toim_nimitykset=$toim_nimitykset//naytetaankolukitut=$naytetaankolukitut";
+
+	if ($lopetus != "") {
+		// Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+		$tilost_lopetus = $lopetus."/SPLIT/".$tilost_lopetus;
 	}
 
 	if ((int) $kukarow['kesken'] == 0 or $tee == "MUUOTAOSTIKKOA") {
@@ -313,6 +321,10 @@
 			$kukarow["kesken"] 	= '';
 			$tilausnumero 		= 0;
 			$tee 				= '';
+
+			if ($lopetus != '') {
+				lopetus($lopetus, "META");
+			}
 		}
 
 		//Kuitataan OK-var riville
@@ -380,7 +392,6 @@
 			if ($tilausrivirow["myyntihinta_maara"] != 0 and $hinta != 0) {
 				$hinta = hintapyoristys($hinta * $tilausrivirow["myyntihinta_maara"]);
 			}
-
 		}
 
 		// Tyhjennet‰‰n tilausrivikent‰t n‰ytˆll‰
@@ -435,9 +446,8 @@
 		if ($tee == 'TI' and $tuoteno != "") {
 			if ($toim != "HAAMU") {
 				$multi = "TRUE";
-				require("../inc/tuotehaku.inc");
+				require("inc/tuotehaku.inc");
 			}
-
 		}
 
 		if ($tee == 'TI' and ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array))) and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
@@ -445,7 +455,7 @@
 				$tuoteno_array[] = $tuoteno;
 			}
 
-			//K‰ytt‰j‰n syˆtt‰m‰ hinta ja ale ja netto, pit‰‰ s‰ilˆ‰ jotta tuotehaussakin voidaan syˆtt‰‰ n‰m‰
+			// K‰ytt‰j‰n syˆtt‰m‰ hinta ja ale ja netto, pit‰‰ s‰ilˆ‰ jotta tuotehaussakin voidaan syˆtt‰‰ n‰m‰
 			$kayttajan_hinta	= $hinta;
 			$kayttajan_ale		= $ale;
 			$kayttajan_netto 	= $netto;
@@ -453,11 +463,12 @@
 			$kayttajan_kpl		= $kpl;
 			$kayttajan_alv		= $alv;
 
-			foreach($tuoteno_array as $tuoteno) {
+			foreach ($tuoteno_array as $tuoteno) {
 
 				$query	= "	SELECT *
-							from tuote
-							where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+							FROM tuote
+							WHERE tuoteno = '$tuoteno'
+							and yhtio = '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
@@ -609,38 +620,59 @@
 			echo "<tr>";
 			echo "<td class='back'>
 					<form action = '$PHP_SELF' method='post'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-					<input type='hidden' name='tee' value='MUUOTAOSTIKKOA'>
-					<input type='hidden' name='tila' value='Muuta'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
+					<input type='hidden' name='toim' 				value = '$toim'>
+					<input type='hidden' name='lopetus' 			value = '$lopetus'>
+					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+					<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+					<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+					<input type='hidden' name='tee' 				value = 'MUUOTAOSTIKKOA'>
+					<input type='hidden' name='tila' 				value = 'Muuta'>
 					<input type='Submit' value='".t("Muuta otsikkoa")."'>
-					</form></td>";
+					</form>
+					</td>";
 
-			if ($kukarow['yhtio'] == 'allr') {
-				echo "<td class='back'>
-						<form action='tuote_selaus_haku_vanha.php' method='post'>
-						<input type='hidden' name='toim_kutsu' value='$toim'>
-						<input type='submit' value='".t("Selaa tuotteita")."'>
-						</form></td>";
-			}
-			else {
-				echo "<td class='back'>
-						<form action='tuote_selaus_haku.php' method='post'>
-						<input type='hidden' name='toim_kutsu' value='$toim'>
-						<input type='submit' value='".t("Selaa tuotteita")."'>
-						</form></td>";
-			}
+			echo "<td class='back'>
+					<form action='tuote_selaus_haku.php' method='post'>
+					<input type='hidden' name='toim_kutsu' value='$toim'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='submit' value='".t("Selaa tuotteita")."'>
+					</form>
+					</td>";
 
 			echo "<td class='back'>
 					<form action='$PHP_SELF' method='post'>
-					<input type='hidden' name='tee' value='mikrotila'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-					<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
+					<input type='hidden' name='toim' 				value = '$toim'>
+					<input type='hidden' name='lopetus' 			value = '$lopetus'>
+					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+					<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+					<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+					<input type='hidden' name='tee' 				value = 'mikrotila'>
 					<input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'>
-					</form></td>";
+					</form>
+					</td>";
+
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
+			$res = mysql_query($queryoik) or pupe_error($queryoik);
+
+			if (mysql_num_rows($res) > 0) {
+
+				if ($laskurow["tunnusnippu"] > 0) {
+					$id = $laskurow["tunnusnippu"];
+				}
+				else {
+					$id = $laskurow["tunnus"];
+				}
+
+				echo "<td class='back'>
+						<form method='POST' action='".$palvelin2."yllapito.php?toim=liitetiedostot&from=tilausmyynti&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
+						<input type='hidden' name='lopetus' value='$tilost_lopetus//from=LASKUTATILAUS'>
+						<input type='hidden' name='toim_kutsu' value='$toim'>
+						<input type='submit' value='" . t('Tilauksen liitetiedostot')."'>
+						</form>
+						</td>";
+			}
+
+
 			echo "</tr>";
 			echo "</table><br>";
 
@@ -668,99 +700,7 @@
 
 			echo "</table><br>";
 
-			//anntetaan mahdollisuus syottaa uusi/muokata tilausrivi/korjata virhelliset rivit
-			if (file_exists("ostomenu.inc") and $toim != "HAAMU"){
-
-				/*
-					sama kuin myyntimenut @ tilaus_myynti.php
-					paitti, ett‰ t‰‰ll‰ tarttetaan toi form
-
-				*/
-
-
-				//	Haetaan ostomenu Array ja kysely Array
-				//	Jos menutilaa ei ole laitetaan oletus
-				if (!isset($menutila)) $menutila = "oletus";
-
-				require("ostomenu.inc");
-
-				//suoritetaan kysely ja tehd‰‰n menut jos aihetta
-				if (is_array($ostomenu)){
-
-					//	Tehd‰‰n menuset
-					$menuset = "<select name='menutila' onChange='submit()'>";
-					foreach($ostomenu as $key => $value){
-						$sel = "";
-						if ($key == $menutila) {
-							$sel = "SELECTED";
-						}
-
-						$menuset .= "<option value='$key' $sel>$value[menuset]</option>";
-					}
-
-					//	Jos ei olla ostomenussa n‰ytet‰‰n aina haku
-					$sel = "";
-					if (!isset($ostomenu[$menutila])) {
-						$sel = "SELECTED";
-					}
-
-					$menuset .= "<option value='haku' $sel>".t("Tuotehaku")."</option>";
-					$menuset .= "</select>";
-
-					//	Tehd‰‰n paikka menusetille
-					echo  "
-								<form name='myyntimenu' action = '$PHP_SELF' method='post' autocomplete='off'>
-									<input type='hidden' name='toiminto' value='$toiminto'>
-									<input type='hidden' name='toim' value='$toim'>
-									<input type='hidden' name='tee' value = 'Y'>
-									<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-									<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-								<table>
-									<tr>
-										<td class='back' align = 'left'><font class='head'>".t("Lis‰‰ rivi").": </font></td><td class='back' align = 'left'>$menuset</td>
-									</tr>
-								</table><hr>
-								</form>";
-
-
-					//	Tarkastetaan viel‰, ett‰ menutila on m‰‰ritelty ja luodaan lista
-					if ($ostomenu[$menutila]["query"] != "") {
-						unset($ulos);
-
-						// varsinainen kysely ja menu
-						$query = " SELECT distinct(tuote.tuoteno), nimitys
-									FROM tuote
-									LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
-									WHERE tuote.yhtio ='$kukarow[yhtio]' and ".$ostomenu[$menutila]["query"];
-									$tuoteresult = mysql_query($query) or pupe_error($query);
-
-						$ulos = "<select Style=\"width: 230px; font-size: 8pt; padding: 0\" name='tuoteno' multiple ='TRUE'><option value=''>Valitse tuote</option>";
-
-						if (mysql_num_rows($tuoteresult) > 0) {
-							while($row=mysql_fetch_array($tuoteresult)) {
-								$sel='';
-								if ($tuoteno==$row['tuoteno']) $sel='SELECTED';
-								$ulos .= "<option value='$row[tuoteno]' $sel>$row[tuoteno] - ".t_tuotteen_avainsanat($row, 'nimitys')."</option>";
-							}
-							$ulos .= "</select>";
-						}
-						else {
-							echo "Valinnan antama haku oli tyhj‰<br>";
-						}
-					}
-					//	Jos haetaan niin ei ilmoitella turhia
-					elseif ($menutila != "haku" and $menutila != "") {
-						echo "HUOM! Koitettiin hakea ostomenua '$menutila' jota ei ollut m‰‰ritelty!<br>";
-					}
-				}
-				else {
-					echo "HUOM! Koitettiin hakea ostomenuja, mutta tiedot olivat puutteelliset.<br>";
-				}
-			}
-			else {
-				echo "<font class='head'>".t("Lis‰‰ rivi").": </font><hr>";
-			}
-
+			echo "<font class='head'>".t("Lis‰‰ rivi").": </font><hr>";
 
 			require('syotarivi_ostotilaus.inc');
 
@@ -778,11 +718,17 @@
 			$sel = array();
 			$sel[$toim_nimitykset] = "CHECKED";
 
-			echo "<form action='$PHP_SELF' method='post'><font class='info'>";
-			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-			echo "<input type='hidden' name='tee' value='Y'>";
+			echo "<form action='$PHP_SELF' method='post'>
+					<input type='hidden' name='toim' 				value = '$toim'>
+					<input type='hidden' name='lopetus' 			value = '$lopetus'>
+					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+					<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+					<input type='hidden' name='tee' 				value = 'Y'>";
+
+			echo "<font class='info'>";
 			echo t("Nimitykset").": <input onclick='submit();' type='radio' name='toim_nimitykset' value='ME' {$sel["ME"]}> ".t("Omat")." <input onclick='submit();' type='radio' name='toim_nimitykset' value='HE' {$sel["HE"]}> ".t("Toimittajan")."";
-			echo "</font></form>";
+			echo "</font>";
+			echo "</form>";
 
 			// katotaan onko joku rivi jo liitetty johonkin keikkaan ja jos on niin annetaan mahdollisuus piilottaa lukitut rivit
 			$query = "SELECT * from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$laskurow[tunnus]' and uusiotunnus != 0";
@@ -798,13 +744,18 @@
 					$sel_ky = "CHECKED";
 					$sel_ei = "";
 				}
-				echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<form action='$PHP_SELF' method='post'><font class='info'>";
-				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-				echo "<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>";
-				echo "<input type='hidden' name='tee' value='Y'>";
-				echo t("N‰ytet‰‰nkˆ lukitut rivit").": <input onclick='submit();' type='radio' name='naytetaankolukitut' value='kylla' $sel_ky> ".t("Kyll‰")." <input onclick='submit();' type='radio' name='naytetaankolukitut' value='EI' $sel_ei> ".t("Ei");
-				echo "</font></form>";
+				echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
+				echo "<form action='$PHP_SELF' method='post'>
+						<input type='hidden' name='toim' 				value = '$toim'>
+						<input type='hidden' name='lopetus' 			value = '$lopetus'>
+						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+						<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+						<input type='hidden' name='tee' 				value = 'Y'>";
+
+				echo "<font class='info'>".t("N‰ytet‰‰nkˆ lukitut rivit").": <input onclick='submit();' type='radio' name='naytetaankolukitut' value='kylla' $sel_ky> ".t("Kyll‰")." <input onclick='submit();' type='radio' name='naytetaankolukitut' value='EI' $sel_ei> ".t("Ei");
+				echo "</font>";
+				echo "</form>";
 			}
 
 			// katotaan miten halutaan sortattavan
@@ -985,20 +936,21 @@
 						echo "<li>".t("Keskihinta").": $prow[keskihinta] $prow[valuutta]</li><li>".t("Ostohinta").": $prow[ostohinta] $prow[valuutta]</li>";
 						echo "</ul>";
 						echo "</div>";
+
 						if ($toim != "HAAMU") {
-							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO' class='tooltip' id='$prow[tunnus]'>$prow[tuoteno]</a>";
+							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='tooltip' id='$prow[tunnus]'>$prow[tuoteno]</a>";
 						}
 						else {
-							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."' class='tooltip' id='$prow[tunnus]'>$prow[tuoteno]</a>";
+							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='tooltip' id='$prow[tunnus]'>$prow[tuoteno]</a>";
 						}
 
 					}
 					else {
 						if ($toim != "HAAMU") {
-							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO'>$prow[tuoteno]</a>";
+							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>$prow[tuoteno]</a>";
 						}
 						else {
-							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."'>$prow[tuoteno]</a>";
+							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>$prow[tuoteno]</a>";
 						}
 					}
 
@@ -1010,10 +962,10 @@
 						$sarjarow = mysql_fetch_array($sarjares);
 
 						if ($sarjarow["kpl"] == abs($prow["varattukpl"])) {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto' style='color:#00FF00;'>".t("S:nro ok")."</font></a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS' style='color:#00FF00;'>".t("S:nro ok")."</font></a>)";
 						}
 						else {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto'>".t("S:nro")."</a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>".t("S:nro")."</a>)";
 						}
 					}
 
@@ -1036,24 +988,26 @@
 
 						echo "	<td valign='top' class='back' nowrap>
 								<form action='$PHP_SELF' method='post'>
-								<input type='hidden' name='tilausnumero' 	value='$tilausnumero'>
-								<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-								<input type='hidden' name='rivitunnus' 		value = '$prow[tunnus]'>
-								<input type='hidden' name='menutila' 		value = '$menutila'>
-								<input type='hidden' name='toim' 			value = '$toim'>
-								<input type='hidden' name='tee' 			value = 'PV'>
-								<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
+								<input type='hidden' name='toim' 				value = '$toim'>
+								<input type='hidden' name='lopetus' 			value = '$lopetus'>
+								<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+								<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+								<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+								<input type='hidden' name='rivitunnus' 			value = '$prow[tunnus]'>
+								<input type='hidden' name='tee' 				value = 'PV'>
 								<input type='Submit' value='".t("Muuta")."'>
 								</td></form>";
 
 						if ($saako_hyvaksya > 0) {
 							echo "<td valign='top' class='back'>
 									<form action='$PHP_SELF' method='post'>
-									<input type='hidden' name='tilausnumero' 	value='$tilausnumero'>
-									<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-									<input type='hidden' name='rivitunnus' 		value = '$prow[tunnus]'>
-									<input type='hidden' name='menutila' 		value = '$menutila'>
-									<input type='hidden' name='tee' 			value = 'OOKOOAA'>
+									<input type='hidden' name='toim' 				value = '$toim'>
+									<input type='hidden' name='lopetus' 			value = '$lopetus'>
+									<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+									<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+									<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+									<input type='hidden' name='rivitunnus' 			value = '$prow[tunnus]'>
+									<input type='hidden' name='tee' 				value = 'OOKOOAA'>
 									<input type='Submit' value='".t("Hyv‰ksy")."'>
 									</form></td> ";
 						}
@@ -1078,12 +1032,13 @@
 								echo "</tr>";
 
 								echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
-										<input type='hidden' name='tilausnumero' 	value='$tilausnumero'>
-										<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-										<input type='hidden' name='toim' 			value='$toim'>
-										<input type='hidden' name='tee' 			value='TI'>
-										<input type='hidden' name='lisavarusteita' 	value='ON'>
-										<input type='hidden' name='perheid2'	 	value='$prow[tunnus]'>";
+										<input type='hidden' name='toim' 			value = '$toim'>
+										<input type='hidden' name='lopetus' 		value = '$lopetus'>
+										<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+										<input type='hidden' name='toim_nimitykset' value = '$toim_nimitykset'>
+										<input type='hidden' name='tee' 			value = 'TI'>
+										<input type='hidden' name='lisavarusteita' 	value = 'ON'>
+										<input type='hidden' name='perheid2'	 	value = '$prow[tunnus]'>";
 
 								if ($alv=='') $alv=$laskurow['alv'];
 								$lask = 0;
@@ -1109,15 +1064,18 @@
 								}
 							}
 							elseif (mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] != -1) {
-								echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
-										<input type='hidden' name='tilausnumero' 	value='$tilausnumero'>
-										<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-										<input type='hidden' name='toim' 			value='$toim'>
-										<input type='hidden' name='tee' 			value='LISLISAV'>
-										<input type='hidden' name='rivitunnus' 		value='$prow[tunnus]'>
-										<input type='hidden' name='menutila' value = '$menutila'>
-										<td class='back'><input type='submit' value='".t("Lis‰‰ lis‰varusteita tuotteelle")."'></td>
-										</form>";
+								echo "	<td class='back'>
+										<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
+										<input type='hidden' name='toim' 				value = '$toim'>
+										<input type='hidden' name='lopetus' 			value = '$lopetus'>
+										<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+										<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+										<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+										<input type='hidden' name='tee' 				value = 'LISLISAV'>
+										<input type='hidden' name='rivitunnus' 			value = '$prow[tunnus]'>
+										<input type='submit' value='".t("Lis‰‰ lis‰varusteita tuotteelle")."'>
+										</form>
+										</td>";
 								echo "</tr>";
 							}
 						}
@@ -1176,13 +1134,13 @@
 					<th colspan='2' nowrap>".t("N‰yt‰ ostotilaus").":</th>
 					<td colspan='2' nowrap>
 					<form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_tosto' id='tulostaform_tosto'>
-					<input type='hidden' name='otunnus' value='$tilausnumero'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-					<input type='hidden' name='toim' value='$kopiotoim'>
-					<input type='hidden' name='nimitykset' value='JOO'>
-					<input type='hidden' name='tee' value='TULOSTA'>
-					<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//ei_aikatarkistusta=$ei_aikatarkistusta//tee='>
+					<input type='hidden' name='otunnus' 		value = '$tilausnumero'>
+					<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+					<input type='hidden' name='toim_nimitykset' value = '$toim_nimitykset'>
+					<input type='hidden' name='toim' 			value = '$kopiotoim'>
+					<input type='hidden' name='nimitykset' 		value = 'JOO'>
+					<input type='hidden' name='tee' 			value = 'TULOSTA'>
+					<input type='hidden' name='lopetus' 		value = '$tilost_lopetus//from=LASKUTATILAUS'>
 					<input type='submit' value='".t("N‰yt‰")."' onClick=\"js_openFormInNewWindow('tulostaform_tosto', 'tulosta_osto'); return false;\">
 					<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tosto', 'samewindow'); return false;\">
 					</form>
@@ -1214,21 +1172,31 @@
 			echo "<br><br><table width='100%'><tr>";
 
 			if ($rivienmaara > 0 and $laskurow["liitostunnus"] != '' and $tilausok == 0) {
-					echo "	<td class='back' align='left'>
-							<form action = '$PHP_SELF' method='post'>";
-					echo "	<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-							<input type='hidden' name='toim' value='$toim'>
-							<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>
-							<input type='hidden' name='tee' value='valmis'><input type='Submit' value='".t("Tilaus valmis")."'>
-						</form></td>";
+					echo "	<td class='back'>
+							<form action = '$PHP_SELF' method='post'>
+							<input type='hidden' name='toim' 				value = '$toim'>
+							<input type='hidden' name='lopetus' 			value = '$lopetus'>
+							<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+							<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+							<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+							<input type='hidden' name='toimittajaid' 		value = '$laskurow[liitostunnus]'>
+							<input type='hidden' name='tee' 				value = 'valmis'>
+							<input type='Submit' value='".t("Tilaus valmis")."'>
+							</form>
+							</td>";
 
 				if ($toim != "HAAMU") {
-					echo "	<td class='back' align='left'>
+					echo "	<td class='back''>
 							<form action = '$PHP_SELF' method='post'>
-								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-								<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
-								<input type='hidden' name='tee' value='vahvista'><input type='Submit' value='".t("Vahvista toimitus")."'>
-							</form></td>";
+							<input type='hidden' name='toim' 				value = '$toim'>
+							<input type='hidden' name='lopetus' 			value = '$lopetus'>
+							<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+							<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+							<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+							<input type='hidden' name='tee' 				value = 'vahvista'>
+							<input type='Submit' value='".t("Vahvista toimitus")."'>
+							</form>
+							</td>";
 				}
 
 			}
@@ -1239,17 +1207,31 @@
 									return confirm(msg);
 							}
 					</SCRIPT>";
-				echo "	<form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
-						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-						<input type='hidden' name='toim' value='$toim'>
-						<td class='back' align='right'><input type='hidden' name='tee' value='poista'><input type='Submit' value='*".t("Mit‰tˆi koko tilaus")."*'></form></td>";
+				echo "	<td class='back' align='right'>
+						<form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
+						<input type='hidden' name='toim' 				value = '$toim'>
+						<input type='hidden' name='lopetus' 			value = '$lopetus'>
+						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+						<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+						<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+						<input type='hidden' name='tee' 				value = 'poista'>
+						<input type='Submit' value='*".t("Mit‰tˆi koko tilaus")."*'>
+						</form>
+						</td>";
 
 			}
 			elseif ($laskurow["tila"] == 'O') {
-				echo "	<form action = '$PHP_SELF' method='post'>
-						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-						<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-						<td class='back' align='right'><input type='hidden' name='tee' value='poista_kohdistamattomat'><input type='Submit' value='*".t("Mit‰tˆi kohdistamattomat rivit")."*'></form></td>";
+				echo "	<td class='back' align='right'>
+						<form action = '$PHP_SELF' method='post'>
+						<input type='hidden' name='toim' 				value = '$toim'>
+						<input type='hidden' name='lopetus' 			value = '$lopetus'>
+						<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+						<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+						<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+						<input type='hidden' name='tee' 				value = 'poista_kohdistamattomat'>
+						<input type='Submit' value='*".t("Mit‰tˆi kohdistamattomat rivit")."*'>
+						</form>
+						</td>";
 
 			}
 			echo "</tr></table>";

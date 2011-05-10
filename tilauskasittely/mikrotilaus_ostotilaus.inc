@@ -137,7 +137,6 @@
 
 			echo "<br><br>";
 			$tee = "Y";
-			$ei_aikatarkistusta = "JOO";
 		}
 		else {
 			$tee = "Y";
@@ -148,10 +147,12 @@
 		echo "<font class='head'>".t("Ostotilaus").":</font><hr><br>";
 
 		echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
-				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-				<input type='hidden' name='lopetus' value='$lopetus'>
-				<input type='hidden' name='tee' value='file'>
-				<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
+				<input type='hidden' name='toim' 				value = '$toim'>
+				<input type='hidden' name='lopetus' 			value = '$lopetus'>
+				<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+				<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+				<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+				<input type='hidden' name='tee' 				value = 'file'>
 
 				<font class='message'>".t("Tiedostomuoto").":</font><br><br>
 
@@ -162,8 +163,7 @@
 
 				<br>
 				<table>
-				<tr>";
-		echo "
+				<tr>
 				<th>".t("Valitse tiedosto").":</th>
 				<td><input name='userfile' type='file'></td>
 				<td class='back'><input type='submit' value='".t("Läheta")."'></td>

@@ -59,13 +59,6 @@
 			echo "<font class='head'>".t("Ostotilauksen otsikko").":</font><hr><br>";
 		}
 
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
-		echo "<input type='hidden' name='tee' value='MUUOTAOSTIKKOA'>";
-		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-		echo "<table>";
-
-
-
 		if (($tunnus != "") or ($kukarow["kesken"] != 0)) {
 			if ($tunnus != "") {
 				$squery = "	SELECT *, tunnus liitostunnus
@@ -82,7 +75,6 @@
 
 			if ($srow["liitostunnus"]>0 and $toimittajaid == 0) $toimittajaid = $srow["liitostunnus"];
 		}
-
 
 		// jos meillä on jo alatila ja tila ei muokkailla niitä!
 		if ($alatila == '') {
@@ -101,18 +93,24 @@
 			$valkoodi = $yhtiorow["valkoodi"];
 		}
 
-		echo "<tr><td colspan='2'>
-				<input type='hidden' name='ovttunnus' value='$srow[ovttunnus]'>
-				<input type='hidden' name='verkkotunnus' value='$srow[verkkotunnus]'>
-				<input type='hidden' name='ytunnus' value='$srow[ytunnus]'>
-				<input type='hidden' name='valkoodi' value='$valkoodi'>
-				<input type='hidden' name='maa' value='$srow[maa]'>
-				<input type='hidden' name='liitostunnus' value='$srow[liitostunnus]'>
-				<input type='hidden' name='ylatila' value='$ylatila'>
-				<input type='hidden' name='alatila' value='$alatila'>
-				<input type='hidden' name='toim' value='$toim'>
-				<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>";
+		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
+				<input type='hidden' name='toim' 				value = '$toim'>
+				<input type='hidden' name='lopetus' 			value = '$lopetus'>
+				<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+				<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+				<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+				<input type='hidden' name='tee' 				value = 'MUUOTAOSTIKKOA'>
+				<input type='hidden' name='ovttunnus' 			value = '$srow[ovttunnus]'>
+				<input type='hidden' name='verkkotunnus' 		value = '$srow[verkkotunnus]'>
+				<input type='hidden' name='ytunnus' 			value = '$srow[ytunnus]'>
+				<input type='hidden' name='valkoodi' 			value = '$valkoodi'>
+				<input type='hidden' name='maa' 				value = '$srow[maa]'>
+				<input type='hidden' name='liitostunnus' 		value = '$srow[liitostunnus]'>
+				<input type='hidden' name='ylatila' 			value = '$ylatila'>
+				<input type='hidden' name='alatila' 			value = '$alatila'>";
 
+		echo "<table>";
+		echo "<tr><td colspan='2'>";
 		echo "<table>
 				<tr><th colspan='2' align='left' valign='top'>&nbsp;".t("Toimittajan tiedot").":</td></tr>
 				<tr><td valign='top'>".t("Nimi").": </td><td><input type='text' name='nimi' size='35' maxlength='31' value='$srow[nimi]'></td></tr>
@@ -315,15 +313,19 @@
 					window.document.otsikko.tila.focus();
 					</script>";
 
-			echo "&nbsp;&nbsp;<form method='post' action='$PHP_SELF' autocomplete='off'>";
-			echo "<input type='hidden' name='tila' value='vaihdaasiakas'>";
-			echo "<input type='hidden' name='tee' value='MUUOTAOSTIKKOA'>";
-			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-			echo "<input type='hidden' name='toim' value='$toim'>";
-			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-			echo "<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>";
-			echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda toimittaja")."'></td></form>";
+			echo "&nbsp;&nbsp;";
 
+			echo "<td class='back'>
+					<form method='post' action='$PHP_SELF' autocomplete='off'>
+					<input type='hidden' name='toim' 				value = '$toim'>
+					<input type='hidden' name='lopetus' 			value = '$lopetus'>
+					<input type='hidden' name='tilausnumero' 		value = '$tilausnumero'>
+					<input type='hidden' name='toim_nimitykset' 	value = '$toim_nimitykset'>
+					<input type='hidden' name='naytetaankolukitut' 	value = '$naytetaankolukitut'>
+					<input type='hidden' name='tila' 				value = 'vaihdaasiakas'>
+					<input type='hidden' name='tee' 				value = 'MUUOTAOSTIKKOA'>
+					<input type='submit' ACCESSKEY='A' value='".t("Vaihda toimittaja")."'></form>
+					</td>";
 		}
 	}
 

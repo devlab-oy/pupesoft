@@ -9,7 +9,7 @@
 	echo "<br><table>";
 	echo "<tr>";
 	echo "<th>".t("Valitse kausi").":</th>";
-	
+
 	echo "<td><select name='alvv'>";
 
 	for ($i = date("Y"); $i >= date("Y")-4; $i--) {
@@ -68,15 +68,15 @@
 		$alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
 		$loppupvm = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
 
-		$query = "	SELECT tiliointi.tunnus, tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, tiliointi.selite, round(tiliointi.summa * tiliointi.vero / 100, 2) verot, lasku.tunnus laskutunnus
+		$query = "	SELECT tiliointi.tunnus, tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, tiliointi.selite, round(tiliointi.summa * tiliointi.vero / 100, 2) verot, lasku.tunnus laskutunnus, tiliointi.tilino, tiliointi.vero
 					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
-					LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tila != 'D')
+					LEFT JOIN lasku USE INDEX (primary) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tila != 'D')
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 					AND tiliointi.tapvm >= '$alkupvm'
 					AND tiliointi.tapvm <= '$loppupvm'
 					AND tiliointi.korjattu = ''
 					AND vero > 0";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$errorit = "";
 
@@ -86,9 +86,9 @@
 			$query = "	SELECT summa, ltunnus
 						FROM tiliointi USE INDEX (aputunnus_index)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-						and tiliointi.korjattu = ''
-						and aputunnus = '$trow[tunnus]'";
-			$xresult = mysql_query($query) or pupe_error($query);
+						AND tiliointi.korjattu = ''
+						AND aputunnus = '$trow[tunnus]'";
+			$xresult = pupe_query($query);
 
 			$error = '';
 
@@ -110,7 +110,7 @@
 			if ($error != '') {
 				$errorkpl++;
 
-				$errorit .= "<tr>";
+				$errorit .= "<tr class='aktiivi'>";
 
 				if ($kukarow['taso'] < 2) {
 					$errorit .= "<td nowrap valign='top'>$trow[tapvm]</td>";
@@ -119,8 +119,10 @@
 					$errorit .= "<td nowrap valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tapvm]</td>";
 				}
 
+				$errorit .= "<td nowrap align='right' valign='top'>$trow[tilino]</td>";
 				$errorit .= "<td nowrap align='right' valign='top'>$trow[summa]</td>";
 				$errorit .= "<td valign='top'>$trow[selite]</td>";
+				$errorit .= "<td valign='top'>$trow[vero]</td>";
 				$errorit .= "<td valign='top'>$trow[verot]</td>";
 				$errorit .= "<td valign='top'>$error</td>";
 				$errorit .= "</tr>";
@@ -128,14 +130,14 @@
 		}
 
 		// käydään läpi kaikki automaattitiliöinnit
-		$query = "	SELECT tiliointi.aputunnus, tiliointi.tunnus, tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, tiliointi.selite, round(tiliointi.summa * tiliointi.vero / 100, 2) verot
+		$query = "	SELECT tiliointi.aputunnus, tiliointi.tunnus, tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, tiliointi.selite, round(tiliointi.summa * tiliointi.vero / 100, 2) verot, tiliointi.tilino, tiliointi.vero
 					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 					AND tiliointi.tapvm >= '$alkupvm'
 					AND tiliointi.tapvm <= '$loppupvm'
 					AND tiliointi.korjattu = ''
 					AND tiliointi.aputunnus != 0";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		while ($trow = mysql_fetch_array ($result)) {
 
@@ -145,12 +147,12 @@
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						and tiliointi.korjattu = ''
 						and tunnus = '$trow[aputunnus]'";
-			$xresult = mysql_query($query) or pupe_error($query);
+			$xresult = pupe_query($query);
 
 			if (mysql_num_rows($xresult) != 1) {
 				$errorkpl++;
 
-				$errorit .= "<tr>";
+				$errorit .= "<tr class='aktiivi'>";
 
 				if ($kukarow['taso'] < 2) {
 					$errorit .= "<td nowrap valign='top'>$trow[tapvm]</td>";
@@ -159,8 +161,10 @@
 					$errorit .= "<td nowrap valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tapvm]</td>";
 				}
 
+				$errorit .= "<td nowrap align='right' valign='top'>$trow[tilino]</td>";
 				$errorit .= "<td nowrap align='right' valign='top'>$trow[summa]</td>";
 				$errorit .= "<td valign='top'>$trow[selite]</td>";
+				$errorit .= "<td valign='top'>$trow[vero]</td>";
 				$errorit .= "<td valign='top'>$trow[verot]</td>";
 				$errorit .= "<td valign='top'>".t("Automaattitiliöinnin isää ei löydy")."! $trow[tunnus]</td>";
 				$errorit .= "</tr>";
@@ -171,8 +175,10 @@
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>".t("tapvm")."</th>";
+			echo "<th>".t("tilino")."</th>";
 			echo "<th>".t("summa")."</th>";
 			echo "<th>".t("selite")."</th>";
+			echo "<th>".t("alv")."</th>";
 			echo "<th>".t("verot")."</th>";
 			echo "<th>".t("virhe")."</th>";
 			echo "</tr>";
@@ -194,7 +200,7 @@
 					and maa != ''
 					and vat_numero != ''
 					and toim_alv != ''";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$tilitrow = mysql_fetch_array($result);
 
 		echo "<br><font class='head'>".t("Käsiviennit").": ".t("Tilit")." $yhtiorow[alv] $tilitrow[alv_output]</font><br><br>";
@@ -206,8 +212,8 @@
 		}
 
 		$query = "	SELECT ltunnus, tiliointi.tilino, tiliointi.tapvm, tiliointi.summa, concat_ws(' ',selite, lasku.nimi) selite
-					FROM tiliointi
-					LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
+					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
+					LEFT JOIN lasku USE INDEX (primary) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
 					tiliointi.korjattu = '' and
 					tiliointi.aputunnus = 0 and
@@ -215,7 +221,7 @@
 					tiliointi.tapvm <= '$loppupvm' and
 					tiliointi.tilino in ($alv_tilit)
 					ORDER BY tilino, tapvm";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<table>";
 		echo "<tr>";
@@ -229,7 +235,7 @@
 		$kasiviennit_kpl = 0;
 
 		while ($trow = mysql_fetch_array ($result)) {
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 
 			if ($kukarow['taso'] < 2) {
 				echo "<td nowrap valign='top'>$trow[tapvm]</td>";
@@ -247,7 +253,7 @@
 			$kasiviennit_kpl++;
 		}
 
-		echo "<tr><td colspan='2' class='spec' align='right'>".t("Yhteensä").":</td><td align='right' class='spec'>$kasiviennit_summa</td><td></td></tr>";
+		echo "<tr><td colspan='2' class='spec' align='right'>".t("Yhteensä").":</td><td align='right' class='spec'>$kasiviennit_summa</td><td class='spec'></td></tr>";
 
 		echo "</table><br>";
 
@@ -270,9 +276,9 @@
 					sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) bruttosumma_valuutassa,
 					sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) verot_valuutassa,
 					count(*) kpl
-					FROM tiliointi
-					LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
-					LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
+					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
+					LEFT JOIN lasku USE INDEX (primary) ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+					LEFT JOIN tili USE INDEX (tili_index) ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 					AND tiliointi.korjattu = ''
 					AND tiliointi.tapvm >= '$alkupvm'
@@ -280,7 +286,7 @@
 					AND tiliointi.vero > 0
 					GROUP BY maa, valuutta, vero, tilino, nimi
 					ORDER BY maa, valuutta, vero, tilino, nimi";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<table><tr>";
 		echo "<th valign='top'>" . t("Maa") . "</th>";
@@ -306,14 +312,14 @@
 				echo "<tr>
 						<td colspan='6' class='spec' align='right'>".t("Yhteensä").":</td>
 						<td align = 'right' class='spec'>".sprintf('%.2f', $verosum)."</td>
-						<td colspan='2'></td>
+						<td colspan='2' class='spec'></td>
 						<td align = 'right' class='spec'>$kplsum</td></tr>";
 
 				$verosum 	= 0.0;
 				$kplsum 	= 0.0;
 			}
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			echo "<td valign='top'>$trow[maa]</td>";
 			echo "<td valign='top'>$trow[valuutta]</td>";
 			echo "<td valign='top' align='right'>".$trow["vero"]."%</td>";

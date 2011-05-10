@@ -549,8 +549,8 @@ if (!function_exists('alku_lahete')) {
 			$kal++;
 		}
 
-		// Jos tuotenumerot ovat hyvin pitkät
-		if (($tuotenopituus / mysql_num_rows($riviresult)) > 140 or ($nimityspituus / mysql_num_rows($riviresult)) > 140) {
+		// Jos tuotenumerot ja nimitykset ovat hyvin pitkät
+		if (($tuotenopituus / mysql_num_rows($riviresult)) + ($nimityspituus / mysql_num_rows($riviresult)) > 280) {
 			$pitkattuotteet = TRUE;
 		}
 
@@ -1299,7 +1299,7 @@ if (!function_exists('rivi_lahete')) {
 
 		// Jos meillä on marginaalimyyntiä/käänteinen alv
 		if ($row["alv"] >= 600) {
-			$row["kommentti"] .= "\n".t("Rakennusalan käännetty verovelvollisuus", $kieli).".";
+			$row["kommentti"] .= "\n".t("Ei lisättyä arvonlisäveroa, ostajan käännetty verovelvollisuus", $kieli).".";
 		}
 		elseif ($row["alv"] >= 500) {
 			$row["kommentti"] .= "\n".t("Ei sisällä vähennettävää veroa", $kieli).".";
@@ -1981,7 +1981,7 @@ if (!function_exists('rivi_eialehintoja_lahete')) {
 			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
 			$kala = $pohja - $rivinkorkeus;
 		}
-		
+
 		if ($row["myyntihinta_maara"] > 1) {
 
 			if ($kala == ($rivi_kala - $rivinkorkeus)) {

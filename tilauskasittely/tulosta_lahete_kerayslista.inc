@@ -1017,8 +1017,19 @@ if (!function_exists('print_pdf_kerayslista')) {
 		// itse print komento...
 		if ($komento == 'email') {
 			$liite = $pdffilenimi;
-			$kutsu = t("Keräyslista", $kieli);
-			echo t("Keräyslista tulostuu")."...<br>";
+
+			if ($tyyppi == "SIIRTOLISTA") {
+				$kutsu = t("Siirtolista", $kieli);
+				echo t("Siirtolista tulostuu")."...<br>";
+			}
+			elseif ($tyyppi == "REKLAMAATIO") {
+				$kutsu = t("Reklamaatio/Purkulista", $kieli);
+				echo t("Reklamaatio/Purkulista tulostuu")."...<br>";
+			}
+			else {
+				$kutsu = t("Keräyslista", $kieli);
+				echo t("Keräyslista tulostuu")."...<br>";
+			}
 
 			if ($kukarow["extranet"] == '') {
 				require("inc/sahkoposti.inc");

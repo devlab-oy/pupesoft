@@ -2,6 +2,11 @@
 
 	require ("../inc/parametrit.inc");
 
+	if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
+		echo "<font class='error'>".t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia")."!</font>";
+		exit;
+	}
+
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 	$lasku_yhtio_originaali = $kukarow['yhtio'];
@@ -51,6 +56,12 @@
 		$tila 				= "V";
 		$lalatila			= "J";
 		$tila_lalatila_lisa = " or (lasku.tila='N' and lasku.alatila='A')";
+		$tilaustyyppi 		= "";
+	}
+	elseif ($toim == 'VASTAANOTA_REKLAMAATIO') {
+		$tila 				= "C";
+		$lalatila			= "B";
+		$tila_lalatila_lisa = "";
 		$tilaustyyppi 		= "";
 	}
 	else {
@@ -184,6 +195,16 @@
 
 							$toim 			= $toim_bck;
 						}
+						elseif ($laskurow["tila"] == 'C' and $laskurow["alatila"] == 'B') {
+							$tee			= "VALMIS";
+							$tulostetaan	= "OK";
+							$toim_bck		= $toim;
+							$takas 			= 1;
+							$tyyppi 		= "REKLAMAATIO";
+
+							require("tilaus-valmis-tulostus.inc");
+
+						}
 						else {
 							require("tilaus-valmis-tulostus.inc");
 						}
@@ -261,6 +282,9 @@
 				}
 				elseif ($toim == 'VALMISTUS') {
 					echo "<font class='head'>".t("Tulosta valmistuslista").":</font><hr>";
+				}
+				elseif ($toim == 'VASTAANOTA_REKLAMAATIO') {
+					echo "<font class='head'>".t("Tulosta purkulista").":</font><hr>";
 				}
 				else {
 					echo "<font class='head'>".t("Tulosta keräyslista").":</font><hr>";
@@ -499,6 +523,9 @@
 		}
 		elseif ($toim == 'VALMISTUS') {
 			echo "<font class='head'>".t("Tulosta valmistuslista").":</font><hr>";
+		}
+		elseif ($toim == 'VASTAANOTA_REKLAMAATIO') {
+			echo "<font class='head'>".t("Tulosta purkulista").":</font><hr>";
 		}
 		else {
 			echo "<font class='head'>".t("Tulosta keräyslista").":</font><hr>";
@@ -1044,7 +1071,22 @@
 			if ($oikeurow['paivitys'] == 1) {
 				echo "<table>";
 				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<tr><th colspan='2'>".t("Tulosta kaikki keräyslistat")."</th></tr>";
+
+				if ($toim == 'SIIRTOLISTA') {
+					echo "<tr><th colspan='2'>".t("Tulosta kaikki siirtolistat")."</th></tr>";
+				}
+				elseif ($toim == 'SIIRTOTYOMAARAYS') {
+					echo "<tr><th colspan='2'>".t("Tulosta kaikki työmääräykset")."</th></tr>";
+				}
+				elseif ($toim == 'VALMISTUS') {
+					echo "<tr><th colspan='2'>".t("Tulosta kaikki valmistuslistat")."</th></tr>";
+				}
+				elseif ($toim == 'VASTAANOTA_REKLAMAATIO') {
+					echo "<tr><th colspan='2'>".t("Tulosta kaikki purkulistat")."</th></tr>";
+				}
+				else {
+					echo "<tr><th colspan='2'>".t("Tulosta kaikki keräyslistat")."</th></tr>";
+				}
 
 				if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
 					$logistiikka_yhtio = $konsernivarasto_yhtiot;

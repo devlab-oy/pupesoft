@@ -405,7 +405,7 @@ if (($tee == "" and (($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 a
 	elseif (@include("luo_myyntitilausotsikko.inc"));
 	else exit;
 
-	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanro, '', $kantaasiakastunnus);
+	$tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanumero, '', $kantaasiakastunnus);
 	$kukarow["kesken"] = $tilausnumero;
 	$kaytiin_otsikolla = "NOJOO!";
 }
@@ -2821,7 +2821,7 @@ if ($tee == '') {
 				</tr>";
 			echo "<tr>$jarjlisa
 				<th align='left'>".t("Myyjänro")."</th>
-				<td><input type='text' size='10' name='myyjanro' value='$my'></td>
+				<td><input type='text' size='10' name='myyjanumero' value='$my'></td>
 				</tr>";
 		}
 	}

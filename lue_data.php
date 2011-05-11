@@ -466,6 +466,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$chminkpl			= 0;
 			$chmaxkpl			= 0;
 			$chalennuslaji		= 0;
+			$chmonikerta		= "";
 			$chalkupvm 			= '0000-00-00';
 			$chloppupvm 		= '0000-00-00';
 			$and 				= '';
@@ -1215,6 +1216,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							if ($otsikko == 'ALENNUSLAJI' and (int) $rivi[$r] > 0) {
 								$chalennuslaji = (int) $rivi[$r];
 							}
+
+							if ($otsikko == 'MONIKERTA' and $rivi[$r] != '') {
+								$chmonikerta = trim($rivi[$r]);
+							}
 						}
 
 						//tarkistetaan kuka juttuja
@@ -1361,11 +1366,22 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					if ($chminkpl != 0) {
 						$and .= " and minkpl = '$chminkpl'";
 					}
-					if ($chmaxkpl != 0) {
-						$and .= " and maxkpl = '$chmaxkpl'";
+
+					if ($table_mysql == 'asiakasalennus') {
+						if ($chmaxkpl != 0) {
+							$and .= " and maxkpl = '$chmaxkpl'";
+						}
 					}
 
 					if ($table_mysql == 'asiakasalennus') {
+
+						if ($chmonikerta != '') {
+							$and .= " and monikerta != ''";
+						}
+						else {
+							$and .= " and monikerta  = ''";
+						}
+
 						if ($chalennuslaji == 0) {
 							$and .= " and alennuslaji = '1'";
 						}

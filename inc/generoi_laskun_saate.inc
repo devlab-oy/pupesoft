@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("generoi_laskun_saate")) {
-	function generoi_laskun_saate ($lasrow, $saatekirje = '', $kieli = '') {
+	function generoi_laskun_saate ($lasrow, $saatekirje = '', $kieli = '',$toim = '') {
 		global $kukarow, $yhtiorow;
 
 		$content_body 		= "";
@@ -39,19 +39,29 @@ if (!function_exists("generoi_laskun_saate")) {
 			$lisa = " ORDER BY jarjestys LIMIT 1";
 		}
 
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND laji = 'LASKUTUS_SAATE'
-					AND kieli = '$kieli' $lisa";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) == 0) {
+		if ($toim == 'EXTRANET_REKLAMAATIO') {
 			$query = "	SELECT *
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND laji = 'LASKUTUS_SAATE' $lisa";
+						AND laji = 'PALAUTUS_SAATE'
+						AND kieli = '$kieli' $lisa";
 			$result = mysql_query($query) or pupe_error($query);
+		}
+		else {
+			$query = "	SELECT *
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND laji = 'LASKUTUS_SAATE'
+						AND kieli = '$kieli' $lisa";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 0) {
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND laji = 'LASKUTUS_SAATE' $lisa";
+				$result = mysql_query($query) or pupe_error($query);
+			}
 		}
 
 		if ($row = mysql_fetch_array($result)) {

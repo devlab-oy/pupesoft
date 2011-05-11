@@ -4637,7 +4637,7 @@ if (!function_exists("alehinta")) {
 
 				$aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
 			}
-			elseif ($ale["ale".$alepostfix] > 0) {
+			elseif (is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] > 0) {
 				// 3. käyttäjän syöttämä alennus
 				$aleperuste["ale".$alepostfix] = 3;
 
@@ -4655,7 +4655,7 @@ if (!function_exists("alehinta")) {
 		$jatka = FALSE;
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-			if (isset($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] == '') {
+			if (isset($ale["ale".$alepostfix]) and !is_numeric($ale["ale".$alepostfix])) {
 				// Jos ale on tyhjä niin unsetataan se
 				unset($ale["ale".$alepostfix]);
 				$jatka = TRUE;

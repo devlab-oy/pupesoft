@@ -283,7 +283,7 @@
 		 													paketinnumero		= '$i',
 		 													paketintunniste 	= '$laatikkoid',
 		 													lahetyslistannro 	= '$pakkauslista',
-		 													toimittajan_tuoteno	= '$value[ProductId]',
+		 													toim_tuoteno		= '$value[ProductId]',
 		 													kappalemaara		= '$value[DeliveredQuantity]',
 		 													tilausrivinpositio	= '$value[PositionNumber]',
 		 													laatija 			= '$kukarow[kuka]',

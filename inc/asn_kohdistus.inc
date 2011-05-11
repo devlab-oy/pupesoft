@@ -51,7 +51,7 @@
 											AND toimi.toimittajanro = '$row[toimittajanumero]')
 							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio
 															AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-															AND tuotteen_toimittajat.toim_tuoteno = '$row[toimittajan_tuoteno]')
+															AND tuotteen_toimittajat.toim_tuoteno = '$row[toim_tuoteno]')
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
@@ -65,10 +65,10 @@
 					// Tuli enemmän, tämä on virhe
 					$virheet++;
 					if (mysql_num_rows($checkres) == 0) {
-						echo "VIRHE: Sopivaa ostotilausrivia ei loydy. Toimittaja $row[toimittajanumero] ASN-sanoma $row[asn_numero] Paketti $row[paketinnumero] Tuote $row[toimittajan_tuoteno]\n";
+						echo "VIRHE: Sopivaa ostotilausrivia ei loydy. Toimittaja $row[toimittajanumero] ASN-sanoma $row[asn_numero] Paketti $row[paketinnumero] Tuote $row[toim_tuoteno]\n";
 					}
 					else {
-						echo "VIRHE: Toimitettu enemman kuin tilattu. Toimittaja $row[toimittajanumero] ASN-sanoma $row[asn_numero] Paketti $row[paketinnumero] Tuote $row[toimittajan_tuoteno] Tilattu $tilausrivirow[varattu] Toimitettu $row[kappalemaara]\n";
+						echo "VIRHE: Toimitettu enemman kuin tilattu. Toimittaja $row[toimittajanumero] ASN-sanoma $row[asn_numero] Paketti $row[paketinnumero] Tuote $row[toim_tuoteno] Tilattu $tilausrivirow[varattu] Toimitettu $row[kappalemaara]\n";
 					}
 				}
 				elseif ($row["kappalemaara"] < $tilausrivirow["varattu"]) {

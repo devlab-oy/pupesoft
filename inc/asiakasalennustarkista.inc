@@ -4,7 +4,7 @@ if(!function_exists("asiakasalennustarkista")) {
 	function asiakasalennustarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
-		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri, $chalennuslaji;
+		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmonikerta, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri, $chalennuslaji;
 
 		if (mysql_field_name($result, $i) == "alennus") {
 			if (trim($t[$i]) == '') {
@@ -66,7 +66,7 @@ if(!function_exists("asiakasalennustarkista")) {
 					$result = mysql_query($query) or pupe_error($query);
 				}
 
-				if (!isset($result) or mysql_num_rows($result) != 1) {
+				if ((!isset($result) and is_numeric($chastunn) and $chastunn > 0) or (isset($result) and mysql_num_rows($result) != 1)) {
 
 					$ytunnus 		= $chastunn;
 					$kutsuja 		= "yllapito.php";
@@ -204,9 +204,9 @@ if(!function_exists("asiakasalennustarkista")) {
 			$chminkpl = (int) $t[$i];
 		}
 
-		if (mysql_field_name($result, $i) == "maxkpl") {
-			$t[$i] = str_replace(",", ".", $t[$i]);
-			$chmaxkpl = (int) $t[$i];
+		if (mysql_field_name($result, $i) == "monikerta") {
+			$t[$i] = trim($t[$i]);
+			$chmonikerta = $t[$i];
 		}
 
 		if (mysql_field_name($result, $i) == "alkupvm") {
@@ -279,7 +279,7 @@ if(!function_exists("asiakasalennustarkista")) {
 						and alkupvm 	= '$chalkupvm'
 						and loppupvm 	= '$chloppupvm'
 						and minkpl 		= $chminkpl
-						and maxkpl 		= $chmaxkpl
+						and monikerta	= '$chmonikerta'
 						and alennuslaji = $chalennuslaji
 						and tunnus	   != '$trow[$i]'";
 			$dsresult = mysql_query($aquery) or pupe_error($aquery);

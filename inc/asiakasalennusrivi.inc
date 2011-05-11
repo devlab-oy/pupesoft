@@ -14,7 +14,7 @@
 					WHERE  avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
 		$preres = mysql_query($preq) or pupe_error($preq);
 
-		$ulos = "<td><select id='piiri' name='$nimi'>";
+		$ulos = "<td><select id='piiri' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = ''>".t("Ei piiri‰")."</option>";
 
 		while ($srow = mysql_fetch_array($preres)) {
@@ -41,7 +41,7 @@
 					ORDER BY node.lft";
 		$preres = mysql_query($preq) or pupe_error($preq);
 
-		$ulos = "<td><select id='asiakas_segmentti' name='$nimi'>";
+		$ulos = "<td><select id='asiakas_segmentti' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value=''>".t("Ei asiakassegmentti‰")."</option>";
 
 		while ($prerow = mysql_fetch_array($preres)) {
@@ -63,7 +63,7 @@
 					ORDER BY ryhma";
 		$sresult = mysql_query($query) or pupe_error($query);
 
-		$ulos = "<td><select id='ryhma' name='$nimi'>";
+		$ulos = "<td><select id='ryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = ''>".t("Ei ryhm‰‰")."</option>";
 
 		while ($srow = mysql_fetch_array($sresult)) {
@@ -86,7 +86,7 @@
 
 		$vresult = t_avainsana("ASIAKASRYHMA");
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei ryhm‰‰")."</option>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -136,6 +136,8 @@
 			$jatko = 0;
 		}
 		else {
+			if ($trow[$i] == 0) $trow[$i] = "";
+
 			// Ei maxlength:i‰ koska silloin hakutoiminto ei v‰ltt‰m‰tt‰ toimi
 			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'></td>";
 			$jatko = 0;
@@ -151,10 +153,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "monikerta") {
+ 		$sel = "";
+		if ($trow[$i] != "") $sel = "SELECTED";
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value = ''>".t("Ei. Alennus on voimassa kun tilataan v‰hintaan minkpl verran")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Kyll‰. Alennus on voimassa kun tilataan minkpl verran, tai mink‰ tahansa minkpl monikerran verran")."</option>";
+		$ulos .= "</select></td>\n";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "alennuslaji") {
  		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill(1, $yhtiorow['myynnin_alekentat'], '');
 
-		$ulos = "<td><select name='{$nimi}'>";
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			$ulos .= "<option value = '$alepostfix' {$sel[$alepostfix]}>".t("Alennus")." $alepostfix</option>";

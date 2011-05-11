@@ -350,10 +350,7 @@
 					break;
 				case "C":
 					$alatila = "Reklamaatio hyllytet‰‰n";
-					break;
-				case "X":
-					$alatila = "Reklamaatio valmis laskutettavaksi";
-					break;
+					break;				
 			}
 			break;
 		case "0":

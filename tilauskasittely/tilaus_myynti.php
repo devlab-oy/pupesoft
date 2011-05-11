@@ -1383,7 +1383,7 @@ if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAAR
 }
 
 if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" and $yhtiorow['reklamaation_kasittely'] == 'U') {
-		
+
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
 	$result = pupe_query($query);
 
@@ -1443,7 +1443,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 	$tilausnumero		= '';
 	$laskurow			= '';
 	$kukarow['kesken']	= '';
-	
+
 	if ($kukarow["extranet"] == "" and $lopetus != '') {
 		lopetus($lopetus, "META");
 	}
@@ -1658,13 +1658,14 @@ if ($tee == '') {
 	}
 
 	// Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty ja arvoja vaihdettu
-	if ((isset($toimitustapa) and strpos($toimitustapa, "###") === FALSE and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
+	if ($kukarow["kesken"] > 0 and (
+		(isset($toimitustapa) and strpos($toimitustapa, "###") === FALSE and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
 		(isset($toimitustapa) and strpos($toimitustapa, "###") !== FALSE and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]."###".$laskurow["toimitustavan_lahto"]) or
 		(isset($viesti) and $viesti != $laskurow["viesti"]) or
 		(isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
 		(isset($myyjanro) and $myyjanro > 0) or
 		(isset($myyja) and $myyja > 0 and $myyja != $laskurow["myyja"]) or
-		(isset($maksutapa) and $maksutapa != '')) {
+		(isset($maksutapa) and $maksutapa != ''))) {
 
 		if ((int) $myyjanro > 0) {
 			$apuqu = "	SELECT *

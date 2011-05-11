@@ -66,7 +66,7 @@ if(!function_exists("asiakashintatarkista")) {
 					$result = mysql_query($query) or pupe_error($query);
 				}
 
-				if (!isset($result) or mysql_num_rows($result) != 1) {
+				if ((!isset($result) and is_numeric($chastunn) and $chastunn > 0) or (isset($result) and mysql_num_rows($result) != 1)) {
 
 					$ytunnus 		= $chastunn;
 					$kutsuja 		= "yllapito.php";

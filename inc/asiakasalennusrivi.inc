@@ -19,7 +19,7 @@
 
 		while ($srow = mysql_fetch_array($preres)) {
 			$sel = '';
-			if ($trow[$i] == $srow["piiri"]) {
+			if (strtoupper($trow[$i]) == strtoupper($srow["piiri"])) {
 				$sel = "selected";
 			}
 			$ulos .= "<option value='$srow[piiri]' $sel>$srow[selitetark]</option>";
@@ -68,7 +68,7 @@
 
 		while ($srow = mysql_fetch_array($sresult)) {
 			$sel = '';
-			if ($trow[$i] == $srow["ryhma"]) {
+			if (strtoupper($trow[$i]) == strtoupper($srow["ryhma"])) {
 				$sel = "selected";
 			}
 			$ulos .= "<option value='$srow[ryhma]' $sel>$srow[selitetark]</option>";
@@ -91,7 +91,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow['selite']) {
+			if (strtoupper($trow[$i]) == strtoupper($vrow['selite'])) {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";

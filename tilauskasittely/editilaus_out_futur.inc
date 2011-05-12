@@ -6,6 +6,8 @@
 
 			extract($params);
 
+			$summa = $toim != '' ? $laskurow['summa'] : '';
+
 		   	//tilauksen otsikko
 		   	$edi_order  = "*IS from:721111720-1 to:IKH,ORDERS*id:{$laskurow['tunnus']} version:AFP-1.0 *MS\n";
 		   	$edi_order .= "*MS {$laskurow['tunnus']}\n";
@@ -24,7 +26,7 @@
 			$edi_order .= "OSTOTIL.OT_MAKSUEHTO:{$laskurow['maksuehto']}\n";
 			$edi_order .= "OSTOTIL.OT_VIITTEEMME:{$laskurow['viesti']}\n";
 			$edi_order .= "OSTOTIL.OT_VIITTEENNE:{$laskurow['sisviesti2']}\n";
-			$edi_order .= "OSTOTIL.OT_SUMMA:\n";
+			$edi_order .= "OSTOTIL.OT_SUMMA:{$summa}\n";
 			$edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:{$laskurow['valkoodi']}\n";
 			$edi_order .= "OSTOTIL.OT_KLAUSUULI1:\n";
 			$edi_order .= "OSTOTIL.OT_KLAUSUULI2:\n";
@@ -41,11 +43,11 @@
 			$edi_order .= "OSTOTIL.OT_YHTEYSHENKILO:\n";
 			$edi_order .= "OSTOTIL.OT_YHTEYSHENKILONPUH:\n";
 			$edi_order .= "OSTOTIL.OT_YHTEYSHENKILONFAX:\n";
-			$edi_order .= "OSTOTIL.OT_MYYNTI_YRITYS:\n";
-			$edi_order .= "OSTOTIL.OT_MYYNTI_KATUOSOITE:\n";
-			$edi_order .= "OSTOTIL.OT_MYYNTI_POSTITOIMIPAIKKA:\n";
-			$edi_order .= "OSTOTIL.OT_MYYNTI_POSTINRO:\n";
-			$edi_order .= "OSTOTIL.OT_MYYNTI_MAAKOODI:\n";
+			$edi_order .= "OSTOTIL.OT_MYYNTI_YRITYS:{$yhtiorow['nimi']}\n";
+			$edi_order .= "OSTOTIL.OT_MYYNTI_KATUOSOITE:{$yhtiorow['osoite']}\n";
+			$edi_order .= "OSTOTIL.OT_MYYNTI_POSTITOIMIPAIKKA:{$yhtiorow['postitp']}\n";
+			$edi_order .= "OSTOTIL.OT_MYYNTI_POSTINRO:{$yhtiorow['postino']}\n";
+			$edi_order .= "OSTOTIL.OT_MYYNTI_MAAKOODI:{$yhtiorow['maa']}\n";
 			$edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILO:\n";
 			$edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONPUH:\n";
 			$edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONFAX:\n";
@@ -71,6 +73,10 @@
 					$kpl = round($tilausrivi_row['varattu'] * 1, 0);
 				}
 
+				if ($tilausrivi_row['var'] == 'P') {
+					$kpl = 0;
+				}
+
 	   			$edi_order .= "*RS OSTOTILRIV {$i}\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_NRO:".substr($laskurow['tunnus'], -6)."\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_RIVINRO:".substr($tilausrivi_row['tunnus'], -6)."\n";
@@ -82,8 +88,12 @@
 
 	    		$edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:{$tilausrivi_row['rivihinta']}\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$tilausrivi_row['hinta']}\n";
-	    		// $edi_order .= "OSTOTILRIV.OTR_ALENNUS:".generoi_alekentta_php($tilausrivi_row, 'M')."\n";
-	    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
+
+				if ($toim == '') {
+		    		// $edi_order .= "OSTOTILRIV.OTR_ALENNUS:".generoi_alekentta_php($tilausrivi_row, 'M')."\n";
+		    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
+				}
+
 				$edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$tilausrivi_row['alv']}\n";
 
 				$edi_order .= "OSTOTILRIV.OTR_VIITE:{$tilausrivi_row['kommentti']}\n";

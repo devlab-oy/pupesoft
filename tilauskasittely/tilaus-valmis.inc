@@ -1044,7 +1044,12 @@ else {
 				// jos varaston ulkoinen järjestelmä on Unikko
 				if ($ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'] == 'U') {
 
-					$pupesoft_tilaustyyppi = 8;
+					if ($toim == "VASTAANOTA_REKLAMAATIO") {
+						$pupesoft_tilaustyyppi = 3;
+					}
+					else {
+						$pupesoft_tilaustyyppi = 8;
+					}
 
 					$query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
 					$asiakas_chk_res = pupe_query($query);
@@ -1063,6 +1068,7 @@ else {
 						'asiakasnro' => $asiakas_chk_row['herminator'],
 						'tilaustyyppi' => $pupesoft_tilaustyyppi,
 						'toimitustapa' => $totarowx['herminator'],
+						'toim' => $toim,
 					);
 
 					require('tilauskasittely/editilaus_out_futur.inc');

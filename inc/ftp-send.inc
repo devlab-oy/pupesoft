@@ -9,7 +9,7 @@ else exit;
 
 $dummy			= array();
 $syy			= "";
-$palautus		= "";
+$palautus		= 0;
 $tulos_ulos_ftp	= "";
 
 $filenimi = basename($ftpfile);

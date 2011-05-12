@@ -660,7 +660,7 @@ else {
 			$laskurow['varasto'] = 0;
 
 			//Toimitustavan hetierä tarvitaan
-			$query = "SELECT tulostustapa from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
+			$query = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$totarowx = mysql_fetch_assoc($result);
 
@@ -727,7 +727,7 @@ else {
 									FROM lasku
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tunnus = '$laskurow[tunnus]'";
-						$laskusplitres = mysql_query($query) or pupe_error($query);
+						$laskusplitres = pupe_query($query);
 					}
 
 					$fields = "yhtio";
@@ -778,7 +778,7 @@ else {
 								FROM laskun_lisatiedot
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus = '$laskurow[tunnus]'";
-					$lisatiedot_result = mysql_query($query) or pupe_error($query);
+					$lisatiedot_result = pupe_query($query);
 					$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
 
 					$laskurow['tunnus'] = (string) mysql_insert_id();
@@ -804,7 +804,7 @@ else {
 					}
 
 					$query = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
-					$lisatiedot_result = mysql_query($query) or pupe_error($query);
+					$lisatiedot_result = pupe_query($query);
 				}
 				else {
 					$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o' " : '';
@@ -1027,6 +1027,57 @@ else {
 					}
 				}
 			} #end if jt_email
+
+			foreach ($tilausnumerot as $til_nro) {
+
+				$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$til_nro}'";
+				$laskurow_edi_res = pupe_query($query);
+				$laskurow_edi = mysql_fetch_assoc($laskurow_edi_res);
+
+				$query = "	SELECT ulkoinen_jarjestelma
+							FROM varastopaikat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow_edi['varasto']}'";
+				$ulkoinen_jarjestelma_res = pupe_query($query);
+				$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
+
+				// jos varaston ulkoinen järjestelmä on Unikko
+				if ($ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'] == 'U') {
+
+					$pupesoft_tilaustyyppi = 8;
+
+					$query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
+					$asiakas_chk_res = pupe_query($query);
+					$asiakas_chk_row = mysql_fetch_assoc($asiakas_osoite_res);
+
+					$query = "	SELECT *
+								FROM laskun_lisatiedot
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND otunnus = '{$laskurow_edi['tunnus']}'";
+					$lisatiedot_result = pupe_query($query);
+					$laskun_lisatiedot = mysql_fetch_array($lisatiedot_result);
+
+					$params = array(
+						'laskurow' => $laskurow_edi,
+						'lisatiedot' => $laskun_lisatiedot,
+						'asiakasnro' => $asiakas_chk_row['herminator'],
+						'tilaustyyppi' => $pupesoft_tilaustyyppi,
+						'toimitustapa' => $totarowx['herminator'],
+					);
+
+					require('tilauskasittely/editilaus_out_futur.inc');
+
+					if (editilaus_out_futur($params) === 0) {
+						$query = "	UPDATE lasku SET
+									tila = 'L',
+									alatila = 'A',
+									lahetepvm = now()
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus = '{$til_nro}'";
+						$upd_res = pupe_query($query);
+					}
+				}
+			}
 		}
 	} // end jos yksikin rivi kerätty else haara
 }

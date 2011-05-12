@@ -182,6 +182,7 @@
 		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
 		$ulos .= "<option value='K'{$sel['K']}>".t("Kardex")."</option>";
 		$ulos .= "<option value='V'{$sel['V']}>".t("Vocollect")."</option>";
+		$ulos .= "<option value='U'{$sel['U']}>".t("Unikko")."</option>";
 		$ulos .= "</select>";
 
 		$ulos .= "</td>";

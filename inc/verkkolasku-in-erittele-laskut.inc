@@ -78,6 +78,47 @@
 			}
 		}
 
+		$xml = @simplexml_load_file($file);
+
+		if ($xml !== FALSE) {
+
+			$i = 1;
+
+			// Unikon laskuaineisto
+			if ($xml->LedgerJournalTable->LedgerJournalName == "ORAO") {
+
+				$vakio_alku = '<?xml version="1.0"?><LedgerJournal><LedgerJournalTable><LedgerJournalName>ORAO</LedgerJournalName><Name>Ostolaskut Unikosta</Name>';
+				$vakio_loppu = '</LedgerJournalTable></LedgerJournal>';
+
+				// Lisätään ekaan tiedostoon alkutagit
+				$xmlnimi = "ORAO-$i-".md5(uniqid(mt_rand(), true)).".xml";
+				file_put_contents($laskut."/".$xmlnimi, $vakio_alku);
+
+				foreach ($xml->LedgerJournalTable->LedgerJournalTrans as $lasku) {
+
+					if ((string) $lasku->AccountType == "Vend" and $i > 1) {
+						// Kun toimittaja vaihtuu, kirjoitetaan lopputagit...
+						file_put_contents($laskut."/".$xmlnimi, $vakio_loppu, FILE_APPEND);
+
+						// ...ja keksitään uusi tiedostonimi...
+						$xmlnimi = "ORAO-$i-".md5(uniqid(mt_rand(), true)).".xml";
+
+						// ...ja kirjotetaan sinne alkutagit
+						file_put_contents($laskut."/".$xmlnimi, $vakio_alku.$lasku->asXML());
+					}
+					else {
+						file_put_contents($laskut."/".$xmlnimi, $lasku->asXML(), FILE_APPEND);
+					}
+
+					$i++;
+				}
+
+				// Lisätään viimeiseen tiedostoon lopputagit
+				file_put_contents($laskut."/".$xmlnimi, $vakio_loppu, FILE_APPEND);
+				$luotiinlaskuja++;
+			}
+		}
+
 		return $luotiinlaskuja;
 	}
 ?>

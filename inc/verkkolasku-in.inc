@@ -37,13 +37,16 @@
 			elseif (strpos($file, "_invoice") !== false){
 				require("inc/verkkolasku-in-teccom.inc");
 			}
+			elseif (strpos($file, "ORAO") !== false){
+				require("inc/verkkolasku-in-unikko.inc");
+			}
 			else {
 				require("inc/verkkolasku-in-pupevoice.inc");
 			}
 
 
 			// Nämä muuttujat kuuluisi olla setattuna:
-/*			
+/*
 			echo "\n\nLASKUNTIEDOT:\n";
 			echo "01: ".$yhtio."\n";
 			echo "02: ".$verkkotunnus_vas."\n";
@@ -73,7 +76,8 @@
 			echo "26: ".$ostaja_asiakkaantiedot["osoite"]."\n";
 			echo "27: ".$ostaja_asiakkaantiedot["postino"]."\n";
 			echo "28: ".$ostaja_asiakkaantiedot["postitp"]."\n";
-			echo "29: teccom-only ".$laskuttajan_toimittajanumero."\n";
+			echo "29: TecCom/Unikko only ".$laskuttajan_toimittajanumero."\n";
+			echo "30: ".$laskuttajan_valkoodi."\n";
 
 			Nämä muuttujat ovat valinnaisia:
 
@@ -92,7 +96,8 @@
 			$rtuoteno[]["tilaajanrivinro"]
 			$rtuoteno[]["tuoteno"]
 			$rtuoteno[]["yksikko"]
-
+			$rtuoteno[]["tilinumero"]
+			$rtuoteno[]["rivihinta_valuutassa"]
 */
 
 			// generic error messagen alku
@@ -273,8 +278,14 @@
 			$yhtio = $yhtiorow['yhtio'];
 
 			// Perusta lasku
-			$summa		= $laskun_summa_eur;
-			$valkoodi	= 'EUR';
+			$summa = $laskun_summa_eur;
+
+			if ($laskuttajan_valkoodi != "") {
+				$valkoodi = $laskuttajan_valkoodi;
+			}
+			else {
+				$valkoodi = 'EUR';
+			}
 
 			if ($laskun_tyyppi == "381" and $summa > 0) {
 				$summa = $summa * -1;
@@ -282,7 +293,7 @@
 			$tpp = (int) substr($laskun_paiva,6,2);
 			$tpk = (int) substr($laskun_paiva,4,2);
 			$tpv = (int) substr($laskun_paiva,0,4);
-		
+
 			$erp = (int) substr($laskun_erapaiva,6,2);
 			$erk = (int) substr($laskun_erapaiva,4,2);
 			$erv = (int) substr($laskun_erapaiva,0,4);
@@ -428,7 +439,7 @@
 					$trow = mysql_fetch_array($result);
 				}
 			}
-			
+
 			if (!isset($trow) and $laskuttajan_toimittajanumero != "") {
 				// 8 etsitään toimittaja teccomi-specific
 				$query = "	SELECT *
@@ -450,7 +461,8 @@
 					$return .= "Etsittiin tiedoilla:\n";
 					$return .= "Nimi: $laskuttajan_nimi\n";
 					$return .= "Ovt: $laskuttajan_ovt $yovt $yovt1 $yovt2\n";
-					$return .= "Vat: $laskuttajan_vat $intvat $intvat2\n\n";
+					$return .= "Vat: $laskuttajan_vat $intvat $intvat2\n";
+					$return .= "Nro: $laskuttajan_toimittajanumero\n\n";
 
 					$urlmain = "/view/ebs-2.0/$yhtiorow[verkkotunnus_vas]/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=".gmdate("YmdHis")."Z&VERSION=ebs-2.0";
 					$digest	 = md5($urlmain . "&" . $yhtiorow['verkkosala_vas']);
@@ -943,9 +955,11 @@
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 				$tunnus = mysql_insert_id();
 				$omasumma = round($summa * $vrow['kurssi'], 2);
+				$omasumma_valuutassa = $summa;
 
 				// Tehdään oletustiliöinnit, ostovelat
 				$vassumma = -1 * $omasumma;
+				$vassumma_valuutassa = -1 * $summa;
 
 				//Tutkitaan otsovelkatiliä
 				if ($trow["konserniyhtio"] != '') {
@@ -975,6 +989,8 @@
 							projekti	= '$ostovelat_projekti',
 							tapvm 		= '$tpv-$tpk-$tpp',
 							summa 		= '$vassumma',
+							summa_valuutassa = '$vassumma_valuutassa',
+							valkoodi 	= '$valkoodi',
 							selite 		= '$selite',
 							vero 		= 0,
 							lukko 		= '1',
@@ -1001,8 +1017,8 @@
 				}
 
 	 			// Tehdän pelkät oletustiliöinnit
-				if (mysql_num_rows($result) == 0 and count($ealvi) == 1) {
-
+	 			// Pitää hardkoodata UNIKKO ohittamaan tämän.
+				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE") {
 					if ($oletustili > 0) {
 						$tili = $oletustili;
 					}
@@ -1020,6 +1036,7 @@
 					$kukarow['kuka']    = 'verkkolas';
 
 					$verkkolaskuveroton = round($omasumma / (1 + ($vero / 100)),2);
+					$verkkolaskuveroton_valuutassa = round($summa / (1 + ($vero / 100)),2);
 					$summa              = $omasumma;
 					$kustp              = $oletuskust;
 					$kohde              = $oletuskohde;
@@ -1043,6 +1060,8 @@
 									kustp = 0,
 									tapvm = '$tpv-$tpk-$tpp',
 									summa = '$verkkolaskuveroton',
+									summa_valuutassa = '$verkkolaskuveroton_valuutassa',
+									valkoodi 	= '$valkoodi',
 									selite = '$selite',
 									vero = 0,
 									lukko = '',
@@ -1059,6 +1078,8 @@
 									projekti = '$projekti',
 									tapvm = '$tpv-$tpk-$tpp',
 									summa = $verkkolaskuveroton*-1,
+									summa_valuutassa = $verkkolaskuveroton_valuutassa*-1,
+									valkoodi 	= '$valkoodi',
 									selite = '$selite',
 									vero = 0,
 									lukko = '',
@@ -1074,15 +1095,17 @@
 				}
 				else {
 					// Tehdään rivikohtaiset tiliöinnit
-					$i					= 0;
-					$totsumma 			= 0;
-					$verkkolaskuveroton = 0;
-					$vtontot 			= 0;
+					$i								= 0;
+					$totsumma 						= 0;
+					$totsumma_valuutassa			= 0;
+					$verkkolaskuveroton 			= 0;
+					$verkkolaskuveroton_valuutassa	= 0;
+					$vtontot 						= 0;
+					$vtontot_valuutassa 			= 0;
 
 					for ($i=0; $i < count($rtuoteno); $i++) {
 
-						if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
-
+						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
 
 							$selite = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["riviinfo"])); // Poistaa SQL-virheen mahdollisuuden
@@ -1112,9 +1135,11 @@
 
 	 							// Hmm, mikään sääntö ei kelpaa
 								if (mysql_num_rows($result) == 0) {
-
-	 								// Toimittajan oletustili
-									if ($oletustili > 0) {
+	 								if ($rtuoteno[$i]["tilinumero"] != "") {
+										$tili = $rtuoteno[$i]["tilinumero"];
+									}
+									elseif ($oletustili > 0) {
+										// Toimittajan oletustili
 										$tili = $oletustili;
 									}
 									else {
@@ -1134,9 +1159,17 @@
 								if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
 							}
 
-							$summa = (float) $rtuoteno[$i]["rivihinta"];
+							// Unikko laskuissa tulee kirjauksetkin valuutassa, joten pitää laskea kurssi.
+							if ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0) {
+								$summa_valuutassa = (float) $rtuoteno[$i]["rivihinta_valuutassa"];
+								$summa = round($summa_valuutassa * $vrow["kurssi"], 2);
+							}
+							else {
+								$summa = (float) $rtuoteno[$i]["rivihinta"];
+								$summa_valuutassa = 0;
+							}
 
-	 						// Hyvityslasku tai summa alle nolla
+							// Hyvityslasku tai summa alle nolla
 							// FINVOICE-laskuilla rivihinta on aina valmiiksi oikeinpäin
 							// LISÄTTY VIELÄ:  and $summa > 0 koska nyt rivihinnat näyttäisi olevan myös INVOIC.D.96A laskulla miinusta kun se on hyväri????????
 							if (($laskun_tyyppi == "381" or $omasumma < 0) and $laskuformaatti != "FINVOICE" and $summa > 0) {
@@ -1145,14 +1178,18 @@
 
 							$vero = (float) $rtuoteno[$i]["alv"];
 
-							$verkkolaskuveroton += $summa;
-							$vtonsumma 			 = $summa;
-							$vtontot 		    += $summa;
-							$summa 			 	 = round($summa * (1+($vero/100)),2);
-							$totsumma 		    += $summa;
-							$selite				 = $selite." ".$trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
-							$kukarow['yhtio'] 	 = $yhtio;
-							$kukarow['kuka'] 	 = 'verkkolas';
+							$verkkolaskuveroton				+= $summa;
+							$verkkolaskuveroton_valuutassa	+= $summa_valuutassa;
+							$vtonsumma						= $summa;
+							$vtonsumma_valuutassa			= $summa_valuutassa;
+							$vtontot						+= $summa;
+							$vtontot_valuutassa				+= $summa_valuutassa;
+							$summa							= round($summa * (1+($vero/100)),2);
+							$totsumma						+= $summa;
+							$totsumma_valuutassa			+= $summa_valuutassa;
+							$selite							= $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero." ".$selite;
+							$kukarow['yhtio']				= $yhtio;
+							$kukarow['kuka']				= 'verkkolas';
 
 							require ("inc/teetiliointi.inc");
 
@@ -1167,6 +1204,8 @@
 											projekti 	= '$projekti',
 											tapvm 		= '$tpv-$tpk-$tpp',
 											summa 		= $vtonsumma *-1,
+											summa_valuutassa = $vtonsumma_valuutassa*-1,
+											valkoodi 	= '$valkoodi',
 											selite 		= '$selite',
 											vero 		= 0,
 											lukko 		= '',
@@ -1187,6 +1226,8 @@
 									kustp 		= 0,
 									tapvm 		= '$tpv-$tpk-$tpp',
 									summa 		= $omasumma - $totsumma,
+									summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa,
+									valkoodi 	= '$valkoodi',
 									selite 		= '$selite',
 									vero 		= 0,
 									lukko 		= '',
@@ -1210,6 +1251,8 @@
 									kustp 		= 0,
 									tapvm 		= '$tpv-$tpk-$tpp',
 									summa 		= '$vtontot',
+									summa_valuutassa = '$vtontot_valuutassa',
+									valkoodi 	= '$valkoodi',
 									selite 		= '$selite',
 									vero 		= 0,
 									lukko 		= '',
@@ -1237,6 +1280,8 @@
 									tilino		= '$ostovelat',
 									tapvm 		= '$erv-$erk-$erp',
 									summa 		= '$omasumma',
+									summa_valuutassa = '$omasumma_valuutassa',
+									valkoodi 	= '$valkoodi',
 									vero 		= 0,
 									lukko 		= '',
 									laatija 	= '$kukarow[kuka]',
@@ -1250,6 +1295,8 @@
 									tilino 		= '$yhtiorow[selvittelytili]',
 									tapvm 		= '$erv-$erk-$erp',
 									summa 		= $vassumma,
+									summa_valuutassa = '$vassumma_valuutassa',
+									valkoodi 	= '$valkoodi',
 									vero 		= 0,
 									lukko 		= '',
 									laatija 	= '$kukarow[kuka]',
@@ -1304,6 +1351,9 @@
 						<!DOCTYPE Finvoice SYSTEM "datain/teccom.dtd">
 						<?xml-stylesheet type="text/xsl" href="datain/teccom.xsl"?>
 						*/
+					}
+					elseif ($ebid == "UNIKKO-INVOICE") {
+						$kayttotarkoitus = 'UNIKKO-INVOICE';
 					}
 					else {
 						$kayttotarkoitus = 'INVOIC.D.96A';

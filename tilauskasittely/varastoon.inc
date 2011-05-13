@@ -90,6 +90,10 @@ if ($suoratoimitus == '' and $kauttalaskutus == '') {
 						<th valign='top'>".t("Rivihinta")."</th>
 						<th valign='top'>".t("Vanha")." ".t("kehahin")."<br>".t("Uusi")." ".t("kehahin")."</th>";
 
+	if ($toiminto == "kalkyyli" and $tee == "") {
+		$varastoon_msg .= "<th valign='top'>".t("Vanha")." ".t("saldo")."<br>".t("Uusi")." ".t("saldo")."</th>";
+	}
+
 	if ($tv_kaytossa) $varastoon_msg .= "<th valign='top'>".t("Ei tullia")."</th>";
 
 	$varastoon_msg .= "</tr>";
@@ -540,9 +544,9 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 						FROM tuotepaikat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tuoteno = '{$tilrivirow['tuoteno']}'
-						AND hyllyalue = '{$tilrivirow['hyllyalue']}' 
-						AND hyllynro = '{$tilrivirow['hyllynro']}' 
-						AND hyllytaso = '{$tilrivirow['hyllytaso']}' 
+						AND hyllyalue = '{$tilrivirow['hyllyalue']}'
+						AND hyllynro = '{$tilrivirow['hyllynro']}'
+						AND hyllytaso = '{$tilrivirow['hyllytaso']}'
 						AND hyllyvali = '{$tilrivirow['hyllyvali']}'
 						LIMIT 1";
 			$paikka_chk_res = mysql_query($query) or pupe_error($query);
@@ -564,7 +568,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 							laatija			= '{$kukarow['kuka']}',
 							luontiaika		= now()";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				// tehd‰‰n tapahtuma
 				$query = "	INSERT into tapahtuma set
 							yhtio 		= '$kukarow[yhtio]',
@@ -843,11 +847,33 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 	else {
 		if ($uusikehahin == "") {
-			$varastoon_msg .= "	<td align='right'>$tuorow[kehahin]<br>~$kehahin</td>";
+
+			$varastoon_fontti = "";
+			if ($kehahin <= 0) {
+				$varastoon_fontti = "error";
+			}
+
+			$varastoon_msg .= "	<td align='right'>$tuorow[kehahin]<br><font class='$varastoon_fontti'>~$kehahin</font></td>";
 		}
 		else {
 			$varastoon_msg .= "	<td align='right'>$tuorow[kehahin]<br>$uusikehahin</td>";
 		}
+	}
+
+	if ($toiminto == "kalkyyli" and $tee == "") {
+
+		list($varastoon_saldo, $dummy1, $dummy2, $dummy3) = saldo_myytavissa($tuorow["tuoteno"]);
+		$varastoon_saldo_uusi = $varastoon_saldo + $tilrivirow["varattu"];
+
+		$varastoon_fontti = "";
+		$varastoon_saldo_viesti = "";
+
+		if ($varastoon_saldo_uusi <= 0) {
+			$varastoon_fontti = "error";
+			$varastoon_saldo_viesti = "<br>".t("HUOM: Saldo j‰‰ negatiiviseksi!");
+		}
+
+		$varastoon_msg .= "<td align='right'>$varastoon_saldo<br><font class='$varastoon_fontti'>$varastoon_saldo_uusi$varastoon_saldo_viesti</font></td>";
 	}
 
 	if ($tv_kaytossa) {

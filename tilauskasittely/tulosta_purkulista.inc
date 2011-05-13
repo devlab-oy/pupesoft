@@ -72,8 +72,8 @@
 				$pdf->draw_text(30, 520, t("Tuotekoodi", $kieli),			$firstpage, $pieni);
 			}
 			else {
-				$pdf->draw_text(30,  520, t("Toimittajan koodi", $kieli),	$firstpage, $pieni);
-				$pdf->draw_text(155, 520, t("Tuotekoodi", $kieli),			$firstpage, $pieni);
+				$pdf->draw_text(30,  520, t("Toimittajan koodi /", $kieli),	$firstpage, $pieni);
+				$pdf->draw_text(30, 513, t("Tuotekoodi", $kieli),			$firstpage, $pieni);
 			}
 
 			if ($mista == 'vastaanota') {
@@ -389,7 +389,7 @@
 		}
 		else {
 			$pdf->draw_text(30,  $kala, $row["toim_tuoteno"],	$firstpage, $b);
-			$pdf->draw_text(155, $kala, $row["tuoteno"], 		$firstpage, $b);
+			$pdf->draw_text(30, $kala-10, $row["tuoteno"], 		$firstpage, $b);
 		}
 
 		if ($mista == "vastaanota") {
@@ -552,11 +552,11 @@
 
 				$image = $pdf->jfif_embed($data);
 
-				$apukala -= 23;
+				$apukala -= 33; // 23
 
 				$pdf->image_place($image, $apukala, 21, $firstpage);
 				system("rm -f $nimi");
-				$kala -= 5;
+				$kala -= 15;
 			}
 		}
 

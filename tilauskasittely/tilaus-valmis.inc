@@ -316,14 +316,17 @@ else {
 			$rahtivapaa_alarajasumma = (float) $yhtiorow["rahtivapaa_alarajasumma"];
 		}
 
-		if (isset($kaikkiyhteensa) and (float) $kaikkiyhteensa != 0) {
-			$kaikkiyhteensa = yhtioval($kaikkiyhteensa, $laskurow["vienti_kurssi"]); // käännetään yhteensäsumma yhtiövaluuttaan
-		}
-		else {
-			$kaikkiyhteensa = 0;
-		}
+		$tilausriviquery = "SELECT SUM(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))) rivihinta
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tilausrivi.otunnus = '$laskurow[tunnus]'";
+		$rivihintaresult = pupe_query($tilausriviquery);
 
-		// $kaikkiyhteensa tulee vain tilaus_myynnistä, eli kaikissa muissa tapauksissa yämä feilaa....
+		$totaalirivi = mysql_fetch_assoc($rivihintaresult);
+
+		$kaikkiyhteensa = $totaalirivi["rivihinta"];
+
+		// kaikkiyhteensä ja rahtivapaa_alarajasumma on verollisia jos myyntihinnat ovat verollisia, tai verottomia vice versa
 		if ($kaikkiyhteensa > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
 			$tilaus_valmis_ulos .= t("Tilauksen arvo ylitti rahtivapaasumman! Merkattiin tilaus rahtivapaaksi.")."<br>";
 

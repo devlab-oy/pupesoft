@@ -194,15 +194,15 @@
 			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$saatavat_array[count($saatavat_array)-1]}, tiliointi.summa_valuutassa, 0)) 'yli_{$saatavat_array[count($saatavat_array)-1]}',\n";
 		}
 		else {
-			$summalisa  = " round(sum(tiliointi.summa_valuutassa),2) avoimia,\n";
-			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > 15, tiliointi.summa_valuutassa, 0)) 'ylivito',\n";
-			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) <= $saatavat_array[0], tiliointi.summa_valuutassa, 0)) 'alle_$saatavat_array[0]',\n";
+			$summalisa  = " round(sum(tiliointi.summa),2) avoimia,\n";
+			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > 15, tiliointi.summa, 0)) 'ylivito',\n";
+			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) <= $saatavat_array[0], tiliointi.summa, 0)) 'alle_$saatavat_array[0]',\n";
 
 			for ($sa = 1; $sa < count($saatavat_array); $sa++) {
-				$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$saatavat_array[$sa-1]} and TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) <= {$saatavat_array[$sa]}, tiliointi.summa_valuutassa, 0)) '".($saatavat_array[$sa-1]+1)."_$saatavat_array[$sa]',\n";
+				$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$saatavat_array[$sa-1]} and TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) <= {$saatavat_array[$sa]}, tiliointi.summa, 0)) '".($saatavat_array[$sa-1]+1)."_$saatavat_array[$sa]',\n";
 			}
 
-			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$saatavat_array[count($saatavat_array)-1]}, tiliointi.summa_valuutassa, 0)) 'yli_{$saatavat_array[count($saatavat_array)-1]}',\n";
+			$summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$saatavat_array[count($saatavat_array)-1]}, tiliointi.summa, 0)) 'yli_{$saatavat_array[count($saatavat_array)-1]}',\n";
 		}
 
 		$query = "	SELECT

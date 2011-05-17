@@ -230,7 +230,7 @@
 
 					if (trim($paramit) != '') {
 						${"lisa_haku_".$param} = " and t_av_$param.selite in ($paramit) ";
-						$lisa_parametri .= " JOIN tuotteen_avainsanat t_av_$param ON (t_av_$param.yhtio = tuote.yhtio and t_av_$param.tuoteno = tuote.tuoteno and t_av_$param.laji = 'parametri_$param' and t_av_$param.selite in ($paramit)) ";
+						$lisa_parametri .= " JOIN tuotteen_avainsanat t_av_$param ON (t_av_$param.yhtio = tuote.yhtio and t_av_$param.tuoteno = tuote.tuoteno and t_av_$param.laji = 'parametri_$param' and t_av_$param.selite in ($paramit) and t_av_$param.kieli IN ('$yhtiorow[kieli]','')) ";
 					}
 				}
 			}

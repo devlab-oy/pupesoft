@@ -78,7 +78,7 @@
 					FROM abc_parametrit
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					ORDER BY osuusprosentti DESC";
-		$luokka_res = mysql_query($query) or pupe_error($query);
+		$luokka_res = pupe_query($query);
 
 		while ($luokka_row = mysql_fetch_assoc($luokka_res)) {
 			$ryhmanimet[] = $luokka_row['luokka'];
@@ -362,7 +362,6 @@
 
 		//Ajetaan itse raportti
 		if (isset($RAPORTOI) and $tee == "RAPORTOI") {
-
 			$osasto = '';
 			$osasto2 = '';
 			$try = '';
@@ -373,6 +372,10 @@
 			$mul_osasto = unserialize(urldecode($mul_osasto));
 			$mul_try = unserialize(urldecode($mul_try));
 			$mul_tme = unserialize(urldecode($mul_tme));
+
+			$lisa = unserialize(urldecode($lisa));
+			$lisa_dynaaminen = unserialize(urldecode($lisa_dynaaminen));
+			$lisa_parametri = unserialize(urldecode($lisa_parametri));
 
 			// tallennamuisti-funkkarin takia joudutaan kaksi kertaa unserializee.
 			if ($mul_osasto != '' and !is_array($mul_osasto)) {
@@ -386,7 +389,6 @@
 			if ($mul_tme != '' and !is_array($mul_tme)) {
 				$mul_tme = unserialize($mul_tme);
 			}
-
 			if ($mul_try != '' and count($mul_try) > 0) {
 
 				foreach ($mul_try as $tr) {
@@ -440,18 +442,19 @@
 				$query = "	SELECT nimi
 							FROM toimi
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus='$toimittajaid'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 				$trow1 = mysql_fetch_array($sresult);
 			}
 			if ($asiakasid != '') {
 				$query = "	SELECT nimi
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus='$asiakasid'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 				$trow2 = mysql_fetch_array($sresult);
 			}
 
 			$abcnimi = $ryhmanimet[$abcrajaus];
+
 
 			echo "	<table>
 					<tr><th>".t("Osasto")."</th><td colspan='3'>$osasto2</td></tr>
@@ -511,7 +514,7 @@
 			$query	= "	SELECT distinct yhtio, nimi
 						from yhtio
 						where konserni = '$yhtiorow[konserni]' and konserni != ''";
-			$presult = mysql_query($query) or pupe_error($query);
+			$presult = pupe_query($query);
 
 			$yhtiot 	= "";
 			$konsyhtiot = "";
@@ -544,7 +547,7 @@
 			$query = "	SELECT *
 						FROM varastopaikat
 						WHERE $konsyhtiot";
-			$vtresult = mysql_query($query) or pupe_error($query);
+			$vtresult = pupe_query($query);
 
 			$varastot 			= "";
 			$varastot2			= "";
@@ -592,7 +595,7 @@
 							and tyyppi 	= 'L'
 							and var 	= 'J'
 							and jt $lisavarattu > 0";
-				$vtresult = mysql_query($query) or pupe_error($query);
+				$vtresult = pupe_query($query);
 				$vrow = mysql_fetch_array($vtresult);
 
 				$jt_tuotteet = "''";
@@ -654,7 +657,7 @@
 				$query = "	SELECT DISTINCT tyyppi
 							FROM yhteensopivuus_mp
 							WHERE yhtio = '{$kukarow['yhtio']}'";
-				$res_rekyht = mysql_query($query);
+				$res_rekyht = pupe_query($query);
 
 				if (mysql_num_rows($res_rekyht) > 0) {
 					$tyyppi = 'mp';
@@ -666,7 +669,7 @@
 					$query = "	SELECT DISTINCT tyyppi
 								FROM yhteensopivuus_tuote
 								WHERE yhtio = '{$kukarow['yhtio']}'";
-					$res_rekyht = mysql_query($query);
+					$res_rekyht = pupe_query($query);
 
 					if (mysql_num_rows($res_rekyht) > 0) {
 						$tyyppi = 'auto';
@@ -754,8 +757,11 @@
 							LEFT JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.oletus = 'X')
 							LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
 							LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa')
+							$lisa_dynaaminen
+							$lisa_parametri
 							$lisaa2
 							WHERE tuote.$yhtiot
+							$lisa
 							$lisaa
 							$abcwhere
 							and tuote.ei_saldoa = ''
@@ -807,14 +813,18 @@
 							and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 							and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')))
 							LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
+							$lisa_dynaaminen
+							$lisa_parametri
 							WHERE tuote.$yhtiot
+							$lisa
 							$lisaa
 							and tuote.ei_saldoa = ''
 							$abcwhere
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";
 			}
-			$res = mysql_query($query) or pupe_error($query);
+
+			$res = pupe_query($query);
 
 			//	Oletetaan ett‰ k‰ytt‰j‰ ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
 			if (!isset($valitut["poistetut"])) $valitut["poistetut"] = "checked";
@@ -958,7 +968,7 @@
 				$ykpl1 = $ykpl2 = $ykpl3 = $ykpl4 = 0;
 
 				if ($paikoittain != '') {
-					$lisa = " and concat_ws(' ',hyllyalue, hyllynro, hyllyvali, hyllytaso)='$row[varastopaikka]' ";
+					$paikkalisa = " and concat_ws(' ',hyllyalue, hyllynro, hyllyvali, hyllytaso)='$row[varastopaikka]' ";
 				}
 
 				//toimittajatiedot
@@ -985,7 +995,7 @@
 								and tuoteno = '$row[tuoteno]'
 								and liitostunnus = '$toimittajaid'";
 				}
-				$result   = mysql_query($query) or pupe_error($query);
+				$result   = pupe_query($query);
 				$toimirow = mysql_fetch_array($result);
 
 				$row['toimittaja'] 		= $toimirow['toimittaja'];
@@ -1038,8 +1048,8 @@
 							and tilausrivi.tuoteno = '$row[tuoteno]'
 							and tilausrivi.laskutettuaika >= '$apvm'
 							and tilausrivi.laskutettuaika <= '$lpvm'
-							$lisa";
-				$result   = mysql_query($query) or pupe_error($query);
+							$paikkalisa";
+				$result   = pupe_query($query);
 				$laskurow = mysql_fetch_array($result);
 
 				$query = "	SELECT
@@ -1053,8 +1063,8 @@
 							and tuoteno = '$row[tuoteno]'
 							and laadittu >= '$apvm'
 							and laadittu <= '$lpvm'
-							$lisa";
-				$result   = mysql_query($query) or pupe_error($query);
+							$paikkalisa";
+				$result   = pupe_query($query);
 				$puuterow = mysql_fetch_array($result);
 
 				// normimyynti
@@ -1099,8 +1109,8 @@
 							and tyyppi = 'V'
 							and tuoteno = '$row[tuoteno]'
 							and ((toimitettuaika >= '$apvm' and toimitettuaika <= '$lpvm') or toimitettuaika = '0000-00-00')
-							$lisa";
-				$result   = mysql_query($query) or pupe_error($query);
+							$paikkalisa";
+				$result   = pupe_query($query);
 				$kulutrow = mysql_fetch_array($result);
 
 				// Yhteens‰ kpl: myydyt normi ja ennakkorivit sek‰ kulutukset (lis‰t‰‰n laskurowiin helppouden vuoksi)
@@ -1123,7 +1133,7 @@
 							and tuoteno = '$row[tuoteno]'
 							and laskutettuaika = '0000-00-00'
 							and (varattu+jt > 0)";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$ennp   = mysql_fetch_assoc($result);
 
 				$query = "	SELECT sum(if(tyyppi = 'G', jt $lisavarattu, 0)) siirtojt
@@ -1132,7 +1142,7 @@
 							and tyyppi in ('O','G')
 							and tuoteno = '$row[tuoteno]'
 							and varattu + jt > 0";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$siirtojtrow = mysql_fetch_array($result);
 
 				if ($paikoittain == '' and $varastot_yhtiot != '') {
@@ -1146,7 +1156,7 @@
 								and tuotepaikat.tuoteno='$row[tuoteno]'
 								GROUP BY varastopaikat.tunnus
 								$varastot";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$sumsaldo = 0;
 
@@ -1166,7 +1176,7 @@
 									and tuotepaikat.tuoteno='$row[tuoteno]'
 									GROUP BY varastopaikat.tunnus
 									$varastot2";
-						$result2 = mysql_query($query) or pupe_error($query);
+						$result2 = pupe_query($query);
 
 						$sumsaldo2 = 0;
 
@@ -1184,8 +1194,8 @@
 								from tuotepaikat
 								where yhtio='$row[yhtio]'
 								and tuoteno='$row[tuoteno]'
-								$lisa";
-					$result = mysql_query($query) or pupe_error($query);
+								$paikkalisa";
+					$result = pupe_query($query);
 					$saldo = mysql_fetch_array($result);
 				}
 
@@ -1196,7 +1206,7 @@
 							and tuoteno='$row[tuoteno]'
 							and oletus='X'
 							group by hyllyalue, hyllynro, hyllyvali, hyllytaso";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$osaldo = mysql_fetch_array($result);
 
 				if ($row['osto_era'] == 0) {
@@ -1268,7 +1278,7 @@
 							and tyyppi='E'
 							and tuoteno='$row[tuoteno]'
 							and laskutettuaika = '0000-00-00'";
-				$ennaresult = mysql_query($query) or pupe_error($query);
+				$ennaresult = pupe_query($query);
 				$ennarow = mysql_fetch_array($ennaresult);
 
 				//asiakkaan ostot
@@ -1291,7 +1301,7 @@
 								and a.ytunnus = l.ytunnus
 								and a.yhtio = l.yhtio
 								and a.osasto = '$asiakasosasto'";
-					$asosresult = mysql_query($query) or pupe_error($query);
+					$asosresult = pupe_query($query);
 					$asosrow = mysql_fetch_array($asosresult);
 				}
 				if ($asiakasid != '') {
@@ -1309,7 +1319,7 @@
 								and l.yhtio = t.yhtio
 								and l.tunnus = t.otunnus
 								and l.liitostunnus 	= '$asiakasid'";
-					$asresult = mysql_query($query) or pupe_error($query);
+					$asresult = pupe_query($query);
 					$asrow = mysql_fetch_array($asresult);
 				}
 
@@ -1437,7 +1447,7 @@
 											FROM korvaavat
 											WHERE tuoteno	= '$row[tuoteno]'
 											and yhtio		= '$row[yhtio]'";
-								$korvaresult1 = mysql_query($query) or pupe_error($query);
+								$korvaresult1 = pupe_query($query);
 
 								$korvaavat_tunrot = '';
 
@@ -1449,7 +1459,7 @@
 												WHERE tuoteno  != '$row[tuoteno]'
 												and id			= '$korvarow[id]'
 												and yhtio		= '$row[yhtio]'";
-									$korvaresult2 = mysql_query($query) or pupe_error($query);
+									$korvaresult2 = pupe_query($query);
 
 									if (mysql_num_rows($korvaresult2) > 0) {
 
@@ -1474,7 +1484,7 @@
 												WHERE yhteensopivuus_tuote.yhtio = '$kukarow[yhtio]'
 												AND yhteensopivuus_tuote.tuoteno IN ($tuotteet)
 												AND yhteensopivuus_tuote.tyyppi IN ($tyyppilisa)";
-									$asresult = mysql_query($query) or pupe_error($query);
+									$asresult = pupe_query($query);
 									$kasrow = mysql_fetch_array($asresult);
 									$rek_kpl_maara = round($kasrow['kpl'], 2);
 								}
@@ -1503,7 +1513,7 @@
 											FROM korvaavat
 											WHERE tuoteno	= '$row[tuoteno]'
 											and yhtio		= '$row[yhtio]'";
-								$korvaresult1 = mysql_query($query) or pupe_error($query);
+								$korvaresult1 = pupe_query($query);
 
 								if (mysql_num_rows($korvaresult1) > 0) {
 									$korvarow = mysql_fetch_array($korvaresult1);
@@ -1513,7 +1523,7 @@
 												WHERE tuoteno  != '$row[tuoteno]'
 												and id			= '$korvarow[id]'
 												and yhtio		= '$row[yhtio]'";
-									$korvaresult2 = mysql_query($query) or pupe_error($query);
+									$korvaresult2 = pupe_query($query);
 
 									if (mysql_num_rows($korvaresult2) > 0) {
 
@@ -1534,7 +1544,7 @@
 														and tuoteno in ('$korvarow[tuoteno]')
 														and laskutettuaika >= '$apvm'
 														and laskutettuaika <= '$lpvm'";
-											$asresult = mysql_query($query) or pupe_error($query);
+											$asresult = pupe_query($query);
 											$kasrow = mysql_fetch_array($asresult);
 
 											$query = "	SELECT sum(saldo) saldo
@@ -1545,7 +1555,7 @@
 														WHERE tuotepaikat.$varastot_yhtiot
 														and tuotepaikat.tuoteno in ('$korvarow[tuoteno]')
 														$varastolisa_korv";
-											$korvasaldoresult = mysql_query($query) or pupe_error($query);
+											$korvasaldoresult = pupe_query($query);
 											$korvasaldorow = mysql_fetch_array($korvasaldoresult);
 
 											// Korvaavan tuotteen varatut ja tilatut
@@ -1560,7 +1570,7 @@
 														and tilausrivi.tyyppi in ('L','V','O','W','M')
 														and tilausrivi.tuoteno in ('$korvarow[tuoteno]')
 														and tilausrivi.varattu > 0";
-											$presult = mysql_query($query) or pupe_error($query);
+											$presult = pupe_query($query);
 											$prow = mysql_fetch_array($presult);
 
 											foreach ($valitut as $key => $val) {
@@ -1850,16 +1860,47 @@
 			// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
 			$lisa  = "";
 			$ulisa = "";
-			$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 
-			require ("../tilauskasittely/monivalintalaatikot.inc");
+			// selite 		= k‰ytet‰‰nkˆ uutta vai vanhaa ulkoasua
+			// selitetark 	= n‰ytett‰v‰t monivalintalaatikot, jos tyhj‰‰, otetaan oletus alhaalla
+			// selitetark_2 = mitk‰ n‰ytett‰vist‰ monivalintalaatikoista on normaaleja alasvetovalikoita
+			$query = "	SELECT selite, selitetark, REPLACE(selitetark_2, ', ', ',') selitetark_2
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND laji = 'HAE_JA_SELAA'
+						AND selite != ''";
+			$hs_result = pupe_query($query);
+			$hs_row = mysql_fetch_assoc($hs_result);
+
+			if (trim($hs_row['selitetark']) != '') {
+				$monivalintalaatikot = explode(",", $hs_row['selitetark']);
+
+				if (trim($hs_row['selitetark_2'] != '')) {
+					$monivalintalaatikot_normaali = explode(",", $hs_row['selitetark_2']);
+				}
+				else {
+					$monivalintalaatikot_normaali = array();
+				}
+			}
+			else {
+				// Oletus
+				$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "<br>MALLI/MALLITARK");
+				$monivalintalaatikot_normaali = array();
+			}
+
+			require ("tilauskasittely/monivalintalaatikot.inc");
+
+			// Otetaan monivalintalaatikoista palautuvat parametrit talteen ja laitetaan isoihin kyselyihin
+			echo "	<input type='hidden' name='lisa' value='".urlencode(serialize($lisa))."'>
+					<input type='hidden' name='lisa_dynaaminen' value='".urlencode(serialize($lisa_dynaaminen))."'>
+					<input type='hidden' name='lisa_parametri' value='".urlencode(serialize($lisa_parametri))."'>";
 
 			echo "<br><br>";
 			echo "<table>";
 			echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
 
 					// katotaan onko abc aputaulu rakennettu
-					$query  = "select count(*) from abc_aputaulu where yhtio='$kukarow[yhtio]' and tyyppi in ('TK','TR','TP')";
+					$query  = "SELECT count(*) FROM abc_aputaulu WHERE yhtio='$kukarow[yhtio]' AND tyyppi IN ('TK','TR','TP')";
 					$abcres = mysql_query($query) or pupe_error($query);
 					$abcrow = mysql_fetch_array($abcres);
 
@@ -1913,7 +1954,7 @@
 						FROM asiakas
 						WHERE yhtio='$kukarow[yhtio]' and osasto!=''
 						order by osasto+0";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 
 			echo "<select name='asiakasosasto'>";
 			echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -1950,7 +1991,7 @@
 						WHERE tallennetut_parametrit.yhtio = '$kukarow[yhtio]'
 						and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
 						ORDER BY tallennetut_parametrit.nimitys";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 
 			if ($kysely_warning != '') {
 				echo "<font class='error'>",t("Et saa tallentaa toisen k‰ytt‰j‰n raporttia"),"!!!";
@@ -1961,6 +2002,9 @@
 			echo "	<input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>
 					<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
 					<input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>
+					<input type='hidden' name='lisa' value='$lisa'>
+					<input type='hidden' name='lisa_dynaaminen' value='$lisa_dynaaminen'>
+					<input type='hidden' name='lisa_parametri' value='$lisa_parametri'>
 					<input type='hidden' name='ytunnus' value='$ytunnus'>
 					<input type='hidden' name='edrappari' value='$rappari'>
 					<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -2086,7 +2130,7 @@
 				$query = "	SELECT nimi
 							FROM toimi
 							WHERE yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 				$trow1 = mysql_fetch_array($sresult);
 			}
 
@@ -2094,7 +2138,7 @@
 				$query = "	SELECT nimi
 							FROM asiakas
 							WHERE yhtio='$kukarow[yhtio]' and tunnus='$asiakasid'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = pupe_query($query);
 				$trow2 = mysql_fetch_array($sresult);
 			}
 
@@ -2113,6 +2157,9 @@
 					<input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>
 					<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
 					<input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>
+					<input type='hidden' name='lisa' value='$lisa'>
+					<input type='hidden' name='lisa_dynaaminen' value='$lisa_dynaaminen'>
+					<input type='hidden' name='lisa_parametri' value='$lisa_parametri'>
 					<input type='hidden' name='ytunnus' value='$ytunnus'>
 					<input type='hidden' name='edrappari' value='$rappari'>
 					<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -2221,7 +2268,7 @@
 			$query	= "	SELECT distinct yhtio, nimi
 						from yhtio
 						where konserni = '$yhtiorow[konserni]' and konserni != ''";
-			$presult = mysql_query($query) or pupe_error($query);
+			$presult = pupe_query($query);
 
 			$yhtiot 	= "";
 			$konsyhtiot = "";
@@ -2358,7 +2405,7 @@
 						FROM varastopaikat
 						WHERE $konsyhtiot
 						ORDER BY yhtio, nimitys";
-			$vtresult = mysql_query($query) or pupe_error($query);
+			$vtresult = pupe_query($query);
 
 			$vlask = 0;
 

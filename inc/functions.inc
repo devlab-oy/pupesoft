@@ -9731,6 +9731,11 @@ if (!function_exists("tarkista_sepa")) {
 
 if (!function_exists("tarkista_iban")) {
 	function tarkista_iban($tilino) {
+		global $yhtiorow;
+		
+		if ($yhtiorow["maa"] != "FI") {
+			return TRUE;
+		}
 
 		// Calculating and validating IBAN checksums:
 
@@ -9971,7 +9976,12 @@ if (!function_exists("tarkista_rfviite")) {
 
 if (!function_exists("tarkista_bic")) {
 	function tarkista_bic($bic) {
-
+		global $yhtiorow;
+		
+		if ($yhtiorow["maa"] != "FI") {
+			return TRUE;
+		}
+		
 		preg_match("/^[A-Z]{6,6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3,3}){0,1}$/", $bic, $matches);
 
 		if ($matches[0] == "") {
@@ -9986,7 +9996,12 @@ if (!function_exists("tarkista_bic")) {
 
 if (!function_exists("tarkista_bban")) {
 	function tarkista_bban($bban) {
-
+		global $yhtiorow;
+		
+		if ($yhtiorow["maa"] != "FI") {
+			return TRUE;
+		}
+		
 		preg_match("/^[a-zA-Z0-9]{1,30}$/", $bban, $matches);
 
 		if ($matches[0] == "") {

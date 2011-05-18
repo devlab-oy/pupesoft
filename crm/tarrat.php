@@ -123,29 +123,29 @@
 
 				$excelsarake = 0;
 
-				$worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Nimi"), $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Nimitarkenne"), $format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Nimitarkenne"), $format_bold);
 				$excelsarake++;
 
 				if ($as_yht_tiedot == 'on') {
-					$worksheet->write($excelrivi, $excelsarake, t("Yhteyshenkilö"), $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Yhteyshenkilö"), $format_bold);
 					$excelsarake++;
 				}
 
-				$worksheet->write($excelrivi, $excelsarake, t("Osoite"), $format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Osoite"), $format_bold);
 				$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, t("Postino"), $format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Postino"), $format_bold);
 				$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, t("Postitp"), $format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Postitp"), $format_bold);
 				$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, t("Maa"), $format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Maa"), $format_bold);
 				$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, t("Sähköpostiosoite"), $format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Sähköpostiosoite"), $format_bold);
 				$excelsarake++;
 				$excelrivi++;
 			}
@@ -193,34 +193,34 @@
 			if ($raportti == "EX") {
 				$excelsarake = 0;
 
-				$worksheet->write($excelrivi, $excelsarake, $row["nimi"]);
+				$worksheet->writeString($excelrivi, $excelsarake, $row["nimi"]);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $row["nimitark"]);
+				$worksheet->writeString($excelrivi, $excelsarake, $row["nimitark"]);
 				$excelsarake++;
 
 				if ($as_yht_tiedot == 'on') {
-					$worksheet->write($excelrivi, $excelsarake, $row["yht_nimi"]);
+					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_nimi"]);
 					$excelsarake++;
 				}
 
-				$worksheet->write($excelrivi, $excelsarake, $row["osoite"]);
+				$worksheet->writeString($excelrivi, $excelsarake, $row["osoite"]);
 				$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, $row["postino"]);
+				$worksheet->writeString($excelrivi, $excelsarake, $row["postino"]);
 				$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, $row["postitp"]);
+				$worksheet->writeString($excelrivi, $excelsarake, $row["postitp"]);
 				$excelsarake++;
 
-				$worksheet->write($excelrivi, $excelsarake, $row["maa"]);
+				$worksheet->writeString($excelrivi, $excelsarake, $row["maa"]);
 				$excelsarake++;
 
 				if ($as_yht_tiedot == 'on') {
-					$worksheet->write($excelrivi, $excelsarake, $row["yht_email"]);
+					$worksheet->writeString($excelrivi, $excelsarake, $row["yht_email"]);
 					$excelsarake++;
 				}
 				else {
-					$worksheet->write($excelrivi, $excelsarake, $row["email"]);
+					$worksheet->writeString($excelrivi, $excelsarake, $row["email"]);
 					$excelsarake++;
 				}
 

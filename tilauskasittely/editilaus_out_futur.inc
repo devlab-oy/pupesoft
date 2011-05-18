@@ -6,7 +6,7 @@
 
 			extract($params);
 
-			$summa = $toim != '' ? $laskurow['summa'] : '';
+			$summa = $toim == 'VASTAANOTA_REKLAMAATIO' ? $laskurow['summa'] : '';
 
 		   	//tilauksen otsikko
 		   	$edi_order  = "*IS from:721111720-1 to:IKH,ORDERS*id:{$laskurow['tunnus']} version:AFP-1.0 *MS\n";
@@ -61,7 +61,13 @@
 
 		   	$i = 1;
 
-			$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}'";
+			$query = "	SELECT tilausrivi.* 
+						FROM tilausrivi 
+						#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '')
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
+						AND tilausrivi.otunnus = '{$laskurow['tunnus']}' 
+						AND tilausrivi.var != 'U'";
 			$tilausrivi_res = pupe_query($query);
 
 			while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
@@ -77,6 +83,13 @@
 					$kpl = 0;
 				}
 
+				// HUOM! Reklamaatioissa laitetaan nettohyvitysyksikköhinta
+				// $hinta = $tilausrivi_row['hinta'] * generoi_alekentta_php($tilausrivi_row, 'M', 'kerto');
+				$hinta = '123';
+
+				// nettorivihinta
+				$rivihinta = $kpl * $hinta;
+
 	   			$edi_order .= "*RS OSTOTILRIV {$i}\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_NRO:".substr($laskurow['tunnus'], -6)."\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_RIVINRO:".substr($tilausrivi_row['tunnus'], -6)."\n";
@@ -86,10 +99,17 @@
 
 				$edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:{$kpl}\n";
 
-	    		$edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:{$tilausrivi_row['rivihinta']}\n";
-	    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$tilausrivi_row['hinta']}\n";
+	    		$edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:{$rivihinta}\n";
 
-				if ($toim == '') {
+				if ($toim == 'VASTAANOTA_REKLAMAATIO') {
+		    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$hinta}\n";
+		    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
+				}
+				else {
+
+		    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$tilausrivi_row['hinta']}\n";
+
+					// MUISTA OTTAA KOMMENTTI POIS JA POISTA NOLLARIVI!!!
 		    		// $edi_order .= "OSTOTILRIV.OTR_ALENNUS:".generoi_alekentta_php($tilausrivi_row, 'M')."\n";
 		    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
 				}
@@ -112,8 +132,6 @@
 		   	$edi_order .= "*ME\n";
 		   	$edi_order .= "*IE";
 
-		   	$edi_order = iconv("UTF-8", "ISO-8859-1", $edi_order);
-
 			$edipolku = "/tmp";
 
 			$filename = $edipolku."/editilaus_out_futur".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
@@ -123,9 +141,6 @@
 			$ftpuser = $ftpuser_unikko;
 			$ftppass = $ftppass_unikko;
 			$ftppath = $ftppath_unikko;
-			
-			$yhtiorow['alert_email'] = 'sami@devlab.fi';
-			$yhtiorow['postittaja_email'] = 'sami@devlab.fi';
 			
 			$ftpfile = $unlink_filename = $filename;
 			

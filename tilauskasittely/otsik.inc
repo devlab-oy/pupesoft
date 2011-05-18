@@ -1520,6 +1520,7 @@
 				echo "<option value='N' $sel[N]>".t("Normaalitilaus")."</option>";
 				echo "<option value='E' $sel[E]>".t("Ennakkotilaus")."</option>";
 				echo "<option value='T' $sel[T]>".t("Tarjoustilaus")."</option>";
+				echo "<option value='7' $sel[7]>".t("Tehdastilaus")."</option>";
 				echo "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
 
 				echo "</select></td>";

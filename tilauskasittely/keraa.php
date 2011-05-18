@@ -1368,7 +1368,7 @@
 								}
 							}
 
-							require_once ("tulosta_lahete.inc");
+							require("tulosta_lahete.inc");
 
 							//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
 							if (function_exists("tulosta_lahete")) {

@@ -298,7 +298,7 @@
 
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' 
+						WHERE yhtio = '$kukarow[yhtio]'
 						order by nimitys";
 			$vtresult = mysql_query($query) or pupe_error($query);
 
@@ -1707,7 +1707,7 @@
 					}
 				}
 
-				require_once ("tulosta_lahete.inc");
+				require("tulosta_lahete.inc");
 
 				//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
 				if (function_exists("tulosta_lahete")) {

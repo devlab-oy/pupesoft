@@ -27,7 +27,7 @@
 		$lahetetyyppi = "tulosta_lahete.inc";
 	}
 
-	require_once ("tulosta_lahete.inc");
+	require("tulosta_lahete.inc");
 
 	if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
 		$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";

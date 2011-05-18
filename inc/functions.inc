@@ -3039,15 +3039,12 @@ if (!function_exists("alehinta")) {
 
 		// haetaan asiakkaan segmentit
 		$query = "	SELECT group_concat(parent.tunnus) tunnukset
-	   				FROM dynaaminen_puu AS node
-	   				JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt)
-	   				JOIN puun_alkio on (puun_alkio.yhtio = node.yhtio and puun_alkio.puun_tunnus = node.tunnus)
-	   				JOIN asiakas on (asiakas.yhtio = node.yhtio and asiakas.tunnus = puun_alkio.liitos)
-	   				WHERE asiakas.tunnus ='$laskurow[liitostunnus]'
-					AND asiakas.yhtio = '$kukarow[yhtio]'
-	   				AND node.laji = parent.laji =  puun_alkio.laji = 'asiakas'
-	   				AND parent.lft > 1
-	   				HAVING tunnukset IS NOT NULL";
+	   				FROM puun_alkio
+					JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+	   				JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.lft > 1)
+	   				WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
+					AND puun_alkio.laji    = 'asiakas'
+					AND puun_alkio.liitos  = '$laskurow[liitostunnus]'";
 		$almight = pupe_query($query);
 		$alehi_assegmenttirow = mysql_fetch_assoc($almight);
 
@@ -4698,7 +4695,7 @@ if (!function_exists("alehinta")) {
 						and alennus <= 100)
 						ORDER BY alennuslaji, prio, minkpl desc, aika, alennus desc, tunnus desc";
 			$hresult = pupe_query($query);
-						
+
 			list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 5, "Asiakkaan tuotteen alennus");
 
 			// 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
@@ -9732,7 +9729,7 @@ if (!function_exists("tarkista_sepa")) {
 if (!function_exists("tarkista_iban")) {
 	function tarkista_iban($tilino) {
 		global $yhtiorow;
-		
+
 		if ($yhtiorow["maa"] != "FI") {
 			return TRUE;
 		}
@@ -9977,11 +9974,11 @@ if (!function_exists("tarkista_rfviite")) {
 if (!function_exists("tarkista_bic")) {
 	function tarkista_bic($bic) {
 		global $yhtiorow;
-		
+
 		if ($yhtiorow["maa"] != "FI") {
 			return TRUE;
 		}
-		
+
 		preg_match("/^[A-Z]{6,6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3,3}){0,1}$/", $bic, $matches);
 
 		if ($matches[0] == "") {
@@ -9997,11 +9994,11 @@ if (!function_exists("tarkista_bic")) {
 if (!function_exists("tarkista_bban")) {
 	function tarkista_bban($bban) {
 		global $yhtiorow;
-		
+
 		if ($yhtiorow["maa"] != "FI") {
 			return TRUE;
 		}
-		
+
 		preg_match("/^[a-zA-Z0-9]{1,30}$/", $bban, $matches);
 
 		if ($matches[0] == "") {

@@ -24,13 +24,14 @@
 			$sdtres = pupe_query($query);
 
 			if (mysql_num_rows($sdtres) == 0) {
-				// Ei saa olla myöskään yhtään tilausriviä
+				// Ei saa olla myöskään yhtään tilausriviä (Puuterivit sallitaan)
 				$query = "	SELECT yhtio
 							FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi in ('0','B','E','F','G','L','M','N','O','T','V','W','Z')
 							and tuoteno = '$tuoteno'
 							and laadittu > '0000-00-00 00:00:00'
+							and var != 'P'
 							LIMIT 1";
 				$sdtres = pupe_query($query);
 
@@ -188,7 +189,7 @@
 			$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 			$ulos .= "<option value = '' $sela>".t("Saldollinen tuote")."</option>";
 			$ulos .= "<option value = 'o' $sel>".t("Saldoton tuote")."</option>";
-			$ulos .= "</select>$disablelisa</td>";
+			$ulos .= "</select></td>";
 		}
 
 

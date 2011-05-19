@@ -2514,6 +2514,11 @@
 			$query = "INSERT into ";
 			$postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
 
+			if (isset($ohjelmamoduli) and $ohjelmamoduli != "") {
+				# Kommentin voi poistaa 20.5.2011
+				#$postquery .= ",ohjelma_moduli = '$ohjelmamoduli'";
+			}
+
 			$query2 = "INSERT into ";
 			$postquery2 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
 

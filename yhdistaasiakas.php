@@ -696,7 +696,7 @@
 				asiakas.asiakasnro,
 				asiakas.yhtio
 				FROM asiakas
-				$lisa_dynaaminen
+				{$lisa_dynaaminen["asiakas"]}
 				WHERE asiakas.yhtio = '$kukarow[yhtio]'
 				$lisa
 				ORDER BY $jarjestys

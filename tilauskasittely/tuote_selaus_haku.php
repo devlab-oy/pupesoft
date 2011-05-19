@@ -751,7 +751,7 @@
 		$submit_button = '';
 	}
 
-	if ($submit_button != '' and ($lisa != '' or $lisa_dynaaminen != '' or $lisa_parametri != '')) {
+	if ($submit_button != '' and ($lisa != '' or $lisa_dynaaminen["tuote"] != '' or $lisa_parametri != '')) {
 
 		$tuotekyslinkki = "";
 
@@ -881,7 +881,7 @@
 					tuote.status
 					FROM tuote use index (tuoteno, nimitys)
 					$lisa_parametri
-					$lisa_dynaaminen
+					{$lisa_dynaaminen["tuote"]}
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					$kieltolisa
 					$lisa
@@ -1305,7 +1305,7 @@
 				}
 
 				echo "<tr class='aktiivi'>";
-											
+
 				if (isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0) {
 					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$row["vastaavamaara"]}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}
@@ -1328,7 +1328,7 @@
 				$tuotteen_lisatiedot = tuotteen_lisatiedot($row["tuoteno"]);
 
 				if (count($tuotteen_lisatiedot) > 0) {
-					$row["nimitys"] .= "<ul>";				
+					$row["nimitys"] .= "<ul>";
 					foreach ($tuotteen_lisatiedot as $tuotteen_lisatiedot_arvo) {
 						$row["nimitys"] .= "<li>$tuotteen_lisatiedot_arvo[kentta] &raquo; $tuotteen_lisatiedot_arvo[selite]</li>";
 					}

@@ -432,7 +432,7 @@
 			$lisa = "";
 		}
 		if (!isset($lisa_dynaaminen)) {
-			$lisa_dynaaminen = "";
+			$lisa_dynaaminen = array("tuote" => "", "asiakas" => "");
 		}
 		if (!isset($lisa_parametri)) {
 			$lisa_parametri = "";
@@ -456,7 +456,7 @@
 			$lisa .= " and asiakas.tunnus = $asiakasid ";
 		}
 
-		if ($submit_button != "" and ($tuoteno != "" or $asiakasid > 0 or $toimittajaid > 0 or $lisa != "" or $lisa_parametri != "" or $lisa_dynaaminen != "" or $liitostunnukset != "") and is_array($tilikaudetrow)) {
+		if ($submit_button != "" and ($tuoteno != "" or $asiakasid > 0 or $toimittajaid > 0 or $lisa != "" or $lisa_parametri != "" or ($toim == "TUOTE" and $lisa_dynaaminen["tuote"] != "") or ($toim == "ASIAKAS" and $lisa_dynaaminen["asiakas"]) or $liitostunnukset != "") and is_array($tilikaudetrow)) {
 
 			if (!@include('Spreadsheet/Excel/Writer.php')) {
 				echo "<font class='error'>",t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta."),"</font><br>";
@@ -516,8 +516,8 @@
 					$lisa = " and asiakas.tunnus in ($liitostunnukset) ";
 				}
 
-				$lisa_parametri = "";
-				$lisa_dynaaminen = "";
+				$lisa_parametri  = "";
+				$lisa_dynaaminen = array("tuote" => "", "asiakas" => "");
 			}
 
 			if ($toim == "TUOTE" and $tuoteno != "") {
@@ -528,7 +528,7 @@
 				$query = "	SELECT DISTINCT tuote.tuoteno, tuote.nimitys
 							FROM tuote
 							$lisa_parametri
-							$lisa_dynaaminen
+							{$lisa_dynaaminen["tuote"]}
 							WHERE tuote.yhtio = '{$kukarow['yhtio']}'
 							AND tuote.status != 'P'
 							$lisa";
@@ -536,8 +536,6 @@
 			elseif ($toim == "TOIMITTAJA") {
 				$query = "	SELECT DISTINCT toimi.tunnus toimittajan_tunnus, toimi.ytunnus, toimi.ytunnus toimittajanro, toimi.nimi, toimi.nimitark
 							FROM toimi
-							$lisa_parametri
-							$lisa_dynaaminen
 							WHERE toimi.yhtio = '$kukarow[yhtio]'
 							$lisa";
 			}
@@ -546,8 +544,7 @@
 							IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimi, '') toim_nimi,
 							IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimitark, '') toim_nimitark
 							FROM asiakas
-							$lisa_parametri
-							$lisa_dynaaminen
+							{$lisa_dynaaminen["asiakas"]}
 							WHERE asiakas.yhtio = '$kukarow[yhtio]'
 							$lisa";
 			}

@@ -28,7 +28,7 @@
 	$monivalintalaatikot = array_map('strtolower', $monivalintalaatikot);
 	$monivalintalaatikot_normaali = array_map('trim', $monivalintalaatikot_normaali);
 	$monivalintalaatikot_normaali = array_map('strtolower', $monivalintalaatikot_normaali);
-	
+
 	if (strtoupper($kukarow["kieli"]) != strtoupper($yhtiorow["kieli"])) {
 		$kieli_selitetark = "	IFNULL((SELECT avainsana_kieli.selitetark
         						FROM avainsana as avainsana_kieli
@@ -41,7 +41,7 @@
 	else {
 		$kieli_selitetark = " avainsana.selitetark ";
 	}
-	
+
 	if (strtoupper($kukarow["kieli"]) != strtoupper($yhtiorow["kieli"])) {
 		$kieli_selite = "	IFNULL((SELECT avainsana_kieli.selite
 							FROM avainsana as avainsana_kieli
@@ -54,7 +54,7 @@
 	else {
 		$kieli_selite = " avainsana.selite ";
 	}
-	
+
 
 	// Setataan muuttujat
 	$lisa_haku_osasto 		 = "";
@@ -73,8 +73,8 @@
 	$lisa_haku_kustp		 = "";
 	$lisa_haku_kohde		 = "";
 	$lisa_haku_projekti		 = "";
-	$lisa_dynaaminen		 = "";
 	$lisa_parametri			 = "";
+	$lisa_dynaaminen		 = array("tuote" => "", "asiakas" => "");
 
 	// Setataan muuttujat
 	if (!isset($mul_osasto)) 		$mul_osasto = array();
@@ -96,6 +96,7 @@
 
 	if (!isset($poislisa_mulsel)) 	$poislisa_mulsel = "";
 
+	$dynaaminen_syvintaso = array("tuote" => 0, "asiakas" => 0);
 	$dynaaminen_check = "";
 
 	// Setataan muuttujat
@@ -156,7 +157,7 @@
 
 			if (trim($osastot) != '') {
 				$lisa_haku_osasto = " and tuote.osasto in ($osastot) ";
-				$lisa .= " and $mulselprefix.osasto in ($osastot) ";
+				$lisa .= " and tuote.osasto in ($osastot) ";
 			}
 		}
 
@@ -175,7 +176,7 @@
 
 			if (trim($tryt) != '') {
 				$lisa_haku_try = " and tuote.try in ($tryt) ";
-				$lisa .= " and $mulselprefix.try in ($tryt) ";
+				$lisa .= " and tuote.try in ($tryt) ";
 			}
 		}
 
@@ -194,7 +195,7 @@
 
 			if (trim($tmet) != '') {
 				$lisa_haku_tme = " and tuote.tuotemerkki in ($tmet) ";
-				$lisa .= " and $mulselprefix.tuotemerkki in ($tmet) ";
+				$lisa .= " and tuote.tuotemerkki in ($tmet) ";
 			}
 		}
 
@@ -213,7 +214,7 @@
 
 			if (trim($mallit) != '') {
 				$lisa_haku_malli = " and tuote.malli in ($mallit) ";
-				$lisa .= " and $mulselprefix.malli in ($mallit) ";
+				$lisa .= " and tuote.malli in ($mallit) ";
 			}
 		}
 
@@ -232,7 +233,7 @@
 
 			if (trim($mallitarkenteet) != '') {
 				$lisa_haku_mallitarkenne = " and tuote.mallitarkenne in ($mallitarkenteet) ";
-				$lisa .= " and $mulselprefix.mallitarkenne in ($mallitarkenteet) ";
+				$lisa .= " and tuote.mallitarkenne in ($mallitarkenteet) ";
 			}
 		}
 
@@ -302,22 +303,22 @@
 
 						if ($kaikki_puun_tunnukset_row["tunnukset"] != "") {
 							// Nollataan joinit tässä vaiheessa näin, koska syvempi puun taso rajaa enemmän kuin edelliset tasot, joten turha joinata monta kertaa
-							$lisa_dynaaminen = "";
+							$lisa_dynaaminen[$param] = "";
 
-							$lisa_dynaaminen .= "JOIN puun_alkio {$param}_alkio{$count_row['syvyys']} ON ({$param}_alkio{$count_row['syvyys']}.yhtio = $param.yhtio AND {$param}_alkio{$count_row['syvyys']}.laji = '{$param}' AND {$param}_alkio{$count_row['syvyys']}.puun_tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) AND {$param}_alkio{$count_row['syvyys']}.liitos = ";
+							$lisa_dynaaminen[$param] .= "JOIN puun_alkio {$param}_alkio{$count_row['syvyys']} ON ({$param}_alkio{$count_row['syvyys']}.yhtio = $param.yhtio AND {$param}_alkio{$count_row['syvyys']}.laji = '{$param}' AND {$param}_alkio{$count_row['syvyys']}.puun_tunnus IN ($kaikki_puun_tunnukset_row[tunnukset]) AND {$param}_alkio{$count_row['syvyys']}.liitos = ";
 
 							if ($param == "tuote") {
-								$lisa_dynaaminen .= "tuote.tuoteno)\n";
+								$lisa_dynaaminen[$param] .= "tuote.tuoteno)\n";
 							}
 							elseif ($param == "asiakas") {
-								$lisa_dynaaminen .= "asiakas.tunnus)\n";
+								$lisa_dynaaminen[$param] .= "asiakas.tunnus)\n";
 							}
 							elseif ($param == "kuka") {
-								$lisa_dynaaminen .= "kuka.kuka)\n";
+								$lisa_dynaaminen[$param] .= "kuka.kuka)\n";
 							}
 
-							$lisa_dynaaminen .= "JOIN dynaaminen_puu dynaaminen_{$param}_{$count_row['syvyys']} ON (dynaaminen_{$param}_{$count_row['syvyys']}.yhtio = {$param}_alkio{$count_row['syvyys']}.yhtio AND dynaaminen_{$param}_{$count_row['syvyys']}.tunnus = {$param}_alkio{$count_row['syvyys']}.puun_tunnus AND dynaaminen_{$param}_{$count_row['syvyys']}.laji = {$param}_alkio{$count_row['syvyys']}.laji)\n\n";
-							$syvintaso = $count_row['syvyys'];
+							$lisa_dynaaminen[$param] .= "JOIN dynaaminen_puu dynaaminen_{$param}_{$count_row['syvyys']} ON (dynaaminen_{$param}_{$count_row['syvyys']}.yhtio = {$param}_alkio{$count_row['syvyys']}.yhtio AND dynaaminen_{$param}_{$count_row['syvyys']}.tunnus = {$param}_alkio{$count_row['syvyys']}.puun_tunnus AND dynaaminen_{$param}_{$count_row['syvyys']}.laji = {$param}_alkio{$count_row['syvyys']}.laji)\n\n";
+							$dynaaminen_syvintaso[$param] = $count_row['syvyys'];
 						}
 					}
 				}
@@ -340,7 +341,7 @@
 
 		if (trim($laskumyyjat) != '') {
 			$lisa_haku_laskumyyja = " and kuka.myyja in ($laskumyyjat) ";
-			$lisa .= " and $mulselprefix.myyjanro in ($laskumyyjat) ";
+			$lisa .= " and tuote.myyjanro in ($laskumyyjat) ";
 		}
 	}
 
@@ -378,7 +379,7 @@
 
 		if (trim($tuotemyyjat) != '') {
 			$lisa_haku_myyja = " and kuka.myyja in ($tuotemyyjat) ";
-			$lisa .= " and $mulselprefix.myyjanro in ($tuotemyyjat) ";
+			$lisa .= " and tuote.myyjanro in ($tuotemyyjat) ";
 		}
 	}
 
@@ -416,7 +417,7 @@
 
 		if (trim($tuoteostajat) != '') {
 			$lisa_haku_ostaja = " and kuka.myyja in ($tuoteostajat) ";
-			$lisa .= " and $mulselprefix.ostajanro in ($tuoteostajat) ";
+			$lisa .= " and tuote.ostajanro in ($tuoteostajat) ";
 		}
 	}
 
@@ -436,7 +437,7 @@
 		if (trim($asiakasosastot) != '') {
 			$lisa_haku_asiakasosasto = " and asiakas.osasto in ($asiakasosastot) ";
 
-			if ($mulselprefix == "abc_aputaulu") $lisa .= " and $mulselprefix.osasto in ($asiakasosastot) ";
+			if ($mulselprefix == "abc_aputaulu") $lisa .= " and abc_aputaulu.osasto in ($asiakasosastot) ";
 			else $lisa .= " and asiakas.osasto in ($asiakasosastot) ";
 		}
 	}
@@ -457,7 +458,7 @@
 		if (trim($asiakasryhmat) != '') {
 			$lisa_haku_asiakasryhma = " and asiakas.ryhma in ($asiakasryhmat) ";
 
-			if ($mulselprefix == "abc_aputaulu") $lisa .= " and $mulselprefix.try in ($asiakasryhmat) ";
+			if ($mulselprefix == "abc_aputaulu") $lisa .= " and abc_aputaulu.try in ($asiakasryhmat) ";
 			else $lisa .= " and asiakas.ryhma in ($asiakasryhmat) ";
 		}
 	}
@@ -631,7 +632,7 @@
 				echo "</select></td>";
 				echo "</tr>";
 
-				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 					$ruksitchk = "";
 
 					if ($ruksit["osasto"] != "") {
@@ -742,7 +743,7 @@
 				echo "</select></td>";
 				echo "</tr>";
 
-				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 					$ruksitchk = "";
 
 					if ($ruksit["try"] != "") {
@@ -777,7 +778,7 @@
 							ORDER BY avainsana.selite";
 				$tmsresult = pupe_query($query);
 			}
-			elseif ($lisa_haku_osasto == "" and $lisa_haku_try == "" and $lisa_dynaaminen == "") {
+			elseif ($lisa_haku_osasto == "" and $lisa_haku_try == "" and $lisa_dynaaminen["tuote"] == "") {
 				$query = "	SELECT avainsana.selite as tme,
 							$kieli_selite
 				            FROM avainsana
@@ -788,10 +789,11 @@
 				            ORDER BY avainsana.jarjestys, avainsana.selite";
 				$tmsresult = pupe_query($query);
 			}
-			elseif ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen != "") {
+			elseif ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen["tuote"] != "") {
 				$query = "	SELECT distinct avainsana.selite as tme,
 							$kieli_selite
 							FROM tuote
+							{$lisa_dynaaminen["tuote"]}
 							JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							$lisa_haku_osasto
@@ -807,7 +809,7 @@
 			if (is_resource($tmsresult) and mysql_num_rows($tmsresult) == 0) {
 				$query = "	SELECT DISTINCT tuote.tuotemerkki tme, tuote.tuotemerkki selite
 							FROM tuote
-							$lisa_dynaaminen
+							{$lisa_dynaaminen["tuote"]}
 							$lisa_parametri
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							and tuote.tuotemerkki != ''
@@ -858,7 +860,7 @@
 				echo "</select></td>";
 				echo "</tr>";
 
-				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 					$ruksitchk = "";
 
 					if ($ruksit["tuotemerkki"] != "") {
@@ -874,13 +876,13 @@
 
 		if ($monivalintalaatikko == "malli/mallitark" or $monivalintalaatikko == "malli") {
 			unset($sxresult);
-			
+
 			if (($lisa_haku_osasto != "" or $lisa_haku_try != "")) {
 
 				if (($lisa_haku_tme != '' or $lisa_haku_try != '') and ($monivalintalaatikko == "malli" or (!in_array("malli", $monivalintalaatikot) and $monivalintalaatikko == 'malli/mallitark'))) {
 					// malli dropdown
 					if (isset($monivalinta_tuotteet)) {
-						$query = "	SELECT avainsana.selite as malli, 
+						$query = "	SELECT avainsana.selite as malli,
 									$kieli_selite,
 									sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
 									FROM tuote
@@ -899,7 +901,7 @@
 						$sxresult = pupe_query($query);
 					}
 					elseif ($lisa_haku_try == "" and $lisa_haku_tme == "") {
-						$query = "	SELECT avainsana.selite as malli, 
+						$query = "	SELECT avainsana.selite as malli,
 									$kieli_selite
 						            FROM avainsana
 						            WHERE avainsana.yhtio 	= '$kukarow[yhtio]'
@@ -910,7 +912,7 @@
 						$sxresult = pupe_query($query);
 					}
 					elseif ($lisa_haku_try != "" or $lisa_haku_tme != "") {
-						$query = "	SELECT distinct avainsana.selite as malli, 
+						$query = "	SELECT distinct avainsana.selite as malli,
 									$kieli_selite
 									FROM tuote
 									$lisa_parametri
@@ -980,7 +982,7 @@
 						echo "</select></td>";
 						echo "</tr>";
 
-						if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+						if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 							$ruksitchk = "";
 
 							if ($ruksit["malli"] != "") {
@@ -999,7 +1001,7 @@
 
 					// mallitarkenne dropdown
 					if (isset($monivalinta_tuotteet)) {
-						$query = "	SELECT avainsana.selite as mallitarkenne, 
+						$query = "	SELECT avainsana.selite as mallitarkenne,
 									$kieli_selite,
 									sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
 									FROM tuote
@@ -1019,7 +1021,7 @@
 						$sxresult = pupe_query($query);
 					}
 					elseif ($lisa_haku_malli == "") {
-						$query = "	SELECT avainsana.selite as mallitarkenne, 
+						$query = "	SELECT avainsana.selite as mallitarkenne,
 									$kieli_selite
 						            FROM avainsana
 						            WHERE avainsana.yhtio 	= '$kukarow[yhtio]'
@@ -1030,7 +1032,7 @@
 						$sxresult = pupe_query($query);
 					}
 					elseif ($lisa_haku_malli != "") {
-						$query = "	SELECT distinct avainsana.selite as mallitarkenne, 
+						$query = "	SELECT distinct avainsana.selite as mallitarkenne,
 									$kieli_selite
 									FROM tuote
 									$lisa_parametri
@@ -1103,7 +1105,7 @@
 						echo "</select></td>";
 						echo "</tr>";
 
-						if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+						if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 							$ruksitchk = "";
 
 							if ($ruksit["mallitarkenne"] != "") {
@@ -1196,7 +1198,7 @@
 							echo "</select></td>";
 							echo "</tr>";
 
-							if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+							if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 								$ruksitchk = "";
 
 								if ($ruksit["dynaaminen_".$tree."_".$edsyvyys] != "") {
@@ -1277,7 +1279,7 @@
 				echo "</select><input type='hidden' name='dynaaminen{$tree}maxsyvyys' value='$edsyvyys'></td>";
 				echo "</tr>";
 
-				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 					$ruksitchk = "";
 
 					if ($ruksit["dynaaminen_".$tree."_".$edsyvyys] != "") {
@@ -1298,7 +1300,7 @@
 			$parametri = substr($monivalintalaatikko, 10);
 
 			// Näytetään parametrit jos ollaan valittu osasto tai  tuoteryhmä tai rajattu segmenteillä
-			if ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen != "") {
+			if ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen["tuote"] != "") {
 
 				if ($kukarow["extranet"] == "" and $verkkokauppa == "") {
 					if (!isset($poistetut) or $poistetut == '') {
@@ -1311,7 +1313,7 @@
 					$query = "	SELECT 1_t_av_$parametri.selite as $parametri,
 								sum(if(tuote.status != 'P', 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
 								FROM tuote
-								$lisa_dynaaminen
+								{$lisa_dynaaminen["tuote"]}
 								$lisa_parametri
 								JOIN tuotteen_avainsanat 1_t_av_$parametri ON (1_t_av_$parametri.yhtio = tuote.yhtio and 1_t_av_$parametri.laji = 'parametri_$parametri' and 1_t_av_$parametri.tuoteno = tuote.tuoteno)
 								JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and avainsana.selite = '$parametri' and avainsana.laji = 'PARAMETRI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
@@ -1328,7 +1330,7 @@
 								ORDER BY 1_t_av_$parametri.jarjestys, 1_t_av_$parametri.selite";
 					$sxresult = pupe_query($query);
 				}
-				elseif ($lisa_haku_osasto == "" and $lisa_haku_try == "" and $lisa_haku_tme == "" and $lisa_dynaaminen == "") {
+				elseif ($lisa_haku_osasto == "" and $lisa_haku_try == "" and $lisa_haku_tme == "" and $lisa_dynaaminen["tuote"] == "") {
 					$query = "	SELECT distinct tuotteen_avainsanat.selite as $parametri
 					            FROM tuotteen_avainsanat
 								JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio and avainsana.laji = 'PARAMETRI' and avainsana.selite = '$parametri' $avainlisa)
@@ -1338,10 +1340,10 @@
 					            ORDER BY tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.selite";
 					$sxresult = pupe_query($query);
 				}
-				elseif ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_haku_tme != "" or $lisa_haku_malli != "" or $lisa_dynaaminen != "") {
+				elseif ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_haku_tme != "" or $lisa_haku_malli != "" or $lisa_dynaaminen["tuote"] != "") {
 					$query = "	SELECT distinct 1_t_av_$parametri.selite as $parametri
 								FROM tuote
-								$lisa_dynaaminen
+								{$lisa_dynaaminen["tuote"]}
 								$lisa_parametri
 								JOIN tuotteen_avainsanat 1_t_av_$parametri ON (1_t_av_$parametri.yhtio = tuote.yhtio and 1_t_av_$parametri.laji = 'parametri_$parametri' and 1_t_av_$parametri.tuoteno = tuote.tuoteno and 1_t_av_$parametri.kieli = '$kukarow[kieli]' and 1_t_av_$parametri.selite != '')
 								JOIN avainsana ON (avainsana.yhtio = 1_t_av_$parametri.yhtio and avainsana.selite = '$parametri' and avainsana.laji = 'PARAMETRI' $avainlisa)
@@ -1400,7 +1402,7 @@
 					echo "</select></td>";
 					echo "</tr>";
 
-					if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+					if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 						$ruksitchk = "";
 
 						if ($ruksit[$parametri] != "") {
@@ -1446,7 +1448,7 @@
 			echo "</select></td>";
 			echo "</tr>";
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$ruksitchk = "";
 
 				if ($ruksit["laskumyyja"] != "") {
@@ -1484,7 +1486,7 @@
 			echo "</select></td>";
 			echo "</tr>";
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$ruksitchk = "";
 
 				if ($ruksit["asiakastila"] != "") {
@@ -1528,7 +1530,7 @@
 			echo "</select></td>";
 			echo "</tr>";
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$ruksitchk = "";
 
 				if ($ruksit["tuotemyyja"] != "") {
@@ -1572,7 +1574,7 @@
 			echo "</select></td>";
 			echo "</tr>";
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$ruksitchk = "";
 
 				if ($ruksit["asiakasmyyja"] != "") {
@@ -1615,7 +1617,7 @@
 			echo "</select></td>";
 			echo "</tr>";
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$ruksitchk = "";
 
 				if ($ruksit["tuoteostaja"] != "") {
@@ -1653,7 +1655,7 @@
 			echo "</select></td>";
 			echo "</tr>";
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$ruksitchk = "";
 
 				if ($ruksit["asiakasosasto"] != "") {
@@ -1691,7 +1693,7 @@
 			echo "</select></td>";
 			echo "</tr>";
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$ruksitchk = "";
 
 				if ($ruksit["asiakasryhma"] != "") {
@@ -1729,7 +1731,7 @@
 			echo "</select></td>";
 			echo "</tr>";
 
-			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 				$ruksitchk = "";
 
 				if ($ruksit["asiakaspiiri"] != "") {
@@ -1783,26 +1785,28 @@
 
 				$tunnukset_save = $tunnukset;
 
-				foreach ($kustparray[$isataso] as $lapsitaso => $sxrow) {
+				if (isset($kustparray[$isataso])) {
+					foreach ($kustparray[$isataso] as $lapsitaso => $sxrow) {
 
-					$sel = '';
-					$tunnukset .= "$sxrow[tunnus],";
+						$sel = '';
+						$tunnukset .= "$sxrow[tunnus],";
 
-					if (count($mul_kustp) > 0) {
-						if (in_array(trim($sxrow['tunnus']), $mul_kustp)) {
-							$sel = 'SELECTED';
+						if (count($mul_kustp) > 0) {
+							if (in_array(trim($sxrow['tunnus']), $mul_kustp)) {
+								$sel = 'SELECTED';
+							}
 						}
+
+						echo "<option value='$sxrow[tunnus]' id='$tunnukset' name='$tunnukset' $sel onclick='javascript:kustannuspaikkaselect(\"$tunnukset\");'>";
+
+						for ($i = 0; $i < $sisennys; $i++) echo "&raquo;";
+
+						echo "$sxrow[koodi] $sxrow[nimi]</option>";
+
+						lapsitasot($sxrow["tunnus"], $sisennys, $tunnukset);
+
+						$tunnukset = $tunnukset_save;
 					}
-
-					echo "<option value='$sxrow[tunnus]' id='$tunnukset' name='$tunnukset' $sel onclick='javascript:kustannuspaikkaselect(\"$tunnukset\");'>";
-
-					for ($i = 0; $i < $sisennys; $i++) echo "&raquo;";
-
-					echo "$sxrow[koodi] $sxrow[nimi]</option>";
-
-					lapsitasot($sxrow["tunnus"], $sisennys, $tunnukset);
-
-					$tunnukset = $tunnukset_save;
 				}
 			}
 
@@ -1819,7 +1823,7 @@
 				echo "</select></td>";
 				echo "</tr>";
 
-				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 					$ruksitchk = "";
 
 					if ($ruksit["kustp"] != "") {
@@ -1866,7 +1870,7 @@
 				echo "</select></td>";
 				echo "</tr>";
 
-				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 					$ruksitchk = "";
 
 					if ($ruksit["kohde"] != "") {
@@ -1913,7 +1917,7 @@
 				echo "</select></td>";
 				echo "</tr>";
 
-				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
 					$ruksitchk = "";
 
 					if ($ruksit["projekti"] != "") {

@@ -7606,6 +7606,86 @@ if (!function_exists("livesearch_asiakashaku")) {
 	}
 }
 
+if (!function_exists("livesearch_varastohaku")) {
+	function livesearch_varastohaku() {
+		global $yhtiorow, $kukarow, $palvelin2;
+
+		$tee = $_REQUEST["livesearch_tee"];
+		$nimi = $_REQUEST["livesearch_nimi"];
+		$formi = $_REQUEST["livesearch_form"];
+		$hakuid = $_REQUEST["livesearch_hakuid"];
+		$submit = $_REQUEST["livesearch_submit"];
+		$haku = trim($_REQUEST["livesearch_haku"]);
+
+		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+			</script>";
+
+			$haku_array = explode(" ", $haku);
+			$haku_query = "";
+			$haku_join = '';
+
+			foreach ($haku_array as $haku) {
+				$haku = mysql_real_escape_string($haku);
+				$haku_query .= "and concat(hyllyalue, hyllynro, hyllyvali, hyllytaso) like '%$haku%'";
+			}
+
+			$query = "	SELECT DISTINCT concat(hyllyalue,'-',hyllynro,'-',hyllyvali,'-',hyllytaso) hyllyt, min(tunnus) tunnus
+						FROM tuotepaikat 
+						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' 
+						$haku_query
+						GROUP BY hyllyt";
+			$result = pupe_query($query);
+
+			$limit = 0;
+			if (mysql_num_rows($result) > 0) {
+				while ($row = mysql_fetch_assoc($result)) {
+					echo "	<div id='varasto_valinta_$row[tunnus]'
+								name='selectOptions$hakuid'
+								onmouseover=\"this.className='liveSearchSelectedItem';
+									keyStrokeIndex = -1;
+									var aEls = document.getElementsByName('selectOptions$hakuid');
+									for (var iEl = 0; iEl < aEls.length; iEl++) {
+										if (aEls[iEl].id.substring(0,16) == 'varasto_valinta_' && aEls[iEl].id != 'varasto_valinta_$row[tunnus]') {
+											document.getElementById(aEls[iEl].id).className='';
+										}
+									} \"
+								onmouseout=\"this.className='';\"
+								onClick=\"document.getElementById('$hakuid').value='$row[hyllyt]';";
+								if ($submit == "") {
+									echo "document.$formi.submit();";
+								}
+								else {
+									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+								}
+								echo "\"
+								style='padding:2px;'>
+								<font style='font-weight:bold'>$row[hyllyt]</font> 
+							</div><div name='selectValues$hakuid' id='$row[hyllyt]'></div>";
+					$limit++;
+					if ($limit > 14) {
+						break;
+					}
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("varastoa"),".</font></div>";
+			}
+			else {
+				echo "<div style='padding:2px'><font class='message'>".t("Ei varastoa.")."</font></div>";
+			}
+		}
+		else {
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+			</script>";
+		}
+	}
+}
+
 if (!function_exists("livesearch_kentta")) {
 	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '') {
 		global $kukarow, $toim;
@@ -8976,7 +9056,7 @@ if (!function_exists("lue_kurssit")) {
 			$result = pupe_query($query);
 
 		}
-	}
+	}	
 }
 
 // textmode progress palkki

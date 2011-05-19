@@ -20,17 +20,17 @@
 						WHERE yhtio = '$kukarow[yhtio]'";
 			$pres = mysql_query($query) or pupe_error($query);
 			$perse = mysql_fetch_array($pres);
-			
+
 			$trow[$i] = $perhe = ($perse["perhe"]+1);
-			
+
 			//P‰ivitet‰‰n t‰m‰ jo t‰ss‰ vaiheessa
 			if ($tunnus > 0) {
 				$query = "	UPDATE avainsana
 							SET perhe = '$perhe'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$tunnus'";
-				$pres = mysql_query($query) or pupe_error($query);	
-			}									
+				$pres = mysql_query($query) or pupe_error($query);
+			}
 		}
 		else {
 			$perhe = $trow[$i];
@@ -38,13 +38,13 @@
 
 		$tyyppi = 4;
 	}
-	
+
 	// Maksuehtojen js toimitustapojen kieliveriot
 	if (mysql_field_name($result, $i) == "selite" and $lukitse_avaimeen != "" and ($lukitse_laji == "TOIMTAPAKV" or $lukitse_laji == "MAKSUEHTOKV" or $lukitse_laji == "PAKKAUSKV")) {
 		$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "selite") {
 		$avain_selite 	= "SELECTED";
 	}
@@ -150,7 +150,8 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "INVEN_LAJI") 		$ulos .= "<option value='INVEN_LAJI' $avain_sel[INVEN_LAJI]>				".t("Inventoinnin laji")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HAE_JA_SELAA") 		$ulos .= "<option value='HAE_JA_SELAA' $avain_sel[HAE_JA_SELAA]>			".t("Hae ja selaa -ohjelman parametrit")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "DYNAAMINEN_PUU") 	$ulos .= "<option value='DYNAAMINEN_PUU' $avain_sel[DYNAAMINEN_PUU]>		".t("Dynaamisen puun p‰‰kategoriat")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM") 		$ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>				".t("Puuterivin kommentti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM") 		$ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>					".t("Puuterivin kommentti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA") 	$ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>		".t("Extranet ulkoasuteema")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -459,7 +460,7 @@
 			$chk = in_array($varasto_row['tunnus'], $varastot) ? ' checked' : '';
 			$ulos .= "<input type='checkbox' name='varastot_array[]' value='$varasto_row[tunnus]'$chk> $varasto_row[nimitys]<br/>";
 		}
-		
+
 		$ulos .= "</td>";
 		$jatko = 0;
 	}

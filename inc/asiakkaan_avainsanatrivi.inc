@@ -1,4 +1,5 @@
 <?php
+
 	$ulos 	= "";
 	$jatko	= 1; // oletetaan normaali käsittely
 	$tyyppi	= 1; // oletetaan rivin näkyvyys
@@ -26,7 +27,7 @@
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)." onchange='submit();'>";
 		$ulos .= "<option value=''>".t("Oletus")."</option>";
 
-		while($row = mysql_fetch_array($vresult)) {
+		while($row = mysql_fetch_assoc($vresult)) {
 			$sel = "";
 
 			if ($row["selite"] == $trow[$i]) {
@@ -54,13 +55,33 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-			while ($vrow=mysql_fetch_array($vresult)) {
+			while ($vrow=mysql_fetch_assoc($vresult)) {
 				$sel="";
 				if ($trow[$i] == $vrow['selite']) {
 					$sel = "selected";
 				}
 				$ulos .= "<option value = '$vrow[selite]' $sel>".t_tunnus_avainsanat($vrow, "selite", "TOIMTAPAKV")."</option>";
 			}
+			$ulos .= "</select></td>";
+			$jatko = 0;
+		}
+		elseif (stripos($asavainsanatyyppi, "EXTRANET_TEEMA") !== FALSE) {
+			$vresult = t_avainsana("EXTRANET_TEEMA");
+
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+			$ulos .= "<option value=''>".t("Oletus")."</option>";
+
+			while ($row = mysql_fetch_assoc($vresult)) {
+				$sel = "";
+
+				if ($row["selite"] == $trow[$i]) {
+					$sel = 'selected';
+					$asavainsanatyyppi = $row["selitetark_2"];
+				}
+
+				$ulos .= "<option value='$row[selite]' $sel>$row[selitetark]</option>";
+			}
+
 			$ulos .= "</select></td>";
 			$jatko = 0;
 		}
@@ -86,9 +107,13 @@
 
 		//	näytetäään vain kielet joita on
 		if ($perhe > 0) {
-			$query = "SELECT group_concat(distinct kieli) kielet FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and kieli != ''";
+			$query = "	SELECT group_concat(distinct kieli) kielet
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kieli != ''";
 			$res = mysql_query($query) or pupe_error($query);
-			$kilerow = mysql_fetch_array($res);
+			$kilerow = mysql_fetch_assoc($res);
+
 			$kielet = $kilerow["kielet"];
 		}
 

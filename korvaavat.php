@@ -1,7 +1,7 @@
 <?php
 	require ("inc/parametrit.inc");
 
-	if ($toim == "vastaavat") {
+	if ($toim == "VASTAAVAT") {
 		$taulu = "vastaavat";
 		echo "<font class='head'>".t("Vastaavien yll‰pito")."</font><hr>";
 	}
@@ -15,7 +15,7 @@
 		  ".t("Etsi tuotetta")." <input type='text' name='tuoteno'>
 		  <input type='submit' value='".t("Hae")."'>
 		  <input type='hidden' value='$toim' name='toim'>
-		  </form>";
+		  </form><br><br>";
 
 	if ($tee == 'del') {
 		//haetaan poistettavan tuotteen id.. k‰ytt‰j‰st‰v‰llist‰..
@@ -115,12 +115,21 @@
 
 			//kummatkin lˆytyiv‰t.. ja ne korvaa toisensa
 			if ($fid != "" and $cid != "" and $fid == $cid) {
-				echo "<font class='error'>".t("Tuotteet")." $korvaava <> $tuoteno ".t("korvaavat jo toisensa")."!</font><br><br>";
+				if ($toim == "VASTAAVAT") {
+					echo "<font class='error'>".t("Tuotteet")." $korvaava <> $tuoteno ".t("ovat jo vastaavia")."!</font><br><br>";
+				}
+				else {
+					echo "<font class='error'>".t("Tuotteet")." $korvaava <> $tuoteno ".t("korvaavat jo toisensa")."!</font><br><br>";
+				}
 			}
 			elseif ($fid != "" and $cid != "" ) {
-				echo "<font class='error'>".t("Tuotteet")." $korvaava, $tuoteno ".t("kuuluvat jo eri korvaavuusketjuihin")."!</font><br><br>";
+				if ($toim == "VASTAAVAT") {
+					echo "<font class='error'>".t("Tuotteet")." $korvaava, $tuoteno ".t("kuuluvat jo eri vastaavuusketjuihin")."!</font><br><br>";
+				}
+				else {
+					echo "<font class='error'>".t("Tuotteet")." $korvaava, $tuoteno ".t("kuuluvat jo eri korvaavuusketjuihin")."!</font><br><br>";
+				}
 			}
-
 		}
 	}
 
@@ -139,7 +148,12 @@
 				$ok=1;
 			}
 			else {
-				echo "<br><font class='message'>".t("Tuotteella ei ole korvaavia tuotteita")."!</font>";
+				if ($toim == "VASTAAVAT") {
+					echo "<br><font class='message'>".t("Tuotteella ei ole vastaavia tuotteita")."!</font>";
+				}
+				else {
+					echo "<br><font class='message'>".t("Tuotteella ei ole korvaavia tuotteita")."!</font>";
+				}
 			}
 		}
 		else {
@@ -152,7 +166,7 @@
 
 			echo "<br><table>";
 			echo "<tr>";
-			if ($toim == "vastaavat") {
+			if ($toim == "VASTAAVAT") {
 				echo "<th>".t("Vastaavia tuotteita")."</td>";
 			}
 			else {
@@ -198,16 +212,26 @@
 
 		if ($ok != 1) {
 			echo "<form action='korvaavat.php' method='post' autocomplete='off'>
-			<input type='hidden' name='tuoteno' value='$tuoteno'>
-			<input type='hidden' name='tee' value='add'>
-			<input type='hidden' value='$toim' name='toim'>
-			<hr>
-			".t("Lis‰‰ korvaava tuote").": <input type='text' name='korvaava'>
-			<input type='submit' value='".t("Lis‰‰")."'>
-			</form>";
+					<input type='hidden' name='tuoteno' value='$tuoteno'>
+					<input type='hidden' name='tee' value='add'>
+					<input type='hidden' value='$toim' name='toim'>
+					<hr>";
+
+			if ($toim == "VASTAAVAT") {
+				echo t("Lis‰‰ vastaava tuote").": ";
+			}
+			else {
+				echo t("Lis‰‰ korvaava tuote").": ";
+			}
+
+			echo "<input type='text' name='korvaava'>
+					<input type='submit' value='".t("Lis‰‰")."'>
+					</form>";
 		}
 	}
+
 	$formi = 'etsituote';
 	$kentta = 'tuoteno';
+
 	require "inc/footer.inc";
 ?>

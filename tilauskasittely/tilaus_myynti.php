@@ -1539,6 +1539,15 @@ if ($tee == 'mikrotila' or $tee == 'file') {
 	}
 }
 
+if ($tee == 'mikrotila_matriisi' or $tee == 'file_matriisi') {
+
+	require('mikrotilaus_matriisi.inc');
+
+	if ($tee == 'Y') {
+		$tee = "";
+	}
+}
+
 // Tehd‰‰n rahoituslaskuelma
 if ($tee == 'osamaksusoppari') {
 	require('osamaksusoppari.inc');
@@ -2168,6 +2177,21 @@ if ($tee == '') {
 					<input type='hidden' name='toim_kutsu' value='$toim'>
 					<input type='submit' value='".t("ATV-Selain")."'>
 					</form>";
+		}
+		
+		if ($kukarow["extranet"] == "" and $yhtiorow["konserni"] == "makia") {
+
+			echo "<form action='$PHP_SELF' method='post'>
+					<input type='hidden' name='tee' value='mikrotila_matriisi'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='mista' value='$mista'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+					<input type='hidden' name='tyojono' value='$tyojono'>
+					<input type='hidden' name='projektilla' value='$projektilla'>";
+			echo "<input type='Submit' value='".t("Lue tuotematriisi")."'>";
+			echo "</form>";
 		}
 
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO") {

@@ -1480,7 +1480,7 @@
 					}
 				}
 
-				echo "<option value='$sxrow[myyja]' $sel>$sxrow[myyja] $sxrow[nimi]</option>";
+				echo "<option value='$sxrow[selite]' $sel>$sxrow[selite] $sxrow[selitetark]</option>";
 			}
 
 			echo "</select></td>";

@@ -12250,7 +12250,7 @@ if (!function_exists("hae_hyvityshinta")) {
 
 		// Haetaan asiakkaan laskutetut/toimitetut veloitusrivit + toisella queryllä hyvitysrivit
 		$query = "	(SELECT datediff(now(), if(tilausrivi.laskutettuaika='0000-00-00', now(), tilausrivi.laskutettuaika)) AS ika,
-					tilausrivi.hinta,
+					tilausrivi.hinta * if (tilausrivi.netto = 'N', 1, (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100)) hinta,
 					sum(tilausrivi.kpl + tilausrivi.varattu) kpl
 					FROM lasku
 					JOIN tilausrivi USE index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
@@ -12267,7 +12267,7 @@ if (!function_exists("hae_hyvityshinta")) {
 					UNION
 
 					(SELECT datediff(now(), if(tilausrivi.laskutettuaika='0000-00-00', now(), tilausrivi.laskutettuaika)) AS ika,
-					tilausrivi.hinta,
+					tilausrivi.hinta * if (tilausrivi.netto = 'N', 1, (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100)) hinta,
 					sum(tilausrivi.kpl  +tilausrivi.varattu) kpl
 					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_varattu)
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio

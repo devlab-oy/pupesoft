@@ -339,6 +339,15 @@ else {
 			// tähän kerätään tilausnumerot, joista lasketaan rahti
 			$rahtimaksu_tunnukset = array();
 
+			$query = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite = '$laskurow[toimitustapa]'";
+			$result = pupe_query($query);
+			$torow = mysql_fetch_assoc($result);
+
+			$rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
+
 			// jos kyseessä on JT-tilaus, katsotaan pitääkö lisätä rahtikulua usealle tilaukselle
 			if ($laskurow["clearing"] == "JT-TILAUS" and $yhtiorow["jt_rahti"] == "E") {
 				// etsitään kaikki isätilaukset miltä nämä JT-tuotteet ovat tulleet ja katsotaan onko niillä jo rahtikulu (lisätään rahtikulu niille jolla ei ole)
@@ -365,7 +374,7 @@ else {
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus in ($step2row[uudet_otunnukset])
-								AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+								AND tuoteno IN ($rahtinro_tuoteno_lisa)";
 					$step3re = pupe_query($query);
 
 					// jos ei niin pitää rahdittaa!
@@ -384,18 +393,11 @@ else {
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus = '$laskurow[tunnus]'
-						and tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+						and tuoteno IN ($rahtinro_tuoteno_lisa)";
 			$result = pupe_query($query);
 
 			//jos tilauksella on jo rahtikulu niin ei lisätä sitä uudestaan
 			if (mysql_num_rows($result) == 0) {
-
-				$query = "	SELECT *
-							FROM toimitustapa
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND selite = '$laskurow[toimitustapa]'";
-				$result = pupe_query($query);
-				$torow = mysql_fetch_assoc($result);
 
 				// jos toimitustapana on joku nouto niin ei lisätä rahtikulua
 				if ($torow["nouto"] == "") {
@@ -486,13 +488,23 @@ else {
 
 		}
 		else {
+
+			$query = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite = '$laskurow[toimitustapa]'";
+			$result = pupe_query($query);
+			$torow = mysql_fetch_assoc($result);
+
+			$rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
+
 			// meillä on rahdituksessa syötettävään painoon perustuva rahtimaksu
 			// katsotaan onko rahtituotenumero syötetty jo käsin
 			$query = "	SELECT tunnus
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus = '$laskurow[tunnus]'
-						and tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+						and tuoteno IN ({$rahtinro_tuoteno_lisa})";
 			$result = pupe_query($query);
 
 			//jos tilauksella on jo rahtikulu niin merkataan se rahtivapaaksi, ettei raihtikulu mene uudestaan laskutuksen yhteydessä!

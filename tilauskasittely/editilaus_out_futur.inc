@@ -134,7 +134,7 @@
 
 			$edipolku = "/tmp";
 
-			$filename = $edipolku."/editilaus_out_futur".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+			$filename = $edipolku."/{$laskurow['tunnus']}.dat";
 			file_put_contents($filename,$edi_order);
 
 			$ftphost = $ftphost_unikko;

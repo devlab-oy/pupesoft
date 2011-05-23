@@ -35,11 +35,16 @@
 			$edi_order .= "OSTOTIL.OT_VAHVISTUS_FAKSILLA:\n";
 			$edi_order .= "OSTOTIL.OT_FAKSI:\n";
 
+			$lask_yritys = trim($lisatiedot['laskutus_nimi'].' '.$lisatiedot['laskutus_nimitark']);
+			$lask_osoite = $lisatiedot['laskutus_osoite'];
+			$lask_postitp = $lisatiedot['laskutus_postitp'];
+			$lask_postino = $lisatiedot['laskutus_postino'];
+
 			$edi_order .= "OSTOTIL.OT_ASIAKASNRO:{$asiakasnro}\n";
-			$edi_order .= "OSTOTIL.OT_YRITYS:".trim($lisatiedot['laskutus_nimi'].' '.$lisatiedot['laskutus_nimitark'])."\n";
-			$edi_order .= "OSTOTIL.OT_KATUOSOITE:{$lisatiedot['laskutus_osoite']}\n";
-			$edi_order .= "OSTOTIL.OT_POSTITOIMIPAIKKA:{$lisatiedot['laskutus_postitp']}\n";
-			$edi_order .= "OSTOTIL.OT_POSTINRO:{$lisatiedot['laskutus_postino']}\n";
+			$edi_order .= "OSTOTIL.OT_YRITYS:{$lask_yritys}\n";
+			$edi_order .= "OSTOTIL.OT_KATUOSOITE:{$lask_osoite}\n";
+			$edi_order .= "OSTOTIL.OT_POSTITOIMIPAIKKA:{$lask_postitp}\n";
+			$edi_order .= "OSTOTIL.OT_POSTINRO:{$lask_postino}\n";
 			$edi_order .= "OSTOTIL.OT_YHTEYSHENKILO:\n";
 			$edi_order .= "OSTOTIL.OT_YHTEYSHENKILONPUH:\n";
 			$edi_order .= "OSTOTIL.OT_YHTEYSHENKILONFAX:\n";
@@ -51,12 +56,27 @@
 			$edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILO:\n";
 			$edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONPUH:\n";
 			$edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONFAX:\n";
-			$edi_order .= "OSTOTIL.OT_TOIMITUS_YRITYS:".substr(trim($laskurow['toim_nimi'].' '.$laskurow['toim_nimitark']), 0, 30)."\n";
+
+			$toim_yritys = substr(trim($laskurow['toim_nimi'].' '.$laskurow['toim_nimitark']), 0, 30);
+			$toim_osoite = substr(trim($laskurow['toim_osoite']), 0, 25);
+			$toim_postitp = substr(trim($laskurow['toim_postitp']), 0, 25);
+			$toim_postino = trim($laskurow['toim_postino']);
+			$toim_maa = trim($laskurow['toim_maa']);
+
+			if ($toim_yritys == $lask_yritys and $toim_osoite == $lask_osoite and $toim_postitp == $lask_postitp and $toim_postino == $lask_postino) {
+				$toim_yritys = '';
+				$toim_osoite = '';
+				$toim_postitp = '';
+				$toim_postino = '';
+				$toim_maa = '';
+			}
+
+			$edi_order .= "OSTOTIL.OT_TOIMITUS_YRITYS:{$toim_yritys}\n";
 			$edi_order .= "OSTOTIL.OT_TOIMITUS_NIMI:\n";
-			$edi_order .= "OSTOTIL.OT_TOIMITUS_KATUOSOITE:".substr(trim($laskurow['toim_osoite']), 0, 25)."\n";
-			$edi_order .= "OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:".substr(trim($laskurow['toim_postitp']), 0, 25)."\n";
-			$edi_order .= "OSTOTIL.OT_TOIMITUS_POSTINRO:{$laskurow['toim_postino']}\n";
-			$edi_order .= "OSTOTIL.OT_TOIMITUS_MAAKOODI:{$laskurow['toim_maa']}\n";
+			$edi_order .= "OSTOTIL.OT_TOIMITUS_KATUOSOITE:{$toim_osoite}\n";
+			$edi_order .= "OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:{$toim_postitp}\n";
+			$edi_order .= "OSTOTIL.OT_TOIMITUS_POSTINRO:{$toim_postino}\n";
+			$edi_order .= "OSTOTIL.OT_TOIMITUS_MAAKOODI:{$toim_maa}\n";
 		   	$edi_order .= "*RE OSTOTIL\n";
 
 		   	$i = 1;
@@ -103,7 +123,7 @@
 
 				if ($toim == 'VASTAANOTA_REKLAMAATIO') {
 		    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$hinta}\n";
-		    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
+		    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS_1:0\n";
 				}
 				else {
 
@@ -111,7 +131,7 @@
 
 					// MUISTA OTTAA KOMMENTTI POIS JA POISTA NOLLARIVI!!!
 		    		// $edi_order .= "OSTOTILRIV.OTR_ALENNUS:".generoi_alekentta_php($tilausrivi_row, 'M')."\n";
-		    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
+		    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS_1:0\n";
 				}
 
 				$edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$tilausrivi_row['alv']}\n";

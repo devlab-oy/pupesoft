@@ -20,7 +20,7 @@
 			exit;
 		}
 
-		$ala_tallenna = array(	"kysely",
+		$ala_tallenna = array(	"kysely", 
 								"uusirappari",
 								"edkysely",
 								"rtee",
@@ -1892,7 +1892,7 @@
 
 			// Otetaan monivalintalaatikoista palautuvat parametrit talteen ja laitetaan isoihin kyselyihin
 			echo "	<input type='hidden' name='lisa' value='".urlencode(serialize($lisa))."'>
-					<input type='hidden' name='lisa_dynaaminen' value='".urlencode(serialize($lisa_dynaaminen))."'>
+					<input type='hidden' name='lisa_dynaaminen' value='".urlencode(serialize($lisa_dynaaminen["tuote"]))."'>
 					<input type='hidden' name='lisa_parametri' value='".urlencode(serialize($lisa_parametri))."'>";
 
 			echo "<br><br>";

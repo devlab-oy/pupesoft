@@ -1088,7 +1088,7 @@ else {
 						$params = array(
 							'laskurow' => $laskurow_edi,
 							'lisatiedot' => $laskun_lisatiedot,
-							'asiakasnro' => $asiakas_chk_row['herminator'],
+							'asiakasnro' => $asiakas_chk_row['asiakasnro'],
 							'tilaustyyppi' => $pupesoft_tilaustyyppi,
 							'toimitustapa' => $totarowx['herminator'],
 							'toim' => $toim,

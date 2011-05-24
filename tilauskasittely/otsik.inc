@@ -2,11 +2,13 @@
 
 	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
-	// ToimehtoTarkenne javascript funktio
-	js_toimehtoTarkenne();
+	if (php_sapi_name() != 'cli' and (!isset($ei_kayttoliittymaa) or $ei_kayttoliittymaa != "kylla")) {
+		// ToimehtoTarkenne javascript funktio
+		js_toimehtoTarkenne();
 
-	// Voidaan esim. luoda lennossa uusia yhteyshenkilöitä
-	js_open_yllapito();
+		// Voidaan esim. luoda lennossa uusia yhteyshenkilöitä
+		js_open_yllapito();
+	}
 
 	//tässä joko tehdään uutta otsikkoa tai muutetaan olemassa olevaa
 	if ($tee == '' or $kopioitava_otsikko != 0) {

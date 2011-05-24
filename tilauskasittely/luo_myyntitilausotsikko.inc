@@ -247,6 +247,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		$jatka	= "JATKA";
 		$tee	= "OTSIK";
 		$override_ytunnus_check = "YES";
+		$ei_kayttoliittymaa = "kylla";
 
 		require ("otsik.inc");
 

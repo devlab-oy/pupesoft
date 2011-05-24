@@ -3510,7 +3510,7 @@ if ($tee == '') {
 	}
 
 	//Lisätään rivi
-	if ((trim($tuoteno) != '' or (is_array($tuoteno_array) and count($tuoteno_array) > 1)) and ($kpl != '' or is_array($kpl_array)) and $tila != "MUUTA" and $ulos == '' and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
+	if ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array)) and $tila != "MUUTA" and $ulos == '' and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
 
 		if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
 			$tuoteno_array[] = $tuoteno;
@@ -3977,7 +3977,7 @@ if ($tee == '') {
 	}
 
 	 // erikoisceisi, jos halutaan pieni tuotekysely tilaustaulussa...
-	if ((($tuoteno != '' or is_array($tuoteno_array)) and $kpl == '' and $kukarow['extranet'] == '') or ($toim == "REKLAMAATIO" and isset($trow['tuoteno']) and $trow['tuoteno'] != '' and $kukarow['extranet'] == '')) {
+	if ((($tuoteno != '' or (is_array($tuoteno_array) and count($tuoteno_array) > 1)) and $kpl == '' and $kukarow['extranet'] == '') or ($toim == "REKLAMAATIO" and isset($trow['tuoteno']) and $trow['tuoteno'] != '' and $kukarow['extranet'] == '')) {
 
 		if ($toim == "REKLAMAATIO" and $tuoteno == '') {
 			$tuoteno_lisa = $trow['tuoteno'];
@@ -3999,7 +3999,7 @@ if ($tee == '') {
 			
 			while ($tuote = mysql_fetch_assoc($result)) {
 				//kursorinohjausta
-				if ($toim == "REKLAMAATIO" and $tuoteno == '') {
+				if (($toim == "REKLAMAATIO" and $tuoteno == '') or (is_array($tuoteno_array) and count($tuoteno_array) > 1)) {
 					$kentta = 'tuoteno';
 				}
 				else {

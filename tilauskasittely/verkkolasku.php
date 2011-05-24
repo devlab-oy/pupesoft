@@ -2018,6 +2018,8 @@
 							$tulos_ulos .= "APIX finvoicemove $apixfinvoice feilas!";
 						}
 
+						$kaikki_apix_laskunumerot_talteen = "";
+						
 						// Luodaan laskupdf:ät
 						foreach ($tulostettavat_apix as $apixlasku) {
 							list($apixnumero, $apixtmpfile) = tulosta_lasku($apixlasku, $kieli, "VERKKOLASKU_APIX", "", $valittu_tulostin, $valittu_kopio_tulostin);
@@ -2026,6 +2028,8 @@
 							if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixnumero.pdf")) {
 								$tulos_ulos .= "APIX tmpmove Apix_invoice_$apixnumero.pdf feilas!";
 							}
+							
+							$kaikki_apix_laskunumerot_talteen .= "$apixlasku ";
 						}
 
 						// Tehdään apixzippi
@@ -2074,6 +2078,8 @@
 							foreach ($xml->FreeText as $teksti) {
 								$tulos_ulos .= "Tilaviesti: ".$teksti."<br>";
 							}
+
+							$tulos_ulos .= "Laskut: $kaikki_apix_laskunumerot_talteen<br>";
 						}
 					}
 					else {

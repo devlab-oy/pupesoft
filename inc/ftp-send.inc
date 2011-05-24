@@ -76,6 +76,12 @@ else {
 		$palautus = 4;
 	}
 
+	$to_email = $yhtiorow['alert_email'];
+
+	if ($yhtiorow['yhtio'] == 'mast') {
+		$to_email .= ", jaana.stenback@maston.fi, helpdesk@devlab.fi";
+	}
+
 	// jos siirto epäonnistuu
 	if ($palautus<>0) {
 
@@ -105,20 +111,20 @@ else {
 		$rivi .= "\n";
 		$rivi .= "$syy\n";
 
-		$boob = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		$boob = mail("$to_email", mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) {
 			$tulos_ulos_ftp .= "<font class='error'>\n";
-			$tulos_ulos_ftp .= "".t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[alert_email] ".t("epäonnistui myös!")."\n";
+			$tulos_ulos_ftp .= "".t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $to_email ".t("epäonnistui myös!")."\n";
 			$tulos_ulos_ftp .= "</font><br>\n";
 
 			$tulos_ulos_ftp .= "<br><pre>$rivi</pre><br>\n";
 		}
 		else {
-			$tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $yhtiorow[alert_email])</font><br>\n";
+			$tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $to_email)</font><br>\n";
 		}
 	}
-	elseif ($palautus_pyynto != "") {
+	elseif ($palautus_pyynto != "" or $yhtiorow['yhtio'] == 'mast') {
 		$rivi  = "$PHP_SELF\n";
 		$rivi .= "\n";
 		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("lähetys onnistui")."!\n";
@@ -127,7 +133,7 @@ else {
 		$rivi .= "\n";
 		$rivi .= "\n";
 
-		$silari = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		$silari = mail("$to_email", mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 	}
 }
 

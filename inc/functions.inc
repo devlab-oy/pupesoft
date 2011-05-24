@@ -5929,7 +5929,7 @@ if (!function_exists("enable_jquery")) {
 if (!function_exists("js_popup")) {
 	// scripti balloonien tekemiseen
 	function js_popup () {
-	
+
 	enable_jquery();
 
 	echo "<script type='text/javascript' language='javascript'>";
@@ -7645,8 +7645,8 @@ if (!function_exists("livesearch_varastohaku")) {
 			}
 
 			$query = "	SELECT DISTINCT concat(hyllyalue,'-',hyllynro,'-',hyllyvali,'-',hyllytaso) hyllyt, min(tunnus) tunnus
-						FROM tuotepaikat 
-						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' 
+						FROM tuotepaikat
+						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 						$haku_query
 						GROUP BY hyllyt";
 			$result = pupe_query($query);
@@ -7674,7 +7674,7 @@ if (!function_exists("livesearch_varastohaku")) {
 								}
 								echo "\"
 								style='padding:2px;'>
-								<font style='font-weight:bold'>$row[hyllyt]</font> 
+								<font style='font-weight:bold'>$row[hyllyt]</font>
 							</div><div name='selectValues$hakuid' id='$row[hyllyt]'></div>";
 					$limit++;
 					if ($limit > 14) {
@@ -9067,7 +9067,7 @@ if (!function_exists("lue_kurssit")) {
 			$result = pupe_query($query);
 
 		}
-	}	
+	}
 }
 
 // textmode progress palkki
@@ -10977,24 +10977,28 @@ if (!function_exists("seuraava_lahtoaika")) {
 }
 
 if (!function_exists("xml_add")) {
-	function xml_add ($joukko, $tieto, $handle, $maxpituus = '') {
+	function xml_add ($joukko, $tieto, $handle, $maxpituus = '', $minpituus = '') {
 		global $yhtiorow, $lasrow;
 
 		$ulos = "<$joukko>";
 
-		if (strlen($tieto) > 0) {
-			//Käsitellään xml-entiteetit
+		if (strlen($tieto) > 0 or $minpituus != '') {
+			// Käsitellään XML-entiteetit
 			$serc = array("&", ">", "<", "'", "\"", "´", "`");
 			$repl = array("&amp;", "&gt;", "&lt;", "&apos;", "&quot;", " ", " ");
-			$tieto = str_replace($serc, $repl, $tieto);
+			$tieto = str_replace($serc, $repl, trim($tieto));
 
-			if ($maxpituus != "" and is_numeric($maxpituus)) {
+			if ($maxpituus != "" and is_numeric($maxpituus) and strlen($tieto) > $maxpituus) {
 				$tieto = substr($tieto, 0, $maxpituus);
 			}
 
-			$ulos .= trim($tieto);
-		}
+			if ($minpituus != "" and is_numeric($minpituus) and strlen($tieto) < $minpituus) {
+				$tieto = str_pad($tieto, $minpituus);
+			}
 
+			$ulos .= $tieto;
+		}
+		
 		$pos = strpos($joukko, " ");
 
 		if ($pos === FALSE) {
@@ -11161,7 +11165,7 @@ if (!function_exists("hintapyoristys")) {
 if (!function_exists("palauta_vak_tiedot")) {
 	function palauta_vak_tiedot ($otunnus, $kieli='', $tyyppi='') {
 		global $kukarow, $yhtiorow;
-		
+
 		if ($tyyppi == "DGD") $kieli = "en";
 
 		// Käytetäänkö VAK-tietokantaa

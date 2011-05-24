@@ -217,14 +217,14 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "<SellerPartyDetails>\r\n");
 			xml_add("SellerPartyIdentifier",				tulosta_ytunnus($yhtiorow['ytunnus'], $y_maa),		$tootfinvoice, 35);
 			#xml_add("SellerPartyIdentifierUrlText",						"", 								$tootfinvoice);
-			xml_add("SellerOrganisationName",							  	$y_nimi,							$tootfinvoice, 35);
+			xml_add("SellerOrganisationName",							  	$y_nimi,							$tootfinvoice, 35, 2);
 			xml_add("SellerOrganisationTaxCode", tulosta_ytunnus(str_replace("0037", "", $y_vatnumero), $y_maa, "VATNUMERO"), $tootfinvoice, 35);
 			#xml_add("SellerOrganisationTaxCodeUrlText",					"", 								$tootfinvoice);
 
 			fputs($tootfinvoice, "<SellerPostalAddressDetails>\r\n");
-			xml_add("SellerStreetName", 								  	$y_osoite,							$tootfinvoice, 35);
-			xml_add("SellerTownName", 									  	$y_postitp,							$tootfinvoice, 35);
-			xml_add("SellerPostCodeIdentifier", 						  	$y_postino,							$tootfinvoice, 35);
+			xml_add("SellerStreetName", 								  	$y_osoite,							$tootfinvoice, 35, 2);
+			xml_add("SellerTownName", 									  	$y_postitp,							$tootfinvoice, 35, 2);
+			xml_add("SellerPostCodeIdentifier", 						  	$y_postino,							$tootfinvoice, 35, 2);
 			xml_add("CountryCode",										  	$y_maa,								$tootfinvoice, 2);
 			xml_add("CountryName",										  	$y_maa,								$tootfinvoice, 35);
 			#xml_add("SellerPostOfficeBoxIdentifier",					  	"",									$tootfinvoice);
@@ -250,26 +250,26 @@ if (!function_exists('finvoice_otsik')) {
 			#xml_add("SellerFreeText",   		                     	  	"",									$tootfinvoice);
 
 			fputs($tootfinvoice, "<SellerAccountDetails>\r\n");
-			xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",	str_replace(" ", "", $pankkitiedot['pankkiiban1']),		$tootfinvoice, 35);
-			xml_add("SellerBic IdentificationSchemeName=\"BIC\"",			$pankkitiedot['pankkiswift1'],		$tootfinvoice, 11);
+			xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",	str_replace(" ", "", $pankkitiedot['pankkiiban1']),		$tootfinvoice, 35, 2);
+			xml_add("SellerBic IdentificationSchemeName=\"BIC\"",			$pankkitiedot['pankkiswift1'],		$tootfinvoice, 11, 8);
 			fputs($tootfinvoice, "</SellerAccountDetails>\r\n");
 
 			if ($pankkitiedot['pankkiiban2']!='') {
 				fputs($tootfinvoice, "<SellerAccountDetails>\r\n");
-				xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",str_replace(" ", "", $pankkitiedot['pankkiiban2']),      	$tootfinvoice, 35);
-				xml_add("SellerBic IdentificationSchemeName=\"BIC\"",		$pankkitiedot['pankkiswift2'],     	$tootfinvoice, 11);
+				xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",str_replace(" ", "", $pankkitiedot['pankkiiban2']),      	$tootfinvoice, 35, 2);
+				xml_add("SellerBic IdentificationSchemeName=\"BIC\"",		$pankkitiedot['pankkiswift2'],     	$tootfinvoice, 11, 8);
 				fputs($tootfinvoice, "</SellerAccountDetails>\r\n");
 			}
 			if ($pankkitiedot['pankkiiban3']!='') {
 				fputs($tootfinvoice, "<SellerAccountDetails>\r\n");
-				xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",str_replace(" ", "", $pankkitiedot['pankkiiban3']),      	$tootfinvoice, 35);
-				xml_add("SellerBic IdentificationSchemeName=\"BIC\"",	  	$pankkitiedot['pankkiswift3'],     	$tootfinvoice, 11);
+				xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",str_replace(" ", "", $pankkitiedot['pankkiiban3']),      	$tootfinvoice, 35, 2);
+				xml_add("SellerBic IdentificationSchemeName=\"BIC\"",	  	$pankkitiedot['pankkiswift3'],     	$tootfinvoice, 11, 8);
 				fputs($tootfinvoice, "</SellerAccountDetails>\r\n");
 			}
 
 			fputs($tootfinvoice, "<InvoiceRecipientDetails>\r\n");
-			xml_add("InvoiceRecipientAddress",							  	str_replace(" ", "", $yhtiorow['pankkiiban1']),		   	$tootfinvoice, 35);
-			xml_add("InvoiceRecipientIntermediatorAddress",				  	$yhtiorow['pankkiswift1'],         	$tootfinvoice, 11);
+			xml_add("InvoiceRecipientAddress",							  	str_replace(" ", "", $yhtiorow['pankkiiban1']),		   	$tootfinvoice, 35, 1);
+			xml_add("InvoiceRecipientIntermediatorAddress",				  	$yhtiorow['pankkiswift1'],         	$tootfinvoice, 11, 8);
 			fputs($tootfinvoice, "</InvoiceRecipientDetails>\r\n");
 			fputs($tootfinvoice, "</SellerInformationDetails>\r\n");
 
@@ -299,12 +299,12 @@ if (!function_exists('finvoice_otsik')) {
 
 				fputs($tootfinvoice, "<InvoiceRecipientPartyDetails>\r\n");
 				xml_add("InvoiceRecipientPartyIdentifier", 						"", 							$tootfinvoice, 35);
-				xml_add("InvoiceRecipientOrganisationName", trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]), $tootfinvoice, 35);
+				xml_add("InvoiceRecipientOrganisationName", trim($tarkrow["laskutus_nimi"]." ".$tarkrow["laskutus_nimitark"]), $tootfinvoice, 35, 1);
 				xml_add("InvoiceRecipientOrganisationTaxCode", 					"",								$tootfinvoice, 35);
 				fputs($tootfinvoice, "<InvoiceRecipientPostalAddressDetails>\r\n");
-				xml_add("InvoiceRecipientStreetName", 							$tarkrow["laskutus_osoite"], 	$tootfinvoice, 35);
-				xml_add("InvoiceRecipientTownName", 							$tarkrow["laskutus_postitp"], 	$tootfinvoice, 35);
-				xml_add("InvoiceRecipientPostCodeIdentifier", 					$tarkrow["laskutus_postino"],	$tootfinvoice, 35);
+				xml_add("InvoiceRecipientStreetName", 							$tarkrow["laskutus_osoite"], 	$tootfinvoice, 35, 2);
+				xml_add("InvoiceRecipientTownName", 							$tarkrow["laskutus_postitp"], 	$tootfinvoice, 35, 2);
+				xml_add("InvoiceRecipientPostCodeIdentifier", 					$tarkrow["laskutus_postino"],	$tootfinvoice, 35, 1);
 				xml_add("CountryCode", 											$tarkrow["laskutus_maa"], 		$tootfinvoice, 2);
 				xml_add("CountryName", 											$tarkrow["laskutus_maa"], 		$tootfinvoice, 35);
 				xml_add("InvoiceRecipientPostOfficeBoxIdentifier",				"", 							$tootfinvoice, 35);
@@ -317,18 +317,18 @@ if (!function_exists('finvoice_otsik')) {
 			#xml_add("InvoiceRecipientContactPersonName", 						"", 							$tootfinvoice);
 			#fputs($tootfinvoice, "<InvoiceRecipientCommunicationDetails>\r\n");
 			#xml_add("InvoiceRecipientPhoneNumberIdentifier", 					"", 							$tootfinvoice);
-			#xml_add("InvoiceRecipientEmailaddressIdentifier", 					"", 							$tootfinvoice);
+			#xml_add("InvoiceRecipientEmailaddressIdentifier", 					"", 							$tootfinvoice, 11, 8);
 			#fputs($tootfinvoice, "</InvoiceRecipientCommunicationDetails>\r\n");
 
 			fputs($tootfinvoice, "<BuyerPartyDetails>\r\n");
 			xml_add("BuyerPartyIdentifier",	tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']), 				$tootfinvoice, 35);
-			xml_add("BuyerOrganisationName",        trim($lasrow['nimi']." ".$lasrow['nimitark']),    			$tootfinvoice, 35);
+			xml_add("BuyerOrganisationName",        trim($lasrow['nimi']." ".$lasrow['nimitark']),    			$tootfinvoice, 35, 2);
 			xml_add("BuyerOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"),$tootfinvoice, 35);
 
 			fputs($tootfinvoice, "<BuyerPostalAddressDetails>\r\n");
-			xml_add("BuyerStreetName",				$lasrow['osoite'],     										$tootfinvoice, 35);
-			xml_add("BuyerTownName",                $lasrow['postitp'],      									$tootfinvoice, 35);
-			xml_add("BuyerPostCodeIdentifier",      $lasrow['postino'],     									$tootfinvoice, 35);
+			xml_add("BuyerStreetName",				$lasrow['osoite'],     										$tootfinvoice, 35, 2);
+			xml_add("BuyerTownName",                $lasrow['postitp'],      									$tootfinvoice, 35, 2);
+			xml_add("BuyerPostCodeIdentifier",      $lasrow['postino'],     									$tootfinvoice, 35, 2);
 			xml_add("CountryCode",      			$lasrow['maa'],     										$tootfinvoice, 2);
 			xml_add("CountryName",      			$lasrow['maa'],     										$tootfinvoice, 35);
 			xml_add("BuyerPostOfficeBoxIdentifier", "",     													$tootfinvoice, 35);
@@ -376,12 +376,12 @@ if (!function_exists('finvoice_otsik')) {
 
 			fputs($tootfinvoice, "<DeliveryPartyDetails>\r\n");
 			xml_add("DeliveryPartyIdentifier",		tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),     		$tootfinvoice, 35);
-			xml_add("DeliveryOrganisationName",                            	trim($lasrow['toim_nimi']." ".$lasrow['toim_nimitark']), $tootfinvoice, 35);
+			xml_add("DeliveryOrganisationName",                            	trim($lasrow['toim_nimi']." ".$lasrow['toim_nimitark']), $tootfinvoice, 35, 2);
 			xml_add("DeliveryOrganisationTaxCode",	tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"),$tootfinvoice, 35);
 			fputs($tootfinvoice, "<DeliveryPostalAddressDetails>\r\n");
-			xml_add("DeliveryStreetName",                             		$lasrow['toim_osoite'],     			$tootfinvoice, 35);
-			xml_add("DeliveryTownName",                                 	$lasrow['toim_postitp'],     			$tootfinvoice, 35);
-			xml_add("DeliveryPostCodeIdentifier",                     		$lasrow['toim_postino'],				$tootfinvoice, 35);
+			xml_add("DeliveryStreetName",                             		$lasrow['toim_osoite'],     			$tootfinvoice, 35, 2);
+			xml_add("DeliveryTownName",                                 	$lasrow['toim_postitp'],     			$tootfinvoice, 35, 2);
+			xml_add("DeliveryPostCodeIdentifier",                     		$lasrow['toim_postino'],				$tootfinvoice, 35, 2);
 			xml_add("CountryCode",                         					$lasrow['toim_maa'],					$tootfinvoice, 2);
 			xml_add("CountryName",                         					$lasrow['toim_maa'],					$tootfinvoice, 35);
 			#xml_add("DeliveryPostofficeBoxIdentifier",						"",					     				$tootfinvoice);
@@ -426,16 +426,16 @@ if (!function_exists('finvoice_otsik')) {
 			// Tsekataan laskun tyyppikoodi INV
 			if ($lasrow['arvo'] >= 0)	{
 				xml_add("InvoiceTypeCode CodeListAgencyIdentifier=\"SPY\"",	"INV01",      		      				$tootfinvoice);
-				xml_add("InvoiceTypeText",									"LASKU",      		      				$tootfinvoice);
+				xml_add("InvoiceTypeText",									"LASKU",      		      				$tootfinvoice, 35, 1);
 			}
 			else {
 				xml_add("InvoiceTypeCode CodeListAgencyIdentifier=\"SPY\"",	"INV02",      		      				$tootfinvoice);
-				xml_add("InvoiceTypeText",									"HYVITYSLASKU",      		      		$tootfinvoice);
+				xml_add("InvoiceTypeText",									"HYVITYSLASKU",      		      		$tootfinvoice, 35, 1);
 			}
 
 			xml_add("OriginCode",              	                   			"Original",                  			$tootfinvoice);
 			#xml_add("OriginText",              	                   		"",                  					$tootfinvoice);
-			xml_add("InvoiceNumber",       	 	                     		$lasrow['laskunro'],  					$tootfinvoice);
+			xml_add("InvoiceNumber",       	 	                     		$lasrow['laskunro'],  					$tootfinvoice, 20, 1);
 			xml_add("InvoiceDate Format=\"CCYYMMDD\"",						vlas_dateconv($lasrow['tapvm']),		$tootfinvoice);
 			xml_add("SellerReferenceIdentifier",							$lasrow['tunnus'],						$tootfinvoice);
 			#xml_add("SellerReferenceIdentifierUrlText",					"",										$tootfinvoice);
@@ -714,17 +714,17 @@ if (!function_exists('finvoice_lasku_loppu')) {
 
 			fputs($tootfinvoice, "<EpiPartyDetails>\r\n");
 			fputs($tootfinvoice, "<EpiBfiPartyDetails>\r\n");
-			xml_add("EpiBfiIdentifier IdentificationSchemeName=\"BIC\""	,					$pankkitiedot["pankkiswift1"],		$tootfinvoice, 11);
+			xml_add("EpiBfiIdentifier IdentificationSchemeName=\"BIC\""	,					$pankkitiedot["pankkiswift1"],		$tootfinvoice, 11, 8);
 			fputs($tootfinvoice, "</EpiBfiPartyDetails>\r\n");
 
 			fputs($tootfinvoice, "<EpiBeneficiaryPartyDetails>\r\n");
 
 			if ($masrow["factoring"] != "") {
-				xml_add("EpiNameAddressDetails",    										$pankkitiedot["pankkinimi1"],		$tootfinvoice, 35);
+				xml_add("EpiNameAddressDetails",    										$pankkitiedot["pankkinimi1"],		$tootfinvoice, 35, 2);
 			}
 			else {
-				xml_add("EpiNameAddressDetails",    										$yhtiorow['nimi'],					$tootfinvoice, 35);
-				xml_add("EpiBei",                         		tulosta_ytunnus($yhtiorow['ytunnus'], $yhtiorow['maa']),		$tootfinvoice, 11);
+				xml_add("EpiNameAddressDetails",    										$yhtiorow['nimi'],					$tootfinvoice, 35, 2);
+				xml_add("EpiBei",                         		tulosta_ytunnus($yhtiorow['ytunnus'], $yhtiorow['maa']),		$tootfinvoice, 11, 8);
 			}
 
 			xml_add("EpiAccountID IdentificationSchemeName=\"IBAN\"",						str_replace(" ", "", $pankkitiedot["pankkiiban1"]),		$tootfinvoice, 34);
@@ -736,7 +736,7 @@ if (!function_exists('finvoice_lasku_loppu')) {
 			#xml_add("EpiPaymentInstructionId", 											"", 								$tootfinvoice);
 			#xml_add("EpiTransactionTypeCode", 												"", 								$tootfinvoice);
 			#xml_add("EpiInstructionCode", 													"", 								$tootfinvoice);
-			xml_add("EpiRemittanceInfoIdentifier IdentificationSchemeName=\"SPY\"",			spyconv($lasrow['viite']),    		$tootfinvoice);
+			xml_add("EpiRemittanceInfoIdentifier IdentificationSchemeName=\"SPY\"",			spyconv($lasrow['viite']),    		$tootfinvoice, 35, 2);
 			xml_add("EpiInstructedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", 	pp($lasrow['summa']),         		$tootfinvoice);
 			xml_add("EpiCharge ChargeOption=\"SHA\"", 										"SHA",								$tootfinvoice);
 			xml_add("EpiDateOptionDate Format=\"CCYYMMDD\"",                				vlas_dateconv($lasrow['erpcm']),	$tootfinvoice);

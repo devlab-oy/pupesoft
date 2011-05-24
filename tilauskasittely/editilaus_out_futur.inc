@@ -13,8 +13,7 @@
 		   	$edi_order .= "*MS {$laskurow['tunnus']}\n";
 		   	$edi_order .= "*RS OSTOTIL\n";
 
-			// int(11), otetaan 6 viimeisintä numeroa
-		   	$edi_order .= "OSTOTIL.OT_NRO:".substr($laskurow['tunnus'], -6)."\n";
+		   	$edi_order .= "OSTOTIL.OT_NRO:{$laskurow['tunnus']}\n";
 			// 4 = Örum
 		   	$edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:4\n";
 			$edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:{$tilaustyyppi}\n";
@@ -81,12 +80,12 @@
 
 		   	$i = 1;
 
-			$query = "	SELECT tilausrivi.* 
-						FROM tilausrivi 
+			$query = "	SELECT tilausrivi.*
+						FROM tilausrivi
 						#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '')
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
-						AND tilausrivi.otunnus = '{$laskurow['tunnus']}' 
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
 						AND tilausrivi.var != 'U'";
 			$tilausrivi_res = pupe_query($query);
 
@@ -111,7 +110,7 @@
 				$rivihinta = $kpl * $hinta;
 
 	   			$edi_order .= "*RS OSTOTILRIV {$i}\n";
-	    		$edi_order .= "OSTOTILRIV.OTR_NRO:".substr($laskurow['tunnus'], -6)."\n";
+	    		$edi_order .= "OSTOTILRIV.OTR_NRO:{$laskurow['tunnus']}\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_RIVINRO:".substr($tilausrivi_row['tunnus'], -6)."\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tilausrivi_row['tuoteno']}\n";
@@ -123,15 +122,26 @@
 
 				if ($toim == 'VASTAANOTA_REKLAMAATIO') {
 		    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$hinta}\n";
-		    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS_1:0\n";
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		    			$edi_order .= "OSTOTILRIV.OTR_ALENNUS_{$alepostfix}:0\n";
+					}
 				}
 				else {
 
 		    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$tilausrivi_row['hinta']}\n";
 
 					// MUISTA OTTAA KOMMENTTI POIS JA POISTA NOLLARIVI!!!
-		    		// $edi_order .= "OSTOTILRIV.OTR_ALENNUS:".generoi_alekentta_php($tilausrivi_row, 'M')."\n";
-		    		$edi_order .= "OSTOTILRIV.OTR_ALENNUS_1:0\n";
+					/*
+					$ale = generoi_alekentta_php($tilausrivi_row, 'M', 'erikseen');
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		    			$edi_order .= "OSTOTILRIV.OTR_ALENNUS_{$alepostfix}:".$ale["ale".$alepostfix]."\n";
+					}
+					*/
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		    			$edi_order .= "OSTOTILRIV.OTR_ALENNUS_{$alepostfix}:0\n";
+					}
 				}
 
 				$edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$tilausrivi_row['alv']}\n";
@@ -161,11 +171,11 @@
 			$ftpuser = $ftpuser_unikko;
 			$ftppass = $ftppass_unikko;
 			$ftppath = $ftppath_unikko;
-			
+
 			$ftpfile = $unlink_filename = $filename;
-			
+
 			require('inc/ftp-send.inc');
-			
+
 			unlink($unlink_filename);
 
 			return $palautus;

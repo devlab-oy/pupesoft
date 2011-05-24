@@ -3510,7 +3510,7 @@ if ($tee == '') {
 	}
 
 	//Lisätään rivi
-	if ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array)) and $tila != "MUUTA" and $ulos == '' and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
+	if ((trim($tuoteno) != '' or (is_array($tuoteno_array) and count($tuoteno_array) > 1)) and ($kpl != '' or is_array($kpl_array)) and $tila != "MUUTA" and $ulos == '' and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
 
 		if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
 			$tuoteno_array[] = $tuoteno;

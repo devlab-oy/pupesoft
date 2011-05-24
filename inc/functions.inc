@@ -5910,18 +5910,29 @@ function toimehtoTarkenne(toimehto) {
 	}
 }
 
+if (!function_exists("enable_jquery")) {
+	function enable_jquery() {
+
+		echo "<script type='text/javascript' language='javascript'>";
+
+		if (file_exists("inc/jquery.min.js")) {
+			require_once("inc/jquery.min.js");
+		}
+		else {
+			require_once("jquery.min.js");
+		}
+
+		echo "</script>";
+	}
+}
+
 if (!function_exists("js_popup")) {
 	// scripti balloonien tekemiseen
 	function js_popup () {
+	
+	enable_jquery();
 
 	echo "<script type='text/javascript' language='javascript'>";
-
-	if (file_exists("inc/jquery.min.js")) {
-		require_once("inc/jquery.min.js");
-	}
-	else {
-		require_once("jquery.min.js");
-	}
 
 	?>
 
@@ -11150,7 +11161,7 @@ if (!function_exists("hintapyoristys")) {
 if (!function_exists("palauta_vak_tiedot")) {
 	function palauta_vak_tiedot ($otunnus, $kieli='', $tyyppi='') {
 		global $kukarow, $yhtiorow;
-
+		
 		if ($tyyppi == "DGD") $kieli = "en";
 
 		// Käytetäänkö VAK-tietokantaa
@@ -11193,7 +11204,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.otunnus = '$otunnus'
+					and tilausrivi.otunnus IN ($otunnus)
 					and tuote.vakkoodi not in ('','0')
 					and (tilausrivi.varattu+tilausrivi.kpl) > 0
 					GROUP BY 1,2,3,4,5,6,7,8,9
@@ -11203,7 +11214,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 		$query = "  SELECT distinct r1.tunnus, r1.pakkaus, r1.pakkauskuvaus, r1.kollit, round(r1.kilot,1) kilot
 					FROM rahtikirjat r1
 					LEFT JOIN rahtikirjat r2 ON (r1.yhtio = r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro != 0)
-					WHERE r1.otsikkonro = '$otunnus'
+					WHERE r1.otsikkonro in ($otunnus)
 					and r1.yhtio = '$kukarow[yhtio]'";
 		$riresult2 = pupe_query($query);
 

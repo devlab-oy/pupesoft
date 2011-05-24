@@ -2,6 +2,18 @@
 
 	require ("inc/parametrit.inc");
 
+	if ($montavalittu == "kylla") {
+		$dgdlle_tunnukset = $tunnukset; // pilkkueroteltu
+		$toimitustavan_tarkistin = explode(",", $tunnukset);
+		sort($toimitustavan_tarkistin);
+		$id = $toimitustavan_tarkistin[0];
+		$rakirno = $toimitustavan_tarkistin[0];
+	}
+	else {
+		unset($dgdlle_tunnukset);
+		unset($toimitustavan_tarkistin);		
+	}
+
 	if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 
 		list($toimitustapa, $yhtio, $varasto, $crap) = explode("!!!!", $toimitustapa_varasto);
@@ -182,11 +194,36 @@
 	}
 
 	if ($id > 0) {
+		$tark = "	SELECT count(DISTINCT toimitustapa) toimitustapoja, 
+					count(DISTINCT liitostunnus) asiakkaita, 
+					count(DISTINCT concat(toim_nimi,toim_nimitark,toim_osoite,toim_postino,toim_postitp,toim_maa)) toim_osoitteita  
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus in ($tunnukset)";
+		$tarkres = pupe_query($tark);
+		$tarkistus_row = mysql_fetch_assoc($tarkres);
+
+		if ($tarkistus_row["toimitustapoja"] > 1) {
+			echo "<br><font class='error'>".t("VIRHE: Valituilla rahtikirjoilla on eri toimitustavat, ei voida jatkaa")."! </font><br>";
+			$id = 0;			
+		}
+		if ($tarkistus_row["asiakkaita"] > 1) {
+			echo "<br><font class='error'>".t("VIRHE: Valituilla rahtikirjoilla on eri asiakkaat, ei voida jatkaa")."! </font><br>";
+			$id = 0;			
+		}
+		if ($tarkistus_row["toim_osoitteita"] > 1) {
+			echo "<br><font class='error'>".t("VIRHE: Valituilla rahtikirjoilla on eri toimitusosoitteet, ei voida jatkaa")."! </font><br>";
+			$id = 0;			
+		}
+	}
+	
+	if ($id > 0) {
+
 		$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi not in ('','0'))
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						AND tilausrivi.otunnus = '$id'
+						AND tilausrivi.otunnus IN ($tunnukset)
 						AND tilausrivi.tyyppi = 'L'
 						AND tilausrivi.var NOT IN ('P', 'J')";
 		$vakresult = mysql_query($vakquery) or pupe_error($vakquery);
@@ -1016,6 +1053,7 @@
 				$params_dgd = array(
 				'kieli'			=> 'en',
 				'laskurow'		=> $laskurow,
+				'dgdtunnukset'	=> $dgdlle_tunnukset,
 				'page'			=> NULL,
 				'pdf'			=> NULL,
 				'row'			=> NULL,
@@ -1398,6 +1436,7 @@
 					  <a href='#' onclick=\"getElementById('jarj').value='toimaika'; document.forms['find'].submit();\">".t("Toimitusaika")."</th>";
 
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</th>";
+			echo "<th></th>";
 
 			if ($yhtiorow['pakkaamolokerot'] != '') {
 				echo "<th valign='top'>".t("Kollit")."<br>".t("Rullakot")."</th>";
@@ -1530,6 +1569,7 @@
 					}
 
 					echo "	<form method='post' action='$PHP_SELF'>
+							<td><input type='checkbox' name='kaikkicheckit[]' value='$row[tunnus]'></td>
 							<input type='hidden' name='id' value='$row[tunnus]'>
 							<input type='hidden' name='tunnukset' value='$row[tunnukset]'>
 							<input type='hidden' name='toim' value='$toim'>
@@ -1680,6 +1720,35 @@
 				}
 			}
 			echo "</table>";
+
+			echo "	<script type='text/javascript' language='javascript'>
+						$(document).ready(function(){
+							$('#valitse_ruksatut_rahtikirjat').click(function(){
+								$('input[name^=\"kaikkicheckit\"]').each(function(){
+									if ($(this).is(':checked')) {
+										//alert(index);
+										var value = $(this).val() + ',' + $('#kaikki_ruksatut_tunnukset').val();
+
+										$('#kaikki_ruksatut_tunnukset').val(value);
+									}
+								});
+
+								var value = $('#kaikki_ruksatut_tunnukset').val().slice(0, -1);
+								$('#kaikki_ruksatut_tunnukset').val(value);
+							});
+						});
+					</script>";
+
+			echo "	<br>
+					<form method='post' action='$PHP_SELF'>
+					<input type='hidden' id='kaikki_ruksatut_tunnukset' name='tunnukset' value=''>";
+
+			echo "	<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
+					<input type='hidden' id='jarj' name='jarj' value='$jarj'>
+					<input type='hidden' name='montavalittu' value='kylla'>
+					<input type='submit' id='valitse_ruksatut_rahtikirjat' name='tila' value='".t("Syötä rahtikirja valituille tilauksille")."'>
+					</form>";
 
 			if (count($osittaiset) > 0) {
 
@@ -2053,6 +2122,10 @@
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='rakirno' value='$rakirno'>";
 			echo "<input type='hidden' name='otsikkonro' value='$otsik[tunnus]'>";
+			if (isset($montavalittu)) {
+				echo "<input type='hidden' name ='dgdlle_tunnukset' value ='$dgdlle_tunnukset'>";
+				echo "<input type='hidden' name ='montavalittu' value ='kylla'>";
+			}
 			echo "<input type='hidden' name='tunnukset' value='$tunnukset'>";
 			echo "<input type='hidden' name='lasku_yhtio' value='$otsik[yhtio]'>";
 
@@ -2363,7 +2436,8 @@
 			$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otsik[tunnus]' and tilausrivi.var != 'J'";
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus IN ($tunnukset) and tilausrivi.var != 'J'";
+
 			$painoresult = mysql_query($query) or pupe_error($query);
 			$painorow = mysql_fetch_assoc($painoresult);
 
@@ -2394,7 +2468,7 @@
 			$query  = "	SELECT round(sum(tuotekorkeus*tuoteleveys*$splisa*(varattu+kpl)),10) tilavuus, sum(varattu+kpl) kpl, sum(if(tuotekorkeus!=0 and tuoteleveys!=0 and $splisa!=0, varattu+kpl, 0)) kplok
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otsik[tunnus]'";
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus IN ($tunnukset)";
 			$tilavuusresult = mysql_query($query) or pupe_error($query);
 			$tilavuusrow = mysql_fetch_assoc($tilavuusresult);
 

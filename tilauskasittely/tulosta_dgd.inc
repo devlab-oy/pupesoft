@@ -136,9 +136,14 @@ if (!function_exists('rivi_dgd')) {
 		$kala = 175;
 
 		$pdf->pages[$sivu]->setFont($norm, 8);
-
-		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['tunnus'], $kieli, "DGD");
-
+		
+		if ($dgdtunnukset != '') {
+			list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($dgdtunnukset, $kieli, "DGD");
+		}
+		else {
+			list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['tunnus'], $kieli, "DGD");
+		}
+		
 		$kollimaara_yht = 0;
 
 		foreach ($vakrakirtiedot as $vakrakirrivi) {

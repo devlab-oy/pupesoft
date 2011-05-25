@@ -6,7 +6,7 @@
 
 			extract($params);
 
-			$summa = $toim == 'VASTAANOTA_REKLAMAATIO' ? $laskurow['summa'] : '';
+			$summa = $toim == 'REKLAMAATIO' ? $laskurow['summa'] : '';
 
 		   	//tilauksen otsikko
 		   	$edi_order  = "*IS from:721111720-1 to:IKH,ORDERS*id:{$laskurow['tunnus']} version:AFP-1.0 *MS\n";
@@ -120,7 +120,7 @@
 
 	    		$edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:{$rivihinta}\n";
 
-				if ($toim == 'VASTAANOTA_REKLAMAATIO') {
+				if ($toim == 'REKLAMAATIO') {
 		    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$hinta}\n";
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {

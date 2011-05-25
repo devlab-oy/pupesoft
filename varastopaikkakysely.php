@@ -119,7 +119,6 @@
 
 		echo "<table>";
 		echo "<tr>";
-		echo "</tr>";
 		echo "<th>Tuoteno</th>";
 		echo "<th>Paikka</th>";
 		echo "<th>Nimitys</th>";

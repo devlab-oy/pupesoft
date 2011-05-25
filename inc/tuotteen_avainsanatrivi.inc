@@ -37,6 +37,12 @@
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$ulos .= "<option value='parametri_$vrow[selite]' ".$sel["parametri_".$vrow["selite"]].">".t("Tuotteen parametri").": $vrow[selitetark]</option>";
 		}
+		
+		$lresult = t_avainsana("LISATIETO");
+
+		while ($lrow = mysql_fetch_array($lresult)) {
+			$ulos .= "<option value='lisatieto_$lrow[selite]' ".$sel["lisatieto_".$lrow["selite"]].">".t("Tuotteen lisätieto").": $lrow[selitetark]</option>";
+		}
 
 		$ulos .= "</select></td>";
 		$jatko = 0;

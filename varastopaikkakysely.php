@@ -115,7 +115,7 @@
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='tee' value='W'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
-		echo "<input type='hidden' name='varastopaikka' value='$varastopaikka'";
+		echo "<input type='hidden' name='varastopaikka' value='$varastopaikka'>";
 
 		echo "<table>";
 		echo "<tr>";

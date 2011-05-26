@@ -17,7 +17,7 @@ if ($phpnimi != "rahtikirja_custom.php") {
 				LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tunnus = '$tunnus'";
-	$tempr = mysql_query($query) or pupe_error($query);
+	$tempr = pupe_query($query);
 	$laskurow = mysql_fetch_array($tempr);
 
 	// K‰ytet‰‰nkˆ VAK-tietokantaa
@@ -40,7 +40,7 @@ if ($phpnimi != "rahtikirja_custom.php") {
 				and tilausrivi.var in ('','H')
 				and tilausrivi.tyyppi in ('L','G')
 				ORDER BY tuote.vakkoodi";
-	$vres = mysql_query($query) or pupe_error($query);
+	$vres = pupe_query($query);
 
 	if (mysql_num_rows($vres) > 0) {
 		$vak = mysql_fetch_assoc($vres);
@@ -51,7 +51,7 @@ if ($phpnimi != "rahtikirja_custom.php") {
 				from asiakas
 				where yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$laskurow[liitostunnus]'";
-	$tempr = mysql_query($query) or pupe_error($query);
+	$tempr = pupe_query($query);
 	$asiakasrow = mysql_fetch_array($tempr);
 }
 else {
@@ -69,7 +69,7 @@ $query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 			FROM varastopaikat
 			WHERE yhtio = '$kukarow[yhtio]'
 			AND tunnus = '$laskurow[varasto]'";
-$tempr = mysql_query($query) or pupe_error($query);
+$tempr = pupe_query($query);
 $postirow_varasto = mysql_fetch_array($tempr);
 
 // jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
@@ -86,7 +86,7 @@ if ($toim == 'EXTRANET_REKLAMAATIO' and $yhtiorow['reklamaation_vastaanottovaras
 	$query = "	SELECT nimi, osoite, postino, postitp, maa
 				FROM yhtio
 				WHERE yhtio = '$yhtiorow[yhtio]'";
-	$tempr = mysql_query($query) or pupe_error($query);
+	$tempr = pupe_query($query);
 	$postirow_varasto = mysql_fetch_array($tempr);
 }
 
@@ -99,7 +99,7 @@ $query = "	SELECT *
 			where yhtio = '$kukarow[yhtio]'
 			and trim(komento) like concat(trim('$prikomento[0]'),'%')
 			and nimi != ''";
-$pres  = mysql_query($query) or pupe_error($query);
+$pres  = pupe_query($query);
 $print = mysql_fetch_assoc($pres);
 
 // jos meill‰ on printterin takana joku spessu osoitetieto niin k‰ytet‰‰n sen tietoja l‰hett‰j‰n tietoina
@@ -320,7 +320,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$query = "	SELECT sum(kollit) kollit
 					FROM rahtikirjat
 					WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$laskurow[tunnus]'";
-		$pakka = mysql_query($query) or pupe_error($query);
+		$pakka = pupe_query($query);
 		$pak = mysql_fetch_array($pakka);
 
 		if ((int) $pak["kollit"] > 0) {
@@ -417,7 +417,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	// Onko tilaus j‰lkivaatimus
 	$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+	$meapu = pupe_query($apuqu);
 	$meapurow = mysql_fetch_array($meapu);
 
 	if ($meapurow["jv"] != "") {
@@ -459,7 +459,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$query = "	SELECT sum(kollit) kollit
 					FROM rahtikirjat
 					WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$laskurow[tunnus]'";
-		$pakka = mysql_query($query) or pupe_error($query);
+		$pakka = pupe_query($query);
 		$pak = mysql_fetch_array($pakka);
 
 		if ((int) $pak["kollit"] > 0) {
@@ -473,7 +473,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 				from toimitustapa
 				where yhtio = '$kukarow[yhtio]'
 				and selite  = '$laskurow[toimitustapa]'";
-	$hetir = mysql_query($query) or pupe_error($query);
+	$hetir = pupe_query($query);
 	$hetirow = mysql_fetch_array($hetir);
 
 	if ($hetirow['tulostustapa'] == 'K') {
@@ -535,5 +535,6 @@ elseif ($oslapp != '' and $oslapp != 'edi') {
 //poistetaan tmp file samantien kuleksimasta...
 system("rm -f $pdffilenimi");
 $pdffilenimi='';
+$tilausnumeroita="";
 
 ?>

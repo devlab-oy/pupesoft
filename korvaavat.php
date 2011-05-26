@@ -1,7 +1,7 @@
 <?php
 	require ("inc/parametrit.inc");
 
-	if ($toim == "VASTAAVAT") {
+	if ($toim == "vastaavat") {
 		$taulu = "vastaavat";
 		echo "<font class='head'>".t("Vastaavien ylläpito")."</font><hr>";
 	}
@@ -115,7 +115,7 @@
 
 			//kummatkin löytyivät.. ja ne korvaa toisensa
 			if ($fid != "" and $cid != "" and $fid == $cid) {
-				if ($toim == "VASTAAVAT") {
+				if ($toim == "vastaavat") {
 					echo "<font class='error'>".t("Tuotteet")." $korvaava <> $tuoteno ".t("ovat jo vastaavia")."!</font><br><br>";
 				}
 				else {
@@ -123,7 +123,7 @@
 				}
 			}
 			elseif ($fid != "" and $cid != "" ) {
-				if ($toim == "VASTAAVAT") {
+				if ($toim == "vastaavat") {
 					echo "<font class='error'>".t("Tuotteet")." $korvaava, $tuoteno ".t("kuuluvat jo eri vastaavuusketjuihin")."!</font><br><br>";
 				}
 				else {
@@ -148,7 +148,7 @@
 				$ok=1;
 			}
 			else {
-				if ($toim == "VASTAAVAT") {
+				if ($toim == "vastaavat") {
 					echo "<br><font class='message'>".t("Tuotteella ei ole vastaavia tuotteita")."!</font>";
 				}
 				else {
@@ -166,7 +166,7 @@
 
 			echo "<br><table>";
 			echo "<tr>";
-			if ($toim == "VASTAAVAT") {
+			if ($toim == "vastaavat") {
 				echo "<th>".t("Vastaavia tuotteita")."</td>";
 			}
 			else {
@@ -217,7 +217,7 @@
 					<input type='hidden' value='$toim' name='toim'>
 					<hr>";
 
-			if ($toim == "VASTAAVAT") {
+			if ($toim == "vastaavat") {
 				echo t("Lisää vastaava tuote").": ";
 			}
 			else {

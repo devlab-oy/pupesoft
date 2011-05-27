@@ -54,6 +54,11 @@
 	if (!isset($paikka)) 			$paikka = "";
 	if (!isset($perhekielto)) 		$perhekielto = "";
 
+	unset($korvaavan_hinta_ylaraja_halvin_alehinta);
+	unset($korvaavan_hinta_ylaraja_halvin_hinta);
+	unset($korvaavan_hinta_ylaraja_halvin_ale);
+	unset($korvaavan_hinta_ylaraja_halvin_netto);
+	
 	if (!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet) {
 			global $kukarow, $perhelisa, $kieltolisa, $lisaarivi_debug;
@@ -497,7 +502,7 @@
 				while ($krow2 = mysql_fetch_array($kres2)) {
 
 					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
-					list($korva_hinta, , $korva_ale, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
+					list($korva_hinta, $korva_netto, $korva_ale, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
 
 					if ($korvaavat_kiellot == "KIELTO") {
 						//Korvaavien myynti kielletty korvaavat_kiellot-taulussa
@@ -506,8 +511,30 @@
 						}
 					}
 					// Asiakas saa aina halvemman hinann mukaan tuotteen, mikäli alkuperäinen tuote on P toistuva tai puute.
-					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] == 'MIN' and $krmyytavissa > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
-						$kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lisätään tuoteno arrayseen
+					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] == 'MIN') {
+
+						// Tähän hintaan asiakas saisi tuotteen
+						if ($korva_ale > 0 and $korva_hinta > 0) {
+							$korvaavan_hinta_ylaraja_hinta = $korva_hinta * (1-$korva_ale/100);
+						}
+						elseif ($korva_hinta > 0) {
+							$korvaavan_hinta_ylaraja_hinta = $korva_hinta;
+						}
+						else {
+							unset($korvaavan_hinta_ylaraja_hinta);
+						}
+
+						// Otetaan koko ketjun halvin hinta/alennus talteen
+						if (isset($korvaavan_hinta_ylaraja_hinta) and (!isset($korvaavan_hinta_ylaraja_halvin_alehinta) or $korvaavan_hinta_ylaraja_halvin_alehinta > $korvaavan_hinta_ylaraja_hinta)) {
+							$korvaavan_hinta_ylaraja_halvin_alehinta = $korvaavan_hinta_ylaraja_hinta;
+							$korvaavan_hinta_ylaraja_halvin_hinta = $korva_hinta;
+							$korvaavan_hinta_ylaraja_halvin_ale = $korva_ale;
+							$korvaavan_hinta_ylaraja_halvin_netto = $korva_netto;
+						}
+
+					 	if ($krmyytavissa > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
+							$kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lisätään tuoteno arrayseen
+						}
 					}
 					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] != '' and $yhtiorow["korvaavan_hinta_ylaraja"] != 'MIN' and ($korva_isa_hinta*(1-($korva_isa_ale/100))) != 0 and (($korva_hinta*(1-($korva_ale/100))) / ($korva_isa_hinta*(1-($korva_isa_ale/100)))) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
 						//Korvaavien myynti kielletty koska korvaava tuote on liian kallis
@@ -1041,14 +1068,9 @@
 
 									// Haluan tarkistaa alkuperäisen hinnan ennen korvausta, niin saadaan se halvempi hinta käyttöön.
 									if ($yhtiorow['korvaavan_hinta_ylaraja'] == 'MIN') {
-										// Alkuperäiset tiedot talteen
-										list($org_hinta, $org_netto, $org_ale, $org_alehinta_alv, $org_alehinta_val) = alehinta($laskurow, $alkupera_trow, $myy_kpl[$indeksi], $alkupera_netto, $alkupera_hinta, $alkupera_ale);
-										list($xx_hinta, $xx_alv) = alv($laskurow, $alkupera_trow, $org_hinta, $alkupera_alv, $org_alehinta_alv);
-
-										// Alkuperäinen hinta on halvempi, myydään siis sillä hinnalla
-										if ($xx_hinta < $lis_hinta) {
-											$lis_hinta = $xx_hinta;
-										}
+										$lis_hinta = $korvaavan_hinta_ylaraja_halvin_hinta;
+										$lis_ale = $korvaavan_hinta_ylaraja_halvin_ale;
+										$lis_netto = $korvaavan_hinta_ylaraja_halvin_netto;
 									}
 
 									// Tilausrivin systeemikommentti

@@ -267,7 +267,7 @@
 			$x++;
 
 			// LIN - line item
-			$query = "	SELECT tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, sum(tilausrivi.varattu) varattu
+			$query = "	SELECT tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, sum(tilausrivi.varattu+tilausrivi.kpl) varattu
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'

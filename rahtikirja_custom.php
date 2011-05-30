@@ -336,10 +336,19 @@ if (!$asiakasid) {
 if ($asiakasid) {
 
 	if (empty($asiakasrow['toim_postitp'])) {
-		$asiakasrow['toim_postitp'] = $asiakasrow['postitp'];
-		$asiakasrow['toim_postino'] = $asiakasrow['postino'];
-		$asiakasrow['toim_osoite']  = $asiakasrow['osoite'];
-		$asiakasrow['toim_nimi']    = $asiakasrow['nimi'];
+		$asiakasrow['toim_postitp']  = $asiakasrow['postitp'];
+		$asiakasrow['toim_postino']  = $asiakasrow['postino'];
+		$asiakasrow['toim_osoite']   = $asiakasrow['osoite'];
+		$asiakasrow['toim_nimitark'] = $asiakasrow['nimitark'];
+		$asiakasrow['toim_nimi']     = $asiakasrow['nimi'];
+	}
+
+	if (isset($tnimi) and trim($tnimi) != '') {
+		$asiakasrow['toim_postitp']	= $tpostitp;
+		$asiakasrow['toim_postino'] = $tpostino;
+		$asiakasrow['toim_osoite']  = $tosoite;
+		$asiakasrow['toim_nimitark'] = $tnimitark;
+		$asiakasrow['toim_nimi']    = $tnimi;
 	}
 
     echo "<form action='' method='post' name='rahtikirja'><table>";

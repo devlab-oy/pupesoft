@@ -35,7 +35,7 @@
 
 	// Monivalintalaatikot (osasto, try tuotemerkki...)
 	// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-	$lisa  = "";
+	$abc_lisa  = "";
 	$ulisa = "";
 	$mulselprefix = "abc_aputaulu";
 
@@ -284,18 +284,20 @@
 
 		if (!$asiakasanalyysi) {
 			if ($status != '') {
-				$lisa .= " and status = '".(string) $status."' ";
+				$abc_lisa .= " and status = '".(string) $status."' ";
 			}
 		}
 
 		//kauden yhteismyynnit ja katteet
 		$query = "	SELECT
-					sum(summa) yhtmyynti,
-					sum(kate)  yhtkate
+					sum(abc_aputaulu.summa) yhtmyynti,
+					sum(abc_aputaulu.kate) yhtkate
 					FROM abc_aputaulu
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='$abcchar'
-					$lisa
+					WHERE abc_aputaulu.yhtio = '$kukarow[yhtio]'
+					AND abc_aputaulu.tyyppi = '$abcchar'
+					$abc_lisa
+					$lisa_parametri
+					{$lisa_dynaaminen["tuote"]}
 					$saapumispvmlisa";
 		$sumres = mysql_query($query) or pupe_error($query);
 		$sumrow = mysql_fetch_array($sumres);
@@ -382,7 +384,9 @@
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi='$abcchar'
-					$lisa
+					$abc_lisa
+					$lisa_parametri
+					{$lisa_dynaaminen["tuote"]}					
 					$saapumispvmlisa
 					$groupby
 					$orderby";

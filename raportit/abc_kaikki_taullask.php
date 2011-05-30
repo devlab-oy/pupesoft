@@ -33,7 +33,7 @@
 
 	// Monivalintalaatikot (osasto, try tuotemerkki...)
 	// Määritellään mitkä latikot halutaan mukaan
-	$lisa  = "";
+	$abc_lisa  = "";
 	$ulisa = "";
 	$mulselprefix = "abc_aputaulu";
 
@@ -147,7 +147,7 @@
 		if (count($haku) > 0) {
 			foreach ($haku as $kentta => $arvo) {
 				if (strlen($arvo) > 0 and $kentta != 'kateosuus') {
-					$lisa  .= " and abc_aputaulu.$kentta like '%$arvo%'";
+					$abc_lisa  .= " and abc_aputaulu.$kentta like '%$arvo%'";
 					$ulisa2 .= "&haku[$kentta]=$arvo";
 				}
 				if (strlen($arvo) > 0 and $kentta == 'kateosuus') {
@@ -189,7 +189,9 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = '$abcchar'
 						and luokka = '$luokkarow[luokka]'
-						$lisa
+						$abc_lisa
+						$lisa_parametri
+						{$lisa_dynaaminen["tuote"]}
 						$saapumispvmlisa";
 			$sumres = mysql_query($query) or pupe_error($query);
 			$sumrow = mysql_fetch_array($sumres);
@@ -206,7 +208,9 @@
 						and tyyppi	= '$abcchar'
 						and luokka	= '$luokkarow[luokka]'
 						$saapumispvmlisa
-						$lisa
+						$abc_lisa
+						$lisa_parametri
+						{$lisa_dynaaminen["tuote"]}
 						$hav
 						ORDER BY $abcwhat desc";
 			$res = mysql_query($query) or pupe_error($query);

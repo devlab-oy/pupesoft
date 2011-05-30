@@ -32,7 +32,7 @@
 
 	// Monivalintalaatikot (osasto, try tuotemerkki...)
 	// Määritellään mitkä latikot halutaan mukaan
-	$lisa  = "";
+	$abc_lisa  = "";
 	$ulisa = "";
 	$mulselprefix = "abc_aputaulu";
 
@@ -114,7 +114,7 @@
 		if (count($haku) > 0) {
 			foreach ($haku as $kentta => $arvo) {
 				if (strlen($arvo) > 0 and $kentta != 'kateosuus') {
-					$lisa  .= " and abc_aputaulu.$kentta like '%$arvo%'";
+					$abc_lisa  .= " and abc_aputaulu.$kentta like '%$arvo%'";
 					$ulisa2 .= "&haku[$kentta]=$arvo";
 				}
 				if (strlen($arvo) > 0 and $kentta == 'kateosuus') {
@@ -140,7 +140,7 @@
 
 		if (!$asiakasanalyysi) {
 			if ($status != '') {
-				$lisa .= " and abc_aputaulu.status = '".(string) $status."' ";
+				$abc_lisa .= " and abc_aputaulu.status = '".(string) $status."' ";
 			}
 		}
 
@@ -151,7 +151,9 @@
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi	= '$abcchar'
-					$lisa
+					$abc_lisa
+					$lisa_parametri
+					{$lisa_dynaaminen["tuote"]}
 					$saapumispvmlisa";
 		$sumres = mysql_query($query) or pupe_error($query);
 		$sumrow = mysql_fetch_array($sumres);
@@ -168,7 +170,9 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi 	= '$abcchar'
 					$saapumispvmlisa
-					$lisa
+					$abc_lisa
+					$lisa_parametri
+					{$lisa_dynaaminen["tuote"]}
 					$hav
 					ORDER BY $jarjestys";
 		$res = mysql_query($query) or pupe_error($query);

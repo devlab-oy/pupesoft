@@ -578,7 +578,7 @@
 			$laskurow = mysql_fetch_assoc($result);
 
 			//Vientilaskuille alatilaa ei saa aina p‰ivitt‰‰
-			if ($laskurow['alatila'] == 'E') {
+			if ($laskurow['alatila'] == 'E' or ($yhtiorow['intrastat_kaytossa'] == 'V' and $laskurow['vienti'] != '')) {
 				$alatila = "E";
 			}
 			else {

@@ -2707,6 +2707,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "intrastat_kaytossa") {
+
+		$apu = $trow[$i];
+		$sel = array($apu => "selected");
+
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+		$ulos .= "<option value = ''>".t("Viennin intrastattia k‰ytet‰‰n")."</option>";
+		$ulos .= "<option value = 'V'{$sel['V']}>".t("Viennin intrastattia ei k‰ytet‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "myynti_asiakhin_tallenna") {
 
 		$sel = "";

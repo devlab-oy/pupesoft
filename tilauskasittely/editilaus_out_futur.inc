@@ -39,7 +39,7 @@
 			$lask_postitp = $lisatiedot['laskutus_postitp'];
 			$lask_postino = $lisatiedot['laskutus_postino'];
 
-			$edi_order .= "OSTOTIL.OT_ASIAKASNRO:{$asiakasnro}\n";
+			$edi_order .= "OSTOTIL.OT_ASIAKASNRO:{$asiakasrow['herminator']}\n";
 			$edi_order .= "OSTOTIL.OT_YRITYS:{$lask_yritys}\n";
 			$edi_order .= "OSTOTIL.OT_KATUOSOITE:{$lask_osoite}\n";
 			$edi_order .= "OSTOTIL.OT_POSTITOIMIPAIKKA:{$lask_postitp}\n";
@@ -62,12 +62,24 @@
 			$toim_postino = trim($laskurow['toim_postino']);
 			$toim_maa = trim($laskurow['toim_maa']);
 
-			if ($toim_yritys == $lask_yritys and $toim_osoite == $lask_osoite and $toim_postitp == $lask_postitp and $toim_postino == $lask_postino) {
-				$toim_yritys = '';
-				$toim_osoite = '';
-				$toim_postitp = '';
-				$toim_postino = '';
-				$toim_maa = '';
+			// jos toimitusosoite eroaa asiakkaan toimitusosoitteesta (tai jos toimitusosoite on tyhj‰ niin asiakkaan osoitteesta), niin silloin se lis‰t‰‰n aineistoon
+			if (trim($asiakasrow['toim_osoite']) != '') {
+				if ($toim_osoite == trim($asiakasrow['toim_osoite']) and $toim_postitp == trim($asiakasrow['toim_postitp']) and $toim_postino == trim($asiakasrow['toim_postino'])) {
+					$toim_yritys = '';
+					$toim_osoite = '';
+					$toim_postitp = '';
+					$toim_postino = '';
+					$toim_maa = '';
+				}
+			}
+			else {
+				if ($toim_osoite == trim($asiakasrow['osoite']) and $toim_postitp == trim($asiakasrow['postitp']) and $toim_postino == trim($asiakasrow['postino'])) {
+					$toim_yritys = '';
+					$toim_osoite = '';
+					$toim_postitp = '';
+					$toim_postino = '';
+					$toim_maa = '';
+				}
 			}
 
 			$edi_order .= "OSTOTIL.OT_TOIMITUS_YRITYS:{$toim_yritys}\n";

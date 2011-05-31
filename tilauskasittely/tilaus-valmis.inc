@@ -1100,7 +1100,7 @@ else {
 						$params = array(
 							'laskurow' => $laskurow_edi,
 							'lisatiedot' => $laskun_lisatiedot,
-							'asiakasnro' => $asiakas_chk_row['asiakasnro'],
+							'asiakasrow' => $asiakas_chk_row,
 							'tilaustyyppi' => $pupesoft_tilaustyyppi,
 							'toimitustapa' => $totarowx['herminator'],
 							'toim' => $toim,

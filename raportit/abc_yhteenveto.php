@@ -45,8 +45,7 @@
 	else {
 		$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "TUOTEMYYJA", "TUOTEOSTAJA");
 	}
-
-	require ("../tilauskasittely/monivalintalaatikot.inc");
+	require ("tilauskasittely/monivalintalaatikot.inc");
 
 	echo "<br>";
 	echo "<table style='display:inline;'>";
@@ -293,11 +292,11 @@
 					sum(abc_aputaulu.summa) yhtmyynti,
 					sum(abc_aputaulu.kate) yhtkate
 					FROM abc_aputaulu
+					JOIN tuote USING (yhtio, tuoteno)
 					WHERE abc_aputaulu.yhtio = '$kukarow[yhtio]'
 					AND abc_aputaulu.tyyppi = '$abcchar'
 					$abc_lisa
-					$lisa_parametri
-					{$lisa_dynaaminen["tuote"]}
+					$lisa
 					$saapumispvmlisa";
 		$sumres = mysql_query($query) or pupe_error($query);
 		$sumrow = mysql_fetch_array($sumres);
@@ -306,7 +305,7 @@
 			$sumrow["yhtkate"] = 0.01;
 		}
 
-		$prequery = " SELECT ";
+		$prequery = "";
 		$orderby  = " ORDER BY ";
 
 		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
@@ -344,49 +343,50 @@
 		}
 
 		//haetaan luokkien arvot
-		$query = "	$prequery
-					count(tuoteno)						tuotelkm,
-					group_concat(tuoteno SEPARATOR '<br>') tuotenumerot,
-					max(summa) 							max,
-					min(summa)	 						min,
-					sum(rivia) 							rivia,
-					sum(kpl) 							kpl,
-					sum(summa) 							summa,
-					sum(kate) 							kate,
-					sum(puutekpl) 						puutekpl,
-					sum(puuterivia) 					puuterivia,
-					sum(osto_rivia) 					osto_rivia,
-					sum(osto_kpl) 						osto_kpl,
-					sum(osto_summa) 					osto_summa,
-					sum(vararvo) 						vararvo,
-					sum(kustannus) 						kustannus,
-					sum(kustannus_osto) 				kustannus_osto,
-					sum(kustannus_yht) 					kustannus_yht,
-					sum(osto_kerrat)					osto_kerrat,
-					osto_kerrat							osto_kerrat2,
-														kerrat,
-					sum(osto_summa)/sum(osto_rivia) 	ostoeranarvo,
-					sum(osto_kpl)/sum(osto_rivia) 		ostoeranakpl,
-					sum(summa)/sum(rivia) 				myyntieranarvo,
-					sum(kpl)/sum(rivia) 				myyntieranakpl,
-					sum(kate)/sum(summa)*100 			kateprosentti,
-					(sum(summa)-sum(kate))/sum(vararvo) kiertonopeus,
-					(sum(kate)/sum(summa)*100) * ((sum(summa)-sum(kate))/sum(vararvo)) kate_kertaa_kierto,
-					sum(kate)/$sumrow[yhtkate] * 100	kateosuus,
-					100 - ((sum(puuterivia)/(sum(puuterivia)+sum(rivia))) * 100) palvelutaso,
-					sum(kate)-sum(kustannus_yht)		total,
-					sum(saldo)							saldo,
-					osasto,
-					try,
-					tuotemerkki,
-					myyjanro,
-					ostajanro
+		$query = "	SELECT
+					$prequery
+					count(abc_aputaulu.tuoteno) tuotelkm,
+					group_concat(abc_aputaulu.tuoteno SEPARATOR '<br>') tuotenumerot,
+					max(abc_aputaulu.summa) max,
+					min(abc_aputaulu.summa) min,
+					sum(abc_aputaulu.rivia) rivia,
+					sum(abc_aputaulu.kpl) kpl,
+					sum(abc_aputaulu.summa) summa,
+					sum(abc_aputaulu.kate) kate,
+					sum(abc_aputaulu.puutekpl) puutekpl,
+					sum(abc_aputaulu.puuterivia) puuterivia,
+					sum(abc_aputaulu.osto_rivia) osto_rivia,
+					sum(abc_aputaulu.osto_kpl) osto_kpl,
+					sum(abc_aputaulu.osto_summa) osto_summa,
+					sum(abc_aputaulu.vararvo) vararvo,
+					sum(abc_aputaulu.kustannus) kustannus,
+					sum(abc_aputaulu.kustannus_osto) kustannus_osto,
+					sum(abc_aputaulu.kustannus_yht) kustannus_yht,
+					sum(abc_aputaulu.osto_kerrat) osto_kerrat,
+					abc_aputaulu.osto_kerrat osto_kerrat2,
+					abc_aputaulu.kerrat,
+					sum(abc_aputaulu.osto_summa) / sum(abc_aputaulu.osto_rivia) ostoeranarvo,
+					sum(abc_aputaulu.osto_kpl) / sum(abc_aputaulu.osto_rivia) ostoeranakpl,
+					sum(abc_aputaulu.summa) / sum(abc_aputaulu.rivia) myyntieranarvo,
+					sum(abc_aputaulu.kpl) / sum(abc_aputaulu.rivia) myyntieranakpl,
+					sum(abc_aputaulu.kate) / sum(abc_aputaulu.summa) * 100 kateprosentti,
+					(sum(abc_aputaulu.summa) - sum(abc_aputaulu.kate)) / sum(abc_aputaulu.vararvo) kiertonopeus,
+					(sum(abc_aputaulu.kate) / sum(abc_aputaulu.summa) * 100) * ((sum(abc_aputaulu.summa) - sum(abc_aputaulu.kate)) / sum(abc_aputaulu.vararvo)) kate_kertaa_kierto,
+					sum(abc_aputaulu.kate) / {$sumrow["yhtkate"]} * 100 kateosuus,
+					100 - ((sum(abc_aputaulu.puuterivia) / (sum(abc_aputaulu.puuterivia) + sum(abc_aputaulu.rivia))) * 100) palvelutaso,
+					sum(abc_aputaulu.kate) - sum(abc_aputaulu.kustannus_yht) total,
+					sum(abc_aputaulu.saldo) saldo,
+					abc_aputaulu.osasto,
+					abc_aputaulu.try,
+					abc_aputaulu.tuotemerkki,
+					abc_aputaulu.myyjanro,
+					abc_aputaulu.ostajanro
 					FROM abc_aputaulu
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='$abcchar'
+					JOIN tuote USING (yhtio, tuoteno)
+					WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
+					and abc_aputaulu.tyyppi = '$abcchar'
 					$abc_lisa
-					$lisa_parametri
-					{$lisa_dynaaminen["tuote"]}					
+					$lisa
 					$saapumispvmlisa
 					$groupby
 					$orderby";

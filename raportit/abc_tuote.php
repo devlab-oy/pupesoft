@@ -88,6 +88,6 @@
 			require ("abc_kaikki_taullask.php");
 		}
 
-		require ("../inc/footer.inc");
+		require ("inc/footer.inc");
 	}
 ?>

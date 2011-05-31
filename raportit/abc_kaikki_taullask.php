@@ -44,7 +44,7 @@
 		$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "TUOTEMYYJA", "TUOTEOSTAJA");
 	}
 
-	require ("../tilauskasittely/monivalintalaatikot.inc");
+	require ("tilauskasittely/monivalintalaatikot.inc");
 
 	echo "<br>";
 	echo "<table style='display:inline;'>";
@@ -183,15 +183,15 @@
 
 			//kauden yhteismyynnit ja katteet
 			$query = "	SELECT
-						sum(summa) yhtmyynti,
-						sum(kate)  yhtkate
+						sum(abc_aputaulu.summa) yhtmyynti,
+						sum(abc_aputaulu.kate) yhtkate
 						FROM abc_aputaulu
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tyyppi = '$abcchar'
-						and luokka = '$luokkarow[luokka]'
+						JOIN tuote USING (yhtio, tuoteno)
+						WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
+						and abc_aputaulu.tyyppi = '$abcchar'
+						and abc_aputaulu.luokka = '{$luokkarow["luokka"]}'
 						$abc_lisa
-						$lisa_parametri
-						{$lisa_dynaaminen["tuote"]}
+						$lisa
 						$saapumispvmlisa";
 			$sumres = mysql_query($query) or pupe_error($query);
 			$sumrow = mysql_fetch_array($sumres);
@@ -200,17 +200,17 @@
 			$sumrow['yhtmyynti'] = (float) $sumrow['yhtmyynti'];
 
 			$query = "	SELECT *,
-						if ($sumrow[yhtkate] = 0, 0, kate/$sumrow[yhtkate]*100)	kateosuus,
-						katepros * varaston_kiertonop kate_kertaa_kierto,
-						kate - kustannus_yht total
+						if ({$sumrow["yhtkate"]} = 0, 0, abc_aputaulu.kate / {$sumrow["yhtkate"]} * 100) kateosuus,
+						abc_aputaulu.katepros * abc_aputaulu.varaston_kiertonop kate_kertaa_kierto,
+						abc_aputaulu.kate - abc_aputaulu.kustannus_yht total
 						FROM abc_aputaulu
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tyyppi	= '$abcchar'
-						and luokka	= '$luokkarow[luokka]'
+						JOIN tuote USING (yhtio, tuoteno)
+						WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
+						and abc_aputaulu.tyyppi	= '$abcchar'
+						and abc_aputaulu.luokka	= '{$luokkarow["luokka"]}'
 						$saapumispvmlisa
 						$abc_lisa
-						$lisa_parametri
-						{$lisa_dynaaminen["tuote"]}
+						$lisa
 						$hav
 						ORDER BY $abcwhat desc";
 			$res = mysql_query($query) or pupe_error($query);

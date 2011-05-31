@@ -24,27 +24,8 @@ if(!function_exists("asiakasalennustarkista")) {
 							and ytunnus = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($sresult) != 1) {
-
-					$ytunnus 		= $chytunnus;
-					$kutsuja 		= "yllapito.php";
-					$ulos 			= "";
-
-					if ($ytunnus != "" and $ytunnus != "0") {
-						require("asiakashaku.inc");
-					}
-
-					if ($ulos != "" and $ytunnus == "") {
-						$alasveto[$i] = "<select name='t[$i]'><option value=''>".t("Valitse asiakas")."</option>".$ulos."</select>";
-						$virhe[$i]    = t("Valitse asiakas!");
-					}
-					elseif ($ytunnus != "") {
-						$t[$i]  = $ytunnus;
-						if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("Asiakas löytyi!");
-					}
-					else {
-						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
-					}
+				if (mysql_num_rows($sresult) == 0) {
+					$virhe[$i] = t("Ytunnuksella ei löydy asiakasta!");
 				}
 			}
 		}

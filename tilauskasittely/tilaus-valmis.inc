@@ -1103,7 +1103,12 @@ else {
 							'toim' => $toim,
 						);
 
-						require('tilauskasittely/editilaus_out_futur.inc');
+						if (file_exists("editilaus_out_futur.inc")) {
+							require("editilaus_out_futur.inc");
+						}
+						else {
+							require("tilauskasittely/editilaus_out_futur.inc");
+						}
 
 						if (editilaus_out_futur($params) === 0) {
 							$query = "	UPDATE lasku SET

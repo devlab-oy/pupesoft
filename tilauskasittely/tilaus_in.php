@@ -51,6 +51,15 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		echo "$edi_ulos";
 		echo "</pre>";
 	}
+	
+	if ($tyyppi=='edifact911') {
+		// tarvitaan $filename
+		echo "<pre>";
+		$edi_tyyppi = "edifact911";
+		require ("editilaus_in.inc");
+		echo "$edi_ulos";
+		echo "</pre>";
+	}
 
 	if ($tyyppi=='yct') {
 		// tarvitaan $filename
@@ -77,6 +86,7 @@ else {
 		 		<option value='magento'>Magento</option>
 		 		<option value='pos'>".t("Kassap‰‰te")."</option>
 		 		<option value='yct'>Yamaha Center</option>
+				<option value='edifact911'>Orders 91.1</option>
 		 		<option value='multi'>Useita asiakkaita</option>
 				</select>
 		 	</td>

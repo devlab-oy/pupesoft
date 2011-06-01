@@ -23,6 +23,10 @@ if ($php_cli) {
 		$argv[2] = 'magento';
 	}
 
+	if (trim($argv[2]) == 'edifact911') {
+		$argv[2] = 'edifact911';
+	}
+
 	// ja toinen parametri komentorivilt‰
 	$edi_tyyppi	= $argv[2];
 
@@ -160,6 +164,16 @@ elseif ($edi_tyyppi == "magento") {
 	$edi_laatija = "Magento";
 	$editilaus_rahtivapaa = "o";
 }
+elseif ($edi_tyyppi == "edifact911") {
+	$edi_subj = "Sis‰‰ntuleva Orders 91.1 tilaus";
+	$edi_laatija = "Orders911";
+
+	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot	
+	$order_tietosisalto = file_get_contents($filename);
+	
+	// Kaivetaan segmentti tekstin "NAD+SE+" ja "NAD+PL+" v‰list‰
+	$nadse_segmentti = substr($order_tietosisalto, strpos($order_tietosisalto, "NAD+SE+"), (strpos($order_tietosisalto, "NAD+PL+") - strpos($order_tietosisalto, "NAD+SE+")));
+}
 else {
 	$edi_subj = t("Sis‰‰ntuleva EDI-tilaus");
 	$edi_laatija = "EDI";
@@ -190,6 +204,10 @@ while (!feof ($fd)) {
 		}
 
 	}
+	elseif ($edi_tyyppi == "edifact911"){
+		$tunnus = substr($tietue, 0, 3);
+		$tieto  = trim(substr($tietue, 4));
+	}
 	else {
 		$tunnus = substr($tietue,0,9);
 		$tieto  = trim(substr($tietue,10));
@@ -200,10 +218,34 @@ while (!feof ($fd)) {
 	$to     = array ('‰','Â','ˆ','ƒ','≈','÷','|'); // 8bit
 	$tieto  = str_replace($from, $to, pupesoft_cleanstring($tieto));
 
+	// Jos kyseess‰ on UNA (ensimm‰inen Orders 91.1 segmentti), niin etsit‰‰n t‰ss‰ vaiheessa NAD SE
+	if ($tunnus == "UNA") {
+		$tunnus = "NADSE"; // Myyj‰
+		$nad_segmentit = explode("+", $nadse_segmentti);
+		$nad_kentta = explode(":", $nad_segmentit[2]);
+		$tieto = $nad_kentta[0];
+	}
+		
+	// Jos kyseess‰ NAD segmentti, tarkennetaan mik‰ NAD on kyseess‰ ja laitetaan $tieto kuntoon
+	if ($tunnus == "NAD") {
+		switch (substr($tieto,0,2)) {
+			case 'BY':
+				$tunnus = "NADBY"; // Ostaja
+				$nad_segmentit = explode("+", $tieto);
+				$nad_kentat = explode(":", $nad_segmentit[1]);
+				$tieto = $nad_kentat[0];
+				break;
+			case 'DP':
+				$tunnus = "NADDP"; // Toimitusosoite
+				break;
+		}
+	}
+
 	switch ($tunnus) {
 		case 'ICHG_RCPT':
 		case 'OSTOTIL.OT_TOIMITTAJANRO':
 		case 'OSTOTIL.OT_OVTTUNNUS':
+		case 'NADSE':
 		//Tilauksen vastaanottaja
 			// V‰hint‰‰n ytunnus ilman etunollaa
 			if (strlen($tieto) >= 7) {
@@ -351,20 +393,29 @@ while (!feof ($fd)) {
 			break;
 
 		case 'ODTM2__DT' :
+		case 'DTM' :
 		// Toimitusp‰iv‰
-			$type = explode("@", $tieto);
 
-			// 102 on p‰iv‰m‰‰r‰, 616 on viikkonumero
-			if (trim($type[1]) == "102") {
-				$tieto = trim($type[0]);
-				$editilaus_toimitusvv = substr($tieto, 0, 4);
-				$editilaus_toimituskk = substr($tieto, 4, 2);
-				$editilaus_toimituspp = substr($tieto, 6, 2);
-				if (checkdate($editilaus_toimituskk, $editilaus_toimituspp, $editilaus_toimitusvv)) {
-					$toimpvm = "$editilaus_toimitusvv-$editilaus_toimituskk-$editilaus_toimituspp";
+			if ($edi_tyyppi == "edifact911") {
+				$kentat = explode(":",$tieto);
+				if ($kentat[0] == 2 and $kentat[2] == 102) {
+					$toimpvm = tv3dateconv($kentat[1]);
 				}
 			}
+			else {
+				$type = explode("@", $tieto);
 
+				// 102 on p‰iv‰m‰‰r‰, 616 on viikkonumero
+				if (trim($type[1]) == "102") {
+					$tieto = trim($type[0]);
+					$editilaus_toimitusvv = substr($tieto, 0, 4);
+					$editilaus_toimituskk = substr($tieto, 4, 2);
+					$editilaus_toimituspp = substr($tieto, 6, 2);
+					if (checkdate($editilaus_toimituskk, $editilaus_toimituspp, $editilaus_toimitusvv)) {
+						$toimpvm = "$editilaus_toimitusvv-$editilaus_toimituskk-$editilaus_toimituspp";
+					}
+				}
+			}
 			break;
 
 		case 'OBGMINUMB' :
@@ -405,13 +456,16 @@ while (!feof ($fd)) {
 		case 'ONADBY_PC' :
 		case 'OSTOTIL.OT_ASIAKASNRO' :
 		case 'ONADDP_PC' :
+		case 'NADBY' :
 			// ONADBY_PC - Ostajan osapuolen tunniste
 			// ONADDP_PC - Toimitusosoitteen osapuolen tunniste
 			// ONADCN_PC - Ostajan logistiikkakeskuksen tunniste (CN -tarkenne ei ole Itellan speksiss‰, joten t‰m‰ on itse p‰‰telty‰!)
 			// ONADBY_RF - Ostajan osapuolen viite (meid‰n asiakasnumero)
 			// OSTOTIL.OT_ASIAKASNRO - Ostajan meid‰n asiakasnumero
 
-			$tieto = trim(substr($tieto, 0, 17));
+			if ($edi_tyyppi != "edifact911") {
+				$tieto = trim(substr($tieto, 0, 17));
+			}
 
 			if ($tieto == "") {
 				break;
@@ -574,6 +628,17 @@ while (!feof ($fd)) {
 			$loppostino = $tieto;
 			break;
 
+		case 'NADDP' :
+		// NAD-DP segmentiss‰, tulee kerralla kaikki toimitusosoitteen tiedot
+		// Toimitusosoitteen nimi-kent‰ss‰ on kovakoodattu teksti "TAVARAN VASTAANOTTAJA" (by Servinet)
+			$kentat = explode("+", $tieto);
+			$tnimi = $kentat[3];
+			$tnimitark = "";
+			$tpostitp = $kentat[5];
+			$tpostino = $kentat[7];
+			$tosoite = $kentat[4];
+			break;
+
 		case 'ONADDP_NA' :
 		case 'OSTOTIL.OT_TOIMITUS_NIMI' :
 			// toimitusasiakkaan nimi
@@ -706,6 +771,12 @@ while (!feof ($fd)) {
 		//Tilaus p‰‰ttyy. Aika tehd‰ se kantaan
 		case 'OHDR__END' :
 		case '*RE OSTOTIL' :
+		case 'UNS':
+
+			// Orders 91.1 tulee kaksi UNS segmentti‰ (D ja S). D tarkoittaa otsikko p‰‰tty, S tarkoittaa sanoma p‰‰ttyy.
+			if ($edi_tyyppi == "edifact911" and substr($tieto, 0, 1) != "D") {
+				break;
+			}
 
 			// valitaan paras arow!
 			if (!is_array($arow)) {
@@ -1001,12 +1072,19 @@ while (!feof ($fd)) {
 
 		case 'OLINSA_NU' :
 		case 'OSTOTILRIV.OTR_TUOTEKOODI' :
+		case 'PIA':
 			//Tuotenumero
+
+			if ($edi_tyyppi == "edifact911") {
+				$kaikki_kentat = explode(":", $tieto);
+				$kentta = explode("+", $kaikki_kentat[1]);
+				$tieto = $kentta[1];
+			}
 
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsi‰ tuote tuotenumerolla
 			if ($tuoteno == "" and $tieto != "") {
 
-				if ($edi_tyyppi != "magento" and $edi_tyyppi != "futursoft" and $yhtiorow["yhtio"] == "artr") {
+				if ($edi_tyyppi != "magento" and $edi_tyyppi != "futursoft" and $edi_tyyppi != "edifact911" and $yhtiorow["yhtio"] == "artr") {
 					// poistetaan jos kolmas merkki jos se on viiva
 					if (substr($tieto, 2, 1) == '-') {
 						$tieto = substr($tieto, 0, 2) . substr($tieto, 3, 15);
@@ -1053,7 +1131,15 @@ while (!feof ($fd)) {
 			break;
 
 		case 'OLINEN_NU' :
+		case 'LIN':
 			// tuotteen EAN-koodi
+
+			if ($edi_tyyppi == "edifact911") {
+				$kaikki_kentat = explode("++", $tieto);
+				$ean_kentta = explode(':', $kaikki_kentat[1]);
+				$tieto = $ean_kentta[0];
+				$rivinumero = $kaikki_kentat[0]; // T‰st‰ segmentist‰ saadaan myˆs rivinumero
+			}
 
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsi‰ tuote EAN koodilla
 			if ($tuoteno == "" and $tieto != "") {
@@ -1097,11 +1183,19 @@ while (!feof ($fd)) {
 
 		case 'OLIN21_QT' :
 		case 'OSTOTILRIV.OTR_TILATTUMAARA' :
-			//Tilattava m‰‰r‰
-			$tieto = str_replace ( ",", ".", $tieto);
+		case 'QTY':
+
+			if ($edi_tyyppi != "edifact911") {
+				//Tilattava m‰‰r‰
+				$tieto = str_replace (",", ".", $tieto);
+			}
 
 			if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
 				$kpl = (float) substr($tieto,0,16);
+			}
+			elseif ($edi_tyyppi == "edifact911") {
+				$kentat = explode(":", $tieto);
+				$kpl = (float) abs($kentat[1]);
 			}
 			else {
 				$kpl = (float) abs(substr($tieto,0,16)); // abs() ettei asiakkaat pysty tekem‰‰n hyvityksi‰!
@@ -1143,6 +1237,18 @@ while (!feof ($fd)) {
 
 		case 'OLIN__END' :
 		case '*RE  OSTOTILRIV' :
+		case 'RFF':
+
+			if ($edi_tyyppi == "edifact911") {
+				$kentat = explode(":", $tieto);
+
+				// Orders 91.1 tulee kaksi RFF segmentti‰ (VN ja WS). VN otsikon viite, joten ei liity tiausriveihin. WS on tilausrivin loppumisen merkki.
+				if ($kentat[0] == "VN") {
+					$asiakkaan_tilausnumero = substr($kentat[1], 0, -1);
+					$viite = substr($kentat[1], 0, -1). ' ';
+					break;
+				}
+			}
 
 			if ($editilaus_otsikko_ok == "KYLLA") {
 
@@ -1355,6 +1461,7 @@ while (!feof ($fd)) {
 
 		case 'OMSG__END' :
 		case '*IE' :
+		case 'UNT':
 
 			// jos meilla on otsikko voidaan laittaa sen valmiiksi
 			if ($editilaus_otsikko_ok == "KYLLA") {

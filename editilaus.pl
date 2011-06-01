@@ -58,7 +58,7 @@ if (!-f $tmpfile) {
 				@rivit = <faili>;
 				$ok=0;
 
-				foreach $rivi (@rivit) {
+				foreach $rivi (@rivit) {											
 					if ($rivi=~m"ICHG__END") {
 						$laskuri=0;
 						$ok=1;  # loppumerkki löytyi file on ok!
@@ -70,6 +70,12 @@ if (!-f $tmpfile) {
 						$ok=1;  # loppumerkki löytyi file on ok!
 						$edi_tyyppi=" futursoft";  # tää on futurifaili, (huom. space tärkeä)
 						last;
+					}
+					if ($rivi=~m"UNS\+S\'") {
+						$laskuri=0;
+						$ok=1;  # loppumerkki löytyi file on ok!
+						$edi_tyyppi=" edifact911";  # tää on orderfaili, (huom. space tärkeä)
+						last;						
 					}
 				}
 
@@ -99,7 +105,7 @@ if (!-f $tmpfile) {
 					$smtp->datasend("\nEditilaus: ".$nimi." taitaa olla viallinen. Siirrettiin faili $dirri2 hakemistoon. Tutki asia!");
 					$smtp->dataend();
 					$smtp->quit;
-
+					
 					$cmd = "mv -f $nimi $dirri2";
 					system($cmd);
 

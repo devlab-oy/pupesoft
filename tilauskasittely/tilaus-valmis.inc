@@ -1061,7 +1061,7 @@ else {
 				}
 			} #end if jt_email
 
-			if (in_array("U", $varasto_chk_array) and in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "VASTAANOTA_REKLAMAATIO"))) {
+			if (in_array("U", $varasto_chk_array) and in_array($toim, array("PIKATILAUS", "RIVISYOTTO"))) {
 
 				foreach ($tilausnumerot as $til_nro) {
 
@@ -1076,10 +1076,7 @@ else {
 					// jos varaston ulkoinen järjestelmä on Unikko
 					if ($varasto_chk_array[$til_nro] == 'U') {
 
-						if ($toim == "VASTAANOTA_REKLAMAATIO") {
-							$pupesoft_tilaustyyppi = 3;
-						}
-						elseif ($laskurow_edi['tilaustyyppi'] == 7) {
+						if ($laskurow_edi['tilaustyyppi'] == 7) {
 							$pupesoft_tilaustyyppi = 7;
 						}
 						else {

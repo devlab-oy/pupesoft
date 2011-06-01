@@ -330,7 +330,7 @@
 				require ("inc/ftp-send.inc");
 			}
 			else {
-				echo "<br/><font class='error'>",t("Tapahtui virhe"),":<br>$error</font><br>";
+				echo "<br/><font class='error'><br><hr>",t("AINEISTOA EI VOIDA LÄHETTÄÄ"),"!<br>",t("Aineistossa virheitä"),":<br>$error</font><hr><br>";
 			}
 		}
 	}

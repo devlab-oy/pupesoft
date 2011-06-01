@@ -78,10 +78,6 @@ else {
 
 	$to_email = $yhtiorow['alert_email'];
 
-	if ($yhtiorow['yhtio'] == 'mast') {
-		$to_email .= ", jaana.stenback@maston.fi, helpdesk@devlab.fi";
-	}
-
 	// jos siirto epäonnistuu
 	if ($palautus<>0) {
 
@@ -124,7 +120,7 @@ else {
 			$tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $to_email)</font><br>\n";
 		}
 	}
-	elseif ($palautus_pyynto != "" or $yhtiorow['yhtio'] == 'mast') {
+	elseif ($palautus_pyynto != "") {
 		$rivi  = "$PHP_SELF\n";
 		$rivi .= "\n";
 		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("lähetys onnistui")."!\n";

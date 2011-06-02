@@ -10976,6 +10976,13 @@ if (!function_exists("seuraava_lahtoaika")) {
 	}
 }
 
+// K‰sitell‰‰n XML-entiteetit
+if (!function_exists("xmlentities")) {
+	function xmlentities($string) {
+   		return str_replace(array('&', '"', "'", '<', '>', '¥', '`'), array('&amp;', '&quot;', '&apos;', '&lt;', '&gt;', '&apos;', '&apos;'), trim($string));
+	}
+}
+
 if (!function_exists("xml_add")) {
 	function xml_add ($joukko, $tieto, $handle, $maxpituus = '', $minpituus = '') {
 		global $yhtiorow, $lasrow;
@@ -10983,10 +10990,7 @@ if (!function_exists("xml_add")) {
 		$ulos = "<$joukko>";
 
 		if (strlen($tieto) > 0 or $minpituus != '') {
-			// K‰sitell‰‰n XML-entiteetit
-			$serc = array("&", ">", "<", "'", "\"", "¥", "`");
-			$repl = array("&amp;", "&gt;", "&lt;", "&apos;", "&quot;", " ", " ");
-			$tieto = str_replace($serc, $repl, trim($tieto));
+			$tieto = xmlentities($tieto);
 
 			if ($maxpituus != "" and is_numeric($maxpituus) and strlen($tieto) > $maxpituus) {
 				$tieto = substr($tieto, 0, $maxpituus);

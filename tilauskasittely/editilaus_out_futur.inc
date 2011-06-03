@@ -103,6 +103,8 @@
 						AND tilausrivi.var != 'U'";
 			$tilausrivi_res = pupe_query($query);
 
+			if (mysql_num_rows($tilausrivi_res) == 0) return false;
+
 			while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
 
 				if ($tilausrivi_row['tilausrivilinkki'] > 0) {

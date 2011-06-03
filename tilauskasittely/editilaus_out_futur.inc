@@ -92,16 +92,28 @@
 
 		   	$i = 1;
 
-			$query = "	SELECT tilausrivi.*
+			$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.tilausrivilinkki
 						FROM tilausrivi
-						#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '')
+						#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '' AND tuote.ei_saldoa == '')
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+							AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
 						AND tilausrivi.var != 'U'";
 			$tilausrivi_res = pupe_query($query);
 
 			while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
+
+				if ($tilausrivi_row['tilausrivilinkki'] > 0) {
+					$query = "SELECT tyyppi FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausrivi_row['tilausrivilinkki']}'";
+					$suoratoimitus_chk_res = pupe_query($query);
+					$suoratoimitus_chk_row = mysql_fetch_assoc($suoratoimitus_chk_res);
+
+					if ($suoratoimitus_chk_row['tyyppi'] == 'O') {
+						continue;
+					}
+				}
 
 				if ($yhtiorow["varaako_jt_saldoa"] == "") {
 					$kpl = round($tilausrivi_row['jt'] * 1, 0);
@@ -123,7 +135,7 @@
 
 	   			$edi_order .= "*RS OSTOTILRIV {$i}\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_NRO:{$laskurow['tunnus']}\n";
-	    		$edi_order .= "OSTOTILRIV.OTR_RIVINRO:".substr($tilausrivi_row['tunnus'], -6)."\n";
+	    		$edi_order .= "OSTOTILRIV.OTR_RIVINRO:".substr($tilausrivi_row['tunnus'], -4)."\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tilausrivi_row['tuoteno']}\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_NIMI:{$tilausrivi_row['nimitys']}\n";

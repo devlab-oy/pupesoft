@@ -2735,4 +2735,19 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "haejaselaa_saapumispvm") {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("N‰ytet‰‰n jos miss‰‰n varastossa ei ole saldoa");
+		$ulos .= "<option value = 'A' $sel[A]>".t("Seuraava saapuminen n‰ytet‰‰n aina");
+		$ulos .= "<option value = 'B' $sel[B]>".t("N‰ytet‰‰n jos normivarastossa ei saldoa");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

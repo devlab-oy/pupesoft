@@ -1079,8 +1079,11 @@ else {
 						if ($laskurow_edi['tilaustyyppi'] == 7) {
 							$pupesoft_tilaustyyppi = 7;
 						}
-						else {
+						elseif ($laskurow_edi['tilaustyyppi'] == 8) {
 							$pupesoft_tilaustyyppi = 8;
+						}
+						else {
+							$pupesoft_tilaustyyppi = 1;
 						}
 
 						$query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";

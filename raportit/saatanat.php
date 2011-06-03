@@ -13,15 +13,15 @@
 
 		require ("../inc/parametrit.inc");
 
-		// Livesearch jutut
-		enable_ajax();
-
 		if (isset($supertee)) {
 			if ($supertee == "lataa_tiedosto") {
 				readfile("/tmp/".$tmpfilenimi);
 				exit;
 			}
 		}
+
+		// Livesearch jutut
+		enable_ajax();
 
 		echo "<font class='head'>".t("Saatavat")." - $yhtiorow[nimi]</font><hr>";
 
@@ -92,17 +92,51 @@
 		echo "<option value = ''>".t("Yrityksen valuutassa")."</option>";
 		echo "<option value = 'V' $sel1>".t("Laskun valuutassa")."</option>";
 		echo "</select></td></tr>";
+		
+		$sel[$laji] = " selected ";
+		
+		echo "<th>".t("Mitkä Laskut Listataan").":</th>";
+		echo "<td><select name='laji'>
+				<option value='M'   $sel[M]>".t("myyntisaamiset")."</option>
+				<option value='MF'  $sel[MF]>".t("factoringmyyntisaamiset")."</option>
+				<option value='MK'  $sel[MK]>".t("konsernimyyntisaamiset")."</option>
+				<option value='MMK' $sel[MMK]>".t("myyntisaamiset + konsernimyyntisaamiset")."</option>
+				<option value='MA'  $sel[MA]>".t("myyntisaamiset + factoringmyyntisaamiset + konsernimyyntisaamiset")."</option>
+				</select></td>";
+		echo "</tr>";
+				
 		echo "<tr><th>".t("Näytä vain ne joilla luottoraja on ylitetty").":</th><td valign='top'><input type='checkbox' name='ylilimiitin' value='ON' $chk></td>";
+		
+		echo "<tr>";
+		
+		if ($luottovakuutettu == "K") {
+			$luottolisa = "K";
+			$checked = "CHECKED";
+		}
+		else {
+			$luottolisa = "";
+			$checked = "";
+		}
+		
+		echo "<th>".t("Vain luottovakuutetut")."</th>";
+		echo "<td><input type='checkbox' name='luottovakuutettu' value='K' $checked></td>";
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Näytä")."'></td></tr>";
+		echo "</tr>";
+		
 		echo "</table><br>";
 		echo "</form>";
 	}
 
 	if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
-
 		if (!isset($sakkl)) $sakkl = date("m");
 		if (!isset($savvl)) $savvl = date("Y");
 		if (!isset($sappl)) $sappl = date("d");
+	
+		if ($laji == 'MK') 		$tili = "'$yhtiorow[konsernimyyntisaamiset]'";
+		elseif ($laji == 'MF') 	$tili = "'$yhtiorow[factoringsaamiset]'";
+		elseif ($laji == 'MA') 	$tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
+		elseif ($laji == 'MMK') $tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
+		else 					$tili = "'$yhtiorow[myyntisaamiset]'";
 
 		$lisa 			 = '';
 		$saatavat_yhtio  = $kukarow['yhtio'];
@@ -211,7 +245,8 @@
 					min(lasku.liitostunnus) litu,
 					min(lasku.tunnus) latunnari
 					FROM lasku use index (yhtio_tila_mapvm)
-					JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]') and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl')
+					JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl')
+					JOIN asiakas on (asiakas.yhtio  = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.luottovakuutettu = '$luottolisa')
 					WHERE lasku.yhtio = '$saatavat_yhtio'
 					and (lasku.mapvm > '$savvl-$sakkl-$sappl' or lasku.mapvm = '0000-00-00')
 					and lasku.tapvm	<= '$savvl-$sakkl-$sappl'

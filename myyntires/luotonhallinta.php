@@ -31,10 +31,11 @@
 		$pvm_loppu = $muut[1];
 		$minimi_myynti = $muut[2];
 		$luottorajauksia = $muut[3];
+		$luottovakuutettu = $muut[4];
 	}
 
 	$asiakasrajaus = "";
-	$muutparametrit = "$pvm_alku#$pvm_loppu#$minimi_myynti#$luottorajauksia";
+	$muutparametrit = "$pvm_alku#$pvm_loppu#$minimi_myynti#$luottorajauksia#$luottovakuutettu";
 
 	if ($ytunnus != '') {
 
@@ -53,6 +54,15 @@
 			}
 			$luottorajauksia = "Z";
 		}
+	}
+
+	if ($luottovakuutettu == "K") {
+		$luottolisa = "K";
+		$checked = "CHECKED";
+	}
+	else {
+		$luottolisa = "";
+		$checked = "";
 	}
 
 	$update_message = array();
@@ -82,6 +92,10 @@
 	echo "<input type='hidden' name='tee' value='1'>";
 	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
+	$monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI");
+	require ("tilauskasittely/monivalintalaatikot.inc");
+
+	echo "<br>";
 	echo "<table>";
 
 	echo "<tr>";
@@ -123,6 +137,11 @@
 	echo "<tr>";
 	echo "<th>".t("Vain asiakas")."</th>";
 	echo "<td><input type='text' name='ytunnus' value='$ytunnus'><input type='hidden' name='asiakasid' value='$asiakasid'>$asiakasrow[nimi]</td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t("Vain luottovakuutetut")."</th>";
+	echo "<td><input type='checkbox' name='luottovakuutettu' value='K' $checked></td>";
 	echo "</tr>";
 
     echo "</table>";
@@ -188,9 +207,11 @@
 					min(myyntikielto) myyntikielto,
 					min(ytunnus) tunniste
 					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND laji != 'P'
+					WHERE asiakas.yhtio = '$kukarow[yhtio]'
+					AND asiakas.laji != 'P'
+					AND asiakas.luottovakuutettu = '$luottolisa'
 					$asiakasrajaus
+					$lisa
 					GROUP BY 1";
 		$asiakasres = mysql_query($query) or pupe_error($query);
 
@@ -204,21 +225,23 @@
 		echo "<th>".t("Ytunnus")."</th>";
 		echo "<th>".t("Laskutus nimi")."</th>";
 		echo "<th>".t("Toimitus nimi")."</th>";
-		echo "<th>".t("Myynti")." $yhtiorow[valkoodi]</th>";
+		echo "<th>".t("Verollinen myynti")." $yhtiorow[valkoodi]</th>";
+		echo "<th>".t("Veroton myynti")." $yhtiorow[valkoodi]</th>";
+		echo "<th>".t("Avoinsaldo nyt")."</th>";
 		echo "<th>".t("Luottoraja")." $yhtiorow[valkoodi]</th>";
 		echo "<th>".t("Myyntikielto")."</th>";
-		
+
 		if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
 			echo "<th>".t("Karhukertoja")."</th>";
 			echo "<th>".t("Laskuja")."</th>";
 		}
-		
+
 		echo "</tr>";
 
 		while ($asiakasrow = mysql_fetch_array($asiakasres)) {
 
 			// haetaan asiakkaan myynnit halutulta ajalta
-			$query = "	SELECT ifnull(sum(summa), 0) summa
+			$query = "	SELECT ifnull(sum(summa), 0) summa, ifnull(sum(arvo), 0) arvo
 						FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tila = 'U'
@@ -227,6 +250,16 @@
 						AND lasku.tapvm <= '$pvm_loppu'";
 			$myyntires = mysql_query($query) or pupe_error($query);
 			$myyntirow = mysql_fetch_array($myyntires);
+
+			$avoinsql = " 	SELECT sum(lasku.summa - lasku.saldo_maksettu) laskuavoinsaldo
+							FROM lasku use index (yhtio_tila_mapvm)
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							AND lasku.tila = 'U'
+							AND lasku.alatila = 'X'
+							AND lasku.mapvm = '0000-00-00'
+							AND lasku.liitostunnus IN ($asiakasrow[liitostunnukset])";
+			$avoinres = pupe_query($avoinsql);
+			$avoinrow = mysql_fetch_assoc($avoinres);
 
 			// Ei näytetä jos ei olla yli minimi myynnin
 			if (($luottorajauksia != "D" and $luottorajauksia != "Z" and $myyntirow["summa"] == 0) or ($myyntirow["summa"] < $minimi_myynti)) {
@@ -264,7 +297,7 @@
 			}
 
 			if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
-				
+
 				if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
 					// käsitellään luottorajoja per ytunnus
 					$extraehto = " AND lasku.ytunnus = '$asiakasrow[ytunnus]'";
@@ -273,7 +306,7 @@
 					// käsitellään luottorajoja per asiakas
 					$extraehto = " AND lasku.liitostunnus = '$asiakasrow[tunnus]'";
 				}
-			
+
 				if ($luottorajauksia == 'G') {
 					$having_ehto = " HAVING karhukerrat >= 1 ";
 				}
@@ -283,14 +316,14 @@
 				if ($luottorajauksia == 'I') {
 					$having_ehto = " HAVING karhukerrat >= 3 ";
 				}
-				
+
 				// haetaan uusin karhukierros/karhukerta
 				$query = "	SELECT count(karhu_lasku.ltunnus) as karhukerrat
 							FROM lasku
 							JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
 							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '')
-							WHERE lasku.yhtio = '$kukarow[yhtio]' 
-							AND lasku.tila = 'U' 
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							AND lasku.tila = 'U'
 							AND lasku.alatila = 'X'
 							AND lasku.mapvm = '0000-00-00'
 							$extraehto
@@ -301,34 +334,36 @@
 
 				if (mysql_num_rows($laskures) > 0) {
 					$karhuttu = mysql_fetch_array($laskures);
-					$ulostulo = $karhuttu[0];		
+					$ulostulo = $karhuttu[0];
 					$kerrat = mysql_num_rows($laskures);
 				}
 				else {
 					continue;
-				}				
+				}
 			}
-			
+
 			if ($asiakasrow["myyntikielto"] != "") {
 				$chk = "CHECKED";
 			}
 			else {
 				$chk = "";
 			}
-				
+
 			echo "<tr class='aktiivi'>";
 			echo "<td>$asiakasrow[tunniste]</td>";
 			echo "<td>$asiakasrow[nimi]</td>";
 			echo "<td>$asiakasrow[toim_nimi]</td>";
 			echo "<td align='right'>$myyntirow[summa]</td>";
+			echo "<td align='right'>$myyntirow[arvo]</td>";
+			echo "<td align='right'>$avoinrow[laskuavoinsaldo]</td>";
 			echo "<td align='right'><input style='text-align:right' type='text' name='luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]' size='11'></td>";
 			echo "<td align='right'><input type='checkbox' name='myyntikielto[$asiakasrow[ytunnus]]' value='K' $chk></td>";
-			
+
 			if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
 				echo "<td align='right'>1 - {$ulostulo}</td>";
 				echo "<td align='right'>{$kerrat}</td>";
 			}
-			
+
 			echo "<td class='back'><font class='error'>".$update_message[$asiakasrow["ytunnus"]]."</font></td>";
 			echo "</tr>";
 
@@ -338,7 +373,7 @@
 			echo "<input type='hidden' name='muutparametrit' value='$muutparametrit'>";
 		}
 
-		echo "<tr><td class='back' colspan='6' align='right'>Ruksaa kaikki &raquo; <input type='checkbox' name='ruksaakaikki' onclick='toggleAll(this)'></td></tr>";
+		echo "<tr><td class='back' colspan='8' align='right'>Ruksaa kaikki &raquo; <input type='checkbox' name='ruksaakaikki' onclick='toggleAll(this)'></td></tr>";
 		echo "</table>";
 
 		echo "<input type='submit' value='".t("Päivitä luottorajat")."'>";

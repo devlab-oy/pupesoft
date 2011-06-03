@@ -1054,5 +1054,19 @@
 			$jatko = 0;
 		}
 	}
+	
+	if (mysql_field_name($result, $i) == "luottovakuutettu") {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Asiakas ei ole luottovakuutettu")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Asiakas on luottovakuutettu")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

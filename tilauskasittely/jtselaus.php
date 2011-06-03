@@ -750,7 +750,7 @@
 				if ($toim == "ENNAKKO") {
 					$query = "	SELECT lasku.liitostunnus, sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * (1 - tilausrivi.ale / 100)) hintarajaus
 								FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-								JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa)
+								JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa)
 								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
 								$toimittajalisa
 								WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
@@ -815,7 +815,7 @@
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa $summarajauslisa)
+							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
 							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'

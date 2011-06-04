@@ -94,8 +94,7 @@
 
 			$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.tilausrivilinkki
 						FROM tilausrivi
-						#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '' AND tuote.ei_saldoa = '')
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '' AND tuote.ei_saldoa = '')
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 							AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -129,8 +128,7 @@
 				}
 
 				// HUOM! Reklamaatioissa laitetaan nettohyvitysyksikköhinta
-				// $hinta = $tilausrivi_row['hinta'] * generoi_alekentta_php($tilausrivi_row, 'M', 'kerto');
-				$hinta = '123';
+				$hinta = $tilausrivi_row['hinta'] * generoi_alekentta_php($tilausrivi_row, 'M', 'kerto');
 
 				// nettorivihinta
 				$rivihinta = $kpl * $hinta;
@@ -157,16 +155,9 @@
 
 		    		$edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$tilausrivi_row['hinta']}\n";
 
-					// MUISTA OTTAA KOMMENTTI POIS JA POISTA NOLLARIVI!!!
-					/*
 					$ale = generoi_alekentta_php($tilausrivi_row, 'M', 'erikseen');
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 		    			$edi_order .= "OSTOTILRIV.OTR_ALENNUS_{$alepostfix}:".$ale["ale".$alepostfix]."\n";
-					}
-					*/
-
-					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-		    			$edi_order .= "OSTOTILRIV.OTR_ALENNUS_{$alepostfix}:0\n";
 					}
 				}
 

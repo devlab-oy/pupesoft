@@ -672,7 +672,7 @@ if (!function_exists('rivi_tarjous')) {
 		$piilotarivi = "";
 
 		// Alennus kuntoon
-		if ($row["netto"] != 'N' and $laskurow["erikoisale"] > 0) {
+		if ($row["netto"] != 'N' and $row["erikoisale"] > 0) {
 			$row["ale1"] = (1 - (1 - $row["ale1"] / 100) * (1 - $row["erikoisale"] / 100)) * 100;
 		}
 

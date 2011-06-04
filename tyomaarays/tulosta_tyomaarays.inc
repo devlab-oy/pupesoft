@@ -677,6 +677,11 @@ if (!function_exists('rivi')) {
 			$ed_ale = array();
 			$lisakala = '';
 
+			// Alennus kuntoon
+			if ($row["netto"] != 'N' and $row["erikoisale"] > 0) {
+				$row["ale1"] = (1 - (1 - $row["ale1"] / 100) * (1 - $row["erikoisale"] / 100)) * 100;
+			}
+
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 
 				if (trim($row["ale{$alepostfix}"]) != 0) {

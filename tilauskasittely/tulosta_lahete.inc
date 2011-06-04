@@ -2097,7 +2097,9 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			$oikpos = $pdf->strlen($row["myyntihinta"]	, $norm);
 			$pdf->draw_text(500-$oikpos, $kala, $row["myyntihinta"], $thispage, $norm);
 
-			$nettohinta = hintapyoristys($row["hinta"] * (1 - $row["ale"] / 100));
+			$alennukset = generoi_alekentta_php($row, 'M', 'kerto');
+
+			$nettohinta = hintapyoristys($row["hinta"] * $alennukset);
 
 			$oikpos = $pdf->strlen($nettohinta, $norm);
 			$pdf->draw_text(570-$oikpos, $kala, $nettohinta, $thispage, $norm);

@@ -313,7 +313,7 @@
 						$kululaskusummat = 0;
 						$tavaralaskusummat = 0;
 
-						if ($i > $x) {
+						if ($i > 1 and $i > $x) {
 							echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>";
 						}
 

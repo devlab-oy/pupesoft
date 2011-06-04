@@ -105,8 +105,8 @@ if ($tee == 'eposti') {
 			$pdf->template->text($otsikkotid, 30,  20, t("Osasto"), $norm_bold);
 			$pdf->template->text($otsikkotid, 30,   0, t("Tuoteryhmä")."/".t("Tuotenumero"), $norm_bold);
 			$pdf->template->text($otsikkotid, 330,  0, t("Aleryhmä"), $norm_bold);
-			$pdf->template->text($otsikkotid, 520,  0, t("Alennus"), $norm_bold);
-			$pdf->template->text($otsikkotid, 610,  0, t("Alennuslaji"), $norm_bold);
+			$pdf->template->text($otsikkotid, 450,  0, t("Alennus"), $norm_bold);
+			$pdf->template->text($otsikkotid, 520,  0, t("Alelaji"), $norm_bold);
 			$pdf->template->place($otsikkotid, $firstpage, 0, 665, $norm_bold);
 			$kala = 650;
 
@@ -157,8 +157,8 @@ if ($tee == 'eposti') {
 			$pdf->draw_text(60, $kala, $tuote, 									$firstpage, $norm);
 		}
 		$pdf->draw_text(310, $kala, sprintf('%10s',$ryhma), 	$firstpage, $norm);
-		$pdf->draw_text(490, $kala, sprintf('%10s',sprintf('%.2d',$ale))."%", 	$firstpage, $norm);
-		$pdf->draw_text(590, $kala, sprintf('%10s',sprintf('%.2d',$alelaji))."%", 	$firstpage, $norm);
+		$pdf->draw_text(420, $kala, sprintf('%10s',sprintf('%.2d',$ale))."%", 	$firstpage, $norm);
+		if (trim($alelaji) != '') $pdf->draw_text(500, $kala, sprintf('%10s',t("Ale").$alelaji), 	$firstpage, $norm);
 
 		$kala -= 15;
 	}

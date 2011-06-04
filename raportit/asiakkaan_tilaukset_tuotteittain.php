@@ -227,7 +227,7 @@
 				$katelisa = "";
 			}
 
-			$ale_query_select_lisa = generoi_alekentta_select("yhteen", "M");
+			$ale_query_select_lisa = generoi_alekentta_select("erikseen", "M");
 
 			$query = "	SELECT distinct
 						tilausrivi.tunnus,

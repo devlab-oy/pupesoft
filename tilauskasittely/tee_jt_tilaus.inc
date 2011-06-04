@@ -554,7 +554,11 @@
 							$kukarow["kesken"]	= $id;
 							$tuoteno 		 	= $lisataanrow["tuoteno"];
 							$netto 			 	= $lisataanrow["netto"];
-							$ale 			 	= $lisataanrow["ale"];
+
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								${'ale'.$alepostfix} = $lisataanrow["ale{$alepostfix}"];
+							}
+
 							$kpl				= $lisataanrow_kpl;
 							$varasto 		 	= $varastosta;
 							$korvaavakielto	 	= "Y";

@@ -72,11 +72,17 @@ else {
 		$laskurow["nippu"] = $laskurow["tunnus"];
 	}
 
+	$ale_query_select_lisa = '';
+
+	for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		$ale_query_select_lisa .= " tilausrivi.ale{$alepostfix},";
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
 				tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
-				tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.var
+				tilausrivi.nimitys, tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -170,7 +176,9 @@ else {
 		if ($naytatvale != 3) {
 			$ulos .= "   ".t("Hinta", $kieli)." ".t("Val", $kieli);
 			if ($naytatvale != 4) {
-				$ulos .= " ".t("Ale", $kieli);
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ulos .= " ".t("Ale{$alepostfix}", $kieli);
+				}
 			}
 		}
 
@@ -224,7 +232,9 @@ else {
 				$ulos .= sprintf("%6.s"  ,$tvtilausrivirow['aleryhma']);
 			}
 			else {
-				$ulos .= sprintf("%5.s"  ,$tvtilausrivirow['ale'])."%";
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ulos .= sprintf("%5.s"  ,$tvtilausrivirow["ale{$alepostfix}"])."%";
+				}
 			}
 			$ulos .= "\n";
 

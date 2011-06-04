@@ -90,6 +90,8 @@
 				$kplyht = '';
 				$i = 0;
 	
+				$query_ale_lisa = generoi_alekentta('M');
+	
 				while ($row = mysql_fetch_array($sresult)) {
 
 					$query  = "	SELECT DISTINCT matkalasku.nimi, tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.kpl, tilausrivi.kommentti, tilausrivi.rivihinta
@@ -145,8 +147,8 @@
 						}
 
 						$query = "	SELECT GROUP_CONCAT(tilausrivi.yksikko,'#',if(tuote.tuotetyyppi = 'K', tilausrivi.varattu, 0)) yksikko, 
-									sum(if(tuote.tuotetyyppi = '', round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$row[erikoisale]-(tilausrivi.ale*$row[erikoisale]/100))/100)),2), 0)) rivihinta_tuote,
-									sum(if(tuote.tuotetyyppi = 'K', round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$row[erikoisale]-(tilausrivi.ale*$row[erikoisale]/100))/100)),2), 0)) rivihinta_tyo
+									sum(if(tuote.tuotetyyppi = '', round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2), 0)) rivihinta_tuote,
+									sum(if(tuote.tuotetyyppi = 'K', round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2), 0)) rivihinta_tyo
 									FROM tilausrivi 
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'

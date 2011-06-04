@@ -105,7 +105,6 @@ if (!function_exists("lisaa_ostoskoriin")) {
 			$kerayspvm			= "";
 			$hinta				= "";
 			$netto				= "";
-			$ale				= "";
 			$var				= "";
 			$alv				= "";
 			$paikka				= "";
@@ -116,6 +115,10 @@ if (!function_exists("lisaa_ostoskoriin")) {
 			$var				= "Y";
 //			$perhekielto		= "TODELLAKIN";
 			$jtkielto 			= $laskurow['jtkielto'];
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				${'ale'.$alepostfix} = '';
+			}
 
 			if (file_exists("../tilauskasittely/lisaarivi.inc")) {
 				require ("../tilauskasittely/lisaarivi.inc");

@@ -23,6 +23,8 @@ $keissit = array("Asiakas","Toimittaja","Kustannupaikka","Laskunumero","Myynti",
 
 mkdir("/tmp/infoglove");
 
+$query_ale_lisa = generoi_alekentta('M');
+
 foreach ($keissit as $keissi) {
 
 	switch ($keissi) {
@@ -118,8 +120,8 @@ foreach ($keissit as $keissi) {
 		case "Myyntitil" :
 			$query =	"SELECT left(lasku.luontiaika,10) AS 'paivays',
 						tilausrivi.tilkpl AS 'maara',
-						round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1),(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)),'$yhtiorow[hintapyoristys]') AS 'arvo',
-						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
+						round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1),(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)),'$yhtiorow[hintapyoristys]') AS 'arvo',
+						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
 						if(tilausrivi.laskutettu!='',tilausrivi.rivihinta-tilausrivi.kate,round(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt),6)) AS 'keskihinta',
 						tilausrivi.tuoteno,
 						asiakas.tunnus AS asiakasnro,
@@ -137,8 +139,8 @@ foreach ($keissit as $keissi) {
 		case "Avointil" :
 			$query =	"SELECT lasku.toimaika AS 'paivays',
 						tilausrivi.tilkpl AS 'maara',
-						round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1),(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)),'$yhtiorow[hintapyoristys]') AS 'arvo',
-						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
+						round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1),(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)),'$yhtiorow[hintapyoristys]') AS 'arvo',
+						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
 						if(tilausrivi.laskutettu!='',tilausrivi.rivihinta-tilausrivi.kate,round(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt),6)) AS 'keskihinta',
 						tilausrivi.tuoteno,
 						asiakas.tunnus AS asiakasnro,

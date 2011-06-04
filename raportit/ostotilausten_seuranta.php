@@ -144,13 +144,15 @@
 		$vaihtuuko_toimittaja = '';
 		$tunnukset = array();
 
+		$query_ale_lisa = generoi_alekentta('O');
+
 		while ($toimittajarow = mysql_fetch_assoc($res)) {
 
 			$query = "	SELECT count(*) riveja,
 						sum(if(tilausrivi.kpl != 0, 1, 0)) riveja_varastossa,
 						sum(tilausrivi.kpl+tilausrivi.varattu) kpl,
 						sum(tilausrivi.kpl) kpl_varastossa,
-						sum((tilausrivi.kpl+tilausrivi.varattu)*tilausrivi.hinta*(1-tilausrivi.ale/100)) arvo,
+						sum((tilausrivi.kpl+tilausrivi.varattu)*tilausrivi.hinta*{$query_ale_lisa}) arvo,
 						lasku.tunnus ltunnus,
 						lasku.lahetepvm,
 						sum(tuote.tuotemassa*(tilausrivi.varattu+tilausrivi.kpl)) massa,
@@ -663,5 +665,3 @@
 	if (file_exists("../inc/footer.inc")) {
 		require ("../inc/footer.inc");
 	}
-
-?>

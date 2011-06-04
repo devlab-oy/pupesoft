@@ -1021,8 +1021,8 @@
 		$ulos .= "<option value = ''>".t("Tilaukset jaetaan osiin varastoittain")."</option>";
 		$ulos .= "<option value = 'E' $sel[E]>".t("Tilauksia ei jaeta osiin")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Tilaukset jaetaan osiin ker‰ysp‰iv‰n mukaan")."</option>";
-		// $ulos .= "<option value = 'V' $sel[V]>".t("Tilaukset jaetaan osiin tuotteen ker‰ysvyˆhykkeen mukaan")."</option>";
-		// $ulos .= "<option value = 'W' $sel[W]>".t("Tilaukset jaetaan osiin varaston hyllypaikan ker‰ysvyˆhykkeen mukaan")."</option>";
+		$ulos .= "<option value = 'V' $sel[V]>".t("Tilaukset jaetaan osiin tuotteen ker‰ysvyˆhykkeen mukaan")."</option>";
+		$ulos .= "<option value = 'W' $sel[W]>".t("Tilaukset jaetaan osiin varaston hyllypaikan ker‰ysvyˆhykkeen mukaan")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -2600,6 +2600,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "kerayserat") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = " selected";
+
+		$ulos .= "<option value = ''>".t("Ker‰yseri‰ ei k‰ytet‰ ker‰yksess‰")."</option>";
+		$ulos .= "<option value = 'K'{$sel['K']}>".t("Ker‰yseri‰ k‰ytet‰‰n ker‰yksess‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "myyntiera_pyoristys" ) {
 
 		$sela = $selb = "";
@@ -2675,7 +2689,8 @@
 	if (mysql_field_name($result, $i) == "reklamaation_vastaanottovarasto" ) {
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
-					WHERE yhtio='$kukarow[yhtio]'";
+					WHERE yhtio='$kukarow[yhtio]'
+					ORDER BY nimitys";
 		$sresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
@@ -2698,12 +2713,28 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
+		// Jos lis‰‰t uuden alennuskent‰n, lis‰‰ se myˆs myynnin_alekentat_muokkaus parametriin
 		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-		$ulos .= "<option value = '1'>".t("Myynniss‰ k‰ytet‰‰n yht‰ alennuskentt‰‰")."</option>";
-		#$ulos .= "<option value = '2'>".t("Myynniss‰ k‰ytet‰‰n kahta alennuskentt‰‰")."</option>";
-		#$ulos .= "<option value = '3'>".t("Myynniss‰ k‰ytet‰‰n kolmea alennuskentt‰‰")."</option>";
+		$ulos .= "<option value = '1'{$sel[1]}>".t("Myynniss‰ k‰ytet‰‰n yht‰ alennuskentt‰‰")."</option>";
+		$ulos .= "<option value = '2'{$sel[2]}>".t("Myynniss‰ k‰ytet‰‰n kahta alennuskentt‰‰")."</option>";
+		$ulos .= "<option value = '3'{$sel[3]}>".t("Myynniss‰ k‰ytet‰‰n kolmea alennuskentt‰‰")."</option>";
 		$ulos .= "</select></td>";
 
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "myynnin_alekentat_muokkaus") {
+		$ulos = "<td>";
+
+ 		$sel = array_fill_keys(explode(",", $trow[$i]), " checked") + array_fill(1, 3, '');
+
+		$ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
+
+		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='1'{$sel[1]}>".t("Ale1 muokkaus")."<br />";
+		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='2'{$sel[2]}>".t("Ale2 muokkaus")."<br />";
+		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='3'{$sel[3]}>".t("Ale3 muokkaus")."<br />";
+
+		$ulos .= "</td>";
 		$jatko = 0;
 	}
 

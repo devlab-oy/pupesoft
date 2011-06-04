@@ -180,6 +180,11 @@
 		}
 
 		if ($toim == 'OSTO') {
+			
+			$query_ale_lisa = generoi_alekentta('O');
+
+			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
+
 			$query = "	SELECT
 						tilausrivi.tunnus,
 						lasku.tunnus tilaus,
@@ -190,7 +195,8 @@
 						round((tilausrivi.varattu+tilausrivi.kpl),4) m‰‰r‰,
 						round((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkm‰‰r‰,
 						round(tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi), '$yhtiorow[hintapyoristys]') hinta,
-						round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+						{$ale_query_select_lisa}
+						round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 						lasku.toimaika,
 						tilausrivi.laskutettuaika tuloutettu,
 						lasku.tila, lasku.alatila
@@ -204,6 +210,9 @@
 						and tilausrivi.$pvmtapa <='$vvl-$kkl-$ppl 23:59:59'";
 		}
 		else {
+			
+			$query_ale_lisa = generoi_alekentta('M');
+			
 			if ((int) $asiakasid > 0) {
 				$asiakaslisa = "";
 			}
@@ -218,6 +227,8 @@
 				$katelisa = "";
 			}
 
+			$ale_query_select_lisa = generoi_alekentta_select("yhteen", "M");
+
 			$query = "	SELECT distinct
 						tilausrivi.tunnus,
 						tilausrivi.otunnus tilaus,
@@ -227,8 +238,8 @@
 						tilausrivi.nimitys,
 						(tilausrivi.kpl+tilausrivi.varattu) m‰‰r‰,
 						tilausrivi.hinta,
-						tilausrivi.ale,
-						if (tilausrivi.kpl!=0, tilausrivi.rivihinta, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))) rivihinta,
+						{$ale_query_select_lisa}
+						if (tilausrivi.kpl!=0, tilausrivi.rivihinta, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) rivihinta,
 						tilausrivi.kate,
 						lasku.toimaika,
 						lasku.lahetepvm K‰sittelyyn,
@@ -346,7 +357,7 @@
 					if (mysql_field_name($result,$i) == 'kerattyaika' or mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'tuloutettu' or mysql_field_name($result,$i) == 'K‰sittelyyn') {
 						echo "<$ero valign='top' $class>".tv1dateconv($row[$i],"pitka")."</$ero>";
 					}
-					elseif (mysql_field_name($result,$i) == 'ale' or mysql_field_name($result,$i) == 'm‰‰r‰') {
+					elseif (substr(mysql_field_name($result,$i), 0, 3) == 'ale' or mysql_field_name($result,$i) == 'm‰‰r‰') {
 						if ($row[$i] == 0) {
 							echo "<$ero valign='top' align='right' $class></$ero>";
 						}
@@ -551,11 +562,21 @@
 				}
 			}
 
+			$csp2 = 2;
+
+			$loopattava_maara = $toim == 'OSTO' ? 1 : $yhtiorow['myynnin_alekentat'];
+
+			for ($alepostfix = 1; $alepostfix <= $loopattava_maara; $alepostfix++) {
+				if ($alepostfix > 1) {
+					$csp2++;
+				}
+			}
+
 			echo "<tr>
 					<td colspan='$csp' class='back'></td>
 					<td align='right' class='back'>".t("Yhteens‰").":</td>
 					<td align='right' class='spec'>".(float) $kplsumma."</td>
-					<td colspan='2' align='right' class='back'></td>
+					<td colspan='{$csp2}' align='right' class='back'></td>
 					<td align='right' class='spec'>".sprintf('%01.2f', $rivihintasumma)."</td>";
 
 			if ($toim != "OSTO" and $kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {

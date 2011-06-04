@@ -84,10 +84,10 @@
 				}
 
 				if (trim($rivi[4]) != '') {
-					$ale = (float) str_replace(",", ".", $rivi[4]);
+					$ale1 = (float) str_replace(",", ".", $rivi[4]);
 				}
 				else {
-					$ale = "";
+					$ale1 = "";
 				}
 
 				$paikka	  = $rivi[5];
@@ -126,7 +126,7 @@
 				$tuoteno	= '';
 				$kpl		= '';
 				$hinta		= '';
-				$ale		= '';
+				$ale1		= '';
 				$alv		= '';
 				$var		= '';
 				$toimaika	= '';

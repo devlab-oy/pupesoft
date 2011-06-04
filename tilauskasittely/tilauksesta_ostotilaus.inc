@@ -252,7 +252,7 @@
 										kpl2			= 0,
 										tilkpl 			= '$tilrivirow[kpl]',
 										jt				= 0,
-										ale 			= '$osstu[alennus]',
+										ale1 			= '$osstu[alennus]',
 										alv 			= '',
 										netto			= '',
 										hinta 			= '$osstu[ostohinta]',

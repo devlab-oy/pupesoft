@@ -70,6 +70,8 @@
 		$tee = "VALITSE";
 	}
 
+	$query_ale_lisa = generoi_alekentta('M');
+
 	if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
 
 		echo "<table><form action='' name='laskuri' method='post'>";
@@ -85,7 +87,7 @@
 		}
 
 		$query_rivi = "	SELECT lasku.valkoodi, lasku.maksuehto, lasku.hinta,
-						sum(round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),$yhtiorow[hintapyoristys])) loppusumma
+						sum(round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},$yhtiorow[hintapyoristys])) loppusumma
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio AND lasku.tunnus=tilausrivi.otunnus)
 						WHERE var != 'J' and otunnus in ($laskutettavat) and tilausrivi.yhtio='$kukarow[yhtio]'
@@ -329,8 +331,9 @@
 					lasku.kohdistettu,
 					lasku.jaksotettu,
 					lasku.verkkotunnus,
-					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
-					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
+					lasku.erikoisale,
+					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
+					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
 					FROM lasku use index (tila_index)
 					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}' AND laskun_lisatiedot.laskutus_nimi != '' AND laskun_lisatiedot.otunnus = lasku.tunnus AND CONCAT(laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa) != CONCAT(lasku.nimi, lasku.osoite, lasku.postino, lasku.postitp, lasku.maa))
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
@@ -345,7 +348,7 @@
 					$muutlisa
 					GROUP BY lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
-					maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus
+					maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale
 					ORDER BY lasku.tunnus";
 		$res = mysql_query($query) or pupe_error($query);
 
@@ -506,7 +509,7 @@
 				if ($row["kateinen"] != "") $kateinen = "X";
 				if ($row["maa"] != "") $maa = $row["maa"];
 
-				$query = "	SELECT sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*(1-ale/100)=0 and var!='P' and var!='J',1,0)) nollarivi
+				$query = "	SELECT sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*{$query_ale_lisa}=0 and var!='P' and var!='J',1,0)) nollarivi
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus = '$row[tunnus]'
@@ -601,26 +604,34 @@
 				if ($yhtiorow["rahti_hinnoittelu"] == "" and $row["rahtivapaa"] == "") {
 
 					// haetaan rahtimaksu
-					$rahtihinta_array 		= hae_rahtimaksu($row["tunnus"]);
+					$rahtihinta_array = hae_rahtimaksu($row["tunnus"]);
+
+					$rahtihinta_ale = array();
 
 					if (is_array($rahtihinta_array)) {
-						$rahtihinta 		= $rahtihinta_array['rahtihinta'];
-						$rahtihinta_ale 	= $rahtihinta_array['alennus'];
+						$rahtihinta = $rahtihinta_array['rahtihinta'];
+
+						foreach ($rahtihinta_array['alennus'] as $ale_k => $ale_v) {
+							$rahtihinta_ale[$ale_k] = $ale_v;
+						}
 					}
 					else {
-						$rahtihinta = $rahtihinta_ale = 0;
+						$rahtihinta = 0;
 					}
 
 					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 					$rhire = mysql_query($query) or pupe_error($query);
 					$trow  = mysql_fetch_array($rhire);
 
-					$netto = $rahtihinta_ale != 0 ? '' : 'N';
+					$netto = count($rahtihinta_ale) > 0 ? '' : 'N';
 
-					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', $netto, $rahtihinta, $rahtihinta_ale);
+					list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', $netto, $rahtihinta, $rahtihinta_ale);
 					list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
 
-					$hinta *= (1 - ($lis_ale / 100));
+					$lis_ale_kaikki['erikoisale'] = $row['erikoisale'];
+					$lis_ale_kaikki['netto'] = $netto;
+
+					$hinta *= generoi_alekentta_php($lis_ale_kaikki, 'M', 'kerto');
 
 					if ($row["kohdistettu"] == "K") {
 						$rahti_hinta = "(" . (float) $hinta ." $row[valkoodi])";
@@ -925,8 +936,8 @@
 					group_concat(distinct lasku.tunnus separator '<br>') tunnukset_ruudulle,
 					count(distinct lasku.tunnus) tilauksia,
 					count(tilausrivi.tunnus) riveja,
-					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
-					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
+					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
+					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
 					FROM lasku use index (tila_index)
 					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'

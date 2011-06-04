@@ -551,8 +551,16 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			// p‰ivitet‰‰n tilausrivi k‰ytetyksi ja splitataan se...
 			// osavalmistus tai kokovalmistus
 			if ($isavarattu <= $tilrivirow["varattu"]) {
+
+				$ale_query_insert_lisa = '';
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ale_query_insert_lisa .= " ale{$alepostfix} = '".$tilrivirow["ale{$alepostfix}"]."',";
+				}
+
 				// Asiakkaallevalmistus
 				if ($laskurow["tilaustyyppi"] == "V" and $tilrivirow["tyyppi"] == "W") {
+
 					//luodaan toimitettu valmisterivi
 					$query = "	INSERT into tilausrivi set
 								laatija			= '$kukarow[kuka]',
@@ -562,7 +570,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 								varattu 		= '$isavarattu',
 								tilkpl 			= '$isavarattu',
 								kpl 			= '',
-								ale 			= '$tilrivirow[ale]',
+								{$ale_query_insert_lisa}
 								netto 			= '$tilrivirow[netto]',
 								jt 				= '',
 								yksikko 		= '$tilrivirow[yksikko]',
@@ -609,7 +617,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 							varattu 		= '$isavarattu',
 							tilkpl 			= '$isavarattu',
 							kpl 			= '$isavarattu',
-							ale 			= '$tilrivirow[ale]',
+							{$ale_query_insert_lisa}
 							netto 			= '$tilrivirow[netto]',
 							jt 				= '',
 							yksikko 		= '$tilrivirow[yksikko]',

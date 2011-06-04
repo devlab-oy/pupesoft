@@ -132,7 +132,13 @@
 				echo "<th>".t("Nimi")."</th>";
 				echo "<th>".t("Nimitark")."</th>";
 				if ($summaa == '') echo "<th>".t("Aleryhm‰")."</th>";
-				if ($summaa == '') echo "<th>".t("Alennus")."</th>";
+
+				if ($summaa == '') {
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						echo "<th>",t("Alennus"),"{$alepostfix}</th>";
+					}
+				}
+
 				if ($summaa == '') echo "<th>".t("Piiri")."</th>";
 				echo "<th>".t("M‰‰r‰")."</th>";
 				echo "<th>".t("Summa")."</th>";
@@ -150,7 +156,13 @@
 				$worksheet->write($excelrivi, $sarake++, t("Nimi"), $format_bold);
 				$worksheet->write($excelrivi, $sarake++, t("Nimitark"), $format_bold);
 				if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Aleryhm‰"), $format_bold);
-				if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Alennus"), $format_bold);
+
+				if ($summaa == '') {
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						$worksheet->write($excelrivi, $sarake++, t("Alennus").$alepostfix, $format_bold);
+					}
+				}
+
 				if ($summaa == '') $worksheet->write($excelrivi, $sarake++, t("Piiri"), $format_bold);
 				$worksheet->write($excelrivi, $sarake++, t("M‰‰r‰"), $format_bold);
 				$worksheet->write($excelrivi, $sarake++, t("Summa"), $format_bold);
@@ -162,9 +174,13 @@
 
 			while ($lrow = mysql_fetch_array($result)) {
 				if ($summaa == '') {
-					$ale = 0;
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						${'ale'.$alepostfix} = 0;
+					}
+
 					//haetaan tuoteryhmm‰n alennusryhm‰
-					$query = "	SELECT alennus
+					$query = "	SELECT alennus, alennuslaji
 								FROM asiakasalennus
 								WHERE yhtio='$kukarow[yhtio]' and ryhma = '$lrow[aleryhma]' and ytunnus = '$lrow[ytunnus]'";
 					$hresult = mysql_query($query) or pupe_error($query);
@@ -173,7 +189,7 @@
 						$hrow = mysql_fetch_array ($hresult);
 
 						if ($hrow["alennus"] > 0) {
-							$ale = $hrow[0];
+							${'ale'.$hrow["alennuslaji"]} = $hrow[0];
 						}
 					}
 					else {
@@ -187,7 +203,11 @@
 							$hrow=mysql_fetch_array ($hresult);
 
 							if ($hrow["alennus"] > 0) {
-								$ale = $hrow[0];
+								$ale1 = $hrow[0];
+							}
+
+							for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								${'ale'.$alepostfix} = '';
 							}
 						}
 					}
@@ -205,7 +225,13 @@
 					echo "<td>".$lrow["nimi"]."</td>";
 					echo "<td>".$lrow["nimitark"]."</td>";
 					if ($summaa == '') echo "<td>$lrow[aleryhma]</td>";
-					if ($summaa == '') echo "<td>$ale</td>";
+
+					if ($summaa == '') {
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							echo "<td>",${'ale'.$alepostfix},"</td>";
+						}
+					}
+
 					if ($summaa == '') echo "<td align='right'>".$lrow["piiri"]."</td>";
 					echo "<td align='right'>".sprintf("%.2f", $lrow["kpl"])."</td>";
 					echo "<td align='right'>".sprintf("%.2f", $lrow["summa"])."</td>";
@@ -220,7 +246,13 @@
 					$worksheet->write($excelrivi, $sarake++, $lrow["nimi"]);
 					$worksheet->write($excelrivi, $sarake++, $lrow["nimitark"]);
 					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["aleryhma"]);
-					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $ale);
+
+					if ($summaa == '') {
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$worksheet->write($excelrivi, $sarake++, ${'ale'.$alepostfix});
+						}
+					}
+
 					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["piiri"]);
 					$worksheet->write($excelrivi, $sarake++, $lrow["kpl"]);
 					$worksheet->write($excelrivi, $sarake++, $lrow["summa"]);

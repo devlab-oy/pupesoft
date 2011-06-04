@@ -78,9 +78,13 @@ if ($suoratoimitus == '' and $kauttalaskutus == '') {
 	$varastoon_msg .= "	<th valign='top'>".t("Varastoonvientip‰iv‰")."</th>
 
 						<th valign='top'>".t("Tuoteno")."</th>
-						<th valign='top'>".t("M‰‰r‰")." ".t("sis").".<br>".t("M‰‰r‰")." ".t("ulk").".</th>
-						<th valign='top'>".t("Alennus")."</th>
-						<th valign='top'>".t("Ostohinta")." ".t("ulk").".<br>".t("Ostohinta")." ".t("sis").".</th>
+						<th valign='top'>".t("M‰‰r‰")." ".t("sis").".<br>".t("M‰‰r‰")." ".t("ulk").".</th>";
+
+	for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		$varastoon_msg .= " <th valign='top'>".t("Alennus")."{$alepostfix}</th>";
+	}
+
+	$varastoon_msg .= "	<th valign='top'>".t("Ostohinta")." ".t("ulk").".<br>".t("Ostohinta")." ".t("sis").".</th>
 						<th valign='top'>".t("Osuus")."<br>".t("rahdista")."</th>
 						<th valign='top'>".t("Rahti")."</th>";
 
@@ -190,14 +194,6 @@ if ($laskurow["vienti_kurssi"] == 0) {
 	if ($suoratoimitus == '' and $kauttalaskutus == '') {
 		exit;
 	}
-}
-
-// jos erikoisale niin otetaan sit‰ kanssa huomioon
-if ($laskurow['erikoisale'] <> 0) {
-	$erikoisale = 1 - ($laskurow['erikoisale']/100);
-}
-else {
-	$erikoisale = 1;
 }
 
 if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
@@ -324,8 +320,10 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$alvit = 1;
 	}
 
+	$ale_lisa_apu_kala = generoi_alekentta_php($tilrivirow, 'O', 'kerto');
+
 	// lasketaan rivin hinta
-	$osuus_apu_hinta = round($erikoisale*$tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
+	$osuus_apu_hinta = round($tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$ale_lisa_apu_kala*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
 
 	// jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
 	if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
@@ -343,7 +341,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 
 	// t‰m‰ on miinusta hyvitysrivill‰
-	$ohinta = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu']+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
+	$ohinta = round($tilrivirow['hinta']*$ale_lisa_apu_kala*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu']+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
 	// Osuus kululaskuista # Osuus eturahdista
 	$hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] * $osuus, 6);
@@ -831,9 +829,13 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 
 	$varastoon_msg .= "	<td valign='top'>$tilrivirow[tuoteno]</td>
-						<td align='right' valign='top'>$tilrivirow[varattu]<br>".sprintf('%.2f', $tilrivirow['varattu']*$tuorow['tuotekerroin'])."</td>
-						<td align='right' valign='top'>$tilrivirow[ale]%</td>
-						<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta'])."<br>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>$tilrivirow[varattu]<br>".sprintf('%.2f', $tilrivirow['varattu']*$tuorow['tuotekerroin'])."</td>";
+
+	for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		$varastoon_msg .= "<td align='right' valign='top'>".$tilrivirow["ale{$alepostfix}"]."%</td>";
+	}
+
+	$varastoon_msg .= "<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta'])."<br>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus)."</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus*$rahtikulut)."</td>";
 

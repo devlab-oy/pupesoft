@@ -311,6 +311,8 @@ if($tee=="" or $tee=="LASKE") {
 		$tunnukset="";
 		if($kuukausia > 0) {
 
+			$query_ale_lisa = generoi_alekentta('M','t');
+
 			$sarakkeet[]="seuranta";
 
 			for($y=1;$y<=$kuukausia;$y++) {
@@ -375,14 +377,14 @@ if($tee=="" or $tee=="LASKE") {
 				$summasarake .= ", sum(if(left(lasku.luontiaika,7)>='$vv-".sprintf("%02s",$kk)."' and left(lasku.luontiaika,7)<='$vv-".sprintf("%02s",$kk)."', 
 										if(lasku.tunnusnippu=0, 
 											(
-												SELECT sum(if(t.uusiotunnus=0,t.hinta * (t.varattu+t.jt) * if(t.netto='N', (1-t.ale/100), (1-(t.ale+l.erikoisale-(t.ale*l.erikoisale/100))/100)),rivihinta))
+												SELECT sum(if(t.uusiotunnus=0,t.hinta * (t.varattu+t.jt) * {$query_ale_lisa},rivihinta))
 												FROM lasku l use index (yhtio_tunnusnippu, tila_index)
 												LEFT JOIN tilausrivi t ON t.yhtio=l.yhtio and t.otunnus=l.tunnus and t.tyyppi!='D' and tuoteno!='$yhtiorow[ennakkomaksu_tuotenumero]'
 												$tarjouslisa
 												WHERE l.yhtio=lasku.yhtio and l.tunnus=lasku.tunnus
 											),
 											(
-												SELECT sum(if(t.uusiotunnus=0,t.hinta * (t.varattu+t.jt) * if(t.netto='N', (1-t.ale/100), (1-(t.ale+l.erikoisale-(t.ale*l.erikoisale/100))/100)),rivihinta)) $tarjoussummalisa
+												SELECT sum(if(t.uusiotunnus=0,t.hinta * (t.varattu+t.jt) * {$query_ale_lisa},rivihinta)) $tarjoussummalisa
 												FROM lasku l use index (yhtio_tunnusnippu, tila_index)
 												LEFT JOIN tilausrivi t ON t.yhtio=l.yhtio and t.otunnus=l.tunnus and t.tyyppi!='D' and tuoteno!='$yhtiorow[ennakkomaksu_tuotenumero]'
 												$tarjouslisa												

@@ -491,7 +491,10 @@
 			$hinta  = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
 		}
 
-		$ale 			= $trow["ale"];
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			${'ale'.$alepostfix} = $trow["ale{$alepostfix}"];
+		}
+		
 		$toimaika 		= $trow["toimaika"];
 		$kerayspvm		= $trow["kerayspvm"];
 		$alv 			= $trow["alv"];
@@ -742,13 +745,15 @@
 
 		if (in_array($jarj, array("ytunnus","tuoteno","luontiaika","toimaika"))) {
 
+			$query_ale_lisa = generoi_alekentta('M');
+
 			if (isset($summarajaus) and $summarajaus != '') {
 				$summarajaus = (float) $summarajaus;
 
 				// jos on annettuna summarajaus, niin katsotaan ylittääkö asiakkaan kaikkien tilausrivien yhteishinta tämän rajan
 				// näytetään vaan kaikkien summarajan ylittäneiden asiakkaiden rivit (summarajauslisa)
 				if ($toim == "ENNAKKO") {
-					$query = "	SELECT lasku.liitostunnus, sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * (1 - tilausrivi.ale / 100)) hintarajaus
+					$query = "	SELECT lasku.liitostunnus, sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa}) hintarajaus
 								FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 								JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa)
 								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
@@ -764,7 +769,7 @@
 								$limit";
 				}
 				else {
-					$query = "	SELECT lasku.liitostunnus, sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * (1 - tilausrivi.ale / 100)) hintarajaus
+					$query = "	SELECT lasku.liitostunnus, sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa}) hintarajaus
 								FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 								JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and ((lasku.tila = 'N' and lasku.alatila != '') or lasku.tila != 'N') $laskulisa)
 								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
@@ -807,10 +812,12 @@
 
 		if (in_array($jarj, array("ytunnus","tuoteno","luontiaika","toimaika")) and $summarajausfail == '') {
 
+			$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
+
 			//haetaan vain tuoteperheiden isät tai sellaset tuotteet jotka eivät kuulu tuoteperheisiin
 			if ($toim == "ENNAKKO") {
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt,
-							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
+							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
@@ -829,7 +836,7 @@
 			}
 			else {
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt,
-							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
+							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi,
@@ -921,7 +928,7 @@
 						unset($lapsires);
 
 						if ($toim == "ENNAKKO" and ($jtrow["perheid"] > 0 or $jtrow["perheid2"] > 0)) {
-							$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.varattu jt, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
+							$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.varattu jt, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
 										tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, tuote.yksikko, lasku.valkoodi, lasku.vienti_kurssi
 										FROM tilausrivi use index (yhtio_otunnus)
 										JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
@@ -935,7 +942,7 @@
 							$lapsires = mysql_query($query) or pupe_error($query);
 						}
 						elseif ($jtrow["perheid"] > 0 or $jtrow["perheid2"] > 0) {
-							$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.jt $lisavarattu jt, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
+							$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.jt $lisavarattu jt, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
 										tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, tuote.yksikko, lasku.valkoodi, lasku.vienti_kurssi
 										FROM tilausrivi use index (yhtio_otunnus)
 										JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
@@ -1039,7 +1046,13 @@
 									echo "<th valign='top'>".t("Tilausnro")."<br>".t("Viesti.")."</th>";
 								}
 
-								echo "<th valign='top'>".t("JT")."<br>".t("Hinta")."<br>".t("Ale")."</th>";
+								echo "<th valign='top'>".t("JT")."<br>".t("Hinta")."<br>";
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									echo t("Ale"),"{$alepostfix}<br />";
+								}
+
+								echo "</th>";
 
 								if (count($suoravarasto) > 0 or $suorana != "") {
 									echo "<th valign='top'>".t("Status")."<br>".t("Suoratoimittaja")."<br>".t("Toimaika")."</th>";
@@ -1349,7 +1362,14 @@
 									$hinta	= hintapyoristys($jtrow["hinta"])." ".$jtrow["valkoodi"];
 								}
 
-								echo "$hinta<br>$jtrow[ale]%</td>";
+								echo "$hinta<br>";
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									if ($jtrow["ale{$alepostfix}"] > 0) {
+										if ($alepostfix > 1) echo "+";
+										echo $jtrow["ale{$alepostfix}"],"%<br>";
+									}
+								}
+								echo "</td>";
 							}
 
 							if ($oikeurow['paivitys'] == '1') {
@@ -1757,7 +1777,16 @@
 										$hinta	= hintapyoristys($perherow["hinta"])." ".$perherow["valkoodi"];
 									}
 
-									echo $hinta."<br>$perherow[ale]%</td>";
+									echo $hinta."<br>";
+
+									for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+										if ($perherow["ale{$alepostfix}"] > 0) {
+											if ($alepostfix > 1) echo "+";
+											echo $perherow["ale{$alepostfix}"],"%<br />";
+										}
+									}
+
+									echo "</td>";
 
 									if ($oikeurow['paivitys'] == '1') {
 										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$perherow[yksikko]'", "", "", "selite")."<br></font>";

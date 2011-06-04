@@ -132,8 +132,11 @@
 								$kerayspvm	     = $laskurow["kerayspvm"];
 								$hinta 		     = "";
 								$netto 		     = "";
-								$ale 		     = "";
 								$alv		     = "";
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									${'ale'.$alepostfix} = "";
+								}
 
 								if ($sarjarow_isa["paikka"] != "###") {
 									$paikka		 = $sarjarow_isa["paikka"];

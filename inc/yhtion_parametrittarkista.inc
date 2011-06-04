@@ -61,6 +61,19 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "myynnin_alekentat_muokkaus") {
+			if (count($t[$i]) > 0) {
+				if (count($t[$i]) == 1 and $t[$i][0] == 'default') {
+					unset($t[$i]);
+					$t[$i] = '';
+				}
+				else {
+					unset($t[$i][0]);
+					$t[$i] = implode(",", $t[$i]);
+				}
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "syncronoi") {
 
 			if($t[$i]!="") {

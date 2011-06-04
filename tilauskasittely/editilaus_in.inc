@@ -768,6 +768,11 @@ while (!feof ($fd)) {
 			}
 			break;
 
+		case 'OSTOTIL.OT_VIITTEENNE':
+			// halutaan futur-aineistosta t‰m‰ tieto sisviesti2-kentt‰‰n
+			$lopviesti = trim($tieto);
+			break;
+
 		//Tilaus p‰‰ttyy. Aika tehd‰ se kantaan
 		case 'OHDR__END' :
 		case '*RE OSTOTIL' :
@@ -945,6 +950,17 @@ while (!feof ($fd)) {
 
 				$til_vienti = $arow["vienti"];
 
+				$tilaustyyppilisa = '';
+
+				if ($edi_tyyppi == 'futursoft' and ($editilaus_tilaustyyppi == 2 or $editilaus_tilaustyyppi == 3)) {
+					$tilaustyyppilisa = $editilaus_tilaustyyppi;
+
+					if ($editilaus_tilaustyyppi == 3) {
+						$editilaus_tila = 'C';
+						$editilaus_alatila = 'A';
+					}
+				}
+
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
@@ -997,7 +1013,7 @@ while (!feof ($fd)) {
 							sisviesti2         					= '$lopviesti',
 							splittauskielto						= '$splittauskielto',
 							tila 			   					= '$editilaus_tila',
-							tilaustyyppi						= '',
+							tilaustyyppi						= '$tilaustyyppilisa',
 							tilausvahvistus    					= '$vastaustapa',
 							tilausyhteyshenkilo					= '',
 							toimaika 		   					= '$toimpvm',
@@ -1261,7 +1277,11 @@ while (!feof ($fd)) {
 					$ytunnus    			= $laskurow["ytunnus"];
 					$hinta 					= "";
 					$netto 					= "";
-					$ale 					= "";
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						${'ale'.$alepostfix} = "";
+					}
+
 					$var					= "";
 					$alv					= "";
 					$toimaika 				= $laskurow["toimaika"];
@@ -1319,7 +1339,7 @@ while (!feof ($fd)) {
 
 					// jos tullaan magentosta ja alennus on tiedossa
 					if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus > 0) {
-						$ale = $editilaus_alennus;
+						$ale1 = $editilaus_alennus;
 					}
 
 					// Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
@@ -1387,6 +1407,11 @@ while (!feof ($fd)) {
 					if ($sallitaanjt == '1') {
 						$var 		= "J";
 						$kommentti 	= ""; // Huom! nollataan kommentti
+					}
+
+					// Sis‰‰ntulevissa EDI-tilauksissa pit‰‰ tehdastilaustuotteeiden saldotarkistus ohittaa (aina nolla)
+					if ($trow['status'] == 'T') {
+						$kpl = 0;
 					}
 
 					require ("lisaarivi.inc");

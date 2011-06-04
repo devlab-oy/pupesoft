@@ -11,7 +11,9 @@
 	// $kerayspvm			--> toivottu keräysaika
 	// $hinta				--> käyttäjän syöttämä hinta
 	// $netto				--> käyttäjän syöttämä netto
-	// $ale					--> käyttäjän syöttämä ale
+	// $ale					--> käyttäjän syöttämä ale (generoidaan yhtiön parametreistä)
+	// $ale2				--> käyttäjän syöttämä ale2 (generoidaan yhtiön parametreistä)
+	// $ale3				--> käyttäjän syöttämä ale3 (generoidaan yhtiön parametreistä)
 	// $var					--> H,J,P varrit
 	// $varasto				--> myydään vain tästä/näistä varastosta
 	// $paikka				--> myydään vain tältä paikalta
@@ -214,13 +216,16 @@
 	// Muutetaan pilkut pisteiksi
 	$kpl	= str_replace(',', '.', $kpl);
 	$hinta	= str_replace(',', '.', $hinta);
-	$ale	= str_replace(',', '.', $ale);
+
+	for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		${'ale'.$alepostfix} = str_replace(',', '.', ${'ale'.$alepostfix});
+		${'alkupera_ale'.$alepostfix} = ${'ale'.$alepostfix};
+	}
 
 	// Alkuperäiset tiedot talteen
 	$alkupera_trow	= $trow;
 	$alkupera_kpl 	= $kpl;
 	$alkupera_hinta = $hinta;
-	$alkupera_ale 	= $ale;
 	$alkupera_netto = $netto;
 	$alkupera_alv 	= $alv;
 
@@ -415,7 +420,7 @@
 	}
 
 	//Varastosiirroissa ei siirretä lähdevarastosta lähdevarastoon!!!!
-	if ($laskurow["tila"] == 'G' and $laskurow["clearing"] > 0) {
+	if ($laskurow["tila"] == 'G' and $laskurow["clearing"] > 0 and $yhtiorow['kerayserat'] == '') {
 		$notfromvarasto = " and varastopaikat.tunnus != $laskurow[clearing] ";
 	}
 	else {
@@ -480,7 +485,7 @@
 			}
 
 			// Otetaan alkuperäisen tuotteen hinta talteen
-			list($korva_isa_hinta, , $korva_isa_ale, , ) = alehinta($laskurow, $trow, $kpl, '', '', '');
+			list($korva_isa_hinta, , $korva_isa_ale_kaikki, , ) = alehinta($laskurow, $trow, $kpl, '', '', '');
 
 			// Tehdään homma siten, että etsitään kaikki korvaavat jo tässä vaiheessa arrayseen
 			$query = "	SELECT *
@@ -502,7 +507,18 @@
 				while ($krow2 = mysql_fetch_array($kres2)) {
 
 					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
-					list($korva_hinta, $korva_netto, $korva_ale, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
+					list($korva_hinta, $korva_netto, $korva_ale_kaikki, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
+
+					$if_ale_korva_isa_chk1 = $korva_isa_hinta;
+					$if_ale_korva_isa_chk2 = $korva_hinta;
+
+					$korva_isa_ale_kaikki['netto'] = $netto;
+					$korva_isa_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
+					$if_ale_korva_isa_chk1 *= generoi_alekentta_php($korva_isa_ale_kaikki, 'M', 'kerto');
+
+					$korva_ale_kaikki['netto'] = $netto;
+					$korva_ale_kaikki['erikoisale'] = $laskurow['erikoisale'];
+					$if_ale_korva_isa_chk2 *= generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
 
 					if ($korvaavat_kiellot == "KIELTO") {
 						//Korvaavien myynti kielletty korvaavat_kiellot-taulussa
@@ -536,7 +552,7 @@
 							$kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lisätään tuoteno arrayseen
 						}
 					}
-					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] != '' and $yhtiorow["korvaavan_hinta_ylaraja"] != 'MIN' and ($korva_isa_hinta*(1-($korva_isa_ale/100))) != 0 and (($korva_hinta*(1-($korva_ale/100))) / ($korva_isa_hinta*(1-($korva_isa_ale/100)))) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
+					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] != '' and $yhtiorow["korvaavan_hinta_ylaraja"] != 'MIN' and ($if_ale_korva_isa_chk1) != 0 and (($if_ale_korva_isa_chk2) / ($if_ale_korva_isa_chk1)) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
 						//Korvaavien myynti kielletty koska korvaava tuote on liian kallis
 						if ($krmyytavissa > 0) {
 							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
@@ -1048,7 +1064,11 @@
 								//Käsinsyötetyt hinnat ja alennukset eivät päde korvaaviin tuotteisiin, eikä tuoteperheiden lapsiin
 								if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"])) {
 									$hinta	= "";
-									$ale	= "";
+
+									for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+										${'ale'.$alepostfix} = "";
+									}
+
 									$netto	= "";
 									$alv 	= "";
 								}
@@ -1060,7 +1080,14 @@
 								$tres = pupe_query($query);
 								$trow = mysql_fetch_array($tres);
 
-								list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale);
+								$ale_kaikki_array = array();
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									$ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
+								}
+
+								list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array);
+
 								list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 
 								// jos ollaan laittamassa muuta tuotetta kun mitä tilattiin, lisätään rivikommentti
@@ -1069,8 +1096,13 @@
 									// Haluan tarkistaa alkuperäisen hinnan ennen korvausta, niin saadaan se halvempi hinta käyttöön.
 									if ($yhtiorow['korvaavan_hinta_ylaraja'] == 'MIN') {
 										$lis_hinta = $korvaavan_hinta_ylaraja_halvin_hinta;
-										$lis_ale = $korvaavan_hinta_ylaraja_halvin_ale;
+										$lis_ale_kaikki['ale1'] = $korvaavan_hinta_ylaraja_halvin_ale;
 										$lis_netto = $korvaavan_hinta_ylaraja_halvin_netto;
+
+										for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+											$lis_ale_kaikki["ale{$alepostfix}"] = '';
+										}
+
 									}
 
 									// Tilausrivin systeemikommentti
@@ -1092,7 +1124,13 @@
 								}
 
 								if ($kutsuja == "EDITILAUS" or $lisaarivi_debug == 1) {
-									$edi_ulos .= " --> ".t("Myydään")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("Ale")." $lis_ale% ".t("Hinta")." $lis_hinta $aperuste ".t("ALV")." $lis_alv% $rivikomm\n";
+									$edi_ulos .= " --> ".t("Myydään")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
+
+									for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+										$edi_ulos .= t("Ale")."$alepostfix ".$lis_ale_kaikki['ale'.$alepostfix]."% ";
+									}
+
+									$edi_ulos .= t("Hinta")." $lis_hinta $aperuste ".t("ALV")." $lis_alv% $rivikomm\n";
 									if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
 								}
 
@@ -1112,10 +1150,16 @@
 
 								if (isset($myy_alekerroi[$indeksi])) {
 									if ((int) $myy_alekerroi[$indeksi] == -1) {
-										$lis_ale = 100.00;
+
+										for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+											$lis_ale_kaikki['ale'.$alepostfix] = 100.00;
+										}
+
 									}
 									else {
-										$lis_ale = round($lis_ale * $myy_alekerroi[$indeksi], $yhtiorow['hintapyoristys']);
+										for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+											$lis_ale_kaikki['ale'.$alepostfix] = round($lis_ale_kaikki['ale'.$alepostfix] * $myy_alekerroi[$indeksi], $yhtiorow['hintapyoristys']);
+										}
 									}
 								}
 
@@ -1172,6 +1216,14 @@
 									$vanharivilaadittu = "now()";
 								}
 
+								$query_ale_lrivi = "";
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									$query_ale_lrivi .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
+								}
+
+								$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
+
 								$query = "	INSERT into tilausrivi set
 											hyllyalue 		= '$myy_hyllyalue[$indeksi]',
 											hyllynro 		= '$myy_hyllynro[$indeksi]',
@@ -1187,7 +1239,8 @@
 											kpl 			= '0',
 											kpl2			= '$kpl2',
 											tilkpl 			= '$tilattu',
-											ale 			= '$lis_ale',
+											{$query_ale_lrivi}
+											{$query_erikoisale_lisa}
 											alv 			= '$lis_alv',
 											netto			= '$lis_netto',
 											hinta 			= '$lis_hinta',
@@ -1623,14 +1676,22 @@
 			// Jos ollaan lisäämässä alkuperäistä tuotetta niin otetaan takaisin käyttäjän syötetyt alkuperäiset hinnat
 			if ($laskurow['tila'] != 'O' and strtoupper($trow["tuoteno"]) == strtoupper($alkupera_trow["tuoteno"])) {
 				$hinta	= $alkupera_hinta;
-				$ale	= $alkupera_ale;
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					${'ale'.$alepostfix} = ${'alkupera_ale'.$alepostfix};
+				}
+
 				$netto	= $alkupera_netto;
 				$alv	= $alkupera_alv;
 			}
 			elseif ($laskurow['tila'] != 'O' and $i > 0) {
 				//Käsinsyöteyt hinnat nollataan kun lisätään tuoteperheiden lapsia
 				$hinta	= "";
-				$ale	= "";
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					${'ale'.$alepostfix} = "";
+				}
+
 				$netto	= "";
 				$alv	= "";
 
@@ -1652,7 +1713,7 @@
 				$lis_hinta = round($lis_hinta / $trow["myyntihinta_maara"], $yhtiorow["hintapyoristys"]);
 			}
 
-			if ($laskurow['tila'] == 'O' and $ale == "") {
+			if ($laskurow['tila'] == 'O' and $ale1 == "") {
 				$query = "	SELECT alennus
 							FROM tuotteen_toimittajat
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -1662,14 +1723,20 @@
 				$rarres = pupe_query($query);
 				$rarrow	 = mysql_fetch_array($rarres);
 
-				$lis_ale = $rarrow["alennus"];
+				$lis_ale_kaikki['ale1'] = $rarrow["alennus"];
 			}
 			elseif ($laskurow['tila'] == 'O') {
-				$lis_ale = $ale;
+				$lis_ale_kaikki['ale1'] = $ale1;
 			}
 
 			if ($laskurow['tila'] != 'O') {
-				list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $kpl, $netto, $hinta, $ale);
+				$ale_kaikki_array = array();
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
+				}
+
+				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $kpl, $netto, $hinta, $ale_kaikki_array);
 				list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 			}
 
@@ -1856,13 +1923,31 @@
 
 			if ($kutsuja == "EDITILAUS" or $lisaarivi_debug == 1) {
 				if ($var == "J") {
-					$edi_ulos .= " --> ".t("JT")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
+					$edi_ulos .= " --> ".t("JT")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						$edi_ulos .= t("Ale")."{$alepostfix} ".$lis_ale_kaikki['ale'.$alepostfix]." ";
+					}
+
+					$edi_ulos .= t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
 				elseif ($var == "P") {
-					$edi_ulos .= " --> ".t("PUUTE")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
+					$edi_ulos .= " --> ".t("PUUTE")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						$edi_ulos .= t("Ale")."{$alepostfix} ".$lis_ale_kaikki['ale'.$alepostfix]." ";
+					}
+
+					$edi_ulos .= t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
 				elseif ($var == "S") {
-					$edi_ulos .= " --> ".t("SUORATOIMITUS")." $trow[tuoteno] ".t("toimittajalta")." $rivinumero: $kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
+					$edi_ulos .= " --> ".t("SUORATOIMITUS")." $trow[tuoteno] ".t("toimittajalta")." $rivinumero: $kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						$edi_ulos .= t("Ale")."{$alepostfix} ".$lis_ale_kaikki['ale'.$alepostfix]." ";
+					}
+
+					$edi_ulos .= t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
 
 				if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
@@ -1881,10 +1966,15 @@
 
 			if ($puu_alekerr[$i] != "X") {
 				if ((int) $puu_alekerr[$i] == -1) {
-					$lis_ale = 100.00;
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						$lis_ale_kaikki['ale'.$alepostfix] = 100.00;
+					}
+
 				}
 				else {
-					$lis_ale = round($lis_ale * $puu_alekerr[$i], $yhtiorow['hintapyoristys']);
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						$lis_ale_kaikki['ale'.$alepostfix] = round($lis_ale_kaikki['ale'.$alepostfix] * $puu_alekerr[$i], $yhtiorow['hintapyoristys']);
+					}
 				}
 			}
 
@@ -1997,6 +2087,14 @@
 				$var = 'P';
 			}
 
+			$query_insert_ale_lisa = '';
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				$query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
+			}
+
+			$query_erikoisale_lisa = trim($lis_netto) != 'N' ? " erikoisale = '{$laskurow['erikoisale']}', " : '';
+
 			// lisätään puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue 		= '$p_hyllyalue',
@@ -2014,7 +2112,8 @@
 						kpl2			= '$kpl2',
 						tilkpl 			= '$kpl',
 						jt				= '$jt',
-						ale 			= '$lis_ale',
+						{$query_insert_ale_lisa}
+						{$query_erikoisale_lisa}
 						alv 			= '$lis_alv',
 						netto			= '$lis_netto',
 						hinta 			= '$lis_hinta',

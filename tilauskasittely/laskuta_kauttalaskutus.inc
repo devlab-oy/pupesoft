@@ -145,7 +145,7 @@
 		$lis_hinta 		= 0;
 		$lis_hinta 		= 0;
 		$lis_netto 		= 0;
-		$lis_ale 		= 0;
+		$lis_ale 		= array();
 		$alehinta_alv 	= 0;
 		$alehinta_val 	= 0;
 		$lis_alv 		= 0;
@@ -159,7 +159,11 @@
 			// Otetaan hintatiedot suoraan finvoicesta
 			$lis_hinta		= $rtuoteno[$i]["hinta"];
 			$lis_netto 		= "";
-			$lis_ale 		= $rtuoteno[$i]["ale"];
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				$lis_ale["ale{$alepostfix}"] = $rtuoteno[$i]["ale{$alepostfix}"];
+			}
+
 			$alehinta_alv 	= $rtuoteno[$i]["alv"];
 
 			if ($yhtiorow["alv_kasittely"] == "") {
@@ -172,6 +176,12 @@
 
 		if (strpos(strtolower($tilausrivin_kommentti), "yhteens") !== FALSE) {
 			$tilausrivin_kommentti = substr($tilausrivin_kommentti, 0, strpos(strtolower($tilausrivin_kommentti), "yhteens"));
+		}
+
+		$ale_query_insert_lisa = '';
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			$ale_query_insert_lisa .= " ale{$alepostfix} = '".$lis_ale["ale{$alepostfix}"]."', ";
 		}
 
 		$query = "	INSERT into tilausrivi set
@@ -190,7 +200,7 @@
 					kpl2			= 0,
 					tilkpl 			= '".$rtuoteno[$i]["kpl"]."',
 					jt				= 0,
-					ale 			= '$lis_ale',
+					{$ale_query_insert_lisa}
 					alv 			= '$lis_alv',
 					netto			= '$lis_netto',
 					hinta 			= '$lis_hinta',

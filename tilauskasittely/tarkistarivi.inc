@@ -12,6 +12,26 @@
 	$tres	= pupe_query($tquery);
 	$trow 	= mysql_fetch_assoc($tres); // haetaan tuotteen tiedot..
 
+	if ($trow['panttitili'] == 'K' and in_array($toim, array('PIKATILAUS', 'RIVISYOTTO', 'REKLAMAATIO'))) {
+		$query = "SELECT panttitili FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
+		$chk_res = pupe_query($query);
+		$chk_row = mysql_fetch_assoc($chk_res);
+
+		if ($chk_row['panttitili'] == 'K' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS' or $toim == 'REKLAMAATIO')) {
+			if ($row['varattu'] < 0) {
+				$varaosavirhe .= t("HUOM: Panttitilillinen tuote, tuote hyvitetään panttitililtä")."<br>";
+			}
+			else {
+				if ($row['var2'] == 'PANT') {
+					$varaosavirhe .= t("HUOM: Panttituote, veloitetaan asiakkaalta")."<br>";
+				}
+				else {
+					$varaosavirhe .= t("HUOM: Panttitilillinen tuote, veloitus siirretään panttitilille")."<br>";
+				}
+			}
+		}
+	}
+
 	if ($yhtiorow["korvaavat_hyvaksynta"] != "" and $alkupera_trow["tuoteno"] != $row["tuoteno"] and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
 		$varaosavirhe .= t("HUOM: tämä on korvaava tuote, haluatko hyväksyä?")."<br>";
 		$riviok++;
@@ -152,16 +172,18 @@
 		$tilausok++;
 	}
 
-	if ($row["netto"] == 'N' and (float) $row["ale"] != 0) {
-		$varaosavirhe .= t("VIRHE: Nettoriville ei voi antaa alennusta!")."<br>";
-		$riviok++;
-		$tilausok++;
-	}
+	for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		if ($row["netto"] == 'N' and (float) $row["ale{$alepostfix}"] != 0) {
+			$varaosavirhe .= t("VIRHE: Nettoriville ei voi antaa alennusta!")."<br>";
+			$riviok++;
+			$tilausok++;
+		}
 
-	if ($row["ale"]!='' and ($row["ale"]<0 or 100<$row["ale"])) {
-		$varaosavirhe .= t("VIRHE: Alennus on oltava 0-100!")."<br>";
-		$riviok++;
-		$tilausok++;
+		if ($row["ale{$alepostfix}"] != '' and ($row["ale{$alepostfix}"] < 0 or 100 < $row["ale{$alepostfix}"])) {
+			$varaosavirhe .= t("VIRHE: Alennus on oltava 0-100!")."<br>";
+			$riviok++;
+			$tilausok++;
+		}
 	}
 
 	if ($kukarow["extranet"] == "" and in_array($trow["status"], array("P","X")) and !in_array($row["var2"], array("OK", "PK"))) {
@@ -487,10 +509,13 @@
 
 					if($kukarow["extranet"] != "") {
 						if ($laskurow["toim_maa"] == $alkurow["varastomaa"]) {
-							if ($yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] != 0 and $yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] > $row["hinta"]*$row["tilkpl"]*(1-$row["ale"]/100)) {
+
+							$ale_lisa_kala = generoi_alekentta_php($row, 'M', 'kerto');
+
+							if ($yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] != 0 and $yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] > $row["hinta"]*$row["tilkpl"]*$ale_lisa_kala) {
 								$varaosakommentti .= t("Tuote ainoastaan noudettavissa myymälöistä joissa varastoituna")."!<br>";
 							}
-							elseif ($yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] != 0 and $yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] < $row["hinta"]*$row["tilkpl"]*(1-$row["ale"]/100)) {
+							elseif ($yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] != 0 and $yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] < $row["hinta"]*$row["tilkpl"]*$ale_lisa_kala) {
 								//jätetään puutteeksi
 							}
 						}

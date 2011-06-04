@@ -2127,9 +2127,12 @@ if ($tee == 'I') {
 		echo "$laskuvirhe<br><br>";
 
 		if ($autokohdistus == "AUTO") {
+
+			$ale_query_lisa = generoi_alekentta_select('erikseen', 'O');
+
 			//Tehd‰‰n keikka ja varastoonvienti automaattisesti
 			$query = "	UPDATE tilausrivi SET
-						hinta = hinta * (1 - ale / 100) * (1 - $laskurow[erikoisale] / 100),
+						hinta = hinta * {$ale_query_lisa},
 						uusiotunnus = '$keikantunnus',
 						tyyppi = 'O',
 						varattu = varattu * -1,

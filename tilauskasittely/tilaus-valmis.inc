@@ -316,7 +316,9 @@ else {
 			$rahtivapaa_alarajasumma = (float) $yhtiorow["rahtivapaa_alarajasumma"];
 		}
 
-		$tilausriviquery = "SELECT SUM(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))) rivihinta
+		$query_ale_lisa = generoi_alekentta('M');
+
+		$tilausriviquery = "SELECT SUM(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * $query_ale_lisa) rivihinta
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.otunnus = '$laskurow[tunnus]'";
@@ -1061,6 +1063,40 @@ else {
 				}
 			} #end if jt_email
 
+			// Örum-keissi
+			if ($kukarow['yhtio'] == 'artr') {
+				// katsotaan onko vielä JT-tilauksia Unikko-järjestelmään
+				foreach ($tilausnumerot as $til_nro_x) {
+
+					$query = "	SELECT lasku.*, tilausrivi.hyllyalue, tilausrivi.hyllynro
+								FROM lasku
+								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND
+													tilausrivi.otunnus = lasku.tunnus AND
+													tilausrivi.var = 'J' AND
+													tilausrivi.tyyppi = 'L' AND
+													tilausrivi.jt+tilausrivi.varattu > 0)
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tunnus = '{$til_nro_x}'";
+					$jt_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($jt_chk_res) > 0) {
+						$jt_chk_row = mysql_fetch_assoc($jt_chk_res);
+
+						// Mihin varastoon
+						$varasto = kuuluukovarastoon($jt_chk_row["hyllyalue"], $jt_chk_row["hyllynro"]);
+
+						$query = "	SELECT ulkoinen_jarjestelma
+									FROM varastopaikat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$varasto}'";
+						$ulkoinen_jarjestelma_res = pupe_query($query);
+						$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
+
+						$varasto_chk_array[$til_nro_x] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
+					}
+				}
+			}
+
 			if (in_array("U", $varasto_chk_array) and in_array($toim, array("PIKATILAUS", "RIVISYOTTO"))) {
 
 				foreach ($tilausnumerot as $til_nro) {
@@ -1086,9 +1122,9 @@ else {
 							$pupesoft_tilaustyyppi = 1;
 						}
 
-						$query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
+						$query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow_edi['liitostunnus']}'";
 						$asiakas_chk_res = pupe_query($query);
-						$asiakas_chk_row = mysql_fetch_assoc($asiakas_osoite_res);
+						$asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
 
 						$query = "	SELECT *
 									FROM laskun_lisatiedot
@@ -1114,6 +1150,7 @@ else {
 						}
 
 						if (editilaus_out_futur($params) === 0) {
+
 							$query = "	UPDATE lasku SET
 										tila = 'L',
 										alatila = 'A',

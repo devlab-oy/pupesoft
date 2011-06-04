@@ -283,9 +283,9 @@
 			$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
 			$pdf->draw_text(480-$oikpos, $kala, hintapyoristys($row["hinta"]), 		$thispage, $norm);
 
-			if ($row["ale"] != 0) {
-				$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
-				$pdf->draw_text(515-$oikpos, $kala, ($row["ale"]*1)."%", 											$thispage, $norm);
+			if ($row["ale1"] != 0) {
+				$oikpos = $pdf->strlen(($row["ale1"]*1)."%", $norm);
+				$pdf->draw_text(515-$oikpos, $kala, ($row["ale1"]*1)."%", 											$thispage, $norm);
 			}
 
 			$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
@@ -416,10 +416,14 @@
 		}
 	}
 
+	$query_ale_lisa = generoi_alekentta('O');
+
+	$ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
+
 	$query = "	SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
 				tilkpl,
 				round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl,
-				hinta, ale, round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+				hinta, {$ale_query_select_lisa} round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 				toimaika, tilausrivi.jaksotettu as vahvistettu, tilausrivi.tunnus,
 				toim_tuoteno
 				FROM tilausrivi

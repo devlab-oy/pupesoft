@@ -210,13 +210,16 @@ if ($faarao == 'TUTKHM') {
 								}
 
 								$netto				= $rivirow["netto"];
-								$ale 				= $rivirow["ale"];
 								$var 				= $hyvaksy."#".$rivirow['varattu'];
 								$kukarow["kesken"]	= $rivirow["otunnus"];
 								$laskurow["tila"] 	= "O";
 								$alv				= $rivirow["alv"];
 								$kommentti			= $rivirow["kommentti"];
 								$rivitunnus			= $rivirow["tunnus"];
+
+								for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+									${'ale'.$alepostfix} = $rivirow["ale{$alepostfix}"];
+								}
 
 								$query = "	SELECT *
 											FROM tuote

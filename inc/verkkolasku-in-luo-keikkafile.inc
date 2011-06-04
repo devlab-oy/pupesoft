@@ -220,7 +220,7 @@
 						kpl2			= 0,
 						tilkpl 			= '".$rtuoteno[$i]["kpl"]."',
 						jt				= 0,
-						ale 			= '".$rtuoteno[$i]["ale"]."',
+						ale1 			= '".$rtuoteno[$i]["ale"]."',
 						alv 			= '',
 						netto			= '',
 						hinta 			= '".$rtuoteno[$i]["hinta"]."',
@@ -387,13 +387,6 @@
 		$laskurow = mysql_fetch_array($result);
 
 		if ($kauttalaskutus == "kylla") {
-			// jos erikoisale niin otetaan sit‰ kanssa huomioon
-			if ($laskurow['erikoisale'] <> 0) {
-				$erikoisale = 1 - ($laskurow['erikoisale']/100);
-			}
-			else {
-				$erikoisale = 1;
-			}
 
 			// jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
 			if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
@@ -415,8 +408,10 @@
 				$alvit = 0;
 			}
 
+			$query_ale_lisa = generoi_alekentta('O');
+
 			// Katostaan stemmaako keikka?
-			$query = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale *
+			$query = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
 						(1+(if ((SELECT max(kaytetty) kaytetty
 								FROM sarjanumeroseuranta
 								WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio

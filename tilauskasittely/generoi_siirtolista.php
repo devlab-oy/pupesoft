@@ -201,23 +201,29 @@
 								$varasto			= $lahdevarasto;
 								$hinta 				= "";
 								$netto 				= "";
-								$ale 				= "";
 								$var				= "";
 								$korvaavakielto		= 1;
 								$perhekielto		= 1;
 								$orvoteikiinnosta	= "EITOD";
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									${'ale'.$alepostfix} = "";
+								}
 
 								require ('lisaarivi.inc');
 
 								$tuoteno	= '';
 								$kpl		= '';
 								$hinta		= '';
-								$ale		= '';
 								$alv		= 'X';
 								$var		= '';
 								$toimaika	= '';
 								$kerayspvm	= '';
 								$kommentti	= '';
+
+								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+									${'ale'.$alepostfix} = '';
+								}
 
 								$tehtyriveja++;
 

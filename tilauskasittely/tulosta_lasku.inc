@@ -803,8 +803,9 @@ if (!function_exists('rivi_original')) {
 		$pdf_lasku->draw_text(390, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
 
 		//Alennus
-		if ($row["ale"] != 0) {
-			$pdf_lasku->draw_text(450, $kala, ($row["ale"]*1), $thispage, $norm);
+		$alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');
+		if ($alennukset_yhteensa != 0) {
+			$pdf_lasku->draw_text(450, $kala, $alennukset_yhteensa, $thispage, $norm);
 		}
 
 		if ($kurssi != 1) {
@@ -854,11 +855,11 @@ if (!function_exists('rivi_original')) {
 			//Lasketaan saman kaavan mukaan kuin laskutus.inc:ssä, eli pyöristetään kaikki kerralla lopuksi!
 			if ($kurssi != 1) {
 				if ($toim == 'PROFORMA') $verollrivi = $row["rivihinta_valuutassa"];
-				else $verollrivi = laskuval($row["hinta"], $kurssi) * (1 - $row["ale"] / 100) * $row["kpl"];
+				else $verollrivi = laskuval($row["hinta"], $kurssi) * generoi_alekentta_php($row, 'M', 'kerto') * $row["kpl"];
 			}
 			else {
 				if ($toim == 'PROFORMA') $verollrivi = $row["rivihinta"];
-				else $verollrivi = $row["hinta"] * (1 - $row["ale"] / 100) * $row["kpl"];
+				else $verollrivi = $row["hinta"] * generoi_alekentta_php($row, 'M', 'kerto') * $row["kpl"];
 			}
 
 			if ($yhtiorow["alv_kasittely"] != '') {
@@ -867,6 +868,14 @@ if (!function_exists('rivi_original')) {
 
 			$oikpos = $pdf_lasku->strlen(hintapyoristys($verollrivi), $pieni);
 			$pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($verollrivi), $thispage, $pieni);
+		}
+
+		if ($yhtiorow['myynnin_alekentat'] > 1) {
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				if (trim($row["ale{$alepostfix}"]) > 0) {
+					$row["kommentti"] .= "\n".t("Ale")."{$alepostfix} ".$row["ale{$alepostfix}"]." %";
+				}
+			}
 		}
 
 		// Kommentti
@@ -979,9 +988,10 @@ if (!function_exists('rivi_plain')) {
 		$pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
 
 		//Alennus
-		if ($row["ale"] != 0) {
-			$oikpos = $pdf_lasku->strlen(($row["ale"]*1), $norm);
-			$pdf_lasku->draw_text(510-$oikpos, $kala, ($row["ale"]*1), 			$thispage, $norm);
+		$alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');
+		if ($alennukset_yhteensa != 0) {
+			$oikpos = $pdf_lasku->strlen(($alennukset_yhteensa*1), $norm);
+			$pdf_lasku->draw_text(510-$oikpos, $kala, ($alennukset_yhteensa*1), 			$thispage, $norm);
 		}
 
 		if ($kurssi != 1) {
@@ -993,6 +1003,14 @@ if (!function_exists('rivi_plain')) {
 			// Veroton Rivihinta
 			$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"]), $norm);
 			$pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
+		}
+
+		if ($yhtiorow['myynnin_alekentat'] > 1) {
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				if (trim($row["ale{$alepostfix}"]) > 0) {
+					$row["kommentti"] .= "\n".t("Ale")."{$alepostfix} ".$row["ale{$alepostfix}"]." %";
+				}
+			}
 		}
 
 		if (trim($row["kommentti"]) != '') {
@@ -1095,9 +1113,10 @@ if (!function_exists('rivi_plain_2')) {
 		$pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)), $thispage, $norm);
 
 		//Alennus
-		if ($row["ale"] != 0) {
-			$oikpos = $pdf_lasku->strlen(($row["ale"]*1), $norm);
-			$pdf_lasku->draw_text(510-$oikpos, $kala, ($row["ale"]*1), 			$thispage, $norm);
+		$alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');
+		if ($alennukset_yhteensa != 0) {
+			$oikpos = $pdf_lasku->strlen(($alennukset_yhteensa*1), $norm);
+			$pdf_lasku->draw_text(510-$oikpos, $kala, ($alennukset_yhteensa*1), 			$thispage, $norm);
 		}
 
 		if ($kurssi != 1) {
@@ -1120,6 +1139,14 @@ if (!function_exists('rivi_plain_2')) {
 		else {
 			// lyhyt nimitys
 			$pdf_lasku->draw_text(20,  $kala, $row['nimitys'],	$thispage, $norm);
+		}
+
+		if ($yhtiorow['myynnin_alekentat'] > 1) {
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				if (trim($row["ale{$alepostfix}"]) > 0) {
+					$row["kommentti"] .= "\n".t("Ale")."{$alepostfix} ".$row["ale{$alepostfix}"]." %";
+				}
+			}
 		}
 
 		if (trim($row["kommentti"]) != '') {
@@ -1236,7 +1263,12 @@ if (!function_exists('rivi_perhe')) {
 
 					$row["hinta"] 		= $perherow["hinta"];
 					$row["rivihinta"] 	= $perherow["rivihinta"];
-					$row["ale"] 		= "";
+
+					if ($yhtiorow['myynnin_alekentat'] > 1) {
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$row["ale{$alepostfix}"] = "";
+						}
+					}
 				}
 			}
 			else {
@@ -1601,6 +1633,8 @@ if (!function_exists('alvierittely')) {
 		$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
 		$kala -= 10;
 
+		$query_ale_lisa = generoi_alekentta('M');
+
 		while ($alvrow = mysql_fetch_assoc($alvresult)) {
 
 			// Valuuttajutut kuntoon
@@ -1615,7 +1649,7 @@ if (!function_exists('alvierittely')) {
 			elseif ($alvrow["alv"] >= 500) {
 				$aquery = "	SELECT
 							sum(0) alvrivihinta,
-							sum(round((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) * tilausrivi.varattu * (1 - tilausrivi.ale / 100),2)) rivihinta
+							sum(round((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) * tilausrivi.varattu * {$query_ale_lisa},2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
@@ -1630,16 +1664,16 @@ if (!function_exists('alvierittely')) {
 			}
 			elseif ($alvrow["alv"] < 500 and $toim != 'PROFORMA' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 				$aquery = "	SELECT
-							round(sum((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * (1-tilausrivi.ale/100) * (tilausrivi.alv/100)),2) alvrivihinta,
-							sum(round((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * (1-tilausrivi.ale/100),2)) rivihinta
+							round(sum((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa} * (tilausrivi.alv/100)),2) alvrivihinta,
+							sum(round((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa},2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
 			}
 			else {
 				$aquery = "	SELECT
-							round(sum((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) * (tilausrivi.alv/100)),2) alvrivihinta,
-							sum(round((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)) rivihinta
+							round(sum((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa} * (tilausrivi.alv/100)),2) alvrivihinta,
+							sum(round((tilausrivi.hinta $kassa_ale_lisa / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
@@ -1865,8 +1899,10 @@ if (!function_exists("tulosta_lasku")) {
 		if ($toim == 'PROFORMA') {
 			$laskurow["tapvm"] = date("Y-m-d");
 
-			$lisa = " 	tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+{$laskurow["erikoisale"]}-(tilausrivi.ale*{$laskurow["erikoisale"]}/100))/100)) rivihinta,
-						(tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+{$laskurow["erikoisale"]}-(tilausrivi.ale*{$laskurow["erikoisale"]}/100))/100)) rivihinta_valuutassa,
+			$query_ale_lisa = generoi_alekentta('M');
+
+			$lisa = " 	tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa} rivihinta,
+						(tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa} rivihinta_valuutassa,
 						(tilausrivi.varattu+tilausrivi.kpl) kpl, ";
 		}
 		else {

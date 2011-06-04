@@ -1523,6 +1523,7 @@
 				echo "<option value='E' $sel[E]>".t("Ennakkotilaus")."</option>";
 				echo "<option value='T' $sel[T]>".t("Tarjoustilaus")."</option>";
 				echo "<option value='7' $sel[7]>".t("Tehdastilaus")."</option>";
+				echo "<option value='8' $sel[8]>".t("Muiden mukana")."</option>";
 				echo "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
 
 				echo "</select></td>";
@@ -2377,7 +2378,14 @@
 
 					// hinnat päivitetään vain jos asiakkaalla on asiakashinta tai asiakasalennus
 					if ($yhtiorow["vaihda_asiakas_hintapaiv"] == "A") {
-						$hinnat = alehinta($laskurow, $trow, $row['tilkpl'], '', '', '', "hinta,hintaperuste,aleperuste,ale");
+
+						$haettavat_kentat = "hinta,hintaperuste,aleperuste";
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$haettavat_kentat .= ",ale{$alepostfix}";
+						}
+
+						$hinnat = alehinta($laskurow, $trow, $row['tilkpl'], '', '', '', $haettavat_kentat);
 
 						// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
 						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
@@ -2385,9 +2393,14 @@
 						}
 					}
 
+					$ale = array();
+
 					if ($row['netto'] == "" and $paivitetaanko) {
 						$hinta 	= '';
-						$ale	= '';
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale{$alepostfix}"] = '';
+						}
 					}
 					else {
 						//Alvihinta korjataan vain jos yhtiöllä on verolliset myyntihinnat
@@ -2398,14 +2411,19 @@
 							$hinta = $row['hinta'];
 						}
 
-						$ale = $row['ale'];
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$ale["ale{$alepostfix}"] = $row["ale{$alepostfix}"];
+						}
 					}
 
 					// haetaan tuotteelle asiakaskohtaisia hintoja..
 					list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $row['tilkpl'], $row['netto'], $hinta, $ale);
 
 					$uusihinta	= '';
-					$uusiale 	= '';
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						${'uusiale'.$alepostfix} = '';
+					}
 
 					if ($hinta != $row['hinta']) {
 						$uusihinta = $hinta;
@@ -2414,11 +2432,13 @@
 						$uusihinta = $row["hinta"];
 					}
 
-					if ($ale != $row['ale']) {
-						$uusiale = $ale;
-					}
-					else {
-						$uusiale = $row['ale'];
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						if ($ale["ale{$alepostfix}"] != $row["ale{$alepostfix}"]) {
+							${'uusiale'.$alepostfix} = $ale["ale{$alepostfix}"];
+						}
+						else {
+							${'uusiale'.$alepostfix} = $row["ale{$alepostfix}"];
+						}
 					}
 				}
 				else {
@@ -2430,7 +2450,9 @@
 						$uusihinta = $row['hinta'];
 					}
 
-					$uusiale = $row['ale'];
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						${'uusiale'.$alepostfix} = $row["ale{$alepostfix}"];
+					}
 				}
 
 				//lasketaan alvit
@@ -2443,16 +2465,25 @@
 
 				list($uusihinta, $alv) = alv($laskurow, $trow, $uusihinta, $alv, $alehinta_alv);
 
-				$query = "UPDATE tilausrivi set hinta='$uusihinta', ale='$uusiale', netto='$netto', alv='$alv' where yhtio='$kukarow[yhtio]' and tunnus='$row[tunnus]'";
+				$ale_query_insert_lisa = '';
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ale_query_insert_lisa .= " ale{$alepostfix} = '".${'uusiale'.$alepostfix}."', ";
+				}
+
+				$query = "UPDATE tilausrivi set hinta='$uusihinta', {$ale_query_insert_lisa} netto='$netto', alv='$alv' where yhtio='$kukarow[yhtio]' and tunnus='$row[tunnus]'";
 				$tres  = pupe_query($query);
 
 				$netto		= '';
 				$uusihinta	= '';
-				$uusiale	= '';
 				$hinta		= '';
-				$ale		= '';
 				$alv		= '';
 				$kpl		= '';
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					${'uusiale'.$alepostfix} = '';
+					${'ale'.$alepostfix} = '';
+				}
 			}
 		}
 
@@ -2899,6 +2930,11 @@
 		$query .= $postquery;
 		$result = pupe_query($query);
 		$id = mysql_insert_id();
+
+		// päivitetään erikoisale tilausriveille
+		$erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
+		$query_erikoisale = "UPDATE tilausrivi SET erikoisale = '{$erikoisale}' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$erikoisale_query_otunnus}'";
+		$upd_erikoisale_res = pupe_query($query_erikoisale);
 
 		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
 

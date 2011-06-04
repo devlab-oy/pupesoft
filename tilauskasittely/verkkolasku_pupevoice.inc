@@ -213,7 +213,7 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("DeliveryDate",						vlas_dateconv($tilrow['toimitettuaika']),	$tootxml);
 		xml_add("UnitPrice",						$tilrow['hinta'], 							$tootxml);
 		xml_add("RowIdentifier",					$tilrow['tilaajanrivinro'], 				$tootxml); // t‰nne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
-		xml_add("RowDiscountPercent",				$tilrow['ale'], 							$tootxml);
+		xml_add("RowDiscountPercent",				$tilrow['ale1'], 							$tootxml);
 		xml_add("RowVatRatePercent",				$tilrow['alv'], 							$tootxml);
 		xml_add("RowVatAmount",						$vatamount, 								$tootxml); // veron m‰‰r‰
 		xml_add("RowTotalVatExcludedAmount",		$tilrow['rivihinta'],		 				$tootxml); // veroton rivihinta

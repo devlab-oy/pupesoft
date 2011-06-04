@@ -604,6 +604,8 @@
 			die("Ei voitu avata filea $path_myynti");
 		}
 
+		$query_ale_lisa = generoi_alekentta('M');
+
 	    $query = "	SELECT
 					tilausrivi.tuoteno nimiketunnus,
 					lasku.liitostunnus asiakastunnus,
@@ -612,7 +614,7 @@
 					if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) toimitusasiakas,
 					tilausrivi.toimaika toimituspaiva,
 					tilausrivi.tyyppi tapahtumalaji,
-					round(tilausrivi.hinta  / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)), $yhtiorow[hintapyoristys]) myyntiarvo,
+					round(tilausrivi.hinta  / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) myyntiarvo,
 					(tilausrivi.varattu+tilausrivi.jt) * tuote.kehahin ostoarvo,
 					tilausrivi.varattu tapahtumamaara,
 					lasku.tunnus tilausnro,

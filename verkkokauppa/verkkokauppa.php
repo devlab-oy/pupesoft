@@ -955,8 +955,10 @@ if ($tee == "asiakastiedot") {
 
 		if ($where != "") {
 
+			$query_ale_lisa = generoi_alekentta('M');
+
 			$query = "	SELECT lasku.*, date_format($aika, '%d. %m. %Y') aika,
-						(	SELECT sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
+						(	SELECT sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa})
 							FROM tilausrivi
 							WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi != 'D'
 						) summa

@@ -180,7 +180,11 @@ if (!function_exists('text_alku')) {
 		$sisalto .= sprintf('%-25.25s', t("Tuotenumero", $kieli));
 		$sisalto .= sprintf('%-8.8s',   t("M‰‰r‰", $kieli));
 		$sisalto .= sprintf('%-12.12s', t("A-hinta", $kieli));
-		$sisalto .= sprintf('%-15.15s', t("Alennus", $kieli)."-%");
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			$sisalto .= sprintf('%-15.15s', t("Alennus", $kieli)."-%");
+		}
+
 		$sisalto .= sprintf('%-15.15s', t("Veroton arvo", $kieli));
 		$sisalto .= "\r\n";
 		$sisalto .= sprintf('%-25.25s', t("Tuotenimi", $kieli));
@@ -212,7 +216,11 @@ if (!function_exists('text_rivi')) {
 		$sisalto .= sprintf('%-25.25s', $row["tuoteno"]);
 		$sisalto .= sprintf('%-8.8s', $row["kpl"]);
 		$sisalto .= sprintf('%-12.12s', $row["hinta"]);
-		$sisalto .= sprintf('%-15.15s', $row["ale"]);
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			$sisalto .= sprintf('%-15.15s', $row["ale{$alepostfix}"]);
+		}
+
 		$sisalto .= sprintf('%-15.15s', $row["rivihinta"]);
 		$sisalto .= "\r\n";
 

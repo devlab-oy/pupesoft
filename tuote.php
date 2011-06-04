@@ -1712,6 +1712,15 @@
 					$ehto  = "";
 				}
 
+				$ale_query_concat_lisa = 'concat(';
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ale_query_concat_lisa .= "' ', tilausrivi.ale{$alepostfix}, ' %',";
+				}
+
+				$ale_query_concat_lisa = substr($ale_query_concat_lisa, 0, -1);
+				$ale_query_concat_lisa .= "),";
+
 				$query = "	SELECT tapahtuma.tuoteno, ifnull(kuka.nimi, tapahtuma.laatija) laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
 							if (tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus,
 							concat_ws(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) tapapaikka,
@@ -1722,7 +1731,7 @@
 							tilausrivin_lisatiedot.osto_vai_hyvitys,
 							lasku2.tunnus lasku2tunnus,
 							lasku2.laskunro lasku2laskunro,
-							concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), concat(tilausrivi.ale, ' %'), round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta
+							concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), $ale_query_concat_lisa round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta
 							FROM tapahtuma use index (yhtio_tuote_laadittu)
 							LEFT JOIN tilausrivi use index (primary) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
 							LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)

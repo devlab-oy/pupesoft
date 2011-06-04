@@ -148,7 +148,7 @@
 					tuoteno 		= '$tuorow[tuoteno]',
 					varattu 		= '1',
 					tilkpl 			= '1',
-					ale 			= '0',
+					ale1 			= '0',
 					netto 			= 'N',
 					jt 				= 0,
 					yksikko 		= '',
@@ -185,7 +185,6 @@
 			$kerayspvm	     = $laskurow["kerayspvm"];
 			$hinta 		     = $kasittelykulu;
 			$netto 		     = "N";
-			$ale 		     = "";
 			$var		     = "H";
 			$alv		     = "";
 			$paikka		     = "";
@@ -195,6 +194,9 @@
 			$varataan_saldoa = "";
 			$jtkielto 		 = $laskurow['jtkielto'];
 
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				${'ale'.$alepostfix} = '';
+			}
 
 			require ("tilauskasittely/lisaarivi.inc");
 		}

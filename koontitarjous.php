@@ -133,8 +133,10 @@
 				$tarjouslisa .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00' and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 			}
 
+			$query_ale_lisa = generoi_alekentta('M');
+
 			$query = "	SELECT lasku.tunnus, lasku.luontiaika, lasku.valkoodi,
-						sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),$yhtiorow[hintapyoristys])) rivihinta
+						sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta
 						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'

@@ -260,7 +260,7 @@
 			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti epäonnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ, pakkaus READ";
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ, pakkaus READ, panttitili WRITE";
 			$locre = mysql_query($query) or pupe_error($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -853,13 +853,18 @@
 						// haetaan rahdin hinta
 						$rahtihinta_array       = hae_rahtimaksu($otsikot);
 
+						$rahtihinta_ale = array();
+
 						// rahtihinta tulee rahtimatriisista yhtiön kotivaluutassa ja on verollinen, jos myyntihinnat ovat verollisia, tai veroton, jos myyntihinnat ovat verottomia (huom. yhtiön parametri alv_kasittely)
 						if (is_array($rahtihinta_array)) {
 							$rahtihinta         = $rahtihinta_array['rahtihinta'];
-							$rahtihinta_ale     = $rahtihinta_array['alennus'];
+
+							foreach ($rahtihinta_array['alennus'] as $ale_k => $ale_v) {
+								$rahtihinta_ale[$ale_k] = $ale_v;
+							}
 						}
 						else {
-							$rahtihinta = $rahtihinta_ale = 0;
+							$rahtihinta = 0;
 						}
 
 						$query = "  SELECT *
@@ -875,13 +880,20 @@
 							$hinta      = $rahtihinta;
 							$nimitys    = "$pvm $laskurow[toimitustapa]";
 							$kommentti  = "".t("Rahtikirja").": $rahtikirjanrot";
-							$netto      = $rahtihinta_ale != 0 ? '' : 'N';
+							$netto      = count($rahtihinta_ale) > 0 ? '' : 'N';
 
-							list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', $netto, $hinta, $rahtihinta_ale);
+							list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', $netto, $hinta, $rahtihinta_ale);
 							list($rahinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
-							$query  = " INSERT INTO tilausrivi (hinta, ale, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-										values ('$rahinta', '$lis_ale', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+							$ale_lisa_insert_query_1 = $ale_lisa_insert_query_2 = '';
+
+							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+								$ale_lisa_insert_query_1 .= " ale{$alepostfix},";
+								$ale_lisa_insert_query_2 .= " '".$lis_ale_kaikki["ale{$alepostfix}"]."',";
+							}
+
+							$query  = " INSERT INTO tilausrivi (hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+										values ('$rahinta', {$ale_lisa_insert_query_2} '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
 							$addtil = mysql_query($query) or pupe_error($query);
 
 							if ($silent == "") {
@@ -1017,9 +1029,12 @@
 
 							if (mysql_num_rows($otsre) == 1 and mysql_num_rows($rhire) == 1 and $aslisakulrow['laskutuslisa'] == '') {
 								if ($yhtiorow["laskutuslisa_tyyppi"] == 'L' or $yhtiorow["laskutuslisa_tyyppi"] == 'K' or $yhtiorow["laskutuslisa_tyyppi"] == 'N') {
+
+									$query_ale_lisa = generoi_alekentta('M');
+
 									// Prosentuaalinen laskutuslisä
 									// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa!)
-									$query = "  SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * if (tilausrivi.netto = 'N', (1 - tilausrivi.ale / 100), (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100))) laskun_loppusumma
+									$query = "  SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * {$query_ale_lisa}) laskun_loppusumma
 												FROM tilausrivi
 												JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 												WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -1056,7 +1071,7 @@
 											kpl2            = '0',
 											tilkpl          = '1',
 											jt              = '0',
-											ale             = '0',
+											ale1            = '0',
 											alv             = '$alv',
 											netto           = 'N',
 											hinta           = '$lkhinta',
@@ -1790,7 +1805,7 @@
 								}
 
 								// Verollinen Rivihinta. Lasketaan saman kaavan mukaan kuin laskutus.inc:ssä, eli pyöristetään kaikki kerralla lopuksi!
-								$totalvat = $tilrow["hinta"] * (1 - $tilrow["ale"] / 100) * $tilrow["kpl"];
+								$totalvat = $tilrow["hinta"] * generoi_alekentta_php($tilrow, 'M', 'kerto') * $tilrow["kpl"];
 
 								if ($yhtiorow["alv_kasittely"] != '') {
 									$totalvat = $totalvat * (1 + ($tilrow["alv"] / 100));

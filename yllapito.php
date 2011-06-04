@@ -248,7 +248,7 @@
 
 		//	Tehd‰‰n muuttujista linkit jolla luomme otsikolliset avaimet!
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
-			if ($t["{$i}_uusi"] != "") {
+			if (isset($t["{$i}_uusi"]) and $t["{$i}_uusi"] != "") {
 				$t[$i] = $t["{$i}_uusi"];
 			}
 			$t[mysql_field_name($result, $i)] = &$t[$i];
@@ -301,7 +301,7 @@
 				@$funktio($t, $i, $result, $tunnus, &$virhe, $trow);
 			}
 
-			if ($virhe[$i] != "") {
+			if (isset($virhe[$i]) and $virhe[$i] != "") {
 				$errori = 1;
 			}
 			
@@ -325,7 +325,7 @@
 		}
 
 		// Jos toimittaja/asiakas merkataan poistetuksi niin unohdetaan kaikki errortsekit...
-		if (($toimtyyppi == "P" or $toimtyyppi == "PP" or $asiak_laji == "P") and $errori != '') {
+		if (((isset($toimtyyppi) and $toimtyyppi == "P") or (isset($toimtyyppi) and $toimtyyppi == "PP") or (isset($asiak_laji) and $asiak_laji == "P")) and $errori != '') {
 			unset($virhe);
 			$errori = "";
 		}
@@ -360,7 +360,7 @@
 			else {
 
 				//	Jos poistettiin jokin liite, poistetaan se nyt
-				if (is_array($poista_liite)) {
+				if (isset($poista_liite) and is_array($poista_liite)) {
 					foreach($poista_liite as $key => $val) {
 						if ($val > 0) {
 							$delquery = " DELETE FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos = 'Yllapito' and tunnus = '$val'";
@@ -376,9 +376,9 @@
 				$query = "UPDATE $toim SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
-					if (isset($t[$i]) or is_array($_FILES["liite_$i"])) {
+					if (isset($t[$i]) or (isset($_FILES["liite_$i"]) and is_array($_FILES["liite_$i"]))) {
 
-						if (is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
+						if (isset($_FILES["liite_$i"]) and is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
 							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
 							if ($id !== false) {
 								$t[$i] = $id;
@@ -569,7 +569,7 @@
 			}
 
 			// Jos p‰ivit‰mme ifamesta tietoja niin p‰ivitet‰‰n varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, ett‰ tietoja on muutettu
-			if ($lukitse_avaimeen != "") {
+			if (isset($lukitse_avaimeen) and $lukitse_avaimeen != "") {
 				if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
 					$query = "	UPDATE tuote
 								SET muuttaja = '$kukarow[kuka]', muutospvm=now()
@@ -936,7 +936,7 @@
 					<input type = 'submit' value = '".t("N‰yt‰ er‰‰ntyneet")."'></form>";
 		}
 
-		if ($toim == "tuote" and $uusi != 1 and $errori == '' and $tmp_tuote_tunnus > 0) {
+		if ($toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
 
 			$query = "	SELECT *
 						FROM tuote
@@ -1288,6 +1288,9 @@
 					case "printteri7":
 						$otsikko = t("JV-lasku/-kuitti");
 						break;
+					case "printteri8":
+						$otsikko = t("Reittietiketti");
+						break;
 					default:
 						$otsikko = t(mysql_field_name($result, $i));
 				}
@@ -1564,6 +1567,9 @@
 					</SCRIPT>";
 
 				if ($rajattu_nakyma == '') {
+
+					if (!isset($seuraavatunnus)) $seuraavatunnus = 0;
+
 					echo "<br><br>
 						<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()' enctype='multipart/form-data'>
 						<input type = 'hidden' name = 'toim' value = '$aputoim'>

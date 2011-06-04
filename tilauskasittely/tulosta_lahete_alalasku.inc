@@ -171,7 +171,7 @@ if (!function_exists('rivi_lahete')) {
 		$pdf->draw_text(190, $kala, $row["tuoteno"], 	$thispage, $norm);
 		$pdf->draw_text(290, $kala, $apukpl, 			$thispage, $norm);
 		$pdf->draw_text(350, $kala, $row["hinta"], 		$thispage, $norm);
-		$pdf->draw_text(410, $kala, $row["ale"],		$thispage, $norm);
+		$pdf->draw_text(410, $kala, $row["ale1"],		$thispage, $norm);
 		$pdf->draw_text(470, $kala, $verotonhinta, 		$thispage, $norm);
 		$pdf->draw_text(530, $kala, $row["alv"], 		$thispage, $norm);
 		$kala = $kala - 10;
@@ -259,16 +259,18 @@ if (!function_exists('alvierittely_lahete')) {
 		$kala -= 20;
 		$lsum  = 0;
 
+		$query_ale_lisa = generoi_alekentta('M');
+
 		while ($alvrow = mysql_fetch_array($alvresult)) {
 			if ($alvrow["alv"] >= 500) {
-				$aquery = "	SELECT round(0) alvrivihinta, round(sum(hinta*varattu*(1-ale/100)),2) rivihinta
+				$aquery = "	SELECT round(0) alvrivihinta, round(sum(hinta * varattu * {$query_ale_lisa}),2) rivihinta
 							FROM tilausrivi
 							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]' and tyyppi='L'";
 			}
 			else {
 				$aquery = "	SELECT
-							round(sum(hinta / if('$yhtiorow[alv_kasittely]' = '', (1+alv/100), 1) * varattu * if(netto='N', (1-ale/100), (1-(ale+$laskurow[erikoisale]-(ale*$laskurow[erikoisale]/100))/100)) * (alv/100)),2) alvrivihinta,
-							round(sum(hinta / if('$yhtiorow[alv_kasittely]' = '', (1+alv/100), 1) * varattu * if(netto='N', (1-ale/100), (1-(ale+$laskurow[erikoisale]-(ale*$laskurow[erikoisale]/100))/100))),2) rivihinta
+							round(sum(hinta / if('$yhtiorow[alv_kasittely]' = '', (1+alv/100), 1) * varattu * {$query_ale_lisa} * (alv/100)),2) alvrivihinta,
+							round(sum(hinta / if('$yhtiorow[alv_kasittely]' = '', (1+alv/100), 1) * varattu * {$query_ale_lisa}),2) rivihinta
 							FROM tilausrivi
 							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]' and tyyppi='L'";
 			}

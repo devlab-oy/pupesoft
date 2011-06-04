@@ -8,14 +8,6 @@
 		$result   = pupe_query($query);
 		$laskurow = mysql_fetch_array($result);
 
-		// jos erikoislale niin otetaan sitä kanssa huomioon
-		if ($laskurow['erikoisale']<>0) {
-			$erikoisale = 1-($laskurow['erikoisale']/100);
-		}
-		else {
-			$erikoisale = 1;
-		}
-
 		// katsotaan onko tälle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
 		$query = "	SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, valkoodi, vienti
 					FROM lasku
@@ -78,10 +70,12 @@
 
 		$lisa2 = " and tilausrivi.tunnus = '{$tunnus}' ";
 
+		$query_ale_lisa = generoi_alekentta('O');
+
 		$query = "	SELECT 
 					round((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl,
-					round((tilausrivi.varattu+tilausrivi.kpl) * (tilausrivi.hinta * (1-(tilausrivi.ale/100))) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),'{$yhtiorow['hintapyoristys']}') rivihinta,
-					round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * (tilausrivi.hinta * (1-(tilausrivi.ale/100))) * {$erikoisale} *
+					round((tilausrivi.varattu+tilausrivi.kpl) * (tilausrivi.hinta * {$query_ale_lisa}) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),'{$yhtiorow['hintapyoristys']}') rivihinta,
+					round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
 											(1+(if ((SELECT max(kaytetty) kaytetty
 													FROM sarjanumeroseuranta
 													WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
@@ -207,10 +201,10 @@
 		$suoratoimitukset = $_POST['suoratoimitukset'];
 
 		$query  = "	UPDATE tilausrivi SET 
-					ale = '{$ale}' 
+					ale1 = '{$ale}' 
 					WHERE yhtio = '{$kukarow['yhtio']}' 
 					AND tunnus = '{$tunnus}' 
-					AND ale <> '{$ale}'";
+					AND ale1 <> '{$ale}'";
 		$result = pupe_query($query);
 
 		$hinnat = laske_hinta($otunnus, $tunnus, $suoratoimitukset);

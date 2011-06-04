@@ -697,4 +697,14 @@
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == "panttitili") {
+
+		$sel = trim($trow[$i]) == 'K' ? ' selected' : '';
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
+		$ulos .= "<option value='K'{$sel}>".t("Käytössä")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+		
+	}

@@ -55,11 +55,17 @@ if (!file_exists($tilvahvfilenimi)) {
 			$laskurow["nippu"] = $laskurow["tunnus"];
 	}
 
+	$ale_query_select_lisa = '';
+
+	for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		$ale_query_select_lisa .= " tilausrivi.ale{$alepostfix},";
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
 				tilausrivi.toimaika, tilausrivi.tilkpl, tilausrivi.alv,
-				tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
+				tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -117,11 +123,17 @@ if (!file_exists($tilvahvfilenimi)) {
 			$ulos .= "TILVAHVRIV.TVR_JT:"    	  . $tvtilausrivirow['jt'] . "\n";
 			$ulos .= "TILVAHVRIV.TVR_OVH:"        . $tvtilausrivirow['hinta'] . "\n";
 
-			$hinta = round($tvtilausrivirow['hinta'] * (1 - $tvtilausrivirow['ale'] / 100),2);
+			$hinta = $tvtilausrivirow['hinta'];
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				$hinta *= (1 - $tvtilausrivirow["ale{$alepostfix}"] / 100);
+			}
 
 			if ($tvtilausrivirow['var'] != 'N') {
-				$hinta = round($hinta * (1 - $laskurow['erikoisale'] / 100),2);
+				$hinta = $hinta * (1 - $laskurow['erikoisale'] / 100);
 			}
+
+			$hinta = round($hinta,2);
 
 			$ulos .= "TILVAHVRIV.TVR_NETTO:" . $hinta . "\n";
 			$ulos .= "TILVAHVRIV.TVR_VEROLLISUUS:1\n";

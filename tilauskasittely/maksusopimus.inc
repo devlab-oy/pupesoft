@@ -10,6 +10,8 @@
 		$sallitut_tilat = "'L','G','E','V','W','N','A'";
 	}
 
+	$query_ale_lisa = generoi_alekentta('M');
+
 	if ($tila == "lisaa_kaikki_jaksotukseen") {
 
 		if ($laskurow["jaksotettu"] == 0) {
@@ -118,8 +120,8 @@
 	if ($tila == "tallenna") {
 
 		$query = "	SELECT
-					round(sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa_veroton,
-					round(sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa_verolli
+					round(sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) jaksotettavaa_veroton,
+					round(sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) jaksotettavaa_verolli
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.jaksotettu='$laskurow[jaksotettu]'
 					WHERE lasku.yhtio 		= '$kukarow[yhtio]'
@@ -303,10 +305,10 @@
 		// Haetaan laskun summat
 		$query = "	SELECT
 					group_concat(distinct lasku.tunnus) tilaukset,
-					round(sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa_veroton,
-					round(sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa_verolli,
-					round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput_veroton,
-					round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput_verolli
+					round(sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) jaksotettavaa_veroton,
+					round(sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) jaksotettavaa_verolli,
+					round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) loput_veroton,
+					round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) loput_verolli
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D'
 					WHERE lasku.yhtio		= '$kukarow[yhtio]'

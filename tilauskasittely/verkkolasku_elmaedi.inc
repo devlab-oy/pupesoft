@@ -109,10 +109,15 @@ if (!function_exists('elmaedi_rivi')) {
 		fputs($tootedi, "ILIN47_QT:".sprintf("%017.2f", $tilrow["kpl"])."@$tilrow[yksikko]\n");
 		fputs($tootedi, "ILININVIV:".sprintf("%017.2f", $tilrow["hinta"])."@   @   @   @          1@PCE\n");
 		fputs($tootedi, "ILIN203MA:$tilrow[rivihinta]\n");
-		if ($tilrow['ale'] > 0) {
+
+		if ($tilrow['ale1'] > 0 or $tilrow['ale2'] > 0 or $tilrow['ale3'] > 0) {
+
+			$alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M');
+
 			fputs($tootedi, "ILIN___AL:\n");
-			fputs($tootedi, "ILIN___PA:1  @$tilrow[ale]\n");
+			fputs($tootedi, "ILIN___PA:1  @$alennukset_yhteensa\n");
 		}
+
 		fputs($tootedi, "ILINVATTX:$tilrow[alv]\n");
 		fputs($tootedi, "ILIN69_DT:" . sprintf("%-35.35s",vlas_dateconv($tilrow["toimitettuaika"])) . "@102\n");
 		fputs($tootedi, "ILIN__END:$rivinumero\n");

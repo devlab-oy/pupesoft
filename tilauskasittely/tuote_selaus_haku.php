@@ -230,7 +230,11 @@
 					$kerayspvm	     = $laskurow["kerayspvm"];
 					$hinta 		     = "";
 					$netto 		     = "";
-					$ale 		     = "";
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						${'ale'.$alepostfix} = "";
+					}
+
 					$alv		     = "";
 					$var			 = "";
 					$varasto 	     = $laskurow["varasto"];
@@ -286,7 +290,6 @@
 		$kerayspvm	     = "";
 		$hinta 		     = "";
 		$netto 		     = "";
-		$ale 		     = "";
 		$alv		     = "";
 		$var			 = "";
 		$varasto 	     = "";
@@ -296,6 +299,10 @@
 		$myy_sarjatunnus = "";
 		$paikka			 = "";
 		$tee 			 = "";
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			${'ale'.$alepostfix} = '';
+		}
 	}
 
 	$jarjestys = "tuote.tuoteno";
@@ -1287,7 +1294,13 @@
 						$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
 					}
 
-					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', "hinta,hintaperuste,aleperuste,ale");
+					$haettavat_kentat = "hinta,hintaperuste,aleperuste";
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						$haettavat_kentat .= ",ale{$alepostfix}";
+					}
+
+					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', $haettavat_kentat);
 
 					// Jos tuote n‰ytet‰‰n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei lˆydy
 					if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
@@ -1489,8 +1502,11 @@
 					$myyntihinta = hintapyoristys($row["myyntihinta"]). " $yhtiorow[valkoodi]";
 
 					if ($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
-						// haetaan tuotteen tiedot
-						$myyntihinta = hintapyoristys($hinnat["hinta"] * (1-($hinnat["ale"]/100)))." $laskurow[valkoodi]";
+						$hinnat["erikoisale"] = 0;
+
+						$myyntihinta_echotus = $hinnat["hinta"] * generoi_alekentta_php($hinnat, 'M', 'kerto');
+
+						$myyntihinta = hintapyoristys($myyntihinta_echotus)." $laskurow[valkoodi]";
 					}
 					elseif ($kukarow["extranet"] != "") {
 						// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa

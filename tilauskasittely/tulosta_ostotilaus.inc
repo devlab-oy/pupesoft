@@ -399,9 +399,9 @@
 				$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
 				$pdf->draw_text(475-$oikpos, $kala, hintapyoristys($row["hinta"]), 					$thispage, $norm);
 
-				if ($row["ale"] != 0) {
-					$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
-					$pdf->draw_text(510-$oikpos, $kala, ($row["ale"]*1)."%", 						$thispage, $norm);
+				if ($row["ale1"] != 0) {
+					$oikpos = $pdf->strlen(($row["ale1"]*1)."%", $norm);
+					$pdf->draw_text(510-$oikpos, $kala, ($row["ale1"]*1)."%", 						$thispage, $norm);
 				}
 
 				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
@@ -566,10 +566,14 @@
 
 		}
 
+		$query_ale_lisa = generoi_alekentta('O');
+
+		$query_ale_select_lisa = generoi_alekentta_select('erikseen', 'O');
+
 		if ($toim != "HAAMU") {
 			if ($mista == 'tulostakopio') {
 				$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
-							tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta,
+							tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 							substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
 							$sorttauskentta
 							FROM tilausrivi
@@ -582,7 +586,7 @@
 			}
 			else {
 				$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
-							tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta,
+							tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 							substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
 							$sorttauskentta
 							FROM tilausrivi
@@ -596,7 +600,7 @@
 		}
 		else {
 			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu,
-						tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta,
+						tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.varattu*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 						substring(tilausrivi.kommentti,1,80) nimitys, tilausrivi.yksikko, tilausrivi.toimaika
 						FROM tilausrivi
 						WHERE tilausrivi.otunnus = '$otunnus'

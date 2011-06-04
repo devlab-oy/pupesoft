@@ -185,6 +185,7 @@
 									and asiakas_segmentti	= '$alrow[asiakas_segmentti]'
 									and piiri            	= '$alrow[piiri]'
 									and alennus            	= '$alrow[alennus]'
+									and alennuslaji			= '$alrow[alennuslaji]'
 									and minkpl           	= '$alrow[minkpl]'
 									and maxkpl           	= '$alrow[maxkpl]'
 									and alkupvm          	= '$alrow[alkupvm]'
@@ -203,6 +204,7 @@
 									asiakas_segmentti	= '$alrow[asiakas_segmentti]',
 									piiri            	= '$alrow[piiri]',
 									alennus            	= '$alrow[alennus]',
+									alennuslaji			= '$alrow[alennuslaji]',
 									minkpl           	= '$alrow[minkpl]',
 									maxkpl           	= '$alrow[maxkpl]',
 									alkupvm          	= '$alrow[alkupvm]',
@@ -241,6 +243,7 @@
 									and asiakas_segmentti	= '$alrow[asiakas_segmentti]'
 									and piiri            	= '$alrow[piiri]'
 									and alennus            	= '$alrow[alennus]'
+									and alennuslaji			= '$alrow[alennuslaji]'
 									and minkpl           	= '$alrow[minkpl]'
 									and maxkpl           	= '$alrow[maxkpl]'
 									and alkupvm          	= '$alrow[alkupvm]'
@@ -259,6 +262,7 @@
 										asiakas_segmentti	= '$alrow[asiakas_segmentti]',
 										piiri            	= '$alrow[piiri]',
 										alennus            	= '$alrow[alennus]',
+										alennuslaji			= '$alrow[alennuslaji]',
 										minkpl           	= '$alrow[minkpl]',
 										maxkpl           	= '$alrow[maxkpl]',
 										alkupvm          	= '$alrow[alkupvm]',

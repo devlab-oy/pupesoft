@@ -129,10 +129,14 @@
 			else {
 				$otunnuslisa = " tilausrivi.otunnus  = '$otunnus'";
 			}
-			
+
+			$query_ale_lisa = generoi_alekentta('O');
+
+			$ale_select_lisa = generoi_alekentta_select('erikseen', 'O');
+
 			//	K‰sitell‰‰n tilausrivit
 			$query = "	SELECT otunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu, toimaika,
-						tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, kommentti
+						tilausrivi.hinta, {$ale_select_lisa} round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta, kommentti
 						FROM tilausrivi
 						join tuote USING (yhtio, tuoteno)
 						join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'

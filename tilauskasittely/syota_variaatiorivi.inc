@@ -121,8 +121,11 @@
 			echo "<th align='left'>".t("Var")."</th>";
 		}
 
-		echo "	<th align='left'>".t("Hinta")."</th>
-				<th align='left'>".t("Ale")."</th>";
+		echo "<th align='left'>".t("Hinta")."</th>";
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
+		}
 
 		if ($variaaritorivi_osto !== TRUE) {
 			echo "<th align='left'>".t("Netto")."</th>";
@@ -148,7 +151,7 @@
 						var formi = document.getElementById(tfield).form;
 
 						for (var elementIdx=0; elementIdx<formi.elements.length; elementIdx++) {
-							if (formi.elements[elementIdx].type == 'text' && formi.elements[elementIdx].id.substring(0,9) == tcolumn) {
+							if (formi.elements[elementIdx].type == 'text' && ((formi.elements[elementIdx].id.substring(0,3) == 'ale' && formi.elements[elementIdx].id.substring(0,10) == tcolumn) || (formi.elements[elementIdx].id.substring(0,9) == tcolumn))) {
 								formi.elements[elementIdx].value = document.getElementById(tfield).value;
 							}
 						}
@@ -161,9 +164,13 @@
 					<td></td>
 					<td><input type='text' id='kpl_js' onKeyUp='fill_all(\"kpl_array\", \"kpl_js\");' size='5'></td>
 					<td><input type='text' id='var_js' onKeyUp='fill_all(\"var_array\", \"var_js\");' size='2'></td>
-					<td><input type='text' id='hin_js' onKeyUp='fill_all(\"hin_array\", \"hin_js\");' size='5'></td>
-					<td><input type='text' id='ale_js' onKeyUp='fill_all(\"ale_array\", \"ale_js\");' size='5'></td>
-					<td><input type='text' id='net_js' onKeyUp='fill_all(\"net_array\", \"net_js\");' size='2'></td></tr>";
+					<td><input type='text' id='hin_js' onKeyUp='fill_all(\"hin_array\", \"hin_js\");' size='5'></td>";
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				echo "	<td><input type='text' id='ale_js_{$alepostfix}' onKeyUp='fill_all(\"ale_array{$alepostfix}\", \"ale_js_{$alepostfix}\");' size='5'></td>";
+			}
+
+			echo "	<td><input type='text' id='net_js' onKeyUp='fill_all(\"net_array\", \"net_js\");' size='2'></td></tr>";
 		}
 
 		$varilask = 0;
@@ -228,8 +235,11 @@
 				}
 			}
 
-			echo "<td valign='top'><input type='text' id='hin_array_$varilask' name='hinta_array[$varirow[tuoteno]]' size='".(5+$yhtiorow['hintapyoristys']-2)."' maxlength='".(12+$yhtiorow['hintapyoristys']-2)."' value='".$hinta_array[$varirow["tuoteno"]]."'></td>
-					<td valign='top'><input type='text' id='ale_array_$varilask' name='ale_array[$varirow[tuoteno]]' size='5' maxlength='6' value='".$ale_array[$varirow["tuoteno"]]."'></td>";
+			echo "<td valign='top'><input type='text' id='hin_array_$varilask' name='hinta_array[$varirow[tuoteno]]' size='".(5+$yhtiorow['hintapyoristys']-2)."' maxlength='".(12+$yhtiorow['hintapyoristys']-2)."' value='".$hinta_array[$varirow["tuoteno"]]."'></td>";
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				echo "<td valign='top'><input type='text' id='ale_array_{$alepostfix}_$varilask' name='ale_array{$alepostfix}[$varirow[tuoteno]]' size='5' maxlength='6' value='".${'ale_array'.$alepostfix}[$varirow["tuoteno"]]."'></td>";
+			}
 
 
 			if ($variaaritorivi_osto !== TRUE) {

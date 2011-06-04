@@ -75,6 +75,13 @@
 		$tee = "ETSILASKU";
 	}
 
+	if ($toim == 'OSTO' or $toim == 'HAAMU' or $toim == 'PURKU' or $toim == 'TARIFFI') {
+		$query_ale_lisa = generoi_alekentta('O');
+	}
+	else {
+		$query_ale_lisa = generoi_alekentta('M');
+	}
+
 	if ($toim == "OSTO") {
 		$fuse = t("Ostotilaus");
 	}
@@ -117,7 +124,8 @@
 	if ($toim == "DGD") {
 		$fuse = "DGD - Multimodal Dangerous Goods Form";
 	}
-	if ($toim == "PAKKALISTA") {		//	Tämä on about yhdistetty vienti-erittely ja lähete
+	if ($toim == "PAKKALISTA") {
+		//	Tämä on about yhdistetty vienti-erittely ja lähete
 		$fuse = t("Pakkalista");
 	}
 	if ($toim == "KERAYSLISTA") {
@@ -920,7 +928,7 @@
 							$kerroinlisa2 = "";
 						}
 
-						$query = "  SELECT round(sum(tilausrivi.hinta $kerroinlisa1 * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$row[erikoisale]-(tilausrivi.ale*$row[erikoisale]/100))/100))), 2) summa
+						$query = "  SELECT round(sum(tilausrivi.hinta $kerroinlisa1 * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}), 2) summa
 									FROM tilausrivi
 									$kerroinlisa2
 									WHERE tilausrivi.yhtio = '$row[yhtio]'
@@ -1520,7 +1528,7 @@
 
 				//työmääräyksen rivit
 				$query = "  SELECT tilausrivi.*,
-							round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+							round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 							$sorttauskentta,
 							if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 							if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -1758,7 +1766,7 @@
 					//generoidaan lähetteelle ja keräyslistalle rivinumerot
 					$query = "  SELECT tilausrivi.*,
 								round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
-								round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+								round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 								$sorttauskentta,
 								if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
 								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
@@ -1850,7 +1858,7 @@
 
 							$query = "  SELECT tilausrivi.*,
 										round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
-										round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+										round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 										$sorttauskentta,
 										if (tilausrivi.tuoteno='$yhtiorow[rahti_tuotenumero]', 2, if(tilausrivi.var='J', 1, 0)) jtsort,
 										if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,

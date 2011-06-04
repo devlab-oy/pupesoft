@@ -150,6 +150,12 @@
 			$skpl = 1;
 		}
 
+		$ale_query_insert_lisa = '';
+
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			$ale_query_insert_lisa .= " ale{$alepostfix} = 0, ";
+		}
+
 		$query = "	INSERT into tilausrivi set
 					varattu 		= '0',
 					tilkpl 			= '$skpl',
@@ -174,7 +180,7 @@
 					laskutettuaika	= '0000-00-00',
 					yhtio 			= '$kukarow[yhtio]',
 					tuoteno 		= '$tuoteno',
-					ale 			= '0',
+					{$ale_query_insert_lisa}
 					netto 			= '',
 					yksikko 		= '$trow[yksikko]',
 					try 			= '$trow[try]',

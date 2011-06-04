@@ -393,7 +393,11 @@
 				}
 
 				$netto		= $coprivirow['netto'];
-				$ale		= $coprivirow['ale'];
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					${'ale'.$alepostfix} = $coprivirow["ale{$alepostfix}"];
+				}
+
 				$kommentti	= $coprivirow['kommentti'];
 				$kerayspvm	= $coprivirow['kerayspvm'];
 				$toimaika	= $coprivirow['toimaika'];

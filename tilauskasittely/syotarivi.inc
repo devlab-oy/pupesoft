@@ -37,8 +37,11 @@
 
 		if ($kukarow['hinnat'] == 0) echo "<th align='left'>".t("Hinta")."</th>";
 
-		echo "	<th align='left'>".t("Ale")."</th>
-				<th align='left'>".t("Netto")."</th>
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
+		}
+
+		echo "	<th align='left'>".t("Netto")."</th>
 				<td valign='top' class='back'></td>
 				</tr>";
 
@@ -72,8 +75,20 @@
 
 		if ($kukarow['hinnat'] == 0) echo "<td valign='top'><input type='text' name='hinta' size='".(5+$yhtiorow['hintapyoristys']-2)."' maxlength='".(12+$yhtiorow['hintapyoristys']-2)."' value='$hinta'></td>";
 
-		echo "	<td valign='top'><input type='text' name='ale' size='5' maxlength='6' value='$ale'></td>
-				<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			echo "<td valign='top'>";
+
+			if (strpos((string) $yhtiorow['myynnin_alekentat_muokkaus'], (string) $alepostfix) !== FALSE) {
+				echo "<input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='",${'ale'.$alepostfix},"' />";
+			}
+			else {
+				echo "<input type='hidden' name='ale{$alepostfix}' value='",${'ale'.$alepostfix},"' />",${'ale'.$alepostfix};
+			}
+
+			echo "</td>";
+		}
+
+		echo "	<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
 				<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
 				<td valign='top' class='back'>
 				<input type='hidden' name='perheid' value = '$perheid'>
@@ -99,6 +114,8 @@
 			if ($kukarow['hinnat'] != 0) {
 				$nrospanni--;
 			}
+
+			$nrospanni += $yhtiorow['myynnin_alekentat'] - 1;
 
 			echo "<th align='left' colspan='2'>".t("Ker‰ysaika")."</th>";
 			echo "<th align='left' colspan='$nrospanni'>".t("Toimitusaika")."</th>";
@@ -169,10 +186,15 @@
 
 		if ($rivitunnus!='') {
 			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T")) {
-				echo "<tr>$jarjlisa
-						<th colspan='6' align='left'>".t("Tuotteen nimitys")."</th>
-						</tr><tr>$jarjlisa
-						<td valign='top' colspan='6'><input type='text' maxlength='100' size='50' name='tuotenimitys' value = '$tuotenimitys'></td></tr>";
+
+				$nrospanni2 = 6;
+
+				$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
+
+				echo "<tr>{$jarjlisa}
+						<th colspan='{$nrospanni2}' align='left'>",t("Tuotteen nimitys"),"</th>
+						</tr><tr>{$jarjlisa}
+						<td valign='top' colspan='{$nrospanni2}'><input type='text' maxlength='100' size='50' name='tuotenimitys' value = '{$tuotenimitys}'></td></tr>";
 			}
 
 			//Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv niin pit‰‰ muistaa ja kertoa se myˆs lis‰‰riville
@@ -207,8 +229,11 @@
 
 		if ($kukarow['hinnat'] == 0) echo "<th align='left'>".t("Hinta")."</th>";
 
-		echo "<th align='left'>".t("Ale")."</th>
-				<th align='left'>".t("Netto")."</th>
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
+		}
+
+		echo "	<th align='left'>".t("Netto")."</th>
 				<th align='left'>".t("Alv")."</th>";
 
 		if ($yhtiorow['rivinumero_syotto'] != '') {
@@ -272,7 +297,18 @@
 
 		if ($kukarow['hinnat'] == 0) echo "<td valign='top'><input type='text' size='".(5+$yhtiorow['hintapyoristys']-2)."' name='hinta' value='$hinta'></td>";
 
-		echo "<td valign='top'><input type='text' size='5' name='ale' value='$ale'></td>";
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			echo "<td valign='top'>";
+
+			if (strpos((string) $yhtiorow['myynnin_alekentat_muokkaus'], (string) $alepostfix) !== FALSE) {
+				echo "<input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='",${'ale'.$alepostfix},"' />";
+			}
+			else {
+				echo "<input type='hidden' name='ale{$alepostfix}' value='",${'ale'.$alepostfix},"' />",${'ale'.$alepostfix};
+			}
+
+			echo "</td>";
+		}
 
 		$chke = $chkn = "";
 
@@ -326,11 +362,13 @@
 
 
 		if ($kukarow['hinnat'] == 0) {
-			$nrospanni = "4";
+			$nrospanni = 4;
 		}
 		else {
-			$nrospanni = "3";
+			$nrospanni = 3;
 		}
+
+		$nrospanni += $yhtiorow['myynnin_alekentat'] - 1;
 
 		echo "<th colspan='$nrospanni' align='left'>".t("Kommentti")."</th>";
 
@@ -384,12 +422,17 @@
 		}
 
 		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T"))) {
+
+			$nrospanni2 = 7;
+
+			$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
+
 			echo "</tr>
 				<tr>$jarjlisa
-					<th colspan='7' align='left'>".t("Tuotteen nimitys")."</th>
+					<th colspan='{$nrospanni2}' align='left'>".t("Tuotteen nimitys")."</th>
 					</tr>
 				<tr>$jarjlisa
-					<td valign='top' colspan='7'><input type='text' maxlength='100' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
+					<td valign='top' colspan='{$nrospanni2}'><input type='text' maxlength='100' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
 		}
 
 		echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'>";

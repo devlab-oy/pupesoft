@@ -101,13 +101,16 @@
 						$var		= '';
 						$hinta		= '';
 						$netto		= '';
-						$ale		= '';
 						$rivitunnus	= '';
 						$kommentti	= '';
 						$kerayspvm	= '';
 						$toimaika	= '';
 						$paikka		= '';
 						$alv		= 'X';
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							${'ale'.$alepostfix} = '';
+						}
 					}
 					else {
 						echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
@@ -172,7 +175,6 @@
 			$var		= '';
 			$hinta		= '';
 			$netto		= '';
-			$ale		= '';
 			$rivitunnus	= '';
 			$kommentti	= '';
 			$kerayspvm	= '';
@@ -180,6 +182,10 @@
 			$paikka		= '';
 			$alv		= 'X';
 			$tee = "Y";
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				${'ale'.$alepostfix} = '';
+			}
 		}
 		else {
 			$tee = "Y";

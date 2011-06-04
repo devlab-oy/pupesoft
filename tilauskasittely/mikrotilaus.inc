@@ -154,7 +154,6 @@
 				$kerayspvm			= "";
 				$hinta				= "";
 				$netto				= "";
-				$ale				= "";
 				$var				= "";
 				$alv				= "";
 				$paikka				= "";
@@ -166,10 +165,14 @@
 				$perhekielto		= "";
 				$jtkielto 		 	= $laskurow['jtkielto'];
 
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					${'ale'.$alepostfix} = "";
+				}
+
 				if ($kukarow["extranet"] == "") {
 					$toimaika 	= $rivi[$ind_Arvioitu];
 					$hinta		= str_replace(",", ".", $rivi[$ind_Hinta]);
-					$ale	  	= str_replace(",", ".", $rivi[$ind_Ale]);
+					$ale1	  	= str_replace(",", ".", $rivi[$ind_Ale]);
 					$netto 	  	= strtoupper(trim($rivi[$ind_Netto]));
 					$var  		= strtoupper(trim($rivi[$ind_Var]));
 					$kommentti	= trim($rivi[$ind_Kommentti]);
@@ -270,7 +273,6 @@
 			$var		= '';
 			$hinta		= '';
 			$netto		= '';
-			$ale		= '';
 			$rivitunnus	= '';
 			$kommentti	= '';
 			$kerayspvm	= '';
@@ -281,6 +283,10 @@
 			$perheid 	= '';
 			$perheid2  	= '';
 			$tee 		= 'Y';
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				${'ale'.$alepostfix} = '';
+			}
 		}
 		else {
 			$tuoteno	= '';
@@ -288,7 +294,6 @@
 			$var		= '';
 			$hinta		= '';
 			$netto		= '';
-			$ale		= '';
 			$rivitunnus	= '';
 			$kommentti	= '';
 			$kerayspvm	= '';
@@ -299,6 +304,10 @@
 			$perheid 	= '';
 			$perheid2  	= '';
 			$tee 		= 'Y';
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				${'ale'.$alepostfix} = '';
+			}
 		}
 	}
 

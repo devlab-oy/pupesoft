@@ -616,8 +616,11 @@
 						$tilrow["hinta"] = laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"]);
 					}
 
+					// Lasketaan alet yhteen
+					$alennukset = generoi_alekentta_php($tilrow, 'M');
+
 					// Verollinen Rivihinta. Lasketaan saman kaavan mukaan kuin laskutus.inc:ssä, eli pyöristetään kaikki kerralla lopuksi!
-					$totalvat = $tilrow["hinta"] * (1 - $tilrow["ale"] / 100) * $tilrow["kpl"];
+					$totalvat = $tilrow["hinta"] * $tilrow["kpl"] * $alennukset;
 
 					if ($yhtiorow["alv_kasittely"] != '') {
 						$totalvat = $totalvat * (1 + ($tilrow["alv"] / 100));

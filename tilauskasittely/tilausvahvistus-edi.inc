@@ -55,9 +55,15 @@ if (!file_exists($tilvahvfilenimi)) {
 		$laskurow["nippu"] = $laskurow["tunnus"];
 	}
 
+	$ale_query_select_lisa = '';
+
+	for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		$ale_query_select_lisa .= " tilausrivi.ale{$alepostfix},";
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi,
 				tilausrivi.tuoteno, tilausrivi.varattu, tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv, tilausrivi.nimitys,
-				tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro, tilausrivi.yksikko
+				tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro, tilausrivi.yksikko
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -155,7 +161,7 @@ if (!file_exists($tilvahvfilenimi)) {
 			$ulos .= "RLINCONMA:" . sprintf("%014.2f", (float) $tvtilausrivirow['hinta']) . $laskurow['valkoodi'] ."  ". $tvtilausrivirow['yksikko'] . "\n";
 			$ulos .= "RLIN21_QT:" . sprintf("%014.2f", (float) $tvtilausrivirow['tilkpl']) .  "     " . $tvtilausrivirow['yksikko'] . "\n";
 			$ulos .= "RLIN113QT:" . sprintf("%014.2f", (float) $tvtilausrivirow['varattu']) . "     " . $tvtilausrivirow['yksikko'] . "\n";
-			$ulos .= "RLIN___PA:" . sprintf("%07.2f",  (float) $tvtilausrivirow['ale']) . "\n";
+			$ulos .= "RLIN___PA:" . sprintf("%07.2f",  (float) $tvtilausrivirow['ale1']) . "\n";
 			$ulos .= "RLIN2__DT:" . tv2dateconv($tvtilausrivirow['toimaika']) . "\n";
 			$ulos .= "RLINVATTX:" . $tvtilausrivirow['alv'] . " S" . "\n";
 			$ulos .= "RLINLINFC:" . str_replace("\n", " ", $tvtilausrivirow['kommentti']) . "\n";

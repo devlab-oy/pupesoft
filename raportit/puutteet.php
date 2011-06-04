@@ -61,11 +61,13 @@
 			$rivilisa = " HAVING puutekpl <> 0 ";
 		}
 
+		$query_ale_lisa = generoi_alekentta('M');
+
 		if ($try != '') {
 			$query = "	SELECT tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus, asiakas.asiakasnro,
 						round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl, 0)),2) puutekpl,
-						round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
-						round(sum(if ((tilausrivi.var='' or tilausrivi.var='H'), tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) myyeur
+						round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
+						round(sum(if ((tilausrivi.var='' or tilausrivi.var='H'), tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) myyeur
 						FROM tilausrivi
 						LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 						LEFT JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
@@ -86,8 +88,8 @@
 		else {
 			$query = "	SELECT tilausrivi.osasto, tilausrivi.try $sellisa,
 						round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl, 0)),2) puutekpl,
-						round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
-						round(sum(if (tilausrivi.var='' or tilausrivi.var='H', tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) myyeur
+						round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
+						round(sum(if (tilausrivi.var='' or tilausrivi.var='H', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) myyeur
 						FROM tilausrivi
 						LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 						LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno

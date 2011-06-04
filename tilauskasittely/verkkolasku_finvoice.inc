@@ -669,6 +669,14 @@ if (!function_exists('finvoice_rivi')) {
 				}
 			}
 
+			if ($yhtiorow['myynnin_alekentat'] > 1) {
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					if (trim($tilrow["ale{$alepostfix}"]) > 0) {
+						$lisakomm .= "|".t("Ale")."{$alepostfix} ".$tilrow["ale{$alepostfix}"]." %";
+					}
+				}
+			}
+
 			// Siivotaan myˆs lis‰kommentti
 			$lisakomm = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
 
@@ -682,7 +690,9 @@ if (!function_exists('finvoice_rivi')) {
 				}
 			}
 
-			xml_add("RowDiscountPercent",                                    					pp($tilrow['ale'], 2),												$tootfinvoice);
+			$alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M');
+
+			xml_add("RowDiscountPercent",                                    					pp($alennukset_yhteensa, 2),										$tootfinvoice);
 			xml_add("RowVatRatePercent",                                    					pp($tilrow['alv'], 2, 5, 2),           								$tootfinvoice);
 			xml_add("RowVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",          	pp($vatamount, $yhtiorow["hintapyoristys"], 5, 2),      			$tootfinvoice);	// veron m‰‰r‰
 			xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",  	pp($tilrow['rivihinta'], $yhtiorow["hintapyoristys"], 5, 2),      	$tootfinvoice);	// veroton rivihinta

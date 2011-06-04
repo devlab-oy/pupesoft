@@ -443,7 +443,7 @@
 						$nimitys = str_replace("\n", ";", $nimitys);
 						$ulos .= sprintf ('%-40.40s', $nimitys);
 						$ulos .= sprintf ('%011.11s', abs($laskurivi['hinta'] * 100)); // Price w/o VAT
-						$ulos .= sprintf ('%02.2s', abs($laskurivi['ale'])); // Discount percent
+						$ulos .= sprintf ('%02.2s', abs($laskurivi['ale1'])); // Discount percent
 						$ulos .= sprintf ('%011.11s', abs($laskurivi['rivihinta'] * 100)); // Row price
 
 						if ($laskurivi['rivihinta'] < 0) {

@@ -185,7 +185,11 @@
 				$worksheet->writeString($excelrivi,  6, t("Aleryhmä", $hinkieli), $format_bold);
 				$worksheet->writeString($excelrivi,  7, t("Veroton Myyntihinta", $hinkieli), $format_bold);
 				$worksheet->writeString($excelrivi,  8, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
-				$worksheet->writeString($excelrivi,  9, t("Alennus", $hinkieli), $format_bold);
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$worksheet->writeString($excelrivi,  9, t("Alennus{$alepostfix}", $hinkieli), $format_bold);
+				}
+
 				$worksheet->writeString($excelrivi, 10, t("Sinun veroton hinta", $hinkieli), $format_bold);
 				$worksheet->writeString($excelrivi, 11, t("Sinun verollinen hinta", $hinkieli), $format_bold);
 				$excelrivi++;
@@ -218,11 +222,23 @@
 				$laskurow["alv"] 			= $asiakasrow["alv"];
 				$laskurow["valkoodi"]		= $asiakasrow["valkoodi"];
 
-				$hinnat = alehinta($laskurow, $alehinrrow, 1, '', '', '', "hinta,netto,ale,alehinta_alv,alehinta_val,hintaperuste,aleperuste", $GLOBALS['eta_yhtio']);
+				$palautettavat_kentat = "hinta,netto,alehinta_alv,alehinta_val,hintaperuste,aleperuste";
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$palautettavat_kentat .= ",ale{$alepostfix}";
+				}
+
+				$hinnat = alehinta($laskurow, $alehinrrow, 1, '', '', '', $palautettavat_kentat, $GLOBALS['eta_yhtio']);
+
+				$hinnat['erikoisale'] = $asiakasrow["erikoisale"];
 
 				$hinta 			= $hinnat["hinta"];
 				$netto 			= $hinnat["netto"];
-				$ale 			= $hinnat["ale"];
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					${'ale'.$alepostfix} = $hinnat["ale{$alepostfix}"];
+				}
+
 				$alehinta_alv	= $hinnat["alehinta_alv"];
 				$alehinta_val	= $hinnat["alehinta_val"];
 
@@ -238,7 +254,9 @@
 				}
 
 				if ($netto == "") {
-					$asiakashinta = hintapyoristys($hinta * (1-($ale/100)));
+					$alennukset = generoi_alekentta_php($hinnat, 'M', 'kerto');
+
+					$asiakashinta = hintapyoristys($hinta * $alennukset);
 				}
 				else {
 					$asiakashinta = $hinta;
@@ -275,11 +293,13 @@
 					$worksheet->writeNumber($excelrivi, 7, $veroton);
 					$worksheet->writeNumber($excelrivi, 8, $verollinen);
 
-					if ($netto != "") {
-						$worksheet->writeString($excelrivi, 9, t("Netto", $hinkieli));
-					}
-					else {
-						$worksheet->writeNumber($excelrivi, 9, sprintf('%.2f',$ale));
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						if ($netto != "") {
+							$worksheet->writeString($excelrivi, 9, t("Netto", $hinkieli));
+						}
+						else {
+							$worksheet->writeNumber($excelrivi, 9, sprintf('%.2f',${'ale'.$alepostfix}));
+						}
 					}
 
 					$worksheet->writeNumber($excelrivi, 10, hintapyoristys($asiakashinta_veroton));

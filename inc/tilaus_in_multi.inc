@@ -93,7 +93,6 @@ while ($rivi = fgets($fd)) {
 			$kerayspvm	     = $laskurow["kerayspvm"];
 			$hinta 		     = str_replace(",", ".", $rivi[6]);
 			$netto 		     = strtoupper(trim($rivi[8]));
-			$ale 		     = str_replace(",", ".", $rivi[7]);
 			$alv		     = str_replace(",", ".", $rivi[4]);
 			$var			 = strtoupper(trim($rivi[9]));
 			$varasto 	     = "";
@@ -104,6 +103,11 @@ while ($rivi = fgets($fd)) {
 			$myy_sarjatunnus = "";
 			$kommentti		 = trim($rivi[10]);
 			$paikka			 = "";
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				if ($alepostfix == 1) ${'ale'.$alepostfix} = str_replace(",", ".", $rivi[7]);
+				else ${'ale'.$alepostfix} = '';
+			}
 
 			if ($hinta == 0) {
  				$hinta = "";

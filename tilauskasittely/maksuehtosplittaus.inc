@@ -18,15 +18,17 @@
 
 		$tulos_ulos_ehtosplit .= sprintf(t("Tilauksella %s on moniehto-maksuehto. Se jaettiin nyt kahdeksi tilaukseksi jakoprosentilla %s"), $laskurow["tunnus"], $mrow["summanjakoprososa2"])."<br>\n";
 
+		$query_ale_lisa = generoi_alekentta('M');
+
 		if ($yhtiorow["alv_kasittely"] == '') {
-			$query = "	SELECT round((varattu*hinta*(1-(ale/100)))/(1+alv/100),2) rivihinta, netto
+			$query = "	SELECT round((varattu*hinta*{$query_ale_lisa})/(1+alv/100),2) rivihinta, netto
 						FROM tilausrivi
 						WHERE otunnus 	= '$laskurow[tunnus]'
 						and yhtio	  	= '$kukarow[yhtio]'
 						and tyyppi		= 'L'";
 		}
 		else {
-			$query = "	SELECT round((varattu*hinta*(1-(ale/100))),2) rivihinta, netto
+			$query = "	SELECT round((varattu*hinta*{$query_ale_lisa}),2) rivihinta, netto
 						FROM tilausrivi
 						WHERE otunnus 	= '$laskurow[tunnus]'
 						and yhtio	  	= '$kukarow[yhtio]'

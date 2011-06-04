@@ -278,6 +278,8 @@
 					$gluku++;
 				}
 
+				$query_ale_lisa = generoi_alekentta('O');
+
 				// Tehdään query
 				$query = "SELECT $select";
 
@@ -297,11 +299,11 @@
 						$loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)-1));
 
 						//Osto
-						$query .= " sum(if($pvmvar >= '$alku'  and $pvmvar <= '$loppu', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Ostot")."', ";
+						$query .= " sum(if($pvmvar >= '$alku'  and $pvmvar <= '$loppu', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*{$query_ale_lisa},0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Ostot")."', ";
 
 						//Ostoed
 						if ($piiloed == "") {
-							$query .= " sum(if($pvmvar >= '$alku_ed'  and $pvmvar <= '$loppu_ed', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Ostot")."', ";
+							$query .= " sum(if($pvmvar >= '$alku_ed'  and $pvmvar <= '$loppu_ed', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*{$query_ale_lisa},0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Ostot")."', ";
 						}
 
 						if ($piilota_kappaleet == "") {
@@ -321,12 +323,12 @@
 				}
 				else {
 					//Osto
-					$query .= " sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) ostonyt, ";
+					$query .= " sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*{$query_ale_lisa},0)) ostonyt, ";
 
 					//Ostoed
 					if ($piiloed == "") {
-						$query .= " sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)) ostoed, ";
-						$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0))/sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*(1-tilausrivi.ale/100),0)),2) ostoind, ";
+						$query .= " sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*{$query_ale_lisa},0)) ostoed, ";
+						$query .= " round(sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*{$query_ale_lisa},0))/sum(if($pvmvar >= '$vvaa-$kka-$ppa'  and $pvmvar <= '$vvll-$kkl-$ppl', tilausrivi.hinta*lasku.vienti_kurssi*tilausrivi.kpl*{$query_ale_lisa},0)),2) ostoind, ";
 					}
 
 					$query .= " sum(if($pvmvar >= '$vva-$kka-$ppa'  and $pvmvar <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) ostoarvonyt, ";

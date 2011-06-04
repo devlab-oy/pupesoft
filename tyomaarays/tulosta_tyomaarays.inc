@@ -674,9 +674,31 @@ if (!function_exists('rivi')) {
 			$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
 			$pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["hinta"]), 				$thispage, $norm);
 
-			if ($row["ale"] > 0) {
-				$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
-				$pdf->draw_text(515-$oikpos, $kala, ($row["ale"]*1)."%", 							$thispage, $norm);
+			$ed_ale = array();
+			$lisakala = '';
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+
+				if (trim($row["ale{$alepostfix}"]) != 0) {
+					if ($alepostfix > 1) {
+						if (count($ed_ale) > 0) {
+							$lisakala .= "+";
+						}
+						$lisakala .= ($row["ale{$alepostfix}"] * 1);
+					}
+					else {
+						$lisakala .= ($row["ale{$alepostfix}"] * 1);
+					}
+
+					$ed_ale[$alepostfix] = $row["ale{$alepostfix}"];
+				}
+			}
+
+			if (trim($lisakala) != '') {
+				list($ff_string, $ff_font) = pdf_fontfit($lisakala, 56, $pdf, $norm);
+
+				$oikpos = $pdf->strlen($ff_string, $ff_font);
+				$pdf->draw_text(515-$oikpos, $kala, $ff_string, $thispage, $norm);
 			}
 
 			$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);

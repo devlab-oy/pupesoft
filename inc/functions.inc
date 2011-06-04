@@ -262,7 +262,9 @@ if (!function_exists("avoin_kori")) {
 			if (mysql_num_rows($result) == 1) {
 				$laskurow = mysql_fetch_assoc($result);
 
-				$query = "	SELECT round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),$yhtiorow[hintapyoristys]) summa
+				$query_ale_lisa = generoi_alekentta('M');
+
+				$query = "	SELECT round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),$yhtiorow[hintapyoristys]) summa
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi != 'D'";
 				$result = pupe_query($query);
@@ -2154,14 +2156,6 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 					$laskurow["vienti_kurssi"] = 1;
 				}
 
-				// jos erikoisale niin otetaan sitä kanssa huomioon
-				if ($laskurow['erikoisale'] <> 0) {
-					$erikoisale = 1 - ($laskurow['erikoisale']/100);
-				}
-				else {
-					$erikoisale = 1;
-				}
-
 				// Tarkastetaan onko taricit käytössä
 				$tv_kaytossa = FALSE;
 
@@ -2196,8 +2190,11 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 						$alvit = 1;
 					}
 
+					$alennukset = generoi_alekentta_php($tilrivirow, 'O', 'kerto');
+
 					if ($laskurow['summa'] != 0) {
-						$osuus   = round($erikoisale*$tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin'],2)/$laskurow['summa'];	// kuinka paljon tämä rivi on koko tilauksesta
+						$osuus   = round($tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$alennukset*$tuorow['tuotekerroin'],2)/$laskurow['summa'];	// kuinka paljon tämä rivi on koko tilauksesta
+
 						$rahtios = $osuus*$rahtikulut;	// lasketaan sama osuus rahtikuluista tälle riville
 					}
 					else {
@@ -2208,7 +2205,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 						$rahtios = $rahtios * -1;
 					}
 
-					$ohinta  = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu']+$rahtios,6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
+					$ohinta  = round($tilrivirow['hinta']*$alennukset*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu']+$rahtios,6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
 					$tulliprossa = 0;
 
@@ -2958,9 +2955,6 @@ if (!function_exists("alehinta")) {
 		HUOM: tarkista kaikki nämä koodit "if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {" kun muutat ale ja hintaperusteita!
 		REGEXP: if \(\$[^\[]*\["hinnastoon"\] == "V" and \(\$[^\[]*\["hintaperuste"\] > 13 or \$[^\[]*\["hintaperuste"\] === FALSE\) and \(\$[^\[]*\["aleperuste"\] > 12 or \$[^\[]*\["aleperuste"\] === FALSE\)\)
 		*/
-
-		// HUOM: VÄLIAIKAINEN TAAKSEPÄIN YHTEENSOPIVUUS!!!!!!
-		$ale = array("ale1" => $ale);
 
 		// Varmistetaan, että määrä on ok
 		$kpl = (float) $kpl;
@@ -4856,7 +4850,7 @@ if (!function_exists("alehinta")) {
 			}
 
 			// 13. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) (Vain ykköstason alennus voidaan tallentaa tähän)
-			if (jatka_ale($ale)) {
+			if (!isset($ale["ale1"])) {
 
 				$query = "	SELECT alennus
 							FROM perusalennus
@@ -4891,9 +4885,6 @@ if (!function_exists("alehinta")) {
 			}
 		}
 
-		// HUOM: VÄLIAIKAINEN TAAKSEPÄIN YHTEENSOPIVUUS!!!!!!
-		$ale = (float) $ale["ale1"];
-
 		$debug = 0;
 		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ",var_dump($ale)," ".t("% HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
 
@@ -4920,6 +4911,10 @@ if (!function_exists("alehinta")) {
 
 				$palauta = trim($palauta);
 
+				if (substr($palauta, 0, 3) == 'ale' and is_numeric($palauta{strlen($palauta) - 1})) {
+					extract($ale);
+				}
+
 				if (isset(${$palauta})) {
 					$ret[$palauta] = ${$palauta};
 				}
@@ -4934,6 +4929,182 @@ if (!function_exists("alehinta")) {
 		else {
 			return array($hinta, $netto, $ale, $alehinta_alv, $alehinta_val);
 		}
+	}
+}
+
+if (!function_exists("generoi_alekentta_php")) {
+	function generoi_alekentta_php ($row, $tyyppi, $tapa = '') {
+		global $yhtiorow;
+
+		if ($row["netto"] == "N") {
+			return 1;
+		}
+
+		if ($tyyppi == 'M') {
+			$maara = $yhtiorow['myynnin_alekentat'];
+		}
+		elseif ($tyyppi == 'O')  {
+			$maara = 1;
+		}
+		else {
+			$maara = 1;
+		}
+
+		if (trim($tapa) == '') {
+			$row_ale_lisa_1 = 0;
+			$row_ale_lisa_2 = 1;
+
+			for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
+				$row_ale_lisa_1 += $row["ale{$alepostfix}"];
+
+				if ($row["ale{$alepostfix}"] != 0) {
+					$row_ale_lisa_2 *= $row["ale{$alepostfix}"];
+				}
+			}
+
+			$erikoisale = $row["erikoisale"] != 0 ? $row["erikoisale"] : 1;
+
+			$ale = round((1 - ($row_ale_lisa_1 + $row["erikoisale"] - ($row_ale_lisa_2 * $erikoisale / 100)) / 100), 2);
+		}
+		else if ($tapa == 'erikseen') {
+			$ale = array();
+
+			for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
+				if ($alepostfix == 1) {				
+					if ($row["ale{$alepostfix}"] != 0) {
+						$ale["ale{$alepostfix}"] = (1 - (1 - $row["ale{$alepostfix}"] / 100) * (1 - $row["erikoisale"] / 100)) * 100;
+					}
+					else {
+						$ale["ale{$alepostfix}"] = 0;
+					}
+				}
+				else {
+					if ($row["ale{$alepostfix}"] != 0) {
+						$ale["ale{$alepostfix}"] = (1 - $row["ale{$alepostfix}"] / 100) * 100;
+					}
+					else {
+						$ale["ale{$alepostfix}"] = 0;
+					}
+				}
+			}
+		}
+		else if ($tapa == 'plain') {
+			$ale = 1;
+
+			for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
+				$ale *= (1 - $row["ale{$alepostfix}"] / 100);
+			}
+
+			$ale *= (1 - $row["erikoisale"] / 100);
+
+			$ale = (1 - $ale) * 100;
+		}
+		else if ($tapa == 'kerto') {
+			$ale = 1;
+
+			for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
+				$ale *= (1 - $row["ale{$alepostfix}"] / 100);
+			}
+
+			$ale *= (1 - $row["erikoisale"] / 100);
+		}
+
+		return $ale;
+	}
+}
+
+if (!function_exists("generoi_alekentta_select")) {
+	function generoi_alekentta_select ($tapa, $tyyppi) {
+		global $yhtiorow;
+
+		// lasketaanko kentät yhteen vai palautetaanko ne erikseen
+		// $tapa = 'yhteen' tai $tapa = 'erikseen'
+		// otetaan huomioon aina erikoisale
+
+		if ($tyyppi == 'M') {
+			$maara = $yhtiorow['myynnin_alekentat'];
+		}
+		elseif ($tyyppi == 'O')  {
+			$maara = 1;
+		}
+		else {
+			$maara = 1;
+		}
+
+		// jos halutaan käyttää jotain omaa tilausrivin taulun nimeä
+		$prefix = 'tilausrivi';
+
+		if ($tapa == 'erikseen') {
+
+			$return = '';
+
+			for ($i = 1; $i <= $maara; $i++) {
+				$return .= " {$prefix}.ale{$i},";
+			}
+		}
+		else if ($tapa == 'yhteen') {
+			$query_1 = $query_2 = '';
+
+			for ($i = 1; $i <= $maara; $i++) {
+
+				if ($i == 1) {
+					$query_1 = "{$prefix}.ale{$i}";
+					$query_2 = "if({$prefix}.ale{$i}=0, 1, {$prefix}.ale{$i})";
+				}
+				else {
+					$query_1 .= " + {$prefix}.ale{$i}";
+					$query_2 .= " * if({$prefix}.ale{$i}=0, 1, {$prefix}.ale{$i})";
+				}
+			}
+
+			$return = "round((1 - (1 - ({$query_1} + {$prefix}.erikoisale - ({$query_2} * if({$prefix}.erikoisale=0, 1, {$prefix}.erikoisale) / 100)) / 100)) * 100, 2)";
+		}
+
+		return $return;
+	}
+}
+
+
+if (!function_exists("generoi_alekentta")) {
+	function generoi_alekentta ($tyyppi, $prefix = '', $ei_erikoisale = '') {
+		global $yhtiorow;
+	
+		if ($tyyppi == 'M') {
+			$maara = $yhtiorow['myynnin_alekentat'];
+		}
+		elseif ($tyyppi == 'O')  {
+			$maara = 1;
+		}
+		else {
+			$maara = 1;
+		}
+
+		# #######################################
+		# ############## ESIMERKIT ##############
+		# #######################################
+		# $_netto = "if (tilausrivi.netto='N', ((0, (1-(tilausrivi.ale+tilausrivi.ale2+tilausrivi.ale3+$laskurow[erikoisale]-(tilausrivi.ale*tilausrivi.ale2*tilausrivi.ale3*$laskurow[erikoisale]/100))/100))";
+
+		$query_1 = $query_2 = '';
+		$ale = '';
+
+		// jos halutaan käyttää jotain omaa tilausrivin taulun nimeä
+		$prefix = trim($prefix) != '' ? trim($prefix) : 'tilausrivi';
+
+		for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
+			if ($alepostfix > 1) {
+				$ale .= "*";
+			}
+
+			$ale .= "(1 - {$prefix}.ale{$alepostfix} / 100)";
+		}
+
+		if (!$ei_erikoisale) {
+			$ale .= "* (1 - {$prefix}.erikoisale / 100)";
+		}
+
+		$return = "if ({$prefix}.netto='N', 1, {$ale})";
+
+		return $return;
 	}
 }
 
@@ -5106,9 +5277,12 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 		$ostorow = mysql_fetch_assoc($otsores);
 
 		if ($ostorow["tunnukset"] != '') {
+
+			$query_ale_lisa = generoi_alekentta('M');
+
 			$query = "	SELECT
 						sum(tilausrivi.rivihinta/tilausrivi.kpl) ostosumma,
-						sum(tilausrivi.hinta * (1-(tilausrivi.ale/100))) ostosumma_eiloppulaskettu
+						sum(tilausrivi.hinta * {$query_ale_lisa}) ostosumma_eiloppulaskettu
 						FROM tilausrivi
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tunnus  IN ($ostorow[tunnukset])";
@@ -7843,9 +8017,12 @@ if (!function_exists("hae_rahtimaksu")) {
 		}
 		// meillä on tilauksen hintaan perustuva hinnoittelu
 		elseif ($yhtiorow["rahti_hinnoittelu"] == "o") {
+
+			$query_ale_lisa = generoi_alekentta('M');
+
 			// alvittomat hinnat
 			if ($yhtiorow["alv_kasittely"] == '') {
-				$query = "	SELECT round(((tilausrivi.varattu + tilausrivi.kpl + tilausrivi.jt) * tilausrivi.hinta * (1 - (tilausrivi.ale / 100))) / (1 + tilausrivi.alv / 100), '$yhtiorow[hintapyoristys]') rivihinta, tilausrivi.netto
+				$query = "	SELECT round(((tilausrivi.varattu + tilausrivi.kpl + tilausrivi.jt) * tilausrivi.hinta * {$query_ale_lisa}) / (1 + tilausrivi.alv / 100), '$yhtiorow[hintapyoristys]') rivihinta, tilausrivi.netto
 							FROM tilausrivi
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.erikoistoimitus_myynti = 0)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -7853,7 +8030,7 @@ if (!function_exists("hae_rahtimaksu")) {
 							AND tilausrivi.otunnus in ($otsikot)";
 			}
 			else {
-				$query = "	SELECT round(((tilausrivi.varattu + tilausrivi.kpl + tilausrivi.jt) * tilausrivi.hinta * (1 - (tilausrivi.ale / 100))), '$yhtiorow[hintapyoristys]') rivihinta, tilausrivi.netto
+				$query = "	SELECT round(((tilausrivi.varattu + tilausrivi.kpl + tilausrivi.jt) * tilausrivi.hinta * {$query_ale_lisa}), '$yhtiorow[hintapyoristys]') rivihinta, tilausrivi.netto
 							FROM tilausrivi
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.erikoistoimitus_myynti = 0)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -7950,12 +8127,12 @@ if (!function_exists("hae_rahtimaksu")) {
 						AND rahti_tuotenumero != ''";
 			$rahti_tuoteno_result = pupe_query($query);
 
-			$ale = 0;
+			$ale_kaikki_array = array();
 
 			if (mysql_num_rows($rahti_tuoteno_result) > 0) {
 				$rahti_tuoteno_row = mysql_fetch_assoc($rahti_tuoteno_result);
 
-				$query = "	SELECT alennus
+				$query = "	SELECT alennus, alennuslaji
 							FROM asiakasalennus
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND asiakas = '$laskurow[liitostunnus]'
@@ -7963,12 +8140,13 @@ if (!function_exists("hae_rahtimaksu")) {
 				$rahti_alennus_result = pupe_query($query);
 
 				if (mysql_num_rows($rahti_alennus_result) > 0) {
-					$rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result);
-					$ale = $rahti_alennus_row['alennus'];
+					while ($rahti_alennus_row = mysql_fetch_assoc($rahti_alennus_result)) {
+						$ale_kaikki_array['ale'.$rahti_alennus_row['alennuslaji']] = $rahti_alennus_row['alennus'];
+					}
 				}
 			}
 
-			return array('rahtihinta' => $hirow["rahtihinta"], 'alennus' => $ale);
+			return array('rahtihinta' => $hirow["rahtihinta"], 'alennus' => $ale_kaikki_array);
 		}
 		else {
 			return 0;
@@ -10897,7 +11075,7 @@ if (!function_exists('hae_suuntalava')) {
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio
 										AND suuntalavat.keraysvyohyke = tuote.keraysvyohyke
-										AND (suuntalavat.keikkatunnus = {$otunnus} or suuntalavat.keikkatunnus = 0)
+										AND suuntalavat.keikkatunnus IN (0, {$otunnus})
 										AND suuntalavat.tila = ''
 										AND (concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0'),lpad(upper(alkuhyllyvali),  5, '0'),lpad(upper(alkuhyllytaso),  5, '0')) <= concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) or alkuhyllyalue = '')
 										AND (concat(rpad(upper(loppuhyllyalue),  5, '0'),lpad(upper(loppuhyllynro),  5, '0'),lpad(upper(loppuhyllyvali),  5, '0'),lpad(upper(loppuhyllytaso),  5, '0')) >= concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) or loppuhyllyalue = ''))
@@ -12267,9 +12445,11 @@ if (!function_exists("hae_hyvityshinta")) {
 		$tuoteres = pupe_query($status);
 		$tuoterow = mysql_fetch_assoc($tuoteres);
 
+		$query_ale_lisa = generoi_alekentta('M');
+
 		// Haetaan asiakkaan laskutetut/toimitetut veloitusrivit + toisella queryllä hyvitysrivit
 		$query = "	(SELECT datediff(now(), if(tilausrivi.laskutettuaika='0000-00-00', now(), tilausrivi.laskutettuaika)) AS ika,
-					tilausrivi.hinta * if (tilausrivi.netto = 'N', 1, (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100)) hinta,
+					tilausrivi.hinta * {$query_ale_lisa} hinta,
 					sum(tilausrivi.kpl + tilausrivi.varattu) kpl
 					FROM lasku
 					JOIN tilausrivi USE index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
@@ -12286,7 +12466,7 @@ if (!function_exists("hae_hyvityshinta")) {
 					UNION
 
 					(SELECT datediff(now(), if(tilausrivi.laskutettuaika='0000-00-00', now(), tilausrivi.laskutettuaika)) AS ika,
-					tilausrivi.hinta * if (tilausrivi.netto = 'N', 1, (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100)) hinta,
+					tilausrivi.hinta * {$query_ale_lisa} hinta,
 					sum(tilausrivi.kpl  +tilausrivi.varattu) kpl
 					FROM tilausrivi USE index (yhtio_tyyppi_tuoteno_varattu)
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio

@@ -114,11 +114,17 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		$laskurow["nippu"] = $laskurow["tunnus"];
 	}
 
+	$ale_query_select_lisa = '';
+
+	for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		$ale_query_select_lisa .= " tilausrivi.ale{$alepostfix},";
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
 				tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
-				tilausrivi.nimitys,	tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.var
+				tilausrivi.nimitys,	tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -220,7 +226,9 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			$ulos .= sprintf("%".$hinta_pituus.".".$hinta_pituus."s", t("Hinta", $kieli));
 			$ulos .= sprintf("%4.4s", t("Val", $kieli));
 			if ($naytatvale != 4) {
-				$ulos .= sprintf("%7.7s", t("Ale", $kieli));
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ulos .= sprintf("%7.7s", t("Ale{$alepostfix}", $kieli));
+				}
 			}
 		}
 
@@ -234,7 +242,9 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		if ($naytatvale != 3) {
 			$liite .= "\t".t("Hinta", $kieli);
 			if ($naytatvale != 4) {
-				$liite .= "\t".t("Ale", $kieli);
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$liite .= "\t".t("Ale{$alepostfix}", $kieli);
+				}
 			}
 		}
 
@@ -287,7 +297,9 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 				$ulos .= sprintf("%6.s"  ,$tvtilausrivirow['aleryhma']);
 			}
 			else {
-				$ulos .= sprintf("%5.s"  ,$tvtilausrivirow['ale'])."%";
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ulos .= sprintf("%5.s"  ,$tvtilausrivirow["ale{$alepostfix}"])."%";
+				}
 			}
 
 			$ulos .= "\n";
@@ -320,7 +332,9 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 				$liite .= $tvtilausrivirow['aleryhma'];
 			}
 			else {
-				$liite .= $tvtilausrivirow['ale'];
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$liite .= $tvtilausrivirow["ale{$alepostfix}"];
+				}
 			}
 			$liite .= "\n";
 		}

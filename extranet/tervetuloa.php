@@ -51,7 +51,6 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 		$kerayspvm	     = $laskurow["kerayspvm"];
 		$hinta 		     = "";
 		$netto 		     = "";
-		$ale 		     = "";
 		$alv		     = "";
 		$var			 = "";
 		$varasto 	     = $laskurow["varasto"];
@@ -61,6 +60,9 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 		$varataan_saldoa = "";
 		$paikka	= "";
 
+		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+			${'ale'.$alepostfix} = "";
+		}
 
 		// jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
 		if (file_exists("../tilauskasittely/lisaarivi.inc")) {
@@ -85,7 +87,6 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 	$kerayspvm	     = "";
 	$hinta 		     = "";
 	$netto 		     = "";
-	$ale 		     = "";
 	$alv		     = "";
 	$var			 = "";
 	$varasto 	     = "";
@@ -95,6 +96,9 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 	$paikka			 = "";
 	$tee 			 = "";
 
+	for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+		${'ale'.$alepostfix} = "";
+	}
 }
 
 if ($tee == '') {
@@ -224,7 +228,7 @@ if ($tee == '') {
 						$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
 						$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
 
-						list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($temp_laskurowwi, $trow, 1, '', '', '');
+						list($hinta, $netto, $ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($temp_laskurowwi, $trow, 1, '', '', '');
 
 						if ($temp_laskurowwi['valkoodi'] != "" and $temp_laskurowwi['valkoodi'] != $yhtiorow["valkoodi"]) {
 							// katotaan onko tuotteelle maakohtaisia valuuttahintoja

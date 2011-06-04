@@ -60,9 +60,13 @@
 				<th>".t("Tuoteno")."</th>
 				<th>".t("M‰‰r‰")."</th>
 				<th>".t("M‰‰r‰")."</th>
-				<th>".t("Hinta")."</th>
-				<th>".t("Ale")."</th>
-				<th>".t("Alv")."</th>
+				<th>".t("Hinta")."</th>";
+
+				for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+					echo "<th>",t("Ale"),"{$alepostfix}</th>";
+				}
+
+		echo 	"<th>".t("Alv")."</th>
 				<th>".t("Viestit")."</th>
 				<td class='back'></td>
 				</tr>";
@@ -89,8 +93,11 @@
 
 		echo "<td>$kpl</td>
 			<td><input type='text' size='7' name='kpl' value = '$kpl'></td>
-			<td><input type='text' size='7' name='hinta' value = '$hinta'></td>
-			<td><input type='text' size='5' name='ale' value = '$ale'></td>";
+			<td><input type='text' size='7' name='hinta' value = '$hinta'></td>";
+
+		for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+			echo "<td><input type='text' size='5' name='ale{$alepostfix}' value = '",${'ale'.$alepostfix},"'></td>";
+		}
 
 		if ($alv=='') $alv=$laskurow['alv'];
 

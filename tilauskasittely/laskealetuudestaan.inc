@@ -44,7 +44,8 @@
 					FROM asiakasalennus
 					WHERE yhtio='$kukarow[yhtio]' and ryhma = '$trow[aleryhma]' and ytunnus = '$laskurow[ytunnus]'";
 		$aleresult = mysql_query($query) or pupe_error($query);
-		
+
+		// TODO: Tämä koko osio on mystistä paskaa!
 		if (mysql_num_rows($aleresult) != 0) {
 			$alerow = mysql_fetch_array ($aleresult);
 			
@@ -54,14 +55,25 @@
 				$debug = 0;
 		
 				if ($debug == 1) {
-					echo "vienti=$vienti alv=$alv netto=$netto akplhinta=$akplhinta aale=$aale rowtilkpl=$jjrow[tilkpl] rowalv=$jjrow[alv] rowhinta=$jjrow[hinta] rowale=$jjrow[ale] apuroytunnus=$apuro[ytunnus] ytunnus=$ytunnus apuroytunnus=$apuro[ytunnus] mista=$mista tunnus=$tunnus<br>";
+					echo "vienti=$vienti alv=$alv netto=$netto akplhinta=$akplhinta aale=$aale rowtilkpl=$jjrow[tilkpl] rowalv=$jjrow[alv] rowhinta=$jjrow[hinta] ";
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						echo "rowale{$alepostfix}=",$jjrow["ale{$alepostfix}"]," ";
+					}
+					echo "apuroytunnus=$apuro[ytunnus] ytunnus=$ytunnus apuroytunnus=$apuro[ytunnus] mista=$mista tunnus=$tunnus<br>";
 					echo "jrowtunnus=$jjrow[tunnus]<br>";
 			    }
 	    
 				list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $jjrow['tilkpl'], '', '', '');			
 				list($hinta, $alv) = alv($laskurow, $trow, $hinta, $jjrow["alv"], $alehinta_alv);
 
-				$query = "UPDATE tilausrivi set hinta='$hinta', ale='$ale', netto='$netto', alv='$alv' where yhtio='$kukarow[yhtio]' and tunnus='$jjrow[tunnus]'";
+				$ale_query_update_lisa = '';
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					$ale_query_update_lisa .= " ale{$alepostfix} = '".$ale["ale{$alepostfix}"]."', ";
+				}
+
+				$query = "UPDATE tilausrivi set hinta='$hinta', {$ale_query_update_lisa} netto='$netto', alv='$alv' where yhtio='$kukarow[yhtio]' and tunnus='$jjrow[tunnus]'";
 				$tres  = mysql_query($query) or pupe_error($query);
 				
 				if ($debug == 1) {
@@ -70,7 +82,11 @@
 				
 				$netto	= '';
 				$hinta	= 0;
-				$ale	= 0;
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					${'ale'.$alepostfix} = 0;
+				}
+
 				$alv	= 0;
 			}
 		}

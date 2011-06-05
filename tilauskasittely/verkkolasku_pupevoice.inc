@@ -213,7 +213,11 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("DeliveryDate",						vlas_dateconv($tilrow['toimitettuaika']),	$tootxml);
 		xml_add("UnitPrice",						$tilrow['hinta'], 							$tootxml);
 		xml_add("RowIdentifier",					$tilrow['tilaajanrivinro'], 				$tootxml); // tänne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
-		xml_add("RowDiscountPercent",				$tilrow['ale1'], 							$tootxml);
+
+		$alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M', 'plain');
+
+		xml_add("RowDiscountPercent",				$alennukset_yhteensa,						$tootxml);
+
 		xml_add("RowVatRatePercent",				$tilrow['alv'], 							$tootxml);
 		xml_add("RowVatAmount",						$vatamount, 								$tootxml); // veron määrä
 		xml_add("RowTotalVatExcludedAmount",		$tilrow['rivihinta'],		 				$tootxml); // veroton rivihinta
@@ -289,6 +293,18 @@ if (!function_exists('pupevoice_rivi')) {
 
 				$tilrow["kommentti"] = trim($lisakomm)."|".trim($tilrow["kommentti"]);
 			}
+		}
+
+		if ($yhtiorow['myynnin_alekentat'] > 1) {
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				if (trim($tilrow["ale{$alepostfix}"]) > 0) {
+					$tilrow["kommentti"] .= "|".t("Ale")."{$alepostfix} ".$tilrow["ale{$alepostfix}"]." %";
+				}
+			}
+		}
+
+		if ($tilrow['erikoisale'] > 0) {
+			$tilrow["kommentti"] .= "|".t("Erikoisale")." ".$tilrow["erikoisale"]." %";
 		}
 
 		xml_add("RowFreeText", substr(trim($tilrow["kommentti"]), 0, 512),		$tootxml);

@@ -677,6 +677,10 @@ if (!function_exists('finvoice_rivi')) {
 				}
 			}
 
+			if ($tilrow['erikoisale'] > 0) {
+				$lisakomm .= "|".t("Erikoisale")." ".$tilrow["erikoisale"]." %";
+			}
+
 			// Siivotaan myös lisäkommentti
 			$lisakomm = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
 
@@ -690,7 +694,7 @@ if (!function_exists('finvoice_rivi')) {
 				}
 			}
 
-			$alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M');
+			$alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M', 'plain');
 
 			xml_add("RowDiscountPercent",                                    					pp($alennukset_yhteensa, 2),										$tootfinvoice);
 			xml_add("RowVatRatePercent",                                    					pp($tilrow['alv'], 2, 5, 2),           								$tootfinvoice);

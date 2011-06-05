@@ -177,7 +177,7 @@
 			}
 
 		   	$edi_order .= "*ME\n";
-		   	$edi_order .= "*IE";
+		   	$edi_order .= "*IE\n";
 
 			$edipolku = "/tmp";
 

@@ -324,7 +324,7 @@
 			echo "</table></td></tr></table><br>";
 
 
-			$ale_query_lisa = generoi_alekentta_select('erikseen', 'M');
+			$ale_query_lisa = generoi_alekentta('M');
 
 			$query = "	SELECT tilausrivi.*, lasku.ytunnus, tilausrivi.varattu+tilausrivi.jt kpl, lasku.nimi, tilausrivi.toimaika, round((tilausrivi.varattu+tilausrivi.jt)*tilausrivi.hinta*{$ale_query_lisa},2) rivihinta
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)

@@ -2,6 +2,10 @@
 
 require ("inc/parametrit.inc");
 
+// Laitetaan max time 5H
+ini_set("max_execution_time", 18000);
+ini_set("mysql.connect_timeout", 600);
+
 echo "<font class='head'>".t("Alkusynkronointi")."</font><hr>";
 
 if (!isset($tee)) $tee = "";
@@ -52,7 +56,7 @@ if ($tee == "SYNK") {
 					JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = yhtio.yhtio)
 					WHERE konserni = '$yhtiorow[konserni]'
 					AND (synkronoi = '$table' or synkronoi like '$table,%' or synkronoi like '%,$table,%' or synkronoi like '%,$table' or synkronoi like '%,$table|%' or synkronoi like '$table|%')";
-		$kohderes = mysql_query($query) or pupe_error($query);
+		$kohderes = pupe_query($query);
 		$kohderow = mysql_fetch_array($kohderes);
 
 		if (strlen($kohderow["yhtiot"]) == 0) {
@@ -71,12 +75,15 @@ if ($tee == "SYNK") {
 
 		$group = substr($group, 0, -1);
 
+		$query = "LOCK TABLES yhtio READ, yhtion_parametrit READ, synclog WRITE, $table WRITE";
+		$abures = pupe_query($query);
+
 		$query = "	SELECT group_concat(tunnus) tunnukset
 					FROM $table
 					WHERE yhtio in ($kohderow[yhtiot])
 					$lajit
 					$group";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 
 		while ($aburow = mysql_fetch_array($abures)) {
 			$query = "	SELECT *
@@ -84,12 +91,17 @@ if ($tee == "SYNK") {
 						WHERE tunnus in ($aburow[tunnukset])
 						ORDER BY if(muutospvm = '0000-00-00 00:00:00', luontiaika, muutospvm) DESC
 						LIMIT 1";
-			$abures1 = mysql_query($query) or pupe_error($query);
+			$abures1 = pupe_query($query);
 
 			while ($aburow1 = mysql_fetch_assoc($abures1)) {
 				synkronoi($aburow1["yhtio"], $table, $aburow1["tunnus"], $aburow1, "F");
 			}
 		}
+
+		$query = "UNLOCK TABLES";
+		$abures = pupe_query($query);
+
+		echo "<font class='error'>$table -synkronointi valmis!</font><br><br>";
 	}
 
 	$tee = "";

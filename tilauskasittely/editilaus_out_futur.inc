@@ -2,7 +2,7 @@
 
 	if (!function_exists("editilaus_out_futur")) {
 		function editilaus_out_futur($params) {
-			global $kukarow, $yhtiorow;
+			global $kukarow, $yhtiorow, $ftphost_unikko, $ftpuser_unikko, $ftppass_unikko, $ftppath_unikko;
 
 			extract($params);
 

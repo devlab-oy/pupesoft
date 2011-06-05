@@ -116,7 +116,7 @@
 	}
 
 	// lukitaan tableja
-	$query = "LOCK TABLES tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tuote read, tilausrivi write, tuotteen_avainsanat read, sarjanumeroseuranta write, tilausrivi as tilausrivi_myynti read, tilausrivi as tilausrivi_osto read, tuotepaikat as tt read, avainsana as avainsana_kieli READ, avainsana READ";
+	$query = "LOCK TABLES tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tuote read, tilausrivi write, tuotteen_avainsanat read, sarjanumeroseuranta write, tilausrivi as tilausrivi_myynti read, tilausrivi as tilausrivi_osto read, tuotepaikat as tt read, avainsana as avainsana_kieli READ, avainsana READ, tili READ";
 	$result = mysql_query($query) or pupe_error($query);
 
 	//tuotteen varastostatus
@@ -653,11 +653,20 @@
 								$result = mysql_query($query) or pupe_error($query);
 								$laskuid = mysql_insert_id($link);
 
+								$query = "	SELECT kustp, kohde, projekti
+											FROM tili
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tilino = '{$yhtiorow['varasto']}'";
+								$kustp_kohde_proj_res = pupe_query($query);
+								$kustp_kohde_proj_row = mysql_fetch_assoc($kustp_kohde_proj_res);
+
 								$query = "	INSERT into tiliointi set
 											yhtio    = '$kukarow[yhtio]',
 											ltunnus  = '$laskuid',
 											tilino   = '$yhtiorow[varasto]',
-											kustp    = 0,
+											kustp    = '{$kustp_kohde_proj_row['kustp']}',
+											kohde	 = '{$kustp_kohde_proj_row['kohde']}',
+											projekti = '{$kustp_kohde_proj_row['projekti']}',
 											tapvm    = now(),
 											summa    = '$summa',
 											vero     = 0,
@@ -674,11 +683,20 @@
 									$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
 								}
 
+								$query = "	SELECT kustp, kohde, projekti
+											FROM tili
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tilino = '{$varastonmuutos_tili}'";
+								$kustp_kohde_proj_res = pupe_query($query);
+								$kustp_kohde_proj_row = mysql_fetch_assoc($kustp_kohde_proj_res);
+
 								$query = "	INSERT into tiliointi set
 											yhtio    = '$kukarow[yhtio]',
 											ltunnus  = '$laskuid',
 											tilino   = '$varastonmuutos_tili',
-											kustp    = 0,
+											kustp    = '{$kustp_kohde_proj_row['kustp']}',
+											kohde	 = '{$kustp_kohde_proj_row['kohde']}',
+											projekti = '{$kustp_kohde_proj_row['projekti']}',
 											tapvm    = now(),
 											summa    = $summa * -1,
 											vero     = 0,

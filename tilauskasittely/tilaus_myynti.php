@@ -2700,14 +2700,8 @@ if ($tee == '') {
 			}
 			echo "</select></td></tr>";
 
-			if ((trim($faktarow["fakta"]) != "" or $faktarow["luokka"]== 'K') and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
+			if (trim($faktarow["fakta"]) != "" and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 				echo "<tr>$jarjlisa<th>".t("Asiakasfakta").":</th><td colspan='3'>";
-
-				//jos asiakkaalla on luokka K niin se on myyntikiellossa ja siitä herjataan
-				if ($faktarow["luokka"]== 'K') {
-					echo "<font class='error'>".t("HUOM!!!!!! Asiakas on myyntikiellossa")."!!!!!<br></font>";
-				}
-
 				echo "<strong>".wordwrap($faktarow["fakta"], 110, "<br>")."</strong>&nbsp;</td></tr>\n";
 			}
 

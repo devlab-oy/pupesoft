@@ -1115,6 +1115,9 @@ else {
 						if ($laskurow_edi['tilaustyyppi'] == 7) {
 							$pupesoft_tilaustyyppi = 7;
 						}
+						elseif ($laskurow_edi['tilaustyyppi'] == 2) {
+							$pupesoft_tilaustyyppi = 2;
+						}
 						elseif ($laskurow_edi['tilaustyyppi'] == 8) {
 							$pupesoft_tilaustyyppi = 8;
 						}

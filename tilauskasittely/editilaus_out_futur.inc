@@ -163,7 +163,7 @@
 
 				$edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$tilausrivi_row['alv']}\n";
 
-				$edi_order .= "OSTOTILRIV.OTR_VIITE:{$tilausrivi_row['kommentti']}\n";
+				#$edi_order .= "OSTOTILRIV.OTR_VIITE:{$tilausrivi_row['kommentti']}\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_YKSIKKO:{$tilausrivi_row['yksikko']}\n";

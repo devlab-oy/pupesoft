@@ -12,9 +12,12 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	$session = "";
 	srand ((double) microtime() * 1000000);
 
-	$query = "	SELECT kuka, session, salasana
+	$query = "	SELECT kuka.kuka, kuka.session, kuka.salasana
 				FROM kuka
-				where kuka = '$user' and extranet != '' and oletus_asiakas != ''";
+				JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.tunnus = kuka.oletus_asiakas AND asiakas.laji != 'P')
+				WHERE kuka.kuka = '$user' 
+				AND kuka.extranet != '' 
+				AND kuka.oletus_asiakas != ''";
 	$result = mysql_query($query) or pupe_error($query);
 	$krow = mysql_fetch_array($result);
 

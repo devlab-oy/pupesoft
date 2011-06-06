@@ -1097,7 +1097,7 @@ else {
 				}
 			}
 
-			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO")) or $tullaanko_tilausten_sisaanluvusta == 'EDITILAUS')) {
+			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tullaanko_tilausten_sisaanluvusta == 'EDITILAUS')) {
 
 				foreach ($tilausnumerot as $til_nro) {
 

@@ -1145,6 +1145,9 @@ else {
 						if (file_exists("editilaus_out_futur.inc")) {
 							require("editilaus_out_futur.inc");
 						}
+						else if (file_exists("pupesoft/editilaus_out_futur.inc")) {
+							require("pupesoft/editilaus_out_futur.inc");
+						}
 						else {
 							require("tilauskasittely/editilaus_out_futur.inc");
 						}

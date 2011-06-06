@@ -168,9 +168,9 @@ elseif ($edi_tyyppi == "edifact911") {
 	$edi_subj = "Sis‰‰ntuleva Orders 91.1 tilaus";
 	$edi_laatija = "Orders911";
 
-	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot	
+	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
 	$order_tietosisalto = file_get_contents($filename);
-	
+
 	// Kaivetaan segmentti tekstin "NAD+SE+" ja "NAD+PL+" v‰list‰
 	$nadse_segmentti = substr($order_tietosisalto, strpos($order_tietosisalto, "NAD+SE+"), (strpos($order_tietosisalto, "NAD+PL+") - strpos($order_tietosisalto, "NAD+SE+")));
 }
@@ -225,7 +225,7 @@ while (!feof ($fd)) {
 		$nad_kentta = explode(":", $nad_segmentit[2]);
 		$tieto = $nad_kentta[0];
 	}
-		
+
 	// Jos kyseess‰ NAD segmentti, tarkennetaan mik‰ NAD on kyseess‰ ja laitetaan $tieto kuntoon
 	if ($tunnus == "NAD") {
 		switch (substr($tieto,0,2)) {
@@ -1101,11 +1101,22 @@ while (!feof ($fd)) {
 					$tieto = trim($tieto);
 				}
 
+				// Spessukase
+				if ($yhtiorow["yhtio"] == "artr") {
+					// Laitetaan kolmanneksi merkiksi space
+					$tuotenumero2 = substr($tieto, 0, 2). " ". substr($tieto, 2);
+				}
+				else {
+					$tuotenumero2 = $tieto;
+				}
+
 				$query = "	SELECT *
 							FROM tuote
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$tieto'
-							$kieltolisa";
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							and tuoteno in ('$tieto', '$tuotenumero2')
+							$kieltolisa
+							ORDER BY tuoteno DESC
+							LIMIT 1";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 0) {
@@ -1294,7 +1305,7 @@ while (!feof ($fd)) {
 						}
 
 						$varasto = $verkkokauppavarasto;
-					}                   
+					}
 					elseif ($olinvarasto != "") {
 						$varasto = $olinvarasto;
 					}

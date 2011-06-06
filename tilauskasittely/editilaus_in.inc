@@ -1294,7 +1294,7 @@ while (!feof ($fd)) {
 						}
 
 						$varasto = $verkkokauppavarasto;
-					}
+					}                   
 					elseif ($olinvarasto != "") {
 						$varasto = $olinvarasto;
 					}
@@ -1539,6 +1539,9 @@ while (!feof ($fd)) {
 					$edi_ulos .= "\n";
 
 					$silent = "SILENT";
+
+					$tullaanko_tilausten_sisaanluvusta = "EDITILAUS";
+
 					require ("tilaus-valmis.inc");
 
 					// jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)

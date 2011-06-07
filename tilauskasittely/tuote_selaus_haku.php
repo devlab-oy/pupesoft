@@ -1958,8 +1958,7 @@
 							}
 						}
 
-						if ((($row['status'] == 'A' or $row['status'] == 'T') and !$loytyko) or $yhtiorow['haejaselaa_saapumispvm'] == "A" or ($yhtiorow['haejaselaa_saapumispvm'] == "B" and !$loytyko_normivarastosta)) {
-							// Status (A,T) ja EI SALDOA ?
+						if (($row['status'] == 'A' or $row['status'] == 'T') and (!$loytyko or $yhtiorow['haejaselaa_saapumispvm'] == "A" or ($yhtiorow['haejaselaa_saapumispvm'] == "B" and !$loytyko_normivarastosta))) {
 							$tulossa_query = " 	SELECT
 												t_myy.otunnus,
 												tli_myy.suoraan_laskutukseen,
@@ -2006,7 +2005,7 @@
 								}
 							}
 
-							if (($row['status'] == 'A' and mysql_num_rows($tulossa_result) == 0) or $yhtiorow['haejaselaa_saapumispvm'] == "A" or ($yhtiorow['haejaselaa_saapumispvm'] == "B" and !$loytyko_normivarastosta)) {
+							if ($row['status'] == 'A' and mysql_num_rows($tulossa_result) == 0) {
 								$tulossa_query = " 	SELECT DATE_ADD(curdate(), INTERVAL (if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika)+if(tuotteen_toimittajat.tilausvali > 0, tuotteen_toimittajat.tilausvali, toimi.oletus_tilausvali)) DAY) paivamaara,
 													if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
 								 					FROM tuotteen_toimittajat
@@ -2027,7 +2026,7 @@
 							}
 						}
 
-						if (($row['status'] == 'T' and !$loytyko) or $yhtiorow['haejaselaa_saapumispvm'] == "A" or ($yhtiorow['haejaselaa_saapumispvm'] == "B" and !$loytyko_normivarastosta))  {
+						if ($row['status'] == 'T' and (!$loytyko or $yhtiorow['haejaselaa_saapumispvm'] == "A" or ($yhtiorow['haejaselaa_saapumispvm'] == "B" and !$loytyko_normivarastosta)))  {
 							$query = "	SELECT if(tuotteen_toimittajat.tehdas_saldo_toimaika != 0, tuotteen_toimittajat.tehdas_saldo_toimaika, if (tuotteen_toimittajat.toimitusaika != 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika)) toimaika,
 										if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
 										FROM tuotteen_toimittajat

@@ -187,7 +187,6 @@
 									and alennus            	= '$alrow[alennus]'
 									and alennuslaji			= '$alrow[alennuslaji]'
 									and minkpl           	= '$alrow[minkpl]'
-									and maxkpl           	= '$alrow[maxkpl]'
 									and alkupvm          	= '$alrow[alkupvm]'
 									and loppupvm         	= '$alrow[loppupvm]'";
 						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
@@ -206,7 +205,6 @@
 									alennus            	= '$alrow[alennus]',
 									alennuslaji			= '$alrow[alennuslaji]',
 									minkpl           	= '$alrow[minkpl]',
-									maxkpl           	= '$alrow[maxkpl]',
 									alkupvm          	= '$alrow[alkupvm]',
 									loppupvm         	= '$alrow[loppupvm]',
 									laatija          	= '$kukarow[kuka]',

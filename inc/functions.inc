@@ -4975,16 +4975,11 @@ if (!function_exists("generoi_alekentta_php")) {
 						$ale["ale{$alepostfix}"] = (1 - (1 - $row["ale{$alepostfix}"] / 100) * (1 - $row["erikoisale"] / 100)) * 100;
 					}
 					else {
-						$ale["ale{$alepostfix}"] = 0;
+						$ale["ale{$alepostfix}"] = $row["erikoisale"];
 					}
 				}
 				else {
-					if ($row["ale{$alepostfix}"] != 0) {
-						$ale["ale{$alepostfix}"] = (1 - $row["ale{$alepostfix}"] / 100) * 100;
-					}
-					else {
-						$ale["ale{$alepostfix}"] = 0;
-					}
+					$ale["ale{$alepostfix}"] = $row["ale{$alepostfix}"];
 				}
 			}
 		}

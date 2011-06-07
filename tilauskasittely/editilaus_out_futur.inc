@@ -124,7 +124,7 @@
 				}
 
 				if ($tilausrivi_row['var'] == 'P') {
-					$kpl = 0;
+					$kpl = $tilausrivi_row['tilkpl'];
 				}
 
 				// HUOM! Reklamaatioissa laitetaan nettohyvitysyksikköhinta

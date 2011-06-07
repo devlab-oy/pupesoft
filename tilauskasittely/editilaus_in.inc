@@ -381,8 +381,26 @@ while (!feof ($fd)) {
 		case 'OFTXDELTX' :
 		case 'OSTOTIL.OT_TOIMITUSTAPA' :
 		//Toimituslauseke
+
 			if (trim($tieto) != '') {
-				$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $tieto ";
+				$query = "	SELECT *
+							FROM asiakkaan_avainsanat
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tarkenne = '{$tieto}'
+							AND laji = 'editilaus_toimitustapa'
+							AND tarkenne != ''
+							AND avainsana != ''
+							ORDER BY muutospvm DESC
+							LIMIT 1";
+				$toimitustapa_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($toimitustapa_chk_res) == 1) {
+					$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
+					$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+				}
+				else {
+					$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $tieto ";
+				}
 			}
 			break;
 
@@ -864,7 +882,7 @@ while (!feof ($fd)) {
 					$editilaus_maksuehto = $arow["maksuehto"];
 				}
 
-				// jos tilauksella ei ole maksuehtoa, k‰ytet‰‰n asiakkaan oletusta
+				// jos tilauksella ei ole toimitustapaa, k‰ytet‰‰n asiakkaan oletusta
 				if ($editilaus_toimitustapa == '') {
 					$editilaus_toimitustapa = $arow["toimitustapa"];
 				}

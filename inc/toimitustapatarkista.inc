@@ -49,6 +49,11 @@ if(!function_exists("toimitustapatarkista")) {
 
 				echo ", ".mysql_affected_rows()." ".t("asiakasta")."";
 
+				$query = "UPDATE asiakkaan_avainsanat set avainsana='$toita' where avainsana='$trow[$i]' and yhtio='$kukarow[yhtio]'";
+				$updre = mysql_query($query) or pupe_error($query);
+
+				echo ", ".mysql_affected_rows()." ".t("asiakkaan avainsanaa")."";
+
 				$query = "UPDATE lasku set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]' and ((tila='L' and alatila in('A','C')) or tila='N')";
 				$updre = mysql_query($query) or pupe_error($query);
 

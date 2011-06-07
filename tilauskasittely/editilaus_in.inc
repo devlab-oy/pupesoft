@@ -199,10 +199,9 @@ while (!feof ($fd)) {
 		$tunnus = trim($tunnus);
 		$tieto  = trim($tieto);
 
-		if (substr($tunnus,0,15) == '*RE  OSTOTILRIV') {
-			$tunnus='*RE  OSTOTILRIV'; // Poistetaan häiritsevä nro
+		if (preg_match('/\*RE *OSTOTILRIV/', $tunnus)) {
+			$tunnus = '*RE  OSTOTILRIV'; // Poistetaan häiritsevä nro
 		}
-
 	}
 	elseif ($edi_tyyppi == "edifact911"){
 		$tunnus = substr($tietue, 0, 3);

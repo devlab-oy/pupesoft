@@ -183,8 +183,12 @@ class Image_Barcode_Code39 extends Image_Barcode
        // Allocate black and white colors to the image
        $black = imagecolorallocate( $img, 0, 0, 0 );
        $white = imagecolorallocate( $img, 255, 255, 255 );
-       $font_height = ( $noText ? 0 : imagefontheight( "gdFontSmall" ) );
-       $font_width = imagefontwidth( "gdFontSmall" );
+
+	   // entinen parametri imagefontheightissä oli "gdFontSmall", nykysin ottaa int
+       $font_height = ( $noText ? 0 : imagefontheight( 1 ) );
+
+	   // entinen parametri oli "gdFontSmall", nykysin ottaa int
+       $font_width = imagefontwidth( 1 );
 
        // fill background with white color
        imagefill( $img, 0, 0, $white );
@@ -215,9 +219,10 @@ class Image_Barcode_Code39 extends Image_Barcode
             }
 
             // draw text under barcode
+			// toinen parametri oli ennen 'gdFontSmall', nykysin ottaa int
             imagestring(
                 $img,
-                'gdFontSmall',
+                1,
                 ( $barcode_len - $font_width * strlen( $this->text ) )/2,
                 $this->_barcodeheight - $font_height,
                 $this->text,

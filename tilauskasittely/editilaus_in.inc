@@ -171,6 +171,30 @@ elseif ($edi_tyyppi == "edifact911") {
 	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meidän pitää heti tässä vaiheessa kaivaa jo vastaanottajan tiedot
 	$order_tietosisalto = file_get_contents($filename);
 
+	$order_tietosisalto = str_replace("\n","",$order_tietosisalto);
+	$order_tietosisalto = explode("'",$order_tietosisalto);
+
+	foreach ($order_tietosisalto as $key => $value) {
+		if (trim($value) != "") {
+			$edi_rivi .= $value."\n";
+		}
+	}
+
+	unset($order_tietosisalto);
+
+	// Luodaan arraysta => tiedosto
+	$tiedosto = "/tmp/ediorders911".uniqid(time()."_").".txt";
+	file_put_contents($tiedosto,$edi_rivi);
+
+	// avataan tiedosto uudestaan
+	if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus epäonnistui")."!\n");
+
+	//jotta filenimi ei varmasti katoaisi matkalla, tämä ylikirjoittaa edellisen mailfilen.
+	$mailfile = $tiedosto;
+
+	// luetaan uudestaan tiedostoon
+	$order_tietosisalto = file_get_contents($tiedosto);
+
 	// Kaivetaan segmentti tekstin "NAD+SE+" ja "NAD+PL+" välistä
 	$nadse_segmentti = substr($order_tietosisalto, strpos($order_tietosisalto, "NAD+SE+"), (strpos($order_tietosisalto, "NAD+PL+") - strpos($order_tietosisalto, "NAD+SE+")));
 }
@@ -489,7 +513,7 @@ while (!feof ($fd)) {
 			}
 
 			if (!is_array($arow)) {
-				$edi_ulos .= t("Tilaava asiakas")." $tunnus: $tieto -> ";
+				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
 
 				$query = "	SELECT *
 							FROM asiakas
@@ -1272,8 +1296,8 @@ while (!feof ($fd)) {
 
 				// Orders 91.1 tulee kaksi RFF segmenttiä (VN ja WS). VN otsikon viite, joten ei liity tiausriveihin. WS on tilausrivin loppumisen merkki.
 				if ($kentat[0] == "VN") {
-					$asiakkaan_tilausnumero = substr($kentat[1], 0, -1);
-					$viite = substr($kentat[1], 0, -1). ' ';
+					$asiakkaan_tilausnumero = $kentat[1];
+					$viite = $kentat[1]. ' ';
 					break;
 				}
 			}

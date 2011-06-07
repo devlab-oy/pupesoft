@@ -71,7 +71,7 @@ if (!-f $tmpfile) {
 						$edi_tyyppi=" futursoft";  # tää on futurifaili, (huom. space tärkeä)
 						last;
 					}
-					if ($rivi=~m"UNS\+S\'") {
+					if ($rivi=~m"UNS\+S") {
 						$laskuri=0;
 						$ok=1;  # loppumerkki löytyi file on ok!
 						$edi_tyyppi=" edifact911";  # tää on orderfaili, (huom. space tärkeä)

@@ -537,8 +537,8 @@
 							unset($korvaavan_hinta_ylaraja_hinta);
 						}
 
-						// Otetaan koko ketjun halvin hinta/alennus talteen
-						if (isset($korvaavan_hinta_ylaraja_hinta) and (!isset($korvaavan_hinta_ylaraja_halvin_alehinta) or $korvaavan_hinta_ylaraja_halvin_alehinta > $korvaavan_hinta_ylaraja_hinta)) {
+						// Otetaan koko ketjun halvin hinta/alennus talteen (ei poistetut tuotteet)
+						if (isset($korvaavan_hinta_ylaraja_hinta) and $krow2["status"] != "P" and (!isset($korvaavan_hinta_ylaraja_halvin_alehinta) or $korvaavan_hinta_ylaraja_halvin_alehinta > $korvaavan_hinta_ylaraja_hinta)) {
 							$korvaavan_hinta_ylaraja_halvin_alehinta = $korvaavan_hinta_ylaraja_hinta;
 							$korvaavan_hinta_ylaraja_halvin_hinta = $korva_hinta;
 							$korvaavan_hinta_ylaraja_halvin_ale = $korva_ale_kaikki;

@@ -117,10 +117,10 @@
 				}
 
 				if ($yhtiorow["varaako_jt_saldoa"] == "") {
-					$kpl = round($tilausrivi_row['jt'] * 1, 0);
+					$kpl = $tilausrivi_row['jt'];
 				}
 				else {
-					$kpl = round($tilausrivi_row['varattu'] * 1, 0);
+					$kpl = $tilausrivi_row['varattu'];
 				}
 
 				if ($tilausrivi_row['var'] == 'P') {

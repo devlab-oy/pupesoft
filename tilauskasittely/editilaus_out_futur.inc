@@ -195,16 +195,19 @@
 			$ftpuser = $ftpuser_unikko;
 			$ftppass = $ftppass_unikko;
 			$ftppath = $ftppath_unikko;
-			
+
 			$ftpfile = $unlink_filename = $filename;
-			
+
 			if (file_exists("ftp-send.inc")) {
 				require("ftp-send.inc");
+			}
+			elseif (file_exists("../inc/ftp-send.inc")) {
+				require("../inc/ftp-send.inc");
 			}
 			else {
 				require("inc/ftp-send.inc");
 			}
-			
+
 			// unlink($unlink_filename);
 
 			return $palautus;

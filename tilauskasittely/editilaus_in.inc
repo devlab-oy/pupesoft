@@ -124,6 +124,7 @@ $til_vienti				= "";
 $verkkokauppavarasto	= "";
 $verkkokauppavarasto_li	= "";
 $editilaus_loppuhinta	= "";
+$kieltolisa				= "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror      	= 1; // oletetaan aina ettei  tuotetta löydy
@@ -209,11 +210,14 @@ while (!feof ($fd)) {
 
 	$tietue = fgets($fd, 4096);
 
+	// Tyhjät rivit skipataan
+	if (trim($tietue) == "") continue;
+
 	// tää on futurikeisi
 	if ($edi_tyyppi == "futursoft" or $edi_tyyppi == "magento") {
 
-		if (substr($tietue,0,1) != '*') {
-			list($tunnus, $tieto)  = explode(':',$tietue);
+		if (substr($tietue, 0, 1) != '*') {
+			list($tunnus, $tieto)  = explode(':', $tietue);
 		}
 		else {
 			$tunnus = $tietue;
@@ -271,68 +275,41 @@ while (!feof ($fd)) {
 		case 'OSTOTIL.OT_OVTTUNNUS':
 		case 'NADSE':
 		//Tilauksen vastaanottaja
-			// Vähintään ytunnus ilman etunollaa
-			if (strlen($tieto) >= 7) {
-				// Arwidson häkki Arwidson Automotivea varten
-				if ($tieto == "003701066781") $tieto = "003707495288";
+			$edi_ulos .= t("Tilaus yritykselle")." '" . $tieto .  "' ";
 
-				$edi_ulos .= t("Tilaus yritykselle")." '" . $tieto .  "' ";
+			$query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
+			$result = mysql_query($query) or die($query);
 
-				$query = "SELECT * FROM yhtio WHERE ovttunnus='$tieto' and ovttunnus != ''";
+			if (mysql_num_rows($result) != 1) {
+				// Kokeillaan tehdä ovttunnuksesta ytunnus
+				$tieto2 = substr($tieto, 4, 8);     // etunollilla
+				$tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
+
+				// Häkki Örumia varten
+				if ((int) $tieto == 0) $tieto = "20428100";
+
+				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
 				$result = mysql_query($query) or die($query);
-
-				if (mysql_num_rows($result) != 1) {
-					// kokeillaan vääntää luvusta ytunnus
-					$tieto2 = substr($tieto, 4, 8);     // etunollilla
-					$tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
-
-					// Arwidson häkki Arwidson Baltia varten
-					if ($tieto == 0) $tieto = "07495288";
-					// Arwidson häkki Arwidson Automotivea varten
-					if ($tieto == 1066781) $tieto = "07495288";
-					// Arwidson häkki Örumia varten
-					if ((int) $tieto == 7495288) $tieto = "20428100";
-
-					$query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
-					$result = mysql_query($query) or die($query);
-				}
-
-				if (mysql_num_rows($result) != 1) {
-					$edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
-					echo $edi_ulos;
-					exit;
-				}
-
-				$yhtiorow = mysql_fetch_array($result);
-
-				$query = "	SELECT *
-							FROM yhtion_parametrit
-							WHERE yhtio='$yhtiorow[yhtio]'";
-				$result = mysql_query($query)
-						or die ("Kysely ei onnistu yhtio $query");
-
-				if (mysql_num_rows($result) == 1) {
-					$yhtion_parametritrow = mysql_fetch_array($result);
-					// lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
-					foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
-						$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
-					}
-				}
-
-				$kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
-				$kukarow['kuka'] = $edi_laatija;
-
-				// nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
-				$argv 		= array();
-				$argv[0] 	= "";
-				$argv[1] 	= $kukarow["yhtio"];
-				$editil_cli = TRUE;
-
-				$edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
 			}
-			else {
-				$edi_ulos .= "\n$tunnus: ".t("kentässä liian lyhyt tieto")." '$tieto'\n";
+
+			if (mysql_num_rows($result) != 1) {
+				$edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
+				break 2;
 			}
+
+			$yhtiorow = mysql_fetch_array($result);
+			$yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
+
+			$kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
+			$kukarow['kuka'] = $edi_laatija;
+
+			// nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
+			$argv 		= array();
+			$argv[0] 	= "";
+			$argv[1] 	= $kukarow["yhtio"];
+			$editil_cli = TRUE;
+
+			$edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
 			break;
 
 		case 'ONADBY_DO' :
@@ -1758,6 +1735,7 @@ while (!feof ($fd)) {
 			$verkkokauppavarasto	= "";
 			$verkkokauppavarasto_li	= "";
 			$editilaus_loppuhinta	= "";
+			$kieltolisa				= "";
 			break;
 	}
 }
@@ -1793,6 +1771,12 @@ if ($yhtiorow["alert_email"] != "") {
 	$content .= "--$bound--\n";
 
 	$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+}
+else {
+	echo gethostname();
+	echo "\n";
+	echo $edi_ulos;
+	echo "\n";
 }
 
 ?>

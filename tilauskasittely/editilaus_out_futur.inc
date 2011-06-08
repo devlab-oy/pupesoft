@@ -117,14 +117,14 @@
 				}
 
 				if ($yhtiorow["varaako_jt_saldoa"] == "") {
-					$kpl = $tilausrivi_row['jt'];
+					$kpl = round($tilausrivi_row['jt'] * 1, 0);
 				}
 				else {
-					$kpl = $tilausrivi_row['varattu'];
+					$kpl = round($tilausrivi_row['varattu'] * 1, 0);
 				}
 
 				if ($tilausrivi_row['var'] == 'P') {
-					$kpl = $tilausrivi_row['tilkpl'];
+					$kpl = round($tilausrivi_row['tilkpl'] * 1, 0);
 				}
 
 				// HUOM! Reklamaatioissa laitetaan nettohyvitysyksikköhinta

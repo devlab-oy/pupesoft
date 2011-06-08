@@ -62,8 +62,15 @@
 			$toim_postino = trim($laskurow['toim_postino']);
 			$toim_maa = trim($laskurow['toim_maa']);
 
+			if ($toim_maa != $yhtiorow["maa"] and $toim_maa != '') {
+				$toim_yritys = '';
+				$toim_osoite = '';
+				$toim_postitp = '';
+				$toim_postino = '';
+				$toim_maa = '';
+			}
 			// jos toimitusosoite eroaa asiakkaan toimitusosoitteesta (tai jos toimitusosoite on tyhj‰ niin asiakkaan osoitteesta), niin silloin se lis‰t‰‰n aineistoon
-			if (trim($asiakasrow['toim_osoite']) != '') {
+			elseif (trim($asiakasrow['toim_osoite']) != '') {
 				if ($toim_osoite == trim($asiakasrow['toim_osoite']) and $toim_postitp == trim($asiakasrow['toim_postitp']) and $toim_postino == trim($asiakasrow['toim_postino'])) {
 					$toim_yritys = '';
 					$toim_osoite = '';

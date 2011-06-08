@@ -992,6 +992,7 @@ while (!feof ($fd)) {
 					if ($editilaus_tilaustyyppi == 3) {
 						$editilaus_tila = 'C';
 						$editilaus_alatila = 'A';
+						$tilaustyyppilisa = 'R';
 					}
 				}
 

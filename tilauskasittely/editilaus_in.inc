@@ -239,6 +239,7 @@ while (!feof ($fd)) {
 	// tehdään kaikille tiedoille 7 -> 8 bit ääkköskonversio..
 	$from   = array ('{','}','|','[',']','\\',chr(179)); // 7bit
 	$to     = array ('ä','å','ö','Ä','Å','Ö','|'); // 8bit
+	$orig_tieto = str_replace($from, $to, $tieto);
 	$tieto  = str_replace($from, $to, pupesoft_cleanstring($tieto));
 
 	// Jos kyseessä on UNA (ensimmäinen Orders 91.1 segmentti), niin etsitään tässä vaiheessa NAD SE
@@ -779,7 +780,9 @@ while (!feof ($fd)) {
 
 		case 'OSTOTIL.OT_VIITTEENNE':
 			// halutaan futur-aineistosta tämä tieto sisviesti2-kenttään
-			$lopviesti = trim($tieto);
+
+			$orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
+			$lopviesti = trim($orig_tieto);
 			break;
 
 		//Tilaus päättyy. Aika tehdä se kantaan

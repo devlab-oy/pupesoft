@@ -9,11 +9,6 @@ if ($tee == "lisaalisaa") {
 
 		$tee = "lisaa";
 	}
-	if ($laji == "") {
-		echo "<font class='error'>Laji puuttuu!</font><br>";
-
-		$tee = "lisaa";
-	}
 	if ($uusitaso == "") {
 		echo "<font class='error'>Taso puuttuu!</font><br>";
 
@@ -111,7 +106,6 @@ if ($tee == "lisaalisaa") {
 		$query = "	INSERT into taso
 					SET taso 		= '$uusitaso',
 					tyyppi	 		= '$tyyppi',
-					laji	 		= '$laji',
 					summattava_taso = '$summattava_taso',
 					nimi	 		= '$nimi',
 					laatija			= '$kukarow[kuka]',
@@ -166,12 +160,6 @@ if ($tee == "lisaa") {
 				</select>
 			</td>
 		</tr>
-
-		<tr><th align='left'>Laji</th>
-		<td><select name='laji'>
-		<option value = 'O' >Normaali</option>
-		<option value = 'N' >Tasoa ei nollata</option>
-		</select></td></tr>
 
 		<tr><th align='left'>Summattava_taso</th><td><input type = 'text' name = 'summattava_taso' value = '$summattava_taso' size='10'></td></tr>
 		<tr><th align='left'>Taso</th><td><input type = 'text' name = 'uusitaso' value = '$uusitaso' size='10'></td></tr>

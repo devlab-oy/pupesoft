@@ -1096,6 +1096,13 @@ while (!feof ($fd)) {
 							otunnus				= '$id'";
 				$lisatiedot_result = mysql_query($query) or die($query);
 
+				if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
+					$query = "	INSERT INTO tyomaarays SET
+								yhtio = '{$kukarow['yhtio']}',
+								otunnus = '{$id}'";
+					$tyomaarays_ins_res = mysql_query($query) or die($query);
+				}
+
 				$edi_ulos .= t("Tilausnumero")." $id\n\n";
 
 				// haetaan tilauksen tiedot

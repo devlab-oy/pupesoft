@@ -153,6 +153,7 @@
 				$query = "	SELECT osasto, ifnull(group_concat(tunnus), 0) tunnukset
 							FROM asiakas
 							WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
+							AND laji != 'P'
 							AND ytunnus = '$sytunnus'
 							AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'
 							GROUP BY 1";
@@ -172,7 +173,7 @@
 			}
 
 			if (!isset($GLOBALS['eta_yhtio']) or trim($GLOBALS['eta_yhtio']) == '' or $GLOBALS['eta_yhtio'] == $kukarow['yhtio']) {
-				$query = "SELECT ifnull(group_concat(tunnus), 0) tunnukset FROM asiakas WHERE yhtio = '$saatavat_yhtio' AND ytunnus = '$sytunnus'";
+				$query = "SELECT ifnull(group_concat(tunnus), 0) tunnukset FROM asiakas WHERE yhtio = '$saatavat_yhtio' AND ytunnus = '$sytunnus' AND laji != 'P'";
 				$result = pupe_query($query);
 				$row = mysql_fetch_assoc($result);
 			}

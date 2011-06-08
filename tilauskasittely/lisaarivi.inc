@@ -60,7 +60,7 @@
 	unset($korvaavan_hinta_ylaraja_halvin_hinta);
 	unset($korvaavan_hinta_ylaraja_halvin_ale);
 	unset($korvaavan_hinta_ylaraja_halvin_netto);
-	
+
 	if (!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet) {
 			global $kukarow, $perhelisa, $kieltolisa, $lisaarivi_debug;
@@ -530,11 +530,8 @@
 					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] == 'MIN') {
 
 						// Tähän hintaan asiakas saisi tuotteen
-						if ($korva_ale_kaikki["ale1"] > 0 and $korva_hinta > 0) {
-							$korvaavan_hinta_ylaraja_hinta = $korva_hinta * (1-$korva_ale_kaikki["ale1"]/100);
-						}
-						elseif ($korva_hinta > 0) {
-							$korvaavan_hinta_ylaraja_hinta = $korva_hinta;
+						if ($korva_hinta > 0) {
+							$korvaavan_hinta_ylaraja_hinta = $korva_hinta * generoi_alekentta_php($korva_ale_kaikki, 'M', 'kerto');
 						}
 						else {
 							unset($korvaavan_hinta_ylaraja_hinta);
@@ -544,7 +541,7 @@
 						if (isset($korvaavan_hinta_ylaraja_hinta) and (!isset($korvaavan_hinta_ylaraja_halvin_alehinta) or $korvaavan_hinta_ylaraja_halvin_alehinta > $korvaavan_hinta_ylaraja_hinta)) {
 							$korvaavan_hinta_ylaraja_halvin_alehinta = $korvaavan_hinta_ylaraja_hinta;
 							$korvaavan_hinta_ylaraja_halvin_hinta = $korva_hinta;
-							$korvaavan_hinta_ylaraja_halvin_ale = $korva_ale_kaikki["ale1"];
+							$korvaavan_hinta_ylaraja_halvin_ale = $korva_ale_kaikki;
 							$korvaavan_hinta_ylaraja_halvin_netto = $korva_netto;
 						}
 
@@ -1096,13 +1093,8 @@
 									// Haluan tarkistaa alkuperäisen hinnan ennen korvausta, niin saadaan se halvempi hinta käyttöön.
 									if ($yhtiorow['korvaavan_hinta_ylaraja'] == 'MIN') {
 										$lis_hinta = $korvaavan_hinta_ylaraja_halvin_hinta;
-										$lis_ale_kaikki['ale1'] = $korvaavan_hinta_ylaraja_halvin_ale;
+										$lis_ale_kaikki = $korvaavan_hinta_ylaraja_halvin_ale;
 										$lis_netto = $korvaavan_hinta_ylaraja_halvin_netto;
-										
-										for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-											$lis_ale_kaikki["ale{$alepostfix}"] = '';
-										}
-										
 									}
 
 									// Tilausrivin systeemikommentti

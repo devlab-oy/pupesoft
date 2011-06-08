@@ -1467,6 +1467,10 @@ while (!feof ($fd)) {
 						$kpl = 0;
 					}
 
+					if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
+						$kpl = abs($kpl) * -1;
+					}
+
 					require ("lisaarivi.inc");
 
 					// jos meill‰ on tiedossa tuotteen sarjanumero, lis‰t‰‰n se

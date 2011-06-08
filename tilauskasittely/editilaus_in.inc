@@ -407,24 +407,8 @@ while (!feof ($fd)) {
 		//Toimituslauseke
 
 			if (trim($tieto) != '') {
-				$query = "	SELECT *
-							FROM asiakkaan_avainsanat
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tarkenne = '{$tieto}'
-							AND laji = 'editilaus_toimitustapa'
-							AND tarkenne != ''
-							AND avainsana != ''
-							ORDER BY muutospvm DESC
-							LIMIT 1";
-				$toimitustapa_chk_res = pupe_query($query);
-
-				if (mysql_num_rows($toimitustapa_chk_res) == 1) {
-					$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
-					$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
-				}
-				else {
-					$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $tieto ";
-				}
+				$editilaus_toimitustapa = $tieto;
+				$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $tieto ";
 			}
 			break;
 
@@ -904,6 +888,28 @@ while (!feof ($fd)) {
 				// jos tilauksella ei ole maksuehtoa, k‰ytet‰‰n asiakkaan oletusta
 				if ($editilaus_maksuehto == '') {
 					$editilaus_maksuehto = $arow["maksuehto"];
+				}
+
+				if (trim($editilaus_toimitustapa) != '') {
+					$query = "	SELECT *
+								FROM asiakkaan_avainsanat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tarkenne = '{$editilaus_toimitustapa}'
+								AND laji = 'editilaus_toimitustapa'
+								AND tarkenne != ''
+								AND avainsana != ''
+								AND liitostunnus = '{$arow['tunnus']}'
+								ORDER BY muutospvm DESC
+								LIMIT 1";
+					$toimitustapa_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($toimitustapa_chk_res) == 1) {
+						$toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
+						$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+					}
+					else {
+						$editilaus_toimitustapa = '';
+					}
 				}
 
 				// jos tilauksella ei ole toimitustapaa, k‰ytet‰‰n asiakkaan oletusta

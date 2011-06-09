@@ -1713,7 +1713,6 @@ while (!feof ($fd)) {
 			unset($arow_ostaja);
 			unset($arow_toimitus);
 			unset($arow_terminaali);
-			unset($yhtiorow);
 			$toimpvm 	 			= date("Y-m-d");
 			$vastaustapa 			= "";
 			$editilaus_tila       	= "N"; // laskun tila

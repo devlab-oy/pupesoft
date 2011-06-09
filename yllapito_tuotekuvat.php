@@ -41,7 +41,7 @@
 			//-->
 			</script>";
 
-		echo "<font class='head'>",t("Liitetiedostojen ylläpito"),"</font><hr>";
+		echo "<font class='head'>",t("Tuotekuvien ylläpito"),"</font><hr>";
 
 		echo "<form action='",$PHP_SELF,"' method='post'>";
 		echo "<table>";

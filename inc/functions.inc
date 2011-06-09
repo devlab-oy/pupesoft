@@ -11217,7 +11217,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 		$kakerroinlisa  = 1;
 		$kerroin 		= '';
-
+		
 		if ($ryhma == 'fi313') {
 			// Tavaraostot muista EU-maista
 			$ryhma = 'fi305';
@@ -11231,8 +11231,8 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 			$kerroin = " * -1 ";
 		}
 
-		if ($ryhma == 'fi305' or $ryhma == 'fi306') {
-			// Hetaan yhteisöostot joilla on kassa-aletta
+		if ($ryhma == 'fi305' or $ryhma == 'fi306' or $ryhma == 'fi320') {
+			// Hetaan yhteisöostot/käänteisen alvin joilla on kassa-aletta
 			$query = "	SELECT
 						group_concat(DISTINCT tiliointi.tunnus) tilioinnit
 						FROM tiliointi
@@ -11271,7 +11271,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 		if (mysql_num_rows($ktres) == 1) {
 			$ktrow = mysql_fetch_assoc($ktres);
 
-			if ($ktrow["tilioinnit"] != "" and ($ryhma == 'fi305' or $ryhma == 'fi306' or $ktrow["yhteensa"] != 0)) {
+			if ($ktrow["tilioinnit"] != "" and ($ryhma == 'fi305' or $ryhma == 'fi306' or $ryhma == 'fi320' or $ktrow["yhteensa"] != 0)) {
 
 				// Palvelut ja tuotteet erikseen
 				if ($ryhma == 'fi311') {

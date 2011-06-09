@@ -80,6 +80,7 @@ unset($arow_viite);
 unset($arow_ostaja);
 unset($arow_toimitus);
 unset($arow_terminaali);
+unset($yhtiorow);
 $toimpvm 	 			= date("Y-m-d");
 $vastaustapa 			= "";
 $editilaus_tila       	= "N"; // laskun tila
@@ -294,7 +295,7 @@ while (!feof ($fd)) {
 
 			if (mysql_num_rows($result) != 1) {
 				$edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
-				break 2;
+				break;
 			}
 
 			$yhtiorow = mysql_fetch_array($result);
@@ -788,9 +789,18 @@ while (!feof ($fd)) {
 				}
 			}
 
+			// Örum häkki
+			if (!isset($yhtiorow) and gethostname() == "orum.devlab.fi") {
+				$yhtiorow = hae_yhtion_parametrit("artr");
+			}
+
 			// lisätään otsikko vain jos asiakas löytyi
 			if (!is_array($arow)) {
 				$edi_ulos .= t("Tilaukselta ei löytynyt asiakastietoja")."!\n";
+				$editilaus_otsikko_ok = "EI";
+			}
+			elseif (!isset($yhtiorow)) {
+				$edi_ulos .= t("Tilaukselta ei löytynyt yhtiötiedoja")."!\n";
 				$editilaus_otsikko_ok = "EI";
 			}
 			else {
@@ -1691,6 +1701,7 @@ while (!feof ($fd)) {
 			unset($arow_ostaja);
 			unset($arow_toimitus);
 			unset($arow_terminaali);
+			unset($yhtiorow);
 			$toimpvm 	 			= date("Y-m-d");
 			$vastaustapa 			= "";
 			$editilaus_tila       	= "N"; // laskun tila
@@ -1774,6 +1785,8 @@ if ($yhtiorow["alert_email"] != "") {
 }
 else {
 	echo gethostname();
+	echo "\n";
+	echo $filename;
 	echo "\n";
 	echo $edi_ulos;
 	echo "\n";

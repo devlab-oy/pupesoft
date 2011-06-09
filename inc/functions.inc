@@ -4937,7 +4937,12 @@ if (!function_exists("generoi_alekentta_php")) {
 		global $yhtiorow;
 
 		if ($row["netto"] == "N") {
-			return 1;
+			if ($tapa == 'plain') {
+				return 0;
+			}
+			else {
+				return 1;
+			}
 		}
 
 		if ($tyyppi == 'M') {
@@ -4970,16 +4975,16 @@ if (!function_exists("generoi_alekentta_php")) {
 			$ale = array();
 
 			for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
-				if ($alepostfix == 1) {				
+				if ($alepostfix == 1) {
 					if ($row["ale{$alepostfix}"] != 0) {
-						$ale["ale{$alepostfix}"] = (1 - (1 - $row["ale{$alepostfix}"] / 100) * (1 - $row["erikoisale"] / 100)) * 100;
+						$ale["ale{$alepostfix}"] = round((1 - (1 - $row["ale{$alepostfix}"] / 100) * (1 - $row["erikoisale"] / 100)) * 100, 2);
 					}
 					else {
-						$ale["ale{$alepostfix}"] = $row["erikoisale"];
+						$ale["ale{$alepostfix}"] = round($row["erikoisale"], 2);
 					}
 				}
 				else {
-					$ale["ale{$alepostfix}"] = $row["ale{$alepostfix}"];
+					$ale["ale{$alepostfix}"] = round($row["ale{$alepostfix}"], 2);
 				}
 			}
 		}
@@ -4992,7 +4997,7 @@ if (!function_exists("generoi_alekentta_php")) {
 
 			$ale *= (1 - $row["erikoisale"] / 100);
 
-			$ale = (1 - $ale) * 100;
+			$ale = round((1 - $ale) * 100, 2);
 		}
 		else if ($tapa == 'kerto') {
 			$ale = 1;
@@ -5002,6 +5007,8 @@ if (!function_exists("generoi_alekentta_php")) {
 			}
 
 			$ale *= (1 - $row["erikoisale"] / 100);
+
+			$ale = round($ale, 2);
 		}
 
 		return $ale;
@@ -5063,7 +5070,7 @@ if (!function_exists("generoi_alekentta_select")) {
 if (!function_exists("generoi_alekentta")) {
 	function generoi_alekentta ($tyyppi, $prefix = '', $ei_erikoisale = '') {
 		global $yhtiorow;
-	
+
 		if ($tyyppi == 'M') {
 			$maara = $yhtiorow['myynnin_alekentat'];
 		}
@@ -6849,7 +6856,7 @@ if (!function_exists("aja_kysely")) {
 			$aja_kysely = $uusi_kysely;
 
 			if ($aja_kysely != "tmpquery") {
-				echo "<font class='message'>".t("Tallennettiin kysely")." $aja_kysely</font>";
+				echo "<br><font class='message'>".t("Tallennettiin kysely")." $aja_kysely</font><br>";
 			}
 			return true;
 		}
@@ -6860,7 +6867,7 @@ if (!function_exists("aja_kysely")) {
 						WHERE yhtio='$kukarow[yhtio]' and haku = '$hakukysely' and kuka = '$kukarow[kuka]' and nimi = '$aja_kysely'";
 			$result = pupe_query($query);
 
-			echo "<font class='message'>".t("Poistettiin kysely")." $aja_kysely</font>";
+			echo "<br><font class='message'>".t("Poistettiin kysely")." $aja_kysely</font><br>";
 
 			return false;
 		}
@@ -6883,7 +6890,7 @@ if (!function_exists("aja_kysely")) {
 			}
 
 			if ($aja_kysely != "tmpquery") {
-				echo "<font class='message'>".t("Suoritetaan kysely")." $aja_kysely</font>";
+				echo "<br><font class='message'>".t("Suoritetaan kysely")." $aja_kysely</font><br>";
 			}
 			return true;
 		}
@@ -11182,7 +11189,7 @@ if (!function_exists("xml_add")) {
 
 			$ulos .= $tieto;
 		}
-		
+
 		$pos = strpos($joukko, " ");
 
 		if ($pos === FALSE) {

@@ -847,6 +847,13 @@ if (!function_exists('rivi_otsikot_lahete')) {
 		elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi_osh.inc") {
 			// tulosta_lahete_viivakoodi.inc
 
+			if ($yhtiorow['alv_kasittely'] == "o") {
+				$tuotealv = t("Veroton", $kieli);
+			}
+			else {
+				$tuotealv = t("Verollinen", $kieli);
+			}
+
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 180,  $thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 180, $kala+10, 360, 	$thispage, $rectparam);
@@ -860,8 +867,10 @@ if (!function_exists('rivi_otsikot_lahete')) {
 			$pdf->draw_text(190, $kala+15, t("Tuotenimi", $kieli),		$thispage, $norm);
 			$pdf->draw_text(370, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
 			$pdf->draw_text(410, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
-			$pdf->draw_text(460, $kala+15, t("OSH-hinta", $kieli),		$thispage, $norm);
-			$pdf->draw_text(515, $kala+15, t("Yks. nettohinta", $kieli),		$thispage, $norm);
+			$pdf->draw_text(460, $kala+22, t("OSH-hinta", $kieli),		$thispage, $pieni);
+			$pdf->draw_text(460, $kala+13, $tuotealv, 					$thispage, $pieni);
+			$pdf->draw_text(515, $kala+22, t("Yks. nettohinta", $kieli),$thispage, $pieni);
+			$pdf->draw_text(515, $kala+13, $tuotealv,					$thispage, $pieni);
 		}
 		elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_asiakviivakoodi.inc") {
 			// tulosta_lahete_asiakviivakoodi.inc
@@ -2072,10 +2081,11 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
-		if ($pdf->strlen($row["nimitys"], $norm) >= 290) {
+		if ($pdf->strlen($row["nimitys"], $norm) >= 280) {		
 			$kala = $kala - $rivinkorkeus;
 		}
-		$pdf->draw_text(190, $kala, $row["nimitys"], 											$thispage, $norm);
+		
+		$pdf->draw_paragraph($kala+$norm["height"]+3, 185, 180, 360, $row["nimitys"],	$thispage, $norm);
 
 		if ($lahetetyyppi == "tulosta_lahete_viivakoodi_osh.inc") {
 			$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
@@ -2115,7 +2125,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]-5, 45, 60, 280, $row["kommentti"],	$thispage, $norm);
 			$kala = $pohja - $rivinkorkeus;
 		}
 
@@ -2137,11 +2147,11 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			fclose($fh);
 
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, $kala-$rivinkorkeus, 320, $thispage);
+			$pdf->image_place($image, $kala, 320, $thispage);
 
 			system("rm -f $nimi");
 
-			$kala = $kala-$rivinkorkeus-$rivinkorkeus;
+			$kala = $kala-$rivinkorkeus;
 		}
 
 		// Luodaan palautettavat

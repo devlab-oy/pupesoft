@@ -60,7 +60,7 @@ if (!function_exists('jt_toimita_editilaus')) {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi  = ''
 					$asiakasmaalisa";
-		$vtresult = mysql_query($query) or pupe_error($query);
+		$vtresult = pupe_query($query);
 
 		$varastosta = array();
 
@@ -475,6 +475,23 @@ while (!feof ($fd)) {
 				break;
 			}
 
+			// ÷rum h‰kki
+			if (!isset($yhtiorow) and gethostname() == "orum.devlab.fi") {
+				$yhtiorow = hae_yhtion_parametrit("artr");
+
+				// Copy pastettu ylh‰‰lt‰ koko setti. :(
+				$kukarow['yhtio'] = $yhtiorow['yhtio']; // T‰m‰ on vaarallista, mutta t‰t‰ ilman ei mik‰n toimi!
+				$kukarow['kuka'] = $edi_laatija;
+
+				// nollataan argv ja laitetaan ensimm‰iseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
+				$argv 		= array();
+				$argv[0] 	= "";
+				$argv[1] 	= $kukarow["yhtio"];
+				$editil_cli = TRUE;
+
+				$edi_ulos .= "VASTAANOTTTAVAN YHTION TIETO PUUTTUU! -> $yhtiorow[nimi] ($kukarow[yhtio])\n";
+			}
+
 			if (!is_array($arow)) {
 				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
 
@@ -678,7 +695,7 @@ while (!feof ($fd)) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND kateinen = 'o'
 							LIMIT 1";
-				$editilaus_kateinen_res = mysql_query($query) or pupe_error($query);
+				$editilaus_kateinen_res = pupe_query($query);
 				$editilaus_kateinen_row = mysql_fetch_array($editilaus_kateinen_res);
 
 				if (mysql_num_rows($editilaus_kateinen_res) == 1) {
@@ -688,7 +705,7 @@ while (!feof ($fd)) {
 								FROM kassalipas
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND nimi = 'Verkkokauppa'";
-					$kassalipas_res = mysql_query($query) or pupe_error($query);
+					$kassalipas_res = pupe_query($query);
 
 					if (mysql_num_rows($kassalipas_res) == 1) {
 						$kassalipas_row = mysql_fetch_array($kassalipas_res);
@@ -718,7 +735,7 @@ while (!feof ($fd)) {
 							AND jv = 'o'
 							ORDER BY jarjestys
 							LIMIT 1";
-				$editilaus_kateinen_res = mysql_query($query) or pupe_error($query);
+				$editilaus_kateinen_res = pupe_query($query);
 				$editilaus_kateinen_row = mysql_fetch_array($editilaus_kateinen_res);
 
 				if (mysql_num_rows($editilaus_kateinen_res) == 1) {
@@ -735,7 +752,7 @@ while (!feof ($fd)) {
 							AND jvkielto = ''
 							ORDER BY jarjestys
 							LIMIT 1";
-				$editilaus_kateinen_res = mysql_query($query) or pupe_error($query);
+				$editilaus_kateinen_res = pupe_query($query);
 				$editilaus_kateinen_row = mysql_fetch_array($editilaus_kateinen_res);
 
 				if (mysql_num_rows($editilaus_kateinen_res) == 1) {
@@ -789,11 +806,6 @@ while (!feof ($fd)) {
 				}
 			}
 
-			// ÷rum h‰kki
-			if (!isset($yhtiorow) and gethostname() == "orum.devlab.fi") {
-				$yhtiorow = hae_yhtion_parametrit("artr");
-			}
-
 			// lis‰t‰‰n otsikko vain jos asiakas lˆytyi
 			if (!is_array($arow)) {
 				$edi_ulos .= t("Tilaukselta ei lˆytynyt asiakastietoja")."!\n";
@@ -808,7 +820,7 @@ while (!feof ($fd)) {
 
 				// haetaan tomitustavan oletusmaksajan tiedot
 				$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
-				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+				$meapu = pupe_query($apuqu);
 				$apuro = mysql_fetch_array($meapu);
 				$maksaja = $apuro['merahti'];
 
@@ -834,7 +846,7 @@ while (!feof ($fd)) {
 						$maa_eu_query = "	SELECT distinct eu
 											FROM maat
 											WHERE koodi = '$arow[maa]'";
-						$maa_eu_res = mysql_query($maa_eu_query) or pupe_error($maa_eu_query);
+						$maa_eu_res = pupe_query($maa_eu_query);
 						$maa_eu_row = mysql_fetch_array($maa_eu_res);
 
 						if ($maa_eu_row["eu"] == "") {
@@ -943,7 +955,7 @@ while (!feof ($fd)) {
 							FROM kuka
 							WHERE yhtio = '$kukarow[yhtio]'
 							and kuka 	= 'EDI'";
-				$meapu = mysql_query($query) or pupe_error($query);
+				$meapu = pupe_query($query);
 
 				if (mysql_num_rows($meapu) == 1) {
 					$apuro = mysql_fetch_array($meapu);
@@ -954,7 +966,7 @@ while (!feof ($fd)) {
 								FROM kuka
 								WHERE yhtio = '$kukarow[yhtio]'
 								and myyja 	= '$arow[myyjanro]'";
-					$meapu = mysql_query($query) or pupe_error($query);
+					$meapu = pupe_query($query);
 
 					if (mysql_num_rows($meapu) == 1) {
 						$apuro = mysql_fetch_array($meapu);
@@ -1102,7 +1114,7 @@ while (!feof ($fd)) {
 							FROM asiakas
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus  = '$laskurow[liitostunnus]'";
-				$vieres = mysql_query($query) or pupe_error($query);
+				$vieres = pupe_query($query);
 				$vierow = mysql_fetch_array($vieres);
 
 				if (isset($vierow) and $vierow["maa"] != "") {
@@ -1339,7 +1351,7 @@ while (!feof ($fd)) {
 										FROM varastopaikat
 										WHERE yhtio = '$kukarow[yhtio]'
 										AND prioriteetti > 0";
-							$pres = mysql_query($query) or pupe_error($query);
+							$pres = pupe_query($query);
 							$prow = mysql_fetch_assoc($pres);
 
 							if ($prow["tunnukset"] != "") {
@@ -1402,7 +1414,7 @@ while (!feof ($fd)) {
 										WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 										AND tuotepaikat.tuoteno = '$tuoteno'
 										ORDER BY prioriteetti";
-							$sres = mysql_query($query) or pupe_error($query);
+							$sres = pupe_query($query);
 
 							$erikoisvarastojen_saldot = array();
 							$erikois_i = 0;
@@ -1464,7 +1476,7 @@ while (!feof ($fd)) {
 					if ($edi_sarjanumero != "") {
 						// etsit‰‰n sarjanumero
 						$sarjaquery = "SELECT * from sarjanumeroseuranta where tunnus='$edi_sarjanumero'";
-						$sarjaresult = mysql_query($sarjaquery) or pupe_error($sarjaquery);
+						$sarjaresult = pupe_query($sarjaquery);
 
 						if (mysql_num_rows($sarjaresult) == 1) {
 
@@ -1479,7 +1491,7 @@ while (!feof ($fd)) {
 										lisatieto			= '$sarjarow[lisatieto]',
 										kaytetty			= '$sarjarow[kaytetty]',
 										myyntirivitunnus 	= '$lisatty_tun'";
-							$sres = mysql_query($query) or pupe_error($query);
+							$sres = pupe_query($query);
 						}
 					}
 
@@ -1556,7 +1568,7 @@ while (!feof ($fd)) {
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND selite = '$toimtapatmp[vak_kielto]'
 									AND vak_kielto = ''";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) == 1) {
 							$query = "UPDATE lasku SET toimitustapa = '$toimtapatmp[vak_kielto]' where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
@@ -1613,7 +1625,7 @@ while (!feof ($fd)) {
 											and tyyppi = ''
 											order by alkuhyllyalue
 											limit 1";
-						$varasto_res = mysql_query($varasto_query) or pupe_error($varasto_query);
+						$varasto_res = pupe_query($varasto_query);
 						$varasto_row = mysql_fetch_array($varasto_res);
 
 						$query = "	SELECT hyllyalue, hyllynro
@@ -1622,7 +1634,7 @@ while (!feof ($fd)) {
 									AND hyllyalue != ''
 									AND hyllynro != ''
 									AND otunnus = '$editilaus_lasku_tunnus'";
-						$edi_varastopaikka_res = mysql_query($query) or pupe_error($query);
+						$edi_varastopaikka_res = pupe_query($query);
 						$edi_varastopaikka_row = mysql_fetch_array($edi_varastopaikka_res);
 
 						$tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
@@ -1641,7 +1653,7 @@ while (!feof ($fd)) {
 									tulostusalue 	= '$tulostusalue'
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus  = '$editilaus_lasku_tunnus'";
-						$magento_maksettu_res = mysql_query($query) or pupe_error($query);
+						$magento_maksettu_res = pupe_query($query);
 
 						// haetaan tilauksen tiedot
 						$query    = "SELECT * FROM lasku WHERE tunnus = '$editilaus_lasku_tunnus' AND yhtio = '$kukarow[yhtio]'";
@@ -1679,7 +1691,7 @@ while (!feof ($fd)) {
 									alatila = 'F'
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$editilaus_lasku_tunnus'";
-						$magento_maksettu_res = mysql_query($query) or pupe_error($query);
+						$magento_maksettu_res = pupe_query($query);
 					}
 
 					$edi_ulos .= "$tilaus_valmis_ulos\n";
@@ -1752,7 +1764,7 @@ while (!feof ($fd)) {
 }
 
 // l‰hetet‰‰n meili
-if ($yhtiorow["alert_email"] != "") {
+if (isset($yhtiorow) and $yhtiorow["alert_email"] != "") {
 
 	$edi_ulos = strip_tags($edi_ulos);
 

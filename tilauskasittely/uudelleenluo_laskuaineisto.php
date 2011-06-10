@@ -554,6 +554,24 @@
 						$tilrow["toimitettuaika"] = $tilrow["toimitettuaika"];
 					}
 
+					// Laitetaan alennukset kommenttiin, koska laksulla on vain yksi alekenttä
+					if ($yhtiorow['myynnin_alekentat'] > 1) {
+
+						$alekomm = "";
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							if (trim($tilrow["ale{$alepostfix}"]) > 0) {
+								$alekomm .= t("Ale")."{$alepostfix} ".($tilrow["ale{$alepostfix}"]*1)." %|";
+							}
+						}
+
+						if ($tilrow['erikoisale'] > 0) {
+							$alekomm .= t("Erikoisale")." ".($tilrow["erikoisale"]*1)." %|";
+						}
+
+						$tilrow["kommentti"] = $alekomm.$tilrow["kommentti"];
+					}
+
 					//Käänteinen arvonlisäverovelvollisuus ja Käytetyn tavaran myynti
 					if ($tilrow["alv"] >= 600) {
 						$tilrow["alv"] = 0;

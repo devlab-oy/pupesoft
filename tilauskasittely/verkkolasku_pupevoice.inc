@@ -36,12 +36,12 @@ if (!function_exists('pupevoice_otsik')) {
 
 			// haetaan toimipaikan tiedot
 			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
-			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+			$alhire = pupe_query($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {
 
 				// haetaan toimipaikan tiedot
-				$alhiro = mysql_fetch_array($alhire);
+				$alhiro = mysql_fetch_assoc($alhire);
 
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
@@ -85,8 +85,8 @@ if (!function_exists('pupevoice_otsik')) {
 
 		// haetaan asiakkaan tiedot
 		$asquery = "SELECT * from asiakas where yhtio='$lasrow[yhtio]' and tunnus='$lasrow[liitostunnus]'";
-		$asiakasre = mysql_query($asquery) or pupe_error($asquery);
-		$asiakasrow = mysql_fetch_array($asiakasre);
+		$asiakasre = pupe_query($asquery);
+		$asiakasrow = mysql_fetch_assoc($asiakasre);
 
 		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],													$tootxml);
 		xml_add("SellerPartyDomicile", 					$y_kotipaikka,															$tootxml);
@@ -147,7 +147,7 @@ if (!function_exists('pupevoice_otsik')) {
 					FROM laskun_lisatiedot
 					WHERE yhtio = '$lasrow[yhtio]'
 					AND otunnus = '$lasrow[tunnus]'";
-		$lasosres = mysql_query($query) or pupe_error($query);
+		$lasosres = pupe_query($query);
 		$lasosrow = mysql_fetch_assoc($lasosres);
 
 		if ($lasosrow['laskutus_nimi'] != '') {
@@ -182,9 +182,9 @@ if (!function_exists('pupevoice_alvierittely')) {
 	function pupevoice_alvierittely($tootxml, $alvrow) {
 
 		fputs($tootxml, "<VatSpecificationDetails>\n");
-		xml_add("VatRatePercent",					$alvrow[0], $tootxml);
-		xml_add("VatBaseAmount",					$alvrow[1], $tootxml);
-		xml_add("VatRateAmount",					$alvrow[2], $tootxml);
+		xml_add("VatRatePercent",					$alvrow['alv'], $tootxml);
+		xml_add("VatBaseAmount",					$alvrow['rivihinta'], $tootxml);
+		xml_add("VatRateAmount",					$alvrow['alvrivihinta'], $tootxml);
 		fputs($tootxml, "</VatSpecificationDetails>\n");
 	}
 }
@@ -201,7 +201,7 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("ArticleName",						$tilrow['nimitys'], 						$tootxml);
 
 		$toim_query = "SELECT toim_tuoteno FROM tuotteen_toimittajat WHERE yhtio = '$tilrow[yhtio]' AND tuoteno = '$tilrow[tuoteno]'";
-		$toim_tuoteno_res = mysql_query($toim_query) or pupe_error($toim_query);
+		$toim_tuoteno_res = pupe_query($toim_query);
 		$toim_tuoteno_row = mysql_fetch_assoc($toim_tuoteno_res);
 
 		$toim_tuoteno = trim($toim_tuoteno_row['toim_tuoteno']) != '' ? $toim_tuoteno_row['toim_tuoteno'] : $tilrow['tuoteno'];
@@ -239,16 +239,16 @@ if (!function_exists('pupevoice_rivi')) {
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tilaustyyppi = 'A'
 						and lasku.tunnus = '$tilrow[otunnus]'";
-			$tyomres = mysql_query($query) or pupe_error($query);
+			$tyomres = pupe_query($query);
 
 			if (mysql_num_rows($tyomres) > 0) {
-				while ($tyomrow = mysql_fetch_array($tyomres)) {
+				while ($tyomrow = mysql_fetch_assoc($tyomres)) {
 
 					$lisakomm .= "|".t("Työmääräys", $kieli). ": $tyomrow[otunnus]";
 
 					$al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
 
-					while ($al_row = mysql_fetch_array($al_res)) {
+					while ($al_row = mysql_fetch_assoc($al_res)) {
 
 						$kentta = $al_row["selite"];
 
@@ -265,8 +265,8 @@ if (!function_exists('pupevoice_rivi')) {
 												FROM kuka
 												WHERE yhtio = '$kukarow[yhtio]'
 												and kuka  	= '".$tyomrow[$kentta]."'";
-									$yresult = mysql_query($query) or pupe_error($query);
-									$row = mysql_fetch_array($yresult);
+									$yresult = pupe_query($query);
+									$row = mysql_fetch_assoc($yresult);
 
 									$tyomrow[$kentta] = $row["nimi"];
 								}
@@ -274,7 +274,7 @@ if (!function_exists('pupevoice_rivi')) {
 									$yresult = t_avainsana("SARJANUMERON_LI", $kieli, "and avainsana.selite = 'MERKKI' and avainsana.selitetark = '".$tyomrow[$kentta]."'");
 
 									if (mysql_num_rows($yresult) > 0) {
-										$row = mysql_fetch_array($yresult);
+										$row = mysql_fetch_assoc($yresult);
 
 										$tyomrow[$kentta] = $row["selitetark_2"];
 									}
@@ -295,19 +295,7 @@ if (!function_exists('pupevoice_rivi')) {
 			}
 		}
 
-		if ($yhtiorow['myynnin_alekentat'] > 1) {
-			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-				if (trim($tilrow["ale{$alepostfix}"]) > 0) {
-					$tilrow["kommentti"] .= "|".t("Ale")."{$alepostfix} ".$tilrow["ale{$alepostfix}"]." %";
-				}
-			}
-		}
-
-		if ($tilrow['erikoisale'] > 0) {
-			$tilrow["kommentti"] .= "|".t("Erikoisale")." ".$tilrow["erikoisale"]." %";
-		}
-
-		xml_add("RowFreeText", substr(trim($tilrow["kommentti"]), 0, 512),		$tootxml);
+		xml_add("RowFreeText", substr(trim(trim($tilrow["kommentti"]), "|"), 0, 512),		$tootxml);
 		fputs($tootxml, "</Row>\n");
 	}
 }

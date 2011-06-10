@@ -128,12 +128,12 @@ if (!function_exists('finvoice_otsik')) {
 
 				// haetaan toimipaikan tiedot
 				$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
-				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+				$alhire = pupe_query($alhqur);
 
 				if (mysql_num_rows($alhire) == 1) {
 
 					// haetaan toimipaikan tiedot
-					$alhiro = mysql_fetch_array($alhire);
+					$alhiro = mysql_fetch_assoc($alhire);
 
 					$y_puhelin		= $alhiro['puhelin'];
 					$y_fax			= $alhiro['fax'];
@@ -177,8 +177,8 @@ if (!function_exists('finvoice_otsik')) {
 
 			// haetaan asiakkaan tiedot
 			$asquery = "SELECT * from asiakas where yhtio='$lasrow[yhtio]' and tunnus='$lasrow[liitostunnus]'";
-			$asiakasre = mysql_query($asquery) or pupe_error($asquery);
-			$asiakasrow = mysql_fetch_array($asiakasre);
+			$asiakasre = pupe_query($asquery);
+			$asiakasrow = mysql_fetch_assoc($asiakasre);
 
 			//laitetaan setit kuntoon..
 			fputs($tootfinvoice, "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\r\n");
@@ -292,7 +292,7 @@ if (!function_exists('finvoice_otsik')) {
 						AND CONCAT(laskutus_nimi, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa) != '$lasrow[nimi]$lasrow[osoite]$lasrow[postino]$lasrow[postitp]$lasrow[maa]'
 						AND otunnus = '{$lasrow['tunnus']}'
 						LIMIT 1";
-			$tarkres = mysql_query($query) or pupe_error($query);
+			$tarkres = pupe_query($query);
 
 			if (mysql_num_rows($tarkres) == 1) {
 				$tarkrow = mysql_fetch_assoc($tarkres);
@@ -350,9 +350,9 @@ if (!function_exists('finvoice_otsik')) {
 							WHERE lasku.yhtio = '$lasrow[yhtio]'
 							and lasku.laskunro = '$lasrow[laskunro]'
 							and lasku.tila = 'L'";
-				$tarkres = mysql_query($query) or pupe_error($query);
+				$tarkres = pupe_query($query);
 
-				while ($tarkrow = mysql_fetch_array($tarkres)) {
+				while ($tarkrow = mysql_fetch_assoc($tarkres)) {
 					if ($asiakkaan_yhteyshenkilo == "") {
 						if ($tarkrow["kaupallinen_kasittelija"] != "") {
 							$asiakkaan_yhteyshenkilo = $tarkrow["kaupallinen_kasittelija"];
@@ -483,10 +483,10 @@ if (!function_exists('finvoice_alvierittely')) {
 		global $err_finvoice;
 		if ($err_finvoice == 0) {
 			fputs($tootfinvoice, "<VatSpecificationDetails>\r\n");
-			xml_add("VatBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow[1]), 	   	$tootfinvoice);
-			xml_add("VatRatePercent",												pp($alvrow[0]), 	   	$tootfinvoice);
-			xml_add("VatRateAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow[2]), 	   	$tootfinvoice);
-			xml_add("VatFreeText",													"",					   	$tootfinvoice);
+			xml_add("VatBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow['rivihinta']),	 $tootfinvoice);
+			xml_add("VatRatePercent",												pp($alvrow['alv']),			 $tootfinvoice);
+			xml_add("VatRateAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow['alvrivihinta']), $tootfinvoice);
+			xml_add("VatFreeText",													"",					   		 $tootfinvoice);
 			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
 		}
 	}
@@ -620,16 +620,16 @@ if (!function_exists('finvoice_rivi')) {
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.tilaustyyppi = 'A'
 							and lasku.tunnus = '$tilrow[otunnus]'";
-				$tyomres = mysql_query($query) or pupe_error($query);
+				$tyomres = pupe_query($query);
 
 				if (mysql_num_rows($tyomres) > 0) {
-					while ($tyomrow = mysql_fetch_array($tyomres)) {
+					while ($tyomrow = mysql_fetch_assoc($tyomres)) {
 
 						$lisakomm .= "|".t("Työmääräys", $kieli). ": $tyomrow[otunnus]";
 
 						$al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
 
-						while ($al_row = mysql_fetch_array($al_res)) {
+						while ($al_row = mysql_fetch_assoc($al_res)) {
 
 							$kentta = $al_row["selite"];
 
@@ -646,8 +646,8 @@ if (!function_exists('finvoice_rivi')) {
 													FROM kuka
 													WHERE yhtio = '$kukarow[yhtio]'
 													and kuka  	= '".$tyomrow[$kentta]."'";
-										$yresult = mysql_query($query) or pupe_error($query);
-										$row = mysql_fetch_array($yresult);
+										$yresult = pupe_query($query);
+										$row = mysql_fetch_assoc($yresult);
 
 										$tyomrow[$kentta] = $row["nimi"];
 									}
@@ -655,7 +655,7 @@ if (!function_exists('finvoice_rivi')) {
 										$yresult = t_avainsana("SARJANUMERON_LI", $kieli, "and avainsana.selite = 'MERKKI' and avainsana.selitetark = '".$tyomrow[$kentta]."'");
 
 										if (mysql_num_rows($yresult) > 0) {
-											$row = mysql_fetch_array($yresult);
+											$row = mysql_fetch_assoc($yresult);
 
 											$tyomrow[$kentta] = $row["selitetark_2"];
 										}
@@ -669,22 +669,10 @@ if (!function_exists('finvoice_rivi')) {
 				}
 			}
 
-			if ($yhtiorow['myynnin_alekentat'] > 1) {
-				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-					if (trim($tilrow["ale{$alepostfix}"]) > 0) {
-						$lisakomm .= "|".t("Ale")."{$alepostfix} ".$tilrow["ale{$alepostfix}"]." %";
-					}
-				}
-			}
-
-			if ($tilrow['erikoisale'] > 0) {
-				$lisakomm .= "|".t("Erikoisale")." ".$tilrow["erikoisale"]." %";
-			}
-
 			// Siivotaan myös lisäkommentti
 			$lisakomm = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
 
-			$RowFreeTexts = explode("|", trim(trim($lisakomm)."|".trim($tilrow["kommentti"])));
+			$RowFreeTexts = explode("|", trim(trim($lisakomm)."|".trim($tilrow["kommentti"]), "|"));
 
 			foreach ($RowFreeTexts as $RowFreeText) {
 				if (trim($RowFreeText) != "") {

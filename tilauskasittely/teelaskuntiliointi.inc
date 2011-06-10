@@ -35,7 +35,7 @@ $query = "	SELECT tilausrivi.alv alv,
 			AND tilausrivi.tyyppi		 = 'L'
 			AND tilausrivi.yhtio		 = '$kukarow[yhtio]'
 			GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13";
-$xresult = mysql_query($query) or pupe_error($query);
+$xresult = pupe_query($query);
 
 $onkoalvia = ""; // apumuuttuja, ett‰ tiedet‰‰n onko alvillista
 
@@ -53,7 +53,7 @@ else {
 	$maksimisumma_projekti = 0;
 
 	// Tehdaan myynnin kirjaukset
-	while ($xrow = mysql_fetch_array($xresult)) {
+	while ($xrow = mysql_fetch_assoc($xresult)) {
 
 		$lukko 							= "";
 		$tunnus 						= $lasku['tunnus'];
@@ -91,11 +91,11 @@ else {
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus IN ($xrow[tunnukset])";
-			$marginaali_myyntirivitres = mysql_query($query) or pupe_error($query);
+			$marginaali_myyntirivitres = pupe_query($query);
 
 			// lasketaan kaikkien marginaalituotteiden ostohinnnat yhteen
 			$marginaali_ostohinta = 0;
-			while ($marginaali_myyntirivi = mysql_fetch_array($marginaali_myyntirivitres)) {
+			while ($marginaali_myyntirivi = mysql_fetch_assoc($marginaali_myyntirivitres)) {
 				$marginaali_ostohinta += round(sarjanumeron_ostohinta("myyntirivitunnus", $marginaali_myyntirivi["tunnus"], "EIKULULASKUJA") * $marginaali_myyntirivi["kpl"], 6);
 			}
 
@@ -125,7 +125,7 @@ else {
 						lukko 				= '1',
 						laatija 			= '$kukarow[kuka]',
 						laadittu 			= now()";
-			$laskutusres = mysql_query($query) or pupe_error($query);
+			$laskutusres = pupe_query($query);
 
 			$vastasumma += $tiliointisumma;
 			$vastasumma_valuutassa += $tiliointisumma_valuutassa;
@@ -219,7 +219,7 @@ else {
 						lukko 				= '$lukko',
 						laatija 			= '$kukarow[kuka]',
 						laadittu 			= now()";
-			$laskutusres = mysql_query($query) or pupe_error($query);
+			$laskutusres = pupe_query($query);
 			$isa = mysql_insert_id ($link);
 
 			$lukko = "";
@@ -246,7 +246,7 @@ else {
 							laatija 			= '$kukarow[kuka]',
 							laadittu 			= now(),
 							aputunnus			= '$isa'";
-				$laskutusres = mysql_query($query) or pupe_error($query);
+				$laskutusres = pupe_query($query);
 			}
 		}
 
@@ -291,7 +291,7 @@ else {
 						lukko 				= '',
 						laatija 			= '$kukarow[kuka]',
 						laadittu 			= now()";
-			$laskutusres = mysql_query($query) or pupe_error($query);
+			$laskutusres = pupe_query($query);
 
 			$tiliointisumma = $tiliointisumma * -1;
 			$tiliointisumma_valuutassa = $tiliointisumma_valuutassa * -1;
@@ -313,7 +313,7 @@ else {
 						lukko 				= '',
 						laatija 			= '$kukarow[kuka]',
 						laadittu 			= now()";
-			$laskutusres = mysql_query($query) or pupe_error($query);
+			$laskutusres = pupe_query($query);
 		}
 	}
 
@@ -322,8 +322,8 @@ else {
 
 		$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' and tunnus = '$lasku[kassalipas]'";
 
-		$kateisresult = mysql_query($query) or pupe_error($query);
-		$kateisrow = mysql_fetch_array($kateisresult);
+		$kateisresult = pupe_query($query);
+		$kateisrow = mysql_fetch_assoc($kateisresult);
 
 		$myysaatili = "";
 
@@ -392,7 +392,7 @@ else {
 		 		   		lukko 				= '1',
 		 		   		laatija 			= '$kukarow[kuka]',
 		 		   		laadittu 			= now()";
-			$laskutusres = mysql_query($query) or pupe_error($query);
+			$laskutusres = pupe_query($query);
 
 			// v‰hennet‰‰n loppusummasta kassa-ale
 			$apusumma 				= $loppusumma - $lasku['kasumma'];
@@ -453,7 +453,7 @@ else {
 							lukko 				= '1',
 							laatija 			= '$kukarow[kuka]',
 							laadittu 			= now()";
-				$laskutusres = mysql_query($query) or pupe_error($query);
+				$laskutusres = pupe_query($query);
 
 				$loppusumma += $arvo;
 				$loppusumma_valuutassa += $arvo_valuutassa;
@@ -478,7 +478,7 @@ else {
 					lukko 				= '1',
 					laatija 			= '$kukarow[kuka]',
 					laadittu 			= now()";
-		$laskutusres = mysql_query($query) or pupe_error($query);
+		$laskutusres = pupe_query($query);
 	}
 
 	// Kirjataan pyoristykset, jos niita on
@@ -502,7 +502,7 @@ else {
 					lukko 				= '',
 					laatija 			= '$kukarow[kuka]',
 					laadittu 			= now()";
-		$laskutusres = mysql_query($query) or pupe_error($query);
+		$laskutusres = pupe_query($query);
 	}
 
 	$vastasumma = 0;

@@ -3,7 +3,7 @@
 if (!function_exists('elmaedi_otsik')) {
 	function elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi) {
 		global $yhtiorow;
-	
+
 		$fstat = fstat($tootedi);
 
 		if ($fstat["size"] == 0) {
@@ -77,17 +77,16 @@ if (!function_exists('elmaedi_otsik')) {
 }
 
 if (!function_exists('elmaedi_alvierittely')) {
-	function elmaedi_alvierittely($tootedi, $alvrow) {	
-	
-		fputs($tootedi, "ITAXVATTX:$alvrow[0]\n");
-		fputs($tootedi, "ITAXVATMA:125@$alvrow[1]\n");
-		fputs($tootedi, "ITAXVATMA:150@$alvrow[2]\n");
+	function elmaedi_alvierittely($tootedi, $alvrow) {
+		fputs($tootedi, "ITAXVATTX:{$alvrow['alv']}\n");
+		fputs($tootedi, "ITAXVATMA:125@{$alvrow['rivihinta']}\n");
+		fputs($tootedi, "ITAXVATMA:150@{$alvrow['alvrivihinta']}\n");
 	}
 }
 
 if (!function_exists('elmaedi_otsikko_loput')) {
 	function elmaedi_otsikko_loput($tootedi, $lasrow) {
-	
+
 		fputs($tootedi, "IHDR__END:".substr($lasrow["tunnus"], -6)."\n");
 	}
 }
@@ -95,12 +94,12 @@ if (!function_exists('elmaedi_otsikko_loput')) {
 if (!function_exists('elmaedi_rivi')) {
 	function elmaedi_rivi($tootedi, $tilrow, $rivinumero) {
 		global $yhtiorow;
-		
+
 		$query = "	SELECT eankoodi
 					from tuote
 					where yhtio='$yhtiorow[yhtio]' and tuoteno='$tilrow[tuoteno]'";
-		$eanres = mysql_query($query) or pupe_error($query);
-		$eanrow = mysql_fetch_array($eanres);
+		$eanres = pupe_query($query);
+		$eanrow = mysql_fetch_assoc($eanres);
 
 		fputs($tootedi, "ILINSTART:$rivinumero\n");
 		fputs($tootedi, "ILINEN_NU:$eanrow[eankoodi]\n");
@@ -126,14 +125,14 @@ if (!function_exists('elmaedi_rivi')) {
 
 if (!function_exists('elmaedi_lasku_loppu')) {
 	function elmaedi_lasku_loppu($tootedi, $lasrow) {
-	
+
 		fputs($tootedi, "IMSG__END:".substr($lasrow["tunnus"], -6)."\n");
 	}
 }
 
 if (!function_exists('elmaedi_aineisto_loppu')) {
 	function elmaedi_aineisto_loppu($tootedi, $timestamppi) {
-	
+
 		//Lopputägit mukaan, paitsi jos failit on tyhjiä
 		$fstat = fstat($tootedi);
 

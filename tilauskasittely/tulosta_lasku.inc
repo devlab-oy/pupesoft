@@ -589,6 +589,23 @@ if (!function_exists('rivi_lasku')) {
 			$kurssi = 1;
 		}
 
+		if ($yhtiorow['myynnin_alekentat'] > 1) {
+
+			$alekomm = "";
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				if (trim($row["ale{$alepostfix}"]) > 0) {
+					$alekomm .= t("Ale")."{$alepostfix} ".($row["ale{$alepostfix}"]*1)." %\n";
+				}
+			}
+
+			if ($row['erikoisale'] > 0) {
+				$alekomm .= t("Erikoisale")." ".($row["erikoisale"]*1)." %\n";
+			}
+
+			$row["kommentti"] = $alekomm.$row["kommentti"];
+		}
+
 		if (trim($valrow['viesti']) != '' and strpos($row["kommentti"], "$valrow[viesti]\n") === FALSE and $laskutyyppi != 6) {
 			$row["kommentti"] = trim($valrow["viesti"])."\n".$row["kommentti"];
 		}
@@ -870,14 +887,6 @@ if (!function_exists('rivi_original')) {
 			$pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($verollrivi), $thispage, $pieni);
 		}
 
-		if ($yhtiorow['myynnin_alekentat'] > 1) {
-			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-				if (trim($row["ale{$alepostfix}"]) > 0) {
-					$row["kommentti"] .= "\n".t("Ale")."{$alepostfix} ".$row["ale{$alepostfix}"]." %";
-				}
-			}
-		}
-
 		// Kommentti
 		if (trim($row["kommentti"]) != '') {
 			$kommentit = explode("\n", trim($row["kommentti"]));
@@ -1003,14 +1012,6 @@ if (!function_exists('rivi_plain')) {
 			// Veroton Rivihinta
 			$oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"]), $norm);
 			$pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
-		}
-
-		if ($yhtiorow['myynnin_alekentat'] > 1) {
-			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-				if (trim($row["ale{$alepostfix}"]) > 0) {
-					$row["kommentti"] .= "\n".t("Ale")."{$alepostfix} ".$row["ale{$alepostfix}"]." %";
-				}
-			}
 		}
 
 		if (trim($row["kommentti"]) != '') {
@@ -1139,14 +1140,6 @@ if (!function_exists('rivi_plain_2')) {
 		else {
 			// lyhyt nimitys
 			$pdf_lasku->draw_text(20,  $kala, $row['nimitys'],	$thispage, $norm);
-		}
-
-		if ($yhtiorow['myynnin_alekentat'] > 1) {
-			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-				if (trim($row["ale{$alepostfix}"]) > 0) {
-					$row["kommentti"] .= "\n".t("Ale")."{$alepostfix} ".$row["ale{$alepostfix}"]." %";
-				}
-			}
 		}
 
 		if (trim($row["kommentti"]) != '') {
@@ -1928,6 +1921,7 @@ if (!function_exists("tulosta_lasku")) {
 					$sorttauskentta,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					tuote.ei_saldoa,
+					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
 					tuote.eankoodi, tuote.sarjanumeroseuranta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno

@@ -2,7 +2,6 @@
 
 	//sis‰‰n tarvitaan $laskurow jossa on laskun tiedot.
 
-
 	$tulos_ulos_ehtosplit = "";
 
 	// otetaan maksuehto t‰ss‰ heti alussa selville
@@ -10,8 +9,8 @@
 				from maksuehto
 				where yhtio	= '$kukarow[yhtio]'
 				and tunnus	= '$laskurow[maksuehto]'";
-	$yresult = mysql_query($query) or pupe_error($query);
-	$mrow = mysql_fetch_array($yresult);
+	$yresult = pupe_query($query);
+	$mrow = mysql_fetch_assoc($yresult);
 
 	//jos ehdot t‰yttyv‰t niin jaetaan tilaus kahteen osaan ja jaetaan loppusumma summanjakoprososa2:sen mukaan
 	if ($mrow["summanjakoprososa2"] != 0 and $mrow["osamaksuehto1"] != 0 and $mrow["osamaksuehto2"] != 0) {
@@ -35,13 +34,13 @@
 						and tyyppi		= 'L'";
 		}
 
-		$presult = mysql_query($query) or pupe_error($query);
+		$presult = pupe_query($query);
 
 		$nyht = 0;
 		$myht = 0;
 		$kyht = 0;
 
-		while ($prow = mysql_fetch_array ($presult)) {
+		while ($prow = mysql_fetch_assoc ($presult)) {
 
 			if ($prow["netto"] != 'N') {
 				$myht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT..
@@ -87,72 +86,78 @@
 
 			list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-			$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika) 
+			$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika)
 						values ('$hinta', 'N', '1', '1', '$otunnus', '$tuoteno', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '','$kukarow[kuka]',now(),'$kukarow[kuka]',now(),now())";
-			$addtil = mysql_query($query) or pupe_error($query);
+			$addtil = pupe_query($query);
 
 			//p‰ivitet‰‰n alkuper‰isen otsikon maksuehto
 			$query = "	UPDATE lasku set
 						maksuehto 	= '$mrow[osamaksuehto1]'
 						where yhtio	= '$kukarow[yhtio]'
 						and tunnus 	= '$laskurow[tunnus]'";
-			$varresult = mysql_query($query) or pupe_error($query);
+			$varresult = pupe_query($query);
 
 			// vaikka meill‰ onkin laskurow, haetaan silti laskun tiedot fetch_arraylla, jotta saadaan kiva looppi
 			$query = "	SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '$laskurow[tunnus]'";
-			$laskufetch_res = mysql_query($query) or pupe_error($query);
-			$laskufetch_row = mysql_fetch_array($laskufetch_res);
+			$laskufetch_res = pupe_query($query);
+			$laskufetch_row = mysql_fetch_assoc($laskufetch_res);
 
 			$query = "INSERT INTO lasku SET ";
 
 			for ($i = 0; $i < mysql_num_fields($laskufetch_res); $i++) {
-				if (mysql_field_name($laskufetch_res, $i) == 'maksuehto') {
-					$query .= mysql_field_name($laskufetch_res, $i)."='$mrow[osamaksuehto2]',";
+
+				$fieldname = mysql_field_name($laskufetch_res, $i);
+
+				if ($fieldname == 'maksuehto') {
+					$query .= $fieldname."='$mrow[osamaksuehto2]',";
 				}
-				elseif (mysql_field_name($laskufetch_res, $i) == 'alatila') {
-					$query .= mysql_field_name($laskufetch_res, $i)."='D',";
+				elseif ($fieldname == 'alatila') {
+					$query .= $fieldname."='D',";
 				}
-				elseif (mysql_field_name($laskufetch_res, $i) == 'tila') {
-					$query .= mysql_field_name($laskufetch_res, $i)."='L',";
+				elseif ($fieldname == 'tila') {
+					$query .= $fieldname."='L',";
 				}
-				elseif (mysql_field_name($laskufetch_res, $i) != 'tunnus') {
-					$query .= mysql_field_name($laskufetch_res, $i)."='".$laskufetch_row[$i]."',";
+				elseif ($fieldname != 'tunnus') {
+					$query .= $fieldname."='".$laskufetch_row[$fieldname]."',";
 				}
 			}
 
 			$query = substr($query, 0, -1);
-			$laskuinsert_result = mysql_query($query) or pupe_error($query);
+			$laskuinsert_result = pupe_query($query);
 			$uusitunnus = (string) mysql_insert_id();
 
 			$query = "	SELECT *
 						FROM laskun_lisatiedot
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND otunnus = '$laskurow[tunnus]'";
-			$lisatiedot_res = mysql_query($query) or pupe_error($query);
-			$lisatiedot_row = mysql_fetch_array($lisatiedot_res);
+			$lisatiedot_res = pupe_query($query);
+			$lisatiedot_row = mysql_fetch_assoc($lisatiedot_res);
 
 			$query = "INSERT INTO laskun_lisatiedot SET ";
 
 			for ($i = 0; $i < mysql_num_fields($lisatiedot_res); $i++) {
-				if (mysql_field_name($lisatiedot_res, $i) == 'laatija') {
-					$query .= mysql_field_name($lisatiedot_res, $i)."='$kukarow[kuka]',";
+
+				$fieldname = mysql_field_name($lisatiedot_res, $i);
+
+				if ($fieldname == 'laatija') {
+					$query .= $fieldname."='$kukarow[kuka]',";
 				}
-				elseif (mysql_field_name($lisatiedot_res, $i) == 'luontiaika') {
-					$query .= mysql_field_name($lisatiedot_res, $i)."=now(),";
+				elseif ($fieldname == 'luontiaika') {
+					$query .= $fieldname."=now(),";
 				}
-				elseif (mysql_field_name($lisatiedot_res, $i) == 'otunnus') {
-					$query .= mysql_field_name($lisatiedot_res, $i)."='$uusitunnus',";
+				elseif ($fieldname == 'otunnus') {
+					$query .= $fieldname."='$uusitunnus',";
 				}
-				elseif (mysql_field_name($lisatiedot_res, $i) != 'tunnus') {
-					$query .= mysql_field_name($lisatiedot_res, $i)."='".$lisatiedot_row[$i]."',";
+				elseif ($fieldname != 'tunnus') {
+					$query .= $fieldname."='".$lisatiedot_row[$fieldname]."',";
 				}
 			}
 
 			$query = substr($query, 0, -1);
-			$lisatiedot_result = mysql_query($query) or pupe_error($query);
+			$lisatiedot_result = pupe_query($query);
 
 
 			$otunnus		= $uusitunnus;
@@ -168,9 +173,9 @@
 
 			list($hinta, $alv) = alv($laskurow, $trow, $hyvitetaan, '', '');
 
-			$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika) 
+			$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika)
 						values ('$hinta', 'N', '1', '1', '$otunnus', '$tuoteno', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '','$kukarow[kuka]',now(),'$kukarow[kuka]',now(),now())";
-			$addtil = mysql_query($query) or pupe_error($query);
+			$addtil = pupe_query($query);
 		}
 	}
 

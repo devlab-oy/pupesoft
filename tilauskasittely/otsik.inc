@@ -1913,6 +1913,7 @@
 				echo "<select name='tyojono'>";
 
 				$vresult = t_avainsana("TYOM_TYOJONO");
+				echo "<option value = '' >".t("Ei työjonoon")."</option>";
 
 				while ($vrow=mysql_fetch_assoc($vresult)) {
 					$sel="";
@@ -3108,7 +3109,7 @@
 				}
 			}
 
-			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
+			if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $tilaustyyppi == "A") and $tyojono != "") {
 				//otetaan kantaa pyörän malliin
 				if ($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;

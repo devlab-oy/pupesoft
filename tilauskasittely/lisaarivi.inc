@@ -314,7 +314,7 @@
 			$kpl = $trow['myynti_era'];
 		}
 		else {
-			(int) $kokonaisluku = number_format($kpl / $trow['myynti_era'],0);
+			(int) $kokonaisluku = number_format($kpl / $trow['myynti_era'],0,'','');
 			(float) $jakojaannos = fmod($kpl,$trow['myynti_era']);
 
 			$test = $kokonaisluku * $trow['myynti_era'];

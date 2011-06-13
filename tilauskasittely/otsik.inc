@@ -2995,6 +2995,7 @@
 									$values .= ", '$kukarow[kuka]'";
 									break;
 								case "luontiaika";
+								case "laadittu";
 									$values .= ", now()";
 									break;
 								case "kerayspvm";
@@ -3109,7 +3110,7 @@
 				}
 			}
 
-			if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $tilaustyyppi == "A") and $tyojono != "") {
+			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
 				//otetaan kantaa pyörän malliin
 				if ($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;

@@ -17,6 +17,14 @@
 		echo "<font class='head'>".t("Tuotteen lisävarusteet")."</font><hr>";
 		$hakutyyppi = "L";
 	}
+	elseif ($toim == "OSALUETTELO") {
+		echo "<font class='head'>".t("Tuotteen osaluettelo")."</font><hr>";
+		$hakutyyppi = "V";
+	}
+	elseif ($toim == "TUOTEKOOSTE") {
+		echo "<font class='head'>".t("Tuotteen koosteluettelo")."</font><hr>";
+		$hakutyyppi = "O";
+	}
 	else {
 		echo "<font class='head'>".t("Tuotereseptit")."</font><hr>";
 		$hakutyyppi = "R";
@@ -39,6 +47,12 @@
 				}
 				elseif ($toim == "LISAVARUSTE") {
 					echo t("Syötä tuote jolle lisävarusteet kopioidaan");
+				}
+				elseif ($toim == "OSALUETTELO") {
+					echo t("Syötä tuote jolle osaluettelo kopioidaan");
+				}
+				elseif ($toim == "TUOTEKOOSTE") {
+					echo t("Syötä tuote jolle tuotekooste kopioidaan");
 				}
 				else {
 					echo t("Syötä valmiste jolle resepti kopioidaan");
@@ -68,7 +82,7 @@
 						and tuote.yhtio 		= '$kukarow[yhtio]'
 						and tuote.status 	   NOT IN ('P','X')
 						HAVING isa is null";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				foreach ($kop_tuoteno as $kop_index => $tuoteno) {
@@ -85,7 +99,7 @@
 									laatija			= '$kukarow[kuka]',
 									luontiaika		= now(),
 									tyyppi 			= '$hakutyyppi'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 				}
 
@@ -96,6 +110,12 @@
 				}
 				elseif ($toim == "LISAVARUSTE") {
 					echo t("Lisävarusteet kopioitu");
+				}
+				elseif ($toim == "OSALUETTELO") {
+					echo t("Osaluettelo kopioitu");
+				}
+				elseif ($toim == "TUOTEKOOSTE") {
+					echo t("Tuotekooste kopioitu");
 				}
 				else {
 					echo t("Resepti kopioitu");
@@ -115,6 +135,12 @@
 				}
 				elseif ($toim == "LISAVARUSTE") {
 					echo t("Tuotetta ei löydy järjestelmästä tai tuotteella on jo lisävarusteita");
+				}
+				elseif ($toim == "OSALUETTELO") {
+					echo t("Tuotetta ei löydy järjestelmästä tai tuotteella on jo osaluettelo");
+				}
+				elseif ($toim == "TUOTEKOOSTE") {
+					echo t("Tuotetta ei löydy järjestelmästä tai tuotteella on jo tuotekooste");
 				}
 				else {
 					echo t("Tuotetta ei löydy järjestelmästä tai tuotteella on jo resepti");
@@ -144,6 +170,12 @@
 		elseif ($toim == "LISAVARUSTE") {
 			echo "<th>".t("Etsi tuotteen lisävausteita").": </th>";
 		}
+		elseif ($toim == "OSALUETTELO") {
+			echo t("Etsi osaluetteloa");
+		}
+		elseif ($toim == "TUOTEKOOSTE") {
+			echo t("Etsi tuotekoostetta");
+		}
 		else{
 			echo "<th>".t("Etsi tuotereseptiä").": </th>";
 		}
@@ -165,7 +197,7 @@
 						where isatuoteno 	= '$isatuoteno'
 						and yhtio 			= '$kukarow[yhtio]'
 						and tyyppi 			= '$hakutyyppi'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
 				//katsotaan ettei tämä isa/lapsi kombinaatio ole jo olemassa
@@ -175,7 +207,7 @@
 							and tuoteno 		= '$tuoteno'
 							and yhtio 			= '$kukarow[yhtio]'
 							and tyyppi 			= '$hakutyyppi'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				//Jos tunnus on erisuuri kuin tyhjä niin ollan päivittämässä olemassa olevaaa kombinaatiota
 				if (mysql_num_rows($result) > 0 and $tunnus == "") {
@@ -194,11 +226,11 @@
 				$error = '';
 
 				$query = "SELECT * from tuote where tuoteno='$isatuoteno' and yhtio='$kukarow[yhtio]'";
-				$res   = mysql_query($query) or pupe_error($query);
+				$res   = pupe_query($query);
 				if (mysql_num_rows($res)==0) $error .= "<font class='error'>".t("Tuotenumero")." $isatuoteno ".t("ei ole tuoterekisterissä, riviä ei voida lisätä")."!</font><br>";
 
 				$query = "SELECT * from tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-				$res   = mysql_query($query) or pupe_error($query);
+				$res   = pupe_query($query);
 				if (mysql_num_rows($res)==0) $error .= "<font class='error'>".t("Tuotenumero")." $tuoteno ".t("ei ole tuoterekisterissä, riviä ei voida lisätä")."!</font><br>";
 
 				if ($error == '') {
@@ -241,7 +273,7 @@
 									tyyppi 			= '$hakutyyppi',
 									ei_nayteta		= '$ei_nayteta'
 									$postq";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$tunnus = "";
 					$tee 	= "";
@@ -268,7 +300,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$hakutyyppi'
 					and isatuoteno = '$isatuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$fakrow = mysql_fetch_array($result);
 
 		$fakta 		= $fakrow["fakta"];
@@ -281,7 +313,7 @@
 					where tunnus = '$tunnus'
 					and yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$hakutyyppi'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$tunnus = '';
 	}
 
@@ -291,7 +323,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$hakutyyppi'
 					and isatuoteno = '$isatuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$query = "	UPDATE tuoteperhe
 					SET fakta = '$fakta', fakta2 = '$fakta2', omasivu = '$omasivu'
@@ -300,7 +332,7 @@
 					and isatuoteno = '$isatuoteno'
 					ORDER BY isatuoteno, tuoteno
 					LIMIT 1";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<br><br><font class='message'>".t("Reseptin tiedot tallennettu")."!</font><br>";
 
@@ -309,7 +341,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$hakutyyppi'
 					and isatuoteno = '$isatuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<font class='message'>".t("Esitysmuoto tallennettu")."!</font><br>";
 
@@ -333,7 +365,7 @@
 					from tuote
 					where yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$tchk'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$query  = "	SELECT distinct isatuoteno
@@ -342,7 +374,7 @@
 						$lisa
 						and tyyppi = '$hakutyyppi'
 						order by isatuoteno, tuoteno";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0 and ($hakutuoteno != '' or $isatuoteno != '')) {
 				if ($toim == "PERHE") {
@@ -352,6 +384,14 @@
 				elseif ($toim == "LISAVARUSTE") {
 					echo "<br><font class='error'>".t("Lisävarusteita ei ole määritelty tuotteelle")." $hakutuoteno!</font><br>";
 					echo "<br><font class='head'>".t("Lisää lisävaruste tuotteelle").": $hakutuoteno</font><hr><br>";
+				}
+				elseif ($toim == "OSALUETTELO") {
+					echo "<br><font class='error'>".t("Tuotenumeroa")." $hakutuoteno ".t("ei löydy mistään osaluettelosta")."!</font><br>";
+					echo "<br><font class='head'>".t("Perusta uusi osaluettelo tuotteelle").": $hakutuoteno</font><hr><br>";
+				}
+				elseif ($toim == "TUOTEKOOSTE") {
+					echo "<br><font class='error'>".t("Tuotekoostetta ei ole määritelty tuotteelle")." $hakutuoteno!</font><br>";
+					echo "<br><font class='head'>".t("Lisää tuotekooste tuotteelle").": $hakutuoteno</font><hr><br>";
 				}
 				else{
 					echo "<br><font class='error'>".t("Tuotenumeroa")." $hakutuoteno ".t("ei löydy mistään tuotereseptistä")."!</font><br>";
@@ -387,7 +427,7 @@
 				//isätuotteen checkki
 				$error = "";
 				$query = "SELECT * from tuote where tuoteno='$isatuoteno' and yhtio='$kukarow[yhtio]'";
-				$res   = mysql_query($query) or pupe_error($query);
+				$res   = pupe_query($query);
 
 				if (mysql_num_rows($res) == 0) {
 					echo "<font class='error'>".t("Tuote ei enää rekisterissä")."!</font><br>";
@@ -405,6 +445,12 @@
 				elseif ($toim == "LISAVARUSTE") {
 					echo "<th>".t("Tuotenumero").": </th>";
 				}
+				elseif ($toim == "OSALUETTELO") {
+					echo "<th>".t("Tuotenumero").": </th>";
+				}
+				elseif ($toim == "TUOTEKOOSTE") {
+					echo "<th>".t("Tuotenumero").": </th>";
+				}
 				else {
 					echo "<th>".t("Tuotereseptin valmiste").": </th>";
 				}
@@ -412,7 +458,7 @@
 				echo "<tr><td>$isatuoteno - $isarow[nimitys]</td></tr></table><br>";
 
 				$query = "SELECT ei_nayteta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' and ei_nayteta != '' ORDER BY isatuoteno, tuoteno LIMIT 1";
-				$ressu = mysql_query($query) or pupe_error($query);
+				$ressu = pupe_query($query);
 				$faktarow = mysql_fetch_array($ressu);
 
 				if ($faktarow["ei_nayteta"] == "") {
@@ -437,7 +483,7 @@
 						</select></td>";
 
 				$query = "SELECT omasivu FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' and omasivu != '' ORDER BY isatuoteno, tuoteno LIMIT 1";
-				$ressu = mysql_query($query) or pupe_error($query);
+				$ressu = pupe_query($query);
 				$faktarow = mysql_fetch_array($ressu);
 
 				if ($toim == "RESEPTI") {
@@ -480,6 +526,12 @@
 				elseif ($toim == "LISAVARUSTE") {
 					echo "<th>".t("Lisävarusteiden faktat").": </th></tr>";
 				}
+				elseif ($toim == "OSALUETTELO") {
+					echo "<th>".t("Osaluettelon faktat").": </th>";
+				}
+				elseif ($toim == "TUOTEKOOSTE") {
+					echo "<th>".t("Tuotekoosteen faktat").": </th>";
+				}
 				else {
 					echo "<th>".t("Reseptin faktat").": </th></tr>";
 				}
@@ -492,7 +544,7 @@
 							and trim(fakta) != ''
 							ORDER BY LENGTH(fakta) desc
 							LIMIT 1";
-				$ressu = mysql_query($query) or pupe_error($query);
+				$ressu = pupe_query($query);
 				$faktarow = mysql_fetch_array($ressu);
 
 				echo "<td><textarea cols='35' rows='7' name='fakta'>$faktarow[fakta]</textarea></td>";
@@ -507,7 +559,7 @@
 								and trim(fakta2) != ''
 								ORDER BY LENGTH(fakta2) desc
 								LIMIT 1";
-					$ressu = mysql_query($query) or pupe_error($query);
+					$ressu = pupe_query($query);
 					$faktarow = mysql_fetch_array($ressu);
 
 					echo "</tr><tr>";
@@ -531,6 +583,12 @@
 				elseif ($toim == "LISAVARUSTE") {
 					echo "<th>".t("Lisävarusteet")."</th><th>".t("Nimitys")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
 				}
+				elseif ($toim == "OSALUETTELO") {
+					echo "<th>".t("Osaluettelot")."</th><th>".t("Nimitys")."</th><th>".t("Kerroin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
+				}
+				elseif ($toim == "TUOTEKOOSTE") {
+					echo "<th>".t("Tuotekoosteet")."</th><th>".t("Nimitys")."</th><th>".t("Kerroin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
+				}
 				else {
 					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("Määräkerroin")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Pituus kerroin")."</th><td class='back'></td></tr>";
 				}
@@ -541,7 +599,7 @@
 							and yhtio = '$kukarow[yhtio]'
 							and tyyppi = '$hakutyyppi'
 							order by isatuoteno, tuoteno";
-				$res   = mysql_query($query) or pupe_error($query);
+				$res   = pupe_query($query);
 
 				$resyht = 0;
 
@@ -586,7 +644,7 @@
 				while ($prow = mysql_fetch_array($res)) {
 					//Tarkistetaan löytyyko tuote enää rekisteristä
 					$query = "SELECT * from tuote where tuoteno='$prow[tuoteno]' and yhtio='$kukarow[yhtio]'";
-					$res1   = mysql_query($query) or pupe_error($query);
+					$res1   = pupe_query($query);
 
 					if (mysql_num_rows($res1)==0) {
 						$error="<font class='error'>(".t("Tuote ei enää rekisterissä")."!)</font>";
@@ -661,7 +719,7 @@
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tunnus = '$tunnus'
 									and tyyppi = '$hakutyyppi'";
-						$zresult = mysql_query($query) or pupe_error($query);
+						$zresult = pupe_query($query);
 						$zrow = mysql_fetch_array($zresult);
 
 
@@ -758,7 +816,7 @@
 								and yhtio = '$kukarow[yhtio]'
 								and tyyppi = '$hakutyyppi'
 								order by isatuoteno, tuoteno";
-					$res   = mysql_query($query) or pupe_error($query);
+					$res   = pupe_query($query);
 
 					echo "<tr><td><a href='$PHP_SELF?toim=$toim&isatuoteno=".urlencode($row["isatuoteno"])."&hakutuoteno=".urlencode($row["isatuoteno"])."'>$row[isatuoteno]</a></td>";
 
@@ -797,7 +855,7 @@
 					$lisa1
 					group by tuoteperhe.isatuoteno
 					order by tuoteperhe.isatuoteno, tuoteperhe.tuoteno";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 

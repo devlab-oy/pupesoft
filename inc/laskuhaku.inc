@@ -139,7 +139,6 @@ for ($i = 1; $i < 32; $i++) {
 
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
-
 echo "<tr>
 	<th valign='top'>".t("Loppupvm")."</th>
 	<td><select name='loppuvv'>";
@@ -199,7 +198,7 @@ echo "</tr>";
 
 echo "</table>";
 echo "</form>";
-echo "<br><br>";
+echo "<hr><br><br>";
 
 $formi = 'valinta';
 $kentta = 'summa1';

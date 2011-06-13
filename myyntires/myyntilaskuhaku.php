@@ -20,20 +20,48 @@
 	$index = "";
 	$lopetus = "${palvelin2}myyntires/myyntilaskuhaku.php////tee={$tee}//summa1={$summa1}//summa2={$summa2}";
 
+	echo "<br><form name = 'valinta' action = '' method='post'>";
+
+	$seldr = array_fill_keys(array($tee), " selected") + array('S','VS','N','V','L');
+
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>",t("Etsi lasku"),"</th>";
+	echo "<td><select name = 'tee'>";
+	echo "<option value = 'S'  {$seldr["S"]}>",t("summalla"),"</option>";
+	echo "<option value = 'VS' {$seldr["VS"]}>",t("valuuttasummalla"),"</option>";
+	echo "<option value = 'N'  {$seldr["N"]}>",t("nimell‰"),"</option>";
+	echo "<option value = 'V'  {$seldr["V"]}>",t("viitteell‰"),"</option>";
+	echo "<option value = 'L'  {$seldr["L"]}>",t("laskunnumerolla"),"</option>";
+	echo "</select></td>";
+	echo "<td><input type = 'text' name = 'summa1' size=13> - <input type = 'text' name = 'summa2' size=13></td>";
+	echo "<td class='back'><input type = 'submit' value = '",t("Hae"),"'></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "</form>";
+	echo "<hr>";
+	
+	$formi = 'valinta';
+	$kentta = 'summa1';
+	
+	if (trim($summa1) == "") {
+		$tee = "";
+	}
+
 	// VS = Etsit‰‰n valuuttasummaa laskulta
 	if ($tee == 'VS') {
-		
+
 		if (strlen($summa2) == 0) {
 			$summa2 = $summa1;
 		}
-		
+
 		$summa1 = (float) str_replace( ",", ".", $summa1);
 		$summa2 = (float) str_replace( ",", ".", $summa2);
-		
+
 		$ehto = "tila = 'U' and ";
 		$index = " use index (yhtio_tila_summavaluutassa) ";
 
-		if ($summa1 == $summa2) {						
+		if ($summa1 == $summa2) {
 			$ehto .= "summa_valuutassa in ({$summa1}, ".($summa1*-1).") ";
 			$jarj = "tapvm desc";
 		}
@@ -45,11 +73,11 @@
 
 	// S = Etsit‰‰n summaa laskulta
 	if ($tee == 'S') {
-		
+
 		if (strlen($summa2) == 0) {
 			$summa2 = $summa1;
 		}
-		
+
 		$summa1 = (float) str_replace(",", ".", $summa1);
 		$summa2 = (float) str_replace(",", ".", $summa2);
 
@@ -179,29 +207,6 @@
 		}
 	}
 
-	if ($tee == '') {
-
-		echo "<form name = 'valinta' action = '' method='post'>";
-
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>",t("Etsi lasku"),"</th>";
-		echo "<td><select name = 'tee'>";
-		echo "<option value = 'S'>",t("summalla"),"</option>";
-		echo "<option value = 'VS'>",t("valuuttasummalla"),"</option>";
-		echo "<option value = 'N'>",t("nimell‰"),"</option>";
-		echo "<option value = 'V'>",t("viitteell‰"),"</option>";
-		echo "<option value = 'L'>",t("laskunnumerolla"),"</option>";
-		echo "</select></td>";
-		echo "<td><input type = 'text' name = 'summa1' size=13> - <input type = 'text' name = 'summa2' size=13></td>";
-		echo "<td class='back'><input type = 'submit' value = '",t("Hae"),"'></td>";
-		echo "</tr>";
-		echo "</table>";
-
-		echo "</form>";
-
-		$formi = 'valinta';
-		$kentta = 'summa1';
-	}
-
 	require ("inc/footer.inc");
+
+?>

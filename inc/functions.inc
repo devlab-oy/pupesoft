@@ -10676,7 +10676,7 @@ if (!function_exists("pupe_DataTables")) {
 					\"bStateSave\" : true,
 					\"iDisplayLength\" : 10,
 					\"oLanguage\": {
-						\"sSearch\" : \"".t("Etsi").":\",
+						\"sSearch\" : \"".t("Etsi taulukosta").":\",
 						\"sZeroRecords\": \"".t("Ei hakuosumia")."\",
 						\"sLengthMenu\": \"",t("N‰yt‰")," _MENU_ ",t("rivi‰"),"\",
 						\"sInfo\": \"",t("N‰ytet‰‰n")," _START_ - _END_ / _TOTAL_ ",t("rivist‰"),"\",

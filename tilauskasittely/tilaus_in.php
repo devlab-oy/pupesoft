@@ -30,7 +30,6 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		// tarvitaan $filename
 		echo "<pre>";
 		require ("editilaus_in.inc");
-		echo "$edi_ulos";
 		echo "</pre>";
 	}
 
@@ -39,7 +38,6 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		echo "<pre>";
 		$edi_tyyppi = "futursoft";
 		require ("editilaus_in.inc");
-		echo "$edi_ulos";
 		echo "</pre>";
 	}
 
@@ -48,16 +46,14 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		echo "<pre>";
 		$edi_tyyppi = "magento";
 		require ("editilaus_in.inc");
-		echo "$edi_ulos";
 		echo "</pre>";
 	}
-	
+
 	if ($tyyppi=='edifact911') {
 		// tarvitaan $filename
 		echo "<pre>";
 		$edi_tyyppi = "edifact911";
 		require ("editilaus_in.inc");
-		echo "$edi_ulos";
 		echo "</pre>";
 	}
 

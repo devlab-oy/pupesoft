@@ -326,7 +326,9 @@
 		$myyntierahuomatus = TRUE;
 	}
 
-	$toimittamatta			= $kpl; //N‰in paljon ollaan toimittamassa
+	$toimittamatta = $kpl; //N‰in paljon ollaan toimittamassa
+
+	if ($lisaarivi_debug==1) echo "Tilattu m‰‰r‰: $toimittamatta<br>";
 
 	// Jos kyseess‰ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
 	if (substr($paikka,0,3) == "°°°") {
@@ -605,7 +607,10 @@
 		// Sitten k‰yd‰‰n kaikkien tuotteiden saldot l‰pi kaikilta varastopaikoilta
 		foreach ($kaikkituotteet as $tuoteno) {
 
-			$query = "SELECT ei_saldoa from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+			$query = "	SELECT ei_saldoa, status
+						FROM tuote
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$tuoteno'";
 			$zres = pupe_query($query);
 			$zrow = mysql_fetch_array($zres);
 
@@ -775,9 +780,6 @@
 				// yhdistet‰‰n arrayt
 				$zzrow = array_merge($oma_maa, $muu_maa);
 
-				// n‰in tehtiin vaan ennen
-				// usort($zzrow, "zzrowcmp");
-
 				if (count($zzrow) > 0) {
 
 					// Jos tuotteella on tuotepaikkoja
@@ -798,7 +800,15 @@
 							$myy_era[$i] 	   = $zrow["era"];
 
 							if (!in_array(strtoupper($tuoteno), $tuoteperhe)) {
-								$myy_tyyppi[$i] = "NORMAALI";
+
+								// Sis‰‰ntulevissa EDI-tilauksissa tehdastilaustuotteita ei saa tilata
+								if (isset($kutsuja) and $kutsuja == "EDITILAUS" and $zrow['status'] == 'T') {
+									$myy_tyyppi[$i] = "TEHDASTILAUSTUOTE";
+								}
+								else {
+									$myy_tyyppi[$i] = "NORMAALI";
+								}
+
 								$saldoyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien isien saldoa yhteens‰.
 							}
 							else {
@@ -834,7 +844,14 @@
 					$myy_era[$i] 	   = "";
 
 					if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
-						$myy_tyyppi[$i] = "NORMAALI";
+						// Sis‰‰ntulevissa EDI-tilauksissa tehdastilaustuotteita ei saa tilata
+						if (isset($kutsuja) and $kutsuja == "EDITILAUS" and $zrow['status'] == 'T') {
+							$myy_tyyppi[$i] = "TEHDASTILAUSTUOTE";
+						}
+						else {
+							$myy_tyyppi[$i] = "NORMAALI";
+						}
+
 						$saldoyhteensa += $toimittamatta; // summaillaan kaikkien isien saldoa yhteens‰.
 					}
 					else {
@@ -942,7 +959,7 @@
 							continue;
 						}
 
-						if ($myy_tyyppi[$i] == "NORMAALI") {
+						if ($myy_tyyppi[$i] == "NORMAALI" or $myy_tyyppi[$i] == "TEHDASTILAUSTUOTE") {
 							$saldoyhteensa -= $myy_kpl[$i];
 						}
 						else {
@@ -964,8 +981,7 @@
 
 			foreach ($myy_tuoteno as $i => $tuoteno) {
 				//T‰ss‰ loopataan vain is‰/normaleja tuotteita
-
-				if ($lisaarivi_debug==1) echo "Loopataan $tuoteno<br>";
+				if ($lisaarivi_debug==1) echo "Loopataan $tuoteno, {$myy_tyyppi[$i]}, $toimittamatta<br>";
 
 				if ($myy_tyyppi[$i] == "NORMAALI") {
 					// jos ei olla viel‰ toimitettu kaikkea, niin lis‰t‰‰n tilausrivi
@@ -1809,9 +1825,17 @@
 				}
 
 				if (trim($var) == 'P') {
+
+					// Onko customi uutekommenttia
 					$puurivires = t_avainsana("PUUTEKOMM");
 
-					if (mysql_num_rows($puurivires) > 0) {
+					if ($kutsuja == "EDITILAUS" and $trow['status'] == 'T') {
+						if (strpos($kommentti, t("Tilaustuote.")) === FALSE) {
+							// Tilausrivin systeemikommentti
+							$kommentti .= " ".t("Tilaustuote.");
+						}
+					}
+					elseif (mysql_num_rows($puurivires) > 0) {
 
 						$puurivirow = mysql_fetch_assoc($puurivires);
 

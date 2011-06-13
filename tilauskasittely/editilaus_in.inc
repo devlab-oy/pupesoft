@@ -23,10 +23,6 @@ if ($php_cli) {
 		$argv[2] = 'magento';
 	}
 
-	if (trim($argv[2]) == 'edifact911') {
-		$argv[2] = 'edifact911';
-	}
-
 	// ja toinen parametri komentorivilt‰
 	$edi_tyyppi	= $argv[2];
 
@@ -81,6 +77,7 @@ unset($arow_ostaja);
 unset($arow_toimitus);
 unset($arow_terminaali);
 unset($yhtiorow);
+
 $toimpvm 	 			= date("Y-m-d");
 $vastaustapa 			= "";
 $editilaus_tila       	= "N"; // laskun tila
@@ -139,8 +136,6 @@ $olinvarasto     	= "";
 $edi_nimitys     	= "";
 $edi_sarjanumero 	= "";
 $edi_hinta       	= "";
-$korvaavakielto  	= "";
-$perhekielto     	= "";
 $sallitaanjt	 	= "";
 $editilaus_hinta	= "";
 $editilaus_alennus	= "";
@@ -201,13 +196,13 @@ elseif ($edi_tyyppi == "edifact911") {
 	$nadse_segmentti = substr($order_tietosisalto, strpos($order_tietosisalto, "NAD+SE+"), (strpos($order_tietosisalto, "NAD+PL+") - strpos($order_tietosisalto, "NAD+SE+")));
 }
 else {
-	$edi_subj = t("Sis‰‰ntuleva EDI-tilaus");
+	$edi_subj = t("Sis‰‰ntuleva EIH 1.4 EDI-tilaus");
 	$edi_laatija = "EDI";
 }
 
 $edi_ulos .= "$edi_subj\n";
 
-while (!feof ($fd)) {
+while (!feof($fd)) {
 
 	$tietue = fgets($fd, 4096);
 
@@ -229,7 +224,7 @@ while (!feof ($fd)) {
 		$tieto  = trim($tieto);
 
 		if (preg_match('/\*RE *OSTOTILRIV/', $tunnus)) {
-			$tunnus = '*RE  OSTOTILRIV'; // Poistetaan h‰iritsev‰ nro
+			$tunnus = '*RE OSTOTILRIV'; // Poistetaan h‰iritsev‰ nro
 		}
 	}
 	elseif ($edi_tyyppi == "edifact911"){
@@ -237,13 +232,13 @@ while (!feof ($fd)) {
 		$tieto  = trim(substr($tietue, 4));
 	}
 	else {
-		$tunnus = substr($tietue,0,9);
+		$tunnus = substr($tietue, 0, 9);
 		$tieto  = trim(substr($tietue,10));
 	}
 
 	// tehd‰‰n kaikille tiedoille 7 -> 8 bit ‰‰kkˆskonversio..
-	$from   = array ('{','}','|','[',']','\\',chr(179)); // 7bit
-	$to     = array ('‰','Â','ˆ','ƒ','≈','÷','|'); // 8bit
+	$from   = array('{','}','|','[',']','\\',chr(179)); // 7bit
+	$to     = array('‰','Â','ˆ','ƒ','≈','÷','|'); 		// 8bit
 	$orig_tieto = str_replace($from, $to, $tieto);
 	$tieto  = str_replace($from, $to, pupesoft_cleanstring($tieto));
 
@@ -276,7 +271,7 @@ while (!feof ($fd)) {
 		case 'OSTOTIL.OT_OVTTUNNUS':
 		case 'NADSE':
 		//Tilauksen vastaanottaja
-			$edi_ulos .= t("Tilaus yritykselle")." '" . $tieto .  "' ";
+			$edi_ulos .= t("Tilaus yritykselle")." '$tieto' ";
 
 			$query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
 			$result = mysql_query($query) or die($query);
@@ -383,11 +378,9 @@ while (!feof ($fd)) {
 
 		case 'OFTXDELTX' :
 		case 'OSTOTIL.OT_TOIMITUSTAPA' :
-		//Toimituslauseke
-
+		//Toimitustapa
 			if (trim($tieto) != '') {
 				$editilaus_toimitustapa = $tieto;
-				$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $tieto ";
 			}
 			break;
 
@@ -476,7 +469,7 @@ while (!feof ($fd)) {
 			}
 
 			// ÷rum h‰kki
-			if (!isset($yhtiorow) and gethostname() == "orum.devlab.fi") {
+			if (!isset($yhtiorow) and strpos($palvelin, "orum.devlab.fi") !== FALSE) {
 				$yhtiorow = hae_yhtion_parametrit("artr");
 
 				// Copy pastettu ylh‰‰lt‰ koko setti. :(
@@ -775,7 +768,6 @@ while (!feof ($fd)) {
 
 		case 'OSTOTIL.OT_VIITTEENNE':
 			// halutaan futur-aineistosta t‰m‰ tieto sisviesti2-kentt‰‰n
-
 			$orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
 			$lopviesti = trim($orig_tieto);
 			break;
@@ -812,7 +804,7 @@ while (!feof ($fd)) {
 				$editilaus_otsikko_ok = "EI";
 			}
 			elseif (!isset($yhtiorow)) {
-				$edi_ulos .= t("Tilaukselta ei lˆytynyt yhtiˆtiedoja")."!\n";
+				$edi_ulos .= t("Tilaukselta ei lˆytynyt yhtiˆtietoja")."!\n";
 				$editilaus_otsikko_ok = "EI";
 			}
 			else {
@@ -910,6 +902,7 @@ while (!feof ($fd)) {
 						$editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
 					}
 					else {
+						$edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa ";
 						$editilaus_toimitustapa = '';
 					}
 				}
@@ -995,6 +988,9 @@ while (!feof ($fd)) {
 					}
 				}
 
+				// Tallennetaan ohjelmamoduli
+				$ohjelmamoduli = strtoupper($edi_tyyppi);
+
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
@@ -1078,7 +1074,8 @@ while (!feof ($fd)) {
 							yhtio_postino						= '$yhtiorow[postino]',
 							yhtio_postitp						= '$yhtiorow[postitp]',
 							yhtio_toimipaikka					= '',
-							ytunnus			   					= '$arow[ytunnus]'";
+							ytunnus			   					= '$arow[ytunnus]',
+							ohjelma_moduli						= '$ohjelmamoduli'";
 				$result = mysql_query($query) or die($query);
 				$id = mysql_insert_id();
 
@@ -1304,7 +1301,7 @@ while (!feof ($fd)) {
 			break;
 
 		case 'OLIN__END' :
-		case '*RE  OSTOTILRIV' :
+		case '*RE OSTOTILRIV' :
 		case 'RFF':
 
 			if ($edi_tyyppi == "edifact911") {
@@ -1365,12 +1362,6 @@ while (!feof ($fd)) {
 					}
 					elseif ($olinvarasto != "") {
 						$varasto = $olinvarasto;
-					}
-
-					if ($ketjutus == 'o') {
-						// kiellet‰‰n kaikki muutokset alkuper‰iseen tilausriviin, jos ketjutus = 'o' eli pupesoft --> pupesoft
-						$korvaavakielto = 'KIELLETTY';
-						$perhekielto    = 'KIELLETTY';
 					}
 
 					// jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sek‰ laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
@@ -1455,15 +1446,10 @@ while (!feof ($fd)) {
 
 					$kutsuja = "EDITILAUS";
 
-					//jos meill‰ on t‰pp‰ p‰‰ll‰, ett‰ asiakas haluaa kamat j‰lkitoimitukseen
+					// Jos meill‰ on t‰pp‰ p‰‰ll‰, ett‰ asiakas haluaa kamat j‰lkitoimitukseen
 					if ($sallitaanjt == '1') {
 						$var 		= "J";
 						$kommentti 	= ""; // Huom! nollataan kommentti
-					}
-
-					// Sis‰‰ntulevissa EDI-tilauksissa pit‰‰ tehdastilaustuotteeiden saldotarkistus ohittaa (aina nolla)
-					if ($trow['status'] == 'T') {
-						$kpl = 0;
 					}
 
 					if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
@@ -1533,8 +1519,6 @@ while (!feof ($fd)) {
 			$edi_nimitys     	= "";
 			$edi_sarjanumero 	= "";
 			$edi_hinta       	= "";
-			$korvaavakielto  	= "";
-			$perhekielto     	= "";
 			$sallitaanjt	 	= "";
 			$editilaus_hinta	= "";
 			$editilaus_alennus	= "";
@@ -1701,7 +1685,6 @@ while (!feof ($fd)) {
 				else {
 					$edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
 				}
-
 			}
 			else {
 				$edi_ulos .= "\n".t("Otsikko oli virheellinen tilausta/rivej‰ ei lis‰tty")."!\n\n";
@@ -1763,7 +1746,7 @@ while (!feof ($fd)) {
 }
 
 // l‰hetet‰‰n meili
-if (isset($yhtiorow) and $yhtiorow["alert_email"] != "") {
+if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtiorow) and $yhtiorow["alert_email"] != "") {
 
 	$edi_ulos = strip_tags($edi_ulos);
 
@@ -1795,7 +1778,6 @@ if (isset($yhtiorow) and $yhtiorow["alert_email"] != "") {
 	$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
 }
 else {
-	echo gethostname();
 	echo "\n";
 	echo $filename;
 	echo "\n";

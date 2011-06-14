@@ -99,6 +99,9 @@
 
 		   	$i = 1;
 
+			// tällä katsotaan monta riviä laitettiin tiedostoon
+			$x = 0;
+
 			$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.tilausrivilinkki
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '' AND tuote.ei_saldoa = '')
@@ -181,6 +184,11 @@
 
 	    		$edi_order .= "*RE  OSTOTILRIV $i\n";
 	    		$i++;
+				$x++;
+			}
+
+			if ($x == 0) {
+				return false;
 			}
 
 		   	$edi_order .= "*ME\n";
@@ -195,9 +203,9 @@
 			$ftpuser = $ftpuser_unikko;
 			$ftppass = $ftppass_unikko;
 			$ftppath = $ftppath_unikko;
-
+			
 			$ftpfile = $unlink_filename = $filename;
-
+			
 			if (file_exists("ftp-send.inc")) {
 				require("ftp-send.inc");
 			}

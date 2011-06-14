@@ -299,6 +299,10 @@ if ($tee == 'I') {
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		else {
+			// trimmataan varmuudeksi swift ja ultilno
+			$toitilinumero = trim($toitilinumero);
+			$toiswift = trim($toiswift);
+			
 			$query = "UPDATE toimi set ultilno='$toitilinumero', swift='$toiswift' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$trow['ultilno']=$toitilinumero;
 			$trow['swift']=$toiswift;

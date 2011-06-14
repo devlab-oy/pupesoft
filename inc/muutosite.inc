@@ -99,7 +99,7 @@
 
 			$pankkitili = $tili;
 			$ultilno = strtoupper($ultilno);
-			$swift = strtoupper($swift);
+			$swift = trim(strtoupper($swift));
 
 			require ("inc/pankkitilinoikeellisuus.php");
 
@@ -157,7 +157,7 @@
 			}
 
 			$ultilno 		= strtoupper($ultilno);
-			$swift 			= strtoupper($swift);
+			$swift 			= trim(strtoupper($swift));
 			$pankki1 		= strtoupper($pankki1);
 			$pankki2 		= strtoupper($pankki2);
 			$pankki3 		= strtoupper($pankki3);

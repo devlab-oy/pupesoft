@@ -69,7 +69,7 @@ if(!function_exists("pankkitiedot")) {
 					case (4) : //Danske Bank
 						$pankki["rahalaitos"]		= '  ';
 						$pankki["pankkilaitos"]	 	= "Danske Bank";
-						$pankki["swift"]			= "DABAFIHX	";
+						$pankki["swift"]			= "DABAFIHX";
 						break;
 					case (6) : //Tapiola Pankki
 						$pankki["rahalaitos"]		= '  ';

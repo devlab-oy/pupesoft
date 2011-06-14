@@ -99,9 +99,6 @@
 
 		   	$i = 1;
 
-			// tällä katsotaan monta riviä laitettiin tiedostoon
-			$x = 0;
-
 			$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.tilausrivilinkki
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '' AND tuote.ei_saldoa = '')
@@ -184,10 +181,9 @@
 
 	    		$edi_order .= "*RE  OSTOTILRIV $i\n";
 	    		$i++;
-				$x++;
 			}
 
-			if ($x == 0) {
+			if ($i == 1) {
 				return false;
 			}
 

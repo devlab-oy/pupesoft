@@ -101,7 +101,7 @@ if(!function_exists("toimitarkista")) {
 			if ($t[$i] == '') $t[$i] = $tmp_swift;
 
 			// Vaaditaan isot kirjaimet
-			$t[$i] = strtoupper($t[$i]);
+			$t[$i] = trim(strtoupper($t[$i]));
 
 			// Jos SEPA-maa, tarkistetaan BIC
 			if (tarkista_sepa($tmp_maakoodi) and tarkista_bic($t[$i]) === FALSE) {

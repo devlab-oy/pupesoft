@@ -925,8 +925,8 @@
 								$ale_lisa_insert_query_2 .= " '".$lis_ale_kaikki["ale{$alepostfix}"]."',";
 							}
 
-							$query  = " INSERT INTO tilausrivi (hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-										values ('$rahinta', {$ale_lisa_insert_query_2} '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+							$query  = " INSERT INTO tilausrivi (laatija, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+										values ('automaatti', now(), '$rahinta', {$ale_lisa_insert_query_2} '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
 							$addtil = pupe_query($query);
 
 							if ($silent == "") {

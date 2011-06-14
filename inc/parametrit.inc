@@ -42,6 +42,7 @@ $_REQUEST	= pupe_register_globals($_REQUEST);
 
 // Nollataan kaikki muuttujat joita voi setata salasanat.php:ssä
 unset($palvelin);
+unset($palvelin_ip);
 unset($dbhost);
 unset($dbkanta);
 unset($dbuser);
@@ -216,8 +217,12 @@ if ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') {
 // otetaan palvelin muuttujasta mahdolliset turhat alut pois
 $alut    = array("http://","https://");
 $apunimi = str_replace($alut, "", $palvelin);
-
 $tark    = $_SERVER['SERVER_NAME'].$portti.$_SERVER['SCRIPT_NAME'];
+
+// Sallitaan forwarded (mod_proxy) servernimi jos $palvelin_ip on setattu salasanat.phpssä 
+if (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) and isset($palvelin_ip) and $palvelin_ip == $_SERVER['SERVER_NAME']) {
+	$tark = $_SERVER['HTTP_X_FORWARDED_SERVER'].$portti.$_SERVER['SCRIPT_NAME'];
+}
 $phpnimi = str_replace($apunimi, "", $tark);
 
 if (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") {

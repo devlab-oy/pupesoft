@@ -79,7 +79,9 @@ if (!function_exists("query_dump")) {
 		$query = str_replace("\r", "", $query);
 		$query = ereg_replace("  +", " ", $query);
 
-		echo "\n$query;\n<br><br>";
+		echo "\n";
+		echo htmlentities($query);
+		echo "\n<br><br>";
 	}
 }
 

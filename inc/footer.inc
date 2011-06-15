@@ -118,7 +118,9 @@
 		}
 
 		if ($GLOBALS["pupe_query_debug"] > 0) {
-			echo "<br>";
+
+			echo "<hr>";
+			echo "<font style='font-family: monospace; font-size: 9pt; white-space: nowrap;'>";
 
 			// Jos debugataan querejä:
 			array_multisort($aika_debug_array, SORT_DESC, $quer_debug_array);
@@ -132,7 +134,9 @@
 				$querytime += $aika_debug_array[$i];
 			}
 
-			echo "Querytime: $querytime<br>";
+			echo "<hr>";
+			echo count($aika_debug_array)." queries in $querytime sec, ".sprintf("%.04f", $querytime/count($aika_debug_array))." sec/query.<br><br>";
+			echo "</font>";
 		}
 
 		echo "</body>";

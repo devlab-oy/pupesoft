@@ -541,26 +541,14 @@
 				$selite         = $trow['nimi'] . " " . $trow['nimitark'] . " Lasno: " . $laskun_numero;
 				$laskun_numero	= preg_replace("/[^0-9]/", "", $laskun_numero);
 
-				// Onko tälle toimitusasiakkaalle erityinen kustannuspaikka?  //
+				// Onko tämä kauttalaskutusta?
 				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
 							FROM tiliointisaanto
 							WHERE ttunnus 	= '$trow[tunnus]'
+							and tyyppi 		= 'k'
 							and yhtio 		= '$yhtio'
-							and tyyppi		= 'o'";
-
-				if ($laskuformaatti == "INVOIC.D.96A") {
-					$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$toim_asiakkaantiedot[nimi]'
-								and SUBSTRING(kuvaus2,  1, 30) = '$toim_asiakkaantiedot[osoite]'
-								and SUBSTRING(mintuote, 1, 30) = '$toim_asiakkaantiedot[postino]'
-								and SUBSTRING(maxtuote, 1, 30) = '$toim_asiakkaantiedot[postitp]'";
-				}
-				else {
-					$query .= " and kuvaus   = '$toim_asiakkaantiedot[nimi]'
-								and kuvaus2  = '$toim_asiakkaantiedot[osoite]'
-								and mintuote = '$toim_asiakkaantiedot[postino]'
-								and maxtuote = '$toim_asiakkaantiedot[postitp]'";
-				}
-
+							and tilino 		= 0
+							and kuvaus 		= '$kauttalaskutus'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) != 0) {
@@ -586,62 +574,27 @@
 						$hyvak[5] = $tiliointirow['hyvak5'];
 					}
 				}
-
-				// Onko tälle ostajatiedoille erityinen kustannuspaikka?
-				$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
-							FROM tiliointisaanto
-							WHERE ttunnus 	= '$trow[tunnus]'
-							and yhtio 		= '$yhtio'
-							and tyyppi		= 'b'";
-
-				if ($laskuformaatti == "INVOIC.D.96A") {
-					$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$ostaja_asiakkaantiedot[nimi]'
-								and SUBSTRING(kuvaus2,  1, 30) = '$ostaja_asiakkaantiedot[osoite]'
-								and SUBSTRING(mintuote, 1, 30) = '$ostaja_asiakkaantiedot[postino]'
-								and SUBSTRING(maxtuote, 1, 30) = '$ostaja_asiakkaantiedot[postitp]'";
-				}
 				else {
-					$query .= " and kuvaus   = '$ostaja_asiakkaantiedot[nimi]'
-								and kuvaus2  = '$ostaja_asiakkaantiedot[osoite]'
-								and mintuote = '$ostaja_asiakkaantiedot[postino]'
-								and maxtuote = '$ostaja_asiakkaantiedot[postitp]'";
-				}
-
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
-
-				if (mysql_num_rows($result) != 0) {
-					$tiliointirow = mysql_fetch_array($result);
-					$oletuskust = $tiliointirow['kustp'];
-
-					if ($tiliointirow['vienti'] != '') {
-						$trow['oletus_vienti'] = $tiliointirow['vienti'];
-					}
-
-					if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
-						$hyvak[1] = "";
-						$hyvak[2] = "";
-						$hyvak[3] = "";
-						$hyvak[4] = "";
-						$hyvak[5] = "";
-					}
-					elseif (trim($tiliointirow['hyvak1']) != '') {
-						$hyvak[1] = $tiliointirow['hyvak1'];
-						$hyvak[2] = $tiliointirow['hyvak2'];
-						$hyvak[3] = $tiliointirow['hyvak3'];
-						$hyvak[4] = $tiliointirow['hyvak4'];
-						$hyvak[5] = $tiliointirow['hyvak5'];
-					}
-				}
-
-				if (mysql_num_rows($result) == 0) {
-					// Onko tälle asiakastunnukselle erityinen kustannuspaikka?
+					// Onko tälle toimitusasiakkaalle erityinen kustannuspaikka?  //
 					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
 								FROM tiliointisaanto
 								WHERE ttunnus 	= '$trow[tunnus]'
-								and tyyppi 		= 'a'
 								and yhtio 		= '$yhtio'
-								and tilino 		= 0
-								and kuvaus 		= '$laskun_asiakastunnus'";
+								and tyyppi		= 'o'";
+
+					if ($laskuformaatti == "INVOIC.D.96A") {
+						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$toim_asiakkaantiedot[nimi]'
+									and SUBSTRING(kuvaus2,  1, 30) = '$toim_asiakkaantiedot[osoite]'
+									and SUBSTRING(mintuote, 1, 30) = '$toim_asiakkaantiedot[postino]'
+									and SUBSTRING(maxtuote, 1, 30) = '$toim_asiakkaantiedot[postitp]'";
+					}
+					else {
+						$query .= " and kuvaus   = '$toim_asiakkaantiedot[nimi]'
+									and kuvaus2  = '$toim_asiakkaantiedot[osoite]'
+									and mintuote = '$toim_asiakkaantiedot[postino]'
+									and maxtuote = '$toim_asiakkaantiedot[postitp]'";
+					}
+
 					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 					if (mysql_num_rows($result) != 0) {
@@ -667,17 +620,27 @@
 							$hyvak[5] = $tiliointirow['hyvak5'];
 						}
 					}
-				}
 
-				if (mysql_num_rows($result) == 0) {
-					// Onko tämä kauttalaskutusta?
+					// Onko tälle ostajatiedoille erityinen kustannuspaikka?
 					$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
 								FROM tiliointisaanto
 								WHERE ttunnus 	= '$trow[tunnus]'
-								and tyyppi 		= 'k'
 								and yhtio 		= '$yhtio'
-								and tilino 		= 0
-								and kuvaus 		= '$kauttalaskutus'";
+								and tyyppi		= 'b'";
+
+					if ($laskuformaatti == "INVOIC.D.96A") {
+						$query .= "	and SUBSTRING(kuvaus,   1, 30) = '$ostaja_asiakkaantiedot[nimi]'
+									and SUBSTRING(kuvaus2,  1, 30) = '$ostaja_asiakkaantiedot[osoite]'
+									and SUBSTRING(mintuote, 1, 30) = '$ostaja_asiakkaantiedot[postino]'
+									and SUBSTRING(maxtuote, 1, 30) = '$ostaja_asiakkaantiedot[postitp]'";
+					}
+					else {
+						$query .= " and kuvaus   = '$ostaja_asiakkaantiedot[nimi]'
+									and kuvaus2  = '$ostaja_asiakkaantiedot[osoite]'
+									and mintuote = '$ostaja_asiakkaantiedot[postino]'
+									and maxtuote = '$ostaja_asiakkaantiedot[postitp]'";
+					}
+
 					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 					if (mysql_num_rows($result) != 0) {
@@ -701,6 +664,42 @@
 							$hyvak[3] = $tiliointirow['hyvak3'];
 							$hyvak[4] = $tiliointirow['hyvak4'];
 							$hyvak[5] = $tiliointirow['hyvak5'];
+						}
+					}
+
+					if (mysql_num_rows($result) == 0) {
+						// Onko tälle asiakastunnukselle erityinen kustannuspaikka?
+						$query = "	SELECT kustp, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, vienti
+									FROM tiliointisaanto
+									WHERE ttunnus 	= '$trow[tunnus]'
+									and tyyppi 		= 'a'
+									and yhtio 		= '$yhtio'
+									and tilino 		= 0
+									and kuvaus 		= '$laskun_asiakastunnus'";
+						$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+						if (mysql_num_rows($result) != 0) {
+							$tiliointirow = mysql_fetch_array($result);
+							$oletuskust = $tiliointirow['kustp'];
+
+							if ($tiliointirow['vienti'] != '') {
+								$trow['oletus_vienti'] = $tiliointirow['vienti'];
+							}
+
+							if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
+								$hyvak[1] = "";
+								$hyvak[2] = "";
+								$hyvak[3] = "";
+								$hyvak[4] = "";
+								$hyvak[5] = "";
+							}
+							elseif (trim($tiliointirow['hyvak1']) != '') {
+								$hyvak[1] = $tiliointirow['hyvak1'];
+								$hyvak[2] = $tiliointirow['hyvak2'];
+								$hyvak[3] = $tiliointirow['hyvak3'];
+								$hyvak[4] = $tiliointirow['hyvak4'];
+								$hyvak[5] = $tiliointirow['hyvak5'];
+							}
 						}
 					}
 				}

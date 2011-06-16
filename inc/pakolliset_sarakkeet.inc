@@ -271,6 +271,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 						$pakolliset = array("KIELI", "PUUN_TUNNUS", "LIITOS");
 						$kielletyt = array("LAJI", "LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 						$wherelliset = array("KIELI", "PUUN_TUNNUS", "LIITOS", "JARJESTYS");
+						$saakopoistaa = TRUE;
 					}
 				}
 

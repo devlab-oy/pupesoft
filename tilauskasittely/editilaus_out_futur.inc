@@ -140,9 +140,16 @@
 				// nettorivihinta
 				$rivihinta = $kpl * $hinta;
 
+				$frivinro = substr($tilausrivi_row['tunnus'], -4);
+
+				// Nolla r‰j‰ht‰‰, joten laitetaan sinne t‰llanen
+				if ($frivinro == 0) {
+					$frivinro = 5555;
+				}
+
 	   			$edi_order .= "*RS OSTOTILRIV {$i}\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_NRO:{$laskurow['tunnus']}\n";
-	    		$edi_order .= "OSTOTILRIV.OTR_RIVINRO:".substr($tilausrivi_row['tunnus'], -4)."\n";
+	    		$edi_order .= "OSTOTILRIV.OTR_RIVINRO:$frivinro\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tilausrivi_row['tuoteno']}\n";
 	    		$edi_order .= "OSTOTILRIV.OTR_NIMI:{$tilausrivi_row['nimitys']}\n";
@@ -199,9 +206,9 @@
 			$ftpuser = $ftpuser_unikko;
 			$ftppass = $ftppass_unikko;
 			$ftppath = $ftppath_unikko;
-			
+
 			$ftpfile = $unlink_filename = $filename;
-			
+
 			if (file_exists("ftp-send.inc")) {
 				require("ftp-send.inc");
 			}

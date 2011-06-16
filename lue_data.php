@@ -313,7 +313,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 		// Haetaan valitun taulun sarakkeet
 		$query = "SHOW COLUMNS FROM $table_mysql";
-		$fres  = mysql_query($query) or pupe_error($query);
+		$fres  = pupe_query($query);
 
 		while ($row = mysql_fetch_array($fres)) {
 			// Pushataan arrayseen kaikki sarakenimet ja tietuetyypit
@@ -534,6 +534,27 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						$tila = 'ohita';
 					}
 				}
+				elseif ($table_mysql == 'extranet_kayttajan_lisatiedot' and strtoupper($taulunotsikot[$taulu][$j]) == "LIITOSTUNNUS" and $liitostunnusvalinta == 2) {
+					$query = "	SELECT tunnus
+								FROM kuka
+								WHERE yhtio = '$kukarow[yhtio]'
+								and extranet != ''
+								and kuka = '$rivi[$j]'";
+					$apures = pupe_query($query);
+
+					if (mysql_num_rows($apures) == 1) {
+						$apurivi = mysql_fetch_assoc($apures);
+
+						$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = $apurivi["tunnus"];
+
+						$valinta .= " and ".$taulunotsikot[$taulu][$j]."='$apurivi[tunnus]'";
+					}
+					else {
+						// Ei löydy, triggeröidään virhe
+						$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = "XXX";
+						$valinta .= " and ".$taulunotsikot[$taulu][$j]."='XXX'";
+					}
+				}
 				elseif ($table_mysql == 'sanakirja' and $taulunotsikot[$taulu][$j] == "FI") {
 					// jos ollaan mulkkaamassa RU ni tehdään utf-8 -> latin-1 konversio FI kentällä
 					if (in_array("RU", $taulunotsikot[$taulu])) {
@@ -553,7 +574,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								and tyyppi  = '{$taulunrivit["yhteensopivuus_tuote"][$eriviindex][array_search("TYYPPI", $taulunotsikot["yhteensopivuus_tuote"])]}'
 								and atunnus = '{$taulunrivit["yhteensopivuus_tuote"][$eriviindex][array_search("ATUNNUS", $taulunotsikot["yhteensopivuus_tuote"])]}'
 								and tuoteno = '{$taulunrivit["yhteensopivuus_tuote"][$eriviindex][array_search("TUOTENO", $taulunotsikot["yhteensopivuus_tuote"])]}'";
-					$apures = mysql_query($apusql) or pupe_error($apusql);
+					$apures = pupe_query($apusql);
 
 					if (mysql_num_rows($apures) == 1) {
 						$apurivi = mysql_fetch_assoc($apures);
@@ -580,7 +601,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND laji = '{$table_tarkenne}'
 											AND koodi = '".trim($rivi[$j])."'";
-							$koodi_tunnus_res = mysql_query($query_x) or pupe_error($query_x);
+							$koodi_tunnus_res = pupe_query($query_x);
 
 							// jos tunnusta ei löydy, ohitetaan kyseinen rivi
 							if (mysql_num_rows($koodi_tunnus_res) == 0) {
@@ -603,7 +624,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND laji != 'P'
 										AND $dynaamisen_taulun_liitos = '".trim($rivi[$j])."'";
-							$asiakkaan_haku_res = mysql_query($query) or pupe_error($query);
+							$asiakkaan_haku_res = pupe_query($query);
 
 							unset($rivit[$eriviindex]);
 
@@ -655,7 +676,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 									JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
 									where konserni = '$yhtiorow[konserni]'
 									and (synkronoi = 'asiakas' or synkronoi like 'asiakas,%' or synkronoi like '%,asiakas,%' or synkronoi like '%,asiakas')";
-						$vresult = mysql_query($query) or pupe_error($query);
+						$vresult = pupe_query($query);
 
 						if (mysql_num_rows($vresult) > 0) {
 							// haetaan konsernifirmat
@@ -664,7 +685,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 										JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
 										where konserni = '$yhtiorow[konserni]'
 										and (synkronoi = 'asiakas' or synkronoi like 'asiakas,%' or synkronoi like '%,asiakas,%' or synkronoi like '%,asiakas')";
-							$vresult = mysql_query($query) or pupe_error($query);
+							$vresult = pupe_query($query);
 							$srowapu = mysql_fetch_array($vresult);
 							$tarkyhtio = $srowapu["yhtiot"];
 						}
@@ -677,7 +698,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								FROM asiakas USE INDEX (asno_index)
 								WHERE yhtio in ($tarkyhtio)
 								AND asiakasnro+0 >= $apu_asiakasnumero";
-					$vresult = mysql_query($query) or pupe_error($query);
+					$vresult = pupe_query($query);
 					$vrow = mysql_fetch_assoc($vresult);
 
 					if ($vrow['asiakasnro'] != '') {
@@ -726,21 +747,21 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 										where yhtio	= '$kukarow[yhtio]'
 										and ytunnus	= '".$rivi[array_search("YTUNNUS", $taulunotsikot[$taulu])]."'
 										and tyyppi != 'P'";
-							$tpres = mysql_query($tpque) or pupe_error($tpque);
+							$tpres = pupe_query($tpque);
 						}
 						elseif (($rivi[array_search("TYYPPI", $taulunotsikot[$taulu])] == "A" and $table_mysql == "yhteyshenkilo") or $table_mysql == "asiakkaan_avainsanat") {
 							$tpque = "	SELECT tunnus
 										from asiakas
 										where yhtio	= '$kukarow[yhtio]'
 										and ytunnus	= '".$rivi[array_search("YTUNNUS", $taulunotsikot[$taulu])]."'";
-							$tpres = mysql_query($tpque) or pupe_error($tpque);
+							$tpres = pupe_query($tpque);
 						}
 						elseif ($table_mysql == "kalenteri") {
 							$tpque = "	SELECT tunnus
 										from asiakas
 										where yhtio	= '$kukarow[yhtio]'
 										and ytunnus	= '".$rivi[array_search("ASIAKAS", $taulunotsikot[$taulu])]."'";
-							$tpres = mysql_query($tpque) or pupe_error($tpque);
+							$tpres = pupe_query($tpque);
 						}
 
 						if (mysql_num_rows($tpres) == 0) {
@@ -821,14 +842,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 									where yhtio	= '$kukarow[yhtio]'
 									and tunnus	= '".$rivi[array_search("LIITOSTUNNUS", $taulunotsikot[$taulu])]."'
 									and tyyppi != 'P'";
-						$tpres = mysql_query($tpque) or pupe_error($tpque);
+						$tpres = pupe_query($tpque);
 					}
 					elseif (($rivi[array_search("TYYPPI", $taulunotsikot[$taulu])] == "A" and $table_mysql == "yhteyshenkilo") or $table_mysql == "asiakkaan_avainsanat" or $table_mysql == "kalenteri") {
 						$tpque = "	SELECT tunnus
 									from asiakas
 									where yhtio	= '$kukarow[yhtio]'
 									and tunnus	= '".$rivi[array_search("LIITOSTUNNUS", $taulunotsikot[$taulu])]."'";
-						$tpres = mysql_query($tpque) or pupe_error($tpque);
+						$tpres = pupe_query($tpque);
 					}
 
 					if (mysql_num_rows($tpres) != 1) {
@@ -846,7 +867,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				$query = "	SELECT tunnus
 							FROM $table_mysql
 							WHERE $valinta";
-				$fresult = mysql_query($query) or pupe_error($query);
+				$fresult = pupe_query($query);
 
 				if ($rivi[$postoiminto] == "MUUTA/LISAA") {
 					// Muutetaan jos löytyy muuten lisätään!
@@ -936,7 +957,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 							$mpquery = "SELECT max(perhe)+1 max
 										FROM avainsana";
-							$vresult = mysql_query($mpquery) or pupe_error($mpquery);
+							$vresult = pupe_query($mpquery);
 							$vrow = mysql_fetch_assoc($vresult);
 
 							$apu_ytunnus = $vrow['max'] + $tarkylisa;
@@ -971,7 +992,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							// haetaan tuotteen varastopaikkainfo
 							$tpque = "	SELECT sum(if (oletus='X',1,0)) oletus, sum(if (oletus='X',0,1)) regular
 										from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
-							$tpres = mysql_query($tpque) or pupe_error($tpque);
+							$tpres = pupe_query($tpque);
 
 							if (mysql_num_rows($tpres) == 0) {
 								$rivi[$r] = "X"; // jos yhtään varastopaikkaa ei löydy, pakotetaan oletus
@@ -1049,7 +1070,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 											and tyyppi = '$kptyyppi'
 											and kaytossa != 'E'
 											and nimi = '$ikustp_tsk'";
-								$ikustpres = mysql_query($ikustpq) or pupe_error($ikustpq);
+								$ikustpres = pupe_query($ikustpq);
 
 								if (mysql_num_rows($ikustpres) == 1) {
 									$ikustprow = mysql_fetch_assoc($ikustpres);
@@ -1064,7 +1085,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 											and tyyppi = '$kptyyppi'
 											and kaytossa != 'E'
 											and koodi = '$ikustp_tsk'";
-								$ikustpres = mysql_query($ikustpq) or pupe_error($ikustpq);
+								$ikustpres = pupe_query($ikustpq);
 
 								if (mysql_num_rows($ikustpres) == 1) {
 									$ikustprow = mysql_fetch_assoc($ikustpres);
@@ -1082,7 +1103,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 											and tyyppi = '$kptyyppi'
 											and kaytossa != 'E'
 											and tunnus = '$ikustp_tsk'";
-								$ikustpres = mysql_query($ikustpq) or pupe_error($ikustpq);
+								$ikustpres = pupe_query($ikustpq);
 
 								if (mysql_num_rows($ikustpres) == 1) {
 									$ikustprow = mysql_fetch_assoc($ikustpres);
@@ -1112,7 +1133,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 										where yhtio	= '$kukarow[yhtio]'
 										and ytunnus	= '$rivi[$r]'
 										and tyyppi != 'P'";
-							$tpres = mysql_query($tpque) or pupe_error($tpque);
+							$tpres = pupe_query($tpque);
 
 							if (mysql_num_rows($tpres) != 1) {
 								$tpque = "	SELECT tunnus
@@ -1121,7 +1142,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 											and toimittajanro = '$rivi[$r]'
 											and toimittajanro != ''
 											and tyyppi != 'P'";
-								$tpres = mysql_query($tpque) or pupe_error($tpque);
+								$tpres = pupe_query($tpque);
 							}
 
 							if (mysql_num_rows($tpres) != 1) {
@@ -1144,7 +1165,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 										where yhtio	= '$kukarow[yhtio]'
 										and tunnus	= '$rivi[$r]'
 										and tyyppi != 'P'";
-							$tpres = mysql_query($tpque) or pupe_error($tpque);
+							$tpres = pupe_query($tpque);
 
 							if (mysql_num_rows($tpres) != 1) {
 								echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>";
@@ -1191,7 +1212,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 							if ($otsikko == 'ASIAKAS_SEGMENTTI' and $segmenttivalinta == '1' and (int) $rivi[$r] > 0) { // 1 tarkoittaa dynaamisen puun KOODIA
 								$etsitunnus = " SELECT tunnus FROM dynaaminen_puu WHERE yhtio='$kukarow[yhtio]' AND laji='asiakas' AND koodi='$rivi[$r]'";
-								$etsiresult = mysql_query($etsitunnus) or pupe_error($etsitunnus);
+								$etsiresult = pupe_query($etsitunnus);
 								$etsirow = mysql_fetch_assoc($etsiresult);
 
 								$chsegmentti = $etsirow['tunnus'];
@@ -1232,20 +1253,20 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								$xquery = "	SELECT tunnus
 											FROM asiakas
 											WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$rivi[$r]'";
-								$xresult = mysql_query($xquery) or pupe_error($xquery);
+								$xresult = pupe_query($xquery);
 
 								if (mysql_num_rows($xresult) == 0) {
 									$xquery = "	SELECT tunnus
 												FROM asiakas
 												WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$rivi[$r]'";
-									$xresult = mysql_query($xquery) or pupe_error($xquery);
+									$xresult = pupe_query($xquery);
 								}
 
 								if (mysql_num_rows($xresult) == 0) {
 									$xquery = "	SELECT tunnus
 												FROM asiakas
 												WHERE yhtio = '$kukarow[yhtio]' and asiakasnro = '$rivi[$r]'";
-									$xresult = mysql_query($xquery) or pupe_error($xquery);
+									$xresult = pupe_query($xquery);
 								}
 
 								if (mysql_num_rows($xresult) == 0) {
@@ -1318,7 +1339,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 														WHERE yhtio = '{$kukarow['yhtio']}'
 														AND laji = '{$table_tarkenne}'
 														AND koodi = '".trim($rivi[$r])."'";
-										$koodi_tunnus_res = mysql_query($query_x) or pupe_error($query_x);
+										$koodi_tunnus_res = pupe_query($query_x);
 										$koodi_tunnus_row = mysql_fetch_assoc($koodi_tunnus_res);
 
 										$query .= ", puun_tunnus = '{$koodi_tunnus_row['tunnus']}' ";
@@ -1445,7 +1466,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				else {
 					$tarq .= " WHERE ".$valinta;
 				}
-				$result = mysql_query($tarq) or pupe_error($tarq);
+				$result = pupe_query($tarq);
 
 				if ($rivi[$postoiminto] == 'MUUTA' and mysql_num_rows($result) != 1) {
 					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Päivitettävää riviä ei löytynyt")."!</font><br>";
@@ -1509,7 +1530,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 										and laji = 'MYSQLALIAS'
 										and selite = '$table_mysql.$tarkista_sarake'
 										and selitetark_2 = ''";
-							$al_res = mysql_query($query) or pupe_error($query);
+							$al_res = pupe_query($query);
 							$pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
 
 							if (mysql_num_rows($al_res) != 0 and strtoupper($pakollisuuden_tarkistus_rivi['selitetark_3']) == "PAKOLLINEN") {
@@ -1555,18 +1576,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 						else {
 							$syncquery .= " WHERE ".$valinta;
 						}
-						$syncres = mysql_query($syncquery) or pupe_error($syncquery);
+						$syncres = pupe_query($syncquery);
 						$syncrow = mysql_fetch_array($syncres);
 
 						// tuotepaikkojen oletustyhjennysquery uskalletaan ajaa vasta tässä
 						if ($tpupque != '') {
-							$tpupres = mysql_query($tpupque) or pupe_error($tpupque);
+							$tpupres = pupe_query($tpupque);
 						}
 
 						$tpupque = "";
 
 						// Itse lue_datan päivitysquery
-						$iresult = mysql_query($query) or pupe_error($query);
+						$iresult = pupe_query($query);
 
 						// Synkronoidaan
 						if ($rivi[$postoiminto] == 'LISAA') {
@@ -1645,70 +1666,79 @@ else {
 					<option value='yhteensopivuus_tuote' $sel[yhteensopivuus_tuote]>".t("Yhteensopivuus tuotteet")."</option>
 					<option value='yhteensopivuus_tuote_lisatiedot' $sel[yhteensopivuus_tuote_lisatiedot]>".t("Yhteensopivuus tuotteet lisätiedot")."</option>
 					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
-					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>";
+					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>
+					<option value='extranet_kayttajan_lisatiedot' $sel[extranet_kayttajan_lisatiedot]>".t("Extranet-käyttäjän lisätietoja")."</option>";
 
-			$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
-			$dynaamiset_avainsanat = '';
+	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
+	$dynaamiset_avainsanat = '';
 
-		if ($kukarow['yhtio'] == 'mast') {
-			echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
-			echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
+	if ($kukarow['yhtio'] == 'mast') {
+		echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
+		echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
+	}
+
+	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
+		if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
+			$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
 		}
 
-			while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
-				if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
-					$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
-				}
+		echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
+	}
 
-				echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
-			}
+	echo "	</select></td></tr>";
 
-			echo "	</select></td>
-			</tr>";
+	if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
+		echo "<tr><td>".t("Ytunnus-tarkkuus").":</td>
+				<td><select name='ytunnustarkkuus'>
+				<option value=''>".t("Päivitetään vain, jos Ytunnuksella löytyy yksi rivi")."</option>
+				<option value='2'>".t("Päivitetään kaikki syötetyllä Ytunnuksella löytyvät asiakkaat")."</option>
+				</select></td>
+		</tr>";
+	}
 
-		if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
-			echo "<tr><td>".t("Ytunnus-tarkkuus").":</td>
-					<td><select name='ytunnustarkkuus'>
-					<option value=''>".t("Päivitetään vain, jos Ytunnuksella löytyy yksi rivi")."</option>
-					<option value='2'>".t("Päivitetään kaikki syötetyllä Ytunnuksella löytyvät asiakkaat")."</option>
-					</select></td>
-			</tr>";
+	if (trim($dynaamiset_avainsanat) != '' and $table == $dynaamiset_avainsanat) {
+		echo "	<tr><td>",t("Valitse liitos"),":</td>
+				<td><select name='dynaamisen_taulun_liitos'>";
+
+		if ($table == 'puun_alkio_asiakas') {
+			echo "	<option value=''>",t("Asiakkaan tunnus"),"</option>
+					<option value='ytunnus'>",t("Asiakkaan ytunnus"),"</option>
+					<option value='toim_ovttunnus'>",t("Asiakkaan toimitusosoitteen ovttunnus"),"</option>
+					<option value='asiakasnro'>",t("Asiakkaan asiakasnumero"),"</option>";
+		}
+		else {
+			echo "	<option value=''>",t("Puun alkion tunnus"),"</option>
+					<option value='koodi'>",t("Puun alkion koodi"),"</option>";
 		}
 
-		if (trim($dynaamiset_avainsanat) != '' and $table == $dynaamiset_avainsanat) {
-			echo "	<tr><td>",t("Valitse liitos"),":</td>
-					<td><select name='dynaamisen_taulun_liitos'>";
+		echo "</select></td></tr>";
+	}
 
-			if ($table == 'puun_alkio_asiakas') {
-				echo "	<option value=''>",t("Asiakkaan tunnus"),"</option>
-						<option value='ytunnus'>",t("Asiakkaan ytunnus"),"</option>
-						<option value='toim_ovttunnus'>",t("Asiakkaan toimitusosoitteen ovttunnus"),"</option>
-						<option value='asiakasnro'>",t("Asiakkaan asiakasnumero"),"</option>";
-			}
-			else {
-				echo "	<option value=''>",t("Puun alkion tunnus"),"</option>
-						<option value='koodi'>",t("Puun alkion koodi"),"</option>";
-			}
+	if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
+		echo "<tr><td>".t("Segmentin valinta").":</td>
+				<td><select name='segmenttivalinta'>
+				<option value='1'>".t("Valitaan käytettäväksi asiakas-segmentin koodia")."</option>
+				<option value='2'>".t("Valitaan käytettäväksi asiakas-segmentin tunnusta ")."</option>
+				</select></td>
+		</tr>";
+	}
 
-			echo "</select></td></tr>";
-		}
+	if ($table == "extranet_kayttajan_lisatiedot") {
+		echo "<tr><td>".t("Liitostunnus").":</td>
+				<td><select name='liitostunnusvalinta'>
+				<option value='1'>".t("Liitostunnus-sarakkeessa liitostunnus")."</option>
+				<option value='2'>".t("Liitostunnus-sarakkeessa käyttäjänimi")."</option>
+				</select></td>
+		</tr>";
+	}
 
-		if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
-			echo "<tr><td>".t("Segmentin valinta").":</td>
-					<td><select name='segmenttivalinta'>
-					<option value='1'>".t("Valitaan käytettäväksi asiakas-segmentin koodia")."</option>
-					<option value='2'>".t("Valitaan käytettäväksi asiakas-segmentin tunnusta ")."</option>
-					</select></td>
-			</tr>";
-		}
+	echo "	<tr><td>".t("Valitse tiedosto").":</td>
+			<td><input name='userfile' type='file'></td>
+			<td class='back'><input type='submit' value='".t("Lähetä")."'></td>
+		</tr>
 
-		echo "	<tr><td>".t("Valitse tiedosto").":</td>
-				<td><input name='userfile' type='file'></td>
-				<td class='back'><input type='submit' value='".t("Lähetä")."'></td>
-			</tr>
-
-			</table>
-			</form>";
+		</table>
+		</form>";
 }
 
 require ("inc/footer.inc");

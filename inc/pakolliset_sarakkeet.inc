@@ -292,6 +292,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("NIMI_JA_KUVAUS", "LUOKKA", "LUOKITUSKOODI", "PAKKAUSRYHMA", "LIPUKKEET", "ERITYISMAARAYKSET");
 				break;
+			case "extranet_kayttajan_lisatiedot" :
+				$pakolliset = array("LIITOSTUNNUS", "LAJI", "SELITE");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");
 				$kielletyt = array();

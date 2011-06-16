@@ -10075,7 +10075,7 @@ if (!function_exists("tarkista_iban")) {
 }
 
 if (!function_exists("tarkista_oikeus")) {
-	function tarkista_oikeus($ohjelma, $alanimi = '', $paivitys = '') {
+	function tarkista_oikeus($ohjelma, $alanimi = '', $paivitys = '', $return = '') {
 		global $kukarow;
 
 		$ohjelma = mysql_real_escape_string(trim($ohjelma));
@@ -10086,7 +10086,8 @@ if (!function_exists("tarkista_oikeus")) {
 			$querylisa .= "AND alanimi like '$alanimi'";
 		}
 		elseif ($alanimi != "") {
-			$querylisa .= "AND alanimi = '$alanimi'";
+			// Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa
+			$querylisa = " AND substring(alanimi, 1, if(LOCATE('&', alanimi) > 0, LOCATE('&', alanimi) - 1, CHAR_LENGTH(alanimi))) = '$alanimi'";	
 		}
 
 		if ($paivitys != "") {
@@ -10102,6 +10103,11 @@ if (!function_exists("tarkista_oikeus")) {
 		$res = pupe_query($query);
 
 		if (mysql_num_rows($res) > 0) {
+
+			if ($return != "") {
+				return mysql_fetch_array($res);
+			}
+
 			return TRUE;
 		}
 		else {

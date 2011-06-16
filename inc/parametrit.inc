@@ -201,46 +201,31 @@ $aika_debug_array = array();
 $quer_debug_array = array();
 
 require("salasanat.php");
+// haetaan jotain tarpeellisia funktioita mukaan..
+if (@include_once("inc/functions.inc"));
+elseif (@include_once("functions.inc"));
+else exit;
 
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteyttä. Se on pois päältä tai käyttäjätietosi ovat virheelliset.");
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (parametrit.inc)");
 
-$PHP_SELF = $_SERVER["SCRIPT_NAME"];
-
-// jos käytetään jotain kummallista porttia (ei http eikä https)
-$portti = "";
-
-if ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') {
-	$portti = ":".$_SERVER['SERVER_PORT'];
-}
-
-// otetaan palvelin muuttujasta mahdolliset turhat alut pois
-$alut    = array("http://","https://");
-$apunimi = str_replace($alut, "", $palvelin);
-$tark    = $_SERVER['SERVER_NAME'].$portti.$_SERVER['SCRIPT_NAME'];
-
-// Sallitaan forwarded (mod_proxy) servernimi jos $palvelin_ip on setattu salasanat.phpssä 
-if (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) and isset($palvelin_ip) and $palvelin_ip == $_SERVER['SERVER_NAME']) {
-	$tark = $_SERVER['HTTP_X_FORWARDED_SERVER'].$portti.$_SERVER['SCRIPT_NAME'];
-}
-$phpnimi = str_replace($apunimi, "", $tark);
-
-if (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") {
-	$session = $_COOKIE["pupesoft_session"];
-}
-else {
-	$session = "";
-}
-
-//Pupeasennuksen root
+// Pupeasennuksen root polku
 $pupe_root_polku = dirname(dirname(__FILE__));
 
-$palvelin2 = "http://$apunimi";
+// Otetaan tietoa tästä requestistä
+$PHP_SELF = $_SERVER["PHP_SELF"];
+$phpnimi = basename($_SERVER["SCRIPT_NAME"]);
+$pupesoft_scheme = (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on') ? "https://" : "http://";
+$pupesoft_server = (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) and isset($palvelin_ip) and $palvelin_ip == $_SERVER['SERVER_NAME']) ? $_SERVER['HTTP_X_FORWARDED_SERVER'] : $_SERVER['SERVER_NAME'];
+$pupesoft_port = ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') ? ":".$_SERVER['SERVER_PORT'] : "";
+$pupesoft_request = pathinfo($pupesoft_scheme.$pupesoft_server.$pupesoft_port.$_SERVER["SCRIPT_NAME"]);
 
-//Onko sittenkin https käytössä
-if (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on') {
-	$palvelin2 = "https://$apunimi";
-}
+// $palvelin muuttujassa on Pupesoft root url, joka tulee salasat.php:stä 
+// $palvelin2 muuttujassa on Pupesoft current url, joka on tehty requestistä
+$palvelin2 = $pupesoft_request["dirname"]."/";
+
+// Haetaan session
+$session = (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") ? $_COOKIE["pupesoft_session"] : "";
 
 //Initioidaan pari muuttujaa
 if(!isset($login))		$login = "";
@@ -326,11 +311,6 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 			$browkieli = 'fi';
 		}
 
-		// haetaan jotain tarpeellisia funktioita mukaan..
-		if (@include_once("inc/functions.inc"));
-		elseif (@include_once("functions.inc"));
-		else exit;
-
 		if (@include_once("login.php"));
 		elseif (@include_once("login_extranet.php"));
 	}
@@ -395,46 +375,21 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 	 	// Tänne pääsee aina!
 		if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
 
-			// No niin nyt meillä on käyttäjä, mutta saako hän tehdä tätä????
-			if(isset($toim)) {
-				$toim = mysql_real_escape_string($toim);
-				// Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa
-				$toimlisa = " and substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi))) ='$toim'";
-			}
-			else {
-				$toimlisa = "";
-			}
+			$oikeurow = tarkista_oikeus($phpnimi, $toim, '', 'X');
 
-			$query = "	SELECT *, substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi)))
-						FROM oikeu
-						WHERE yhtio = '$kukarow[yhtio]'
-						and kuka = '$kukarow[kuka]'
-						and nimi = '$phpnimi'
-						$toimlisa";
-			$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
-
-			if (mysql_num_rows($result) == 0) {
-
-				echo "<table width='100%' height='70%'>
-						<tr><td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>
-						<img src='http://www.pupesoft.com/pupesoft.gif'><br><br>";
-				if (strlen($toim) == 0) {
-					echo "Käyttäjä $kukarow[kuka] pyysi toimintoa $phpnimi, joka on kielletty!";
-				}
-				else {
-					echo "Käyttäjä $kukarow[kuka] pyysi toimintoa $phpnimi alamenu $toim, joka on kielletty!";
-				}
-				echo "</td></tr></table>";
+			if ($oikeurow === FALSE) {
+				echo "<table width='100%' height='70%'>";
+				echo "<tr>";
+				echo "<td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>";
+				echo "<img src='http://www.pupesoft.com/pupesoft.gif'><br><br>";
+				echo "Käyttäjä {$kukarow["kuka"]} pyysi toimintoa $phpnimi $toim, joka on kielletty!";
+				echo "</td>";
+				echo "</tr>";
+				echo "</table>";
 				exit;
 			}
-			$oikeurow = mysql_fetch_assoc($result);
 		}
 	}
-
-	// haetaan jotain tarpeellisia funktioita mukaan..
-	if (@include_once("inc/functions.inc"));
-	elseif (@include_once("functions.inc"));
-	else exit;
 
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
@@ -654,5 +609,3 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 		@(include_once("inc/dokumentinhallinta.inc")) or $yhtiorow["dokumentaatiohallinta"] = "";
 	}
 }
-
-?>

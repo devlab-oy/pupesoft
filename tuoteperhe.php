@@ -10,20 +10,20 @@
 	enable_ajax();
 
 	if ($toim == "PERHE") {
-		echo "<font class='head'>".t("Tuoteperheet")."</font><hr>";
+		echo "<font class='head'>".t("Tuoteperheet")."(".t("Vain isätuotetta voi tilata").")</font><hr>";
 		$hakutyyppi = "P";
+	}
+	elseif ($toim == "OSALUETTELO") {
+		echo "<font class='head'>".t("Tuotteen osaluettelo")."(".t("Kaikkia tuotteita voi tilata").")</font><hr>";
+		$hakutyyppi = "O";
+	}
+	elseif ($toim == "TUOTEKOOSTE") {
+		echo "<font class='head'>".t("Tuotteen koosteluettelo")."(".t("Vain lapsituotteita voi tilata").")</font><hr>";
+		$hakutyyppi = "V";
 	}
 	elseif ($toim == "LISAVARUSTE") {
 		echo "<font class='head'>".t("Tuotteen lisävarusteet")."</font><hr>";
 		$hakutyyppi = "L";
-	}
-	elseif ($toim == "OSALUETTELO") {
-		echo "<font class='head'>".t("Tuotteen osaluettelo")."</font><hr>";
-		$hakutyyppi = "V";
-	}
-	elseif ($toim == "TUOTEKOOSTE") {
-		echo "<font class='head'>".t("Tuotteen koosteluettelo")."</font><hr>";
-		$hakutyyppi = "O";
 	}
 	else {
 		echo "<font class='head'>".t("Tuotereseptit")."</font><hr>";

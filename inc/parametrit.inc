@@ -211,6 +211,7 @@ mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $d
 
 // Pupeasennuksen root polku
 $pupe_root_polku = dirname(dirname(__FILE__));
+$pupesoft_url = parse_url($palvelin);
 
 // Otetaan tietoa tästä requestistä
 $PHP_SELF = $_SERVER["PHP_SELF"];
@@ -218,11 +219,10 @@ $phpnimi = basename($_SERVER["SCRIPT_NAME"]);
 $pupesoft_scheme = (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on') ? "https://" : "http://";
 $pupesoft_server = (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) and isset($palvelin_ip) and $palvelin_ip == $_SERVER['SERVER_NAME']) ? $_SERVER['HTTP_X_FORWARDED_SERVER'] : $_SERVER['SERVER_NAME'];
 $pupesoft_port = ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') ? ":".$_SERVER['SERVER_PORT'] : "";
-$pupesoft_request = pathinfo($pupesoft_scheme.$pupesoft_server.$pupesoft_port.$_SERVER["SCRIPT_NAME"]);
 
 // $palvelin muuttujassa on Pupesoft root url, joka tulee salasat.php:stä 
-// $palvelin2 muuttujassa on Pupesoft current url, joka on tehty requestistä
-$palvelin2 = $pupesoft_request["dirname"]."/";
+// $palvelin2 muuttujassa on Pupesoft root url, mutta scheme/server/portti on muutettu tarpeen mukaan
+$palvelin2 = $pupesoft_scheme.$pupesoft_server.$pupesoft_port.$pupesoft_url["path"];
 
 // Haetaan session
 $session = (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") ? $_COOKIE["pupesoft_session"] : "";

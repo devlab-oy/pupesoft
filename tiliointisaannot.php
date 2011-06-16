@@ -369,7 +369,7 @@
 						WHERE tiliointisaanto.ttunnus	= '$tunnus'
 						and tiliointisaanto.tyyppi 		= '$tyyppi'
 						and tiliointisaanto.yhtio 		= '$kukarow[yhtio]'
-						order by tiliointisaanto.mintuote";
+						order by tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus";
 		}
 		elseif ($tyyppi == 'o' or $tyyppi == 'b') {
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Nimi, tiliointisaanto.kuvaus2 Osoite,
@@ -380,7 +380,7 @@
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
 						and tiliointisaanto.tyyppi 		= '$tyyppi'
 						and tiliointisaanto.yhtio 		= '$kukarow[yhtio]'
-						order by tiliointisaanto.kuvaus";
+						order by tiliointisaanto.kuvaus, tiliointisaanto.kuvaus2, tiliointisaanto.mintuote, tiliointisaanto.maxtuote";
 		}
 		elseif ($tyyppi == 'a') {
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Asiakastunnus,
@@ -390,7 +390,8 @@
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
 						and tiliointisaanto.tyyppi 		= '$tyyppi'
 						and tiliointisaanto.yhtio 		= '$kukarow[yhtio]'
-						and tiliointisaanto.tilino 		= 0";
+						and tiliointisaanto.tilino 		= 0
+						ORDER BY tiliointisaanto.kuvaus";
 		}
 		elseif ($tyyppi == 'k') {
 			$query = "	SELECT tiliointisaanto.tunnus, tiliointisaanto.kuvaus Kauttalaskutus,
@@ -400,7 +401,7 @@
 						WHERE tiliointisaanto.ttunnus 	= '$tunnus'
 						and tiliointisaanto.tyyppi 		= '$tyyppi'
 						and tiliointisaanto.yhtio 		= '$kukarow[yhtio]'
-						order by tiliointisaanto.kuvaus";
+						ORDER BY tiliointisaanto.kuvaus";
 		}
 
 		$result = mysql_query($query) or pupe_error($query);
@@ -455,43 +456,43 @@
 			if ($tyyppi != 't') {
 				echo "<td>";
 
-				if ($tiliointirow[vienti] == '')  {
+				if ($tiliointirow["vienti"] == '')  {
 					echo t("Toimittajan oletus");
 				}
-				if ($tiliointirow[vienti] == 'A') {
+				if ($tiliointirow["vienti"] == 'A') {
 					echo t("Kotimaa");
 				}
-				if ($tiliointirow[vienti] == 'B') {
+				if ($tiliointirow["vienti"] == 'B') {
 					echo t("Kotimaa huolinta/rahti");
 				}
-				if ($tiliointirow[vienti] == 'C') {
+				if ($tiliointirow["vienti"] == 'C') {
 					echo t("Kotimaa vaihto-omaisuus");
 				}
-				if ($tiliointirow[vienti] == 'D') {
+				if ($tiliointirow["vienti"] == 'D') {
 					echo t("EU");
 				}
-				if ($tiliointirow[vienti] == 'E') {
+				if ($tiliointirow["vienti"] == 'E') {
 					echo t("EU huolinta/rahti");
 				}
-				if ($tiliointirow[vienti] == 'F') {
+				if ($tiliointirow["vienti"] == 'F') {
 					echo t("EU vaihto-omaisuus");
 				}
-				if ($tiliointirow[vienti] == 'G') {
+				if ($tiliointirow["vienti"] == 'G') {
 					echo t("ei-EU");
 				}
-				if ($tiliointirow[vienti] == 'H') {
+				if ($tiliointirow["vienti"] == 'H') {
 					echo t("ei-EU huolinta/rahti");
 				}
-				if ($tiliointirow[vienti] == 'I') {
+				if ($tiliointirow["vienti"] == 'I') {
 					echo t("ei-EU vaihto-omaisuus");
 				}
-				if ($tiliointirow[vienti] == 'J') {
+				if ($tiliointirow["vienti"] == 'J') {
 					echo t("Kotimaa raaka-aine");
 				}
-				if ($tiliointirow[vienti] == 'K') {
+				if ($tiliointirow["vienti"] == 'K') {
 					echo t("EU raaka-aine");
 				}
-				if ($tiliointirow[vienti] == 'L') {
+				if ($tiliointirow["vienti"] == 'L') {
 					echo t("ei-EU raaka-aine");
 				}
 				echo "</td>";

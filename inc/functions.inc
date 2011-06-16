@@ -1078,7 +1078,7 @@ if (!function_exists("saldo_myytavissa")) {
 							$query = "	SELECT
 										ifnull(sum(tilausrivi.varattu),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
 										JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero) ON sarjanumeroseuranta.yhtio = tilausrivi.yhtio
 										and sarjanumeroseuranta.tuoteno 			= tilausrivi.tuoteno
 										and sarjanumeroseuranta.hyllyalue 			= tilausrivi.hyllyalue
@@ -1089,7 +1089,7 @@ if (!function_exists("saldo_myytavissa")) {
 										and sarjanumeroseuranta.sarjanumero 		= '$era'
 										WHERE tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 										and tilausrivi.yhtio = '$yhtiolisa'
-										and tilausrivi.tyyppi = 'W'
+										and tilausrivi.tyyppi in ('W','M')
 										and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
 										and tilausrivi.tuoteno = '$tuoteno'
 										and tilausrivi.varattu 	 > 0
@@ -1103,10 +1103,10 @@ if (!function_exists("saldo_myytavissa")) {
 							$query = "	SELECT
 										ifnull(sum(tilausrivi.varattu),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
 										WHERE tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 										and tilausrivi.yhtio = '$yhtiolisa'
-										and tilausrivi.tyyppi = 'W'
+										and tilausrivi.tyyppi in ('W','M')
 										and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
 										and tilausrivi.tuoteno = '$tuoteno'
 										and tilausrivi.varattu > 0
@@ -5010,7 +5010,7 @@ if (!function_exists("generoi_alekentta_php")) {
 
 			$ale *= (1 - $row["erikoisale"] / 100);
 
-			$ale = round($ale, 2);
+			$ale = round($ale, 4);
 		}
 
 		return $ale;
@@ -10087,7 +10087,7 @@ if (!function_exists("tarkista_oikeus")) {
 		}
 		elseif ($alanimi != "") {
 			// Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa
-			$querylisa = " AND substring(alanimi, 1, if(LOCATE('&', alanimi) > 0, LOCATE('&', alanimi) - 1, CHAR_LENGTH(alanimi))) = '$alanimi'";	
+			$querylisa = " AND substring(alanimi, 1, if(LOCATE('&', alanimi) > 0, LOCATE('&', alanimi) - 1, CHAR_LENGTH(alanimi))) = '$alanimi'";
 		}
 
 		if ($paivitys != "") {
@@ -11225,7 +11225,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 		$kakerroinlisa  = 1;
 		$kerroin 		= '';
-		
+
 		if ($ryhma == 'fi313') {
 			// Tavaraostot muista EU-maista
 			$ryhma = 'fi305';

@@ -12363,7 +12363,7 @@ if (!function_exists("kopioi_tilausrivi")) {
 					case 'laatija':
 						$rvalues .= "'$kukarow[kuka]',";
 						break;
-					case 'luontiaika':
+					case 'laadittu':
 						$rvalues .= "now(),";
 						break;
 					default:

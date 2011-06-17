@@ -795,6 +795,7 @@
 				$kokonaissaldo = 0;
 				$kokonaishyllyssa = 0;
 				$kokonaismyytavissa = 0;
+				$kokonaissaldo_tapahtumalle = 0;
 
 				//saldot per varastopaikka
 				if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F" or $tuoterow["sarjanumeroseuranta"] == "G") {
@@ -835,18 +836,23 @@
 								and tuote.tuoteno = '$tuoteno'
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				}
+				
 				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_array ($sresult)) {
-
+												
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
 
-						//summataan kokonaissaldoa
+						//summataan kokonaissaldoa ja vain oman firman saldoa
 						$kokonaissaldo += $saldo;
 						$kokonaishyllyssa += $hyllyssa;
 						$kokonaismyytavissa += $myytavissa;
-
+							
+						if ($saldorow["yhtio"] == $kukarow["yhtio"]) {
+							$kokonaissaldo_tapahtumalle += $saldo;
+						}
+						
 						echo "<tr>
 								<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>
 								<td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>
@@ -868,7 +874,7 @@
 					echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
 					echo "</tr>";
 
-					//summataan kokonaissaldoa
+					//summataan kokonaissaldoa ja vain oman firman saldoa.
 					$kokonaissaldo += $saldo;
 					$kokonaishyllyssa += $hyllyssa;
 					$kokonaismyytavissa += $myytavissa;
@@ -883,8 +889,6 @@
 						";
 
 				echo "</table><br>";
-
-				$kokonaissaldo_tapahtumalle = $kokonaissaldo;
 
 				// katsotaan onko t‰lle tuotteelle yht‰‰n sis‰ist‰ toimittajaa ja ett‰ toimittajan tiedoissa on varmasti kaikki EDI mokkulat p‰‰ll‰ ja oletusvienti on jotain vaihto-omaisuutta
 				$query = "	SELECT tyyppi_tieto, liitostunnus

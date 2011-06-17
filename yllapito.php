@@ -415,7 +415,7 @@
 								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
 								WHERE yhtio = '$kukarow[yhtio]'
 								and (
-										(tila IN ('L','N','R','V','E') AND alatila != 'X')
+										(tila IN ('L','N','R','V','E','C') AND alatila != 'X')
 										OR
 										(tila = 'T' AND alatila in ('','A'))
 										OR

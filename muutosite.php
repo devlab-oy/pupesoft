@@ -88,9 +88,9 @@ if ($tee == 'G') {
 }
 
 // Tositeselailu
-if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu' or $tee == 'KP') {
+if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu' or $tee == 'KP') {
 
-	if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu' or $tee == 'KP') {
+	if  ($tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu' or $tee == 'KP') {
 
 		// Etsitään virheet vain kuluvalta tilikaudelta!
 		if ($tee == 'Z') {
@@ -105,6 +105,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		}
 
 		if ($tee == 'X') {
+			// etsii kaikki tositteet joilta puuttuu kustannuspaikka, EI myynti ja tasetilit
 			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
 						FROM tiliointi use index (yhtio_tilino_tapvm), tili use index (tili_index)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
@@ -119,9 +120,20 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						AND tiliointi.tilino != '$yhtiorow[myynti_ei_eu]'
 						AND tiliointi.tilino != '$yhtiorow[myynti_eu]'
 						AND tiliointi.tilino != '$yhtiorow[varastonmuutos]'
-						AND tiliointi.tilino != '$yhtiorow[pyoristys]'";
+						AND tiliointi.tilino != '$yhtiorow[pyoristys]'";						
 		}
-
+		if ($tee == 'XKAIKKI') {
+			// etsii kaikki tositteet joilta puuttuu kustannuspaikka, myös myynti ja tasetilit
+			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
+						FROM tiliointi use index (yhtio_tilino_tapvm), tili use index (tili_index)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						AND tili.yhtio = '$kukarow[yhtio]'
+						AND tiliointi.tilino = tili.tilino
+						AND tiliointi.korjattu = ''
+						AND tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
+						AND tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						AND tiliointi.kustp = 0";						
+		}
 		if ($tee == 'W') {
 			$query = "	(SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
 						count(tiliointi.tunnus) saamistilejä,
@@ -1512,6 +1524,10 @@ if (strlen($tee) == 0) {
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joilta puuttuu kustannuspaikka")."</td>
 		  	<td><form action = '$PHP_SELF?tee=X' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+		  	</tr>
+			<tr class='aktiivi'>
+		  	<td>".t("näytä tositteet, joilta puuttuu kustannuspaikka (myös myynti- sekä tasetilit 	)")."</td>
+		  	<td><form action = '$PHP_SELF?tee=XKAIKKI' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
 		  	<td>".t("näytä tositteet, joiden ostovelat ei täsmää")."</td>

@@ -56,36 +56,36 @@
 			$edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONPUH:\n";
 			$edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONFAX:\n";
 
-			$toim_yritys = substr(trim($laskurow['toim_nimi'].' '.$laskurow['toim_nimitark']), 0, 30);
-			$toim_osoite = substr(trim($laskurow['toim_osoite']), 0, 25);
-			$toim_postitp = substr(trim($laskurow['toim_postitp']), 0, 25);
-			$toim_postino = trim($laskurow['toim_postino']);
-			$toim_maa = trim($laskurow['toim_maa']);
+			$toim_yritys 	= substr(trim($laskurow['toim_nimi'].' '.$laskurow['toim_nimitark']), 0, 30);
+			$toim_osoite 	= substr(trim($laskurow['toim_osoite']), 0, 25);
+			$toim_postitp	= substr(trim($laskurow['toim_postitp']), 0, 25);
+			$toim_postino	= trim($laskurow['toim_postino']);
+			$toim_maa 	 	= trim($laskurow['toim_maa']);
 
-			if ($toim_maa != $yhtiorow["maa"] and $toim_maa != '') {
-				$toim_yritys = '';
-				$toim_osoite = '';
+			if ($toim_maa != '' and strtoupper($toim_maa) != strtoupper($yhtiorow["maa"])) {
+				$toim_yritys  = '';
+				$toim_osoite  = '';
 				$toim_postitp = '';
 				$toim_postino = '';
-				$toim_maa = '';
+				$toim_maa	  = '';
 			}
 			// jos toimitusosoite eroaa asiakkaan toimitusosoitteesta (tai jos toimitusosoite on tyhj‰ niin asiakkaan osoitteesta), niin silloin se lis‰t‰‰n aineistoon
 			elseif (trim($asiakasrow['toim_osoite']) != '') {
-				if ($toim_osoite == trim($asiakasrow['toim_osoite']) and $toim_postitp == trim($asiakasrow['toim_postitp']) and $toim_postino == trim($asiakasrow['toim_postino'])) {
-					$toim_yritys = '';
-					$toim_osoite = '';
-					$toim_postitp = '';
-					$toim_postino = '';
-					$toim_maa = '';
+				if ($toim_osoite == substr(trim($asiakasrow['osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['osoite']), 0, 25) and $toim_postino == trim($asiakasrow['toim_postino'])) {
+					$toim_yritys 	= '';
+					$toim_osoite 	= '';
+					$toim_postitp 	= '';
+					$toim_postino 	= '';
+					$toim_maa 		= '';
 				}
 			}
 			else {
-				if ($toim_osoite == trim($asiakasrow['osoite']) and $toim_postitp == trim($asiakasrow['postitp']) and $toim_postino == trim($asiakasrow['postino'])) {
-					$toim_yritys = '';
-					$toim_osoite = '';
-					$toim_postitp = '';
-					$toim_postino = '';
-					$toim_maa = '';
+				if ($toim_osoite == substr(trim($asiakasrow['osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['postitp']), 0, 25) and $toim_postino == trim($asiakasrow['postino'])) {
+					$toim_yritys 	= '';
+					$toim_osoite 	= '';
+					$toim_postitp	= '';
+					$toim_postino 	= '';
+					$toim_maa 		= '';
 				}
 			}
 

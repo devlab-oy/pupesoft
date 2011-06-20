@@ -259,7 +259,10 @@
 				}
 
 				$pdf->draw_text(310, $lakork-10, t("Olkaa hyvä ja kirjoittakaa tilausnumero lähetteeseen, laskuun ja kirjeisiin", $kieli).".", $thispage, $pieni);
-
+				
+				// Ostotilaukselle teksti että hinnat ovat verottimia.
+				$pdf->draw_text(310, $lakork-20, t("Ostotilauksen hinnat eivät sisällä arvonlisäveroa", $kieli).".", $thispage, $pieni);
+				
 				$komm = "";
 
 				if (trim($laskurow['viesti']) != '') {

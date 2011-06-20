@@ -6,7 +6,7 @@ if (php_sapi_name() == 'cli') {
 	$cli = true;
 
 	ini_set("mysql.connect_timeout", 600);
-	ini_set("memory_limit", "520M");
+	ini_set("memory_limit", "1G");
 
 	if (trim($argv[1]) != '') {
 		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
@@ -23,6 +23,8 @@ if (php_sapi_name() == 'cli') {
 		die ("Et antanut taulun nime‰.\n");
 	}
 
+	$kukarow['kuka'] = "cli";
+
 	if (trim($argv[3]) != '') {
 		$path_parts = pathinfo(trim($argv[3]));
 		$_FILES['userfile']['name'] = $path_parts['basename'];
@@ -36,7 +38,7 @@ if (php_sapi_name() == 'cli') {
 	}
 }
 else {
-	require ("inc/parametrit.inc");	
+	require ("inc/parametrit.inc");
 	$cli = false;
 }
 
@@ -45,7 +47,7 @@ ini_set("max_execution_time", 18000);
 
 if (!$cli) echo "<font class='head'>".t("Datan sis‰‰nluku")."</font><hr>";
 
-if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
+if (!$cli and $oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
 	if ($uusi == 1) {
 		echo "<b>".t("Sinulla ei ole oikeutta lis‰t‰")."</b><br>";
 		$uusi = '';
@@ -268,9 +270,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim
 					}
 				}
 			}
+
+			if ($cli) echo " Luetaan rivit: $excei\r";
 			$excei++;
 		}
 		fclose($file);
+		if ($cli) echo "\n";
 	}
 
 	// Korjataan spessujoini yhteensopivuus_tuote_lisatiedot/yhteensopivuus_tuote
@@ -1547,7 +1552,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim
 							$tassafailissa = TRUE;
 						}
 						else {
-							$t[$i] = $tarkrow[mysql_field_name($result, $i)];
+
+							$t[$i] = isset($tarkrow[mysql_field_name($result, $i)]) ? $tarkrow[mysql_field_name($result, $i)] : "";
 
 							// T‰m‰ rivi ei oo exceliss‰
 							$tassafailissa = FALSE;
@@ -1589,7 +1595,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim
 						}
 
 						// Ignoorataan virhe jos se ei koske t‰ss‰ failissa olutta saraketta
-						if ($tassafailissa and $virhe[$i] != "") {
+						if ($tassafailissa and isset($virhe[$i]) and $virhe[$i] != "") {
 							switch ($table_mysql) {
 								case "tuote":
 									$virheApu = t("Tuote")." ".$tarkrow["tuoteno"].": ";

@@ -1,8 +1,49 @@
 <?php
 
-require ("inc/parametrit.inc");
+if (php_sapi_name() == 'cli') {
+	require('inc/connect.inc');
+	require('inc/functions.inc');
+	$cli = true;
 
-echo "<font class='head'>".t("Datan sisäänluku")."</font><hr>";
+	ini_set("mysql.connect_timeout", 600);
+	ini_set("memory_limit", "520M");
+
+	if (trim($argv[1]) != '') {
+		$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+	}
+	else {
+		die ("Et antanut yhtiötä.\n");
+	}
+
+	if (trim($argv[2]) != '') {
+		$table = trim($argv[2]);
+	}
+	else {
+		die ("Et antanut taulun nimeä.\n");
+	}
+
+	if (trim($argv[3]) != '') {
+		$path_parts = pathinfo(trim($argv[3]));
+		$_FILES['userfile']['name'] = $path_parts['basename'];
+		$_FILES['userfile']['type'] = (strtoupper($path_parts['extension']) == 'TXT' or strtoupper($path_parts['extension']) == 'CSV') ? 'text/plain' : (strtoupper($path_parts['extension']) == 'XLS') ? 'application/vnd.ms-excel' : '';
+		$_FILES['userfile']['tmp_name'] = $argv[3];
+		$_FILES['userfile']['error'] = 0; // UPLOAD_ERR_OK
+		$_FILES['userfile']['size'] = filesize($argv[3]);
+	}
+	else {
+		die ("Et antanut tiedoston nimeä ja polkua.\n");
+	}
+}
+else {
+	require ("inc/parametrit.inc");	
+	$cli = false;
+}
+
+// Laitetaan max time 5H
+ini_set("max_execution_time", 18000);
+
+if (!$cli) echo "<font class='head'>".t("Datan sisäänluku")."</font><hr>";
 
 if ($oikeurow['paivitys'] != '1') { // Saako päivittää
 	if ($uusi == 1) {
@@ -24,7 +65,7 @@ if ($oikeurow['paivitys'] != '1') { // Saako päivittää
 
 flush();
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim($_FILES['userfile']['tmp_name']) != '')) {
 
 	require ("inc/pakolliset_sarakkeet.inc");
 
@@ -51,7 +92,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 		$data->read($_FILES['userfile']['tmp_name']);
 	}
 
-	echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
+	if (!$cli) echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
 
 	// luetaan eka rivi tiedostosta..
 	if ($ext == "XLS") {
@@ -441,14 +482,19 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			exit;
 		}
 
-		echo "<br><font class='message'>".t("Tiedosto ok, aloitetaan päivitys")." $table_mysql-".t("tauluun")."...<br></font>";
+		if (!$cli) echo "<br><font class='message'>".t("Tiedosto ok, aloitetaan päivitys")." $table_mysql-".t("tauluun")."...<br></font>";
 		flush();
 
 		$rivilaskuri = 1;
 
 		$puun_alkio_index_plus = 0;
 
+		$max_rivit = count($rivit);
+
 		for ($eriviindex = 0; $eriviindex < (count($rivit) + $puun_alkio_index_plus); $eriviindex++) {
+
+			if ($cli) progress_bar($eriviindex, $max_rivit);
+
 			$hylkaa    = 0;
 			$tila      = "";
 			$tee       = "";
@@ -474,7 +520,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$toimi_liitostunnus = '';
 
 			if ($rivilaskuri % 500 == 0) {
-				echo "<font class='message'>Käsitellään riviä: $rivilaskuri</font><br>";
+				if (!$cli) echo "<font class='message'>Käsitellään riviä: $rivilaskuri</font><br>";
 				flush();
 			}
 
@@ -1610,7 +1656,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			}
 		}
 
-		echo t("Päivitettiin")." $lask ".t("riviä")."!<br><br>";
+		if (!$cli) echo t("Päivitettiin")." $lask ".t("riviä")."!<br><br>";
+		else echo "\nPäivitettiin $lask riviä\n";
 	}
 }
 else {
@@ -1669,59 +1716,59 @@ else {
 					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>
 					<option value='extranet_kayttajan_lisatiedot' $sel[extranet_kayttajan_lisatiedot]>".t("Extranet-käyttäjän lisätietoja")."</option>";
 
-	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
-	$dynaamiset_avainsanat = '';
+			$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
+			$dynaamiset_avainsanat = '';
 
-	if ($kukarow['yhtio'] == 'mast') {
-		echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
-		echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
-	}
-
-	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
-		if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
-			$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
+		if ($kukarow['yhtio'] == 'mast') {
+			echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
+			echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
 		}
 
-		echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
-	}
+			while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
+				if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
+					$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
+				}
+
+				echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
+			}
 
 	echo "	</select></td></tr>";
 
-	if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
-		echo "<tr><td>".t("Ytunnus-tarkkuus").":</td>
-				<td><select name='ytunnustarkkuus'>
-				<option value=''>".t("Päivitetään vain, jos Ytunnuksella löytyy yksi rivi")."</option>
-				<option value='2'>".t("Päivitetään kaikki syötetyllä Ytunnuksella löytyvät asiakkaat")."</option>
-				</select></td>
-		</tr>";
-	}
-
-	if (trim($dynaamiset_avainsanat) != '' and $table == $dynaamiset_avainsanat) {
-		echo "	<tr><td>",t("Valitse liitos"),":</td>
-				<td><select name='dynaamisen_taulun_liitos'>";
-
-		if ($table == 'puun_alkio_asiakas') {
-			echo "	<option value=''>",t("Asiakkaan tunnus"),"</option>
-					<option value='ytunnus'>",t("Asiakkaan ytunnus"),"</option>
-					<option value='toim_ovttunnus'>",t("Asiakkaan toimitusosoitteen ovttunnus"),"</option>
-					<option value='asiakasnro'>",t("Asiakkaan asiakasnumero"),"</option>";
-		}
-		else {
-			echo "	<option value=''>",t("Puun alkion tunnus"),"</option>
-					<option value='koodi'>",t("Puun alkion koodi"),"</option>";
+		if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
+			echo "<tr><td>".t("Ytunnus-tarkkuus").":</td>
+					<td><select name='ytunnustarkkuus'>
+					<option value=''>".t("Päivitetään vain, jos Ytunnuksella löytyy yksi rivi")."</option>
+					<option value='2'>".t("Päivitetään kaikki syötetyllä Ytunnuksella löytyvät asiakkaat")."</option>
+					</select></td>
+			</tr>";
 		}
 
-		echo "</select></td></tr>";
-	}
+		if (trim($dynaamiset_avainsanat) != '' and $table == $dynaamiset_avainsanat) {
+			echo "	<tr><td>",t("Valitse liitos"),":</td>
+					<td><select name='dynaamisen_taulun_liitos'>";
 
-	if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
-		echo "<tr><td>".t("Segmentin valinta").":</td>
-				<td><select name='segmenttivalinta'>
-				<option value='1'>".t("Valitaan käytettäväksi asiakas-segmentin koodia")."</option>
-				<option value='2'>".t("Valitaan käytettäväksi asiakas-segmentin tunnusta ")."</option>
-				</select></td>
-		</tr>";
-	}
+			if ($table == 'puun_alkio_asiakas') {
+				echo "	<option value=''>",t("Asiakkaan tunnus"),"</option>
+						<option value='ytunnus'>",t("Asiakkaan ytunnus"),"</option>
+						<option value='toim_ovttunnus'>",t("Asiakkaan toimitusosoitteen ovttunnus"),"</option>
+						<option value='asiakasnro'>",t("Asiakkaan asiakasnumero"),"</option>";
+			}
+			else {
+				echo "	<option value=''>",t("Puun alkion tunnus"),"</option>
+						<option value='koodi'>",t("Puun alkion koodi"),"</option>";
+			}
+
+			echo "</select></td></tr>";
+		}
+
+		if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
+			echo "<tr><td>".t("Segmentin valinta").":</td>
+					<td><select name='segmenttivalinta'>
+					<option value='1'>".t("Valitaan käytettäväksi asiakas-segmentin koodia")."</option>
+					<option value='2'>".t("Valitaan käytettäväksi asiakas-segmentin tunnusta ")."</option>
+					</select></td>
+			</tr>";
+		}
 
 	if ($table == "extranet_kayttajan_lisatiedot") {
 		echo "<tr><td>".t("Liitostunnus").":</td>
@@ -1732,13 +1779,13 @@ else {
 		</tr>";
 	}
 
-	echo "	<tr><td>".t("Valitse tiedosto").":</td>
-			<td><input name='userfile' type='file'></td>
-			<td class='back'><input type='submit' value='".t("Lähetä")."'></td>
-		</tr>
+		echo "	<tr><td>".t("Valitse tiedosto").":</td>
+				<td><input name='userfile' type='file'></td>
+				<td class='back'><input type='submit' value='".t("Lähetä")."'></td>
+			</tr>
 
-		</table>
-		</form>";
+			</table>
+			</form>";
 }
 
 require ("inc/footer.inc");

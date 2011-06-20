@@ -652,13 +652,11 @@
 					ORDER BY tilausrivi.tuoteno";
 		$tilrivires = mysql_query($query) or die($query);
 
-		if (!isset($ei_nayteta_riveja) or trim($ei_nayteta_riveja) == '') {
-			echo "<table>";
-			echo "<tr><th>".t("Tuoteno")."</th>";
-			echo "<th>".t("Varattu")."</th>";
-			echo "<th>".t("Tyyppi")."</th>";
-			echo "<th>".t("Varastopaikka")."</th></tr>";
-		}
+		echo "<table>";
+		echo "<tr><th>".t("Tuoteno")."</th>";
+		echo "<th>".t("Varattu")."</th>";
+		echo "<th>".t("Tyyppi")."</th>";
+		echo "<th>".t("Varastopaikka")."</th></tr>";
 
 		echo "<form method='POST' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='CLEANRIVIT'>";
@@ -687,22 +685,18 @@
 				while ($tuoterow = mysql_fetch_array($tuoteresult)) {
 					echo "<input type='hidden' name='rivitunnus[]' value='$tuoterow[tunnus]'>";
 
-					if (!isset($ei_nayteta_riveja) or trim($ei_nayteta_riveja) == '') {
-						echo "<tr>";
-						echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($tuoterow["tuoteno"])."'>$tuoterow[tuoteno]</a></td>";
-						echo "<td>$tuoterow[varattu]</td>";
-						echo "<td>$tuoterow[var]</td>";
-						echo "<td>$tuoterow[paikka]</td>";
-						echo "</tr>";
-					}
+					echo "<tr>";
+					echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($tuoterow["tuoteno"])."'>$tuoterow[tuoteno]</a></td>";
+					echo "<td>$tuoterow[varattu]</td>";
+					echo "<td>$tuoterow[var]</td>";
+					echo "<td>$tuoterow[paikka]</td>";
+					echo "</tr>";
 					$laskuri++;
 				}
 			}
 		}
 
-		if (!isset($ei_nayteta_riveja) or trim($ei_nayteta_riveja) == '') {
-			echo "</table>";
-		}
+		echo "</table>";
 
 		if ($laskuri > 0) {
 			echo "<br><input type='submit' value='".t("Päivitä tilausriveille oletuspaikka")."'>";
@@ -732,29 +726,37 @@
 					ORDER BY tapahtuma.laadittu";
 		$tapahtumares = mysql_query($query) or pupe_error($query);
 
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>".t("Tuoteno")."</th>";
-		echo "<th>".t("Laadittu")."</th>";
-		echo "<th>".t("Laji")."</th>";
-		echo "<th>".t("Varastopaikka")."</th>";
-		echo "</tr>";
+		if (!isset($ei_nayteta_riveja) or trim($ei_nayteta_riveja) == '') {
+			echo "<table>";
+			echo "<tr>";
+			echo "<th>".t("Tuoteno")."</th>";
+			echo "<th>".t("Laadittu")."</th>";
+			echo "<th>".t("Laji")."</th>";
+			echo "<th>".t("Varastopaikka")."</th>";
+			echo "</tr>";
+		}
 
 		echo "<form method='POST' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='CLEANTAPAHTUMAT'>";
 
  		while ($tapahtumarow = mysql_fetch_array($tapahtumares)) {
 			echo "<input type='hidden' name='rivitunnus[]' value='$tapahtumarow[tunnus]'>";
-			echo "<tr>";
-			echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($tapahtumarow["tuoteno"])."'>$tapahtumarow[tuoteno]</a></td>";
-			echo "<td>$tapahtumarow[laadittu]</td>";
-			echo "<td>$tapahtumarow[laji]</td>";
-			echo "<td>$tapahtumarow[paikka]</td>";
-			echo "</tr>";
+
+			if (!isset($ei_nayteta_riveja) or trim($ei_nayteta_riveja) == '') {
+				echo "<tr>";
+				echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($tapahtumarow["tuoteno"])."'>$tapahtumarow[tuoteno]</a></td>";
+				echo "<td>$tapahtumarow[laadittu]</td>";
+				echo "<td>$tapahtumarow[laji]</td>";
+				echo "<td>$tapahtumarow[paikka]</td>";
+				echo "</tr>";
+			}
+
 			$laskuri++;
 		}
 
-		echo "</table>";
+		if (!isset($ei_nayteta_riveja) or trim($ei_nayteta_riveja) == '') {
+			echo "</table>";
+		}
 
 		if ($laskuri > 0) {
 			echo "<br><input type='submit' value='".t("Päivitä tapahtumille oletuspaikka")."'>";
@@ -887,7 +889,6 @@
 		echo "<input type='hidden' name='tee' value='LISTAAVIRHEELLISETRIVIT'>";
 		echo "<tr><th>".t("Listaa tilausrivit joiden tuotepaikkoja ei löydy")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
-		echo "<tr><td class='back'><input type='checkbox' name='ei_nayteta_riveja'> ",t("Rivejä ei näytetä"),"</td></tr>";
 		echo "</form>";
 
 		echo "<form method='post' action='$PHP_SELF'>";
@@ -895,6 +896,7 @@
 		echo "<input type='hidden' name='tee' value='LISTAATAPAHTUMATILMANPAIKKAA'>";
 		echo "<tr><th>".t("Listaa tapahtumat, joiden tuotepaikkoja ei löydy")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
+		echo "<tr><td class='back'><input type='checkbox' name='ei_nayteta_riveja'> ",t("Rivejä ei näytetä"),"</td></tr>";
 		echo "</form>";
 
 		echo "</table>";

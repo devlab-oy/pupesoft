@@ -24,38 +24,24 @@
 	}
 
 	$lopeta_body = TRUE;
-	$piirra_kello = TRUE;
 	$piirra_sanakirja = TRUE;
 
 	// Piilotetaan koko body
 	if (isset($nayta_pdf) and $nayta_pdf == "1") {
 		$lopeta_body = FALSE;
-		$piirra_kello = FALSE;
 		$piirra_sanakirja = FALSE;
 	}
 
 	// Piilotetaan koko body
 	if (isset($no_head) and $no_head == "yes") {
 		$lopeta_body = FALSE;
-		$piirra_kello = FALSE;
 		$piirra_sanakirja = FALSE;
 	}
 
-	// Piilotetaan kello ja sanakirja
-	if (isset($ei_kelloa) and $ei_kelloa != "") {
-		$piirra_kello = FALSE;
-		$piirra_sanakirja = FALSE;
-	}
-
-	// Piilotetaan kello ja sanakirja
+	// Piilotetaan koko body
 	if (isset($ohje) and $ohje == "off") {
 		$piirra_kello = FALSE;
 		$piirra_sanakirja = FALSE;
-	}
-
-	// Piilotetaan aika
-	if (stripos($kukarow['profiilit'], "admin") === FALSE) {
-		$piirra_kello = FALSE;
 	}
 
 	// Piilotetaan sanakirja
@@ -64,15 +50,6 @@
 	}
 
 	if ($lopeta_body) {
-
-		if ($piirra_kello or $piirra_sanakirja) {
-			echo "<br><br>";
-		}
-
-		if ($piirra_kello) {
-			$loppumem = memory_get_usage();
-			echo "<font class='info'>$aika ".round((($loppumem-$alkumem)/1000000), 1)."</font>";
-		}
 
 		if ($piirra_sanakirja) {
 			switch (strtoupper($kukarow["kieli"])) {
@@ -101,6 +78,7 @@
 					$kindex = 0;
 			}
 
+			echo "<br><br>";
 			echo "<form name='sanakirjaform' method='post' action='${palvelin2}sanakirja.php'>";
 			echo "<input type='hidden' name='kieli[$kindex]' value='$kieli'>";
 			echo "<input type='hidden' name='show' value='all'>";
@@ -117,26 +95,26 @@
 			echo $yhtiorow["web_seuranta"];
 		}
 
-		if ($GLOBALS["pupe_query_debug"] > 0) {
+		if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0) {
 
-			echo "<hr>";
 			echo "<font style='font-family: monospace; font-size: 9pt; white-space: nowrap;'>";
 
-			// Jos debugataan querejä:
-			array_multisort($aika_debug_array, SORT_DESC, $quer_debug_array);
+			$loppumem = memory_get_usage();
+			echo "php: ".sprintf("%.04f", $aika)." sec, ".round((($loppumem - $alkumem) / 1024 / 1024), 2)." mb<br>";
+			echo "sql: ".sprintf("%.04f", array_sum($aika_debug_array))." sec, ".sprintf("%.04f", array_sum($aika_debug_array) / count($aika_debug_array))." sec/query (".count($aika_debug_array)." queries)<br>";
+			echo "<hr>";
 
-			$querytime = 0;
+			// Sortataan kestojärjestykseen
+			array_multisort($aika_debug_array, SORT_DESC, $quer_debug_array);
 
 			for ($i=0; $i<count($aika_debug_array); $i++) {
 				if ($aika_debug_array[$i] > $GLOBALS["pupe_query_debug"]) {
-					echo "$aika_debug_array[$i]: ", query_dump($quer_debug_array[$i]);
+					echo sprintf("%.04f", $aika_debug_array[$i]).": ", query_dump($quer_debug_array[$i]);
 				}
-				$querytime += $aika_debug_array[$i];
 			}
 
-			echo "<hr>";
-			echo count($aika_debug_array)." queries in $querytime sec, ".sprintf("%.04f", $querytime/count($aika_debug_array))." sec/query.<br><br>";
 			echo "</font>";
+			echo "<br><br>";
 		}
 
 		echo "</body>";
@@ -144,5 +122,3 @@
 	}
 
 	mysql_close($link);
-
-?>

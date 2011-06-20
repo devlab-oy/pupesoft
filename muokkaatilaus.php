@@ -42,7 +42,7 @@
 						and nimi		= 'tilauskasittely/tilaus_myynti.php'
 						and alanimi 	= 'TARJOUS'
 						and paivitys	= '1'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
 				$deletarjous = TRUE;
@@ -130,7 +130,7 @@
 										comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa muokkaatilaus.php now()')
 								WHERE	yhtio = '$kukarow[yhtio]'
 								AND		tunnus = $tilausnumero";
-			$result_tarjous = mysql_query($query_tarjous) or pupe_error($query_tarjous);
+			$result_tarjous = pupe_query($query_tarjous);
 
 			echo "<font class='message'>".t("Mitätöitiin lasku")." $tilausnumero</font><br><br>";
 		}
@@ -151,43 +151,43 @@
 				$query = "	SELECT *
 							FROM lasku use index (tila_index)
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'G'";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
 				$query = "	SELECT *
 							FROM lasku use index (tila_index)
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'S'";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYSSUPER") {
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='A' and alatila = '' and tilaustyyppi='A'";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]') and tila = 'C' and alatila in ('A','B') and tilaustyyppi='R'";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "REKLAMAATIO" or $toim == "REKLAMAATIOSUPER") {
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila = 'C' and alatila = '' and tilaustyyppi = 'R'";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "TARJOUS" or $toim == "TARJOUSSUPER") {
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='T' and alatila in ('','A') and tilaustyyppi='T'";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "OSTO") {
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and tilaustyyppi = '' and alatila = ''";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "OSTOSUPER") {
 				$query = "	SELECT lasku.*
@@ -199,13 +199,13 @@
 							and tilausrivi.uusiotunnus 		= 0
 							GROUP by lasku.tunnus
 							ORDER by lasku.tunnus";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "HAAMU") {
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and tilaustyyppi = 'O' and alatila = ''";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "ENNAKKO") {
 				$query = "	SELECT lasku.*
@@ -217,32 +217,32 @@
 							and lasku.alatila in ('','A','J')
 							and lasku.tilaustyyppi = 'E'
 							GROUP BY lasku.tunnus";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
 				$query = "	SELECT *
 							FROM lasku use index (tila_index)
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'V'";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "" or $toim == "SUPER" or $toim == "PROJEKTI") {
 				$query = "	SELECT *
 							FROM lasku use index (tila_index)
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]') and alatila='' and tila in ('N','E')";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "LASKUTUSKIELTO") {
 				$query = "	SELECT lasku.*
 							FROM lasku use index (tila_index)
 							JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus and lasku.chn = '999'
 							WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila in ('N','L') and alatila != 'X'";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 			elseif ($toim == "YLLAPITO") {
 				$query = "	SELECT lasku.*
 							FROM lasku use index (tila_index)
 							WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila = '0' and alatila not in ('V','D')";
-				$eresult = mysql_query($query) or pupe_error($query);
+				$eresult = pupe_query($query);
 			}
 
 
@@ -372,7 +372,7 @@
 			$yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 
 			$haku='';
-			if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%')";
+			if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%' or kuka1.nimi like '%$etsi%' or  kuka2.nimi like '%$etsi%')";
 			if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%')";
 
 			$seuranta = "";
@@ -482,7 +482,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -516,7 +516,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -545,7 +545,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'E')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'E'";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -592,7 +592,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila in ('','A','B','J')";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 			$miinus = 3;
@@ -616,7 +616,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila in ('','A','B','C','J')";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -641,7 +641,7 @@
 				 				FROM lasku use index (tila_index)
 				 				JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 				 				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'";
-				 $sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				 $sumresult = pupe_query($sumquery);
 				 $sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -666,7 +666,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='N' and lasku.alatila='U'";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -696,7 +696,7 @@
 								and lasku.tila = 'V'
 								and lasku.alatila in ('','A','B','J')
 								and lasku.tilaustyyppi != 'W'";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -726,7 +726,7 @@
 								and lasku.tila = 'V'
 								and lasku.alatila in ('','A','B','C','J')
 								and lasku.tilaustyyppi != 'W'";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -758,7 +758,7 @@
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								and ((tila='V' and alatila in ('','A','B','J')) or (lasku.tila in ('L','N') and lasku.alatila in ('A','')))
 								and tilaustyyppi != 'W'";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -791,7 +791,7 @@
 								and tila in ('L','N','V')
 								and alatila not in ('X','V')
 								and tilaustyyppi != 'W'";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -833,7 +833,7 @@
 		    					FROM lasku use index (tila_index)
 		    					LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 		    					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' $tyomalatlat";
-		    	$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+		    	$sumresult = pupe_query($sumquery);
 		    	$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -878,7 +878,7 @@
 						    	WHERE lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tilaustyyppi = 'R'
 								$rekla_tila";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -924,7 +924,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila ='T' and lasku.tilaustyyppi='T' and lasku.alatila in ('','A')";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -955,7 +955,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila ='T' and lasku.tilaustyyppi='T' and lasku.alatila in ('','A')";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -980,7 +980,7 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = 'F'";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -1005,7 +1005,7 @@
 				   				FROM lasku use index (tila_index)
 				   				JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 				   				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('N','L') and lasku.alatila != 'X' and lasku.chn = '999'";
-				   $sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				   $sumresult = pupe_query($sumquery);
 				   $sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -1111,7 +1111,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus and (laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('0') and lasku.alatila != 'D'";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
@@ -1143,13 +1143,13 @@
 								FROM lasku use index (tila_index)
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in('L','N') and lasku.alatila in ('A','')";
-				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+				$sumresult = pupe_query($sumquery);
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 6;
 		}
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 0) {
 
@@ -1326,7 +1326,7 @@
 				// jos kyseessä on "odottaa JT tuotteita rivi"
 				if ($row["tila"] == "N" and $row["alatila"] == "T") {
 					$query = "SELECT tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and tyyppi='L' and otunnus='$row[tilaus]'";
-					$countres = mysql_query($query) or pupe_error($query);
+					$countres = pupe_query($query);
 
 					// ja sillä ei ole yhtään riviä
 					if (mysql_num_rows($countres) == 0) {
@@ -1364,7 +1364,7 @@
 									where tilausrivi.yhtio	= '$kukarow[yhtio]'
 									and tilausrivi.tyyppi	= 'L'
 									and tilausrivi.otunnus	= '$row[tilaus]'";
-						$countres = mysql_query($query) or pupe_error($query);
+						$countres = pupe_query($query);
 
 						$jtok = 0;
 
@@ -1419,7 +1419,7 @@
 												WHERE yhtio = '$kukarow[yhtio]'
 												AND tunnus in (".$row[$fieldname].")
 												AND (comments != '' OR sisviesti2 != '')";
-							$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
+							$result_comments = pupe_query($query_comments);
 							$row_comments = mysql_fetch_assoc($result_comments);
 
 							if (trim($row_comments["comments"]) != "") {
@@ -1443,7 +1443,7 @@
 												WHERE yhtio = '$kukarow[yhtio]'
 												AND lasku.tila != 'S'
 												AND tunnusnippu = '$row[tunnusnippu]' and tunnusnippu>0";
-							$ares = mysql_query($query_comments) or pupe_error($query_comments);
+							$ares = pupe_query($query_comments);
 
 							if (mysql_num_rows($ares) > 0) {
 								$arow = mysql_fetch_assoc($ares);
@@ -1455,7 +1455,7 @@
 														WHERE yhtio = '$kukarow[yhtio]'
 														AND tyyppi = 'Memo'
 														AND otunnus IN ($arow[tunnukset])";
-									$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
+									$result_comments = pupe_query($query_comments);
 
 									$nums="";
 									if (mysql_num_rows($result_comments) > 0) {

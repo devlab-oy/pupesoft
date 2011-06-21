@@ -753,7 +753,7 @@ if ($tee == "tallenna_osoite") {
 }
 
 if ($tee == "tilaa") {
-	$query = "	SELECT tunnus
+	$query = "	SELECT *
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]' and
 				tila = 'N' and

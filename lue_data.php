@@ -638,7 +638,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim
 				elseif ($table_mysql == 'puun_alkio') {
 
 					// voidaan vaan lisätä puun alkioita
-					if ($rivi[$postoiminto] != "LISAA") {
+					if ($rivi[$postoiminto] != "LISAA" or $rivi[$postoiminto] != "POISTA") {
 						$tila = 'ohita';
 					}
 

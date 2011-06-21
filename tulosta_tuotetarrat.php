@@ -95,11 +95,11 @@
 		$eankoodires = mysql_query($query) or pupe_error($query);
 		$eankoodirow = mysql_fetch_array($eankoodires);
 
-		if ($eankoodirow[0] != 0) {
+		if ($eankoodirow[0] != 0 and $eankoodirow[0] != '') {
 			$lets='go';
 		}
 		elseif ($tee != '' and $tee !='Y' and $tee !='H') {
-			if ($toim == 'YKS' and $eankoodirow[0] != '') {
+			if ($toim == 'YKS' and $eankoodirow[0] != '' and $eankoodirow[0] != 0) {
 				$lets = 'go';
 			}
 			else {
@@ -150,7 +150,7 @@
 
 
 			foreach ($tuotteet as $key => $tuoteno) {
-				if ($malli != 'Zebra') {
+				if ($malli != 'Zebra' and $malli != 'Zebra_hylly' and $malli != 'Zebra_tuote') {
 					for ($a = 0; $a < $tkpl; $a++) {
 						if ($malli == 'Tec') {
 							require("inc/tulosta_tuotetarrat_tec.inc");
@@ -214,7 +214,7 @@
 		}
 
 		echo "<tr>";
-		echo "<td><input type='text' name='tuoteno' size='20' maxlength='20' value='$tuoteno'></td>";
+		echo "<td><input type='text' name='tuoteno' size='20' maxlength='60' value='$tuoteno'></td>";
 		echo "<td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'></td>";
 		echo "<td><select name='kirjoitin'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
@@ -239,6 +239,8 @@
 		$pohjat[] = 'Tec';
 		$pohjat[] = 'Intermec';
 		$pohjat[] = 'Zebra';
+		$pohjat[] = 'Zebra_hylly';
+		$pohjat[] = 'Zebra_tuote';
 		$pohjat[] = 'PDF24';
 		$pohjat[] = 'PDF40';
 

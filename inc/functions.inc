@@ -5155,7 +5155,7 @@ if (!function_exists('ebid')) {
 		$res = pupe_query($query);
 		$laskurow = mysql_fetch_assoc($res);
 
-		if ($laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML" and $laskurow['ebid'] != "TECCOM-INVOICE") {
+		if ($laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML" and $laskurow['ebid'] != "TECCOM-INVOICE" and $laskurow['ebid'] != "UNIKKO-INVOICE") {
 			$ebid = $laskurow['ebid'];
 
 			$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
@@ -5238,6 +5238,10 @@ if (!function_exists('ebid')) {
 					$out .= "<a $target href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä lasku') ."</a> ";
 				}
 
+			}
+
+			if ($laskurow['ebid'] == "UNIKKO-INVOICE") {
+				return t('Unikkolasku');
 			}
 
 			if ($out != '') {

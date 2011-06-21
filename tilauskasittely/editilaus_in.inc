@@ -871,7 +871,13 @@ while (!feof($fd)) {
 				}
 
 				// jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JO KYSESSÄ ON KOONTIKULJETUSKEISSI)
-				if ($tnimi != "" and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
+				if (($tnimi != "" or ($tnimi == "" and $tnimitark != "")) and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
+
+					if ($tnimi == "" and $tnimitark != "") {
+						$tnimi = $tnimitark;
+						$tnimitark = "";
+					}
+
 					$arow['toim_nimi']		= $tnimi;
 					$arow['toim_nimitark']	= $tnimitark;
 					$arow['toim_osoite']	= $tosoite;

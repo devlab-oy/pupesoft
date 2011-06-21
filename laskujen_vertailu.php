@@ -137,7 +137,8 @@
 		$query = "	SELECT tapvm, erpcm, concat(nimi, ' ', nimitark) nimi, postitp, ytunnus, summa, valkoodi, laskunro, tunnus, hyvaksyja_nyt, tila
 					FROM lasku
 					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laskunro = '{$laskunro}'";
+					AND laskunro = '{$laskunro}'
+					ORDER BY tunnus DESC";
 		$lasku_res = mysql_query($query) or pupe_error($query);
 		$lasku_row = mysql_fetch_assoc($lasku_res);
 

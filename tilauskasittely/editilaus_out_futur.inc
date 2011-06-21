@@ -71,7 +71,7 @@
 			}
 			// jos toimitusosoite eroaa asiakkaan toimitusosoitteesta (tai jos toimitusosoite on tyhj‰ niin asiakkaan osoitteesta), niin silloin se lis‰t‰‰n aineistoon
 			elseif (trim($asiakasrow['toim_osoite']) != '') {
-				if ($toim_osoite == substr(trim($asiakasrow['osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['osoite']), 0, 25) and $toim_postino == trim($asiakasrow['toim_postino'])) {
+				if ($toim_osoite == substr(trim($asiakasrow['toim_osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['toim_postitp']), 0, 25) and $toim_postino == trim($asiakasrow['toim_postino'])) {
 					$toim_yritys 	= '';
 					$toim_osoite 	= '';
 					$toim_postitp 	= '';
@@ -90,7 +90,7 @@
 			}
 
 			$edi_order .= "OSTOTIL.OT_TOIMITUS_YRITYS:{$toim_yritys}\n";
-			$edi_order .= "OSTOTIL.OT_TOIMITUS_NIMI:\n";
+			#$edi_order .= "OSTOTIL.OT_TOIMITUS_NIMI:\n";
 			$edi_order .= "OSTOTIL.OT_TOIMITUS_KATUOSOITE:{$toim_osoite}\n";
 			$edi_order .= "OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:{$toim_postitp}\n";
 			$edi_order .= "OSTOTIL.OT_TOIMITUS_POSTINRO:{$toim_postino}\n";
@@ -123,12 +123,7 @@
 					}
 				}
 
-				if ($yhtiorow["varaako_jt_saldoa"] == "") {
-					$kpl = round($tilausrivi_row['jt'] * 1, 0);
-				}
-				else {
-					$kpl = round($tilausrivi_row['varattu'] * 1, 0);
-				}
+				$kpl = round(($tilausrivi_row['jt'] + $tilausrivi_row['varattu']), 0);
 
 				if ($tilausrivi_row['var'] == 'P') {
 					$kpl = round($tilausrivi_row['tilkpl'] * 1, 0);

@@ -77,8 +77,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tuotetyyppi") {
-		$sel = array();
-		$sel[$trow[$i]] = "selected";
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('A', 'B', 'R', 'K', 'M'), '');
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
@@ -215,8 +214,7 @@
 
 	if (mysql_field_name($result, $i) == "vaaditaan_kpl2") {
 
-		$sel = array();
-		$sel[$trow[$i]] = "SELECTED";
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('P', 'M', 'N'), '');
 
 		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = ''>".t("Normaalik‰sittely")."</option>";
@@ -229,8 +227,7 @@
 
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
-		$sel = array();
-		$sel[$trow[$i]] = "selected";
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
 
 		$query = "	SELECT count(*) saldo
 					FROM tuotepaikat
@@ -375,22 +372,13 @@
 
 	if (mysql_field_name($result, $i) == "hinnastoon") {
 
-		$sele = $selw = "";
-		if ($trow[$i] == 'E') {
-			$sele = "SELECTED";
-		}
-		if ($trow[$i] == 'W') {
-			$selw = "SELECTED";
-		}
-		if ($trow[$i] == 'V') {
-			$selv = "SELECTED";
-		}
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('E', 'W', 'V'), '');
 
 		$ulos = "<td><select name = '$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
 			<option value=''>".t("Tuote n‰ytet‰‰n hinnastossa, mutta ei verkkokaupassa")."</option>
-			<option value='E' $sele>".t("Tuotetta ei n‰ytet‰ hinnastossa, eik‰ verkkokaupassa")."</option>
-			<option value='W' $selw>".t("Tuote n‰kyy hinnastossa ja verkkokaupassa")."</option>
-			<option value='V' $selv>".t("Tuote n‰kyy hinnastossa sek‰ verkkokaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>
+			<option value='E' {$sel['E']}>".t("Tuotetta ei n‰ytet‰ hinnastossa, eik‰ verkkokaupassa")."</option>
+			<option value='W' {$sel['W']}>".t("Tuote n‰kyy hinnastossa ja verkkokaupassa")."</option>
+			<option value='V' {$sel['V']}>".t("Tuote n‰kyy hinnastossa sek‰ verkkokaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>
 			</select></td>";
 		$jatko = 0;
 	}
@@ -643,12 +631,11 @@
 
 	if (mysql_field_name($result, $i) == "yksin_kerailyalustalle") {
 
-		$sel = array();
-		$sel[$trow[$i]] = ' selected';
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value=''>".t("Ei")."</option>";
-		$ulos .= "<option value='K'{$sel['K']}>".t("Kyll‰")."</option>";
+		$ulos .= "<option value='K'{$sel}>".t("Kyll‰")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

@@ -71,7 +71,8 @@
 			}
 			// jos toimitusosoite eroaa asiakkaan toimitusosoitteesta (tai jos toimitusosoite on tyhj‰ niin asiakkaan osoitteesta), niin silloin se lis‰t‰‰n aineistoon
 			elseif (trim($asiakasrow['toim_osoite']) != '') {
-				if ($toim_osoite == substr(trim($asiakasrow['toim_osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['toim_postitp']), 0, 25) and $toim_postino == trim($asiakasrow['toim_postino'])) {
+				// Kauttalaskutusasiakkaille ei tyhjennet‰
+				if ($asiakasrow["osasto"] != "6" and $toim_osoite == substr(trim($asiakasrow['toim_osoite']), 0, 25) and $toim_postitp == substr(trim($asiakasrow['toim_postitp']), 0, 25) and $toim_postino == trim($asiakasrow['toim_postino'])) {
 					$toim_yritys 	= '';
 					$toim_osoite 	= '';
 					$toim_postitp 	= '';

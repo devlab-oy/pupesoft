@@ -67,7 +67,10 @@ if (!$cli and $oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
 
 flush();
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim($_FILES['userfile']['tmp_name']) != '')) {
+if (!isset($table)) $table = '';
+
+
+if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim($_FILES['userfile']['tmp_name']) != ''))) {
 
 	require ("inc/pakolliset_sarakkeet.inc");
 
@@ -638,7 +641,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim
 				elseif ($table_mysql == 'puun_alkio') {
 
 					// voidaan vaan lis‰t‰ puun alkioita
-					if ($rivi[$postoiminto] != "LISAA" or $rivi[$postoiminto] != "POISTA") {
+					if ($rivi[$postoiminto] != "LISAA" and $rivi[$postoiminto] != "POISTA") {
 						$tila = 'ohita';
 					}
 
@@ -1465,7 +1468,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim
 					$and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
 				}
 
-				if (substr($taulu, 0, 11) == 'puun_alkio_') {
+				if (substr($taulu, 0, 11) == 'puun_alkio_' and $rivi[$postoiminto] != 'POISTA') {
 					$query .= " , laji = '{$table_tarkenne}' ";
 				}
 
@@ -1668,7 +1671,63 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim
 }
 else {
 
-	$sel[$table] = "SELECTED";
+	$indx = array(
+		'asiakas',
+		'asiakasalennus',
+		'asiakashinta',
+		'asiakaskommentti',
+		'asiakkaan_avainsanat',
+		'abc_parametrit',
+		'autodata',
+		'autodata_tuote',
+		'avainsana',
+		'budjetti',
+		'etaisyydet',
+		'hinnasto',
+		'kalenteri',
+		'kustannuspaikka',
+		'liitetiedostot',
+		'maksuehto',
+		'pakkaus',
+		'perusalennus',
+		'rahtimaksut',
+		'rahtisopimukset',
+		'rekisteritiedot',
+		'sanakirja',
+		'sarjanumeron_lisatiedot',
+		'taso',
+		'tili',
+		'todo',
+		'toimi',
+		'toimitustapa',
+		'tullinimike',
+		'tuote',
+		'tuotepaikat',
+		'tuoteperhe',
+		'tuotteen_alv',
+		'tuotteen_avainsanat',
+		'tuotteen_orginaalit',
+		'tuotteen_toimittajat',
+		'vak',
+		'yhteensopivuus_auto',
+		'yhteensopivuus_auto_2',
+		'yhteensopivuus_mp',
+		'yhteensopivuus_tuote',
+		'yhteensopivuus_tuote_lisatiedot',
+		'yhteyshenkilo',
+		'kuka',
+		'extranet_kayttajan_lisatiedot',
+		'auto_vari',
+		'auto_vari_tuote'
+	);
+
+	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
+
+	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
+		$indx[] = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
+	}
+
+	$sel = array_fill_keys(array($table), " selected") + array_fill_keys($indx, '');
 
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
 			<input type='hidden' name='tee' value='file'>

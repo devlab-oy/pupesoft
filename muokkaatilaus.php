@@ -9,12 +9,14 @@
 		require("inc/parametrit.inc");
 	}
 
+	if (!isset($toim)) $toim = '';
+
 	if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
 		echo "<font class='error'>".t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia")."!</font>";
 		exit;
 	}
 
-	if ($tee == 'MITATOI_TARJOUS') {
+	if (isset($tee) and $tee == 'MITATOI_TARJOUS') {
 		unset($tee);
 	}
 
@@ -25,6 +27,10 @@
 		}
 	}
 	else {
+
+		if (!isset($asiakastiedot)) $asiakastiedot = '';
+		if (!isset($limit)) $limit = '';
+		if (!isset($etsi)) $etsi = '';
 
 		// scripti balloonien tekemiseen
 		js_popup();
@@ -381,6 +387,8 @@
 			$kohde = "";
 			$kohdelisa = "";
 
+			$toimaikalisa = "";
+
 			if ($yhtiorow["tilauksen_seuranta"] !="") {
 				$seuranta = " seuranta, ";
 				$seurantalisa = "LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus";
@@ -394,7 +402,6 @@
 			if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and $toim != "TARJOUS") {
 				$toimaikalisa = ' lasku.toimaika, ';
 			}
-
 
 			if ($limit == "") {
 				$rajaus = "LIMIT 50";

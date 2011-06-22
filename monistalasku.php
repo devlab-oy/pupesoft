@@ -378,10 +378,10 @@ if ($tee == 'MONISTA') {
 		$sprojekti  = "";
 		$koptyom	= "";
 
-		if ($korjaaalvit[$lasku] != '')  		$alvik		= "on";
-		if ($suoraanlasku[$lasku] != '') 		$slask		= "on";
-		if ($sailytaprojekti[$lasku] != '') 	$sprojekti	= "on";
-		if ($sailytatyomaarays[$lasku] != '')	$koptyom 	= "on";
+		if (isset($korjaaalvit[$lasku]) and $korjaaalvit[$lasku] != '')  			$alvik		= "on";
+		if (isset($suoraanlasku[$lasku]) and $suoraanlasku[$lasku] != '') 			$slask		= "on";
+		if (isset($sailytaprojekti[$lasku]) and $sailytaprojekti[$lasku] != '') 	$sprojekti	= "on";
+		if (isset($sailytatyomaarays[$lasku]) and $sailytatyomaarays[$lasku] != '')	$koptyom 	= "on";
 
 		if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
 			$kklkm = 1;

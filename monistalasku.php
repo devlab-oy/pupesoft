@@ -1009,6 +1009,8 @@ if ($tee == 'MONISTA') {
 								$asiakrow = mysql_fetch_array($asiakres);
 
 								$rvalues .= ", '{$asiakrow['alv']}'";
+
+								$rivirow['alv'] = $asiakrow['alv'];
 							}
 							else {
 								$rvalues .= ", '".$rivirow[$i]."'";

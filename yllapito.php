@@ -64,6 +64,7 @@
 	if (!isset($alias_set)) 		$alias_set = "";
 	if (!isset($rajattu_nakyma)) 	$rajattu_nakyma = "";
 	if (!isset($lukossa)) 			$lukossa = "";
+	if (!isset($lukitse_laji))		$lukitse_laji = "";
 
 	// Tutkitaan vähän alias_settejä ja rajattua näkymää
 	$al_lisa = " and selitetark_2 = '' ";

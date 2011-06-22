@@ -21,6 +21,8 @@
 	if (!isset($kkl)) $kkl = "";
 	if (!isset($vvl)) $vvl = "";
 	if (!isset($lopetus)) $lopetus = "";
+	if (!isset($linkurl)) $linkurl = "";
+	if (!isset($kieli)) $kieli = "";
 
 	$query = "	SELECT lasku.*,
 				laskun_lisatiedot.laskutus_nimi,
@@ -390,7 +392,7 @@
 		}
 	}
 
-	if ($myyrow['kuka'] != $laskurow['laatija']) {
+	if (!isset($myyrow) or $myyrow['kuka'] != $laskurow['laatija']) {
 		//etsit‰‰n laatijan nimi
 		$query  = "	SELECT nimi
 					from kuka

@@ -752,12 +752,21 @@ if ($tuoteno != '') {
 												$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
 											}
 
+											$query = "	SELECT kustp, kohde, projekti
+														FROM tili
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND tilino = '{$varastonmuutos_tili}'";
+											$kustp_kohde_proj_res = pupe_query($query);
+											$kustp_kohde_proj_row = mysql_fetch_assoc($kustp_kohde_proj_res);
+
 											// kirjotetaan uudet tiliönnit
 											$query = "	INSERT INTO tiliointi SET
 														yhtio    = '$kukarow[yhtio]',
 														ltunnus  = '$invrow[ltunnus]',
 														tilino   = '$varastonmuutos_tili',
-														kustp    = 0,
+														kustp    = '{$kustp_kohde_proj_row['kustp']}',
+														kohde    = '{$kustp_kohde_proj_row['kohde']}',
+														projekti = '{$kustp_kohde_proj_row['projekti']}',
 														tapvm    = '$invrow[tapvm]',
 														summa    = $trow[kpl] * $uusikehahin * -1,
 														vero     = 0,
@@ -773,7 +782,9 @@ if ($tuoteno != '') {
 														yhtio    = '$kukarow[yhtio]',
 														ltunnus  = '$invrow[ltunnus]',
 														tilino   = '$yhtiorow[varasto]',
-														kustp    = 0,
+														kustp    = '{$invrow['kustp']}',
+														kohde    = '{$invrow['kohde']}',
+														projekti = '{$invrow['projekti']}',
 														tapvm    = '$invrow[tapvm]',
 														summa    = $trow[kpl] * $uusikehahin,
 														vero     = 0,
@@ -802,7 +813,9 @@ if ($tuoteno != '') {
 														yhtio    = '$kukarow[yhtio]',
 														ltunnus  = '$invrow[ltunnus]',
 														tilino   = '$yhtiorow[varasto]',
-														kustp    = 0,
+														kustp    = '{$invrow['kustp']}',
+														kohde    = '{$invrow['kohde']}',
+														projekti = '{$invrow['projekti']}',
 														tapvm    = '$invrow[tapvm]',
 														summa    = $trow[kpl] * $uusikehahin,
 														vero     = 0,

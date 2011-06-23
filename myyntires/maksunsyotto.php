@@ -8,6 +8,7 @@ if ($livesearch_tee == "ASIAKASHAKU") {
 	exit;
 }
 
+js_popup();
 enable_ajax();
 
 if ($tee != "CHECK" or $tiliote != 'Z') {
@@ -144,8 +145,7 @@ if ($tee == "SYOTTO") {
 	}
 
 	if ($ytunnus{0} == "£") {
-		$query = "SELECT nimi FROM lasku WHERE ytunnus='".substr($ytunnus, 1)."' and yhtio = '$kukarow[yhtio]'";
-		$asiakasid = 0;
+		$query = "SELECT nimi, liitostunnus FROM lasku WHERE ytunnus='".substr($ytunnus, 1)."' and yhtio = '$kukarow[yhtio]'";
 	}
 	else {
 		$query = "SELECT nimi FROM asiakas WHERE tunnus = '$asiakasid' and yhtio = '$kukarow[yhtio]'";
@@ -155,6 +155,10 @@ if ($tee == "SYOTTO") {
 	if ($row = mysql_fetch_array($result)) {
 		$asiakas_nimi = pupesoft_cleanstring($row[0]);
 		$asiakasstr = substr($row[0], 0, 12);
+
+		if ($ytunnus{0} == "£") {
+			$asiakasid = $row['liitostunnus'];
+		}
 	}
 
 	// tehd‰‰n dummy-lasku johon liitet‰‰n kirjaukset
@@ -535,7 +539,7 @@ if ($tee == "" and $ytunnus == "") {
 
 	$maksaja_haku = htmlentities($maksaja_haku);
 
-	echo "<font class='message'>Voit etsi‰ maksajaa nimen, ytunnuksen tai laskunumeron perusteella.</font><br>";
+	echo "<font class='message'>",t("Maksajan hakuinfo")," ",asiakashakuohje(),"</font><br>";
 	echo "<br>";
 	echo t("Maksaja").": ";
 	echo "<form action = '$PHP_SELF' method='post' name='maksaja'>";

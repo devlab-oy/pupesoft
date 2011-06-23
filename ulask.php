@@ -1764,13 +1764,17 @@ if ($tee == 'I') {
 
 		if (strlen($itili[$i]) > 0) {
 
+			$ikustp_ins = $ikustp[$i] == 0 ? $ikustp[$maksimisumma_i] : $ikustp[$i];
+			$ikohde_ins = $ikohde[$i] == 0 ? $ikohde[$maksimisumma_i] : $ikohde[$i];
+			$iprojekti_ins = $iprojekti[$i] == 0 ? $iprojekti[$maksimisumma_i] : $iprojekti[$i];
+
 			$query = "	INSERT INTO tiliointi SET
 						yhtio 				= '$kukarow[yhtio]',
 						ltunnus 			= '$tunnus',
 						tilino 				= '$itili[$i]',
-						kustp 				= '$ikustp[$i]',
-						kohde 				= '$ikohde[$i]',
-						projekti 			= '$iprojekti[$i]',
+						kustp 				= '{$ikustp_ins}',
+						kohde 				= '{$ikohde_ins}',
+						projekti 			= '{$iprojekti_ins}',
 						tapvm 				= '$tpv-$tpk-$tpp',
 						summa 				= '$isumma[$i]',
 						summa_valuutassa	= '$isumma_valuutassa[$i]',
@@ -1791,9 +1795,9 @@ if ($tee == 'I') {
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
 							tilino 				= '$tilino_alv',
-							kustp 				= 0,
-							kohde 				= 0,
-							projekti 			= 0,
+							kustp 				= '{$ikustp_ins}',
+							kohde 				= '{$ikohde_ins}',
+							projekti 			= '{$iprojekti_ins}',
 							tapvm 				= '$tpv-$tpk-$tpp',
 							summa 				= '$ialv[$i]',
 							summa_valuutassa 	= '$ialv_valuutassa[$i]',
@@ -1822,9 +1826,9 @@ if ($tee == 'I') {
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
 							tilino 				= '$varastonmuutostili',
-							kustp 				= '$ikustp[$i]',
-							kohde 				= '$ikohde[$i]',
-							projekti 			= '$iprojekti[$i]',
+							kustp 				= '{$ikustp_ins}',
+							kohde 				= '{$ikohde_ins}',
+							projekti 			= '{$iprojekti_ins}',
 							tapvm 				= '$tpv-$tpk-$tpp',
 							summa 				= $isumma[$i] * -1,
 							summa_valuutassa	= $isumma_valuutassa[$i] * -1,

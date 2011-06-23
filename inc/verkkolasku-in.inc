@@ -1259,6 +1259,23 @@
 									laadittu	= now()";
 						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
+						/**
+						 * Jos Unikkoinvoice, muutetaan oletus_vienti
+						 * C => A
+						 * F => D
+						 * I => G
+						 */
+						if ($laskun_tyyppi == "UNIKKO-INVOICE") {
+							$trow['oletus_vienti'] = ($trow['oletus_vienti'] == 'C') ? 'A' : ($trow['oletus_vienti'] == 'F') ? 'D' : ($trow['oletus_vienti'] == 'I') ? 'G' : $trow['oletus_vienti'];
+
+							$query = "	UPDATE lasku SET
+										vienti = '{$trow['oletus_vienti']}'
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$tunnus}'";
+							echo str_replace("\t", "", "<pre>$query</pre>");
+							$vienti_upd_res = pupe_query($query);
+						}
+
 						// Jos t‰m‰ lasku menee varastoon, tehd‰‰n valmiiksi keikka
 						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
 							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);

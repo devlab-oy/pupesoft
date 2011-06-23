@@ -231,7 +231,7 @@ else {
 		$excelsarake++;
 		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("määrä")), $format_bold);
 		$excelsarake++;
-		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("saldo")), $format_bold);
+		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("myytävissä")), $format_bold);
 		$excelsarake++;
 		$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("kierto")), $format_bold);
 		$excelsarake++;
@@ -373,7 +373,7 @@ else {
 				$ennres = mysql_query($query) or pupe_error($query);
 				$ennrow = mysql_fetch_assoc($ennres);
 
-				// lasketaan saldo
+				// lasketaan saldo (myytävissä)
 				$saldo = $row["saldo"] - $ennrow["ennpois"];
 
 				// lasketaan varaston kiertonopeus

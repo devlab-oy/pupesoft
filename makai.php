@@ -533,7 +533,13 @@
 								if (!isset($edmaksu_tili)) {
 									$yritystilino = $laskurow["ytilino"];
 									$yrityytunnus = $yhtiorow['ytunnus'];
-									$maksupvm     = $laskurow["olmapvm"];
+
+									if ($laskurow["olmapvm"] >= date("Y-m-d")) {
+										$maksupvm	= date("Y-m-d");
+									}
+									else {
+										$maksupvm	= $laskurow["olmapvm"];
+									}
 
 									if ($kotimaa == "FI") {
 										//haetaan tämän tilin tiedot
@@ -672,7 +678,13 @@
 
 						$laskunimi2 	= $laskurow["osoite"];
 						$laskunimi3 	= $laskurow["postitp"];
-						$maksupvm		= $laskurow["olmapvm"];
+
+						if ($laskurow["olmapvm"] >= date("Y-m-d")) {
+							$maksupvm	= date("Y-m-d");
+						}
+						else {
+							$maksupvm	= $laskurow["olmapvm"];
+						}
 
 						if ($laskurow["alatila"] == 'K') { // maksetaan käteisalennuksella
 							$laskusumma = $laskurow["summa"] - $laskurow["kasumma"];

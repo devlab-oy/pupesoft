@@ -1236,15 +1236,8 @@
 						echo "<br>";
 					}
 
-					if ($trow['olmapvm'] >= date("Y-m-d") and strtoupper($trow['maa']) == 'FI') {
+					if ($trow['olmapvm'] >= date("Y-m-d")) {
 						echo "<input type='checkbox' name='poikkeus'> ";
-						echo t("Maksetaan heti");
-						echo "<br>";
-					}
-					#  T‰ss‰ ei taida olla mit‰‰n j‰rke‰ en‰‰ SEPA:ssa
-					elseif (strtoupper($trow['maa']) != 'FI') {
-						echo "<input type='checkbox' DISABLED CHECKED> ";
-						echo "<input type='hidden' name='poikkeus' value='on'>";
 						echo t("Maksetaan heti");
 						echo "<br>";
 					}

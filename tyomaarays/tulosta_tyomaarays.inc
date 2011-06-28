@@ -1,8 +1,8 @@
 <?php
 
 //viivakoodien tulostamista varten
-define (__TRACE_ENABLED__, false);
-define (__DEBUG_ENABLED__, false);
+define ('__TRACE_ENABLED__', false);
+define ('__DEBUG_ENABLED__', false);
 
 require_once("barcode/barcode.php");
 require_once("barcode/c39object.php");
@@ -26,9 +26,9 @@ $iso["font"] 			= "Helvetica-Bold";
 $rectparam["width"] 	= 0.3;
 $lineparam["width"] 	= 1;
 $rivinkorkeus			= 17;
-
-if (!function_exists('alku')) {
-	function alku($tyyppi = "") {
+// tää tässä kusee 
+if (!function_exists('tyomaarays_alku')) { 
+	function tyomaarays_alku($tyyppi = "") {
 		global $pdf, $sivu, $lahetetyyppi, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $tilausnumeroita;
 
 		//PDF parametrit
@@ -64,7 +64,7 @@ if (!function_exists('alku')) {
 
 		// haetaan maksuehdon tiedot
 		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-		$masresult = mysql_query($query) or pupe_error($query);
+		$masresult = pupe_query($query);
 		$masrow = mysql_fetch_array($masresult);
 
 		//maksuehto tekstinä
@@ -155,7 +155,7 @@ if (!function_exists('alku')) {
 		$query  = "	select nimi
 					from kuka
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
-		$myyresult = mysql_query($query) or pupe_error($query);
+		$myyresult = pupe_query($query);
 		$myyrow = mysql_fetch_array($myyresult);
 
 		$pdf->draw_text(310, 719, $myyrow["nimi"], 										$thispage, $norm);
@@ -218,7 +218,7 @@ if (!function_exists('alku')) {
 									FROM kuka
 									WHERE yhtio = '$kukarow[yhtio]'
 									and kuka  	= '".$laskurow[$kentta]."'";
-						$yresult = mysql_query($query) or pupe_error($query);
+						$yresult = pupe_query($query);
 						$row = mysql_fetch_array($yresult);
 
 						$laskurow[$kentta] = $row["nimi"];
@@ -347,8 +347,8 @@ if (!function_exists('alku')) {
 	}
 }
 
-if (!function_exists('uusi_sivu')) {
-	function uusi_sivu ($tyyppi = "") {
+if (!function_exists('tyomaarays_uusi_sivu')) {
+	function tyomaarays_uusi_sivu ($tyyppi = "") {
 		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala, $tilausnumeroita;
 
 		$thispage = $pdf->new_page("a4");
@@ -375,7 +375,7 @@ if (!function_exists('uusi_sivu')) {
 
 		// haetaan maksuehdon tiedot
 		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-		$masresult = mysql_query($query) or pupe_error($query);
+		$masresult = pupe_query($query);
 		$masrow = mysql_fetch_array($masresult);
 
 		//maksuehto tekstinä
@@ -472,8 +472,8 @@ if (!function_exists('uusi_sivu')) {
 	}
 }
 
-if (!function_exists('rivi_otsikot')) {
-	function rivi_otsikot ($thispage, $tuotetyyppi, $tyyppi='') {
+if (!function_exists('tyomaarays_rivi_otsikot')) {
+	function tyomaarays_rivi_otsikot ($thispage, $tuotetyyppi, $tyyppi='') {
 		global $pdf, $kieli, $lahetetyyppi, $norm, $boldi, $rectparam, $kala, $yhtiorow;
 
 		$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
@@ -530,8 +530,8 @@ if (!function_exists('rivi_otsikot')) {
 	}
 }
 
-if (!function_exists('rivi')) {
-	function rivi($thispage, $tyyppi="") {
+if (!function_exists('tyomaarays_rivi')) {
+	function tyomaarays_rivi($thispage, $tyyppi="") {
 		global $pdf, $page, $lahetetyyppi, $edtuotetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $toim;
 
 		// viivat rivien väliin...
@@ -548,9 +548,9 @@ if (!function_exists('rivi')) {
 
 			$sivu++;
 
-			loppu($thispage, 0);
+			tyomaarays_loppu($thispage, 0);
 
-			$page[$sivu] = uusi_sivu($tyyppi);
+			$page[$sivu] = tyomaarays_uusi_sivu($tyyppi);
 			$thispage    = $page[$sivu];
 			$uudehko 	 = "ON";
 
@@ -566,14 +566,14 @@ if (!function_exists('rivi')) {
 
 				$sivu++;
 
-				loppu($thispage, 0);
+				tyomaarays_loppu($thispage, 0);
 
-				$page[$sivu] = uusi_sivu($tyyppi);
+				$page[$sivu] = tyomaarays_uusi_sivu($tyyppi);
 				$thispage    = $page[$sivu];
 				$uudehko 	 = "ON";
 			}
 
-			rivi_otsikot($thispage, $row["tuotetyyppi"], $tyyppi);
+			tyomaarays_rivi_otsikot($thispage, $row["tuotetyyppi"], $tyyppi);
 		}
 
 		$edtuotetyyppi = $row["tuotetyyppi"];
@@ -590,7 +590,7 @@ if (!function_exists('rivi')) {
 						FROM lasku
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and tunnus	= '$row[otunnus]'";
-			$vtunres = mysql_query($query) or pupe_error($query);
+			$vtunres = pupe_query($query);
 			$vtunrow = mysql_fetch_array($vtunres);
 
 			if ($vtunrow["vanhatunnus"] != 0) {
@@ -598,7 +598,7 @@ if (!function_exists('rivi')) {
 							FROM lasku use index (yhtio_vanhatunnus)
 							WHERE yhtio		= '$kukarow[yhtio]'
 							and vanhatunnus = '$vtunrow[vanhatunnus]'";
-				$perheresult = mysql_query($query) or pupe_error($query);
+				$perheresult = pupe_query($query);
 				$numrows = mysql_num_rows($perheresult);
 			}
 
@@ -607,7 +607,7 @@ if (!function_exists('rivi')) {
 							FROM lasku use index (PRIMARY)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$row[otunnus]'";
-				$perheresult = mysql_query($query) or pupe_error($query);
+				$perheresult = pupe_query($query);
 			}
 
 			if (mysql_num_rows($perheresult) > 0) {
@@ -620,7 +620,7 @@ if (!function_exists('rivi')) {
 							and tilausrivi.otunnus in ($perherow[tunnukset])
 							and tilausrivi.perheid = '$row[perheid]'
 							ORDER BY tilausrivi.tunnus";
-				$perheresult = mysql_query($query) or pupe_error($query);
+				$perheresult = pupe_query($query);
 
 				if (mysql_num_rows($perheresult) > 1) {
 					while ($perherow = mysql_fetch_array($perheresult)) {
@@ -768,7 +768,7 @@ if (!function_exists('rivi')) {
 						and $sarjanutunnus='$row[tunnus]'
 						and sarjanumero != ''
 						ORDER BY sarjanumero";
-			$sarjares = mysql_query($query) or pupe_error($query);
+			$sarjares = pupe_query($query);
 
 			if (mysql_num_rows($sarjares) > 0) {
 				if ($row["kommentti"] != '') {
@@ -814,8 +814,8 @@ if (!function_exists('rivi')) {
 	}
 }
 
-if (!function_exists('loppu')) {
-	function loppu($thispage, $tots) {
+if (!function_exists('tyomaarays_loppu')) {
+	function tyomaarays_loppu($thispage, $tots) {
 		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $rectparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page;
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
@@ -887,8 +887,8 @@ if (!function_exists('loppu')) {
 	}
 }
 
-if (!function_exists('loppu_lisarivit')) {
-	function loppu_lisarivit($thispage, $tots) {
+if (!function_exists('tyomaarays_loppu_lisarivit')) {
+	function tyomaarays_loppu_lisarivit($thispage, $tots) {
 		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $rectparam, $lineparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page;
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
@@ -1001,20 +1001,20 @@ if (!function_exists('loppu_lisarivit')) {
 		}
 		else {
 
-			loppu($thispage, 0);
+			tyomaarays_loppu($thispage, 0);
 
 			$sivu++;
-			$page[$sivu] = uusi_sivu($tyyppi);
+			$page[$sivu] = tyomaarays_uusi_sivu($tyyppi);
 			$thispage    = $page[$sivu];
 			$uudehko 	 = "ON";
 
-			loppu_lisarivit($thispage, 1);
+			tyomaarays_loppu_lisarivit($thispage, 1);
 		}
 	}
 }
 
-if (!function_exists('print_pdf')) {
-	function print_pdf($komento) {
+if (!function_exists('tyomaarays_print_pdf')) {
+	function tyomaarays_print_pdf($komento) {
 		global $pdf, $kukarow, $yhtiorow, $kateinen, $returnvalue, $kieli, $tee;
 
 		$returnvalue=0;

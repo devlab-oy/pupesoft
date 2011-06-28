@@ -181,6 +181,35 @@
 		}
 
 		echo "<td>".livesearch_kentta($formi, "TUOTEHAKU", "hakutuoteno", 210)."</td>";
+		echo "<tr><th>".t("Rajaa hakum‰‰r‰‰")."</th>";
+		echo "<td>";
+		
+		if (!isset($limitti)) $limitti = 100;
+		
+		if ($limitti == 100) {
+			$sel1 = "selected";
+		}
+		elseif ($limitti == 1000) {
+			$sel2 = "selected";
+		}
+		elseif ($limitti == 5000) {
+			$sel3 = "selected";
+		}
+		elseif ($limitti == "U") {
+			$sel5 = "selected";
+		}
+		else {
+			$sel4 = "selected";
+		}
+		
+		echo "<select name='limitti'>";
+		echo "<option value='100' $sel1>".t("100 ensimm‰ist‰")."</option>";
+		echo "<option value='1000' $sel2>".t("1000 ensimm‰ist‰")."</option>";
+		echo "<option value='5000' $sel3>".t("5000 ensimm‰ist‰")."</option>";
+		echo "<option value='' $sel4>".t("Koko lista")."</option>";
+		echo "<option value='U' $sel5>".t("Tuoreimmasta vanhimpaan n‰ytt‰en koko lista")."</option>";
+		echo "</select>";
+		echo "</td>";
 		echo "<td class='back'><input type='Submit' value='".t("Jatka")."'></td>";
 		echo "</table></form>";
 	}
@@ -836,7 +865,18 @@
 	elseif ($tee == "") {
 
 		$lisa1 = "";
-
+		$lisalimit = "";
+		
+		if ($limitti !='' and $limitti !="U") {
+			$limitteri = " limit $limitti";
+		}
+		elseif ($limitti == "U") {
+			$lisalimit = "tuoteperhe.tunnus desc, ";
+		}
+		else {
+			$limitteri = "";
+		}
+		
 		if ($isatuoteno_haku != '') {
 			$lisa1 .= " and tuoteperhe.isatuoteno like '%$isatuoteno_haku%' ";
 		}
@@ -854,7 +894,8 @@
 					and tuoteperhe.tyyppi = '$hakutyyppi'
 					$lisa1
 					group by tuoteperhe.isatuoteno
-					order by tuoteperhe.isatuoteno, tuoteperhe.tuoteno";
+					order by $lisalimit tuoteperhe.isatuoteno, tuoteperhe.tuoteno
+					$limitteri";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {

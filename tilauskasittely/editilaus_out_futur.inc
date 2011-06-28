@@ -24,6 +24,20 @@
 			$edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:{$laskurow['toimitusehto']}\n";
 			$edi_order .= "OSTOTIL.OT_MAKSUEHTO:{$laskurow['maksuehto']}\n";
 			$edi_order .= "OSTOTIL.OT_VIITTEEMME:{$laskurow['viesti']}\n";
+
+			// Onko asiakkaan takana hyllypaikka jossa tavarat säilytetään
+			$query = "	SELECT avainsana
+						FROM asiakkaan_avainsanat
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND liitostunnus = '$laskurow[liitostunnus]'
+						AND laji = 'JMALMIHYLLY'";
+			$aares = pupe_query($query);
+
+			if (mysql_num_rows($aares) > 0) {
+				$aarow = mysql_fetch_assoc($aares);
+				$laskurow['sisviesti2'] .= ";;".$aarow["avainsana"];
+			}
+
 			$edi_order .= "OSTOTIL.OT_VIITTEENNE:{$laskurow['sisviesti2']}\n";
 			$edi_order .= "OSTOTIL.OT_SUMMA:{$summa}\n";
 			$edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:{$laskurow['valkoodi']}\n";

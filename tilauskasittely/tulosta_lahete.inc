@@ -1495,15 +1495,18 @@ if (!function_exists('rivi_lahete')) {
 				#$yhtiorow['alv_kasittely'] == '' - Verolliset myyntihinnat
 				#$yhtiorow['alv_kasittely'] != '' - Verottomat myyntihinnat
 
+				$alv_laskentaan = ($row['alv'] >= 500) ? 0 : $row['alv'];
+
 				if ($yhtiorow['alv_kasittely'] == '') {
 					$return["summa"] += $row['rivihinta'];
-					$return["arvo"]  += ($row['rivihinta'] / (1 + $row['alv'] / 100));
+					$return["arvo"]  += ($row['rivihinta'] / (1 + $alv_laskentaan / 100));
+					
 				}
 				else {
-					$return["summa"] += ($row['rivihinta'] * (1 + $row['alv'] / 100));
+					$return["summa"] += ($row['rivihinta'] * (1 + $alv_laskentaan / 100));
 					$return["arvo"]  += $row['rivihinta'];
 				}
-
+				
 				$return = rivi_custom_lahete($return);
 			}
 			else {

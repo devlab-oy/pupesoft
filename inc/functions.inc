@@ -9259,7 +9259,20 @@ if (!function_exists("lue_kurssit")) {
 // textmode progress palkki
 if (!function_exists("progress_bar")) {
 	function progress_bar($current_item, $total_items, $bar_length = 60) {
-		printf("|%-60s| [$current_item/$total_items]\r", sprintf("%'#".round($current_item / $total_items * $bar_length)."s", ''));
+		static $microtime_start = NULL;
+
+		if ($microtime_start === NULL) {
+			$timeparts = explode(" ", microtime());
+			$microtime_start = $timeparts[1].substr($timeparts[0], 1);
+	    }
+
+		$timeparts = explode(" ", microtime());
+		$microtime_stop = $timeparts[1].substr($timeparts[0], 1);
+
+		$microtime_current = round($microtime_stop - $microtime_start, 0);
+		$microtime_total = round($microtime_current / $current_item * $total_items, 0);
+
+		printf("|%-60s| [$current_item/$total_items] ($microtime_current sec, total $microtime_total sec)\r", sprintf("%'#".round($current_item / $total_items * $bar_length)."s", ''));
 	}
 }
 

@@ -2890,10 +2890,22 @@ if (!function_exists('print_pdf_lahete')) {
 							echo t("Tilausvahvistus tulostuu")."...<br>";
 						}
 
-						$kutsu = t("Tilausvahvistus %s", $kieli, $laskurow["tunnus"]);
+						if ($laskurow["tunnusnippu"] > 0) {
+							if ($tyyppi == "YLLAPITOSOPIMUS" or $laskurow["nippu"] > 0) {
+								$subjnumero = $laskurow["tunnusnippu"];
+							}
+							else {
+								$subjnumero = $laskurow["tunnusnippu"]."/".$laskurow["tunnus"];
+							}
+						}
+						else {
+							$subjnumero = $laskurow["tunnus"];
+						}
+
+						$kutsu = t("Tilausvahvistus %s", $kieli, $subjnumero);
 
 						$content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
-						$content_body .= t("Tilausnumeronne on", $kieli)." $laskurow[tunnus]\n\n";
+						$content_body .= t("Tilausnumeronne on", $kieli)." $subjnumero\n\n";
 						$content_body .= t("Tämä on automaattinen vahvistus tilauksestanne, tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n\n";
 						$content_body .= t("Ystävällisin terveisin", $kieli).",\n";
 						$content_body .= $yhtiorow["nimi"]."\n";

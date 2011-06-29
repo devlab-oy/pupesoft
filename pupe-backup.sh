@@ -77,12 +77,69 @@ echo " - Copy config files."
 # Backupataan Pupeasenukseen liittyv‰t asetuskset
 PUPEPOLKU=`dirname $0|cut -d "/" -f 2-`
 FILENAME="linux-backup-${FILEDATE}.bz2"
+BACKUPFILET=""
 
 # Siirryt‰‰n roottiin, koska tar ei tallenna absoluuttisia polkuja
 cd /
 
-# Pakataan t‰rke‰t tiedostot 
-tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 etc/ssh/sshd_config etc/httpd/conf/* etc/rc.local etc/dhcp/dhcpd.conf etc/vtund.conf etc/samba/smb.conf etc/cups/printers.conf etc/cups/lpoptions etc/my.cnf root/.forward etc/hosts etc/sysconfig/network etc/mail/* etc/crontab ${PUPEPOLKU}/inc/salasanat.php etc/cron.*
+# Pakataan t‰rke‰t tiedostot
+if [ -f "etc/ssh/sshd_config" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/ssh/sshd_config"
+fi
+
+if [ -f "etc/rc.local" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/rc.local"
+fi
+
+if [ -f "etc/dhcp/dhcpd.conf" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/dhcp/dhcpd.conf"
+fi
+
+if [ -f "etc/vtund.conf" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/vtund.conf"
+fi
+
+if [ -f "etc/samba/smb.conf" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/samba/smb.conf"
+fi
+
+if [ -f "etc/cups/printers.conf" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/cups/printers.conf"
+fi
+
+if [ -f "etc/cups/lpoptions" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/cups/lpoptions"
+fi
+
+if [ -f "etc/my.cnf" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/my.cnf"
+fi
+
+if [ -f "root/.forward" ]; then
+	BACKUPFILET="${BACKUPFILET} root/.forward"
+fi
+
+if [ -f "etc/hosts" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/hosts"
+fi
+
+if [ -f "etc/sysconfig/network" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/sysconfig/network"
+fi
+
+if [ -f "etc/crontab" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/crontab"
+fi
+
+if [ -d etc/mail/ ]; then
+	BACKUPFILET="${BACKUPFILET} etc/mail/*"
+fi
+
+if [ -d etc/httpd/conf/ ]; then
+	BACKUPFILET="${BACKUPFILET} etc/httpd/conf/*"
+fi
+
+tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2  ${PUPEPOLKU}/inc/salasanat.php etc/cron.* ${BACKUPFILET}
 
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete

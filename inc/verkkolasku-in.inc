@@ -44,9 +44,8 @@
 				require("inc/verkkolasku-in-pupevoice.inc");
 			}
 
-
 			// Nämä muuttujat kuuluisi olla setattuna:
-/*
+			/*
 			echo "\n\nLASKUNTIEDOT:\n";
 			echo "01: ".$yhtio."\n";
 			echo "02: ".$verkkotunnus_vas."\n";
@@ -55,29 +54,31 @@
 			echo "05: ".$laskun_ebid."\n";
 			echo "06: ".$laskun_paiva."\n";
 			echo "07: ".$laskun_erapaiva."\n";
-			echo "08: ".$laskuttajan_ovt."\n";
-			echo "09: ".$laskuttajan_nimi."\n";
-			echo "10: ".$laskuttajan_vat."\n";
-			echo "11: ".$laskun_pankkiviite."\n";
-			echo "12: ".$laskun_asiakastunnus."\n";
-			echo "13: ".$laskun_summa_eur."\n";
-			echo "14: ".$laskun_tilausviite."\n";
-			echo "15: ".$kauttalaskutus."\n";
-			echo "16: ".$laskun_asiakkaan_tilausnumero."\n";
-			echo "17: ".$toim_asiakkaantiedot["toim_ovttunnus"]."\n";
-			echo "18: ".$toim_asiakkaantiedot["ytunnus"]."\n";
-			echo "19: ".$toim_asiakkaantiedot["nimi"]."\n";
-			echo "20: ".$toim_asiakkaantiedot["osoite"]."\n";
-			echo "21: ".$toim_asiakkaantiedot["postino"]."\n";
-			echo "22: ".$toim_asiakkaantiedot["postitp"]."\n";
-			echo "23: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."\n";
-			echo "24: ".$ostaja_asiakkaantiedot["ytunnus"]."\n";
-			echo "25: ".$ostaja_asiakkaantiedot["nimi"]."\n";
-			echo "26: ".$ostaja_asiakkaantiedot["osoite"]."\n";
-			echo "27: ".$ostaja_asiakkaantiedot["postino"]."\n";
-			echo "28: ".$ostaja_asiakkaantiedot["postitp"]."\n";
-			echo "29: TecCom/Unikko only ".$laskuttajan_toimittajanumero."\n";
-			echo "30: ".$laskuttajan_valkoodi."\n";
+			echo "08: ".$laskun_kapvm."\n";
+			echo "09: ".$laskun_kasumma."\n";
+			echo "10: ".$laskuttajan_ovt."\n";
+			echo "11: ".$laskuttajan_nimi."\n";
+			echo "12: ".$laskuttajan_vat."\n";
+			echo "13: ".$laskun_pankkiviite."\n";
+			echo "14: ".$laskun_asiakastunnus."\n";
+			echo "15: ".$laskun_summa_eur."\n";
+			echo "16: ".$laskun_tilausviite."\n";
+			echo "17: ".$kauttalaskutus."\n";
+			echo "18: ".$laskun_asiakkaan_tilausnumero."\n";
+			echo "19: ".$toim_asiakkaantiedot["toim_ovttunnus"]."\n";
+			echo "20: ".$toim_asiakkaantiedot["ytunnus"]."\n";
+			echo "21: ".$toim_asiakkaantiedot["nimi"]."\n";
+			echo "22: ".$toim_asiakkaantiedot["osoite"]."\n";
+			echo "23: ".$toim_asiakkaantiedot["postino"]."\n";
+			echo "24: ".$toim_asiakkaantiedot["postitp"]."\n";
+			echo "25: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."\n";
+			echo "26: ".$ostaja_asiakkaantiedot["ytunnus"]."\n";
+			echo "27: ".$ostaja_asiakkaantiedot["nimi"]."\n";
+			echo "28: ".$ostaja_asiakkaantiedot["osoite"]."\n";
+			echo "29: ".$ostaja_asiakkaantiedot["postino"]."\n";
+			echo "30: ".$ostaja_asiakkaantiedot["postitp"]."\n";
+			echo "31: TecCom/Unikko only ".$laskuttajan_toimittajanumero."\n";
+			echo "32: ".$laskuttajan_valkoodi."\n";
 
 			Nämä muuttujat ovat valinnaisia:
 
@@ -98,7 +99,7 @@
 			$rtuoteno[]["yksikko"]
 			$rtuoteno[]["tilinumero"]
 			$rtuoteno[]["rivihinta_valuutassa"]
-*/
+			*/
 
 			// generic error messagen alku
 			$return  = "Tiedosto: $file\n";
@@ -290,13 +291,6 @@
 			if ($laskun_tyyppi == "381" and $summa > 0) {
 				$summa = $summa * -1;
 			}
-			$tpp = (int) substr($laskun_paiva,6,2);
-			$tpk = (int) substr($laskun_paiva,4,2);
-			$tpv = (int) substr($laskun_paiva,0,4);
-
-			$erp = (int) substr($laskun_erapaiva,6,2);
-			$erk = (int) substr($laskun_erapaiva,4,2);
-			$erv = (int) substr($laskun_erapaiva,0,4);
 
 			$viite  = $laskun_pankkiviite;
 			$ebid   = $laskun_ebid;
@@ -704,10 +698,12 @@
 					}
 				}
 
-				// errorcheckit...
-				$val = checkdate($tpk, $tpp, $tpv);
+				// Tsekataan laskun päiväys
+				$tpp = (int) substr($laskun_paiva, 6, 2);
+				$tpk = (int) substr($laskun_paiva, 4, 2);
+				$tpv = (int) substr($laskun_paiva, 0, 4);
 
-				if (!$val) {
+				if (!checkdate($tpk, $tpp, $tpv)) {
 					// Laitetaan sitten ajopäivä
 					list($tpv,$tpk,$tpp) = explode("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d"),date("Y"))));
 					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui päiväys. Tarkista asia laskulta!<br>" . $komm;
@@ -717,10 +713,10 @@
 				$tilalk = explode("-", $yhtiorow["ostoreskontrakausi_alku"]);
 				$tillop = explode("-", $yhtiorow["ostoreskontrakausi_loppu"]);
 
-				// verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
+				// Verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
 				$ostoresktilalk = (int) date('Ymd',mktime(0,0,0,$tilalk[1],$tilalk[2],$tilalk[0]));
 				$ostoresktillop = (int) date('Ymd',mktime(0,0,0,$tillop[1],$tillop[2],$tillop[0]));
-				$syotettypvm = (int) date('Ymd',mktime(0,0,0,$tpk,$tpp,$tpv));
+				$syotettypvm 	= (int) date('Ymd',mktime(0,0,0,$tpk,$tpp,$tpv));
 
 				if ($syotettypvm > $ostoresktillop) {
 					$tpp = $tillop[2];
@@ -736,7 +732,7 @@
 					$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli liian vanha päiväys. Tarkista asia laskulta!<br>" . $komm;
 				}
 
-				// oletus alv nolla paitsi jos toimittajalla on oletuksena jotain kotimaahan liittyvää ni haetaan oletus avainsanoista...
+				// Oletus-alv nolla paitsi jos toimittajalla on oletuksena jotain kotimaahan liittyvää ni haetaan oletus avainsanoista...
 				$oletusalvi = 0;
 
 				if ($trow['oletus_vienti'] == "A" or $trow['oletus_vienti'] == "B" or $trow['oletus_vienti'] == "C" or $trow['oletus_vienti'] == "J") {
@@ -758,14 +754,81 @@
 					}
 				}
 
+				// Tsekataan laskun eräpäivä
+				$erp = (int) substr($laskun_erapaiva, 6, 2);
+				$erk = (int) substr($laskun_erapaiva, 4, 2);
+				$erv = (int) substr($laskun_erapaiva, 0, 4);
+
 				// jos eräpäivää ei tule laskulta, otetaan toimittajan oletus
 				if ($erp == 0 and $erk == 0 and $erv == 0) {
 					$err = $trow["oletus_erapvm"];
-					// jos oletustakaan ei ole, laitetaan lasku erääntymään huomenna...
+
+					// Jos oletustakaan ei ole, laitetaan lasku erääntymään huomenna...
 					if ($err == 0) {
 						list($erv,$erk,$erp) = explode("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d")+1,date("Y"))));
 					}
+					elseif ($err > 0) {
+						$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk, $tpp+$err, $tpv));
+						$erp = (int) substr($newer, 8, 2);
+						$erk = (int) substr($newer, 5, 2);
+						$erv = (int) substr($newer, 0, 4);
+					}
+
 					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui eräpvm. Tarkista asia laskulta!<br>" . $komm;
+				}
+
+				if (!checkdate($erk, $erp, $erv)) {
+					$return .= "Virheellinen eräpvm $erv-$erk-$erp\n";
+					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					return ($return);
+				}
+
+				$kassaale = 0;
+
+				// Tsekataan laskun kassa-alepäivä
+				$krp = (int) substr($laskun_kapvm, 6, 2);
+				$krk = (int) substr($laskun_kapvm, 4, 2);
+				$krv = (int) substr($laskun_kapvm, 0, 4);
+
+				// Jos kassa-alennusta ei tule laskulta, otetaan toimittajan oletus
+				if ($krp == 0 and $krk == 0 and $krv == 0) {
+					$krr   = $trow["oletus_kapvm"];
+					$kapro = $trow['oletus_kapro'];
+
+					if ($krr > 0) {
+						$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk, $tpp+$krr, $tpv));
+						$krp = (int) substr($newer, 8, 2);
+						$krk = (int) substr($newer, 5, 2);
+						$krv = (int) substr($newer, 0, 4);
+
+						if ((float) $kapro != 0 and (float) $summa != 0) {
+							$kassaale = $summa * $kapro / 100;
+						}
+					}
+				}
+				elseif ((float) $laskun_kasumma != 0) {
+					$kassaale = (float) $laskun_kasumma;
+				}
+
+				if ($kassaale != 0) {
+					$kassaale = abs(round($kassaale, 2));
+
+					if ($summa < 0) {
+						$kassaale = $kassaale *-1;
+					}
+				}
+
+				if ($krk > 0 and $krp > 0 and $krv > 0 and $kassaale != 0) {
+					if (!checkdate($krk, $krp, $krv)) {
+						$return .= "Virheellinen kassaeräpvm '$krv-$krk-$krp' kassaale '$kassaale'\n";
+						mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						return ($return);
+					}
+					elseif ($kassaale == 0) {
+						$return .= "Kassapvm on, mutta kassa-ale puuttu\n";
+						mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						return ($return);
+					}
 				}
 
 				if (trim($laskun_numero) != '' and trim($trow['tunnus']) != '') {
@@ -783,61 +846,7 @@
 					}
 				}
 
-				if ($err > 0) {
-					$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk,$tpp+$err,$tpv));
-					$erp = (int) substr($newer, 8, 2);
-					$erk = (int) substr($newer, 5, 2);
-					$erv = (int) substr($newer, 0, 4);
-					$err = 0;
-				}
-
-				$kar   = $trow['oletus_kapvm'];
-				$kapro = $trow['oletus_kapro'];
-
-				$kap = 0;
-				$kak = 0;
-				$kav = 0;
-
-				if ($kar > 0) {
-					$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk,$tpp+$kar,$tpv));
-					$kap = (int) substr($newer, 8, 2);
-					$kak = (int) substr($newer, 5, 2);
-					$kav = (int) substr($newer, 0, 4);
-					$kar = 0;
-				}
-
-				$val = checkdate($erk, $erp, $erv);
-				if (!$val) {
-					$return .= "Virheellinen eräpvm $erv-$erk-$erp\n";
-					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-					return ($return);
-				}
-
-				$kassaale = 0;
-				if ($kapro != 0 and (float) $summa > 0) {
-					$kassaale = $summa * $kapro / 100;
-					$kapro = 0;
-				}
-				$kassaale = round($kassaale,2);
-
-				if ($kak > 0 and $kap > 0 and $kav > 0 and $kassaale > 0) {
-
-					$val = checkdate($kak, $kap, $kav);
-					if (!$val) {
-						$return .= "Virheellinen kassaeräpvm '$kav-$kak-$kap' kassaale '$kassaale'\n";
-						mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-						return ($return);
-					}
-					else {
-						if ($kassaale == 0) {
-							$return .= "Kassapvm on, mutta kassa-ale puuttu\n";
-							mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-							return ($return);
-						}
-					}
-				}
-
-				$summa = round($summa,2);
+				$summa = round($summa, 2);
 
 				if ($summa == 0.0) {
 					$return .= "Laskulta puuttuu summa!\n";
@@ -852,7 +861,7 @@
 				}
 
 				if (strlen($viite) > 0 and strlen($viesti) > 0) {
-					$return .= "Viitettä ja viestiä ei voi antaa yhtaikaa!\n";
+					$return .= "Viitettä ja viestiä ei voi antaa yhtäaikaa!\n";
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
@@ -866,7 +875,7 @@
 					return ($return);
 				}
 
-				$vrow = mysql_fetch_array ($result);
+				$vrow = mysql_fetch_array($result);
 
 				$hyvaksyja_nyt 	= '';
 				$tila 			= "M";
@@ -900,8 +909,8 @@
 
 				$olmapvm = $erv."-".$erk."-".$erp;
 
-				if ($kap != 0) {
-					$olmapvm = $kav."-".$kak."-".$kap;
+				if ($krp != 0) {
+					$olmapvm = $krv."-".$krk."-".$krp;
 				}
 
 				// Kirjoitetaan lasku
@@ -910,7 +919,7 @@
 							summa 				= '$summa',
 							kasumma 			= '$kassaale',
 							erpcm 				= '$erv-$erk-$erp',
-							kapvm 				= '$kav-$kak-$kap',
+							kapvm 				= '$krv-$krk-$krp',
 							olmapvm 			= '$olmapvm',
 							valkoodi 			= '$valkoodi',
 							hyvak1 				= '$hyvak[1]',
@@ -1272,7 +1281,6 @@
 										vienti = '{$trow['oletus_vienti']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$tunnus}'";
-							echo str_replace("\t", "", "<pre>$query</pre>");
 							$vienti_upd_res = pupe_query($query);
 						}
 

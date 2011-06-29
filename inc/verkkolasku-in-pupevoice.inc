@@ -10,6 +10,8 @@ $laskun_numero 			= array_shift($xml->xpath('BGM/@e1004'));
 $laskun_ebid 			= array_shift($xml->xpath('Group1/RFF[@eC506.1153="ZEB"]/@eC506.1154'));
 $laskun_paiva			= array_shift($xml->xpath('DTM[@eC507.2005="3"]/@eC507.2380'));
 $laskun_erapaiva		= array_shift($xml->xpath('Group8[PAT/@e4279="1"]/DTM[@eC507.2005="13"]/@eC507.2380'));
+$laskun_kapvm 			= "";
+$laskun_kasumma 		= "";
 $laskuttajan_ovt		= array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC082.3039'));
 $laskuttajan_nimi		= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC080.3036.1')));
 $laskuttajan_vat		= array_shift($xml->xpath('Group2/Group3/RFF[@eC506.1153="VA"]/@eC506.1154'));

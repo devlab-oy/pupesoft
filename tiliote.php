@@ -41,7 +41,7 @@
 	}
 
 	// katotaan onko faili uploadattu
-	if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+	if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$userfile	= $_FILES['userfile']['name'];
 		$filenimi	= $_FILES['userfile']['tmp_name'];
 		$ok			= 1;

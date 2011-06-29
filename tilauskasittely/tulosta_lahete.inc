@@ -1169,8 +1169,8 @@ if (!function_exists('rivi_lahete')) {
 
 		if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
 
-			// Lasketaan alet yhteen									
-			$alennukset = generoi_alekentta_php($row);				
+			// Lasketaan alet yhteen
+			$alennukset = generoi_alekentta_php($row);
 
 			$row["rivihinta"] = $row["hinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"]) * $alennukset;
 
@@ -1261,7 +1261,7 @@ if (!function_exists('rivi_lahete')) {
 
 					for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 						$row['ale'.$alepostfix] = 0;
-					}					
+					}
 				}
 			}
 			else {
@@ -1500,13 +1500,13 @@ if (!function_exists('rivi_lahete')) {
 				if ($yhtiorow['alv_kasittely'] == '') {
 					$return["summa"] += $row['rivihinta'];
 					$return["arvo"]  += ($row['rivihinta'] / (1 + $alv_laskentaan / 100));
-					
+
 				}
 				else {
 					$return["summa"] += ($row['rivihinta'] * (1 + $alv_laskentaan / 100));
 					$return["arvo"]  += $row['rivihinta'];
 				}
-				
+
 				$return = rivi_custom_lahete($return);
 			}
 			else {
@@ -2084,10 +2084,10 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
-		if ($pdf->strlen($row["nimitys"], $norm) >= 280) {		
+		if ($pdf->strlen($row["nimitys"], $norm) >= 280) {
 			$kala = $kala - $rivinkorkeus;
 		}
-		
+
 		$pdf->draw_paragraph($kala+$norm["height"]+3, 185, 180, 360, $row["nimitys"],	$thispage, $norm);
 
 		if ($lahetetyyppi == "tulosta_lahete_viivakoodi_osh.inc") {
@@ -2122,7 +2122,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 	$thispage, $norm);
 
 			$oikpos = $pdf->strlen($row["varattu"], $norm);
-			$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 									$thispage, $norm);			
+			$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 									$thispage, $norm);
 		}
 
 		$kala = $kala - $rivinkorkeus;
@@ -2885,7 +2885,10 @@ if (!function_exists('print_pdf_lahete')) {
 					$content_body = "";
 
 					if ($tyyppi == "TILAUSVAHVISTUS") {
-						echo t("Tilausvahvistus tulostuu")."...<br>";
+
+						if (php_sapi_name() != 'cli') {
+							echo t("Tilausvahvistus tulostuu")."...<br>";
+						}
 
 						$kutsu = t("Tilausvahvistus %s", $kieli, $laskurow["tunnus"]);
 

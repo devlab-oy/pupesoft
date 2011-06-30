@@ -123,6 +123,7 @@ $verkkokauppavarasto	= "";
 $verkkokauppavarasto_li	= "";
 $editilaus_loppuhinta	= "";
 $kieltolisa				= "";
+$OT_ASIAKASNRO			= "";
 
 // nollataan kaikki rivin muuttujat (n‰m‰ samat pit‰‰ tehd‰ tuote insertin j‰lkeen)
 $tuoteerror      	= 1; // oletetaan aina ettei  tuotetta lˆydy
@@ -468,6 +469,9 @@ while (!feof($fd)) {
 				break;
 			}
 
+			// Otetaan talteen
+			$OT_ASIAKASNRO = $tieto;
+
 			// ÷rum h‰kki
 			if (!isset($yhtiorow) and strpos($palvelin, "orum.devlab.fi") !== FALSE) {
 				$yhtiorow = hae_yhtion_parametrit("artr");
@@ -560,23 +564,23 @@ while (!feof($fd)) {
 			break;
 
 		case 'OSTOTIL.OT_YRITYS':
-			$lnimitark = $tieto;
+			$lnimitark = trim($tieto);
 			break;
 
 		case 'OSTOTIL.OT_KATUOSOITE':
-			$losoite = $tieto;
+			$losoite = trim($tieto);
 			break;
 
 		case 'OSTOTIL.OT_POSTITOIMIPAIKKA':
-			$lpostitp = $tieto;
+			$lpostitp = trim($tieto);
 			break;
 
 		case 'OSTOTIL.OT_POSTINRO':
-			$lpostino = $tieto;
+			$lpostino = trim($tieto);
 			break;
 
 		case 'OSTOTIL.OT_YHTEYSHENKILO':
-			$lnimi = $tieto;
+			$lnimi = trim($tieto);
 			break;
 
 		case 'ONADPL_PC' :
@@ -847,7 +851,6 @@ while (!feof($fd)) {
 						else {
 							$arow["vienti"] = "E";
 						}
-
 					}
 				}
 
@@ -1125,6 +1128,35 @@ while (!feof($fd)) {
 				}
 				else {
 					$kieltolisa = "";
+				}
+
+				// HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meid‰n kannassa on eri kuin tilaukselta tullut nimi
+				if ($lnimitark != "" and $arow["yhtio"] == "artr") {
+
+					$asnokonflikti = "";
+
+					// Kauttalaskutus
+					if (strtoupper($arow["toim_nimi"]) != strtoupper($lnimitark) and $arow["yhtio"] == "artr" and $arow["osasto"] == "6") {
+						$asnokonflikti = $arow["toim_nimi"];
+					}
+					elseif (strtoupper($arow["nimi"]) != strtoupper($lnimitark)) {
+						$asnokonflikti = $arow["nimi"];
+					}
+
+					if ($asnokonflikti != "") {
+						// l‰hetet‰‰n meili
+						$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+
+						$mail  = "\n";
+						$mail .= "Tilausnumero: $id\n";
+						$mail .= "Pvm: ".date("d.m.Y")."\n\n";
+						$mail .= "Asiakkaan nimi Futursoft-aineistossa: $lnimitark\n";
+						$mail .= "Asiakasnumero Futursoft-aineistossa: $OT_ASIAKASNRO\n\n";
+						$mail .= "Asiakkaan nimi Pupesoftissa: $asnokonflikti\n";
+						$mail .= "Asiakasnumero Pupesoftissa: $arow[asiakasnro]\n";
+
+						$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sis‰‰nluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
+					}
 				}
 			}
 
@@ -1567,7 +1599,6 @@ while (!feof($fd)) {
 					}
 				}
 
-
 				// Tilaus merkataan valmiiksi
 				$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or die($query);
@@ -1747,6 +1778,7 @@ while (!feof($fd)) {
 			$verkkokauppavarasto_li	= "";
 			$editilaus_loppuhinta	= "";
 			$kieltolisa				= "";
+			$OT_ASIAKASNRO			= "";
 			break;
 	}
 }

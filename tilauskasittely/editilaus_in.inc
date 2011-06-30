@@ -148,6 +148,14 @@ $tulos_ulos = "edi"; // t‰‰ on ftp-send.inciss‰
 $filename = trim($filename);
 if ($filename == "") die('Tiedostonimi puuttui!\n');
 
+// Mutetaan ISO-merkistˆˆn jos UTF8:ia
+$encoding = exec("file -b --mime-encoding $filename");
+
+if (preg_match("/(utf\-8|binary)/i", $encoding)) {
+	$convert = exec("iconv -f $encoding -t ISO8859-1  $filename > $filename.ISO");
+	rename($filename.".ISO", $filename);
+}
+
 if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus ep‰onnistui")."!\n");
 
 //jotta filenimi ei varmasti katoaisi matkalla
@@ -203,9 +211,7 @@ else {
 
 $edi_ulos .= "$edi_subj\n";
 
-while (!feof($fd)) {
-
-	$tietue = fgets($fd, 4096);
+while ($tietue = fgets($fd)) {
 
 	// Tyhj‰t rivit skipataan
 	if (trim($tietue) == "") continue;
@@ -1145,15 +1151,23 @@ while (!feof($fd)) {
 
 					if ($asnokonflikti != "") {
 						// l‰hetet‰‰n meili
-						$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+						$bound   = uniqid(time()."_") ;
 
-						$mail  = "\n";
+						$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+						$header .= "MIME-Version: 1.0\n" ;
+						$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+
+						$mail  = "--$bound\n";
+						$mail .= "Content-Type: text/plain;charset=iso-8859-1\n" ;
+						$mail .= "Content-Transfer-Encoding: quoted-printable\n";
+						$mail .= "\n";
 						$mail .= "Tilausnumero: $id\n";
 						$mail .= "Pvm: ".date("d.m.Y")."\n\n";
 						$mail .= "Asiakkaan nimi Futursoft-aineistossa: $lnimitark\n";
 						$mail .= "Asiakasnumero Futursoft-aineistossa: $OT_ASIAKASNRO\n\n";
 						$mail .= "Asiakkaan nimi Pupesoftissa: $asnokonflikti\n";
 						$mail .= "Asiakasnumero Pupesoftissa: $arow[asiakasnro]\n";
+						$mail .= "--$bound--\n";
 
 						$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sis‰‰nluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
 					}

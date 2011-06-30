@@ -280,7 +280,8 @@
 		}
 
 		if ($alias_set != "VAHITTAISMYYNTI") {
-			$ulos .= " <a target='YTJ' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("Tarkista ytunnus")."</a>";
+			$ulos .= " <a target='VIES' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("Tarkista VIES")."</a>";
+			$ulos .= " <a target='YTJ' href='http://www.ytj.fi/yrityshaku.aspx?path=1547%3b1631%3b1678&kielikoodi=1".strtoupper($kukarow["kieli"])."'>".t("Tarkista YTJ")."</a>";
 		}
 
 		$ulos .= "</div>";

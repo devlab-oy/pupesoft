@@ -1131,7 +1131,7 @@ while (!feof($fd)) {
 				}
 
 				// HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meidän kannassa on eri kuin tilaukselta tullut nimi
-				if ($lnimitark != "" and $arow["yhtio"] == "artr") {
+				if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr") {
 
 					$asnokonflikti = "";
 

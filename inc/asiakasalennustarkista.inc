@@ -47,7 +47,7 @@ if(!function_exists("asiakasalennustarkista")) {
 					$result = mysql_query($query) or pupe_error($query);
 				}
 
-				if ((!isset($result) and is_numeric($chastunn) and $chastunn > 0) or (isset($result) and mysql_num_rows($result) != 1)) {
+				if (!isset($result) or (isset($result) and mysql_num_rows($result) != 1)) {
 
 					$ytunnus 		= $chastunn;
 					$kutsuja 		= "yllapito.php";
@@ -73,7 +73,7 @@ if(!function_exists("asiakasalennustarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "asiakas_ryhma") {
-			$chasiakas_ryhma = $t[$i];
+			$chasiakas_ryhma = trim($t[$i]);
 
 			// Ei tsekata turhaan kun rivi dellataan luedatasta
 			if ($chasiakas_ryhma != '' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {

@@ -648,11 +648,19 @@
 							#echo "</table>";
 
 							$laskuorow["tila"]		= "H";
+
 							$laskuorow["hyvak1"]	= $otsikrow["oletus_hyvak1"];
 							$laskuorow["hyvak2"]	= $otsikrow["oletus_hyvak2"];
 							$laskuorow["hyvak3"]	= $otsikrow["oletus_hyvak3"];
 							$laskuorow["hyvak4"]	= $otsikrow["oletus_hyvak4"];
 							$laskuorow["hyvak5"]	= $otsikrow["oletus_hyvak5"];
+
+							$laskuorow["h1time"]	= "0000-00-00 00:00:00";
+							$laskuorow["h2time"]	= "0000-00-00 00:00:00";
+							$laskuorow["h3time"]	= "0000-00-00 00:00:00";
+							$laskuorow["h4time"]	= "0000-00-00 00:00:00";
+							$laskuorow["h5time"]	= "0000-00-00 00:00:00";
+
 							$laskuorow["hyvaksyja_nyt"] = $otsikrow["oletus_hyvak1"];
 						}
 
@@ -666,6 +674,11 @@
 									hyvak3 				= '$laskuorow[hyvak3]',
 									hyvak4 				= '$laskuorow[hyvak4]',
 									hyvak5 				= '$laskuorow[hyvak5]',
+									h1time				= '$laskuorow[h1time]',
+									h2time				= '$laskuorow[h2time]',
+									h3time				= '$laskuorow[h3time]',
+									h4time				= '$laskuorow[h4time]',
+									h5time				= '$laskuorow[h5time]',
 									hyvaksyja_nyt 		= '$laskuorow[hyvaksyja_nyt]',
 									ytunnus 			= '$otsikrow[ytunnus]',
 									tilinumero 			= '$otsikrow[tilinumero]',

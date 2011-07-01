@@ -18,11 +18,11 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}
-	
+
 	if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote") {
 		enable_ajax();
 	}
-	
+
 	if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
@@ -305,7 +305,7 @@
 			if (isset($virhe[$i]) and $virhe[$i] != "") {
 				$errori = 1;
 			}
-			
+
 			if (mysql_num_rows($al_res) != 0 and strtoupper($pakollisuuden_tarkistus_rivi['selitetark_3']) == "PAKOLLINEN") {
 				if (((mysql_field_type($result, $i) == 'real' or  mysql_field_type($result, $i) == 'int') and (float) str_replace(",", ".", $t[$i]) == 0) or
 				     (mysql_field_type($result, $i) != 'real' and mysql_field_type($result, $i) != 'int' and trim($t[$i]) == "")) {
@@ -478,7 +478,6 @@
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and otunnus			= '$laskuorow[tunnus]'";
 						$updaresult = pupe_query($query);
-
 					}
 				}
 			}
@@ -569,6 +568,132 @@
 				}
 			}
 
+			if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "toimi") {
+
+				$query = "	SELECT *
+							FROM toimi
+							WHERE tunnus = '$tunnus'
+							and yhtio 	 = '$kukarow[yhtio]'";
+				$otsikres = pupe_query($query);
+
+				if (mysql_num_rows($otsikres) == 1) {
+					$otsikrow = mysql_fetch_array($otsikres);
+
+					$query = "	SELECT *
+								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tila IN ('H','M')
+								and liitostunnus = '$otsikrow[tunnus]'
+								and tapvm != '0000-00-00'";
+					$laskuores = pupe_query($query);
+
+					while ($laskuorow = mysql_fetch_assoc($laskuores)) {
+
+						if ($yhtiorow['ostolaskujen_paivays'] == "1") {
+							$ltpp = substr($laskuorow["lapvm"], 8, 2);
+							$ltpk = substr($laskuorow["lapvm"], 5, 2);
+							$ltpv = substr($laskuorow["lapvm"], 0, 4);
+						}
+						else {
+							$ltpp = substr($laskuorow["tapvm"], 8, 2);
+							$ltpk = substr($laskuorow["tapvm"], 5, 2);
+							$ltpv = substr($laskuorow["tapvm"], 0, 4);
+						}
+
+						$oletus_erapvm = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_erapvm"], $ltpv));
+						$oletus_kapvm  = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_kapvm"], $ltpv));
+
+						$otsikrow["oletus_kasumma"] = round($laskuorow["summa"] * $otsikrow['oletus_kapro'] / 100, 2);
+
+						if ($otsikrow["oletus_kasumma"] != 0) {
+							$otsikrow["oletus_olmapvm"] = $oletus_kapvm;
+						}
+						else {
+							$otsikrow["oletus_olmapvm"] = $oletus_erapvm;
+						}
+
+						// Jos lasku on hyv‰ksytty ja muutetaan hyvˆksynt‰‰n liittyvi‰ tietoja
+						if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
+							($laskuorow["erpcm"] != $oletus_erapvm) or
+							($laskuorow["kapvm"] != $oletus_kapvm) or
+							($laskuorow["kasumma"] != $otsikrow["oletus_kasumma"]) or
+							($laskuorow["tilinumero"] != $otsikrow["tilinumero"]) or
+							($laskuorow["ultilno"] != $otsikrow["ultilno"]) or
+							($laskuorow["pankki_haltija"] != $otsikrow["pankki_haltija"]) or
+							($laskuorow["swift"] != $otsikrow["swift"]) or
+							($laskuorow["pankki1"] != $otsikrow["pankki1"]) or
+							($laskuorow["pankki2"] != $otsikrow["pankki2"]) or
+							($laskuorow["pankki3"] != $otsikrow["pankki3"]) or
+							($laskuorow["pankki4"] != $otsikrow["pankki4"]) or
+							($laskuorow["hyvaksynnanmuutos"] != $otsikrow["oletus_hyvaksynnanmuutos"]) or
+							($laskuorow["suoraveloitus"] != $otsikrow["oletus_suoraveloitus"]) or
+							($laskuorow["sisviesti1"] != $otsikrow["ohjeitapankille"]))) {
+
+							#echo "Lasku palautetaan hyv‰ksynt‰‰n<br><table>";
+							#echo "<tr><td>$laskuorow[summa]</td></tr>";
+							#echo "<tr><td>".$laskuorow["erpcm"]."</td><td>".$oletus_erapvm."</td></tr>";
+							#echo "<tr><td>".$laskuorow["kapvm"]."</td><td>".$oletus_kapvm."</td></tr>";
+							#echo "<tr><td>".$laskuorow["kasumma"]."</td><td>".$otsikrow["oletus_kasumma"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["tilinumero"]."</td><td>".$otsikrow["tilinumero"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["ultilno"]."</td><td>".$otsikrow["ultilno"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["pankki_haltija"]."</td><td>".$otsikrow["pankki_haltija"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["swift"]."</td><td>".$otsikrow["swift"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["pankki1"]."</td><td>".$otsikrow["pankki1"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["pankki2"]."</td><td>".$otsikrow["pankki2"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["pankki3"]."</td><td>".$otsikrow["pankki3"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["pankki4"]."</td><td>".$otsikrow["pankki4"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["hyvaksynnanmuutos"]."</td><td>".$otsikrow["oletus_hyvaksynnanmuutos"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["suoraveloitus"]."</td><td>".$otsikrow["oletus_suoraveloitus"]."</td></tr>";
+							#echo "<tr><td>".$laskuorow["sisviesti1"]."</td><td>".$otsikrow["ohjeitapankille"]."</td></tr>";
+							#echo "</table>";
+
+							$laskuorow["tila"]		= "H";
+							$laskuorow["hyvak1"]	= $otsikrow["oletus_hyvak1"];
+							$laskuorow["hyvak2"]	= $otsikrow["oletus_hyvak2"];
+							$laskuorow["hyvak3"]	= $otsikrow["oletus_hyvak3"];
+							$laskuorow["hyvak4"]	= $otsikrow["oletus_hyvak4"];
+							$laskuorow["hyvak5"]	= $otsikrow["oletus_hyvak5"];
+							$laskuorow["hyvaksyja_nyt"] = $otsikrow["oletus_hyvak1"];
+						}
+
+						$query = "	UPDATE lasku
+									SET erpcm 			= '$oletus_erapvm',
+									kapvm 				= '$oletus_kapvm',
+									kasumma				= '$otsikrow[oletus_kasumma]',
+									olmapvm 			= '$otsikrow[oletus_olmapvm]',
+									hyvak1 				= '$laskuorow[hyvak1]',
+									hyvak2 				= '$laskuorow[hyvak2]',
+									hyvak3 				= '$laskuorow[hyvak3]',
+									hyvak4 				= '$laskuorow[hyvak4]',
+									hyvak5 				= '$laskuorow[hyvak5]',
+									hyvaksyja_nyt 		= '$laskuorow[hyvaksyja_nyt]',
+									ytunnus 			= '$otsikrow[ytunnus]',
+									tilinumero 			= '$otsikrow[tilinumero]',
+									nimi 				= '$otsikrow[nimi]',
+									nimitark 			= '$otsikrow[nimitark]',
+									osoite 				= '$otsikrow[osoite]',
+									osoitetark 			= '$otsikrow[osoitetark]',
+									postino 			= '$otsikrow[postino]',
+									postitp 			= '$otsikrow[postitp]',
+									maa 				= '$otsikrow[maa]',
+									tila 				= '$laskuorow[tila]',
+									ultilno 			= '$otsikrow[ultilno]',
+									pankki_haltija 		= '$otsikrow[pankki_haltija]',
+									swift 				= '$otsikrow[swift]',
+									pankki1 			= '$otsikrow[pankki1]',
+									pankki2 			= '$otsikrow[pankki2]',
+									pankki3 			= '$otsikrow[pankki3]',
+									pankki4 			= '$otsikrow[pankki4]',
+									hyvaksynnanmuutos 	= '$otsikrow[oletus_hyvaksynnanmuutos]',
+									suoraveloitus 		= '$otsikrow[oletus_suoraveloitus]',
+									sisviesti1 			= '$otsikrow[ohjeitapankille]'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus	= '$laskuorow[tunnus]'";
+						$updaresult = pupe_query($query);
+					}
+				}
+			}
+
 			// Jos p‰ivit‰mme ifamesta tietoja niin p‰ivitet‰‰n varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, ett‰ tietoja on muutettu
 			if (isset($lukitse_avaimeen) and $lukitse_avaimeen != "") {
 				if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
@@ -604,7 +729,7 @@
 
 			$uusi = 0;
 
-			if (isset($yllapitonappi) and $lukossa != "ON" or isset($paluunappi)) {
+			if ((isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset)) and $lukossa != "ON" or isset($paluunappi)) {
 				$tmp_tuote_tunnus  = $tunnus;
 				$tunnus  = 0;
 			}
@@ -902,7 +1027,7 @@
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 					<input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
-					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";				
+					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 		}
 
 		if (mysql_num_rows($result) >= 350) {
@@ -1194,7 +1319,7 @@
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
-		
+
 		// Kokeillaan geneerist‰
 		$query = "	SELECT *
 					FROM $toim
@@ -1386,6 +1511,9 @@
 		if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {
 			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja p‰ivit‰ tiedot myˆs avoimille tilauksille")."'>";
 		}
+		if ($toim == "toimi" and $uusi != 1) {
+			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja p‰ivit‰ tiedot myˆs avoimille laskuille")."'>";
+		}
 
 		if ($lukossa == "ON") {
 			echo "<input type='hidden' name='lukossa' value = '$lukossa'>";
@@ -1484,14 +1612,14 @@
 			}
 		}
 
-		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhteensopivuus_tuote") {	
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhteensopivuus_tuote") {
 			if (tarkista_oikeus("yllapito.php", "yhteensopivuus_tuote_lisatiedot") and $toim == 'yhteensopivuus_tuote') {
 				echo "<iframe id='yhteensopivuus_tuote_lisatiedot_iframe' name='yhteensopivuus_tuote_lisatiedot_iframe' src='yllapito.php?toim=yhteensopivuus_tuote_lisatiedot&from=yllapito&haku[5]=$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
 
-		
-		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {			
+
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {
 			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot") and $toim == 'toimitustapa') {
 				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
@@ -1556,7 +1684,7 @@
 			$toim == "asiakkaan_avainsanat" or
 			$toim == "rahtisopimukset" or
 			$toim == "tilikaudet" or
-			$toim == "hyvityssaannot" or			
+			$toim == "hyvityssaannot" or
 			($toim == "liitetiedostot" and $poistolukko == "") or
 			($toim == "tuote" and $poistolukko == "") or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {
@@ -1605,7 +1733,7 @@
 				<input type = 'hidden' name = 'laji' value = '$laji'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name = 'uusi' value = '1'>
-				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";				
+				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 	}
 
 

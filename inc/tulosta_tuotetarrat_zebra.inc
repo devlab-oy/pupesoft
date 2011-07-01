@@ -20,7 +20,7 @@ if (mysql_num_rows($tarrares) == 1) {
 		$tarrarow['eankoodi'] = $tarrarow['tuoteno'];
 	}
 	//jos eankoodi kentt‰ on tyhj‰ ei viittit‰ edes l‰hte‰ tulostelemaan
-	if ($tarrarow['eankoodi'] != 0 and $tarrarow['eankoodi'] != '') {
+	if (($tarrarow['eankoodi'] != 0 or $tarrarow['eankoodi'] != "0") and $tarrarow['eankoodi'] != '') {
 		$eankoodi = trim($tarrarow['eankoodi']);
 		$nimitys = $tarrarow['nimitys'];
 		$nimitys2 = '';
@@ -163,8 +163,10 @@ if (mysql_num_rows($tarrares) == 1) {
 
 			$sivu .= "^MD10";  											// TUMMUUS, , vakio on 8 mutta se ei riit‰ viivakoodille.
 			$sivu .= "^PQ$tkpl";										// Tulostettavien lukum‰‰r‰
-			$sivu .= "^FO200,200\n^BEN,100,Y,N^FD$eankoodi\n^FS";		// viivakoodi EAN-13
-
+//			$sivu .= "^FO200,200\n^BEN,100,Y,N^FD$eankoodi\n^FS";		// viivakoodi EAN-13
+			$sivu .= "^BY1,3,100\n";									// kutistaa viivakoodia. Vakioasetus olisi ^BY2,2
+			$sivu .= "^FO150,200\n^BCN,100,Y,N,N\n^FD$eankoodi\n^FS";		// Code 128
+			
 			$sivu .= "^FO100,320\n^ASN,20,12\n^FDVarasto: ".$tarrarow['tuotepaikka']."\n^FS"; // varastopaikka, oletus
 			$sivu .= "^FO200,360\n^AQN,18,8\n^FD$yhtiorow[nimi]\n^FS";	// Tulostetaan Firma
 
@@ -173,7 +175,7 @@ if (mysql_num_rows($tarrares) == 1) {
 		}
 		// t‰m‰ haara on Zebra_tuote, joka liimataan tuotteeseen
 		else {
-			// Toimii ja suunniteltu mallille GX20t
+			// Toimii ja suunniteltu mallille GX420t
 			// Tarrakoko 76 mm x 25 mm
 
 			$pituus = 50; // voidaan m‰‰ritt‰‰ mist‰ kohdasta katkaistaan teksti.
@@ -200,7 +202,7 @@ if (mysql_num_rows($tarrares) == 1) {
 				$nimitys = substr($nimitys,0,$pituus);
 				$nimitys2 = substr($nimitys2,0,$pituus);
 			}
-
+			
 
 			$sivu  = "^XA\n";		// vakio alku, pakollinen
 			$sivu .= "^LH50\n";	// offset vasemmasta
@@ -210,7 +212,7 @@ if (mysql_num_rows($tarrares) == 1) {
 			$sivu .= "^FO85,88\n^AQN,18,8\n^FD$nimitys2\n^FS";
 			$sivu .= "^MD10";  											// TUMMUUS, vakio on 8 mutta se ei riit‰ viivakoodille.
 			$sivu .= "^PQ$tkpl";										// Tulostettavien lukum‰‰r‰
-			$sivu .= "^FO250,120\n^BEN,40,Y,N\n^FD$eankoodi\n^FS";		// viivakoodi EAN-13
+			$sivu .= "^FO80,120\n^BCN,40,Y,N,N\n^FD$eankoodi\n^FS";		// viivakoodi CODE-128
 			$sivu .= "^FO260,180\n^AQN,18,8\n^FD$yhtiorow[nimi]\n^FS";	// Tulostetaan Firma
 
 			$sivu .= "\n^XZ";	// pakollinen lopetus

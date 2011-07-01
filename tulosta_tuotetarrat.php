@@ -99,7 +99,7 @@
 			$lets='go';
 		}
 		elseif ($tee != '' and $tee !='Y' and $tee !='H') {
-			if ($toim == 'YKS' and $eankoodirow[0] != '' and $eankoodirow[0] != 0) {
+			if ($toim == 'YKS' and $eankoodirow[0] != '' and $eankoodirow[0] != "0") {
 				$lets = 'go';
 			}
 			else {

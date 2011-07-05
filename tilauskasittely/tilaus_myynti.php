@@ -1647,7 +1647,6 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS","PIK
 
 	while ($tilausrivi = mysql_fetch_assoc($result)) {
 
-		$query_ale_lisa = generoi_alekentta('M');		
 		$hintapyoristys_echo = $tilausrivi["hinta"] * generoi_alekentta_php($tilausrivi, 'M', 'kerto');
 
 		$query = "	SELECT *
@@ -1655,7 +1654,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS","PIK
 					where yhtio	 = '$kukarow[yhtio]'
 					and tuoteno	 = '$tilausrivi[tuoteno]'
 					and asiakas	 = '$laskurow[liitostunnus]'
-					and hinta	 = round($tilausrivi[hinta] * $tilausrivi[myyntihinta_maara] * {$query_ale_lisa}, $yhtiorow[hintapyoristys])
+					and hinta	 = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys])
 					and valkoodi = '$laskurow[valkoodi]'";
 		$chk_result = pupe_query($query);
 
@@ -1664,7 +1663,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS","PIK
 						yhtio		= '$kukarow[yhtio]',
 						tuoteno		= '$tilausrivi[tuoteno]',
 						asiakas		= '$laskurow[liitostunnus]',
-						hinta		= round($tilausrivi[hinta] * $tilausrivi[myyntihinta_maara] * {$query_ale_lisa}, $yhtiorow[hintapyoristys]),
+						hinta		= round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys]),
 						valkoodi	= '$laskurow[valkoodi]',
 						alkupvm		= now(),
 						laatija		= '$kukarow[kuka]',
@@ -2255,7 +2254,7 @@ if ($tee == '') {
 					<input type='submit' value='".t("ATV-Selain")."'>
 					</form>";
 		}
-		
+
 		if ($kukarow["extranet"] == "" and $yhtiorow["konserni"] == "makia") {
 
 			echo "<form action='$PHP_SELF' method='post'>
@@ -2931,13 +2930,13 @@ if ($tee == '') {
 	$numres = pupe_query($query);
 
 	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or mysql_num_rows($numres) == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
-		$sytunnus 	 = $laskurow['ytunnus'];
-		$eiliittymaa = 'ON';
-
-		$luottorajavirhe = '';
-		$jvvirhe 		 = '';
-		$ylivito 		 = '';
-		$trattavirhe 	 = '';
+		$sytunnus 	 	 = $laskurow['ytunnus'];
+		$eiliittymaa 	 = "ON";
+		$luottorajavirhe = "";
+		$jvvirhe 		 = "";
+		$ylivito 		 = "";
+		$trattavirhe 	 = "";
+		$laji 			 = "MA";
 
 		if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
 			$grouppaus = "ytunnus";
@@ -4095,7 +4094,7 @@ if ($tee == '') {
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 0) {
-			
+
 			while ($tuote = mysql_fetch_assoc($result)) {
 				//kursorinohjausta
 				if (($toim == "REKLAMAATIO" and $tuoteno == '') or (is_array($tuoteno_array) and count($tuoteno_array) > 1)) {
@@ -4505,7 +4504,7 @@ if ($tee == '') {
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 						$headerit .= "<th style='text-align:right;'>".t("Ale{$alepostfix}%")."</th>";
 						$sarakkeet++;
-					}			
+					}
 
 					$headerit .= "<th style='text-align:right;'>".t("Hinta")."</th>";
 					$sarakkeet++;
@@ -4769,8 +4768,8 @@ if ($tee == '') {
 				}
 
 				// Tän rivin rivihinta
-				$summa 		= $row["hinta"] * ($row["varattu"]+$row["jt"]) * generoi_alekentta_php($row, 'M', 'kerto');
-				$kotisumma	= $row["kotihinta"] * ($row["varattu"] + $row["jt"]) * generoi_alekentta_php($row, 'M', 'kerto');
+				$summa 		= $row["hinta"] * ($row["varattu"]+$row["jt"]) * generoi_alekentta_php($row, 'M', 'kerto', 'ei_erikoisale');
+				$kotisumma	= $row["kotihinta"] * ($row["varattu"] + $row["jt"]) * generoi_alekentta_php($row, 'M', 'kerto', 'ei_erikoisale');
 
 				// Tän rivin alviton rivihinta
 				if ($yhtiorow["alv_kasittely"] == '') {
@@ -5576,7 +5575,7 @@ if ($tee == '') {
 						$myyntihinta	= hintapyoristys(tuotteen_myyntihinta($laskurow, $trow, 1) * $alvillisuus_kerto);
 					}
 
-					$kplhinta = $hinta * generoi_alekentta_php($row, 'M', 'kerto');
+					$kplhinta = $hinta * generoi_alekentta_php($row, 'M', 'kerto', 'ei_erikoisale');
 
 					if ($kukarow['hinnat'] == 1) {
 						echo "<td $class align='right' valign='top'>$myyntihinta</td>";
@@ -5952,7 +5951,7 @@ if ($tee == '') {
 							echo "	<td valign='top'><input type='text' name='var_array[$prow[tuoteno]]'   size='2' maxlength='1'></td>
 									<td valign='top'><input type='text' name='netto_array[$prow[tuoteno]]' size='2' maxlength='1'></td>
 									<td valign='top'><input type='text' name='hinta_array[$prow[tuoteno]]' size='5' maxlength='12'></td>";
-							
+
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 								echo "<td valign='top'><input type='text' name='ale_array{$alepostfix}[$prow[tuoteno]]' size='5' maxlength='6'></td>";
 							}
@@ -6468,7 +6467,7 @@ if ($tee == '') {
 						$rahti_trow_res = pupe_query($query);
 						$rahti_trow  = mysql_fetch_assoc($rahti_trow_res);
 
-						$netto = $rahtihinta_ale_kaikki_array['ale1'] != 0 ? '' : 'N';
+						$netto = count($rahtihinta_ale_kaikki_array) > 0 ? '' : 'N';
 
 						// muutetaan rahtihinta laskun valuuttaan, koska rahtihinta tulee matriisista aina yhtiön kotivaluutassa
 						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
@@ -6476,7 +6475,6 @@ if ($tee == '') {
 						}
 
 						list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rahti_trow, '1', $netto, $rahtihinta, $rahtihinta_ale_kaikki_array);
-
 						list($hinta, $alv) = alv($laskurow, $rahti_trow, $lis_hinta, '', $alehinta_alv);
 
 						// muutetaan rahtihinta laskun valuuttaan, koska alehinta-funktio palauttaa aina hinnan yhtiön kotivaluutassa

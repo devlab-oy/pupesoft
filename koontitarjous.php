@@ -98,6 +98,7 @@
 		$query = "	SELECT nimi, nimitark, ytunnus, asiakasnro, tunnus
 					FROM asiakas
 					WHERE yhtio = '{$kukarow['yhtio']}'
+					and laji != 'P'
 					$wherelisa";
 		$asiakasres = mysql_query($query) or pupe_error($query);
 

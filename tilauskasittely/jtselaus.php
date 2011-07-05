@@ -1366,7 +1366,7 @@
 								for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 									if ($jtrow["ale{$alepostfix}"] > 0) {
 										if ($alepostfix > 1) echo "+";
-										echo $jtrow["ale{$alepostfix}"],"%<br>";
+										echo ($jtrow["ale{$alepostfix}"]*1),"%<br>";
 									}
 								}
 								echo "</td>";

@@ -405,14 +405,20 @@ else {
 				if ($torow["nouto"] == "") {
 
 					// haetaan rahtimaksu
-					$rahtihinta_array 		= hae_rahtimaksu($rahtimaksu_tunnukset);
+					$rahtihinta_array = hae_rahtimaksu($rahtimaksu_tunnukset);
 
+					$rahtihinta_ale_kaikki_array = array();
+
+					// rahtihinta tulee rahtimatriisista yhtiön kotivaluutassa ja on verollinen, jos myyntihinnat ovat verollisia, tai veroton, jos myyntihinnat ovat verottomia (huom. yhtiön parametri alv_kasittely)
 					if (is_array($rahtihinta_array)) {
-						$rahtihinta 		= $rahtihinta_array['rahtihinta'];
-						$rahtihinta_ale 	= $rahtihinta_array['alennus'];
+						$rahtihinta = $rahtihinta_array['rahtihinta'];
+
+						foreach ($rahtihinta_array['alennus'] as $ale_key => $ale_val) {
+							$rahtihinta_ale_kaikki_array[$ale_key] = $ale_val;
+						}
 					}
 					else {
-						$rahtihinta = $rahtihinta_ale = 0;
+						$rahtihinta = 0;
 					}
 
 					// haetaan rahtituotteen tiedot
@@ -431,13 +437,30 @@ else {
 						$hinta		 = $rahtihinta;
 						$trow["alv"] = $laskurow["alv"];
 						$nimitys	 = $laskurow["toimitustapa"];
-						$netto		 = $rahtihinta_ale != 0 ? '' : 'N';
+						$netto 		 = count($rahtihinta_ale_kaikki_array) > 0 ? '' : 'N';
 
-						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', $netto, $hinta, $rahtihinta_ale);
+						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', $netto, $hinta, $rahtihinta_ale_kaikki_array);
 						list($hinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
-						$query = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, ale)
-									values  (now(), '$hinta', '$netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '', '$lis_ale')";
+						$query_ale_lrivi = "";
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							$query_ale_lrivi .= " ale{$alepostfix} = '".$lis_ale['ale'.$alepostfix]."',";
+						}
+
+						$query = "	INSERT into tilausrivi SET
+									laadittu	= now(),
+									hinta 		= '$hinta',
+									netto 		= '$netto',
+									varattu 	= '1',
+									tilkpl 		= '1',
+									otunnus 	= '$otunnus',
+									tuoteno 	= '$trow[tuoteno]',
+									nimitys 	= '$nimitys',
+									yhtio 		= '$kukarow[yhtio]',
+									tyyppi 		= 'L',
+									$query_ale_lrivi
+									alv 		= '$alv'";
 						$addtil = pupe_query($query);
 
 						if ($rahtihinta_ale != 0) {

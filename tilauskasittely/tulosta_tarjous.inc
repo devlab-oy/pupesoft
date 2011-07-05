@@ -1467,14 +1467,7 @@ if (!function_exists('tulosta_tarjous')) {
 		$pdf_tarjous->set_default('margin-left',   0);
 		$pdf_tarjous->set_default('margin-right',  0);
 
-		// Rivit
-		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-			$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
-		}
-		else {
-			$hinta_riv = "tilausrivi.hinta";
-		}
-
+		// Rivit		
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["tarjouksen_jarjestys"]);
 
 		if ($yhtiorow["tarjouksen_palvelutjatuottet"] == "E" and $yhtiorow['tarjoustyyppi'] != 1) $pjat_sortlisa = "tuotetyyppi,";
@@ -1483,8 +1476,8 @@ if (!function_exists('tulosta_tarjous')) {
 		$query_ale_lisa = generoi_alekentta('M');
 
 		$query = "	SELECT tilausrivi.*,
-					round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2) rivihinta,
-					round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,
+					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2) rivihinta,
+					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,
 					tilausrivin_lisatiedot.positio,
 					$sorttauskentta,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,

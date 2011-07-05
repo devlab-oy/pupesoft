@@ -912,7 +912,7 @@
 							$otunnus    = $laskurow['tunnus'];
 							$hinta      = $rahtihinta;
 							$nimitys    = "$pvm $laskurow[toimitustapa]";
-							$kommentti  = "".t("Rahtikirja").": $rahtikirjanrot";
+							$kommentti  = t("Rahtikirja").": $rahtikirjanrot";
 							$netto      = count($rahtihinta_ale) > 0 ? '' : 'N';
 
 							list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', $netto, $hinta, $rahtihinta_ale);

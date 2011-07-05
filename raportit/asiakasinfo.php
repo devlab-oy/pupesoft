@@ -17,6 +17,12 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 	exit;
 }
 
+$alennuslaji = "";
+
+if ($yhtiorow['myynnin_alekentat'] > 1) {
+	$alennuslaji = "alennuslaji";
+}
+
 //	Haardkoodataan exranetrajaus vain alennukseen
 if ($kukarow["extranet"] != "") {
 
@@ -106,7 +112,7 @@ if ($tee == 'eposti') {
 			$pdf->template->text($otsikkotid, 30,   0, t("Tuoteryhmä")."/".t("Tuotenumero"), $norm_bold);
 			$pdf->template->text($otsikkotid, 330,  0, t("Aleryhmä"), $norm_bold);
 			$pdf->template->text($otsikkotid, 450,  0, t("Alennus"), $norm_bold);
-			$pdf->template->text($otsikkotid, 520,  0, t("Alelaji"), $norm_bold);
+			if ($yhtiorow['myynnin_alekentat'] > 1) $pdf->template->text($otsikkotid, 520,  0, t("Alelaji"), $norm_bold);
 			$pdf->template->place($otsikkotid, $firstpage, 0, 665, $norm_bold);
 			$kala = 650;
 
@@ -144,21 +150,21 @@ if ($tee == 'eposti') {
 		//	Vaihdetaan osastoa
 		if ($osasto != $edosasto) {
 			$kala -= 15;
-			$pdf->draw_text(30,  $kala, $osasto, 									$firstpage, $norm_bold);
+			$pdf->draw_text(30,  $kala, $osasto, 							$firstpage, $norm_bold);
 			$kala -= 25;
 		}
 
 		$edosasto = $osasto;
 
 		if ($tuote == " - ") {
-			$pdf->draw_text(30,  $kala, $try, 										$firstpage, $norm);
+			$pdf->draw_text(30,  $kala, $try, 								$firstpage, $norm);
 		}
 		else {
-			$pdf->draw_text(60, $kala, $tuote, 									$firstpage, $norm);
+			$pdf->draw_text(60, $kala, $tuote, 								$firstpage, $norm);
 		}
 		$pdf->draw_text(310, $kala, sprintf('%10s',$ryhma), 	$firstpage, $norm);
 		$pdf->draw_text(420, $kala, sprintf('%10s',sprintf('%.2d',$ale))."%", 	$firstpage, $norm);
-		if (trim($alelaji) != '') $pdf->draw_text(500, $kala, sprintf('%10s',t("Ale").$alelaji), 	$firstpage, $norm);
+		if ($yhtiorow['myynnin_alekentat'] > 1 and trim($alelaji) != '') $pdf->draw_text(500, $kala, sprintf('%10s',t("Ale").$alelaji), 	$firstpage, $norm);
 
 		$kala -= 15;
 	}
@@ -906,32 +912,32 @@ if ($asiakasid > 0) {
 			if ($aletaulu != "" or $tee == "eposti") {
 				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukko")."<br>".t("osastoittain/tuoteryhmittäin")."</font></caption>";
 				if ($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
-					$otsik = array("osasto", "try", "alennusryhmä", "tuoteno", "alennus", "alennuslaji", "alkupvm", "loppupvm");
-					$otsik_spread = array("osasto", "osasto_nimi", "try",  "try_nimi", "alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "alennuslaji", "alkupvm", "loppupvm");
+					$otsik = array("osasto", "try", "alennusryhmä", "tuoteno", "alennus", "$alennuslaji", "alkupvm", "loppupvm");
+					$otsik_spread = array("osasto", "osasto_nimi", "try",  "try_nimi", "alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "$alennuslaji", "alkupvm", "loppupvm");
 				}
 				else {
-					$otsik = array("osasto", "try", "alennusryhmä", "tuoteno", "asiakasryhmä", "alennus", "alennuslaji", "alkupvm", "loppupvm", "tyyppi");
-					$otsik_spread = array("osasto", "osasto_nimi", "try", "try_nimi", "alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "asiakasryhmä", "asiakasryhmä_nimi", "alennus", "alennuslaji", "alkupvm", "loppupvm");
+					$otsik = array("osasto", "try", "alennusryhmä", "tuoteno", "asiakasryhmä", "alennus", "$alennuslaji", "alkupvm", "loppupvm", "tyyppi");
+					$otsik_spread = array("osasto", "osasto_nimi", "try", "try_nimi", "alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "asiakasryhmä", "asiakasryhmä_nimi", "alennus", "$alennuslaji", "alkupvm", "loppupvm");
 				}
 			}
 			elseif ($yhdistetty != "") {
 				$ulos  = "<table><caption><font class='message'>".t("Yhdistetty alennustaulukko")."</font></caption>";
 				if ($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
-					$otsik = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "osasto", "try", "alennus", "alennuslaji", "alkupvm", "loppupvm");
+					$otsik = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "osasto", "try", "alennus", "$alennuslaji", "alkupvm", "loppupvm");
 				}
 				else {
-					$otsik = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhmä",  "asiakasryhmä_nimi", "osasto", "try", "alennus", "alennuslaji", "alkupvm", "loppupvm", "tyyppi");
+					$otsik = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhmä",  "asiakasryhmä_nimi", "osasto", "try", "alennus", "$alennuslaji", "alkupvm", "loppupvm", "tyyppi");
 				}
 			}
 			else {
 				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukko")."</font></caption>";
 				if ($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
-					$otsik = array("alennusryhmä", "tuoteno", "alennus", "alennuslaji", "alkupvm", "loppupvm");
-					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "alennus", "alennuslaji", "alkupvm", "loppupvm");
+					$otsik = array("alennusryhmä", "tuoteno", "alennus", "$alennuslaji", "alkupvm", "loppupvm");
+					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "alennus", "$alennuslaji", "alkupvm", "loppupvm");
 				}
 				else {
-					$otsik = array("alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "alennuslaji", "alkupvm", "loppupvm", "tyyppi");
-					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "asiakasryhmä", "alennus", "alennuslaji", "alkupvm", "loppupvm");
+					$otsik = array("alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "$alennuslaji", "alkupvm", "loppupvm", "tyyppi");
+					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "asiakasryhmä", "alennus", "$alennuslaji", "alkupvm", "loppupvm");
 				}
 			}
 
@@ -1480,12 +1486,12 @@ if ($asiakasid > 0) {
 			$yhdistetty  = "<table><caption><font class='message'>".t("Yhdistetty alennustaulukko")."</font></caption>";
 
 			if ($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
-				$otsik = array("alennusryhmä",  "tuoteno", "alennus", "alennuslaji", "hinta", "alkupvm", "loppupvm");
-				$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "alennuslaji", "hinta", "alkupvm", "loppupvm");
+				$otsik = array("alennusryhmä",  "tuoteno", "alennus", "$alennuslaji", "hinta", "alkupvm", "loppupvm");
+				$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "$alennuslaji", "hinta", "alkupvm", "loppupvm");
 			}
 			else {
-				$otsik = array("alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "alennuslaji", "hinta", "alkupvm", "loppupvm", "tyyppi");
-				$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "alennuslaji", "hinta", "alkupvm", "loppupvm");
+				$otsik = array("alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "$alennuslaji", "hinta", "alkupvm", "loppupvm", "tyyppi");
+				$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "$alennuslaji", "hinta", "alkupvm", "loppupvm");
 			}
 
 			// Otsikot

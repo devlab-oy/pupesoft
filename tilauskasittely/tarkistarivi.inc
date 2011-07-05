@@ -722,16 +722,19 @@
 
 	//	Onko tätä varattuna siirtolistalla?
 	if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J","U","T","P","R"))) {
+
 		$query = "	SELECT kohde.nimitys kohde, lahde.nimitys lahde, tila, alatila, sum(varattu+jt+kpl) kpl, lasku.tunnus, tilausrivi.yksikko
 					FROM lasku USE INDEX (tila_index)
-					RIGHT JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tuoteno = '$trow[tuoteno]')
+					JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.tuoteno = '$trow[tuoteno]')
 					LEFT JOIN varastopaikat lahde USE INDEX (PRIMARY) ON (lahde.yhtio = lasku.yhtio and lahde.tunnus = lasku.varasto)
 					LEFT JOIN varastopaikat kohde USE INDEX (PRIMARY) ON (kohde.yhtio = lasku.yhtio and kohde.tunnus = lasku.clearing)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'G' and alatila != 'V'
+					WHERE lasku.yhtio = '$kukarow[yhtio]' 
+					and lasku.tila = 'G' 
+					and lasku.alatila in ('','J','A','B','C','D','E','T','P')
 					GROUP BY tuoteno, lasku.tunnus";
 		$siirtores = pupe_query($query);
 
-		while($siirtorow = mysql_fetch_assoc($siirtores)) {
+		while ($siirtorow = mysql_fetch_assoc($siirtores)) {
 			$laskutyyppi = $siirtorow["tila"];
 			$alatila	 = $siirtorow["alatila"];
 

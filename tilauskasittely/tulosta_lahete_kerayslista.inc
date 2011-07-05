@@ -651,7 +651,8 @@ if (!function_exists('rivi_kerayslista')) {
 
 			$varastopaikka = $row["hyllyalue"] . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 
-			$row["perhe_kommentti"] = "";
+			$row["perhe_kommentti1"] = "";
+			$row["perhe_kommentti2"] = "";
 
 			// Info tuoteperheestä
 			if ($row["perheid"] > 0 and $perheid != $row["perheid"]) {
@@ -694,23 +695,31 @@ if (!function_exists('rivi_kerayslista')) {
 					$perheresult = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($perheresult) > 1) {
+						$perherow = mysql_fetch_assoc($perheresult);
+
+						$row["perhe_kommentti1"] = $perherow["tuoteno"]." (".$row["varattu"].") ".$perherow["nimitys"];
+
 						while ($perherow = mysql_fetch_assoc($perheresult)) {
-							if ($row["perhe_kommentti"] == "") {
-								$row["perhe_kommentti"] .= t("Tuoteperhe", $kieli).": ";
-								$row["perhe_kommentti"] .= $perherow["tuoteno"]." (".$row["varattu"].") ".$perherow["nimitys"].".\n".t("Sisältää tuotteet", $kieli).": ";
-							}
-							else {
-								$row["perhe_kommentti"] .= strtoupper($perherow["tuoteno"]).", ";
-							}
+							$row["perhe_kommentti2"] .= strtoupper($perherow["tuoteno"]).", ";
 						}
-						$row["perhe_kommentti"] = substr($row["perhe_kommentti"],0,-2);
+
+						$row["perhe_kommentti2"] = substr($row["perhe_kommentti2"], 0, -2);
 					}
 				}
 			}
 
-			if (trim($row["perhe_kommentti"]) != '') {
-				$pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],	$thispage, $norm);
-				$kala = $pohja - $rivinkorkeus;
+			if (trim($row["perhe_kommentti1"]) != '') {			
+				$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
+				$pdf->draw_text(23, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
+				list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 500, $pdf, $norm);			
+				$pdf->draw_text($plen+23, $kala, $ff_string, $thispage, $ff_font);
+				$kala -= $rivinkorkeus;
+
+				$plen = $pdf->strlen(t("Sisältää tuotteet", $kieli).": ", $norm);
+				$pdf->draw_text(23, $kala, t("Sisältää tuotteet", $kieli).": ", $thispage, $norm);
+				list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 500, $pdf, $norm);
+				$pdf->draw_text($plen+23, $kala, $ff_string, $thispage, $ff_font);
+				$kala -= $rivinkorkeus;
 			}
 
 			if ($yhtiorow['kerayserat'] == 'K' and $tyyppi == 'KERAYSERA') {

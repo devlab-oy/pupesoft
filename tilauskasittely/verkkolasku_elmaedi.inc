@@ -109,10 +109,9 @@ if (!function_exists('elmaedi_rivi')) {
 		fputs($tootedi, "ILININVIV:".sprintf("%017.2f", $tilrow["hinta"])."@   @   @   @          1@PCE\n");
 		fputs($tootedi, "ILIN203MA:$tilrow[rivihinta]\n");
 
-		if ($tilrow['ale1'] > 0 or $tilrow['ale2'] > 0 or $tilrow['ale3'] > 0) {
+		$alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M', 'plain');
 
-			$alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M');
-
+		if ($alennukset_yhteensa > 0) {
 			fputs($tootedi, "ILIN___AL:\n");
 			fputs($tootedi, "ILIN___PA:1  @$alennukset_yhteensa\n");
 		}

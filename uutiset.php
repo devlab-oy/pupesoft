@@ -565,7 +565,7 @@ if ($tee == '') {
 						fclose($fh);
 
 						$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
-						
+
 						// Haetaan kuvan väriprofiili
 						exec("nice -n 20 identify -format %[colorspace] \"$nimi1\"", $identify);
 
@@ -612,11 +612,11 @@ if ($tee == '') {
 				// ##tuoteno##
 				$search = "/#{2}(.*?)#{2}/s";
 				preg_match_all($search, $uutinen["kentta02"], $matches, PREG_SET_ORDER);
-				//echo "<pre>".print_r($matches, true)."</pre>";
 
-				if(count($matches) > 0) {
+				if (count($matches) > 0) {
 					$search = array();
 					$replace = array();
+
 					foreach($matches as $m) {
 
 						//	Haetaan tuotenumero
@@ -628,13 +628,12 @@ if ($tee == '') {
 						//	Tämä me korvataan aina!
 						$search[] = "/$m[0]/";
 
-						if(mysql_num_rows($tres) <> 1) {
+						if (mysql_num_rows($tres) > 1) {
 							$replace[]	= "";
 						}
 						else {
 							$trow = mysql_fetch_array($tres);
 
-						//	$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=$m[1]'>$trow[tuoteno]</a> $trow[nimitys]";
 							$replace[]	= "<a href = '$PHP_SELF?toim=$toim'>$trow[tuoteno]</a> $trow[nimitys]";
 						}
 					}

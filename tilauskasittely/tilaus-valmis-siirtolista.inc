@@ -480,7 +480,8 @@
 							$querysel
 							if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 							if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-							tuote.sarjanumeroseuranta
+							tuote.sarjanumeroseuranta,
+							tuote.eankoodi
 							FROM tilausrivi use index (yhtio_otunnus)
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 							WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
@@ -538,7 +539,8 @@
 				'tilausnumeroita' 	=> $tilausnumeroita,
 				'toim'            	=> $toim,
 				'tots'            	=> 0,
-				'tyyppi'		  	=> $tyyppi);
+				'tyyppi'		  	=> $tyyppi,
+				'kerayslistatyyppi'	=> '');
 
 				// Aloitellaan keräyslistan teko
 				$params_kerayslista = alku_kerayslista($params_kerayslista);

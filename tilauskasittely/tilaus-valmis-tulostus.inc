@@ -65,10 +65,25 @@
 		$riresult = mysql_query($query) or pupe_error($query);
 		$asrow = mysql_fetch_array($riresult);
 
-		$select_lisa 	= "";
-		$where_lisa 	= "";
-		$lisa1 			= "";
-		$pjat_sortlisa 	= "";
+		$query = "	SELECT ulkoinen_jarjestelma
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$laskurow[varasto]'";
+		$result = pupe_query($query);
+		$varastorow = mysql_fetch_assoc($result);
+
+		$select_lisa 		= "";
+		$where_lisa 		= "";
+		$lisa1 				= "";
+		$pjat_sortlisa 		= "";
+		$kerayslistatyyppi 	= "";
+
+		if ($varastorow["ulkoinen_jarjestelma"] == "G") {
+			$kerayslistatyyppi = "EXCEL2";
+		}
+		elseif ($varastorow["ulkoinen_jarjestelma"] == "C") {
+			$kerayslistatyyppi = "EXCEL1";
+		}
 
 		$tyyppi = "";
 
@@ -120,7 +135,7 @@
 				if ($yhtiorow["kerayslistan_jarjestys"] == "S") {
 					$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
 					$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
-				}	
+				}
 			}
 		}
 
@@ -147,7 +162,8 @@
 						$sorttauskentta,
 						if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 						if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-						tuote.sarjanumeroseuranta
+						tuote.sarjanumeroseuranta,
+						tuote.eankoodi
 						FROM tilausrivi
 						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						WHERE tilausrivi.otunnus in ($tilausnumeroita)
@@ -210,7 +226,8 @@
 		'toim'            	=> $toim,
 		'tots'            	=> 0,
 		'tyyppi'		  	=> $tyyppi,
-		'kerayseran_numero' => $kerayseran_numero);
+		'kerayseran_numero' => $kerayseran_numero,
+		'kerayslistatyyppi'	=> $kerayslistatyyppi);
 
 		// Aloitellaan keräyslistan teko
 		$params_kerayslista = alku_kerayslista($params_kerayslista);

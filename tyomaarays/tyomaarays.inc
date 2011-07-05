@@ -66,7 +66,8 @@
 					$sorttauskentta,
 					if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 					if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-					tuote.sarjanumeroseuranta
+					tuote.sarjanumeroseuranta,
+					tuote.eankoodi
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -159,7 +160,8 @@
 			'tilausnumeroita' 	=> $tilausnumeroita,
 			'toim'            	=> $toim,
 			'tots'            	=> 0,
-			'tyyppi'		  	=> $tyyppi);
+			'tyyppi'		  	=> $tyyppi,
+			'kerayslistatyyppi'	=> '');
 
 
 			// Aloitellaan keräyslistan teko

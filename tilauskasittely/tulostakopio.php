@@ -1715,6 +1715,21 @@
 					}
 				}
 
+				/*
+				Testausta varten.....
+				$lahetetyyppi = "tulosta_lahete.inc";
+				$lahetetyyppi = "tulosta_lahete_brutto.inc";
+				$lahetetyyppi = "tulosta_lahete_eialeja.inc";
+				$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
+				$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
+				$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
+				$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
+				$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
+				$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
+				$lahetetyyppi = "tulosta_lahete_custom.inc";
+				$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
+				*/
+
 				require("tulosta_lahete.inc");
 
 				//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
@@ -1967,10 +1982,25 @@
 				$result = pupe_query($query);
 				$asrow = mysql_fetch_assoc($result);
 
-				$select_lisa 	= "";
-				$where_lisa 	= "";
-				$lisa1 			= "";
-				$pjat_sortlisa 	= "";
+				$query = "	SELECT ulkoinen_jarjestelma
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = '$laskurow[varasto]'";
+				$result = pupe_query($query);
+				$varastorow = mysql_fetch_assoc($result);
+
+				$select_lisa 		= "";
+				$where_lisa 		= "";
+				$lisa1 				= "";
+				$pjat_sortlisa 		= "";
+				$kerayslistatyyppi 	= "";
+
+				if ($varastorow["ulkoinen_jarjestelma"] == "G") {
+					$kerayslistatyyppi = "EXCEL2";
+				}
+				elseif ($varastorow["ulkoinen_jarjestelma"] == "C") {
+					$kerayslistatyyppi = "EXCEL1";
+				}
 
 				// keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
 				if ($yhtiorow["kerataanko_saldottomat"] == '') {
@@ -2009,7 +2039,8 @@
 							$sorttauskentta,
 							if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
 							if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-							tuote.sarjanumeroseuranta
+							tuote.sarjanumeroseuranta,
+							tuote.eankoodi
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 							WHERE tilausrivi.otunnus = '$otunnus'
@@ -2067,7 +2098,8 @@
 				'tilausnumeroita' 	=> $tilausnumeroita,
 				'toim'            	=> $toim,
 				'tots'            	=> 0,
-				'tyyppi'		  	=> $tyyppi);
+				'tyyppi'		  	=> $tyyppi,
+				'kerayslistatyyppi'	=> $kerayslistatyyppi);
 
 				// Aloitellaan keräyslistan teko
 				$params_kerayslista = alku_kerayslista($params_kerayslista);

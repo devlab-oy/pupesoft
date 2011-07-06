@@ -1,1 +1,0 @@
-tulosta_lahete_simppeli.inc

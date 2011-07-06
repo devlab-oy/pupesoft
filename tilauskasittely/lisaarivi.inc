@@ -62,8 +62,8 @@
 	unset($korvaavan_hinta_ylaraja_halvin_netto);
 
 	if (!function_exists("tuoteperhe_reku")) {
-		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet) {
-			global $kukarow, $perhelisa, $kieltolisa, $lisaarivi_debug;
+		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet, $perhelisa, $kieltolisa, $lisaarivi_debug) {
+			global $yhtiorow, $kukarow;
 
 			//Haetaan tuoteperheen lapset ja lis‰t‰‰n ne $tuoteperhe ja $kaikkituotteet arraysiin
 			$query = "	SELECT tuoteperhe.*
@@ -92,8 +92,8 @@
 	}
 
 	if (!function_exists("tuoteperhe_reku2")) {
-		function tuoteperhe_reku2($tuoteno, $isat_array, $kaikki_array, $kerroin_array) {
-			global $kukarow, $perhelisa, $kieltolisa, $lisaarivi_debug;
+		function tuoteperhe_reku2($tuoteno, $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug) {
+			global $yhtiorow, $kukarow;
 
 			$perhearray = array();
 			$tuoteno 	= strtoupper($tuoteno);
@@ -584,7 +584,7 @@
 				$isa_array[] = $isatuoteno;
 
 				for($isa=0; $isa < $riikoko; $isa++) {
-					list($tuoteperhe, $kaikkituotteet) = tuoteperhe_reku($isatuoteno, $isa_array[$isa], $tuoteperhe, $kaikkituotteet);
+					list($tuoteperhe, $kaikkituotteet) = tuoteperhe_reku($isatuoteno, $isa_array[$isa], $tuoteperhe, $kaikkituotteet, $perhelisa, $kieltolisa, $lisaarivi_debug);
 
 					// Ollaanko rekursiivisia vai ei
 					if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
@@ -1013,7 +1013,7 @@
 							$perhearray 	= array();
 
 							for ($isa = 0; $isa < $riikoko; $isa++) {
-								list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array);
+								list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug);
 								$perhearray	= array_merge($perhearray, $perherow);
 
 								if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
@@ -1601,7 +1601,7 @@
 			$perhearray 	= array();
 
 			for ($isa=0; $isa < $riikoko; $isa++) {
-				list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array);
+				list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug);
 				$perhearray	= array_merge($perhearray, $perherow);
 
 				// Ollaanko rekursiivisia vai ei

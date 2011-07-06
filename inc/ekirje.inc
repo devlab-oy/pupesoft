@@ -313,7 +313,7 @@ class Pupe_Pdfekirje {
 					<lb:Eu1 lb:name=":yritys_nimi" lb:address=":yritys_osoite" lb:postalCode=":yritys_postino" lb:city=":yritys_postitp" lb:countryCode=":yritys_maa"/>
 				</lb:SenderAddress>
 			</lb:Sender>
-			<lb:StdBundleProcessing lb:customerId=":asiakas_tunnus" lb:password=":salasana" lb:serviceFuntion="0" lb:electronicArchiving="T" lb:letterClass=":kirjeluokka" lb:envelope="S" lb:paper="0" lb:fileFormat="0" lb:departmentClassification="true" lb:isDuplex="false"/>
+			<lb:StdBundleProcessing lb:customerId=":asiakas_tunnus" lb:password=":salasana" lb:serviceFunction="0" lb:electronicArchiving="T" lb:letterClass=":kirjeluokka" lb:envelope="S" lb:paper="0" lb:fileFormat="0" lb:departmentClassification="true" lb:isDuplex="false"/>
 			<lb:ExternalFile lb:senderFileId=":file_id" lb:format="PDF" lb:fileName=":file_nimi"/>
 		</lb:BundleCommon>
 		<lb:Letter lb:senderLetterId=":kirje_id">

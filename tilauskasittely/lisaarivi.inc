@@ -151,7 +151,7 @@
 		}
 	}
 
-	//Onko päässätty varasto josta myydään
+	// Onko päässätty varasto josta myydään
 	if (isset($varasto) and is_array($varasto) and count($varasto) > 0) {
 		$varasto = $varasto;
 	}
@@ -1884,50 +1884,47 @@
 							ORDER BY tuotepaikat.oletus DESC";
 				$result = pupe_query($query);
 
-				$loydetytpaikat = 0;
+				if (mysql_num_rows($result) > 0) {
 
-				if (mysql_num_rows($result) != 0) {
+					// Yritetään löytää paras varastopaikka
+					$loydetytpaikat = FALSE;
 
-					//Yritetään löytää paikka laskurow[varasto]:sta
-					while ($olerow = mysql_fetch_array($result)) {
-						$loytyko_varasto = '';
+					// löytyykö syötetty $varasto (muttujassa tulee myös $laskurow[varasto] tai $kukarow["varasto"] jos $varastoa ei olla eksplisiittisesti syötetty)?
+					if (isset($varasto) and is_array($varasto)) {
+						while ($olerow = mysql_fetch_assoc($result)) {
+							if (in_array($olerow["varastotunnus"], $varasto)) {
+								$p_hyllyalue	= $olerow["hyllyalue"];
+								$p_hyllynro		= $olerow["hyllynro"];
+								$p_hyllyvali	= $olerow["hyllyvali"];
+								$p_hyllytaso	= $olerow["hyllytaso"];
 
-						if (isset($kukarow["oletus_varasto"]) and $kukarow['oletus_varasto'] != '' and $kukarow['oletus_varasto'] != 0) {
-							// katsotaan onko käyttäjän oletus_varasto käyttäjän takana ruksatuissa varastoissa
-							foreach(explode(',', $kukarow['varasto']) as $kukarow_varasto_chk) {
-								if ($kukarow['oletus_varasto'] == $kukarow_varasto_chk) {
-									$loytyko_varasto = $kukarow['oletus_varasto'];
-									break;
-								}
+								$loydetytpaikat = TRUE;
+								break;
 							}
 						}
+					}
 
-						// katsotaan onko oletuspaikka käyttäjän takana ruksatuissa varastoissa ja käyttäjän oletus_varasto ei osunut
-						if (isset($kukarow["varasto"]) and $loytyko_varasto == '') {
-							foreach(explode(',', $kukarow['varasto']) as $kukarow_varasto_chk) {
-								if ($olerow['varastotunnus'] == $kukarow_varasto_chk) {
-									$loytyko_varasto = $kukarow_varasto_chk;
-									break;
-								}
+					// löytyykö $kukarow["oletus_varasto"]?
+					if (!$loydetytpaikat and $kukarow["oletus_varasto"] > 0) {
+						mysql_data_seek($result,0);
+
+						while ($olerow = mysql_fetch_assoc($result)) {
+							if ($olerow["varastotunnus"] == $kukarow["oletus_varasto"]) {
+								$p_hyllyalue	= $olerow["hyllyalue"];
+								$p_hyllynro		= $olerow["hyllynro"];
+								$p_hyllyvali	= $olerow["hyllyvali"];
+								$p_hyllytaso	= $olerow["hyllytaso"];
+
+								$loydetytpaikat = TRUE;
+								break;
 							}
-						}
-
-						if ($olerow["varastotunnus"] == $laskurow["varasto"] or ($loytyko_varasto == $olerow['varastotunnus'])) {
-							$p_hyllyalue	= $olerow["hyllyalue"];
-							$p_hyllynro		= $olerow["hyllynro"];
-							$p_hyllyvali	= $olerow["hyllyvali"];
-							$p_hyllytaso	= $olerow["hyllytaso"];
-
-							$loydetytpaikat++;
-							break;
 						}
 					}
 
 					//Jos ei löytynyt niin myydään oletuspaikalta
-					if ($loydetytpaikat == 0) {
-
+					if (!$loydetytpaikat) {
 						mysql_data_seek($result,0);
-						$olerow = mysql_fetch_array($result);
+						$olerow = mysql_fetch_assoc($result);
 
 						$p_hyllyalue	= $olerow["hyllyalue"];
 						$p_hyllynro		= $olerow["hyllynro"];

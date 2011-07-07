@@ -5273,11 +5273,12 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 
 		if ($ostorow["tunnukset"] != '') {
 
-			$query_ale_lisa = generoi_alekentta('M');
+			$query_ale_lisa_m = generoi_alekentta('M');
+			$query_ale_lisa_o = generoi_alekentta('O');
 
 			$query = "	SELECT
 						sum(tilausrivi.rivihinta/tilausrivi.kpl) ostosumma,
-						sum(tilausrivi.hinta * {$query_ale_lisa}) ostosumma_eiloppulaskettu
+						sum(tilausrivi.hinta * if(tilausrivi.tyyppi = 'O', {$query_ale_lisa_o}, {$query_ale_lisa_m})) ostosumma_eiloppulaskettu
 						FROM tilausrivi
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tunnus  IN ($ostorow[tunnukset])";

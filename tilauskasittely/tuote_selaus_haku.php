@@ -2108,10 +2108,10 @@
 					list($kommentit, $text_output, $kuvalisa_bin, $ostohinta, $tuotemyyntihinta) = sarjanumeronlisatiedot_popup($row["sarjatunnus"], $row["sarjayhtio"], '', '', '100%', '');
 
 					if ($lisatiedot != "") {
-						echo "<tr class='aktiivi'><td colspan='7'>$kommentit</td></tr>";
+						echo "<tr class='aktiivi'><td class='back'>&nbsp;</td><td colspan='7'>$kommentit</td></tr>";
 					}
 					else {
-						echo "<tr class='aktiivi'><td colspan='6'>$kommentit</td></tr>";
+						echo "<tr class='aktiivi'><td class='back'>&nbsp;</td><td colspan='6'>$kommentit</td></tr>";
 					}
 				}
 			}

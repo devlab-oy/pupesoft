@@ -47,7 +47,7 @@ if (!function_exists('alku_kerayslista')) {
 
 		if ($kerayslistatyyppi == 'EXCEL1') {
 
-			require('Spreadsheet/Excel/Writer.php');
+			require_once('Spreadsheet/Excel/Writer.php');
 
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
@@ -76,7 +76,7 @@ if (!function_exists('alku_kerayslista')) {
 		}
 		elseif ($kerayslistatyyppi == 'EXCEL2') {
 
-			require('Spreadsheet/Excel/Writer.php');
+			require_once('Spreadsheet/Excel/Writer.php');
 
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
@@ -1231,7 +1231,7 @@ if (!function_exists('print_pdf_kerayslista')) {
 				echo t("Reklamaatio/Purkulista tulostuu")."...<br>";
 			}
 			else {
-				$kutsu = t("Ker‰yslista", $kieli);
+				$kutsu = t("Ker‰yslista", $kieli).": $laskurow[tunnus]";
 				echo t("Ker‰yslista tulostuu")."...<br>";
 			}
 

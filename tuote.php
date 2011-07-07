@@ -619,7 +619,7 @@
 			}
 
 			// aika karseeta, mutta katotaan voidaanko t‰ll‰st‰ optiota n‰ytt‰‰ yks tosi firma specific juttu
-			if (table_exists("yhteensopivuus_tuote") and file_exists("yhteensopivuus_tuote.php")) {
+			if (table_exists("yhteensopivuus_tuote") and file_exists("yhteensopivuus_tuote.php") and tarkista_oikeus('yhteensopivuus_tuote.php')) {
 
                 $lisa = " and tuoteno = '$tuoteno' ";
 

@@ -8,7 +8,7 @@
 
 if ($tee == "update") {
 
-	$query = "select * from lasku WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+	$query = "SELECT * from lasku WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array ($result);
 
@@ -32,7 +32,7 @@ if ($tee == "update") {
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
 	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
 	$bruttopaino 	= str_replace ( ",", ".", $bruttopaino);
-
+	
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
@@ -53,6 +53,14 @@ if ($tee == "update") {
 				ultilno 		= '$ultilno'
 				WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
+	
+	$query_erikoisale = "	UPDATE tilausrivi
+							SET erikoisale = '{$erikoisale}'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND uusiotunnus = '{$otunnus}'
+							AND netto  != 'N'
+							AND tyyppi != 'D'";
+	$upd_erikoisale_res = pupe_query($query_erikoisale);
 
 	$toiminto = "";
 }

@@ -137,11 +137,11 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
 	$kommentti 		= $trow["kommentti"];
 	$rivinotunnus	= $trow["otunnus"];
 	$rivitunnus		= $riviid;
-	
+
 	for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
 		${'ale'.$alepostfix} = $trow["ale{$alepostfix}"];
 	}
-	
+
 	echo t("Muuta rivi‰").":<br>";
 
 	//pidet‰‰n kaikki muuttujat tallessa
@@ -224,7 +224,7 @@ if ($tee == 'TI' and isset($tyhjenna)) {
 		unset(${'ale_array'.$alepostfix});
 		unset(${'kayttajan_ale'.$alepostfix});
 	}
-	
+
 	unset($alv);
 	unset($alv_array);
 	unset($hinta);
@@ -324,7 +324,7 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
 	for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
 		${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};
 	}
-	
+
 	$kayttajan_hinta	= $hinta;
 	$kayttajan_netto 	= $netto;
 	$kayttajan_var		= $var;
@@ -419,7 +419,7 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
 		$kpl 	= '';
 		$alv 	= '';
 		$paikka	= '';
-		
+
 		for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
 			${'ale'.$alepostfix} = '';
 		}
@@ -442,7 +442,7 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
 		unset(${'ale_array'.$alepostfix});
 		unset(${'kayttajan_ale'.$alepostfix});
 	}
-	
+
 	unset($alv);
 	unset($alv_array);
 	unset($hinta);
@@ -618,8 +618,9 @@ if ($tila == 'tee_siirto') {
 					// Siiret‰‰n rivi t‰lle keikalle
 					$query = "	UPDATE tilausrivi USE INDEX (uusiotunnus_index)
 								SET uusiotunnus = '$otunnus',
-								kerattyaika = now(),
-								keratty = '$kukarow[kuka]'
+								erikoisale 		= '$laskurow[erikoisale]'
+								kerattyaika 	= now(),
+								keratty 		= '$kukarow[kuka]'
 								$kpl_lisa
 								WHERE yhtio = '$kukarow[yhtio]'
 								and uusiotunnus = '$valittuuusiotunnus'
@@ -742,7 +743,7 @@ if ($tila == 'tee_kohdistus') {
 		}
 		$tunnukset2 = substr($tunnukset2,0,-1);
 
-		$query = "UPDATE tilausrivi use index (PRIMARY) SET uusiotunnus='0', kerattyaika='0', keratty='' WHERE tunnus in ($tunnukset2) AND yhtio='$kukarow[yhtio]'";
+		$query = "UPDATE tilausrivi use index (PRIMARY) SET uusiotunnus=0, kerattyaika='0000-00-00 00:00:00', keratty='', erikoisale=0 WHERE tunnus in ($tunnukset2) AND yhtio='$kukarow[yhtio]'";
 		$result = pupe_query($query);
 	}
 
@@ -753,7 +754,7 @@ if ($tila == 'tee_kohdistus') {
 
 			list($valittutunnus, $valittuotunnus) = explode("###", $valittu);
 
-			$query = "UPDATE tilausrivi use index (yhtio_otunnus) SET uusiotunnus='$otunnus', kerattyaika=now(), keratty='$kukarow[kuka]' WHERE yhtio='$kukarow[yhtio]' and otunnus in ('$valittuotunnus','$otunnus') and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
+			$query = "UPDATE tilausrivi use index (yhtio_otunnus) SET uusiotunnus='$otunnus', kerattyaika=now(), keratty='$kukarow[kuka]', erikoisale = '$laskurow[erikoisale]' WHERE yhtio='$kukarow[yhtio]' and otunnus in ('$valittuotunnus','$otunnus') and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
 			$result = pupe_query($query);
 		}
 	}
@@ -879,9 +880,9 @@ if ($tila == '') {
 	else {
 		$alvit = 0;
 	}
-	
+
 	$query_ale_lisa = generoi_alekentta('O');
-	
+
 	$query = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
 				(1+(if ((SELECT max(kaytetty) kaytetty
 						FROM sarjanumeroseuranta
@@ -1172,7 +1173,6 @@ if ($tila == '') {
 	<tr>
 		<th>".t("N‰yt‰ lasku").":</th><td>";
 
-
 	js_popup();
 
 	$query = "	SELECT l2.ebid, l2.nimi, l2.summa, l2.tunnus
@@ -1194,13 +1194,12 @@ if ($tila == '') {
 		<th>".t("N‰yt‰ vain kohdistamattomat").":</th><td><INPUT type='radio' $chk2 name='nayta_kohdistetut' value='eitod' onclick='submit()'></td>
 		</tr>
 		<tr>
-		<th>".t("Erikoisalennus")."</th><td>$laskurow[erikoisale]</td>
+		<th>".t("Erikoisalennus")."</th><td>".($laskurow["erikoisale"]*1)."%</td>
 		<th>".t("Kohdistettu summa (riv/kpl)")."</th><td style='text-align:right'>$ok $valittusumma $kulurow[valkoodi] ($kappaleetrow[rivit]/".(float) $kappaleetrow['kappaleet'].")$okend</td>
 		<th>".t("N‰yt‰ kaikki yhdell‰ sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
 		</tr>";
 
 	echo "<tr><th>".t("N‰ytet‰‰n rivit")."</th>";
-
 
 	if ($chk3 == "checked"){
 			$sivu  = 1;

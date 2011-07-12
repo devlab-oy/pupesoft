@@ -361,6 +361,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 		// Unohdetaan tallennettu state jos tullaan suoraan indexsvassista
 		if (isset($pupe_DataTables) and $pupe_DataTables != "" and isset($indexvas) and $indexvas == 1) {
+			
 			// DataTables cookie name SpryMedia_DataTables_TAULUNID_SKRIPTIN-NIMI
 			$dtpalvelin = parse_url($palvelin, PHP_URL_PATH);
 			$dtpathparts = pathinfo($phpnimi);
@@ -368,13 +369,19 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			if ($dtpathparts["dirname"] != "" and $dtpathparts["dirname"] != ".") {
 				$dtpalvelin .= $dtpathparts["dirname"]."/";
 			}
-
+			
+			if (basename($phpnimi) == "keikka.php") {
+				$dtpalvelin .= "tilauskasittely/";	
+			}
+			
 			$bool = setcookie("SpryMedia_DataTables_".$pupe_DataTables."_".basename($phpnimi), "", time()+43200, $dtpalvelin);
 		}
 
 	 	// T‰nne p‰‰see aina!
 		if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
-
+			
+			if (!isset($toim)) $toim = ""; 
+						
 			$oikeurow = tarkista_oikeus($phpnimi, $toim, '', 'X');
 
 			if ($oikeurow === FALSE) {

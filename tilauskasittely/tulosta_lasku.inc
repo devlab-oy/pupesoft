@@ -871,12 +871,10 @@ if (!function_exists('rivi_original')) {
 		if ($laskutyyppi != 5 and $row["alv"] < 500) {
 			//Lasketaan saman kaavan mukaan kuin laskutus.inc:ssä, eli pyöristetään kaikki kerralla lopuksi!
 			if ($kurssi != 1) {
-				if ($toim == 'PROFORMA') $verollrivi = $row["rivihinta_valuutassa"];
-				else $verollrivi = laskuval($row["hinta"], $kurssi) * generoi_alekentta_php($row, 'M', 'kerto') * $row["kpl"];
+				$verollrivi = $row["rivihinta_valuutassa"];
 			}
 			else {
-				if ($toim == 'PROFORMA') $verollrivi = $row["rivihinta"];
-				else $verollrivi = $row["hinta"] * generoi_alekentta_php($row, 'M', 'kerto') * $row["kpl"];
+				$verollrivi = $row["rivihinta"];
 			}
 
 			if ($yhtiorow["alv_kasittely"] != '') {
@@ -941,8 +939,6 @@ if (!function_exists('rivi_original')) {
 
 		$kala = $kala - 15;
 
-		$arvo += hintapyoristys($row["rivihinta"]);
-
 		// Jos meillä on marginaalimyyntiä/käänteinen alv
 		$laskalv = $row["alv"];
 
@@ -950,7 +946,14 @@ if (!function_exists('rivi_original')) {
 			$laskalv = 0;
 		}
 
-		$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
+		if ($kurssi != 1) {
+			$arvo += hintapyoristys($row["rivihinta_valuutassa"]);
+			$summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)));
+		}
+		else {
+			$arvo += hintapyoristys($row["rivihinta"]);
+			$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
+		}
 
 		return array($thispage, $kala, $summa, $arvo);
 	}
@@ -1062,8 +1065,6 @@ if (!function_exists('rivi_plain')) {
 
 		$kala = $kala - 15;
 
-		$arvo += hintapyoristys($row["rivihinta"]);
-
 		// Jos meillä on marginaalimyyntiä/käänteinen alv
 		$laskalv = $row["alv"];
 
@@ -1071,7 +1072,14 @@ if (!function_exists('rivi_plain')) {
 			$laskalv = 0;
 		}
 
-		$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
+		if ($kurssi != 1) {
+			$arvo += hintapyoristys($row["rivihinta_valuutassa"]);
+			$summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)));
+		}
+		else {
+			$arvo += hintapyoristys($row["rivihinta"]);
+			$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
+		}
 
 		return array($thispage, $kala, $summa, $arvo);
 	}
@@ -1190,8 +1198,6 @@ if (!function_exists('rivi_plain_2')) {
 
 		$kala = $kala - 15;
 
-		$arvo += hintapyoristys($row["rivihinta"]);
-
 		// Jos meillä on marginaalimyyntiä/käänteinen alv
 		$laskalv = $row["alv"];
 
@@ -1199,7 +1205,14 @@ if (!function_exists('rivi_plain_2')) {
 			$laskalv = 0;
 		}
 
-		$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
+		if ($kurssi != 1) {
+			$arvo += hintapyoristys($row["rivihinta_valuutassa"]);
+			$summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)));
+		}
+		else {
+			$arvo += hintapyoristys($row["rivihinta"]);
+			$summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)));
+		}
 
 		return array($thispage, $kala, $summa, $arvo);
 	}
@@ -1328,7 +1341,7 @@ if (!function_exists('loppu')) {
 
 			if ($toim == 'PROFORMA') {
 				if ($yhtiorow["laskunsummapyoristys"] != '' or $asiakasrow["laskunsummapyoristys"] != '') {
-			        $summa = round($summa,0);
+			        $summa = round($summa, 0);
 				}
 
 				$pdf_lasku->draw_text(490, 92+$vientikala + $barcode_korkeus,  sprintf('%.2f', $summa),			$thispage, $boldi);
@@ -1676,7 +1689,7 @@ if (!function_exists('alvierittely')) {
 
 			$pdf_lasku->draw_text(360, $kala, t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."): ",	$thispage, $norm);
 			$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $arow["alvrivihinta"]), $norm);
-			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arow["alvrivihinta"]), 		$thispage, $norm);
+			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arow["alvrivihinta"]), 			$thispage, $norm);
 
 			if ($alvrow["alv"] >= 600) {
 				$pdf_lasku->draw_text(550, $kala, t("K.V.", $kieli), 									$thispage, $norm);
@@ -1685,19 +1698,19 @@ if (!function_exists('alvierittely')) {
 				$pdf_lasku->draw_text(550, $kala, t("M.V.", $kieli), 									$thispage, $norm);
 			}
 			else {
-				$pdf_lasku->draw_text(550, $kala, ($alvrow["alv"]*1)."%", 							$thispage, $norm);
+				$pdf_lasku->draw_text(550, $kala, ($alvrow["alv"]*1)."%", 								$thispage, $norm);
 			}
 
 			$kala -= 10;
 		}
 
-		$pdf_lasku->draw_text(360, $kala, t("Lasku Yhteensä", $kieli).":",							$thispage, $norm);
+		$pdf_lasku->draw_text(360, $kala, t("Lasku Yhteensä", $kieli).":",								$thispage, $norm);
 
 		if ($toim == 'PROFORMA') {
 			$summa = $kassa_ale != '' ? $summa * (1-$kassa_ale/100) : $summa;
 
 			$oikpos = $pdf_lasku->strlen(sprintf('%.2f', $summa), $norm);
-			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa), 						$thispage, $norm);
+			$pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa), 							$thispage, $norm);
 			$pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], 									$thispage, $norm);
 		}
 		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {

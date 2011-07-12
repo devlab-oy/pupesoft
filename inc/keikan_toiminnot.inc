@@ -1,12 +1,14 @@
 <?php
 
-	function laske_hinta($otunnus, $tunnus, $suoratoimitukset = '') {
-		global $kukarow, $yhtiorow;
+	// haetaan keikkaotsikon tiedot
+	$query    = "SELECT * FROM lasku WHERE tunnus = '{$keikan_otunnus}' AND yhtio = '{$kukarow['yhtio']}'";
+	$result   = pupe_query($query);
+	$laskurow = mysql_fetch_array($result);
 
-		// haetaan keikkaotsikon tiedot
-		$query    = "SELECT * FROM lasku WHERE tunnus = '{$otunnus}' AND yhtio = '{$kukarow['yhtio']}'";
-		$result   = pupe_query($query);
-		$laskurow = mysql_fetch_array($result);
+	if (!isset($suoratoimitukset)) $suoratoimitukset = "";
+
+	function laske_hinta($laskurow, $tunnus, $suoratoimitukset = '') {
+		global $kukarow, $yhtiorow;
 
 		// katsotaan onko t‰lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
 		$query = "	SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, valkoodi, vienti
@@ -24,7 +26,7 @@
 			$kulurow = mysql_fetch_array($result);
 		}
 		else {
-			$kulurow = array(); // muuten tyhj‰‰
+			$kulurow = array("vienti" => "", "summa" => 0, "arvo" => 0, "valkoodi" => ""); // muuten tyhj‰‰
 		}
 
 		// jos ollaan liitetty jo vaihto-omaisuuslasku, k‰ytet‰‰n sen vientikentt‰‰
@@ -35,7 +37,8 @@
 		// jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
 		if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
 
-			$simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1),2);
+			if ($kulurow["arvo"] != 0) $simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1),2);
+			else $simualv = 0;
 
 			if (in_array($simualv, array(8,12,17,22))) {
 				$alvti = $simualv;
@@ -68,11 +71,9 @@
 			$tilaajanrivinro = '';
 		}
 
-		$lisa2 = " and tilausrivi.tunnus = '{$tunnus}' ";
-
 		$query_ale_lisa = generoi_alekentta('O');
 
-		$query = "	SELECT 
+		$query = "	SELECT
 					round((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl,
 					round((tilausrivi.varattu+tilausrivi.kpl) * (tilausrivi.hinta * {$query_ale_lisa}) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),'{$yhtiorow['hintapyoristys']}') rivihinta,
 					round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
@@ -81,16 +82,16 @@
 													WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
 													and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno
 													and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, {$alvit})/100)) ,'{$yhtiorow['hintapyoristys']}') alerivihinta
-					FROM lasku
-					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' {$tilaajanrivinro} {$lisa2}
+					FROM tilausrivi
+					JOIN lasku ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and lasku.liitostunnus = '{$laskurow['liitostunnus']}' and lasku.tila in ('O','K','D')
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 					LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '{$laskurow['maa']}')
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-					and lasku.liitostunnus = '{$laskurow['liitostunnus']}'
-					and lasku.tila in ('O','K','D')
-					GROUP BY tilausrivi.tunnus
-					ORDER BY tilausrivi.perheid2, tilausrivi.tunnus";
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					and tilausrivi.tunnus = '{$tunnus}'
+					and tilausrivi.tyyppi = 'O'
+					{$tilaajanrivinro}
+					GROUP BY tilausrivi.tunnus";
 		$hintojen_haku_res = pupe_query($query);
 		$hintojen_haku_row = mysql_fetch_assoc($hintojen_haku_res);
 
@@ -124,7 +125,7 @@
 	elseif ($_POST['ajax_toiminto'] == 'kohdista_rivi') {
 		list($valittutunnus, $valittuotunnus) = explode("###", $_POST['valittu']);
 
-		$otunnus = $_POST['otunnus'];
+		$otunnus = (int) $_POST['otunnus'];
 
 		$suuntalava_querylisa = '';
 
@@ -141,58 +142,53 @@
 			}
 		}
 
-		$updatelisa = $otunnus == 0 ? ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '' " : "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}' ";
+		$updatelisa = $otunnus == 0 ? ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale=0 " : "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale = '{$laskurow['erikoisale']}' ";
+		
+		// Haetaan rivit ennen p‰ivityst‰
+		$vanhathinnat = array();
+		
+		$updquery = "	SELECT tunnus
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
+						AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
+		$selresult = pupe_query($updquery);
 
-		$query = "	UPDATE tilausrivi use index (yhtio_otunnus) SET 
-					uusiotunnus = '{$otunnus}' 
+		while ($updrow = mysql_fetch_assoc($selresult)) {
+			$vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"], $suoratoimitukset);
+		}
+		
+		$query = "	UPDATE tilausrivi use index (yhtio_otunnus) SET
+					uusiotunnus = '{$otunnus}'
 					$updatelisa
-					WHERE yhtio = '{$kukarow['yhtio']}' 
-					AND otunnus IN ('{$valittuotunnus}','{$otunnus}') 
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND otunnus IN ('{$valittuotunnus}','{$otunnus}')
 					AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
 		$result = pupe_query($query);
+
+		// Haetaan p‰ivitetyt rivit
+		$uudethinnat = array();
+		mysql_data_seek($selresult, 0);
+			
+		while ($updrow = mysql_fetch_assoc($selresult)) {
+			$uudethinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"], $suoratoimitukset);
+		}
+
+		$data = array('vanhat_hinnat' => $vanhathinnat, 'uudet_hinnat' => $uudethinnat, 'suuntalava' => 0);
 
 		// Tuotteet p‰ivitet‰‰n kohdistuksissa automaattisesti oikeille suuntalavoille, mik‰li sellainen on jo perustettu (suuntalavan m‰‰riteltyjen varastopaikkojen sek‰ ker‰ysvyˆhykkeen mukaan)
 		if ($yhtiorow['suuntalavat'] == 'S' and $otunnus > 0) {
 			if ($suuntalavan_tunnus > 0) {
-				$data = array('suuntalava' => $suuntalavan_tunnus);
-				echo json_encode($data);
+				$data['suuntalava'] = $suuntalavan_tunnus;
 			}
 			else {
 				// toistaiseksi ei setata suuntalavaa dropdowniin kohdistuksen yhteydess‰ automaattisesti
-				// $data = array('suuntalava' => $suuntalava);
-				$data = array('suuntalava' => 0);
-				echo json_encode($data);
+				// $data['suuntalava'] = $suuntalava;
+				$data['suuntalava'] = 0;
 			}
 		}
-	}
-	elseif ($_POST['ajax_toiminto'] == 'kohdista_koko_sivu' or $_POST['ajax_toiminto'] == 'ala_kohdista_mitaan') {
 
-		if ($_POST['ajax_toiminto'] == 'ala_kohdista_mitaan') {
-			$tunnus = $_POST['tunnus'];
-
-			$query = "	UPDATE tilausrivi USE INDEX (PRIMARY) SET 
-						uusiotunnus = 0, 
-						kerattyaika = '0000-00-00 00:00:00', 
-						suuntalava = 0,
-						keratty = '' 
-						WHERE tunnus = {$tunnus} 
-						AND yhtio = '{$kukarow['yhtio']}'";
-			$result = pupe_query($query);
-		}
-		else if ($_POST['ajax_toiminto'] == 'kohdista_koko_sivu') {
-			$otunnus = $_POST['otunnus'];
-
-			list($valittutunnus, $valittuotunnus) = explode("###", $_POST['valittu']);
-
-			$query = "	UPDATE tilausrivi USE INDEX (yhtio_otunnus) SET 
-						uusiotunnus = '{$otunnus}', 
-						kerattyaika = now(), 
-						keratty = '{$kukarow['kuka']}'
-						WHERE yhtio = '{$kukarow['yhtio']}' 
-						AND otunnus IN ('{$valittuotunnus}','{$otunnus}') 
-						AND (tunnus = '{$valittutunnus}' OR perheid2 = '{$valittutunnus}')";
-			$result = pupe_query($query);
-		}
+		echo json_encode($data);
 	}
 	elseif ($_POST['ajax_toiminto'] == 'rivi_ale') {
 		$ale  = str_replace(",",".", $_POST['ale']);
@@ -200,14 +196,14 @@
 		$otunnus = $_POST['otunnus'];
 		$suoratoimitukset = $_POST['suoratoimitukset'];
 
-		$query  = "	UPDATE tilausrivi SET 
-					ale1 = '{$ale}' 
-					WHERE yhtio = '{$kukarow['yhtio']}' 
-					AND tunnus = '{$tunnus}' 
+		$query  = "	UPDATE tilausrivi SET
+					ale1 = '{$ale}'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tunnus}'
 					AND ale1 <> '{$ale}'";
 		$result = pupe_query($query);
 
-		$hinnat = laske_hinta($otunnus, $tunnus, $suoratoimitukset);
+		$hinnat = laske_hinta($laskurow, $tunnus, $suoratoimitukset);
 
 		$data = array('rivihinta' => (float) $hinnat['rivihinta'], 'alerivihinta' => (float) $hinnat['alerivihinta']);
 
@@ -225,7 +221,7 @@
 		$query  = "UPDATE tilausrivi set hinta='{$hinta}' where yhtio='{$kukarow['yhtio']}' and tunnus='{$tunnus}' and hinta<>'{$hinta}'";
 		$result = pupe_query($query);
 
-		$hinnat = laske_hinta($otunnus, $tunnus, $suoratoimitukset);
+		$hinnat = laske_hinta($laskurow, $tunnus, $suoratoimitukset);
 
 		$data = array('hinta' => $hinta, 'rivihinta' => (float) $hinnat['rivihinta'], 'alerivihinta' => (float) $hinnat['alerivihinta']);
 
@@ -242,7 +238,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}'";
 		$result = pupe_query($query);
 		$rivi	= mysql_fetch_assoc($result);
-	
+
 		// jos t‰t‰ rivi‰ ei ole viel‰ viety varastoon ni p‰ivitet‰‰n varattu kentt‰‰
 		if ($rivi["kpl"] == 0 and $rivi["varattu"] != 0 and $kpl != 0) {
 			$query = "	UPDATE tilausrivi
@@ -252,14 +248,14 @@
 						and varattu <> '{$kpl}'";
 			$result = pupe_query($query);
 		}
-	
+
 		if ($rivi["kpl"] == 0 and strtoupper($kpl) == "DEL") {
 			$query = "	DELETE FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						and tunnus = '{$tunnus}'
 						and tyyppi = 'O'";
 			$result = pupe_query($query);
-	
+
 			//Nollataan sarjanumero
 			if ($rivi["varattu"] > 0) {
 				$tunken = "ostorivitunnus";
@@ -267,7 +263,7 @@
 			else {
 				$tunken = "myyntirivitunnus";
 			}
-	
+
 			$query = "	UPDATE sarjanumeroseuranta
 						SET {$tunken} = 0
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -276,7 +272,7 @@
 			$sarjares = pupe_query($query);
 		}
 
-		$hinnat = laske_hinta($otunnus, $tunnus, $suoratoimitukset);
+		$hinnat = laske_hinta($laskurow, $tunnus, $suoratoimitukset);
 
 		$data = array('rivihinta' => (float) $hinnat['rivihinta'], 'alerivihinta' => (float) $hinnat['alerivihinta'], 'ulkkpl' => (float) $hinnat['ulkkpl']);
 
@@ -288,11 +284,11 @@
 		$suoratoimitukset = $_POST['suoratoimitukset'];
 		$uuden_rivin_kpl = $_POST['uuden_rivin_kpl'];
 
-		$query = "	SELECT tilausrivi.*, GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY toim_tuoteno SEPARATOR ',') toim_tuoteno 
-					FROM tilausrivi 
+		$query = "	SELECT tilausrivi.*, GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY toim_tuoteno SEPARATOR ',') toim_tuoteno
+					FROM tilausrivi
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
 					LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
-					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}' 
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 					AND tilausrivi.tunnus = '{$tunnus}'";
 		$result = pupe_query($query);
 
@@ -337,14 +333,14 @@
 
 		$uuden_rivin_id = mysql_insert_id();
 
-		$hinnat = laske_hinta($otunnus, $uuden_rivin_id, $suoratoimitukset);
+		$hinnat = laske_hinta($laskurow, $uuden_rivin_id, $suoratoimitukset);
 
 		$rivi['rivihinta'] = $hinnat['rivihinta'];
 		$rivi['alerivihinta'] = $hinnat['alerivihinta'];
 		$rivi['tunnus'] = $uuden_rivin_id;
 		$rivi['varattu'] = $uuden_rivin_kpl;
 		$rivi['toimaika'] = tv1dateconv($rivi['toimaika']);
-		$rivi['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='$rivirow[yksikko]'", "", "", "selite");
+		$rivi['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='$rivi[yksikko]'", "", "", "selite");
 
 		echo json_encode($rivi);
 	}

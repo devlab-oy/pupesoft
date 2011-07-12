@@ -10,7 +10,7 @@ if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
 	require ("../inc/keikan_toiminnot.inc");
 }
 
-if ($livesearch_tee == "TUOTEHAKU") {
+if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
 	livesearch_tuotehaku();
 	exit;
 }
@@ -196,6 +196,9 @@ if (!function_exists("tsekit")) {
 	}
 }
 
+
+if (!isset($toiminto)) $toiminto = "";
+
 echo "<font class='head'>".t("Saapuva keikka")."</font><hr>";
 
 if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
@@ -207,7 +210,7 @@ js_popup();
 
 echo "<div id='toimnapit'></div>";
 
-if ($nappikeikalle == 'menossa') {
+if (isset($nappikeikalle) and $nappikeikalle == 'menossa') {
 	$query = "UPDATE kuka SET kesken = 0 where yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
 	$nappiresult = pupe_query($query);
 }
@@ -334,7 +337,7 @@ if ($toiminto == "tulosta") {
 	}
 
 	if ($komento["Purkulista"] != '') {
-		require('tulosta_purkulista.inc');		
+		require('tulosta_purkulista.inc');
 	}
 
 	if ($komento["Tuotetarrat"] != '') {
@@ -404,7 +407,7 @@ if ($toiminto == 'kalkyyli' and $yhtiorow['suuntalavat'] == 'S' and $tee == '' a
 		$koko_suuntalava_result = pupe_query($query);
 
 		if (mysql_num_rows($koko_suuntalava_result) > 0) {
-			$query = "	UPDATE tilausrivi 
+			$query = "	UPDATE tilausrivi
 						JOIN suuntalavat ON (suuntalavat.yhtio = tilausrivi.yhtio AND suuntalavat.tunnus = tilausrivi.suuntalava AND suuntalavat.tila = 'S')
 						SET tilausrivi.hyllyalue = '{$suuntalavan_hyllyalue}',
 						tilausrivi.hyllynro = '{$suuntalavan_hyllynro}',
@@ -492,7 +495,7 @@ if ($toiminto == "kalkyyli") {
 	require ("kalkyyli.inc");
 }
 
-if ($toiminto != 'kohdista' and $nappikeikalla == 'ollaan') {
+if (isset($nappikeikalla) and $nappikeikalla == 'ollaan' and $toiminto != 'kohdista') {
 	$toiminto = "kohdista";
 }
 
@@ -558,9 +561,11 @@ if ($ytunnus != "" or $toimittajaid != "") {
 }
 
 if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
-	echo "<table>";
+
 	echo "<form name='toimi' action='$PHP_SELF' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+
+	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Etsi toimittaja")."</th>";
 	echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td>";
@@ -605,7 +610,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 					$kukalisa
 					ORDER BY nimi";
 		$keikan_laatija_res = pupe_query($query);
-	
+
 		echo "<td><select name='keikan_laatija' onchange='submit();'>";
 		echo "<option value=''>",t("Valitse"),"</option>";
 
@@ -630,21 +635,21 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		echo "</tr>";
 	}
 
-	echo "</form>";
 	echo "</table>";
+	echo "</form>";
 
 	// kursorinohjausta
 	$formi    = "toimi";
 	$kentta   = "ytunnus";
 	$toiminto = "";
 
-	$kaikkivarastossayhteensa = 0;
-	$vaihtoomaisuuslaskujayhteensa = 0;
-	$kululaskujayhteensa = 0;
+	$kaikkivarastossayhteensa 		= 0;
+	$vaihtoomaisuuslaskujayhteensa 	= 0;
+	$kululaskujayhteensa 			= 0;
 
 	$laatijalisa = '';
 
-	if (trim($keikan_laatija) != '') {
+	if (isset($keikan_laatija) and trim($keikan_laatija) != '') {
 		$laatijalisa = " and lasku.laatija = '$keikan_laatija' ";
 	}
 
@@ -660,10 +665,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
 				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
 				$suuntalavajoin
-				WHERE lasku.yhtio = '$kukarow[yhtio]' 
-				and lasku.tila = 'K' 
-				and lasku.alatila = '' 
-				and lasku.vanhatunnus = 0 
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				and lasku.tila = 'K'
+				and lasku.alatila = ''
+				and lasku.vanhatunnus = 0
 				and lasku.mapvm = '0000-00-00'
 				$laatijalisa
 				GROUP BY liitostunnus, ytunnus, nimi, osoite, postitp, swift
@@ -702,10 +707,11 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 			// tehd‰‰n pop-up divi jos keikalla on kommentti...
 			if ($row["comments"] != "") {
+				echo "<td valign='top' class='tooltip' id='$row[liitostunnus]'><img src='$palvelin2/pics/lullacons/info.png'>";
 				echo "<div id='div_$row[liitostunnus]' class='popup' style='width: 500px;'>";
 				echo $row["comments"];
 				echo "</div>";
-				echo "<td valign='top' class='tooltip' id='$row[liitostunnus]'><img src='$palvelin2/pics/lullacons/info.png'></td>";
+				echo "</td>";
 			}
 			else {
 				echo "<td>&nbsp;</td>";
@@ -714,10 +720,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			if ($row["varastossaarvo"] == 0) $row["varastossaarvo"] = "";
 
 			echo "<td>$row[nimi] $row[nimitark]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[keikat]</td><td align='right'>$row[kpl]</td><td align='right'>$row[varastossaarvo]</td>";
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<td><form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
-			echo "<td><input type='submit' value='".t("Valitse")."'></td>";
-			echo "</form>";
+			echo "<input type='submit' value='".t("Valitse")."'>";
+			echo "</form></td>";
 			echo "</tr>";
 		}
 
@@ -730,7 +736,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 			echo "<tr><th>".t("Kululaskuja liitetty")."</th><td align='right'>".sprintf("%01.2f", $kululaskujayhteensa)." $yhtiorow[valkoodi]</td></tr>";
 			echo "</table>";
 		}
-
 	}
 }
 
@@ -872,9 +877,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 			$keikkakesken = file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock");
 		}
 
-		$kaikkivarastossayhteensa = 0;
-		$vaihtoomaisuuslaskujayhteensa = 0;
-		$kululaskujayhteensa = 0;
+		$kaikkivarastossayhteensa 		= 0;
+		$vaihtoomaisuuslaskujayhteensa 	= 0;
+		$kululaskujayhteensa 			= 0;
 
 		while ($row = mysql_fetch_array($result)) {
 
@@ -961,14 +966,16 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 				echo "<td>".t("Varastoonvienti kesken")."</td>";
 			}
 			else {
-				echo "<form action='$PHP_SELF' method='post'>";
+
 				echo "<td align='right'>";
-				echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-				echo "<input type='hidden' name='otunnus' value='$row[tunnus]'>";
-				echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
-				echo "<input type='hidden' name='keikkaid' value='$row[laskunro]'>";
-				echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
-				echo "<input type='hidden' name='laskunro' value='$row[laskunro]'>";
+				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<input type='hidden' name='toimittajaid' 	value='$toimittajaid'>";
+				echo "<input type='hidden' name='otunnus' 		value='$row[tunnus]'>";
+				echo "<input type='hidden' name='ytunnus' 		value='$ytunnus'>";
+				echo "<input type='hidden' name='keikkaid' 		value='$row[laskunro]'>";
+				echo "<input type='hidden' name='tunnus' 		value='$row[tunnus]'>";
+				echo "<input type='hidden' name='laskunro' 		value='$row[laskunro]'>";
+				echo "<input type='hidden' name='indexvas' 		value='1'>";
 				echo "<select name='toiminto'>";
 
 				// n‰it‰ saa tehd‰ aina keikalle
@@ -1005,9 +1012,10 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 				}
 
 				echo "</select>";
-				echo " <input type='submit' value='".t("Tee")."'>";
-				echo "</td>";
+				echo "<input type='submit' value='".t("Tee")."'>";
 				echo "</form>";
+				echo "</td>";
+
 			}
 			echo "</tr>";
 		}
@@ -1038,7 +1046,9 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	$tsekkiresult = pupe_query($query);
 	$tsekkirow = mysql_fetch_array($tsekkiresult);
 
-	list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($tsekkirow,$kaikkivarastossayhteensa);
+	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
+
+	list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($tsekkirow, $kaikkivarastossayhteensa);
 
 	$formalku =  "<td class='back'>";
 	$formalku .= "<form action='$PHP_SELF?indexvas=1' method='post'>";

@@ -152,7 +152,7 @@ if ($filename == "") die('Tiedostonimi puuttui!\n');
 $encoding = exec("file -b --mime-encoding $filename");
 
 if (preg_match("/(utf\-8|binary)/i", $encoding)) {
-	$convert = exec("iconv -f $encoding -t ISO8859-1  $filename > $filename.ISO");
+	$convert = exec("iconv -f utf-8 -t ISO8859-1  $filename > $filename.ISO");
 	rename($filename.".ISO", $filename);
 }
 

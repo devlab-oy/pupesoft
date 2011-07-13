@@ -26,11 +26,12 @@ read jatketaanko
 echo
 
 if [ ${jatketaanko} = "k" ]; then
-       echo "Paivitetaan Pupesoft..."
-       echo
-       svn update ${pupedir}
+	echo "Paivitetaan Pupesoft..."
+	echo
+	cd ${pupedir}
+	git pull
 else
-       echo "Pupesoftia ei paivitetty!"
+	echo "Pupesoftia ei paivitetty!"
 fi
 
 echo
@@ -38,6 +39,7 @@ echo "Valmis!"
 echo
 
 ###################################################################################
-# Nain luodaan pupeinstallaatio:
-# svn co svn://svn.devlab.fi/var/svn/devlab/devlab/pupesoft /var/www/html/pupesoft/
+# Nain luodaan Pupe-installaatio:
+# mkdir -p /var/www/html/pupesoft
+# git clone git@github.com:devlab-oy/pupesoft.git /var/www/html/pupesoft/
 ###################################################################################

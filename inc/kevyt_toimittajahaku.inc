@@ -100,7 +100,7 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "<input type='hidden' name='mul_tuoteryhma' value='".base64_encode(serialize($mul_tuoteryhma))."'>";
 		echo "<input type='hidden' name='mul_kustannuspaikka' value='".base64_encode(serialize($mul_kustannuspaikka))."'>";
 		echo "<input type='hidden' name='vain_excel' value='$vain_excel'>";
-		echo "<input type='submit' value='".t("Valitse")."' onclick=\"this.form.id='kevyt_toimittajahaku';\">";
+		echo "<input type='submit' name='valitse_toimittaja' value='".t("Valitse")."' onclick=\"this.form.id='kevyt_toimittajahaku';\">";
 		echo "</form>";
 		echo "</td></tr>";
 

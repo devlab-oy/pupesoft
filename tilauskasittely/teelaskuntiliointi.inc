@@ -72,7 +72,24 @@ else {
 		$kustp 		= $xrow["kustp"];
 		$kohde 		= $xrow["kohde"];
 		$projekti 	= $xrow["projekti"];
+		
+		// Muun haarojen kustannupaikat, kohteet ja projektit
+		$kustkustp = 0;
+		$kustkohde = 0;
+        $kustproje = 0;
 
+		$mkakustp = 0;
+        $mkakohde = 0;
+        $mkaproje = 0;
+
+		$mskustp = 0;
+		$mskohde = 0;
+		$msproje = 0;
+		
+		$pyorkustp = 0;
+		$pyorkohde = 0;
+		$pyorproje = 0;
+		
 		// otetaan suurimman myynnin tiedot
 		if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and $xrow["summa"] > $maksimisumma) {
 			$maksimisumma = $xrow["summa"];
@@ -228,14 +245,26 @@ else {
 			if ($xrow['alv'] > 0) {
 
 				$onkoalvia = "kylla"; // apumuuttuja, että tiedetään alempana, että tehtiin alvikirjauksia
+				
+				// Etsitään onko tilin takana kustannuspaikkaa laitettuna, jos on niin laitetaan se ALV:n tiliöinnille.
+				$kustptilisql = " 	SELECT kustp, kohde, projekti 
+									FROM tili 
+									WHERE yhtio = '$kukarow[yhtio]' 
+									AND tilino = '$xrow[alvtilino]'";
+				$kustpresult = pupe_query($kustptilisql);
+
+				$kustrivi = mysql_fetch_assoc($kustpresult);
+				$kustkustp = $kustrivi['kustp'];
+				$kustkohde = $kustrivi['kohde'];
+				$kustproje = $kustrivi['projekti'];
 
 				$query = "	INSERT into tiliointi set
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
 							tilino 				= '$xrow[alvtilino]',
-							kustp 				= 0,
-							kohde 				= 0,
-							projekti 			= 0,
+							kustp 				= '$kustkustp',
+							kohde 				= '$kustkohde',
+							projekti 			= '$kustproje',
 							tapvm 				= '$tapvm',
 							summa 				= $alv * -1,
 							summa_valuutassa 	= $alv_valuutassa * -1,
@@ -375,14 +404,28 @@ else {
 
 		// jos maksetaan käteisellä ja meillä on kassa-alennusta, tehdään kirjaus... vain jos alvikirjauksia EI OLE tehty!
 		if ($lasku['kasumma'] != '' and $onkoalvia == "") {
+			
+			// Etsitään onko tilin takana kustannuspaikkaa laitettuna, jos on niin laitetaan se tiliöinnille.
+			$mkasql = " 	SELECT kustp, kohde, projekti 
+							FROM tili 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND tilino = '$yhtiorow[myynninkassaale]'";
+			$mkaresult = pupe_query($mkasql);
+			
+			
+			$rivimka = mysql_fetch_assoc($mkaresult);
+			$mkakustp = $rivimka['kustp'];
+			$mkakohde = $rivimka['kohde'];
+			$mkaproje = $rivimka['projekti'];
+			
 			$selite = "Lasku ". $lasku['nimi']." ".$lasku['nimitark'];
 			$query  = "	INSERT into tiliointi set
 		 		   		yhtio 				= '$kukarow[yhtio]',
 		 		   		ltunnus 			= '$tunnus',
 		 		   		tilino 				= '$yhtiorow[myynninkassaale]',
-		 		   		kustp 				= 0,
-		 		   		kohde 				= 0,
-		 		   		projekti 			= 0,
+		 		   		kustp 				= '$mkakustp',
+		 		   		kohde 				= '$mkakohde',
+		 		   		projekti 			= '$mkaproje',
 		 		   		tapvm 				= '$tapvm',
 		 		   		summa 				= '$lasku[kasumma]',
 						summa_valuutassa 	= '$lasku[kasumma_valuutassa]',
@@ -437,13 +480,25 @@ else {
 					$arvo_valuutassa = round($arvo / $lasku["vienti_kurssi"], 2);
 				}
 
+				// Etsitään onko tilin takana kustannuspaikkaa laitettuna, jos on niin laitetaan se tiliöinnille.
+				$mysasql = " 	SELECT kustp, kohde, projekti
+								FROM tili 
+								WHERE yhtio = '$kukarow[yhtio]' 
+								AND tilino = '$myysaa_kateinen[$tili]'";
+				$mysaresult = pupe_query($mysasql);
+
+				$rivims = mysql_fetch_assoc($mysaresult);
+				$mskustp = $rivims['kustp'];
+				$mskohde = $rivims['kohde'];
+				$msproje = $rivims['projekti'];
+				
 				$query = "	INSERT into tiliointi set
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
 							tilino 				= '$myysaa_kateinen[$tili]',
-							kustp 				= 0,
-							kohde 				= 0,
-							projekti 			= 0,
+							kustp 				= '$mskustp',
+							kohde 				= '$mskohde',
+							projekti 			= '$msproje',
 							tapvm 				= '$tapvm',
 							summa 				= '$arvo',
 							summa_valuutassa 	= '$arvo_valuutassa',
@@ -486,13 +541,27 @@ else {
 	$vastasumma_valuutassa = round($vastasumma_valuutassa,2);
 
 	if ($vastasumma != $loppusumma or ($lasku['valkoodi'] != $yhtiorow['valkoodi'] and $vastasumma_valuutassa != $loppusumma_valuutassa)) {
+		
+		// Etsitään onko tilin takana kustannuspaikkaa laitettuna, jos on niin laitetaan se tiliöinnille.
+		$pyoristyssql = "	SELECT kustp, kohde, projekti 
+							FROM tili 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND tilino = '$yhtiorow[pyoristys]'";
+		$pyoristysresult = pupe_query($pyoristyssql);
+
+		$rivip = mysql_fetch_assoc($pyoristysresult);		
+		$pyorkustp = $rivip['kustp'];
+		$pyorkohde = $rivip['kohde'];
+		$pyorproje = $rivip['projekti'];
+	
+		
 		$query = "	INSERT into tiliointi set
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$tunnus',
 					tilino 				= '$yhtiorow[pyoristys]',
-					kustp 				= 0,
-					kohde 				= 0,
-					projekti 			= 0,
+					kustp 				= '$pyorkustp',
+					kohde 				= '$pyorkohde',
+					projekti 			= '$pyorproje',
 					tapvm 				= '$tapvm',
 					summa 				= $vastasumma - $loppusumma,
 					summa_valuutassa 	= $vastasumma_valuutassa - $loppusumma_valuutassa,

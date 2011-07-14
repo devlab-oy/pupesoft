@@ -29,7 +29,8 @@ if [ ${jatketaanko} = "k" ]; then
 	echo "Paivitetaan Pupesoft..."
 	echo
 	cd ${pupedir}
-	git pull
+	git checkout .             # revertataan kaikki local muutokset
+	git pull origin master     # paivitetaan aina varmasti master branchi
 else
 	echo "Pupesoftia ei paivitetty!"
 fi

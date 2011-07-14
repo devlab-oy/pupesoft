@@ -14,7 +14,8 @@ echo
 echo "Paivitetaan ${PRIVATEDIR}"
 
 cd ${PRIVATEDIR}
-git pull
+git checkout .             # revertataan kaikki local muutokset
+git pull origin master     # paivitetaan aina varmasti master branchi
 
 cp -Rf ${PRIVATEDIR}/* ${PUPEDIR}/
 

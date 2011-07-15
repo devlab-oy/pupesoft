@@ -42,5 +42,5 @@ echo
 ###################################################################################
 # Nain luodaan Pupe-installaatio:
 # mkdir -p /var/www/html/pupesoft
-# git clone git@github.com:devlab-oy/pupesoft.git /var/www/html/pupesoft/
+# git clone git://github.com/devlab-oy/pupesoft.git /var/www/html/pupesoft/
 ###################################################################################

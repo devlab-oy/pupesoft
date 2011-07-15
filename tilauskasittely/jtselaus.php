@@ -540,6 +540,22 @@
 	//Lisätään muokaattu tilausrivi
 	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'LISAARIVI') {
 
+		// lisää päivämäärän tarkistus.
+		if (checkdate($kerayskka, $keraysppa, $keraysvva)) {
+			$kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
+		}
+		else {
+			$kerayspvm  = date("Y-m-d");
+		}
+		
+		// lisää päivämäärän tarkistus.
+		if (checkdate($toimkka, $toimppa, $toimvva)) {
+			$toimaika  =  $toimvva."-".$toimkka."-".$toimppa;
+		}
+		else {
+			$toimaika  = date("Y-m-d");
+		}
+
 		if ($kpl > 0) {
 			$query = "	SELECT *
 						FROM tuote

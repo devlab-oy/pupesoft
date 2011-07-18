@@ -2135,7 +2135,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 		// Luodaan muuttujat
 		extract($params);
 
-		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
+		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]], $thispage, $pieni);
 
 		if (trim($row["perhe_kommentti1"]) != '') {			
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
@@ -2156,14 +2156,24 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
-		if ($pdf->strlen($row["nimitys"], $norm) >= 280) {
-			#$kala = $kala - $rivinkorkeus;
-		}
+		if ($pdf->strlen($row["nimitys"], $norm) >= 180) {		
 
-		$pdf->draw_paragraph($kala+$norm["height"]+3, 185, 180, 340, $row["nimitys"],	$thispage, $norm);
+			$kala = $kala - $rivinkorkeus;
+			$pdf->draw_paragraph($kala+25, 185, 180, 360, $row["nimitys"],	$thispage, $norm);
+			$kuha = "k";
+		}
+		else {
+			$pdf->draw_paragraph($kala+$norm["height"]+3, 185, 180, 340, $row["nimitys"],	$thispage, $norm);
+			$kuha = "e";
+		}
 
 		if ($lahetetyyppi == "tulosta_lahete_viivakoodi_osh.inc") {
 			$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
+			
+			if ($kuha == "k") {
+				$kala = $kala + $rivinkorkeus;
+			}
+			
 			$pdf->draw_text(395-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 	$thispage, $norm);
 
 			$oikpos = $pdf->strlen($row["varattu"], $norm);
@@ -2188,19 +2198,23 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 
 			$oikpos = $pdf->strlen($nettohinta, $norm);
 			$pdf->draw_text(570-$oikpos, $kala, $nettohinta, $thispage, $norm);
+			
+			$kala = $kala - $rivinkorkeus;
+			
 		}
 		else {
 			$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
 			$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 	$thispage, $norm);
 
 			$oikpos = $pdf->strlen($row["varattu"], $norm);
-			$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 									$thispage, $norm);
+			$pdf->draw_text(575-$oikpos, $kala, $row["varattu"],$thispage, $norm);			
 		}
 
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]-5, 45, 60, 280, $row["kommentti"],	$thispage, $norm);
+			
+			$pohja = $pdf->draw_paragraph($kala+10, 45, 60, 280, $row["kommentti"],	$thispage, $norm);
 			$kala = $pohja - $rivinkorkeus;
 		}
 		else {
@@ -2225,7 +2239,12 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			fclose($fh);
 
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, $kala, 320, $thispage);
+			
+			if ($row["kommentti"] != '') { // halutaan viivakoodi hippasen ylemmäs. säästää tilaa
+				$kala = $kala + $rivinkorkeus;
+			}
+			
+			$pdf->image_place($image, $kala, 337, $thispage);
 
 			system("rm -f $nimi");
 

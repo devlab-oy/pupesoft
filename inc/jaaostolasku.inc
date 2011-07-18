@@ -251,13 +251,16 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 	$check2 = mysql_fetch_assoc($result);
 
 	if ($check1['summa'] != 0) {
+
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["pyoristys"]);
+
 		$query = "	INSERT into tiliointi set
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$jaettavalaskurow[tunnus]',
 					tilino 				= '$yhtiorow[pyoristys]',
-					kustp 				= 0,
-					kohde 				= 0,
-					projekti 			= 0,
+					kustp 				= '{$kustp_ins}',
+					kohde 				= '{$kohde_ins}',
+					projekti 			= '{$projekti_ins}',
 					tapvm 				= '$jaettavalaskurow[tapvm]',
 					summa 				= -1 * $check1[summa],
 					summa_valuutassa 	= -1 * $check1[summa_valuutassa],
@@ -271,13 +274,16 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 	}
 
 	if ($check2['summa'] != 0) {
+
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["pyoristys"]);
+
 		$query = "	INSERT into tiliointi set
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$utunnus',
 					tilino 				= '$yhtiorow[pyoristys]',
-					kustp 				= 0,
-					kohde 				= 0,
-					projekti 			= 0,
+					kustp 				= '{$kustp_ins}',
+					kohde 				= '{$kohde_ins}',
+					projekti 			= '{$projekti_ins}',
 					tapvm 				= '$jaettavalaskurow[tapvm]',
 					summa 				= -1 * $check2[summa],
 					summa_valuutassa 	= -1 * $check2[summa_valuutassa],

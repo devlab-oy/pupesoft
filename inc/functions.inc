@@ -7303,7 +7303,7 @@ if (!function_exists("tarvitaanko_intrastat")) {
 
 if (!function_exists("palauta_intrastat_tiedot")) {
 	function palauta_intrastat_tiedot($laskurow, $varasto, $teeupdate = FALSE) {
-		global $yhtiorow, $kukarow;
+		global $yhtiorow, $kukarow; 
 
 		if ($varasto > 0) {
 			$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
@@ -12782,5 +12782,44 @@ if (!function_exists("tuotteen_lisatiedot")) {
 		return $parametrit;
 	}
 }
+
+if (!function_exists("kustannuspaikka_kohde_projekti")) {
+	function kustannuspaikka_kohde_projekti($tilino, $kustp='', $kohde='', $projekti='') {
+		global $kukarow;
+		
+		$query = "	SELECT kustp, kohde, projekti
+					FROM tili
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tilino = '{$tilino}'";
+		$kustp_kohde_proj_res = pupe_query($query);
+		$kustp_kohde_proj_row = mysql_fetch_assoc($kustp_kohde_proj_res);
+		
+		$returnarray = array();
+		
+		if ($kustp == "") {
+			$returnarray[] = $kustp_kohde_proj_row["kustp"];
+		}
+		else {
+			$returnarray[] = $kustp;	
+		}
+		
+		if ($kohde == "") {
+			$returnarray[] = $kustp_kohde_proj_row["kohde"];
+		}
+		else {
+			$returnarray[] = $kohde;	
+		}
+		
+		if ($projekti == "") {
+			$returnarray[] = $kustp_kohde_proj_row["projekti"];
+		}
+		else {
+			$returnarray[] = $projekti;	
+		}
+				
+		return $returnarray;
+	}
+}
+
 
 ?>

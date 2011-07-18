@@ -10,20 +10,22 @@
 		echo "<b>".t("Lasku")." '$tunnus' ".t("katosi")."</b><br>";
 		exit;
 	}
+
 	$laskurow = mysql_fetch_array($lresult);
 
 	$query = "	SELECT *
 				FROM tiliointi
 				WHERE tunnus = '$isa'
 				AND ltunnus = '$tunnus'
-				AND yhtio ='$kukarow[yhtio]'";
+				AND yhtio = '$kukarow[yhtio]'";
 	$tresult = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($tresult) == 0) {
 		echo "<b>".t("Tiliointi")." '$isa' ".t("katosi")."</b><br>";
 		exit;
 	}
-	$tiliointirow = mysql_fetch_array ($tresult);
+
+	$tiliointirow = mysql_fetch_array($tresult);
 
 	if ($tiliointirow['vero'] != 0) {
 		echo "<br>";
@@ -117,7 +119,7 @@
 							tilino		= '$tiliointirow[tilino]',
 							kustp		= '$tiliointirow[kustp]',
 							kohde		= '$tiliointirow[kohde]',
-							projekti	= '$projekti',
+							projekti	= '$tiliointirow[projekti]',
 							tapvm		= '$tapvm',
 							summa		= '$asumma',
 							vero		= 0,
@@ -137,7 +139,7 @@
 							tilino		= '$jaksotilino',
 							kustp		= '$tiliointirow[kustp]',
 							kohde		= '$tiliointirow[kohde]',
-							projekti	= '$projekti',
+							projekti	= '$tiliointirow[projekti]',
 							tapvm		= '$tapvm',
 							summa		= $ssumma,
 							vero		= 0,
@@ -172,7 +174,7 @@
 							tilino		= '$tiliointirow[tilino]',
 							kustp		= '$tiliointirow[kustp]',
 							kohde		= '$tiliointirow[kohde]',
-							projekti	= '$projekti',
+							projekti	= '$tiliointirow[projekti]',
 							tapvm		= '$tapvm',
 							summa		= '$summa',
 							vero		= 0,
@@ -190,7 +192,7 @@
 							tilino		= '$jaksotilino',
 							kustp		= '$tiliointirow[kustp]',
 							kohde		= '$tiliointirow[kohde]',
-							projekti	= '$projekti',
+							projekti	= '$tiliointirow[projekti]',
 							tapvm		= '$tapvm',
 							summa		= $summa * -1,
 							vero		= 0,

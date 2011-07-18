@@ -26,11 +26,16 @@
 
 		// Tehd‰‰n vastakirjaus
 		if ($tkesken == 0 and $laskuid != 0) {
+
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
+
 			$query = "	INSERT into tiliointi set
 		                yhtio 				= '$yritirow[yhtio]',
 		                ltunnus 			= '$laskuid',
 		                tilino 				= '$yritirow[oletus_rahatili]',
-		                kustp 				= 0,
+		                kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
 		                tapvm 				= '$tpv-$tpk-$tpp',
 		                summa 				= '$vastavienti',
 						summa_valuutassa	= '$vastavienti_valuutassa',
@@ -41,9 +46,10 @@
 		                laatija 			= 'tiliote',
 		                laadittu 			= now()";
 			$result = mysql_query($query) or pupe_error($query);
-			$vastavienti = 0;
+
+			$vastavienti 			= 0;
 			$vastavienti_valuutassa = 0;
-			$laskuid = 0;
+			$laskuid 				= 0;
 
 			echo "<font class='message'>*** ".t("Vastavienti luotu")." ($yritirow[oletus_rahatili]) ***</font><br>";
 		}
@@ -64,12 +70,16 @@
 
 				// Palkkio: vikasta spacesta loppuun
 				$palkkio = (float) substr($luottokuntatieto, (strrpos($luottokuntatieto, " ") + 1));
-
+				
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointisaantorow["tilino2"], $tiliointisaantorow["kustp2"]);
+				
 				$query = "	INSERT into tiliointi set
 			                yhtio 				= '$yritirow[yhtio]',
 			                ltunnus 			= '$laskuid',
 			                tilino 				= '$tiliointisaantorow[tilino2]',
-			                kustp 				= '$tiliointisaantorow[kustp2]',
+			                kustp    			= '{$kustp_ins}',
+							kohde	 			= '{$kohde_ins}',
+							projekti 			= '{$projekti_ins}',
 			                tapvm 				= '$tpv-$tpk-$tpp',
 			                summa 				= $palkkio * -1,
 							summa_valuutassa 	= round($palkkio * $kurssi * -1, 2),
@@ -80,12 +90,16 @@
 			                laatija 			= 'tiliote',
 			                laadittu 			= now()";
 				$result = mysql_query($query) or pupe_error($query);
-
+				
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointisaantorow["tilino"], $tiliointisaantorow["kustp"]);
+				
 				$query = "	INSERT into tiliointi set
 			                yhtio 				= '$yritirow[yhtio]',
 			                ltunnus 			= '$laskuid',
 			                tilino 				= '$tiliointisaantorow[tilino]',
-			                kustp 				= '$tiliointisaantorow[kustp]',
+			                kustp    			= '{$kustp_ins}',
+							kohde	 			= '{$kohde_ins}',
+							projekti 			= '{$projekti_ins}',
 			                tapvm 				= '$tpv-$tpk-$tpp',
 			                summa 				= $kanta * -1,
 							summa_valuutassa	= round($kanta * $kurssi * -1, 2),
@@ -98,11 +112,16 @@
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			else {
+				
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointisaantorow["tilino"], $tiliointisaantorow["kustp"]);
+				
 				$query = "	INSERT into tiliointi set
 		                	yhtio 				= '$yritirow[yhtio]',
 			                ltunnus 			= '$laskuid',
 			                tilino 				= '$tiliointisaantorow[tilino]',
-			                kustp 				= '$tiliointisaantorow[kustp]',
+			                kustp    			= '{$kustp_ins}',
+							kohde	 			= '{$kohde_ins}',
+							projekti 			= '{$projekti_ins}',
 			                tapvm 				= '$tpv-$tpk-$tpp',
 			                summa 				= $maara * -1,
 							summa_valuutassa 	= $kohdm * -1,

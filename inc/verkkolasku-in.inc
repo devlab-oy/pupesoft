@@ -1062,37 +1062,37 @@
 						}
 
 						$query = "	INSERT into tiliointi set
-									yhtio = '$kukarow[yhtio]',
-									ltunnus = '$tunnus',
-									tilino = '$varastotili',
-									kustp = 0,
-									tapvm = '$tpv-$tpk-$tpp',
-									summa = '$verkkolaskuveroton',
+									yhtio 		= '$kukarow[yhtio]',
+									ltunnus 	= '$tunnus',
+									tilino 		= '$varastotili',
+									kustp 		= 0, #OLETUSKUSTP?
+									tapvm 		= '$tpv-$tpk-$tpp',
+									summa		= '$verkkolaskuveroton',
 									summa_valuutassa = '$verkkolaskuveroton_valuutassa',
-									valkoodi 	= '$valkoodi',
-									selite = '$selite',
-									vero = 0,
-									lukko = '',
-									laatija = '$kukarow[kuka]',
-									laadittu = now()";
+									valkoodi	= '$valkoodi',
+									selite 		= '$selite',
+									vero 		= 0,
+									lukko 		= '',
+									laatija 	= '$kukarow[kuka]',
+									laadittu 	= now()";
 						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
 						$query = "	INSERT into tiliointi set
-									yhtio ='$kukarow[yhtio]',
-									ltunnus = '$tunnus',
-									tilino = '$yhtiorow[varastonmuutos]',
-									kustp = '$kustp',
-									kohde = '$kohde',
-									projekti = '$projekti',
-									tapvm = '$tpv-$tpk-$tpp',
-									summa = $verkkolaskuveroton*-1,
+									yhtio 		= '$kukarow[yhtio]',
+									ltunnus 	= '$tunnus',
+									tilino 		= '$yhtiorow[varastonmuutos]',
+									kustp 		= '$kustp',
+									kohde 		= '$kohde',
+									projekti 	= '$projekti',
+									tapvm 		= '$tpv-$tpk-$tpp',
+									summa 		= $verkkolaskuveroton*-1,
 									summa_valuutassa = $verkkolaskuveroton_valuutassa*-1,
 									valkoodi 	= '$valkoodi',
-									selite = '$selite',
-									vero = 0,
-									lukko = '',
-									laatija = '$kukarow[kuka]',
-									laadittu = now()";
+									selite 		= '$selite',
+									vero 		= 0,
+									lukko 		= '',
+									laatija 	= '$kukarow[kuka]',
+									laadittu 	= now()";
 						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
 						// Jos t‰m‰ lasku menee varastoon, tehd‰‰n valmiiksi keikka
@@ -1231,7 +1231,7 @@
 									yhtio 		= '$yhtio',
 									ltunnus 	= '$tunnus',
 									tilino 		= '$yhtiorow[pyoristys]',
-									kustp 		= 0,
+									kustp 		= 0, #OLETUSKUSTP?
 									tapvm 		= '$tpv-$tpk-$tpp',
 									summa 		= $omasumma - $totsumma,
 									summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa,
@@ -1256,7 +1256,7 @@
 									yhtio 		= '$kukarow[yhtio]',
 									ltunnus 	= '$tunnus',
 									tilino 		= '$varastotili',
-									kustp 		= 0,
+									kustp 		= 0, #OLETUSKUSTP?
 									tapvm 		= '$tpv-$tpk-$tpp',
 									summa 		= '$vtontot',
 									summa_valuutassa = '$vtontot_valuutassa',
@@ -1302,6 +1302,7 @@
 									yhtio 		= '$kukarow[yhtio]',
 									ltunnus 	= '$tunnus',
 									tilino		= '$ostovelat',
+									kustp 		= 0, #OLETUSKUSTP?
 									tapvm 		= '$erv-$erk-$erp',
 									summa 		= '$omasumma',
 									summa_valuutassa = '$omasumma_valuutassa',
@@ -1317,6 +1318,7 @@
 									yhtio 		= '$kukarow[yhtio]',
 									ltunnus 	= '$tunnus',
 									tilino 		= '$yhtiorow[selvittelytili]',
+									kustp 		= 0, #OLETUSKUSTP?
 									tapvm 		= '$erv-$erk-$erp',
 									summa 		= $vassumma,
 									summa_valuutassa = '$vassumma_valuutassa',

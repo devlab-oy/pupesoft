@@ -139,7 +139,7 @@
 						yhtio    = '$kukarow[yhtio]',
 						ltunnus  = '$kpitorow[tosite]',
 						tilino   = '$yhtiorow[varasto]',
-						kustp    = 0,
+						kustp    = 0, #OLETUSKUSTP?
 						tapvm    = '$tapvm',
 						summa    = '$arvo',
 						vero     = 0,
@@ -153,7 +153,7 @@
 						yhtio    = '$kukarow[yhtio]',
 						ltunnus  = '$kpitorow[tosite]',
 						tilino   = '$yhtiorow[varastonmuutos]',
-						kustp    = 0,
+						kustp    = 0, #OLETUSKUSTP?
 						tapvm    = '$tapvm',
 						summa    = $arvo * -1,
 						vero     = 0,

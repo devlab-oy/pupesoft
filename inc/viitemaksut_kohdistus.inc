@@ -102,8 +102,11 @@
 
 			list($myyntisaamiset_kustp, $myyntisaamiset_kohde, $myyntisaamiset_projekti) = explode(" ", $row["saamiset_tarkenteet"]);
 
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointisaantorow["myyntisaamiset"], $myyntisaamiset_kustp, $myyntisaamiset_kohde, $myyntisaamiset_projekti);
+			
 			# Myyntisaamiset
-			$query = "INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, kustp, kohde, projekti) values ('$row[suoriyhtio]', 'automaatti', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[myyntisaamiset]', -$row[laskutettu], -$row[laskutettu_valuutassa], '$row[laskuvaluutta]', 'Automaattikohdistettu asiakkaan suoritus', $myyntisaamiset_kustp, $myyntisaamiset_kohde, $myyntisaamiset_projekti)";
+			$query = "	INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, kustp, kohde, projekti) 
+						values ('$row[suoriyhtio]', 'automaatti', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[myyntisaamiset]', -$row[laskutettu], -$row[laskutettu_valuutassa], '$row[laskuvaluutta]', 'Automaattikohdistettu asiakkaan suoritus', $myyntisaamiset_kustp, $myyntisaamiset_kohde, $myyntisaamiset_projekti)";
 			$insres = mysql_query($query) or pupe_error($query);
 
 			if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
@@ -116,7 +119,9 @@
 			}
 
 			# Kassatili
-			$query = "INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite) values ('$row[suoriyhtio]', 'automaatti', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[kassatili]', $suoritettu_kassaan, '$suoritettu_kassaan_valuutassa', '$row[suoritusvaluutta]', 'Automaattikohdistettu asiakkaan suoritus')";
+			#OLETUSKUSTP?
+			$query = "	INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite) 
+						values ('$row[suoriyhtio]', 'automaatti', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[kassatili]', $suoritettu_kassaan, '$suoritettu_kassaan_valuutassa', '$row[suoritusvaluutta]', 'Automaattikohdistettu asiakkaan suoritus')";
 			$insres = mysql_query($query) or pupe_error($query);
 
 			// Mahdollinen kassa-alennus
@@ -145,6 +150,7 @@
 								tapvm 				= '$row[kirjpvm]',
 								ltunnus 			= '$row[laskutunnus]',
 								tilino 				= '$row[alennustili]',
+								kustp 				= 0, #OLETUSKUSTP?
 								summa 				= '$alennus',
 								summa_valuutassa	= '$alennus_valuutassa',
 								valkoodi			= '$row[suoritusvaluutta]',
@@ -204,6 +210,7 @@
 										SET yhtio 			= '$row[suoriyhtio]',
 										ltunnus 			= '$row[laskutunnus]',
 										tilino 				= '$row[alvtili]',
+										kustp 				= 0, #OLETUSKUSTP?
 										tapvm 				= '$row[kirjpvm]',
 										summa 				= '$alv',
 										summa_valuutassa 	= '$alv_valuutassa',
@@ -261,6 +268,7 @@
 				$valero = round($row["laskutettu"] - $suoritettu_kassaan - $alennus, 2);
 
 				if (abs($valero) >= 0.01) {
+					#OLETUSKUSTP?
 					$query = "	INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite)
 			            		VALUES ('$row[suoriyhtio]','automaatti',now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[valuuttaerotili]', $valero, 'Automaattikohdistettu asiakkaan suoritus')";
 					$result = mysql_query($query) or pupe_error($query);
@@ -342,12 +350,16 @@
 			$maksaja_espattu = mysql_real_escape_string($row["nimi_maksaja"]);
 
 			# Myyntisaamiset tai selvittely
-			$query = "INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, lukko) values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[myyntisaamiset]', -$summa, -$summa_valuutassa, '$row[suoritusvaluutta]', ' $maksaja_espattu maksoi viitteell‰ v‰‰rin', '1')";
+			#OLETUSKUSTP?
+			$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, lukko) 
+						values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[myyntisaamiset]', -$summa, -$summa_valuutassa, '$row[suoritusvaluutta]', ' $maksaja_espattu maksoi viitteell‰ v‰‰rin', '1')";
 			$insres = mysql_query($query) or pupe_error($query);
 			$tlast_id = mysql_insert_id();
 
 			# Kassatili
-			$query = "INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, aputunnus, lukko) values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[oletus_rahatili]', $summa, $summa_valuutassa, '$row[suoritusvaluutta]', ' $maksaja_espattu maksoi viitteell‰ v‰‰rin', '$tlast_id', '1')";
+			#OLETUSKUSTP?
+			$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, aputunnus, lukko) 
+						values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[oletus_rahatili]', $summa, $summa_valuutassa, '$row[suoritusvaluutta]', ' $maksaja_espattu maksoi viitteell‰ v‰‰rin', '$tlast_id', '1')";
 			$insres = mysql_query($query) or pupe_error($query);
 
 			$query = "UPDATE suoritus SET ltunnus='$tlast_id' WHERE tunnus='$row[tunnus]'";

@@ -486,7 +486,7 @@
 											yhtio    = '$kukarow[yhtio]',
 											ltunnus  = '$laskuid',
 											tilino   = '$yhtiorow[varasto]',
-											kustp    = 0,
+											kustp    = 0, #OLETUSKUSTP?
 											tapvm    = now(),
 											summa    = '$tyokulut',
 											vero     = 0,
@@ -500,7 +500,7 @@
 											yhtio    = '$kukarow[yhtio]',
 											ltunnus  = '$laskuid',
 											tilino   = '$yhtiorow[varastonmuutos_valmistuksesta]',
-											kustp    = 0,
+											kustp    = 0, #OLETUSKUSTP?
 											tapvm    = now(),
 											summa    = $tyokulut * -1,
 											vero     = 0,

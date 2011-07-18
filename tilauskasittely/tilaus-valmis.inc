@@ -738,6 +738,8 @@ else {
 			$temp_laskutunnus = $laskurow['tunnus'];
 
 			$varasto_chk_array = array();
+			$varasto_kpl_array = array();
+			$tulalue_kpl_array = array();
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -855,44 +857,16 @@ else {
 					$lisatiedot_result = pupe_query($query);
 				}
 				else {
+					// Pidet‰‰n lukua kuinka paljon mist‰kin varastosta on rivi‰, jotka j‰‰ alkuperˆiselle tilaukselle
+					if ($varasto > 0) {
+						if (isset($varasto_kpl_array[$varasto])) $varasto_kpl_array[$varasto]++;
+						else $varasto_kpl_array[$varasto] = 1;
+					}
 
-					$query = "	SELECT ulkoinen_jarjestelma
-								FROM varastopaikat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$varasto}'";
-					$ulkoinen_jarjestelma_res = pupe_query($query);
-					$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
-
-					$varasto_chk_array[$laskurow['tunnus']] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
-
-					$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o' " : '';
-
-					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
-					$query = "	UPDATE lasku set
-								varasto 							= '$varasto',
-								tulostusalue						= '$tulostusalue',
-								ultilno 							= '$laskurow[ultilno]',
-								aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
-								aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',
-								bruttopaino 						= '$laskurow[bruttopaino]',
-								kauppatapahtuman_luonne 			= '$laskurow[kauppatapahtuman_luonne]',
-								kontti								= '$laskurow[kontti]',
-								kuljetusmuoto						= '$laskurow[kuljetusmuoto]',
-								lisattava_era 						= '$laskurow[lisattava_era]',
-								maa_lahetys							= '$laskurow[maa_lahetys]',
-								maa_maara							= '$laskurow[maa_maara]',
-								poistumistoimipaikka 				= '$laskurow[poistumistoimipaikka]',
-								poistumistoimipaikka_koodi 			= '$laskurow[poistumistoimipaikka_koodi]',
-								sisamaan_kuljetus					= '$laskurow[sisamaan_kuljetus]',
-								sisamaan_kuljetusmuoto  			= '$laskurow[sisamaan_kuljetusmuoto]',
-								sisamaan_kuljetus_kansallisuus		= '$laskurow[sisamaan_kuljetus_kansallisuus]',
-								vahennettava_era 					= '$laskurow[vahennettava_era]'
-								$toimitustapalisa
-								where yhtio = '$kukarow[yhtio]'
-								and tunnus  = '$laskurow[tunnus]'";
-					$varresult = pupe_query($query);
-
-					$laskurow["varasto"] = $varasto;
+					if ($tulostusalue != "") {
+						if (isset($tulalue_kpl_array[$tulostusalue])) $tulalue_kpl_array[$tulostusalue]++;
+						else $tulalue_kpl_array[$tulostusalue] = 1;
+					}
 				}
 
 				//	edellinen varasto talteen
@@ -911,13 +885,65 @@ else {
 				}
 			}
 
+			// Valitaan paras varasto ja tulostusalue alkuper‰iselle osalla
+			asort($varasto_kpl_array);
+			asort($tulalue_kpl_array);
+			
+			$varasto_kpl_array = array_keys($varasto_kpl_array);
+			$tulalue_kpl_array = array_keys($tulalue_kpl_array);
+						
+			$varasto = array_pop($varasto_kpl_array);
+			$tulostusalue = array_pop($tulalue_kpl_array);
+
+			$query = "	SELECT ulkoinen_jarjestelma
+						FROM varastopaikat
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$varasto}'";
+			$ulkoinen_jarjestelma_res = pupe_query($query);
+			$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
+			
+			// Intrastat-tiedot
+			$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
+			
+			$varasto_chk_array[$temp_laskutunnus] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
+
+			$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o' " : '';
+
+			//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
+			$query = "	UPDATE lasku set
+						varasto 							= '$varasto',
+						tulostusalue						= '$tulostusalue',
+						ultilno 							= '$laskurow[ultilno]',
+						aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
+						aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',
+						bruttopaino 						= '$laskurow[bruttopaino]',
+						kauppatapahtuman_luonne 			= '$laskurow[kauppatapahtuman_luonne]',
+						kontti								= '$laskurow[kontti]',
+						kuljetusmuoto						= '$laskurow[kuljetusmuoto]',
+						lisattava_era 						= '$laskurow[lisattava_era]',
+						maa_lahetys							= '$laskurow[maa_lahetys]',
+						maa_maara							= '$laskurow[maa_maara]',
+						poistumistoimipaikka 				= '$laskurow[poistumistoimipaikka]',
+						poistumistoimipaikka_koodi 			= '$laskurow[poistumistoimipaikka_koodi]',
+						sisamaan_kuljetus					= '$laskurow[sisamaan_kuljetus]',
+						sisamaan_kuljetusmuoto  			= '$laskurow[sisamaan_kuljetusmuoto]',
+						sisamaan_kuljetus_kansallisuus		= '$laskurow[sisamaan_kuljetus_kansallisuus]',
+						vahennettava_era 					= '$laskurow[vahennettava_era]'
+						$toimitustapalisa
+						where yhtio = '$kukarow[yhtio]'
+						and tunnus  = '$temp_laskutunnus'";
+			$varresult = pupe_query($query);
+
+			echo "$query<br>";
+
+			$laskurow["varasto"] = $varasto;
+
 			// Jos tilaus splittaantui moneen osaan
 			if (count($tilausnumerot) > 1) {
 				$tilauksia = 1;
 				$numerot = implode(', ',$tilausnumerot);
 
 				foreach ($tilausnumerot as $tilausnumero) {
-
 					$upviesti = t("Tilaus jakaantunut")." ".count($tilausnumerot)." ".t("tilaukseksi").": ".$numerot." ".t("Tilaus").": ".$tilauksia."/".count($tilausnumerot);
 
 					$query = "	UPDATE lasku set sisviesti2 = concat_ws(' ', sisviesti2, '$upviesti')

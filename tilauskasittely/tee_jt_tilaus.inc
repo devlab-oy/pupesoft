@@ -273,7 +273,11 @@
 						// keräysaika ja toimitusaikaan now
 						elseif (mysql_field_name($stresult,$i)=='kerayspvm' or
 								mysql_field_name($stresult,$i)=='toimaika') {
+							
+							
+							## Miksi?
 							$query .= mysql_field_name($stresult,$i)."=now(),";
+						
 						}
 						// Katotaan oisko käsinsyötetty eräpäivämäärä
 						elseif (mysql_field_name($stresult,$i)=='erpcm') {

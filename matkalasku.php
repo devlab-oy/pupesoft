@@ -355,16 +355,16 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 			echo "<font class='message'>".t("HUOM! tiliöidään poikkeavalle tilille '$tilino'<br>");
 			$trow["tilino"] = $tilino;
 		}
-		
-		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tilino, $tiliointisaantorow["kustp2"]);
+
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tilino, $kustp, $kohde, $projekti);
 
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$kukarow[yhtio]',
 					ltunnus 	= '$tilausnumero',
 					tilino 		= '{$tilino}',
-					kustp 		= '$kustp',
-					kohde 		= '$kohde', #OLETUSKUSTP?
-					projekti 	= '$projekti',
+					kustp    	= '{$kustp_ins}',
+					kohde	 	= '{$kohde_ins}',
+					projekti 	= '{$projekti_ins}',
 					tapvm 		= '$laskurow[tapvm]',
 					summa 		= '$summa',
 					vero 		= '$vero',
@@ -440,7 +440,10 @@ function korjaa_ostovelka($ltunnus) {
 		return false;
 	}
 
-	$query = "	select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$ltunnus'";
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus  = '$ltunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($result);
 
@@ -451,19 +454,19 @@ function korjaa_ostovelka($ltunnus) {
 
 	$query = "	SELECT sum((-1*summa)) summa, count(*) kpl
 				FROM tiliointi
-				WHERE yhtio = '$kukarow[yhtio]'
-				and ltunnus='$ltunnus'
-				and korjattu=''
-				and tilino != '$yhtiorow[ostovelat]'";
+				WHERE yhtio  = '$kukarow[yhtio]'
+				and ltunnus  = '$ltunnus'
+				and korjattu = ''
+				and tilino  != '$yhtiorow[ostovelat]'";
 	$summares = mysql_query($query) or pupe_error($query);
 	$summarow = mysql_fetch_array($summares);
 
 	//	Onko meillä jo ostovelkatiliöinti vai perustetaanko uusi?
-	$query = "	SELECT *
+	$query = "	SELECT tunnus
 				FROM tiliointi
-				WHERE yhtio = '$kukarow[yhtio]'
-				and ltunnus = '$ltunnus'
-				and tilino = '$yhtiorow[ostovelat]'
+				WHERE yhtio  = '$kukarow[yhtio]'
+				and ltunnus  = '$ltunnus'
+				and tilino   = '$yhtiorow[ostovelat]'
 				and korjattu = ''";
 	$velkares = mysql_query($query) or pupe_error($query);
 
@@ -471,35 +474,45 @@ function korjaa_ostovelka($ltunnus) {
 		$velkarow = mysql_fetch_array($velkares);
 		if ($debug == 1) echo "Löydettiin ostovelkatiliöinti tunnuksella $velkarow[tunnus] tiliöintejä ($summarow[kpl]) kpl<br>";
 
-		$query = "	UPDATE tiliointi SET ";
-		$where = "	WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$velkarow[tunnus]'";
+		$query = "	UPDATE tiliointi SET
+					summa 		= '$summarow[summa]',
+					tapvm 		= '$laskurow[tapvm]',
+					vero 		= 0,
+					tosite 		= '$tositenro'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$velkarow[tunnus]'";
+		$updres = mysql_query($query) or pupe_error($query);
 	}
 	else {
 		if ($debug == 1) echo "Luodaan uusi ostovelkatiliöinti<br>";
 
-		$query = "	INSERT into tiliointi SET
-					yhtio 	= '$kukarow[yhtio]',
-					ltunnus = '$ltunnus',
-					lukko 	= '1',
-					tilino 	= '$yhtiorow[ostovelat]',";
-		$where = "";
-	}
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["ostovelat"]);
 
-	$query .= "		summa 		= '$summarow[summa]',
-					kustp 		= 0, #OLETUSKUSTP?
+		$query = "	INSERT into tiliointi SET
+					yhtio 		= '$kukarow[yhtio]',
+					ltunnus 	= '$ltunnus',
+					lukko 		= '1',
+					tilino 		= '$yhtiorow[ostovelat]',
+					summa 		= '$summarow[summa]',
+					kustp    	= '{$kustp_ins}',
+					kohde	 	= '{$kohde_ins}',
+					projekti 	= '{$projekti_ins}',
 					tapvm 		= '$laskurow[tapvm]',
 					vero 		= 0,
 					tosite 		= '$tositenro',
 					laatija 	= '$kukarow[kuka]',
 					laadittu 	= now()";
-	$query = $query.$where;
-	$updres = mysql_query($query) or pupe_error($query);
+		$updres = mysql_query($query) or pupe_error($query);
+	}
 
 	if ($debug == 1) echo "Korjattiin ostovelkatiliöinti uusi summa on $summarow[summa]";
 
 	//	Päivitetään laskun summa
 	if ($laskurow["tilaustyyppi"] == "M") {
-		$query = "UPDATE lasku set summa = '".(-1 * $summarow["summa"])."' where yhtio = '$kukarow[yhtio]' and tunnus = '$ltunnus'";
+		$query = "	UPDATE lasku
+					set summa = '".(-1 * $summarow["summa"])."'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$ltunnus'";
 		$updres = mysql_query($query) or pupe_error($query);
 	}
 
@@ -510,8 +523,8 @@ function korjaa_ostovelka($ltunnus) {
 				and otunnus = '$ltunnus'
 				and tyyppi = 'M'";
 	$result = mysql_query($query) or pupe_error($query);
-
 	$rivisumma = mysql_fetch_array($result);
+
 	$ero = round($rivisumma["summa"], 2) + round($summarow["summa"], 2);
 
 	if ($ero <> 0) {
@@ -542,7 +555,8 @@ function erittele_rivit($tilausnumero) {
 	$toimires = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($toimires) == 0) {
-		die(t("Sori, mutta tän toimittajan laskuja EI SAA eritellä!"));
+		echo t("VIRHE: Toimittajan laskuja ei saa eritellä")."!";
+		return false;
 	}
 
 	$query = "	SELECT tunnus
@@ -557,8 +571,9 @@ function erittele_rivit($tilausnumero) {
 		return true;
 	}
 
-	$query = " 	DELETE
-				FROM tiliointi
+	$query = " 	UPDATE tiliointi
+				SET korjattu = '$kukarow[kuka]',
+				korjausaika  = now()
 				WHERE yhtio = '$kukarow[yhtio]'
 				and ltunnus = '$tilausnumero'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -580,7 +595,7 @@ function erittele_rivit($tilausnumero) {
 
 		require("inc/verkkolasku-in-pupevoice.inc");
 
-		if (count($tuotetiedot)>0) {
+		if (count($tuotetiedot) > 0) {
 			for ($i=0; $i < count($tuotetiedot); $i++) {
 
 				//	Näyttäisikö tämä korkoriviltä, otetaan se talteen ja laitetaan myös riville?
@@ -649,9 +664,10 @@ function erittele_rivit($tilausnumero) {
 					$lisatty_tun = mysql_insert_id();
 
 					//	Päivitetään perheid2
-					$query = " 	UPDATE tilausrivi set perheid2 = '$lisatty_tun'
+					$query = " 	UPDATE tilausrivi
+								set perheid2 = '$lisatty_tun'
 								WHERE yhtio = '$kukarow[yhtio]'
-								and tunnus = '$lisatty_tun'";
+								and tunnus  = '$lisatty_tun'";
 					$updres = mysql_query($query) or pupe_error($query);
 
 					//	Tehdään oletustiliöinti
@@ -671,7 +687,7 @@ function erittele_rivit($tilausnumero) {
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
 					$result = mysql_query($query) or pupe_error($query);
-					$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
+					$isa = mysql_insert_id();
 
 					$query = "	INSERT INTO tilausrivin_lisatiedot SET
 								yhtio				= '$kukarow[yhtio]',
@@ -686,7 +702,6 @@ function erittele_rivit($tilausnumero) {
 					$updres = mysql_query($query) or pupe_error($query);
 
 					korjaa_ostovelka($tilausnumero);
-
 				}
 			}
 		}
@@ -1034,7 +1049,11 @@ if ($tee == "MUOKKAA") {
 		}
 
 		if ($poistakuva > 0) {
-			$query = "DELETE from liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos='lasku' and liitostunnus='$tilausnumero' and tunnus = '$poistakuva'";
+			$query = "	DELETE from liitetiedostot
+						WHERE yhtio 		= '$kukarow[yhtio]'
+						and liitos			= 'lasku'
+						and liitostunnus	= '$tilausnumero'
+						and tunnus 			= '$poistakuva'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_affected_rows() == 0) {
@@ -1112,7 +1131,7 @@ if ($tee == "MUOKKAA") {
 					$tilausrivi = mysql_fetch_array($result);
 
 					// Poistetaan muokattava tilausrivi
-					if ($tilausrivi["perheid"]>0) {
+					if ($tilausrivi["perheid"] > 0) {
 						$query = "	DELETE from tilausrivi
 									WHERE yhtio = '$kukarow[yhtio]' and perheid = '$rivitunnus'";
 						$result = mysql_query($query) or pupe_error($query);
@@ -1125,7 +1144,9 @@ if ($tee == "MUOKKAA") {
 					}
 
 					//	Poistetaan myös vastaava tiliöinti
-					$query = "	DELETE from tiliointi
+					$query = "	UPDATE tiliointi
+								SET korjattu = '$kukarow[kuka]',
+								korjausaika  = now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and ltunnus = '$tilausnumero'
 								and (tunnus = '$tilausrivi[tiliointirivitunnus]' or aputunnus = '$tilausrivi[tiliointirivitunnus]')";
@@ -1413,18 +1434,6 @@ if ($tee == "MUOKKAA") {
 				}
 
 				echo "</table>";
-
-/*
-				if ($perheid2 > 0 and $perheid2 != $tilausrivi["tunnus"]) {
-					echo "<br><form action = '$PHP_SELF' method='post' autocomplete='off'>";
-					echo "<input type='hidden' name='tee' value='$tee'>";
-					echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-					echo "<input type='hidden' name='toim' value='$toim'>";
-					echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-					echo "<tr><td class='back'><input type='submit' value='".t("Uusi tapahtuma")."'></td></tr>";
-					echo "</form><br>";
-				}
-*/
 			}
 		}
 		else {
@@ -1438,7 +1447,7 @@ if ($tee == "MUOKKAA") {
 			$query = "SELECT * from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tuotetyyppi = '$tyyppi' and status != 'P'";
 			$tres = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($tres) == 1){
+			if (mysql_num_rows($tres) == 1) {
 				$trow = mysql_fetch_array($tres);
 			}
 			else {

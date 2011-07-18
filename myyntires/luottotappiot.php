@@ -68,9 +68,9 @@ if ($tila == 'K' and is_array($luottotappio)) {
 
 					// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
 					if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
-						
+
 						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["toim_alv"]);
-						
+
 						$query = "	INSERT INTO tiliointi SET
 									yhtio		= '$kukarow[yhtio]',
 									ltunnus		= '$lasku[ltunnus]',
@@ -90,9 +90,9 @@ if ($tila == 'K' and is_array($luottotappio)) {
 						$result = mysql_query($query) or pupe_error($query);
 					}
 					else {
-						
+
 						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["alv"]);
-						
+
 						$query = "	INSERT INTO tiliointi SET
 									yhtio		= '$kukarow[yhtio]',
 									ltunnus		= '$lasku[ltunnus]',
@@ -114,21 +114,21 @@ if ($tila == 'K' and is_array($luottotappio)) {
 				}
 			}
 			else {
-				$query = "INSERT INTO tiliointi SET
-						yhtio 		= '$kukarow[yhtio]',
-						ltunnus		= '$lasku[ltunnus]',
-						tilino		= '$lasku[tilino]',
-						kustp		= '$lasku[kustp]',
-						kohde		= '$lasku[kohde]',
-						projekti	= '$lasku[projekti]',
-						tapvm		= '$tpv-$tpk-$tpp',
-						summa		= $lasku[summa] * -1,
-						vero		= 0,
-						selite		= '$lasku[selite]',
-						lukko		= '',
-						tosite		= '$lasku[tosite]',
-						laatija		= '$kukarow[kuka]',
-						laadittu	= now()";
+				$query = "	INSERT INTO tiliointi SET
+							yhtio 		= '$kukarow[yhtio]',
+							ltunnus		= '$lasku[ltunnus]',
+							tilino		= '$lasku[tilino]',
+							kustp		= '$lasku[kustp]',
+							kohde		= '$lasku[kohde]',
+							projekti	= '$lasku[projekti]',
+							tapvm		= '$tpv-$tpk-$tpp',
+							summa		= $lasku[summa] * -1,
+							vero		= 0,
+							selite		= '$lasku[selite]',
+							lukko		= '',
+							tosite		= '$lasku[tosite]',
+							laatija		= '$kukarow[kuka]',
+							laadittu	= now()";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
@@ -213,17 +213,17 @@ if ($tila == 'N') {
 		echo "<td>".tv1dateconv($lasku["tapvm"])."</td>";
 		echo "<td>".tv1dateconv($lasku["erpcm"])."</td>";
 		echo "<td align='right'>$lasku[summa]</td>";
-		
+
 		$ltchk = "";
-		
+
 		if ($eraantyneet != "" and (int) str_replace("-", "", $lasku['erpcm']) < (int) date("Ymd")) {
 			$ltchk = "CHECKED";
 		}
 		elseif ($eraantyneet == "")  {
 			$ltchk = "CHECKED";
 		}
-		
-		
+
+
 		echo "<td align='center'><input type='checkbox' name='luottotappio[]' value='$lasku[laskunro]' $ltchk></td>";
 		echo "</tr>";
 	}
@@ -256,13 +256,13 @@ if ($tila == 'N') {
 if ($tila == "") {
 
 	pupe_DataTables($pupe_DataTables, 5, 6);
-	
+
 	$lisa = "";
 	$erachk = "";
-	
+
 	if ($eraantyneet != "") {
 		$lisa = " and erpcm < curdate() ";
-		$erachk = "SELECTED"; 
+		$erachk = "SELECTED";
 	}
 
 	$query = "	SELECT *, concat_ws(' ', nimi, nimitark, '<br>', osoite, '<br>', postino, postitp) asiakas, sum(summa-saldo_maksettu) summa, count(*) kpl, group_concat(distinct laskunro SEPARATOR '<br>') laskut
@@ -276,19 +276,19 @@ if ($tila == "") {
 				GROUP BY liitostunnus
 				ORDER BY ytunnus";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	echo "<form action = '$PHP_SELF' method = 'post'>";
 	echo "<table>";
 	echo "<tr><th>".t("Rajaus")."</th>";
-	
+
 	echo "<td><select name='eraantyneet'>
 			<option value=''>".t("Näytä kaikki laskut")."</option>
 			<option value='E' $erachk>".t("Näytä vain erääntyneet laskut")."</option>
-			</select></td>										
+			</select></td>
 			<td class='back'><input type='submit' value='".t("Aja")."'></td>";
 	echo "</table>";
 	echo "</form><br>";
-	
+
 	echo "<table class='display' id='$pupe_DataTables'>";
 
 	echo "<thead>
@@ -324,7 +324,7 @@ if ($tila == "") {
 		echo "<td class='back'>
 				<form action = '$PHP_SELF' method = 'post'>
 	   			<input type='hidden' name='tila' value='N'>
-				<input type='hidden' name='eraantyneet' value='$eraantyneet'>	
+				<input type='hidden' name='eraantyneet' value='$eraantyneet'>
 	   			<input type='hidden' name='liitostunnus' value='$asiakas[liitostunnus]'>
 	   			<input type='submit' value='".t("Luottotappio")."'>
 				</form>

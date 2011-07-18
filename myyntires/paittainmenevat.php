@@ -55,9 +55,9 @@
 		$query  = "	SELECT a.tunnus atunnus, b.tunnus btunnus, a.ltunnus altunnus, b.ltunnus bltunnus, a.kirjpvm akirjpvm, a.summa asumma, b.kirjpvm bkirjpvm, b.summa bsumma, a.nimi_maksaja
 					FROM suoritus a
 					JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.summa * -1 = a.summa $tilitselisa)
-					WHERE a.yhtio = '$kukarow[yhtio]' and
-					a.kohdpvm = '0000-00-00' and
-					a.summa < 0";
+					WHERE a.yhtio = '$kukarow[yhtio]'
+					and a.kohdpvm = '0000-00-00'
+					and a.summa < 0";
 		$paaresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($paaresult) > 0) {
@@ -65,7 +65,11 @@
 			while ($suoritusrow = mysql_fetch_array ($paaresult)) {
 
 				// Onko tilioinnit veilä olemassa ja suoritus oikeassa tilassa
-				$query  = "SELECT tunnus, kirjpvm from suoritus where tunnus in ('$suoritusrow[atunnus]', '$suoritusrow[btunnus]') and kohdpvm = '0000-00-00'";
+				$query  = "	SELECT tunnus, kirjpvm
+							FROM suoritus
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus in ('$suoritusrow[atunnus]', '$suoritusrow[btunnus]')
+							AND kohdpvm = '0000-00-00'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) == 2) {
@@ -74,8 +78,9 @@
 					$suoritus2row = mysql_fetch_array($result);
 
 					$query  = "	SELECT ltunnus, summa, tilino, kustp, kohde, projekti
-								from tiliointi
-								where tunnus = '$suoritusrow[altunnus]'";
+								FROM tiliointi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus  = '$suoritusrow[altunnus]'";
 					$result = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($result) == 1) {
@@ -83,8 +88,9 @@
 						$tiliointi1row = mysql_fetch_array ($result);
 
 						$query  = "	SELECT ltunnus, summa, tilino, kustp, kohde, projekti
-									from tiliointi
-									where tunnus = '$suoritusrow[bltunnus]'";
+									FROM tiliointi
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus  = '$suoritusrow[bltunnus]'";
 						$result = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($result) == 1) {

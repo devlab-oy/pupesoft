@@ -948,9 +948,12 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 
 			// tehdään vielä kirjapitoa...
 			// päivitetään tilaus saapuneeksi varastoon kirjanpitoon
-			$query = "	SELECT tunnus, summa
+			$query = "	SELECT tunnus, summa, kustp, kohde, projekti
 						FROM tiliointi
-						WHERE yhtio='$kukarow[yhtio]' and ltunnus='$kulurow[tunnus]' and tilino = '$yhtiorow[matkalla_olevat]' and korjattu=''";
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and ltunnus  = '$kulurow[tunnus]'
+						and tilino   = '$yhtiorow[matkalla_olevat]'
+						and korjattu = ''";
 			$result1 = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result1) == 1) { // Tiliointi löytyi
@@ -963,29 +966,33 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 				}
 
 				$query = "	INSERT into tiliointi set
-							yhtio	= '$kukarow[yhtio]',
-							ltunnus	= '$kulurow[tunnus]',
-							tilino	= '$yhtiorow[matkalla_olevat]',
-							kustp 	= 0, #OLETUSKUSTP?
-							tapvm	= now(),
-							summa	= $tiliointirow[summa] * -1,
-							selite	= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
-							lukko	= '',
-							laatija	= '$kukarow[kuka]',
-							laadittu= now()";
+							yhtio		= '$kukarow[yhtio]',
+							ltunnus		= '$kulurow[tunnus]',
+							tilino		= '$yhtiorow[matkalla_olevat]',
+							kustp    	= '{$tiliointirow["kustp"]}',
+							kohde	 	= '{$tiliointirow["kohde"]}',
+							projekti 	= '{$tiliointirow["projekti"]}',
+							tapvm		= now(),
+							summa		= $tiliointirow[summa] * -1,
+							selite		= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
+							lukko		= '',
+							laatija		= '$kukarow[kuka]',
+							laadittu	= now()";
 				$result2 = mysql_query($query) or pupe_error($query);
 
 				$query = "	INSERT into tiliointi set
-							yhtio	= '$kukarow[yhtio]',
-							ltunnus	= '$kulurow[tunnus]',
-							tilino	= '$varastotili',
-							kustp 	= 0, #OLETUSKUSTP?
-							tapvm	= now(),
-							summa	= '$tiliointirow[summa]',
-							selite	= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
-							lukko	= '',
-							laatija = '$kukarow[kuka]',
-							laadittu = now()";
+							yhtio		= '$kukarow[yhtio]',
+							ltunnus		= '$kulurow[tunnus]',
+							tilino		= '$varastotili',
+							kustp    	= '{$tiliointirow["kustp"]}',
+							kohde	 	= '{$tiliointirow["kohde"]}',
+							projekti 	= '{$tiliointirow["projekti"]}',
+							tapvm		= now(),
+							summa		= '$tiliointirow[summa]',
+							selite		= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
+							lukko		= '',
+							laatija 	= '$kukarow[kuka]',
+							laadittu	= now()";
 				$result3 = mysql_query($query) or pupe_error($query);
 			}
 			else {

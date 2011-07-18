@@ -302,7 +302,7 @@ if ($tee == 'I') {
 			// trimmataan varmuudeksi swift ja ultilno
 			$toitilinumero = trim($toitilinumero);
 			$toiswift = trim($toiswift);
-			
+
 			$query = "UPDATE toimi set ultilno='$toitilinumero', swift='$toiswift' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$trow['ultilno']=$toitilinumero;
 			$trow['swift']=$toiswift;
@@ -1370,7 +1370,10 @@ if ($tee == 'P' or $tee == 'E') {
 
 			// Etsitään selväkielinen tilinnimi, jos sellainen on
 			if (strlen($itili[$i]) != 0) {
-				$query = "SELECT nimi FROM tili	WHERE yhtio = '$kukarow[yhtio]' and tilino = '$itili[$i]'";
+				$query = "	SELECT nimi
+							FROM tili
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tilino = '$itili[$i]'";
 				$vresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($vresult) != 0) {
@@ -1579,7 +1582,11 @@ if ($tee == 'I') {
 		$alaraja = 41000000;
 		$ylaraja = 42000000;
 
-		$query  = "	SELECT max(tosite) + 1 nro FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and tosite > $alaraja and tosite < $ylaraja";
+		$query  = "	SELECT max(tosite) + 1 nro
+					FROM tiliointi
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tosite > $alaraja
+					and tosite < $ylaraja";
 		$tresult = mysql_query($query) or pupe_error($query);
 		$tositenrorow = mysql_fetch_array($tresult);
 
@@ -1670,13 +1677,13 @@ if ($tee == 'I') {
 	$vassumma_valuutassa = -1 * $omasumma_valuutassa;
 
 	// Nyt on saatava pyöristykset ok
-	$veroton = 0;
-	$veroton_valuutassa = 0;
+	$veroton 			 = 0;
+	$veroton_valuutassa  = 0;
 
-	$muusumma = 0;
+	$muusumma 			 = 0;
 	$muusumma_valuutassa = 0;
-	$maksimisumma = 0;
-	$maksimisumma_i = 0;
+	$maksimisumma 		 = 0;
+	$maksimisumma_i 	 = 0;
 
 	for ($i=1; $i<$maara; $i++) {
 		$ivero[$i]				= (float) $ivero[$i];
@@ -1716,14 +1723,21 @@ if ($tee == 'I') {
 		$ostovelat = $yhtiorow["ostovelat"];
 	}
 
+	if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat, $ikustp[$maksimisumma_i], $ikohde[$maksimisumma_i], $iprojekti[$maksimisumma_i]);
+	}
+	else {
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat);
+	}
+	
 	// Ostovelka
 	$query = "	INSERT INTO tiliointi SET
 				yhtio				= '$kukarow[yhtio]',
 				ltunnus				= '$tunnus',
 				tilino				= '$ostovelat',
-				kustp 				= '$ikustp[$maksimisumma_i]',
-				kohde 				= '$ikohde[$maksimisumma_i]',
-				projekti 			= '$iprojekti[$maksimisumma_i]',
+				kustp    			= '{$kustp_ins}',
+				kohde	 			= '{$kohde_ins}',
+				projekti 			= '{$projekti_ins}',
 				tapvm				= '$tpv-$tpk-$tpp',
 				summa				= '$vassumma',
 				summa_valuutassa	= '$vassumma_valuutassa',
@@ -1764,9 +1778,11 @@ if ($tee == 'I') {
 
 		if (strlen($itili[$i]) > 0) {
 
-			$ikustp_ins = $ikustp[$i] == 0 ? $ikustp[$maksimisumma_i] : $ikustp[$i];
-			$ikohde_ins = $ikohde[$i] == 0 ? $ikohde[$maksimisumma_i] : $ikohde[$i];
-			$iprojekti_ins = $iprojekti[$i] == 0 ? $iprojekti[$maksimisumma_i] : $iprojekti[$i];
+			$ikustp_ins 	= $ikustp[$i] == 0 ? $ikustp[$maksimisumma_i] : $ikustp[$i];
+			$ikohde_ins 	= $ikohde[$i] == 0 ? $ikohde[$maksimisumma_i] : $ikohde[$i];
+			$iprojekti_ins 	= $iprojekti[$i] == 0 ? $iprojekti[$maksimisumma_i] : $iprojekti[$i];
+
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($itili[$i], $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
 			$query = "	INSERT INTO tiliointi SET
 						yhtio 				= '$kukarow[yhtio]',
@@ -1795,7 +1811,7 @@ if ($tee == 'I') {
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
 							tilino 				= '$tilino_alv',
-							kustp 				= '{$ikustp_ins}',
+							kustp 				= '{$ikustp_ins}',  #OLETUSKUSTP?
 							kohde 				= '{$ikohde_ins}',
 							projekti 			= '{$iprojekti_ins}',
 							tapvm 				= '$tpv-$tpk-$tpp',
@@ -1821,6 +1837,8 @@ if ($tee == 'I') {
 				else {
 					$varastonmuutostili = $yhtiorow["varastonmuutos"];
 				}
+
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
 				$query = "	INSERT INTO tiliointi SET
 							yhtio 				= '$kukarow[yhtio]',
@@ -1853,11 +1871,15 @@ if ($tee == 'I') {
 			$varastotili = $yhtiorow['varasto'];
 		}
 
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili);
+
 		$query = "	INSERT INTO tiliointi SET
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$tunnus',
 					tilino 				= '$varastotili',
-					kustp				= 0, #OLETUSKUSTP?
+					kustp    			= '{$kustp_ins}',
+					kohde	 			= '{$kohde_ins}',
+					projekti 			= '{$projekti_ins}',
 					tapvm 				= '$tpv-$tpk-$tpp',
 					summa 				= $veroton,
 					summa_valuutassa	= $veroton_valuutassa,
@@ -1880,13 +1902,17 @@ if ($tee == 'I') {
 
 			echo " ".t('oletuspankkitilille').".</font><br>";
 
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat);
+
 			// Oletustiliöinnit
 			// Ostovelat
 			$query = "	INSERT INTO tiliointi SET
 						yhtio 				= '$kukarow[yhtio]',
 						ltunnus 			= '$tunnus',
 						tilino 				= '$ostovelat',
-						kustp 				= 0, #OLETUSKUSTP?
+						kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
 						tapvm 				= '$erv-$erk-$erp',
 						summa 				= '$omasumma',
 						summa_valuutassa	= '$omasumma_valuutassa',
@@ -1898,12 +1924,16 @@ if ($tee == 'I') {
 						laadittu 			= now()";
 			$xresult = mysql_query($query) or pupe_error($query);
 
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"]);
+
 			// Rahatili
 			$query = "	INSERT INTO tiliointi SET
 						yhtio 				= '$kukarow[yhtio]',
 						ltunnus 			= '$tunnus',
 						tilino 				= '$yhtiorow[selvittelytili]',
-						kustp 				= 0, #OLETUSKUSTP?
+						kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
 						tapvm 				= '$erv-$erk-$erp',
 						summa 				= '$vassumma',
 						summa_valuutassa	= '$vassumma_valuutassa',
@@ -1950,7 +1980,11 @@ if ($tee == 'I') {
 		else {
 			$laskurow = mysql_fetch_array ($result);
 
-			$query = "SELECT * FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' order by tunnus";
+			$query = "	SELECT *
+						FROM tiliointi
+						WHERE yhtio = '$kukarow[yhtio]'
+						and ltunnus = '$tunnus'
+						order by tunnus";
 			$tilresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($tilresult) == 0) {
@@ -2040,7 +2074,7 @@ if ($tee == 'I') {
 
 				while ($tiliointirow = mysql_fetch_array ($tilresult)) {
 
-					$query = "INSERT into tiliointi set ";
+					$query = "INSERT INTO tiliointi SET ";
 
 					for ($i=0; $i<mysql_num_fields($tilresult); $i++) {
 

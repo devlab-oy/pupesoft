@@ -9,7 +9,9 @@ if ($tee == 'V') {
 	// Lasku on valittu ja sitä tiliöidään (suoritetaan)
 	$query = "	SELECT *
 				FROM tiliointi
-				WHERE tunnus = '$stunnus' and yhtio = '$kukarow[yhtio]' and tilino ='$yhtiorow[selvittelytili]'";
+				WHERE tunnus = '$stunnus' 
+				and yhtio    = '$kukarow[yhtio]' 
+				and tilino   = '$yhtiorow[selvittelytili]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$tiliointirow = mysql_fetch_array($result);
 
@@ -20,7 +22,9 @@ if ($tee == 'V') {
 
 	$query = "	SELECT *
 				FROM lasku
-				WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tila = 'Q'";
+				WHERE tunnus = '$tunnus' 
+				and yhtio    = '$kukarow[yhtio]' 
+				and tila     = 'Q'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -33,34 +37,34 @@ if ($tee == 'V') {
 	// Oletustiliöinnit
 	// Ostovelat
 	$query = "	INSERT INTO tiliointi SET
-				yhtio = '$kukarow[yhtio]',
-				ltunnus = '$laskurow[tunnus]',
-				tilino = '$yhtiorow[ostovelat]',
-				tapvm = '$tiliointirow[tapvm]',
-				summa = '$laskurow[summa]',
-				vero = 0,
-				lukko = '',
-				laatija = '$kukarow[kuka]',
-				laadittu = now()";
+				yhtio 		= '$kukarow[yhtio]',
+				ltunnus 	= '$laskurow[tunnus]',
+				tilino 		= '$yhtiorow[ostovelat]',
+				tapvm 		= '$tiliointirow[tapvm]',
+				summa 		= '$laskurow[summa]',
+				vero 		= 0,
+				lukko 		= '',
+				laatija 	= '$kukarow[kuka]',
+				laadittu 	= now()";
 	$xresult = mysql_query($query) or pupe_error($query);
 
 	// Rahatili
 	$query = "	INSERT INTO tiliointi SET
-				yhtio = '$kukarow[yhtio]',
-				ltunnus = '$laskurow[tunnus]',
-				tilino = '$yhtiorow[selvittelytili]',
-				tapvm = '$tiliointirow[tapvm]',
-				summa = -1 * $laskurow[summa],
-				vero = 0,
-				lukko = '',
-				laatija = '$kukarow[kuka]',
-				laadittu = now()";
+				yhtio 		= '$kukarow[yhtio]',
+				ltunnus 	= '$laskurow[tunnus]',
+				tilino 		= '$yhtiorow[selvittelytili]',
+				tapvm 		= '$tiliointirow[tapvm]',
+				summa 		= -1 * $laskurow[summa],
+				vero 		= 0,
+				lukko 		= '',
+				laatija 	= '$kukarow[kuka]',
+				laadittu 	= now()";
 	$xresult = mysql_query($query) or pupe_error($query);
 
 	$query = "	UPDATE lasku set
-				tila = 'Y',
-				mapvm = '$tiliointirow[tapvm]',
-				maksu_kurssi = 1
+				tila 			= 'Y',
+				mapvm 			= '$tiliointirow[tapvm]',
+				maksu_kurssi 	= 1
 				WHERE tunnus = '$tunnus'";
 	$xresult = mysql_query($query) or pupe_error($query);
 	$tee = '';

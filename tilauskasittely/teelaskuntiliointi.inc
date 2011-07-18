@@ -4,7 +4,7 @@
 
 $tulos_ulos_tiliointi = "";
 
-//Tehtaan tiliointiaineisto suoraan sql:lla
+// Tehtaan tiliointiaineisto suoraan sql:lla
 $query = "	SELECT tilausrivi.alv alv,
 			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino, '') != '', 					tuotteen_alv.tilino, 					if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino, '') != '', 				yhtion_toimipaikat.tilino, 					if(ifnull(tuote.tilino, '') != '', 					tuote.tilino,	 				if(ifnull(asiakas.tilino, '') != '', 					asiakas.tilino, 				if(ifnull(yhtion_toimipaikat.tilino, '') != '', 				yhtion_toimipaikat.tilino, 					yhtio.myynti))))) tilino,
 			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino_eu, '') != '', 				tuotteen_alv.tilino_eu, 				if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino_eu, '') != '', 				yhtion_toimipaikat.tilino_eu, 				if(ifnull(tuote.tilino_eu, '') != '', 				tuote.tilino_eu, 				if(ifnull(asiakas.tilino_eu, '') != '', 				asiakas.tilino_eu, 				if(ifnull(yhtion_toimipaikat.tilino_eu, '') != '', 				yhtion_toimipaikat.tilino_eu, 				yhtio.myynti_eu))))) tilino_eu,
@@ -108,7 +108,7 @@ else {
 			//T‰h‰n ei osata parempaa valuuttasummaa keksi‰, pit‰‰ k‰‰nt‰‰ kurssilla
 			$tiliointisumma_valuutassa = round($tiliointisumma / $lasku['vienti_kurssi'], 2);
 
-			//Tiliˆid‰‰n margiinaalimyyntitapahtuma
+			//Tiliˆid‰‰n marginaalimyyntitapahtuma
 			$query = "	INSERT into tiliointi set
 						yhtio 				= '$kukarow[yhtio]',
 						ltunnus 			= '$tunnus',
@@ -261,11 +261,11 @@ else {
 		// Kirjataan varastonmuutos, jos sita on
 		if ($varmuutos != 0) {
 
-			if($xrow["marginaaliostot"] == "KYLLA" or $xrow["marginaalihyvitys"] == "KYLLA") {
-				$selite		= "Varastoontulo ". $lasku['nimi'];
+			if ($xrow["marginaaliostot"] == "KYLLA" or $xrow["marginaalihyvitys"] == "KYLLA") {
+				$selite	= "Varastoontulo ". $lasku['nimi'];
 			}
 			else {
-				$selite		= "Varastostamyynti ". $lasku['nimi'];
+				$selite	= "Varastostamyynti ". $lasku['nimi'];
 			}
 
 			$vero			= 0;

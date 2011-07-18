@@ -15,7 +15,6 @@
                 tila 			= 'X',
                 laatija 		= 'tiliote',
                 luontiaika 		= now()";
-
 	$result = mysql_query($query) or pupe_error($query);
 	$kulutunnus = mysql_insert_id ($link);
 

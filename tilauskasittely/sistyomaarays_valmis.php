@@ -482,11 +482,15 @@
 								$result = mysql_query($query) or pupe_error($query);
 								$laskuid = mysql_insert_id($link);
 
-								$query = "INSERT into tiliointi set
+								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"]);
+
+								$query = "	INSERT into tiliointi set
 											yhtio    = '$kukarow[yhtio]',
 											ltunnus  = '$laskuid',
 											tilino   = '$yhtiorow[varasto]',
-											kustp    = 0, #OLETUSKUSTP?
+											kustp    = '{$kustp_ins}',
+											kohde	 = '{$kohde_ins}',
+											projekti = '{$projekti_ins}',
 											tapvm    = now(),
 											summa    = '$tyokulut',
 											vero     = 0,
@@ -496,11 +500,15 @@
 											laadittu = now()";
 								$result = mysql_query($query) or pupe_error($query);
 
-								$query = "INSERT into tiliointi set
+								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos_valmistuksesta"]);
+
+								$query = "	INSERT into tiliointi set
 											yhtio    = '$kukarow[yhtio]',
 											ltunnus  = '$laskuid',
 											tilino   = '$yhtiorow[varastonmuutos_valmistuksesta]',
-											kustp    = 0, #OLETUSKUSTP?
+											kustp    = '{$kustp_ins}',
+											kohde	 = '{$kohde_ins}',
+											projekti = '{$projekti_ins}',
 											tapvm    = now(),
 											summa    = $tyokulut * -1,
 											vero     = 0,

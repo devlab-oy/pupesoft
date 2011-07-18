@@ -978,32 +978,34 @@
 				}
 
 				if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
-					$ostovelat_kustp = $oletuskust;
-					$ostovelat_kohde = $oletuskohde;
+					$ostovelat_kustp 	= $oletuskust;
+					$ostovelat_kohde 	= $oletuskohde;
 					$ostovelat_projekti = $oletusprojekti;
 				}
 				else {
-					$ostovelat_kustp = 0;
-					$ostovelat_kohde = 0;
+					$ostovelat_kustp 	= 0;
+					$ostovelat_kohde 	= 0;
 					$ostovelat_projekti = 0;
 				}
 
-				$query = "	INSERT into tiliointi set
-							yhtio 		= '$yhtio',
-							ltunnus 	= '$tunnus',
-							tilino 		= '$ostovelat',
-							kustp		= '$ostovelat_kustp',
-							kohde		= '$ostovelat_kohde',
-							projekti	= '$ostovelat_projekti',
-							tapvm 		= '$tpv-$tpk-$tpp',
-							summa 		= '$vassumma',
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat, $ostovelat_kustp, $ostovelat_kohde, $ostovelat_projekti);
+
+				$query = "	INSERT INTO tiliointi SET
+							yhtio 			 = '$yhtio',
+							ltunnus 		 = '$tunnus',
+							tilino 			 = '$ostovelat',
+							kustp    		 = '{$kustp_ins}',
+							kohde	 		 = '{$kohde_ins}',
+							projekti 		 = '{$projekti_ins}',
+							tapvm 			 = '$tpv-$tpk-$tpp',
+							summa 			 = '$vassumma',
 							summa_valuutassa = '$vassumma_valuutassa',
-							valkoodi 	= '$valkoodi',
-							selite 		= '$selite',
-							vero 		= 0,
-							lukko 		= '1',
-							laatija 	= 'verkkolas',
-							laadittu 	= now()";
+							valkoodi 		 = '$valkoodi',
+							selite 			 = '$selite',
+							vero 			 = 0,
+							lukko 			 = '1',
+							laatija 		 = 'verkkolas',
+							laadittu 		 = now()";
 				$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
 				// Onko rivikohtaisia tiliöintisääntöjä
@@ -1058,41 +1060,47 @@
 						$varastotili = $yhtiorow['varasto'];
 
 						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-								$varastotili = $yhtiorow['matkalla_olevat'];
+							$varastotili = $yhtiorow['matkalla_olevat'];
 						}
 
-						$query = "	INSERT into tiliointi set
-									yhtio 		= '$kukarow[yhtio]',
-									ltunnus 	= '$tunnus',
-									tilino 		= '$varastotili',
-									kustp 		= 0, #OLETUSKUSTP?
-									tapvm 		= '$tpv-$tpk-$tpp',
-									summa		= '$verkkolaskuveroton',
-									summa_valuutassa = '$verkkolaskuveroton_valuutassa',
-									valkoodi	= '$valkoodi',
-									selite 		= '$selite',
-									vero 		= 0,
-									lukko 		= '',
-									laatija 	= '$kukarow[kuka]',
-									laadittu 	= now()";
-						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili);
 
 						$query = "	INSERT into tiliointi set
-									yhtio 		= '$kukarow[yhtio]',
-									ltunnus 	= '$tunnus',
-									tilino 		= '$yhtiorow[varastonmuutos]',
-									kustp 		= '$kustp',
-									kohde 		= '$kohde',
-									projekti 	= '$projekti',
-									tapvm 		= '$tpv-$tpk-$tpp',
-									summa 		= $verkkolaskuveroton*-1,
+									yhtio 			 = '$kukarow[yhtio]',
+									ltunnus 		 = '$tunnus',
+									tilino 			 = '$varastotili',
+									kustp    		 = '{$kustp_ins}',
+									kohde	 		 = '{$kohde_ins}',
+									projekti 		 = '{$projekti_ins}',
+									tapvm 			 = '$tpv-$tpk-$tpp',
+									summa			 = '$verkkolaskuveroton',
+									summa_valuutassa = '$verkkolaskuveroton_valuutassa',
+									valkoodi		 = '$valkoodi',
+									selite 			 = '$selite',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija 		 = '$kukarow[kuka]',
+									laadittu 		 = now()";
+						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"], $kustp, $kohde, $projekti);
+
+						$query = "	INSERT into tiliointi set
+									yhtio 			 = '$kukarow[yhtio]',
+									ltunnus 		 = '$tunnus',
+									tilino 			 = '$yhtiorow[varastonmuutos]',
+									kustp    		 = '{$kustp_ins}',
+									kohde	 		 = '{$kohde_ins}',
+									projekti 		 = '{$projekti_ins}',
+									tapvm 			 = '$tpv-$tpk-$tpp',
+									summa 			 = $verkkolaskuveroton*-1,
 									summa_valuutassa = $verkkolaskuveroton_valuutassa*-1,
-									valkoodi 	= '$valkoodi',
-									selite 		= '$selite',
-									vero 		= 0,
-									lukko 		= '',
-									laatija 	= '$kukarow[kuka]',
-									laadittu 	= now()";
+									valkoodi 		 = '$valkoodi',
+									selite 			 = '$selite',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija 		 = '$kukarow[kuka]',
+									laadittu 		 = now()";
 						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
 						// Jos tämä lasku menee varastoon, tehdään valmiiksi keikka
@@ -1201,24 +1209,27 @@
 
 							require ("inc/teetiliointi.inc");
 
-							// jos kyseessä on jonkin rahti/huolintakuluja, tiliöidään varastonmuutokseen
+							// jos kyseessä on rahti/huolintakuluja, tiliöidään varastonmuutokseen
 							if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
+
+								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"], $kustp, $kohde, $projekti);
+
 								$query = "	INSERT into tiliointi set
-											yhtio 		= '$kukarow[yhtio]',
-											ltunnus 	= '$tunnus',
-											tilino 		= '$yhtiorow[varastonmuutos]',
-											kustp 		= '$kustp',
-											kohde 		= '$kohde',
-											projekti 	= '$projekti',
-											tapvm 		= '$tpv-$tpk-$tpp',
-											summa 		= $vtonsumma *-1,
+											yhtio 			 = '$kukarow[yhtio]',
+											ltunnus 		 = '$tunnus',
+											tilino 			 = '$yhtiorow[varastonmuutos]',
+											kustp    		 = '{$kustp_ins}',
+											kohde	 		 = '{$kohde_ins}',
+											projekti 		 = '{$projekti_ins}',
+											tapvm 			 = '$tpv-$tpk-$tpp',
+											summa 			 = $vtonsumma *-1,
 											summa_valuutassa = $vtonsumma_valuutassa*-1,
-											valkoodi 	= '$valkoodi',
-											selite 		= '$selite',
-											vero 		= 0,
-											lukko 		= '',
-											laatija 	= '$kukarow[kuka]',
-											laadittu 	= now()";
+											valkoodi 		 = '$valkoodi',
+											selite 			 = '$selite',
+											vero 			 = 0,
+											lukko 			 = '',
+											laatija 		 = '$kukarow[kuka]',
+											laadittu 		 = now()";
 								$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 							}
 						}
@@ -1227,20 +1238,25 @@
 
 	 				// Tuli pyöristyseroja
 					if (round(abs($totsumma - $omasumma),2) >= 0.01) {
+
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["pyoristys"]);
+
 						$query = "	INSERT into tiliointi set
-									yhtio 		= '$yhtio',
-									ltunnus 	= '$tunnus',
-									tilino 		= '$yhtiorow[pyoristys]',
-									kustp 		= 0, #OLETUSKUSTP?
-									tapvm 		= '$tpv-$tpk-$tpp',
-									summa 		= $omasumma - $totsumma,
+									yhtio 			 = '$yhtio',
+									ltunnus 		 = '$tunnus',
+									tilino 			 = '$yhtiorow[pyoristys]',
+									kustp    		 = '{$kustp_ins}',
+									kohde	 		 = '{$kohde_ins}',
+									projekti 		 = '{$projekti_ins}',
+									tapvm 			 = '$tpv-$tpk-$tpp',
+									summa 			 = $omasumma - $totsumma,
 									summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa,
-									valkoodi 	= '$valkoodi',
-									selite 		= '$selite',
-									vero 		= 0,
-									lukko 		= '',
-									laatija 	= 'verkkolas',
-									laadittu 	= now()";
+									valkoodi 		 = '$valkoodi',
+									selite 			 = '$selite',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija 		 = 'verkkolas',
+									laadittu 		 = now()";
 						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 					}
 
@@ -1248,24 +1264,29 @@
 					if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
 
 						$varastotili = $yhtiorow['varasto'];
+
 						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-								$varastotili = $yhtiorow['matkalla_olevat'];
+							$varastotili = $yhtiorow['matkalla_olevat'];
 						}
 
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili);
+
 						$query = "	INSERT into tiliointi set
-									yhtio 		= '$kukarow[yhtio]',
-									ltunnus 	= '$tunnus',
-									tilino 		= '$varastotili',
-									kustp 		= 0, #OLETUSKUSTP?
-									tapvm 		= '$tpv-$tpk-$tpp',
-									summa 		= '$vtontot',
+									yhtio 			 = '$kukarow[yhtio]',
+									ltunnus 		 = '$tunnus',
+									tilino 			 = '$varastotili',
+									kustp    		 = '{$kustp_ins}',
+									kohde	 		 = '{$kohde_ins}',
+									projekti 		 = '{$projekti_ins}',
+									tapvm 			 = '$tpv-$tpk-$tpp',
+									summa 			 = '$vtontot',
 									summa_valuutassa = '$vtontot_valuutassa',
-									valkoodi 	= '$valkoodi',
-									selite 		= '$selite',
-									vero 		= 0,
-									lukko 		= '',
-									laatija		= '$kukarow[kuka]',
-									laadittu	= now()";
+									valkoodi 		 = '$valkoodi',
+									selite 			 = '$selite',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija			 = '$kukarow[kuka]',
+									laadittu		 = now()";
 						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
 						/**
@@ -1296,37 +1317,46 @@
 
 					if ($trow['oletus_suoravel_pankki'] > 0) {
 						 //Toimittajalla on pankkitili, teemme eräpäivälle suorituksen valmiiksi
+
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat);
+
 						// Oletustiliöinnit
 						// Ostovelat
 						$query = "	INSERT into tiliointi set
-									yhtio 		= '$kukarow[yhtio]',
-									ltunnus 	= '$tunnus',
-									tilino		= '$ostovelat',
-									kustp 		= 0, #OLETUSKUSTP?
-									tapvm 		= '$erv-$erk-$erp',
-									summa 		= '$omasumma',
+									yhtio 			 = '$kukarow[yhtio]',
+									ltunnus 		 = '$tunnus',
+									tilino			 = '$ostovelat',
+									kustp    		 = '{$kustp_ins}',
+									kohde	 		 = '{$kohde_ins}',
+									projekti 		 = '{$projekti_ins}',
+									tapvm 			 = '$erv-$erk-$erp',
+									summa 			 = '$omasumma',
 									summa_valuutassa = '$omasumma_valuutassa',
-									valkoodi 	= '$valkoodi',
-									vero 		= 0,
-									lukko 		= '',
-									laatija 	= '$kukarow[kuka]',
-									laadittu	= now()";
+									valkoodi 		 = '$valkoodi',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija 		 = '$kukarow[kuka]',
+									laadittu		 = now()";
 						$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"]);
 
 						// Rahatili
 						$query = "	INSERT into tiliointi set
-									yhtio 		= '$kukarow[yhtio]',
-									ltunnus 	= '$tunnus',
-									tilino 		= '$yhtiorow[selvittelytili]',
-									kustp 		= 0, #OLETUSKUSTP?
-									tapvm 		= '$erv-$erk-$erp',
-									summa 		= $vassumma,
+									yhtio 			 = '$kukarow[yhtio]',
+									ltunnus 		 = '$tunnus',
+									tilino 			 = '$yhtiorow[selvittelytili]',
+									kustp    		 = '{$kustp_ins}',
+									kohde	 		 = '{$kohde_ins}',
+									projekti 		 = '{$projekti_ins}',
+									tapvm 			 = '$erv-$erk-$erp',
+									summa 			 = $vassumma,
 									summa_valuutassa = '$vassumma_valuutassa',
-									valkoodi 	= '$valkoodi',
-									vero 		= 0,
-									lukko 		= '',
-									laatija 	= '$kukarow[kuka]',
-									laadittu 	= now()";
+									valkoodi 		 = '$valkoodi',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija 		 = '$kukarow[kuka]',
+									laadittu 		 = now()";
 						$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
 
 						if ($tila == 'M') {

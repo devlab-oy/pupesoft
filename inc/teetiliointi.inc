@@ -37,45 +37,48 @@
 	if (!isset($alv_tili) or $alv_tili == "" or !is_numeric($alv_tili)) {
 		$alv_tili = $yhtiorow["alv"];
 	}
+	
+	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);
 
 	$query = "	INSERT into tiliointi set
-				yhtio 		= '$kukarow[yhtio]',
-				ltunnus 	= '$tunnus',
-				tilino 		= '$tili',
-				kustp 		= '$kustp',
-				kohde 		= '$kohde',
-				projekti 	= '$projekti',
-				tapvm 		= '$laskurow[tapvm]',
-				summa 		= '$summa',
+				yhtio 			 = '$kukarow[yhtio]',
+				ltunnus 		 = '$tunnus',
+				tilino 			 = '$tili',
+				kustp    		 = '{$kustp_ins}',
+				kohde	 		 = '{$kohde_ins}',
+				projekti 		 = '{$projekti_ins}',
+				tapvm 			 = '$laskurow[tapvm]',
+				summa 			 = '$summa',
 				summa_valuutassa = '$summa_valuutassa',
-				valkoodi 	= '$valkoodi',
-				vero 		= '$vero',
-				selite 		= '$selite',
-				lukko 		= '',
-				tosite 		= '$tositenro',
-				laatija 	= '$kukarow[kuka]',
-				laadittu 	= now()";
+				valkoodi 		 = '$valkoodi',
+				vero 			 = '$vero',
+				selite 			 = '$selite',
+				lukko 			 = '',
+				tosite 			 = '$tositenro',
+				laatija 		 = '$kukarow[kuka]',
+				laadittu 		 = now()";
 	$result = mysql_query($query) or pupe_error($query);
 	$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
-
-	if ($vero != 0) { // Tiliöidään alv
+	
+	// Tiliöidään alv
+	if ($vero != 0) { 
 		$query = "	INSERT into tiliointi set
-					yhtio 		= '$kukarow[yhtio]',
-					ltunnus 	= '$tunnus',
-					tilino 		= '$alv_tili',
-					kustp 		= 0, #OLETUSKUSTP?
-					kohde 		= 0,
-					projekti 	= 0,
-					tapvm 		= '$laskurow[tapvm]',
-					summa 		= '$alv',
+					yhtio 			 = '$kukarow[yhtio]',
+					ltunnus 		 = '$tunnus',
+					tilino 			 = '$alv_tili',
+					kustp 			 = 0, #OLETUSKUSTP?
+					kohde 			 = 0,
+					projekti 		 = 0,
+					tapvm 			 = '$laskurow[tapvm]',
+					summa 			 = '$alv',
 					summa_valuutassa = '$alv_valuutassa',
-					valkoodi 	= '$valkoodi',
-					vero 		= 0,
-					selite 		= '$selite',
-					lukko 		= '1',
-					laatija 	= '$kukarow[kuka]',
-					laadittu 	= now(),
-					aputunnus 	= $isa";
+					valkoodi 		 = '$valkoodi',
+					vero 			 = 0,
+					selite 			 = '$selite',
+					lukko 			 = '1',
+					laatija 		 = '$kukarow[kuka]',
+					laadittu 		 = now(),
+					aputunnus 		 = $isa";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 ?>

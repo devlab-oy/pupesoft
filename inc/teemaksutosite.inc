@@ -136,11 +136,11 @@
 
 			while ($tiliointirow = mysql_fetch_assoc($yresult)) {
 				// Kuinka paljon on tämän viennin osuus
-				$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $trow['vietysumma'] * $vesumma,2);
+				$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $trow['vietysumma'] * $vesumma, 2);
 
 				echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>";
 
-				if (round($summa,2) != 0) {
+				if (round($summa, 2) != 0) {
 					$query = "	INSERT into tiliointi set
 								yhtio 		= '$yritirow[yhtio]',
 								ltunnus 	= '$trow[tunnus]',
@@ -171,13 +171,17 @@
 				$xresult = mysql_query($query) or pupe_error($query);
 			}
 		}
-
+		
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
+		
 		//Rahatili
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$yritirow[yhtio]',
 					ltunnus 	= '$trow[tunnus]',
 					tilino 		= '$yritirow[oletus_rahatili]',
-					kustp 		= 0, #OLETUSKUSTP?
+					kustp    	= '{$kustp_ins}',
+					kohde	 	= '{$kohde_ins}',
+					projekti 	= '{$projekti_ins}',
 					tapvm 		= '$tpv-$tpk-$tpp',
 					summa 		= '$maara',
 					vero 		= 0,

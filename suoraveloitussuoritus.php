@@ -9,8 +9,8 @@ if ($tee == 'V') {
 	// Lasku on valittu ja sitä tiliöidään (suoritetaan)
 	$query = "	SELECT *
 				FROM tiliointi
-				WHERE tunnus = '$stunnus' 
-				and yhtio    = '$kukarow[yhtio]' 
+				WHERE tunnus = '$stunnus'
+				and yhtio    = '$kukarow[yhtio]'
 				and tilino   = '$yhtiorow[selvittelytili]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$tiliointirow = mysql_fetch_array($result);
@@ -22,8 +22,8 @@ if ($tee == 'V') {
 
 	$query = "	SELECT *
 				FROM lasku
-				WHERE tunnus = '$tunnus' 
-				and yhtio    = '$kukarow[yhtio]' 
+				WHERE tunnus = '$tunnus'
+				and yhtio    = '$kukarow[yhtio]'
 				and tila     = 'Q'";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -34,12 +34,17 @@ if ($tee == 'V') {
 
 	$laskurow = mysql_fetch_array($result);
 
+	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["ostovelat"]);
+
 	// Oletustiliöinnit
 	// Ostovelat
 	$query = "	INSERT INTO tiliointi SET
 				yhtio 		= '$kukarow[yhtio]',
 				ltunnus 	= '$laskurow[tunnus]',
 				tilino 		= '$yhtiorow[ostovelat]',
+				kustp    	= '{$kustp_ins}',
+				kohde	 	= '{$kohde_ins}',
+				projekti 	= '{$projekti_ins}',
 				tapvm 		= '$tiliointirow[tapvm]',
 				summa 		= '$laskurow[summa]',
 				vero 		= 0,
@@ -48,11 +53,16 @@ if ($tee == 'V') {
 				laadittu 	= now()";
 	$xresult = mysql_query($query) or pupe_error($query);
 
+	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"]);
+
 	// Rahatili
 	$query = "	INSERT INTO tiliointi SET
 				yhtio 		= '$kukarow[yhtio]',
 				ltunnus 	= '$laskurow[tunnus]',
 				tilino 		= '$yhtiorow[selvittelytili]',
+				kustp    	= '{$kustp_ins}',
+				kohde	 	= '{$kohde_ins}',
+				projekti 	= '{$projekti_ins}',
 				tapvm 		= '$tiliointirow[tapvm]',
 				summa 		= -1 * $laskurow[summa],
 				vero 		= 0,
@@ -77,9 +87,9 @@ if ($tee == '') {
 	echo "<table>";
 
 	// katotaan jos meillä on jotain selvittelytilejä pankkitilien takana
-	$query = "	SELECT oletus_selvittelytili 
-				from yriti 
-				where yhtio = '$kukarow[yhtio]' 
+	$query = "	SELECT oletus_selvittelytili
+				from yriti
+				where yhtio = '$kukarow[yhtio]'
 				and oletus_selvittelytili != ''";
 	$result = mysql_query($query) or pupe_error($query);
 

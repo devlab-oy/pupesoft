@@ -92,6 +92,7 @@
 								yhtio 		= '$yritirow[yhtio]',
 								ltunnus 	= '$trow[tunnus]',
 								tilino 		= '$yhtiorow[alv]',
+								kustp 		= 0, #OLETUSKUSTP?
 								tapvm 		= '$tpv-$tpk-$tpp',
 								summa 		= $alv * -1,
 								vero 		= 0,
@@ -176,7 +177,7 @@
 					yhtio 		= '$yritirow[yhtio]',
 					ltunnus 	= '$trow[tunnus]',
 					tilino 		= '$yritirow[oletus_rahatili]',
-					kustp 		= 0,
+					kustp 		= 0, #OLETUSKUSTP?
 					tapvm 		= '$tpv-$tpk-$tpp',
 					summa 		= '$maara',
 					vero 		= 0,

@@ -355,41 +355,43 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 			echo "<font class='message'>".t("HUOM! tiliöidään poikkeavalle tilille '$tilino'<br>");
 			$trow["tilino"] = $tilino;
 		}
+		
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tilino, $tiliointisaantorow["kustp2"]);
 
 		$query = "	INSERT into tiliointi set
-					yhtio ='$kukarow[yhtio]',
-					ltunnus = '$tilausnumero',
-					tilino = '{$tilino}',
-					kustp = '$kustp',
-					kohde = '$kohde',
-					projekti = '$projekti',
-					tapvm = '$laskurow[tapvm]',
-					summa = '$summa',
-					vero = '$vero',
-					selite = '".mysql_real_escape_string($selite)."',
-					lukko = '1',
-					tosite = '$tositenro',
-					laatija = '$kukarow[kuka]',
-					laadittu = now()";
+					yhtio 		= '$kukarow[yhtio]',
+					ltunnus 	= '$tilausnumero',
+					tilino 		= '{$tilino}',
+					kustp 		= '$kustp',
+					kohde 		= '$kohde', #OLETUSKUSTP?
+					projekti 	= '$projekti',
+					tapvm 		= '$laskurow[tapvm]',
+					summa 		= '$summa',
+					vero 		= '$vero',
+					selite 		= '".mysql_real_escape_string($selite)."',
+					lukko 		= '1',
+					tosite 		= '$tositenro',
+					laatija 	= '$kukarow[kuka]',
+					laadittu 	= now()";
 		$result = mysql_query($query) or pupe_error($query);
 		$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
 
 		if ($vero != 0) { // Tiliöidään alv
 			$query = "	INSERT into tiliointi set
-							yhtio ='$kukarow[yhtio]',
-							ltunnus = '$tilausnumero',
-							tilino = '$yhtiorow[alv]',
-							kustp = 0,
-							kohde = 0,
-							projekti = 0,
-							tapvm = '$laskurow[tapvm]',
-							summa = '$alv',
-							vero = 0,
-							selite = '".mysql_real_escape_string($selite)."',
-							lukko = '1',
-							laatija = '$kukarow[kuka]',
-							laadittu = now(),
-							aputunnus = $isa";
+						yhtio 		= '$kukarow[yhtio]',
+						ltunnus 	= '$tilausnumero',
+						tilino 		= '$yhtiorow[alv]',
+						kustp 		= 0, #OLETUSKUSTP?
+						kohde 		= 0,
+						projekti 	= 0,
+						tapvm 		= '$laskurow[tapvm]',
+						summa 		= '$alv',
+						vero 		= 0,
+						selite 		= '".mysql_real_escape_string($selite)."',
+						lukko 		= '1',
+						laatija 	= '$kukarow[kuka]',
+						laadittu 	= now(),
+						aputunnus 	= $isa";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
@@ -470,26 +472,26 @@ function korjaa_ostovelka($ltunnus) {
 		if ($debug == 1) echo "Löydettiin ostovelkatiliöinti tunnuksella $velkarow[tunnus] tiliöintejä ($summarow[kpl]) kpl<br>";
 
 		$query = "	UPDATE tiliointi SET ";
-		$where = "	WHERE yhtio='$kukarow[yhtio]' and tunnus='$velkarow[tunnus]'";
+		$where = "	WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$velkarow[tunnus]'";
 	}
 	else {
 		if ($debug == 1) echo "Luodaan uusi ostovelkatiliöinti<br>";
 
 		$query = "	INSERT into tiliointi SET
-					yhtio ='$kukarow[yhtio]',
+					yhtio 	= '$kukarow[yhtio]',
 					ltunnus = '$ltunnus',
-					lukko = '1',
-					tilino = '$yhtiorow[ostovelat]',";
+					lukko 	= '1',
+					tilino 	= '$yhtiorow[ostovelat]',";
 		$where = "";
 	}
 
-	$query .= "		summa = '$summarow[summa]',
-					kustp = 0,
-					tapvm = '$laskurow[tapvm]',
-					vero = 0,
-					tosite = '$tositenro',
-					laatija = '$kukarow[kuka]',
-					laadittu = now()";
+	$query .= "		summa 		= '$summarow[summa]',
+					kustp 		= 0, #OLETUSKUSTP?
+					tapvm 		= '$laskurow[tapvm]',
+					vero 		= 0,
+					tosite 		= '$tositenro',
+					laatija 	= '$kukarow[kuka]',
+					laadittu 	= now()";
 	$query = $query.$where;
 	$updres = mysql_query($query) or pupe_error($query);
 
@@ -654,20 +656,20 @@ function erittele_rivit($tilausnumero) {
 
 					//	Tehdään oletustiliöinti
 					$query = "	INSERT into tiliointi set
-								yhtio ='$kukarow[yhtio]',
-								ltunnus = '$tilausnumero',
-								tilino = '$yhtiorow[selvittelytili]',
-								kustp = 0,
-								kohde = 0,
-								projekti = 0,
-								tapvm = '$laskurow[tapvm]',
-								summa = '$rivihinta',
-								vero = 0,
-								selite = 'EC selvittely',
-								lukko = '1',
-								tosite = '$tositenro',
-								laatija = '$kukarow[kuka]',
-								laadittu = now()";
+								yhtio 		= '$kukarow[yhtio]',
+								ltunnus 	= '$tilausnumero',
+								tilino 		= '$yhtiorow[selvittelytili]',
+								kustp 		= 0, #OLETUSKUSTP?
+								kohde 		= 0,
+								projekti 	= 0,
+								tapvm 		= '$laskurow[tapvm]',
+								summa 		= '$rivihinta',
+								vero 		= 0,
+								selite 		= 'EC selvittely',
+								lukko 		= '1',
+								tosite 		= '$tositenro',
+								laatija 	= '$kukarow[kuka]',
+								laadittu 	= now()";
 					$result = mysql_query($query) or pupe_error($query);
 					$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
 

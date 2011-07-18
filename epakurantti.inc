@@ -325,20 +325,15 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 					$laskuid = mysql_insert_id($link);
 				}
 
-				$query = "	SELECT kustp, kohde, projekti
-							FROM tili
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tilino = '{$yhtiorow['varasto']}'";
-				$kustp_kohde_proj_res = pupe_query($query);
-				$kustp_kohde_proj_row = mysql_fetch_assoc($kustp_kohde_proj_res);
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"]);
 
 				$query = "	INSERT into tiliointi set
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$yhtiorow[varasto]',
-							kustp    = '{$kustp_kohde_proj_row['kustp']}',
-							kohde	 = '{$kustp_kohde_proj_row['kohde']}',
-							projekti = '{$kustp_kohde_proj_row['projekti']}',
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}',
 							tapvm    = now(),
 							summa    = '$muutos',
 							vero     = 0,
@@ -355,20 +350,15 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 					$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
 				}
 
-				$query = "	SELECT kustp, kohde, projekti
-							FROM tili
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tilino = '{$varastonmuutos_tili}'";
-				$kustp_kohde_proj_res = pupe_query($query);
-				$kustp_kohde_proj_row = mysql_fetch_assoc($kustp_kohde_proj_res);
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili);
 
 				$query = "	INSERT into tiliointi set
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$varastonmuutos_tili',
-							kustp    = '{$kustp_kohde_proj_row['kustp']}',
-							kohde	 = '{$kustp_kohde_proj_row['kohde']}',
-							projekti = '{$kustp_kohde_proj_row['projekti']}',
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}',
 							tapvm    = now(),
 							summa    = $muutos * -1,
 							vero     = 0,

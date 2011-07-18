@@ -68,13 +68,16 @@ if ($tila == 'K' and is_array($luottotappio)) {
 
 					// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
 					if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
+						
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["toim_alv"]);
+						
 						$query = "	INSERT INTO tiliointi SET
 									yhtio		= '$kukarow[yhtio]',
 									ltunnus		= '$lasku[ltunnus]',
 									tilino		= '$yhtiorow[toim_alv]',
-									kustp		= 0,
-									kohde		= 0,
-									projekti	= 0,
+									kustp    	= '{$kustp_ins}',
+									kohde	 	= '{$kohde_ins}',
+									projekti 	= '{$projekti_ins}',
 									tapvm		= '$tpv-$tpk-$tpp',
 									summa		= $alv * -1,
 									vero		= 0,
@@ -87,13 +90,16 @@ if ($tila == 'K' and is_array($luottotappio)) {
 						$result = mysql_query($query) or pupe_error($query);
 					}
 					else {
+						
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["alv"]);
+						
 						$query = "	INSERT INTO tiliointi SET
 									yhtio		= '$kukarow[yhtio]',
 									ltunnus		= '$lasku[ltunnus]',
 									tilino		= '$yhtiorow[alv]',
-									kustp		= 0,
-									kohde		= 0,
-									projekti	= 0,
+									kustp    	= '{$kustp_ins}',
+									kohde	 	= '{$kohde_ins}',
+									projekti 	= '{$projekti_ins}',
 									tapvm		= '$tpv-$tpk-$tpp',
 									summa		= $alv * -1,
 									vero		= 0,

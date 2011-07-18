@@ -1857,7 +1857,7 @@ if ($tee == 'I') {
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$tunnus',
 					tilino 				= '$varastotili',
-					kustp				= 0,
+					kustp				= 0, #OLETUSKUSTP?
 					tapvm 				= '$tpv-$tpk-$tpp',
 					summa 				= $veroton,
 					summa_valuutassa	= $veroton_valuutassa,
@@ -1886,6 +1886,7 @@ if ($tee == 'I') {
 						yhtio 				= '$kukarow[yhtio]',
 						ltunnus 			= '$tunnus',
 						tilino 				= '$ostovelat',
+						kustp 				= 0, #OLETUSKUSTP?
 						tapvm 				= '$erv-$erk-$erp',
 						summa 				= '$omasumma',
 						summa_valuutassa	= '$omasumma_valuutassa',
@@ -1902,6 +1903,7 @@ if ($tee == 'I') {
 						yhtio 				= '$kukarow[yhtio]',
 						ltunnus 			= '$tunnus',
 						tilino 				= '$yhtiorow[selvittelytili]',
+						kustp 				= 0, #OLETUSKUSTP?
 						tapvm 				= '$erv-$erk-$erp',
 						summa 				= '$vassumma',
 						summa_valuutassa	= '$vassumma_valuutassa',

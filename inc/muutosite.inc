@@ -721,7 +721,7 @@
 	//Muutetaan laskun tila
 	if ($tila == 'W') {
 
-		//Poistetaan kirjanpidosta mahdoliset varastoviennit
+		//Poistetaan kirjanpidosta mahdolliset varastoviennit
 		$query = "	UPDATE tiliointi
 					SET korjattu = '$kukarow[kuka]',
 					korjausaika = now()
@@ -805,7 +805,7 @@
 						yhtio 		= '$kukarow[yhtio]',
 						ltunnus 	= '$tunnus',
 						tilino 		= '$vientitili',
-						kustp 		= 0,
+						kustp 		= 0, #OLETUSKUSTP?
 						tapvm 		= '$trow[tapvm]',
 						summa 		= $vientisumma,
 						vero 		= 0,

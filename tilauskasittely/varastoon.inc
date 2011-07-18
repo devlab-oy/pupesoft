@@ -966,6 +966,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 							yhtio	= '$kukarow[yhtio]',
 							ltunnus	= '$kulurow[tunnus]',
 							tilino	= '$yhtiorow[matkalla_olevat]',
+							kustp 	= 0, #OLETUSKUSTP?
 							tapvm	= now(),
 							summa	= $tiliointirow[summa] * -1,
 							selite	= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
@@ -978,6 +979,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 							yhtio	= '$kukarow[yhtio]',
 							ltunnus	= '$kulurow[tunnus]',
 							tilino	= '$varastotili',
+							kustp 	= 0, #OLETUSKUSTP?
 							tapvm	= now(),
 							summa	= '$tiliointirow[summa]',
 							selite	= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',

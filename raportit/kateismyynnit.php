@@ -768,7 +768,7 @@
 			// Jos kenttä on käteistilitys, niin toinen tiliöidään käteistilitys-tilille ja se summa myös miinustetaan kassasta
 			if (abs(str_replace(",",".",$arvo)) > 0 and stristr($kentta, "kateistilitys")) {
 				$arvo = str_replace(",",".",$arvo);
-				$query = "INSERT INTO tiliointi SET
+				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$kassalipasrow[kateistilitys]',
@@ -782,7 +782,7 @@
 							laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query = "INSERT INTO tiliointi SET
+				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$kassalipasrow[kassa]',
@@ -800,7 +800,7 @@
 			// Jos kenttä on käteisotto, niin toinen tiliöidään käteisotto-tilille ja se summa myös miinustetaan kassasta
 			if (abs(str_replace(",",".",$arvo)) > 0 and stristr($kentta, "kateisotto")) {
 				$arvo = str_replace(",",".",$arvo);
-				$query = "INSERT INTO tiliointi SET
+				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$kassalipasrow[kateisotto]',
@@ -814,7 +814,7 @@
 							laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query = "INSERT INTO tiliointi SET
+				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$kassalipasrow[kassa]',

@@ -322,19 +322,19 @@ if ($kollityht > 0) {
 		$pdf->draw_text(mm_pt(15),	mm_pt(130), $laskurow['toim_osoite'],						$firstpage, $kirj);
 		$pdf->draw_text(mm_pt(15),	mm_pt(123), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $iso);
 
-		$query = "	select *
-					from maat
-					where koodi = '$laskurow[toim_maa]'";
+		$query = "	SELECT *
+					FROM maat
+					WHERE koodi = '$laskurow[toim_maa]'";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$maarow = mysql_fetch_array($tempr);
 
 		$pdf->draw_text(mm_pt(15),	mm_pt(116), substr($maarow['nimi'],5),								$firstpage, $iso);
 
 
-		$query = "	select *
-					from asiakas
-					where yhtio = '$kukarow[yhtio]'
-					and tunnus  = '$laskurow[liitostunnus]'";
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus  = '$laskurow[liitostunnus]'";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$asiakasrow = mysql_fetch_array($tempr);
 

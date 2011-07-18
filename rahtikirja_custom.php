@@ -149,7 +149,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	$osoitelappurow["postitp"] 			= $asiakasrow["postitp"];
 	$osoitelappurow["viesti"] 			= "";
 	$osoitelappurow["liitostunnus"] 	= $asiakasrow["tunnus"];
-	$osoitelappurow["toimitustapa"] 	= $asiakasrow["toimitustapa"];
+	$osoitelappurow["toimitustapa"] 	= $toimitustapa; 
 	$osoitelappurow["maksuehto"] 		= $asiakasrow["maksuehto"];
 	$osoitelappurow["yhteyshenkilo"] 	= $kukarow["tunnus"];
 	$osoitelappurow["sisviesti1"] 		= $asiakasrow["sisviesti1"];

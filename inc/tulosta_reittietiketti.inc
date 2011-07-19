@@ -1,6 +1,6 @@
 <?php
 
-	if (!is_array($erat)) {
+	if (!is_array($erat) and (!isset($ei_tulosteta) or !$ei_tulosteta)) {
 		echo "<br /><font class='error'>",t("VIRHE: Keräyserää ei enää löydy"),"!</font><br />";
 
 		require('inc/footer.inc');
@@ -21,7 +21,7 @@
 			$query = "	SELECT ifnull(max(nro), 0) AS nro 
 						FROM kerayserat 
 						WHERE yhtio = '{$kukarow['yhtio']}'";
-			$nro_fetch_res = mysql_query($query) or pupe_error($query);
+			$nro_fetch_res = pupe_query($query);
 			$nro_fetch_row = mysql_fetch_assoc($nro_fetch_res);
 
 			$kerayseran_numero = $nro_fetch_row['nro'] + 1;
@@ -40,10 +40,10 @@
 
 					// emuloidaan transactioita mysql LOCK komennolla
 					$query = "LOCK TABLES avainsana WRITE";
-					$res   = mysql_query($query) or pupe_error($query);
+					$res   = pupe_query($query);
 
 					$query = "SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 					$row = mysql_fetch_assoc($result);
 
 					$sscc = is_numeric($row['selite']) ? (int) $row['selite'] + 1 : 1;
@@ -54,7 +54,7 @@
 						$query = "	SELECT max(perhe)+1 perhe
 									FROM avainsana
 									WHERE yhtio = '{$kukarow['yhtio']}'";
-						$max_perhe_res = mysql_query($query) or pupe_error($query);
+						$max_perhe_res = pupe_query($query);
 						$max_perhe_row = mysql_fetch_assoc($max_perhe_res);
 
 						$query = "	INSERT INTO avainsana SET 
@@ -72,16 +72,16 @@
 									luontiaika = now(),
 									muutospvm = now(),
 									muuttaja = '{$kukarow['kuka']}'";
-						$insert_res = mysql_query($query) or pupe_error($query);
+						$insert_res = pupe_query($query);
 					}
 					else {
 						$query = "UPDATE avainsana SET selite = '{$sscc}' WHERE yhtio = '{$kukarow['yhtio']}' AND laji='SSCC'";
-						$update_res = mysql_query($query) or pupe_error($query);
+						$update_res = pupe_query($query);
 					}
 
 					// poistetaan lukko
 					$query = "UNLOCK TABLES";
-					$res   = mysql_query($query) or pupe_error($query);
+					$res   = pupe_query($query);
 
 					foreach ($pakkaus as $tilriv => $kpl) {
 						$pakkaus_kirjaimet[$tilriv][$pakkaus_kirjain] = $kpl;
@@ -94,14 +94,14 @@
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivi.tunnus = '{$tilriv}'";
-						$paino_res = mysql_query($query) or pupe_error($query);
+						$paino_res = pupe_query($query);
 						$paino_row = mysql_fetch_assoc($paino_res);
 
 						$paino += $paino_row['paino'];
 						$tilavuus += $paino_row['tilavuus'];
 
 						$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$paino_row['otunnus']}'";
-						$res = mysql_query($query) or pupe_error($query);
+						$res = pupe_query($query);
 						$laskurow = mysql_fetch_assoc($res);
 
 						// tila = 'K' tarkoittaa "Keräyksessä"
@@ -119,28 +119,30 @@
 									luontiaika = now(),
 									muuttaja = '{$kukarow['kuka']}',
 									muutospvm = now()";
-						$insert_res = mysql_query($query) or pupe_error($query);
+						$insert_res = pupe_query($query);
 					} #end foreach $pakkaus
 
-					$params = array(
-						'tilriv' => $tilriv,
-						'pakkaus_kirjain' => $pakkaus_kirjain,
-						'sscc' => $sscc,
-						'toimitustapa' => $laskurow['toimitustapa'],
-						'rivit' => $rivit,
-						'paino' => $paino,
-						'tilavuus' => $tilavuus,
-						'lask_nimi' => $laskurow['nimi'],
-						'lask_nimitark' => $laskurow['nimitark'],
-						'lask_osoite' => $laskurow['osoite'],
-						'lask_postino' => $laskurow['postino'],
-						'lask_postitp' => $laskurow['postitp'],
-						'lask_viite' => $laskurow['viesti'],
-						'lask_merkki' => $laskurow['sisviesti2'],
-						'komento_reittietiketti' => $komento['reittietiketti'],
-					);
+					if (!isset($ei_tulosteta) or !$ei_tulosteta) {
+						$params = array(
+							'tilriv' => $tilriv,
+							'pakkaus_kirjain' => $pakkaus_kirjain,
+							'sscc' => $sscc,
+							'toimitustapa' => $laskurow['toimitustapa'],
+							'rivit' => $rivit,
+							'paino' => $paino,
+							'tilavuus' => $tilavuus,
+							'lask_nimi' => $laskurow['nimi'],
+							'lask_nimitark' => $laskurow['nimitark'],
+							'lask_osoite' => $laskurow['osoite'],
+							'lask_postino' => $laskurow['postino'],
+							'lask_postitp' => $laskurow['postitp'],
+							'lask_viite' => $laskurow['viesti'],
+							'lask_merkki' => $laskurow['sisviesti2'],
+							'komento_reittietiketti' => $komento['reittietiketti'],
+						);
 
-					tulosta_reittietiketti($params);
+						tulosta_reittietiketti($params);
+					}
 				} #end foreach $rarr
 			} #end foreach $era_arr
 		} #end if

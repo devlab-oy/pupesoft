@@ -171,9 +171,9 @@
 				$xresult = mysql_query($query) or pupe_error($query);
 			}
 		}
-		
+
 		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
-		
+
 		//Rahatili
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$yritirow[yhtio]',

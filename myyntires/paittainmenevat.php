@@ -11,8 +11,8 @@
 		$tilitselisa = " and b.tilino = a.tilino ";
 	}
 
-
 	//$debug = 1;
+
 	if ($tee == 'N') {
 
 		$query  = "LOCK TABLES suoritus as a READ, suoritus as b READ, suoritus WRITE, tiliointi WRITE, sanakirja WRITE, avainsana as avainsana_kieli READ";
@@ -107,23 +107,67 @@
 							// Nyt kaikki on hyvin ja voimme tehdä päivitykset
 							// Kirjataan päittäinmeno selvittelytilin kautta
 							// Tiliöinniltä otetaan selvittelytilin vastatili
-							$query = "	INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu, kustp, kohde, projekti)
-										VALUES ('$kukarow[yhtio]', '$tiliointi1row[ltunnus]', '$tapvm', $tiliointi1row[summa], '$yhtiorow[selvittelytili]', '".t('Suoritettu päittäin')."',1,'$kukarow[kuka]',now(), $tiliointi1row[kustp], $tiliointi1row[kohde], $tiliointi1row[projekti])";
+							$query = "	INSERT INTO tiliointi SET
+										yhtio		= '$kukarow[yhtio]',
+										ltunnus		= '$tiliointi1row[ltunnus]',
+										tapvm		= '$tapvm',
+										summa		= $tiliointi1row[summa],
+										tilino		= '$yhtiorow[selvittelytili]',
+										selite		= '".t('Suoritettu päittäin')."',
+										lukko		= 1,
+										laatija		= '$kukarow[kuka]',
+										laadittu	= now(),
+										kustp		= $tiliointi1row[kustp],
+										kohde		= $tiliointi1row[kohde],
+										projekti	= $tiliointi1row[projekti]";
 							if ($debug == 1) echo "$query<br>";
 							else $result = mysql_query($query) or pupe_error($query);
 
-							$query = "	INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu, kustp, kohde, projekti)
-										VALUES ('$kukarow[yhtio]', '$tiliointi1row[ltunnus]', '$tapvm', $tiliointi1row[summa] * -1, '$tiliointi1row[tilino]', '".t('Suoritettu päittäin')."',1,'$kukarow[kuka]',now(), $tiliointi1row[kustp], $tiliointi1row[kohde], $tiliointi1row[projekti])";
+							$query = "	INSERT INTO tiliointi SET
+										yhtio		= '$kukarow[yhtio]',
+										ltunnus		= '$tiliointi1row[ltunnus]',
+										tapvm		= '$tapvm',
+										summa		= $tiliointi1row[summa] * -1,
+										tilino		= '$tiliointi1row[tilino]',
+										selite		= '".t('Suoritettu päittäin')."',
+										lukko		= 1,
+										laatija		= '$kukarow[kuka]',
+										laadittu	= now(),
+										kustp		= $tiliointi1row[kustp],
+										kohde		= $tiliointi1row[kohde],
+										projekti	= $tiliointi1row[projekti]";
 							if ($debug == 1) echo "$query<br>";
 							else $result = mysql_query($query) or pupe_error($query);
 
-							$query = "	INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu, kustp, kohde, projekti)
-										VALUES ('$kukarow[yhtio]', '$tiliointi2row[ltunnus]', '$tapvm', $tiliointi2row[summa], '$yhtiorow[selvittelytili]', '".t('Suoritettu päittäin')."',1,'$kukarow[kuka]',now(), $tiliointi2row[kustp], $tiliointi2row[kohde], $tiliointi2row[projekti])";
+							$query = "	INSERT INTO tiliointi SET
+										yhtio		= '$kukarow[yhtio]',
+										ltunnus		= '$tiliointi2row[ltunnus]',
+										tapvm		= '$tapvm',
+										summa		= $tiliointi2row[summa],
+										tilino		= '$yhtiorow[selvittelytili]',
+										selite		= '".t('Suoritettu päittäin')."',
+										lukko		= 1,
+										laatija		= '$kukarow[kuka]',
+										laadittu	= now(),
+										kustp		= $tiliointi2row[kustp],
+										kohde		= $tiliointi2row[kohde],
+										projekti	= $tiliointi2row[projekti]";
 							if ($debug == 1) echo "$query<br>";
 							else $result = mysql_query($query) or pupe_error($query);
 
-							$query = "	INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu, kustp, kohde, projekti)
-										VALUES ('$kukarow[yhtio]', '$tiliointi2row[ltunnus]', '$tapvm', $tiliointi2row[summa] * -1, '$tiliointi1row[tilino]', '".t('Suoritettu päittäin')."', 1,'$kukarow[kuka]',now(), $tiliointi2row[kustp], $tiliointi2row[kohde], $tiliointi2row[projekti])";
+							$query = "	INSERT INTO tiliointi SET
+										yhtio		= '$kukarow[yhtio]',
+										ltunnus		= '$tiliointi2row[ltunnus]',
+										tapvm		= '$tapvm',
+										summa		= $tiliointi2row[summa] * -1,
+										tilino		= '$tiliointi1row[tilino]',
+										selite		= '".t('Suoritettu päittäin')."',
+										lukko		= 1,
+										laatija		= '$kukarow[kuka]',
+										laadittu	= now(),
+										kustp		= $tiliointi2row[kustp],
+										kohde		= $tiliointi2row[kohde],
+										projekti	= $tiliointi2row[projekti]";
 							if ($debug == 1) echo "$query<br>";
 							else $result = mysql_query($query) or pupe_error($query);
 
@@ -234,6 +278,6 @@
 
 	}
 
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 
 ?>

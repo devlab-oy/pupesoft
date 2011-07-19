@@ -677,6 +677,7 @@
 				if (mysql_num_rows($result) == 1) {
 					$kassalipasrow = mysql_fetch_array($result);
 					$tilino = $kassalipasrow["pankkikortti"];
+					$kustp  = $kassalipasrow["kustp"];
 				}
 			}
 			elseif (stristr($arvo, "luottokortti")) {
@@ -693,6 +694,7 @@
 				if (mysql_num_rows($result) == 1) {
 					$kassalipasrow = mysql_fetch_array($result);
 					$tilino = $kassalipasrow["luottokortti"];
+					$kustp  = $kassalipasrow["kustp"];
 				}
 			}
 			elseif (stristr($arvo, "kateinen")) {
@@ -709,7 +711,7 @@
 				if (mysql_num_rows($result) == 1) {
 					$kassalipasrow = mysql_fetch_array($result);
 					$tilino = $kassalipasrow["kassa"];
-					$kustp = $kassalipasrow["kustp"];
+					$kustp  = $kassalipasrow["kustp"];
 				}
 			}
 
@@ -718,61 +720,63 @@
 			if (abs(str_replace(",",".",$arvo)) > 0 and (stristr($kentta, "solu") or stristr($kentta, "erotus"))) {
 
 				// Pilkut pisteiksi
-				$arvo = str_replace(",",".",$arvo);
+				$arvo = str_replace(",", ".", $arvo);
+
+				// Jos kentän nimi on soluerotus niin se tiliöidään kassaerotustilille (eli täsmäyserot), muuten normaalisti ylempänä parsetettu tilinumero
+				if (stristr($kentta, "soluerotus")) {
+					$tilino = $kassalipasrow["kassaerotus"];
+				}
+
+				// Jos kenttä on soluerotus tai erotus niin kerrotaan arvo -1:llä
+				if (stristr($kentta, "soluerotus") or stristr($kentta, "erotus")) {
+					$arvo = $arvo * -1;
+				}
+
+				$selitelisa = "";
+
+				// Jos kenttä on soluerotus niin lisätään selitteeseen "kassaero"
+				if (stristr($kentta, "soluerotus")) {
+					$selitelisa .= " ".t("kassaero");
+				}
+				// Jos kenttä on erotus niin lisätään selitteeseen "erotus"
+				elseif (stristr($kentta, "erotus")) {
+					$selitelisa .= " ".t("erotus");
+				}
+
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tilino, $kustp);
 
 				// Aletaan rakentaa inserttiä
 				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
-							ltunnus  = '$laskuid',";
-
-				// Jos kentän nimi on soluerotus niin se tiliöidään kassaerotustilille (eli täsmäyserot), muuten normaalisti ylempänä parsetettu tilinumero
-				if (stristr($kentta, "soluerotus")) {
-					$query .= "tilino = '$kassalipasrow[kassaerotus]',";
-				}
-				else {
-					$query .= "tilino   = '$tilino',";
-				}
-
-				$query .=  "kustp    = '$kustp',";
-				$query .=  "tapvm    = '$vv-$kk-$pp',";
-
-				// Jos kenttä on soluerotus tai erotus niin kerrotaan arvo -1:llä
-				if (stristr($kentta, "soluerotus") or stristr($kentta, "erotus")) {
-					$query .= "summa = $arvo * -1,";
-				}
-				else {
-					$query .= "summa = '$arvo',";
-				}
-
-				$query .= "	vero     = 0,
+							ltunnus  = '$laskuid',
+							tilino	 = '$tilino',
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}',
+							tapvm    = '$vv-$kk-$pp',
+							summa 	 = $arvo,
+							vero     = 0,
 							lukko    = '',
-							selite   = '$kassalipas $maksutapa";
-
-				// Jos kenttä on soluerotus niin lisätään selitteeseen "kassaero"
-				if (stristr($kentta, "soluerotus")) {
-					$query .= " ".t("kassaero")."',";
-				}
-				// Jos kenttä on erotus niin lisätään selitteeseen "erotus"
-				elseif (stristr($kentta, "erotus")) {
-					$query .= " ".t("erotus")."',";
-				}
-				else {
-					$query .= "',";
-				}
-
-				$query .=  "laatija  = '$kukarow[kuka]',
+							selite   = '$kassalipas $maksutapa$selitelisa',
+							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
 			// Jos kenttä on käteistilitys, niin toinen tiliöidään käteistilitys-tilille ja se summa myös miinustetaan kassasta
 			if (abs(str_replace(",",".",$arvo)) > 0 and stristr($kentta, "kateistilitys")) {
+
 				$arvo = str_replace(",",".",$arvo);
+
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kateistilitys"], $kustp);
+
 				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$kassalipasrow[kateistilitys]',
-							kustp    = '$kustp',
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}',
 							tapvm    = '$vv-$kk-$pp',
 							summa    = $arvo,
 							vero     = 0,
@@ -782,11 +786,15 @@
 							laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
 
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kassa"], $kustp);
+
 				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$kassalipasrow[kassa]',
-							kustp    = '$kustp',
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}',
 							tapvm    = '$vv-$kk-$pp',
 							summa    = $arvo * -1,
 							vero     = 0,
@@ -800,6 +808,9 @@
 			// Jos kenttä on käteisotto, niin toinen tiliöidään käteisotto-tilille ja se summa myös miinustetaan kassasta
 			if (abs(str_replace(",",".",$arvo)) > 0 and stristr($kentta, "kateisotto")) {
 				$arvo = str_replace(",",".",$arvo);
+
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kateisotto"], $kustp);
+
 				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
@@ -813,6 +824,8 @@
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
+
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kassa"], $kustp);
 
 				$query = "	INSERT INTO tiliointi SET
 							yhtio    = '$kukarow[yhtio]',

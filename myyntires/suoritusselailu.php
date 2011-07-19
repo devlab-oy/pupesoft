@@ -99,12 +99,38 @@
 					$selite = t('Suoritus poistettu');
 				}
 
-				$query = "	INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu, summa_valuutassa, valkoodi)
-							VALUES ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa], '$stili', '$selite', 0, '$kukarow[kuka]', now(), $tiliointi1_row[summa_valuutassa], '$tiliointi1_row[valkoodi]')";
+				$query = "	INSERT INTO tiliointi SET
+							yhtio		= '$kukarow[yhtio]',
+							ltunnus		= '$tiliointi1_row[ltunnus]',
+							tapvm		= '$tapvm',
+							summa		= $tiliointi1_row[summa],
+							tilino		= '$stili',
+							kustp 		= '$tiliointi1_row[kustp]', #OLETUSKUSTP?
+							kohde 		= '$tiliointi1_row[kohde]',
+							projekti 	= '$tiliointi1_row[projekti]',
+							selite		= '$selite',
+							lukko		= 0,
+							laatija		= '$kukarow[kuka]',
+							laadittu	= now(),
+							summa_valuutassa = $tiliointi1_row[summa_valuutassa],
+							valkoodi	= '$tiliointi1_row[valkoodi]'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query = "	INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu, summa_valuutassa, valkoodi)
-							VALUES ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa] * -1, '$tiliointi1_row[tilino]', '$selite', 1, '$kukarow[kuka]', now(), $tiliointi1_row[summa_valuutassa] * -1, '$tiliointi1_row[valkoodi]')";
+				$query = "	INSERT INTO tiliointi SET
+							yhtio		= '$kukarow[yhtio]',
+							ltunnus		= '$tiliointi1_row[ltunnus]',
+							tapvm		= '$tapvm',
+							summa		= $tiliointi1_row[summa] * -1,
+							tilino		= '$tiliointi1_row[tilino]',
+							kustp 		= '$tiliointi1_row[kustp]',
+							kohde 		= '$tiliointi1_row[kohde]',
+							projekti 	= '$tiliointi1_row[projekti]',
+							selite		= '$selite',
+							lukko		= 1,
+							laatija		= '$kukarow[kuka]',
+							laadittu	= now(),
+							summa_valuutassa = $tiliointi1_row[summa_valuutassa] * -1,
+							valkoodi	= '$tiliointi1_row[valkoodi]'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$query = "UPDATE suoritus set kohdpvm = '$tapvm', summa=0 where tunnus='$suoritus_row[tunnus]'";

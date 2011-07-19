@@ -22,7 +22,7 @@
 			exit;
 		}
 
-		$tiliointirow = mysql_fetch_array ($result);
+		$tiliointirow = mysql_fetch_array($result);
 		$query = "INSERT into tiliointi set ";
 
 		for ($i = 0; $i < mysql_num_fields($result); $i++) {
@@ -801,11 +801,15 @@
 			//Ostoreskontralaskun veroton arvo
 			$vientisumma = round($trow["summa"]*$trow["vienti_kurssi"],2) - $alvirow["summa"];
 
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($vientitili);
+
 			$query = "	INSERT into tiliointi set
 						yhtio 		= '$kukarow[yhtio]',
 						ltunnus 	= '$tunnus',
 						tilino 		= '$vientitili',
-						kustp 		= 0, #OLETUSKUSTP?
+						kustp    	= '{$kustp_ins}',
+						kohde	 	= '{$kohde_ins}',
+						projekti 	= '{$projekti_ins}',
 						tapvm 		= '$trow[tapvm]',
 						summa 		= $vientisumma,
 						vero 		= 0,

@@ -173,8 +173,21 @@ if ($tee == "SYOTTO") {
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($myyntisaamiset);
 
 	// Myyntisaamiset
-	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, lukko, kustp, kohde, projekti)
-				VALUES ('$kukarow[yhtio]', '$kukarow[kuka]', now(), '$tapvm', '$ltunnus', '$myyntisaamiset', $omasumma * -1, $pistesumma * -1, '$tilivaluutta', 'Käsin syötetty suoritus $asiakas_nimi $selite', '1', '$kustp_ins', '$kohde_ins', '$projekti_ins')";
+	$query = "	INSERT INTO tiliointi SET
+			yhtio	= '$kukarow[yhtio]',
+			laatija	= '$kukarow[kuka]',
+			laadittu	= now(),
+			tapvm	= '$tapvm',
+			ltunnus	= '$ltunnus',
+			tilino	= '$myyntisaamiset',
+			summa	= $omasumma * -1,
+			summa_valuutassa	= $pistesumma * -1,
+			valkoodi	= '$tilivaluutta',
+			selite	= 'Käsin syötetty suoritus $asiakas_nimi $selite',
+			lukko	= '1',
+			kustp	= '$kustp_ins',
+			kohde	= '$kohde_ins',
+			projekti	= '$projekti_ins'";
 	$result = pupe_query($query);
 	$ttunnus = mysql_insert_id($link);
 
@@ -182,13 +195,37 @@ if ($tee == "SYOTTO") {
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassatili, $kustannuspaikka);
 
 	// Kassatili
-	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, aputunnus, lukko, kustp, kohde, projekti)
-				VALUES ('$kukarow[yhtio]', '$kukarow[kuka]', now(), '$tapvm', '$ltunnus', '$kassatili', '$omasumma', '$pistesumma', '$tilivaluutta', 'Käsin syötetty suoritus $asiakas_nimi $selite', '$ttunnus', '1', '$kustp_ins', '$kohde_ins', '$projekti_ins')";
+	$query = "	INSERT INTO tiliointi SET
+			yhtio	= '$kukarow[yhtio]',
+			laatija	= '$kukarow[kuka]',
+			laadittu	= now(),
+			tapvm	= '$tapvm',
+			ltunnus	= '$ltunnus',
+			tilino	= '$kassatili',
+			summa	= '$omasumma',
+			summa_valuutassa	= '$pistesumma',
+			valkoodi	= '$tilivaluutta',
+			selite	= 'Käsin syötetty suoritus $asiakas_nimi $selite',
+			aputunnus	= '$ttunnus',
+			lukko	= '1',
+			kustp	= '$kustp_ins',
+			kohde	= '$kohde_ins',
+			projekti	= '$projekti_ins'";
 	$result = pupe_query($query);
 
 	// Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa. (Kuten alv-vienti)
-	$query = "	INSERT INTO suoritus (yhtio, tilino, nimi_maksaja, summa, maksupvm, kirjpvm, asiakas_tunnus, ltunnus, viesti, valkoodi, kurssi)
-				VALUES ('$kukarow[yhtio]', '$tilistr', '$asiakasstr', '$pistesumma', '$tapvm', '$tapvm', '$asiakasid', '$ttunnus', '$selite', '$tilivaluutta', '$tilikurssi')";
+	$query = "	INSERT INTO suoritus SET
+			yhtio	= '$kukarow[yhtio]',
+			tilino	= '$tilistr',
+			nimi_maksaja	= '$asiakasstr',
+			summa	= '$pistesumma',
+			maksupvm	= '$tapvm',
+			kirjpvm	= '$tapvm',
+			asiakas_tunnus	= '$asiakasid',
+			ltunnus	= '$ttunnus',
+			viesti	= '$selite',
+			valkoodi	= '$tilivaluutta',
+			kurssi	= '$tilikurssi'";
 	$result = pupe_query($query);
 	$suoritus_tunnus = mysql_insert_id();
 

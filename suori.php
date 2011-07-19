@@ -175,7 +175,7 @@
 				exit;
 			}
 
-			while ($tiliointirow = mysql_fetch_array ($yresult)) {
+			while ($tiliointirow = mysql_fetch_array($yresult)) {
 				// Kuinka paljon on tämän viennin osuus
 				$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma'] * $laskurow['maksukasumma'],2);
 				$summa_valuutassa = round($tiliointirow['summa_valuutassa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma_valuutassa'] * $laskurow['maksukasumma_valuutassa'],2);
@@ -214,11 +214,13 @@
 				$isa = mysql_insert_id ($link); // Näin löydämme tähän liittyvät alvit....
 
 				if ($tiliointirow['vero'] != 0) {
-
 					$query = "	INSERT into tiliointi set
 								yhtio 				= '$kukarow[yhtio]',
 								ltunnus 			= '$laskurow[tunnus]',
 								tilino 				= '$yhtiorow[alv]',
+								kustp 				= '', #OLETUSKUSTP?
+								kohde 				= '',
+								projekti 			= '',
 								tapvm 				= '$mav-$mak-$map',
 								summa 				= $alv * -1,
 								summa_valuutassa	= $alv_valuutassa * -1,
@@ -346,10 +348,15 @@
 			$rahatili = $yritirow['oletus_rahatili'];
 		}
 
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($rahatili);
+
 		$query = "	INSERT INTO tiliointi SET
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$laskurow[tunnus]',
 					tilino 				= '$rahatili',
+					kustp    			= '{$kustp_ins}',
+					kohde	 			= '{$kohde_ins}',
+					projekti 			= '{$projekti_ins}',
 					tapvm 				= '$mav-$mak-$map',
 					summa 				= -1 * $rahasumma,
 					summa_valuutassa	= -1 * $rahasumma_valuutassa,

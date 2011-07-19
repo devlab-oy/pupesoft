@@ -787,7 +787,8 @@
 				// T‰lle saamme tositenron ostoveloista
 				if ($laskurow['tapvm'] == $tiliointipvm) {
 
-					$query = "	SELECT tosite FROM tiliointi
+					$query = "	SELECT tosite 
+								FROM tiliointi
 								WHERE yhtio = '$kukarow[yhtio]' and
 								ltunnus = '$tunnus' and
 								tapvm = '$tiliointipvm' and
@@ -809,7 +810,8 @@
  				// T‰lle saamme tositenron ostoveloista
 				if ($laskurow['mapvm'] == $tiliointipvm) {
 
-					$query = "	SELECT tosite FROM tiliointi
+					$query = "	SELECT tosite 
+								FROM tiliointi
 								WHERE yhtio = '$kukarow[yhtio]' and
 								ltunnus = '$tunnus' and
 								tapvm = '$tiliointipvm' and
@@ -1348,8 +1350,8 @@
 			if ($naytalisa != '') {
 				$query = "	SELECT vero, sum(summa) veroton, round(sum(summa*vero/100),2) 'veron m‰‰r‰', round(sum(summa*(1+vero/100)),2) verollinen from tiliointi
 							WHERE ltunnus = '$tunnus' and
-							tiliointi.yhtio = '$kukarow[yhtio]' and
-							korjattu='' and
+							yhtio = '$kukarow[yhtio]' and
+							korjattu = '' and
 							tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
 							GROUP BY 1";
 				$result = mysql_query($query) or pupe_error($query);

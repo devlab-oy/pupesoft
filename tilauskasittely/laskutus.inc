@@ -211,7 +211,7 @@
 									}
 
 									$query = "	UPDATE tilausrivi SET
-												varattu = '{$vanhin_pantti_row['kpl']}',
+												varattu = -".abs($vanhin_pantti_row['kpl']).",
 												ale1 = 100,
 												{$ale_query_update_lisa}
 												kommentti = '{$tilkom_upd}'

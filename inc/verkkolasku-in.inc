@@ -1274,7 +1274,6 @@
 						 * F => D
 						 * I => G
 						 */
-						echo $trow['oletus_vienti'];
 						if ($laskun_tyyppi == "UNIKKO-INVOICE") {
 
 							if ($trow['oletus_vienti'] == 'C') $trow['oletus_vienti'] = 'A';
@@ -1287,7 +1286,6 @@
 										AND tunnus = '{$tunnus}'";
 							$vienti_upd_res = pupe_query($query);
 						}
-						echo "<br>". $trow['oletus_vienti'];
 						// Jos t‰m‰ lasku menee varastoon, tehd‰‰n valmiiksi keikka
 						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
 							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);

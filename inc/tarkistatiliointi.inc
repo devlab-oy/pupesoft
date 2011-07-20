@@ -128,7 +128,6 @@
 				}
 			}
 			
-			
 			if ($xrow['kustp'] != 0 and isset($kustp) and $kustp == 0) {
 				$virhe = t("Pakollinen kustannuspaikka puuttui")."!";
 				$ok = 1;

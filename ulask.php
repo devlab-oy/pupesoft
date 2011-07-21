@@ -1768,8 +1768,7 @@ if ($tee == 'I') {
 		exit;
 	}
 
-	for ($i=1; $i<$maara; $i++) {
-
+	for ($i = 1; $i < $maara; $i++) {
 		if (strlen($itili[$i]) > 0) {
 
 			$ikustp_ins 	= $ikustp[$i] == 0 ? $ikustp[$maksimisumma_i] : $ikustp[$i];
@@ -1805,9 +1804,9 @@ if ($tee == 'I') {
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
 							tilino 				= '$tilino_alv',
-							kustp 				= '{$ikustp_ins}',  #OLETUSKUSTP?
-							kohde 				= '{$ikohde_ins}',
-							projekti 			= '{$iprojekti_ins}',
+							kustp 				= '',  #OLETUSKUSTP?
+							kohde 				= '',
+							projekti 			= '',
 							tapvm 				= '$tpv-$tpk-$tpp',
 							summa 				= '$ialv[$i]',
 							summa_valuutassa 	= '$ialv_valuutassa[$i]',
@@ -1822,14 +1821,39 @@ if ($tee == 'I') {
 				$result = pupe_query($query);
 			}
 
-			// Varastonmuutos tulee tuloslaskelmaan, joten kopioidaan sinne kustannuspaikat jne...
+			// jos kyseessä on vaihto-omaisuutta tai rahti/huolintakuluja, tiliöidään varastonarvoon
 			if ($vienti != 'A' and $vienti != 'D' and $vienti != 'G' and $vienti != '') {
+
+				$varastotili = $yhtiorow['varasto'];
+
+				if ($vienti == 'C' or $vienti == 'F' or $vienti == 'I' or $vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
+					$varastotili = $yhtiorow['matkalla_olevat'];
+				}
+
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili);
+
+				$query = "	INSERT INTO tiliointi SET
+							yhtio 				= '$kukarow[yhtio]',
+							ltunnus 			= '$tunnus',
+							tilino 				= '$varastotili',
+							kustp    			= '{$kustp_ins}',
+							kohde	 			= '{$kohde_ins}',
+							projekti 			= '{$projekti_ins}',
+							tapvm 				= '$tpv-$tpk-$tpp',
+							summa 				= $veroton,
+							summa_valuutassa	= $veroton_valuutassa,
+							valkoodi			= '$valkoodi',
+							vero 				= 0,
+							lukko 				= '',
+							tosite 				= '$tositenro',
+							laatija 			= '$kukarow[kuka]',
+							laadittu 			= now()";
+				$result = pupe_query($query);
+
+				$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
 				if ($vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
 					$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
-				}
-				else {
-					$varastonmuutostili = $yhtiorow["varastonmuutos"];
 				}
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
@@ -1853,37 +1877,6 @@ if ($tee == 'I') {
 				$result = pupe_query($query);
 			}
 		}
-	}
-
-	// Kirjataan tarvittava taseen varastovienti
-	if ($vienti != 'A' and $vienti != 'D' and $vienti != 'G' and $vienti != '') {
-
-		if ($vienti == 'C' or $vienti == 'F' or $vienti == 'I' or $vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
-			$varastotili = $yhtiorow['matkalla_olevat'];
-		}
-		else {
-			$varastotili = $yhtiorow['varasto'];
-		}
-
-		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili);
-
-		$query = "	INSERT INTO tiliointi SET
-					yhtio 				= '$kukarow[yhtio]',
-					ltunnus 			= '$tunnus',
-					tilino 				= '$varastotili',
-					kustp    			= '{$kustp_ins}',
-					kohde	 			= '{$kohde_ins}',
-					projekti 			= '{$projekti_ins}',
-					tapvm 				= '$tpv-$tpk-$tpp',
-					summa 				= $veroton,
-					summa_valuutassa	= $veroton_valuutassa,
-					valkoodi			= '$valkoodi',
-					vero 				= 0,
-					lukko 				= '',
-					tosite 				= '$tositenro',
-					laatija 			= '$kukarow[kuka]',
-					laadittu 			= now()";
-		$result = pupe_query($query);
 	}
 
 	// Jos meillä on suoraveloitus

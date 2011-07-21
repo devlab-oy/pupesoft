@@ -1,6 +1,6 @@
 <?php
 
-/* Tälle on anenttava
+/* Tälle on annettava
 
 $tuoteno 	= korjattava tuote
 $pvm 		= mihin päivään asti korjataan
@@ -288,12 +288,14 @@ if (!function_exists("korjaalaskut")) {
 
 						// korjataan varastonmuutostiliöinti
 						kopioitiliointi($tiliointi1['tunnus'], $kukarow['kuka']); // kopioidaan vanha tiliöintirivi ja yliviivataan se
+						
 						$query = "UPDATE tiliointi SET summa = summa + $tilausrivi[kate] - $uusikate, laadittu=now(), laatija='$kukarow[kuka]' WHERE tunnus='$tiliointi1[tunnus]'";
 						if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 						$katekorjres = mysql_query($query) or pupe_error($query);
 
 						// korjataan varastotiliöinti
 						kopioitiliointi($tiliointi2['tunnus'], $kukarow['kuka']); // kopioidaan vanha tiliöintirivi ja yliviivataan se
+						
 						$query = "UPDATE tiliointi SET summa = summa - $tilausrivi[kate] + $uusikate, laadittu=now(), laatija='$kukarow[kuka]' WHERE tunnus='$tiliointi2[tunnus]'";
 						if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 						$katekorjres = mysql_query($query) or pupe_error($query);
@@ -315,7 +317,6 @@ if (!function_exists("korjaalaskut")) {
 
 					}
 					else {
-
 						echo "<font class='error'>".t("Emme osanneet korjata kirjanpitoa eikä katteita!")." ".t("Laskulta ei löydy sopivaa tiliöintiä (varasto)")."
 						tuoteno:									$tuoteno,
 						tilino: 									$yhtiorow[varastonmuutos],

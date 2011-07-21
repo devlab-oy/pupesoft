@@ -171,7 +171,7 @@
 						WHERE ltunnus	= '$tunnus'
 						and yhtio 		= '$kukarow[yhtio]'
 						and tapvm 		= '$laskurow[tapvm]'
-						and tilino not in ('$yhtiorow[ostovelat]','$yhtiorow[alv]','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]','$yhtiorow[konserniostovelat]','$yhtiorow[kassaale]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+						and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
 						and korjattu 	= ''";
 			$yresult = pupe_query($query);
 
@@ -275,7 +275,7 @@
 						WHERE ltunnus	= '$tunnus'
 						and yhtio 		= '$kukarow[yhtio]'
 						and tapvm 		= '$laskurow[tapvm]'
-						and tilino not in ('$yhtiorow[ostovelat]','$yhtiorow[alv]','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]','$yhtiorow[matkalla_olevat]','$yhtiorow[konserniostovelat]','$yhtiorow[kassaale]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]')
+						and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
 						and korjattu 	= ''";
 			$yresult = pupe_query($query);
 
@@ -284,7 +284,7 @@
 				exit;
 			}
 
-			while ($tiliointirow = mysql_fetch_assoc ($yresult)) {
+			while ($tiliointirow = mysql_fetch_assoc($yresult)) {
 				// Kuinka paljon on tämän viennin osuus
 				$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma'] * $vesumma, 2);
 

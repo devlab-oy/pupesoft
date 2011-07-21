@@ -742,14 +742,14 @@
 		if ($vienti != 'A' and $vienti != 'D' and $vienti != 'G' and $vienti != '') {
 
 			// Haetaan kulutiliöinti
-			$query = "	SELECT kustp, kohde, projekti, summa
-						from tiliointi
+			$query = "	SELECT kustp, kohde, projekti, sum(summa) summa
+						FROM tiliointi
 						WHERE yhtio		= '$kukarow[yhtio]'
-						and ltunnus		= '$tunnus'
-						and tapvm		= '$trow[tapvm]'
-						and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
-						and korjattu	= ''
-						group by 1,2,3";
+						AND ltunnus		= '$tunnus'
+						AND tapvm		= '$trow[tapvm]'
+						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+						AND korjattu	= ''
+						GROUP BY 1,2,3";
 			$result = pupe_query($query);
 
 			while ($tiliointirow = mysql_fetch_assoc($result)) {

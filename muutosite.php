@@ -103,9 +103,9 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						GROUP BY ltunnus, tapvm
 						HAVING summa <> 0";
 		}
-
 		if ($tee == 'X') {
 			// etsii kaikki tositteet joilta puuttuu kustannuspaikka, EI myynti ja tasetilit
+			// Onko where oikein!
 			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
 						FROM tiliointi use index (yhtio_tilino_tapvm), tili use index (tili_index)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'

@@ -105,7 +105,7 @@
 
 		$query = "	SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
 					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino='$yhtiorow[varasto]'
+					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino = '$yhtiorow[varasto]'
 					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
 					WHERE lasku.yhtio	= '$kukarow[yhtio]'
 					and lasku.tila     	= 'X'
@@ -129,10 +129,18 @@
 						and tunnus 	= '$ttunnus'";
 			$upresult = pupe_query($query);
 
-			$query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varasto] AND yhtio='$kukarow[yhtio]'";
+			$query = "	UPDATE tiliointi
+						SET korjausaika = now(),
+						korjattu 		= '$kukarow[kuka]'
+						WHERE tunnus = $kpitorow[varasto]
+						AND yhtio 	 = '$kukarow[yhtio]'";
 	        $result = pupe_query($query);
 
-			$query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varastonmuutos] AND yhtio='$kukarow[yhtio]'";
+			$query = "	UPDATE tiliointi
+						SET korjausaika = now(),
+						korjattu 		= '$kukarow[kuka]'
+						WHERE tunnus = $kpitorow[varastonmuutos]
+						AND yhtio 	 = '$kukarow[yhtio]'";
 	        $result = pupe_query($query);
 
 			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"]);
@@ -183,7 +191,7 @@
 
 		$query = "	SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
 					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino='$yhtiorow[varasto]'
+					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino = '$yhtiorow[varasto]'
 					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
 					WHERE lasku.yhtio	= '$kukarow[yhtio]'
 					and lasku.tila     	= 'X'
@@ -377,7 +385,7 @@
 
 					$query = "	SELECT sum(tiliointi.summa) summa
 								FROM lasku use index (yhtio_tila_tapvm)
-								JOIN tiliointi ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu='' and tiliointi.tilino='$yhtiorow[varasto]'
+								JOIN tiliointi ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino = '$yhtiorow[varasto]'
 								WHERE lasku.yhtio	= '$kukarow[yhtio]'
 								and lasku.tila     	= 'X'
 								and lasku.tapvm     = '$tuoterow[tapvm]'

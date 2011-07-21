@@ -1121,8 +1121,11 @@
 					$vtontot 						= 0;
 					$vtontot_valuutassa 			= 0;
 
-					for ($i=0; $i < count($rtuoteno); $i++) {
+					$kustp		= $oletuskust;
+					$kohde		= $oletuskohde;
+					$projekti	= $oletusprojekti;
 
+					for ($i = 0; $i < count($rtuoteno); $i++) {
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
 
@@ -1198,16 +1201,16 @@
 
 							$verkkolaskuveroton				+= $summa;
 							$verkkolaskuveroton_valuutassa	+= $summa_valuutassa;
-							$vtonsumma						= $summa;
-							$vtonsumma_valuutassa			= $summa_valuutassa;
+							$vtonsumma						 = $summa;
+							$vtonsumma_valuutassa			 = $summa_valuutassa;
 							$vtontot						+= $summa;
 							$vtontot_valuutassa				+= $summa_valuutassa;
-							$summa							= round($summa * (1+($vero/100)),2);
+							$summa						 	 = round($summa * (1+($vero/100)),2);
 							$totsumma						+= $summa;
 							$totsumma_valuutassa			+= $summa_valuutassa;
-							$selite							= $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero." ".$selite;
-							$kukarow['yhtio']				= $yhtio;
-							$kukarow['kuka']				= 'verkkolas';
+							$selite							 = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero." ".$selite;
+							$kukarow['yhtio']				 = $yhtio;
+							$kukarow['kuka']				 = 'verkkolas';
 
 							require ("inc/teetiliointi.inc");
 
@@ -1233,6 +1236,32 @@
 											laatija 		 = '$kukarow[kuka]',
 											laadittu 		 = now()";
 								$result = pupe_query($query);
+								
+								$varastotili = $yhtiorow['varasto'];
+
+								if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
+									$varastotili = $yhtiorow['matkalla_olevat'];
+								}
+
+								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp, $kohde, $projekti);
+
+								$query = "	INSERT into tiliointi set
+											yhtio 			 = '$kukarow[yhtio]',
+											ltunnus 		 = '$tunnus',
+											tilino 			 = '$varastotili',
+											kustp    		 = '{$kustp_ins}',
+											kohde	 		 = '{$kohde_ins}',
+											projekti 		 = '{$projekti_ins}',
+											tapvm 			 = '$tpv-$tpk-$tpp',
+											summa 			 = '$vtonsumma',
+											summa_valuutassa = '$vtonsumma_valuutassa',
+											valkoodi 		 = '$valkoodi',
+											selite 			 = '$selite',
+											vero 			 = 0,
+											lukko 			 = '',
+											laatija			 = '$kukarow[kuka]',
+											laadittu		 = now()";
+								$result = pupe_query($query);																
 							}
 						}
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
@@ -1263,52 +1292,27 @@
 					}
 
 					// jos kyseess‰ on jonkin rahti/huolintakuluja, tiliˆid‰‰n varastonarvoon
-					if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
-
-						$varastotili = $yhtiorow['varasto'];
-
-						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-							$varastotili = $yhtiorow['matkalla_olevat'];
-						}
-
-						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili);
-
-						$query = "	INSERT into tiliointi set
-									yhtio 			 = '$kukarow[yhtio]',
-									ltunnus 		 = '$tunnus',
-									tilino 			 = '$varastotili',
-									kustp    		 = '{$kustp_ins}',
-									kohde	 		 = '{$kohde_ins}',
-									projekti 		 = '{$projekti_ins}',
-									tapvm 			 = '$tpv-$tpk-$tpp',
-									summa 			 = '$vtontot',
-									summa_valuutassa = '$vtontot_valuutassa',
-									valkoodi 		 = '$valkoodi',
-									selite 			 = '$selite',
-									vero 			 = 0,
-									lukko 			 = '',
-									laatija			 = '$kukarow[kuka]',
-									laadittu		 = now()";
-						$result = pupe_query($query);
-
+					if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {						
+						
 						/**
 						 * Jos Unikkoinvoice, muutetaan oletus_vienti
 						 * C => A
 						 * F => D
 						 * I => G
-						 */
+						*/
 						if ($laskun_tyyppi == "UNIKKO-INVOICE") {
 
 							if ($trow['oletus_vienti'] == 'C') $trow['oletus_vienti'] = 'A';
 							elseif ($trow['oletus_vienti'] == 'F') $trow['oletus_vienti'] = 'D';
 							elseif ($trow['oletus_vienti'] == 'I') $trow['oletus_vienti'] = 'G';
-							
+
 							$query = "	UPDATE lasku SET
 										vienti = '{$trow['oletus_vienti']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$tunnus}'";
 							$vienti_upd_res = pupe_query($query);
-						}
+						}						
+						
 						// Jos t‰m‰ lasku menee varastoon, tehd‰‰n valmiiksi keikka
 						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
 							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);

@@ -800,7 +800,7 @@ if ($tila == 'tee_kohdistus') {
 						$alvtili = $yhtiorow["alv"];
 					}
 
-					//Etsitään myynti-tiliöinnit
+					// Etsitään myynti-tiliöinnit
 					$query = "	SELECT summa, vero, kustp, kohde, projekti, summa_valuutassa, valkoodi
 								FROM tiliointi use index (tositerivit_index)
 								WHERE ltunnus	= '$lasku[tunnus]'
@@ -815,17 +815,17 @@ if ($tila == 'tee_kohdistus') {
 						echo "<font class='error'>".t("En löytänyt laskun myynnin vientejä! Alv varmaankin heittää")."</font> ";
 
 						$query = "	INSERT INTO tiliointi SET
-			yhtio	= '$kukarow[yhtio]',
-			laatija	= '$kukarow[kuka]',
-			laadittu	= now(),
-			tapvm	= '$suoritus[maksupvm]',
-			ltunnus	= '$lasku[tunnus]',
-			tilino	= '$suoritus[kassa_ale_tilino]',
-			summa	= '$lasku[alennus]',
-			summa_valuutassa	= '$lasku[alennus_valuutassa]',
-			valkoodi	= '$lasku[valkoodi]',
-			selite	= 'Manuaalisesti kohdistettu suoritus (alv ongelma) $suoritus[viesti]',
-			vero	= '0'";
+									yhtio		= '$kukarow[yhtio]',
+									laatija		= '$kukarow[kuka]',
+									laadittu	= now(),
+									tapvm		= '$suoritus[maksupvm]',
+									ltunnus		= '$lasku[tunnus]',
+									tilino		= '$suoritus[kassa_ale_tilino]',
+									summa		= '$lasku[alennus]',
+									summa_valuutassa = '$lasku[alennus_valuutassa]',
+									valkoodi	= '$lasku[valkoodi]',
+									selite		= 'Manuaalisesti kohdistettu suoritus (alv ongelma) $suoritus[viesti]',
+									vero		= '0'";
 						$result = mysql_query($query) or pupe_error($query);
 					}
 					else {
@@ -852,20 +852,20 @@ if ($tila == 'tee_kohdistus') {
 							$totkasumma_valuutassa += $summa_valuutassa + $alv_valuutassa;
 
 							$query = "	INSERT INTO tiliointi SET
-			yhtio	= '$kukarow[yhtio]',
-			laatija	= '$kukarow[kuka]',
-			laadittu	= now(),
-			tapvm	= '$suoritus[maksupvm]',
-			ltunnus	= '$lasku[tunnus]',
-			tilino	= '$suoritus[kassa_ale_tilino]',
-			summa	= $summa,
-			summa_valuutassa	= $summa_valuutassa,
-			valkoodi	= '$tiliointirow[valkoodi]',
-			selite	= 'Manuaalisesti kohdistettu suoritus $suoritus[viesti]',
-			vero	= '$tiliointirow[vero]',
-			kustp	= '$tiliointirow[kustp]',
-			kohde	= '$tiliointirow[kohde]',
-			projekti	= '$tiliointirow[projekti]'";
+										yhtio		= '$kukarow[yhtio]',
+										laatija		= '$kukarow[kuka]',
+										laadittu	= now(),
+										tapvm		= '$suoritus[maksupvm]',
+										ltunnus		= '$lasku[tunnus]',
+										tilino		= '$suoritus[kassa_ale_tilino]',
+										summa		= $summa,
+										summa_valuutassa = $summa_valuutassa,
+										valkoodi	= '$tiliointirow[valkoodi]',
+										selite		= 'Manuaalisesti kohdistettu suoritus $suoritus[viesti]',
+										vero		= '$tiliointirow[vero]',
+										kustp		= '$tiliointirow[kustp]',
+										kohde		= '$tiliointirow[kohde]',
+										projekti	= '$tiliointirow[projekti]'";
 							$result = mysql_query($query) or pupe_error($query);
 							$isa = mysql_insert_id ($link);
 

@@ -291,20 +291,19 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 				else {
 					die(t("Kuranttiustapahtumaa tai tuotetta ei löydy. Ei uskalleta jatkaa!"));
 				}
-
 			}
 
 			///* Tehdään tapahtuma *///
 			$query = "	INSERT into tapahtuma set
-						yhtio   = '$kukarow[yhtio]',
-						tuoteno = '$tuoterow[tuoteno]',
-						laji    = 'Epäkurantti',
-						kpl     = '$tuoterow[saldo]',
-						hinta   = round('$tuoterow[kehahin]', 6),
-						kplhinta= round('$tuoterow[kehahin]', 6),
-						selite  = '$tee. ".t("Keskihankintahinta").": $tuoterow[kehahin] ".t("Varastonmuutos").": $muutos',
-						laatija    = '$kukarow[kuka]',
-						laadittu = now()";
+						yhtio   	= '$kukarow[yhtio]',
+						tuoteno 	= '$tuoterow[tuoteno]',
+						laji    	= 'Epäkurantti',
+						kpl     	= '$tuoterow[saldo]',
+						hinta   	= round('$tuoterow[kehahin]', 6),
+						kplhinta	= round('$tuoterow[kehahin]', 6),
+						selite  	= '$tee. ".t("Keskihankintahinta").": $tuoterow[kehahin] ".t("Varastonmuutos").": $muutos',
+						laatija    	= '$kukarow[kuka]',
+						laadittu 	= now()";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle

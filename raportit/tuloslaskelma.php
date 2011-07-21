@@ -412,7 +412,7 @@
 			}
 			elseif ($tyyppi == "1") {
 				// Vastaavaa Varat
-				$otsikko 	= "Vastaavaa_Varat";
+				$otsikko 	= "Vastaavaa Varat";
 				$kirjain 	= "U";
 				$aputyyppi 	= 1;
 				$tilikarttataso = "ulkoinen_taso";
@@ -420,7 +420,7 @@
 			}
 			elseif ($tyyppi == "2") {
 				// Vastattavaa Velat
-				$otsikko 	= "Vastattavaa_Velat";
+				$otsikko 	= "Vastattavaa Velat";
 				$kirjain 	= "U";
 				$aputyyppi 	= 2;
 				$tilikarttataso = "ulkoinen_taso";
@@ -428,7 +428,7 @@
 			}
 			elseif ($tyyppi == "3") {
 				// Ulkoinen tuloslaskelma
-				$otsikko 	= "Ulkoinen_tuloslaskelma";
+				$otsikko 	= "Ulkoinen tuloslaskelma";
 				$kirjain 	= "U";
 				$aputyyppi 	= 3;
 				$tilikarttataso = "ulkoinen_taso";
@@ -436,7 +436,7 @@
 			}
 			else {
 				// Sisäinen tuloslaskelma
-				$otsikko 	= "Sisäinen_tuloslaskelma";
+				$otsikko 	= "Sisäinen tuloslaskelma";
 				$kirjain 	= "S";
 				$aputyyppi 	= 3;
 				$tilikarttataso = "sisainen_taso";
@@ -1391,6 +1391,8 @@
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='toim' value='$toim'>";
 					echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
+					// poistetaan välilyönti
+					$otsikko = str_replace(" ","_",$otsikko);
 					echo "<input type='hidden' name='kaunisnimi' value='$otsikko.pdf'>";
 					echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
 					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";

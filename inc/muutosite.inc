@@ -742,7 +742,9 @@
 		if ($vienti != 'A' and $vienti != 'D' and $vienti != 'G' and $vienti != '') {
 
 			// Haetaan kulutiliöinti
-			$query = "	SELECT kustp, kohde, projekti, sum(summa) summa
+			$query = "	SELECT kustp, kohde, projekti,
+						sum(summa) summa,
+						sum(summa_valuutassa) summa_valuutassa
 						FROM tiliointi
 						WHERE yhtio		= '$kukarow[yhtio]'
 						AND ltunnus		= '$tunnus'
@@ -754,70 +756,52 @@
 
 			while ($tiliointirow = mysql_fetch_assoc($result)) {
 
-				// jos raaka-ainevarastoon
-				if ($vienti == "J" or $vienti == "K" or $vienti == "L") {
-					$vientitili = $yhtiorow["raaka_ainevarastonmuutos"];
-				}
-				else {
-					$vientitili = $yhtiorow["varastonmuutos"];
+				$varastotili = $yhtiorow['varasto'];
+
+				if ($vienti == 'C' or $vienti == 'F' or $vienti == 'I' or $vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
+					$varastotili = $yhtiorow['matkalla_olevat'];
 				}
 
 				$query = "	INSERT into tiliointi set
-							yhtio 		= '$kukarow[yhtio]',
-							ltunnus 	= '$tunnus',
-							tilino 		= '$vientitili',
-							kustp 		= '$tiliointirow[kustp]',
-							kohde 		= '$tiliointirow[kohde]',
-							projekti 	= '$tiliointirow[projekti]',
-							tapvm 		= '$trow[tapvm]',
-							summa 		= $tiliointirow[summa] * -1,
-							vero 		= 0,
-							lukko 		= '',
-							tosite 		= '$tiliointirow[tosite]',
-							laatija 	= '$kukarow[kuka]',
-							laadittu 	= now()";
+							yhtio 				= '$kukarow[yhtio]',
+							ltunnus 			= '$tunnus',
+							tilino 				= '$varastotili',
+							kustp 				= '$tiliointirow[kustp]',
+							kohde 				= '$tiliointirow[kohde]',
+							projekti 			= '$tiliointirow[projekti]',
+							tapvm 				= '$trow[tapvm]',
+							summa 				= $tiliointirow[summa],
+							summa_valuutassa	= $tiliointirow[summa_valuutassa],
+							vero 				= 0,
+							lukko 				= '',
+							tosite 				= '$tiliointirow[tosite]',
+							laatija 			= '$kukarow[kuka]',
+							laadittu 			= now()";
 				$xresult = pupe_query($query);
 
+				$varastonmuutostili = $yhtiorow["varastonmuutos"];
+
+				if ($vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
+					$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+				}
+
+				$query = "	INSERT into tiliointi set
+							yhtio 				= '$kukarow[yhtio]',
+							ltunnus 			= '$tunnus',
+							tilino 				= '$varastonmuutostili',
+							kustp 				= '$tiliointirow[kustp]',
+							kohde 				= '$tiliointirow[kohde]',
+							projekti 			= '$tiliointirow[projekti]',
+							tapvm 				= '$trow[tapvm]',
+							summa 				= $tiliointirow[summa] * -1,
+							summa_valuutassa	= $tiliointirow[summa_valuutassa] * -1,
+							vero 				= 0,
+							lukko 				= '',
+							tosite 				= '$tiliointirow[tosite]',
+							laatija 			= '$kukarow[kuka]',
+							laadittu 			= now()";
+				$xresult = pupe_query($query);
 			}
-
-			// jos rahti/tai huolintalasku niin varastoon muuten matkalle
-			if ($vienti == "B" or $vienti == "E" or $vienti == "H") {
-				$vientitili = $yhtiorow["varasto"];
-			}
-			else {
-				$vientitili = $yhtiorow["matkalla_olevat"];
-			}
-
-			//Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
-			$query = "	SELECT sum(summa) summa
-						FROM tiliointi
-						WHERE yhtio		= '$kukarow[yhtio]'
-						and ltunnus		= '$tunnus'
-						and tilino  	= '$yhtiorow[alv]'
-						and korjattu 	= ''";
-			$alvires = pupe_query($query);
-			$alvirow = mysql_fetch_assoc($alvires);
-
-			//Ostoreskontralaskun veroton arvo
-			$vientisumma = round($trow["summa"]*$trow["vienti_kurssi"],2) - $alvirow["summa"];
-
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($vientitili);
-
-			$query = "	INSERT into tiliointi set
-						yhtio 		= '$kukarow[yhtio]',
-						ltunnus 	= '$tunnus',
-						tilino 		= '$vientitili',
-						kustp    	= '{$kustp_ins}',
-						kohde	 	= '{$kohde_ins}',
-						projekti 	= '{$projekti_ins}',
-						tapvm 		= '$trow[tapvm]',
-						summa 		= $vientisumma,
-						vero 		= 0,
-						lukko 		= '',
-						tosite 		= '$tiliointirow[tosite]',
-						laatija 	= '$kukarow[kuka]',
-						laadittu 	= now()";
-			$xresult = pupe_query($query);
 		}
 
 		$tee = 'E';

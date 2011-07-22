@@ -35,7 +35,6 @@ if (!function_exists("kopioitiliointi")) {
 			$query = "INSERT into tiliointi set ";
 
 			for ($i=0; $i<mysql_num_fields($result); $i++) {
-
 				if (mysql_field_name($result, $i) != 'tunnus') {
 
 					if ($viivaaja != '') {
@@ -53,7 +52,6 @@ if (!function_exists("kopioitiliointi")) {
 					else {
 						$query .= mysql_field_name($result,$i) . "='" . $tiliointirow[$i] . "',";
 					}
-
 				}
 			}
 

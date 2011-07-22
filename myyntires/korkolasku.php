@@ -17,7 +17,7 @@ $query = "	SELECT tuoteno
 			FROM tuote
 			WHERE yhtio = '$kukarow[yhtio]'
 			AND tuoteno = 'Korko'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) != 1) {
 	echo "<font class='error'>".t("Tuoterekisteristä ei löydy 'KORKO'-tuotetta")."!</font><br>";
@@ -44,7 +44,7 @@ if ($tee == 'LAHETA') {
 				SET olmapvm = now()
 				WHERE tunnus in ($xquery)
 				and yhtio = '$kukarow[yhtio]'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	$tee = "KOROTA";
 }
@@ -62,11 +62,11 @@ if ($tee == "ALOITAKOROTUS") {
 	$query = "	SELECT GROUP_CONCAT(distinct ovttunnus) konsrernyhtiot
 				FROM yhtio
 				WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	$konslisa = "";
 	if (mysql_num_rows($result) > 0) {
-		$konsrow = mysql_fetch_array($result);
+		$konsrow = mysql_fetch_assoc($result);
 		$konslisa = " and lasku.ovttunnus not in ($konsrow[konsrernyhtiot])";
 	}
 
@@ -108,12 +108,12 @@ if ($tee == "ALOITAKOROTUS") {
 				GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
 				HAVING korkosumma > 0 $korkolisa
 				ORDER BY asiakas.ytunnus";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	$korotettavat = array();
 
 	if (mysql_num_rows($result) > 0) {
-		while ($karhuttavarow = mysql_fetch_array($result)) {
+		while ($karhuttavarow = mysql_fetch_assoc($result)) {
 			$korotettavat[] = $karhuttavarow["korotettavat"];
 		}
 		$tee = "KOROTA";
@@ -142,19 +142,20 @@ if ($tee == "KOROTA")  {
 				and lasku.tunnus in ($korotettavat[0])
 				GROUP BY lasku.tunnus
 				ORDER BY lasku.erpcm";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	//Poistetaan arraysta käytetyt tunnukset
 	unset($korotettavat[0]);
 
 	//otetaan asiakastiedot ekalta laskulta
-	$asiakastiedot = mysql_fetch_array($result);
+	$asiakastiedot = mysql_fetch_assoc($result);
 
 	$query = "	SELECT *
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and tunnus = '$asiakastiedot[liitostunnus]'";
-	$asiakasresult = mysql_query($query) or pupe_error($query);
-	$asiakastiedot = mysql_fetch_array($asiakasresult);
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus = '$asiakastiedot[liitostunnus]'";
+	$asiakasresult = pupe_query($query);
+	$asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
 	//ja kelataan akuun
 	mysql_data_seek($result,0);
@@ -190,7 +191,7 @@ if ($tee == "KOROTA")  {
 	$summmmma2 = 0;
 	$edlasku = 0;
 
-	while ($lasku=mysql_fetch_array($result)) {
+	while ($lasku=mysql_fetch_assoc($result)) {
 
 		echo "<tr><td>";
 		if ($kukarow['taso'] < 2) {
@@ -314,11 +315,11 @@ if ($tee == "") {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa = ''
 				ORDER BY jarjestys, teksti";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	$ulos = "<select name='vmehto'>";
 
-	while ($vrow = mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_assoc($vresult)) {
 		$sel = "";
 		if ($vmehto == $vrow["tunnus"]) $sel = "SELECTED";
 
@@ -376,12 +377,12 @@ if ($tee == "") {
 	$apuqu = "	SELECT kuka, nimi, puhno, eposti, tunnus
 				from kuka
 				where yhtio='$kukarow[yhtio]' and nimi!='' and puhno!='' and eposti!='' and extranet=''";
-	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+	$meapu = pupe_query($apuqu);
 
 	echo "<tr><th>".t("Yhteyshenkilö").":</th>";
 	echo "<td colspan='3'><select name='yhteyshenkilo'>";
 
-	while($row = mysql_fetch_array($meapu)) {
+	while($row = mysql_fetch_assoc($meapu)) {
 		$sel = "";
 
 		if ($row['kuka'] == $kukarow['kuka']) {

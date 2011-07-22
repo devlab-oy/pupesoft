@@ -44,10 +44,10 @@ if (mysql_num_rows($xresult) == 0) {
 }
 else {
 
-	$varmuutos  = 0;
-	$vastasumma = 0;
-	$vastasumma_valuutassa = 0;
-	$maksimisumma = 0;
+	$varmuutos  			= 0;
+	$vastasumma 			= 0;
+	$vastasumma_valuutassa 	= 0;
+	$maksimisumma 			= 0;
 	$maksimisumma_kustp 	= 0;
 	$maksimisumma_kohde 	= 0;
 	$maksimisumma_projekti 	= 0;

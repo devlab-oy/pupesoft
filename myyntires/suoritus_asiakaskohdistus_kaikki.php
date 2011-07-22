@@ -7,7 +7,7 @@ $query  = "	SELECT *
 			WHERE asiakas_tunnus = ''
 			and yhtio = '$kukarow[yhtio]'
 			and summa != 0";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 while ($suoritus = mysql_fetch_assoc($result)) {
 
@@ -22,7 +22,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 					AND alatila = 'X'
 					AND mapvm = '0000-00-00'
 					AND viite = '$suoritus[viite]'";
-		$laresult = mysql_query($query) or pupe_error($query);
+		$laresult = pupe_query($query);
 
 		// Viitteellä löytyi lasku!
 		if (mysql_num_rows($laresult) == 1) {
@@ -33,7 +33,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$lasku[liitostunnus]'";
-			$asres = mysql_query($query) or pupe_error($query);
+			$asres = pupe_query($query);
 
 			if (mysql_num_rows($asres) == 1) {
 				$asiakas = mysql_fetch_assoc($asres);
@@ -42,18 +42,19 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 				echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] viitteen perusteella</font><br>";
 
 				if ($asiakas['konserniyhtio'] != '') {
-					$query   = "	UPDATE tiliointi SET tilino = '$yhtiorow[konsernimyyntisaamiset]'
+					$query   = "	UPDATE tiliointi
+									SET tilino = '$yhtiorow[konsernimyyntisaamiset]'
 									WHERE yhtio  = '$kukarow[yhtio]'
 									AND tunnus   = '$suoritus[ltunnus]'
 									AND korjattu = ''";
-					$result2 = mysql_query($query) or pupe_error($query);
+					$result2 = pupe_query($query);
 				}
 
 				$query = "	UPDATE suoritus
 							set asiakas_tunnus = '$asiakas[tunnus]'
 							where tunnus = '$suoritus[tunnus]'
 							AND yhtio = '$kukarow[yhtio]'";
-				$result2 = mysql_query($query) or pupe_error($query);
+				$result2 = pupe_query($query);
 			}
 		}
 	}
@@ -73,7 +74,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
 					and left(nimi, 12) = '{$suoritus['nimi_maksaja']}'";
-		$asres = mysql_query($query) or pupe_error($query);
+		$asres = pupe_query($query);
 
 		if (mysql_num_rows($asres) == 1) {
 			$asiakas = mysql_fetch_assoc($asres);
@@ -85,7 +86,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
 						and MATCH (nimi) AGAINST ('$unimi')";
-			$asres = mysql_query($query) or pupe_error($query);
+			$asres = pupe_query($query);
 
 			if (mysql_num_rows($asres) == 1) {
 				$asiakas = mysql_fetch_assoc($asres);
@@ -97,18 +98,19 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 			echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] nimen perusteella</font><br>";
 
 			if ($asiakas['konserniyhtio'] != '') {
-				$query   = "	UPDATE tiliointi SET tilino = '$yhtiorow[konsernimyyntisaamiset]'
+				$query   = "	UPDATE tiliointi
+								SET tilino = '$yhtiorow[konsernimyyntisaamiset]'
 								WHERE yhtio  = '$kukarow[yhtio]'
 								AND tunnus   = '$suoritus[ltunnus]'
 								AND korjattu = ''";
-				$result2 = mysql_query($query) or pupe_error($query);
+				$result2 = pupe_query($query);
 			}
 
 			$query = "	UPDATE suoritus
 						SET asiakas_tunnus = '$asiakas[tunnus]'
 						WHERE tunnus = '$suoritus[tunnus]'
 						AND yhtio = '$kukarow[yhtio]'";
-			$result2 = mysql_query($query) or pupe_error($query);
+			$result2 = pupe_query($query);
 		}
 	}
 }

@@ -949,7 +949,10 @@
 
 			$kassat_temp = substr($kassat_temp,0,-1);
 
-			$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' and tunnus in ($kassat_temp)";
+			$query = "	SELECT *
+						FROM kassalipas
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus in ($kassat_temp)";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == count($kassakone)) {
@@ -968,7 +971,6 @@
 			else {
 				die("virhe");
 			}
-
 		}
 
 		$myyntisaamiset_tilit = substr($myyntisaamiset_tilit, 0, -1);

@@ -37,9 +37,9 @@ if ($tila == 'K' and is_array($luottotappio)) {
 					AND lasku.liitostunnus	= '$liitostunnus'
 					and lasku.laskunro in ($laskunrot)
 					ORDER BY 1";
-		$laskuresult = mysql_query($query) or pupe_error($query);
+		$laskuresult = pupe_query($query);
 
-		while ($lasku = mysql_fetch_array($laskuresult)) {
+		while ($lasku = mysql_fetch_assoc($laskuresult)) {
 
 			if ($lasku['tilino'] != $yhtiorow['myyntisaamiset'] and $lasku['tilino'] != $yhtiorow['factoringsaamiset'] and $lasku['tilino'] != $yhtiorow['konsernimyyntisaamiset']) {
 				// Hoidetaan alv
@@ -60,7 +60,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
 							tosite		= '$lasku[tosite]',
 							laatija		= '$kukarow[kuka]',
 							laadittu	= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$isa = mysql_insert_id ($link);
 
 				// Tiliöidään alv
@@ -87,7 +87,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
 									laatija		= '$kukarow[kuka]',
 									laadittu	= now(),
 									aputunnus	= '$isa'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 					else {
 
@@ -109,7 +109,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
 									laatija		= '$kukarow[kuka]',
 									laadittu	= now(),
 									aputunnus	= '$isa'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 				}
 			}
@@ -129,11 +129,11 @@ if ($tila == 'K' and is_array($luottotappio)) {
 							tosite		= '$lasku[tosite]',
 							laatija		= '$kukarow[kuka]',
 							laadittu	= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			$query = "UPDATE lasku set mapvm = '$tpv-$tpk-$tpp' where yhtio ='$kukarow[yhtio]' and tunnus = '$lasku[ltunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		echo "<font class='message'>".t("Laskut on tiliöity luottotappioksi")."!</font><br><br>";
@@ -160,8 +160,8 @@ if ($tila == 'N') {
 				AND liitostunnus	= '$liitostunnus'
 				GROUP BY liitostunnus
 				ORDER BY ytunnus";
-	$result = mysql_query($query) or pupe_error($query);
-	$asiakas = mysql_fetch_array ($result);
+	$result = pupe_query($query);
+	$asiakas = mysql_fetch_assoc ($result);
 
 	echo "<table>";
 
@@ -197,7 +197,7 @@ if ($tila == 'N') {
 				AND yhtio		= '$kukarow[yhtio]'
 				AND liitostunnus = '$liitostunnus'
 				ORDER BY 1";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	echo "<tr>";
 	echo "<th>".t("Laskunro")."</th>";
@@ -207,7 +207,7 @@ if ($tila == 'N') {
 	echo "<th>".t("Luottotappio")."</th>";
 	echo "</tr>";
 
-	while ($lasku = mysql_fetch_array ($result)) {
+	while ($lasku = mysql_fetch_assoc ($result)) {
 		echo "<tr>";
 		echo "<td>$lasku[laskunro]</td>";
 		echo "<td>".tv1dateconv($lasku["tapvm"])."</td>";
@@ -275,7 +275,7 @@ if ($tila == "") {
 				$lisa
 				GROUP BY liitostunnus
 				ORDER BY ytunnus";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	echo "<form action = '$PHP_SELF' method = 'post'>";
 	echo "<table>";
@@ -312,7 +312,7 @@ if ($tila == "") {
 
 	echo "<tbody>";
 
-	while ($asiakas = mysql_fetch_array ($result)) {
+	while ($asiakas = mysql_fetch_assoc ($result)) {
 
 		echo "<tr class='aktiivi'>";
 		echo "<td>$asiakas[ytunnus]</td>";

@@ -673,7 +673,7 @@
 				$query = "	SELECT tunnus
 							FROM tiliointi
 							WHERE ltunnus = '$tunnus'
-							and yhtio = '$kukarow[yhtio]'
+							and yhtio = '$kukarow[yhtio]' 
 							and tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
 							and abs($trow[summa] + summa) <= 0.01
 							and korjattu = ''";

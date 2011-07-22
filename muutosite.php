@@ -741,8 +741,10 @@ if ($tee == 'U') {
 			//T‰ll‰ ei viel‰ ole tositenroa. Yritet‰‰n jotain
 			switch ($laskurow['tila']) {
 				case "X" : // T‰m‰ on muistiotosite, sill‰ voi olla vain yksi tositenro
-					$query = "SELECT distinct tosite FROM tiliointi
-								WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus'";
+					$query = "	SELECT distinct tosite
+								FROM tiliointi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and ltunnus = '$tunnus'";
 					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) != 1) {
@@ -756,17 +758,22 @@ if ($tee == 'U') {
 					break;
 
 				case 'U' : //T‰m‰ on myyntilasku
-					$query = "SELECT tosite FROM tiliointi
-									WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus'";
+					$query = "	SELECT tosite
+								FROM tiliointi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and ltunnus = '$tunnus'";
 					$result = pupe_query($query);
 					if (mysql_num_rows($result) != 0) {
 
 						// T‰lle saamme tositenron myyntisaamisista
 						if ($laskurow['tapvm'] == $tiliointipvm) {
-							$query = "	SELECT tosite FROM tiliointi
-										WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and
-										tapvm='$tiliointipvm' and tilino = '$yhtiorow[myyntisaamiset]' and
-										summa = $laskurow[summa]";
+							$query = "	SELECT tosite
+										FROM tiliointi
+										WHERE yhtio = '$kukarow[yhtio]'
+										and ltunnus = '$tunnus'
+										and tapvm   = '$tiliointipvm'
+										and tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+										and summa   = $laskurow[summa]";
 							$result = pupe_query($query);
 
 							if (mysql_num_rows($result) == 0) {
@@ -774,7 +781,7 @@ if ($tee == 'U') {
 								$tositenro=0;
 							}
 							else {
-								$tositerow=mysql_fetch_assoc ($result);
+								$tositerow = mysql_fetch_assoc($result);
 								$tositenro = $tositerow['tosite'];
 							}
 						}
@@ -782,17 +789,21 @@ if ($tee == 'U') {
 
 							// T‰lle saamme tositenron jostain samanlaisesta viennist‰
 							if ($laskurow['tapvm'] != $tiliointipvm) {
-								$query = "	SELECT tosite FROM tiliointi
-											WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and
-											tapvm='$tiliointipvm' and tilino != '$yhtiorow[myyntisaamiset]' and
-											summa != $laskurow[summa]";
+								$query = "	SELECT tosite
+											FROM tiliointi
+											WHERE yhtio = '$kukarow[yhtio]'
+											and ltunnus = '$tunnus'
+											and tapvm = '$tiliointipvm'
+											and tilino not in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+											and summa != $laskurow[summa]";
 								$result = pupe_query($query);
+
 								if (mysql_num_rows($result) == 0) {
 									echo t("Tositenron tarkastus ei onnistu! Oletetaan nolla");
 									$tositenro=0;
 								}
 								else {
-									$tositerow=mysql_fetch_assoc ($result);
+									$tositerow = mysql_fetch_assoc($result);
 									$tositenro = $tositerow['tosite'];
 								}
 							}

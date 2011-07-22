@@ -7,7 +7,7 @@ echo "<font class='head'>".t("Lasku ei ollutkaan käteistä")."</font><hr>";
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	// tutkaillaan maksuehtoa
 	$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Maksuehto katosi")."!</font><br><br>";
@@ -16,12 +16,12 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		$maksuehto = 0;
 	}
 	else {
-		$mehtorow = mysql_fetch_array($result);
+		$mehtorow = mysql_fetch_assoc($result);
 	}
-	
+
 	// tutkaillaan laskua
 	$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Lasku katosi")."!</font><br><br>";
@@ -30,7 +30,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		$maksuehto = 0;
 	}
 	else {
-		$laskurow = mysql_fetch_array($result);
+		$laskurow = mysql_fetch_assoc($result);
 	}
 }
 
@@ -58,37 +58,48 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		$kassa_loppusumma = "";
 	}
 
-	// päivitetään lasku	
-	$query = "	UPDATE lasku set 
-				mapvm     = '', 
+	// päivitetään lasku
+	$query = "	UPDATE lasku set
+				mapvm     = '',
 				maksuehto = '$maksuehto',
 				erpcm     = $erapvm,
 				kapvm     = $kassa_erapvm,
 				kasumma   = '$kassa_loppusumma'
-				where yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-	$result = mysql_query($query) or pupe_error($query);
+				where yhtio = '$kukarow[yhtio]'
+				and tunnus  = '$tunnus'";
+	$result = pupe_query($query);
 
 	if (mysql_affected_rows() > 0) {
-		echo "<font class='message'>".t("Muutettin laskun")." $laskurow[laskunro] ".t("maksuehdoksi")." ".t_tunnus_avainsanat($mehtorow, "teksti", "MAKSUEHTOKV")." ".t("ja merkattiin maksu avoimeksi").".</font><br>";	
+		echo "<font class='message'>".t("Muutettin laskun")." $laskurow[laskunro] ".t("maksuehdoksi")." ".t_tunnus_avainsanat($mehtorow, "teksti", "MAKSUEHTOKV")." ".t("ja merkattiin maksu avoimeksi").".</font><br>";
 	}
 	else {
-		echo "<font class='error'>".t("Laskua")." $laskurow[laskunro] ".t("ei pystytty muuttamaan")."!</font><br>";	
+		echo "<font class='error'>".t("Laskua")." $laskurow[laskunro] ".t("ei pystytty muuttamaan")."!</font><br>";
 	}
 
 	// tehdään kirjanpitomuutokset
-	$query = "UPDATE tiliointi set tilino='$yhtiorow[myyntisaamiset]', summa='$laskurow[summa]' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[kassa]'";
-	$result = mysql_query($query) or pupe_error($query);
+	$query = "	UPDATE tiliointi
+				SET tilino = '$yhtiorow[myyntisaamiset]',
+				summa = '$laskurow[summa]'
+				WHERE yhtio	= '$kukarow[yhtio]'
+				and ltunnus	= '$tunnus'
+				and tilino	= '$yhtiorow[kassa]'";
+	$result = pupe_query($query);
 
 	if (mysql_affected_rows() > 0) {
-		echo "<font class='message'>".t("Korjattiin kirjanpitoviennit")." (".mysql_affected_rows()." ".t("kpl").").</font><br>";	
+		echo "<font class='message'>".t("Korjattiin kirjanpitoviennit")." (".mysql_affected_rows()." ".t("kpl").").</font><br>";
 	}
 	else {
 		echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehdä! Korjaa kirjanpito käsin")."!</font><br>";
 	}
 
 	// yliviivataan kassa-aletiliöinnit
-	$query = "UPDATE tiliointi set korjattu='X' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[myynninkassaale]'";
-	$result = mysql_query($query) or pupe_error($query);
+	$query = "	UPDATE tiliointi
+				SET korjattu = 'X',
+				korjausaika  = now()
+				where yhtio = '$kukarow[yhtio]'
+				and ltunnus = '$tunnus'
+				and tilino  = '$yhtiorow[myynninkassaale]'";
+	$result = pupe_query($query);
 
 	if (mysql_affected_rows() > 0) {
 		echo "<font class='message'>".t("Poistettiin kassa-alekirjaukset")." (".mysql_affected_rows()." ".t("kpl").").</font><br><br>";
@@ -102,22 +113,22 @@ if ((int) $laskuno != 0) {
 	$query = "	SELECT lasku.*, lasku.tunnus ltunnus, maksuehto.tunnus, maksuehto.teksti
 				from lasku
 				JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen!=''
-				where lasku.yhtio	= '$kukarow[yhtio]' 				
-				and lasku.laskunro	= '$laskuno' 
-				and lasku.tila		= 'U' 
+				where lasku.yhtio	= '$kukarow[yhtio]'
+				and lasku.laskunro	= '$laskuno'
+				and lasku.tila		= 'U'
 				and lasku.alatila	= 'X'";
-	$result = mysql_query($query) or pupe_error($query);
-	
+	$result = pupe_query($query);
+
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei löydy käteislaskua")."!</font><br><br>";
 		$laskuno = 0;
 	}
 	else {
-		$laskurow = mysql_fetch_array($result);
+		$laskurow = mysql_fetch_assoc($result);
 
 		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "<input name='tunnus' type='hidden' value='$laskurow[ltunnus]'>";
-		
+
 		echo "<table>
 			<tr><th>".t("Laskutusosoite")."</th><th>".t("Toimitusosoite")."</th></tr>
 			<tr><td>$laskurow[ytunnus]<br> $laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]</td><td>$laskurow[ytunnus]<br> $laskurow[toim_nimi] $laskurow[toim_nimitark]<br> $laskurow[toim_osoite]<br> $laskurow[toim_postino] $laskurow[toim_postitp]</td></tr>
@@ -134,14 +145,14 @@ if ((int) $laskuno != 0) {
 					FROM maksuehto
 					WHERE yhtio = '$kukarow[yhtio]' and kateinen=''
 					ORDER BY jarjestys, teksti";
-		$vresult = mysql_query($query) or pupe_error($query);
-		
+		$vresult = pupe_query($query);
+
 		echo "<select name='maksuehto'>";
 
-		while ($vrow=mysql_fetch_array($vresult)) {
+		while ($vrow=mysql_fetch_assoc($vresult)) {
 			echo "<option value='$vrow[tunnus]'>".t_tunnus_avainsanat($vrow, "teksti", "MAKSUEHTOKV")."</option>";
 		}
-		
+
 		echo "</select>";
 		echo "</td></tr></table><br>";
 		echo "<input name='subnappi' type='submit' value='".t("Muuta maksuehto")."'></td>";

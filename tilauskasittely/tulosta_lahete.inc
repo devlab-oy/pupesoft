@@ -1491,7 +1491,7 @@ if (!function_exists('rivi_lahete')) {
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_eialehintoja.inc") {
 				// tulosta_lahete.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
-					$return["summa"] += $row['brutto_rivihinta'];
+					$return["summa"] += hintapyoristys($row['hinta'] * $row['tilkpl']);
 				}
 				else {
 					$row['rivihinta'] = 0;
@@ -1548,23 +1548,23 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
 
 		// Rivin eka rivi
 		$rivi_kala = $kala;
-		
+
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$thispage, $pieni);
-		
-		if (trim($row["perhe_kommentti1"]) != '') {			
+
+		if (trim($row["perhe_kommentti1"]) != '') {
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
-			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);			
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
-			
+
 			$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
 			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
 		}
-		
+
 		if ($pitkattuotteet) {
 			list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 270, $pdf, $norm);
 			$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
@@ -1716,13 +1716,13 @@ if (!function_exists('rivi_brutto_lahete')) {
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
 
-		if (trim($row["perhe_kommentti1"]) != '') {			
+		if (trim($row["perhe_kommentti1"]) != '') {
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
-			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);			
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
-			
+
 			$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
 			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 485, $pdf, $norm);
@@ -1784,21 +1784,21 @@ if (!function_exists('rivi_ei_ale_ei_hinta_lahete')) {
 		$lisarivi = 0;
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
 
-		if (trim($row["perhe_kommentti1"]) != '') {			
+		if (trim($row["perhe_kommentti1"]) != '') {
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
-			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);			
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
-			
+
 			$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
 			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
-			
+
 			$lisarivi++;
-		}	
+		}
 
 		list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], $nimityskohta-65, $pdf, $norm);
 		$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
@@ -1848,13 +1848,13 @@ if (!function_exists('rivi_eialeja_lahete')) {
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]], $thispage, $pieni);
 
-		if (trim($row["perhe_kommentti1"]) != '') {			
+		if (trim($row["perhe_kommentti1"]) != '') {
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
-			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);			
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
-			
+
 			$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
 			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 485, $pdf, $norm);
@@ -1943,13 +1943,13 @@ if (!function_exists('rivi_eialehintoja_lahete')) {
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]], $thispage, $pieni);
 
-		if (trim($row["perhe_kommentti1"]) != '') {			
+		if (trim($row["perhe_kommentti1"]) != '') {
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
-			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);			
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
-			
+
 			$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
 			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 485, $pdf, $norm);
@@ -2029,13 +2029,13 @@ if (!function_exists('rivi_hae_hinnat_lahete')) {
 		// Luodaan muuttujat
 		extract($params);
 
-		if (trim($row["perhe_kommentti1"]) != '') {			
+		if (trim($row["perhe_kommentti1"]) != '') {
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
-			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);			
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
-			
+
 			$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
 			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 485, $pdf, $norm);
@@ -2137,13 +2137,13 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
 
-		if (trim($row["perhe_kommentti1"]) != '') {			
+		if (trim($row["perhe_kommentti1"]) != '') {
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
-			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);			
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
-			
+
 			$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
 			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 485, $pdf, $norm);
@@ -2248,13 +2248,13 @@ if (!function_exists('rivi_asiakviivakoodi_lahete')) {
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
 
-		if (trim($row["perhe_kommentti1"]) != '') {			
+		if (trim($row["perhe_kommentti1"]) != '') {
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
-			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);			
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
-			
+
 			$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
 			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 485, $pdf, $norm);
@@ -2341,13 +2341,13 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
 
-		if (trim($row["perhe_kommentti1"]) != '') {			
+		if (trim($row["perhe_kommentti1"]) != '') {
 			$plen = $pdf->strlen(t("Tuoteperhe", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Tuoteperhe", $kieli).": ", $thispage, $norm);
-			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);			
+			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti1"], 485, $pdf, $norm);
 			$pdf->draw_text($plen+45, $kala, $ff_string, $thispage, $ff_font);
 			$kala -= $rivinkorkeus;
-			
+
 			$plen = $pdf->strlen(t("Sis‰lt‰‰ tuotteet", $kieli).": ", $norm);
 			$pdf->draw_text(45, $kala, t("Sis‰lt‰‰ tuotteet", $kieli).": ", $thispage, $norm);
 			list($ff_string, $ff_font) = pdf_fontfit($row["perhe_kommentti2"], 485, $pdf, $norm);

@@ -12785,8 +12785,7 @@ if (!function_exists("tuotteen_lisatiedot")) {
 
 if (!function_exists("tee_keraysera")) {
 	function tee_keraysera($keraysvyohyke) {
-
-		global $kukarow;
+		global $kukarow, $yhtiorow;
 
 		// toimitustavan lähtöjen viikonpäivä
 		$viikonpaiva = date('w');
@@ -13438,7 +13437,7 @@ if (!function_exists("tee_keraysera")) {
 			}
 		}
 
-		echo "</table>";
+		if ($debug) echo "</table>";
 
 		if ($debug) {
 			if ($era_valmis) echo "ERÄ VALMIS!!!<br>";

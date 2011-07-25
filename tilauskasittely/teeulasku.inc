@@ -18,6 +18,7 @@
 	$tilausyhteyshenkilo 	= "";
 	$asiakkaan_tilausnumero	= "";
 	$kohde 					= "";
+	$useita					= "EI";
 
 	$query  = "	SELECT
 				sum(arvo) arvo,
@@ -35,7 +36,8 @@
 				group_concat(distinct if(trim(viesti)='', NULL, trim(viesti)) 									SEPARATOR ' / ') viestit,
 				group_concat(distinct if(trim(tilausyhteyshenkilo)='', NULL, trim(tilausyhteyshenkilo)) 		SEPARATOR ' / ') tilausyhteyshenkilo,
 				group_concat(distinct if(trim(asiakkaan_tilausnumero)='', NULL, trim(asiakkaan_tilausnumero)) 	SEPARATOR ' / ') asiakkaan_tilausnumero,
-				group_concat(distinct if(trim(kohde)='', NULL, trim(kohde)) 									SEPARATOR ' / ') kohde
+				group_concat(distinct if(trim(kohde)='', NULL, trim(kohde)) 									SEPARATOR ' / ') kohde, 
+				count(distinct toimitustapa) toimitustavat
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus in ($tunnukset)";
@@ -111,7 +113,13 @@
 		$lasrow["toim_postitp"]  = t("Useita", $kielirow["kieli"]);
 		$lasrow["toim_maa"]      = $lasrow["maa"];
 	}
-
+	
+	// Jos laskulla on useita toimitustapoja niin laitetaan sinne tekstiksi "USEITA"
+	if ($sumrow["toimitustavat"] > 1) {
+		$lasrow["toimitustapa"]     = t("Useita", $kielirow["kieli"]);
+		$useita = "KYLLA";
+	}
+	
 	// haetaan maksuehdon tiedot, jotta osataan tiliöidä käteismyynti kassaan
 	$query = "	SELECT *
 				FROM maksuehto
@@ -447,7 +455,7 @@
 		while ($valsurow = mysql_fetch_assoc($valsures)) {
 			if ($valsurow["otunnus"] != $edotunnus and $edotunnus != '') {
 
-				$query = "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi
+				$query = "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi, toimitustapa
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$edotunnus'";
@@ -472,6 +480,11 @@
 				else {
 					$sumskommentti = t("Tilaus", $kielirow["kieli"])." $edotunnus ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 				}
+				
+				if ($useita == "KYLLA") {
+					$sumskommentti .= "\nToimitustapa : $sumsrow[toimitustapa]";
+				}
+				
 
 				$query = "	UPDATE tilausrivi
 							SET kommentti = concat(kommentti, '\n', '$sumskommentti')
@@ -486,7 +499,7 @@
 
 		//laitetaan välisumma vikallekin tilaukselle
 		if ($edtunnus != "") {
-			$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi
+			$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi, toimitustapa
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$edotunnus'";
@@ -508,6 +521,10 @@
 			}
 			else {
 				$sumskommentti = t("Tilaus", $kielirow["kieli"])." $edotunnus ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
+			}
+
+			if ($useita == "KYLLA") {
+				$sumskommentti .= "\nToimitustapa : $sumsrow[toimitustapa]";
 			}
 
 			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";

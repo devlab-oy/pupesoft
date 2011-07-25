@@ -1391,6 +1391,8 @@
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='toim' value='$toim'>";
 					echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
+					// poistetaan välilyönti
+					$otsikko = str_replace(" ","_",$otsikko);
 					echo "<input type='hidden' name='kaunisnimi' value='$otsikko.pdf'>";
 					echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
 					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
@@ -1408,6 +1410,8 @@
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
+				// poistetaan välilyönti
+				$otsikko = str_replace(" ","_",$otsikko);
 				echo "<input type='hidden' name='kaunisnimi' value='$otsikko.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";

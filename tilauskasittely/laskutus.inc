@@ -153,7 +153,7 @@
 
 										switch ($fieldname) {
 											case 'varattu':
-												$rvalues .= ", ".($pantti_kpl - $vanhin_pantti_row['kpl']);
+												$rvalues .= ", -".($pantti_kpl - $vanhin_pantti_row['kpl']);
 												break;
 											case 'tunnus':
 												$rvalues .= ", NULL";
@@ -211,7 +211,7 @@
 									}
 
 									$query = "	UPDATE tilausrivi SET
-												varattu = '{$vanhin_pantti_row['kpl']}',
+												varattu = -".abs($vanhin_pantti_row['kpl']).",
 												ale1 = 100,
 												{$ale_query_update_lisa}
 												kommentti = '{$tilkom_upd}'

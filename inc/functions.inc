@@ -13488,13 +13488,5 @@ if (!function_exists("tee_keraysera")) {
 
 			unlink($unlink_filenimi);
 		}
-
-		if ($debug) {
-			echo "<pre>",var_dump($kaytettavat_pakkaukset, $erat),"</pre>";
-		}
-
-		return $erat;
 	}
 }
-
-?>

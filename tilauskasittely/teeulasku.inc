@@ -390,14 +390,21 @@
 	$lisatiedot_result = pupe_query($query);
 
 	// haetaan nyt varmuuden vuoksi viel‰ insertoidut tiedot takaisin..
-	$query = "SELECT * FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$uusiotunnus'";
+	$query = "	SELECT * 
+				FROM lasku 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and tunnus  = '$uusiotunnus'";
 	$uusiuresult = pupe_query($query);
 
 	if (mysql_num_rows($uusiuresult)==0) die (t("Lasku")." $uusiotunnus ".t("katosi")."!");
 	$laskurow = mysql_fetch_assoc($uusiuresult);
 
 	// p‰ivitet‰‰n tilausriveille uuden otsikon tiedot (ei p‰ivitet‰ Puute ja Jt rivej‰ laskutetuiksi)
-	$query = "UPDATE tilausrivi SET uusiotunnus='$laskurow[tunnus]' WHERE otunnus in ($tunnukset) and yhtio='$kukarow[yhtio]' and var not in ('P','J')";
+	$query = "	UPDATE tilausrivi 
+				SET uusiotunnus = '$laskurow[tunnus]' 
+				WHERE otunnus in ($tunnukset) 
+				and yhtio = '$kukarow[yhtio]' 
+				and var not in ('P','J')";
 	$ulasr = pupe_query($query);
 
 	// katotaan montako tilausta ollaan k‰sittelem‰ss‰

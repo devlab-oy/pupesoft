@@ -368,9 +368,9 @@
 										yhtio 		= '$kukarow[yhtio]',
 										ltunnus 	= '$laskurow[tunnus]',
 										tilino 		= '$yhtiorow[alv]',
-										kustp    	= '', #OLETUSKUSTP?
-										kohde	 	= '',
-										projekti 	= '',
+										kustp 		= 0,
+										kohde 		= 0,
+										projekti 	= 0,
 										tapvm 		= '$trow[olmapvm]',
 										summa 		= $alv * -1,
 										vero 		= 0,

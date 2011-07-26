@@ -182,7 +182,12 @@ if ($tee == "SYOTTO") {
 
 	$selite = pupesoft_cleanstring($selite);
 
-	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($myyntisaamiset);
+	if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($myyntisaamiset, $kustannuspaikka);
+	}
+	else {
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($myyntisaamiset);
+	}
 
 	// Myyntisaamiset
 	$query = "	INSERT INTO tiliointi SET
@@ -202,7 +207,6 @@ if ($tee == "SYOTTO") {
 				projekti 			= '{$projekti_ins}'";
 	$result = pupe_query($query);
 	$ttunnus = mysql_insert_id($link);
-
 
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassatili, $kustannuspaikka);
 
@@ -225,13 +229,10 @@ if ($tee == "SYOTTO") {
 				projekti 			= '{$projekti_ins}'";
 	$result = pupe_query($query);
 
-	// Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa. (Kuten alv-vienti)
+	// Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa
 	$query = "	INSERT INTO suoritus SET
 				yhtio			= '$kukarow[yhtio]',
 				tilino			= '$tilistr',
-				kustp    		= '', #OLETUSKUSTP?
-				kohde	 		= '',
-				projekti 		= '',
 				nimi_maksaja	= '$asiakasstr',
 				summa			= '$pistesumma',
 				maksupvm		= '$tapvm',

@@ -223,9 +223,9 @@
 								yhtio 				= '$kukarow[yhtio]',
 								ltunnus 			= '$laskurow[tunnus]',
 								tilino 				= '$yhtiorow[alv]',
-								kustp 				= '', #OLETUSKUSTP?
-								kohde 				= '',
-								projekti 			= '',
+								kustp 				= 0,
+								kohde 				= 0,
+								projekti 			= 0,
 								tapvm 				= '$mav-$mak-$map',
 								summa 				= $alv * -1,
 								summa_valuutassa	= $alv_valuutassa * -1,
@@ -265,60 +265,62 @@
 			if ($laskurow['alatila'] == 'K'  and $laskurow['maksukasumma'] != 0) {
 				$vesumma = round($rahasumma - ($laskurow['vietysumma'] - $laskurow['maksukasumma']), 2);
 			}
+			
+			if (round($vesumma, 2) != 0) {
+				echo "<font class='message'>".t("Kirjaan valuuttaeroa yhteensä")." $vesumma</font><br>";
 
-			echo "<font class='message'>".t("Kirjaan valuuttaeroa yhteensä")." $vesumma</font><br>";
+				$totvesumma = 0;
 
-			$totvesumma = 0;
+				$query = "	SELECT *
+							FROM tiliointi
+							WHERE ltunnus	= '$tunnus'
+							and yhtio 		= '$kukarow[yhtio]'
+							and tapvm 		= '$laskurow[tapvm]'
+							and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+							and korjattu 	= ''";
+				$yresult = pupe_query($query);
 
-			$query = "	SELECT *
-						FROM tiliointi
-						WHERE ltunnus	= '$tunnus'
-						and yhtio 		= '$kukarow[yhtio]'
-						and tapvm 		= '$laskurow[tapvm]'
-						and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
-						and korjattu 	= ''";
-			$yresult = pupe_query($query);
-
-			if (mysql_num_rows($yresult) == 0) {
-				echo "<font class='error'>".t("Laskulla ei ole kulutiliöintiä. Tämä on systeemivirhe")."!</font><br>";
-				exit;
-			}
-
-			while ($tiliointirow = mysql_fetch_assoc($yresult)) {
-				// Kuinka paljon on tämän viennin osuus
-				$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma'] * $vesumma, 2);
-
-				echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>";
-
-				if (round($summa,2) != 0) {
-					$query = "	INSERT into tiliointi set
-								yhtio 		= '$kukarow[yhtio]',
-								ltunnus 	= '$laskurow[tunnus]',
-								tilino 		= '$yhtiorow[valuuttaero]',
-								kustp 		= '$tiliointirow[kustp]',
-								kohde 		= '$tiliointirow[kohde]',
-								projekti 	= '$tiliointirow[projekti]',
-								tapvm 		= '$mav-$mak-$map',
-								summa 		= $summa,
-								vero 		= 0,
-								lukko 		= '',
-								laatija 	= '$kukarow[kuka]',
-								laadittu 	= now()";
-					$xresult = pupe_query($query);
-					$isa = mysql_insert_id ($link);
-
-					$totvesumma += $summa;
+				if (mysql_num_rows($yresult) == 0) {
+					echo "<font class='error'>".t("Laskulla ei ole kulutiliöintiä. Tämä on systeemivirhe")."!</font><br>";
+					exit;
 				}
-			}
 
-			//Hoidetaan mahdolliset pyöristykset
-			if ($totvesumma != $vesumma) {
-				echo "<font class='message'>".t("Joudun pyöristämään valuuttaeroa")."</font><br>";
+				while ($tiliointirow = mysql_fetch_assoc($yresult)) {
+					// Kuinka paljon on tämän viennin osuus
+					$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma'] * $vesumma, 2);
 
-				$query = "	UPDATE tiliointi
-							SET summa = summa - $totvesumma + $vesumma
-							WHERE tunnus = '$isa' and yhtio='$kukarow[yhtio]'";
-				$xresult = pupe_query($query);
+					echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>";
+
+					if (round($summa, 2) != 0) {
+						$query = "	INSERT into tiliointi set
+									yhtio 		= '$kukarow[yhtio]',
+									ltunnus 	= '$laskurow[tunnus]',
+									tilino 		= '$yhtiorow[valuuttaero]',
+									kustp 		= '$tiliointirow[kustp]',
+									kohde 		= '$tiliointirow[kohde]',
+									projekti 	= '$tiliointirow[projekti]',
+									tapvm 		= '$mav-$mak-$map',
+									summa 		= $summa,
+									vero 		= 0,
+									lukko 		= '',
+									laatija 	= '$kukarow[kuka]',
+									laadittu 	= now()";
+						$xresult = pupe_query($query);
+						$isa = mysql_insert_id ($link);
+
+						$totvesumma += $summa;
+					}
+				}
+
+				//Hoidetaan mahdolliset pyöristykset
+				if ($totvesumma != $vesumma) {
+					echo "<font class='message'>".t("Joudun pyöristämään valuuttaeroa")."</font><br>";
+
+					$query = "	UPDATE tiliointi
+								SET summa = summa - $totvesumma + $vesumma
+								WHERE tunnus = '$isa' and yhtio='$kukarow[yhtio]'";
+					$xresult = pupe_query($query);
+				}
 			}
 		}
 

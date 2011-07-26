@@ -68,49 +68,29 @@ if ($tila == 'K' and is_array($luottotappio)) {
 
 					// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
 					if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
-
-						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["toim_alv"]);
-
-						$query = "	INSERT INTO tiliointi SET
-									yhtio		= '$kukarow[yhtio]',
-									ltunnus		= '$lasku[ltunnus]',
-									tilino		= '$yhtiorow[toim_alv]',
-									kustp    	= '{$kustp_ins}',
-									kohde	 	= '{$kohde_ins}',
-									projekti 	= '{$projekti_ins}',
-									tapvm		= '$tpv-$tpk-$tpp',
-									summa		= $alv * -1,
-									vero		= 0,
-									selite		= '$lasku[selite]',
-									lukko		= '1',
-									tosite		= '$lasku[tosite]',
-									laatija		= '$kukarow[kuka]',
-									laadittu	= now(),
-									aputunnus	= '$isa'";
-						$result = pupe_query($query);
+						$alvtilino = $yhtiorow["toim_alv"];
 					}
 					else {
-
-						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["alv"]);
-
-						$query = "	INSERT INTO tiliointi SET
-									yhtio		= '$kukarow[yhtio]',
-									ltunnus		= '$lasku[ltunnus]',
-									tilino		= '$yhtiorow[alv]',
-									kustp    	= '{$kustp_ins}',
-									kohde	 	= '{$kohde_ins}',
-									projekti 	= '{$projekti_ins}',
-									tapvm		= '$tpv-$tpk-$tpp',
-									summa		= $alv * -1,
-									vero		= 0,
-									selite		= '$lasku[selite]',
-									lukko		= '1',
-									tosite		= '$lasku[tosite]',
-									laatija		= '$kukarow[kuka]',
-									laadittu	= now(),
-									aputunnus	= '$isa'";
-						$result = pupe_query($query);
+						$alvtilino = $yhtiorow["alv"];
 					}
+
+					$query = "	INSERT INTO tiliointi SET
+								yhtio		= '$kukarow[yhtio]',
+								ltunnus		= '$lasku[ltunnus]',
+								tilino		= '$alvtilino',
+								kustp 		= 0,
+								kohde 		= 0,
+								projekti 	= 0,
+								tapvm		= '$tpv-$tpk-$tpp',
+								summa		= $alv * -1,
+								vero		= 0,
+								selite		= '$lasku[selite]',
+								lukko		= '1',
+								tosite		= '$lasku[tosite]',
+								laatija		= '$kukarow[kuka]',
+								laadittu	= now(),
+								aputunnus	= '$isa'";
+					$result = pupe_query($query);
 				}
 			}
 			else {

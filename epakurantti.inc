@@ -374,7 +374,6 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 				echo t("Varastonarvoa muutettiin")." $muutos<br>";
 				echo "</font><br>";
 			}
-
 		}
 	}
 }

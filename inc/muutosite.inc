@@ -406,7 +406,8 @@
 					kapvm 				= $kassa_erapvm,
 					kasumma 			= '$kassa_loppusumma',
 					kasumma_valuutassa	= '$kassa_loppusumma_valuutassa'
-					WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+					WHERE tunnus = '$tunnus'
+					and yhtio 	 = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
 
 
@@ -548,7 +549,7 @@
 					and korjattu	= ''";
 		$result = pupe_query($query);
 
-		while ($xrow=mysql_fetch_assoc ($result)) {
+		while ($xrow = mysql_fetch_assoc($result)) {
 			kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
 		}
 
@@ -673,13 +674,13 @@
 				$query = "	SELECT tunnus
 							FROM tiliointi
 							WHERE ltunnus = '$tunnus'
-							and yhtio = '$kukarow[yhtio]' 
+							and yhtio = '$kukarow[yhtio]'
 							and tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
 							and abs($trow[summa] + summa) <= 0.01
 							and korjattu = ''";
 				$result = pupe_query($query);
 
-				while ($xrow=mysql_fetch_assoc ($result)) {
+				while ($xrow = mysql_fetch_assoc ($result)) {
 					kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
 				}
 
@@ -742,16 +743,13 @@
 		if ($vienti != 'A' and $vienti != 'D' and $vienti != 'G' and $vienti != '') {
 
 			// Haetaan kulutiliöinti
-			$query = "	SELECT kustp, kohde, projekti,
-						sum(summa) summa,
-						sum(summa_valuutassa) summa_valuutassa
+			$query = "	SELECT kustp, kohde, projekti, summa, summa_valuutassa
 						FROM tiliointi
 						WHERE yhtio		= '$kukarow[yhtio]'
 						AND ltunnus		= '$tunnus'
 						AND tapvm		= '$trow[tapvm]'
 						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
-						AND korjattu	= ''
-						GROUP BY 1,2,3";
+						AND korjattu	= ''";
 			$result = pupe_query($query);
 
 			while ($tiliointirow = mysql_fetch_assoc($result)) {

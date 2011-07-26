@@ -96,19 +96,19 @@
 									}
 
 									$query = "	INSERT into tapahtuma set
-												yhtio   = '$kukarow[yhtio]',
-												tuoteno = '$tuoteno',
-												laji    = 'Epäkurantti',
-												kpl     = '$tkpl',
-												hinta   = '$tero',
-												kplhinta= '$tero',
-												hyllyalue = '$sarjarow[hyllyalue]',
-												hyllynro = '$sarjarow[hyllynro]',
-												hyllyvali = '$sarjarow[hyllyvali]',
-												hyllytaso = '$sarjarow[hyllytaso]',
-												selite  = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo. $lisaselite',
-												laatija    = '$kukarow[kuka]',
-												laadittu = now()";
+												yhtio   	= '$kukarow[yhtio]',
+												tuoteno 	= '$tuoteno',
+												laji    	= 'Epäkurantti',
+												kpl     	= '$tkpl',
+												hinta   	= '$tero',
+												kplhinta	= '$tero',
+												hyllyalue	= '$sarjarow[hyllyalue]',
+												hyllynro 	= '$sarjarow[hyllynro]',
+												hyllyvali 	= '$sarjarow[hyllyvali]',
+												hyllytaso 	= '$sarjarow[hyllytaso]',
+												selite  	= '".t("Varastonarvon muutos").": $edarvo -> $uuarvo. $lisaselite',
+												laatija    	= '$kukarow[kuka]',
+												laadittu 	= now()";
 									$result = pupe_query($query);
 									$tapahtumaid = mysql_insert_id();
 
@@ -124,7 +124,7 @@
 
 									list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"]);
 
-									$query = "INSERT into tiliointi set
+									$query = "	INSERT into tiliointi set
 												yhtio    = '$kukarow[yhtio]',
 												ltunnus  = '$laskuid',
 												tilino   = '$yhtiorow[varasto]',
@@ -142,7 +142,7 @@
 
 									list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"]);
 
-									$query = "INSERT into tiliointi set
+									$query = "	INSERT into tiliointi set
 												yhtio    = '$kukarow[yhtio]',
 												ltunnus  = '$laskuid',
 												tilino   = '$yhtiorow[varastonmuutos]',

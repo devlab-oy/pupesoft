@@ -444,7 +444,8 @@ if ($tee == 'I') {
 			$kapro = 0;
 		}
 	}
-	$kassaale = round($kassaale,2);
+
+	$kassaale = round($kassaale, 2);
 
 	if ($kak > 0) {
 		$kak += 0;
@@ -1602,58 +1603,53 @@ if ($tee == 'I') {
 	}
 
 	// Kirjoitetaan lasku
-	$query = "INSERT into lasku set
-			yhtio = '$kukarow[yhtio]',
-			summa = '$summa',
-			kasumma = '$kassaale',
-			lapvm = '$vpv-$vpk-$vpp',
-			erpcm = '$erv-$erk-$erp',
-			kapvm = '$kav-$kak-$kap',
-			olmapvm = '$olmapvm',
-			valkoodi = '$valkoodi',
-			hyvak1 = '$hyvak[1]',
-			hyvak2 = '$hyvak[2]',
-			hyvak3 = '$hyvak[3]',
-			hyvak4 = '$hyvak[4]',
-			hyvak5 = '$hyvak[5]',
-			hyvaksyja_nyt = '$hyvaksyja_nyt',
-			ytunnus = '$trow[ytunnus]',
-			tilinumero = '$trow[tilinumero]',
-			nimi = '$trow[nimi]',
-			nimitark = '$trow[nimitark]',
-			osoite = '$trow[osoite]',
-			osoitetark = '$trow[osoitetark]',
-			postino = '$trow[postino]',
-			postitp = '$trow[postitp]',
-			maa =  '$trow[maa]',
-			viite = '$viite',
-			viesti = '$viesti',
-			vienti = '$vienti',
-			tapvm = '$tpv-$tpk-$tpp',
-			ebid = '$ebid',
-			tila = '$tila',
-			ultilno = '$trow[ultilno]',
-			pankki_haltija = '$trow[pankki_haltija]',
-			swift = '$trow[swift]',
-			pankki1 = '$trow[pankki1]',
-			pankki2 = '$trow[pankki2]',
-			pankki3 = '$trow[pankki3]',
-			pankki4 = '$trow[pankki4]',
-			vienti_kurssi = '$vrow[kurssi]',
-			laatija = '$kukarow[kuka]',
-			liitostunnus = '$toimittajaid',
-			hyvaksynnanmuutos = '$ohyvaksynnanmuutos',
-			suoraveloitus = '$osuoraveloitus',
-			luontiaika = now(),
-			comments = '$komm',
-			laskunro = '$toimittajan_laskunumero',
-			sisviesti1 = '$ohjeitapankille',
-			alv_tili = '$tilino_alv'";
-
-// Poistin nämä toistaiseksi insertistä
-//			sisviesti1 = '$sis1',
-//			sisviesti2 = '$sis2',
-
+	$query = "	INSERT into lasku set
+				yhtio 				= '$kukarow[yhtio]',
+				summa 				= '$summa',
+				kasumma 			= '$kassaale',
+				lapvm 				= '$vpv-$vpk-$vpp',
+				erpcm 				= '$erv-$erk-$erp',
+				kapvm 				= '$kav-$kak-$kap',
+				olmapvm 			= '$olmapvm',
+				valkoodi 			= '$valkoodi',
+				hyvak1 				= '$hyvak[1]',
+				hyvak2 				= '$hyvak[2]',
+				hyvak3 				= '$hyvak[3]',
+				hyvak4 				= '$hyvak[4]',
+				hyvak5 				= '$hyvak[5]',
+				hyvaksyja_nyt 		= '$hyvaksyja_nyt',
+				ytunnus 			= '$trow[ytunnus]',
+				tilinumero 			= '$trow[tilinumero]',
+				nimi 				= '$trow[nimi]',
+				nimitark 			= '$trow[nimitark]',
+				osoite 				= '$trow[osoite]',
+				osoitetark 			= '$trow[osoitetark]',
+				postino 			= '$trow[postino]',
+				postitp 			= '$trow[postitp]',
+				maa 				=  '$trow[maa]',
+				viite 				= '$viite',
+				viesti 				= '$viesti',
+				vienti 				= '$vienti',
+				tapvm 				= '$tpv-$tpk-$tpp',
+				ebid 				= '$ebid',
+				tila 				= '$tila',
+				ultilno 			= '$trow[ultilno]',
+				pankki_haltija 		= '$trow[pankki_haltija]',
+				swift 				= '$trow[swift]',
+				pankki1 			= '$trow[pankki1]',
+				pankki2 			= '$trow[pankki2]',
+				pankki3 			= '$trow[pankki3]',
+				pankki4 			= '$trow[pankki4]',
+				vienti_kurssi 		= '$vrow[kurssi]',
+				laatija 			= '$kukarow[kuka]',
+				liitostunnus 		= '$toimittajaid',
+				hyvaksynnanmuutos 	= '$ohyvaksynnanmuutos',
+				suoraveloitus 		= '$osuoraveloitus',
+				luontiaika 			= now(),
+				comments 			= '$komm',
+				laskunro 			= '$toimittajan_laskunumero',
+				sisviesti1 			= '$ohjeitapankille',
+				alv_tili 			= '$tilino_alv'";
 	$result = pupe_query($query);
 	$tunnus = mysql_insert_id ($link);
 
@@ -1804,9 +1800,9 @@ if ($tee == 'I') {
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
 							tilino 				= '$tilino_alv',
-							kustp 				= '',  #OLETUSKUSTP?
-							kohde 				= '',
-							projekti 			= '',
+							kustp 				= 0,
+							kohde 				= 0,
+							projekti 			= 0,
 							tapvm 				= '$tpv-$tpk-$tpp',
 							summa 				= '$ialv[$i]',
 							summa_valuutassa 	= '$ialv_valuutassa[$i]',
@@ -1830,7 +1826,7 @@ if ($tee == 'I') {
 					$varastotili = $yhtiorow['matkalla_olevat'];
 				}
 
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili);
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
 				$query = "	INSERT INTO tiliointi SET
 							yhtio 				= '$kukarow[yhtio]',
@@ -1946,8 +1942,10 @@ if ($tee == 'I') {
 		 	// Tämä on vain suoraveloitus
 			if ($tila == 'M') {
 				echo " ".t('ilman oletuspankkitiliä').".</font><br>";
+
 				$query = "UPDATE lasku set tila = 'Q' WHERE tunnus = '$tunnus'";
 				$xresult = pupe_query($query);
+
 				echo "<font class='message'>".t('Lasku merkittiin odottamaan suoritusta')."</font><br>";
 			}
 		}

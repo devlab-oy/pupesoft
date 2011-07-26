@@ -240,9 +240,8 @@ if (!function_exists("korjaalaskut")) {
 						$query = "UPDATE tilausrivi SET kate = $uusikate WHERE tunnus='$tilausrivi[ttunnus]'";
 						if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 						$katekorjres = mysql_query($query) or pupe_error($query);
-
 					}
-				} // end jos ei löydetty yhtään
+				}
 
 				// jos löydetään varastonmuutostiliöinti ja kate on muuttunut.. tehdään tarvittavat muutokset
 				if ($tilikpl == 1 and $muutos <> 0) {
@@ -286,14 +285,14 @@ if (!function_exists("korjaalaskut")) {
 
 						// korjataan varastonmuutostiliöinti
 						kopioitiliointi($tiliointi1['tunnus'], $kukarow['kuka']); // kopioidaan vanha tiliöintirivi ja yliviivataan se
-						
+
 						$query = "UPDATE tiliointi SET summa = summa + $tilausrivi[kate] - $uusikate, laadittu=now(), laatija='$kukarow[kuka]' WHERE tunnus='$tiliointi1[tunnus]'";
 						if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 						$katekorjres = mysql_query($query) or pupe_error($query);
 
 						// korjataan varastotiliöinti
 						kopioitiliointi($tiliointi2['tunnus'], $kukarow['kuka']); // kopioidaan vanha tiliöintirivi ja yliviivataan se
-						
+
 						$query = "UPDATE tiliointi SET summa = summa - $tilausrivi[kate] + $uusikate, laadittu=now(), laatija='$kukarow[kuka]' WHERE tunnus='$tiliointi2[tunnus]'";
 						if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 						$katekorjres = mysql_query($query) or pupe_error($query);
@@ -329,24 +328,6 @@ if (!function_exists("korjaalaskut")) {
 						if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 						$jlerror = 1;
 					}
-				} // end jos löydettiin yks
-
-				// jos löydetään monta varastonmuutostiliöintiä ja kate on muuttunut...ei osata vielä tehä mitään :(
-				if ($tilikpl > 1 and $muutos <> 0) {
-
-					echo "<font class='error'>".t("Emme osanneet korjata kirjanpitoa eikä katteita!")." ".t("Laskulta löytyi monta tiliöintiä (varastonmuutos)")."
-					".t("tuoteno").":							    		    $tuoteno,
-					".t("tilino").":										    $yhtiorow[varastonmuutos],
-					".t("kustp").":							    			    $xrivi[kustp],
-					".t("kohde").":							    			    $xrivi[kohde],
-					".t("projekti").":						    			    $xrivi[projekti],
-					".t("tiliöinnin summa").":						    	    summa + $tilausrivi[kate] - $uusikate,
-					".t("laskun")." ($tilausrivi[ltunnus]) ".t("kate").":	    kate - $tilausrivi[kate] + $uusikate,
-					".t("tilausrivin")." ($tilausrivi[ttunnus]) ".t("kate").":	$uusikate
-					</font><br><br>";
-
-					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
-					$jlerror = 1;
 				}
 			}
 		}

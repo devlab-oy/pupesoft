@@ -52,13 +52,15 @@
 
 	echo "</td></tr>";
 
-	$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+	$query  = "	SELECT tunnus, nimitys
+				FROM varastopaikat
+				WHERE yhtio = '$kukarow[yhtio]'";
 	$vares = pupe_query($query);
 
 	echo "<tr><th valign='top'>".t('Varastot')."<br /><br />(".t('Saat kaikki varastot jos et valitse yht‰‰n').")</th>";
 	echo "<td colspan='3'>";
 
-	$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+	$varastot = (isset($_POST['varastot']) and is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
 
     while ($varow = mysql_fetch_array($vares)) {
 		$sel = '';
@@ -103,7 +105,9 @@
 
 	if ($tee == 'KORJAA') {
 
-		$query = "	SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
+		$query = "	SELECT lasku.tunnus tosite,
+					t1.tunnus varasto, t1.selite sel1, t1.kustp kustp1,  t1.kohde kohde1,  t1.projekti projekti1,
+					t2.tunnus varastonmuutos, t2.selite sel2, t2.kustp kustp2,  t2.kohde kohde2,  t2.projekti projekti2
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino = '$yhtiorow[varasto]'
 					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
@@ -143,15 +147,13 @@
 						AND yhtio 	 = '$kukarow[yhtio]'";
 	        $result = pupe_query($query);
 
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"]);
-
-			$query = " INSERT into tiliointi set
+			$query = " 	INSERT into tiliointi set
 						yhtio    = '$kukarow[yhtio]',
 						ltunnus  = '$kpitorow[tosite]',
 						tilino   = '$yhtiorow[varasto]',
-						kustp    = '{$kustp_ins}',
-						kohde	 = '{$kohde_ins}',
-						projekti = '{$projekti_ins}',
+						kustp    = '$kpitorow[kustp1]',
+						kohde	 = '$kpitorow[kohde1]',
+						projekti = '$kpitorow[projekti1]',
 						tapvm    = '$tapvm',
 						summa    = '$arvo',
 						vero     = 0,
@@ -161,15 +163,13 @@
 						laadittu = now()";
 			$result = pupe_query($query);
 
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"]);
-
-			$query = "INSERT into tiliointi set
+			$query = "	INSERT into tiliointi set
 						yhtio    = '$kukarow[yhtio]',
 						ltunnus  = '$kpitorow[tosite]',
 						tilino   = '$yhtiorow[varastonmuutos]',
-						kustp    = '{$kustp_ins}',
-						kohde	 = '{$kohde_ins}',
-						projekti = '{$projekti_ins}',
+						kustp    = '$kpitorow[kustp2]',
+						kohde	 = '$kpitorow[kohde2]',
+						projekti = '$kpitorow[projekti2]',
 						tapvm    = '$tapvm',
 						summa    = $arvo * -1,
 						vero     = 0,

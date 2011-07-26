@@ -381,7 +381,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 						yhtio 		= '$kukarow[yhtio]',
 						ltunnus 	= '$tilausnumero',
 						tilino 		= '$yhtiorow[alv]',
-						kustp 		= 0, #OLETUSKUSTP?
+						kustp 		= 0,
 						kohde 		= 0,
 						projekti 	= 0,
 						tapvm 		= '$laskurow[tapvm]',
@@ -1663,6 +1663,7 @@ if ($tee == "MUOKKAA") {
 						$alvrow = mysql_fetch_assoc($alhire);
 
 						$alvulk = $alvrow["alv"];
+
 						if ($alvulk == "") {
 							echo "<font class='error'>".t("Kulun arvonlis‰veroa kohdemaassa ei ole m‰‰ritelty")."</font><br>";
 						}

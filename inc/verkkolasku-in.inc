@@ -741,7 +741,9 @@
 
 					$query = "	SELECT selite
 								FROM avainsana
-								WHERE yhtio = '$yhtio' and laji = 'alv' and selitetark != ''
+								WHERE yhtio = '$yhtio'
+								and laji = 'alv'
+								and selitetark != ''
 								ORDER BY jarjestys,selite";
 					$avainresult = pupe_query($query);
 
@@ -1091,7 +1093,7 @@
 						if ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
 							$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
 						}
-						
+
 						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
 
 						$query = "	INSERT into tiliointi set
@@ -1249,13 +1251,13 @@
 											laatija			 = '$kukarow[kuka]',
 											laadittu		 = now()";
 								$result = pupe_query($query);
-								
+
 								$varastonmuutostili = $yhtiorow["varastonmuutos"];
 
 								if ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
 									$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
 								}
-								
+
 								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
 
 								$query = "	INSERT into tiliointi set
@@ -1283,16 +1285,13 @@
 
 	 				// Tuli pyöristyseroja
 					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {
-
-						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["pyoristys"]);
-
 						$query = "	INSERT into tiliointi set
 									yhtio 			 = '$yhtio',
 									ltunnus 		 = '$tunnus',
 									tilino 			 = '$yhtiorow[pyoristys]',
-									kustp    		 = '{$kustp_ins}',
-									kohde	 		 = '{$kohde_ins}',
-									projekti 		 = '{$projekti_ins}',
+									kustp 			 = 0,
+									kohde 			 = 0,
+									projekti 		 = 0,
 									tapvm 			 = '$tpv-$tpk-$tpp',
 									summa 			 = $omasumma - $totsumma,
 									summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa,

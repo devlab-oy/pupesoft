@@ -37,7 +37,7 @@
 	if (!isset($alv_tili) or $alv_tili == "" or !is_numeric($alv_tili)) {
 		$alv_tili = $yhtiorow["alv"];
 	}
-	
+
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);
 
 	$query = "	INSERT into tiliointi set
@@ -59,14 +59,14 @@
 				laadittu 		 = now()";
 	$result = mysql_query($query) or pupe_error($query);
 	$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
-	
+
 	// Tiliöidään alv
-	if ($vero != 0) { 
+	if ($vero != 0) {
 		$query = "	INSERT into tiliointi set
 					yhtio 			 = '$kukarow[yhtio]',
 					ltunnus 		 = '$tunnus',
 					tilino 			 = '$alv_tili',
-					kustp 			 = 0, #OLETUSKUSTP?
+					kustp 			 = 0,
 					kohde 			 = 0,
 					projekti 		 = 0,
 					tapvm 			 = '$laskurow[tapvm]',

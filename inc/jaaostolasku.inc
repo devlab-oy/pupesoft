@@ -15,14 +15,14 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$jaettavalasku'
 				AND tila in ('H', 'M', 'Q', 'Y')";
-	$jaettavalaskures = mysql_query($query) or pupe_error($query);
+	$jaettavalaskures = pupe_query($query);
 
 	if (mysql_num_rows($jaettavalaskures) != 1) {
 		echo "<font class='error'>",t("Laskua ei voida jakaa, koska se on väärässä tilassa"),"!<br/>";
 		return false;
 	}
 
-	$jaettavalaskurow = mysql_fetch_array($jaettavalaskures);
+	$jaettavalaskurow = mysql_fetch_assoc($jaettavalaskures);
 
 	if (($jaettavalaskurow['summa'] >= 0 and $vahennettavasumma_valuutassa <= 0) or ($jaettavalaskurow['summa'] <= 0 and $vahennettavasumma_valuutassa >= 0) or (abs($vahennettavasumma_valuutassa) >= abs($jaettavalaskurow['summa']))) {
 		echo "<font class='error'>",t("Syötetty summa on virheellinen"),"! $vahennettavasumma_valuutassa<br/>";
@@ -40,7 +40,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				AND korjattu = ''
 				and tilino != '$yhtiorow[pyoristys]'
 				HAVING summa = 0";
-	$tiliointires = mysql_query($query) or pupe_error($query);
+	$tiliointires = pupe_query($query);
 
 	if (mysql_num_rows($tiliointires) > 0) {
 		echo "<font class='error'>",t("Laskua ei voida jakaa näin pieneen osaan"),"!<br/>";
@@ -55,7 +55,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				and lasku.tila = 'K'
 				and lasku.alatila in ('', 'S')
 				and lasku.vanhatunnus = '$jaettavalaskurow[tunnus]'";
-	$keikkares = mysql_query($query) or pupe_error($query);
+	$keikkares = pupe_query($query);
 	$keikkarow = mysql_fetch_assoc($keikkares);
 
 	// katsotaan onko jälkilaskettu
@@ -67,7 +67,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				AND tila = 'K'
 				AND alatila = 'X'
 				AND kohdistettu = 'X'";
-	$check_res = mysql_query($query) or pupe_error($query);
+	$check_res = pupe_query($query);
 
 	if (mysql_num_rows($check_res) != 0) {
 		echo "<font class='error'>",t("Laskua ei voida jakaa, koska se on liitetty keikkaan joka on jälkilaskettu"),"!<br/>";
@@ -87,7 +87,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				$values .= "'0.00',";
 				break;
 			default:
-				$values .= "'$jaettavalaskurow[$i]',";
+				$values .= "'".$jaettavalaskurow[mysql_field_name($jaettavalaskures, $i)]."',";
 		}
 	}
 
@@ -97,7 +97,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 
 	// Lisätään uusi lasku
 	$query = "INSERT into lasku ($fields) VALUES ($values)";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$utunnus = mysql_insert_id();
 
 	if ($jaettavalaskurow["vanhatunnus"] == 0) {
@@ -116,7 +116,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				vanhatunnus = $alkuperainen_tunnus
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$jaettavalaskurow[tunnus]'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	// Päivitetään uusi lasku
 	$query  = "	UPDATE lasku SET
@@ -124,7 +124,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				vanhatunnus = $alkuperainen_tunnus
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$utunnus'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	// Lisätään tiliöinnit
 	$selite = t('Ostolaskun osasuoritus');
@@ -138,7 +138,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				AND ltunnus = '$jaettavalaskurow[tunnus]'
 				AND korjattu = ''
 				ORDER BY aputunnus DESC";
-	$tiliointires = mysql_query($query) or pupe_error($query);
+	$tiliointires = pupe_query($query);
 
 	while ($tiliointirow = mysql_fetch_assoc($tiliointires)) {
 
@@ -157,8 +157,8 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 						ltunnus 			= '$jaettavalaskurow[tunnus]',
 						tilino 				= '$tiliointirow[tilino]',
 						kustp				= '$tiliointirow[kustp]',
-						projekti			= '$tiliointirow[projekti]',
 						kohde				= '$tiliointirow[kohde]',
+						projekti			= '$tiliointirow[projekti]',
 						vero				= '$tiliointirow[vero]',
 						tapvm 				= '$tiliointirow[tapvm]',
 						summa 				= '$vanha_summa',
@@ -172,7 +172,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 						aputunnus			= '',
 						laatija				= '$kukarow[kuka]',
 						laadittu			= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$uusi_id = mysql_insert_id();
 
 			// jos aputunnus ei ole tyhjä, otetaan se avaimeksi taulukkoon ja laitetaan uuden aputunnusrivin id sen alle
@@ -185,7 +185,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				$query = "	UPDATE tiliointi SET
 							aputunnus = $uusi_id
 							WHERE tunnus = {$aputunnukset_vanha[$tiliointirow['tunnus']]}";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			$query = "	INSERT INTO tiliointi SET
@@ -208,7 +208,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 						aputunnus			= '',
 						laatija				= '$kukarow[kuka]',
 						laadittu			= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$uusi_id = mysql_insert_id();
 
 			if ($tiliointirow['aputunnus'] != '') {
@@ -220,7 +220,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				$query = "	UPDATE tiliointi SET
 							aputunnus = $uusi_id
 							WHERE tunnus = {$aputunnukset_uusi[$tiliointirow['tunnus']]}";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 
@@ -230,7 +230,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 					korjausaika = now()
 					WHERE yhtio = '$tiliointirow[yhtio]'
 					AND tunnus = '$tiliointirow[tunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 	}
 
 	// tarkistetaan onko pyöristyseroja
@@ -239,7 +239,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND ltunnus = '$jaettavalaskurow[tunnus]'
 				AND korjattu = ''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$check1 = mysql_fetch_assoc($result);
 
 	$query = "	SELECT sum(summa) summa, sum(summa_valuutassa) summa_valuutassa
@@ -247,20 +247,17 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND ltunnus = '$utunnus'
 				AND korjattu = ''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$check2 = mysql_fetch_assoc($result);
 
 	if ($check1['summa'] != 0) {
-
-		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["pyoristys"]);
-
 		$query = "	INSERT into tiliointi set
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$jaettavalaskurow[tunnus]',
 					tilino 				= '$yhtiorow[pyoristys]',
-					kustp 				= '{$kustp_ins}',
-					kohde 				= '{$kohde_ins}',
-					projekti 			= '{$projekti_ins}',
+					kustp 				= 0,
+					kohde 				= 0,
+					projekti 			= 0,
 					tapvm 				= '$jaettavalaskurow[tapvm]',
 					summa 				= -1 * $check1[summa],
 					summa_valuutassa 	= -1 * $check1[summa_valuutassa],
@@ -270,20 +267,17 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 					lukko 				= '',
 					laatija 			= '$kukarow[kuka]',
 					laadittu 			= now()";
-		$laskutusres = mysql_query($query) or pupe_error($query);
+		$laskutusres = pupe_query($query);
 	}
 
 	if ($check2['summa'] != 0) {
-
-		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["pyoristys"]);
-
 		$query = "	INSERT into tiliointi set
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$utunnus',
 					tilino 				= '$yhtiorow[pyoristys]',
-					kustp 				= '{$kustp_ins}',
-					kohde 				= '{$kohde_ins}',
-					projekti 			= '{$projekti_ins}',
+					kustp 				= 0,
+					kohde 				= 0,
+					projekti 			= 0,
 					tapvm 				= '$jaettavalaskurow[tapvm]',
 					summa 				= -1 * $check2[summa],
 					summa_valuutassa 	= -1 * $check2[summa_valuutassa],
@@ -293,7 +287,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 					lukko 				= '',
 					laatija 			= '$kukarow[kuka]',
 					laadittu 			= now()";
-		$laskutusres = mysql_query($query) or pupe_error($query);
+		$laskutusres = pupe_query($query);
 	}
 
 	// Haetaan keikat, joihin lasku on liitetty
@@ -304,7 +298,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				and lasku.tila = 'K'
 				and lasku.alatila in ('', 'S')
 				and lasku.vanhatunnus = '$jaettavalaskurow[tunnus]'";
-	$keikkares = mysql_query($query) or pupe_error($query);
+	$keikkares = pupe_query($query);
 
 	$keikat = array();
 	while ($keikkarow = mysql_fetch_assoc($keikkares)) {
@@ -326,7 +320,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				and lasku.tila = 'K'
 				and lasku.alatila in ('', 'S')
 				and lasku.vanhatunnus = '$jaettavalaskurow[tunnus]'";
-	$keikkares = mysql_query($query) or pupe_error($query);
+	$keikkares = pupe_query($query);
 
 	foreach ($keikat as $keikka) {
 		$query = "	SELECT *
@@ -335,7 +329,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 					AND tila = 'K'
 					AND vanhatunnus = 0
 					AND laskunro = '$keikka'";
-		$laskures = mysql_query($query) or pupe_error($query);
+		$laskures = pupe_query($query);
 		$laskurow = mysql_fetch_assoc($laskures);
 
 		$tee_kululaskut = 'liita';
@@ -358,7 +352,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND liitostunnus = '$jaettavalaskurow[tunnus]'
 				AND liitos = 'lasku'";
-	$insert_res = mysql_query($query) or pupe_error($query);
+	$insert_res = pupe_query($query);
 
 	return true;
 

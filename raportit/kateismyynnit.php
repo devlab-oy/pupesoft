@@ -382,7 +382,10 @@
 				$kassat = $kassat_temp;
 			}
 
-			$query = "SELECT kateistilitys, kassaerotus, kateisotto FROM kassalipas WHERE tunnus in ($kassat) AND yhtio='$kukarow[yhtio]'";
+			$query = "	SELECT kateistilitys, kassaerotus, kateisotto
+						FROM kassalipas
+						WHERE tunnus in ($kassat)
+						AND yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($result);
 

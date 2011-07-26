@@ -10128,6 +10128,10 @@ if (!function_exists("tarkista_viite")) {
 		// palautetaan TRUE jos viite on ok, muutoin FALSE
 		// sallitaan viitteessä vaan numerot 0-9
 
+		if (!is_numeric($viite)) {
+			return FALSE;
+		}
+
 		$viite = preg_replace("/[^0-9]/", "", $viite);
 		$kerroin = 7;
 		$tulo = 0;
@@ -11041,7 +11045,7 @@ if (!function_exists("pupe_DataTables")) {
 							var rivi_kpl_value 		= parseFloat($('#rivi_kpl_'+tun).val());
 							var rivi_hinta_alkup	= parseFloat($('#rivihintaalkuperainen_'+tun).val());
 							var alerivi_hinta_alkup	= parseFloat($('#alerivihintaalkuperainen_'+tun).val());
-							var hinta 				= parseFloat(this.value);
+							var hinta 				= parseFloat(this.value.replace(',','.'));
 
 							if ((rivi_kpl_value * hinta) > 9999999999.99) {
 								var virhe = '".t('VIRHE: liian iso loppusumma')."!';

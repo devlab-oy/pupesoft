@@ -10128,6 +10128,10 @@ if (!function_exists("tarkista_viite")) {
 		// palautetaan TRUE jos viite on ok, muutoin FALSE
 		// sallitaan viitteessä vaan numerot 0-9
 
+		if (!is_numeric($viite)) {
+			return FALSE;
+		}
+
 		$viite = preg_replace("/[^0-9]/", "", $viite);
 		$kerroin = 7;
 		$tulo = 0;

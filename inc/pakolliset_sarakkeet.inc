@@ -296,6 +296,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("LIITOSTUNNUS", "LAJI", "SELITE");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
+			case "varaston_hyllypaikat":
+				$pakolliset = array("VARASTO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO");
+				$wherelliset = array("VARASTO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");
 				$kielletyt = array();

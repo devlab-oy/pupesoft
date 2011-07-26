@@ -1779,7 +1779,8 @@ else {
 					<option value='yhteensopivuus_tuote_lisatiedot' $sel[yhteensopivuus_tuote_lisatiedot]>".t("Yhteensopivuus tuotteet lisätiedot")."</option>
 					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
 					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>
-					<option value='extranet_kayttajan_lisatiedot' $sel[extranet_kayttajan_lisatiedot]>".t("Extranet-käyttäjän lisätietoja")."</option>";
+					<option value='extranet_kayttajan_lisatiedot' $sel[extranet_kayttajan_lisatiedot]>".t("Extranet-käyttäjän lisätietoja")."</option>
+					<option value='varaston_hyllypaikat' {$sel['varaston_hyllypaikat']}>".t("Varaston hyllypaikat")."</option>";
 
 			$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
 			$dynaamiset_avainsanat = '';

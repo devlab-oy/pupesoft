@@ -200,6 +200,7 @@
 				$totkasumma += $summa + $alv;
 				$totkasumma_valuutassa += $summa_valuutassa + $alv_valuutassa;
 
+				// Kassa-ale
 				$query = "	INSERT into tiliointi set
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$laskurow[tunnus]',
@@ -219,6 +220,7 @@
 				$isa = mysql_insert_id ($link); // Näin löydämme tähän liittyvät alvit....
 
 				if ($tiliointirow['vero'] != 0) {
+					// Kassa-ale alv
 					$query = "	INSERT into tiliointi set
 								yhtio 				= '$kukarow[yhtio]',
 								ltunnus 			= '$laskurow[tunnus]',
@@ -265,7 +267,7 @@
 			if ($laskurow['alatila'] == 'K'  and $laskurow['maksukasumma'] != 0) {
 				$vesumma = round($rahasumma - ($laskurow['vietysumma'] - $laskurow['maksukasumma']), 2);
 			}
-			
+
 			if (round($vesumma, 2) != 0) {
 				echo "<font class='message'>".t("Kirjaan valuuttaeroa yhteensä")." $vesumma</font><br>";
 
@@ -292,6 +294,7 @@
 					echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>";
 
 					if (round($summa, 2) != 0) {
+						// Valuuttaero
 						$query = "	INSERT into tiliointi set
 									yhtio 		= '$kukarow[yhtio]',
 									ltunnus 	= '$laskurow[tunnus]',
@@ -357,6 +360,7 @@
 
 		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($rahatili);
 
+		// Rahatili
 		$query = "	INSERT INTO tiliointi SET
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$laskurow[tunnus]',

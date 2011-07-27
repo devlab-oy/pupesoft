@@ -105,7 +105,7 @@
 							tapvm		= '$tapvm',
 							summa		=  $tiliointi1_row[summa],
 							tilino		= '$stili',
-							kustp 		= '$tiliointi1_row[kustp]', #OLETUSKUSTP?
+							kustp 		= '$tiliointi1_row[kustp]',
 							kohde 		= '$tiliointi1_row[kohde]',
 							projekti 	= '$tiliointi1_row[projekti]',
 							selite		= '$selite',

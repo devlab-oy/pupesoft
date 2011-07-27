@@ -1,13 +1,13 @@
 <?php
 
 	$query = "SELECT tapvm FROM lasku WHERE tunnus='$tunnus'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<b>".t("Lasku katosi")."</b><br>";
 		exit;
 	}
-	$laskurow = mysql_fetch_array($result);
+	$laskurow = mysql_fetch_assoc($result);
 
 	$summa = round($summa,2);
 
@@ -57,7 +57,7 @@
 				tosite 			 = '$tositenro',
 				laatija 		 = '$kukarow[kuka]',
 				laadittu 		 = now()";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
 
 	// Tiliöidään alv
@@ -79,6 +79,6 @@
 					laatija 		 = '$kukarow[kuka]',
 					laadittu 		 = now(),
 					aputunnus 		 = $isa";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 	}
 ?>

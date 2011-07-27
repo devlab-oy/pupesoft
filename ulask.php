@@ -248,7 +248,7 @@ if ($tee == 'I') {
 
 		$query = "SHOW variables like 'max_allowed_packet'";
 		$result = pupe_query($query);
-		$varirow = mysql_fetch_array($result);
+		$varirow = mysql_fetch_row($result);
 
 		if ($filesize > $varirow[1]) {
 			$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! (mysql: $varirow[1]) </font>";
@@ -1773,6 +1773,7 @@ if ($tee == 'I') {
 
 			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($itili[$i], $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
+			// Kulutili
 			$query = "	INSERT INTO tiliointi SET
 						yhtio 				= '$kukarow[yhtio]',
 						ltunnus 			= '$tunnus',
@@ -1796,6 +1797,7 @@ if ($tee == 'I') {
 			if ($ivero[$i] != 0) {
 				$isa = mysql_insert_id ($link); // Näin löydämme tähän liittyvät alvit....
 
+				// Kulun alv
 				$query = "	INSERT INTO tiliointi SET
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
@@ -1828,6 +1830,7 @@ if ($tee == 'I') {
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
+				// Varasto
 				$query = "	INSERT INTO tiliointi SET
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
@@ -1854,6 +1857,7 @@ if ($tee == 'I') {
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
+				// Varastonmuutos
 				$query = "	INSERT INTO tiliointi SET
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',

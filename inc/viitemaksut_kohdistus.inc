@@ -147,9 +147,9 @@
 						tapvm				= '$row[kirjpvm]',
 						ltunnus				= '$row[laskutunnus]',
 						tilino				= '$row[kassatili]',
-						kustp    			= '', #OLETUSKUSTP?
-						kohde	 			= '',
-						projekti 			= '',
+						kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
 						summa				= $suoritettu_kassaan,
 						summa_valuutassa	= '$suoritettu_kassaan_valuutassa',
 						valkoodi			= '$row[suoritusvaluutta]',
@@ -315,9 +315,9 @@
 									tapvm		= '$row[kirjpvm]',
 									ltunnus		= '$row[laskutunnus]',
 									tilino		= '$row[valuuttaerotili]',
-									kustp		= '$kustp_ins',
-									kohde		= '$kohde_ins',
-									projekti	= '$projekti_ins',
+									kustp    	= '{$kustp_ins}',
+									kohde	 	= '{$kohde_ins}',
+									projekti 	= '{$projekti_ins}',
 									summa		= $valero,
 									selite		= 'Automaattikohdistettu asiakkaan suoritus'";
 						$result = pupe_query($query);
@@ -442,6 +442,8 @@
 
 			$maksaja_espattu = mysql_real_escape_string($row["nimi_maksaja"]);
 
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["myyntisaamiset"]);
+
 			# Myyntisaamiset tai selvittely
 			$query = "	INSERT INTO tiliointi SET
 						yhtio				= '$row[yhtio]',
@@ -450,9 +452,9 @@
 						tapvm				= '$row[kirjpvm]',
 						ltunnus				= '{$laskut[$row["yhtio"]]}',
 						tilino				= '$row[myyntisaamiset]',
-						kustp    			= '', #OLETUSKUSTP?
-						kohde	 			= '',
-						projekti 			= '',
+						kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
 						summa				= -$summa,
 						summa_valuutassa	= -$summa_valuutassa,
 						valkoodi			= '$row[suoritusvaluutta]',
@@ -460,6 +462,8 @@
 						lukko				= '1'";
 			$insres = pupe_query($query);
 			$tlast_id = mysql_insert_id();
+
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["oletus_rahatili"]);
 
 			# Kassatili
 			$query = "	INSERT INTO tiliointi SET
@@ -469,9 +473,9 @@
 						tapvm				= '$row[kirjpvm]',
 						ltunnus				= '{$laskut[$row["yhtio"]]}',
 						tilino				= '$row[oletus_rahatili]',
-						kustp    			= '', #OLETUSKUSTP?
-						kohde	 			= '',
-						projekti 			= '',
+						kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
 						summa				= $summa,
 						summa_valuutassa	= $summa_valuutassa,
 						valkoodi			= '$row[suoritusvaluutta]',

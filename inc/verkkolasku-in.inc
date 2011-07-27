@@ -994,6 +994,7 @@
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat, $ostovelat_kustp, $ostovelat_kohde, $ostovelat_projekti);
 
+				// Ostovelka
 				$query = "	INSERT INTO tiliointi SET
 							yhtio 			 = '$yhtio',
 							ltunnus 		 = '$tunnus',
@@ -1070,6 +1071,7 @@
 
 						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp, $kohde, $projekti);
 
+						// Varasto
 						$query = "	INSERT into tiliointi set
 									yhtio 			 = '$kukarow[yhtio]',
 									ltunnus 		 = '$tunnus',
@@ -1096,6 +1098,7 @@
 
 						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
 
+						// Varastonmuutos
 						$query = "	INSERT into tiliointi set
 									yhtio 			 = '$kukarow[yhtio]',
 									ltunnus 		 = '$tunnus',
@@ -1234,6 +1237,7 @@
 
 								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp, $kohde, $projekti);
 
+								// Varasto
 								$query = "	INSERT into tiliointi set
 											yhtio 			 = '$kukarow[yhtio]',
 											ltunnus 		 = '$tunnus',
@@ -1260,6 +1264,7 @@
 
 								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
 
+								// Varastonmuutos
 								$query = "	INSERT into tiliointi set
 											yhtio 			 = '$kukarow[yhtio]',
 											ltunnus 		 = '$tunnus',
@@ -1285,6 +1290,7 @@
 
 	 				// Tuli pyöristyseroja
 					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {
+						// Pyöristyserot
 						$query = "	INSERT into tiliointi set
 									yhtio 			 = '$yhtio',
 									ltunnus 		 = '$tunnus',

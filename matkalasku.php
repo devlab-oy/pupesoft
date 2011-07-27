@@ -358,6 +358,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 
 		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tilino, $kustp, $kohde, $projekti);
 
+		// Kulutili
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$kukarow[yhtio]',
 					ltunnus 	= '$tilausnumero',
@@ -376,7 +377,8 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 		$result = pupe_query($query);
 		$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
 
-		if ($vero != 0) { // Tiliöidään alv
+		if ($vero != 0) {
+			// Alv
 			$query = "	INSERT into tiliointi set
 						yhtio 		= '$kukarow[yhtio]',
 						ltunnus 	= '$tilausnumero',
@@ -473,10 +475,10 @@ function korjaa_ostovelka($ltunnus) {
 		$summares = pupe_query($query);
 		$summarow = mysql_fetch_assoc($summares);
 
-		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat, $summarow["kustp"], $summarow["kohde"], $summarow["projekti"]);
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["ostovelat"], $summarow["kustp"], $summarow["kohde"], $summarow["projekti"]);
 	}
 	else {
-		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat);
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["ostovelat"]);
 	}
 
 	//	Onko meillä jo ostovelkatiliöinti vai perustetaanko uusi?
@@ -507,6 +509,7 @@ function korjaa_ostovelka($ltunnus) {
 	else {
 		if ($debug == 1) echo "Luodaan uusi ostovelkatiliöinti<br>";
 
+		// Ostovelka
 		$query = "	INSERT into tiliointi SET
 					yhtio 		= '$kukarow[yhtio]',
 					ltunnus 	= '$ltunnus',
@@ -694,7 +697,7 @@ function erittele_rivit($tilausnumero) {
 								yhtio 		= '$kukarow[yhtio]',
 								ltunnus 	= '$tilausnumero',
 								tilino 		= '$yhtiorow[selvittelytili]',
-								kustp 		= 0, #OLETUSKUSTP?
+								kustp 		= 0,
 								kohde 		= 0,
 								projekti 	= 0,
 								tapvm 		= '$laskurow[tapvm]',
@@ -1006,7 +1009,7 @@ if ($tee == "TALLENNA") {
 
 						$query = "SHOW variables like 'max_allowed_packet'";
 						$result = pupe_query($query);
-						$varirow = mysql_fetch_array($result);
+						$varirow = mysql_fetch_row($result);
 
 						$filetype = $_FILES['userfile']['type'];
 						$filesize = $_FILES['userfile']['size'];

@@ -62,7 +62,7 @@
 
 	$varastot = (isset($_POST['varastot']) and is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
 
-    while ($varow = mysql_fetch_array($vares)) {
+    while ($varow = mysql_fetch_assoc($vares)) {
 		$sel = '';
 		if (in_array($varow['tunnus'], $varastot)) {
 			$sel = 'checked';
@@ -118,7 +118,7 @@
 					and lasku.tapvm 	<= '$yhtiorow[tilikausi_loppu]'
 					and lasku.viite    	= '$ttunnus'";
 		$kpitores = pupe_query($query);
-		$kpitorow = mysql_fetch_array($kpitores);
+		$kpitorow = mysql_fetch_assoc($kpitores);
 
 		if ($kpitorow["tosite"] > 0 and $kpitorow["varasto"] > 0 and $kpitorow["varastonmuutos"] > 0 and (float) $arvo != 0 and (float) $arvo != (float) $edarvo) {
 
@@ -200,7 +200,7 @@
 					and lasku.tapvm 	<= '$yhtiorow[tilikausi_loppu]'
 					and lasku.viite    	= '$ttunnus'";
 		$kpitores = pupe_query($query);
-		$kpitorow = mysql_fetch_array($kpitores);
+		$kpitorow = mysql_fetch_assoc($kpitores);
 
 		if ($kpitorow["tosite"] > 0 and $kpitorow["varasto"] > 0 and $kpitorow["varastonmuutos"] > 0) {
 
@@ -376,7 +376,7 @@
 				echo "<th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("M‰‰r‰")."</th><th>".t("Poikkeamaprosentti")." %</th>";
 				echo "</tr>";
 
-				while ($tuoterow = mysql_fetch_array($saldoresult)) {
+				while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
 					echo "<tr><th colspan='5'>$tuoterow[tuoteno]</th></tr>";
 
 					echo "<td>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td>".tv1dateconv($tuoterow["laadittu"], "P")."</td><td>$tuoterow[kpl]</td><td>$tuoterow[inventointipoikkeama]</td></tr>";
@@ -391,7 +391,7 @@
 								and lasku.tapvm     = '$tuoterow[tapvm]'
 								and lasku.viite    	= '$tuoterow[ttunnus]'";
 					$kpitores = pupe_query($query);
-					$kpitorow = mysql_fetch_array($kpitores);
+					$kpitorow = mysql_fetch_assoc($kpitores);
 
 					preg_match("/ \(([0-9\.\-]*?)\) /", $tuoterow["selite"], $invkpl);
 
@@ -408,7 +408,7 @@
 									and inventointitunnus	= '$tuoterow[ttunnus]'";
 						$sarjares = pupe_query($query);
 
-						while ($sarjarow = mysql_fetch_array($sarjares)) {
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 							echo "<tr><td>".t("Snro").": </td><td colspan='4'>$sarjarow[sarjanumero]</td></tr>";
 						}
 					}
@@ -523,7 +523,7 @@
 			$rivit = 1;
 			$arvoyht = 0;
 
-			while ($row = mysql_fetch_array($saldoresult)) {
+			while ($row = mysql_fetch_assoc($saldoresult)) {
 				if ($rivit >= 19) {
 					fwrite($fh, $ots);
 					$rivit = 1;
@@ -538,7 +538,7 @@
 							FROM tilausrivi
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and varattu>0 and tyyppi='O'";
 				$result1 = pupe_query($query);
-				$prow    = mysql_fetch_array($result1);
+				$prow    = mysql_fetch_assoc($result1);
 
 				if ($row["inventointiaika"]=='0000-00-00 00:00:00') {
 					$row["inventointiaika"] = t("Ei inventoitu");

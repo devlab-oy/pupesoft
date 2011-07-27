@@ -250,7 +250,7 @@
 					echo "<option value = '2'>".t("Tilaus tulostusjonossa")."</option>";
 				}
 				if (in_array($tila_row["alatila"], array('B','C','D'))) {
-					echo "<option value = '3'>".t("Lähete tulostettu")."</option>";
+					echo "<option value = '3'>".t("Keräyslista tulostettu")."</option>";
 				}
 				if (in_array($tila_row["alatila"], array('B','D'))) {
 					echo "<option value = '4'>".t("Tilaus kerätty")."</option>";

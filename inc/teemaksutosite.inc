@@ -71,6 +71,7 @@
 
 				$totkasumma += $summa + $alv;
 
+				// Kassa-ale
 				$query = "	INSERT into tiliointi set
 							yhtio 		= '$yritirow[yhtio]',
 							ltunnus 	= '$trow[tunnus]',
@@ -88,6 +89,7 @@
 				$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
 
 				if ($tiliointirow['vero'] != 0) {
+					// Kassa-alen alv
 					$query = "	INSERT into tiliointi set
 								yhtio 		= '$yritirow[yhtio]',
 								ltunnus 	= '$trow[tunnus]',
@@ -129,7 +131,7 @@
 			if ($trow['alatila'] == 'K' and $trow['vietykasumma'] != 0) {
 				$vesumma = round(($maara*-1) - ($trow['vietysumma'] - $trow['vietykasumma']),2);
 			}
-			
+
 			if (round($vesumma, 2) != 0) {
 				echo "<font class='message'>".t("Kirjaan valuuttaeroa yhteensä")." $vesumma</font><br>";
 
@@ -144,6 +146,7 @@
 					echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>";
 
 					if (round($summa, 2) != 0) {
+						// Valuuttaero
 						$query = "	INSERT into tiliointi set
 									yhtio 		= '$yritirow[yhtio]',
 									ltunnus 	= '$trow[tunnus]',
@@ -164,7 +167,7 @@
 					}
 				}
 
-				//Hoidetaan mahdolliset pyöristykset
+				// Hoidetaan mahdolliset pyöristykset
 				if ($totvesumma != $vesumma) {
 					echo "<font class='message'>".t("Joudun pyöristämään valuuttaeroa")."</font><br>";
 
@@ -175,10 +178,10 @@
 				}
 			}
 		}
-
+		
 		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
-
-		//Rahatili
+		
+		// Rahatili
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$yritirow[yhtio]',
 					ltunnus 	= '$trow[tunnus]',
@@ -194,7 +197,7 @@
 					laadittu 	= now()";
 		$result = pupe_query($query);
 
-		//Ostovelat
+		// Ostovelat
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$yritirow[yhtio]',
 					ltunnus 	= '$trow[tunnus]',

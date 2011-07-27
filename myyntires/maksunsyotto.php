@@ -182,12 +182,7 @@ if ($tee == "SYOTTO") {
 
 	$selite = pupesoft_cleanstring($selite);
 
-	if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
-		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($myyntisaamiset, $kustannuspaikka);
-	}
-	else {
-		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($myyntisaamiset);
-	}
+	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($myyntisaamiset);
 
 	// Myyntisaamiset
 	$query = "	INSERT INTO tiliointi SET
@@ -210,7 +205,7 @@ if ($tee == "SYOTTO") {
 
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassatili, $kustannuspaikka);
 
-	// Kassatili
+	// Rahatili
 	$query = "	INSERT INTO tiliointi SET
 				yhtio				= '$kukarow[yhtio]',
 				laatija				= '$kukarow[kuka]',

@@ -310,8 +310,8 @@
 		}
 		else {
 			$query = "SELECT nimi FROM kassalipas WHERE tunnus='$tasmayskassa' AND yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$row = mysql_fetch_array($result);
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
 		}
 
 		$tasmays_query = "	SELECT group_concat(distinct lasku.tunnus) ltunnukset
@@ -323,8 +323,8 @@
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							AND lasku.tila = 'X'
 							AND lasku.tapvm = '$vv-$kk-$pp'";
-		$tasmays_result = mysql_query($tasmays_query) or pupe_error($tasmays_query);
-		$tasmaysrow = mysql_fetch_array($tasmays_result);
+		$tasmays_result = pupe_query($tasmays_query);
+		$tasmaysrow = mysql_fetch_assoc($tasmays_result);
 
 		if ($tasmaysrow["ltunnukset"] != "") {
 			$tasmatty = array();
@@ -357,7 +357,7 @@
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								AND lasku.tunnus in ('$kassat_temp')
 								ORDER BY tiliointi.tunnus, tiliointi.selite";
-			$tasmays_result = mysql_query($tasmays_query) or pupe_error($tasmays_query);
+			$tasmays_result = pupe_query($tasmays_query);
 
 			//kirjoitetaan  faili levylle..
 			$filenimi = "/tmp/KATKIRJA.txt";
@@ -386,8 +386,8 @@
 						FROM kassalipas
 						WHERE tunnus in ($kassat)
 						AND yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$row = mysql_fetch_array($result);
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
 
 			if (is_array($kassakone) and count($kassakone) > 0) {
 				$tilit = count($kassakone);
@@ -401,7 +401,7 @@
 			$edltunnus = "X";
 			$edselitelen = 0;
 
-			while ($tasmaysrow = mysql_fetch_array($tasmays_result)) {
+			while ($tasmaysrow = mysql_fetch_assoc($tasmays_result)) {
 
 				if ($tasmaysrow["tilino"] != $row["kateistilitys"] and $tasmaysrow["tilino"] != $row["kassaerotus"] and $tasmaysrow["tilino"] != $row["kateisotto"] and !stristr($tasmaysrow["selite"], t("erotus"))) {
 
@@ -454,8 +454,8 @@
 			if ($tulosta != null) {
 				//haetaan tilausken tulostuskomento
 				$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$printteri'";
-				$kirres  = mysql_query($query) or pupe_error($query);
-				$kirrow  = mysql_fetch_array($kirres);
+				$kirres  = pupe_query($query);
+				$kirrow  = mysql_fetch_assoc($kirres);
 				$komento = $kirrow['komento'];
 
 				//--no-header
@@ -499,13 +499,13 @@
 			$kassat_temp = substr($kassat_temp,0,-1);
 
 			$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' and tunnus in ($kassat_temp)";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 1) {
 
 				$account_check = array();
 
-				while ($row = mysql_fetch_array($result)) {
+				while ($row = mysql_fetch_assoc($result)) {
 
 					if ($row['kassa'] == '' or $row['pankkikortti'] == '' or $row['luottokortti'] == '' or $row['kateistilitys'] == '' or $row['kassaerotus'] == '' or $row['kateisotto'] == '') {
 						echo "<font class='error'>".t("Kassalippaan")." $row[nimi] ".t("tiedot ovat puutteelliset").".</font><br>";
@@ -578,7 +578,7 @@
 			$kassat_temp = substr($kassat_temp,0,-1);
 
 			$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' and tunnus in ($kassat_temp) and kassa != '' and pankkikortti != '' and luottokortti != '' and kateistilitys != '' and kassaerotus != '' and kateisotto != ''";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != count($kassakone)) {
 				echo "<font class='error'>".t("Ei voida täsmäyttää. Kassalippaan pakollisia tietoja puuttuu").".</font><br>";
@@ -608,7 +608,7 @@
 					tila       = 'X',
 					laatija    = '$kukarow[kuka]',
 					luontiaika = now()";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$laskuid = mysql_insert_id();
 
 		$maksutapa	 	= "";
@@ -673,12 +673,12 @@
 
 				// Haetaan kassalipastiedot tietokannasta
 				$query = "SELECT * FROM kassalipas WHERE yhtio = '$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$kustp = "";
 
 				if (mysql_num_rows($result) == 1) {
-					$kassalipasrow = mysql_fetch_array($result);
+					$kassalipasrow = mysql_fetch_assoc($result);
 					$tilino = $kassalipasrow["pankkikortti"];
 					$kustp  = $kassalipasrow["kustp"];
 				}
@@ -690,12 +690,12 @@
 
 				// Haetaan kassalipastiedot tietokannasta
 				$query = "SELECT * FROM kassalipas WHERE yhtio = '$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$kustp = "";
 
 				if (mysql_num_rows($result) == 1) {
-					$kassalipasrow = mysql_fetch_array($result);
+					$kassalipasrow = mysql_fetch_assoc($result);
 					$tilino = $kassalipasrow["luottokortti"];
 					$kustp  = $kassalipasrow["kustp"];
 				}
@@ -707,12 +707,12 @@
 
 				// Haetaan kassalipastiedot tietokannasta
 				$query = "SELECT * FROM kassalipas WHERE yhtio = '$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$kustp = "";
 
 				if (mysql_num_rows($result) == 1) {
-					$kassalipasrow = mysql_fetch_array($result);
+					$kassalipasrow = mysql_fetch_assoc($result);
 					$tilino = $kassalipasrow["kassa"];
 					$kustp  = $kassalipasrow["kustp"];
 				}
@@ -763,7 +763,7 @@
 							selite   = '$kassalipas $maksutapa$selitelisa',
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			// Jos kenttä on käteistilitys, niin toinen tiliöidään käteistilitys-tilille ja se summa myös miinustetaan kassasta
@@ -787,7 +787,7 @@
 							selite   = '$kassalipas ".t("Käteistilitys pankkiin kassasta")."',
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kassa"], $kustp);
 
@@ -805,7 +805,7 @@
 							selite   = '$kassalipas ".t("Käteistilitys pankkiin kassasta")."',
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			// Jos kenttä on käteisotto, niin toinen tiliöidään käteisotto-tilille ja se summa myös miinustetaan kassasta
@@ -826,7 +826,7 @@
 							selite   = '$kassalipas ".t("Käteisotto kassasta")."',
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassalipasrow["kassa"], $kustp);
 
@@ -842,7 +842,7 @@
 							selite   = '$kassalipas ".t("Käteisotto kassasta")."',
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 
@@ -855,7 +855,7 @@
 		$query = "	UPDATE lasku SET comments = '$comments<br>".t("Alkukassa yhteensä").": $pohjakassa<br>$comments_yht'
 					WHERE yhtio  = '$kukarow[yhtio]'
 					AND tunnus = $laskuid";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$tulosta = "kyllä";
 		$lasku_id = array();
@@ -905,8 +905,8 @@
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and myyja 	= '$myyjanro'
 						AND myyja > 0";
-			$result = mysql_query($query) or pupe_error($query);
-			$row = mysql_fetch_array($result);
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
 
 			$lisa = " and lasku.myyja='$row[tunnus]' ";
 		}
@@ -956,10 +956,10 @@
 						FROM kassalipas
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus in ($kassat_temp)";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == count($kassakone)) {
-				while ($row = mysql_fetch_array($result)) {
+				while ($row = mysql_fetch_assoc($result)) {
 					if ($row["kassa"] != $yhtiorow["kassa"]) {
 						$myyntisaamiset_tilit .= "'$row[kassa]',";
 					}
@@ -1017,7 +1017,7 @@
 					$lisa
 					$kassat
 					ORDER BY kassa, kassanimi, tyyppi, lasku.tapvm, lasku.laskunro";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$i = 1;
 
@@ -1089,7 +1089,7 @@
 				echo "<td align='center' style='width:100px' nowrap>".strtoupper(t("Myynti"))."</td><td align='center' style='width:100px' nowrap>".strtoupper(t("Erotus"))."</td></tr>";
 				echo "</tr>";
 
-				$row = mysql_fetch_array($result);
+				$row = mysql_fetch_assoc($result);
 
 				echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 				echo "<input type='hidden' name='tyyppi_pohjakassa$i' id='tyyppi_pohjakassa$i' value='$row[kassanimi]'>";
@@ -1163,7 +1163,7 @@
 					mysql_data_seek($result, 0);
 				}
 
-				while ($row = mysql_fetch_array($result)) {
+				while ($row = mysql_fetch_assoc($result)) {
 
 					if ($row["tyyppi"] == 'Pankkikortti') {
 						$pankkikortti = true;
@@ -1338,12 +1338,12 @@
 					// tällä päästään alempaan iffiin käsiksi
 					$kateismaksu = "kateinen";
 					mysql_data_seek($result,0);
-					$row = mysql_fetch_array($result);
+					$row = mysql_fetch_assoc($result);
 					$edkassanimi = $row["kassanimi"];
 
 					$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND nimi = '$row[kassanimi]'";
-					$kassalipasresult = mysql_query($query) or pupe_error($query);
-					$kassalipasrow = mysql_fetch_array($kassalipasresult);
+					$kassalipasresult = pupe_query($query);
+					$kassalipasrow = mysql_fetch_assoc($kassalipasresult);
 					$kateinen = $kassalipasrow["kassa"];
 					$row["tilino"] = $kassalipasrow["kassa"];
 				}
@@ -1473,7 +1473,7 @@
 							<th>".t("Pvm")."</th>
 							<th>$yhtiorow[valkoodi]</th></tr>";
 
-					while ($row = mysql_fetch_array($result)) {
+					while ($row = mysql_fetch_assoc($result)) {
 
 						if ($row["tyyppi"] == 'Pankkikortti') {
 
@@ -1559,7 +1559,7 @@
 							<th>".t("Pvm")."</th>
 							<th>$yhtiorow[valkoodi]</th></tr>";
 
-					while ($row = mysql_fetch_array($result)) {
+					while ($row = mysql_fetch_assoc($result)) {
 
 						if ($row["tyyppi"] == 'Luottokortti') {
 
@@ -1633,7 +1633,7 @@
 				}
 			}
 			else {
-				while ($row = mysql_fetch_array($result)) {
+				while ($row = mysql_fetch_assoc($result)) {
 
 					if ((($edkassa != $row["kassa"] and $edkassa != '') or ($kateinen != $row["tilino"] and $kateinen != ''))) {
 						echo "</table><table width='100%'>";
@@ -1766,7 +1766,7 @@
 							and lasku.tapvm >= '$vva-$kka-$ppa'
 							and lasku.tapvm <= '$vvl-$kkl-$ppl'
 							ORDER BY lasku.laskunro";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$kassayhteensa = 0;
 
@@ -1780,7 +1780,7 @@
 							<th nowrap>".t("Pvm")."</th>
 							<th nowrap>$yhtiorow[valkoodi]</th></tr>";
 
-					while ($row = mysql_fetch_array($result)) {
+					while ($row = mysql_fetch_assoc($result)) {
 
 						echo "<tr>";
 						echo "<td>".t("Käteissuoritus")."</td>";
@@ -1889,8 +1889,8 @@
 
 			//haetaan tilausken tulostuskomento
 			$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$printteri'";
-			$kirres  = mysql_query($query) or pupe_error($query);
-			$kirrow  = mysql_fetch_array($kirres);
+			$kirres  = pupe_query($query);
+			$kirrow  = mysql_fetch_assoc($kirres);
 			$komento = $kirrow['komento'];
 
 			$line = exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=94 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
@@ -1942,14 +1942,14 @@
 				FROM kuka
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY nimi";
-	$yresult = mysql_query($query) or pupe_error($query);
+	$yresult = pupe_query($query);
 
 	echo "<tr>";
 	echo "<th>".t("TAI valitse käyttäjä")."</th>";
 	echo "<td colspan='3'><select name='myyja'>";
 	echo "<option value='' >".t("Kaikki")."</option>";
 
-	while ($row = mysql_fetch_array($yresult)) {
+	while ($row = mysql_fetch_assoc($yresult)) {
 		if ($row['kuka'] == $myyja) {
 			$sel = 'selected';
 		}
@@ -2005,9 +2005,9 @@
 				FROM kassalipas
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY tunnus";
-	$vares = mysql_query($query) or pupe_error($query);
+	$vares = pupe_query($query);
 
-	while ($varow = mysql_fetch_array($vares)) {
+	while ($varow = mysql_fetch_assoc($vares)) {
 		$sel = '';
 		if ($kassakone[$varow["tunnus"]] != '') $sel = 'CHECKED';
 		echo "<tr>";
@@ -2076,14 +2076,14 @@
 	echo "</tr>";
 
 	$query = "SELECT * FROM kirjoittimet WHERE yhtio = '$kukarow[yhtio]'";
-	$kires = mysql_query($query) or pupe_error($query);
+	$kires = pupe_query($query);
 
 	echo "<tr>";
 	echo "<th>".t("Valitse tulostuspaikka").":</th>";
 	echo "<td colspan='3'><select name='printteri'>";
 	echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-	while ($kirow = mysql_fetch_array($kires)) {
+	while ($kirow = mysql_fetch_assoc($kires)) {
 		if ($kirow["tunnus"] == $printteri) {
 			$select = "SELECTED";
 		}

@@ -346,6 +346,7 @@
 
 						$totkasumma += $summa + $alv;
 
+						// Kassa-ale
 						$query = "	INSERT into tiliointi set
 									yhtio 		= '$kukarow[yhtio]',
 									ltunnus 	= '$laskurow[tunnus]',
@@ -364,6 +365,7 @@
 						$isa = mysql_insert_id ($link); // Näin löydämme tähän liittyvät alvit....
 
 						if ($tiliointirow['vero'] != 0) {
+							// Kassa-alen alv
 							$query = "	INSERT into tiliointi set
 										yhtio 		= '$kukarow[yhtio]',
 										ltunnus 	= '$laskurow[tunnus]',

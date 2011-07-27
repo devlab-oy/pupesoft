@@ -61,7 +61,7 @@ if ($suoratoimitus == '' and $kauttalaskutus == '') {
 	$tv_kaytossa = FALSE;
 
 	$query = "SELECT count(*) kpl from taric_veroperusteet";
-	$tv_res = mysql_query($query);
+	$tv_res = pupe_query($query);
 	$tv_row = mysql_fetch_assoc($tv_res);
 
 	if ($tv_row["kpl"] > 0) {

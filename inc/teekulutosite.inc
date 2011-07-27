@@ -15,11 +15,12 @@
                 tila 			= 'X',
                 laatija 		= 'tiliote',
                 luontiaika 		= now()";
-	$result = mysql_query($query) or pupe_error($query);
-	$kulutunnus = mysql_insert_id ($link);
+	$result = pupe_query($query);
+	$kulutunnus = mysql_insert_id($link);
 
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
 
+	// Rahatili
 	$query = "	INSERT into tiliointi set
                 yhtio 		= '$yritirow[yhtio]',
                 ltunnus 	= '$kulutunnus',
@@ -34,11 +35,12 @@
 				selite 		= '$selite',
                 laatija 	= 'tiliote',
                 laadittu	= now()";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$vasumma = $maara * -1;
 
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_kulutili"], $yritirow["oletus_kustp"], $yritirow["oletus_kohde"], $yritirow["oletus_projekti"]);
-
+	
+	// Pankin kuluja
 	$query = "	INSERT into tiliointi set
                 yhtio 		= '$yritirow[yhtio]',
                 ltunnus 	= '$kulutunnus',
@@ -53,13 +55,20 @@
 				selite 		= '$selite',
                 laatija 	= 'tiliote',
                 laadittu 	= now()";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
-    $query = "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=".mysql_insert_id ($link)." WHERE tunnus='$tiliotedataid'";
-	$dummyresult = mysql_query($query) or pupe_error($query);
+    $query = "	UPDATE tiliotedata
+				SET kasitelty = now(),
+				tiliointitunnus = ".mysql_insert_id ($link)."
+				WHERE tunnus = '$tiliotedataid'";
+	$dummyresult = pupe_query($query);
 
-	$query = "UPDATE tiliotedata SET kuitattu = 'tiliote', kuitattuaika = now() WHERE yhtio = '$yritirow[yhtio]' and perheid = '$tiliotedatape'";
-	$dummyresult = mysql_query($query) or pupe_error($query);
+	$query = "	UPDATE tiliotedata
+				SET kuitattu = 'tiliote',
+				kuitattuaika = now()
+				WHERE yhtio = '$yritirow[yhtio]'
+				and perheid = '$tiliotedatape'";
+	$dummyresult = pupe_query($query);
 
 	// Merkataan k‰sitellyiksi & lis‰t‰‰n linkki
 	echo "<font class='message'>*** ".t("tosite luotu")." ***</font><br>"

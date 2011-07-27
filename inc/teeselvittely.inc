@@ -19,7 +19,7 @@
 						tila 		= 'X',
 						laatija 	= 'tiliote',
 						luontiaika 	= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$laskuid = mysql_insert_id ($link);
 			echo "<font class='message'>*** ".t("Tositteen otsikko luotu")." ***</font><br>";
 		}
@@ -29,6 +29,7 @@
 
 			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
 
+			// Rahatili
 			$query = "	INSERT into tiliointi set
 		                yhtio 				= '$yritirow[yhtio]',
 		                ltunnus 			= '$laskuid',
@@ -45,7 +46,7 @@
 						selite 				= 'Vastavienti rahatilille',
 		                laatija 			= 'tiliote',
 		                laadittu 			= now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$vastavienti 			= 0;
 			$vastavienti_valuutassa = 0;
@@ -70,9 +71,10 @@
 
 				// Palkkio: vikasta spacesta loppuun
 				$palkkio = (float) substr($luottokuntatieto, (strrpos($luottokuntatieto, " ") + 1));
-				
+
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointisaantorow["tilino2"], $tiliointisaantorow["kustp2"]);
-				
+
+				// Kulutili 2
 				$query = "	INSERT into tiliointi set
 			                yhtio 				= '$yritirow[yhtio]',
 			                ltunnus 			= '$laskuid',
@@ -89,10 +91,11 @@
 							selite 				= '$vientiselite',
 			                laatija 			= 'tiliote',
 			                laadittu 			= now()";
-				$result = mysql_query($query) or pupe_error($query);
-				
+				$result = pupe_query($query);
+
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointisaantorow["tilino"], $tiliointisaantorow["kustp"]);
-				
+
+				// Kulutili 1
 				$query = "	INSERT into tiliointi set
 			                yhtio 				= '$yritirow[yhtio]',
 			                ltunnus 			= '$laskuid',
@@ -109,12 +112,13 @@
 							selite 				= '$vientiselite',
 			                laatija 			= 'tiliote',
 			                laadittu 			= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 			else {
-				
+
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tiliointisaantorow["tilino"], $tiliointisaantorow["kustp"]);
-				
+
+				// Kulutili
 				$query = "	INSERT into tiliointi set
 		                	yhtio 				= '$yritirow[yhtio]',
 			                ltunnus 			= '$laskuid',
@@ -131,15 +135,22 @@
 							selite 				= '$vientiselite',
 			                laatija 			= 'tiliote',
 			                laadittu 			= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
-	        $query = "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=".mysql_insert_id ($link)." WHERE tunnus='$tiliotedataid'";
-			$dummyresult = mysql_query($query) or pupe_error($query);
+	        $query = "	UPDATE tiliotedata
+						SET kasitelty = now(),
+						tiliointitunnus = ".mysql_insert_id ($link)."
+						WHERE tunnus = '$tiliotedataid'";
+			$dummyresult = pupe_query($query);
 
 			if ($loydettiinko_sopiva_tili != '') {
-				$query = "UPDATE tiliotedata SET kuitattu = 'tiliote', kuitattuaika = now() WHERE yhtio = '$yritirow[yhtio]' and perheid = '$tiliotedatape'";
-				$dummyresult = mysql_query($query) or pupe_error($query);
+				$query = "	UPDATE tiliotedata
+							SET kuitattu = 'tiliote',
+							kuitattuaika = now()
+							WHERE yhtio = '$yritirow[yhtio]'
+							and perheid = '$tiliotedatape'";
+				$dummyresult = pupe_query($query);
 			}
 
 			// Merkataan k‰sitellyiksi & lis‰t‰‰n linkki

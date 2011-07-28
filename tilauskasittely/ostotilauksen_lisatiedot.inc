@@ -12,6 +12,10 @@ if ($tee == "update") {
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array ($result);
 
+	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
+
+	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
+
 	if ($laskurow["erikoisale"] == $erikoisale and $laskurow["rahti_etu"] == $rahti_etu and $laskurow["rahti_etu_alv"] == $rahti_etu_alv) {
 		$kohdistettu = $laskurow["kohdistettu"];
 	}
@@ -23,7 +27,7 @@ if ($tee == "update") {
 		echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, kohdistus pit‰‰ tarkastaa uudelleen.")."</font><br><br>";
 	}
 	else {
-		echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, muistathan painaa kohdistus valmis, jotta muutokset huomioidaan.")."</font>";
+		echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, muistathan painaa kohdistus valmis, jotta muutokset huomioidaan.")."<br></font>";
 	}
 
 	// Hoidetaan pilkut pisteiksi....
@@ -32,7 +36,23 @@ if ($tee == "update") {
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
 	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
 	$bruttopaino 	= str_replace ( ",", ".", $bruttopaino);
-	
+
+
+	if ($llrow["vosumma"] >= 0) {
+		if ($rahti_etu > $llrow['vosumma'] and $llrow['volasku'] == 1) {
+			echo "<font class='message'>Virhe!! Eturahti ei saa olla suurempi kuin laskujen yhteissumma</font><br>";
+		}
+		
+		if ($rahti_etu < 0.00) {
+			echo "<font class='message'>Virhe!! Eturahti ei saa olla negatiivinen</font><br><br>";
+		}
+	}
+	else {
+		if ($rahti_etu <= $llrow['vosumma']) {
+			echo "<font class='message'>Virhe!! Eturahti pit‰‰ olla suurempi tai yht‰suuri kuin laskujen yhteissumma</font><br>";
+		}
+	}
+
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
@@ -66,24 +86,17 @@ if ($tee == "update") {
 }
 
 if ($tee == "") {
-
+	
 	$query = "SELECT *
 			  FROM lasku
 			  WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array ($result);
 
-	// lasketaan keikan ostolaskujen summat yhteen
-	$query = "	SELECT sum(summa) vosumma
-				from lasku
-				where yhtio='$kukarow[yhtio]'
-				and tila='K'
-				and vanhatunnus<>0
-				and laskunro='$laskurow[laskunro]'
-				and vienti in ('C','F','I','J','K','L')";
-	$llres = mysql_query($query) or pupe_error($query);
-	$llrow = mysql_fetch_array($llres);
+	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
 
+	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
+	
 	// haetaan toimittajan tiedot
 	$query  = "SELECT * FROM toimi WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[liitostunnus]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -260,8 +273,23 @@ if ($tee == "") {
 		$lisamassa = "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 	}
 
+	if ($llrow["vosumma"] >= 0.00) {
+		if ($laskurow['rahti_etu'] > $llrow['vosumma']) {
+			$lisatiedot = "<font class='message'>Virhe!! Eturahti ei saa olla suurempi kuin laskujen yhteissumma</font><br>";
+		}
+		
+		if ($laskurow['rahti_etu']< 0.00) {
+			$lisatiedot = "<font class='message'>Virhe!! Eturahti ei saa olla negatiivinen</font><br>";
+		}
+	}
+	else {
+		if ($laskurow['rahti_etu'] <= $llrow['vosumma']) {
+			$lisatiedot = "<font class='message'>Virhe!! Eturahti pit‰‰ olla suurempi tai yht‰suuri kuin laskujen yhteissumma</font><br>";
+		}
+	}
+
 	echo "<tr><td valign='top'>".t("Nettopaino").":</td><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back' width='450'>$lisamassa</td></tr>";
-	echo "<tr><td valign='top'>".t("Veroton")." ".t("Eturahti").":</td><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td></tr>";
+	echo "<tr><td valign='top'>".t("Veroton")." ".t("Eturahti").":</td><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td><td class='back'> $lisatiedot </td></tr>";
 	echo "<tr><td valign='top'>".t("Arvioitu kuluprosentti").":</td><td valign='top' colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
 	echo "<tr><td valign='top'>".t("Kulusumma")." $yhtiorow[valkoodi]:</td><td valign='top' colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
 	echo "<tr><td valign='top'>".t("Erikoisalennus").":</td><td valign='top' colspan='3'><input type='text' name='erikoisale' value='$laskurow[erikoisale]'></td></tr>";

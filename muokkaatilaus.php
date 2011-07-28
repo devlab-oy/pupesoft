@@ -361,25 +361,36 @@
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 			// Näytetään muuten vaan sopivia tilauksia
-			echo "<br><br>
-					<form action='$PHP_SELF' method='post'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>
-					<input type='hidden' name='limit' value='$limit'>
-					<font class='head'>".t("Etsi")." $otsikko<hr></font>
-					".t("Syötä tilausnumero, nimen tai laatijan osa").":
-					<input type='text' name='etsi'>
-					<input type='Submit' value = '".t("Etsi")."'>
-					</form><br><br>";
+			echo "<br><br>";
+			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
+			echo "<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>";
+			echo "<input type='hidden' name='limit' value='$limit'>";
+			echo "<font class='head'>".t("Etsi")." $otsikko<hr></font>";
+			if ($toim != "YLLAPITO") {
+				echo t("Syötä tilausnumeron, nimen tai laatijan osa");
+			}
+			else {
+				echo t("Syötä tilausnumeron, nimen, laatijan tai sopimuksen lisätidon osa");
+			}
+			echo "<input type='text' name='etsi'>";
+			echo "<input type='Submit' value = '".t("Etsi")."'>";
+			echo "</form>";
+			echo "<br>";
 
 			// pvm 30 pv taaksepäin
 			$dd = date("d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 			$mm = date("m",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 			$yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 
-			$haku='';
+			$haku = "";
 			if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%' or kuka1.nimi like '%$etsi%' or  kuka2.nimi like '%$etsi%')";
 			if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%')";
+
+			if ($toim == 'YLLAPITO' and $etsi != "" and $haku != "") {
+				$haku = substr($haku, 0, -1); // Poistetaan vika sulku $hausta
+				$haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%$etsi%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%$etsi%')";
+			}
 
 			$seuranta = "";
 			$seurantalisa = "";
@@ -1098,13 +1109,30 @@
 			$miinus = 5;
 		}
 		elseif ($toim == 'YLLAPITO') {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka != kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, concat_ws('###', sopimus_alkupvm, sopimus_loppupvm) sopimuspvm, lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu, sopimus_loppupvm
+			$query = "  SELECT lasku.tunnus tilaus,
+						lasku.asiakkaan_tilausnumero 'asiak. tilno',
+						$asiakasstring asiakas,
+						lasku.luontiaika,
+						if(kuka1.kuka != kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
+						concat_ws('###', sopimus_alkupvm, sopimus_loppupvm) sopimuspvm,
+						lasku.alatila,
+						lasku.tila,
+						lasku.tunnus,
+						tunnusnippu,
+						sopimus_loppupvm,
+						group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto1 separator '<br>') sopimuksen_lisatieto1,
+						group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto2 separator '<br>') sopimuksen_lisatieto2
 						FROM lasku use index (tila_index)
+						JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+						JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio = lasku.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
 						LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = '0' and alatila NOT IN ('D')
+						WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+						AND tila = '0'
+						AND alatila NOT IN ('D')
 						$haku
+						GROUP BY 1,2,3,4,5,6,7,8,9,10,11
 						ORDER by lasku.luontiaika desc
 						$rajaus";
 
@@ -1122,7 +1150,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 5;
+			$miinus = 7;
 		}
 		else {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,

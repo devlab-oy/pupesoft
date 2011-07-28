@@ -2078,6 +2078,12 @@
 						</tr>";
 			}
 
+			if ($toim == "YLLAPITO") {
+				echo "	<tr>
+						<td>".t("Sis‰iset kommentit").":</td><td colspan='3'><textarea name='sopimus_lisatietoja' rows='6' cols='50'>$srow[sopimus_lisatietoja]</textarea></td>
+						</tr>";
+			}
+
 			echo "</table><br>";
 
 			// tehd‰‰n yll‰pitosopimista varten laskutusaikataulu taulu
@@ -3174,6 +3180,7 @@
 							sopimus_pp					= '$sopimus_pp',
 							sopimus_alkupvm				= '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
 							sopimus_loppupvm			= '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
+							sopimus_lisatietoja			= '$sopimus_lisatietoja',
 							kolm_ovttunnus				= '$kolm_ovttunnus',
 							kolm_nimi					= '$kolm_nimi',
 							kolm_nimitark				= '$kolm_nimitark',

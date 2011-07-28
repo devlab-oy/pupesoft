@@ -721,6 +721,13 @@
 
 				$vvaa = $vva - '1';
 				$vvll = $vvl - '1';
+				
+				if ($naytakaikkityypit != "") {
+					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M','N') ";
+				}
+				else {
+					$lisa .= " and tuote.tuotetyyppi in ('','R','K','M') ";
+				}
 
 				if ($kateprossat != "") {
 					$katelisanyt = " 0 kateprosnyt, ";
@@ -750,7 +757,7 @@
 				if ($naytaennakko == "") {
 					$lisa .= " and tilausrivi.tuoteno !='$yhtiorow[ennakkomaksu_tuotenumero]'";
 				}
-
+				
 				// Jos ei olla valittu mitään
 				if ($group == "") {
 					$select = "tuote.yhtio, ";
@@ -2111,6 +2118,7 @@
 			if ($piilota_kappaleet != '')	$piilota_kappaleet_sel 	= "CHECKED";
 			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
+			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -2385,6 +2393,12 @@
 				<tr>
 				<th>".t("Näytä myös ennakkolaskutus")."</th>
 				<td><input type='checkbox' name='naytaennakko' $naytaennakkochk></td>
+				<td></td>
+				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>".t("Näytä kaikki tuotetyypit")."</th>
+				<td><input type='checkbox' name='naytakaikkityypit' $naytakaikkityypitchk></td>
 				<td></td>
 				<td class='back'></td>
 				</tr>

@@ -224,10 +224,16 @@
 
 					$ytunnus         = $laskurow["ytunnus"];
 					$kpl             = (float) $kpl;
-					$kpl_echo 		 = (float) $kpl;
+					$kpl_echo 		 = (float) $kpl;					
 					$tuoteno         = $trow["tuoteno"];
-					$toimaika 	     = $laskurow["toimaika"];
-					$kerayspvm	     = $laskurow["kerayspvm"];
+					if ($toim_kutsu != "YLLAPITO") {
+						$toimaika = $laskurow["toimaika"];
+						$kerayspvm = $laskurow["kerayspvm"];
+					}
+					else {
+						$toimaika = "";
+						$kerayspvm = "";
+					}
 					$hinta 		     = "";
 					$netto 		     = "";
 

@@ -453,10 +453,10 @@ if ((int) $kukarow["kesken"] > 0) {
 
 	if ($yhtiorow["tilauksen_kohteet"] == "K") {
 		$query 	= "	SELECT *
-					from laskun_lisatiedot
+					FROM laskun_lisatiedot
 					where otunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-		$result  	= pupe_query($query);
-		$lasklisatied_row  = mysql_fetch_assoc($result);
+		$result = pupe_query($query);
+		$lasklisatied_row = mysql_fetch_assoc($result);
 	}
 
 	if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0 and $yhtiorow["suoratoim_ulkomaan_alarajasumma"] > 0) {
@@ -3702,20 +3702,30 @@ if ($tee == '') {
 
 			$tuoteno = trim($tuoteno);
 
+			$toimvva = (int) $toimvva;
+			$toimkka = (int) $toimkka;
+			$toimppa = (int) $toimppa;
+
 			if (checkdate($toimkka,$toimppa,$toimvva)) {
 				$toimaika = $toimvva."-".$toimkka."-".$toimppa;
 			}
+
+			$keraysvva = (int) $keraysvva;
+			$kerayskka = (int) $kerayskka;
+			$keraysppa = (int) $keraysppa;
 
 			if (checkdate($kerayskka,$keraysppa,$keraysvva)) {
 				$kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
 			}
 
-			if ($toimaika == "" or $toimaika == "0000-00-00") {
-				$toimaika = $laskurow["toimaika"];
-			}
+			if ($toim != "YLLAPITO") {
+				if ($toimaika == "" or $toimaika == "0000-00-00") {
+					$toimaika = $laskurow["toimaika"];
+				}
 
-			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
-				$kerayspvm = $laskurow["kerayspvm"];
+				if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+					$kerayspvm = $laskurow["kerayspvm"];
+				}
 			}
 
 			$varasto = $laskurow["varasto"];

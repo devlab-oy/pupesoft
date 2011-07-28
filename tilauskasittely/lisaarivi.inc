@@ -61,6 +61,9 @@
 	unset($korvaavan_hinta_ylaraja_halvin_ale);
 	unset($korvaavan_hinta_ylaraja_halvin_netto);
 
+	// selaimet käyttää toim_kutsua, välitetään sen $toimiin
+	if (!isset($toim) and (isset($toim_kutsu))) $toim = $toim_kutsu;
+
 	if (!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet, $perhelisa, $kieltolisa, $lisaarivi_debug) {
 			global $yhtiorow, $kukarow;
@@ -193,6 +196,9 @@
 
 	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$toimaika = date("Y-m-d");
+		if ($toim == "YLLAPITO") {
+			$toimaika = "0000-00-00"; // Ylläpitosoppareissa toimaika tarkoittaa sopimuksen poikkeavaa alkupäivää ja nolla on default
+		}
 	}
 
 	list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $kerayspvm);
@@ -203,6 +209,9 @@
 
 	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$kerayspvm = date("Y-m-d");
+		if ($toim == "YLLAPITO") {
+			$kerayspvm = "0000-00-00"; // Ylläpitosoppareissa kerayspvm tarkoittaa sopimuksen poikkeavaa loppupäivää ja nolla on default
+		}
 	}
 
 	// Jos yhtiön saldokäsittely on ajasta riippuvainen
@@ -1295,6 +1304,13 @@
 									$myy_lapsi_ein[$indeksi] = "";
 								}
 
+								if ($toim == "YLLAPITO") {
+									$sopimuslisays = ", sopimuksen_lisatieto1 = '$sopimuksen_lisatieto1', sopimuksen_lisatieto2 = '$sopimuksen_lisatieto2'";
+								}
+								else {
+									$sopimuslisays = "";
+								}
+
 								if (mysql_num_rows($lisatied_res) > 0) {
 									$lisatied_row = mysql_fetch_array($lisatied_res);
 
@@ -1305,6 +1321,7 @@
 												muutospvm			= now(),
 												muuttaja			= '$kukarow[kuka]',
 												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]'
+												$sopimuslisays
 												$tlisatied_lisa
 												WHERE yhtio			 = '$kukarow[yhtio]'
 												and tilausrivitunnus = '$lisatty_tun'";
@@ -1329,6 +1346,7 @@
 												jarjestys			= '$jarjestys',
 												luontiaika			= now(),
 												laatija 			= '$kukarow[kuka]'
+												$sopimuslisays
 												$tlisatied_lisa";
 
 									if ($trow["sarjanumeroseuranta"] == "S" and $varattu < 0) {

@@ -48,6 +48,12 @@
 				$riviok++;
 				$tilausok++;
 			}
+
+			if ($row["kerayspvm"] != '0000-00-00' and $row["toimaika"] != '0000-00-00' and $row["kerayspvm"] > $row["toimaika"]) {
+				$varaosavirhe .= t("VIRHE: Poikkeava alkupäivä ei voi olla uudempi kun poikkeava loppupäivä!")."<br>";
+				$riviok++;
+				$tilausok++;
+			}
 		}
 	}
 

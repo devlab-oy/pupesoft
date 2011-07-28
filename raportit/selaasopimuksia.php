@@ -78,8 +78,8 @@
 		echo "<td nowrap>{$rivit["tuoteno"]}</td>";
 		echo "<td>{$rivit["nimitys"]}</td>";
 		echo "<td>{$rivit["kommentti"]}</td>";
-		echo "<td nowrap>".tv1dateconv($rivit["rivinsopimus_alku"])."</td>";
-		echo "<td nowrap>".tv1dateconv($rivit["rivinsopimus_loppu"])."</td>";
+		echo "<td nowrap>{$rivit["rivinsopimus_alku"]}</td>";
+		echo "<td nowrap>{$rivit["rivinsopimus_loppu"]}</td>";
 		echo "<td nowrap>{$rivit["tilkpl"]}</td>";
 		echo "<td nowrap align='right'>".hintapyoristys($rivit["hinta"])."</td>";
 		echo "<td nowrap align='right'>{$rivit["rivihinta"]}</td>";

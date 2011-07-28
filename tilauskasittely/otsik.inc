@@ -1944,7 +1944,6 @@
 				echo "</select>";
 				echo "</td></tr>";
 			}
-
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
 				//Täysin dynaaminen osio
 				$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != ''");
@@ -1986,6 +1985,20 @@
 								<input type='text' name='".$kentta."pp' size='3' value='$al_pp'>
 								<input type='text' name='".$kentta."kk' size='3' value='$al_kk'>
 								<input type='text' name='".$kentta."vv' size='5' value='$al_vv'></td>";
+					}
+					elseif (strtoupper($al_row["selitetark_2"]) == "DROPDOWN") {
+						$dropdown_arvot = explode("#", $al_row['selitetark_3']);
+						
+						echo "<td>{$al_row["selitetark"]}</td>";
+						echo "<td><select name='$kentta'>";
+						
+						foreach ($dropdown_arvot as $arvo) {
+							$sele = ($srow[$kentta] == $arvo) ? "SELECTED" : "";
+							echo "<option value='$arvo' $sele>$arvo</option>";
+						}
+
+						echo "</select>";
+						echo "</td>";
 					}
 					elseif ($kentta == "suorittaja") {
 
@@ -3153,6 +3166,7 @@
 							vikakoodi		= '$vikakoodi',
 							takuunumero		= '$takuunumero',
 							tyokoodi		= '$tyokoodi',
+							hyvaksy			= '$hyvaksy',							
 							otunnus 		= '$kukarow[kesken]'";
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);

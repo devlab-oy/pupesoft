@@ -3,7 +3,7 @@
 if (!function_exists("kopioi_tilaus")) {
 
 	// otetaan parametriksi tunnus
-	function kopioi_tilaus($tunnus, $muokkaa_lasku = "", $muokkaa_rivi = "") {
+	function kopioi_tilaus($tunnus, $muokkaa_lasku = "", $muokkaa_rivi = "", $tapahtumapvm = "") {
 
 		// tarvitaan yhtiörowta ja kukarowta
 		global $yhtiorow, $kukarow;
@@ -19,6 +19,17 @@ if (!function_exists("kopioi_tilaus")) {
 					WHERE otunnus = '$tunnus'
 					AND yhtio = '{$kukarow["yhtio"]}'";
 		$lisatiedotres = pupe_query($query);
+
+		// Katsotaan, että tilausrivi on voimassa $tapahtumapvm == sopimuksen tämä laskutuspäivä
+		if ($tapahtumapvm != "") {
+			// tilausrivi.kerayspvm => poikkeava alkupäivä on syötetty ja se on pienempi kuin tämä laskutuspäivä
+			// tilausrivi.toimaika => poikkeava loppupäivä on syötetty ja se suurempi kuin tämä laskutuspäivä
+			$lisaehto = "	AND (tilausrivi.kerayspvm = '0000-00-00' or (tilausrivi.kerayspvm != '0000-00-00' and tilausrivi.kerayspvm <= '$tapahtumapvm'))
+							AND (tilausrivi.toimaika = '0000-00-00' or (tilausrivi.toimaika != '0000-00-00' and tilausrivi.toimaika >= '$tapahtumapvm'))";
+		}
+		else {
+			$lisaehto = "";
+		}
 
 		$query = "	SELECT *
 					FROM tilausrivi

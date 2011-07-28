@@ -193,6 +193,9 @@
 
 	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$toimaika = date("Y-m-d");
+		if ($toim == "YLLAPITO") {
+			$toimaika = "0000-00-00"; // Ylläpitosoppareissa toimaika tarkoittaa sopimuksen poikkeavaa alkupäivää ja nolla on default
+		}
 	}
 
 	list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $kerayspvm);
@@ -203,6 +206,9 @@
 
 	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$kerayspvm = date("Y-m-d");
+		if ($toim == "YLLAPITO") {
+			$kerayspvm = "0000-00-00"; // Ylläpitosoppareissa kerayspvm tarkoittaa sopimuksen poikkeavaa loppupäivää ja nolla on default
+		}
 	}
 
 	// Jos yhtiön saldokäsittely on ajasta riippuvainen

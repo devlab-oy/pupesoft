@@ -325,7 +325,7 @@
 		echo "<option value='E' $chke>".t("E-Netto")."</option>";
 		echo "</select></td>";
 
-		//Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv 
+		//Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv
 		if (isset($alv) and $alv >= 500) {
 			echo "<td valign='top'>";
 
@@ -357,9 +357,14 @@
 			echo "<th></th>";
 		}
 
-		echo "	<th align='left'>".t("Ker‰ysaika")."</th>
-				<th align='left' colspan='2'>".t("Toimitusaika")."</th>";
-
+		if ($toim != "YLLAPITO") {
+			echo "<th align='left'>".t("Ker‰ysaika")."</th>";
+			echo "<th align='left' colspan='2'>".t("Toimitusaika")."</th>";
+		}
+		else {
+			echo "<th align='left'>".t("Poikkeava Alkup‰iv‰")."</th>";
+			echo "<th align='left' colspan='2'>".t("Poikkeava Loppup‰iv‰")."</th>";
+		}
 
 		if ($kukarow['hinnat'] == 0) {
 			$nrospanni = 4;
@@ -383,34 +388,60 @@
 			echo "<td></td>";
 		}
 
-		if ($toimaika == "" or $toimaika == "0000-00-00") {
-			$toimaika = $laskurow["toimaika"];
-		}
+		if ($toim != "YLLAPITO") {
+			if ($toimaika == "" or $toimaika == "0000-00-00") {
+				$toimaika = $laskurow["toimaika"];
+			}
 
-		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
-			$kerayspvm = $laskurow["kerayspvm"];
-		}
+			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+				$kerayspvm = $laskurow["kerayspvm"];
+			}
 
-		if ($toimaika == "" or $toimaika == "0000-00-00") {
-			$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-			$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-			$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			if ($toimaika == "" or $toimaika == "0000-00-00") {
+				$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			}
+			else {
+				$toimkka = substr($toimaika, 5, 2);
+				$toimvva = substr($toimaika, 0, 4);
+				$toimppa = substr($toimaika, 8, 2);
+			}
+
+			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+				$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			}
+			else {
+				$kerayskka = substr($kerayspvm, 5, 2);
+				$keraysvva = substr($kerayspvm, 0, 4);
+				$keraysppa = substr($kerayspvm, 8, 2);
+			}
 		}
 		else {
-			$toimkka = substr($toimaika, 5, 2);
-			$toimvva = substr($toimaika, 0, 4);
-			$toimppa = substr($toimaika, 8, 2);
-		}
+			// Yll‰pitosoppareissa toimaika tarkoittaa poikkeavaa sopimuksen alkup‰iv‰‰ ja ker‰yspvm poikkeavaa loppup‰iv‰‰
+			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+				$kerayskka = "";
+				$keraysvva = "";
+				$keraysppa = "";
+			}
+			else {
+				$kerayskka = substr($kerayspvm, 5, 2);
+				$keraysvva = substr($kerayspvm, 0, 4);
+				$keraysppa = substr($kerayspvm, 8, 2);
+			}
 
-		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
-			$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-			$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-			$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-		}
-		else {
-			$kerayskka = substr($kerayspvm, 5, 2);
-			$keraysvva = substr($kerayspvm, 0, 4);
-			$keraysppa = substr($kerayspvm, 8, 2);
+			if ($toimaika == "" or $toimaika == "0000-00-00") {
+				$toimkka = "";
+				$toimvva = "";
+				$toimppa = "";
+			}
+			else {
+				$toimkka = substr($toimaika, 5, 2);
+				$toimvva = substr($toimaika, 0, 4);
+				$toimppa = substr($toimaika, 8, 2);
+			}			
 		}
 
 		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
@@ -449,7 +480,7 @@
 			echo "<td><textarea name='sopimuksen_lisatieto1' cols='32' rows='4' wrap='soft'>$sopimuksen_lisatieto1</textarea></td>";
 			echo "<td colspan='2'><textarea name='sopimuksen_lisatieto2' cols='32' rows='4' wrap='soft'>$sopimuksen_lisatieto2</textarea>";
 		}
-		
+
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";

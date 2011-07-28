@@ -47,23 +47,21 @@
 
 	$query = "	SELECT lasku.tunnus tilaus,
 				concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas,
-				if (tilausrivi.kerayspvm = '0000-00-00', if(sopimus_loppupvm = '0000-00-00', '', sopimus_loppupvm), tilausrivi.kerayspvm) rivinsopimus_alku,
-				if (tilausrivi.toimaika = '0000-00-00', if(sopimus_alkupvm = '0000-00-00', '', sopimus_loppupvm), tilausrivi.toimaika) rivinsopimus_loppu,
 				lasku.asiakkaan_tilausnumero,
-				sopimus_alkupvm,
-				sopimus_loppupvm,
 				lasku.valkoodi,
-				tuote.nimitys,
+				laskun_lisatiedot.sopimus_alkupvm,
+				laskun_lisatiedot.sopimus_loppupvm,
+				if (tilausrivi.kerayspvm = '0000-00-00', if(laskun_lisatiedot.sopimus_loppupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.kerayspvm) rivinsopimus_alku,
+				if (tilausrivi.toimaika = '0000-00-00', if(laskun_lisatiedot.sopimus_alkupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.toimaika) rivinsopimus_loppu,
+				tilausrivi.nimitys,
 				tilausrivi.tuoteno,
-				round(tilausrivi.hinta * (tilausrivi.tilkpl) * {$query_ale_lisa}, {$yhtiorow["hintapyoristys"]}) rivihinta,
-				tilausrivi.tilkpl,
+				round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, {$yhtiorow["hintapyoristys"]}) rivihinta,
+				tilausrivi.varattu,
 				tilausrivi.hinta,
 				tilausrivi.kommentti
 				FROM lasku use index (tila_index)
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus and (laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
-				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-				JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = lasku.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-				JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = '0')
 				WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 				AND tila = '0'
 				AND alatila NOT IN ('D')
@@ -80,7 +78,7 @@
 		echo "<td>{$rivit["kommentti"]}</td>";
 		echo "<td nowrap>{$rivit["rivinsopimus_alku"]}</td>";
 		echo "<td nowrap>{$rivit["rivinsopimus_loppu"]}</td>";
-		echo "<td nowrap>{$rivit["tilkpl"]}</td>";
+		echo "<td nowrap>{$rivit["varattu"]}</td>";
 		echo "<td nowrap align='right'>".hintapyoristys($rivit["hinta"])."</td>";
 		echo "<td nowrap align='right'>{$rivit["rivihinta"]}</td>";
 		echo "</tr>";

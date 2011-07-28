@@ -61,6 +61,9 @@
 	unset($korvaavan_hinta_ylaraja_halvin_ale);
 	unset($korvaavan_hinta_ylaraja_halvin_netto);
 
+	// selaimet k‰ytt‰‰ toim_kutsua, v‰litet‰‰n sen $toimiin
+	if (!isset($toim) and (isset($toim_kutsu))) $toim = $toim_kutsu;
+
 	if (!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet, $perhelisa, $kieltolisa, $lisaarivi_debug) {
 			global $yhtiorow, $kukarow;

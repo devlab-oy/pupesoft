@@ -1,11 +1,22 @@
 <?php
 
-	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto,$excel) = explode("/",$muutparametrit);
-
 	echo "<font class=head>".t("Avoimet laskut")."</font><hr>";
 
 	// scripti balloonien tekemiseen
 	js_popup();
+
+	if (!isset($maksuehto))				$maksuehto = "";
+	if (!isset($asiakasid))				$asiakasid = "";
+	if (!isset($toimittajaid))			$toimittajaid = "";
+	if (!isset($tee))					$tee = "";
+	if (!isset($valuutassako))			$valuutassako = "";
+	if (!isset($ytunnus))				$ytunnus = "";
+	if (!isset($asitoimittain))			$asitoimittain = "";
+	if (!isset($laji))					$laji = "";
+	if (!isset($muutparametrit))		$muutparametrit = "";
+	if (!isset($naytetaankokommentit))	$naytetaankokommentit = "";
+
+	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto,$excel) = explode("/",$muutparametrit);
 
 	// Tarkistetaan pvm
 	if ($tee != '') {
@@ -68,7 +79,7 @@
 	if (!isset($kk)) $kk = date("n");
 	if (!isset($pp)) $pp = date("j");
 
-	$sel[$laji] = " selected ";
+	$sel = array_fill_keys(array($laji), " selected") + array_fill_keys(array('M', 'MF', 'MK', 'MMK', 'MA', 'O', 'OK', 'OOK'), '');
 
 	echo "	<form name = 'valinta' action = 'raportit.php' method='post'>
 			<input type = 'hidden' name = 'toim' value = 'avoimet'>
@@ -142,7 +153,10 @@
 
 	echo "<tr><th>" . t('Maa'). " ".t("(vain myyntilaskut)").":</th><td colspan=3><select name='maa'>";
 
-	$query = "select distinct maa from asiakas where yhtio='$kukarow[yhtio]' and maa!=''";
+	$query = "	SELECT distinct maa
+				FROM asiakas
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND maa != ''";
 	$res = pupe_query($query);
 
 	echo "<option value=''>" . t('Kaikki'). "</option>";
@@ -167,8 +181,7 @@
 	$query = "	SELECT *
 				FROM maksuehto
 				WHERE yhtio = '$kukarow[yhtio]'
-				and (sallitut_maat = '' or sallitut_maat like '%$srow[maa]%')
-				order by jarjestys, teksti, tunnus";
+				ORDER BY jarjestys, teksti, tunnus";
 	$mresult = pupe_query($query);
 
 	while($row = mysql_fetch_assoc($mresult)) {
@@ -244,13 +257,6 @@
 			$valkoodi2 = " and suoritus.valkoodi = '$savalkoodi'";
 		}
 
-		if ($ojarj != "") {
-			$jarj = $ojarj;
-		}
-		else {
-			$jarj = "lasku.ytunnus";
-		}
-
 		if (substr($laji,0,1) == 'O') {
 
 			$lisa = '';
@@ -318,7 +324,7 @@
 						$lisa
 						$valkoodi1
 						$groupby
-						ORDER BY $jarj";
+						ORDER BY lasku.ytunnus";
 			$result = pupe_query($query);
 
 			// poimitaan kuluva päivä, raportin timestampille
@@ -625,7 +631,7 @@
 						$valkoodi
 						$maalisa
 						$groupby
-						ORDER BY $jarj, lasku.laskunro";
+						ORDER BY lasku.ytunnus, lasku.laskunro";
 			$result = pupe_query($query);
 
 			// poimitaan kuluva päivä, raportin timestampille
@@ -758,13 +764,17 @@
 						echo "<td align='right'>$trow[tiliointisumma_valuutassa]</td>";
 						echo "<td align='right' class='avoin'>$trow[tiliointiavoinsaldo_valuutassa]</td>";
 						echo "<td align='right'>$trow[valkoodi]</td>";
-						$summa[$trow["valkoodi"]] += $trow["tiliointiavoinsaldo_valuutassa"];	// paljo kirjanpidossa avoimena valuutassa
+
+						if (!isset($summa[$trow["valkoodi"]])) $summa[$trow["valkoodi"]] = $trow["tiliointiavoinsaldo_valuutassa"];	// paljo kirjanpidossa avoimena valuutassa
+						else $summa[$trow["valkoodi"]] += $trow["tiliointiavoinsaldo_valuutassa"];	// paljo kirjanpidossa avoimena valuutassa
 					}
 					else {
 						echo "<td align='right'>$trow[tiliointisumma]</td>";
 						echo "<td align='right' class='avoin'>$trow[tiliointiavoinsaldo]</td>";
 						echo "<td align='right'>$yhtiorow[valkoodi]</td>";
-						$summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
+
+						if (!isset($summa[$yhtiorow["valkoodi"]])) $summa[$yhtiorow["valkoodi"]] = $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
+						else $summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
 					}
 
 					// jos ollaan ajettu tälle päivälle laskuittain voidaan echota errori avoimesta saldosta

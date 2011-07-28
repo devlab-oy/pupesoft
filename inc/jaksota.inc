@@ -67,7 +67,6 @@
 			if ($i % 6 == 0) {
 				echo "</tr><tr>";
 			}
-
 		}
 
 		echo "</tr>";
@@ -85,6 +84,8 @@
 		$kpl = count($kausi);
 
 		$summa = round($tiliointirow['summa']/$kpl,2);
+
+		$tsumma = 0;
 
 		$eka = 0; // Tällä katsotaan ollaanko ensimmäisellä kierroksella
 

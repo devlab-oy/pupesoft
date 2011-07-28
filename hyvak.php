@@ -10,6 +10,19 @@
 
 	enable_ajax();
 
+	if (!isset($tee)) 			$tee = "";
+	if (!isset($tila)) 			$tila = "";
+	if (!isset($keikalla)) 		$keikalla = "";
+	if (!isset($kutsuja)) 		$kutsuja = "";
+	if (!isset($tunnus))		$tunnus = "";
+	if (!isset($nayta)) 		$nayta = "";
+	if (!isset($iframe)) 		$iframe = "";
+	if (!isset($iframe_id)) 	$iframe_id = "";
+	if (!isset($naytalisa)) 	$naytalisa = "";
+	if (!isset($ok)) 			$ok = "";
+	if (!isset($toimittajaid)) 	$toimittajaid = "";
+	if (!isset($livesearch_tee)) $livesearch_tee = "";
+
 	if ($livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
@@ -191,7 +204,7 @@
 	}
 
 	// halutaan nähdä otsikko, tai ollaan eka hyväksyjä ja ei olla hyväksymässä laskua
-	if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D' and ($kukarow['taso'] == '2' or $kukarow["taso"] == '3'))) {
+	if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D' and $tee != 'Z' and ($kukarow['taso'] == '2' or $kukarow["taso"] == '3'))) {
 		$query = "	SELECT *
 					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]'
@@ -205,13 +218,15 @@
 			exit;
 		}
 
-		$trow = mysql_fetch_assoc ($result);
+		$trow = mysql_fetch_assoc($result);
 
 		if ($trow['hyvak1'] == $kukarow['kuka']) {
-			$hyvak_apu_tee = $tee;
+			$hyvak_apu_tee  = $tee;
 			$hyvak_apu_tila = $tila;
+
 			require ("inc/muutosite.inc");
-			$tee = $hyvak_apu_tee;
+
+			$tee  = $hyvak_apu_tee;
 			$tila = $hyvak_apu_tila;
 		}
 	}
@@ -762,7 +777,7 @@
 		$tiliulos = $ulos;
 
  		// Tarvitaan kenties tositenro
-		if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
+		if (isset($kpexport) and $kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 
 			if ($tositenro != 0) {
 				$query = "	SELECT tosite
@@ -1349,7 +1364,7 @@
 							WHERE ltunnus = '$tunnus'
 							and yhtio = '$kukarow[yhtio]'
 							and korjattu = ''
-							and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+							and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
 							GROUP BY 1";
 				$result = pupe_query($query);
 

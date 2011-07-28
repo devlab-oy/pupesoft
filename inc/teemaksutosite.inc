@@ -34,7 +34,7 @@
 				WHERE ltunnus 	= '$trow[tunnus]'
 				and yhtio 		= '$yritirow[yhtio]'
 				and tapvm 		= '$trow[tapvm]'
-				and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+				and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
 				and korjattu 	= ''
 				order by tunnus";
 	$yresult = pupe_query($query);
@@ -178,9 +178,9 @@
 				}
 			}
 		}
-		
+
 		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
-		
+
 		// Rahatili
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$yritirow[yhtio]',

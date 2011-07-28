@@ -1,7 +1,10 @@
 <?php
 
 	require_once ("inc/tilinumero.inc");
-
+	
+	if (!isset($tila)) $tila = "";
+	if (!isset($komm)) $komm = "";
+	
 	function erottele($pvm) {
 		$paluu['pp'] = substr($pvm,-2);
 		$paluu['kk'] = substr($pvm,5,2);
@@ -18,7 +21,7 @@
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo "Tiliöintirivi kateissa Systeemivirhe!";
+			echo "Tiliöintirivi kateissa. Systeemivirhe!";
 			exit;
 		}
 
@@ -748,7 +751,7 @@
 						WHERE yhtio		= '$kukarow[yhtio]'
 						AND ltunnus		= '$tunnus'
 						AND tapvm		= '$trow[tapvm]'
-						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
 						AND korjattu	= ''";
 			$result = pupe_query($query);
 
@@ -981,7 +984,7 @@
 				echo "	<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type = 'hidden' name='tila' value='P'>
-						<input type = 'hidden' name='tee' value='M'>
+						<input type = 'hidden' name='tee'  value='M'>
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
 						<tr>
 						<th>".t("Tapahtumapvm")."</th>
@@ -1162,19 +1165,32 @@
 		}
 
 		if (($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and mysql_num_rows($keikres) == 0 and $trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
-
-			if ($trow['vienti']=='A') $vientia='selected';
-			if ($trow['vienti']=='B') $vientib='selected';
-			if ($trow['vienti']=='C') $vientic='selected';
-			if ($trow['vienti']=='D') $vientid='selected';
-			if ($trow['vienti']=='E') $vientie='selected';
-			if ($trow['vienti']=='F') $vientif='selected';
-			if ($trow['vienti']=='G') $vientig='selected';
-			if ($trow['vienti']=='H') $vientih='selected';
-			if ($trow['vienti']=='I') $vientii='selected';
-			if ($trow['vienti']=='J') $vientij='selected';
-			if ($trow['vienti']=='K') $vientik='selected';
-			if ($trow['vienti']=='L') $vientil='selected';
+			
+			$vientia = '';
+			$vientib = '';
+			$vientic = '';
+			$vientid = '';
+			$vientie = '';
+			$vientif = '';
+			$vientig = '';
+			$vientih = '';
+			$vientii = '';
+			$vientij = '';
+			$vientik = '';
+			$vientil = '';
+			
+			if ($trow['vienti']=='A') $vientia = 'selected';
+			if ($trow['vienti']=='B') $vientib = 'selected';
+			if ($trow['vienti']=='C') $vientic = 'selected';
+			if ($trow['vienti']=='D') $vientid = 'selected';
+			if ($trow['vienti']=='E') $vientie = 'selected';
+			if ($trow['vienti']=='F') $vientif = 'selected';
+			if ($trow['vienti']=='G') $vientig = 'selected';
+			if ($trow['vienti']=='H') $vientih = 'selected';
+			if ($trow['vienti']=='I') $vientii = 'selected';
+			if ($trow['vienti']=='J') $vientij = 'selected';
+			if ($trow['vienti']=='K') $vientik = 'selected';
+			if ($trow['vienti']=='L') $vientil = 'selected';
 
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>

@@ -324,7 +324,18 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 					$laskuid = mysql_insert_id($link);
 				}
 
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"]);
+				if ($yhtiorow["varastonmuutos_epakurantti"] != "") {
+					$varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
+				}
+				else {
+					$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+				}
+
+				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili);
+
+				// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
 				$query = "	INSERT into tiliointi set
 							yhtio    = '$kukarow[yhtio]',
@@ -341,15 +352,6 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);
-
-				if ($yhtiorow["varastonmuutos_epakurantti"] != "") {
-					$varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
-				}
-				else {
-					$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
-				}
-
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili);
 
 				$query = "	INSERT into tiliointi set
 							yhtio    = '$kukarow[yhtio]',
@@ -371,7 +373,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 			if (!isset($php_cli) or !$php_cli) {
 				echo "<font class='message'>";
 				echo t("Tuote")." $tuoteno ok!<br>";
-				echo t("Varastonarvoa muutettiin")." $muutos<br>";
+				echo t("Varastonarvoa muutettiin")." $muutos $yhtiorow[valkoodi].<br>";
 				echo "</font><br>";
 			}
 		}

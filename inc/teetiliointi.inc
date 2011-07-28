@@ -9,7 +9,7 @@
 	}
 	$laskurow = mysql_fetch_assoc($result);
 
-	$summa = round($summa,2);
+	$summa = round($summa, 2);
 
 	if ($vero != 0) { // Netotetaan alvi
 		$alv = round($summa - $summa / (1 + ($vero / 100)),2);
@@ -37,7 +37,11 @@
 	if (!isset($alv_tili) or $alv_tili == "" or !is_numeric($alv_tili)) {
 		$alv_tili = $yhtiorow["alv"];
 	}
-
+	
+	if (!isset($valkoodi) or $valkoodi == "") {
+		$valkoodi = $yhtiorow["valkoodi"];
+	}
+	
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);
 
 	$query = "	INSERT into tiliointi set

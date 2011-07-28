@@ -1,5 +1,11 @@
 <?php
 
+	if (!isset($lopetus))			$lopetus = "";
+	if (!isset($lopetuslisa))		$lopetuslisa = "";
+	if (!isset($silent))			$silent = "";
+	if (!isset($tee))				$tee = "";
+	if (!isset($tiliotejarjestys))	$tiliotejarjestys = "";
+
 	$tunnus = substr($tietue, 0, 3);
 
 	if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
@@ -98,7 +104,7 @@
 							$result = pupe_query($query);
 						}
 
-						if (mysql_num_rows($result) != 1 and strlen(trim($maksaa)) > 0) {
+						if ((!isset($result) or mysql_num_rows($result) != 1) and strlen(trim($maksaa)) > 0) {
 							echo "<font class='message'>".t("Maksukandidaatti nimi & m‰‰r‰")."</font><br>";
 
 							// tarkka 35 merkki‰ <-> 35 merkki‰ nimihaku
@@ -276,7 +282,7 @@
 		echo "<td class='$class'></td><td class='$class'>";
 
 		//Jos t‰m‰ on selvittelyss‰, niin annetaan mahdollisuus suorittaa!
-		if ($kuitattu_checked == '' and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00" or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) and $kuittikoodi == ' ') {
+		if (isset($tiliointirow) and $kuitattu_checked == '' and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00" or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) and $kuittikoodi == ' ') {
 			//Olisiko t‰m‰ meid‰n toimittaja
 			$tpv = substr($pvm,0,2);
 			$tpk = substr($pvm,2,2);
@@ -892,7 +898,7 @@
 
 				$colspan = $tee == 'S' ? 7 : 6;
 
-				echo "<tr><td colspan='$colspan'>".t("Koronlakentatiedot")."</td></tr>";
+				echo "<tr><td colspan='$colspan'>".t("Koronlaskentatiedot")."</td></tr>";
 				echo "<tr><th colspan='$colspan'>".t("Korkokausi")." ".substr($tietue,11,13)."</th></tr>";
 
 				if (substr($tietue,24,1) == '1') {

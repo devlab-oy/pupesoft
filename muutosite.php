@@ -4,7 +4,18 @@ if ($_REQUEST["tee"] == 'NAYTATILAUS' or $_POST["tee"] == 'NAYTATILAUS' or $_GET
 
 require ("inc/parametrit.inc");
 
-$liitetiedosto = 0;
+if (!isset($ok)) $ok = 0;
+if (!isset($tee)) $tee = "";
+if (!isset($tee2)) $tee2 = "";
+if (!isset($jaksota)) $jaksota = "";
+if (!isset($lopetus)) $lopetus = "";
+if (!isset($viivatut)) $viivatut = "";
+if (!isset($tee_pdf)) $tee_pdf = "";
+if (!isset($kpexport)) $kpexport = "";
+if (!isset($liitetiedosto)) $liitetiedosto = 0;
+if (!isset($livesearch_tee)) $livesearch_tee = "";
+
+$listaus = FALSE;
 
 if ($tee_pdf == 'tulosta_karhu') {
 	require ('myyntires/paperikarhu.php');
@@ -89,7 +100,6 @@ if ($tee == 'G') {
 
 // Tositeselailu
 if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu' or $tee == 'KP') {
-
 	if  ($tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä' or $tee == 'automaattikirjauksia_muutettu' or $tee == 'kasintehtyja_alvkirjauksia' or $tee == 'alvkirjauksia_ilmanalvtasoa' or $tee == 'automaattikirjauksia_alv_muutettu' or $tee == 'KP') {
 
 		// Etsitään virheet vain kuluvalta tilikaudelta!
@@ -347,16 +357,15 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 						GROUP BY 1,2,3,4";
 		}
 	}
-	else {
+	elseif((int) $tav > 0 or strlen($selite) > 0 or strlen($tilino) > 0 or strlen($summa) > 0 or strlen($laatija) > 0 or ($kpexport == 1 and strlen($tositenro) > 0)) {
 
 		$plisa = "";
 		$lisa  = "";
-		$vlisa = "";
 		$summa = str_replace ( ",", ".", $summa);
 
-		$tav += 0; // Tehdään pvmstä numeroita
-		$tak += 0;
-		$tap += 0;
+		$tav = (int) $tav;
+		$tak = (int) $tak;
+		$tap = (int) $tap;
 
 		if ($tav > 0 and $tav < 1000) {
 			$tav += 2000;
@@ -408,8 +417,10 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 
 		if ($viivatut != 'on') {
 			$vlisa = "and tiliointi.korjattu=''";
+			$slisa = "";
 		}
 		else {
+			$vlisa = "";
 			$slisa = ", concat_ws('@', korjattu, korjausaika) korjaus";
 		}
 
@@ -424,11 +435,18 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 					$lisa
 					ORDER BY tiliointi.ltunnus desc, tiliointi.tunnus";
 	}
+	else {
+		// Ei haettu mitään, eli ei löydetä mitään
+		$query = "	SELECT tunnus
+					FROM tiliointi
+					WHERE tunnus = -1 ";
+	}
+
+
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Haulla ei löytynyt yhtään tositetta")."</font>";
-		$tyhja = 1;
 	}
 	else {
 
@@ -451,10 +469,11 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 		echo "<tr class='aktiivi'>";
 
 		$ero = 0;
+		$edtunnus = 0;
 
-		while ($trow = mysql_fetch_assoc ($result)) {
+		while ($trow = mysql_fetch_assoc($result)) {
 			//Laitetaan linkki tuonne pvm:ään, näin voimme avata tositteita tab:eihin
-			if (strlen($edtunnus) > 0 and ($tee != 'KP' or $ero != 0)) {
+			if ($edtunnus > 0 and ($tee != 'KP' or $ero != 0)) {
 				// Tosite vaihtui
 				if ($trow["ltunnus"] != $edtunnus) {
 					echo "</tr><tr><th style='padding:3px;' colspan='".(mysql_num_fields($result)+$miinusta)."'></th></tr><tr class='aktiivi'>";
@@ -489,6 +508,8 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 					}
 				}
 				elseif (is_numeric($trow[$kennimi]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
+					if ($kennimi == "vero") $trow[$kennimi] = $trow[$kennimi] * 1;
+
 					echo "<td align='right'>$trow[$kennimi]</td>";
 				}
 				elseif (mysql_field_name($result, $i) == "tapvm") {
@@ -607,10 +628,12 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 				}
 			}
 		}
-	}
 
-	echo "</tr>";
-	echo "</table><br><br>";
+		echo "</tr>";
+		echo "</table><br><br>";
+
+		$listaus = TRUE;
+	}
 
 	$tee = "";
 }
@@ -1465,9 +1488,9 @@ if ($tee == 'E' or $tee == 'F') {
 	}
 }
 
-if (strlen($tee) == 0) {
+if ($tee == "") {
 
-	if (strlen($formi) == 0) {
+	if (!isset($formi) and $listaus === FALSE) {
 		$formi = 'valikko';
 		$kentta = 'tap';
 	}

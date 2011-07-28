@@ -437,6 +437,19 @@
 
 		echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
 
+		if ($toim == "YLLAPITO") {
+			// sarjanumerot ja vasteaika
+			echo "</td>";
+			echo "</tr>";
+			echo "<tr>";
+			echo "<th>".t("Lis‰tieto 1")."</th>";
+			echo "<th colspan='2'>".t("Lis‰tieto 2")."</th>";
+			echo "</tr>";
+			echo "<tr>";
+			echo "<td><textarea name='sopimuksen_lisatieto1' cols='32' rows='4' wrap='soft'>$sopimuksen_lisatieto1</textarea></td>";
+			echo "<td colspan='2'><textarea name='sopimuksen_lisatieto2' cols='32' rows='4' wrap='soft'>$sopimuksen_lisatieto2</textarea>";
+		}
+		
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";

@@ -1295,6 +1295,13 @@
 									$myy_lapsi_ein[$indeksi] = "";
 								}
 
+								if ($toim == "YLLAPITO") {
+									$sopimuslisays = ", sopimuksen_lisatieto1 = '$sopimuksen_lisatieto1', sopimuksen_lisatieto2 = '$sopimuksen_lisatieto2'";
+								}
+								else {
+									$sopimuslisays = "";
+								}
+
 								if (mysql_num_rows($lisatied_res) > 0) {
 									$lisatied_row = mysql_fetch_array($lisatied_res);
 
@@ -1305,6 +1312,7 @@
 												muutospvm			= now(),
 												muuttaja			= '$kukarow[kuka]',
 												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]'
+												$sopimuslisays
 												$tlisatied_lisa
 												WHERE yhtio			 = '$kukarow[yhtio]'
 												and tilausrivitunnus = '$lisatty_tun'";
@@ -1329,6 +1337,7 @@
 												jarjestys			= '$jarjestys',
 												luontiaika			= now(),
 												laatija 			= '$kukarow[kuka]'
+												$sopimuslisays
 												$tlisatied_lisa";
 
 									if ($trow["sarjanumeroseuranta"] == "S" and $varattu < 0) {

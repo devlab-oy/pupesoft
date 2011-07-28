@@ -18,6 +18,14 @@
 		exit;
 	}
 
+	if ($argv[2] != "") {
+		$to_email = $argv[2];
+	}
+	else {
+		echo "Anna email!\n\n";
+		exit;
+	}
+
 	// tilausrivi.kerayspvm => poikkeava alkupäivä
 	// tilausrivi.toimaika => poikkeava loppupäivä
 
@@ -57,16 +65,20 @@
 	$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
 	$header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
 
-	$out  = "<html>";
+	$out  = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">";
+	$out .= "<html>";
 	$out .= "<head>";
+	$out .= "<meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-15'>";
 	$out .= "<style type='text/css'>{$yhtiorow["css"]}</style>";
+	$out .= "<title></title>";
 	$out .= "</head>";
 
 	$out .= "<body>";
 	$out .= "<font class='head'>".t("Vanhenevat sopimukset")."</font><hr><br>";
 
-	$out .= "<table>";
-	$out .= "<thead>";
+	$out .= "<table summary='".t("Vanhenevat sopimukset")."'>";
+
+	$out .= "<thead>\n";
 	$out .= "<tr>";
 	$out .= "<th width='1'>".t("Sopimus")."</th>";
 	$out .= "<th width='1'>".t("Asiakkaan")."<br>".t("Tilausnumero")."</th>";
@@ -80,7 +92,10 @@
 	$out .= "<th width='1'>".t("Kpl")."</th>";
 	$out .= "<th width='1'>".t("Hinta")."</th>";
 	$out .= "<th width='1'>".t("Rivihinta")."</th>";
-	$out .= "</tr>";
+	$out .= "</tr>\n";
+	$out .= "</thead>\n";
+
+	$out .= "<tbody>\n";
 
 	$query_ale_lisa = generoi_alekentta('M');
 
@@ -104,21 +119,21 @@
 		while ($rivirow = mysql_fetch_assoc($riviresult)) {
 				$out .= "<tr class='aktiivi'>";
 				$out .= "<td nowrap>{$laskurow["tunnus"]}</td>";
-				$out .= "<td>{$laskurow["asiakkaan_tilausnumero"]}</td>";
-				$out .= "<td>{$laskurow["ytunnus"]}</td>";
-				$out .= "<td>{$laskurow["nimi"]}</td>";
-				$out .= "<td nowrap>{$rivirow["tuoteno"]}</td>";
-				$out .= "<td>{$rivirow["nimitys"]}</td>";
-				$out .= "<td>{$rivirow["kommentti"]}</td>";
+				$out .= "<td>".htmlentities($laskurow["asiakkaan_tilausnumero"])."</td>";
+				$out .= "<td>".htmlentities($laskurow["ytunnus"])."</td>";
+				$out .= "<td>".htmlentities($laskurow["nimi"])."</td>";
+				$out .= "<td nowrap>".htmlentities($rivirow["tuoteno"])."</td>";
+				$out .= "<td>".htmlentities($rivirow["nimitys"])."</td>";
+				$out .= "<td>".htmlentities($rivirow["kommentti"])."</td>";
 				$out .= "<td nowrap>{$rivirow["rivinsopimus_alku"]}</td>";
 				$out .= "<td nowrap>{$rivirow["rivinsopimus_loppu"]}</td>";
 				$out .= "<td nowrap>{$rivirow["varattu"]}</td>";
 				$out .= "<td nowrap align='right'>".hintapyoristys($rivirow["hinta"])."</td>";
 				$out .= "<td nowrap align='right'>{$rivirow["rivihinta"]}</td>";
-				$out .= "</tr>";
+				$out .= "</tr>\n";
 		}
 
-		$out .= "<tr><td colspan='12' class='back'>&nbsp;</td></tr>";
+		$out .= "<tr><td colspan='12' class='back'>&nbsp;</td></tr>\n";
 	}
 
 	$out .= "</tbody>";
@@ -126,4 +141,4 @@
 	$out .= "</body>";
 	$out .= "</html>";
 
-	$postia = mail($yhtiorow['alert_email'], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Lista erääntyvistä sopimuksista", $kieli), "ISO-8859-1", "Q"), $out, $header, "-f $yhtiorow[postittaja_email]");
+	$postia = mail($to_email, mb_encode_mimeheader("{$yhtiorow["nimi"]} - ".t("Vanhenevat sopimukset", $kieli), "ISO-8859-1", "Q"), $out, $header, "-f {$yhtiorow["postittaja_email"]}");

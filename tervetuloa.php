@@ -193,6 +193,50 @@ if (!isset($tee) or $tee == '') {
         echo "</table><br>";
 	}
 
+	// Näytetään käyttäjäkohtaiset työmääräykset
+	$tyojonosql = "	SELECT lasku.tunnus,
+					lasku.nimi,
+					lasku.toimaika,
+					avainsana.selitetark_2 tyostatusvari
+					FROM lasku
+					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio
+						AND tyomaarays.otunnus = lasku.tunnus
+						AND tyomaarays.tyojono != ''
+						AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
+					LEFT JOIN avainsana ON (avainsana.yhtio = tyomaarays.yhtio 
+						AND avainsana.selite = tyomaarays.tyostatus 
+						AND avainsana.laji = 'TYOM_TYOSTATUS')
+					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+					AND lasku.tila in ('A','L','N','S','C')
+					AND lasku.alatila != 'X'
+					ORDER BY toimaika ASC";
+	$tyoresult = pupe_query($tyojonosql);
+
+	if (mysql_num_rows($tyoresult) > 0) {
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<td colspan='3' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
+		echo "</tr>";
+		echo "<tr>";
+		echo "<th>".t("Työnumero")."</th>";
+		echo "<th>".t("Asiakas")."</th>";
+		echo "<th>".t("Päivämäärä")."</th>";
+		echo "</tr>";
+
+	 	while ($tyorow = mysql_fetch_array($tyoresult)) {
+			// Laitetetaan taustaväri jos sellainen on syötetty
+			$varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
+
+			echo "<tr$varilisa>";
+			echo "<td>{$tyorow["tunnus"]}</td>";
+			echo "<td>{$tyorow["nimi"]}</td>";
+			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";
+			echo "</tr>";
+		}
+		echo "</table><br>";
+	}
+
 	// katsotaan onko käyttäjällä oikeus muutosite.php ja alv_laskelma_uusi.php
 	$queryoik = "	SELECT oikeu.tunnus
 					FROM oikeu

@@ -12,6 +12,51 @@
 	$tres	= pupe_query($tquery);
 	$trow 	= mysql_fetch_assoc($tres); // haetaan tuotteen tiedot..
 
+	if ($toim == "YLLAPITO") {
+		// Jos ollaan syötetty poikkeavat sopimuksen alku-/loppupäivät tilausriville, tarkistetaan että ne on oikeelliset
+		if ($row["kerayspvm"] != '0000-00-00' or $row["toimaika"] != '0000-00-00') {
+
+			$sopimusquery = "	SELECT sopimus_alkupvm, sopimus_loppupvm
+								FROM laskun_lisatiedot
+								WHERE yhtio = '{$kukarow["yhtio"]}'
+								AND otunnus = '{$laskurow["tunnus"]}'";
+			$sopimus_result = pupe_query($sopimusquery);
+			$sopimus_row = mysql_fetch_assoc($sopimus_result);
+
+			// tilausrivi.kerayspvm == poikkeava alkupäivä
+			if ($row["kerayspvm"] != '0000-00-00' and $row["kerayspvm"] < $sopimus_row["sopimus_alkupvm"]) {
+				$varaosavirhe .= t("VIRHE: Poikkeava alkupäivä ei voi olla vanhempi kun sopimuksen alkupäivä!")."<br>";
+				$riviok++;
+				$tilausok++;
+			}
+
+			if ($row["kerayspvm"] != '0000-00-00' and $row["kerayspvm"] > $sopimus_row["sopimus_loppupvm"]) {
+				$varaosavirhe .= t("VIRHE: Poikkeava alkupäivä ei voi olla uudempi kun sopimuksen loppupäivä!")."<br>";
+				$riviok++;
+				$tilausok++;
+			}
+
+			// tilausrivi.toimaika == poikkeava loppupäivä
+			if ($row["toimaika"] != '0000-00-00' and $row["toimaika"] < $sopimus_row["sopimus_alkupvm"]) {
+				$varaosavirhe .= t("VIRHE: Poikkeava loppupäivä ei voi olla vanhempi kun sopimuksen alkupäivä!")."<br>";
+				$riviok++;
+				$tilausok++;
+			}
+
+			if ($row["toimaika"] != '0000-00-00' and $row["toimaika"] > $sopimus_row["sopimus_loppupvm"] and $sopimus_row["sopimus_loppupvm"] != "0000-00-00") {
+				$varaosavirhe .= t("VIRHE: Poikkeava loppupäivä ei voi olla uudempi kun sopimuksen loppupäivä!")."<br>";
+				$riviok++;
+				$tilausok++;
+			}
+
+			if ($row["kerayspvm"] != '0000-00-00' and $row["toimaika"] != '0000-00-00' and $row["kerayspvm"] > $row["toimaika"]) {
+				$varaosavirhe .= t("VIRHE: Poikkeava alkupäivä ei voi olla uudempi kun poikkeava loppupäivä!")."<br>";
+				$riviok++;
+				$tilausok++;
+			}
+		}
+	}
+
 	if ($trow['panttitili'] == 'K' and in_array($toim, array('PIKATILAUS', 'RIVISYOTTO', 'REKLAMAATIO'))) {
 		$query = "SELECT panttitili FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
 		$chk_res = pupe_query($query);
@@ -728,9 +773,10 @@
 					JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.tuoteno = '$trow[tuoteno]')
 					LEFT JOIN varastopaikat lahde USE INDEX (PRIMARY) ON (lahde.yhtio = lasku.yhtio and lahde.tunnus = lasku.varasto)
 					LEFT JOIN varastopaikat kohde USE INDEX (PRIMARY) ON (kohde.yhtio = lasku.yhtio and kohde.tunnus = lasku.clearing)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' 
-					and lasku.tila = 'G' 
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'G'
 					and lasku.alatila in ('','J','A','B','C','D','E','T','P')
+					and lasku.tunnus != '{$laskurow["tunnus"]}'
 					GROUP BY tuoteno, lasku.tunnus";
 		$siirtores = pupe_query($query);
 
@@ -741,7 +787,7 @@
 			//tehdään selväkielinen tila/alatila
 			require "inc/laskutyyppi.inc";
 
-			$varaosakommentti .= t("Siirtolistalla").": $siirtorow[kpl] {".t_avainsana("Y", "", "and avainsana.selite='$siirtorow[yksikko]'", "", "", "selite")."} $siirtorow[lahde] -> $siirtorow[kohde] ($alatila)<br>";
+			$varaosakommentti .= t("Siirtolistalla")." ($siirtorow[tunnus]) on: $siirtorow[kpl] {".t_avainsana("Y", "", "and avainsana.selite='$siirtorow[yksikko]'", "", "", "selite")."} $siirtorow[lahde] -> $siirtorow[kohde] ($alatila)<br>";
 		}
 
 		// katotaan onko vielä ostotilauksella!

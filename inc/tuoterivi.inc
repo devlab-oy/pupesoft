@@ -90,6 +90,7 @@
 			$ulos .= "<option value='R' $sel[R]>".t("Raaka-aine")."</option>";
 			$ulos .= "<option value='K' $sel[K]>".t("Palvelu")."</option>";
 			$ulos .= "<option value='M' $sel[M]>".t("Muu/Informatiivinen")."</option>";
+			$ulos .= "<option value='N' $sel[N]>".t("Normaali / Kulutuote (ei näytetä myynninseurannassa)")."</option>";
 		}
 		$ulos .= "</select></td>";
 

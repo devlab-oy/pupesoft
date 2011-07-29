@@ -10703,7 +10703,7 @@ if (!function_exists("pupe_DataTables")) {
 					{$lengthmenu}
 					\"bInfo\" : {$info},
 					\"bStateSave\" : true,
-					\"iDisplayLength\" : 10,
+					\"iDisplayLength\" : 25,
 					\"oLanguage\": {
 						\"sSearch\" : \"".t("Etsi taulukosta").":\",
 						\"sZeroRecords\": \"".t("Ei hakuosumia")."\",

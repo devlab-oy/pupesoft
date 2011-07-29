@@ -223,7 +223,7 @@ $pupesoft_scheme = (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on') ? "h
 $pupesoft_server = (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) and isset($palvelin_ip) and $palvelin_ip == $_SERVER['SERVER_NAME']) ? $_SERVER['HTTP_X_FORWARDED_SERVER'] : $_SERVER['SERVER_NAME'];
 $pupesoft_port = ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') ? ":".$_SERVER['SERVER_PORT'] : "";
 
-// $palvelin muuttujassa on Pupesoft root url, joka tulee salasat.php:st‰ 
+// $palvelin muuttujassa on Pupesoft root url, joka tulee salasat.php:st‰
 // $palvelin2 muuttujassa on Pupesoft root url, mutta scheme/server/portti on muutettu tarpeen mukaan
 $palvelin2 = $pupesoft_scheme.$pupesoft_server.$pupesoft_port.$pupesoft_url["path"];
 
@@ -364,7 +364,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
 		// Unohdetaan tallennettu state jos tullaan suoraan indexsvassista
 		if (isset($pupe_DataTables) and $pupe_DataTables != "" and isset($indexvas) and $indexvas == 1) {
-			
+
 			// DataTables cookie name SpryMedia_DataTables_TAULUNID_SKRIPTIN-NIMI
 			$dtpalvelin = parse_url($palvelin, PHP_URL_PATH);
 			$dtpathparts = pathinfo($phpnimi);
@@ -372,19 +372,27 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 			if ($dtpathparts["dirname"] != "" and $dtpathparts["dirname"] != ".") {
 				$dtpalvelin .= $dtpathparts["dirname"]."/";
 			}
-			
+
 			if (basename($phpnimi) == "keikka.php") {
-				$dtpalvelin .= "tilauskasittely/";	
+				$dtpalvelin .= "tilauskasittely/";
 			}
-			
+
+			if (basename($phpnimi) == "tyojono.php") {
+				$dtpalvelin .= "tyomaarays/";
+			}
+
+			if (basename($phpnimi) == "selaasopimuksia.php") {
+				$dtpalvelin .= "raportit/";
+			}
+
 			$bool = setcookie("SpryMedia_DataTables_".$pupe_DataTables."_".basename($phpnimi), "", time()+43200, $dtpalvelin);
 		}
 
 	 	// T‰nne p‰‰see aina!
 		if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
-			
-			if (!isset($toim)) $toim = ""; 
-						
+
+			if (!isset($toim)) $toim = "";
+
 			$oikeurow = tarkista_oikeus($phpnimi, $toim, '', 'X');
 
 			if ($oikeurow === FALSE) {

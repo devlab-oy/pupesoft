@@ -29,13 +29,12 @@
 	// tilausrivi.kerayspvm => poikkeava alkup‰iv‰
 	// tilausrivi.toimaika => poikkeava loppup‰iv‰
 
-	// Haetaan kaikki 30 sis‰ll‰ vanhenevat sopimukset/sopimusrivit
+	// Haetaan kaikki 30 p‰iv‰n p‰‰st‰ vanhenevat sopimukset/sopimusrivit
 	$query = "	(SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakkaan_tilausnumero, lasku.valkoodi
 				FROM lasku
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio
 					AND laskun_lisatiedot.otunnus = lasku.tunnus
-					AND datediff(now(), laskun_lisatiedot.sopimus_loppupvm) <= 31
-					AND datediff(now(), laskun_lisatiedot.sopimus_loppupvm) > 0)
+					AND datediff(now(), laskun_lisatiedot.sopimus_loppupvm) = 30)
 				WHERE lasku.yhtio = '$yhtio'
 				AND lasku.tila = '0'
 				AND lasku.alatila != 'D')
@@ -48,8 +47,7 @@
 					AND tilausrivi.otunnus = lasku.tunnus
 					AND tilausrivi.tyyppi = 'L'
 					AND tilausrivi.toimaika != '0000-00-00'
-					AND datediff(now(), tilausrivi.toimaika) <= 31
-					AND datediff(now(), tilausrivi.toimaika) > 0)
+					AND datediff(now(), tilausrivi.toimaika) = 30)
 				WHERE lasku.yhtio = '$yhtio'
 				AND lasku.tila = '0'
 				AND lasku.alatila != 'D')

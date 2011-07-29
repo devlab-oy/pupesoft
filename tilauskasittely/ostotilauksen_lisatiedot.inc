@@ -42,10 +42,6 @@ if ($tee == "update") {
 		if ($rahti_etu > $llrow['vosumma'] and $llrow['volasku'] == 1) {
 			echo "<font class='message'>Virhe!! Eturahti ei saa olla suurempi kuin laskujen yhteissumma</font><br>";
 		}
-		
-		if ($rahti_etu < 0.00) {
-			echo "<font class='message'>Virhe!! Eturahti ei saa olla negatiivinen</font><br><br>";
-		}
 	}
 	else {
 		if ($rahti_etu <= $llrow['vosumma']) {
@@ -276,10 +272,6 @@ if ($tee == "") {
 	if ($llrow["vosumma"] >= 0.00) {
 		if ($laskurow['rahti_etu'] > $llrow['vosumma']) {
 			$lisatiedot = "<font class='message'>Virhe!! Eturahti ei saa olla suurempi kuin laskujen yhteissumma</font><br>";
-		}
-		
-		if ($laskurow['rahti_etu']< 0.00) {
-			$lisatiedot = "<font class='message'>Virhe!! Eturahti ei saa olla negatiivinen</font><br>";
 		}
 	}
 	else {

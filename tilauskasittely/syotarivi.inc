@@ -441,7 +441,7 @@
 				$toimkka = substr($toimaika, 5, 2);
 				$toimvva = substr($toimaika, 0, 4);
 				$toimppa = substr($toimaika, 8, 2);
-			}			
+			}
 		}
 
 		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
@@ -469,16 +469,21 @@
 		echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
 
 		if ($toim == "YLLAPITO") {
-			// sarjanumerot ja vasteaika
-			echo "</td>";
-			echo "</tr>";
-			echo "<tr>";
-			echo "<th>".t("Lis‰tieto 1")."</th>";
-			echo "<th colspan='2'>".t("Lis‰tieto 2")."</th>";
-			echo "</tr>";
-			echo "<tr>";
-			echo "<td><textarea name='sopimuksen_lisatieto1' cols='32' rows='4' wrap='soft'>$sopimuksen_lisatieto1</textarea></td>";
-			echo "<td colspan='2'><textarea name='sopimuksen_lisatieto2' cols='32' rows='4' wrap='soft'>$sopimuksen_lisatieto2</textarea>";
+
+			// Katsotaan halutaanko dynaamisia kentti‰ n‰kyviin
+			$yllapito_dynamic_result = t_avainsana("SOPIMUS_KENTTA","", "and avainsana.selitetark != ''");
+
+			if (mysql_num_rows($yllapito_dynamic_result) > 0) {
+				echo "</td></tr><tr><td colspan='7'>";
+				echo "<table>";
+				echo "<tr>";
+				while ($yllapito_dynamic_row = mysql_fetch_assoc($yllapito_dynamic_result)) {
+					echo "<th>{$yllapito_dynamic_row["selitetark"]}</th>";
+					echo "<td><textarea name='{$yllapito_dynamic_row["selite"]}' cols='32' rows='4' wrap='soft'>".${$yllapito_dynamic_row["selite"]}."</textarea></td>";
+				}
+				echo "</tr>";
+				echo "</table>";
+			}
 		}
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..

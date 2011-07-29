@@ -224,10 +224,19 @@
 
 					$ytunnus         = $laskurow["ytunnus"];
 					$kpl             = (float) $kpl;
-					$kpl_echo 		 = (float) $kpl;
+					$kpl_echo 		 = (float) $kpl;					
 					$tuoteno         = $trow["tuoteno"];
-					$toimaika 	     = $laskurow["toimaika"];
-					$kerayspvm	     = $laskurow["kerayspvm"];
+					$yllapita_toim_stash = $toim;
+					
+					if ($toim_kutsu != "YLLAPITO") {
+						$toimaika = $laskurow["toimaika"];
+						$kerayspvm = $laskurow["kerayspvm"];
+					}
+					else {
+						$toim = "YLLAPITO";
+						$toimaika = "";
+						$kerayspvm = "";
+					}
 					$hinta 		     = "";
 					$netto 		     = "";
 
@@ -268,6 +277,7 @@
 						require ("lisaarivi.inc");
 					}
 
+					$toim = $yllapita_toim_stash;
 					echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".t_avainsana("Y", "", " and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("tuotetta")." $tiltuoteno[$yht_i].</font><br>";
 
 					//Hanskataan sarjanumerollisten tuotteiden lisävarusteet

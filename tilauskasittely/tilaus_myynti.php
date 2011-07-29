@@ -453,10 +453,10 @@ if ((int) $kukarow["kesken"] > 0) {
 
 	if ($yhtiorow["tilauksen_kohteet"] == "K") {
 		$query 	= "	SELECT *
-					from laskun_lisatiedot
+					FROM laskun_lisatiedot
 					where otunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-		$result  	= pupe_query($query);
-		$lasklisatied_row  = mysql_fetch_assoc($result);
+		$result = pupe_query($query);
+		$lasklisatied_row = mysql_fetch_assoc($result);
 	}
 
 	if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0 and $yhtiorow["suoratoim_ulkomaan_alarajasumma"] > 0) {
@@ -874,6 +874,8 @@ if (isset($tyhjenna)) {
 	$var 				= "";
 	$variaatio_tuoteno 	= "";
 	$var_array 			= "";
+	$sopimuksen_lisatieto1 = "";
+	$sopimuksen_lisatieto2 = "";	
 }
 
 if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kertakassa != '')) and $kukarow['extranet'] == '') {
@@ -3419,6 +3421,8 @@ if ($tee == '') {
 			$rivinumero	= $tilausrivi['tilaajanrivinro'];
 			$jaksotettu = $tilausrivi['jaksotettu'];
 			$perheid2 	= $tilausrivi["perheid2"];
+			$sopimuksen_lisatieto1 = $tilausrivi["sopimuksen_lisatieto1"];
+			$sopimuksen_lisatieto2 = $tilausrivi["sopimuksen_lisatieto2"];
 
 			// useamman valmisteen reseptit...
 			if ($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) {
@@ -3702,20 +3706,30 @@ if ($tee == '') {
 
 			$tuoteno = trim($tuoteno);
 
+			$toimvva = (int) $toimvva;
+			$toimkka = (int) $toimkka;
+			$toimppa = (int) $toimppa;
+
 			if (checkdate($toimkka,$toimppa,$toimvva)) {
 				$toimaika = $toimvva."-".$toimkka."-".$toimppa;
 			}
+
+			$keraysvva = (int) $keraysvva;
+			$kerayskka = (int) $kerayskka;
+			$keraysppa = (int) $keraysppa;
 
 			if (checkdate($kerayskka,$keraysppa,$keraysvva)) {
 				$kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
 			}
 
-			if ($toimaika == "" or $toimaika == "0000-00-00") {
-				$toimaika = $laskurow["toimaika"];
-			}
+			if ($toim != "YLLAPITO") {
+				if ($toimaika == "" or $toimaika == "0000-00-00") {
+					$toimaika = $laskurow["toimaika"];
+				}
 
-			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
-				$kerayspvm = $laskurow["kerayspvm"];
+				if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+					$kerayspvm = $laskurow["kerayspvm"];
+				}
 			}
 
 			$varasto = $laskurow["varasto"];
@@ -3976,6 +3990,8 @@ if ($tee == '') {
 		$tuoteno 			= "";
 		$var 				= "";
 		$var_array 			= "";
+		$sopimuksen_lisatieto1 = "";
+		$sopimuksen_lisatieto2 = "";
 		if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
 	}
 

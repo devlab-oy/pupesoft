@@ -140,7 +140,9 @@
 														"sisviesti2" => array("from" => $from, "to" => $to),
 													),
 												array(	"kommentti" => array("from" => $from, "to" => $to)
-												));
+													),
+												$tapahtumapvm
+								);
 
 			if ($ok !== FALSE) {
 

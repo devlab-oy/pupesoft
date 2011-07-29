@@ -874,6 +874,8 @@ if (isset($tyhjenna)) {
 	$var 				= "";
 	$variaatio_tuoteno 	= "";
 	$var_array 			= "";
+	$sopimuksen_lisatieto1 = "";
+	$sopimuksen_lisatieto2 = "";	
 }
 
 if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kertakassa != '')) and $kukarow['extranet'] == '') {
@@ -3419,6 +3421,8 @@ if ($tee == '') {
 			$rivinumero	= $tilausrivi['tilaajanrivinro'];
 			$jaksotettu = $tilausrivi['jaksotettu'];
 			$perheid2 	= $tilausrivi["perheid2"];
+			$sopimuksen_lisatieto1 = $tilausrivi["sopimuksen_lisatieto1"];
+			$sopimuksen_lisatieto2 = $tilausrivi["sopimuksen_lisatieto2"];
 
 			// useamman valmisteen reseptit...
 			if ($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) {
@@ -3978,6 +3982,8 @@ if ($tee == '') {
 		$tuoteno 			= "";
 		$var 				= "";
 		$var_array 			= "";
+		$sopimuksen_lisatieto1 = "";
+		$sopimuksen_lisatieto2 = "";
 		if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
 	}
 

@@ -37,11 +37,15 @@
 	if (!isset($alv_tili) or $alv_tili == "" or !is_numeric($alv_tili)) {
 		$alv_tili = $yhtiorow["alv"];
 	}
-	
+
 	if (!isset($valkoodi) or $valkoodi == "") {
 		$valkoodi = $yhtiorow["valkoodi"];
 	}
-	
+
+	if (!isset($summa_valuutassa)) {
+		$summa_valuutassa = $summa;
+	}
+
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);
 
 	$query = "	INSERT into tiliointi set
@@ -66,6 +70,11 @@
 
 	// Tiliöidään alv
 	if ($vero != 0) {
+
+		if (!isset($alv_valuutassa)) {
+			$alv_valuutassa = $alv;
+		}
+
 		$query = "	INSERT into tiliointi set
 					yhtio 			 = '$kukarow[yhtio]',
 					ltunnus 		 = '$tunnus',
@@ -85,4 +94,5 @@
 					aputunnus 		 = $isa";
 		$result = pupe_query($query);
 	}
+
 ?>

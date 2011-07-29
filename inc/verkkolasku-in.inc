@@ -108,7 +108,10 @@
 			$return .= "Päivä: $laskun_paiva\n";
 			$return .= "Summa: $laskun_summa_eur\n";
 			$return .= "Viite: $laskun_pankkiviite\n";
-			$komm = "";
+
+			$komm 		= "";
+			$laskuvirhe = "";
+			$viesti		= "";
 
 			// $yhtio:ssa on nyt laskun VASTAANOTTAJAN ovt-tunnus ja $verkkotunnus_vas:ssa on VASTAANOTTAJAN verkkolaskutunnus
 			$verkkotunnus_vas 	= trim($verkkotunnus_vas);
@@ -294,7 +297,8 @@
 				$summa = $summa * -1;
 			}
 
-			$viite  = $laskun_pankkiviite;
+			// Vite on aina numeerinen
+			$viite  = (float) $laskun_pankkiviite;
 			$ebid   = $laskun_ebid;
 			$selite = t("Laskunumero").": ".$laskun_numero;
 
@@ -852,19 +856,19 @@
 
 				$summa = round($summa, 2);
 
-				if ($summa == 0.0) {
+				if ($summa == 0) {
 					$return .= "Laskulta puuttuu summa!\n";
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
-				if (strlen($viite) > 0 and tarkista_viite($viite) === FALSE) {
-					$return .= "Viite on väärin!\n";
+				if (isset($viite) and strlen($viite) > 0 and tarkista_viite($viite) === FALSE) {
+					$return .= "Viite '$viite' on väärin!\n";
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
-				if (strlen($viite) > 0 and strlen($viesti) > 0) {
+				if (isset($viite) and strlen($viite) > 0 and isset($viesti) and strlen($viesti) > 0) {
 					$return .= "Viitettä ja viestiä ei voi antaa yhtäaikaa!\n";
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
@@ -944,7 +948,7 @@
 							viite 				= '$viite',
 							viesti 				= '$viesti',
 							sisviesti1 			= '$laskun_tilausviite',
-							sisviesti2 			= '$sis2',
+							sisviesti2 			= '',
 							tapvm 				= '$tpv-$tpk-$tpp',
 							vienti 				= '$trow[oletus_vienti]',
 							ebid 				= '$ebid',
@@ -966,6 +970,7 @@
 							asiakkaan_tilausnumero = '$laskun_asiakkaan_tilausnumero'";
 				$result = pupe_query($query);
 				$tunnus = mysql_insert_id();
+
 				$omasumma = round($summa * $vrow['kurssi'], 2);
 				$omasumma_valuutassa = $summa;
 
@@ -981,27 +986,14 @@
 					$ostovelat = $yhtiorow["ostovelat"];
 				}
 
-				if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
-					$ostovelat_kustp 	= $oletuskust;
-					$ostovelat_kohde 	= $oletuskohde;
-					$ostovelat_projekti = $oletusprojekti;
-				}
-				else {
-					$ostovelat_kustp 	= 0;
-					$ostovelat_kohde 	= 0;
-					$ostovelat_projekti = 0;
-				}
-
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat, $ostovelat_kustp, $ostovelat_kohde, $ostovelat_projekti);
-
-				// Ostovelka
+				// Ostovelka, (Hoidetaan kustannuspaikka alempana, kun tiedetään kulutiliöintien kustannuspaikat....)
 				$query = "	INSERT INTO tiliointi SET
 							yhtio 			 = '$yhtio',
 							ltunnus 		 = '$tunnus',
 							tilino 			 = '$ostovelat',
-							kustp    		 = '{$kustp_ins}',
-							kohde	 		 = '{$kohde_ins}',
-							projekti 		 = '{$projekti_ins}',
+							kustp    		 = '0',
+							kohde	 		 = '0',
+							projekti 		 = '0',
 							tapvm 			 = '$tpv-$tpk-$tpp',
 							summa 			 = '$vassumma',
 							summa_valuutassa = '$vassumma_valuutassa',
@@ -1012,6 +1004,7 @@
 							laatija 		 = 'verkkolas',
 							laadittu 		 = now()";
 				$result = pupe_query($query);
+				$ostovelkatiliointitunnus = mysql_insert_id();
 
 				// Onko rivikohtaisia tiliöintisääntöjä
 				$query = "	SELECT *
@@ -1059,6 +1052,13 @@
 					$projekti           = $oletusprojekti;
 
 					require ("inc/teetiliointi.inc");
+
+					// Napataan luodut tarkenteet...
+					if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
+						$ostovel_kustp		= $kustp_ins;
+						$ostovel_kohde		= $kohde_ins;
+						$ostovel_projekti	= $projekti_ins;
+					}
 
 					// jos kyseessä on vaihto-omaisuutta tai rahti/huolintakuluja, tiliöidään varastonarvoon
 					if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
@@ -1132,6 +1132,7 @@
 					$verkkolaskuveroton_valuutassa	= 0;
 					$vtontot 						= 0;
 					$vtontot_valuutassa 			= 0;
+					$maksimisumma 		 			= 0;
 
 					$kustp		= $oletuskust;
 					$kohde		= $oletuskohde;
@@ -1225,6 +1226,15 @@
 							$kukarow['kuka']				 = 'verkkolas';
 
 							require ("inc/teetiliointi.inc");
+
+							// Napataan luodut tarkenteet...
+							if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and (($isumma[$i] > $maksimisumma and $omasumma >= 0) or ($isumma[$i] < $maksimisumma and $omasumma < 0))) {
+							## KORJAA KORJAA	
+							if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and $summa > $maksimisumma) {
+								$ostovel_kustp		= $kustp_ins;
+								$ostovel_kohde		= $kohde_ins;
+								$ostovel_projekti	= $projekti_ins;
+							}
 
 							// jos kyseessä on rahti/huolintakuluja, tiliöidään varastonmuutokseen
 							if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
@@ -1335,6 +1345,29 @@
 						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 					}
 				}
+
+				// Lisätään vielä ostovelkatiliöinnin tarkenteet
+				if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
+					$ostovel_kustp		= $kustp_ins;
+					$ostovel_kohde		= $kohde_ins;
+					$ostovel_projekti	= $projekti_ins;
+				}
+				else {
+					$ostovel_kustp		= 0;
+					$ostovel_kohde		= 0;
+					$ostovel_projekti	= 0;
+				}
+
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat, $ostovel_kustp, $ostovel_kohde, $ostovel_projekti);
+
+				$query = "	UPDATE tiliointi SET
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}'
+							WHERE yhtio = '{$yhtio}'
+							AND tunnus  = '{$ostovelkatiliointitunnus}'";
+				$vienti_upd_res = pupe_query($query);
+
 
 				// Jos meillä on suoraveloitus
 				if ($trow['oletus_suoraveloitus'] != '') {

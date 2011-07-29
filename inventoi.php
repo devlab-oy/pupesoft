@@ -2,6 +2,11 @@
 
 	require ("inc/parametrit.inc");
 
+	if (!isset($fileesta))			$fileesta = "";
+	if (!isset($filusta))			$filusta = "";
+	if (!isset($livesearch_tee))	$livesearch_tee = "";
+	if (!isset($mobiili))			$mobiili = "";
+
 	if ($livesearch_tee == "TUOTEHAKU") {
 		livesearch_tuotehaku();
 		exit;
@@ -167,17 +172,22 @@
 					// käydään kaikki ruudulla näkyvät läpi ja katsotaan onko joku niistä uusi
 					$onko_uusia = 0;
 
-					foreach ($sarjanumero_kaikki[$i] as $snro => $schk) {
-						if ($sarjanumero_uudet[$i][$snro] == '0000-00-00') {
-							$onko_uusia++;
+					if (isset($sarjanumero_kaikki[$i])) {
+						foreach ($sarjanumero_kaikki[$i] as $snro => $schk) {
+							if ($sarjanumero_uudet[$i][$snro] == '0000-00-00') {
+								$onko_uusia++;
+							}
 						}
 					}
 
 					// käydään kaikki valitut checkboxit läpi ja katsotaan onko joku niistä vanha
 					$onko_vanhoja = 0;
-					foreach ($sarjanumero_valitut[$i] as $snro => $schk) {
-						if ($sarjanumero_uudet[$i][$snro] != '0000-00-00') {
-							$onko_vanhoja++;
+
+					if (isset($sarjanumero_valitut[$i])) {
+						foreach ($sarjanumero_valitut[$i] as $snro => $schk) {
+							if ($sarjanumero_uudet[$i][$snro] != '0000-00-00') {
+								$onko_vanhoja++;
+							}
 						}
 					}
 
@@ -208,7 +218,7 @@
 						$virhe = 1;
 					}
 
-					if (is_array($eranumero_kaikki[$i])) {
+					if (isset($eranumero_kaikki[$i]) and is_array($eranumero_kaikki[$i])) {
 						if (is_array($eranumero_valitut[$i])) {
 
 							$erasyotetyt = 0;
@@ -653,7 +663,19 @@
 								$result = pupe_query($query);
 								$laskuid = mysql_insert_id($link);
 
-								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"]);
+
+								if ($yhtiorow["varastonmuutos_inventointi"] != "") {
+									$varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+								}
+								else {
+									$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+								}
+
+								// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili);
+
+								// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
+								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
 								$query = "	INSERT into tiliointi set
 											yhtio    = '$kukarow[yhtio]',
@@ -670,15 +692,6 @@
 											laatija  = '$kukarow[kuka]',
 											laadittu = now()";
 								$result = pupe_query($query);
-
-								if ($yhtiorow["varastonmuutos_inventointi"] != "") {
-									$varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
-								}
-								else {
-									$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
-								}
-
-								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili);
 
 								$query = "	INSERT into tiliointi set
 											yhtio    = '$kukarow[yhtio]',

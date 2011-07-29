@@ -1680,7 +1680,10 @@ if ($tee == 'I') {
 		$isumma_valuutassa[$i]	= (float) $isumma[$i];
 		$isumma[$i] 			= (float) round($isumma[$i] * $vrow['kurssi'], 2);
 
-		if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and $isumma[$i] > $maksimisumma) {
+		// Laitetaan oletuskustannuspaikat kuntoon
+		list($ikustp[$i], $ikohde[$i], $iprojekti[$i]) = kustannuspaikka_kohde_projekti($itili[$i], $ikustp[$i], $ikohde[$i], $iprojekti[$i]);
+
+		if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and (($isumma[$i] > $maksimisumma and $omasumma >= 0) or ($isumma[$i] < $maksimisumma and $omasumma < 0))) {
 			$maksimisumma = $isumma[$i];
 			$maksimisumma_i = $i;
 		}
@@ -1770,8 +1773,6 @@ if ($tee == 'I') {
 			$ikustp_ins 	= $ikustp[$i] == 0 ? $ikustp[$maksimisumma_i] : $ikustp[$i];
 			$ikohde_ins 	= $ikohde[$i] == 0 ? $ikohde[$maksimisumma_i] : $ikohde[$i];
 			$iprojekti_ins 	= $iprojekti[$i] == 0 ? $iprojekti[$maksimisumma_i] : $iprojekti[$i];
-
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($itili[$i], $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
 			// Kulutili
 			$query = "	INSERT INTO tiliointi SET

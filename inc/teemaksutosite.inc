@@ -197,7 +197,7 @@
 					laadittu 	= now()";
 		$result = pupe_query($query);
 
-		// Ostovelat
+		// Ostovelat, tarkenteet kopsataan alkuperäisesltä tiliöinniltä
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$yritirow[yhtio]',
 					ltunnus 	= '$trow[tunnus]',

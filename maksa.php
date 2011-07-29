@@ -8,6 +8,16 @@
 
 	js_popup();
 
+	if (!isset($kaikki))		$kaikki = "";
+	if (!isset($summa))			$summa = "";
+	if (!isset($tapa))			$tapa = "";
+	if (!isset($tili))			$tili = "";
+	if (!isset($tunnus))		$tunnus = "";
+	if (!isset($poikkeus))		$poikkeus = "";
+	if (!isset($kaale))			$kaale = "";
+	if (!isset($nimihaku))		$nimihaku = "";
+	if (!isset($eipankkiin))	$eipankkiin = "";
+
 	echo "<font class='head'>".t("Laskujen maksatus")."</font><hr>";
 
 
@@ -278,13 +288,12 @@
 						WHERE ltunnus 	= '$laskurow[tunnus]'
 						and yhtio 		= '$kukarow[yhtio]'
 						and tapvm 		= '$laskurow[tapvm]'
-						and abs(summa + $laskurow[vietysumma]) <= 0.02
 						and tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
 						and korjattu 	= ''";
-			$result = pupe_query($query);
+			$ostvresult = pupe_query($query);
 
-			if (mysql_num_rows($result) == 1) {
-				$ostovelkarow = mysql_fetch_assoc($result);
+			if (mysql_num_rows($ostvresult) == 1) {
+				$ostovelkarow = mysql_fetch_assoc($ostvresult);
 
 				// Ostovelat
 				$query = "	INSERT into tiliointi set
@@ -1174,10 +1183,12 @@
 				if (strtoupper($trow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
 					echo "$trow[summa] $trow[valkoodi]";
 
-					$valsumma[$trow["valkoodi"]] += $trow["summa"];
+					if (!isset($valsumma[$trow["valkoodi"]])) $valsumma[$trow["valkoodi"]] = $trow["summa"];
+					else $valsumma[$trow["valkoodi"]] += $trow["summa"];
 				}
 				else {
-					$valsumma[$trow["valkoodi"]] += $trow["summa"];
+					if (!isset($valsumma[$trow["valkoodi"]])) $valsumma[$trow["valkoodi"]] = $trow["summa"];
+					else $valsumma[$trow["valkoodi"]] += $trow["summa"];
 				}
 
 				echo "</td>";
@@ -1211,13 +1222,18 @@
 
 				// tehdään lasku linkki
 				echo "<td nowrap valign='top'>";
+
 				$lasku_urlit = ebid($trow['tunnus'], true);
+
 				if (count($lasku_urlit) == 0) {
 					echo t("Paperilasku");
 				}
-				foreach ($lasku_urlit as $lasku_url) {
-					echo "<a href='$lasku_url' target='Attachment'>".t("Näytä liite")."</a><br>";
+				elseif (is_array($lasku_urlit)) {
+					foreach ($lasku_urlit as $lasku_url) {
+						echo "<a href='$lasku_url' target='Attachment'>".t("Näytä liite")."</a><br>";
+					}
 				}
+
 				echo "</td>";
 
 				// Ok, mutta onko meillä varaa makssa kyseinen lasku???

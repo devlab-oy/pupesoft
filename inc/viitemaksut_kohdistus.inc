@@ -109,9 +109,7 @@
 			$asresult = pupe_query($query);
 			$mskustprow = mysql_fetch_assoc($asresult);
 
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["myyntisaamiset"], $mskustprow["kustp"], $mskustprow["kohde"], $mskustprow["projekti"]);
-
-			# Myyntisaamiset
+			# Myyntisaamiset, tarkenteet kopsataan alkuperäisesltä tiliöinniltä
 			$query = "	INSERT INTO tiliointi SET
 						yhtio				= '$row[suoriyhtio]',
 						laatija				= 'automaatti',
@@ -119,9 +117,9 @@
 						tapvm				= '$row[kirjpvm]',
 						ltunnus				= '$row[laskutunnus]',
 						tilino				= '$row[myyntisaamiset]',
-						kustp    			= '{$kustp_ins}',
-						kohde	 			= '{$kohde_ins}',
-						projekti 			= '{$projekti_ins}',
+						kustp				= '$mskustprow[kustp]',
+						kohde				= '$mskustprow[kohde]',
+						projekti			= '$mskustprow[projekti]',
 						summa				= -$row[laskutettu],
 						summa_valuutassa	= -$row[laskutettu_valuutassa],
 						valkoodi			= '$row[laskuvaluutta]',
@@ -153,10 +151,7 @@
 						summa				= $suoritettu_kassaan,
 						summa_valuutassa	= '$suoritettu_kassaan_valuutassa',
 						valkoodi			= '$row[suoritusvaluutta]',
-						selite				= 'Automaattikohdistettu asiakkaan suoritus',
-						kustp				= $kustp_ins,
-						kohde				= $kohde_ins,
-						projekti			= $projekti_ins";
+						selite				= 'Automaattikohdistettu asiakkaan suoritus'";
 			$insres = pupe_query($query);
 
 			// Mahdollinen kassa-alennus

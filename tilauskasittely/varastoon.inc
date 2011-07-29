@@ -333,7 +333,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	}
 	else {
 		$rahtios = 0;
-		$osuus = 0;
+		$osuus   = 0;
 	}
 
 	if ($tilrivirow['varattu'] < 0) {

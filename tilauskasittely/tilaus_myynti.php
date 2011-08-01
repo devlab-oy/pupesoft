@@ -3880,7 +3880,15 @@ if ($tee == '') {
 
 				if ($trow['hinnastoon'] == 'V' and $toim != "SIIRTOLISTA" and $toim != 'VALMISTAVARASTOON') {
 					//	katsotaan löytyyko asiakasalennus / asikakashinta
-					$hinnat = alehinta($laskurow, $trow, $kpl, '', '', '',"hintaperuste,aleperuste");
+
+					if ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") {
+						$alemaara = 99999999999;
+					}
+					else {
+						$alemaara = $kpl;
+					}
+
+					$hinnat = alehinta($laskurow, $trow, $alemaara, '', '', '',"hintaperuste,aleperuste");
 
 					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
 					if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {

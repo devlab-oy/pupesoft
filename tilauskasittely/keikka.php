@@ -189,23 +189,10 @@ if (!function_exists("tsekit")) {
 					and lasku.laskunro = '$row[laskunro]'";
 		$llres = pupe_query($query);
 		$llrow = mysql_fetch_array($llres);
-		
-		if ($llrow["vosumma"] >= 0) {
-			if ($row['rahti_etu'] > $llrow['vosumma'] and $llrow['volasku'] == 1) {
-				$lisok = 0;
-				$lisatiedot = t("kesken");
-			}
 
-			if ($row['rahti_etu'] < 0.00) {
-				$lisok = 0;
-				$lisatiedot = t("kesken");
-			}
-		}
-		else {
-			if ($row['rahti_etu'] <= $llrow['vosumma']) {
-				$lisok = 0;
-				$lisatiedot = t("kesken");
-			}
+		if (abs($row['rahti_etu']) > abs($llrow['vosumma'])) {
+			$lisok = 0;
+			$lisatiedot = t("kesken");
 		}
 
 		// $kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok

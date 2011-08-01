@@ -37,16 +37,8 @@ if ($tee == "update") {
 	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
 	$bruttopaino 	= str_replace ( ",", ".", $bruttopaino);
 
-
-	if ($llrow["vosumma"] >= 0) {
-		if ($rahti_etu > $llrow['vosumma'] and $llrow['volasku'] == 1) {
-			echo "<font class='message'>Virhe!! Eturahti ei saa olla suurempi kuin laskujen yhteissumma</font><br>";
-		}
-	}
-	else {
-		if ($rahti_etu <= $llrow['vosumma']) {
-			echo "<font class='message'>Virhe!! Eturahti pit‰‰ olla suurempi tai yht‰suuri kuin laskujen yhteissumma</font><br>";
-		}
+	if (abs($rahti_etu) > abs($llrow['vosumma'])) {
+		echo "<font class='message'>Virhe!! Eturahti ei saa olla suurempi kuin laskujen yhteissumma</font><br>";
 	}
 
 	$toimaika 		= $vv."-".$kk."-".$pp;

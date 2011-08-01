@@ -5853,7 +5853,7 @@ if ($tee == '') {
 								</form> ";
 					}
 
-					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o" and $row["status"] != 'P') {
+					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o" and $row["status"] != 'P' and $row["status"] != 'X') {
 
 						echo " <form action='$PHP_SELF' method='post' name='jalkitoimita'>
 									<input type='hidden' name='toim' 			value = '$toim'>

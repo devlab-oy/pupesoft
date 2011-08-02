@@ -598,7 +598,7 @@ if ($tila == 'tee_siirto') {
 										case 'laatija':
 											$rvalues .= ", '$kukarow[kuka]'";
 											break;
-										case 'laadittu':
+										case 'luontiaika':
 											$rvalues .= ", now()";
 											break;
 										case 'tilausrivitunnus':
@@ -618,7 +618,7 @@ if ($tila == 'tee_siirto') {
 					// Siiret‰‰n rivi t‰lle keikalle
 					$query = "	UPDATE tilausrivi USE INDEX (uusiotunnus_index)
 								SET uusiotunnus = '$otunnus',
-								erikoisale 		= '$laskurow[erikoisale]'
+								erikoisale 		= '$laskurow[erikoisale]',
 								kerattyaika 	= now(),
 								keratty 		= '$kukarow[kuka]'
 								$kpl_lisa

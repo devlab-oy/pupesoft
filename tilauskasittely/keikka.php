@@ -190,7 +190,7 @@ if (!function_exists("tsekit")) {
 		$llres = pupe_query($query);
 		$llrow = mysql_fetch_array($llres);
 
-		if (abs($row['rahti_etu']) > abs($llrow['vosumma'])) {
+		if ((abs($row['rahti_etu']) > abs($llrow['vosumma'])) and $llrow['volasku'] == 1) {
 			$lisok = 0;
 			$lisatiedot = t("kesken");
 		}

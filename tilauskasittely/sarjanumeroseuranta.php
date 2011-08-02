@@ -1243,7 +1243,7 @@
 			echo "<td valign='top' nowrap>";
 
 			//jos saa muuttaa niin n‰ytet‰‰n muokkaa linkki, Jos myyntirivi on laskutettu niin ei muokata
-			if ((strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE or $PHP_SELF == "sarjanumeroseuranta.php") and ($sarjarow["myynti_laskaika"] == "" or $sarjarow["myynti_laskaika"] == "0000-00-00")) {
+			if ((strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE or $PHP_SELF == "sarjanumeroseuranta.php") and ($sarjarow["myynti_laskaika"] == "" or $sarjarow["myynti_laskaika"] == "0000-00-00" or strpos($sarjarow["sarjanumero"], "PUUTTUU") !== FALSE)) {
 				echo "<a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=".urlencode($tuoteno_haku)."&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat'>".t("Muokkaa")."</a>";
 			}
 

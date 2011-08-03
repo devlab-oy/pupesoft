@@ -888,10 +888,10 @@ else {
 			// Valitaan paras varasto ja tulostusalue alkuperäiselle osalla
 			asort($varasto_kpl_array);
 			asort($tulalue_kpl_array);
-			
+
 			$varasto_kpl_array = array_keys($varasto_kpl_array);
 			$tulalue_kpl_array = array_keys($tulalue_kpl_array);
-						
+
 			$varasto = array_pop($varasto_kpl_array);
 			$tulostusalue = array_pop($tulalue_kpl_array);
 
@@ -901,10 +901,10 @@ else {
 						AND tunnus = '{$varasto}'";
 			$ulkoinen_jarjestelma_res = pupe_query($query);
 			$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
-			
+
 			// Intrastat-tiedot
 			$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
-			
+
 			$varasto_chk_array[$temp_laskutunnus] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
 
 			$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o' " : '';
@@ -933,8 +933,6 @@ else {
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$temp_laskutunnus'";
 			$varresult = pupe_query($query);
-
-			echo "$query<br>";
 
 			$laskurow["varasto"] = $varasto;
 

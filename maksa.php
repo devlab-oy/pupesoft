@@ -153,36 +153,37 @@
 		// Hyvityslasku --> vastaava m‰‰r‰ rahaa on oltava veloituspuolella
 		if ($trow['summa'] < 0 and $eipankkiin == '')  {
 
+			// Huomaa samat kyselyt (wheret) tee == G haarassa...
 			if (strtoupper($trow['maa']) == 'FI') {
 				$query = "	SELECT sum(if(alatila = 'K' and summa > 0, summa - kasumma, summa)) summa
 							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tila = 'P'
-							and olmapvm = '$trow[olmapvm]'
-							and maksaja = '$kukarow[kuka]'
-							and maksu_tili = '$tili'
-							and maa = 'FI'
-							and tilinumero = '$trow[tilinumero]'";
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and tila 		= 'P'
+							and olmapvm 	= '$trow[olmapvm]'
+							and maksaja 	= '$kukarow[kuka]'
+							and maksu_tili 	= '$tili'
+							and maa 		= 'FI'
+							and tilinumero 	= '$trow[tilinumero]'";
 			}
 			else {
 				$query = "	SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
 							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tila = 'P'
-							and olmapvm = '$trow[olmapvm]'
-							and maksaja = '$kukarow[kuka]'
-							and maksu_tili = '$tili'
-							and maa <> 'FI'
-							and valkoodi = '$trow[valkoodi]'
-							and ultilno = '$trow[ultilno]'
-							and swift = '$trow[swift]'
-							and pankki1 = '$trow[pankki1]'
-							and pankki2 = '$trow[pankki2]'
-							and pankki3 = '$trow[pankki3]'
-							and pankki4 = '$trow[pankki4]'
-							and sisviesti1 = '$trow[sisviesti1]'
-							and maksaja = '$kukarow[kuka]'";
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and tila 		= 'P'
+							and olmapvm 	= '$trow[olmapvm]'
+							and maksaja 	= '$kukarow[kuka]'
+							and maksu_tili 	= '$tili'
+							and maa 	   != 'FI'
+							and valkoodi 	= '$trow[valkoodi]'
+							and ultilno 	= '$trow[ultilno]'
+							and swift 		= '$trow[swift]'
+							and pankki1 	= '$trow[pankki1]'
+							and pankki2 	= '$trow[pankki2]'
+							and pankki3 	= '$trow[pankki3]'
+							and pankki4 	= '$trow[pankki4]'
+							and sisviesti1 	= '$trow[sisviesti1]'";
 			}
+
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != 1) {
@@ -216,8 +217,8 @@
 						<input type='hidden' name = 'tunnus' value='$tunnus'>
 						<input type='hidden' name = 'kaale' value='$kaale'>
 						<input type='hidden' name = 'poikkeus' value='$poikkeus'>
-						<input type='radio' name = 'valinta' value='K' checked> ".t("Kyll‰")."
-						<input type='radio' name = 'valinta' value='E'> ".t("Ei")."
+						<input type='radio'  name = 'valinta' value='K' checked> ".t("Kyll‰")."
+						<input type='radio'  name = 'valinta' value='E'> ".t("Ei")."
 						<input type='submit' name = 'valitse' value='".t("Valitse")."'>";
 
 						require ("inc/footer.inc");
@@ -253,20 +254,48 @@
 
 		$kurssi = 1;
 
-		$query = "	SELECT ytunnus, nimi, postitp,
-					round(summa * $kurssi, 2) 'maksusumma',
-					round(kasumma * $kurssi, 2) 'maksukasumma',
-					round(summa * vienti_kurssi, 2) 'vietysumma',
-					round(kasumma * vienti_kurssi, 2) 'vietykasumma',
-					concat(summa, ' ', valkoodi) 'summa',
-					ebid, tunnus, alatila, vienti_kurssi, tapvm
-					FROM lasku
-					WHERE yhtio 	= '$kukarow[yhtio]'
-					and tila		= 'P'
-					and olmapvm 	= '$trow[olmapvm]'
-					and maksu_tili 	= '$tili'
-					and valkoodi	= '$yhtiorow[valkoodi]'
-					and tilinumero	= '$trow[tilinumero]'";
+		if (strtoupper($trow['maa']) == 'FI') {
+			$query = "	SELECT ytunnus, nimi, postitp,
+						round(summa * $kurssi, 2) 'maksusumma',
+						round(kasumma * $kurssi, 2) 'maksukasumma',
+						round(summa * vienti_kurssi, 2) 'vietysumma',
+						round(kasumma * vienti_kurssi, 2) 'vietykasumma',
+						concat(summa, ' ', valkoodi) 'summa',
+						ebid, tunnus, alatila, vienti_kurssi, tapvm
+						FROM lasku
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						and tila 		= 'P'
+						and olmapvm 	= '$trow[olmapvm]'
+						and maksaja 	= '$kukarow[kuka]'
+						and maksu_tili 	= '$tili'
+						and maa 		= 'FI'
+						and tilinumero 	= '$trow[tilinumero]'";
+		}
+		else {
+			$query = "	SELECT ytunnus, nimi, postitp,
+						round(summa * $kurssi, 2) 'maksusumma',
+						round(kasumma * $kurssi, 2) 'maksukasumma',
+						round(summa * vienti_kurssi, 2) 'vietysumma',
+						round(kasumma * vienti_kurssi, 2) 'vietykasumma',
+						concat(summa, ' ', valkoodi) 'summa',
+						ebid, tunnus, alatila, vienti_kurssi, tapvm
+						FROM lasku
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						and tila 		= 'P'
+						and olmapvm 	= '$trow[olmapvm]'
+						and maksaja 	= '$kukarow[kuka]'
+						and maksu_tili 	= '$tili'
+						and maa 	   != 'FI'
+						and valkoodi 	= '$trow[valkoodi]'
+						and ultilno 	= '$trow[ultilno]'
+						and swift 		= '$trow[swift]'
+						and pankki1 	= '$trow[pankki1]'
+						and pankki2 	= '$trow[pankki2]'
+						and pankki3 	= '$trow[pankki3]'
+						and pankki4 	= '$trow[pankki4]'
+						and sisviesti1 	= '$trow[sisviesti1]'";
+		}
+
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) < 2) {

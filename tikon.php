@@ -44,7 +44,7 @@
 		exit;
 	}
 
-	function teetietue ($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, $projekti, $ytunnus, $nimi, $selite) {
+	function teetietue ($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, $projekti, $ytunnus, $nimi, $selite, $jakso) {
 
 		$ulos = 'TKB';																//tietuetyyppi
 		$ulos .= sprintf ('%-8s',  $tapvm);											//päivämäärä
@@ -55,7 +55,7 @@
 		$ulos .= sprintf ('%6.6s', $kustp);
 		$ulos .= sprintf ('%6.6s', $projekti);
 		$ulos .= sprintf ('%-10s', ' '); 											//???? projektilaji
-		$ulos .= sprintf ('%04d', $row['jakso']);									//jakso
+		$ulos .= sprintf ('%04d', $jakso);									//jakso
 
 		if ($summa > 0) {
 			$etu   = '+';
@@ -73,10 +73,8 @@
 		$ulos .= $etu;																//määrän etumerkki
 		$ulos .= $maara;															//määrä
 		$ulos .= sprintf ('%-72.72s', $nimi . "/" . $selite);						//liikekumppanin nimi + tiliöinnin selite
-	//	$ulos .= sprintf ('%08d', '0'); 											//asiakasnumero
 		$ulos .= sprintf ('%-8.8s', ''); 											//asiakasnumero
 		$ulos .= sprintf ('%-2.2s', ' ');											//???? laskulaji
-	//	$ulos .= sprintf ('%06.6d', '0'); 											//laskun numero
 		$ulos .= sprintf ('%-6.6s', ' '); 											//laskun numero
 		$ulos .= sprintf ('%-6.6s', ' ');											//???? kustannuslaji
 		$ulos .= sprintf ('%-8.8s', ' ');											//???? ryhmä3
@@ -90,7 +88,8 @@
 		$ulos .= sprintf ('%-4s', ' ');												//???? yritysnumero
 		$ulos .= sprintf ('%-20s', ' ');											//???? maksatuserätunnus
 		$ulos .= sprintf ('%-3s', 'EUR');											//rahayksikön valuutta
-		$palautus .= $ulos."\r\n";
+
+		$palautus = $ulos."\r\n";
 
 		return $palautus;
 	}
@@ -110,6 +109,7 @@
 		$sytunnus 		= "";
 		$snimi 			= "";
 		$sselite 		= "";
+		$sjakso 		= "";
 		$slaskunro 		= "";
 		$smapvm 		= "";
 
@@ -172,7 +172,7 @@
 				if ($summataan != '' and ($sltunnus != $vltunnus or $stapvm != $row['tapvm'] or $stilino != $row['tilino'] or $skustp != $row['kustp'] or $sprojekti != $row['projekti'])) {
 
 					if ($summa != 0) {
-						$palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite);
+						$palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite, $sjakso);
 						$rivitruudulle[] = array("tapvm" => $stapvmcle, "nimi" => $snimi, "summa" => $summa, "tilino" => $stilino, "kustp" => $skustp, "projekti" => $sprojekti, "selite" => $sselite, "laskunro" => $slaskunro, "tosite" => $stosite, "mapvm" => $smapvm);
 					}
 
@@ -187,12 +187,13 @@
 					$sytunnus 	= $row['ytunnus'];
 					$snimi 		= $row['nimi'];
 					$sselite 	= $row['selite'];
+					$sjakso 	= $row['jakso'];
 					$slaskunro 	= $row['laskunro'];
 					$smapvm 	= $row['mapvm'];
 				}
 			}
 			else {
-				$palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite);
+				$palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite, $sjakso);
 				$rivitruudulle[] = array("tapvm" => $stapvmcle, "nimi" => $snimi, "summa" => $summa, "tilino" => $stilino, "kustp" => $skustp, "projekti" => $sprojekti, "selite" => $sselite, "laskunro" => $slaskunro, "tosite" => $stosite, "mapvm" => $smapvm);
 
 				$stosite 	= $tosite;
@@ -206,6 +207,7 @@
 				$sytunnus 	= $row['ytunnus'];
 				$snimi 		= $row['nimi'];
 				$sselite 	= $row['selite'];
+				$sjakso 	= $row['jakso'];
 				$slaskunro 	= $row['laskunro'];
 				$smapvm 	= $row['mapvm'];
 			}
@@ -218,7 +220,7 @@
 		}
 
 		if ($summa != 0) {
-			$palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite);
+			$palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite, $sjakso);
 			$rivitruudulle[] = array("tapvm" => $stapvmcle, "nimi" => $snimi, "summa" => $summa, "tilino" => $stilino, "kustp" => $skustp, "projekti" => $sprojekti, "selite" => $sselite, "laskunro" => $slaskunro, "tosite" => $stosite, "mapvm" => $smapvm);
 		}
 

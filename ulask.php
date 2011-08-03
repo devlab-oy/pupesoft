@@ -1829,7 +1829,18 @@ if ($tee == 'I') {
 					$varastotili = $yhtiorow['matkalla_olevat'];
 				}
 
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
+
+				$varastonmuutostili = $yhtiorow["varastonmuutos"];
+
+				if ($vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
+					$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+				}
+
+				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
+
+				// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp_ins, $kohde_ins, $projekti_ins);
 
 				// Varasto
 				$query = "	INSERT INTO tiliointi SET
@@ -1840,8 +1851,8 @@ if ($tee == 'I') {
 							kohde	 			= '{$kohde_ins}',
 							projekti 			= '{$projekti_ins}',
 							tapvm 				= '$tpv-$tpk-$tpp',
-							summa 				= $veroton,
-							summa_valuutassa	= $veroton_valuutassa,
+							summa 				= $isumma[$i],
+							summa_valuutassa	= $isumma_valuutassa[$i],
 							valkoodi			= '$valkoodi',
 							vero 				= 0,
 							lukko 				= '',
@@ -1849,14 +1860,6 @@ if ($tee == 'I') {
 							laatija 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$result = pupe_query($query);
-
-				$varastonmuutostili = $yhtiorow["varastonmuutos"];
-
-				if ($vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
-					$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
-				}
-
-				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $ikustp_ins, $ikohde_ins, $iprojekti_ins);
 
 				// Varastonmuutos
 				$query = "	INSERT INTO tiliointi SET

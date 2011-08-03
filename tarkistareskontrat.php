@@ -132,7 +132,7 @@
 						and lasku.tapvm < '$loppu'
 						and lasku.tila = 'U'
 						and lasku.alatila = 'X'
-						and lsaku.mapvm != '0000-00-00'
+						and lasku.mapvm != '0000-00-00'
 						GROUP BY lasku.tunnus";
 
 			$result = pupe_query($query);

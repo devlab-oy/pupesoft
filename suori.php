@@ -630,8 +630,8 @@
 				echo "</td><td></td><td>";
 				echo "<font class='error'>".t("Tilikausi lukittu")."</font></td></tr></form>";
 			}
-
 		}
+
 		echo "</table>";
 	}
 

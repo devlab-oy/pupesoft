@@ -26,7 +26,7 @@
 		}
 		else {
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tapahtuma WRITE, tiliointi WRITE, tilausrivi WRITE, tilausrivi as tilausrivi2 WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE, avainsana as avainsana_kieli READ";
+			$query = "LOCK TABLES lasku WRITE, tapahtuma WRITE, tiliointi WRITE, tilausrivi WRITE, tilausrivi as tilausrivi2 WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE, avainsana as avainsana_kieli READ, tili WRITE";
 			$locre = pupe_query($query);
 
 			$query = "	SELECT *
@@ -596,7 +596,9 @@
 
 		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='S' and alatila='C'
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tila	= 'S' 
+					and alatila = 'C'
 					$haku
 					order by luontiaika desc";
 		$result = pupe_query($query);
@@ -662,5 +664,5 @@
 			echo t("Ei tilauksia")."...";
 		}
 	}
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 ?>

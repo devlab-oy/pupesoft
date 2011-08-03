@@ -250,7 +250,7 @@ else {
 			}
 
 			// Jos maksetaan käteisellä ja meillä on kassa-alennusta, niin kirjataan ne tässä (samalle kustannuspaikalle ku myynti)
-			if ($mehtorow['kateinen'] != '' and $lasku['kasumma'] != '') {
+			if ($mehtorow['kateinen'] != '' and $lasku['kasumma'] != 0) {
 
 				// Kuinka paljon on tämän viennin osuus
 				$kassaale 			 = round($tiliointisumma*$mehtorow['kassa_alepros']/100, 2);
@@ -302,7 +302,7 @@ else {
 								laatija 			= '$kukarow[kuka]',
 								laadittu 			= now(),
 								aputunnus 			= $isa";
-					$xresult = pupe_query($query);
+					$laskutusres = pupe_query($query);
 				}
 			}
 		}
@@ -329,7 +329,11 @@ else {
 			$tiliointisumma	= $varmuutos * -1;
 			$tiliointisumma_valuutassa = $varmuutos_valuutassa * -1;
 
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp, $kohde, $projekti);
+			// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"], $kustp, $kohde, $projekti);
+
+			// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
+			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
 			//Kirjataan 'varasto'-tilille
 			$query = "	INSERT into tiliointi set
@@ -352,8 +356,6 @@ else {
 
 			$tiliointisumma = $tiliointisumma * -1;
 			$tiliointisumma_valuutassa = $tiliointisumma_valuutassa * -1;
-
-			list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"], $kustp, $kohde, $projekti);
 
 			//Kirjataan 'varastonmuutos'-tilille
 			$query = "	INSERT into tiliointi set

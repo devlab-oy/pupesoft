@@ -25,7 +25,7 @@
 
 
 	// lukitaan tableja
-	$query = "lock tables tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tilausrivi as tilausrivi_upd write, tuote read, tilausrivi read, tuotteen_avainsanat read, sarjanumeroseuranta write, tilausrivi as tilausrivi_myynti read, tilausrivi as tilausrivi_osto read, tuotepaikat as tt read, avainsana as avainsana_kieli READ";
+	$query = "lock tables tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tilausrivi as tilausrivi_upd write, tuote read, tilausrivi read, tuotteen_avainsanat read, sarjanumeroseuranta write, tilausrivi as tilausrivi_myynti read, tilausrivi as tilausrivi_osto read, tuotepaikat as tt read, avainsana as avainsana_kieli READ, tili READ";
 	$result = pupe_query($query);
 
 	//tuotteen varastostatus
@@ -122,7 +122,11 @@
 									$result = pupe_query($query);
 									$laskuid = mysql_insert_id($link);
 
-									list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"]);
+									// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+									list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"]);
+
+									// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
+									list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
 									$query = "	INSERT into tiliointi set
 												yhtio    = '$kukarow[yhtio]',
@@ -139,8 +143,6 @@
 												laatija  = '$kukarow[kuka]',
 												laadittu = now()";
 									$result = pupe_query($query);
-
-									list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varastonmuutos"]);
 
 									$query = "	INSERT into tiliointi set
 												yhtio    = '$kukarow[yhtio]',

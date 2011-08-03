@@ -1562,11 +1562,11 @@ if ($tee == "") {
 		  	<td><form action = '$PHP_SELF?tee=alvkirjauksia_ilmanalvtasoa' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
-		  	<td>".t("näytä tositteet, joilta puuttuu kustannuspaikka")."</td>
+		  	<td>".t("näytä tositteet, joilta puuttuu kustannuspaikka")." (".t("ei huomioida myynti- ja varastonmuutostilejä").")</td>
 		  	<td><form action = '$PHP_SELF?tee=X' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
-		  	<td>".t("näytä tositteet, joilta puuttuu kustannuspaikka (myös myynti- sekä tasetilit 	)")."</td>
+		  	<td>".t("näytä tositteet, joilta puuttuu kustannuspaikka")." (".t("huomioidaan kaikki tilit").")</td>
 		  	<td><form action = '$PHP_SELF?tee=XKAIKKI' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
 		  	</tr>
 			<tr class='aktiivi'>
@@ -1600,6 +1600,6 @@ if ($tee == "") {
 			</table>";
 }
 
-require "inc/footer.inc";
+require ("inc/footer.inc");
 
 ?>

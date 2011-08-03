@@ -525,10 +525,11 @@
 	// tehdään laskun tiliöinnit.. tarvitaan $lasku array
 	$lasku = $laskurow;
 
-	//haetaan asiakkaan tiedot (esim konserniyhtiö)
+	// haetaan asiakkaan tiedot (esim konserniyhtiö)
 	$query = "	SELECT konserniyhtio
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and ytunnus = '$laskurow[ytunnus]'";
 	$konsres = pupe_query($query);
 	$konsrow = mysql_fetch_assoc($konsres);
 

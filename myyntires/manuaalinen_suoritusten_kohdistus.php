@@ -1178,7 +1178,7 @@ if ($tila == 'tee_kohdistus') {
 			$query = "UPDATE suoritus SET kohdpvm=now(), summa=$kaatosumma WHERE tunnus=$suoritus[tunnus] AND yhtio='$kukarow[yhtio]'";
 			$result = pupe_query($query);
 
-			// Luetaan ketjussa olevat tapahtumat ja poistetaan ne (=merkataan korjatuksi)
+			// Luetaan ketjussa olevat tapahtumat ja poistetaan ne ( = merkataan korjatuksi)
 			$query = "	SELECT aputunnus, ltunnus, summa, summa_valuutassa, valkoodi
 						FROM tiliointi
 						WHERE tunnus = $suoritus[ltunnus]

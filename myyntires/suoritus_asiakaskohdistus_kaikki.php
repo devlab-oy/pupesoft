@@ -1,6 +1,6 @@
 <?php
 
-echo "<font class='message'>Suorituksia kohdistetaan asiakkaaseen</font><br>";
+echo "<font class='message'>".t("Suorituksia kohdistetaan asiakkaaseen")."</font><br>";
 
 $query  = "	SELECT *
 			FROM suoritus

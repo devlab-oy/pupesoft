@@ -403,6 +403,6 @@ if ($tee == "") {
 	echo "</table>";
 }
 
-require("../inc/footer.inc");
+require("inc/footer.inc");
 
 ?>

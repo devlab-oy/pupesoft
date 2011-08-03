@@ -44,7 +44,7 @@
 
 	if ($tee == "tee") {
 
-		echo "<font class='message'>Logistiikan tapahtumat ja niiden varastonmuutos</font><br><br>";
+		echo "<font class='message'>".t("Logistiikan tapahtumat ja niiden varastonmuutos")."</font><br><br>";
 
 		// haetaan halutut varastotaphtumat
 		$query  = "	SELECT laji, count(*) kpl, round(sum(if(laji='tulo', kplhinta, hinta) * kpl), 2) logistiikka
@@ -138,7 +138,7 @@
 		echo "<br><br><hr>";
 
 
-		echo "<font class='message'>Inventoinnit ja niiden varastonmuutos</font><br><br>";
+		echo "<font class='message'>".t("Inventoinnit ja niiden varastonmuutos")."</font><br><br>";
 
 		echo "<table>";
 		echo "<tr>";
@@ -214,7 +214,7 @@
 		echo "</table><br><br>Yhteens‰: $eroyht";
 		echo "<br><br><hr>";
 
-		echo "<font class='message'>Myyntilaskut ja niiden varastonmuutos</font><br><br>";
+		echo "<font class='message'>".t("Myyntilaskut ja niiden varastonmuutos")."</font><br><br>";
 
 		// haetaan myyntilaskut ja niiden varastonmuutos
 		$query  = "	SELECT lasku.tunnus, sum(tiliointi.summa) varastonmuutos
@@ -268,7 +268,7 @@
 		echo "</tr>";
 		echo "</table><br><br>";
 
-		echo "<font class='message'>Myyntitapahtumat ja niiden varastonmuutos</font><br><br>";
+		echo "<font class='message'>".t("Myyntitapahtumat ja niiden varastonmuutos")."</font><br><br>";
 
 		echo "<table>";
 		echo "<tr>";
@@ -373,7 +373,7 @@
 		echo "</table><br><br>Yhteens‰: $eroyht<br>";
 
 		echo "<br><hr>";
-		echo "<font class='message'>Keikat ja niiden varastonmuutos (listataan vain jos eroja)</font><br><br>";
+		echo "<font class='message'>".t("Keikat ja niiden varastonmuutos (listataan vain jos eroja)")."</font><br><br>";
 
 		// haetaan kaikki ajanjakson keikat
 		$query  = "	SELECT *
@@ -403,7 +403,7 @@
 		$timuutos = 0.0;
 		$kpmuutos = 0.0;
 
-		while ($trow = mysql_fetch_assoc ($result)) {
+		while ($trow = mysql_fetch_assoc($result)) {
 
 			// haetaan kaikki keikkaan liitetyt vaihto-omaisuus ja rahtilaskut
 			$query = "	SELECT
@@ -515,7 +515,7 @@
 		echo "</table>";
 
 		echo "<br><hr>";
-		echo "<font class='message'>V‰‰rin laskutetut myyntitilaukset (suuntaa-antava arvio)</font><br><br>";
+		echo "<font class='message'>".t("V‰‰rin laskutetut myyntitilaukset (suuntaa-antava arvio)")."</font><br><br>";
 
 		echo "<table>";
 

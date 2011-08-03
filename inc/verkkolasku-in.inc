@@ -297,8 +297,8 @@
 				$summa = $summa * -1;
 			}
 
-			// Vite on aina numeerinen
-			$viite  = (float) $laskun_pankkiviite;
+			// Viite on aina numeerinen
+			$viite  = preg_replace("/[^0-9]/", "", $laskun_pankkiviite);
 			$ebid   = $laskun_ebid;
 			$selite = t("Laskunumero").": ".$laskun_numero;
 
@@ -991,9 +991,9 @@
 							yhtio 			 = '$yhtio',
 							ltunnus 		 = '$tunnus',
 							tilino 			 = '$ostovelat',
-							kustp    		 = '0',
-							kohde	 		 = '0',
-							projekti 		 = '0',
+							kustp    		 = 0,
+							kohde	 		 = 0,
+							projekti 		 = 0,
 							tapvm 			 = '$tpv-$tpk-$tpp',
 							summa 			 = '$vassumma',
 							summa_valuutassa = '$vassumma_valuutassa',
@@ -1228,9 +1228,7 @@
 							require ("inc/teetiliointi.inc");
 
 							// Napataan luodut tarkenteet...
-							if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and (($isumma[$i] > $maksimisumma and $omasumma >= 0) or ($isumma[$i] < $maksimisumma and $omasumma < 0))) {
-							## KORJAA KORJAA	
-							if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and $summa > $maksimisumma) {
+							if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and (($summa > $maksimisumma and $omasumma >= 0) or ($summa < $maksimisumma and $omasumma < 0))) {
 								$ostovel_kustp		= $kustp_ins;
 								$ostovel_kohde		= $kohde_ins;
 								$ostovel_projekti	= $projekti_ins;

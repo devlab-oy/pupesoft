@@ -6,7 +6,10 @@ echo "<font class='head'>".t("Lasku ei ollutkaan käteistä")."</font><hr>";
 
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	// tutkaillaan maksuehtoa
-	$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
+	$query = "	SELECT *
+				FROM maksuehto
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus = '$maksuehto'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -20,7 +23,10 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	}
 
 	// tutkaillaan laskua
-	$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus = '$tunnus'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -32,6 +38,14 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	else {
 		$laskurow = mysql_fetch_assoc($result);
 	}
+
+	// haetaan asiakkaan tiedot (esim konserniyhtiö)
+	$query = "	SELECT konserniyhtio
+				FROM asiakas
+				WHERE yhtio = '$kukarow[yhtio]'
+				and ytunnus = '$laskurow[ytunnus]'";
+	$konsres = pupe_query($query);
+	$konsrow = mysql_fetch_assoc($konsres);
 }
 
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
@@ -76,9 +90,19 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		echo "<font class='error'>".t("Laskua")." $laskurow[laskunro] ".t("ei pystytty muuttamaan")."!</font><br>";
 	}
 
+	if ($mehtorow["factoring"] != "") {
+		$myysaatili	= $yhtiorow['factoringsaamiset'];
+	}
+	elseif ($konsrow["konserniyhtio"] != "") {
+		$myysaatili	= $yhtiorow['konsernimyyntisaamiset'];
+	}
+	else {
+		$myysaatili	= $yhtiorow['myyntisaamiset'];
+	}
+
 	// tehdään kirjanpitomuutokset
 	$query = "	UPDATE tiliointi
-				SET tilino = '$yhtiorow[myyntisaamiset]',
+				SET tilino = '$myysaatili',
 				summa = '$laskurow[summa]'
 				WHERE yhtio	= '$kukarow[yhtio]'
 				and ltunnus	= '$tunnus'
@@ -92,17 +116,46 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehdä! Korjaa kirjanpito käsin")."!</font><br>";
 	}
 
-	// yliviivataan kassa-aletiliöinnit
+	// yliviivataan kassa-aletiliöinnit ja pyöristykset
 	$query = "	UPDATE tiliointi
 				SET korjattu = 'X',
 				korjausaika  = now()
 				where yhtio = '$kukarow[yhtio]'
 				and ltunnus = '$tunnus'
-				and tilino  = '$yhtiorow[myynninkassaale]'";
+				and tilino  IN ('$yhtiorow[myynninkassaale]', '$yhtiorow[pyoristys]')";
 	$result = pupe_query($query);
 
 	if (mysql_affected_rows() > 0) {
-		echo "<font class='message'>".t("Poistettiin kassa-alekirjaukset")." (".mysql_affected_rows()." ".t("kpl").").</font><br><br>";
+		echo "<font class='message'>".t("Poistettiin pyöristys- ja kassa-alekirjaukset")." (".mysql_affected_rows()." ".t("kpl").").</font><br><br>";
+	}
+
+	// tarkistetaan onko pyöristyseroja
+	$query = "	SELECT sum(summa) summa, sum(summa_valuutassa) summa_valuutassa
+				FROM tiliointi
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND ltunnus = '$tunnus'
+				AND korjattu = ''";
+	$result = pupe_query($query);
+	$check1 = mysql_fetch_assoc($result);
+
+	if ($check1['summa'] != 0) {
+		$query = "	INSERT into tiliointi set
+					yhtio 				= '$kukarow[yhtio]',
+					ltunnus 			= '$tunnus',
+					tilino 				= '$yhtiorow[pyoristys]',
+					kustp 				= 0,
+					kohde 				= 0,
+					projekti 			= 0,
+					tapvm 				= '$laskurow[tapvm]',
+					summa 				= -1 * $check1[summa],
+					summa_valuutassa 	= -1 * $check1[summa_valuutassa],
+					valkoodi			= '$laskurow[valkoodi]',
+					vero 				= 0,
+					selite 				= '".t("Pyöristysero")."',
+					lukko 				= '',
+					laatija 			= '$kukarow[kuka]',
+					laadittu 			= now()";
+		$laskutusres = pupe_query($query);
 	}
 
 	$laskuno = 0;
@@ -175,6 +228,6 @@ if ($laskuno == 0) {
 $formi = "eikat";
 $kentta = "laskuno";
 
-require ("../inc/footer.inc");
+require ("inc/footer.inc");
 
 ?>

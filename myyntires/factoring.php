@@ -7,11 +7,20 @@ echo "<font class='head'>".t("Muuta factorointia")."</font><hr>";
 if (isset($maksuehto) and isset($tunnus)) {
 
 	// tutkaillaan maksuehtoa
-	$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto' and factoring!=''";
+	$query = "	SELECT *
+				from maksuehto
+				where yhtio = '$kukarow[yhtio]'
+				and tunnus = '$maksuehto'
+				and factoring != ''";
 
 	if ($laji == 'pois') {
-		$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto' and factoring=''";
+		$query = "	SELECT *
+					FROM maksuehto
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$maksuehto'
+					and factoring = ''";
 	}
+
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -39,6 +48,14 @@ if (isset($maksuehto) and isset($tunnus)) {
 	else {
 		$laskurow = mysql_fetch_assoc($result);
 	}
+
+	// haetaan asiakkaan tiedot (esim konserniyhtiö)
+	$query = "	SELECT konserniyhtio
+				FROM asiakas
+				WHERE yhtio = '$kukarow[yhtio]'
+				and ytunnus = '$laskurow[ytunnus]'";
+	$konsres = pupe_query($query);
+	$konsrow = mysql_fetch_assoc($konsres);
 }
 
 if (isset($maksuehto) and isset($tunnus)) {
@@ -70,8 +87,9 @@ if (isset($maksuehto) and isset($tunnus)) {
 				maksuehto = '$maksuehto',
 				erpcm     = $erapvm,
 				kapvm     = $kassa_erapvm,
-				kasumma   ='$kassa_loppusumma'
-				where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+				kasumma   = '$kassa_loppusumma'
+				where yhtio = '$kukarow[yhtio]'
+				and tunnus  = '$tunnus'";
 	$result = pupe_query($query);
 
 	if (mysql_affected_rows() > 0) {
@@ -81,23 +99,42 @@ if (isset($maksuehto) and isset($tunnus)) {
 		echo "<font class='error'>".t("Laskua")." $laskurow[laskunro] ".t("ei pystytty muuttamaan")."!</font><br>";
 	}
 
+	if ($mehtorow["factoring"] != "") {
+		$myysaatili	= $yhtiorow['factoringsaamiset'];
+	}
+	elseif ($konsrow["konserniyhtio"] != "") {
+		$myysaatili	= $yhtiorow['konsernimyyntisaamiset'];
+	}
+	else {
+		$myysaatili	= $yhtiorow['myyntisaamiset'];
+	}
+
 	// tehdään kirjanpitomuutokset
 	if ($laji == 'pois') {
 		$query = "	UPDATE tiliointi
-					SET tilino = '$yhtiorow[myyntisaamiset]'
+					SET tilino = '$myysaatili'
 					WHERE yhtio = '$kukarow[yhtio]'
 					and ltunnus = '$tunnus'
 					and tilino	= '$yhtiorow[factoringsaamiset]'
 					and tapvm 	= '$laskurow[tapvm]'";
 	}
 	else {
+
+		if ($konsrow["konserniyhtio"] != "") {
+			$myysaatili2 = $yhtiorow['konsernimyyntisaamiset'];
+		}
+		else {
+			$myysaatili2 = $yhtiorow['myyntisaamiset'];
+		}
+
 		$query = "	UPDATE tiliointi
-					set tilino = '$yhtiorow[factoringsaamiset]'
+					set tilino = '$myysaatili'
 					where yhtio = '$kukarow[yhtio]'
 					and ltunnus = '$tunnus'
-					and tilino 	= '$yhtiorow[myyntisaamiset]'
+					and tilino 	= '$myysaatili2'
 					and tapvm 	= '$laskurow[tapvm]'";
 	}
+
 	$result = pupe_query($query);
 
 	if (mysql_affected_rows() > 0) {
@@ -106,6 +143,7 @@ if (isset($maksuehto) and isset($tunnus)) {
 	else {
 		echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehdä! Korjaa kirjanpito käsin")."!</font><br>";
 	}
+
 	unset($laskuno);
 }
 
@@ -169,6 +207,7 @@ if (isset($laskuno)) {
 						WHERE yhtio = '$kukarow[yhtio]' and factoring=''
 						ORDER BY jarjestys, teksti";
 		}
+
 		$vresult = pupe_query($query);
 
 		echo "<select name='maksuehto'>";
@@ -202,6 +241,6 @@ if (!isset($laskuno)) {
 $formi = "eikat";
 $kentta = "laskuno";
 
-require ("../inc/footer.inc");
+require ("inc/footer.inc");
 
 ?>

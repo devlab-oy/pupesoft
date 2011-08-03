@@ -211,6 +211,9 @@
 		if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") === FALSE and strpos($_SERVER['SCRIPT_NAME'], "selaajamuuta.php") === FALSE) {
 			echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'> ".t("Jaksota")."</td>";
 		}
+		else {
+			echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font></td>";
+		}
 
 		echo "</tr>";
 		echo "</form>";

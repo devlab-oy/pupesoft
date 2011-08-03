@@ -119,8 +119,6 @@ if (!function_exists("korjaalaskut")) {
 						AND tilausrivi.yhtio	= '$kukarow[yhtio]'";
 			$xresult = pupe_query($query);
 			$xrivi  = mysql_fetch_assoc($xresult);
-			
-			echo "$query<br><br>";
 
 			// katotaan saadaanko tehdä tiliöintejä
 			// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
@@ -149,9 +147,7 @@ if (!function_exists("korjaalaskut")) {
 							ORDER BY summa DESC
 							LIMIT 1";
 				$result = pupe_query($query);
-				
-				echo "$query<br><br>";
-				
+
 				// otetaan löydettyjen rivien määrä talteen
 				$tilikpl = mysql_num_rows($result);
 
@@ -177,9 +173,7 @@ if (!function_exists("korjaalaskut")) {
 								ORDER BY summa DESC
 								LIMIT 1";
 					$result = pupe_query($query);
-					
-					echo "$query<br><br>";
-					
+
 					// löydettiin varastonmuutos tiliöintijä.. otetaan kpl talteen ja jatketaan chekeissä eteenpän
 					if (mysql_num_rows($result) != 0) {
 						$tilikpl = mysql_num_rows($result);
@@ -269,9 +263,7 @@ if (!function_exists("korjaalaskut")) {
 								ORDER BY summa asc
 								LIMIT 1";
 					$result = pupe_query($query);
-					
-					echo "$query<br><br>";
-					
+
 					// varmistetaan vielä, että löydetään varastotiliöintikin...
 					if (mysql_num_rows($result) == 0) {
 						$query = "	SELECT *
@@ -283,8 +275,6 @@ if (!function_exists("korjaalaskut")) {
 									ORDER BY summa asc
 									LIMIT 1";
 						$result = pupe_query($query);
-						
-						echo "$query<br><br>";
 					}
 
 					// Toivottavasti jotain löyty

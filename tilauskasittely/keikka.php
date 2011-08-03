@@ -173,7 +173,7 @@ if (!function_exists("tsekit")) {
 		// katotaan onko liitettyjä laskuja
 		// ('C','F','I','J','K','L') // vaihto-omaisuus ja raaka-aine
 		// ('B','C','J','E','F','K','H','I','L') // kaikki
-
+		
 		$query = "	SELECT count(*) num,
 					sum(if(lasku.vienti='C' or lasku.vienti='F' or lasku.vienti='I' or lasku.vienti='J' or lasku.vienti='K' or lasku.vienti='L', 1, 0)) volasku,
 					sum(if(ostores_lasku.tila != 'H' and (lasku.vienti='C' or lasku.vienti='F' or lasku.vienti='I' or lasku.vienti='J' or lasku.vienti='K' or lasku.vienti='L'), 1, 0)) volasku_ok,
@@ -190,6 +190,7 @@ if (!function_exists("tsekit")) {
 		$llres = pupe_query($query);
 		$llrow = mysql_fetch_array($llres);
 		
+		/*
 		if ($llrow["vosumma"] >= 0) {
 			if ($row['rahti_etu'] > $llrow['vosumma'] and $llrow['volasku'] == 1) {
 				$lisok = 0;
@@ -207,6 +208,7 @@ if (!function_exists("tsekit")) {
 				$lisatiedot = t("kesken");
 			}
 		}
+		*/
 
 		// $kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok
 		return array($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok);

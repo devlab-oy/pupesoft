@@ -4864,7 +4864,7 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$aleperuste = 13;
+					$aleperuste["ale1"] = 13;
 
 					$hrow = mysql_fetch_assoc($hresult);
 					$ale["ale1"]  = $hrow["alennus"];

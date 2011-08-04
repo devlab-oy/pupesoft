@@ -4,7 +4,7 @@
 
 	if (isset($_REQUEST["tee"])) {
 		if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+		if (isset($_REQUEST["kaunisnimi"]) and $_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
 	}
 
 	require ("../inc/parametrit.inc");
@@ -21,7 +21,6 @@
 		}
 
 		echo "<font class='head'>".t("Ostoraportti")."</font><hr>";
-
 
 		if (!aja_kysely()) {
 			unset($_REQUEST);
@@ -358,6 +357,20 @@
 			}
 		}
 
+		// ABC luokkanimet
+		$ryhmanimet = $ryhmaprossat = array();
+
+		$query = "	SELECT DISTINCT luokka, osuusprosentti
+					FROM abc_parametrit
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					ORDER BY osuusprosentti DESC";
+		$luokka_res = pupe_query($query);
+
+		while ($luokka_row = mysql_fetch_assoc($luokka_res)) {
+			$ryhmanimet[] = $luokka_row['luokka'];
+			$ryhmaprossat[] = $luokka_row['osuusprosentti'];
+		}
+
 		ob_start();
 
 		echo "<form action='' method='post' autocomplete='off'>";
@@ -552,24 +565,26 @@
 		//Ostokausivalinnat
 		echo "<tr><th>",t("Ostoehdotus")," (",t("anna varastointitarve viikoissa"),"):</th><td colspan='2'>";
 
-		foreach ($ryhmanimet as $ryhma) {
-			echo "<select name='valitut[KAUSI$ryhma]'>";
+		if (count($ryhmanimet) > 0) {
+			foreach ($ryhmanimet as $ryhma) {
+				echo "<select name='valitut[KAUSI$ryhma]'>";
 
-			for ($i = 1; $i < 53; $i++) {
-				$chk = '';
+				for ($i = 1; $i < 53; $i++) {
+					$chk = '';
 
-				if ($valitut["KAUSI$ryhma"] == "$ryhma##$i") {
+					if ($valitut["KAUSI$ryhma"] == "$ryhma##$i") {
+						$chk = 'selected';
+					}
+					echo "<option value='$ryhma##$i' $chk>$i</option>";
+				}
+
+				if ($valitut["KAUSI$ryhma"] == "$ryhma##104") {
 					$chk = 'selected';
 				}
-				echo "<option value='$ryhma##$i' $chk>$i</option>";
-			}
 
-			if ($valitut["KAUSI$ryhma"] == "$ryhma##104") {
-				$chk = 'selected';
+				echo "<option value='$ryhma##104' $chk>104</option>";
+				echo "</select> $ryhma<br/>";
 			}
-
-			echo "<option value='$ryhma##104' $chk>104</option>";
-			echo "</select> $ryhma<br/>";
 		}
 
 		echo "</td></tr>";
@@ -798,20 +813,6 @@
 			//	Haetaan kaikki varastot ja luodaan kysely paljonko ko. varastoon on tilattu tavaraa..
 			$varastolisa = "";
 
-			// ABC luokkanimet
-			$ryhmanimet = $ryhmaprossat = array();
-
-			$query = "	SELECT DISTINCT luokka, osuusprosentti
-						FROM abc_parametrit
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						ORDER BY osuusprosentti DESC";
-			$luokka_res = pupe_query($query);
-
-			while ($luokka_row = mysql_fetch_assoc($luokka_res)) {
-				$ryhmanimet[] = $luokka_row['luokka'];
-				$ryhmaprossat[] = $luokka_row['osuusprosentti'];
-			}
-
 			// Jos jt-rivit varaavat saldoa niin se vaikuttaa asioihin
 			if ($yhtiorow["varaako_jt_saldoa"] != "") {
 				$lisavarattu = " + tilausrivi.varattu";
@@ -948,8 +949,6 @@
 				require("inc/footer.inc");
 				exit;
 			}
-
-			echo t("Ajetaan raportti").":<br><br>";
 
 			$abcwhere = "";
 
@@ -1109,6 +1108,47 @@
 				$splisa = "tuote.tuotesyvyys";
 			}
 
+			echo "<font class='message'>".t("Ajetaan raportti").":<br></font>";
+
+			//	Oletetaan ett‰ k‰ytt‰j‰ ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
+			if (!isset($valitut["poistetut"])) $valitut["poistetut"] = "checked";
+			if (!isset($valitut["poistuvat"])) $valitut["poistuvat"] = "checked";
+
+			if ($valitut["poistetut"] != '' and $valitut["poistuvat"] == '') {
+				echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistuvat n‰ytet‰‰n").".<br></font>";
+			}
+			if ($valitut["poistetut"] != '' and $valitut["poistuvat"] != '') {
+				echo "<font class='message'>".t("Vain aktiiviset tuotteet").".<br></font>";
+			}
+			if ($valitut["poistetut"] == '' and $valitut["poistuvat"] != '') {
+				echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistetut n‰ytet‰‰n").".<br></font>";
+			}
+			if ($valitut["OSTOTVARASTOITTAIN"] != '') {
+				echo "<font class='message'>".t("Tilatut eritell‰‰n varastoittain").".<br></font>";
+			}
+			if ($valitut["VAINUUDETTUOTTEET"] != '') {
+				echo "<font class='message'>".t("Listaa vain 12kk sis‰ll‰ perustetut tuotteet").".<br></font>";
+			}
+			if ($valitut["UUDETTUOTTEET"] != '') {
+				echo "<font class='message'>".t("Ei listata 12kk sis‰ll‰ perustettuja tuotteita").".<br></font>";
+			}
+			if ($abcrajaus != "") {
+
+				echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhm‰luokka tai ABC-tuotemerkkiluokka >=")." $ryhmanimet[$abcrajaus] ".t("tai sit‰ on j‰lkitoimituksessa");
+
+				if ($valitut["VAINUUDETTUOTTEET"] == '' and $valitut["UUDETTUOTTEET"] == '') {
+					echo " ".t("tai tuote on perustettu viimeisen 12kk sis‰ll‰").".<br>";
+				}
+				else {
+					echo ".<br>";
+				}
+				
+				echo "</font>";
+			}
+
+			echo "                                                                                                                                                                                                                                                                                                                                                                                                <br>\n\r";
+			flush();
+
 			//Ajetaan raportti tuotteittain
 			if ($paikoittain == '') {
 				$query = "	SELECT
@@ -1219,44 +1259,10 @@
 
 			$res = pupe_query($query);
 
-			//	Oletetaan ett‰ k‰ytt‰j‰ ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
-			if (!isset($valitut["poistetut"])) $valitut["poistetut"] = "checked";
-			if (!isset($valitut["poistuvat"])) $valitut["poistuvat"] = "checked";
-
-			if ($valitut["poistetut"] != '' and $valitut["poistuvat"] == '') {
-				echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistuvat n‰ytet‰‰n").".<br>";
-			}
-			if ($valitut["poistetut"] != '' and $valitut["poistuvat"] != '') {
-				echo "<font class='message'>".t("Vain aktiiviset tuotteet").".<br>";
-			}
-			if ($valitut["poistetut"] == '' and $valitut["poistuvat"] != '') {
-				echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistetut n‰ytet‰‰n").".<br>";
-			}
-			if ($valitut["OSTOTVARASTOITTAIN"] != '') {
-				echo "<font class='message'>".t("Tilatut eritell‰‰n varastoittain").".<br>";
-			}
-			if ($valitut["VAINUUDETTUOTTEET"] != '') {
-				echo "<font class='message'>".t("Listaa vain 12kk sis‰ll‰ perustetut tuotteet").".<br>";
-			}
-			if ($valitut["UUDETTUOTTEET"] != '') {
-				echo "<font class='message'>".t("Ei listata 12kk sis‰ll‰ perustettuja tuotteita").".<br>";
-			}
-			if ($abcrajaus != "") {
-
-				echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhm‰luokka tai ABC-tuotemerkkiluokka >=")." $ryhmanimet[$abcrajaus] ".t("tai sit‰ on j‰lkitoimituksessa");
-
-				if ($valitut["VAINUUDETTUOTTEET"] == '' and $valitut["UUDETTUOTTEET"] == '') {
-					echo " ".t("tai tuote on perustettu viimeisen 12kk sis‰ll‰").".<br>";
-				}
-				else {
-					echo ".<br>";
-				}
-			}
-
-			echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>";
+			echo "<font class='message'>".t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br></font>";
 
 			if ($valitut["EHDOTETTAVAT"] != '') {
-				echo "<font class='message'>".t("Joista j‰tet‰‰n pois ne tuotteet joita ei ehdoteta ostettavaksi").".<br>";
+				echo "<font class='message'>".t("Joista j‰tet‰‰n pois ne tuotteet joita ei ehdoteta ostettavaksi").".<br></font>";
 			}
 
 			flush();
@@ -2185,7 +2191,8 @@
 		else {
 			ob_end_flush();
 		}
-		require ("../inc/footer.inc");
+
+		require("inc/footer.inc");
 	}
 
 ?>

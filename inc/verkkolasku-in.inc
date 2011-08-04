@@ -292,7 +292,7 @@
 				$summa = $summa * -1;
 			}
 
-			$viite  = $laskun_pankkiviite;
+			$viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
 			$ebid   = $laskun_ebid;
 			$selite = t("Laskunumero").": ".$laskun_numero;
 

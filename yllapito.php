@@ -353,7 +353,7 @@
 
 						if (mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
 
-						$query .= ", ". mysql_field_name($result,$i)."='".$t[$i]."' ";
+						$query .= ", ". mysql_field_name($result,$i)."='".trim($t[$i])."' ";
 					}
 				}
 			}
@@ -387,7 +387,7 @@
 						}
 
 						if (mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
-						$query .= ", ". mysql_field_name($result,$i)."='".$t[$i]."' ";
+						$query .= ", ". mysql_field_name($result,$i)."='".trim($t[$i])."' ";
 
 					}
 				}

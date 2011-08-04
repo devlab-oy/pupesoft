@@ -9244,6 +9244,40 @@ if (!function_exists("lue_kurssit")) {
 	}
 }
 
+// gui progress palkki
+if (!function_exists("progress_bar_ui")) {
+	function progress_bar_ui($current_item, $total_items, $bar_length = 60) {
+
+		static $current_position = FALSE;
+
+		// Ekalla kerralla tullaan t‰nne
+		if ($current_position === FALSE) {
+			// Current positio nollaks
+			$current_position = 0;
+			// Ja piirret‰‰n 100% pituus div
+			echo "<br><div style='height:15px;width:{$bar_length}px;text-align:center;border-left:1px;border-right:1px;border-top:0px;border-bottom:0px;border-color:#000000;border-style:solid;'><font class='info'>100%</font></div>";
+			flush();
+		}
+
+		// Lasketaan miss‰ kohtaa palkkia nyt pit‰s menn‰
+		$new_position = round($bar_length * ($current_item / $total_items));
+
+		// Jos ollaan edetty
+		if ($new_position > $current_position) {
+			// Lasketaan ero pixeleiss‰
+			$position_ero = $new_position - $current_position;
+
+			// Piirret‰‰n eron verran pixeleit‰
+			echo "<img src='{$GLOBALS["palvelin2"]}pics/vaaleanvihrea.png' style='float:left;height:15px;width:{$position_ero}px;'></img>\r\n";
+
+			flush();
+		}
+
+		// Current positio talteen
+		$current_position = $new_position;
+	}
+}
+
 // textmode progress palkki
 if (!function_exists("progress_bar")) {
 	function progress_bar($current_item, $total_items, $bar_length = 60) {
@@ -10653,11 +10687,11 @@ if (!function_exists("pupe_DataTables")) {
 		for ($i = 1; $i <= $sarakkeetVis; $i++) {
 			// Keikalla eka sarake on kohdistusnappula....
 			if ($i == 1 and $taulu == "keikka") {
-				$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false, \"sWidth\": \"20px\"},";	
+				$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false, \"sWidth\": \"20px\"},";
 			}
 			else {
-				$aoColumns .= " null,";	
-			}			
+				$aoColumns .= " null,";
+			}
 		}
 		for ($i = $sarakkeetVis+1; $i <= $sarakkeetTot; $i++) {
 			$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false},";
@@ -10718,13 +10752,13 @@ if (!function_exists("pupe_DataTables")) {
 
 				// KEIKKA.PHPN OMAT JQUERY-TOIMINNALLISUUDET
 				if ('{$taulu}' == 'keikka') {
-					
+
 					$(window).keypress(function(e) {
 					    if(e.keyCode == 13) {
 					        $('#submit_tallenna').trigger('click');
 					    }
 					});
-					
+
 					// JOS RUKSATAAN/RUKSATAAN POIS JOKIN RIVI
 					$('input[name^=\"rivi_valitut_tunnukset\"]').live('click', function(){
 						rivi_ja_otsikko = this.value.split(\"###\", 2);

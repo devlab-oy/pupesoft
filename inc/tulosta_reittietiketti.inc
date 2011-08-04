@@ -148,9 +148,11 @@
 		} #end if
 	} #end foreach $erat
 
-	if (trim($komento['reittietiketti']) != '') {
-		echo t("Reittietiketti tulostuu"),"...<br />";
-	}
-	else {
-		echo t("Reittietiketin tulostinta ei ole valittu. Reittietiketti ei tulostu"),"...<br />";
+	if (!isset($ei_tulosteta) or !$ei_tulosteta) {
+		if (trim($komento['reittietiketti']) != '') {
+			echo t("Reittietiketti tulostuu"),"...<br />";
+		}
+		else {
+			echo t("Reittietiketin tulostinta ei ole valittu. Reittietiketti ei tulostu"),"...<br />";
+		}
 	}

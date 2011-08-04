@@ -8632,7 +8632,7 @@ if (!function_exists("t_avainsana")) {
 								and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.$kielilisa) $kielilisa";
 		}
 
-		$query = "	SELECT DISTINCT avainsana.*
+		$query = "	SELECT DISTINCT avainsana.* $kielisubquery
 					FROM avainsana
 					WHERE $yhtiolisa
 					and avainsana.laji = '$laji'

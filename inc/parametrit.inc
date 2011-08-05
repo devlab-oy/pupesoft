@@ -225,6 +225,9 @@ $pupesoft_port = ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] !=
 // $palvelin2 muuttujassa on Pupesoft root url, mutta scheme/server/portti on muutettu tarpeen mukaan
 $palvelin2 = $pupesoft_scheme.$pupesoft_server.$pupesoft_port.$pupesoft_url["path"];
 
+// Haetaan requestin dirname
+$pupesoft_dirname = str_replace(array($phpnimi, $palvelin2), array("", ""), $pupesoft_scheme.$_SERVER["SERVER_NAME"].$_SERVER["SCRIPT_NAME"]);
+
 // Haetaan session
 $session = (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") ? $_COOKIE["pupesoft_session"] : "";
 
@@ -238,7 +241,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 	$_GET["yhtio"] = mysql_real_escape_string($_GET["yhtio"]);
 	$_GET["user"]  = mysql_real_escape_string($_GET["user"]);
 	$_GET["pass"]  = mysql_real_escape_string($_GET["pass"]);
-	$ostoskori     = (int) $_REQUEST["ostoskori"];
+	$ostoskori     = isset($_REQUEST["ostoskori"]) ? (int) $_REQUEST["ostoskori"] : 0;
 
 	$query = "SELECT * FROM kuka WHERE yhtio='$_GET[yhtio]' AND kuka='$_GET[user]' AND salasana='$_GET[pass]'";
 	$result = mysql_query($query) or die ("Sis‰‰nkirjaus ep‰onnistui!");
@@ -286,7 +289,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
 		// refreshataan vain jos ei ole ostoskoria mukana
 		if ($ostoskori == 0) {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2$phpnimi'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}{$pupesoft_dirname}{$phpnimi}'>";
 			exit;
 		}
 	}

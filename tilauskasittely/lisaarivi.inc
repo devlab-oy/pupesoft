@@ -2113,6 +2113,7 @@
 			// jos tuote on poistettu niin sitä ei voi laittaa jälkitoimitukseen
 			if ($var == 'J' and ($trow["status"] == "P" or $trow["status"] == "X")) {
 				$var = 'P';
+				$varattu = 0;
 			}
 
 			$query_insert_ale_lisa = '';

@@ -126,7 +126,7 @@
 		$tee = '';
 	}
 
-	// t‰m‰ tulostaa nimen-muutos lomakkeen
+	// t‰m‰ tulostaa nimenmuutos -lomakkeen
 	if (isset($nimi) AND trim($nimi) != "" AND isset($tee) and $tee == 'muokkaa') {
 		echo "<form method='POST' autocomplete='off'>";
 		echo "<table><tr><th>",t('Kategorian nimi'),":</th><td>$nimi</td></tr>";
@@ -139,7 +139,16 @@
 		echo "<input type='submit' value='",t('Tallenna kategoria'),"' />";
 		echo "</form><br><br>";
 	}
-
+		
+	// Siirret‰‰n haaraa j‰rjestyksess‰ ylˆs tai alas
+	if (isset($tee) and ($tee == 'ylos' || $tee == 'alas') AND isset($lft) and isset($rgt)) {
+		
+		$src['lft'] = $lft; $src['rgt'] = $rgt;
+		
+		// $tee:ss‰ on suunta mihin siirret‰‰n
+		$kohde = SiirraTaso($toim,$src,$tee);
+	}
+	
 	if (isset($toim)) {
 
 		$query = "	SELECT
@@ -194,7 +203,8 @@
 					$rowspan = $lastenmaara;
 				}
 
-				echo "\n<td rowspan='$rowspan'>",$row['node_koodi'] ,' ',ucwords(strtolower(str_replace('/', ', ', $row['node_nimi'])))," ($row[node_tunnus])<hr>";
+				echo "\n<td rowspan='$rowspan'>",$row['node_koodi']," ",$row['node_nimi']," (",$row['node_tunnus'],")<hr>";
+				// echo "\n<td rowspan='$rowspan'>",$row['node_koodi']," ",$row['node_nimi']," (",$row['node_tunnus'],") [", $row[lft],"-",$row[rgt],"]<hr>"; // testausta varten
 
 				if ($tee == "valitsesegmentti") {
 					$check = '';
@@ -204,14 +214,25 @@
 
 					echo "\n<input type='checkbox' name='id[]' value='{$row["node_tunnus"]}' $check />";
 				}
+				
 				elseif ($oikeus != '') {
+					// lis‰‰
 					echo "\n<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&syvyys={$row['syvyys']}&tee=lisaa'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰ lapsikategoria'),"'/></a>";
-				 	if ($row['lft'] > 1) echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&tee=poista'><img src='{$palvelin2}pics/lullacons/remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";
-				 	echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&koodi={$row['node_koodi']}&lft={$row['lft']}&tee=muokkaa&kategoriaid={$row['node_tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
-
-					if ($lastenmaara > 1) {
-						echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&tee=taso'><img src='{$palvelin2}pics/lullacons/folder-new.png' alt='",t('Lis‰‰ taso'),"'/></a>";
+					// poista
+					if ($row['lft'] > 1) echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&tee=poista'><img src='{$palvelin2}pics/lullacons/remove.png' alt='",t('Poista lapsikategoria'),"'/></a>";
+					// muokkaa
+					echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&koodi={$row['node_koodi']}&lft={$row['lft']}&tee=muokkaa&kategoriaid={$row['node_tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/></a>";
+					// lis‰‰ taso v‰liin
+					if ($lastenmaara > 1) { echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&tee=taso'><img src='{$palvelin2}pics/lullacons/folder-new.png' alt='",t('Lis‰‰ taso'),"'/></a>"; }
+					// Siirto -painikkeet
+					if ($row['lft'] > 1) {
+						// ylos
+						echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&rgt={$row['rgt']}&tee=ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='",t('Siirr‰ ylˆsp‰in'),"'/></a>";
+						// alas
+						echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&rgt={$row['rgt']}&tee=alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='",t('Siirr‰ alasp‰in'),"'/></a>";
 					}
+					
+					
 				}
 
 				echo "</td></tr>";

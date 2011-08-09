@@ -77,7 +77,7 @@
 			//Suoritetaan jälkilaskenta
 			$query = "	SELECT *
 						from tapahtuma
-						where yhtio='$kukarow[yhtio]' and laji='kulutus' and rivitunnus='$perherow[tunnus]'
+						where yhtio='$kukarow[yhtio]' and laji='kulutus' and rivitunnus='$perherow[tunnus]' and tuoteno='$perherow[tuoteno]'
 						order by tunnus";
 			$res = mysql_query($query) or pupe_error($query);
 			$osavalm_lukumaara = mysql_num_rows($res);

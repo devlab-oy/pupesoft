@@ -173,7 +173,7 @@ if (!function_exists("tsekit")) {
 		// katotaan onko liitettyjä laskuja
 		// ('C','F','I','J','K','L') // vaihto-omaisuus ja raaka-aine
 		// ('B','C','J','E','F','K','H','I','L') // kaikki
-
+		
 		$query = "	SELECT count(*) num,
 					sum(if(lasku.vienti='C' or lasku.vienti='F' or lasku.vienti='I' or lasku.vienti='J' or lasku.vienti='K' or lasku.vienti='L', 1, 0)) volasku,
 					sum(if(ostores_lasku.tila != 'H' and (lasku.vienti='C' or lasku.vienti='F' or lasku.vienti='I' or lasku.vienti='J' or lasku.vienti='K' or lasku.vienti='L'), 1, 0)) volasku_ok,

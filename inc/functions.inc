@@ -3037,7 +3037,7 @@ if (!function_exists("alehinta")) {
 		$query = "	SELECT group_concat(parent.tunnus) tunnukset
 	   				FROM puun_alkio
 					JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
-	   				JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.lft > 1)
+	   				JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.lft > 0)
 	   				WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
 					AND puun_alkio.laji    = 'asiakas'
 					AND puun_alkio.liitos  = '$laskurow[liitostunnus]'";
@@ -4864,7 +4864,7 @@ if (!function_exists("alehinta")) {
 				$hresult = pupe_query($query);
 
 				if (mysql_num_rows($hresult) > 0) {
-					$aleperuste = 13;
+					$aleperuste["ale1"] = 13;
 
 					$hrow = mysql_fetch_assoc($hresult);
 					$ale["ale1"]  = $hrow["alennus"];
@@ -8632,7 +8632,7 @@ if (!function_exists("t_avainsana")) {
 								and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.$kielilisa) $kielilisa";
 		}
 
-		$query = "	SELECT DISTINCT avainsana.*
+		$query = "	SELECT DISTINCT avainsana.* $kielisubquery
 					FROM avainsana
 					WHERE $yhtiolisa
 					and avainsana.laji = '$laji'
@@ -10132,7 +10132,6 @@ if (!function_exists("tarkista_viite")) {
 			return FALSE;
 		}
 
-		$viite = preg_replace("/[^0-9]/", "", $viite);
 		$kerroin = 7;
 		$tulo = 0;
 

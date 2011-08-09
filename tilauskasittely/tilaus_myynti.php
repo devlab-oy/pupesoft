@@ -875,7 +875,7 @@ if (isset($tyhjenna)) {
 	$variaatio_tuoteno 	= "";
 	$var_array 			= "";
 	$sopimuksen_lisatieto1 = "";
-	$sopimuksen_lisatieto2 = "";	
+	$sopimuksen_lisatieto2 = "";
 }
 
 if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kertakassa != '')) and $kukarow['extranet'] == '') {
@@ -3890,8 +3890,17 @@ if ($tee == '') {
 
 					$hinnat = alehinta($laskurow, $trow, $alemaara, '', '', '',"hintaperuste,aleperuste");
 
-					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-					if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
+					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy, katotaan onko alennuksia.
+					$onko_asiakkaalla_alennuksia = FALSE;
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+							$onko_asiakkaalla_alennuksia = TRUE;
+						}
+					}
+
+					if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE) {
+
 						if ($kukarow['extranet'] != '') {
 							$varaosavirhe .= t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
 						}

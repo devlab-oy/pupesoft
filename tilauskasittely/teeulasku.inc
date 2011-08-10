@@ -117,7 +117,7 @@
 	// Jos laskulla on useita toimitustapoja niin laitetaan sinne tekstiksi "USEITA"
 	if ($sumrow["toimitustavat"] > 1) {
 		$lasrow["toimitustapa"]     = t("Useita", $kielirow["kieli"]);
-		$useita_toimtapoja = "KYLLA";
+		$useita_toimtapoja = t("KYLLA");
 	}
 	
 	// haetaan maksuehdon tiedot, jotta osataan tiliöidä käteismyynti kassaan
@@ -131,7 +131,7 @@
 		$mehtorow = array();
 
 		if ($lasrow["erpcm"] == "0000-00-00") {
-			$tulos_ulos_ulasku .= "<font class='message'><br>".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei löydy")."! Tunnus $lasrow[tunnus] ".t("Laskunro")." $lasrow[laskunro] ".t("epäonnistui pahasti")."!</font><br><br>\r\n";
+			$tulos_ulos_ulasku .= "<font class='message'><br>".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei löydy")."! ".t("Tunnus")." $lasrow[tunnus] ".t("Laskunro")." $lasrow[laskunro] ".t("epäonnistui pahasti")."!</font><br><br>\r\n";
 		}
 	}
 	else {

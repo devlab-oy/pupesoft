@@ -18,7 +18,7 @@
 	$tilausyhteyshenkilo 	= "";
 	$asiakkaan_tilausnumero	= "";
 	$kohde 					= "";
-	$useita					= "EI";
+	$useita_toimtapoja		= "EI";
 
 	$query  = "	SELECT
 				sum(arvo) arvo,
@@ -117,7 +117,7 @@
 	// Jos laskulla on useita toimitustapoja niin laitetaan sinne tekstiksi "USEITA"
 	if ($sumrow["toimitustavat"] > 1) {
 		$lasrow["toimitustapa"]     = t("Useita", $kielirow["kieli"]);
-		$useita = "KYLLA";
+		$useita_toimtapoja = "KYLLA";
 	}
 	
 	// haetaan maksuehdon tiedot, jotta osataan tiliöidä käteismyynti kassaan
@@ -481,11 +481,10 @@
 					$sumskommentti = t("Tilaus", $kielirow["kieli"])." $edotunnus ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 				}
 				
-				if ($useita == "KYLLA") {
+				if ($useita_toimtapoja == "KYLLA") {
 					$sumskommentti .= "\nToimitustapa : $sumsrow[toimitustapa]";
 				}
 				
-
 				$query = "	UPDATE tilausrivi
 							SET kommentti = concat(kommentti, '\n', '$sumskommentti')
 							WHERE tunnus = '$edtunnus'
@@ -523,7 +522,7 @@
 				$sumskommentti = t("Tilaus", $kielirow["kieli"])." $edotunnus ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 			}
 
-			if ($useita == "KYLLA") {
+			if ($useita_toimtapoja == "KYLLA") {
 				$sumskommentti .= "\nToimitustapa : $sumsrow[toimitustapa]";
 			}
 

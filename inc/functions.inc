@@ -39,7 +39,7 @@ if (!function_exists("pupe_error")) {
 		$query = str_replace("\t", " ",$query);
 		$query = str_replace("\n", "", $query);
 		$query = str_replace("\r", "", $query);
-		$query = ereg_replace("  +", " ", $query);
+		$query = preg_replace("/  +/", " ", $query);
 
 		$debuggi = array_reverse(debug_backtrace());
 

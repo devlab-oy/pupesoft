@@ -3881,21 +3881,23 @@ if ($tee == '') {
 				if ($trow['hinnastoon'] == 'V' and $toim != "SIIRTOLISTA" and $toim != 'VALMISTAVARASTOON') {
 					//	katsotaan löytyyko asiakasalennus / asikakashinta
 
+					// Reklamaatiolla ei huomioida kappalemääriin sidottuja alennuksia
 					if ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") {
 						$alemaara = 99999999999;
 					}
 					else {
 						$alemaara = $kpl;
 					}
-
+										
 					$hinnat = alehinta($laskurow, $trow, $alemaara, '', '', '',"hintaperuste,aleperuste");
 
-					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy, katotaan onko alennuksia.
+					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
 					$onko_asiakkaalla_alennuksia = FALSE;
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
 							$onko_asiakkaalla_alennuksia = TRUE;
+							break;
 						}
 					}
 

@@ -517,7 +517,7 @@
 								$alvilisa
 								and korjattu = ''";
 					$alvires = pupe_query($query);
-					$alvirow = mysql_fetch_array($alvires);
+					$alvirow = mysql_fetch_assoc($alvires);
 
 					// Ostoreskontralaskun veron m‰‰r‰
 					$alvisumma = $alvirow["summa"];

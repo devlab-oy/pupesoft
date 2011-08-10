@@ -15,7 +15,21 @@ if ($tee == "update") {
 	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
 
 	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
-
+	
+	if (abs($rahti_etu) > abs($llrow['vosumma'])) {
+		echo "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br><br>";
+		
+		$tee = "";
+		$toiminto = "lisatiedot";
+		
+		if ($nappikeikalla == 'ollaan') {
+			$nappikeikalle = 'menossa';
+			$nappikeikalla = '';
+		}
+	}
+}
+	
+if ($tee == "update") {	
 	if ($laskurow["erikoisale"] == $erikoisale and $laskurow["rahti_etu"] == $rahti_etu and $laskurow["rahti_etu_alv"] == $rahti_etu_alv) {
 		$kohdistettu = $laskurow["kohdistettu"];
 	}
@@ -36,11 +50,7 @@ if ($tee == "update") {
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
 	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
 	$bruttopaino 	= str_replace ( ",", ".", $bruttopaino);
-
-	if (abs($rahti_etu) > abs($llrow['vosumma'])) {
-		echo "<font class='message'>Virhe!! Eturahti ei saa olla suurempi kuin laskujen yhteissumma</font><br>";
-	}
-
+	
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
@@ -261,15 +271,8 @@ if ($tee == "") {
 		$lisamassa = "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 	}
 
-	if ($llrow["vosumma"] >= 0.00) {
-		if ($laskurow['rahti_etu'] > $llrow['vosumma']) {
-			$lisatiedot = "<font class='message'>Virhe!! Eturahti ei saa olla suurempi kuin laskujen yhteissumma</font><br>";
-		}
-	}
-	else {
-		if ($laskurow['rahti_etu'] <= $llrow['vosumma']) {
-			$lisatiedot = "<font class='message'>Virhe!! Eturahti pit‰‰ olla suurempi tai yht‰suuri kuin laskujen yhteissumma</font><br>";
-		}
+	if (abs($laskurow['rahti_etu']) > abs($llrow['vosumma'])) {
+		$lisatiedot = "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br>";	
 	}
 
 	echo "<tr><td valign='top'>".t("Nettopaino").":</td><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back' width='450'>$lisamassa</td></tr>";

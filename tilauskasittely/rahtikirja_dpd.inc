@@ -30,7 +30,12 @@ if ($kollityht > 0) {
 	}
 	else {
 		//Tulostetaan standardi kolliosoitelappu
-		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
+		$query = "	SELECT * 
+					FROM lasku 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tunnus in ($otunnukset) 
+					ORDER BY tunnus 
+					LIMIT 1";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($tempr);
 

@@ -19,9 +19,9 @@
 		$kukarow["yhtio"] = $argv[1];
 	}
 
-	$kansio 		= "/Users/jamppa/Desktop/teccom-ainetot";			// muuta näiden polut oikeiksi
-	$kansio_valmis 	= "/Users/jamppa/Desktop/teccom-ainetot/valmis";	// muuta näiden polut oikeiksi
-	$kansio_error 	= "/Users/jamppa/Desktop/teccom-ainetot/error";		// muuta näiden polut oikeiksi
+	$kansio 		= "/Users/sami/temp/asn_testi";			// muuta näiden polut oikeiksi
+	$kansio_valmis 	= "/Users/sami/temp/asn_testi/valmis";	// muuta näiden polut oikeiksi
+	$kansio_error 	= "/Users/sami/temp/asn_testi/error";		// muuta näiden polut oikeiksi
 
 	// setataan käytetyt muuttujat:
 	$asn_numero					= "";

@@ -30,7 +30,7 @@
 				// Toimittaja vaihtuu tai ASN-sanoma vaihtuu tai paketti vaihtuu ja ei ole virheitä, teidään keikka ja suuntalava sekä kohdistetaan rivit
 				if ((isset($edellinen_toimittaja) and $edellinen_toimittaja != $row["toimittajanumero"]) or (isset($edellinen_asn_numero) and $edellinen_asn_numero != $row["asn_numero"]) or (isset($edellinen_paketinnumero) and $edellinen_paketinnumero != $row["paketinnumero"])) {
 					if ($virheet == 0) {
-						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset);
+						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $paketin_tunnukset_ja_rivit);
 					}
 					else {
 						$virheet = 0;
@@ -39,6 +39,7 @@
 					$paketin_rivit = array();
 					$paketin_tunnukset = array();
 					$paketin_tuotteet = array();
+					$paketin_tunnukset_ja_rivit = array();
 				}
 
 				// Katsotaan, löytyykö tämä rivi ostotilaukselta
@@ -56,7 +57,7 @@
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
 							AND tilausrivi.otunnus = '$row[tilausnumero]'
-							AND (tilausrivi.tunnus = '$row[tilausrivinpositio]' OR tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]')";
+							#AND (tilausrivi.tunnus = '$row[tilausrivinpositio]' OR tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]')";
 				$checkres = pupe_query($query);
 				$tilausrivirow = mysql_fetch_array($checkres);
 
@@ -114,10 +115,11 @@
 				$paketin_tunnukset[] = $row["tunnus"];
 				$paketin_rivit[] = $tilausrivirow["tunnus"];
 				$paketin_tuotteet[] = $tilausrivirow["tuoteno"];
+				$paketin_tunnukset_ja_rivit[$row['tunnus']] = $tilausrivirow["tunnus"];
 			}
 
 			if ($virheet == 0 and count($paketin_rivit) > 0) {
-				asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset);
+				asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $paketin_tunnukset_ja_rivit);
 			}
 			elseif ($virheet != 0) {
 				echo "VIRHE: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero\n\n";
@@ -129,7 +131,7 @@
 
 	if (!function_exists("asn_kohdista_suuntalava")) {
 
-		function asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset) {
+		function asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $paketin_tunnukset_ja_rivit) {
 
 			global $yhtiorow, $kukarow;
 
@@ -219,7 +221,7 @@
 							FROM tuote
 							JOIN keraysvyohyke on (keraysvyohyke.yhtio = tuote.yhtio and keraysvyohyke.tunnus = tuote.keraysvyohyke)
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
-							AND tuote.tuoteno IN (".implode(",", $paketin_tuotteet).")
+							AND tuote.tuoteno IN ('".implode("','", $paketin_tuotteet)."')
 							GROUP BY 1
 							ORDER BY 3 DESC
 							LIMIT 1";
@@ -257,11 +259,20 @@
 							AND tilausrivi.tunnus IN (".implode(",", $paketin_rivit).")";
 				$updateres = pupe_query($query);
 
-				$query = "	UPDATE asn_sanomat SET
-							status = 'X'
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus IN (".implode(",", $paketin_tunnukset).")";
-				$updateres = pupe_query($query);
+				// $query = "	UPDATE asn_sanomat SET
+				// 			status = 'X'
+				// 			WHERE yhtio = '$kukarow[yhtio]'
+				// 			AND tunnus IN (".implode(",", $paketin_tunnukset).")";
+				// $updateres = pupe_query($query);
+
+				foreach ($paketin_tunnukset_ja_rivit as $tun => $riv) {
+					$query = "	UPDATE asn_sanomat SET
+								status = 'X',
+								tilausrivi = '$riv'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$tun}'";
+					$updateres = pupe_query($query);
+				}
 			}
 
 		}

@@ -776,6 +776,7 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'G'
 					and lasku.alatila in ('','J','A','B','C','D','E','T','P')
+					and lasku.tunnus != '{$laskurow["tunnus"]}'
 					GROUP BY tuoteno, lasku.tunnus";
 		$siirtores = pupe_query($query);
 
@@ -786,7 +787,7 @@
 			//tehdään selväkielinen tila/alatila
 			require "inc/laskutyyppi.inc";
 
-			$varaosakommentti .= t("Siirtolistalla").": $siirtorow[kpl] {".t_avainsana("Y", "", "and avainsana.selite='$siirtorow[yksikko]'", "", "", "selite")."} $siirtorow[lahde] -> $siirtorow[kohde] ($alatila)<br>";
+			$varaosakommentti .= t("Siirtolistalla")." ($siirtorow[tunnus]) on: $siirtorow[kpl] {".t_avainsana("Y", "", "and avainsana.selite='$siirtorow[yksikko]'", "", "", "selite")."} $siirtorow[lahde] -> $siirtorow[kohde] ($alatila)<br>";
 		}
 
 		// katotaan onko vielä ostotilauksella!

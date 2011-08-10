@@ -117,7 +117,7 @@
 	// Jos laskulla on useita toimitustapoja niin laitetaan sinne tekstiksi "USEITA"
 	if ($sumrow["toimitustavat"] > 1) {
 		$lasrow["toimitustapa"]     = t("Useita", $kielirow["kieli"]);
-		$useita_toimtapoja = t("KYLLA");
+		$useita_toimtapoja = "KYLLA";
 	}
 	
 	// haetaan maksuehdon tiedot, jotta osataan tiliöidä käteismyynti kassaan
@@ -482,7 +482,7 @@
 				}
 				
 				if ($useita_toimtapoja == "KYLLA") {
-					$sumskommentti .= "\nToimitustapa : $sumsrow[toimitustapa]";
+					$sumskommentti .= "\n".t("Toimitustapa")." : $sumsrow[toimitustapa]";
 				}
 				
 				$query = "	UPDATE tilausrivi
@@ -523,7 +523,7 @@
 			}
 
 			if ($useita_toimtapoja == "KYLLA") {
-				$sumskommentti .= "\nToimitustapa : $sumsrow[toimitustapa]";
+				$sumskommentti .= "\n".t("Toimitustapa")." : $sumsrow[toimitustapa]";
 			}
 
 			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";

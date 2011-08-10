@@ -206,7 +206,7 @@
 									WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 					}
 
-					$rarresult = mysql_query($query) or pupe_error($query);
+					$rarresult = pupe_query($query);
 
 					if (mysql_num_rows($rarresult) == 1) {
 
@@ -215,7 +215,7 @@
 						$ohitus = 0;
 						if ($kukarow["extranet"] != "") {
 							$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
-							$asiakastempres = mysql_query($query);
+							$asiakastempres = pupe_query($query);
 							$asiakastemprow = mysql_fetch_array($asiakastempres);
 
 							$temp_laskurowwi = array();
@@ -228,11 +228,11 @@
 							$hinnat = alehinta($temp_laskurowwi, $trow, 1, '', '', '', "hintaperuste,aleperuste");
 							
 							// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-							$onko_asiakkaalla_alennuksia = TRUE;
+							$onko_asiakkaalla_alennuksia = FALSE;
 
 							for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-								if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] > 12) {
-									$onko_asiakkaalla_alennuksia = FALSE;
+								if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+									$onko_asiakkaalla_alennuksia = TRUE;
 									break;
 								}
 							}

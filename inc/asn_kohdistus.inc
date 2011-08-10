@@ -21,6 +21,7 @@
 						FROM asn_sanomat
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND status = ''
+						AND tilausrivi = ''
 						ORDER BY toimittajanumero, asn_numero, paketinnumero";
 			$result = pupe_query($query);
 
@@ -106,6 +107,14 @@
 								hyllyvali = '$tilausrivirow[hyllyvali]',
 								tilaajanrivinro = '$tilausrivirow[tunnus]'";
 					$inskres = pupe_query($query);
+				}
+				else {
+					// p‰ivitet‰‰n tilausrivin tunnus talteen asn_sanomat-tauluun, koska t‰m‰ kohdistuu kyseiseen riviin
+					$query = "	UPDATE asn_sanomat SET
+								tilausrivi = '{$tilausrivirow['tunnus']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$row['tunnus']}'";
+					$upd_res = pupe_query($query);
 				}
 
 				// Otetaan talteen t‰m‰n kierroksen tiedot

@@ -754,7 +754,14 @@ if ($tila == 'tee_kohdistus') {
 
 			list($valittutunnus, $valittuotunnus) = explode("###", $valittu);
 
-			$query = "UPDATE tilausrivi use index (yhtio_otunnus) SET uusiotunnus='$otunnus', kerattyaika=now(), keratty='$kukarow[kuka]', erikoisale = '$laskurow[erikoisale]' WHERE yhtio='$kukarow[yhtio]' and otunnus in ('$valittuotunnus','$otunnus') and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
+			$query = "	UPDATE tilausrivi use index (yhtio_otunnus) 
+						SET uusiotunnus = '$otunnus', 
+						kerattyaika = now(), 
+						keratty = '$kukarow[kuka]', 
+						erikoisale = '$laskurow[erikoisale]' 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and otunnus in ('$valittuotunnus','$otunnus') 
+						and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
 			$result = pupe_query($query);
 		}
 	}

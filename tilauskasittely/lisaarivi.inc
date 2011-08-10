@@ -1758,16 +1758,16 @@
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 					$ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
 				}
-				if ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") {
-					$kpl = $alemaara;
-				}
-
-				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $kpl, $netto, $hinta, $ale_kaikki_array);
-				list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 				
 				if ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") {
-					$kpl = $alkupera_kpl;
+					$alemaara = 99999999999;
 				}
+				else {
+					$alemaara = $kpl;
+				}
+
+				list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array);
+				list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 			}
 
 			if ($laskurow['tila'] != 'O') {

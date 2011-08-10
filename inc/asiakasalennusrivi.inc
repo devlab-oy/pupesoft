@@ -35,7 +35,7 @@
 					FROM dynaaminen_puu AS node
 					JOIN dynaaminen_puu AS parent ON (node.lft BETWEEN parent.lft AND parent.rgt AND parent.laji = node.laji AND parent.yhtio = node.yhtio)
 					WHERE node.yhtio = '$kukarow[yhtio]'
-					AND node.lft > 1
+					AND node.lft > 0
 					AND node.laji = 'asiakas'
 					GROUP BY node.tunnus
 					ORDER BY node.lft";

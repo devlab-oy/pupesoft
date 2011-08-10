@@ -40,10 +40,10 @@
 								and var		= 'J'
 								and tyyppi in ('L','G')";
 				}
-				$tresult = mysql_query($query) or pupe_error($query);
+				$tresult = pupe_query($query);
 
 				$query = "UPDATE sarjanumeroseuranta set myyntirivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and myyntirivitunnus in ($tunnukset)";
-				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjares = pupe_query($query);
 
 			}
 			else {
@@ -71,7 +71,7 @@
 								and tilausrivi.var     			= 'J'
 								and tilausrivi.tyyppi 			in ('L','G')";
 				}
-				$rivitres = mysql_query($query) or pupe_error($query);
+				$rivitres = pupe_query($query);
 
 				if (mysql_num_rows($rivitres) == 0) {
 					echo "Tilausrivi‰ '$tunnusarray[0]' ei lˆytynyt<br><br>$query";
@@ -89,13 +89,13 @@
 								WHERE yhtio	= '$kukarow[yhtio]' and
 								tunnus		= '$kukarow[kesken]' and
 								tila        in ('N', 'L', 'E', 'G', 'C')";
-					$stresult = mysql_query($query) or pupe_error($query);
+					$stresult = pupe_query($query);
 
 					$query = "	SELECT *
 								FROM laskun_lisatiedot
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus = '$kukarow[kesken]'";
-					$lisatiedot_result = mysql_query($query) or pupe_error($query);
+					$lisatiedot_result = pupe_query($query);
 				}
 				elseif ($isarivirow["osatoimitus"] != "") {
 					$query = "	SELECT *
@@ -104,20 +104,20 @@
 								and tunnus	= '$isarivirow[otunnus]'
 								and tila	in ('N', 'L')
 								and alatila != 'X'";
-					$stresult = mysql_query($query) or pupe_error($query);
+					$stresult = pupe_query($query);
 
 					$query = "	SELECT *
 								FROM laskun_lisatiedot
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus = '$isarivirow[otunnus]'";
-					$lisatiedot_result = mysql_query($query) or pupe_error($query);
+					$lisatiedot_result = pupe_query($query);
 				}
 				else {
 					// tila pit‰‰ olla l‰hete, tilaus, ennakko tai siirtolista
 					$query = "	SELECT *
 								FROM lasku
 								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$isarivirow[otunnus]' and tila in ('N', 'L', 'E', 'G', 'C')";
-					$stresult = mysql_query($query) or pupe_error($query);
+					$stresult = pupe_query($query);
 
 					if (mysql_num_rows($stresult) == 0) {
 						echo "Otsikkoa '$isarivirow[otunnus]' ei lˆytynyt";
@@ -129,7 +129,7 @@
 								FROM laskun_lisatiedot
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus = '$isarivirow[otunnus]'";
-					$lisatiedot_result = mysql_query($query) or pupe_error($query);
+					$lisatiedot_result = pupe_query($query);
 					$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
 
 					if ($debug==1) echo t("Perusotsikko lˆytyi")." $otsikkorivi[nimi] $isarivirow[otunnus]<br>";
@@ -140,7 +140,7 @@
 					if ($toim == "ENNAKKO") {
 						// Tutkitaan perusotsikon er‰p‰iv‰m‰‰r‰‰
 						$erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and tunnus='$otsikkorivi[maksuehto]'";
-						$erpres = mysql_query($erpquery) or pupe_error($erpquery);
+						$erpres = pupe_query($erpquery);
 						$meapurow = mysql_fetch_array($erpres);
 
 						list($erpcmvv, $erpcmkk, $erpcmpp) = explode('-', $otsikkorivi["erpcm"]);
@@ -216,7 +216,7 @@
 								and laskun_lisatiedot.laskutus_maa 		= '$lisatiedot_row[laskutus_maa]'
 								$erpcmlisa1
 								$yhdlisa";
-					$stresult = mysql_query($query) or pupe_error($query);
+					$stresult = pupe_query($query);
 				}
 
 				if (mysql_num_rows($stresult) != 0) {
@@ -325,7 +325,7 @@
 											FROM asiakas
 											where yhtio = '$yhtiorow[yhtio]'
 											and tunnus = '$otsikkorivi[liitostunnus]'";
-							$tv_res = mysql_query($tv_query) or pupe_error($tv_query);
+							$tv_res = pupe_query($tv_query);
 							$tv_row = mysql_fetch_array($tv_res);
 
 							if ($tv_row["tilausvahvistus_jttoimituksista"] == "K" or ($yhtiorow["tilausvahvistus_jttoimituksista"] == "K" and $tv_row["tilausvahvistus_jttoimituksista"] != "E")) {
@@ -416,7 +416,7 @@
 												join maksuehto ON asiakas.yhtio = maksuehto.yhtio and asiakas.maksuehto = maksuehto.tunnus
 												where asiakas.yhtio = '$yhtiorow[yhtio]'
 												and asiakas.tunnus = '$otsikkorivi[liitostunnus]'";
-							$maksuehto_result = mysql_query($maksuehto_query) or pupe_error($maksuehto_query);
+							$maksuehto_result = pupe_query($maksuehto_query);
 							$maksuehtorow = mysql_fetch_array($maksuehto_result);
 
 							if ($maksuehtorow['jv'] != '') {
@@ -433,7 +433,7 @@
 						}
 					}
 					$query = substr($query,0,-1);
-					$stresult = mysql_query($query) or pupe_error($query);
+					$stresult = pupe_query($query);
 					$id = mysql_insert_id();
 
 					$query = "INSERT INTO laskun_lisatiedot SET ";
@@ -454,7 +454,7 @@
 					}
 
 					$query = substr($query, 0, -1);
-					$lisatiedot_result = mysql_query($query) or pupe_error($query);
+					$lisatiedot_result = pupe_query($query);
 
 					if ($debug==1) echo t("Perustin laskun")." $otsikkorivi[nimi] $id<br>";
 				}
@@ -525,7 +525,7 @@
 											and tilausrivi.var = 'J'
 											and tilausrivi.tyyppi in ('L','G')";
 							}
-							$rivitres = mysql_query($query) or pupe_error($query);
+							$rivitres = pupe_query($query);
 							$lisataanrow = mysql_fetch_array ($rivitres);
 
 							if ($toim == "ENNAKKO") {
@@ -541,13 +541,13 @@
 										FROM tuote
 										WHERE yhtio  = '$kukarow[yhtio]'
 										and  tuoteno = '$lisataanrow[tuoteno]'";
-							$aresult = mysql_query($query) or pupe_error($query);
+							$aresult = pupe_query($query);
 							$trow = mysql_fetch_array($aresult);
 
 							$query = "	SELECT *
 										FROM lasku
 										WHERE tunnus = '$id'";
-							$aresult = mysql_query($query) or pupe_error($query);
+							$aresult = pupe_query($query);
 							$laskurow = mysql_fetch_array($aresult);
 
 							$talteen_kpl		= $kpl; // lis‰‰rivi rikkoo t‰n, otetaan talteen
@@ -590,10 +590,10 @@
 								$alkupotunnus = $lisataanrow["otunnus"];
 							}
 
-							$query = "	SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo
+							$query = "	SELECT tunnus, asiakkaan_tilausnumero, viesti, tilausyhteyshenkilo, sisviesti1, kohde
 										FROM lasku
 										WHERE tunnus = '$alkupotunnus'";
-							$aresult = mysql_query($query) or pupe_error($query);
+							$aresult = pupe_query($query);
 
 							if (mysql_num_rows($aresult) > 0) {
 								$orig_laskurow = mysql_fetch_array($aresult);
@@ -624,6 +624,19 @@
 										// Tilausrivin systeemikommentti
 										$kommentti .= t("Tilaaja").": ".trim($orig_laskurow['tilausyhteyshenkilo']);
 									}
+									
+									if (trim($orig_laskurow['sisviesti1']) != "" and strpos($kommentti, t("Kommentti").": ".trim($orig_laskurow['sisviesti1'])) === FALSE) {
+										if (trim($kommentti) != "") $kommentti .= " / ";
+										// Tilausrivin systeemikommentti
+										$kommentti .= t("Kommentti").": ".trim($orig_laskurow['sisviesti1']);
+									}
+									
+									if (trim($orig_laskurow['kohde']) != "" and strpos($kommentti, t("Kohde").": ".trim($orig_laskurow['kohde'])) === FALSE) {
+										if (trim($kommentti) != "") $kommentti .= " / ";
+										// Tilausrivin systeemikommentti
+										$kommentti .= t("Kohde").": ".trim($orig_laskurow['kohde']);
+									}
+									
 								}
 								elseif ($otsikkorivi["osatoimitus"] == "" and $otsikkorivi['jtkielto'] == "Y") {
 									if (strpos($kommentti, t("Alkuper‰inen tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
@@ -715,10 +728,10 @@
 												WHERE yhtio = '$kukarow[yhtio]'
 												and tunnus = $poistetaan
 												and kpl = 0";
-									$tresult = mysql_query($query) or pupe_error($query);
+									$tresult = pupe_query($query);
 
 									$query = "UPDATE sarjanumeroseuranta set myyntirivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and myyntirivitunnus=$poistetaan";
-									$sarjares = mysql_query($query) or pupe_error($query);
+									$sarjares = pupe_query($query);
 
 									if ($debug==1) echo t("Saldo ei riitt‰nyt. Tehd‰‰n rollback")."<br>";
 								}
@@ -736,7 +749,7 @@
 											and sarjanumeroseuranta.tuoteno = '$lisataanrow[tuoteno]'
 											and sarjanumeroseuranta.myyntirivitunnus  = '$lisataanrow[tunnus]'
 											group by myyntirivitunnus";
-								$sarjares = mysql_query($query) or pupe_error($query);
+								$sarjares = pupe_query($query);
 								$sarjarow = mysql_fetch_array($sarjares);
 
 								foreach ($lisatyt_rivit1 as $lisatty_tun) {
@@ -745,7 +758,7 @@
 												WHERE yhtio = '$kukarow[yhtio]'
 												and otunnus = '$id'
 												and tunnus  = '$lisatty_tun'";
-									$lisres = mysql_query($query) or pupe_error($query);
+									$lisres = pupe_query($query);
 									$lisrow = mysql_fetch_array($lisres);
 
 									if ($lisrow["varattu"] != 0) {
@@ -757,14 +770,14 @@
 													and sarjanumeroseuranta.tuoteno = '$lisataanrow[tuoteno]'
 													and sarjanumeroseuranta.myyntirivitunnus  = '$lisataanrow[tunnus]'
 													LIMIT $lisrow[varattu]";
-										$cores = mysql_query($query) or pupe_error($query);
+										$cores = pupe_query($query);
 									}
 
 									//Kopioidaan tilausrivin lisatiedot
 									$query = "	SELECT *
 												FROM tilausrivin_lisatiedot
 												WHERE tilausrivitunnus='$lisataanrow[tunnus]' and yhtio ='$kukarow[yhtio]'";
-									$monistares2 = mysql_query($query) or pupe_error($query);
+									$monistares2 = pupe_query($query);
 
 									if (mysql_num_rows($monistares2) > 0) {
 										$monistarow2 = mysql_fetch_array($monistares2);
@@ -801,7 +814,7 @@
 
 										$kysely  = substr($kysely, 0, -1);
 										$kysely .= " WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus='$lisrow[tunnus]'";
-										$insres2 = mysql_query($kysely) or pupe_error($kysely);
+										$insres2 = pupe_query($kysely);
 									}
 
 									// jos alkuper‰inen rivi oli suoratoimitettu asiakkaalle, merkataan rivit ker‰tyksi ja toimitetuksi
@@ -814,7 +827,7 @@
 														kommentti = concat(kommentti, ' ".t("Suoratoimitus")."')
 														WHERE yhtio = '$kukarow[yhtio]'
 														AND tunnus = '$lisrow[tunnus]'";
-										$toimupdres = mysql_query($toimquery) or pupe_error($toimquery);
+										$toimupdres = pupe_query($toimquery);
 									}
 								}
 
@@ -824,7 +837,7 @@
 											WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 											and sarjanumeroseuranta.tuoteno = '$lisataanrow[tuoteno]'
 											and sarjanumeroseuranta.myyntirivitunnus  = '$lisataanrow[tunnus]'";
-								$cores = mysql_query($query) or pupe_error($query);
+								$cores = pupe_query($query);
 							}
 						}
 
@@ -845,7 +858,7 @@
 													WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 													and tilausrivi.tunnus  = '$tunnus_nyt'";
 									}
-									$rivitres = mysql_query($query) or pupe_error($query);
+									$rivitres = pupe_query($query);
 
 									$poista_update_lisa = "";
 
@@ -875,7 +888,7 @@
 												WHERE yhtio = '$kukarow[yhtio]'
 												and tunnus = '$tunnus_nyt'
 												and kpl = 0";
-									$tresult = mysql_query($query) or pupe_error($query);
+									$tresult = pupe_query($query);
 
 									if ($debug==1) echo t("Poistetaan loput rivilt‰").": $tunnus_nyt<br>";
 								}
@@ -895,7 +908,7 @@
 													WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 													and tilausrivi.tunnus  = '$tunnus_nyt'";
 									}
-									$rivitres = mysql_query($query) or pupe_error($query);
+									$rivitres = pupe_query($query);
 
 									if (mysql_num_rows($rivitres) == 1) {
 										$row = mysql_fetch_array ($rivitres);
@@ -918,7 +931,7 @@
 															and tunnus = '$tunnus_nyt'
 															and kpl = 0";
 											}
-											$tresult = mysql_query($query) or pupe_error($query);
+											$tresult = pupe_query($query);
 
 											if ($debug==1) echo t("J‰tet‰‰n loput rivilt‰").": $tunnus_nyt<br>";
 
@@ -928,7 +941,7 @@
 														WHERE yhtio = '$kukarow[yhtio]'
 														and tunnus = '$tunnus_nyt'
 														and kpl = 0";
-											$tresult = mysql_query($query) or pupe_error($query);
+											$tresult = pupe_query($query);
 
 											if ($debug==1) echo t("J‰tet‰‰n loput, mutta j‰tett‰v‰‰ ei ollut, joten dellataan rivi").": $tunnus_nyt<br>";
 										}
@@ -943,7 +956,7 @@
 										and otunnus = '$id'
 										and perheid != 0
 										GROUP by perheid";
-							$copresult = mysql_query($query) or pupe_error($query);
+							$copresult = pupe_query($query);
 
 							while ($coprivirow = mysql_fetch_array($copresult)) {
 								$query = "	UPDATE tilausrivi
@@ -951,7 +964,7 @@
 											WHERE yhtio = '$kukarow[yhtio]'
 											and otunnus = '$id'
 											and perheid = '$coprivirow[perheid]'";
-								$cores = mysql_query($query) or pupe_error($query);
+								$cores = pupe_query($query);
 							}
 
 							//Korjataan perheid2:t uusilla riveill‰
@@ -961,7 +974,7 @@
 										and otunnus = '$id'
 										and perheid2 != 0
 										GROUP by perheid2";
-							$copresult = mysql_query($query) or pupe_error($query);
+							$copresult = pupe_query($query);
 
 							while ($coprivirow = mysql_fetch_array($copresult)) {
 								$query = "	UPDATE tilausrivi
@@ -969,7 +982,7 @@
 											WHERE yhtio = '$kukarow[yhtio]'
 											and otunnus = '$id'
 											and perheid2 = '$coprivirow[perheid2]'";
-								$cores = mysql_query($query) or pupe_error($query);
+								$cores = pupe_query($query);
 							}
 						}
 					}

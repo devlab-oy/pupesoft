@@ -186,9 +186,19 @@ if (isset($submitnappi)) {
 			$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
 
 			$hinnat = alehinta($temp_laskurowwi, $tuoterow, 1, '', '', '', "hintaperuste,aleperuste");
+			
+			// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
+			$onko_asiakkaalla_alennuksia = TRUE;
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] > 12) {
+					$onko_asiakkaalla_alennuksia = FALSE;
+					break;
+				}
+			}
 
 			// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-			if ($tuoterow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
+			if ($tuoterow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
 				$ohitus = 1;
 			}
 		}

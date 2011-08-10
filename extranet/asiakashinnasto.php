@@ -243,9 +243,19 @@
 				$alehinta_val	= $hinnat["alehinta_val"];
 
 				list($hinta, $lis_alv) = alv($laskurow, $rrow, $hinta, '', $alehinta_alv);
-
+				
 				// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-				if ($rrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
+				$onko_asiakkaalla_alennuksia = TRUE;
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] > 12) {
+						$onko_asiakkaalla_alennuksia = FALSE;
+						break;
+					}
+				}
+				
+				// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
+				if ($rrow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
 					continue;
 				}
 

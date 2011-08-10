@@ -283,13 +283,17 @@ if (!function_exists("menu")) {
 									"vienti_kurssi" => 1,
 									"liitostunnus" => $asiakasrow["tunnus"],
 									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
-
+									
 						if ($hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 12) {
 							$ok = 1;
 						}
-						if ($hinnat["aleperuste"] >= 5 or $hinnat["aleperuste"] <= 8) {
-							$ok = 1;
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and ($hinnat["aleperuste"]["ale".$alepostfix] >= 5 and $hinnat["aleperuste"]["ale".$alepostfix] <= 8)) {
+								$ok = 1;
+							}
 						}
+
 					}
 					else {
 						$ok = 1;
@@ -370,13 +374,13 @@ if (!function_exists("menu")) {
 									"liitostunnus" => $asiakasrow["tunnus"],
 									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
-
-						// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
-							$ok = 0;
-						}
-						else {
-							$ok = 1;
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] > 12) {
+								$ok = 0;
+							}
+							else {
+								$ok = 1;
+							}
 						}
 					}
 					else {

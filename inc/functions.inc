@@ -7495,7 +7495,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 			$haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
 		}
 
-		if (strlen($haku) >= 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
@@ -7507,14 +7507,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 
 			foreach ($haku_array as $haku) {
 				$haku = mysql_real_escape_string($haku);
-								
-				if (substr($haku,0,1) == "@") {
-					$haku = substr($haku,1);
-					$haku_query .= " and (tuote.tuoteno = '$haku' or tuote.nimitys = '$haku') ";
-				}
-				else {
-					$haku_query .= " and (tuote.tuoteno like ('%$haku%') or tuote.nimitys like ('%$haku%')) ";
-				}
+				$haku_query .= " and (tuote.tuoteno like ('%$haku%') or tuote.nimitys like ('%$haku%')) ";
 			}
 
 			// vientikieltokäsittely:

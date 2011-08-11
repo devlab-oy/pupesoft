@@ -1,305 +1,268 @@
 <?php
 
-	require ("inc/parametrit.inc");
-	
-	echo "<font class='head'>".t("Mysqlalias-avainsanojen yll‰pito")."</font><hr>";
-	
+require ("inc/parametrit.inc");
+
+echo "<font class='head'>".t("Sanakirjojen yhdistely")."</font><hr>";
+
+if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
+	if ($uusi == 1) {
+		echo "<b>".t("Sinulla ei ole oikeutta lis‰t‰")."</b><br>";
+		$uusi = '';
+	}
+	if ($del == 1) {
+		echo "<b>".t("Sinulla ei ole oikeuttaa poistaa")."</b><br>";
+		$del = '';
+		$tunnus = 0;
+	}
 	if ($upd == 1) {
-
-		list($xtaulu, $xalias_set) = explode("###", $taulu);
-
-		// Luodaan puskuri, jotta saadaan taulukot kuntoon
-		$query = "	SELECT *
-					FROM $xtaulu
-					WHERE tunnus = '0'";
-		$result = mysql_query($query) or pupe_error($query);
-		$trow = mysql_fetch_array($result);
-
-		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
-
-			// Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
-			$al_nimi   = mysql_field_name($result, $i);
-
-			$query = "	DELETE
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji	= 'MYSQLALIAS'
-						and selite	= '$xtaulu.$al_nimi'
-						and selitetark_2 = '$xalias_set'";
-			$al_res = mysql_query($query) or pupe_error($query);
-			
-			if ($mysqlaliasbox[$al_nimi] != "" or trim($mysqlalias[$al_nimi]) != "") {
-				
-				$pakollisuus = "";
-				
-				if ($mysqlaliaspakollisuus[$al_nimi] != "") {
-					$pakollisuus = "PAKOLLINEN";
-				}
-				
-				$xotsikko = str_replace("(BR)", "<br>", trim($mysqlalias[$al_nimi]));
-				
-				$query = "	INSERT INTO avainsana
-							SET yhtio 		= '$kukarow[yhtio]',
-							laji			= 'MYSQLALIAS',
-							selite			= '$xtaulu.$al_nimi',
-							selitetark 		= '$xotsikko',
-							selitetark_2 	= '$xalias_set',
-							selitetark_3 	= '$pakollisuus'";
-				$al_res = mysql_query($query) or pupe_error($query);				
-			}
-		}
+		echo "<b>".t("Sinulla ei ole oikeuttaa muuttaa")."</b><br>";
+		$upd = '';
+		$uusi = 0;
+		$tunnus = 0;
 	}
-	
-	if ($kopsaataulu != "" and $uusisetti != "") {
-		
-		list($kopsaataulu, $alias_set) = explode("###", $kopsaataulu);
-		
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]'
-					and laji='MYSQLALIAS'
-					and selite like '$kopsaataulu.%'
-					and selitetark_2 = '$alias_set'";
-		$al_res1 = mysql_query($query) or pupe_error($query);
-		
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]'
-					and laji='MYSQLALIAS'
-					and selite like '$kopsaataulu.%'
-					and selitetark_2 = '$uusisetti'";
-		$al_res2 = mysql_query($query) or pupe_error($query);
-		
-		if (mysql_num_rows($al_res1) > 0 and mysql_num_rows($al_res2) == 0) {
-			while ($al_row = mysql_fetch_array($al_res1)) {
-				$query = "	INSERT INTO avainsana
-							SET yhtio 		= '$kukarow[yhtio]',
-							laji			= 'MYSQLALIAS',
-							selite			= '$al_row[selite]',
-							selitetark 		= '$al_row[selitetark]',
-							selitetark_2 	= '$uusisetti'";
-				$al_res3 = mysql_query($query) or pupe_error($query);
-			}
+}
+
+if (!isset($tee)) $tee = "";
+
+$kieliarray = array("se","en","de","no","dk","ee");
+
+if ($tee == "TEE" or $tee == "UPDATE") {
+
+	$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = ''";
+	$referes = pupe_query($sanakirjaquery, $link);
+
+	$query = "SHOW databases";
+	$dbresult = pupe_query($query, $link);
+
+	while ($dbrow = mysql_fetch_row($dbresult)) {
+
+		if ($dbrow[0] == "referenssi" or $dbrow[0] == "matchrace" or $dbrow[0] == "signalold") {
+			continue;
 		}
+
+		// otetaan sanakirja connect
+		$sanalink = mysql_connect($dbhost, "pupesoft2", "pupe1") or die ("Ongelma tietokantapalvelimessa $dbhost\n");
+		mysql_select_db($dbrow[0], $sanalink) or die ("\nTietokantaa $dbrow[0] ei lˆydy palvelimelta!\n");
+
+		$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = ''";
+		$referes = mysql_query($sanakirjaquery, $sanalink);
 	}
-	
-	// Nyt selataan
-	$query  = "SHOW TABLES FROM $dbkanta";
-	$tabresult = mysql_query($query) or pupe_error($query);
 
-	$sel[$taulu] = "SELECTED";
-	
-	echo "<form method = 'post'><table>";
-	echo "<tr><th>".t("Muokkaa aliasryhm‰‰").":</th><td>";
-	echo "<select name = 'taulu'>";
-	
-	while ($tables = mysql_fetch_array($tabresult)) {
-		if (file_exists("inc/".$tables[0].".inc")) {
+	$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,muutospvm
+						FROM sanakirja
+						ORDER BY kysytty desc";
+	$referes = pupe_query($sanakirjaquery, $link);
 
-			$query = "	SELECT distinct selitetark_2
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji	= 'MYSQLALIAS'
-						and selite	like '".$tables[0].".%'
-						and selitetark_2 != ''";
-			$al_res = mysql_query($query) or pupe_error($query);
-			
-			echo "<option value='$tables[0]' ".$sel[$tables[0]].">$tables[0]</option>";
-			
-			if (mysql_num_rows($al_res) > 0) {
-				while ($alrow = mysql_fetch_array($al_res)) {
-					echo "<option value='$tables[0]###$alrow[selitetark_2]' ".$sel[$tables[0]."###".$alrow["selitetark_2"]].">$tables[0] - $alrow[selitetark_2]</option>";
-				}
-			}
-		}
-	}
-	
-	echo "</select></td><td class='back'>";
-	echo "<input type='submit' value='".t("Valitse")."'>";
-	echo "</td></tr></table></form><br><br>";
-	
-	if ($taulu == "") {	
-		
-		echo "<form method = 'post'><table>";
-		echo "<tr><th>".t("Kopioi aliasryhm‰").":</th><td>";		
-		echo "<select name = 'kopsaataulu'>";
-		
-		mysql_data_seek($tabresult, 0);
-		
-		while ($tables = mysql_fetch_array($tabresult)) {
-			if (file_exists("inc/".$tables[0].".inc")) {
+	if (mysql_num_rows($referes) > 1) {
 
-				$query = "	SELECT distinct selitetark_2
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]'
-							and laji	= 'MYSQLALIAS'
-							and selite	like '".$tables[0].".%'
-							and selitetark_2 != ''";
-				$al_res = mysql_query($query) or pupe_error($query);
-			
-				echo "<option value='$tables[0]' ".$sel[$tables[0]].">$tables[0]</option>";
-			
-				if (mysql_num_rows($al_res) > 0) {
-					while ($alrow = mysql_fetch_array($al_res)) {
-						echo "<option value='$tables[0]###$alrow[selitetark_2]' ".$sel[$tables[0]."###".$alrow["selitetark_2"]].">$tables[0] - $alrow[selitetark_2]</option>";
-					}
-				}
-			}
-		}
-	
-		echo "</select></td>";
-		
-		echo "<th>".t("Uuden aliasryhm‰n nimi").":</th><td><input type='text' size='30' name='uusisetti'>";
-		echo "</select></td><td class='back'>";
-		echo "<input type='submit' value='".t("Valitse")."'>";
-		echo "</td></tr></table></form><br><br>";
-	}
-	
-	// Nyt n‰ytet‰‰n vanha tai tehd‰‰n uusi(=tyhj‰)
-	if ($taulu != "") {	
-		echo "<form method = 'post'>";
-		echo "<input type = 'hidden' name = 'taulu' value = '$taulu'>";
-		echo "<input type = 'hidden' name = 'upd' value = '1'>";
-
-		list($taulu, $alias_set) = explode("###", $taulu);
-
-		// Kokeillaan geneerist‰
-		$query = "	SELECT *
-					FROM $taulu
-					WHERE tunnus = 0";
-		$result = mysql_query($query) or pupe_error($query);
-		$trow = mysql_fetch_array($result);
-		
-		echo "<table><tr><td class='back' valign='top'>";
 		echo "<table>";
-		echo "<tr>";
-		echo "<th>Sarakkeen nimi</th>";
-		echo "<th>N‰kyvyys</th>";
-		echo "<th>Pakollisuus</th>";
-		echo "<th>Seliteteksti</th>";
-		echo "<th>Esimerkkej‰</th>";
+		echo "<tr><th>".t("Kysytty")."</td>";
+		echo "<th>".t("Me")." FI</td><th>".t("Ref")." FI</td>";
+
+		foreach ($kieliarray as $kieli) {
+			echo "<th>".t("Me")." $kieli</td><th>".t("Ref")." $kieli</td>";
+		}
+
 		echo "</tr>";
 
-		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
+		while ($rivi = mysql_fetch_assoc($referes)) {
 
-			$nimi = "t[$i]";
+			if (trim($rivi["fi"]) != "") {
 
-			if (isset($t[$i])) {
-				$trow[$i] = $t[$i];
-			}
+				$query = "SHOW databases";
+				$dbresult = pupe_query($query, $link);
 
-			if (strlen($trow[$i]) > 35) {
-				$size = strlen($trow[$i])+2;
-			}
-			elseif (mysql_field_len($result,$i)>10) {
-				$size = '35';
-			}
-			elseif (mysql_field_len($result,$i)<5) {
-				$size = '5';
-			}
-			else {
-				$size = '10';
-			}
+				while ($dbrow = mysql_fetch_row($dbresult)) {
 
-			$maxsize = mysql_field_len($result,$i); // Jotta t‰t‰ voidaan muuttaa
+					if ($dbrow[0] == "referenssi" or $dbrow[0] == "matchrace" or $dbrow[0] == "signalold") {
+						continue;
+					}
 
-			require ("inc/$taulu"."rivi.inc");
+					// otetaan sanakirja connect
+					$sanalink = mysql_connect($dbhost, "pupesoft2", "pupe1") or die ("Ongelma tietokantapalvelimessa $dbhost\n");
+					mysql_select_db($dbrow[0], $sanalink) or die ("\nTietokantaa $dbrow[0] ei lˆydy palvelimelta!\n");
 
-			// N‰it‰ kentti‰ ei ikin‰ saa p‰ivitt‰‰ k‰yttˆliittym‰st‰
-			if (mysql_field_name($result, $i) == "laatija" or
-				mysql_field_name($result, $i) == "muutospvm" or
-				mysql_field_name($result, $i) == "muuttaja" or
-				mysql_field_name($result, $i) == "luontiaika") {
-				$tyyppi = 2;
-			}
+					$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,muutospvm
+										FROM sanakirja
+										WHERE fi = BINARY '{$rivi["fi"]}'";
+					$sanakirjaresult = mysql_query($sanakirjaquery, $sanalink);
 
-			//Haetaan tietokantasarakkeen nimialias
-			$al_nimi = mysql_field_name($result, $i);
-			$otsikko = "";
-			$box 	 = "CHK";
+					if ($sanakirjaresult !== FALSE and mysql_num_rows($sanakirjaresult) > 0) {
+						$sanakirjarow = mysql_fetch_assoc($sanakirjaresult);
 
-			$query = "	SELECT *
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji='MYSQLALIAS'
-						and selite='$taulu.$al_nimi'
-						and selitetark_2 = '$alias_set'";
-			$al_res = mysql_query($query) or pupe_error($query);
+						#echo "<tr><th>{$dbrow[0]}</th><td>".$rivi["kysytty"]."</td>";
+						#echo "<td>".$sanakirjarow["fi"]."</td><td>$rivi[fi]</td>";
 
-			if(mysql_num_rows($al_res) > 0) {
-				$al_row = mysql_fetch_array($al_res);
+						$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = 'X' where fi = BINARY '{$sanakirjarow["fi"]}'";
+						$sanakirjaresult = mysql_query($sanakirjaquery, $sanalink);
 
-				$otsikko = str_replace("<br>", "(BR)", $al_row["selitetark"]);				
-				$box = "CHECKED";
-				
-				if ($al_row['selitetark_3'] == 'PAKOLLINEN') {
-					$pakollisuusbox = "CHECKED";
+						foreach ($kieliarray as $kieli) {
+							$sanakirjarow[$kieli] = pupesoft_cleanstring($sanakirjarow[$kieli]);
+
+							// Korjataan k‰‰nnˆksen eka merkki vastamaan referenssin ekan merkin kokoa
+							if (ctype_upper(substr($sanakirjarow["fi"], 0, 1)) === TRUE) {
+								// Eka merkki iso kirjain
+								$sanakirjarow[$kieli] = ucfirst($sanakirjarow[$kieli]);
+							}
+							else {
+								// Muuten koko stringi pienill‰
+								$sanakirjarow[$kieli] = strtolower($sanakirjarow[$kieli]);
+							}
+
+							if ($sanakirjarow[$kieli] != "" and $sanakirjarow[$kieli] != $rivi[$kieli]) {
+
+								if ($tee == "UPDATE") {
+									$sanakirjaquery  = "UPDATE sanakirja SET $kieli = '{$sanakirjarow[$kieli]}' where fi = BINARY '{$sanakirjarow["fi"]}' and muutospvm<='{$sanakirjarow["muutospvm"]}'";
+									$sanakirjaresult = pupe_query($sanakirjaquery, $link);
+								}
+
+								$e = "<font class='error'>";
+								$t = "</font>";
+							}
+							else {
+								$e = "";
+								$t = "";
+							}
+
+							#echo "<td>$e".$sanakirjarow[$kieli]."$t</td><td>$rivi[$kieli]</td>";
+						}
+					}
 				}
-				else {
-					$pakollisuusbox = "";
+
+				$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,muutospvm FROM sanakirja WHERE fi = BINARY '$rivi[fi]'";
+				$sanakirjaresult = pupe_query($sanakirjaquery, $link);
+				$sanakirjarow = mysql_fetch_assoc($sanakirjaresult);
+
+				$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = 'X' where fi = BINARY '$rivi[fi]'";
+				$sanakirjaresult = pupe_query($sanakirjaquery, $link);
+
+				echo "<tr>
+						<td>".$rivi["kysytty"]."</td>
+						<td class='green'>{$sanakirjarow["fi"]}</td><td class='green'>$rivi[fi]</td>";
+
+				foreach ($kieliarray as $kieli) {
+					echo "<td class='green'>{$sanakirjarow[$kieli]}</td><td class='green'>$rivi[$kieli]</td>";
 				}
-			}
 
-			// $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
-			// $tyyppi --> 1 rivi n‰ytet‰‰n normaalisti
-			// $tyyppi --> 1.5 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰
-			// $tyyppi --> 2 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, eik‰ sen arvoa p‰vitet‰
-			// $tyyppi --> 3 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, mutta sen arvo p‰ivitet‰‰n
-			// $tyyppi --> 4 rivi‰ ei n‰ytet‰ ollenkaan, mutta sen arvo p‰ivitet‰‰n
-			// $tyyppi --> 5 liitetiedosto
-
-			if (($tyyppi > 0 and $tyyppi < 4) or $tyyppi == 5) {
-				echo "<tr>";
-				echo "<th align='left'>".mysql_field_name($result, $i)."</th>";
-				
-				echo "<th><input type='checkbox' name='mysqlaliasbox[".mysql_field_name($result, $i)."]' $box></th>";
-				echo "<th><input type='checkbox' name='mysqlaliaspakollisuus[".mysql_field_name($result, $i)."]' $pakollisuusbox></th>";
-				
-				echo "<th align='left'><input type='text' size='30' name='mysqlalias[".mysql_field_name($result, $i)."]' value='$otsikko'></th>";
-			}
-
-			if ($jatko == 0) {
-				echo $ulos;
-			}
-			elseif ($tyyppi == 1) {
-				echo "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
-			}
-			elseif ($tyyppi == 1.5) {
-				$vva = substr($trow[$i],0,4);
-				$kka = substr($trow[$i],5,2);
-				$ppa = substr($trow[$i],8,2);
-
-				echo "<td>
-						<input type = 'text' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
-						<input type = 'text' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
-						<input type = 'text' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
-			}
-			elseif ($tyyppi == 2) {
-				echo "<td>$trow[$i]</td>";
-			}
-			elseif($tyyppi == 3) {
-				echo "<td>$trow[$i]<input type = 'hidden' name = '$nimi' value = '$trow[$i]'></td>";
-			}
-			elseif($tyyppi == 4) {
-				echo "<input type = 'hidden' name = '$nimi' value = '$trow[$i]'>";
-			}
-			elseif($tyyppi == 5) {
-				echo "<td><input type = 'file' name = 'liite_$i'></td>";
-			}
-
-			if (isset($virhe[$i])) {
-				echo "<td class='back'><font class='error'>$virhe[$i]</font></td>\n";
-			}
-
-			if (($tyyppi > 0 and $tyyppi < 4) or $tyyppi == 5) {
 				echo "</tr>";
 			}
 		}
-		echo "</table><br>";
-		echo "<input type='submit' value='".t("P‰ivit‰")."'>";
-		echo "</form>";		
+
+		$query = "SHOW databases";
+		$dbresult = pupe_query($query, $link);
+
+		while ($dbrow = mysql_fetch_row($dbresult)) {
+
+			if ($dbrow[0] == "referenssi" or $dbrow[0] == "matchrace" or $dbrow[0] == "signalold") {
+				continue;
+			}
+
+			// otetaan sanakirja connect
+			$sanalink = mysql_connect($dbhost, "pupesoft2", "pupe1") or die ("Ongelma tietokantapalvelimessa $dbhost\n");
+			mysql_select_db($dbrow[0], $sanalink) or die ("\nTietokantaa $dbrow[0] ei lˆydy palvelimelta!\n");
+
+			// Hetaan ne jotka ei ollut referenssiss‰
+			$sanakirjaquery  = "SELECT *
+								FROM sanakirja
+								WHERE synkronoi = ''
+								and (se !='' or no !='' or en !='' or de !='' or dk !='' or ee !='')";
+			$sanakirjaresult = mysql_query($sanakirjaquery, $sanalink);
+
+			while ($sanakirjarow = mysql_fetch_assoc($sanakirjaresult)) {
+
+				// Varmistetaan, ett‰ ei ole referenssiss‰
+				$sanakirjaquery  = "SELECT *
+									FROM sanakirja
+									WHERE fi = BINARY '$sanakirjarow[fi]'";
+				$referesult = mysql_query($sanakirjaquery, $link);
+				$referow = mysql_fetch_assoc($referesult);
+
+				if (mysql_num_rows($referesult) == 0) {
+
+					foreach ($kieliarray as $kieli) {
+						$sanakirjarow[$kieli] = pupesoft_cleanstring($sanakirjarow[$kieli]);
+
+						// Korjataan k‰‰nnˆksen eka merkki vastamaan referenssin ekan merkin kokoa
+						if (ctype_upper(substr($sanakirjarow["fi"], 0, 1)) === TRUE) {
+							// Eka merkki iso kirjain
+							$sanakirjarow[$kieli] = ucfirst($sanakirjarow[$kieli]);
+						}
+						else {
+							// Muuten koko stringi pienill‰
+							$sanakirjarow[$kieli] = strtolower($sanakirjarow[$kieli]);
+						}
+					}
+
+					$sanakirjaquery  = "INSERT INTO sanakirja
+										SET
+										fi = '$sanakirjarow[fi]',
+										se = '$sanakirjarow[se]',
+										no = '$sanakirjarow[no]',
+										en = '$sanakirjarow[en]',
+										de = '$sanakirjarow[de]',
+										dk = '$sanakirjarow[dk]',
+										ee = '$sanakirjarow[ee]',
+										aikaleima 	= '$sanakirjarow[aikaleima]',
+										kysytty 	= '$sanakirjarow[kysytty]',
+										laatija 	= '$sanakirjarow[laatija]',
+										luontiaika 	= '$sanakirjarow[luontiaika]',
+										muutospvm 	= '$sanakirjarow[muutospvm]',
+										muuttaja 	= '$sanakirjarow[muuttaja]'";
+					$result = pupe_query($sanakirjaquery, $link);
+				}
+				else {
+
+					foreach ($kieliarray as $kieli) {
+						$sanakirjarow[$kieli] = pupesoft_cleanstring($sanakirjarow[$kieli]);
+
+						// Korjataan k‰‰nnˆksen eka merkki vastamaan referenssin ekan merkin kokoa
+						if (ctype_upper(substr($sanakirjarow["fi"], 0, 1)) === TRUE) {
+							// Eka merkki iso kirjain
+							$sanakirjarow[$kieli] = ucfirst($sanakirjarow[$kieli]);
+						}
+						else {
+							// Muuten koko stringi pienill‰
+							$sanakirjarow[$kieli] = strtolower($sanakirjarow[$kieli]);
+						}
+
+						if ($sanakirjarow[$kieli] == "") {
+							$sanakirjarow[$kieli] = $referow[$kieli];
+						}
+					}
+
+					$sanakirjaquery  = "UPDATE sanakirja
+										SET
+										se 			= '$sanakirjarow[se]',
+										no 			= '$sanakirjarow[no]',
+										en 			= '$sanakirjarow[en]',
+										de 			= '$sanakirjarow[de]',
+										dk 			= '$sanakirjarow[dk]',
+										ee 			= '$sanakirjarow[ee]',
+										kysytty     = kysytty+$sanakirjarow[kysytty],
+										muutospvm   = if('$sanakirjarow[muutospvm]' > muutospvm, '$sanakirjarow[muutospvm]', muutospvm)
+										WHERE fi = BINARY '$sanakirjarow[fi]'";
+					$result = pupe_query($sanakirjaquery, $link);
+				}
+			}
+		}
+
+		echo "</table><br><br>";
+
+		echo "	<form method='post' action='$PHP_SELF'>
+				<input type='hidden' name='tee' value='UPDATE'>
+				<input type='submit' value='".t("Synkronoi")."'>
+				</form>";
+
 	}
-	
-	require ("inc/footer.inc");
+}
+else {
+	echo "	<br><br>
+			<form method='post' action='$PHP_SELF'>
+			<input type='hidden' name='tee' value='UPDATE'>
+			<input type='submit' value='".t("Vertaa sanakirjoja")."'>
+			</form>";
+}
+
+require ("inc/footer.inc");
 
 ?>

@@ -283,7 +283,7 @@
 
 		if (!$asiakasanalyysi) {
 			if ($status != '') {
-				$abc_lisa .= " and status = '".(string) $status."' ";
+				$abc_lisa .= " and abc_aputaulu.status = '".(string) $status."' ";
 			}
 		}
 
@@ -298,7 +298,7 @@
 					$abc_lisa
 					$lisa
 					$saapumispvmlisa";
-		$sumres = mysql_query($query) or pupe_error($query);
+		$sumres = pupe_query($query);
 		$sumrow = mysql_fetch_array($sumres);
 
 		if ($sumrow["yhtkate"] == 0) {
@@ -390,14 +390,14 @@
 					$saapumispvmlisa
 					$groupby
 					$orderby";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		$i = 0;
 
 		while ($row = mysql_fetch_array($res)) {
 
 			$query = "SELECT * FROM abc_parametrit WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$paramtyppi' and luokka = '$ryhmanimet[$i]'";
-			$paramres = mysql_query($query) or pupe_error($query);
+			$paramres = pupe_query($query);
 			$paramrow = mysql_fetch_array($paramres);
 
 			$i++;
@@ -442,7 +442,7 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								and myyja = '$row[myyjanro]'
 								AND myyja > 0";
-				$myyjares = mysql_query($keymyyja) or pupe_error($keymyyja);
+				$myyjares = pupe_query($keymyyja);
 				$keytuotemyyja = mysql_fetch_array($myyjares);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_tuotemyyja[]=$row[myyjanro]&lisatiedot=$lisatiedot&status=$status'>$keytuotemyyja[nimi]</a></td>";
@@ -454,7 +454,7 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								and myyja = '$row[ostajanro]'
 								AND myyja > 0";
-				$ostajares = mysql_query($keyostaja) or pupe_error($keymyyja);
+				$ostajares = pupe_query($keyostaja);
 				$keytuoteostaja = mysql_fetch_array($ostajares);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_tuoteostaja[]=$row[ostajanro]&lisatiedot=$lisatiedot&status=$status'>$keytuoteostaja[nimi]</a></td>";

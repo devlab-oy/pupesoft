@@ -155,7 +155,7 @@
 					$abc_lisa
 					$lisa
 					$saapumispvmlisa";
-		$sumres = mysql_query($query) or pupe_error($query);
+		$sumres = pupe_query($query);
 		$sumrow = mysql_fetch_array($sumres);
 
 		if ($sumrow["yhtkate"] == 0) {
@@ -175,7 +175,7 @@
 					$lisa
 					$hav
 					ORDER BY $jarjestys";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		echo "<br><table>";
 		echo "<tr>";
@@ -307,7 +307,7 @@
 								FROM asiakas
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$row[tuoteno]'";
-					$asres = mysql_query($query) or pupe_error($query);
+					$asres = pupe_query($query);
 					$asrow = mysql_fetch_array($asres);
 
 					$row["asiakastunnus"] = $row["tuoteno"];
@@ -347,7 +347,7 @@
 								AND myyja = '$row[myyjanro]'
 								AND myyja > 0
 								ORDER BY myyja";
-					$sresult = mysql_query($query) or pupe_error($query);
+					$sresult = pupe_query($query);
 					$srow = mysql_fetch_array($sresult);
 
 					echo "<td valign='top'>$srow[nimi]</td>";
@@ -358,7 +358,7 @@
 								AND myyja = '$row[ostajanro]'
 								AND myyja > 0
 								ORDER BY myyja";
-					$sresult = mysql_query($query) or pupe_error($query);
+					$sresult = pupe_query($query);
 					$srow = mysql_fetch_array($sresult);
 
 					echo "<td valign='top'>$srow[nimi]</td>";

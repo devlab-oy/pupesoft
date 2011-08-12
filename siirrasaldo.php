@@ -183,7 +183,7 @@
 			fclose($file);
 
 			if ($virhe == 0) {
-				$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tuote READ, tilausrivi READ, avainsana READ";
+				$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tuote READ, tilausrivi READ, avainsana READ, avainsana as avainsana_kieli READ";
 				$result = pupe_query($query);
 
 				echo "<pre>";

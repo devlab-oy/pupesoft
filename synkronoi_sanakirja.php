@@ -22,6 +22,10 @@ if ($oikeurow['paivitys'] != '1') { // Saako päivittää
 	}
 }
 
+if (!isset($tee)) $tee = "";
+
+$kieliarray = array("se","en","de","no","dk","ee");
+
 if ($tee == "TEE" or $tee == "UPDATE") {
 
 	$file	 = fopen("http://www.devlab.fi/softa/referenssisanakirja.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
@@ -41,109 +45,110 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 		if (isset($sync_otsikot["fi"])) {
 
 			echo "<table>";
-			echo "<tr><th>".t("Kysytty")."</td>
-			<th>".t("Me")." FI</td><th>".t("Ref")." FI</td>
-			<th>".t("Me")." SE</td><th>".t("Ref")." SE</td>
-			<th>".t("Me")." EN</td><th>".t("Ref")." EN</td>
-			<th>".t("Me")." DE</td><th>".t("Ref")." DE</td>
-			</tr>";
+			echo "<tr><th>".t("Kysytty")."</td>";
+			echo "<th>".t("Me")." FI</td><th>".t("Ref")." FI</td>";
 
+			foreach ($kieliarray as $kieli) {
+				echo "<th>".t("Me")." $kieli</td><th>".t("Ref")." $kieli</td>";
+			}
+
+			echo "</tr>";
 
 			$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = ''";
 			$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
 
-			$rivi = fgets($file);
-
-			while (!feof($file)) {
+			while ($rivi = fgets($file)) {
 				// luetaan rivi tiedostosta..
 				$poista	 = array("'", "\\");
 				$rivi	 = str_replace($poista,"",$rivi);
 				$rivi	 = explode("\t", trim($rivi));
 
-				if($rivi[$sync_otsikot["fi"]] != "") {
+				if ($rivi[$sync_otsikot["fi"]] != "") {
 
-					$sanakirjaquery  = "SELECT kysytty,fi,se,en,de,dk FROM sanakirja WHERE fi = BINARY '".$rivi[$sync_otsikot["fi"]]."'";
+					$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,muutospvm
+										FROM sanakirja
+										WHERE fi = BINARY '".$rivi[$sync_otsikot["fi"]]."'";
 					$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
 
 					if (mysql_num_rows($sanakirjaresult) > 0) {
-						$sanakirjarow = mysql_fetch_array($sanakirjaresult);
+						$sanakirjarow = mysql_fetch_assoc($sanakirjaresult);
 
 						$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = 'X' where fi = BINARY '$sanakirjarow[fi]'";
 						$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
 
 						echo "<tr><td>".$rivi[$sync_otsikot["kysytty"]]."</td>";
-
 						echo "<td>".$sanakirjarow["fi"]."</td><td>".$rivi[$sync_otsikot["fi"]]."</td>";
 
-						if ($sanakirjarow["se"] != $rivi[$sync_otsikot["se"]]) {
+						foreach ($kieliarray as $kieli) {
 
-							if ($tee == "UPDATE") {
-								$sanakirjaquery  = "UPDATE sanakirja SET se = '".$rivi[$sync_otsikot["se"]]."' where fi = BINARY '$sanakirjarow[fi]'";
-								$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
-							}
-
-							$e = "<font class='error'>";
-							$t = "</font>";
-						}
-						else {
 							$e = "";
 							$t = "";
-						}
 
-						echo "<td>$e".$sanakirjarow["se"]."$t</td><td>".$rivi[$sync_otsikot["se"]]."</td>";
+							if ($sanakirjarow[$kieli] != $rivi[$sync_otsikot[$kieli]]) {
 
-						if ($sanakirjarow["en"] != $rivi[$sync_otsikot["en"]]) {
+								$sanakirjarow[$kieli] = pupesoft_cleanstring($sanakirjarow[$kieli]);
 
-							if ($tee == "UPDATE") {
-								$sanakirjaquery  = "UPDATE sanakirja SET en = '".$rivi[$sync_otsikot["en"]]."' where fi = BINARY '$sanakirjarow[fi]'";
-								$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+								// Korjataan käännöksen eka merkki vastamaan referenssin ekan merkin kokoa
+								if (ctype_upper(substr($sanakirjarow["fi"], 0, 1)) === TRUE) {
+									// Eka merkki iso kirjain
+									$sanakirjarow[$kieli] = ucfirst($sanakirjarow[$kieli]);
+								}
+								else {
+									// Muuten koko stringi pienillä
+									$sanakirjarow[$kieli] = strtolower($sanakirjarow[$kieli]);
+								}
+
+								if ($tee == "UPDATE") {
+									$sanakirjaquery  = "UPDATE sanakirja SET $kieli = '".$rivi[$sync_otsikot[$kieli]]."' where fi = BINARY '$sanakirjarow[fi]'";
+									$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+
+									$sanakirjarow[$kieli] = $rivi[$sync_otsikot[$kieli]];
+								}
+								else {
+									$e = "<font class='error'>";
+									$t = "</font>";
+								}
 							}
 
-
-							$e = "<font class='error'>";
-							$t = "</font>";
+							echo "<td>$e".$sanakirjarow[$kieli]."$t</td><td>".$rivi[$sync_otsikot[$kieli]]."</td>";
 						}
-						else {
-							$e = "";
-							$t = "";
-						}
-
-						echo "<td>$e".$sanakirjarow["en"]."$t</td><td>".$rivi[$sync_otsikot["en"]]."</td>";
-
-						if ($sanakirjarow["de"] != $rivi[$sync_otsikot["de"]]) {
-
-							if ($tee == "UPDATE") {
-								$sanakirjaquery  = "UPDATE sanakirja SET de = '".$rivi[$sync_otsikot["de"]]."' where fi = BINARY '$sanakirjarow[fi]'";
-								$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
-							}
-
-							$e = "<font class='error'>";
-							$t = "</font>";
-						}
-						else {
-							$e = "";
-							$t = "";
-						}
-
-						echo "<td>$e".$sanakirjarow["de"]."$t</td><td>".$rivi[$sync_otsikot["de"]]."</td>";
-
 
 						echo "</tr>";
 					}
 					else {
 
+						echo "<tr><td>".$rivi[$sync_otsikot["kysytty"]]."</td>";
+
 						if ($tee == "UPDATE") {
-							$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '".$rivi[$sync_otsikot["fi"]]."', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
+							$sanakirjaquery  = "INSERT INTO sanakirja SET
+												fi = '".$rivi[$sync_otsikot["fi"]]."',
+												se = '".$rivi[$sync_otsikot["se"]]."',
+												no = '".$rivi[$sync_otsikot["no"]]."',
+												en = '".$rivi[$sync_otsikot["en"]]."',
+												de = '".$rivi[$sync_otsikot["de"]]."',
+												dk = '".$rivi[$sync_otsikot["dk"]]."',
+												ee = '".$rivi[$sync_otsikot["ee"]]."',
+												aikaleima	= now(),
+												kysytty		= 1,
+												laatija		= '$kukarow[kuka]',
+												luontiaika	= now()";
 							$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
+
+							echo "<td>".$rivi[$sync_otsikot["fi"]]."</td><td>".$rivi[$sync_otsikot["fi"]]."</td>";
+
+							foreach ($kieliarray as $kieli) {
+								echo "<td>".$rivi[$sync_otsikot[$kieli]]."</td><td>".$rivi[$sync_otsikot[$kieli]]."</td>";
+							}
+						}
+						else {
+							echo "<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["fi"]]."</td>";
+
+							foreach ($kieliarray as $kieli) {
+								echo "<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot[$kieli]]."</td>";
+							}
 						}
 
-						echo "<tr>
-								<td>".$rivi[$sync_otsikot["kysytty"]]."</td>
-								<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["fi"]]."</td>
-								<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["se"]]."</td>
-								<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["en"]]."</td>
-								<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["de"]]."</td>
-								</tr>";
+						echo "</tr>";
 					}
 				}
 
@@ -153,15 +158,22 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 
 			fclose($file);
 
-			$sanakirjaquery  = "SELECT kysytty,fi,se,en,de,dk FROM sanakirja WHERE synkronoi='' and (se!='' or en!='') and kysytty>1 ORDER BY kysytty desc";
+			$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,muutospvm
+								FROM sanakirja
+								WHERE synkronoi = ''
+								and (se !='' or no !='' or en !='' or de !='' or dk !='' or ee !='')
+								and kysytty > 1
+								ORDER BY kysytty desc";
 			$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
 
-			while ($sanakirjarow = mysql_fetch_array($sanakirjaresult)) {
+			while ($sanakirjarow = mysql_fetch_assoc($sanakirjaresult)) {
 				echo "<tr><td>".$sanakirjarow["kysytty"]."</td>";
 				echo "<td>".$sanakirjarow["fi"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
-				echo "<td>".$sanakirjarow["se"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
-				echo "<td>".$sanakirjarow["en"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
-				echo "<td>".$sanakirjarow["de"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
+
+				foreach ($kieliarray as $kieli) {
+					echo "<td>".$sanakirjarow[$kieli]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
+				}
+
 				echo "</tr>";
 			}
 

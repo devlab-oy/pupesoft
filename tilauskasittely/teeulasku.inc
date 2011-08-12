@@ -131,7 +131,7 @@
 		$mehtorow = array();
 
 		if ($lasrow["erpcm"] == "0000-00-00") {
-			$tulos_ulos_ulasku .= "<font class='message'><br>".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei löydy")."! ".t("Tunnus")." $lasrow[tunnus] ".t("Laskunro")." $lasrow[laskunro] ".t("epäonnistui pahasti")."!</font><br><br>\r\n";
+			$tulos_ulos_ulasku .= "<font class='message'><br>".t("Maksuehtoa", $kielirow["kieli"])." $lasrow[maksuehto] ".t("ei löydy", $kielirow["kieli"])."! ".t("Tunnus", $kielirow["kieli"])." $lasrow[tunnus] ".t("Laskunro", $kielirow["kieli"])." $lasrow[laskunro] ".t("epäonnistui pahasti", $kielirow["kieli"])."!</font><br><br>\r\n";
 		}
 	}
 	else {
@@ -401,7 +401,7 @@
 	$query = "SELECT * FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$uusiotunnus'";
 	$uusiuresult = pupe_query($query);
 
-	if (mysql_num_rows($uusiuresult)==0) die (t("Lasku")." $uusiotunnus ".t("katosi")."!");
+	if (mysql_num_rows($uusiuresult)==0) die (t("Lasku", $kielirow["kieli"])." $uusiotunnus ".t("katosi", $kielirow["kieli"])."!");
 	$laskurow = mysql_fetch_assoc($uusiuresult);
 
 	// päivitetään tilausriveille uuden otsikon tiedot (ei päivitetä Puute ja Jt rivejä laskutetuiksi)
@@ -482,7 +482,7 @@
 				}
 				
 				if ($useita_toimtapoja == "KYLLA") {
-					$sumskommentti .= "\n".t("Toimitustapa")." : $sumsrow[toimitustapa]";
+					$sumskommentti .= "\n".t("Toimitustapa", $kielirow["kieli"])." : $sumsrow[toimitustapa]";
 				}
 				
 				$query = "	UPDATE tilausrivi
@@ -523,7 +523,7 @@
 			}
 
 			if ($useita_toimtapoja == "KYLLA") {
-				$sumskommentti .= "\n".t("Toimitustapa")." : $sumsrow[toimitustapa]";
+				$sumskommentti .= "\n".t("Toimitustapa", $kielirow["kieli"])." : $sumsrow[toimitustapa]";
 			}
 
 			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";

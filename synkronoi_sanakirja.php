@@ -151,9 +151,6 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 						echo "</tr>";
 					}
 				}
-
-				// luetaan seuraava rivi failista
-				$rivi = fgets($file);
 			}
 
 			fclose($file);

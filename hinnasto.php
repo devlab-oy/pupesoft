@@ -43,7 +43,7 @@ if (!isset($submitnappi)) {
 
 	if ($kukarow['extranet'] == '') {
 		echo "<tr><th>".t("Listaa kaikki tuotteet").":</th>
-				<td><input type='checkbox' name='kl_hinnastoon'> (".t("muuten hinnastoon flägi <> E ja V").")</td></tr>";
+				<td><input type='checkbox' name='kl_hinnastoon'> (".t("muuten hinnastoon flägi eri kuin E ja V").")</td></tr>";
 
 
 		echo "<tr><th>".t("Näytä aleryhmän tunnus").":</th>

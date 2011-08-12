@@ -374,7 +374,11 @@ if (!function_exists("menu")) {
 									"vienti_kurssi" => 1,
 									"liitostunnus" => $asiakasrow["tunnus"],
 									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
-
+						
+			            if ($hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 12) {
+			            	$ok = 1;
+			            }
+						
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
 								$ok = 1;

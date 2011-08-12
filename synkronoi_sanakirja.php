@@ -55,7 +55,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 			echo "</tr>";
 
 			$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = ''";
-			$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+			$sanakirjaresult = pupe_query($sanakirjaquery);
 
 			while ($rivi = fgets($file)) {
 				// luetaan rivi tiedostosta..
@@ -68,13 +68,13 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 					$sanakirjaquery  = "SELECT kysytty,fi,se,no,en,de,dk,ee,muutospvm
 										FROM sanakirja
 										WHERE fi = BINARY '".$rivi[$sync_otsikot["fi"]]."'";
-					$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+					$sanakirjaresult = pupe_query($sanakirjaquery);
 
 					if (mysql_num_rows($sanakirjaresult) > 0) {
 						$sanakirjarow = mysql_fetch_assoc($sanakirjaresult);
 
 						$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = 'X' where fi = BINARY '$sanakirjarow[fi]'";
-						$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+						$sanakirjaresult = pupe_query($sanakirjaquery);
 
 						echo "<tr><td>".$rivi[$sync_otsikot["kysytty"]]."</td>";
 						echo "<td>".$sanakirjarow["fi"]."</td><td>".$rivi[$sync_otsikot["fi"]]."</td>";
@@ -100,7 +100,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 
 								if ($tee == "UPDATE") {
 									$sanakirjaquery  = "UPDATE sanakirja SET $kieli = '".$rivi[$sync_otsikot[$kieli]]."' where fi = BINARY '$sanakirjarow[fi]'";
-									$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+									$sanakirjaresult = pupe_query($sanakirjaquery);
 
 									$sanakirjarow[$kieli] = $rivi[$sync_otsikot[$kieli]];
 								}
@@ -132,7 +132,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 												kysytty		= 1,
 												laatija		= '$kukarow[kuka]',
 												luontiaika	= now()";
-							$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
+							$sanakirjaresult = pupe_query($sanakirjaquery);
 
 							echo "<td>".$rivi[$sync_otsikot["fi"]]."</td><td>".$rivi[$sync_otsikot["fi"]]."</td>";
 
@@ -164,7 +164,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 								and (se !='' or no !='' or en !='' or de !='' or dk !='' or ee !='')
 								and kysytty > 1
 								ORDER BY kysytty desc";
-			$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+			$sanakirjaresult = pupe_query($sanakirjaquery);
 
 			while ($sanakirjarow = mysql_fetch_assoc($sanakirjaresult)) {
 				echo "<tr><td>".$sanakirjarow["kysytty"]."</td>";

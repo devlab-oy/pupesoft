@@ -21,7 +21,7 @@ if ($_REQUEST["tee"] == "login") {
 					and yhtio 			 = '$verkkokauppa'
 					and extranet 		!= ''
 					and oletus_asiakas 	!= ''";
-		$result = mysql_query($query) or die("VIRHE: Kysely ei onnistu!");
+		$result = pupe_query($query);
 		$krow = mysql_fetch_array($result);
 
 		if ($salamd5 != '') {
@@ -49,7 +49,7 @@ if ($_REQUEST["tee"] == "login") {
 						and yhtio 			 = '$verkkokauppa'
 						and extranet		!= ''
 						and oletus_asiakas	!= ''";
-			$result = mysql_query($query) or die ("Päivitys epäonnistui kuka $query");
+			$result = pupe_query($query);
 
 			$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH));
 
@@ -92,7 +92,7 @@ if (!function_exists("tilaus")) {
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and liitostunnus = '$kukarow[oletus_asiakas]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$laskurow = mysql_fetch_array($result);
 
 		if ($muokkaa != "" and ($laskurow["tila"] != "N" or $laskurow["alatila"] != "" or $kukarow["kesken"] != $tunnus)) {
@@ -158,7 +158,7 @@ if (!function_exists("menu")) {
 						FROM lasku
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and tunnus  = '$kukarow[kesken]'";
-			$vieres = mysql_query($query) or pupe_error($query);
+			$vieres = pupe_query($query);
 			$vierow = mysql_fetch_array($vieres);
 		}
 		elseif ($verkkokauppa != "") {
@@ -245,7 +245,7 @@ if (!function_exists("menu")) {
 						and tuote.status != 'P'
 						and tuote.hinnastoon IN ('W', 'V')
 						ORDER BY avainsana.jarjestys, avainsana.selite+0";
-			$tryres = mysql_query($query) or pupe_error($query);
+			$tryres = pupe_query($query);
 
 			while ($tryrow = mysql_fetch_array($tryres)) {
 
@@ -262,18 +262,18 @@ if (!function_exists("menu")) {
 							$kieltolisa
 							$tuotemerkkilis
 							and hinnastoon IN ('W','V')";
-				$res = mysql_query($query) or pupe_error($query);
+				$res = pupe_query($query);
 
 				while ($trow = mysql_fetch_array($res) and $ok == 0) {
 
-					//	JOS asiakkaalle näytetään vain tuotteet jossa on asiakasale/hinta tai jos tuote näkyy verkkokaupassa vain jos asiakkaalla on asiakasale/hinta
+					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
 					if ($trow["hinnastoon"] == "V" or $kukarow["naytetaan_tuotteet"] == "A") {
 
 						if (!is_array($asiakasrow)) {
 							$query = "	SELECT *
 										FROM asiakas
 										WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-							$asres = mysql_query($query) or pupe_error($query);
+							$asres = pupe_query($query);
 							$asiakasrow = mysql_fetch_array($asres);
 						}
 
@@ -284,11 +284,15 @@ if (!function_exists("menu")) {
 									"liitostunnus" => $asiakasrow["tunnus"],
 									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
-						if ($hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 12) {
+						if ($hinnat["hintaperuste"] !== FALSE and $hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 13) {
 							$ok = 1;
 						}
-						if ($hinnat["aleperuste"] >= 5 or $hinnat["aleperuste"] <= 8) {
-							$ok = 1;
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and ($hinnat["aleperuste"] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] >= 5 and $hinnat["aleperuste"]["ale".$alepostfix] < 13)) {
+								$ok = 1;
+								break;
+							}
 						}
 					}
 					else {
@@ -331,7 +335,7 @@ if (!function_exists("menu")) {
 						and tuote.status != 'P'
 						and tuote.hinnastoon IN ('W', 'V')
 						ORDER BY avainsana.jarjestys, avainsana.selite";
-			$meres = mysql_query($query) or pupe_error($query);
+			$meres = pupe_query($query);
 
 			while ($merow = mysql_fetch_array($meres)) {
 
@@ -348,18 +352,18 @@ if (!function_exists("menu")) {
 							and status 	   != 'P'
 							$kieltolisa
 							and hinnastoon IN ('W', 'V')";
-				$res = mysql_query($query) or pupe_error($query);
+				$res = pupe_query($query);
 
 				while ($trow = mysql_fetch_array($res) and $ok == 0) {
 
-					//	JOS asiakkaalle näytetään vain tuotteet jossa on asiakasale/hinta tai jos tuote näkyy verkkokaupassa vain jos asiakkaalla on asiakasale/hinta
+					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
 					if ($trow["hinnastoon"] == "V" or $kukarow["naytetaan_tuotteet"] == "A") {
 
 						if (!is_array($asiakasrow)) {
 							$query = "	SELECT *
 										FROM asiakas
 										WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-							$asres = mysql_query($query) or pupe_error($query);
+							$asres = pupe_query($query);
 							$asiakasrow = mysql_fetch_array($asres);
 						}
 
@@ -370,13 +374,15 @@ if (!function_exists("menu")) {
 									"liitostunnus" => $asiakasrow["tunnus"],
 									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
-
-						// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
-							$ok = 0;
-						}
-						else {
+			            if ($hinnat["hintaperuste"] !== FALSE and $hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 13) {
 							$ok = 1;
+						}
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and ($hinnat["aleperuste"] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] >= 5 and $hinnat["aleperuste"]["ale".$alepostfix] < 13)) {
+								$ok = 1;
+								break;
+							}
 						}
 					}
 					else {
@@ -423,7 +429,7 @@ if (!function_exists("uutiset")) {
 					WHERE yhtio = '$kukarow[yhtio]'  $lisa
 					ORDER BY kokopaiva DESC, luontiaika DESC
 					LIMIT 8";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$val .= "<table class='uutinen'>";
@@ -453,7 +459,7 @@ if (!function_exists("uutiset")) {
 						$query = "	SELECT tuoteno, nimitys
 						 			FROM tuote
 									WHERE yhtio = '$kukarow[yhtio]' and tuoteno like ('$m[1]%') and status != 'P'";
-						$tres = mysql_query($query) or pupe_error($query);
+						$tres = pupe_query($query);
 
 						//	Tämä me korvataan aina!
 						$search[] = "/$m[0]/";
@@ -498,7 +504,7 @@ if ($tee == "monistalasku") {
 		$query = "	SELECT tunnus
 					FROM lasku
 					WHERE yhtio='$kukarow[yhtio]' and liitostunnus='$kukarow[oletus_asiakas]' and laskunro = '$laskunro' and tila = 'U'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		if (mysql_num_rows($result)==1) {
 			$row = mysql_fetch_array($result);
 
@@ -527,7 +533,7 @@ if ($tee == "jatkatilausta") {
 	if ((int) $tilaus > 0) {
 		$kukarow["kesken"] = $tilaus;
 		$query = "	UPDATE kuka SET kesken = '$tilaus' WHERE yhtio ='$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<font class='message'>".t("Aktivoitiin tilaus %s", $kieli, $tilaus)."</font><br>";
 
@@ -539,7 +545,7 @@ if ($tee == "keskeytatilaus") {
 	if ((int) $tilaus > 0) {
 		$kukarow["kesken"] = 0;
 		$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio ='$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<font class='message'>".t("Jätettiin tilaus %s kesken", $kieli, $tilaus)."</font><br>";
 	}
@@ -554,7 +560,7 @@ if ($tee == "tuotteen_lisatiedot") {
 	$query = "	SELECT kuvaus, lyhytkuvaus
 				FROM tuote
 				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and hinnastoon in ('W','V') and status != 'P'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$row = mysql_fetch_array($result);
 
 	//	Eka rivi aina head
@@ -611,7 +617,7 @@ if ($tee == "tuotteen_lisatiedot") {
 				and tuote.hinnastoon in ('W','V')
 				and tuote.status != 'P'
 				ORDER BY liitetiedostot.kayttotarkoitus IN ('TK') DESC, liitetiedostot.selite";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
 
@@ -660,7 +666,7 @@ if ($tee == "poistakori") {
 				tila = 'N' and
 				tunnus = '$kukarow[kesken]' and
 				alatila=''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
 		// löyty vaan yks dellataan se
@@ -673,7 +679,7 @@ if ($tee == "poistakori") {
 					where yhtio = '$kukarow[yhtio]' and
 					tyyppi = 'L' and
 					otunnus = '$kalakori[tunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$query = "	UPDATE lasku SET
 					alatila = tila,
@@ -682,10 +688,10 @@ if ($tee == "poistakori") {
 					where yhtio = '$kukarow[yhtio]' and
 					tila = 'N' and
 					tunnus = '$kalakori[tunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$query = "	UPDATE kuka SET kesken = '' WHERE yhtio ='$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<center><font class ='message'>".t("Tilaus %s mitätöity", $kieli, $kukarow["kesken"])."</font></center>";
 		$kukarow["kesken"] = 0;
@@ -699,7 +705,7 @@ if ($tee == "poistarivi") {
 				tila = 'N' and
 				tunnus = '$kukarow[kesken]' and
 				alatila=''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
 		// löyty vaan yks dellataan siitä rivi
@@ -710,7 +716,7 @@ if ($tee == "poistarivi") {
 					tyyppi = 'D',
 					kommentti = trim(concat(kommentti, ' Käyttäjä $kukarow[kuka] mitätöi tilausrivin laskulta $kukarow[kesken].'))
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'L' and tunnus = '$rivitunnus' LIMIT 1";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 	}
 
 	$tee = "tilatut";
@@ -723,7 +729,7 @@ if ($tee == "tallenna_osoite") {
 				tila = 'N' and
 				tunnus = '$kukarow[kesken]' and
 				alatila=''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
 		$kalakori = mysql_fetch_array($result);
@@ -741,12 +747,12 @@ if ($tee == "tallenna_osoite") {
 						comments				= '$comments',
 						toimaika				= '$toimvv-$toimkk-$toimpp'
 					WHERE yhtio = '$kukarow[yhtio]' and tila = 'N' and tunnus = '$kukarow[kesken]' LIMIT 1";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$query = "	UPDATE tilausrivi
 					SET toimaika = '".$toimvv."-".$toimkk."-".$toimpp."'
 					WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kalakori[tunnus]' and toimaika = '$kalakori[toimaika]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 	}
 
 	$tee = "tilatut";
@@ -759,7 +765,7 @@ if ($tee == "tilaa") {
 				tila = 'N' and
 				tunnus = '$kukarow[kesken]' and
 				alatila=''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	if (mysql_num_rows($result) == 1) {
 
 		$laskurow = mysql_fetch_array($result);
@@ -773,7 +779,7 @@ if ($tee == "tilaa") {
 						and tunnus='$kukarow[kesken]'
 						and tila = 'N'
 						and alatila = ''";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 		else {
 			// tulostetaan lähetteet ja tilausvahvistukset tai sisäinen lasku..
@@ -785,8 +791,8 @@ if ($tee == "tilaa") {
 
 
 		// tilaus ei enää kesken...
-		$query	= "update kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$query	= "UPDATE kuka SET kesken=0 WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
+		$result = pupe_query($query);
 	}
 
 	die($ulos);
@@ -800,7 +806,7 @@ if ($tee == "tilatut") {
 				tila = 'N' and
 				tunnus = '$kukarow[kesken]' and
 				alatila = ''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
 		$tee = "selaa";
@@ -817,7 +823,7 @@ if ($tee == "tilatut") {
 		$query = "	SELECT count(*) rivei
 					FROM tilausrivi
 					WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi = 'L'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$row = mysql_fetch_array($result);
 
 		$ulos .= "<br><input type='button' onclick=\"if (confirm('".t("Oletko varma, että haluat jättää tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')) { sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, false); }\" value='".t("Jätä kesken")."'>&nbsp;&nbsp;";
@@ -849,7 +855,7 @@ if ($tee == "asiakastiedot") {
 							concat_ws('<br>', toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp) toimitusosoite
 					FROM asiakas
 					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$asiakasrow = mysql_fetch_array($result);
 
 		echo "<table>
@@ -967,7 +973,7 @@ if ($tee == "asiakastiedot") {
 						and liitostunnus = '$kukarow[oletus_asiakas]'
 						$vainlisa
 						$where";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
 

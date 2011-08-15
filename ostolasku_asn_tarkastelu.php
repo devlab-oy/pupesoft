@@ -12,6 +12,12 @@
 						$('#formi').submit();
 					});
 
+					$('.toimittajabutton').click(function(){
+						var asn = $(this).attr('id');
+						$('#tee').val('vaihdatoimittaja');
+						$('#formi').attr('action', '?asn_numero='+asn).submit();
+					});
+
 					$('.etsibutton').click(function(){
 						var rivitunniste = $(this).attr('id');
 						$('#asn_rivi').val(rivitunniste);
@@ -20,8 +26,7 @@
 
 					$('.vahvistabutton').click(function(){
 						$('#tee').val('vahvistakolli');
-						$('#kolliformi').attr('action', '?');
-						$('#kolliformi').submit();
+						$('#kolliformi').attr('action', '?').submit();
 					});
 
 					$('#kohdista_tilausrivi_formi').submit(function(){
@@ -46,6 +51,59 @@
 	echo "<font class='head'>",t("Ostolasku / ASN-sanomien tarkastelu"),"</font><hr><br />";
 
 	if (!isset($tee)) $tee = '';
+
+	if ($tee == 'vaihdatoimittaja') {
+
+		$tila = '';
+
+		if (isset($nimi) and trim($nimi) != '') {
+
+			//tehdään asiakas- ja toimittajahaku yhteensopivuus
+			$ytunnus = $nimi;
+
+			$lause = "<font class='head'>".t("Valitse toimittaja").":</font><hr><br>";
+			require ("inc/kevyt_toimittajahaku.inc");
+
+			if ($ytunnus == '' and $monta > 1) {
+				//Löytyi monta sopivaa, näytetään formi, mutta ei otsikkoa
+				$tila = 'monta';
+			}
+			elseif ($ytunnus == '' and $monta < 1) {
+				//yhtään asiakasta ei löytynyt, näytetään otsikko
+				$tila = '';
+			}
+			else {
+				//oikea asiakas on löytynyt
+				$tunnus = $toimittajaid;
+				$tila = 'ok';
+			}
+			
+		}
+
+		if (isset($toimittajaid) and trim($toimittajaid) != '') {
+
+			$toimittajaid = (int) $toimittajaid;
+			$asn_numero = (int) $muutparametrit;
+
+			$query = "SELECT toimittajanro FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$toimittajaid}'";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
+
+			$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero = '{$asn_numero}'";
+			$res = pupe_query($query);
+
+			$tee = '';
+			$tila = 'ok';
+		}
+
+		if ($tila == '') {
+			echo "<form method='post' action='?tee={$tee}&muutparametrit={$asn_numero}'>";
+			echo "<table>";
+			echo "<tr><th>",t("Etsi toimittajaa")," (",t("nimi")," / ",t("ytunnus"),")</th><td><input type='text' name='nimi' value='' />&nbsp;<input type='submit' value='",t("Etsi"),"' /></td></tr>";
+			echo "</table>";
+			echo "</form>";
+		}
+	}
 
 	if ($tee == 'vahvistakolli') {
 
@@ -637,7 +695,7 @@
 
 	if ($tee == '') {
 		$query = "	SELECT toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift,
-					asn_sanomat.asn_numero, asn_sanomat.paketintunniste,
+					asn_sanomat.asn_numero, asn_sanomat.paketintunniste, asn_sanomat.toimittajanumero, 
 					count(asn_sanomat.tunnus) AS rivit,
 					sum(if(status != '', 1, 0)) AS ok
 					FROM asn_sanomat
@@ -647,7 +705,8 @@
 					ORDER BY asn_sanomat.asn_numero, asn_sanomat.paketintunniste";
 		$result = pupe_query($query);
 
-		echo "<form method='post' action='?tee=nayta_kolli&lopetus={$PHP_SELF}////tee=' id='formi'>";
+		echo "<form method='post' action='?lopetus={$PHP_SELF}////tee=' id='formi'>";
+		echo "<input type='hidden' id='tee' name='tee' value='nayta_kolli' />";
 		echo "<input type='hidden' id='kolli' name='kolli' value='' />";
 		echo "<table>";
 		echo "<tr>";
@@ -661,7 +720,20 @@
 		echo "<th>&nbsp;</th>";
 		echo "</tr>";
 
+		$ed_asn = '';
+		$naytetaanko_toimittajabutton = true;
+
 		while ($row = mysql_fetch_assoc($result)) {
+
+			if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
+
+				if ($naytetaanko_toimittajabutton) {
+					echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+				}
+
+				echo "<tr><td colspan='8' class='back'>&nbsp;</td></tr>";
+			}
+
 			echo "<tr>";
 			echo "<td>{$row['ytunnus']}</td>";
 
@@ -679,6 +751,16 @@
 			echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 			echo "<td><input type='button' class='kollibutton' id='{$row['paketintunniste']}' value='",t("Valitse"),"' /></td>";
 			echo "</tr>";
+
+			if (($ed_toimittaja == '' or $ed_toimittaja == $row['toimittajanumero']) and $row['ok'] == $row['rivit']) {
+				$naytetaanko_toimittajabutton = false;
+			}
+
+			$ed_asn = $row['asn_numero'];
+		}
+
+		if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
+			echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_asn}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
 		}
 
 		echo "</table>";

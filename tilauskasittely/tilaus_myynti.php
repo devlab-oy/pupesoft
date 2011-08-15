@@ -4486,7 +4486,7 @@ if ($tee == '') {
 			$sarakkeet_alku = 0;
 
 			// Sarakkeiden otsikot
-			$headerit = "<tr>$jarjlisa<th>".t("#")."</th>";
+			$headerit = "<tr>$jarjlisa<th>#</th>";
 			$sarakkeet++;
 
 			if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or ($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("RIVISYOTTO")))) {

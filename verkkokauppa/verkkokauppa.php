@@ -283,18 +283,17 @@ if (!function_exists("menu")) {
 									"vienti_kurssi" => 1,
 									"liitostunnus" => $asiakasrow["tunnus"],
 									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
-									
-						if ($hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 12) {
+
+						if ($hinnat["hintaperuste"] !== FALSE and $hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 13) {
 							$ok = 1;
 						}
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and ($hinnat["aleperuste"]["ale".$alepostfix] >= 5 and $hinnat["aleperuste"]["ale".$alepostfix] <= 8)) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and ($hinnat["aleperuste"] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] >= 5 and $hinnat["aleperuste"]["ale".$alepostfix] <= 12)) {
 								$ok = 1;
 								break;
 							}
 						}
-
 					}
 					else {
 						$ok = 1;
@@ -374,14 +373,15 @@ if (!function_exists("menu")) {
 									"vienti_kurssi" => 1,
 									"liitostunnus" => $asiakasrow["tunnus"],
 									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
-						
-			            if ($hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 12) {
-			            	$ok = 1;
-			            }
-						
+
+			            if ($hinnat["hintaperuste"] !== FALSE and $hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 13) {
+							$ok = 1;
+						}
+
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and ($hinnat["aleperuste"] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] >= 5 and $hinnat["aleperuste"]["ale".$alepostfix] <= 12)) {
 								$ok = 1;
+								break;
 							}
 						}
 					}

@@ -266,7 +266,7 @@ if (!function_exists("menu")) {
 
 				while ($trow = mysql_fetch_array($res) and $ok == 0) {
 
-					//	JOS asiakkaalle näytetään vain tuotteet jossa on asiakasale/hinta tai jos tuote näkyy verkkokaupassa vain jos asiakkaalla on asiakasale/hinta
+					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
 					if ($trow["hinnastoon"] == "V" or $kukarow["naytetaan_tuotteet"] == "A") {
 
 						if (!is_array($asiakasrow)) {
@@ -289,7 +289,7 @@ if (!function_exists("menu")) {
 						}
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and ($hinnat["aleperuste"] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] >= 5 and $hinnat["aleperuste"]["ale".$alepostfix] <= 12)) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and ($hinnat["aleperuste"] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] >= 5 and $hinnat["aleperuste"]["ale".$alepostfix] < 13)) {
 								$ok = 1;
 								break;
 							}
@@ -356,7 +356,7 @@ if (!function_exists("menu")) {
 
 				while ($trow = mysql_fetch_array($res) and $ok == 0) {
 
-					//	JOS asiakkaalle näytetään vain tuotteet jossa on asiakasale/hinta tai jos tuote näkyy verkkokaupassa vain jos asiakkaalla on asiakasale/hinta
+					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
 					if ($trow["hinnastoon"] == "V" or $kukarow["naytetaan_tuotteet"] == "A") {
 
 						if (!is_array($asiakasrow)) {
@@ -379,7 +379,7 @@ if (!function_exists("menu")) {
 						}
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and ($hinnat["aleperuste"] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] >= 5 and $hinnat["aleperuste"]["ale".$alepostfix] <= 12)) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and ($hinnat["aleperuste"] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] >= 5 and $hinnat["aleperuste"]["ale".$alepostfix] < 13)) {
 								$ok = 1;
 								break;
 							}

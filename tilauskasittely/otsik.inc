@@ -1988,10 +1988,10 @@
 					}
 					elseif (strtoupper($al_row["selitetark_2"]) == "DROPDOWN") {
 						$dropdown_arvot = explode("#", $al_row['selitetark_3']);
-						
+
 						echo "<td>{$al_row["selitetark"]}</td>";
 						echo "<td><select name='$kentta'>";
-						
+
 						foreach ($dropdown_arvot as $arvo) {
 							$sele = ($srow[$kentta] == $arvo) ? "SELECTED" : "";
 							echo "<option value='$arvo' $sele>$arvo</option>";
@@ -2407,12 +2407,11 @@
 						}
 
 						$hinnat = alehinta($laskurow, $trow, $row['tilkpl'], '', '', '', $haettavat_kentat);
-						
-						// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
+
 						$onko_asiakkaalla_alennuksia = FALSE;
 
 						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
 								$onko_asiakkaalla_alennuksia = TRUE;
 								break;
 							}
@@ -3176,7 +3175,7 @@
 							vikakoodi		= '$vikakoodi',
 							takuunumero		= '$takuunumero',
 							tyokoodi		= '$tyokoodi',
-							hyvaksy			= '$hyvaksy',							
+							hyvaksy			= '$hyvaksy',
 							otunnus 		= '$kukarow[kesken]'";
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);

@@ -224,10 +224,10 @@
 
 					$ytunnus         = $laskurow["ytunnus"];
 					$kpl             = (float) $kpl;
-					$kpl_echo 		 = (float) $kpl;					
+					$kpl_echo 		 = (float) $kpl;
 					$tuoteno         = $trow["tuoteno"];
 					$yllapita_toim_stash = $toim;
-					
+
 					if ($toim_kutsu != "YLLAPITO") {
 						$toimaika = $laskurow["toimaika"];
 						$kerayspvm = $laskurow["kerayspvm"];
@@ -1311,12 +1311,11 @@
 					}
 
 					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', $haettavat_kentat);
-					
-					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
+
 					$onko_asiakkaalla_alennuksia = FALSE;
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
 							$onko_asiakkaalla_alennuksia = TRUE;
 							break;
 						}

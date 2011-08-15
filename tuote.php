@@ -1815,7 +1815,11 @@
 								echo "<div id='div_$prow[trivitunn]' class='popup' style='width:200px;'>";
 								echo "<table>";
 
-								$query = "	SELECT tilausrivi.nimitys, tilausrivi.tuoteno, tilausrivi.kpl, tapahtuma.hinta, tilausrivi.kpl*tapahtuma.hinta yhteensa
+								$query = "	SELECT tilausrivi.nimitys, 
+											tilausrivi.tuoteno, 
+											tapahtuma.kpl * -1 'kpl', 
+											tapahtuma.hinta, 
+											tapahtuma.kpl * tapahtuma.hinta * -1 yhteensa
 											FROM tilausrivi
 											JOIN tapahtuma ON tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus
 											WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'

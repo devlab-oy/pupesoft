@@ -303,7 +303,7 @@
 
 	$paikat	= "";
 
-	if ($yhtiorow['myyntiera_pyoristys'] == 'K' and in_array($row['tunnus'], $myyntierahuom) and $kpl_st != $org_kpl) {
+	if ($yhtiorow['myyntiera_pyoristys'] == 'K' and isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus'], $myyntierahuom) and $kpl_st != $org_kpl) {
 		$varaosavirhe .= t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on").": $trow[myynti_era]<br>";
 	}
 

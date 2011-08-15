@@ -126,14 +126,14 @@ if (isset($submitnappi)) {
 	else {
 		// otetaan valuuttatiedot oletus asiakkaalta
 		$query = "SELECT maa, valkoodi, ytunnus from asiakas where tunnus='$kukarow[oletus_asiakas]' and yhtio ='$kukarow[yhtio]'";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		// käytetään tätä laskurowna
 		$laskurowfake = mysql_fetch_assoc($res);
 	}
 
 	$query = "SELECT kurssi from valuu where nimi = '$laskurowfake[valkoodi]' and yhtio = '$kukarow[yhtio]'";
-	$res = mysql_query($query) or pupe_error($query);
+	$res = pupe_query($query);
 	$kurssi = mysql_fetch_array($res);
 
 	// asetetaan vienti kurssi
@@ -161,7 +161,7 @@ if (isset($submitnappi)) {
 				and tuote.vienti not like '%+$laskurowfake[maa]%')
 				and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 				ORDER BY tuote.osasto+0, tuote.try+0";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<br><br><font class='message'>".t('Yhtään tuotetta ei löytynyt hinnastoon.') . '</font><br />';
@@ -187,8 +187,17 @@ if (isset($submitnappi)) {
 
 			$hinnat = alehinta($temp_laskurowwi, $tuoterow, 1, '', '', '', "hintaperuste,aleperuste");
 
+			$onko_asiakkaalla_alennuksia = FALSE;
+
+			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+				if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+					$onko_asiakkaalla_alennuksia = TRUE;
+					break;
+				}
+			}
+
 			// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-			if ($tuoterow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
+			if ($tuoterow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
 				$ohitus = 1;
 			}
 		}

@@ -17,12 +17,307 @@
 						$('#asn_rivi').val(rivitunniste);
 						$('#kolliformi').submit();
 					});
+
+					$('.vahvistabutton').click(function(){
+						$('#tee').val('vahvistakolli');
+						$('#kolliformi').attr('action', '?');
+						$('#kolliformi').submit();
+					});
+
+					$('#kohdista_tilausrivi_formi').submit(function(){
+						var kohdistettu = false;
+
+						$('.tunnukset').each(function(){
+							if ($(this).is(':checked')) {
+								kohdistettu = true;
+							}
+						});
+
+						if (kohdistettu) {
+							var lopetus = $('#lopetus').val();
+							lopetukset = lopetus.split('/SPLIT/');
+
+							$('#lopetus').val(lopetukset[0]);
+						}
+					});
 				});
 			</script>";
 
 	echo "<font class='head'>",t("Ostolasku / ASN-sanomien tarkastelu"),"</font><hr><br />";
 
 	if (!isset($tee)) $tee = '';
+
+	if ($tee == 'vahvistakolli') {
+
+		$kolli = mysql_real_escape_string($kolli);
+
+		$paketin_rivit = array();
+		$paketin_tunnukset = array();
+
+		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND paketintunniste = '{$kolli}'";
+		$kollires = pupe_query($query);
+
+		while ($kollirow = mysql_fetch_assoc($kollires)) {
+			$toimittaja = $kollirow['toimittajanumero'];
+			$asn_numero = $kollirow['asn_numero'];
+			$paketin_tunnukset[] = $kollirow['tunnus'];
+
+			if (strpos($kollirow['tilausrivi'], ",") !== false) {
+
+				foreach (explode(",", $kollirow['tilausrivi']) as $tun) {
+					$paketin_rivit[] = $tun;
+				}
+			}
+			else {
+				$paketin_rivit[] = $kollirow['tilausrivi'];
+			}
+		}
+
+		$query = "SELECT GROUP_CONCAT(tuoteno) AS tuotenumerot FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN (".implode(",", $paketin_rivit).")";
+		$tuotenores = pupe_query($query);
+		$tuotenorow = mysql_fetch_assoc($tuotenores);
+
+		$paketin_tuotteet = explode(",", $tuotenorow['tuotenumerot']);
+
+		require('inc/asn_kohdistus.inc');
+
+		asn_kohdista_suuntalava($toimittaja, $asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset);
+
+		$tee = '';
+	}
+
+	if ($tee == 'uusirivi') {
+
+		echo t("Tee uusi rivi").":<br>";
+
+		$var = 'O';
+
+		if (trim($tilausnro) == '' or $tilausnro == 0) {
+
+			$asn_rivi = (int) $asn_rivi;
+
+			$query = "SELECT tilausnumero FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
+
+			$tilausnro = $row['tilausnumero'];
+		}
+
+		//pidetään kaikki muuttujat tallessa
+		$muut_siirrettavat = $asn_rivi."!¡!".$toimittaja."!¡!".$tilausnro."!¡!".$tuoteno."!¡!".$tilaajanrivinro."!¡!".$kpl;
+
+		$rivinotunnus = $tilausnro;
+		$toimaika = date('Y')."-".date('m')."-".date('d');
+
+		require('tilauskasittely/syotarivi_ostotilaus.inc');
+		require('inc/footer.inc');
+		exit;
+
+	}
+
+	//poistetaan rivi, näytetään lista
+	if ($tee == 'TI' and isset($tyhjenna)) {
+		$tee = 'etsi_tilausrivi';
+	}
+
+	//tarkastetaan tilausrivi
+	if ($tee == 'TI') {
+		// Parametreja joita tarkistarivi tarvitsee
+		$laskurow["tila"] 	= "O";
+		$toim_tarkistus 	= "EI";
+		$prow["tuoteno"] 	= $tuoteno;
+		$prow["var"]		= $rivinvar;
+		$kukarow["kesken"]	= $rivinotunnus;
+
+		$kpl 	= str_replace(',','.',$kpl);
+		$hinta 	= str_replace(',','.',$hinta);
+
+		for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+			${'ale'.$alepostfix} = str_replace(',','.', ${'ale'.$alepostfix});
+		}
+
+		if (checkdate($toimkka,$toimppa,$toimvva)) {
+			$toimaika = $toimvva."-".$toimkka."-".$toimppa;
+		}
+
+		if ($hinta == "") {
+
+			$toimittaja = (int) $toimittaja;
+
+			$query = "	SELECT tunnus
+						FROM toimi
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND toimittajanro = '{$toimittaja}'";
+			$toimires = pupe_query($query);
+			$toimirow = mysql_fetch_assoc($toimires);
+
+			$laskurow['liitostunnus'] = $toimirow['tunnus'];
+
+			$query = "	SELECT *
+						FROM tuotteen_toimittajat
+						WHERE tuoteno = '{$prow['tuoteno']}'
+						AND yhtio = '{$kukarow['yhtio']}'
+						AND liitostunnus = '{$laskurow['liitostunnus']}'";
+			$rarres1 = pupe_query($query);
+			$hinrow1 = mysql_fetch_assoc($rarres1);
+
+			$prow["hinta"] = $hinrow1["ostohinta"];
+		}
+		else {
+			$prow["hinta"] = $hinta;
+		}
+
+		$multi = "";
+		require("inc/tuotehaku.inc");
+		$prow["tuoteno"] = $tuoteno;
+
+		require('tilauskasittely/tarkistarivi_ostotilaus.inc');
+
+		//näytetään virhe ja annetaan mahis korjata se
+		if (trim($varaosavirhe) != '' or trim($tuoteno) == "") {
+
+			//rivien splittausvaihtoehtot näkyviin
+			$automatiikka = 'ON';
+
+			echo t("Muuta riviä"),":<br>";
+			require('tilauskasittely/syotarivi_ostotilaus.inc');
+			require('inc/footer.inc');
+			exit;
+		}
+
+	}
+
+	//rivi on tarkistettu ja se lisataan tietokantaan
+	if ((isset($varaosavirhe) and trim($varaosavirhe) == '') and ($tee == "TI") and trim($tuoteno) != '') {
+
+		$laskurow["tila"] = "O";
+		$kukarow["kesken"] = $rivinotunnus;
+
+		if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
+			$tuoteno_array[] = $tuoteno;
+		}
+
+		//Käyttäjän syöttämä hinta ja ale ja netto, pitää säilöä jotta tuotehaussakin voidaan syöttää nämä
+		for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+			${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};
+		}
+
+		$kayttajan_hinta	= $hinta;
+		$kayttajan_netto 	= $netto;
+		$kayttajan_var		= $var;
+		$kayttajan_kpl		= $kpl;
+		$kayttajan_alv		= $alv;
+
+		foreach ($tuoteno_array as $tuoteno) {
+
+			$query	= "	SELECT *
+						FROM tuote
+						WHERE tuoteno = '{$tuoteno}'
+						and yhtio = '{$kukarow['yhtio']}'
+						and ei_saldoa = ''";
+			$result = pupe_query($query);
+
+			if (mysql_num_rows($result) > 0) {
+				//Tuote löytyi
+				$trow = mysql_fetch_array($result);
+			}
+			else {
+				//Tuotetta ei löydy, arvataan muutamia muuttujia
+				$trow["alv"] = $laskurow["alv"];
+			}
+
+			if (checkdate($toimkka,$toimppa,$toimvva)) {
+				$toimaika = $toimvva."-".$toimkka."-".$toimppa;
+			}
+			if (checkdate($kerayskka,$keraysppa,$keraysvva)) {
+				$kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
+			}
+			if ($toimaika == "" or $toimaika == "0000-00-00") {
+				$toimaika = $laskurow["toimaika"];
+			}
+			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+				$kerayspvm = $laskurow["kerayspvm"];
+			}
+
+			$varasto = $laskurow["varasto"];
+
+			//Tehdään muuttujaswitchit
+			if (is_array($hinta_array)) {
+				$hinta = $hinta_array[$tuoteno];
+			}
+			else {
+				$hinta = $kayttajan_hinta;
+			}
+
+			for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+				if (is_array(${'ale_array'.$alepostfix})) {
+					${'ale'.$alepostfix} = ${'ale_array'.$alepostfix}[$tuoteno];
+				}
+				else {
+					${'ale'.$alepostfix} = ${'kayttajan_ale'.$alepostfix};
+				}
+			}
+
+			if (is_array($netto_array)) {
+				$netto = $netto_array[$tuoteno];
+			}
+			else {
+				$netto = $kayttajan_netto;
+			}
+
+			if (is_array($var_array)) {
+				$var = $var_array[$tuoteno];
+			}
+			else {
+				$var = $kayttajan_var;
+			}
+
+			if (is_array($kpl_array)) {
+				$kpl = $kpl_array[$tuoteno];
+			}
+			else {
+				$kpl = $kayttajan_kpl;
+			}
+
+			if (is_array($alv_array)) {
+				$alv = $alv_array[$tuoteno];
+			}
+			else {
+				$alv = $kayttajan_alv;
+			}
+
+			if ($kpl != 0) {
+				require ('tilauskasittely/lisaarivi.inc');
+			}
+
+			$hinta 	= '';
+			$netto 	= '';
+			$var 	= '';
+			$kpl 	= '';
+			$alv 	= '';
+			$paikka	= '';
+
+			for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+				${'ale'.$alepostfix} = '';
+			}
+		}
+
+		if ($lisavarusteita == "ON" and $perheid2 > 0) {
+			//Päivitetään isälle perheid jotta tiedetään, että lisävarusteet on nyt lisätty
+			$query = "	UPDATE tilausrivi set
+						perheid2	= '{$perheid2}'
+						where yhtio = '{$kukarow['yhtio']}'
+						and tunnus 	= '{$perheid2}'";
+			$updres = pupe_query($query);
+		}
+
+		$tee = 'etsi_tilausrivi';
+	}
+
+	//korjataan siirrettävät muuttujat taas talteen
+	if (isset($muut_siirrettavat)) {
+		list($asn_rivi, $toimittaja, $tilausnro, $tuoteno, $tilaajanrivinro, $kpl) = explode("!¡!", $muut_siirrettavat);
+	}
 
 	if ($tee == 'kohdista_tilausrivi') {
 
@@ -31,18 +326,17 @@
 			$tee = 'etsi_tilausrivi';
 		}
 		else {
-			// echo "<pre>",var_dump($tunnukset),"</pre>";
-			// echo (int) array_walk($tunnukset, 'settype', 'int');
-			// $tunnukset = array_map(create_function('$value', 'return (int) $value;'), $tunnukset);
-
 			// typecastataan formista tulleet tunnukset stringeistä inteiksi
 			$tunnukset = array_map('intval', $tunnukset);
 
-			// echo "<pre>",var_dump($tunnukset),"</pre>";
-
-			$query = "UPDATE asn_sanomat SET status = 'X', tilausrivi = '".implode(",", $tunnukset)."' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
+			$query = "UPDATE asn_sanomat SET tilausrivi = '".implode(",", $tunnukset)."' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
 			$updres = pupe_query($query);
 
+			$query = "SELECT paketintunniste FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$asn_rivi}'";
+			$res = pupe_query($query);
+			$row = mysql_fetch_assoc($res);
+
+			$kolli = $row['paketintunniste'];
 			$tee = 'nayta_kolli';
 		}
 	}
@@ -90,7 +384,9 @@
 
 		echo "<br /><hr /><br />";
 
-		echo "<input type='button' value='",t("Tee uusi tilausrivi"),"' />";
+		echo "<form method='post' action='?tee=uusirivi&asn_rivi={$asn_rivi}&toimittaja={$toimittaja}&tilausnro={$tilausnro}&tuoteno={$tuoteno}&tilaajanrivinro={$tilaajanrivinro}&kpl={$kpl}&lopetus={$lopetus}'>";
+		echo "<input type='submit' value='",t("Tee uusi tilausrivi"),"' />";
+		echo "</form>";
 		echo "<br />";
 
 		if (trim($toimittaja) != '' or trim($tilausnro) != '' or trim($tuoteno) != '' or trim($tilaajanrivinro) != '' or trim($kpl) != '') {
@@ -98,7 +394,8 @@
 
 			if (isset($error)) echo "<font class='error'>{$error}</font><br /><br />";
 
-			echo "<form method='post' action='?tee=kohdista_tilausrivi&asn_rivi={$asn_rivi}&toimittaja={$toimittaja}&tilausnro={$tilausnro}&tuoteno={$tuoteno}&tilaajanrivinro={$tilaajanrivinro}&kpl={$kpl}&lopetus={$lopetus}'>";
+			echo "<form method='post' id='kohdista_tilausrivi_formi' action='?tee=kohdista_tilausrivi&asn_rivi={$asn_rivi}&toimittaja={$toimittaja}&tilausnro={$tilausnro}&tuoteno={$tuoteno}&tilaajanrivinro={$tilaajanrivinro}&kpl={$kpl}'>";
+			echo "<input type='hidden' name='lopetus' id='lopetus' value='{$lopetus}' />";
 
 			echo "<table>";
 			echo "<tr><th colspan='5'>",t("Haun tulokset"),"</th><th><input type='submit' value='",t("Kohdista"),"' /></th></tr>";
@@ -175,7 +472,7 @@
 				}
 				else {
 					echo "<td>&nbsp;</td>";
-					echo "<td align='center'><input type='checkbox' name='tunnukset[]' value='{$row['tunnus']}' /></td>";
+					echo "<td align='center'><input type='checkbox' name='tunnukset[]' class='tunnukset' value='{$row['tunnus']}' /></td>";
 				}
 
 				echo "</tr>";
@@ -191,7 +488,7 @@
 		$kolli = mysql_real_escape_string($kolli);
 
 		$query = "	SELECT asn_sanomat.toimittajanumero, asn_sanomat.toim_tuoteno, asn_sanomat.tilausrivinpositio, asn_sanomat.kappalemaara, asn_sanomat.status, asn_sanomat.tilausnumero,
-					tilausrivi.tuoteno
+					tilausrivi.tuoteno, if(tilausrivi.ale1 = 0, '', tilausrivi.ale1) AS alennus
 					#tuotteen_toimittajat.tuoteno#, tuote.nimitys#, tilausrivi.tilaajanrivinro
 					FROM asn_sanomat
 					JOIN tilausrivi ON (tilausrivi.yhtio = asn_sanomat.yhtio AND tilausrivi.tunnus IN (asn_sanomat.tilausrivi))
@@ -205,7 +502,9 @@
 		#echo "<pre>",str_replace("\t","",$query),"</pre>";
 		$result = pupe_query($query);
 
-		echo "<form method='post' action='?tee=etsi_tilausrivi&lopetus={$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta_kolli//kolli={$kolli}' id='kolliformi'>";
+		echo "<form method='post' action='?lopetus={$lopetus}/SPLIT/{$PHP_SELF}////tee=nayta_kolli//kolli={$kolli}' id='kolliformi'>";
+		echo "<input type='hidden' id='tee' name='tee' value='etsi_tilausrivi' />";
+		echo "<input type='hidden' id='kolli' name='kolli' value='{$kolli}' />";
 		echo "<input type='hidden' id='asn_rivi' name='asn_rivi' value='' />";
 
 		echo "<table>";
@@ -223,7 +522,12 @@
 		echo "<th>&nbsp;</th>";
 		echo "</tr>";
 
+		$ok = 0;
+
 		while ($row = mysql_fetch_assoc($result)) {
+
+			$ok++;
+
 			echo "<tr>";
 
 			$query = "SELECT nimitys FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$row['tuoteno']}'";
@@ -240,7 +544,7 @@
 			echo "<td align='right'>{$row['tilausrivinpositio']}</td>";
 			echo "<td align='right'>{$row['kappalemaara']}</td>";
 			echo "<td></td>";
-			echo "<td></td>";
+			echo "<td>{$row['alennus']}</td>";
 
 			echo "<td><font class='ok'>",t("Ok"),"</font></td>";
 
@@ -248,6 +552,8 @@
 
 			echo "</tr>";
 		}
+
+		$virhe = 0;
 
 		$query = "	SELECT asn_sanomat.toimittajanumero, asn_sanomat.toim_tuoteno, asn_sanomat.tilausrivinpositio, asn_sanomat.kappalemaara, asn_sanomat.status, asn_sanomat.tilausnumero,
 					toimi.tunnus AS toimi_tunnus, asn_sanomat.tunnus AS asn_tunnus
@@ -261,6 +567,9 @@
 		$result = pupe_query($query);
 
 		while ($row = mysql_fetch_assoc($result)) {
+
+			$virhe++;
+
 			echo "<tr>";
 
 			$query = "SELECT tuoteno FROM tuotteen_toimittajat WHERE yhtio = '{$kukarow['yhtio']}' AND toim_tuoteno = '{$row['toim_tuoteno']}' AND liitostunnus = '{$row['toimi_tunnus']}'";
@@ -316,6 +625,10 @@
 			echo "</td>";
 
 			echo "</tr>";
+		}
+
+		if ($ok and !$virhe) {
+			echo "<tr><th colspan='11'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
 		}
 
 		echo "</table>";

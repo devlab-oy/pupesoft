@@ -36,7 +36,7 @@
 				group_concat(distinct if(trim(viesti)='', NULL, trim(viesti)) 									SEPARATOR ' / ') viestit,
 				group_concat(distinct if(trim(tilausyhteyshenkilo)='', NULL, trim(tilausyhteyshenkilo)) 		SEPARATOR ' / ') tilausyhteyshenkilo,
 				group_concat(distinct if(trim(asiakkaan_tilausnumero)='', NULL, trim(asiakkaan_tilausnumero)) 	SEPARATOR ' / ') asiakkaan_tilausnumero,
-				group_concat(distinct if(trim(kohde)='', NULL, trim(kohde)) 									SEPARATOR ' / ') kohde, 
+				group_concat(distinct if(trim(kohde)='', NULL, trim(kohde)) 									SEPARATOR ' / ') kohde,
 				count(distinct toimitustapa) toimitustavat
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
@@ -113,13 +113,13 @@
 		$lasrow["toim_postitp"]  = t("Useita", $kielirow["kieli"]);
 		$lasrow["toim_maa"]      = $lasrow["maa"];
 	}
-	
+
 	// Jos laskulla on useita toimitustapoja niin laitetaan sinne tekstiksi "USEITA"
 	if ($sumrow["toimitustavat"] > 1) {
 		$lasrow["toimitustapa"]     = t("Useita", $kielirow["kieli"]);
 		$useita_toimtapoja = "KYLLA";
 	}
-	
+
 	// haetaan maksuehdon tiedot, jotta osataan tiliöidä käteismyynti kassaan
 	$query = "	SELECT *
 				FROM maksuehto
@@ -401,7 +401,7 @@
 	$query = "SELECT * FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$uusiotunnus'";
 	$uusiuresult = pupe_query($query);
 
-	if (mysql_num_rows($uusiuresult)==0) die (t("Lasku", $kielirow["kieli"])." $uusiotunnus ".t("katosi", $kielirow["kieli"])."!");
+	if (mysql_num_rows($uusiuresult)==0) die (t("Lasku")." $uusiotunnus ".t("katosi")."!");
 	$laskurow = mysql_fetch_assoc($uusiuresult);
 
 	// päivitetään tilausriveille uuden otsikon tiedot (ei päivitetä Puute ja Jt rivejä laskutetuiksi)
@@ -480,11 +480,11 @@
 				else {
 					$sumskommentti = t("Tilaus", $kielirow["kieli"])." $edotunnus ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 				}
-				
+
 				if ($useita_toimtapoja == "KYLLA") {
 					$sumskommentti .= "\n".t("Toimitustapa", $kielirow["kieli"])." : $sumsrow[toimitustapa]";
 				}
-				
+
 				$query = "	UPDATE tilausrivi
 							SET kommentti = concat(kommentti, '\n', '$sumskommentti')
 							WHERE tunnus = '$edtunnus'

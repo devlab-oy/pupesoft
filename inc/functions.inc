@@ -39,7 +39,7 @@ if (!function_exists("pupe_error")) {
 		$query = str_replace("\t", " ",$query);
 		$query = str_replace("\n", "", $query);
 		$query = str_replace("\r", "", $query);
-		$query = ereg_replace("  +", " ", $query);
+		$query = preg_replace("/  +/", " ", $query);
 
 		$debuggi = array_reverse(debug_backtrace());
 
@@ -10652,11 +10652,11 @@ if (!function_exists("pupe_DataTables")) {
 		for ($i = 1; $i <= $sarakkeetVis; $i++) {
 			// Keikalla eka sarake on kohdistusnappula....
 			if ($i == 1 and $taulu == "keikka") {
-				$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false, \"sWidth\": \"20px\"},";	
+				$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false, \"sWidth\": \"20px\"},";
 			}
 			else {
-				$aoColumns .= " null,";	
-			}			
+				$aoColumns .= " null,";
+			}
 		}
 		for ($i = $sarakkeetVis+1; $i <= $sarakkeetTot; $i++) {
 			$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false},";
@@ -10717,13 +10717,13 @@ if (!function_exists("pupe_DataTables")) {
 
 				// KEIKKA.PHPN OMAT JQUERY-TOIMINNALLISUUDET
 				if ('{$taulu}' == 'keikka') {
-					
+
 					$(window).keypress(function(e) {
 					    if(e.keyCode == 13) {
 					        $('#submit_tallenna').trigger('click');
 					    }
 					});
-					
+
 					// JOS RUKSATAAN/RUKSATAAN POIS JOKIN RIVI
 					$('input[name^=\"rivi_valitut_tunnukset\"]').live('click', function(){
 						rivi_ja_otsikko = this.value.split(\"###\", 2);

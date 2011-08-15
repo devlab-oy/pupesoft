@@ -398,14 +398,21 @@
 	$lisatiedot_result = pupe_query($query);
 
 	// haetaan nyt varmuuden vuoksi vielä insertoidut tiedot takaisin..
-	$query = "SELECT * FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$uusiotunnus'";
+	$query = "	SELECT * 
+				FROM lasku 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and tunnus  = '$uusiotunnus'";
 	$uusiuresult = pupe_query($query);
 
 	if (mysql_num_rows($uusiuresult)==0) die (t("Lasku")." $uusiotunnus ".t("katosi")."!");
 	$laskurow = mysql_fetch_assoc($uusiuresult);
 
 	// päivitetään tilausriveille uuden otsikon tiedot (ei päivitetä Puute ja Jt rivejä laskutetuiksi)
-	$query = "UPDATE tilausrivi SET uusiotunnus='$laskurow[tunnus]' WHERE otunnus in ($tunnukset) and yhtio='$kukarow[yhtio]' and var not in ('P','J')";
+	$query = "	UPDATE tilausrivi 
+				SET uusiotunnus = '$laskurow[tunnus]' 
+				WHERE otunnus in ($tunnukset) 
+				and yhtio = '$kukarow[yhtio]' 
+				and var not in ('P','J')";
 	$ulasr = pupe_query($query);
 
 	// katotaan montako tilausta ollaan käsittelemässä
@@ -534,10 +541,11 @@
 	// tehdään laskun tiliöinnit.. tarvitaan $lasku array
 	$lasku = $laskurow;
 
-	//haetaan asiakkaan tiedot (esim konserniyhtiö)
+	// haetaan asiakkaan tiedot (esim konserniyhtiö)
 	$query = "	SELECT konserniyhtio
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and ytunnus = '$laskurow[ytunnus]'";
 	$konsres = pupe_query($query);
 	$konsrow = mysql_fetch_assoc($konsres);
 

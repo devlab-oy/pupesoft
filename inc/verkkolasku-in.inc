@@ -297,8 +297,7 @@
 				$summa = $summa * -1;
 			}
 
-			// Viite on aina numeerinen
-			$viite  = preg_replace("/[^0-9]/", "", $laskun_pankkiviite);
+			$viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
 			$ebid   = $laskun_ebid;
 			$selite = t("Laskunumero").": ".$laskun_numero;
 

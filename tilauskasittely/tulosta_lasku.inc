@@ -620,6 +620,7 @@ if (!function_exists('rivi_lasku')) {
 		if ($kieli != $yhtiorow["kieli"]) {
 			$row["kommentti"] = str_replace("Ennakkotilaus:", t("Ennakkotilaus", $kieli).":", $row["kommentti"]);
 			$row["kommentti"] = str_replace("Tilaus:", t("Tilaus", $kieli).":", $row["kommentti"]);
+			$row["kommentti"] = str_replace("Rahtikirja:", t("Rahtikirja", $kieli).":", $row["kommentti"]);
 		}
 
 		// Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv

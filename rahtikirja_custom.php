@@ -1,4 +1,5 @@
 <?php
+
 require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tyhjä rahtikirja").":</font><hr><br>";
@@ -65,7 +66,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		(int) $otsikkonro
 	);
 
-	mysql_query($query) or pupe_error($query);
+	pupe_query($query);
 
 	// --------------------------------------------------------
 	//
@@ -111,8 +112,8 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 				FROM asiakas
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND ytunnus = '$ytunnus'";
-	$asres = mysql_query($query) or pupe_error($query);
-	$asiakasrow = mysql_fetch_array($asres);
+	$asres = pupe_query($query);
+	$asiakasrow = mysql_fetch_assoc($asres);
 
 	$osoitelappurow["tunnus"] = $otsikkonro;
 
@@ -149,7 +150,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	$osoitelappurow["postitp"] 			= $asiakasrow["postitp"];
 	$osoitelappurow["viesti"] 			= "";
 	$osoitelappurow["liitostunnus"] 	= $asiakasrow["tunnus"];
-	$osoitelappurow["toimitustapa"] 	= $asiakasrow["toimitustapa"];
+	$osoitelappurow["toimitustapa"] 	= $data['toimitustapa']; 
 	$osoitelappurow["maksuehto"] 		= $asiakasrow["maksuehto"];
 	$osoitelappurow["yhteyshenkilo"] 	= $kukarow["tunnus"];
 	$osoitelappurow["sisviesti1"] 		= $asiakasrow["sisviesti1"];
@@ -169,10 +170,10 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 				from yhtion_toimipaikat
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus = '$kukarow[toimipaikka]'";
-	$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+	$alhire = pupe_query($alhqur);
 
 	if (mysql_num_rows($alhire) == 1) {
-		$apualvrow = mysql_fetch_array($alhire);
+		$apualvrow = mysql_fetch_assoc($alhire);
 
 		$osoitelappurow['yhtio_nimi'] 		= $apualvrow["nimi"];
 		$osoitelappurow['yhtio_nimitark']	= $apualvrow["nimitark"];
@@ -188,8 +189,8 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 				FROM varastopaikat
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$varasto'";
-	$tempr = mysql_query($query) or pupe_error($query);
-	$postirow_varasto = mysql_fetch_array($tempr);
+	$tempr = pupe_query($query);
+	$postirow_varasto = mysql_fetch_assoc($tempr);
 
 	// jos varastolle on annettu joku osoite, käytetään sitä
 	if ($postirow_varasto["nimi"] != "") {
@@ -208,17 +209,17 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 				WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}'
 				AND selite = '$toimitustapa'
 				ORDER BY jarjestys,selite";
-	$result = mysql_query($query) or pupe_error($query);
-	$toitarow = mysql_fetch_array($result);
+	$result = pupe_query($query);
+	$toitarow = mysql_fetch_assoc($result);
 
 	if ((int) $tulostin > 0 and $oslappkpl > 0) {
 		$query = "	SELECT komento
 					from kirjoittimet
 					where tunnus 	= '$tulostin'
 					AND yhtio		= '$kukarow[yhtio]'";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
-		$k = mysql_fetch_array($res);
+		$k = mysql_fetch_assoc($res);
 
 	    $kirjoitin = $k['komento'];
 		$tulostuskpl = $oslappkpl;
@@ -235,7 +236,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 					tyhjanrahtikirjan_otsikkotiedot = '$rahtikirjanrostring',
 					tulostettu = now()
 					where yhtio='$kukarow[yhtio]' and otsikkonro=($otsikkonro*-1) and rahtikirjanro=($otsikkonro*-1)";
-		$kirres = mysql_query($query) or pupe_error($query);
+		$kirres = pupe_query($query);
 	}
 
 	if ((int) $valittu_oslapp_tulostin > 0 and $oslappkpl > 0) {
@@ -245,8 +246,8 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 					from kirjoittimet
 					where yhtio	= '$kukarow[yhtio]'
 					and tunnus	= '$valittu_oslapp_tulostin'";
-		$kirres = mysql_query($query) or pupe_error($query);
-		$kirrow = mysql_fetch_array($kirres);
+		$kirres = pupe_query($query);
+		$kirrow = mysql_fetch_assoc($kirres);
 		$oslapp = $kirrow['komento'];
 
 		// Tulostetaan osoitelappu
@@ -291,7 +292,7 @@ if (!$asiakasid) {
 					and tulostettu >= date_sub(now(), INTERVAL 180 DAY)
 					GROUP BY rahtikirjanro
 					ORDER BY tulostettu desc";
-		$kirres = mysql_query($query) or pupe_error($query);
+		$kirres = pupe_query($query);
 
 		if (mysql_num_rows($kirres) > 0) {
 
@@ -299,7 +300,7 @@ if (!$asiakasid) {
 						FROM kirjoittimet
 						WHERE yhtio = '$kukarow[yhtio]'
 						ORDER by kirjoitin";
-			$kirre = mysql_query($query) or pupe_error($query);
+			$kirre = pupe_query($query);
 
 			echo "<br><br>".t("Uusimmat tyhjät rahtikirjat").":<br>";
 			echo "<table>";
@@ -421,16 +422,17 @@ if (! isset($_POST['toimitustapa'])) {
 
     // haetaan toimitustavan tiedot tarkastuksia varten
     $apuqu2 = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa_val'";
-    $meapu2 = mysql_query($apuqu2) or pupe_error($apuqu2);
-    $meapu2row = mysql_fetch_array($meapu2);
+    $meapu2 = pupe_query($apuqu2);
+    $meapu2row = mysql_fetch_assoc($meapu2);
 
     if ($meapu2row["merahti"] == "") {
     	$merahti = false;
     	$sel = "selected";
     }
-} else {
-
+} 
+else {
     $sel = '';
+
     if (isset($_POST['merahti']) && $_POST['merahti'] === '0') {
         $sel = 'selected';
     }
@@ -467,7 +469,7 @@ if (! isset($_POST['toimitustapa'])) {
 					and tunnus	= '$varasto'
 					order by alkuhyllyalue, alkuhyllynro";
 	}
-	$kirre = mysql_query($query) or pupe_error($query);
+	$kirre = pupe_query($query);
 
 	if (mysql_num_rows($kirre) > 0) {
 
@@ -485,9 +487,9 @@ if (! isset($_POST['toimitustapa'])) {
 				from kirjoittimet
 				where yhtio = '$kukarow[yhtio]'
 				ORDER BY kirjoitin";
-	$kires = mysql_query($query) or pupe_error($query);
+	$kires = pupe_query($query);
 
-	while ($kirow = mysql_fetch_array($kires)) {
+	while ($kirow = mysql_fetch_assoc($kires)) {
 		echo "<option value='$kirow[tunnus]' ".$sel_lahete[$kirow["tunnus"]].">$kirow[kirjoitin]</option>\n";
 	}
 
@@ -501,7 +503,7 @@ if (! isset($_POST['toimitustapa'])) {
 
 	mysql_data_seek($kires, 0);
 
-	while ($kirow = mysql_fetch_array($kires)) {
+	while ($kirow = mysql_fetch_assoc($kires)) {
 		echo "<option value='$kirow[tunnus]' ".$sel_oslapp[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
 	}
 
@@ -520,7 +522,7 @@ if (! isset($_POST['toimitustapa'])) {
 				FROM pakkaus
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY jarjestys";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";
 
@@ -586,7 +588,7 @@ function pupe_rahtikirja_insert($data) {
 		values('%s')",
 		implode("','", array_values($data))
 	);
-	mysql_query($query) or pupe_error($query);
+	pupe_query($query);
 
 	return mysql_insert_id();
 }
@@ -659,10 +661,10 @@ function pupe_varasto_fetch_all() {
 				WHERE yhtio = '%s'
 				ORDER BY nimitys", mysql_real_escape_string($GLOBALS['kukarow']['yhtio']));
 
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	$varastot = array();
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		$varastot[$row['tunnus']] = $row['nimitys'];
 	}
 
@@ -679,11 +681,11 @@ function pupe_varasto_fetch_all() {
 function pupe_toimitustapa_fetch_all() {
 	// haetaan kaikki toimitustavat
 	$query  = "SELECT * FROM toimitustapa WHERE yhtio='{$GLOBALS['kukarow']['yhtio']}' order by jarjestys,selite";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	$data = array();
 
-	while ($row = mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_assoc($result)) {
 		$data[] = $row;
 	}
 
@@ -700,8 +702,8 @@ function pupe_toimitustapa_fetch_all() {
 function pupe_rahtisopimus($merahti, $toimitustapa, $ytunnus = null) {
 	if ($merahti) {
 		$query = "SELECT merahti,sopimusnro from toimitustapa where selite='{$toimitustapa}' and yhtio='{$GLOBALS['kukarow']['yhtio']}'";
-		$res = mysql_query($query) or pupe_error($query);
-		$merahti = mysql_fetch_array($res);
+		$res = pupe_query($query);
+		$merahti = mysql_fetch_assoc($res);
 
 		if ($merahti['merahti'] == 'K') {
 			return $merahti['sopimusnro'];
@@ -711,10 +713,10 @@ function pupe_rahtisopimus($merahti, $toimitustapa, $ytunnus = null) {
 
 	// kokeillaan löytyykö rahtisopimusta asiakkaalle sekä toimitustavalle
 	$query = "SELECT * from rahtisopimukset where toimitustapa='$toimitustapa' and ytunnus='$ytunnus' and yhtio='{$GLOBALS['kukarow']['yhtio']}'";
-	$res = mysql_query($query) or pupe_error($query);
+	$res = pupe_query($query);
 
 	if (mysql_num_rows($res) === 1) {
-		$sopimus = mysql_fetch_array($res);
+		$sopimus = mysql_fetch_assoc($res);
 		return $sopimus['rahtisopimus'];
 	}
 

@@ -92,7 +92,7 @@ if (!function_exists("yhdista")) {
 				return FALSE; 
 			}
 			else {
-				echo "<br><font class='message'>".t("Valmis!")."<br>Rivi $vanhatunnus on nyt poistettu ja sen tiedot siirretty riville $uusitunnus<br><br><br></font>";
+				echo "<br><font class='message'>".t("Valmis")."!<br>Rivi $vanhatunnus on nyt poistettu ja sen tiedot siirretty riville $uusitunnus<br><br><br></font>";
 			}
 
 			//pistet‰‰n selectlistat taas n‰kyviin

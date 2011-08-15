@@ -4,8 +4,13 @@
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-
+	
 	require "inc/parametrit.inc";
+
+	if (!isset($tee))		$tee = "";
+	if (!isset($tyyppi))	$tyyppi = "";
+	if (!isset($tiliote))	$tiliote = "";
+	if (!isset($tilino))	$tilino = "";
 
 	$query = "	SELECT tunnus
 				FROM tiliotedata
@@ -284,9 +289,8 @@
 			if ($yritirow["tilino"] == $tilino) $chk = "selected";
 			echo "<option value='$yritirow[tilino]' $chk>$yritirow[nimi] ($yritirow[tilino])";
 		}
-
-		$chk = array();
-		$chk[$tyyppi] = "selected";
+		
+		$chk = array_fill_keys(array($tyyppi), " selected") + array_fill_keys(array('1', '2', '3'), '');
 
 		echo "</select></td></tr>
 				<tr>

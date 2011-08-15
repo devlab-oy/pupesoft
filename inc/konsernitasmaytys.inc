@@ -175,20 +175,20 @@
 					FROM yhtio
 					WHERE konserni = '$yhtiorow[konserni]'
 					AND trim(konserni) != ''";
-		$konserniresult = mysql_query($query) or pupe_error($query);
+		$konserniresult = pupe_query($query);
 
 		if (mysql_num_rows($konserniresult) > 0) {
 
 				echo "<table>";
 
-				while ($konsernirow = mysql_fetch_array($konserniresult)) {
+				while ($konsernirow = mysql_fetch_assoc($konserniresult)) {
 
 					echo "<tr><td class='back' colspan='5'><br><font class='message'>$konsernirow[nimi] ($konsernirow[ytunnus])</font></td></tr>";
 
 					$myyntisaamiset_yhteensa = 0;
 					$ostovelat_yhteensa = 0;
 					$erotus_yhteensa = 0;
-					
+
 					$query = "	SELECT lasku.ytunnus, group_concat(distinct lasku.nimi) nimi, sum(tiliointi.summa) myyntisaamiset
 								FROM tiliointi
 								JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
@@ -198,7 +198,7 @@
 								AND tiliointi.tapvm <= '$alvv-$alvk-$alvp'
 								AND tiliointi.korjattu = ''
 								GROUP BY lasku.ytunnus";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					echo "<tr>";
 					echo "<th>".t("Ytunnus")."</th>";
@@ -208,29 +208,27 @@
 					echo "<th>".t("Erotus")."</th>";
 					echo "</tr>";
 
-					while ($trow = mysql_fetch_array($result)) {
+					while ($trow = mysql_fetch_assoc($result)) {
 
 						$query = "	SELECT *
 									FROM yhtio
 									WHERE ytunnus = '$trow[ytunnus]'";
-						$riviyhtioresult = mysql_query($query) or pupe_error($query);
+						$riviyhtioresult = pupe_query($query);
 
 						if (mysql_num_rows($riviyhtioresult) == 1) {
 
-							$riviyhtiorow = mysql_fetch_array ($riviyhtioresult);
+							$riviyhtiorow = mysql_fetch_assoc($riviyhtioresult);
 
 							$query = "	SELECT sum(tiliointi.summa) ostovelat
 										FROM tiliointi
-										JOIN lasku ON (lasku.yhtio = tiliointi.yhtio
-											AND lasku.tunnus = tiliointi.ltunnus
-											AND lasku.ytunnus = '$konsernirow[ytunnus]')
+										JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus AND lasku.ytunnus = '$konsernirow[ytunnus]')
 										WHERE tiliointi.yhtio = '$riviyhtiorow[yhtio]'
 										AND tiliointi.tilino = '$riviyhtiorow[konserniostovelat]'
 										AND tiliointi.tapvm >= '$plvv-$plvk-$plvp'
 										AND tiliointi.tapvm <= '$alvv-$alvk-$alvp'
 										AND tiliointi.korjattu = ''";
-							$ostovelatresult = mysql_query($query) or pupe_error($query);
-							$ostovelatrow = mysql_fetch_array ($ostovelatresult);
+							$ostovelatresult = pupe_query($query);
+							$ostovelatrow = mysql_fetch_assoc($ostovelatresult);
 						}
 						else {
 							$ostovelatrow['ostovelat'] = "N/A";
@@ -242,26 +240,26 @@
 							$myyntisaamiset_yhteensa += $trow["myyntisaamiset"];
 							$ostovelat_yhteensa += $trow["ostovelat"];
 							$erotus_yhteensa += $erotus;
-							
+
 							echo "<tr>";
 							echo "<td>$trow[ytunnus]</td>";
 							echo "<td>$trow[nimi]</td>";
 							echo "<td align='right'>$trow[myyntisaamiset]</td>";
 							echo "<td align='right'>$ostovelatrow[ostovelat]</td>";
 							echo "<td align='right'>".sprintf("%.02f", $erotus)."</td>";
-							echo "</tr>";							
+							echo "</tr>";
 						}
 					}
-					
+
 					echo "<tr>";
 					echo "<th colspan='2'>Yhteensä</th>";
 					echo "<th>".sprintf("%.02f", $myyntisaamiset_yhteensa)."</th>";
 					echo "<th>".sprintf("%.02f", $ostovelat_yhteensa)."</th>";
 					echo "<th>".sprintf("%.02f", $erotus_yhteensa)."</th>";
 					echo "</tr>";
-					
+
 				}
-				
+
 				echo "</table><br>";
 		}
 		else {

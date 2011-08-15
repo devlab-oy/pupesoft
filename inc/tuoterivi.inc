@@ -188,7 +188,7 @@
 		else {
 			$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 			$ulos .= "<option value = '' $sela>".t("Saldollinen tuote")."</option>";
-			$ulos .= "<option value = 'o' $sel>".t("Saldoton tuote")."</option>";
+			$ulos .= "<option value = 'o' $sel>".t("Saldoton tuote")." (".t("Ei varastokirjanpitoa").")</option>";
 			$ulos .= "</select></td>";
 		}
 

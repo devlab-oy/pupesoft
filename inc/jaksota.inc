@@ -4,26 +4,28 @@
 				FROM lasku
 				WHERE tunnus = '$tunnus'
 				AND yhtio ='$kukarow[yhtio]'";
-	$lresult = mysql_query($query) or pupe_error($query);
+	$lresult = pupe_query($query);
 
 	if (mysql_num_rows($lresult) == 0) {
 		echo "<b>".t("Lasku")." '$tunnus' ".t("katosi")."</b><br>";
 		exit;
 	}
-	$laskurow = mysql_fetch_array($lresult);
+
+	$laskurow = mysql_fetch_assoc($lresult);
 
 	$query = "	SELECT *
 				FROM tiliointi
 				WHERE tunnus = '$isa'
 				AND ltunnus = '$tunnus'
-				AND yhtio ='$kukarow[yhtio]'";
-	$tresult = mysql_query($query) or pupe_error($query);
+				AND yhtio = '$kukarow[yhtio]'";
+	$tresult = pupe_query($query);
 
 	if (mysql_num_rows($tresult) == 0) {
 		echo "<b>".t("Tiliointi")." '$isa' ".t("katosi")."</b><br>";
 		exit;
 	}
-	$tiliointirow = mysql_fetch_array ($tresult);
+
+	$tiliointirow = mysql_fetch_assoc($tresult);
 
 	if ($tiliointirow['vero'] != 0) {
 		echo "<br>";
@@ -65,7 +67,6 @@
 			if ($i % 6 == 0) {
 				echo "</tr><tr>";
 			}
-
 		}
 
 		echo "</tr>";
@@ -83,6 +84,8 @@
 		$kpl = count($kausi);
 
 		$summa = round($tiliointirow['summa']/$kpl,2);
+
+		$tsumma = 0;
 
 		$eka = 0; // Tällä katsotaan ollaanko ensimmäisellä kierroksella
 
@@ -117,7 +120,7 @@
 							tilino		= '$tiliointirow[tilino]',
 							kustp		= '$tiliointirow[kustp]',
 							kohde		= '$tiliointirow[kohde]',
-							projekti	= '$projekti',
+							projekti	= '$tiliointirow[projekti]',
 							tapvm		= '$tapvm',
 							summa		= '$asumma',
 							vero		= 0,
@@ -125,7 +128,7 @@
 							lukko		= '',
 							laatija		= '$kukarow[kuka]',
 							laadittu	= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$jisa = mysql_insert_id($link);
 				$viimeinen1 = $jisa;
 
@@ -137,7 +140,7 @@
 							tilino		= '$jaksotilino',
 							kustp		= '$tiliointirow[kustp]',
 							kohde		= '$tiliointirow[kohde]',
-							projekti	= '$projekti',
+							projekti	= '$tiliointirow[projekti]',
 							tapvm		= '$tapvm',
 							summa		= $ssumma,
 							vero		= 0,
@@ -146,7 +149,7 @@
 							aputunnus	= '$jisa',
 							laatija		= '$kukarow[kuka]',
 							laadittu	= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$viimeinen2 = mysql_insert_id($link);
 
 				$ok = 1; // Ensimmäinen on käsitelty
@@ -172,7 +175,7 @@
 							tilino		= '$tiliointirow[tilino]',
 							kustp		= '$tiliointirow[kustp]',
 							kohde		= '$tiliointirow[kohde]',
-							projekti	= '$projekti',
+							projekti	= '$tiliointirow[projekti]',
 							tapvm		= '$tapvm',
 							summa		= '$summa',
 							vero		= 0,
@@ -181,7 +184,7 @@
 							aputunnus	= '$jisa',
 							laatija		= '$kukarow[kuka]',
 							laadittu	= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$viimeinen1 = mysql_insert_id($link);
 
 				$query = "	INSERT INTO tiliointi SET
@@ -190,7 +193,7 @@
 							tilino		= '$jaksotilino',
 							kustp		= '$tiliointirow[kustp]',
 							kohde		= '$tiliointirow[kohde]',
-							projekti	= '$projekti',
+							projekti	= '$tiliointirow[projekti]',
 							tapvm		= '$tapvm',
 							summa		= $summa * -1,
 							vero		= 0,
@@ -199,7 +202,7 @@
 							aputunnus	= '$jisa',
 							laatija		= '$kukarow[kuka]',
 							laadittu	= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$viimeinen2 = mysql_insert_id($link);
 
 				$tsumma += $summa;
@@ -223,15 +226,15 @@
 			$tsumma = round($tsumma,2);
 
 			$query = "UPDATE tiliointi SET summa = summa - $tsumma WHERE tunnus = '$viimeinen1' and yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query = "UPDATE tiliointi SET summa = summa + $tsumma WHERE tunnus = '$viimeinen2' and yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		// Yliviivataan varsinainen tiliointi
 		$query = "UPDATE tiliointi SET korjattu = '$kukarow[kuka]', korjausaika = now() WHERE tunnus = '$isa' and yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$tee = 'E';
 	}
 	elseif ($tee != "E") {

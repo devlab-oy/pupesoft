@@ -4,9 +4,10 @@
 		global $laskut;
 
 		$luotiinlaskuja = 0;
-		$boob			= "";
-		$soap			= "";
-		$type			= "";
+		$type = "";
+		$boob = "";
+		$soap = "";
+		$ebid = "";
 
 		$poistettavat = array('/','.',':'); //Merkit, jotka poistetaan filennimest‰
 
@@ -24,13 +25,13 @@
 
 				if (strpos($ln, "Version=\"1.3\"") !== FALSE) {
 					$finvoice_dtd = "datain/Finvoice_1.3.dtd";
-					$finvoice_xsl = "datain/Finvoice_1.3.xsl";					
+					$finvoice_xsl = "datain/Finvoice_1.3.xsl";
 				}
 				else {
 					$finvoice_dtd = "datain/Finvoice.dtd";
-					$finvoice_xsl = "datain/Finvoice.xsl";					
+					$finvoice_xsl = "datain/Finvoice.xsl";
 				}
-				
+
 				// 	lis‰t‰‰n varmasti oikeat DOCTYPE m‰‰ritys
 				//	T‰m‰ siksi ett‰ haluamme k‰ytt‰‰ paikallista kuvausta eik‰ ladata kuvausta verkosta!
 				$ln = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<!DOCTYPE Finvoice SYSTEM \"$finvoice_dtd\">\n<?xml-stylesheet type=\"text/xsl\" href=\"$finvoice_xsl\"?>\n".$ln;

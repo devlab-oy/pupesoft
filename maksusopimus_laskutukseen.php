@@ -17,7 +17,7 @@
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$tunnus' and tila in ('L','N','R') and alatila != 'X'";
-			$stresult = mysql_query($query) or pupe_error($query);
+			$stresult = pupe_query($query);
 
 			if (mysql_num_rows($stresult) == 0) {
 				echo "Otsikkoa '$tunnus' ei löytynyt, tai se on väärässä tilassa.";
@@ -34,7 +34,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and otunnus = '$tunnus'
 						and uusiotunnus = 0";
-			$posres = mysql_query($query) or pupe_error($query);
+			$posres = pupe_query($query);
 
 			if (mysql_num_rows($posres) <= 1) {
 				echo t("VIRHE: Tilauksella ei ole ennakkolaskutettavia positioita!")."<br>";
@@ -49,7 +49,7 @@
 						and uusiotunnus = 0
 						ORDER BY tunnus
 						LIMIT 1";
-			$posres = mysql_query($query) or pupe_error($query);
+			$posres = pupe_query($query);
 			$posrow = mysql_fetch_array($posres);
 
 			if ($debug==1) echo t("Löydettiin maksupositio")." $posrow[tunnus], $posrow[osuus] %, $posrow[maksuehto]<br>";
@@ -66,7 +66,7 @@
 						FROM maksupositio
 						WHERE yhtio = '$kukarow[yhtio]'
 						and otunnus = '$tunnus'";
-			$abures = mysql_query($query) or pupe_error($query);
+			$abures = pupe_query($query);
 			$aburow = mysql_fetch_array($abures);
 
 			$lahteva_lasku = ($aburow["laskutettu"] + 1)."/".$aburow["yhteensa"];
@@ -167,7 +167,7 @@
 			}
 
 			$query = substr($query,0,-1);
-			$stresult = mysql_query($query) or pupe_error($query);
+			$stresult = pupe_query($query);
 			$id = mysql_insert_id();
 
 			// tehdään vanhan laskun lisätiedoista 1:1 kopio...
@@ -175,7 +175,7 @@
 						FROM laskun_lisatiedot
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND otunnus = '$tunnus'";
-			$lisatiedot_result = mysql_query($query) or pupe_error($query);
+			$lisatiedot_result = pupe_query($query);
 			$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
 
 			$query = "INSERT INTO laskun_lisatiedot SET ";
@@ -196,14 +196,14 @@
 			}
 
 			$query = substr($query, 0, -1);
-			$lisatiedot_result = mysql_query($query) or pupe_error($query);
+			$lisatiedot_result = pupe_query($query);
 
 			// tehdään vanhan laskun työmääräystidoista 1:1 kopio...
 			$query = "	SELECT *
 						FROM tyomaarays
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND otunnus = '$tunnus'";
-			$lisatiedot_result = mysql_query($query) or pupe_error($query);
+			$lisatiedot_result = pupe_query($query);
 			$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
 
 			$query = "INSERT INTO tyomaarays SET ";
@@ -224,7 +224,7 @@
 			}
 
 			$query = substr($query, 0, -1);
-			$lisatiedot_result = mysql_query($query) or pupe_error($query);
+			$lisatiedot_result = pupe_query($query);
 
 
 			if ($debug==1) echo t("Perustin laskun")." $laskurow[nimi] $id<br>";
@@ -240,7 +240,7 @@
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 						and lasku.jaksotettu  	= '$tunnus'
 						GROUP by lasku.jaksotettu";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$sumrow = mysql_fetch_array($result);
 
 			$query = "	SELECT
@@ -251,12 +251,12 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu = '$tunnus'
 						GROUP BY lasku.jaksotettu, alv";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 			$tot = 0;
 
 			//	Lasku voi mennä myös kaukomaille, joten haetaan tämän asiakkaan kieli..
 			$query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-			$kielires = mysql_query($query) or pupe_error($query);
+			$kielires = pupe_query($query);
 			$kielirow = mysql_fetch_array($kielires);
 
 			if ($kielirow["kieli"] == "") {
@@ -277,7 +277,7 @@
 
 				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
 							('0', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now())";
-				$addtil = mysql_query($query) or pupe_error($query);
+				$addtil = pupe_query($query);
 			}
 			else {
 				while($row = mysql_fetch_array($sresult)) {
@@ -287,7 +287,7 @@
 
 					$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
 								('$summa', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now())";
-					$addtil = mysql_query($query) or pupe_error($query);
+					$addtil = pupe_query($query);
 
 					if ($debug==1) echo t("Lisättiin ennakkolaskuun rivi")." $summa $row[alv] otunnus $id<br>";
 
@@ -299,21 +299,21 @@
 
 			// Päivitetään positiolle tämän laskun tunnus
 			$query = "UPDATE maksupositio set uusiotunnus='$id' where tunnus='$posrow[tunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// merkataan tässä vaiheessa luotu ennakkomaksu-tilaus toimitetuksi
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]', toimitettuaika=now(), kerattyaika=now()
 						WHERE yhtio = '$kukarow[yhtio]'
 						and otunnus = '$id'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// ja päivitetään luotu ennakkomaksu-tilaus laskutusjonoon
 			$query = "	UPDATE lasku
 						set tila='L', alatila='D'
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$id'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			return $id;
 		}
@@ -328,7 +328,7 @@
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						and jaksotettu = '$tunnus' and tila != 'D' and tila in ('L','N','R')";
-			$stresult = mysql_query($query) or pupe_error($query);
+			$stresult = pupe_query($query);
 
 			if (mysql_num_rows($stresult) == 0) {
 				echo "<font class='error'>Otsikkoa '$tunnus' ei löytynyt, tai se on väärässä tilassa.</font><br><br>";
@@ -351,7 +351,7 @@
 						and uusiotunnus = ''
 						ORDER BY tunnus
 						LIMIT 1";
-			$posres = mysql_query($query) or pupe_error($query);
+			$posres = pupe_query($query);
 
 			if (mysql_num_rows($posres) == 1) {
 				$posrow = mysql_fetch_array($posres);
@@ -370,7 +370,7 @@
 						FROM maksupositio
 						WHERE yhtio = '$kukarow[yhtio]'
 						and otunnus = '$tunnus'";
-			$abures = mysql_query($query) or pupe_error($query);
+			$abures = pupe_query($query);
 			$aburow = mysql_fetch_array($abures);
 
 			$lahteva_lasku = ($aburow["laskutettu"] + 1)."/".$aburow["yhteensa"];
@@ -387,7 +387,7 @@
 						where yhtio    = '$kukarow[yhtio]'
 						and tunnus     = '$posrow[maksuehto]'
 						and jaksotettu = ''";
-			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+			$meapu = pupe_query($apuqu);
 
 			$erlisa = "";
 
@@ -416,11 +416,11 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu = '".($tunnus*-1)."'
 						GROUP BY alv";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = pupe_query($query);
 
 			//	Haetaan asiakkaan kieli niin hekin ymmärtävät..
 			$query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-			$kielires = mysql_query($query) or pupe_error($query);
+			$kielires = pupe_query($query);
 			$kielirow = mysql_fetch_array($kielires);
 
 			if ($kielirow["kieli"] == "") {
@@ -438,14 +438,14 @@
 
 				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu)
 							values  ('$row[laskutettu]', 'N', '-1', '-1', '$vikatunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
-				$addtil = mysql_query($query) or pupe_error($query);
+				$addtil = pupe_query($query);
 
 				if ($debug==1) echo t("Loppulaskuun lisättiin ennakkolaskun hyvitys")." -$row[laskutettu] alv $row[alv]% otunnus $vimppa<br>";
 			}
 
 			// Päivitetään positiolle laskutustunnus
 			$query = "UPDATE maksupositio set uusiotunnus='$vikatunnus' where tunnus = '$posrow[tunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// Alkuperäinen tilaus/tilaukset menee laskutukseen
 			$query = "	UPDATE lasku
@@ -457,7 +457,7 @@
 						WHERE yhtio 	= '$kukarow[yhtio]'
 						and jaksotettu 	= '$tunnus'
 						and tila		!= 'R'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			//	Merkataan projekti valmiiksi
 			$query = "	UPDATE lasku
@@ -465,13 +465,13 @@
 						WHERE yhtio 	= '$kukarow[yhtio]'
 						and jaksotettu 	= '$tunnus'
 						and tila		= 'R'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query = "	SELECT group_concat(distinct tunnus) tunnukset
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						and jaksotettu 	= '$tunnus'";
-			$lres = mysql_query($query) or pupe_error($query);
+			$lres = pupe_query($query);
 			$lrow = mysql_fetch_array($lres);
 
 			return $lrow["tunnukset"];
@@ -483,7 +483,7 @@
 		$query = "	SELECT nimitys
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
-		$tresult = mysql_query($query) or pupe_error($query);
+		$tresult = pupe_query($query);
 
 		if (mysql_num_rows($tresult) == 0) die(t("VIRHE: Yhtiöllä EI OLE ennakkolaskutustuotetta, sopimuslaskutusta ei voida toteuttaa!"));
 		echo "<font class='head'>".t("Sopimuslaskutus").":</font><hr><br>";
@@ -503,7 +503,7 @@
 						and maksupositio.otunnus 	 = '$tunnus'
 						and maksupositio.uusiotunnus = 0
 						ORDER BY maksupositio.tunnus";
-			$rahres = mysql_query($query) or pupe_error($query);
+			$rahres = pupe_query($query);
 			$posrow = mysql_fetch_array($rahres);
 
 			for($ie=0; $ie < $posrow["ennakko_kpl"]; $ie++) {
@@ -546,7 +546,7 @@
 						GROUP BY jaksotettu, nimi
 						HAVING yhteensa_kpl > laskutettu_kpl
 						ORDER BY jaksotettu desc";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			pupe_DataTables($pupe_DataTables, 7, 8);
 
@@ -588,7 +588,7 @@
 							and maksupositio.uusiotunnus = 0
 							ORDER BY maksupositio.tunnus
 							LIMIT 1";
-				$rahres = mysql_query($query) or pupe_error($query);
+				$rahres = pupe_query($query);
 				$posrow = mysql_fetch_array($rahres);
 
 				$query = "	SELECT *
@@ -597,7 +597,7 @@
 							and tunnus  = '$row[jaksotettu]'
 							ORDER BY tunnus
 							LIMIT 1";
-				$rahres = mysql_query($query) or pupe_error($query);
+				$rahres = pupe_query($query);
 				$laskurow = mysql_fetch_array($rahres);
 
 				$query = "	SELECT group_concat(tunnus SEPARATOR '<br>') tunnukset
@@ -605,7 +605,7 @@
 							WHERE yhtio 	= '$kukarow[yhtio]'
 							and jaksotettu  = '$row[jaksotettu]'
 							and tila in ('L','N','R')";
-				$rahres = mysql_query($query) or pupe_error($query);
+				$rahres = pupe_query($query);
 				$laskurow2 = mysql_fetch_array($rahres);
 
 				echo "<tr class='aktiivi'>";
@@ -636,7 +636,7 @@
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.jaksotettu = '$row[jaksotettu]' and tila in ('L','N','R')
 								GROUP BY lasku.jaksotettu";
-					$tarkres = mysql_query($query) or pupe_error($query);
+					$tarkres = pupe_query($query);
 					$tarkrow = mysql_fetch_array($tarkres);
 
 					if ($tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {

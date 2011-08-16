@@ -23,6 +23,9 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 // Livesearch jutut
 enable_ajax();
 
+if (!isset($excel)) 		 $excel = "";
+if (!isset($livesearch_tee)) $livesearch_tee = "";
+
 if ($livesearch_tee == "TILIHAKU") {
 	livesearch_tilihaku();
 	exit;

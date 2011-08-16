@@ -45,7 +45,7 @@
 			$query  = "	SELECT *
 						FROM asiakas
 						WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$asiakasrow = mysql_fetch_array($result);
@@ -77,7 +77,7 @@
 			echo "<tr><th>".t("Kieli").":</th><td><select name='hinkieli'>";
 
 			$query  = "SHOW columns from sanakirja";
-			$fields =  mysql_query($query);
+			$fields =  pupe_query($query);
 
 			while ($apurow = mysql_fetch_array($fields)) {
 				if (strlen($apurow[0]) == 2) {
@@ -125,7 +125,7 @@
 			$query  = "	SELECT if(toim_maa != '', toim_maa, maa) sallitut_maat, osasto
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$asiakas'";
-			$maa_result = mysql_query($query) or pupe_error($query);
+			$maa_result = pupe_query($query);
 			$asiakas_maa_row = mysql_fetch_array($maa_result);
 
 			$kieltolisa = '';
@@ -142,7 +142,7 @@
 						$kieltolisa
 						$lisa
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
-			$rresult = mysql_query($query) or pupe_error($query);
+			$rresult = pupe_query($query);
 
 			echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
 			flush();
@@ -208,7 +208,7 @@
 								FROM tuote
 								WHERE yhtio = '$GLOBALS[eta_yhtio]'
 								AND tuoteno = '$rrow[tuoteno]'";
-					$tres_eta = mysql_query($query) or pupe_error($query);
+					$tres_eta = pupe_query($query);
 					$alehinrrow = mysql_fetch_assoc($tres_eta);
 				}
 				else {
@@ -244,8 +244,17 @@
 
 				list($hinta, $lis_alv) = alv($laskurow, $rrow, $hinta, '', $alehinta_alv);
 
+				$onko_asiakkaalla_alennuksia = FALSE;
+
+				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+					if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+						$onko_asiakkaalla_alennuksia = TRUE;
+						break;
+					}
+				}
+
 				// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-				if ($rrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
+				if ($rrow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
 					continue;
 				}
 

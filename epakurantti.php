@@ -11,7 +11,7 @@
 		require ("epakurantti.inc");
 
 		if ($tee == 'vahvista') {
-		
+
 			echo "<table>";
 			echo "<tr><th>".t("Tuote")            ."</th><td>$tuoterow[tuoteno]</td></tr>";
 			echo "<tr><th>".t("Varastonarvo")     ."</th><td>$apu</td></tr>";
@@ -21,7 +21,7 @@
 			echo "<tr><th>".t("75% epäkurantti")  ."</th><td>$tuoterow[epakurantti75pvm]</td></tr>";
 			echo "<tr><th>".t("Epäkurantti")      ."</th><td>$tuoterow[epakurantti100pvm]</td></tr>";
 			echo "</table><br>";
-			
+
 			// voidaan merkata 25epäkurantiksi
 			if ($tuoterow['epakurantti25pvm'] == '0000-00-00') {
 				echo "<form action='$PHP_SELF' method='post'>";
@@ -29,7 +29,7 @@
 				echo "<input type='hidden' name = 'tee' value='25paalle'> ";
 				echo "<input type='submit' value='".t("Merkitään 25% epäkurantiksi")."'></form> ";
 			}
-			
+
 			// voidaan merkata puoliepäkurantiksi
 			if ($tuoterow['epakurantti50pvm'] == '0000-00-00') {
 				echo "<form action='$PHP_SELF' method='post'>";
@@ -37,7 +37,7 @@
 				echo "<input type='hidden' name = 'tee' value='puolipaalle'> ";
 				echo "<input type='submit' value='".t("Merkitään puoliepäkurantiksi")."'></form> ";
 			}
-			
+
 			// voidaan merkata 75epäkurantiksi
 			if ($tuoterow['epakurantti75pvm'] == '0000-00-00') {
 				echo "<form action='$PHP_SELF' method='post'>";
@@ -45,7 +45,7 @@
 				echo "<input type='hidden' name = 'tee' value='75paalle'> ";
 				echo "<input type='submit' value='".t("Merkitään 75% epäkurantiksi")."'></form> ";
 			}
-			
+
 			// voidaan merkata epäkurantiksi
 			if ($tuoterow['epakurantti100pvm'] == '0000-00-00') {
 				echo "<form action='$PHP_SELF' method='post'>";
@@ -62,6 +62,9 @@
 				echo "<input type='submit' value='".t("Aktivoidaan kurantiksi")."'></form>";
 			}
 		}
+		else {
+			$tee = "";
+		}
 	}
 
 	if ($tee == '') {
@@ -73,12 +76,12 @@
 		echo "<input type='submit' value='".t("Valitse")."'>";
 		echo "</form>";
 		echo "</td></tr></table>";
-		
+
 		// kursorinohjausta
 		$formi  = "epaku";
 		$kentta = "tuoteno";
 	}
-	
+
 	require ("inc/footer.inc");
-	
+
 ?>

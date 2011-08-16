@@ -92,7 +92,7 @@
 		echo "<th>",t("Tuotteen status"),"</th>";
 		echo "<td><select name='status'><option value=''>".t("Kaikki")."</option>";
 
-		while ($lajirow = mysql_fetch_array ($result)) {
+		while ($lajirow = mysql_fetch_assoc ($result)) {
 			$selli = '';
 			if ($lajirow['selite'] == $status) {
 				$selli = 'SELECTED';
@@ -299,7 +299,7 @@
 					$lisa
 					$saapumispvmlisa";
 		$sumres = pupe_query($query);
-		$sumrow = mysql_fetch_array($sumres);
+		$sumrow = mysql_fetch_assoc($sumres);
 
 		if ($sumrow["yhtkate"] == 0) {
 			$sumrow["yhtkate"] = 0.01;
@@ -394,11 +394,11 @@
 
 		$i = 0;
 
-		while ($row = mysql_fetch_array($res)) {
+		while ($row = mysql_fetch_assoc($res)) {
 
 			$query = "SELECT * FROM abc_parametrit WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$paramtyppi' and luokka = '$ryhmanimet[$i]'";
 			$paramres = pupe_query($query);
-			$paramrow = mysql_fetch_array($paramres);
+			$paramrow = mysql_fetch_assoc($paramres);
 
 			$i++;
 
@@ -413,7 +413,7 @@
 					$keyres = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
 				}
 
-				$keyosa = mysql_fetch_array($keyres);
+				$keyosa = mysql_fetch_assoc($keyres);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_osasto[]=$row[osasto]&lisatiedot=$lisatiedot&status=$status'>$row[osasto] $keyosa[selitetark]</a></td>";
 			}
@@ -427,7 +427,7 @@
 					$keyres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");
 				}
 
-				$keytry = mysql_fetch_array($keyres);
+				$keytry = mysql_fetch_assoc($keyres);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_try[]=$row[try]&lisatiedot=$lisatiedot&status=$status'>$row[try] $keytry[selitetark]</a></td>";
 			}
@@ -443,7 +443,7 @@
 								and myyja = '$row[myyjanro]'
 								AND myyja > 0";
 				$myyjares = pupe_query($keymyyja);
-				$keytuotemyyja = mysql_fetch_array($myyjares);
+				$keytuotemyyja = mysql_fetch_assoc($myyjares);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_tuotemyyja[]=$row[myyjanro]&lisatiedot=$lisatiedot&status=$status'>$keytuotemyyja[nimi]</a></td>";
 			}
@@ -455,7 +455,7 @@
 								and myyja = '$row[ostajanro]'
 								AND myyja > 0";
 				$ostajares = pupe_query($keyostaja);
-				$keytuoteostaja = mysql_fetch_array($ostajares);
+				$keytuoteostaja = mysql_fetch_assoc($ostajares);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_tuoteostaja[]=$row[ostajanro]&lisatiedot=$lisatiedot&status=$status'>$keytuoteostaja[nimi]</a></td>";
 			}

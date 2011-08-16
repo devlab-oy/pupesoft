@@ -179,7 +179,7 @@
 					ORDER BY luokka";
 		$luokkares = pupe_query($query);
 
-		while ($luokkarow = mysql_fetch_array($luokkares)) {
+		while ($luokkarow = mysql_fetch_assoc($luokkares)) {
 
 			//kauden yhteismyynnit ja katteet
 			$query = "	SELECT
@@ -194,7 +194,7 @@
 						$lisa
 						$saapumispvmlisa";
 			$sumres = pupe_query($query);
-			$sumrow = mysql_fetch_array($sumres);
+			$sumrow = mysql_fetch_assoc($sumres);
 
 			$sumrow['yhtkate'] = (float) $sumrow['yhtkate'];
 			$sumrow['yhtmyynti'] = (float) $sumrow['yhtmyynti'];
@@ -215,7 +215,7 @@
 						ORDER BY $abcwhat desc";
 			$res = pupe_query($query);
 
-			while ($row = mysql_fetch_array($res)) {
+			while ($row = mysql_fetch_assoc($res)) {
 
 				if (!$asiakasanalyysi) {
 					$query = "	SELECT group_concat(distinct toim_tuoteno) toim_tuoteno
@@ -223,7 +223,7 @@
 								WHERE tuoteno = '$row[tuoteno]'
 								and yhtio = '$kukarow[yhtio]'";
 					$tuoresult = pupe_query($query);
-					$tuorow = mysql_fetch_array($tuoresult);
+					$tuorow = mysql_fetch_assoc($tuoresult);
 
 					$query = "	SELECT distinct myyja, nimi
 								FROM kuka
@@ -232,7 +232,7 @@
 								AND myyja > 0
 								ORDER BY myyja";
 					$myyjaresult = pupe_query($query);
-					$myyjarow = mysql_fetch_array($myyjaresult);
+					$myyjarow = mysql_fetch_assoc($myyjaresult);
 
 					$query = "	SELECT distinct myyja, nimi
 								FROM kuka
@@ -241,7 +241,7 @@
 								AND myyja > 0
 								ORDER BY myyja";
 					$ostajaresult = pupe_query($query);
-					$ostajarow = mysql_fetch_array($ostajaresult);
+					$ostajarow = mysql_fetch_assoc($ostajaresult);
 				}
 
 				//haetaan varastopaikat ja saldot
@@ -266,7 +266,7 @@
 				}
 				$paikresult = pupe_query($query);
 
-				while ($paikrow = mysql_fetch_array($paikresult)) {
+				while ($paikrow = mysql_fetch_assoc($paikresult)) {
 
 					if ($asiakasanalyysi) {
 						$row["tuoteno"] = $paikrow["ytunnus"];

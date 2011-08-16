@@ -56,7 +56,7 @@
 		echo "<th>",t("Tuotteen status"),"</th>";
 		echo "<td><select name='status'><option value=''>".t("Kaikki")."</option>";
 
-		while ($lajirow = mysql_fetch_array ($result)) {
+		while ($lajirow = mysql_fetch_assoc ($result)) {
 			$selli = '';
 			if ($lajirow['selite'] == $status) {
 				$selli = 'SELECTED';
@@ -156,7 +156,7 @@
 					$lisa
 					$saapumispvmlisa";
 		$sumres = pupe_query($query);
-		$sumrow = mysql_fetch_array($sumres);
+		$sumrow = mysql_fetch_assoc($sumres);
 
 		if ($sumrow["yhtkate"] == 0) {
 			$sumrow["yhtkate"] = 0.01;
@@ -299,7 +299,7 @@
 			echo "</table>";
 		}
 		else {
-			while ($row = mysql_fetch_array($res)) {
+			while ($row = mysql_fetch_assoc($res)) {
 
 				//haetaan asiakkaan tiedot
 				if ($asiakasanalyysi) {
@@ -308,7 +308,7 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$row[tuoteno]'";
 					$asres = pupe_query($query);
-					$asrow = mysql_fetch_array($asres);
+					$asrow = mysql_fetch_assoc($asres);
 
 					$row["asiakastunnus"] = $row["tuoteno"];
 					$row["tuoteno"] = $asrow["ytunnus"];
@@ -318,11 +318,11 @@
 				if (!$asiakasanalyysi and $lisatiedot == "TARK") {
 					// tehd‰‰n avainsana query
 					$keyres = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
-					$keytry = mysql_fetch_array($keyres);
+					$keytry = mysql_fetch_assoc($keyres);
 
 					// tehd‰‰n avainsana query
 					$keyres = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
-					$keyosa = mysql_fetch_array($keyres);
+					$keyosa = mysql_fetch_assoc($keyres);
 				}
 
 				echo "<tr>";
@@ -348,7 +348,7 @@
 								AND myyja > 0
 								ORDER BY myyja";
 					$sresult = pupe_query($query);
-					$srow = mysql_fetch_array($sresult);
+					$srow = mysql_fetch_assoc($sresult);
 
 					echo "<td valign='top'>$srow[nimi]</td>";
 
@@ -359,7 +359,7 @@
 								AND myyja > 0
 								ORDER BY myyja";
 					$sresult = pupe_query($query);
-					$srow = mysql_fetch_array($sresult);
+					$srow = mysql_fetch_assoc($sresult);
 
 					echo "<td valign='top'>$srow[nimi]</td>";
 

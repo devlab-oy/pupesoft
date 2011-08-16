@@ -1,9 +1,10 @@
 <?php
 	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 	$useslave = 1;
+
 	// DataTables p‰‰lle
 	$pupe_DataTables = "asiakkaantilaukset";
-	
+
 	require ("../inc/parametrit.inc");
 
 	if (substr($toim, 0, 8) == "KONSERNI") {
@@ -69,7 +70,7 @@
 	}
 
 	//	Voidaan n‰ytt‰‰ vain tilaus ilman hakuja yms. Haluamme kuitenkin tarkastaa oikeudet.
-	if ($tee=="NAYTA" and $til != "") {
+	if ($tee == "NAYTA" and $til != "") {
 		require ("raportit/naytatilaus.inc");
 		require ("inc/footer.inc");
 		die();
@@ -210,7 +211,7 @@
 	elseif ($sopimus > 0) {
 		$query = "	SELECT laskunro, ytunnus, liitostunnus
 					FROM lasku
-					WHERE tunnus='$sopimus'
+					WHERE tunnus = '$sopimus'
 					and $logistiikka_yhtiolisa";
 		$result = pupe_query($query);
 		$row = mysql_fetch_array($result);
@@ -325,9 +326,9 @@
 			$vvl = date("Y");
 		if (!isset($ppl))
 			$ppl = date("d");
-			
+
 		$chk = "";
-		
+
 		if ($kaikki != "") {
 			$chk = "CHECKED";
 		}
@@ -342,18 +343,18 @@
 				<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 		echo "</tr>";
 		echo "<tr>";
-		
-		// haetaan asiakkaan tiedot etuk‰teen laskettavaksi. 
+
+		// haetaan asiakkaan tiedot etuk‰teen laskettavaksi.
 		// halutaan n‰ytt‰‰ nappi vain jos laskuja on enemm‰n kuin 500..
 		$apuquery = "SELECT count(tunnus) laskuja FROM lasku
 					WHERE lasku.$logistiikka_yhtiolisa
 					and lasku.liitostunnus = '$asiakasid'
-					and $til 
+					and $til
 					and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'
 					and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'";
 		$apures = pupe_query($apuquery);
 		$apurow = mysql_fetch_assoc($apures);
-		
+
 		if ($apurow["laskuja"] >= 501) {
 			echo "<th>".t("N‰ytet‰‰n 500 ensimm‰ist‰")."</th><td colspan='3' class='back'><input type='checkbox' name='kaikki' $chk></td>";
 		}
@@ -474,7 +475,7 @@
 						and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
 						$jarj";
 		}
-		
+
 		if ($kaikki == "") {
 			if ($apurow["laskuja"] >= 501){
 				$query .= " limit 50";
@@ -486,7 +487,7 @@
 		else {
 			$query .= " limit 500";
 		}
-		
+
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result)!=0) {
@@ -507,27 +508,27 @@
 					pupe_DataTables($pupe_DataTables, 8, 9);
 				}
 			}
-			
+
 			echo "<br>";
-			echo "<table class='display' id='$pupe_DataTables'>";					
-			
+			echo "<table class='display' id='$pupe_DataTables'>";
+
 			echo "<thead>";
 			echo "<tr>";
-			
+
 			for ($i=0; $i < mysql_num_fields($result)-8; $i++) {
 				echo "<th>".t(mysql_field_name($result,$i))."</th>";
 			}
-			
+
 			echo "<th>".t("Tyyppi")."</th>
 				  <th class='back'></th>";
 			echo "</tr>";
-			
+
 			echo "<tr>";
-			
+
 			for ($i=0; $i < mysql_num_fields($result)-8; $i++) {
 				echo "<td><input type='text' name='search_".t(mysql_field_name($result,$i))."'></td>";
 			}
-			
+
 			echo "<td><input type='text' name='search_tyyppi'></td>
 			      <td class='back'></td>";
 			echo "</tr>";
@@ -535,7 +536,7 @@
 			echo "<tbody>";
 
 			while ($row = mysql_fetch_array($result)) {
-								
+
 				echo "<tr class='aktiivi'>";
 
 				// Laatikot laskujen ymp‰rille
@@ -588,11 +589,11 @@
 
 					$borderlask--;
 				}
-				
+
 				if ($tunnus == $row['tilaus']) {
 					$classalku	.= " class='tumma' ";
 					$classloppu	.= " class='tumma' ";
-					$class 		.= " class='tumma' ";				
+					$class 		.= " class='tumma' ";
 				}
 
 				if ($row["tila"] == "U") {
@@ -687,7 +688,7 @@
 
 				$edlaskunro = $row["laskunro"];
 			}
-			
+
 			echo "</tbody>";
 			echo "</table>";
 		}

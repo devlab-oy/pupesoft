@@ -10138,10 +10138,6 @@ if (!function_exists("tarkista_viite")) {
 			return FALSE;
 		}
 
-<<<<<<< HEAD
-		$viite 	 = preg_replace("/[^0-9]/", "", $viite);
-=======
->>>>>>> 756f5c26df7884e4d7dd0689bf8b055c93c30c5e
 		$kerroin = 7;
 		$tulo 	 = 0;
 

@@ -624,19 +624,19 @@
 										// Tilausrivin systeemikommentti
 										$kommentti .= t("Tilaaja").": ".trim($orig_laskurow['tilausyhteyshenkilo']);
 									}
-									
+
 									if (trim($orig_laskurow['sisviesti1']) != "" and strpos($kommentti, t("Kommentti").": ".trim($orig_laskurow['sisviesti1'])) === FALSE) {
 										if (trim($kommentti) != "") $kommentti .= " / ";
 										// Tilausrivin systeemikommentti
 										$kommentti .= t("Kommentti").": ".trim($orig_laskurow['sisviesti1']);
 									}
-									
+
 									if (trim($orig_laskurow['kohde']) != "" and strpos($kommentti, t("Kohde").": ".trim($orig_laskurow['kohde'])) === FALSE) {
 										if (trim($kommentti) != "") $kommentti .= " / ";
 										// Tilausrivin systeemikommentti
 										$kommentti .= t("Kohde").": ".trim($orig_laskurow['kohde']);
 									}
-									
+
 								}
 								elseif ($otsikkorivi["osatoimitus"] == "" and $otsikkorivi['jtkielto'] == "Y") {
 									if (strpos($kommentti, t("Alkuperäinen tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {

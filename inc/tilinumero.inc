@@ -14,14 +14,16 @@ function tilinumero_print($tilino_data) {
 	else {
 		if (substr($tilino_data, 0, 1) >= 0 and substr($tilino_data, 0, 1) <= '9') {
 			$alkuosa = substr($tilino_data, 0, 6);
-			if ($tilino_print[0] == "4" or $tilino_print[0] == "5") {
-				$loppuosa = substr($tilino_data, 6, 1);
-				$loppuindex = 7;
-			}
-			else {
+			
+			# WHAT ???
+			#if ($tilino_print[0] == "4" or $tilino_print[0] == "5") {
+			#	$loppuosa = substr($tilino_data, 6, 1);
+			#	$loppuindex = 7;
+			#}
+			#else {
 				$loppuosa = "";
 				$loppuindex = 6;
-	  		}
+	  		#}
 
 			while ($tilino_data[$loppuindex] == "0") {
 				$loppuindex++;

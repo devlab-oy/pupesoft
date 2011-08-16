@@ -32,7 +32,7 @@
 
 		//varmistellaan ettei vanhat kummittele...
 		$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 	}
 
 	if ($from == "LASKUTATILAUS") {
@@ -42,7 +42,7 @@
 	if ($tee == 'AKTIVOI') {
 		// katsotaan onko muilla aktiivisena
 		$query = "SELECT * from kuka where yhtio='$kukarow[yhtio]' and kesken='$tilausnumero' and kesken!=0";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		unset($row);
 
@@ -54,8 +54,8 @@
 			echo "<font class='error'>".t("Tilaus on aktiivisena käyttäjällä")." $row[nimi]. ".t("Tilausta ei voi tällä hetkellä muokata").".</font><br>";
 
 			// poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
-			$query = "update kuka set kesken='' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
+			$result = pupe_query($query);
 
 			exit;
 		}
@@ -65,7 +65,7 @@
 						WHERE yhtio = '$kukarow[yhtio]' AND
 						kuka = '$kukarow[kuka]' AND
 						session = '$session'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$kukarow['kesken'] 	 = $tilausnumero;
 			$tee = "Y";
@@ -110,7 +110,7 @@
 		$query = "	SELECT *
 					FROM lasku
 					WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]' and tila = 'O'";
-		$aresult = mysql_query($query) or pupe_error($query);
+		$aresult = pupe_query($query);
 
 		if (mysql_num_rows($aresult) == 0) {
 			echo "<font class='message'>".t("VIRHE: Tilausta ei löydy")."!<br><br></font>";
@@ -121,7 +121,7 @@
 
 		if ($tee == "vahvista") {
 			$query = "UPDATE tilausrivi SET  jaksotettu=1 where yhtio='$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi='O' and uusiotunnus=0";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			if (mysql_affected_rows() > 0) {
 				echo "<font class='message'>".t("Toimitus vahvistettu")."</font><br><br>";
 			}
@@ -135,7 +135,7 @@
 		if ($tee == 'poista') {
 			// poistetaan tilausrivit, mutta jätetään PUUTE rivit analyysejä varten...
 			$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			//Nollataan sarjanumerolinkit
 			$query    = "	SELECT tilausrivi.tunnus
@@ -143,18 +143,18 @@
 							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.otunnus = '$kukarow[kesken]'";
-			$sres = mysql_query($query) or pupe_error($query);
+			$sres = pupe_query($query);
 
 			while($srow = mysql_fetch_array($sres)) {
-				$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and ostorivitunnus='$srow[tunnus]'";
-				$sarjares = mysql_query($query) or pupe_error($query);
+				$query = "UPDATE sarjanumeroseuranta SET ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' AND ostorivitunnus='$srow[tunnus]'";
+				$sarjares = pupe_query($query);
 			}
 
 			$query = "UPDATE lasku SET tila='D', alatila='$laskurow[tila]', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa tilaus_osto.php ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query = "UPDATE kuka SET kesken=0 WHERE session='$session'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tee = "";
 			$kukarow["kesken"] = 0; // Ei enää kesken
@@ -164,7 +164,7 @@
 		if ($tee == 'poista_kohdistamattomat') {
 			// poistetaan kohdistamattomat ostotilausrivit
 			$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and uusiotunnus=0";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			echo "<font class='message'>".t("Kohdistamattomat tilausrivit poistettu")."!<br><br></font>";
 
@@ -179,7 +179,7 @@
 			if (count($komento) == 0) {
 				// päivitetään tässä tilaus valmiiksi
 				$query = "UPDATE lasku SET alatila = 'A' WHERE tunnus='$kukarow[kesken]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if ($toim == "HAAMU") {
 					echo "<font class='head'>".t("Työ/tarvikeosto").":</font><hr><br>";
@@ -194,7 +194,7 @@
 
 			// luodaan varastopaikat jos tilaus on optimoitu varastoon...
 			$query = "SELECT * from lasku WHERE tunnus='$kukarow[kesken]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$laskurow = mysql_fetch_array($result);
 
 			if ($laskurow['tila'] != 'O') {
@@ -206,7 +206,7 @@
 			if ($laskurow["varasto"] != 0) {
 
 				$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and tyyppi='O'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				// käydään läpi kaikki tilausrivit
 				while ($ostotilausrivit = mysql_fetch_array($result)) {
@@ -217,7 +217,7 @@
 					 			from tuotepaikat
 								where yhtio='$kukarow[yhtio]' and tuoteno='$ostotilausrivit[tuoteno]'
 								order by sorttauskentta";
-					$tuopaires = mysql_query($query) or pupe_error($query);
+					$tuopaires = pupe_query($query);
 
 					// apulaskuri
 					$kuuluu = 0;
@@ -234,7 +234,7 @@
 										hyllyvali = '$tuopairow[hyllyvali]'
 										where yhtio = '$kukarow[yhtio]' and
 										tunnus = '$ostotilausrivit[tunnus]'";
-							$tuopaiupd = mysql_query($query) or pupe_error($query);
+							$tuopaiupd = pupe_query($query);
 
 							$kuuluu++;
 							break; // breakataan niin ei looppailla enää turhaa
@@ -246,7 +246,7 @@
 
 						// haetaan halutun varaston tiedot
 						$query = "SELECT alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'";
-						$hyllyres = mysql_query($query) or pupe_error($query);
+						$hyllyres = pupe_query($query);
 						$hyllyrow =  mysql_fetch_array($hyllyres);
 
 						// katotaan löytykö yhtään tuotepaikkaa, jos ei niin tehään oletus
@@ -270,7 +270,7 @@
 									hyllynro 	= '$hyllyrow[alkuhyllynro]',
 									hyllytaso 	= '0',
 									hyllyvali 	= '0'";
-						$updres = mysql_query($query) or pupe_error($query);
+						$updres = pupe_query($query);
 
 						// tehdään tapahtuma
 						$query = "	INSERT into tapahtuma set
@@ -287,7 +287,7 @@
 									selite 		= '".t("Lisättiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
 									laatija 	= '$kukarow[kuka]',
 									laadittu 	= now()";
-						$updres = mysql_query($query) or pupe_error($query);
+						$updres = pupe_query($query);
 
 						// päivitetään tilausrivi
 						$query = "	UPDATE tilausrivi set
@@ -297,7 +297,7 @@
 									hyllyvali 	= '0'
 									where yhtio = '$kukarow[yhtio]' and
 									tunnus = '$ostotilausrivit[tunnus]'";
-						$updres = mysql_query($query) or pupe_error($query);
+						$updres = pupe_query($query);
 
 					}
 				} // end while ostotilausrivit
@@ -309,18 +309,18 @@
 
 			// päivitetään tässä tilaus tulostetuksi
 			$query = "UPDATE lasku SET lahetepvm = now() WHERE tunnus='$kukarow[kesken]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if ($toim == "HAAMU") {
 				$query = "UPDATE lasku SET tila='D', tilaustyyppi = 'O' WHERE tunnus='$kukarow[kesken]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$query = "UPDATE tilausrivi SET tyyppi = 'D' WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			$query = "UPDATE kuka SET kesken=0 WHERE session='$session'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$kukarow["kesken"] 	= '';
 			$tilausnumero 		= 0;
@@ -336,7 +336,7 @@
 			$query = "	UPDATE tilausrivi
 						SET var2 = 'OK'
 						WHERE tunnus = '$rivitunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tee 		= "Y";
 			$rivitunnus = "";
@@ -350,7 +350,7 @@
 						WHERE tilausrivi.tunnus = '$rivitunnus'
 						and tilausrivi.yhtio	= '$kukarow[yhtio]'
 						and tilausrivi.otunnus	= '$kukarow[kesken]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				echo t("Tilausrivi ei enää löydy")."! $query";
@@ -361,21 +361,20 @@
 			$query = "	DELETE
 						FROM tilausrivi
 						WHERE tunnus = '$rivitunnus'";
-			$result = mysql_query($query) or pupe_error($query);
-
+			$result = pupe_query($query);
 
 			// Tehdään pari juttua jos tuote on sarjanumeroseurannassa
 			if ($tilausrivirow["sarjanumeroseuranta"] != '') {
 				//Nollataan sarjanumero
 				$query = "SELECT tunnus FROM sarjanumeroseuranta WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilausrivirow[tuoteno]' and ostorivitunnus='$tilausrivirow[tunnus]'";
-				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjares = pupe_query($query);
 				$sarjarow = mysql_fetch_array($sarjares);
 
 				//Pidetään sarjatunnus muistissa
 				$osto_sarjatunnus = $sarjarow["tunnus"];
 
-				$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilausrivirow[tuoteno]' and ostorivitunnus='$tilausrivirow[tunnus]'";
-				$sarjares = mysql_query($query) or pupe_error($query);
+				$query = "UPDATE sarjanumeroseuranta SET ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' AND tuoteno='$tilausrivirow[tuoteno]' AND ostorivitunnus='$tilausrivirow[tunnus]'";
+				$sarjares = pupe_query($query);
 			}
 
 
@@ -449,7 +448,7 @@
 						set perheid2 = -1
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus 	= '$rivitunnus'";
-			$updres = mysql_query($query) or pupe_error($query);
+			$updres = pupe_query($query);
 			$tee = "Y";
 		}
 
@@ -483,7 +482,7 @@
 							FROM tuote
 							WHERE tuoteno = '$tuoteno'
 							and yhtio = '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
 					//Tuote löytyi
@@ -576,7 +575,7 @@
 							perheid2	= '$perheid2'
 							where yhtio = '$kukarow[yhtio]'
 							and tunnus 	= '$perheid2'";
-				$updres = mysql_query($query) or pupe_error($query);
+				$updres = pupe_query($query);
 			}
 
 			$tee = "Y";
@@ -674,7 +673,7 @@
 					</td>";
 
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
-			$res = mysql_query($queryoik) or pupe_error($queryoik);
+			$res = pupe_query($queryoik);
 
 			if (mysql_num_rows($res) > 0) {
 
@@ -702,7 +701,7 @@
 			$query = "	SELECT a.fakta, l.ytunnus
 						FROM toimi a, lasku l
 						WHERE l.tunnus='$kukarow[kesken]' and l.yhtio='$kukarow[yhtio]' and a.yhtio = l.yhtio and a.tunnus = l.liitostunnus";
-			$faktaresult = mysql_query($query) or pupe_error($query);
+			$faktaresult = pupe_query($query);
 			$faktarow = mysql_fetch_array($faktaresult);
 
 			echo "<table>";
@@ -754,7 +753,7 @@
 
 			// katotaan onko joku rivi jo liitetty johonkin keikkaan ja jos on niin annetaan mahdollisuus piilottaa lukitut rivit
 			$query = "SELECT * from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$laskurow[tunnus]' and uusiotunnus != 0";
-			$kaunisres = mysql_query($query) or pupe_error($query);
+			$kaunisres = pupe_query($query);
 
 			if (mysql_num_rows($kaunisres) != 0) {
 
@@ -814,7 +813,7 @@
 						and tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi = 'O'
 						ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
-			$presult = mysql_query($query) or pupe_error($query);
+			$presult = pupe_query($query);
 
 			$rivienmaara = mysql_num_rows($presult);
 
@@ -873,7 +872,7 @@
 									and otunnus = '$kukarow[kesken]'
 									$pklisa
 									and tyyppi != 'D'";
-						$pkres = mysql_query($query) or pupe_error($query);
+						$pkres = pupe_query($query);
 						$pkrow = mysql_fetch_array($pkres);
 
 						if ($prow["perheid2"] == 0 or $prow["perheid2"] == -1) {
@@ -882,7 +881,7 @@
 										WHERE tuoteperhe.yhtio 		= '$kukarow[yhtio]'
 										and tuoteperhe.isatuoteno 	= '$prow[tuoteno]'
 										and tuoteperhe.tyyppi 		= 'L'";
-							$lisaresult = mysql_query($query) or pupe_error($query);
+							$lisaresult = pupe_query($query);
 
 							$lisays = mysql_num_rows($lisaresult)+1;
 						}
@@ -951,7 +950,7 @@
 					echo "<td valign='top' $class>$prow[paikka]</td>";
 
 					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$prow[tuoteno]'";
-					$sarjares = mysql_query($query) or pupe_error($query);
+					$sarjares = pupe_query($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 
 					// tehdään pop-up divi jos keikalla on kommentti...
@@ -988,7 +987,7 @@
 						$query = "	SELECT count(*) kpl
 									from sarjanumeroseuranta
 									where yhtio='$kukarow[yhtio]' and tuoteno='$prow[tuoteno]' and ostorivitunnus='$prow[tunnus]'";
-						$sarjares = mysql_query($query) or pupe_error($query);
+						$sarjares = pupe_query($query);
 						$sarjarow = mysql_fetch_array($sarjares);
 
 						if ($sarjarow["kpl"] == abs($prow["varattukpl"])) {
@@ -1059,7 +1058,7 @@
 										and tuoteperhe.isatuoteno 	= '$prow[tuoteno]'
 										and tuoteperhe.tyyppi 		= 'L'
 										order by tuoteperhe.tuoteno";
-							$lisaresult = mysql_query($query) or pupe_error($query);
+							$lisaresult = pupe_query($query);
 
 							if (mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] == -1) {
 

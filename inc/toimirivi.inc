@@ -488,7 +488,7 @@
 		$sel[$apu] = "selected";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Ei käytössä<")."/option>";
+		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
 		$ulos .= "<option value='editilaus_out_elma.inc' $sel[editilaus_out_elma]>".t("Elma-editilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_teccom.inc' $sel[editilaus_out_teccom]>".t("TecCom-editilaus")."</option>";
 		$ulos .= "</select></td>";

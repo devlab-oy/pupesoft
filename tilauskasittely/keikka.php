@@ -80,40 +80,40 @@ if (!function_exists("tsekit")) {
 		}
 
 		if ($eipaikkoja == 0 and $kplyhteensa > 0) {
-			$varok=1;
+			$varok = 1;
 			$varastopaikat = "<font class='ok'>".t("ok")."</font>";
 		}
 		else {
-			$varok=0;
+			$varok = 0;
 			$varastopaikat = t("kesken");
 		}
 
 		// tutkitaan onko kaikki lisätiedot syötetty vai ei...
 		$query = "	SELECT *
 					from lasku use index (PRIMARY)
-					where lasku.yhtio='$kukarow[yhtio]'
-					and tunnus='$row[tunnus]'
-					and maa != '$yhtiorow[maa]'
+					where yhtio	= '$kukarow[yhtio]'
+					and tunnus	= '$row[tunnus]'
+					and maa	   != '$yhtiorow[maa]'
 					and (maa_maara = '' or maa_lahetys = '' or bruttopaino = '' or kauppatapahtuman_luonne <= 0 or kuljetusmuoto = '' or toimaika = '0000-00-00')
 					and kauppatapahtuman_luonne != '999'";
 		$okres = pupe_query($query);
 
-		if (mysql_num_rows($okres)==0) {
-			$lisok=1;
+		if (mysql_num_rows($okres) == 0) {
+			$lisok = 1;
 			$lisatiedot = "<font class='ok'>".t("ok")."</font>";
 		}
 		else {
-			$lisok=0;
+			$lisok = 0;
 			$lisatiedot = t("kesken");
 		}
 
 		// katotaan onko kohdistus tehty pennilleen
 		if ($row["kohdistettu"] == 'K') {
-			$kohok=1;
+			$kohok = 1;
 			$kohdistus = "<font class='ok'>".t("ok")."</font>";
 		}
 		else {
-			$kohok=0;
+			$kohok = 0;
 			$kohdistus = t("kesken");
 		}
 
@@ -189,33 +189,16 @@ if (!function_exists("tsekit")) {
 					and lasku.laskunro = '$row[laskunro]'";
 		$llres = pupe_query($query);
 		$llrow = mysql_fetch_array($llres);
-		
-		/*
-		if ($llrow["vosumma"] >= 0) {
-			if ($row['rahti_etu'] > $llrow['vosumma'] and $llrow['volasku'] == 1) {
-				$lisok = 0;
-				$lisatiedot = t("kesken");
-			}
 
-			if ($row['rahti_etu'] < 0.00) {
-				$lisok = 0;
-				$lisatiedot = t("kesken");
-			}
+		if ((abs($row['rahti_etu']) > abs($llrow['vosumma'])) and $llrow['volasku'] > 0) {
+			$lisok = 0;
+			$lisatiedot = t("kesken");
 		}
-		else {
-			if ($row['rahti_etu'] <= $llrow['vosumma']) {
-				$lisok = 0;
-				$lisatiedot = t("kesken");
-			}
-		}
-		*/
 
 		// $kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok
 		return array($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok);
-
 	}
 }
-
 
 if (!isset($toiminto)) $toiminto = "";
 
@@ -519,7 +502,7 @@ if (isset($nappikeikalla) and $nappikeikalla == 'ollaan' and $toiminto != 'kohdi
 	$toiminto = "kohdista";
 }
 
-if ($toiminto == "kohdista") {
+if ($toiminto == "kohdista") {	
 	require('ostotilausten_rivien_kohdistus.inc');
 }
 

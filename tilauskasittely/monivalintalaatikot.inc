@@ -496,8 +496,14 @@
 		$kustpt = substr($kustpt, 0, -1);
 
 		if (trim($kustpt) != '') {
-			$lisa_haku_kustp = " and tiliointi.kustp in ($kustpt) ";
-			$lisa .= " and tiliointi.kustp in ($kustpt) ";
+			if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta_new") !== FALSE) {
+				$lisa_haku_kustp = " and (tuote.kustp in ($kustpt) or asiakas.kustannuspaikka in ($kustpt)) ";
+				$lisa .= " and (tuote.kustp in ($kustpt) or asiakas.kustannuspaikka in ($kustpt)) ";
+			}
+			else {
+				$lisa_haku_kustp = " and tiliointi.kustp in ($kustpt) ";
+				$lisa .= " and tiliointi.kustp in ($kustpt) ";
+			}
 		}
 	}
 

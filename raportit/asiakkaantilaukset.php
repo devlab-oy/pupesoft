@@ -68,6 +68,12 @@
 
 		$til = " tila in ('L','N','C','D') and tilaustyyppi='R' ";
 	}
+	
+	if ($til == "" or $cleantoim == "") {
+	  echo "<p><font class='error'>".t("J‰rjestelm‰virhe, t‰m‰n modulin suorittaminen suoralla urlilla on kielletty")." !!!</font></p>";
+	  require ("inc/footer.inc");
+	  exit;
+	 }
 
 	//	Voidaan n‰ytt‰‰ vain tilaus ilman hakuja yms. Haluamme kuitenkin tarkastaa oikeudet.
 	if ($tee == "NAYTA" and $til != "") {

@@ -275,6 +275,7 @@
 									if ($laatikkoid != "TOTAL PACKS") { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
 		 								$sqlinsert =  "		INSERT INTO asn_sanomat SET
 		 													yhtio 				= '$kukarow[yhtio]',
+															laji				= 'asn'
 		 													toimittajanumero	= '$tavarantoimittajanumero',
 		 													asn_numero			= '$asn_numero',
 		 													saapumispvm 		= '$toimituspvm',

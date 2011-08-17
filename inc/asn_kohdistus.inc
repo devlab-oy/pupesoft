@@ -22,6 +22,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND status = ''
 						AND tilausrivi = ''
+						AND laji = 'asn'
 						ORDER BY toimittajanumero, asn_numero, paketinnumero";
 			$result = pupe_query($query);
 

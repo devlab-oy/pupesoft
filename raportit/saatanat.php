@@ -32,6 +32,9 @@
 		if (!isset($savvl)) $savvl = date("Y");
 		if (!isset($sappl)) $sappl = date("d");
 
+		$yli = str_replace(',','.', $yli);
+		$yli = (float) $yli;
+
 		echo "<table>";
 		echo "<tr><th>".t("Näytä vain tämä ytunnus").":</th><td valign='top'><input type='text' name='sytunnus' size ='15' value='$sytunnus'></td><td valign='top' class='back'>".t("Jätä kaikki hakukentät tyhjäksi jos haluat listata kaikki saatavat").".</td></tr>";
 		echo "<tr><th>".t("Näytä vain tämä nimi").":</th><td valign='top'><input type='text' name='sanimi' size ='15' value='$sanimi'></td></tr>";
@@ -180,13 +183,11 @@
 			$lisa .= " and lasku.liitostunnus in ($row[tunnukset]) ";
 		}
 
-		$yli = str_replace(',','.', $yli);
-
 		if ($yli != 0) {
-			$having = " HAVING avoimia >= $yli ";
+			$having = " HAVING avoimia >= '$yli' ";
 		}
 		else {
-			$having = " HAVING avoimia != 0 ";
+			$having = " HAVING (avoimia != 0 or avoimia = 0)";
 		}
 
 		if ($grouppaus == 'ytunnus') {

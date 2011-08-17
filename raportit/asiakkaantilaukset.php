@@ -337,31 +337,13 @@
 				<td><input type='text' name='ppa' value='$ppa' size='3'></td>
 				<td><input type='text' name='kka' value='$kka' size='3'></td>
 				<td><input type='text' name='vva' value='$vva' size='5'></td>
-				</tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
+				</tr>";
+		echo "<tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
 				<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 				<td><input type='text' name='kkl' value='$kkl' size='3'></td>
 				<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 		echo "</tr>";
-		echo "<tr>";
 
-		// haetaan asiakkaan tiedot etukäteen laskettavaksi.
-		// halutaan näyttää nappi vain jos laskuja on enemmän kuin 500..
-		$apuquery = "SELECT count(tunnus) laskuja FROM lasku
-					WHERE lasku.$logistiikka_yhtiolisa
-					and lasku.liitostunnus = '$asiakasid'
-					and $til
-					and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'
-					and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'";
-		$apures = pupe_query($apuquery);
-		$apurow = mysql_fetch_assoc($apures);
-
-		if ($apurow["laskuja"] >= 501) {
-			echo "<th>".t("Näytetään 500 ensimmäistä")."</th><td colspan='3' class='back'><input type='checkbox' name='kaikki' $chk></td>";
-		}
-		else {
-			echo "<td colspan='4' class='back'> </td>";
-		}
-		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr></form></table>";
 
 		if ($cleantoim == 'OSTO') {
 			$litunn = $toimittajaid;
@@ -477,18 +459,37 @@
 		}
 
 		if ($kaikki == "") {
-			if ($apurow["laskuja"] >= 501){
-				$query .= " limit 50";
-			}
-			else {
-				$query .= "";
-			}
+			$query .= " limit 51";
+			$limittrikkeri = "A";
 		}
 		else {
-			$query .= " limit 500";
+			$query .= " limit 500 ";
+			$limittrikkeri = "X";
 		}
 
 		$result = pupe_query($query);
+
+		echo "<tr>";
+
+		if (mysql_num_rows($result) > 50) {
+			echo "<th>".t("Näytä 500 uusinta tilausta")."</th>";
+			echo "<td colspan='3' class=''>";
+			echo "<input type='checkbox' name='kaikki' $chk></td>";
+		}
+		else {
+			echo "<td colspan='4' class='back'>";
+		}
+
+		echo "<td class='back'>";
+		echo "<input type='submit' value='".t("Hae")."'>";
+		echo "</td></tr>";
+
+		echo "</form>";
+		echo "</table>";
+
+		if (mysql_num_rows($result) > 50 and $limittrikkeri == "A") {
+			echo "<p><font class='error'>".t("HUOM")."! ".t("Näytetään vain 50 uusinta tilausta")."</font></p>";
+		}
 
 		if (mysql_num_rows($result)!=0) {
 

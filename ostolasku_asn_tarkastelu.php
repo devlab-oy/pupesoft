@@ -872,7 +872,7 @@
 				$query = "	SELECT toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift,
 							asn_sanomat.asn_numero, asn_sanomat.paketintunniste, asn_sanomat.toimittajanumero, 
 							count(asn_sanomat.tunnus) AS rivit,
-							sum(if(asn_sanomat.tlausrivi != '', 1, 0)) AS ok
+							sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
 							FROM asn_sanomat
 							JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero)
 							WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'

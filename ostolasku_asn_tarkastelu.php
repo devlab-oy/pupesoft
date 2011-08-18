@@ -19,9 +19,18 @@
 					});
 
 					$('.toimittajabutton').click(function(){
-						var asn = $(this).attr('id');
 						$('#tee').val('vaihdatoimittaja');
-						$('#formi').attr('action', '?asn_numero='+asn+'&lopetus={$PHP_SELF}////tee=').submit();
+
+						var valitse = $(this).attr('valitse');
+
+						if (valitse == 'asn') {
+							var asn = $(this).attr('id');
+							$('#formi').attr('action', '?valitse=asn&asn_numero='+asn+'&lopetus={$PHP_SELF}////tee=').submit();
+						}
+						else {
+							var tilausnumero = $(this).attr('id');
+							$('#formi').attr('action', '?valitse=ostolasku&tilausnumero='+tilausnumero+'&lopetus={$PHP_SELF}////tee=').submit();
+						}
 					});
 
 					$('.etsibutton').click(function(){
@@ -95,21 +104,40 @@
 		if (isset($toimittajaid) and trim($toimittajaid) != '') {
 
 			$toimittajaid = (int) $toimittajaid;
-			$asn_numero = (int) $muutparametrit;
 
 			$query = "SELECT toimittajanro FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$toimittajaid}'";
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
 
-			$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero = '{$asn_numero}'";
-			$res = pupe_query($query);
+			list($nro, $valitse) = explode("##", $muutparametrit);
+
+			if ($valitse == 'asn') {
+				$asn_numero = (int) $nro;
+
+				$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND asn_numero = '{$asn_numero}'";
+				$res = pupe_query($query);
+			}
+			else {
+				$tilausnumero = (int) $nro;
+
+				$query = "UPDATE asn_sanomat SET toimittajanumero = '{$row['toimittajanro']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tilausnumero = '{$tilausnumero}'";
+				$res = pupe_query($query);
+			}
 
 			$tee = '';
 			$tila = 'ok';
 		}
 
 		if ($tila == '') {
-			echo "<form method='post' action='?tee={$tee}&muutparametrit={$asn_numero}'>";
+
+			if ($valitse == 'asn') {
+				$action = "&muutparametrit={$asn_numero}##{$valitse}";
+			}
+			else {
+				$action = "&muutparametrit={$tilausnumero}##{$valitse}";
+			}
+
+			echo "<form method='post' action='?tee={$tee}{$action}'>";
 			echo "<table>";
 			echo "<tr><th>",t("Etsi toimittajaa")," (",t("nimi")," / ",t("ytunnus"),")</th><td><input type='text' name='nimi' value='' />&nbsp;<input type='submit' value='",t("Etsi"),"' /></td></tr>";
 			echo "</table>";
@@ -119,12 +147,19 @@
 
 	if ($tee == 'vahvistakolli') {
 
-		$kolli = mysql_real_escape_string($kolli);
+		if ($valitse == 'asn') {
+			$kolli = mysql_real_escape_string($kolli);
+			$wherelisa = "AND paketintunniste = '{$kolli}'";
+		}
+		else {
+			$lasku = (int) $lasku;
+			$wherelisa = "AND tilausnumero = '{$lasku}'";
+		}
 
 		$paketin_rivit = array();
 		$paketin_tunnukset = array();
 
-		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND paketintunniste = '{$kolli}'";
+		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' {$wherelisa}";
 		$kollires = pupe_query($query);
 
 		while ($kollirow = mysql_fetch_assoc($kollires)) {
@@ -830,7 +865,6 @@
 			echo "<td><input type='submit' value='",t("Hae"),"' /></td>";
 			echo "</tr></table>";
 			echo "</form>";
-
 		}
 		else {
 
@@ -847,8 +881,9 @@
 							ORDER BY asn_sanomat.asn_numero, asn_sanomat.paketintunniste";
 				$result = pupe_query($query);
 
-				echo "<form method='post' action='?valitse={$valitse}&lopetus={$PHP_SELF}////valitse=asn&tee=' id='formi'>";
+				echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=asn&tee=' id='formi'>";
 				echo "<input type='hidden' id='tee' name='tee' value='nayta' />";
+				echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
 				echo "<input type='hidden' id='kolli' name='kolli' value='' />";
 				echo "<table>";
 				echo "<tr>";
@@ -863,6 +898,7 @@
 				echo "</tr>";
 
 				$ed_asn = '';
+				$ed_toimittaja = '';
 				$naytetaanko_toimittajabutton = true;
 
 				while ($row = mysql_fetch_assoc($result)) {
@@ -899,6 +935,7 @@
 					}
 
 					$ed_asn = $row['asn_numero'];
+					$ed_toimittaja = $row['toimittajanumero'];
 				}
 
 				if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
@@ -909,24 +946,6 @@
 				echo "</form>";
 			}
 			else {
-
-				$query = "	SELECT lasku.ytunnus,
-							if(lasku.nimitark != '', concat(lasku.nimi, ' ', lasku.nimitark), lasku.nimi) AS nimi, 
-							if(lasku.osoitetark != '', concat(lasku.osoite, ' ', lasku.osoitetark), lasku.osoite) AS osoite, 
-							lasku.postino, lasku.postitp, lasku.maa, lasku.swift, lasku.laskunro,
-							lasku2.tunnus, lasku.tunnus AS latunnus
-							#count(tilausrivi.tunnus) AS rivit,
-							#sum(if(status != '', 1, 0)) AS ok
-							FROM lasku
-							LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
-							JOIN liitetiedostot AS lt ON (lt.yhtio = lasku.yhtio AND lt.liitostunnus = lasku.tunnus AND lt.liitos = 'lasku' AND lt.kayttotarkoitus = 'TECCOM-INVOICE')
-							WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-							AND lasku.tila IN ('H','M','P','Q','Y')
-							AND lasku.laskunro != 0
-							AND lasku.tapvm >= '{$yhtiorow['tilikausi_alku']}'
-							#GROUP BY 1,2,3,4,5,6,7,8,9,10
-							HAVING lasku2.tunnus IS NULL
-							ORDER BY lasku.ytunnus, lasku.nimi, lasku.laskunro";
 
 				$query = "	SELECT toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift,
 							asn_sanomat.tilausnumero, asn_sanomat.paketintunniste, asn_sanomat.toimittajanumero, 
@@ -940,8 +959,9 @@
 							ORDER BY toimi.nimi, toimi.ytunnus";
 				$result = pupe_query($query);
 
-				echo "<form method='post' action='?valitse={$valitse}&lopetus={$PHP_SELF}////valitse=ostolasku&tee=' id='formi'>";
+				echo "<form method='post' action='?lopetus={$PHP_SELF}////valitse=ostolasku&tee=' id='formi'>";
 				echo "<input type='hidden' id='tee' name='tee' value='nayta' />";
+				echo "<input type='hidden' id='valitse' name='valitse' value='{$valitse}' />";
 				echo "<input type='hidden' id='lasku' name='lasku' value='' />";
 				echo "<table>";
 				echo "<tr>";
@@ -954,7 +974,20 @@
 				echo "<th>&nbsp;</th>";
 				echo "</tr>";
 
+				$ed_toimittaja = '';
+				$ed_tilausnumero = '';
+				$naytetaanko_toimittajabutton = true;
+
 				while ($row = mysql_fetch_assoc($result)) {
+
+					if ($ed_toimittaja != '' and $ed_toimittaja != $row['toimittajanumero']) {
+
+						if ($naytetaanko_toimittajabutton) {
+							echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
+						}
+
+						echo "<tr><td colspan='8' class='back'>&nbsp;</td></tr>";
+					}
 
 					echo "<tr>";
 					echo "<td>{$row['ytunnus']}</td>";
@@ -965,6 +998,17 @@
 					echo "<td>{$row['ok']} / {$row['rivit']}</td>";
 					echo "<td><input type='button' class='ostolaskubutton' id='{$row['tilausnumero']}' value='",t("Valitse"),"' /></td>";
 					echo "</tr>";
+
+					if (($ed_toimittaja == '' or $ed_toimittaja == $row['toimittajanumero']) and $row['ok'] == $row['rivit']) {
+						$naytetaanko_toimittajabutton = false;
+					}
+
+					$ed_toimittaja = $row['toimittajanumero'];
+					$ed_tilausnumero = $row['tilausnumero'];
+				}
+
+				if (mysql_num_rows($result) > 0 and $naytetaanko_toimittajabutton) {
+					echo "<tr><th colspan='8'><input type='button' class='toimittajabutton' id='{$ed_tilausnumero}' value='",t("Vaihda toimittajaa"),"' /></th></tr>";
 				}
 
 				echo "</table>";

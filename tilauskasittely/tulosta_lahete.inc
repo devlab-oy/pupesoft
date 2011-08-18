@@ -1994,7 +1994,7 @@ if (!function_exists('rivi_eialehintoja_lahete')) {
 				$kala = $kala - $rivinkorkeus;
 			}
 
-			$pdf->draw_text($nimityskohta, $kala, $nimityskohta." ".$row["nimitys"], $thispage, $norm);
+			$pdf->draw_text($nimityskohta, $kala, $row["nimitys"], $thispage, $norm);
 		}
 
 		$kala = $kala - $rivinkorkeus;

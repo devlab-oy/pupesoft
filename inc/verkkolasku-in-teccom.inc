@@ -196,7 +196,7 @@
 					$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 				}
 
-				$rtuoteno[$i]["ostotilausnro"] = (string) $tuotetieto->OrderRef->BuyerOrderNumber; // mihin tätä tarvitiin ?
+				$rtuoteno[$i]["ostotilausnro"] = (string) $tuotetieto->OrderRef->BuyerOrderNumber;
 				
 				$rtuoteno[$i]["tilaajanrivinro"] = (string) $tuotetieto->PositionNumber;
 				

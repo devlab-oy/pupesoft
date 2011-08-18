@@ -33,6 +33,11 @@
 						}
 					});
 
+					$('.hintapoikkeavuusbutton').click(function(){
+						$('#tee').val('hintavertailu');
+						$('#riviformi').submit();
+					});
+
 					$('.etsibutton').click(function(){
 						var rivitunniste = $(this).attr('id');
 						$('#asn_rivi').val(rivitunniste);
@@ -73,6 +78,71 @@
 
 	if (!isset($tee)) $tee = '';
 	if (!isset($valitse)) $valitse = '';
+
+	if ($tee == 'hintavertailu') {
+		echo "foo<br>";
+
+		if (@include_once("pdflib/phppdflib.class.php"));
+		else include_once("phppdflib.class.php");
+
+		$norm["height"] 		= 10;
+		$norm["font"] 			= "Times-Roman";
+
+		$pieni["height"] 		= 8;
+		$pieni["font"] 			= "Times-Roman";
+
+		$boldi["height"] 		= 10;
+		$boldi["font"] 			= "Times-Bold";
+
+		$pieni_boldi["height"] 	= 8;
+		$pieni_boldi["font"] 	= "Times-Bold";
+
+		$iso["height"] 			= 14;
+		$iso["font"] 			= "Helvetica-Bold";
+
+		$rectparam["width"] 	= 0.3;
+		$rivinkorkeus			= 15;
+
+		$pdf = new pdffile;
+		$pdf->set_default('margin-top', 	0);
+		$pdf->set_default('margin-bottom', 	0);
+		$pdf->set_default('margin-left', 	0);
+		$pdf->set_default('margin-right', 	0);
+
+		$thispage = $pdf->new_page("a4");
+
+		$pdf->draw_text(310, 815, t("Hintavertailu", $kieli), $thispage, $iso);
+
+		$lasku = (int) $lasku;
+
+		$query = "SELECT * FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND tilausnumero = '{$lasku}'";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+
+		$query = "SELECT nimi, nimitark FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND toimittajanro = '{$row['toimittajanumero']}'";
+		$toimires = pupe_query($query);
+		$toimirow = mysql_fetch_assoc($toimires);
+
+		$pdf->draw_text(50, 775, t("Toimittaja", $kieli).": {$toimirow['nimi']} {$toimirow['nimitark']}", $thispage, $norm);
+
+		mysql_data_seek($result, 0);
+
+		// while ($row = mysql_fetch_assoc($result)) {
+		// 
+		// }
+
+		//keksitään uudelle failille joku varmasti uniikki nimi:
+		list($usec, $sec) = explode(' ', microtime());
+		mt_srand((float) $sec + ((float) $usec * 100000));
+		$pdffilenimi = "/tmp/".t("Hintavertailu")."-".md5(uniqid(mt_rand(), true)).".pdf";
+
+		//kirjoitetaan pdf faili levylle..
+		$fh = fopen($pdffilenimi, "w");
+		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
+		fclose($fh);
+
+		
+	}
 
 	if ($tee == 'vaihdatoimittaja') {
 

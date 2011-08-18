@@ -163,6 +163,7 @@
 					$ostoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
 					$ostoilla[$i]["kpl"] = $rtuoteno[$i]["kpl"];
 					$ostoilla[$i]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
+					$ostoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
 				}
 				else {
 					echo "Virheellisiä kappalemääriä tilauksella ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."\n";
@@ -176,6 +177,7 @@
 					$keikoilla[$i]["tunnus"] = $tilausrivirow['tunnus'];
 					$keikoilla[$i]["uusiotunnus"] = $tilausrivirow['uusiotunnus'];
 					$keikoilla[$i]["hinta"] = $rtuoteno[$i]["hinta"];
+					$keikoilla[$i]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
 				}
 				else {
 					echo "Virheellisiä kappalemääriä tilauksella ".$rtuoteno[$i]["ostotilausnro"]." tuote ".$rtuoteno[$i]["tuoteno"]." kpl ".$rtuoteno[$i]["kpl"]."\n";
@@ -247,6 +249,8 @@
 
 	// Jos kyseessä on TecCom oastolasku
 	if ($osrow["ebid"] == "TECCOM-INVOICE") {
+		$update_asn_chk = true;
+
 		// ensin ostoilta, sitten keikalta, sitten virheet.
 		if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0) {
 
@@ -312,8 +316,16 @@
 				$results = pupe_query($query);
 				$tilausrivirow = mysql_fetch_assoc($results);
 
-				// jos ei splitata, päivitetään hinta, mutta ei kohdisteta.
+				// jos ei splitata, päivitetään hinta ja kohdistetaan.
 				if ($tilausrivirow['varattu'] == $pointteri["kpl"]) {
+					$update_asn = "	UPDATE asn_sanomat SET
+									tilausrivi = '{$pointteri['tunnus']}',
+									keikkarivinhinta = '{$tilausrivirow['hinta']}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tilausnumero = '{$laskun_numero}'
+									AND tilausrivinpositio = '{$pointteri['tilaajanrivinro']}'";
+					pupe_query($update_asn);
+
 					$update = "	UPDATE tilausrivi SET
 								hinta		= '$pointteri[hinta]',
 								uusiotunnus = '$keikan_tunnus'
@@ -368,6 +380,19 @@
 			verkkolasku_luo_liitosotsikko($tunnus, $keikoilla[0]["uusiotunnus"]);
 
 			foreach ($keikoilla as $pointteri) {
+
+				$query = "SELECT hinta FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$pointteri['tunnus']}'";
+				$hinta_chk_res = pupe_query($query);
+				$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
+
+				$update_asn = "	UPDATE asn_sanomat SET
+								tilausrivi = '{$pointteri['tunnus']}',
+								keikkarivinhinta = '{$hinta_chk_row['hinta']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausnumero = '{$laskun_numero}'
+								AND tilausrivinpositio = '{$pointteri['tilaajanrivinro']}'";
+				pupe_query($update_asn);
+
 				$update = "UPDATE tilausrivi set hinta = '".$pointteri["hinta"]."' where yhtio='$kukarow[yhtio]' and tunnus = '".$pointteri["tunnus"]."'";
 				pupe_query($update);
 			}
@@ -375,6 +400,59 @@
 		}
 		else {
 			echo "Laskulla oli virheitä, emme tehneet mitään.\n";
+			$update_asn_chk = false;
+		}
+
+		if ($update_asn_chk) {
+
+			if (count($ostoilla) > 0 and count($keikoilla) == 0 and $virheet == 0) {
+
+				$upd_chk = true;
+
+				foreach ($ostoilla as $osto_loop) {
+					$query = "	SELECT tilausrivi
+								FROM asn_sanomat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausnumero = '{$laskun_numero}'
+								AND tilausrivinpositio = '{$osto_loop['tilaajanrivinro']}'";
+					$chk_res = pupe_query($query);
+					$chk_row = mysql_fetch_assoc($chk_res);
+
+					if ($chk_row['tilausrivi'] == '') $upd_chk = false;
+				}
+
+				if ($upd_chk) {
+					$query = "	UPDATE asn_sanomat SET
+								status = 'X'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausnumero = '{$laskun_numero}'";
+					$chk_res = pupe_query($query);
+				}
+			}
+			elseif (count($ostoilla) == 0 and count($keikoilla) > 0 and $virheet == 0) {
+
+				$upd_chk = true;
+
+				foreach ($keikoilla as $keikka_loop) {
+					$query = "	SELECT tilausrivi
+								FROM asn_sanomat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausnumero = '{$laskun_numero}'
+								AND tilausrivinpositio = '{$keikka_loop['tilaajanrivinro']}'";
+					$chk_res = pupe_query($query);
+					$chk_row = mysql_fetch_assoc($chk_res);
+
+					if ($chk_row['tilausrivi'] == '') $upd_chk = false;
+				}
+
+				if ($upd_chk) {
+					$query = "	UPDATE asn_sanomat SET
+								status = 'X'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tilausnumero = '{$laskun_numero}'";
+					$chk_res = pupe_query($query);
+				}
+			}
 		}
 	}
 

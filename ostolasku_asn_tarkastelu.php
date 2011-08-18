@@ -563,6 +563,12 @@
 
 			while ($row = mysql_fetch_assoc($result)) {
 
+				// katsotaan ettei riviä ole jo kohdistettu muuhun asn riviin
+				$query = "SELECT tunnus FROM asn_sanomat WHERE yhtio = '{$kukarow['yhtio']}' AND toimittajanumero = '{$toimittaja}' AND tilausrivi LIKE '%{$row['tunnus']}%'";
+				$chkres = pupe_query($query);
+
+				if (mysql_num_rows($chkres) > 0) continue;
+
 				echo "<tr>";
 				echo "<td align='right'>{$row['otunnus']}</td>";
 				echo "<td>{$row['tuoteno']}</td>";
@@ -739,7 +745,7 @@
 			}
 
 			if ($ok and !$virhe) {
-				echo "<tr><th colspan='11'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
+				echo "<tr><th colspan='10'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
 			}
 
 			echo "</table>";
@@ -792,6 +798,7 @@
 			$result = pupe_query($query);
 
 			$ok = $virhe = 0;
+			$hintapoikkeavuus = false;
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -828,6 +835,15 @@
 				if ($row['tilausrivi'] != '') {
 					echo "<font class='ok'>Ok</font>";
 					$ok++;
+
+					$query = "SELECT hinta FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
+					$hinta_chk_res = pupe_query($query);
+					$hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
+
+					if ($row['hinta'] != $hinta_chk_row['hinta']) {
+						echo "<br /><font class='error'>",t("Hintapoikkeavuus"),"</font>";
+						$hintapoikkeavuus = true;
+					}
 				}
 				else {
 					echo "<font class='error'>",t("Virhe"),"</font>";
@@ -842,7 +858,11 @@
 			}
 
 			if ($ok and !$virhe) {
-				echo "<tr><th colspan='11'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
+				if ($hintapoikkeavuus) {
+					echo "<tr><th colspan='10'><input type='button' class='hintapoikkeavuusbutton' value='",t("Hintapoikkeavuus"),"' /></th></tr>";
+				}
+
+				echo "<tr><th colspan='10'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";
 			}
 
 			echo "</table>";

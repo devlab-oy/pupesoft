@@ -160,6 +160,30 @@
 
 		while ($row = mysql_fetch_assoc($result)) {
 
+			if ($kala <= 150) {
+				$thispage = $pdf->new_page("a4");
+
+				$kala = 815;
+
+				$pdf->draw_text(310, $kala, t("Hintavertailu", $kieli), $thispage, $iso);
+
+				$kala -= 40;
+				$pdf->draw_text(50, $kala, t("Toimittaja", $kieli).": {$toimirow['nimi']} {$toimirow['nimitark']}", $thispage, $boldi);
+
+				$kala -= ($rivinkorkeus * 2);
+
+				$pdf->draw_rectangle($kala + 10, 40, $kala - 5, 580, $thispage, $rectparam);
+
+				$pdf->draw_text(50, $kala, t("Tuoteno", $kieli), $thispage, $boldi);
+				$pdf->draw_text(200, $kala, t("Kpl", $kieli), $thispage, $boldi);
+				$pdf->draw_text(260, $kala, t("Hinta", $kieli), $thispage, $boldi);
+				$pdf->draw_text(340, $kala, t("Rivihinta", $kieli), $thispage, $boldi);
+				$pdf->draw_text(425, $kala, t("Hintaero", $kieli), $thispage, $boldi);
+				$pdf->draw_text(500, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
+
+				$kala -= 25;
+			}
+
 			$query = "SELECT tuoteno, nimitys, varattu + kpl AS kpl, hinta FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
 			$rivires = pupe_query($query);
 			$rivirow = mysql_fetch_assoc($rivires);

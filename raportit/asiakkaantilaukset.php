@@ -68,7 +68,7 @@
 
 		$til = " tila in ('L','N','C','D') and tilaustyyppi='R' ";
 	}
-	
+
 	if ($til == "" or $cleantoim == "") {
 	  echo "<p><font class='error'>".t("Järjestelmävirhe, tämän modulin suorittaminen suoralla urlilla on kielletty")." !!!</font></p>";
 	  require ("inc/footer.inc");

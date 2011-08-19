@@ -682,7 +682,7 @@
 
 		// Uusi tosite
 		// Tehdään haluttu määrä tiliöintirivejä
-		$tilmaarat = array("3","5","9","13","17","21","25","29","33","41","51","101","151", "201", "301", "401", "501");
+		$tilmaarat = array("3","5","9","13","17","21","25","29","33","41","51","101","151", "201", "301", "401", "501", "601", "701", "801", "901", "1001");
 
 		if (isset($gokfrom) and $gokfrom != "") {
 			// Valitaan sopiva tiliöintimäärä kun tullaan palkkatositteelta

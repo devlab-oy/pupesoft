@@ -111,7 +111,9 @@
 
 		$thispage = $pdf->new_page("a4");
 
-		$pdf->draw_text(310, 815, t("Hintavertailu", $kieli), $thispage, $iso);
+		$kala = 815;
+
+		$pdf->draw_text(310, $kala, t("Hintavertailu", $kieli), $thispage, $iso);
 
 		$lasku = (int) $lasku;
 
@@ -123,13 +125,46 @@
 		$toimires = pupe_query($query);
 		$toimirow = mysql_fetch_assoc($toimires);
 
-		$pdf->draw_text(50, 775, t("Toimittaja", $kieli).": {$toimirow['nimi']} {$toimirow['nimitark']}", $thispage, $norm);
+		$kala -= 40;
+
+		$pdf->draw_text(50, $kala, t("Toimittaja", $kieli).": {$toimirow['nimi']} {$toimirow['nimitark']}", $thispage, $boldi);
 
 		mysql_data_seek($result, 0);
 
-		// while ($row = mysql_fetch_assoc($result)) {
-		// 
-		// }
+		$kala -= ($rivinkorkeus * 2);
+
+		$pdf->draw_rectangle($kala + 10, 40, $kala - 5, 580, $thispage, $rectparam);
+
+		$pdf->draw_text(50, $kala, t("Tuoteno", $kieli), $thispage, $boldi);
+		$pdf->draw_text(200, $kala, t("Kpl", $kieli), $thispage, $boldi);
+		$pdf->draw_text(260, $kala, t("Hinta", $kieli), $thispage, $boldi);
+		$pdf->draw_text(340, $kala, t("Rivihinta", $kieli), $thispage, $boldi);
+		$pdf->draw_text(425, $kala, t("Hintaero", $kieli), $thispage, $boldi);
+		$pdf->draw_text(500, $kala, t("Rivihintaero", $kieli), $thispage, $boldi);
+
+		$kala -= 25;
+
+		while ($row = mysql_fetch_assoc($result)) {
+
+			$query = "SELECT tuoteno, nimitys, varattu + kpl AS kpl, hinta FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tilausrivi']}'";
+			$rivires = pupe_query($query);
+			$rivirow = mysql_fetch_assoc($rivires);
+
+			$pdf->draw_text(50, $kala, $rivirow['tuoteno'], $thispage, $norm);
+			$pdf->draw_text(200, $kala, $rivirow['kpl'], $thispage, $norm);
+			$pdf->draw_text(260, $kala, round($rivirow['hinta'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
+			$pdf->draw_text(340, $kala, round($rivirow['hinta'] * $rivirow['kpl'], $yhtiorow["hintapyoristys"]), $thispage, $norm);
+			$pdf->draw_text(425, $kala, round($row['keikkarivinhinta'] - $rivirow['hinta'], $yhtiorow['hintapyoristys']), $thispage, $norm);
+			$pdf->draw_text(500, $kala, round(($row['keikkarivinhinta'] * $row['kappalemaara']) - ($rivirow['hinta'] * $rivirow['kpl']), $yhtiorow['hintapyoristys']), $thispage, $norm);
+
+			$kala -= $rivinkorkeus;
+
+			$pdf->draw_text(50, $kala, $rivirow['nimitys'], $thispage, $norm);
+
+			$pdf->draw_rectangle($kala - 7, 40, $kala - 7, 580, $thispage, $rectparam);
+
+			$kala -= ($rivinkorkeus + 5);
+		}
 
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
@@ -929,7 +964,7 @@
 
 			if ($ok and !$virhe) {
 				if ($hintapoikkeavuus) {
-					echo "<tr><th colspan='10'><input type='button' class='hintapoikkeavuusbutton' value='",t("Hintapoikkeavuus"),"' /></th></tr>";
+					echo "<tr><th colspan='10'><input type='button' class='hintapoikkeavuusbutton' value='",t("Hintapoikkeavuus raportti"),"' /></th></tr>";
 				}
 
 				echo "<tr><th colspan='10'><input type='button' class='vahvistabutton' value='",t("Vahvista"),"' /></th></tr>";

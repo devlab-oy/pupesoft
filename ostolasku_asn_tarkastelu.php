@@ -80,7 +80,19 @@
 	if (!isset($valitse)) $valitse = '';
 
 	if ($tee == 'hintavertailu') {
-		echo "foo<br>";
+
+		if (!isset($komento)) {
+
+			$otunnus = $lasku;
+			$tila = $valitse;
+
+			$tulostimet[0] = t("Hintapoikkeavuus");
+
+			require("inc/valitse_tulostin.inc");
+		}
+
+		$valitse = $tila;
+		$lasku = $otunnus;
 
 		if (@include_once("pdflib/phppdflib.class.php"));
 		else include_once("phppdflib.class.php");
@@ -124,6 +136,8 @@
 		$query = "SELECT nimi, nimitark FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND toimittajanro = '{$row['toimittajanumero']}'";
 		$toimires = pupe_query($query);
 		$toimirow = mysql_fetch_assoc($toimires);
+
+		$toimittajan_nimi = trim($toimirow['nimi'].' '.$toimirow['nimitark']);
 
 		$kala -= 40;
 
@@ -176,7 +190,38 @@
 		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
 		fclose($fh);
 
-		
+		if (!is_array($komento)) {
+			$komentoulos = array($komento);
+		}
+		else {
+			$komentoulos = $komento;
+		}
+
+		foreach ($komentoulos as $komento) {
+
+			// itse print komento...
+			if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
+				$liite = $pdffilenimi;
+				$content_body = "";
+
+				echo t("Hintapoikkeavuus-raportti tulostuu")."...<br>";
+
+				$kutsu = t("Hintapoikkeavuus-raportti", $kieli).' '.$toimittajan_nimi;
+
+				if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+					$kutsu .= " ".t("Hintapoikkeavuus-raportti", $kieli).' '.$toimittajan_nimi;
+				}
+
+				include("inc/sahkoposti.inc");
+			}
+			elseif ($komento != '' and $komento != 'edi') {
+				echo t("Hintapoikkeavuus-raportti tulostuu")."...<br>";
+				$line = exec("{$komento} {$pdffilenimi}", $output, $returnvalue);
+			}
+		}
+
+		// poistetaan tmp file samantien kuleksimasta...
+		system("rm -f {$pdffilenimi}");
 	}
 
 	if ($tee == 'vaihdatoimittaja') {
@@ -803,9 +848,9 @@
 
 					$row['tuoteno'] = $ttrow['tuoteno'];
 
-					$query = "	SELECT nimitys 
-								FROM tuote 
-								WHERE yhtio = '{$kukarow['yhtio']}' 
+					$query = "	SELECT nimitys
+								FROM tuote
+								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tuoteno = '{$ttrow['tuoteno']}'";
 					$tres = pupe_query($query);
 					$trow = mysql_fetch_assoc($tres);
@@ -883,12 +928,12 @@
 			$laskures = pupe_query($query);
 			$laskurow = mysql_fetch_assoc($laskures);
 
-			$query = "	SELECT asn_sanomat.toimittajanumero, 
-						asn_sanomat.toim_tuoteno, 
-						asn_sanomat.tilausrivinpositio, 
-						asn_sanomat.kappalemaara, 
-						asn_sanomat.status, 
-						asn_sanomat.tilausnumero, 
+			$query = "	SELECT asn_sanomat.toimittajanumero,
+						asn_sanomat.toim_tuoteno,
+						asn_sanomat.tilausrivinpositio,
+						asn_sanomat.kappalemaara,
+						asn_sanomat.status,
+						asn_sanomat.tilausnumero,
 						asn_sanomat.kappalemaara,
 						asn_sanomat.tilausrivi,
 						asn_sanomat.hinta,
@@ -915,9 +960,9 @@
 
 					$row['tuoteno'] = $ttrow['tuoteno'];
 
-					$query = "	SELECT nimitys 
-								FROM tuote 
-								WHERE yhtio = '{$kukarow['yhtio']}' 
+					$query = "	SELECT nimitys
+								FROM tuote
+								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tuoteno = '{$ttrow['tuoteno']}'";
 					$tres = pupe_query($query);
 					$trow = mysql_fetch_assoc($tres);
@@ -995,7 +1040,7 @@
 
 			if ($valitse == 'asn') {
 				$query = "	SELECT toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift,
-							asn_sanomat.asn_numero, asn_sanomat.paketintunniste, asn_sanomat.toimittajanumero, 
+							asn_sanomat.asn_numero, asn_sanomat.paketintunniste, asn_sanomat.toimittajanumero,
 							count(asn_sanomat.tunnus) AS rivit,
 							sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
 							FROM asn_sanomat
@@ -1073,7 +1118,7 @@
 			else {
 
 				$query = "	SELECT toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.osoite, toimi.osoitetark, toimi.postino, toimi.postitp, toimi.maa, toimi.swift,
-							asn_sanomat.tilausnumero, asn_sanomat.paketintunniste, asn_sanomat.toimittajanumero, 
+							asn_sanomat.tilausnumero, asn_sanomat.paketintunniste, asn_sanomat.toimittajanumero,
 							count(asn_sanomat.tunnus) AS rivit,
 							sum(if(asn_sanomat.tilausrivi != '', 1, 0)) AS ok
 							FROM asn_sanomat

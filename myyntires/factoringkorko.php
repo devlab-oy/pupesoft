@@ -26,8 +26,11 @@ print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 if (isset($tilino)){
 
 	// tutkaillaan tiliä
-	$query = "select * from tili where yhtio='$kukarow[yhtio]' and tilino='$tilino'";
-	$result = mysql_query($query) or pupe_error($query);
+	$query = "	SELECT *
+				FROM tili
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tilino  = '$tilino'";
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Kirjanpidon tiliä ei löydy")."!</font> $tilino<br><br>";
@@ -36,23 +39,23 @@ if (isset($tilino)){
 		unset($valitut);
 	}
 	else {
-		$tilirow = mysql_fetch_array($result);
+		$tilirow = mysql_fetch_assoc($result);
 	}
 }
 
 if (isset($tapa) and $tapa == 'paalle') {
 	if (isset($viite)) {
 		// tutkaillaan suoritusta
-		$query = "	SELECT suoritus.* 
-					from suoritus, yriti 
-					where suoritus.yhtio='$kukarow[yhtio]' 
-					and summa != 0 
-					and kohdpvm = '0000-00-00' 
-					and viite like '$viite%' 
-					and suoritus.yhtio=yriti.yhtio 
-					and suoritus.tilino=yriti.tilino 
+		$query = "	SELECT suoritus.*
+					from suoritus, yriti
+					where suoritus.yhtio='$kukarow[yhtio]'
+					and summa != 0
+					and kohdpvm = '0000-00-00'
+					and viite like '$viite%'
+					and suoritus.yhtio=yriti.yhtio
+					and suoritus.tilino=yriti.tilino
 					and yriti.factoring != ''";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Sopivia suorituksia ei löydy")."!</font><br><br>";
@@ -66,7 +69,7 @@ if (isset($tapa) and $tapa == 'paalle') {
 			echo "<table>
 				<tr><th>".t("Viite")."</th><th>".t("Asiakas")."</th><th>".t("Summa")."</th><th>".t("Valitse")."</th></tr>";
 
-			while ($suoritusrow=mysql_fetch_array($result)) {
+			while ($suoritusrow=mysql_fetch_assoc($result)) {
 				echo "<tr><td>$suoritusrow[viite]</td><td>$suoritusrow[nimi_maksaja]</td><td>$suoritusrow[summa]</td><td><input name='valitut[]' type='checkbox' value='$suoritusrow[tunnus]' CHECKED></td></tr>";
 			}
 
@@ -81,16 +84,16 @@ if (isset($tapa) and $tapa == 'paalle') {
 		echo "Kohdistan!<br>";
 		foreach ($valitut as $valittu) {
 			$query = "select * from suoritus where yhtio='$kukarow[yhtio]' and tunnus='$valittu' and kohdpvm='0000-00-00'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Suoritus on kadonnut tai se on käytetty")."!</font><br><br>";
 			}
 			else {
-				$suoritusrow=mysql_fetch_array($result);
+				$suoritusrow=mysql_fetch_assoc($result);
 				// päivitetään suoritus
 				$query = "update suoritus set kohdpvm = now(), summa = 0 where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[tunnus]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				//echo "$query<br>";
 				if (mysql_affected_rows() == 0) {
 					echo "<font class='error'>".t("Suorituksen päivitys epäonnistui")."! $tunnus</font><br>";
@@ -98,7 +101,7 @@ if (isset($tapa) and $tapa == 'paalle') {
 
 				// tehdään kirjanpitomuutokset
 				$query = "update tiliointi set tilino='$tilino', selite = '".t("Kohdistettiin korkoihin")."' where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[ltunnus]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				//echo "$query<br>";
 				if (mysql_affected_rows() == 0) {
 					echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehdä! Korjaa kirjanpito käsin")."!</font><br>";
@@ -111,19 +114,19 @@ if (isset($tapa) and $tapa == 'paalle') {
 }
 if (isset($tapa) and $tapa == 'pois') {
 	if (isset($viite)) {
-		$query = "	SELECT suoritus.*, tiliointi.summa 
-					from suoritus, yriti, tiliointi 
-					where suoritus.yhtio='$kukarow[yhtio]' 
-					and suoritus.summa = 0 
-					and kohdpvm != '0000-00-00' 
-					and viite like '$viite%' 
-					and suoritus.yhtio=yriti.yhtio 
-					and suoritus.tilino=yriti.tilino 
-					and yriti.factoring != '' 
-					and tiliointi.yhtio=suoritus.yhtio 
-					and selite = '".t("Kohdistettiin korkoihin")."' 
+		$query = "	SELECT suoritus.*, tiliointi.summa
+					from suoritus, yriti, tiliointi
+					where suoritus.yhtio='$kukarow[yhtio]'
+					and suoritus.summa = 0
+					and kohdpvm != '0000-00-00'
+					and viite like '$viite%'
+					and suoritus.yhtio=yriti.yhtio
+					and suoritus.tilino=yriti.tilino
+					and yriti.factoring != ''
+					and tiliointi.yhtio=suoritus.yhtio
+					and selite = '".t("Kohdistettiin korkoihin")."'
 					and tiliointi.tunnus=suoritus.ltunnus";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Sopivia korkovientejä ei löydy")."!</font><br><br>";
@@ -137,7 +140,7 @@ if (isset($tapa) and $tapa == 'pois') {
 			echo "<table>
 				<tr><th>".t("Viite")."</th><th>".t("Asiakas")."</th><th>".t("Summa")."</th><th>".t("Valitse")."</th></tr>";
 
-			while ($suoritusrow=mysql_fetch_array($result)) {
+			while ($suoritusrow = mysql_fetch_assoc($result)) {
 				echo "<tr><td>$suoritusrow[viite]</td><td>$suoritusrow[nimi_maksaja]</td><td>$suoritusrow[summa]</td><td><input name='valitut[]' type='checkbox' value='$suoritusrow[tunnus]' CHECKED></td></tr>";
 			}
 			echo "</table><br><input type='submit' value='".t("Peru korkoviennit")."'></form>";
@@ -146,50 +149,75 @@ if (isset($tapa) and $tapa == 'pois') {
 
 	if (isset($tilino) and is_array($valitut)) {
 		echo "Kohdistan!<br>";
+
 		foreach ($valitut as $valittu) {
-			$query = "select * from suoritus where yhtio='$kukarow[yhtio]' and tunnus='$valittu' and kohdpvm!='0000-00-00'";
-			$result = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT *
+						FROM suoritus
+						WHERE yhtio  = '$kukarow[yhtio]'
+						AND tunnus   = '$valittu'
+						AND kohdpvm != '0000-00-00'";
+			$result = pupe_query($query);
+
 			//echo "$query<br>";
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Suoritus on kadonnut tai se ei ole enää käytetty")."!</font><br><br>";
 			}
 			else {
-				$suoritusrow=mysql_fetch_array($result);
+				$suoritusrow = mysql_fetch_assoc($result);
+
 				// Etsitään kirjanpitotapahtuma
-				$query = "select summa from tiliointi where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[ltunnus]'";
-				$result = mysql_query($query) or pupe_error($query);
-				//echo "$query<br>";
+				$query = "	SELECT summa
+							from tiliointi
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$suoritusrow[ltunnus]'";
+				$result = pupe_query($query);
+
 				if (mysql_num_rows($result) == 0) {
 					echo "<font class='error'>".t("Tiliöinti on kadonnut")."!</font><br><br>";
 				}
 				else {
-					$tiliointirow=mysql_fetch_array($result);
-					$query = "select pankki_tili from factoring where yhtio='$kukarow[yhtio]' and pankki_tili='$suoritusrow[tilino]'";
-					$result = mysql_query($query) or pupe_error($query);
-					//echo "$query<br>";
+					$tiliointirow = mysql_fetch_assoc($result);
+
+					$query = "	SELECT pankki_tili
+								from factoring
+								where yhtio = '$kukarow[yhtio]'
+								and pankki_tili = '$suoritusrow[tilino]'";
+					$result = pupe_query($query);
+
 					if (mysql_num_rows($result) == 0) {
 						$tilino = $yhtiorow['myyntisaamiset'];
 					}
 					else {
 						$tilino = $yhtiorow['factoringsaamiset'];
 					}
+
 					// päivitetään suoritus
-					$query = "update suoritus set kohdpvm = '0000-00-00', summa = -1 * $tiliointirow[summa] where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[tunnus]'";
-					$result = mysql_query($query) or pupe_error($query);
-					//echo "$query<br>";
+					$query = "	UPDATE suoritus
+								SET kohdpvm = '0000-00-00',
+								summa = -1 * $tiliointirow[summa]
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  = '$suoritusrow[tunnus]'";
+					$result = pupe_query($query);
+
 					if (mysql_affected_rows() == 0) {
 						echo "<font class='error'>".t("Suorituksen päivitys epäonnistui")."! $tunnus</font><br>";
 					}
+
 					// tehdään kirjanpitomuutokset
-					$query = "update tiliointi set tilino='$tilino', selite = '".t("Korjatttu suoritus")."' where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[ltunnus]'";
-					$result = mysql_query($query) or pupe_error($query);
-					//echo "$query<br>";
+					$query = "	UPDATE tiliointi
+								SET tilino = '$tilino',
+								selite = '".t("Korjattu suoritus")."'
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  = '$suoritusrow[ltunnus]'";
+					$result = pupe_query($query);
+
 					if (mysql_affected_rows() == 0) {
 						echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehdä! Korjaa kirjanpito käsin")."!</font><br>";
 					}
 				}
 			}
 		}
+
 		unset($viite);
 		unset($tapa);
 	}

@@ -158,7 +158,7 @@
 		// haetaan avoimen tilauksen otsikko
 		if ($kukarow["kesken"] != 0) {
 			$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
-			$laskures = mysql_query($query);
+			$laskures = pupe_query($query);
 		}
 		else {
 			// Luodaan uusi myyntitilausotsikko
@@ -185,7 +185,7 @@
 
 			// haetaan avoimen tilauksen otsikko
 			$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
-			$laskures = mysql_query($query);
+			$laskures = pupe_query($query);
 		}
 
 		if ($kukarow["kesken"] != 0 and $laskures != '') {
@@ -194,10 +194,10 @@
 		}
 
 		if (is_numeric($ostoskori)) {
-			echo "<font class='message'>Lisätään tuotteita ostoskoriin $ostoskori.</font><br>";
+			echo "<font class='message'>".t("Lisätään tuotteita ostoskoriin")." $ostoskori.</font><br>";
 		}
 		else {
-			echo "<font class='message'>Lisätään tuotteita tilaukselle $kukarow[kesken].</font><br>";
+			echo "<font class='message'>".t("Lisätään tuotteita tilaukselle")." $kukarow[kesken].</font><br>";
 		}
 
 		// Käydään läpi formin kaikki rivit
@@ -213,10 +213,10 @@
 
 				// haetaan tuotteen tiedot
 				$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tiltuoteno[$yht_i]'";
-				$tuoteres = mysql_query($query);
+				$tuoteres = pupe_query($query);
 
 				if (mysql_num_rows($tuoteres) == 0) {
-					echo "<font class='error'>Tuotetta $tiltuoteno[$yht_i] ei löydy!</font><br>";
+					echo "<font class='error'>".t("Tuotetta %s ei löydy","", $tiltuoteno[$yht_i])."!</font><br>";
 				}
 				else {
 					// tuote löytyi ok, lisätään rivi
@@ -224,10 +224,10 @@
 
 					$ytunnus         = $laskurow["ytunnus"];
 					$kpl             = (float) $kpl;
-					$kpl_echo 		 = (float) $kpl;					
+					$kpl_echo 		 = (float) $kpl;
 					$tuoteno         = $trow["tuoteno"];
 					$yllapita_toim_stash = $toim;
-					
+
 					if ($toim_kutsu != "YLLAPITO") {
 						$toimaika = $laskurow["toimaika"];
 						$kerayspvm = $laskurow["kerayspvm"];
@@ -1285,7 +1285,7 @@
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tuoteno = '$row[tuoteno]'";
-					$tuotetempres = mysql_query($query);
+					$tuotetempres = pupe_query($query);
 					$temptrow = mysql_fetch_assoc($tuotetempres);
 
 					$temp_laskurowwi = $laskurow;
@@ -1295,7 +1295,7 @@
 									FROM asiakas
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$kukarow[oletus_asiakas]'";
-						$asiakastempres = mysql_query($query);
+						$asiakastempres = pupe_query($query);
 						$asiakastemprow = mysql_fetch_assoc($asiakastempres);
 
 						$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
@@ -1312,8 +1312,17 @@
 
 					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', $haettavat_kentat);
 
+					$onko_asiakkaalla_alennuksia = FALSE;
+
+					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+							$onko_asiakkaalla_alennuksia = TRUE;
+							break;
+						}
+					}
+
 					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-					if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
+					if ($temptrow["hinnastoon"] == "V" and (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE)) {
 						continue;
 					}
 				}

@@ -30,7 +30,6 @@ if ($tee == "update") {
 }
 
 if ($tee == "update") {
-
 	if ($laskurow["erikoisale"] == $erikoisale and $laskurow["rahti_etu"] == $rahti_etu and $laskurow["rahti_etu_alv"] == $rahti_etu_alv) {
 		$kohdistettu = $laskurow["kohdistettu"];
 	}
@@ -51,18 +50,6 @@ if ($tee == "update") {
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
 	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
 	$bruttopaino 	= str_replace ( ",", ".", $bruttopaino);
-
-
-	if ($llrow["vosumma"] >= 0) {
-		if ($rahti_etu > $llrow['vosumma'] and $llrow['volasku'] == 1) {
-			echo "<font class='message'>Virhe!! Eturahti ei saa olla suurempi kuin laskujen yhteissumma</font><br>";
-		}
-	}
-	else {
-		if ($rahti_etu <= $llrow['vosumma']) {
-			echo "<font class='message'>Virhe!! Eturahti pit‰‰ olla suurempi tai yht‰suuri kuin laskujen yhteissumma</font><br>";
-		}
-	}
 
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);

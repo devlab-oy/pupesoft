@@ -173,7 +173,7 @@ if (!function_exists("tsekit")) {
 		// katotaan onko liitettyjä laskuja
 		// ('C','F','I','J','K','L') // vaihto-omaisuus ja raaka-aine
 		// ('B','C','J','E','F','K','H','I','L') // kaikki
-		
+
 		$query = "	SELECT count(*) num,
 					sum(if(lasku.vienti='C' or lasku.vienti='F' or lasku.vienti='I' or lasku.vienti='J' or lasku.vienti='K' or lasku.vienti='L', 1, 0)) volasku,
 					sum(if(ostores_lasku.tila != 'H' and (lasku.vienti='C' or lasku.vienti='F' or lasku.vienti='I' or lasku.vienti='J' or lasku.vienti='K' or lasku.vienti='L'), 1, 0)) volasku_ok,
@@ -189,24 +189,6 @@ if (!function_exists("tsekit")) {
 					and lasku.laskunro = '$row[laskunro]'";
 		$llres = pupe_query($query);
 		$llrow = mysql_fetch_array($llres);
-		
-		if ($llrow["vosumma"] >= 0) {
-			if ($row['rahti_etu'] > $llrow['vosumma'] and $llrow['volasku'] == 1) {
-				$lisok = 0;
-				$lisatiedot = t("kesken");
-			}
-
-			if ($row['rahti_etu'] < 0.00) {
-				$lisok = 0;
-				$lisatiedot = t("kesken");
-			}
-		}
-		else {
-			if ($row['rahti_etu'] <= $llrow['vosumma']) {
-				$lisok = 0;
-				$lisatiedot = t("kesken");
-			}
-		}
 
 		if ((abs($row['rahti_etu']) > abs($llrow['vosumma'])) and $llrow['volasku'] > 0) {
 			$lisok = 0;
@@ -520,7 +502,7 @@ if (isset($nappikeikalla) and $nappikeikalla == 'ollaan' and $toiminto != 'kohdi
 	$toiminto = "kohdista";
 }
 
-if ($toiminto == "kohdista") {	
+if ($toiminto == "kohdista") {
 	require('ostotilausten_rivien_kohdistus.inc');
 }
 

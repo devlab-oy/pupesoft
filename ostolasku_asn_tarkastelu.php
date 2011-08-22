@@ -78,6 +78,7 @@
 
 	if (!isset($tee)) $tee = '';
 	if (!isset($valitse)) $valitse = '';
+	if (!isset($asn_rivi)) $asn_rivi = '';
 
 	if ($tee == 'hintavertailu') {
 

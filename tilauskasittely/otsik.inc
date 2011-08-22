@@ -1988,10 +1988,10 @@
 					}
 					elseif (strtoupper($al_row["selitetark_2"]) == "DROPDOWN") {
 						$dropdown_arvot = explode("#", $al_row['selitetark_3']);
-						
+
 						echo "<td>{$al_row["selitetark"]}</td>";
 						echo "<td><select name='$kentta'>";
-						
+
 						foreach ($dropdown_arvot as $arvo) {
 							$sele = ($srow[$kentta] == $arvo) ? "SELECTED" : "";
 							echo "<option value='$arvo' $sele>$arvo</option>";
@@ -2408,8 +2408,17 @@
 
 						$hinnat = alehinta($laskurow, $trow, $row['tilkpl'], '', '', '', $haettavat_kentat);
 
+						$onko_asiakkaalla_alennuksia = FALSE;
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+								$onko_asiakkaalla_alennuksia = TRUE;
+								break;
+							}
+						}
+
 						// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
-						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
+						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE) {
 							$paivitetaanko = FALSE;
 						}
 					}
@@ -2477,11 +2486,14 @@
 				}
 
 				//lasketaan alvit
-				if ($row["alv"] < 500) {
-					$alv = "";
+				if ($row["alv"] >= 600) {
+					$alv = 600;
+				}
+				elseif ($row["alv"] >= 500) {
+					$alv = 500;
 				}
 				else {
-					$alv = 500;
+					$alv = '';
 				}
 
 				list($uusihinta, $alv) = alv($laskurow, $trow, $uusihinta, $alv, $alehinta_alv);
@@ -3166,7 +3178,7 @@
 							vikakoodi		= '$vikakoodi',
 							takuunumero		= '$takuunumero',
 							tyokoodi		= '$tyokoodi',
-							hyvaksy			= '$hyvaksy',							
+							hyvaksy			= '$hyvaksy',
 							otunnus 		= '$kukarow[kesken]'";
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);

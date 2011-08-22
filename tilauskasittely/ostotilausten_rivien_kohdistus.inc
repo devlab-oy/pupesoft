@@ -598,7 +598,7 @@ if ($tila == 'tee_siirto') {
 										case 'laatija':
 											$rvalues .= ", '$kukarow[kuka]'";
 											break;
-										case 'laadittu':
+										case 'luontiaika':
 											$rvalues .= ", now()";
 											break;
 										case 'tilausrivitunnus':
@@ -618,7 +618,7 @@ if ($tila == 'tee_siirto') {
 					// Siiret‰‰n rivi t‰lle keikalle
 					$query = "	UPDATE tilausrivi USE INDEX (uusiotunnus_index)
 								SET uusiotunnus = '$otunnus',
-								erikoisale 		= '$laskurow[erikoisale]'
+								erikoisale 		= '$laskurow[erikoisale]',
 								kerattyaika 	= now(),
 								keratty 		= '$kukarow[kuka]'
 								$kpl_lisa
@@ -754,7 +754,14 @@ if ($tila == 'tee_kohdistus') {
 
 			list($valittutunnus, $valittuotunnus) = explode("###", $valittu);
 
-			$query = "UPDATE tilausrivi use index (yhtio_otunnus) SET uusiotunnus='$otunnus', kerattyaika=now(), keratty='$kukarow[kuka]', erikoisale = '$laskurow[erikoisale]' WHERE yhtio='$kukarow[yhtio]' and otunnus in ('$valittuotunnus','$otunnus') and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
+			$query = "	UPDATE tilausrivi use index (yhtio_otunnus) 
+						SET uusiotunnus = '$otunnus', 
+						kerattyaika = now(), 
+						keratty = '$kukarow[kuka]', 
+						erikoisale = '$laskurow[erikoisale]' 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and otunnus in ('$valittuotunnus','$otunnus') 
+						and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
 			$result = pupe_query($query);
 		}
 	}

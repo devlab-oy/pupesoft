@@ -8,13 +8,13 @@ echo "<font class='head'>".t("Karhu")."</font><hr>";
 
 // vain n‰in monta p‰iv‰‰ sitten karhutut
 // laskut huomioidaan n‰kym‰sss‰
-if(!isset($kpvm_aikaa)) {
+if (!isset($kpvm_aikaa)) {
 	$kpvm_aikaa = 10;
 }
 
 // vain n‰in monta p‰iv‰‰ sitten er‰‰ntyneet
 // laskut huomioidaan n‰kym‰sss‰
-if(!isset($lpvm_aikaa)) {
+if (!isset($lpvm_aikaa)) {
 	$lpvm_aikaa = 7;
 }
 
@@ -36,16 +36,16 @@ if ($tee == 'LAHETA') {
 	$ekarhu_success = true;
 
 	if (!empty($_POST['lasku_tunnus'])) {
-
 		try {
 			// koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
 			require ('paperikarhu.php');
-
-		} catch (Exception $e) {
+		}
+		catch (Exception $e) {
 			$ekarhu_success = false;
 			echo "<font class='error'>Ei voitu l‰hett‰‰ karhua eKirjeen‰, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
 		}
-	} else {
+	}
+	else {
 		echo "<font class='error'>Et valinnut yht‰‰n laskua.</font>";
 		$ekarhu_success = false;
 	}
@@ -80,13 +80,13 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
-			$factoringrow = mysql_fetch_array($result);
+			$factoringrow = mysql_fetch_assoc($result);
 			$query = "	SELECT GROUP_CONCAT(tunnus) karhuttavat
 						FROM maksuehto
 						WHERE yhtio = '$kukarow[yhtio]' and factoring = '$factoringrow[factoringyhtio]'";
 			$result = pupe_query($query);
 
-			$maksuehdotrow = mysql_fetch_array($result);
+			$maksuehdotrow = mysql_fetch_assoc($result);
 
 			if ($maksuehdotrow["karhuttavat"] != '') {
 				$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat]) and lasku.valkoodi = '$factoringrow[valkoodi]'";
@@ -107,7 +107,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 					WHERE yhtio = '$kukarow[yhtio]' and factoring = ''";
 		$result = pupe_query($query);
 
-		$maksuehdotrow = mysql_fetch_array($result);
+		$maksuehdotrow = mysql_fetch_assoc($result);
 
 		if ($maksuehdotrow["karhuttavat"] != '') {
 			$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat])";
@@ -125,7 +125,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 	$konslisa = "";
 
 	if (mysql_num_rows($result) > 0) {
-		$konsrow = mysql_fetch_array($result);
+		$konsrow = mysql_fetch_assoc($result);
 		$konslisa = " and lasku.ovttunnus not in ($konsrow[konsrernyhtiot])";
 	}
 
@@ -175,7 +175,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		$karhuttavat = array();
 		unset($pdf);
 
-		while ($karhuttavarow = mysql_fetch_array($result)) {
+		while ($karhuttavarow = mysql_fetch_assoc($result)) {
 			$karhuttavat[] = $karhuttavarow["karhuttavat"];
 		}
 
@@ -194,19 +194,10 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 if ($tee == "KARHUAKAIKKI") {
 
-	foreach ($karhuttavat as $murr) {
-
-		if (strpos(",", $murr)) {
-			$lasku_tunnus = implode(",", $murr);
-		}
-		else {
-			$lasku_tunnus = array($murr);
-		}
-
+	foreach ($karhuttavat as $lasku_tunnus) {
 		try {
 			// koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
 			require ('paperikarhu.php');
-
 		}
 		catch (Exception $e) {
 			$ekarhu_success = false;
@@ -246,13 +237,13 @@ if ($tee == 'KARHUA')  {
 	$result = pupe_query($query);
 
 	//otetaan asiakastiedot ekalta laskulta
-	$asiakastiedot = mysql_fetch_array($result);
+	$asiakastiedot = mysql_fetch_assoc($result);
 
 	$query = "	SELECT *
 				FROM asiakas
 				WHERE yhtio='$kukarow[yhtio]' and tunnus = '$asiakastiedot[liitostunnus]'";
 	$asiakasresult = pupe_query($query);
-	$asiakastiedot = mysql_fetch_array($asiakasresult);
+	$asiakastiedot = mysql_fetch_assoc($asiakasresult);
 
 	//ja kelataan akuun
 	mysql_data_seek($result,0);
@@ -271,7 +262,7 @@ if ($tee == 'KARHUA')  {
 
 	$max = 0;
 
-	while ($lasku = mysql_fetch_array($result)) {
+	while ($lasku = mysql_fetch_assoc($result)) {
 		if ($lasku['karhuttu'] > $max) {
 			$max = $lasku['karhuttu'];
 		}
@@ -306,7 +297,7 @@ if ($tee == 'KARHUA')  {
 		$sel1 = 'selected';
 	}
 
-	while ($viesti = mysql_fetch_array($res)) {
+	while ($viesti = mysql_fetch_assoc($res)) {
 		if ($viesti["kieli"] != $edkieli) {
 			$lask = 1;
 		}
@@ -340,7 +331,7 @@ if ($tee == 'KARHUA')  {
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tunnus in ($karhuttavat[0])";
 	$lires = pupe_query($query);
-	$lirow = mysql_fetch_array($lires);
+	$lirow = mysql_fetch_assoc($lires);
 
 	$query = "	SELECT SUM(summa) summa
 				FROM suoritus
@@ -348,7 +339,7 @@ if ($tee == 'KARHUA')  {
 				and ltunnus <> 0
 				and asiakas_tunnus in ($lirow[liitokset])";
 	$summaresult = pupe_query($query);
-	$kaato = mysql_fetch_array($summaresult);
+	$kaato = mysql_fetch_assoc($summaresult);
 
 	$kaatosumma=$kaato["summa"];
 	if (!$kaatosumma) $kaatosumma='0.00';
@@ -360,7 +351,8 @@ if ($tee == 'KARHUA')  {
 
 	if (isset($ekirje_config) && is_array($ekirje_config)) {
 		$submit_text = 'L‰het‰ eKirje';
-	} else {
+	}
+	else {
 		$submit_text = 'Tulosta paperille';
 	}
 
@@ -389,7 +381,7 @@ if ($tee == 'KARHUA')  {
 	$summmmma = 0;
 
 	$valuutat = array();
-	while ($lasku = mysql_fetch_array($result)) {
+	while ($lasku = mysql_fetch_assoc($result)) {
 		echo "<tr class='aktiivi'><td>";
 
 		if ($kukarow['taso'] < 2) {
@@ -423,9 +415,11 @@ if ($tee == 'KARHUA')  {
 
 		echo "<td>";
 		echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv] ";
+
 		if ($lasku["tratattu"] > 0) {
 			echo t("Lasku tratattu");
 		}
+
 		echo "</td>";
 
 		echo "<td>$lasku[comments]</td>";
@@ -503,7 +497,7 @@ if ($tee == "") {
 		echo "<td><select name='ktunnus'>";
 		echo "<option value='0'>".t("Ei factoroidut")."</option>";
 
-		while ($row = mysql_fetch_array($meapu)) {
+		while ($row = mysql_fetch_assoc($meapu)) {
 			echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
 		}
 
@@ -523,7 +517,7 @@ if ($tee == "") {
 				ORDER BY koodi";
 	$meapu = pupe_query($query);
 
-	while ($row = mysql_fetch_array($meapu)) {
+	while ($row = mysql_fetch_assoc($meapu)) {
 		$sel = '';
 		if ($row["koodi"] == $lasku_maa) {
 			$sel = 'selected';
@@ -545,7 +539,7 @@ if ($tee == "") {
 	echo "<tr><th>".t("Yhteyshenkilˆ").":</th>";
 	echo "<td><select name='yhteyshenkilo'>";
 
-	while ($row = mysql_fetch_array($meapu)) {
+	while ($row = mysql_fetch_assoc($meapu)) {
 		$sel = "";
 
 		if ($row['kuka'] == $kukarow['kuka']) {

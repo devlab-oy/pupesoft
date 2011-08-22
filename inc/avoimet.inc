@@ -1,11 +1,22 @@
 <?php
 
-	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto,$excel) = explode("/",$muutparametrit);
-
 	echo "<font class=head>".t("Avoimet laskut")."</font><hr>";
 
 	// scripti balloonien tekemiseen
 	js_popup();
+
+	if (!isset($maksuehto))				$maksuehto = "";
+	if (!isset($asiakasid))				$asiakasid = "";
+	if (!isset($toimittajaid))			$toimittajaid = "";
+	if (!isset($tee))					$tee = "";
+	if (!isset($valuutassako))			$valuutassako = "";
+	if (!isset($ytunnus))				$ytunnus = "";
+	if (!isset($asitoimittain))			$asitoimittain = "";
+	if (!isset($laji))					$laji = "";
+	if (!isset($muutparametrit))		$muutparametrit = "";
+	if (!isset($naytetaankokommentit))	$naytetaankokommentit = "";
+
+	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto,$excel) = explode("/",$muutparametrit);
 
 	// Tarkistetaan pvm
 	if ($tee != '') {
@@ -27,18 +38,19 @@
 		}
 
 		// Löytyykö oikea tilikausi?
-		$query = "	SELECT * FROM tilikaudet
+		$query = "	SELECT *
+					FROM tilikaudet
 					WHERE yhtio = '$kukarow[yhtio]'
 					and '$pvm' >= tilikausi_alku
 					and '$pvm' <= tilikausi_loppu";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo "<font class='error'>".t("Päivämäärälle ei löydy tilikautta")."</font><br>";
 			$tee = '';
 		}
 		else {
-			$tilikausirow = mysql_fetch_array($result);
+			$tilikausirow = mysql_fetch_assoc($result);
 		}
 	}
 
@@ -67,7 +79,7 @@
 	if (!isset($kk)) $kk = date("n");
 	if (!isset($pp)) $pp = date("j");
 
-	$sel[$laji] = " selected ";
+	$sel = array_fill_keys(array($laji), " selected") + array_fill_keys(array('M', 'MF', 'MK', 'MMK', 'MA', 'O', 'OK', 'OOK'), '');
 
 	echo "	<form name = 'valinta' action = 'raportit.php' method='post'>
 			<input type = 'hidden' name = 'toim' value = 'avoimet'>
@@ -111,12 +123,12 @@
 				FROM valuu
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY jarjestys";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	echo "<tr><th>".t('Näytä vain valuutta') .":</th><td colspan=3><select name='savalkoodi'>";
 	echo "<option value = ''>".t("Kaikki")."</option>";
 
-	while ($vrow = mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_assoc($vresult)) {
 		$sel="";
 	 	if (strtoupper($vrow['nimi']) == strtoupper($savalkoodi)) {
 	 		$sel = "selected";
@@ -141,12 +153,15 @@
 
 	echo "<tr><th>" . t('Maa'). " ".t("(vain myyntilaskut)").":</th><td colspan=3><select name='maa'>";
 
-	$query = "select distinct maa from asiakas where yhtio='$kukarow[yhtio]' and maa!=''";
-	$res = mysql_query($query) or pupe_error($query);
+	$query = "	SELECT distinct maa
+				FROM asiakas
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND maa != ''";
+	$res = pupe_query($query);
 
 	echo "<option value=''>" . t('Kaikki'). "</option>";
 
-	while ($rowmaa = mysql_fetch_array($res)) {
+	while ($rowmaa = mysql_fetch_assoc($res)) {
 		if ($maa == $rowmaa['maa']) {
 			$sel = "SELECTED";
 		}
@@ -166,11 +181,10 @@
 	$query = "	SELECT *
 				FROM maksuehto
 				WHERE yhtio = '$kukarow[yhtio]'
-				and (sallitut_maat = '' or sallitut_maat like '%$srow[maa]%')
-				order by jarjestys, teksti, tunnus";
-	$mresult = mysql_query($query) or pupe_error($query);
+				ORDER BY jarjestys, teksti, tunnus";
+	$mresult = pupe_query($query);
 
-	while($row = mysql_fetch_array($mresult)) {
+	while($row = mysql_fetch_assoc($mresult)) {
 		if ($row["tunnus"] == $maksuehto) {
 			$sel = 'selected';
 		}
@@ -243,13 +257,6 @@
 			$valkoodi2 = " and suoritus.valkoodi = '$savalkoodi'";
 		}
 
-		if ($ojarj != "") {
-			$jarj = $ojarj;
-		}
-		else {
-			$jarj = "lasku.ytunnus";
-		}
-
 		if (substr($laji,0,1) == 'O') {
 
 			$lisa = '';
@@ -317,8 +324,8 @@
 						$lisa
 						$valkoodi1
 						$groupby
-						ORDER BY $jarj";
-			$result = mysql_query($query) or pupe_error($query);
+						ORDER BY lasku.ytunnus";
+			$result = pupe_query($query);
 
 			// poimitaan kuluva päivä, raportin timestampille
 			$today = date("Y-m-d");
@@ -410,7 +417,7 @@
 			$summa  = array();
 			$summa2 = 0;
 
-			while ($trow = mysql_fetch_array ($result)) {
+			while ($trow = mysql_fetch_assoc ($result)) {
 				if ($trow['avoinsaldo'] != 0) {
 
 					// Laskun valuutassa
@@ -526,8 +533,8 @@
 						and tapvm	>= '$tilikausirow[tilikausi_alku]'
 						and tapvm	<= '$pvm'
 						and tilino	IN ($tili)";
-			$result = mysql_query($query) or pupe_error($query);
-			$trow = mysql_fetch_array ($result);
+			$result = pupe_query($query);
+			$trow = mysql_fetch_assoc ($result);
 
 			$erotus = $trow['saldo']+$summa2;
 
@@ -624,8 +631,8 @@
 						$valkoodi
 						$maalisa
 						$groupby
-						ORDER BY $jarj, lasku.laskunro";
-			$result = mysql_query($query) or pupe_error($query);
+						ORDER BY lasku.ytunnus, lasku.laskunro";
+			$result = pupe_query($query);
 
 			// poimitaan kuluva päivä, raportin timestampille
 			$today = date("Y-m-d");
@@ -728,7 +735,7 @@
 			$summa = array(); // tässä kirjanpidosta osasuoritukset poistettuna
 			$summatotal = 0;  // ässä koko höskä kotivaluutassa
 
-			while ($trow = mysql_fetch_array ($result)) {
+			while ($trow = mysql_fetch_assoc ($result)) {
 
 				if ($trow['tiliointiavoinsaldo'] != 0) {
 
@@ -757,13 +764,17 @@
 						echo "<td align='right'>$trow[tiliointisumma_valuutassa]</td>";
 						echo "<td align='right' class='avoin'>$trow[tiliointiavoinsaldo_valuutassa]</td>";
 						echo "<td align='right'>$trow[valkoodi]</td>";
-						$summa[$trow["valkoodi"]] += $trow["tiliointiavoinsaldo_valuutassa"];	// paljo kirjanpidossa avoimena valuutassa
+
+						if (!isset($summa[$trow["valkoodi"]])) $summa[$trow["valkoodi"]] = $trow["tiliointiavoinsaldo_valuutassa"];	// paljo kirjanpidossa avoimena valuutassa
+						else $summa[$trow["valkoodi"]] += $trow["tiliointiavoinsaldo_valuutassa"];	// paljo kirjanpidossa avoimena valuutassa
 					}
 					else {
 						echo "<td align='right'>$trow[tiliointisumma]</td>";
 						echo "<td align='right' class='avoin'>$trow[tiliointiavoinsaldo]</td>";
 						echo "<td align='right'>$yhtiorow[valkoodi]</td>";
-						$summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
+
+						if (!isset($summa[$yhtiorow["valkoodi"]])) $summa[$yhtiorow["valkoodi"]] = $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
+						else $summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
 					}
 
 					// jos ollaan ajettu tälle päivälle laskuittain voidaan echota errori avoimesta saldosta
@@ -820,12 +831,12 @@
 						$lisa2
 						$valkoodi2
 				  		ORDER BY ytunnus";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$suoritussumma = array();
 			$suoritussummatotal = 0; // tässä koko höskä kotivaluutassa
 
-			while ($trow = mysql_fetch_array ($result)) {
+			while ($trow = mysql_fetch_assoc ($result)) {
 					echo "<tr class='aktiivi'>";
 
 					$suoritussummatotal += $trow["suoritussumma"];
@@ -937,8 +948,8 @@
 							and tapvm >= '$tilikausirow[tilikausi_alku]'
 							and tapvm <= '$pvm'
 							and tilino in ($tili)";
-				$result = mysql_query($query) or pupe_error($query);
-				$trow = mysql_fetch_array ($result);
+				$result = pupe_query($query);
+				$trow = mysql_fetch_assoc ($result);
 
 				$trow["saldo"] 	= sprintf("%.2f", $trow["saldo"]);
 				$erotus 		= $summatotal + $suoritussummatotal - $trow["saldo"];

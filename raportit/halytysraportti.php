@@ -700,7 +700,7 @@
 
 			if ($abcrajaus != "") {
 
-				echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhmäluokka >=")." $ryhmanimet[$abcrajaus] ".t("tai sitä on jälkitoimituksessa");
+				echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhmäluokka")." >= $ryhmanimet[$abcrajaus] ".t("tai sitä on jälkitoimituksessa");
 
 				if ($valitut["VAINUUDETTUOTTEET"] == '' and $valitut["UUDETTUOTTEET"] == '') {
 					echo " ".t("tai tuote on perustettu viimeisen 12kk sisällä").".<br>";

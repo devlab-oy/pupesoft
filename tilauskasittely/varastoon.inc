@@ -61,8 +61,8 @@ if ($suoratoimitus == '' and $kauttalaskutus == '') {
 	$tv_kaytossa = FALSE;
 
 	$query = "SELECT count(*) kpl from taric_veroperusteet";
-	$tv_res = mysql_query($query);
-	$tv_row = mysql_fetch_array($tv_res);
+	$tv_res = pupe_query($query);
+	$tv_row = mysql_fetch_assoc($tv_res);
 
 	if ($tv_row["kpl"] > 0) {
 		$tv_kaytossa = TRUE;
@@ -159,7 +159,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 }
 
-$presult = mysql_query($query) or pupe_error($query);
+$presult = pupe_query($query);
 
 // jos meillä on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille
 $query  = "	SELECT sum(summa) summa, sum(arvo) arvo, ifnull(round(sum(summa * vienti_kurssi) / sum(summa), 6), 0) vientikurssi
@@ -170,8 +170,8 @@ $query  = "	SELECT sum(summa) summa, sum(arvo) arvo, ifnull(round(sum(summa * vi
 			and vanhatunnus <> 0
 			and laskunro = '$laskurow[laskunro]'
 			and vienti in ('C','F','I','J','K','L')";
-$result = mysql_query($query) or pupe_error($query);
-$kurssirow = mysql_fetch_array($result);
+$result = pupe_query($query);
+$kurssirow = mysql_fetch_assoc($result);
 
 if ($laskurow["vienti_kurssi"] != 1 and $kurssirow["vientikurssi"] != 0) {
 	$laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
@@ -220,8 +220,8 @@ else {
 					and tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.netto = ''
 					and tilausrivi.varattu <> 0";
-	$result   = mysql_query($query) or pupe_error($query);
-	$hintarow = mysql_fetch_array($result);
+	$result   = pupe_query($query);
+	$hintarow = mysql_fetch_assoc($result);
 
 	$laskurow['summa'] = $hintarow['summa'];
 
@@ -282,7 +282,7 @@ if ($tee != "" and $mobiili_keikka != "yes" and $suoratoimitus == '' and $kautta
 	$bar->initialize(mysql_num_rows($presult)); // print the empty bar
 }
 
-while ($tilrivirow = mysql_fetch_array($presult)) {
+while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
 	$hankintakulut = "";
 
@@ -292,8 +292,8 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 	// lasketaan keskihankintahinta, tarvitaan tuotteen saldo ja tuotteen tiedot
 	$query  = "SELECT sum(saldo) saldo from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
-	$salres = mysql_query($query) or pupe_error($query);
-	$salrow = mysql_fetch_array($salres);
+	$salres = pupe_query($query);
+	$salrow = mysql_fetch_assoc($salres);
 
 	$query  = "	SELECT tuote.*,
 				if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) alv,
@@ -302,8 +302,8 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 				LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
 				where tuote.yhtio	= '$kukarow[yhtio]'
 				and tuote.tuoteno	= '$tilrivirow[tuoteno]'";
-	$tuores = mysql_query($query) or pupe_error($query);
-	$tuorow = mysql_fetch_array($tuores);
+	$tuores = pupe_query($query);
+	$tuorow = mysql_fetch_assoc($tuores);
 
 	if ((float) $tuorow['tuotekerroin'] <= 0) $tuorow['tuotekerroin'] = 1;
 
@@ -333,7 +333,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 	else {
 		$rahtios = 0;
-		$osuus = 0;
+		$osuus   = 0;
 	}
 
 	if ($tilrivirow['varattu'] < 0) {
@@ -450,15 +450,15 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 		if ($hankintakulut != '') {
 			$query = "SELECT hankintakulut FROM tilausrivin_lisatiedot WHERE yhtio = '$kukarow[yhtio]' AND tilausrivitunnus = '$tilrivirow[tunnus]'";
-			$resxxxx = mysql_query($query) or pupe_error($query);
+			$resxxxx = pupe_query($query);
 
 			if (mysql_num_rows($resxxxx) == 0) {
 				$query = "INSERT INTO tilausrivin_lisatiedot SET hankintakulut = '$hankintakulut', yhtio = '$kukarow[yhtio]', tilausrivitunnus = '$tilrivirow[tunnus]'";
-				$hankresxxx = mysql_query($query) or pupe_error($query);
+				$hankresxxx = pupe_query($query);
 			}
 			else {
 				$query = "UPDATE tilausrivin_lisatiedot SET hankintakulut = '$hankintakulut' WHERE yhtio = '$kukarow[yhtio]' AND tilausrivitunnus = '$tilrivirow[tunnus]'";
-				$hankresxxx = mysql_query($query) or pupe_error($query);
+				$hankresxxx = pupe_query($query);
 			}
 		}
 	}
@@ -468,7 +468,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$query  = "	UPDATE tilausrivi set
 					rivihinta = '$rivihin'
 					WHERE yhtio='$kukarow[yhtio]' and tunnus='$tilrivirow[tunnus]'";
-		$resultxxx = mysql_query($query) or pupe_error($query);
+		$resultxxx = pupe_query($query);
 
 		if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
 			$kehalis = "";
@@ -483,7 +483,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					vihahin     = round('$ohinta','$yhtiorow[hintapyoristys]'),
 					vihapvm     = '$varastoonvientipva'
 					WHERE yhtio = '$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if ($tuorow["sarjanumeroseuranta"] == "E" or $tuorow["sarjanumeroseuranta"] == "F" or $tuorow["sarjanumeroseuranta"] == "G") {
 
@@ -493,15 +493,15 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 						and tuoteno 		 = '$tilrivirow[tuoteno]'
 						and ostorivitunnus 	 = '$tilrivirow[tunnus]'
 						and myyntirivitunnus = 0";
-			$sarjares = mysql_query($query) or pupe_error($query);
+			$sarjares = pupe_query($query);
 
-			while($sarjarow = mysql_fetch_array($sarjares)) {
+			while($sarjarow = mysql_fetch_assoc($sarjares)) {
 				if ($sarjarow["era_kpl"] < 0) {
 					$query = "	UPDATE sarjanumeroseuranta
 								SET era_kpl = 0
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus 	= $sarjarow[tunnus]";
-					$lisa_res = mysql_query($query) or pupe_error($query);
+					$lisa_res = pupe_query($query);
 				}
 			}
 		}
@@ -532,7 +532,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					laatija    = '$kukarow[kuka]',
 					rivitunnus = '$tilrivirow[tunnus]',
 					laadittu   = '$varastoonvientipva'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$tapahtumaid = mysql_insert_id();
 
 		// Viedään koko suuntalava varastoon. Eli kaikille suuntalavalla oleville tuotteille päivitetään sama tuotepaikka
@@ -547,7 +547,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 						AND hyllytaso = '{$tilrivirow['hyllytaso']}'
 						AND hyllyvali = '{$tilrivirow['hyllyvali']}'
 						LIMIT 1";
-			$paikka_chk_res = mysql_query($query) or pupe_error($query);
+			$paikka_chk_res = pupe_query($query);
 
 			if (mysql_num_rows($paikka_chk_res) == 0) {
 				// lisätään paikka
@@ -565,7 +565,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 							tyyppi 			= 'S',
 							laatija			= '{$kukarow['kuka']}',
 							luontiaika		= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				// tehdään tapahtuma
 				$query = "	INSERT into tapahtuma set
@@ -582,7 +582,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 							selite 		= '".t("Lisättiin tuotepaikka")." {$tilrivirow['hyllyalue']} {$tilrivirow['hyllynro']} {$tilrivirow['hyllyvali']} {$tilrivirow['hyllytaso']}',
 							laatija 	= '$kukarow[kuka]',
 							laadittu 	= date_sub('$varastoonvientipva', interval 1 SECOND)";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 			else {
 				// päivitetään saldo tuoterivillä olevalle paikalle
@@ -598,7 +598,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 							AND hyllytaso   = '{$tilrivirow['hyllytaso']}'
 							AND hyllyvali   = '{$tilrivirow['hyllyvali']}'
 							LIMIT 1";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 		else {
@@ -614,7 +614,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 						hyllytaso   	= '$tilrivirow[hyllytaso]' and
 						hyllyvali   	= '$tilrivirow[hyllyvali]'
 						limit 1";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		$jtvarastot[$tilrivirow["tunnus"]] = array($tilrivirow["hyllyalue"], $tilrivirow["hyllynro"]);
@@ -631,7 +631,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	   		 			tuoteno     	= '$tilrivirow[tuoteno]' and
 	   		 			oletus     	   != ''
 	   		 			LIMIT 1";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
 						FROM tuotepaikat
@@ -639,8 +639,8 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	   		 			tuoteno     	= '$tilrivirow[tuoteno]' and
 	   		 			oletus     	   != ''
 	   		 			LIMIT 1";
-			$olpares = mysql_query($query) or pupe_error($query);
-			$olparow = mysql_fetch_array($olpares);
+			$olpares = pupe_query($query);
+			$olparow = mysql_fetch_assoc($olpares);
 
 			$jtvarastot[$tilrivirow["tunnus"]] = array($olparow["hyllyalue"], $olparow["hyllynro"]);
 			$millepakallemeni = " hyllyalue = '$olparow[hyllyalue]', hyllynro = '$olparow[hyllynro]', hyllyvali = '$olparow[hyllyvali]', hyllytaso = '$olparow[hyllytaso]' ";
@@ -656,7 +656,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 							and tyyppi = ''
 							ORDER BY alkuhyllyalue, alkuhyllynro
 							LIMIT 1";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 1) {
 					// haetaan firman eka varasto, tökätään kama sinne ja tehdään siitä oletuspaikka
@@ -665,11 +665,11 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 								WHERE yhtio = '$kukarow[yhtio]'
 								ORDER BY alkuhyllyalue, alkuhyllynro
 								LIMIT 1";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 
 				if (mysql_num_rows($result) == 1) {
-					$hyllyrow =  mysql_fetch_array($result);
+					$hyllyrow =  mysql_fetch_assoc($result);
 				}
 				else {
 					$hyllyrow = array();
@@ -691,7 +691,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 							hyllynro    	= '$hyllyrow[alkuhyllynro]',
 							hyllytaso   	= '0',
 							hyllyvali   	= '0'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$jtvarastot[$tilrivirow["tunnus"]] = array($hyllyrow["alkuhyllyalue"], $hyllyrow["alkuhyllynro"]);
 				$millepakallemeni = "hyllyalue = '$hyllyrow[alkuhyllyalue]', hyllynro = '$hyllyrow[alkuhyllynro]', hyllyvali = '0', hyllytaso = '0' ";
@@ -711,7 +711,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 							selite 		= '".t("Lisättiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
 							laatija 	= '$kukarow[kuka]',
 							laadittu 	= date_sub('$varastoonvientipva', interval 1 SECOND)";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 	   		}
 			else {
 				$varastoon_msg .= " <font class='error'>".t("Huh, se onnistui!")."</font><br>";
@@ -724,7 +724,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 						$millepakallemeni
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$tapahtumaid'";
-			$varastoon_result = mysql_query($query) or pupe_error($query);
+			$varastoon_result = pupe_query($query);
 
 			$millepakallemeni = " ,".$millepakallemeni;
 		}
@@ -741,7 +741,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					WHERE yhtio='$kukarow[yhtio]'
 					and otunnus='$tilrivirow[otunnus]'
 					and (tunnus='$tilrivirow[tunnus]' or perheid='$tilrivirow[tunnus]')";
-		$varastoon_result = mysql_query($query) or pupe_error($query);
+		$varastoon_result = pupe_query($query);
 
 		$rivia++;
 
@@ -754,8 +754,8 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		   				WHERE tilausrivin_lisatiedot.yhtio 			 = '$kukarow[yhtio]'
 		   				AND tilausrivin_lisatiedot.tilausrivilinkki  = '$tilrivirow[tunnus]'
 						$suoralisa";
-			$varastoon_result = mysql_query($query) or pupe_error($query);
-			$varastoon_row = mysql_fetch_array($varastoon_result);
+			$varastoon_result = pupe_query($query);
+			$varastoon_row = mysql_fetch_assoc($varastoon_result);
 
 			if ($varastoon_row["jtrivit"] != "") {
 				$jtrivit .= "$varastoon_row[jtrivit],";
@@ -791,7 +791,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
 			$query = "SELECT sscc FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
-			$sscc_res = mysql_query($query) or pupe_error($query);
+			$sscc_res = pupe_query($query);
 			$sscc_row = mysql_fetch_assoc($sscc_res);
 
 			// näytetään listauksessa SSCC-koodi ja otetaan mukaan suuntalavan tunnus
@@ -818,7 +818,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 		if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
 			$query = "SELECT sscc FROM suuntalavat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$suuntalavan_tunnus}'";
-			$sscc_res = mysql_query($query) or pupe_error($query);
+			$sscc_res = pupe_query($query);
 			$sscc_row = mysql_fetch_assoc($sscc_res);
 
 			// näytetään listauksessa SSCC-koodi ja otetaan mukaan suuntalavan tunnus
@@ -924,7 +924,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 				maksu_kurssi = '$laskurow[maksu_kurssi]'
 				WHERE tunnus = '$laskurow[tunnus]'
 				and yhtio = '$kukarow[yhtio]'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	// haetaan keikan vaihto-omaisuuslaskut (kotimaa, eu tai ei-eu)
 	$query = "	SELECT vanhatunnus
@@ -934,57 +934,69 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 				and laskunro	= '$laskurow[laskunro]'
 				and vanhatunnus <> 0
 				and vienti in ('C','F','I','J','K','L')";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	// jos on, haetaan liitetyn laskun tiedot
 	if (mysql_num_rows($result) >= 1) {
 
-		while ($llrow = mysql_fetch_array($result)) {
+		while ($llrow = mysql_fetch_assoc($result)) {
 
 			//Tämä on ostoreskontran lasku
 			$query   = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$llrow[vanhatunnus]'";
-			$llres   = mysql_query($query) or pupe_error($query);
-			$kulurow = mysql_fetch_array($llres);
+			$llres   = pupe_query($query);
+			$kulurow = mysql_fetch_assoc($llres);
 
 			// tehdään vielä kirjapitoa...
 			// päivitetään tilaus saapuneeksi varastoon kirjanpitoon
-			$query = "	SELECT tunnus, summa
+			$query = "	SELECT tunnus, summa, kustp, kohde, projekti
 						FROM tiliointi
-						WHERE yhtio='$kukarow[yhtio]' and ltunnus='$kulurow[tunnus]' and tilino = '$yhtiorow[matkalla_olevat]' and korjattu=''";
-			$result1 = mysql_query($query) or pupe_error($query);
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and ltunnus  = '$kulurow[tunnus]'
+						and tilino   = '$yhtiorow[matkalla_olevat]'
+						and korjattu = ''";
+			$result1 = pupe_query($query);
 
-			if (mysql_num_rows($result1) == 1) { // Tiliointi löytyi
-				$tiliointirow = mysql_fetch_array($result1);
+			if (mysql_num_rows($result1) > 0) { // Tiliointi löytyi
+				while ($tiliointirow = mysql_fetch_assoc($result1)) {
 
-				$varastotili = $yhtiorow["varasto"];
+					// Kumotaan, matkallaolevat
+					$query = "	INSERT into tiliointi set
+								yhtio		= '$kukarow[yhtio]',
+								ltunnus		= '$kulurow[tunnus]',
+								tilino		= '$yhtiorow[matkalla_olevat]',
+								kustp    	= '{$tiliointirow["kustp"]}',
+								kohde	 	= '{$tiliointirow["kohde"]}',
+								projekti 	= '{$tiliointirow["projekti"]}',
+								tapvm		= now(),
+								summa		= $tiliointirow[summa] * -1,
+								selite		= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
+								lukko		= '',
+								laatija		= '$kukarow[kuka]',
+								laadittu	= now()";
+					$result2 = pupe_query($query);
 
-				if (($kulurow["vienti"]=='J') or ($kulurow["vienti"]=='K') or ($kulurow["vienti"]=='L')) {
-					$varastotili = $yhtiorow["raaka_ainevarasto"];
+					$varastotili = $yhtiorow["varasto"];
+
+					if ($kulurow["vienti"] == 'J' or $kulurow["vienti"] == 'K' or $kulurow["vienti"] == 'L') {
+						$varastotili = $yhtiorow["raaka_ainevarasto"];
+					}
+
+					// Kirjataan varastonarvo
+					$query = "	INSERT into tiliointi set
+								yhtio		= '$kukarow[yhtio]',
+								ltunnus		= '$kulurow[tunnus]',
+								tilino		= '$varastotili',
+								kustp    	= '{$tiliointirow["kustp"]}',
+								kohde	 	= '{$tiliointirow["kohde"]}',
+								projekti 	= '{$tiliointirow["projekti"]}',
+								tapvm		= now(),
+								summa		= '$tiliointirow[summa]',
+								selite		= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
+								lukko		= '',
+								laatija 	= '$kukarow[kuka]',
+								laadittu	= now()";
+					$result3 = pupe_query($query);
 				}
-
-				$query = "	INSERT into tiliointi set
-							yhtio	= '$kukarow[yhtio]',
-							ltunnus	= '$kulurow[tunnus]',
-							tilino	= '$yhtiorow[matkalla_olevat]',
-							tapvm	= now(),
-							summa	= $tiliointirow[summa] * -1,
-							selite	= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
-							lukko	= '',
-							laatija	= '$kukarow[kuka]',
-							laadittu= now()";
-				$result2 = mysql_query($query) or pupe_error($query);
-
-				$query = "	INSERT into tiliointi set
-							yhtio	= '$kukarow[yhtio]',
-							ltunnus	= '$kulurow[tunnus]',
-							tilino	= '$varastotili',
-							tapvm	= now(),
-							summa	= '$tiliointirow[summa]',
-							selite	= '".t("Lasku kirjattiin varastoon")." $kulurow[nimi]',
-							lukko	= '',
-							laatija = '$kukarow[kuka]',
-							laadittu = now()";
-				$result3 = mysql_query($query) or pupe_error($query);
 			}
 			else {
 				echo "<font class='error'>".t("En löytänyt matkallaolevat kirjausta!")." $kulurow[tunnus] $yhtiorow[matkalla_olevat]</font><br>";
@@ -1117,7 +1129,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 					AND tilausrivi.kpl != 0
 					AND tilausrivi.tyyppi = 'O'
 					AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
-		$netto_suuntalava_result = mysql_query($query) or pupe_error($query);
+		$netto_suuntalava_result = pupe_query($query);
 
 		// AINA EI SIIS OSUTA TÄHÄN, JOS JÄMÄRIVEJÄ EI OLE
 		// JOS JÄMÄRIVEJÄ (= SPLITTAANTUNEET) JÄÄ SUUNTALAVALLE
@@ -1131,7 +1143,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 					AND tilausrivi.kpl = 0
 					AND tilausrivi.tyyppi = 'O'
 					AND tilausrivi.suuntalava = '{$suuntalavan_tunnus}'";
-		$netto_suuntalava_result = mysql_query($query) or pupe_error($query);
+		$netto_suuntalava_result = pupe_query($query);
 	}
 
 	//	Halutaanko toimittaa jälkkäreitä automaattisesti ja saako käyttäjä ylipäätään käsitellä jälkkäreitä..
@@ -1141,11 +1153,11 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 				and kuka	= '$kukarow[kuka]'
 				and nimi	= 'tilauskasittely/jtselaus.php'
 				and alanimi = ''";
-	$jtoikeudetres = mysql_query($query) or pupe_error($query);
+	$jtoikeudetres = pupe_query($query);
 
 	if (mysql_num_rows($jtoikeudetres) > 0 and $yhtiorow["automaattinen_jt_toimitus"] != "") {
 
-		$jtoikeudetrow = mysql_fetch_array($jtoikeudetres);
+		$jtoikeudetrow = mysql_fetch_assoc($jtoikeudetres);
 		$mista = 'varastoon.inc';
 		$varastosta = array();
 

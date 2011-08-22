@@ -1,15 +1,15 @@
 <?php
 
 	$query = "SELECT tapvm FROM lasku WHERE tunnus='$tunnus'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<b>".t("Lasku katosi")."</b><br>";
 		exit;
 	}
-	$laskurow = mysql_fetch_array($result);
+	$laskurow = mysql_fetch_assoc($result);
 
-	$summa = round($summa,2);
+	$summa = round($summa, 2);
 
 	if ($vero != 0) { // Netotetaan alvi
 		$alv = round($summa - $summa / (1 + ($vero / 100)),2);
@@ -38,44 +38,61 @@
 		$alv_tili = $yhtiorow["alv"];
 	}
 
+	if (!isset($valkoodi) or $valkoodi == "") {
+		$valkoodi = $yhtiorow["valkoodi"];
+	}
+
+	if (!isset($summa_valuutassa)) {
+		$summa_valuutassa = $summa;
+	}
+
+	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);
+
 	$query = "	INSERT into tiliointi set
-				yhtio ='$kukarow[yhtio]',
-				ltunnus = '$tunnus',
-				tilino = '$tili',
-				kustp = '$kustp',
-				kohde = '$kohde',
-				projekti = '$projekti',
-				tapvm = '$laskurow[tapvm]',
-				summa = '$summa',
+				yhtio 			 = '$kukarow[yhtio]',
+				ltunnus 		 = '$tunnus',
+				tilino 			 = '$tili',
+				kustp    		 = '{$kustp_ins}',
+				kohde	 		 = '{$kohde_ins}',
+				projekti 		 = '{$projekti_ins}',
+				tapvm 			 = '$laskurow[tapvm]',
+				summa 			 = '$summa',
 				summa_valuutassa = '$summa_valuutassa',
-				valkoodi = '$valkoodi',
-				vero = '$vero',
-				selite = '$selite',
-				lukko = '',
-				tosite = '$tositenro',
-				laatija = '$kukarow[kuka]',
-				laadittu = now()";
-	$result = mysql_query($query) or pupe_error($query);
+				valkoodi 		 = '$valkoodi',
+				vero 			 = '$vero',
+				selite 			 = '$selite',
+				lukko 			 = '',
+				tosite 			 = '$tositenro',
+				laatija 		 = '$kukarow[kuka]',
+				laadittu 		 = now()";
+	$result = pupe_query($query);
 	$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
 
-	if ($vero != 0) { // Tiliöidään alv
+	// Tiliöidään alv
+	if ($vero != 0) {
+
+		if (!isset($alv_valuutassa)) {
+			$alv_valuutassa = $alv;
+		}
+
 		$query = "	INSERT into tiliointi set
-					yhtio ='$kukarow[yhtio]',
-					ltunnus = '$tunnus',
-					tilino = '$alv_tili',
-					kustp = 0,
-					kohde = 0,
-					projekti = 0,
-					tapvm = '$laskurow[tapvm]',
-					summa = '$alv',
+					yhtio 			 = '$kukarow[yhtio]',
+					ltunnus 		 = '$tunnus',
+					tilino 			 = '$alv_tili',
+					kustp 			 = 0,
+					kohde 			 = 0,
+					projekti 		 = 0,
+					tapvm 			 = '$laskurow[tapvm]',
+					summa 			 = '$alv',
 					summa_valuutassa = '$alv_valuutassa',
-					valkoodi = '$valkoodi',
-					vero = 0,
-					selite = '$selite',
-					lukko = '1',
-					laatija = '$kukarow[kuka]',
-					laadittu = now(),
-					aputunnus = $isa";
-		$result = mysql_query($query) or pupe_error($query);
+					valkoodi 		 = '$valkoodi',
+					vero 			 = 0,
+					selite 			 = '$selite',
+					lukko 			 = '1',
+					laatija 		 = '$kukarow[kuka]',
+					laadittu 		 = now(),
+					aputunnus 		 = $isa";
+		$result = pupe_query($query);
 	}
+
 ?>

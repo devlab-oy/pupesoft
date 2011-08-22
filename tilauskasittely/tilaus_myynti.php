@@ -3880,17 +3880,27 @@ if ($tee == '') {
 
 				if ($trow['hinnastoon'] == 'V' and $toim != "SIIRTOLISTA" and $toim != 'VALMISTAVARASTOON') {
 					//	katsotaan löytyyko asiakasalennus / asikakashinta
-					$hinnat = alehinta($laskurow, $trow, $kpl, '', '', '',"hintaperuste,aleperuste");
 
-					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy, katotaan onko alennuksia.
+					// Reklamaatiolla ei huomioida kappalemääriin sidottuja alennuksia
+					if ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") {
+						$alemaara = 99999999999;
+					}
+					else {
+						$alemaara = $kpl;
+					}
+
+					$hinnat = alehinta($laskurow, $trow, $alemaara, '', '', '',"hintaperuste,aleperuste");
+
 					$onko_asiakkaalla_alennuksia = FALSE;
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
 							$onko_asiakkaalla_alennuksia = TRUE;
+							break;
 						}
 					}
 
+					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
 					if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE) {
 
 						if ($kukarow['extranet'] != '') {
@@ -4486,7 +4496,7 @@ if ($tee == '') {
 			$sarakkeet_alku = 0;
 
 			// Sarakkeiden otsikot
-			$headerit = "<tr>$jarjlisa<th>".t("#")."</th>";
+			$headerit = "<tr>$jarjlisa<th>#</th>";
 			$sarakkeet++;
 
 			if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or ($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("RIVISYOTTO")))) {
@@ -5862,7 +5872,7 @@ if ($tee == '') {
 								</form> ";
 					}
 
-					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o" and $row["status"] != 'P') {
+					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o" and $row["status"] != 'P' and $row["status"] != 'X') {
 
 						echo " <form action='$PHP_SELF' method='post' name='jalkitoimita'>
 									<input type='hidden' name='toim' 			value = '$toim'>

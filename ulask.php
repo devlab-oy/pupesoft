@@ -2237,6 +2237,8 @@ if (strlen($tee) == 0) {
 		<option value ='8'>7
 		<option value ='16'>15
 		<option value ='31'>30
+		<option value ='41'>40
+		<option value ='51'>50
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
@@ -2248,6 +2250,8 @@ if (strlen($tee) == 0) {
 		<option value ='8'>7
 		<option value ='16'>15
 		<option value ='31'>30
+		<option value ='41'>40
+		<option value ='51'>50
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
@@ -2264,6 +2268,8 @@ if (strlen($tee) == 0) {
 		<option value ='8'>7
 		<option value ='16'>15
 		<option value ='31'>30
+		<option value ='41'>40
+		<option value ='51'>50
 		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr>";
 	echo "</form>";
@@ -2287,6 +2293,8 @@ if (strlen($tee) == 0) {
 			<option value ='8'>7
 			<option value ='16'>15
 			<option value ='31'>30
+			<option value ='41'>40
+			<option value ='51'>50
 			</select></td>
 			<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></table></form>";
 		}

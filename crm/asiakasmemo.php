@@ -58,7 +58,7 @@
 						FROM kalenteri
 						LEFT JOIN asiakas ON (kalenteri.yhtio = asiakas.yhtio and kalenteri.liitostunnus = asiakas.tunnus)
 						WHERE kalenteri.tunnus = '$tunnus'";
-			$res = mysql_query($query) or pupe_error($query);
+			$res = pupe_query($query);
 			$row = mysql_fetch_array($res);
 
 			$meili = "\n$kukarow[nimi] ".t("lähetti sinulle asiakasmemon").".\n\n\n";
@@ -92,7 +92,7 @@
 						perheid 		= '$row[tunnus]',
 						laatija			= '$kukarow[kuka]',
 						luontiaika		= now()";
-			$result = mysql_query($kysely) or pupe_error($kysely);
+			$result = pupe_query($kysely);
 
 			if ($row["tyyppi"] == "Lead") {
 				$kysely = "	INSERT INTO kalenteri
@@ -109,7 +109,7 @@
 							kuittaus 		= '$row[kuittaus]',
 							laatija			= '$kukarow[kuka]',
 							luontiaika		= now()";
-				$result = mysql_query($kysely) or pupe_error($kysely);
+				$result = pupe_query($kysely);
 			}
 			//echo "<br>Sähköposti lähetetty osoitteeseen: $email<br><br>";
 
@@ -186,7 +186,7 @@
 								kuittaus 		= '$kuittaus',
 								laatija			= '$kukarow[kuka]',
 								luontiaika		= now()";
-					$result = mysql_query($kysely) or pupe_error($kysely);
+					$result = pupe_query($kysely);
 					$muist = mysql_insert_id();
 
 					if ($tyyppi == "Muistutus") {
@@ -195,7 +195,7 @@
 									FROM kuka
 									WHERE yhtio	= '$kukarow[yhtio]'
 									and kuka	= '$kuka'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 						$row = mysql_fetch_array($result);
 
 						// Käyttäjälle lähetetään tekstiviestimuistutus
@@ -250,7 +250,7 @@
 							muuttaja		= '$kukarow[kuka]',
 							muutospvm		= now()
 							WHERE tunnus = '$korjaus'";
-				$result = mysql_query($kysely) or pupe_error($kysely);
+				$result = pupe_query($kysely);
 
 				$aputyyppi 			= $tyyppi;
 				$tapa     			= "";
@@ -305,7 +305,7 @@
 							kentta08 = '$extrat',
 							tyyppi   = 'Memo',
 							pvmalku  = now()";
-				$result = mysql_query($kysely) or pupe_error($kysely);
+				$result = pupe_query($kysely);
 			}
 			$tee = '';
 		}
@@ -318,7 +318,7 @@
 						and yhtio			= '$kukarow[yhtio]'
 						and asiakas			= '$ytunnus'
 						and liitostunnus 	= '$asiakasid'";
-			$result = mysql_query($kysely) or pupe_error($kysely);
+			$result = pupe_query($kysely);
 
 			$kysely = "	UPDATE liitetiedostot
 						SET 	liitos = concat('DELETED ',liitos)
@@ -326,7 +326,7 @@
 						AND 	liitos			= '$liitostyyppi'
 						and 	yhtio			= '$kukarow[yhtio]'";
 
-			$result = mysql_query($kysely) or pupe_error($kysely);
+			$result = pupe_query($kysely);
 
 			$tee = '';
 		}
@@ -343,7 +343,7 @@
 						and (perheid=0 or tunnus=perheid)
 						ORDER BY tunnus desc
 						LIMIT 1";
-			$res = mysql_query($query) or pupe_error($query);
+			$res = pupe_query($query);
 			$korjrow = mysql_fetch_array($res);
 
 			$tapa     			= $korjrow["tapa"];
@@ -377,7 +377,7 @@
 								WHERE yhtio	= '$kukarow[yhtio]'
                                 and ytunnus	= '$ytunnus'
                                 and tunnus	= '$asiakasid'";
-			$result_update = mysql_query($query_update) or pupe_error($query_update);
+			$result_update = pupe_query($query_update);
 
 			echo t("Vaihdettiin asiakkaan tila")."<br/>";
 		}
@@ -390,7 +390,7 @@
 							FROM yhteyshenkilo
 							WHERE yhtio='$kukarow[yhtio]' and liitostunnus='$asiakasid'
 							ORDER BY nimi";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$yhenkilo = "<form action='$PHP_SELF' method='POST'>
 							<input type='hidden' name='ytunnus' value='$ytunnus'>
@@ -461,7 +461,7 @@
 							and kuka	= '$kukarow[kuka]'
 							and nimi	= 'yllapito.php'
 							and alanimi = 'asiakas'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
 					echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkilö")."</a></td>";
@@ -500,7 +500,7 @@
 							and kuka	= '$kukarow[kuka]'
 							and nimi	= 'crm/kalenteri.php'
 							and alanimi = ''";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
 					echo "<td><a href='{$palvelin2}crm/kalenteri.php?lopetus=$asmemo_lopetus'>".t("Kalenteri")."</a></td>";
@@ -521,7 +521,7 @@
 							and kuka	= '$kukarow[kuka]'
 							and nimi	= 'raportit/myyntiseuranta.php'
 							and alanimi = ''";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
 					echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=$asmemo_lopetus'>".t("Myynninseuranta")."</a></td>";
@@ -544,7 +544,7 @@
 							and kuka	= '$kukarow[kuka]'
 							and nimi	= 'raportit/asiakasinfo.php'
 							and alanimi = ''";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
 					echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=$asmemo_lopetus'>".t("Näytä alennustaulukko")."</a></td>";
@@ -649,7 +649,7 @@
 								and oikeu.nimi		= 'crm/kalenteri.php'
 								and kuka.kuka 		<> '$kukarow[kuka]'
 								ORDER BY kuka.nimi";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					while ($row = mysql_fetch_array($result)) {
 						if ($row["kuka"] == $kuka) {
@@ -708,7 +708,7 @@
 								and oikeu.nimi		= 'crm/kalenteri.php'
 								and kuka.asema   like '%MP%'
 								ORDER BY kuka.nimi";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					while ($row = mysql_fetch_array($result)) {
 						if ($row["myyntipaallikko"] == $myyntipaallikko) {
@@ -736,7 +736,7 @@
 								and oikeu.nimi		= 'crm/kalenteri.php'
 								and kuka.kuka 		<> '$kukarow[kuka]'
 								ORDER BY kuka.nimi";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					while ($row = mysql_fetch_array($result)) {
 						if ($row["kuka"] == $kuka) {
@@ -832,7 +832,7 @@
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") === FALSE) {
 				$query .= "	LIMIT 5 ";
 			}
-			$res = mysql_query($query) or pupe_error($query);
+			$res = pupe_query($query);
 
 			while ($memorow = mysql_fetch_array($res)) {
 				if($memorow["tapa"] == "asiakasanalyysi") {
@@ -889,7 +889,7 @@
 						echo "<select name='email' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
 						$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 						$konsernit = "";
 
 						while ($row = mysql_fetch_array($result)) {
@@ -898,7 +898,7 @@
 						$lisa2 = " yhtio in (".substr($konsernit, 0, -1).") ";
 
 						$query  = "SELECT distinct kuka, nimi, eposti FROM kuka WHERE $lisa2 and extranet='' and eposti != '' ORDER BY nimi";
-						$vares = mysql_query($query) or pupe_error($query);
+						$vares = pupe_query($query);
 
 						while ($varow = mysql_fetch_array($vares)) {
 							echo "<option value='$varow[eposti]###$varow[kuka]'>$varow[nimi]</option>";
@@ -920,14 +920,16 @@
 			}
 
 			echo "</table>";
-
-			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $naytapoistetut == "") {
-				echo "<br>";
-				echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä poistetut muistiinpanot")."</a>";
-			}
-			else {
-				echo "<br>";
-				echo "<a href='$PHP_SELF?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä aktiiviset muistiinpanot")."</a>";
+			
+			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE ) {
+				if ($naytapoistetut == "") {
+					echo "<br>";
+					echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä poistetut muistiinpanot")."</a>";
+				}
+				else {
+					echo "<br>";
+					echo "<a href='$PHP_SELF?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä aktiiviset muistiinpanot"). "</a>";
+				}
 			}
 		}
    	}
@@ -945,7 +947,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND liitostunnus = '$kalenteritunnus'
 					AND liitos = '$tyyppi'";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		while ($row = mysql_fetch_array($res)) {
 			$out .= "<a href='{$palvelin2}view.php?id=$row[tunnus]' target='Attachment'>".t('Näytä liite')."</a> ".$row['filename']."<br>\n";

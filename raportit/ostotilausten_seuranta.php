@@ -14,7 +14,7 @@
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus = '$tun'";
-		$comm_res = mysql_query($query) or pupe_error($query);
+		$comm_res = pupe_query($query);
 		$comm_row = mysql_fetch_assoc($comm_res);
 		echo $comm_row['comments'];
 		exit;
@@ -32,7 +32,7 @@
 						comments = '$kommentti'
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '$tilaus'";
-			$comm_ins_res = mysql_query($query) or pupe_error($query);
+			$comm_ins_res = pupe_query($query);
 
 			if ($kommentti == '') {
 				echo "<br><font class='message'>",t("Tyhjensit kommentin ostotilaukselta")," $tilaus</font><br>";
@@ -137,7 +137,7 @@
 					FROM toimi
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					$toimittajalisa";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		echo "<table>";
 
@@ -157,7 +157,8 @@
 						lasku.lahetepvm,
 						sum(tuote.tuotemassa*(tilausrivi.varattu+tilausrivi.kpl)) massa,
 						sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok,
-						lasku.comments
+						lasku.comments, 
+						lasku.valkoodi
 						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
 						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
@@ -168,7 +169,7 @@
 						and lasku.lahetepvm <='$vvl-$kkl-$ppl 23:59:59'
 						GROUP BY lasku.tunnus
 						ORDER BY lasku.ytunnus, lasku.lahetepvm";
-			$tilrivi_res = mysql_query($query) or pupe_error($query);
+			$tilrivi_res = pupe_query($query);
 
 			if (mysql_num_rows($tilrivi_res) > 0) {
 
@@ -196,7 +197,7 @@
 								lasku.tila = 'K' and
 								lasku.vanhatunnus = 0 and
 								lasku.liitostunnus = '$toimittajarow[tunnus]'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$i = 1;
 					$x = mysql_num_rows($result);
@@ -217,7 +218,7 @@
 									lasku.liitostunnus = '$toimittajarow[tunnus]' and
 									tilausrivi.tunnus IS NULL
 									ORDER BY laskunro";
-						$ei_tilriveja_res = mysql_query($query) or pupe_error($query);
+						$ei_tilriveja_res = pupe_query($query);
 
 						$xx += mysql_num_rows($ei_tilriveja_res);
 
@@ -238,7 +239,7 @@
 						echo "<th>",t("Paino"),"</th>";
 						echo "<th>",t("M‰‰r‰"),"</th>";
 						echo "<th>",t("Rivim‰‰r‰"),"</th>";
-						echo "<th>",t("Tilauksen"),"<br/>",t("arvo"),"<br/>$yhtiorow[valkoodi]</th>";
+						echo "<th>",t("Tilauksen"),"<br/>",t("arvo"),"<br/>$tilrivi_row[valkoodi]</th>";
 						echo "<th>",t("Keikka"),"</th>";
 						echo "<th>",t("Tavaralaskun"),"<br/>",t("luontiaika"),"</th>";
 						echo "<th>",t("Summa"),"<br/>$yhtiorow[valkoodi]</th>";
@@ -331,7 +332,7 @@
 									AND liitosotsikko.vanhatunnus <> 0
 									AND liitosotsikko.tila = 'K'
 									AND ostoreskontran_lasku.vienti in ('C', 'J', 'F', 'K', 'I', 'L')"; // tavaralaskut
-						$ostolaskures = mysql_query($query) or pupe_error($query);
+						$ostolaskures = pupe_query($query);
 
 						if (mysql_num_rows($ostolaskures) > 0) {
 							echo "<td style='vertical-align: top;' nowrap>";
@@ -380,7 +381,7 @@
 									AND liitosotsikko.vanhatunnus <> 0
 									AND liitosotsikko.tila = 'K'
 									AND ostoreskontran_lasku.vienti in ('B', 'E', 'H')"; // rahtilaskut
-						$ostolaskures = mysql_query($query) or pupe_error($query);
+						$ostolaskures = pupe_query($query);
 
 						if (mysql_num_rows($ostolaskures) > 0) {
 
@@ -446,7 +447,7 @@
 									AND otunnus = $tilrivi_row[ltunnus]
 									AND uusiotunnus = $keikkarow[tunnus]
 									AND tyyppi = 'O'";
-						$saldoille_res = mysql_query($query) or pupe_error($query);
+						$saldoille_res = pupe_query($query);
 						$saldoille_row = mysql_fetch_assoc($saldoille_res);
 
 						echo "<td style='vertical-align: top;' nowrap>".tv1dateconv($saldoille_row['laskettuaika'])."</td>";
@@ -496,7 +497,7 @@
 							lasku.liitostunnus = '$toimittajarow[tunnus]' and
 							lasku2.tunnus IS NULL
 							ORDER BY lasku.luontiaika, lasku.summa";
-				$ei_liitetyt_res = mysql_query($query) or pupe_error($query);
+				$ei_liitetyt_res = pupe_query($query);
 
 				while ($ei_liitetyt_row = mysql_fetch_assoc($ei_liitetyt_res)) {
 					// jos meill‰ on hyvityslasku niin haetaan vaan negatiivisi‰ alvikirjauksia (en tied‰ ollenkaan onko t‰m‰ futureprooof) :(
@@ -515,8 +516,8 @@
 								and tilino  = '$yhtiorow[alv]'
 								$alvilisa
 								and korjattu = ''";
-					$alvires = mysql_query($query) or pupe_error($query);
-					$alvirow = mysql_fetch_array($alvires);
+					$alvires = pupe_query($query);
+					$alvirow = mysql_fetch_assoc($alvires);
 
 					// Ostoreskontralaskun veron m‰‰r‰
 					$alvisumma = $alvirow["summa"];

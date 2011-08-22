@@ -18,7 +18,7 @@
 				and abs(summa + $trow[vietysumma]) <= 0.02
 				and tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
 				and korjattu 	= ''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 1) {
 		$ostovelkarow = mysql_fetch_assoc($result);
@@ -34,10 +34,10 @@
 				WHERE ltunnus 	= '$trow[tunnus]'
 				and yhtio 		= '$yritirow[yhtio]'
 				and tapvm 		= '$trow[tapvm]'
-				and tilino not in ('$yhtiorow[ostovelat]','$yhtiorow[alv]','$yhtiorow[varasto]','$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '$yhtiorow[matkalla_olevat]','$yhtiorow[konserniostovelat]','$yhtiorow[kassaale]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]')
+				and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
 				and korjattu 	= ''
 				order by tunnus";
-	$yresult = mysql_query($query) or pupe_error($query);
+	$yresult = pupe_query($query);
 
 	if (mysql_num_rows($yresult) == 0) {
 		echo "<font class='error'>".t("VIRHE: Kulutilin määrittely epäonnistui")."!<br>".t("Summaa ei kirjattu")."!</font><br>";
@@ -71,6 +71,7 @@
 
 				$totkasumma += $summa + $alv;
 
+				// Kassa-ale
 				$query = "	INSERT into tiliointi set
 							yhtio 		= '$yritirow[yhtio]',
 							ltunnus 	= '$trow[tunnus]',
@@ -84,14 +85,18 @@
 							lukko 		= '',
 							laatija 	= 'tiliote',
 							laadittu 	= now()";
-				$xresult = mysql_query($query) or pupe_error($query);
+				$xresult = pupe_query($query);
 				$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
 
 				if ($tiliointirow['vero'] != 0) {
+					// Kassa-alen alv
 					$query = "	INSERT into tiliointi set
 								yhtio 		= '$yritirow[yhtio]',
 								ltunnus 	= '$trow[tunnus]',
 								tilino 		= '$yhtiorow[alv]',
+								kustp 		= 0,
+								kohde 		= 0,
+								projekti 	= 0,
 								tapvm 		= '$tpv-$tpk-$tpp',
 								summa 		= $alv * -1,
 								vero 		= 0,
@@ -100,7 +105,7 @@
 								laatija 	= 'tiliote',
 								laadittu 	= now(),
 								aputunnus 	= $isa";
-					$xresult = mysql_query($query) or pupe_error($query);
+					$xresult = pupe_query($query);
 				}
 			}
 
@@ -114,7 +119,7 @@
 							SET summa = summa + $heitto
 							WHERE tunnus = '$isa'
 							and yhtio 	 = '$yritirow[yhtio]'";
-				$xresult = mysql_query($query) or pupe_error($query);
+				$xresult = pupe_query($query);
 			}
 		}
 
@@ -127,65 +132,72 @@
 				$vesumma = round(($maara*-1) - ($trow['vietysumma'] - $trow['vietykasumma']),2);
 			}
 
-			echo "<font class='message'>".t("Kirjaan valuuttaeroa yhteensä")." $vesumma</font><br>";
+			if (round($vesumma, 2) != 0) {
+				echo "<font class='message'>".t("Kirjaan valuuttaeroa yhteensä")." $vesumma</font><br>";
 
-			$totvesumma = 0;
+				$totvesumma = 0;
 
-			mysql_data_seek($yresult, 0);
+				mysql_data_seek($yresult, 0);
 
-			while ($tiliointirow = mysql_fetch_assoc($yresult)) {
-				// Kuinka paljon on tämän viennin osuus
-				$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $trow['vietysumma'] * $vesumma,2);
+				while ($tiliointirow = mysql_fetch_assoc($yresult)) {
+					// Kuinka paljon on tämän viennin osuus
+					$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $trow['vietysumma'] * $vesumma, 2);
 
-				echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>";
+					echo "<font class='message'>".t("Kirjaan valuuttaeroa")." $summa</font><br>";
 
-				if (round($summa,2) != 0) {
-					$query = "	INSERT into tiliointi set
-								yhtio 		= '$yritirow[yhtio]',
-								ltunnus 	= '$trow[tunnus]',
-								tilino 		= '$yhtiorow[valuuttaero]',
-								kustp 		= '$tiliointirow[kustp]',
-								kohde 		= '$tiliointirow[kohde]',
-								projekti 	= '$tiliointirow[projekti]',
-								tapvm 		= '$tpv-$tpk-$tpp',
-								summa 		= $summa,
-								vero 		= 0,
-								lukko 		= '',
-								laatija 	= 'tiliote',
-								laadittu 	= now()";
-					$xresult = mysql_query($query) or pupe_error($query);
-					$isa = mysql_insert_id ($link);
+					if (round($summa, 2) != 0) {
+						// Valuuttaero
+						$query = "	INSERT into tiliointi set
+									yhtio 		= '$yritirow[yhtio]',
+									ltunnus 	= '$trow[tunnus]',
+									tilino 		= '$yhtiorow[valuuttaero]',
+									kustp 		= '$tiliointirow[kustp]',
+									kohde 		= '$tiliointirow[kohde]',
+									projekti 	= '$tiliointirow[projekti]',
+									tapvm 		= '$tpv-$tpk-$tpp',
+									summa 		= $summa,
+									vero 		= 0,
+									lukko 		= '',
+									laatija 	= 'tiliote',
+									laadittu 	= now()";
+						$xresult = pupe_query($query);
+						$isa = mysql_insert_id ($link);
 
-					$totvesumma += $summa;
+						$totvesumma += $summa;
+					}
 				}
-			}
 
-			//Hoidetaan mahdolliset pyöristykset
-			if ($totvesumma != $vesumma) {
-				echo "<font class='message'>".t("Joudun pyöristämään valuuttaeroa")."</font><br>";
+				// Hoidetaan mahdolliset pyöristykset
+				if ($totvesumma != $vesumma) {
+					echo "<font class='message'>".t("Joudun pyöristämään valuuttaeroa")."</font><br>";
 
-				$query = "	UPDATE tiliointi
-							SET summa = summa - $totvesumma + $vesumma
-							WHERE tunnus = '$isa' and yhtio='$yritirow[yhtio]'";
-				$xresult = mysql_query($query) or pupe_error($query);
+					$query = "	UPDATE tiliointi
+								SET summa = summa - $totvesumma + $vesumma
+								WHERE tunnus = '$isa' and yhtio='$yritirow[yhtio]'";
+					$xresult = pupe_query($query);
+				}
 			}
 		}
 
-		//Rahatili
+		list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
+
+		// Rahatili
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$yritirow[yhtio]',
 					ltunnus 	= '$trow[tunnus]',
 					tilino 		= '$yritirow[oletus_rahatili]',
-					kustp 		= 0,
+					kustp    	= '{$kustp_ins}',
+					kohde	 	= '{$kohde_ins}',
+					projekti 	= '{$projekti_ins}',
 					tapvm 		= '$tpv-$tpk-$tpp',
 					summa 		= '$maara',
 					vero 		= 0,
 					lukko 		= '',
 					laatija 	= 'tiliote',
 					laadittu 	= now()";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
-		//Ostovelat
+		// Ostovelat, tarkenteet kopsataan alkuperäisesltä tiliöinniltä
 		$query = "	INSERT into tiliointi set
 					yhtio 		= '$yritirow[yhtio]',
 					ltunnus 	= '$trow[tunnus]',
@@ -199,13 +211,20 @@
 					lukko 		= '',
 					laatija 	= 'tiliote',
 					laadittu 	= now()";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
-	    $query = "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=".mysql_insert_id($link)." WHERE tunnus='$tiliotedataid'";
-		$dummyresult = mysql_query($query) or pupe_error($query);
+	    $query = "	UPDATE tiliotedata
+					SET kasitelty = now(),
+					tiliointitunnus = ".mysql_insert_id($link)."
+					WHERE tunnus='$tiliotedataid'";
+		$dummyresult = pupe_query($query);
 
-		$query = "UPDATE tiliotedata SET kuitattu = 'tiliote', kuitattuaika = now() WHERE yhtio = '$yritirow[yhtio]' and perheid = '$tiliotedatape'";
-		$dummyresult = mysql_query($query) or pupe_error($query);
+		$query = "	UPDATE tiliotedata
+					SET kuitattu = 'tiliote',
+					kuitattuaika = now()
+					WHERE yhtio = '$yritirow[yhtio]'
+					and perheid = '$tiliotedatape'";
+		$dummyresult = pupe_query($query);
 
 		// Merkataan käsitellyiksi & lisätään linkki
 		echo "<font class='message'>*** ".t("laskuun lisätty maksutiliöinti")." ***</font><br>";
@@ -217,17 +236,22 @@
 			$kurssi = 1;
 		}
 
-		$query = "	UPDATE lasku set tila = 'Y', maksu_kurssi = $kurssi, mapvm = '$tpv-$tpk-$tpp'
+		$query = "	UPDATE lasku
+					set tila = 'Y',
+					maksu_kurssi = $kurssi,
+					mapvm = '$tpv-$tpk-$tpp'
 					WHERE tunnus = '$trow[tunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<font class='message'>*** ".t("lasku suoritettu")." ***</font><br>";
 
 	}
 	else {
 		// Päivitetään virhetapauksissa kasitelty nollaksi jotta tämä käsitellään sit seuraavan kerran kun tiliotetta katsotaan!!!!
-		$query = "UPDATE tiliotedata SET kasitelty = '0000-00-00 00:00:00' WHERE tunnus='$tiliotedataid'";
-		$dummyresult = mysql_query($query) or pupe_error($query);
+		$query = "	UPDATE tiliotedata
+					SET kasitelty = '0000-00-00 00:00:00'
+					WHERE tunnus = '$tiliotedataid'";
+		$dummyresult = pupe_query($query);
 	}
 
 ?>

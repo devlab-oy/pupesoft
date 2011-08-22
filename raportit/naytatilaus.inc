@@ -812,7 +812,7 @@
 		}
 
 		echo "<table>";
-		echo "<tr><th>".t("#")."</th>";
+		echo "<tr><th>#</th>";
 
 		if ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
 

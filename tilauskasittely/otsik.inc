@@ -2486,11 +2486,14 @@
 				}
 
 				//lasketaan alvit
-				if ($row["alv"] < 500) {
-					$alv = "";
+				if ($row["alv"] >= 600) {
+					$alv = 600;
+				}
+				elseif ($row["alv"] >= 500) {
+					$alv = 500;
 				}
 				else {
-					$alv = 500;
+					$alv = '';
 				}
 
 				list($uusihinta, $alv) = alv($laskurow, $trow, $uusihinta, $alv, $alehinta_alv);

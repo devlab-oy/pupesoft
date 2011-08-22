@@ -83,6 +83,7 @@ if (!isset($var_array)) 			$var_array = "";
 if (!isset($tilausrivi_alvillisuus)) $tilausrivi_alvillisuus = "";
 if (!isset($valitsetoimitus_vaihdarivi)) $valitsetoimitus_vaihdarivi = "";
 if (!isset($saako_liitaa_laskuja_tilaukseen)) $saako_liitaa_laskuja_tilaukseen = "";
+if (!isset($omalle_tilaukselle)) $omalle_tilaukselle = '';
 
 // Setataan lopetuslinkki, jotta pääsemme takaisin tilaukselle jos käydään jossain muualla
 $tilmyy_lopetus = "{$palvelin2}tilauskasittely/tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -876,6 +877,7 @@ if (isset($tyhjenna)) {
 	$var_array 			= "";
 	$sopimuksen_lisatieto1 = "";
 	$sopimuksen_lisatieto2 = "";
+	$omalle_tilaukselle = "";
 }
 
 if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kertakassa != '')) and $kukarow['extranet'] == '') {
@@ -3423,6 +3425,7 @@ if ($tee == '') {
 			$perheid2 	= $tilausrivi["perheid2"];
 			$sopimuksen_lisatieto1 = $tilausrivi["sopimuksen_lisatieto1"];
 			$sopimuksen_lisatieto2 = $tilausrivi["sopimuksen_lisatieto2"];
+			$omalle_tilaukselle = $tilausrivi['omalle_tilaukselle'];
 
 			// useamman valmisteen reseptit...
 			if ($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) {
@@ -4004,6 +4007,7 @@ if ($tee == '') {
 		$sopimuksen_lisatieto1 = "";
 		$sopimuksen_lisatieto2 = "";
 		if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
+		$omalle_tilaukselle = "";
 	}
 
 	//Syöttörivi

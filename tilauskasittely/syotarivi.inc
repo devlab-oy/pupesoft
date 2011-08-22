@@ -41,8 +41,13 @@
 			echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
 		}
 
-		echo "	<th align='left'>".t("Netto")."</th>
-				<td valign='top' class='back'></td>
+		echo "	<th align='left'>".t("Netto")."</th>";
+
+		if ($trow['yksin_kerailyalustalle'] == 'T' and $tuoteno != '') {
+			echo "<th align='left'>",t("Omalle tilaukselle"),"</th>";
+		}
+
+		echo "	<td valign='top' class='back'></td>
 				</tr>";
 
 		echo "<tr>$jarjlisa";
@@ -88,8 +93,13 @@
 			echo "</td>";
 		}
 
-		echo "	<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
-				<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'></td>
+		echo "	<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>";
+
+		if ($trow['yksin_kerailyalustalle'] == 'T' and $tuoteno != '') {
+			echo "<td><input type='text' name='omalle_tilaukselle' size='2' maxlength='1' value='{$omalle_tilaukselle}' /></td>";
+		}
+
+		echo "	<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'></td>
 				<td valign='top' class='back'>
 				<input type='hidden' name='perheid' value = '$perheid'>
 				<input type='hidden' name='perheid2' value = '$perheid2'>
@@ -236,6 +246,10 @@
 		echo "	<th align='left'>".t("Netto")."</th>
 				<th align='left'>".t("Alv")."</th>";
 
+		if ($trow['yksin_kerailyalustalle'] == 'T' and $tuoteno != '') {
+			echo "<th align='left'>",t("Omalle tilaukselle"),"</th>";
+		}
+
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<th align='left'></th>";
 		}
@@ -342,6 +356,15 @@
 			echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 		}
 
+		if ($trow['yksin_kerailyalustalle'] == 'T' and $tuoteno != '') {
+			$sel = (isset($omalle_tilaukselle) and trim($omalle_tilaukselle) != '') ? ' selected' : '';
+
+			echo "<td><select name='omalle_tilaukselle'>";
+			echo "<option value=''>",t("Ei"),"</option>";
+			echo "<option value='K'{$sel}>",t("Kyllä"),"</option>";
+			echo "</select></td>";
+		}
+
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<td valign='top'></td>";
 		}
@@ -373,6 +396,10 @@
 			$nrospanni = 3;
 		}
 
+		if ($trow['yksin_kerailyalustalle'] == 'T' and $tuoteno != '') {
+			$nrospanni++;
+		}
+	
 		$nrospanni += $yhtiorow['myynnin_alekentat'] - 1;
 
 		echo "<th colspan='$nrospanni' align='left'>".t("Kommentti")."</th>";

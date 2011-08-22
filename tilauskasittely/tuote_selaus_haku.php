@@ -227,11 +227,7 @@
 					$kpl_echo 		 = (float) $kpl;
 					$tuoteno         = $trow["tuoteno"];
 					$yllapita_toim_stash = $toim;
-<<<<<<< HEAD
-					
-=======
 
->>>>>>> develop
 					if ($toim_kutsu != "YLLAPITO") {
 						$toimaika = $laskurow["toimaika"];
 						$kerayspvm = $laskurow["kerayspvm"];

@@ -875,11 +875,7 @@ if (isset($tyhjenna)) {
 	$variaatio_tuoteno 	= "";
 	$var_array 			= "";
 	$sopimuksen_lisatieto1 = "";
-<<<<<<< HEAD
-	$sopimuksen_lisatieto2 = "";	
-=======
 	$sopimuksen_lisatieto2 = "";
->>>>>>> develop
 }
 
 if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kertakassa != '')) and $kukarow['extranet'] == '') {

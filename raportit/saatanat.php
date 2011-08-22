@@ -187,7 +187,7 @@
 			$having = " HAVING avoimia >= '$yli' ";
 		}
 		else {
-			$having = " HAVING (avoimia != 0 or avoimia = 0)";
+			$having = " HAVING avoimia != 0";
 		}
 
 		if ($grouppaus == 'ytunnus') {

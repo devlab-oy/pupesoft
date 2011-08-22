@@ -16,6 +16,21 @@ if ($tee == "update") {
 
 	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
 
+	if (abs($rahti_etu) > abs($llrow['vosumma'])) {
+		echo "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br><br>";
+
+		$tee = "";
+		$toiminto = "lisatiedot";
+
+		if ($nappikeikalla == 'ollaan') {
+			$nappikeikalle = 'menossa';
+			$nappikeikalla = '';
+		}
+	}
+}
+
+if ($tee == "update") {
+
 	if ($laskurow["erikoisale"] == $erikoisale and $laskurow["rahti_etu"] == $rahti_etu and $laskurow["rahti_etu_alv"] == $rahti_etu_alv) {
 		$kohdistettu = $laskurow["kohdistettu"];
 	}
@@ -69,7 +84,7 @@ if ($tee == "update") {
 				ultilno 		= '$ultilno'
 				WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	$query_erikoisale = "	UPDATE tilausrivi
 							SET erikoisale = '{$erikoisale}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
@@ -82,7 +97,7 @@ if ($tee == "update") {
 }
 
 if ($tee == "") {
-	
+
 	$query = "SELECT *
 			  FROM lasku
 			  WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
@@ -92,7 +107,7 @@ if ($tee == "") {
 	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
 
 	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
-	
+
 	// haetaan toimittajan tiedot
 	$query  = "SELECT * FROM toimi WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[liitostunnus]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -269,15 +284,8 @@ if ($tee == "") {
 		$lisamassa = "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 	}
 
-	if ($llrow["vosumma"] >= 0.00) {
-		if ($laskurow['rahti_etu'] > $llrow['vosumma']) {
-			$lisatiedot = "<font class='message'>Virhe!! Eturahti ei saa olla suurempi kuin laskujen yhteissumma</font><br>";
-		}
-	}
-	else {
-		if ($laskurow['rahti_etu'] <= $llrow['vosumma']) {
-			$lisatiedot = "<font class='message'>Virhe!! Eturahti pit‰‰ olla suurempi tai yht‰suuri kuin laskujen yhteissumma</font><br>";
-		}
+	if (abs($laskurow['rahti_etu']) > abs($llrow['vosumma'])) {
+		$lisatiedot = "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br>";
 	}
 
 	echo "<tr><td valign='top'>".t("Nettopaino").":</td><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back' width='450'>$lisamassa</td></tr>";

@@ -39,7 +39,7 @@ if (!function_exists("pupe_error")) {
 		$query = str_replace("\t", " ",$query);
 		$query = str_replace("\n", "", $query);
 		$query = str_replace("\r", "", $query);
-		$query = ereg_replace("  +", " ", $query);
+		$query = preg_replace("/  +/", " ", $query);
 
 		$debuggi = array_reverse(debug_backtrace());
 
@@ -103,7 +103,7 @@ if (!function_exists("tv1dateconv")) {
 		if ($date == "0000-00-00" or $date == "0000-00-00 00:00:00" or $date == "") {
 			return "";
 		}
-		elseif ($laskurow["maa"] == "SE") {
+		elseif (isset($laskurow["maa"]) and $laskurow["maa"] == "SE") {
 			if ($lyhyt == "LYHYT") return substr($date,2,2)."-". (int) substr($date,5,2)."-". (int) substr($date,8,2).$jatko;
 			else return substr($date,0,4)."-".substr($date,5,2)."-".substr($date,8,2).$jatko;
 		}
@@ -3037,7 +3037,7 @@ if (!function_exists("alehinta")) {
 		$query = "	SELECT group_concat(parent.tunnus) tunnukset
 	   				FROM puun_alkio
 					JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
-	   				JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.lft > 1)
+	   				JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio and node.laji = parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt AND parent.lft > 0)
 	   				WHERE puun_alkio.yhtio = '$kukarow[yhtio]'
 					AND puun_alkio.laji    = 'asiakas'
 					AND puun_alkio.liitos  = '$laskurow[liitostunnus]'";
@@ -5172,7 +5172,7 @@ if (!function_exists('ebid')) {
 			$res = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($res)) {
-				$out .= " <a $target href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä liite') ."</a> ";
+				$out .= " <a href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä liite') ."</a> ";
 			}
 
 			return $out;
@@ -5196,7 +5196,7 @@ if (!function_exists('ebid')) {
 			$res = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($res)) {
-				$out .= " <a $target href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä liite') ."</a> ";
+				$out .= " <a href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä liite') ."</a> ";
 			}
 
 			return $out;
@@ -5222,9 +5222,8 @@ if (!function_exists('ebid')) {
 					$out[] = $palvelin2."view.php?id=$row[tunnus]";
 				}
 				else {
-					$out .= "<a $target href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä lasku') ."</a> ";
+					$out .= "<a href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä lasku') ."</a> ";
 				}
-
 			}
 
 			if ($laskurow['ebid'] == "UNIKKO-INVOICE") {
@@ -8546,6 +8545,13 @@ if (!function_exists("t")) {
 		//	Palautetaan muotoiltu stringi!!!
 		if (func_num_args() > 2) {
 		    $arg = func_get_args();
+
+			if (!isset($arg[2])) $arg[2] = "";
+			if (!isset($arg[3])) $arg[3] = "";
+			if (!isset($arg[4])) $arg[4] = "";
+			if (!isset($arg[5])) $arg[5] = "";
+			if (!isset($arg[6])) $arg[6] = "";
+
 			return sprintf($stringi, $arg[2],$arg[3],$arg[4],$arg[5],$arg[6]);
 		}
 		else {
@@ -8632,7 +8638,7 @@ if (!function_exists("t_avainsana")) {
 								and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.$kielilisa) $kielilisa";
 		}
 
-		$query = "	SELECT DISTINCT avainsana.*
+		$query = "	SELECT DISTINCT avainsana.* $kielisubquery
 					FROM avainsana
 					WHERE $yhtiolisa
 					and avainsana.laji = '$laji'
@@ -10133,7 +10139,7 @@ if (!function_exists("tarkista_viite")) {
 		}
 
 		$kerroin = 7;
-		$tulo = 0;
+		$tulo 	 = 0;
 
 		for ($i = 2; $i <= strlen($viite); $i++) {
 
@@ -10652,11 +10658,11 @@ if (!function_exists("pupe_DataTables")) {
 		for ($i = 1; $i <= $sarakkeetVis; $i++) {
 			// Keikalla eka sarake on kohdistusnappula....
 			if ($i == 1 and $taulu == "keikka") {
-				$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false, \"sWidth\": \"20px\"},";	
+				$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false, \"sWidth\": \"20px\"},";
 			}
 			else {
-				$aoColumns .= " null,";	
-			}			
+				$aoColumns .= " null,";
+			}
 		}
 		for ($i = $sarakkeetVis+1; $i <= $sarakkeetTot; $i++) {
 			$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false},";
@@ -10717,13 +10723,13 @@ if (!function_exists("pupe_DataTables")) {
 
 				// KEIKKA.PHPN OMAT JQUERY-TOIMINNALLISUUDET
 				if ('{$taulu}' == 'keikka') {
-					
+
 					$(window).keypress(function(e) {
 					    if(e.keyCode == 13) {
 					        $('#submit_tallenna').trigger('click');
 					    }
 					});
-					
+
 					// JOS RUKSATAAN/RUKSATAAN POIS JOKIN RIVI
 					$('input[name^=\"rivi_valitut_tunnukset\"]').live('click', function(){
 						rivi_ja_otsikko = this.value.split(\"###\", 2);
@@ -12805,10 +12811,10 @@ if (!function_exists("tee_keraysera")) {
 		// millä tarkkuudella tuotteita pakataan (esim. 5 cm)
 		$resoluutio = 5;
 
-		$query = "	SELECT sallitut_alustat, 
-					if(max_keraysera_pintaala * pow({$mittakerroin}, 2) < 1, 1, max_keraysera_pintaala * pow({$mittakerroin}, 2)) max_keraysera_pintaala, 
-					max_keraysera_rivit, 
-					yhdistelysaanto, 
+		$query = "	SELECT sallitut_alustat,
+					if(max_keraysera_pintaala * pow({$mittakerroin}, 2) < 1, 1, max_keraysera_pintaala * pow({$mittakerroin}, 2)) max_keraysera_pintaala,
+					max_keraysera_rivit,
+					yhdistelysaanto,
 					lahtojen_valinen_enimmaisaika,
 					ulkoinen_jarjestelma
 					FROM keraysvyohyke
@@ -13256,11 +13262,11 @@ if (!function_exists("tee_keraysera")) {
 									'pakkaukset' 				=> $pakkaukset,
 									'tuoterow'					=> $tuoterow,
 									'resoluutio'				=> $resoluutio,
-									'eran_koko' 				=> $eran_koko, 
-									'max_keraysera_pintaala' 	=> $max_keraysera_pintaala, 
-									'row'						=> $row, 
-									'juokseva_pakkausnro'		=> $juokseva_pakkausnro, 
-									'ed_juokseva'				=> $ed_juokseva, 
+									'eran_koko' 				=> $eran_koko,
+									'max_keraysera_pintaala' 	=> $max_keraysera_pintaala,
+									'row'						=> $row,
+									'juokseva_pakkausnro'		=> $juokseva_pakkausnro,
+									'ed_juokseva'				=> $ed_juokseva,
 									'erat' 						=> $erat,
 									'debug'						=> $debug
 								);
@@ -13759,3 +13765,47 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 		}
 	}
 }
+
+if (!function_exists("kustannuspaikka_kohde_projekti")) {
+	function kustannuspaikka_kohde_projekti($tilino, $kustp=0, $kohde=0, $projekti=0) {
+		global $kukarow;
+
+		$kustp		= (int) $kustp;
+		$kohde		= (int) $kohde;
+		$projekti	= (int) $projekti;
+
+		$query = "	SELECT kustp, kohde, projekti
+					FROM tili
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tilino = '{$tilino}'";
+		$kustp_kohde_proj_res = pupe_query($query);
+		$kustp_kohde_proj_row = mysql_fetch_assoc($kustp_kohde_proj_res);
+
+		$returnarray = array();
+
+		if ($kustp == 0) {
+			$returnarray[] = $kustp_kohde_proj_row["kustp"];
+		}
+		else {
+			$returnarray[] = $kustp;
+		}
+
+		if ($kohde == 0) {
+			$returnarray[] = $kustp_kohde_proj_row["kohde"];
+		}
+		else {
+			$returnarray[] = $kohde;
+		}
+
+		if ($projekti == 0) {
+			$returnarray[] = $kustp_kohde_proj_row["projekti"];
+		}
+		else {
+			$returnarray[] = $projekti;
+		}
+
+		return $returnarray;
+	}
+}
+
+?>

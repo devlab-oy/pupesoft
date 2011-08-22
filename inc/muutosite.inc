@@ -1,7 +1,10 @@
 <?php
 
 	require_once ("inc/tilinumero.inc");
-
+	
+	if (!isset($tila)) $tila = "";
+	if (!isset($komm)) $komm = "";
+	
 	function erottele($pvm) {
 		$paluu['pp'] = substr($pvm,-2);
 		$paluu['kk'] = substr($pvm,5,2);
@@ -15,14 +18,14 @@
 		global $kukarow;
 
 		$query = "SELECT * FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo "Tiliöintirivi kateissa Systeemivirhe!";
+			echo "Tiliöintirivi kateissa. Systeemivirhe!";
 			exit;
 		}
 
-		$tiliointirow = mysql_fetch_array ($result);
+		$tiliointirow = mysql_fetch_assoc($result);
 		$query = "INSERT into tiliointi set ";
 
 		for ($i = 0; $i < mysql_num_fields($result); $i++) {
@@ -34,29 +37,31 @@
 					elseif (mysql_field_name($result, $i) == 'korjausaika') {
 						$query .= "korjausaika = now(),";
 					}
-					else
-						$query .= mysql_field_name($result,$i) . "='" . $tiliointirow[$i] . "',";
+					else {
+						$query .= mysql_field_name($result,$i) . "='" . $tiliointirow[mysql_field_name($result,$i)] . "',";
+					}
 				}
-				else
-					$query .= mysql_field_name($result,$i) . "='" . $tiliointirow[$i] . "',";
+				else {
+					$query .= mysql_field_name($result,$i) . "='" . $tiliointirow[mysql_field_name($result,$i)] . "',";
+				}
 			}
 		}
 
 		$query = substr($query, 0, -1);
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 	}
 
 	$query = "	SELECT *
 				FROM lasku
 				WHERE tunnus = '$tunnus'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) != 1) {
 		echo t("Tositetta")." $tunnus ".t("ei löytynytkään")."!";
 		exit;
 	}
 
-	$trow = mysql_fetch_array($result);
+	$trow = mysql_fetch_assoc($result);
 
 	//Poistetaan suoraveloitus
 	if ($tila == 'A') {
@@ -73,7 +78,7 @@
 					yhtio = '$kukarow[yhtio]' and
 					suoraveloitus != '' and
 					maksu_tili = ''";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$tee = 'E';
 		$tila = '';
 
@@ -81,14 +86,14 @@
 		$query = "	SELECT *
 					FROM lasku
 					WHERE tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo t("Tositetta")." $tunnus ".t("ei löytynytkään")."!";
 			exit;
 		}
 
-		$trow = mysql_fetch_array($result);
+		$trow = mysql_fetch_assoc($result);
 	}
 
 	// Tasolla 1 ei saa muuttaa tapvm_ää tai maksutiliä
@@ -141,7 +146,7 @@
 						comments = '$kommentti'
 						WHERE tunnus = '$tunnus'
 						and yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tee = 'M';
 			$tila = 'nollaahyvak';
@@ -185,14 +190,14 @@
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '$tunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != 1) {
 				echo t('lasku kateissa') . "$tunnus</font>";
 				exit;
 			}
 
-			$trow = mysql_fetch_array($result);
+			$trow = mysql_fetch_assoc($result);
 
 			$kommentti = "($kukarow[kuka]@".date('Y-m-d').") ".t("Laskun maksutili muutettiin. Vanha oli").": $trow[pankki_haltija], $trow[ultilno], $trow[swift], $trow[pankki1], $trow[pankki2], $trow[pankki3], $trow[pankki4], $trow[sisviesti1].<br>$trow[comments]";
 
@@ -209,7 +214,7 @@
 					comments 		= '$kommentti'
 					WHERE tunnus = '$tunnus'
 					AND yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tee  = 'M';
 			$tila = 'nollaahyvak';
@@ -232,7 +237,7 @@
 			$query = "	UPDATE lasku
 						set viesti='$viesti'
 						WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tee = 'E';
 			$tila = 'X';
@@ -240,9 +245,6 @@
 
 		//Täällä tarkistetaan pvm
 		if ($tila == 'P') {
-			//	$kk = substr($trow[1],5,2);
-			//	$vv = substr($trow[1],0,4);
-
 			if ($vv < 1000) $vv += 2000;
 			$val = checkdate($kk, $pp, $vv);
 
@@ -271,24 +273,24 @@
 		if ($tila == 'P') {
 
 			$query = "UPDATE lasku SET tapvm = '$vv-$kk-$pp'  WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query = "LOCK table tiliointi WRITE";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query = "SELECT tunnus FROM tiliointi WHERE ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]' and korjattu=''";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
-			while ($xrow=mysql_fetch_array ($result)) {
+			while ($xrow=mysql_fetch_assoc ($result)) {
 				kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
 			}
 
 			$query = "	UPDATE tiliointi SET tapvm = '$vv-$kk-$pp', laadittu=now(), laatija='$kukarow[kuka]'
 						WHERE ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]' and korjattu=''";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query = "UNLOCK table";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tee = 'E';
 			$tila = 'X';
@@ -307,7 +309,7 @@
 						WHERE tunnus = '$tunnus'
 						and yhtio = '$kukarow[yhtio]'
 						and tila = 'Q'";
-			$updresult = mysql_query($query) or pupe_error($query);
+			$updresult = pupe_query($query);
 
 			if (mysql_affected_rows() != 1) { // Jotain meni pieleen
 				echo "System error Debug --> $query<br>";
@@ -357,7 +359,7 @@
 
 		$query = "UPDATE lasku SET erpcm = '$pvm' $rlisa WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
 
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$tee = 'E';
 		$tila = 'X';
 	}
@@ -367,15 +369,15 @@
 
 		// Etsitään lasku
 		$query = "SELECT summa, summa_valuutassa FROM lasku WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-		$lasres = mysql_query($query) or pupe_error($query);
-		$lasrow = mysql_fetch_array($lasres);
+		$lasres = pupe_query($query);
+		$lasrow = mysql_fetch_assoc($lasres);
 
 		// Etsitään maksuehto
 		$query = "	SELECT *
 					FROM maksuehto
 					WHERE tunnus = '$maksuehto' and yhtio = '$kukarow[yhtio]'";
-		$mehres = mysql_query($query) or pupe_error($query);
-		$mehrow = mysql_fetch_array($mehres);
+		$mehres = pupe_query($query);
+		$mehrow = mysql_fetch_assoc($mehres);
 
 		if ($mehrow['kassa_abspvm'] != '0000-00-00' or $mehrow["kassa_relpvm"] > 0) {
 			if ($mehrow['kassa_abspvm'] == '0000-00-00') {
@@ -407,8 +409,9 @@
 					kapvm 				= $kassa_erapvm,
 					kasumma 			= '$kassa_loppusumma',
 					kasumma_valuutassa	= '$kassa_loppusumma_valuutassa'
-					WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+					WHERE tunnus = '$tunnus'
+					and yhtio 	 = '$kukarow[yhtio]'";
+		$result = pupe_query($query);
 
 
 		$tee  = 'E';
@@ -449,10 +452,10 @@
 	//Täällä päivitetään laskun uusi kassa-alepvm
 	if ($tila == 'B') {
 		$query = "UPDATE lasku SET kapvm = '$pvm' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$query = "UPDATE lasku SET olmapvm=if(kapvm<now(),if(kapvm='0000-00-00',erpcm,kapvm),erpcm) WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$tee = 'E';
 		$tila = 'X';
@@ -505,11 +508,11 @@
 
 		// Päivitetään lasku
 		$query = "UPDATE lasku SET kasumma = '$summa', kapvm='$vv-$kk-$pp' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-	    $result = mysql_query($query) or pupe_error($query);
+	    $result = pupe_query($query);
 
 		//Päivitetään kenties oletusmaksupäivä
 	 	$query = "UPDATE lasku SET olmapvm=if(kapvm<now(), erpcm, kapvm) WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-	    $result = mysql_query($query) or pupe_error($query);
+	    $result = pupe_query($query);
 		$tee = 'E';
 		$tila = 'X';
 	}
@@ -539,12 +542,17 @@
 
 		// Päivitetään ostovelkatapahtuma siis euroina!
 		$query = "LOCK table tiliointi WRITE";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
-		$query = "SELECT tunnus FROM tiliointi WHERE (tilino = '$yhtiorow[ostovelat]' or tilino='$yhtiorow[konserniostovelat]') and ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and korjattu=''";
-		$result = mysql_query($query) or pupe_error($query);
+		$query = "	SELECT tunnus
+					FROM tiliointi
+					WHERE tilino   in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
+					and ltunnus 	= '$tunnus'
+					and yhtio 		= '$kukarow[yhtio]'
+					and korjattu	= ''";
+		$result = pupe_query($query);
 
-		while ($xrow=mysql_fetch_array ($result)) {
+		while ($xrow = mysql_fetch_assoc($result)) {
 			kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
 		}
 
@@ -553,31 +561,28 @@
 					summa_valuutassa = -1 * $summa,
 					laadittu = now(),
 					laatija = '$kukarow[kuka]'
-					WHERE (tilino = '$yhtiorow[ostovelat]' or tilino='$yhtiorow[konserniostovelat]') and
-					ltunnus = '$tunnus' and
-					yhtio = '$kukarow[yhtio]' and
-					korjattu=''";
-	    $result = mysql_query($query) or pupe_error($query);
+					WHERE tilino   in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
+					and ltunnus 	= '$tunnus'
+					and yhtio 		= '$kukarow[yhtio]'
+					and korjattu	= ''";
+	    $result = pupe_query($query);
 
 		$query = "UNLOCK table";
-	    $result = mysql_query($query) or pupe_error($query);
+	    $result = pupe_query($query);
 
 	    // Päivitetään lasku
 		$query = "	UPDATE lasku SET
 					summa = $summa
 					WHERE tunnus = '$tunnus' and
 					yhtio = '$kukarow[yhtio]'";
-	    $result = mysql_query($query) or pupe_error($query);
+	    $result = pupe_query($query);
 
-		$tee = 'E';
+		$tee  = 'E';
 		$tila = 'X';
 	}
 
 	//Täällä tarkistetaan laskun uusi maksupvm
 	if ($tila == 'S') {
-		//	$kk = substr($trow[7],5,2);
-		//	$vv = substr($trow[7],0,4);
-
 		if ($vv < 1000) $vv += 2000;
 		$val = checkdate($kk, $pp, $vv);
 
@@ -614,46 +619,46 @@
 					mapvm = '$pvm'
 					WHERE tunnus = '$tunnus' and
 					yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		// Jos noi oli sama ei tehdä mitään
 		if ($trow['mapvm'] != $trow['tapvm']) {
 
 			$query = "LOCK table tiliointi WRITE";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query = "SELECT tunnus FROM tiliointi WHERE ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[mapvm]' and korjattu = ''";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
-			while ($xrow=mysql_fetch_array ($result)) {
+			while ($xrow=mysql_fetch_assoc ($result)) {
 				kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
 			}
 
 			$query = "UPDATE tiliointi SET tapvm = '$pvm', laadittu=now(), laatija='$kukarow[kuka]' WHERE ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[mapvm]' and korjattu=''";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query = "UNLOCK table";
-	    	$result = mysql_query($query) or pupe_error($query);
+	    	$result = pupe_query($query);
 	   	}
 		else {
 			echo "<font class='message'>".t("En siirtänyt muita tiliöintejä, koska tapahtuma- ja maksupvmt olivat samat")."<br>".t("Siirrä nyt suoritustapahtumat käsin")."</font>";
 
 			$query = "LOCK table tiliointi WRITE";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// Ei myyntitilaus
 			if ($trow['tila'] != 'U') {
 
 				$query = "	SELECT tunnus
 							FROM tiliointi
-							WHERE ltunnus = '$tunnus' and
-							yhtio = '$kukarow[yhtio]' and
-							(tilino = '$yhtiorow[ostovelat]' or tilino='$yhtiorow[konserniostovelat]') and
-							abs(round($trow[summa] * $trow[vienti_kurssi],2) - summa) <= 0.01 and
-							korjattu = ''";
-				$result = mysql_query($query) or pupe_error($query);
+							WHERE ltunnus = '$tunnus'
+							and yhtio = '$kukarow[yhtio]'
+							and tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
+							and abs(round($trow[summa] * $trow[vienti_kurssi],2) - summa) <= 0.01
+							and korjattu = ''";
+				$result = pupe_query($query);
 
-				while ($xrow=mysql_fetch_array ($result)) {
+				while ($xrow=mysql_fetch_assoc ($result)) {
 					kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
 				}
 
@@ -661,24 +666,24 @@
 							tapvm = '$pvm',
 							laadittu = now(),
 							laatija = '$kukarow[kuka]'
-							WHERE ltunnus = '$tunnus' and
-							yhtio = '$kukarow[yhtio]' and
-							(tilino = '$yhtiorow[ostovelat]' or tilino='$yhtiorow[konserniostovelat]') and
-							abs(round($trow[summa] * $trow[vienti_kurssi],2) - summa) <= 0.01 and
-							korjattu = ''";
-				$result = mysql_query($query) or pupe_error($query);
+							WHERE ltunnus = '$tunnus'
+							and yhtio = '$kukarow[yhtio]'
+							and tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
+							and abs(round($trow[summa] * $trow[vienti_kurssi],2) - summa) <= 0.01
+							and korjattu = ''";
+				$result = pupe_query($query);
 			}
 			else {
 				$query = "	SELECT tunnus
 							FROM tiliointi
-							WHERE ltunnus = '$tunnus' and
-							yhtio = '$kukarow[yhtio]' and
-							tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]') and
-							abs($trow[summa] + summa) <= 0.01 and
-							korjattu = ''";
-				$result = mysql_query($query) or pupe_error($query);
+							WHERE ltunnus = '$tunnus'
+							and yhtio = '$kukarow[yhtio]'
+							and tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
+							and abs($trow[summa] + summa) <= 0.01
+							and korjattu = ''";
+				$result = pupe_query($query);
 
-				while ($xrow=mysql_fetch_array ($result)) {
+				while ($xrow = mysql_fetch_assoc ($result)) {
 					kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
 				}
 
@@ -686,15 +691,15 @@
 							tapvm = '$pvm',
 							laadittu = now(),
 							laatija = '$kukarow[kuka]'
-							WHERE ltunnus = '$tunnus' and
-							yhtio = '$kukarow[yhtio]' and
-							tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]') and
-							abs($trow[summa] + summa) <= 0.01 and
-							korjattu = ''";
-				$result = mysql_query($query) or pupe_error($query);
+							WHERE ltunnus = '$tunnus'
+							and yhtio = '$kukarow[yhtio]'
+							and tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
+							and abs($trow[summa] + summa) <= 0.01
+							and korjattu = ''";
+				$result = pupe_query($query);
 			}
 			$query = "UNLOCK table";
-	    	$result = mysql_query($query) or pupe_error($query);
+	    	$result = pupe_query($query);
 		}
 		$tee = 'E';
 		$tila = 'X';
@@ -709,7 +714,7 @@
 		}
 
 		$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[tunnus]'";
-		$keikres = mysql_query($query) or pupe_error($query);
+		$keikres = pupe_query($query);
 
 		if (!(($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and mysql_num_rows($keikres) == 0 and $trow['tapvm'] >= $yhtiorow['tilikausi_alku'])) {
 			echo "<font class='error'>".t("Laskun tila tai tapvm on muuttunut tai se on liitetty keikkaan")."</font><br>";
@@ -721,7 +726,7 @@
 	//Muutetaan laskun tila
 	if ($tila == 'W') {
 
-		//Poistetaan kirjanpidosta mahdoliset varastoviennit
+		// Poistetaan kirjanpidosta mahdolliset varastoviennit
 		$query = "	UPDATE tiliointi
 					SET korjattu = '$kukarow[kuka]',
 					korjausaika = now()
@@ -729,91 +734,75 @@
 					AND	yhtio = '$kukarow[yhtio]'
 					AND	korjattu = ''
 					AND tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$query = "	UPDATE lasku
 					SET vienti = '$vienti'
-					WHERE tunnus = '$tunnus' AND
-					yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+					WHERE tunnus = '$tunnus'
+					AND yhtio = '$kukarow[yhtio]'";
+		$result = pupe_query($query);
 
-		//Tehdään varastotiliöinnit
+		// Tehdään varastotiliöinnit
 		if ($vienti != 'A' and $vienti != 'D' and $vienti != 'G' and $vienti != '') {
 
-			$query = "	SELECT kustp, kohde, projekti, summa
-						from tiliointi
+			// Haetaan kulutiliöinti
+			$query = "	SELECT kustp, kohde, projekti, summa, summa_valuutassa
+						FROM tiliointi
 						WHERE yhtio		= '$kukarow[yhtio]'
-						and ltunnus		= '$tunnus'
-						and tapvm		= '$trow[tapvm]'
-						and tilino 	   != '$yhtiorow[alv]'
-						and tilino 	   != '$yhtiorow[ostovelat]'
-						and tilino 	   != '$yhtiorow[konserniostovelat]'
-						and korjattu	= ''
-						group by 1,2,3";
-			$result = mysql_query($query) or pupe_error($query);
+						AND ltunnus		= '$tunnus'
+						AND tapvm		= '$trow[tapvm]'
+						AND tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+						AND korjattu	= ''";
+			$result = pupe_query($query);
 
-			while ($tiliointirow = mysql_fetch_array ($result)) {
+			while ($tiliointirow = mysql_fetch_assoc($result)) {
 
-				// jos raaka-ainevarastoon
-				if ($vienti == "J" or $vienti == "K" or $vienti == "L") {
-					$vientitili = $yhtiorow["raaka_ainevarastonmuutos"];
-				}
-				else {
-					$vientitili = $yhtiorow["varastonmuutos"];
+				$varastotili = $yhtiorow['varasto'];
+
+				if ($vienti == 'C' or $vienti == 'F' or $vienti == 'I' or $vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
+					$varastotili = $yhtiorow['matkalla_olevat'];
 				}
 
 				$query = "	INSERT into tiliointi set
-							yhtio 		= '$kukarow[yhtio]',
-							ltunnus 	= '$tunnus',
-							tilino 		= '$vientitili',
-							kustp 		= '$tiliointirow[kustp]',
-							kohde 		= '$tiliointirow[kohde]',
-							projekti 	= '$tiliointirow[projekti]',
-							tapvm 		= '$trow[tapvm]',
-							summa 		= $tiliointirow[summa] * -1,
-							vero 		= 0,
-							lukko 		= '',
-							tosite 		= '$tiliointirow[tosite]',
-							laatija 	= '$kukarow[kuka]',
-							laadittu 	= now()";
-				$xresult = mysql_query($query) or pupe_error($query);
+							yhtio 				= '$kukarow[yhtio]',
+							ltunnus 			= '$tunnus',
+							tilino 				= '$varastotili',
+							kustp 				= '$tiliointirow[kustp]',
+							kohde 				= '$tiliointirow[kohde]',
+							projekti 			= '$tiliointirow[projekti]',
+							tapvm 				= '$trow[tapvm]',
+							summa 				= $tiliointirow[summa],
+							summa_valuutassa	= $tiliointirow[summa_valuutassa],
+							vero 				= 0,
+							lukko 				= '',
+							tosite 				= '$tiliointirow[tosite]',
+							laatija 			= '$kukarow[kuka]',
+							laadittu 			= now()";
+				$xresult = pupe_query($query);
 
+				$varastonmuutostili = $yhtiorow["varastonmuutos"];
+
+				if ($vienti == 'J' or $vienti == 'K' or $vienti == 'L') {
+					$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+				}
+
+				$query = "	INSERT into tiliointi set
+							yhtio 				= '$kukarow[yhtio]',
+							ltunnus 			= '$tunnus',
+							tilino 				= '$varastonmuutostili',
+							kustp 				= '$tiliointirow[kustp]',
+							kohde 				= '$tiliointirow[kohde]',
+							projekti 			= '$tiliointirow[projekti]',
+							tapvm 				= '$trow[tapvm]',
+							summa 				= $tiliointirow[summa] * -1,
+							summa_valuutassa	= $tiliointirow[summa_valuutassa] * -1,
+							vero 				= 0,
+							lukko 				= '',
+							tosite 				= '$tiliointirow[tosite]',
+							laatija 			= '$kukarow[kuka]',
+							laadittu 			= now()";
+				$xresult = pupe_query($query);
 			}
-
-			// jos rahti/tai huolintalasku niin varastoon muuten matkalle
-			if ($vienti == "B" or $vienti == "E" or $vienti == "H") {
-				$vientitili = $yhtiorow["varasto"];
-			}
-			else {
-				$vientitili = $yhtiorow["matkalla_olevat"];
-			}
-
-			//Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
-			$query = "	SELECT sum(summa) summa
-						from tiliointi
-						where yhtio		= '$kukarow[yhtio]'
-						and ltunnus		= '$tunnus'
-						and tilino  	= '$yhtiorow[alv]'
-						and korjattu 	= ''";
-			$alvires = mysql_query($query) or pupe_error($query);
-			$alvirow = mysql_fetch_array($alvires);
-
-			//Ostoreskontralaskun veroton arvo
-			$vientisumma = round($trow["summa"]*$trow["vienti_kurssi"],2) - $alvirow["summa"];
-
-			$query = "	INSERT into tiliointi set
-						yhtio 		= '$kukarow[yhtio]',
-						ltunnus 	= '$tunnus',
-						tilino 		= '$vientitili',
-						kustp 		= 0,
-						tapvm 		= '$trow[tapvm]',
-						summa 		= $vientisumma,
-						vero 		= 0,
-						lukko 		= '',
-						tosite 		= '$tiliointirow[tosite]',
-						laatija 	= '$kukarow[kuka]',
-						laadittu 	= now()";
-			$xresult = mysql_query($query) or pupe_error($query);
 		}
 
 		$tee = 'E';
@@ -825,19 +814,19 @@
 			$query = "	SELECT comments
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != 1) {
 				echo t('lasku kateissa') . "$tunnus</font>";
 				exit;
 			}
 
-			$trow=mysql_fetch_array($result);
+			$trow=mysql_fetch_assoc($result);
 
 			if ($komm != '') {
 				$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") " . trim($komm) . "<br>" . $trow['comments'];
 				$query = "UPDATE lasku set comments = '$komm' WHERE tunnus='$tunnus'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			$tee = 'E';
@@ -849,7 +838,7 @@
 		if ($alv_tili != '') {
 			$alv_tili = mysql_real_escape_string($alv_tili);
 			$query = "UPDATE lasku SET alv_tili = '$alv_tili' WHERE tunnus = '$tunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		$tee = 'E';
@@ -880,21 +869,21 @@
 					h5time = ''
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		// haetaan laskun tiedot uudestaan
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo t("Lasku")." $tunnus ".t("ei löytynytkään")."!";
 			exit;
 		}
 
-		$trow = mysql_fetch_array($result);
+		$trow = mysql_fetch_assoc($result);
 		$tee = 'E';
 		$tila = 'X';
 	}
@@ -908,21 +897,21 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tila in ('H','Y','M','P','Q')
 					and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		// haetaan laskun tiedot uudestaan
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo t("Lasku")." $tunnus ".t("ei löytynytkään")."!";
 			exit;
 		}
 
-		$trow = mysql_fetch_array($result);
+		$trow = mysql_fetch_assoc($result);
 		$tee = 'E';
 		$tila = 'X';
 	}
@@ -932,21 +921,21 @@
 					viikorkopros = '$viikorkoprossa'
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		// haetaan laskun tiedot uudestaan
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo t("Lasku")." $tunnus ".t("ei löytynytkään")."!";
 			exit;
 		}
 
-		$trow = mysql_fetch_array($result);
+		$trow = mysql_fetch_assoc($result);
 		$tee = 'E';
 		$tila = 'X';
 	}
@@ -964,7 +953,7 @@
 		else {
 			$pvm = date("Y-m-d", mktime (0,0,0,$vkk,$vpp,$vvv));
 			$query = "UPDATE lasku SET lapvm = '$pvm' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tee = 'E';
 			$tila = 'X';
@@ -981,8 +970,8 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND lasku.tila = 'K'
 					AND lasku.vanhatunnus = '$trow[tunnus]'";
-		$keikres = mysql_query($query) or pupe_error($query);
-		$keikrow = mysql_fetch_array($keikres);
+		$keikres = pupe_query($query);
+		$keikrow = mysql_fetch_assoc($keikres);
 
 		$tila = 'E';
 		echo "<table>";
@@ -995,7 +984,7 @@
 				echo "	<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type = 'hidden' name='tila' value='P'>
-						<input type = 'hidden' name='tee' value='M'>
+						<input type = 'hidden' name='tee'  value='M'>
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
 						<tr>
 						<th>".t("Tapahtumapvm")."</th>
@@ -1138,9 +1127,9 @@
 										and kaytossa 	= ''
 										and (sallitut_maat = '' or sallitut_maat like '%$trow[maa]%')
 										order by jarjestys, teksti";
-							$mresult = mysql_query($query) or pupe_error($query);
+							$mresult = pupe_query($query);
 
-							while ($row = mysql_fetch_array($mresult)) {
+							while ($row = mysql_fetch_assoc($mresult)) {
 								$sel = "";
 								if ($trow["maksuehto"] == $row["tunnus"]) {
 									$sel = 'selected';
@@ -1176,19 +1165,32 @@
 		}
 
 		if (($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and mysql_num_rows($keikres) == 0 and $trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
-
-			if ($trow['vienti']=='A') $vientia='selected';
-			if ($trow['vienti']=='B') $vientib='selected';
-			if ($trow['vienti']=='C') $vientic='selected';
-			if ($trow['vienti']=='D') $vientid='selected';
-			if ($trow['vienti']=='E') $vientie='selected';
-			if ($trow['vienti']=='F') $vientif='selected';
-			if ($trow['vienti']=='G') $vientig='selected';
-			if ($trow['vienti']=='H') $vientih='selected';
-			if ($trow['vienti']=='I') $vientii='selected';
-			if ($trow['vienti']=='J') $vientij='selected';
-			if ($trow['vienti']=='K') $vientik='selected';
-			if ($trow['vienti']=='L') $vientil='selected';
+			
+			$vientia = '';
+			$vientib = '';
+			$vientic = '';
+			$vientid = '';
+			$vientie = '';
+			$vientif = '';
+			$vientig = '';
+			$vientih = '';
+			$vientii = '';
+			$vientij = '';
+			$vientik = '';
+			$vientil = '';
+			
+			if ($trow['vienti']=='A') $vientia = 'selected';
+			if ($trow['vienti']=='B') $vientib = 'selected';
+			if ($trow['vienti']=='C') $vientic = 'selected';
+			if ($trow['vienti']=='D') $vientid = 'selected';
+			if ($trow['vienti']=='E') $vientie = 'selected';
+			if ($trow['vienti']=='F') $vientif = 'selected';
+			if ($trow['vienti']=='G') $vientig = 'selected';
+			if ($trow['vienti']=='H') $vientih = 'selected';
+			if ($trow['vienti']=='I') $vientii = 'selected';
+			if ($trow['vienti']=='J') $vientij = 'selected';
+			if ($trow['vienti']=='K') $vientik = 'selected';
+			if ($trow['vienti']=='L') $vientil = 'selected';
 
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1272,7 +1274,7 @@
 					and maa != ''
 					and vat_numero != ''
 					and toim_alv != ''";
-		$alhire = mysql_query($query) or pupe_error($query);
+		$alhire = pupe_query($query);
 
 		// ollaan alv-rekisteröity
 		if (mysql_num_rows($alhire) >= 1) {
@@ -1291,7 +1293,7 @@
 			echo "<td><select name='alv_tili'>";
 			echo "<option value='$yhtiorow[alv]'>$yhtiorow[alv] - $yhtiorow[nimi], $yhtiorow[kotipaikka], $yhtiorow[maa]</option>";
 
-			while ($vrow = mysql_fetch_array($alhire)) {
+			while ($vrow = mysql_fetch_assoc($alhire)) {
 				$sel = "";
 				if ($alv_tili == $vrow['toim_alv']) {
 					$sel = "selected";
@@ -1435,7 +1437,7 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$trow[tunnus]'
 								AND olmapvm > '0000-00-00'";
-			$korko_result = mysql_query($korko_query) or pupe_error($korko_query);
+			$korko_result = pupe_query($korko_query);
 
 			// jos ei olla niin voidaan nollata viikorkoprossa
 			if (mysql_num_rows($korko_result) == 0) {

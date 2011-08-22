@@ -18,6 +18,7 @@
 	$tilausyhteyshenkilo 	= "";
 	$asiakkaan_tilausnumero	= "";
 	$kohde 					= "";
+	$useita_toimtapoja		= "EI";
 
 	$query  = "	SELECT
 				sum(arvo) arvo,
@@ -35,7 +36,8 @@
 				group_concat(distinct if(trim(viesti)='', NULL, trim(viesti)) 									SEPARATOR ' / ') viestit,
 				group_concat(distinct if(trim(tilausyhteyshenkilo)='', NULL, trim(tilausyhteyshenkilo)) 		SEPARATOR ' / ') tilausyhteyshenkilo,
 				group_concat(distinct if(trim(asiakkaan_tilausnumero)='', NULL, trim(asiakkaan_tilausnumero)) 	SEPARATOR ' / ') asiakkaan_tilausnumero,
-				group_concat(distinct if(trim(kohde)='', NULL, trim(kohde)) 									SEPARATOR ' / ') kohde
+				group_concat(distinct if(trim(kohde)='', NULL, trim(kohde)) 									SEPARATOR ' / ') kohde,
+				count(distinct toimitustapa) toimitustavat
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus in ($tunnukset)";
@@ -112,6 +114,12 @@
 		$lasrow["toim_maa"]      = $lasrow["maa"];
 	}
 
+	// Jos laskulla on useita toimitustapoja niin laitetaan sinne tekstiksi "USEITA"
+	if ($sumrow["toimitustavat"] > 1) {
+		$lasrow["toimitustapa"]     = t("Useita", $kielirow["kieli"]);
+		$useita_toimtapoja = "KYLLA";
+	}
+
 	// haetaan maksuehdon tiedot, jotta osataan tiliöidä käteismyynti kassaan
 	$query = "	SELECT *
 				FROM maksuehto
@@ -123,7 +131,7 @@
 		$mehtorow = array();
 
 		if ($lasrow["erpcm"] == "0000-00-00") {
-			$tulos_ulos_ulasku .= "<font class='message'><br>".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei löydy")."! Tunnus $lasrow[tunnus] ".t("Laskunro")." $lasrow[laskunro] ".t("epäonnistui pahasti")."!</font><br><br>\r\n";
+			$tulos_ulos_ulasku .= "<font class='message'><br>".t("Maksuehtoa", $kielirow["kieli"])." $lasrow[maksuehto] ".t("ei löydy", $kielirow["kieli"])."! ".t("Tunnus", $kielirow["kieli"])." $lasrow[tunnus] ".t("Laskunro", $kielirow["kieli"])." $lasrow[laskunro] ".t("epäonnistui pahasti", $kielirow["kieli"])."!</font><br><br>\r\n";
 		}
 	}
 	else {
@@ -390,14 +398,21 @@
 	$lisatiedot_result = pupe_query($query);
 
 	// haetaan nyt varmuuden vuoksi vielä insertoidut tiedot takaisin..
-	$query = "SELECT * FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$uusiotunnus'";
+	$query = "	SELECT * 
+				FROM lasku 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and tunnus  = '$uusiotunnus'";
 	$uusiuresult = pupe_query($query);
 
 	if (mysql_num_rows($uusiuresult)==0) die (t("Lasku")." $uusiotunnus ".t("katosi")."!");
 	$laskurow = mysql_fetch_assoc($uusiuresult);
 
 	// päivitetään tilausriveille uuden otsikon tiedot (ei päivitetä Puute ja Jt rivejä laskutetuiksi)
-	$query = "UPDATE tilausrivi SET uusiotunnus='$laskurow[tunnus]' WHERE otunnus in ($tunnukset) and yhtio='$kukarow[yhtio]' and var not in ('P','J')";
+	$query = "	UPDATE tilausrivi 
+				SET uusiotunnus = '$laskurow[tunnus]' 
+				WHERE otunnus in ($tunnukset) 
+				and yhtio = '$kukarow[yhtio]' 
+				and var not in ('P','J')";
 	$ulasr = pupe_query($query);
 
 	// katotaan montako tilausta ollaan käsittelemässä
@@ -447,7 +462,7 @@
 		while ($valsurow = mysql_fetch_assoc($valsures)) {
 			if ($valsurow["otunnus"] != $edotunnus and $edotunnus != '') {
 
-				$query = "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi
+				$query = "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi, toimitustapa
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$edotunnus'";
@@ -473,6 +488,10 @@
 					$sumskommentti = t("Tilaus", $kielirow["kieli"])." $edotunnus ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 				}
 
+				if ($useita_toimtapoja == "KYLLA") {
+					$sumskommentti .= "\n".t("Toimitustapa", $kielirow["kieli"])." : $sumsrow[toimitustapa]";
+				}
+
 				$query = "	UPDATE tilausrivi
 							SET kommentti = concat(kommentti, '\n', '$sumskommentti')
 							WHERE tunnus = '$edtunnus'
@@ -486,7 +505,7 @@
 
 		//laitetaan välisumma vikallekin tilaukselle
 		if ($edtunnus != "") {
-			$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi
+			$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi, toimitustapa
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$edotunnus'";
@@ -510,6 +529,10 @@
 				$sumskommentti = t("Tilaus", $kielirow["kieli"])." $edotunnus ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 			}
 
+			if ($useita_toimtapoja == "KYLLA") {
+				$sumskommentti .= "\n".t("Toimitustapa", $kielirow["kieli"])." : $sumsrow[toimitustapa]";
+			}
+
 			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
 			$paivres = pupe_query($query);
 		}
@@ -518,10 +541,11 @@
 	// tehdään laskun tiliöinnit.. tarvitaan $lasku array
 	$lasku = $laskurow;
 
-	//haetaan asiakkaan tiedot (esim konserniyhtiö)
+	// haetaan asiakkaan tiedot (esim konserniyhtiö)
 	$query = "	SELECT konserniyhtio
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and ytunnus = '$laskurow[ytunnus]'";
 	$konsres = pupe_query($query);
 	$konsrow = mysql_fetch_assoc($konsres);
 

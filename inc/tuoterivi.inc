@@ -228,7 +228,7 @@
 
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
- 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
+ 		$sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
 
 		$query = "	SELECT count(*) saldo
 					FROM tuotepaikat
@@ -695,5 +695,5 @@
 		$ulos .= "<option value='K'{$sel}>".t("Käytössä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
-		
+
 	}

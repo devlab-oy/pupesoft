@@ -130,8 +130,7 @@ class Pupe_Pdfekirje {
 			throw new Exception("File $file does not exist or is not readable.");
 		}
 
-		$pdf_file = $this->_info['tmp_dir']
-				  . 'ekirje-' . $this->_info['kirje_id'] . '.pdf';
+		$pdf_file = $this->_info['tmp_dir'] . 'ekirje-' . $this->_info['kirje_id'] . '.pdf';
 
 		if (! copy($file, $pdf_file)) {
 			throw new Exception(

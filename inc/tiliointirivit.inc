@@ -4,11 +4,30 @@
 
 	// Onko tosite liitetty keikkaan
 	$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
-	$keikres = mysql_query($query) or pupe_error($query);
+	$keikres = pupe_query($query);
 
 	if (mysql_num_rows($keikres) > 0) {
 		echo "<br><br><font class='message'>".t("Lasku on liitetty keikkaan, alv tiliöintejä ei voi muuttaa")."!</font>";
 	}
+
+	if (!isset($alv_tili))	$alv_tili = "";
+	if (!isset($iframe))	$iframe = "";
+	if (!isset($iframe_id))	$iframe_id = "";
+	if (!isset($jarj))		$jarj = "";
+	if (!isset($kk))		$kk = "";
+	if (!isset($laji))		$laji = "";
+	if (!isset($ok))		$ok = 0;
+	if (!isset($tiliulos))	$tiliulos = "";
+	if (!isset($tositenro))	$tositenro = "";
+	if (!isset($valkoodi))	$valkoodi = "";
+	if (!isset($viivatut))	$viivatut = "";
+	if (!isset($virhe))		$virhe = "";
+	if (!isset($vv))		$vv = "";
+	if (!isset($yhtsum))	$yhtsum = "";
+	if (!isset($kustp))		$kustp = "";
+	if (!isset($kohde))		$kohde = "";
+	if (!isset($projekti))	$projekti = "";
+	if (!isset($summa_valuutassa))	$summa_valuutassa = "";
 
 	echo "<br><br>";
 	echo "<table>";
@@ -23,6 +42,7 @@
 	if ($viivatut == 'on') {
 		echo "<th>".t("Laadittu")." / ".t("Poistettu")."</th>";
 	}
+
 	echo "<th></th>";
 	echo "</tr>";
 
@@ -46,12 +66,12 @@
 					and tyyppi = 'K'
 					and kaytossa != 'E'
 					ORDER BY nimi";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$ulos = "<select name = 'kustp' style='width: 140px'><option value = ' '>".t("Ei kustannuspaikkaa");
 
-			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
+			while ($kustannuspaikkarow = mysql_fetch_assoc($result)) {
 				$valittu = "";
 				if ($kustannuspaikkarow["tunnus"] == $kustp) {
 					$valittu = "selected";
@@ -67,12 +87,12 @@
 					and tyyppi = 'O'
 					and kaytossa != 'E'
 					ORDER BY nimi";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$ulos .= "<select name = 'kohde' style='width: 140px'><option value = ' '>".t("Ei kohdetta");
 
-			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
+			while ($kustannuspaikkarow = mysql_fetch_assoc($result)) {
 				$valittu = "";
 				if ($kustannuspaikkarow["tunnus"] == $kohde) {
 					$valittu = "selected";
@@ -88,12 +108,12 @@
 					and tyyppi = 'P'
 					and kaytossa != 'E'
 					ORDER BY nimi";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$ulos .= "<select name = 'projekti' style='width: 140px'><option value = ' '>".t("Ei projektia");
 
-			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
+			while ($kustannuspaikkarow = mysql_fetch_assoc($result)) {
 				$valittu = "";
 				if ($kustannuspaikkarow["tunnus"] == $projekti) {
 					$valittu = "selected";
@@ -155,11 +175,11 @@
 					(SELECT if ('$trow[tapvm]' >= '$yhtiorow[tilikausi_alku]', '$trow[tapvm]', CURDATE()) pvm)
 					UNION
 					(SELECT mapvm pvm FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and mapvm >= '$yhtiorow[tilikausi_alku]')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 1) {
 			echo "<select name = 'tiliointipvm'>";
-			while ($tiliointirow = mysql_fetch_array($result)) {
+			while ($tiliointirow = mysql_fetch_assoc($result)) {
 				$valittu = "";
 				if ($tiliointirow["pvm"] == $tiliointipvm) $valittu = "selected";
 				echo "<option value = '$tiliointirow[pvm]' $valittu>".tv1dateconv($tiliointirow["pvm"])."</option>";
@@ -167,7 +187,7 @@
 			echo "</select>";
 		}
 		else {
-			$tiliointirow = mysql_fetch_array($result);
+			$tiliointirow = mysql_fetch_assoc($result);
 			// tapahtumapäivä on vanhalla tilikaudella, ei anneta lisätä kun tälle päivälle
 			if (strtotime($tiliointirow["pvm"]) < strtotime($yhtiorow['tilikausi_alku'])) {
 				$tiliointirow["pvm"] = date("Y-m-d");
@@ -190,6 +210,9 @@
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") === FALSE and strpos($_SERVER['SCRIPT_NAME'], "selaajamuuta.php") === FALSE) {
 			echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'> ".t("Jaksota")."</td>";
+		}
+		else {
+			echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font></td>";
 		}
 
 		echo "</tr>";
@@ -223,7 +246,7 @@
 				and tiliointi.ltunnus = '$tunnus'
 				$lisa
 				ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.laadittu, tiliointi.tunnus";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<br><br><font class='message'>".t("Laskulla ei ole vielä tiliöintirivejä")."</font><br><br>";
@@ -231,7 +254,7 @@
 
 	$maara = mysql_num_rows($result);
 
-	while ($trow = mysql_fetch_array ($result)) {
+	while ($trow = mysql_fetch_assoc ($result)) {
 
 		$class = "";
 		if ($trow["korjattu"] != '') {
@@ -360,8 +383,8 @@
 	$query = "	SELECT liitostunnus, tilaustyyppi
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-	$lasres = mysql_query($query) or pupe_error($query);
-	$mtklasrow = mysql_fetch_array($lasres);
+	$lasres = pupe_query($query);
+	$mtklasrow = mysql_fetch_assoc($lasres);
 
 	//	Saadaanko muokata superina?
 	$query = "	SELECT yhtio
@@ -370,7 +393,7 @@
 				and kuka	= '$kukarow[kuka]'
 				and nimi	= 'matkalasku.php'
 				and alanimi = 'SUPER'";
-	$oires = mysql_query($query) or pupe_error($query);
+	$oires = pupe_query($query);
 
 	if (mysql_num_rows($oires) > 0) {
 		$su = "SUPER";
@@ -384,7 +407,7 @@
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$mtklasrow[liitostunnus]'
 				AND laskun_erittely != ''";
-	$toimires = mysql_query($query) or pupe_error($query);
+	$toimires = pupe_query($query);
 
 	if (mysql_num_rows($toimires)==1) {
 		echo "	<td class='back'><form action = '".$palvelin2."matkalasku.php' method='get'>

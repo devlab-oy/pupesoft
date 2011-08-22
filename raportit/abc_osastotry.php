@@ -56,7 +56,7 @@
 		echo "<th>",t("Tuotteen status"),"</th>";
 		echo "<td><select name='status'><option value=''>".t("Kaikki")."</option>";
 
-		while ($lajirow = mysql_fetch_array ($result)) {
+		while ($lajirow = mysql_fetch_assoc ($result)) {
 			$selli = '';
 			if ($lajirow['selite'] == $status) {
 				$selli = 'SELECTED';
@@ -155,8 +155,8 @@
 					$abc_lisa
 					$lisa
 					$saapumispvmlisa";
-		$sumres = mysql_query($query) or pupe_error($query);
-		$sumrow = mysql_fetch_array($sumres);
+		$sumres = pupe_query($query);
+		$sumrow = mysql_fetch_assoc($sumres);
 
 		if ($sumrow["yhtkate"] == 0) {
 			$sumrow["yhtkate"] = 0.01;
@@ -175,7 +175,7 @@
 					$lisa
 					$hav
 					ORDER BY $jarjestys";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		echo "<br><table>";
 		echo "<tr>";
@@ -299,7 +299,7 @@
 			echo "</table>";
 		}
 		else {
-			while ($row = mysql_fetch_array($res)) {
+			while ($row = mysql_fetch_assoc($res)) {
 
 				//haetaan asiakkaan tiedot
 				if ($asiakasanalyysi) {
@@ -307,8 +307,8 @@
 								FROM asiakas
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$row[tuoteno]'";
-					$asres = mysql_query($query) or pupe_error($query);
-					$asrow = mysql_fetch_array($asres);
+					$asres = pupe_query($query);
+					$asrow = mysql_fetch_assoc($asres);
 
 					$row["asiakastunnus"] = $row["tuoteno"];
 					$row["tuoteno"] = $asrow["ytunnus"];
@@ -318,11 +318,11 @@
 				if (!$asiakasanalyysi and $lisatiedot == "TARK") {
 					// tehd‰‰n avainsana query
 					$keyres = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
-					$keytry = mysql_fetch_array($keyres);
+					$keytry = mysql_fetch_assoc($keyres);
 
 					// tehd‰‰n avainsana query
 					$keyres = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
-					$keyosa = mysql_fetch_array($keyres);
+					$keyosa = mysql_fetch_assoc($keyres);
 				}
 
 				echo "<tr>";
@@ -347,8 +347,8 @@
 								AND myyja = '$row[myyjanro]'
 								AND myyja > 0
 								ORDER BY myyja";
-					$sresult = mysql_query($query) or pupe_error($query);
-					$srow = mysql_fetch_array($sresult);
+					$sresult = pupe_query($query);
+					$srow = mysql_fetch_assoc($sresult);
 
 					echo "<td valign='top'>$srow[nimi]</td>";
 
@@ -358,8 +358,8 @@
 								AND myyja = '$row[ostajanro]'
 								AND myyja > 0
 								ORDER BY myyja";
-					$sresult = mysql_query($query) or pupe_error($query);
-					$srow = mysql_fetch_array($sresult);
+					$sresult = pupe_query($query);
+					$srow = mysql_fetch_assoc($sresult);
 
 					echo "<td valign='top'>$srow[nimi]</td>";
 

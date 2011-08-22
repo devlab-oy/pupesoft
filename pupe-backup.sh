@@ -6,6 +6,11 @@ DBKAYTTAJA=$3
 DBSALASANA=$4
 BACKUPPAIVAT=$5
 
+# Katsotaan, onko salausavain syötetty
+if [ ! -n $6 ]; then
+	SALAUSAVAIN=$6
+fi
+
 # Katsotaan, että parametrit on annettu
 if [ -z ${BACKUPDIR} ] || [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
 	echo
@@ -67,6 +72,15 @@ tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
 
 echo -n `date "+%Y-%m-%d %H:%M:%S"`
 echo " - Bzip2 done."
+
+if [ ! -n ${SALAUSAVAIN} ]; then
+	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
+
+	if [[ $? != 0 ]]; then
+		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
+		echo
+	fi
+fi
 
 # Dellataan pois tempit
 rm -rf /tmp/${DBKANTA}

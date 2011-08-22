@@ -16,7 +16,7 @@ if ($tuoteno != "" and ($tee == "paalle" or $tee == "25paalle" or $tee == "puoli
 				AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
 				AND tuote.tuoteno = '$tuoteno'
 				GROUP by 1,2,3,4,5,6,7";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) != 1) {
 		echo "<font class='error'>";
@@ -24,7 +24,7 @@ if ($tuoteno != "" and ($tee == "paalle" or $tee == "25paalle" or $tee == "puoli
 		echo "</font><br>";
 		$tee = '';
 	}
-	$tuoterow = mysql_fetch_array($result);
+	$tuoterow = mysql_fetch_assoc($result);
 
 	// lasketaan varastonarvo
 	$muutos = $tuoterow['saldo'] * $tuoterow['kehahin'];
@@ -101,8 +101,8 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 					and tuoteno = '$tuoterow[tuoteno]'
 					and varattu > 0
 					and tyyppi = 'O'";
-		$tilre = mysql_query($query) or pupe_error($query);
-		$tilro = mysql_fetch_array($tilre);
+		$tilre = pupe_query($query);
+		$tilro = mysql_fetch_assoc($tilre);
 
 		if ($tilro["varattu"] != 0 and $tee != "pois") {
 			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on tilauksessa!")." ".t("Ei voida laittaa epäkurantiksi!")."</font><br>";
@@ -121,10 +121,10 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 					and tuoteno = '$tuoterow[tuoteno]'
 					and varattu = 0
 					and tyyppi = 'O'";
-		$tilre = mysql_query($query) or pupe_error($query);
+		$tilre = pupe_query($query);
 
 		if (mysql_num_rows($tilre) != 0 and $tee != "pois") {
-			$tilro = mysql_fetch_array($tilre);
+			$tilro = mysql_fetch_assoc($tilre);
 			echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on viemättä varastoon keikalla")." $tilro[laskunro]. ".t("Ei voida laittaa epäkurantiksi!")."</font><br>";
 			$tee = "";
 		}
@@ -168,7 +168,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 						epakurantti100pvm = '0000-00-00'
 						WHERE yhtio = '$kukarow[yhtio]'
 						and	tuoteno = '$tuoterow[tuoteno]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 		else {
 			$lisa75 = "";
@@ -198,7 +198,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 						epakurantti100pvm = now()
 						WHERE yhtio = '$kukarow[yhtio]'
 						and	tuoteno = '$tuoterow[tuoteno]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		///* Päivitetään tuote 75epäkurantiksi *///
@@ -210,7 +210,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 						epakurantti100pvm = ''
 						WHERE yhtio = '$kukarow[yhtio]'
 						and	tuoteno = '$tuoterow[tuoteno]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		///* Päivitetään tuote puoliepäkurantiksi *///
@@ -222,7 +222,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 						epakurantti100pvm = ''
 						WHERE yhtio = '$kukarow[yhtio]'
 						and	tuoteno = '$tuoterow[tuoteno]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		///* Päivitetään tuote 25epäkurantiksi *///
@@ -234,7 +234,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 						epakurantti100pvm = ''
 						WHERE yhtio = '$kukarow[yhtio]'
 						and	tuoteno = '$tuoterow[tuoteno]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		// jos ollaan laittamassa tuotetta puoliepäkurantiksi, puoliepäkuranttia täysepäkurantiksi tai laittamassa puoliepäkuranttia kurantiksi tai jotain, muutetaan kehahin
@@ -269,9 +269,9 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 							and tapahtuma.laji = 'Epäkurantti'
 							ORDER BY tapahtuma.tunnus desc
 							LIMIT 1";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				if (mysql_num_rows($result) > 0) {
-					$vikarow = mysql_fetch_array($result);
+					$vikarow = mysql_fetch_assoc($result);
 
 					if (strtoupper(substr($vikarow["selite"],0,6)) == "PAALLE") {
 						$uuushinta = 0.0001;
@@ -286,26 +286,25 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 								muuttaja = '$kukarow[kuka]'
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$tuoterow[tuoteno]'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 				else {
 					die(t("Kuranttiustapahtumaa tai tuotetta ei löydy. Ei uskalleta jatkaa!"));
 				}
-
 			}
 
 			///* Tehdään tapahtuma *///
 			$query = "	INSERT into tapahtuma set
-						yhtio   = '$kukarow[yhtio]',
-						tuoteno = '$tuoterow[tuoteno]',
-						laji    = 'Epäkurantti',
-						kpl     = '$tuoterow[saldo]',
-						hinta   = round('$tuoterow[kehahin]', 6),
-						kplhinta= round('$tuoterow[kehahin]', 6),
-						selite  = '$tee. ".t("Keskihankintahinta").": $tuoterow[kehahin] ".t("Varastonmuutos").": $muutos',
-						laatija    = '$kukarow[kuka]',
-						laadittu = now()";
-			$result = mysql_query($query) or pupe_error($query);
+						yhtio   	= '$kukarow[yhtio]',
+						tuoteno 	= '$tuoterow[tuoteno]',
+						laji    	= 'Epäkurantti',
+						kpl     	= '$tuoterow[saldo]',
+						hinta   	= round('$tuoterow[kehahin]', 6),
+						kplhinta	= round('$tuoterow[kehahin]', 6),
+						selite  	= '$tee. ".t("Keskihankintahinta").": $tuoterow[kehahin] ".t("Varastonmuutos").": $muutos',
+						laatija    	= '$kukarow[kuka]',
+						laadittu 	= now()";
+			$result = pupe_query($query);
 
 			// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
 			$tapahtumaid = mysql_insert_id();
@@ -321,32 +320,9 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 								viite      = '$tapahtumaid',
 								laatija    = '$kukarow[kuka]',
 								luontiaika = now()";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 					$laskuid = mysql_insert_id($link);
 				}
-
-				$query = "	SELECT kustp, kohde, projekti
-							FROM tili
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tilino = '{$yhtiorow['varasto']}'";
-				$kustp_kohde_proj_res = pupe_query($query);
-				$kustp_kohde_proj_row = mysql_fetch_assoc($kustp_kohde_proj_res);
-
-				$query = "	INSERT into tiliointi set
-							yhtio    = '$kukarow[yhtio]',
-							ltunnus  = '$laskuid',
-							tilino   = '$yhtiorow[varasto]',
-							kustp    = '{$kustp_kohde_proj_row['kustp']}',
-							kohde	 = '{$kustp_kohde_proj_row['kohde']}',
-							projekti = '{$kustp_kohde_proj_row['projekti']}',
-							tapvm    = now(),
-							summa    = '$muutos',
-							vero     = 0,
-							lukko    = '',
-							selite   = 'Tuote $tuoterow[tuoteno] epäkuranttimuutos',
-							laatija  = '$kukarow[kuka]',
-							laadittu = now()";
-				$result = mysql_query($query) or pupe_error($query);
 
 				if ($yhtiorow["varastonmuutos_epakurantti"] != "") {
 					$varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
@@ -355,20 +331,35 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 					$varastonmuutos_tili = $yhtiorow["varastonmuutos"];
 				}
 
-				$query = "	SELECT kustp, kohde, projekti
-							FROM tili
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tilino = '{$varastonmuutos_tili}'";
-				$kustp_kohde_proj_res = pupe_query($query);
-				$kustp_kohde_proj_row = mysql_fetch_assoc($kustp_kohde_proj_res);
+				// Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutos_tili);
+
+				// Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
+
+				$query = "	INSERT into tiliointi set
+							yhtio    = '$kukarow[yhtio]',
+							ltunnus  = '$laskuid',
+							tilino   = '$yhtiorow[varasto]',
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}',
+							tapvm    = now(),
+							summa    = '$muutos',
+							vero     = 0,
+							lukko    = '',
+							selite   = 'Tuote $tuoterow[tuoteno] epäkuranttimuutos',
+							laatija  = '$kukarow[kuka]',
+							laadittu = now()";
+				$result = pupe_query($query);
 
 				$query = "	INSERT into tiliointi set
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$varastonmuutos_tili',
-							kustp    = '{$kustp_kohde_proj_row['kustp']}',
-							kohde	 = '{$kustp_kohde_proj_row['kohde']}',
-							projekti = '{$kustp_kohde_proj_row['projekti']}',
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}',
 							tapvm    = now(),
 							summa    = $muutos * -1,
 							vero     = 0,
@@ -376,16 +367,15 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 							selite   = 'Tuote $tuoterow[tuoteno] epäkuranttimuutos',
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			if (!isset($php_cli) or !$php_cli) {
 				echo "<font class='message'>";
 				echo t("Tuote")." $tuoteno ok!<br>";
-				echo t("Varastonarvoa muutettiin")." $muutos<br>";
+				echo t("Varastonarvoa muutettiin")." $muutos $yhtiorow[valkoodi].<br>";
 				echo "</font><br>";
 			}
-
 		}
 	}
 }

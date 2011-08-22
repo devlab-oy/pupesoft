@@ -108,7 +108,10 @@
 			$return .= "Päivä: $laskun_paiva\n";
 			$return .= "Summa: $laskun_summa_eur\n";
 			$return .= "Viite: $laskun_pankkiviite\n";
-			$komm = "";
+
+			$komm 		= "";
+			$laskuvirhe = "";
+			$viesti		= "";
 
 			// $yhtio:ssa on nyt laskun VASTAANOTTAJAN ovt-tunnus ja $verkkotunnus_vas:ssa on VASTAANOTTAJAN verkkolaskutunnus
 			$verkkotunnus_vas 	= trim($verkkotunnus_vas);
@@ -124,17 +127,17 @@
 			if ($verkkotunnus_vas != "") {
 				// 1 kokeillaan löytää yritys verkkotunnuksella
 				$query = "SELECT * FROM yhtion_parametrit WHERE verkkotunnus_vas = '$verkkotunnus_vas'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$paramrow = mysql_fetch_array($result);
+					$paramrow = mysql_fetch_assoc($result);
 
 					// löydettiin parametreistä oikea yhtiö haetaan yhtiorow
 					$query = "SELECT * FROM yhtio WHERE yhtio = '$paramrow[yhtio]'";
-					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 1) {
-						$yhtiorow = mysql_fetch_array($result);
+						$yhtiorow = mysql_fetch_assoc($result);
 					}
 				}
 			}
@@ -142,10 +145,10 @@
 			if (!isset($yhtiorow) and $verkkotunnus_vas != "") {
 				// 2 etsitään vastaanottavaa yritystä ovt-tunnuksella..
 				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$verkkotunnus_vas'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$yhtiorow = mysql_fetch_array($result);
+					$yhtiorow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -154,10 +157,10 @@
 				$oyhtio1 = substr($verkkotunnus_vas, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
 
 				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$oyhtio1'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$yhtiorow = mysql_fetch_array($result);
+					$yhtiorow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -167,36 +170,36 @@
 				$yyhtio2 = (int) $yyhtio1; // ilman etunollaa
 
 				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$yyhtio1', '$yyhtio2')";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$yhtiorow = mysql_fetch_array($result);
+					$yhtiorow = mysql_fetch_assoc($result);
 				}
 			}
 
 			if (!isset($yhtiorow) and $yhtio != "" and $yhtio != 0) {
 				// 5 etsitään vastaanottavaa yritystä ovt-tunnuksella..
 				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$yhtio'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$yhtiorow = mysql_fetch_array($result);
+					$yhtiorow = mysql_fetch_assoc($result);
 				}
 			}
 
 			if (!isset($yhtiorow) and $yhtio != "") {
 				// 6 etsitään vastaanottavaa yritystä IBAN-tilinumerolla
 				$query = "SELECT * FROM yriti WHERE kaytossa != 'E' and iban = '$yhtio'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$ibanrow = mysql_fetch_array($result);
+					$ibanrow = mysql_fetch_assoc($result);
 
 					$query = "SELECT * FROM yhtio WHERE yhtio = '$ibanrow[yhtio]'";
-					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 1) {
-						$yhtiorow = mysql_fetch_array($result);
+						$yhtiorow = mysql_fetch_assoc($result);
 					}
 				}
 			}
@@ -206,10 +209,10 @@
 				$oyhtio2 = substr($yhtio, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
 
 				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$oyhtio2'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$yhtiorow = mysql_fetch_array($result);
+					$yhtiorow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -219,27 +222,30 @@
 				$yyhtio4 = (int) $yyhtio3; // ilman etunollaa
 
 				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$yyhtio3', '$yyhtio4')";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$yhtiorow = mysql_fetch_array($result);
+					$yhtiorow = mysql_fetch_assoc($result);
 				}
 			}
 
 			if (!isset($yhtiorow) and $yhtio != "" and $yhtio != 0) {
 				// 9 viimeinen hätäkeino, katotaan onko joku lisätieto ongelma
 				$query = "SELECT * FROM yhtio WHERE ovttunnus like '$yhtio%'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$yhtiorow = mysql_fetch_array($result);
+					$yhtiorow = mysql_fetch_assoc($result);
 				}
 			}
 
 			if (!isset($yhtiorow) and $luolasku === TRUE) {
 				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin admineille!
-				$query = "SELECT distinct yhtio nimi, alert_email, postittaja_email FROM yhtion_parametrit WHERE alert_email != '' and postittaja_email != ''";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$query = "	SELECT distinct yhtio nimi, alert_email, postittaja_email
+							FROM yhtion_parametrit
+							WHERE alert_email != ''
+							AND postittaja_email != ''";
+				$result = pupe_query($query);
 
 				$hostname = exec('hostname');
 
@@ -249,25 +255,24 @@
 				$return .= "Ovt: $yhtio $oyhtio1 $oyhtio2\n";
 				$return .= "Ytunnus: $yyhtio1 $yyhtio2 $yyhtio3 $yyhtio4\n\n";
 
-				while ($yhtiorow = mysql_fetch_array($result)) {
+				while ($yhtiorow = mysql_fetch_assoc($result)) {
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				}
 
 				return ($return);
 			}
-			elseif(isset($yhtiorow)) {
+			elseif (isset($yhtiorow)) {
 
 				$return .= "Lasku yhtiölle: $yhtiorow[nimi] ($yhtiorow[yhtio])\n";
 
 				// Haetaan yhtiön parametrit
 				$query = "	SELECT *
 							FROM yhtion_parametrit
-							WHERE yhtio='$yhtiorow[yhtio]'";
-				$result = mysql_query($query)
-						or die ("Kysely ei onnistu yhtio $query");
+							WHERE yhtio = '$yhtiorow[yhtio]'";
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$yhtion_parametritrow = mysql_fetch_array($result);
+					$yhtion_parametritrow = mysql_fetch_assoc($result);
 					// lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
 					foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
 						$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
@@ -314,10 +319,10 @@
 							WHERE yhtio = '$yhtio'
 							and nimi = 'Örum Oy Ab / ARW'
 							and tyyppi != 'P'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_array($result);
+					$trow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -329,10 +334,10 @@
 							and ovttunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_array($result);
+					$trow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -346,10 +351,10 @@
 							and ovttunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_array($result);
+					$trow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -361,10 +366,10 @@
 							and ovttunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_array($result);
+					$trow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -376,10 +381,10 @@
 							and ytunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_array($result);
+					$trow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -394,10 +399,10 @@
 							and ytunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_array($result);
+					$trow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -412,10 +417,10 @@
 							and ytunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_array($result);
+					$trow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -427,10 +432,10 @@
 							and nimi = '$laskuttajan_nimi'
 							and nimi not in ('','0')
 							and tyyppi != 'P'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_array($result);
+					$trow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -441,10 +446,10 @@
 							WHERE yhtio = '$yhtio'
 							and toimittajanro = '$laskuttajan_toimittajanumero'
 							and tyyppi != 'P'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_array($result);
+					$trow = mysql_fetch_assoc($result);
 				}
 			}
 
@@ -489,7 +494,7 @@
 											where yhtio = '$yhtio' and
 											tunnus = '$ostotunnus' and
 											tyyppi = 'O'";
-							$checkostot = mysql_query($chkquery) or die ("$chkquery<br><br>".mysql_error());
+							$checkostot = pupe_query($chkquery);
 
 							if (mysql_num_rows($checkostot) == 1) {
 								$chkriviok++;
@@ -505,7 +510,7 @@
 						}
 						else {
 							$chkquery = "SELECT * from maat where koodi = '$trow[maa]' and eu != ''";
-							$checkostot = mysql_query($chkquery) or die ("$chkquery<br><br>".mysql_error());
+							$checkostot = pupe_query($chkquery);
 
 							if (mysql_num_rows($checkostot) != 0) {
 								// kyseessä EU
@@ -543,10 +548,10 @@
 							and yhtio 		= '$yhtio'
 							and tilino 		= 0
 							and kuvaus 		= '$kauttalaskutus'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 0) {
-					$tiliointirow = mysql_fetch_array($result);
+					$tiliointirow = mysql_fetch_assoc($result);
 					$oletuskust = $tiliointirow['kustp'];
 
 					if ($tiliointirow['vienti'] != '') {
@@ -589,10 +594,10 @@
 									and maxtuote = '$toim_asiakkaantiedot[postitp]'";
 					}
 
-					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) != 0) {
-						$tiliointirow = mysql_fetch_array($result);
+						$tiliointirow = mysql_fetch_assoc($result);
 						$oletuskust = $tiliointirow['kustp'];
 
 						if ($tiliointirow['vienti'] != '') {
@@ -635,10 +640,10 @@
 									and maxtuote = '$ostaja_asiakkaantiedot[postitp]'";
 					}
 
-					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) != 0) {
-						$tiliointirow = mysql_fetch_array($result);
+						$tiliointirow = mysql_fetch_assoc($result);
 						$oletuskust = $tiliointirow['kustp'];
 
 						if ($tiliointirow['vienti'] != '') {
@@ -670,10 +675,10 @@
 									and yhtio 		= '$yhtio'
 									and tilino 		= 0
 									and kuvaus 		= '$laskun_asiakastunnus'";
-						$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+						$result = pupe_query($query);
 
 						if (mysql_num_rows($result) != 0) {
-							$tiliointirow = mysql_fetch_array($result);
+							$tiliointirow = mysql_fetch_assoc($result);
 							$oletuskust = $tiliointirow['kustp'];
 
 							if ($tiliointirow['vienti'] != '') {
@@ -739,9 +744,11 @@
 
 					$query = "	SELECT selite
 								FROM avainsana
-								WHERE yhtio = '$yhtio' and laji = 'alv' and selitetark != ''
+								WHERE yhtio = '$yhtio'
+								and laji = 'alv'
+								and selitetark != ''
 								ORDER BY jarjestys,selite";
-					$avainresult = mysql_query($query) or die ("$query".mysql_error());
+					$avainresult = pupe_query($query);
 
 					if (mysql_num_rows($avainresult) != 1) {
 						$return .= "Yrityksen $yhtio oletus ALV% puuttuu tai niitä on monta!\n";
@@ -749,7 +756,7 @@
 						return ($return);
 					}
 					else {
-						$avainrow = mysql_fetch_array($avainresult);
+						$avainrow = mysql_fetch_assoc($avainresult);
 						$oletusalvi = $avainrow['selite'];
 					}
 				}
@@ -839,7 +846,7 @@
 								AND laskunro = '{$laskun_numero}'
 								AND tapvm >= date_sub(now(), INTERVAL 12 MONTH)
 								AND liitostunnus = '{$trow['tunnus']}'";
-					$duplikaattilasku_check_res = mysql_query($query) or pupe_error($query);
+					$duplikaattilasku_check_res = pupe_query($query);
 
 					if (mysql_num_rows($duplikaattilasku_check_res) > 0) {
 						$komm = "(verkkolas@" . date('Y-m-d') .") Mahdollisesti duplikaattilasku!<br>".$komm;
@@ -848,26 +855,26 @@
 
 				$summa = round($summa, 2);
 
-				if ($summa == 0.0) {
+				if ($summa == 0) {
 					$return .= "Laskulta puuttuu summa!\n";
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
-				if (strlen($viite) > 0 and tarkista_viite($viite) === FALSE) {
-					$return .= "Viite on väärin!\n";
+				if (isset($viite) and strlen($viite) > 0 and tarkista_viite($viite) === FALSE) {
+					$return .= "Viite '$viite' on väärin!\n";
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
-				if (strlen($viite) > 0 and strlen($viesti) > 0) {
+				if (isset($viite) and strlen($viite) > 0 and isset($viesti) and strlen($viesti) > 0) {
 					$return .= "Viitettä ja viestiä ei voi antaa yhtäaikaa!\n";
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 
 				$query = "SELECT kurssi FROM valuu WHERE nimi = '$valkoodi' and yhtio = '$yhtio'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 1) {
 					$return .= "Valuuttaa $valkoodi ei löytynytkään!\n";
@@ -875,7 +882,7 @@
 					return ($return);
 				}
 
-				$vrow = mysql_fetch_array($result);
+				$vrow = mysql_fetch_assoc($result);
 
 				$hyvaksyja_nyt 	= '';
 				$tila 			= "M";
@@ -940,7 +947,7 @@
 							viite 				= '$viite',
 							viesti 				= '$viesti',
 							sisviesti1 			= '$laskun_tilausviite',
-							sisviesti2 			= '$sis2',
+							sisviesti2 			= '',
 							tapvm 				= '$tpv-$tpk-$tpp',
 							vienti 				= '$trow[oletus_vienti]',
 							ebid 				= '$ebid',
@@ -960,8 +967,9 @@
 							comments 			= '$komm',
 							laskunro 			= '$laskun_numero',
 							asiakkaan_tilausnumero = '$laskun_asiakkaan_tilausnumero'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				$result = pupe_query($query);
 				$tunnus = mysql_insert_id();
+
 				$omasumma = round($summa * $vrow['kurssi'], 2);
 				$omasumma_valuutassa = $summa;
 
@@ -969,7 +977,7 @@
 				$vassumma = -1 * $omasumma;
 				$vassumma_valuutassa = -1 * $summa;
 
-				//Tutkitaan otsovelkatiliä
+				//Tutkitaan ostovelkatiliä
 				if ($trow["konserniyhtio"] != '') {
 					$ostovelat = $yhtiorow["konserniostovelat"];
 				}
@@ -977,34 +985,25 @@
 					$ostovelat = $yhtiorow["ostovelat"];
 				}
 
-				if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
-					$ostovelat_kustp = $oletuskust;
-					$ostovelat_kohde = $oletuskohde;
-					$ostovelat_projekti = $oletusprojekti;
-				}
-				else {
-					$ostovelat_kustp = 0;
-					$ostovelat_kohde = 0;
-					$ostovelat_projekti = 0;
-				}
-
-				$query = "	INSERT into tiliointi set
-							yhtio 		= '$yhtio',
-							ltunnus 	= '$tunnus',
-							tilino 		= '$ostovelat',
-							kustp		= '$ostovelat_kustp',
-							kohde		= '$ostovelat_kohde',
-							projekti	= '$ostovelat_projekti',
-							tapvm 		= '$tpv-$tpk-$tpp',
-							summa 		= '$vassumma',
+				// Ostovelka, (Hoidetaan kustannuspaikka alempana, kun tiedetään kulutiliöintien kustannuspaikat....)
+				$query = "	INSERT INTO tiliointi SET
+							yhtio 			 = '$yhtio',
+							ltunnus 		 = '$tunnus',
+							tilino 			 = '$ostovelat',
+							kustp    		 = 0,
+							kohde	 		 = 0,
+							projekti 		 = 0,
+							tapvm 			 = '$tpv-$tpk-$tpp',
+							summa 			 = '$vassumma',
 							summa_valuutassa = '$vassumma_valuutassa',
-							valkoodi 	= '$valkoodi',
-							selite 		= '$selite',
-							vero 		= 0,
-							lukko 		= '1',
-							laatija 	= 'verkkolas',
-							laadittu 	= now()";
-				$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+							valkoodi 		 = '$valkoodi',
+							selite 			 = '$selite',
+							vero 			 = 0,
+							lukko 			 = '1',
+							laatija 		 = 'verkkolas',
+							laadittu 		 = now()";
+				$result = pupe_query($query);
+				$ostovelkatiliointitunnus = mysql_insert_id();
 
 				// Onko rivikohtaisia tiliöintisääntöjä
 				$query = "	SELECT *
@@ -1013,7 +1012,7 @@
 							and yhtio 		= '$yhtio'
 							and tyyppi 		= 't'
 							and tilino	   != 0";
-				$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+				$result = pupe_query($query);
 
 				// Onko laskuriveillä useita alv-verokantoja?
 				if (count($ealvi) > 0) {
@@ -1027,6 +1026,7 @@
 	 			// Tehdän pelkät oletustiliöinnit
 	 			// Pitää hardkoodata UNIKKO ohittamaan tämän.
 				if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $laskun_tyyppi != "UNIKKO-INVOICE") {
+
 					if ($oletustili > 0) {
 						$tili = $oletustili;
 					}
@@ -1052,51 +1052,72 @@
 
 					require ("inc/teetiliointi.inc");
 
-					// jos kyseessä on jonkin rahti/huolintakuluja, tiliöidään varastonarvoon
+					// Napataan luodut tarkenteet...
+					if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
+						$ostovel_kustp		= $kustp_ins;
+						$ostovel_kohde		= $kohde_ins;
+						$ostovel_projekti	= $projekti_ins;
+					}
+
+					// jos kyseessä on vaihto-omaisuutta tai rahti/huolintakuluja, tiliöidään varastonarvoon
 					if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
 
 						$varastotili = $yhtiorow['varasto'];
 
-						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-								$varastotili = $yhtiorow['matkalla_olevat'];
+						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I' or $trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
+							$varastotili = $yhtiorow['matkalla_olevat'];
 						}
 
-						$query = "	INSERT into tiliointi set
-									yhtio = '$kukarow[yhtio]',
-									ltunnus = '$tunnus',
-									tilino = '$varastotili',
-									kustp = 0,
-									tapvm = '$tpv-$tpk-$tpp',
-									summa = '$verkkolaskuveroton',
-									summa_valuutassa = '$verkkolaskuveroton_valuutassa',
-									valkoodi 	= '$valkoodi',
-									selite = '$selite',
-									vero = 0,
-									lukko = '',
-									laatija = '$kukarow[kuka]',
-									laadittu = now()";
-						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp, $kohde, $projekti);
 
+						// Varasto
 						$query = "	INSERT into tiliointi set
-									yhtio ='$kukarow[yhtio]',
-									ltunnus = '$tunnus',
-									tilino = '$yhtiorow[varastonmuutos]',
-									kustp = '$kustp',
-									kohde = '$kohde',
-									projekti = '$projekti',
-									tapvm = '$tpv-$tpk-$tpp',
-									summa = $verkkolaskuveroton*-1,
+									yhtio 			 = '$kukarow[yhtio]',
+									ltunnus 		 = '$tunnus',
+									tilino 			 = '$varastotili',
+									kustp    		 = '{$kustp_ins}',
+									kohde	 		 = '{$kohde_ins}',
+									projekti 		 = '{$projekti_ins}',
+									tapvm 			 = '$tpv-$tpk-$tpp',
+									summa			 = '$verkkolaskuveroton',
+									summa_valuutassa = '$verkkolaskuveroton_valuutassa',
+									valkoodi		 = '$valkoodi',
+									selite 			 = '$selite',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija 		 = '$kukarow[kuka]',
+									laadittu 		 = now()";
+						$result = pupe_query($query);
+
+						$varastonmuutostili = $yhtiorow["varastonmuutos"];
+
+						if ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
+							$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+						}
+
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
+
+						// Varastonmuutos
+						$query = "	INSERT into tiliointi set
+									yhtio 			 = '$kukarow[yhtio]',
+									ltunnus 		 = '$tunnus',
+									tilino 			 = '$varastonmuutostili',
+									kustp    		 = '{$kustp_ins}',
+									kohde	 		 = '{$kohde_ins}',
+									projekti 		 = '{$projekti_ins}',
+									tapvm 			 = '$tpv-$tpk-$tpp',
+									summa 			 = $verkkolaskuveroton*-1,
 									summa_valuutassa = $verkkolaskuveroton_valuutassa*-1,
-									valkoodi 	= '$valkoodi',
-									selite = '$selite',
-									vero = 0,
-									lukko = '',
-									laatija = '$kukarow[kuka]',
-									laadittu = now()";
-						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+									valkoodi 		 = '$valkoodi',
+									selite 			 = '$selite',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija 		 = '$kukarow[kuka]',
+									laadittu 		 = now()";
+						$result = pupe_query($query);
 
 						// Jos tämä lasku menee varastoon, tehdään valmiiksi keikka
-						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
+						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I' or $trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
 							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 						}
 					}
@@ -1110,9 +1131,13 @@
 					$verkkolaskuveroton_valuutassa	= 0;
 					$vtontot 						= 0;
 					$vtontot_valuutassa 			= 0;
+					$maksimisumma 		 			= 0;
 
-					for ($i=0; $i < count($rtuoteno); $i++) {
+					$kustp		= $oletuskust;
+					$kohde		= $oletuskohde;
+					$projekti	= $oletusprojekti;
 
+					for ($i = 0; $i < count($rtuoteno); $i++) {
 						if ((float) $rtuoteno[$i]["rivihinta"] != 0 or ($laskun_tyyppi == "UNIKKO-INVOICE" and $rtuoteno[$i]["rivihinta_valuutassa"] != 0)) {
 							$kustp = $oletuskust;
 
@@ -1127,7 +1152,7 @@
 										and mintuote   <= '$tuote'
 										and maxtuote   >= '$tuote'
 										and tilino 	   != 0";
-							$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+							$result = pupe_query($query);
 
 	 						// Sopiva sääntöä ei löytynyt
 							if (mysql_num_rows($result) == 0) {
@@ -1139,7 +1164,7 @@
 											and yhtio 		= '$yhtio'
 											and kuvaus like '%$selite%'
 											and tilino     != 0";
-								$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+								$result = pupe_query($query);
 
 	 							// Hmm, mikään sääntö ei kelpaa
 								if (mysql_num_rows($result) == 0) {
@@ -1156,13 +1181,13 @@
 									}
 								}
 								else {
-									$tiliointirow = mysql_fetch_array($result);
+									$tiliointirow = mysql_fetch_assoc($result);
 									$tili = $tiliointirow['tilino'];
 									if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
 								}
 							}
 							else {
-								$tiliointirow = mysql_fetch_array($result);
+								$tiliointirow = mysql_fetch_assoc($result);
 								$tili = $tiliointirow['tilino'];
 								if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
 							}
@@ -1188,146 +1213,205 @@
 
 							$verkkolaskuveroton				+= $summa;
 							$verkkolaskuveroton_valuutassa	+= $summa_valuutassa;
-							$vtonsumma						= $summa;
-							$vtonsumma_valuutassa			= $summa_valuutassa;
+							$vtonsumma						 = $summa;
+							$vtonsumma_valuutassa			 = $summa_valuutassa;
 							$vtontot						+= $summa;
 							$vtontot_valuutassa				+= $summa_valuutassa;
-							$summa							= round($summa * (1+($vero/100)),2);
+							$summa						 	 = round($summa * (1+($vero/100)),2);
 							$totsumma						+= $summa;
 							$totsumma_valuutassa			+= $summa_valuutassa;
-							$selite							= $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero." ".$selite;
-							$kukarow['yhtio']				= $yhtio;
-							$kukarow['kuka']				= 'verkkolas';
+							$selite							 = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero." ".$selite;
+							$kukarow['yhtio']				 = $yhtio;
+							$kukarow['kuka']				 = 'verkkolas';
 
 							require ("inc/teetiliointi.inc");
 
-							// jos kyseessä on jonkin rahti/huolintakuluja, tiliöidään varastonmuutokseen
+							// Napataan luodut tarkenteet...
+							if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and (($summa > $maksimisumma and $omasumma >= 0) or ($summa < $maksimisumma and $omasumma < 0))) {
+								$ostovel_kustp		= $kustp_ins;
+								$ostovel_kohde		= $kohde_ins;
+								$ostovel_projekti	= $projekti_ins;
+							}
+
+							// jos kyseessä on rahti/huolintakuluja, tiliöidään varastonmuutokseen
 							if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
+
+								$varastotili = $yhtiorow['varasto'];
+
+								if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I' or $trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
+									$varastotili = $yhtiorow['matkalla_olevat'];
+								}
+
+								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp, $kohde, $projekti);
+
+								// Varasto
 								$query = "	INSERT into tiliointi set
-											yhtio 		= '$kukarow[yhtio]',
-											ltunnus 	= '$tunnus',
-											tilino 		= '$yhtiorow[varastonmuutos]',
-											kustp 		= '$kustp',
-											kohde 		= '$kohde',
-											projekti 	= '$projekti',
-											tapvm 		= '$tpv-$tpk-$tpp',
-											summa 		= $vtonsumma *-1,
+											yhtio 			 = '$kukarow[yhtio]',
+											ltunnus 		 = '$tunnus',
+											tilino 			 = '$varastotili',
+											kustp    		 = '{$kustp_ins}',
+											kohde	 		 = '{$kohde_ins}',
+											projekti 		 = '{$projekti_ins}',
+											tapvm 			 = '$tpv-$tpk-$tpp',
+											summa 			 = '$vtonsumma',
+											summa_valuutassa = '$vtonsumma_valuutassa',
+											valkoodi 		 = '$valkoodi',
+											selite 			 = '$selite',
+											vero 			 = 0,
+											lukko 			 = '',
+											laatija			 = '$kukarow[kuka]',
+											laadittu		 = now()";
+								$result = pupe_query($query);
+
+								$varastonmuutostili = $yhtiorow["varastonmuutos"];
+
+								if ($trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
+									$varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+								}
+
+								list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastonmuutostili, $kustp, $kohde, $projekti);
+
+								// Varastonmuutos
+								$query = "	INSERT into tiliointi set
+											yhtio 			 = '$kukarow[yhtio]',
+											ltunnus 		 = '$tunnus',
+											tilino 			 = '$varastonmuutostili',
+											kustp    		 = '{$kustp_ins}',
+											kohde	 		 = '{$kohde_ins}',
+											projekti 		 = '{$projekti_ins}',
+											tapvm 			 = '$tpv-$tpk-$tpp',
+											summa 			 = $vtonsumma *-1,
 											summa_valuutassa = $vtonsumma_valuutassa*-1,
-											valkoodi 	= '$valkoodi',
-											selite 		= '$selite',
-											vero 		= 0,
-											lukko 		= '',
-											laatija 	= '$kukarow[kuka]',
-											laadittu 	= now()";
-								$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+											valkoodi 		 = '$valkoodi',
+											selite 			 = '$selite',
+											vero 			 = 0,
+											lukko 			 = '',
+											laatija 		 = '$kukarow[kuka]',
+											laadittu 		 = now()";
+								$result = pupe_query($query);
 							}
 						}
+
 						$selite = $trow['nimi']." ".$trow['nimitark']." Lasno: ".$laskun_numero;
 					}
 
 	 				// Tuli pyöristyseroja
-					if (round(abs($totsumma - $omasumma),2) >= 0.01) {
+					if (round(abs($totsumma - $omasumma), 2) >= 0.01) {
+						// Pyöristyserot
 						$query = "	INSERT into tiliointi set
-									yhtio 		= '$yhtio',
-									ltunnus 	= '$tunnus',
-									tilino 		= '$yhtiorow[pyoristys]',
-									kustp 		= 0,
-									tapvm 		= '$tpv-$tpk-$tpp',
-									summa 		= $omasumma - $totsumma,
+									yhtio 			 = '$yhtio',
+									ltunnus 		 = '$tunnus',
+									tilino 			 = '$yhtiorow[pyoristys]',
+									kustp 			 = 0,
+									kohde 			 = 0,
+									projekti 		 = 0,
+									tapvm 			 = '$tpv-$tpk-$tpp',
+									summa 			 = $omasumma - $totsumma,
 									summa_valuutassa = $omasumma_valuutassa - $totsumma_valuutassa,
-									valkoodi 	= '$valkoodi',
-									selite 		= '$selite',
-									vero 		= 0,
-									lukko 		= '',
-									laatija 	= 'verkkolas',
-									laadittu 	= now()";
-						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
+									valkoodi 		 = '$valkoodi',
+									selite 			 = '$selite',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija 		 = 'verkkolas',
+									laadittu 		 = now()";
+						$result = pupe_query($query);
 					}
 
-					// jos kyseessä on jonkin rahti/huolintakuluja, tiliöidään varastonarvoon
-					if ($trow['oletus_vienti'] != 'A' and $trow['oletus_vienti'] != 'D' and $trow['oletus_vienti'] != 'G' and $trow['oletus_vienti'] != '') {
-
-						$varastotili = $yhtiorow['varasto'];
-						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-								$varastotili = $yhtiorow['matkalla_olevat'];
-						}
-
-						$query = "	INSERT into tiliointi set
-									yhtio 		= '$kukarow[yhtio]',
-									ltunnus 	= '$tunnus',
-									tilino 		= '$varastotili',
-									kustp 		= 0,
-									tapvm 		= '$tpv-$tpk-$tpp',
-									summa 		= '$vtontot',
-									summa_valuutassa = '$vtontot_valuutassa',
-									valkoodi 	= '$valkoodi',
-									selite 		= '$selite',
-									vero 		= 0,
-									lukko 		= '',
-									laatija		= '$kukarow[kuka]',
-									laadittu	= now()";
-						$result = mysql_query($query) or die ("$query\n\n".mysql_error());
-
+					// jos kyseessä on tavaraa
+					if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I' or $trow['oletus_vienti'] == 'J' or $trow['oletus_vienti'] == 'K' or $trow['oletus_vienti'] == 'L') {
 						/**
 						 * Jos Unikkoinvoice, muutetaan oletus_vienti
 						 * C => A
 						 * F => D
 						 * I => G
-						 */
-						if ($laskun_tyyppi == "UNIKKO-INVOICE") {
+						*/
+						if ($laskun_tyyppi == "UNIKKO-INVOICE" and $trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
 
-							if ($trow['oletus_vienti'] == 'C') $trow['oletus_vienti'] = 'A';
-							elseif ($trow['oletus_vienti'] == 'F') $trow['oletus_vienti'] = 'D';
-							elseif ($trow['oletus_vienti'] == 'I') $trow['oletus_vienti'] = 'G';
-							
+							if ($trow['oletus_vienti'] == 'C') 		$trow['oletus_vienti'] = 'A';
+							elseif ($trow['oletus_vienti'] == 'F') 	$trow['oletus_vienti'] = 'D';
+							elseif ($trow['oletus_vienti'] == 'I') 	$trow['oletus_vienti'] = 'G';
+
 							$query = "	UPDATE lasku SET
 										vienti = '{$trow['oletus_vienti']}'
 										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND tunnus = '{$tunnus}'";
+										AND tunnus  = '{$tunnus}'";
 							$vienti_upd_res = pupe_query($query);
 						}
+
 						// Jos tämä lasku menee varastoon, tehdään valmiiksi keikka
-						if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-							verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
-						}
+						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 					}
 				}
+
+				// Lisätään vielä ostovelkatiliöinnin tarkenteet
+				if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
+					$ostovel_kustp		= $kustp_ins;
+					$ostovel_kohde		= $kohde_ins;
+					$ostovel_projekti	= $projekti_ins;
+				}
+				else {
+					$ostovel_kustp		= 0;
+					$ostovel_kohde		= 0;
+					$ostovel_projekti	= 0;
+				}
+
+				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat, $ostovel_kustp, $ostovel_kohde, $ostovel_projekti);
+
+				$query = "	UPDATE tiliointi SET
+							kustp    = '{$kustp_ins}',
+							kohde	 = '{$kohde_ins}',
+							projekti = '{$projekti_ins}'
+							WHERE yhtio = '{$yhtio}'
+							AND tunnus  = '{$ostovelkatiliointitunnus}'";
+				$vienti_upd_res = pupe_query($query);
+
 
 				// Jos meillä on suoraveloitus
 				if ($trow['oletus_suoraveloitus'] != '') {
 
 					if ($trow['oletus_suoravel_pankki'] > 0) {
 						 //Toimittajalla on pankkitili, teemme eräpäivälle suorituksen valmiiksi
+
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat);
+
 						// Oletustiliöinnit
 						// Ostovelat
 						$query = "	INSERT into tiliointi set
-									yhtio 		= '$kukarow[yhtio]',
-									ltunnus 	= '$tunnus',
-									tilino		= '$ostovelat',
-									tapvm 		= '$erv-$erk-$erp',
-									summa 		= '$omasumma',
+									yhtio 			 = '$kukarow[yhtio]',
+									ltunnus 		 = '$tunnus',
+									tilino			 = '$ostovelat',
+									kustp    		 = '{$kustp_ins}',
+									kohde	 		 = '{$kohde_ins}',
+									projekti 		 = '{$projekti_ins}',
+									tapvm 			 = '$erv-$erk-$erp',
+									summa 			 = '$omasumma',
 									summa_valuutassa = '$omasumma_valuutassa',
-									valkoodi 	= '$valkoodi',
-									vero 		= 0,
-									lukko 		= '',
-									laatija 	= '$kukarow[kuka]',
-									laadittu	= now()";
-						$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+									valkoodi 		 = '$valkoodi',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija 		 = '$kukarow[kuka]',
+									laadittu		 = now()";
+						$xresult = pupe_query($query);
+
+						list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"]);
 
 						// Rahatili
 						$query = "	INSERT into tiliointi set
-									yhtio 		= '$kukarow[yhtio]',
-									ltunnus 	= '$tunnus',
-									tilino 		= '$yhtiorow[selvittelytili]',
-									tapvm 		= '$erv-$erk-$erp',
-									summa 		= $vassumma,
+									yhtio 			 = '$kukarow[yhtio]',
+									ltunnus 		 = '$tunnus',
+									tilino 			 = '$yhtiorow[selvittelytili]',
+									kustp    		 = '{$kustp_ins}',
+									kohde	 		 = '{$kohde_ins}',
+									projekti 		 = '{$projekti_ins}',
+									tapvm 			 = '$erv-$erk-$erp',
+									summa 			 = $vassumma,
 									summa_valuutassa = '$vassumma_valuutassa',
-									valkoodi 	= '$valkoodi',
-									vero 		= 0,
-									lukko 		= '',
-									laatija 	= '$kukarow[kuka]',
-									laadittu 	= now()";
-						$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+									valkoodi 		 = '$valkoodi',
+									vero 			 = 0,
+									lukko 			 = '',
+									laatija 		 = '$kukarow[kuka]',
+									laadittu 		 = now()";
+						$xresult = pupe_query($query);
 
 						if ($tila == 'M') {
 							$query = "	UPDATE lasku set
@@ -1335,7 +1419,7 @@
 										mapvm 	= '$erv-$erk-$erp',
 										maksu_kurssi = 1
 										WHERE tunnus = '$tunnus'";
-							$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+							$xresult = pupe_query($query);
 							//echo "Lasku merkittiin suoraan maksetuksi";
 						}
 					}
@@ -1345,18 +1429,18 @@
 							$query = "	UPDATE lasku set
 										tila = 'Q'
 										WHERE tunnus='$tunnus'";
-							$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+							$xresult = pupe_query($query);
 							//echo "Lasku merkittiin odottamaan suoritusta";
 						}
 					}
 				}
 
 				$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-				$kuvalaskures = mysql_query($query) or pupe_error($query);
+				$kuvalaskures = pupe_query($query);
 
 				if (mysql_num_rows($kuvalaskures) > 0) {
 
-					$kuvalaskurow = mysql_fetch_array($kuvalaskures);
+					$kuvalaskurow = mysql_fetch_assoc($kuvalaskures);
 
 					$ebid 	= $kuvalaskurow['ebid'];
 					$selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
@@ -1403,7 +1487,7 @@
 								jarjestys			= '1',
 								laatija				= '$kukarow[kuka]',
 								luontiaika			= now()";
-					$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+					$Xresult = pupe_query($query);
 
 					// Haetaan verkkolaskun visualisoitu versio
 					if ($kayttotarkoitus == "INVOIC.D.96A") {
@@ -1447,7 +1531,7 @@
 										jarjestys			= '1',
 										laatija				= '$kukarow[kuka]',
 										luontiaika			= now()";
-							$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+							$Xresult = pupe_query($query);
 						}
 					}
 
@@ -1487,7 +1571,7 @@
 												jarjestys			= '1',
 												laatija				= '$kukarow[kuka]',
 												luontiaika			= now()";
-									$editilaus_laskulle_result = mysql_query($query) or die ("$query\n\n".mysql_error());
+									$editilaus_laskulle_result = pupe_query($query);
 
 									// Katotaan onko eroja vai onko ok
 									list($invoice, $purchaseorder, $invoice_ei_loydy, $purchaseorder_ei_loydy, $loytyy_kummastakin, $purchaseorder_tilausnumero) = laskun_ja_tilauksen_vertailu($kukarow, $tunnus);
@@ -1516,7 +1600,7 @@
 															hyvaksyja_nyt = '',
 															comments 	  = trim(concat(comments, '\n Lasku siirrettiin suoraan maksuvalmiiksi, koska se täsmäsi ostotilaukseen.'))
 															WHERE tunnus = '$tunnus'";
-												$xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+												$xresult = pupe_query($query);
 											}
 										}
 									}

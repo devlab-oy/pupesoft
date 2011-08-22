@@ -18,7 +18,7 @@
 				$query = "	SELECT *
 							FROM varastopaikat
 							WHERE tunnus='$lahdevarasto' and yhtio = '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$lahderow = mysql_fetch_array($result);
 			}
 			else {
@@ -29,7 +29,7 @@
 				$query = "	SELECT *
 							FROM varastopaikat
 							WHERE tunnus='$kohdevarasto' and yhtio = '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$kohderow = mysql_fetch_array($result);
 			}
 			else {
@@ -52,7 +52,7 @@
 						WHERE alkuhyllyalue <= '$hyllyalue'
 						and loppuhyllyalue >= '$hyllyalue'
 						and yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Turvapaikkaa")." $hyllyalue $hyllynro $hyllyvali $hyllytaso ".t("ei ole miss‰‰n varastossa")."!</font><br>";
@@ -103,7 +103,7 @@
 					$query = "	SELECT *
 								FROM tuote
 								WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 1) {
 						//Yritet‰‰n p‰‰tt‰‰ l‰hdepaikka
@@ -115,7 +115,7 @@
 									and yhtio = '$kukarow[yhtio]'
 									ORDER BY oletus desc
 									LIMIT 1";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 
 						$lahde = 0;
 
@@ -139,7 +139,7 @@
 										and yhtio 	   = '$kukarow[yhtio]'
 										ORDER BY oletus desc
 										LIMIT 1";
-							$result = mysql_query($query) or pupe_error($query);
+							$result = pupe_query($query);
 
 							if (mysql_num_rows($result) == 0) {
 								if ($hyllyalue != '') {
@@ -183,8 +183,8 @@
 			fclose($file);
 
 			if ($virhe == 0) {
-				$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tuote READ, tilausrivi READ";
-				$result = mysql_query($query) or pupe_error($query);
+				$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tuote READ, tilausrivi READ, avainsana READ, avainsana as avainsana_kieli READ";
+				$result = pupe_query($query);
 
 				echo "<pre>";
 
@@ -207,7 +207,7 @@
 					$query = "	UPDATE tuotepaikat set saldo = saldo - $maara, saldoaika=now()
 								WHERE yhtio = '$kukarow[yhtio]' and tuoteno='$tuoteno' and
 								hyllyalue = '$lhyllyalue' and hyllynro = '$lhyllynro' and hyllyvali = '$lhyllyvali' and hyllytaso = '$lhyllytaso'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 
 					if ($toiminto == "TURVAPAIKKA") {
@@ -220,20 +220,20 @@
 									hyllynro 	= '$khyllynro',
 									hyllyvali 	= '$khyllyvali',
 									hyllytaso 	= '$khyllytaso'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 					else {
 						$query = "	UPDATE tuotepaikat set saldo = saldo + $maara, saldoaika=now()
 									WHERE yhtio = '$kukarow[yhtio]' and tuoteno='$tuoteno' and
 									hyllyalue = '$khyllyalue' and hyllynro = '$khyllynro' and hyllyvali = '$khyllyvali' and hyllytaso = '$khyllytaso'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 
 					$kehahin_query = "	SELECT kehahin, yksikko
 										FROM tuote
 										WHERE yhtio = '$kukarow[yhtio]'
 										and tuoteno = '$tuoteno'";
-					$kehahin_result = mysql_query($kehahin_query) or pupe_error($kehahin_query);
+					$kehahin_result = pupe_query($kehahin_query);
 					$kehahin_row = mysql_fetch_array($kehahin_result);
 
 					$query = "	INSERT into tapahtuma set
@@ -249,7 +249,7 @@
 									selite = '".t("Paikasta")." $lhyllyalue $lhyllynro $lhyllyvali $lhyllytaso ".t("v‰hennettiin")." $maara',
 									laatija = '$kukarow[kuka]',
 									laadittu = now()";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					$query = "	INSERT into tapahtuma set
 									yhtio ='$kukarow[yhtio]',
@@ -264,7 +264,7 @@
 									selite = '".t("Paikalle")." $khyllyalue $khyllynro $khyllyvali $khyllytaso ".t("lis‰ttiin")." $maara',
 									laatija = '$kukarow[kuka]',
 									laadittu = now()";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					echo t("Tuote")." $tuoteno ".t("siirrettiin")." $maara ".t_avainsana("Y", "", "and avainsana.selite='$kehahin_row[yksikko]'", "", "", "selite")." ".t("paikasta")." $lhyllyalue $lhyllynro $lhyllyvali $lhyllytaso --> ".t("paikkaan").": $khyllyalue $khyllynro $khyllyvali $khyllytaso<br>";
 				}
@@ -272,7 +272,7 @@
 				echo "</pre>";
 
 				$query  = "UNLOCK TABLES";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 			else {
 				echo "<br><font class='error'>".t("Materiaalissasi oli virheit‰! Korjaa ensin kaikki virheet, vasta sitten saldojen siirto onnistuu")."!</font><br>";
@@ -314,7 +314,7 @@
 				echo "<td colspan='4'><select name='lahdevarasto'><option value=''>".t("Valitse")."</option>";
 
 				$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
-				$vares = mysql_query($query) or pupe_error($query);
+				$vares = pupe_query($query);
 
 				while ($varow = mysql_fetch_array($vares))
 				{
@@ -330,7 +330,7 @@
 				echo "<td colspan='4'><select name='kohdevarasto'><option value=''>".t("Valitse")."</option>";
 
 				$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
-				$vares = mysql_query($query) or pupe_error($query);
+				$vares = pupe_query($query);
 
 				while ($varow = mysql_fetch_array($vares))
 				{

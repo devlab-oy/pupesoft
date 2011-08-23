@@ -1209,20 +1209,26 @@ while ($tietue = fgets($fd)) {
 
 				// Spessukase
 				if ($yhtiorow["yhtio"] == "artr") {
-					// Laitetaan kolmanneksi merkiksi space
-					$tuotenumero2 = substr($tieto, 0, 2). " ". substr($tieto, 2);
-				}
-				else {
-					$tuotenumero2 = $tieto;
+
+					$query = "	SELECT *
+								FROM tuote
+								WHERE yhtio = '{$kukarow["yhtio"]}'
+								and tuoteno = '{$tieto}'
+								and status != 'P'
+								{$kieltolisa}";
+					$result = mysql_query($query) or die($query);
+
+					if (mysql_num_rows($result) == 0) {
+						// Laitetaan kolmanneksi merkiksi space
+						$tieto = substr($tieto, 0, 2). " ". substr($tieto, 2);
+					}
 				}
 
 				$query = "	SELECT *
 							FROM tuote
 							WHERE yhtio = '{$kukarow["yhtio"]}'
-							and tuoteno in ('$tieto', '$tuotenumero2')
-							$kieltolisa
-							ORDER BY tuoteno DESC
-							LIMIT 1";
+							and tuoteno = '{$tieto}'
+							{$kieltolisa}";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 0) {

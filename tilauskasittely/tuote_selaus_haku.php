@@ -1338,10 +1338,10 @@
 
 				echo "<tr class='aktiivi'>";
 
-				if (isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0) {
+				if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0) {
 					echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$row["vastaavamaara"]}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
 				}
-				elseif (!isset($row["mikavastaava"])) {
+				elseif ($verkkokauppa == "" and !isset($row["mikavastaava"])) {
 					echo "<td class='back'></td>";
 				}
 

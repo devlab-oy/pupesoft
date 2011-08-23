@@ -43,7 +43,7 @@
 
 		echo "	<th align='left'>".t("Netto")."</th>";
 
-		if ($trow['yksin_kerailyalustalle'] == 'T' and $tuoteno != '') {
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
 			echo "<th align='left'>",t("Omalle tilaukselle"),"</th>";
 		}
 
@@ -95,7 +95,7 @@
 
 		echo "	<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>";
 
-		if ($trow['yksin_kerailyalustalle'] == 'T' and $tuoteno != '') {
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
 			echo "<td><input type='text' name='omalle_tilaukselle' size='2' maxlength='1' value='{$omalle_tilaukselle}' /></td>";
 		}
 
@@ -246,7 +246,7 @@
 		echo "	<th align='left'>".t("Netto")."</th>
 				<th align='left'>".t("Alv")."</th>";
 
-		if ($trow['yksin_kerailyalustalle'] == 'T' and $tuoteno != '') {
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
 			echo "<th align='left'>",t("Omalle tilaukselle"),"</th>";
 		}
 
@@ -356,7 +356,7 @@
 			echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 		}
 
-		if ($trow['yksin_kerailyalustalle'] == 'T' and $tuoteno != '') {
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
 			$sel = (isset($omalle_tilaukselle) and trim($omalle_tilaukselle) != '') ? ' selected' : '';
 
 			echo "<td><select name='omalle_tilaukselle'>";
@@ -396,7 +396,7 @@
 			$nrospanni = 3;
 		}
 
-		if ($trow['yksin_kerailyalustalle'] == 'T' and $tuoteno != '') {
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
 			$nrospanni++;
 		}
 	

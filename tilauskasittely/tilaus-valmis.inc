@@ -706,6 +706,59 @@ else {
 			$result = pupe_query($query);
 			$maehrowx = mysql_fetch_assoc($result);
 
+			// t‰ss‰ v‰liss‰ katsotaan onko tilausrivi_omalle_tilaukselle-parametri p‰‰ll‰
+			// jos on, niin splitataan ne tilausrivit, joille ollaan valittu "omalle_tilaukselle" tilausrivi‰ syˆtett‰ess‰
+			// splittaus tapahtuu niin, ett‰ jokaiselle tilausriville j‰‰ yksi kappale
+			// eli jos "omalle_tilausriville"-tilausrivin kpl = 5, niin tehd‰‰n 4 uutta rivi‰ ja jokaisella viidell‰ tilausrivill‰ on 1 kpl
+			// if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '') {
+			// 
+			// 	$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.omalle_tilaukselle
+			// 				FROM tilausrivi
+			// 				JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+			// 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+			// 				and tilausrivi.otunnus = '{$laskurow['tunnus']}'
+			// 				and tilausrivi.hyllyalue != ''
+			// 				and tilausrivi.varattu + tilausrivi.kpl > 0
+			// 				and tilausrivi.var NOT IN ('J','P')";
+			// 	$result = pupe_query($query);
+			// 
+			// 	while ($row = mysql_fetch_array($result)) {
+			// 
+			// 		if ($row['omalle_tilaukselle'] != '') {
+			// 
+			// 			$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tunnus']}'";
+			// 			$splitres = pupe_query($query);
+			// 			$splitrow = mysql_fetch_assoc($splitres);
+			// 
+			// 			// otetaan loopattavat kplm‰‰r‰t talteen
+			// 			$split_kpl = $splitrow['varattu'];
+			// 
+			// 			mysql_data_seek($splitres, 0);
+			// 
+			// 			$fields = "yhtio";
+			// 			$values = "'$kukarow[yhtio]'";
+			// 
+			// 			// Ei monisteta tunnusta
+			// 			for ($i = 1; $i < mysql_num_fields($splitres)-1; $i++) {
+			// 
+			// 				$fieldname = mysql_field_name($splitres,$i);
+			// 
+			// 				$fields .= ", ".$fieldname;
+			// 
+			// 				switch ($fieldname) {
+			// 					case 'alatila':
+			// 						$values .= ", 'A'";
+			// 						break;
+			// 					default:
+			// 						$values .= ", '".$laskurow[$fieldname]."'";
+			// 				}
+			// 			}
+			// 
+			// 		}
+			// 
+			// 	}
+			// }
+
 			if ($yhtiorow["splittauskielto"] == "K") {
 				$sorttaus = "tilausrivi.kerayspvm, sorttauskentta";
 			}

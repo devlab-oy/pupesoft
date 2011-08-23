@@ -637,7 +637,6 @@
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value=''>".t("Ei")."</option>";
 		$ulos .= "<option value='K'{$sel['K']}>".t("Kyllä")."</option>";
-		$ulos .= "<option value='T'{$sel['T']}>".t("Tarpeen mukaan")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

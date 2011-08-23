@@ -1571,7 +1571,7 @@ if ($tee == 'I') {
 	$tositenro=0;
 
 	if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
-		$query = "LOCK TABLE tiliointi WRITE, lasku WRITE, sanakirja WRITE, liitetiedostot WRITE";
+		$query = "LOCK TABLE tiliointi WRITE, lasku WRITE, sanakirja WRITE, liitetiedostot WRITE, tili READ";
 		$result = pupe_query($query);
 
 		$alaraja = 41000000;

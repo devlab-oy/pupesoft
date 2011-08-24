@@ -266,7 +266,7 @@
 								left(concat_ws(' ', postino, postitp),20) postitp,
 								summa, lasku.valkoodi, viite, viesti,
 								tilinumero, lasku.tunnus, sisviesti2,
-								yriti.tilino ytilino, alatila, kasumma
+								yriti.tilino ytilino, alatila, kasumma, laskunro
 								FROM lasku, yriti
 								WHERE lasku.yhtio 	= '$kukarow[yhtio]'
 								and tila 			= 'P'
@@ -310,7 +310,7 @@
 						$laskusis1  	= $laskurow["tunnus"];
 						$laskusis2  	= $laskurow["sisviesti2"];
 				  	 	$laskutyyppi	= 5;
-				  	 	$laskuviesti 	= $laskurow["viesti"];
+                        $laskuviesti    = (trim($laskurow['viesti']) == "") ? $laskurow['laskunro'] : $laskurow['viesti']." ".$laskurow['laskunro'];
 
 						if (strlen($laskurow["viite"]) > 0) {
 							$laskuviesti = sprintf ('%020s', $laskurow["viite"]); //Etunollatäyttö

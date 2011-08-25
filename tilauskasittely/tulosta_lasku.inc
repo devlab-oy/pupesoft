@@ -878,7 +878,7 @@ if (!function_exists('rivi_original')) {
 				$verollrivi = $row["rivihinta"];
 			}
 
-			if ($yhtiorow["alv_kasittely"] != '') {
+			if ($yhtiorow["alv_kasittely"] == '') {
 				$verollrivi = $verollrivi * (1 + ($row["alv"] / 100));
 			}
 
@@ -998,7 +998,7 @@ if (!function_exists('rivi_plain')) {
 
 		// A-hinta
 		$oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($veroton_hinta, $kurssi)), $norm);
-		$pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
+		$pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)). " KOHTA 1001",	$thispage, $norm);
 
 		//Alennus
 		$alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');
@@ -1120,7 +1120,7 @@ if (!function_exists('rivi_plain_2')) {
 
 		// A-hinta
 		$oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($veroton_hinta, $kurssi)), $norm);
-		$pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)), $thispage, $norm);
+		$pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)). " KOHTA 1123", $thispage, $norm);
 
 		//Alennus
 		$alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');

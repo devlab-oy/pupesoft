@@ -43,12 +43,16 @@
 		elseif ($trow[$i] == "O") {
 			$chko = 'SELECTED';
 		}
+		elseif ($trow[$i] == "K") {
+			$chkk = 'SELECTED';
+		}
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Bruttohinta Myyntihinta")."</option>";
 		$ulos .= "<option value='N' $chkn>".t("N-Nettohinta Myyntihinta")."</option>";
 		$ulos .= "<option value='E' $chke>".t("E-Nettohinta Myyntihinta")."</option>";
 		$ulos .= "<option value='O' $chko>".t("Ostohinta")."</option>";
+		$ulos .= "<option value='K' $chkk>".t("Informatiivinen selainhinta")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

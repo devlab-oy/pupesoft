@@ -8622,7 +8622,7 @@ if (!function_exists("t_avainsana")) {
 			}
 		}
 		else {
-			$orderlisa = "";
+			$orderlisa = " ORDER BY avainsana.jarjestys, avainsana.selite ";
 		}
 
 		$kielisubquery = "";
@@ -9307,19 +9307,33 @@ if (!function_exists("viivakoodi")) {
 		$encoding = trim(strtolower($encoding));
 
 		switch ($encoding) {
-			case 'ean':
-			case 'upc':
-			case 'isbn':
-			case 'code 128-b':
-			case 'code 128-c':
-			case 'code 128 raw':
-			case 'code 39':
-			case 'interleaved 2 of 5':
-			case 'code 128':
-			case 'codabar':
-			case 'plessey':
-			case 'msi':
-			case 'code 93':
+			case "ean":
+			case "ean13":
+			case "ean-13":
+			case "ean8":
+			case "ean-8":
+			case "upc":
+			case "upc-a":
+			case "upc-e":
+			case "isbn":
+			case "39":
+			case "code39":
+			case "128c":
+			case "code128c":
+			case "128b":
+			case "code128b":
+			case "128":
+			case "code128":
+			case "128raw":
+			case "i25":
+			case "interleaved 2 of 5":
+			case "cbr":
+			case "codabar":
+			case "msi":
+			case "pls":
+			case "plessey":
+			case "code93":
+			case "93":
 				break;
 			default:
 				return FALSE;
@@ -9328,7 +9342,7 @@ if (!function_exists("viivakoodi")) {
 		$lisa = $teksti != "" ? "" : "-n";
 
 		ob_start();
-		passthru("barcode -b $viivakoodi -e $encoding -u mm -g {$leveys}x{$korkeus} -E $lisa | convert -fill white ps:- jpg:-", $return);
+		passthru("barcode -b $viivakoodi -e \"$encoding\" -u mm -g {$leveys}x{$korkeus} -E $lisa | convert -fill white -quality 80 ps:- jpg:-", $return);
 		$barcode = ob_get_contents();
 		ob_end_clean();
 

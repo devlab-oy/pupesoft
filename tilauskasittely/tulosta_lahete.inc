@@ -2120,7 +2120,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
 		if ($lahetetyyppi == "tulosta_lahete_viivakoodi_osh.inc") {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 180, 360, $row["nimitys"],	$thispage, $norm);
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 70, 360, $row["nimitys"], $thispage, $norm);
 
 			$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
 			$pdf->draw_text(395-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 	$thispage, $norm);
@@ -2149,7 +2149,7 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 			$pdf->draw_text(570-$oikpos, $kala, $nettohinta, $thispage, $norm);
 		}
 		else {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 180, 460, $row["nimitys"],	$thispage, $norm);
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 70, 460, $row["nimitys"], $thispage, $norm);
 
 			$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
 			$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 	$thispage, $norm);
@@ -2226,7 +2226,7 @@ if (!function_exists('rivi_asiakviivakoodi_lahete')) {
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 									$thispage, $norm);
 
-		$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 180, 460, $row["nimitys"],	$thispage, $norm);
+		$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 70, 460, $row["nimitys"],	$thispage, $norm);
 
 		$kala = $pohja - $rivinkorkeus;
 
@@ -2306,7 +2306,7 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 									$thispage, $norm);
 
-		$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 180, 400, $row["nimitys"],	$thispage, $norm);
+		$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 70, 400, $row["nimitys"],	$thispage, $norm);
 
 		$kala = $pohja - $rivinkorkeus;
 

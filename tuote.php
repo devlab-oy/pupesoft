@@ -333,7 +333,8 @@
 			$peralresult = pupe_query($query);
 			$peralrow = mysql_fetch_array($peralresult);
 
-			$query = "	SELECT distinct valkoodi, maa from hinnasto
+			$query = "	SELECT distinct valkoodi, maa 
+						from hinnasto
 						where yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoterow[tuoteno]'
 						and laji = ''

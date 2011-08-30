@@ -651,8 +651,11 @@
 
 		while ($laskurow = mysql_fetch_array($result)) {
 
-			if (trim($laskurow['viesti']) == '' and $laskurow['laskunro'] != 0) $laskurow['viesti'] = $laskurow['laskunro'];
-			
+            // Jos laskunumero on syötetty, lisätään se viestiin mukaan
+            if ($laskurow['laskunro'] != 0) {
+                $laskurow['viesti'] = (trim($laskurow['viesti']) == "") ? $laskurow['laskunro'] : $laskurow['viesti']." ".$laskurow['laskunro'];
+            }
+
 			if ($edmaksutili != $laskurow['maksu_tili']) {
 				$edmaksutili = $laskurow['maksu_tili'];
 			}

@@ -298,6 +298,7 @@
 			}
 
 			$viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
+			$viite  = str_replace("N/A", "", $viite); // Poistetaan viitteestä N/A tieto, mikäli joistakin skannauspalvelusta sellainen tulee
 			$ebid   = $laskun_ebid;
 			$selite = t("Laskunumero").": ".$laskun_numero;
 

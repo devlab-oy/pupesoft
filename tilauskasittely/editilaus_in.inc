@@ -178,12 +178,22 @@ elseif ($edi_tyyppi == "edifact911") {
 	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
 	$order_tietosisalto = file_get_contents($filename);
 
-	$order_tietosisalto = str_replace("\n","",$order_tietosisalto);
-	$order_tietosisalto = explode("'",$order_tietosisalto);
+	$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
+	$order_tietosisalto = explode("'", $order_tietosisalto);
+
+	// Tallennetaan NAD+SE -segmentti, koska se tulee muuten liian myˆh‰isess‰ vaiheessa...
+	$nadse_segmentti = "";
 
 	foreach ($order_tietosisalto as $key => $value) {
-		if (trim($value) != "") {
+
+		$value = trim($value);
+
+		if ($value != "") {
 			$edi_rivi .= $value."\n";
+
+			if (substr($value, 0, 6) == "NAD+SE") {
+				$nadse_segmentti = $value;
+			}
 		}
 	}
 
@@ -191,19 +201,13 @@ elseif ($edi_tyyppi == "edifact911") {
 
 	// Luodaan arraysta => tiedosto
 	$tiedosto = "/tmp/ediorders911".uniqid(time()."_").".txt";
-	file_put_contents($tiedosto,$edi_rivi);
+	file_put_contents($tiedosto, $edi_rivi);
 
 	// avataan tiedosto uudestaan
 	if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus ep‰onnistui")."!\n");
 
 	//jotta filenimi ei varmasti katoaisi matkalla, t‰m‰ ylikirjoittaa edellisen mailfilen.
 	$mailfile = $tiedosto;
-
-	// luetaan uudestaan tiedostoon
-	$order_tietosisalto = file_get_contents($tiedosto);
-
-	// Kaivetaan segmentti tekstin "NAD+SE+" ja "NAD+PL+" v‰list‰
-	$nadse_segmentti = substr($order_tietosisalto, strpos($order_tietosisalto, "NAD+SE+"), (strpos($order_tietosisalto, "NAD+DP+") - strpos($order_tietosisalto, "NAD+SE+")));
 }
 else {
 	$edi_subj = t("Sis‰‰ntuleva EIH 1.4 EDI-tilaus");
@@ -253,15 +257,10 @@ while ($tietue = fgets($fd)) {
 	// Jos kyseess‰ on UNA (ensimm‰inen Orders 91.1 segmentti), niin etsit‰‰n t‰ss‰ vaiheessa NAD SE
 	if ($tunnus == "UNA") {
 		$tunnus = "NADSE"; // Myyj‰
-				
+
 		$nad_segmentit = explode("+", $nadse_segmentti);
 		$nad_kentta = explode(":", $nad_segmentit[2]);
 		$tieto = $nad_kentta[0];
-		
-		// otetaan NAD+PL kent‰st‰ "toim_ovttunnus"
-		$nad_kentta = explode(":", $nad_segmentit[6]);
-		$servinet_ovttunnus = $nad_kentta[0];
-		//$edi_ulos .= "\n$nad_kentta[0]"; 	
 	}
 
 	// Jos kyseess‰ NAD segmentti, tarkennetaan mik‰ NAD on kyseess‰ ja laitetaan $tieto kuntoon
@@ -269,6 +268,12 @@ while ($tietue = fgets($fd)) {
 		switch (substr($tieto,0,2)) {
 			case 'BY':
 				$tunnus = "NADBY"; // Ostaja
+				$nad_segmentit = explode("+", $tieto);
+				$nad_kentat = explode(":", $nad_segmentit[1]);
+				$tieto = $nad_kentat[0];
+				break;
+			case 'PL':
+				$tunnus = "NADPL"; // Edelleenlaskutettava
 				$nad_segmentit = explode("+", $tieto);
 				$nad_kentat = explode(":", $nad_segmentit[1]);
 				$tieto = $nad_kentat[0];
@@ -468,6 +473,7 @@ while ($tietue = fgets($fd)) {
 		case 'OSTOTIL.OT_ASIAKASNRO' :
 		case 'ONADDP_PC' :
 		case 'NADBY' :
+		case 'NADPL' :
 			// ONADBY_PC - Ostajan osapuolen tunniste
 			// ONADDP_PC - Toimitusosoitteen osapuolen tunniste
 			// ONADCN_PC - Ostajan logistiikkakeskuksen tunniste (CN -tarkenne ei ole Itellan speksiss‰, joten t‰m‰ on itse p‰‰telty‰!)
@@ -510,7 +516,7 @@ while ($tietue = fgets($fd)) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and toim_ovttunnus = '$tieto'
 							and toim_ovttunnus not in ('','0')
-							and laji not in ('R','P')";				
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -526,27 +532,7 @@ while ($tietue = fgets($fd)) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ovttunnus = '$tieto'
 							and ovttunnus not in ('','0')
-							and laji not in ('R','P')";				
-				$result = mysql_query($query) or die($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$arow = mysql_fetch_array($result);
-					$vastaustapa .= $arow['tilausvahvistus'];
-					$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
-				}
-			}
-			
-			if (!is_array($arow) and $edi_tyyppi == "edifact911") {
-				// t‰m‰ on v‰h‰n erikoiskeissi. joillain ketjuilla voi olla monia samalla ovttunnuksella 
-				// mutta toim_ovttunnuksen kohdalla voi olla myym‰l‰ tunnus tai vastaavaa.
-				
-				$query = "	SELECT *
-							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]'
-							and ovttunnus = '$tieto'
-							and toim_ovttunnus = '$servinet_ovttunnus'
-							and ovttunnus not in ('','0')
-							and laji not in ('R','P')";				
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -562,7 +548,7 @@ while ($tietue = fgets($fd)) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakasnro = '$tieto'
 							and asiakasnro not in ('','0')
-							and laji not in ('R','P')";				
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {

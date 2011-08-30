@@ -22,7 +22,7 @@ if ($tee == '') {
 				and tila = 'H'
 				and hyvaksyja_nyt != ''
 				GROUP BY 1,2
-				ORDER BY 1,2";
+				ORDER BY nimi";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<table>";

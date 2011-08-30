@@ -21,14 +21,14 @@
 			$query = "	SELECT hyvak, nimi, oletus_rahatili, oletus_kulutili, yhtio
 						FROM yriti
 						WHERE tilino = '$pankkitilino'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != 1) {
 				echo "<font class='message'>".t("Tiliä")." '$pankkitilino' ".t("ei löytynyt")."!</font><br>";
 				$toim = 'E';
 			}
 			else {
-				$yritirow = mysql_fetch_array($result);
+				$yritirow = mysql_fetch_assoc($result);
 
 				echo "<tr><td colspan='5'><font class='message'>".t("tili löytyi")." $yritirow[yhtio] ".t("vastuussa")." '$yritirow[hyvak]'</font><br>";
 
@@ -37,28 +37,29 @@
 					$toim = 'E';
 				}
 				else {
-					echo "<font class='message'>".t("Tilin rahatili on")." '$yritirow[oletus_rahatili]' ".t("ja kulutili")." '$yritirow[3]'</font><br>";
+					echo "<font class='message'>".t("Tilin rahatili on")." '$yritirow[oletus_rahatili]' ".t("ja kulutili")." '$yritirow[oletus_kulutili]'</font><br>";
 				}
 
 				$query = "	SELECT *
 							FROM yhtio
 							WHERE yhtio = '$yritirow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 1) {
 					echo "<font class='message'>".t("Yritystä")." '$yritirow[yhtio]' ".t("ei löytynyt")."!</font><br>";
 					$toim = 'E';
 				}
 				else {
-					$yhtiorow = mysql_fetch_array ($result);
+					$yhtiorow = mysql_fetch_assoc ($result);
 
 					$query = "	SELECT *
 								FROM yhtion_parametrit
 								WHERE yhtio='$yhtiorow[yhtio]'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 1) {
-						$yhtion_parametritrow = mysql_fetch_array($result);
+						$yhtion_parametritrow = mysql_fetch_assoc($result);
+
 						// lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
 						foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
 							$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
@@ -70,7 +71,7 @@
 				}
 			}
 
-			// Jos perustietoja ei löydy lopetetaam heti!
+			// Jos perustietoja ei löydy lopetetaan heti!
 			if ($toim != 'K') {
 				exit;
 			}
@@ -137,7 +138,7 @@
 								and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
 								and yhtio = '$yritirow[yhtio]'
 								and tila = 'Q'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) != 1) {
 							echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua viitteella")." '$viite' ".t("ei löytynyt")."!</font><br>";
@@ -157,7 +158,7 @@
 								and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
 								and yhtio 	= '$yritirow[yhtio]'
 								and tila 	= 'Q'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) != 1) {
 						// tarkka 35 merkkiä <-> 35 merkkiä NIMI ja NIMITARK haku
@@ -167,7 +168,7 @@
 									and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
 									and yhtio 	= '$yritirow[yhtio]'
 									and tila 	= 'Q'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 
 					if (mysql_num_rows($result) != 1) {
@@ -178,7 +179,7 @@
 									and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
 									and yhtio	= '$yritirow[yhtio]'
 									and tila 	= 'Q'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 
 					if (mysql_num_rows($result) != 1) {
@@ -191,7 +192,7 @@
 									and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
 									and yhtio	= '$yritirow[yhtio]'
 									and tila 	= 'Q'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 
 					if (mysql_num_rows($result) != 1) {
@@ -209,7 +210,7 @@
 									and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))
 									and yhtio 	= '$yritirow[yhtio]'
 									and tila 	= 'Q'";
-						$result = mysql_query($query) or pupe_error($query);
+						$result = pupe_query($query);
 					}
 
 					if (mysql_num_rows($result) != 1) {
@@ -221,7 +222,7 @@
 				}
 
 				if ($loytyi == 1) {
-					$trow = mysql_fetch_array ($result);
+					$trow = mysql_fetch_assoc ($result);
 					echo "<font class='message'>Pupesoft: ".t("maksu löytyi")." '$trow[tunnus]' '$trow[nimi]'</font><br>";
 					require "inc/teemaksutosite.inc";
 				}
@@ -243,9 +244,9 @@
 								FROM tiliointi
 								LEFT JOIN tili on tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino
 								WHERE tiliointi.tunnus = '$tiliotedatatu'";
-					$tiliointiresult = mysql_query($query) or pupe_error($query);
+					$tiliointiresult = pupe_query($query);
 
-					if ($tiliointirow = mysql_fetch_array($tiliointiresult)) {
+					if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {
 						echo "<font class='message'>".t("Tapahtuma on käsitelty"). " ". tv1dateconv($tiliotedataka) ."<br>";
 						echo t("Alkuperäinen tiliöinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
 

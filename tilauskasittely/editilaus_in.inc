@@ -203,7 +203,7 @@ elseif ($edi_tyyppi == "edifact911") {
 	$order_tietosisalto = file_get_contents($tiedosto);
 
 	// Kaivetaan segmentti tekstin "NAD+SE+" ja "NAD+PL+" v‰list‰
-	$nadse_segmentti = substr($order_tietosisalto, strpos($order_tietosisalto, "NAD+SE+"), (strpos($order_tietosisalto, "NAD+PL+") - strpos($order_tietosisalto, "NAD+SE+")));
+	$nadse_segmentti = substr($order_tietosisalto, strpos($order_tietosisalto, "NAD+SE+"), (strpos($order_tietosisalto, "NAD+DP+") - strpos($order_tietosisalto, "NAD+SE+")));
 }
 else {
 	$edi_subj = t("Sis‰‰ntuleva EIH 1.4 EDI-tilaus");
@@ -253,9 +253,15 @@ while ($tietue = fgets($fd)) {
 	// Jos kyseess‰ on UNA (ensimm‰inen Orders 91.1 segmentti), niin etsit‰‰n t‰ss‰ vaiheessa NAD SE
 	if ($tunnus == "UNA") {
 		$tunnus = "NADSE"; // Myyj‰
+				
 		$nad_segmentit = explode("+", $nadse_segmentti);
 		$nad_kentta = explode(":", $nad_segmentit[2]);
 		$tieto = $nad_kentta[0];
+		
+		// otetaan NAD+PL kent‰st‰ "toim_ovttunnus"
+		$nad_kentta = explode(":", $nad_segmentit[6]);
+		$servinet_ovttunnus = $nad_kentta[0];
+		//$edi_ulos .= "\n$nad_kentta[0]"; 	
 	}
 
 	// Jos kyseess‰ NAD segmentti, tarkennetaan mik‰ NAD on kyseess‰ ja laitetaan $tieto kuntoon
@@ -504,7 +510,7 @@ while ($tietue = fgets($fd)) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and toim_ovttunnus = '$tieto'
 							and toim_ovttunnus not in ('','0')
-							and laji not in ('R','P')";
+							and laji not in ('R','P')";				
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -520,7 +526,27 @@ while ($tietue = fgets($fd)) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ovttunnus = '$tieto'
 							and ovttunnus not in ('','0')
-							and laji not in ('R','P')";
+							and laji not in ('R','P')";				
+				$result = mysql_query($query) or die($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$arow = mysql_fetch_array($result);
+					$vastaustapa .= $arow['tilausvahvistus'];
+					$edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
+				}
+			}
+			
+			if (!is_array($arow) and $edi_tyyppi == "edifact911") {
+				// t‰m‰ on v‰h‰n erikoiskeissi. joillain ketjuilla voi olla monia samalla ovttunnuksella 
+				// mutta toim_ovttunnuksen kohdalla voi olla myym‰l‰ tunnus tai vastaavaa.
+				
+				$query = "	SELECT *
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]'
+							and ovttunnus = '$tieto'
+							and toim_ovttunnus = '$servinet_ovttunnus'
+							and ovttunnus not in ('','0')
+							and laji not in ('R','P')";				
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -536,7 +562,7 @@ while ($tietue = fgets($fd)) {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakasnro = '$tieto'
 							and asiakasnro not in ('','0')
-							and laji not in ('R','P')";
+							and laji not in ('R','P')";				
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {

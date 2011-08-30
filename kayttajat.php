@@ -930,8 +930,8 @@
 					echo "</select></td></tr>";
 
 
-					echo "<tr><th align='left'>".t("Kassamyyjä").":</td>";
-					echo "<td><select name='kassamyyja'><option value=''>".t("Ei kassamyyjä")."</option>";
+					echo "<tr><th align='left'>".t("Kassamyyjä / oletuskassalipas").":</td>";
+					echo "<td><select name='kassamyyja'><option value=''>".t("Ei oletuskassalipasta")."</option>";
 
 					$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' ORDER BY nimi";
 					$vares = mysql_query($query) or pupe_error($query);
@@ -944,7 +944,7 @@
 
 					echo "</select></td></tr>";
 
-					echo "<tr><th align='left'>".t("Dynaaminen kassamyyjä").":</td>";
+					echo "<tr><th align='left'>".t("Kassamyyjä / kassalippaan valinta tilauksella").":</td>";
 
 					$sel1="";
 					$sel2="";
@@ -956,8 +956,8 @@
 						$sel2 = "selected";
 					}
 					echo "<td><select name='dynaaminen_kassamyynti'>";
-					echo "<option value='' $sel1>".t("Normaalimyyjä ei toimi kassamyyjänä")."</option>";
-					echo "<option value='o' $sel2>".t("Normaalimyyjä voi toimia tarpeen mukaan kassamyyjänä")."</option>";
+					echo "<option value='' $sel1>".t("Kassalipasta ei voi valita tilauksella")."</option>";
+					echo "<option value='o' $sel2>".t("Kassalippaan voi valita tilauksella")."</option>";
 					echo "</select></td>";
 
 					$sel0 = $sel1 = "";

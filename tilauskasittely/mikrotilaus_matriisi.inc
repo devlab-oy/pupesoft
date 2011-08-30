@@ -115,7 +115,7 @@
 							$query = "	SELECT *
 										FROM tuote
 										WHERE yhtio = '$kukarow[yhtio]'
-										AND tuoteno like '{$mikrotila_sesonki}_{$tuokoodi}% $koko'
+										AND (tuoteno like '{$mikrotila_sesonki}\_{$tuokoodi}% $koko' or tuoteno like '{$mikrotila_sesonki}\_{$tuokoodi}%\_$koko')
 										AND status != 'P'";
 							$rarresult = mysql_query($query) or pupe_error($query);
 
@@ -130,7 +130,7 @@
 								$query = "	SELECT *
 											FROM tuote
 											WHERE yhtio = '$kukarow[yhtio]'
-											AND tuoteno like '{$tuokoodi}% $koko'
+											AND (tuoteno like '{$tuokoodi}% $koko' or tuoteno like '{$tuokoodi}%\_$koko')
 											AND status != 'P'";
 								$rarresult = mysql_query($query) or pupe_error($query);
 
@@ -146,7 +146,7 @@
 								$query = "	SELECT *
 											FROM tuote
 											WHERE yhtio = '$kukarow[yhtio]'
-											AND tuoteno like '{$mikrotila_sesonki}_{$tuokoodi}% $koko'";
+											AND (tuoteno like '{$mikrotila_sesonki}\_{$tuokoodi}% $koko' or tuoteno like '{$mikrotila_sesonki}\_{$tuokoodi}%\_$koko')";
 								$rarresult = mysql_query($query) or pupe_error($query);
 
 								if (mysql_num_rows($rarresult) == 1) {
@@ -161,7 +161,7 @@
 								$query = "	SELECT *
 											FROM tuote
 											WHERE yhtio = '$kukarow[yhtio]'
-											AND tuoteno like '{$tuokoodi}% $koko'";
+											AND (tuoteno like '{$tuokoodi}% $koko' or tuoteno like '{$tuokoodi}%\_$koko')";
 								$rarresult = mysql_query($query) or pupe_error($query);
 
 								if (mysql_num_rows($rarresult) == 1) {

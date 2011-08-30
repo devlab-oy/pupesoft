@@ -8621,7 +8621,8 @@ if (!function_exists("t_avainsana")) {
 				$orderlisa = " ORDER BY avainsana.jarjestys, avainsana.selite ";
 			}
 		}
-		else {
+
+		if ($orderlisa == "" and stripos($wherelisa, "ORDER BY") === FALSE) {
 			$orderlisa = " ORDER BY avainsana.jarjestys, avainsana.selite ";
 		}
 

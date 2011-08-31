@@ -872,14 +872,10 @@ if (!function_exists('rivi_original')) {
 		if ($laskutyyppi != 5 and $row["alv"] < 500) {
 			//Lasketaan saman kaavan mukaan kuin laskutus.inc:ssä, eli pyöristetään kaikki kerralla lopuksi!
 			if ($kurssi != 1) {
-				$verollrivi = $row["rivihinta_valuutassa"];
+				$verollrivi = $row["rivihinta_valuutassa"] * (1 + ($row["alv"] / 100));
 			}
 			else {
-				$verollrivi = $row["rivihinta"];
-			}
-
-			if ($yhtiorow["alv_kasittely"] != '') {
-				$verollrivi = $verollrivi * (1 + ($row["alv"] / 100));
+				$verollrivi = $row["rivihinta"] * (1 + ($row["alv"] / 100));
 			}
 
 			$oikpos = $pdf_lasku->strlen(hintapyoristys($verollrivi), $pieni);
@@ -998,7 +994,7 @@ if (!function_exists('rivi_plain')) {
 
 		// A-hinta
 		$oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($veroton_hinta, $kurssi)), $norm);
-		$pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
+		$pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi)), $thispage, $norm);
 
 		//Alennus
 		$alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');

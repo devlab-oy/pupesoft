@@ -115,6 +115,12 @@ else {
 
 	// katotaan ollaanko valittu joku poikkeava kassalipas
 	if ($kertakassa != '') {
+
+		// Ohitetaan kassamyynti
+		if ($kertakassa == 'EI_KASSAMYYNTIA') {
+			$kertakassa = "";
+		}
+
 		$query = "UPDATE lasku SET kassalipas = '$kertakassa' where yhtio='$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
 		$result = pupe_query($query);
 

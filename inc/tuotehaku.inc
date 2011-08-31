@@ -3,14 +3,14 @@
 	$enarimatch = FALSE;
 
 	// Etsitän enarilla jos kappaleita ei ole syötetty eikä hakuja käytetty
-	if ((!isset($kpl) or $kpl == "") and !is_array($kpl_array) and substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#') {
+	if ((!isset($kpl) or $kpl == "") and !is_array($kpl_array) and substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and substr($tuoteno,0,1) != '@') {
 
 		$query = "	SELECT *
 					FROM tuote
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 					and tuote.eankoodi = '$tuoteno'";
-		$tresult = mysql_query($query) or pupe_error($query);
+		$tresult = pupe_query($query);
 
 		if (mysql_num_rows($tresult) == 1) {
 			//Tehdään tuotenumero ja kpl
@@ -23,13 +23,13 @@
 
 	if (!$enarimatch) {
 
-		if (substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and $yhtiorow["automaattinen_tuotehaku"] != '') {
+		if (substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and substr($tuoteno,0,1) != '@' and $yhtiorow["automaattinen_tuotehaku"] != '') {
 			$query = "	SELECT *
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.tuoteno = '$tuoteno'
 						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 				$query = "	SELECT *
@@ -37,7 +37,7 @@
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							and tuote.tuoteno LIKE '$tuoteno%'
 							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) != 1) {
 					$tuoteno = $tuoteno . "*";
@@ -50,7 +50,7 @@
 		}
 
 	 	// Nyt me selataan
-		if ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*' or substr($tuoteno,0,1) == '?') and trim(strlen($tuoteno)) > 2) {
+		if ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*' or substr($tuoteno,0,1) == '?' or substr($tuoteno,0,1) == "@") and trim(strlen($tuoteno)) >= 2) {
 
 			$lisa1 		= "";
 			$ulos  		= "";
@@ -64,7 +64,7 @@
 							from tuotteen_toimittajat
 							where yhtio = '$kukarow[yhtio]'
 							and toim_tuoteno = '".substr($tuoteno,1)."'";
-				$tresult = mysql_query($query) or pupe_error($query);
+				$tresult = pupe_query($query);
 
 				while ($toimirivi = mysql_fetch_assoc($tresult)) {
 					$lisa1 .= "'$toimirivi[tuoteno]',";
@@ -93,6 +93,11 @@
 
 				$lisa1 = " and tuote.tuoteno like '" . $tuoteno . "%' ";
 			}
+			elseif (substr($tuoteno,0,1) == '@') {
+				// Jos ensimmäinen merkki on AT-merkki niin etsitään kyseisellä tuotenumero
+				$tuoteno = substr($tuoteno,1);
+				$lisa1 = " and tuote.tuoteno = '".$tuoteno."' ";
+			}
 
 			$yhtiot 	= "";
 			$konsyhtiot = array();
@@ -108,7 +113,7 @@
 							from yhtio
 							where konserni = '$yhtiorow[konserni]'
 							and konserni != ''";
-				$presult = mysql_query($query) or pupe_error($query);
+				$presult = pupe_query($query);
 
 				if (mysql_num_rows($presult) > 0) {
 					while ($prow = mysql_fetch_assoc($presult)) {
@@ -139,7 +144,7 @@
 								FROM lasku
 								WHERE yhtio	= '$kukarow[yhtio]'
 								and tunnus  = '$kukarow[kesken]'";
-					$vieres = mysql_query($query) or pupe_error($query);
+					$vieres = pupe_query($query);
 					$vierow = mysql_fetch_assoc($vieres);
 				}
 				elseif ($verkkokauppa != "") {
@@ -157,7 +162,7 @@
 								FROM asiakas
 								WHERE yhtio	= '$kukarow[yhtio]'
 								and tunnus  = '$kukarow[oletus_asiakas]'";
-					$vieres = mysql_query($query) or pupe_error($query);
+					$vieres = pupe_query($query);
 					$vierow = mysql_fetch_assoc($vieres);
 				}
 
@@ -194,7 +199,7 @@
 						$poislisa
 						ORDER BY tuote.tuoteno
 						LIMIT 201";
-			$thresult = mysql_query($query) or pupe_error($query);
+			$thresult = pupe_query($query);
 
 			$rows = array();
 
@@ -231,7 +236,7 @@
 									$kieltolisa
 									$poislisa
 									ORDER BY korvaavat.jarjestys, korvaavat.tuoteno";
-						$kores = mysql_query($query) or pupe_error($query);
+						$kores = pupe_query($query);
 
 						if (mysql_num_rows($kores) > 0) {
 
@@ -355,7 +360,7 @@
 								AND kieli = '$yhtiorow[kieli]'
 								AND tuoteno = '$trow[tuoteno]'
 								LIMIT 1";
-					$parametrit_res = mysql_query($query) or pupe_error($query);
+					$parametrit_res = pupe_query($query);
 					$parametritrivi = mysql_fetch_assoc($parametrit_res);
 
 					if (trim($parametritrivi["selite"]) != "" and $parametritrivi["selite"] != $edvariaatio) {
@@ -374,7 +379,7 @@
 				}
 			}
 		}
-		elseif ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*' or substr($tuoteno,0,1) == '?') and trim(strlen($tuoteno)) < 3) {
+		elseif ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*' or substr($tuoteno,0,1) == '?' or substr($tuoteno,0,1) == '@') and trim(strlen($tuoteno)) < 2) {
 			$kentta			= 'tuoteno';
 			$varaosavirhe 	= t("VIRHE: Hakusanan on sisällettävä vähintään kaksi merkkiä")."!<br>";
 			$tuoteno		= '';
@@ -394,7 +399,7 @@
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 							$lisa1";
-				$tresult = mysql_query($query) or pupe_error($query);
+				$tresult = pupe_query($query);
 
 				if (mysql_num_rows($tresult) > 1) {
 					$kentta='tuoteno';
@@ -428,7 +433,7 @@
 						WHERE tuote.yhtio = '$hakyhtio'
 						and tuote.tuoteno = '$tuoteno'
 						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) != 1) {
 				$kentta = 'tuoteno';

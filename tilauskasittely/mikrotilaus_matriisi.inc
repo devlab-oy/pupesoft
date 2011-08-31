@@ -108,39 +108,75 @@
 							$koko = $excelrivi[$kokorivi][$er4];
 
 							$ohitus = 0;
+							$tyoteloyty = FALSE;
 
 							#echo "<th>$koko/$kpl</th>";
 
 							$query = "	SELECT *
 										FROM tuote
 										WHERE yhtio = '$kukarow[yhtio]'
-										AND tuoteno like '{$mikrotila_sesonki}_{$tuokoodi}% $koko'
+										AND (tuoteno like '{$mikrotila_sesonki}\_{$tuokoodi}% $koko' or tuoteno like '{$mikrotila_sesonki}\_{$tuokoodi}%\_$koko')
 										AND status != 'P'";
 							$rarresult = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($rarresult) == 1) {
 								$trow = mysql_fetch_assoc($rarresult);
+								$tyoteloyty = TRUE;
 
 								#echo "<th>$trow[tuoteno]: $kpl</th>";
 							}
-							else {
 
+							if (!$tyoteloyty) {
 								$query = "	SELECT *
 											FROM tuote
 											WHERE yhtio = '$kukarow[yhtio]'
-											AND tuoteno like '{$mikrotila_sesonki}_{$tuokoodi}% $koko'";
+											AND (tuoteno like '{$tuokoodi}% $koko' or tuoteno like '{$tuokoodi}%\_$koko')
+											AND status != 'P'";
 								$rarresult = mysql_query($query) or pupe_error($query);
 
 								if (mysql_num_rows($rarresult) == 1) {
 									$trow = mysql_fetch_assoc($rarresult);
+									$tyoteloyty = TRUE;
 
 									#echo "<th>$trow[tuoteno]: $kpl</th>";
 								}
-								else {
-									echo "<font class='message'>VIRHE: Rivillä $rivilask1: ".t("Tuotetta")." $mikrotila_sesonki $tuokoodi $koko ".t("ei löydy")."!</font><br>";
-									$ohitus = 1;
+							}
+
+							if (!$tyoteloyty) {
+								$query = "	SELECT *
+											FROM tuote
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND (tuoteno like '{$mikrotila_sesonki}\_{$tuokoodi}% $koko' or tuoteno like '{$mikrotila_sesonki}\_{$tuokoodi}%\_$koko')";
+								$rarresult = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($rarresult) == 1) {
+									$trow = mysql_fetch_assoc($rarresult);
+									$tyoteloyty = TRUE;
+
+									#echo "<th>$trow[tuoteno]: $kpl</th>";
 								}
 							}
+
+							if (!$tyoteloyty) {
+								$query = "	SELECT *
+											FROM tuote
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND (tuoteno like '{$tuokoodi}% $koko' or tuoteno like '{$tuokoodi}%\_$koko')";
+								$rarresult = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($rarresult) == 1) {
+									$trow = mysql_fetch_assoc($rarresult);
+									$tyoteloyty = TRUE;
+
+									#echo "<th>$trow[tuoteno]: $kpl</th>";
+								}
+							}
+
+							if (!$tyoteloyty) {
+								echo "<font class='message'>VIRHE: Rivillä $rivilask1: ".t("Tuotetta")." $mikrotila_sesonki $tuokoodi $koko ".t("ei löydy")."!</font><br>";
+								$ohitus = 1;
+							}
+
 
 							if ($ohitus == 0) {
 
@@ -169,10 +205,10 @@
 						        }
 
 						        //lisätään rivi
-						        require ("lisaarivi.inc");								
-								
-								if ($rivilask1 % 10 == 0) flush(); 
-								
+						        require ("lisaarivi.inc");
+
+								if ($rivilask1 % 10 == 0) flush();
+
 							}
 						}
 					}
@@ -215,7 +251,7 @@
 				<table>";
 
 		echo "<tr><th>".t("Valitse tiedosto").":</th><td><input name='userfile' type='file'></td></tr>";
-		
+
 		echo "<tr><th>".t("Valitse sesonki:")."</th>
 				<td><select name='mikrotila_sesonki'>
 				<option value='SS10'>".t("SS10")."

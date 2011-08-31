@@ -38,7 +38,7 @@
 		$query = "	SELECT tunnus
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 0 ) {
 			$tee = 'HAKU';
@@ -48,7 +48,7 @@
 			$query = "	SELECT *
 						FROM tuote
 						WHERE yhtio = '$hakyhtio' and tuoteno = '$tuoteno'";
-			$stresult = mysql_query($query) or pupe_error($query);
+			$stresult = pupe_query($query);
 
 			if (mysql_num_rows($stresult) == 0 ) {
 				$tee = 'HAKU';
@@ -60,7 +60,7 @@
 				$tuotepaikat_query = "	SELECT *
 										FROM tuotepaikat
 										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
-				$tuotepaikat_result = mysql_query($tuotepaikat_query) or pupe_error($tuotepaikat_query);
+				$tuotepaikat_result = pupe_query($tuotepaikat_query);
 
 				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($tuotepaikat_result) == 0 and $otsikkorivi["ei_saldoa"] == "") {
 					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
@@ -91,7 +91,7 @@
 											laatija			= '$kukarow[kuka]',
 											muutospvm		= now(),
 											muuttaja		= '$kukarow[kuka]'";
-					$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
+					$tuotepaikka_result = pupe_query($tuotepaikka_query);
 				}
 
 				// tehd‰‰n vanhasta tuotteesta 1:1 kopio...
@@ -99,46 +99,45 @@
 
 				for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
-
-					if (mysql_field_name($stresult,$i)=='yhtio') {
+					if (mysql_field_name($stresult,$i) == 'yhtio') {
 						$query .= "yhtio='$kukarow[yhtio]',";
 					}
 					// tuotenumeroksi tietenkin uustuoteno
-					elseif (mysql_field_name($stresult,$i)=='tuoteno') {
+					elseif (mysql_field_name($stresult,$i) == 'tuoteno') {
 						$query .= "tuoteno='$uustuoteno',";
 					}
 					// laatijaksi klikkaaja
-					elseif (mysql_field_name($stresult,$i)=='laatija') {
+					elseif (mysql_field_name($stresult,$i) == 'laatija') {
 						$query .= "laatija='$kukarow[kuka]',";
 					}
 					// luontiaika
-					elseif (mysql_field_name($stresult,$i)=='luontiaika') {
+					elseif (mysql_field_name($stresult,$i) == 'luontiaika') {
 						$query .= mysql_field_name($stresult,$i)."=now(),";
 					}
 					// luontiaika
-					elseif (mysql_field_name($stresult,$i)=='muutospvm') {
+					elseif (mysql_field_name($stresult,$i) == 'muutospvm') {
 						$query .= mysql_field_name($stresult,$i)."=now(),";
 					}
 
 					// n‰m‰ kent‰t tyhjennet‰‰n
-					elseif (mysql_field_name($stresult,$i)=='kehahin' or
-							mysql_field_name($stresult,$i)=='vihahin' or
-							mysql_field_name($stresult,$i)=='vihapvm' or
-							mysql_field_name($stresult,$i)=='epakurantti25pvm' or
-							mysql_field_name($stresult,$i)=='epakurantti50pvm' or
-							mysql_field_name($stresult,$i)=='epakurantti75pvm' or
-							mysql_field_name($stresult,$i)=='epakurantti100pvm' or
-							mysql_field_name($stresult,$i)=='eankoodi') {
+					elseif (mysql_field_name($stresult,$i) == 'kehahin' or
+							mysql_field_name($stresult,$i) == 'vihahin' or
+							mysql_field_name($stresult,$i) == 'vihapvm' or
+							mysql_field_name($stresult,$i) == 'epakurantti25pvm' or
+							mysql_field_name($stresult,$i) == 'epakurantti50pvm' or
+							mysql_field_name($stresult,$i) == 'epakurantti75pvm' or
+							mysql_field_name($stresult,$i) == 'epakurantti100pvm' or
+							mysql_field_name($stresult,$i) == 'eankoodi') {
 						$query .= mysql_field_name($stresult,$i)."='',";
 					}
 					// ja kaikki muut paitsi tunnus sellaisenaan
-					elseif (mysql_field_name($stresult,$i)!='tunnus') {
+					elseif (mysql_field_name($stresult,$i) != 'tunnus') {
 						$query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
 					}
 				}
 				$query = substr($query,0,-1);
 
-				$stresult = mysql_query($query) or pupe_error($query);
+				$stresult = pupe_query($query);
 				$id = mysql_insert_id();
 
 				//	T‰m‰ funktio tekee myˆs oikeustarkistukset!
@@ -147,7 +146,7 @@
 				$query = "	SELECT *
 							FROM tuotteen_toimittajat
 							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
-				$stresult = mysql_query($query) or pupe_error($query);
+				$stresult = pupe_query($query);
 
 				if (mysql_num_rows($stresult) != 0 ) {
 					while ($otsikkorivi = mysql_fetch_array($stresult)) {
@@ -156,27 +155,73 @@
 						for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
 							// tuotenumeroksi tietenkin uustuoteno
-							if (mysql_field_name($stresult,$i)=='tuoteno') {
+							if (mysql_field_name($stresult,$i) == 'tuoteno') {
 								$query .= "tuoteno='$uustuoteno',";
 							}
 							// ja kaikki muut paitsi tunnus sellaisenaan
-							elseif (mysql_field_name($stresult,$i)!='tunnus') {
+							elseif (mysql_field_name($stresult,$i) != 'tunnus') {
 								$query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
 							}
 						}
 						$query = substr($query,0,-1);
 
-						$astresult = mysql_query($query) or pupe_error($query);
+						$astresult = pupe_query($query);
 						$id2 = mysql_insert_id();
 
 						synkronoi($kukarow["yhtio"], "tuotteen_toimittajat", $id2, "", "");
 					}
 				}
 
+				// kopioidaan dynaamisen puun tiedot uudelle tuotteelle
+				$query = "	SELECT * 
+							FROM puun_alkio
+							WHERE yhtio = '$kukarow[yhtio]' and liitos = '$tuoteno'";
+				$stresult = pupe_query($query);
+				
+				if (mysql_num_rows($stresult) != 0) {
+					
+					while($otsikkorivi = mysql_fetch_array($stresult)) {
+
+						// tehd‰‰n vanhasta alkiosta kopio...
+						$query = "INSERT into puun_alkio set ";
+					
+						for ($i=0; $i<mysql_num_fields($stresult); $i++) {
+
+							if (mysql_field_name($stresult,$i) == 'yhtio') {
+								$query .= "yhtio='$kukarow[yhtio]',";
+							}
+							// liitokseksi tietenkin uustuoteno
+							elseif (mysql_field_name($stresult,$i) == 'liitos') {
+								$query .= "liitos='$uustuoteno',";
+							}
+							// laatijaksi klikkaaja
+							elseif (mysql_field_name($stresult,$i) == 'laatija') {
+								$query .= "laatija='$kukarow[kuka]',";
+							}
+							// luontiaika
+							elseif (mysql_field_name($stresult,$i) == 'luontiaika') {
+								$query .= mysql_field_name($stresult,$i)."=now(),";
+							}
+							// n‰m‰ kent‰t tyhjennet‰‰n
+							elseif (mysql_field_name($stresult,$i) == 'muutospvm' or
+									mysql_field_name($stresult,$i) == 'muuttaja') {
+								$query .= mysql_field_name($stresult,$i)."='',";
+							}
+							// ja kaikki muut paitsi tunnus sellaisenaan
+							elseif (mysql_field_name($stresult,$i) != 'tunnus') {
+								$query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
+							}
+						}
+						
+						$query = substr($query,0,-1);
+						$puunalkio_result = pupe_query($query);
+					}
+				}
+				
 				$query = "	SELECT tunnus
 							FROM tuote
 							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$rivi = mysql_fetch_array($result);
 
 				//	L‰hetet‰‰n mailia t‰st‰ eteenp‰in jos meill‰ on vastaanottajia
@@ -185,7 +230,7 @@
 					$header .= "MIME-Version: 1.0\n" ;
 
 					$query = "SELECT * from yhtio where yhtio='$hakyhtio'";
-					$yres = mysql_query($query) or pupe_error($query);
+					$yres = pupe_query($query);
 					$yrow = mysql_fetch_array($yres);
 
 					$content = $kukarow["nimi"]." ".t("kopioi yhtiˆn")." $yrow[nimi] ".t("tuotteen")." '$tuoteno' ".t("yhtiˆn")." $yhtiorow[nimi] ".t("tuotteeksi")." '$uustuoteno'\n\n";
@@ -209,7 +254,7 @@
 		$query = "	SELECT tunnus
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$tee = 'AVALITTU';

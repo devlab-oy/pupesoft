@@ -92,7 +92,7 @@
 		echo "<th>",t("Tuotteen status"),"</th>";
 		echo "<td><select name='status'><option value=''>".t("Kaikki")."</option>";
 
-		while ($lajirow = mysql_fetch_array ($result)) {
+		while ($lajirow = mysql_fetch_assoc ($result)) {
 			$selli = '';
 			if ($lajirow['selite'] == $status) {
 				$selli = 'SELECTED';
@@ -283,7 +283,7 @@
 
 		if (!$asiakasanalyysi) {
 			if ($status != '') {
-				$abc_lisa .= " and status = '".(string) $status."' ";
+				$abc_lisa .= " and abc_aputaulu.status = '".(string) $status."' ";
 			}
 		}
 
@@ -298,8 +298,8 @@
 					$abc_lisa
 					$lisa
 					$saapumispvmlisa";
-		$sumres = mysql_query($query) or pupe_error($query);
-		$sumrow = mysql_fetch_array($sumres);
+		$sumres = pupe_query($query);
+		$sumrow = mysql_fetch_assoc($sumres);
 
 		if ($sumrow["yhtkate"] == 0) {
 			$sumrow["yhtkate"] = 0.01;
@@ -390,15 +390,15 @@
 					$saapumispvmlisa
 					$groupby
 					$orderby";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		$i = 0;
 
-		while ($row = mysql_fetch_array($res)) {
+		while ($row = mysql_fetch_assoc($res)) {
 
 			$query = "SELECT * FROM abc_parametrit WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$paramtyppi' and luokka = '$ryhmanimet[$i]'";
-			$paramres = mysql_query($query) or pupe_error($query);
-			$paramrow = mysql_fetch_array($paramres);
+			$paramres = pupe_query($query);
+			$paramrow = mysql_fetch_assoc($paramres);
 
 			$i++;
 
@@ -413,7 +413,7 @@
 					$keyres = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
 				}
 
-				$keyosa = mysql_fetch_array($keyres);
+				$keyosa = mysql_fetch_assoc($keyres);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_osasto[]=$row[osasto]&lisatiedot=$lisatiedot&status=$status'>$row[osasto] $keyosa[selitetark]</a></td>";
 			}
@@ -427,7 +427,7 @@
 					$keyres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");
 				}
 
-				$keytry = mysql_fetch_array($keyres);
+				$keytry = mysql_fetch_assoc($keyres);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_try[]=$row[try]&lisatiedot=$lisatiedot&status=$status'>$row[try] $keytry[selitetark]</a></td>";
 			}
@@ -442,8 +442,8 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								and myyja = '$row[myyjanro]'
 								AND myyja > 0";
-				$myyjares = mysql_query($keymyyja) or pupe_error($keymyyja);
-				$keytuotemyyja = mysql_fetch_array($myyjares);
+				$myyjares = pupe_query($keymyyja);
+				$keytuotemyyja = mysql_fetch_assoc($myyjares);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_tuotemyyja[]=$row[myyjanro]&lisatiedot=$lisatiedot&status=$status'>$keytuotemyyja[nimi]</a></td>";
 			}
@@ -454,8 +454,8 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								and myyja = '$row[ostajanro]'
 								AND myyja > 0";
-				$ostajares = mysql_query($keyostaja) or pupe_error($keymyyja);
-				$keytuoteostaja = mysql_fetch_array($ostajares);
+				$ostajares = pupe_query($keyostaja);
+				$keytuoteostaja = mysql_fetch_assoc($ostajares);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_tuoteostaja[]=$row[ostajanro]&lisatiedot=$lisatiedot&status=$status'>$keytuoteostaja[nimi]</a></td>";
 			}

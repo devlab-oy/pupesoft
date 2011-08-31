@@ -9,9 +9,11 @@ if ($tee == 'V') {
 	// Lasku on valittu ja sitä tiliöidään (suoritetaan)
 	$query = "	SELECT *
 				FROM tiliointi
-				WHERE tunnus = '$stunnus' and yhtio = '$kukarow[yhtio]' and tilino ='$yhtiorow[selvittelytili]'";
-	$result = mysql_query($query) or pupe_error($query);
-	$tiliointirow = mysql_fetch_array($result);
+				WHERE tunnus = '$stunnus'
+				and yhtio    = '$kukarow[yhtio]'
+				and tilino   = '$yhtiorow[selvittelytili]'";
+	$result = pupe_query($query);
+	$tiliointirow = mysql_fetch_assoc($result);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Suoritus katosi")."!</font><br>";
@@ -20,49 +22,61 @@ if ($tee == 'V') {
 
 	$query = "	SELECT *
 				FROM lasku
-				WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tila = 'Q'";
-	$result = mysql_query($query) or pupe_error($query);
+				WHERE tunnus = '$tunnus'
+				and yhtio    = '$kukarow[yhtio]'
+				and tila     = 'Q'";
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Lasku katosi, tai sen on joku jo suorittanut")."!</font><br>";
 		exit;
 	}
 
-	$laskurow = mysql_fetch_array($result);
+	$laskurow = mysql_fetch_assoc($result);
+
+	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["ostovelat"]);
 
 	// Oletustiliöinnit
 	// Ostovelat
 	$query = "	INSERT INTO tiliointi SET
-				yhtio = '$kukarow[yhtio]',
-				ltunnus = '$laskurow[tunnus]',
-				tilino = '$yhtiorow[ostovelat]',
-				tapvm = '$tiliointirow[tapvm]',
-				summa = '$laskurow[summa]',
-				vero = 0,
-				lukko = '',
-				laatija = '$kukarow[kuka]',
-				laadittu = now()";
-	$xresult = mysql_query($query) or pupe_error($query);
+				yhtio 		= '$kukarow[yhtio]',
+				ltunnus 	= '$laskurow[tunnus]',
+				tilino 		= '$yhtiorow[ostovelat]',
+				kustp    	= '{$kustp_ins}',
+				kohde	 	= '{$kohde_ins}',
+				projekti 	= '{$projekti_ins}',
+				tapvm 		= '$tiliointirow[tapvm]',
+				summa 		= '$laskurow[summa]',
+				vero 		= 0,
+				lukko 		= '',
+				laatija 	= '$kukarow[kuka]',
+				laadittu 	= now()";
+	$xresult = pupe_query($query);
+
+	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"]);
 
 	// Rahatili
 	$query = "	INSERT INTO tiliointi SET
-				yhtio = '$kukarow[yhtio]',
-				ltunnus = '$laskurow[tunnus]',
-				tilino = '$yhtiorow[selvittelytili]',
-				tapvm = '$tiliointirow[tapvm]',
-				summa = -1 * $laskurow[summa],
-				vero = 0,
-				lukko = '',
-				laatija = '$kukarow[kuka]',
-				laadittu = now()";
-	$xresult = mysql_query($query) or pupe_error($query);
+				yhtio 		= '$kukarow[yhtio]',
+				ltunnus 	= '$laskurow[tunnus]',
+				tilino 		= '$yhtiorow[selvittelytili]',
+				kustp    	= '{$kustp_ins}',
+				kohde	 	= '{$kohde_ins}',
+				projekti 	= '{$projekti_ins}',
+				tapvm 		= '$tiliointirow[tapvm]',
+				summa 		= -1 * $laskurow[summa],
+				vero 		= 0,
+				lukko 		= '',
+				laatija 	= '$kukarow[kuka]',
+				laadittu 	= now()";
+	$xresult = pupe_query($query);
 
 	$query = "	UPDATE lasku set
-				tila = 'Y',
-				mapvm = '$tiliointirow[tapvm]',
-				maksu_kurssi = 1
+				tila 			= 'Y',
+				mapvm 			= '$tiliointirow[tapvm]',
+				maksu_kurssi 	= 1
 				WHERE tunnus = '$tunnus'";
-	$xresult = mysql_query($query) or pupe_error($query);
+	$xresult = pupe_query($query);
 	$tee = '';
 
 }
@@ -73,17 +87,18 @@ if ($tee == '') {
 	echo "<table>";
 
 	// katotaan jos meillä on jotain selvittelytilejä pankkitilien takana
-	$query = "	SELECT oletus_selvittelytili 
-				from yriti 
-				where yhtio = '$kukarow[yhtio]' 
-				and oletus_selvittelytili != ''";
-	$result = mysql_query($query) or pupe_error($query);
+	$query = "	SELECT group_concat(concat('\'',oletus_selvittelytili,'\'')) oletus_selvittelytilit
+				FROM yriti
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND oletus_selvittelytili != ''";
+	$result = pupe_query($query);
+	$trow = mysql_fetch_assoc($result);
 
-	$selvittelytilit = "'$yhtiorow[selvittelytili]',";
-	while ($trow = mysql_fetch_array($result)) {
-		$selvittelytilit .= "'$trow[oletus_selvittelytili]',";
+	$selvittelytilit = "'$yhtiorow[selvittelytili]'";
+
+	if ($trow["oletus_selvittelytilit"] != "") {
+		$selvittelytilit .= ", $trow[oletus_selvittelytilit]";
 	}
-	$selvittelytilit = substr($selvittelytilit, 0, -1); // vika pilkku pois
 
 	$query = "	SELECT nimi nimi, lasku.tapvm tapvm, ifnull(tiliointi.tapvm, 'Ei sopivaa suoritusta') suorituspvm, tiliointi.selite tilioteselite, lasku.summa, lasku.tunnus, tiliointi.tunnus stunnus
 				FROM lasku use index (yhtio_tila_mapvm)
@@ -92,23 +107,27 @@ if ($tee == '') {
 				AND lasku.tila = 'Q'
 				AND lasku.mapvm = '0000-00-00'
 				AND lasku.suoraveloitus != ''";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
 
 		echo "<font class='message'>".t("Kohdistamattomat suoraveloituslaskut")."</font>";
 
 		echo "<tr>";
+
 		for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
 		}
+
 		echo "<th></th></tr>";
 
-		while ($trow = mysql_fetch_array ($result)) {
+		while ($trow = mysql_fetch_assoc($result)) {
 			echo "<tr>";
+
 			for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
-				echo "<td>" . $trow[$i] . "</td>";
+				echo "<td>".$trow[mysql_field_name($result,$i)]."</td>";
 			}
+
 			if ($trow['suorituspvm'] != 'Ei sopivaa suoritusta') {
 				echo "<td><form name = 'valinta' action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name = 'tee' value = 'V'>
@@ -117,7 +136,7 @@ if ($tee == '') {
 					<input type = 'submit' value = '".t("suorita")."'></form></td>";
 			}
 			else {
-				echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[tunnus]'>Tutki</a></td>";
+				echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[tunnus]'>".t("Tutki")."</a></td>";
 			}
 			echo "</tr>";
 		}

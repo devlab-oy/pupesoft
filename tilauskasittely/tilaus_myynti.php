@@ -880,11 +880,18 @@ if (isset($tyhjenna)) {
 
 if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kertakassa != '')) and $kukarow['extranet'] == '') {
 
-	if ($kassamyyja_kesken != 'ei' and !isset($seka)) {
+	if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and isset($kertakassa) and $kertakassa == 'EI_KASSAMYYNTIA') {
+		$kassamyyja_kesken 	= "";
+		$kateisohitus		= "X";
+	}
+	elseif (!isset($kassamyyja_kesken) and !isset($seka)) {
 
-		$query_maksuehto = " SELECT *
-							 FROM maksuehto
-							 WHERE yhtio='$kukarow[yhtio]' and kateinen != '' and kaytossa = '' and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
+		$query_maksuehto = "	SELECT *
+								FROM maksuehto
+							 	WHERE yhtio = '$kukarow[yhtio]'
+								and kateinen != ''
+								and kaytossa = ''
+								and (sallitut_maat = '' or sallitut_maat like '%$laskurow[maa]%')";
 		$maksuehtores = pupe_query($query_maksuehto);
 
 		if (mysql_num_rows($maksuehtores) > 1) {
@@ -934,25 +941,16 @@ if ($tee == "VALMIS" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOM
 
 			echo "</table>";
 
+			if (@include("inc/footer.inc"));
+			elseif (@include("footer.inc"));
 			exit;
 		}
 		else {
-
-			$maksuehtorow = mysql_fetch_assoc($maksuehtores);
-
-			echo "<form action='' method='post'>";
-			echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
-			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-			echo "<input type='hidden' name='mista' value='$mista'>";
-			echo "<input type='hidden' name='tee' value='VALMIS'>";
-			echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
-			echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
-			echo "<input type='hidden' name='kateinen' value='$kateinen'>";
-			echo "<input type='hidden' name='toim' value='$toim'>";
-			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
-			echo "</form></tr>";
+			// Mennään laskun maksuehdolla, jos yhtiöllä ei ole useampia käteismaksuehtoja
+			$kassamyyja_kesken 	= "ei";
+			$maksutapa 			= $laskurow["maksuehto"];
+			$kateisohitus		= "";
 		}
-		echo "</table>";
 	}
 	elseif ($kassamyyja_kesken == 'ei' and $seka == 'X') {
 		$query_maksuehto = " SELECT *
@@ -1052,15 +1050,19 @@ if ($tee == 'VALMIS' and $kukarow['extranet'] != '') {
 				AND tilausrivi.tyyppi != 'D'";
 	$varattu_check_res = pupe_query($query);
 	$varattu_nollana = false;
+
 	while ($varattu_check_row = mysql_fetch_assoc($varattu_check_res)) {
 		if ($varattu_check_row['varattu'] == 0) $varattu_nollana = true;
 	}
+
 	if ($varattu_nollana) $tee = '';
 }
 
 if ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kukarow['extranet'] == '' and $kateisohitus == "") {
 
-	if ($kertakassa == "") $kertakassa = $kukarow["kassamyyja"];
+	if ($kertakassa == '') {
+		$kertakassa = $kukarow["kassamyyja"];
+	}
 
 	$query_maksuehto = "UPDATE lasku
 						SET maksuehto 	= '$maksutapa',
@@ -1791,7 +1793,10 @@ if ($tee == '') {
 		}
 
 		// haetaan maksuehdoen tiedot tarkastuksia varten
-		$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+		$apuqu = "	SELECT *
+					FROM maksuehto
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus  = '$laskurow[maksuehto]'";
 		$meapu = pupe_query($apuqu);
 
 		$kassalipas = "";
@@ -1802,15 +1807,24 @@ if ($tee == '') {
 			// jos kyseessä oli käteinen
 			if ($meapurow["kateinen"] != "") {
 				// haetaan toimitustavan tiedot tarkastuksia varten
-				$apuqu2 = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+				$apuqu2 = "	SELECT *
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND selite  = '$toimitustapa'";
 				$meapu2 = pupe_query($apuqu2);
 				$meapu2row = mysql_fetch_assoc($meapu2);
 
 				// ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
 				if ($meapu2row["nouto"] == "") {
-					$apuqu = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and nouto != '' order by jarjestys limit 1";
+					$apuqu = "	SELECT *
+								FROM toimitustapa
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND nouto != ''
+								ORDER BY jarjestys
+								LIMIT 1";
 					$meapu = pupe_query($apuqu);
 					$apuro = mysql_fetch_assoc($meapu);
+
 					$toimitustapa = $apuro['selite'];
 
 					echo "<font class='error'>".t("Toimitustapa on oltava nouto, koska maksuehto on käteinen")."!</font><br><br>";
@@ -3880,17 +3894,27 @@ if ($tee == '') {
 
 				if ($trow['hinnastoon'] == 'V' and $toim != "SIIRTOLISTA" and $toim != 'VALMISTAVARASTOON') {
 					//	katsotaan löytyyko asiakasalennus / asikakashinta
-					$hinnat = alehinta($laskurow, $trow, $kpl, '', '', '',"hintaperuste,aleperuste");
 
-					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy, katotaan onko alennuksia.
+					// Reklamaatiolla ei huomioida kappalemääriin sidottuja alennuksia
+					if ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") {
+						$alemaara = 99999999999;
+					}
+					else {
+						$alemaara = $kpl;
+					}
+
+					$hinnat = alehinta($laskurow, $trow, $alemaara, '', '', '',"hintaperuste,aleperuste");
+
 					$onko_asiakkaalla_alennuksia = FALSE;
 
 					for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+						if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
 							$onko_asiakkaalla_alennuksia = TRUE;
+							break;
 						}
 					}
 
+					// Jos tuote näytetään vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei löydy
 					if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE) {
 
 						if ($kukarow['extranet'] != '') {
@@ -4486,7 +4510,7 @@ if ($tee == '') {
 			$sarakkeet_alku = 0;
 
 			// Sarakkeiden otsikot
-			$headerit = "<tr>$jarjlisa<th>".t("#")."</th>";
+			$headerit = "<tr>$jarjlisa<th>#</th>";
 			$sarakkeet++;
 
 			if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $laskurow["tilaustyyppi"] == "T" or ($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("RIVISYOTTO")))) {
@@ -5862,7 +5886,7 @@ if ($tee == '') {
 								</form> ";
 					}
 
-					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o" and $row["status"] != 'P') {
+					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o" and $row["status"] != 'P' and $row["status"] != 'X') {
 
 						echo " <form action='$PHP_SELF' method='post' name='jalkitoimita'>
 									<input type='hidden' name='toim' 			value = '$toim'>
@@ -7019,10 +7043,16 @@ if ($tee == '') {
 				}
 
 				if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
-					if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kukarow["kassamyyja"] == "") {
-						echo "<br><br>".t("Valitse kassalipas").":<br><select name='kertakassa'><option value=''>".t("Ei kassamyyntiä")."</option>";
 
-						$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' ORDER BY nimi";
+					if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
+						echo "<br><br>".t("Valitse kassalipas").":<br>
+								<select name='kertakassa'>
+								<option value='EI_KASSAMYYNTIA'>".t("Ei kassamyyntiä")."</option>";
+
+						$query = "	SELECT *
+									FROM kassalipas
+									WHERE yhtio = '$kukarow[yhtio]'
+									ORDER BY nimi";
 						$vares = pupe_query($query);
 
 						while ($varow = mysql_fetch_assoc($vares)) {
@@ -7042,12 +7072,12 @@ if ($tee == '') {
 					echo "<option value=''>".t("Ei kuittikopiota")."</option>";
 
 					$querykieli = "	SELECT *
-									from kirjoittimet
-									where yhtio = '$kukarow[yhtio]'
+									FROM kirjoittimet
+									WHERE yhtio = '$kukarow[yhtio]'
 									ORDER BY kirjoitin";
 					$kires = pupe_query($querykieli);
 
-					while ($kirow=mysql_fetch_assoc($kires)) {
+					while ($kirow = mysql_fetch_assoc($kires)) {
 						echo "<option value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
 					}
 

@@ -10624,8 +10624,19 @@ if (!function_exists("paivitakat")) {
 if (!function_exists("muutaOksienRL")) {
 	function muutaOksienRL($laji, $kohdevas, $muutos) {
 		global $kukarow;
-		pupe_query("UPDATE dynaaminen_puu SET lft = lft+{$muutos} WHERE yhtio = '{$kukarow["yhtio"]}' AND laji = '{$laji}' and lft >= '{$kohdevas}'");
-		pupe_query("UPDATE dynaaminen_puu SET rgt = rgt+{$muutos} WHERE yhtio = '{$kukarow["yhtio"]}' AND laji = '{$laji}' and rgt >= '{$kohdevas}'");
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET lft = lft+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}' and lft >= '{$kohdevas}'";
+		$re = pupe_query($qu);
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET rgt = rgt+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}'
+				and rgt >= '{$kohdevas}'";
+		$re = pupe_query($qu);
 	}
 }
 
@@ -10633,9 +10644,22 @@ if (!function_exists("muutaOksienRL")) {
 if (!function_exists("muutaOksavalinRL")) {
 	function muutaOksavalinRL($laji, $src, $muutos) {
 		global $kukarow;
-		
-		pupe_query("UPDATE dynaaminen_puu SET lft=lft+{$muutos} WHERE yhtio = '{$kukarow["yhtio"]}' AND laji = '{$laji}' AND lft >= {$src['lft']} AND lft <= {$src['rgt']}");
-		pupe_query("UPDATE dynaaminen_puu SET rgt=rgt+{$muutos} WHERE yhtio = '{$kukarow["yhtio"]}' AND laji = '{$laji}' AND rgt >= {$src['lft']} AND rgt <= {$src['rgt']}");
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET lft = lft+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}'
+				AND lft >= {$src['lft']}
+				AND lft <= {$src['rgt']}";
+		$re = pupe_query($qu);
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET rgt = rgt+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}'
+				AND rgt >= {$src['lft']}
+				AND rgt <= {$src['rgt']}";
+		$re = pupe_query($qu);
 	}
 }
 
@@ -10643,22 +10667,22 @@ if (!function_exists("muutaOksavalinRL")) {
 if (!function_exists("siirraOksa")) {
 	function siirraOksa($laji, $src, $kohde) {
 		global $kukarow;
-		
+
 		// lasketaan siirrettavan haaran koko
 		$haarakoko = $src['rgt']-$src['lft']+1;
-		
+
 		// tehdaan kohteeseen tilaa ja lisataan kohteen l-arvon oik. puolelle lahdehaaran koon verran
 		muutaOksienRL($laji, $kohde, $haarakoko);
-		
+
 		// jos lahdetta on siirretty niin tehdaan sama muutos muuttujiin
-		if($src['lft'] >= $kohde) {
+		if ($src['lft'] >= $kohde) {
 			$src['lft'] += $haarakoko;
 			$src['rgt'] += $haarakoko;
 		}
-		
+
 		// siirretaan lahdehaara kohteen tilalle
 		muutaOksavalinRL($laji, $src, $kohde-$src['lft']);
-		
+
 		// korjataan siirrosta aiheutunut loppupuun venyminen
 		muutaOksienRL($laji, $src['rgt']+1, -$haarakoko);
 	}
@@ -10668,21 +10692,34 @@ if (!function_exists("siirraOksa")) {
 if (!function_exists("SiirraTaso")) {
 	function SiirraTaso($laji, $src, $suunta) {
 		global $kukarow;
-		
+
 		if ($suunta == 'ylos') {
-			$re = pupe_query("SELECT lft, rgt FROM dynaaminen_puu WHERE yhtio = '{$kukarow["yhtio"]}' AND laji = '{$laji}' AND rgt = {$src['lft']} - 1");
+
+			$qu = "	SELECT lft, rgt
+					FROM dynaaminen_puu
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND laji = '{$laji}'
+					AND rgt = {$src['lft']} - 1";
+			$re = pupe_query($qu);
 			$kohde = mysql_fetch_array($re);
-			
-			if($kohde['lft'] == '' || $kohde['rgt'] == '') return "fail";
+
+			if ($kohde['lft'] == '' or $kohde['rgt'] == '') return "fail";
 			siirraOksa($laji, $src, $kohde['lft']);
 		}
 		if ($suunta == 'alas') {
-			$re = pupe_query("SELECT lft, rgt FROM dynaaminen_puu WHERE yhtio = '{$kukarow["yhtio"]}' AND laji = '{$laji}' AND lft = {$src['rgt']} + 1");
+
+			$qu = "	SELECT lft, rgt
+					FROM dynaaminen_puu
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND laji = '{$laji}'
+					AND lft = {$src['rgt']} + 1";
+			$re = pupe_query($qu);
 			$kohde = mysql_fetch_array($re);
-			if($kohde['lft'] == '' || $kohde['rgt'] == '') return "fail";
+
+			if($kohde['lft'] == '' or $kohde['rgt'] == '') return "fail";
 			siirraOksa($laji, $src, $kohde['rgt']+1);
 		}
-		
+
 		return $kohde;
 
 	}

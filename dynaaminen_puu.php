@@ -139,16 +139,17 @@
 		echo "<input type='submit' value='",t('Tallenna kategoria'),"' />";
 		echo "</form><br><br>";
 	}
-		
+
 	// Siirret‰‰n haaraa j‰rjestyksess‰ ylˆs tai alas
-	if (isset($tee) and ($tee == 'ylos' || $tee == 'alas') AND isset($lft) and isset($rgt)) {
-		
-		$src['lft'] = $lft; $src['rgt'] = $rgt;
-		
+	if (isset($tee) and ($tee == 'ylos' or $tee == 'alas') AND isset($lft) and isset($rgt)) {
+
+		$src['lft'] = $lft;
+		$src['rgt'] = $rgt;
+
 		// $tee:ss‰ on suunta mihin siirret‰‰n
-		$kohde = SiirraTaso($toim,$src,$tee);
+		$kohde = SiirraTaso($toim, $src, $tee);
 	}
-	
+
 	if (isset($toim)) {
 
 		$query = "	SELECT
@@ -214,7 +215,7 @@
 
 					echo "\n<input type='checkbox' name='id[]' value='{$row["node_tunnus"]}' $check />";
 				}
-				
+
 				elseif ($oikeus != '') {
 					// lis‰‰
 					echo "\n<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&syvyys={$row['syvyys']}&tee=lisaa'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lis‰‰ lapsikategoria'),"'/></a>";
@@ -231,8 +232,8 @@
 						// alas
 						echo "\n&nbsp;<a href='?toim=$toim&laji=$toim&nimi={$row['node_nimi']}&lft={$row['lft']}&rgt={$row['rgt']}&tee=alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='",t('Siirr‰ alasp‰in'),"'/></a>";
 					}
-					
-					
+
+
 				}
 
 				echo "</td></tr>";

@@ -12954,5 +12954,23 @@ if (!function_exists("kustannuspaikka_kohde_projekti")) {
 	}
 }
 
+if (!function_exists("tarkistahetu")) {
+	function tarkistahetu($hetu) {
+
+		$hetu_orig = $hetu;
+
+		// tarkistetaan onko ytunnus henkilötunnus
+		require ("inc/tarkistahetu.inc");
+		
+		if ($hetuok == 0) {
+			$hetu_clean = substr($hetu_orig, 0, 7)."XXXX";
+		}
+		else {
+			$hetu_clean = $hetu_orig;
+		}
+
+		return $hetu_clean;
+	}
+}
 
 ?>

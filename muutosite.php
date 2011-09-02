@@ -969,7 +969,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<tr><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
+		echo "<tr><th>".t("Ytunnus")."</th><td>".tarkistahetu($trow["ytunnus"])."</td></tr>";
 		echo "<tr><th>".t("Nimi")."</th><td>$trow[nimi]</td></tr>";
 		if ($trow["nimitark"] != "") echo "<tr><th>".t("Nimitark")."</th><td>$trow[nimitark]</td></tr>";
 		echo "<tr><th>".t("Osoite")."</th><td>$trow[osoite]</td></tr>";
@@ -1164,7 +1164,7 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<tr><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 			echo "<table>";
-			echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
+			echo "<tr><th>".t("Ytunnus")."</th><td>".tarkistahetu($trow["ytunnus"])."</td></tr>";
 			echo "<tr><th>".t("Nimi")."</th><td>$trow[nimi]</td></tr>";
 			if ($trow["nimitark"] != "") echo "<tr><th>".t("Nimitark")."</th><td>$trow[nimitark]</td></tr>";
 			echo "<tr><th>".t("Osoite")."</th><td>$trow[osoite]</td></tr>";
@@ -1194,7 +1194,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<tr><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
+		echo "<tr><th>".t("Ytunnus")."</th><td>".tarkistahetu($trow["ytunnus"])."</td></tr>";
 		echo "<tr><th>".t("Nimi")."</th><td>$trow[nimi]</td></tr>";
 		if ($trow["nimitark"] != "") echo "<tr><th>".t("Nimitark")."</th><td>$trow[nimitark]</td></tr>";
 		echo "<tr><th>".t("Osoite")."</th><td>$trow[osoite]</td></tr>";

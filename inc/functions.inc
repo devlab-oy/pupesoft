@@ -10620,6 +10620,111 @@ if (!function_exists("paivitakat")) {
 	}
 }
 
+// muuttaa left/right arvoja muutos -muuttujan verran $kohdevas -muuttujasta ylospain
+if (!function_exists("muutaOksienRL")) {
+	function muutaOksienRL($laji, $kohdevas, $muutos) {
+		global $kukarow;
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET lft = lft+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}' and lft >= '{$kohdevas}'";
+		$re = pupe_query($qu);
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET rgt = rgt+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}'
+				and rgt >= '{$kohdevas}'";
+		$re = pupe_query($qu);
+	}
+}
+
+// muuttaa left/right arvoja muutos -muuttujan verran $src[lft]:n ja $src[rgt]:n valilla
+if (!function_exists("muutaOksavalinRL")) {
+	function muutaOksavalinRL($laji, $src, $muutos) {
+		global $kukarow;
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET lft = lft+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}'
+				AND lft >= {$src['lft']}
+				AND lft <= {$src['rgt']}";
+		$re = pupe_query($qu);
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET rgt = rgt+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}'
+				AND rgt >= {$src['lft']}
+				AND rgt <= {$src['rgt']}";
+		$re = pupe_query($qu);
+	}
+}
+
+// siirretaan puun oksaa, $src:ssa tulee lahteen lft/rgt ja $kohde on kohde-noden lft -arvo
+if (!function_exists("siirraOksa")) {
+	function siirraOksa($laji, $src, $kohde) {
+		global $kukarow;
+
+		// lasketaan siirrettavan haaran koko
+		$haarakoko = $src['rgt']-$src['lft']+1;
+
+		// tehdaan kohteeseen tilaa ja lisataan kohteen l-arvon oik. puolelle lahdehaaran koon verran
+		muutaOksienRL($laji, $kohde, $haarakoko);
+
+		// jos lahdetta on siirretty niin tehdaan sama muutos muuttujiin
+		if ($src['lft'] >= $kohde) {
+			$src['lft'] += $haarakoko;
+			$src['rgt'] += $haarakoko;
+		}
+
+		// siirretaan lahdehaara kohteen tilalle
+		muutaOksavalinRL($laji, $src, $kohde-$src['lft']);
+
+		// korjataan siirrosta aiheutunut loppupuun venyminen
+		muutaOksienRL($laji, $src['rgt']+1, -$haarakoko);
+	}
+}
+
+// Siirrä puun haaraa järjestyksessä ylös tai alaspäin
+if (!function_exists("SiirraTaso")) {
+	function SiirraTaso($laji, $src, $suunta) {
+		global $kukarow;
+
+		if ($suunta == 'ylos') {
+
+			$qu = "	SELECT lft, rgt
+					FROM dynaaminen_puu
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND laji = '{$laji}'
+					AND rgt = {$src['lft']} - 1";
+			$re = pupe_query($qu);
+			$kohde = mysql_fetch_array($re);
+
+			if ($kohde['lft'] == '' or $kohde['rgt'] == '') return "fail";
+			siirraOksa($laji, $src, $kohde['lft']);
+		}
+		if ($suunta == 'alas') {
+
+			$qu = "	SELECT lft, rgt
+					FROM dynaaminen_puu
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND laji = '{$laji}'
+					AND lft = {$src['rgt']} + 1";
+			$re = pupe_query($qu);
+			$kohde = mysql_fetch_array($re);
+
+			if($kohde['lft'] == '' or $kohde['rgt'] == '') return "fail";
+			siirraOksa($laji, $src, $kohde['rgt']+1);
+		}
+
+		return $kohde;
+
+	}
+}
+
 if (!function_exists("laskutuspaiva")) {
 	function laskutuspaiva ($mika, $arki = FALSE, $seuraava_kk = 0) {
 
@@ -12849,5 +12954,23 @@ if (!function_exists("kustannuspaikka_kohde_projekti")) {
 	}
 }
 
+if (!function_exists("tarkistahetu")) {
+	function tarkistahetu($hetu) {
+
+		$hetu_orig = $hetu;
+
+		// tarkistetaan onko ytunnus henkilötunnus
+		require ("inc/tarkistahetu.inc");
+		
+		if ($hetuok == 0) {
+			$hetu_clean = substr($hetu_orig, 0, 7)."XXXX";
+		}
+		else {
+			$hetu_clean = $hetu_orig;
+		}
+
+		return $hetu_clean;
+	}
+}
 
 ?>

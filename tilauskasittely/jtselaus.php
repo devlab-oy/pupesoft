@@ -494,7 +494,7 @@
 		for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 			${'ale'.$alepostfix} = $trow["ale{$alepostfix}"];
 		}
-		
+
 		$toimaika 		= $trow["toimaika"];
 		$kerayspvm		= $trow["kerayspvm"];
 		$alv 			= $trow["alv"];
@@ -547,7 +547,7 @@
 		else {
 			$kerayspvm  = date("Y-m-d");
 		}
-		
+
 		// lisää päivämäärän tarkistus.
 		if (checkdate($toimkka, $toimppa, $toimvva)) {
 			$toimaika  =  $toimvva."-".$toimkka."-".$toimppa;
@@ -706,6 +706,10 @@
 		if ($tuoteosasto != '') {
 			$tuotelisa .= " and tuote.osasto = '$tuoteosasto' ";
 		}
+
+        if ($ei_tehdastoimitus_tuotteita != "") {
+            $tuotelisa .= " and tuote.status != 'T' ";
+        }
 
 		if ($tuotemerkki != '') {
 			$tuotelisa .= " and tuote.tuotemerkki = '$tuotemerkki' ";

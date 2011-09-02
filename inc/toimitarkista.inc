@@ -4,13 +4,18 @@ if(!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
 
-		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_tilinumeropos;
+		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_tilinumeropos, $tmp_nimi;
 
 		if ((mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "maa") or
 			(mysql_field_name($result, $i) == "ytunnus") or
 			(mysql_field_name($result, $i) == "oletus_hyvak1") or
 			(mysql_field_name($result, $i) == "oletus_valkoodi")) {
+
+
+			if (mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set == "KAYTTAJA") {
+				$t[$i] = $tmp_nimi;
+			}
 
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
@@ -20,6 +25,10 @@ if(!function_exists("toimitarkista")) {
 				$t[$i] = strtoupper($t[$i]);
 				$tmp_maakoodi = $t[$i];
 			}
+		}
+
+		if (mysql_field_name($result, $i) == "nimi") {
+			$tmp_nimi = $t[$i];
 		}
 
 		if (mysql_field_name($result, $i) == "tilino" and $t[$i] != "") {

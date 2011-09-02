@@ -537,7 +537,10 @@ if (!function_exists('tarjous_rivi_otsikot')) {
 			$pdf_tarjous->draw_text(330, $kala+15, t("Tilattu", $kieli),		$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(380, $kala+15, t("Yks.hinta", $kieli),		$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(450, $kala+15, t("Alennus", $kieli),		$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(498, $kala+15, t("Alv", $kieli),			$page_tarjous, $norm);
+			
+			if ($yhtiorow['tarjoustyyppi'] != 2) {
+			    $pdf_tarjous->draw_text(498, $kala+15, t("Alv", $kieli), $page_tarjous, $norm);
+			}
 
 			if (trim($naytetaanko_rivihinta) == '') {
 				$pdf_tarjous->draw_text(537, $kala+15, t("Rivihinta", $kieli),		$page_tarjous, $norm);
@@ -875,15 +878,17 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 			$pdf_tarjous->draw_text(482-$oikpos, $kala, $ff_string, $page_tarjous[$sivu], $norm);
 		}
 
-		if ($row["alv"] >= 600) {
-			$pdf_tarjous->draw_text(500, $kala, t("K.V.", $kieli), $page_tarjous[$sivu], $norm);
-		}
-		elseif ($row["alv"] >= 500) {
-			$pdf_tarjous->draw_text(500, $kala, t("M.V.", $kieli), $page_tarjous[$sivu], $norm);
-		}
-		else {
-			$pdf_tarjous->draw_text(500, $kala, ($row["alv"]*1)."%", $page_tarjous[$sivu], $norm);
-		}
+        if ($yhtiorow['tarjoustyyppi'] != 2) {
+    		if ($row["alv"] >= 600) {
+    			$pdf_tarjous->draw_text(500, $kala, t("K.V.", $kieli), $page_tarjous[$sivu], $norm);
+    		}
+    		elseif ($row["alv"] >= 500) {
+    			$pdf_tarjous->draw_text(500, $kala, t("M.V.", $kieli), $page_tarjous[$sivu], $norm);
+    		}
+    		else {
+    			$pdf_tarjous->draw_text(500, $kala, ($row["alv"]*1)."%", $page_tarjous[$sivu], $norm);
+    		}
+    	}
 
 		if (trim($naytetaanko_rivihinta) == '') {
 			$oikpos = $pdf_tarjous->strlen(hintapyoristys($row["rivihinta"]), $norm);

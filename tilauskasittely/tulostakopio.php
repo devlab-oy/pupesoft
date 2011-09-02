@@ -1684,15 +1684,15 @@
 			if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
 
 				$params = array(
-					'laskurow' => $laskurow,
+					'laskurow'					=> $laskurow,
 					'sellahetetyyppi' => $sellahetetyyppi,
 					'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
-					'naytetaanko_rivihinta' => $naytetaanko_rivihinta,
-					'tee' => $tee,
-					'toim' => $toim,
+					'naytetaanko_rivihinta'		=> $naytetaanko_rivihinta,
+					'tee'						=> $tee,
+					'toim'						=> $toim,
 					'query_ale_lisa' => $query_ale_lisa,
 					'komento' => $komento
-				);
+					);
 
 				pupesoft_tulosta_lahete($params);
 

@@ -8621,8 +8621,9 @@ if (!function_exists("t_avainsana")) {
 				$orderlisa = " ORDER BY avainsana.jarjestys, avainsana.selite ";
 			}
 		}
-		else {
-			$orderlisa = "";
+
+		if ($orderlisa == "" and stripos($wherelisa, "ORDER BY") === FALSE) {
+			$orderlisa = " ORDER BY avainsana.jarjestys, avainsana.selite ";
 		}
 
 		$kielisubquery = "";
@@ -9307,19 +9308,33 @@ if (!function_exists("viivakoodi")) {
 		$encoding = trim(strtolower($encoding));
 
 		switch ($encoding) {
-			case 'ean':
-			case 'upc':
-			case 'isbn':
-			case 'code 128-b':
-			case 'code 128-c':
-			case 'code 128 raw':
-			case 'code 39':
-			case 'interleaved 2 of 5':
-			case 'code 128':
-			case 'codabar':
-			case 'plessey':
-			case 'msi':
-			case 'code 93':
+			case "ean":
+			case "ean13":
+			case "ean-13":
+			case "ean8":
+			case "ean-8":
+			case "upc":
+			case "upc-a":
+			case "upc-e":
+			case "isbn":
+			case "39":
+			case "code39":
+			case "128c":
+			case "code128c":
+			case "128b":
+			case "code128b":
+			case "128":
+			case "code128":
+			case "128raw":
+			case "i25":
+			case "interleaved 2 of 5":
+			case "cbr":
+			case "codabar":
+			case "msi":
+			case "pls":
+			case "plessey":
+			case "code93":
+			case "93":
 				break;
 			default:
 				return FALSE;
@@ -9328,7 +9343,7 @@ if (!function_exists("viivakoodi")) {
 		$lisa = $teksti != "" ? "" : "-n";
 
 		ob_start();
-		passthru("barcode -b $viivakoodi -e $encoding -u mm -g {$leveys}x{$korkeus} -E $lisa | convert -fill white ps:- jpg:-", $return);
+		passthru("barcode -b $viivakoodi -e \"$encoding\" -u mm -g {$leveys}x{$korkeus} -E $lisa | convert -fill white -quality 80 ps:- jpg:-", $return);
 		$barcode = ob_get_contents();
 		ob_end_clean();
 
@@ -10602,6 +10617,111 @@ if (!function_exists("paivitakat")) {
 
 		$qu = "UNLOCK TABLES";
 		$re = pupe_query($qu);
+	}
+}
+
+// muuttaa left/right arvoja muutos -muuttujan verran $kohdevas -muuttujasta ylospain
+if (!function_exists("muutaOksienRL")) {
+	function muutaOksienRL($laji, $kohdevas, $muutos) {
+		global $kukarow;
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET lft = lft+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}' and lft >= '{$kohdevas}'";
+		$re = pupe_query($qu);
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET rgt = rgt+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}'
+				and rgt >= '{$kohdevas}'";
+		$re = pupe_query($qu);
+	}
+}
+
+// muuttaa left/right arvoja muutos -muuttujan verran $src[lft]:n ja $src[rgt]:n valilla
+if (!function_exists("muutaOksavalinRL")) {
+	function muutaOksavalinRL($laji, $src, $muutos) {
+		global $kukarow;
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET lft = lft+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}'
+				AND lft >= {$src['lft']}
+				AND lft <= {$src['rgt']}";
+		$re = pupe_query($qu);
+
+		$qu = "	UPDATE dynaaminen_puu
+				SET rgt = rgt+{$muutos}
+				WHERE yhtio = '{$kukarow["yhtio"]}'
+				AND laji = '{$laji}'
+				AND rgt >= {$src['lft']}
+				AND rgt <= {$src['rgt']}";
+		$re = pupe_query($qu);
+	}
+}
+
+// siirretaan puun oksaa, $src:ssa tulee lahteen lft/rgt ja $kohde on kohde-noden lft -arvo
+if (!function_exists("siirraOksa")) {
+	function siirraOksa($laji, $src, $kohde) {
+		global $kukarow;
+
+		// lasketaan siirrettavan haaran koko
+		$haarakoko = $src['rgt']-$src['lft']+1;
+
+		// tehdaan kohteeseen tilaa ja lisataan kohteen l-arvon oik. puolelle lahdehaaran koon verran
+		muutaOksienRL($laji, $kohde, $haarakoko);
+
+		// jos lahdetta on siirretty niin tehdaan sama muutos muuttujiin
+		if ($src['lft'] >= $kohde) {
+			$src['lft'] += $haarakoko;
+			$src['rgt'] += $haarakoko;
+		}
+
+		// siirretaan lahdehaara kohteen tilalle
+		muutaOksavalinRL($laji, $src, $kohde-$src['lft']);
+
+		// korjataan siirrosta aiheutunut loppupuun venyminen
+		muutaOksienRL($laji, $src['rgt']+1, -$haarakoko);
+	}
+}
+
+// Siirrä puun haaraa järjestyksessä ylös tai alaspäin
+if (!function_exists("SiirraTaso")) {
+	function SiirraTaso($laji, $src, $suunta) {
+		global $kukarow;
+
+		if ($suunta == 'ylos') {
+
+			$qu = "	SELECT lft, rgt
+					FROM dynaaminen_puu
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND laji = '{$laji}'
+					AND rgt = {$src['lft']} - 1";
+			$re = pupe_query($qu);
+			$kohde = mysql_fetch_array($re);
+
+			if ($kohde['lft'] == '' or $kohde['rgt'] == '') return "fail";
+			siirraOksa($laji, $src, $kohde['lft']);
+		}
+		if ($suunta == 'alas') {
+
+			$qu = "	SELECT lft, rgt
+					FROM dynaaminen_puu
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					AND laji = '{$laji}'
+					AND lft = {$src['rgt']} + 1";
+			$re = pupe_query($qu);
+			$kohde = mysql_fetch_array($re);
+
+			if($kohde['lft'] == '' or $kohde['rgt'] == '') return "fail";
+			siirraOksa($laji, $src, $kohde['rgt']+1);
+		}
+
+		return $kohde;
+
 	}
 }
 
@@ -13805,6 +13925,25 @@ if (!function_exists("kustannuspaikka_kohde_projekti")) {
 		}
 
 		return $returnarray;
+	}
+}
+
+if (!function_exists("tarkistahetu")) {
+	function tarkistahetu($hetu) {
+
+		$hetu_orig = $hetu;
+
+		// tarkistetaan onko ytunnus henkilötunnus
+		require ("inc/tarkistahetu.inc");
+		
+		if ($hetuok == 0) {
+			$hetu_clean = substr($hetu_orig, 0, 7)."XXXX";
+		}
+		else {
+			$hetu_clean = $hetu_orig;
+		}
+
+		return $hetu_clean;
 	}
 }
 

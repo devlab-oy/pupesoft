@@ -112,6 +112,7 @@ $yhteyshenkilon_puhelin = "";
 $lopviesti            	= "";
 $ketjutus             	= "";
 $editilaus_maksuehto	= "";
+$editilaus_maksuteksti	= "";
 $editilaus_toimitustapa = "";
 $tilaus_hyvaksyntaan	= "";
 $editilaus_rahtivapaa	= "";
@@ -454,6 +455,13 @@ while ($tietue = fgets($fd)) {
 		case 'ORFFCR_NU'  :
 		//Kommentteja
 			$edi_kommentti .= $tieto . ' ';
+			break;
+
+		case 'OSTOTIL.OT_MAKSUEHTO' :
+		//Magento keississä maksuehdon koko nimi verkkokaupassa
+			if ($edi_tyyppi == "magento") {
+				$editilaus_maksuteksti .= $tieto;
+			}
 			break;
 
 		case 'ORFFABONU' :
@@ -1054,7 +1062,7 @@ while ($tietue = fgets($fd)) {
 							maa 			   					= '$arow[maa]',
 							maa_maara							= '$arow[maa_maara]',
 							maksuehto 		   					= '$editilaus_maksuehto',
-							maksuteksti 						= '',
+							maksuteksti 						= '$editilaus_maksuteksti',
 							myyja 			   					= '$edimyyja',
 							nimi 			   					= '$arow[nimi]',
 							nimitark 		   					= '$arow[nimitark]',
@@ -1799,6 +1807,7 @@ while ($tietue = fgets($fd)) {
 			$lopviesti            	= "";
 			$ketjutus             	= "";
 			$editilaus_maksuehto	= "";
+			$editilaus_maksuteksti	= "";
 			$editilaus_toimitustapa = "";
 			$tilaus_hyvaksyntaan	= "";
 			$editilaus_rahtivapaa	= "";

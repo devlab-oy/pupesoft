@@ -23,7 +23,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Postitp")."</th></tr>";
-			echo "<tr><td>$trow[ytunnus]</td><td>$trow[nimi]</td><td>$trow[postitp]</td></tr>";
+			echo "<tr><td>".tarkistahetu($trow["ytunnus"])."</td><td>$trow[nimi]</td><td>$trow[postitp]</td></tr>";
 			echo "</table>";
 			
 			$lisa='';
@@ -124,7 +124,7 @@
 				echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Postitp")."</th></tr>";
 												
 		 		while ($trow = mysql_fetch_array($result)) {
-					echo "<tr><td>$trow[ytunnus]</td><td>$trow[nimi]</td><td>$trow[postitp]</td></tr>";
+					echo "<tr><td>".tarkistahetu($trow["ytunnus"])."</td><td>$trow[nimi]</td><td>$trow[postitp]</td></tr>";
 				}
 				
 				echo "</table>";
@@ -349,28 +349,29 @@
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
 		}
+		
 		if (mysql_num_rows($result) > 40) {
 			echo "<b>".t("Haulla löytyi liikaa toimittajia. Tarkenna hakua")."</b><br>";
 			$tee = '';
 		}
 		else {
 			echo "<table><tr>";
+			echo "<th>" . t("Ytunnus")."</th>";
+			echo "<th>" . t("Nimi")."</th>";
+			echo "<th>" . t("Postitp")."</th>";
+			echo "<th>" . t("Avoimet")."</th>";
+			echo "<th>" . t("Valitse")."</th><th></th></tr>";
 
-			for ($i = 1; $i < mysql_num_fields($result); $i++) {
-				echo "<th>" . t(mysql_field_name($result,$i))."</th>";
-			}
-
-			echo "<th>".t("valitse")."</th><th></th></tr>";
-
-			while ($trow = mysql_fetch_array ($result)) {
+			while ($trow = mysql_fetch_array($result)) {
 				echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
 						<tr>
 						<input type='hidden' name='tunnus' value='$trow[tunnus]'>
 						<input type='hidden' name='tee' value='A'>";
 
-				for ($i=1; $i<mysql_num_fields($result); $i++) {
-					echo "<td>$trow[$i]</td>";
-				}
+				echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
+				echo "<td>$trow[nimi]</td>";
+				echo "<td>$trow[postitp]</td>";
+				echo "<td>$trow[avoimet]</td>";
 
 				echo "<td><select name = 'laji'>
 						<option value = 'K'>".t("Kaikki")."

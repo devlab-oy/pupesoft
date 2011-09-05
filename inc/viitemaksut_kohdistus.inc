@@ -46,7 +46,7 @@
 				yriti.oletus_rahatili kassatili,
 				yriti.oletus_selvittelytili,
 				factoring.pankki_tili ftilino,
-				(select count(*) from tiliointi WHERE tiliointi.yhtio = suoritus.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.tilino = IF(yriti.factoring != '', yhtio.factoringsaamiset, yhtio.myyntisaamiset)) saamisetkpl
+				(SELECT count(*) from tiliointi WHERE tiliointi.yhtio = suoritus.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.tilino in (yhtio.factoringsaamiset, yhtio.myyntisaamiset, yhtio.konsernimyyntisaamiset)) saamisetkpl
 				FROM yhtio
 				JOIN lasku use index (yhtio_tila_mapvm) ON (lasku.yhtio = yhtio.yhtio and lasku.tila = 'U' and lasku.alatila = 'X' and lasku.mapvm = '0000-00-00')
 				JOIN yriti ON (yriti.yhtio = yhtio.yhtio)

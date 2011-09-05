@@ -1,7 +1,6 @@
 <?php
 
 	echo "<font class='head'>".t("Toimittajan laskut")."</font><hr>";
-
 	if ($tee == 'A') {
 		// N‰ytet‰‰n toimittajan laskuja
 		//Jos k‰ytet‰‰n $tunnusta niin k‰ytet‰‰n liitostunnusta
@@ -9,12 +8,13 @@
 
 		if (!isset($kausi)) $kausi = '';
 		if (strlen($kausi) == 10) $laji = 'o';
+		if (!isset($aikalisa)) $aikalisa ='';
 
 		if ($laji == 'O') {
 			$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, postitp
 						FROM toimi
 						WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 			 	echo "<b>".t("Haulla ei lˆytynyt yht‰‰n toimittajaa")."</b>";
@@ -22,9 +22,41 @@
 		 	$trow = mysql_fetch_array ($result);
 
 			echo "<table>";
-			echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Postitp")."</th></tr>";
-			echo "<tr><td>".tarkistahetu($trow["ytunnus"])."</td><td>$trow[nimi]</td><td>$trow[postitp]</td></tr>";
+			echo "<tr>";
+			echo "<th>".t("Ytunnus")."</th>";
+			echo "<th>".t("Nimi")."</th>";
+			echo "<th>".t("Postitp")."</th>";
+			echo "</tr>";
+			echo "<tr>";
+			echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
+			echo "<td>$trow[nimi]</td>";
+			echo "<td>$trow[postitp]</td>";
+			echo "</tr>";
 			echo "</table>";
+			
+			echo "<br>";
+			echo "<table>";
+			echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
+					<tr>
+					<input type='hidden' name='tunnus' value='$tunnus'>
+					<input type='hidden' name='tee' value='A'>";
+
+			$sel = array();
+			$sel[$laji]	= " selected";
+			echo "<td><select name = 'laji'>
+					<option $sel[K] value = 'K'>".t("Kaikki")."
+					<option $sel[H] value = 'H'>".t("Hyv‰ksytt‰v‰n‰")."
+					<option $sel[M] value = 'M'>".t("Maksamatta")."
+					<option $sel[Q] value = 'Q'>".t("Odottaa suoritusta")."
+					<option $sel[Y] value = 'Y'>".t("Maksettu")."
+					<option $sel[O] value = 'O'>".t("Ostoraportti")."
+					</select></td>
+					<td><input type='Submit' value='".t("N‰yt‰")."'></td>
+					</tr></form>";
+			echo "</table>";
+			
+			echo "<br>";
+			
 			
 			$lisa='';
 
@@ -62,7 +94,8 @@
 					  	WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$tunnus' $lisa
 					  	and tila in ('H', 'M', 'P', 'Q', 'Y')
 					  	GROUP BY 1";
-			$result = mysql_query($query) or pupe_error($query);
+					
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 			 	echo "<font class='error'>".t("Haulla ei lˆytynyt yht‰‰n laskua")."</font>";
@@ -113,7 +146,7 @@
 				$toimiliilisa = " and liitostunnus = '$tunnus' ";
 			}
 
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 			 	echo "<b>".t("Haulla ei lˆytynyt yht‰‰n toimittajaa")."</b>";
@@ -121,16 +154,63 @@
 			else {
 				
 				echo "<table>";
-				echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Postitp")."</th></tr>";
+				echo "<tr>";
+				echo "<th>".t("Ytunnus")."</th>";
+				echo "<th>".t("Nimi")."</th>";
+				echo "<th>".t("Postitp")."</th>";
+				echo "</tr>";
 												
 		 		while ($trow = mysql_fetch_array($result)) {
-					echo "<tr><td>".tarkistahetu($trow["ytunnus"])."</td><td>$trow[nimi]</td><td>$trow[postitp]</td></tr>";
+					echo "<tr>";
+					echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
+					echo "<td>$trow[nimi]</td><td>$trow[postitp]</td>";
+					echo "</tr>";
 				}
 				
 				echo "</table>";
 				echo "<br>";
+				echo "<table>";
+				echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
+						<tr>
+						<input type='hidden' name='tunnus' value='$tunnus'>
+						<input type='hidden' name='tee' value='A'>";
+				
+				$sel = array();
+				$sel[$laji]	= " selected";
 
-				echo "<a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO'>N‰yt‰ kaikki laskut</a><br><br>";
+				echo "<td><select name = 'laji'>
+						<option $sel[K] value = 'K'>".t("Kaikki")."
+						<option $sel[H] value = 'H'>".t("Hyv‰ksytt‰v‰n‰")."
+						<option $sel[M] value = 'M'>".t("Maksamatta")."
+						<option $sel[Q] value = 'Q'>".t("Odottaa suoritusta")."
+						<option $sel[Y] value = 'Y'>".t("Maksettu")."
+						<option $sel[O] value = 'O'>".t("Ostoraportti")."
+						</select></td>
+						<td><input type='Submit' value='".t("N‰yt‰")."'></td>
+						</tr>";
+				
+				echo "<tr>";
+				echo "<td>".t("Alkup‰iv‰m‰‰r‰")."</td>";
+				echo "<td>";
+				echo "<input type='text' name='pp1' value='$pp1' size='4'>";
+				echo "<input type='text' name='kk1' value='$kk1' size='4'>";
+				echo "<input type='text' name='vv1' value='$vv1' size='4'>";
+				echo "</td>";
+				echo "</tr>";
+				echo "<tr>";
+				echo "<td>".t("Loppup‰iv‰m‰‰r‰")."</td>";
+				echo "<td>";
+				echo "<input type='text' name='pp2' value='$pp2' size='4'>";
+				echo "<input type='text' name='kk2' value='$kk2' size='4'>";
+				echo "<input type='text' name='vv2' value='$vv2' size='4'>";
+				echo "</td>";
+				echo "</tr>";
+				echo "</form>";
+				echo "</table>";
+				
+				echo "<br>";
+
+				echo "<a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO'>".t("N‰yt‰ kaikki laskut")."</a><br><br>";
 
 				$lisa = '';
 
@@ -145,10 +225,35 @@
 
 				$alku += 0;
 
+				if ($kk1 == '' and $pp1 == '' and $vv1 == '') {
+					// annetaan menn‰ tyhj‰n‰
+				}
+				elseif (checkdate($kk1, $pp1, $vv1)) {
+					$aikalisa = " AND lasku.tapvm >='$vv1-$kk1-$pp1' ";
+					$limit = "NO";
+				}
+				else {
+					echo "<p><font class='error'>".t("Alkup‰iv‰m‰‰r‰ virheellinen!")."</font></p>";
+
+				}
+				
+				if ($kk2 == '' and $pp2 == '' and $vv2 == '') {
+					// annetaan menn‰ tyhj‰n‰
+				}
+				elseif (checkdate($kk2, $pp2, $vv2)) {
+					$aikalisa .= " AND lasku.tapvm <='$vv2-$kk2-$pp2' ";
+					$limit = "NO";
+					
+				}
+				else {
+					echo "<p><font class='error'>".t("Loppup‰iv‰m‰‰r‰ virheellinen!")."</font></p>";
+				}
+
+
 				if ($limit != "NO") {
 					$limlis = " LIMIT $alku, 50 ";
 				}
-
+				
 				$query = "	SELECT tapvm, erpcm, summa, valkoodi, vienti,
 							concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus,
 							if(laskunro = 0, '', laskunro) laskunro,
@@ -157,10 +262,11 @@
 						  	WHERE yhtio = '$kukarow[yhtio]'
 						  	$toimiliilisa
 							$lisa
+							$aikalisa
 						  	and tila in ('H', 'M', 'P', 'Q', 'Y')
 						  	ORDER BY tapvm desc
 							$limlis";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$seraavako = mysql_num_rows($result);
 
 				if (mysql_num_rows($result) == 0) {
@@ -253,7 +359,7 @@
 									AND keikka.vanhatunnus = 0
 									WHERE lasku.yhtio = '$kukarow[yhtio]'
 									AND lasku.vanhatunnus = '$trow[tunnus]'";
-						$keikka_res = mysql_query($query) or pupe_error($query);
+						$keikka_res = pupe_query($query);
 
 						while ($keikka_row = mysql_fetch_array($keikka_res)) {
 							echo "<a href='tilauskasittely/selaa_tilauksia.php?toim=KEIKKA&tee=tilaus&tunnus=$keikka_row[tunnus]'>".$keikka_row['laskunro']."</a><br>";
@@ -344,7 +450,7 @@
 					WHERE toimi.yhtio='$kukarow[yhtio]' $lisat
 					GROUP BY toimi.tunnus
 					ORDER BY selaus";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Haulla ei lˆytynyt yht‰‰n toimittajaa")."</b>";

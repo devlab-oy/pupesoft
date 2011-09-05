@@ -211,8 +211,6 @@
 					and laskutettu != ''
 					and tyyppi		= 'L'";
 		$result = pupe_query($query);
-query_dump($query);
-exit;
 
 		if (mysql_num_rows($result) == 0) {
 			// merkataan tässä vaiheessa toimittamattomat rivi toimitetuiksi
@@ -1007,6 +1005,10 @@ exit;
 								}
 								else if (laskullaviikonpaivat.value == 9) {
 									var msg = 'Asiakkaan '+paiva+'. Haluatko varmasti laskuttaa ?';
+									return confirm(msg);
+								}
+								else if (laskullaviikonpaivat.value == 0) {
+									var msg = '".t("Haluatko laskuttaa nyt?")."';
 									return confirm(msg);
 								}
 								else {

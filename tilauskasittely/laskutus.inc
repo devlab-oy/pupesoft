@@ -130,6 +130,7 @@
 									}
 
 									$query = "	UPDATE tilausrivi SET
+												varattu = -".abs($pantti_kpl).",
 												ale1 = 100,
 												{$ale_query_update_lisa}
 												kommentti = '{$tilkom_upd}'
@@ -153,10 +154,13 @@
 
 										switch ($fieldname) {
 											case 'varattu':
-												$rvalues .= ", -".($pantti_kpl - $vanhin_pantti_row['kpl']);
+												$rvalues .= ", -".$vanhin_pantti_row['kpl'];
 												break;
 											case 'tunnus':
 												$rvalues .= ", NULL";
+												break;
+											case 'kommentti':
+												$rvalues .= ", '{$tilkom_upd}'";
 												break;
 											default:
 												$rvalues .= ", '".mysql_real_escape_string($trow[$fieldname])."'";

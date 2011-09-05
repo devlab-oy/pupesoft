@@ -43,6 +43,8 @@
 
 			$sel = array();
 			$sel[$laji]	= " selected";
+			
+			echo "<th>".t("Laskuntyyppi")."</th>";
 			echo "<td><select name = 'laji'>
 					<option $sel[K] value = 'K'>".t("Kaikki")."
 					<option $sel[H] value = 'H'>".t("Hyv‰ksytt‰v‰n‰")."
@@ -51,7 +53,7 @@
 					<option $sel[Y] value = 'Y'>".t("Maksettu")."
 					<option $sel[O] value = 'O'>".t("Ostoraportti")."
 					</select></td>
-					<td><input type='Submit' value='".t("N‰yt‰")."'></td>
+					<td class='back'><input type='Submit' value='".t("N‰yt‰")."'></td>
 					</tr></form>";
 			echo "</table>";
 			
@@ -177,7 +179,8 @@
 				
 				$sel = array();
 				$sel[$laji]	= " selected";
-
+				
+				echo "<th>".t("Laskuntyyppi")."</th>";
 				echo "<td><select name = 'laji'>
 						<option $sel[K] value = 'K'>".t("Kaikki")."
 						<option $sel[H] value = 'H'>".t("Hyv‰ksytt‰v‰n‰")."
@@ -186,11 +189,10 @@
 						<option $sel[Y] value = 'Y'>".t("Maksettu")."
 						<option $sel[O] value = 'O'>".t("Ostoraportti")."
 						</select></td>
-						<td><input type='Submit' value='".t("N‰yt‰")."'></td>
 						</tr>";
 				
 				echo "<tr>";
-				echo "<td>".t("Alkup‰iv‰m‰‰r‰")."</td>";
+				echo "<th>".t("Alkup‰iv‰m‰‰r‰")."</th>";
 				echo "<td>";
 				echo "<input type='text' name='pp1' value='$pp1' size='4'>";
 				echo "<input type='text' name='kk1' value='$kk1' size='4'>";
@@ -198,12 +200,13 @@
 				echo "</td>";
 				echo "</tr>";
 				echo "<tr>";
-				echo "<td>".t("Loppup‰iv‰m‰‰r‰")."</td>";
+				echo "<th>".t("Loppup‰iv‰m‰‰r‰")."</th>";
 				echo "<td>";
 				echo "<input type='text' name='pp2' value='$pp2' size='4'>";
 				echo "<input type='text' name='kk2' value='$kk2' size='4'>";
 				echo "<input type='text' name='vv2' value='$vv2' size='4'>";
 				echo "</td>";
+				echo "<td class='back'><input type='Submit' value='".t("N‰yt‰")."'></td>";
 				echo "</tr>";
 				echo "</form>";
 				echo "</table>";

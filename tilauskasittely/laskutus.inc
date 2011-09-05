@@ -159,9 +159,11 @@
 											case 'tunnus':
 												$rvalues .= ", NULL";
 												break;
-											case 'kommentti':
-												$rvalues .= ", '{$tilkom_upd}'";
-												break;
+											// case 'kommentti':
+											// 	$rvalues .= ", '{$tilkom_upd}'";
+											// 	break;
+											// case 'ale1':
+											// 	$rvalues .= ", 100";
 											default:
 												$rvalues .= ", '".mysql_real_escape_string($trow[$fieldname])."'";
 										}

@@ -63,6 +63,8 @@
 
 						if ($trow['varattu'] < 0) {
 
+							$tilausrivin_tunnus_chk = $trow['tunnus'];
+
 							$pantti_kpl = abs($trow['varattu']);
 
 							// etsit‰‰n vanhin pantti
@@ -87,7 +89,7 @@
 											AND tunnus = '{$vanhin_pantti_row['tunnus']}'";
 								$pantti_upd = pupe_query($query);
 
-								$tilkom_upd = trim($trow['kommentti']) != '' ? $trow['kommentti']."\n".t("Panttitilillinen tuote, tuote hyvitetty panttitililt‰")."." : t("Panttitilillinen tuote, tuote hyvitetty panttitililt‰").".";
+								$tilkom_upd = trim($trow['kommentti']) != '' ? $trow['kommentti']." ".t("Panttitilillinen tuote, tuote hyvitetty panttitililt‰")."." : t("Panttitilillinen tuote, tuote hyvitetty panttitililt‰").".";
 
 								if ($vanhin_pantti_row['kpl'] >= $pantti_kpl) {
 									// k‰ytet‰‰n niin monta panttia kuin on tarvis
@@ -135,7 +137,7 @@
 												{$ale_query_update_lisa}
 												kommentti = '{$tilkom_upd}'
 												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus = '{$trow['tunnus']}'";
+												AND tunnus = '{$tilausrivin_tunnus_chk}'";
 									$pantti_update = pupe_query($query);
 
 									break;
@@ -178,7 +180,7 @@
 									//Kopioidaan tilausrivin lisatiedot
 									$query = "	SELECT *
 												FROM tilausrivin_lisatiedot
-												WHERE tilausrivitunnus = '{$trow['tunnus']}'
+												WHERE tilausrivitunnus = '{$tilausrivin_tunnus_chk}'
 												and yhtio = '{$kukarow['yhtio']}'";
 									$monistares2 = pupe_query($query);
 
@@ -222,8 +224,9 @@
 												{$ale_query_update_lisa}
 												kommentti = '{$tilkom_upd}'
 												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus = '{$trow['tunnus']}'";
+												AND tunnus = '{$tilausrivin_tunnus_chk}'";
 									$pantti_update = pupe_query($query);
+									$tilausrivin_tunnus_chk = $insid_uusi;
 								}
 							}
 						}

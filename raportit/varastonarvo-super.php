@@ -616,7 +616,9 @@
 
 		if (!$php_cli) {
 			echo "Löytyi $elements tietuetta.<br><br>";
-			echo "Lasketaan varastonarvo.<br>";
+
+			echo "<a name='focus_tahan'>".t("Lasketaan varastonarvo")."...<br></a>";
+			echo "<script LANGUAGE='JavaScript'>window.location.hash=\"focus_tahan\";</script>";
 
 			if ($elements > 0) {
 				require_once ('inc/ProgressBar.class.php');

@@ -1129,7 +1129,8 @@ else {
 													tilausrivi.tyyppi = 'L' AND
 													tilausrivi.jt+tilausrivi.varattu > 0)
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tunnus = '{$til_nro_x}'";
+								AND lasku.tunnus = '{$til_nro_x}'
+								AND lasku.tilaustyyppi != '8'";
 					$jt_chk_res = pupe_query($query);
 
 					if (mysql_num_rows($jt_chk_res) > 0) {

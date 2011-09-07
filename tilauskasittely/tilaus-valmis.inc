@@ -836,6 +836,8 @@ else {
 			$varasto_kpl_array = array();
 			$tulalue_kpl_array = array();
 
+			$sisviesti2_array = array("{$laskurow['sisviesti2']}" => 1);
+
 			while ($row = mysql_fetch_assoc($result)) {
 
 				// Mihin varastoon
@@ -891,6 +893,15 @@ else {
 								break;
 							case 'tulostusalue':
 								$values .= ", '$tulostusalue'";
+								break;
+							case 'sisviesti2':
+								if ($row['omalle_tilaukselle'] != '') {
+									$values .= ", '{$laskurow['sisviesti2']}-{$sisviesti2_array[$laskurow['sisviesti2']]}'";
+									$sisviesti2_array[$laskurow['sisviesti2']]++;
+								}
+								else {
+									$values .= ", '{$laskurow['sisviesti2']}'";
+								}
 								break;
 							case 'rahtivapaa':
 								if ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') {

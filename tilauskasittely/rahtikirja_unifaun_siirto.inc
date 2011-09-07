@@ -7,45 +7,110 @@ if ($kollityht > 0) {
 
 	if (($unifaun_host != "" and $unifaun_user != "" and $unifaun_pass != "" and $unifaun_path != "") or $unifaun_path != "") {
 
-		// tarvitaan tilauksen tunnus muutujassa $tunnus
-		// printterin komento muuttujassa $oslapp
-		// $kukarow[yhtio] jostain saadaan yhtio
-		// $yhtiorow array josta saada lähettäjän tiedot
+		if ($phpnimi == "rahtikirja_custom.php") {
+			$postirow = $osoitelappurow;
+			$rakir_row = $osoitelappurow;
+		}
+		else {
+			$query = "SELECT * from lasku where yhtio = '$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
+			$tempr = mysql_query($query) or pupe_error($query);
+			$postirow = mysql_fetch_array($tempr);
+		}
 
-		// nyt on kaikki tiedot rahtikirjaa varten haettu..
-		//
-		// arrayt:
-		// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-		// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
-		//
-		// muuttujat:
-		// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
-		// mehto sisältää maksuehdon tiedot
-		// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
-		//
-		// tulostetaan rahtikirja
+		// haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
+		$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$postirow[varasto]'";
+		$tempr = mysql_query($query) or pupe_error($query);
+		$postirow_varasto = mysql_fetch_array($tempr);
+
+		// jos varastolle on annettu joku osoite, käytetään sitä
+		if ($postirow_varasto["nimi"] != "") {
+			$postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
+			$postirow['yhtio_nimitark']	= $postirow_varasto["nimitark"];
+			$postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
+			$postirow["yhtio_postino"]  = $postirow_varasto["postino"];
+			$postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
+			$postirow["yhtio_maa"]      = $postirow_varasto["maa"];
+		}
 
 		//Näin se oli muuallakin onkai se sitten oikein?
 		$rahtikirjanro = $lotsikot[0];
 
-		if ($phpnimi == "rahtikirja_custom.php") {
-			$laskurow = $osoitelappurow;
-			$rakir_row = $osoitelappurow;
-		}
+		// Luodaan UNIFAUN-XML
+		$xml = new SimpleXMLElement("<?xml version="1.0" encoding=\"ISO-8859-1\"?>");
 
-		// $apu_kollityht = $kollityht;
-		if ($kollityht > 10) {
-			die("Liikaa kolleja! (max 10 kpl)"); // kolleja ei saa olla yli 10 per toimitusrivi...
-		}
+		$uni_printserver = $xml->addChild('printserver');
+			
+			// Metatiedot
+			#<meta>
+			#	<val n="printer"></val>							# Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
+			#	<val n="favorite"></val>						# Defines the print favourite in the online system which is used to auto-complete the order file if necessary.
+			#	<val n="partition"></val>						# Defines the profile group where the shipment should be stored in the online system.
+			#</meta>
+				
+			// Lähettäjän tiedot
+			$uni_sender = $uni_printserver->addChild('sender');	# Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory		
+				$uni_sender->addAttribute('sndid', "");				
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # Sender's name
+				$uni_snd_val->addAttribute('n', "name");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # Address line 1
+				$uni_snd_val->addAttribute('n', "address1");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # Address line 2
+				$uni_snd_val->addAttribute('n', "address2");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # Zip code
+				$uni_snd_val->addAttribute('n', "zipcode");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # City
+				$uni_snd_val->addAttribute('n', "city");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # Country code according to ISO-standard
+				$uni_snd_val->addAttribute('n', "country");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # Contact person
+				$uni_snd_val->addAttribute('n', "contact");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # Phone number
+				$uni_snd_val->addAttribute('n', "phone");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # Fax number
+				$uni_snd_val->addAttribute('n', "fax");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # Organisation number (only for Sweden)
+				$uni_snd_val->addAttribute('n', "orgno");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # VAT number
+				$uni_snd_val->addAttribute('n', "vatno");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # E-mail
+				$uni_snd_val->addAttribute('n', "email");
+				
+				$uni_snd_val = $uni_sender->addChild('val', ""); # Mobile phone number. In Sweden the number must begin with 07 and contain 10 digits.
+				$uni_snd_val->addAttribute('n', "sms");
+				
+				#<partner parid="...">							# Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
+				#	<val n="custno"></val>						# Customer number
+				#	<val n="custno_international"></val>		# Customer number for international services
+				#	<val n="ediaddress"></val>					# EDI-address. UFPS only.
+				#	<val n="palletregno"></val>					# Pallet reg. number for EUR-pallets
+				#	<val n="terminal"></val>					# Terminal, used with delivery terms for international freights.
+				#	<val n="postgiro"></val>					# Number for PlusGiro. Used mostly by Cash On Delivery add-on.
+				#	<val n="bankgiro"></val>					# Number for BankGiro. Used mostly by Cash On Delivery add-on.
+				#	<val n="konto"></val>						# Specifies an offshore account.
+				#	<val n="iban"></val>						# IBAN account number
+				#	<val n="bic"></val>							# BIC number
+				#	<val n="paymentmethod"></val>				# Payment method. Used for Posten's mail services. Valid values: INVO = Credit without delivery note INVODN = Credit with delivery note METERED = Domestic franking STAMP = Stamp/cash
+				#</partner>			
 
 		/*
 		<?xml version="1.0" encoding="ISO-8859-1"?>
 		<printserver>
-			<meta>
-				<val n="printer"></val>							# Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
-				<val n="favorite"></val>						# Defines the print favourite in the online system which is used to auto-complete the order file if necessary.
-				<val n="partition"></val>						# Defines the profile group where the shipment should be stored in the online system.
-			</meta>
+			
 			<sender sndid="...">								# Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory.
 				<val n="name"></val>							# Sender's name
 				<val n="address1"></val>						# Address line 1.

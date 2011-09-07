@@ -1,5 +1,13 @@
 <?php
 
+	if (!isset($monivalintalaatikot)) {
+		$monivalintalaatikot = array();
+	}
+
+	if (!isset($monivalintalaatikot_normaali)) {
+		$monivalintalaatikot_normaali = array();
+	}
+
 	if (!isset($orderlisa)) {
 		$orderlisa = '';
 	}

@@ -1335,8 +1335,6 @@
 										$jarjestys = 0;
 									}
 
-									$omalle_tilaukselle_lisa = in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
-
 									$query = "	INSERT INTO tilausrivin_lisatiedot
 												SET yhtio			= '$kukarow[yhtio]',
 												positio 			= '$trivtyrow[selite]',

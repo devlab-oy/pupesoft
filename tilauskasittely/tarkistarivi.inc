@@ -249,6 +249,12 @@
 		$tilausok++;
 	}
 
+	if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $row['omalle_tilaukselle'] != '' and fmod($row['varattu'], 1) != 0) {
+		$varaosavirhe .= t("VIRHE: Kappalem‰‰r‰ pit‰‰ olla kokonaisluku")."!<br>";
+		$riviok++;
+		$tilausok++;
+	}
+
 	if (trim($trow["vienti"]) != '' and $row["tyyppi"] != "V" and $row["tyyppi"] != "W") {
 
 		// vientikieltok‰sittely:

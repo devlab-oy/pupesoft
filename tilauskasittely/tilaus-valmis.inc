@@ -722,16 +722,18 @@ else {
 							FROM tilausrivi
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.omalle_tilaukselle != '')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-							and tilausrivi.otunnus = '{$laskurow['tunnus']}'
-							and tilausrivi.hyllyalue != ''
-							and tilausrivi.varattu > 1
-							and tilausrivi.var NOT IN ('J','P')
-							and MOD(tilausrivi.varattu, 1) = 0";
+							AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+							AND tilausrivi.hyllyalue != ''
+							AND tilausrivi.varattu > 1
+							AND tilausrivi.var NOT IN ('J','P')";
 				$result = pupe_query($query);
 
 				while ($row = mysql_fetch_assoc($result)) {
 
-					$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tunnus']}'";
+					$query = "  SELECT *
+					            FROM tilausrivi
+					            WHERE yhtio = '{$kukarow['yhtio']}'
+					            AND tunnus = '{$row['tunnus']}'";
 					$splitres = pupe_query($query);
 					$splitrow = mysql_fetch_assoc($splitres);
 
@@ -747,7 +749,6 @@ else {
 						for ($i = 1; $i < mysql_num_fields($splitres) - 1; $i++) {
 
 							$fieldname = mysql_field_name($splitres, $i);
-
 							$fields .= ", ".$fieldname;
 
 							switch ($fieldname) {
@@ -766,19 +767,18 @@ else {
 
 						$query = "	SELECT *
 									FROM tilausrivin_lisatiedot
-									WHERE yhtio = '$kukarow[yhtio]'
+									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tilausrivitunnus = '{$row['tunnus']}'";
 						$lisatiedot_result = pupe_query($query);
 						$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
 
 						$fields = "yhtio";
-						$values = "'$kukarow[yhtio]'";
+						$values = "'{$kukarow['yhtio']}'";
 
 						// Ei monisteta tunnusta
 						for ($i = 1; $i < mysql_num_fields($lisatiedot_result) - 1; $i++) {
 
 							$fieldname = mysql_field_name($lisatiedot_result, $i);
-
 							$fields .= ", ".$fieldname;
 
 							switch ($fieldname) {

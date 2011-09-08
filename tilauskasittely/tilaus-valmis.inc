@@ -808,7 +808,7 @@ else {
 			}
 
 			//haetaan kaikkien tilausrivien varastopaikat
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika, tilausrivin_lisatiedot.erikoistoimitus_myynti, 
+			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika, tilausrivin_lisatiedot.erikoistoimitus_myynti,
 						tilausrivin_lisatiedot.omalle_tilaukselle, tilausrivi.varattu, 
 						concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
@@ -860,19 +860,26 @@ else {
 					}
 
 					if (!is_resource($laskusplitres)) {
-						// Jotta saadaa lasku kopsattua kivasti jos se splittaantuu
+						// Jotta saadaa lasku ja sen lisätiedot kopsattua kivasti jos se splittaantuu
 						$query = "	SELECT *
 									FROM lasku
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tunnus = '$laskurow[tunnus]'";
 						$laskusplitres = pupe_query($query);
+
+						$query = "	SELECT *
+									FROM laskun_lisatiedot
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND otunnus = '$laskurow[tunnus]'";
+						$laskulisatiedotsplitres = pupe_query($query);
+						$lisatiedot_row = mysql_fetch_assoc($laskulisatiedotsplitres);
 					}
 
 					$fields = "yhtio";
 					$values = "'$kukarow[yhtio]'";
 
 					// Ei monisteta tunnusta
-					for($i=1; $i < mysql_num_fields($laskusplitres)-1; $i++) {
+					for ($i=1; $i < mysql_num_fields($laskusplitres)-1; $i++) {
 
 						$fieldname = mysql_field_name($laskusplitres,$i);
 
@@ -921,34 +928,17 @@ else {
 					$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 					$uusires = pupe_query($kysely);
 
-					$select_tunnus = $laskurow['tunnus'];
-
 					$laskurow['tunnus'] = mysql_insert_id();
+
 					$tilausnumerot[] = $laskurow["tunnus"];
-
-					$query = "	SELECT *
-								FROM laskun_lisatiedot
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND otunnus = '{$select_tunnus}'";
-					$lisatiedot_result = pupe_query($query);
-					$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
-
-					$query = "	SELECT ulkoinen_jarjestelma
-								FROM varastopaikat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$varasto}'";
-					$ulkoinen_jarjestelma_res = pupe_query($query);
-					$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
-
-					$varasto_chk_array[$laskurow['tunnus']] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
 
 					$fields = "yhtio";
 					$values = "'$kukarow[yhtio]'";
 
 					// Ei monisteta tunnusta
-					for ($i = 1; $i < mysql_num_fields($lisatiedot_result) - 1; $i++) {
+					for ($i = 1; $i < mysql_num_fields($laskulisatiedotsplitres) - 1; $i++) {
 
-						$fieldname = mysql_field_name($lisatiedot_result, $i);
+						$fieldname = mysql_field_name($laskulisatiedotsplitres, $i);
 
 						$fields .= ", ".$fieldname;
 
@@ -962,7 +952,16 @@ else {
 					}
 
 					$query = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
-					$lisatiedot_result = pupe_query($query);
+					$uusires = pupe_query($query);
+
+					$query = "	SELECT ulkoinen_jarjestelma
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$varasto}'";
+					$ulkoinen_jarjestelma_res = pupe_query($query);
+					$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
+
+					$varasto_chk_array[$laskurow['tunnus']] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
 				}
 				else {
 					// Pidetään lukua kuinka paljon mistäkin varastosta on riviä, jotka jää alkuperöiselle tilaukselle

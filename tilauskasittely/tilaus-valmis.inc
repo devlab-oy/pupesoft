@@ -801,10 +801,10 @@ else {
 			}
 
 			if ($yhtiorow["splittauskielto"] == "K") {
-				$sorttaus = "tilausrivi.kerayspvm, sorttauskentta";
+				$sorttaus = "tilausrivin_lisatiedot.omalle_tilaukselle, tilausrivi.kerayspvm, sorttauskentta";
 			}
 			else {
-				$sorttaus = "sorttauskentta";
+				$sorttaus = "tilausrivin_lisatiedot.omalle_tilaukselle, sorttauskentta";
 			}
 
 			//haetaan kaikkien tilausrivien varastopaikat

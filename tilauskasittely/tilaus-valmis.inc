@@ -808,8 +808,7 @@ else {
 			}
 
 			//haetaan kaikkien tilausrivien varastopaikat
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika, tilausrivin_lisatiedot.erikoistoimitus_myynti,
-						tilausrivin_lisatiedot.omalle_tilaukselle, tilausrivi.varattu, 
+			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika, tilausrivin_lisatiedot.erikoistoimitus_myynti, tilausrivin_lisatiedot.omalle_tilaukselle,
 						concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -836,7 +835,7 @@ else {
 			$varasto_kpl_array = array();
 			$tulalue_kpl_array = array();
 
-			$sisviesti2_array = array("{$laskurow['sisviesti2']}" => 1);
+			$sisviesti2_numerointi = 1;
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -903,8 +902,8 @@ else {
 								break;
 							case 'sisviesti2':
 								if ($row['omalle_tilaukselle'] != '') {
-									$values .= ", '{$laskurow['sisviesti2']}-{$sisviesti2_array[$laskurow['sisviesti2']]}'";
-									$sisviesti2_array[$laskurow['sisviesti2']]++;
+									$values .= ", '{$laskurow['sisviesti2']}-{$sisviesti2_numerointi}'";
+									$sisviesti2_numerointi++;
 								}
 								else {
 									$values .= ", '{$laskurow['sisviesti2']}'";

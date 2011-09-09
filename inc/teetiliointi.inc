@@ -53,25 +53,83 @@
 		$liitostunnus = 0;
 	}
 
-	$query = "	INSERT into tiliointi set
-				yhtio 			 = '{$kukarow['yhtio']}',
-				ltunnus 		 = '{$tunnus}',
-				liitos			 = '{$liitos}',
-				liitostunnus	 = '{$liitostunnus}',
-				tilino 			 = '{$tili}',
-				kustp    		 = '{$kustp_ins}',
-				kohde	 		 = '{$kohde_ins}',
-				projekti 		 = '{$projekti_ins}',
-				tapvm 			 = '{$laskurow['tapvm']}',
-				summa 			 = '{$summa}',
-				summa_valuutassa = '{$summa_valuutassa}',
-				valkoodi 		 = '{$valkoodi}',
-				vero 			 = '{$vero}',
-				selite 			 = '{$selite}',
-				lukko 			 = '',
-				tosite 			 = '{$tositenro}',
-				laatija 		 = '{$kukarow['kuka']}',
-				laadittu 		 = now()";
+	if ($paivitetaanko) {
+
+		$query = "	SELECT * 
+					FROM tiliointi 
+					WHERE yhtio = '{$kukarow['yhtio']}' 
+					AND ltunnus = '{$tunnus}'
+					AND tunnus = '{$tiliointirivit[$i]}'
+					AND liitos = '{$liitos}'
+					AND liitostunnus = '{$liitostunnus}'
+					AND tilino = '{$tili}'
+					AND kustp = '{$kustp_ins}'
+					AND kohde = '{$kohde_ins}'
+					AND projekti = '{$projekti_ins}'
+					AND summa = '{$summa}'
+					AND summa_valuutassa = '{$summa_valuutassa}'
+					AND valkoodi = '{$valkoodi}'
+					AND tapvm = '{$laskurow['tapvm']}'
+					AND tosite = '{$tositenro}'
+					AND vero = '{$vero}'
+					AND selite = '{$selite}'";
+		$tilrivi_chk_res = pupe_query($query);
+
+		if (mysql_num_rows($tilrivi_chk_res) == 0) {
+
+			$query = "	UPDATE tiliointi SET
+						korjattu = '{$kukarow['kuka']}',
+			      		korjausaika = now()
+			      		WHERE ltunnus = '{$tunnus}'
+			      		AND yhtio = '{$kukarow['yhtio']}'
+			      		AND korjattu = ''
+						AND tunnus = '{$tiliointirivit[$i]}'";
+			$ylikirjaus_result = pupe_query($query);
+
+			$query = "	INSERT into tiliointi set
+						yhtio 			 = '{$kukarow['yhtio']}',
+						ltunnus 		 = '{$tunnus}',
+						liitos			 = '{$liitos}',
+						liitostunnus	 = '{$liitostunnus}',
+						tilino 			 = '{$tili}',
+						kustp    		 = '{$kustp_ins}',
+						kohde	 		 = '{$kohde_ins}',
+						projekti 		 = '{$projekti_ins}',
+						tapvm 			 = '{$laskurow['tapvm']}',
+						summa 			 = '{$summa}',
+						summa_valuutassa = '{$summa_valuutassa}',
+						valkoodi 		 = '{$valkoodi}',
+						vero 			 = '{$vero}',
+						selite 			 = '{$selite}',
+						lukko 			 = '',
+						tosite 			 = '{$tositenro}',
+						laatija 		 = '{$kukarow['kuka']}',
+						laadittu 		 = now()";
+		}
+
+	}
+	else {
+		$query = "	INSERT into tiliointi set
+					yhtio 			 = '{$kukarow['yhtio']}',
+					ltunnus 		 = '{$tunnus}',
+					liitos			 = '{$liitos}',
+					liitostunnus	 = '{$liitostunnus}',
+					tilino 			 = '{$tili}',
+					kustp    		 = '{$kustp_ins}',
+					kohde	 		 = '{$kohde_ins}',
+					projekti 		 = '{$projekti_ins}',
+					tapvm 			 = '{$laskurow['tapvm']}',
+					summa 			 = '{$summa}',
+					summa_valuutassa = '{$summa_valuutassa}',
+					valkoodi 		 = '{$valkoodi}',
+					vero 			 = '{$vero}',
+					selite 			 = '{$selite}',
+					lukko 			 = '',
+					tosite 			 = '{$tositenro}',
+					laatija 		 = '{$kukarow['kuka']}',
+					laadittu 		 = now()";
+	}
+
 	$result = pupe_query($query);
 	$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
 

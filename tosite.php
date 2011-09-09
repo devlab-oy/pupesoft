@@ -22,8 +22,18 @@
 		}
 	}
 
+	if (!isset($tiliointirivit)) $tiliointirivit = array();
+
+	if (isset($tullaan) and $tullaan == 'muutosite') {
+		$iliitos = unserialize(urldecode($iliitos));
+		$ed_iliitostunnus = unserialize(urldecode($ed_iliitostunnus));
+		$tiliointirivit = unserialize(urldecode($tiliointirivit));
+	}
+
+	if (isset($tiliointirivit) and !is_array($tiliointirivit)) $tiliointirivit = unserialize(urldecode($tiliointirivit));
+
 	if (isset($muutparametrit)) {
-		list($tee, $kuitti, $kuva, $maara, $tpp, $tpk, $tpv, $summa, $valkoodi, $alv_tili, $nimi, $comments, $selite, $liitos, $liitostunnus, $MAX_FILE_SIZE, $itili, $ikustp, $ikohde, $isumma, $ivero, $iselite, $iliitos, $ed_iliitostunnus) = explode("#!#", $muutparametrit);
+		list($tee, $kuitti, $kuva, $maara, $tpp, $tpk, $tpv, $summa, $valkoodi, $alv_tili, $nimi, $comments, $selite, $liitos, $liitostunnus, $tunnus, $tiliointirivit, $MAX_FILE_SIZE, $itili, $ikustp, $ikohde, $isumma, $ivero, $iselite, $iliitos, $ed_iliitostunnus) = explode("#!#", $muutparametrit);
 
 		$itili		= unserialize(urldecode($itili));
 		$ikustp		= unserialize(urldecode($ikustp));
@@ -33,6 +43,7 @@
 		$iselite	= unserialize(urldecode($iselite));
 		$iliitos = unserialize(urldecode($iliitos));
 		$ed_iliitostunnus = unserialize(urldecode($ed_iliitostunnus));
+		$tiliointirivit = unserialize(urldecode($tiliointirivit));
 	}
 
 	if ($toimittajaid > 0) {
@@ -60,7 +71,7 @@
 		}
 	}
 
-	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$liitos."#!#".$liitostunnus."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite))."#!#".urlencode(serialize($iliitos))."#!#".urlencode(serialize($ed_iliitostunnus));
+	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$liitos."#!#".$liitostunnus."#!#".$tunnus."#!#".urlencode(serialize($tiliointirivit))."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite))."#!#".urlencode(serialize($iliitos))."#!#".urlencode(serialize($ed_iliitostunnus));
 
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>\n";
 
@@ -497,18 +508,38 @@
 			$qlisa = " nimi = '{$nimi}',";
 		}
 
+		$paivitetaanko = false;
 
-		$query = "	INSERT into lasku set
-					yhtio 		= '{$kukarow['yhtio']}',
-					tapvm 		= '{$tpv}-{$tpk}-{$tpp}',
-					{$qlisa}
-					tila 		= 'X',
-					alv_tili 	= '{$alv_tili}',
-					comments	= '{$comments}',
-					laatija 	= '{$kukarow['kuka']}',
-					luontiaika 	= now()";
-		$result = pupe_query($query);
-		$tunnus = mysql_insert_id ($link);
+		if (isset($tunnus) and trim($tunnus) > 0) {
+
+			$tunnus = (int) $tunnus;
+
+			$query = "	UPDATE lasku SET
+						tapvm = '{$tpv}-{$tpk}-{$tpp}',
+						{$qlisa}
+						alv_tili = '{$alv_tili}',
+						comments = '{$comments}'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$tunnus}'";
+			$result = pupe_query($query);
+
+			$paivitetaanko = true;
+
+			$maara = count($ed_iliitostunnus)+1;
+		}
+		else {
+			$query = "	INSERT into lasku set
+						yhtio 		= '{$kukarow['yhtio']}',
+						tapvm 		= '{$tpv}-{$tpk}-{$tpp}',
+						{$qlisa}
+						tila 		= 'X',
+						alv_tili 	= '{$alv_tili}',
+						comments	= '{$comments}',
+						laatija 	= '{$kukarow['kuka']}',
+						luontiaika 	= now()";
+			$result = pupe_query($query);
+			$tunnus = mysql_insert_id ($link);
+		}
 
 		if (isset($avaavatase) and $avaavatase == 'joo') {
 			$query = "	UPDATE tilikaudet SET
@@ -531,6 +562,7 @@
 		// Tehdään tiliöinnit
 		for ($i=1; $i<$maara; $i++) {
 			if (strlen($itili[$i]) > 0) {
+
 				$tili				= $itili[$i];
 				$kustp				= $ikustp[$i];
 				$kohde				= $ikohde[$i];
@@ -712,6 +744,15 @@
 		echo "<form name='tosite' action='tosite.php' method='post' enctype='multipart/form-data' onSubmit = 'return verify()' autocomplete='off'>\n";
 		echo "<input type='hidden' name='tee' value='I'>\n";
 
+		echo "<input type='hidden' name='tiliointirivit' value='",urlencode(serialize($tiliointirivit)),"' />";
+		echo "<input type='hidden' name='tunnus' value='{$tunnus}' />";
+
+		if (isset($tullaan) and $tullaan == 'muutosite' and (!isset($toimittajaid) and !isset($asiakasid)) or ($toimittajaid == 0 and $asiakasid == 0)) {
+			echo "<input type='hidden' name='ed_iliitostunnus' value='",urlencode(serialize($ed_iliitostunnus)),"' />";
+			echo "<input type='hidden' name='iliitos' value='",urlencode(serialize($iliitos)),"' />";
+			echo "<input type='hidden' name='tullaan' value='{$tullaan}' />";
+		}
+
 		if ((isset($gokfrom) and $gokfrom == 'avaavatase') or (isset($tilikausi) and is_numeric($tilikausi))) {
 			echo "<input type='hidden' name='avaavatase' value='joo' />";
 			echo "<input type='hidden' name='tilikausi' value='{$tilikausi}' />";
@@ -728,6 +769,49 @@
 					$maara = $tilmaara;
 					break;
 				}
+			}
+		}
+
+		if (isset($tunnus) and $tunnus > 0 and count($tiliointirivit) > 0) {
+
+			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tila = 'X' and tunnus = '{$tunnus}'";
+			$lasku_chk_res = pupe_query($query);
+			$lasku_chk_row = mysql_fetch_assoc($lasku_chk_res);
+
+			$comments = $lasku_chk_row['comments'];
+
+			$itili = $ikustp = $ikohde = $iprojekti = $isumma = $isumma_valuutassa = $ivero = $iselite = array();
+
+			$skipattuja = 0;
+
+			foreach ($tiliointirivit as $xxx => $rivix) {
+
+				$query = "SELECT * FROM tiliointi WHERE yhtio = '{$kukarow['yhtio']}' AND ltunnus = '{$tunnus}' AND tunnus = '{$rivix}'";
+				$info_res = pupe_query($query);
+				$info_row = mysql_fetch_assoc($info_res);
+
+				if ($info_row['korjattu'] != '') {
+					$skipattuja++;
+					continue;
+				}
+
+				$xxx -= $skipattuja;
+
+				$itili[$xxx] = $info_row['tilino'];
+				$ikustp[$xxx] = $info_row['kustp'];
+				$ikohde[$xxx] = $info_row['kohde'];
+				$iprojekti[$xxx] = $info_row['projekti'];
+				$isumma[$xxx] = $info_row['summa'];
+				$isumma_valuutassa[$xxx] = $info_row['summa_valuutassa'];
+				$ivero[$xxx] = $info_row['vero'];
+				$iselite[$xxx] = $info_row['selite'];
+			}
+
+			$maara = count($tiliointirivit) + 1 - $skipattuja;
+
+			if (!in_array($maara, $tilmaarat)) {
+				$tilmaarat[] = $maara;
+				sort($tilmaarat);
 			}
 		}
 

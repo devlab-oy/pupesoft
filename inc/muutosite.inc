@@ -995,6 +995,37 @@
 						</tr>
 						</form>";
 			}
+
+			$query = "SELECT tunnus, liitos, liitostunnus FROM tiliointi WHERE yhtio = '{$kukarow['yhtio']}' AND ltunnus = '{$tunnus}' and korjattu = ''";
+			$tunnukset_talteen_res = pupe_query($query);
+
+			$tiliointirivit = array();
+			$ed_iliitostunnus = array();
+			$iliitos = array();
+
+			$xxx = 1;
+
+			while ($tunnukset_talteen_row = mysql_fetch_assoc($tunnukset_talteen_res)) {
+				$tiliointirivit[$xxx] = $tunnukset_talteen_row['tunnus'];
+				$ed_iliitostunnus[$xxx] = $tunnukset_talteen_row['liitostunnus'];
+				$iliitos[$xxx] = $tunnukset_talteen_row['liitos'];
+				$xxx++;
+			}
+
+			echo "	<form action = 'tosite.php' method='post'>
+					<input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
+					<input type = 'hidden' name='tee'  value=''>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+					<input type = 'hidden' name='tiliointirivit' value='".urlencode(serialize($tiliointirivit))."' />
+					<input type = 'hidden' name='ed_iliitostunnus' value='".urlencode(serialize($ed_iliitostunnus))."' />
+					<input type = 'hidden' name='iliitos' value='".urlencode(serialize($iliitos))."' />
+					<input type = 'hidden' name='tullaan' value='muutosite' />
+					<tr>
+					<th>".t("Vaihda asiakas-/toimittajaliitos")."</th>
+					<td>&nbsp;</td><td><input type = 'submit' value = '".t("Hae")."'></td>
+					</tr>
+					</form>";
+
 		}
 		else {
 			if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku'] and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {

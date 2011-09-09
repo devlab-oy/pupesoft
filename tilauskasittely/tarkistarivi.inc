@@ -243,7 +243,7 @@
 	}
 
 	// Jos tilaus on tehdastilaus, niin tilaukselle saa laittaa vain tehdastilaustuotteita
-	if ($laskurow['tilaustyyppi'] == '7' and $trow['status'] != 'T') {
+	if ($laskurow['tilaustyyppi'] == '7' and $trow['status'] != 'T' and $trow['panttitili'] == '' and $trow["ei_saldoa"] == "") {
 		$varaosavirhe .= t("VIRHE: Tuote ei ole tehdastilaustuote")."!<br>";
 		$riviok++;
 		$tilausok++;

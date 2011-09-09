@@ -1308,6 +1308,8 @@
 									$sopimuslisays = "";
 								}
 
+								$omalle_tilaukselle_lisa = in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
+
 								if (mysql_num_rows($lisatied_res) > 0) {
 									$lisatied_row = mysql_fetch_array($lisatied_res);
 
@@ -1318,6 +1320,7 @@
 												muutospvm			= now(),
 												muuttaja			= '$kukarow[kuka]',
 												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]'
+												{$omalle_tilaukselle_lisa}
 												$sopimuslisays
 												$tlisatied_lisa
 												WHERE yhtio			 = '$kukarow[yhtio]'
@@ -1343,6 +1346,7 @@
 												jarjestys			= '$jarjestys',
 												luontiaika			= now(),
 												laatija 			= '$kukarow[kuka]'
+												{$omalle_tilaukselle_lisa}
 												$sopimuslisays
 												$tlisatied_lisa";
 
@@ -2202,6 +2206,8 @@
 						and tilausrivitunnus = '$lisatty_tun'";
 			$lisatied_res = pupe_query($query);
 
+			$omalle_tilaukselle_lisa = in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
+
 			if (mysql_num_rows($lisatied_res) > 0) {
 				$lisatied_row = mysql_fetch_array($lisatied_res);
 
@@ -2211,6 +2217,7 @@
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]'
+							{$omalle_tilaukselle_lisa}
 							$tlisatied_lisa
 							WHERE yhtio			 = '$kukarow[yhtio]'
 							and tilausrivitunnus = '$lisatty_tun'";
@@ -2233,6 +2240,7 @@
 							ei_nayteta			= '$puu_ein[$i]',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'
+							{$omalle_tilaukselle_lisa}
 							$tlisatied_lisa";
 
 				if ($trow["sarjanumeroseuranta"] == "S" and $kpl < 0) {

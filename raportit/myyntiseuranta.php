@@ -425,8 +425,15 @@
 
 						if ($osoitetarrat != "") $select .= "asiakas.tunnus astunnus, ";
 
-						$select .= "asiakas.ytunnus, asiakas.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi!='' and asiakas.nimi!=asiakas.toim_nimi,concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark),NULL)) nimi, concat_ws('<br>',asiakas.postitp,if(asiakas.toim_postitp!='' and asiakas.postitp!=asiakas.toim_postitp,asiakas.toim_postitp,NULL)) postitp, ";
-						$order  .= "asiakas.ytunnus,";
+						if ($ytunnus_mistatiedot != "") {
+							$etuliite = "lasku";
+						}
+						else {
+							$etuliite = "asiakas";
+						}
+
+						$select .= "$etuliite.ytunnus, $etuliite.toim_ovttunnus, concat_ws('<br>',concat_ws(' ',$etuliite.nimi,$etuliite.nimitark),if($etuliite.toim_nimi!='' and $etuliite.nimi!=$etuliite.toim_nimi,concat_ws(' ',$etuliite.toim_nimi,$etuliite.toim_nimitark),NULL)) nimi, concat_ws('<br>',$etuliite.postitp,if($etuliite.toim_postitp!='' and $etuliite.postitp!=$etuliite.toim_postitp,$etuliite.toim_postitp,NULL)) postitp, ";
+						$order  .= "$etuliite.ytunnus,";
 						$gluku++;
 					}
 
@@ -565,13 +572,25 @@
 
 					if ($mukaan == "laskuittain") {
 						if ($group!="") $group .= ",lasku.tunnus";
-						else $group .= "laskunumero";
+						else $group .= "lasku.tunnus";
 						$select .= "if(lasku.laskunro>0,concat('".t("LASKU").":',lasku.laskunro),concat('".t("TILAUS").":',lasku.tunnus)) laskunumero, ";
 						$order  .= "laskunumero,";
 						$gluku++;
 
 						if ($rajaus[$i] != "") {
 							$lisa .= " and lasku.laskunro = '$rajaus[$i]' ";
+						}
+					}
+
+					if ($mukaan == "asiakkaan_tilausnumeroittain") {
+						if ($group!="") $group .= ",lasku.asiakkaan_tilausnumero";
+						else $group .= "lasku.asiakkaan_tilausnumero";
+						$select .= "lasku.asiakkaan_tilausnumero asiakkaan_tilausnumero, ";
+						$order  .= "asiakkaan_tilausnumero,";
+						$gluku++;
+
+						if ($rajaus[$i] != "") {
+							$lisa .= " and lasku.asiakkaan_tilausnumero = '$rajaus[$i]' ";
 						}
 					}
 
@@ -2113,6 +2132,7 @@
 			if ($ruksit[190] != '')			$ruk190chk 				= "CHECKED";
 			if ($ruksit[200] != '')			$ruk200chk 				= "CHECKED";
 			if ($ruksit[210] != '')			$ruk210chk 				= "CHECKED";
+			if ($ruksit[220] != '')			$ruk220chk 				= "CHECKED";
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
 			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
@@ -2132,6 +2152,7 @@
 			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
+			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
 
 			echo "<table>
 				<tr>
@@ -2145,7 +2166,12 @@
 				<th>".t("Listaa y-tunnuksella")."</th>
 				<td><input type='text' name='jarjestys[60]' size='2' value='$jarjestys[60]'></td>
 				<td><input type='checkbox' name='ruksit[60]' value='ytunnus' $ruk60chk></td>
-				<td><input type='text' name='ytunnus' value='$ytunnus'><br></td>
+				<td><input type='text' name='ytunnus' value='$ytunnus'>
+				<select name='ytunnus_mistatiedot'>
+				<option value=''>".t("Asiakasrekisteristä")."</option>
+				<option value='laskulta' $ytun_mistatiedot_sel>".t("Laskuilta")."</option>
+				</select>
+				</td>
 				</tr>
 				<tr>
 				<th>".t("Listaa asiakasnumerolla")."</th>
@@ -2304,6 +2330,12 @@
 				<td><input type='text' name='jarjestys[210]' size='2' value='$jarjestys[210]'></td>
 				<td><input type='checkbox' name='ruksit[210]' value='maksuehdoittain' $ruk210chk></td>
 				<td><input type='text' name='rajaus[210]' value='$rajaus[210]'></td>
+				</tr>
+				<tr>
+				<th>".t("Listaa asiakkaan tilausnumeroittain")."</th>
+				<td><input type='text' name='jarjestys[220]' size='2' value='$jarjestys[220]'></td>
+				<td><input type='checkbox' name='ruksit[220]' value='asiakkaan_tilausnumeroittain' $ruk220chk></td>
+				<td><input type='text' name='rajaus[220]' value='$rajaus[220]'></td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

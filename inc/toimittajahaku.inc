@@ -33,7 +33,7 @@
 			echo "<td>$trow[postitp]</td>";
 			echo "</tr>";
 			echo "</table>";
-			
+
 			echo "<br>";
 			echo "<table>";
 			echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
@@ -43,7 +43,7 @@
 
 			$sel = array();
 			$sel[$laji]	= " selected";
-			
+
 			echo "<th>".t("Laskuntyyppi")."</th>";
 			echo "<td><select name = 'laji'>
 					<option $sel[K] value = 'K'>".t("Kaikki")."
@@ -56,10 +56,10 @@
 					<td class='back'><input type='Submit' value='".t("Näytä")."'></td>
 					</tr></form>";
 			echo "</table>";
-			
+
 			echo "<br>";
-			
-			
+
+
 			$lisa='';
 
 			if (!isset($kausi)) $kausi='';
@@ -96,7 +96,7 @@
 					  	WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$tunnus' $lisa
 					  	and tila in ('H', 'M', 'P', 'Q', 'Y')
 					  	GROUP BY 1";
-					
+
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -154,21 +154,21 @@
 			 	echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
 			}
 			else {
-				
+
 				echo "<table>";
 				echo "<tr>";
 				echo "<th>".t("Ytunnus")."</th>";
 				echo "<th>".t("Nimi")."</th>";
 				echo "<th>".t("Postitp")."</th>";
 				echo "</tr>";
-												
+
 		 		while ($trow = mysql_fetch_array($result)) {
 					echo "<tr>";
 					echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
 					echo "<td>$trow[nimi]</td><td>$trow[postitp]</td>";
 					echo "</tr>";
 				}
-				
+
 				echo "</table>";
 				echo "<br>";
 				echo "<table>";
@@ -176,10 +176,10 @@
 						<tr>
 						<input type='hidden' name='tunnus' value='$tunnus'>
 						<input type='hidden' name='tee' value='A'>";
-				
+
 				$sel = array();
 				$sel[$laji]	= " selected";
-				
+
 				echo "<th>".t("Laskuntyyppi")."</th>";
 				echo "<td><select name = 'laji'>
 						<option $sel[K] value = 'K'>".t("Kaikki")."
@@ -190,7 +190,7 @@
 						<option $sel[O] value = 'O'>".t("Ostoraportti")."
 						</select></td>
 						</tr>";
-				
+
 				echo "<tr>";
 				echo "<th>".t("Alkupäivämäärä")."</th>";
 				echo "<td>";
@@ -210,7 +210,7 @@
 				echo "</tr>";
 				echo "</form>";
 				echo "</table>";
-				
+
 				echo "<br>";
 
 				echo "<a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO'>".t("Näytä kaikki laskut")."</a><br><br>";
@@ -228,35 +228,26 @@
 
 				$alku += 0;
 
-				if ($kk1 == '' and $pp1 == '' and $vv1 == '') {
-					// annetaan mennä tyhjänä
-				}
-				elseif (checkdate($kk1, $pp1, $vv1)) {
+				if (@checkdate($kk1, $pp1, $vv1)) {
 					$aikalisa = " AND lasku.tapvm >='$vv1-$kk1-$pp1' ";
 					$limit = "NO";
 				}
-				else {
+				elseif ($kk1 != '' or $pp1 != '' or $vv1 != '') {
 					echo "<p><font class='error'>".t("Alkupäivämäärä virheellinen!")."</font></p>";
+				}
 
-				}
-				
-				if ($kk2 == '' and $pp2 == '' and $vv2 == '') {
-					// annetaan mennä tyhjänä
-				}
-				elseif (checkdate($kk2, $pp2, $vv2)) {
+                if (@checkdate($kk2, $pp2, $vv2)) {
 					$aikalisa .= " AND lasku.tapvm <='$vv2-$kk2-$pp2' ";
 					$limit = "NO";
-					
 				}
-				else {
+				elseif ($kk2 != '' or $pp2 != '' or $vv2 != '') {
 					echo "<p><font class='error'>".t("Loppupäivämäärä virheellinen!")."</font></p>";
 				}
-
 
 				if ($limit != "NO") {
 					$limlis = " LIMIT $alku, 50 ";
 				}
-				
+
 				$query = "	SELECT tapvm, erpcm, summa, valkoodi, vienti,
 							concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus,
 							if(laskunro = 0, '', laskunro) laskunro,
@@ -289,7 +280,7 @@
 							if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
 							summat[valuutta] += aaData[aiDisplay[i]][1]*1;
 						}
-						
+
 						// Tyhjennetään kaikki summat
 						$('td[name=yhteensa]').each(
 							function() {
@@ -458,7 +449,7 @@
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
 		}
-		
+
 		if (mysql_num_rows($result) > 40) {
 			echo "<b>".t("Haulla löytyi liikaa toimittajia. Tarkenna hakua")."</b><br>";
 			$tee = '';

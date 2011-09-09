@@ -589,7 +589,7 @@
 
 					while ($laskuorow = mysql_fetch_assoc($laskuores)) {
 
-						if ($yhtiorow['ostolaskujen_paivays'] == "1") {
+						if ($yhtiorow['ostolaskujen_paivays'] == "1" and $laskuorow["lapvm"] != '0000-00-00') {
 							$ltpp = substr($laskuorow["lapvm"], 8, 2);
 							$ltpk = substr($laskuorow["lapvm"], 5, 2);
 							$ltpv = substr($laskuorow["lapvm"], 0, 4);

@@ -1,6 +1,6 @@
 <?php
 
-	$query = "SELECT tapvm FROM lasku WHERE tunnus='$tunnus'";
+	$query = "SELECT tapvm FROM lasku WHERE tunnus = '{$tunnus}'";
 	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -48,22 +48,29 @@
 
 	list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);
 
+	if (trim($liitostunnus) == '') {
+		$liitos = '';
+		$liitostunnus = 0;
+	}
+
 	$query = "	INSERT into tiliointi set
-				yhtio 			 = '$kukarow[yhtio]',
-				ltunnus 		 = '$tunnus',
-				tilino 			 = '$tili',
+				yhtio 			 = '{$kukarow['yhtio']}',
+				ltunnus 		 = '{$tunnus}',
+				liitos			 = '{$liitos}',
+				liitostunnus	 = '{$liitostunnus}',
+				tilino 			 = '{$tili}',
 				kustp    		 = '{$kustp_ins}',
 				kohde	 		 = '{$kohde_ins}',
 				projekti 		 = '{$projekti_ins}',
-				tapvm 			 = '$laskurow[tapvm]',
-				summa 			 = '$summa',
-				summa_valuutassa = '$summa_valuutassa',
-				valkoodi 		 = '$valkoodi',
-				vero 			 = '$vero',
-				selite 			 = '$selite',
+				tapvm 			 = '{$laskurow['tapvm']}',
+				summa 			 = '{$summa}',
+				summa_valuutassa = '{$summa_valuutassa}',
+				valkoodi 		 = '{$valkoodi}',
+				vero 			 = '{$vero}',
+				selite 			 = '{$selite}',
 				lukko 			 = '',
-				tosite 			 = '$tositenro',
-				laatija 		 = '$kukarow[kuka]',
+				tosite 			 = '{$tositenro}',
+				laatija 		 = '{$kukarow['kuka']}',
 				laadittu 		 = now()";
 	$result = pupe_query($query);
 	$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
@@ -76,22 +83,22 @@
 		}
 
 		$query = "	INSERT into tiliointi set
-					yhtio 			 = '$kukarow[yhtio]',
-					ltunnus 		 = '$tunnus',
-					tilino 			 = '$alv_tili',
+					yhtio 			 = '{$kukarow['yhtio']}',
+					ltunnus 		 = '{$tunnus}',
+					tilino 			 = '{$alv_tili}',
 					kustp 			 = 0,
 					kohde 			 = 0,
 					projekti 		 = 0,
-					tapvm 			 = '$laskurow[tapvm]',
-					summa 			 = '$alv',
-					summa_valuutassa = '$alv_valuutassa',
-					valkoodi 		 = '$valkoodi',
+					tapvm 			 = '{$laskurow['tapvm']}',
+					summa 			 = '{$alv}',
+					summa_valuutassa = '{$alv_valuutassa}',
+					valkoodi 		 = '{$valkoodi}',
 					vero 			 = 0,
-					selite 			 = '$selite',
+					selite 			 = '{$selite}',
 					lukko 			 = '1',
-					laatija 		 = '$kukarow[kuka]',
+					laatija 		 = '{$kukarow['kuka']}',
 					laadittu 		 = now(),
-					aputunnus 		 = $isa";
+					aputunnus 		 = {$isa}";
 		$result = pupe_query($query);
 	}
 

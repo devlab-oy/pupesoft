@@ -548,7 +548,7 @@
 
 				if (!isset($nayta_pdf)) echo "<font class='message'>".t("Asiakas")." $rakir_row[toim_nimi]</font><li>".t("Yhdistetään tilaukset").": ";
 
-				foreach($lotsikot as $doit) {
+				foreach ($lotsikot as $doit) {
 					if (!isset($nayta_pdf)) echo "$doit ";
 					$kaikki_lotsikot .= $doit.", ";
 				}
@@ -574,7 +574,7 @@
 
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
 					$query = "	UPDATE rahtikirjat
-								set rahtikirjanro='$rahtikirjanro'
+								set rahtikirjanro = '$rahtikirjanro'
 								where tunnus in ($tunnukset)
 								and yhtio = '$kukarow[yhtio]'";
 					$ures  = mysql_query($query) or pupe_error($query);
@@ -592,6 +592,25 @@
 				if ($rakir_row['toimitusvahvistus'] != '') {
 					if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
 						require("tilauskasittely/$rakir_row[toimitusvahvistus]");
+					}
+				}
+
+				// Katsotaan onko magento-API konffattu, eli verkkokauppa käytössä, silloin merkataan tilaus toimitetuksi Magentossa kun rahtikirja tulostetaan
+				if ($magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
+					$query = "	SELECT asiakkaan_tilausnumero
+								FROM lasku
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus  IN ($otunnukset)
+								AND laatija = 'Magento'
+								AND asiakkaan_tilausnumero != ''";
+					$mageres = mysql_query($query) or pupe_error($query);
+
+					while ($magerow = mysql_fetch_assoc($mageres)) {
+						$magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
+						$magento_api_rak = $rahtikirjanro;
+						$magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+
+						require("magento_toimita_tilaus.php");
 					}
 				}
 

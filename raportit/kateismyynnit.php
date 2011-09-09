@@ -486,7 +486,7 @@
 	}
 
 	// Jos ollaan täsmäyttämässä käteismyyntiä
-	if ($tasmays != "") {
+	if (isset($tasmays) and $tasmays != "") {
 
 		// Tarkistetaan eriävätkö kassalippaiden pankki- ja luottokorttitilit
 		if (count($kassakone) > 1) {
@@ -928,7 +928,7 @@
 		}
 		$lisa .= ") ";
 
-		if ($tasmays != '') {
+		if (isset($tasmays) and $tasmays != '') {
 			//ylikirjotetaan koko lisä, koska ei saa olla muita rajauksia
 			$lisa = " and lasku.tapvm = '$vv-$kk-$pp'";
 		}
@@ -979,7 +979,7 @@
 		$myyntisaamiset_tilit = substr($myyntisaamiset_tilit, 0, -1);
 
 		//jos monta kassalipasta niin tungetaan tämä queryyn.
-		if (count($kassakone) > 1 and $tasmays != '') {
+		if (count($kassakone) > 1 and isset($tasmays) and $tasmays != '') {
 			$selecti = "if(tiliointi.tilino = kassalipas.kassa OR tiliointi.tilino = '$yhtiorow[kassa]', concat(kassalipas.nimi, ' kateinen'),
 				if(tiliointi.tilino = kassalipas.pankkikortti OR tiliointi.tilino = '$yhtiorow[pankkikortti]', 'Pankkikortti',
 				if(tiliointi.tilino = kassalipas.luottokortti OR tiliointi.tilino = '$yhtiorow[luottokortti]', 'Luottokortti', 'Muut'))) tyyppi, ";
@@ -1029,7 +1029,7 @@
 		$ltunnukset = array();
 
 		// Tarkistetaan ensiksi onko kassalippaat jo tiliöity lockdown-funktion avulla
-		if ($tasmays != '') {
+		if (isset($tasmays) and $tasmays != '') {
 			$ltunnusx = array();
 			if ($kassakone != '') {
 				foreach ($kassakone as $kassax) {
@@ -1062,7 +1062,7 @@
 			// Jos tositteita löytyy niin ei tehdä mitään
 		}
 		else {
-			if ($tasmays != '') {
+			if (isset($tasmays) and $tasmays != '') {
 				echo "<table><tr><td>";
 				echo "<font class='head'>".t("Täsmäys").":</font><br>";
 				echo "<form method='post' action='$PHP_SELF' id='tasmaytysform' onSubmit='return verify();'>";
@@ -1125,7 +1125,7 @@
 					<th nowrap>".t("Pvm")."</th>
 					<th nowrap>$yhtiorow[valkoodi]</th></tr>";
 
-			if ($tasmays == '' and $vaiht == 1) {
+			if ((!isset($tasmays) or $tasmays == '') and $vaiht == 1) {
 				//kirjoitetaan  faili levylle..
 				$filenimi = "/tmp/KATKIRJA.txt";
 				$fh = fopen($filenimi, "w+");
@@ -1158,7 +1158,7 @@
 			$kassalippaat = array();
 			$kassalipas_tunnus = array();
 
-			if ($tasmays != '') {
+			if (isset($tasmays) and $tasmays != '') {
 				if (mysql_num_rows($result) > 0) {
 					mysql_data_seek($result, 0);
 				}
@@ -1815,7 +1815,7 @@
 				}
 			}
 
-			if ($tasmays != '') {
+			if (isset($tasmays) and $tasmays != '') {
 				echo "<tr><td colspan='8'>&nbsp;</td></tr>";
 			}
 
@@ -1824,7 +1824,7 @@
 			echo "<input type='hidden' id='myynti_yhteensa_hidden' name='myynti_yhteensa' value='$yhteensa'>";
 			echo "<tr><td align='left' colspan='3'><font class='head'>";
 
-			if ($tasmays != '') {
+			if (isset($tasmays) and $tasmays != '') {
 				echo t("Myynti yhteensä");
 			}
 			else {
@@ -1837,7 +1837,7 @@
 
 			echo "' disabled></td></tr>";
 
-			if ($tasmays != '') {
+			if (isset($tasmays) and $tasmays != '') {
 				echo "<tr><td align='left' colspan='3'><font class='head'>".t("Kassalippaassa käteistä").":</td><td align='right'>";
 				echo "<input type='text' id='kaikkiyhteensa' size='10' value='' disabled></td></tr>";
 				echo "<tr><td align='left' colspan='3'><font class='head'>".t("Loppukassa yhteensä").":</td><td align='right'>";
@@ -1877,7 +1877,7 @@
 			echo "</table>";
 		}
 
-		if ($tasmays == '' and $vaiht == 1) {
+		if ((!isset($tasmays) or $tasmays == '') and $vaiht == 1) {
 			$prn = "\n";
 			$prn .= sprintf ("%-'.84s", t("Yhteensä")." ");
 			$prn .= sprintf ("%'.10s", " ".str_replace(".",",", sprintf('%.2f', $yhteensa)));
@@ -1963,7 +1963,7 @@
 
 	echo "<tr><td class='back'><br></td></tr>";
 
-	if (!$tasmays) {
+	if (!isset($tasmays) or !$tasmays) {
 		$dis = "disabled";
 		$dis2 = "";
 	}
@@ -1974,7 +1974,7 @@
 
 	if ($oikeurow['paivitys'] == 1) {
 
-		if ($tasmays != '') {
+		if (isset($tasmays) and $tasmays != '') {
 			$sel = 'CHECKED';
 		}
 		if ($tilityskpl == '') {

@@ -211,7 +211,11 @@ if ($tee == 'VIIVA') {
 			$tee = "";
 		}
 		else {
-			$trow		 	= mysql_fetch_assoc($result);
+			$trow = mysql_fetch_assoc($result);
+
+			// Ei näytetä henkilötunnusta
+			$trow["ytunnus_clean"] = tarkistahetu($trow["ytunnus"]);
+
 			$toimittajaid 	= $trow["tunnus"];
 			$tee 			= "P";
 			$tee2 			= "V"; // Meillä on eroja virheentarkastuksissa, jos tiedot tuli viivakoodista
@@ -288,7 +292,10 @@ if ($tee == 'I') {
 			exit;
 		}
 
-		$trow = mysql_fetch_assoc ($result);
+		$trow = mysql_fetch_assoc($result);
+
+		// Ei näytetä henkilötunnusta
+		$trow["ytunnus_clean"] = tarkistahetu($trow["ytunnus"]);
 
 		if (isset($toitilinumero) and (strtoupper($trow['maa'])) == 'FI') {
 			$pankkitili = $toitilinumero;
@@ -613,7 +620,10 @@ if ($tee == 'I') {
 			exit;
 		}
 
-		$trow = mysql_fetch_assoc ($result);
+		$trow = mysql_fetch_assoc($result);
+
+		// Ei näytetä henkilötunnusta
+		$trow["ytunnus_clean"] = tarkistahetu($trow["ytunnus"]);
 	}
 
 	if (strlen($trow['ytunnus']) == 0) {
@@ -845,6 +855,9 @@ if ($tee == 'P' or $tee == 'E') {
 
 		$trow = mysql_fetch_assoc($result);
 
+		// Ei näytetä henkilötunnusta
+		$trow["ytunnus_clean"] = tarkistahetu($trow["ytunnus"]);
+
 		// Oletusarvot toimittajalta, jos ekaaa kertaa täällä
 		if ($tee == 'P') {
 			$valkoodi 			= $trow['oletus_valkoodi'];
@@ -881,7 +894,7 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<table><tr><td valign='top' style='padding: 0px;'>";
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
-		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus])</td></tr>";
+		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus_clean])</td></tr>";
 		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maa]-$trow[postino] $trow[postitp], $trow[maa] $fakta</td></tr>";
 		echo "<tr><td><a href='yllapito.php?toim=toimi&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara//iframe=$iframe//skannattu_lasku=$skannattu_lasku//tultiin=$tultiin'>".t("Muuta toimittajan tietoja")."</a></td></tr>";
 		echo "</table>";
@@ -1571,7 +1584,7 @@ if ($tee == 'I') {
 	$tositenro=0;
 
 	if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
-		$query = "LOCK TABLE tiliointi WRITE, lasku WRITE, sanakirja WRITE, liitetiedostot WRITE";
+		$query = "LOCK TABLE tiliointi WRITE, lasku WRITE, sanakirja WRITE, liitetiedostot WRITE, tili READ";
 		$result = pupe_query($query);
 
 		$alaraja = 41000000;
@@ -2110,11 +2123,11 @@ if ($tee == 'I') {
 	if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 		$query = "UNLOCK TABLES";
 		$result = pupe_query($query);
-		echo "<font class='message'>".t("Lasku perustettiin asiakkalle")." $trow[nimi]<br>";
+		echo "<font class='message'>".t("Lasku perustettiin toimittajalle")." $trow[nimi]<br>";
 		echo t("Summa")." $yleissumma $valkoodi = $omasumma $yhtiorow[valkoodi]".t('Tositenro on')." $tositenro<br></font><hr>";
 	}
 	else {
-		echo "<font class='message'>".t("Lasku perustettiin asiakkalle")." $trow[nimi]<br>";
+		echo "<font class='message'>".t("Lasku perustettiin toimittajalle")." $trow[nimi]<br>";
 		echo t("Summa")." $yleissumma $valkoodi = $omasumma $yhtiorow[valkoodi]<br></font><hr>";
 	}
 

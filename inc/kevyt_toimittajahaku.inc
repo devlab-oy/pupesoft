@@ -64,7 +64,7 @@ if ($monta > 1 and $monta <= $limit) {
 		else die("VIRHE: Toimittajalla ei ole ytunnusta! Korjaa asia!");
 
 		echo "<tr class='aktiivi'>
-				<td>$toimittaja[ytunnus]</td>
+				<td>".tarkistahetu($toimittaja["ytunnus"])."</td>
 				<td>$toimittaja[nimi] $toimittaja[nimitark]</td>
 				<td>$toimittaja[osoite]</td>
 				<td>$toimittaja[postino]</td>

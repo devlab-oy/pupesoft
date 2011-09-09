@@ -1,6 +1,7 @@
 <?php
 
 	echo "<font class='head'>".t("Toimittajan laskut")."</font><hr>";
+
 	if ($tee == 'A') {
 		// N‰ytet‰‰n toimittajan laskuja
 		//Jos k‰ytet‰‰n $tunnusta niin k‰ytet‰‰n liitostunnusta
@@ -96,7 +97,6 @@
 					  	WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$tunnus' $lisa
 					  	and tila in ('H', 'M', 'P', 'Q', 'Y')
 					  	GROUP BY 1";
-
 			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -154,7 +154,6 @@
 			 	echo "<b>".t("Haulla ei lˆytynyt yht‰‰n toimittajaa")."</b>";
 			}
 			else {
-
 				echo "<table>";
 				echo "<tr>";
 				echo "<th>".t("Ytunnus")."</th>";

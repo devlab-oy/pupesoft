@@ -889,6 +889,7 @@
 					laskuttaja 				= '$kukarow[kuka]',
 					tapvm 					= '$laskutuspvm',
 					maksuehto 				= '$orow[maksuehto]',
+					maksuteksti 			= if(maksuteksti='','$xrow[teksti]',maksuteksti),
 					laskutettu 				= now()
 					WHERE tunnus = '$kukarow[kesken]'
 					and yhtio	 = '$kukarow[yhtio]'";

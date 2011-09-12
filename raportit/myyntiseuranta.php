@@ -750,6 +750,10 @@
 					$lisa .= " and tuote.status = '".(string) $status."' ";
 				}
 
+				if (isset($verkkokaupat) and $verkkokaupat != '') {
+					$lisa .= " and lasku.laatija = 'Magento' ";
+				}
+
 				$vvaa = $vva - '1';
 				$vvll = $vvl - '1';
 
@@ -2153,6 +2157,7 @@
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($naytakaikkityypit != '')	$naytakaikkityypitchk	= "CHECKED";
 			if ($ytunnus_mistatiedot != '')	$ytun_mistatiedot_sel	= "SELECTED";
+			if ($verkkokaupat != '') 		$verkkokaupatchk		= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -2225,7 +2230,7 @@
 			echo "<select name='rajaus[100]'>";
 			echo "<option value = '' ></option>";
 
-			while ($vrow=mysql_fetch_array($vresult)) {
+			while ($vrow = mysql_fetch_array($vresult)) {
 
 				if ($rajaus[100] == $vrow['myyja']) {
 					$sel = "selected";
@@ -2456,22 +2461,29 @@
 				<tr>
 				<th>",t("N‰yt‰ tuotteet statuksella"),"</th>";
 
-				$status_result = t_avainsana("S");
+			$status_result = t_avainsana("S");
 
-				echo "<td colspan='2'><select name='status'><option value=''>",t("Kaikki"),"</option>";
+			echo "<td colspan='2'><select name='status'><option value=''>",t("Kaikki"),"</option>";
 
-				while ($statusrow = mysql_fetch_assoc($status_result)) {
+			while ($statusrow = mysql_fetch_assoc($status_result)) {
 
-					$sel = '';
+				$sel = '';
 
-					if (isset($status) and $status == $statusrow['selite']) $sel = ' SELECTED';
+				if (isset($status) and $status == $statusrow['selite']) $sel = ' SELECTED';
 
-					echo "<option value='$statusrow[selite]'$sel>$statusrow[selite] - $statusrow[selitetark]</option>";
-				}
+				echo "<option value='$statusrow[selite]'$sel>$statusrow[selite] - $statusrow[selitetark]</option>";
+			}
 
-				echo "</select></td>
-				</tr>
-				</table><br>";
+			echo "</select></td></tr>";
+
+			echo "<tr>
+				<th>".t("N‰yt‰ vain verkkokauppatilauksia")."</th>
+				<td><input type='checkbox' name='verkkokaupat' $verkkokaupatchk></td>
+				<td></td>
+				<td class='back'></td>
+				</tr>";
+
+			echo "</table><br>";
 
 			// p‰iv‰m‰‰r‰rajaus
 			echo "<table>";

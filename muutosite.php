@@ -890,6 +890,9 @@ if ($tee == 'U') {
 
 	if ($ok != 1) {
 		require "inc/teetiliointi.inc";
+
+		$liitos = '';
+		$liitostunnus = 0;
 	}
 }
 

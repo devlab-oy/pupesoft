@@ -75,7 +75,7 @@ if (!isset($tee) or $tee == '') {
 					}
 
 					echo "<td><font class='$style'>".tv1dateconv($trow["erpcm"])."</font></td>";
-					echo "<td><font class='$style'>$trow[ytunnus]</font></td>";
+					echo "<td><font class='$style'>".tarkistahetu($trow["ytunnus"])."</font></td>";
 
 
 					if ($kukrow["yhtio"] == $kukarow["yhtio"]) {

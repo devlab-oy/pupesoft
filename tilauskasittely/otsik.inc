@@ -2195,10 +2195,7 @@
 				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[29] value='29'> 29 </td>";
 				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[30] value='30'> 30 </td>";
 				echo "</tr><tr>";
-				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[31] value='31'> 31 </td>";
-
-				// t‰‰ ei oo viel‰ implmentoitu
-				//echo "<td colspan='9'><input name='yllapito_pp[]' $disable type='checkbox' $chk[99] value='99'> Kuun viimeinen </td>";
+				echo "<td colspan='10'><input name='yllapito_pp[]' $disable type='checkbox' $chk[31] value='31'> 31 / ".t("Kuukauden viimeinen p‰iv‰")." </td>";
 
 				echo "</tr></table>";
 				echo "</td>";

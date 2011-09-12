@@ -1647,7 +1647,7 @@ if (!function_exists("synclog")) {
 // Konserniyhtiöiden tietueiden synkronointi
 if (!function_exists("synkronoi")) {
 	function synkronoi($yhtio, $table, $tunnus, $orig = "", $force = "") {
-		global $yhtiorow, $kukarow;
+		global $yhtiorow, $kukarow, $synkronoi_kiellot;
 
 		//	Onko mahdollista synkronoida?
 		if (strpos($yhtiorow["synkronoi"], $table) === false) {
@@ -1711,7 +1711,12 @@ if (!function_exists("synkronoi")) {
 
 						foreach($diff as $key => $value) {
 							if (is_string($key) and !in_array($key, array("tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
-								$muutokset[$key] .= $value;
+							    if (isset($synkronoi_kiellot[$table]) and in_array($key, $synkronoi_kiellot[$table])) {
+							        // Ohitetaan tämä koska se on synkronoi kielloissa
+							    }
+							    else {
+								    $muutokset[$key] .= $value;
+								}
 							}
 						}
 					}
@@ -1928,7 +1933,7 @@ if (!function_exists("synkronoi")) {
 						}
 
 						// Tarkastetaan että hinnat eivät mene aivan päin metsää..
-						$query = "select tunnus from yhtion_parametrit where yhtio='$kohderow[yhtio]' and alv_kasittely!='$yhtiorow[alv_kasittely]'";
+						$query = "SELECT tunnus FROM yhtion_parametrit WHERE yhtio='$kohderow[yhtio]' AND alv_kasittely!='$yhtiorow[alv_kasittely]'";
 						$abures = pupe_query($query);
 
 						if (mysql_num_rows($abures)!=0 and $masterrow["alv"] > 0) {
@@ -2038,10 +2043,11 @@ if (!function_exists("synkronoi")) {
 						//	Duunataan itse päivitys/insert kysely!!!
 						for ($i=1; $i < mysql_num_fields($masterres); $i++) {
 							if (isset($masterrow[mysql_field_name($masterres, $i)]) and !in_array(mysql_field_name($masterres, $i), array("yhtio","tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
-								if (isset($override[mysql_field_name($masterres, $i)])) {
-									if ($override[mysql_field_name($masterres, $i)] != "") {
-										$query .= ", ". mysql_field_name($masterres,$i)."='".$override[mysql_field_name($masterres, $i)]."' ";
-									}
+							    if (isset($synkronoi_kiellot[$table]) and in_array(mysql_field_name($masterres, $i), $synkronoi_kiellot[$table])) {
+							        // Ohitetaan tämä koska se on synkronoi kielloissa
+							    }
+                                elseif (isset($override[mysql_field_name($masterres, $i)]) and $override[mysql_field_name($masterres, $i)] != "") {
+									$query .= ", ". mysql_field_name($masterres,$i)."='".$override[mysql_field_name($masterres, $i)]."' ";
 								}
 								else {
 									$query .= ", ". mysql_field_name($masterres,$i)."='".$masterrow[mysql_field_name($masterres, $i)]."' ";

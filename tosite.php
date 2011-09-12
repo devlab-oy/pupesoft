@@ -837,8 +837,6 @@
 
 		if ($toimittajaid > 0) {
 			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>{$toimrow['ytunnus']} {$toimrow['nimi']}\n";
-		// }
-		// else {
 		}
 		echo "<input type = 'text' name = 'toimittaja_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'>";
 
@@ -860,8 +858,6 @@
 
 		if ($asiakasid > 0) {
 			echo "<input type='hidden' name='asiakasid' value='{$asiakasid}'>{$asrow['ytunnus']} {$asrow['nimi']} {$asrow['nimitark']}<br>{$asrow['toim_ovttunnus']} {$asrow['toim_nimi']} {$asrow['toim_nimitark']} {$asrow['toim_postitp']}\n";
-		// }
-		// else {
 		}
 		echo "<input type = 'text' name = 'asiakas_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'>";
 

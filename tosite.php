@@ -809,7 +809,7 @@
 				$iselite[$xxx] = $info_row['selite'];
 			}
 
-			$maara = count($tiliointirivit) + 1 - $skipattuja;
+			$maara = (!isset($maara) or $maara < (count($tiliointirivit) + 1 - $skipattuja)) ? count($tiliointirivit) + 1 - $skipattuja : $maara;
 
 			if (!in_array($maara, $tilmaarat)) {
 				$tilmaarat[] = $maara;

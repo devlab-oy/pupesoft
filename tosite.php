@@ -23,6 +23,8 @@
 	}
 
 	if (!isset($tiliointirivit)) $tiliointirivit = array();
+	if (!isset($iliitos)) $iliitos = array();
+	if (!isset($ed_iliitostunnus)) $ed_iliitostunnus = array();
 
 	if (isset($tullaan) and $tullaan == 'muutosite') {
 		$iliitos = unserialize(urldecode($iliitos));
@@ -747,7 +749,7 @@
 		echo "<input type='hidden' name='tiliointirivit' value='",urlencode(serialize($tiliointirivit)),"' />";
 		echo "<input type='hidden' name='tunnus' value='{$tunnus}' />";
 
-		if (isset($tullaan) and $tullaan == 'muutosite' and (!isset($toimittajaid) and !isset($asiakasid)) or ($toimittajaid == 0 and $asiakasid == 0)) {
+		if (isset($tullaan) and $tullaan == 'muutosite' and ((!isset($toimittajaid) and !isset($asiakasid)) or ($toimittajaid == 0 and $asiakasid == 0))) {
 			echo "<input type='hidden' name='ed_iliitostunnus' value='",urlencode(serialize($ed_iliitostunnus)),"' />";
 			echo "<input type='hidden' name='iliitos' value='",urlencode(serialize($iliitos)),"' />";
 			echo "<input type='hidden' name='tullaan' value='{$tullaan}' />";
@@ -1095,7 +1097,7 @@
 
 			echo "<input type='hidden' name='iliitostunnus[0]' value='default' />";
 
-			if ($toimittajaid > 0 ) {
+			if ($toimittajaid > 0) {
 
 				$chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) == $toimittajaid) ? ' checked' : ((isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) == $toimittajaid) ? ' checked' : '');
 
@@ -1103,13 +1105,6 @@
 				echo "<input type='hidden' name='iliitos[{$i}]' value='toimi' />";
 				echo "<input type='checkbox' name='iliitostunnus[{$i}]' value='{$toimittajaid}' {$chk} /> ";
 
-				$tunnus_chk = isset($iliitostunnus[$i]) ? $iliitostunnus[$i] : $ed_iliitostunnus[$i];
-
-				$query = "SELECT nimi, nimitark FROM toimi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus_chk}'";
-				$toimittajares = pupe_query($query);
-				$toimittajarow = mysql_fetch_assoc($toimittajares);
-
-				echo "{$toimittajarow['nimi']} {$toimittajarow['nimitark']}";
 			}
 
 			if ($asiakasid > 0) {
@@ -1120,14 +1115,20 @@
 				echo "<input type='hidden' name='iliitos[{$i}]' value='asiakas' />";
 				echo "<input type='checkbox' name='iliitostunnus[{$i}]' value='{$asiakasid}' {$chk} /> ";
 
-				$tunnus_chk = isset($iliitostunnus[$i]) ? $iliitostunnus[$i] : $ed_iliitostunnus[$i];
+			}
 
-				$query = "SELECT nimi, nimitark FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus_chk}'";
+			if (isset($iliitos[$i]) and trim($iliitos[$i]) != '' and ((isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) != '') or (isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) != ''))) {
+
+				$tunnus_chk = isset($iliitostunnus[$i]) ? $iliitostunnus[$i] : $ed_iliitostunnus[$i];
+				
+				$query = "SELECT nimi, nimitark FROM {$iliitos[$i]} WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus_chk}'";
 				$asiakasres = pupe_query($query);
 				$asiakasrow = mysql_fetch_assoc($asiakasres);
-
+				
 				echo "{$asiakasrow['nimi']} {$asiakasrow['nimitark']}";
+
 			}
+
 			echo "</td>\n";
 
 			echo "<td class='back'>";

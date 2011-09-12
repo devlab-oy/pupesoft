@@ -138,6 +138,8 @@
 				<input type='hidden' name = 'kk' value = '$kk'>
 				<input type='hidden' name = 'iframe' value = '$iframe'>
 				<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
+				<input type='hidden' name = 'liitos' value='{$liitos}' />
+				<input type='hidden' name = 'liitostunnus' value='{$liitostunnus}' />
 				<input type='hidden' name = 'jarj' value = '$jarj'>";
 
 		if ($tiliulos == '') {

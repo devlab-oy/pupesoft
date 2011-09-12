@@ -9857,13 +9857,20 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 
 			// jos yksi rivi ei mätsää (esim. kuljetusvakuutus)
 			if (count($invoice_ei_loydy) == 1) {
-				foreach ($invoice_ei_loydy as $ei_loydy) {
-					// esim. kuljetusvakuutuksella ei ole tilattuamäärää
-					// huono tsekkaus! Miten erotetaan paremmin kuljetusvakuutukset ja runkoveloitukset?
-					if ($ei_loydy['tilattumaara'] == 0) {
+				foreach ($invoice_ei_loydy as $ei_loydytuoteno => $ei_loydy) {
 
-						// oletetaan että tämä on kuljetusvakuutus, joten laitetaan se "löytyviin" että vertailu-check hyväksyy nämä OK:na
+					// Jos tämä tuote on saldoton, niin oletetaan, että se on kuljetusvakuutus tai joku muu "ei alunperin tilattu" rivi.
+					$query = "	SELECT ei_saldoa
+								FROM tuote
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tuoteno = '$ei_loydytuoteno'";
+					$esaldoa_result = mysql_query($query) or pupe_error($query);
+					$esaldoa_row = mysql_fetch_assoc($esaldoa_result);
+
+					if ($ei_loydy['tilattumaara'] == 0 or $esaldoa_row["ei_saldoa"] != "") {
+						// oletetaan että tämä on kuljetusvakuutus tms., joten laitetaan se "löytyviin" että vertailu-check hyväksyy nämä OK:na
 						$loytyy_kummastakin[key($invoice_ei_loydy)] = $ei_loydy;
+						$purchaseorder[key($invoice_ei_loydy)] = $ei_loydy;
 
 						// poistetaan se ei löydetyistä
 						array_pop($invoice_ei_loydy);
@@ -12961,7 +12968,7 @@ if (!function_exists("tarkistahetu")) {
 
 		// tarkistetaan onko ytunnus henkilötunnus
 		require ("inc/tarkistahetu.inc");
-		
+
 		if ($hetuok == 0) {
 			$hetu_clean = substr($hetu_orig, 0, 7)."XXXX";
 		}

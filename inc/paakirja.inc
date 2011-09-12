@@ -395,11 +395,11 @@
 		}
 
 		if ($asiakasid != "") {
-			$lisa1 .= " and lasku.liitostunnus='$asiakasid' and lasku.tila in ('U','L') ";
+			$lisa1 .= " and ((lasku.liitostunnus='$asiakasid' and lasku.tila in ('U','L')) or (tiliointi.liitos = 'asiakas' and tiliointi.liitostunnus='{$asiakasid}' and lasku.tila 'X')) ";
 		}
 
 		if ($toimittajaid != "") {
-			$lisa1 .= " and lasku.liitostunnus='$toimittajaid' and lasku.tila in ('H','Y','M','P','Q') ";
+			$lisa1 .= " and ((lasku.liitostunnus='{$toimittajaid}' and lasku.tila in ('H','Y','M','P','Q')) or (tiliointi.liitos='toimi' and tiliointi.liitostunnus='{$toimittajaid}' and lasku.tila = 'X')) ";
 		}
 
 		if (!isset($alv)) $alv = 'tyhja';
@@ -415,7 +415,7 @@
 		if ((isset($lisa) and strpos($lisa, "asiakas.") !== FALSE) or (isset($konsernirajaus) and $konsernirajaus != "")) {
 
 			if (strpos($lisa, "asiakas.") !== FALSE) {
-				$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus ";
+				$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and (lasku.liitostunnus = asiakas.tunnus or (tiliointi.liitos = 'asiakas' and tiliointi.liitostunnus = asiakas.tunnus)) ";
 			}
 
 			if ($konsernirajaus == "AT") {

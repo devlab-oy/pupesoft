@@ -198,7 +198,7 @@
 	echo "<tr>";
 	echo "<th>".t("Näytä asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin")."</th>";
 	echo "<td colspan='3'>";
-	echo "<input type='text' name='karhuja' value='$karhuja'>";
+	echo "<input type='text' size='5' name='karhuja' value='$karhuja'> ".t("kertaa")."";
 	echo "</td>";
 	echo "</tr>";
 
@@ -583,35 +583,33 @@
 			elseif ($laji == 'MMK') $tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
 			else 					$tili = "'$yhtiorow[myyntisaamiset]'";
 
-			$having_ehto = '';
 			$tunnukset = '';
 			$tunnuslisa = '';
+			$karhuja = (int) $karhuja;
 
-			if (trim($karhuja) > 0) {
-
-				$having_ehto = " HAVING karhukerrat >= $karhuja ";
+			if ($karhuja > 0) {
 
 				$query = "	SELECT count(karhu_lasku.ltunnus) as karhukerrat,
-							concat(karhu_lasku.ltunnus, ',') as tunnus
+							group_concat(karhu_lasku.ltunnus) as karhutunnukset
 							FROM lasku
 							JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
 							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '')
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 							AND lasku.tila = 'U'
 							AND lasku.alatila = 'X'
 							AND lasku.mapvm = '0000-00-00'
 							GROUP BY karhu_lasku.ltunnus
-							$having_ehto
-							ORDER BY tunnus DESC";
+							HAVING karhukerrat >= $karhuja";
 				$tunnusres = pupe_query($query);
 
 				if (mysql_num_rows($tunnusres) > 0) {
-					$tunnukset .= '(';
+
 					while ($tunnusrivi = mysql_fetch_assoc($tunnusres)) {
-						$tunnukset .= $tunnusrivi['tunnus'];
+						$tunnukset .= $tunnusrivi['karhutunnukset'].",";
 					}
-					$tunnukset = substr($tunnukset, 0, -1).')';
-					$tunnuslisa = 'AND lasku.tunnus in '.$tunnukset.' ';
+
+					$tunnukset = substr($tunnukset, 0, -1);
+					$tunnuslisa = "AND lasku.tunnus in ($tunnukset)";
 				}
 			}
 
@@ -853,6 +851,9 @@
 				}
 			}
 
+			$suoritussumma = array();
+			$suoritussummatotal = 0; // tässä koko höskä kotivaluutassa
+
 			// Ei listata kohdistamattomia mikäli ollaan haettu karhuttuja laskuja
 			if (trim($karhuja) == '' or $karhuja == 0) {
 				//Listataan vielä kohdistamattomat
@@ -873,9 +874,6 @@
 							$valkoodi2
 					  		ORDER BY ytunnus";
 				$result = pupe_query($query);
-
-				$suoritussumma = array();
-				$suoritussummatotal = 0; // tässä koko höskä kotivaluutassa
 
 				while ($trow = mysql_fetch_assoc ($result)) {
 						echo "<tr class='aktiivi'>";
@@ -980,7 +978,7 @@
 			}
 
 			// ei rajauksia, voidaan näyttää erotus kirjanpitoon
-			if ($lisa1 == "" and $lisa3 == "" and $valkoodi == "" and $maa == "") {
+			if ($lisa1 == "" and $lisa3 == "" and $valkoodi == "" and $maa == "" and $karhuja == 0) {
 
 		        $query = "	SELECT sum(summa) saldo
 							FROM tiliointi

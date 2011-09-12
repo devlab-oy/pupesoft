@@ -215,7 +215,7 @@
 					fclose($file);
 				}
 
-				$maara = 0;
+				$maara = 1;
 
 				foreach ($excelrivi as $erivi) {
 					foreach ($erivi as $e => $eriv) {

@@ -9,6 +9,7 @@ $laskun_tyyppi 			= $xml->InvoiceDetails->InvoiceTypeCode;
 $laskun_numero 			= $xml->InvoiceDetails->InvoiceNumber;
 $laskun_ebid 			= "FINVOICEXML";
 $laskun_paiva			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
+$laskun_la_paiva		= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
 $laskun_erapaiva		= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOptionDate;
 $laskun_kapvm 			= "";
 $laskun_kasumma 		= "";

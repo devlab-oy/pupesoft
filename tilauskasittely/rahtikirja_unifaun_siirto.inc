@@ -61,7 +61,7 @@ if ($kollityht > 0) {
 
 			// Lähettäjän tiedot
 			$uni_sender = $xml->addChild('sender');	# Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory
-			$uni_sender->addAttribute('sndid', $yhtiorow["tunnus"]);
+			$uni_sender->addAttribute('sndid', "0".$yhtiorow["tunnus"]);
 
 				$uni_snd_val = $uni_sender->addChild('val', $postirow["yhtio_nimi"]); # Sender's name
 				$uni_snd_val->addAttribute('n', "name");
@@ -109,7 +109,7 @@ if ($kollityht > 0) {
 					$uni_par_val = $uni_partner->addChild('val', $toitarow['sopimusnro']); 	# Customer number
 					$uni_par_val->addAttribute('n', "custno");
 
-					$uni_par_val = $uni_partner->addChild('val', ""); 	# Customer number for international services
+					$uni_par_val = $uni_partner->addChild('val', $toitarow['sopimusnro']); 	# Customer number for international services
 					$uni_par_val->addAttribute('n', "custno_international");
 
 					$uni_par_val = $uni_partner->addChild('val', ""); 	# EDI-address. UFPS only.
@@ -130,10 +130,10 @@ if ($kollityht > 0) {
 					$uni_par_val = $uni_partner->addChild('val', ""); 	# Specifies an offshore account.
 					$uni_par_val->addAttribute('n', "konto");
 
-					$uni_par_val = $uni_partner->addChild('val', ""); 	# IBAN account number
+					$uni_par_val = $uni_partner->addChild('val', $yhtiorow["pankkitili1"]); 	# IBAN account number
 					$uni_par_val->addAttribute('n', "iban");
 
-					$uni_par_val = $uni_partner->addChild('val', ""); 	# BIC number
+					$uni_par_val = $uni_partner->addChild('val', $yhtiorow["pankkiswift1"]); 	# BIC number
 					$uni_par_val->addAttribute('n', "bic");
 
 					$uni_par_val = $uni_partner->addChild('val', ""); 	# Payment method. Used for Posten's mail services. Valid values: INVO = Credit without delivery note INVODN = Credit with delivery note METERED = Domestic franking STAMP = Stamp/cash
@@ -146,7 +146,7 @@ if ($kollityht > 0) {
 				$uni_rcv_val = $uni_receiver->addChild('val', trim($rakir_row["toim_nimi"]."".$rakir_row["toim_nimitark"])); # Receiver's name
 				$uni_rcv_val->addAttribute('n', "name");
 
-				$uni_rcv_val = $uni_receiver->addChild('val', $rakir_row["toim_osoite"]); # Address line 1
+				$uni_rcv_val = $uni_receiver->addChild('val', urlencode($rakir_row["toim_osoite"])); # Address line 1
 				$uni_rcv_val->addAttribute('n', "address1");
 
 				$uni_rcv_val = $uni_receiver->addChild('val', ""); # Address line 2
@@ -155,7 +155,7 @@ if ($kollityht > 0) {
 				$uni_rcv_val = $uni_receiver->addChild('val', $rakir_row["toim_postino"]); # Zipcode
 				$uni_rcv_val->addAttribute('n', "zipcode");
 
-				$uni_rcv_val = $uni_receiver->addChild('val', $rakir_row["toim_postitp"]); # City
+				$uni_rcv_val = $uni_receiver->addChild('val', urlencode($rakir_row["toim_postitp"])); # City
 				$uni_rcv_val->addAttribute('n', "city");
 
 				$uni_rcv_val = $uni_receiver->addChild('val', ""); # State
@@ -320,7 +320,7 @@ if ($kollityht > 0) {
 				$uni_shi_val->addAttribute('n', "customsunit");
 
 				$uni_service = $uni_shipment->addChild('service'); # Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
-				$uni_service->addAttribute('srvid', "APA2");
+				$uni_service->addAttribute('srvid', $toitarow['virallinen_selite']);
 
 					$uni_ser_val = $uni_service->addChild('val', "no"); # Defines if the shipment is a return shipment or not. Valid values: yes, no
 					$uni_ser_val->addAttribute('n', "returnlabel");
@@ -336,41 +336,66 @@ if ($kollityht > 0) {
 						$uni_ser_val = $uni_booking->addChild('val', ""); # Booking office, numeric code. See SUP-112-Services-en.xls for valid codes.
 						$uni_ser_val->addAttribute('n', "bookingoffice");
 
-					$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
-					$uni_addon->addAttribute('adnid', "");
 
-						$uni_add_val = $uni_addon->addChild('val', ""); # Amount. Used only with add-on COD (Cash On Delivery).
-						$uni_add_val->addAttribute('n', "amount");
-
-						$uni_add_val = $uni_addon->addChild('val', ""); # Customer number for carrier. Used primarily with RPAY (receiver pays) and OPAY (other payer).
-						$uni_add_val->addAttribute('n', "custno");
-
-						$uni_add_val = $uni_addon->addChild('val', ""); # Payment reference. Used with add-on COD.
-						$uni_add_val->addAttribute('n', "reference");
-
-						$uni_add_val = $uni_addon->addChild('val', ""); # Defines value for misctype.
+					if ($toitarow['virallinen_selite'] == "P19" and $rakir_row["puhelin"] != "") {
+						$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
+						$uni_addon->addAttribute('adnid', "NOTSMS");
+						$uni_add_val = $uni_addon->addChild('val', $rakir_row["puhelin"]); # Defines value for misctype.
 						$uni_add_val->addAttribute('n', "misc");
-
-						$uni_add_val = $uni_addon->addChild('val', ""); # Used to define notification mode for add-on NOT. Valid values: PHONE = Phone, FAX = Fax.
+						$uni_add_val = $uni_addon->addChild('val', "PHONE"); # Used to define notification mode for add-on NOT. Valid values: PHONE = Phone, FAX = Fax.
 						$uni_add_val->addAttribute('n', "misctype");
+					}
+					elseif ($toitarow['virallinen_selite'] == "P19") {
+						$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
+						$uni_addon->addAttribute('adnid', "NOTLTR");
+					}
 
-						$uni_add_val = $uni_addon->addChild('val', ""); # Defines name of collection point for Posten add-on DLVNOT.
-						$uni_add_val->addAttribute('n', "text1");
+					if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
+						$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
+						$uni_addon->addAttribute('adnid', "COD");
 
-						$uni_add_val = $uni_addon->addChild('val', ""); # Defines address for collection point for Posten add-on DLVNOT.
-						$uni_add_val->addAttribute('n', "text2");
+							$uni_add_val = $uni_addon->addChild('val', $yhteensa); # Amount. Used only with add-on COD (Cash On Delivery).
+							$uni_add_val->addAttribute('n', "amount");
 
-						$uni_add_val = $uni_addon->addChild('val', ""); # Defines phone number for Posten add-ons PODNOT, DLVNOT and PRENOT.
-						$uni_add_val->addAttribute('n', "text3");
+							$uni_add_val = $uni_addon->addChild('val', $viite); # Payment reference. Used with add-on COD.
+							$uni_add_val->addAttribute('n', "reference");
+					}
 
-						$uni_add_val = $uni_addon->addChild('val', ""); # Defines e-mail address for Posten add-ons PODNOT, DLVNOT and PRENOT.
-						$uni_add_val->addAttribute('n', "text4");
-
-						$uni_add_val = $uni_addon->addChild('val', ""); # Max. temperature allowed. Used with DBSchenker ColdSped.
-						$uni_add_val->addAttribute('n', "tempmax");
-
-						$uni_add_val = $uni_addon->addChild('val', ""); # Min. temperature allowed. Used by DBSchenker ColdSped.
-						$uni_add_val->addAttribute('n', "tempmin");
+					#$uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
+					#$uni_addon->addAttribute('adnid', "");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Amount. Used only with add-on COD (Cash On Delivery).
+					#	$uni_add_val->addAttribute('n', "amount");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Customer number for carrier. Used primarily with RPAY (receiver pays) and OPAY (other payer).
+					#	$uni_add_val->addAttribute('n', "custno");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Payment reference. Used with add-on COD.
+					#	$uni_add_val->addAttribute('n', "reference");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Defines value for misctype.
+					#	$uni_add_val->addAttribute('n', "misc");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Used to define notification mode for add-on NOT. Valid values: PHONE = Phone, FAX = Fax.
+					#	$uni_add_val->addAttribute('n', "misctype");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Defines name of collection point for Posten add-on DLVNOT.
+					#	$uni_add_val->addAttribute('n', "text1");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Defines address for collection point for Posten add-on DLVNOT.
+					#	$uni_add_val->addAttribute('n', "text2");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Defines phone number for Posten add-ons PODNOT, DLVNOT and PRENOT.
+					#	$uni_add_val->addAttribute('n', "text3");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Defines e-mail address for Posten add-ons PODNOT, DLVNOT and PRENOT.
+					#	$uni_add_val->addAttribute('n', "text4");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Max. temperature allowed. Used with DBSchenker ColdSped.
+					#	$uni_add_val->addAttribute('n', "tempmax");
+                    #
+					#	$uni_add_val = $uni_addon->addChild('val', ""); # Min. temperature allowed. Used by DBSchenker ColdSped.
+					#	$uni_add_val->addAttribute('n', "tempmin");
 
 				$uni_parcel = $uni_shipment->addChild('container'); # Parcel information can be supplied in various ways. See p. 7.
 				$uni_parcel->addAttribute('type', "parcel");

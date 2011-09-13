@@ -1594,7 +1594,7 @@
 				}
 
 				//tulostetaan sivu
-				tyomaarays_print_pdf($komento["NAYTATILAUS"]);
+				tyomaarays_print_pdf($komento["Työmääräys"]);
 				$tee = '';
 			}
 

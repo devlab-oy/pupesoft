@@ -18,7 +18,8 @@
 			$laskun_tyyppi		= "UNIKKO-INVOICE";
 			$laskun_numero		= (string) trim($lasku->Invoice);
 			$laskun_ebid		= "UNIKKO-INVOICE";
-			$laskun_paiva		= (string) tv2dateconv(trim($lasku->DocumentDate));
+			$laskun_paiva		= (string) tv2dateconv(trim($lasku->TransDate));
+			$laskun_la_paiva	= (string) tv2dateconv(trim($lasku->DocumentDate));
 			$laskun_erapaiva	= (string) tv2dateconv(trim($lasku->Due));
 			$laskun_kapvm		= (string) tv2dateconv(trim($lasku->DateCashDisc));
 			$laskun_kasumma		= (float) trim($lasku->CashDiscAmount);

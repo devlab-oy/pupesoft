@@ -90,9 +90,16 @@
 			<td><input type = 'text' name = 'pp' value='$pp' size=2></td>
 			<td><input type = 'text' name = 'kk' value='$kk' size=2></td>
 			<td><input type = 'text' name = 'vv' value='$vv' size=4></td>
-			</tr>
-
-			<tr>
+			</tr>";
+			
+	echo "	<tr>
+			<th>".t("Anna p‰iv‰m‰‰r‰ mist‰ p‰iv‰st‰ eteenp‰in")."</th>
+			<td><input type = 'text' name = 'pp2' value='$pp2' size=2></td>
+			<td><input type = 'text' name = 'kk2' value='$kk2' size=2></td>
+			<td><input type = 'text' name = 'vv2' value='$vv2' size=4></td>
+			</tr>";
+			
+	echo "	<tr>
 			<th>".t("Mitk‰ laskut listataan:")."</th>
 			<td colspan = '3'><select name='laji'>
 			<option value='M'   $sel[M]>".t("myyntisaamiset")."</option>
@@ -201,6 +208,16 @@
 	echo "<input type='text' size='5' name='karhuja' value='$karhuja'> ".t("kertaa")."";
 	echo "</td>";
 	echo "</tr>";
+	
+	// luottovakuutettu
+	echo "<tr>";
+	echo "<th>".t("Luottovakuutettu (Vain Myyntilaskut)")."</th>";
+	if ($luottovakuutettu == "K") {
+		$luottochecked = "CHECKED";
+	}
+	echo "<td colspan='3'>";
+	echo "<input type='checkbox' name='luottovakuutettu' value='K' $luottochecked>";
+	echo "</td></tr>";
 
 	if ($excel != "") $exsel = "CHECKED";
 	else $exsel = "";
@@ -274,6 +291,18 @@
 			else {
 				$indeksi = " use index (yhtio_tila_tapvm)";
 			}
+			
+			if ($pp2 !='' and $kk2 !='' and $vv2 !='') {
+
+				if (!checkdate($kk2, $pp2, $vv2)) {
+					echo "<font class='error'>".t("Virheellinen loppumispvm")."</font><br>";
+					$tee = '';
+				}
+				else {
+					$pvm2 = sprintf("%04d", $vv2) . "-" . sprintf("%02d", $kk2) . "-" . sprintf("%02d", $pp2);
+					$paivamaaralisa = " AND lasku.tapvm >= '$pvm2' ";
+				}
+			}
 
 			if ($laji == 'OOK') 	$tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";
 			elseif ($laji == 'OK') 	$tili = "'".$yhtiorow['konserniostovelat']."'";
@@ -324,6 +353,7 @@
 						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio=tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tapvm = tiliointi.tapvm and tiliointi.tilino IN ($tili) and tiliointi.korjattu = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and (mapvm > '$pvm' or mapvm = '0000-00-00')
+						$paivamaaralisa
 						and lasku.tapvm <= '$pvm'
 						and lasku.tapvm > '0000-00-00'
 						and tila in ('H','Y','M','P','Q')
@@ -556,6 +586,9 @@
 			$lisa1 = ""; // lasku rajauksia
 			$lisa2 = ""; // suoritus rajauksia
 			$lisa3 = ""; // asiakas rajauksia
+			$luottotunnukset = ''; // asikkaat joilla on luottovakuudet
+			$luottovakuutuslisa = '';
+			
 
 			if ($asiakasid != '')  {
 				$lisa1 .= " and liitostunnus='$asiakasid' ";
@@ -586,6 +619,38 @@
 			$tunnukset = '';
 			$tunnuslisa = '';
 			$karhuja = (int) $karhuja;
+			
+			if ($luottovakuutettu == "K") {
+
+				$query = "	SELECT concat(tunnus, ',') as tunnukset
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND asiakas.laji != 'P'
+							AND asiakas.luottovakuutettu = 'K'";
+				$luottores = pupe_query($query);
+
+				if (mysql_num_rows($luottores) >0) {
+					$luottotunnukset .= '(';
+					while($rivi = mysql_fetch_assoc($luottores)) {
+						$luottotunnukset .= $rivi['tunnukset'];
+					}
+					$luottotunnukset = substr($luottotunnukset, 0, -1).')';
+				}
+				$luottovakuutuslisa = " AND lasku.liitostunnus in $luottotunnukset ";
+
+			}
+			
+			if ($pp2 !='' and $kk2 !='' and $vv2 !='') {
+
+				if (!checkdate($kk2, $pp2, $vv2)) {
+					echo "<font class='error'>".t("Virheellinen loppumispvm")."</font><br>";
+					$tee = '';
+				}
+				else {
+					$pvm2 = sprintf("%04d", $vv2) . "-" . sprintf("%02d", $kk2) . "-" . sprintf("%02d", $pp2);
+					$paivamaaralisa = " AND lasku.tapvm >= '$pvm2' ";
+				}
+			}
 
 			if ($karhuja > 0) {
 
@@ -659,6 +724,7 @@
 						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$pvm')
 						WHERE lasku.yhtio		= '$kukarow[yhtio]'
 						and (lasku.mapvm		> '$pvm' or lasku.mapvm = '0000-00-00')
+						$paivamaaralisa
 						and lasku.tapvm			<= '$pvm'
 						and lasku.tapvm 		> '0000-00-00'
 						and lasku.tila			= 'U'
@@ -667,6 +733,7 @@
 						$valkoodi
 						$maalisa
 						$tunnuslisa
+						$luottovakuutuslisa
 						$groupby
 						ORDER BY lasku.ytunnus, lasku.laskunro";
 			$result = pupe_query($query);

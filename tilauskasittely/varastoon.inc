@@ -196,7 +196,7 @@ if ($laskurow["vienti_kurssi"] == 0) {
 	}
 }
 
-if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
+if ((($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) and $yhtiorow["jalkilaskenta_kuluperuste"] == '') {
 	// jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
 	$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 6);
 	$rahtitapa  = t("Virallinen");
@@ -228,9 +228,9 @@ else {
 	// lasketaan itse rahtikulut
 	$rahtikulut = round($laskurow['summa'] * $laskurow['vienti_kurssi'] * ($laskurow['rahti'] / 100), 2);
 	$rahtitapa  = t("Kuluprosentti") ." ". $laskurow['rahti']. "%";
-
+	
 	// jos ollaan annettu t‰lle batchille kulusumma, k‰ytet‰‰nkin vaan sit‰!
-	if ($laskurow["rahti_huolinta"] != 0) {
+	if ($laskurow["rahti_huolinta"] != 0 and $toiminto != "kaikkiok") {
 		$rahtikulut = $laskurow["rahti_huolinta"];
 		$rahtitapa  = t("Kulusumma");
 	}
@@ -321,7 +321,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	}
 
 	$ale_lisa_apu_kala = generoi_alekentta_php($tilrivirow, 'O', 'kerto');
-
+	
 	// lasketaan rivin hinta
 	$osuus_apu_hinta = round($tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$ale_lisa_apu_kala*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
 

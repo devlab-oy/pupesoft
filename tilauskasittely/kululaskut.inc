@@ -602,6 +602,10 @@ if ($silent == "") {
 		else {
 			$vientitilat = " and lasku.vienti in ('B','C','J','E','F','K','H','I','L') ";
 		}
+		
+		if ($yhtiorow["jalkilaskenta_kuluperuste"] == 'KP') {
+			$vientitilat = " and lasku.vienti in ('C','J','F','K','I','L') ";
+		}
 
 		// haetaan vaihto-omaisuus, rahti ja raaka-aine laskuja (kotimaa, ei-eu, eu) HUOMAA LIMIT!
 		$query = "	SELECT lasku.*, (select min(tunnus) from tiliointi where lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu='') tiliointi

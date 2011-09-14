@@ -2796,4 +2796,18 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "jalkilaskenta_kuluperuste") {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Lasketaan vanhalla tavalla");
+		$ulos .= "<option value = 'KP' $sel[KP]>".t("Lasketaan toimittajan kuluprosentin mukaan");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

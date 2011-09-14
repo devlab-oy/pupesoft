@@ -280,7 +280,7 @@
 							$updres = pupe_query($query);
 
 							// Onko suoratoimitus
-							if ($rivi["var"] == "U") {
+							if ($tyyppi == "U" or ($tyyppi == 'KAIKKI' and $yhtiorow["tee_osto_myyntitilaukselta"] == 'Q')) {
 								$suoraan_laskutukseen = "o";
 							}
 							else {

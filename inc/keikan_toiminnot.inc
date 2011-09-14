@@ -122,6 +122,20 @@
 			echo json_encode('ok');
 		}
 	}
+	elseif ($_POST['ajax_toiminto'] == 'rivi_toimitettuaika') {
+		$tunnus = mysql_real_escape_string($_POST['tunnus']);
+
+		if ($rivi_taika_vv < 2000) $rivi_taika_vv += 2000;
+
+		$query = "	UPDATE tilausrivin_lisatiedot SET
+					suoratoimitettuaika = '$rivi_taika_vv-$rivi_taika_kk-$rivi_taika_pp'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivitunnus = '{$tunnus}'";
+		$update_res = pupe_query($query);
+
+		echo json_encode('ok');
+
+	}
 	elseif ($_POST['ajax_toiminto'] == 'kohdista_rivi') {
 		list($valittutunnus, $valittuotunnus) = explode("###", $_POST['valittu']);
 
@@ -143,10 +157,10 @@
 		}
 
 		$updatelisa = $otunnus == 0 ? ", suuntalava = 0, kerattyaika = '0000-00-00 00:00:00', keratty = '', erikoisale=0 " : "$suuntalava_querylisa , kerattyaika = now(), keratty = '{$kukarow['kuka']}', erikoisale = '{$laskurow['erikoisale']}' ";
-		
+
 		// Haetaan rivit ennen päivitystä
 		$vanhathinnat = array();
-		
+
 		$updquery = "	SELECT tunnus
 						FROM tilausrivi
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -157,7 +171,7 @@
 		while ($updrow = mysql_fetch_assoc($selresult)) {
 			$vanhathinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"], $suoratoimitukset);
 		}
-		
+
 		$query = "	UPDATE tilausrivi use index (yhtio_otunnus) SET
 					uusiotunnus = '{$otunnus}'
 					$updatelisa
@@ -169,7 +183,7 @@
 		// Haetaan päivitetyt rivit
 		$uudethinnat = array();
 		mysql_data_seek($selresult, 0);
-			
+
 		while ($updrow = mysql_fetch_assoc($selresult)) {
 			$uudethinnat[$updrow["tunnus"]] = laske_hinta($laskurow, $updrow["tunnus"], $suoratoimitukset);
 		}

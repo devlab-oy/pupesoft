@@ -9,6 +9,7 @@ $laskun_tyyppi 			= array_shift($xml->xpath('BGM/@eC002.1001'));
 $laskun_numero 			= array_shift($xml->xpath('BGM/@e1004'));
 $laskun_ebid 			= array_shift($xml->xpath('Group1/RFF[@eC506.1153="ZEB"]/@eC506.1154'));
 $laskun_paiva			= array_shift($xml->xpath('DTM[@eC507.2005="3"]/@eC507.2380'));
+$laskun_la_paiva		= array_shift($xml->xpath('DTM[@eC507.2005="3"]/@eC507.2380'));
 $laskun_erapaiva		= array_shift($xml->xpath('Group8[PAT/@e4279="1"]/DTM[@eC507.2005="13"]/@eC507.2380'));
 $laskun_kapvm 			= "";
 $laskun_kasumma 		= "";

@@ -11235,6 +11235,33 @@ if (!function_exists("pupe_DataTables")) {
 
 						});
 
+						$('input[name^=\"rivi_toimitettuaika_vv\"]').each(function(){
+
+							var tun 				= $(this).attr('id').substring(23);
+							var otunnus 			= $('input[name=\"otunnus\"]').val();
+
+							var rivi_taika_vv		= parseFloat(this.value);
+							var rivi_taika_kk		= parseFloat($('input[name=\"rivi_toimitettuaika_kk_'+tun+'\"]').val());
+							var rivi_taika_pp		= parseFloat($('input[name=\"rivi_toimitettuaika_pp_'+tun+'\"]').val());
+
+							if (rivi_taika_vv > 0 && rivi_taika_kk > 0 && rivi_taika_pp > 0) {
+								$.post('{$_SERVER['SCRIPT_NAME']}',
+									{ 	keikan_otunnus: otunnus,
+										otunnus: otunnus,
+										tunnus: tun,
+										ajax_toiminto: 'rivi_toimitettuaika',
+										rivi_taika_vv: rivi_taika_vv,
+										rivi_taika_kk: rivi_taika_kk,
+										rivi_taika_pp: rivi_taika_pp,
+										no_head: 'yes',
+										ohje: 'off'},
+									function(return_value) {
+										var data = jQuery.parseJSON(return_value);
+									}
+								);
+							}
+						});
+
 					}).ajaxComplete(function(){
 						if ($('#refresh_screen_ajaxille').val() == 'true') {
 							$('#refresh_screen_ajaxille').val('false');

@@ -31,6 +31,20 @@
 			$tee = '';
 		}
 
+		$paivamaaralisa = "";
+
+		if ($pp2 !='' and $kk2 !='' and $vv2 !='') {
+
+			if (!checkdate($kk2, $pp2, $vv2)) {
+				echo "<font class='error'>".t("Virheellinen alkup‰iv‰m‰‰r‰")."</font><br>";
+				$tee = '';
+			}
+			else {
+				$pvm2 = sprintf("%04d", $vv2) . "-" . sprintf("%02d", $kk2) . "-" . sprintf("%02d", $pp2);
+				$paivamaaralisa = " AND lasku.tapvm >= '$pvm2' ";
+			}
+		}
+
 		// katotaan onko annettu t‰m‰ p‰iv‰ (ett‰ voidaanko n‰ytt‰‰ kirjanpitovertailuja
 		$onkotanaan = "";
 		if ($pvm != date("Y-m-d")) {
@@ -86,19 +100,19 @@
 			<input type = 'hidden' name = 'tee' value = 'X'>
 			<table>
 			<tr>
-			<th>".t("Anna p‰iv‰m‰‰r‰, muodossa pp-kk-vvvv:")."</th>
+			<th>".t("Anna p‰iv‰m‰‰r‰, jonka tilanteen haluat:")."</th>
 			<td><input type = 'text' name = 'pp' value='$pp' size=2></td>
 			<td><input type = 'text' name = 'kk' value='$kk' size=2></td>
 			<td><input type = 'text' name = 'vv' value='$vv' size=4></td>
 			</tr>";
-			
+
 	echo "	<tr>
-			<th>".t("Anna p‰iv‰m‰‰r‰ mist‰ p‰iv‰st‰ eteenp‰in")."</th>
+			<th>".t("Anna alkup‰iv‰m‰‰r‰, jota vanhempia laskuja ei n‰ytet‰:")."</th>
 			<td><input type = 'text' name = 'pp2' value='$pp2' size=2></td>
 			<td><input type = 'text' name = 'kk2' value='$kk2' size=2></td>
 			<td><input type = 'text' name = 'vv2' value='$vv2' size=4></td>
 			</tr>";
-			
+
 	echo "	<tr>
 			<th>".t("Mitk‰ laskut listataan:")."</th>
 			<td colspan = '3'><select name='laji'>
@@ -158,6 +172,18 @@
 	echo "<option value = 'V' $sel1>".t("Laskun valuutassa")."</option>";
 	echo "</select></td></tr>";
 
+	$sel1 = '';
+
+	if ($asitoimittain == 'AT') {
+		$sel1 = "SELECTED";
+	}
+
+	echo "<tr><th>".t("Summaustaso").":</th>";
+	echo "<td colspan=3><select name='asitoimittain'>";
+	echo "<option value = ''>".t("Lasku")."</option>";
+	echo "<option value = 'AT' $sel1>".t("Asiakas/Toimittaja")."</option>";
+	echo "</select></td></tr>";
+
 	echo "<tr><th>" . t('Maa'). " ".t("(vain myyntilaskut)").":</th><td colspan=3><select name='maa'>";
 
 	$query = "	SELECT distinct maa
@@ -203,12 +229,12 @@
 	}
 	echo "</select></td></tr>";
 	echo "<tr>";
-	echo "<th>".t("N‰yt‰ asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin")."</th>";
+	echo "<th>".t("N‰yt‰ laskut, joita on karhuttu ainakin (Vain Myyntilaskut)")."</th>";
 	echo "<td colspan='3'>";
 	echo "<input type='text' size='5' name='karhuja' value='$karhuja'> ".t("kertaa")."";
 	echo "</td>";
 	echo "</tr>";
-	
+
 	// luottovakuutettu
 	echo "<tr>";
 	echo "<th>".t("Luottovakuutettu (Vain Myyntilaskut)")."</th>";
@@ -223,18 +249,6 @@
 	else $exsel = "";
 
 	echo "<tr><th>".t("Tee Excel")."</th><td colspan='3'><input type='checkbox' name='excel' value = 'YES' $exsel></td></tr>";
-
-	$sel1 = '';
-
-	if ($asitoimittain == 'AT') {
-		$sel1 = "SELECTED";
-	}
-
-	echo "<tr><th>".t("Summaustaso").":</th>";
-	echo "<td colspan=3><select name='asitoimittain'>";
-	echo "<option value = ''>".t("Lasku")."</option>";
-	echo "<option value = 'AT' $sel1>".t("Asiakas/Toimittaja")."</option>";
-	echo "</select></td></tr>";
 
 	echo "</table><br>";
 	echo "<input type = 'submit' value = '".t("Aja raportti")."'>";
@@ -290,18 +304,6 @@
 			}
 			else {
 				$indeksi = " use index (yhtio_tila_tapvm)";
-			}
-			
-			if ($pp2 !='' and $kk2 !='' and $vv2 !='') {
-
-				if (!checkdate($kk2, $pp2, $vv2)) {
-					echo "<font class='error'>".t("Virheellinen loppumispvm")."</font><br>";
-					$tee = '';
-				}
-				else {
-					$pvm2 = sprintf("%04d", $vv2) . "-" . sprintf("%02d", $kk2) . "-" . sprintf("%02d", $pp2);
-					$paivamaaralisa = " AND lasku.tapvm >= '$pvm2' ";
-				}
 			}
 
 			if ($laji == 'OOK') 	$tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";
@@ -588,7 +590,7 @@
 			$lisa3 = ""; // asiakas rajauksia
 			$luottotunnukset = ''; // asikkaat joilla on luottovakuudet
 			$luottovakuutuslisa = '';
-			
+
 
 			if ($asiakasid != '')  {
 				$lisa1 .= " and liitostunnus='$asiakasid' ";
@@ -619,7 +621,7 @@
 			$tunnukset = '';
 			$tunnuslisa = '';
 			$karhuja = (int) $karhuja;
-			
+
 			if ($luottovakuutettu == "K") {
 
 				$query = "	SELECT concat(tunnus, ',') as tunnukset
@@ -638,18 +640,6 @@
 				}
 				$luottovakuutuslisa = " AND lasku.liitostunnus in $luottotunnukset ";
 
-			}
-			
-			if ($pp2 !='' and $kk2 !='' and $vv2 !='') {
-
-				if (!checkdate($kk2, $pp2, $vv2)) {
-					echo "<font class='error'>".t("Virheellinen loppumispvm")."</font><br>";
-					$tee = '';
-				}
-				else {
-					$pvm2 = sprintf("%04d", $vv2) . "-" . sprintf("%02d", $kk2) . "-" . sprintf("%02d", $pp2);
-					$paivamaaralisa = " AND lasku.tapvm >= '$pvm2' ";
-				}
 			}
 
 			if ($karhuja > 0) {

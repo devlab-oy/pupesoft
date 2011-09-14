@@ -988,17 +988,14 @@
 								if ($perherow["ei_saldoa"] == "") {
 									foreach ($varastosta as $vara) {
 										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
-										
-										if ($saldolaskenta == "myytavissasaldo") {
-											$lapsitoimittamatta -= $myytavissa;
-										}
-										elseif ($saldolaskenta == "hyllysaldo") {
+
+										if ($saldolaskenta == "hyllysaldo") {
 											$lapsitoimittamatta -= $hyllyssa;
 										}
 										else {
 											$lapsitoimittamatta -= $myytavissa;
 										}
-									
+
 									}
 								}
 								else {
@@ -1019,16 +1016,13 @@
 
 						if ($jtrow["ei_saldoa"] == "") {
 							foreach ($varastosta as $vara) {
-														
+
 								$jt_saldopvm = "";
 								if ($yhtiorow["saldo_kasittely"] != "") $jt_saldopvm = date("Y-m-d");
 
 								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
-								
-								if ($saldolaskenta == "myytavissasaldo") {
-									$kokonaismyytavissa += $myytavissa;
-								}
-								elseif ($saldolaskenta == "hyllysaldo") {
+
+								if ($saldolaskenta == "hyllysaldo") {
 									$kokonaismyytavissa += $hyllyssa;
 								}
 								else {
@@ -1768,10 +1762,7 @@
 									foreach ($varastosta as $vara) {
 										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
 
-										if ($saldolaskenta == "myytavissasaldo") {
-											$kokonaismyytavissa += $myytavissa;
-										}
-										elseif ($saldolaskenta == "hyllysaldo") {
+										if ($saldolaskenta == "hyllysaldo") {
 											$kokonaismyytavissa += $hyllyssa;
 										}
 										else {
@@ -1900,11 +1891,8 @@
 
 											foreach ($varastosta as $vara) {
 												list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($krow2row["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
-												
-												if ($saldolaskenta == "myytavissasaldo") {
-													$vapaana += $myytavissa;
-												}
-												elseif ($saldolaskenta == "hyllysaldo") {
+
+												if ($saldolaskenta == "hyllysaldo") {
 													$vapaana += $hyllyssa;
 												}
 												else {
@@ -2103,10 +2091,10 @@
 				<th>".t("Toimita selke‰t rivit automaagisesti")."</th>
 				<td><input type='checkbox' name='automaaginen' value='tosi_automaaginen' $sel onClick = 'return verify()'></td>
 			</tr>";
-		
+
 		$selvar=array();
 		$selvar[$saldolaskenta] = "SELECTED";
-			
+
 		echo "	<tr>
 				<th>".t("Saldovalinnassa k‰ytet‰‰n")."</th>
 				<td><select name='saldolaskenta'>

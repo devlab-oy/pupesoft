@@ -237,7 +237,7 @@
 
 	// luottovakuutettu
 	echo "<tr>";
-	echo "<th>".t("Luottovakuutettu (Vain Myyntilaskut)")."</th>";
+	echo "<th>".t("Näytä vain luottovakuutetut asiakkaat (Vain Myyntilaskut)")."</th>";
 	if ($luottovakuutettu == "K") {
 		$luottochecked = "CHECKED";
 	}
@@ -588,9 +588,6 @@
 			$lisa1 = ""; // lasku rajauksia
 			$lisa2 = ""; // suoritus rajauksia
 			$lisa3 = ""; // asiakas rajauksia
-			$luottotunnukset = ''; // asikkaat joilla on luottovakuudet
-			$luottovakuutuslisa = '';
-
 
 			if ($asiakasid != '')  {
 				$lisa1 .= " and liitostunnus='$asiakasid' ";
@@ -622,25 +619,8 @@
 			$tunnuslisa = '';
 			$karhuja = (int) $karhuja;
 
-			if ($luottovakuutettu == "K") {
-
-				$query = "	SELECT concat(tunnus, ',') as tunnukset
-							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND asiakas.laji != 'P'
-							AND asiakas.luottovakuutettu = 'K'";
-				$luottores = pupe_query($query);
-
-				if (mysql_num_rows($luottores) >0) {
-					$luottotunnukset .= '(';
-					while($rivi = mysql_fetch_assoc($luottores)) {
-						$luottotunnukset .= $rivi['tunnukset'];
-					}
-					$luottotunnukset = substr($luottotunnukset, 0, -1).')';
-				}
-				$luottovakuutuslisa = " AND lasku.liitostunnus in $luottotunnukset ";
-
-			}
+            // Halutaanko vain luottovakuutetut asiakkaat
+            $luottovakuutuslisa = ($luottovakuutettu == "K") ? "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.laji != 'P' and asiakas.luottovakuutettu = 'K')" : "";
 
 			if ($karhuja > 0) {
 
@@ -712,6 +692,7 @@
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 						FROM lasku $indeksi
 						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$pvm')
+						$luottovakuutuslisa
 						WHERE lasku.yhtio		= '$kukarow[yhtio]'
 						and (lasku.mapvm		> '$pvm' or lasku.mapvm = '0000-00-00')
 						$paivamaaralisa
@@ -723,7 +704,6 @@
 						$valkoodi
 						$maalisa
 						$tunnuslisa
-						$luottovakuutuslisa
 						$groupby
 						ORDER BY lasku.ytunnus, lasku.laskunro";
 			$result = pupe_query($query);

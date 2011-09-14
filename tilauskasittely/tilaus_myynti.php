@@ -6635,7 +6635,7 @@ if ($tee == '') {
 							echo "<option value='VAKUUTUSHAKEMUS'>".t("Vakuutushakemus")."</option>";
 						}
 						if (file_exists("../tyomaarays/tulosta_tyomaarays.inc")) {
-							echo "<option value='TYOMAARAYS'>".t("Työmäärys")."</option>";
+							echo "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
 						}
 						if (file_exists("tulosta_rekisteriilmoitus.inc")) {
 							echo "<option value='REKISTERIILMOITUS'>".t("Rekisteröinti-ilmoitus")."</option>";

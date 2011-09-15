@@ -723,13 +723,10 @@ else {
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.omalle_tilaukselle != '')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-							AND tilausrivi.hyllyalue != ''
 							AND tilausrivi.varattu > 1
 							AND tilausrivi.var NOT IN ('J','P')
 							ORDER BY tilausrivi.tunnus";
 				$result = pupe_query($query);
-
-				$vanhat_tuoteperheen_isat = array();
 
 				while ($row = mysql_fetch_assoc($result)) {
 
@@ -898,7 +895,7 @@ else {
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
-						and tilausrivi.hyllyalue != ''
+						and (tilausrivi.hyllyalue != '' OR tilausrivin_lisatiedot.omalle_tilaukselle != '')
 						and tilausrivi.varattu+tilausrivi.kpl > 0
 						and tilausrivi.var not in ('J','P')
 						ORDER BY $sorttaus";

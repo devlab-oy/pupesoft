@@ -595,16 +595,14 @@ if ($silent == "") {
 			$vienti		= $vaihtrow["vienti"];
 		}
 
-
 		if ($keikanalatila == "T") {
-			$vientitilat = " and lasku.vienti in ('A','D','G') ";
+            $vientitilat = " and lasku.vienti in ('A','D','G') ";
+		}
+		elseif ($yhtiorow["jalkilaskenta_kuluperuste"] == 'KP') {
+            $vientitilat = " and lasku.vienti in ('C','J','F','K','I','L') ";
 		}
 		else {
-			$vientitilat = " and lasku.vienti in ('B','C','J','E','F','K','H','I','L') ";
-		}
-		
-		if ($yhtiorow["jalkilaskenta_kuluperuste"] == 'KP') {
-			$vientitilat = " and lasku.vienti in ('C','J','F','K','I','L') ";
+            $vientitilat = " and lasku.vienti in ('B','C','J','E','F','K','H','I','L') ";
 		}
 
 		// haetaan vaihto-omaisuus, rahti ja raaka-aine laskuja (kotimaa, ei-eu, eu) HUOMAA LIMIT!

@@ -159,13 +159,13 @@
 		echo "<td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td>";
 		echo "<td>$valkoodi</td>";
 		echo "</tr>";
-		
+
 		echo "<tr>";
 		echo "<td>".t("Pankkikortilla")."</td>";
 		echo "<td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td>";
 		echo "<td>$valkoodi</td>";
 		echo "</tr>";
-		
+
 		echo "<tr>";
 		echo "<td>".t("Luottokortilla")."</td>";
 		echo "<td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td>";
@@ -177,7 +177,7 @@
 		echo "<td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td>";
 		echo "<td>$valkoodi</td>";
 		echo "</tr>";
-		
+
 		echo "<tr>";
 		echo "<td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyv‰ksy")."' disabled></td>";
 		echo "</tr>";
@@ -893,17 +893,17 @@
 			echo "<br><input type='submit' value='".t("Laskuta")."'>";
 			echo "<input type='hidden' name='paiva' value='$teksti'>";
 			echo "</form>";
-			
+
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 
 						function verify(){
 							var pp = document.lasku.laskpp;
 							var kk = document.lasku.laskkk;
 							var vv = document.lasku.laskvv;
-							
+
 							var laskullaviikonpaivat = document.lasku.laskullaviikonpaiva;
 							var paiva = document.lasku.paiva.value;
-													
+
 							pp = Number(pp.value);
 							kk = Number(kk.value)-1;
 							vv = Number(vv.value);
@@ -915,14 +915,14 @@
 
 								var dateSyotetty = new Date(tanaanvv, tanaankk, tanaanpp);
 								var pvmcheck = new Date(tanaanvv, tanaankk, tanaanpp);
-								
+
 								// Laitetaan yksi ylim‰‰r‰inen kuukausi niin saadaan tulostukseen oikea kk n‰kyviin
 								var tanaanoikeakk = $tanaankk+1;
 								if (tanaanoikeakk <10) {
 									tanaanoikeakk = '0'+tanaanoikeakk;
-								}																
+								}
 								var paivamaara = tanaanpp+'.'+tanaanoikeakk+'.'+tanaanvv;
-								
+
 							}
 							else {
 								if (vv > 0 && vv < 1000) {
@@ -931,7 +931,7 @@
 
 								var dateSyotetty = new Date(vv,kk,pp);
 								var pvmcheck = new Date(vv,kk,pp);
-								
+
 								// Laitetaan yksi ylim‰‰r‰inen kuukausi niin saadaan tulostukseen oikea kk n‰kyviin
 								var oikeakk = kk+1;
 								if (oikeakk < 10) {
@@ -942,24 +942,14 @@
 
 							var dateTallaHet = new Date();
 							var ero = (dateTallaHet.getTime() - dateSyotetty.getTime()) / 86400000;
-							
+
 							var vertaa = pvmcheck.getDay(pvmcheck)+1;
-							
-							var viikonpaivannimi = [];
-							viikonpaivannimi[1] = '".t("Sunnuntai")."';
-							viikonpaivannimi[2] = '".t("Maanantai")."';
-							viikonpaivannimi[3] = '".t("Tiistai")."';
-							viikonpaivannimi[4] = '".t("Keskiviikko")."';
-							viikonpaivannimi[5] = '".t("Torstai")."';
-							viikonpaivannimi[6] = '".t("Perjantai")."';
-							viikonpaivannimi[7] = '".t("Lauantai")."';
-							
+
 							var tilalkpp = $tilalkpp;
 							var tilalkkk = $tilalkkk;
 							var tilalkvv = $tilalkvv;
 							var dateTiliAlku = new Date(tilalkvv,tilalkkk,tilalkpp);
 							dateTiliAlku = dateTiliAlku.getTime();
-
 
 							var tilloppp = $tilloppp;
 							var tillopkk = $tillopkk;
@@ -979,43 +969,34 @@
 									return false;
 								}
 							}
-					
-							var naytetaanko_herja = [];
-							naytetaanko_herja['herjataanko'] = false;
-							
+
+							var naytetaanko_herja = false
+
 							if (laskullaviikonpaivat.length > 1) {
-									for (var i = 0; i < laskullaviikonpaivat.length; i++) {
-										if (laskullaviikonpaivat[i].value != 0) {
-											if (vertaa != laskullaviikonpaivat[i].value) {
-												naytetaanko_herja['herjataanko'] = true;
-											}
+								for (var i = 0; i < laskullaviikonpaivat.length; i++) {
+									if (laskullaviikonpaivat[i].value != 0) {
+										if (vertaa != laskullaviikonpaivat[i].value) {
+											naytetaanko_herja = true;
 										}
 									}
+								}
 							}
 							else {
 								if (laskullaviikonpaivat.value > 0 && laskullaviikonpaivat.value < 9 ) {
 									if (laskullaviikonpaivat.value != vertaa) {
-											naytetaanko_herja['herjataanko'] = true;
+										naytetaanko_herja = true;
 									}
 								}
 								else if (laskullaviikonpaivat.value < 0) {
 									if (paiva != paivamaara) {
-										naytetaanko_herja['herjataanko'] = true;
+										naytetaanko_herja = true;
 									}
 								}
 								else if (laskullaviikonpaivat.value == 9) {
-									var msg = 'Asiakkaan '+paiva+'. Haluatko varmasti laskuttaa ?';
-									return confirm(msg);
-								}
-								else if (laskullaviikonpaivat.value == 0) {
-									var msg = '".t("Haluatko laskuttaa nyt?")."';
-									return confirm(msg);
-								}
-								else {
-									alert('".t("VIRHE: J‰rjestelm‰ss‰ on jotain h‰ikk‰‰, ota yhteytt‰ ohjelmistotaloon.")."')
+									naytetaanko_herja = true;
 								}
 							}
-							
+
 							if (ero >= 2) {
 								var msg = '".t("Oletko varma, ett‰ haluat p‰iv‰t‰ laskun yli 2pv menneisyyteen?")."';
 								return confirm(msg);
@@ -1030,9 +1011,9 @@
 									return false;
 								}
 							}
-							
-							if (naytetaanko_herja['herjataanko'] == true) {
-								var msg = 'Asiakkaan normaali laskutusp‰iv‰ on '+paiva+'. Haluatko varmasti laskuttaa ?';
+
+							if (naytetaanko_herja == true) {
+								var msg = 'Asiakkaan laskutusp‰iv‰ on '+paiva+'. Haluatko varmasti laskuttaa t‰n‰‰n?';
 								return confirm(msg);
 							}
 						}
@@ -1235,6 +1216,6 @@
 			echo "<font class='message'>".t("Yht‰‰n toimitettavaa ei lˆytynyt")."...</font>";
 		}
 	}
-	
+
 	require ("../inc/footer.inc");
 ?>

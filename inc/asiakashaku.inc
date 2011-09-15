@@ -3,7 +3,7 @@
 // tarvitaan $ytunnus (jolla haetaan) tai $asiakasid (joka on asiakas.tunnus) ja $kukarow
 // palautetaan $asiakasrow
 
-if (trim($konserni) != '') {
+if (isset($konserni) and trim($konserni) != '') {
 	if ($konserni == "KONSERNIVARASTO") {
 		if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
 			$konsyhtiot = "yhtio in ($konsernivarasto_yhtiot) ";
@@ -24,6 +24,7 @@ if (trim($konserni) != '') {
 	}
 }
 else {
+	$konserni 	= "";
 	$konsyhtiot = "yhtio = '$kukarow[yhtio]' ";
 }
 

@@ -3507,10 +3507,10 @@ if ($tee == '') {
 				$var		= '';
 				$hinta		= '';
 				$netto		= '';
-				$rivitunnus			= 0;
+				$rivitunnus	= 0;
 				$paikka		= '';
 				$alv		= '';
-				$perheid			= 0;
+				$perheid	= 0;
 				$perheid2			= 0;
 				$tilausrivilinkki	= '';
 				$toimittajan_tunnus	= '';
@@ -3548,7 +3548,7 @@ if ($tee == '') {
 				$var		= '';
 				$hinta		= '';
 				$netto		= '';
-				$rivitunnus			= 0;
+				$rivitunnus	= 0;
 				$kommentti	= '';
 				$kerayspvm	= '';
 				$toimaika	= '';
@@ -3960,6 +3960,37 @@ if ($tee == '') {
 			for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 				${'ale'.$alepostfix} = '';
 			}
+		}
+
+		// Jos tämä on suoratoimitusrivi päivitetään sille tallenettu toimitettuaika
+		// $lisatty_tun ja $lisatied_row tulee lisaarivi.inc:stä...
+		if ($lisatty_tun > 0 and $lisatied_row["suoraan_laskutukseen"] != "" and $lisatied_row["tilausrivilinkki"] > 0) {
+			//Tutkitaan löytyykö ostorivi ja sen toimitettuaika
+		   	$query = "	SELECT tilausrivin_lisatiedot.suoratoimitettuaika
+		   				FROM tilausrivi
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+		   				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.tyyppi  = 'O'
+		   				and tilausrivi.tunnus  = '$tilausrivi[tilausrivilinkki]'
+						and tilausrivin_lisatiedot.suoratoimitettuaika >= '0000-00-00 00:00:00'";
+			$suoratoimresult = pupe_query($query);
+
+			if ($suoratoimrow = mysql_fetch_assoc($suoratoimresult)) {
+				$toimitettuaika = " '$suoratoimrow[suoratoimitettuaika]' ";
+			}
+			else {
+				$toimitettuaika = " now() ";
+			}
+
+			$toimquery = "	UPDATE tilausrivi
+							SET keratty 	= '$kukarow[kuka]',
+							kerattyaika 	= $toimitettuaika,
+							toimitettu 		= '$kukarow[kuka]',
+							toimitettuaika 	= $toimitettuaika
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND otunnus = '$kukarow[kesken]'
+							AND tunnus  = '$lisatty_tun'";
+			$toimupdres = pupe_query($toimquery);
 		}
 
 		if ($lisavarusteita == "ON" and $perheid2 > 0) {

@@ -13,12 +13,12 @@
 	$laskun_tilausviite		= "";
 
 	if (isset($xml->InvoiceHeader->InvoiceIssueDate->Date)) {
-		$laskun_paiva = $xml->InvoiceHeader->InvoiceIssueDate->Date;
-		$laskun_la_paiva = $xml->InvoiceHeader->InvoiceIssueDate->Date;
+		$laskun_paiva 		= $xml->InvoiceHeader->InvoiceIssueDate->Date;
+		$laskun_la_paiva	= date("Ymd");
 	}
 	else {
-		$laskun_paiva = "";
-		$laskun_la_paiva = "";
+		$laskun_paiva 		= "";
+		$laskun_la_paiva 	= "";
 	}
 
 	if (isset($xml->InvoiceHeader->InvoiceDueDate->Date)) {

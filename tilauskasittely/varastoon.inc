@@ -196,7 +196,7 @@ if ($laskurow["vienti_kurssi"] == 0) {
 	}
 }
 
-if ((($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) and $yhtiorow["jalkilaskenta_kuluperuste"] == '') {
+if ((($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) and $yhtiorow["jalkilaskenta_kuluperuste"] == "") {
 	// jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
 	$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 6);
 	$rahtitapa  = t("Virallinen");
@@ -212,14 +212,22 @@ else {
 		$erikoisale = 1;
 	}
 
+	if ($toiminto == "kaikkiok") {
+		$maara_peruste = "and tilausrivi.varattu = 0 and tilausrivi.kpl != 0";
+	}
+	else {
+		$maara_peruste = "and tilausrivi.varattu <> 0";
+	}
+
 	// lasketaan nyt varastoon viet‰vien rivien summa yhteens‰
-	$query    = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * $erikoisale) summa
+	$query    = "	SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * $erikoisale) summa
 					FROM tilausrivi use index (uusiotunnus_index)
-					LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno)
+					LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '{$laskurow["liitostunnus"]}' and tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno)
 					WHERE tilausrivi.uusiotunnus = '$otunnus'
-					and tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+					and	tilausrivi.tyyppi = 'O'
 					and tilausrivi.netto = ''
-					and tilausrivi.varattu <> 0";
+					$maara_peruste";
 	$result   = pupe_query($query);
 	$hintarow = mysql_fetch_assoc($result);
 
@@ -228,9 +236,9 @@ else {
 	// lasketaan itse rahtikulut
 	$rahtikulut = round($laskurow['summa'] * $laskurow['vienti_kurssi'] * ($laskurow['rahti'] / 100), 2);
 	$rahtitapa  = t("Kuluprosentti") ." ". $laskurow['rahti']. "%";
-	
+
 	// jos ollaan annettu t‰lle batchille kulusumma, k‰ytet‰‰nkin vaan sit‰!
-	if ($laskurow["rahti_huolinta"] != 0 and $toiminto != "kaikkiok") {
+	if ($laskurow["rahti_huolinta"] != 0) {
 		$rahtikulut = $laskurow["rahti_huolinta"];
 		$rahtitapa  = t("Kulusumma");
 	}
@@ -321,7 +329,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 	}
 
 	$ale_lisa_apu_kala = generoi_alekentta_php($tilrivirow, 'O', 'kerto');
-	
+
 	// lasketaan rivin hinta
 	$osuus_apu_hinta = round($tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$ale_lisa_apu_kala*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
 

@@ -561,7 +561,7 @@
 				$vertailubu = "";
 
 				$laskujoini = " JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus ";
-				$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus ";
+				$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and (lasku.liitostunnus = asiakas.tunnus or (tiliointi.liitos = 'asiakas' and tiliointi.liitostunnus = asiakas.tunnus)) ";
 
 				if (isset($sarakebox["ASOSASTO"]) and $sarakebox["ASOSASTO"] != "") {
 					// N‰it‰ tarvitaan kun piirret‰‰n headerit

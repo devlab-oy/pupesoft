@@ -24,10 +24,12 @@
 
 	if (!isset($tiliointirivit)) $tiliointirivit = array();
 	if (!isset($iliitos)) $iliitos = array();
+	if (!isset($ed_iliitos)) $ed_iliitos = array();
 	if (!isset($ed_iliitostunnus)) $ed_iliitostunnus = array();
 
 	if (isset($tullaan) and $tullaan == 'muutosite') {
 		$iliitos = unserialize(urldecode($iliitos));
+		$ed_iliitos = $iliitos;
 		$ed_iliitostunnus = unserialize(urldecode($ed_iliitostunnus));
 		$tiliointirivit = unserialize(urldecode($tiliointirivit));
 	}
@@ -35,7 +37,7 @@
 	if (isset($tiliointirivit) and !is_array($tiliointirivit)) $tiliointirivit = unserialize(urldecode($tiliointirivit));
 
 	if (isset($muutparametrit)) {
-		list($tee, $kuitti, $kuva, $maara, $tpp, $tpk, $tpv, $summa, $valkoodi, $alv_tili, $nimi, $comments, $selite, $liitos, $liitostunnus, $tunnus, $tiliointirivit, $MAX_FILE_SIZE, $itili, $ikustp, $ikohde, $isumma, $ivero, $iselite, $iliitos, $ed_iliitostunnus) = explode("#!#", $muutparametrit);
+		list($tee, $kuitti, $kuva, $maara, $tpp, $tpk, $tpv, $summa, $valkoodi, $alv_tili, $nimi, $comments, $selite, $liitos, $liitostunnus, $tunnus, $tiliointirivit, $MAX_FILE_SIZE, $itili, $ikustp, $ikohde, $isumma, $ivero, $iselite, $iliitos, $ed_iliitostunnus, $ed_iliitos) = explode("#!#", $muutparametrit);
 
 		$itili		= unserialize(urldecode($itili));
 		$ikustp		= unserialize(urldecode($ikustp));
@@ -45,6 +47,7 @@
 		$iselite	= unserialize(urldecode($iselite));
 		$iliitos = unserialize(urldecode($iliitos));
 		$ed_iliitostunnus = unserialize(urldecode($ed_iliitostunnus));
+		$ed_iliitos = unserialize(urldecode($ed_iliitos));
 		$tiliointirivit = unserialize(urldecode($tiliointirivit));
 	}
 
@@ -54,9 +57,11 @@
 
 			if ($iliitos[$i] == 'toimi' and $iliitostunnus[$i] == $toimittajaid) {
 				$ed_iliitostunnus[$i] = $toimittajaid;
+				$ed_iliitos[$i] = 'toimi';
 			}
 			elseif ($iliitos[$i] == 'toimi' and isset($iliitostunnus) and !isset($iliitostunnus[$i]) and $ed_iliitostunnus[$i] == $toimittajaid) {
 				$ed_iliitostunnus[$i] = '';
+				$ed_iliitos[$i] = '';
 			}
 		}
 	}
@@ -66,14 +71,16 @@
 
 			if ($iliitos[$i] == 'asiakas' and $iliitostunnus[$i] == $asiakasid) {
 				$ed_iliitostunnus[$i] = $asiakasid;
+				$ed_iliitos[$i] = 'asiakas';
 			}
 			elseif ($iliitos[$i] == 'asiakas' and isset($iliitostunnus) and !isset($iliitostunnus[$i]) and $ed_iliitostunnus[$i] == $asiakasid) {
 				$ed_iliitostunnus[$i] = '';
+				$ed_iliitos[$i] = '';
 			}
 		}
 	}
 
-	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$liitos."#!#".$liitostunnus."#!#".$tunnus."#!#".urlencode(serialize($tiliointirivit))."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite))."#!#".urlencode(serialize($iliitos))."#!#".urlencode(serialize($ed_iliitostunnus));
+	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$liitos."#!#".$liitostunnus."#!#".$tunnus."#!#".urlencode(serialize($tiliointirivit))."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite))."#!#".urlencode(serialize($iliitos))."#!#".urlencode(serialize($ed_iliitostunnus))."#!#".urlencode(serialize($ed_iliitos));
 
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>\n";
 
@@ -559,6 +566,7 @@
 
 		foreach ($ed_iliitostunnus as $liit_indx => $liit) {
 			$iliitostunnus[$liit_indx] = $liit;
+			$iliitos[$liit_indx] = $ed_iliitos[$liit_indx];
 		}
 
 		// Tehdään tiliöinnit
@@ -751,6 +759,7 @@
 
 		if (isset($tullaan) and $tullaan == 'muutosite' and ((!isset($toimittajaid) and !isset($asiakasid)) or ($toimittajaid == 0 and $asiakasid == 0))) {
 			echo "<input type='hidden' name='ed_iliitostunnus' value='",urlencode(serialize($ed_iliitostunnus)),"' />";
+			echo "<input type='hidden' name='ed_iliitos' value='",urlencode(serialize($ed_iliitos)),"' />";
 			echo "<input type='hidden' name='iliitos' value='",urlencode(serialize($iliitos)),"' />";
 			echo "<input type='hidden' name='tullaan' value='{$tullaan}' />";
 		}
@@ -1098,6 +1107,7 @@
 				$chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) == $toimittajaid) ? ' checked' : ((isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) == $toimittajaid) ? ' checked' : '');
 
 				echo "<input type='hidden' name='ed_iliitostunnus[{$i}]' value='{$ed_iliitostunnus[$i]}' />";
+				echo "<input type='hidden' name='ed_iliitos[$i]' value='{$ed_iliitos[$i]}' />";
 				echo "<input type='hidden' name='iliitos[{$i}]' value='toimi' />";
 				echo "<input type='checkbox' name='iliitostunnus[{$i}]' value='{$toimittajaid}' {$chk} /> ";
 
@@ -1108,6 +1118,7 @@
 				$chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) == $asiakasid) ? ' checked' : ((isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) == $asiakasid) ? ' checked' : '');
 
 				echo "<input type='hidden' name='ed_iliitostunnus[{$i}]' value='{$ed_iliitostunnus[$i]}' />";
+				echo "<input type='hidden' name='ed_iliitos[$i]' value='{$ed_iliitos[$i]}' />";
 				echo "<input type='hidden' name='iliitos[{$i}]' value='asiakas' />";
 				echo "<input type='checkbox' name='iliitostunnus[{$i}]' value='{$asiakasid}' {$chk} /> ";
 
@@ -1115,9 +1126,11 @@
 
 			if (isset($iliitos[$i]) and trim($iliitos[$i]) != '' and ((isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) != '') or (isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) != ''))) {
 
-				$tunnus_chk = isset($iliitostunnus[$i]) ? $iliitostunnus[$i] : $ed_iliitostunnus[$i];
-				
-				$query = "SELECT nimi, nimitark FROM {$iliitos[$i]} WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus_chk}'";
+				$tunnus_chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) != '') ? $iliitostunnus[$i] : $ed_iliitostunnus[$i];
+
+				$taulu_chk = $tunnus_chk == $ed_iliitostunnus[$i] ? $ed_iliitos[$i] : $iliitos[$i];
+
+				$query = "SELECT nimi, nimitark FROM {$taulu_chk} WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus_chk}'";
 				$asiakasres = pupe_query($query);
 				$asiakasrow = mysql_fetch_assoc($asiakasres);
 				

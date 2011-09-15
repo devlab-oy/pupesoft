@@ -419,16 +419,16 @@
 			}
 
 			if ($konsernirajaus == "AT") {
-				$konsernijoini  = "	LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != ''
-									LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and lasku.liitostunnus = kt.tunnus and kt.konserniyhtio != '' ";
+				$konsernijoini  = "	LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and (lasku.liitostunnus = ka.tunnus or (tiliointi.liitos = 'asiakas' and tiliointi.liitostunnus = ka.tunnus)) and ka.konserniyhtio != ''
+									LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and (lasku.liitostunnus = kt.tunnus or (tiliointi.liitos = 'toimi' and tiliointi.liitostunnus = kt.tunnus)) and kt.konserniyhtio != '' ";
 				$konsernilisa = " and (ka.tunnus is not null or kt.tunnus is not null) ";
 			}
 			elseif ($konsernirajaus == "T") {
-				$konsernijoini = "  LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and lasku.liitostunnus = kt.tunnus and kt.konserniyhtio != '' ";
+				$konsernijoini = "  LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and (lasku.liitostunnus = kt.tunnus or (tiliointi.liitos = 'toimi' and tiliointi.liitostunnus = kt.tunnus)) and kt.konserniyhtio != '' ";
 				$konsernilisa = " and kt.tunnus is not null ";
 			}
 			elseif ($konsernirajaus == "A") {
-				$konsernijoini = "  LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != '' ";
+				$konsernijoini = "  LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and (lasku.liitostunnus = ka.tunnus or (tiliointi.liitos = 'asiakas' and tiliointi.liitostunnus = ka.tunnus)) and ka.konserniyhtio != '' ";
 				$konsernilisa = " and ka.tunnus is not null ";
 			}
 		}

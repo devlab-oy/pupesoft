@@ -730,10 +730,13 @@ if ($tee == 'U') {
 		$laskurow = mysql_fetch_assoc($result);
 	}
 
-	$summa 		= str_replace ( ",", ".", $summa);
-	$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
-	$tositetila = $laskurow["tila"];
-	$tositeliit = $laskurow["liitostunnus"];
+	$summa 			= str_replace ( ",", ".", $summa);
+	$selausnimi 	= 'tili'; // Minka niminen mahdollinen popup on?
+	$tositetila 	= $laskurow["tila"];
+	$tositeliit 	= $laskurow["liitostunnus"];
+	$kustp_tark		= $kustp;
+	$kohde_tark		= $kohde;
+	$projekti_tark	= $projekti;
 
 	require "inc/tarkistatiliointi.inc";
 

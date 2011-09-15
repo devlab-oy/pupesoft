@@ -265,7 +265,7 @@
 					fclose($file);
 				}
 
-				$maara = 0;
+				$maara = 1;
 
 				foreach ($excelrivi as $erivi) {
 					foreach ($erivi as $e => $eriv) {
@@ -407,17 +407,17 @@
 					$gok = 1;
 				}
 
-				$ulos 		= "";
-				$virhe 		= "";
-				$tili 		= $itili[$i];
-				$summa 		= $isumma[$i];
-				$totsumma  += $summa;
-				$selausnimi = "itili['.$i.']"; // Minka niminen mahdollinen popup on?
-				$vero 		= "";
-				$tositetila = "X";
-				$kustp_tark		= $ikustp[$i];		// nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
-				$kohde_tark		= $ikohde[$i];      // nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
-				$projekti_tark	= $iprojekti[$i];   // nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
+				$ulos 			= "";
+				$virhe 			= "";
+				$tili 			= $itili[$i];
+				$summa 			= $isumma[$i];
+				$totsumma  	   += $summa;
+				$selausnimi 	= "itili['.$i.']"; // Minka niminen mahdollinen popup on?
+				$vero 			= "";
+				$tositetila 	= "X";
+				$kustp_tark		= $ikustp[$i];
+				$kohde_tark		= $ikohde[$i];
+				$projekti_tark	= $iprojekti[$i];
 
 				if (isset($toimittajaid) and $toimittajaid > 0) {
 					$tositeliit = $toimrow["tunnus"];

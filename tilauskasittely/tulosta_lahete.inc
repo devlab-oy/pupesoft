@@ -2160,14 +2160,6 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 
 		$kala = $pohja - $rivinkorkeus;
 
-		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+10, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
-		}
-		else {
-			$kala = $kala - $rivinkorkeus;
-		}
-
 		// tutkitaan onko tuotteelle eankoodi
 		$eanquery = "	SELECT eankoodi
 						from tuote
@@ -2176,14 +2168,23 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
 		$eanres = mysql_query($eanquery) or pupe_error($eanquery);
 		$eanrow = mysql_fetch_assoc($eanres);
 
+		$alakala = $kala;
+
 		if (trim($eanrow["eankoodi"]) != "" and trim($eanrow["eankoodi"]) != '0') {
 			# viivakoodi
 			$data = viivakoodi($eanrow["eankoodi"], "code128", 100, 10, "");
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, $kala+2, 410, $thispage, array("scale" => 0.5));
-			$pdf->draw_text(420, $kala, $eanrow["eankoodi"], $thispage, $pieni);
-			$kala = $kala-$rivinkorkeus;
+			$pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
+			$pdf->draw_text(420, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+			$alakala = $kala-17-$rivinkorkeus;
 		}
+
+		if ($row["kommentti"] != '') {
+			$pohja = $pdf->draw_paragraph($kala+10, 45, 60, 400, $row["kommentti"],	$thispage, $norm);
+			$kala = $pohja - $rivinkorkeus;
+		}
+
+		if ($kala > $alakala) $kala = $alakala;
 
 		// Luodaan palautettavat
 		$return = compact(array_keys($params));
@@ -2306,15 +2307,6 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 									$thispage, $norm);
 
-		$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 70, 400, $row["nimitys"],	$thispage, $norm);
-
-		$kala = $pohja - $rivinkorkeus;
-
-		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 480, $row["kommentti"],	$thispage, $norm);
-			$kala = $pohja - $rivinkorkeus;
-		}
-
 		// tutkitaan onko tuotteelle eankoodi
 		$eanquery = "	SELECT trim(eankoodi) eankoodi
 						from tuote
@@ -2323,15 +2315,27 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 		$eanres = mysql_query($eanquery) or pupe_error($eanquery);
 		$eanrow = mysql_fetch_assoc($eanres);
 
+		$alakala = $kala;
+
 		if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"])) {
 			#viivakoodi
 			$data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, $kala, 410, $thispage, array("scale" => 0.5));
-			$pdf->draw_text(425, $kala-2, $eanrow["eankoodi"], $thispage, $pieni);
+			$pdf->image_place($image, $kala-25, 410, $thispage, array("scale" => 0.5));
+			$pdf->draw_text(425, $kala-27, $eanrow["eankoodi"], $thispage, $pieni);
 
-			$kala = $kala-$rivinkorkeus;
+			$alakala = $kala-27-$rivinkorkeus;
 		}
+
+		$pohja = $pdf->draw_paragraph($kala+$norm["height"]+1, 185, 70, 400, $row["nimitys"],	$thispage, $norm);
+		$kala = $pohja - $rivinkorkeus;
+
+		if ($row["kommentti"] != '') {
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+3, 45, 60, 400, $row["kommentti"],	$thispage, $norm);
+			$kala = $pohja - $rivinkorkeus;
+		}
+
+		if ($kala > $alakala) $kala = $alakala;
 
 		// Luodaan palautettavat
 		$return = compact(array_keys($params));

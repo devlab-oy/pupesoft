@@ -53,32 +53,33 @@
 			echo "04: ".$laskun_numero."\n";
 			echo "05: ".$laskun_ebid."\n";
 			echo "06: ".$laskun_paiva."\n";
-			echo "07: ".$laskun_erapaiva."\n";
-			echo "08: ".$laskun_kapvm."\n";
-			echo "09: ".$laskun_kasumma."\n";
-			echo "10: ".$laskuttajan_ovt."\n";
-			echo "11: ".$laskuttajan_nimi."\n";
-			echo "12: ".$laskuttajan_vat."\n";
-			echo "13: ".$laskun_pankkiviite."\n";
-			echo "14: ".$laskun_asiakastunnus."\n";
-			echo "15: ".$laskun_summa_eur."\n";
-			echo "16: ".$laskun_tilausviite."\n";
-			echo "17: ".$kauttalaskutus."\n";
-			echo "18: ".$laskun_asiakkaan_tilausnumero."\n";
-			echo "19: ".$toim_asiakkaantiedot["toim_ovttunnus"]."\n";
-			echo "20: ".$toim_asiakkaantiedot["ytunnus"]."\n";
-			echo "21: ".$toim_asiakkaantiedot["nimi"]."\n";
-			echo "22: ".$toim_asiakkaantiedot["osoite"]."\n";
-			echo "23: ".$toim_asiakkaantiedot["postino"]."\n";
-			echo "24: ".$toim_asiakkaantiedot["postitp"]."\n";
-			echo "25: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."\n";
-			echo "26: ".$ostaja_asiakkaantiedot["ytunnus"]."\n";
-			echo "27: ".$ostaja_asiakkaantiedot["nimi"]."\n";
-			echo "28: ".$ostaja_asiakkaantiedot["osoite"]."\n";
-			echo "29: ".$ostaja_asiakkaantiedot["postino"]."\n";
-			echo "30: ".$ostaja_asiakkaantiedot["postitp"]."\n";
-			echo "31: TecCom/Unikko only ".$laskuttajan_toimittajanumero."\n";
-			echo "32: ".$laskuttajan_valkoodi."\n";
+			echo "07: ".$laskun_la_paiva."\n";
+			echo "08: ".$laskun_erapaiva."\n";
+			echo "09: ".$laskun_kapvm."\n";
+			echo "10: ".$laskun_kasumma."\n";
+			echo "11: ".$laskuttajan_ovt."\n";
+			echo "12: ".$laskuttajan_nimi."\n";
+			echo "13: ".$laskuttajan_vat."\n";
+			echo "14: ".$laskun_pankkiviite."\n";
+			echo "15: ".$laskun_asiakastunnus."\n";
+			echo "16: ".$laskun_summa_eur."\n";
+			echo "17: ".$laskun_tilausviite."\n";
+			echo "18: ".$kauttalaskutus."\n";
+			echo "19: ".$laskun_asiakkaan_tilausnumero."\n";
+			echo "20: ".$toim_asiakkaantiedot["toim_ovttunnus"]."\n";
+			echo "21: ".$toim_asiakkaantiedot["ytunnus"]."\n";
+			echo "22: ".$toim_asiakkaantiedot["nimi"]."\n";
+			echo "23: ".$toim_asiakkaantiedot["osoite"]."\n";
+			echo "24: ".$toim_asiakkaantiedot["postino"]."\n";
+			echo "25: ".$toim_asiakkaantiedot["postitp"]."\n";
+			echo "26: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."\n";
+			echo "27: ".$ostaja_asiakkaantiedot["ytunnus"]."\n";
+			echo "28: ".$ostaja_asiakkaantiedot["nimi"]."\n";
+			echo "29: ".$ostaja_asiakkaantiedot["osoite"]."\n";
+			echo "30: ".$ostaja_asiakkaantiedot["postino"]."\n";
+			echo "31: ".$ostaja_asiakkaantiedot["postitp"]."\n";
+			echo "32: TecCom/Unikko only ".$laskuttajan_toimittajanumero."\n";
+			echo "33: ".$laskuttajan_valkoodi."\n";
 
 			Nämä muuttujat ovat valinnaisia:
 
@@ -921,6 +922,17 @@
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
 
+				if ($yhtiorow['ostolaskujen_paivays'] == "1") {
+					$vpp = (int) substr($laskun_la_paiva, 6, 2);
+					$vpk = (int) substr($laskun_la_paiva, 4, 2);
+					$vpv = (int) substr($laskun_la_paiva, 0, 4);
+				}
+				else {
+					$vpp = $tpp;
+					$vpk = $tpk;
+					$vpv = $tpv;
+				}
+
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set
 							yhtio 				= '$yhtio',
@@ -950,6 +962,7 @@
 							sisviesti1 			= '$laskun_tilausviite',
 							sisviesti2 			= '',
 							tapvm 				= '$tpv-$tpk-$tpp',
+							lapvm 				= '$vpv-$vpk-$vpp',
 							vienti 				= '$trow[oletus_vienti]',
 							ebid 				= '$ebid',
 							tila 				= '$tila',

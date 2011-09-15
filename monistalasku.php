@@ -31,6 +31,9 @@ if ($vain_monista == "") {
 	elseif ($toim == 'TILAUS') {
 		echo "<font class='head'>".t("Monista tilaus")."</font><hr>";
 	}
+	elseif ($toim == 'ENNAKKOTILAUS') {
+		echo "<font class='head'>".t("Monista ennakkotilaus")."</font><hr>";
+	}
 	elseif ($toim == 'OSTOTILAUS') {
 		echo "<font class='head'>".t("Monista ostotilaus")."</font><hr>";
 	}
@@ -48,7 +51,7 @@ if ($toim == 'TYOMAARAYS') {
 	// Halutaanko saldot koko konsernista?
 	$query = "	SELECT *
 				FROM yhtio
-				WHERE konserni = '{$yhtiorow['konserni']}' 
+				WHERE konserni = '{$yhtiorow['konserni']}'
 				AND konserni != ''";
 	$result = pupe_query($query);
 
@@ -171,6 +174,10 @@ if ($tee == "ETSILASKU") {
 			$where 	= " tila in ('N','L') and tunnus = '{$otunnus}' ";
 			$use 	= " ";
 		}
+		elseif ($toim == 'ENNAKKOTILAUS') {
+			$where 	= " tila = 'E' and tunnus = '{$otunnus}' ";
+			$use 	= " ";
+		}
 		elseif ($toim == 'OSTOTILAUS') {
 			$where 	= " tila = 'O' and tunnus = '{$otunnus}' ";
 			$use 	= " ";
@@ -207,6 +214,11 @@ if ($tee == "ETSILASKU") {
 						and lasku.liitostunnus = '{$asiakasid}' ";
 			$use 	= " ";
 		}
+		elseif ($toim == 'ENNAKKOTILAUS') {
+			$where 	= " tila = 'E'
+						and lasku.liitostunnus = '{$asiakasid}' ";
+			$use 	= " ";
+		}
 		elseif ($toim == 'OSTOTILAUS') {
 			$where 	= " tila = 'O'
 						and lasku.liitostunnus = '{$toimittajaid}' ";
@@ -226,7 +238,7 @@ if ($tee == "ETSILASKU") {
 				FROM lasku {$use}
 				WHERE {$where}
 				AND yhtio in ('".implode("','", $yhtiot)."')
-				ORDER BY tapvm, lasku.tunnus DESC 
+				ORDER BY tapvm, lasku.tunnus DESC
 				LIMIT 100";
 	$result = pupe_query($query);
 
@@ -290,16 +302,13 @@ if ($tee == "ETSILASKU") {
 			if (isset($monistettavat[$row["tilaus"]]) and $monistettavat[$row["tilaus"]] == 'HYVITA')  $selhy = "CHECKED";
 			if (isset($monistettavat[$row["tilaus"]]) and $monistettavat[$row["tilaus"]] == 'REKLAMA') $selre = "CHECKED";
 
-			if ($toim == 'TILAUS') {
-				echo "<input type='checkbox' name='monistettavat[{$row['tilaus']}]' value='MONISTA' {$selmo}>".t("Monista")."<br>";
-			}
-			else {
-				echo "<input type='radio' name='monistettavat[{$row['tilaus']}]' value='MONISTA' {$selmo}>".t("Monista")."<br>";
-			}
-
 			if ($toim == '') {
+				echo "<input type='radio' name='monistettavat[{$row['tilaus']}]' value='MONISTA' {$selmo}>".t("Monista")."<br>";
 				echo "<input type='radio' name='monistettavat[{$row['tilaus']}]' value='HYVITA' {$selhy}>".t("Hyvitä")."<br>";
 				echo "<input type='radio' name='monistettavat[{$row['tilaus']}]' value='REKLAMA' {$selre}>".t("Reklamaatio")."<br>";
+			}
+			else {
+				echo "<input type='checkbox' name='monistettavat[{$row['tilaus']}]' value='MONISTA' {$selmo}>".t("Monista")."<br>";
 			}
 
 			if ($toim == '') {
@@ -400,7 +409,7 @@ if ($tee == 'MONISTA') {
 		elseif ($toim == 'TYOMAARAYS') {
 			echo "{$kklkm} ".t("työmääräys(tä)").".<br><br>";
 		}
-		elseif ($toim == 'TILAUS') {
+		elseif ($toim == 'TILAUS' or $toim == 'ENNAKKOTILAUS') {
 			echo "{$kklkm} ".t("tilaus(ta)").".<br><br>";
 		}
 		elseif ($toim == 'OSTOTILAUS') {
@@ -545,6 +554,9 @@ if ($tee == 'MONISTA') {
 						elseif ($toim == 'OSTOTILAUS') {
 							$values .= ", 'O'";
 						}
+						elseif ($toim == 'ENNAKKOTILAUS') {
+							$values .= ", 'E'";
+						}
 						else {
 							$values .= ", 'N'";
 						}
@@ -560,6 +572,10 @@ if ($tee == 'MONISTA') {
 						}
 						elseif ($toim == 'TARJOUS') {
 							$values .= ", 'T'";
+							break;
+						}
+						elseif ($toim == 'ENNAKKOTILAUS') {
+							$values .= ", 'E'";
 							break;
 						}
 					case 'tunnus':
@@ -635,7 +651,7 @@ if ($tee == 'MONISTA') {
 						if ($alvik == "on") {
 							$squery = "	SELECT *
 										FROM asiakas
-										WHERE yhtio = '{$kukarow['yhtio']}' 
+										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND tunnus = '{$monistarow['liitostunnus']}'";
 							$asiakres = pupe_query($squery);
 							$asiakrow = mysql_fetch_array($asiakres);
@@ -765,7 +781,7 @@ if ($tee == 'MONISTA') {
 					//	Päivitetään jaksotettu myös laskulle
 					$kysely = "	UPDATE lasku SET
 								jaksotettu = '{$utunnus}'
-								WHERE yhtio = '{$kukarow['yhtio']}' 
+								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND tunnus = '{$utunnus}'";
 					$updres = pupe_query($kysely);
 				}
@@ -774,7 +790,7 @@ if ($tee == 'MONISTA') {
 			//Kopioidaan otsikon lisatiedot
 			$query = "	SELECT *
 						FROM laskun_lisatiedot
-						WHERE otunnus = '{$lasku}' 
+						WHERE otunnus = '{$lasku}'
 						AND yhtio = '{$monistarow['yhtio']}'";
 			$monistalisres = pupe_query($query);
 
@@ -850,7 +866,7 @@ if ($tee == 'MONISTA') {
 				$insres2 = pupe_query($kysely);
 			}
 
-			if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS') {
+			if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS' or $toim == 'ENNAKKOTILAUS') {
 				$query = "	SELECT *
 							FROM tilausrivi
 							WHERE otunnus = '{$lasku}'
@@ -934,7 +950,7 @@ if ($tee == 'MONISTA') {
 							$rvalues .= ", ''";
 							break;
 						case 'kommentti':
-							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS') {
+							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS' or $toim == 'ENNAKKOTILAUS') {
 								$rvalues .= ", '{$rivirow['kommentti']}'";
 							}
 							else {
@@ -1003,7 +1019,7 @@ if ($tee == 'MONISTA') {
 							if ($alvik == "on") {
 								$squery = "	SELECT *
 											FROM asiakas
-											WHERE yhtio = '{$kukarow['yhtio']}' 
+											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$monistarow['liitostunnus']}'";
 								$asiakres = pupe_query($squery);
 								$asiakrow = mysql_fetch_array($asiakres);

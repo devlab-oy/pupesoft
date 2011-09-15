@@ -565,7 +565,7 @@ if ($tee == 'I') {
 	}
 
  	// Käydään tiliöinnit läpi
-	for ($i=1; $i<$maara; $i++) {
+	for ($i = 1; $i < $maara; $i++) {
  		// Käsitelläänkö rivi??
 		if (strlen($itili[$i]) > 0) {
 			$turvasumma 	= $summa;
@@ -577,6 +577,9 @@ if ($tee == 'I') {
 			$ulos			= ""; // Mahdollinen popup tyhjennetaan
 			$tositetila 	= "U";
 			$tositeliit		= $trow["tunnus"];
+			$kustp_tark		= $ikustp[$i];
+			$kohde_tark		= $ikohde[$i];
+			$projekti_tark	= $iprojekti[$i];
 
 			require "inc/tarkistatiliointi.inc";
 

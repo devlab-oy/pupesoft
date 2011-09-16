@@ -918,6 +918,8 @@ else {
 
 			$sisviesti2_numerointi = 1;
 
+			$i_counter = 1;
+
 			while ($row = mysql_fetch_assoc($result)) {
 
 				// Mihin varastoon
@@ -930,7 +932,7 @@ else {
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
 				// varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if (((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '')) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K") or ($row['omalle_tilaukselle'] != '')) {
+				if (((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '')) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K") or ($row['omalle_tilaukselle'] != '' and $i_counter > 1)) {
 
 					// Meidän on päivitettävä tunnusnippu
 					if ($yhtiorow["splittauskielto"] == "K" and $laskurow["tunnusnippu"] == 0) {
@@ -1075,6 +1077,8 @@ else {
 						$ohno  = pupe_query($query);
 					}
 				}
+
+				$i_counter++;
 			}
 
 			// Valitaan paras varasto ja tulostusalue alkuperäiselle osalla

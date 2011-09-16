@@ -188,6 +188,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("TUOTENO", "TOIMITTAJA");
 				$joinattavat = array("TUOTENO" => "tuote");
+				$saakopoistaa = TRUE;
 				break;
 			case "kuka" :
 				$pakolliset = array("KUKA");

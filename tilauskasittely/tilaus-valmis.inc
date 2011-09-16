@@ -1078,7 +1078,12 @@ else {
 					}
 				}
 
-				$i_counter++;
+				if ($row['perheid'] > 0 and $row['perheid'] == $row['tunnus']) {
+					$i_counter++;
+				}
+				elseif ($row['perheid'] == 0) {
+					$i_counter++;
+				}
 			}
 
 			// Valitaan paras varasto ja tulostusalue alkuperäiselle osalla

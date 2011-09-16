@@ -500,7 +500,7 @@ if (!function_exists("table_exists")) {
 }
 
 if (!function_exists("vapauta_sarjanumerot")) {
-	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="") {
+	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="", $dellaa_ostorivi = TRUE) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu, tilausrivi.tuoteno, tuote.sarjanumeroseuranta, tilausrivin_lisatiedot.tilausrivilinkki
@@ -550,7 +550,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 			}
 
 			// Onko tätä ostotilauksella?
-			if ($srow["tilausrivilinkki"] > 0) {
+			if ($dellaa_ostorivi and $srow["tilausrivilinkki"] > 0) {
 				$query = "	UPDATE tilausrivi
 							SET tyyppi = 'D'
 							WHERE yhtio 	= '$kukarow[yhtio]'

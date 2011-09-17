@@ -8,13 +8,15 @@ $verkkotunnus_vas 		= array_shift($xml->xpath('Group2/NAD[@e3035="MR"]/@eC082.30
 $laskun_tyyppi 			= array_shift($xml->xpath('BGM/@eC002.1001'));
 $laskun_numero 			= array_shift($xml->xpath('BGM/@e1004'));
 $laskun_ebid 			= array_shift($xml->xpath('Group1/RFF[@eC506.1153="ZEB"]/@eC506.1154'));
-$laskun_paiva			= array_shift($xml->xpath('DTM[@eC507.2005="3"]/@eC507.2380'));
+$laskun_tapvm			= array_shift($xml->xpath('DTM[@eC507.2005="3"]/@eC507.2380'));
+$laskun_lapvm			= array_shift($xml->xpath('DTM[@eC507.2005="3"]/@eC507.2380'));
 $laskun_erapaiva		= array_shift($xml->xpath('Group8[PAT/@e4279="1"]/DTM[@eC507.2005="13"]/@eC507.2380'));
 $laskun_kapvm 			= "";
 $laskun_kasumma 		= "";
 $laskuttajan_ovt		= array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC082.3039'));
 $laskuttajan_nimi		= utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="II"]/@eC080.3036.1')));
 $laskuttajan_vat		= array_shift($xml->xpath('Group2/Group3/RFF[@eC506.1153="VA"]/@eC506.1154'));
+$laskuttajan_valkoodi   = "";
 $laskun_pankkiviite		= array_shift($xml->xpath('Group1/RFF[@eC506.1153="PQ"]/@eC506.1154'));
 $laskun_asiakastunnus	= array_shift($xml->xpath('Group2[NAD/@e3035="IV"]/Group3/RFF/@eC506.1154'));
 $laskun_summa_eur		= (float) array_shift($xml->xpath('Group48/MOA[@eC516.5025="9" and @eC516.6345="EUR"]/@eC516.5004'));
@@ -47,6 +49,7 @@ if ($ostaja_asiakkaantiedot["nimi"] == '') {
 	$ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="IV"]/@e3164'))));
 }
 
+$laskuttajan_toimittajanumero = "";
 
 // jos ei löytynyt EUR summaa kokeillaan ilman valkoodia
 if ($laskun_summa_eur == 0) {

@@ -1,9 +1,10 @@
 <?php
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
+
 	// DataTables päälle
 	$pupe_DataTables = "asiakkaantilaukset";
-	
+
 	require ("../inc/parametrit.inc");
 
 	if (substr($toim, 0, 8) == "KONSERNI") {
@@ -68,8 +69,14 @@
 		$til = " tila in ('L','N','C','D') and tilaustyyppi='R' ";
 	}
 
+	if ($til == "" or $cleantoim == "") {
+	  echo "<p><font class='error'>".t("Järjestelmävirhe, tämän modulin suorittaminen suoralla urlilla on kielletty")." !!!</font></p>";
+	  require ("inc/footer.inc");
+	  exit;
+	 }
+
 	//	Voidaan näyttää vain tilaus ilman hakuja yms. Haluamme kuitenkin tarkastaa oikeudet.
-	if ($tee=="NAYTA" and $til != "") {
+	if ($tee == "NAYTA" and $til != "") {
 		require ("raportit/naytatilaus.inc");
 		require ("inc/footer.inc");
 		die();
@@ -82,7 +89,7 @@
 	if ($ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
 
 		$query = "SELECT ytunnus, liitostunnus FROM lasku WHERE $logistiikka_yhtiolisa and tunnus = '$kukarow[kesken]' and $til";
-		$keskenresult = mysql_query($query) or pupe_error($query);
+		$keskenresult = pupe_query($query);
 
 		if (mysql_num_rows($keskenresult) == 1) {
 			$keskenrow = mysql_fetch_array($keskenresult);
@@ -122,7 +129,7 @@
 						FROM rahtikirjat
 						WHERE otsikkonro='$tunnus'
 						and $logistiikka_yhtiolisa ";
-			$rahtiresult = mysql_query($query) or pupe_error($query);
+			$rahtiresult = pupe_query($query);
 
 			if (mysql_num_rows($rahtiresult)> 0) {
 				echo "<b>".t("Rahtikirjatiedot").":</b><hr>";
@@ -144,7 +151,7 @@
 								WHERE tunnus='$rahtirow[tulostuspaikka]'
 								and $logistiikka_yhtiolisa
 								limit 1";
-					$varnimresult = mysql_query($query) or pupe_error($query);
+					$varnimresult = pupe_query($query);
 					$varnimrow = mysql_fetch_array($varnimresult);
 
 					echo "<tr><td>$rahtirow[kilot]</td>
@@ -192,7 +199,7 @@
 					FROM lasku use index (yhtio_tunnusnippu)
 					WHERE tunnusnippu = '$otunnus'
 					and $logistiikka_yhtiolisa)";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$row = mysql_fetch_array($result);
 
 		if ($row["laskunro"] > 0) {
@@ -210,9 +217,9 @@
 	elseif ($sopimus > 0) {
 		$query = "	SELECT laskunro, ytunnus, liitostunnus
 					FROM lasku
-					WHERE tunnus='$sopimus'
+					WHERE tunnus = '$sopimus'
 					and $logistiikka_yhtiolisa";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$row = mysql_fetch_array($result);
 
 		$laskunro = $row["laskunro"];
@@ -233,7 +240,7 @@
 						and tila		= 'K'
 						and vanhatunnus = 0
 						and $logistiikka_yhtiolisa";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$row = mysql_fetch_array($result);
 
 			$laskunro 		= $row["laskunro"];
@@ -247,7 +254,7 @@
 						and tila 		= 'U'
 						and alatila		= 'X'
 						and $logistiikka_yhtiolisa";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$row = mysql_fetch_array($result);
 
 			$laskunro 		= $row["laskunro"];
@@ -260,7 +267,7 @@
 					FROM lasku use index (yhtio_asiakkaan_tilausnumero)
 					WHERE asiakkaan_tilausnumero LIKE ('%$astilnro%')
 					and $logistiikka_yhtiolisa";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$row = mysql_fetch_array($result);
 
 		if ($row["laskunro"] > 0) {
@@ -294,7 +301,7 @@
 						FROM asiakas
 						WHERE $logistiikka_yhtiolisa
 						and tunnus='$asiakasid'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$asiakasrow 	= mysql_fetch_array($result);
 
 			echo "<table><tr><th>".t("Valittu asiakas").":</th><td>$asiakasrow[nimi]</td></tr></table><br>";
@@ -304,7 +311,7 @@
 						FROM toimi
 						WHERE $logistiikka_yhtiolisa
 						and tunnus='$toimittajaid'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$asiakasrow 	= mysql_fetch_array($result);
 
 			echo "<table><tr><th>".("Valittu toimittaja").":</th><td>$asiakasrow[nimi]</td></tr></table><br>";
@@ -326,15 +333,23 @@
 		if (!isset($ppl))
 			$ppl = date("d");
 
+		$chk = "";
+
+		if ($kaikki != "") {
+			$chk = "CHECKED";
+		}
+
 		echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
 				<td><input type='text' name='ppa' value='$ppa' size='3'></td>
 				<td><input type='text' name='kka' value='$kka' size='3'></td>
 				<td><input type='text' name='vva' value='$vva' size='5'></td>
-				</tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
+				</tr>";
+		echo "<tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
 				<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 				<td><input type='text' name='kkl' value='$kkl' size='3'></td>
 				<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
-		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr></form></table>";
+		echo "</tr>";
+
 
 		if ($cleantoim == 'OSTO') {
 			$litunn = $toimittajaid;
@@ -449,7 +464,38 @@
 						$jarj";
 		}
 
-		$result = mysql_query($query) or pupe_error($query);
+		if ($kaikki == "") {
+			$query .= " limit 51";
+			$limittrikkeri = "A";
+		}
+		else {
+			$query .= " limit 500 ";
+			$limittrikkeri = "X";
+		}
+
+		$result = pupe_query($query);
+
+		echo "<tr>";
+
+		if (mysql_num_rows($result) > 50) {
+			echo "<th>".t("Näytä 500 uusinta tilausta")."</th>";
+			echo "<td colspan='3' class=''>";
+			echo "<input type='checkbox' name='kaikki' $chk></td>";
+		}
+		else {
+			echo "<td colspan='4' class='back'>";
+		}
+
+		echo "<td class='back'>";
+		echo "<input type='submit' value='".t("Hae")."'>";
+		echo "</td></tr>";
+
+		echo "</form>";
+		echo "</table>";
+
+		if (mysql_num_rows($result) > 50 and $limittrikkeri == "A") {
+			echo "<p><font class='error'>".t("HUOM")."! ".t("Näytetään vain 50 uusinta tilausta")."</font></p>";
+		}
 
 		if (mysql_num_rows($result)!=0) {
 
@@ -469,27 +515,27 @@
 					pupe_DataTables($pupe_DataTables, 8, 9);
 				}
 			}
-			
+
 			echo "<br>";
-			echo "<table class='display' id='$pupe_DataTables'>";					
-			
+			echo "<table class='display' id='$pupe_DataTables'>";
+
 			echo "<thead>";
 			echo "<tr>";
-			
+
 			for ($i=0; $i < mysql_num_fields($result)-8; $i++) {
 				echo "<th>".t(mysql_field_name($result,$i))."</th>";
 			}
-			
+
 			echo "<th>".t("Tyyppi")."</th>
 				  <th class='back'></th>";
 			echo "</tr>";
-			
+
 			echo "<tr>";
-			
+
 			for ($i=0; $i < mysql_num_fields($result)-8; $i++) {
 				echo "<td><input type='text' name='search_".t(mysql_field_name($result,$i))."'></td>";
 			}
-			
+
 			echo "<td><input type='text' name='search_tyyppi'></td>
 			      <td class='back'></td>";
 			echo "</tr>";
@@ -497,7 +543,7 @@
 			echo "<tbody>";
 
 			while ($row = mysql_fetch_array($result)) {
-								
+
 				echo "<tr class='aktiivi'>";
 
 				// Laatikot laskujen ympärille
@@ -507,7 +553,7 @@
 								WHERE $logistiikka_yhtiolisa
 								and laskunro = '$row[laskunro]'
 								and tila in ('U','L')";
-					$pkres = mysql_query($query) or pupe_error($query);
+					$pkres = pupe_query($query);
 					$pkrow = mysql_fetch_array($pkres);
 
 					$pknum 		= $pkrow[0];
@@ -550,11 +596,11 @@
 
 					$borderlask--;
 				}
-				
+
 				if ($tunnus == $row['tilaus']) {
 					$classalku	.= " class='tumma' ";
 					$classloppu	.= " class='tumma' ";
-					$class 		.= " class='tumma' ";				
+					$class 		.= " class='tumma' ";
 				}
 
 				if ($row["tila"] == "U") {
@@ -649,7 +695,7 @@
 
 				$edlaskunro = $row["laskunro"];
 			}
-			
+
 			echo "</tbody>";
 			echo "</table>";
 		}

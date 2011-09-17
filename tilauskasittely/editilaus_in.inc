@@ -34,18 +34,19 @@ if (!function_exists('jt_toimita_editilaus')) {
 	function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa) {
 		global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
 
-		$automaaginen 			= "automaaginen";
-		$tee 					= "JATKA";
-		$oikeurow['paivitys'] 	= '1';
-		$toimittaja				= "";
-		$toimittajaid			= "";
-		$jarj	 				= "tuoteno";
-		$tuotenumero			= "";
-		$tilaus					= "";
-		$toimi					= "";
-		$superit				= "";
-		$tilaus_on_jo			= "KYLLA";
-		$from_varastoon_inc 	= "editilaus_in.inc";
+		$automaaginen 			        = "automaaginen";
+		$tee 					        = "JATKA";
+		$oikeurow['paivitys'] 	        = '1';
+		$toimittaja				        = "";
+		$toimittajaid			        = "";
+		$jarj	 				        = "tuoteno";
+		$tuotenumero			        = "";
+		$tilaus					        = "";
+		$toimi					        = "";
+		$superit				        = "";
+		$tilaus_on_jo			        = "KYLLA";
+		$from_varastoon_inc 	        = "editilaus_in.inc";
+		$ei_tehdastoimitus_tuotteita    = "EI";
 
 		if ($asiakasmaa != '') {
 			$asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
@@ -111,6 +112,7 @@ $yhteyshenkilon_puhelin = "";
 $lopviesti            	= "";
 $ketjutus             	= "";
 $editilaus_maksuehto	= "";
+$editilaus_maksuteksti	= "";
 $editilaus_toimitustapa = "";
 $tilaus_hyvaksyntaan	= "";
 $editilaus_rahtivapaa	= "";
@@ -177,12 +179,22 @@ elseif ($edi_tyyppi == "edifact911") {
 	// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
 	$order_tietosisalto = file_get_contents($filename);
 
-	$order_tietosisalto = str_replace("\n","",$order_tietosisalto);
-	$order_tietosisalto = explode("'",$order_tietosisalto);
+	$order_tietosisalto = str_replace("\n","", $order_tietosisalto);
+	$order_tietosisalto = explode("'", $order_tietosisalto);
+
+	// Tallennetaan NAD+SE -segmentti, koska se tulee muuten liian myˆh‰isess‰ vaiheessa...
+	$nadse_segmentti = "";
 
 	foreach ($order_tietosisalto as $key => $value) {
-		if (trim($value) != "") {
+
+		$value = trim($value);
+
+		if ($value != "") {
 			$edi_rivi .= $value."\n";
+
+			if (substr($value, 0, 6) == "NAD+SE") {
+				$nadse_segmentti = $value;
+			}
 		}
 	}
 
@@ -190,19 +202,13 @@ elseif ($edi_tyyppi == "edifact911") {
 
 	// Luodaan arraysta => tiedosto
 	$tiedosto = "/tmp/ediorders911".uniqid(time()."_").".txt";
-	file_put_contents($tiedosto,$edi_rivi);
+	file_put_contents($tiedosto, $edi_rivi);
 
 	// avataan tiedosto uudestaan
 	if (!$fd = fopen($tiedosto, "r")) die("Filen '$tiedosto' ".t("avaus ep‰onnistui")."!\n");
 
 	//jotta filenimi ei varmasti katoaisi matkalla, t‰m‰ ylikirjoittaa edellisen mailfilen.
 	$mailfile = $tiedosto;
-
-	// luetaan uudestaan tiedostoon
-	$order_tietosisalto = file_get_contents($tiedosto);
-
-	// Kaivetaan segmentti tekstin "NAD+SE+" ja "NAD+PL+" v‰list‰
-	$nadse_segmentti = substr($order_tietosisalto, strpos($order_tietosisalto, "NAD+SE+"), (strpos($order_tietosisalto, "NAD+PL+") - strpos($order_tietosisalto, "NAD+SE+")));
 }
 else {
 	$edi_subj = t("Sis‰‰ntuleva EIH 1.4 EDI-tilaus");
@@ -252,6 +258,7 @@ while ($tietue = fgets($fd)) {
 	// Jos kyseess‰ on UNA (ensimm‰inen Orders 91.1 segmentti), niin etsit‰‰n t‰ss‰ vaiheessa NAD SE
 	if ($tunnus == "UNA") {
 		$tunnus = "NADSE"; // Myyj‰
+
 		$nad_segmentit = explode("+", $nadse_segmentti);
 		$nad_kentta = explode(":", $nad_segmentit[2]);
 		$tieto = $nad_kentta[0];
@@ -262,6 +269,12 @@ while ($tietue = fgets($fd)) {
 		switch (substr($tieto,0,2)) {
 			case 'BY':
 				$tunnus = "NADBY"; // Ostaja
+				$nad_segmentit = explode("+", $tieto);
+				$nad_kentat = explode(":", $nad_segmentit[1]);
+				$tieto = $nad_kentat[0];
+				break;
+			case 'PL':
+				$tunnus = "NADPL"; // Edelleenlaskutettava
 				$nad_segmentit = explode("+", $tieto);
 				$nad_kentat = explode(":", $nad_segmentit[1]);
 				$tieto = $nad_kentat[0];
@@ -444,6 +457,13 @@ while ($tietue = fgets($fd)) {
 			$edi_kommentti .= $tieto . ' ';
 			break;
 
+		case 'OSTOTIL.OT_MAKSUEHTO' :
+		//Magento keississ‰ maksuehdon koko nimi verkkokaupassa
+			if ($edi_tyyppi == "magento") {
+				$editilaus_maksuteksti .= $tieto;
+			}
+			break;
+
 		case 'ORFFABONU' :
 		case 'OSTOTIL.OT_VIITTEEMME' :
 		//Asiakkaan viite
@@ -461,6 +481,7 @@ while ($tietue = fgets($fd)) {
 		case 'OSTOTIL.OT_ASIAKASNRO' :
 		case 'ONADDP_PC' :
 		case 'NADBY' :
+		case 'NADPL' :
 			// ONADBY_PC - Ostajan osapuolen tunniste
 			// ONADDP_PC - Toimitusosoitteen osapuolen tunniste
 			// ONADCN_PC - Ostajan logistiikkakeskuksen tunniste (CN -tarkenne ei ole Itellan speksiss‰, joten t‰m‰ on itse p‰‰telty‰!)
@@ -1041,7 +1062,7 @@ while ($tietue = fgets($fd)) {
 							maa 			   					= '$arow[maa]',
 							maa_maara							= '$arow[maa_maara]',
 							maksuehto 		   					= '$editilaus_maksuehto',
-							maksuteksti 						= '',
+							maksuteksti 						= '$editilaus_maksuteksti',
 							myyja 			   					= '$edimyyja',
 							nimi 			   					= '$arow[nimi]',
 							nimitark 		   					= '$arow[nimitark]',
@@ -1209,20 +1230,26 @@ while ($tietue = fgets($fd)) {
 
 				// Spessukase
 				if ($yhtiorow["yhtio"] == "artr") {
-					// Laitetaan kolmanneksi merkiksi space
-					$tuotenumero2 = substr($tieto, 0, 2). " ". substr($tieto, 2);
-				}
-				else {
-					$tuotenumero2 = $tieto;
+
+					$query = "	SELECT *
+								FROM tuote
+								WHERE yhtio = '{$kukarow["yhtio"]}'
+								and tuoteno = '{$tieto}'
+								and status != 'P'
+								{$kieltolisa}";
+					$result = mysql_query($query) or die($query);
+
+					if (mysql_num_rows($result) == 0) {
+						// Laitetaan kolmanneksi merkiksi space
+						$tieto = substr($tieto, 0, 2). " ". substr($tieto, 2);
+					}
 				}
 
 				$query = "	SELECT *
 							FROM tuote
 							WHERE yhtio = '{$kukarow["yhtio"]}'
-							and tuoteno in ('$tieto', '$tuotenumero2')
-							$kieltolisa
-							ORDER BY tuoteno DESC
-							LIMIT 1";
+							and tuoteno = '{$tieto}'
+							{$kieltolisa}";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 0) {
@@ -1780,6 +1807,7 @@ while ($tietue = fgets($fd)) {
 			$lopviesti            	= "";
 			$ketjutus             	= "";
 			$editilaus_maksuehto	= "";
+			$editilaus_maksuteksti	= "";
 			$editilaus_toimitustapa = "";
 			$tilaus_hyvaksyntaan	= "";
 			$editilaus_rahtivapaa	= "";

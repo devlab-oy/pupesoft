@@ -88,7 +88,12 @@
 		$jatko = 0;
 	}
 
-    if ((mysql_field_name($result, $i) == "oletus_hyvak1") or
+	if (mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set == "KAYTTAJA") {
+		$ulos = "<td><input type='hidden' name='$nimi' value=''>".t("Matkustaja itse")."</td>";
+		$jatko = 0;
+	}
+
+    if ((mysql_field_name($result, $i) == "oletus_hyvak1" and $alias_set != "KAYTTAJA") or
     	(mysql_field_name($result, $i) == "oletus_hyvak2") or
     	(mysql_field_name($result, $i) == "oletus_hyvak3") or
     	(mysql_field_name($result, $i) == "oletus_hyvak4") or
@@ -96,7 +101,8 @@
 
 		$query = "	SELECT kuka, nimi
 					FROM kuka
-					WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and hyvaksyja = 'o'
 					ORDER BY nimi";
 		$vresult = pupe_query($query);
 
@@ -106,7 +112,7 @@
 		}
 		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kukaan")."";
 
-		while ($vrow=mysql_fetch_array($vresult)) {
+		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['kuka']) {
 				$sel = "selected";
@@ -123,7 +129,7 @@
 					FROM kuka
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND extranet = ''
-					AND hyvaksyja = 'o'
+					AND nimi != ''
 					ORDER BY nimi";
 		$vresult = pupe_query($query);
 
@@ -133,7 +139,7 @@
 		}
 		$ulos = "<td><select name='$nimi'>";
 
-		while ($vrow=mysql_fetch_array($vresult)) {
+		while ($vrow = mysql_fetch_assoc($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['kuka']) {
 				$sel = "selected";
@@ -174,10 +180,11 @@
 
 	if (mysql_field_name($result, $i) == "kohde") { //kohteet
 		$query = "	SELECT tunnus, nimi, koodi
-						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and
-						tyyppi = 'O'
-						ORDER BY nimi";
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = 'O'
+					and kaytossa != 'E'
+					ORDER BY nimi";
 		$vresult = pupe_query($query);
 
 		$sel="";
@@ -202,8 +209,9 @@
 
 		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and
-					tyyppi = 'P'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = 'P'
+					and kaytossa != 'E'
 					ORDER BY nimi";
 		$vresult = pupe_query($query);
 
@@ -488,7 +496,7 @@
 		$sel[$apu] = "selected";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Ei käytössä<")."/option>";
+		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
 		$ulos .= "<option value='editilaus_out_elma.inc' $sel[editilaus_out_elma]>".t("Elma-editilaus")."</option>";
 		$ulos .= "<option value='editilaus_out_teccom.inc' $sel[editilaus_out_teccom]>".t("TecCom-editilaus")."</option>";
 		$ulos .= "</select></td>";

@@ -850,7 +850,7 @@
 			}
 			if ($abcrajaus != "") {
 
-				echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhmäluokka tai ABC-tuotemerkkiluokka >=")." $ryhmanimet[$abcrajaus] ".t("tai sitä on jälkitoimituksessa");
+				echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhmäluokka tai ABC-tuotemerkkiluokka")."  >= $ryhmanimet[$abcrajaus] ".t("tai sitä on jälkitoimituksessa");
 
 				if ($valitut["VAINUUDETTUOTTEET"] == '' and $valitut["UUDETTUOTTEET"] == '') {
 					echo " ".t("tai tuote on perustettu viimeisen 12kk sisällä").".<br>";
@@ -2410,7 +2410,7 @@
 			$vlask = 0;
 
 			echo "<tr>";
-			echo "<th rowspan='".(mysql_num_rows($vtresult)+1)."'>".t("Varastot:")."</th>";
+			echo "<th rowspan='".(mysql_num_rows($vtresult)+1)."'>".t("Varastot").":</th>";
 			echo "<th>".t("Huomioi varaston saldo ostoehdotuksen laskennassa")."</th>";
 			echo "<th>".t("Näytä myös varaston saldo")."</th>";
 			echo "</tr>";

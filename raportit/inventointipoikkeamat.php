@@ -52,15 +52,17 @@
 
 	echo "</td></tr>";
 
-	$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
-	$vares = mysql_query($query) or pupe_error($query);
+	$query  = "	SELECT tunnus, nimitys
+				FROM varastopaikat
+				WHERE yhtio = '$kukarow[yhtio]'";
+	$vares = pupe_query($query);
 
 	echo "<tr><th valign='top'>".t('Varastot')."<br /><br />(".t('Saat kaikki varastot jos et valitse yht‰‰n').")</th>";
 	echo "<td colspan='3'>";
 
-	$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+	$varastot = (isset($_POST['varastot']) and is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
 
-    while ($varow = mysql_fetch_array($vares)) {
+    while ($varow = mysql_fetch_assoc($vares)) {
 		$sel = '';
 		if (in_array($varow['tunnus'], $varastot)) {
 			$sel = 'checked';
@@ -103,9 +105,11 @@
 
 	if ($tee == 'KORJAA') {
 
-		$query = "	SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
+		$query = "	SELECT lasku.tunnus tosite,
+					t1.tunnus varasto, t1.selite sel1, t1.kustp kustp1,  t1.kohde kohde1,  t1.projekti projekti1,
+					t2.tunnus varastonmuutos, t2.selite sel2, t2.kustp kustp2,  t2.kohde kohde2,  t2.projekti projekti2
 					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino='$yhtiorow[varasto]'
+					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino = '$yhtiorow[varasto]'
 					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
 					WHERE lasku.yhtio	= '$kukarow[yhtio]'
 					and lasku.tila     	= 'X'
@@ -113,8 +117,8 @@
 					and lasku.tapvm 	>= '$yhtiorow[tilikausi_alku]'
 					and lasku.tapvm 	<= '$yhtiorow[tilikausi_loppu]'
 					and lasku.viite    	= '$ttunnus'";
-		$kpitores = mysql_query($query) or pupe_error($query);
-		$kpitorow = mysql_fetch_array($kpitores);
+		$kpitores = pupe_query($query);
+		$kpitorow = mysql_fetch_assoc($kpitores);
 
 		if ($kpitorow["tosite"] > 0 and $kpitorow["varasto"] > 0 and $kpitorow["varastonmuutos"] > 0 and (float) $arvo != 0 and (float) $arvo != (float) $edarvo) {
 
@@ -127,19 +131,29 @@
 						where yhtio = '$kukarow[yhtio]'
 						and laji 	= 'inventointi'
 						and tunnus 	= '$ttunnus'";
-			$upresult = mysql_query($query) or pupe_error($query);
+			$upresult = pupe_query($query);
 
-			$query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varasto] AND yhtio='$kukarow[yhtio]'";
-	        $result = mysql_query($query) or pupe_error($query);
+			$query = "	UPDATE tiliointi
+						SET korjausaika = now(),
+						korjattu 		= '$kukarow[kuka]'
+						WHERE tunnus = $kpitorow[varasto]
+						AND yhtio 	 = '$kukarow[yhtio]'";
+	        $result = pupe_query($query);
 
-			$query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varastonmuutos] AND yhtio='$kukarow[yhtio]'";
-	        $result = mysql_query($query) or pupe_error($query);
+			$query = "	UPDATE tiliointi
+						SET korjausaika = now(),
+						korjattu 		= '$kukarow[kuka]'
+						WHERE tunnus = $kpitorow[varastonmuutos]
+						AND yhtio 	 = '$kukarow[yhtio]'";
+	        $result = pupe_query($query);
 
-			$query = " INSERT into tiliointi set
+			$query = " 	INSERT into tiliointi set
 						yhtio    = '$kukarow[yhtio]',
 						ltunnus  = '$kpitorow[tosite]',
 						tilino   = '$yhtiorow[varasto]',
-						kustp    = 0,
+						kustp    = '$kpitorow[kustp1]',
+						kohde	 = '$kpitorow[kohde1]',
+						projekti = '$kpitorow[projekti1]',
 						tapvm    = '$tapvm',
 						summa    = '$arvo',
 						vero     = 0,
@@ -147,13 +161,15 @@
 						selite   = 'KORJATTU: $kpitorow[sel1]',
 						laatija  = '$kukarow[kuka]',
 						laadittu = now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
-			$query = "INSERT into tiliointi set
+			$query = "	INSERT into tiliointi set
 						yhtio    = '$kukarow[yhtio]',
 						ltunnus  = '$kpitorow[tosite]',
 						tilino   = '$yhtiorow[varastonmuutos]',
-						kustp    = 0,
+						kustp    = '$kpitorow[kustp2]',
+						kohde	 = '$kpitorow[kohde2]',
+						projekti = '$kpitorow[projekti2]',
 						tapvm    = '$tapvm',
 						summa    = $arvo * -1,
 						vero     = 0,
@@ -161,7 +177,7 @@
 						selite   = 'KORJATTU: $kpitorow[sel2]',
 						laatija  = '$kukarow[kuka]',
 						laadittu = now()";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			echo "<font class='message'>".t("Inventointi korjattu")."!</font><br><br>";
 		}
@@ -175,7 +191,7 @@
 
 		$query = "	SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
 					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino='$yhtiorow[varasto]'
+					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino = '$yhtiorow[varasto]'
 					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
 					WHERE lasku.yhtio	= '$kukarow[yhtio]'
 					and lasku.tila     	= 'X'
@@ -183,8 +199,8 @@
 					and lasku.tapvm 	>= '$yhtiorow[tilikausi_alku]'
 					and lasku.tapvm 	<= '$yhtiorow[tilikausi_loppu]'
 					and lasku.viite    	= '$ttunnus'";
-		$kpitores = mysql_query($query) or pupe_error($query);
-		$kpitorow = mysql_fetch_array($kpitores);
+		$kpitores = pupe_query($query);
+		$kpitorow = mysql_fetch_assoc($kpitores);
 
 		if ($kpitorow["tosite"] > 0 and $kpitorow["varasto"] > 0 and $kpitorow["varastonmuutos"] > 0) {
 
@@ -196,13 +212,13 @@
 						where yhtio = '$kukarow[yhtio]'
 						and laji 	= 'inventointi'
 						and tunnus 	= '$ttunnus'";
-			$upresult = mysql_query($query) or pupe_error($query);
+			$upresult = pupe_query($query);
 
 			$query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varasto] AND yhtio='$kukarow[yhtio]'";
-	        $result = mysql_query($query) or pupe_error($query);
+	        $result = pupe_query($query);
 
 			$query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varastonmuutos] AND yhtio='$kukarow[yhtio]'";
-	        $result = mysql_query($query) or pupe_error($query);
+	        $result = pupe_query($query);
 
 			$query = "	UPDATE sarjanumeroseuranta
 						SET myyntirivitunnus = 0,
@@ -214,7 +230,7 @@
 						and inventointitunnus	= $ttunnus
 						and myyntirivitunnus 	= -1
 						and siirtorivitunnus 	= -1";
-	        $result = mysql_query($query) or pupe_error($query);
+	        $result = pupe_query($query);
 
 			$query = "	UPDATE tuotepaikat
 						SET saldo = saldo-$kpl,
@@ -226,7 +242,7 @@
 						and hyllytaso = '$hyllytaso'
 						and hyllyvali = '$hyllyvali'
 						LIMIT 1";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			echo "$query<br>";
 
@@ -238,7 +254,7 @@
 							and tuoteno	= '$tuoteno'
 							and oletus != ''
 							LIMIT 1";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 
 			echo "<font class='message'>".t("Inventointi peruttu")."!</font><br><br>";
@@ -347,7 +363,7 @@
 						$tuote_lisa
 						$lisa_vamu
 						ORDER BY tuote.tuoteno, sorttauskentta";
-			$saldoresult = mysql_query($query) or pupe_error($query);
+			$saldoresult = pupe_query($query);
 
 			if (mysql_num_rows($saldoresult) == 0) {
 				echo "<font class='error'>".t("Yht‰‰n tuotetta ei lˆytynyt")."!</font><br><br>";
@@ -360,7 +376,7 @@
 				echo "<th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("M‰‰r‰")."</th><th>".t("Poikkeamaprosentti")." %</th>";
 				echo "</tr>";
 
-				while ($tuoterow = mysql_fetch_array($saldoresult)) {
+				while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
 					echo "<tr><th colspan='5'>$tuoterow[tuoteno]</th></tr>";
 
 					echo "<td>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td>".tv1dateconv($tuoterow["laadittu"], "P")."</td><td>$tuoterow[kpl]</td><td>$tuoterow[inventointipoikkeama]</td></tr>";
@@ -369,13 +385,13 @@
 
 					$query = "	SELECT sum(tiliointi.summa) summa
 								FROM lasku use index (yhtio_tila_tapvm)
-								JOIN tiliointi ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu='' and tiliointi.tilino='$yhtiorow[varasto]'
+								JOIN tiliointi ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino = '$yhtiorow[varasto]'
 								WHERE lasku.yhtio	= '$kukarow[yhtio]'
 								and lasku.tila     	= 'X'
 								and lasku.tapvm     = '$tuoterow[tapvm]'
 								and lasku.viite    	= '$tuoterow[ttunnus]'";
-					$kpitores = mysql_query($query) or pupe_error($query);
-					$kpitorow = mysql_fetch_array($kpitores);
+					$kpitores = pupe_query($query);
+					$kpitorow = mysql_fetch_assoc($kpitores);
 
 					preg_match("/ \(([0-9\.\-]*?)\) /", $tuoterow["selite"], $invkpl);
 
@@ -390,9 +406,9 @@
 									and myyntirivitunnus 	= '-1'
 									and siirtorivitunnus	= '-1'
 									and inventointitunnus	= '$tuoterow[ttunnus]'";
-						$sarjares = mysql_query($query) or pupe_error($query);
+						$sarjares = pupe_query($query);
 
-						while ($sarjarow = mysql_fetch_array($sarjares)) {
+						while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 							echo "<tr><td>".t("Snro").": </td><td colspan='4'>$sarjarow[sarjanumero]</td></tr>";
 						}
 					}
@@ -507,7 +523,7 @@
 			$rivit = 1;
 			$arvoyht = 0;
 
-			while ($row = mysql_fetch_array($saldoresult)) {
+			while ($row = mysql_fetch_assoc($saldoresult)) {
 				if ($rivit >= 19) {
 					fwrite($fh, $ots);
 					$rivit = 1;
@@ -521,8 +537,8 @@
 				$query = "	SELECT sum(varattu) varattu, min(toimaika) toimaika
 							FROM tilausrivi
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and varattu>0 and tyyppi='O'";
-				$result1 = mysql_query($query) or pupe_error($query);
-				$prow    = mysql_fetch_array($result1);
+				$result1 = pupe_query($query);
+				$prow    = mysql_fetch_assoc($result1);
 
 				if ($row["inventointiaika"]=='0000-00-00 00:00:00') {
 					$row["inventointiaika"] = t("Ei inventoitu");
@@ -588,5 +604,5 @@
 		}
 	}
 
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 ?>

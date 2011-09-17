@@ -41,8 +41,13 @@
 			echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
 		}
 
-		echo "	<th align='left'>".t("Netto")."</th>
-				<td valign='top' class='back'></td>
+		echo "	<th align='left'>".t("Netto")."</th>";
+
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+			echo "<th align='left'>",t("Omalle tilaukselle"),"</th>";
+		}
+
+		echo "	<td valign='top' class='back'></td>
 				</tr>";
 
 		echo "<tr>$jarjlisa";
@@ -88,8 +93,13 @@
 			echo "</td>";
 		}
 
-		echo "	<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
-				<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
+		echo "	<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>";
+
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+			echo "<td><input type='text' name='omalle_tilaukselle' size='2' maxlength='1' value='{$omalle_tilaukselle}' /></td>";
+		}
+
+		echo "	<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
 				<td valign='top' class='back'>
 				<input type='hidden' name='perheid' value = '$perheid'>
 				<input type='hidden' name='perheid2' value = '$perheid2'>
@@ -121,7 +131,7 @@
 			echo "<th align='left' colspan='$nrospanni'>".t("Toimitusaika")."</th>";
 
 			if ($yhtiorow['rivinumero_syotto'] != '') {
-				echo "<th align='left'>".t("Rivinumero")."</th>";
+				echo "<th align='left'>".t("Rivinro")."</th>";
 			}
 
 			echo "</tr>";
@@ -190,7 +200,11 @@
 				$nrospanni2 = 6;
 
 				$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
-
+				
+				if ($yhtiorow['rivinumero_syotto'] != '') {
+					$nrospanni2++;
+				}
+				
 				echo "<tr>{$jarjlisa}
 						<th colspan='{$nrospanni2}' align='left'>",t("Tuotteen nimitys"),"</th>
 						</tr><tr>{$jarjlisa}
@@ -235,6 +249,10 @@
 
 		echo "	<th align='left'>".t("Netto")."</th>
 				<th align='left'>".t("Alv")."</th>";
+
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+			echo "<th align='left'>",t("Omalle tilaukselle"),"</th>";
+		}
 
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<th align='left'></th>";
@@ -325,7 +343,7 @@
 		echo "<option value='E' $chke>".t("E-Netto")."</option>";
 		echo "</select></td>";
 
-		//Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv 
+		//Jos meill‰ on marginaalimyynti‰/k‰‰nteinen alv
 		if (isset($alv) and $alv >= 500) {
 			echo "<td valign='top'>";
 
@@ -340,6 +358,15 @@
 		}
 		else {
 			echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
+		}
+
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+			$sel = (isset($omalle_tilaukselle) and trim($omalle_tilaukselle) != '') ? ' selected' : '';
+
+			echo "<td><select name='omalle_tilaukselle'>";
+			echo "<option value=''>",t("Ei"),"</option>";
+			echo "<option value='K'{$sel}>",t("Kyll‰"),"</option>";
+			echo "</select></td>";
 		}
 
 		if ($yhtiorow['rivinumero_syotto'] != '') {
@@ -357,9 +384,14 @@
 			echo "<th></th>";
 		}
 
-		echo "	<th align='left'>".t("Ker‰ysaika")."</th>
-				<th align='left' colspan='2'>".t("Toimitusaika")."</th>";
-
+		if ($toim != "YLLAPITO") {
+			echo "<th align='left'>".t("Ker‰ysaika")."</th>";
+			echo "<th align='left' colspan='2'>".t("Toimitusaika")."</th>";
+		}
+		else {
+			echo "<th align='left'>".t("Poikkeava Alkup‰iv‰")."</th>";
+			echo "<th align='left' colspan='2'>".t("Poikkeava Loppup‰iv‰")."</th>";
+		}
 
 		if ($kukarow['hinnat'] == 0) {
 			$nrospanni = 4;
@@ -368,12 +400,16 @@
 			$nrospanni = 3;
 		}
 
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+			$nrospanni++;
+		}
+	
 		$nrospanni += $yhtiorow['myynnin_alekentat'] - 1;
 
 		echo "<th colspan='$nrospanni' align='left'>".t("Kommentti")."</th>";
 
 		if ($yhtiorow['rivinumero_syotto'] != '') {
-			echo "<th align='left'>".t("Rivinumero")."</th>";
+			echo "<th align='left'>".t("Rivinro")."</th>";
 		}
 
 		echo "<td valign='top' class='back'></td></tr>";
@@ -383,34 +419,60 @@
 			echo "<td></td>";
 		}
 
-		if ($toimaika == "" or $toimaika == "0000-00-00") {
-			$toimaika = $laskurow["toimaika"];
-		}
+		if ($toim != "YLLAPITO") {
+			if ($toimaika == "" or $toimaika == "0000-00-00") {
+				$toimaika = $laskurow["toimaika"];
+			}
 
-		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
-			$kerayspvm = $laskurow["kerayspvm"];
-		}
+			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+				$kerayspvm = $laskurow["kerayspvm"];
+			}
 
-		if ($toimaika == "" or $toimaika == "0000-00-00") {
-			$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-			$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-			$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			if ($toimaika == "" or $toimaika == "0000-00-00") {
+				$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			}
+			else {
+				$toimkka = substr($toimaika, 5, 2);
+				$toimvva = substr($toimaika, 0, 4);
+				$toimppa = substr($toimaika, 8, 2);
+			}
+
+			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+				$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			}
+			else {
+				$kerayskka = substr($kerayspvm, 5, 2);
+				$keraysvva = substr($kerayspvm, 0, 4);
+				$keraysppa = substr($kerayspvm, 8, 2);
+			}
 		}
 		else {
-			$toimkka = substr($toimaika, 5, 2);
-			$toimvva = substr($toimaika, 0, 4);
-			$toimppa = substr($toimaika, 8, 2);
-		}
+			// Yll‰pitosoppareissa toimaika tarkoittaa poikkeavaa sopimuksen alkup‰iv‰‰ ja ker‰yspvm poikkeavaa loppup‰iv‰‰
+			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+				$kerayskka = "";
+				$keraysvva = "";
+				$keraysppa = "";
+			}
+			else {
+				$kerayskka = substr($kerayspvm, 5, 2);
+				$keraysvva = substr($kerayspvm, 0, 4);
+				$keraysppa = substr($kerayspvm, 8, 2);
+			}
 
-		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
-			$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-			$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-			$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-		}
-		else {
-			$kerayskka = substr($kerayspvm, 5, 2);
-			$keraysvva = substr($kerayspvm, 0, 4);
-			$keraysppa = substr($kerayspvm, 8, 2);
+			if ($toimaika == "" or $toimaika == "0000-00-00") {
+				$toimkka = "";
+				$toimvva = "";
+				$toimppa = "";
+			}
+			else {
+				$toimkka = substr($toimaika, 5, 2);
+				$toimvva = substr($toimaika, 0, 4);
+				$toimppa = substr($toimaika, 8, 2);
+			}
 		}
 
 		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
@@ -426,6 +488,10 @@
 			$nrospanni2 = 7;
 
 			$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
+			
+			if ($yhtiorow['rivinumero_syotto'] != '') {
+				$nrospanni2++;
+			}
 
 			echo "</tr>
 				<tr>$jarjlisa
@@ -436,6 +502,24 @@
 		}
 
 		echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
+
+		if ($toim == "YLLAPITO") {
+
+			// Katsotaan halutaanko dynaamisia kentti‰ n‰kyviin
+			$yllapito_dynamic_result = t_avainsana("SOPIMUS_KENTTA","", "and avainsana.selitetark != ''");
+
+			if (mysql_num_rows($yllapito_dynamic_result) > 0) {
+				echo "</td></tr><tr><td colspan='7'>";
+				echo "<table>";
+				echo "<tr>";
+				while ($yllapito_dynamic_row = mysql_fetch_assoc($yllapito_dynamic_result)) {
+					echo "<th>{$yllapito_dynamic_row["selitetark"]}</th>";
+					echo "<td><textarea name='{$yllapito_dynamic_row["selite"]}' cols='32' rows='4' wrap='soft'>".${$yllapito_dynamic_row["selite"]}."</textarea></td>";
+				}
+				echo "</tr>";
+				echo "</table>";
+			}
+		}
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {

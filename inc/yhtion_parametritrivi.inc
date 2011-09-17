@@ -2449,6 +2449,7 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = '0' $sel[0]>".t("Normaali tarjouspohja");
+		$ulos .= "<option value = '2' $sel[2]>".t("Normaali tarjouspohja ei ALV");
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty tarjouspohja");
 		$ulos .= "</select></td>";
 
@@ -2777,6 +2778,20 @@
 		$ulos .= "<option value = ''>".t("N‰ytet‰‰n jos miss‰‰n varastossa ei ole saldoa");
 		$ulos .= "<option value = 'A' $sel[A]>".t("Seuraava saapuminen n‰ytet‰‰n aina");
 		$ulos .= "<option value = 'B' $sel[B]>".t("N‰ytet‰‰n jos normivarastossa ei saldoa");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	// t‰ll‰ ominaisuudella voidaan yhdest‰ tilausrivist‰ tehd‰ monta tilausta
+	// jos tilausrivill‰ on kappaleena 5, niin siint‰ tehd‰‰n 5 tilausta ja kussakin tilauksessa yksi kappale kyseist‰ tuotetta
+	if (mysql_field_name($result, $i) == "tilausrivi_omalle_tilaukselle") {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? " selected" : '';
+
+		$ulos .= "<option value = ''>".t("Myynniss‰ tilausrivi‰ ei voi pakottaa uudelle tilaukselle")."</option>";
+		$ulos .= "<option value = 'K'{$sel}>".t("Myynniss‰ tilausrivin voi pakottaa uudelle tilaukselle")." (".t("tilaus per kpl").")</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

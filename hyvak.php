@@ -10,6 +10,19 @@
 
 	enable_ajax();
 
+	if (!isset($tee)) 			$tee = "";
+	if (!isset($tila)) 			$tila = "";
+	if (!isset($keikalla)) 		$keikalla = "";
+	if (!isset($kutsuja)) 		$kutsuja = "";
+	if (!isset($tunnus))		$tunnus = "";
+	if (!isset($nayta)) 		$nayta = "";
+	if (!isset($iframe)) 		$iframe = "";
+	if (!isset($iframe_id)) 	$iframe_id = "";
+	if (!isset($naytalisa)) 	$naytalisa = "";
+	if (!isset($ok)) 			$ok = "";
+	if (!isset($toimittajaid)) 	$toimittajaid = "";
+	if (!isset($livesearch_tee)) $livesearch_tee = "";
+
 	if ($livesearch_tee == "TILIHAKU") {
 		livesearch_tilihaku();
 		exit;
@@ -20,11 +33,10 @@
 	require_once ("inc/tilinumero.inc");
 
 	if ($keikalla == "on") {
-
 		//	Täällä haetaan laskurow aika monta kertaa, joskus voisi tehdä recodea?
 		$query = "	SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-		$abures = mysql_query($query) or pupe_error($query);
-		$laskurow = mysql_fetch_array($abures);
+		$abures = pupe_query($query);
+		$laskurow = mysql_fetch_assoc($abures);
 
 		//	Meillä on oikea toimittajaid
 		if ($tee == "haekeikka") {
@@ -40,11 +52,11 @@
 
 				$PHP_SELF = "javascript:ajaxPost('kevyt_toimittajahaku', '{$palvelin2}hyvak.php?', 'keikka', '', '', '', 'post');";
 
-				require ("inc/kevyt_toimittajahaku.inc"); 
+				require ("inc/kevyt_toimittajahaku.inc");
 			}
 
 			if ($toimittajaid != "") {
-				echo "<table><tr><th>".t("Valittu toimittaja")."</th><td>$toimittajarow[nimi] $toimittajarow[osoite] $toimittajarow[postino] $toimittajarow[postitp] ($toimittajarow[ytunnus])</td><td class='back'><a href = 'javascript:sndReq(\"keikka\", \"{$palvelin2}hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus&toimittajaid=\");'>Vaihda toimittaja</a></td></tr></table><br>";
+				echo "<table><tr><th>".t("Valittu toimittaja")."</th><td>$toimittajarow[nimi] $toimittajarow[osoite] $toimittajarow[postino] $toimittajarow[postitp] (".tarkistahetu($toimittajarow["ytunnus"]).")</td><td class='back'><a href = 'javascript:sndReq(\"keikka\", \"{$palvelin2}hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus&toimittajaid=\");'>Vaihda toimittaja</a></td></tr></table><br>";
 
 				//	Listataan keikat
 				$query = "	SELECT comments, lasku.tunnus otunnus, lasku.laskunro keikka, sum(tilausrivi.rivihinta) varastossaarvo, count(distinct tilausrivi.tunnus) kpl, sum(if (kpl = 0, 0, 1)) varastossa
@@ -57,7 +69,7 @@
 							and lasku.vanhatunnus = 0
 							GROUP BY lasku.laskunro
 							ORDER BY lasku.luontiaika";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
 					//	Haetaan vientitieto..
@@ -71,7 +83,7 @@
 						echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
 						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th></tr>";
 
-						while($row = mysql_fetch_array($result)) {
+						while($row = mysql_fetch_assoc($result)) {
 							echo "<tr><td>$row[keikka]</td><td>$row[comments]</td><td align='right'>$row[kpl]/$row[varastossa]</td><td align='right'>$row[varastossaarvo]</td><td>";
 							echo "<input type='text' name='liita[".$row["otunnus"]."][liitasumma]' value='$liitasumma' size='10'>";
 							echo "</td></tr>";
@@ -80,7 +92,7 @@
 					}
 					else {
 						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th></tr>";
-						while($row = mysql_fetch_array($result)) {
+						while($row = mysql_fetch_assoc($result)) {
 
 							$query = "	SELECT sum(summa) summa
 										from tiliointi
@@ -88,8 +100,8 @@
 										and ltunnus	= '$tunnus'
 										and tilino  = '$yhtiorow[alv]'
 										and korjattu = ''";
-							$alvires = mysql_query($query) or pupe_error($query);
-							$alvirow = mysql_fetch_array($alvires);
+							$alvires = pupe_query($query);
+							$alvirow = mysql_fetch_assoc($alvires);
 							$summa_kaytettavissa = round((float) $laskurow["summa"] - (float) $alvirow["summa"], 2);
 
 							echo "<tr><td>$row[keikka]</td><td>$row[comments]</td><td align='right'>$row[kpl]/$row[varastossa]</td><td align='right'>$row[varastossaarvo]</td>";
@@ -179,10 +191,10 @@
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus = '$tunnus'";
-		$check_res = mysql_query($query) or pupe_error($query);
+		$check_res = pupe_query($query);
 
 		if (mysql_num_rows($check_res) == 1) {
-			$check_row = mysql_fetch_array($check_res);
+			$check_row = mysql_fetch_assoc($check_res);
 
 			// jos ensimmäinen hyväksyjä on tää käyttäjä ja ei olla vielä hyväksytty
 			if ($check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
@@ -192,13 +204,13 @@
 	}
 
 	// halutaan nähdä otsikko, tai ollaan eka hyväksyjä ja ei olla hyväksymässä laskua
-	if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D' and ($kukarow['taso'] == '2' or $kukarow["taso"] == '3'))) {
+	if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D' and $tee != 'Z' and ($kukarow['taso'] == '2' or $kukarow["taso"] == '3'))) {
 		$query = "	SELECT *
 					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]'
 					and yhtio = '$kukarow[yhtio]'
 					and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
@@ -206,13 +218,15 @@
 			exit;
 		}
 
-		$trow = mysql_fetch_array ($result);
+		$trow = mysql_fetch_assoc($result);
 
 		if ($trow['hyvak1'] == $kukarow['kuka']) {
-			$hyvak_apu_tee = $tee;
+			$hyvak_apu_tee  = $tee;
 			$hyvak_apu_tila = $tila;
+
 			require ("inc/muutosite.inc");
-			$tee = $hyvak_apu_tee;
+
+			$tee  = $hyvak_apu_tee;
 			$tila = $hyvak_apu_tila;
 		}
 	}
@@ -225,7 +239,7 @@
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
 					yhtio = '$kukarow[yhtio]' and
 					tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
@@ -234,7 +248,7 @@
 			exit;
 		}
 
-		$trow = mysql_fetch_array ($result);
+		$trow = mysql_fetch_assoc ($result);
 
 		if ($trow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"] or ($trow["tapvm"]=="0000-00-00" and $trow["laskutyyppi"] == "M")) {
 
@@ -247,7 +261,7 @@
 						WHERE ltunnus = '$tunnus' and
 						yhtio = '$kukarow[yhtio]' and
 						tiliointi.korjattu = ''";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// Merkataan lasku poistetuksi
 			$query = "	UPDATE lasku SET
@@ -256,7 +270,7 @@
 						comments = '$komm'
 						WHERE tunnus = '$tunnus' and
 						yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'], $tunnus)."</font><br>";
 		}
@@ -275,11 +289,11 @@
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
 					yhtio = '$kukarow[yhtio]' and
 					tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		if (mysql_num_rows($result) == 0) {
 			die(t("Lasku kateissa"));
 		}
-		$lrow = mysql_fetch_array($result);
+		$lrow = mysql_fetch_assoc($result);
 
 		if ($viesti == "" or (int) $hyvaksyja == 0) {
 
@@ -296,7 +310,7 @@
 
 
 			//	Valitse kenelle palautetaan
-			for($i=1;$i<5;$i++) {
+			for ($i=1; $i<5; $i++) {
 				$haika	= "h".$i."time";
 				$haiku	= "hyvak".$i;
 
@@ -304,9 +318,10 @@
 
 					$query = "	SELECT nimi
 								FROM kuka
-								WHERE yhtio = '$kukarow[yhtio]' and kuka = '".$lrow[$haiku]."'";
-					$result = mysql_query($query) or pupe_error($query);
-					$krow = mysql_fetch_array($result);
+								WHERE yhtio = '$kukarow[yhtio]'
+								and kuka = '{$lrow[$haiku]}'";
+					$result = pupe_query($query);
+					$krow = mysql_fetch_assoc($result);
 
 					if ($hyvaksyja == $i) {
 						$sel = "checked";
@@ -314,18 +329,14 @@
 					else {
 						$sel = "";
 					}
-					$hyvaksyjat .= "
-									<tr>
-										<td><input type='radio' name='hyvaksyja' value='$i' $sel> $i. $krow[nimi]</td>
-									</tr>";
+
+					$hyvaksyjat .= "<tr><td><input type='radio' name='hyvaksyja' value='$i' $sel> $i. $krow[nimi]</td></tr>";
 				}
 			}
 
-			$hyvaksyjat .= "
-			</table><br>";
+			$hyvaksyjat .= "</table><br>";
 
-			echo "
-					<form action = '$PHP_SELF' method='post'>
+			echo "	<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='tee' value='$tee'>
 					<input type='hidden' name='formilta' value='true'>
@@ -364,15 +375,15 @@
 			$query = "	SELECT *
 						FROM kuka
 						WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukahyvak'";
-			$result = mysql_query($query) or pupe_error($query);
-			$krow = mysql_fetch_array($result);
+			$result = pupe_query($query);
+			$krow = mysql_fetch_assoc($result);
 
 			// Merkataan lasku poistetuksi
 			$query = "	UPDATE lasku SET
 						$upd
 						WHERE tunnus = '$tunnus' and
 						yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			echo "<font class='message'>".t('Palauttettiin lasku käyttäjälle')." $krow[nimi]</font><br>";
 
@@ -400,7 +411,7 @@
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
 					yhtio = '$kukarow[yhtio]' and
 					tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
@@ -415,18 +426,18 @@
 		}
 		echo "</tr>";
 
-		$trow = mysql_fetch_array ($result);
+		$trow = mysql_fetch_assoc($result);
 
 		echo "<tr>";
 
 		for ($i=1; $i<mysql_num_fields($result); $i++) {
 			if ($i == mysql_num_fields($result)-1) {
-				if ($trow[$i] != "") {
-					echo "<tr><td colspan='".mysql_num_fields($result)."'><font class='error'>$trow[$i]</font></td>";
+				if ($trow[mysql_field_name($result, $i)] != "") {
+					echo "<tr><td colspan='".mysql_num_fields($result)."'><font class='error'>".$trow[mysql_field_name($result,$i)]."</font></td>";
 				}
 			}
 			else {
-				echo "<td>$trow[$i]</td>";
+				echo "<td>".$trow[mysql_field_name($result,$i)]."</td>";
 			}
 		}
 
@@ -454,7 +465,7 @@
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
 					yhtio = '$kukarow[yhtio]' and
 					tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
@@ -463,12 +474,12 @@
 			exit;
 		}
 
-		$trow = mysql_fetch_array($result);
+		$trow = mysql_fetch_assoc($result);
 
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") " . trim($komm) . "<br>" . $trow['comments'];
 
 		$query = "UPDATE lasku set comments = '$komm', alatila='H' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$tunnus = '';
 		$tee = '';
@@ -481,7 +492,7 @@
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]'
 					and yhtio = '$kukarow[yhtio]'
 					and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) !=1 ) {
 			echo t('lasku kateissa') . "$tunnus</font>";
@@ -490,12 +501,12 @@
 			exit;
 		}
 
-		$trow = mysql_fetch_array($result);
+		$trow = mysql_fetch_assoc($result);
 
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") " . trim($komm) . "<br>" . $trow['comments'];
 
 		$query = "UPDATE lasku set comments = '$komm' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$tee = '';
 	}
@@ -507,7 +518,7 @@
 					WHERE tunnus='$tunnus' and
 					yhtio = '$kukarow[yhtio]' and
 					hyvaksyja_nyt='$kukarow[kuka]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus<br>".t('Paina reload nappia')."</font>";
@@ -516,7 +527,7 @@
 			exit;
 		}
 
-		$laskurow = mysql_fetch_array($result);
+		$laskurow = mysql_fetch_assoc($result);
 
 		if ($laskurow['hyvak1'] != $laskurow['hyvaksyja_nyt'] or $laskurow['hyvaksynnanmuutos'] == '') {
 			echo pupe_eror('lasku on väärässä tilassa');
@@ -526,12 +537,13 @@
 		}
 
 		$query = "	UPDATE lasku SET
-					hyvak2='$hyvak[2]',
-					hyvak3='$hyvak[3]',
-					hyvak4='$hyvak[4]',
-					hyvak5='$hyvak[5]'
-                    WHERE yhtio = '$kukarow[yhtio]'  and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+					hyvak2 = '$hyvak[2]',
+					hyvak3 = '$hyvak[3]',
+					hyvak4 = '$hyvak[4]',
+					hyvak5 = '$hyvak[5]'
+                    WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$tunnus'";
+		$result = pupe_query($query);
 
 		$tee = '';
 
@@ -550,7 +562,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and
 					tunnus = '$tunnus' and
 					hyvaksyja_nyt = '$kukarow[kuka]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) !=1 ) {
 			echo t('lasku kateissa') . "$tunnus<br>".t('Paina reload nappia')."</font>";
@@ -559,23 +571,23 @@
 			exit;
 		}
 
-		$laskurow = mysql_fetch_array($result);
+		$laskurow = mysql_fetch_assoc($result);
 
 		//	Jos tehdään matkalaskun ensimmäinen hyväksyntä..
 		if ($laskurow["tilaustyyppi"] == "M" and $laskurow["h1time"]=="0000-00-00 00:00:00") {
 
 			$query = "select * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-			$toimires = mysql_query($query) or pupe_error($query);
-			$toimirow = mysql_fetch_array($toimires);
+			$toimires = pupe_query($query);
+			$toimirow = mysql_fetch_assoc($toimires);
 
 			//	Päivitetään tapvm ja viesti laskulle
 			$viesti = t("Matkalasku")." ".date("d").".".date("m").".".date("Y");
 			$query = " update lasku set tapvm=now(), erpcm=DATE_ADD(now(), INTERVAL $toimirow[oletus_erapvm] DAY), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
-			$updres = mysql_query($query) or pupe_error($query);
+			$updres = pupe_query($query);
 
 			//	Päivitetään tiliöintien tapvm as well
 			$query = " update tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tunnus'";
-			$updres = mysql_query($query) or pupe_error($query);
+			$updres = pupe_query($query);
 
 		}
 
@@ -632,19 +644,19 @@
 	        	if ($laskurow['suoraveloitus'] != '') {
 
 	        		// Jotta tiedämme seuraavan tilan pitää tutkia toimittajaa
-	        		$tila='Q';
+	        		$tila = 'Q';
 	        		$viesti = t("Suoraveloituslasku odottaa nyt suorituksen kuittausta");
 
 					// #TODO eikö tässä pitäisi olla liitostunnus?!?
 	        		$query = "	SELECT *
 								FROM toimi
-								WHERE yhtio='$kukarow[yhtio]' and
-								ytunnus = '$laskurow[ytunnus]'";
-					$result = mysql_query($query) or pupe_error($query);
+								WHERE yhtio = '$kukarow[yhtio]'
+								and ytunnus = '$laskurow[ytunnus]'";
+					$result = pupe_query($query);
 
 					// Toimittaja löytyi
 					if (mysql_num_rows($result) > 0) {
-						$toimirow = mysql_fetch_array($result);
+						$toimirow = mysql_fetch_assoc($result);
 
 						if ($toimirow['oletus_suoravel_pankki'] > 0) {
 							$tila = 'Y';
@@ -671,7 +683,7 @@
 			 		alatila = '',
 					mapvm='$mapvm'
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<br><font class='message'>'$laskurow[hyvaksyja_nyt]' ".t("hyväksyi laskun")." $viesti</font><br><br>";
 
@@ -685,7 +697,7 @@
 					FROM tiliointi
 					WHERE tunnus = '$ptunnus' and
 					yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo t("Tiliöintiä ei löydy")."! $query";
@@ -694,7 +706,7 @@
 			exit;
 		}
 
-		$tiliointirow = mysql_fetch_array($result);
+		$tiliointirow = mysql_fetch_assoc($result);
 
 		$tili		= $tiliointirow['tilino'];
 		$kustp		= $tiliointirow['kustp'];
@@ -708,33 +720,34 @@
 		$ok = 1;
 
 		// Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
-		$query = "	SELECT sum(summa)
+		$query = "	SELECT sum(summa) summa
 					FROM tiliointi
 					WHERE aputunnus = '$ptunnus' and
 					yhtio = '$kukarow[yhtio]' and
 					korjattu = ''
 					GROUP BY aputunnus";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 0) {
-			$summarow = mysql_fetch_array($result);
-			$summa += $summarow[0];
+			$summarow = mysql_fetch_assoc($result);
+			$summa += $summarow["summa"];
 
 			$query = "	UPDATE tiliointi SET
-						korjattu = '$kukarow[kuka]',
+						korjattu 	= '$kukarow[kuka]',
 						korjausaika = now()
-						WHERE aputunnus = '$ptunnus' and
-						yhtio = '$kukarow[yhtio]' and
-						korjattu = ''";
-			$result = mysql_query($query) or pupe_error($query);
+						WHERE aputunnus = '$ptunnus'
+						and yhtio = '$kukarow[yhtio]'
+						and korjattu = ''";
+			$result = pupe_query($query);
 		}
 
 		$query = "	UPDATE tiliointi SET
-					korjattu = '$kukarow[kuka]',
+					korjattu 	= '$kukarow[kuka]',
 					korjausaika = now()
-					WHERE tunnus = '$ptunnus' and
-					yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+					WHERE tunnus = '$ptunnus'
+					and yhtio = '$kukarow[yhtio]'";
+		$result = pupe_query($query);
+
 		$tee = "E"; // Näytetään miltä tosite nyt näyttää
 	}
 
@@ -744,7 +757,7 @@
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo t("Laskua ei enää löydy! Systeemivirhe!");
@@ -753,19 +766,22 @@
 			exit;
 		}
 
-		$laskurow = mysql_fetch_array($result);
+		$laskurow = mysql_fetch_assoc($result);
 
-		$summa 		= str_replace ( ",", ".", $summa);
-		$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
-		$tositetila = $laskurow["tila"];
-		$tositeliit = $laskurow["liitostunnus"];
+		$summa 			= str_replace ( ",", ".", $summa);
+		$selausnimi 	= 'tili'; // Minka niminen mahdollinen popup on?
+		$tositetila 	= $laskurow["tila"];
+		$tositeliit 	= $laskurow["liitostunnus"];
+		$kustp_tark		= $kustp;
+		$kohde_tark		= $kohde;
+		$projekti_tark	= $projekti;
 
 		require ("inc/tarkistatiliointi.inc");
 
 		$tiliulos = $ulos;
 
  		// Tarvitaan kenties tositenro
-		if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
+		if (isset($kpexport) and $kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 
 			if ($tositenro != 0) {
 				$query = "	SELECT tosite
@@ -773,7 +789,7 @@
 							WHERE yhtio = '$kukarow[yhtio]' and
 							ltunnus = '$tunnus' and
 							tosite = '$tositenro'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) == 0) {
 					echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
@@ -787,13 +803,14 @@
 				// Tälle saamme tositenron ostoveloista
 				if ($laskurow['tapvm'] == $tiliointipvm) {
 
-					$query = "	SELECT tosite FROM tiliointi
-								WHERE yhtio = '$kukarow[yhtio]' and
-								ltunnus = '$tunnus' and
-								tapvm = '$tiliointipvm' and
-								tilino = '$yhtiorow[ostovelat]' and
-								summa = round($laskurow[summa] * $laskurow[vienti_kurssi],2) * -1";
-					$result = mysql_query($query) or pupe_error($query);
+					$query = "	SELECT tosite
+								FROM tiliointi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and ltunnus = '$tunnus'
+								and tapvm 	= '$tiliointipvm'
+								and tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
+								and summa 	= round($laskurow[summa] * $laskurow[vienti_kurssi],2) * -1";
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 0) {
 						echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
@@ -802,20 +819,21 @@
 						exit;
 					}
 
-					$tositerow = mysql_fetch_array ($result);
+					$tositerow = mysql_fetch_assoc($result);
 					$tositenro = $tositerow['tosite'];
 				}
 
  				// Tälle saamme tositenron ostoveloista
 				if ($laskurow['mapvm'] == $tiliointipvm) {
 
-					$query = "	SELECT tosite FROM tiliointi
-								WHERE yhtio = '$kukarow[yhtio]' and
-								ltunnus = '$tunnus' and
-								tapvm = '$tiliointipvm' and
-								tilino = '$yhtiorow[ostovelat]' and
-								summa = round($laskurow[summa] * $laskurow[vienti_kurssi],2)";
-					$result = mysql_query($query) or pupe_error($query);
+					$query = "	SELECT tosite
+								FROM tiliointi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and ltunnus = '$tunnus'
+								and tapvm 	= '$tiliointipvm'
+								and tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
+								and summa 	= round($laskurow[summa] * $laskurow[vienti_kurssi],2)";
+					$result = pupe_query($query);
 
 					if (mysql_num_rows($result) == 0) {
 						echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
@@ -824,7 +842,7 @@
 						exit;
 					}
 
-					$tositerow = mysql_fetch_array ($result);
+					$tositerow = mysql_fetch_assoc ($result);
 					$tositenro = $tositerow['tosite'];
 				}
 			}
@@ -843,7 +861,7 @@
 					round(summa * vienti_kurssi, 2) kotisumma
 					FROM lasku
 					WHERE tunnus='$tunnus' and yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Lasku katosi")."</b><br>";
@@ -852,7 +870,7 @@
 			exit;
 		}
 
-		$laskurow = mysql_fetch_array($result);
+		$laskurow = mysql_fetch_assoc($result);
 
 		//	Tarkistetaan onko tälläistä laskua tältä toimittajalta jo kierrossa
 		if ($laskurow["laskunro"] != "") {
@@ -867,12 +885,12 @@
 						and laskunro = '$laskurow[laskunro]'
 						and laskunro != 0
 						and tunnus != $laskurow[tunnus]";
-			$tarkres = mysql_query($query) or pupe_error($query);
+			$tarkres = pupe_query($query);
 
 			if (mysql_num_rows($tarkres) != 0) {
 				echo "<br><font class = 'error'>".t("HUOM! Toimittajalta on saapunut jo lasku samalla laskunumerolla!")."</font><table>";
 
-				while ($tarkrow = mysql_fetch_array($tarkres)) {
+				while ($tarkrow = mysql_fetch_assoc($tarkres)) {
 					echo "<tr><td class='back'>$tarkrow[summa] $tarkrow[valkoodi]</td><td class='back'>$tarkrow[kuka]</td><td class='back'><a href='muutosite.php?tee=E&tunnus=$tarkrow[tunnus]'>".t("Avaa lasku")."</a></td>";
 				}
 				echo "</table><br><br>";
@@ -932,7 +950,7 @@
 		echo "</tr>";
 
 		echo "<tr>";
-		echo "<td>$laskurow[ytunnus]</td>";
+		echo "<td>".tarkistahetu($laskurow["ytunnus"])."</td>";
 		echo "<td>$laskurow[nimi]</td>";
 		echo "<td>$laskurow[postitp]</td>";
 		echo "</tr>";
@@ -951,7 +969,7 @@
 
 		// Näytetään poistonappi, jos se on sallittu ja lasku ei ole keikalla ja on avoimella tilikaudella
 		$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
-		$keikres = mysql_query($query) or pupe_error($query);
+		$keikres = pupe_query($query);
 
 		if (($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') and $oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0 and $laskurow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"]) {
 
@@ -985,7 +1003,7 @@
 		$query = "	SELECT fakta
 					FROM toimi
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-		$toimres = mysql_query($query) or pupe_error($query);
+		$toimres = pupe_query($query);
 		$toimrow = mysql_fetch_assoc($toimres);
 
 		if (trim($toimrow["fakta"]) != "") {
@@ -1043,7 +1061,7 @@
 							and hyvaksyja = 'o'
 							and kuka = '$laskurow[hyvaksyja_nyt]'
 				          	ORDER BY nimi";
-				$vresult = mysql_query($query) or pupe_error($query);
+				$vresult = pupe_query($query);
 				$hierarkiarow = mysql_fetch_assoc($vresult);
 
 				$loytyyko_esimies = '';
@@ -1101,16 +1119,17 @@
 						and hyvaksyja = 'o'
 						and kuka = '$laskurow[hyvak1]'
 			          	ORDER BY nimi";
-			$vresult = mysql_query($query) or pupe_error($query);
-			$vrow = mysql_fetch_array($vresult);
+			$vresult = pupe_query($query);
+			$vrow = mysql_fetch_assoc($vresult);
 
 			echo "<tr><td>1. $vrow[nimi]</td><td>";
 
-			$query = "SELECT kuka, nimi
-			          FROM kuka
-			          WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
-			          ORDER BY nimi";
-			$vresult = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT kuka, nimi
+			          	FROM kuka
+			          	WHERE yhtio = '$kukarow[yhtio]'
+						and hyvaksyja = 'o'
+			          	ORDER BY nimi";
+			$vresult = pupe_query($query);
 
 			$ulos = '';
 
@@ -1119,7 +1138,7 @@
 			// Täytetään 4 hyväksyntäkenttää (ensinmäinen on jo käytössä)
 			for ($i=2; $i<6; $i++) {
 
-				while ($vrow=mysql_fetch_array($vresult)) {
+				while ($vrow=mysql_fetch_assoc($vresult)) {
 					$sel = "";
 
 					if ($hyvak[$i] == $vrow['kuka']) {
@@ -1137,7 +1156,7 @@
 										AND parent.lft > 1
 										GROUP BY parent.tunnus
 										ORDER BY parent.lft";
-							$esimies_result = mysql_query($query) or pupe_error($query);
+							$esimies_result = pupe_query($query);
 
 							if (mysql_num_rows($esimies_result) != 0) $loytyyko_esimies = 'joo';
 						}
@@ -1180,11 +1199,10 @@
 					$query = "	SELECT kuka, nimi
 					          	FROM kuka
 					          	WHERE yhtio = '$kukarow[yhtio]'
-								and hyvaksyja = 'o'
 								and kuka = '$laskurow[$hyind]'
 					          	ORDER BY nimi";
-					$vresult = mysql_query($query) or pupe_error($query);
-					$vrow = mysql_fetch_array($vresult);
+					$vresult = pupe_query($query);
+					$vrow = mysql_fetch_assoc($vresult);
 
 					if (isset($loytyyko_esimies) and $loytyyko_esimies == '' and isset($hyvaksyja_maksimisumma) and $hyvaksyja_maksimisumma != 0 and $hyvaksyja_maksimisumma > $laskurow['summa'] and $hierarkia != '') {
 						$query = "	SELECT parent.tunnus tunnus
@@ -1198,7 +1216,7 @@
 									AND parent.lft > 1
 									GROUP BY parent.tunnus
 									ORDER BY parent.lft";
-						$esimies_result = mysql_query($query) or pupe_error($query);
+						$esimies_result = pupe_query($query);
 
 						if (mysql_num_rows($esimies_result) != 0) $loytyyko_esimies = 'joo';
 					}
@@ -1230,8 +1248,8 @@
 						and ltunnus	= '$tunnus'
 						and tilino  = '$yhtiorow[alv]'
 						and korjattu = ''";
-			$alvires = mysql_query($query) or pupe_error($query);
-			$alvirow = mysql_fetch_array($alvires);
+			$alvires = pupe_query($query);
+			$alvirow = mysql_fetch_assoc($alvires);
 
 			$jaljella = round((float) $laskurow["summa"] - (float) $alvirow["summa"], 2);
 
@@ -1242,10 +1260,10 @@
 						and lasku.tila		= 'K'
 						and lasku.vanhatunnus	= '$tunnus'
 						HAVING vanhatunnus = 0";
-			$apure = mysql_query($query) or pupe_error($query);
+			$apure = pupe_query($query);
 
 			if (mysql_num_rows($apure)>0) {
-				while($apurow = mysql_fetch_array($apure)) {
+				while($apurow = mysql_fetch_assoc($apure)) {
 
 					if ($apurow["comments"] != "") $apurow["comments"] = "<i>($apurow[comments])</i>";
 
@@ -1274,7 +1292,7 @@
 				echo "<tr><td colspan = '2'>".t("Laskua ei ole vielä kohdistettu")."</td></tr>";
 			}
 
-			$apurow = mysql_fetch_array($apure);
+			$apurow = mysql_fetch_assoc($apure);
 
 			// Roundataan...
 			$jaljella = round($jaljella, 2);
@@ -1347,12 +1365,12 @@
 			// Näytetään alv-erittely, jos on useita kantoja.
 			if ($naytalisa != '') {
 				$query = "	SELECT vero, sum(summa) veroton, round(sum(summa*vero/100),2) 'veron määrä', round(sum(summa*(1+vero/100)),2) verollinen from tiliointi
-							WHERE ltunnus = '$tunnus' and
-							tiliointi.yhtio = '$kukarow[yhtio]' and
-							korjattu='' and
-							tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+							WHERE ltunnus = '$tunnus'
+							and yhtio = '$kukarow[yhtio]'
+							and korjattu = ''
+							and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
 							GROUP BY 1";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 1) {
 
@@ -1364,20 +1382,17 @@
 
 					echo "</tr>";
 
-					while ($tiliointirow=mysql_fetch_array ($result)) {
+					while ($tiliointirow = mysql_fetch_assoc($result)) {
 
 						echo "<tr>";
 
 						for ($i=0; $i<mysql_num_fields($result); $i++) {
-							echo "<td>$tiliointirow[$i]</td>";
+							echo "<td>".$tiliointirow[mysql_field_name($result,$i)]."</td>";
 						}
 
 						echo "</tr>";
-
 					}
-
 					echo "</table>";
-
 				}
 			}
 		}
@@ -1423,7 +1438,6 @@
 					<th>".t("Avaa lasku tähän ikkunaan")."</th>
 					<td>";
 
-
 			if (is_array($liitteet) and count($liitteet) == 1) {
 				echo "<input type='hidden' name = 'iframe_id' value='$liitteet[0]'>
 						<input type='Submit' value='".t("Avaa")."'>";
@@ -1467,14 +1481,18 @@
 
 		// Tällä ollaan, jos olemme vasta valitsemassa laskua
 		if ($nayta == '') {
-			$query = "	SELECT count(*) FROM lasku
-				 		WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukarow[yhtio]' and alatila = 'H' and tila != 'D'
+			$query = "	SELECT count(*) kpl
+						FROM lasku
+				 		WHERE hyvaksyja_nyt = '$kukarow[kuka]'
+						and yhtio = '$kukarow[yhtio]'
+						and alatila = 'H'
+						and tila != 'D'
 				  		ORDER BY erpcm";
-			$result = mysql_query($query) or pupe_error($query);
-			$trow = mysql_fetch_array ($result);
+			$result = pupe_query($query);
+			$trow = mysql_fetch_assoc ($result);
 
-			if ($trow[0] > 0) {
-				echo "<a href='$PHP_SELF?nayta=1'><font class='error'>". sprintf(t('Sinulla on %d pysäytettyä laskua'), $trow[0]) . "</font></a><br><br>";
+			if ($trow["kpl"] > 0) {
+				echo "<a href='$PHP_SELF?nayta=1'><font class='error'>". sprintf(t('Sinulla on %d pysäytettyä laskua'), $trow["kpl"]) . "</font></a><br><br>";
 			}
 		}
 
@@ -1488,7 +1506,7 @@
 					and tila != 'D'
 					$nayta
 				  	ORDER BY if (kapvm!='0000-00-00',kapvm,erpcm)";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Sinulla ei ole hyväksymättömiä laskuja")."</b><br>";
@@ -1512,14 +1530,14 @@
 		echo "<th>".t("Kustannuspaikka")."</th>";
 		echo "</tr>";
 
-		while ($trow = mysql_fetch_array ($result)) {
+		while ($trow = mysql_fetch_assoc($result)) {
 
 			$query = "	SELECT laskunro
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tila = 'K'
 						AND vanhatunnus = '$trow[tunnus]'";
-			$keikres = mysql_query($query) or pupe_error($query);
+			$keikres = pupe_query($query);
 
 			//	Onko liitetty jo keikkaan
 			if (in_array($trow["vienti"], array("B", "C", "J", "E", "F", "K", "H", "I", "L"))) {
@@ -1551,7 +1569,7 @@
 
 			echo "</td>";
 
-			echo "<td valign='top'>$trow[ytunnus]</td>";
+			echo "<td valign='top'>".tarkistahetu($trow["ytunnus"])."</td>";
 
 			if ($trow['comments'] != '') {
 				echo "<td valign='top'>$trow[nimi]<br><font class='error'>$trow[comments]</font></td>";
@@ -1603,19 +1621,19 @@
 
 				echo "</td>";
 			}
-			
+
 			// kustannuspaikka näkyviin asiakkaan toiveesta..
-			$kustpq = "	SELECT kustp, 
+			$kustpq = "	SELECT kustp,
 							(SELECT DISTINCT nimi
-							FROM kustannuspaikka 
-							WHERE kustannuspaikka.yhtio=tiliointi.yhtio AND kustannuspaikka.tunnus=tiliointi.kustp) kustp2 
+							FROM kustannuspaikka
+							WHERE kustannuspaikka.yhtio=tiliointi.yhtio AND kustannuspaikka.tunnus=tiliointi.kustp) kustp2
 						FROM tiliointi
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND ltunnus = '$trow[tunnus]'
 						and kustp != 0
 						ORDER BY tiliointi.tunnus LIMIT 1";
 
-			$kustpres = mysql_query($kustpq) or pupe_error($kustpq);
+			$kustpres = pupe_query($kustpq);
 			$kustprivi = mysql_fetch_assoc($kustpres);
 			if (trim($kustprivi['kustp2']) =='') {
 				echo "<td>".t("Kustannuspaikkaa ei ole syötetty")."</td>";
@@ -1623,7 +1641,7 @@
 			else {
 				echo "<td>".$kustprivi['kustp2']."</td>";
 			}
-					
+
 			echo "<td class='back' valign='top'>
 					<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tunnus' value='$trow[tunnus]'>

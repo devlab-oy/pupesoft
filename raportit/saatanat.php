@@ -32,6 +32,9 @@
 		if (!isset($savvl)) $savvl = date("Y");
 		if (!isset($sappl)) $sappl = date("d");
 
+		$yli = str_replace(',','.', $yli);
+		$yli = (float) $yli;
+
 		echo "<table>";
 		echo "<tr><th>".t("Näytä vain tämä ytunnus").":</th><td valign='top'><input type='text' name='sytunnus' size ='15' value='$sytunnus'></td><td valign='top' class='back'>".t("Jätä kaikki hakukentät tyhjäksi jos haluat listata kaikki saatavat").".</td></tr>";
 		echo "<tr><th>".t("Näytä vain tämä nimi").":</th><td valign='top'><input type='text' name='sanimi' size ='15' value='$sanimi'></td></tr>";
@@ -69,7 +72,6 @@
 		echo "<tr><th>".t("Valitse valuutta").":</th><td><select name='savalkoodi'>";
 		echo "<option value = ''>".t("Kaikki")."</option>";
 
-
 		while ($vrow = mysql_fetch_assoc($vresult)) {
 			$sel="";
 			if (strtoupper($vrow['nimi']) == strtoupper($savalkoodi)) {
@@ -92,9 +94,9 @@
 		echo "<option value = ''>".t("Yrityksen valuutassa")."</option>";
 		echo "<option value = 'V' $sel1>".t("Laskun valuutassa")."</option>";
 		echo "</select></td></tr>";
-		
+
 		$sel[$laji] = " selected ";
-		
+
 		echo "<th>".t("Mitkä Laskut Listataan").":</th>";
 		echo "<td><select name='laji'>
 				<option value='M'   $sel[M]>".t("myyntisaamiset")."</option>
@@ -104,11 +106,11 @@
 				<option value='MA'  $sel[MA]>".t("myyntisaamiset + factoringmyyntisaamiset + konsernimyyntisaamiset")."</option>
 				</select></td>";
 		echo "</tr>";
-				
+
 		echo "<tr><th>".t("Näytä vain ne joilla luottoraja on ylitetty").":</th><td valign='top'><input type='checkbox' name='ylilimiitin' value='ON' $chk></td>";
-		
+
 		echo "<tr>";
-		
+
 		if ($luottovakuutettu == "K") {
 			$luottolisa = "K";
 			$checked = "CHECKED";
@@ -117,12 +119,12 @@
 			$luottolisa = "";
 			$checked = "";
 		}
-		
+
 		echo "<th>".t("Vain luottovakuutetut")."</th>";
 		echo "<td><input type='checkbox' name='luottovakuutettu' value='K' $checked></td>";
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Näytä")."'></td></tr>";
 		echo "</tr>";
-		
+
 		echo "</table><br>";
 		echo "</form>";
 	}
@@ -131,7 +133,7 @@
 		if (!isset($sakkl)) $sakkl = date("m");
 		if (!isset($savvl)) $savvl = date("Y");
 		if (!isset($sappl)) $sappl = date("d");
-	
+
 		if ($laji == 'MK') 		$tili = "'$yhtiorow[konsernimyyntisaamiset]'";
 		elseif ($laji == 'MF') 	$tili = "'$yhtiorow[factoringsaamiset]'";
 		elseif ($laji == 'MA') 	$tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
@@ -181,10 +183,8 @@
 			$lisa .= " and lasku.liitostunnus in ($row[tunnukset]) ";
 		}
 
-		$yli = str_replace(',','.', $yli);
-
 		if ($yli != 0) {
-			$having = " HAVING avoimia >= $yli ";
+			$having = " HAVING avoimia >= '$yli' ";
 		}
 		else {
 			$having = " HAVING avoimia != 0 ";

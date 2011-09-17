@@ -710,7 +710,7 @@
 		}
 		if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
 			// Tulostellaan venemyyntiin liittyviä osia
-			$where1 .= " lasku.tila in ('L','T','N') ";
+			$where1 .= " lasku.tila in ('L','T','N','A') ";
 
 			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
@@ -1594,7 +1594,7 @@
 				}
 
 				//tulostetaan sivu
-				tyomaarays_print_pdf($komento["NAYTATILAUS"]);
+				tyomaarays_print_pdf($komento["Työmääräys"]);
 				$tee = '';
 			}
 
@@ -1715,20 +1715,18 @@
 					}
 				}
 
-				/*
-				Testausta varten.....
-				$lahetetyyppi = "tulosta_lahete.inc";
-				$lahetetyyppi = "tulosta_lahete_brutto.inc";
-				$lahetetyyppi = "tulosta_lahete_eialeja.inc";
-				$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
-				$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
-				$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
-				$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
-				$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
-				$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
-				$lahetetyyppi = "tulosta_lahete_custom.inc";
-				$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
-				*/
+				#Testausta varten.....
+				#$lahetetyyppi = "tulosta_lahete.inc";
+				#$lahetetyyppi = "tulosta_lahete_brutto.inc";
+				#$lahetetyyppi = "tulosta_lahete_eialeja.inc";
+				#$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
+				#$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
+				#$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
+				#$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
+				#$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
+				#$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
+				#$lahetetyyppi = "tulosta_lahete_custom.inc";
+				#$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
 
 				require("tulosta_lahete.inc");
 

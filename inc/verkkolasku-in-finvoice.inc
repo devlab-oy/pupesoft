@@ -8,13 +8,15 @@ $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 $laskun_tyyppi 			= $xml->InvoiceDetails->InvoiceTypeCode;
 $laskun_numero 			= $xml->InvoiceDetails->InvoiceNumber;
 $laskun_ebid 			= "FINVOICEXML";
-$laskun_paiva			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
+$laskun_tapvm			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
+$laskun_lapvm			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
 $laskun_erapaiva		= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOptionDate;
 $laskun_kapvm 			= "";
 $laskun_kasumma 		= "";
 $laskuttajan_ovt		= $xml->SellerOrganisationUnitNumber;
 $laskuttajan_nimi		= utf8_decode($xml->SellerPartyDetails->SellerOrganisationName);
 $laskuttajan_vat		= $xml->SellerPartyDetails->SellerOrganisationTaxCode;
+$laskuttajan_valkoodi   = "";
 $laskun_pankkiviite 	= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiRemittanceInfoIdentifier;
 $laskun_asiakastunnus	= $xml->BuyerPartyDetails->BuyerPartyIdentifier;
 $laskun_summa_eur		= (float) str_replace(",", ".", $xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount);
@@ -37,6 +39,8 @@ $ostaja_asiakkaantiedot["nimi"] 			= trim(utf8_decode($xml->BuyerPartyDetails->B
 $ostaja_asiakkaantiedot["osoite"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerStreetName));
 $ostaja_asiakkaantiedot["postino"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier));
 $ostaja_asiakkaantiedot["postitp"] 			= trim(utf8_decode($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName));
+
+$laskuttajan_toimittajanumero = "";
 
 if ($yhtio == "") {
 	$yhtio = $xml->BuyerPartyDetails->BuyerPartyIdentifier;

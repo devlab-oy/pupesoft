@@ -1944,7 +1944,6 @@
 				echo "</select>";
 				echo "</td></tr>";
 			}
-
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
 				//T‰ysin dynaaminen osio
 				$al_res = t_avainsana("TYOM_TYOKENTAT","", "and avainsana.selitetark != ''");
@@ -1986,6 +1985,20 @@
 								<input type='text' name='".$kentta."pp' size='3' value='$al_pp'>
 								<input type='text' name='".$kentta."kk' size='3' value='$al_kk'>
 								<input type='text' name='".$kentta."vv' size='5' value='$al_vv'></td>";
+					}
+					elseif (strtoupper($al_row["selitetark_2"]) == "DROPDOWN") {
+						$dropdown_arvot = explode("#", $al_row['selitetark_3']);
+
+						echo "<td>{$al_row["selitetark"]}</td>";
+						echo "<td><select name='$kentta'>";
+
+						foreach ($dropdown_arvot as $arvo) {
+							$sele = ($srow[$kentta] == $arvo) ? "SELECTED" : "";
+							echo "<option value='$arvo' $sele>$arvo</option>";
+						}
+
+						echo "</select>";
+						echo "</td>";
 					}
 					elseif ($kentta == "suorittaja") {
 
@@ -2075,6 +2088,12 @@
 			if ($toim == 'REKLAMAATIO') {
 				echo "	<tr>
 						<td>".t("Sis‰iset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='6' cols='50'>$srow[komm2]</textarea></td>
+						</tr>";
+			}
+
+			if ($toim == "YLLAPITO") {
+				echo "	<tr>
+						<td>".t("Sis‰iset kommentit").":</td><td colspan='3'><textarea name='sopimus_lisatietoja' rows='6' cols='50'>$srow[sopimus_lisatietoja]</textarea></td>
 						</tr>";
 			}
 
@@ -2176,10 +2195,7 @@
 				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[29] value='29'> 29 </td>";
 				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[30] value='30'> 30 </td>";
 				echo "</tr><tr>";
-				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[31] value='31'> 31 </td>";
-
-				// t‰‰ ei oo viel‰ implmentoitu
-				//echo "<td colspan='9'><input name='yllapito_pp[]' $disable type='checkbox' $chk[99] value='99'> Kuun viimeinen </td>";
+				echo "<td colspan='10'><input name='yllapito_pp[]' $disable type='checkbox' $chk[31] value='31'> 31 / ".t("Kuukauden viimeinen p‰iv‰")." </td>";
 
 				echo "</tr></table>";
 				echo "</td>";
@@ -2389,8 +2405,17 @@
 
 						$hinnat = alehinta($laskurow, $trow, $row['tilkpl'], '', '', '', $haettavat_kentat);
 
+						$onko_asiakkaalla_alennuksia = FALSE;
+
+						for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+							if (isset($hinnat["aleperuste"]["ale".$alepostfix]) and $hinnat["aleperuste"]["ale".$alepostfix] !== FALSE and $hinnat["aleperuste"]["ale".$alepostfix] < 13) {
+								$onko_asiakkaalla_alennuksia = TRUE;
+								break;
+							}
+						}
+
 						// Jos tuote n‰ytet‰‰n vain jos asiakkaalla on asiakasalennus tai asiakahinta niin skipataan se jos alea tai hintaa ei lˆydy
-						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] > 12 or $hinnat["aleperuste"] === FALSE)) {
+						if (($hinnat["hintaperuste"] > 13 or $hinnat["hintaperuste"] === FALSE) and $onko_asiakkaalla_alennuksia === FALSE) {
 							$paivitetaanko = FALSE;
 						}
 					}
@@ -2458,11 +2483,14 @@
 				}
 
 				//lasketaan alvit
-				if ($row["alv"] < 500) {
-					$alv = "";
+				if ($row["alv"] >= 600) {
+					$alv = 600;
+				}
+				elseif ($row["alv"] >= 500) {
+					$alv = 500;
 				}
 				else {
-					$alv = 500;
+					$alv = '';
 				}
 
 				list($uusihinta, $alv) = alv($laskurow, $trow, $uusihinta, $alv, $alehinta_alv);
@@ -3147,6 +3175,7 @@
 							vikakoodi		= '$vikakoodi',
 							takuunumero		= '$takuunumero',
 							tyokoodi		= '$tyokoodi',
+							hyvaksy			= '$hyvaksy',
 							otunnus 		= '$kukarow[kesken]'";
 				$query2 .= $postquery2;
 				$result = pupe_query($query2);
@@ -3174,6 +3203,7 @@
 							sopimus_pp					= '$sopimus_pp',
 							sopimus_alkupvm				= '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
 							sopimus_loppupvm			= '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
+							sopimus_lisatietoja			= '$sopimus_lisatietoja',
 							kolm_ovttunnus				= '$kolm_ovttunnus',
 							kolm_nimi					= '$kolm_nimi',
 							kolm_nimitark				= '$kolm_nimitark',

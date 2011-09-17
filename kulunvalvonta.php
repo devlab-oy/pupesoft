@@ -449,7 +449,7 @@
 								LIMIT 1";
 					$htunnusresult = mysql_query($query) or pupe_error($query);
 					if (mysql_num_rows($htunnusresult) == 0) {
-						echo "<font class='error'><br>" . t("VIRHE: Käyttäjän ") . $hyvaksytyt["nimi"] . t(" nimeä ja henkilötunnusta ei löydy toimittajista")."<br></font>";
+						echo "<font class='error'><br>" . t("VIRHE: Käyttäjän")." ".$hyvaksytyt["nimi"]." ".t("nimeä ja henkilötunnusta ei löydy toimittajista")."<br></font>";
 						$htunnusvirhe = $hyvaksytyt["kuka"]; //ei herjata samasta käyttäjästä kuin kerran
 						$virhe = TRUE;
 					}

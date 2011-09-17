@@ -62,8 +62,17 @@
 			$laskutuspaivat = array();
 
 			foreach ($laskutus_kk as $laskk) {
+
+				$kkvikapva = date("t",mktime(0, 0, 0, $laskk, 1, $tapvmvv));
+
 				foreach ($laskutus_pp as $laspp) {
-					$laskutuspaivat[] = $tapvmvv."-".sprintf("%02d", $laskk)."-".sprintf("%02d", $laspp);
+
+					if ($laspp > $kkvikapva and !array_search($tapvmvv."-".sprintf("%02d", $laskk)."-".sprintf("%02d", $kkvikapva), $laskutuspaivat)) {
+						$laskutuspaivat[] = $tapvmvv."-".sprintf("%02d", $laskk)."-".sprintf("%02d", $kkvikapva);
+					}
+					else {
+						$laskutuspaivat[] = $tapvmvv."-".sprintf("%02d", $laskk)."-".sprintf("%02d", $laspp);
+					}
 				}
 			}
 
@@ -74,13 +83,13 @@
 			if ($tama_laskutus == 0 and $tama_laskutus == $soplaskmaara) {
 				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus]);
 
-				$ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv-1));
+				$ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp+1, $vv-1));
 				$se_lopp  = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv+1));
 			}
 			// Jos t‰m‰ t‰n vuoden eka sopparilasku, niin edellinen on viime vuoden vika
 			elseif ($tama_laskutus == 0) {
 				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$soplaskmaara]);
-				$ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv-1));
+				$ed_alku = date("Y-m-d", mktime(0, 0, 0, $kk, $pp+1, $vv-1));
 
 				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus+1]);
 				$se_lopp  = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv));
@@ -88,7 +97,7 @@
 			// Jos t‰m‰ t‰n vuoden vika sopparilasku, niin seuraava on ens vuoden eka
 			elseif ($tama_laskutus == $soplaskmaara) {
 				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus-1]);
-				$ed_alku = date("Y-m-d",mktime(0, 0, 0, $kk, $pp, $vv));
+				$ed_alku = date("Y-m-d",mktime(0, 0, 0, $kk, $pp+1, $vv));
 
 				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[0]);
 				$se_lopp = date("Y-m-d",mktime(0, 0, 0, $kk, $pp-1, $vv+1));
@@ -96,15 +105,15 @@
 			// T‰m‰ ei ole t‰n vuoden eka eik‰ vika sopparilasku
 			else {
 				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus-1]);
-				$ed_alku = date("Y-m-d",mktime(0, 0, 0, $kk, $pp, $vv));
+				$ed_alku = date("Y-m-d",mktime(0, 0, 0, $kk, $pp+1, $vv));
 
 				list($vv,$kk,$pp) = explode("-", $laskutuspaivat[$tama_laskutus+1]);
 				$se_lopp = date("Y-m-d",mktime(0, 0, 0, $kk, $pp-1, $vv));
 			}
 
-			// Edellinen kausi on siis "$ed_alku" - "$tapahtumapvm-1" ja seuraava on "$tapahtumapvm" - "$se_lopp"
+			// Edellinen kausi on siis "$ed_alku" - "$tapahtumapvm" ja seuraava on "$tapahtumapvm" - "$se_lopp"
 			list($vv,$kk,$pp) = explode("-", $tapahtumapvm);
-			$ed_lopp = date("Y-m-d", mktime(0, 0, 0, $kk, $pp-1, $vv));
+			$ed_lopp = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv));
 
 			// Onko seuraava tai edellinen sopimuskauden ulkopuolella?
 			if ($soprow["sopimus_alkupvm"] != "0000-00-00" and str_replace("-", "", $ed_alku) < str_replace("-", "", $soprow["sopimus_alkupvm"])) {
@@ -140,7 +149,9 @@
 														"sisviesti2" => array("from" => $from, "to" => $to),
 													),
 												array(	"kommentti" => array("from" => $from, "to" => $to)
-												));
+													),
+												$tapahtumapvm
+								);
 
 			if ($ok !== FALSE) {
 
@@ -315,6 +326,7 @@
 			echo "<td valign='top'>$row[nimi]</td>";
 			echo "<td valign='top'>".tv1dateconv($row["sopimus_alkupvm"])."</td>";
 			echo "<td valign='top'>";
+
 			// kaunistelua
 			if ($row["sopimus_loppupvm"] == '0000-00-00') {
 				echo t("Toistaiseksi");
@@ -322,6 +334,7 @@
 			else {
 				echo tv1dateconv($row["sopimus_loppupvm"]);
 			}
+
 			echo "</td>";
 			echo "<td valign='top'>";
 			if (count(explode(',', $row["sopimus_kk"])) == 12) echo "Kaikki";
@@ -350,6 +363,9 @@
 				$pvmloppu = date('Ymd');
 			}
 
+			// Nollataan
+			unset($ruksatut_paivat);
+
 			// for looppi k‰yd‰‰n l‰pi kaikki p‰iv‰t
 			for ($pvm = $pvmalku; $pvm <= $pvmloppu; $pvm = (int) date('Ymd',mktime(0,0,0,$pvmloop_kk,$pvmloop_pp+1,$pvmloop_vv))) {
 
@@ -358,7 +374,22 @@
 				$pvmloop_kk = substr($pvm,4,2);
 				$pvmloop_vv = substr($pvm,0,4);
 
-				if (in_array($pvmloop_kk, explode(',', $row["sopimus_kk"])) and in_array($pvmloop_pp, explode(',', $row["sopimus_pp"]))) {
+				// Jos sopparille on valittu liian iso p‰iv‰:
+				if (!isset($ruksatut_paivat[$pvmloop_kk])) {
+					$ruksatut_paivat[$pvmloop_kk] = array();
+					$kkvikapva = date("t",mktime(0, 0, 0, $pvmloop_kk, 1, $pvmloop_vv));
+
+					foreach (explode(',', $row["sopimus_pp"]) as $ruksattu_paiva) {
+						if ($ruksattu_paiva > $kkvikapva) {
+							$ruksatut_paivat[$pvmloop_kk][$kkvikapva] = $kkvikapva;
+						}
+						else {
+							$ruksatut_paivat[$pvmloop_kk][$ruksattu_paiva] = $ruksattu_paiva;
+						}
+					}
+				}
+
+				if (in_array($pvmloop_kk, explode(',', $row["sopimus_kk"])) and in_array($pvmloop_pp, $ruksatut_paivat[$pvmloop_kk])) {
 
 					// katotaan ollaanko t‰m‰ lasku laskutettu
 					$query = "	SELECT *

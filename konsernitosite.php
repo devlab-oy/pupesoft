@@ -101,19 +101,16 @@
 
 				$totsumma[$kukarow['yhtio']] += $isumma[$i];
 
-				// Onko tämä konsernitili
-				if (strlen($itili[$i]) != 5 and strlen($itili[$i]) != 0) {
-//					$ivirhe[$i] .= t('Tili ei ole konsernitili (Ne ovat 5 merkkiä pitkiä)') . '<br>';
-//					$gok = 1;
-				}
-
-				$ulos		= "";
-				$virhe		= "";
-				$tili		= $itili[$i];
-				$summa		= $isumma[$i];
-				$selausnimi	= "itili[$i]"; // Minka niminen mahdollinen popup on?
-				$tositetila = "X";
-				$tositeliit = 0;
+				$ulos			= "";
+				$virhe			= "";
+				$tili			= $itili[$i];
+				$summa			= $isumma[$i];
+				$selausnimi		= "itili[$i]"; // Minka niminen mahdollinen popup on?
+				$tositetila 	= "X";
+				$tositeliit 	= 0;
+				$kustp_tark		= $ikustp[$i];
+				$kohde_tark		= $ikohde[$i];
+				$projekti_tark	= $iprojekti[$i];
 
 				require ("inc/tarkistatiliointi.inc");
 

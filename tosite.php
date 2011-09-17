@@ -215,7 +215,7 @@
 					fclose($file);
 				}
 
-				$maara = 0;
+				$maara = 1;
 
 				foreach ($excelrivi as $erivi) {
 					foreach ($erivi as $e => $eriv) {
@@ -357,17 +357,17 @@
 					$gok = 1;
 				}
 
-				$ulos 		= "";
-				$virhe 		= "";
-				$tili 		= $itili[$i];
-				$summa 		= $isumma[$i];
-				$totsumma  += $summa;
-				$selausnimi = "itili['.$i.']"; // Minka niminen mahdollinen popup on?
-				$vero 		= "";
-				$tositetila = "X";
-				$kustp_tark		= $ikustp[$i];		// nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
-				$kohde_tark		= $ikohde[$i];      // nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
-				$projekti_tark	= $iprojekti[$i];   // nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
+				$ulos 			= "";
+				$virhe 			= "";
+				$tili 			= $itili[$i];
+				$summa 			= $isumma[$i];
+				$totsumma  	   += $summa;
+				$selausnimi 	= "itili['.$i.']"; // Minka niminen mahdollinen popup on?
+				$vero 			= "";
+				$tositetila 	= "X";
+				$kustp_tark		= $ikustp[$i];
+				$kohde_tark		= $ikohde[$i];
+				$projekti_tark	= $iprojekti[$i];
 
 				if ((isset($toimittajaid) and $toimittajaid > 0) or (isset($asiakasid) and $asiakasid > 0)) {
 					$tositeliit = $toimasrow["tunnus"];
@@ -682,7 +682,7 @@
 
 		// Uusi tosite
 		// Tehdään haluttu määrä tiliöintirivejä
-		$tilmaarat = array("3","5","9","13","17","21","25","29","33","41","51","101","151", "201", "301", "401", "501");
+		$tilmaarat = array("3","5","9","13","17","21","25","29","33","41","51","101","151", "201", "301", "401", "501", "601", "701", "801", "901", "1001");
 
 		if (isset($gokfrom) and $gokfrom != "") {
 			// Valitaan sopiva tiliöintimäärä kun tullaan palkkatositteelta

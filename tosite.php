@@ -150,7 +150,7 @@
 			//	ei koskaan päivitetä automaattisesti
 			$tee = "";
 
-			$retval = tarkasta_liite("tositefile", array("TXT", "CSV", "XLS"));
+			$retval = tarkasta_liite("tositefile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT"));
 
 			if ($retval === true) {
 

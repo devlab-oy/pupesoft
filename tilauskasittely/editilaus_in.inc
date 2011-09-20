@@ -661,7 +661,7 @@ while ($tietue = fgets($fd)) {
 		// NAD-DP segmentissä, tulee kerralla kaikki toimitusosoitteen tiedot
 		// Toimitusosoitteen nimi-kentässä on kovakoodattu teksti "TAVARAN VASTAANOTTAJA" (by Servinet)
 			$kentat = explode("+", $tieto);
-			$tnimi = $kentat[3];
+			$tnimi = "";
 			$tnimitark = "";
 			$tpostitp = $kentat[5];
 			$tpostino = $kentat[7];

@@ -31,6 +31,20 @@
 			$tee = '';
 		}
 
+		$paivamaaralisa = "";
+
+		if ($pp2 !='' and $kk2 !='' and $vv2 !='') {
+
+			if (!checkdate($kk2, $pp2, $vv2)) {
+				echo "<font class='error'>".t("Virheellinen alkup‰iv‰m‰‰r‰")."</font><br>";
+				$tee = '';
+			}
+			else {
+				$pvm2 = sprintf("%04d", $vv2) . "-" . sprintf("%02d", $kk2) . "-" . sprintf("%02d", $pp2);
+				$paivamaaralisa = " AND lasku.tapvm >= '$pvm2' ";
+			}
+		}
+
 		// katotaan onko annettu t‰m‰ p‰iv‰ (ett‰ voidaanko n‰ytt‰‰ kirjanpitovertailuja
 		$onkotanaan = "";
 		if ($pvm != date("Y-m-d")) {
@@ -86,13 +100,20 @@
 			<input type = 'hidden' name = 'tee' value = 'X'>
 			<table>
 			<tr>
-			<th>".t("Anna p‰iv‰m‰‰r‰, muodossa pp-kk-vvvv:")."</th>
+			<th>".t("Anna p‰iv‰m‰‰r‰, jonka tilanteen haluat:")."</th>
 			<td><input type = 'text' name = 'pp' value='$pp' size=2></td>
 			<td><input type = 'text' name = 'kk' value='$kk' size=2></td>
 			<td><input type = 'text' name = 'vv' value='$vv' size=4></td>
-			</tr>
+			</tr>";
 
-			<tr>
+	echo "	<tr>
+			<th>".t("Anna alkup‰iv‰m‰‰r‰, jota vanhempia laskuja ei n‰ytet‰:")."</th>
+			<td><input type = 'text' name = 'pp2' value='$pp2' size=2></td>
+			<td><input type = 'text' name = 'kk2' value='$kk2' size=2></td>
+			<td><input type = 'text' name = 'vv2' value='$vv2' size=4></td>
+			</tr>";
+
+	echo "	<tr>
 			<th>".t("Mitk‰ laskut listataan:")."</th>
 			<td colspan = '3'><select name='laji'>
 			<option value='M'   $sel[M]>".t("myyntisaamiset")."</option>
@@ -151,6 +172,18 @@
 	echo "<option value = 'V' $sel1>".t("Laskun valuutassa")."</option>";
 	echo "</select></td></tr>";
 
+	$sel1 = '';
+
+	if ($asitoimittain == 'AT') {
+		$sel1 = "SELECTED";
+	}
+
+	echo "<tr><th>".t("Summaustaso").":</th>";
+	echo "<td colspan=3><select name='asitoimittain'>";
+	echo "<option value = ''>".t("Lasku")."</option>";
+	echo "<option value = 'AT' $sel1>".t("Asiakas/Toimittaja")."</option>";
+	echo "</select></td></tr>";
+
 	echo "<tr><th>" . t('Maa'). " ".t("(vain myyntilaskut)").":</th><td colspan=3><select name='maa'>";
 
 	$query = "	SELECT distinct maa
@@ -196,28 +229,26 @@
 	}
 	echo "</select></td></tr>";
 	echo "<tr>";
-	echo "<th>".t("N‰yt‰ asiakkaat, joilla on avoimia karhuja, joita on karhuttu ainakin")."</th>";
+	echo "<th>".t("N‰yt‰ laskut, joita on karhuttu ainakin (Vain Myyntilaskut)")."</th>";
 	echo "<td colspan='3'>";
 	echo "<input type='text' size='5' name='karhuja' value='$karhuja'> ".t("kertaa")."";
 	echo "</td>";
 	echo "</tr>";
 
+	// luottovakuutettu
+	echo "<tr>";
+	echo "<th>".t("N‰yt‰ vain luottovakuutetut asiakkaat (Vain Myyntilaskut)")."</th>";
+	if ($luottovakuutettu == "K") {
+		$luottochecked = "CHECKED";
+	}
+	echo "<td colspan='3'>";
+	echo "<input type='checkbox' name='luottovakuutettu' value='K' $luottochecked>";
+	echo "</td></tr>";
+
 	if ($excel != "") $exsel = "CHECKED";
 	else $exsel = "";
 
 	echo "<tr><th>".t("Tee Excel")."</th><td colspan='3'><input type='checkbox' name='excel' value = 'YES' $exsel></td></tr>";
-
-	$sel1 = '';
-
-	if ($asitoimittain == 'AT') {
-		$sel1 = "SELECTED";
-	}
-
-	echo "<tr><th>".t("Summaustaso").":</th>";
-	echo "<td colspan=3><select name='asitoimittain'>";
-	echo "<option value = ''>".t("Lasku")."</option>";
-	echo "<option value = 'AT' $sel1>".t("Asiakas/Toimittaja")."</option>";
-	echo "</select></td></tr>";
 
 	echo "</table><br>";
 	echo "<input type = 'submit' value = '".t("Aja raportti")."'>";
@@ -324,6 +355,7 @@
 						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio=tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tapvm = tiliointi.tapvm and tiliointi.tilino IN ($tili) and tiliointi.korjattu = '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and (mapvm > '$pvm' or mapvm = '0000-00-00')
+						$paivamaaralisa
 						and lasku.tapvm <= '$pvm'
 						and lasku.tapvm > '0000-00-00'
 						and tila in ('H','Y','M','P','Q')
@@ -587,6 +619,9 @@
 			$tunnuslisa = '';
 			$karhuja = (int) $karhuja;
 
+            // Halutaanko vain luottovakuutetut asiakkaat
+            $luottovakuutuslisa = ($luottovakuutettu == "K") ? "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.laji != 'P' and asiakas.luottovakuutettu = 'K')" : "";
+
 			if ($karhuja > 0) {
 
 				$query = "	SELECT count(karhu_lasku.ltunnus) as karhukerrat,
@@ -657,8 +692,10 @@
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 						FROM lasku $indeksi
 						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$pvm')
+						$luottovakuutuslisa
 						WHERE lasku.yhtio		= '$kukarow[yhtio]'
 						and (lasku.mapvm		> '$pvm' or lasku.mapvm = '0000-00-00')
+						$paivamaaralisa
 						and lasku.tapvm			<= '$pvm'
 						and lasku.tapvm 		> '0000-00-00'
 						and lasku.tila			= 'U'

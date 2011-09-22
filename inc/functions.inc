@@ -500,7 +500,7 @@ if (!function_exists("table_exists")) {
 }
 
 if (!function_exists("vapauta_sarjanumerot")) {
-	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="") {
+	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="", $dellaa_ostorivi = TRUE) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu, tilausrivi.tuoteno, tuote.sarjanumeroseuranta, tilausrivin_lisatiedot.tilausrivilinkki
@@ -550,7 +550,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 			}
 
 			// Onko t‰t‰ ostotilauksella?
-			if ($srow["tilausrivilinkki"] > 0) {
+			if ($dellaa_ostorivi and $srow["tilausrivilinkki"] > 0) {
 				$query = "	UPDATE tilausrivi
 							SET tyyppi = 'D'
 							WHERE yhtio 	= '$kukarow[yhtio]'
@@ -11235,6 +11235,33 @@ if (!function_exists("pupe_DataTables")) {
 
 						});
 
+						$('input[name^=\"rivi_toimitettuaika_vv\"]').each(function(){
+
+							var tun 				= $(this).attr('id').substring(23);
+							var otunnus 			= $('input[name=\"otunnus\"]').val();
+
+							var rivi_taika_vv		= parseFloat(this.value);
+							var rivi_taika_kk		= parseFloat($('input[name=\"rivi_toimitettuaika_kk_'+tun+'\"]').val());
+							var rivi_taika_pp		= parseFloat($('input[name=\"rivi_toimitettuaika_pp_'+tun+'\"]').val());
+
+							if (rivi_taika_vv > 0 && rivi_taika_kk > 0 && rivi_taika_pp > 0) {
+								$.post('{$_SERVER['SCRIPT_NAME']}',
+									{ 	keikan_otunnus: otunnus,
+										otunnus: otunnus,
+										tunnus: tun,
+										ajax_toiminto: 'rivi_toimitettuaika',
+										rivi_taika_vv: rivi_taika_vv,
+										rivi_taika_kk: rivi_taika_kk,
+										rivi_taika_pp: rivi_taika_pp,
+										no_head: 'yes',
+										ohje: 'off'},
+									function(return_value) {
+										var data = jQuery.parseJSON(return_value);
+									}
+								);
+							}
+						});
+
 					}).ajaxComplete(function(){
 						if ($('#refresh_screen_ajaxille').val() == 'true') {
 							$('#refresh_screen_ajaxille').val('false');
@@ -12986,4 +13013,64 @@ if (!function_exists("tarkistahetu")) {
 	}
 }
 
-?>
+if (!function_exists("tarkistaytunnus")) {
+	function tarkistaytunnus($ytunnus) {
+
+		$tulo = 0;
+
+		// Ytunnus pit‰‰ olla numeerinen ja 8 merkki‰ pitk‰
+		if (!is_numeric($ytunnus) or strlen($ytunnus) != 8) {
+			return FALSE;
+		}
+
+		// loopataan ytunnus
+		for ($ytunnusi = 0; $ytunnusi < 7; $ytunnusi++) {
+
+			$merkki = substr($ytunnus, $ytunnusi, 1);
+
+			switch ($ytunnusi) {
+				case 0:
+					$kerroin = 7;
+					break;
+				case 1:
+					$kerroin = 9;
+					break;
+				case 2:
+					$kerroin = 10;
+					break;
+				case 3:
+					$kerroin = 5;
+					break;
+				case 4:
+					$kerroin = 8;
+					break;
+				case 5:
+					$kerroin = 4;
+					break;
+				case 6:
+					$kerroin = 2;
+					break;
+			}
+			$tulo += $kerroin * $merkki;
+		}
+
+		// otetaan tarkastusmerkki
+		$tmerkki = substr($ytunnus, -1);
+
+		// summasta mod 11
+		$tulo = $tulo % 11;
+
+		if ($tulo <> 0) {
+			$tulo = 11 - $tulo;
+		}
+
+		// oliko tarkastusmerkki ok
+		if ($tulo == $tmerkki) {
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
+
+	}
+}

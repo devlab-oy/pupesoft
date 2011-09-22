@@ -1,11 +1,9 @@
 <?php
-	 error_reporting(E_ALL);
-	 ini_set("display_errors", 1);
 
 	$laskuformaatti 		= "TECCOM-INVOICE";
 
 	// parseroidaan xml
-	$yhtio 					= "20428100"; //$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber;
+	$yhtio 					= "20428100"; 		//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber;
 	$verkkotunnus_vas		= "003720428100";	//$xml->InvoiceHeader->InvoiceOrg->TaxRegistrationNumber; 	// joissakin materiaaleissa viallista materiaalia.
 	$laskun_tyyppi 			= "TECCOM-INVOICE";
 	$laskun_numero 			= $xml->InvoiceHeader->InvoiceId;
@@ -13,19 +11,19 @@
 	$laskun_tilausviite		= "";
 
 	if (isset($xml->InvoiceHeader->InvoiceIssueDate->Date)) {
-		$laskun_paiva = $xml->InvoiceHeader->InvoiceIssueDate->Date;
-		$laskun_la_paiva = $xml->InvoiceHeader->InvoiceIssueDate->Date;
+		$laskun_tapvm 	= $xml->InvoiceHeader->InvoiceIssueDate->Date;
+		$laskun_lapvm	= $xml->InvoiceHeader->InvoiceIssueDate->Date;
 	}
 	else {
-		$laskun_paiva = "";
-		$laskun_la_paiva = "";
+		$laskun_tapvm 	= date("Ymd");
+		$laskun_lapvm 	= date("Ymd");
 	}
 
 	if (isset($xml->InvoiceHeader->InvoiceDueDate->Date)) {
 		$laskun_erapaiva = $xml->InvoiceHeader->InvoiceDueDate->Date;
 	}
 	else {
-		$laskun_erapaiva = "";
+		$laskun_erapaiva = date("Ymd");
 	}
 
 	$laskuttajan_ovt				= "";

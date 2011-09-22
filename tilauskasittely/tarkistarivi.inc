@@ -366,9 +366,10 @@
 		}
 
 		//Katotaan voidaanko tämä myydä joltain toiselta paikalta
-		if ($kpl_st > 0 and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G")) {
+		if (!in_array($row["var"], array('J','S','U','T','P')) and $kpl_st > 0 and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G")) {
 
 			$paikat .= "<option value='EIERAAVIELA#EIEI'>".t("Valitse erä")."</option>";
+			$paikatlask++;
 
 			if ($trow["sarjanumeroseuranta"] == "F") {
 				$pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
@@ -378,6 +379,7 @@
 				$pepvmlisa1 = "";
 				$pepvmlisa2 = "";
 			}
+
 			$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 						tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 						sarjanumeroseuranta.sarjanumero era,

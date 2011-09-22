@@ -119,8 +119,13 @@
 		$tulostettavat       = array();
 		$tulostettavat_apix  = array();
 		$tulostettavat_email = array();
-		$verkkolaskuputkeen  = array();
 		$tulos_ulos          = "";
+
+		$verkkolaskuputkeen_pupevoice  	= array();
+		$verkkolaskuputkeen_finvoice  	= array();
+		$verkkolaskuputkeen_suora 		= array();
+		$verkkolaskuputkeen_elmaedi 	= array();
+		$verkkolaskuputkeen_apix		= array();
 
 		if (!isset($silent)) {
 			$silent = "";
@@ -1927,24 +1932,37 @@
 							if ($lasrow["chn"] == "111") {
 								elmaedi_lasku_loppu($tootedi, $lasrow);
 
+								//Nämä menee verkkolaskuputkeen
+								$verkkolaskuputkeen_elmaedi[$lasrow["laskunro"]] = $lasrow["nimi"];
+
 								$edilask++;
 							}
 							elseif ($lasrow["chn"] == "112") {
 								finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow);
+
+								//Nämä menee verkkolaskuputkeen
+								$verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
 							}
 							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
 								finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
 
 								if ($yhtiorow["verkkolasku_lah"] == "apix") {
 									$tulostettavat_apix[] = $lasrow["tunnus"];
+
+									//Nämä menee verkkolaskuputkeen
+									$verkkolaskuputkeen_apix[$lasrow["laskunro"]] = $lasrow["nimi"];
+								}
+								else {
+									//Nämä menee verkkolaskuputkeen
+									$verkkolaskuputkeen_finvoice[$lasrow["laskunro"]] = $lasrow["nimi"];
 								}
 							}
 							else {
 								pupevoice_lasku_loppu($tootxml);
-							}
 
-							//Nämä menee verkkolaskuputkeen
-							$verkkolaskuputkeen[$lasrow["laskunro"]] = $lasrow["nimi"];
+								//Nämä menee verkkolaskuputkeen
+								$verkkolaskuputkeen_pupevoice[$lasrow["laskunro"]] = $lasrow["nimi"];
+							}
 
 							// Otetaan talteen jokainen laskunumero joka lähetetään jotta voidaan tulostaa paperilaskut
 							$tulostettavat[] = $lasrow["tunnus"];
@@ -2077,7 +2095,7 @@
 					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
 					$verkkolasmail .= t("Aineiston laskut").":\n";
 
-					foreach ($verkkolaskuputkeen as $lasnoputk => $nimiputk) {
+					foreach ($verkkolaskuputkeen_pupevoice as $lasnoputk => $nimiputk) {
 						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
 					}
 
@@ -2222,7 +2240,7 @@
 					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
 					$verkkolasmail .= t("Aineiston laskut").":\n";
 
-					foreach ($verkkolaskuputkeen as $lasnoputk => $nimiputk) {
+					foreach ($verkkolaskuputkeen_finvoice as $lasnoputk => $nimiputk) {
 						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
 					}
 
@@ -2281,7 +2299,7 @@
 					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
 					$verkkolasmail .= t("Aineiston laskut").":\n";
 
-					foreach ($verkkolaskuputkeen as $lasnoputk => $nimiputk) {
+					foreach ($verkkolaskuputkeen_elmaedi as $lasnoputk => $nimiputk) {
 						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
 					}
 
@@ -2330,7 +2348,7 @@
 					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
 					$verkkolasmail .= t("Aineiston laskut").":\n";
 
-					foreach ($verkkolaskuputkeen as $lasnoputk => $nimiputk) {
+					foreach ($verkkolaskuputkeen_suora as $lasnoputk => $nimiputk) {
 						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
 					}
 

@@ -68,59 +68,87 @@ if (!$cli and $oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
 flush();
 
 if (!isset($table)) $table = '';
-
+$kasitellaan_tiedosto = FALSE;
 
 if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim($_FILES['userfile']['tmp_name']) != ''))) {
 
+	$kasitellaan_tiedosto = TRUE;
+
 	require ("inc/pakolliset_sarakkeet.inc");
 
-	$path_parts = pathinfo($_FILES['userfile']['name']);
-	$ext = strtoupper($path_parts['extension']);
-
-	if ($ext != "TXT" and $ext != "XLS" and $ext != "CSV") {
-		die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
-	}
-
 	if ($_FILES['userfile']['size'] == 0) {
-		die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
-	}
-
-	if ($ext == "XLS") {
-		require_once ('excel_reader/reader.php');
-
-		// ExcelFile
-		$data = new Spreadsheet_Excel_Reader();
-
-		// Set output Encoding.
-		$data->setOutputEncoding('CP1251');
-		$data->setRowColOffset(0);
-		$data->read($_FILES['userfile']['tmp_name']);
+		echo "<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>";
+		$kasitellaan_tiedosto = FALSE;
 	}
 
 	if (!$cli) echo "<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...<br><br></font>";
 
-	// luetaan eka rivi tiedostosta..
-	if ($ext == "XLS") {
-		$headers = array();
+	$retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT"));
 
-		for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-			$headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
-		}
-
-		for ($excej = (count($headers)-1); $excej > 0 ; $excej--) {
-			if ($headers[$excej] != "") {
-				break;
-			}
-			else {
-				unset($headers[$excej]);
-			}
-		}
+	if ($retval !== TRUE) {
+		echo "<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>";
+		$kasitellaan_tiedosto = FALSE;
 	}
-	else {
-		$file	 = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+}
 
-		$rivi    = fgets($file);
-		$headers = explode("\t", strtoupper(trim($rivi)));
+if ($kasitellaan_tiedosto) {
+
+	/** PHPExcel kirjasto **/
+	require_once "PHPExcel/PHPExcel/IOFactory.php";
+
+	/** Tunnistetaan tiedostomuoto **/
+	$inputFileType = PHPExcel_IOFactory::identify($_FILES['userfile']['tmp_name']);
+
+	/** Luodaan readeri **/
+	$objReader = PHPExcel_IOFactory::createReader($inputFileType);
+
+	/** Ladataan vain solujen datat (ei formatointeja jne) **/
+	if ($inputFileType != "CSV") {
+		$objReader->setReadDataOnly(true);
+	}
+
+	if ($inputFileType == "CSV") {
+		$objReader->setDelimiter("\t");
+		$objReader->setInputEncoding("ISO-8859-1");
+	}
+
+	/** Ladataan file halutuilla parametreilla **/
+	$objPHPExcel = $objReader->load($_FILES['userfile']['tmp_name']);
+
+	/** Laitetaan rivit arrayseen **/
+	$excelrivit = array();
+
+	/** Loopataan tiedoston rivit **/
+	foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
+	    $cellIterator = $row->getCellIterator();
+	    $cellIterator->setIterateOnlyExistingCells(false);
+
+		$rowIndex = ($row->getRowIndex())-1;
+
+	    foreach ($cellIterator as $cell) {
+	        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
+
+			$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
+	    }
+	}
+
+	/** Tuhotaan excel oliot **/
+	unset($objReader);
+	unset($objPHPExcel);
+
+	/** Otetaan tiedoston otsikkorivi **/
+	$headers = $excelrivit[0];
+	$headers = array_map('trim', $headers);
+	$headers = array_map('strtoupper', $headers);
+
+	// Unsetatan tyhj‰t sarakkeet
+	for ($i = (count($headers)-1); $i > 0 ; $i--) {
+		if ($headers[$i] != "") {
+			break;
+		}
+		else {
+			unset($headers[$i]);
+		}
 	}
 
 	$taulut			= array();
@@ -220,65 +248,37 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 		}
 	}
 
+	// rivim‰‰r‰ exceliss‰
+	$excelrivimaara = count($excelrivit);
+
+	// sarakem‰‰r‰ exceliss‰
+	$excelsarakemaara = count($headers);
+
 	// Luetaan tiedosto loppuun ja tehd‰‰n taulukohtainen array koko datasta
-	if ($ext == "XLS") {
-		for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
-			for ($excej = 0; $excej < count($headers); $excej++) {
+	for ($excei = 1; $excei < $excelrivimaara; $excei++) {
+		for ($excej = 0; $excej < $excelsarakemaara; $excej++) {
 
-				$taulunrivit[$taulut[$excej]][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
+			$taulunrivit[$taulut[$excej]][$excei-1][] = trim($excelrivit[$excei][$excej]);
 
-				// Pit‰‰kˆ t‰m‰ sarake laittaa myˆs johonki toiseen tauluun?
-				foreach ($taulunotsikot as $taulu => $joinit) {
+			// Pit‰‰kˆ t‰m‰ sarake laittaa myˆs johonki toiseen tauluun?
+			foreach ($taulunotsikot as $taulu => $joinit) {
 
-					if (strpos($headers[$excej], ".") !== FALSE) {
-						list ($etu, $taka) = explode(".", $headers[$excej]);
-						if ($taka == "") $taka = $etu;
-					}
-					else {
-						$taka = $headers[$excej];
-					}
+				if (strpos($headers[$excej], ".") !== FALSE) {
+					list ($etu, $taka) = explode(".", $headers[$excej]);
+					if ($taka == "") $taka = $etu;
+				}
+				else {
+					$taka = $headers[$excej];
+				}
 
-					if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
-						$taulunrivit[$taulu][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
-					}
+				if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
+					$taulunrivit[$taulu][$excei-1][] = trim($excelrivit[$excei][$excej]);
 				}
 			}
 		}
-	}
-	else {
 
-		$excei = 0;
-
-		while ($rivi = fgets($file)) {
-			// luetaan rivi tiedostosta..
-			$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
-
-			for ($excej = 0; $excej < count($rivi); $excej++) {
-
-				$taulunrivit[$taulut[$excej]][$excei][] = trim($rivi[$excej]);
-
-				// Pit‰‰kˆ t‰m‰ sarake laittaa myˆs johonki toiseen tauluun?
-				foreach ($taulunotsikot as $taulu => $joinit) {
-
-					if (strpos($headers[$excej], ".") !== FALSE) {
-						list ($etu, $taka) = explode(".", $headers[$excej]);
-						if ($taka == "") $taka = $etu;
-					}
-					else {
-						$taka = $headers[$excej];
-					}
-
-					if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
-						$taulunrivit[$taulu][$excei][] = trim($rivi[$excej]);
-					}
-				}
-			}
-
-			if ($cli) echo " Luetaan rivit: $excei\r";
-			$excei++;
-		}
-		fclose($file);
-		if ($cli) echo "\n";
+		// Tuhotaan as we go, ku n‰it‰ ei en‰‰ tarvita...
+		unset($excelrivit[$excei]);
 	}
 
 	// Korjataan spessujoini yhteensopivuus_tuote_lisatiedot/yhteensopivuus_tuote
@@ -1209,7 +1209,10 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 								// Tarvitaan tarkista.inc failissa
 								$toimi_liitostunnus = $tpttrow["tunnus"];
 
-								$query .= ", liitostunnus='$tpttrow[tunnus]' ";
+								if ($rivi[$postoiminto] != 'POISTA') {
+									$query .= ", liitostunnus='$tpttrow[tunnus]' ";
+								}
+
 								$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 							}
 						}
@@ -1669,7 +1672,8 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 		else echo "\nP‰ivitettiin $lask rivi‰\n";
 	}
 }
-else {
+
+if (!$cli) {
 
 	$indx = array(
 		'asiakas',

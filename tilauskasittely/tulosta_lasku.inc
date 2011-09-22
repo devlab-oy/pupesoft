@@ -848,20 +848,17 @@ if (!function_exists('rivi_original')) {
 			$pdf_lasku->draw_text(550, $kala, ($row["alv"]*1)."%", $thispage, $norm);
 		}
 
+		if ($row["myyntihinta_maara"] > 1) {
+			$kala = $kala - 7;
+			$pdf_lasku->draw_text(390, $kala, hintapyoristys($veroton_hinta*$row["myyntihinta_maara"])." / $row[myyntihinta_maara] $row[yksikko]", $thispage, $pieni);
+		}
+
+
 		// Ensimmäinen rivi piirretty
 		$kala = $kala - 10;
 
 		//Yksikkö
-		$pdf_lasku->draw_text(340, $kala, t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selitetark"),		$thispage, $pieni);
-
-		if ($row["myyntihinta_maara"] > 1) {
-			$kala = $kala - $rivinkorkeus + 5;
-
-			$oikpos = $pdf->strlen(hintapyoristys($veroton_hinta*$row["myyntihinta_maara"]), $pieni);
-			$pdf->draw_text(465-$oikpos, $kala, hintapyoristys($veroton_hinta*$row["myyntihinta_maara"]), $thispage, $pieni);
-
-			$pdf->draw_text(465, $kala, " / $row[myyntihinta_maara] $omyks", $thispage, $pieni);
-		}
+		$pdf_lasku->draw_text(340, $kala, t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selitetark"),	$thispage, $pieni);
 
 		//Toimitusaika
 		if (substr($row["toimitettuaika"],0,10) != "0000-00-00" and $laskutyyppi != 6) {

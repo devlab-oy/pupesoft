@@ -3972,7 +3972,7 @@ if ($tee == '') {
 		   				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi  = 'O'
 		   				and tilausrivi.tunnus  = '$tilausrivi[tilausrivilinkki]'
-						and tilausrivin_lisatiedot.suoratoimitettuaika >= '0000-00-00 00:00:00'";
+						and tilausrivin_lisatiedot.suoratoimitettuaika != '0000-00-00'";
 			$suoratoimresult = pupe_query($query);
 
 			if ($suoratoimrow = mysql_fetch_assoc($suoratoimresult)) {

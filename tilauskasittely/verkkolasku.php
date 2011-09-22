@@ -121,6 +121,12 @@
 		$tulostettavat_email = array();
 		$tulos_ulos          = "";
 
+		$verkkolaskuputkeen_pupevoice  	= array();
+		$verkkolaskuputkeen_finvoice  	= array();
+		$verkkolaskuputkeen_suora 		= array();
+		$verkkolaskuputkeen_elmaedi 	= array();
+		$verkkolaskuputkeen_apix		= array();
+
 		if (!isset($silent)) {
 			$silent = "";
 		}
@@ -1926,20 +1932,36 @@
 							if ($lasrow["chn"] == "111") {
 								elmaedi_lasku_loppu($tootedi, $lasrow);
 
+								//N‰m‰ menee verkkolaskuputkeen
+								$verkkolaskuputkeen_elmaedi[$lasrow["laskunro"]] = $lasrow["nimi"];
+
 								$edilask++;
 							}
 							elseif ($lasrow["chn"] == "112") {
 								finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow);
+
+								//N‰m‰ menee verkkolaskuputkeen
+								$verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
 							}
 							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
 								finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
 
 								if ($yhtiorow["verkkolasku_lah"] == "apix") {
 									$tulostettavat_apix[] = $lasrow["tunnus"];
+
+									//N‰m‰ menee verkkolaskuputkeen
+									$verkkolaskuputkeen_apix[$lasrow["laskunro"]] = $lasrow["nimi"];
+								}
+								else {
+									//N‰m‰ menee verkkolaskuputkeen
+									$verkkolaskuputkeen_finvoice[$lasrow["laskunro"]] = $lasrow["nimi"];
 								}
 							}
 							else {
 								pupevoice_lasku_loppu($tootxml);
+
+								//N‰m‰ menee verkkolaskuputkeen
+								$verkkolaskuputkeen_pupevoice[$lasrow["laskunro"]] = $lasrow["nimi"];
 							}
 
 							// Otetaan talteen jokainen laskunumero joka l‰hetet‰‰n jotta voidaan tulostaa paperilaskut
@@ -2060,8 +2082,35 @@
 					$ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
 					$ftpfile = realpath($nimixml);
 
-					// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
-					$cmd = "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";
+					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
+					$bound = uniqid(time()."_") ;
+
+					$verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+					$verkkolasheader .= "MIME-Version: 1.0\n" ;
+					$verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+
+					$verkkolasmail = "--$bound\n";
+					$verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
+					$verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
+					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+					$verkkolasmail .= t("Aineiston laskut").":\n";
+
+					foreach ($verkkolaskuputkeen_pupevoice as $lasnoputk => $nimiputk) {
+						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
+					}
+
+					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
+					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
+					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
+					$verkkolasmail .= "--$bound\n";
+					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
+					$verkkolasmail .= "\n" ;
+					$verkkolasmail .= "--$bound--\n";
+
+					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Pupevoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
 					require("inc/ftp-send.inc");
 
@@ -2178,8 +2227,35 @@
 					$ftpfile = realpath($nimifinvoice);
 					$renameftpfile = $nimifinvoice_delivered;
 
-					// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
-					$cmd = "mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile);
+					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
+					$bound = uniqid(time()."_") ;
+
+					$verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+					$verkkolasheader .= "MIME-Version: 1.0\n" ;
+					$verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+
+					$verkkolasmail = "--$bound\n";
+					$verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
+					$verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
+					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+					$verkkolasmail .= t("Aineiston laskut").":\n";
+
+					foreach ($verkkolaskuputkeen_finvoice as $lasnoputk => $nimiputk) {
+						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
+					}
+
+					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
+					$verkkolasmail .= "mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\n\n";
+					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
+					$verkkolasmail .= "--$bound\n";
+					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
+					$verkkolasmail .= "\n" ;
+					$verkkolasmail .= "--$bound--\n";
+
+					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("iPost Finvoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
 					require("inc/ftp-send.inc");
 
@@ -2210,6 +2286,36 @@
 					$ftppath = $edi_ftppath;
 					$ftpfile = realpath($nimiedi);
 
+					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
+					$bound = uniqid(time()."_") ;
+
+					$verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+					$verkkolasheader .= "MIME-Version: 1.0\n" ;
+					$verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+
+					$verkkolasmail = "--$bound\n";
+					$verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
+					$verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
+					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+					$verkkolasmail .= t("Aineiston laskut").":\n";
+
+					foreach ($verkkolaskuputkeen_elmaedi as $lasnoputk => $nimiputk) {
+						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
+					}
+
+					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
+					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
+					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
+					$verkkolasmail .= "--$bound\n";
+					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
+					$verkkolasmail .= "\n" ;
+					$verkkolasmail .= "--$bound--\n";
+
+					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("EDI-inhouse-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+
 					require("inc/ftp-send.inc");
 
 					if ($silent == "") {
@@ -2222,12 +2328,42 @@
 						$tulos_ulos .= "<br><br>\n".t("FTP-siirto Pupesoft-Finvoice:")."<br>\n";
 					}
 
-					//siirretaan laskutiedosto operaattorille, EDI-inhouse muoto
+					//siirretaan laskutiedosto operaattorille, Sis‰inenFinvoice muoto
 					$ftphost = $sisainenfoinvoice_ftphost;
 					$ftpuser = $sisainenfoinvoice_ftpuser;
 					$ftppass = $sisainenfoinvoice_ftppass;
 					$ftppath = $sisainenfoinvoice_ftppath;
 					$ftpfile = realpath($nimisisainenfinvoice);
+
+					// Tehd‰‰n maili, ett‰ siirret‰‰n laskut operaattorille
+					$bound = uniqid(time()."_") ;
+
+					$verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+					$verkkolasheader .= "MIME-Version: 1.0\n" ;
+					$verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+
+					$verkkolasmail = "--$bound\n";
+					$verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
+					$verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
+					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+					$verkkolasmail .= t("Aineiston laskut").":\n";
+
+					foreach ($verkkolaskuputkeen_suora as $lasnoputk => $nimiputk) {
+						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
+					}
+
+					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
+					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
+					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
+					$verkkolasmail .= "--$bound\n";
+					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
+					$verkkolasmail .= "\n" ;
+					$verkkolasmail .= "--$bound--\n";
+
+					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Pupesoft-Finvoice-aineiston siirto eteenp‰in"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
 
 					require("inc/ftp-send.inc");
 

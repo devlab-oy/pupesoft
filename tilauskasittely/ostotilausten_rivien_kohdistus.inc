@@ -1021,7 +1021,8 @@ if ($tila == '') {
 	foreach ($kenhak_array as $i => $kentta) {
 		// tarkastetaan onko hakukentässä jotakin
 		if (strlen($haku[$i]) > 0) {
-			$haku[$i] = str_replace(",",".",$haku[$i]);
+			#$haku[$i] = str_replace(",",".",$haku[$i]);
+			
 			$lisa1 .= " $kentta like '%$haku[$i]%' and";
 
 			//pidetään muistissa linkkejä varten

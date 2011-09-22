@@ -500,7 +500,7 @@ if (!function_exists("table_exists")) {
 }
 
 if (!function_exists("vapauta_sarjanumerot")) {
-	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="") {
+	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="", $dellaa_ostorivi = TRUE) {
 		global $kukarow, $yhtiorow;
 
 		$query = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu, tilausrivi.tuoteno, tuote.sarjanumeroseuranta, tilausrivin_lisatiedot.tilausrivilinkki
@@ -550,7 +550,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 			}
 
 			// Onko t‰t‰ ostotilauksella?
-			if ($srow["tilausrivilinkki"] > 0) {
+			if ($dellaa_ostorivi and $srow["tilausrivilinkki"] > 0) {
 				$query = "	UPDATE tilausrivi
 							SET tyyppi = 'D'
 							WHERE yhtio 	= '$kukarow[yhtio]'
@@ -1647,7 +1647,7 @@ if (!function_exists("synclog")) {
 // Konserniyhtiˆiden tietueiden synkronointi
 if (!function_exists("synkronoi")) {
 	function synkronoi($yhtio, $table, $tunnus, $orig = "", $force = "") {
-		global $yhtiorow, $kukarow;
+		global $yhtiorow, $kukarow, $synkronoi_kiellot;
 
 		//	Onko mahdollista synkronoida?
 		if (strpos($yhtiorow["synkronoi"], $table) === false) {
@@ -1711,7 +1711,12 @@ if (!function_exists("synkronoi")) {
 
 						foreach($diff as $key => $value) {
 							if (is_string($key) and !in_array($key, array("tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
-								$muutokset[$key] .= $value;
+							    if (isset($synkronoi_kiellot[$table]) and in_array($key, $synkronoi_kiellot[$table])) {
+							        // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
+							    }
+							    else {
+								    $muutokset[$key] .= $value;
+								}
 							}
 						}
 					}
@@ -1928,7 +1933,7 @@ if (!function_exists("synkronoi")) {
 						}
 
 						// Tarkastetaan ett‰ hinnat eiv‰t mene aivan p‰in mets‰‰..
-						$query = "select tunnus from yhtion_parametrit where yhtio='$kohderow[yhtio]' and alv_kasittely!='$yhtiorow[alv_kasittely]'";
+						$query = "SELECT tunnus FROM yhtion_parametrit WHERE yhtio='$kohderow[yhtio]' AND alv_kasittely!='$yhtiorow[alv_kasittely]'";
 						$abures = pupe_query($query);
 
 						if (mysql_num_rows($abures)!=0 and $masterrow["alv"] > 0) {
@@ -2038,10 +2043,11 @@ if (!function_exists("synkronoi")) {
 						//	Duunataan itse p‰ivitys/insert kysely!!!
 						for ($i=1; $i < mysql_num_fields($masterres); $i++) {
 							if (isset($masterrow[mysql_field_name($masterres, $i)]) and !in_array(mysql_field_name($masterres, $i), array("yhtio","tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
-								if (isset($override[mysql_field_name($masterres, $i)])) {
-									if ($override[mysql_field_name($masterres, $i)] != "") {
-										$query .= ", ". mysql_field_name($masterres,$i)."='".$override[mysql_field_name($masterres, $i)]."' ";
-									}
+							    if (isset($synkronoi_kiellot[$table]) and in_array(mysql_field_name($masterres, $i), $synkronoi_kiellot[$table])) {
+							        // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
+							    }
+                                elseif (isset($override[mysql_field_name($masterres, $i)]) and $override[mysql_field_name($masterres, $i)] != "") {
+									$query .= ", ". mysql_field_name($masterres,$i)."='".$override[mysql_field_name($masterres, $i)]."' ";
 								}
 								else {
 									$query .= ", ". mysql_field_name($masterres,$i)."='".$masterrow[mysql_field_name($masterres, $i)]."' ";
@@ -9891,13 +9897,20 @@ if (!function_exists("laskun_ja_tilauksen_vertailu")) {
 
 			// jos yksi rivi ei m‰ts‰‰ (esim. kuljetusvakuutus)
 			if (count($invoice_ei_loydy) == 1) {
-				foreach ($invoice_ei_loydy as $ei_loydy) {
-					// esim. kuljetusvakuutuksella ei ole tilattuam‰‰r‰‰
-					// huono tsekkaus! Miten erotetaan paremmin kuljetusvakuutukset ja runkoveloitukset?
-					if ($ei_loydy['tilattumaara'] == 0) {
+				foreach ($invoice_ei_loydy as $ei_loydytuoteno => $ei_loydy) {
 
-						// oletetaan ett‰ t‰m‰ on kuljetusvakuutus, joten laitetaan se "lˆytyviin" ett‰ vertailu-check hyv‰ksyy n‰m‰ OK:na
+					// Jos t‰m‰ tuote on saldoton, niin oletetaan, ett‰ se on kuljetusvakuutus tai joku muu "ei alunperin tilattu" rivi.
+					$query = "	SELECT ei_saldoa
+								FROM tuote
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tuoteno = '$ei_loydytuoteno'";
+					$esaldoa_result = mysql_query($query) or pupe_error($query);
+					$esaldoa_row = mysql_fetch_assoc($esaldoa_result);
+
+					if ($ei_loydy['tilattumaara'] == 0 or $esaldoa_row["ei_saldoa"] != "") {
+						// oletetaan ett‰ t‰m‰ on kuljetusvakuutus tms., joten laitetaan se "lˆytyviin" ett‰ vertailu-check hyv‰ksyy n‰m‰ OK:na
 						$loytyy_kummastakin[key($invoice_ei_loydy)] = $ei_loydy;
+						$purchaseorder[key($invoice_ei_loydy)] = $ei_loydy;
 
 						// poistetaan se ei lˆydetyist‰
 						array_pop($invoice_ei_loydy);
@@ -11254,6 +11267,33 @@ if (!function_exists("pupe_DataTables")) {
 								);
 							}
 
+						});
+
+						$('input[name^=\"rivi_toimitettuaika_vv\"]').each(function(){
+
+							var tun 				= $(this).attr('id').substring(23);
+							var otunnus 			= $('input[name=\"otunnus\"]').val();
+
+							var rivi_taika_vv		= parseFloat(this.value);
+							var rivi_taika_kk		= parseFloat($('input[name=\"rivi_toimitettuaika_kk_'+tun+'\"]').val());
+							var rivi_taika_pp		= parseFloat($('input[name=\"rivi_toimitettuaika_pp_'+tun+'\"]').val());
+
+							if (rivi_taika_vv > 0 && rivi_taika_kk > 0 && rivi_taika_pp > 0) {
+								$.post('{$_SERVER['SCRIPT_NAME']}',
+									{ 	keikan_otunnus: otunnus,
+										otunnus: otunnus,
+										tunnus: tun,
+										ajax_toiminto: 'rivi_toimitettuaika',
+										rivi_taika_vv: rivi_taika_vv,
+										rivi_taika_kk: rivi_taika_kk,
+										rivi_taika_pp: rivi_taika_pp,
+										no_head: 'yes',
+										ohje: 'off'},
+									function(return_value) {
+										var data = jQuery.parseJSON(return_value);
+									}
+								);
+							}
 						});
 
 					}).ajaxComplete(function(){
@@ -12995,7 +13035,7 @@ if (!function_exists("tarkistahetu")) {
 
 		// tarkistetaan onko ytunnus henkilˆtunnus
 		require ("inc/tarkistahetu.inc");
-		
+
 		if ($hetuok == 0) {
 			$hetu_clean = substr($hetu_orig, 0, 7)."XXXX";
 		}
@@ -13007,4 +13047,64 @@ if (!function_exists("tarkistahetu")) {
 	}
 }
 
-?>
+if (!function_exists("tarkistaytunnus")) {
+	function tarkistaytunnus($ytunnus) {
+
+		$tulo = 0;
+
+		// Ytunnus pit‰‰ olla numeerinen ja 8 merkki‰ pitk‰
+		if (!is_numeric($ytunnus) or strlen($ytunnus) != 8) {
+			return FALSE;
+		}
+
+		// loopataan ytunnus
+		for ($ytunnusi = 0; $ytunnusi < 7; $ytunnusi++) {
+
+			$merkki = substr($ytunnus, $ytunnusi, 1);
+
+			switch ($ytunnusi) {
+				case 0:
+					$kerroin = 7;
+					break;
+				case 1:
+					$kerroin = 9;
+					break;
+				case 2:
+					$kerroin = 10;
+					break;
+				case 3:
+					$kerroin = 5;
+					break;
+				case 4:
+					$kerroin = 8;
+					break;
+				case 5:
+					$kerroin = 4;
+					break;
+				case 6:
+					$kerroin = 2;
+					break;
+			}
+			$tulo += $kerroin * $merkki;
+		}
+
+		// otetaan tarkastusmerkki
+		$tmerkki = substr($ytunnus, -1);
+
+		// summasta mod 11
+		$tulo = $tulo % 11;
+
+		if ($tulo <> 0) {
+			$tulo = 11 - $tulo;
+		}
+
+		// oliko tarkastusmerkki ok
+		if ($tulo == $tmerkki) {
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
+
+	}
+}

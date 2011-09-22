@@ -19,7 +19,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 
 	if (mysql_num_rows($jaettavalaskures) != 1) {
 		echo "<font class='error'>",t("Laskua ei voida jakaa, koska se on väärässä tilassa"),"!<br/>";
-		return false;
+		return FALSE;
 	}
 
 	$jaettavalaskurow = mysql_fetch_assoc($jaettavalaskures);
@@ -30,7 +30,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 	}
 
 	// Lasketaan kerroin annetusta summasta ja alkuperäisestä summasta
-	$kerroin = round($vahennettavasumma_valuutassa / $jaettavalaskurow['summa'], 6);
+	$kerroin = $vahennettavasumma_valuutassa / $jaettavalaskurow['summa'];
 
 	// Katsotaan voidaanko splitata vai meneekö tiliöinnit nollaan
 	$query = "	SELECT round(summa * $kerroin, 2) summa

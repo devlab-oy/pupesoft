@@ -131,7 +131,7 @@
 			echo "<th align='left' colspan='$nrospanni'>".t("Toimitusaika")."</th>";
 
 			if ($yhtiorow['rivinumero_syotto'] != '') {
-				echo "<th align='left'>".t("Rivinumero")."</th>";
+				echo "<th align='left'>".t("Rivinro")."</th>";
 			}
 
 			echo "</tr>";
@@ -200,7 +200,11 @@
 				$nrospanni2 = 6;
 
 				$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
-
+				
+				if ($yhtiorow['rivinumero_syotto'] != '') {
+					$nrospanni2++;
+				}
+				
 				echo "<tr>{$jarjlisa}
 						<th colspan='{$nrospanni2}' align='left'>",t("Tuotteen nimitys"),"</th>
 						</tr><tr>{$jarjlisa}
@@ -405,7 +409,7 @@
 		echo "<th colspan='$nrospanni' align='left'>".t("Kommentti")."</th>";
 
 		if ($yhtiorow['rivinumero_syotto'] != '') {
-			echo "<th align='left'>".t("Rivinumero")."</th>";
+			echo "<th align='left'>".t("Rivinro")."</th>";
 		}
 
 		echo "<td valign='top' class='back'></td></tr>";
@@ -484,6 +488,10 @@
 			$nrospanni2 = 7;
 
 			$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
+			
+			if ($yhtiorow['rivinumero_syotto'] != '') {
+				$nrospanni2++;
+			}
 
 			echo "</tr>
 				<tr>$jarjlisa

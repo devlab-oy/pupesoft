@@ -102,13 +102,13 @@ if ($tuoteno != '') {
 }
 
 if (isset($KAIKKI)) {
-	
+
 	$lisa = "";
-	
+
 	if ($maa != "") {
 		echo "$maa";
 	}
-	
+
 	if ($toimittaja != "") {
 		$lisa = " and tuotteen_toimittajat.liitostunnus = '$toimittaja' ";
 	}
@@ -121,8 +121,7 @@ if (isset($KAIKKI)) {
 				and tuotteen_toimittajat.alkuperamaa not in ('FI', '')
 				and tuote.tullinimike1 not in ('', 0)
 				$lisa
-				ORDER BY tuotteen_toimittajat.alkuperamaa, tuote.tuoteno
-				LIMIT 100";
+				ORDER BY tuotteen_toimittajat.alkuperamaa, tuote.tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<pre>";
@@ -135,19 +134,19 @@ if (isset($KAIKKI)) {
 		echo sprintf('%-60.60s', $tuorow["tuoteno"])."\t";
 		echo sprintf('%8.8s',   $tuorow["tullinimike1"])."\t";
 		echo sprintf('%4.4s',   $tuorow["tullinimike2"])."\t";
-		
+
 
 		$tulliprossa = "";
-		
+
 		if ($maa != "") {
 			$laskurow["maa_lahetys"] = $maa;
 		}
-		else {	
+		else {
 			$laskurow["maa_lahetys"] = $tuorow["alkuperamaa"];
 		}
-		
+
 		echo sprintf('%2.2s',   $laskurow["maa_lahetys"])."\t";
-		
+
 		ob_start();
 
 		require("taric_veroperusteet.inc");

@@ -287,7 +287,7 @@
 								AND alkup_tilaus.otunnus = tilausrivin_lisatiedot.vanha_otunnus)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.otunnus = '$laskurow[tunnus]'
-							and tilausrivi.var = 'J'
+							and tilausrivi.var != 'J'
 							GROUP BY tilausrivin_lisatiedot.vanha_otunnus
 							HAVING jt = 0 or jt IS NULL";
 				$result = pupe_query($query);

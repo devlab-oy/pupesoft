@@ -13013,21 +13013,21 @@ if (!function_exists("tarkistahetu")) {
 	}
 }
 
-
 if (!function_exists("tarkistaytunnus")) {
 	function tarkistaytunnus($ytunnus) {
 
-		$tulo    = 0;
+		$tulo = 0;
 
-		// sallitaan vain numerot 0-9
-		$ytunnus = preg_replace("/[^0-9]/", "", $ytunnus);
-
-		// tehd‰‰n kaheksen merkki‰ pitk‰ksi
-		$ytunnus = sprintf("%08.8s",$ytunnus);
+		// Ytunnus pit‰‰ olla numeerinen ja 8 merkki‰ pitk‰
+		if (!is_numeric($ytunnus) or strlen($ytunnus) != 8) {
+			return FALSE;
+		}
 
 		// loopataan ytunnus
-		for ($ytunnusi=0; $ytunnusi<7; $ytunnusi++) {
+		for ($ytunnusi = 0; $ytunnusi < 7; $ytunnusi++) {
+
 			$merkki = substr($ytunnus, $ytunnusi, 1);
+
 			switch ($ytunnusi) {
 				case 0:
 					$kerroin = 7;
@@ -13066,14 +13066,11 @@ if (!function_exists("tarkistaytunnus")) {
 
 		// oliko tarkastusmerkki ok
 		if ($tulo == $tmerkki) {
-			return true;
+			return TRUE;
 		}
 		else {
-			return false;
+			return FALSE;
 		}
-		
+
 	}
 }
-
-
-?>

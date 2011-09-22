@@ -747,6 +747,7 @@
 					WHERE tunnus = '$ptunnus'
 					and yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
+
 		$tee = "E"; // N‰ytet‰‰n milt‰ tosite nyt n‰ytt‰‰
 	}
 
@@ -767,10 +768,13 @@
 
 		$laskurow = mysql_fetch_assoc($result);
 
-		$summa 		= str_replace ( ",", ".", $summa);
-		$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
-		$tositetila = $laskurow["tila"];
-		$tositeliit = $laskurow["liitostunnus"];
+		$summa 			= str_replace ( ",", ".", $summa);
+		$selausnimi 	= 'tili'; // Minka niminen mahdollinen popup on?
+		$tositetila 	= $laskurow["tila"];
+		$tositeliit 	= $laskurow["liitostunnus"];
+		$kustp_tark		= $kustp;
+		$kohde_tark		= $kohde;
+		$projekti_tark	= $projekti;
 
 		require ("inc/tarkistatiliointi.inc");
 
@@ -1122,7 +1126,7 @@
 
 			$query = "	SELECT kuka, nimi
 			          	FROM kuka
-			          	WHERE yhtio = '$kukarow[yhtio]' 
+			          	WHERE yhtio = '$kukarow[yhtio]'
 						and hyvaksyja = 'o'
 			          	ORDER BY nimi";
 			$vresult = pupe_query($query);

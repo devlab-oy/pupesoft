@@ -150,72 +150,53 @@
 			//	ei koskaan päivitetä automaattisesti
 			$tee = "";
 
-			$retval = tarkasta_liite("tositefile", array("TXT", "CSV", "XLS"));
+			$retval = tarkasta_liite("tositefile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT"));
 
 			if ($retval === true) {
-				$path_parts = pathinfo($_FILES['tositefile']['name']);
-				$name	= strtoupper($path_parts['filename']);
-				$ext	= strtoupper($path_parts['extension']);
 
-				if (strtoupper($ext)=="XLS") {
-					require_once ('excel_reader/reader.php');
+				/** PHPExcel kirjasto **/
+				require_once "PHPExcel/PHPExcel/IOFactory.php";
 
-					// ExcelFile
-					$data = new Spreadsheet_Excel_Reader();
+				/** Tunnistetaan tiedostomuoto **/
+				$inputFileType = PHPExcel_IOFactory::identify($_FILES['tositefile']['tmp_name']);
 
-					// Set output Encoding.
-					$data->setOutputEncoding('CP1251');
-					$data->setRowColOffset(0);
-					$data->read($_FILES['tositefile']['tmp_name']);
+				/** Luodaan readeri **/
+				$objReader = PHPExcel_IOFactory::createReader($inputFileType);
+
+				/** Ladataan vain solujen datat (ei formatointeja jne) **/
+				if ($inputFileType != "CSV") {
+					$objReader->setReadDataOnly(true);
 				}
 
-				echo "<font class='message'>".t("Tutkaillaan mitä olet lähettänyt").".<br></font>\n";
-
-				// luetaan eka rivi tiedostosta..
-				if (strtoupper($ext) == "XLS") {
-					$otsikot = array();
-
-					for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-						$otsikot[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
-					}
-				}
-				else {
-					$file	 = fopen($_FILES['tositefile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
-
-					$rivi    = fgets($file);
-					$otsikot = explode("\t", strtoupper(trim($rivi)));
+				if ($inputFileType == "CSV") {
+					$objReader->setDelimiter("\t");
+					$objReader->setInputEncoding("ISO-8859-1");
 				}
 
-				// luetaan tiedosto loppuun ja tehdään array koko datasta
+				/** Ladataan file halutuilla parametreilla **/
+				$objPHPExcel = $objReader->load($_FILES['tositefile']['tmp_name']);
+
+				/** Laitetaan solut arrayseen **/
 				$excelrivi = array();
 
-				if (strtoupper($ext) == "XLS") {
-					for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {
-						for ($excej = 0; $excej <= $data->sheets[0]['numCols']; $excej++) {
-							$excelrivi[$excei][$excej] = $data->sheets[0]['cells'][$excei][$excej];
-						}
-					}
-				}
-				else {
-					$excei = 1;
+				/** Loopataan rivit/sarakkeet **/
+				foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
+				    $cellIterator = $row->getCellIterator();
+				    $cellIterator->setIterateOnlyExistingCells(false);
 
-					while ($rivi = fgets($file)) {
-						// luetaan rivi tiedostosta..
-						$poista	 = array("'", "\\");
-						$rivi	 = str_replace($poista,"",$rivi);
-						$rivi	 = explode("\t", trim($rivi));
+					$rowIndex = ($row->getRowIndex())-1;
 
-						$excej = 0;
-						foreach ($rivi as $riv) {
-							$excelrivi[$excei][$excej] = $riv;
-							$excej++;
-						}
-						$excei++;
-					}
-					fclose($file);
+				    foreach ($cellIterator as $cell) {
+				        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
+
+						$excelrivi[$rowIndex][$colIndex] = utf8_decode($cell->getCalculatedValue());
+				    }
 				}
 
-				$maara = 0;
+				// Otetaan tiedoston otsikkorivi
+				$otsikot = array_shift($excelrivi);
+
+				$maara = 1;
 
 				foreach ($excelrivi as $erivi) {
 					foreach ($erivi as $e => $eriv) {
@@ -277,6 +258,7 @@
 							${"i".strtolower($otsikot[$e])}[$maara] = $eriv;
 						}
 					}
+
 					$maara++;
 				}
 
@@ -357,17 +339,17 @@
 					$gok = 1;
 				}
 
-				$ulos 		= "";
-				$virhe 		= "";
-				$tili 		= $itili[$i];
-				$summa 		= $isumma[$i];
-				$totsumma  += $summa;
-				$selausnimi = "itili['.$i.']"; // Minka niminen mahdollinen popup on?
-				$vero 		= "";
-				$tositetila = "X";
-				$kustp_tark		= $ikustp[$i];		// nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
-				$kohde_tark		= $ikohde[$i];      // nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
-				$projekti_tark	= $iprojekti[$i];   // nämä muuttujat menevät tarkistatiliointi.inc:iin tarkistukseen, mikäli on pakollisia kenttiä tilikartan takaata
+				$ulos 			= "";
+				$virhe 			= "";
+				$tili 			= $itili[$i];
+				$summa 			= $isumma[$i];
+				$totsumma  	   += $summa;
+				$selausnimi 	= "itili['.$i.']"; // Minka niminen mahdollinen popup on?
+				$vero 			= "";
+				$tositetila 	= "X";
+				$kustp_tark		= $ikustp[$i];
+				$kohde_tark		= $ikohde[$i];
+				$projekti_tark	= $iprojekti[$i];
 
 				if ((isset($toimittajaid) and $toimittajaid > 0) or (isset($asiakasid) and $asiakasid > 0)) {
 					$tositeliit = $toimasrow["tunnus"];
@@ -825,13 +807,6 @@
 			echo "<input type='hidden' name='alv_tili' value='$tilino_alv'>\n";
 		}
 
-		if (is_readable("excel_reader/reader.php")) {
-			$excel = ".xls, ";
-		}
-		else {
-			$excel = "";
-		}
-
 		echo "<tr>\n";
 		echo "<th>".t("Tositteen kommentti")."</th>\n";
 		echo "<td colspan='3'><input type='text' name='comments' value='$comments' size='60'></td>\n";
@@ -848,7 +823,7 @@
 		echo "<table>
 				<tr>
 					<th>".t("Valitse tiedosto")."</th>
-					<td><input type='file' name='tositefile' onchage='submit()'>  <font class='info'>".t("Vain $excel.txt ja .cvs tiedosto sallittuja")."</td>
+					<td><input type='file' name='tositefile' onchage='submit()'></td>
 				</tr>
 			</table>";
 

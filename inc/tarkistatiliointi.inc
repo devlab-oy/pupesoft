@@ -78,8 +78,6 @@
 			7 = pakollisia kenttiä tiliöinnissä on projekti
 			*/
 
-
-
 			if ($xrow['tiliointi_tarkistus'] != 0) {
 
 				if ($xrow['tiliointi_tarkistus'] == 1) {

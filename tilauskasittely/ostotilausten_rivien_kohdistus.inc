@@ -754,13 +754,13 @@ if ($tila == 'tee_kohdistus') {
 
 			list($valittutunnus, $valittuotunnus) = explode("###", $valittu);
 
-			$query = "	UPDATE tilausrivi use index (yhtio_otunnus) 
-						SET uusiotunnus = '$otunnus', 
-						kerattyaika = now(), 
-						keratty = '$kukarow[kuka]', 
-						erikoisale = '$laskurow[erikoisale]' 
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and otunnus in ('$valittuotunnus','$otunnus') 
+			$query = "	UPDATE tilausrivi use index (yhtio_otunnus)
+						SET uusiotunnus = '$otunnus',
+						kerattyaika = now(),
+						keratty = '$kukarow[kuka]',
+						erikoisale = '$laskurow[erikoisale]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus in ('$valittuotunnus','$otunnus')
 						and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
 			$result = pupe_query($query);
 		}
@@ -792,6 +792,18 @@ if ($tila == 'tee_kohdistus') {
 		foreach ($rivi_ale as $tunnus => $ale) {
 			$ale  = str_replace(",",".", $ale);
 			$query  = "UPDATE tilausrivi set ale1='$ale' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and ale1<>'$ale'";
+			$result = pupe_query($query);
+		}
+	}
+
+	// katotaan päivitetäänkö toimitettuaikoja
+	if (is_array($rivi_toimitettuaika_vv)) {
+		foreach ($rivi_toimitettuaika_vv as $tunnus => $toimitettuvv) {
+
+			$toimitettukk = $rivi_toimitettuaika_kk[$tunnus];
+			$toimitettupp = $rivi_toimitettuaika_pp[$tunnus];
+
+			$query  = "UPDATE tilausrivin_lisatiedot set suoratoimitettuaika='$toimitettuvv-$toimitettukk-$toimitettupp' where yhtio='$kukarow[yhtio]' and tilausrivitunnus='$tunnus'";
 			$result = pupe_query($query);
 		}
 	}
@@ -1009,7 +1021,8 @@ if ($tila == '') {
 	foreach ($kenhak_array as $i => $kentta) {
 		// tarkastetaan onko hakukentässä jotakin
 		if (strlen($haku[$i]) > 0) {
-			$haku[$i] = str_replace(",",".",$haku[$i]);
+			#$haku[$i] = str_replace(",",".",$haku[$i]);
+			
 			$lisa1 .= " $kentta like '%$haku[$i]%' and";
 
 			//pidetään muistissa linkkejä varten
@@ -1095,9 +1108,11 @@ if ($tila == '') {
 				tuotteen_toimittajat.ostohinta,
 				tuotteen_toimittajat.valuutta,
 				tilausrivi.yksikko tilyksikko,
-				if(tuotteen_toimittajat.toim_yksikko!='', tuotteen_toimittajat.toim_yksikko, tilausrivi.yksikko) toimyksikko
+				if(tuotteen_toimittajat.toim_yksikko!='', tuotteen_toimittajat.toim_yksikko, tilausrivi.yksikko) toimyksikko,
+				tilausrivin_lisatiedot.suoratoimitettuaika
 				FROM lasku
 				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
+				LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus) 
 				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno  and tuote.ei_saldoa = '')
 				LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
@@ -1451,6 +1466,7 @@ if ($tila == '') {
 		}
 
 		$onkosuoratoimitus = FALSE;
+		$onkosuoratoimitus_suoraan_asiakkaalle = FALSE;
 
 		//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
 	   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
@@ -1465,10 +1481,11 @@ if ($tila == '') {
 			$onkosuoratoimitus = TRUE;
 
 			if ($varastoon_row["suoraan_laskutukseen"] != "") {
-				$rivirow["kommentti"] .= "<br>".t("Suoratoimitus asiakkaalle").": ".$varastoon_row["nimi"];
+				$rivirow["kommentti"] .= "<br><font class='info'>".t("Suoratoimitus asiakkaalle").":</font> ".$varastoon_row["nimi"];
+				$onkosuoratoimitus_suoraan_asiakkaalle = TRUE;
 			}
 			else {
-				$rivirow["kommentti"] .= "<br>".t("Tilattu asiakkaalle").": ".$varastoon_row["nimi"];
+				$rivirow["kommentti"] .= "<br><font class='info'>".t("Tilattu asiakkaalle").":</font> ".$varastoon_row["nimi"];
 			}
 		}
 		else {
@@ -1697,7 +1714,30 @@ if ($tila == '') {
 			echo tv1dateconv($rivirow["toimaika"]);
 		}
 
-		echo "<br>$rivirow[kommentti]</$td>";
+		echo "<br>$rivirow[kommentti]";
+
+		if ($onkosuoratoimitus_suoraan_asiakkaalle) {
+
+			$toimitettuaikavv = substr($rivirow["suoratoimitettuaika"], 0, 4);
+			$toimitettuaikakk = substr($rivirow["suoratoimitettuaika"], 5, 2);
+			$toimitettuaikapp = substr($rivirow["suoratoimitettuaika"], 8, 2);
+
+			if ($toimitettuaikavv == 0) $toimitettuaikavv = "";
+			if ($toimitettuaikakk == 0) $toimitettuaikakk = "";
+			if ($toimitettuaikapp == 0) $toimitettuaikapp = "";
+
+			if ($rivirow["varastossa_kpl"] == 0) {
+				echo "<br><font class='info'>".t("Toimitettu asiakkaalle").":</font><br>
+						<input size='4' type='text' name='rivi_toimitettuaika_pp[$rivirow[rivitunnus]]' value='$toimitettuaikapp' style='text-align:right'>
+						<input size='4' type='text' name='rivi_toimitettuaika_kk[$rivirow[rivitunnus]]' value='$toimitettuaikakk' style='text-align:right'>
+						<input size='4' type='text' name='rivi_toimitettuaika_vv[$rivirow[rivitunnus]]' value='$toimitettuaikavv' style='text-align:right'>";
+			}
+			elseif ($toimitettuaikavv != "") {
+				echo "<br><font class='info'>".t("Toimitettu asiakkaalle").":</font> ".tv1dateconv("$toimitettuaikavv-$toimitettuaikakk-$toimitettuaikapp");
+			}
+		}
+
+		echo "</$td>";
 
 		//Tutkitaan tuotteiden lisävarusteita
 		$query  = "	SELECT tuote.tuoteno, tuote.nimitys, tuotteen_toimittajat.toim_tuoteno

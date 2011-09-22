@@ -710,7 +710,7 @@
 		}
 		if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
 			// Tulostellaan venemyyntiin liittyviä osia
-			$where1 .= " lasku.tila in ('L','T','N') ";
+			$where1 .= " lasku.tila in ('L','T','N','A') ";
 
 			if (strlen($ytunnus) > 0 and $ytunnus{0} == '£') {
 				$where2 .= $wherenimi;
@@ -1594,7 +1594,7 @@
 				}
 
 				//tulostetaan sivu
-				tyomaarays_print_pdf($komento["NAYTATILAUS"]);
+				tyomaarays_print_pdf($komento["Työmääräys"]);
 				$tee = '';
 			}
 

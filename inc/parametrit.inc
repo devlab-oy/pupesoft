@@ -198,6 +198,7 @@ unset($liitetaanko_editilaus_laskulle_hakemisto);
 
 unset($siirrasuoritustilille);
 unset($ohjewiki_url);
+unset($synkronoi_kiellot);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();

@@ -15,21 +15,22 @@ if ($tee == "update") {
 	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
 
 	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
-	
-	if (abs($rahti_etu) > abs($llrow['vosumma'])) {
+
+	// Tsekki tehd‰‰n vain jos vaihto-omaisuus laskuja on liitetty keikkaan!
+	if ($llrow["volasku"] != 0 and abs($rahti_etu) > abs($llrow['vosumma_valuutassa'])) {
 		echo "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br><br>";
-		
+
 		$tee = "";
 		$toiminto = "lisatiedot";
-		
+
 		if ($nappikeikalla == 'ollaan') {
 			$nappikeikalle = 'menossa';
 			$nappikeikalla = '';
 		}
 	}
 }
-	
-if ($tee == "update") {	
+
+if ($tee == "update") {
 	if ($laskurow["erikoisale"] == $erikoisale and $laskurow["rahti_etu"] == $rahti_etu and $laskurow["rahti_etu_alv"] == $rahti_etu_alv) {
 		$kohdistettu = $laskurow["kohdistettu"];
 	}
@@ -50,7 +51,7 @@ if ($tee == "update") {
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
 	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
 	$bruttopaino 	= str_replace ( ",", ".", $bruttopaino);
-	
+
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
@@ -71,7 +72,7 @@ if ($tee == "update") {
 				ultilno 		= '$ultilno'
 				WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	$query_erikoisale = "	UPDATE tilausrivi
 							SET erikoisale = '{$erikoisale}'
 							WHERE yhtio = '{$kukarow['yhtio']}'
@@ -84,7 +85,7 @@ if ($tee == "update") {
 }
 
 if ($tee == "") {
-	
+
 	$query = "SELECT *
 			  FROM lasku
 			  WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
@@ -94,17 +95,17 @@ if ($tee == "") {
 	if (!isset($kaikkivarastossayhteensa)) $kaikkivarastossayhteensa = 0;
 
 	list (,,,,,,,$llrow,,,,,,) = tsekit($laskurow, $kaikkivarastossayhteensa);
-	
+
 	// haetaan toimittajan tiedot
 	$query  = "SELECT * FROM toimi WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[liitostunnus]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$toimittaja = mysql_fetch_array($result);
 
 	// katotaan paljonko on kohdistamatta
-	$jaljella = sprintf("%.2f", $llrow["vosumma"] - $laskurow["summa"]);
+	$jaljella = sprintf("%.2f", $llrow["vosumma_valuutassa"] - $laskurow["summa"]);
 
 	// kaunistellaan
-	if ($llrow["vosumma"] == "") $llrow["vosumma"] = "0.00";
+	if ($llrow["vosumma_valuutassa"] == "") $llrow["vosumma_valuutassa"] = "0.00";
 
 	// n‰ytet‰‰n viel‰ laskun tiedot, ettei kohdisteta p‰in berberi‰
 	echo "<table>";
@@ -118,7 +119,15 @@ if ($tee == "") {
 	echo "<th>".t("kohdistettu")."</th>";
 	echo "<th>".t("j‰ljell‰")."</th>";
 	echo "</tr>";
-	echo "<tr><td>$laskurow[laskunro]</td><td>$laskurow[ytunnus]</td><td>$laskurow[nimi]</td><td>$laskurow[tapvm]</td><td>$laskurow[toimitusehto]</td><td>$llrow[vosumma] $laskurow[valkoodi]</td><td>$laskurow[summa] $laskurow[valkoodi]</td><td>$jaljella $laskurow[valkoodi]</td></tr>";
+	echo "<tr>
+			<td>$laskurow[laskunro]</td>
+			<td>$laskurow[ytunnus]</td>
+			<td>$laskurow[nimi]</td>
+			<td>$laskurow[tapvm]</td>
+			<td>$laskurow[toimitusehto]</td>
+			<td>$llrow[vosumma_valuutassa] $laskurow[valkoodi]</td>
+			<td>$laskurow[summa] $laskurow[valkoodi]</td>
+			<td>$jaljella $laskurow[valkoodi]</td></tr>";
 	echo "</table><br>";
 
 	echo "<table>";
@@ -133,7 +142,7 @@ if ($tee == "") {
 		echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 	}
 
-	echo "<tr><td>".t("L‰hetysmaa").":</td><td colspan='3'>
+	echo "<tr><th>".t("L‰hetysmaa").":</th><td colspan='3'>
 			<select name='maa_lahetys'>";
 
 	$query = "	SELECT distinct koodi, nimi
@@ -161,7 +170,7 @@ if ($tee == "") {
 	echo "</select></td>";
 	echo "</tr>";
 
-	echo "	<tr><td>".t("M‰‰r‰maan koodi").":</td>
+	echo "	<tr><th>".t("M‰‰r‰maan koodi").":</th>
 			<td colspan='3'><select name='maa_maara'>";
 
 	$query = "	SELECT distinct koodi, nimi
@@ -209,7 +218,7 @@ if ($tee == "") {
 		$laskurow["tuontipvm"] = $vv."-".$kk."-".$pp;
 	}
 
-	echo "<tr><td>".t("Kauppatapahtuman luonne").":</td><td colspan='3'><select name='ktapahtuman_luonne'>";
+	echo "<tr><th>".t("Kauppatapahtuman luonne").":</th><td colspan='3'><select name='ktapahtuman_luonne'>";
 	echo "<option value=''>".t("Valitse")."</option>";
 
 	$result = t_avainsana("KT");
@@ -227,7 +236,7 @@ if ($tee == "") {
 	echo "</select></td>";
 	echo "</tr>";
 
-	echo "<tr><td>".t("Kuljetusmuoto").":</td><td colspan='3'>
+	echo "<tr><th>".t("Kuljetusmuoto").":</th><td colspan='3'>
 				<select NAME='kuljetusmuoto'>";
 	echo "<option value=''>".t("Valitse")."</option>";
 
@@ -271,15 +280,15 @@ if ($tee == "") {
 		$lisamassa = "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 	}
 
-	if (abs($laskurow['rahti_etu']) > abs($llrow['vosumma'])) {
-		$lisatiedot = "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br>";	
+	if (abs($laskurow['rahti_etu']) > abs($llrow['vosumma_valuutassa'])) {
+		$lisatiedot = "<font class='message'>".t("VIRHE: Eturahti ei saa olla suurempi kuin laskujen yhteissumma")."!</font><br>";
 	}
 
-	echo "<tr><td valign='top'>".t("Nettopaino").":</td><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back' width='450'>$lisamassa</td></tr>";
-	echo "<tr><td valign='top'>".t("Veroton")." ".t("Eturahti").":</td><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td><td class='back'> $lisatiedot </td></tr>";
-	echo "<tr><td valign='top'>".t("Arvioitu kuluprosentti").":</td><td valign='top' colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
-	echo "<tr><td valign='top'>".t("Kulusumma")." $yhtiorow[valkoodi]:</td><td valign='top' colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
-	echo "<tr><td valign='top'>".t("Erikoisalennus").":</td><td valign='top' colspan='3'><input type='text' name='erikoisale' value='$laskurow[erikoisale]'></td></tr>";
+	echo "<tr><th valign='top'>".t("Nettopaino").":</th><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back' width='450'>$lisamassa</td></tr>";
+	echo "<tr><th valign='top'>".t("Veroton")." ".t("Eturahti").":</th><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td><td class='back'> $lisatiedot </td></tr>";
+	echo "<tr><th valign='top'>".t("Arvioitu kuluprosentti").":</th><td valign='top' colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
+	echo "<tr><th valign='top'>".t("Kulusumma")." $yhtiorow[valkoodi]:</th><td valign='top' colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
+	echo "<tr><th valign='top'>".t("Erikoisalennus").":</th><td valign='top' colspan='3'><input type='text' name='erikoisale' value='$laskurow[erikoisale]'></td></tr>";
 
 	if ($laskurow["toimaika"] != '0000-00-00') {
 		$vv = substr($laskurow["toimaika"],0,4);
@@ -292,12 +301,12 @@ if ($tee == "") {
 		$pp = date("d");
 	}
 
-	echo "<tr><td>".t("Toimitusaika").":</td>
+	echo "<tr><th>".t("Toimitusaika").":</th>
 			<td>".t("pp")." <input type='text' name='pp' value='$pp' size='3'></td>
 			<td>".t("kk")." <input type='text' name='kk' value='$kk' size='3'></td>
 			<td>".t("vvvv")." <input type='text' name='vv' value='$vv' size='5'></td></tr>";
 
-	echo "<tr><td>".t("Kommentti").":</td><td colspan='3'><input type='text' name='kommentti' size='40' value='$laskurow[comments]'></td></tr>";
+	echo "<tr><th>".t("Kommentti").":</th><td colspan='3'><input type='text' name='kommentti' size='40' value='$laskurow[comments]'></td></tr>";
 
 	echo "</table>";
 

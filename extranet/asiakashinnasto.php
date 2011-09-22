@@ -229,8 +229,10 @@
 				}
 
 				$hinnat = alehinta($laskurow, $alehinrrow, 1, '', '', '', $palautettavat_kentat, $GLOBALS['eta_yhtio']);
-
-				$hinnat['erikoisale'] = $asiakasrow["erikoisale"];
+				
+				// Otetaan erikoisalennus pois asiakashinnastosta
+				// $hinnat['erikoisale'] = $asiakasrow["erikoisale"];
+				$hinnat['erikoisale'] = 0;
 
 				$hinta 			= $hinnat["hinta"];
 				$netto 			= $hinnat["netto"];

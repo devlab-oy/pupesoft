@@ -52,33 +52,34 @@
 			echo "03: ".$laskun_tyyppi."\n";
 			echo "04: ".$laskun_numero."\n";
 			echo "05: ".$laskun_ebid."\n";
-			echo "06: ".$laskun_paiva."\n";
-			echo "07: ".$laskun_erapaiva."\n";
-			echo "08: ".$laskun_kapvm."\n";
-			echo "09: ".$laskun_kasumma."\n";
-			echo "10: ".$laskuttajan_ovt."\n";
-			echo "11: ".$laskuttajan_nimi."\n";
-			echo "12: ".$laskuttajan_vat."\n";
-			echo "13: ".$laskun_pankkiviite."\n";
-			echo "14: ".$laskun_asiakastunnus."\n";
-			echo "15: ".$laskun_summa_eur."\n";
-			echo "16: ".$laskun_tilausviite."\n";
-			echo "17: ".$kauttalaskutus."\n";
-			echo "18: ".$laskun_asiakkaan_tilausnumero."\n";
-			echo "19: ".$toim_asiakkaantiedot["toim_ovttunnus"]."\n";
-			echo "20: ".$toim_asiakkaantiedot["ytunnus"]."\n";
-			echo "21: ".$toim_asiakkaantiedot["nimi"]."\n";
-			echo "22: ".$toim_asiakkaantiedot["osoite"]."\n";
-			echo "23: ".$toim_asiakkaantiedot["postino"]."\n";
-			echo "24: ".$toim_asiakkaantiedot["postitp"]."\n";
-			echo "25: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."\n";
-			echo "26: ".$ostaja_asiakkaantiedot["ytunnus"]."\n";
-			echo "27: ".$ostaja_asiakkaantiedot["nimi"]."\n";
-			echo "28: ".$ostaja_asiakkaantiedot["osoite"]."\n";
-			echo "29: ".$ostaja_asiakkaantiedot["postino"]."\n";
-			echo "30: ".$ostaja_asiakkaantiedot["postitp"]."\n";
-			echo "31: TecCom/Unikko only ".$laskuttajan_toimittajanumero."\n";
-			echo "32: ".$laskuttajan_valkoodi."\n";
+			echo "06: ".$laskun_tapvm."\n";
+			echo "07: ".$laskun_lapvm."\n";
+			echo "08: ".$laskun_erapaiva."\n";
+			echo "09: ".$laskun_kapvm."\n";
+			echo "10: ".$laskun_kasumma."\n";
+			echo "11: ".$laskuttajan_ovt."\n";
+			echo "12: ".$laskuttajan_nimi."\n";
+			echo "13: ".$laskuttajan_vat."\n";
+			echo "14: ".$laskun_pankkiviite."\n";
+			echo "15: ".$laskun_asiakastunnus."\n";
+			echo "16: ".$laskun_summa_eur."\n";
+			echo "17: ".$laskun_tilausviite."\n";
+			echo "18: ".$kauttalaskutus."\n";
+			echo "19: ".$laskun_asiakkaan_tilausnumero."\n";
+			echo "20: ".$toim_asiakkaantiedot["toim_ovttunnus"]."\n";
+			echo "21: ".$toim_asiakkaantiedot["ytunnus"]."\n";
+			echo "22: ".$toim_asiakkaantiedot["nimi"]."\n";
+			echo "23: ".$toim_asiakkaantiedot["osoite"]."\n";
+			echo "24: ".$toim_asiakkaantiedot["postino"]."\n";
+			echo "25: ".$toim_asiakkaantiedot["postitp"]."\n";
+			echo "26: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."\n";
+			echo "27: ".$ostaja_asiakkaantiedot["ytunnus"]."\n";
+			echo "28: ".$ostaja_asiakkaantiedot["nimi"]."\n";
+			echo "29: ".$ostaja_asiakkaantiedot["osoite"]."\n";
+			echo "30: ".$ostaja_asiakkaantiedot["postino"]."\n";
+			echo "31: ".$ostaja_asiakkaantiedot["postitp"]."\n";
+			echo "32: TecCom/Unikko only ".$laskuttajan_toimittajanumero."\n";
+			echo "33: ".$laskuttajan_valkoodi."\n";
 
 			Nämä muuttujat ovat valinnaisia:
 
@@ -105,7 +106,7 @@
 			$return  = "Tiedosto: $file\n";
 			$return .= "Lähettäjä: $laskuttajan_nimi\n";
 			$return .= "Laskunro: $laskun_numero\n";
-			$return .= "Päivä: $laskun_paiva\n";
+			$return .= "Päivä: $laskun_tapvm\n";
 			$return .= "Summa: $laskun_summa_eur\n";
 			$return .= "Viite: $laskun_pankkiviite\n";
 
@@ -704,14 +705,22 @@
 					}
 				}
 
-				// Tsekataan laskun päiväys
-				$tpp = (int) substr($laskun_paiva, 6, 2);
-				$tpk = (int) substr($laskun_paiva, 4, 2);
-				$tpv = (int) substr($laskun_paiva, 0, 4);
+				// Laitetaan tänä päivä laskun tapahtumapäiväksi jos yhtiön parametri on tässä asennossa. (UNIKKO-INVOICE:ssa tapvm tulee erikseen, joten käytetään sitä siinä tapauksessa suoraan...)
+				if ($yhtiorow['ostolaskujen_paivays'] == "1" and $laskun_tyyppi != "UNIKKO-INVOICE") {
+					$laskun_tapvm = date("Ymd");
+				}
 
+				$tpp = (int) substr($laskun_tapvm, 6, 2);
+				$tpk = (int) substr($laskun_tapvm, 4, 2);
+				$tpv = (int) substr($laskun_tapvm, 0, 4);
+
+				// Tsekataan laskun päiväys
 				if (!checkdate($tpk, $tpp, $tpv)) {
 					// Laitetaan sitten ajopäivä
-					list($tpv,$tpk,$tpp) = explode("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d"),date("Y"))));
+					$tpp = date("d");
+					$tpk = date("m");
+					$tpv = date("Y");
+
 					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui päiväys. Tarkista asia laskulta!<br>" . $komm;
 				}
 
@@ -720,9 +729,9 @@
 				$tillop = explode("-", $yhtiorow["ostoreskontrakausi_loppu"]);
 
 				// Verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
-				$ostoresktilalk = (int) date('Ymd',mktime(0,0,0,$tilalk[1],$tilalk[2],$tilalk[0]));
-				$ostoresktillop = (int) date('Ymd',mktime(0,0,0,$tillop[1],$tillop[2],$tillop[0]));
-				$syotettypvm 	= (int) date('Ymd',mktime(0,0,0,$tpk,$tpp,$tpv));
+				$ostoresktilalk = (int) date('Ymd', mktime(0,0,0, $tilalk[1], $tilalk[2], $tilalk[0]));
+				$ostoresktillop = (int) date('Ymd', mktime(0,0,0, $tillop[1], $tillop[2], $tillop[0]));
+				$syotettypvm 	= (int) date('Ymd', mktime(0,0,0, $tpk, $tpp, $tpv));
 
 				if ($syotettypvm > $ostoresktillop) {
 					$tpp = $tillop[2];
@@ -921,6 +930,10 @@
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
 
+				$vpp = (int) substr($laskun_lapvm, 6, 2);
+				$vpk = (int) substr($laskun_lapvm, 4, 2);
+				$vpv = (int) substr($laskun_lapvm, 0, 4);
+
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set
 							yhtio 				= '$yhtio',
@@ -950,6 +963,7 @@
 							sisviesti1 			= '$laskun_tilausviite',
 							sisviesti2 			= '',
 							tapvm 				= '$tpv-$tpk-$tpp',
+							lapvm 				= '$vpv-$vpk-$vpp',
 							vienti 				= '$trow[oletus_vienti]',
 							ebid 				= '$ebid',
 							tila 				= '$tila',
@@ -1615,7 +1629,7 @@
 				}
 
 				// päästiin onnillisesti loppuun
-		    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
+		    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_tapvm\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
 
 				$tulos = mail($yhtiorow['alert_email'], mb_encode_mimeheader("$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 

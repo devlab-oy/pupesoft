@@ -91,6 +91,7 @@
 		$ulos .= "<option value='ITKY14I' {$sel["ITKY14I"]}>Itella Express Business Day pallet (int.)</option>";
 		$ulos .= "<option value='ITKY21' {$sel["ITKY21"]}>Express Flex kuljetusyksikkö 21</option>";
 		$ulos .= "<option value='ITKYEXPC' {$sel["ITKYEXPC"]}>Express City 00 kuljetusyksikkö</option>";
+		$ulos .= "<option value='Priority Ulkomaa' {$sel["Priority"]}>Itella Priority Ulkomaan lähetys</option>";
 		$ulos .= "</optgroup>";
 
 		$ulos .= "<optgroup label='Posten Logistik AB'>";

@@ -2767,7 +2767,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "haejaselaa_saapumispvm") {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -2796,4 +2796,19 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "jalkilaskenta_kuluperuste") {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan käytetään keikkaan liitettyjen huolinta-/rahtilaskujen summaa");
+		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan käytetään keikalle syötettyä kuluprosenttia");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

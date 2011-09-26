@@ -154,7 +154,7 @@ if ($filename == "") die('Tiedostonimi puuttui!\n');
 $encoding = exec("file -b --mime-encoding $filename");
 
 if (preg_match("/(utf\-8|binary)/i", $encoding)) {
-	$convert = exec("iconv -f utf-8 -t ISO8859-1  $filename > $filename.ISO");
+	$convert = exec("iconv -c -f utf-8 -t ISO8859-1  $filename > $filename.ISO");
 	rename($filename.".ISO", $filename);
 }
 
@@ -1382,6 +1382,10 @@ while ($tietue = fgets($fd)) {
 
 			break;
 
+		case 'OSTOTILRIV.OTR_VIITE' :
+			$rivikommentti = pupesoft_cleanstring($tieto);
+			break;
+
 		case 'OLIN__END' :
 		case '*RE OSTOTILRIV' :
 		case 'RFF':
@@ -1421,6 +1425,7 @@ while ($tietue = fgets($fd)) {
 					$kukarow["kesken"] 		= $laskurow["tunnus"];
 					$jtkielto 				= $laskurow['jtkielto'];
 					$varasto 				= array();
+					$kommentti				= $rivikommentti;
 					$laskurow["varasto"]	= "";
 
 					if ($edi_tyyppi == "magento") {
@@ -1518,7 +1523,7 @@ while ($tietue = fgets($fd)) {
 								$laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
 
 								// Tilausrivin systeemikommentti
-								$kommentti = t("Huom: Tuote toimitetaan erikoisvarastosta!");
+								$kommentti .= t("Huom: Tuote toimitetaan erikoisvarastosta!");
 							}
 							else {
 								$var = "H";
@@ -1570,7 +1575,7 @@ while ($tietue = fgets($fd)) {
 					// tuotenumero ei löytynyt, tehdään dummyrivi..
 
 					// Tilausrivin systeemikommentti
-					$kommentti = t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
+					$kommentti .= t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
 
 					$query = "	INSERT into tilausrivi set
 								tilaajanrivinro = '$rivinumero',

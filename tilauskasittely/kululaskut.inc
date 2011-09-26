@@ -363,7 +363,7 @@ if ($silent == "") {
 			echo "<table>";
 			echo "<tr>
 					<th>".t("Nimi")."</th>
-					<th>".t("Tapvm")."</th>
+					<th>".t("Pvm")."</th>
 					<th>".t("Summa")."</th>
 					<th>".t("Veroton")."</th>
 					<th>".t("Valuutta")."</th>
@@ -381,9 +381,9 @@ if ($silent == "") {
 
 				echo "<tr>
 						<td valign='top'>$llrow[nimi]$comments</td>
-						<td valign='top'>".tv1dateconv($llrow["tapvm"])."</td>
-						<td valign='top' align='right'>$llrow[summa]</td>
-						<td valign='top' align='right'>$llrow[arvo]</td>
+						<td valign='top' NOWRAP>".tv1dateconv($llrow["tapvm"])."</td>
+						<td valign='top' align='right' NOWRAP>$llrow[summa]</td>
+						<td valign='top' align='right' NOWRAP>$llrow[arvo]</td>
 						<td valign='top'>$llrow[valkoodi]</td>
 						<td valign='top'>$llrow[viite]</td>";
 
@@ -595,9 +595,11 @@ if ($silent == "") {
 			$vienti		= $vaihtrow["vienti"];
 		}
 
-
 		if ($keikanalatila == "T") {
 			$vientitilat = " and lasku.vienti in ('A','D','G') ";
+		}
+		elseif ($yhtiorow["jalkilaskenta_kuluperuste"] == 'KP') {
+			$vientitilat = " and lasku.vienti in ('C','J','F','K','I','L') ";
 		}
 		else {
 			$vientitilat = " and lasku.vienti in ('B','C','J','E','F','K','H','I','L') ";
@@ -624,7 +626,7 @@ if ($silent == "") {
 			echo "<br><table>";
 			echo "<tr>
 					<th>".t("Nimi")."</th>
-					<th>".t("Tapvm")."</th>
+					<th>".t("Pvm")."</th>
 					<th>".t("Summa")."</th>
 					<th>".t("Veroton")."</th>
 					<th>".t("Valuutta")."</th>
@@ -721,8 +723,8 @@ if ($silent == "") {
 				echo "</td>";
 
 				echo "	<td valign='top' NOWRAP>".tv1dateconv($llrow["tapvm"])."</td>
-						<td align='right' valign='top'>".sprintf('%.2f',$verosumma)."</td>
-						<td align='right' valign='top'>".sprintf('%.2f',$verotonsumma)."</td>
+						<td align='right' valign='top' NOWRAP>".sprintf('%.2f',$verosumma)."</td>
+						<td align='right' valign='top' NOWRAP>".sprintf('%.2f',$verotonsumma)."</td>
 						<td valign='top'>$llrow[valkoodi]</td>
 						<td valign='top'>$llrow[viite]</td>";
 

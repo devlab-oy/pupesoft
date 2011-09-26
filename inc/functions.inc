@@ -10782,80 +10782,97 @@ if (!function_exists("laskutuspaiva")) {
 }
 
 if (!function_exists("pupe_DataTables")) {
-	function pupe_DataTables($taulu, $sarakkeetVis, $sarakkeetTot, $footerCallBack = "", $paginate = 'false', $info = 'false') {
-
+	function pupe_DataTables($parametrit) {
 		global $yhtiorow;
 
-		$aoColumns = "";
-
-		for ($i = 1; $i <= $sarakkeetVis; $i++) {
-			// Keikalla eka sarake on kohdistusnappula....
-			if ($i == 1 and $taulu == "keikka") {
-				$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false, \"sWidth\": \"20px\"},";
-			}
-			else {
-				$aoColumns .= " null,";
-			}
-		}
-		for ($i = $sarakkeetVis+1; $i <= $sarakkeetTot; $i++) {
-			$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false},";
-		}
-
-		$aoColumns = substr($aoColumns, 0, -1);
-
 		echo "<script type='text/javascript' language='javascript'>";
-
 		require_once("inc/jquery.min.js");
 		require_once("DataTables/media/js/jquery.dataTables.min.js");
-
 		echo "</script>";
 
-		/*
-		\"sScrollY\": w_height,
-		\"bScrollCollapse\" : true,
-		var w_height = $(window).height()-250;
-		*/
+		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
+		preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
-		$paginationtype = $paginate != 'false' ? "\"sPaginationType\": \"full_numbers\"," : '';
-		$lengthmenu = $paginate != 'false' ? "\"aLengthMenu\": [[10, 25, 50, 100, 250, 500, -1], [10, 25, 50, 100, 250, 500, \"".t("Kaikki")."\"]]," : '';
+		$json_pass = array();
+
+		// Luetaan taulujen parametrit ja vied‰‰n ne javascriptille...
+		foreach ($parametrit as $param) {
+
+			$taulu			= $param[0];
+			$sarakkeetVis	= $param[1];
+			$sarakkeetTot	= $param[2];
+			$footerCallBack = isset($param[3]) ? $param[3] : "";
+			$paginate 		= isset($param[4]) ? $param[4] : "false";
+			$info 			= isset($param[5]) ? $param[5] : "false";
+			$sorting 		= isset($param[6]) ? $param[6] : "true";
+			$aoColumns 		= "";
+			$paginationtype = $paginate !== false ? "full_numbers" : "two_button";
+
+			$json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $footerCallBack, $sorting);
+		}
 
 		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
 		preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
-			var asInitVals = new Array();
-
 			$(document).ready(function() {
 
-				var oTable = $('#{$taulu}').dataTable( {
-					\"bDestroy\" : true,
-					\"bPaginate\" : {$paginate},
-					{$paginationtype}
-					{$lengthmenu}
-					\"bInfo\" : {$info},
-					\"bStateSave\" : true,
-					\"iDisplayLength\" : 25,
-					\"oLanguage\": {
-						\"sSearch\" : \"".t("Etsi taulukosta").":\",
-						\"sZeroRecords\": \"".t("Ei hakuosumia")."\",
-						\"sLengthMenu\": \"",t("N‰yt‰")," _MENU_ ",t("rivi‰"),"\",
-						\"sInfo\": \"",t("N‰ytet‰‰n")," _START_ - _END_ / _TOTAL_ ",t("rivist‰"),"\",
-						\"sInfoFiltered\": \"(",t("suodatettu kaikista")," _MAX_ ",t("rivist‰"),")\",
-						\"oPaginate\": {
-							\"sFirst\": \"&laquo;&laquo;\",
-							\"sPrevious\": \"&laquo;\",
-							\"sNext\": \"&raquo;\",
-							\"sLast\": \"&raquo;&raquo;\"
+				var datatablesit = [];
+				var parametrit 	 = ".json_encode($json_pass).";
+
+				// Loopataan l‰pi kaikki datatablesit
+				$('.dataTable').each(function(t) {
+
+					var tableid = $(this).attr(\"id\");
+
+					var aoColumns = [];
+
+					for (var i = 1; i <= parametrit[tableid][0]; i++) {
+						// Keikalla eka sarake on kohdistusnappula....
+						if (i == 1 && tableid == \"keikka\") {
+							aoColumns[i-1] = \"{\\\"bSortable\\\": false, \\\"bSearchable\\\": false, \\\"sWidth\\\": 20px}\";
 						}
-					},
-					\"aaSorting\": [],
-					\"aoColumns\": [{$aoColumns}]
-					{$footerCallBack}
+						else {
+							aoColumns[i-1] = \"{\\\"bSortable\\\": true, \\\"bSearchable\\\": true}\";
+						}
+					}
+
+					for (var i = parametrit[tableid][0]+1; i <= parametrit[tableid][1]; i++) {
+						aoColumns[i-1] = \"{\\\"bSortable\\\": false, \\\"bSearchable\\\": false}\";
+					}
+
+					datatablesit[t] = $(this).dataTable( {
+						\"bDeferRender\": true,
+						\"bSortCellsTop\": true,
+						\"bDestroy\" : true,
+						\"bPaginate\" : parametrit[tableid][2],
+						\"sPaginationType\": parametrit[tableid][3],
+						\"aLengthMenu\": [[10, 25, 50, 100, 250, 500, -1], [10, 25, 50, 100, 250, 500, \"".t("Kaikki")."\"]],
+						\"bInfo\" : parametrit[tableid][4],
+						\"bStateSave\" : true,
+						\"iDisplayLength\" : 25,
+						\"oLanguage\": {
+							\"sSearch\" : \"".t("Etsi taulukosta").":\",
+							\"sZeroRecords\": \"".t("Ei hakuosumia")."\",
+							\"sLengthMenu\": \"",t("N‰yt‰")," _MENU_ ",t("rivi‰"),"\",
+							\"sInfo\": \"",t("N‰ytet‰‰n")," _START_ - _END_ / _TOTAL_ ",t("rivist‰"),"\",
+							\"sInfoFiltered\": \"(",t("suodatettu kaikista")," _MAX_ ",t("rivist‰"),")\",
+							\"oPaginate\": {
+								\"sFirst\": \"&laquo;&laquo;\",
+								\"sPrevious\": \"&laquo;\",
+								\"sNext\": \"&raquo;\",
+								\"sLast\": \"&raquo;&raquo;\"
+							}
+						},
+						\"bSort\" : parametrit[tableid][6],
+						\"aaSorting\": [],
+						\"aoColumns\": aoColumns
+					} )
 				} );
 
 				// KEIKKA.PHPN OMAT JQUERY-TOIMINNALLISUUDET
-				if ('{$taulu}' == 'keikka') {
+				if (datatablesit[0].attr(\"id\") == 'keikka') {
 
 					$(window).keypress(function(e) {
 					    if(e.keyCode == 13) {
@@ -10994,7 +11011,7 @@ if (!function_exists("pupe_DataTables")) {
 							kohde = 1;
 						}
 
-						oTable.fnFilter(tun, kohde);
+						datatablesit[0].fnFilter(tun, kohde);
 						$('input[name=\"search_'+searchbox+'\"]').val(tun);
 					});
 
@@ -11383,15 +11400,33 @@ if (!function_exists("pupe_DataTables")) {
 					});
 				}
 
+				// Sarakefiltterˆinti, toistaiseksi vain ekalle taululle!
 				$(\"thead input\").keyup( function () {
-					oTable.fnFilter( this.value, $(\"thead input\").index(this) );
+					var arvo = this.value;
+					var sarake = $(\"thead input\").index(this);
+
+					// fnFilter toistaiseksi vain ekalle tablelle
+					datatablesit[0].fnFilter( arvo, sarake );
+
+					// filtterˆid‰‰n tyˆjono.php:ssa myˆs alempaa taulua
+					if (datatablesit[0].attr(\"id\") == \"tyojono0\") {
+						var tyojono = [];
+
+						$(\"span[class=tyom_id]\").each(function(i) {
+							tyojono[i] = this.innerHTML;
+						});
+
+						var jonosearch = tyojono.join(\"|\");
+						datatablesit[1].fnFilter( jonosearch, 0, true, false, true );
+					}
 				} );
 
-				var oSettings = oTable.fnSettings();
+				// Presorttaus, eli luetaan cookiesta tarvittavat tiedot, toistaiseksi vain ekalle taululle!
+				var oSettings = datatablesit[0].fnSettings();
 
-				$(\"thead input\").each(function(i){
-					if (oSettings.aoPreSearchCols[i]['sSearch']!=''){
-						$(this).val(oSettings.aoPreSearchCols[i]['sSearch']);
+				$(\"thead input\").each(function(u){
+					if (oSettings.aoPreSearchCols[u]['sSearch']!=''){
+						$(this).val(oSettings.aoPreSearchCols[u]['sSearch']);
 					}
 				} );
 

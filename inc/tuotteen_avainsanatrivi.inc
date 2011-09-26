@@ -180,4 +180,22 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'status') {
+		if (substr($trow['laji'], 0, 10) == 'lisatieto_') {
+	 		$sel = array_fill_keys(array($trow[$i]), " selected") + array('o' => '', 'L' => '');
+
+			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";	
+			$ulos .= "<option value=''>".t("Aktiivinen")."</option>";
+			$ulos .= "<option value='L'{$sel['L']}>".t("Aktiivinen")." (".t("lukittu").")</option>";
+			$ulos .= "<option value='o'{$sel['o']}>".t("Poistettu")."</option>";
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+		else {
+			$ulos = '<td>&nbsp;</td>';
+			$jatko = 0;
+		}
+	}
+
 ?>

@@ -1503,6 +1503,7 @@
 								$kommentti 			= "";
 								$tuotenimitys 		= "";
 								$tuotenimitys_force = "";
+								$omalle_tilaukselle = "";
 
 							} // Tällä rundilla myydyt
 						} // Jos tuoteperhettä löytyi riittävästi tai myytiin pelkää isää

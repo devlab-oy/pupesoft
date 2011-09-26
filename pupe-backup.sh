@@ -117,8 +117,8 @@ if [ -f "etc/samba/smb.conf" ]; then
 	BACKUPFILET="${BACKUPFILET} etc/samba/smb.conf"
 fi
 
-if [ -f "etc/cups/printers.conf" ]; then
-	BACKUPFILET="${BACKUPFILET} etc/cups/printers.conf"
+if [ -f "etc/cups/" ]; then
+	BACKUPFILET="${BACKUPFILET} etc/cups/*"
 fi
 
 if [ -f "etc/cups/lpoptions" ]; then

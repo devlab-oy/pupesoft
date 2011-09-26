@@ -65,10 +65,12 @@
 
 			$PmtInfId = $PmtInf->addChild('PmtInfId', $laskurow['tunnus']);																	// PaymentInformationIdentification, Pakollinen kenttä
 			$PmtMtd = $PmtInf->addChild('PmtMtd', 'TRF'); 																					// PaymentMethod, Pakollinen kenttä (TRF = transfer)
-//			$PmtTpInf = $PmtInf->addChild('PmtTpInf');
+		if (tarkista_sepa($laskurow["maa"]) !== FALSE) {
+			$PmtTpInf = $PmtInf->addChild('PmtTpInf');																						// Jos SEPA maa, laitetaan nämä segmentit mukaan
 //			 	$InstrPrty = $PmtTpInf->addChild('InstrPrty');
-//			 	$SvcLvl = $PmtTpInf->addChild('SvcLvl');
-//			 		$SvcLvl->addChild('Cd', 'SEPA');
+			 	$SvcLvl = $PmtTpInf->addChild('SvcLvl');
+			 		$SvcLvl->addChild('Cd', 'SEPA');
+		}
 //			 	$LclInstrm = $PmtTpInf->addChild('LclInstrm');
 //			 		$LclInstrm->addChild('Cd', '');
 //			 	$CtgyPurp = $PmtTpInf->addChild('CtgyPurp');
@@ -256,7 +258,7 @@
 //				$Nm = $CdtrAgtAcct->addChild('Nm', '');
 
 			$Cdtr = $CdtTrfTxInf->addChild('Cdtr', '');																									// Creditor
-			
+
 			// jos pankkihaltijan nimi on syötetty, laitetaan se nimen tilalle
 			if (trim($laskurow['pankki_haltija']) != '') {
 				$Nm = $Cdtr->addChild('Nm', sprintf("%-1.70s", $laskurow['pankki_haltija']));															// Name, Pakollinen kenttä 1-70

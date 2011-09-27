@@ -2302,6 +2302,7 @@ if ($tee == '') {
 				echo "<form method='POST' action='".$palvelin2."tyomaarays/tyojono.php'>
 						<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=VALITSETOIMITUS//tyojono=$tyojono'>
 						<input type='hidden' name='toim' value='$toim2'>
+						<input type='hidden' name='indexvas' value='1'>
 						<input type='hidden' name='tyojono' value='$tyojono'>
 						<input type='submit' value='" . t('Työjono')."'>
 						</form>";

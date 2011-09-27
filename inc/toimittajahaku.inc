@@ -266,37 +266,9 @@
 				 	echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
 				}
 
-				$footerCallBack = ",
-					\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
-						var summat = new Array();
-						var valuutat = new Array();
-						var valuutta = '';
+				pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
 
-						for (var i=iStart; i<iEnd; i++) {
-							valuutta = aaData[aiDisplay[i]][2];
-							valuutat[valuutta] = valuutta;
-
-							if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
-							summat[valuutta] += aaData[aiDisplay[i]][1]*1;
-						}
-
-						// Tyhjennetään kaikki summat
-						$('td[name=yhteensa]').each(
-							function() {
-								$( this ).html('');
-							}
-						);
-
-						// Ekotetaan vain ne valuutat jotka löytyy
-						for (valuutta in valuutat) {
-							if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
-							$('#yhteensa_'+valuutta).html(summat[valuutta].toFixed(2));
-						}
-					}";
-
-				pupe_DataTables($pupe_DataTables, 8, 8, $footerCallBack);
-
-				echo "<table class='display' id='$pupe_DataTables'>";
+				echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
 				echo "<thead>";
 				echo "<tr>
@@ -310,14 +282,14 @@
 						<th>".t("Tila/Vienti")."</th>
 						</tr>
 						<tr>
-						<td><input type='text' name='search_tapvm'></td>
-						<td><input type='text' name='search_summa'></td>
-						<td><input type='text' name='search_valuutta'></td>
-						<td><input type='text' name='search_laskunro'></td>
-						<td><input type='text' name='search_viite'></td>
-						<td><input type='text' name='search_keikka'></td>
-						<td><input type='text' name='search_ebid'></td>
-						<td><input type='text' name='search_tila'></td>
+						<td><input type='text' class='search_field' name='search_tapvm'></td>
+						<td><input type='text' class='search_field' name='search_summa'></td>
+						<td><input type='text' class='search_field' name='search_valuutta'></td>
+						<td><input type='text' class='search_field' name='search_laskunro'></td>
+						<td><input type='text' class='search_field' name='search_viite'></td>
+						<td><input type='text' class='search_field' name='search_keikka'></td>
+						<td><input type='text' class='search_field' name='search_ebid'></td>
+						<td><input type='text' class='search_field' name='search_tila'></td>
 					</tr>";
 
 				echo "</thead>";

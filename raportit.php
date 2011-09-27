@@ -8,7 +8,13 @@ if (isset($_POST["tee"])) {
 
 if ((($_REQUEST["toim"] != 'hyvaksynta') or ($_REQUEST["tee"] != 'T')) and ($_REQUEST["toim"] !='maksuvalmius')) $useslave = 1;
 
-if ($_REQUEST["toim"] == 'toimittajahaku' or $_REQUEST["toim"] == 'laskuhaku' or $_REQUEST["toim"] == 'avoimet' or $_REQUEST["toim"] == 'myyrespaakirja') {
+
+if ($_REQUEST["toim"] == 'avoimet') {
+	// DataTables p‰‰lle
+	$pupe_DataTables = array("avoimet0", "avoimet1");
+}
+
+if ($_REQUEST["toim"] == 'toimittajahaku' or $_REQUEST["toim"] == 'laskuhaku' or $_REQUEST["toim"] == 'myyrespaakirja') {
 	// DataTables p‰‰lle
 	$pupe_DataTables = $_REQUEST["toim"];
 }

@@ -186,20 +186,9 @@
 						ORDER BY o_pvm, o_sum";
 			$result = mysql_query($query) or pupe_error($query);
 
-			$footerCallBack = ",
-				\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
-					var summa = 0;
+			pupe_DataTables(array(array($pupe_DataTables, 7, 7)));
 
-					for (var i=iStart; i<iEnd; i++) {
-						summa += aaData[aiDisplay[i]][6]*1;
-					}
-
-					$('#yhteensa').html(summa.toFixed(2));
-				}";
-
-			pupe_DataTables($pupe_DataTables, 7, 7, $footerCallBack);
-
-			echo "<table class='display' id='$pupe_DataTables'>";
+			echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
 			echo "<thead>";
 			echo "<tr>
@@ -212,13 +201,13 @@
 					<th>".t("Yhteensä")." $yhtiorow[valkoodi]</th>
 					</tr>
 					<tr>
-					<td><input type='text' name='search_nimi'></td>
-					<td><input type='text' name='search_laskunro'></td>
-					<td><input type='text' name='search_summa'></td>
-					<td><input type='text' name='search_valuutta'></td>
-					<td><input type='text' name='search_pvm'></td>
-					<td><input type='text' name='search_summa'></td>
-					<td><input type='text' name='search_yhteensa'></td>
+					<td><input type='text' class='search_field' name='search_nimi'></td>
+					<td><input type='text' class='search_field' name='search_laskunro'></td>
+					<td><input type='text' class='search_field' name='search_summa'></td>
+					<td><input type='text' class='search_field' name='search_valuutta'></td>
+					<td><input type='text' class='search_field' name='search_pvm'></td>
+					<td><input type='text' class='search_field' name='search_summa'></td>
+					<td><input type='text' class='search_field' name='search_yhteensa'></td>
 				</tr>";
 			echo "</thead>";
 

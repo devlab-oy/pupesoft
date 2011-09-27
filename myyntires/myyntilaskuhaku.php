@@ -154,9 +154,9 @@
 		}
 		else {
 
-			pupe_DataTables($pupe_DataTables, 8, 8);
+			pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
 
-			echo "<table class='display' id='{$pupe_DataTables}'>";
+			echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
 			echo "<thead>
 					<tr>
@@ -170,14 +170,14 @@
 					<th>",t("Tila"),"</th>
 					</tr>
 					<tr>
-					<td><input type='text' name='search_pvm'></td>
-					<td><input type='text' name='search_erpvm'></td>
-					<td><input type='text' name='search_laskunro'></td>
-					<td><input type='text' name='search_nimi'></td>
-					<td><input type='text' name='search_summa'></td>
-					<td><input type='text' name='search_valuutta'></td>
-					<td><input type='text' name='search_ebid'></td>
-					<td><input type='text' name='search_tila'></td>
+					<td><input type='text' class='search_field' name='search_pvm'></td>
+					<td><input type='text' class='search_field' name='search_erpvm'></td>
+					<td><input type='text' class='search_field' name='search_laskunro'></td>
+					<td><input type='text' class='search_field' name='search_nimi'></td>
+					<td><input type='text' class='search_field' name='search_summa'></td>
+					<td><input type='text' class='search_field' name='search_valuutta'></td>
+					<td><input type='text' class='search_field' name='search_ebid'></td>
+					<td><input type='text' class='search_field' name='search_tila'></td>
 					</tr>
 				</thead>";
 

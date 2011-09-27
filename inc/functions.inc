@@ -11619,6 +11619,12 @@ if (!function_exists("pupe_DataTables")) {
 						});
 
 						var jonosearch = tyojono.join(\"|\");
+						
+						if (arvo != \"\" && jonosearch == \"\") {
+							// ei n‰ytet‰ mit‰‰n
+							jonosearch = \"xyzzypupe\";
+						}
+						
 						datatablesit[1].fnFilter( jonosearch, 0, true, false, true );
 					}
 				} );

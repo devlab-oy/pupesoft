@@ -34,11 +34,11 @@ if ($tee == 'M') {
 
 // S = Etsit‰‰n summaa laskulta
 if ($tee == 'S') {
-	
+
 	if (strlen($summa2) == 0) {
 		$summa2 = $summa1;
 	}
-	
+
 	$summa1 = (float) str_replace( ",", ".", $summa1);
 	$summa2 = (float) str_replace( ",", ".", $summa2);
 
@@ -46,7 +46,7 @@ if ($tee == 'S') {
 	$index = " use index (yhtio_tila_summa)";
 
 	if ($summa1 == $summa2) {
-		$ehto .= "summa in ($summa1, ".($summa1*-1).") ";	
+		$ehto .= "summa in ($summa1, ".($summa1*-1).") ";
 		$jarj = "tapvm desc";
 	}
 	else {
@@ -223,37 +223,9 @@ if ($tee != '') {
 		exit;
 	}
 
-	$footerCallBack = ",
-		\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
-			var summat = new Array();
-			var valuutat = new Array();
-			var valuutta = '';
+	pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
 
-			for (var i=iStart; i<iEnd; i++) {
-				valuutta = aaData[aiDisplay[i]][3];
-				valuutat[valuutta] = valuutta;
-
-				if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
-				summat[valuutta] += aaData[aiDisplay[i]][2]*1;
-			}
-
-			// Tyhjennet‰‰n kaikki summat
-			$('td[name=yhteensa]').each(
-				function() {
-					$( this ).html('');
-				}
-			);
-			
-			// Ekotetaan vain ne valuutat jotka lˆytyy
-			for (valuutta in valuutat) {
-				if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
-				$('#yhteensa_'+valuutta).html(summat[valuutta].toFixed(2));
-			}
-		}";
-
-	pupe_DataTables($pupe_DataTables, 8, 8, $footerCallBack);
-
-	echo "<table class='display' id='$pupe_DataTables'>";
+	echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
 	echo "<thead>";
 	echo "<tr>
@@ -267,14 +239,14 @@ if ($tee != '') {
 			<th>".t("Tila/Vienti")."</th>
 			</tr>
 			<tr>
-			<td><input type='text' name='search_tapvm'></td>
-			<td><input type='text' name='search_nimi'></td>
-			<td><input type='text' name='search_summa'></td>
-			<td><input type='text' name='search_valuutta'></td>
-			<td><input type='text' name='search_laskunro'></td>
-			<td><input type='text' name='search_viite'></td>
-			<td><input type='text' name='search_ebid'></td>
-			<td><input type='text' name='search_tila'></td>
+			<td><input type='text' class='search_field' name='search_tapvm'></td>
+			<td><input type='text' class='search_field' name='search_nimi'></td>
+			<td><input type='text' class='search_field' name='search_summa'></td>
+			<td><input type='text' class='search_field' name='search_valuutta'></td>
+			<td><input type='text' class='search_field' name='search_laskunro'></td>
+			<td><input type='text' class='search_field' name='search_viite'></td>
+			<td><input type='text' class='search_field' name='search_ebid'></td>
+			<td><input type='text' class='search_field' name='search_tila'></td>
 		</tr>";
 
 	echo "</thead>";

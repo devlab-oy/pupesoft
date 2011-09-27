@@ -1,7 +1,7 @@
 <?php
 
-	// DataTables päälle
-	$pupe_DataTables = "tyojono";
+	// headles päälle
+	$pupe_DataTables = array("tyojono0", "tyojono1");
 
 	require('../inc/parametrit.inc');
 
@@ -49,9 +49,7 @@
 		echo "</form>";
 	}
 
-	pupe_DataTables($pupe_DataTables, 7, 8, '', true, true);
-
-	echo "<table class='display' id='$pupe_DataTables'>";
+	echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
 	echo "<thead>";
 	echo "<tr>";
 
@@ -59,14 +57,14 @@
 		echo "<th>".t("Yhtiö")."</th>";
 	}
 
-	echo "	<th width='1'>".t("Työmääräys")."<br>".t("Tilausviite")."</th>
-			<th width='1'>".t("Ytunnus")."<br>".t("Asiakas")."</th>
-			<th width='1'>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
-			<th width='1'>".t("Toimitetaan")."</th>
-			<th width='1'>".t("Myyjä")."<br>".t("Tyyppi")."</th>
-			<th width='1'>".t("Työjono")."/<br>".t("Työstatus")."</th>
-			<th width='1'>".t("Vaihda")."<br>".t("Työstatusta")."</th>
-			<th width='1'>".t("Muokkaa")."</th>
+	echo "	<th>".t("Työm").".<br>".t("Viite")."</th>
+			<th>".t("Ytunnus")."<br>".t("Asiakas")."</th>
+			<th>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
+			<th>".t("Toimitetaan")."</th>
+			<th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
+			<th>".t("Työjono")."/<br>".t("Työstatus")."</th>
+			<th>".t("Vaihda")."<br>".t("Työstatusta")."</th>
+			<th>".t("Muokkaa")."</th>
 			</tr>";
 
 	echo "<tr>";
@@ -75,13 +73,13 @@
 		echo "<td></td>";
 	}
 
-	echo "<td valign='top'><input type='text' size='10' name='search_myyntitilaus_haku'></td>";
-	echo "<td valign='top'><input type='text' size='10' name='search_asiakasnimi_haku'></td>";
-	echo "<td valign='top'><input type='text' size='10' name='search_suorittaja_haku'></td>";
-	echo "<td valign='top'><input type='hidden' size='10' name='search_toimitetaan_haku'></td>"; 	// toistaiseksi, pitää hiddenöidä että saa haun toimimaan.
-	echo "<td valign='top'><input type='hidden' size='10' name='search_myyja_haku'></td>";			// toistaiseksi, pitää hiddenöidä että saa haun toimimaan.
-	echo "<td valign='top'><input type='text' size='10' name='search_tyojono_haku'></td>";
-	echo "<td valign='top'><input type='hidden' size='10' name='search_tyostatus_haku'></td>";
+	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_myyntitilaus_haku'></td>";
+	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
+	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_suorittaja_haku'></td>";
+	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_toimitetaan_haku'></td>";
+	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_myyja_haku'></td>";
+	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_tyojono_haku'></td>";
+	echo "<td valign='top'><input type='hidden' size='10' class='search_field' name='search_tyostatus_haku'></td>";
 	echo "<td valign='top'></td>";
 	echo "</tr>";
 	echo "</thead>";
@@ -167,8 +165,7 @@
 				a3.nimi suorittajanimi,
 				a2.jarjestys prioriteetti,
 				lasku.luontiaika,
-				group_concat(a4.selitetark_2) asekalsuorittajanimi,
-				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', a4.selitetark_2, '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
+				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
 				FROM lasku
 				JOIN yhtio ON lasku.yhtio=yhtio.yhtio
 				JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
@@ -186,7 +183,8 @@
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
 				$omattyot
 				$lisa2
-				ORDER BY prioriteetti, luontiaika ASC";
+				ORDER BY prioriteetti, luontiaika ASC
+				LIMIT 100";
 	$vresult = pupe_query($query);
 
 	$tyomaarays_tunti_yhteensa = array();
@@ -194,7 +192,7 @@
 
 	echo "<tbody>";
 
-	while ($vrow = mysql_fetch_array($vresult)) {
+	while ($vrow = mysql_fetch_assoc($vresult)) {
 
 		$laskutyyppi = $vrow["tila"];
 		$alatila	 = $vrow["alatila"];
@@ -231,16 +229,16 @@
 			echo "<div id='div_$vrow[tunnus]' class='popup' style='width:500px;'>";
 			echo t("Työmääräys"),": $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"]);
 			echo "</div>";
-			echo "<td valign='top' class='tooltip' id='$vrow[tunnus]'>$vrow[tunnus]</td>";
+			echo "<td valign='top' class='tooltip' id='$vrow[tunnus]'><span class='tyom_id'>$vrow[tunnus]</span></td>";
 		}
 		else {
-			echo "<td valign='top'>$vrow[tunnus]<br>$vrow[viesti]</td>";
+			echo "<td valign='top'><span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]</td>";
 		}
 
 		echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
 
 
-		echo "<td valign='top'>";
+		echo "<td valign='top' nowrap>";
 
 		$olenko_asentaja_tassa_hommassa = FALSE;
 
@@ -289,7 +287,7 @@
 			}
 
 			// lasketaan katotaan mitä asentajat on syöttänyt tunteja
-			$query = "	SELECT kalenteri.kuka, a4.selitetark_2 nimi, left(kalenteri.pvmalku, 10) pvmalku, left(kalenteri.pvmloppu, 10) pvmloppu,
+			$query = "	SELECT kalenteri.kuka, if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2) nimi, left(kalenteri.pvmalku, 10) pvmalku, left(kalenteri.pvmloppu, 10) pvmloppu,
 						sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu)) sekunnit,
 						SEC_TO_TIME(sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) aika
 						FROM kalenteri
@@ -310,9 +308,7 @@
 					list($url_tunti, $url_min, $url_sek) = explode(":", $tunti_chk_row["aika"]);
 					echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>".tv1dateconv($tunti_chk_row["pvmalku"], "", "LYHYT")." $tunti_chk_row[nimi]: ".(int) $url_tunti."h ".$url_min."m</a><br>";
 				}
-
 			}
-
 		}
 
 		echo $vrow["suorittajanimi"];
@@ -368,8 +364,9 @@
 		else {
 			$muoklinkki = "";
 		}
-//		echo "<td valign='top' valign='top' $varilisa>$vrow[tyostatus]</td>";
+
 		echo "<td>";
+
 		if ($toim != 'TYOMAARAYS_ASENTAJA') {
 			$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
 
@@ -401,84 +398,128 @@
 		}
 		// Laitetaan hiddeninä työstatus sorttauksen takia.
 		echo "<p style='visibility:hidden'>$vrow[tyostatus]</p>";
-
 		echo "</td>";
 
 		echo "<td valign='top'>$muoklinkki</td>";
 		echo "</tr>";
 	}
 
-	echo "</tbody></table>";
+	echo "</tbody>";
+	echo "</table>";
 	echo "<br><br>";
-	echo "<table><tr>";
 
-	if (count($tyomaarays_tunti_yhteensa) > 0) {
-		if ($toim != 'TYOMAARAYS_ASENTAJA') {
-			echo "<td class='back'><table><tr><th colspan='2'>",t("Työmääräyksien tuntiyhteenveto"),"</th><th>",t("Työmääräyksien asentajien tuntiyhteenveto"),"</th></tr>";
+	// Konffataan datatablesit
+	$datatables_conf = array();
+	$datatables_conf[] = array($pupe_DataTables[0],7,8,true,true);
 
-			$total_yht = 0;
+	if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
 
-			foreach ($tyomaarays_tunti_yhteensa as $tyom_id => $tyom_array) {
-				$yht = 0;
-				$yhtk = 0;
+		$datatables_conf[] = array($pupe_DataTables[1],3,3,false,true,false);
 
-				echo "<tr><td>$tyom_id</td><td><table width='100%'>";
+		echo "<table class='display dataTable' id='$pupe_DataTables[1]'>";
+		echo "<thead>";
+		echo "<tr><th>",t("Työmääräys"),"</th><th>",t("Työmääräyksien tuntiyhteenveto"),"</th><th>",t("Työmääräyksien asentajien tuntiyhteenveto"),"</th></tr>";
+		echo "</thead>";
 
-				ksort($tyom_array);
-
-				foreach ($tyom_array as $tyom_asentaja => $tyom_sekunnit) {
-					echo "<tr><td>$tyom_asentaja</td><td class='ok' align='right'><strong>".tunnit_minuutit($tyom_sekunnit)."</strong></td></tr>";
-					$yht += $tyom_sekunnit;
-				}
-
-				echo "</table></td>";
-				echo "<td><table width='100%'>";
-
-				ksort($tyomaarays_kuitti_yhteensa[$tyom_id]);
-
-				foreach ($tyomaarays_kuitti_yhteensa[$tyom_id] as $tyom_asentaja => $tyom_sekunnit) {
-					echo "<tr><td>$tyom_asentaja</td><td class='ok' align='right'><strong>".tunnit_minuutit($tyom_sekunnit)."</strong></td></tr>";
-					$yhtk += $tyom_sekunnit;
-				}
-
-				echo "</table></td>";
-				echo "</tr>";
-				echo "<tr><td class='tumma'>",t("Yhteensä")," ",t("Työmääräys")," $tyom_id</td><td class='tumma' align='right'>".tunnit_minuutit($yht)."</td><td class='tumma' align='right'>".tunnit_minuutit($yhtk)."</td></tr>";
-
-				$total_yht += $yht;
-				$total_yhtk += $yhtk;
-			}
-
-			echo "<tr><th>",t("Yhteensä"),"</th><td class='tumma' align='right'>".tunnit_minuutit($total_yht)."</td><td class='tumma' align='right'>".tunnit_minuutit($total_yhtk)."</td></tr>";
-			echo "</table></td>";
-		}
-	}
-	elseif (count($tyomaarays_kuitti_yhteensa) > 0) {
-		echo "<td class='back'><table>";
-		echo "<tr><th colspan='2'>",t("Työmääräyksien asentajien tuntiyhteenveto"),"</th></tr>";
+		echo "<tbody>";
 
 		$total_yht = 0;
 
-		foreach ($tyomaarays_kuitti_yhteensa as $tyom_id => $tyom_array) {
+		foreach ($tyomaarays_tunti_yhteensa as $tyom_id => $tyom_array) {
 			$yht = 0;
+			$yhtk = 0;
 
-			echo "<tr><td>$tyom_id</td><td><table width='100%'>";
+			echo "<tr><td>$tyom_id</td>";
+
+			echo "<td style='vertical-align:bottom;'>";
+			echo "<table width='100%'>";
+
+			ksort($tyom_array);
 
 			foreach ($tyom_array as $tyom_asentaja => $tyom_sekunnit) {
 				echo "<tr><td>$tyom_asentaja</td><td class='ok' align='right'><strong>".tunnit_minuutit($tyom_sekunnit)."</strong></td></tr>";
 				$yht += $tyom_sekunnit;
 			}
 
-			echo "</td></table></td></tr>";
-			echo "<tr><td class='tumma'>",t("Yhteensä")," ",t("Työmääräys")," $tyom_id</td><td class='tumma' align='right'>".tunnit_minuutit($yht)."&nbsp;</td></tr>";
+			echo "<tr><td class='tumma'>",t("Yhteensä"),"</td><td class='tumma' align='right'><span class='yhteensa'>".tunnit_minuutit($yht)."</span></td></tr>";
+			echo "</table>";
+			echo "</td>";
+
+			echo "<td style='vertical-align:bottom;'>";
+			echo "<table width='100%'>";
+
+			if (is_array($tyomaarays_kuitti_yhteensa[$tyom_id])) {
+				ksort($tyomaarays_kuitti_yhteensa[$tyom_id]);
+
+				foreach ($tyomaarays_kuitti_yhteensa[$tyom_id] as $tyom_asentaja => $tyom_sekunnit) {
+					echo "<tr><td>$tyom_asentaja</td><td class='ok' align='right'><strong>".tunnit_minuutit($tyom_sekunnit)."</strong></td></tr>";
+					$yhtk += $tyom_sekunnit;
+				}
+			}
+
+			echo "<tr><td class='tumma'>",t("Yhteensä"),"</td><td class='tumma' align='right'><span class='yhteensa'>".tunnit_minuutit($yhtk)."</span></td></tr>";
+			echo "</table>";
+			echo "</td>";
+			echo "</tr>";
 
 			$total_yht += $yht;
+			$total_yhtk += $yhtk;
 		}
+		echo "</tbody>";
 
-		echo "<tr><th>",t("Yhteensä"),"</th><td class='tumma' align='right'>".tunnit_minuutit($total_yht)."&nbsp;</th></tr>";
-		echo "</table></td>";
+		echo "<tfoot>";
+		echo "<tr><td class='tumma'>",t("Kaikki yhteensä"),"</td><td class='tumma' align='right' id='tyom_yhteensa1'>".tunnit_minuutit($total_yht)."</td><td class='tumma' align='right' id='tyom_yhteensa2'>".tunnit_minuutit($total_yhtk)."</td></tr>";
+		echo "</tfoot>";
+		echo "</table>";
 	}
-	echo "</tr></table>";
+	elseif (count($tyomaarays_kuitti_yhteensa) > 0) {
+
+		$datatables_conf[] = array($pupe_DataTables[1],2,2,false,true,false);
+
+		echo "<table class='display dataTable' id='$pupe_DataTables[1]'>";
+		echo "<thead>";
+		echo "<tr><th>",t("Työmääräys"),"</th><th>",t("Työmääräyksien asentajien tuntiyhteenveto"),"</th></tr>";
+		echo "</thead>";
+
+		echo "<tbody>";
+
+		$total_yht = 0;
+
+		foreach ($tyomaarays_kuitti_yhteensa as $tyom_id => $tyom_array) {
+			$yht = 0;
+			$yhtk = 0;
+
+			echo "<tr><td>$tyom_id</td>";
+
+			echo "<td style='vertical-align:bottom;'>";
+			echo "<table width='100%'>";
+
+			if (is_array($tyomaarays_kuitti_yhteensa[$tyom_id])) {
+				ksort($tyomaarays_kuitti_yhteensa[$tyom_id]);
+
+				foreach ($tyomaarays_kuitti_yhteensa[$tyom_id] as $tyom_asentaja => $tyom_sekunnit) {
+					echo "<tr><td>$tyom_asentaja</td><td class='ok' align='right'><strong>".tunnit_minuutit($tyom_sekunnit)."</strong></td></tr>";
+					$yhtk += $tyom_sekunnit;
+				}
+			}
+
+			echo "<tr><td class='tumma'>",t("Yhteensä"),"</td><td class='tumma' align='right'><span class='yhteensa'>".tunnit_minuutit($yhtk)."</span></td></tr>";
+			echo "</table>";
+			echo "</td>";
+			echo "</tr>";
+
+			$total_yht += $yht;
+			$total_yhtk += $yhtk;
+		}
+		echo "</tbody>";
+
+		echo "<tfoot>";
+		echo "<tr><td class='tumma'>",t("Kaikki yhteensä"),"</td><td class='tumma' align='right' id='tyom_yhteensa1'>".tunnit_minuutit($total_yhtk)."&nbsp;</td></tr>";
+		echo "</tfoot>";
+		echo "</table>";
+	}
+
+	pupe_DataTables($datatables_conf);
 
 	echo "<br><br>";
 

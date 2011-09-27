@@ -319,35 +319,9 @@
 			echo "<font class='head'>".t("Saatavat")." - $yhtiorow[nimi] - $sappl.$sakkl.$savvl</font><hr>";
 
 			if ($eiliittymaa != 'ON') {
-				$footerCallBack = ",
-					\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
-						var saatavaty = new Array();
-						var sarakemaara = ".count($saatavat_array)."+5;
-
-						// Summataan vain ruudulla näkyvät luvut
-						for (var i=iStart; i<iEnd; i++) {
-
-							for (var j=2; j<=sarakemaara; j++) {
-								if (typeof saatavaty[j] == 'undefined') saatavaty[j] = 0;
-								saatavaty[j] += aaData[aiDisplay[i]][j]*1;
-							}
-						}
-
-						// Tyhjennetään kaikki summat
-						$('td[name=saatavat_yhteensa]').each(
-							function() {
-								$( this ).html('');
-							}
-						);
-
-						for (var j=2; j<=sarakemaara; j++) {
-							$('#saatavat_yhteensa_'+j).html(saatavaty[j].toFixed(2));
-						}
-					}";
-
 				$sarakemaara = count($saatavat_array)+7;
-
-				pupe_DataTables($pupe_DataTables, $sarakemaara, $sarakemaara, $footerCallBack);
+				
+				pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
 			}
 
 			// Linkki asiakasrappariin
@@ -358,7 +332,7 @@
 				$asirappari_linkki_alatila = "Y";
 			}
 
-			echo "<table class='display' id='$pupe_DataTables'>";
+			echo "<table class='display dataTable' id='$pupe_DataTables'>";
 			echo "<thead>";
 			echo "<tr>";
 			echo "<th>".t("Ytunnus")."</th>";

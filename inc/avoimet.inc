@@ -374,38 +374,9 @@
 				echo "<font class='message'>".t("Yrityksellä")." $yhtiorow[nimi] ".t("oli")." ".tv1dateconv($pvm)." ".t("seuraavat avoimet")." $lista:</font><br>";
 			}
 
-			$footerCallBack = ",
-				\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
-					var avoimety = new Array();
-					var valuutat = new Array();
-					var valuutta = '';
+			pupe_DataTables(array(array($pupe_DataTables[0], 10, 11)));
 
-					// Summataan vain ruudulla näkyvät luvut
-					for (var i=iStart; i<iEnd; i++) {
-						valuutta = aaData[aiDisplay[i]][9];
-						valuutat[valuutta] = valuutta;
-
-						if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-						avoimety[valuutta] += aaData[aiDisplay[i]][8]*1;
-					}
-
-					// Tyhjennetään kaikki summat
-					$('td[name=avoimet_yhteensa]').each(
-						function() {
-							$( this ).html('');
-						}
-					);
-
-					// Ekotetaan vain ne valuutat jotka löytyy
-					for (valuutta in valuutat) {
-						if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-						$('#avoimet_yhteensa_'+valuutta).html(avoimety[valuutta].toFixed(2));
-					}
-				}";
-
-			pupe_DataTables($pupe_DataTables, 10, 11, $footerCallBack);
-
-			echo "<table class='display' id='$pupe_DataTables'>";
+			echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
 
 			echo "<thead>";
 			echo "<tr>
@@ -422,16 +393,16 @@
 					<th class='back'></th>
 					</tr>
 					<tr>
-					<td><input type='text' name='search_ytunnus'></td>
-					<td><input type='text' name='search_nimi'></td>
-					<td><input type='text' name='search_maksutieto'></td>
-					<td><input type='text' name='search_laskunro'></td>
-					<td><input type='text' name='search_pvm'></td>
-					<td><input type='text' name='search_maksupaiva'></td>
-					<td><input type='text' name='search_olmaksupaiva'></td>
-					<td><input type='text' name='search_erapaiva'></td>
-					<td><input type='text' name='search_avoinsaldo'></td>
-					<td><input type='text' name='search_val'></td>
+					<td><input type='text' class='search_field' name='search_ytunnus'></td>
+					<td><input type='text' class='search_field' name='search_nimi'></td>
+					<td><input type='text' class='search_field' name='search_maksutieto'></td>
+					<td><input type='text' class='search_field' name='search_laskunro'></td>
+					<td><input type='text' class='search_field' name='search_pvm'></td>
+					<td><input type='text' class='search_field' name='search_maksupaiva'></td>
+					<td><input type='text' class='search_field' name='search_olmaksupaiva'></td>
+					<td><input type='text' class='search_field' name='search_erapaiva'></td>
+					<td><input type='text' class='search_field' name='search_avoinsaldo'></td>
+					<td><input type='text' class='search_field' name='search_val'></td>
 					<td class='back'></td>
 				</tr>";
 
@@ -717,52 +688,9 @@
 				echo "<font class='message'>".t("Yrityksellä")." $yhtiorow[nimi] ".t("oli")." ".tv1dateconv($pvm)." ".t("seuraavat avoimet")." $lista:</font><br>";
 			}
 
-			$footerCallBack = ",
-				\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
-					var avoimety = new Array();
-					var avoimetsuoriy = new Array();
-					var valuutat = new Array();
-					var yseroyhteensa = 0;
-					var valuutta = '';
+			pupe_DataTables(array(array($pupe_DataTables[1], 9, 10)));
 
-					// Summataan vain ruudulla näkyvät luvut
-					for (var i=iStart; i<iEnd; i++) {
-						valuutta = aaData[aiDisplay[i]][8];
-						valuutat[valuutta] = valuutta;
-
-						if (aaData[aiDisplay[i]][6] == '') {
-							if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
-							avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][7]*1;
-						}
-						else {
-							if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-							avoimety[valuutta] += aaData[aiDisplay[i]][7]*1;
-						}
-					}
-
-					// Tyhjennetään kaikki summat
-					$('td[name=avoimet_yhteensa]').each(
-						function() {
-							$( this ).html('');
-						}
-					);
-
-					// Ekotetaan vain ne valuutat jotka löytyy
-					for (valuutta in valuutat) {
-						if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
-						if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-
-						$('#avoimet_yhteensa_'+valuutta).html(avoimety[valuutta].toFixed(2));
-						$('#avoimet_suoriyhteensa_'+valuutta).html(avoimetsuoriy[valuutta].toFixed(2));
-
-						yseroyhteensa = avoimety[valuutta] + avoimetsuoriy[valuutta];
-						$('#avoimet_yseroyhteensa_'+valuutta).html(yseroyhteensa.toFixed(2));
-					}
-				}";
-
-			pupe_DataTables($pupe_DataTables, 9, 10, $footerCallBack);
-
-			echo "<table class='display' id='$pupe_DataTables'>";
+			echo "<table class='display dataTable' id='$pupe_DataTables[1]'>";
 
 			echo "<thead>";
 			echo "<tr>
@@ -775,19 +703,19 @@
 					<th>".t("Laskun summa")."</th>
 					<th>".t("Avoin saldo")."</th>
 					<th>".t("Val")."</th>
-					<th class='back'></th>
+					<th style='visibility:hidden;'></th>
 					</tr>
 					<tr>
-					<td><input type='text' name='search_ytunnus'></td>
-					<td><input type='text' name='search_nimi'></td>
-					<td><input type='text' name='search_laskunro'></td>
-					<td><input type='text' name='search_pvm'></td>
-					<td><input type='text' name='search_maksupaiva'></td>
-					<td><input type='text' name='search_erapvm'></td>
-					<td><input type='text' name='search_summa'></td>
-					<td><input type='text' name='search_avoinsaldo'></td>
-					<td><input type='text' name='search_val'></td>
-					<td class='back'></td>
+					<td><input type='text' class='search_field' name='search_ytunnus'></td>
+					<td><input type='text' class='search_field' name='search_nimi'></td>
+					<td><input type='text' class='search_field' name='search_laskunro'></td>
+					<td><input type='text' class='search_field' name='search_pvm'></td>
+					<td><input type='text' class='search_field' name='search_maksupaiva'></td>
+					<td><input type='text' class='search_field' name='search_erapvm'></td>
+					<td><input type='text' class='search_field' name='search_summa'></td>
+					<td><input type='text' class='search_field' name='search_avoinsaldo'></td>
+					<td><input type='text' class='search_field' name='search_val'></td>
+					<td style='visibility:hidden;'></td>
 				</tr>";
 
 			echo "</thead>";

@@ -171,8 +171,7 @@
 
 	if ($tee == '') {
 
-		enable_ajax();
-	    pupe_DataTables($pupe_DataTables, 7, 7, '', 'true');
+	    pupe_DataTables(array(array($pupe_DataTables, 7, 7, true)));
 
         $query = "	SELECT
 					asiakas.tunnus,
@@ -188,7 +187,7 @@
 					ORDER by nimi";
 		$result = mysql_query ($query) or pupe_error("Kysely ei onnistu $query");
 
-		echo "<table class='display' id='$pupe_DataTables'>";
+		echo "<table class='display dataTable' id='$pupe_DataTables'>";
 		echo "<thead>";
 		echo "<tr>";
 		echo "<th>".t("Nimi")."</th>";
@@ -200,13 +199,13 @@
 		echo "<th>".t("Asiakastunnus")."</th>";
 		echo "</tr>";
 		echo "<tr>";
-		echo "<td><input type='text' name='search_nimi'></td>";
-		echo "<td><input type='text' name='search_nimitark'></td>";
-		echo "<td><input type='text' name='search_postitp'></td>";
-		echo "<td><input type='text' name='search_ytunnus'></td>";
-		echo "<td><input type='text' name='search_ovttunnus'></td>";
-		echo "<td><input type='text' name='search_asiakasnro'></td>";
-		echo "<td><input type='text' name='search_tunnus'></td>";
+		echo "<td><input type='text' class='search_field' name='search_nimi'></td>";
+		echo "<td><input type='text' class='search_field' name='search_nimitark'></td>";
+		echo "<td><input type='text' class='search_field' name='search_postitp'></td>";
+		echo "<td><input type='text' class='search_field' name='search_ytunnus'></td>";
+		echo "<td><input type='text' class='search_field' name='search_ovttunnus'></td>";
+		echo "<td><input type='text' class='search_field' name='search_asiakasnro'></td>";
+		echo "<td><input type='text' class='search_field' name='search_tunnus'></td>";
 		echo "</tr>";
 		echo "</thead>";
 		echo "<tbody>";

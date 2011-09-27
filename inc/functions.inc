@@ -10801,14 +10801,13 @@ if (!function_exists("pupe_DataTables")) {
 			$taulu			= $param[0];
 			$sarakkeetVis	= $param[1];
 			$sarakkeetTot	= $param[2];
-			$footerCallBack = isset($param[3]) ? $param[3] : "";
-			$paginate 		= isset($param[4]) ? $param[4] : "false";
-			$info 			= isset($param[5]) ? $param[5] : "false";
-			$sorting 		= isset($param[6]) ? $param[6] : "true";
+			$paginate 		= isset($param[3]) ? $param[3] : "false";
+			$info 			= isset($param[4]) ? $param[4] : "false";
+			$sorting 		= isset($param[5]) ? $param[5] : "true";
 			$aoColumns 		= "";
 			$paginationtype = $paginate !== false ? "full_numbers" : "two_button";
 
-			$json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $footerCallBack, $sorting);
+			$json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting);
 		}
 
 		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
@@ -10843,7 +10842,6 @@ if (!function_exists("pupe_DataTables")) {
 					}
 
 					datatablesit[t] = $(this).dataTable( {
-						\"bDeferRender\": true,
 						\"bSortCellsTop\": true,
 						\"bDestroy\" : true,
 						\"bPaginate\" : parametrit[tableid][2],
@@ -10865,10 +10863,214 @@ if (!function_exists("pupe_DataTables")) {
 								\"sLast\": \"&raquo;&raquo;\"
 							}
 						},
-						\"bSort\" : parametrit[tableid][6],
+						\"bSort\" : parametrit[tableid][5],
 						\"aaSorting\": [],
-						\"aoColumns\": aoColumns
-					} )
+						\"aoColumns\": aoColumns,
+						\"fnFooterCallback\": function( nRow, aaData, iStart, iEnd, aiDisplay ) {
+
+							if (tableid == \"tyojono1\") {
+								var tunnit1 = 0;
+								var minsat1 = 0;
+								var tunnit2 = 0;
+								var minsat2 = 0;
+
+
+								for (var i=iStart; i<iEnd; i++) {
+									puperegexp = new RegExp(\"<span class=\\\"yhteensa\\\">(.*)<\\/span>\");
+
+									var pupematch1 = puperegexp.exec(aaData[aiDisplay[i]][1]);
+									var pupematch2 = puperegexp.exec(aaData[aiDisplay[i]][2]);
+
+									if (pupematch1 !== null) {
+										osat = pupematch1[1].split(\":\");
+
+										tunnit1 += osat[0]*1;
+										minsat1 += osat[1]*1;
+									}
+
+									if (pupematch2 !== null) {
+										osat = pupematch2[1].split(\":\");
+
+										tunnit2 += osat[0]*1;
+										minsat2 += osat[1]*1;
+									}
+								}
+
+								// Muutetaan sekunneiks
+								tunnit1 = tunnit1*3600+minsat1*60;
+								tunnit2 = tunnit2*3600+minsat2*60;
+
+								// Ja takas tunneiks ja minuuteiks
+								var tun1 = Math.round(tunnit1 / 3600);
+								var min1 = Math.round((tunnit1 / 60) % 60);
+
+								var tun2 = Math.round(tunnit2 / 3600);
+								var min2 = Math.round((tunnit2 / 60) % 60);
+
+								$('#tyom_yhteensa1').html(tun1+\":\"+min1+\"&nbsp;\");
+								$('#tyom_yhteensa2').html(tun2+\":\"+min2+\"&nbsp;\");
+							}
+
+							if (tableid == \"avoimet0\") {
+								var avoimety = new Array();
+								var valuutat = new Array();
+								var valuutta = '';
+
+								// Summataan vain ruudulla näkyvät luvut
+								for (var i=iStart; i<iEnd; i++) {
+									valuutta = aaData[aiDisplay[i]][9];
+									valuutat[valuutta] = valuutta;
+
+									if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
+									avoimety[valuutta] += aaData[aiDisplay[i]][8]*1;
+								}
+
+								// Tyhjennetään kaikki summat
+								$('td[name=avoimet_yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								// Ekotetaan vain ne valuutat jotka löytyy
+								for (valuutta in valuutat) {
+									if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
+									$('#avoimet_yhteensa_'+valuutta).html(avoimety[valuutta].toFixed(2));
+								}
+							}
+
+							if (tableid == \"avoimet1\") {
+								var avoimety = new Array();
+								var avoimetsuoriy = new Array();
+								var valuutat = new Array();
+								var yseroyhteensa = 0;
+								var valuutta = '';
+
+								// Summataan vain ruudulla näkyvät luvut
+								for (var i=iStart; i<iEnd; i++) {
+									valuutta = aaData[aiDisplay[i]][8];
+									valuutat[valuutta] = valuutta;
+
+									if (aaData[aiDisplay[i]][6] == '') {
+										if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
+										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][7]*1;
+									}
+									else {
+										if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
+										avoimety[valuutta] += aaData[aiDisplay[i]][7]*1;
+									}
+								}
+
+								// Tyhjennetään kaikki summat
+								$('td[name=avoimet_yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								// Ekotetaan vain ne valuutat jotka löytyy
+								for (valuutta in valuutat) {
+									if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
+									if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
+
+									$('#avoimet_yhteensa_'+valuutta).html(avoimety[valuutta].toFixed(2));
+									$('#avoimet_suoriyhteensa_'+valuutta).html(avoimetsuoriy[valuutta].toFixed(2));
+
+									yseroyhteensa = avoimety[valuutta] + avoimetsuoriy[valuutta];
+									$('#avoimet_yseroyhteensa_'+valuutta).html(yseroyhteensa.toFixed(2));
+								}
+							}
+
+							if (tableid == \"laskuhaku\") {
+								var summat = new Array();
+								var valuutat = new Array();
+								var valuutta = '';
+
+								for (var i=iStart; i<iEnd; i++) {
+									valuutta = aaData[aiDisplay[i]][3];
+									valuutat[valuutta] = valuutta;
+
+									if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+									summat[valuutta] += aaData[aiDisplay[i]][2]*1;
+								}
+
+								// Tyhjennetään kaikki summat
+								$('td[name=yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								// Ekotetaan vain ne valuutat jotka löytyy
+								for (valuutta in valuutat) {
+									if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+									$('#yhteensa_'+valuutta).html(summat[valuutta].toFixed(2));
+								}
+							}
+
+							if (tableid == \"myyrespaakirja\") {
+								var summa = 0;
+
+								for (var i=iStart; i<iEnd; i++) {
+									summa += aaData[aiDisplay[i]][6]*1;
+								}
+
+								$('#yhteensa').html(summa.toFixed(2));
+							}
+
+							if (tableid == \"toimittajahaku\") {
+								var summat = new Array();
+								var valuutat = new Array();
+								var valuutta = '';
+
+								for (var i=iStart; i<iEnd; i++) {
+									valuutta = aaData[aiDisplay[i]][2];
+									valuutat[valuutta] = valuutta;
+
+									if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+									summat[valuutta] += aaData[aiDisplay[i]][1]*1;
+								}
+
+								// Tyhjennetään kaikki summat
+								$('td[name=yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								// Ekotetaan vain ne valuutat jotka löytyy
+								for (valuutta in valuutat) {
+									if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+									$('#yhteensa_'+valuutta).html(summat[valuutta].toFixed(2));
+								}
+							}
+
+							if (tableid == \"saatanat_taulu\") {
+								var saatavaty = new Array();
+								var sarakemaara = ".count($saatavat_array)."+5;
+
+								// Summataan vain ruudulla näkyvät luvut
+								for (var i=iStart; i<iEnd; i++) {
+
+									for (var j=2; j<=sarakemaara; j++) {
+										if (typeof saatavaty[j] == 'undefined') saatavaty[j] = 0;
+										saatavaty[j] += aaData[aiDisplay[i]][j]*1;
+									}
+								}
+
+								// Tyhjennetään kaikki summat
+								$('td[name=saatavat_yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								for (var j=2; j<=sarakemaara; j++) {
+									$('#saatavat_yhteensa_'+j).html(saatavaty[j].toFixed(2));
+								}
+							}
+						}
+					} );
 				} );
 
 				// KEIKKA.PHPN OMAT JQUERY-TOIMINNALLISUUDET

@@ -1246,12 +1246,12 @@
 		}
 		else {
 
-			pupe_DataTables($pupe_DataTables, 7, 11);
+			pupe_DataTables(array(array($pupe_DataTables, 7, 11)));
 
 			// Näytetään valitut laskut
 			echo "<br><font class='message'>".t("Maksuvalmiit laskut")."</font><hr>";
 
-			echo "<table class='display' id='$pupe_DataTables'>";
+			echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
 			echo "<thead>
 					<tr>
@@ -1268,13 +1268,13 @@
 					<th class='back'></th>
 					</tr>
 					<tr>
-					<td><input type='text' name='search_nimi'></td>
-					<td><input type='text' name='search_tilinumero'></td>
-					<td><input type='text' name='search_erpcm'></td>
-					<td><input type='text' name='search_kassaale'></td>
-					<td><input type='text' name='search_summa'></td>
-					<td><input type='text' name='search_laskunro'></td>
-					<td><input type='text' name='search_viite'></td>
+					<td><input type='text' class='search_field' name='search_nimi'></td>
+					<td><input type='text' class='search_field' name='search_tilinumero'></td>
+					<td><input type='text' class='search_field' name='search_erpcm'></td>
+					<td><input type='text' class='search_field' name='search_kassaale'></td>
+					<td><input type='text' class='search_field' name='search_summa'></td>
+					<td><input type='text' class='search_field' name='search_laskunro'></td>
+					<td><input type='text' class='search_field' name='search_viite'></td>
 					<td></td>
 					<td></td>
 					<td></td>

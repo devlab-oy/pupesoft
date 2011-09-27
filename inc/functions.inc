@@ -10782,80 +10782,299 @@ if (!function_exists("laskutuspaiva")) {
 }
 
 if (!function_exists("pupe_DataTables")) {
-	function pupe_DataTables($taulu, $sarakkeetVis, $sarakkeetTot, $footerCallBack = "", $paginate = 'false', $info = 'false') {
-
+	function pupe_DataTables($parametrit) {
 		global $yhtiorow;
 
-		$aoColumns = "";
-
-		for ($i = 1; $i <= $sarakkeetVis; $i++) {
-			// Keikalla eka sarake on kohdistusnappula....
-			if ($i == 1 and $taulu == "keikka") {
-				$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false, \"sWidth\": \"20px\"},";
-			}
-			else {
-				$aoColumns .= " null,";
-			}
-		}
-		for ($i = $sarakkeetVis+1; $i <= $sarakkeetTot; $i++) {
-			$aoColumns .= " {\"bSortable\": false, \"bSearchable\": false},";
-		}
-
-		$aoColumns = substr($aoColumns, 0, -1);
-
 		echo "<script type='text/javascript' language='javascript'>";
-
 		require_once("inc/jquery.min.js");
 		require_once("DataTables/media/js/jquery.dataTables.min.js");
-
 		echo "</script>";
 
-		/*
-		\"sScrollY\": w_height,
-		\"bScrollCollapse\" : true,
-		var w_height = $(window).height()-250;
-		*/
+		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
+		preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
-		$paginationtype = $paginate != 'false' ? "\"sPaginationType\": \"full_numbers\"," : '';
-		$lengthmenu = $paginate != 'false' ? "\"aLengthMenu\": [[10, 25, 50, 100, 250, 500, -1], [10, 25, 50, 100, 250, 500, \"".t("Kaikki")."\"]]," : '';
+		$json_pass = array();
+
+		// Luetaan taulujen parametrit ja vied‰‰n ne javascriptille...
+		foreach ($parametrit as $param) {
+
+			$taulu			= $param[0];
+			$sarakkeetVis	= $param[1];
+			$sarakkeetTot	= $param[2];
+			$paginate 		= isset($param[3]) ? $param[3] : "false";
+			$info 			= isset($param[4]) ? $param[4] : "false";
+			$sorting 		= isset($param[5]) ? $param[5] : "true";
+			$aoColumns 		= "";
+			$paginationtype = $paginate !== false ? "full_numbers" : "two_button";
+
+			$json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting);
+		}
 
 		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
 		preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
 		echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
-			var asInitVals = new Array();
-
 			$(document).ready(function() {
 
-				var oTable = $('#{$taulu}').dataTable( {
-					\"bDestroy\" : true,
-					\"bPaginate\" : {$paginate},
-					{$paginationtype}
-					{$lengthmenu}
-					\"bInfo\" : {$info},
-					\"bStateSave\" : true,
-					\"iDisplayLength\" : 25,
-					\"oLanguage\": {
-						\"sSearch\" : \"".t("Etsi taulukosta").":\",
-						\"sZeroRecords\": \"".t("Ei hakuosumia")."\",
-						\"sLengthMenu\": \"",t("N‰yt‰")," _MENU_ ",t("rivi‰"),"\",
-						\"sInfo\": \"",t("N‰ytet‰‰n")," _START_ - _END_ / _TOTAL_ ",t("rivist‰"),"\",
-						\"sInfoFiltered\": \"(",t("suodatettu kaikista")," _MAX_ ",t("rivist‰"),")\",
-						\"oPaginate\": {
-							\"sFirst\": \"&laquo;&laquo;\",
-							\"sPrevious\": \"&laquo;\",
-							\"sNext\": \"&raquo;\",
-							\"sLast\": \"&raquo;&raquo;\"
+				var datatablesit = [];
+				var parametrit 	 = ".json_encode($json_pass).";
+
+				// Loopataan l‰pi kaikki datatablesit
+				$('.dataTable').each(function(t) {
+
+					var tableid = $(this).attr(\"id\");
+
+					var aoColumns = [];
+
+					for (var i = 1; i <= parametrit[tableid][0]; i++) {
+						// Keikalla eka sarake on kohdistusnappula....
+						if (i == 1 && tableid == \"keikka\") {
+							aoColumns[i-1] = \"{\\\"bSortable\\\": false, \\\"bSearchable\\\": false, \\\"sWidth\\\": 20px}\";
 						}
-					},
-					\"aaSorting\": [],
-					\"aoColumns\": [{$aoColumns}]
-					{$footerCallBack}
+						else {
+							aoColumns[i-1] = \"{\\\"bSortable\\\": true, \\\"bSearchable\\\": true}\";
+						}
+					}
+
+					for (var i = parametrit[tableid][0]+1; i <= parametrit[tableid][1]; i++) {
+						aoColumns[i-1] = \"{\\\"bSortable\\\": false, \\\"bSearchable\\\": false}\";
+					}
+
+					datatablesit[t] = $(this).dataTable( {
+						\"bSortCellsTop\": true,
+						\"bDestroy\" : true,
+						\"bPaginate\" : parametrit[tableid][2],
+						\"sPaginationType\": parametrit[tableid][3],
+						\"aLengthMenu\": [[10, 25, 50, 100, 250, 500, -1], [10, 25, 50, 100, 250, 500, \"".t("Kaikki")."\"]],
+						\"bInfo\" : parametrit[tableid][4],
+						\"bStateSave\" : true,
+						\"iDisplayLength\" : 25,
+						\"oLanguage\": {
+							\"sSearch\" : \"".t("Etsi taulukosta").":\",
+							\"sZeroRecords\": \"".t("Ei hakuosumia")."\",
+							\"sLengthMenu\": \"",t("N‰yt‰")," _MENU_ ",t("rivi‰"),"\",
+							\"sInfo\": \"",t("N‰ytet‰‰n")," _START_ - _END_ / _TOTAL_ ",t("rivist‰"),"\",
+							\"sInfoFiltered\": \"(",t("suodatettu kaikista")," _MAX_ ",t("rivist‰"),")\",
+							\"oPaginate\": {
+								\"sFirst\": \"&laquo;&laquo;\",
+								\"sPrevious\": \"&laquo;\",
+								\"sNext\": \"&raquo;\",
+								\"sLast\": \"&raquo;&raquo;\"
+							}
+						},
+						\"bSort\" : parametrit[tableid][5],
+						\"aaSorting\": [],
+						\"aoColumns\": aoColumns,
+						\"fnFooterCallback\": function( nRow, aaData, iStart, iEnd, aiDisplay ) {
+
+							if (tableid == \"tyojono1\")†{
+								var tunnit1 = 0;
+								var minsat1 = 0;
+								var tunnit2 = 0;
+								var minsat2 = 0;
+
+
+								for (var i=iStart; i<iEnd; i++) {
+									puperegexp = new RegExp(\"<span class=\\\"yhteensa\\\">(.*)<\\/span>\");
+
+									var pupematch1 = puperegexp.exec(aaData[aiDisplay[i]][1]);
+									var pupematch2 = puperegexp.exec(aaData[aiDisplay[i]][2]);
+
+									if (pupematch1 !== null) {
+										osat = pupematch1[1].split(\":\");
+
+										tunnit1 += osat[0]*1;
+										minsat1 += osat[1]*1;
+									}
+
+									if (pupematch2 !== null) {
+										osat = pupematch2[1].split(\":\");
+
+										tunnit2 += osat[0]*1;
+										minsat2 += osat[1]*1;
+									}
+								}
+
+								// Muutetaan sekunneiks
+								tunnit1 = tunnit1*3600+minsat1*60;
+								tunnit2 = tunnit2*3600+minsat2*60;
+
+								// Ja takas tunneiks ja minuuteiks
+								var tun1 = Math.round(tunnit1 / 3600);
+								var min1 = Math.round((tunnit1 / 60) % 60);
+
+								var tun2 = Math.round(tunnit2 / 3600);
+								var min2 = Math.round((tunnit2 / 60) % 60);
+
+								$('#tyom_yhteensa1').html(tun1+\":\"+min1+\"&nbsp;\");
+								$('#tyom_yhteensa2').html(tun2+\":\"+min2+\"&nbsp;\");
+							}
+
+							if (tableid == \"avoimet0\")†{
+								var avoimety = new Array();
+								var valuutat = new Array();
+								var valuutta = '';
+
+								// Summataan vain ruudulla n‰kyv‰t luvut
+								for (var i=iStart; i<iEnd; i++) {
+									valuutta = aaData[aiDisplay[i]][9];
+									valuutat[valuutta] = valuutta;
+
+									if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
+									avoimety[valuutta] += aaData[aiDisplay[i]][8]*1;
+								}
+
+								// Tyhjennet‰‰n kaikki summat
+								$('td[name=avoimet_yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								// Ekotetaan vain ne valuutat jotka lˆytyy
+								for (valuutta in valuutat) {
+									if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
+									$('#avoimet_yhteensa_'+valuutta).html(avoimety[valuutta].toFixed(2));
+								}
+							}
+
+							if (tableid == \"avoimet1\")†{
+								var avoimety = new Array();
+								var avoimetsuoriy = new Array();
+								var valuutat = new Array();
+								var yseroyhteensa = 0;
+								var valuutta = '';
+
+								// Summataan vain ruudulla n‰kyv‰t luvut
+								for (var i=iStart; i<iEnd; i++) {
+									valuutta = aaData[aiDisplay[i]][8];
+									valuutat[valuutta] = valuutta;
+
+									if (aaData[aiDisplay[i]][6] == '') {
+										if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
+										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][7]*1;
+									}
+									else {
+										if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
+										avoimety[valuutta] += aaData[aiDisplay[i]][7]*1;
+									}
+								}
+
+								// Tyhjennet‰‰n kaikki summat
+								$('td[name=avoimet_yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								// Ekotetaan vain ne valuutat jotka lˆytyy
+								for (valuutta in valuutat) {
+									if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
+									if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
+
+									$('#avoimet_yhteensa_'+valuutta).html(avoimety[valuutta].toFixed(2));
+									$('#avoimet_suoriyhteensa_'+valuutta).html(avoimetsuoriy[valuutta].toFixed(2));
+
+									yseroyhteensa = avoimety[valuutta] + avoimetsuoriy[valuutta];
+									$('#avoimet_yseroyhteensa_'+valuutta).html(yseroyhteensa.toFixed(2));
+								}
+							}
+
+							if (tableid == \"laskuhaku\")†{
+								var summat = new Array();
+								var valuutat = new Array();
+								var valuutta = '';
+
+								for (var i=iStart; i<iEnd; i++) {
+									valuutta = aaData[aiDisplay[i]][3];
+									valuutat[valuutta] = valuutta;
+
+									if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+									summat[valuutta] += aaData[aiDisplay[i]][2]*1;
+								}
+
+								// Tyhjennet‰‰n kaikki summat
+								$('td[name=yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								// Ekotetaan vain ne valuutat jotka lˆytyy
+								for (valuutta in valuutat) {
+									if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+									$('#yhteensa_'+valuutta).html(summat[valuutta].toFixed(2));
+								}
+							}
+
+							if (tableid == \"myyrespaakirja\")†{
+								var summa = 0;
+
+								for (var i=iStart; i<iEnd; i++) {
+									summa += aaData[aiDisplay[i]][6]*1;
+								}
+
+								$('#yhteensa').html(summa.toFixed(2));
+							}
+
+							if (tableid == \"toimittajahaku\")†{
+								var summat = new Array();
+								var valuutat = new Array();
+								var valuutta = '';
+
+								for (var i=iStart; i<iEnd; i++) {
+									valuutta = aaData[aiDisplay[i]][2];
+									valuutat[valuutta] = valuutta;
+
+									if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+									summat[valuutta] += aaData[aiDisplay[i]][1]*1;
+								}
+
+								// Tyhjennet‰‰n kaikki summat
+								$('td[name=yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								// Ekotetaan vain ne valuutat jotka lˆytyy
+								for (valuutta in valuutat) {
+									if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
+									$('#yhteensa_'+valuutta).html(summat[valuutta].toFixed(2));
+								}
+							}
+
+							if (tableid == \"saatanat_taulu\")†{
+								var saatavaty = new Array();
+								var sarakemaara = ".count($saatavat_array)."+5;
+
+								// Summataan vain ruudulla n‰kyv‰t luvut
+								for (var i=iStart; i<iEnd; i++) {
+
+									for (var j=2; j<=sarakemaara; j++) {
+										if (typeof saatavaty[j] == 'undefined') saatavaty[j] = 0;
+										saatavaty[j] += aaData[aiDisplay[i]][j]*1;
+									}
+								}
+
+								// Tyhjennet‰‰n kaikki summat
+								$('td[name=saatavat_yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								for (var j=2; j<=sarakemaara; j++) {
+									$('#saatavat_yhteensa_'+j).html(saatavaty[j].toFixed(2));
+								}
+							}
+						}
+					} );
 				} );
 
 				// KEIKKA.PHPN OMAT JQUERY-TOIMINNALLISUUDET
-				if ('{$taulu}' == 'keikka') {
+				if (datatablesit[0].attr(\"id\") == 'keikka') {
 
 					$(window).keypress(function(e) {
 					    if(e.keyCode == 13) {
@@ -10994,7 +11213,7 @@ if (!function_exists("pupe_DataTables")) {
 							kohde = 1;
 						}
 
-						oTable.fnFilter(tun, kohde);
+						datatablesit[0].fnFilter(tun, kohde);
 						$('input[name=\"search_'+searchbox+'\"]').val(tun);
 					});
 
@@ -11383,15 +11602,39 @@ if (!function_exists("pupe_DataTables")) {
 					});
 				}
 
+				// Sarakefiltterˆinti, toistaiseksi vain ekalle taululle!
 				$(\"thead input\").keyup( function () {
-					oTable.fnFilter( this.value, $(\"thead input\").index(this) );
+					var arvo = this.value;
+					var sarake = $(\"thead input\").index(this);
+
+					// fnFilter toistaiseksi vain ekalle tablelle
+					datatablesit[0].fnFilter( arvo, sarake );
+
+					// filtterˆid‰‰n tyˆjono.php:ssa myˆs alempaa taulua
+					if (datatablesit[0].attr(\"id\") == \"tyojono0\") {
+						var tyojono = [];
+
+						$(\"span[class=tyom_id]\").each(function(i) {
+							tyojono[i] = this.innerHTML;
+						});
+
+						var jonosearch = tyojono.join(\"|\");
+						
+						if (arvo != \"\" && jonosearch == \"\") {
+							// ei n‰ytet‰ mit‰‰n
+							jonosearch = \"xyzzypupe\";
+						}
+						
+						datatablesit[1].fnFilter( jonosearch, 0, true, false, true );
+					}
 				} );
 
-				var oSettings = oTable.fnSettings();
+				// Presorttaus, eli luetaan cookiesta tarvittavat tiedot, toistaiseksi vain ekalle taululle!
+				var oSettings = datatablesit[0].fnSettings();
 
-				$(\"thead input\").each(function(i){
-					if (oSettings.aoPreSearchCols[i]['sSearch']!=''){
-						$(this).val(oSettings.aoPreSearchCols[i]['sSearch']);
+				$(\"thead input\").each(function(u){
+					if (oSettings.aoPreSearchCols[u]['sSearch']!=''){
+						$(this).val(oSettings.aoPreSearchCols[u]['sSearch']);
 					}
 				} );
 

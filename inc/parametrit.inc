@@ -3,7 +3,7 @@
 // otetaan includepath aina rootista
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
 error_reporting(E_ERROR);
-ini_set("display_errors", 0);
+ini_set("display_errors", 1);
 ini_set("log_errors", 1);
 
 $alkumem		= memory_get_usage();

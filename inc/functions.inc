@@ -14009,6 +14009,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 				$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
 			}
 
+			$query_ale_lisa = generoi_alekentta('M');
+
 			//generoidaan lähetteelle ja keräyslistalle rivinumerot
 			$query = "  SELECT tilausrivi.*,
 						round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,

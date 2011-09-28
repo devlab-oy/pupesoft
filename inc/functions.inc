@@ -14068,7 +14068,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 			'nimitysleveys'				=> '',
 			'tyyppi'					=> '',
 			'useita'					=> '',
-			'ei_echoa'					=> $ei_echoa
+			'ei_echoa'					=> $ei_echoa,
+			'komento'					=> $komento
 			);
 
 			if ($laskurow["tila"] == "G") {
@@ -14163,7 +14164,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 				$params_lahete = kuittaus_lahete($params_lahete);
 			}
 
-			if (isset($komento["Lähete"])) $params_lahete["komento"] = $komento["Lähete"];
+			if (is_array($komento) and isset($komento["Lähete"])) $params_lahete["komento"] = $komento["Lähete"];
 
 			//tulostetaan sivu
 			print_pdf_lahete($params_lahete);

@@ -67,166 +67,192 @@
 
 							$pantti_kpl = abs($trow['varattu']);
 
-							// etsitään vanhin pantti
-							$query = "	SELECT *
-										FROM panttitili
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND asiakas = '{$orow['liitostunnus']}'
-										AND tuoteno = '{$trow['tuoteno']}'
-										AND status = ''
-										AND kaytettypvm = '0000-00-00'
-										AND kaytettytilausnro = 0
-										ORDER BY myyntipvm ASC";
-							$vanhin_pantti_res = pupe_query($query);
+							if ($orow['clearing'] == 'HYVITYS' and $orow['vanhatunnus'] > 0) {
 
-							while ($vanhin_pantti_row = mysql_fetch_assoc($vanhin_pantti_res)) {
-
-								$query = "	UPDATE panttitili SET
-											status = 'K',
-											kaytettypvm = now(),
-											kaytettytilausnro = '{$trow['otunnus']}'
+								$query = "	SELECT *
+											FROM panttitili
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus = '{$vanhin_pantti_row['tunnus']}'";
-								$pantti_upd = pupe_query($query);
+											AND asiakas = '{$orow['liitostunnus']}'
+											AND tuoteno = '{$trow['tuoteno']}'
+											AND myyntitilausnro = '{$orow['vanhatunnus']}'
+											AND status = ''
+											AND kaytettypvm = '0000-00-00'
+											AND kaytettytilausnro = 0
+											ORDER BY myyntipvm ASC";
+								$vanhin_pantti_res = pupe_query($query);
 
-								$tilkom_upd = trim($trow['kommentti']) != '' ? $trow['kommentti']." ".t("Panttitilillinen tuote, tuote hyvitetty panttitililtä")."." : t("Panttitilillinen tuote, tuote hyvitetty panttitililtä").".";
-
-								if ($vanhin_pantti_row['kpl'] >= $pantti_kpl) {
-									// käytetään niin monta panttia kuin on tarvis
-
-									$vanhin_pantti_row['kpl'] -= $pantti_kpl;
-
-									if ($vanhin_pantti_row['kpl'] > 0) {
-
-										$ale_query_insert_lisa = '';
-
-										for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-											$ale_query_insert_lisa .= " ale{$alepostfix} = '".$vanhin_pantti_row["ale{$alepostfix}"]."', ";
-										}
-
-										$query = "	INSERT INTO panttitili SET
-													yhtio = '{$kukarow['yhtio']}',
-													asiakas = '{$vanhin_pantti_row['asiakas']}',
-													tuoteno = '{$vanhin_pantti_row['tuoteno']}',
-													status = '',
-													kpl = '{$vanhin_pantti_row['kpl']}',
-													hinta = '{$vanhin_pantti_row['hinta']}',
-													{$ale_query_insert_lisa}
-													myyntipvm = '{$vanhin_pantti_row['myyntipvm']}',
-													myyntitilausnro = '{$vanhin_pantti_row['myyntitilausnro']}',
-													kaytettypvm = '0000-00-00',
-													kaytettytilausnro = 0";
-										$uusi_pantti_res = pupe_query($query);
-
-										$query = "	UPDATE panttitili SET
-													kpl = {$pantti_kpl}
-													WHERE yhtio = '{$kukarow['yhtio']}'
-													AND tunnus = '{$vanhin_pantti_row['tunnus']}'";
-										$pantti_upd = pupe_query($query);
-									}
-
-									$ale_query_update_lisa = '';
-
-									for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-										$ale_query_update_lisa .= " ale{$alepostfix} = 0, ";
-									}
-
-									$query = "	UPDATE tilausrivi SET
-												varattu = -".abs($pantti_kpl).",
-												ale1 = 100,
-												{$ale_query_update_lisa}
-												kommentti = '{$tilkom_upd}'
+								while ($vanhin_pantti_row = mysql_fetch_assoc($vanhin_pantti_res)) {
+									$query = "	UPDATE panttitili SET
+												status = 'K',
+												kaytettypvm = now(),
+												kaytettytilausnro = '{$orow['tunnus']}'
 												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus = '{$tilausrivin_tunnus_chk}'";
-									$pantti_update = pupe_query($query);
-
-									break;
+												AND tunnus = '{$vanhin_pantti_row['tunnus']}'";
+									$pantti_upd = pupe_query($query);
 								}
-								else {
-									// jos panttitilillä ei ole tarpeeksi, käytetään se mitä on ja splitataan rivi
+							}
+							else {
+								// etsitään vanhin pantti
+								$query = "	SELECT *
+											FROM panttitili
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND asiakas = '{$orow['liitostunnus']}'
+											AND tuoteno = '{$trow['tuoteno']}'
+											AND status = ''
+											AND kaytettypvm = '0000-00-00'
+											AND kaytettytilausnro = 0
+											ORDER BY myyntipvm ASC";
+								$vanhin_pantti_res = pupe_query($query);
 
-									$rfields = "yhtio";
-									$rvalues = "'{$kukarow['yhtio']}'";
+								while ($vanhin_pantti_row = mysql_fetch_assoc($vanhin_pantti_res)) {
 
-									for ($i = 1; $i < mysql_num_fields($presult) - 1; $i++) { // Ei tunnusta
+									$query = "	UPDATE panttitili SET
+												status = 'K',
+												kaytettypvm = now(),
+												kaytettytilausnro = '{$trow['otunnus']}'
+												WHERE yhtio = '{$kukarow['yhtio']}'
+												AND tunnus = '{$vanhin_pantti_row['tunnus']}'";
+									$pantti_upd = pupe_query($query);
 
-										$fieldname = mysql_field_name($presult, $i);
+									$tilkom_upd = trim($trow['kommentti']) != '' ? $trow['kommentti']." ".t("Panttitilillinen tuote, tuote hyvitetty panttitililtä")."." : t("Panttitilillinen tuote, tuote hyvitetty panttitililtä").".";
 
-										$rfields .= ", ".$fieldname;
+									if ($vanhin_pantti_row['kpl'] >= $pantti_kpl) {
+										// käytetään niin monta panttia kuin on tarvis
 
-										switch ($fieldname) {
-											case 'varattu':
-												$rvalues .= ", -".$vanhin_pantti_row['kpl'];
-												break;
-											case 'tunnus':
-												$rvalues .= ", NULL";
-												break;
-											// case 'kommentti':
-											// 	$rvalues .= ", '{$tilkom_upd}'";
-											// 	break;
-											// case 'ale1':
-											// 	$rvalues .= ", 100";
-											default:
-												$rvalues .= ", '".mysql_real_escape_string($trow[$fieldname])."'";
+										$vanhin_pantti_row['kpl'] -= $pantti_kpl;
+
+										if ($vanhin_pantti_row['kpl'] > 0) {
+
+											$ale_query_insert_lisa = '';
+
+											for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+												$ale_query_insert_lisa .= " ale{$alepostfix} = '".$vanhin_pantti_row["ale{$alepostfix}"]."', ";
+											}
+
+											$query = "	INSERT INTO panttitili SET
+														yhtio = '{$kukarow['yhtio']}',
+														asiakas = '{$vanhin_pantti_row['asiakas']}',
+														tuoteno = '{$vanhin_pantti_row['tuoteno']}',
+														status = '',
+														kpl = '{$vanhin_pantti_row['kpl']}',
+														hinta = '{$vanhin_pantti_row['hinta']}',
+														{$ale_query_insert_lisa}
+														myyntipvm = '{$vanhin_pantti_row['myyntipvm']}',
+														myyntitilausnro = '{$vanhin_pantti_row['myyntitilausnro']}',
+														kaytettypvm = '0000-00-00',
+														kaytettytilausnro = 0";
+											$uusi_pantti_res = pupe_query($query);
+
+											$query = "	UPDATE panttitili SET
+														kpl = {$pantti_kpl}
+														WHERE yhtio = '{$kukarow['yhtio']}'
+														AND tunnus = '{$vanhin_pantti_row['tunnus']}'";
+											$pantti_upd = pupe_query($query);
 										}
+
+										$ale_query_update_lisa = '';
+
+										for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+											$ale_query_update_lisa .= " ale{$alepostfix} = 0, ";
+										}
+
+										$query = "	UPDATE tilausrivi SET
+													varattu = -".abs($pantti_kpl).",
+													ale1 = 100,
+													{$ale_query_update_lisa}
+													kommentti = '{$tilkom_upd}'
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus = '{$tilausrivin_tunnus_chk}'";
+										$pantti_update = pupe_query($query);
+
+										break;
 									}
+									else {
+										// jos panttitilillä ei ole tarpeeksi, käytetään se mitä on ja splitataan rivi
 
-									$kysely_insertti = "INSERT into tilausrivi ($rfields) VALUES ($rvalues)";
-									$insresultti = pupe_query($kysely_insertti);
-									$insid_uusi  = mysql_insert_id();
+										$rfields = "yhtio";
+										$rvalues = "'{$kukarow['yhtio']}'";
 
-									$pantti_kpl -= $vanhin_pantti_row['kpl'];
+										for ($i = 1; $i < mysql_num_fields($presult) - 1; $i++) { // Ei tunnusta
 
-									//Kopioidaan tilausrivin lisatiedot
-									$query = "	SELECT *
-												FROM tilausrivin_lisatiedot
-												WHERE tilausrivitunnus = '{$tilausrivin_tunnus_chk}'
-												and yhtio = '{$kukarow['yhtio']}'";
-									$monistares2 = pupe_query($query);
+											$fieldname = mysql_field_name($presult, $i);
 
-									if (mysql_num_rows($monistares2) > 0) {
-										$monistarow2 = mysql_fetch_assoc($monistares2);
-
-										$kysely = "	INSERT INTO tilausrivin_lisatiedot
-													SET yhtio 			= '{$kukarow['yhtio']}',
-													laatija				= '{$kukarow['kuka']}',
-													luontiaika 			= now(),
-													tilausrivitunnus	= {$insid_uusi},";
-
-										for ($i = 0; $i < mysql_num_fields($monistares2) - 1; $i++) { // Ei monisteta tunnusta
-
-											$fieldname = mysql_field_name($monistares2, $i);
+											$rfields .= ", ".$fieldname;
 
 											switch ($fieldname) {
-												case 'laatija':
-												case 'luontiaika':
-												case 'tilausrivitunnus':
-												case 'yhtio':
+												case 'varattu':
+													$rvalues .= ", -".$vanhin_pantti_row['kpl'];
 													break;
+												case 'tunnus':
+													$rvalues .= ", NULL";
+													break;
+												// case 'kommentti':
+												// 	$rvalues .= ", '{$tilkom_upd}'";
+												// 	break;
+												// case 'ale1':
+												// 	$rvalues .= ", 100";
 												default:
-													$kysely .= $fieldname."='".$monistarow2[$fieldname]."',";
+													$rvalues .= ", '".mysql_real_escape_string($trow[$fieldname])."'";
 											}
 										}
 
-										$kysely  = substr($kysely, 0, -1);
-										$insres2 = pupe_query($kysely);
+										$kysely_insertti = "INSERT into tilausrivi ($rfields) VALUES ($rvalues)";
+										$insresultti = pupe_query($kysely_insertti);
+										$insid_uusi  = mysql_insert_id();
+
+										$pantti_kpl -= $vanhin_pantti_row['kpl'];
+
+										//Kopioidaan tilausrivin lisatiedot
+										$query = "	SELECT *
+													FROM tilausrivin_lisatiedot
+													WHERE tilausrivitunnus = '{$tilausrivin_tunnus_chk}'
+													and yhtio = '{$kukarow['yhtio']}'";
+										$monistares2 = pupe_query($query);
+
+										if (mysql_num_rows($monistares2) > 0) {
+											$monistarow2 = mysql_fetch_assoc($monistares2);
+
+											$kysely = "	INSERT INTO tilausrivin_lisatiedot
+														SET yhtio 			= '{$kukarow['yhtio']}',
+														laatija				= '{$kukarow['kuka']}',
+														luontiaika 			= now(),
+														tilausrivitunnus	= {$insid_uusi},";
+
+											for ($i = 0; $i < mysql_num_fields($monistares2) - 1; $i++) { // Ei monisteta tunnusta
+
+												$fieldname = mysql_field_name($monistares2, $i);
+
+												switch ($fieldname) {
+													case 'laatija':
+													case 'luontiaika':
+													case 'tilausrivitunnus':
+													case 'yhtio':
+														break;
+													default:
+														$kysely .= $fieldname."='".$monistarow2[$fieldname]."',";
+												}
+											}
+
+											$kysely  = substr($kysely, 0, -1);
+											$insres2 = pupe_query($kysely);
+										}
+
+										$ale_query_update_lisa = '';
+
+										for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+											$ale_query_update_lisa .= " ale{$alepostfix} = 0, ";
+										}
+
+										$query = "	UPDATE tilausrivi SET
+													varattu = -".abs($vanhin_pantti_row['kpl']).",
+													ale1 = 100,
+													{$ale_query_update_lisa}
+													kommentti = '{$tilkom_upd}'
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													AND tunnus = '{$tilausrivin_tunnus_chk}'";
+										$pantti_update = pupe_query($query);
+										$tilausrivin_tunnus_chk = $insid_uusi;
 									}
-
-									$ale_query_update_lisa = '';
-
-									for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-										$ale_query_update_lisa .= " ale{$alepostfix} = 0, ";
-									}
-
-									$query = "	UPDATE tilausrivi SET
-												varattu = -".abs($vanhin_pantti_row['kpl']).",
-												ale1 = 100,
-												{$ale_query_update_lisa}
-												kommentti = '{$tilkom_upd}'
-												WHERE yhtio = '{$kukarow['yhtio']}'
-												AND tunnus = '{$tilausrivin_tunnus_chk}'";
-									$pantti_update = pupe_query($query);
-									$tilausrivin_tunnus_chk = $insid_uusi;
 								}
 							}
 						}

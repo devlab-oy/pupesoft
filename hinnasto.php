@@ -21,61 +21,59 @@ elseif (@include("parametrit.inc"));
 else exit;
 
 echo "<font class='head'>".t("Hinnastoajo")."</font><hr>";
+echo "<form method='post' action=''>";
+echo "<input type='hidden' name='tee' value='kaikki'>";
 
-// K‰yttˆliittym‰ vain jos ei olla submitattu
-if (!isset($submitnappi)) {
+// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 
-	echo "<form method='post' action=''>";
-	echo "<input type='hidden' name='tee' value='kaikki'>";
-
-	// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
-
-	if (file_exists("tilauskasittely/monivalintalaatikot.inc")) {
-		require("tilauskasittely/monivalintalaatikot.inc");
-	}
-	else {
-		require("monivalintalaatikot.inc");
-	}
-
-	echo "<br><br>";
-	echo "<table>";
-
-	if ($kukarow['extranet'] == '') {
-		echo "<tr><th>".t("Listaa kaikki tuotteet").":</th>
-				<td><input type='checkbox' name='kl_hinnastoon'> (".t("muuten hinnastoon fl‰gi eri kuin E ja V").")</td></tr>";
-
-
-		echo "<tr><th>".t("N‰yt‰ aleryhm‰n tunnus").":</th>
-				<td><input type='checkbox' name='kl_alenimi'> (".t("muuten n‰ytet‰‰n aleryhm‰n nimi").")</td></tr>";
-	}
-
-	echo "<tr>
-		<th>" .t('Muutosp‰iv‰m‰‰r‰') . "</th>
-		<td>
-			<input type='text' name='pp' value='$pp' size='3'>
-			<input type='text' name='kk' value='$kk' size='3'>
-			<input type='text' name='vv' value='$vv' size='5'>
-			" . t('ppkkvvvv') . "
-		</td>
-		</tr>
-		<tr>
-		<th>" . t('Hinnastoformaatti') . "</th>
-		<td>
-			<select name='hinnasto'>
-				<option value='futur'>" . t('Futursoft') . "</option>
-				<option value='automaster'>" . t('Automaster') . "</option>
-				<option value='vienti'>" . t('Vientihinnasto') . "</option>
-				<option value='tab'>" . t('Tab eroteltu') . "</option>
-			</select>
-		</td>
-		</tr>
-	</table>";
-
-	echo "<br>";
-	echo "<input type='submit' name='submitnappi' value='".t("L‰het‰")."'>";
-	echo "</form>";
+if (file_exists("tilauskasittely/monivalintalaatikot.inc")) {
+	require("tilauskasittely/monivalintalaatikot.inc");
 }
+else {
+	require("monivalintalaatikot.inc");
+}
+
+echo "<br><br>";
+echo "<table>";
+
+if ($kukarow['extranet'] == '') {
+	echo "<tr><th>".t("Listaa kaikki tuotteet").":</th>
+			<td><input type='checkbox' name='kl_hinnastoon'> (".t("muuten hinnastoon fl‰gi eri kuin E ja V").")</td></tr>";
+
+
+	echo "<tr><th>".t("N‰yt‰ aleryhm‰n tunnus").":</th>
+			<td><input type='checkbox' name='kl_alenimi'> (".t("muuten n‰ytet‰‰n aleryhm‰n nimi").")</td></tr>";
+}
+
+
+$sel[$hinnasto] = "SELECTED";
+
+echo "<tr>
+	<th>" .t('Muutosp‰iv‰m‰‰r‰') . "</th>
+	<td>
+		<input type='text' name='pp' value='$pp' size='3'>
+		<input type='text' name='kk' value='$kk' size='3'>
+		<input type='text' name='vv' value='$vv' size='5'>
+		" . t('ppkkvvvv') . "
+	</td>
+	</tr>
+	<tr>
+	<th>" . t('Hinnastoformaatti') . "</th>
+	<td>
+		<select name='hinnasto'>
+			<option value='futur' $sel[futur]>" . t('Futursoft') . "</option>
+			<option value='automaster' $sel[automaster]>" . t('Automaster') . "</option>
+			<option value='vienti' $sel[vienti]>" . t('Vientihinnasto') . "</option>
+			<option value='tab' $sel[tab]>" . t('Tab eroteltu') . "</option>
+		</select>
+	</td>
+	</tr>
+</table>";
+
+echo "<br>";
+echo "<input type='submit' name='submitnappi' value='".t("L‰het‰")."'>";
+echo "</form>";
 
 // jos ollaan painettu submittia, tehd‰‰n rappa
 if (isset($submitnappi)) {
@@ -87,10 +85,9 @@ if (isset($submitnappi)) {
 		die("filen luonti ep‰onnistui!");
 	}
 
-	echo "<font class='message'>".t("Luodaan hinnastoa")."...</font>";
+	echo "<br><br><font class='message'>".t("Luodaan hinnastoa")."...</font>";
 
 	// katsotaan mik‰ hinnastoformaatti
-
 	if (file_exists("inc/hinnastorivi".basename($_POST["hinnasto"]).".inc")) {
 		require("inc/hinnastorivi".basename($_POST["hinnasto"]).".inc");
 	}
@@ -174,6 +171,7 @@ if (isset($submitnappi)) {
 	while ($tuoterow = mysql_fetch_array($result)) {
 
 		$ohitus = 0;
+
 		if (!empty($kukarow['extranet'])) {
 			$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
 			$asiakastempres = mysql_query($query);

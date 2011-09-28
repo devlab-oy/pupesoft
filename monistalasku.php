@@ -47,6 +47,150 @@ if ($tee == 'MONISTA' and count($monistettavat) == 0) {
 	$tee = "";
 }
 
+if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
+
+	foreach ($monistettavat as $lasku_x => $kumpi_x) {
+
+		if ($kumpi_x == 'HYVITA') {
+
+			$query = "	SELECT clearing, vanhatunnus, liitostunnus
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$lasku_x}'
+						AND tila = 'U'
+						AND alatila = 'X'";
+			$chk_res = pupe_query($query);
+			$chk_row = mysql_fetch_assoc($chk_res);
+
+			// jos tilauksella on panttituotteita/sarjanumeroita pit‰‰ est‰‰, ett‰ hyvityst‰ ei saa en‰‰ hyvitt‰‰ (clearing=hyvitys) 
+			if ($chk_row['clearing'] == 'HYVITYS') {
+
+				$query = "	SELECT vanhatunnus 
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$chk_row['vanhatunnus']}'";
+				$chk_res2 = pupe_query($query);
+				$chk_row2 = mysql_fetch_assoc($chk_res2);
+
+				$query = "	SELECT tuote.panttitili
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.otunnus = '{$chk_row2['vanhatunnus']}'";
+				$chk_til_res = pupe_query($query);
+
+				while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
+
+					if ($chk_til_row['panttitili'] != '') {
+						echo "<font class='error'>",t("Et voi monistaa hyvityslaskua, jossa on panttitilillisi‰ tuotteita"),"! ({$lasku_x})</font><br>";
+						$tee = "";
+						break 2;
+					}
+
+				}
+			}
+			elseif ($chk_row['vanhatunnus'] > 0) {
+
+				// jos tilauksella on panttituotteita/sarjanumeroita pit‰‰ tarkistaa, ett‰ ei anneta hyvitt‰‰ laskua joka on jo hyvitetty (vanhatunnus lˆytyy) 
+				$query = "	SELECT tunnus, clearing
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND vanhatunnus = '{$lasku_x}'
+							AND tila = 'U'
+							AND alatila = 'X'";
+				$clearing_chk_res = pupe_query($query);
+				$clearing_chk_row = mysql_fetch_assoc($clearing_chk_res);
+
+				$query = "	SELECT tuote.panttitili, tuote.tuoteno
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.otunnus = '{$chk_row['vanhatunnus']}'";
+				$chk_til_res = pupe_query($query);
+
+				while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
+
+					if ($chk_til_row['panttitili'] != '') {
+						if ($clearing_chk_row['clearing'] == 'HYVITYS') {
+							echo "<font class='error'>",t("Et voi hyvitt‰‰ tilausta, jossa on panttitilillisi‰ tuotteita ja joka on jo hyvitetty"),"! ({$lasku_x})</font><br>";
+							$tee = "";
+							break 2;
+						}
+						else {
+							// jos tilauksella on panttituotteita ja ollaan tekem‰ss‰ hyvityst‰, pit‰‰ katsoa, ett‰ t‰m‰n veloituslakun panttitili rivej‰ ei ole viel‰ k‰ytetty 
+							// (status, kaytettypvm, kaytettytilausnro pit‰‰ olla tyhj‰‰). jos ei ole, niin hyvityst‰ ei voida tehd‰, virhe "panttitilituotteet on jo k‰ytetty"
+							// etsit‰‰n vanhin pantti
+							$query = "	SELECT *
+										FROM panttitili
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND asiakas = '{$chk_row['liitostunnus']}'
+										AND tuoteno = '{$chk_til_row['tuoteno']}'
+										AND status = ''
+										AND kaytettypvm = '0000-00-00'
+										AND kaytettytilausnro = 0
+										ORDER BY myyntipvm ASC";
+							$pantti_chk_res = pupe_query($query);
+
+							if (mysql_num_rows($pantti_chk_res) == 0) {
+								echo "<font class='error'>",t("Et voi hyvitt‰‰ tilausta, jossa on panttitilillisi‰ tuotteita ja sen panttitilituotteet on jo k‰ytetty"),"! ({$lasku_x})</font><br>";
+								$tee = "";
+								break 2;
+							}
+						}
+					}
+				}
+			}
+		}
+		elseif ($kumpi_x == 'MONISTA') {
+
+			$query = "	SELECT clearing, vanhatunnus
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$lasku_x}'
+						AND tila = 'U'
+						AND alatila = 'X'";
+			$chk_res = pupe_query($query);
+			$chk_row = mysql_fetch_assoc($chk_res);
+
+			$query = "	SELECT vanhatunnus 
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$chk_row['vanhatunnus']}'";
+			$chk_res2 = pupe_query($query);
+			$chk_row2 = mysql_fetch_assoc($chk_res2);
+
+			$query = "	SELECT tuote.panttitili
+						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus = '{$chk_row2['vanhatunnus']}'";
+			$chk_til_res = pupe_query($query);
+
+			while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
+
+				if ($chk_til_row['panttitili'] != '') {
+
+					$query = "	SELECT tunnus
+								FROM lasku
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND vanhatunnus = '{$lasku_x}'
+								AND tila = 'U'
+								AND alatila = 'X'
+								AND clearing = 'HYVITYS'";
+					$clearing_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($clearing_chk_res) == 0) {
+						echo "<font class='error'>",t("Et voi monistaa tilausta, jossa on panttitilillisi‰ tuotteita ja se on hyvitetty, mutta hyvityst‰ ei ole laskutettu"),"! ({$lasku_x})</font><br>";
+						$tee = "";
+						break 2;
+					}
+				}
+
+			}
+		}
+	}
+}
+
 if ($toim == 'TYOMAARAYS') {
 	// Halutaanko saldot koko konsernista?
 	$query = "	SELECT *
@@ -605,7 +749,6 @@ if ($tee == 'MONISTA') {
 					case 'viite':
 					case 'laskunro':
 					case 'mapvm':
-					case 'clearing':
 					case 'tilausvahvistus':
 					case 'viikorkoeur':
 					case 'tullausnumero':
@@ -614,7 +757,6 @@ if ($tee == 'MONISTA') {
 					case 'noutaja':
 					case 'jaksotettu':
 					case 'factoringsiirtonumero':
-					case 'vanhatunnus':
 					case 'laskutuspvm':
 					case 'maksuaika':
 					case 'maa_maara':
@@ -625,6 +767,22 @@ if ($tee == 'MONISTA') {
 					case 'poistumistoimipaikka':
 					case 'poistumistoimipaikka_koodi':
 						$values .= ", ''";
+						break;
+					case 'clearing':
+						if ($kumpi == 'HYVITA') {
+							$values .= ", 'HYVITYS'";
+						}
+						else {
+							$values .= ", ''";
+						}
+						break;
+					case 'vanhatunnus':
+						if ($kumpi == 'HYVITA') {
+							$values .= ", '{$lasku}'";
+						}
+						else {
+							$values .= ", ''";
+						}
 						break;
 					case 'laatija':
 						$values .= ", '{$kukarow['kuka']}'";

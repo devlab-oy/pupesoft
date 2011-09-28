@@ -857,7 +857,7 @@ else {
 
 								$query = "INSERT into tilausrivin_lisatiedot ($fields) VALUES ($values)";
 								$lisatiedot_result = pupe_query($query);
-								
+
 							}
 						}
 
@@ -916,9 +916,9 @@ else {
 			$varasto_kpl_array = array();
 			$tulalue_kpl_array = array();
 
-			$sisviesti2_numerointi = 1;
-
-			$i_counter = 1;
+			$sisviesti2_numerointi	= 1;
+			$i_counter 				= 1;
+			$tilaus_splitattu 		= FALSE;
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -933,6 +933,8 @@ else {
 
 				// varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
 				if (((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '')) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K") or ($row['omalle_tilaukselle'] != '' and $i_counter > 1)) {
+
+					$tilaus_splitattu = TRUE;
 
 					// Meidän on päivitettävä tunnusnippu
 					if ($yhtiorow["splittauskielto"] == "K" and $laskurow["tunnusnippu"] == 0) {
@@ -1045,7 +1047,7 @@ else {
 
 					$varasto_chk_array[$laskurow['tunnus']] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
 				}
-				else {
+				elseif (!$tilaus_splitattu) {
 					// Pidetään lukua kuinka paljon mistäkin varastosta on riviä, jotka jää alkuperöiselle tilaukselle
 					if ($varasto > 0) {
 						if (isset($varasto_kpl_array[$varasto])) $varasto_kpl_array[$varasto]++;

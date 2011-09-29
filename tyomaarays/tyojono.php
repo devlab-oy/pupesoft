@@ -213,7 +213,7 @@
 			echo "<td>$vrow[yhtio]</td>";
 		}
 
-		if ($vrow['tila'] == 'L' and $vrow['tilaustyyppi'] == 'A') {
+		if ($vrow["tila"] == "A" or ($vrow['tila'] == 'L' and $vrow['tilaustyyppi'] == 'A')) {
 			if ($toim == 'TYOMAARAYS_ASENTAJA') {
 				$toimi = 'TYOMAARAYS_ASENTAJA';
 			}
@@ -229,9 +229,6 @@
 		}
 		elseif ($vrow["tila"] == "S") {
 			$toimi = "SIIRTOTYOMAARAYS";
-		}
-		elseif ($vrow["tila"] == "A") {
-			$toimi = "TYOMAARAYS";
 		}
 		elseif ($vrow['tila'] == 'C') {
 			$toimi = 'REKLAMAATIO';

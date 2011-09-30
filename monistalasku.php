@@ -86,7 +86,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 						$tee = "";
 						break 2;
 					}
-					elseif ($chk_til_row["sarjanumeroseuranta"] == "E" or $chk_til_row["sarjanumeroseuranta"] == "F" or $chk_til_row["sarjanumeroseuranta"] == "G") {
+					elseif ($chk_til_row["sarjanumeroseuranta"] != "") {
 						echo "<font class='error'>",t("Et voi hyvitt‰‰ hyvityslaskua, jossa on sarjanumeroseurannallisia tuotteita"),"! ({$lasku_x})</font><br>";
 						$tee = "";
 						break 2;
@@ -121,7 +121,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 							$tee = "";
 							break 2;
 						}
-						elseif ($chk_til_row["sarjanumeroseuranta"] == "E" or $chk_til_row["sarjanumeroseuranta"] == "F" or $chk_til_row["sarjanumeroseuranta"] == "G") {
+						elseif ($chk_til_row["sarjanumeroseuranta"] != "") {
 							echo "<font class='error'>",t("Et voi hyvitt‰‰ tilausta, jossa on sarjanumeroseurannallisia tuotteita ja joka on jo hyvitetty"),"! ({$lasku_x})</font><br>";
 							$tee = "";
 							break 2;

@@ -72,7 +72,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 				$chk_res2 = pupe_query($query);
 				$chk_row2 = mysql_fetch_assoc($chk_res2);
 
-				$query = "	SELECT tuote.panttitili
+				$query = "	SELECT tuote.panttitili, tuote.sarjanumeroseuranta
 							FROM tilausrivi
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -82,7 +82,12 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 				while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
 
 					if ($chk_til_row['panttitili'] != '') {
-						echo "<font class='error'>",t("Et voi monistaa hyvityslaskua, jossa on panttitilillisi‰ tuotteita"),"! ({$lasku_x})</font><br>";
+						echo "<font class='error'>",t("Et voi hyvitt‰‰ hyvityslaskua, jossa on panttitilillisi‰ tuotteita"),"! ({$lasku_x})</font><br>";
+						$tee = "";
+						break 2;
+					}
+					elseif ($chk_til_row["sarjanumeroseuranta"] == "E" or $chk_til_row["sarjanumeroseuranta"] == "F" or $chk_til_row["sarjanumeroseuranta"] == "G") {
+						echo "<font class='error'>",t("Et voi hyvitt‰‰ hyvityslaskua, jossa on sarjanumeroseurannallisia tuotteita"),"! ({$lasku_x})</font><br>";
 						$tee = "";
 						break 2;
 					}
@@ -101,7 +106,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 				$clearing_chk_res = pupe_query($query);
 				$clearing_chk_row = mysql_fetch_assoc($clearing_chk_res);
 
-				$query = "	SELECT tuote.panttitili, tuote.tuoteno
+				$query = "	SELECT tuote.panttitili, tuote.tuoteno, tuote.sarjanumeroseuranta
 							FROM tilausrivi
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -113,6 +118,11 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 					if ($chk_til_row['panttitili'] != '') {
 						if ($clearing_chk_row['clearing'] == 'HYVITYS') {
 							echo "<font class='error'>",t("Et voi hyvitt‰‰ tilausta, jossa on panttitilillisi‰ tuotteita ja joka on jo hyvitetty"),"! ({$lasku_x})</font><br>";
+							$tee = "";
+							break 2;
+						}
+						elseif ($chk_til_row["sarjanumeroseuranta"] == "E" or $chk_til_row["sarjanumeroseuranta"] == "F" or $chk_til_row["sarjanumeroseuranta"] == "G") {
+							echo "<font class='error'>",t("Et voi hyvitt‰‰ tilausta, jossa on sarjanumeroseurannallisia tuotteita ja joka on jo hyvitetty"),"! ({$lasku_x})</font><br>";
 							$tee = "";
 							break 2;
 						}

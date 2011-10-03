@@ -22,16 +22,19 @@ if ($tee == "SYNK") {
 		$table = substr($table, 0, 9);
 
 		$abulisa = preg_match("/(^|,)(avainsana\|*([\|a-zA-Z_\-]*))($|,)/i", $yhtiorow["synkronoi"], $regs);
-		$la = explode("|", $regs[3]);
 
-		$lajit  = " and laji in (";
+		if ($regs[3] != "") {
+			$la = explode("|", $regs[3]);
 
-		foreach($la as  $l) {
-			$lajit .= "'$l',";
+			$lajit  = " and laji in (";
+
+			foreach($la as  $l) {
+				$lajit .= "'$l',";
+			}
+			$lajit = substr($lajit, 0, -1);
+
+			$lajit .= ")";
 		}
-		$lajit = substr($lajit, 0, -1);
-
-		$lajit .= ")";
 	}
 	else {
 		if(strpos($yhtiorow["synkronoi"], $table) === false or $table == "") {

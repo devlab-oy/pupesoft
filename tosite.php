@@ -872,7 +872,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = 'K'
 						and kaytossa != 'E'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
@@ -893,7 +893,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = 'O'
 						and kaytossa != 'E'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
@@ -914,7 +914,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = 'P'
 						and kaytossa != 'E'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {

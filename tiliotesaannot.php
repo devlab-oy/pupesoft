@@ -189,7 +189,7 @@
 									and kaytossa != 'E'
 									and tyyppi = 'K'";
 						$xresult = mysql_query($query) or pupe_error($query);
-						$xrow=mysql_fetch_array ($xresult);
+						$xrow = mysql_fetch_array($xresult);
 						echo "$xrow[0]";
 					}
 					echo "</td>";
@@ -243,7 +243,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi = 'K'
 					and kaytossa != 'E'
-					ORDER BY nimi";
+					ORDER BY koodi+0, koodi, nimi";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<select name = 'kustp'><option value = ' '>Ei kustannuspaikkaa";

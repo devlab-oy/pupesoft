@@ -438,7 +438,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = 'K'
 							and kaytossa != 'E'
-							ORDER BY nimi";
+							ORDER BY koodi+0, koodi, nimi";
 				$vresult = mysql_query($query) or pupe_error($query);
 
 				echo "<td><select name='ikustp[$i]'>";
@@ -459,7 +459,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = 'O'
 							and kaytossa != 'E'
-							ORDER BY nimi";
+							ORDER BY koodi+0, koodi, nimi";
 				$vresult = mysql_query($query) or pupe_error($query);
 
 				echo "<select name='ikohde[$i]'>";
@@ -480,7 +480,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = 'P'
 							and kaytossa != 'E'
-							ORDER BY nimi";
+							ORDER BY koodi+0, koodi, nimi";
 				$vresult = mysql_query($query) or pupe_error($query);
 
 				echo "<select name='iprojekti[$i]'>";

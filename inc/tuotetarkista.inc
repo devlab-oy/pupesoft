@@ -328,7 +328,8 @@ if(!function_exists("tuotetarkista")) {
 
 				$query = "	SELECT *
 							FROM tuotepaikat
-							WHERE tuoteno = '$tem_tuoteno' and yhtio = '$kukarow[yhtio]'";
+							WHERE tuoteno = '$tem_tuoteno'
+							and yhtio = '$kukarow[yhtio]'";
 				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) == 0) {
@@ -386,7 +387,8 @@ if(!function_exists("tuotetarkista")) {
 													luontiaika		= now(),
 													laatija			= '{$kukarow['kuka']}',
 													muutospvm		= now(),
-													muuttaja		= '{$kukarow['kuka']}'";
+													muuttaja		= '{$kukarow['kuka']}'
+													ON DUPLICATE KEY UPDATE muuttaja = '{$kukarow['kuka']}', muutospvm = now()";
 							$tuotepaikka_result = pupe_query($tuotepaikka_query);
 						}
 						elseif ($tem_status == 'T') {
@@ -402,7 +404,8 @@ if(!function_exists("tuotetarkista")) {
 													luontiaika		= now(),
 													laatija			= '{$kukarow['kuka']}',
 													muutospvm		= now(),
-													muuttaja		= '{$kukarow['kuka']}'";
+													muuttaja		= '{$kukarow['kuka']}'
+													ON DUPLICATE KEY UPDATE muuttaja = '{$kukarow['kuka']}', muutospvm = now()";
 							$tuotepaikka_result = pupe_query($tuotepaikka_query);
 						}
 					}

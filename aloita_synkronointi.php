@@ -75,7 +75,13 @@ if ($tee == "SYNK") {
 
 		$group = substr($group, 0, -1);
 
-		$query = "LOCK TABLES yhtio READ, yhtion_parametrit READ, synclog WRITE, $table WRITE";
+		$lisa = "";
+
+		if ($table == "asiakas") {
+			$lisa = ", maksuehto READ";
+		}
+
+		$query = "LOCK TABLES yhtio READ, yhtion_parametrit READ, synclog WRITE, $table WRITE $lisa";
 		$abures = pupe_query($query);
 
 		$query = "	SELECT group_concat(tunnus) tunnukset

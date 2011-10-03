@@ -764,6 +764,28 @@
 					}
 				}
 
+				if (!function_exists('zzrowcmp_mod')) {
+
+					function zzrowcmp_mod($a, $b) {
+
+						if ($a["myytavissa"] < $b["myytavissa"]) {
+							return 1;
+						}
+						elseif ($a["myytavissa"] > $b["myytavissa"]) {
+							return -1;
+						}
+						elseif ($a["varasto"] < $b["varasto"]) {
+							return 1;
+						}
+						elseif ($a["varasto"] > $b["varasto"]) {
+							return -1;
+						}
+						else {
+							return 0;
+						}
+					}
+				}
+
 				// sortataan varastopaikkojen saldot by ostajan maa
 				$oma_maa = array();
 				$muu_maa = array();
@@ -778,10 +800,18 @@
 					}
 				}
 
-				// sortataan ostajan maan varastopaikat saldo j‰rkk‰‰n
-				usort($oma_maa, "zzrowcmp");
-				// sortataan muiden maiden varastopaikat saldo j‰rkk‰‰n
-				usort($muu_maa, "zzrowcmp");
+				if ($yhtiorow['varaston_splittaus'] == 'K') {
+					// sortataan ostajan maan varastopaikat saldo j‰rkk‰‰n
+					usort($oma_maa, 'zzrowcmp_mod');
+					// sortataan muiden maiden varastopaikat saldo j‰rkk‰‰n
+					usort($muu_maa, "zzrowcmp_mod");
+				}
+				else {
+					// sortataan ostajan maan varastopaikat saldo j‰rkk‰‰n
+					usort($oma_maa, "zzrowcmp");
+					// sortataan muiden maiden varastopaikat saldo j‰rkk‰‰n
+					usort($muu_maa, "zzrowcmp");
+				}
 
 				// yhdistet‰‰n arrayt
 				$zzrow = array_merge($oma_maa, $muu_maa);

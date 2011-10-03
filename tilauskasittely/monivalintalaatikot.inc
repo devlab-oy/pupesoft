@@ -1783,7 +1783,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and kaytossa != 'E'
 						and tyyppi = 'K'
-						ORDER BY isa_tarkenne, nimi";
+						ORDER BY isa_tarkenne, koodi+0, koodi, nimi";
 			$sresult = pupe_query($query);
 
 			$kustparray = array();
@@ -1858,7 +1858,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and kaytossa != 'E'
 						and tyyppi = 'O'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) > 0) {
@@ -1905,7 +1905,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and kaytossa != 'E'
 						and tyyppi = 'P'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$sresult = pupe_query($query);
 
 			if (mysql_num_rows($sresult) > 0) {

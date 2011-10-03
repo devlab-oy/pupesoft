@@ -157,7 +157,7 @@ if(!function_exists("tuotetarkista")) {
 								AND tuoteno = '$tem_tuoteno'
 								LIMIT 1";
 					$tapahtuma_chk_res = pupe_query($query);
-					
+
 					if (trim(strtoupper($trow["tuotetyyppi"])) == "" or trim(strtoupper($trow["tuotetyyppi"])) == "N") {
 						if (mysql_num_rows($tapahtuma_chk_res) == 1 and ($t[$i] == 'R' or $t[$i] == 'K'or $t[$i] == 'M')) {
 							$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";

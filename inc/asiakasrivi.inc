@@ -25,7 +25,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kaytossa != 'E'
 					and tyyppi = 'K'
-					ORDER BY nimi";
+					ORDER BY koodi+0, koodi, nimi";
 		$vresult = pupe_query($query);
 
 		$sel="";
@@ -53,7 +53,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and kaytossa != 'E'
 						and tyyppi = 'O'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 		$vresult = pupe_query($query);
 
 		$sel="";
@@ -81,7 +81,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kaytossa != 'E'
 					and tyyppi = 'P'
-					ORDER BY nimi";
+					ORDER BY koodi+0, koodi, nimi";
 		$vresult = pupe_query($query);
 
 		$sel="";
@@ -1055,7 +1055,7 @@
 			$jatko = 0;
 		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "luottovakuutettu") {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 

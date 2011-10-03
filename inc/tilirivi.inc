@@ -83,7 +83,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$kustp_tyyppi'
 					and kaytossa != 'E'
-					ORDER BY nimi";
+					ORDER BY koodi+0, koodi, nimi";
 		$tasoresu = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($tasoresu) > 0) {
@@ -114,7 +114,7 @@
 		$ulos .= "</select></td>\n";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tiliointi_tarkistus") {
 
 		$apu = $trow[$i];
@@ -133,5 +133,5 @@
 		$ulos .= "</select></td>\n";
 		$jatko = 0;
 	}
-	
+
 ?>

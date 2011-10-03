@@ -180,30 +180,53 @@ if ($tee == 'VIIVA') {
 	// 041215
 	// 00008
 
-	if (substr($nimi,0,1) != '2' or strlen($nimi) != 54) {
-		echo "<font class='error'>".t("Emme osaa kuin viivakoodi-versio kakkosta! Syöttämäsi tieto ei ole sitä!")."</font><br><br>";
-		$tee = "";
-	}
-	else {
+	if (strlen($nimi) == 54 and ( substr($nimi,0,1) == '2' or substr($nimi,0,1) == '4' or substr($nimi,0,1) == '5') ) {
+		$versio = substr($nimi,0,1);
 		$tee2	= "";
-		$tilino = substr($nimi,1,14);
-		$summa  = substr($nimi,15,8) / 100;
-		$viite  = ltrim(substr($nimi,23,20),"0"); // etunollat pois
-		$erv    = substr($nimi,43,2);
-		$erk    = substr($nimi,45,2);
-		$erp    = substr($nimi,47,2);
+		
+		if( $versio == '2' ){
+			$tilino = substr($nimi,1,14);
+			$summa  = substr($nimi,15,8) / 100;
+			$viite  = ltrim(substr($nimi,23,20),"0"); // etunollat pois
+			$erv    = substr($nimi,43,2);
+			$erk    = substr($nimi,45,2);
+			$erp    = substr($nimi,47,2);
+		}
+		elseif( $versio == '4' ){
+			$tilino	= substr($nimi,1,16);
+			$summa	= substr($nimi,17,8) / 100;
+			$viite 	= ltrim(substr($nimi,28,20),"0"); // etunollat pois
+			$erv 	= substr($nimi,48,2);
+			$erk 	= substr($nimi,50,2);
+			$erp 	= substr($nimi,52,2);
+		}
+		elseif( $versio == '5' ){
+			$tilino	= substr($nimi,1,16);
+			$summa	= substr($nimi,17,8) / 100;
+			$viite 	= "RF".substr($nimi,25,2).ltrim(substr($nimi,27,21),"0"); // Tarkistenumeron jälkeen tulevat täytenollat pois
+			$erv 	= substr($nimi,48,2);
+			$erk 	= substr($nimi,50,2);
+			$erp 	= substr($nimi,52,2);
+		}
 
 		//Toistaiseksi osataan vaan tarkistaa suomalaisten pankkitilien oikeellisuutta
 		if (strtoupper($yhtiorow['maa']) == 'FI') {
-			$pankkitili = $tilino;
-			require("inc/pankkitilinoikeellisuus.php");
-			$tilino = $pankkitili;
+			if($versio=='2'){
+				$pankkitili = $tilino;
+				require("inc/pankkitilinoikeellisuus.php");
+				$tilino = $pankkitili;
+				$hakuehto = "tilinumero";
+			}
+			else{
+				$hakuehto = "ultilno";
+				$tilino = tarkista_iban("FI".$tilino);
+			}
 		}
 
 		$query = "	SELECT tunnus
 					FROM toimi
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tilinumero = '$tilino'";
+					and $hakuehto = '$tilino'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -220,6 +243,10 @@ if ($tee == 'VIIVA') {
 			$tee 			= "P";
 			$tee2 			= "V"; // Meillä on eroja virheentarkastuksissa, jos tiedot tuli viivakoodista
 		}
+	}
+	else {
+		echo "<font class='error'>".t("Virheellinen viivakoodi!")."</font><br><br>";
+		$tee = "";
 	}
 }
 

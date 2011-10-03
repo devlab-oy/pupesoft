@@ -1762,11 +1762,16 @@ if (!function_exists('alvierittely')) {
 }
 
 if (!function_exists('PalautaPankkiviivakoodi')) {
-	function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.0000", $viitenumero = 0) {
-		$versio = 2;
+	function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.0000", $viitenumero = 0, $versio = 2) {
 
-		$pankkitili = $tilinumero;
-		include("inc/pankkitilinoikeellisuus.php");
+		if( $versio == '2' ){
+			$pankkitili = $tilinumero;
+			include("inc/pankkitilinoikeellisuus.php");
+		}
+		else{
+			// tarkista_iban ei osaa tarkistaa kuin Suomalaisia tilinumeroita
+			$pankkitili = substr(tarkista_iban( $tilinumero ), 2); // Maatunnus pois
+		}
 
 		if ($pankkitili == "") {
 			return;
@@ -1785,7 +1790,15 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 		$konekielinen_summa = sprintf("%08d", $konekielinen_summa);
 
 		// Viitenumero
-		$konekielinen_viitenumero = sprintf("%020d", $viitenumero);
+		if( $versio == '2' or $versio == '4' ){
+			$konekielinen_viitenumero = sprintf("%020d", $viitenumero);
+		}
+		elseif( $versio == '5' ){
+			// Annettu viite pitaisi olla muodossa RFxxyy...yy, jossa xx on tarkistenumero
+			$tarkiste = substr($viitenumero,2,2);
+			$viitenumero = substr($viitenumero,4);
+			$konekielinen_viitenumero = $tarkiste.sprintf("%021d", $viitenumero);
+		}
 
 		// Erapaiva
 		$pp = substr($erapv, 0, 2);
@@ -1794,17 +1807,34 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 
 		$konekielinen_erapv = $vv.$kk.$pp;
 
-		$vara = "0000";
+		// Varalla
+		if($versio=='2'){
+			$vara = "0000";
+		}
+		elseif($versio=='4'){
+			$vara = "000";
+		}
+		else $vara = '';
 
 		// Koonti
-		$pankkiviivakoodi = $versio.$konekielinen_tilinumero.$konekielinen_summa.$konekielinen_viitenumero.$konekielinen_erapv.$vara;
+		$pankkiviivakoodi = $versio.$konekielinen_tilinumero.$konekielinen_summa;
+		
+		if($versio=='2'){
+			$pankkiviivakoodi .= $konekielinen_viitenumero.$konekielinen_erapv.$vara;
+		}
+		else{
+			$pankkiviivakoodi .= $vara.$konekielinen_viitenumero.$konekielinen_erapv;
+		}
 
 		// Tarkistusnumero
 		$viite = $pankkiviivakoodi;
 
-		// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
-		include("inc/generoiviite.inc");
-
+		// Vain versio kakkoseen tarkiste 1
+		if($versio == '2'){
+			// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
+			include("inc/generoiviite.inc");
+		}
+		
 		return($viite);
 	}
 }

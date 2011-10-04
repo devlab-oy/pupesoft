@@ -52,8 +52,8 @@
 			echo "03: ".$laskun_tyyppi."\n";
 			echo "04: ".$laskun_numero."\n";
 			echo "05: ".$laskun_ebid."\n";
-			echo "06: ".$laskun_paiva."\n";
-			echo "07: ".$laskun_la_paiva."\n";
+			echo "06: ".$laskun_tapvm."\n";
+			echo "07: ".$laskun_lapvm."\n";
 			echo "08: ".$laskun_erapaiva."\n";
 			echo "09: ".$laskun_kapvm."\n";
 			echo "10: ".$laskun_kasumma."\n";
@@ -106,7 +106,7 @@
 			$return  = "Tiedosto: $file\n";
 			$return .= "Lähettäjä: $laskuttajan_nimi\n";
 			$return .= "Laskunro: $laskun_numero\n";
-			$return .= "Päivä: $laskun_paiva\n";
+			$return .= "Päivä: $laskun_tapvm\n";
 			$return .= "Summa: $laskun_summa_eur\n";
 			$return .= "Viite: $laskun_pankkiviite\n";
 
@@ -705,14 +705,22 @@
 					}
 				}
 
-				// Tsekataan laskun päiväys
-				$tpp = (int) substr($laskun_paiva, 6, 2);
-				$tpk = (int) substr($laskun_paiva, 4, 2);
-				$tpv = (int) substr($laskun_paiva, 0, 4);
+				// Laitetaan tänä päivä laskun tapahtumapäiväksi jos yhtiön parametri on tässä asennossa. (UNIKKO-INVOICE:ssa tapvm tulee erikseen, joten käytetään sitä siinä tapauksessa suoraan...)
+				if ($yhtiorow['ostolaskujen_paivays'] == "1" and $laskun_tyyppi != "UNIKKO-INVOICE") {
+					$laskun_tapvm = date("Ymd");
+				}
 
+				$tpp = (int) substr($laskun_tapvm, 6, 2);
+				$tpk = (int) substr($laskun_tapvm, 4, 2);
+				$tpv = (int) substr($laskun_tapvm, 0, 4);
+
+				// Tsekataan laskun päiväys
 				if (!checkdate($tpk, $tpp, $tpv)) {
 					// Laitetaan sitten ajopäivä
-					list($tpv,$tpk,$tpp) = explode("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d"),date("Y"))));
+					$tpp = date("d");
+					$tpk = date("m");
+					$tpv = date("Y");
+
 					$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui päiväys. Tarkista asia laskulta!<br>" . $komm;
 				}
 
@@ -721,9 +729,9 @@
 				$tillop = explode("-", $yhtiorow["ostoreskontrakausi_loppu"]);
 
 				// Verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
-				$ostoresktilalk = (int) date('Ymd',mktime(0,0,0,$tilalk[1],$tilalk[2],$tilalk[0]));
-				$ostoresktillop = (int) date('Ymd',mktime(0,0,0,$tillop[1],$tillop[2],$tillop[0]));
-				$syotettypvm 	= (int) date('Ymd',mktime(0,0,0,$tpk,$tpp,$tpv));
+				$ostoresktilalk = (int) date('Ymd', mktime(0,0,0, $tilalk[1], $tilalk[2], $tilalk[0]));
+				$ostoresktillop = (int) date('Ymd', mktime(0,0,0, $tillop[1], $tillop[2], $tillop[0]));
+				$syotettypvm 	= (int) date('Ymd', mktime(0,0,0, $tpk, $tpp, $tpv));
 
 				if ($syotettypvm > $ostoresktillop) {
 					$tpp = $tillop[2];
@@ -922,16 +930,9 @@
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
 
-				if ($yhtiorow['ostolaskujen_paivays'] == "1") {
-					$vpp = (int) substr($laskun_la_paiva, 6, 2);
-					$vpk = (int) substr($laskun_la_paiva, 4, 2);
-					$vpv = (int) substr($laskun_la_paiva, 0, 4);
-				}
-				else {
-					$vpp = $tpp;
-					$vpk = $tpk;
-					$vpv = $tpv;
-				}
+				$vpp = (int) substr($laskun_lapvm, 6, 2);
+				$vpk = (int) substr($laskun_lapvm, 4, 2);
+				$vpv = (int) substr($laskun_lapvm, 0, 4);
 
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set
@@ -1029,11 +1030,10 @@
 				$result = pupe_query($query);
 
 				// Onko laskuriveillä useita alv-verokantoja?
-				if (count($ealvi) > 0) {
-					$ealvi = array_unique($ealvi);
-				}
-				else {
-					//Katsotaan alv laskuerittelystä
+				$ealvi = array_unique($ealvi);
+
+				// Katsotaan alv laskuerittelystä
+				if (count($ealvi) == 1 and $ealvi[0] == "") {
 					$ealvi[0] = $lisavat[0];
 				}
 
@@ -1048,11 +1048,10 @@
 						$tili = $yhtiorow['muutkulut'];
 					}
 
-					$vero = $oletusalvi;
+					if ($ealvi[0] != "") $vero = $ealvi[0];
+					else $vero = $oletusalvi;
 
-					if ($ealvi[0] != '') {
-						$vero = $ealvi[0]; //Tuliko jotain verkkolaskulta
-					}
+					$vero = (float) $vero;
 
 					$kukarow['yhtio']   = $yhtio;
 					$kukarow['kuka']    = 'verkkolas';
@@ -1223,7 +1222,10 @@
 								$summa = $summa * -1;
 							}
 
-							$vero = (float) $rtuoteno[$i]["alv"];
+							if ($rtuoteno[$i]["alv"] != "") $vero = $rtuoteno[$i]["alv"];
+							else $vero = $oletusalvi;
+
+							$vero = (float) $vero;
 
 							$verkkolaskuveroton				+= $summa;
 							$verkkolaskuveroton_valuutassa	+= $summa_valuutassa;
@@ -1628,7 +1630,7 @@
 				}
 
 				// päästiin onnillisesti loppuun
-		    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
+		    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_tapvm\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
 
 				$tulos = mail($yhtiorow['alert_email'], mb_encode_mimeheader("$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 

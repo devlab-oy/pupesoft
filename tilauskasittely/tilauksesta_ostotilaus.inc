@@ -5,7 +5,7 @@
 
 	if (!function_exists("tilauksesta_ostotilaus")) {
 		function tilauksesta_ostotilaus($otunnus, $tyyppi) {
-			global $yhtiorow, $kukarow;
+			global $yhtiorow, $kukarow, $toim;
 
 			$tilauksesta_ostotilaus = "";
 			$lisa_varattusiirto = "";
@@ -20,7 +20,7 @@
 				$vars = " and tilausrivi.var != 'P' ";
 			}
 			else {
-				echo "VIRHE: Funktiota kutsuttiin väärällä parametrilla!<br><br>";
+				echo t("VIRHE: Funktiota kutsuttiin väärällä parametrilla")."!<br><br>";
 				return false;
 			}
 
@@ -32,7 +32,7 @@
 			$myytilrow = mysql_fetch_assoc($result);
 
 			//otetaan ensin vain lisävarusteettomat tuotteet tai lisävarusteperheiden isät
-			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, tuote.ei_saldoa
+			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, tuote.ei_saldoa, tuote.sarjanumeroseuranta
 						FROM tilausrivi
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
@@ -87,7 +87,7 @@
 							$rivi["toimittajan_tunnus"] = $aburow["liitostunnus"];
 						}
 						else {
-							$tilauksesta_ostotilaus .= "<font class='error'>Koitettiin päivittää riville toimittaja, mutta toimittajaa ei löydy! '$rivi[tunnus]'<br>";
+							$tilauksesta_ostotilaus .= "<font class='error'>".t("VIRHE: Toimittajaa ei löydy riville").": '$rivi[tunnus]'<br>";
 						}
 					}
 
@@ -101,7 +101,7 @@
 					$erres = pupe_query($query);
 
 					if (mysql_num_rows($erres) != 1) {
-						$tilauksesta_ostotilaus .= "<font class='error'>Toimittajan tietoja ei löytynyt tuotteelta $rivi[tuoteno]!<br>";
+						$tilauksesta_ostotilaus .= "<font class='error'>".t("VIRHE: Toimittajan tietoja ei löytynyt tuotteelta").": $rivi[tuoteno]!<br>";
 					}
 					else {
 						// toimittaja löytyi, tehdään tästä ostotilaus
@@ -318,6 +318,11 @@
 									where yhtio = '$kukarow[yhtio]'
 									and tunnus = '$rivi[rivitunnus]'";
 						$updre = pupe_query($query);
+
+						// Vapautetaan JT-rivin erät jos niitä on
+						if ($rivi["sarjanumeroseuranta"] == "E" or $rivi["sarjanumeroseuranta"] == "F" or $rivi["sarjanumeroseuranta"] == "G") {
+							vapauta_sarjanumerot($toim, $rivi["otunnus"], " and tilausrivi.tunnus = '$rivi[rivitunnus]' ", FALSE);
+						}
 
 						if ($yhtiorow["varaako_jt_saldoa"] == "") {
 							// Siirretään kappaleet, jos ne on jääny väärälle puolelle

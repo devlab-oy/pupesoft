@@ -220,7 +220,8 @@
 					from kustannuspaikka
 					where yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$kptyyppi'
-					and kaytossa != 'E'";
+					and kaytossa != 'E'
+					ORDER BY koodi+0, koodi, nimi";
 		$vresult = mysql_query($tpque) or pupe_error($tpque);
 
 		$sel="";

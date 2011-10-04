@@ -4,7 +4,7 @@ if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
 
-		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi;
+		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind, $tem_tuotetyyppi, $tem_status;
 
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			if (trim($t[$i]) == '') {
@@ -157,7 +157,7 @@ if(!function_exists("tuotetarkista")) {
 								AND tuoteno = '$tem_tuoteno'
 								LIMIT 1";
 					$tapahtuma_chk_res = pupe_query($query);
-					
+
 					if (trim(strtoupper($trow["tuotetyyppi"])) == "" or trim(strtoupper($trow["tuotetyyppi"])) == "N") {
 						if (mysql_num_rows($tapahtuma_chk_res) == 1 and ($t[$i] == 'R' or $t[$i] == 'K'or $t[$i] == 'M')) {
 							$virhe[$i] = t("Tuotetyyppi‰ ei voida muuttaa, koska tuotteella on tapahtumia")."!";
@@ -291,6 +291,10 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == 'status') {
+			$tem_status = $t[$i];
+		}
+
 		//tehd‰‰n n‰‰ jutut t‰ss‰ koska t‰m‰ on aina viimeinen sarake
 		if (mysql_field_name($result, $i) == "tunnus") {
 
@@ -324,39 +328,87 @@ if(!function_exists("tuotetarkista")) {
 
 				$query = "	SELECT *
 							FROM tuotepaikat
-							WHERE tuoteno = '$tem_tuoteno' and yhtio = '$kukarow[yhtio]'";
+							WHERE tuoteno = '$tem_tuoteno'
+							and yhtio = '$kukarow[yhtio]'";
 				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) == 0) {
-					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
 
-					if ($hyllyalue == "" or !isset($hyllyalue)) {
-						$hyllyalue = 0;
-					}
-					if ($hyllynro == "" or !isset($hyllynro)) {
-						$hyllynro = 0;
-					}
-					if ($hyllyvali == "" or !isset($hyllyvali)) {
-						$hyllyvali = 0;
-					}
-					if ($hyllytaso == "" or !isset($hyllytaso)) {
-						$hyllytaso = 0;
+					$_counter = 0;
+
+					foreach (explode(",", $yhtiorow["tuotteen_oletuspaikka"]) as $_tuotepaikka) {
+						list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", trim($_tuotepaikka));
+
+						if ($hyllyalue == "" or !isset($hyllyalue)) {
+							$hyllyalue = 0;
+						}
+						if ($hyllynro == "" or !isset($hyllynro)) {
+							$hyllynro = 0;
+						}
+						if ($hyllyvali == "" or !isset($hyllyvali)) {
+							$hyllyvali = 0;
+						}
+						if ($hyllytaso == "" or !isset($hyllytaso)) {
+							$hyllytaso = 0;
+						}
+
+						$oletus_x = $_counter == 0 ? 'X' : '';
+
+						$tuotepaikka_query = "	INSERT INTO tuotepaikat SET
+						 						yhtio			= '{$kukarow['yhtio']}',
+									 			tuoteno     	= '{$tem_tuoteno}',
+									 			oletus      	= '{$oletus_x}',
+							   		 			saldoaika   	= now(),
+												hyllyalue   	= '{$hyllyalue}',
+												hyllynro    	= '{$hyllynro}',
+												hyllyvali   	= '{$hyllyvali}',
+												hyllytaso   	= '{$hyllytaso}',
+												luontiaika		= now(),
+												laatija			= '{$kukarow['kuka']}',
+												muutospvm		= now(),
+												muuttaja		= '{$kukarow['kuka']}'";
+						$tuotepaikka_result = pupe_query($tuotepaikka_query);
+
+						$_counter++;
 					}
 
-					$tuotepaikka_query = "	INSERT INTO tuotepaikat set
-					 						yhtio			= '$kukarow[yhtio]',
-								 			tuoteno     	= '$tem_tuoteno',
-								 			oletus      	= 'X',
-						   		 			saldoaika   	= now(),
-											hyllyalue   	= '$hyllyalue',
-											hyllynro    	= '$hyllynro',
-											hyllyvali   	= '$hyllyvali',
-											hyllytaso   	= '$hyllytaso',
-											luontiaika		= now(),
-											laatija			= '$kukarow[kuka]',
-											muutospvm		= now(),
-											muuttaja		= '$kukarow[kuka]'";
-					$tuotepaikka_result = pupe_query($tuotepaikka_query);
+					if ($kukarow['yhtio'] == 'artr') {
+
+						if ($tem_status == 'A') {
+							$tuotepaikka_query = "	INSERT INTO tuotepaikat SET
+							 						yhtio			= '{$kukarow['yhtio']}',
+										 			tuoteno     	= '{$tem_tuoteno}',
+										 			oletus      	= '',
+								   		 			saldoaika   	= now(),
+													hyllyalue   	= 'UUSI',
+													hyllynro    	= '0',
+													hyllyvali   	= '0',
+													hyllytaso   	= '0',
+													luontiaika		= now(),
+													laatija			= '{$kukarow['kuka']}',
+													muutospvm		= now(),
+													muuttaja		= '{$kukarow['kuka']}'
+													ON DUPLICATE KEY UPDATE muuttaja = '{$kukarow['kuka']}', muutospvm = now()";
+							$tuotepaikka_result = pupe_query($tuotepaikka_query);
+						}
+						elseif ($tem_status == 'T') {
+							$tuotepaikka_query = "	INSERT INTO tuotepaikat SET
+							 						yhtio			= '{$kukarow['yhtio']}',
+										 			tuoteno     	= '{$tem_tuoteno}',
+										 			oletus      	= '',
+								   		 			saldoaika   	= now(),
+													hyllyalue   	= 'T',
+													hyllynro    	= '0',
+													hyllyvali   	= '0',
+													hyllytaso   	= '0',
+													luontiaika		= now(),
+													laatija			= '{$kukarow['kuka']}',
+													muutospvm		= now(),
+													muuttaja		= '{$kukarow['kuka']}'
+													ON DUPLICATE KEY UPDATE muuttaja = '{$kukarow['kuka']}', muutospvm = now()";
+							$tuotepaikka_result = pupe_query($tuotepaikka_query);
+						}
+					}
 				}
 			}
 		}

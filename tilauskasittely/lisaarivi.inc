@@ -335,7 +335,7 @@
 	$toimittamatta = $kpl; //N‰in paljon ollaan toimittamassa
 
 	if ($lisaarivi_debug==1) echo "Tilattu m‰‰r‰: $toimittamatta<br>";
-
+		
 	// Jos kyseess‰ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
 	if (substr($paikka,0,3) == "°°°") {
 		$var 		 		= "T";
@@ -1421,10 +1421,10 @@
 													FROM sarjanumeroseuranta
 													WHERE yhtio		= '$kukarow[yhtio]'
 													and tuoteno		= '$myy_tuoteno[$indeksi]'
-													and hyllyalue = '$myy_hyllyalue[$indeksi]'
-													and hyllynro = '$myy_hyllynro[$indeksi]'
-													and hyllytaso = '$myy_hyllytaso[$indeksi]'
-													and hyllyvali = '$myy_hyllyvali[$indeksi]'
+													and hyllyalue	= '$myy_hyllyalue[$indeksi]'
+													and hyllynro 	= '$myy_hyllynro[$indeksi]'
+													and hyllytaso 	= '$myy_hyllytaso[$indeksi]'
+													and hyllyvali 	= '$myy_hyllyvali[$indeksi]'
 													and sarjanumero = '$myy_era[$indeksi]'";
 										$lisa_res = pupe_query($query);
 										$lisa_row = mysql_fetch_array($lisa_res);
@@ -1449,10 +1449,10 @@
 												takuu_alku 		= '$lisa_row[takuu_alku]',
 												takuu_loppu		= '$lisa_row[takuu_loppu]',
 												parasta_ennen	= '$lisa_row[parasta_ennen]',
-												hyllyalue 	= '$myy_hyllyalue[$indeksi]',
-												hyllynro 	= '$myy_hyllynro[$indeksi]',
-												hyllytaso 	= '$myy_hyllytaso[$indeksi]',
-												hyllyvali 	= '$myy_hyllyvali[$indeksi]',
+												hyllyalue 		= '$myy_hyllyalue[$indeksi]',
+												hyllynro 		= '$myy_hyllynro[$indeksi]',
+												hyllytaso 		= '$myy_hyllytaso[$indeksi]',
+												hyllyvali 		= '$myy_hyllyvali[$indeksi]',
 												sarjanumero 	= '$myy_era[$indeksi]'";
 									$lisa_res = pupe_query($query);
 								}
@@ -1503,6 +1503,7 @@
 								$kommentti 			= "";
 								$tuotenimitys 		= "";
 								$tuotenimitys_force = "";
+								$omalle_tilaukselle = "";
 
 							} // T‰ll‰ rundilla myydyt
 						} // Jos tuoteperhett‰ lˆytyi riitt‰v‰sti tai myytiin pelk‰‰ is‰‰
@@ -1554,7 +1555,7 @@
 
 				$var 		 = "S";
 				$paikka 	 = substr($superpaikka, strpos($superpaikka,'#')+1);
-				$rivinumero = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
+				$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
 			}
 		}
 
@@ -1762,7 +1763,7 @@
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 					$ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
 				}
-				
+
 				if ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") {
 					$alemaara = 99999999999;
 				}

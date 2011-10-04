@@ -2302,6 +2302,7 @@ if ($tee == '') {
 				echo "<form method='POST' action='".$palvelin2."tyomaarays/tyojono.php'>
 						<input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=VALITSETOIMITUS//tyojono=$tyojono'>
 						<input type='hidden' name='toim' value='$toim2'>
+						<input type='hidden' name='indexvas' value='1'>
 						<input type='hidden' name='tyojono' value='$tyojono'>
 						<input type='submit' value='" . t('Työjono')."'>
 						</form>";
@@ -3972,7 +3973,7 @@ if ($tee == '') {
 		   				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi  = 'O'
 		   				and tilausrivi.tunnus  = '$tilausrivi[tilausrivilinkki]'
-						and tilausrivin_lisatiedot.suoratoimitettuaika >= '0000-00-00 00:00:00'";
+						and tilausrivin_lisatiedot.suoratoimitettuaika != '0000-00-00'";
 			$suoratoimresult = pupe_query($query);
 
 			if ($suoratoimrow = mysql_fetch_assoc($suoratoimresult)) {

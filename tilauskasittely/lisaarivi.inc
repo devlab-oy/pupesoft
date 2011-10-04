@@ -764,25 +764,121 @@
 					}
 				}
 
-				if (!function_exists('zzrowcmp_mod')) {
+				if (!function_exists('chk_varaston_saldo')) {
+					function chk_varaston_saldo($arr, $kpl) {
+						/**
+						- Pitäiskö eka kattoa löytyykö kaikki joltain yhdeltä paikalta?
+						- Katotaan missä oletuspaikka, riittääkö oletuspaikan varaston saldo? 
+						- Riittääkö jonkun toisen varaston saldo?
+						- Jos ei niin splitataan.
+						*/
 
-					function zzrowcmp_mod($a, $b) {
+						$chk_yksi_paikka = false;
 
-						if ($a["myytavissa"] < $b["myytavissa"]) {
-							return 1;
+						// Pitäiskö eka kattoa löytyykö kaikki joltain yhdeltä paikalta?
+						foreach ($arr as $indx => $chk_row) {
+
+							if ($chk_row['myytavissa'] >= $kpl) {
+
+								unset($arr[$indx]);
+								array_unshift($arr, $chk_row);
+								$chk_yksi_paikka = true;
+								break;
+							}
 						}
-						elseif ($a["myytavissa"] > $b["myytavissa"]) {
-							return -1;
+
+						if (!$chk_yksi_paikka) {
+
+							$chk_oletus_var = '';
+
+							reset($arr);
+
+							// Katotaan missä oletuspaikka
+							foreach ($arr as $indx => $chk_row) {
+								if (trim($chk_row['oletus']) != '') {
+									$chk_oletus_var = $chk_row['varasto'];
+									break;
+								}
+							}
+
+							if ($chk_oletus_var) {
+
+								reset($arr);
+
+								$chk_saldo = 0;
+								$checked_saldo = false;
+
+								// riittääkö oletuspaikan varaston saldo? 
+								foreach ($arr as $indx => $chk_row) {
+
+									if ($chk_row['varasto'] == $chk_oletus_var) {
+										$chk_saldo += $chk_row['myytavissa'];
+
+										if ($chk_saldo >= $kpl) {
+											$checked_saldo = true;
+											break;
+										}
+									}
+								}
+
+								reset($arr);
+
+								if ($checked_saldo) {
+									foreach ($arr as $indx => $chk_row) {
+										if ($chk_row['varasto'] == $chk_oletus_var) {
+											unset($arr[$indx]);
+											array_unshift($arr, $chk_row);
+										}
+									}
+								}
+								else {
+
+									// Riittääkö jonkun toisen varaston saldo?
+									$chk_distinct_varasto = array();
+
+									// loopataan distinct varasto
+									foreach ($arr as $indx => $chk_row) {
+										if (!isset($chk_distinct_varasto[$chk_row['varasto']])) {
+											$chk_distinct_varasto[$chk_row['varasto']] = $chk_row['varasto'];
+										}
+									}
+
+									reset($arr);
+
+									unset($chk_distinct_varasto[$chk_oletus_var]);
+
+									foreach ($chk_distinct_varasto as $varasto) {
+
+										$varaston_saldo = 0;
+										$varasto_set = '';
+
+										foreach ($arr as $indx => $chk_row) {
+											if ($varasto == $chk_row['varasto']) {
+												$varaston_saldo += $chk_row['myytavissa'];
+
+												if ($varaston_saldo >= $kpl) {
+													$varasto_set = $chk_row['varasto'];
+													break;
+												}
+											}
+										}
+
+										if ($varasto_set != '') {
+											reset($arr);
+
+											foreach ($arr as $indx => $chk_row) {
+												if ($chk_row['varasto'] == $varasto_set) {
+													unset($arr[$indx]);
+													array_unshift($arr, $chk_row);
+												}
+											}
+										}
+									}
+								}
+							}
 						}
-						elseif ($a["varasto"] < $b["varasto"]) {
-							return 1;
-						}
-						elseif ($a["varasto"] > $b["varasto"]) {
-							return -1;
-						}
-						else {
-							return 0;
-						}
+
+						return $arr;
 					}
 				}
 
@@ -802,9 +898,10 @@
 
 				if ($yhtiorow['varaston_splittaus'] == 'K') {
 					// sortataan ostajan maan varastopaikat saldo järkkään
-					usort($oma_maa, 'zzrowcmp_mod');
+					$oma_maa = chk_varaston_saldo($oma_maa, $kpl);
+
 					// sortataan muiden maiden varastopaikat saldo järkkään
-					usort($muu_maa, "zzrowcmp_mod");
+					$muu_maa = chk_varaston_saldo($muu_maa, $kpl);
 				}
 				else {
 					// sortataan ostajan maan varastopaikat saldo järkkään

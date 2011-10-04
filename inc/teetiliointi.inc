@@ -55,35 +55,35 @@
 
 	if ($paivitetaanko) {
 
-		$query = "	SELECT * 
-					FROM tiliointi 
-					WHERE yhtio = '{$kukarow['yhtio']}' 
-					AND ltunnus = '{$tunnus}'
-					AND tunnus = '{$tiliointirivit[$i]}'
-					AND liitos = '{$liitos}'
-					AND liitostunnus = '{$liitostunnus}'
-					AND tilino = '{$tili}'
-					AND kustp = '{$kustp_ins}'
-					AND kohde = '{$kohde_ins}'
-					AND projekti = '{$projekti_ins}'
-					AND summa = '{$summa}'
+		$query = "	SELECT *
+					FROM tiliointi
+					WHERE yhtio 		 = '{$kukarow['yhtio']}'
+					AND ltunnus 		 = '{$tunnus}'
+					AND tunnus 			 = '{$tiliointirivit[$i]}'
+					AND liitos 			 = '{$liitos}'
+					AND liitostunnus 	 = '{$liitostunnus}'
+					AND tilino 			 = '{$tili}'
+					AND kustp 			 = '{$kustp_ins}'
+					AND kohde 			 = '{$kohde_ins}'
+					AND projekti 		 = '{$projekti_ins}'
+					AND summa 			 = '{$summa}'
 					AND summa_valuutassa = '{$summa_valuutassa}'
-					AND valkoodi = '{$valkoodi}'
-					AND tapvm = '{$laskurow['tapvm']}'
-					AND tosite = '{$tositenro}'
-					AND vero = '{$vero}'
-					AND selite = '{$selite}'";
+					AND valkoodi 		 = '{$valkoodi}'
+					AND tapvm 			 = '{$laskurow['tapvm']}'
+					AND tosite 			 = '{$tositenro}'
+					AND vero 			 = '{$vero}'
+					AND selite 			 = '{$selite}'";
 		$tilrivi_chk_res = pupe_query($query);
 
 		if (mysql_num_rows($tilrivi_chk_res) == 0) {
 
 			$query = "	UPDATE tiliointi SET
-						korjattu = '{$kukarow['kuka']}',
+						korjattu 	= '{$kukarow['kuka']}',
 			      		korjausaika = now()
-			      		WHERE ltunnus = '{$tunnus}'
-			      		AND yhtio = '{$kukarow['yhtio']}'
-			      		AND korjattu = ''
-						AND tunnus = '{$tiliointirivit[$i]}'";
+			      		WHERE ltunnus 	= '{$tunnus}'
+			      		AND yhtio 		= '{$kukarow['yhtio']}'
+			      		AND korjattu 	= ''
+						AND tunnus 		= '{$tiliointirivit[$i]}'";
 			$ylikirjaus_result = pupe_query($query);
 
 			$query = "	INSERT into tiliointi set

@@ -1,4 +1,5 @@
 <?php
+
 	if (!isset($link)) require "inc/parametrit.inc";
 
 	enable_ajax();
@@ -45,7 +46,7 @@
 		$isumma		= unserialize(urldecode($isumma));
 		$ivero		= unserialize(urldecode($ivero));
 		$iselite	= unserialize(urldecode($iselite));
-		$iliitos = unserialize(urldecode($iliitos));
+		$iliitos 	= unserialize(urldecode($iliitos));
 		$ed_iliitostunnus = unserialize(urldecode($ed_iliitostunnus));
 		$ed_iliitos = unserialize(urldecode($ed_iliitos));
 		$tiliointirivit = unserialize(urldecode($tiliointirivit));
@@ -55,11 +56,11 @@
 
 		for ($i = 1; $i <= count($iliitos); $i++) {
 
-			if ($iliitos[$i] == 'toimi' and $iliitostunnus[$i] == $toimittajaid) {
+			if ($iliitos[$i] == 'T' and $iliitostunnus[$i] == $toimittajaid) {
 				$ed_iliitostunnus[$i] = $toimittajaid;
-				$ed_iliitos[$i] = 'toimi';
+				$ed_iliitos[$i] = 'T';
 			}
-			elseif ($iliitos[$i] == 'toimi' and isset($iliitostunnus) and !isset($iliitostunnus[$i]) and $ed_iliitostunnus[$i] == $toimittajaid) {
+			elseif ($iliitos[$i] == 'T' and isset($iliitostunnus) and !isset($iliitostunnus[$i]) and $ed_iliitostunnus[$i] == $toimittajaid) {
 				$ed_iliitostunnus[$i] = '';
 				$ed_iliitos[$i] = '';
 			}
@@ -69,11 +70,11 @@
 
 		for ($i = 1; $i <= count($iliitos); $i++) {
 
-			if ($iliitos[$i] == 'asiakas' and $iliitostunnus[$i] == $asiakasid) {
+			if ($iliitos[$i] == 'A' and $iliitostunnus[$i] == $asiakasid) {
 				$ed_iliitostunnus[$i] = $asiakasid;
-				$ed_iliitos[$i] = 'asiakas';
+				$ed_iliitos[$i] = 'A';
 			}
-			elseif ($iliitos[$i] == 'asiakas' and isset($iliitostunnus) and !isset($iliitostunnus[$i]) and $ed_iliitostunnus[$i] == $asiakasid) {
+			elseif ($iliitos[$i] == 'A' and isset($iliitostunnus) and !isset($iliitostunnus[$i]) and $ed_iliitostunnus[$i] == $asiakasid) {
 				$ed_iliitostunnus[$i] = '';
 				$ed_iliitos[$i] = '';
 			}
@@ -81,6 +82,26 @@
 	}
 
 	$muutparametrit = $tee."#!#".$kuitti."#!#".$kuva."#!#".$maara."#!#".$tpp."#!#".$tpk."#!#".$tpv."#!#".$summa."#!#".$valkoodi."#!#".$alv_tili."#!#".$nimi."#!#".$comments."#!#".$selite."#!#".$liitos."#!#".$liitostunnus."#!#".$tunnus."#!#".urlencode(serialize($tiliointirivit))."#!#".$MAX_FILE_SIZE."#!#".urlencode(serialize($itili))."#!#".urlencode(serialize($ikustp))."#!#".urlencode(serialize($ikohde))."#!#".urlencode(serialize($isumma))."#!#".urlencode(serialize($ivero))."#!#".urlencode(serialize($iselite))."#!#".urlencode(serialize($iliitos))."#!#".urlencode(serialize($ed_iliitostunnus))."#!#".urlencode(serialize($ed_iliitos));
+
+	echo "<script type='text/javascript' language='javascript'>";
+	require_once("inc/jquery.min.js");
+	echo "</script>";
+
+	echo "<script type=\"text/javascript\" charset=\"utf-8\">
+
+		$(document).ready(function(){
+			$('#liitosbox_checkall').click(function() {
+
+				if ($(this).is(':checked')) {
+					$('.liitosbox').attr('checked', 'checked');
+				}
+				else {
+					$('.liitosbox').attr('checked', '');
+				}
+			});
+		});
+		</script>";
+
 
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>\n";
 
@@ -542,7 +563,9 @@
 
 		if ($kuva) {
 			// päivitetään kuvalle vielä linkki toiseensuuntaa
-			$query = "UPDATE liitetiedostot set liitostunnus = '{$tunnus}', selite = '{$selite} {$summa}' where tunnus = '{$kuva}'";
+			$query = "	UPDATE liitetiedostot
+						set liitostunnus = '{$tunnus}', selite = '{$selite} {$summa}'
+						where tunnus = '{$kuva}'";
 			$result = pupe_query($query);
 		}
 
@@ -581,25 +604,53 @@
 				$iliitostunnus[$i]		= '';
 			}
 		}
-		if ($kuitti != '') require("inc/kuitti.inc");
 
-		$tee		= "";
-		$selite		= "";
-		$fnimi		= "";
-		$summa		= "";
-		$nimi		= "";
-		$kuitti		= "";
-		$kuva 		= "";
-		$turvasumma_valuutassa = "";
-		$valkoodi 	= "";
+		if ($kuitti != '') {
+			require("inc/kuitti.inc");
+		}
 
-		echo "<font class='message'>".t("Tosite luotu")."!</font>\n";
+		$alv_tili = "";
+		$asiakas_y = "";
+		$comments = "";
+		$ed_iliitos = "";
+		$ed_iliitostunnus = "";
+		$ikohde = "";
+		$ikustp = "";
+		$iliitos = "";
+		$iprojekti = "";
+		$iselite = "";
+		$isumma = "";
+		$itili = "";
+		$ivero = "";
+		$maara = "";
+		$nimi = "";
+		$selite = "";
+		$summa = "";
+		$tee = "";
+		$teetosite = "";
+		$tiliointirivit = "";
+		$toimittaja_y = "";
+		$tositesum = "";
+		$tpk = "";
+		$tpp = "";
+		$tpv = "";
+		$valkoodi = "";
 
-		echo "	<form action = 'muutosite.php' method='post'>
-				<input type='hidden' name='tee' value='E'>
-				<input type='hidden' name='tunnus' value='{$tunnus}'>
-				<input type='Submit' value='".t("Näytä tosite")."'>
-				</form><br><hr><br>";
+		if ($lopetus != '' and $tullaan == "muutosite") {
+			lopetus($lopetus, "META");
+			exit;
+		}
+		else {
+			echo "<font class='message'>".t("Tosite luotu")."!</font>\n";
+			echo "	<form action = 'muutosite.php' method='post'>
+					<input type='hidden' name='tee' value='E'>
+					<input type='hidden' name='tunnus' value='{$tunnus}'>
+					<input type='Submit' value='".t("Näytä tosite")."'>
+					</form><br><hr><br>";
+		}
+
+		$tullaan = "";
+		$tunnus = "";
 	}
 	else {
 		$tee = "";
@@ -734,6 +785,7 @@
 		echo "<font class='head'>".t("Tositteen otsikkotiedot").":</font>\n";
 
 		echo "<form name='tosite' action='tosite.php' method='post' enctype='multipart/form-data' onSubmit = 'return verify()' autocomplete='off'>\n";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>\n";
 		echo "<input type='hidden' name='tee' value='I'>\n";
 
 		echo "<input type='hidden' name='tiliointirivit' value='",urlencode(serialize($tiliointirivit)),"' />";
@@ -823,12 +875,9 @@
 
 		echo "</select></td>";
 
-		echo "<th nowrap>".t("Liitä toimittaja")."</th>";
+		echo "<th nowrap>".t("Valitse toimittaja")."</th>";
 		echo "<td>";
 
-		if ($toimittajaid > 0) {
-			echo "<input type='hidden' name='toimittajaid' value='{$toimittajaid}'>{$toimrow['ytunnus']} {$toimrow['nimi']}\n";
-		}
 		echo "<input type = 'text' name = 'toimittaja_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'>";
 
 		echo "</td>\n";
@@ -844,12 +893,9 @@
 		echo "<input type='text' name='tpk' maxlength='2' size='2' value='{$tpk}'>\n";
 		echo "<input type='text' name='tpv' maxlength='4' size='4' value='{$tpv}'> ".t("ppkkvvvv")." {$tapvmvirhe}</td>\n";
 
-		echo "<th nowrap>".t("tai")." ".t("Liitä asiakas")."</th>";
+		echo "<th nowrap>".t("tai")." ".t("valitse asiakas")."</th>";
 		echo "<td>";
 
-		if ($asiakasid > 0) {
-			echo "<input type='hidden' name='asiakasid' value='{$asiakasid}'>{$asrow['ytunnus']} {$asrow['nimi']} {$asrow['nimitark']}<br>{$asrow['toim_ovttunnus']} {$asrow['toim_nimi']} {$asrow['toim_nimitark']} {$asrow['toim_postitp']}\n";
-		}
 		echo "<input type = 'text' name = 'asiakas_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'>";
 
 		echo "</td>\n";
@@ -948,17 +994,34 @@
 		echo "<th>".t("Tiliöintien selitteet")."</th>\n";
 		echo "<td colspan='3'><input type='text' name='selite' value='{$selite}' maxlength='150' size='60' onchange='javascript:selitejs();' onkeyup='javascript:selitejs();'></td>\n";
 		echo "</tr>\n";
+
+		echo "<tr>
+				<th>".t("Lue tositteen rivit tiedostosta")."</th>
+				<td colspan='3'><input type='file' name='tositefile' onchage='submit()'></td>
+				</tr>\n";
+
+		if ($asiakasid > 0 or $toimittajaid > 0) {
+			echo "<tr>\n";
+			echo "<td colspan='4' class='back'><br></td>\n";
+			echo "</tr>\n";
+
+			if ($asiakasid > 0) {
+				echo "<tr>\n";
+				echo "<th>".t("Valittu asiakas")."</th>\n";
+				echo "<td colspan='2'><input type='hidden' name='asiakasid' value='{$asiakasid}'>{$asrow['ytunnus']} {$asrow['nimi']} {$asrow['nimitark']}<br>{$asrow['toim_ovttunnus']} {$asrow['toim_nimi']} {$asrow['toim_nimitark']} {$asrow['toim_postitp']}</td>\n";
+				echo "<td>".t("Liitä valittu asiakas kaikkiin tiliöinteihin").": <input type='checkbox' id='liitosbox_checkall'/></td>";
+				echo "</tr>\n";
+			}
+			if ($toimittajaid > 0) {
+				echo "<tr>\n";
+				echo "<th>".t("Valittu toimittaja")."</th>\n";
+				echo "<td colspan='2'><input type='hidden' name='toimittajaid' value='{$toimittajaid}'>{$toimrow['ytunnus']} {$toimrow['nimi']}</td>\n";
+				echo "<td>".t("Liitä valittu toimittaja kaikkiin tiliöinteihin").": <input type='checkbox' id='liitosbox_checkall'/></td>";
+				echo "</tr>\n";
+			}
+		}
+
 		echo "</table>\n";
-
-		echo "<br><font class='head'>".t("Lue tositteen rivit tiedostosta").":</font>\n";
-
-		echo "<table>
-				<tr>
-					<th>".t("Valitse tiedosto")."</th>
-					<td><input type='file' name='tositefile' onchage='submit()'></td>
-				</tr>
-			</table>";
-
 		echo "<br><font class='head'>".t("Syötä tositteen rivit").":</font>\n";
 
 		echo "<table>\n";
@@ -972,6 +1035,14 @@
 				echo "<th>".t("Summa")."</th>\n";
 				echo "<th>".t("Vero")."</th>\n";
 				echo "<th>",t("Liitos"),"</th>";
+
+				if ($asiakasid > 0) {
+					echo "<th>",t("Liitä valittu asiakas"),"</th>";
+				}
+				if ($toimittajaid > 0) {
+					echo "<th>",t("Liitä valittu toimittaja"),"</th>";
+				}
+
 				echo "</tr>\n";
 			}
 
@@ -1075,37 +1146,24 @@
 
 			echo "<td>";
 
-			echo "<input type='hidden' name='iliitostunnus[0]' value='default' />";
-
-			if ($toimittajaid > 0) {
-
-				$chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) == $toimittajaid) ? ' checked' : ((isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) == $toimittajaid) ? ' checked' : '');
-
-				echo "<input type='hidden' name='ed_iliitostunnus[{$i}]' value='{$ed_iliitostunnus[$i]}' />";
-				echo "<input type='hidden' name='ed_iliitos[$i]' value='{$ed_iliitos[$i]}' />";
-				echo "<input type='hidden' name='iliitos[{$i}]' value='toimi' />";
-				echo "<input type='checkbox' name='iliitostunnus[{$i}]' value='{$toimittajaid}' {$chk} /> ";
-
-			}
-
-			if ($asiakasid > 0) {
-
-				$chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) == $asiakasid) ? ' checked' : ((isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) == $asiakasid) ? ' checked' : '');
-
-				echo "<input type='hidden' name='ed_iliitostunnus[{$i}]' value='{$ed_iliitostunnus[$i]}' />";
-				echo "<input type='hidden' name='ed_iliitos[$i]' value='{$ed_iliitos[$i]}' />";
-				echo "<input type='hidden' name='iliitos[{$i}]' value='asiakas' />";
-				echo "<input type='checkbox' name='iliitostunnus[{$i}]' value='{$asiakasid}' {$chk} /> ";
-
-			}
+			$cspan = 0;
 
 			if (isset($iliitos[$i]) and trim($iliitos[$i]) != '' and ((isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) != '') or (isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) != ''))) {
 
 				$tunnus_chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) != '') ? $iliitostunnus[$i] : $ed_iliitostunnus[$i];
-
 				$taulu_chk = $tunnus_chk == $ed_iliitostunnus[$i] ? $ed_iliitos[$i] : $iliitos[$i];
 
-				$query = "SELECT nimi, nimitark FROM {$taulu_chk} WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus_chk}'";
+				if ($taulu_chk == "A") {
+					$taulu = "asiakas";
+				}
+				elseif ($taulu_chk == "T") {
+					$taulu = "toimi";
+				}
+				else {
+					$taulu = "SQLERROR";
+				}
+
+				$query = "SELECT nimi, nimitark FROM {$taulu} WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus_chk}'";
 				$asiakasres = pupe_query($query);
 				$asiakasrow = mysql_fetch_assoc($asiakasres);
 
@@ -1113,18 +1171,49 @@
 
 			}
 
-			echo "</td>\n";
+			echo "</td>";
+
+			if ($toimittajaid > 0) {
+				$cspan++;
+
+				echo "<td>";
+				echo "<input type='hidden' name='iliitostunnus[0]' value='default' />";
+
+				$chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) == $toimittajaid) ? ' checked' : ((isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) == $toimittajaid) ? ' checked' : '');
+
+				echo "<input type='hidden' name='ed_iliitostunnus[{$i}]' value='{$ed_iliitostunnus[$i]}' />";
+				echo "<input type='hidden' name='ed_iliitos[$i]' value='{$ed_iliitos[$i]}' />";
+				echo "<input type='hidden' name='iliitos[{$i}]' value='T' />";
+				echo "<input type='checkbox' class='liitosbox' name='iliitostunnus[{$i}]' value='{$toimittajaid}' {$chk} /> ";
+				echo "</td>\n";
+			}
+
+			if ($asiakasid > 0) {
+				$cspan++;
+
+				echo "<td>";
+				echo "<input type='hidden' name='iliitostunnus[0]' value='default' />";
+
+				$chk = (isset($iliitostunnus[$i]) and trim($iliitostunnus[$i]) == $asiakasid) ? ' checked' : ((isset($ed_iliitostunnus[$i]) and trim($ed_iliitostunnus[$i]) == $asiakasid) ? ' checked' : '');
+
+				echo "<input type='hidden' name='ed_iliitostunnus[{$i}]' value='{$ed_iliitostunnus[$i]}' />";
+				echo "<input type='hidden' name='ed_iliitos[$i]' value='{$ed_iliitos[$i]}' />";
+				echo "<input type='hidden' name='iliitos[{$i}]' value='A' />";
+				echo "<input type='checkbox' class='liitosbox' name='iliitostunnus[{$i}]' value='{$asiakasid}' {$chk} /> ";
+				echo "</td>\n";
+			}
+
 
 			echo "<td class='back'>";
 			if (isset($ivirhe[$i])) echo "<font class='error'>{$ivirhe[$i]}</font>";
 			echo "</td>\n";
 			echo "</tr>\n";
 
-			echo "<tr><td colspan='5' nowrap><input type='text' name='iselite[{$i}]' value='{$iselite[$i]}' maxlength='150' size='80' placeholder='".t("Selite")."'></td></tr>\n";
+			echo "<tr><td colspan='".(5+$cspan)."' nowrap><input type='text' name='iselite[{$i}]' value='{$iselite[$i]}' maxlength='150' size='80' placeholder='".t("Selite")."'></td></tr>\n";
 			echo "<tr style='height: 5px;'></tr>\n";
 		}
 
-		echo "<tr><th colspan='2'>".t("Tosite yhteensä").":</th><td><input type='text' size='13' style='text-align: right;' name='tositesum' value='' readonly> {$valkoodi}</td><td></td></tr>\n";
+		echo "<tr><th colspan='2'>".t("Tosite yhteensä").":</th><td><input type='text' size='13' style='text-align: right;' name='tositesum' value='' readonly> {$valkoodi}</td></tr>\n";
 		echo "</table><br>\n";
 
 		echo "<script language='javascript'>javascript:tositesumma();</script>";

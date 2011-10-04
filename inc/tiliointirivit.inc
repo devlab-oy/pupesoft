@@ -205,13 +205,24 @@
 
 		if ($trow['tila'] == 'X' and trim($liitos) != '' and $liitostunnus > 0) {
 
-			$query = "SELECT nimi, nimitark FROM {$liitos} WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$liitostunnus}'";
+			if ($liitos == "A") {
+				$taulu = "asiakas";
+			}
+			elseif ($liitos == "T") {
+				$taulu = "toimi";
+			}
+			else {
+				$taulu = "SQLERROR";
+			}
+
+			$query = "	SELECT nimi, nimitark
+						FROM {$taulu}
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$liitostunnus}'";
 			$liitos_nimi_res = pupe_query($query);
 			$liitos_nimi_row = mysql_fetch_assoc($liitos_nimi_res);
 
-			echo "<br />",t(ucwords($liitos)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
-			
-
+			echo "<br />",t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
 		}
 
 		echo "</td>";
@@ -298,11 +309,24 @@
 
 		if ($tila_chk_row['tila'] == 'X' and $trow['liitos'] != '' and $trow['liitostunnus'] > 0) {
 
-			$query = "SELECT nimi, nimitark FROM {$trow['liitos']} WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$trow['liitostunnus']}'";
+			if ($trow['liitos'] == "A") {
+				$taulu = "asiakas";
+			}
+			elseif ($trow['liitos'] == "T") {
+				$taulu = "toimi";
+			}
+			else {				
+				$taulu = "SQLERROR";
+			}
+
+			$query = "	SELECT nimi, nimitark
+						FROM {$taulu}
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$trow['liitostunnus']}'";
 			$liitos_nimi_res = pupe_query($query);
 			$liitos_nimi_row = mysql_fetch_assoc($liitos_nimi_res);
 
-			echo "<br />",t(ucwords($trow['liitos'])),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
+			echo "<br />",t(ucwords($taulu)),": {$liitos_nimi_row['nimi']} {$liitos_nimi_row['nimitark']}";
 
 		}
 
@@ -417,7 +441,8 @@
 
 	$query = "	SELECT liitostunnus, tilaustyyppi
 				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus = '$tunnus'";
 	$lasres = pupe_query($query);
 	$mtklasrow = mysql_fetch_assoc($lasres);
 

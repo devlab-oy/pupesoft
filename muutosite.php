@@ -641,7 +641,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 // Olemassaolevaa tiliöintiä muutetaan, joten yliviivataan rivi ja annetaan perustettavaksi
 if ($tee == 'P') {
 
-	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi
+	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi, liitos, liitostunnus
 				FROM tiliointi
 				WHERE tunnus = '$ptunnus'
 				AND yhtio = '$kukarow[yhtio]'
@@ -669,6 +669,8 @@ if ($tee == 'P') {
 	$tositenro			= $tiliointirow['tosite'];
 	$ok					= 1;
 	$alv_tili			= $yhtiorow["alv"];
+	$liitos 			= $tiliointirow['liitos'];
+	$liitostunnus		= $tiliointirow['liitostunnus'];
 
 	// Katotaan voisiko meillä olla tässä joku toinen ALV tili
 	// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
@@ -891,6 +893,9 @@ if ($tee == 'U') {
 
 	if ($ok != 1) {
 		require "inc/teetiliointi.inc";
+
+		$liitos = '';
+		$liitostunnus = 0;
 	}
 }
 

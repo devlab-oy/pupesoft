@@ -2816,8 +2816,8 @@
 
 		$sel = $trow[$i] == 'K' ? ' selected' : '';
 
-		$ulos .= "<option value = ''>".t("K‰ytet‰‰n normaalia varastonsplittausta")."</option>";
-		$ulos .= "<option value = 'K' {$sel}>".t("Koitetaan myyd‰ kaikki saman varaston sis‰lt‰")."</option>";
+		$ulos .= "<option value = ''>".t("Myyd‰‰n ensin oletuspaikka tyhj‰ksi ja k‰ytet‰‰n sen j‰lkeen muita tuotepaikkoja saldoj‰rjestyksess‰")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Yritet‰‰n myyd‰ kaikki saman varaston sis‰lt‰, ensisijaisesti oletuspaikan varastosta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

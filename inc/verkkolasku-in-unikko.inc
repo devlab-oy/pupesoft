@@ -6,6 +6,7 @@
 	$verkkotunnus_vas	= "003720428100";
 	$laskun_tyyppi 		= "UNIKKO-INVOICE";
 	$a 					= 0;
+	$ealvi		 		= array("");
 
 	foreach ($xml->LedgerJournalTable->LedgerJournalTrans as $lasku) {
 

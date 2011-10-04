@@ -1006,7 +1006,7 @@
 						and tyyppi = 'K'
 						and kaytossa != 'E'
 						ORDER BY koodi+0, koodi, nimi";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
 				echo "<select name = 'ikustp[{$i}]' style='width: 140px'><option value = ' '>".t("Ei kustannuspaikkaa");
@@ -1027,7 +1027,7 @@
 						and tyyppi = 'O'
 						and kaytossa != 'E'
 						ORDER BY koodi+0, koodi, nimi";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
 				echo "<select name = 'ikohde[{$i}]' style='width: 140px'><option value = ' '>".t("Ei kohdetta");
@@ -1048,7 +1048,7 @@
 						and tyyppi = 'P'
 						and kaytossa != 'E'
 						ORDER BY koodi+0, koodi, nimi";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0) {
 				echo "<select name = 'iprojekti[{$i}]' style='width: 140px'><option value = ' '>".t("Ei projektia");
@@ -1108,7 +1108,7 @@
 				$query = "SELECT nimi, nimitark FROM {$taulu_chk} WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus_chk}'";
 				$asiakasres = pupe_query($query);
 				$asiakasrow = mysql_fetch_assoc($asiakasres);
-				
+
 				echo "{$asiakasrow['nimi']} {$asiakasrow['nimitark']}";
 
 			}

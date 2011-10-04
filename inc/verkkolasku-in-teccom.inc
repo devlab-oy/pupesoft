@@ -160,7 +160,7 @@
 	$tuotetiedot	= $xml->InvoiceDetail;
 	$i				= 0;
 	$rtuoteno		= array();
-	$ealvi		 	= array();
+	$ealvi		 	= array("");
 	$aputuoteno		= "";
 	$pituus			= "";
 
@@ -217,7 +217,7 @@
 					$rtuoteno[$i]["hinta"] = $rtuoteno[$i]["rivihinta"]  / $rtuoteno[$i]["kpl"] ;
 				}
 
-				$ealvi[] = 0; // Oletetaan aina ALV 0%
+				$ealvi[$i] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["alv"] = 0; // Oletetaan aina ALV 0%
 				$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ProductDescription->ProductName1);
 			}

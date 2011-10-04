@@ -335,7 +335,7 @@
 	$toimittamatta = $kpl; //N‰in paljon ollaan toimittamassa
 
 	if ($lisaarivi_debug==1) echo "Tilattu m‰‰r‰: $toimittamatta<br>";
-		
+
 	// Jos kyseess‰ on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
 	if (substr($paikka,0,3) == "°°°") {
 		$var 		 		= "T";
@@ -703,14 +703,14 @@
 					// hoidetaan pois problematiikka jos meill‰ on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
 					if ($orvot > 0) {
 						if ($myytavissa >= $orvot) {
-					 	// poistaan orpojen varaamat tuotteet t‰lt‰ paikalta
-					 	$myytavissa = $myytavissa - $orvot;
-					 	$orvot = 0;
+					 		// poistaan orpojen varaamat tuotteet t‰lt‰ paikalta
+					 		$myytavissa = $myytavissa - $orvot;
+					 		$orvot = 0;
 						}
 						elseif ($orvot > $myytavissa) {
-					 	// poistetaan niin paljon orpojen saldoa ku voidaan
-					 	$orvot = $orvot - $myytavissa;
-					 	$myytavissa = 0;
+					 		// poistetaan niin paljon orpojen saldoa ku voidaan
+					 		$orvot = $orvot - $myytavissa;
+					 		$myytavissa = 0;
 						}
 					}
 
@@ -766,9 +766,9 @@
 
 				if (!function_exists('chk_varaston_saldo')) {
 					function chk_varaston_saldo($arr, $kpl) {
-						/**
+						/*
 						- Pit‰iskˆ eka kattoa lˆytyykˆ kaikki joltain yhdelt‰ paikalta?
-						- Katotaan miss‰ oletuspaikka, riitt‰‰kˆ oletuspaikan varaston saldo? 
+						- Katotaan miss‰ oletuspaikka, riitt‰‰kˆ oletuspaikan varaston saldo?
 						- Riitt‰‰kˆ jonkun toisen varaston saldo?
 						- Jos ei niin splitataan.
 						*/
@@ -779,7 +779,6 @@
 						foreach ($arr as $indx => $chk_row) {
 
 							if ($chk_row['myytavissa'] >= $kpl) {
-
 								unset($arr[$indx]);
 								array_unshift($arr, $chk_row);
 								$chk_yksi_paikka = true;
@@ -794,83 +793,73 @@
 							reset($arr);
 
 							// Katotaan miss‰ oletuspaikka
+							$chk_oletus_var = $arr[0]['varasto'];
+
+							$chk_saldo = 0;
+							$checked_saldo = false;
+
+							// riitt‰‰kˆ oletuspaikan varaston saldo?
 							foreach ($arr as $indx => $chk_row) {
-								if (trim($chk_row['oletus']) != '') {
-									$chk_oletus_var = $chk_row['varasto'];
-									break;
+
+								if ($chk_row['varasto'] == $chk_oletus_var) {
+									$chk_saldo += $chk_row['myytavissa'];
+
+									if ($chk_saldo >= $kpl) {
+										$checked_saldo = true;
+										break;
+									}
 								}
 							}
 
-							if ($chk_oletus_var) {
+							reset($arr);
 
-								reset($arr);
-
-								$chk_saldo = 0;
-								$checked_saldo = false;
-
-								// riitt‰‰kˆ oletuspaikan varaston saldo? 
+							if ($checked_saldo) {
 								foreach ($arr as $indx => $chk_row) {
-
 									if ($chk_row['varasto'] == $chk_oletus_var) {
-										$chk_saldo += $chk_row['myytavissa'];
+										unset($arr[$indx]);
+										array_unshift($arr, $chk_row);
+									}
+								}
+							}
+							else {
 
-										if ($chk_saldo >= $kpl) {
-											$checked_saldo = true;
-											break;
-										}
+								// Riitt‰‰kˆ jonkun toisen varaston saldo?
+								$chk_distinct_varasto = array();
+
+								// loopataan distinct varasto
+								foreach ($arr as $indx => $chk_row) {
+									if (!isset($chk_distinct_varasto[$chk_row['varasto']])) {
+										$chk_distinct_varasto[$chk_row['varasto']] = $chk_row['varasto'];
 									}
 								}
 
 								reset($arr);
 
-								if ($checked_saldo) {
+								unset($chk_distinct_varasto[$chk_oletus_var]);
+
+								foreach ($chk_distinct_varasto as $varasto) {
+
+									$varaston_saldo = 0;
+									$varasto_set = '';
+
 									foreach ($arr as $indx => $chk_row) {
-										if ($chk_row['varasto'] == $chk_oletus_var) {
-											unset($arr[$indx]);
-											array_unshift($arr, $chk_row);
-										}
-									}
-								}
-								else {
+										if ($varasto == $chk_row['varasto']) {
+											$varaston_saldo += $chk_row['myytavissa'];
 
-									// Riitt‰‰kˆ jonkun toisen varaston saldo?
-									$chk_distinct_varasto = array();
-
-									// loopataan distinct varasto
-									foreach ($arr as $indx => $chk_row) {
-										if (!isset($chk_distinct_varasto[$chk_row['varasto']])) {
-											$chk_distinct_varasto[$chk_row['varasto']] = $chk_row['varasto'];
-										}
-									}
-
-									reset($arr);
-
-									unset($chk_distinct_varasto[$chk_oletus_var]);
-
-									foreach ($chk_distinct_varasto as $varasto) {
-
-										$varaston_saldo = 0;
-										$varasto_set = '';
-
-										foreach ($arr as $indx => $chk_row) {
-											if ($varasto == $chk_row['varasto']) {
-												$varaston_saldo += $chk_row['myytavissa'];
-
-												if ($varaston_saldo >= $kpl) {
-													$varasto_set = $chk_row['varasto'];
-													break;
-												}
+											if ($varaston_saldo >= $kpl) {
+												$varasto_set = $chk_row['varasto'];
+												break;
 											}
 										}
+									}
 
-										if ($varasto_set != '') {
-											reset($arr);
+									if ($varasto_set != '') {
+										reset($arr);
 
-											foreach ($arr as $indx => $chk_row) {
-												if ($chk_row['varasto'] == $varasto_set) {
-													unset($arr[$indx]);
-													array_unshift($arr, $chk_row);
-												}
+										foreach ($arr as $indx => $chk_row) {
+											if ($chk_row['varasto'] == $varasto_set) {
+												unset($arr[$indx]);
+												array_unshift($arr, $chk_row);
 											}
 										}
 									}
@@ -896,18 +885,17 @@
 					}
 				}
 
+				// sortataan ostajan maan varastopaikat saldo j‰rkk‰‰n
+				usort($oma_maa, "zzrowcmp");
+				// sortataan muiden maiden varastopaikat saldo j‰rkk‰‰n
+				usort($muu_maa, "zzrowcmp");
+
 				if ($yhtiorow['varaston_splittaus'] == 'K') {
 					// sortataan ostajan maan varastopaikat saldo j‰rkk‰‰n
 					$oma_maa = chk_varaston_saldo($oma_maa, $kpl);
 
 					// sortataan muiden maiden varastopaikat saldo j‰rkk‰‰n
 					$muu_maa = chk_varaston_saldo($muu_maa, $kpl);
-				}
-				else {
-					// sortataan ostajan maan varastopaikat saldo j‰rkk‰‰n
-					usort($oma_maa, "zzrowcmp");
-					// sortataan muiden maiden varastopaikat saldo j‰rkk‰‰n
-					usort($muu_maa, "zzrowcmp");
 				}
 
 				// yhdistet‰‰n arrayt

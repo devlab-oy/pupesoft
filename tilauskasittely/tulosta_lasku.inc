@@ -1535,7 +1535,19 @@ if (!function_exists('loppu')) {
 			$width = 340;
 			$height = $barcode_korkeus-1 * 1.2;
 			$style = BCS_IMAGE_JPEG;
-			$code = PalautaPankkiviivakoodi($pankkitiedot["pankkitili1"], $summa, $erapaiva, $laskurow["viite"]);
+
+			$onko_tili1_iban = tarkista_iban($pankkitiedot["pankkitili1"]);
+			$onko_iban1_iban = tarkista_iban($pankkitiedot["pankkiiban1"]);
+
+			if ($onkotili1iban != "") {
+				$code = PalautaPankkiviivakoodi($onkotili1iban, $summa, $erapaiva, $laskurow["viite"], 4);
+			}
+			elseif ($onko_iban1_iban != "") {
+				$code = PalautaPankkiviivakoodi($onko_iban1_iban, $summa, $erapaiva, $laskurow["viite"], 4);
+			}
+			else {
+				$code = PalautaPankkiviivakoodi($pankkitiedot["pankkitili1"], $summa, $erapaiva, $laskurow["viite"], 2);
+			}
 
 			$font = 5;
 			$xres = 1;
@@ -1764,13 +1776,13 @@ if (!function_exists('alvierittely')) {
 if (!function_exists('PalautaPankkiviivakoodi')) {
 	function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.0000", $viitenumero = 0, $versio = 2) {
 
-		if( $versio == '2' ){
+		if ($versio == '2') {
 			$pankkitili = $tilinumero;
 			include("inc/pankkitilinoikeellisuus.php");
 		}
-		else{
+		else {
 			// tarkista_iban ei osaa tarkistaa kuin Suomalaisia tilinumeroita
-			$pankkitili = substr(tarkista_iban( $tilinumero ), 2); // Maatunnus pois
+			$pankkitili = substr(tarkista_iban($tilinumero), 2); // Maatunnus pois
 		}
 
 		if ($pankkitili == "") {
@@ -1790,10 +1802,10 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 		$konekielinen_summa = sprintf("%08d", $konekielinen_summa);
 
 		// Viitenumero
-		if( $versio == '2' or $versio == '4' ){
+		if ($versio == '2' or $versio == '4' ) {
 			$konekielinen_viitenumero = sprintf("%020d", $viitenumero);
 		}
-		elseif( $versio == '5' ){
+		elseif ($versio == '5') {
 			// Annettu viite pitaisi olla muodossa RFxxyy...yy, jossa xx on tarkistenumero
 			$tarkiste = substr($viitenumero,2,2);
 			$viitenumero = substr($viitenumero,4);
@@ -1808,21 +1820,21 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 		$konekielinen_erapv = $vv.$kk.$pp;
 
 		// Varalla
-		if($versio=='2'){
+		if ($versio=='2') {
 			$vara = "0000";
 		}
-		elseif($versio=='4'){
+		elseif ($versio=='4') {
 			$vara = "000";
 		}
 		else $vara = '';
 
 		// Koonti
 		$pankkiviivakoodi = $versio.$konekielinen_tilinumero.$konekielinen_summa;
-		
-		if($versio=='2'){
+
+		if ($versio=='2') {
 			$pankkiviivakoodi .= $konekielinen_viitenumero.$konekielinen_erapv.$vara;
 		}
-		else{
+		else {
 			$pankkiviivakoodi .= $vara.$konekielinen_viitenumero.$konekielinen_erapv;
 		}
 
@@ -1830,11 +1842,11 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 		$viite = $pankkiviivakoodi;
 
 		// Vain versio kakkoseen tarkiste 1
-		if($versio == '2'){
+		if ($versio == '2') {
 			// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
 			include("inc/generoiviite.inc");
 		}
-		
+
 		return($viite);
 	}
 }

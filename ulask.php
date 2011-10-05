@@ -11,6 +11,57 @@ if ($livesearch_tee == "TILIHAKU") {
 	exit;
 }
 
+echo "<script type='text/javascript' language='javascript'>";
+require_once("inc/jquery.min.js");
+echo "</script>";
+
+echo "	<script type='text/javascript' charset='utf-8'>
+
+			$(document).ready(function() {
+
+				$('.uusitiliointirivi').click(function() {
+					var i = $('.maara').val() - 1;
+					var ii = $('.maara').val();
+
+					var uusi_rivi = $('tr .rivi_'+i).clone();
+
+					$(uusi_rivi).find('input, select').each(function() {
+
+						if ($(this).attr('id') != false && $(this).attr('id') != undefined) {
+							$(this).attr('id', $(this).attr('id').replace(i, ii));
+						}
+
+						if ($(this).attr('class') != false && $(this).attr('class') != undefined) {
+							$(this).attr('class', $(this).attr('class').replace(i, ii));
+						}
+
+						if ($(this).attr('name') != false && $(this).attr('name') != undefined) {
+							$(this).attr('name', $(this).attr('name').replace(i, ii));
+						}
+
+						if ($(this).is('input') && $(this).val() != false && $(this).val() != undefined) {
+							$(this).val($(this).val().replace(i, ii));
+						}
+
+						if ($(this).is('a') && $(this).attr('href') != false && $(this).attr('href') != undefined) {
+							$(this).attr('href', $(this).attr('href').replace(new RegExp(i, 'g'), ii));
+						}
+					});
+
+					$(uusi_rivi).removeClass().addClass('rivi_'+ii);
+
+					ii++;
+
+					$('.maara').val(ii);
+
+					$('tr .rivi_'+i).after(uusi_rivi);
+					$('tr .rivi_'+i).after('<tr><td colspan=\'4\'><hr></td></tr>');
+				});
+
+			});
+
+		</script>";
+
 function poistalaskuserverilta($skanlasku) {
 
 	GLOBAL $kukarow, $yhtiorow;
@@ -1369,7 +1420,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 		for ($i=1; $i<$maara; $i++) {
 
-			echo "<tr><td valign='top'>";
+			echo "<tr class='rivi_{$i}'><td valign='top'>";
 
  			// Tehaan kentta tai naytetaan popup
 			if ($iulos[$i] == '') {
@@ -1480,6 +1531,8 @@ if ($tee == 'P' or $tee == 'E') {
 			}
 		}
 
+		echo "<tr><td colspan='4'><input type='button' class='uusitiliointirivi' value='Uusi rivi' /></td></tr>";
+
 		echo "</table>";
 
 	} // end taso < 2
@@ -1502,7 +1555,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 	echo "<br>
 		<input type = 'hidden' name = 'toimittajaid' value = '$toimittajaid'>
-		<input type = 'hidden' name = 'maara' value = '$maara'>
+		<input type = 'hidden' class='maara' name = 'maara' value = '$maara'>
 		<input type = 'submit' value = '".t("Perusta")."' tabindex='-1'></form>";
 
 } // end if tee = 'P'

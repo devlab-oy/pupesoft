@@ -1,6 +1,6 @@
 <?php
 
-	// headles päälle
+	// Datatables päälle
 	$pupe_DataTables = array("tyojono0", "tyojono1");
 
 	require('../inc/parametrit.inc');
@@ -139,6 +139,7 @@
 		$linkkihaku = urldecode($linkkihaku);
 		$omattyot = " HAVING suorittajanimi = '$linkkihaku' or asekalsuorittajanimi = '$linkkihaku' ";
 	}
+
 	// scripti balloonien tekemiseen
 	js_popup();
 
@@ -165,6 +166,7 @@
 				a3.nimi suorittajanimi,
 				a2.jarjestys prioriteetti,
 				lasku.luontiaika,
+				group_concat(a4.selitetark_2) asekalsuorittajanimi,
 				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
 				FROM lasku
 				JOIN yhtio ON lasku.yhtio=yhtio.yhtio
@@ -211,7 +213,15 @@
 			echo "<td>$vrow[yhtio]</td>";
 		}
 
-		if ($vrow["tila"] == "L" or $vrow["tila"] == "N") {
+		if ($vrow["tila"] == "A" or ($vrow['tila'] == 'L' and $vrow['tilaustyyppi'] == 'A')) {
+			if ($toim == 'TYOMAARAYS_ASENTAJA') {
+				$toimi = 'TYOMAARAYS_ASENTAJA';
+			}
+			else {
+				$toimi = 'TYOMAARAYS';
+			}
+		}
+		elseif ($vrow["tila"] == "L" or $vrow["tila"] == "N") {
 			$toimi = "RIVISYOTTO";
 		}
 		elseif ($vrow["tila"] == "T") {
@@ -220,9 +230,13 @@
 		elseif ($vrow["tila"] == "S") {
 			$toimi = "SIIRTOTYOMAARAYS";
 		}
-		elseif ($vrow["tila"] == "A") {
-			$toimi = "TYOMAARAYS";
+		elseif ($vrow['tila'] == 'C') {
+			$toimi = 'REKLAMAATIO';
 		}
+
+		$lopetusx = "";
+		if ($lopetus != "") $lopetusx = $lopetus;
+		$lopetusx .= "/SPLIT/{$palvelin2}tyomaarays/tyojono.php////konserni=$konserni//toim=$toim";
 
 		if (trim($vrow["komm1"]) != "") {
 			echo "<div id='div_$vrow[tunnus]' class='popup' style='width:500px;'>";
@@ -243,12 +257,6 @@
 
 		if ($vrow["asennuskalenteri"] != "") {
 
-			$lopetusx = "";
-
-			if ($lopetus != "") $lopetusx = $lopetus;
-
-			$lopetusx .= "/SPLIT/$PHP_SELF////konserni=$konserni//toim=$toim//myyntitilaus_haku=$myyntitilaus_haku//viesti_haku=$viesti_haku//asiakasnumero_haku=$asiakasnumero_haku//asiakasnimi_haku=$asiakasnimi_haku//suorittaja_haku=$suorittaja_haku//tyojono_haku=$tyojono_haku//tyostatus_haku=$tyostatus_haku";
-
 			// vrow.asennuskalenteri = kaikki työnjohdon tekemät merkinnät tälle työmääräykselle
 			foreach (explode(",", $vrow["asennuskalenteri"]) as $asekale) {
 
@@ -261,7 +269,7 @@
 					if ($kukarow['kuka'] == $selitetark) {
 						$olenko_asentaja_tassa_hommassa = TRUE;
 						list($url_vuosi, $url_kk, $url_pp) = explode("-", $alku_pvm);
-						echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>".tv1dateconv($alku_pvm, "", "LYHYT")." $selitetark_2</a><br>";
+						echo "<a href='{$palvelin2}crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=TYOMAARAYS_ASENTAJA&lopetus=$lopetusx'>".tv1dateconv($alku_pvm, "", "LYHYT")." $selitetark_2</a><br>";
 					}
 					else {
 						echo tv1dateconv($pvmloppu, "", "LYHYT")." $selitetark_2<br>";
@@ -305,7 +313,7 @@
 				if ($toim == 'TYOMAARAYS_ASENTAJA' and $kukarow['kuka'] == $tunti_chk_row["kuka"]) {
 					list($url_vuosi, $url_kk, $url_pp) = explode("-", $tunti_chk_row["pvmalku"]);
 					list($url_tunti, $url_min, $url_sek) = explode(":", $tunti_chk_row["aika"]);
-					echo "<a href='".$palvelin2."crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=$toim&lopetus=$lopetusx'>".tv1dateconv($tunti_chk_row["pvmalku"], "", "LYHYT")." $tunti_chk_row[nimi]: ".(int) $url_tunti."h ".$url_min."m</a><br>";
+					echo "<a href='{$palvelin2}crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=TYOMAARAYS_ASENTAJA&lopetus=$lopetusx'>".tv1dateconv($tunti_chk_row["pvmalku"], "", "LYHYT")." $tunti_chk_row[nimi]: ".(int) $url_tunti."h ".$url_min."m</a><br>";
 				}
 			}
 		}
@@ -321,12 +329,7 @@
 
 			$ankkuri = "{$ankkuri_pp}_{$ankkuri_kk}_{$ankkuri_vv}";
 
-			if ($toim == "OMAJONO") {
-				$toim = "";
-				$omatoimi = "OMAJONO";
-			}
-
-			echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&toim=$toim&lopetus=$lopetus/SPLIT/$PHP_SELF////konserni=$konserni//toim=$toim#$ankkuri'>{$vrow["toimaika"]}</a></td>";
+			echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&lopetus=$lopetusx#$ankkuri'>{$vrow["toimaika"]}</a></td>";
 		}
 		else {
 			echo "<td valign='top'>{$vrow["toimaika"]}</td>";
@@ -343,21 +346,12 @@
 
 		echo "<td valign='top' $varilisa>$vrow[tyojono] / <br>$vrow[tyostatus]</td>";
 
-		if ($toim == 'TYOMAARAYS_ASENTAJA' and $toimi != 'TYOMAARAYS_ASENTAJA') $toimi = 'TYOMAARAYS_ASENTAJA';
-
-		if ($vrow['tila'] == 'C') {
-			$toimi = 'REKLAMAATIO';
-		}
-		elseif ($vrow['tila'] == 'L' and $vrow['tilaustyyppi'] == 'A') {
-			$toimi = $toimi != 'TYOMAARAYS_ASENTAJA' ? 'TYOMAARAYS' : 'TYOMAARAYS_ASENTAJA';
-		}
-
 		if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
 			if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
-				$muoklinkki = "<a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus={$palvelin2}tyomaarays/tyojono.php////toim=$omatoimi'>".t("Muokkaa")."</a>";
+				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
 			}
 			else {
-				$muoklinkki = "<a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&tyojono=$tyojono&lopetus={$palvelin2}tyomaarays/tyojono.php////toim=$omatoimi'>".t("Muokkaa")."</a>";
+				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&tyojono=$tyojono&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
 			}
 		}
 		else {

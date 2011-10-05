@@ -84,7 +84,7 @@
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
 				and tyyppi = 'K'
-				ORDER BY nimi";
+				ORDER BY koodi+0, koodi, nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='mul_kustannuspaikka[]' multiple='TRUE' size='10' style='width:100%;'>";

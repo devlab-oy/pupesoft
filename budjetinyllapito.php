@@ -150,7 +150,7 @@ else {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
 				and tyyppi = 'K'
-				ORDER BY nimi";
+				ORDER BY koodi+0, koodi, nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='kustp'><option value='0'>".t("Ei valintaa")."</option>";
@@ -171,7 +171,7 @@ else {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
 				and tyyppi = 'O'
-				ORDER BY nimi";
+				ORDER BY koodi+0, koodi, nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='kohde'><option value='0'>".t("Ei valintaa")."</option>";
@@ -193,7 +193,7 @@ else {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
 				and tyyppi = 'P'
-				ORDER BY nimi";
+				ORDER BY koodi+0, koodi, nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='proj'><option value='0'>".t("Ei valintaa")."</option>";

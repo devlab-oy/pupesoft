@@ -10122,15 +10122,18 @@ if (!function_exists("tarkista_oikeus")) {
 		$querylisa = "";
 
 		if (strpos($alanimi, "%") !== FALSE) {
-			$querylisa .= "AND alanimi like '$alanimi'";
+			$querylisa .= " AND alanimi like '$alanimi'";
 		}
 		elseif ($alanimi != "") {
 			// Luetaan alanime‰ vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myˆs jotain lis‰tietoja toisessa muuttujassa
 			$querylisa = " AND substring(alanimi, 1, if(LOCATE('&', alanimi) > 0, LOCATE('&', alanimi) - 1, CHAR_LENGTH(alanimi))) = '$alanimi'";
 		}
+		else {
+			$querylisa .= " AND alanimi = '' ";
+		}
 
 		if ($paivitys != "") {
-			$querylisa .= "AND paivitys = '1'";
+			$querylisa .= " AND paivitys = '1' ";
 		}
 
 		$query = "	SELECT *
@@ -11619,12 +11622,12 @@ if (!function_exists("pupe_DataTables")) {
 						});
 
 						var jonosearch = tyojono.join(\"|\");
-						
+
 						if (arvo != \"\" && jonosearch == \"\") {
 							// ei n‰ytet‰ mit‰‰n
 							jonosearch = \"xyzzypupe\";
 						}
-						
+
 						datatablesit[1].fnFilter( jonosearch, 0, true, false, true );
 					}
 				} );

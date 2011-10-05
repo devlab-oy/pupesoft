@@ -89,7 +89,7 @@ if ($laskun_tyyppi == "INV02") {
 $tuotetiedot	= $xml->InvoiceRow;
 $i				= 0;
 $rtuoteno		= array();
-$ealvi		 	= array();
+$ealvi		 	= array("");
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
@@ -106,10 +106,10 @@ if (count($tuotetiedot) > 0) {
 			$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ArticleName);
 			$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount);
 
-			$xvati = (float) str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+			$xvati = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 
 			$rtuoteno[$i]["alv"] = $xvati;
-			$ealvi[] = $xvati;
+			$ealvi[$i] = $xvati;
 
 			$rtuoteno[$i]["ale"] = (float) str_replace(",", ".", $tuotetieto->RowDiscountPercent);
 			$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
@@ -144,12 +144,12 @@ if (count($tuotetiedot) > 0) {
 
 // Verotiedot
 $vattiedot	= $xml->InvoiceDetails->VatSpecificationDetails;
-$lisavat	= array();
+$lisavat	= array("");
 $i 			= 0;
 
 if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {
-		$lisavat[$i] = (float) str_replace(",", ".", $vattieto->VatRatePercent);
+		$lisavat[$i] = str_replace(",", ".", $vattieto->VatRatePercent);
 		$i++;
 	}
 }

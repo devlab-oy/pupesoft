@@ -29,9 +29,6 @@
 							// data.addRows(Object.keys(args).length);
 							data.addRows(1);
 
-							console.log(args);
-							console.log(Object.keys(args).length);
-
 							var div_id;
 							var _i = 0;
 
@@ -39,11 +36,8 @@
 								var _x = 0;
 								div_id = i;
 
-								console.log('args[\''+i+'\'] is '+ args[i]);
-
 								for (var x in args[i]) {
 									data.setValue(_i, _x, args[i][x]);
-									console.log('setataan '+_i+' '+_x+' '+args[i][x]);
 									_x++;
 								}
 								_i++;
@@ -57,12 +51,13 @@
 							chart.draw(data, options);
 
 							var body_bgcolor = $('body').css('background-color');
-							$('#chart_div *').css('background-color', body_bgcolor);
+							$('#chart_div *').css({'background-color': body_bgcolor});
 						},
 						draw: function(value) {
 
 							value = parseInt(value);
-						
+
+							// debug
 							// value = 50000;
 						
 							if (parseInt((value / (value / 5))) > 4) {
@@ -90,64 +85,13 @@
 					}
 				});
 
-				// function drawChart() {
-				// 	var data = new google.visualization.DataTable();
-				// 	data.addColumn('string', 'Label');
-				// 	data.addColumn('number', 'Value');
-				// 	data.addRows(1);
-				// 	data.setValue(0, 0, 'EUR');
-				// 	data.setValue(0, 1, 0);
-				// 
-				// 	var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
-				// 	var options = {	width: 800, 
-				// 					height: 220, 
-				// 					min: 0,
-				// 					max: 400000,
-				// 					redFrom: 200000, 
-				// 					redTo: 300000, 
-				// 					greenFrom: 350000, 
-				// 					greenTo: 400000,
-				// 					yellowFrom: 300000, 
-				// 					yellowTo: 350000, 
-				// 					minorTicks: 5,
-				// 					majorTicks: ['0', '100k', '200k', '300k', '400k']};
-				// 	chart.draw(data, options);
-				// 
-				// 	var tilatut_eurot = parseInt($('#tilatut_eurot').val());
-				// 
-				// 	// tilatut_eurot = 50000;
-				// 
-				// 	if (tilatut_eurot / 4000 > 4) {
-				// 
-				// 		var force = parseInt(tilatut_eurot / 80000);
-				// 		force = force < 2 ? 2 : force;
-				// 		force = 1 + '.' + force;
-				// 
-				// 		var _dot120 = parseInt(tilatut_eurot * force);
-				// 		data.setValue(0, 1, _dot120);
-				// 		chart.draw(data, options);
-				// 
-				// 		var _dot90 = parseInt(tilatut_eurot * 0.9);
-				// 		setTimeout(function(){data.setValue(0, 1, _dot90); chart.draw(data, options);}, 400);
-				// 
-				// 		setTimeout(function(){data.setValue(0, 1, tilatut_eurot); chart.draw(data, options);}, 800);
-				// 	}
-				// 	else {
-				// 		data.setValue(0, 1, tilatut_eurot);
-				// 		chart.draw(data, options);
-				// 	}
-				// 
-				// 	var body_bgcolor = $('body').css('background-color');
-				// 	$('#chart_div table tr td').css('background-color', body_bgcolor);
-				// }
-
 				$(document).ready(function() {
 
 					setTimeout(function() {
 						
 						var gauge = new Gauge();
 						var args = {
-							tilatut: ['EUR', 0]
+							tilatut: ['Tilatut', 0]
 						}
 					
 						var options = {	width: 800, 
@@ -169,7 +113,7 @@
 
 						var gauge = new Gauge();
 						var args = {
-							kate: ['EUR', 0]
+							kate: ['Kate', 0]
 						}
 					
 						var options = {	width: 800, 
@@ -210,7 +154,7 @@
 						gauge.init(args, options);
 
 						gauge.draw($('#tilatut_katepros').val());
-					}, 50);
+					}, 1);
 
 					$('#naytetaan_tulos').change(function() {
 						var date = new Date();
@@ -236,9 +180,8 @@
 	echo "<font class='head'>",t("Myyntitilasto"),"</font><hr>";
 
 	echo "<form method='post' action=''>";
-	echo "<table><tr><td class='back' style='text-align: center'>";
-	echo "<div id='chart_div' style='display: block;'></div>";
-	echo "</td><td class='back' style='vertical-align: middle'>";
+	echo "<table><tr>";
+	echo "<td class='back'>";
 
 	$query_ale_lisa = generoi_alekentta('M');
 
@@ -351,12 +294,24 @@
 	echo "<tr><td colspan='2' class='back'><input type='submit' value='",t("Hae"),"' /></td></tr>";
 
 	echo "</table>";
-	echo "</td></tr></table>";
+	echo "</td>";
+	echo "<td class='back'><div id='chart_div'></div></td>";
+	echo "</tr></table>";
 	echo "</form>";
 
 	if (!isset($tee)) $tee = '';
 
+	if (isset($yhtiot) and count($yhtiot) == 1) {
+		echo "<font class='error'>",t("Et valinnut yhtiötä"),"!</font>";
+		$tee = '';
+	}
+
 	if ($tee == 'laske') {
+
+		// poistetaan default
+		unset($yhtiot[0]);
+
+		$query_yhtiot = implode("','", $yhtiot);
 
 		$ppa = (int) $ppa;
 		$kka = (int) $kka;
@@ -380,12 +335,13 @@
 					(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1) AS tilatut_eurot
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					WHERE tilausrivi.yhtio IN ('{$query_yhtiot}')
 					AND tilausrivi.tyyppi = 'L'
 					AND tilausrivi.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 					AND tilausrivi.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-					AND tilausrivi.laskutettu = ''";
-		echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					AND tilausrivi.laskutettu = ''
+					ORDER BY tilausrivi.laadittu";
+		// echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$result = pupe_query($query);
 
 		// $kateprosentti = round($row["kate"] / $row["summa"] * 100, 2);
@@ -426,12 +382,13 @@
 					tilausrivi.rivihinta AS 'laskutetut_eurot'
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					WHERE tilausrivi.yhtio IN ('{$query_yhtiot}')
 					AND tilausrivi.tyyppi = 'L'
 					AND tilausrivi.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 					AND tilausrivi.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-					AND tilausrivi.laskutettu != ''";
-		echo "<pre>",str_replace("\t", "", $query),"</pre>";
+					AND tilausrivi.laskutettu != ''
+					ORDER BY tilausrivi.laadittu";
+		// echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$result = pupe_query($query);
 
 		while ($row = mysql_fetch_assoc($result)) {
@@ -460,6 +417,9 @@
 			$arvot['tilatut_eurot'] = $arvot['tilatut_eurot'] + $arvot['laskutetut_eurot'];
 			$tilatut_katepros = round(($tilatut_katepros + $laskutetut_katepros) / 2, 1);
 
+			$yhteensa['tilatut_eurot'] += $arvot['tilatut_eurot'];
+			$yhteensa['laskutetut_eurot'] += $arvot['laskutetut_eurot'];
+
 			echo "<tr>";
 			echo "<td align='right'>{$pvm}</td>";
 			echo "<td align='right'>{$arvot['tilatut_eurot']}</td>";
@@ -473,7 +433,7 @@
 		echo "<th>",t("Yhteensä"),"</th>";
 		echo "<td align='right'>{$yhteensa['tilatut_eurot']}</td>";
 		echo "<td align='right'></td>";
-		echo "<td align='right'></td>";
+		echo "<td align='right'>{$yhteensa['laskutetut_eurot']}</td>";
 		echo "<td align='right'></td>";
 		echo "</tr>";
 

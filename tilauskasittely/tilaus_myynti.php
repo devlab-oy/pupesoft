@@ -18,7 +18,6 @@ if (!isset($alv)) 					$alv = "";
 if (!isset($alv_array)) 			$alv_array = "";
 if (!isset($asiakasid)) 			$asiakasid = "";
 if (!isset($asiakasOnProspekti)) 	$asiakasOnProspekti = "";
-if (!isset($eta_yhtio)) 			$eta_yhtio = "";
 if (!isset($from)) 					$from = "";
 if (!isset($hinta)) 				$hinta = "";
 if (!isset($hinta_array)) 			$hinta_array = "";
@@ -2392,8 +2391,9 @@ if ($tee == '') {
 		$faktaresult = pupe_query($query);
 		$faktarow = mysql_fetch_assoc($faktaresult);
 
-		if ($GLOBALS['eta_yhtio'] != '' and ($koti_yhtio != $kukarow['yhtio'] or $faktarow['osasto'] != '6')) {
-			unset($GLOBALS['eta_yhtio']);
+		// KAUTTALASKUTUSKIKKARE
+		if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and ($koti_yhtio != $kukarow['yhtio'] or $faktarow['osasto'] != '6')) {
+			$GLOBALS['eta_yhtio'] = "";
 		}
 
 		echo "<tr>$jarjlisa";
@@ -5062,7 +5062,7 @@ if ($tee == '') {
 						$pknum = 0;
 						$borderlask = 0;
 
-						if ($row["kommentti"] != "" or ($GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
+						if ($row["kommentti"] != "" or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
 							echo "<td valign='top' rowspan = '2' $class>$echorivino</td>";
 						}
 						else {

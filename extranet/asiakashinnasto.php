@@ -122,17 +122,19 @@
 
 		if ($tee != '' and $asiakas > 0 and isset($ajahinnasto)) {
 
-			$query  = "	SELECT if(toim_maa != '', toim_maa, maa) sallitut_maat, osasto
-						FROM asiakas
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$asiakas'";
-			$maa_result = pupe_query($query);
-			$asiakas_maa_row = mysql_fetch_array($maa_result);
+			$kieltolisa 	= '';
+			$sallitut_maat 	= $asiakasrow["toim_maa"] != '' ? $asiakasrow["toim_maa"] : $asiakasrow["maa"];
 
-			$kieltolisa = '';
-
-			if ($asiakas_maa_row["sallitut_maat"] != "") {
-				$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$asiakas_maa_row[sallitut_maat]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$asiakas_maa_row[sallitut_maat]%' ";
+			if ($sallitut_maat != "") {
+				$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$sallitut_maat%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$sallitut_maat%' ";
 			}
+
+			$query = "	SELECT kurssi
+						FROM valuu
+						WHERE nimi = '$asiakasrow[valkoodi]'
+						and yhtio  = '$kukarow[yhtio]'";
+			$asres = pupe_query($query);
+			$kurssi = mysql_fetch_assoc($asres);
 
 			$query = "	SELECT *
 						FROM tuote
@@ -195,18 +197,19 @@
 				$excelrivi++;
 			}
 
-			if ($GLOBALS['eta_yhtio'] != '' and ($GLOBALS['koti_yhtio'] != $kukarow['yhtio'] or $asiakas_maa_row['osasto'] != '6')) {
-				unset($GLOBALS['eta_yhtio']);
+			// KAUTTALASKUTUSKIKKARE
+			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and ($GLOBALS['koti_yhtio'] != $kukarow['yhtio'] or $asiakasrow['osasto'] != '6')) {
+				$GLOBALS['eta_yhtio'] = "";
 			}
 
 			while ($rrow = mysql_fetch_assoc($rresult)) {
 
 				$bar->increase();
 
-				if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
+				if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
 					$query = "	SELECT *
 								FROM tuote
-								WHERE yhtio = '$GLOBALS[eta_yhtio]'
+								WHERE yhtio = '{$GLOBALS["eta_yhtio"]}'
 								AND tuoteno = '$rrow[tuoteno]'";
 					$tres_eta = pupe_query($query);
 					$alehinrrow = mysql_fetch_assoc($tres_eta);
@@ -216,11 +219,14 @@
 				}
 
 				//haetaan asiakkaan oma hinta
-				$laskurow["ytunnus"] 		= $ytunnus;
-				$laskurow["liitostunnus"] 	= $asiakas;
+				$laskurow["ytunnus"] 		= $asiakasrow["ytunnus"];
+				$laskurow["liitostunnus"] 	= $asiakasrow["tunnus"];
 				$laskurow["vienti"] 		= $asiakasrow["vienti"];
 				$laskurow["alv"] 			= $asiakasrow["alv"];
 				$laskurow["valkoodi"]		= $asiakasrow["valkoodi"];
+				$laskurow["vienti_kurssi"]	= $kurssi;
+				$laskurow["maa"]			= $asiakasrow["maa"];
+				$laskurow['toim_ovttunnus'] = $asiakasrow["toim_ovttunnus"];
 
 				$palautettavat_kentat = "hinta,netto,alehinta_alv,alehinta_val,hintaperuste,aleperuste";
 
@@ -229,7 +235,7 @@
 				}
 
 				$hinnat = alehinta($laskurow, $alehinrrow, 1, '', '', '', $palautettavat_kentat, $GLOBALS['eta_yhtio']);
-				
+
 				// Otetaan erikoisalennus pois asiakashinnastosta
 				// $hinnat['erikoisale'] = $asiakasrow["erikoisale"];
 				$hinnat['erikoisale'] = 0;

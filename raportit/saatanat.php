@@ -150,32 +150,37 @@
 
 		if ($sytunnus != '') {
 
-			if ($GLOBALS['eta_yhtio'] != '' and $kukarow['yhtio'] == $GLOBALS['koti_yhtio'] and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+			// KAUTTALASKUTUSKIKKARE
+			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $kukarow['yhtio'] == $GLOBALS['koti_yhtio'] and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
 
 				$query = "	SELECT osasto, ifnull(group_concat(tunnus), 0) tunnukset
 							FROM asiakas
 							WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
 							AND laji != 'P'
-							AND ytunnus = '$sytunnus'
 							AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'
+							AND toim_ovttunnus != ''
 							GROUP BY 1";
 				$result = pupe_query($query);
 				$row = mysql_fetch_assoc($result);
 
 				if ($row['osasto'] != '6') {
-					unset($GLOBALS['eta_yhtio']);
+					$GLOBALS['eta_yhtio'] = "";
 				}
 				else {
-					$saatavat_yhtio = $GLOBALS['eta_yhtio'];
-					$eta_asiakaslisa = " AND asiakas.toim_ovttunnus = '{$laskurow['toim_ovttunnus']}' ";
+					$saatavat_yhtio  = $GLOBALS['eta_yhtio'];
+					$eta_asiakaslisa = " AND asiakas.tunnus in ({$row['tunnukset']}) ";
 				}
 			}
 			else {
-				unset($GLOBALS['eta_yhtio']);
+				$GLOBALS['eta_yhtio'] = "";
 			}
 
 			if (!isset($GLOBALS['eta_yhtio']) or trim($GLOBALS['eta_yhtio']) == '' or $GLOBALS['eta_yhtio'] == $kukarow['yhtio']) {
-				$query = "SELECT ifnull(group_concat(tunnus), 0) tunnukset FROM asiakas WHERE yhtio = '$saatavat_yhtio' AND ytunnus = '$sytunnus' AND laji != 'P'";
+				$query = "	SELECT ifnull(group_concat(tunnus), 0) tunnukset
+							FROM asiakas
+							WHERE yhtio = '$saatavat_yhtio'
+							AND ytunnus = '$sytunnus'
+							AND laji != 'P'";
 				$result = pupe_query($query);
 				$row = mysql_fetch_assoc($result);
 			}
@@ -320,7 +325,7 @@
 
 			if ($eiliittymaa != 'ON') {
 				$sarakemaara = count($saatavat_array)+7;
-				
+
 				pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
 			}
 

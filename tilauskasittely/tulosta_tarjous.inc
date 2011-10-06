@@ -1075,24 +1075,6 @@ if (!function_exists('loppu_tarjous')) {
 			}
 		}
 
-		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '') {
-			// etäyhtiön yhtiötiedot
-			$y_puhelin		= $GLOBALS['eta_yhtio_puhelin'];
-			$y_fax			= $GLOBALS['eta_yhtio_fax'];
-			$y_email		= $GLOBALS['eta_yhtio_email'];
-			$y_www			= $GLOBALS['eta_yhtio_email'];
-			$y_nimi 		= $GLOBALS['eta_yhtio_nimi'];
-			$y_osoite 		= $GLOBALS['eta_yhtio_osoite'];
-			$y_postino	 	= $GLOBALS['eta_yhtio_postino'];
-			$y_postitp	 	= $GLOBALS['eta_yhtio_postitp'];
-			$y_maa 			= $GLOBALS['eta_yhtio_maa'];
-			$y_kotipaikka	= $GLOBALS['eta_yhtio_kotipaikka'];
-			$y_vatnumero	= str_replace("0037", "", $GLOBALS['eta_yhtio_ovttunnus']);
-			$y_kotipaikka	= $GLOBALS['eta_yhtio_kotipaikka'];
-			$y_iban 		= "";
-			$y_swift 		= "";
-		}
-
 		if ($yhtiorow['tarjoustyyppi'] == 1) {
 
 			$yhteystiedot_len = $pdf_tarjous->strlen("$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $pieni);

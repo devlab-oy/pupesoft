@@ -2975,21 +2975,26 @@ if (!function_exists("alehinta")) {
 		$vanha_yhtio	= "";
 		$vanha_liitostunnus = 0;
 
+		// KAUTTALASKUTUSKIKKARE
 		if ($yhtio != '') {
-			$vanha_yhtio = $kukarow['yhtio'];
+			$vanha_yhtio 		= $kukarow['yhtio'];
+			$vanha_liitostunnus = $laskurow['liitostunnus'];
+			$vanha_ytunnus 		= $laskurow['ytunnus'];
+
 			$yhtiorow = hae_yhtion_parametrit($yhtio);
 			$kukarow['yhtio'] = $yhtio;
 
-			$query = "	SELECT tunnus
+			$query = "	SELECT ytunnus, tunnus
 						FROM asiakas
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND ytunnus = '{$laskurow['ytunnus']}'
-						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'";
+						AND laji != 'P'
+						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'
+						AND toim_ovttunnus != ''";
 			$asiakas_tunnus_res = pupe_query($query);
 			$asiakas_tunnus_row = mysql_fetch_assoc($asiakas_tunnus_res);
 
-			$vanha_liitostunnus = $laskurow['liitostunnus'];
-			$laskurow['liitostunnus'] = $asiakas_tunnus_row['tunnus'];
+			$laskurow["ytunnus"] 		= $asiakas_tunnus_row["ytunnus"];
+			$laskurow["liitostunnus"] 	= $asiakas_tunnus_row["tunnus"];
 		}
 
 		// oletetaan yhtiön valuutta jos sitä ei tiedetä
@@ -3002,12 +3007,12 @@ if (!function_exists("alehinta")) {
 		if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 
 			// tutkitaan ollaanko siellä alv-rekisteröity
-			$query = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
+			$query = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
 			$alhire = pupe_query($query);
 
 			// ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
 			if (mysql_num_rows($alhire) == 1) {
-				$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$trow[tuoteno]' limit 1";
+				$query = "SELECT * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$trow[tuoteno]' limit 1";
 				$alhire = pupe_query($query);
 
 				// ei löytynyt alvia, se on pakko löytyä
@@ -4898,8 +4903,9 @@ if (!function_exists("alehinta")) {
 
 		if ($yhtio != '') {
 			$yhtiorow = hae_yhtion_parametrit($vanha_yhtio);
-			$kukarow['yhtio'] = $vanha_yhtio;
-			$laskurow['liitostunnus'] = $vanha_liitostunnus;
+			$kukarow['yhtio'] 			= $vanha_yhtio;
+			$laskurow['liitostunnus'] 	= $vanha_liitostunnus;
+			$laskurow['ytunnus'] 		= $vanha_ytunnus;
 		}
 
 		if ($trow["myyntihinta_maara"] != 0) {

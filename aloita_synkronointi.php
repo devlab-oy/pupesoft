@@ -22,16 +22,19 @@ if ($tee == "SYNK") {
 		$table = substr($table, 0, 9);
 
 		$abulisa = preg_match("/(^|,)(avainsana\|*([\|a-zA-Z_\-]*))($|,)/i", $yhtiorow["synkronoi"], $regs);
-		$la = explode("|", $regs[3]);
 
-		$lajit  = " and laji in (";
+		if ($regs[3] != "") {
+			$la = explode("|", $regs[3]);
 
-		foreach($la as  $l) {
-			$lajit .= "'$l',";
+			$lajit  = " and laji in (";
+
+			foreach($la as  $l) {
+				$lajit .= "'$l',";
+			}
+			$lajit = substr($lajit, 0, -1);
+
+			$lajit .= ")";
 		}
-		$lajit = substr($lajit, 0, -1);
-
-		$lajit .= ")";
 	}
 	else {
 		if(strpos($yhtiorow["synkronoi"], $table) === false or $table == "") {
@@ -75,7 +78,13 @@ if ($tee == "SYNK") {
 
 		$group = substr($group, 0, -1);
 
-		$query = "LOCK TABLES yhtio READ, yhtion_parametrit READ, synclog WRITE, $table WRITE";
+		$lisa = "";
+
+		if ($table == "asiakas") {
+			$lisa = ", maksuehto READ";
+		}
+
+		$query = "LOCK TABLES yhtio READ, yhtion_parametrit READ, synclog WRITE, $table WRITE $lisa";
 		$abures = pupe_query($query);
 
 		$query = "	SELECT group_concat(tunnus) tunnukset

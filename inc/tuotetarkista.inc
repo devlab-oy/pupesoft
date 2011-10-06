@@ -157,7 +157,7 @@ if(!function_exists("tuotetarkista")) {
 								AND tuoteno = '$tem_tuoteno'
 								LIMIT 1";
 					$tapahtuma_chk_res = pupe_query($query);
-					
+
 					if (trim(strtoupper($trow["tuotetyyppi"])) == "" or trim(strtoupper($trow["tuotetyyppi"])) == "N") {
 						if (mysql_num_rows($tapahtuma_chk_res) == 1 and ($t[$i] == 'R' or $t[$i] == 'K'or $t[$i] == 'M')) {
 							$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
@@ -328,7 +328,8 @@ if(!function_exists("tuotetarkista")) {
 
 				$query = "	SELECT *
 							FROM tuotepaikat
-							WHERE tuoteno = '$tem_tuoteno' and yhtio = '$kukarow[yhtio]'";
+							WHERE tuoteno = '$tem_tuoteno'
+							and yhtio = '$kukarow[yhtio]'";
 				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) == 0) {
@@ -386,7 +387,8 @@ if(!function_exists("tuotetarkista")) {
 													luontiaika		= now(),
 													laatija			= '{$kukarow['kuka']}',
 													muutospvm		= now(),
-													muuttaja		= '{$kukarow['kuka']}'";
+													muuttaja		= '{$kukarow['kuka']}'
+													ON DUPLICATE KEY UPDATE muuttaja = '{$kukarow['kuka']}', muutospvm = now()";
 							$tuotepaikka_result = pupe_query($tuotepaikka_query);
 						}
 						elseif ($tem_status == 'T') {
@@ -402,7 +404,8 @@ if(!function_exists("tuotetarkista")) {
 													luontiaika		= now(),
 													laatija			= '{$kukarow['kuka']}',
 													muutospvm		= now(),
-													muuttaja		= '{$kukarow['kuka']}'";
+													muuttaja		= '{$kukarow['kuka']}'
+													ON DUPLICATE KEY UPDATE muuttaja = '{$kukarow['kuka']}', muutospvm = now()";
 							$tuotepaikka_result = pupe_query($tuotepaikka_query);
 						}
 					}

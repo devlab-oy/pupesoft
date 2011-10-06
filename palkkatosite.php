@@ -165,13 +165,13 @@
 
 						//	tarkastetaan löytyykö oikea tsk!
 						$tsk = "";
-						
+
 						if ($tsk_nimi != "") {
 							$query = "	SELECT tunnus
 										FROM kustannuspaikka
-										WHERE yhtio = '$kukarow[yhtio]' 
-										and tyyppi = '$tsk_tyyppi' 
-										and kaytossa != 'E' 
+										WHERE yhtio = '$kukarow[yhtio]'
+										and tyyppi = '$tsk_tyyppi'
+										and kaytossa != 'E'
 										and nimi = '$tsk_nimi'";
 							$tskres = mysql_query($query) or pupe_error($query);
 
@@ -184,9 +184,9 @@
 						if ($tsk_nimi != "" and $tsk == 0) {
 							$query = "	SELECT tunnus
 										FROM kustannuspaikka
-										WHERE yhtio = '$kukarow[yhtio]' 
-										and tyyppi = '$tsk_tyyppi' 
-										and kaytossa != 'E' 
+										WHERE yhtio = '$kukarow[yhtio]'
+										and tyyppi = '$tsk_tyyppi'
+										and kaytossa != 'E'
 										and koodi = '$tsk_nimi'";
 							$tskres = mysql_query($query) or pupe_error($query);
 
@@ -202,9 +202,9 @@
 
 							$query = "	SELECT tunnus
 										FROM kustannuspaikka
-										WHERE yhtio = '$kukarow[yhtio]' 
-										and tyyppi = '$tsk_tyyppi' 
-										and kaytossa != 'E' 
+										WHERE yhtio = '$kukarow[yhtio]'
+										and tyyppi = '$tsk_tyyppi'
+										and kaytossa != 'E'
 										and tunnus = '$tsk_nimi'";
 							$tskres = mysql_query($query) or pupe_error($query);
 
@@ -213,7 +213,7 @@
 								$tsk = $tskrow["tunnus"];
 							}
 						}
-						
+
 						if ($tsk == 0) {
 							echo "<font class='error'>".t("Kustannuspaikkaa ei löydy").": $tsk_nimi</font><br>";
 						}
@@ -224,7 +224,7 @@
 							elseif ($tsk_tyyppi == "P") {
 								$iprojekti[$maara] = $tsk;
 							}
-						}						
+						}
 					}
 				}
 
@@ -242,7 +242,7 @@
 					$tpk=substr($kentat[5],3,2);
 					$tpp=substr($kentat[5],0,2);
 				}
-				
+
 				// Selite
 				$iselite[$maara] = "Palkkatosite $tpp.$tpk.$tpv / ".$kentat[2];
 

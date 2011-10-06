@@ -420,7 +420,7 @@ if (isset($tee)) {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
 				and tyyppi = 'K'
-				ORDER BY nimi";
+				ORDER BY koodi+0, koodi, nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='kustp'>
@@ -444,7 +444,7 @@ if (isset($tee)) {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
 				and tyyppi = 'O'
-				ORDER BY nimi";
+				ORDER BY koodi+0, koodi, nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td>
@@ -468,7 +468,7 @@ if (isset($tee)) {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
 				and tyyppi = 'P'
-				ORDER BY nimi";
+				ORDER BY koodi+0, koodi, nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td>

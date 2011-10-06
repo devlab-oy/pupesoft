@@ -1030,11 +1030,10 @@
 				$result = pupe_query($query);
 
 				// Onko laskuriveillä useita alv-verokantoja?
-				if (count($ealvi) > 0) {
-					$ealvi = array_unique($ealvi);
-				}
-				else {
-					//Katsotaan alv laskuerittelystä
+				$ealvi = array_unique($ealvi);
+
+				// Katsotaan alv laskuerittelystä
+				if (count($ealvi) == 1 and $ealvi[0] == "") {
 					$ealvi[0] = $lisavat[0];
 				}
 
@@ -1049,11 +1048,10 @@
 						$tili = $yhtiorow['muutkulut'];
 					}
 
-					$vero = $oletusalvi;
+					if ($ealvi[0] != "") $vero = $ealvi[0];
+					else $vero = $oletusalvi;
 
-					if ($ealvi[0] != '') {
-						$vero = $ealvi[0]; //Tuliko jotain verkkolaskulta
-					}
+					$vero = (float) $vero;
 
 					$kukarow['yhtio']   = $yhtio;
 					$kukarow['kuka']    = 'verkkolas';
@@ -1224,7 +1222,10 @@
 								$summa = $summa * -1;
 							}
 
-							$vero = (float) $rtuoteno[$i]["alv"];
+							if ($rtuoteno[$i]["alv"] != "") $vero = $rtuoteno[$i]["alv"];
+							else $vero = $oletusalvi;
+
+							$vero = (float) $vero;
 
 							$verkkolaskuveroton				+= $summa;
 							$verkkolaskuveroton_valuutassa	+= $summa_valuutassa;

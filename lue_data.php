@@ -118,6 +118,9 @@ if ($kasitellaan_tiedosto) {
 	/** Laitetaan rivit arrayseen **/
 	$excelrivit = array();
 
+	/** Aktivoidaan eka sheetti**/
+	$objPHPExcel->setActiveSheetIndex(0);
+
 	/** Loopataan tiedoston rivit **/
 	foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
 	    $cellIterator = $row->getCellIterator();

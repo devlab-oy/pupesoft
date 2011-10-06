@@ -257,6 +257,9 @@
 				/** Laitetaan solut arrayseen **/
 				$excelrivi = array();
 
+				/** Aktivoidaan eka sheetti**/
+				$objPHPExcel->setActiveSheetIndex(0);
+
 				/** Loopataan rivit/sarakkeet **/
 				foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
 				    $cellIterator = $row->getCellIterator();

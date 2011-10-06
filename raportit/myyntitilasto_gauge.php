@@ -43,11 +43,11 @@
 
 					if (tilatut_eurot / 4000 > 4) {
 
-						var over = parseInt(tilatut_eurot / 80000);
-						over = over < 2 ? 2 : over;
-						over = 1 + '.' + over;
+						var force = parseInt(tilatut_eurot / 80000);
+						force = force < 2 ? 2 : force;
+						force = 1 + '.' + force;
 
-						var _dot120 = parseInt(tilatut_eurot * over);
+						var _dot120 = parseInt(tilatut_eurot * force);
 						data.setValue(0, 1, _dot120);
 						chart.draw(data, options);
 
@@ -100,7 +100,7 @@
 				FROM tilausrivi
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tyyppi = 'L'
-				AND laadittu >= '2011-10-04 00:00:00'
+				AND laadittu >= '2011-10-05 00:00:00'
 				#AND laadittu >= CURDATE() + ' 00:00:00'
 				AND laadittu <= CURDATE() + ' 23:59:59'";
 	$result = pupe_query($query);
@@ -195,13 +195,14 @@
 		$kkl = (int) $kkl;
 		$vvl = (int) $vvl;
 
-		$query = "	SELECT ROUND(SUM(hinta) / 1000, 0) AS tilatut_eurot
+		$query = "	SELECT SUBSTR(laadittu FROM 0 FOR 10) AS pvm, ROUND(SUM(hinta) / 1000, 0) AS tilatut_eurot
 					FROM tilausrivi
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tyyppi = 'L'
 					AND laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 					#AND laadittu >= CURDATE() + ' 00:00:00'
-					AND laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'";
+					AND laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+					GROUP BY 1";
 		$result = pupe_query($query);
 
 		echo "<br />";
@@ -218,7 +219,7 @@
 
 		while ($row = mysql_fetch_assoc($result)) {
 			echo "<tr>";
-			echo "<td></td>";
+			echo "<td>{$row['pvm']}</td>";
 			echo "<td align='right'>{$row['tilatut_eurot']}</td>";
 			echo "<td></td>";
 			echo "<td align='right'></td>";

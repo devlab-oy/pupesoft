@@ -59,20 +59,20 @@
 
 							// debug
 							// value = 50000;
-						
+
 							if (parseInt((value / (max / 40))) >= 4) {
-						
+
 								var force = parseInt(value / 80000);
 								force = force < 2 ? 2 : force;
 								force = 1 + '.' + force;
-						
+
 								var _dot120 = parseInt(value * force);
 								data.setValue(0, 1, _dot120);
 								chart.draw(data, options);
-						
+
 								var _dot90 = parseInt(value * 0.9);
 								setTimeout(function(){data.setValue(0, 1, _dot90); chart.draw(data, options);}, 400);
-						
+
 								setTimeout(function(){data.setValue(0, 1, value); chart.draw(data, options);}, 800);
 							}
 							else {
@@ -88,68 +88,68 @@
 				$(document).ready(function() {
 
 					setTimeout(function() {
-						
+
 						var gauge = new Gauge();
 						var args = {
-							tilatut: ['Tilatut', 0]
+							tilatut: ['EUR', 0]
 						}
-					
-						var options = {	width: 800, 
-										height: 220, 
+
+						var options = {	width: 800,
+										height: 220,
 										min: 0,
 										max: 400000,
-										redFrom: 200000, 
-										redTo: 300000, 
-										greenFrom: 350000, 
+										redFrom: 200000,
+										redTo: 300000,
+										greenFrom: 350000,
 										greenTo: 400000,
-										yellowFrom: 300000, 
-										yellowTo: 350000, 
+										yellowFrom: 300000,
+										yellowTo: 350000,
 										minorTicks: 5,
-										majorTicks: ['0', '100k', '200k', '300k', '400k']};
-					
+										majorTicks: ['0', '50', '100', '150', '200', '250', '300', '350', '400']};
+
 						gauge.init(args, options);
 
 						gauge.draw($('#tilatut_eurot').val(), options.max);
 
 						var gauge = new Gauge();
 						var args = {
-							kate: ['Kate', 0]
+							kate: ['Rivit', 0]
 						}
-					
-						var options = {	width: 800, 
-										height: 220, 
+
+						var options = {	width: 800,
+										height: 220,
 										min: 0,
-										max: 400000,
-										redFrom: 200000, 
-										redTo: 300000, 
-										greenFrom: 350000, 
-										greenTo: 400000,
-										yellowFrom: 300000, 
-										yellowTo: 350000, 
+										max: 8000,
+										redFrom: 4000,
+										redTo: 6000,
+										yellowFrom: 6000,
+										yellowTo: 7000,
+										greenFrom: 7000,
+										greenTo: 8000,
 										minorTicks: 5,
-										majorTicks: ['0', '100k', '200k', '300k', '400k']};
-					
+										majorTicks: ['0', '1', '2', '3', '4', '5', '6', '7', '8']};
+
 						gauge.init(args, options);
 
-						gauge.draw($('#tilatut_kate').val(), options.max);
+						gauge.draw($('#toimitetut_rivit').val(), options.max);
 
 						var gauge = new Gauge();
 						var args = {
 							katepros: ['Kate%', 0]
 						}
 
-						var options = {	width: 800, 
-										height: 220, 
+						var options = {	width: 800,
+										height: 220,
 										min: 0,
 										max: 100,
-										redFrom: 50, 
-										redTo: 75, 
-										greenFrom: 90, 
+										redFrom: 50,
+										redTo: 75,
+										greenFrom: 90,
 										greenTo: 100,
-										yellowFrom: 75, 
-										yellowTo: 90, 
+										yellowFrom: 75,
+										yellowTo: 90,
 										minorTicks: 5,
-										majorTicks: ['0', '25', '50', '75', '100']};
+										majorTicks: ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100']};
 
 						gauge.init(args, options);
 
@@ -173,7 +173,7 @@
 						$('#kkl').val(date.getMonth()+1);
 						$('#vvl').val(date.getFullYear());
 					});
-					
+
 				});
 			</script>";
 
@@ -194,7 +194,8 @@
 	// 			AND laadittu <= CURDATE() + ' 23:59:59'";
 
 	$query = "	SELECT round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta,(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)), 0) AS 'tilatut_eurot',
-				round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))),'{$yhtiorow['hintapyoristys']}') AS 'tilatut_kate'
+				round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))),'{$yhtiorow['hintapyoristys']}') AS 'tilatut_kate',
+				if(tilausrivi.toimitettu!='', 1, 0) AS 'toimitetut_rivit'
 				FROM tilausrivi
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -203,22 +204,24 @@
 				AND tilausrivi.laadittu <= CURDATE() + ' 23:59:59'";
 	$result = pupe_query($query);
 
-	$arr = array('tilatut_eurot' => 0, 'tilatut_kate' => 0);
+	$arr = array('tilatut_eurot' => 0, 'tilatut_kate' => 0, 'toimitetut_rivit');
 
 	while ($row = mysql_fetch_assoc($result)) {
 		if (!isset($arr['tilatut_eurot'])) $arr['tilatut_eurot'] = 0;
 		if (!isset($arr['tilatut_kate'])) $arr['tilatut_kate'] = 0;
+		if (!isset($arr['toimitetut_rivit'])) $arr['toimitetut_rivit'] = 0;
 
 		$arr['tilatut_eurot'] += $row['tilatut_eurot'];
 		$arr['tilatut_kate'] += $row['tilatut_kate'];
+		$arr['toimitetut_rivit'] += $row['toimitetut_rivit'];
 	}
 
 	$tilatut_eurot = round($arr['tilatut_eurot'], 0);
-	$tilatut_kate = round($arr['tilatut_kate'], 0);
+	$toimitetut_rivit = round($arr['toimitetut_rivit'], 0);
 	$tilatut_katepros = round($arr['tilatut_kate'] / $arr['tilatut_eurot'] * 100, 1);
 
 	echo "<input type='hidden' id='tilatut_eurot' value='{$tilatut_eurot}' />";
-	echo "<input type='hidden' id='tilatut_kate' value='{$tilatut_kate}' />";
+	echo "<input type='hidden' id='toimitetut_rivit' value='{$toimitetut_rivit}' />";
 	echo "<input type='hidden' id='tilatut_katepros' value='{$tilatut_katepros}' />";
 	echo "<input type='hidden' name='tee' value='laske' />";
 
@@ -330,7 +333,7 @@
 			$pvmlisa = "SUBSTRING(tilausrivi.laadittu, 1, 10)";
 		}
 
-		$query = "	SELECT {$pvmlisa} AS 'pvm', 
+		$query = "	SELECT {$pvmlisa} AS 'pvm',
 					round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'{$yhtiorow['hintapyoristys']}') AS 'tilatut_kate',
 					(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1) AS tilatut_eurot
 					FROM tilausrivi
@@ -377,7 +380,7 @@
 
 		// echo "<pre>",var_dump($arr),"</pre>";
 
-		$query = "	SELECT {$pvmlisa} AS 'pvm', 
+		$query = "	SELECT {$pvmlisa} AS 'pvm',
 					tilausrivi.kate AS 'laskutetut_kate',
 					tilausrivi.rivihinta AS 'laskutetut_eurot'
 					FROM tilausrivi

@@ -335,9 +335,15 @@
 								}
 							}
 						}
+						elseif(strtolower($otsikot[$e]) == "summa") {
+
+							${"i".strtolower($otsikot[$e])}[$maara] = round($eriv, 2);
+						}
 						else {
+
 							${"i".strtolower($otsikot[$e])}[$maara] = $eriv;
 						}
+
 					}
 
 					$maara++;

@@ -53,14 +53,14 @@
 							var body_bgcolor = $('body').css('background-color');
 							$('#chart_div *').css({'background-color': body_bgcolor});
 						},
-						draw: function(value) {
+						draw: function(value, max) {
 
 							value = parseInt(value);
 
 							// debug
 							// value = 50000;
 						
-							if (parseInt((value / (value / 5))) > 4) {
+							if (parseInt((value / (max / 40))) >= 4) {
 						
 								var force = parseInt(value / 80000);
 								force = force < 2 ? 2 : force;
@@ -109,7 +109,7 @@
 					
 						gauge.init(args, options);
 
-						gauge.draw($('#tilatut_eurot').val());
+						gauge.draw($('#tilatut_eurot').val(), options.max);
 
 						var gauge = new Gauge();
 						var args = {
@@ -131,7 +131,7 @@
 					
 						gauge.init(args, options);
 
-						gauge.draw($('#tilatut_kate').val());
+						gauge.draw($('#tilatut_kate').val(), options.max);
 
 						var gauge = new Gauge();
 						var args = {
@@ -153,7 +153,7 @@
 
 						gauge.init(args, options);
 
-						gauge.draw($('#tilatut_katepros').val());
+						gauge.draw($('#tilatut_katepros').val(), options.max);
 					}, 1);
 
 					$('#naytetaan_tulos').change(function() {

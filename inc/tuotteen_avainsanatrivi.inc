@@ -25,19 +25,19 @@
 		$ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhmä")."</option>";
 		$ulos .= "<option value='pakkauskoko2' $sel[pakkauskoko2]>".t("Tuotteen pakkauskoko 2")."</option>";
 		$ulos .= "<option value='pakkauskoko3' $sel[pakkauskoko3]>".t("Tuotteen pakkauskoko 3")."</option>";
-		
+
 		$sresult = t_avainsana("TUOTEULK");
-		
+
 		while ($srow = mysql_fetch_array($sresult)) {
 			$ulos .= "<option value='$srow[selite]' ".$sel[$srow["selite"]].">$srow[selite] $srow[selitetark]</option>";
 		}
-		
+
 		$vresult = t_avainsana("PARAMETRI");
 
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$ulos .= "<option value='parametri_$vrow[selite]' ".$sel["parametri_".$vrow["selite"]].">".t("Tuotteen parametri").": $vrow[selitetark]</option>";
 		}
-		
+
 		$lresult = t_avainsana("LISATIETO");
 
 		while ($lrow = mysql_fetch_array($lresult)) {
@@ -81,7 +81,7 @@
 		elseif($trow["laji"] == "oletusvalinta") {
 			$sel = array($trow[$i] => "SELECTED");
 
-			
+
 			$ulos = "<td>
 						<select name='$nimi'>
 							<option value=''>".t("Ei oletustoimintoa")."</option>";
@@ -96,10 +96,10 @@
 					$ulos .= "
 						<option value='!!!{$olrow["tunnus"]}' ".$sel["!!!{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan asiakkaalle")."</option>
 						<option value='¡¡¡{$olrow["tunnus"]}' ".$sel["¡¡¡{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan varastoon")."</option>";
-					
+
 				}
 			}
-			
+
 			$olquery = "	SELECT tunnus
 							FROM tuoteperhe
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -111,7 +111,7 @@
 				while($olrow = mysql_fetch_array($oltarkres)) {
 					$ulos .= "
 							<option value='¡¡V' ".$sel["¡¡V"].">".t("Valmistetaan varastoon (oletuspaikka)")."</option>";
-					
+
 				}
 			}
 			$ulos .= "
@@ -124,9 +124,9 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "selitetark") {
-		
+
 		if ($trow["laji"] == "pakkauskoko2" or $trow["laji"] == "pakkauskoko3") {
 			$vresult = t_avainsana("Y");
 			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -182,19 +182,18 @@
 
 	if (mysql_field_name($result, $i) == 'status') {
 		if (substr($trow['laji'], 0, 10) == 'lisatieto_') {
-	 		$sel = array_fill_keys(array($trow[$i]), " selected") + array('o' => '', 'L' => '');
+	 		$sel = array_fill_keys(array($trow[$i]), " selected") + array('P' => '', 'L' => '');
 
-			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";	
+			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 			$ulos .= "<option value=''>".t("Aktiivinen")."</option>";
 			$ulos .= "<option value='L'{$sel['L']}>".t("Aktiivinen")." (".t("lukittu").")</option>";
-			$ulos .= "<option value='o'{$sel['o']}>".t("Poistettu")."</option>";
+			$ulos .= "<option value='P'{$sel['P']}>".t("Poistettu")."</option>";
 			$ulos .= "</select></td>";
 
 			$jatko = 0;
 		}
 		else {
-			$ulos = '<td>&nbsp;</td>';
-			$jatko = 0;
+			$tyyppi = 0;
 		}
 	}
 

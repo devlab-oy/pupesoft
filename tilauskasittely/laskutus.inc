@@ -136,6 +136,8 @@
 														status = '',
 														kpl = '{$vanhin_pantti_row['kpl']}',
 														hinta = '{$vanhin_pantti_row['hinta']}',
+														alv = '{$vanhin_pantti_row['alv']}',
+														erikoisale = '{$vanhin_pantti_row['erikoisale']}',
 														{$ale_query_insert_lisa}
 														myyntipvm = '{$vanhin_pantti_row['myyntipvm']}',
 														myyntitilausnro = '{$vanhin_pantti_row['myyntitilausnro']}',
@@ -271,6 +273,8 @@
 										status = '',
 										kpl = '{$trow['varattu']}',
 										hinta = '{$trow['hinta']}',
+										alv = '{$trow['alv']}',
+										erikoisale = '{$trow['erikoisale']}',
 										{$ale_query_insert_lisa}
 										myyntipvm = now(),
 										myyntitilausnro = '{$trow['otunnus']}'";

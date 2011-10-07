@@ -466,8 +466,16 @@
 					}
 				}
 
+				// Onko asiakkalla panttitili
+				$query = "	SELECT panttitili
+							FROM asiakas
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow['liitostunnus']}'";
+				$asiakas_panttitili_chk_res = pupe_query($query);
+				$asiakas_panttitili_chk_row = mysql_fetch_assoc($asiakas_panttitili_chk_res);
+
 				// Tsekataan vähän alveja ja sarjanumerojuttuja
-				$query = "  SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.alv, tuote.kehahin, tuote.ei_saldoa
+				$query = "  SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.alv, tuote.kehahin, tuote.ei_saldoa, tuote.panttitili, tilausrivi.var2
 							FROM tilausrivi use index (yhtio_otunnus)
 							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -653,6 +661,34 @@
 									$tulos_ulos_sarjanumerot .= t("Olet myymässä käytettyä venettä, jota ei ole vielä ostettu! Ei voida laskuttaa!").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
 								}
 							}
+						}
+					}
+
+					// jos asiakkaalla on panttitili käytössä, katsotaan tilausrivien tuotteet läpi onko niissä panttitilillisiä tuotteita
+					if ($asiakas_panttitili_chk_row['panttitili'] == "K" and $srow1['panttitili'] == 'K' and $trow['var2'] != 'PANT' and $srow1['varattu'] < 0) {
+
+						// jos tilausrivi ei ole cronin generoima (silloin var2-kenttään tallennetaan PANT-teksti)
+						// cron-ohjelma on panttitili_cron.php
+						if ($orow['clearing'] == 'HYVITYS') {
+							// Tsekataan löytyykö hyvitettävän laskun pantit vielä?
+							// Samantyylinen tsekki ku monistalaskussa
+
+							//jos ei löydy niin
+							#$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
+
+							#if ($silent == "" or $silent == "VIENTI") {
+							#	$tulos_ulos_sarjanumerot .= t("Homma kusi!")."<br>\n";
+							#}
+						}
+						else {
+							// Tsekataan löytyykö riittävästi vapaita panteja
+
+							//jos ei löydy niin
+							#$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
+
+							#if ($silent == "" or $silent == "VIENTI") {
+							#	$tulos_ulos_sarjanumerot .= t("Homma kusi!")."<br>\n";
+							#}
 						}
 					}
 				}

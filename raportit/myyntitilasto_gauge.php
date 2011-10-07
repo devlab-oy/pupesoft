@@ -226,6 +226,11 @@
 		$tee = '';
 	}
 
+	if ((isset($ppa) and trim($ppa) == '') or (isset($kka) and trim($kka) == '') or (isset($vva) and trim($vva) == '') or (isset($ppl) and trim($ppl) == '') or (isset($kkl) and trim($kkl) == '') or (isset($vvl) and trim($vvl) == '')) {
+		echo "<font class='error'>",t("Päivämäärässä on virhe"),"!</font>";
+		$tee = '';
+	}
+
 	if ($tee == 'laske') {
 
 		// poistetaan default

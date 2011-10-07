@@ -14379,9 +14379,6 @@ if (!function_exists('gauge')) {
 
 								value = parseInt(value);
 
-								// debug
-								// value = 50000;
-
 								if (parseInt((value / (max / 40))) >= 4) {
 
 									var force = parseInt(value / 80000);

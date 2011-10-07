@@ -119,7 +119,7 @@
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.tyyppi = 'L'
-				AND tilausrivi.laadittu >= '2011-10-06 00:00:00'
+				AND tilausrivi.laadittu >= CURDATE() + ' 00:00:00'
 				AND tilausrivi.laadittu <= CURDATE() + ' 23:59:59'";
 	$result = pupe_query($query);
 

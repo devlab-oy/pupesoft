@@ -14399,7 +14399,6 @@ if (!function_exists('gauge')) {
 								}
 								else {
 									data.setValue(0, 1, value);
-									chart.draw(data, options);
 								}
 
 								chart.draw(data, options);

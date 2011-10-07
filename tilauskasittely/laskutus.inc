@@ -55,7 +55,11 @@
 				// jos tilausrivi ei ole cronin generoima (silloin var2-kenttään tallennetaan PANT-teksti)
 				// cron-ohjelma on panttitili_cron.php
 				if ($trow['var2'] != 'PANT') {
-					$query = "SELECT panttitili FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$trow['tuoteno']}'";
+
+					$query = "	SELECT panttitili
+								FROM tuote
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tuoteno = '{$trow['tuoteno']}'";
 					$tuote_panttitili_chk_res = pupe_query($query);
 					$tuote_panttitili_chk_row = mysql_fetch_assoc($tuote_panttitili_chk_res);
 
@@ -67,7 +71,7 @@
 
 							$pantti_kpl = abs($trow['varattu']);
 
-							if ($orow['clearing'] == 'HYVITYS' and $orow['vanhatunnus'] > 0) {
+							if ($orow['clearing'] == 'HYVITYS') {
 
 								$query = "	SELECT *
 											FROM panttitili

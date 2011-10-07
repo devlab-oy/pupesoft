@@ -718,14 +718,14 @@ else {
 			// eli jos "omalle_tilausriville"-tilausrivin kpl = 5, niin tehd‰‰n 4 uutta rivi‰ ja jokaisella viidell‰ tilausrivill‰ on 1 kpl
 			if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '') {
 
-				$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.omalle_tilaukselle
+				$query = "	SELECT tilausrivin_lisatiedot.omalle_tilaukselle, tilausrivi.*
 							FROM tilausrivi
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.omalle_tilaukselle != '')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-							AND tilausrivi.hyllyalue != ''
 							AND tilausrivi.varattu > 1
-							AND tilausrivi.var NOT IN ('J','P')";
+							AND tilausrivi.var NOT IN ('J','P')
+							ORDER BY tilausrivi.tunnus";
 				$result = pupe_query($query);
 
 				while ($row = mysql_fetch_assoc($result)) {
@@ -792,6 +792,87 @@ else {
 
 						$query = "INSERT into tilausrivin_lisatiedot ($fields) VALUES ($values)";
 						$lisatiedot_result = pupe_query($query);
+
+						// tuoteperhe-keissi
+						if ($row['perheid'] > 0 and $row['tunnus'] == $row['perheid']) {
+							// p‰ivitet‰‰n splitatulle riville perheid
+							$query = "UPDATE tilausrivi SET perheid = '{$split_tilausrivin_tunnus}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$split_tilausrivin_tunnus}'";
+							$update_res = pupe_query($query);
+
+							$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}' AND perheid = '{$row['tunnus']}' AND tunnus != '{$row['tunnus']}'";
+							$lapsires = pupe_query($query);
+
+							while ($lapsirow = mysql_fetch_assoc($lapsires)) {
+
+								$fields = "yhtio";
+								$values = "'{$kukarow['yhtio']}'";
+
+								// Ei monisteta tunnusta
+								for ($i = 1; $i < mysql_num_fields($lapsires) - 1; $i++) {
+
+									$fieldname = mysql_field_name($lapsires, $i);
+									$fields .= ", ".$fieldname;
+
+									switch ($fieldname) {
+										case 'varattu':
+											$values .= ", '".($lapsirow['varattu'] / $row['varattu'])."'";
+											break;
+										case 'perheid':
+											$values .= ", {$split_tilausrivin_tunnus}";
+											break;
+										default:
+											$values .= ", '{$lapsirow[$fieldname]}'";
+									}
+								}
+
+								$kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
+								$uusires = pupe_query($kysely);
+
+								$split_tilausrivin_tunnus_lapsi = mysql_insert_id();
+
+								$query = "	SELECT *
+											FROM tilausrivin_lisatiedot
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND tilausrivitunnus = '{$lapsirow['tunnus']}'";
+								$lisatiedot_result = pupe_query($query);
+								$lisatiedot_row = mysql_fetch_array($lisatiedot_result);
+
+								$fields = "yhtio";
+								$values = "'{$kukarow['yhtio']}'";
+
+								// Ei monisteta tunnusta
+								for ($i = 1; $i < mysql_num_fields($lisatiedot_result) - 1; $i++) {
+
+									$fieldname = mysql_field_name($lisatiedot_result, $i);
+									$fields .= ", ".$fieldname;
+
+									switch ($fieldname) {
+										case 'tilausrivitunnus':
+											$values .= ", '{$split_tilausrivin_tunnus_lapsi}'";
+											break;
+										default:
+											$values .= ", '".$lisatiedot_row[$fieldname]."'";
+									}
+								}
+
+								$query = "INSERT into tilausrivin_lisatiedot ($fields) VALUES ($values)";
+								$lisatiedot_result = pupe_query($query);
+
+							}
+						}
+
+					}
+
+					if ($row['perheid'] > 0 and $row['tunnus'] == $row['perheid']) {
+						// jos on tuoteperhe, niin p‰ivitet‰‰n lapsille varattu
+
+						$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}' AND perheid = '{$row['tunnus']}' AND tunnus != '{$row['tunnus']}'";
+						$lapsires = pupe_query($query);
+
+						while ($lapsirow = mysql_fetch_assoc($lapsires)) {
+							$query = "UPDATE tilausrivi SET varattu = '".($lapsirow['varattu'] / $row['varattu'])."' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}' AND tunnus = '{$lapsirow['tunnus']}'";
+							$update_res = pupe_query($query);
+						}
 					}
 
 					// p‰ivitet‰‰n alkuper‰isen rivin varattu-kentt‰‰n 1
@@ -808,13 +889,13 @@ else {
 			}
 
 			//haetaan kaikkien tilausrivien varastopaikat
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika, tilausrivin_lisatiedot.erikoistoimitus_myynti, tilausrivin_lisatiedot.omalle_tilaukselle,
+			$query = "	SELECT tilausrivi.otunnus, tilausrivi.perheid, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika, tilausrivin_lisatiedot.erikoistoimitus_myynti, tilausrivin_lisatiedot.omalle_tilaukselle,
 						concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
-						and tilausrivi.hyllyalue != ''
+						and (tilausrivi.hyllyalue != '' OR tilausrivin_lisatiedot.omalle_tilaukselle != '')
 						and tilausrivi.varattu+tilausrivi.kpl > 0
 						and tilausrivi.var not in ('J','P')
 						ORDER BY $sorttaus";
@@ -835,7 +916,9 @@ else {
 			$varasto_kpl_array = array();
 			$tulalue_kpl_array = array();
 
-			$sisviesti2_numerointi = 1;
+			$sisviesti2_numerointi	= 1;
+			$i_counter 				= 1;
+			$tilaus_splitattu 		= FALSE;
 
 			while ($row = mysql_fetch_assoc($result)) {
 
@@ -849,7 +932,9 @@ else {
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
 				// varasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if (((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '')) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K") or ($row['omalle_tilaukselle'] != '')) {
+				if (((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '')) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K") or ($row['omalle_tilaukselle'] != '' and $i_counter > 1)) {
+
+					$tilaus_splitattu = TRUE;
 
 					// Meid‰n on p‰ivitett‰v‰ tunnusnippu
 					if ($yhtiorow["splittauskielto"] == "K" and $laskurow["tunnusnippu"] == 0) {
@@ -962,7 +1047,7 @@ else {
 
 					$varasto_chk_array[$laskurow['tunnus']] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
 				}
-				else {
+				elseif (!$tilaus_splitattu) {
 					// Pidet‰‰n lukua kuinka paljon mist‰kin varastosta on rivi‰, jotka j‰‰ alkuperˆiselle tilaukselle
 					if ($varasto > 0) {
 						if (isset($varasto_kpl_array[$varasto])) $varasto_kpl_array[$varasto]++;
@@ -988,6 +1073,18 @@ else {
 				if ($row['otunnus'] != $laskurow['tunnus']) {
 					$query = "UPDATE tilausrivi set otunnus='$laskurow[tunnus]' where tunnus='$row[tunnus]' and yhtio='$kukarow[yhtio]'";
 					$ohno  = pupe_query($query);
+
+					if ($row['omalle_tilaukselle'] != '' and $row['perheid'] > 0 and $row['perheid'] == $row['tunnus']) {
+						$query = "UPDATE tilausrivi SET otunnus = '{$laskurow['tunnus']}' WHERE otunnus = '{$row['otunnus']}' AND perheid = '{$row['tunnus']}' AND tunnus != '{$row['tunnus']}' AND yhtio = '{$kukarow['yhtio']}'";
+						$ohno  = pupe_query($query);
+					}
+				}
+
+				if ($row['perheid'] > 0 and $row['perheid'] == $row['tunnus']) {
+					$i_counter++;
+				}
+				elseif ($row['perheid'] == 0) {
+					$i_counter++;
 				}
 			}
 

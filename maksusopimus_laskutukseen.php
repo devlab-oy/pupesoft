@@ -548,9 +548,9 @@
 						ORDER BY jaksotettu desc";
 			$result = pupe_query($query);
 
-			pupe_DataTables($pupe_DataTables, 7, 8);
+			pupe_DataTables(array(array($pupe_DataTables, 7, 8)));
 
-			echo "<table class='display' id='$pupe_DataTables'>";
+			echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
 			echo "<thead>";
 			echo "<tr>
@@ -561,18 +561,18 @@
 					<th>".t("Laskutettu")."</th>
 					<th>".t("Yhteensä")."</th>
 					<th>".t("Seuraava positio")."</th>
-					<th class='back'></th>
+					<th style='visibility:hidden;'></th>
 				</tr>";
 
 			echo "<tr>
-					<td><input type='text' name='search_tilaus'></td>
-					<td><input type='text' name='search_asiakas'></td>
-					<td><input type='text' name='search_era'></td>
-					<td><input type='text' name='search_laskuttamatta'></td>
-					<td><input type='text' name='search_laskutettu'></td>
-					<td><input type='text' name='search_yhteensa'></td>
-					<td><input type='text' name='search_seuraava'></td>
-					<td class='back'></td>
+					<td><input type='text' class='search_field' name='search_tilaus'></td>
+					<td><input type='text' class='search_field' name='search_asiakas'></td>
+					<td><input type='text' class='search_field' name='search_era'></td>
+					<td><input type='text' class='search_field' name='search_laskuttamatta'></td>
+					<td><input type='text' class='search_field' name='search_laskutettu'></td>
+					<td><input type='text' class='search_field' name='search_yhteensa'></td>
+					<td><input type='text' class='search_field' name='search_seuraava'></td>
+					<td style='visibility:hidden;'></td>
 				</tr>";
 
 			echo "</thead>";
@@ -608,7 +608,7 @@
 				$rahres = pupe_query($query);
 				$laskurow2 = mysql_fetch_array($rahres);
 
-				echo "<tr class='aktiivi'>";
+				echo "<tr>";
 				echo "<td valign='top'>$laskurow2[tunnukset]</td>";
 				echo "<td valign='top'>$row[nimi]</td>";
 				echo "<td valign='top'>$row[laskutettu_kpl] / $row[yhteensa_kpl]</td>";

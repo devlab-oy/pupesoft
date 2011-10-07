@@ -49,7 +49,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and kaytossa != 'E'
 						and tyyppi = 'K'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			while ($vrow = mysql_fetch_array($vresult)) {

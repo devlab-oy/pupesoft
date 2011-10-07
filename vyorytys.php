@@ -186,12 +186,15 @@
 
 				if ($kustp != '') {
 
-					$query2 = "SELECT nimi, koodi FROM kustannuspaikka WHERE kustannuspaikka.yhtio = '$kukarow[yhtio]' AND kustannuspaikka.tunnus = '$trow[kustp]'";
+					$query2 = "	SELECT nimi, koodi
+								FROM kustannuspaikka
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$trow[kustp]'";
 					$result2 = mysql_query($query2) or pupe_error($query2);
 					$tarkenne = mysql_fetch_assoc($result2);
 
-					if ($tarkenne[nimi] == '') {
-						$tarkenne[nimi] = t("Ei kustannuspaikkaa");
+					if ($tarkenne["nimi"] == '') {
+						$tarkenne["nimi"] = t("Ei kustannuspaikkaa");
 					}
 
 					echo "<td>$tarkenne[koodi] $tarkenne[nimi]</td>";

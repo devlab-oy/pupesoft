@@ -1360,11 +1360,11 @@
 												yhtio = '{$kukarow['yhtio']}'";
 								$ker_res = mysql_query($query_ker) or pupe_error($query_ker);
 
+								$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
+								$alatila_upd_res = mysql_query($query) or pupe_error($query);
+
 								// jos kyseessä on toimitustapa jonka rahtikirja on hetitulostus, tulostetaan myös rahtikirja tässä vaiheessa
 								if ($laskurow['tulostustapa'] == 'H' and $laskurow["nouto"] == "") {
-
-									$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
-									$alatila_upd_res = mysql_query($query) or pupe_error($query);
 
 									// päivitetään keräyserän tila "Rahtikirja tulostettu"-tilaan
 									$query = "UPDATE kerayserat SET tila = 'R' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}'";

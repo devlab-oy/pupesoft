@@ -19,7 +19,7 @@ list(,,$kohok,,,,$lisok,,$sarjanrook,,,,,$varok) = tsekit($laskurow,0);
 if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 	if ($tee == "varma") {
 		require ("varastoon.inc");
-	
+
 		// takaisin ihan alkuun
 		$toiminto 		= "dummy";
 		$ytunnus  		= "";
@@ -44,20 +44,20 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 			}
 			$tee = "";
 		}
-	
+
 		// katotaan onko liitettyj‰ laskuja, mutta ei vaihto-omaisuuslaskuja
-		$query  = "	SELECT * 
-					from lasku 
-					where yhtio = '$kukarow[yhtio]' 
-					and tila = 'K' 
-					and alatila = '' 
-					and vanhatunnus <> 0 
-					and laskunro = '$laskurow[laskunro]' 
+		$query  = "	SELECT *
+					from lasku
+					where yhtio = '$kukarow[yhtio]'
+					and tila = 'K'
+					and alatila = ''
+					and vanhatunnus <> 0
+					and laskunro = '$laskurow[laskunro]'
 					and vienti not in ('C','F','I','J','K','L')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$summa = 0;
-	
+
 		echo "<br>";
 
 		if (mysql_num_rows($result) != 0) {
@@ -98,13 +98,15 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 			echo "</table><br>";
 		}
 
-		echo "<font class='message'>";
-		echo t("Kululaskuja yhteens‰").": ".$summa." $yhtiorow[valkoodi]";
-		echo "</font><br>";
+		if ($yhtiorow["jalkilaskenta_kuluperuste"] == "") {
+			echo "<font class='message'>";
+			echo t("Kululaskuja yhteens‰").": ".$summa." $yhtiorow[valkoodi]";
+			echo "</font><br>";
 
-		// yht‰‰n kululaskua ei ole liitetty
-		if ($summa == 0) {
-			echo "<font class='error'>".t("Yht‰‰n kululaskua ei ole liitetty keikkaan!")."<br>";		
+			// yht‰‰n kululaskua ei ole liitetty
+			if ($summa == 0) {
+				echo "<font class='error'>".t("Yht‰‰n kululaskua ei ole liitetty keikkaan!")."<br>";
+			}
 		}
 
 		// p‰ivitet‰‰n kululaskujen summa kentt‰‰n saldo_maksettu keikan otsikolle
@@ -113,12 +115,12 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		$result = mysql_query($query) or pupe_error($query);
 
 		// haetaan keikan otsikko laskurowhun
-		$query  = "	SELECT * 
+		$query  = "	SELECT *
 					from lasku
 					where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0 and laskunro='$laskurow[laskunro]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
-	
+
 		require ("varastoon.inc");
 
 		echo "<form action='$PHP_SELF' method='post'>";

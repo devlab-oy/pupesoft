@@ -2086,7 +2086,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and kaytossa != 'E'
 						and tyyppi = 'K'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_kustp[]' multiple='TRUE' size='10' style='width:100%;'>";

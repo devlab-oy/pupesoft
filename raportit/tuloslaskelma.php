@@ -503,7 +503,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and kaytossa != 'E'
 							and tyyppi = 'K'
-							ORDER BY nimi";
+							ORDER BY koodi+0, koodi, nimi";
 				$vresult = mysql_query($query) or pupe_error($query);
 
 				while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -524,7 +524,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and kaytossa != 'E'
 							and tyyppi = 'O'
-							ORDER BY nimi";
+							ORDER BY koodi+0, koodi, nimi";
 				$vresult = mysql_query($query) or pupe_error($query);
 
 				while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -545,7 +545,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and kaytossa != 'E'
 							and tyyppi = 'P'
-							ORDER BY nimi";
+							ORDER BY koodi+0, koodi, nimi";
 				$vresult = mysql_query($query) or pupe_error($query);
 
 				while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -561,7 +561,7 @@
 				$vertailubu = "";
 
 				$laskujoini = " JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus ";
-				$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus ";
+				$asiakasjoini = " JOIN asiakas ON lasku.yhtio = asiakas.yhtio and (lasku.liitostunnus = asiakas.tunnus or (tiliointi.liitos = 'A' and tiliointi.liitostunnus = asiakas.tunnus)) ";
 
 				if (isset($sarakebox["ASOSASTO"]) and $sarakebox["ASOSASTO"] != "") {
 					// N‰it‰ tarvitaan kun piirret‰‰n headerit
@@ -601,16 +601,16 @@
 				$laskujoini = " JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus ";
 
 				if ($konsernirajaus == "AT") {
-					$konsernijoini  = "	LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != ''
-										LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and lasku.liitostunnus = kt.tunnus and kt.konserniyhtio != '' ";
+					$konsernijoini  = "	LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and ((lasku.liitostunnus = ka.tunnus) or (tiliointi.liitos='A' and ka.tunnus = tiliointi.liitostunnus)) and ka.konserniyhtio != ''
+										LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and ((lasku.liitostunnus = kt.tunnus) or (tiliointi.liitos='T' and kt.tunnus = tiliointi.liitostunnus)) and kt.konserniyhtio != '' ";
 					$konsernilisa = " and (ka.tunnus is not null or kt.tunnus is not null) ";
 				}
 				elseif ($konsernirajaus == "T") {
-					$konsernijoini = "  LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and lasku.liitostunnus = kt.tunnus and kt.konserniyhtio != '' ";
+					$konsernijoini = "  LEFT JOIN toimi kt ON lasku.yhtio = kt.yhtio and ((lasku.liitostunnus = kt.tunnus) or (tiliointi.liitos='T' and kt.tunnus = tiliointi.liitostunnus)) and kt.konserniyhtio != '' ";
 					$konsernilisa = " and kt.tunnus is not null ";
 				}
 				elseif ($konsernirajaus == "A") {
-					$konsernijoini = "  LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and lasku.liitostunnus = ka.tunnus and ka.konserniyhtio != '' ";
+					$konsernijoini = "  LEFT JOIN asiakas ka ON lasku.yhtio = ka.yhtio and ((lasku.liitostunnus = ka.tunnus) or (tiliointi.liitos='A' and ka.tunnus = tiliointi.liitostunnus)) and ka.konserniyhtio != '' ";
 					$konsernilisa = " and ka.tunnus is not null ";
 				}
 			}

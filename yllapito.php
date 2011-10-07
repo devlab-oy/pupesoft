@@ -854,23 +854,34 @@
 	for ($i=0; $i<=$count; $i++) {
 		if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
 
-			if ($from == "" and ((($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') or ($toim == 'yhteyshenkilo' and trim($array[$i]) == 'liitostunnus'))) {
+			// @-merkki eteen, tarkka haku
+			if ($haku[$i]{0} == "@") {
+				$tarkkahaku = TRUE;
+				$hakuehto = " = '".substr($haku[$i], 1)."' ";
+			}
+			else {
+				$tarkkahaku = FALSE;
+				$hakuehto = " like '%{$haku[$i]}%' ";
+			}
 
+			if ($from == "" and ((($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') or ($toim == 'yhteyshenkilo' and trim($array[$i]) == 'liitostunnus'))) {
 				if (!is_numeric($haku[$i])) {
-					// haetaan laskutus-asiakas
-					$ashak = "SELECT group_concat(tunnus) tunnukset FROM asiakas WHERE yhtio='$kukarow[yhtio]' and nimi like '%" . $haku[$i] . "%'";
+					$ashak = "	SELECT group_concat(tunnus) tunnukset
+								FROM asiakas
+								WHERE yhtio = '$kukarow[yhtio]'
+								and nimi {$hakuehto}";
 					$ashakres = pupe_query($ashak);
-					$ashakrow = mysql_fetch_array($ashakres);
+					$ashakrow = mysql_fetch_assoc($ashakres);
 
 					if ($ashakrow["tunnukset"] != "") {
-						$lisa .= " and " . $array[$i] . " in (" . $ashakrow["tunnukset"] . ")";
+						$lisa .= " and {$array[$i]} in (" . $ashakrow["tunnukset"] . ")";
 					}
 					else {
-						$lisa .= " and " . $array[$i] . " = NULL ";
+						$lisa .= " and {$array[$i]} = NULL ";
 					}
 				}
 				else {
-					$lisa .= " and " . $array[$i] . " = '" . $haku[$i] . "'";
+					$lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
 				}
 			}
 			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
@@ -894,59 +905,60 @@
 			}
 			elseif ($from == "" and $toim == 'tuotteen_toimittajat' and trim($array[$i]) == 'nimi') {
 				if (!is_numeric($haku[$i])) {
-					// haetaan laskutus-asiakas
-					$ashak = "SELECT group_concat(concat(\"'\",ytunnus,\"'\")) tunnukset FROM toimi WHERE yhtio='$kukarow[yhtio]' and nimi like '%" . $haku[$i] . "%'";
+					$ashak = "	SELECT group_concat(concat(\"'\",ytunnus,\"'\")) tunnukset
+								FROM toimi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and nimi {$hakuehto}";
 					$ashakres = pupe_query($ashak);
-					$ashakrow = mysql_fetch_array($ashakres);
+					$ashakrow = mysql_fetch_assoc($ashakres);
 
 					if ($ashakrow["tunnukset"] != "") {
-						$lisa .= " and toimittaja in (" . $ashakrow["tunnukset"] . ")";
+						$lisa .= " and toimittaja in ({$ashakrow["tunnukset"]})";
 					}
 					else {
 						$lisa .= " and toimittaja = NULL ";
 					}
 				}
 				else {
-					$lisa .= " and toimittaja = '" . $haku[$i] . "'";
+					$lisa .= " and toimittaja = '{$haku[$i]}'";
 				}
 			}
 			elseif ($from == "" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'ytunnus') {
 
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
-					$ashak = "SELECT group_concat(distinct concat('\'',ytunnus,'\'')) tunnukset FROM asiakas WHERE yhtio='$kukarow[yhtio]' and (nimi like '%" . $haku[$i] . "%' or ytunnus like '%" . $haku[$i] . "%')";
+					$ashak = "	SELECT group_concat(distinct concat('\'',ytunnus,'\'')) tunnukset
+								FROM asiakas
+								WHERE yhtio = '$kukarow[yhtio]'
+								and (nimi {$hakuehto} or ytunnus {$hakuehto})";
 					$ashakres = pupe_query($ashak);
-					$ashakrow = mysql_fetch_array($ashakres);
+					$ashakrow = mysql_fetch_assoc($ashakres);
 
 					if ($ashakrow["tunnukset"] != "") {
-						$lisa .= " and " . $array[$i] . " in (" . $ashakrow["tunnukset"] . ")";
+						$lisa .= " and {$array[$i]} in ({$ashakrow["tunnukset"]})";
 					}
 					else {
-						$lisa .= " and " . $array[$i] . " = NULL ";
+						$lisa .= " and {$array[$i]} = NULL ";
 					}
 				}
 				else {
-					$lisa .= " and " . $array[$i] . " = '" . $haku[$i] . "'";
+					$lisa .= " and {$array[$i]} = '{$haku[$i]}'";
 				}
 			}
 			elseif ($toim == 'puun_alkio' and $i == 5) {
-				if ($haku[$i]{0} == "@") {
-					$lisa .= " AND (SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = puun_alkio.puun_tunnus AND laji = '{$laji}' AND nimi = '".substr($haku[$i], 1)."') = '".substr($haku[$i], 1)."' ";
-				}
-				else {
-					$lisa .= " AND (SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = puun_alkio.puun_tunnus AND laji = '{$laji}' AND nimi like '%{$haku[5]}%') LIKE '%{$haku[5]}%' ";
-				}
-			}
-			elseif ($haku[$i]{0} == "@") {
-				$lisa .= " and " . $array[$i] . " = '" . substr($haku[$i], 1) . "'";
+				$lisa .= " AND (SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = puun_alkio.puun_tunnus AND laji = '{$laji}' AND nimi {$hakuehto}) {$hakuehto} ";
 			}
 			elseif (strpos($array[$i], "/") !== FALSE) {
 				$lisa .= " and (";
-				foreach (explode("/", $array[$i]) as $spl) $lisa .= "$spl like '%".$haku[$i]."%' or ";
+
+				foreach (explode("/", $array[$i]) as $spl) {
+					$lisa .= "{$spl} {$hakuehto} or ";
+				}
+
 				$lisa = substr($lisa, 0, -3).")";
 			}
 			else {
-				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+				$lisa .= " and {$array[$i]} {$hakuehto} ";
 			}
 
 			$ulisa .= "&haku[$i]=".urlencode($haku[$i]);
@@ -1007,7 +1019,6 @@
 
 	    	$jarjestys = "$ojar $osuu ";
 	    }
-
 
 		if ($osuu == '') {
 			$osuu	= 'asc';
@@ -1562,21 +1573,20 @@
 			}
 
 			if (tarkista_oikeus("yllapito.php", "asiakaskommentti")) {
-				echo "<iframe id='asiakaskommentti_iframe' name='asiakaskommentti_iframe' src='yllapito.php?toim=asiakaskommentti&from=yllapito&ohje=off&haku[1]=$trow[ytunnus]&lukitse_avaimeen=$trow[ytunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='asiakaskommentti_iframe' name='asiakaskommentti_iframe' src='yllapito.php?toim=asiakaskommentti&from=yllapito&ohje=off&haku[1]=@$trow[ytunnus]&lukitse_avaimeen=$trow[ytunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 
 			if (tarkista_oikeus("yllapito.php", "asiakkaan_avainsanat")) {
-				echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=asiakkaan_avainsanat&from=yllapito&ohje=off&haku[5]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=asiakkaan_avainsanat&from=yllapito&ohje=off&haku[5]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 
 			if (tarkista_oikeus("yllapito.php", "puun_alkio&laji=asiakas%")) {
-				echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=asiakas&lukitse_laji=asiakas&from=yllapito&ohje=off&haku[1]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=asiakas&lukitse_laji=asiakas&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 
 			if (tarkista_oikeus("yllapito.php", "rahtisopimukset")) {
-				echo "<iframe id='rahtisopimukset_iframe' name='rahtisopimukset_iframe' src='yllapito.php?toim=rahtisopimukset&from=yllapito&ohje=off&haku[1]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='rahtisopimukset_iframe' name='rahtisopimukset_iframe' src='yllapito.php?toim=rahtisopimukset&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
-
 		}
 
 		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
@@ -1627,14 +1637,14 @@
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhteensopivuus_tuote") {
 			if (tarkista_oikeus("yllapito.php", "yhteensopivuus_tuote_lisatiedot") and $toim == 'yhteensopivuus_tuote') {
-				echo "<iframe id='yhteensopivuus_tuote_lisatiedot_iframe' name='yhteensopivuus_tuote_lisatiedot_iframe' src='yllapito.php?toim=yhteensopivuus_tuote_lisatiedot&from=yllapito&haku[5]=$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='yhteensopivuus_tuote_lisatiedot_iframe' name='yhteensopivuus_tuote_lisatiedot_iframe' src='yllapito.php?toim=yhteensopivuus_tuote_lisatiedot&from=yllapito&haku[5]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
 
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {
 			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot") and $toim == 'toimitustapa') {
-				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=@$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
 
@@ -1698,6 +1708,7 @@
 			$toim == "rahtisopimukset" or
 			$toim == "tilikaudet" or
 			$toim == "hyvityssaannot" or
+			$toim == "varaston_hyllypaikat" or
 			($toim == "liitetiedostot" and $poistolukko == "") or
 			($toim == "tuote" and $poistolukko == "") or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {

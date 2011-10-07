@@ -146,6 +146,15 @@
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 			$rresult = pupe_query($query);
 
+			// KAUTTALASKUTUSKIKKARE
+			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and ($GLOBALS['koti_yhtio'] != $kukarow['yhtio'] or $asiakasrow['osasto'] != '6')) {
+				$GLOBALS['eta_yhtio'] = "";
+			}
+			elseif (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '') {
+				// haetaan etäyhtiön tiedot
+				$yhtiorow_eta = $yhtiorow = hae_yhtion_parametrit($GLOBALS['eta_yhtio']);
+			}
+
 			echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
 			flush();
 
@@ -197,11 +206,6 @@
 				$excelrivi++;
 			}
 
-			// KAUTTALASKUTUSKIKKARE
-			if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and ($GLOBALS['koti_yhtio'] != $kukarow['yhtio'] or $asiakasrow['osasto'] != '6')) {
-				$GLOBALS['eta_yhtio'] = "";
-			}
-
 			while ($rrow = mysql_fetch_assoc($rresult)) {
 
 				$bar->increase();
@@ -213,6 +217,7 @@
 								AND tuoteno = '$rrow[tuoteno]'";
 					$tres_eta = pupe_query($query);
 					$alehinrrow = mysql_fetch_assoc($tres_eta);
+					$yhtiorow = $yhtiorow_eta;
 				}
 				else {
 					$alehinrrow = $rrow;
@@ -236,12 +241,17 @@
 
 				$hinnat = alehinta($laskurow, $alehinrrow, 1, '', '', '', $palautettavat_kentat, $GLOBALS['eta_yhtio']);
 
+				// Kauttalaskutuksessa pitää otaa etäyhtiön tiedot
+				if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
+					$yhtiorow = $yhtiorow_eta;
+				}
+
 				// Otetaan erikoisalennus pois asiakashinnastosta
 				// $hinnat['erikoisale'] = $asiakasrow["erikoisale"];
 				$hinnat['erikoisale'] = 0;
 
-				$hinta 			= $hinnat["hinta"];
-				$netto 			= $hinnat["netto"];
+				$hinta = $hinnat["hinta"];
+				$netto = $hinnat["netto"];
 
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 					${'ale'.$alepostfix} = $hinnat["ale{$alepostfix}"];

@@ -181,26 +181,20 @@
 
 	echo "<form method='post' action=''>";
 	echo "<table><tr>";
+	echo "<td class='back'><div id='chart_div'></div></td>";
+	echo "</tr><tr>";
 	echo "<td class='back'>";
 
 	$query_ale_lisa = generoi_alekentta('M');
-
-	// $query = "	SELECT ROUND(SUM(hinta), 0) AS tilatut_eurot
-	// 			FROM tilausrivi
-	// 			WHERE yhtio = '{$kukarow['yhtio']}'
-	// 			AND tyyppi = 'L'
-	// 			AND laadittu >= '2011-10-05 00:00:00'
-	// 			#AND laadittu >= CURDATE() + ' 00:00:00'
-	// 			AND laadittu <= CURDATE() + ' 23:59:59'";
 
 	$query = "	SELECT round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta,(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)), 0) AS 'tilatut_eurot',
 				round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))),'{$yhtiorow['hintapyoristys']}') AS 'tilatut_kate',
 				if(tilausrivi.toimitettu!='', 1, 0) AS 'toimitetut_rivit'
 				FROM tilausrivi
-				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.tyyppi = 'L'
-				AND tilausrivi.laadittu >= '2011-10-05 00:00:00'
+				AND tilausrivi.laadittu >= '2011-10-06 00:00:00'
 				AND tilausrivi.laadittu <= CURDATE() + ' 23:59:59'";
 	$result = pupe_query($query);
 
@@ -297,9 +291,7 @@
 	echo "<tr><td colspan='2' class='back'><input type='submit' value='",t("Hae"),"' /></td></tr>";
 
 	echo "</table>";
-	echo "</td>";
-	echo "<td class='back'><div id='chart_div'></div></td>";
-	echo "</tr></table>";
+	echo "</td></tr></table>";
 	echo "</form>";
 
 	if (!isset($tee)) $tee = '';
@@ -334,17 +326,15 @@
 		}
 
 		$query = "	SELECT {$pvmlisa} AS 'pvm',
-					round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'{$yhtiorow['hintapyoristys']}') AS 'tilatut_kate',
-					(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1) AS tilatut_eurot
+					if(tilausrivi.laskutettu != '', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) AS 'tilatut_kate',
+					if(tilausrivi.laskutettu != '', tilausrivi.rivihinta, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)) AS tilatut_eurot
 					FROM tilausrivi
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
 					WHERE tilausrivi.yhtio IN ('{$query_yhtiot}')
 					AND tilausrivi.tyyppi = 'L'
 					AND tilausrivi.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
 					AND tilausrivi.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-					AND tilausrivi.laskutettu = ''
 					ORDER BY tilausrivi.laadittu";
-		// echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$result = pupe_query($query);
 
 		// $kateprosentti = round($row["kate"] / $row["summa"] * 100, 2);
@@ -365,7 +355,9 @@
 
 		$yhteensa = array(
 			'tilatut_eurot' => 0,
+			'tilatut_kate' => 0,
 			'laskutetut_eurot' => 0,
+			'laskutetut_kate' => 0,
 		);
 
 		$arr = array();
@@ -378,20 +370,27 @@
 			$arr[$row['pvm']]['tilatut_kate'] += $row['tilatut_kate'];
 		}
 
-		// echo "<pre>",var_dump($arr),"</pre>";
+		if ($naytetaan_tulos == 'weekly') {
+			$pvmlisa = "WEEK(SUBSTRING(tilausrivi.laskutettuaika, 1, 10), 7)";
+		}
+		elseif ($naytetaan_tulos == 'monthly') {
+			$pvmlisa = "MONTH(SUBSTRING(tilausrivi.laskutettuaika, 1, 10))";
+		}
+		else {
+			$pvmlisa = "SUBSTRING(tilausrivi.laskutettuaika, 1, 10)";
+		}
 
 		$query = "	SELECT {$pvmlisa} AS 'pvm',
 					tilausrivi.kate AS 'laskutetut_kate',
 					tilausrivi.rivihinta AS 'laskutetut_eurot'
 					FROM tilausrivi
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
 					WHERE tilausrivi.yhtio IN ('{$query_yhtiot}')
 					AND tilausrivi.tyyppi = 'L'
-					AND tilausrivi.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-					AND tilausrivi.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+					AND tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+					AND tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
 					AND tilausrivi.laskutettu != ''
 					ORDER BY tilausrivi.laadittu";
-		// echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$result = pupe_query($query);
 
 		while ($row = mysql_fetch_assoc($result)) {
@@ -409,19 +408,16 @@
 				$pvm = $p.$k;
 			}
 
+			$yhteensa['tilatut_eurot'] += $arvot['tilatut_eurot'];
+			$yhteensa['tilatut_kate'] += $arvot['tilatut_kate'];
+			$yhteensa['laskutetut_eurot'] += $arvot['laskutetut_eurot'];
+			$yhteensa['laskutetut_kate'] += $arvot['laskutetut_kate'];
+
 			$tilatut_katepros = round($arvot['tilatut_kate'] / $arvot['tilatut_eurot'] * 100, 1);
-
-			$arvot['tilatut_eurot'] = round($arvot['tilatut_eurot'] / 1000, 0);
-
 			$laskutetut_katepros = round($arvot['laskutetut_kate'] / $arvot['laskutetut_eurot'] * 100, 1);
 
+			$arvot['tilatut_eurot'] = round($arvot['tilatut_eurot'] / 1000, 0);
 			$arvot['laskutetut_eurot'] = round($arvot['laskutetut_eurot'] / 1000, 0);
-
-			$arvot['tilatut_eurot'] = $arvot['tilatut_eurot'] + $arvot['laskutetut_eurot'];
-			$tilatut_katepros = round(($tilatut_katepros + $laskutetut_katepros) / 2, 1);
-
-			$yhteensa['tilatut_eurot'] += $arvot['tilatut_eurot'];
-			$yhteensa['laskutetut_eurot'] += $arvot['laskutetut_eurot'];
 
 			echo "<tr>";
 			echo "<td align='right'>{$pvm}</td>";
@@ -434,10 +430,10 @@
 
 		echo "<tr>";
 		echo "<th>",t("Yhteensä"),"</th>";
-		echo "<td align='right'>{$yhteensa['tilatut_eurot']}</td>";
-		echo "<td align='right'></td>";
-		echo "<td align='right'>{$yhteensa['laskutetut_eurot']}</td>";
-		echo "<td align='right'></td>";
+		echo "<td align='right'>",round($yhteensa['tilatut_eurot'] / 1000, 0),"</td>";
+		echo "<td align='right'>",round($yhteensa['tilatut_kate'] / $yhteensa['tilatut_eurot'] * 100, 1),"</td>";
+		echo "<td align='right'>",round($yhteensa['laskutetut_eurot'] / 1000, 0),"</td>";
+		echo "<td align='right'>",(round($yhteensa['laskutetut_kate'] / $yhteensa['laskutetut_eurot'] * 100, 1)),"</td>";
 		echo "</tr>";
 
 		echo "</table>";

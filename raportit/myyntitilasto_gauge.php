@@ -226,7 +226,7 @@
 		$tee = '';
 	}
 
-	if ((isset($ppa) and trim($ppa) == '') or (isset($kka) and trim($kka) == '') or (isset($vva) and trim($vva) == '') or (isset($ppl) and trim($ppl) == '') or (isset($kkl) and trim($kkl) == '') or (isset($vvl) and trim($vvl) == '')) {
+	if ((isset($ppa) and (int) $ppa == 0) or (isset($kka) and (int) $kka == 0) or (isset($vva) and (int) $vva == 0) or (isset($ppl) and (int) $ppl == 0) or (isset($kkl) and (int) $kkl == 0) or (isset($vvl) and (int) $vvl == 0)) {
 		echo "<font class='error'>",t("Päivämäärässä on virhe"),"!</font>";
 		$tee = '';
 	}

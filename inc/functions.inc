@@ -14348,7 +14348,6 @@ if (!function_exists('gauge')) {
 								data.addColumn('string', 'Label');
 								data.addColumn('number', 'Value');
 
-								// data.addRows(Object.keys(args).length);
 								data.addRows(1);
 
 								var div_id;
@@ -14381,7 +14380,7 @@ if (!function_exists('gauge')) {
 
 								if (parseInt((value / (max / 40))) >= 4) {
 
-									var force = parseInt(value / 80000);
+									var force = parseInt(value / (max / 40));
 									force = force < 2 ? 2 : force;
 									force = 1 + '.' + force;
 

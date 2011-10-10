@@ -112,7 +112,7 @@
 		echo "<table>";
 		echo "<tr><th colspan='4'>",t("Attribuutit"),"</th></tr>";
 
-		$query = "	SELECT count(selite) laskuri, selitetark, selite, jarjestys
+		$query = "	SELECT count(selite) laskuri, selitetark, selite, jarjestys, min(tunnus) mintunnus
 					FROM avainsana
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND kieli = 'fi'
@@ -139,11 +139,11 @@
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND kieli = 'fi'
 							AND laji = 'ASAVAINSANA'
-							AND selite = '{$dynamic_row[selite]}'
+							AND selite = '{$dynamic_row["selite"]}'
 							ORDER BY selitetark_2";
 				$filler_res = pupe_query($query);
 
-				echo "<td><select name='{$dynamic_row['selite']}'><option value=''>",t("Ei valintaa"),"</option>";
+				echo "<td><select name='{$dynamic_row['selite']}' ".js_alasvetoMaxWidth($dynamic_row['mintunnus'], 300)."><option value=''>",t("Ei valintaa"),"</option>";
 
 				$var = $dynamic_row['selite'];
 
@@ -175,7 +175,7 @@
 				}
 				else {
 
-					echo "<td><select name='{$dynamic_row['selite']}'><option value=''>",t("Ei valintaa"),"</option>";
+					echo "<td><select name='{$dynamic_row['selite']}' ".js_alasvetoMaxWidth($dynamic_row['mintunnus'], 300)."><option value=''>",t("Ei valintaa"),"</option>";
 
 					$var = $dynamic_row['selite'];
 
@@ -208,7 +208,7 @@
 
 		echo "</form>";
 
-		if ($etsi != '') {
+		if (isset($etsi)) {
 
 			$query = "	SELECT asiakas.*
 						FROM asiakas
@@ -294,7 +294,7 @@
 				$query .= " AND (asiakas.email = '$email' or asiakas.email like '%$email%') ";
 			}
 
-			$query .= "	group by tunnus order by postitp, nimi";
+			$query .= "	GROUP BY tunnus order by postitp, nimi";
 			$res = pupe_query($query);
 
 			echo "<form method='post' action=''>";
@@ -318,7 +318,7 @@
 
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
 			echo "</tr>";
-			
+
 			echo "</table>";
 			echo "<br>";
 			echo "<table>";
@@ -388,7 +388,7 @@
 			while ($row = mysql_fetch_assoc($res)) {
 
 				if ($myynti == '') $myynti = 0;
-				
+
 				// Subquery. Haetaan riveiltä yhteissummia
 				$query = "	SELECT sum(rivihinta) rivin_summa, tuote.try
 							FROM tilausrivi
@@ -402,7 +402,7 @@
 				$summress = pupe_query($query);
 				$rivit = mysql_fetch_assoc($summress);
 
-				
+
 				if ((mysql_num_rows($summress) > 0 and $myynti > 0) or $myynti == 0) {
 
 					echo "<tr class='aktiivi'>";
@@ -413,7 +413,7 @@
 					echo "<td align='right'>". round($rivit['rivin_summa'], $yhtiorow["hintapyoristys"])."</td>";
 
 					echo "</tr>";
-				
+
 					$rivi .= str_replace(",", ".", $row['ytunnus']).",";
 					$rivi .= str_replace(",", ".", $row['nimi']).",";
 					$rivi .= str_replace(",", ".", $row['email']).",";

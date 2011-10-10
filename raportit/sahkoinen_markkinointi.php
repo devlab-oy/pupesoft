@@ -84,7 +84,7 @@
 		echo "<tr><td colspan='2' class='back'>&nbsp;</td></tr>";
 		echo "<tr><th colspan='2'>".t("Myynnintiedot")."</th></tr>";
 		echo "<tr>";
-		echo "<td>".t("Myynti alv 0% v‰hint‰‰n")."</td>";
+		echo "<td>".t("Veroton myynti v‰hint‰‰n")."</td>";
 		echo "<td><input type='text' name='myynti' id='myynti' value='$myynti'></td>";
 
 		// laitetaan oletusp‰ivi‰
@@ -97,9 +97,9 @@
 		if (!isset($vuosi2))	$vuosi2 = date("Y");
 
 		echo "<tr>";
-		echo "<td>".t("Alkaa")."</td><td><input type='text' name='pvm1' value='$pvm1' size='2'> <input type='text' name='kk1' value='$kk1' size='2'> <input type='text' name='vuosi1' value='$vuosi1' size='4'></td>";
+		echo "<td>".t("Alkup‰iv‰m‰‰r‰")."</td><td><input type='text' name='pvm1' value='$pvm1' size='2'> <input type='text' name='kk1' value='$kk1' size='2'> <input type='text' name='vuosi1' value='$vuosi1' size='4'></td>";
 		echo "</tr><tr>";
-		echo "<td>".t("Loppuu")."</td><td><input type='text' name='pvm2' value='$pvm2' size='2'> <input type='text' name='kk2' value='$kk2' size='2'> <input type='text' name='vuosi2' value='$vuosi2' size='4'></td>";
+		echo "<td>".t("Loppup‰iv‰m‰‰r‰")."</td><td><input type='text' name='pvm2' value='$pvm2' size='2'> <input type='text' name='kk2' value='$kk2' size='2'> <input type='text' name='vuosi2' value='$vuosi2' size='4'></td>";
 		echo "</tr>";
 
 		echo "<tr><td>".t("Kategoria")."</th><td>";
@@ -206,10 +206,9 @@
 			}
 		}
 
-		echo "<tr><td class='back' colspan='4' align='right'><input type='submit' name='etsi' value='Etsi'></td></tr>";
-		echo "</table>";
-
-		echo "</form>";
+		echo "</table><br>";
+		echo "<input type='submit' name='etsi' value='Etsi'>";
+		echo "</form><br><br>";
 
 		if (isset($etsi)) {
 
@@ -386,11 +385,25 @@
 				$excelsarake = 0;
 			}
 
+			// Haetaan asikasavainsanat
+			$query = "	SELECT DISTINCT selitetark, jarjestys, selite
+						FROM avainsana
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND kieli = 'fi'
+						AND laji = 'ASAVAINSANA'
+						ORDER BY jarjestys";
+			$otsikot_res = pupe_query($query);
+
 			$rows = 0;
 
 			while ($row = mysql_fetch_assoc($res)) {
 
-				if ($myynti == '') $myynti = 0;
+				$myynti = (float) $myynti;
+				$mlisa  = "";
+
+				if ($myynti != 0) {
+					$mlisa = " HAVING rivin_summa >= {$myynti} ";
+				}
 
 				// Subquery. Haetaan riveilt‰ yhteissummia
 				$query = "	SELECT sum(tilausrivi.rivihinta) rivin_summa
@@ -404,12 +417,12 @@
 							AND lasku.tapvm >= '{$alkaa}'
 							AND lasku.tapvm <= '{$loppuu}'
 							{$lisa}
-							HAVING rivin_summa >= {$myynti}";
+							{$mlisa}";
 				$summress = pupe_query($query);
 				$rivit = mysql_fetch_assoc($summress);
 
 
-				if ((mysql_num_rows($summress) > 0 and $myynti > 0) or $myynti == 0) {
+				if ((mysql_num_rows($summress) > 0 and $myynti != 0) or $myynti == 0) {
 
 					echo "<tr class='aktiivi'>";
 					echo "<td>{$row['ytunnus']}</td>";
@@ -430,26 +443,20 @@
 
 					if (isset($workbook)) {
 
-						$worksheet->writeString($excelrivi, $excelsarake, $row["ytunnus"],	$format_bold);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["ytunnus"]);
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, $row["nimi"], 	$format_bold);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["nimi"]);
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, $row["email"], 	$format_bold);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["email"]);
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, $row["postino"], 	$format_bold);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["postino"]);
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, $row["postitp"], 	$format_bold);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["postitp"]);
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, round($rivit['rivin_summa'], $yhtiorow["hintapyoristys"]), 	$format_bold);
+						$worksheet->writeString($excelrivi, $excelsarake, round($rivit['rivin_summa'], $yhtiorow["hintapyoristys"]));
 						$excelsarake++;
 
-						$query = "	SELECT DISTINCT selitetark, jarjestys, selite
-									FROM avainsana
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND kieli = 'fi'
-									AND laji = 'ASAVAINSANA'
-									ORDER BY jarjestys";
-						$otsikot_res = pupe_query($query);
+						mysql_data_seek($otsikot_res, 0);
 
 						while ($otsikot_row = mysql_fetch_assoc($otsikot_res)) {
 
@@ -458,11 +465,10 @@
 										WHERE yhtio = '{$kukarow['yhtio']}'
 										AND liitostunnus = '{$row['tunnus']}'
 										AND laji = '{$otsikot_row['selite']}'";
-
 							$attr_res = pupe_query($query);
-
 							$attr_row = mysql_fetch_assoc($attr_res);
-							$worksheet->writeString($excelrivi, $excelsarake, $attr_row['avainsana'], $format_bold);
+
+							$worksheet->writeString($excelrivi, $excelsarake, $attr_row['avainsana']);
 							$excelsarake++;
 						}
 

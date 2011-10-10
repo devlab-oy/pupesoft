@@ -40,7 +40,7 @@
 		echo "<form action='' method='post'>";
 
 		echo "<tr>";
-		echo "<th colspan='2'>",t("Tiedot"),"</th>";
+		echo "<th colspan='2'>",t("Asiakastiedot"),"</th>";
 		echo "</tr>";
 		echo "<tr>";
 		echo "<td>",t("Ytunnus"),"</td>";
@@ -81,17 +81,11 @@
 		echo "<tr><td>",t("Sähköpostiosoite"),"</td>";
 		echo "<td><input type='text' name='email' id='email' value='$email'></td>";
 		echo "</tr>";
+		echo "<tr><td colspan='2' class='back'>&nbsp;</td></tr>";
+		echo "<tr><th colspan='2'>".t("Myynnintiedot")."</th></tr>";
 		echo "<tr>";
 		echo "<td>".t("Myynti alv 0% vähintään")."</td>";
 		echo "<td><input type='text' name='myynti' id='myynti' value='$myynti'></td>";
-
-		echo "<tr><td>".t("Kategoria")."</th><td>";
-
-		$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "<br>MALLI/MALLITARK");
-		$monivalintalaatikot_normaali = array();
-		require ("tilauskasittely/monivalintalaatikot.inc");
-
-		echo "</td></tr>";
 
 		// laitetaan oletuspäiviä
 		if (!isset($pvm1)) 		$pvm1 = '01';
@@ -107,10 +101,19 @@
 		echo "</tr><tr>";
 		echo "<td>".t("Loppuu")."</td><td><input type='text' name='pvm2' value='$pvm2' size='2'> <input type='text' name='kk2' value='$kk2' size='2'> <input type='text' name='vuosi2' value='$vuosi2' size='4'></td>";
 		echo "</tr>";
+
+		echo "<tr><td>".t("Kategoria")."</th><td>";
+
+		$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "<br>MALLI/MALLITARK");
+		$monivalintalaatikot_normaali = array();
+		require ("tilauskasittely/monivalintalaatikot.inc");
+
+		echo "</td></tr>";
+
 		echo "</table>";
 		echo "<br>";
 		echo "<table>";
-		echo "<tr><th colspan='4'>",t("Attribuutit"),"</th></tr>";
+		echo "<tr><th colspan='4'>",t("Asiakkaan avainsanat"),"</th></tr>";
 
 		$query = "	SELECT count(selite) laskuri, selitetark, selite, jarjestys, min(tunnus) mintunnus
 					FROM avainsana
@@ -250,7 +253,7 @@
 
 			if ($ytunnus != '') {
 				$ytunnus = mysql_real_escape_string($ytunnus);
-				$query .= " AND asiakas.ytunnus = '$ytunnus' ";
+				$query .= " AND asiakas.ytunnus like '%$ytunnus%' ";
 			}
 
 			if ($nimi != '') {
@@ -390,13 +393,16 @@
 				if ($myynti == '') $myynti = 0;
 
 				// Subquery. Haetaan riveiltä yhteissummia
-				$query = "	SELECT sum(rivihinta) rivin_summa, tuote.try
-							FROM tilausrivi
-							JOIN tuote on (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
-							JOIN lasku on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus='{$row["tunnus"]}' and lasku.tila='L' and lasku.alatila='X')
-							WHERE tilausrivi.yhtio='{$kukarow["yhtio"]}'
-							AND tilausrivi.laskutettuaika >= '{$alkaa}'
-							AND tilausrivi.laskutettuaika <= '{$loppuu}'
+				$query = "	SELECT sum(tilausrivi.rivihinta) rivin_summa
+							FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
+							JOIN tilausrivi on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi != 'D')
+							JOIN tuote on (lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
+							WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+							AND lasku.tila = 'L'
+							AND lasku.alatila = 'X'
+							and lasku.liitostunnus = '{$row["tunnus"]}'
+							AND lasku.tapvm >= '{$alkaa}'
+							AND lasku.tapvm <= '{$loppuu}'
 							{$lisa}
 							HAVING rivin_summa >= {$myynti}";
 				$summress = pupe_query($query);

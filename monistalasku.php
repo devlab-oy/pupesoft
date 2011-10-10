@@ -64,7 +64,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 			$chk_row = mysql_fetch_assoc($chk_res);
 
 			// Hyvitettävän laskun rivit
-			$query = "	SELECT tilausrivi.otunnus, tuote.panttitili, tuote.sarjanumeroseuranta
+			$query = "	SELECT tilausrivi.otunnus, tuote.panttitili, tuote.sarjanumeroseuranta, tuote.tuoteno
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

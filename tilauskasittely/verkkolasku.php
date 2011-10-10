@@ -664,31 +664,54 @@
 						}
 					}
 
+					// jos tilausrivi ei ole cronin generoima (silloin var2-kenttään tallennetaan PANT-teksti)
+					// cron-ohjelma on panttitili_cron.php
 					// jos asiakkaalla on panttitili käytössä, katsotaan tilausrivien tuotteet läpi onko niissä panttitilillisiä tuotteita
 					if ($asiakas_panttitili_chk_row['panttitili'] == "K" and $srow1['panttitili'] == 'K' and $trow['var2'] != 'PANT' and $srow1['varattu'] < 0) {
 
-						// jos tilausrivi ei ole cronin generoima (silloin var2-kenttään tallennetaan PANT-teksti)
-						// cron-ohjelma on panttitili_cron.php
-						if ($orow['clearing'] == 'HYVITYS') {
+						if ($laskurow['clearing'] == 'HYVITYS') {
+
 							// Tsekataan löytyykö hyvitettävän laskun pantit vielä?
-							// Samantyylinen tsekki ku monistalaskussa
+							// Hyvitettävän laskun rivit
+							$query = "	SELECT tilausrivi.otunnus, tuote.panttitili, tilausrivi.varattu
+										FROM tilausrivi
+										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+										AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+										AND tilausrivi.tuoteno = '{$srow1['tuoteno']}'";
+							$chk_til_res = pupe_query($query);
 
-							//jos ei löydy niin
-							#$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
+							$query = "SELECT vanhatunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['vanhatunnus']}'";
+							$vanhatunnus_chk_res = pupe_query($query);
 
-							#if ($silent == "" or $silent == "VIENTI") {
-							#	$tulos_ulos_sarjanumerot .= t("Homma kusi!")."<br>\n";
-							#}
-						}
-						else {
-							// Tsekataan löytyykö riittävästi vapaita panteja
+							if (mysql_num_rows($vanhatunnus_chk_res) > 0) {
+								$vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res);
+								$wherelisa_panttitili = "AND myyntitilausnro = '{$vanhatunnus_chk_row['vanhatunnus']}'";
+							}
 
-							//jos ei löydy niin
-							#$lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
+							while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
 
-							#if ($silent == "" or $silent == "VIENTI") {
-							#	$tulos_ulos_sarjanumerot .= t("Homma kusi!")."<br>\n";
-							#}
+								$query = "	SELECT *
+											FROM panttitili
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											AND asiakas = '{$laskurow['liitostunnus']}'
+											AND tuoteno = '{$srow1['tuoteno']}'
+											{$wherelisa_panttitili}
+											AND kpl = '".abs($chk_til_row['varattu'])."'
+											AND status = ''
+											AND kaytettypvm = '0000-00-00'
+											AND kaytettytilausnro = 0
+											ORDER BY myyntipvm ASC";
+								$pantti_chk_res = pupe_query($query);
+
+								if (mysql_num_rows($pantti_chk_res) == 0) {
+									$lasklisa .= " and lasku.tunnus != '{$laskurow['tunnus']}' ";
+
+									if ($silent == "" or $silent == "VIENTI") {
+										$tulos_ulos_sarjanumerot .= t("Hyvitettävän laskun pantit on jo käytetty")."!<br>\n";
+									}
+								}
+							}
 						}
 					}
 				}

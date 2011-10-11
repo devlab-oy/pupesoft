@@ -72,28 +72,31 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 			$chk_til_res = pupe_query($query);
 
 			while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
+
 				// jos tilauksella on panttituotteita ja ollaan tekem‰ss‰ hyvityst‰, pit‰‰ katsoa, ett‰ t‰m‰n veloituslakun panttitili rivej‰ ei ole viel‰ k‰ytetty
 				// (status, kaytettypvm, kaytettytilausnro pit‰‰ olla tyhj‰‰). jos ei ole, niin hyvityst‰ ei voida tehd‰, virhe "panttitilituotteet on jo k‰ytetty"
 				// etsit‰‰n vanhin pantti
-				$query = "	SELECT *
-							FROM panttitili
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND asiakas = '{$chk_row['liitostunnus']}'
-							AND tuoteno = '{$chk_til_row['tuoteno']}'
-							AND myyntitilausnro = '{$chk_til_row['otunnus']}'
-							AND status = ''
-							AND kaytettypvm = '0000-00-00'
-							AND kaytettytilausnro = 0
-							ORDER BY myyntipvm ASC";
-				$pantti_chk_res = pupe_query($query);
 
-				if (mysql_num_rows($pantti_chk_res) == 0) {
-					echo "<font class='error'>",t("Et voi hyvitt‰‰ laskua, jossa on panttitilillisi‰ tuotteita ja sen pantit on jo k‰ytetty"),"! ({$lasku_x})</font><br>";
-					$tee = "";
-					break 2;
+				if ($chk_til_row['panttitili'] != '') {
+					$query = "	SELECT *
+								FROM panttitili
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND asiakas = '{$chk_row['liitostunnus']}'
+								AND tuoteno = '{$chk_til_row['tuoteno']}'
+								AND myyntitilausnro = '{$chk_til_row['otunnus']}'
+								AND status = ''
+								AND kaytettypvm = '0000-00-00'
+								AND kaytettytilausnro = 0
+								ORDER BY myyntipvm ASC";
+					$pantti_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($pantti_chk_res) == 0) {
+						echo "<font class='error'>",t("Et voi hyvitt‰‰ laskua, jossa on panttitilillisi‰ tuotteita ja sen pantit on jo k‰ytetty"),"! ({$lasku_x})</font><br>";
+						$tee = "";
+						break 2;
+					}
 				}
 			}
-
 
 			// jos tilauksella on panttituotteita/sarjanumeroita pit‰‰ est‰‰, ett‰ hyvityst‰ ei saa en‰‰ hyvitt‰‰ (clearing=hyvitys)
 			if ($chk_row['clearing'] == 'HYVITYS') {

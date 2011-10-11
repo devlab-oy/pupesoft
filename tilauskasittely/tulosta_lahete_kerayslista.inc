@@ -992,7 +992,7 @@ if (!function_exists('rivi_kerayslista')) {
 
 					$paino += $ypaino;
 				}
-				
+
 				$kala = $kala - $rivinkorkeus;
 
 				// Tulostataan myyntiera
@@ -1002,17 +1002,17 @@ if (!function_exists('rivi_kerayslista')) {
 				}
 
 				if ($yhtiorow["siirtolistatyyppi"] == "A") {
-					
-					if ($trow['myynti_era'] == 1) {
-						$kala = $kala-7;
-					}
-					else {
+
+					if ($trow['myynti_era'] > 1) {
 						$kala = $kala - $rivinkorkeus;
 					}
-					
+					else {
+						$kala = $kala-7;
+					}
+
 					$oikpos = $pdf->strlen((float) $trow["myyntihinta"]." ".$yhtiorow["valkoodi"], $pieni);
 					$pdf->draw_text(520-$oikpos, $kala+15, (float) $trow["myyntihinta"]." ".$yhtiorow["valkoodi"],	$thispage, $pieni);
-					
+
 					if ($trow['myynti_era'] > 1) {
 						$kala = $kala + $rivinkorkeus;
 					}

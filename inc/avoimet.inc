@@ -299,7 +299,7 @@
 			$lisa = '';
 
 			if ($toimittajaid != '')  {
-				$lisa = " and liitostunnus='$toimittajaid'";
+				$lisa = " and lasku.liitostunnus='$toimittajaid'";
 				$indeksi = " use index (yhtio_tila_liitostunnus_tapvm)";
 			}
 			else {
@@ -561,7 +561,7 @@
 			$lisa3 = ""; // asiakas rajauksia
 
 			if ($asiakasid != '')  {
-				$lisa1 .= " and liitostunnus='$asiakasid' ";
+				$lisa1 .= " and lasku.liitostunnus='$asiakasid' ";
 				$lisa2 .= " and asiakas_tunnus='$asiakasid' ";
 				$indeksi = " use index (yhtio_tila_liitostunnus_tapvm)";
 			}

@@ -1673,12 +1673,13 @@
 				echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=tuote&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
-
+		
 		echo "</td></tr>";
 		echo "</table>";
 
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
-		if ($toim == "puun_alkio" or
+		if ($toim == "auto_vari_korvaavat" or
+			$toim == "puun_alkio" or
 			$toim == "toimitustavan_lahdot" or
 			$toim == "keraysvyohyke" or
 			$toim == "avainsana" or

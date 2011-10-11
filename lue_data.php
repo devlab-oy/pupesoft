@@ -66,7 +66,6 @@ if (!$cli and $oikeurow['paivitys'] != '1') { // Saako päivittää
 }
 
 flush();
-
 if (!isset($table)) $table = '';
 $kasitellaan_tiedosto = FALSE;
 
@@ -92,7 +91,7 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 }
 
 if ($kasitellaan_tiedosto) {
-
+	
 	/** PHPExcel kirjasto **/
 	require_once "PHPExcel/PHPExcel/IOFactory.php";
 
@@ -303,7 +302,7 @@ if ($kasitellaan_tiedosto) {
 		}
 	}
 
-	/*
+/*	
 	foreach ($taulunrivit as $taulu => $rivit) {
 
 		list($table_mysql, ) = explode(".", $taulu);
@@ -325,7 +324,7 @@ if ($kasitellaan_tiedosto) {
 		echo "</table><br>";
 	}
 	exit;
-	*/
+*/	
 
 	$taulunrivit_keys = array_keys($taulunrivit);
 
@@ -1725,7 +1724,8 @@ if (!$cli) {
 		'kuka',
 		'extranet_kayttajan_lisatiedot',
 		'auto_vari',
-		'auto_vari_tuote'
+		'auto_vari_tuote',
+		'auto_vari_korvaavat'
 	);
 
 	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
@@ -1736,7 +1736,7 @@ if (!$cli) {
 
 	$sel = array_fill_keys(array($table), " selected") + array_fill_keys($indx, '');
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action=''>
 			<input type='hidden' name='tee' value='file'>
 			<table>
 			<tr>
@@ -1788,7 +1788,8 @@ if (!$cli) {
 					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>
 					<option value='extranet_kayttajan_lisatiedot' $sel[extranet_kayttajan_lisatiedot]>".t("Extranet-käyttäjän lisätietoja")."</option>
 					<option value='varaston_hyllypaikat' {$sel['varaston_hyllypaikat']}>".t("Varaston hyllypaikat")."</option>
-					<option value='toimitustavan_lahdot' {$sel['toimitustavan_lahdot']}>".t("Toimitustavan lähdöt")."</option>";
+					<option value='toimitustavan_lahdot' {$sel['toimitustavan_lahdot']}>".t("Toimitustavan lähdöt")."</option>
+					<option value='auto_vari_korvaavat' $sel[auto_vari_korvaavat]>".t("Auto Väri Korvaavat")."</option>";
 
 			$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
 			$dynaamiset_avainsanat = '';

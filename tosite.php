@@ -257,6 +257,9 @@
 				/** Laitetaan solut arrayseen **/
 				$excelrivi = array();
 
+				/** Aktivoidaan eka sheetti**/
+				$objPHPExcel->setActiveSheetIndex(0);
+
 				/** Loopataan rivit/sarakkeet **/
 				foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
 				    $cellIterator = $row->getCellIterator();
@@ -332,9 +335,15 @@
 								}
 							}
 						}
+						elseif(strtolower($otsikot[$e]) == "summa") {
+
+							${"i".strtolower($otsikot[$e])}[$maara] = round($eriv, 2);
+						}
 						else {
+
 							${"i".strtolower($otsikot[$e])}[$maara] = $eriv;
 						}
+
 					}
 
 					$maara++;

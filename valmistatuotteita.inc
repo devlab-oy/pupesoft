@@ -651,7 +651,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 				//p‰ivitet‰‰n alkuper‰inen rivi
 				$query = "	UPDATE tilausrivi
-							SET varattu = '$jaljella'
+							SET varattu = '$jaljella',
+							kpl 		= round(kpl+$isavarattu,2)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus = '$tilrivirow[otunnus]'
 							and tunnus  = '$tilrivirow[tunnus]'

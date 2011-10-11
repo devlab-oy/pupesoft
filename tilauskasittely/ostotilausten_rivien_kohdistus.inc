@@ -78,7 +78,7 @@ if ($tila == 'valmis') {
 //muokataan tilausrivi‰
 if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
 
-	$query = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta
+	$query = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta, tuote.myyntihinta_maara
 				FROM tilausrivi use index (PRIMARY)
 				LEFT JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 				WHERE tilausrivi.tunnus = '$riviid'
@@ -137,6 +137,10 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
 	$kommentti 		= $trow["kommentti"];
 	$rivinotunnus	= $trow["otunnus"];
 	$rivitunnus		= $riviid;
+
+	if ($trow["myyntihinta_maara"] != 0 and $hinta != 0) {
+		$hinta = hintapyoristys($hinta * $trow["myyntihinta_maara"]);
+	}
 
 	for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
 		${'ale'.$alepostfix} = $trow["ale{$alepostfix}"];
@@ -287,7 +291,7 @@ if ($tee == 'TI' or $tee == "Y") {
 		$prow["hinta"] = $hinrow1["ostohinta"];
 	}
 	else {
-		$prow["hinta"] 		= $hinta;
+		$prow["hinta"] = $hinta;
 	}
 
 	$multi = "";
@@ -1022,7 +1026,7 @@ if ($tila == '') {
 		// tarkastetaan onko hakukent‰ss‰ jotakin
 		if (strlen($haku[$i]) > 0) {
 			#$haku[$i] = str_replace(",",".",$haku[$i]);
-			
+
 			$lisa1 .= " $kentta like '%$haku[$i]%' and";
 
 			//pidet‰‰n muistissa linkkej‰ varten
@@ -1112,7 +1116,7 @@ if ($tila == '') {
 				tilausrivin_lisatiedot.suoratoimitettuaika
 				FROM lasku
 				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
-				LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus) 
+				LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno  and tuote.ei_saldoa = '')
 				LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')

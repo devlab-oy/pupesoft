@@ -2804,8 +2804,20 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikkaan liitettyjen huolinta-/rahtilaskujen summaa");
-		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikalle syˆtetty‰ kuluprosenttia");
+		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikkaan liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
+		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikalle syˆtetty‰ kuluprosenttia")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'varaston_splittaus') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Myyd‰‰n ensin oletuspaikka tyhj‰ksi ja k‰ytet‰‰n sen j‰lkeen muita tuotepaikkoja saldoj‰rjestyksess‰")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Yritet‰‰n myyd‰ kaikki saman varaston sis‰lt‰, ensisijaisesti oletuspaikan varastosta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

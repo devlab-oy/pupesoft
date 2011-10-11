@@ -998,7 +998,24 @@ if (!function_exists('rivi_kerayslista')) {
 				// Tulostataan myyntiera
 				if ($trow['myynti_era'] > 1) {
 					$oikpos = $pdf->strlen(round(($row['varattu']+$row['kpl'])/$trow['myynti_era'],2)." me", $norm);
-					$pdf->draw_text(520-$oikpos, $kala+5, round(($row['varattu']+$row['kpl'])/$trow['myynti_era'],2)." me",	$thispage, $norm);
+					$pdf->draw_text(525-$oikpos, $kala+7, round(($row['varattu']+$row['kpl'])/$trow['myynti_era'],2)." me",	$thispage, $pieni);
+				}
+
+				if ($yhtiorow["siirtolistatyyppi"] == "A") {
+
+					if ($trow['myynti_era'] > 1) {
+						$kala = $kala - $rivinkorkeus;
+					}
+					else {
+						$kala = $kala-7;
+					}
+
+					$oikpos = $pdf->strlen((float) $trow["myyntihinta"]." ".$yhtiorow["valkoodi"], $pieni);
+					$pdf->draw_text(520-$oikpos, $kala+15, (float) $trow["myyntihinta"]." ".$yhtiorow["valkoodi"],	$thispage, $pieni);
+
+					if ($trow['myynti_era'] > 1) {
+						$kala = $kala + $rivinkorkeus;
+					}
 				}
 
 				//Haetan sarjanumeron tiedot

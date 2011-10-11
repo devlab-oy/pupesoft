@@ -4795,7 +4795,7 @@ if ($tee == '') {
 				}
 
 				// voidaan lukita tämä tilausrivi
-				if ($row["uusiotunnus"] > 0 or $laskurow["tunnus"] != $row["otunnus"] or ($laskurow["tila"] == "V" and $row["toimitettuaika"] != '0000-00-00 00:00:00')) {
+				if ($row["uusiotunnus"] > 0 or $laskurow["tunnus"] != $row["otunnus"] or ($laskurow["tila"] == "V" and $row["kpl"] != 0)) {
 					$muokkauslukko_rivi = "LUKOSSA";
 				}
 				else {

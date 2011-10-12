@@ -13291,6 +13291,8 @@ if (!function_exists("tee_keraysera")) {
 					ORDER BY lahto, erotus, lasku.hyvaksynnanmuutos, tilauksen_koko DESC, minimi_indeksi, lasku.h1time ASC, lasku.sisviesti2, keraysvyohyke.nimitys";
 		$res = pupe_query($query);
 
+		$debug_mail = "Keräyserä ja sen muodostuminen\n\n";
+
 		$debug = false;
 
 		if ($debug) {
@@ -13339,6 +13341,9 @@ if (!function_exists("tee_keraysera")) {
 		while ($row = mysql_fetch_assoc($res)) {
 
 			if ($row['erotus'] > $lahtojen_valinen_enimmaisaika) {
+				$debug_mail .= "Lähdön enimmäisaika ylittyi! ({$row['erotus']} > {$lahtojen_valinen_enimmaisaika})\n";
+				$debug_mail .= "Tilauksen tunnus: {$row['tunnus']}\nAsiaskas: {$row['asiakas_nimi']}\nErotus: {$row['erotus']}\nLähtö: {$row['lahto']}\nMinimi_indeksi: {$row['minimi_indeksi']}\nTilauksen koko: {$row['tilauksen_koko']}\nH1time: {$row['h1time']}\nPrioriteetti: {$row['prioriteetti']}\n\n";
+
 				if ($debug) {
 					echo "Lähdön enimmäisaika ylittyi! Let's skip it. ($row[erotus] > $lahtojen_valinen_enimmaisaika)<br>";
 					echo "Laskutunnus: $row[tunnus]<br>Asiaskas: $row[asiakas_nimi]<br>Erotus: $row[erotus]<br>Lähtö: $row[lahto]<br>Minimi_indeksi: $row[minimi_indeksi]<br>Tilauksen koko: $row[tilauksen_koko]<br>H1time: $row[h1time]<br>Prioriteetti: $row[prioriteetti]<br><br>";
@@ -13347,6 +13352,8 @@ if (!function_exists("tee_keraysera")) {
 			}
 
 			if ($eran_koko > $max_keraysera_pintaala) {
+				$debug_mail .= "Keräyserän maksimiraja ylitetty! ({$eran_koko} > {$max_keraysera_pintaala})\n\n";
+
 				if ($debug) {
 					echo "Keräyserän maksimiraja ylitetty! $eran_koko / $max_keraysera_pintaala<br>";
 				}
@@ -13357,6 +13364,8 @@ if (!function_exists("tee_keraysera")) {
 			}
 
 			if (trim($ed_prioriteetti) != '' and $ed_prioriteetti != $row['prioriteetti'] and strpos($yhdistelysaanto, 'P') === false and count($kaytettavat_pakkaukset) > 0) {
+				$debug_mail .= "Keräysvyöhykkeen yhdistelysäännöissä ei sallita useita prioriteetteja. Prioriteetti vaihtui, joten määritellään keräyserä valmiiksi.\n\n";
+
 				if ($debug) {
 					echo "EI SAA OLLA USEITA PRIORITEETTEJÄ ALUSTOISSA! KERÄYSERÄ VALMIS<br>";
 				}
@@ -13368,6 +13377,8 @@ if (!function_exists("tee_keraysera")) {
 			$ed_prioriteetti = $row['prioriteetti'];
 
 			if (trim($ed_lahto) != '' and $ed_lahto != $row['lahto'] and strpos($yhdistelysaanto, 'K') === false and count($kaytettavat_pakkaukset) > 0) {
+				$debug_mail .= "Keräysvyöhykkeen yhdistelysäännöissä ei sallita alustoja useista eri lähdöistä. Lähtö vaihtui, joten määritellään keräyserä valmiiksi.\n\n";
+
 				if ($debug) {
 					echo "EI SAA OLLA ALUSTOJA USEISTA LÄHDÖISTÄ! KERÄYSERÄ VALMIS<br>";
 				}
@@ -13382,6 +13393,8 @@ if (!function_exists("tee_keraysera")) {
 				$asiakkaan_pakkaukset = array();
 
 				if (strpos($yhdistelysaanto, 'S') === false and count($kaytettavat_pakkaukset) > 0) {
+					$debug_mail .= "Keräysvyöhykkeen yhdistelysäännöissä ei sallita useita asiakkaita. Asiakas vaihtui, joten määritellään keräyserä valmiiksi.\n\n";
+
 					if ($debug) {
 						echo "EI SAA OLLA USEITA ASIAKKAITA! KERÄYSERÄ VALMIS<br>";
 					}
@@ -13412,6 +13425,8 @@ if (!function_exists("tee_keraysera")) {
 			while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
 
 				if ($rivit >= $max_keraysera_rivit) {
+					$debug_mail .= "Keräyserän sallittu maksimirivimäärä {$max_keraysera_rivit} ylittyi. Keräyserä on valmis.\n\n";
+
 					if ($debug) {
 						echo "RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $max_keraysera_rivit)<br>";
 					}
@@ -13430,6 +13445,8 @@ if (!function_exists("tee_keraysera")) {
 				$kerayserat_chk_res = pupe_query($query);
 
 				if (mysql_num_rows($kerayserat_chk_res) != 0) {
+
+					$debug_mail .= "Tilausrivi on jo keräyserässä. Ohitetaan kyseinen tilausrivi.\n";
 
 					if ($debug) {
 						echo "Tilausrivi on jo keräyserässä!!!! Let's skip it.<br />";
@@ -13452,6 +13469,8 @@ if (!function_exists("tee_keraysera")) {
 
 					if ($tuoterow['y_maara'] == $kerayserat_chk_row['montako']) {
 
+						$debug_mail .= "Kaikki tilausrivin kappaleet ovat jo keräyserässä. Haetaan seuraava tilausrivi.\n";
+
 						if ($debug) {
 							echo "Kaikki tilausrivin kappaleet ovat jo keräyserissä. Let's skipataan.<br>";
 						}
@@ -13461,6 +13480,14 @@ if (!function_exists("tee_keraysera")) {
 
 					$tuoterow['y_maara'] -= $kerayserat_chk_row['montako'];
 				}
+
+				$debug_mail .= "\nLisätietoja:\n";
+				$debug_mail .= "Tilaus: {$row['tunnus']} Keräysvyöhyke: {$row['keraysvyohyke_nimitys']} ";
+				$debug_mail .= "Max m2: {$max_keraysera_pintaala} Max rivit: {$max_keraysera_rivit} ";
+				$debug_mail .= "Aika: {$row['aika']} Tilauksen koko: {$row['tilauksen_koko']} Asiakas: {$row['asiakas_nimi']} ";
+				$debug_mail .= "Tilausrivi: {$tuoterow['tunnus']} Tuoteno: {$tuoterow['tuoteno']} Tuotteen tilavuus: {$tuoterow['tuotteen_koko']} ";
+				$debug_mail .= "Yks. koko: {$tuoterow['y_koko']} ({$tuoterow['tuoteleveys']} x {$tuoterow['tuotekorkeus']} x {$tuoterow['tuotesyvyys']}) ";
+				$debug_mail .= "Yks. maara: {$tuoterow['y_maara']} Yks. paino: {$tuoterow['y_paino']} Yksin keräysalustalle: {$tuoterow['yksin_kerailyalustalle']}\n\n";
 
 				if ($debug) {
 					echo "<tr>";
@@ -13489,6 +13516,11 @@ if (!function_exists("tee_keraysera")) {
 
 						// skipataan pakkaus, jos yksittäinen tuote ei mahdu kyseiseen laatikkoon
 						if ($tuoterow['tuoteleveys'] > $xarr['leveys'] or $tuoterow['tuotekorkeus'] > $xarr['korkeus'] or $tuoterow['tuotesyvyys'] > $xarr['syvyys']) {
+
+							$debug_mail .= "Tuote {$tuoterow['tuoteno']} ei mahdu pakkaukseen. Poistetaan pakkaus (paketin tunnus: {$pakkauksen_tunnus})\n";
+							$debug_mail .= "Tuotteen leveys: {$tuoterow['tuoteleveys']} Pakkauksen leveys: {$xarr['leveys']}\n";
+							$debug_mail .= "Tuotteen korkeus: {$tuoterow['tuotekorkeus']} Pakkauksen korkeus: {$xarr['korkeus']}\n";
+							$debug_mail .= "Tuotteen syvyys: {$tuoterow['tuotesyvyys']} Pakkauksen syvyys: {$xarr['syvyys']}\n\n";
 
 							if ($debug) {
 								echo "POISTETAAN PAKETTI [$pakkauksen_tunnus]<br>";
@@ -13521,6 +13553,13 @@ if (!function_exists("tee_keraysera")) {
 					continue;
 				}
 
+				$debug_mail .= "Tarkastellaan asiakasta {$row['asiakas_nimi']} (asiakkaan tunnus {$row['asiakas_tunnus']})\n";
+				$debug_mail .= "Tarkastellaan tuotetta {$tuoterow['tuoteno']} ({$tuoterow['y_maara']} kpl)\n";
+
+				if (trim($tuoterow['yksin_kerailyalustalle']) != '') {
+					$debug_mail .= "Tuote tulee yksin keräysalustalle.\n";
+				}
+
 				if ($debug) {
 					echo "ASIAKAS: $row[asiakas_nimi] ($row[asiakas_tunnus])<br>";
 					echo "TUOTE: $tuoterow[tuoteno] ($tuoterow[y_maara] kpl)<br>";
@@ -13532,6 +13571,8 @@ if (!function_exists("tee_keraysera")) {
 				}
 
 				$all_in_one = false;
+
+				$debug_mail .= "Juokseva pakkausnumero: {$juokseva_pakkausnro}\n";
 
 				if ($debug) {
 					echo "Juokseva pakkausnro: $juokseva_pakkausnro<br>";
@@ -13573,6 +13614,8 @@ if (!function_exists("tee_keraysera")) {
 
 								foreach ($arr as $juokseva_pakkausnumero => &$taulukko_chk) {
 
+									$debug_mail .= "Katsotaan mahtuuko aiempaan pakkaukseen ({$key})\n";
+
 									if ($debug) {
 										echo "Katsotaan mahtuuko aiempaan pakkaukseen [$key]<br>";
 									}
@@ -13593,6 +13636,9 @@ if (!function_exists("tee_keraysera")) {
 
 									if ($vapaa_x !== false and $vapaa_y !== false and $vapaa_z !== false and $vapaa_chk_x !== false and $vapaa_chk_y !== false and $vapaa_chk_z !== false) {
 
+										$debug_mail .= "Tuote mahtuu aiempaan pakkaukseen ({$key}). Juokseva pakkausnumero on {$juokseva_pakkausnumero}\n";
+										$debug_mail .= "VapaaChkX: {$vapaa_chk_x} VapaaX: {$vapaa_x} VapaaChkY: {$vapaa_chk_y} VapaaY: {$vapaa_y} VapaaChkZ: {$vapaa_chk_z} VapaaZ: {$vapaa_z}\n\n";
+
 										if ($debug) {
 											echo "MAHTUU AIEMPAAN PAKKAUKSEEN!!!! [$key] juokseva: $juokseva_pakkausnumero<br>";
 											echo "vapaa_chk_x: $vapaa_chk_x ($vapaa_x) vapaa_chk_y: $vapaa_chk_y ($vapaa_y) vapaa_chk_z: $vapaa_chk_z ($vapaa_z)<br><br>";
@@ -13601,11 +13647,16 @@ if (!function_exists("tee_keraysera")) {
 										if ($pakkaukset[$key]['paino'] > ($pakkauksen_paino + $tuotteenpaino)) {
 											$pakkauksen_paino += $tuotteenpaino;
 
+											$debug_mail .= "Pakkauksen paino nyt: {$pakkauksen_paino}\n";
+
 											if ($debug) {
 												echo "Pakkauksen paino nyt: $pakkauksen_paino<br>";
 											}
 										}
 										else {
+											$debug_mail .= "Paino ylittää pakkauksen maksimipainon. Ei lisätä tuotetta pakkaukseen\n";
+											$debug_mail .= "Pakkauksen paino: {$pakkauksen_paino} Tuotteen paino: {$tuotteenpaino} Pakkauksen max paino: {$pakkaukset[$key]['paino']}\n";
+
 											if ($debug) {
 												echo "PAINO YLITTÄÄ PAKKAUKSEN MAKSIMIPAINON! ($pakkauksen_paino + $tuotteenpaino > {$pakkaukset[$key]['paino']})<br>";
 											}
@@ -13628,6 +13679,8 @@ if (!function_exists("tee_keraysera")) {
 										$rivit++;
 
 										if ($i == $tuoterow['y_maara']) {
+											$debug_mail .= "Keräyserän koko nyt: {$eran_koko}\n\n";
+
 											if ($debug) {
 												echo "Erän koko nyt: $eran_koko<br><br>";
 											}
@@ -13652,6 +13705,8 @@ if (!function_exists("tee_keraysera")) {
 						foreach ($sopiva_pakkaus as $key => &$taulukko_chk) {
 
 							if (trim($tuoterow['yksin_kerailyalustalle']) != '') {
+
+								$debug_mail .= "Tuote lisätään nyt omalle keräysalustalle.\n";
 
 								if ($debug) {
 									echo "TUOTE LISÄTÄÄN NYT OMALLE KERÄYSALUSTALLE!!!!<br>";
@@ -13691,6 +13746,8 @@ if (!function_exists("tee_keraysera")) {
 								$pakkauksen_paino = 0;
 								$rivit++;
 
+								$debug_mail .= "Lisätään uusi pakkaus. Juokseva pakkausnumero: {$juokseva_pakkausnro}\n\n";
+
 								if ($debug) {
 									echo "Lisätään uusi laatikko! juokseva: $juokseva_pakkausnro<br>";
 									echo "=================================<br><br>";
@@ -13718,6 +13775,10 @@ if (!function_exists("tee_keraysera")) {
 
 							extract($return_params);
 
+							$debug_mail .= "VapaaX: {$vapaa_x} VapaaY: {$vapaa_y} VapaaZ: {$vapaa_z}\n";
+							$debug_mail .= "VapaaChkX: {$vapaa_chk_x} VapaaChkY: {$vapaa_chk_y}, VapaaChkZ: {$vapaa_chk_z}\n";
+							$debug_mail .= "KPL: {$i}\n";
+
 							if ($debug) {
 								echo "vapaa_x: $vapaa_x, vapaa_y: $vapaa_y, vapaa_z: $vapaa_z<br>";
 								echo "vapaa_chk_x: $vapaa_chk_x, vapaa_chk_y: $vapaa_chk_y, vapaa_chk_z: $vapaa_chk_z<br>";
@@ -13730,6 +13791,11 @@ if (!function_exists("tee_keraysera")) {
 
 									// skipataan pakkaus, jos yksittäinen tuote ei mahdu kyseiseen laatikkoon
 									if ($tuoterow['tuoteleveys'] > $qarr['leveys'] or $tuoterow['tuotekorkeus'] > $qarr['korkeus'] or $tuoterow['tuotesyvyys'] > $qarr['syvyys']) {
+										$debug_mail .= "Tuote {$tuoterow['tuoteno']} ei mahdu pakkaukseen (pakkauksen tunnus {$pakkauksen_tunnus})\n";
+										$debug_mail .= "Tuotteen leveys: {$tuoterow['tuoteleveys']} Pakkauksen leveys: {$qarr['leveys']}\n";
+										$debug_mail .= "Tuotteen korkeus: {$tuoterow['tuotekorkeus']} Pakkauksen korkeus: {$qarr['korkeus']}\n";
+										$debug_mail .= "Tuotteen syvyys: {$tuoterow['tuotesyvyys']} Pakkauksen syvyys: {$qarr['syvyys']}\n\n";
+
 										if ($debug) {
 											echo "TUOTE EI VOI MAHTUA PAKETTIIN [$pakkauksen_tunnus]<br>";
 											echo "$tuoterow[tuoteleveys] > $qarr[leveys] or $tuoterow[tuotekorkeus] > $qarr[korkeus] or $tuoterow[tuotesyvyys] > $qarr[syvyys]<br><br>";
@@ -13740,6 +13806,10 @@ if (!function_exists("tee_keraysera")) {
 								}
 
 								$asiakkaan_pakkaukset[$key][$juokseva_pakkausnro] = $taulukko_chk;
+
+								if ($ed_asiakas == $row['liitostunnus']) {
+									$debug_mail .= "Asiakas {$row['asiakas_nimi']} on sama kuin viime kierroksella.\n";
+								}
 
 								if ($debug) {
 									if ($ed_asiakas == $row['liitostunnus']) {
@@ -13753,12 +13823,17 @@ if (!function_exists("tee_keraysera")) {
 
 								$eran_koko += ($pakkaukset[$key]['leveys'] * $pakkaukset[$key]['syvyys']);
 
+								$debug_mail .= "Pakkaus käytetty ({$pakkaukset[$key]['leveys']} x {$pakkaukset[$key]['syvyys']}): ".($pakkaukset[$key]['leveys'] * $pakkaukset[$key]['syvyys'])." (resoluutio: {$resoluutio}) / {$max_keraysera_pintaala}\n";
+								$debug_mail .= "Erän koko nyt: {$eran_koko}\n";
+
 								if ($debug) {
 									echo "Pakkaus käytetty ({$pakkaukset[$key]['leveys']} x {$pakkaukset[$key]['syvyys']}): ".($pakkaukset[$key]['leveys'] * $pakkaukset[$key]['syvyys'])." (resoluutio: $resoluutio) / $max_keraysera_pintaala<br>";
 									echo "Erän koko nyt: $eran_koko<br>";
 								}
 
 								if (count($pakkaukset) == 0) {
+									$debug_mail .= "Käytettäviä pakkauksia ei ole enää jäljellä. Keräyserä on valmis.\n\n";
+
 									if ($debug) {
 										echo "Käytettäviä pakkauksia ei ole enää jäljellä! Keräyserä valmis.<br><br>";
 									}
@@ -13773,6 +13848,8 @@ if (!function_exists("tee_keraysera")) {
 
 								$ed_juokseva = $juokseva_pakkausnro;
 								$juokseva_pakkausnro++;
+
+								$debug_mail .= "Lisätään uusi pakkaus.\n\n";
 
 								if ($debug) {
 									echo "Lisätään uusi laatikko!<br>";
@@ -13790,6 +13867,8 @@ if (!function_exists("tee_keraysera")) {
 							}
 							else {
 
+								$debug_mail .= "VapaaChkX: {$vapaa_chk_x} VapaaX: {$vapaa_x} VapaaChkY: {$vapaa_chk_y} VapaaY: {$vapaa_y} VapaaChkZ: {$vapaa_chk_z} VapaaZ: {$vapaa_z}\n\n";
+
 								if ($debug) {
 									echo "vapaa_chk_x: $vapaa_chk_x ($vapaa_x) vapaa_chk_y: $vapaa_chk_y ($vapaa_y) vapaa_chk_z: $vapaa_chk_z ($vapaa_z)<br><br>";
 								}
@@ -13797,11 +13876,19 @@ if (!function_exists("tee_keraysera")) {
 								if ($pakkaukset[$key]['paino'] > ($pakkauksen_paino + $tuotteenpaino)) {
 									$pakkauksen_paino += $tuotteenpaino;
 
+									$debug_mail .= "Pakkauksen ({$key}) paino nyt: $pakkauksen_paino\n";
+
 									if ($debug) {
 										echo "Pakkauksen [$key] paino nyt: $pakkauksen_paino<br>";
 									}
 								}
 								else {
+
+									$debug_mail .= "Paino ylittää pakkauksen maksimipainon.\n";
+									$debug_mail .= "Pakkauksen paino: {$pakkauksen_paino}\n";
+									$debug_mail .= "Tuotteen paino: {$tuotteenpaino}\n";
+									$debug_mail .= "Pakkauksen maksimipaino: {$pakkaukset[$key]['paino']}\n\n";
+
 									if ($debug) {
 										echo "PAINO YLITTÄÄ PAKKAUKSEN MAKSIMIPAINON! ($pakkauksen_paino + $tuotteenpaino > {$pakkaukset[$key]['paino']})<br>";
 									}
@@ -13845,6 +13932,8 @@ if (!function_exists("tee_keraysera")) {
 				$ed_sisviesti2 = $row['sisviesti2'];
 			}
 
+			$debug_mail .= "==========================================================\n\n\n";
+
 			if ($debug) {
 				echo "==========================================================<br>";
 				echo "==========================================================<br><br><br><br>";
@@ -13852,6 +13941,23 @@ if (!function_exists("tee_keraysera")) {
 		}
 
 		if ($debug) echo "</table>";
+
+		if ($era_valmis) $debug_mail .= "Keräyserä on valmis.\n";
+		elseif (count($erat['tilaukset']) == 0) $debug_mail .= "Keräyserä on tyhjä.\n";
+
+		if ($kukarow['eposti'] != '') {
+			$komento = 'email';
+
+			$pp = date("d");
+			$kk = date("m");
+			$vv = date("Y");
+
+			$kutsu = t("Keräyserä debug")." $vv-$kk-$pp";
+			$ctype = "TEXT";
+			$content_body = $debug_mail;
+
+			require("inc/sahkoposti.inc");
+		}
 
 		if ($debug) {
 			if ($era_valmis) echo "ERÄ VALMIS!!!<br>";

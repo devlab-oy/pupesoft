@@ -152,48 +152,62 @@
 		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 		// Katsotaan onko k‰ytt‰j‰ll‰ jo ker‰yser‰ ker‰yksess‰
-		$query = "	SELECT tilausrivi, tunnus, pakkausnro, sscc
+		// $query = "	SELECT tilausrivi, tunnus, pakkausnro, sscc
+		// 			FROM kerayserat
+		// 			WHERE yhtio = '{$kukarow['yhtio']}'
+		// 			AND laatija = '{$kukarow['kuka']}'
+		// 			AND tila = 'K'
+		// 			ORDER BY sscc, otunnus, pakkausnro";
+
+		$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
 					FROM kerayserat
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laatija = '{$kukarow['kuka']}'
-					AND tila = 'K'
-					ORDER BY sscc, otunnus, pakkausnro";
+					AND tila = 'K'";
 		$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 
-		if (mysql_num_rows($result) > 0) {
+		$row = mysql_fetch_assoc($result);
 
-			$kpl = mysql_num_rows($result);
+		// if (mysql_num_rows($result) > 0) {
+		if (trim($row['tilausrivit']) != '') {
+
+			$kpl_arr = explode(",", $row['tilausrivit']);
+			$kpl = count($kpl_arr);
 			$n = 1;
 
-			while ($row = mysql_fetch_assoc($result)) {
+			// while ($row = mysql_fetch_assoc($result)) {
 
 				$query = "	SELECT keraysvyohyke.nimitys AS ker_nimitys,
 							tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
 							IFNULL(vh.varmistuskoodi, '00') AS varmistuskoodi,
-							tilausrivi.tuoteno, ROUND(tilausrivi.varattu, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys
+							tilausrivi.tuoteno, ROUND(tilausrivi.varattu, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
+							kerayserat.pakkausnro, kerayserat.sscc, kerayserat.tunnus AS kerayseran_tunnus
 							FROM tilausrivi
+							JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = tuote.keraysvyohyke)
 							JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-							AND tilausrivi.tunnus = '{$row['tilausrivi']}'";
+							AND tilausrivi.tunnus IN ({$row['tilausrivit']})
+							ORDER BY kerayserat.sscc, vh.indeksi, kerayserat.otunnus, kerayserat.pakkausnro";
 				$rivi_result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe\r\n\r\n");
-				$rivi_row = mysql_fetch_assoc($rivi_result);
 
-				$pakkauskirjain = chr((64+$row['pakkausnro']));
-				$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
+				while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
+					$pakkauskirjain = chr((64+$rivi_row['pakkausnro']));
+					$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
 
-				$hyllypaikka = $rivi_row['hyllyalue'];
-				$hyllypaikka = trim($rivi_row['hyllynro']) != '' ? $hyllypaikka."-".$rivi_row['hyllynro'] : $hyllypaikka;
-				$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka."-".$rivi_row['hyllyvali'] : $hyllypaikka;
-				$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka."-".$rivi_row['hyllytaso'] : $hyllypaikka;
+					$hyllypaikka = $rivi_row['hyllyalue'];
+					$hyllypaikka = trim($rivi_row['hyllynro']) != '' ? $hyllypaikka."-".$rivi_row['hyllynro'] : $hyllypaikka;
+					$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka."-".$rivi_row['hyllyvali'] : $hyllypaikka;
+					$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka."-".$rivi_row['hyllytaso'] : $hyllypaikka;
 
-				$response .= "N,";
-				$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
-				$response .= "{$kpl} rivi‰,{$row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$row['tunnus']},{$tuotteen_nimitys},Rivi {$n},0\r\n";
+					$response .= "N,";
+					$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
+					$response .= "{$kpl} rivi‰,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},Rivi {$n},0\r\n";
 
-				$n++;
-			}
+					$n++;
+				}
+			// }
 
 			$response .= "\r\n";
 		}
@@ -228,46 +242,60 @@
 							AND tunnus in ({$otunnukset})";
 				$upd_res = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe tilauksen p‰ivityksen yhteydess‰\r\n\r\n");
 
-				$query = "	SELECT tilausrivi, tunnus, pakkausnro, sscc
+				// $query = "	SELECT tilausrivi, tunnus, pakkausnro, sscc
+				// 			FROM kerayserat
+				// 			WHERE yhtio = '{$kukarow['yhtio']}'
+				// 			AND laatija = '{$kukarow['kuka']}'
+				// 			AND tila = 'K'
+				// 			ORDER BY sscc, otunnus, pakkausnro";
+
+				$query = "	SELECT GROUP_CONCAT(tilausrivi) AS tilausrivit
 							FROM kerayserat
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND laatija = '{$kukarow['kuka']}'
-							AND tila = 'K'
-							ORDER BY sscc, otunnus, pakkausnro";
+							AND tila = 'K'";
 				$result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe ker‰yser‰‰ haettaessa\r\n\r\n");
 
-				$kpl = mysql_num_rows($result);
+				$row = mysql_fetch_assoc($result);
+
+				$kpl_arr = explode(",", $row['tilausrivit']);
+				$kpl = count($kpl_arr);
 				$n = 1;
 
-				while ($row = mysql_fetch_assoc($result)) {
+				// while ($row = mysql_fetch_assoc($result)) {
 
 					$query = "	SELECT keraysvyohyke.nimitys AS ker_nimitys,
 								tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
 								IFNULL(vh.varmistuskoodi, '00') AS varmistuskoodi,
-								tilausrivi.tuoteno, ROUND(tilausrivi.varattu, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys
+								tilausrivi.tuoteno, ROUND(tilausrivi.varattu, 0) AS varattu, tilausrivi.yksikko, tuote.nimitys,
+								kerayserat.pakkausnro, kerayserat.sscc, kerayserat.tunnus AS kerayseran_tunnus
 								FROM tilausrivi
+								JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = tuote.keraysvyohyke)
 								JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.tunnus = '{$row['tilausrivi']}'";
+								AND tilausrivi.tunnus IN ({$row['tilausrivit']})
+								ORDER BY kerayserat.sscc, vh.indeksi, kerayserat.otunnus, kerayserat.pakkausnro";
 					$rivi_result = mysql_query($query) or die("1, Tietokantayhteydess‰ virhe\r\n\r\n");
-					$rivi_row = mysql_fetch_assoc($rivi_result);
 
-					$pakkauskirjain = chr((64+$row['pakkausnro']));
-					$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
+					while ($rivi_row = mysql_fetch_assoc($rivi_result)) {
 
-					$hyllypaikka = $rivi_row['hyllyalue'];
-					$hyllypaikka = trim($rivi_row['hyllynro']) != '' ? $hyllypaikka."-".$rivi_row['hyllynro'] : $hyllypaikka;
-					$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka."-".$rivi_row['hyllyvali'] : $hyllypaikka;
-					$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka."-".$rivi_row['hyllytaso'] : $hyllypaikka;
+						$pakkauskirjain = chr((64+$rivi_row['pakkausnro']));
+						$tuotteen_nimitys = str_replace(array("'", ","), "", $rivi_row['nimitys']);
 
-					$response .= "N,";
-					$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
-					$response .= "{$kpl} rivi‰,{$row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$row['tunnus']},{$tuotteen_nimitys},Rivi {$n},0\r\n";
+						$hyllypaikka = $rivi_row['hyllyalue'];
+						$hyllypaikka = trim($rivi_row['hyllynro']) != '' ? $hyllypaikka."-".$rivi_row['hyllynro'] : $hyllypaikka;
+						$hyllypaikka = trim($rivi_row['hyllyvali']) != '' ? $hyllypaikka."-".$rivi_row['hyllyvali'] : $hyllypaikka;
+						$hyllypaikka = trim($rivi_row['hyllytaso']) != '' ? $hyllypaikka."-".$rivi_row['hyllytaso'] : $hyllypaikka;
 
-					$n++;
-				}
+						$response .= "N,";
+						$response .= substr($rivi_row['ker_nimitys'], 0, 255).",";
+						$response .= "{$kpl} rivi‰,{$rivi_row['sscc']},{$hyllypaikka},{$rivi_row['varmistuskoodi']},{$rivi_row['tuoteno']},{$rivi_row['varattu']},{$rivi_row['yksikko']},{$pakkauskirjain},{$rivi_row['kerayseran_tunnus']},{$tuotteen_nimitys},Rivi {$n},0\r\n";
+
+						$n++;
+					}
+				// }
 
 				$response .= "\r\n";
 			}

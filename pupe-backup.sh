@@ -7,7 +7,7 @@ DBSALASANA=$4
 BACKUPPAIVAT=$5
 
 # Katsotaan, onko salausavain syötetty
-if [ ! -n $6 ]; then
+if [ ! -z $6 ]; then
 	SALAUSAVAIN=$6
 fi
 

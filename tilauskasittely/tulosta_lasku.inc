@@ -1289,7 +1289,7 @@ if (!function_exists('loppu')) {
 	function loppu ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $thispage, $masrow, $sivu, $summa, $arvo, $page, $vientikala, $laskutyyppi, $vikasivu = "") {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
-		if ($yhtiorow["viivakoodi_laskulle"] == "K" and $laskurow["maa"] == "FI" and $laskurow["summa"] > 0 and $vikasivu != "" and function_exists("imagecreate")) {
+		if ($yhtiorow["viivakoodi_laskulle"] == "K" and $laskurow["maa"] == "FI" and $laskurow["summa"] > 0 and $vikasivu != "" and function_exists("imagecreate") and $laskurow["vienti"] == "" and strtoupper($laskurow["maa"]) == strtoupper($yhtiorow["maa"])) {
 			$piirra_viivakoodi = true;
 			$barcode_korkeus = 50;
 		}
@@ -1302,10 +1302,6 @@ if (!function_exists('loppu')) {
 			for ($pp=1; $pp<=$sivu; $pp++) {
 				$pdf_lasku->draw_text(500, 815, t("Sivu", $kieli).": $pp / $sivu", $page[$pp], $norm);
 			}
-		}
-
-		if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maa"])) {
-			$piirra_viivakoodi = false;
 		}
 
 		//yhteensärivi

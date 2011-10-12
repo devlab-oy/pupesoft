@@ -91,7 +91,7 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 }
 
 if ($kasitellaan_tiedosto) {
-	
+
 	/** PHPExcel kirjasto **/
 	require_once "PHPExcel/PHPExcel/IOFactory.php";
 
@@ -302,7 +302,7 @@ if ($kasitellaan_tiedosto) {
 		}
 	}
 
-/*	
+/*
 	foreach ($taulunrivit as $taulu => $rivit) {
 
 		list($table_mysql, ) = explode(".", $taulu);
@@ -324,7 +324,7 @@ if ($kasitellaan_tiedosto) {
 		echo "</table><br>";
 	}
 	exit;
-*/	
+*/
 
 	$taulunrivit_keys = array_keys($taulunrivit);
 
@@ -349,6 +349,7 @@ if ($kasitellaan_tiedosto) {
 		$apu_sarakkeet	= array();
 		$rivimaara 		= count($rivit);
 		$dynaamiset_rivit = array();
+		$rep 			= ""; 
 
 		// Siivotaan joinit ja muut pois tietokannan nimestä
 		list($table_mysql, ) = explode(".", $taulu);
@@ -417,7 +418,7 @@ if ($kasitellaan_tiedosto) {
 					$postoiminto = (string) array_search($column, $taulunotsikot[$taulu]);
 				}
 				else {
-					if (!isset($trows[$table_mysql.".".$column])) {
+					if (!isset($trows[$table_mysql.".".$column]) and $table_mysql !="auto_vari_korvaavat") {
 						echo "<font class='error'>".t("Saraketta")." \"$column\" ".t("ei löydy")." $table_mysql-".t("taulusta")."!</font><br>";
 						$vikaa++;
 					}
@@ -455,6 +456,17 @@ if ($kasitellaan_tiedosto) {
 			}
 		}
 
+
+		// Tässä huijataan Pupea että, excel-tiedostossa on kenttä AVK_TUNNUS joka tarkoittaa oikeasti TUNNUS-kenttää.
+		foreach($taulunotsikot['auto_vari_korvaavat'] as $kentta => $value) {
+			if ($value == 'AVK_TUNNUS') {
+				$rep = array($kentta => 'TUNNUS');
+			}
+		}
+		if ($rep !="") {
+			$taulunotsikot['auto_vari_korvaavat'] = array_replace($taulunotsikot['auto_vari_korvaavat'], $rep);
+		}
+
 		// Oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
 		if ($vikaa != 0 or $tarkea != count($pakolliset) or $postoiminto == 'X' or $kielletty > 0 or (is_array($wherelliset) and $wheretarkea != count($wherelliset))) {
 
@@ -478,7 +490,7 @@ if ($kasitellaan_tiedosto) {
 				echo "<font class='error'>".t("Yrität päivittää kiellettyjä sarakkeita")." $table_mysql-".t("taulussa")."!</font><br>$viesti";
 			}
 
-			if (is_array($wherelliset) and $wheretarkea != count($wherelliset)) {
+			if (is_array($wherelliset) and $wheretarkea != count($wherelliset) ) {
 				echo "<font class='error'>".t("Sinulta puuttui jokin pakollisista sarakkeista")." (";
 
 				foreach ($wherelliset as $apupako) echo "$apupako ";
@@ -571,6 +583,19 @@ if ($kasitellaan_tiedosto) {
 			if (is_array($wherelliset)) {
 				$indeksi = array_merge($indeksi, $indeksi_where);
 				$indeksi = array_unique($indeksi);
+			}
+
+			if ($table_mysql == 'auto_vari_korvaavat' and $rivi[$postoiminto] == "MUUTA") {
+
+				 // Okei, tämä on HardKoodattua, Mutta sen pitää olla arvo 2.
+				 // Toi tulee pakollisista_sarakkeista.
+				 // 0 = varikoodi, 1 = korvaava_varikoodi
+				 // Jos muutetaan pakollisia kenttiä niin $rep arrayn Tunnus arvoa pitää kasvattaa, tai menee metsään ja kovaa
+				 // EXCELissä pitää olla vain nämä kentät: VARIKOODI, KORVAAVA_VARIKOODI, AVK_TUNNUS, AVK_TUNNUS muutetaan TUNNUS-otsikoksi rivillä 467
+				$rep = array('TUNNUS' => 2);
+				$indeksi = array_replace($indeksi, $rep);
+				$indeksi = array_unique($indeksi);
+				$apumuuttuja = "TOTTA";
 			}
 
 			foreach ($indeksi as $j) {
@@ -776,6 +801,16 @@ if ($kasitellaan_tiedosto) {
 					}
 
 					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='$apu_ytunnus'";
+				}
+				elseif ($table_mysql == 'auto_vari_korvaavat' and $apumuuttuja == "TOTTA") {
+					if ($taulunotsikot[$taulu][$j] == "TUNNUS") {
+						$valinta .= " and tunnus = '".trim(pupesoft_cleanstring($rivi[$j]))."'";
+						$apumuuttuja == "VALETTA";
+					}
+					else {
+						$apuvalinta .= " and ".$taulunotsikot[$taulu][$j]."='".trim(pupesoft_cleanstring($rivi[$j]))."'";
+						
+					}
 				}
 				else {
 					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='".trim(pupesoft_cleanstring($rivi[$j]))."'";
@@ -993,6 +1028,12 @@ if ($kasitellaan_tiedosto) {
 					elseif ($eiyhtiota == "TRIP") {
 						$query = "UPDATE $table_mysql SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 	      			}
+				}
+				
+				// erikoiskeissi, halutaan SET-arvoihin muuttuneet arvot, muuten ne menisi WHEREEN
+				if ($rivi[$postoiminto] == 'MUUTA' and $table_mysql == "auto_vari_korvaavat") {
+					$apuvalinta = str_replace("and", ",", $apuvalinta);
+					$query .= $apuvalinta;
 				}
 
 				if ($rivi[$postoiminto] == 'POISTA') {

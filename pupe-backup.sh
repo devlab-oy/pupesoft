@@ -73,7 +73,7 @@ tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
 echo -n `date "+%Y-%m-%d %H:%M:%S"`
 echo " - Bzip2 done."
 
-if [ ! -n ${SALAUSAVAIN} ]; then
+if [ ! -z ${SALAUSAVAIN} ]; then
 	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
 
 	if [[ $? != 0 ]]; then
@@ -154,6 +154,15 @@ if [ -d etc/httpd/conf/ ]; then
 fi
 
 tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2  ${PUPEPOLKU}/inc/salasanat.php etc/cron.* ${BACKUPFILET}
+
+if [ ! -z ${SALAUSAVAIN} ]; then
+	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
+
+	if [[ $? != 0 ]]; then
+		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
+		echo
+	fi
+fi
 
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete

@@ -80,6 +80,9 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 		$kasitellaan_tiedosto = FALSE;
 	}
 
+	$path_parts = pathinfo($_FILES['userfile']['name']);
+	$ext = strtoupper($path_parts['extension']);
+
 	if (!$cli) echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
 
 	$retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT"));
@@ -92,51 +95,68 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 
 if ($kasitellaan_tiedosto) {
 
-	/** PHPExcel kirjasto **/
-	require_once "PHPExcel/PHPExcel/IOFactory.php";
+	if ($ext == "CSV" or $ext == "TXT") {
+		/** Ladataan file **/
+		$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
 
-	/** Tunnistetaan tiedostomuoto **/
-	$inputFileType = PHPExcel_IOFactory::identify($_FILES['userfile']['tmp_name']);
+		/** Laitetaan rivit arrayseen **/
+		$excelrivit = array();
 
-	/** Luodaan readeri **/
-	$objReader = PHPExcel_IOFactory::createReader($inputFileType);
+		$rowIndex = 0;
 
-	/** Ladataan vain solujen datat (ei formatointeja jne) **/
-	if ($inputFileType != "CSV") {
+		while ($rivi = fgets($file)) {
+			// luetaan rivi tiedostosta..
+			$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
+
+			for ($colIndex = 0; $colIndex < count($rivi); $colIndex++) {
+				$excelrivit[$rowIndex][$colIndex] = trim($rivi[$colIndex]);
+			}
+
+			$rowIndex++;
+		}
+
+		fclose($file);
+	}
+	else {
+		/** PHPExcel kirjasto **/
+		require_once "PHPExcel/PHPExcel/IOFactory.php";
+
+		/** Tunnistetaan tiedostomuoto **/
+		$inputFileType = PHPExcel_IOFactory::identify($_FILES['userfile']['tmp_name']);
+
+		/** Luodaan readeri **/
+		$objReader = PHPExcel_IOFactory::createReader($inputFileType);
+
+		/** Ladataan vain solujen datat (ei formatointeja jne) **/
 		$objReader->setReadDataOnly(true);
+
+		/** Ladataan file halutuilla parametreilla **/
+		$objPHPExcel = $objReader->load($_FILES['userfile']['tmp_name']);
+
+		/** Laitetaan rivit arrayseen **/
+		$excelrivit = array();
+
+		/** Aktivoidaan eka sheetti**/
+		$objPHPExcel->setActiveSheetIndex(0);
+
+		/** Loopataan tiedoston rivit **/
+		foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
+		    $cellIterator = $row->getCellIterator();
+		    $cellIterator->setIterateOnlyExistingCells(false);
+
+			$rowIndex = ($row->getRowIndex())-1;
+
+		    foreach ($cellIterator as $cell) {
+		        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
+
+				$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
+		    }
+		}
+
+		/** Tuhotaan excel oliot **/
+		unset($objReader);
+		unset($objPHPExcel);
 	}
-
-	if ($inputFileType == "CSV") {
-		$objReader->setDelimiter("\t");
-		$objReader->setInputEncoding("ISO-8859-1");
-	}
-
-	/** Ladataan file halutuilla parametreilla **/
-	$objPHPExcel = $objReader->load($_FILES['userfile']['tmp_name']);
-
-	/** Laitetaan rivit arrayseen **/
-	$excelrivit = array();
-
-	/** Aktivoidaan eka sheetti**/
-	$objPHPExcel->setActiveSheetIndex(0);
-
-	/** Loopataan tiedoston rivit **/
-	foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
-	    $cellIterator = $row->getCellIterator();
-	    $cellIterator->setIterateOnlyExistingCells(false);
-
-		$rowIndex = ($row->getRowIndex())-1;
-
-	    foreach ($cellIterator as $cell) {
-	        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
-
-			$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
-	    }
-	}
-
-	/** Tuhotaan excel oliot **/
-	unset($objReader);
-	unset($objPHPExcel);
 
 	/** Otetaan tiedoston otsikkorivi **/
 	$headers = $excelrivit[0];

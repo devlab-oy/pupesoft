@@ -311,12 +311,12 @@ else {
 			if ($row["vihapvm"] == "0000-00-00") $row["vihapvm"] = '1970-01-01';
 
 			// haetaan eka ja vika saapumispäivä
-			$query  = "	SELECT date_format(ifnull(min(laadittu),'1970-01-01'),'%Y-%m-%d') min, 
+			$query  = "	SELECT date_format(ifnull(min(laadittu),'1970-01-01'),'%Y-%m-%d') min,
 						date_format(ifnull(max(laadittu),'1970-01-01'),'%Y-%m-%d') max
 						FROM tapahtuma
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tuoteno = '$row[tuoteno]'
-						AND laji = 'Tulo'";
+						AND laji in ('tulo', 'valmistus')";
 			$tapres = mysql_query($query) or pupe_error($query);
 			$taprow = mysql_fetch_assoc($tapres);
 

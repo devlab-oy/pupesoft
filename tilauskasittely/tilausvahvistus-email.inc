@@ -120,6 +120,13 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		$ale_query_select_lisa .= " tilausrivi.ale{$alepostfix},";
 	}
 
+	if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
+		$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
+	}
+	else {
+		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
@@ -128,6 +135,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				$tyyppilisa
 				and $wherelisa
 				ORDER BY tilausrivi.tunnus";
 	$tilvahresult = mysql_query($query) or pupe_error($query);
@@ -167,6 +175,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			$query = "	SELECT distinct(toimaika)
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]'
+						$tyyppilisa
 						and otunnus IN ($laskurow[nippu])
 						and toimaika != '0000-00-00'";
 			$toimaikares = mysql_query($query) or pupe_error($query);

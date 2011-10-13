@@ -64,7 +64,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 			$chk_row = mysql_fetch_assoc($chk_res);
 
 			// Hyvitett‰v‰n laskun rivit
-			$query = "	SELECT tilausrivi.otunnus, tuote.panttitili, tuote.sarjanumeroseuranta, tuote.tuoteno
+			$query = "	SELECT tilausrivi.otunnus, tuote.panttitili, tuote.sarjanumeroseuranta, tuote.tuoteno, tilausrivi.varattu
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -77,7 +77,8 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 				// (status, kaytettypvm, kaytettytilausnro pit‰‰ olla tyhj‰‰). jos ei ole, niin hyvityst‰ ei voida tehd‰, virhe "panttitilituotteet on jo k‰ytetty"
 				// etsit‰‰n vanhin pantti
 
-				if ($chk_til_row['panttitili'] != '') {
+				if ($chk_til_row['panttitili'] != '' and $chk_til_row['varattu'] < 0) {
+
 					$query = "	SELECT *
 								FROM panttitili
 								WHERE yhtio = '{$kukarow['yhtio']}'

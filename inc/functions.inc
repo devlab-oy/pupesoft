@@ -8407,23 +8407,28 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		}
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") !== FALSE) {
-			require("tulosta_tilausvahvistus_pdf.inc");
+			if (@include("tilauskasittely/tulosta_tilausvahvistus_pdf.inc"));
+			else require("tulosta_tilausvahvistus_pdf.inc");
 		}
 		else {
 			if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
-				require("tilausvahvistus-edi.inc");
+				if (@include("tilauskasittely/tilausvahvistus-edi.inc"));
+				else require("tilausvahvistus-edi.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-				require("tilausvahvistus-email.inc");
+				if (@include("tilauskasittely/tilausvahvistus-email.inc"));
+				else require("tilausvahvistus-email.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
-				require("tilausvahvistus-fax.inc");
+				if (@include("tilauskasittely/tilausvahvistus-fax.inc"));
+				else require("tilausvahvistus-fax.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
-				require("tilausvahvistus-futursoft.inc");
+				if (@include("tilauskasittely/tilausvahvistus-futursoft.inc"));
+				else require("tilausvahvistus-futursoft.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
@@ -8439,7 +8444,8 @@ if (!function_exists("laheta_tilausvahvistus")) {
 					$toim_save = $toim;
 					if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
 
-					require("tulosta_tilausvahvistus_pdf.inc");
+					if (@include("tilauskasittely/tulosta_tilausvahvistus_pdf.inc"));
+					else require("tulosta_tilausvahvistus_pdf.inc");
 					$toim = $toim_save;
 				}
 			}
@@ -8834,7 +8840,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
 		$query = "	SELECT *
 					FROM yhtio
-					WHERE yhtio='$yhtio'";
+					WHERE yhtio = '$yhtio'";
 		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 		if (mysql_num_rows($result) == 0) {

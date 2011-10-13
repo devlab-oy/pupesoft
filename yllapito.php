@@ -1643,7 +1643,7 @@
 
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {
-			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot") and $toim == 'toimitustapa') {
+			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot")) {
 				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=@$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
@@ -1673,12 +1673,23 @@
 				echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=puun_alkio&laji=tuote&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
-		
+
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "auto_vari") {
+			if (tarkista_oikeus("yllapito.php", "auto_vari_tuote")) {
+				echo "<iframe id='auto_vari_tuote_iframe' name='auto_vari_tuote_iframe' src='yllapito.php?toim=auto_vari_tuote&from=yllapito&haku[1]=@$trow[varikoodi]&ohje=off&lukitse_avaimeen=$trow[varikoodi]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+			if (tarkista_oikeus("yllapito.php", "auto_vari_korvaavat")) {
+				echo "<iframe id='auto_vari_korvaavat_iframe' name='auto_vari_korvaavat_iframe' src='yllapito.php?toim=auto_vari_korvaavat&from=yllapito&haku[1]=@$trow[varikoodi]&ohje=off&lukitse_avaimeen=$trow[varikoodi]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
 		echo "</td></tr>";
 		echo "</table>";
 
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
-		if ($toim == "auto_vari_korvaavat" or
+		if ($toim == "auto_vari" or
+			$toim == "auto_vari_tuote" or
+			$toim == "auto_vari_korvaavat" or
 			$toim == "puun_alkio" or
 			$toim == "toimitustavan_lahdot" or
 			$toim == "keraysvyohyke" or
@@ -1823,6 +1834,14 @@
 
 	if ($from == "yllapito" and $toim == "toimitustavan_lahdot") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimitustavan_lahdot_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "auto_vari_tuote") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('auto_vari_tuote_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "auto_vari_korvaavat") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('auto_vari_korvaavat_iframe' $jcsmaxheigth);</script>";
 	}
 
 	if ($from == "yllapito" and $toim == "puun_alkio") {

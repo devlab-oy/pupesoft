@@ -948,6 +948,9 @@
 			elseif ($toim == 'puun_alkio' and $i == 5) {
 				$lisa .= " AND (SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = puun_alkio.puun_tunnus AND laji = '{$laji}' AND nimi {$hakuehto}) {$hakuehto} ";
 			}
+			elseif ($toim == 'varaston_hyllypaikat' and $i == 1) {
+				$lisa .= " AND varaston_hyllypaikat.keraysvyohyke {$hakuehto} ";
+			}
 			elseif (strpos($array[$i], "/") !== FALSE) {
 				$lisa .= " and (";
 
@@ -1174,6 +1177,25 @@
 						if (!isset($haku[$i])) $haku[$i] = "";
 
 						echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+					}
+					elseif (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'varaston_hyllypaikat' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
+						if (!isset($haku[$i])) $haku[$i] = "";
+
+						echo "<br />";
+						echo "<select name='haku[{$i}]'>";
+						echo "<option value=''></option>";
+
+						$query = "SELECT nimitys, tunnus FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY nimitys";
+						$keraysvyohyke_chk_res = pupe_query($query);
+
+						while ($keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res)) {
+
+							$sel = (isset($haku[$i]) and $haku[$i] == "@".$keraysvyohyke_chk_row['tunnus']) ? ' selected' : '';
+
+							echo "<option value='@{$keraysvyohyke_chk_row['tunnus']}'{$sel}>{$keraysvyohyke_chk_row['nimitys']}</option>";
+						}
+
+						echo "</select>";
 					}
 					echo "</th>";
 				}

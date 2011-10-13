@@ -11,6 +11,14 @@ if [ ! -z $6 ]; then
 	SALAUSAVAIN=$6
 fi
 
+if [ ! -z $7 ]; then
+	SAMBAHOST=$7
+	SAMBAUSER=$8
+	SAMBAPASS=$9
+	SAMBAREMDIR=${10}
+	SAMBALOCALDIR=${11}
+fi
+
 # Katsotaan, että parametrit on annettu
 if [ -z ${BACKUPDIR} ] || [ -z ${DBKANTA} ] || [ -z ${DBKAYTTAJA} ] || [ -z ${DBSALASANA} ]; then
 	echo
@@ -163,6 +171,27 @@ if [ ! -z ${SALAUSAVAIN} ]; then
 		echo
 	fi
 fi
+
+#Siirretäänkö tuorein backuppi myös sambaserverille jos sellainen on konffattu
+if [ ! -z ${SAMBAHOST} ]; then
+	checksamba=`mount -t cifs -o username=${SAMBAUSER},password=${SAMBAPASS} //${SAMBAHOST}/${SAMBAREMDIR} ${SAMBALOCALDIR}`
+
+	if [[ $? != 0 ]]; then
+		echo "Sambamount ei onnistunut!"
+		echo
+	else
+		#Poistetaan vanha backuppi
+		rm -f ${SAMBALOCALDIR}/${DBKANTA}-backup-*
+		rm -f ${SAMBALOCALDIR}/linux-backup-*
+
+		# Siirretään tämä
+		cp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${SAMBALOCALDIR}
+		cp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${SAMBALOCALDIR}
+
+		umount ${SAMBALOCALDIR}
+	fi
+fi
+
 
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete

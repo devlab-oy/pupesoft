@@ -322,7 +322,7 @@ if ($kasitellaan_tiedosto) {
 		}
 	}
 
-/*
+	/*
 	foreach ($taulunrivit as $taulu => $rivit) {
 
 		list($table_mysql, ) = explode(".", $taulu);
@@ -344,7 +344,7 @@ if ($kasitellaan_tiedosto) {
 		echo "</table><br>";
 	}
 	exit;
-*/
+	*/
 
 	$taulunrivit_keys = array_keys($taulunrivit);
 
@@ -369,8 +369,6 @@ if ($kasitellaan_tiedosto) {
 		$apu_sarakkeet	= array();
 		$rivimaara 		= count($rivit);
 		$dynaamiset_rivit = array();
-		$replace_array 	= ""; 
-		$virhetulostus	= 0;
 
 		// Siivotaan joinit ja muut pois tietokannan nimestä
 		list($table_mysql, ) = explode(".", $taulu);
@@ -438,7 +436,7 @@ if ($kasitellaan_tiedosto) {
 					$postoiminto = (string) array_search($column, $taulunotsikot[$taulu]);
 				}
 				else {
-					if (!isset($trows[$table_mysql.".".$column]) and $table_mysql !="auto_vari_korvaavat" and $column != "AVK_TUNNUS") {
+					if (!isset($trows[$table_mysql.".".$column]) and $column != "AVK_TUNNUS") {
 						echo "<font class='error'>".t("Saraketta")." \"$column\" ".t("ei löydy")." $table_mysql-".t("taulusta")."!</font><br>";
 						$vikaa++;
 					}
@@ -476,23 +474,11 @@ if ($kasitellaan_tiedosto) {
 			}
 		}
 
-
-		// Tässä huijataan Pupea että, excel-tiedostossa on kenttä AVK_TUNNUS joka tarkoittaa oikeasti TUNNUS-kenttää.
-		foreach($taulunotsikot['auto_vari_korvaavat'] as $kentta => $value) {
-			if ($value == 'AVK_TUNNUS') {
-				$replace_array = array($kentta => 'TUNNUS');
-			}
-		}
-		if ($replace_array !="") {
-			$taulunotsikot['auto_vari_korvaavat'] = array_replace($taulunotsikot['auto_vari_korvaavat'], $replace_array);
-		}
-
 		// Oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
 		if ($vikaa != 0 or $tarkea != count($pakolliset) or $postoiminto == 'X' or $kielletty > 0 or (is_array($wherelliset) and $wheretarkea != count($wherelliset))) {
 
 			if ($vikaa != 0) {
 				echo "<font class='error'>".t("Vääriä sarakkeita tai yritit muuttaa yhtiö/tunnus saraketta")."!</font><br>";
-				$virhetulostus = 1;
 			}
 
 			if ($tarkea != count($pakolliset)) {
@@ -501,37 +487,27 @@ if ($kasitellaan_tiedosto) {
 				foreach ($pakolliset as $apupako) echo "$apupako ";
 
 				echo " ) $table_mysql-".t("taulusta")."!</font><br>";
-				$virhetulostus = 1;
 			}
 
 			if ($postoiminto == 'X') {
 				echo "<font class='error'>".t("Toiminto sarake puuttuu")."!</font><br>";
-				$virhetulostus = 1;
 			}
 
 			if ($kielletty > 0) {
 				echo "<font class='error'>".t("Yrität päivittää kiellettyjä sarakkeita")." $table_mysql-".t("taulussa")."!</font><br>$viesti";
-				$virhetulostus = 1;
 			}
 
-			if (is_array($wherelliset) and $wheretarkea != count($wherelliset) and $table_mysql != "auto_vari_korvaavat") {
+			if (is_array($wherelliset) and $wheretarkea != count($wherelliset)) {
 				echo "<font class='error'>".t("Sinulta puuttui jokin pakollisista sarakkeista")." (";
 
 				foreach ($wherelliset as $apupako) echo "$apupako ";
 
 				echo ") $table_mysql-".t("taulusta")."!</font><br>";
-				$virhetulostus = 1;
 			}
 
-			if (is_array($wherelliset) and $wheretarkea != count($wherelliset) and $table_mysql == "auto_vari_korvaavat") {
-				// annetaan mennä ohi vaan eteenpäin
-			}
-			
-			if ($virhetulostus == 1) {
-				echo "<font class='error'>".t("Virheitä löytyi. Ei voida jatkaa")."!<br></font>";
-				require ("inc/footer.inc");
-				exit;
-			}
+			echo "<font class='error'>".t("Virheitä löytyi. Ei voida jatkaa")."!<br></font>";
+			require ("inc/footer.inc");
+			exit;
 		}
 
 		if (!$cli) echo "<br><font class='message'>".t("Tiedosto ok, aloitetaan päivitys")." $table_mysql-".t("tauluun")."...<br></font>";
@@ -577,10 +553,10 @@ if ($kasitellaan_tiedosto) {
 			}
 
 			if ($eiyhtiota == "") {
-				$valinta   = " YHTIO = '$kukarow[yhtio]'";
+				$valinta   = " yhtio = '$kukarow[yhtio]'";
 			}
 			elseif ($eiyhtiota == "TRIP") {
-				$valinta   = " TUNNUS > 0 ";
+				$valinta   = " tunnus > 0 ";
 			}
 
 			// Rakennetaan rivikohtainen array
@@ -614,11 +590,8 @@ if ($kasitellaan_tiedosto) {
 				$indeksi = array_merge($indeksi, $indeksi_where);
 				$indeksi = array_unique($indeksi);
 			}
-			
-			$avkmuuttuja = "VALETTA";
-			if ($table_mysql == 'auto_vari_korvaavat' and $rivi[$postoiminto] == "MUUTA") {
-				$avkmuuttuja = "TOTTA";
-			}
+
+			$avkmuuttuja = FALSE;
 
 			foreach ($indeksi as $j) {
 				if ($taulunotsikot[$taulu][$j] == "TUOTENO") {
@@ -824,12 +797,16 @@ if ($kasitellaan_tiedosto) {
 
 					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='$apu_ytunnus'";
 				}
-				elseif ($table_mysql == 'auto_vari_korvaavat' and $avkmuuttuja == "TOTTA") {
-					if ($taulunotsikot[$taulu][$j] == "TUNNUS") {
-						$valinta .= " and tunnus = '".trim(pupesoft_cleanstring($rivi[$j]))."'";
+				elseif ($table_mysql == 'auto_vari_korvaavat') {
+
+					if ($taulunotsikot[$taulu][$j] == "AVK_TUNNUS") {
+						$valinta = " yhtio = '$kukarow[yhtio]' and tunnus = '".trim(pupesoft_cleanstring($rivi[$j]))."'";
+
+						$apu_sarakkeet = array("AVK_TUNNUS");
+						$avkmuuttuja = TRUE;
 					}
-					else {
-						$ohitusmuuttuja .= " and ".$taulunotsikot[$taulu][$j]."='".trim(pupesoft_cleanstring($rivi[$j]))."'";
+					elseif (!$avkmuuttuja) {
+						$valinta .= " and ".$taulunotsikot[$taulu][$j]."='".trim(pupesoft_cleanstring($rivi[$j]))."'";
 					}
 				}
 				else {
@@ -841,6 +818,7 @@ if ($kasitellaan_tiedosto) {
 					$tila = 'ohita';
 				}
 			}
+
 			if (substr($taulu, 0, 11) == 'puun_alkio_') {
 				$valinta .= " and laji = '".substr($taulu, 11)."' ";
 			}
@@ -974,12 +952,12 @@ if ($kasitellaan_tiedosto) {
 						$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 					}
 				}
-				
+
 				$query = "	SELECT tunnus
 							FROM $table_mysql
 							WHERE $valinta";
 				$fresult = pupe_query($query);
-			
+
 				if ($rivi[$postoiminto] == "MUUTA/LISAA") {
 					// Muutetaan jos löytyy muuten lisätään!
 					if (mysql_num_rows($fresult) == 0) {
@@ -1049,18 +1027,11 @@ if ($kasitellaan_tiedosto) {
 						$query = "UPDATE $table_mysql SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 	      			}
 				}
-			
+
 				if ($rivi[$postoiminto] == 'POISTA') {
 					$query = "DELETE FROM $table_mysql ";
 				}
-				
-				// erikoiskeissi, halutaan SET-arvoihin muuttuneet arvot, muuten ne menisi WHEREEN
-				if ($rivi[$postoiminto] == 'MUUTA'  and $table_mysql == "auto_vari_korvaavat") {
-					$ohitusmuuttuja = str_replace("and", ",", $ohitusmuuttuja);
-					$query .= $ohitusmuuttuja;
-				}
 
-			
 				foreach ($taulunotsikot[$taulu] as $r => $otsikko) {
 
 					//	Näitä ei koskaan lisätä

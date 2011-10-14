@@ -948,8 +948,13 @@
 			elseif ($toim == 'puun_alkio' and $i == 5) {
 				$lisa .= " AND (SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = puun_alkio.puun_tunnus AND laji = '{$laji}' AND nimi {$hakuehto}) {$hakuehto} ";
 			}
-			elseif ($toim == 'varaston_hyllypaikat' and $i == 1) {
-				$lisa .= " AND varaston_hyllypaikat.keraysvyohyke {$hakuehto} ";
+			elseif ($toim == 'varaston_hyllypaikat' and ($i == 1 or $i == 2)) {
+				if ($i == 2 and $haku[$i] != '') {
+					$lisa .= " AND varaston_hyllypaikat.reservipaikka {$hakuehto} ";
+				}
+				else {
+					$lisa .= " AND varaston_hyllypaikat.keraysvyohyke {$hakuehto} ";
+				}
 			}
 			elseif (strpos($array[$i], "/") !== FALSE) {
 				$lisa .= " and (";
@@ -1172,30 +1177,41 @@
 					elseif	(mysql_field_len($result,$i)<5)  $size='5';
 					else	$size='10';
 
-					// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
-					if (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'puun_alkio' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
-						if (!isset($haku[$i])) $haku[$i] = "";
-
-						echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
-					}
-					elseif (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'varaston_hyllypaikat' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
+					if ($toim == 'varaston_hyllypaikat' and ($i == 1 or $i == 2)) {
 						if (!isset($haku[$i])) $haku[$i] = "";
 
 						echo "<br />";
 						echo "<select name='haku[{$i}]'>";
-						echo "<option value=''></option>";
 
-						$query = "SELECT nimitys, tunnus FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY nimitys";
-						$keraysvyohyke_chk_res = pupe_query($query);
+						if ($i == 1) {
+							echo "<option value=''></option>";
 
-						while ($keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res)) {
+							$query = "SELECT nimitys, tunnus FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY nimitys";
+							$keraysvyohyke_chk_res = pupe_query($query);
 
-							$sel = (isset($haku[$i]) and $haku[$i] == "@".$keraysvyohyke_chk_row['tunnus']) ? ' selected' : '';
+							while ($keraysvyohyke_chk_row = mysql_fetch_assoc($keraysvyohyke_chk_res)) {
 
-							echo "<option value='@{$keraysvyohyke_chk_row['tunnus']}'{$sel}>{$keraysvyohyke_chk_row['nimitys']}</option>";
+								$sel = (isset($haku[$i]) and $haku[$i] == "@".$keraysvyohyke_chk_row['tunnus']) ? ' selected' : '';
+
+								echo "<option value='@{$keraysvyohyke_chk_row['tunnus']}'{$sel}>{$keraysvyohyke_chk_row['nimitys']}</option>";
+							}
+						}
+						else {
+
+							$sel = array_fill_keys(array($haku[$i]), ' selected') + array('@E' => '', '@K' => '');
+
+							echo "<option value=''></option>";
+							echo "<option value='@E'{$sel['@E']}>",t("Ei"),"</option>";
+							echo "<option value='@K'{$sel['@K']}>",t("Kyll‰"),"</option>";
 						}
 
 						echo "</select>";
+					}
+					elseif (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'puun_alkio' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
+						// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
+						if (!isset($haku[$i])) $haku[$i] = "";
+
+						echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
 					}
 					echo "</th>";
 				}

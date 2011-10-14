@@ -31,11 +31,11 @@
 
 	if (mysql_field_name($result, $i) == "reservipaikka") {
 
-		$sel = $trow[$i] == 'K' ? ' selected' : '';
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array('E' => '', 'K' => '');
 
 		$ulos = "<td><select name='{$nimi}'>";
-		$ulos .= "<option value=''>".t("Ei")."</option>";
-		$ulos .= "<option value='K'{$sel}>".t("Kyllä")."</option>";
+		$ulos .= "<option value='E'{$sel['E']}>".t("Ei")."</option>";
+		$ulos .= "<option value='K'{$sel['K']}>".t("Kyllä")."</option>";
 		$ulos .= "</select></td>";
 	
 		$jatko = 0;

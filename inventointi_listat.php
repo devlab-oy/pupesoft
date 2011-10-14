@@ -491,11 +491,11 @@
 				$lefttoimi = "";
 			}
 
-			if (isset($reservipaikka) and $reservipaikka != '') {
-				$reservipaikka = mysql_real_escape_string($reservipaikka);
+			if (isset($reservipaikka)) {
+				$ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."'" : "";
 
 				$join .= " JOIN varaston_hyllypaikat ON (
-							varaston_hyllypaikat.reservipaikka = '{$reservipaikka}'
+							{$ressulisa}
 							AND varaston_hyllypaikat.yhtio = tuotepaikat.yhtio 
 							AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue 
 							AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro 

@@ -255,7 +255,7 @@
 								// haetaan alkuperäisen tilauksen vanhatunnus
 								$query = "	SELECT GROUP_CONCAT(lx_otsikko.tunnus) AS tunnukset
 											FROM lasku AS ux_otsikko 
-											JOIN lasku AS lx_otsikko (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
+											JOIN lasku AS lx_otsikko ON (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
 											WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}' 
 											AND ux_otsikko.tunnus = '{$orow['vanhatunnus']}'";
 								$vanhatunnus_chk_res = pupe_query($query);

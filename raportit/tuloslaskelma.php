@@ -86,7 +86,7 @@
 			            WHERE tili.yhtio = '$kukarow[yhtio]'
 						$tililisa
 						and taso.tunnus is null";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) > 0 ) {
 
@@ -154,7 +154,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tilikausi_alku <= now()
 							and tilikausi_loppu >= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$tilikausirow = mysql_fetch_assoc($result);
 
 				$plvv = substr($tilikausirow['tilikausi_alku'], 0, 4);
@@ -266,7 +266,7 @@
 						FROM tilikaudet
 						WHERE yhtio = '$kukarow[yhtio]'
 						ORDER BY tilikausi_alku DESC";
-			$vresult = mysql_query($query) or pupe_error($query);
+			$vresult = pupe_query($query);
 
 			echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
 
@@ -289,7 +289,7 @@
 			$query = "	SELECT max(length(taso)) taso
 						from taso
 						where yhtio = '$kukarow[yhtio]'";
-			$vresult = mysql_query($query) or pupe_error($query);
+			$vresult = pupe_query($query);
 			$vrow = mysql_fetch_assoc($vresult);
 
 			echo "<option value='TILI'>".t("Tili taso")."</option>\n";
@@ -321,19 +321,23 @@
 					<option $sel[0] value='0'>0 ".t("desimaalia")."</option>
 					</select></td></tr>";
 
-			$kauchek = $vchek = $bchek = $ychek = "";
-			if ($kaikkikaudet != "") $kauchek = "SELECTED";
+			$vchek = $bchek = $ychek = "";
 			if ($vertailued != "")   $vchek = "CHECKED";
 			if ($vertailubu != "")   $bchek = "CHECKED";
 			if ($ei_yhteensa != "")   $ychek = "CHECKED";
+			
+			$kausi = array("VY" => "", "KY" => "", "V" => "", "K" => "", "Y" => "");
+			$kausi[$kaikkikaudet] = "SELECTED";
 
 			echo "<tr><th valign='top'>".t("Näkymä")."</th>";
 
 			echo "<td><select name='kaikkikaudet'>
-					<option value=''>".t("Näytä vain viimeisin kausi")."</option>
-					<option value='o' $kauchek>".t("Näytä kaikki kaudet")."</option>
+					<option value='VY' $kausi[VY]>".t("Näytä vain viimeisin kausi ja yhteensä")."</option>
+					<option value='KY' $kausi[KY]>".t("Näytä kaikkikaudet ja yhteensä")."</option>
+					<option value='V'  $kausi[V]>".t("Näytä vain viimeisin kausi")."</option>
+					<option value='K'  $kausi[K]>".t("Näytä kaikkikaudet")."</option>
+					<option value='Y'  $kausi[Y]>".t("Näytä vain yhteensä")."</option>
 					</select>
-					<br>&nbsp;<input type='checkbox' name='ei_yhteensa' $ychek> ".t("Ei yhteensäsaraketta")."
 					</td></tr>";
 
 			echo "<tr><th valign='top'>".t("Vertailu")."</th>";
@@ -455,7 +459,7 @@
 				$query = "	SELECT tilikausi_alku, tilikausi_loppu
 							FROM tilikaudet
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$tkrow = mysql_fetch_assoc($result);
 
 				$plvv = substr($tkrow['tilikausi_alku'], 0, 4);
@@ -504,7 +508,7 @@
 							and kaytossa != 'E'
 							and tyyppi = 'K'
 							ORDER BY koodi+0, koodi, nimi";
-				$vresult = mysql_query($query) or pupe_error($query);
+				$vresult = pupe_query($query);
 
 				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$kustannuspaikat[$vrow["tunnus"]] = $vrow["nimi"];
@@ -525,7 +529,7 @@
 							and kaytossa != 'E'
 							and tyyppi = 'O'
 							ORDER BY koodi+0, koodi, nimi";
-				$vresult = mysql_query($query) or pupe_error($query);
+				$vresult = pupe_query($query);
 
 				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$kohteet[$vrow["tunnus"]] = $vrow["nimi"];
@@ -546,7 +550,7 @@
 							and kaytossa != 'E'
 							and tyyppi = 'P'
 							ORDER BY koodi+0, koodi, nimi";
-				$vresult = mysql_query($query) or pupe_error($query);
+				$vresult = pupe_query($query);
 
 				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$projektit[$vrow["tunnus"]] = $vrow["nimi"];
@@ -624,11 +628,19 @@
 
 		if ($tltee == "aja") {
 
+			// Tässä voidaan vain setata ei_yhteensä muuttuja, muut tehdään myöhemmin
+			if ($kaikkikaudet == "KY" or $kaikkikaudet == "VY" or $kaikkikaudet == "Y") {
+				$ei_yhteensa = "";
+			}
+			else {
+				$ei_yhteensa = "JOO";
+			}
+
 			// Haetaan yhtiön tulostili
 			$query = "	SELECT tunnus, tilino
 						FROM tili
 						WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$yhtiorow["tilikauden_tulos"]}'";
-			$tulostilires = mysql_query($query) or pupe_error($query);
+			$tulostilires = pupe_query($query);
 
 			if (mysql_num_rows($tulostilires) == 1) {
 				$tulostilirow = mysql_fetch_assoc($tulostilires);
@@ -641,7 +653,7 @@
 						and kuka	= '$kukarow[kuka]'
 						and nimi	= 'raportit.php'
 						and alanimi = 'paakirja'";
-			$oikresult = mysql_query($query) or pupe_error($query);
+			$oikresult = pupe_query($query);
 
 			if (mysql_num_rows($oikresult) > 0) {
 				$paakirjalink = TRUE;
@@ -764,7 +776,7 @@
 			            $lisa
 			            GROUP BY tiliointi.tilino, groupsarake
 						ORDER BY tiliointi.tilino, groupsarake";
-			$tilires = mysql_query($query) or pupe_error($query);
+			$tilires = pupe_query($query);
 
 			$tilioinnit = array();
 			$sarakkeet  = array();
@@ -799,7 +811,7 @@
 				            $lisa
 				            GROUP BY groupsarake
 							ORDER BY groupsarake";
-				$tulosres = mysql_query($query) or pupe_error($query);
+				$tulosres = pupe_query($query);
 
 				while ($tulosrow = mysql_fetch_assoc($tulosres)) {
 					// Jos tiliöintejä ei ole, niin laitetaan tulos suoraan tähän, muuten summataan yhteen myöhemmin
@@ -821,7 +833,7 @@
 						$bulisa
 						GROUP BY budjetti.taso, groupsarake
 						ORDER BY budjetti.taso, groupsarake";
-			$tilires = mysql_query($query) or pupe_error($query);
+			$tilires = pupe_query($query);
 
 			$budjetit = array();
 
@@ -837,7 +849,7 @@
 						and LEFT(taso, 1) in (BINARY '$aputyyppi')
 						and taso != ''
 						ORDER BY taso";
-			$tasores = mysql_query($query) or pupe_error($query);
+			$tasores = pupe_query($query);
 
 			while ($tasorow = mysql_fetch_assoc($tasores)) {
 
@@ -863,7 +875,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and $tilikarttataso = BINARY '$tasorow[taso]'
 							ORDER BY tilino";
-				$tilires = mysql_query($query) or pupe_error($query);
+				$tilires = pupe_query($query);
 
 				while ($tilirow = mysql_fetch_assoc($tilires)) {
 
@@ -916,22 +928,56 @@
 					}
 				}
 			}
-
-			// Haluaako käyttäjä nähä kaikki kaudet
-			if ($kaikkikaudet == "") {
+	
+	
+			if ($kaikkikaudet == "VY") {
+				// vika + yht
+				$kaikkikaudet = "";
+				$ei_yhteensa = "";
 				$alkukausi = count($kaudet)-2;
-
-				if ($ei_yhteensa == "") {
-					if ($vertailued != "") $alkukausi -= 2;
-					if ($vertailubu != "") $alkukausi -= 2;
-				}
-				else {
-					if ($vertailued != "" and $vertailubu != "") $alkukausi -= 1;
-					if ($vertailued == "" and $vertailubu == "") $alkukausi += 1;
-				}
+				
+				if ($vertailued != "") $alkukausi -= 2;
+				if ($vertailubu != "") $alkukausi -= 2;
+				
+			}
+			elseif ($kaikkikaudet == "V") {
+				// vika ei yht
+				$kaikkikaudet = "";
+				$ei_yhteensa = "joo";
+				$alkukausi = count($kaudet)-2;
+				
+				if ($vertailued != "" and $vertailubu != "") $alkukausi -= 1;
+				if ($vertailued == "" and $vertailubu == "") $alkukausi += 1;
+			}
+			elseif ($kaikkikaudet == "KY") {
+				// kaikki + yht
+				$kaikkikaudet = "joo";
+				$ei_yhteensa = "";
+				$alkukausi = 0;	
+			}
+			elseif ($kaikkikaudet == "K") {
+				// kaikki ei yht
+				$kaikkikaudet = "joo";
+				$ei_yhteensa = "joo";
+				$alkukausi = 0;	
 			}
 			else {
-				$alkukausi = 0;
+				// vain yhteensä
+				$alkukausi = count($kaudet)-1;
+
+				if ($vertailued != "" and $vertailubu != ""){ 
+					$alkukausi -= 3;
+				}
+				elseif ($vertailued != "" and $vertailubu == "") {
+					$alkukausi -= 1;
+				}
+				elseif ($vertailued == "" and $vertailubu != "") {
+					$alkukausi -= 1;
+				}
+				else {
+					// en tee mitään poikkeavaa
+				}
+		
 			}
 
 			echo "<table>";
@@ -1076,7 +1122,7 @@
 										and taso 			 = BINARY '$key'
 										and summattava_taso != ''
 										and tyyppi 			 = '$kirjain'";
-							$summares = mysql_query($query) or pupe_error($query);
+							$summares = pupe_query($query);
 
 							// Budjettia ei summata
 							if ($summarow = mysql_fetch_assoc($summares) and substr($kaudet[$i],0,4) != "budj") {

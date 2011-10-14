@@ -6,6 +6,7 @@
 				mysql_field_name($result, $i) != 'luontiaika' and
 				mysql_field_name($result, $i) != 'muutospvm' and
 				mysql_field_name($result, $i) != 'muuttaja' and
+				mysql_field_name($result, $i) != 'reservipaikka' and
 				mysql_field_name($result, $i) != 'tunnus') {
 			
 				if (trim($t[$i]) != '') {

@@ -28,6 +28,18 @@
 	
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "reservipaikka") {
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos = "<td><select name='{$nimi}'>";
+		$ulos .= "<option value=''>".t("Ei")."</option>";
+		$ulos .= "<option value='K'{$sel}>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
+	
+		$jatko = 0;
+	}
 	
 	if (mysql_field_name($result, $i) == "keraysvyohyke") {
 		$ulos = "<td><select name='{$nimi}'>";

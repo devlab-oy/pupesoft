@@ -1821,24 +1821,24 @@ if (!$cli) {
 					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>
 					<option value='extranet_kayttajan_lisatiedot' $sel[extranet_kayttajan_lisatiedot]>".t("Extranet-käyttäjän lisätietoja")."</option>
 					<option value='varaston_hyllypaikat' {$sel['varaston_hyllypaikat']}>".t("Varaston hyllypaikat")."</option>
-					<option value='toimitustavan_lahdot' {$sel['toimitustavan_lahdot']}>".t("Toimitustavan lähdöt")."</option>
-					<option value='auto_vari_korvaavat' $sel[auto_vari_korvaavat]>".t("Auto Väri Korvaavat")."</option>";
+					<option value='toimitustavan_lahdot' {$sel['toimitustavan_lahdot']}>".t("Toimitustavan lähdöt")."</option>";
 
-			$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
-			$dynaamiset_avainsanat = '';
+	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
+	$dynaamiset_avainsanat = '';
 
-		if ($kukarow['yhtio'] == 'mast') {
-			echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
-			echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
+	if ($kukarow['yhtio'] == 'mast') {
+		echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
+		echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
+		echo "<option value='auto_vari_korvaavat' $sel[auto_vari_korvaavat]>".t("Autoväri-korvaavat")."</option>";
+	}
+
+	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
+		if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
+			$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
 		}
 
-			while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
-				if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
-					$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
-				}
-
-				echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
-			}
+		echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
+	}
 
 	echo "	</select></td></tr>";
 

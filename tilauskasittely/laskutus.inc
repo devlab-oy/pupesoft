@@ -179,7 +179,7 @@
 
 										switch ($fieldname) {
 											case 'varattu':
-												$rvalues .= ", -".$vanhin_pantti_row['kpl'];
+												$rvalues .= ", -".($pantti_kpl - $vanhin_pantti_row['kpl']);
 												break;
 											case 'tunnus':
 												$rvalues .= ", NULL";

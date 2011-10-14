@@ -41,6 +41,21 @@
 
 	echo "<tr><td class='back'>".t("ja/tai")."...</td></tr>";
 
+	$query = "SELECT count(tunnus) AS cnt FROM varaston_hyllypaikat WHERE yhtio = '{$kukarow['yhtio']}'";
+	$cnt_chk_res = pupe_query($query);
+	$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
+
+	if ($cnt_chk_row['cnt'] > 0) {
+		echo "<tr><th>",t("Reservipaikka"),"</th>";
+		echo "<td><select name='reservipaikka'>";
+		echo "<option value=''></option>";
+		echo "<option value='E'>",t("Ei"),"</pre>";
+		echo "<option value='K'>",t("Kyllä"),"</pre>";
+		echo "</select></td></tr>";
+
+		echo "<tr><td class='back'>".t("ja/tai")."...</td></tr>";
+	}
+
 	echo "<tr><th>".t("Anna toimittajanumero(ytunnus):")."</th>
 	<td><input type='text' size='25' name='toimittaja'>
 	</td></tr>";
@@ -474,6 +489,18 @@
 					$join 		.= " JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno and tuotteen_toimittajat.toimittaja = '$toimittaja' ";
 				}
 				$lefttoimi = "";
+			}
+
+			if (isset($reservipaikka) and $reservipaikka != '') {
+				$reservipaikka = mysql_real_escape_string($reservipaikka);
+
+				$join .= " JOIN varaston_hyllypaikat ON (
+							varaston_hyllypaikat.reservipaikka = '{$reservipaikka}'
+							AND varaston_hyllypaikat.yhtio = tuotepaikat.yhtio 
+							AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue 
+							AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro 
+							AND varaston_hyllypaikat.hyllytaso = tuotepaikat.hyllytaso 
+							AND varaston_hyllypaikat.hyllyvali = tuotepaikat.hyllyvali) ";
 			}
 
 			if ($jarjestys == 'tuoteno') {

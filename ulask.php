@@ -39,10 +39,6 @@ echo "	<script type='text/javascript' charset='utf-8'>
 							$(this).attr('name', $(this).attr('name').replace(i, ii));
 						}
 
-						if ($(this).is('input') && $(this).val() != false && $(this).val() != undefined) {
-							$(this).val($(this).val().replace(i, ii));
-						}
-
 						if ($(this).is('a') && $(this).attr('href') != false && $(this).attr('href') != undefined) {
 							$(this).attr('href', $(this).attr('href').replace(new RegExp(i, 'g'), ii));
 						}

@@ -125,8 +125,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 							WHERE yhtio 	= '{$kukarow['yhtio']}'
 							AND vanhatunnus = '{$lasku_x}'
 							AND clearing 	= 'HYVITYS'
-							AND tila 		= 'U'
-							AND alatila 	= 'X'";
+							AND tila 		IN ('N', 'L', 'U')";
 				$clearing_chk_res = pupe_query($query);
 
 				// Lasku on jo hyvitetty

@@ -41,21 +41,6 @@
 
 	echo "<tr><td class='back'>",t("ja/tai"),"...</td></tr>";
 
-	$query = "SELECT count(tunnus) AS cnt FROM varaston_hyllypaikat WHERE yhtio = '{$kukarow['yhtio']}'";
-	$cnt_chk_res = pupe_query($query);
-	$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
-
-	if ($cnt_chk_row['cnt'] > 0) {
-		echo "<tr><th>",t("Reservipaikka"),"</th>";
-		echo "<td><select name='reservipaikka'>";
-		echo "<option value=''>",t("Valitse"),"</option>";
-		echo "<option value='E'>",t("Ei"),"</pre>";
-		echo "<option value='K'>",t("Kyllä"),"</pre>";
-		echo "</select></td></tr>";
-
-		echo "<tr><td class='back'>",t("ja/tai"),"...</td></tr>";
-	}
-
 	echo "<tr><th>",t("Anna toimittajanumero(ytunnus):"),"</th>
 	<td><input type='text' size='25' name='toimittaja'>
 	</td></tr>";
@@ -172,6 +157,19 @@
 	echo "<option value='A' {$sel}>",t("Ei listata poistettuja tuotteita"),"</option>";
 
 	echo "</td></tr>";
+
+	$query = "SELECT count(tunnus) AS cnt FROM varaston_hyllypaikat WHERE yhtio = '{$kukarow['yhtio']}'";
+	$cnt_chk_res = pupe_query($query);
+	$cnt_chk_row = mysql_fetch_assoc($cnt_chk_res);
+
+	if ($cnt_chk_row['cnt'] > 0) {
+		echo "<tr><th>",t("Reservipaikka"),"</th>";
+		echo "<td><select name='reservipaikka'>";
+		echo "<option value=''>",t("Valitse"),"</option>";
+		echo "<option value='E'>",t("Ei"),"</pre>";
+		echo "<option value='K'>",t("Kyllä"),"</pre>";
+		echo "</select></td></tr>";
+	}
 
 	echo "<tr><th>",t("Järjestä lista:"),"</th>";
 
@@ -373,6 +371,20 @@
 		{$sorttauskentan_jarjestys} sorttauskentta";
 		$groupby = " tuote.tuoteno, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 
+		$joinlisa = "";
+
+		if (isset($reservipaikka)) {
+			$ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."'" : "";
+
+			$joinlisa = " JOIN varaston_hyllypaikat ON (
+							{$ressulisa}
+							AND varaston_hyllypaikat.yhtio = tuotepaikat.yhtio 
+							AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue 
+							AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro 
+							AND varaston_hyllypaikat.hyllytaso = tuotepaikat.hyllytaso 
+							AND varaston_hyllypaikat.hyllyvali = tuotepaikat.hyllyvali) ";
+		}
+
 		if (($tryt != '' or $osastot != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
 			///* Inventoidaan *///
 
@@ -484,16 +496,8 @@
 				$lefttoimi = "";
 			}
 
-			if (isset($reservipaikka)) {
-				$ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."'" : "";
-
-				$join .= " JOIN varaston_hyllypaikat ON (
-							{$ressulisa}
-							AND varaston_hyllypaikat.yhtio = tuotepaikat.yhtio 
-							AND varaston_hyllypaikat.hyllyalue = tuotepaikat.hyllyalue 
-							AND varaston_hyllypaikat.hyllynro = tuotepaikat.hyllynro 
-							AND varaston_hyllypaikat.hyllytaso = tuotepaikat.hyllytaso 
-							AND varaston_hyllypaikat.hyllyvali = tuotepaikat.hyllyvali) ";
+			if ($joinlisa != "") {
+				$join .= $joinlisa;
 			}
 
 			if ($jarjestys == 'tuoteno') {
@@ -541,6 +545,7 @@
 				$query = "	SELECT {$select}
 							FROM tuotepaikat USE INDEX (saldo_index)
 							JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ei_saldoa = '')
+							{$joinlisa}
 							LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
 							WHERE tuotepaikat.yhtio	= '{$kukarow['yhtio']}'
 							AND tuotepaikat.saldoaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
@@ -572,6 +577,7 @@
 				$query = "	SELECT DISTINCT {$select}
 							FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
 							JOIN tuotepaikat USE INDEX (tuote_index) ON (tuotepaikat.yhtio = tilausrivi.yhtio AND tuotepaikat.tuoteno = tilausrivi.tuoteno)
+							{$joinlisa}
 							JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ei_saldoa = '')
 							LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
 							WHERE tilausrivi.yhtio			= '{$kukarow['yhtio']}'
@@ -606,6 +612,7 @@
 
 				$query = "	SELECT {$select}
 							FROM tuotepaikat USE INDEX (saldo_index)
+							{$joinlisa}
 							JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ei_saldoa = '')
 							LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
 							WHERE tuotepaikat.yhtio	= '{$kukarow['yhtio']}'
@@ -626,6 +633,7 @@
 		elseif ($tila == "SIIVOUS") {
 				$query = "	SELECT {$select}
 							FROM tuotepaikat USE INDEX (primary)
+							{$joinlisa}
 							JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ei_saldoa = '')
 							LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
 							WHERE tuotepaikat.yhtio	= '{$kukarow['yhtio']}'
@@ -924,4 +932,3 @@
 	}
 
 	require ("inc/footer.inc");
-?>

@@ -47,7 +47,7 @@
 		// Muokataan tilikartan rakennetta
 		if (isset($tasomuutos)) {
 			require("../tasomuutos.inc");
-			require ('../inc/footer.inc');
+			require('../inc/footer.inc');
 			exit;
 		}
 
@@ -325,18 +325,18 @@
 			if ($vertailued != "")   $vchek = "CHECKED";
 			if ($vertailubu != "")   $bchek = "CHECKED";
 			if ($ei_yhteensa != "")   $ychek = "CHECKED";
-			
+
 			$kausi = array("VY" => "", "KY" => "", "V" => "", "K" => "", "Y" => "");
 			$kausi[$kaikkikaudet] = "SELECTED";
 
 			echo "<tr><th valign='top'>".t("Näkymä")."</th>";
 
 			echo "<td><select name='kaikkikaudet'>
-					<option value='VY' $kausi[VY]>".t("Näytä vain viimeisin kausi ja yhteensä")."</option>
-					<option value='KY' $kausi[KY]>".t("Näytä kaikkikaudet ja yhteensä")."</option>
+					<option value='VY' $kausi[VY]>".t("Näytä vain viimeisin kausi ja yhteensäsumma")."</option>
+					<option value='KY' $kausi[KY]>".t("Näytä kaikki kaudet ja yhteensäsumma")."</option>
 					<option value='V'  $kausi[V]>".t("Näytä vain viimeisin kausi")."</option>
-					<option value='K'  $kausi[K]>".t("Näytä kaikkikaudet")."</option>
-					<option value='Y'  $kausi[Y]>".t("Näytä vain yhteensä")."</option>
+					<option value='K'  $kausi[K]>".t("Näytä kaikki kaudet")."</option>
+					<option value='Y'  $kausi[Y]>".t("Näytä vain yhteensäsumma")."</option>
 					</select>
 					</td></tr>";
 
@@ -928,44 +928,44 @@
 					}
 				}
 			}
-	
-	
+
+
 			if ($kaikkikaudet == "VY") {
 				// vika + yht
 				$kaikkikaudet = "";
-				$ei_yhteensa = "";
+
 				$alkukausi = count($kaudet)-2;
-				
+
 				if ($vertailued != "") $alkukausi -= 2;
 				if ($vertailubu != "") $alkukausi -= 2;
-				
+
 			}
 			elseif ($kaikkikaudet == "V") {
 				// vika ei yht
 				$kaikkikaudet = "";
-				$ei_yhteensa = "joo";
+
 				$alkukausi = count($kaudet)-2;
-				
+
 				if ($vertailued != "" and $vertailubu != "") $alkukausi -= 1;
 				if ($vertailued == "" and $vertailubu == "") $alkukausi += 1;
 			}
 			elseif ($kaikkikaudet == "KY") {
 				// kaikki + yht
 				$kaikkikaudet = "joo";
-				$ei_yhteensa = "";
-				$alkukausi = 0;	
+
+				$alkukausi = 0;
 			}
 			elseif ($kaikkikaudet == "K") {
 				// kaikki ei yht
 				$kaikkikaudet = "joo";
-				$ei_yhteensa = "joo";
-				$alkukausi = 0;	
+
+				$alkukausi = 0;
 			}
 			else {
 				// vain yhteensä
 				$alkukausi = count($kaudet)-1;
 
-				if ($vertailued != "" and $vertailubu != ""){ 
+				if ($vertailued != "" and $vertailubu != ""){
 					$alkukausi -= 3;
 				}
 				elseif ($vertailued != "" and $vertailubu == "") {
@@ -974,10 +974,6 @@
 				elseif ($vertailued == "" and $vertailubu != "") {
 					$alkukausi -= 1;
 				}
-				else {
-					// en tee mitään poikkeavaa
-				}
-		
 			}
 
 			echo "<table>";
@@ -1071,7 +1067,7 @@
 										if (isset($tilisumkau[$kaudet[$i]][(string) $sarake])) $apu = sprintf($muoto, $tilisumkau[$kaudet[$i]][(string) $sarake] * $luku_kerroin / $tarkkuus);
 										if ($apu == 0) $apu = "";
 
-										$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
+										$tilirivi2 .= "<td align='right' nowrap>".number_format((float) $apu, $desi, ',', ' ')."</td>";
 										$tilirivi2_px[] = $apu;
 
 										if ($tilisumkau[$kaudet[$i]][(string) $sarake] != 0) {
@@ -1143,7 +1139,7 @@
 								$tulos++; // summaillaan tätä jos meillä oli rivillä arvo niin osataan tulostaa
 							}
 
-							$rivi .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
+							$rivi .= "<td class='$class' align='right' nowrap>".number_format((float) $apu, $desi,  ',', ' ')."</td>";
 
 							$rivit_px[$px] = array_merge($rivit_px[$px], array($apu));
 						}

@@ -42,7 +42,7 @@ if (!-f $tmpfile) {
 		$nimi = $dirri1.$file;
 		$ok = 0;
 
-		if (-f $nimi && $extchk != '.tmp') {
+		if (-f $nimi && $extchk ne '.tmp') {
 
 			# loopataan tätä failia kunnes ok
 			while ($ok < 1) {

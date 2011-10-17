@@ -288,6 +288,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$saakopoistaa = TRUE;
 				break;
+			case "auto_vari_korvaavat" :
+				$pakolliset = array("VARIKOODI","KORVAAVA_VARIKOODI");
+				$wherelliset = array("VARIKOODI","KORVAAVA_VARIKOODI","AVK_TUNNUS");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
+				break;
 			case "vak" :
 				$pakolliset = array("YK_NRO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");

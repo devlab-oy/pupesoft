@@ -42,6 +42,19 @@ echo "	<script type='text/javascript' charset='utf-8'>
 						if ($(this).is('a') && $(this).attr('href') != false && $(this).attr('href') != undefined) {
 							$(this).attr('href', $(this).attr('href').replace(new RegExp(i, 'g'), ii));
 						}
+
+						if ($(this).is('input')) {
+							$(this).val('');
+
+							var id = $(this).attr('id');
+							var iduusi = id + ii;
+
+							$(this).attr('id', iduusi);
+
+							if ($(this).attr('onkeydown')) {
+								console.log($(this).attr('onkeydown'));
+							}
+						}
 					});
 
 					$(uusi_rivi).removeClass().addClass('rivi_'+ii);

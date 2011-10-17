@@ -137,7 +137,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 							WHERE yhtio 	= '{$kukarow['yhtio']}'
 							AND vanhatunnus = '{$lasku_x}'
 							AND clearing 	= 'HYVITYS'
-							AND tila 		IN ('N', 'L', 'U')";
+							AND tila 		IN ('N', 'L')";
 				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$clearing_chk_res = pupe_query($query);
 

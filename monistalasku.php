@@ -139,6 +139,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 					$query = "	SELECT *
 								FROM panttitili
 								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND asiakas = '{$chk_row['liitostunnus']}'
 								{$wherelisa_panttitili}
 								AND kpl = '".abs($chk_til_row['varattu'])."'
 								AND status = ''

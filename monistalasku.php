@@ -116,6 +116,43 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 						break 2;
 					}
 				}
+
+				// Tsekataan löytyykö hyvitettävän laskun pantit vielä?
+				// Hyvitettävän laskun rivit
+				$query = "	SELECT tilausrivi.otunnus, tuote.panttitili, tilausrivi.varattu
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.otunnus = '{$chk_row['vanhatunnus']}'";
+				$chk_til_res = pupe_query($query);
+
+				$query = "SELECT vanhatunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$chk_row['vanhatunnus']}'";
+				$vanhatunnus_chk_res = pupe_query($query);
+
+				if (mysql_num_rows($vanhatunnus_chk_res) > 0) {
+					$vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res);
+					$wherelisa_panttitili = "AND myyntitilausnro = '{$vanhatunnus_chk_row['vanhatunnus']}'";
+				}
+
+				while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
+
+					$query = "	SELECT *
+								FROM panttitili
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								{$wherelisa_panttitili}
+								AND kpl = '".abs($chk_til_row['varattu'])."'
+								AND status = ''
+								AND kaytettypvm = '0000-00-00'
+								AND kaytettytilausnro = 0
+								ORDER BY myyntipvm ASC";
+					$pantti_chk_res = pupe_query($query);
+
+					if (mysql_num_rows($pantti_chk_res) == 0) {
+						echo "<font class='error'>",t("Hyvitettävän laskun pantit on jo käytetty"),"! ({$lasku_x})</font><br>";
+						$tee = "";
+						break 2;
+					}
+				}
 			}
 			else {
 

@@ -119,24 +119,23 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 			}
 			else {
 
-				$query = "	SELECT GROUP_CONCAT(lx_otsikko.tunnus) AS tunnukset
-							FROM lasku AS ux_otsikko 
-							JOIN lasku AS lx_otsikko ON (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
-							WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}' 
-							AND ux_otsikko.tunnus = '{$lasku_x}'";
-				$vanhatunnus_chk_res = pupe_query($query);
-				$vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res);
-
-				if ($vanhatunnus_chk_row['tunnukset'] != '') {
-					$wherelisa = "AND vanhatunnus IN ({$vanhatunnus_chk_row['tunnukset']})";
-				}
+				// $query = "	SELECT GROUP_CONCAT(lx_otsikko.tunnus) AS tunnukset
+				// 			FROM lasku AS ux_otsikko 
+				// 			JOIN lasku AS lx_otsikko ON (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
+				// 			WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}' 
+				// 			AND ux_otsikko.tunnus = '{$lasku_x}'";
+				// $vanhatunnus_chk_res = pupe_query($query);
+				// $vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res);
+				// 
+				// if ($vanhatunnus_chk_row['tunnukset'] != '') {
+				// 	$wherelisa = "AND vanhatunnus IN ({$vanhatunnus_chk_row['tunnukset']})";
+				// }
 
 				// jos tilauksella on panttituotteita/sarjanumeroita pit‰‰ tarkistaa, ett‰ ei anneta hyvitt‰‰ laskua joka on jo hyvitetty (vanhatunnus lˆytyy)
 				$query = "	SELECT tunnus, clearing
 							FROM lasku
 							WHERE yhtio 	= '{$kukarow['yhtio']}'
-							#AND vanhatunnus = '{$lasku_x}'
-							{$wherelisa}
+							AND vanhatunnus = '{$lasku_x}'
 							AND clearing 	= 'HYVITYS'
 							AND tila 		IN ('N', 'L', 'U')";
 				echo "<pre>",str_replace("\t", "", $query),"</pre>";
@@ -146,26 +145,27 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 
 				// Lasku on jo hyvitetty
 				if (mysql_num_rows($clearing_chk_res) > 0) {
-					$clearing_chk_row = mysql_fetch_assoc($clearing_chk_res);
 
-					$query = "	SELECT tuote.panttitili, tuote.sarjanumeroseuranta
-								FROM tilausrivi
-								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-								AND tilausrivi.uusiotunnus = '{$clearing_chk_row['tunnus']}'";
-					echo "<pre>",str_replace("\t", "", $query),"</pre>";
-					$chk_til_res = pupe_query($query);
+					while ($clearing_chk_row = mysql_fetch_assoc($clearing_chk_res)) {
+						$query = "	SELECT tuote.panttitili, tuote.sarjanumeroseuranta
+									FROM tilausrivi
+									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									AND tilausrivi.otunnus = '{$clearing_chk_row['tunnus']}'";
+						echo "<pre>",str_replace("\t", "", $query),"</pre>";
+						$chk_til_res = pupe_query($query);
 
-					while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
-						if ($chk_til_row['panttitili'] != '') {
-							echo "<font class='error'>",t("Et voi hyvitt‰‰ tilausta, jossa on panttitilillisi‰ tuotteita ja joka on jo hyvitetty"),"! ({$lasku_x})</font><br>";
-							$tee = "";
-							break 2;
-						}
-						elseif ($chk_til_row["sarjanumeroseuranta"] != "") {
-							echo "<font class='error'>",t("Et voi hyvitt‰‰ tilausta, jossa on sarjanumerollisia tuotteita ja joka on jo hyvitetty"),"! ({$lasku_x})</font><br>";
-							$tee = "";
-							break 2;
+						while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
+							if ($chk_til_row['panttitili'] != '') {
+								echo "<font class='error'>",t("Et voi hyvitt‰‰ tilausta, jossa on panttitilillisi‰ tuotteita ja joka on jo hyvitetty"),"! ({$lasku_x})</font><br>";
+								$tee = "";
+								break 3;
+							}
+							elseif ($chk_til_row["sarjanumeroseuranta"] != "") {
+								echo "<font class='error'>",t("Et voi hyvitt‰‰ tilausta, jossa on sarjanumerollisia tuotteita ja joka on jo hyvitetty"),"! ({$lasku_x})</font><br>";
+								$tee = "";
+								break 3;
+							}
 						}
 					}
 				}

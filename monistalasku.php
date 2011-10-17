@@ -126,7 +126,10 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 							AND vanhatunnus = '{$lasku_x}'
 							AND clearing 	= 'HYVITYS'
 							AND tila 		IN ('N', 'L', 'U')";
+				echo "<pre>",str_replace("\t", "", $query),"</pre>";
 				$clearing_chk_res = pupe_query($query);
+
+				echo "Monta riviä löyty: ".mysql_num_rows($clearing_chk_res)." riviä!!!!<br>";
 
 				// Lasku on jo hyvitetty
 				if (mysql_num_rows($clearing_chk_res) > 0) {
@@ -137,6 +140,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 								AND tilausrivi.uusiotunnus = '{$clearing_chk_row['tunnus']}'";
+					echo "<pre>",str_replace("\t", "", $query),"</pre>";
 					$chk_til_res = pupe_query($query);
 
 					while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {

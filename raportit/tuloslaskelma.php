@@ -966,7 +966,7 @@
 				$alkukausi = count($kaudet)-1;
 
 				if ($vertailued != "" and $vertailubu != ""){
-					$alkukausi -= 3;
+					$alkukausi -= 2;
 				}
 				elseif ($vertailued != "" and $vertailubu == "") {
 					$alkukausi -= 1;
@@ -1067,7 +1067,11 @@
 										if (isset($tilisumkau[$kaudet[$i]][(string) $sarake])) $apu = sprintf($muoto, $tilisumkau[$kaudet[$i]][(string) $sarake] * $luku_kerroin / $tarkkuus);
 										if ($apu == 0) $apu = "";
 
-										$tilirivi2 .= "<td align='right' nowrap>".number_format((float) $apu, $desi, ',', ' ')."</td>";
+										if (is_numeric($apu)) {
+											$apu = number_format($apu, $desi, ',', ' ');
+										}
+
+										$tilirivi2 .= "<td align='right' nowrap>$apu</td>";
 										$tilirivi2_px[] = $apu;
 
 										if ($tilisumkau[$kaudet[$i]][(string) $sarake] != 0) {
@@ -1139,7 +1143,11 @@
 								$tulos++; // summaillaan tätä jos meillä oli rivillä arvo niin osataan tulostaa
 							}
 
-							$rivi .= "<td class='$class' align='right' nowrap>".number_format((float) $apu, $desi,  ',', ' ')."</td>";
+							if (is_numeric($apu)) {
+								$apu = number_format($apu, $desi, ',', ' ');
+							}
+
+							$rivi .= "<td class='$class' align='right' nowrap>$apu</td>";
 
 							$rivit_px[$px] = array_merge($rivit_px[$px], array($apu));
 						}
@@ -1392,7 +1400,10 @@
 							if (isset($teepdf) and $teepdf == "OK") $pdf->draw_text($sisennys, $bottom, $nimi, $firstpage, $b);
 						}
 						elseif ($pi > 2) {
-							$arvo = number_format($arvo, $desi, '.', '');
+
+							if (is_numeric($arvo)) {
+								$arvo = number_format($arvo, $desi, '.', '');
+							}
 
 							if (isset($teexls) and $teexls == "OK") $worksheet->writeNumber($excelrivi, $pi-2, $arvo);
 

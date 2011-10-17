@@ -639,7 +639,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		$headerivi .= "".t("tuotteen hälytysraja")."\t";
 		$tuoterivi .= str_replace(".",",",$row['halytysraja'])."\t";
 		$headerivi .= "".t("ostoerä")."\t";
-		$tuoterivi .= str_replace(".",",",$row['osto_era'])."\t";
+		$tuoterivi .= "\"$toimirow[osto_era]\"\t";
 		$headerivi .= "".t("myyntierä")."\t";
 		$tuoterivi .= str_replace(".",",",$row['myynti_era'])."\t";
 		$headerivi .= "".t("toimittaja")."\t";

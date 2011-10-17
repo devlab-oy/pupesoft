@@ -119,11 +119,24 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 			}
 			else {
 
+				$query = "	SELECT GROUP_CONCAT(lx_otsikko.tunnus) AS tunnukset
+							FROM lasku AS ux_otsikko 
+							JOIN lasku AS lx_otsikko ON (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
+							WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}' 
+							AND ux_otsikko.tunnus = '{$lasku_x}'";
+				$vanhatunnus_chk_res = pupe_query($query);
+				$vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res);
+
+				if ($vanhatunnus_chk_row['tunnukset'] != '') {
+					$wherelisa = "AND vanhatunnus IN ({$vanhatunnus_chk_row['tunnukset']})";
+				}
+
 				// jos tilauksella on panttituotteita/sarjanumeroita pitää tarkistaa, että ei anneta hyvittää laskua joka on jo hyvitetty (vanhatunnus löytyy)
 				$query = "	SELECT tunnus, clearing
 							FROM lasku
 							WHERE yhtio 	= '{$kukarow['yhtio']}'
-							AND vanhatunnus = '{$lasku_x}'
+							#AND vanhatunnus = '{$lasku_x}'
+							{$wherelisa}
 							AND clearing 	= 'HYVITYS'
 							AND tila 		IN ('N', 'L', 'U')";
 				echo "<pre>",str_replace("\t", "", $query),"</pre>";

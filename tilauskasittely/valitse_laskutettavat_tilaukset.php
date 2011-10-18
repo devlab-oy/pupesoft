@@ -911,7 +911,8 @@
 							pp = Number(pp.value);
 							kk = Number(kk.value)-1;
 							vv = Number(vv.value);
-
+							
+							// Mikäli ei syötetä mitään 3 kenttään niin oletetaan tätäpäivää maksupäiväksi
 							if (vv == 0 && pp == 0 && kk == -1) {
 								var tanaanpp = $tanaanpp;
 								var tanaankk = $tanaankk;
@@ -929,6 +930,7 @@
 
 							}
 							else {
+								// voidaan syöttää kenttää 2 pituinen vuosiarvo esim. 11 = 2011
 								if (vv > 0 && vv < 1000) {
 									vv = vv+2000;
 								}
@@ -973,13 +975,26 @@
 									return false;
 								}
 							}
+							
+							// ALERT errorit ennen confirmiä, näin estetään ettei vahingossakaan päästä läpi.
+							if (ero < 0) {
+								var msg = '".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
+
+								if (alert(msg)) {
+									return false;
+								}
+								else {
+									return false;
+								}
+							}
 
 							if (laskullaviikonpaivat.length > 1) {
 								for (var i = 0; i < laskullaviikonpaivat.length; i++) {
 									if (laskullaviikonpaivat[i].value != 0) {
 										if (vertaa != laskullaviikonpaivat[i].value) {
 											naytetaanko_herja = true;
-											var msg = msg+' Asiakkaan normaali laskutuspäivä on '+paiva+'. Haluatko varmasti laskuttaa '+paivamaara+' ?';
+											var msg = '".t("Laskulla normaali laskutuspäivä on")." '+paiva+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+' ?\\n';
+											// ei haluta concatenoida tässä msg:tä, varoitusviestistä tulee liian sekava muuten mikäli ajetaan esim 20 laskua....
 										}
 									}
 								}
@@ -988,34 +1003,24 @@
 								if (laskullaviikonpaivat.value > 0 && laskullaviikonpaivat.value < 9 ) {
 									if (laskullaviikonpaivat.value != vertaa) {
 										naytetaanko_herja = true;
-										var msg = msg+' Asiakkaan normaali laskutuspäivä on '+paiva+'. Haluatko varmasti laskuttaa '+paivamaara+'?';
+										var msg = msg+'".t("Asiakkaan normaali laskutuspäivä on")." '+paiva+'.".t("Haluatko varmasti laskuttaa")." '+paivamaara+'?\\n';
 									}
 								}
 								else if (laskullaviikonpaivat.value < 0) {
 									if (paiva != paivamaara) {
 										naytetaanko_herja = true;
-										var msg = msg+' Asiakkaan normaali laskutuspäivä on '+paiva+'. Haluatko varmasti laskuttaa '+paivamaara+'?';
+										var msg = msg+'".t("Asiakkaan normaali laskutuspäivä on")." '+paiva+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'?\\n';
 									}
 								}
 								else if (laskullaviikonpaivat.value == 9) {
 									naytetaanko_herja = true;
-									var msg = msg+' Asiakkaan normaali laskutuspäivä on '+paiva+'. Haluatko varmasti laskuttaa '+paivamaara+'?';
+									var msg = msg+'".t("Asiakkaan normaali laskutuspäivä on")." '+paiva+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'?\\n';
 								}
 							}
 
 							if (ero >= 2) {
-								var msg = msg+' ".t("Oletko varma, että haluat päivätä laskun yli 2pv menneisyyteen?")."';
+								var msg = msg+'".t("Oletko varma, että haluat päivätä laskun yli 2pv menneisyyteen?")."\\n';
 								naytetaanko_herja = true;
-							}
-							if (ero < 0) {
-								var msg = msg+' ".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
-
-								if (alert(msg)) {
-									return false;
-								}
-								else {
-									return false;
-								}
 							}
 
 							if (naytetaanko_herja == true) {

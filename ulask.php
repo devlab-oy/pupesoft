@@ -25,22 +25,32 @@ echo "	<script type='text/javascript' charset='utf-8'>
 
 					var uusi_rivi = $('tr .rivi_'+i).clone();
 
-					$(uusi_rivi).find('input, select').each(function() {
+					$(uusi_rivi).find('input, select, div').each(function() {
 
-						if ($(this).attr('id') != false && $(this).attr('id') != undefined) {
-							$(this).attr('id', $(this).attr('id').replace(i, ii));
+						if ($(this).is('select, input')) {
+							if ($(this).attr('id') != false && $(this).attr('id') != undefined && $(this).attr('id').substring(0, 4) !== 'haku') {
+								$(this).attr('id', $(this).attr('id').replace(i, ii));
+							}
+
+							if ($(this).attr('class') != false && $(this).attr('class') != undefined) {
+								$(this).attr('class', $(this).attr('class').replace(i, ii));
+							}
+
+							if ($(this).attr('name') != false && $(this).attr('name') != undefined) {
+								$(this).attr('name', $(this).attr('name').replace(i, ii));
+							}
+
+							if ($(this).is('a') && $(this).attr('href') != false && $(this).attr('href') != undefined) {
+								$(this).attr('href', $(this).attr('href').replace(new RegExp(i, 'g'), ii));
+							}
 						}
 
-						if ($(this).attr('class') != false && $(this).attr('class') != undefined) {
-							$(this).attr('class', $(this).attr('class').replace(i, ii));
-						}
+						if ($(this).is('div')) {
+							var id = $(this).attr('id');
+							var iduusi = id + ii;
 
-						if ($(this).attr('name') != false && $(this).attr('name') != undefined) {
-							$(this).attr('name', $(this).attr('name').replace(i, ii));
-						}
-
-						if ($(this).is('a') && $(this).attr('href') != false && $(this).attr('href') != undefined) {
-							$(this).attr('href', $(this).attr('href').replace(new RegExp(i, 'g'), ii));
+							$(this).attr('id', iduusi);
+							$(this).attr('name', iduusi);
 						}
 
 						if ($(this).is('input')) {
@@ -51,8 +61,40 @@ echo "	<script type='text/javascript' charset='utf-8'>
 
 							$(this).attr('id', iduusi);
 
-							if ($(this).attr('onkeydown')) {
+							if ($(this).attr('id').substring(0, 4) == 'haku') {
 								console.log($(this).attr('onkeydown'));
+
+								$(this).removeAttr('onkeydown');
+
+								$(this).bind('keydown', function(event) {
+									return livesearch_keyhandler(event, iduusi, 'lasku', 'EISUBMIT');
+								});
+
+								console.log($(this).attr('onkeyup'));
+								
+								$(this).removeAttr('onkeyup');
+
+								$(this).bind('keyup', function(event) {
+									if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
+										sndReq('livesearch_'+iduusi, '?livesearch_tee=TILIHAKU&livesearch_form=lasku&livesearch_hakuid='+iduusi+'&livesearch_nimi=itili['+ii+']&livesearch_submit=EISUBMIT&ohje=off&toim=&livesearch_haku='+$(this).val());
+										keyStrokeIndex = -1;
+									}
+								});
+
+								console.log($(this).attr('onblur'));
+
+								$(this).removeAttr('onblur');
+
+								$(this).bind('blur', function(event) {
+									var selectOptions = document.getElementsByName('selectOptions'+iduusi);
+										for (var iEl = 0; iEl < selectOptions.length; iEl++) {
+											if (document.getElementById(selectOptions[iEl].id).className != '') {
+												return false;
+											}
+										}
+
+										document.getElementById('livesearch_'+iduusi).style.visibility = 'hidden';
+								});
 							}
 						}
 					});

@@ -879,14 +879,14 @@
 			echo "<tr><th>".t("Syötä poikkeava laskutuspäivämäärä (pp-kk-vvvv)").":</th>
 					<td><input type='text' name='laskpp' value='' size='3'></td>
 					<td><input type='text' name='laskkk' value='' size='3'></td>
-					<td><input type='text' name='laskvv' value='' size='5'></td></tr>\n";
+					<td><input type='text' name='laskvv' value='' size='5'></td></tr>";
 
 			if ($yhtiorow["myyntilaskun_erapvmlaskenta"] == "K") {
 				echo "<tr><th>".t("Laske eräpäivä").":</th>
 					<td colspan='3'><select name='erpcmlaskenta'>";
 				echo "<option value=''>".t("Eräpäivä lasketaan laskutuspäivästä")."</option>";
 				echo "<option value='NOW'>".t("Eräpäivä lasketaan tästä hetkestä")."</option>";
-				echo "</select></td></tr>\n";
+				echo "</select></td></tr>";
 			}
 
 			echo "</table>";
@@ -897,6 +897,10 @@
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 
 						function verify(){
+
+							var naytetaanko_herja = false
+							var msg = '';
+
 							var pp = document.lasku.laskpp;
 							var kk = document.lasku.laskkk;
 							var vv = document.lasku.laskvv;
@@ -970,13 +974,12 @@
 								}
 							}
 
-							var naytetaanko_herja = false
-
 							if (laskullaviikonpaivat.length > 1) {
 								for (var i = 0; i < laskullaviikonpaivat.length; i++) {
 									if (laskullaviikonpaivat[i].value != 0) {
 										if (vertaa != laskullaviikonpaivat[i].value) {
 											naytetaanko_herja = true;
+											var msg = msg+' Asiakkaan normaali laskutuspäivä on '+paiva+'. Haluatko varmasti laskuttaa '+paivamaara+' ?';
 										}
 									}
 								}
@@ -985,24 +988,27 @@
 								if (laskullaviikonpaivat.value > 0 && laskullaviikonpaivat.value < 9 ) {
 									if (laskullaviikonpaivat.value != vertaa) {
 										naytetaanko_herja = true;
+										var msg = msg+' Asiakkaan normaali laskutuspäivä on '+paiva+'. Haluatko varmasti laskuttaa '+paivamaara+'?';
 									}
 								}
 								else if (laskullaviikonpaivat.value < 0) {
 									if (paiva != paivamaara) {
 										naytetaanko_herja = true;
+										var msg = msg+' Asiakkaan normaali laskutuspäivä on '+paiva+'. Haluatko varmasti laskuttaa '+paivamaara+'?';
 									}
 								}
 								else if (laskullaviikonpaivat.value == 9) {
 									naytetaanko_herja = true;
+									var msg = msg+' Asiakkaan normaali laskutuspäivä on '+paiva+'. Haluatko varmasti laskuttaa '+paivamaara+'?';
 								}
 							}
 
 							if (ero >= 2) {
-								var msg = '".t("Oletko varma, että haluat päivätä laskun yli 2pv menneisyyteen?")."';
-								return confirm(msg);
+								var msg = msg+' ".t("Oletko varma, että haluat päivätä laskun yli 2pv menneisyyteen?")."';
+								naytetaanko_herja = true;
 							}
 							if (ero < 0) {
-								var msg = '".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
+								var msg = msg+' ".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
 
 								if (alert(msg)) {
 									return false;
@@ -1013,7 +1019,6 @@
 							}
 
 							if (naytetaanko_herja == true) {
-								var msg = 'Asiakkaan laskutuspäivä on '+paiva+'. Haluatko varmasti laskuttaa tänään?';
 								return confirm(msg);
 							}
 						}

@@ -1000,14 +1000,14 @@
 					echo "</td>";
 					echo "<td valign='top' $class>$prow[toim_tuoteno]</td>";
 					echo "<td valign='top' $class align='right'>".($prow["tilattu"]*1)."<br>".($prow["tilattu_ulk"]*1)."</td>";
-					echo "<td valign='top' $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
+					echo "<td valign='top' $class align='right'>".hintapyoristys($prow["hinta"], $yhtiorow["hintapyoristys"])." </td>";
 
 					for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
 						echo "<td valign='top' $class align='right'>".((float) $prow["ale{$alepostfix}"])."</td>";
 					}
 
 					echo "<td valign='top' $class align='right'>".((float) $prow["alv"])."</td>";
-					echo "<td valign='top' $class align='right'>".hintapyoristys($prow["rivihinta"])."</td>";
+					echo "<td valign='top' $class align='right'>".hintapyoristys($prow["rivihinta"], $yhtiorow["hintapyoristys"])." </td>";
 					echo "<td valign='top' $classlisa align='right'>$prow[valuutta]</td>";
 
 					if ($prow["uusiotunnus"] == 0) {

@@ -647,9 +647,9 @@
 										FROM sarjanumeroseuranta
 										LEFT JOIN tilausrivi use index (PRIMARY) ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus)
 										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus)
-										WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-										and sarjanumeroseuranta.tuoteno = '$srow1[tuoteno]'
-										and sarjanumeroseuranta.$tunken = '$srow1[tunnus]'
+										WHERE sarjanumeroseuranta.yhtio  = '$kukarow[yhtio]'
+										and sarjanumeroseuranta.tuoteno  = '$srow1[tuoteno]'
+										and sarjanumeroseuranta.$tunken  = '$srow1[tunnus]'
 										and sarjanumeroseuranta.kaytetty = 'K'";
 							$sarres = pupe_query($query);
 							$srow2 = mysql_fetch_assoc($sarres);
@@ -667,44 +667,36 @@
 					// jos tilausrivi ei ole cronin generoima (silloin var2-kenttään tallennetaan PANT-teksti)
 					// cron-ohjelma on panttitili_cron.php
 					// jos asiakkaalla on panttitili käytössä, katsotaan tilausrivien tuotteet läpi onko niissä panttitilillisiä tuotteita
-					if ($asiakas_panttitili_chk_row['panttitili'] == "K" and $srow1['panttitili'] == 'K' and $trow['var2'] != 'PANT' and $srow1['varattu'] < 0) {
+					if ($asiakas_panttitili_chk_row['panttitili'] == "K" and $srow1['panttitili'] == 'K' and $srow1['var2'] != 'PANT' and $srow1['varattu'] < 0) {
 
 						if ($laskurow['clearing'] == 'HYVITYS') {
 
-							// Tsekataan löytyykö hyvitettävän laskun pantit vielä?
-							// Hyvitettävän laskun rivit
-							$query = "	SELECT tilausrivi.otunnus, tuote.panttitili, tilausrivi.varattu
+							// jos tilauksella on panttituotteita ja ollaan tekemässä hyvitystä, pitää katsoa, että alkuperäisen veloituslakun panttitili rivejä ei ole vielä käytetty
+							$query = "	SELECT otunnus, tuoteno, sum(kpl) kpl
 										FROM tilausrivi
-										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-										WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-										AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-										AND tilausrivi.tuoteno = '{$srow1['tuoteno']}'";
-							$chk_til_res = pupe_query($query);
-
-							$query = "SELECT vanhatunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['vanhatunnus']}'";
+										WHERE yhtio 	= '{$kukarow['yhtio']}'
+										AND tyyppi  	= 'L'
+										AND tuoteno 	= '{$srow1['tuoteno']}'
+										AND uusiotunnus = '{$laskurow['vanhatunnus']}'
+										AND kpl > 0
+										GROUP BY 1, 2";
 							$vanhatunnus_chk_res = pupe_query($query);
 
-							if (mysql_num_rows($vanhatunnus_chk_res) > 0) {
-								$vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res);
-								$wherelisa_panttitili = "AND myyntitilausnro = '{$vanhatunnus_chk_row['vanhatunnus']}'";
-							}
+							while ($vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res)) {
 
-							while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
-
-								$query = "	SELECT *
-											FROM panttitili
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND asiakas = '{$laskurow['liitostunnus']}'
-											AND tuoteno = '{$srow1['tuoteno']}'
-											{$wherelisa_panttitili}
-											AND kpl = '".abs($chk_til_row['varattu'])."'
-											AND status = ''
-											AND kaytettypvm = '0000-00-00'
-											AND kaytettytilausnro = 0
-											ORDER BY myyntipvm ASC";
+								$query = "  SELECT sum(kpl) kpl
+									        FROM panttitili
+									        WHERE yhtio 			= '{$kukarow['yhtio']}'
+									        AND asiakas 			= '{$laskurow['liitostunnus']}'
+									        AND tuoteno 			= '{$srow1['tuoteno']}'
+									        AND myyntitilausnro 	= '{$vanhatunnus_chk_row['otunnus']}'
+									        AND status 				= ''
+									        AND kaytettypvm 		= '0000-00-00'
+									        AND kaytettytilausnro 	= 0";
 								$pantti_chk_res = pupe_query($query);
+                            	$pantti_chk_row = mysql_fetch_assoc($pantti_chk_res);
 
-								if (mysql_num_rows($pantti_chk_res) == 0) {
+								if ($vanhatunnus_chk_row['kpl'] != $pantti_chk_row['kpl']) {
 									$lasklisa .= " and lasku.tunnus != '{$laskurow['tunnus']}' ";
 
 									if ($silent == "" or $silent == "VIENTI") {
@@ -718,8 +710,8 @@
 
 				$query = "  SELECT *
 							FROM maksuehto
-							WHERE yhtio='$kukarow[yhtio]'
-							and tunnus='$laskurow[maksuehto]'";
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and tunnus	= '$laskurow[maksuehto]'";
 				$maresult = pupe_query($query);
 				$maksuehtorow = mysql_fetch_assoc($maresult);
 

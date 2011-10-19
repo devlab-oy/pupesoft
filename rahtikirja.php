@@ -1943,6 +1943,7 @@
 		echo "<form name='rahtikirjainfoa' action='$PHP_SELF?$ltun_linkklisa' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='add'>";
 		echo "<input type='hidden' name='mista' value='$mista'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 
 		if ($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 			echo "<input type='hidden' name='toimitustapa_varasto' value='$toimitustapa_varasto'>";
@@ -1952,7 +1953,6 @@
 		}
 		else {
 			echo "<input type='hidden' name='rahtikirjan_esisyotto' value='$rahtikirjan_esisyotto'>";
-			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='rakirno' value='$rakirno'>";
 			echo "<input type='hidden' name='otsikkonro' value='$otsik[tunnus]'>";
 			echo "<input type='hidden' name='dgdlle_tunnukset' value='$tunnukset'>";

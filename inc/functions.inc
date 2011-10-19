@@ -13216,6 +13216,381 @@ if (!function_exists("tuotteen_lisatiedot")) {
 	}
 }
 
+if (!function_exists("valitse_pakkaus")) {
+	function valitse_pakkaus($pakkaukset, $pisin_tuote_array) {
+
+		$kaytettava_pakkaus = "";
+
+		// sortataan pisin tuote ensiksi
+		arsort($pisin_tuote_array);
+		echo "<pre>",var_dump($pisin_tuote_array),"</pre>";
+
+		$pisin_tuote = array_shift($pisin_tuote_array);
+
+		reset($pakkaukset);
+
+		// pakkaukset ovat pienimmästä isoimpaan
+		foreach ($pakkaukset as $indx => $pakkaus_array) {
+
+			if ($pakkaus_array['leveys'] >= max())
+
+		}
+
+		return $kaytettava_pakkaus;
+
+	}
+}
+
+if (!function_exists("tee_keraysera2")) {
+	function tee_keraysera2($keraysvyohyke) {
+		global $kukarow, $yhtiorow;
+
+		// toimitustavan lähtöjen viikonpäivä
+		$viikonpaiva = date('w');
+
+		$pakkaukset = array();
+		$keraysvyohyketiedot = array();
+		$max_keraysera_pintaala = 0;
+		$max_keraysera_rivit = 0;
+		$lahtojen_valinen_enimmaisaika = 0;
+		$yhdistelysaanto = '';
+		$ulkoinen_jarjestelma = '';
+
+		// esim. muutetaan metrit senteiksi
+		$mittakerroin = 100;
+		// millä tarkkuudella tuotteita pakataan (esim. 5 cm)
+		$resoluutio = 5;
+
+		$query = "	SELECT sallitut_alustat,
+					if(max_keraysera_pintaala * pow({$mittakerroin}, 2) < 1, 1, max_keraysera_pintaala * pow({$mittakerroin}, 2)) max_keraysera_pintaala,
+					max_keraysera_rivit,
+					yhdistelysaanto,
+					lahtojen_valinen_enimmaisaika,
+					ulkoinen_jarjestelma
+					FROM keraysvyohyke
+					JOIN pakkaus ON (pakkaus.yhtio = keraysvyohyke.yhtio AND pakkaus.tunnus IN (keraysvyohyke.sallitut_alustat))
+					WHERE keraysvyohyke.yhtio = '{$kukarow['yhtio']}'
+					AND keraysvyohyke.tunnus = '{$keraysvyohyke}'";
+		$ker_result = pupe_query($query);
+
+		while ($ker_row = mysql_fetch_assoc($ker_result)) {
+			$keraysvyohyketiedot['max_keraysera_pintaala'] 			= $ker_row['max_keraysera_pintaala'];
+			$keraysvyohyketiedot['max_keraysera_rivit']				= $ker_row['max_keraysera_rivit'];
+			$keraysvyohyketiedot['yhdistelysaanto']					= $ker_row['yhdistelysaanto'];
+			$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] 	= $ker_row['lahtojen_valinen_enimmaisaika'];
+			$keraysvyohyketiedot['ulkoinen_jarjestelma'] 			= $ker_row['ulkoinen_jarjestelma'];
+
+			$query = "	SELECT pakkaus.tunnus,
+						pakkaus.pakkaus,
+						pakkaus.paino,
+						if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) leveys,
+						if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) korkeus,
+						if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) syvyys,
+						if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) * if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) * if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) AS tilavuus
+						FROM pakkaus
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus IN ({$ker_row['sallitut_alustat']})
+						ORDER BY tilavuus ASC";
+			$pakkaus_result = pupe_query($query);
+
+			while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
+				$pakkaukset[$pakkaus_row['tunnus']]['leveys'] 	= $pakkaus_row['leveys'];
+				$pakkaukset[$pakkaus_row['tunnus']]['korkeus'] 	= $pakkaus_row['korkeus'];
+				$pakkaukset[$pakkaus_row['tunnus']]['syvyys'] 	= $pakkaus_row['syvyys'];
+				$pakkaukset[$pakkaus_row['tunnus']]['paino'] 	= $pakkaus_row['paino'];
+				$pakkaukset[$pakkaus_row['tunnus']]['tilavuus'] = $pakkaus_row['tilavuus'];
+			}
+		}
+
+		$query = "	SELECT lasku.tunnus,
+					keraysvyohyke.nimitys as keraysvyohyke_nimitys,
+					lasku.liitostunnus,
+					lasku.nimi as asiakas_nimi,
+					SUBSTRING(lasku.h1time, 12, 8) aika,
+					asiakas.tunnus as asiakas_tunnus,
+					toimitustavan_lahdot.tunnus as lahto,
+					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
+					lasku.hyvaksynnanmuutos as prioriteetti,
+					lasku.h1time,
+					lasku.sisviesti2,
+					keraysvyohyke.tunnus as keraysvyohyke_tunnus,
+					MIN(vh.indeksi) as minimi_indeksi,
+					SUM(ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu+tilausrivi.kpl), 4)) tilauksen_koko
+					FROM lasku
+					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+					JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
+					JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.tunnus = '{$keraysvyohyke}')
+					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
+				 	JOIN toimitustavan_lahdot ON (toimitustavan_lahdot.yhtio = toimitustapa.yhtio
+													AND toimitustavan_lahdot.liitostunnus = toimitustapa.tunnus
+													AND toimitustavan_lahdot.lahdon_kellonaika >= CURTIME()
+													AND toimitustavan_lahdot.lahdon_viikonpvm = {$viikonpaiva}
+													AND toimitustavan_lahdot.aktiivi = ''
+													AND toimitustavan_lahdot.kerailyn_aloitusaika <= CURTIME()
+ 												)
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND lasku.tila = 'N'
+					AND lasku.alatila = 'A'
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
+					ORDER BY lahto, erotus, lasku.hyvaksynnanmuutos, tilauksen_koko DESC, minimi_indeksi, lasku.h1time ASC, lasku.sisviesti2, keraysvyohyke.nimitys";
+		$res = pupe_query($query);
+
+		$ulkoisen_jarjestelman_tiedosto = '';
+
+		$ed_lahto = '';
+		$ed_prioriteetti = '';
+		$ed_sisviesti2 = 'ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ';
+
+		$eran_koko = 0;
+		$era_valmis = false;
+
+		$erat = array('tilaukset' => array(), 'pakkaukset' => array());
+
+		echo "<pre>",var_dump($pakkaukset),"</pre>";
+
+		$pisin_tuote = array();
+
+		// tarkistetaan mikä on asiakkaan pisin tuote
+		while ($row = mysql_fetch_assoc($res)) {
+
+			echo "Asiakas: $row[asiakas_nimi]<br>";
+
+			$query = "	SELECT tilausrivi.tunnus, tilausrivi.otunnus,
+						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}) * (tilausrivi.varattu+tilausrivi.kpl), 4) as tuotteen_koko,
+						tilausrivi.tuoteno,
+						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 4) y_koko,
+						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}), 2) tuotekorkeus,
+						round(if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}), 2) tuoteleveys,
+						round(if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 2) tuotesyvyys,
+						(tilausrivi.varattu+tilausrivi.kpl) y_maara,
+						tuote.yksin_kerailyalustalle,
+						tuote.tuotemassa y_paino
+						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
+						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus = '{$row['tunnus']}'
+						ORDER BY tuote.yksin_kerailyalustalle ASC, y_koko DESC";
+			$tuoteres = pupe_query($query);
+			
+			while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
+
+				if (!isset($pisin_tuote[$tuoterow['tuoteno']])) $pisin_tuote[$tuoterow['tuoteno']] = 0;
+
+				echo "Otunnus: $tuoterow[otunnus] ";
+				echo "Tuoteno: $tuoterow[tuoteno] "; 
+				echo "Tuotteen tilavuus: $tuoterow[y_koko] (l: $tuoterow[tuoteleveys] x k: $tuoterow[tuotekorkeus] x s: $tuoterow[tuotesyvyys]) ";
+				echo "Yksin keräysalustalle: $tuoterow[yksin_kerailyalustalle] ";
+				echo "<br>";
+
+				if ($tuoterow['yksin_kerailyalustalle'] == '') {
+
+					if ($tuoterow['tuoteleveys'] > $pisin_tuote[$tuoterow['tuoteno']]) {
+						$pisin_tuote[$tuoterow['tuoteno']] = $tuoterow['tuoteleveys'];
+					}
+
+					if ($tuoterow['tuotekorkeus'] > $pisin_tuote[$tuoterow['tuoteno']]) {
+						$pisin_tuote[$tuoterow['tuoteno']] = $tuoterow['tuotekorkeus'];
+					}
+
+					if ($tuoterow['tuotesyvyys'] > $pisin_tuote[$tuoterow['tuoteno']]) {
+						$pisin_tuote[$tuoterow['tuoteno']] = $tuoterow['tuotesyvyys'];
+					}
+
+				}
+			}
+		}
+
+		echo "<pre>",var_dump($pisin_tuote),"</pre>";
+
+		$kaytettava_pakkaus = valitse_pakkaus($pakkaukset, $pisin_tuote);
+
+		echo "<pre>",var_dump($kaytettava_pakkaus),"</pre>";
+
+		mysql_data_seek($res, 0);
+		while ($row = mysql_fetch_assoc($res)) {
+
+			// if ($row['erotus'] > $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']) {
+			// 	echo "Lähdön enimmäisaika ylittyi! Let's skip it. ($row[erotus] > $keraysvyohyketiedot[lahtojen_valinen_enimmaisaika])<br>";
+			// 	echo "Laskutunnus: $row[tunnus]<br>Asiaskas: $row[asiakas_nimi]<br>Erotus: $row[erotus]<br>Lähtö: $row[lahto]<br>Minimi_indeksi: $row[minimi_indeksi]<br>Tilauksen koko: $row[tilauksen_koko]<br>H1time: $row[h1time]<br>Prioriteetti: $row[prioriteetti]<br><br>";
+			// 	continue;
+			// }
+			// 
+			// if ($eran_koko > $keraysvyohyketiedot['max_keraysera_pintaala']) {
+			// 	echo "Keräyserän maksimiraja ylitetty! $eran_koko / $keraysvyohyketiedot[max_keraysera_pintaala]<br>";
+			// 	$keraysvyohyke = $row['keraysvyohyke_tunnus'];
+			// 	$era_valmis = true;
+			// 	break;
+			// }
+			// 
+			// if (trim($ed_prioriteetti) != '' and $ed_prioriteetti != $row['prioriteetti'] and strpos($keraysvyohyketiedot['yhdistelysaanto'], 'P') === false and count($kaytettavat_pakkaukset) > 0) {
+			// 	echo "EI SAA OLLA USEITA PRIORITEETTEJÄ ALUSTOISSA! KERÄYSERÄ VALMIS<br>";
+			// 	$era_valmis = true;
+			// 	break;
+			// }
+			// 
+			// $ed_prioriteetti = $row['prioriteetti'];
+			// 
+			// if (trim($ed_lahto) != '' and $ed_lahto != $row['lahto'] and strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and count($kaytettavat_pakkaukset) > 0) {
+			// 	echo "EI SAA OLLA ALUSTOJA USEISTA LÄHDÖISTÄ! KERÄYSERÄ VALMIS<br>";
+			// 	$era_valmis = true;
+			// 	break;
+			// }
+			// 
+			// $ed_lahto = $row['lahto'];
+			// 
+			// if (trim($ed_asiakas) != '' and $ed_asiakas != $row['liitostunnus']) {
+			// 	$asiakkaan_pakkaukset = array();
+			// 
+			// 	if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') === false and count($kaytettavat_pakkaukset) > 0) {
+			// 		echo "EI SAA OLLA USEITA ASIAKKAITA! KERÄYSERÄ VALMIS<br>";
+			// 		$era_valmis = true;
+			// 		break;
+			// 	}
+			// }
+
+			$query = "	SELECT tilausrivi.tunnus, tilausrivi.otunnus,
+						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}) * (tilausrivi.varattu+tilausrivi.kpl), 4) as tuotteen_koko,
+						tilausrivi.tuoteno,
+						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 4) y_koko,
+						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}), 2) tuotekorkeus,
+						round(if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}), 2) tuoteleveys,
+						round(if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 2) tuotesyvyys,
+						(tilausrivi.varattu+tilausrivi.kpl) y_maara,
+						tuote.yksin_kerailyalustalle,
+						tuote.tuotemassa y_paino
+						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
+						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus = '{$row['tunnus']}'
+						ORDER BY tuote.yksin_kerailyalustalle ASC, y_koko DESC";
+			$tuoteres = pupe_query($query);
+
+			while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
+
+				// if ($rivit >= $keraysvyohyketiedot['max_keraysera_rivit']) {
+				// 	echo "RIVEJÄ ON TARPEEKSI KERÄYSERÄÄ VARTEN (rivit: $rivit max_rivit: $keraysvyohyketiedot[max_keraysera_pintaala])<br>";
+				// 	$era_valmis = true;
+				// 	break 2;
+				// }
+				// 
+				// // katsotaan onko tilaus kokonaan jo keräyserässä
+				// $query = "	SELECT tunnus
+				// 			FROM kerayserat
+				// 			WHERE yhtio = '{$kukarow['yhtio']}'
+				// 			AND otunnus = '{$row['tunnus']}'
+				// 			AND tilausrivi = '{$tuoterow['tunnus']}'
+				// 			AND kpl = '{$tuoterow['y_maara']}'";
+				// $kerayserat_chk_res = pupe_query($query);
+				// 
+				// if (mysql_num_rows($kerayserat_chk_res) != 0) {
+				// 	echo "Tilausrivi on jo keräyserässä!!!! Let's skip it.<br />";
+				// 	continue;
+				// }
+				// 
+				// // katsotaan onko tilaus osittain jo keräyserässä
+				// $query = "	SELECT sum(kpl) as montako
+				// 			FROM kerayserat
+				// 			WHERE yhtio = '{$kukarow['yhtio']}'
+				// 			AND otunnus = '{$row['tunnus']}'
+				// 			AND tilausrivi = '{$tuoterow['tunnus']}'
+				// 			AND kpl < '{$tuoterow['y_maara']}'";
+				// $kerayserat_chk_res = pupe_query($query);
+				// $kerayserat_chk_row = mysql_fetch_assoc($kerayserat_chk_res);
+				// 
+				// if ($kerayserat_chk_row['montako'] > 0) {
+				// 
+				// 	if ($tuoterow['y_maara'] == $kerayserat_chk_row['montako']) {
+				// 		echo "Kaikki tilausrivin kappaleet ovat jo keräyserissä. Let's skipataan.<br>";
+				// 		continue;
+				// 	}
+				// 
+				// 	$tuoterow['y_maara'] -= $kerayserat_chk_row['montako'];
+				// }
+
+				
+
+
+			}
+
+			if (mysql_num_rows($tuoteres) > 0) {
+				$ed_asiakas = $row['liitostunnus'];
+				$ed_sisviesti2 = $row['sisviesti2'];
+			}
+		}
+
+		exit;
+
+		if ($kukarow['eposti'] != '') {
+			$komento = 'email';
+
+			$pp = date("d");
+			$kk = date("m");
+			$vv = date("Y");
+
+			$kutsu = t("Keräyserä debug")." $vv-$kk-$pp";
+			$ctype = "TEXT";
+			$content_body = $debug_mail;
+
+			require("inc/sahkoposti.inc");
+		}
+
+		if ($ulkoinen_jarjestelma == 'K') {
+			//keksitään uudelle failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$filenimi = "/Users/sami/temp/kardex/orders/ulkoisen_jarjestelman_tiedosto-".md5(uniqid(mt_rand(), true)).".txt";
+			$fh = fopen($filenimi, "w+");
+		}
+
+		foreach ($kaytettavat_pakkaukset as $pakkauksen_nro => $larr) {
+			foreach ($larr as $as_tun => $jarr) {
+				foreach ($jarr as $juokseva_nro => $marr) {
+					foreach ($marr as $tilriv => $kpl) {
+
+						$erat['pakkaukset'][$pakkauksen_nro][$juokseva_nro][$tilriv] = $kpl;
+
+						if ($ulkoinen_jarjestelma == 'K') {
+							$query = "SELECT otunnus, tuoteno, nimitys, CONCAT(hyllyalue, '-', hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+							$tilriv_tiedot_res = pupe_query($query);
+							$tilriv_tiedot_row = mysql_fetch_assoc($tilriv_tiedot_res);
+
+							$sisalto = "4;{$juokseva_nro};{$tilriv_tiedot_row['tuoteno']};{$tilriv_tiedot_row['nimitys']};-{$kpl};{$tilriv_tiedot_row['hyllypaikka']};{$tilriv};";
+
+							fputs($fh, $sisalto."\r\n");
+						}
+					}
+				}
+			}
+		}
+
+		if ($ulkoinen_jarjestelma == 'K') {
+
+			fclose($fh);
+
+			$ftphost = $ftphost_kardex;
+			$ftpuser = $ftpuser_kardex;
+			$ftppass = $ftppass_kardex;
+			$ftppath = $ftppath_kardex;
+
+			$ftpfile = $unlink_filenimi = $filenimi;
+
+			require('inc/ftp-send.inc');
+
+			unlink($unlink_filenimi);
+		}
+
+		if ($debug) {
+			echo "<pre>",var_dump($kaytettavat_pakkaukset, $erat),"</pre>";
+		}
+
+		return $erat;
+	}
+}
+
 if (!function_exists("tee_keraysera")) {
 	function tee_keraysera($keraysvyohyke) {
 		global $kukarow, $yhtiorow;

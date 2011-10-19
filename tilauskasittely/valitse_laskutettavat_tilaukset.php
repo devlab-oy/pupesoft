@@ -496,7 +496,9 @@
 			$maksu_positiot = array();
 
 			while ($row = mysql_fetch_assoc($res)) {
-
+				
+				$jspaivamaara = "";
+				
 				// jos yksikin on k‰teinen niin kaikki on k‰teist‰ (se hoidetaan jo ylh‰‰ll‰)
 				if ($row["kateinen"] != "") $kateinen = "X";
 				if ($row["maa"] != "") $maa = $row["maa"];
@@ -526,6 +528,8 @@
 				echo "<td>".t("$teksti")."</td>";
 
 				echo "<td>$row[kukanimi]<br>".tv1dateconv($row["luontiaika"], "P")."</td>";
+
+				$jspaivamaara = $row["laskutusvkopv"];
 
 				if ($row["laskutusvkopv"] == 0)		$teksti = t("Kaikki");
 				elseif ($row["laskutusvkopv"] == 2)	$teksti = t("Maanantai");
@@ -588,7 +592,6 @@
 				}
 
 				echo "<td>$teksti ";
-				echo "<input type='hidden' name='laskullaviikonpaiva' value ='{$row["laskutusvkopv"]}'>";
 				echo "</td>";
 
 				echo "<td>$row[meh]</td>";
@@ -892,6 +895,8 @@
 			echo "</table>";
 			echo "<br><input type='submit' value='".t("Laskuta")."'>";
 			echo "<input type='hidden' name='paiva' value='$teksti'>";
+			echo "<input type='hidden' name='laskullaviikonpaiva' value ='$jspaivamaara'>";
+
 			echo "</form>";
 
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
@@ -911,7 +916,7 @@
 							pp = Number(pp.value);
 							kk = Number(kk.value)-1;
 							vv = Number(vv.value);
-							
+
 							// Mik‰li ei syˆtet‰ mit‰‰n 3 kentt‰‰n niin oletetaan t‰t‰p‰iv‰‰ maksup‰iv‰ksi
 							if (vv == 0 && pp == 0 && kk == -1) {
 								var tanaanpp = $tanaanpp;
@@ -975,7 +980,7 @@
 									return false;
 								}
 							}
-							
+
 							// ALERT errorit ennen confirmi‰, n‰in estet‰‰n ettei vahingossakaan p‰‰st‰ l‰pi.
 							if (ero < 0) {
 								var msg = '".t("VIRHE: Laskua ei voi p‰iv‰t‰ tulevaisuuteen!")."';
@@ -988,34 +993,21 @@
 								}
 							}
 
-							if (laskullaviikonpaivat.length > 1) {
-								for (var i = 0; i < laskullaviikonpaivat.length; i++) {
-									if (laskullaviikonpaivat[i].value != 0) {
-										if (vertaa != laskullaviikonpaivat[i].value) {
-											naytetaanko_herja = true;
-											var msg = '".t("Laskulla normaali laskutusp‰iv‰ on")." '+paiva+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+' ?\\n';
-											// ei haluta concatenoida t‰ss‰ msg:t‰, varoitusviestist‰ tulee liian sekava muuten mik‰li ajetaan esim 20 laskua....
-										}
-									}
+							if (laskullaviikonpaivat.value > 0 && laskullaviikonpaivat.value < 9 ) {
+								if (laskullaviikonpaivat.value != vertaa) {
+									naytetaanko_herja = true;
+									var msg = '".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+paiva+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'?\\n';
 								}
 							}
-							else {
-								if (laskullaviikonpaivat.value > 0 && laskullaviikonpaivat.value < 9 ) {
-									if (laskullaviikonpaivat.value != vertaa) {
-										naytetaanko_herja = true;
-										var msg = msg+'".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+paiva+'.".t("Haluatko varmasti laskuttaa")." '+paivamaara+'?\\n';
-									}
-								}
-								else if (laskullaviikonpaivat.value < 0) {
-									if (paiva != paivamaara) {
-										naytetaanko_herja = true;
-										var msg = msg+'".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+paiva+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'?\\n';
-									}
-								}
-								else if (laskullaviikonpaivat.value == 9) {
+							else if (laskullaviikonpaivat.value < 0) {
+								if (paiva != paivamaara) {
 									naytetaanko_herja = true;
-									var msg = msg+'".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+paiva+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'?\\n';
+									var msg = '".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+paiva+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'?\\n';
 								}
+							}
+							else if (laskullaviikonpaivat.value == 9) {
+								naytetaanko_herja = true;
+								var msg = '".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+paiva+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'?\\n';
 							}
 
 							if (ero >= 2) {

@@ -2833,5 +2833,17 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == 'varastoarvon_tuote_jarjestys') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'V' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Varastoarvon tuote järjestys, tuotenumeron mukaan");
+		$ulos .= "<option value = 'V' $sel>".t("Varastoarvon tuote järjestys, variaation, värin ja koon mukaan");
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
 
 ?>

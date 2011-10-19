@@ -320,20 +320,26 @@
 							  tmp_tuotepaikat.hyllyvali,
 							  tmp_tuotepaikat.hyllytaso";
 		}
+		
+		// Tarkastetaan yhtion parametreista varastoarvon tuote järjestys
+		if ($yhtiorow['varastoarvon_tuote_jarjestys'] == 'V') {
+			$order_extra = 'variaatio, vari, koko';
+		}
+		else $order_extra = 'tuoteno';
 
 		// laitetaan varastopaikkojen tunnukset mysql-muotoon
 		if (!empty($varastot)) {
 			$varastontunnukset = " AND varastopaikat.tunnus IN (".implode(",", $varastot).")";
 
 			if ($summaustaso == "T" or $summaustaso == "TRY") {
-				$order_lisa = "variaatio, vari, koko, osasto, try, tuoteno";
+				$order_lisa = "osasto, try, $order_extra";
 			}
 			else {
-				$order_lisa = "variaatio, vari, koko, varastonnimi, osasto, try, tuoteno";
+				$order_lisa = "varastonnimi, osasto, try, $order_extra";
 			}
 		}
 		else {
-			$order_lisa = "variaatio, vari, koko, osasto, try, tuoteno";
+			$order_lisa = "osasto, try, $order_extra";
 		}
 
 		if (isset($epakur) and $epakur == 'epakur') {

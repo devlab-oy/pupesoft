@@ -2,9 +2,12 @@
 
 	date_default_timezone_set("Europe/Helsinki");
 
-	// jos meill‰ on lock-file ja se on alle 15 minuuttia vanha
-	if (file_exists("/tmp/##verkkolasku-in.lock") and mktime()-filemtime("/tmp/##verkkolasku-in.lock") < 900) {
+	// jos meill‰ on lock-file ja se on alle 90 minuuttia vanha (90 minsaa ku backuppia odotellessa saataa tunti vier‰ht‰‰ aika nopeasti)
+	if (file_exists("/tmp/##verkkolasku-in.lock") and mktime()-filemtime("/tmp/##verkkolasku-in.lock") < 5400) {
 		echo "Verkkolaskujen sis‰‰nluku k‰ynniss‰, odota hetki!";
+	}
+	elseif (file_exists("/tmp/##verkkolasku-in.lock") and mktime()-filemtime("/tmp/##verkkolasku-in.lock") >= 5400) {
+		echo "VIRHE: Verkkolaskujen sis‰‰nluku jumissa! Ota yhteys tekniseen tukeen!!!";
 	}
 	else {
 

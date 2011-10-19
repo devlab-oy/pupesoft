@@ -259,16 +259,7 @@
 				$varasto = implode(",", $varasto);
 			}
 
-			if (count($keraysvyohyke) > 0) {
-				if (count($keraysvyohyke) == 1 and $keraysvyohyke[0] == 'default') {
-					unset($keraysvyohyke);
-					$keraysvyohyke = '';
-				}
-				else {
-					unset($keraysvyohyke[0]);
-					$keraysvyohyke = implode(",", $keraysvyohyke);
-				}
-			}
+			$keraysvyohyke = isset($keraysvyohyke) ? (int) $keraysvyohyke : 0;
 
 			$oletus_profiili = mysql_real_escape_string(trim($oletus_profiili));
 
@@ -465,16 +456,7 @@
 				$varasto = implode(",", $varasto);
 			}
 
-			if (count($keraysvyohyke) > 0) {
-				if (count($keraysvyohyke) == 1 and $keraysvyohyke[0] == 'default') {
-					unset($keraysvyohyke);
-					$keraysvyohyke = '';
-				}
-				else {
-					unset($keraysvyohyke[0]);
-					$keraysvyohyke = implode(",", $keraysvyohyke);
-				}
-			}
+			$keraysvyohyke = isset($keraysvyohyke) ? (int) $keraysvyohyke : 0;
 
 			$query = "	UPDATE kuka
 						SET nimi 						= '{$firname}',
@@ -747,16 +729,17 @@
 
 						echo "<tr><th align='left'>",t("Keräysvyöhyke"),":</th><td>";
 
-						echo "<input type='hidden' name='keraysvyohyke[]' value='default' />";
+						echo "<select name='keraysvyohyke'>";
+						echo "<option value=''>",t("Valitse"),"</option>";
 
 						while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
 
-							$checked = in_array($keraysvyohyke_row['tunnus'], explode(",", $krow['keraysvyohyke'])) ? ' checked' : '';
+							$sel = $keraysvyohyke_row['tunnus'] = $krow['keraysvyohyke'] ? ' selected' : '';
 
-							echo "<input type='checkbox' name='keraysvyohyke[]' value='{$keraysvyohyke_row['tunnus']}'{$checked}>{$keraysvyohyke_row['nimitys']}<br />";
+							echo "<option value='{$keraysvyohyke_row['tunnus']}'{$sel}>{$keraysvyohyke_row['nimitys']}</option>";
 						}
 
-						echo "</td></tr>";
+						echo "</select></td></tr>";
 					}
 
 				}

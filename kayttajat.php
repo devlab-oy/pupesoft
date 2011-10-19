@@ -734,7 +734,7 @@
 
 						while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
 
-							$sel = $keraysvyohyke_row['tunnus'] = $krow['keraysvyohyke'] ? ' selected' : '';
+							$sel = $keraysvyohyke_row['tunnus'] == $krow['keraysvyohyke'] ? ' selected' : '';
 
 							echo "<option value='{$keraysvyohyke_row['tunnus']}'{$sel}>{$keraysvyohyke_row['nimitys']}</option>";
 						}

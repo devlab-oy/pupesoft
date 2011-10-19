@@ -4048,6 +4048,7 @@ if ($tee == '') {
 		$toimaika 			= "";
 		$tuotenimitys 		= "";
 		$tuoteno 			= "";
+		$tuoteno_array 		= "";
 		$var 				= "";
 		$var_array 			= "";
 		$sopimuksen_lisatieto1 = "";
@@ -4160,7 +4161,7 @@ if ($tee == '') {
 	}
 
 	 // erikoisceisi, jos halutaan PIENITUOTEKYSELY tilaustaulussa, mutta emme halua näyttää niitä kun lisätään lisävarusteita
-	if (($tuoteno != '' and $kpl == '' and $kukarow['extranet'] == '') or (is_array($tuoteno_array) and count($tuoteno_array) > 1 and $kpl == '' and $lisavarusteita == '' and $kukarow['extranet'] == '')  or ($toim == "REKLAMAATIO" and isset($trow['tuoteno']) and $trow['tuoteno'] != '' and $kukarow['extranet'] == '')) {
+	if ((($tuoteno != '' or (is_array($tuoteno_array) and count($tuoteno_array) > 1)) and $kpl == '' and $kukarow['extranet'] == '') or ($toim == "REKLAMAATIO" and isset($trow['tuoteno']) and $trow['tuoteno'] != '' and $kukarow['extranet'] == '')) {
 		
 		if ($toim == "REKLAMAATIO" and $tuoteno == '') {
 			$tuoteno_lisa = $trow['tuoteno'];

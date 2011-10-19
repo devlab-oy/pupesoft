@@ -5,9 +5,10 @@
 // hg clone https://code.google.com/p/wse-php/
 
 require('wse-php/soap-wsse.php');
+require('ws-sepa-tee-pyynto.php');
 
 define('PRIVATE_KEY', '/home/jarmo/pupesoft/datain/Nordea_Demo_Certificate_key.pem');
-define('CERT_FILE', '/home/jarmo/pupesoft/datain/Nordea_Demo_Certificate_key.pem');
+define('CERT_FILE', '/home/jarmo/pupesoft/datain/Nordea_Demo_Certificate.crt');
 
 class mySoap extends SoapClient {
 
@@ -17,40 +18,36 @@ class mySoap extends SoapClient {
 
 	$objWSSE = new WSSESoap($doc);
 
-    /* add Timestamp with no expiration timestamp */
+	/* add Timestamp with no expiration timestamp */
 	$objWSSE->addTimestamp();
 
-    /* create new XMLSec Key using RSA SHA-1 and type is private key */
+	/* create new XMLSec Key using RSA SHA-1 and type is private key */
 	$objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type'=>'private'));
 
-    /* load the private key from file - last arg is bool if key in file (TRUE) or is string (FALSE) */
+	/* load the private key from file - last arg is bool if key in file (TRUE) or is string (FALSE) */
 	$objKey->loadKey(PRIVATE_KEY, TRUE);
 
-    /* Sign the message - also signs appropraite WS-Security items */
+	/* Sign the message - also signs appropraite WS-Security items */
 	$objWSSE->signSoapDoc($objKey);
 
-    /* Add certificate (BinarySecurityToken) to the message and attach pointer to Signature */
+	/* Add certificate (BinarySecurityToken) to the message and attach pointer to Signature */
 	$token = $objWSSE->addBinaryToken(file_get_contents(CERT_FILE));
 	$objWSSE->attachTokentoSig($token);
 	var_dump($objWSSE->saveXML());
-    //return parent::__doRequest($objWSSE->saveXML(), $location, $saction, $version);
-	return;
+	return parent::__doRequest($objWSSE->saveXML(), $location, $saction, $version);
 	}
 }
 
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 date_default_timezone_set('Europe/Helsinki');
 
-$client = new mySoap ("file:///home/jarmo/pupesoft/datain/BankCorporateFileService_20080616.wsdl", array('trace' => 1));
-
-	echo("\nDumping client object:\n");
+/*	echo("\nDumping client object:\n");
 	var_dump($client);
 
 	echo("\nDumping client object functions:\n");
 	var_dump($client->__getFunctions());
-
 
 	$vastaus = array("ResponseHeader" => array(
 				"SenderId" => '11111111A1',
@@ -58,8 +55,9 @@ $client = new mySoap ("file:///home/jarmo/pupesoft/datain/BankCorporateFileServi
 				"Timestamp" => date('c'),
 				"ResponseCode" => '',
 				"ResponseText" => '',
-				"ReceiverId" => '111111111')
+				"ReceiverId" => '111111111'),
 			"ApplicationResponse" => '');
+*/
 
 	$lahetys = array("RequestHeader" => array(
 				"SenderId" => '111111111',
@@ -70,7 +68,33 @@ $client = new mySoap ("file:///home/jarmo/pupesoft/datain/BankCorporateFileServi
 				"ReceiverId" => '11111111A1'),
 			"ApplicationRequest" => '');
 
-	$itsedata =  '';
-	
-	$client -> getUserInfo($lahetys);
+$pyyntoxml = tee_applicationrequest('', '', '', '');
+
+$doc = new DOMDocument();
+$doc->loadXML($pyyntoxml);
+
+$objDSig = new XMLSecurityDSig();
+$objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
+$objDSig->addReference($doc, XMLSecurityDSig::SHA1, array('http://www.w3.org/2000/09/xmldsig#enveloped-signature'));
+
+$objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type'=>'private'));
+/* load private key */
+$objKey->loadKey(PRIVATE_KEY, TRUE);
+/* if key has Passphrase, set it using $objKey->passphrase = <passphrase> " */
+
+$objDSig->sign($objKey);
+
+/* Add associated public key */
+$objDSig->add509Cert(CERT_FILE);
+$objDSig->appendSignature($doc->documentElement);
+
+$pyyntoxml = $doc->saveXML();
+
+try {
+	$client = new mySoap ("file:///home/jarmo/pupesoft/datain/BankCorporateFileService_20080616.wsdl", array('trace' => 1));
+	$client->location = 'https://filetransfer.nordea.com/services/CorporateFileService/';
+	$client -> getUserInfo($pyyntoxml);
+} catch (SoapFault $e) {
+	var_dump($e);
+}
 ?>

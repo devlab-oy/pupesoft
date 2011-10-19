@@ -2525,18 +2525,25 @@ if (!function_exists('loppu_lahete')) {
 				$pdf->draw_text(200, $kala-25, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $thispage, $norm);
 
 				$pdf->draw_text(50,  $kala-38, t("Maksuehto", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala-38, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli), $thispage, $norm);
+				$pdf->draw_text(200, $kala-38, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli).t(" tai erillisen maksupostiohjelman mukaan", $kieli), $thispage, $norm);
 
 				$pdf->draw_text(50,  $kala-51, t("Myynti- ja toimitusehdot", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli), $thispage, $norm);
+				$pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 1.5.2010", $thispage, $norm);
 
-				$pdf->draw_text(50,  $kala-66, t("Liitteet", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala-66, "________", $thispage, $norm);
+				$pdf->draw_text(50,  $kala-64, t("Liitteet", $kieli), $thispage, $boldi);
+				$pdf->draw_text(200, $kala-64, "________", $thispage, $norm);
+				
+				$pdf->draw_text(50, $kala-87, t("RAKENNUSKOHTEISSA", $kieli), $thispage, $boldi);
 
-				$pdf->draw_text(50,  $kala-77, t("Vakuutus", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala-77, t("Tilaaja ottaa kustannuksellaan kohteeseen tyˆaikaisen rakennustyˆvakuutuksen ennen", $kieli).' ', $thispage, $norm);
-				$pdf->draw_text(200, $kala-90, t("tˆiden alkamista ja toimittaa vakuutuskirjan", $kieli)." {$yhtiorow['nimi']}".t(":lle", $kieli), $thispage, $norm);
+				$pdf->draw_text(50,  $kala-100, t("Vakuutus", $kieli), $thispage, $boldi);
+				$pdf->draw_text(200, $kala-100, t("Tilaaja ottaa kustannuksellaan kohteeseen tyˆaikaisen rakennustyˆvakuutuksen ennen", $kieli).' ', $thispage, $norm);
+				$pdf->draw_text(200, $kala-113, t("tˆiden alkamista", $kieli), $thispage, $norm);
 
+				$pdf->draw_text(50, $kala-126, t("Muut ehdot", $kieli), $thispage, $boldi);
+				$pdf->draw_text(200, $kala-126, t("Mik‰li rakennesuunnitelmat muuttuvat sopimuksen allekirjoituksen j‰lkeen, pid‰tt‰‰", $kieli), $thispage, $norm);
+				$pdf->draw_text(200, $kala-139, $yhtiorow['nimi']." ".t("oikeuden muuttaa hintaa vastaavasti", $kieli), $thispage, $norm);
+				$pdf->draw_text(200, $kala-152, t("Tarjous / sopimus perustuu piirustuksiin _____/_____ 20__", $kieli), $thispage, $norm);
+				
 				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
 				if ($kala-253 <= 300) {
 					$sivu++;
@@ -2567,12 +2574,12 @@ if (!function_exists('loppu_lahete')) {
 					$kala += 110;
 				}
 
-				$pdf->draw_text(50, $kala-120, t("Sopimusasiakirjojen etusijaj‰rjestys on seuraava", $kieli).':', $thispage, $pieni);
-				$pdf->draw_text(50, $kala-130, '1. '.t("Kauppasopimus / tilaus", $kieli), $thispage, $pieni);
-				$pdf->draw_text(50, $kala-140, "2. $yhtiorow[nimi]".t(":n yleiset toimitusehdot", $kieli)." 1.5.2010", $thispage, $pieni);
-				$pdf->draw_text(50, $kala-150, "3. ".t("Rakennustuotteiden yleisi‰ hankinta- ja toimitusehtoja (RYHT 2000) ja betonielementtien asennusehdot", $kieli).'.', $thispage, $pieni);
+				$pdf->draw_text(50, $kala-130, t("Sopimusasiakirjojen etusijaj‰rjestys on seuraava", $kieli).':', $thispage, $pieni);
+				$pdf->draw_text(50, $kala-140, '1. '.t("Kauppasopimus / tilaus", $kieli), $thispage, $pieni);
+				$pdf->draw_text(50, $kala-150, "2. $yhtiorow[nimi]".t(":n yleiset kauppaehdot", $kieli)." 1.5.2010", $thispage, $pieni);
+				$pdf->draw_text(50, $kala-160, "3. ".t("Rakennustuotteiden yleisi‰ hankinta- ja toimitusehtoja (RYHT 2000) ja betonielementtien asennusehdot", $kieli).'.', $thispage, $pieni);
 
-				$pdf->draw_text(50, $kala-170, t("Olen tutustunut", $kieli)." $yhtiorow[nimi]".t(":n yleisiin sopimusehtoihin ja hyv‰ksyn ne sellaisenaan").'.', $thispage, $pieni);
+				$pdf->draw_text(50, $kala-180, t("Olen tutustunut", $kieli)." $yhtiorow[nimi]".t(":n yleisiin sopimusehtoihin ja hyv‰ksyn ne sellaisenaan").'.', $thispage, $pieni);
 
 				$x[0] = 50;
 				$x[1] = 230;

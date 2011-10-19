@@ -1173,18 +1173,25 @@ if (!function_exists('loppu_tarjous')) {
 				$pdf_tarjous->draw_text(200, $kala-38, t($voimassa, $kieli), $page_tarjous[$sivu], $norm);
 
 				$pdf_tarjous->draw_text(50, $kala-51, t("Maksuehto", $kieli), $page_tarjous[$sivu], $boldi);
-				$pdf_tarjous->draw_text(200, $kala-51, t($laskurow['maksuehto'], $kieli), $page_tarjous[$sivu], $norm);
+				$pdf_tarjous->draw_text(200, $kala-51, t($laskurow['maksuehto'], $kieli).t(" tai erillisen maksupostiohjelman mukaan", $kieli), $page_tarjous[$sivu], $norm);
 
-				$pdf_tarjous->draw_text(50, $kala-66, t("Myynti- ja toimitusehdot", $kieli), $page_tarjous[$sivu], $boldi);
-				$pdf_tarjous->draw_text(200, $kala-66, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli), $page_tarjous[$sivu], $norm);
+				$pdf_tarjous->draw_text(50, $kala-64, t("Myynti- ja toimitusehdot", $kieli), $page_tarjous[$sivu], $boldi);
+				$pdf_tarjous->draw_text(200, $kala-64, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 1.5.2010", $page_tarjous[$sivu], $norm);
 
 				$pdf_tarjous->draw_text(50, $kala-77, t("Liitteet", $kieli), $page_tarjous[$sivu], $boldi);
 				$pdf_tarjous->draw_text(200, $kala-77, "________", $page_tarjous[$sivu], $norm);
+				
+				$pdf_tarjous->draw_text(50, $kala-100, t("RAKENNUSKOHTEISSA", $kieli), $page_tarjous[$sivu], $boldi);
 
-				$pdf_tarjous->draw_text(50, $kala-90, t("Vakuutus", $kieli), $page_tarjous[$sivu], $boldi);
-				$pdf_tarjous->draw_text(200, $kala-90, t("Tilaaja ottaa kustannuksellaan kohteeseen tyˆaikaisen rakennustyˆvakuutuksen ennen", $kieli).' ', $page_tarjous[$sivu], $norm);
-				$pdf_tarjous->draw_text(200, $kala-103, t("tˆiden alkamista ja toimittaa vakuutuskirjan", $kieli)." {$yhtiorow['nimi']}".t(":lle", $kieli), $page_tarjous[$sivu], $norm);
+				$pdf_tarjous->draw_text(50, $kala-113, t("Vakuutus", $kieli), $page_tarjous[$sivu], $boldi);
+				$pdf_tarjous->draw_text(200, $kala-113, t("Tilaaja ottaa kustannuksellaan kohteeseen tyˆaikaisen rakennustyˆvakuutuksen ennen", $kieli), $page_tarjous[$sivu], $norm);
+				$pdf_tarjous->draw_text(200, $kala-126, t("tˆiden alkamista", $kieli), $page_tarjous[$sivu], $norm);
 
+				$pdf_tarjous->draw_text(50, $kala-139, t("Muut ehdot", $kieli), $page_tarjous[$sivu], $boldi);
+				$pdf_tarjous->draw_text(200, $kala-139, t("Mik‰li rakennesuunnitelmat muuttuvat sopimuksen allekirjoituksen j‰lkeen, pid‰tt‰‰", $kieli), $page_tarjous[$sivu], $norm);
+				$pdf_tarjous->draw_text(200, $kala-152, $yhtiorow['nimi'] .' '.t("oikeuden muuttaa hintaa vastaavasti", $kieli), $page_tarjous[$sivu], $norm);
+				$pdf_tarjous->draw_text(200, $kala-165, t("Tarjous / sopimus perustuu piirustuksiin _____/_____ 20__", $kieli), $page_tarjous[$sivu], $norm);
+				
 				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
 				if ($kala-253 <= 300) {
 					list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, $total_uudet, $total_vanhat);
@@ -1208,7 +1215,7 @@ if (!function_exists('loppu_tarjous')) {
 
 				$pdf_tarjous->draw_text(50, $kala-130, t("Sopimusasiakirjojen etusijaj‰rjestys on seuraava", $kieli).':', $page_tarjous[$sivu], $pieni);
 				$pdf_tarjous->draw_text(50, $kala-140, '1. '.t("Kauppasopimus / tilaus", $kieli), $page_tarjous[$sivu], $pieni);
-				$pdf_tarjous->draw_text(50, $kala-150, "2. $yhtiorow[nimi]".t(":n yleiset toimitusehdot", $kieli)." 1.5.2010", $page_tarjous[$sivu], $pieni);
+				$pdf_tarjous->draw_text(50, $kala-150, "2. $yhtiorow[nimi]".t(":n yleiset kauppaehdot", $kieli)." 1.5.2010", $page_tarjous[$sivu], $pieni);
 				$pdf_tarjous->draw_text(50, $kala-160, "3. ".t("Rakennustuotteiden yleisi‰ hankinta- ja toimitusehtoja (RYHT 2000) ja betonielementtien asennusehdot", $kieli).'.', $page_tarjous[$sivu], $pieni);
 
 				$pdf_tarjous->draw_text(50, $kala-180, t("Olen tutustunut", $kieli)." $yhtiorow[nimi]".t(":n yleisiin sopimusehtoihin ja hyv‰ksyn ne sellaisenaan").'.', $page_tarjous[$sivu], $pieni);

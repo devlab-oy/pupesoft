@@ -326,14 +326,14 @@
 			$varastontunnukset = " AND varastopaikat.tunnus IN (".implode(",", $varastot).")";
 
 			if ($summaustaso == "T" or $summaustaso == "TRY") {
-				$order_lisa = "osasto, try, tuoteno";
+				$order_lisa = "variaatio, vari, koko, osasto, try, tuoteno";
 			}
 			else {
-				$order_lisa = "varastonnimi, osasto, try, tuoteno";
+				$order_lisa = "variaatio, vari, koko, varastonnimi, osasto, try, tuoteno";
 			}
 		}
 		else {
-			$order_lisa = "osasto, try, tuoteno";
+			$order_lisa = "variaatio, vari, koko, osasto, try, tuoteno";
 		}
 
 		if (isset($epakur) and $epakur == 'epakur') {
@@ -431,12 +431,18 @@
 					tuote.epakurantti75pvm,
 					tuote.epakurantti100pvm,
 					tuote.sarjanumeroseuranta,
-					tuote.vihapvm
+					tuote.vihapvm,
+					t1.selite as variaatio,
+					t2.selite as vari,
+					if(t3.jarjestys = 0 or t3.jarjestys is null, 999999, t3.jarjestys) koko
 					FROM tapahtuma USE INDEX (yhtio_laadittu_hyllyalue_hyllynro)
 					JOIN tuote ON	(tuote.yhtio = tapahtuma.yhtio
 									AND tuote.tuoteno = tapahtuma.tuoteno
 									AND tuote.ei_saldoa = ''
-									$tuote_lisa)
+									$tuote_lisa)		
+					LEFT JOIN tuotteen_avainsanat t1 ON tuote.yhtio = t1.yhtio AND tuote.tuoteno = t1.tuoteno AND t1.laji = 'parametri_variaatio' AND t1.kieli = 'fi' 
+					LEFT JOIN tuotteen_avainsanat t2 ON tuote.yhtio = t2.yhtio AND tuote.tuoteno = t2.tuoteno AND t2.laji = 'parametri_vari' AND t2.kieli = 'fi'
+					LEFT JOIN tuotteen_avainsanat t3 ON tuote.yhtio = t3.yhtio AND tuote.tuoteno = t3.tuoteno AND t3.laji = 'parametri_koko' AND t3.kieli = 'fi'
 					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 					AND tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59')
 					UNION
@@ -459,12 +465,18 @@
 					tuote.epakurantti75pvm,
 					tuote.epakurantti100pvm,
 					tuote.sarjanumeroseuranta,
-					tuote.vihapvm
+					tuote.vihapvm,
+					t1.selite as variaatio,
+					t2.selite as vari,
+					if(t3.jarjestys = 0 or t3.jarjestys is null, 999999, t3.jarjestys) koko
 					FROM tuotepaikat USE INDEX (tuote_index)
 					JOIN tuote ON	(tuote.yhtio = tuotepaikat.yhtio
 									AND tuote.tuoteno = tuotepaikat.tuoteno
 									AND tuote.ei_saldoa = ''
 									$tuote_lisa)
+					LEFT JOIN tuotteen_avainsanat t1 ON tuote.yhtio = t1.yhtio AND tuote.tuoteno = t1.tuoteno AND t1.laji = 'parametri_variaatio' AND t1.kieli = 'fi' 
+					LEFT JOIN tuotteen_avainsanat t2 ON tuote.yhtio = t2.yhtio AND tuote.tuoteno = t2.tuoteno AND t2.laji = 'parametri_vari' AND t2.kieli = 'fi'
+					LEFT JOIN tuotteen_avainsanat t3 ON tuote.yhtio = t3.yhtio AND tuote.tuoteno = t3.tuoteno AND t3.laji = 'parametri_koko' AND t3.kieli = 'fi'
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]')";
 		$result = pupe_query($query);
 

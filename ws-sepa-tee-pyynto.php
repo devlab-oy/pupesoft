@@ -1,11 +1,13 @@
 <?php
 
-date_default_timezone_set('Europe/Helsinki');
+function tee_applicationrequest ($Command, $TargetId, $FileType, $Content) {
+
+	date_default_timezone_set('Europe/Helsinki');
 
 	$Command = 'GetUserInfo';
 	$TargetId = '0012345678';
 	$FileType = '';
-	$Content = '';	
+	$Content = '';
 
 	$juuri = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
 	$juuri .= '<ApplicationRequest xmlns="http://bxd.fi/xmldata/"></ApplicationRequest>';
@@ -66,7 +68,6 @@ date_default_timezone_set('Europe/Helsinki');
 
 		echo "<br>";
 	}
-
-
-	var_dump($pyynto->saveXML());
+	return $pyynto->saveXML();
+}
 ?>

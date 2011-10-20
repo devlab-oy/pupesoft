@@ -41,7 +41,10 @@
 											and tilausrivi.tyyppi 		= 'L'
 											ORDER BY tilausrivi.tunnus";
 
-		$query = "SELECT panttitili FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$orow['liitostunnus']}'";
+		$query = "	SELECT panttitili
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus 	= '{$orow['liitostunnus']}'";
 		$asiakas_panttitili_chk_res = pupe_query($query);
 		$asiakas_panttitili_chk_row = mysql_fetch_assoc($asiakas_panttitili_chk_res);
 
@@ -64,21 +67,19 @@
 					$tuote_panttitili_chk_row = mysql_fetch_assoc($tuote_panttitili_chk_res);
 
 					if ($tuote_panttitili_chk_row['panttitili'] == 'K') {
-
 						if ($trow['varattu'] < 0) {
 
 							$tilausrivin_tunnus_chk = $trow['tunnus'];
-
 							$pantti_kpl = abs($trow['varattu']);
 
 							$wherelisa_panttitili = '';
 
 							if ($orow['clearing'] == 'HYVITYS') {
 								$query = "	SELECT GROUP_CONCAT(lx_otsikko.tunnus) AS tunnukset
-											FROM lasku AS ux_otsikko 
+											FROM lasku AS ux_otsikko
 											JOIN lasku AS lx_otsikko ON (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
-											WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}' 
-											AND ux_otsikko.tunnus = '{$orow['vanhatunnus']}'";
+											WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}'
+											AND ux_otsikko.tunnus  = '{$orow['vanhatunnus']}'";
 								$vanhatunnus_chk_res = pupe_query($query);
 								$vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res);
 
@@ -107,16 +108,16 @@
 											kaytettypvm = now(),
 											kaytettytilausnro = '{$trow['otunnus']}'
 											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND tunnus = '{$vanhin_pantti_row['tunnus']}'";
+											AND tunnus  = '{$vanhin_pantti_row['tunnus']}'";
 								$pantti_upd = pupe_query($query);
 
 								$tilkom_upd = trim($trow['kommentti']) != '' ? $trow['kommentti']." ".t("Panttitilillinen tuote, tuote hyvitetty panttitililtä")."." : t("Panttitilillinen tuote, tuote hyvitetty panttitililtä").".";
 
 								if ($vanhin_pantti_row['kpl'] >= $pantti_kpl) {
 									// käytetään niin monta panttia kuin on tarvis
-
 									$vanhin_pantti_row['kpl'] -= $pantti_kpl;
 
+									// Panttia jää yli....
 									if ($vanhin_pantti_row['kpl'] > 0) {
 
 										$ale_query_insert_lisa = '';
@@ -126,16 +127,16 @@
 										}
 
 										$query = "	INSERT INTO panttitili SET
-													yhtio = '{$kukarow['yhtio']}',
-													asiakas = '{$vanhin_pantti_row['asiakas']}',
-													tuoteno = '{$vanhin_pantti_row['tuoteno']}',
-													status = '',
-													kpl = '{$vanhin_pantti_row['kpl']}',
-													hinta = '{$vanhin_pantti_row['hinta']}',
-													alv = '{$vanhin_pantti_row['alv']}',
-													erikoisale = '{$vanhin_pantti_row['erikoisale']}',
+													yhtio 		= '{$kukarow['yhtio']}',
+													asiakas 	= '{$vanhin_pantti_row['asiakas']}',
+													tuoteno 	= '{$vanhin_pantti_row['tuoteno']}',
+													status 		= '',
+													kpl 		= '{$vanhin_pantti_row['kpl']}',
+													hinta 		= '{$vanhin_pantti_row['hinta']}',
+													alv 		= '{$vanhin_pantti_row['alv']}',
+													erikoisale 	= '{$vanhin_pantti_row['erikoisale']}',
 													{$ale_query_insert_lisa}
-													myyntipvm = '{$vanhin_pantti_row['myyntipvm']}',
+													myyntipvm 	= '{$vanhin_pantti_row['myyntipvm']}',
 													myyntitilausnro = '{$vanhin_pantti_row['myyntitilausnro']}',
 													kaytettypvm = '0000-00-00',
 													kaytettytilausnro = 0";
@@ -155,7 +156,6 @@
 									}
 
 									$query = "	UPDATE tilausrivi SET
-												varattu = -".abs($pantti_kpl).",
 												ale1 = 100,
 												{$ale_query_update_lisa}
 												kommentti = '{$tilkom_upd}'
@@ -205,29 +205,29 @@
 									if (mysql_num_rows($monistares2) > 0) {
 										$monistarow2 = mysql_fetch_assoc($monistares2);
 
-										$kysely = "	INSERT INTO tilausrivin_lisatiedot
-													SET yhtio 			= '{$kukarow['yhtio']}',
-													laatija				= '{$kukarow['kuka']}',
-													luontiaika 			= now(),
-													tilausrivitunnus	= {$insid_uusi},";
+										$rfields = "yhtio";
+										$rvalues = "'{$kukarow['yhtio']}'";
 
-										for ($i = 0; $i < mysql_num_fields($monistares2) - 1; $i++) { // Ei monisteta tunnusta
+										for ($i = 1; $i < mysql_num_fields($monistares2) - 1; $i++) { // Ei tunnusta
 
 											$fieldname = mysql_field_name($monistares2, $i);
 
+											$rfields .= ", ".$fieldname;
+
 											switch ($fieldname) {
-												case 'laatija':
-												case 'luontiaika':
 												case 'tilausrivitunnus':
-												case 'yhtio':
+													$rvalues .= ", '{$insid_uusi}'";
+													break;
+												case 'tunnus':
+													$rvalues .= ", NULL";
 													break;
 												default:
-													$kysely .= $fieldname."='".$monistarow2[$fieldname]."',";
+													$rvalues .= ", '".mysql_real_escape_string($monistarow2[$fieldname])."'";
 											}
 										}
 
-										$kysely  = substr($kysely, 0, -1);
-										$insres2 = pupe_query($kysely);
+										$kysely_insertti = "INSERT into tilausrivin_lisatiedot ($rfields) VALUES ($rvalues)";
+										$insresultti = pupe_query($kysely_insertti);
 									}
 
 									$ale_query_update_lisa = '';
@@ -249,14 +249,13 @@
 							}
 						}
 						elseif ($trow['varattu'] > 0) {
-
 							if ($orow['clearing'] == 'HYVITYS') {
 
 								// haetaan alkuperäisen tilauksen vanhatunnus
 								$query = "	SELECT GROUP_CONCAT(lx_otsikko.tunnus) AS tunnukset
-											FROM lasku AS ux_otsikko 
+											FROM lasku AS ux_otsikko
 											JOIN lasku AS lx_otsikko ON (lx_otsikko.yhtio = ux_otsikko.yhtio AND lx_otsikko.laskunro = ux_otsikko.laskunro AND lx_otsikko.tila = 'L' AND lx_otsikko.alatila = 'X')
-											WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}' 
+											WHERE ux_otsikko.yhtio = '{$kukarow['yhtio']}'
 											AND ux_otsikko.tunnus = '{$orow['vanhatunnus']}'";
 								$vanhatunnus_chk_res = pupe_query($query);
 								$vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res);
@@ -264,16 +263,18 @@
 								if ($vanhatunnus_chk_row['tunnukset'] != '') {
 									$wherelisa_panttitili = "AND kaytettytilausnro IN ({$vanhatunnus_chk_row['tunnukset']})";
 
-									// etsitään vanhin pantti
+									// etsitään vanhin pantti, ja merkitään se käyttämättömäksi
 									$query = "	SELECT *
 												FROM panttitili
 												WHERE yhtio = '{$kukarow['yhtio']}'
 												AND asiakas = '{$orow['liitostunnus']}'
 												AND tuoteno = '{$trow['tuoteno']}'
+												AND kpl 	= '{$trow['varattu']}'
 												{$wherelisa_panttitili}
 												AND status != ''
 												AND kaytettypvm != '0000-00-00'
-												ORDER BY myyntipvm ASC";
+												ORDER BY myyntipvm ASC
+												LIMIT 1";
 									$vanhin_pantti_res = pupe_query($query);
 
 									if (mysql_num_rows($vanhin_pantti_res) > 0) {
@@ -299,16 +300,16 @@
 								}
 
 								$query = "	INSERT INTO panttitili SET
-											yhtio = '{$kukarow['yhtio']}',
-											asiakas = '{$orow['liitostunnus']}',
-											tuoteno = '{$trow['tuoteno']}',
-											status = '',
-											kpl = '{$trow['varattu']}',
-											hinta = '{$trow['hinta']}',
-											alv = '{$trow['alv']}',
-											erikoisale = '{$trow['erikoisale']}',
+											yhtio 		= '{$kukarow['yhtio']}',
+											asiakas 	= '{$orow['liitostunnus']}',
+											tuoteno 	= '{$trow['tuoteno']}',
+											status 		= '',
+											kpl 		= '{$trow['varattu']}',
+											hinta 		= '{$trow['hinta']}',
+											alv 		= '{$trow['alv']}',
+											erikoisale 	= '{$trow['erikoisale']}',
 											{$ale_query_insert_lisa}
-											myyntipvm = now(),
+											myyntipvm 	= now(),
 											myyntitilausnro = '{$trow['otunnus']}'";
 								$panttitili_upd = pupe_query($query);
 
@@ -327,7 +328,6 @@
 											WHERE yhtio = '{$kukarow['yhtio']}'
 											AND tunnus = '{$trow['tunnus']}'";
 								$panttitili_upd = pupe_query($query);
-								
 							}
 						}
 					}

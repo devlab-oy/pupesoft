@@ -138,7 +138,7 @@ if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 				if (mysql_num_rows($chk_til_res) > 0) {
 					while ($chk_til_row = mysql_fetch_assoc($chk_til_res)) {
 
-						// jos tilauksella on panttituotteita ja ollaan tekem‰ss‰ hyvityst‰, pit‰‰ katsoa, ett‰ alkuper‰isen veloituslakun panttitili rivej‰ ei ole viel‰ k‰ytetty
+						// jos tilauksella on panttituotteita ja ollaan tekem‰ss‰ hyvityst‰, pit‰‰ katsoa, ett‰ alkuper‰isen veloituslaskun panttitili rivej‰ ei ole viel‰ k‰ytetty
 						$query = "	SELECT sum(kpl) kpl
 									FROM panttitili
 									WHERE yhtio 			= '{$kukarow['yhtio']}'

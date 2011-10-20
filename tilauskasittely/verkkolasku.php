@@ -671,7 +671,7 @@
 
 						if ($laskurow['clearing'] == 'HYVITYS') {
 
-							// jos tilauksella on panttituotteita ja ollaan tekem‰ss‰ hyvityst‰, pit‰‰ katsoa, ett‰ alkuper‰isen veloituslakun panttitili rivej‰ ei ole viel‰ k‰ytetty
+							// jos tilauksella on panttituotteita ja ollaan tekem‰ss‰ hyvityst‰, pit‰‰ katsoa, ett‰ alkuper‰isen veloituslaskun panttitili rivej‰ ei ole viel‰ k‰ytetty
 							$query = "	SELECT otunnus, tuoteno, sum(kpl) kpl
 										FROM tilausrivi
 										WHERE yhtio 	= '{$kukarow['yhtio']}'

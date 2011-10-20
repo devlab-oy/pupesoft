@@ -324,8 +324,8 @@
 		$jarjestys_lisa1 = "";
 		$jarjestys_lisa2 = "";
 
-		// Tarkastetaan yhtion parametreista varastoarvo_tuote_jarjestys (V = variaation, koon ja varin mukaan)
-		if ($yhtiorow['varastoarvon_tuote_jarjestys'] == 'V') {
+		// Tarkastetaan yhtion parametreista tuoteraportin_jarjestys (V = variaation, koon ja varin mukaan)
+		if ($yhtiorow['tuoteraportin_jarjestys'] == 'V') {
 			// Order by lisa
 			$order_extra = 'variaatio, vari, koko';
 			

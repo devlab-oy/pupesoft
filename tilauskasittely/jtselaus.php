@@ -228,6 +228,7 @@
 		$jtrest = pupe_query($query);
 
 		while ($laskurow = mysql_fetch_array($jtrest)) {
+
 			$query  = "	UPDATE lasku
 						SET alatila = 'A'
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -254,7 +255,22 @@
 			// tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
 			$kukarow["kesken"] = $laskurow["tunnus"];
 
+			// Oletuksena ei laiteta k‰teistilauksia suoraan laskutuskeen vaikka ne muuten menisiv‰t sinne.
 			$kateisohitus = "X";
+
+			// Onko yht‰‰n ker‰tt‰v‰‰ rivi‰, vai oliko kaikki esim. suoratoimituksia?
+			$query = "	SELECT tunnus
+			 			FROM tilausrivi
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						AND otunnus 	= '$laskurow[tunnus]'
+						AND toimitettu  = ''";
+			$apure = pupe_query($query);
+
+			// Kaikki rivit toimitettu:
+			if (mysql_num_rows($apure) == 0) {
+				$kateisohitus = "";
+				$laskurow['eilahetetta'] = 'o';
+			}
 
 			if ($laskurow['tila']== 'G') {
 				$vanhatoim = $toim;
@@ -1358,19 +1374,6 @@
 									if ($trattavirhe != '') {
 										echo "<br/>";
 										echo "<font class='message'>".t("Asiakkaalla on maksamattomia trattoja")."<br></font>";
-									}
-
-									// jos on jo laskutettu, huomautetaan k‰ytt‰j‰‰ tarkistamaan alennus!
-									$query = "	SELECT tapvm
-												FROM lasku
-												WHERE yhtio = '$kukarow[yhtio]'
-												AND tunnus = '$jtrow[ltunnus]'";
-									$checkaa_ale_res = pupe_query($query);
-									$checkaa_ale_row = mysql_fetch_assoc($checkaa_ale_res);
-
-									if ($checkaa_ale_row['tapvm'] > '0000-00-00') {
-										echo "<br/>";
-										echo "<font class='message'>",t("HUOM: Tarkista alennus"),"!<br/></font>";
 									}
 
 									echo "</td>";

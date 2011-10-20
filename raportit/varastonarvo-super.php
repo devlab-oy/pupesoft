@@ -320,10 +320,23 @@
 							  tmp_tuotepaikat.hyllyvali,
 							  tmp_tuotepaikat.hyllytaso";
 		}
-		
-		// Tarkastetaan yhtion parametreista varastoarvon tuote järjestys
+
+		$jarjestys_lisa1 = "";
+		$jarjestys_lisa2 = "";
+
+		// Tarkastetaan yhtion parametreista varastoarvo_tuote_jarjestys (V = variaation, koon ja varin mukaan)
 		if ($yhtiorow['varastoarvon_tuote_jarjestys'] == 'V') {
+			// Order by lisa
 			$order_extra = 'variaatio, vari, koko';
+			
+			// queryyn muutoksia jos lajitellaan näin
+			$jarjestys_lisa1 = ", t1.selite as variaatio,
+								t2.selite as vari,
+								if(t3.jarjestys = 0 or t3.jarjestys is null, 999999, t3.jarjestys) koko";
+			
+			$jarjestys_lisa2 = "LEFT JOIN tuotteen_avainsanat t1 ON tuote.yhtio = t1.yhtio AND tuote.tuoteno = t1.tuoteno AND t1.laji = 'parametri_variaatio' AND t1.kieli = 'fi' 
+								LEFT JOIN tuotteen_avainsanat t2 ON tuote.yhtio = t2.yhtio AND tuote.tuoteno = t2.tuoteno AND t2.laji = 'parametri_vari' AND t2.kieli = 'fi'
+								LEFT JOIN tuotteen_avainsanat t3 ON tuote.yhtio = t3.yhtio AND tuote.tuoteno = t3.tuoteno AND t3.laji = 'parametri_koko' AND t3.kieli = 'fi'";
 		}
 		else $order_extra = 'tuoteno';
 
@@ -437,18 +450,14 @@
 					tuote.epakurantti75pvm,
 					tuote.epakurantti100pvm,
 					tuote.sarjanumeroseuranta,
-					tuote.vihapvm,
-					t1.selite as variaatio,
-					t2.selite as vari,
-					if(t3.jarjestys = 0 or t3.jarjestys is null, 999999, t3.jarjestys) koko
+					tuote.vihapvm
+					$jarjestys_lisa1
 					FROM tapahtuma USE INDEX (yhtio_laadittu_hyllyalue_hyllynro)
 					JOIN tuote ON	(tuote.yhtio = tapahtuma.yhtio
 									AND tuote.tuoteno = tapahtuma.tuoteno
 									AND tuote.ei_saldoa = ''
 									$tuote_lisa)		
-					LEFT JOIN tuotteen_avainsanat t1 ON tuote.yhtio = t1.yhtio AND tuote.tuoteno = t1.tuoteno AND t1.laji = 'parametri_variaatio' AND t1.kieli = 'fi' 
-					LEFT JOIN tuotteen_avainsanat t2 ON tuote.yhtio = t2.yhtio AND tuote.tuoteno = t2.tuoteno AND t2.laji = 'parametri_vari' AND t2.kieli = 'fi'
-					LEFT JOIN tuotteen_avainsanat t3 ON tuote.yhtio = t3.yhtio AND tuote.tuoteno = t3.tuoteno AND t3.laji = 'parametri_koko' AND t3.kieli = 'fi'
+					$jarjestys_lisa2
 					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 					AND tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59')
 					UNION
@@ -471,18 +480,14 @@
 					tuote.epakurantti75pvm,
 					tuote.epakurantti100pvm,
 					tuote.sarjanumeroseuranta,
-					tuote.vihapvm,
-					t1.selite as variaatio,
-					t2.selite as vari,
-					if(t3.jarjestys = 0 or t3.jarjestys is null, 999999, t3.jarjestys) koko
+					tuote.vihapvm
+					$jarjestys_lisa1
 					FROM tuotepaikat USE INDEX (tuote_index)
 					JOIN tuote ON	(tuote.yhtio = tuotepaikat.yhtio
 									AND tuote.tuoteno = tuotepaikat.tuoteno
 									AND tuote.ei_saldoa = ''
 									$tuote_lisa)
-					LEFT JOIN tuotteen_avainsanat t1 ON tuote.yhtio = t1.yhtio AND tuote.tuoteno = t1.tuoteno AND t1.laji = 'parametri_variaatio' AND t1.kieli = 'fi' 
-					LEFT JOIN tuotteen_avainsanat t2 ON tuote.yhtio = t2.yhtio AND tuote.tuoteno = t2.tuoteno AND t2.laji = 'parametri_vari' AND t2.kieli = 'fi'
-					LEFT JOIN tuotteen_avainsanat t3 ON tuote.yhtio = t3.yhtio AND tuote.tuoteno = t3.tuoteno AND t3.laji = 'parametri_koko' AND t3.kieli = 'fi'
+					$jarjestys_lisa2
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]')";
 		$result = pupe_query($query);
 

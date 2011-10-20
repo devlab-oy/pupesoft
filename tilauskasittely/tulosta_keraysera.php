@@ -437,7 +437,7 @@
 
 			if ($tee == 'keraysera' and trim($keraysvyohyke) != '') {
 
-				$erat = tee_keraysera2($keraysvyohyke);
+				$erat = tee_keraysera($keraysvyohyke);
 
 				if (count($erat['tilaukset']) != 0) {
 					$otunnukset = implode(",", $erat['tilaukset']);

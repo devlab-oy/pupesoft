@@ -1808,7 +1808,7 @@ if (!function_exists('alvierittely')) {
 			}
 		}
 
-		$pdf_tarjous->draw_text(150, $kala, t("Lasku Yhteensä", $kieli).":", $page_tarjous[$sivu], $boldi);
+		$pdf_tarjous->draw_text(150, $kala, t("Lasku yhteensä", $kieli).":", $page_tarjous[$sivu], $boldi);
 
 		if ($toim == 'PROFORMA') {
 			$summa = $kassa_ale != '' ? $summa * (1-$kassa_ale/100) : $summa;
@@ -1871,7 +1871,7 @@ if (!function_exists('alvierittely')) {
 		}
 
 		if ($yhtiorow['tarjoustyyppi'] == 1) {
-			$pdf_tarjous->draw_text(150, $kala+20, t("Verollinen arvo Yhteensä", $kieli).":", $page_tarjous[$sivu], $boldi);
+			$pdf_tarjous->draw_text(150, $kala+20, t("Verollinen arvo yhteensä", $kieli).":", $page_tarjous[$sivu], $boldi);
 
 			$oikpos = $pdf_tarjous->strlen(sprintf('%.2f', $total_uudet), $boldi);
 			$pdf_tarjous->draw_text(498-$oikpos, $kala+20, sprintf('%.2f', $total_uudet), $page_tarjous[$sivu], $boldi);

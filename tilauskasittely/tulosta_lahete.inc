@@ -2806,7 +2806,7 @@ if (!function_exists('alvierittely_lahete')) {
 			$summa = $kassa_ale != '' ? $summa * (1-$kassa_ale/100) : $summa;
 		}
 
-		$pdf->draw_text(150, $kala, t("Verollinen arvo Yhteensä", $kieli).":", $thispage, $boldi);
+		$pdf->draw_text(150, $kala, t("Verollinen arvo yhteensä", $kieli).":", $thispage, $boldi);
 
 		$oikpos = $pdf->strlen(sprintf('%.2f', $summa), $boldi);
 		$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $summa), $thispage, $boldi);
@@ -2814,7 +2814,7 @@ if (!function_exists('alvierittely_lahete')) {
 
 		$kala -= 15;
 
-		$pdf->draw_text(150, $kala, t("Lasku Yhteensä", $kieli).":",						$thispage, $boldi);
+		$pdf->draw_text(150, $kala, t("Lasku yhteensä", $kieli).":",						$thispage, $boldi);
 
 		$oikpos = $pdf->strlen(sprintf('%.2f', $summa), $boldi);
 		$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $summa), 						$thispage, $boldi);

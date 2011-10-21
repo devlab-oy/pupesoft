@@ -20,7 +20,7 @@
 		unset($tee);
 	}
 
-	if (isset($tee) and $tee == 'TOIMITA_ENNAKKO') {
+	if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_toimitus"] == "M") {
 
 		$toimita_ennakko = explode(",", $toimita_ennakko);
 
@@ -32,7 +32,7 @@
 						AND tila 		 = 'E'
 						AND tilaustyyppi = 'E'";
 			$jtrest = pupe_query($query);
-			
+
 			while ($laskurow = mysql_fetch_assoc($jtrest)) {
 
 				$query  = "	UPDATE lasku
@@ -49,12 +49,68 @@
 				$laskurow["clearing"] 		= "ENNAKKOTILAUS";
 				$laskurow["tilaustyyppi"] 	= "";
 
-				$query  = "	UPDATE tilausrivi
-							SET tyyppi = 'L'
+				// P‰ivitet‰‰n rivit
+				$query  = "	SELECT tunnus, tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
+							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus = '$laskurow[tunnus]'
 							and tyyppi  = 'E'";
 				$apure  = pupe_query($query);
+
+				while ($rivirow = mysql_fetch_assoc($apure)) {
+
+					$varastorotunnus = kuuluukovarastoon($rivirow["hyllyalue"], $rivirow["hyllynro"]);
+
+					if ($laskurow["varasto"] > 0 and $varastorotunnus != $laskurow["varasto"]) {
+						// Katotaan, ett‰ rivit myyd‰‰n halutusta varastosta
+						$query = "	SELECT tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
+									FROM tuotepaikat
+									JOIN varastopaikat on (varastopaikat.yhtio=tuotepaikat.yhtio
+						 			and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+						 			and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))
+									WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+									AND tuotepaikat.tuoteno = '{$rivirow['tuoteno']}'
+									and varastopaikat.tunnus = '{$laskurow["varasto"]}'
+									ORDER BY saldo desc
+									LIMIT 1";
+						$tuotepaikka_result = pupe_query($query);
+
+						if (mysql_num_rows($tuotepaikka_result) == 1) {
+							$tuotepaikka_row = mysql_fetch_assoc($tuotepaikka_result);
+
+							$rivirow["hyllyalue"] = $tuotepaikka_row["hyllyalue"];
+							$rivirow["hyllynro"]  = $tuotepaikka_row["hyllynro"];
+							$rivirow["hyllyvali"] = $tuotepaikka_row["hyllyvali"];
+							$rivirow["hyllytaso"] = $tuotepaikka_row["hyllytaso"];
+						}
+					}
+					elseif ($varastorotunnus == 0) {
+						// Rivill‰ ei ollut mit‰‰n viksua paikkaa
+						$query = "	SELECT tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllytaso, tuotepaikat.hyllyvali
+									FROM tuotepaikat
+									WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+									AND tuotepaikat.tuoteno = '{$rivirow['tuoteno']}'
+									AND tuotepaikat.oletus != ''";
+						$tuotepaikka_result = pupe_query($query);
+						$tuotepaikka_row = mysql_fetch_assoc($tuotepaikka_result);
+
+						$rivirow["hyllyalue"] = $tuotepaikka_row["hyllyalue"];
+						$rivirow["hyllynro"]  = $tuotepaikka_row["hyllynro"];
+						$rivirow["hyllyvali"] = $tuotepaikka_row["hyllyvali"];
+						$rivirow["hyllytaso"] = $tuotepaikka_row["hyllytaso"];
+					}
+
+					$query  = "	UPDATE tilausrivi
+								SET tyyppi 	= 'L',
+								hyllyalue 	= '{$rivirow["hyllyalue"]}',
+								hyllynro 	= '{$rivirow["hyllynro"]}',
+								hyllyvali 	= '{$rivirow["hyllyvali"]}',
+								hyllytaso 	= '{$rivirow["hyllytaso"]}'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = '$rivirow[tunnus]'
+								and tyyppi  = 'E'";
+					$updapure  = pupe_query($query);
+				}
 
 				// tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
 				$kukarow["kesken"] = $laskurow["tunnus"];
@@ -1811,7 +1867,7 @@
 						echo "</form></td>";
 					}
 
-					if ($whiletoim == "ENNAKKO" and $kukarow["toimita_ennakoita"] == "") {
+					if ($whiletoim == "ENNAKKO" and $yhtiorow["ennakkotilausten_toimitus"] == "M") {
 
 						$toimitettavat_ennakot[] = $row["tunnus"];
 
@@ -1884,7 +1940,7 @@
 					echo "</table></form><br>";
 				}
 
-				if ($whiletoim == "ENNAKKO" and $kukarow["toimita_ennakoita"] == "" and count($toimitettavat_ennakot) > 0) {
+				if ($whiletoim == "ENNAKKO" and $yhtiorow["ennakkotilausten_toimitus"] == "M" and count($toimitettavat_ennakot) > 0) {
 					echo "<br><form method='post' action='muokkaatilaus.php' onSubmit='return verify();'>";
 					echo "<input type='hidden' name='toim' value='$whiletoim'>";
 					echo "<input type='hidden' name='tee' value='TOIMITA_ENNAKKO'>";

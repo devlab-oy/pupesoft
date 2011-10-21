@@ -2525,18 +2525,25 @@ if (!function_exists('loppu_lahete')) {
 				$pdf->draw_text(200, $kala-25, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $thispage, $norm);
 
 				$pdf->draw_text(50,  $kala-38, t("Maksuehto", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala-38, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli), $thispage, $norm);
+				$pdf->draw_text(200, $kala-38, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli).t(" tai erillisen maksupostiohjelman mukaan", $kieli), $thispage, $norm);
 
 				$pdf->draw_text(50,  $kala-51, t("Myynti- ja toimitusehdot", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli), $thispage, $norm);
+				$pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 1.5.2010", $thispage, $norm);
 
-				$pdf->draw_text(50,  $kala-66, t("Liitteet", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala-66, "________", $thispage, $norm);
+				$pdf->draw_text(50,  $kala-64, t("Liitteet", $kieli), $thispage, $boldi);
+				$pdf->draw_text(200, $kala-64, "________", $thispage, $norm);
+				
+				$pdf->draw_text(50, $kala-87, t("RAKENNUSKOHTEISSA", $kieli), $thispage, $boldi);
 
-				$pdf->draw_text(50,  $kala-77, t("Vakuutus", $kieli), $thispage, $boldi);
-				$pdf->draw_text(200, $kala-77, t("Tilaaja ottaa kustannuksellaan kohteeseen tyˆaikaisen rakennustyˆvakuutuksen ennen", $kieli).' ', $thispage, $norm);
-				$pdf->draw_text(200, $kala-90, t("tˆiden alkamista ja toimittaa vakuutuskirjan", $kieli)." {$yhtiorow['nimi']}".t(":lle", $kieli), $thispage, $norm);
+				$pdf->draw_text(50,  $kala-100, t("Vakuutus", $kieli), $thispage, $boldi);
+				$pdf->draw_text(200, $kala-100, t("Tilaaja ottaa kustannuksellaan kohteeseen tyˆaikaisen rakennustyˆvakuutuksen ennen", $kieli).' ', $thispage, $norm);
+				$pdf->draw_text(200, $kala-113, t("tˆiden alkamista", $kieli), $thispage, $norm);
 
+				$pdf->draw_text(50, $kala-126, t("Muut ehdot", $kieli), $thispage, $boldi);
+				$pdf->draw_text(200, $kala-126, t("Mik‰li rakennesuunnitelmat muuttuvat sopimuksen allekirjoituksen j‰lkeen, pid‰tt‰‰", $kieli), $thispage, $norm);
+				$pdf->draw_text(200, $kala-139, $yhtiorow['nimi']." ".t("oikeuden muuttaa hintaa vastaavasti", $kieli), $thispage, $norm);
+				$pdf->draw_text(200, $kala-152, t("Tarjous / sopimus perustuu piirustuksiin _____/_____ 20__", $kieli), $thispage, $norm);
+				
 				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
 				if ($kala-253 <= 300) {
 					$sivu++;
@@ -2567,16 +2574,16 @@ if (!function_exists('loppu_lahete')) {
 					$kala += 110;
 				}
 
-				$pdf->draw_text(50, $kala-120, t("Sopimusasiakirjojen etusijaj‰rjestys on seuraava", $kieli).':', $thispage, $pieni);
-				$pdf->draw_text(50, $kala-130, '1. '.t("Kauppasopimus / tilaus", $kieli), $thispage, $pieni);
-				$pdf->draw_text(50, $kala-140, "2. $yhtiorow[nimi]".t(":n yleiset toimitusehdot", $kieli)." 1.5.2010", $thispage, $pieni);
-				$pdf->draw_text(50, $kala-150, "3. ".t("Rakennustuotteiden yleisi‰ hankinta- ja toimitusehtoja (RYHT 2000) ja betonielementtien asennusehdot", $kieli).'.', $thispage, $pieni);
+				$pdf->draw_text(50, $kala-190, t("Sopimusasiakirjojen etusijaj‰rjestys on seuraava", $kieli).':', $thispage, $pieni);
+				$pdf->draw_text(50, $kala-200, '1. '.t("Kauppasopimus / tilaus", $kieli), $thispage, $pieni);
+				$pdf->draw_text(50, $kala-210, "2. $yhtiorow[nimi]".t(":n yleiset kauppaehdot", $kieli)." 1.5.2010", $thispage, $pieni);
+				$pdf->draw_text(50, $kala-220, "3. ".t("Rakennustuotteiden yleisi‰ hankinta- ja toimitusehtoja (RYHT 2000) ja betonielementtien asennusehdot", $kieli).'.', $thispage, $pieni);
 
-				$pdf->draw_text(50, $kala-170, t("Olen tutustunut", $kieli)." $yhtiorow[nimi]".t(":n yleisiin sopimusehtoihin ja hyv‰ksyn ne sellaisenaan").'.', $thispage, $pieni);
+				$pdf->draw_text(50, $kala-240, t("Olen tutustunut", $kieli)." $yhtiorow[nimi]".t(":n yleisiin sopimusehtoihin ja hyv‰ksyn ne sellaisenaan").'.', $thispage, $pieni);
 
 				$x[0] = 50;
 				$x[1] = 230;
-				$y[0] = $y[1] = $kala-210;
+				$y[0] = $y[1] = $kala-270;
 				$pdf->draw_line($x, $y, $thispage, $rectparam);
 
 				//etsit‰‰n myyj‰n nimi
@@ -2586,19 +2593,19 @@ if (!function_exists('loppu_lahete')) {
 				$myyresult = mysql_query($query) or pupe_error($query);
 				$myyrow = mysql_fetch_assoc($myyresult);
 
-				$pdf->draw_text(50, $kala-223, $myyrow['nimi'], $thispage, $norm);
-				$pdf->draw_text(50, $kala-253, t("Myyj‰n allekirjoitus"), $thispage, $boldi);
+				$pdf->draw_text(50, $kala-283, $myyrow['nimi'], $thispage, $norm);
+				$pdf->draw_text(50, $kala-303, t("Myyj‰n allekirjoitus"), $thispage, $boldi);
 
 				$x[0] = 330;
 				$x[1] = 510;
-				$y[0] = $y[1] = $kala-210;
+				$y[0] = $y[1] = $kala-270;
 				$pdf->draw_line($x, $y, $thispage, $rectparam);
 
 				$x[0] = 330;
 				$x[1] = 510;
-				$y[0] = $y[1] = $kala-240;
+				$y[0] = $y[1] = $kala-290;
 				$pdf->draw_line($x, $y, $thispage, $rectparam);
-				$pdf->draw_text(330, $kala-253, t("Ostajan allekirjoitus ja nimenselvennys"), $thispage, $boldi);
+				$pdf->draw_text(330, $kala-303, t("Ostajan allekirjoitus ja nimenselvennys"), $thispage, $boldi);
 			}
 			else {
 				if ($laskurow['alv'] > 0 and $yhtiorow["alv_kasittely"] == '') {
@@ -2614,7 +2621,7 @@ if (!function_exists('loppu_lahete')) {
 		}
 
 		if ($tots != 1) {
-			$pdf->draw_text(530, 72, t("Jatkuu", $kieli)."...", $thispage, $norm);
+			$pdf->draw_text(530, 72, t("Jatkuu", $kieli)."...", $thispage, $boldi);
 		}
 
 		if ($tots == 1) {
@@ -2799,7 +2806,7 @@ if (!function_exists('alvierittely_lahete')) {
 			$summa = $kassa_ale != '' ? $summa * (1-$kassa_ale/100) : $summa;
 		}
 
-		$pdf->draw_text(150, $kala, t("Verollinen arvo Yhteens‰", $kieli).":", $thispage, $boldi);
+		$pdf->draw_text(150, $kala, t("Verollinen arvo yhteens‰", $kieli).":", $thispage, $boldi);
 
 		$oikpos = $pdf->strlen(sprintf('%.2f', $summa), $boldi);
 		$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $summa), $thispage, $boldi);
@@ -2807,7 +2814,7 @@ if (!function_exists('alvierittely_lahete')) {
 
 		$kala -= 15;
 
-		$pdf->draw_text(150, $kala, t("Lasku Yhteens‰", $kieli).":",						$thispage, $boldi);
+		$pdf->draw_text(150, $kala, t("Lasku yhteens‰", $kieli).":",						$thispage, $boldi);
 
 		$oikpos = $pdf->strlen(sprintf('%.2f', $summa), $boldi);
 		$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f', $summa), 						$thispage, $boldi);

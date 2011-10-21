@@ -881,6 +881,9 @@ else {
 				}
 			}
 
+			$varaston_hyllypaikat_select = $yhtiorow['kerayserat'] != '' ? "vh.keraysvyohyke, " : "";
+			$varaston_hyllypaikat_join = $yhtiorow['kerayserat'] != '' ? "JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)" : "";
+
 			if ($yhtiorow["splittauskielto"] == "K") {
 				$sorttaus = "tilausrivin_lisatiedot.omalle_tilaukselle, tilausrivi.kerayspvm, sorttauskentta";
 			}
@@ -888,11 +891,17 @@ else {
 				$sorttaus = "tilausrivin_lisatiedot.omalle_tilaukselle, sorttauskentta";
 			}
 
+			if ($yhtiorow['kerayserat'] != '') {
+				$sorttaus = "vh.keraysvyohyke, {$sorttaus}";
+			}
+
 			//haetaan kaikkien tilausrivien varastopaikat
 			$query = "	SELECT tilausrivi.otunnus, tilausrivi.perheid, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika, tilausrivin_lisatiedot.erikoistoimitus_myynti, tilausrivin_lisatiedot.omalle_tilaukselle,
+						{$varaston_hyllypaikat_select}
 						concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+						{$varaston_hyllypaikat_join}
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
 						and (tilausrivi.hyllyalue != '' OR tilausrivin_lisatiedot.omalle_tilaukselle != '')
@@ -906,7 +915,7 @@ else {
 			$tilausnumerot[] = $laskurow["tunnus"];
 
 			//mihin varastoon lähete kuuluu. aluksi x
-			$varasto = $edvarasto = $kerayspvm = $edkerayspvm = "x";
+			$varasto = $edvarasto = $kerayspvm = $edkerayspvm = $keraysvyohyke = $edkeraysvyohyke = "x";
 			$tulostusalue = $edtulostusalue = "x";
 
 			//jos tilaus splittaantuu, niin laitetaan muihin otsikoihin ensimmäisen tilauksen tunnus vanhaksitunnukseksi
@@ -928,11 +937,14 @@ else {
 				// Mikä tulostusalue
 				$tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
 
+				// Mikä keräysvyöhyke
+				$keraysvyohyke = $row['keraysvyohyke'];
+
 				// Intrastat-tiedot
 				$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
 				// varasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if (((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '')) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K") or ($row['omalle_tilaukselle'] != '' and $i_counter > 1)) {
+				if (((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '') or ($keraysvyohyke != $edkeraysvyohyke and $edkeraysvyohyke != 'x' and $edkeraysvyohyke != '')) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K") or ($row['omalle_tilaukselle'] != '' and $i_counter > 1)) {
 
 					$tilaus_splitattu = TRUE;
 
@@ -1065,6 +1077,9 @@ else {
 
 				// edellinen tulostusalue talteen
 				$edtulostusalue = $tulostusalue;
+
+				// edellinen keraysvyohyke
+				$edkeraysvyohyke = $keraysvyohyke;
 
 				//	edellinen kerayspvm talteen
 				$edkerayspvm = $row["kerayspvm"];

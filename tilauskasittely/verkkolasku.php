@@ -234,24 +234,24 @@
 
 			//Tiedostojen polut ja nimet
 			//keksitään uudelle failille joku varmasti uniikki nimi:
-			$nimixml = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
+			$nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
 
 			//  Itellan iPost vaatii siirtoon vähän oman nimen..
 			if ($yhtiorow["verkkolasku_lah"] == "iPost") {
 				$nimiipost = "-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-				$nimifinvoice = "../dataout/TRANSFER_IPOST".$nimiipost;
+				$nimifinvoice = "$pupe_root_polku/dataout/TRANSFER_IPOST".$nimiipost;
 				$nimifinvoice_delivered = "DELIVERED_IPOST".$nimiipost;
 			}
 			elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
 				$nimifinvoice = "/tmp/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
 			}
 			else {
-				$nimifinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+				$nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
 			}
 
-			$nimisisainenfinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_sisainenfinvoice.xml";
+			$nimisisainenfinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_sisainenfinvoice.xml";
 
-			$nimiedi = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
+			$nimiedi = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
 
 			//Pupevoice xml-dataa
 			if (!$tootxml = fopen($nimixml, "w")) die("Filen $nimixml luonti epäonnistui!");
@@ -266,7 +266,7 @@
 			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti epäonnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES tili READ, lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ, pakkaus READ, panttitili WRITE";
+			$query = "LOCK TABLES tili READ, lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ, pakkaus READ, panttitili WRITE, lasku AS ux_otsikko WRITE, lasku AS lx_otsikko WRITE";
 			$locre = pupe_query($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -466,8 +466,16 @@
 					}
 				}
 
+				// Onko asiakkalla panttitili
+				$query = "	SELECT panttitili
+							FROM asiakas
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow['liitostunnus']}'";
+				$asiakas_panttitili_chk_res = pupe_query($query);
+				$asiakas_panttitili_chk_row = mysql_fetch_assoc($asiakas_panttitili_chk_res);
+
 				// Tsekataan vähän alveja ja sarjanumerojuttuja
-				$query = "  SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.alv, tuote.kehahin, tuote.ei_saldoa
+				$query = "  SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.alv, tuote.kehahin, tuote.ei_saldoa, tuote.panttitili, tilausrivi.var2
 							FROM tilausrivi use index (yhtio_otunnus)
 							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -639,9 +647,9 @@
 										FROM sarjanumeroseuranta
 										LEFT JOIN tilausrivi use index (PRIMARY) ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus)
 										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus)
-										WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-										and sarjanumeroseuranta.tuoteno = '$srow1[tuoteno]'
-										and sarjanumeroseuranta.$tunken = '$srow1[tunnus]'
+										WHERE sarjanumeroseuranta.yhtio  = '$kukarow[yhtio]'
+										and sarjanumeroseuranta.tuoteno  = '$srow1[tuoteno]'
+										and sarjanumeroseuranta.$tunken  = '$srow1[tunnus]'
 										and sarjanumeroseuranta.kaytetty = 'K'";
 							$sarres = pupe_query($query);
 							$srow2 = mysql_fetch_assoc($sarres);
@@ -655,12 +663,55 @@
 							}
 						}
 					}
+
+					// jos tilausrivi ei ole cronin generoima (silloin var2-kenttään tallennetaan PANT-teksti)
+					// cron-ohjelma on panttitili_cron.php
+					// jos asiakkaalla on panttitili käytössä, katsotaan tilausrivien tuotteet läpi onko niissä panttitilillisiä tuotteita
+					if ($asiakas_panttitili_chk_row['panttitili'] == "K" and $srow1['panttitili'] == 'K' and $srow1['var2'] != 'PANT' and $srow1['varattu'] < 0) {
+
+						if ($laskurow['clearing'] == 'HYVITYS') {
+
+							// jos tilauksella on panttituotteita ja ollaan tekemässä hyvitystä, pitää katsoa, että alkuperäisen veloituslaskun panttitili rivejä ei ole vielä käytetty
+							$query = "	SELECT otunnus, tuoteno, sum(kpl) kpl
+										FROM tilausrivi
+										WHERE yhtio 	= '{$kukarow['yhtio']}'
+										AND tyyppi  	= 'L'
+										AND tuoteno 	= '{$srow1['tuoteno']}'
+										AND uusiotunnus = '{$laskurow['vanhatunnus']}'
+										AND kpl > 0
+										GROUP BY 1, 2";
+							$vanhatunnus_chk_res = pupe_query($query);
+
+							while ($vanhatunnus_chk_row = mysql_fetch_assoc($vanhatunnus_chk_res)) {
+
+								$query = "  SELECT sum(kpl) kpl
+									        FROM panttitili
+									        WHERE yhtio 			= '{$kukarow['yhtio']}'
+									        AND asiakas 			= '{$laskurow['liitostunnus']}'
+									        AND tuoteno 			= '{$srow1['tuoteno']}'
+									        AND myyntitilausnro 	= '{$vanhatunnus_chk_row['otunnus']}'
+									        AND status 				= ''
+									        AND kaytettypvm 		= '0000-00-00'
+									        AND kaytettytilausnro 	= 0";
+								$pantti_chk_res = pupe_query($query);
+                            	$pantti_chk_row = mysql_fetch_assoc($pantti_chk_res);
+
+								if ($vanhatunnus_chk_row['kpl'] != $pantti_chk_row['kpl']) {
+									$lasklisa .= " and lasku.tunnus != '{$laskurow['tunnus']}' ";
+
+									if ($silent == "" or $silent == "VIENTI") {
+										$tulos_ulos_sarjanumerot .= t("Hyvitettävän laskun pantit on jo käytetty")."!<br>\n";
+									}
+								}
+							}
+						}
+					}
 				}
 
 				$query = "  SELECT *
 							FROM maksuehto
-							WHERE yhtio='$kukarow[yhtio]'
-							and tunnus='$laskurow[maksuehto]'";
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and tunnus	= '$laskurow[maksuehto]'";
 				$maresult = pupe_query($query);
 				$maksuehtorow = mysql_fetch_assoc($maresult);
 

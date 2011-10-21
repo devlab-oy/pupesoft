@@ -66,7 +66,7 @@
 						FROM tapahtuma
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tuoteno = '$epakurantti_row[tuoteno]'
-						AND laji = 'tulo'
+						AND laji in ('tulo', 'valmistus')
 						ORDER BY laadittu DESC
 						LIMIT 1;";
 			$tapres = mysql_query($query) or pupe_error($query);

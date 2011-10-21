@@ -321,19 +321,38 @@
 							  tmp_tuotepaikat.hyllytaso";
 		}
 
+		$jarjestys_lisa1 = "";
+		$jarjestys_lisa2 = "";
+
+		// Tarkastetaan yhtion parametreista tuotteiden_jarjestys_raportoinnissa (V = variaation, koon ja varin mukaan)
+		if ($yhtiorow['tuotteiden_jarjestys_raportoinnissa'] == 'V') {
+			// Order by lisa
+			$order_extra = 'variaatio, vari, koko';
+
+			// queryyn muutoksia jos lajitellaan näin
+			$jarjestys_lisa1 = ", t1.selite as variaatio,
+								t2.selite as vari,
+								if(t3.jarjestys = 0 or t3.jarjestys is null, 999999, t3.jarjestys) koko";
+
+			$jarjestys_lisa2 = "LEFT JOIN tuotteen_avainsanat t1 ON tuote.yhtio = t1.yhtio AND tuote.tuoteno = t1.tuoteno AND t1.laji = 'parametri_variaatio' AND t1.kieli = '{$yhtiorow['kieli']}'
+								LEFT JOIN tuotteen_avainsanat t2 ON tuote.yhtio = t2.yhtio AND tuote.tuoteno = t2.tuoteno AND t2.laji = 'parametri_vari' AND t2.kieli = '{$yhtiorow['kieli']}'
+								LEFT JOIN tuotteen_avainsanat t3 ON tuote.yhtio = t3.yhtio AND tuote.tuoteno = t3.tuoteno AND t3.laji = 'parametri_koko' AND t3.kieli = '{$yhtiorow['kieli']}'";
+		}
+		else $order_extra = 'tuoteno';
+
 		// laitetaan varastopaikkojen tunnukset mysql-muotoon
 		if (!empty($varastot)) {
 			$varastontunnukset = " AND varastopaikat.tunnus IN (".implode(",", $varastot).")";
 
 			if ($summaustaso == "T" or $summaustaso == "TRY") {
-				$order_lisa = "osasto, try, tuoteno";
+				$order_lisa = "osasto, try, $order_extra";
 			}
 			else {
-				$order_lisa = "varastonnimi, osasto, try, tuoteno";
+				$order_lisa = "varastonnimi, osasto, try, $order_extra";
 			}
 		}
 		else {
-			$order_lisa = "osasto, try, tuoteno";
+			$order_lisa = "osasto, try, $order_extra";
 		}
 
 		if (isset($epakur) and $epakur == 'epakur') {
@@ -432,11 +451,10 @@
 					tuote.epakurantti100pvm,
 					tuote.sarjanumeroseuranta,
 					tuote.vihapvm
+					$jarjestys_lisa1
 					FROM tapahtuma USE INDEX (yhtio_laadittu_hyllyalue_hyllynro)
-					JOIN tuote ON	(tuote.yhtio = tapahtuma.yhtio
-									AND tuote.tuoteno = tapahtuma.tuoteno
-									AND tuote.ei_saldoa = ''
-									$tuote_lisa)
+					JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio AND tuote.tuoteno = tapahtuma.tuoteno AND tuote.ei_saldoa = '' $tuote_lisa)
+					$jarjestys_lisa2
 					WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 					AND tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59')
 					UNION
@@ -460,11 +478,10 @@
 					tuote.epakurantti100pvm,
 					tuote.sarjanumeroseuranta,
 					tuote.vihapvm
+					$jarjestys_lisa1
 					FROM tuotepaikat USE INDEX (tuote_index)
-					JOIN tuote ON	(tuote.yhtio = tuotepaikat.yhtio
-									AND tuote.tuoteno = tuotepaikat.tuoteno
-									AND tuote.ei_saldoa = ''
-									$tuote_lisa)
+					JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno AND tuote.ei_saldoa = '' $tuote_lisa)
+					$jarjestys_lisa2
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]')";
 		$result = pupe_query($query);
 
@@ -523,6 +540,8 @@
 					$having_lisa
 					ORDER BY $order_lisa";
 		$result = pupe_query($query);
+		
+		echo "BR: $order_lisa";
 
 		$lask   = 0;
 		$varvo  = 0; // tähän summaillaan
@@ -623,8 +642,8 @@
 			if ($elements > 0) {
 				require_once ('inc/ProgressBar.class.php');
 
-				$bar = new ProgressBar();
-				$bar->initialize($elements); // print the empty bar
+				#$bar = new ProgressBar();
+				#$bar->initialize($elements); // print the empty bar
 			}
 		}
 
@@ -635,7 +654,7 @@
 			$bruttovaraston_arvo = 0;
 
 			if (!$php_cli) {
-				$bar->increase();
+				#$bar->increase();
 			}
 
 			if ($summaustaso == 'T' or $summaustaso == 'TRY') {

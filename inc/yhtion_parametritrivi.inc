@@ -2833,5 +2833,17 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == 'tuotteiden_jarjestys_raportoinnissa') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'V' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Tuotenumeron mukaan");
+		$ulos .= "<option value = 'V' $sel>".t("Variaation, värin ja koon mukaan");
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
 
 ?>

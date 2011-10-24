@@ -542,8 +542,8 @@
 			//4
 			echo "<tr>";
 			echo "<th>".t("Hälyraja")." / ".t("Varastoitava")."</th>";
-			echo "<th>".t("Tilerä")."</th>";
-			echo "<th>".t("Toierä")."</th>";
+			echo "<th>".t("Ostoerä")."</th>";
+			echo "<th>".t("Myyntierä")."</th>";
 			echo "<th>".t("Kerroin")."</th>";
 			echo "<th>".t("Tarrakerroin")."</th>";
 			echo "<th>".t("Tarrakpl")."</th>";

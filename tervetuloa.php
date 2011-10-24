@@ -229,7 +229,7 @@ if (!isset($tee) or $tee == '') {
 			$varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
 
 			echo "<tr$varilisa>";
-			echo "<td>{$tyorow["tunnus"]}</td>";
+			echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
 			echo "<td>{$tyorow["nimi"]}</td>";
 			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";
 			echo "</tr>";

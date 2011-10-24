@@ -91,7 +91,7 @@
 
 		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='S'{$sel['S']}>".t("Saa olla useita asiakkaita")."<br />";
 		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='K'{$sel['K']}>".t("Keräyserän alustoja voi olla useista lähdöistä")."<br />";
-		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='P'{$sel['P']}>".t("Alustoissa voi olla useita prioriteettejä")."<br />";
+		$ulos .= "<input type='checkbox' name='{$nimi}[]' value='P'{$sel['P']}>".t("Keräyserässä voi olla useita prioriteettejä")."<br />";
 
 		$ulos .= "</td>";
 		$jatko = 0;

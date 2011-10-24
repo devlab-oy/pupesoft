@@ -2833,5 +2833,29 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == 'tuotteiden_jarjestys_raportoinnissa') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'V' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Tuotenumeron mukaan");
+		$ulos .= "<option value = 'V' $sel>".t("Variaation, värin ja koon mukaan");
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == 'ennakkotilausten_toimitus') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'M' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Ennakkotilaukset toimitetaan Ennakko-selaus ohjelmalla");
+		$ulos .= "<option value = 'M' $sel>".t("Ennakkotilaukset toimitetaan tilauskittain ja/tai Ennakko-selaus ohjelmalla");
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
 
 ?>

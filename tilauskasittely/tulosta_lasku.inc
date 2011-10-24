@@ -2163,7 +2163,7 @@ if (!function_exists("tulosta_lasku")) {
 				$kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
 
 				if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-					$kutsu .= " ".trim($laskurow["nimi"]);
+					$kutsu .= ", ".trim($laskurow["nimi"]);
 				}
 
 				$liite 				= $pdf_laskufilenimi;

@@ -82,4 +82,19 @@
 		$jatko = 0;
 	}
 
-?>
+	if (mysql_field_name($result, $i) == "asiakasluokka") {
+		$vresult = t_avainsana("ASIAKASLUOKKA");
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300)."><option value=' '>".t("Ei luokkaa")."</option>";
+
+		while($row = mysql_fetch_array($vresult)) {
+			$sel = $row["selite"] == $trow[$i] ? $sel = " selected" : "";
+
+			$ulos .= "<option value='{$row['selite']}'{$sel}>{$row['selite']}";
+			if (trim($row['selitetark']) != "") $ulos .= " - {$row['selitetark']}";
+			$ulos .= "</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}

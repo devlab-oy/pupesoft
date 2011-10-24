@@ -1597,7 +1597,7 @@
 			echo "<td>".t("Laskuta heti")." (".t("sisäinen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
 			echo "</tr>";
 
-			echo "<td>".t("Keräysprioriteetti").":</td><td>";
+			echo "<tr><td>".t("Keräysprioriteetti").":</td><td>";
 
 			$tresult = t_avainsana("ASIAKASLUOKKA");
 

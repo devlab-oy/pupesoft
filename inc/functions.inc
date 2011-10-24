@@ -13450,7 +13450,8 @@ if (!function_exists("tee_keraysera2")) {
 					asiakas.tunnus as asiakas_tunnus,
 					toimitustavan_lahdot.tunnus as lahto,
 					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
-					lasku.hyvaksynnanmuutos as prioriteetti,
+					#lasku.hyvaksynnanmuutos as prioriteetti,
+					avainsana.selitetark_3 as prioriteetti,
 					lasku.h1time,
 					lasku.sisviesti2,
 					keraysvyohyke.tunnus as keraysvyohyke_tunnus,
@@ -13470,14 +13471,20 @@ if (!function_exists("tee_keraysera2")) {
 													AND toimitustavan_lahdot.lahdon_viikonpvm = {$viikonpaiva}
 													AND toimitustavan_lahdot.aktiivi = ''
 													AND toimitustavan_lahdot.kerailyn_aloitusaika <= CURTIME()
+													AND toimitustavan_lahdot.asiakasluokka = lasku.hyvaksynnanmuutos
  												)
+					JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = 'fi' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tila = 'N'
 					AND lasku.alatila = 'A'
 					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
-					ORDER BY lahto, erotus, lasku.hyvaksynnanmuutos, tilauksen_koko DESC, minimi_indeksi, lasku.h1time ASC, lasku.sisviesti2, keraysvyohyke.nimitys";
+					ORDER BY lahto, erotus, prioriteetti, tilauksen_koko DESC, minimi_indeksi, lasku.h1time ASC, lasku.sisviesti2, keraysvyohyke.nimitys";
 		// echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$res = pupe_query($query);
+
+		if (mysql_num_rows($res) == 0) {
+			return array();
+		}
 
 		$ulkoisen_jarjestelman_tiedosto = '';
 

@@ -352,7 +352,7 @@
 			$query = "	SELECT keraysvyohyke
 						FROM kuka
 						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND kuka = '{$kukarow['kuka']}'";
+						AND kuka = '{$keraaja['kuka']}'";
 			$keraysvyohyke_res = pupe_query($query);
 			$keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_res);
 
@@ -437,7 +437,9 @@
 
 			if ($tee == 'keraysera' and trim($keraysvyohyke) != '') {
 
-				$erat = tee_keraysera($keraysvyohyke);
+				echo "<font class='head'>Ker‰‰j‰: $who</font><br>";
+
+				$erat = tee_keraysera2($keraysvyohyke);
 
 				if (count($erat['tilaukset']) != 0) {
 					$otunnukset = implode(",", $erat['tilaukset']);

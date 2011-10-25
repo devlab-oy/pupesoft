@@ -348,10 +348,10 @@ if (!function_exists('alku_lahete')) {
 
 			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc" or (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '')) {
 				if ($yhtiorow['alv_kasittely'] == '') {
-					$pdf->draw_text(310, 640, t("Hinnat sisältävät arvonlisäveron", $kieli),".", $thispage, $boldi);
+					$pdf->draw_text(310, 640, t("Hinnat sisältävät arvonlisäveron", $kieli).".", $thispage, $boldi);
 				}
 				else {
-					$pdf->draw_text(310, 640, t("Hinnat eivät sisällä arvonlisäveroa", $kieli),".",	$thispage, $boldi);
+					$pdf->draw_text(310, 640, t("Hinnat eivät sisällä arvonlisäveroa", $kieli).".",	$thispage, $boldi);
 				}
 			}
 		}

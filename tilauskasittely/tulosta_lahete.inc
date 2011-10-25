@@ -351,7 +351,7 @@ if (!function_exists('alku_lahete')) {
 					$pdf->draw_text(310, 640, t("Hinnat sisältävät arvonlisäveron", $kieli),".", $thispage, $boldi);
 				}
 				else {
-					$pdf->draw_text(310, 640, t("Hinnat eivät sisällä arvonlisäveroa"),".",	$thispage, $boldi);
+					$pdf->draw_text(310, 640, t("Hinnat eivät sisällä arvonlisäveroa", $kieli),".",	$thispage, $boldi);
 				}
 			}
 		}
@@ -933,7 +933,7 @@ if (!function_exists('rivi_otsikot_lahete')) {
 					$pdf->draw_text(473, $kala+5, t("Verollinen", $kieli), $thispage, $boldi);
 				}
 				else {
-					$pdf->draw_text(473, $kala+5, t("Veroton"),	$thispage, $boldi);
+					$pdf->draw_text(473, $kala+5, t("Veroton", $kieli),	$thispage, $boldi);
 				}
 			}
 
@@ -2513,7 +2513,7 @@ if (!function_exists('loppu_lahete')) {
 					$kala += 36;
 				}
 
-				$pdf->draw_text(50, $kala-25, t("Toimitustapa"), $thispage, $boldi);
+				$pdf->draw_text(50, $kala-25, t("Toimitustapa", $kieli), $thispage, $boldi);
 				$pdf->draw_text(200, $kala-25, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $thispage, $norm);
 
 				$pdf->draw_text(50,  $kala-38, t("Maksuehto", $kieli), $thispage, $boldi);
@@ -2571,7 +2571,7 @@ if (!function_exists('loppu_lahete')) {
 				$pdf->draw_text(50, $kala-210, "2. $yhtiorow[nimi]".t(":n yleiset kauppaehdot", $kieli)." 1.5.2010", $thispage, $pieni);
 				$pdf->draw_text(50, $kala-220, "3. ".t("Rakennustuotteiden yleisiä hankinta- ja toimitusehtoja (RYHT 2000) ja betonielementtien asennusehdot", $kieli).'.', $thispage, $pieni);
 
-				$pdf->draw_text(50, $kala-240, t("Olen tutustunut", $kieli)." $yhtiorow[nimi]".t(":n yleisiin sopimusehtoihin ja hyväksyn ne sellaisenaan").'.', $thispage, $pieni);
+				$pdf->draw_text(50, $kala-240, t("Olen tutustunut", $kieli)." $yhtiorow[nimi]".t(":n yleisiin sopimusehtoihin ja hyväksyn ne sellaisenaan", $kieli).'.', $thispage, $pieni);
 
 				$x[0] = 50;
 				$x[1] = 230;
@@ -2586,7 +2586,7 @@ if (!function_exists('loppu_lahete')) {
 				$myyrow = mysql_fetch_assoc($myyresult);
 
 				$pdf->draw_text(50, $kala-283, $myyrow['nimi'], $thispage, $norm);
-				$pdf->draw_text(50, $kala-303, t("Myyjän allekirjoitus"), $thispage, $boldi);
+				$pdf->draw_text(50, $kala-303, t("Myyjän allekirjoitus", $kieli), $thispage, $boldi);
 
 				$x[0] = 330;
 				$x[1] = 510;
@@ -2597,7 +2597,7 @@ if (!function_exists('loppu_lahete')) {
 				$x[1] = 510;
 				$y[0] = $y[1] = $kala-290;
 				$pdf->draw_line($x, $y, $thispage, $rectparam);
-				$pdf->draw_text(330, $kala-303, t("Ostajan allekirjoitus ja nimenselvennys"), $thispage, $boldi);
+				$pdf->draw_text(330, $kala-303, t("Ostajan allekirjoitus ja nimenselvennys", $kieli), $thispage, $boldi);
 			}
 			else {
 				if ($laskurow['alv'] > 0 and $yhtiorow["alv_kasittely"] == '') {

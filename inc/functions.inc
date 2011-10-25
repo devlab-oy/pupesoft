@@ -11637,8 +11637,8 @@ if (!function_exists("pupe_DataTables")) {
 					// fnFilter toistaiseksi vain ekalle tablelle
 					datatablesit[0].fnFilter( arvo, sarake );
 
-					// filtteröidään työjono.php:ssa myös alempaa taulua
-					if (datatablesit[0].attr(\"id\") == \"tyojono0\") {
+					// filtteröidään työjono.php:ssa myös alempaa taulua, jos ja vain jos alempi taulu on olemassa
+					if (datatablesit[0].attr(\"id\") == \"tyojono0\" && datatablesit[1] != undefined) {
 						var tyojono = [];
 
 						$(\"span[class=tyom_id]\").each(function(i) {
@@ -11668,6 +11668,30 @@ if (!function_exists("pupe_DataTables")) {
 				if (oSettings.oPreviousSearch['sSearch']!=''){
 					$('.search_field').val(oSettings.oPreviousSearch['sSearch']);
 				}
+				
+				// Työjonon ja työstatuksen rajausta dropdownilla
+				$('select.tyojono_sort, select.tyostatus_sort').change(function() { 
+					var tyojono = $('select.tyojono_sort option:selected');
+					var tyostatus = $('select.tyostatus_sort option:selected');
+					var hakuarvo;
+					
+					// Jos tyojono tai tyostatus on tyhja, haetaan vain yhdellä ehdolla
+					haku_arvo = tyojono.text() +' / '+ tyostatus.text();
+					
+					if (tyojono.val() == '-') {
+						haku_arvo = tyostatus.text();
+					}
+					if (tyostatus.val() == '-') {
+						haku_arvo = tyojono.text();
+					}
+					if(tyojono.val() == '-' && tyostatus.val() == '-') {
+						haku_arvo = '';
+					}
+
+					console.log(haku_arvo);
+					datatablesit[0].fnFilter(haku_arvo, 5);										
+				} );
+				
 			} );
 		</script>";
 	}

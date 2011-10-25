@@ -348,20 +348,12 @@ if (!function_exists('alku_lahete')) {
 
 			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc" or (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '')) {
 				if ($yhtiorow['alv_kasittely'] == '') {
-					$pdf->draw_text(310, 640, t("Hinnat sis‰lt‰v‰t arvonlis‰veron", $kieli), $thispage, $boldi);
+					$pdf->draw_text(310, 640, t("Hinnat sis‰lt‰v‰t arvonlis‰veron", $kieli),".", $thispage, $boldi);
 				}
 				else {
-					$pdf->draw_text(310, 640, t("Hinnat eiv‰t sis‰ll‰ arvonlis‰veroa"),	$thispage, $boldi);
+					$pdf->draw_text(310, 640, t("Hinnat eiv‰t sis‰ll‰ arvonlis‰veroa"),".",	$thispage, $boldi);
 				}
 			}
-
-			#$pdf->draw_rectangle(653, 300, 632, 580, $thispage, $rectparam);
-			#$pdf->draw_text(310, 645, "1", $thispage, $pieni);
-			#$pdf->draw_text(310, 635, "1", $thispage, $norm);
-
-			#$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
-			#$pdf->draw_text(310, 624, "2", 	$thispage, $pieni);
-			#$pdf->draw_text(310, 614, "2", 	$thispage, $norm);
 		}
 
 		$komm = "";
@@ -728,7 +720,7 @@ if (!function_exists('rivi_otsikot_lahete')) {
 			$pdf->draw_text(330, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
 			$pdf->draw_text(375, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
 			$pdf->draw_text(425, $kala+15, t("Yks.hinta", $kieli),		$thispage, $norm);
-			$pdf->draw_text(500, $kala+15, t("Ale", $kieli),			$thispage, $norm);
+			$pdf->draw_text(480, $kala+15, t("Ale", $kieli),			$thispage, $norm);
 
 			if (trim($naytetaanko_rivihinta) == '') {
 				$pdf->draw_text(530, $kala+15, t("Rivihinta", $kieli),	$thispage, $norm);
@@ -2532,7 +2524,7 @@ if (!function_exists('loppu_lahete')) {
 
 				$pdf->draw_text(50,  $kala-64, t("Liitteet", $kieli), $thispage, $boldi);
 				$pdf->draw_text(200, $kala-64, "________", $thispage, $norm);
-				
+
 				$pdf->draw_text(50, $kala-87, t("RAKENNUSKOHTEISSA", $kieli), $thispage, $boldi);
 
 				$pdf->draw_text(50,  $kala-100, t("Vakuutus", $kieli), $thispage, $boldi);
@@ -2543,7 +2535,7 @@ if (!function_exists('loppu_lahete')) {
 				$pdf->draw_text(200, $kala-126, t("Mik‰li rakennesuunnitelmat muuttuvat sopimuksen allekirjoituksen j‰lkeen, pid‰tt‰‰", $kieli), $thispage, $norm);
 				$pdf->draw_text(200, $kala-139, $yhtiorow['nimi']." ".t("oikeuden muuttaa hintaa vastaavasti", $kieli), $thispage, $norm);
 				$pdf->draw_text(200, $kala-152, t("Tarjous / sopimus perustuu piirustuksiin _____/_____ 20__", $kieli), $thispage, $norm);
-				
+
 				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
 				if ($kala-253 <= 300) {
 					$sivu++;

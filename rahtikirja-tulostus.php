@@ -269,7 +269,7 @@
 			}
 
 			// haetaan tälle rahtikirjalle kuuluvat tunnukset
-			$query = "	SELECT rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
+			$query = "	SELECT rahtikirjat.rahtikirjanro, rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
 						FROM rahtikirjat
 						join lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') ";
 
@@ -574,13 +574,14 @@
 					if (!isset($nayta_pdf)) echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
 				}
 
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+				// Kopsuille ei päivitetä eikä kun muokataan rahtikirjan tietoja!
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 					$query = "	UPDATE rahtikirjat
 								set rahtikirjanro = '$rahtikirjanro'
 								where tunnus in ($tunnukset)
 								and yhtio = '$kukarow[yhtio]'";
 					$ures  = mysql_query($query) or pupe_error($query);
-
+					
 					if (trim($pakkaustieto_tunnukset) != '') {
 						$query = "	UPDATE rahtikirjat
 									set rahtikirjanro='$rahtikirjanro'
@@ -588,7 +589,6 @@
 									and yhtio = '$kukarow[yhtio]'";
 						$ures  = mysql_query($query) or pupe_error($query);
 					}
-
 				}
 
 				if ($rakir_row['toimitusvahvistus'] != '') {

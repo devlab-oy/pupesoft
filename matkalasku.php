@@ -1538,15 +1538,22 @@ if ($tee == "MUOKKAA") {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kaytossa != 'E'
 					and tyyppi = 'K'
-					ORDER BY koodi+0, nimi";
+					ORDER BY koodi+0, koodi, nimi";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
-			$kustannuspaikka = "<select name = 'kustp' style=\"width: 100px\"><option value = ' '>".t("Ei kustannuspaikkaa")." '$trow[kustannuspaikka]'</option>";
+			$kustannuspaikka = "<select name = 'kustp' style=\"width: 100px\"><option value = ' '>".t("Ei kustannuspaikkaa")."</option>";
 
-			if (!isset($kustp)) $kustp = $laskurow["kustannuspaikka"];
+			if (!isset($kustp)) {
+				if ($trow["kustp"] > 0) {
+					$kustp = $trow["kustp"];
+				}
+				else {
+					$kustp = $laskurow["kustannuspaikka"];
+				}
+			}
 
-			while ($kustannuspaikkarow = mysql_fetch_assoc ($result)) {
+			while ($kustannuspaikkarow = mysql_fetch_assoc($result)) {
 				$valittu = "";
 
 				if ($kustannuspaikkarow["tunnus"] == $kustp) {
@@ -1555,6 +1562,7 @@ if ($tee == "MUOKKAA") {
 
 				$kustannuspaikka .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]</option>";
 			}
+
 			$kustannuspaikka .= "</select>";
 		}
 
@@ -1563,21 +1571,28 @@ if ($tee == "MUOKKAA") {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kaytossa != 'E'
 					and tyyppi = 'O'
-					ORDER BY koodi+0, nimi";
+					ORDER BY koodi+0, koodi, nimi";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$kustannuspaikka .= " <select name = 'kohde' style=\"width: 100px\"><option value = ' '>".t("Ei kohdetta");
 
-			if (!isset($kohde)) $kohde = $laskurow["kohde"];
+			if ($trow["kohde"] > 0) {
+				$kohde = $trow["kohde"];
+			}
+			else {
+				$kohde = $laskurow["kohde"];
+			}
 
-			while ($kustannuspaikkarow=mysql_fetch_assoc ($result)) {
+			while ($kustannuspaikkarow = mysql_fetch_assoc($result)) {
 				$valittu = "";
 				if ($kustannuspaikkarow["tunnus"] == $kohde) {
 					$valittu = "selected";
 				}
+
 				$kustannuspaikka .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]</option>";
 			}
+
 			$kustannuspaikka .= "</select>";
 		}
 
@@ -1586,21 +1601,27 @@ if ($tee == "MUOKKAA") {
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kaytossa != 'E'
 					and tyyppi = 'P'
-					ORDER BY koodi+0, nimi";
+					ORDER BY koodi+0, koodi, nimi";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$kustannuspaikka .= " <select name = 'projekti' style=\"width: 100px\"><option value = ' '>".t("Ei projektia");
 
-			if (!isset($projekti)) $projekti = $laskurow["projekti"];
+			if ($trow["projekti"] > 0) {
+				$projekti = $trow["projekti"];
+			}
+			else {
+				$projekti = $laskurow["projekti"];
+			}
 
-			while ($kustannuspaikkarow = mysql_fetch_assoc ($result)) {
+			while ($kustannuspaikkarow = mysql_fetch_assoc($result)) {
 				$valittu = "";
 				if ($kustannuspaikkarow["tunnus"] == $projekti) {
 					$valittu = "selected";
 				}
 				$kustannuspaikka .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]</option>";
 			}
+
 			$kustannuspaikka .= "</select>";
 		}
 

@@ -37,10 +37,12 @@ if (!-f $tmpfile) {
 
 	while ($file = readdir($hakemisto)) {
 
+		my $extchk = substr $file, -4;
+
 		$nimi = $dirri1.$file;
 		$ok = 0;
 
-		if (-f $nimi) {
+		if (-f $nimi && $extchk ne '.tmp') {
 
 			# loopataan tätä failia kunnes ok
 			while ($ok < 1) {

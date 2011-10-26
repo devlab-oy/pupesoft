@@ -6,8 +6,8 @@
 
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
-	} 
-	
+	}
+
 	if (mysql_field_name($result, $i) == "maa") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
@@ -26,7 +26,7 @@
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
-	} 				
+	}
 
 	if ((mysql_field_name($result, $i) == "tilino") or
 		(mysql_field_name($result, $i) == "tilino_eu") or
@@ -59,12 +59,12 @@
 				$vrow = mysql_fetch_array($vresult);
 				$ulos .= " $vrow[nimi]";
 			}
-			
+
 			$ulos .= "</td>";
 			$jatko = 0;
 		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") {
 
 		if (mysql_field_name($result, $i) == "projekti") $kptyyppi = "P";
@@ -75,7 +75,8 @@
 					from kustannuspaikka
 					where yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$kptyyppi'
-					and kaytossa != 'E'";
+					and kaytossa != 'E'
+					ORDER BY koodi+0, koodi, nimi";
 		$vresult = mysql_query($tpque) or pupe_error($tpque);
 
 		$sel="";
@@ -94,19 +95,19 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "toim_automaattinen_jtraportti") {
 
 		$sel = array();
 		$sel[$trow[$i]] = "SELECTED";
 
-		$ulos = "<td><select name='$nimi'><option value=''>".t("Ei")."</option>";		
+		$ulos = "<td><select name='$nimi'><option value=''>".t("Ei")."</option>";
 		$ulos .= "<option value = 'pv' $sel[pv]>".t("Päivittäin")."</option>";
 		$ulos .= "<option value = 'vk' $sel[vk]>".t("Viikottain")."</option>";
 		$ulos .= "<option value = '2vk' {$sel["2vk"]}>".t("Joka toinen viikko")."</option>";
 		$ulos .= "<option value = 'kk' $sel[kk]>".t("Kuukausittain")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
-		
+
 	}
 ?>

@@ -5810,6 +5810,24 @@ if (!function_exists("enable_ajax")) {
 
 	var keyStrokeIndex=-1;
 
+	function livesearch_blurhandler(id) {
+		if ( document.activeElement ) hf = document.activeElement;
+		else hf = document.focusNode;
+
+		if (hf.id != id) {
+
+			var selectOptions = document.getElementsByName('selectOptions'+id);
+
+			for (var iEl = 0; iEl < selectOptions.length; iEl++) {
+				if (document.getElementById(selectOptions[iEl].id).className != '') {
+					return false;
+				}
+			}
+
+			document.getElementById('livesearch_'+id).style.visibility = 'hidden';
+		}
+	}
+
 	function livesearch_keyhandler(event, haku_id, haku_formi, dont_submit_after) {
 
 		var selectOptions = document.getElementsByName('selectOptions'+haku_id);
@@ -5845,6 +5863,8 @@ if (!function_exists("enable_ajax")) {
 				}
 
 				selectOptions[keyStrokeIndex].className='liveSearchSelectedItem';
+
+				if (selectOptions[keyStrokeIndex].id) document.getElementById(selectOptions[keyStrokeIndex].id).scrollIntoView();
 			}
 		}
 		else if (event.keyCode == 13) {
@@ -7464,12 +7484,13 @@ if (!function_exists("livesearch_tilihaku")) {
 								<font style='font-weight:bold'>$row[tilino]</font> &raquo; $row[nimi]
 							</div><div name='selectValues$hakuid' id='$row[tilino]'></div>";
 					$limit++;
-					if ($limit > 14) {
+
+					if ($limit > 49) {
 						break;
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>Haulla löytyi ".mysql_num_rows($result). " tiliä.</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ",t("tiliä")," ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei tilejä.")."</font></div>";
@@ -7593,12 +7614,13 @@ if (!function_exists("livesearch_tuotehaku")) {
 								<font style='font-weight:bold'>$row[tuoteno]</font> &raquo; $row[nimitys]
 							</div><div name='selectValues$hakuid' id='$row[tuoteno]'></div>";
 					$limit++;
-					if ($limit > 14) {
+
+					if ($limit > 49) {
 						break;
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>Haulla löytyi ".mysql_num_rows($result). " tuotetta, näytetään 15 tarkinta osumaa.</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ".t("tuotetta").", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."</font></div>";
@@ -7689,12 +7711,13 @@ if (!function_exists("livesearch_kayttajahaku")) {
 								<font style='font-weight:bold'>$row[nimi]</font> &raquo; ($row[kuka])
 							</div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
 					$limit++;
-					if ($limit > 14) {
+
+					if ($limit > 49) {
 						break;
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("käyttäjää"),".</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("käyttäjää"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei käyttäjiä.")."</font></div>";
@@ -7772,12 +7795,13 @@ if (!function_exists("livesearch_asiakashaku")) {
 								<font style='font-weight:bold'>$row[ytunnus] &raquo; $row[asiakkaan_tieto]</font>
 							</div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
 					$limit++;
-					if ($limit > 14) {
+
+					if ($limit > 49) {
 						break;
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("asiakasta"),".</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("asiakasta"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei asiakkaita.")."</font></div>";
@@ -7852,12 +7876,13 @@ if (!function_exists("livesearch_varastohaku")) {
 								<font style='font-weight:bold'>$row[hyllyt]</font>
 							</div><div name='selectValues$hakuid' id='$row[hyllyt]'></div>";
 					$limit++;
-					if ($limit > 14) {
+
+					if ($limit > 49) {
 						break;
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("varastoa"),".</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("varastoa"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei varastoa.")."</font></div>";
@@ -7886,17 +7911,10 @@ if (!function_exists("livesearch_kentta")) {
 					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
 							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&ohje=off&toim=$toim&livesearch_haku='+this.value);
-							keyStrokeIndex = -1;
-					}\"
-					onblur=\"var selectOptions = document.getElementsByName('selectOptions$hakuID');
-					for (var iEl = 0; iEl < selectOptions.length; iEl++) {
-						if (document.getElementById(selectOptions[iEl].id).className != '') {
-							return false;
-						}
-					}
-					document.getElementById('livesearch_$hakuID').style.visibility = 'hidden';\">
+							keyStrokeIndex = -1;}\"
+					onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\')', 100);\">
 				<div style='break:all'></div>
-				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px;'></div>";
+				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
 	}
 }
 
@@ -8407,23 +8425,28 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		}
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") !== FALSE) {
-			require("tulosta_tilausvahvistus_pdf.inc");
+			if (@include("tilauskasittely/tulosta_tilausvahvistus_pdf.inc"));
+			else require("tulosta_tilausvahvistus_pdf.inc");
 		}
 		else {
 			if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
-				require("tilausvahvistus-edi.inc");
+				if (@include("tilauskasittely/tilausvahvistus-edi.inc"));
+				else require("tilausvahvistus-edi.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-				require("tilausvahvistus-email.inc");
+				if (@include("tilauskasittely/tilausvahvistus-email.inc"));
+				else require("tilausvahvistus-email.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
-				require("tilausvahvistus-fax.inc");
+				if (@include("tilauskasittely/tilausvahvistus-fax.inc"));
+				else require("tilausvahvistus-fax.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
-				require("tilausvahvistus-futursoft.inc");
+				if (@include("tilauskasittely/tilausvahvistus-futursoft.inc"));
+				else require("tilausvahvistus-futursoft.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
@@ -8439,7 +8462,8 @@ if (!function_exists("laheta_tilausvahvistus")) {
 					$toim_save = $toim;
 					if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
 
-					require("tulosta_tilausvahvistus_pdf.inc");
+					if (@include("tilauskasittely/tulosta_tilausvahvistus_pdf.inc"));
+					else require("tulosta_tilausvahvistus_pdf.inc");
 					$toim = $toim_save;
 				}
 			}
@@ -8834,7 +8858,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
 		$query = "	SELECT *
 					FROM yhtio
-					WHERE yhtio='$yhtio'";
+					WHERE yhtio = '$yhtio'";
 		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 		if (mysql_num_rows($result) == 0) {
@@ -11975,6 +11999,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.tyyppi  = 'L'
 					and tilausrivi.otunnus IN ($otunnus)
 					and tuote.vakkoodi not in ('','0')
 					and (tilausrivi.varattu+tilausrivi.kpl) > 0

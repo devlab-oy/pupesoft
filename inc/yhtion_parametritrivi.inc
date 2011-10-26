@@ -2804,10 +2804,57 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikkaan liitettyjen huolinta-/rahtilaskujen summaa");
-		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikalle syˆtetty‰ kuluprosenttia");
+		$ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikkaan liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
+		$ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan k‰ytet‰‰n keikalle syˆtetty‰ kuluprosenttia")."</option>";
 		$ulos .= "</select></td>";
 
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'varaston_splittaus') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Myyd‰‰n ensin oletuspaikka tyhj‰ksi ja k‰ytet‰‰n sen j‰lkeen muita tuotepaikkoja saldoj‰rjestyksess‰")."</option>";
+		$ulos .= "<option value = 'K' {$sel}>".t("Yritet‰‰n myyd‰ kaikki saman varaston sis‰lt‰, ensisijaisesti oletuspaikan varastosta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	if (mysql_field_name($result, $i) == 'siirtolistatyyppi') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'A' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Siirtolistalla ei n‰ytet‰ tuotteen myyntihintaa")."</option>";
+		$ulos .= "<option value = 'A' {$sel}>".t("Siirtolistalla n‰ytet‰‰n tuotteen myyntihinta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == 'tuotteiden_jarjestys_raportoinnissa') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'V' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Tuotenumeron mukaan");
+		$ulos .= "<option value = 'V' $sel>".t("Variaation, v‰rin ja koon mukaan");
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == 'ennakkotilausten_toimitus') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'M' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Ennakkotilaukset toimitetaan Ennakko-selaus ohjelmalla");
+		$ulos .= "<option value = 'M' $sel>".t("Ennakkotilaukset toimitetaan tilauskittain ja/tai Ennakko-selaus ohjelmalla");
+		$ulos .= "</select></td>";
+		
 		$jatko = 0;
 	}
 

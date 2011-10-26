@@ -1428,7 +1428,7 @@ if ($tee == 'P' or $tee == 'E') {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = 'K'
 						and kaytossa != 'E'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$vresult = pupe_query($query);
 
 			echo "<td valign='top'>";
@@ -1454,7 +1454,7 @@ if ($tee == 'P' or $tee == 'E') {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = 'O'
 						and kaytossa != 'E'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$vresult = pupe_query($query);
 
 			if (mysql_num_rows($vresult) > 0) {
@@ -1479,7 +1479,7 @@ if ($tee == 'P' or $tee == 'E') {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = 'P'
 							and kaytossa != 'E'
-							ORDER BY nimi";
+							ORDER BY koodi+0, koodi, nimi";
 				$vresult = pupe_query($query);
 
 				echo "<select name='iprojekti[$i]'>";

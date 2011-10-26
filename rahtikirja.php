@@ -289,6 +289,65 @@
 		}
 	}
 
+	// liitet‰‰n tilaus
+	if ($tee == "lisaatilaus") {
+
+		// Haetaan sopivia tilauksia
+		$query = "	SELECT DISTINCT lasku.tunnus, lasku.nimi
+					FROM lasku use index (tila_index)
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '' and tilausrivi.keratty != 'saldoton'
+					LEFT JOIN toimitustapa use index (selite_index) ON toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
+					LEFT JOIN varastopaikat on varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
+					WHERE lasku.$logistiikka_yhtiolisa
+					and lasku.tila = 'L'
+					and lasku.alatila = 'C'
+					and lasku.liitostunnus in ($asiakkaat)
+					and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')";
+		$tilre = pupe_query($query);
+
+		echo "<font class='head'>".t("Lis‰‰ tilaus valittuun rahtikirjaan")."</font><hr>";
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>",t("Valittu rahtikirja"),"</th>";
+		echo "<td>$rakirno</td>";
+		echo "</tr>";
+		echo "</table>";
+		echo "<br><br>";
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>",t("Tilaus"),"</th>";
+		echo "<th>",t("Asiakas"),"</th>";
+		echo "</tr>";
+
+		while ($row = mysql_fetch_assoc($tilre)) {
+			echo "<tr class='aktiivi'>";
+			echo "<td>$row[tunnus]</td>";
+			echo "<td>$row[nimi]</td>";
+
+			echo "	<td class='back'><form method='post' action='$PHP_SELF'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='tee' value='change'>
+					<input type='hidden' name='rakirno' value='$rakirno'>
+					<input type='hidden' name='lasku_yhtio' value='$lasku_yhtio'>
+					<input type='hidden' name='id' value='$id'>
+					<input type='hidden' name='tunnukset' value='".$tunnukset,",",$row["tunnus"]."'>
+					<input type='submit' value='".t("Liit‰ valittuun rahtikirjaan")."'>
+					</form></td>";
+
+			echo "</tr>";
+		}
+
+		echo "</table><br><br>";
+
+		$tee 			= "";
+		$rakirno 		= "";
+		$lasku_yhtio 	= "";
+		$id 			= "";
+		$tunnukset 		= "";
+	}
+
 	// jos ollaan rahtikirjan esisyˆtˆss‰ niin tehd‰‰n lis‰ys v‰h‰n helpommin
 	if ($rahtikirjan_esisyotto != "" and $tee == "add" and $yhtiorow["rahtikirjojen_esisyotto"] == "M") {
 
@@ -547,7 +606,6 @@
 											(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) VALUES
 											('','$rakirno','$yksikilo','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$viesti','$kukarow[yhtio]')";
 								$result = pupe_query($query);
-
 							}
 
 							if ($kollit[$i] == '')		$kollit[$i]		= 0;
@@ -901,7 +959,6 @@
 				$params_dgd = array(
 				'kieli'			=> 'en',
 				'laskurow'		=> $laskurow,
-				'dgdtunnukset'	=> $dgdlle_tunnukset,
 				'page'			=> NULL,
 				'pdf'			=> NULL,
 				'row'			=> NULL,
@@ -1777,20 +1834,22 @@
 				$haku .= " and lasku.clearing='JT-TILAUS' ";
 			}
 		}
+
 		// pvm 30 pv taaksep‰in
 		$dd = date("d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 		$mm = date("m",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 		$yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 
-		// n‰ytet‰‰n tilauksia jota voisi muokata, tila L alatila B tai E tai sitetn alatila D jos toimitustapa on HETI
+		// n‰ytet‰‰n tilauksia jota voisi muokata, tila L alatila B tai E tai sitten alatila D jos toimitustapa on HETI
 		$query = "	SELECT lasku.yhtio yhtio,
 					lasku.yhtio_nimi yhtio_nimi,
-		 			lasku.tunnus 'tilaus',
-					lasku.nimi asiakas,
-					concat_ws(' ', lasku.toimitustapa, vienti, ' ', varastopaikat.nimitys) toimitustapa,
-					date_format(lasku.luontiaika, '%Y-%m-%d') laadittu,
-					lasku.laatija,
 					rahtikirjat.rahtikirjanro rakirno,
+		 			group_concat(distinct lasku.tunnus SEPARATOR ', ') 'tilaus',
+					group_concat(distinct lasku.liitostunnus) asiakkaat,
+					max(lasku.nimi) asiakas,
+					max(concat_ws(' ', lasku.toimitustapa, vienti, ' ', varastopaikat.nimitys)) toimitustapa,
+					max(date_format(lasku.luontiaika, '%Y-%m-%d')) laadittu,
+					max(lasku.laatija) laatija,
 					sum(kilot) kilot,
 					sum(kollit) kollit,
 					sum(kuutiot) kuutiot,
@@ -1804,7 +1863,7 @@
 					AND (lasku.alatila in ('B','E') or (lasku.alatila='D' and toimitustapa.tulostustapa='H'))
 					$haku
 					$tilaustyyppi
-					GROUP BY 1,2,3,4,5,6,7,8
+					GROUP BY 1,2,3
 					ORDER BY lasku.toimitustapa, lasku.luontiaika desc";
 		$tilre = pupe_query($query);
 
@@ -1826,6 +1885,11 @@
 
 			while ($row = mysql_fetch_assoc($tilre)) {
 				echo "<tr class='aktiivi'>";
+
+				if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+					echo "<td>$row[yhtio_nimi]</td>";
+				}
+
 				echo "<td>$row[tilaus]</td>";
 				echo "<td>$row[rakirno]</td>";
 				echo "<td>$row[asiakas]</td>";
@@ -1833,22 +1897,24 @@
 				echo "<td>".tv1dateconv($row["laadittu"])."</td>";
 
 				$tiedot = "";
-				if ($row['kollit'] > 0)		$tiedot .= "$row[kollit] kll ";
-				if ($row['kilot'] > 0)		$tiedot .= "$row[kilot] kg ";
-				if ($row['kuutiot'] > 0)	$tiedot .= "$row[kuutiot] m&sup3; ";
+				if ($row['kollit'] > 0)		$tiedot .= "$row[kollit] kll<br>";
+				if ($row['kilot'] > 0)		$tiedot .= (float) $row["kilot"]." kg<br>";
+				if ($row['kuutiot'] > 0)	$tiedot .= "$row[kuutiot] m&sup3;<br>";
 				if ($row['lavametri'] > 0)	$tiedot .= "$row[lavametri] m";
 
-				echo "<td>$tiedot</td>";
+				echo "<td align='right'>$tiedot</td>";
 
-				echo "<form method='post' action='$PHP_SELF'>
+				echo "<td class='back'>";
+
+				echo "	<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='change'>
 						<input type='hidden' name='rakirno' value='$row[rakirno]'>
 						<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 						<input type='hidden' name='id' value='$row[tilaus]'>
 						<input type='hidden' name='tunnukset' value='$row[tilaus]'>
-						<td class='back'><input type='submit' value='".t("Muokkaa rahtikirjaa")."'></td>
-						</form>";
+						<input type='submit' value='".t("Muokkaa rahtikirjaa")."'>
+						</form><br>";
 
 				if ($row["tilaus"] != $edotsikkonro) {
 					echo "<form method='post' action='$PHP_SELF'>
@@ -1856,13 +1922,23 @@
 							<input type='hidden' name='id' value='$row[tilaus]'>
 							<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 							<input type='hidden' name='tunnukset' value='$row[tilaus]'>
-							<td class='back'><input type='submit' value='".t("Lis‰‰ rahtikirja tilaukselle")."'></td>
-							</form>";
-				}
-				else {
-					echo "<td class='back'></td>";
+							<input type='submit' value='".t("Lis‰‰ rahtikirja tilaukselle")."'>
+							</form><br>";
 				}
 
+				echo "<form method='post' action='$PHP_SELF'>
+						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='tee' value='lisaatilaus'>
+						<input type='hidden' name='rakirno' value='$row[rakirno]'>
+						<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
+						<input type='hidden' name='id' value='$row[tilaus]'>
+						<input type='hidden' name='tunnukset' value='$row[tilaus]'>
+						<input type='hidden' name='asiakkaat' value='$row[asiakkaat]'>
+						<input type='submit' value='".t("Liit‰ tilaus rahtikirjaan")."'>
+						</form><br><br>";
+
+
+				echo "</td>";
 				echo "</tr>";
 
 				$edotsikkonro = $row["tilaus"];
@@ -2350,12 +2426,12 @@
 			}
 
 			$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
-						from rahtikirjat use index (otsikko_index)
-						where yhtio			= '$kukarow[yhtio]'
+						FROM rahtikirjat use index (otsikko_index)
+						WHERE yhtio			= '$kukarow[yhtio]'
 						$rahti_otsikot
 						$rahti_rahtikirjanro
-						and pakkaus			= '$row[pakkaus]'
-						and pakkauskuvaus	= '$row[pakkauskuvaus]'";
+						AND pakkaus			= '$row[pakkaus]'
+						AND pakkauskuvaus	= '$row[pakkauskuvaus]'";
 			$rarrr = pupe_query($query);
 
 			if (mysql_num_rows($rarrr) == 1) {
@@ -2608,7 +2684,7 @@
 
 		echo "</table>";
 
-		if ($tee == 'change' or $tee == 'add') {
+		if ($tee == 'change') {
 			echo "<input type='hidden' name='muutos' value='yes'>";
 		}
 

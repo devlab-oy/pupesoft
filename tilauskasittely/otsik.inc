@@ -1082,28 +1082,15 @@
 						ORDER BY jarjestys,selite";
 			$tresult = pupe_query($query);
 
-			$lahtoseleted = FALSE;
-
-			if (isset($laskurow["toimitustavan_lahto"]) and $laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
-				echo "<option value='$laskurow[toimitustapa]'>".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."    $laskurow[toimitustavan_lahto]</option>";
-				$lahtoseleted = TRUE;
-			}
-
 			while($row = mysql_fetch_assoc($tresult)) {
 
 				$sel = "";
-				if ($row["selite"] == $srow["toimitustapa"] and !$lahtoseleted) {
+				if ($row["selite"] == $srow["toimitustapa"]) {
 					$sel = 'selected';
 				}
 
-				$toimitustava_lahto = seuraava_lahtoaika($row['tunnus']);
-
-				echo "<option value='$row[selite]#$toimitustava_lahto' $sel>";
+				echo "<option value='$row[selite]' $sel>";
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
-
-				if ($toimitustava_lahto != "0000-00-00 00:00:00") {
-					echo " - ".t("Lähtö")." ".tv1dateconv($toimitustava_lahto, "PITKA");
-				}
 
 				echo "</option>";
 			}

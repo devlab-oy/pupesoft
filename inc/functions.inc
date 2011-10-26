@@ -11702,7 +11702,7 @@ if (!function_exists('hae_suuntalava')) {
 }
 
 if (!function_exists("seuraava_lahtoaika")) {
-	function seuraava_lahtoaika($ttunnus) {
+	function seuraava_lahtoaika($ttunnus, $aika_vkonpvm = '') {
 
 		global $yhtiorow, $kukarow;
 
@@ -11723,35 +11723,51 @@ if (!function_exists("seuraava_lahtoaika")) {
 		$pvmnimet[6] = t("Lauantai");
 		$pvmnimet[0] = t("Sunnuntai");
 
-		$query = 	"	(SELECT '1' prio, concat(curdate(), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+		if ($aika_vkonpvm != '') {
+			$viikonpaiva = $aika_vkonpvm;
+			$select = array(1 => "", 2 => "", 3 => "");
+			$limit = "LIMIT 1";
+		}
+		else {
+			$select = array(
+						1 => "concat(curdate(), ' ', lahdon_kellonaika) as lahto,",
+						2 => "concat(adddate(curdate(), (lahdon_viikonpvm-{$viikonpaiva})), ' ', lahdon_kellonaika) as lahto,",
+						3 => "concat(adddate(curdate(),  (7-{$viikonpaiva}+lahdon_viikonpvm)), ' ', lahdon_kellonaika) as lahto,"
+						);
+			$limit = "";
+		}
+
+		$query = 	"	(SELECT '1' prio, {$select[1]} lahdon_viikonpvm, lahdon_kellonaika
 						FROM toimitustavan_lahdot
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND liitostunnus = '$ttunnus'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND liitostunnus = '{$ttunnus}'
 						and viimeinen_tilausaika > curtime()
-						and lahdon_viikonpvm = '$viikonpaiva'
+						and lahdon_viikonpvm = '{$viikonpaiva}'
 						AND aktiivi != 'E')
 
 						UNION
 
-						(SELECT '2' prio, concat(adddate(curdate(), (lahdon_viikonpvm-$viikonpaiva)), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+						(SELECT '2' prio, {$select[2]} lahdon_viikonpvm, lahdon_kellonaika
 						FROM toimitustavan_lahdot
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND liitostunnus = '$ttunnus'
-						and lahdon_viikonpvm > '$viikonpaiva'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND liitostunnus = '{$ttunnus}'
+						and lahdon_viikonpvm > '{$viikonpaiva}'
 						AND aktiivi != 'E')
 
 						UNION
 
-						(SELECT '3' prio, concat(adddate(curdate(),  (7-$viikonpaiva+lahdon_viikonpvm)), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+						(SELECT '3' prio, {$select[3]} lahdon_viikonpvm, lahdon_kellonaika
 						FROM toimitustavan_lahdot
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND liitostunnus = '$ttunnus'
-						AND lahdon_viikonpvm <= '$viikonpaiva'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND liitostunnus = '{$ttunnus}'
+						AND lahdon_viikonpvm <= '{$viikonpaiva}'
 						AND aktiivi != 'E')
 
 						ORDER BY prio, lahdon_viikonpvm, lahdon_kellonaika
-						LIMIT 1";
+						{$limit}";
 		$result = pupe_query($query);
+
+		return $result;
 
 		if (mysql_num_rows($result) > 0) {
 			$rivi = mysql_fetch_assoc($result);
@@ -13567,7 +13583,7 @@ if (!function_exists("tee_keraysera2")) {
 		[] saa olla useita prioriteettejä
 
 		2)
-		ORDER BY erotus, prioriteetti ASC, lasku.liitostunnus, lahto, lasku.sisviesti2, lasku.h1time ASC, minimi_indeksi
+		ORDER BY erotus, prioriteetti ASC, lahto, lasku.liitostunnus, lasku.sisviesti2, lasku.h1time ASC, minimi_indeksi
 		[x] saa olla useita asiakkaita
 		[] saa olla useita lähtöjä
 		[] saa olla useita prioriteettejä
@@ -13607,21 +13623,27 @@ if (!function_exists("tee_keraysera2")) {
 		$yhdistelysaanto_p = strpos($keraysvyohyketiedot['yhdistelysaanto'], 'P') !== false ? true : false;
 
 		if ($yhdistelysaanto_s and !$yhdistelysaanto_k and !$yhdistelysaanto_p) {
-			$orderby = "ORDER BY erotus, prioriteetti ASC, lasku.liitostunnus, lahto, lasku.sisviesti2, lasku.h1time ASC, minimi_indeksi";
+			#2
+			$orderby = "ORDER BY erotus, prioriteetti ASC, lahto, lasku.liitostunnus, lasku.sisviesti2, lasku.h1time ASC, minimi_indeksi";
 		}
 		elseif ($yhdistelysaanto_s and $yhdistelysaanto_k and !$yhdistelysaanto_p) {
+			#3
 			$orderby = "ORDER BY erotus, prioriteetti ASC, lasku.h1time ASC, lasku.liitostunnus, lahto, lasku.sisviesti2, minimi_indeksi";
 		}
 		elseif ($yhdistelysaanto_s and $yhdistelysaanto_k and $yhdistelysaanto_p) {
+			#4
 			$orderby = "ORDER BY erotus, lasku.h1time ASC, prioriteetti ASC, lasku.liitostunnus, lahto, lasku.sisviesti2, minimi_indeksi";
 		}
 		elseif (!$yhdistelysaanto_s and $yhdistelysaanto_k and !$yhdistelysaanto_p) {
+			#5
 			$orderby = "ORDER BY erotus, lahto, lasku.h1time ASC, prioriteetti ASC, lasku.liitostunnus, lasku.sisviesti2, minimi_indeksi";
 		}
 		elseif (!$yhdistelysaanto_s and $yhdistelysaanto_k and $yhdistelysaanto_p) {
+			#6
 			$orderby = "ORDER BY erotus, lasku.liitostunnus, lasku.h1time ASC, prioriteetti ASC, lahto, lasku.sisviesti2, minimi_indeksi";
 		}
 		else {
+			#1
 			$orderby = "ORDER BY erotus, prioriteetti ASC, lasku.h1time ASC, lasku.liitostunnus, lahto, lasku.sisviesti2, minimi_indeksi";
 		}
 

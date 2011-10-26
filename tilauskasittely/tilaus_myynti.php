@@ -1750,8 +1750,8 @@ if ($tee == '') {
 
 	// Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty ja arvoja vaihdettu
 	if ($kukarow["kesken"] > 0 and (
-		(isset($toimitustapa) and strpos($toimitustapa, "###") === FALSE and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
-		(isset($toimitustapa) and strpos($toimitustapa, "###") !== FALSE and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]."###".$laskurow["toimitustavan_lahto"]) or
+		(isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
+		(isset($toimitustapa) and $toimitustapa != '' and $laskurow["toimitustavan_lahto"] != $toimitustavan_lahto) or
 		(isset($viesti) and $viesti != $laskurow["viesti"]) or
 		(isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
 		(isset($myyjanro) and $myyjanro > 0) or
@@ -1783,12 +1783,7 @@ if ($tee == '') {
 			$pika_paiv_myyja = " myyja = '$myyja', ";
 		}
 
-		if (strpos($toimitustapa, "###") !== FALSE) {
-			list($toimitustapa, $toimitustavan_lahto) = explode("###", $toimitustapa);
-		}
-		else {
-			$toimitustavan_lahto = "";
-		}
+		if (!isset($toimitustavan_lahto)) $toimitustavan_lahto = "0000-00-00 00:00:00";
 
 		if ($maksutapa != '') {
 			$laskurow["maksuehto"] = $maksutapa;
@@ -2414,20 +2409,20 @@ if ($tee == '') {
 				echo "$laskurow[ytunnus] </td>";
 			}
 
-			echo "<th>".t("Asiakasnro").":</th><td>$faktarow[asiakasnro]</td>";
+			echo "<th>",t("Asiakasnro"),":</th><td>{$faktarow['asiakasnro']}</td>";
 			echo "</tr>";
 
-			echo "<tr>$jarjlisa";
-			echo "<th align='left'>".t("Asiakas").":</th>";
+			echo "<tr>{$jarjlisa}";
+			echo "<th align='left'>",t("Asiakas"),":</th>";
 
 			if ($kukarow["extranet"] == "") {
-				echo "<td><a href='{$palvelin2}crm/asiakasmemo.php?ytunnus=$laskurow[ytunnus]&asiakasid=$laskurow[liitostunnus]&from=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$laskurow[nimi]</a>";
+				echo "<td><a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
  			}
 			else {
-				echo "<td>$laskurow[nimi]";
+				echo "<td>{$laskurow['nimi']}";
 			}
 
-			if ($laskurow["toim_nimi"] != $laskurow["nimi"]) echo "<br>$laskurow[toim_nimi]";
+			if ($laskurow["toim_nimi"] != $laskurow["nimi"]) echo "<br>{$laskurow['toim_nimi']}";
 			echo "</td>";
 
 			echo "<th align='left'>".t("Toimitustapa").":</th>";
@@ -2435,64 +2430,114 @@ if ($tee == '') {
 			if ($kukarow["extranet"] != "") {
 				$query = "	(SELECT toimitustapa.*
 							FROM toimitustapa
-							WHERE toimitustapa.yhtio = '$kukarow[yhtio]' and (toimitustapa.extranet in ('K','M') or toimitustapa.selite = '$extra_asiakas[toimitustapa]')
-							and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%$laskurow[toim_maa]%'))
+							WHERE toimitustapa.yhtio = '{$kukarow['yhtio']}' and (toimitustapa.extranet in ('K','M') or toimitustapa.selite = '{$extra_asiakas['toimitustapa']}')
+							and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%{$laskurow['toim_maa']}%'))
 							UNION
 							(SELECT toimitustapa.*
 							FROM toimitustapa
-							JOIN asiakkaan_avainsanat ON toimitustapa.yhtio = asiakkaan_avainsanat.yhtio and toimitustapa.selite = asiakkaan_avainsanat.avainsana and asiakkaan_avainsanat.laji = 'toimitustapa' and asiakkaan_avainsanat.liitostunnus = '$laskurow[liitostunnus]'
-							WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
-							and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%$laskurow[toim_maa]%'))
+							JOIN asiakkaan_avainsanat ON toimitustapa.yhtio = asiakkaan_avainsanat.yhtio and toimitustapa.selite = asiakkaan_avainsanat.avainsana and asiakkaan_avainsanat.laji = 'toimitustapa' and asiakkaan_avainsanat.liitostunnus = '{$laskurow['liitostunnus']}'
+							WHERE toimitustapa.yhtio = '{$kukarow['yhtio']}'
+							and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%{$laskurow['toim_maa']}%'))
 							ORDER BY jarjestys,selite";
 			}
 			else {
 				$query = "	SELECT toimitustapa.*
 							FROM toimitustapa
-							WHERE yhtio = '$kukarow[yhtio]' and (extranet in ('','M') or selite = '$laskurow[toimitustapa]')
-							and (sallitut_maat = '' or sallitut_maat like '%$laskurow[toim_maa]%')
+							WHERE yhtio = '{$kukarow['yhtio']}' and (extranet in ('','M') or selite = '{$laskurow['toimitustapa']}')
+							and (sallitut_maat = '' or sallitut_maat like '%{$laskurow['toim_maa']}%')
 							ORDER BY jarjestys,selite";
 			}
-
 			$tresult = pupe_query($query);
 
 			if ($kukarow["extranet"] != "" and mysql_num_rows($tresult) == 0) {
-				echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."<br><br>";
+				echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään."),"<br><br>";
 				exit;
 			}
 
-			echo "<td><select name='toimitustapa' onchange='submit()' $state>";
+			echo "<td><select name='toimitustapa' onchange='submit()' {$state}>";
 
 			// Otetaan toimitustavan tiedot ja käytetään niitä läpi tilausmyynnin!
 			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
 			mysql_data_seek($tresult, 0);
 
-			if ($laskurow["toimitustavan_lahto"] != '0000-00-00 00:00:00') {
-				echo "<option value='$laskurow[toimitustapa]'>$toimtapa_kv - ".t("Lähtö")." ".tv1dateconv($laskurow["toimitustavan_lahto"], "PITKA")."</option>";
-			}
+			$toimitustavan_tunnus = 0;
 
 			while ($row = mysql_fetch_assoc($tresult)) {
 
 				$sel = "";
-				if ($row["selite"] == $laskurow["toimitustapa"] and $laskurow["toimitustavan_lahto"] == '0000-00-00 00:00:00') {
+				if ($row["selite"] == $laskurow["toimitustapa"]) {
 					$sel = 'selected';
 					$tm_toimitustaparow = $row;
+					$toimitustavan_tunnus = $row['tunnus'];
 				}
 
-				$toimitustava_lahto = seuraava_lahtoaika($row['tunnus']);
-
-				echo "<option value='$row[selite]###$toimitustava_lahto' $sel>";
+				echo "<option value='{$row['selite']}' {$sel}>";
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
-
-				if ($toimitustava_lahto != "0000-00-00 00:00:00") {
-					echo " - ".t("Lähtö")." ".tv1dateconv($toimitustava_lahto, "PITKA");
-				}
 
 				echo "</option>";
 			}
 			echo "</select>";
 
+			if ($toimitustavan_tunnus > 0 and $kukarow['extranet'] == "") {
+				echo "&nbsp;<select name='toimitustavan_lahto' onchange='submit()' {$state}>";
+				echo "<option value=''>",t("Valitse"),"</option>";
+
+				$toimitustavan_lahto_result = seuraava_lahtoaika($toimitustavan_tunnus);
+
+				$viimeinen_toimitustavan_lahto = false;
+
+				if (mysql_num_rows($toimitustavan_lahto_result) > 0) {
+
+					while ($toimitustavan_lahto_row = mysql_fetch_assoc($toimitustavan_lahto_result)) {
+						$viimeinen_toimitustavan_lahto = $toimitustavan_lahto_row['lahto'];
+						$sel = $toimitustavan_lahto == $toimitustavan_lahto_row['lahto'] ? " selected" : ($laskurow['toimitustavan_lahto'] == $toimitustavan_lahto_row['lahto'] ? " selected" : "");
+						echo "<option value='{$toimitustavan_lahto_row['lahto']}'{$sel}>",tv1dateconv($toimitustavan_lahto_row['lahto'], "PITKA"),"</option>";
+					}
+				}
+
+				if ($viimeinen_toimitustavan_lahto) {
+
+					list($viimeinen_toimitustavan_lahto_pvm, $viimeinen_toimitustavan_lahto_klo) = explode(" ", $viimeinen_toimitustavan_lahto);
+					list($toim_lah_vv, $toim_lah_kk, $toim_lah_pp) = explode("-", $viimeinen_toimitustavan_lahto_pvm);
+
+					// 2 vkoa
+					for ($i = 1; $i <= 12; $i++) {
+
+						$time = mktime(0, 0, 0, $toim_lah_kk, $toim_lah_pp+$i, $toim_lah_vv);
+
+						$aika = date("Y-m-d", $time);
+
+						// haetaan ajan viikonpäivä
+						$aika_vkonpvm = date("w", $time);
+
+						// tarkistetaan onko lähdön viikonpäivä olemassa
+						$query = "	SELECT *
+									FROM toimitustavan_lahdot
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND liitostunnus = '{$toimitustavan_tunnus}'
+									and lahdon_viikonpvm = '{$aika_vkonpvm}'
+									AND aktiivi != 'E'";
+						$chk_res = pupe_query($query);
+
+						if (mysql_num_rows($chk_res) == 0) {
+							continue;
+						}
+
+						$aika_vkonpvm_result = seuraava_lahtoaika($toimitustavan_tunnus, $aika_vkonpvm);
+						$aika_vkonpvm_row = mysql_fetch_assoc($aika_vkonpvm_result);
+
+						$aika = "{$aika} {$aika_vkonpvm_row['lahdon_kellonaika']}";
+
+						$sel = $toimitustavan_lahto == $aika ? " selected" : ($laskurow['toimitustavan_lahto'] == $aika ? " selected" : "");
+						echo "<option value='{$aika}'{$sel}>",tv1dateconv($aika, "PITKA"),"</option>";
+					}
+				}
+
+				echo "</select>";
+			}
+
 			if ($laskurow["rahtivapaa"] != "") {
-				echo " (".t("Rahtivapaa").") ";
+				echo " (",t("Rahtivapaa"),") ";
 			}
 
 			if ($kukarow["extranet"] == "") {
@@ -2500,22 +2545,22 @@ if ($tee == '') {
 				$rahsoprow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
 
 				if ($rahsoprow > 0) {
-					$ylisa = "&tunnus=$rahsoprow[tunnus]";
+					$ylisa = "&tunnus={$rahsoprow['tunnus']}";
 				}
 				else {
-					$ylisa = "&uusi=1&ytunnus=$laskurow[ytunnus]&toimitustapa=$laskurow[toimitustapa]";
+					$ylisa = "&uusi=1&ytunnus={$laskurow['ytunnus']}&toimitustapa={$laskurow['toimitustapa']}";
 					$rahsoprow["rahtisopimus"] = t("Rahtisopimus");
 				}
 
-				echo " <a href='{$palvelin2}yllapito.php?toim=rahtisopimukset$ylisa&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$rahsoprow[rahtisopimus]</a>";
+				echo " <a href='{$palvelin2}yllapito.php?toim=rahtisopimukset{$ylisa}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$rahsoprow['rahtisopimus']}</a>";
 			}
 
 			echo "</td>";
 		}
 
 		echo "</tr>";
-		echo "<tr>$jarjlisa";
-		echo "<th align='left'>".t("Tilausnumero").":</th>";
+		echo "<tr>{$jarjlisa}";
+		echo "<th align='left'>",t("Tilausnumero"),":</th>";
 
 		if ($laskurow["tunnusnippu"] > 0) {
 

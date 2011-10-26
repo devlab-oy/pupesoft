@@ -1717,7 +1717,7 @@
 				'norm'			=> $norm,
 				);
 
-				// Aloitellaan lähetteen teko
+				// Aloitellaan DGD:n teko
 				$params_dgd = alku_dgd($params_dgd);
 				$params_dgd = rivi_dgd($params_dgd);
 				$params_dgd = loppu_dgd($params_dgd);

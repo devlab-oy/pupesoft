@@ -128,10 +128,10 @@
 					// haetaan tuotteen myydyt kappaleet
 					$query  = "	SELECT ifnull(sum(kpl),0) kpl
 								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-								WHERE yhtio = '{$kukarow['yhtio']}' 
-								AND tyyppi = 'L' 
-								AND tuoteno = '{$row['tuoteno']}' 
-								AND laskutettuaika <= '{$vv}-{$kk}-{$pp}' 
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tyyppi = 'L'
+								AND tuoteno = '{$row['tuoteno']}'
+								AND laskutettuaika <= '{$vv}-{$kk}-{$pp}'
 								AND laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', INTERVAL 12 month)";
 					$xmyyres = pupe_query($query);
 					$xmyyrow = mysql_fetch_array($xmyyres);
@@ -139,10 +139,10 @@
 					// haetaan tuotteen kulutetut kappaleet
 					$query  = "	SELECT ifnull(sum(kpl),0) kpl
 								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-								WHERE yhtio = '{$kukarow['yhtio']}' 
-								AND tyyppi = 'V' 
-								AND tuoteno = '{$row['tuoteno']}' 
-								AND toimitettuaika <= '{$vv}-{$kk}-{$pp}' 
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tyyppi = 'V'
+								AND tuoteno = '{$row['tuoteno']}'
+								AND toimitettuaika <= '{$vv}-{$kk}-{$pp}'
 								AND toimitettuaika >= date_sub('{$vv}-{$kk}-{$pp}', INTERVAL 12 month)";
 					$xkulres = pupe_query($query);
 					$xkulrow = mysql_fetch_array($xkulres);
@@ -1064,8 +1064,8 @@
 							{$trlisatiedot}
 							{$varastojoin}
 							{$kantaasiakasjoin}
-							LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-							LEFT JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
+							JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+							JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
 							LEFT JOIN toimitustapa ON lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite
 							WHERE lasku.yhtio in ({$yhtio})
 							{$asiakasrajaus} and
@@ -1393,7 +1393,7 @@
 								if (mysql_field_name($result, $i) == "myyja") {
 									$query = "	SELECT nimi
 												FROM kuka
-												WHERE yhtio IN ({$yhtio}) 
+												WHERE yhtio IN ({$yhtio})
 												AND tunnus = '{$row[$i]}'";
 									$osre = pupe_query($query);
 
@@ -1427,7 +1427,7 @@
 									$toimittajat = "'".str_replace(",","','",$row[$i])."'";
 									$query = "	SELECT group_concat(concat_ws(' / ',ytunnus,nimi)) nimi
 												FROM toimi
-												WHERE yhtio IN ({$yhtio}) 
+												WHERE yhtio IN ({$yhtio})
 												AND tunnus IN ({$toimittajat})";
 									$osre = pupe_query($query);
 									if (mysql_num_rows($osre) == 1) {
@@ -1865,7 +1865,7 @@
 
 			$query = "	SELECT *
 						FROM yhtio
-						WHERE konserni = '{$yhtiorow['konserni']}' 
+						WHERE konserni = '{$yhtiorow['konserni']}'
 						AND konserni != ''";
 			$result = pupe_query($query);
 

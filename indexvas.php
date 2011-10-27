@@ -86,7 +86,7 @@ if ($kukarow["extranet"] != "") {
 	}
 }
 else {
-	$extralisa = " and sovellus not like 'Extranet%' and sovellus not like 'Extranet Futursoft%' ";
+	$extralisa = " and sovellus not like 'Extranet%'";
 }
 
 // mit‰ sovelluksia k‰ytt‰j‰ saa k‰ytt‰‰

@@ -255,6 +255,8 @@
 					if(tilausrivi.laskutettu != '', tilausrivi.rivihinta, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)) AS tilatut_eurot
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
+					JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+					JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
 					WHERE tilausrivi.yhtio IN ('{$query_yhtiot}')
 					AND tilausrivi.tyyppi = 'L'
 					AND tilausrivi.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
@@ -306,6 +308,8 @@
 					tilausrivi.rivihinta AS 'laskutetut_eurot'
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
+					JOIN lasku on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+					JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '')
 					WHERE tilausrivi.yhtio IN ('{$query_yhtiot}')
 					AND tilausrivi.tyyppi = 'L'
 					AND tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}'

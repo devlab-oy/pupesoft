@@ -14322,3 +14322,110 @@ if (!function_exists("tarkistaytunnus")) {
 
 	}
 }
+
+if (!function_exists('gauge')) {
+	function gauge() {
+
+		/**
+		 * Mittari piirret‰‰n diviin id:ll‰ chart_div
+		 * Tarvitaan args- ja options-oliot
+		 */
+
+		/** ESIMERKKI
+			var gauge = new Gauge();
+			var args = {
+				foo: ['BAR', 0]
+			}
+
+			var options = {	width: 800,
+							height: 220,
+							min: 0,
+							max: 400000,
+							redFrom: 200000,
+							redTo: 300000,
+							greenFrom: 350000,
+							greenTo: 400000,
+							yellowFrom: 300000,
+							yellowTo: 350000,
+							minorTicks: 5,
+							majorTicks: ['0', '50', '100', '150', '200', '250', '300', '350', '400']};
+
+			gauge.init(args, options);
+			gauge.draw($('#value_from').val(), options.max);
+		*/
+
+		echo "<script type='text/javascript' src='https://www.google.com/jsapi'></script>";
+		echo "	<script type='text/javascript' charset='utf-8'>
+
+					google.load('visualization', '1', {packages:['gauge']});
+					// google.setOnLoadCallback(drawChart);
+
+					var Gauge = (function() {
+						var data;
+						var options;
+						var chart;
+
+						return {
+							init: function(args, opt) {
+								data = new google.visualization.DataTable();
+								options = opt;
+
+								data.addColumn('string', 'Label');
+								data.addColumn('number', 'Value');
+
+								data.addRows(1);
+
+								var div_id;
+								var _i = 0;
+
+								for (var i in args) {
+									var _x = 0;
+									div_id = i;
+
+									for (var x in args[i]) {
+										data.setValue(_i, _x, args[i][x]);
+										_x++;
+									}
+									_i++;
+								}
+
+								$('#chart_div').append('<div id=\''+div_id+'\'></div>');
+								$('#'+div_id).css('float', 'left');
+								var div = document.getElementById(div_id);
+								chart = new google.visualization.Gauge(div);
+
+								chart.draw(data, options);
+
+								var body_bgcolor = $('body').css('background-color');
+								$('#chart_div *').css({'background-color': body_bgcolor});
+							},
+							draw: function(value, max) {
+
+								value = parseInt(value);
+
+								if (parseInt((value / (max / 40))) >= 4) {
+
+									var force = parseInt(value / (max / 40));
+									force = force < 2 ? 2 : force;
+									force = 1 + '.' + force;
+
+									var _dot120 = parseInt(value * force);
+									data.setValue(0, 1, _dot120);
+									chart.draw(data, options);
+
+									var _dot90 = parseInt(value * 0.9);
+									setTimeout(function(){data.setValue(0, 1, _dot90); chart.draw(data, options);}, 400);
+
+									setTimeout(function(){data.setValue(0, 1, value); chart.draw(data, options);}, 800);
+								}
+								else {
+									data.setValue(0, 1, value);
+									chart.draw(data, options);
+								}
+							}
+						}
+					});
+
+				</script>";
+	}
+}

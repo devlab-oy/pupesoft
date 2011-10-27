@@ -308,8 +308,8 @@
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
 					WHERE tilausrivi.yhtio IN ('{$query_yhtiot}')
 					AND tilausrivi.tyyppi = 'L'
-					AND tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-					AND tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+					AND tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}'
+					AND tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}'
 					AND tilausrivi.laskutettu != ''
 					ORDER BY tilausrivi.laadittu";
 		$result = pupe_query($query);

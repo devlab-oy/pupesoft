@@ -848,6 +848,7 @@ while ($tietue = fgets($fd)) {
 				$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
 				$meapu = pupe_query($apuqu);
 				$apuro = mysql_fetch_array($meapu);
+
 				$maksaja = $apuro['merahti'];
 
 				// Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
@@ -1029,6 +1030,11 @@ while ($tietue = fgets($fd)) {
 
 				// Tallennetaan ohjelmamoduli
 				$ohjelmamoduli = strtoupper($edi_tyyppi);
+
+				// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+				if ($maksaja == "" and $editilaus_rahtivapaa != "") {
+					$maksaja = "K";
+				}
 
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET

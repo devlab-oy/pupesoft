@@ -72,9 +72,11 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			// haetaan tomitustavan oletusmaksajan tiedot
 			$apuqu = "	SELECT *
 						from toimitustapa use index (selite_index)
-						where yhtio='$kukarow[yhtio]' and selite='$asiakasrow[toimitustapa]'";
+						where yhtio='$kukarow[yhtio]'
+						and selite='$asiakasrow[toimitustapa]'";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 			$apuro = mysql_fetch_array($meapu);
+
 			$maksaja = $apuro['merahti'];
 
 			if ($myyjanro != "") {

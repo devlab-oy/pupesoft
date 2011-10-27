@@ -97,7 +97,7 @@
 
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]' 
+					WHERE yhtio = '$kukarow[yhtio]'
 					order by tyyppi, nimitys";
 		$vtresult = mysql_query($query) or pupe_error($query);
 
@@ -148,7 +148,7 @@
 
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' 
+						WHERE yhtio = '$kukarow[yhtio]'
 						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
@@ -465,8 +465,10 @@
 		}
 		elseif ($toim == "SIIRTOLISTA") {
 			$query .= ",tilaustyyppi = 'G', tila='G', ytunnus='SIIRTO', liitostunnus='9999999999'";
+
+			// Siirtolistat aina lähettäjän rahtisopparilla
 			$query .= ",kohdistettu = 'K'";
-			
+
 			if (isset($chn) and $chn == 'GEN') {
 				$query .= ",chn = 'GEN'"; // tällä erotellaan "tulosta siirtolista"-kohdassa generoidut ja käsin tehdyt siirtolistat
 			}

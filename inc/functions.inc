@@ -2004,11 +2004,11 @@ if (!function_exists("synkronoi")) {
 									and merahti			= '$aburow[merahti]'
 									and multi_jv		= '$aburow[multi_jv]'
 									and nouto			= '$aburow[nouto]'
-									and sallitut_maat	= '$aburow[sallitut_maat]'
-									";
+									and sallitut_maat	= '$aburow[sallitut_maat]'";
 						$tarkres=pupe_query($query);
+
 						if (mysql_num_rows($tarkres) == 1) {
-							$tarkrow=mysql_fetch_assoc($tarkres);
+							$tarkrow = mysql_fetch_assoc($tarkres);
 							$override["toimitustapa"] = $tarkrow["tunnus"];
 						}
 						else {

@@ -882,7 +882,7 @@
 						$tulos_ulos .= "<br>\n".t("Rahtikulut").":<br>\n<table>";
 					}
 
-					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per p‰iv‰ miss‰ merahti (eli kohdistettu) = K
+					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per p‰iv‰ miss‰ merahti (eli kohdistettu) = K (K‰ytet‰‰n l‰hett‰j‰n rahtisopimusnumeroa)
 					// j‰lkivaatimukset omalle riville
 					$query   = "SELECT group_concat(distinct lasku.tunnus) tunnukset
 								FROM lasku, rahtikirjat, maksuehto

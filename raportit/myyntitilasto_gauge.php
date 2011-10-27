@@ -16,7 +16,7 @@
 
 						var gauge = new Gauge();
 						var args = {
-							tilatut: ['EUR', 0]
+							tilatut: ['k".$yhtiorow["valkoodi"]."', 0]
 						}
 
 						var options = {	width: 800,
@@ -112,6 +112,9 @@
 
 	$query_ale_lisa = generoi_alekentta('M');
 
+	$alku = date("Y-m-d")." 00:00:00";
+	$lopu = date("Y-m-d")." 23:59:59";
+
 	$query = "	SELECT round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta,(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)), 0) AS 'tilatut_eurot',
 				round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))),'{$yhtiorow['hintapyoristys']}') AS 'tilatut_kate',
 				if(tilausrivi.toimitettu!='', 1, 0) AS 'toimitetut_rivit'
@@ -119,8 +122,8 @@
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 				AND tilausrivi.tyyppi = 'L'
-				AND tilausrivi.laadittu >= CURDATE() + ' 00:00:00'
-				AND tilausrivi.laadittu <= CURDATE() + ' 23:59:59'";
+				AND tilausrivi.laadittu >= '$alku'
+				AND tilausrivi.laadittu <= '$lopu'";
 	$result = pupe_query($query);
 
 	$arr = array('tilatut_eurot' => 0, 'tilatut_kate' => 0, 'toimitetut_rivit');
@@ -279,9 +282,9 @@
 		echo "<th>";
 		echo $naytetaan_tulos == 'monthly' ? t("Kuukausi") : ($naytetaan_tulos == 'weekly' ? t("Viikko") : t("Päivä"));
 		echo "</th>";
-		echo "<th>",t("Tilatut eurot"),"</th>";
+		echo "<th>",t("Tilatut")," k{$yhtiorow["valkoodi"]}</th>";
 		echo "<th>",t("Tilatut Kate%"),"</th>";
-		echo "<th>",t("Laskutetut eurot"),"</th>";
+		echo "<th>",t("Laskutetut")," k{$yhtiorow["valkoodi"]}</th>";
 		echo "<th>",t("Laskutetut Kate%"),"</th>";
 		echo "</tr>";
 
@@ -337,7 +340,7 @@
 
 			if ($naytetaan_tulos == 'daily') {
 				list($v, $k, $p) = explode("-", $pvm);
-				$pvm = $p.$k;
+				$pvm = $p.".".$k;
 			}
 
 			$yhteensa['tilatut_eurot'] += $arvot['tilatut_eurot'];

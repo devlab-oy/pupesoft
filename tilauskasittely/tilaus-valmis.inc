@@ -335,10 +335,16 @@ else {
 		if ($totaalirivi["rivihinta"] > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
 			$tilaus_valmis_ulos .= t("Tilauksen arvo ylitti rahtivapaasumman! Merkattiin tilaus rahtivapaaksi.")."<br>";
 
-			$query = "UPDATE lasku SET rahtivapaa = 'o' WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[tunnus]'";
+			// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+			$query = "	UPDATE lasku
+						SET rahtivapaa  = 'o',
+						kohdistettu 	= 'K'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus = '$laskurow[tunnus]'";
 			$rahtivapres = pupe_query($query);
 
-			$laskurow["rahtivapaa"] = 'o';
+			$laskurow["kohdistettu"] = 'K';
+			$laskurow["rahtivapaa"]  = 'o';
 		}
 		elseif ($yhtiorow["rahti_hinnoittelu"] == "o" or $yhtiorow["rahti_hinnoittelu"] == "P") {
 			// jos rahtihinnoittelu tapahtuu tilauksen hinnan (alviton) perusteella
@@ -538,12 +544,20 @@ else {
 						and tuoteno IN ({$rahtinro_tuoteno_lisa})";
 			$result = pupe_query($query);
 
-			//jos tilauksella on jo rahtikulu niin merkataan se rahtivapaaksi, ettei raihtikulu mene uudestaan laskutuksen yhteydess‰!
+			// jos tilauksella on jo rahtikulu niin merkataan se rahtivapaaksi, ettei rahtikulu mene uudestaan laskutuksen yhteydess‰!
 			if (mysql_num_rows($result) > 0) {
 				$tilaus_valmis_ulos .= t("Tilauksella oli k‰sin syˆtetty rahtikulu! Merkattiin tilaus rahtivapaaksi, ettei kulua lis‰t‰ en‰‰ automaattisesti laskutuksessa.")."<br>";
-				$query = "UPDATE lasku SET rahtivapaa = 'o' WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[tunnus]'";
+
+				// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+				$query = "	UPDATE lasku
+							SET rahtivapaa = 'o',
+							kohdistettu = 'K'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus = '$laskurow[tunnus]'";
 				$rahtivapres = pupe_query($query);
-				$laskurow["rahtivapaa"] = 'o';
+
+				$laskurow["kohdistettu"] = 'K';
+				$laskurow["rahtivapaa"]  = 'o';
 			}
 		}
 
@@ -962,6 +976,27 @@ else {
 					$fields = "yhtio";
 					$values = "'$kukarow[yhtio]'";
 
+					$split_kohdistettu	= $laskurow["kohdistettu"];
+					$split_rahtivapaa	= $laskurow["rahtivapaa"];
+					$split_toimitustapa = $laskurow["toimitustapa"];
+
+					$query = "	SELECT ulkoinen_jarjestelma, erikoistoimitus_toimitustapa
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$varasto}'";
+					$ulkoinen_jarjestelma_res = pupe_query($query);
+					$varaston_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
+
+					$varasto_chk_array[$laskurow['tunnus']] = $varaston_row['ulkoinen_jarjestelma'];
+
+					// Erikoistoimitukset rahtivapaana
+					// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+					if ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') {
+						$split_kohdistettu	= "K";
+						$split_rahtivapaa	= "o";
+						$split_toimitustapa = $varaston_row["erikoistoimitus_toimitustapa"];
+					}
+
 					// Ei monisteta tunnusta
 					for ($i=1; $i < mysql_num_fields($laskusplitres)-1; $i++) {
 
@@ -994,16 +1029,15 @@ else {
 									$values .= ", '{$laskurow['sisviesti2']}'";
 								}
 								break;
+							case 'kohdistettu':
+								$values .= ", '$split_kohdistettu'";
+								break;
 							case 'rahtivapaa':
-								if ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') {
-									$values .= ", 'o'";
-									break;
-								}
+								$values .= ", '$split_rahtivapaa'";
+								break;
 							case 'toimitustapa':
-								if ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') {
-									$values .= ", '$varaston_row[erikoistoimitus_toimitustapa]'";
-									break;
-								}
+								$values .= ", '$split_toimitustapa'";
+								break;
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
 						}
@@ -1037,15 +1071,6 @@ else {
 
 					$query = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
 					$uusires = pupe_query($query);
-
-					$query = "	SELECT ulkoinen_jarjestelma
-								FROM varastopaikat
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tunnus = '{$varasto}'";
-					$ulkoinen_jarjestelma_res = pupe_query($query);
-					$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
-
-					$varasto_chk_array[$laskurow['tunnus']] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
 				}
 				elseif (!$tilaus_splitattu) {
 					// Pidet‰‰n lukua kuinka paljon mist‰kin varastosta on rivi‰, jotka j‰‰ alkuperˆiselle tilaukselle
@@ -1098,19 +1123,20 @@ else {
 			$varasto = array_pop($varasto_kpl_array);
 			$tulostusalue = array_pop($tulalue_kpl_array);
 
-			$query = "	SELECT ulkoinen_jarjestelma
+			$query = "	SELECT ulkoinen_jarjestelma, erikoistoimitus_toimitustapa
 						FROM varastopaikat
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND tunnus = '{$varasto}'";
 			$ulkoinen_jarjestelma_res = pupe_query($query);
-			$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
+			$varaston_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
 
 			// Intrastat-tiedot
 			$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
-			$varasto_chk_array[$temp_laskutunnus] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
+			$varasto_chk_array[$temp_laskutunnus] = $varaston_row['ulkoinen_jarjestelma'];
 
-			$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o' " : '';
+			// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+			$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o', kohdistettu = 'K' " : '';
 
 			//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
 			$query = "	UPDATE lasku set
@@ -1341,9 +1367,9 @@ else {
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND tunnus = '{$varasto}'";
 						$ulkoinen_jarjestelma_res = pupe_query($query);
-						$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
+						$varaston_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
 
-						$varasto_chk_array[$til_nro_x] = $ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'];
+						$varasto_chk_array[$til_nro_x] = $varaston_row['ulkoinen_jarjestelma'];
 					}
 				}
 			}
@@ -1353,7 +1379,12 @@ else {
 				foreach ($tilausnumerot as $til_nro) {
 
 					// Jos tilauksista yksikin menee "Unikko"-j‰rjestelm‰‰n, p‰ivitet‰‰n kaikki tilaukset rahtivapaiksi
-					$query = "UPDATE lasku SET rahtivapaa = 'X' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$til_nro}'";
+					// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+					$query = "	UPDATE lasku
+								SET rahtivapaa = 'X',
+								kohdistettu = 'K'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus  = '{$til_nro}'";
 					$rahtivapaa_upd_res = pupe_query($query);
 
 					$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$til_nro}'";

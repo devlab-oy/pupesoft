@@ -398,7 +398,7 @@
 							}
 						}
 						//HUOM: Laitetaan clearing kentt‰‰n jotain speciaalia
-						elseif ($fieldname=='clearing') {
+						elseif ($fieldname == 'clearing') {
 							if ($toim == "ENNAKKO") {
 								$query .= "clearing='ENNAKKOTILAUS',";
 							}
@@ -412,22 +412,30 @@
 						elseif ($fieldname == 'eilahetetta') {
 							$query .= "eilahetetta='".$isarivirow["suoraan_laskutukseen"]."',";
 						}
+						elseif ($fieldname == 'kohdistettu') {
+							// riipastaan tarkoituksella tyhj‰‰, hoidetaan homma 'rahtivapaa' haarassa
+						}
 						elseif ($fieldname == 'rahtivapaa') {
 							if ($yhtiorow["jt_rahti"] == "B") {
 								// Ennakot/J‰lkitoimitukset ovat aina rahtivapaita
-								$query .= "rahtivapaa='o',";
+								// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+								$query .= "rahtivapaa = 'o',";
+								$query .= "kohdistettu = 'K',";
 							}
 							elseif ($yhtiorow["jt_rahti"] == "C") {
 								// Ennakoihin/J‰lkitoimituksiin lis‰t‰‰n aina rahtikulu
-								$query .= "rahtivapaa='',";
+								$query .= "rahtivapaa = '',";
+								$query .= "kohdistettu = '{$otsikkorivi["kohdistettu"]}',";
 							}
 							elseif ($yhtiorow["jt_rahti"] == "D") {
 								// Ennakot/J‰lkitoimitukset ovat rahtivapaita, jos tilauksen arvo on yli rahtivapausrajan (tilaus-valmis.inc hoitaa rahtikulun kuntoon)
-								$query .= "rahtivapaa='',";
+								$query .= "rahtivapaa = '',";
+								$query .= "kohdistettu = '{$otsikkorivi["kohdistettu"]}',";
 							}
 							else {
 								// Ennakko/J‰lkitoimitus on rahtivapaa, jos alkuper‰inen tilaus oli rahtivapaa
-								$query .= "rahtivapaa='".$otsikkorivi[$fieldname]."',";
+								$query .= "rahtivapaa = '".$otsikkorivi[$fieldname]."',";
+								$query .= "kohdistettu = '{$otsikkorivi["kohdistettu"]}',";
 							}
 						}
 						elseif ($fieldname=='maksuehto') {

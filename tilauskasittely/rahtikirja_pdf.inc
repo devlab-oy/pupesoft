@@ -291,7 +291,7 @@
 		if(isset($data) !== FALSE and $yhtiorow["oslapp_rakir_logo"] == '') {
 			$image = $pdf->jfif_embed($data);
 
-			if ($image) {			
+			if ($image) {
 				$logoparam = array();
 
 				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 50) {

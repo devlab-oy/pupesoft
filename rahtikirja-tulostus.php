@@ -40,7 +40,10 @@
 		$varasto 		= (int) $varasto;
 
 		// haetaan toimitustavan tiedot
-		$query    = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
+		$query    = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite = '$toimitustapa'";
 		$toitares = mysql_query($query) or pupe_error($query);
 		$toitarow = mysql_fetch_assoc($toitares);
 
@@ -54,7 +57,7 @@
 				}
 			}
 
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=rahtikirja.php?toim=lisaa&id=dummy&jv=$jv&komento=$komento&mista=rahtikirja-tulostus.php&toimitustapa_varasto=$toimitustapa_varasto&valittu_rakiroslapp_tulostin={$valittu_rakiroslapp_tulostin}{$linkkilisa}'>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=rahtikirja.php?toim=lisaa&id=dummy&jv=$jv&komento=$komento&merahti=$toitarow[merahti]&mista=rahtikirja-tulostus.php&toimitustapa_varasto=$toimitustapa_varasto&valittu_rakiroslapp_tulostin={$valittu_rakiroslapp_tulostin}{$linkkilisa}'>";
 			exit;
 		}
 
@@ -208,25 +211,25 @@
 
 		while ($rakir_row = mysql_fetch_assoc($rakir_res)) {
 			// muutama muuttuja tarvitaan
-			$pakkaus       	= array();
-			$pakkauskuvaus 	= array();
-			$pakkauskuvaustark = array();
-			$kilot         	= array();
-			$kollit        	= array();
-			$kuutiot       	= array();
-			$lavametri     	= array();
-			$lotsikot      	= array();
-			$astilnrot		= array();
-			$vakit         	= array();
-			$kilotyht      	= 0;
-			$lavatyht      	= 0;
-			$kollityht     	= 0;
-			$kuutiotyht    	= 0;
-			$tulostuskpl   	= 0;
-			$otunnukset    	= "";
-			$tunnukset     	= "";
-			$rahtikirjanro 	= "";
-			$kaikki_lotsikot = "";
+			$pakkaus       		= array();
+			$pakkauskuvaus 		= array();
+			$pakkauskuvaustark 	= array();
+			$kilot         		= array();
+			$kollit        		= array();
+			$kuutiot       		= array();
+			$lavametri     		= array();
+			$lotsikot      		= array();
+			$astilnrot			= array();
+			$vakit         		= array();
+			$kilotyht      		= 0;
+			$lavatyht      		= 0;
+			$kollityht     		= 0;
+			$kuutiotyht    		= 0;
+			$tulostuskpl   		= 0;
+			$otunnukset    		= "";
+			$tunnukset     		= "";
+			$rahtikirjanro 		= "";
+			$kaikki_lotsikot 	= "";
 
 			if ($rakir_row['merahti'] == 'K') {
 				$rahdinmaksaja = "Lähettäjä";
@@ -581,7 +584,7 @@
 								where tunnus in ($tunnukset)
 								and yhtio = '$kukarow[yhtio]'";
 					$ures  = mysql_query($query) or pupe_error($query);
-					
+
 					if (trim($pakkaustieto_tunnukset) != '') {
 						$query = "	UPDATE rahtikirjat
 									set rahtikirjanro='$rahtikirjanro'

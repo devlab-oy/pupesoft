@@ -198,8 +198,12 @@
 		}
 	}
 
+	if (isset($jatka) and $maksaja == "" and $rahtivapaa != "") {
+		echo "<font class='error'>".t("HUOM: Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella")."!</font><br>";
+	}
+
 	if (isset($jatka) and $asiakasid == "" and $override_ytunnus_check != 'YES') {
-		echo "<font class='error'>".t("VIRHE: Tilaukselta puuttuu Y-tunnus").":</font><br>";
+		echo "<font class='error'>".t("VIRHE: Tilaukselta puuttuu Y-tunnus")."!</font><br>";
 
 		$tee	= "OTSIK";
 		$tila 	= "";
@@ -1039,9 +1043,13 @@
 			$apu_rahdinmaksaja = $srow["kohdistettu"];
 
 			if ($apu_rahdinmaksaja == "O") {
-				$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$srow[toimitustapa]'";
+				$apuqu = "	SELECT *
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND selite  = '$srow[toimitustapa]'";
 				$meapu = pupe_query($apuqu);
 				$apuro = mysql_fetch_assoc($meapu);
+
 				$apu_rahdinmaksaja = $apuro['merahti'];
 			}
 
@@ -1050,11 +1058,11 @@
 			if ($apu_rahdinmaksaja == "") $apu_rahdinmaksaja = "V";
 			$sel[$apu_rahdinmaksaja] = "selected";
 
-			echo "<td>".t("Rahdinmaksaja").":</td>
+			echo "<td>".t("Rahtisopimus").":</td>
 				<td><select name='maksaja'>
 					<option value='O'>".t("Oletus")."</option>
-					<option value='K' $sel[K]>".t("L‰hett‰j‰")."</option>
-					<option value=''  $sel[V]>".t("Vastaanottaja")."</option>
+					<option value='K' $sel[K]>".t("K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta")."</option>
+					<option value=''  $sel[V]>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>
 					</select>
 				</td>
 				</tr>";
@@ -1089,7 +1097,7 @@
 				$lahtoseleted = TRUE;
 			}
 
-			while($row = mysql_fetch_assoc($tresult)) {
+			while ($row = mysql_fetch_assoc($tresult)) {
 
 				$sel = "";
 				if ($row["selite"] == $srow["toimitustapa"] and !$lahtoseleted) {
@@ -2717,9 +2725,13 @@
 
 		// jos ollaan valittu rahdinmaksajaksi oletus, haetaan oletusmaksaja toimitustavalta
 		if ($maksaja == "O") {
-			$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+			$apuqu = "	SELECT *
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite = '$toimitustapa'";
 			$meapu = pupe_query($apuqu);
 			$apuro = mysql_fetch_assoc($meapu);
+
 			$maksaja = $apuro['merahti'];
 		}
 
@@ -2738,7 +2750,7 @@
 			$chn = '999';
 		}
 		elseif ($liitostunnus != "") {
-			$apuqu = "select chn from asiakas where yhtio='$kukarow[yhtio]' and tunnus = '$liitostunnus'";
+			$apuqu = "SELECT chn from asiakas where yhtio='$kukarow[yhtio]' and tunnus = '$liitostunnus'";
 			$meapu = pupe_query($apuqu);
 			$apuro = mysql_fetch_assoc($meapu);
 			$chn = $apuro['chn'];
@@ -2785,6 +2797,11 @@
 				$yhtiotoimipaikka	= $apualvrow["tunnus"]; // ylikirjoitetaan myˆs k‰ytt‰j‰n oletustoimipaikka
 				$yhtioalv_tilino	= $apualvrow["toim_alv"];
 			}
+		}
+
+		// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+		if ($maksaja == "" and $rahtivapaa != "") {
+			$maksaja = "K";
 		}
 
 		//Otetaan valuutan kurssi

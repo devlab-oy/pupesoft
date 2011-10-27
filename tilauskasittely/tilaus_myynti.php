@@ -2501,7 +2501,7 @@ if ($tee == '') {
 					list($toim_lah_vv, $toim_lah_kk, $toim_lah_pp) = explode("-", $viimeinen_toimitustavan_lahto_pvm);
 
 					// 2 vkoa
-					for ($i = 1; $i <= 12; $i++) {
+					for ($i = 1; $i <= 14; $i++) {
 
 						$time = mktime(0, 0, 0, $toim_lah_kk, $toim_lah_pp+$i, $toim_lah_vv);
 
@@ -2517,16 +2517,17 @@ if ($tee == '') {
 									AND liitostunnus = '{$toimitustavan_tunnus}'
 									and lahdon_viikonpvm = '{$aika_vkonpvm}'
 									AND aktiivi != 'E'";
+						// echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$chk_res = pupe_query($query);
 
 						if (mysql_num_rows($chk_res) == 0) {
 							continue;
 						}
 
-						$aika_vkonpvm_result = seuraava_lahtoaika($toimitustavan_tunnus, $aika_vkonpvm);
-						$aika_vkonpvm_row = mysql_fetch_assoc($aika_vkonpvm_result);
+						$aika_vkonpvm_row = mysql_fetch_assoc($chk_res);
 
 						$aika = "{$aika} {$aika_vkonpvm_row['lahdon_kellonaika']}";
+						// echo "vkonpvm: $aika_vkonpvm aika: $aika<br>";
 
 						$sel = $toimitustavan_lahto == $aika ? " selected" : ($laskurow['toimitustavan_lahto'] == $aika ? " selected" : "");
 						echo "<option value='{$aika}'{$sel}>",tv1dateconv($aika, "PITKA"),"</option>";

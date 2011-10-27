@@ -115,9 +115,10 @@
 	$alku = date("Y-m-d")." 00:00:00";
 	$lopu = date("Y-m-d")." 23:59:59";
 
-	$query = "	SELECT round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta,(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)), 0) AS 'tilatut_eurot',
-				round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))),'{$yhtiorow['hintapyoristys']}') AS 'tilatut_kate',
-				if(tilausrivi.toimitettu!='', 1, 0) AS 'toimitetut_rivit'
+	$query = "	SELECT
+				round(sum(round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta,(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)), 0)), 0) AS 'tilatut_eurot',
+				round(sum(round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))),'{$yhtiorow['hintapyoristys']}')), 0) AS 'tilatut_kate',
+				round(sum(if(tilausrivi.toimitettu!='', 1, 0)), 0) AS 'toimitetut_rivit'
 				FROM tilausrivi
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotetyyppi != 'N')
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -125,26 +126,11 @@
 				AND tilausrivi.laadittu >= '$alku'
 				AND tilausrivi.laadittu <= '$lopu'";
 	$result = pupe_query($query);
+	$row = mysql_fetch_assoc($result);
 
-	$arr = array('tilatut_eurot' => 0, 'tilatut_kate' => 0, 'toimitetut_rivit');
-
-	while ($row = mysql_fetch_assoc($result)) {
-		if (!isset($arr['tilatut_eurot'])) $arr['tilatut_eurot'] = 0;
-		if (!isset($arr['tilatut_kate'])) $arr['tilatut_kate'] = 0;
-		if (!isset($arr['toimitetut_rivit'])) $arr['toimitetut_rivit'] = 0;
-
-		$arr['tilatut_eurot'] += $row['tilatut_eurot'];
-		$arr['tilatut_kate'] += $row['tilatut_kate'];
-		$arr['toimitetut_rivit'] += $row['toimitetut_rivit'];
-	}
-
-	$tilatut_eurot = round($arr['tilatut_eurot'], 0);
-	$toimitetut_rivit = round($arr['toimitetut_rivit'], 0);
-	$tilatut_katepros = round($arr['tilatut_kate'] / $arr['tilatut_eurot'] * 100, 1);
-
-	echo "<input type='hidden' id='tilatut_eurot' value='{$tilatut_eurot}' />";
-	echo "<input type='hidden' id='toimitetut_rivit' value='{$toimitetut_rivit}' />";
-	echo "<input type='hidden' id='tilatut_katepros' value='{$tilatut_katepros}' />";
+	echo "<input type='hidden' id='tilatut_eurot' value='{$row['tilatut_eurot']}' />";
+	echo "<input type='hidden' id='toimitetut_rivit' value='{$row['toimitetut_rivit']}' />";
+	echo "<input type='hidden' id='tilatut_katepros' value='".round($row['tilatut_kate'] / $row['tilatut_eurot'] * 100, 1)."' />";
 	echo "<input type='hidden' name='tee' value='laske' />";
 
 	if (!isset($kka)) $kka = date("n",mktime(0, 0, 0, date("n"), 1, date("Y")));

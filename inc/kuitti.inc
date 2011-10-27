@@ -102,7 +102,7 @@ if ($kirjoitinrow["komento"] == 'email') {
 	$kutsu = t("Kuitti", $kieli);
 
 	if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-		$kutsu .= " ".trim($saaja);
+		$kutsu .= ", ".trim($saaja);
 	}
 
 	if (@include("../inc/sahkoposti.inc"));

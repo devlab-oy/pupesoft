@@ -2475,7 +2475,7 @@
 								$kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
 
 								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-									$kutsu .= " ".trim($laskurow["nimi"]);
+									$kutsu .= ", ".trim($laskurow["nimi"]);
 								}
 
 								$liite              = $pdffilenimi;

@@ -2532,7 +2532,7 @@ if (!function_exists('loppu_lahete')) {
 
 				$pdf->draw_text(50,  $kala-64, t("Liitteet", $kieli), $thispage, $boldi);
 				$pdf->draw_text(200, $kala-64, "________", $thispage, $norm);
-				
+
 				$pdf->draw_text(50, $kala-87, t("RAKENNUSKOHTEISSA", $kieli), $thispage, $boldi);
 
 				$pdf->draw_text(50,  $kala-100, t("Vakuutus", $kieli), $thispage, $boldi);
@@ -2543,7 +2543,7 @@ if (!function_exists('loppu_lahete')) {
 				$pdf->draw_text(200, $kala-126, t("Mik‰li rakennesuunnitelmat muuttuvat sopimuksen allekirjoituksen j‰lkeen, pid‰tt‰‰", $kieli), $thispage, $norm);
 				$pdf->draw_text(200, $kala-139, $yhtiorow['nimi']." ".t("oikeuden muuttaa hintaa vastaavasti", $kieli), $thispage, $norm);
 				$pdf->draw_text(200, $kala-152, t("Tarjous / sopimus perustuu piirustuksiin _____/_____ 20__", $kieli), $thispage, $norm);
-				
+
 				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
 				if ($kala-253 <= 300) {
 					$sivu++;
@@ -2951,7 +2951,7 @@ if (!function_exists('print_pdf_lahete')) {
 					}
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-						$kutsu .= " ".trim($laskurow["nimi"]);
+						$kutsu .= ", ".trim($laskurow["nimi"]);
 					}
 
 					if (@include("../inc/sahkoposti.inc"));

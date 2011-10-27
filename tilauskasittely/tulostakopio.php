@@ -1335,7 +1335,7 @@
 						$kutsu = t("SAD-lomake", $kieli);
 
 						if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-							$kutsu .= " ".trim($laskurow["nimi"]);
+							$kutsu .= ", ".trim($laskurow["nimi"]);
 						}
 
 						require("../inc/sahkoposti.inc");
@@ -1382,7 +1382,7 @@
 					$kutsu = t("Vientierittely", $kieli);
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-						$kutsu .= " ".trim($laskurow["nimi"]);
+						$kutsu .= ", ".trim($laskurow["nimi"]);
 					}
 
 					require("../inc/sahkoposti.inc");

@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 
 	// Kutsutaanko CLI:stä

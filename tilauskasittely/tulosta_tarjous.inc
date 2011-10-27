@@ -1367,7 +1367,7 @@ if (!function_exists('print_pdf_tarjous')) {
 			$kutsu = t("Tarjous", $kieli);
 
 			if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-				$kutsu .= " ".trim($laskurow["nimi"]);
+				$kutsu .= ", ".trim($laskurow["nimi"]);
 			}
 
 			echo t("Tarjous tulostuu")."...<br>";

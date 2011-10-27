@@ -167,11 +167,17 @@
 	echo "<input type='text' name='vvl' id='vvl' value='{$vvl}' size='5'></td>";
 	echo "</tr>";
 
-	$query = "SELECT group_concat(yhtio) AS yhtiot FROM yhtio";
+	$query = "	SELECT group_concat(yhtio) AS yhtiot
+				FROM yhtio
+				WHERE konserni = '$yhtiorow[konserni]'
+				and konserni != ''";
 	$yhtio_res = pupe_query($query);
 	$yhtio_array = mysql_fetch_assoc($yhtio_res);
 
-	$query = "SELECT nimi, yhtio FROM yhtio";
+	$query = "	SELECT nimi, yhtio
+				FROM yhtio
+				WHERE konserni = '$yhtiorow[konserni]'
+				and konserni != ''";
 	$yhtio_res = pupe_query($query);
 
 	$numrows = mysql_num_rows($yhtio_res);
@@ -364,7 +370,8 @@
 
 		echo "</table>";
 
-
 	}
 
 	require ("inc/footer.inc");
+
+?>

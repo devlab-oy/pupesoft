@@ -1751,7 +1751,7 @@ if ($tee == '') {
 	// Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty ja arvoja vaihdettu
 	if ($kukarow["kesken"] > 0 and (
 		(isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
-		(isset($toimitustapa) and $toimitustapa != '' and $laskurow["toimitustavan_lahto"] != $toimitustavan_lahto) or
+		(isset($toimitustapa) and $toimitustapa != '' and $toimitustavan_lahto != '' and $laskurow["toimitustavan_lahto"] != $toimitustavan_lahto) or
 		(isset($viesti) and $viesti != $laskurow["viesti"]) or
 		(isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
 		(isset($myyjanro) and $myyjanro > 0) or
@@ -1783,7 +1783,7 @@ if ($tee == '') {
 			$pika_paiv_myyja = " myyja = '$myyja', ";
 		}
 
-		if (!isset($toimitustavan_lahto)) $toimitustavan_lahto = "0000-00-00 00:00:00";
+		if (!isset($toimitustavan_lahto) or $toimitustapa != $laskurow['toimitustapa']) $toimitustavan_lahto = "0000-00-00 00:00:00";
 
 		if ($maksutapa != '') {
 			$laskurow["maksuehto"] = $maksutapa;
@@ -2488,9 +2488,17 @@ if ($tee == '') {
 
 				if (mysql_num_rows($toimitustavan_lahto_result) > 0) {
 
+					$sel_ensimmainen = true;
+
 					while ($toimitustavan_lahto_row = mysql_fetch_assoc($toimitustavan_lahto_result)) {
 						$viimeinen_toimitustavan_lahto = $toimitustavan_lahto_row['lahto'];
 						$sel = $toimitustavan_lahto == $toimitustavan_lahto_row['lahto'] ? " selected" : ($laskurow['toimitustavan_lahto'] == $toimitustavan_lahto_row['lahto'] ? " selected" : "");
+
+						if ($sel == "" and $sel_ensimmainen) {
+							$sel = " selected";
+							$sel_ensimmainen = false;
+						}
+
 						echo "<option value='{$toimitustavan_lahto_row['lahto']}'{$sel}>",tv1dateconv($toimitustavan_lahto_row['lahto'], "PITKA"),"</option>";
 					}
 				}
@@ -2517,7 +2525,6 @@ if ($tee == '') {
 									AND liitostunnus = '{$toimitustavan_tunnus}'
 									and lahdon_viikonpvm = '{$aika_vkonpvm}'
 									AND aktiivi != 'E'";
-						// echo "<pre>",str_replace("\t", "", $query),"</pre>";
 						$chk_res = pupe_query($query);
 
 						if (mysql_num_rows($chk_res) == 0) {
@@ -2527,7 +2534,6 @@ if ($tee == '') {
 						$aika_vkonpvm_row = mysql_fetch_assoc($chk_res);
 
 						$aika = "{$aika} {$aika_vkonpvm_row['lahdon_kellonaika']}";
-						// echo "vkonpvm: $aika_vkonpvm aika: $aika<br>";
 
 						$sel = $toimitustavan_lahto == $aika ? " selected" : ($laskurow['toimitustavan_lahto'] == $aika ? " selected" : "");
 						echo "<option value='{$aika}'{$sel}>",tv1dateconv($aika, "PITKA"),"</option>";

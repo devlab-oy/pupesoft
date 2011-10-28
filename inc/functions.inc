@@ -6125,128 +6125,54 @@ if (!function_exists("js_popup")) {
 	// scripti balloonien tekemiseen
 	function js_popup () {
 
-	enable_jquery();
+		enable_jquery();
 
-	echo "<script type='text/javascript' language='javascript'>";
+		echo "<script type='text/javascript' language='javascript'>";
 
-	?>
-
-	jQuery.fn.tooltip = function(allowHtml, className){
-		jQuery.fn.tooltip.created.id = 'toolTip';
-		$('body').append(jQuery.fn.tooltip.created);
-
-		var toolTip = $(jQuery.fn.tooltip.created);
-
-	    toolTip.css({'position':'absolute','display':'none'});
-
-	    //functions
-		function getMouseX(e) {
-			var x = null;
-
-			if (e.pageX) 	{
-				x = e.pageX;
-			}
-			else if (e.clientX) {
-				x = e.clientX + document.body.scrollLeft
-					+ document.documentElement.scrollLeft;
-			}
-			return x;
+		if (file_exists("inc/jquery.tools.min.js")) {
+			require_once("inc/jquery.tools.min.js");
 		}
-		function getMouseY(e) {
-			var y = null;
-
-			if (e.pageY) 	{
-				y = e.pageY;
-			}
-			else if (e.clientY) {
-				y = e.clientY + document.body.scrollTop
-					+ document.documentElement.scrollTop;
-			}
-
-			return y;
+		else {
+			require_once("jquery.tools.min.js");
 		}
 
-	    function toolTipShow(e, x, y) {
-	        toolTip.css({'top':y, 'left':x}).delay(1000).show('fast');
-	    }
+		echo "</script>";
 
-	    function toolTipHide() {
-			toolTip.hide().clearQueue();
-	    }
+		echo "<script type='text/javascript' language='javascript'>
+			$(document).ready(function() {
+				$('.tooltip').mouseover(function() {
 
-        $('.tooltip').mousemove(function(e){
-			var x = getMouseX(e) + 20;
-			var y = getMouseY(e) + 20;
+					var pop_id = $(this).attr('id');
 
-			// get content id from element and fetch text from the div
-			var content_id = $(this).attr('id');
-			var content = $('#div_'+content_id).html();
+					console.log(pop_id);
 
-			var div_height = $('#div_'+content_id).height();
-			var div_width = $('#div_'+content_id).width();
+					$(this).tooltip({
+						// avattava divi
+						tip: '#div_'+pop_id,
 
-			var window_width = $(window).width();
-			var window_height = $(window).height();
+						// custom positioning
+						position: 'center right',
 
-			var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
-			var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
+						// move tooltip a little bit to the right
+						offset: [0, 15],
 
-			//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
-			if (div_height != null && div_width != null && x != null && y != null) {
-				//	Riittääkö leveys
-				if (((x - scrollX) + div_width + 30) > window_width) {
-					//	Siirretään tämä ihan oikeaan laitaan..
-					x = window_width - div_width - 30 + scrollX;
-				}
+						// there is no delay when the mouse is moved away from the trigger
+						delay: 0,
 
-				if ((y - scrollY) + div_height > window_height) {
-					y -= (div_height);
-				}
+						// Popup divin classi
+						tipClass: 'popup',
 
-				//	Oikea laita on kuitenkin aina tärkein!
-				if (x < 10) {
-					x = 10;
-				}
-				if (y < 10) {
-					y = 10;
-				}
-			}
-
-			toolTipShow(e, x, y);
-
-            //update the content
-            if (allowHtml) {
-                toolTip.html(content);
-			}
-            else {
-                toolTip.text(content);
-			}
-
-            //remove all classes for the tipBox before add a new one and to avoid the 'append class'
-            toolTip.removeClass();
-
-            //set class if specified
-            if (className) {
-				toolTip.addClass(className);
-			}
-		});
-
-        $(this).live('mouseout', function(){
-            toolTipHide();
-        });
-	};
-
-	$(function(){
-		//create the element (avoiding create multiple divisions for the tooltip)
-		jQuery.fn.tooltip.created = document.createElement('div');
-
-		$('.tooltip').tooltip('yes', 'popup');
-	});
-
-	<?php
-
-	echo "</script>";
-
+						// Käytettävä efekti
+						effect: 'fade',
+						
+						events: {
+			                def: \"mouseover,mouseleave\",
+							tooltip: \"mouseover,mouseleave\"
+			            }
+					});
+				});
+			});
+			</script>";
 	}
 }
 

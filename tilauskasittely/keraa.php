@@ -57,7 +57,7 @@
 							$('#maaran_paivitys_'+rivitunnukset[0]).html(yhteensa);
 						});
 					});
-				</script>";	
+				</script>";
 	}
 
 	if (!isset($toim)) $toim = '';
@@ -1312,9 +1312,9 @@
 					}
 
 					if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
-						$query = "	SELECT pakkaus.pakkaus, 
-									pakkaus.pakkauskuvaus, 
-									tuote.tuotemassa, 
+						$query = "	SELECT pakkaus.pakkaus,
+									pakkaus.pakkauskuvaus,
+									tuote.tuotemassa,
 									(pakkaus.leveys * pakkaus.korkeus * pakkaus.syvyys) as kuutiot,
 									kerayserat.kpl,
 									kerayserat.pakkausnro

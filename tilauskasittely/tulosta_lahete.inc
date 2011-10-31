@@ -2943,7 +2943,7 @@ if (!function_exists('print_pdf_lahete')) {
 					}
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-						$kutsu .= " ".trim($laskurow["nimi"]);
+						$kutsu .= ", ".trim($laskurow["nimi"]);
 					}
 
 					if (@include("../inc/sahkoposti.inc"));

@@ -11074,7 +11074,7 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (tableid == \"saatanat_taulu\") {
 								var saatavaty = new Array();
-								var sarakemaara = ".count($saatavat_array)."+5;
+								var sarakemaara = parametrit[tableid][0]-2;
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {

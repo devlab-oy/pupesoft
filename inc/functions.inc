@@ -13291,7 +13291,7 @@ if (!function_exists("pisin_tuote")) {
 }
 
 if (!function_exists("valitse_pakkaus")) {
-	function valitse_pakkaus($pakkaukset, $pisin_tuote_array, $pisin_tuote_per_asiakas, $eran_koko = '', $kaytetty_paino = '', $koko_nippu = 0) {
+	function valitse_pakkaus($pakkaukset, $pisin_tuote_array, $pisin_tuote_per_asiakas, $eran_koko = '', $kaytetty_paino = '', $koko_nippu_tilavuus = 0) {
 
 		$kaytettava_pakkaus = "";
 
@@ -13372,17 +13372,17 @@ if (!function_exists("valitse_pakkaus")) {
 			foreach ($pakkaukset as $indx => $pakkaus_array) {
 
 				// and $pisin_tuote['tilavuus'] >= $pakkaus_array['minimi_tilavuus']
-				if ($pakkaus_array['leveys'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $pisin_tuote['paino'] and $koko_nippu >= $pakkaus_array['minimi_tilavuus']) {
+				if ($pakkaus_array['leveys'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $pisin_tuote['paino'] and $koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
 					$kaytettava_pakkaus = $indx;
 					break;
 				}
 
-				if ($pakkaus_array['korkeus'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $pisin_tuote['paino'] and $koko_nippu >= $pakkaus_array['minimi_tilavuus']) {
+				if ($pakkaus_array['korkeus'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $pisin_tuote['paino'] and $koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
 					$kaytettava_pakkaus = $indx;
 					break;
 				}
 
-				if ($pakkaus_array['syvyys'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $pisin_tuote['paino'] and $koko_nippu >= $pakkaus_array['minimi_tilavuus']) {
+				if ($pakkaus_array['syvyys'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $pisin_tuote['paino'] and $koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
 					$kaytettava_pakkaus = $indx;
 					break;
 				}
@@ -13891,11 +13891,7 @@ if (!function_exists("tee_keraysera2")) {
 
 			if ($kaytettava_pakkaus == "") {
 
-				echo "cnt: ".count($pisin_tuote)."<br>";
-
 				$cnt = count($pisin_tuote);
-
-				// echo "<pre>",var_dump($pisin_tuote),"</pre>";
 
 				$pisin_tuote_chklist = $pisin_tuote;
 
@@ -13907,24 +13903,13 @@ if (!function_exists("tee_keraysera2")) {
 					if ($kaytettava_pakkaus == '') {
 						$pisin_tuote_arr_chk = pisin_tuote($pisin_tuote_chklist, $pisin_tuote_per_asiakas);
 
-						// echo "<pre>",var_dump($pisin_tuote_arr_chk),"</pre>";
-
 						$arr_keys = array_keys($pisin_tuote_arr_chk);
-
-						// echo "<pre>",var_dump($arr_keys),"</pre>";
 
 						$tuote_yksin_keraysalustalle[$arr_keys[0]] = array_shift($pisin_tuote_arr_chk);
 
 						unset($pisin_tuote_chklist[$arr_keys[0]]);
 
-						// echo "eran koko chk: $eran_koko_chk {$pisin_tuote[$arr_keys[0]]['tilavuus']}<br>";
 						$eran_koko_chk -= ($pisin_tuote[$arr_keys[0]]['tilavuus'] * $pisin_tuote[$arr_keys[0]]['kpl']);
-
-						// echo "<pre>",var_dump($tuote_yksin_keraysalustalle, $arr_keys),"</pre>";
-						
-						// if ($i == 3) {
-						// 	exit;
-						// }
 					}
 				}
 

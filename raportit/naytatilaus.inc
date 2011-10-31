@@ -796,6 +796,7 @@
 					tuote.kehahin,
 					tuote.sarjanumeroseuranta,
 					tuote.myyntihinta_maara,
+					tuote.status,
 					if (tilausrivi.tyyppi='V', 0, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) rivihinta,
 					if (tilausrivi.tyyppi='V', 0, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) arvo,
 					if (tilausrivi.tyyppi='V', 0, if (tilausrivi.kpl!=0, tilausrivi.rivihinta * if (tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa})) summa,
@@ -874,10 +875,18 @@
 			echo "<th style='text-align:right;'>".t("Kate")."</th>";
 		}
 
-		echo "	<th style='text-align:right;'>".t("Alv%")."</th>
-				<td class='back'>&nbsp;</td>
-				<td class='back'>&nbsp;</td>
-				</tr>";
+		echo "	<th style='text-align:right;'>".t("Alv%")."</th>";
+		
+		if ($yhtiorow["reaalisaldo_tulostuksessa"] == "K" and $toim == "VALMISTUS") {
+			echo "<th style='text-align:right;'>".t("Reaalisaldo")."</th>";
+		}
+		else {
+			echo "	<th style='text-align:right;'>&nbsp;</th>
+					<th style='text-align:right;'>&nbsp;</th>";
+		}
+
+		
+		echo "</tr>";
 
 		$tuotetyyppi		= "";
 		$positio_varattu	= "";
@@ -1076,10 +1085,10 @@
 					$borderlask = 0;
 
 					if ($row["kommentti"] != "") {
-						echo "<td valign='top' rowspan = '2' $class>$echorivino</td>";
+						echo "<td valign='top' rowspan = '2' $class>$echorivino </td>";
 					}
 					else {
-						echo "<td valign='top' $class>$echorivino</td>";
+						echo "<td valign='top' $class>$echorivino </td>";
 					}
 				}
 				else {
@@ -1087,7 +1096,7 @@
 						$tuoteperhe_kayty = $row['perheid'];
 					}
 
-					echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$echorivino</td>";
+					echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$echorivino </td>";
 				}
 			}
 			// normirivit tai jos tuoteperheit‰ ei pidet‰ yhdess‰, n‰ytet‰‰n lapsille rivinumerot
@@ -1460,6 +1469,54 @@
 			else {
 				echo "<td $classx align='right' valign='top' nowrap>".($row["alv"] * 1)."</td>";
 			}
+			
+			if ($yhtiorow["reaalisaldo_tulostuksessa"] == "K" and $toim == "VALMISTUS") {
+				$rsaldoclass = '';
+				list ($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+				
+				$tilauksessa = "SELECT sum(tilausrivi.varattu) tulossa
+								FROM tilausrivi
+								WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+								AND tilausrivi.tuoteno = '{$row["tuoteno"]}'
+								AND tilausrivi.tyyppi = 'O'
+								AND tilausrivi.varattu > 0";
+				$tilres = pupe_query($tilauksessa);
+				$tilrivi = mysql_fetch_assoc($tilres);
+				
+				$reaalisaldo = $myytavissa + $tilrivi["tulossa"];
+				
+				if ($reaalisaldo < 0) {
+					$rsaldoclass = 'error';
+				}
+				
+				echo "<td align='right' class=$rsaldoclass>{$reaalisaldo}</td>";
+
+				if ($row["status"] == "T" and $reaalisaldo < $row["tilkpl"]) {
+					$arvaus = $row["tilkpl"];
+					// haetaan tuotteen toimittajan tiedot ja datat
+					$query2 = "	SELECT tt.liitostunnus, if (tt.jarjestys = 0, 9999, tt.jarjestys) sorttaus, tt.osto_era 
+								FROM tuotteen_toimittajat as tt
+								WHERE tt.yhtio = '{$kukarow["yhtio"]}'
+								AND tt.tuoteno = '$row[tuoteno]'
+								ORDER BY sorttaus
+								LIMIT 1";
+					$result2   = pupe_query($query2);
+					$toimirow2 = mysql_fetch_array($result2);
+
+					$ostoera = $toimirow2['osto_era'];
+					$toim_liitostunnus = $toimirow2['liitostunnus'];
+
+					$tarve[$toim_liitostunnus][$row["tuoteno"]]["maara"] += $row["tilkpl"];
+					$tarve[$toim_liitostunnus][$row["tuoteno"]]["osto"] = $ostoera;
+					$tarve[$toim_liitostunnus][$row["tuoteno"]]["reaali"] = $reaalisaldo;
+					$tarve[$toim_liitostunnus][$row["tuoteno"]]["tulossa"] = $tilrivi["tulossa"];
+					$tarve[$toim_liitostunnus][$row["tuoteno"]]["nimitys"] = $trow["nimitys"];
+					
+					$ehdotus[$toim_liitostunnus][$row["tuoteno"]]["plaah"] = 1;
+					
+				} 
+	
+			} 
 
 			if ($verkkokauppa != "" and $muokkaa != "") {
 				echo "<td class='back'><input type = 'button' onclick = \"if (confirm('".t("Oletko varma, ett‰ haluat mit‰tˆid‰ tilausrivin?")."')) { sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus=$row[tunnus]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'); }\" value='".t("Mit‰tˆi rivi")."'></td>";
@@ -1669,7 +1726,95 @@
 
 		echo "</table>";
 	}
+	// Tehd‰‰n yhteistilaus.
+	if ($yhtiorow["reaalisaldo_tulostuksessa"] == "K") {
+		
+		echo "<table>";
+		$nolla = 0;
 
+		if (!function_exists("tuot_toim")) {
+			function tuot_toim($liitostunnus) {
+				global $kukarow, $yhtiorow;
+				// Haetaan tuotteen toimittajan liitostunnuksella toimitaulusta kaikki tiedot.
+				// halutaan n‰ytt‰‰ rivill‰ t‰ydellinen toimittajanimi pelk‰n tunnuksen sijasta.
+				 
+				$toimsql = "SELECT * from toimi where yhtio = '{$kukarow["yhtio"]}' and tunnus = '{$liitostunnus}'";
+				$toimres = pupe_query($toimsql);
+			
+				if (mysql_num_rows($toimres) >1) {
+					return FALSE;
+				}
+				else {
+					$toimrivit = mysql_fetch_assoc($toimres);
+					return $toimrivit;
+				}
+				
+			}
+		}
+
+		foreach ($ehdotus as $toimind => $value) {
+			$ping = FALSE;
+			echo "<tr>";
+			
+			$toimittaja = tuot_toim($toimind);
+			
+			echo "<th colspan='5'>Toimittajalta: {$toimittaja["nimi"]}</th>";
+
+				foreach ($value as $tuotenoind => $val) {
+					
+					if ($tarve[$toimind][$tuotenoind]["tulossa"] < $tarve[$toimind][$tuotenoind]["maara"]) {
+						
+						echo "<tr><td>Tuoteno: $tuotenoind <br> {$tarve[$toimind][$tuotenoind]["nimitys"]}</td>";
+						echo "<td align='right'>Tarve: {$tarve[$toimind][$tuotenoind]["maara"]} <br> Reaalisaldo: {$tarve[$toimind][$tuotenoind]["reaali"]} <br> Tulossa: {$tarve[$toimind][$tuotenoind]["tulossa"]}</td>";
+				
+						$arvaus = $tarve[$toimind][$tuotenoind]["maara"]; // paljonko tarvitaan
+						$ostoera = $tarve[$toimind][$tuotenoind]["osto"]; // minimi tilaus
+				
+						if ($ostoera == 0 or $ostoera == "") {
+							$kerroin = 1;
+						}
+						else {
+							$kerroin = $ostoera;
+						}
+				
+						if ($arvaus < $kerroin) {
+							$arvaus = $kerroin;
+						}
+						else {
+							// mik‰li on tulossa niin otetaan se huomioon
+							$arvaus = $arvaus - $tarve[$toimind][$tuotenoind]["tulossa"];
+							(int) $kokonaisluku = number_format($arvaus / $kerroin,0,'','');
+							(float) $jakojaannos = fmod($arvaus,$kerroin);
+
+							$test = $kokonaisluku * $kerroin;
+							if ($arvaus > $test) {
+								$test = ($kokonaisluku + 1) * $kerroin;
+							}
+							$arvaus = (float) $test;
+						}
+						// mik‰li muutat n‰iden nimityksi‰, niin nimitykset pit‰‰ korjata myˆs lahetteen_tulostujono.php kohdan "NAYTATILAUS" javascriptiin. 
+						echo "<td>";
+						echo "<input type='text' size='6' id='maara_$nolla' name='maara' value='$arvaus'>";
+						echo "<input type='button' value='".t("Tilaa tuotetta")."' class='tilaa' id='submit_$nolla'>";
+						echo "<input type='hidden' id='tuoteno_$nolla' name='tuoteno' value='$tuotenoind'>";
+						echo "<input type='hidden' id='toimittaja_$nolla' name='toimittaja' value='$toimind'>";
+						echo "</td>";	
+						$nolla++;
+					}
+					else {
+						echo "<tr><td>Tuoteno: $tuotenoind <br> {$tarve[$toimind][$tuotenoind]["nimitys"]}</td>";
+						echo "<td align='right'>Tarve: {$tarve[$toimind][$tuotenoind]["maara"]} <br> Tulossa: {$tarve[$toimind][$tuotenoind]["tulossa"]}</td>";
+						
+					}
+				}
+				
+			echo "</tr>";
+		
+		}
+	
+		echo "</table>";
+	}
+	
 	//	N‰ytet‰‰n vaan t‰‰ tilaus jostain linkist‰..
 	if ($tee != "NAYTA") {
 		if ($laskurow["jaksotettu"] <> 0) {

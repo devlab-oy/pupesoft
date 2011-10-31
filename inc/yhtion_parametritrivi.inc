@@ -2857,5 +2857,18 @@
 		
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == 'reaalisaldo_tulostuksessa') {
+		// alter table yhtion_parametrit add column reaalisaldo_tulostuksessa char(1) not null after jalkilaskenta_kuluperuste
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Ei n‰ytet‰ reaalisaldo-saraketta valmistuksen tulostuksessa");
+		$ulos .= "<option value = 'K' $sel>".t("n‰ytet‰‰n reaalisaldo-sarake valmistuksen tulostuksessa");
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
 
 ?>

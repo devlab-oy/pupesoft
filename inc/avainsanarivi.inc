@@ -72,6 +72,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "PARAMETRI") 		$ulos .= "<option value='PARAMETRI' $avain_sel[PARAMETRI]>					".t("Tuotteen parametri")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LISATIETO") 		$ulos .= "<option value='LISATIETO' $avain_sel[LISATIETO]>					".t("Tuotteen lisätieto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TARRATYYPPI") 		$ulos .= "<option value='TARRATYYPPI' $avain_sel[TARRATYYPPI]>				".t("Tuotteen tarratyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "VALMISTUSLINJA") 	$ulos .= "<option value='VALMISTUSLINJA' $avain_sel[VALMISTUSLINJA]>		".t("Tuotteen valmistuslinja")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";

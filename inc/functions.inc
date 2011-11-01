@@ -13423,6 +13423,37 @@ if (!function_exists("pakkauksen_iterointi")) {
 	}
 }
 
+if (!function_exists("calculate_median")) {
+	function calculate_median($arr) {
+	    sort($arr);
+
+		// total numbers in array
+	    $count = count($arr);
+
+		// find the middle value, or the lowest middle value
+	    $middleval = floor(($count - 1) / 2);
+
+		// odd number, middle is the median
+	    if ($count % 2) {
+	        $median = $arr[$middleval];
+	    } 
+		else {
+			// even number, calculate avg of 2 medians
+	        $low = $arr[$middleval];
+	        $high = $arr[$middleval + 1];
+	        $median = (($low + $high) / 2);
+	    }
+
+	    return $median;
+	}
+}
+
+if (!function_exists("calculate_average")) {
+	function calculate_average($arr) {
+		return array_sum($arr) / count($arr);
+	}
+}
+
 if (!function_exists("tee_keraysera2")) {
 	function tee_keraysera2($keraysvyohyke) {
 		global $kukarow, $yhtiorow;
@@ -13649,6 +13680,106 @@ if (!function_exists("tee_keraysera2")) {
 		if (mysql_num_rows($res) == 0) {
 			return array();
 		}
+
+		// $home_values_array = array("2", "2", "3", "45", "66", "77", "88", "99", "99");
+		// 
+		// $median_home_value = calculate_median($home_values_array);
+		// echo '<br>Median home value: '.number_format($median_home_value).'<br />';
+		// $average_home_value = calculate_average($home_values_array);
+		// echo 'Average home value: '.number_format($average_home_value).'<br>';
+
+		/**
+		 * Keräilynippujen optimaalinen järjestäminen.
+		 * Lasketaan optimaalinen kävelymatka varaston hyllypaikkojen indeksien mediaanien avulla.
+		 * Mediaaniryppäästä otetaan keskihajontaluku eri askelväleillä.
+		 * Askelväli riippuu montako keräilynippuja saadaan. 
+		 */
+		$kerailyniput = array();
+		$kerailyniput_key = array();
+
+		$ed_prioriteetti = '';
+		$ed_asiakas = '';
+		$ed_lahto = '';
+
+		$i = 1;
+
+		while ($row = mysql_fetch_assoc($res)) {
+			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'P') === false and trim($ed_prioriteetti) != '' and $ed_prioriteetti != $row['prioriteetti']) {
+				echo "EI SAA OLLA USEITA PRIORITEETTEJÄ ALUSTOISSA! BREAK<br>";
+				break;
+			}
+
+			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_asiakas) != '' and $ed_asiakas == $row['liitostunnus'] and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
+				echo "EI SAA OLLA USEITA LÄHTÖJÄ! BREAK<br>";
+			}
+
+			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') === false and trim($ed_asiakas) != '' and $ed_asiakas != $row['liitostunnus']) {
+				echo "EI SAA OLLA USEITA ASIAKKAITA! BREAK<br>";
+				break;
+			}
+
+			// otunnukset tulevat group concatilla esim. 123,124,125
+			$query = "	SELECT GROUP_CONCAT(vh.indeksi) AS indeksit
+						FROM tilausrivi
+						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = '{$keraysvyohyke}')
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus IN ({$row['tunnus']})
+						ORDER BY vh.indeksi";
+			$indeksi_res = pupe_query($query);
+			$indeksi_row = mysql_fetch_assoc($indeksi_res);
+
+			$mediaani = calculate_median(explode(",", $indeksi_row['indeksit']));
+
+			$kerailyniput[$i] = $mediaani;
+			$kerailyniput_key[$i] = $row['tunnus'];
+
+			$ed_prioriteetti = $row['prioriteetti'];
+			$ed_asiakas = $row['liitostunnus'];
+			$ed_lahto = $row['lahto'];
+
+			$i++;
+		}
+
+		asort($kerailyniput);
+
+		$min_max = array(
+					// mediaanien lkm min
+					0 => array(5 => 3), 
+					// mediaanien lkm max
+					1 => array(70 => 10)
+					);
+
+		$mediaanilkm = count($kerailyniput);
+
+		// $mediaanilkm = 57;
+
+		if ($mediaanilkm >= key($min_max[0])) {
+
+			if ($mediaanilkm > key($min_max[1])) {
+				$askelvali = current($min_max[1]);
+			}
+			else {
+				// lineaarisen suoran kulmakerroin ja vakio
+				$kulmakerroin = round((current($min_max[1]) - current($min_max[0])) / (key($min_max[1]) - key($min_max[0])), 5);  
+				$vakio = round(current($min_max[0]) - ($kulmakerroin * key($min_max[0])) , 5);
+				$askelvali = round($mediaanilkm * $kulmakerroin + $vakio , 0);
+			}
+		}
+
+		echo "<table>";
+		echo "<tr><th>Mediaani lkm</th><th>Kulmakerroin</th><th>Vakio</th><th>Askelväli</th></tr>";
+		echo "<tr><td>$mediaanilkm</td><td>$kulmakerroin</td><td>$vakio</td><td>$askelvali</td></tr>";
+
+		echo "<table>";
+		echo "<tr><th>Index</th><th>Keräilynippu</th><th>Mediaani</th></tr>";
+		foreach ($kerailyniput as $indx => $mediaani) {
+			echo "<tr><td>$indx</td><td>{$kerailyniput_key[$indx]}</td><td>$mediaani</td></tr>";
+		}
+		echo "</table>";
+
+		
+
+		mysql_data_seek($res, 0);
 
 		$ulkoisen_jarjestelman_tiedosto = '';
 
@@ -13893,11 +14024,11 @@ if (!function_exists("tee_keraysera2")) {
 			$eran_koko += $eran_koko_chk;
 			$eran_koko_pintaala += $eran_koko_pintaala;
 
-			if ($row['erotus'] > $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']) {
-				echo "Lähdön enimmäisaika ylittyi! Let's skip it. ($row[erotus] > $keraysvyohyketiedot[lahtojen_valinen_enimmaisaika])<br>";
-				echo "Laskutunnus: $row[tunnus]<br>Asiaskas: $row[asiakas_nimi]<br>Erotus: $row[erotus]<br>Lähtö: $row[lahto]<br>Minimi_indeksi: $row[minimi_indeksi]<br>Tilauksen koko: $row[tilauksen_koko]<br>H1time: $row[h1time]<br>Prioriteetti: $row[prioriteetti]<br><br>";
-				continue;
-			}
+			// if ($row['erotus'] > $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika']) {
+			// 	echo "Lähdön enimmäisaika ylittyi! Let's skip it. ($row[erotus] > $keraysvyohyketiedot[lahtojen_valinen_enimmaisaika])<br>";
+			// 	echo "Laskutunnus: $row[tunnus]<br>Asiaskas: $row[asiakas_nimi]<br>Erotus: $row[erotus]<br>Lähtö: $row[lahto]<br>Minimi_indeksi: $row[minimi_indeksi]<br>Tilauksen koko: $row[tilauksen_koko]<br>H1time: $row[h1time]<br>Prioriteetti: $row[prioriteetti]<br><br>";
+			// 	continue;
+			// }
 			
 			if ($eran_koko_pintaala > $keraysvyohyketiedot['max_keraysera_pintaala']) {
 				echo "Keräyserän maksimiraja ylitetty! $eran_koko_pintaala / $keraysvyohyketiedot[max_keraysera_pintaala]<br>";

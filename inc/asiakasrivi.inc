@@ -1081,3 +1081,15 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == 'myynninseuranta') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+		$sel = trim($trow[$i]) == 'E' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Asiakas otetaan huomioon myynninseurannassa")."</option>";
+		$ulos .= "<option value = 'E'{$sel}>".t("Asiakasta ei oteta huomioon myynninseurannassa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}

@@ -109,7 +109,7 @@ if ($kollityht > 0) {
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 					LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}' 
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus in ($otunnukset)
 					ORDER BY lasku.tunnus limit 1";
 		$ups_laskures = mysql_query($query) or pupe_error($query);
@@ -121,10 +121,10 @@ if ($kollityht > 0) {
 		C = Conditional
 		*/
 
-		$query = "	SELECT * 
-					FROM yhteyshenkilo 
-					WHERE yhtio = '$kukarow[yhtio]' 
-					AND liitostunnus = '$laskurow[liitostunnus]' 
+		$query = "	SELECT *
+					FROM yhteyshenkilo
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND liitostunnus = '$laskurow[liitostunnus]'
 					AND nimi = '$laskurow[tilausyhteyshenkilo]'";
 		$yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
 		$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
@@ -206,7 +206,7 @@ if ($kollityht > 0) {
 //		$upsaccountnumber			= $shipfrom->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiä, C
 //		$residentialindicator		= $shipfrom->addChild('ResidentialIndicator', ''); // 1 merkki, O
 
-/*
+		/*
 		// PRODUCER
 		$producer					= $xml->OpenShipment->addChild('Producer');
 		$customerid 				= $producer->addChild('CustomerID', ''); // max 35 merkkiä, R
@@ -286,10 +286,10 @@ if ($kollityht > 0) {
 		$telephone					= $thirdpartyreceiver->addChild('Telephone', ''); // max 15 merkkiä, C
 		$faxnumber					= $thirdpartyreceiver->addChild('FaxNumber', ''); // max 15 merkkiä, O
 		$upsaccountnumber			= $thirdpartyreceiver->addChild('UpsAccountNumber', ''); // 6 tai 10 merkkiä, C
-*/
+		*/
 
-
-		$query ="	SELECT merahti, sum(kollit) kollit,
+		$query ="	SELECT merahti,
+					sum(kollit) kollit,
 					sum(kilot) kilot,
 					sum(kuutiot) kuutiot,
 					sum(lavametri) lavametri,
@@ -401,7 +401,7 @@ if ($kollityht > 0) {
 		*******************************************************************************
 		WorldEase	Bill Transportation to indicates the party who paid for Master Shipment
 		******************************************************************************/
-		// rahtikirjan merahti == '' --> vastaanottaja maksaa, K = lähettäjä maksaa
+		// rahtikirjan merahti == '' --> Käytetään vastaanottajan rahtisopimusnumeroa, K = Käytetään lähettäjän rahtisopimusnumeroa
 		$rahdinmaksaja 			= $ups_rakirow['merahti'] == 'K' ? 'SHP' : 'REC';
 		$billtransportationto	= $shipmentinformation->addChild('BillTransportationTo', "$rahdinmaksaja"); // max 3 merkkiä, C
 
@@ -730,20 +730,20 @@ if ($kollityht > 0) {
 		/******************************************************************************
 		Term of Sale
 		Valid Values	Description
-		CIP				Carriage and Insurance Paid	
-		CPT				Carriage Paid To	
-		CFR				Cost and Freight	
-		CIF				Cost, Insurance and Freight	
-		DAF				Delivered at Frontier	
-		DDP				Delivered Duty Paid	
-		DDU				Delivered Duty Unpaid	
-		DEQ				Delivered Ex Quay	
-		DES				Delivered Ex Ship	
-		EXW				Ex Works	
-		FAS				Free Along Side	
-		FCA				Free Carrier	
-		FOB				Free On Board	
-		UNK				Unknown	
+		CIP				Carriage and Insurance Paid
+		CPT				Carriage Paid To
+		CFR				Cost and Freight
+		CIF				Cost, Insurance and Freight
+		DAF				Delivered at Frontier
+		DDP				Delivered Duty Paid
+		DDU				Delivered Duty Unpaid
+		DEQ				Delivered Ex Quay
+		DES				Delivered Ex Ship
+		EXW				Ex Works
+		FAS				Free Along Side
+		FCA				Free Carrier
+		FOB				Free On Board
+		UNK				Unknown
 		******************************************************************************/
 //		$invoicetermofsale = $internationaldocumentation->addChild('InvoiceTermOfSale', ''); // max 255 merkkiä, C
 

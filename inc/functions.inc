@@ -2004,11 +2004,11 @@ if (!function_exists("synkronoi")) {
 									and merahti			= '$aburow[merahti]'
 									and multi_jv		= '$aburow[multi_jv]'
 									and nouto			= '$aburow[nouto]'
-									and sallitut_maat	= '$aburow[sallitut_maat]'
-									";
+									and sallitut_maat	= '$aburow[sallitut_maat]'";
 						$tarkres=pupe_query($query);
+
 						if (mysql_num_rows($tarkres) == 1) {
-							$tarkrow=mysql_fetch_assoc($tarkres);
+							$tarkrow = mysql_fetch_assoc($tarkres);
 							$override["toimitustapa"] = $tarkrow["tunnus"];
 						}
 						else {
@@ -11074,7 +11074,7 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (tableid == \"saatanat_taulu\")†{
 								var saatavaty = new Array();
-								var sarakemaara = ".count($saatavat_array)."+5;
+								var sarakemaara = parametrit[tableid][0]-2;
 
 								// Summataan vain ruudulla n‰kyv‰t luvut
 								for (var i=iStart; i<iEnd; i++) {
@@ -11999,6 +11999,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.tyyppi  = 'L'
 					and tilausrivi.otunnus IN ($otunnus)
 					and tuote.vakkoodi not in ('','0')
 					and (tilausrivi.varattu+tilausrivi.kpl) > 0
@@ -14319,5 +14320,112 @@ if (!function_exists("tarkistaytunnus")) {
 			return FALSE;
 		}
 
+	}
+}
+
+if (!function_exists('gauge')) {
+	function gauge() {
+
+		/**
+		 * Mittari piirret‰‰n diviin id:ll‰ chart_div
+		 * Tarvitaan args- ja options-oliot
+		 */
+
+		/** ESIMERKKI
+			var gauge = new Gauge();
+			var args = {
+				foo: ['BAR', 0]
+			}
+
+			var options = {	width: 800,
+							height: 220,
+							min: 0,
+							max: 400000,
+							redFrom: 200000,
+							redTo: 300000,
+							greenFrom: 350000,
+							greenTo: 400000,
+							yellowFrom: 300000,
+							yellowTo: 350000,
+							minorTicks: 5,
+							majorTicks: ['0', '50', '100', '150', '200', '250', '300', '350', '400']};
+
+			gauge.init(args, options);
+			gauge.draw($('#value_from').val(), options.max);
+		*/
+
+		echo "<script type='text/javascript' src='https://www.google.com/jsapi'></script>";
+		echo "	<script type='text/javascript' charset='utf-8'>
+
+					google.load('visualization', '1', {packages:['gauge']});
+					// google.setOnLoadCallback(drawChart);
+
+					var Gauge = (function() {
+						var data;
+						var options;
+						var chart;
+
+						return {
+							init: function(args, opt) {
+								data = new google.visualization.DataTable();
+								options = opt;
+
+								data.addColumn('string', 'Label');
+								data.addColumn('number', 'Value');
+
+								data.addRows(1);
+
+								var div_id;
+								var _i = 0;
+
+								for (var i in args) {
+									var _x = 0;
+									div_id = i;
+
+									for (var x in args[i]) {
+										data.setValue(_i, _x, args[i][x]);
+										_x++;
+									}
+									_i++;
+								}
+
+								$('#chart_div').append('<div id=\''+div_id+'\'></div>');
+								$('#'+div_id).css('float', 'left');
+								var div = document.getElementById(div_id);
+								chart = new google.visualization.Gauge(div);
+
+								chart.draw(data, options);
+
+								var body_bgcolor = $('body').css('background-color');
+								$('#chart_div *').css({'background-color': body_bgcolor});
+							},
+							draw: function(value, max) {
+
+								value = parseInt(value);
+
+								if (parseInt((value / (max / 40))) >= 4) {
+
+									var force = parseInt(value / (max / 40));
+									force = force < 2 ? 2 : force;
+									force = 1 + '.' + force;
+
+									var _dot120 = parseInt(value * force);
+									data.setValue(0, 1, _dot120);
+									chart.draw(data, options);
+
+									var _dot90 = parseInt(value * 0.9);
+									setTimeout(function(){data.setValue(0, 1, _dot90); chart.draw(data, options);}, 400);
+
+									setTimeout(function(){data.setValue(0, 1, value); chart.draw(data, options);}, 800);
+								}
+								else {
+									data.setValue(0, 1, value);
+									chart.draw(data, options);
+								}
+							}
+						}
+					});
+
+				</script>";
 	}
 }

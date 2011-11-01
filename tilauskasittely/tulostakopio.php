@@ -1335,7 +1335,7 @@
 						$kutsu = t("SAD-lomake", $kieli);
 
 						if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-							$kutsu .= " ".trim($laskurow["nimi"]);
+							$kutsu .= ", ".trim($laskurow["nimi"]);
 						}
 
 						require("../inc/sahkoposti.inc");
@@ -1382,7 +1382,7 @@
 					$kutsu = t("Vientierittely", $kieli);
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-						$kutsu .= " ".trim($laskurow["nimi"]);
+						$kutsu .= ", ".trim($laskurow["nimi"]);
 					}
 
 					require("../inc/sahkoposti.inc");
@@ -1717,7 +1717,7 @@
 				'norm'			=> $norm,
 				);
 
-				// Aloitellaan lähetteen teko
+				// Aloitellaan DGD:n teko
 				$params_dgd = alku_dgd($params_dgd);
 				$params_dgd = rivi_dgd($params_dgd);
 				$params_dgd = loppu_dgd($params_dgd);

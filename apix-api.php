@@ -1,0 +1,80 @@
+#!/usr/bin/php
+<?php
+
+// Kutsutaanko CLI:stä
+if (php_sapi_name() != 'cli') {
+	die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+}
+// Asetukset
+$software = "Pupesoft";
+$version = "1.0";
+#$pupesoft_polku = "/var/www/html/pupesoft/";
+$pupesoft_polku = "";
+
+// otetaan tietokanta connect
+require ($pupesoft_polku."inc/connect.inc");
+
+if (!isset($verkkolaskut_in) or $verkkolaskut_in == "" or !is_dir($verkkolaskut_in)) {
+	die("VIRHE: verkkolaskut_in-kansio ei ole määritelty!");
+}
+
+// Haetaan api_keyt yhtion_parametreistä
+$sql_query = "	SELECT yhtion_parametrit.verkkotunnus_vas, yhtion_parametrit.verkkosala_vas, yhtio.nimi
+				FROM yhtio
+				JOIN yhtion_parametrit USING (yhtio)
+				WHERE yhtion_parametrit.verkkotunnus_vas != ''
+				AND yhtion_parametrit.verkkosala_vas != ''";
+$apix_result = mysql_query($sql_query) or die("Error in query");
+
+// Jos yhtään apix käyttäjää ei löydy
+if (mysql_num_rows($apix_result) == 0) {
+	die("Apix käyttäviä yrityksiä ei löytynyt!");
+}
+
+while ($apix_keys = mysql_fetch_assoc($apix_result)) {
+	
+	//TEST URL:https://test-terminal.apix.fi/receive?TraID=<TransferID>&t=<Timestamp>&soft=<SoftwareName>&ver=<SoftwareVersion>&resend=<resend>&d=SHA256:<digest>
+	$url = "https://test-terminal.apix.fi/receive";
+	$timestamp	= gmdate("YmdHis");
+	
+	// Muodostetaan apixin vaatima salaus ja url
+	$digest_src = "$software+$version+".$apix_keys['verkkotunnus_vas']."+".$timestamp.$apix_keys['verkkosala_vas'];
+	$dt	= substr(hash("sha256", $digest_src), 0, 64);
+	$real_url = "$url?TraID={$apix_keys['verkkotunnus_vas']}&t=$timestamp&soft=$software&ver=$version&d=SHA-256:$dt";
+	
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $real_url);
+	curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$response = curl_exec($ch);
+	curl_close($ch);
+	
+	
+	if (!$response == '') {
+		$tiedosto = $verkkolaskut_in."apix_".md5(uniqid(mt_rand(), true))."_nimi.zip";
+		$fd = fopen($tiedosto, "w") or die("Tiedostoa ei voitu luoda!");
+		fwrite($fd, $response);
+		
+		$zip = new ZipArchive();
+		if($zip->open($tiedosto) === TRUE) {
+			// Loopataan tiedostot läpi
+			// PDF ja XML, mutta otetaan vain XML!!
+			for ($i = 0; $i < $zip->numFiles; $i++) {
+				$file = $zip->getNameIndex($i);
+				// Puretaan vain .xml tiedostot ja nimetään se uudelleen.
+				if($zip->extractTo($verkkolaskut_in, substr($file, 0, -4).".xml")) {
+					rename($verkkolaskut_in.substr($file, 0, -4).".xml", $verkkolaskut_in."apix_".md5(uniqid(mt_rand(), true)).".xml");
+					echo "Haettiin lasku yritykselle: {$apix_keys['nimi']}\n";
+				}
+			}
+			// Poistetaan zippi
+			unlink($tiedosto);
+			fclose($fd);
+		} else {
+			echo "Virhe, tiedoston purku\n";
+		}		
+	} else {
+		exit("Ei uusia laskuja!\n");
+	}
+}
+?>

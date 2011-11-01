@@ -13427,21 +13427,30 @@ if (!function_exists("calculate_median")) {
 	function calculate_median($arr) {
 	    sort($arr);
 
+		// echo "<br><br>sortattu array:";
+		// echo "<pre>",var_dump($arr),"</pre>";
+
 		// total numbers in array
 	    $count = count($arr);
+
+		// echo "count: $count<br>";
 
 		// find the middle value, or the lowest middle value
 	    $middleval = floor(($count - 1) / 2);
 
+		// echo "middleval: $middleval (floor(($count - 1) / 2))<br>";
+
 		// odd number, middle is the median
 	    if ($count % 2) {
 	        $median = $arr[$middleval];
+			// echo "median: $median = arrayn middleval<br>";
 	    } 
 		else {
 			// even number, calculate avg of 2 medians
 	        $low = $arr[$middleval];
 	        $high = $arr[$middleval + 1];
 	        $median = (($low + $high) / 2);
+			// echo "median: $median (($low + $high) / 2)<br>";
 	    }
 
 	    return $median;
@@ -13766,6 +13775,25 @@ if (!function_exists("tee_keraysera2")) {
 			}
 		}
 
+		// echo "<pre>",var_dump(array_slice($kerailyniput, 0, $askelvali, TRUE)),"</pre>";
+
+		// echo "Standard deviation: ",stats_standard_deviation(array_slice($kerailyniput, 0, $askelvali, TRUE)),"<br>";
+		// echo "Standard deviation: ",stats_standard_deviation(array_slice($kerailyniput, 7, 5, TRUE)),"<br>";
+
+		// function standard_deviation($aValues, $bSample = false)
+		// {
+		//     $fMean = array_sum($aValues) / count($aValues);
+		//     $fVariance = 0.0;
+		//     foreach ($aValues as $i)
+		//     {
+		//         $fVariance += pow($i - $fMean, 2);
+		//     }
+		//     $fVariance /= ( $bSample ? count($aValues) - 1 : count($aValues) );
+		//     return (float) sqrt($fVariance);
+		// }
+		// 
+		// echo "stand dev: ".standard_deviation(array_slice($kerailyniput, 0, $askelvali, TRUE)),"<br>";
+
 		echo "<table>";
 		echo "<tr><th>Mediaani lkm</th><th>Kulmakerroin</th><th>Vakio</th><th>Askelväli</th></tr>";
 		echo "<tr><td>$mediaanilkm</td><td>$kulmakerroin</td><td>$vakio</td><td>$askelvali</td></tr>";
@@ -13777,7 +13805,53 @@ if (!function_exists("tee_keraysera2")) {
 		}
 		echo "</table>";
 
-		
+		$keskihajonta = array();
+
+		echo "<table>";
+		echo "<tr><td>";
+
+		echo "<table>";
+		echo "<tr><th>I</th><th>Keskihajonta</th><th>Key</th></tr>";
+		for ($i = 0; $i < $mediaanilkm; $i++) {
+			$tmp_arr = array_slice($kerailyniput, $i, $askelvali, TRUE); 
+
+			$cnt_tmp_arr = count($tmp_arr);
+
+			if ($cnt_tmp_arr < $askelvali) continue;
+
+			$std_deviation = round(stats_standard_deviation($tmp_arr, TRUE), 0);
+
+			$get_indx_from = array_chunk($tmp_arr, $cnt_tmp_arr / 2, TRUE);
+			$indx_from = array_pop($get_indx_from);
+			$key = key($indx_from);
+
+			$keskihajonta[$key] = $std_deviation;
+
+			echo "<tr><td>$i</td><td>$std_deviation</td><td>$key</td></tr>";
+		}
+		echo "</table>";
+		echo "</td>";
+
+		echo "<td>";
+		echo "<table>";
+		echo "<tr><th>Key</th><th>Keskihajonta</th></tr>";
+		foreach ($keskihajonta as $key => $kh) {
+			echo "<tr><td>$key</td><td>$kh</td></tr>";
+		}
+		echo "</table>";
+		echo "</td>";
+
+		asort($keskihajonta);
+
+		echo "<td>";
+		echo "<table>";
+		echo "<tr><th>Key</th><th>Keskihajonta</th></tr>";
+		foreach ($keskihajonta as $key => $kh) {
+			echo "<tr><td>$key</td><td>$kh</td></tr>";
+		}
+		echo "</table>";
+		echo "</td></tr>";
+		echo "</table>";
 
 		mysql_data_seek($res, 0);
 

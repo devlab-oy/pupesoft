@@ -2797,6 +2797,8 @@
 			$voimaika_pp = "00";
 		}
 
+		$ohjausmerkki = trim($ohjausmerkki);
+
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
 					alatila 							= '$alatila',

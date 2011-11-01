@@ -13720,6 +13720,7 @@ if (!function_exists("tee_keraysera2")) {
 
 			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_asiakas) != '' and $ed_asiakas == $row['liitostunnus'] and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
 				echo "EI SAA OLLA USEITA LÄHTÖJÄ! BREAK<br>";
+				break;
 			}
 
 			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') === false and trim($ed_asiakas) != '' and $ed_asiakas != $row['liitostunnus']) {

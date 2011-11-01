@@ -13648,7 +13648,7 @@ if (!function_exists("tee_keraysera2")) {
 			#8
 			$select = "GROUP_CONCAT(lasku.tunnus)";
 			$groupby = "GROUP BY erotus, prioriteetti, lahto, liitostunnus, asiakas_nimi, lasku.ohjausmerkki";
-			$orderby = "ORDER BY erotus, prioriteetti ASC, lahto, lasku.ohjausmerkki DESC, lasku.liitostunnus, lasku.h1time ASC";
+			$orderby = "ORDER BY erotus, prioriteetti ASC, lahto, lasku.liitostunnus, lasku.ohjausmerkki, lasku.h1time ASC";
 		}
 		else {
 			#1
@@ -13824,7 +13824,7 @@ if (!function_exists("tee_keraysera2")) {
 		$looppi_koko = 0;
 
 		$kaytettavat_pakkaukset = array();
-		$juokseva_nro = 1;
+		$juokseva_nro = 0;
 		// $eran_koko = 0;
 		// $eran_koko_pintaala = 0;
 
@@ -13939,6 +13939,8 @@ if (!function_exists("tee_keraysera2")) {
 			echo "</table>";
 
 			echo "<br><br>";
+
+			$juokseva_nro++;
 
 			if ($kaytettava_pakkaus == "") {
 

@@ -6140,7 +6140,7 @@ if (!function_exists("js_popup")) {
 
 		echo "<script type='text/javascript' language='javascript'>
 			$(document).ready(function() {
-				$('.tooltip').mouseover(function() {
+				$('.tooltip').live('mouseover', function() {
 
 					var pop_id = $(this).attr('id');
 
@@ -6164,7 +6164,7 @@ if (!function_exists("js_popup")) {
 
 						// Käytettävä efekti
 						effect: 'fade',
-						
+
 						events: {
 			                def: \"mouseover,mouseleave\",
 							tooltip: \"mouseover,mouseleave\"
@@ -10726,7 +10726,7 @@ if (!function_exists("laskutuspaiva")) {
 
 if (!function_exists("pupe_DataTables")) {
 	function pupe_DataTables($parametrit) {
-		global $yhtiorow;
+		global $yhtiorow, $PHP_SELF;
 
 		echo "<script type='text/javascript' language='javascript'>";
 		require_once("inc/jquery.min.js");
@@ -10748,9 +10748,11 @@ if (!function_exists("pupe_DataTables")) {
 			$info 			= isset($param[4]) ? $param[4] : "false";
 			$sorting 		= isset($param[5]) ? $param[5] : "true";
 			$aoColumns 		= "";
+			$serverside		= isset($param[6]) ? $param[6] : "EI";
+
 			$paginationtype = $paginate !== false ? "full_numbers" : "two_button";
 
-			$json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting);
+			$json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting, $serverside);
 		}
 
 		preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
@@ -10784,7 +10786,41 @@ if (!function_exists("pupe_DataTables")) {
 						aoColumns[i-1] = \"{\\\"bSortable\\\": false, \\\"bSearchable\\\": false}\";
 					}
 
-					datatablesit[t] = $(this).dataTable( {
+					if (parametrit[tableid][6] == 'YKS') {
+						var ss_params = {	\"bProcessing\": true,
+			        						\"bServerSide\": true,
+			        						\"sAjaxSource\": \"{$PHP_SELF}\",
+											\"fnServerParams\": function ( aoData ) {
+												aoData.push( { \"name\": \"tee\", \"value\": \"AJAX\" } );
+												aoData.push( { \"name\": \"no_head\", \"value\": \"yes\" } );
+												aoData.push( { \"name\": \"ohje\", \"value\": \"off\" } );
+											},
+											\"fnServerData\": function ( sSource, aoData, fnCallback ) {
+																$.ajax( {
+																	\"dataType\": \"json\",
+																	\"type\": \"GET\",
+																	\"url\": sSource,
+																	\"data\": aoData,
+																	\"success\": function (json) {
+
+																					$('#jupster').html('JAAHAS!');
+
+																					fnCallback(json);
+																				}
+																} );
+											}
+										};
+					}
+					else if (parametrit[tableid][6] == 'KAKS') {
+						var ss_params = {	\"bProcessing\": true,
+			        						\"sAjaxSource\": \"arrays.txt\"
+										};
+					}
+					else {
+						var ss_params = {};
+					}
+
+					var dt_params = {
 						\"bSortCellsTop\": true,
 						\"bDestroy\" : true,
 						\"bPaginate\" : parametrit[tableid][2],
@@ -10794,6 +10830,7 @@ if (!function_exists("pupe_DataTables")) {
 						\"bStateSave\" : true,
 						\"iDisplayLength\" : 25,
 						\"oLanguage\": {
+							\"sProcessing\" : \"".t("Ladataan")."\",
 							\"sSearch\" : \"".t("Etsi taulukosta").":\",
 							\"sZeroRecords\": \"".t("Ei hakuosumia")."\",
 							\"sLengthMenu\": \"",t("Näytä")," _MENU_ ",t("riviä"),"\",
@@ -11013,8 +11050,12 @@ if (!function_exists("pupe_DataTables")) {
 								}
 							}
 						}
-					} );
-				} );
+					};
+
+					$.extend(ss_params,dt_params);
+
+					datatablesit[t] = $(this).dataTable(ss_params);
+				} );								
 
 				// KEIKKA.PHPN OMAT JQUERY-TOIMINNALLISUUDET
 				if (datatablesit[0].attr(\"id\") == 'keikka') {
@@ -11583,7 +11624,7 @@ if (!function_exists("pupe_DataTables")) {
 
 				if (oSettings.oPreviousSearch['sSearch']!=''){
 					$('.search_field').val(oSettings.oPreviousSearch['sSearch']);
-				}
+				}				
 			} );
 		</script>";
 	}

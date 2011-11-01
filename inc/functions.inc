@@ -7901,10 +7901,6 @@ if (!function_exists("livesearch_kentta")) {
 	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '') {
 		global $kukarow, $toim;
 
-		if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) {
-			return "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'>";
-		}
-
 		$hakuID = "haku".uniqid();
 
 		return "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
@@ -7915,6 +7911,69 @@ if (!function_exists("livesearch_kentta")) {
 					onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\')', 100);\">
 				<div style='break:all'></div>
 				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
+	}
+}
+
+if (!function_exists("jquery_autocomplete_kentta")) {
+	function jquery_autocomplete_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '') {
+		global $kukarow, $toim, $PHP_SELF;	
+		
+		$hakuID = "haku".uniqid();
+	
+		echo "	<div class='ui-widget'>
+					<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'>
+				</div>
+
+				<div class='ui-widget' style='margin-top:2em; font-family:Arial'>
+					<div id='log' style='height: 200px; width: 300px; overflow: auto;' class='ui-widget-content'></div>
+				</div>";
+				
+		echo "<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				$(function() {					
+					
+					function log( message ) {
+						$( '<div/>' ).text( message ).prependTo( '#log' );
+						$( '#log' ).scrollTop( 0 );
+					}
+					
+					$( '#$hakuID' ).autocomplete({
+						source: function( request, response ) {
+							$.ajax({
+								url: '{$PHP_SELF}',
+								dataType: 'jsonp',
+								data: {
+									featureClass: 'P',
+									style: 'full',
+									maxRows: 12,
+									name_startsWith: request.term
+								},
+								success: function( data ) {
+									response( $.map( data.geonames, function( item ) {
+										return {
+											label: item.name + (item.adminName1 ? ', ' + item.adminName1 : '') + ', ' + item.countryName,
+											value: item.name
+										}
+									}));
+								}
+							});
+						},
+						
+						minLength: 2,
+													
+						select: function( event, ui ) {
+							log( ui.item ?
+								'Selected: ' + ui.item.label :
+								'Nothing selected, input was ' + this.value);
+						},
+						open: function() {
+							$( this ).removeClass( 'ui-corner-all' ).addClass( 'ui-corner-top' );
+						},
+						close: function() {
+							$( this ).removeClass( 'ui-corner-top' ).addClass( 'ui-corner-all' );
+						}
+					});
+				});
+				</script>";			
 	}
 }
 

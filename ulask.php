@@ -28,6 +28,11 @@ echo "	<script type='text/javascript' charset='utf-8'>
 					$(uusi_rivi).find('input, select, div').each(function() {
 
 						if ($(this).is('select, input')) {
+
+							if ($(this).is('select') && $(this).attr('name').substring(0, 5) !== 'ivero') {
+								$(this).val('0');
+							}
+
 							if ($(this).attr('id') != false && $(this).attr('id') != undefined && $(this).attr('id').substring(0, 4) !== 'haku') {
 								$(this).attr('id', $(this).attr('id').replace(i, ii));
 							}
@@ -45,7 +50,12 @@ echo "	<script type='text/javascript' charset='utf-8'>
 							}
 						}
 
-						if ($(this).is('div')) {
+						if ($(this).is('div') && $(this).attr('id').substring(0, 4) == 'nimi') {
+							$(this).attr('id', $(this).attr('id').replace(i, ii));
+							
+							$(this).html('');
+						}
+						else if ($(this).is('div')) {
 							var id = $(this).attr('id');
 							var iduusi = id + ii;
 
@@ -71,7 +81,7 @@ echo "	<script type='text/javascript' charset='utf-8'>
 								});
 
 								console.log($(this).attr('onkeyup'));
-								
+
 								$(this).removeAttr('onkeyup');
 
 								$(this).bind('keyup', function(event) {
@@ -108,7 +118,6 @@ echo "	<script type='text/javascript' charset='utf-8'>
 					$('tr .rivi_'+i).after(uusi_rivi);
 					$('tr .rivi_'+i).after('<tr><td colspan=\'4\'><hr></td></tr>');
 				});
-
 			});
 
 		</script>";
@@ -285,7 +294,7 @@ if ($tee == 'VIIVA') {
 	if (strlen($nimi) == 54 and ( substr($nimi,0,1) == '2' or substr($nimi,0,1) == '4' or substr($nimi,0,1) == '5') ) {
 		$versio = substr($nimi,0,1);
 		$tee2	= "";
-		
+
 		if( $versio == '2' ){
 			$tilino = substr($nimi,1,14);
 			$summa  = substr($nimi,15,8) / 100;
@@ -1500,9 +1509,9 @@ if ($tee == 'P' or $tee == 'E') {
 
 			echo "<tr class='rivi_{$i}'><td valign='top'>";
 
- 			// Tehaan kentta tai naytetaan popup
+ 			// Tehd‰‰n kentt‰ tai naytet‰‰n popup
 			if ($iulos[$i] == '') {
-				echo livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");
+				echo jquery_autocomplete("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");											
 			}
 			else {
 				echo "$iulos[$i]";
@@ -1518,7 +1527,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 				if (mysql_num_rows($vresult) != 0) {
 					$vrow = mysql_fetch_assoc($vresult);
-					echo "<br>$vrow[nimi]";
+					echo "<br><div id='nimi_$i'>$vrow[nimi]</div>";
 				}
 			}
 

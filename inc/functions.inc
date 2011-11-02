@@ -13798,6 +13798,9 @@ if (!function_exists("tee_keraysera2")) {
 		echo "<table>";
 		echo "<tr><th>Mediaani lkm</th><th>Kulmakerroin</th><th>Vakio</th><th>Askelväli</th></tr>";
 		echo "<tr><td>$mediaanilkm</td><td>$kulmakerroin</td><td>$vakio</td><td>$askelvali</td></tr>";
+		echo "</table>";
+
+		echo "<br>";
 
 		echo "<table>";
 		echo "<tr><th>Index</th><th>Keräilynippu</th><th>Mediaani</th></tr>";
@@ -13806,9 +13809,11 @@ if (!function_exists("tee_keraysera2")) {
 		}
 		echo "</table>";
 
+		echo "<br>";
 		$keskihajonta = array();
 
 		echo "<table>";
+		echo "<tr><th>Aputaulukko</th><th>Tulos</th><th>Sortattu</th></tr>";
 		echo "<tr><td>";
 
 		echo "<table>";
@@ -13853,6 +13858,52 @@ if (!function_exists("tee_keraysera2")) {
 		echo "</table>";
 		echo "</td></tr>";
 		echo "</table>";
+
+		reset($keskihajonta);
+
+		$main_key = key($keskihajonta);
+		$main_value = $kerailyniput[$main_key];
+
+		// echo "curr: $main_key med: $kerailyniput[$main_key]<br>";
+
+		if (!function_exists('arrcmp')) {
+			function arrcmp($a, $b) {
+				global $main_value;
+
+				if (abs($a - $main_value) > abs($b - $main_value)) {
+					return -1;
+				}
+				elseif (abs($b - $main_value) > abs($a - $main_value)) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+			}
+		}
+
+		uasort($kerailyniput, 'arrcmp');
+
+		echo "<br>";
+
+		echo "<table>";
+		echo "<tr><th>Indeksi</th><th>Mediaani</th></tr>";
+		foreach ($kerailyniput as $indx => $med) {
+			echo "<tr><td>$indx</td><td>$med</td></tr>";
+		}
+		echo "</table>";
+		// echo "<pre>",var_dump($kerailyniput),"</pre>";
+
+		$fixed_main_array = array();
+
+		reset($kerailyniput);
+
+		foreach ($kerailyniput as $indx => $med) {
+			$fixed_main_array[$indx] = $kerailyniput_key[$indx];
+		}
+		
+
+		echo "<pre>",var_dump($fixed_main_array),"</pre>";
 
 		mysql_data_seek($res, 0);
 

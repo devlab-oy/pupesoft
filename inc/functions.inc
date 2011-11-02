@@ -13427,30 +13427,21 @@ if (!function_exists("calculate_median")) {
 	function calculate_median($arr) {
 	    sort($arr);
 
-		// echo "<br><br>sortattu array:";
-		// echo "<pre>",var_dump($arr),"</pre>";
-
 		// total numbers in array
 	    $count = count($arr);
-
-		// echo "count: $count<br>";
 
 		// find the middle value, or the lowest middle value
 	    $middleval = floor(($count - 1) / 2);
 
-		// echo "middleval: $middleval (floor(($count - 1) / 2))<br>";
-
 		// odd number, middle is the median
 	    if ($count % 2) {
 	        $median = $arr[$middleval];
-			// echo "median: $median = arrayn middleval<br>";
 	    } 
 		else {
 			// even number, calculate avg of 2 medians
 	        $low = $arr[$middleval];
 	        $high = $arr[$middleval + 1];
 	        $median = (($low + $high) / 2);
-			// echo "median: $median (($low + $high) / 2)<br>";
 	    }
 
 	    return $median;
@@ -13475,8 +13466,6 @@ if (!function_exists("tee_keraysera2")) {
 		$max_keraysera_pintaala = 0;
 		$max_keraysera_rivit = 0;
 		$lahtojen_valinen_enimmaisaika = 0;
-		$yhdistelysaanto = '';
-		$ulkoinen_jarjestelma = '';
 
 		// esim. muutetaan metrit senteiksi
 		$mittakerroin = 100;
@@ -13495,47 +13484,42 @@ if (!function_exists("tee_keraysera2")) {
 					AND keraysvyohyke.tunnus = '{$keraysvyohyke}'";
 		$ker_result = pupe_query($query);
 
-		while ($ker_row = mysql_fetch_assoc($ker_result)) {
-			echo "<font class='head'>Keräysvyöhyke: $ker_row[nimitys]</font><br>";
-			$keraysvyohyketiedot['max_keraysera_pintaala'] 			= $ker_row['max_keraysera_pintaala'];
-			$keraysvyohyketiedot['max_keraysera_rivit']				= $ker_row['max_keraysera_rivit'];
-			$keraysvyohyketiedot['yhdistelysaanto']					= $ker_row['yhdistelysaanto'];
-			$keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] 	= $ker_row['lahtojen_valinen_enimmaisaika'];
-			$keraysvyohyketiedot['ulkoinen_jarjestelma'] 			= $ker_row['ulkoinen_jarjestelma'];
+		$keraysvyohyketiedot = mysql_fetch_assoc($ker_result);
 
-			$query = "	SELECT pakkaus.tunnus,
-						pakkaus.pakkauskuvaus,
-						pakkaus.pakkaus,
-						pakkaus.paino, 
-						pakkaus.minimi_tilavuus * pow({$mittakerroin}, 3) as minimi_tilavuus,
-						pakkaus.minimi_paino,
-						(pakkaus.kayttoprosentti / 100) AS kayttoprosentti,
-						if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) leveys,
-						if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) korkeus,
-						if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) syvyys,
-						if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) * if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) * if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) AS tilavuus
-						FROM pakkaus
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND paino > 0
-						AND leveys > 0
-						AND syvyys > 0
-						AND korkeus > 0
-						AND tunnus IN ({$ker_row['sallitut_alustat']})
-						ORDER BY tilavuus ASC";
-			$pakkaus_result = pupe_query($query);
+		echo "<font class='head'>Keräysvyöhyke: $keraysvyohyketiedot[nimitys]</font><br>";
 
-			while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
-				$pakkaukset[$pakkaus_row['tunnus']]['nimi']					= $pakkaus_row['pakkauskuvaus'];
-				$pakkaukset[$pakkaus_row['tunnus']]['leveys'] 				= $pakkaus_row['leveys'];
-				$pakkaukset[$pakkaus_row['tunnus']]['korkeus'] 				= $pakkaus_row['korkeus'];
-				$pakkaukset[$pakkaus_row['tunnus']]['syvyys'] 				= $pakkaus_row['syvyys'];
-				$pakkaukset[$pakkaus_row['tunnus']]['paino'] 				= $pakkaus_row['paino'];
-				$pakkaukset[$pakkaus_row['tunnus']]['minimi_tilavuus'] 		= $pakkaus_row['minimi_tilavuus'];
-				$pakkaukset[$pakkaus_row['tunnus']]['minimi_paino'] 		= $pakkaus_row['minimi_paino'];
-				$pakkaukset[$pakkaus_row['tunnus']]['tilavuus'] 			= $pakkaus_row['tilavuus'] * $pakkaus_row['kayttoprosentti'];
-				$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_tilavuus'] 	= 0;
-				$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_paino'] 		= 0;
-			}
+		$query = "	SELECT pakkaus.tunnus,
+					pakkaus.pakkauskuvaus,
+					pakkaus.pakkaus,
+					pakkaus.paino, 
+					pakkaus.minimi_tilavuus * pow({$mittakerroin}, 3) as minimi_tilavuus,
+					pakkaus.minimi_paino,
+					(pakkaus.kayttoprosentti / 100) AS kayttoprosentti,
+					if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) leveys,
+					if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) korkeus,
+					if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) syvyys,
+					if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) * if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) * if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) AS tilavuus
+					FROM pakkaus
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND paino > 0
+					AND leveys > 0
+					AND syvyys > 0
+					AND korkeus > 0
+					AND tunnus IN ({$keraysvyohyketiedot['sallitut_alustat']})
+					ORDER BY tilavuus ASC";
+		$pakkaus_result = pupe_query($query);
+
+		while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
+			$pakkaukset[$pakkaus_row['tunnus']]['nimi']					= $pakkaus_row['pakkauskuvaus'];
+			$pakkaukset[$pakkaus_row['tunnus']]['leveys'] 				= $pakkaus_row['leveys'];
+			$pakkaukset[$pakkaus_row['tunnus']]['korkeus'] 				= $pakkaus_row['korkeus'];
+			$pakkaukset[$pakkaus_row['tunnus']]['syvyys'] 				= $pakkaus_row['syvyys'];
+			$pakkaukset[$pakkaus_row['tunnus']]['paino'] 				= $pakkaus_row['paino'];
+			$pakkaukset[$pakkaus_row['tunnus']]['minimi_tilavuus'] 		= $pakkaus_row['minimi_tilavuus'];
+			$pakkaukset[$pakkaus_row['tunnus']]['minimi_paino'] 		= $pakkaus_row['minimi_paino'];
+			$pakkaukset[$pakkaus_row['tunnus']]['tilavuus'] 			= $pakkaus_row['tilavuus'] * $pakkaus_row['kayttoprosentti'];
+			$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_tilavuus'] 	= 0;
+			$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_paino'] 		= 0;
 		}
 
 		/*
@@ -14726,7 +14710,7 @@ if (!function_exists("tee_keraysera2")) {
 			require("inc/sahkoposti.inc");
 		}
 
-		if ($ulkoinen_jarjestelma == 'K') {
+		if ($keraysvyohyketiedot['ulkoinen_jarjestelma'] == 'K') {
 			//keksitään uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
@@ -14741,7 +14725,7 @@ if (!function_exists("tee_keraysera2")) {
 
 						$erat['pakkaukset'][$pakkauksen_nro][$juokseva_nro][$tilriv] = $kpl;
 
-						if ($ulkoinen_jarjestelma == 'K') {
+						if ($keraysvyohyketiedot['ulkoinen_jarjestelma'] == 'K') {
 							$query = "SELECT otunnus, tuoteno, nimitys, CONCAT(hyllyalue, '-', hyllynro, '-', hyllyvali, '-', hyllytaso) AS hyllypaikka FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
 							$tilriv_tiedot_res = pupe_query($query);
 							$tilriv_tiedot_row = mysql_fetch_assoc($tilriv_tiedot_res);
@@ -14755,7 +14739,7 @@ if (!function_exists("tee_keraysera2")) {
 			}
 		}
 
-		if ($ulkoinen_jarjestelma == 'K') {
+		if ($keraysvyohyketiedot['ulkoinen_jarjestelma'] == 'K') {
 
 			fclose($fh);
 

@@ -13463,14 +13463,9 @@ if (!function_exists("tee_keraysera2")) {
 
 		$pakkaukset = array();
 		$keraysvyohyketiedot = array();
-		$max_keraysera_pintaala = 0;
-		$max_keraysera_rivit = 0;
-		$lahtojen_valinen_enimmaisaika = 0;
 
 		// esim. muutetaan metrit senteiksi
 		$mittakerroin = 100;
-		// millä tarkkuudella tuotteita pakataan (esim. 5 cm)
-		$resoluutio = 5;
 
 		$query = "	SELECT nimitys, sallitut_alustat,
 					if(max_keraysera_pintaala * pow({$mittakerroin}, 2) < 1, 1, max_keraysera_pintaala * pow({$mittakerroin}, 2)) max_keraysera_pintaala,

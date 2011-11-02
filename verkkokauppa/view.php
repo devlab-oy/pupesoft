@@ -1,5 +1,8 @@
 <?php
 
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
+
 if (file_exists("inc/connect.inc")) {
 	require ("inc/connect.inc");
 }
@@ -9,8 +12,8 @@ else {
 
 $id = (int) $_GET["id"];
 
-$query = "	SELECT * 
-			from liitetiedostot 
+$query = "	SELECT *
+			from liitetiedostot
 			where tunnus = '$id'
 			and liitos in ('kalenteri','tuote','sarjanumeron_lisatiedot')";
 $liiteres = mysql_query($query) or pupe_error($query);

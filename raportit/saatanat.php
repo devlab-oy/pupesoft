@@ -6,7 +6,7 @@
 			if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 		}
 
-		///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+		//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 		$useslave = 1;
 
 		$pupe_DataTables = "saatanat_taulu";

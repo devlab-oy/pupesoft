@@ -1,5 +1,6 @@
 <?php
 
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (file_exists("inc/connect.inc")) {

@@ -1,5 +1,5 @@
 <?php
-
+	
 	if ($_POST["tee"] == 'lataa_tiedosto') {
 		$lataa_tiedosto = 1;
 	}
@@ -562,7 +562,7 @@
 
 		if ($tee == 'LISTAA') {
 
-			// käytetään slavea
+			//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 			$useslave = 1;
 
 			require('inc/connect.inc');

@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	// Kutsutaanko CLI:stä
 	$php_cli = FALSE;
 
@@ -540,7 +543,7 @@
 					$having_lisa
 					ORDER BY $order_lisa";
 		$result = pupe_query($query);
-		
+
 		echo "BR: $order_lisa";
 
 		$lask   = 0;

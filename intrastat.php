@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	if (isset($_POST["tee"])) {
 		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
@@ -115,7 +118,7 @@
 						$vainnimikelisa2
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
-						left(max(tuote.nimitys), 40) nimitys,			
+						left(max(tuote.nimitys), 40) nimitys,
 						round(sum(tilausrivi.kpl),0) kpl,
 						if (round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0) > 0.5, round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0), 1) as paino,
 						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,

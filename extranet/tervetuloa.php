@@ -28,7 +28,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 		$laskurow = mysql_fetch_array($laskures);
 	}
 
-	echo "<font class='message'>Lisätään tuotteita tilaukselle $kukarow[kesken].</font><br>";
+	echo "<font class='message'>".t("Lisätään tuotteita tilaukselle")." $kukarow[kesken].</font><br>";
 
 	$kpl = 1;
 
@@ -37,7 +37,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 	$tuoteres = mysql_query($query);
 
 	if (mysql_num_rows($tuoteres) == 0) {
-		echo "<font class='error'>Tuotetta $tuoteno ei löydy!</font><br>";
+		echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei löydy")."!</font><br>";
 	}
 	else {
 		// tuote löytyi ok, lisätään rivi

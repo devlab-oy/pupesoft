@@ -46,8 +46,9 @@
 			unset($_REQUEST);
 		}
 
-		// k‰ytet‰‰n slavea
+		//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 		$useslave = 1;
+
 		require ("inc/connect.inc");
 
 		if ($lopetus == "") {

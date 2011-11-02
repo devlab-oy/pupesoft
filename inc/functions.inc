@@ -6147,11 +6147,11 @@ if (!function_exists("js_popup")) {
 				x = e.pageX;
 			}
 			else if (e.clientX) {
-				x = e.clientX + document.body.scrollLeft
-					+ document.documentElement.scrollLeft;
+				x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
 			}
 			return x;
 		}
+		
 		function getMouseY(e) {
 			var y = null;
 
@@ -6167,11 +6167,12 @@ if (!function_exists("js_popup")) {
 		}
 
 	    function toolTipShow(e, x, y) {
-	        toolTip.css({'top':y, 'left':x}).delay(1000).show('fast');
+	        toolTip.css({'top':y, 'left':x}).delay(500).show('fast');
 	    }
 
-	    function toolTipHide() {
-			toolTip.hide().clearQueue();
+	    function toolTipHide() {			
+			toolTip.clearQueue();
+			toolTip.hide();
 	    }
 
 	    //events for each element

@@ -242,7 +242,7 @@
 			echo "<div id='div_$vrow[tunnus]' class='popup' style='width:500px;'>";
 			echo t("Työmääräys"),": $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"]);
 			echo "</div>";
-			echo "<td valign='top' class='tooltip' id='$vrow[tunnus]'><span class='tyom_id'>$vrow[tunnus]</span></td>";
+			echo "<td valign='top' class='tooltip' id='$vrow[tunnus]'><span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]</td>";
 		}
 		else {
 			echo "<td valign='top'><span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]</td>";

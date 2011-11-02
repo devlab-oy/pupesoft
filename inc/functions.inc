@@ -7580,11 +7580,15 @@ if (!function_exists("livesearch_tuotehaku")) {
 					$kieltolisa .= " and tuote.hinnastoon != 'E' ";
 				}
 			}
+			
+			if ($yhtiorow['livetuotehaku_poistetut'] != 'X') {
+				$naytetaanko_poistetut = "and tuote.status != 'P'";
+			}
 
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						and tuote.status != 'P'
+						$naytetaanko_poistetut
 						$kieltolisa
 						$haku_query";
 			$result = pupe_query($query);

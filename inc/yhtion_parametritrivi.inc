@@ -2266,6 +2266,21 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "livetuotehaku_poistetut") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Älä näytä poistettuja tuotteita oletuksena")."</option>";
+		$ulos .= "<option value = 'X' $sel[X]>".t("Näytä poistetut tuotteet oletuksena")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "naytetaanko_osaston_ja_tryn_selite") {
 

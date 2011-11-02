@@ -910,7 +910,7 @@ else {
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
 						and (tilausrivi.hyllyalue != '' OR tilausrivin_lisatiedot.omalle_tilaukselle != '')
-						and tilausrivi.varattu+tilausrivi.kpl > 0
+						and tilausrivi.varattu > 0
 						and tilausrivi.var not in ('J','P')
 						ORDER BY $sorttaus";
 			$result = pupe_query($query);
@@ -987,8 +987,6 @@ else {
 					$ulkoinen_jarjestelma_res = pupe_query($query);
 					$varaston_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
 
-					$varasto_chk_array[$laskurow['tunnus']] = $varaston_row['ulkoinen_jarjestelma'];
-
 					// Erikoistoimitukset rahtivapaana
 					// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
 					if ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') {
@@ -1048,6 +1046,10 @@ else {
 
 					$laskurow['tunnus'] = mysql_insert_id();
 
+					// Laitetaan uuden tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen
+					$varasto_chk_array[$laskurow['tunnus']] = $varaston_row['ulkoinen_jarjestelma'];
+
+					// Tallennetaan kaikki splitit
 					$tilausnumerot[] = $laskurow["tunnus"];
 
 					$fields = "yhtio";
@@ -1073,7 +1075,7 @@ else {
 					$uusires = pupe_query($query);
 				}
 				elseif (!$tilaus_splitattu) {
-					// Pidet‰‰n lukua kuinka paljon mist‰kin varastosta on rivi‰, jotka j‰‰ alkuperˆiselle tilaukselle
+					// Pidet‰‰n lukua kuinka paljon mist‰kin varastosta on rivi‰, jotka j‰‰ alkuper‰iselle tilaukselle
 					if ($varasto > 0) {
 						if (isset($varasto_kpl_array[$varasto])) $varasto_kpl_array[$varasto]++;
 						else $varasto_kpl_array[$varasto] = 1;
@@ -1133,6 +1135,7 @@ else {
 			// Intrastat-tiedot
 			$laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
 
+			// Laitetaan alkuper‰isen tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen
 			$varasto_chk_array[$temp_laskutunnus] = $varaston_row['ulkoinen_jarjestelma'];
 
 			// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
@@ -1375,7 +1378,6 @@ else {
 			}
 
 			if (in_array("U", $varasto_chk_array) and (in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "EXTRANET")) or $tullaanko_tilausten_sisaanluvusta == 'EDITILAUS' or $tullaanko_tilausten_sisaanluvusta == 'VARAOSASELAIN' or (in_array($toim, array("","ENNAKKO")) and $mista == "jtselaus"))) {
-
 				foreach ($tilausnumerot as $til_nro) {
 
 					// Jos tilauksista yksikin menee "Unikko"-j‰rjestelm‰‰n, p‰ivitet‰‰n kaikki tilaukset rahtivapaiksi
@@ -1393,7 +1395,6 @@ else {
 
 					// jos varaston ulkoinen j‰rjestelm‰ on Unikko
 					if ($varasto_chk_array[$til_nro] == 'U') {
-
 						if ($laskurow_edi['tilaustyyppi'] == 7) {
 							$pupesoft_tilaustyyppi = 7;
 						}
@@ -1453,6 +1454,7 @@ else {
 		}
 	} // end jos yksikin rivi ker‰tty else haara
 }
+
 //tyhjennet‰‰n ett‰ se ei kummittele uudella tilauksella
 $hinta = '';
 

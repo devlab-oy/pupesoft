@@ -13341,19 +13341,29 @@ if (!function_exists("valitse_pakkaus")) {
 			// pakkaukset ovat pienimmästä isoimpaan
 			foreach ($pakkaukset as $indx => $pakkaus_array) {
 
-				if ($pakkaus_array['leveys'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $pisin_tuote['paino'] and $koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
-					$kaytettava_pakkaus = $indx;
-					break;
-				}
-
-				if ($pakkaus_array['korkeus'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $pisin_tuote['paino'] and $koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
-					$kaytettava_pakkaus = $indx;
-					break;
-				}
-
-				if ($pakkaus_array['syvyys'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $pisin_tuote['paino'] and $koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
-					$kaytettava_pakkaus = $indx;
-					break;
+				if (($pakkaus_array['leveys'] >= $pisin_tuote['koko'] or $pakkaus_array['korkeus'] >= $pisin_tuote['koko'] or $pakkaus_array['syvyys'] >= $pisin_tuote['koko']) and $pakkaus_array['paino'] >= $pisin_tuote['paino']) {
+					if ($koko_nippu_tilavuus > 0 and $koko_nippu_paino > 0) {
+						if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus'] or $koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
+							$kaytettava_pakkaus = $indx;
+							break;
+						}
+					}
+					elseif ($koko_nippu_tilavuus > 0 and $koko_nippu_paino == 0) {
+						if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
+							$kaytettava_pakkaus = $indx;
+							break;
+						}
+					}
+					elseif ($koko_nippu_tilavuus == 0 and $koko_nippu_paino > 0) {
+						if ($koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
+							$kaytettava_pakkaus = $indx;
+							break;
+						}
+					}
+					else {
+						$kaytettava_pakkaus = $indx;
+						break;
+					}
 				}
 			}
 		}
@@ -13669,13 +13679,6 @@ if (!function_exists("tee_keraysera2")) {
 			return array();
 		}
 
-		// $home_values_array = array("2", "2", "3", "45", "66", "77", "88", "99", "99");
-		// 
-		// $median_home_value = calculate_median($home_values_array);
-		// echo '<br>Median home value: '.number_format($median_home_value).'<br />';
-		// $average_home_value = calculate_average($home_values_array);
-		// echo 'Average home value: '.number_format($average_home_value).'<br>';
-
 		/**
 		 * Keräilynippujen optimaalinen järjestäminen.
 		 * Lasketaan optimaalinen kävelymatka varaston hyllypaikkojen indeksien mediaanien avulla.
@@ -13693,6 +13696,7 @@ if (!function_exists("tee_keraysera2")) {
 		$i = 1;
 
 		while ($row = mysql_fetch_assoc($res)) {
+
 			if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'P') === false and trim($ed_prioriteetti) != '' and $ed_prioriteetti != $row['prioriteetti']) {
 				echo "EI SAA OLLA USEITA PRIORITEETTEJÄ ALUSTOISSA! BREAK<br>";
 				break;
@@ -13718,8 +13722,10 @@ if (!function_exists("tee_keraysera2")) {
 			$indeksi_res = pupe_query($query);
 			$indeksi_row = mysql_fetch_assoc($indeksi_res);
 
+			// lasketaan saatujen varaston hyllypaikkojen indeksien mediaani
 			$mediaani = calculate_median(explode(",", $indeksi_row['indeksit']));
 
+			// otetaan mediaani, loopattavat tilaukset ja niiden tiedot talteen
 			$kerailyniput[$i] = $mediaani;
 			$kerailyniput_key[$i] = $row['tunnus'];
 			$kerailyniput_tiedot[$i]['liitostunnus'] = $row['liitostunnus'];
@@ -13733,8 +13739,10 @@ if (!function_exists("tee_keraysera2")) {
 			$i++;
 		}
 
+		// järjestetään mediaanit nousevaan järjestykseen
 		asort($kerailyniput);
 
+		// annetaan mediaanien lukumäärän minimi ja maksimiarvot (ja niille askelvälit) joita käytetään lineaarisen suoran kulmakertoimen ja vakion laskentaan
 		$min_max = array(
 					// mediaanien lkm min
 					0 => array(5 => 3), 
@@ -13742,155 +13750,140 @@ if (!function_exists("tee_keraysera2")) {
 					1 => array(70 => 10)
 					);
 
+		// mediaanien lukumäärä
 		$mediaanilkm = count($kerailyniput);
 
-		// $mediaanilkm = 57;
+		// $mediaanilkm = 1;
 
+		// jos mediaanien lukumäärä on vähintään yhtä suuri kuin annettu minimi
 		if ($mediaanilkm >= key($min_max[0])) {
 
+			// jos mediaanien lukumäärä ylittää sallitun maksimin, käytetään maksimin askelväliä
 			if ($mediaanilkm > key($min_max[1])) {
 				$askelvali = current($min_max[1]);
 			}
 			else {
 				// lineaarisen suoran kulmakerroin ja vakio
+				// kulmakertoimella ja vakiolla pystytään laskemaan askelväli
 				$kulmakerroin = round((current($min_max[1]) - current($min_max[0])) / (key($min_max[1]) - key($min_max[0])), 5);  
 				$vakio = round(current($min_max[0]) - ($kulmakerroin * key($min_max[0])) , 5);
 				$askelvali = round($mediaanilkm * $kulmakerroin + $vakio , 0);
 			}
-		}
 
-		// echo "<pre>",var_dump(array_slice($kerailyniput, 0, $askelvali, TRUE)),"</pre>";
+			echo "<table>";
+			echo "<tr><th>Mediaani lkm</th><th>Kulmakerroin</th><th>Vakio</th><th>Askelväli</th></tr>";
+			echo "<tr><td>$mediaanilkm</td><td>$kulmakerroin</td><td>$vakio</td><td>$askelvali</td></tr>";
+			echo "</table>";
 
-		// echo "Standard deviation: ",stats_standard_deviation(array_slice($kerailyniput, 0, $askelvali, TRUE)),"<br>";
-		// echo "Standard deviation: ",stats_standard_deviation(array_slice($kerailyniput, 7, 5, TRUE)),"<br>";
+			echo "<br>";
 
-		// function standard_deviation($aValues, $bSample = false)
-		// {
-		//     $fMean = array_sum($aValues) / count($aValues);
-		//     $fVariance = 0.0;
-		//     foreach ($aValues as $i)
-		//     {
-		//         $fVariance += pow($i - $fMean, 2);
-		//     }
-		//     $fVariance /= ( $bSample ? count($aValues) - 1 : count($aValues) );
-		//     return (float) sqrt($fVariance);
-		// }
-		// 
-		// echo "stand dev: ".standard_deviation(array_slice($kerailyniput, 0, $askelvali, TRUE)),"<br>";
+			echo "<table>";
+			echo "<tr><th>Index</th><th>Keräilynippu</th><th>Mediaani</th></tr>";
+			foreach ($kerailyniput as $indx => $mediaani) {
+				echo "<tr><td>$indx</td><td>{$kerailyniput_key[$indx]}</td><td>$mediaani</td></tr>";
+			}
+			echo "</table>";
 
-		echo "<table>";
-		echo "<tr><th>Mediaani lkm</th><th>Kulmakerroin</th><th>Vakio</th><th>Askelväli</th></tr>";
-		echo "<tr><td>$mediaanilkm</td><td>$kulmakerroin</td><td>$vakio</td><td>$askelvali</td></tr>";
-		echo "</table>";
+			echo "<br>";
+			$keskihajonta = array();
 
-		echo "<br>";
+			echo "<table>";
+			echo "<tr><th>Aputaulukko</th><th>Tulos</th><th>Sortattu</th></tr>";
+			echo "<tr><td>";
 
-		echo "<table>";
-		echo "<tr><th>Index</th><th>Keräilynippu</th><th>Mediaani</th></tr>";
-		foreach ($kerailyniput as $indx => $mediaani) {
-			echo "<tr><td>$indx</td><td>{$kerailyniput_key[$indx]}</td><td>$mediaani</td></tr>";
-		}
-		echo "</table>";
+			echo "<table>";
+			echo "<tr><th>I</th><th>Keskihajonta</th><th>Key</th></tr>";
 
-		echo "<br>";
-		$keskihajonta = array();
+			// muodostetaan keskihajonta-taulukko
+			for ($i = 0; $i < $mediaanilkm; $i++) {
+				$tmp_arr = array_slice($kerailyniput, $i, $askelvali, TRUE); 
 
-		echo "<table>";
-		echo "<tr><th>Aputaulukko</th><th>Tulos</th><th>Sortattu</th></tr>";
-		echo "<tr><td>";
+				$cnt_tmp_arr = count($tmp_arr);
 
-		echo "<table>";
-		echo "<tr><th>I</th><th>Keskihajonta</th><th>Key</th></tr>";
-		for ($i = 0; $i < $mediaanilkm; $i++) {
-			$tmp_arr = array_slice($kerailyniput, $i, $askelvali, TRUE); 
+				if ($cnt_tmp_arr < $askelvali) continue;
 
-			$cnt_tmp_arr = count($tmp_arr);
+				$std_deviation = round(stats_standard_deviation($tmp_arr, TRUE), 0);
 
-			if ($cnt_tmp_arr < $askelvali) continue;
+				$get_indx_from = array_chunk($tmp_arr, $cnt_tmp_arr / 2, TRUE);
+				$indx_from = array_pop($get_indx_from);
+				$key = key($indx_from);
 
-			$std_deviation = round(stats_standard_deviation($tmp_arr, TRUE), 0);
+				$keskihajonta[$key] = $std_deviation;
 
-			$get_indx_from = array_chunk($tmp_arr, $cnt_tmp_arr / 2, TRUE);
-			$indx_from = array_pop($get_indx_from);
-			$key = key($indx_from);
+				echo "<tr><td>$i</td><td>$std_deviation</td><td>$key</td></tr>";
+			}
+			echo "</table>";
+			echo "</td>";
 
-			$keskihajonta[$key] = $std_deviation;
+			echo "<td>";
+			echo "<table>";
+			echo "<tr><th>Key</th><th>Keskihajonta</th></tr>";
+			foreach ($keskihajonta as $key => $kh) {
+				echo "<tr><td>$key</td><td>$kh</td></tr>";
+			}
+			echo "</table>";
+			echo "</td>";
 
-			echo "<tr><td>$i</td><td>$std_deviation</td><td>$key</td></tr>";
-		}
-		echo "</table>";
-		echo "</td>";
+			// järjestetään keskihajonta-taulukko nousevaan järjestykseen
+			// mitä pienempi keskihajontaluku on, sitä parempi!
+			asort($keskihajonta);
 
-		echo "<td>";
-		echo "<table>";
-		echo "<tr><th>Key</th><th>Keskihajonta</th></tr>";
-		foreach ($keskihajonta as $key => $kh) {
-			echo "<tr><td>$key</td><td>$kh</td></tr>";
-		}
-		echo "</table>";
-		echo "</td>";
+			echo "<td>";
+			echo "<table>";
+			echo "<tr><th>Key</th><th>Keskihajonta</th></tr>";
+			foreach ($keskihajonta as $key => $kh) {
+				echo "<tr><td>$key</td><td>$kh</td></tr>";
+			}
+			echo "</table>";
+			echo "</td></tr>";
+			echo "</table>";
 
-		asort($keskihajonta);
+			reset($keskihajonta);
 
-		echo "<td>";
-		echo "<table>";
-		echo "<tr><th>Key</th><th>Keskihajonta</th></tr>";
-		foreach ($keskihajonta as $key => $kh) {
-			echo "<tr><td>$key</td><td>$kh</td></tr>";
-		}
-		echo "</table>";
-		echo "</td></tr>";
-		echo "</table>";
+			// otetaan ensimmäisen alkion mediaani talteen
+			$main_value = $kerailyniput[key($keskihajonta)];
 
-		reset($keskihajonta);
+			// järjestellään keräilyniput bubble sortin avulla vartaamalla sitä ensimmäisen alkion mediaaniin, eli ensimmäisen = parhaaseen keskihajontaotokseen
+			if (!function_exists('arrcmp')) {
+				function arrcmp($a, $b) {
+					global $main_value;
 
-		$main_key = key($keskihajonta);
-		$main_value = $kerailyniput[$main_key];
-
-		// echo "curr: $main_key med: $kerailyniput[$main_key]<br>";
-
-		if (!function_exists('arrcmp')) {
-			function arrcmp($a, $b) {
-				global $main_value;
-
-				if (abs($a - $main_value) > abs($b - $main_value)) {
-					return -1;
-				}
-				elseif (abs($b - $main_value) > abs($a - $main_value)) {
-					return 1;
-				}
-				else {
-					return 0;
+					if (abs($a - $main_value) > abs($b - $main_value)) {
+						return -1;
+					}
+					elseif (abs($b - $main_value) > abs($a - $main_value)) {
+						return 1;
+					}
+					else {
+						return 0;
+					}
 				}
 			}
+
+			uasort($kerailyniput, 'arrcmp');
+
+			echo "<br>";
+
+			echo "<table>";
+			echo "<tr><th>Indeksi</th><th>Mediaani</th></tr>";
+			foreach ($kerailyniput as $indx => $med) {
+				echo "<tr><td>$indx</td><td>$med</td></tr>";
+			}
+			echo "</table>";
+			// echo "<pre>",var_dump($kerailyniput),"</pre>";
+
 		}
-
-		uasort($kerailyniput, 'arrcmp');
-
-		echo "<br>";
-
-		echo "<table>";
-		echo "<tr><th>Indeksi</th><th>Mediaani</th></tr>";
-		foreach ($kerailyniput as $indx => $med) {
-			echo "<tr><td>$indx</td><td>$med</td></tr>";
-		}
-		echo "</table>";
-		// echo "<pre>",var_dump($kerailyniput),"</pre>";
 
 		$fixed_main_array = array();
 
 		reset($kerailyniput);
 
+		// muodostetaan loopattava päätaulukko
 		foreach ($kerailyniput as $indx => $med) {
 			$fixed_main_array[$indx] = $kerailyniput_key[$indx];
 		}
-		
 
 		echo "<pre>",var_dump($fixed_main_array),"</pre>";
-
-		mysql_data_seek($res, 0);
-
-		$ulkoisen_jarjestelman_tiedosto = '';
 
 		$tuote_yksin_keraysalustalle = array();
 
@@ -13902,6 +13895,7 @@ if (!function_exists("tee_keraysera2")) {
 
 		enable_ajax();
 
+		// siirretään lopputulos-taulu debugia varten ylös
 		echo "	<script type='text/javascript'>
 
 					$(document).ready(function() {
@@ -13981,7 +13975,6 @@ if (!function_exists("tee_keraysera2")) {
 				$ohjausmerkki[$ohjausmerkki_row['tunnus']] = $ohjausmerkki_row['ohjausmerkki'];
 			}
 
-
 			echo "<br><br>ASIAKAS: {$kerailyniput_tiedot[$key]['nimi']}<br>";
 			echo "Tilaukset: $tilaukset<br>";
 			echo "<br>ETSITÄÄN PISIN TUOTE:<br>";
@@ -14012,7 +14005,7 @@ if (!function_exists("tee_keraysera2")) {
 
 				echo "<font class='head'>Tuoteno: $tuoterow[tuoteno] KPL: $tuoterow[y_maara]</font> "; 
 				echo "Otunnus: $tuoterow[otunnus] ";
-				echo "Tuotteen tilavuus: $tuoterow[y_koko] <font class='head'>($tuoterow[tuoteleveys] cm&nbsp;&nbsp;x&nbsp;&nbsp;$tuoterow[tuotekorkeus] cm&nbsp;&nbsp;x&nbsp;&nbsp;$tuoterow[tuotesyvyys] cm)</font> ";
+				echo "Tuotteen tilavuus: $tuoterow[y_koko] Tuotteen paino: $tuoterow[y_paino] <font class='head'>($tuoterow[tuoteleveys] cm&nbsp;&nbsp;x&nbsp;&nbsp;$tuoterow[tuotekorkeus] cm&nbsp;&nbsp;x&nbsp;&nbsp;$tuoterow[tuotesyvyys] cm)</font> ";
 				echo "<br>";
 
 				if ($tuoterow['tuoteleveys'] > $pisin_tuote[$tuoterow['tuoteno']]['koko']) {
@@ -14039,6 +14032,9 @@ if (!function_exists("tee_keraysera2")) {
 				$eran_koko_pintaala_chk += ($tuoterow['tuoteleveys'] * $tuoterow['tuotesyvyys']);
 				$eran_paino_chk += ($tuoterow['y_paino'] * $tuoterow['y_maara']);
 			}
+
+			echo "<br><font class='head'>NIPUN TILAVUUS YHT: $eran_koko_chk</font>";
+			echo "<br><font class='head'>NIPUN PAINO YHT: $eran_paino_chk</font><br>";
 
 			echo "<br><font class='head'>PISIMMÄT TUOTTEET JÄRJESTYKSESSÄ:</font>";
 
@@ -14282,7 +14278,14 @@ if (!function_exists("tee_keraysera2")) {
 
 
 					// // tilaus loppuu, tehdään vielä tässä vaiheessa pakkaustsekki
-					list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
+					// list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
+
+					$param = $eran_koko_chk;
+					$kaytettava_pakkaus = valitse_pakkaus($pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $param);
+
+					if ($kaytettava_pakkaus == '') {
+						break 2;
+					}
 
 					if (($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
 						echo "Tuleva pakkaus ylittäisi JOKA TAPAUKSESSA keräyserän sallitun pinta-alan ($eran_koko_pintaala cm2 + ".($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])." cm2 > $keraysvyohyketiedot[max_keraysera_pintaala] cm2). Keräyserä valmis!<br>";
@@ -14295,7 +14298,7 @@ if (!function_exists("tee_keraysera2")) {
 
 				if ($tuoterow['yksin_kerailyalustalle'] != '' or ($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']] and $tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] != '')) {
 
-					if ($kaytettava_pakkaus == "") $juokseva_nro--;
+					// if ($kaytettava_pakkaus == "") $juokseva_nro--;
 
 					echo "<br><br>Erän tilavuus ennen YKSIN KERÄYSALUSTALLE: $eran_koko cm3<br>";
 					echo "Erän pinta-ala ennen YKSIN KERÄYSALUSTALLE: $eran_koko_pintaala cm2<br>";
@@ -14318,8 +14321,11 @@ if (!function_exists("tee_keraysera2")) {
 						unset($pisin_tuote[$tuoterow['tuoteno']]);
 					}
 
-					if ($kaytettava_pakkaus == '') {
+					if ($kaytettava_pakkaus == '' and $eran_koko_chk > 0) {
 						$kaytettava_pakkaus = valitse_pakkaus($pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, ($eran_koko_chk - $eran_koko));
+					}
+					else {
+						$juokseva_nro--;
 					}
 
 					continue;
@@ -14363,6 +14369,8 @@ if (!function_exists("tee_keraysera2")) {
 
 					echo "<font class='error'>Kaikki tuotteet eivät mahtuneet samaan pakettiin.</font><br>";
 					echo "Katsotaan montako tuotetta mahtuu tähän pakettiin (kappaleita $tuoterow[y_maara])<br>";
+
+					$xxx = 1;
 
 					for ($i = 1; $i <= $tuoterow['y_maara']; $i++) {
 						echo "$i. tuote ";
@@ -14424,6 +14432,14 @@ if (!function_exists("tee_keraysera2")) {
 								list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
 							}
 
+							// varotoimenpide ikuista looppia varten
+							if ($xxx > ($tuoterow['y_maara'] * 2)) {
+								echo "Nyt sisäinen looppi on $xxx > ($tuoterow[y_maara] * 2)<br>";
+								echo "POIS TÄÄLTÄ! KERÄYSERÄ VALMIS!<br>";
+								$era_valmis = true;
+								break 3;								
+							}
+
 							if ($ed_tuote != '' and isset($pisin_tuote[$ed_tuote]['tilaus'][$tuoterow['otunnus']])) {
 								echo "<br>Edellinen tuote on $ed_tuote! Otetaan se pois.<br><br>";
 
@@ -14471,6 +14487,8 @@ if (!function_exists("tee_keraysera2")) {
 							$looppi_koko = 0;
 							$i--;
 							$juokseva_nro++;
+
+							$xxx++;
 
 							echo "KÄYTETÄÄN PAKKAUSTA $kaytettava_pakkaus:<br>";
 							echo "<pre>",var_dump($pakkaukset[$kaytettava_pakkaus]),"</pre>";

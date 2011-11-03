@@ -112,7 +112,7 @@ if ($tee == "aja") {
 					JOIN tuote ON tuote.yhtio = liitetiedostot.yhtio and tuote.hinnastoon = 'W' and tuote.tunnus = liitetiedostot.liitostunnus
 					WHERE liitetiedostot.yhtio = '$kyhtio' and liitetiedostot.liitos = 'tuote' and liitetiedostot.kayttotarkoitus in ('TK','MU')
 					ORDER BY liitetiedostot.kayttotarkoitus ASC";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		//l‰hetet‰‰n tiedosto
 		$conn_id = ftp_connect($ftpkuvahost);

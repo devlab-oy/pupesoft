@@ -25,7 +25,7 @@ if (mysql_num_rows($result) != 1) {
 $id = (int) $_GET["id"];
 
 $query = "SELECT * FROM liitetiedostot where tunnus = '$id'";
-$liiteres = mysql_query($query) or pupe_error($query);
+$liiteres = pupe_query($query);
 $liiterow = mysql_fetch_assoc($liiteres);
 
 if ($kuka_check_row['yhtio'] != $liiterow['yhtio'] and $liiterow['liitos'] != 'kalenteri') {

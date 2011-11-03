@@ -19,7 +19,7 @@
 					JOIN liitetiedostot ON (liitetiedostot.yhtio = lasku.yhtio and liitetiedostot.liitos = 'lasku' AND liitetiedostot.liitostunnus = lasku.tunnus AND liitetiedostot.kayttotarkoitus IN ('FINVOICE', 'EDI'))
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND lasku.laskunro = '$laskunro'";
-		$lasku_res = mysql_query($query) or pupe_error($query);
+		$lasku_res = pupe_query($query);
 		$lasku_row = mysql_fetch_assoc($lasku_res);
 
 		if (mysql_num_rows($lasku_res) == 1 and $lasku_row['kayttotarkoitus'] == 'FINVOICE') {

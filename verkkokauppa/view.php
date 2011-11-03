@@ -16,7 +16,7 @@ $query = "	SELECT *
 			from liitetiedostot
 			where tunnus = '$id'
 			and liitos in ('kalenteri','tuote','sarjanumeron_lisatiedot')";
-$liiteres = mysql_query($query) or pupe_error($query);
+$liiteres = pupe_query($query);
 
 if (mysql_num_rows($liiteres) > 0) {
 

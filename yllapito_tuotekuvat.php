@@ -554,7 +554,7 @@
 							AND liitos = 'tuote'
 							AND filename != ''
 							AND filetype = '$filetype'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 
@@ -688,7 +688,7 @@
 						WHERE tuote.yhtio 	= '$kukarow[yhtio]'
 						$lisa
 						ORDER BY $orderlisa";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// scripti balloonien tekemiseen
 			js_popup();

@@ -27,6 +27,7 @@
 		}
 	}
 
+	// Tyostatuksen muutos dropdownilla
 	if ($tyostatus_muutos != '' and $tyomaarayksen_tunnus != '') {
 		$tyostatus_muutos = mysql_real_escape_string($tyostatus_muutos);
 		$tyomaarayksen_tunnus = (int) $tyomaarayksen_tunnus;
@@ -37,7 +38,19 @@
 					AND otunnus = '$tyomaarayksen_tunnus'";
 		$update_tyom_res = pupe_query($query);
 	}
+	
+	// Tyojonon muutos dropdownilla
+	if ($tyojono_muutos != '' and $tyomaarayksen_tunnus != '') {
+		$tyojono_muutos = mysql_real_escape_string($tyojono_muutos);
+		$tyomaarayksen_tunnus = (int) $tyomaarayksen_tunnus;
 
+		$query = "	UPDATE tyomaarays SET
+					tyojono = '$tyojono_muutos'
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND otunnus = '$tyomaarayksen_tunnus'";
+		$update_tyom_res = pupe_query($query);
+	}
+	
 	$chk = "";
 	if (trim($konserni) != '') {
 		$chk = "CHECKED";
@@ -63,7 +76,7 @@
 			<th>".t("Toimitetaan")."</th>
 			<th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
 			<th>".t("Työjono")."/<br>".t("Työstatus")."</th>
-			<th>".t("Vaihda")."<br>".t("Työstatusta")."</th>
+			<th>".t("Vaihda")."<br>".t("Työjonoa")." ".t("työstatusta")."</th>
 			<th>".t("Muokkaa")."</th>
 			</tr>";
 
@@ -78,9 +91,30 @@
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_suorittaja_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_toimitetaan_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_myyja_haku'></td>";
-	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_tyojono_haku'></td>";
+	
+	echo "<td>";
+	echo "<select class='tyojono_sort'>";
+	echo "<option value='-'>".t('Ei valintaa')."</option>";
+	
+	// Haetaan tyojono avainsanat	
+	$tyojono_result = t_avainsana("TYOM_TYOJONO");
+	while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
+		echo "<option value='$tyojono_row[selitetark]'>$tyojono_row[selitetark]</option>";
+	}
+	echo "</select>";
+	echo "<select class='tyostatus_sort'>";
+	echo "<option value='-'>".t('Ei valintaa')."</option>";
+	
+	// Haetaan tyostatus avainsanat	
+	$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
+	while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
+		echo "<option value='$tyostatus_row[selitetark]'>$tyostatus_row[selitetark]</option>";
+	}
+	echo "</select>";
+	echo "</td>";
+	
+	echo "<td valign='top'><input type='hidden'	size='10' class='search_field' name='search_tyojono_haku'></td>";
 	echo "<td valign='top'><input type='hidden' size='10' class='search_field' name='search_tyostatus_haku'></td>";
-	echo "<td valign='top'></td>";
 	echo "</tr>";
 	echo "</thead>";
 
@@ -222,7 +256,7 @@
 			}
 		}
 		elseif ($vrow["tila"] == "L" or $vrow["tila"] == "N") {
-			$toimi = "RIVISYOTTO";
+			$toimi = "TYOMAARAYS";
 		}
 		elseif ($vrow["tila"] == "T") {
 			$toimi = "TARJOUS";
@@ -362,9 +396,10 @@
 
 		if ($toim != 'TYOMAARAYS_ASENTAJA') {
 			$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
+			$tyojono_result = t_avainsana("TYOM_TYOJONO");
 
 			if (mysql_num_rows($tyostatus_result) > 0) {
-				echo "<form method='post' id='tmform' name='tmform'>";
+				echo "<form method='post' id='tmform' name='tmform' action=''>";
 				echo "<input type='hidden' name='tyomaarayksen_tunnus' value='$vrow[tunnus]'>";
 				echo "<input type='hidden' name='konserni' value='$konserni'>";
 				echo "<input type='hidden' name='myyntitilaus_haku' value='$myyntitilaus_haku'>";
@@ -376,13 +411,20 @@
 				echo "<input type='hidden' name='suorittaja_haku' value='$suorittaja_haku'>";
 				echo "<input type='hidden' name='tyojono' value='$tyojono'>";
 
+				// Haetaan tyojonot
+				echo "<select name='tyojono_muutos' onchange='submit();'>";
+				while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
+					$sel = $vrow['tyojono'] == $tyojono_row['selitetark'] ? ' SELECTED' : '';
+					echo "<option value='$tyojono_row[selite]'$sel>$tyojono_row[selitetark]</option>";
+				}
+				echo "</select>";
+				
+				// Haetaan tyostatukset
 				echo "<select name='tyostatus_muutos' onchange='submit();'>";
-
 				while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
 					$sel = $vrow['tyostatus'] == $tyostatus_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyostatus_row[selite]'$sel>$tyostatus_row[selitetark]</option>";
 				}
-
 				echo "</select></form>";
 			}
 		}

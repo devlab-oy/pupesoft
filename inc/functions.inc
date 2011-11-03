@@ -13278,16 +13278,30 @@ if (!function_exists("valitse_pakkaus")) {
 			// pakkaukset ovat pienimmästä isoimpaan
 			foreach ($pakkaukset as $indx => $pakkaus_array) {
 
-				if ($pakkaus_array['leveys'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $kaytetty_paino and $koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
-					continue;
-				}
+				if (($pakkaus_array['leveys'] >= $pisin_tuote['koko'] or $pakkaus_array['korkeus'] >= $pisin_tuote['koko'] or $pakkaus_array['syvyys'] >= $pisin_tuote['koko']) and $pakkaus_array['paino'] >= $kaytetty_paino) {
 
-				if ($pakkaus_array['korkeus'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $kaytetty_paino and $koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
-					continue;
-				}
-				
-				if ($pakkaus_array['syvyys'] >= $pisin_tuote['koko'] and $pakkaus_array['paino'] >= $kaytetty_paino and $koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
-					continue;
+					if ($koko_nippu_tilavuus > 0 and $koko_nippu_paino > 0) {
+						if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus'] or $koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
+							$kaytettava_pakkaus = $indx;
+							continue;
+						}
+					}
+					elseif ($koko_nippu_tilavuus > 0 and $koko_nippu_paino == 0) {
+						if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
+							$kaytettava_pakkaus = $indx;
+							continue;
+						}
+					}
+					elseif ($koko_nippu_tilavuus == 0 and $koko_nippu_paino > 0) {
+						if ($koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
+							$kaytettava_pakkaus = $indx;
+							continue;
+						}
+					}
+					else {
+						$kaytettava_pakkaus = $indx;
+						continue;
+					}
 				}
 
 				unset($pakkaukset[$indx]);
@@ -13392,7 +13406,9 @@ if (!function_exists("pakkauksen_iterointi")) {
 		$param = $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'];
 		$param_paino = $pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'];
 
-		$kaytettava_pakkaus = valitse_pakkaus($pakkaukset, $pisin_tuote, $valitse_pakkaus_array_per_asiakas, $param, $param_paino, $param);
+		echo "kaytetty paino: $param_paino<br>";
+
+		$kaytettava_pakkaus = valitse_pakkaus($pakkaukset, $pisin_tuote, $valitse_pakkaus_array_per_asiakas, $param, $param_paino, $param, $param_paino);
 
 		if ($kaytettava_pakkaus != $kaytettava_pakkaus_backup and $kaytettava_pakkaus != '') {
 			echo "Tää ois parempi!!!! $kaytettava_pakkaus<br>";
@@ -13653,9 +13669,10 @@ if (!function_exists("tee_keraysera2")) {
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
-					JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = '{$keraysvyohyke}')
-					#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+					#JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = '{$keraysvyohyke}')
+					JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
+					#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.tunnus = '{$keraysvyohyke}')
 					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 				 	JOIN toimitustavan_lahdot ON (toimitustavan_lahdot.yhtio = toimitustapa.yhtio
@@ -13715,7 +13732,8 @@ if (!function_exists("tee_keraysera2")) {
 			// otunnukset tulevat group concatilla esim. 123,124,125
 			$query = "	SELECT GROUP_CONCAT(vh.indeksi) AS indeksit
 						FROM tilausrivi
-						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = '{$keraysvyohyke}')
+						#JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = '{$keraysvyohyke}')
+						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$row['tunnus']})
 						ORDER BY vh.indeksi";
@@ -13991,8 +14009,8 @@ if (!function_exists("tee_keraysera2")) {
 						tuote.tuotemassa y_paino,
 						if (tuote.tuotekorkeus > tuote.tuoteleveys, if(tuote.tuotekorkeus > tuote.tuotesyvyys, tuote.tuotekorkeus, tuote.tuotesyvyys), if(tuote.tuoteleveys > tuote.tuotesyvyys, tuote.tuoteleveys, tuote.tuotesyvyys)) AS pisin_sorttaus
 						FROM tilausrivi
-						#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
+						#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$tilaukset})
@@ -14100,7 +14118,7 @@ if (!function_exists("tee_keraysera2")) {
 					if ($eran_koko_chk > $pakkaukset[$kaytettava_pakkaus]['tilavuus']) {
 						echo "Pitäisikö valita isompi pakkaus?<br>";
 				
-						$kaytettava_pakkaus_chk = valitse_pakkaus($pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $eran_koko_chk, '', $eran_koko_chk);
+						$kaytettava_pakkaus_chk = valitse_pakkaus($pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $eran_koko_chk, '', $eran_koko_chk, $eran_paino_chk);
 				
 						$kaytettava_pakkaus = $kaytettava_pakkaus_chk !== false ? $kaytettava_pakkaus_chk : $kaytettava_pakkaus;
 				
@@ -14323,9 +14341,6 @@ if (!function_exists("tee_keraysera2")) {
 
 					if ($kaytettava_pakkaus == '' and $eran_koko_chk > 0) {
 						$kaytettava_pakkaus = valitse_pakkaus($pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, ($eran_koko_chk - $eran_koko));
-					}
-					else {
-						$juokseva_nro--;
 					}
 
 					continue;

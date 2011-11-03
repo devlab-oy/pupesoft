@@ -13512,6 +13512,7 @@ if (!function_exists("tee_keraysera2")) {
 		$query = "	SELECT pakkaus.tunnus,
 					pakkaus.pakkauskuvaus,
 					pakkaus.pakkaus,
+					pakkaus.yksin_eraan,
 					pakkaus.paino, 
 					pakkaus.minimi_tilavuus * pow({$mittakerroin}, 3) as minimi_tilavuus,
 					pakkaus.minimi_paino,
@@ -13530,6 +13531,8 @@ if (!function_exists("tee_keraysera2")) {
 					ORDER BY tilavuus ASC";
 		$pakkaus_result = pupe_query($query);
 
+		$yksin_eraan = false;
+
 		while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
 			$pakkaukset[$pakkaus_row['tunnus']]['nimi']					= $pakkaus_row['pakkauskuvaus'];
 			$pakkaukset[$pakkaus_row['tunnus']]['leveys'] 				= $pakkaus_row['leveys'];
@@ -13539,8 +13542,13 @@ if (!function_exists("tee_keraysera2")) {
 			$pakkaukset[$pakkaus_row['tunnus']]['minimi_tilavuus'] 		= $pakkaus_row['minimi_tilavuus'];
 			$pakkaukset[$pakkaus_row['tunnus']]['minimi_paino'] 		= $pakkaus_row['minimi_paino'];
 			$pakkaukset[$pakkaus_row['tunnus']]['tilavuus'] 			= $pakkaus_row['tilavuus'] * $pakkaus_row['kayttoprosentti'];
+			$pakkaukset[$pakkaus_row['tunnus']]['yksin_eraan'] 			= $pakkaus_row['yksin_eraan'];
 			$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_tilavuus'] 	= 0;
 			$pakkaukset[$pakkaus_row['tunnus']]['kaytetty_paino'] 		= 0;
+
+			if (!$yksin_eraan and $pakkaus_row['yksin_eraan'] == 'K') {
+				$yksin_eraan = true;
+			}
 		}
 
 		/*
@@ -13665,7 +13673,7 @@ if (!function_exists("tee_keraysera2")) {
 					LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
 					{$select} as tunnus
 					#MIN(vh.indeksi) as minimi_indeksi,
-					#SUM(ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu+tilausrivi.kpl), 4)) tilauksen_koko
+					#SUM(ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu), 4)) tilauksen_koko
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
@@ -13730,8 +13738,11 @@ if (!function_exists("tee_keraysera2")) {
 			}
 
 			// otunnukset tulevat group concatilla esim. 123,124,125
-			$query = "	SELECT GROUP_CONCAT(vh.indeksi) AS indeksit
+			$query = "	SELECT GROUP_CONCAT(vh.indeksi) AS indeksit,
+						SUM(ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu), 4)) tilauksen_koko,
+						SUM(ROUND(tuote.tuotemassa * tilausrivi.varattu, 4)) as tilauksen_paino
 						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
 						#JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = '{$keraysvyohyke}')
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -13749,6 +13760,8 @@ if (!function_exists("tee_keraysera2")) {
 			$kerailyniput_tiedot[$i]['liitostunnus'] = $row['liitostunnus'];
 			$kerailyniput_tiedot[$i]['lahto'] = $row['lahto'];
 			$kerailyniput_tiedot[$i]['nimi'] = $row['asiakas_nimi'];
+			$kerailyniput_tiedot[$i]['tilauksen_koko'] = $indeksi_row['tilauksen_koko'];
+			$kerailyniput_tiedot[$i]['tilauksen_paino'] = $indeksi_row['tilauksen_paino'];
 
 			$ed_prioriteetti = $row['prioriteetti'];
 			$ed_asiakas = $row['liitostunnus'];
@@ -13903,6 +13916,34 @@ if (!function_exists("tee_keraysera2")) {
 
 		echo "<pre>",var_dump($fixed_main_array),"</pre>";
 
+		// koitetaan heittää tilausrypäs ensimmäiseksi joka matchaa minimi tilavuuteen tai minimi painoon
+		if ($yksin_eraan) {
+			foreach ($kerailyniput_tiedot as $key => $arr) {
+				foreach ($arr as $ot => $val) {
+					if ($ot == 'tilauksen_koko' or $ot == 'tilauksen_paino') {
+						foreach ($pakkaukset as $paktun => $pak) {
+							if ($pak['yksin_eraan'] == 'K') {
+								if (($ot == 'tilauksen_koko' and $val >= $pak['minimi_tilavuus']) or ($ot == 'tilauksen_paino' and $val >= $pak['minimi_paino'])) {
+									echo "Siirretään $key ensimmäiseksi!<br>";
+									echo "($ot == 'tilauksen_koko' and $val >= $pak[minimi_tilavuus]) or ($ot == 'tilauksen_paino' and $val >= $pak[minimi_paino])<br><br>";
+
+									$backup_array = array();
+									$backup_array[$key] = $fixed_main_array[$key];
+									unset($fixed_main_array[$key]);
+									$fixed_main_array = $backup_array + $fixed_main_array;
+									break 2;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		echo "<pre>",var_dump($fixed_main_array),"</pre>";
+
+		// echo "<pre>",var_dump($kerailyniput_tiedot),"</pre>";
+
 		$tuote_yksin_keraysalustalle = array();
 
 		$eran_koko = 0;
@@ -13933,7 +13974,7 @@ if (!function_exists("tee_keraysera2")) {
 		echo "KÄYTETTÄVÄT PAKKAUKSET:";
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>Nimi</th><th>Leveys</th><th>Korkeus</th><th>Syvyys</th><th>Kantavuus</th><th>Minimi<br>tilavuus</th><th>Minimi<br>Kantavuus</th><th>Netto<br>tilavuus</th><th>Käytetty<br>tilavuus</th><th>Käytetty<br>paino</th></tr>";
+		echo "<th>Nimi</th><th>Leveys</th><th>Korkeus</th><th>Syvyys</th><th>Kantavuus</th><th>Minimi<br>tilavuus</th><th>Minimi<br>Kantavuus</th><th>Netto<br>tilavuus</th><th>Yksin<br>erään</th><th>Käytetty<br>tilavuus</th><th>Käytetty<br>paino</th></tr>";
 
 		foreach ($pakkaukset as $nro) {
 			echo "<tr>";
@@ -14089,6 +14130,8 @@ if (!function_exists("tee_keraysera2")) {
 
 				$pisin_tuote_chklist = $pisin_tuote;
 
+				$ed_pitkatuote = '';
+
 				for ($i = 1; $i <= $cnt; $i++) {
 					$kaytettava_pakkaus = valitse_pakkaus($pakkaukset, $pisin_tuote_chklist, $pisin_tuote_per_asiakas, '', '', $eran_koko_chk, $eran_paino_chk);
 
@@ -14101,9 +14144,17 @@ if (!function_exists("tee_keraysera2")) {
 
 						$tuote_yksin_keraysalustalle[$arr_keys[0]] = array_shift($pisin_tuote_arr_chk);
 
-						unset($pisin_tuote_chklist[$arr_keys[0]]);
+						if ($ed_pitkatuote != '' and $ed_pitkatuote != $arr_keys[0]) {
+							unset($pisin_tuote_chklist[$arr_keys[0]]);
+						}
+
+						echo "eran_koko_chk: $eran_koko_chk<br>";
+						echo "foo: $arr_keys[0]<br>";
 
 						$eran_koko_chk -= ($pisin_tuote[$arr_keys[0]]['tilavuus'] * $pisin_tuote[$arr_keys[0]]['kpl']);
+						echo "eran_koko_chk jälkeen kun ollaan poistettu {$pisin_tuote[$arr_keys[0]]['kpl']} verran kappaleita: $eran_koko_chk<br>";
+
+						$ed_pitkatuote = $arr_keys[0];
 					}
 				}
 
@@ -14340,8 +14391,14 @@ if (!function_exists("tee_keraysera2")) {
 					}
 
 					if ($kaytettava_pakkaus == '' and $eran_koko_chk > 0) {
-						$kaytettava_pakkaus = valitse_pakkaus($pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, ($eran_koko_chk - $eran_koko));
+						$kaytettava_pakkaus = valitse_pakkaus($pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, abs($eran_koko_chk - $eran_koko));
 					}
+
+					if ($max_tuoterivit == $ii) {
+						$juokseva_nro--;
+					}
+
+					$ii++;
 
 					continue;
 				}

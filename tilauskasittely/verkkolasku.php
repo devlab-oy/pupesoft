@@ -2173,8 +2173,8 @@
 					// siirret‰‰n laskutiedosto operaattorille
 					#$url           = "https://test-api.apix.fi/invoices";
 					$url            = "https://api.apix.fi/invoices";
-					$transferkey    = $yhtiorow['verkkosala_lah'];
-					$transferid     = $yhtiorow['verkkotunnus_lah'];
+					$transferkey    = $yhtiorow['apix_avain'];
+					$transferid     = $yhtiorow['apix_tunnus'];
 					$software       = "Pupesoft";
 					$version        = "1.0";
 					$timestamp      = gmdate("YmdHis");

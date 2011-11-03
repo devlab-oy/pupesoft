@@ -7581,10 +7581,13 @@ if (!function_exists("livesearch_tuotehaku")) {
 				}
 			}
 			
-			if ($yhtiorow['livetuotehaku_poistetut'] != 'X') {
+			// Näytetään poistuvat tuotteet mutta ei poistettuja
+			if ($yhtiorow['livetuotehaku_poistetut'] == 'X') {
+				$naytetaanko_poistetut = "and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0";
+			} 
+			else {
 				$naytetaanko_poistetut = "and tuote.status != 'P'";
-			}
-
+			}	
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'

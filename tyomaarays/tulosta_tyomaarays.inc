@@ -26,8 +26,8 @@ $iso["font"] 			= "Helvetica-Bold";
 $rectparam["width"] 	= 0.3;
 $lineparam["width"] 	= 1;
 $rivinkorkeus			= 17;
-// tää tässä kusee 
-if (!function_exists('tyomaarays_alku')) { 
+// tää tässä kusee
+if (!function_exists('tyomaarays_alku')) {
 	function tyomaarays_alku($tyyppi = "") {
 		global $pdf, $sivu, $lahetetyyppi, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $tilausnumeroita;
 
@@ -1036,7 +1036,7 @@ if (!function_exists('tyomaarays_print_pdf')) {
 			$kutsu = t("Työmääräys", $kieli);
 
 			if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-				$kutsu .= " ".trim($laskurow["nimi"]);
+				$kutsu .= ", ".trim($laskurow["nimi"]);
 			}
 
 			echo t("Työmääräys tulostuu")."...<br>";

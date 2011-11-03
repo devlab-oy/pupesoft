@@ -1,6 +1,6 @@
 <?php
 
-///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require('../inc/parametrit.inc');
@@ -13,7 +13,7 @@ if ($tee == "" or $tee == "JATKA") {
 	if ($debug == 1) {
 		echo "debug1 tee = $tee | asiakasid = $asiakasid | asiakasno = $asiakasno | toimittajaid = $toimittajaid | ytunnus = $ytunnus | toimittaja = $toimi<br>";
 	}
-	
+
 	if (isset($muutparametrit)) {
 		list($vva,$kka,$ppa,$vvl,$kkl,$ppl,$ytunnus,$asiakasno,$toimi) = explode('#', $muutparametrit);
 	}
@@ -21,12 +21,12 @@ if ($tee == "" or $tee == "JATKA") {
 	$muutparametrit = $vva."#".$kka."#".$ppa."#".$vvl."#".$kkl."#".$ppl."#".$ytunnus."#".$asiakasno."#".$toimi."#";
 
 	if ($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != '' and $ytunnus != '' and $asiakasno != '') {
-		if ($ytunnus != '' and !isset($ylatila)) {			
+		if ($ytunnus != '' and !isset($ylatila)) {
 
 			require("../inc/kevyt_toimittajahaku.inc");
 
 			if ($ytunnus != '') {
-				$tee = "JATKA";	
+				$tee = "JATKA";
 			}
 		}
 		elseif($ytunnus != '' and isset($ylatila)) {
@@ -41,7 +41,7 @@ if ($tee == "" or $tee == "JATKA") {
 		echo "<font class='error'>".t("Jonkun kentän tiedot puuttuu, ei voida ajaa raporttia")."</font><br>";
 		$tee = "";
 	}
-	
+
 	if ($debug == 1) {
 		echo "debug2 tee = $tee | asiakasid = $asiakasid | asiakasno = $asiakasno | toimittajaid = $toimittajaid | ytunnus = $ytunnus | toimittaja = $toimi<br>";
 	}
@@ -60,7 +60,7 @@ if ($tee == "" or $tee == "JATKA") {
 		if ($ytunnus != '') {
 			$tee = "JATKA";
 			$asiakasno = $ytunnus;
-			$ytunnus = $toimi;	
+			$ytunnus = $toimi;
 		}
 		else {
 			$asiakasno = $ytunnus;
@@ -80,7 +80,7 @@ if ($debug == 1) {
 
 
 if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' and $toimi != '') {
-		
+
 		$query = "	SELECT b.tuoteno, b.nimitys, sum(a.kpl) kpl, round(sum(a.rivihinta*((a.alv/100)+1)),2) summa, round(sum(a.rivihinta),2) summa2
 					FROM tilausrivi a,
 					tuote b,
@@ -101,7 +101,7 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
 					GROUP BY 1
 					ORDER BY 1";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($result) > 0 ) {
 
 			echo "<table>

@@ -1,6 +1,9 @@
 <?php
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "viranomaisilmoitukset.php") === FALSE) {
+		//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+		$useslave = 1;
+
 		require("../inc/parametrit.inc");
 	}
 
@@ -11,33 +14,33 @@
 			global $kukarow, $startmonth, $endmonth;
 
 			if ($tulos == '22' or $tulos == 'veronmaara' or $tulos == 'summa') {
-				
-				if ($taso == 'fi307') { 
+
+				if ($taso == 'fi307') {
 					$vainsuomi = "JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.maa in ('FI', '')";
 				}
 				else {
-					$vainsuomi = '';					
+					$vainsuomi = '';
 				}
-								
+
 				if ($taso == 'fi309' or $taso == 'fi310') {
 					$_309lisa 	 = " or alv_taso like '%fi300%' ";
 					$vainveroton = " and tiliointi.vero = 0 ";
 				}
 				else {
 					$_309lisa	 = "";
-					$vainveroton = '';	
+					$vainveroton = '';
 				}
-								
-				$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit300, 
+
+				$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit300,
 							ifnull(group_concat(if(alv_taso not like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
 							FROM tili
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							and (alv_taso like '%$taso%' $_309lisa)";
 				$tilires = mysql_query($query) or pupe_error($query);
 				$tilirow = mysql_fetch_array($tilires);
-								
+
 				$vero = 0.0;
-								
+
 				if ($tilirow['tilit300'] != '' or $tilirow['tilitMUU'] != '') {
 
 					$tiliointilisa = '';
@@ -54,7 +57,7 @@
 								$tiliointilisa
 								AND korjattu = ''
 								AND (";
-								
+
 					if ($tilirow["tilit300"] != "") $query .= "	(tilino in ($tilirow[tilit300]) $vainveroton)";
 					if ($tilirow["tilit300"] != "" and $tilirow["tilitMUU"] != "") $query .= " or ";
 					if ($tilirow["tilitMUU"] != "") $query .= "	 tilino in ($tilirow[tilitMUU])";
@@ -168,7 +171,7 @@
 			echo "<br><table>";
 			echo "<tr><th>Ilmoittava yritys</th><th>$uytunnus</th></tr>";
 			echo "<tr><th>Ilmoitettava kausi</th><th>".substr($startmonth,0,4)."/".substr($startmonth,5,2)."</th></tr>";
-			
+
 			echo "<tr><th colspan='2'>Vero kotimaan myynnistä verokannoittain</th></tr>";
 			echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi301&vv=$vv&kk=$kk'>201</a> 22% :n vero</td><td align='right'>".sprintf('%.2f',$fi201)."</td></tr>";
 			echo "<tr><td><a href = '?tee=VSRALVKK_VANHA_erittele&ryhma=fi302&vv=$vv&kk=$kk'>202</a> 17% :n vero</td><td align='right'>".sprintf('%.2f',$fi202)."</td></tr>";
@@ -317,8 +320,8 @@
 		$alkupvm  		= date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
 		$loppupvm 		= date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
 		$vainveroton 	= "";
-		$vainsuomi 		= '';				
-		
+		$vainsuomi 		= '';
+
 		if ($ryhma == 'fi301' or $ryhma == 'fi302' or $ryhma == 'fi303') {
 			$taso = 'fi300';
 		}
@@ -329,19 +332,19 @@
 		else {
 			$taso = $ryhma;
 		}
-		
-		$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit300, 
+
+		$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit300,
 					ifnull(group_concat(if(alv_taso not like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
 					FROM tili
 					WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%$taso'";
 		$tilires = mysql_query($query) or pupe_error($query);
 		$tilirow = mysql_fetch_array($tilires);
-					
+
 		if ($tilirow['tilit300'] != '' or $tilirow['tilitMUU'] != '') {
-			
+
 			echo "<table>";
 			echo "<tr>";
-							
+
 			switch ($ryhma) {
 				case 'fi301' :
 					$tiliointilisa .= " and tiliointi.vero = '22' ";
@@ -353,7 +356,7 @@
 					$tiliointilisa .= " and tiliointi.vero = '8' ";
 					break;
 			}
-					
+
 			if ($ryhma == 'fi307') {
 				$tiliointilisa .= " and tiliointi.vero > 0 ";
 				$vainsuomi = "and lasku.maa in ('FI', '')";
@@ -380,7 +383,7 @@
 						AND tiliointi.tapvm <= '$loppupvm'
 						$tiliointilisa
 						AND (";
-					
+
 			if ($tilirow["tilit300"] != "") $query .= "	(tiliointi.tilino in ($tilirow[tilit300]) $vainveroton)";
 			if ($tilirow["tilit300"] != "" and $tilirow["tilitMUU"] != "") $query .= " or ";
 			if ($tilirow["tilitMUU"] != "") $query .= " tiliointi.tilino in ($tilirow[tilitMUU])";
@@ -389,7 +392,7 @@
 						GROUP BY 1, 2, 3, 4, 5
 						ORDER BY maa, valuutta, vero, tilino, nimi";
 			$result = mysql_query($query) or pupe_error($query);
-												
+
 			echo "<table><tr>";
 			echo "<th valign='top'>" . t("Maa") . "</th>";
 			echo "<th valign='top'>" . t("Val") . "</th>";
@@ -429,7 +432,7 @@
 				echo "<td valign='top'>$trow[maa]</td>";
 				echo "<td valign='top'>$trow[valuutta]</td>";
 				echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-			
+
 				if ($trow['kpl'] > 1000)
 					echo "<td valign='top'>$trow[tilino]</td>";
 				else
@@ -468,9 +471,9 @@
 							WHERE yhtio = '$kukarow[yhtio]' and alv_taso in ('fi305', 'fi306')";
 				$tilires = mysql_query($query) or pupe_error($query);
 				$tilirow = mysql_fetch_array($tilires);
-				
+
 				$vero = 0.0;
-			
+
 				if ($tilirow['tilit'] != '') {
 					$query = "	SELECT sum(round(summa * 0.22, 2)) veronmaara
 								FROM tiliointi

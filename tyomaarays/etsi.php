@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	include('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";

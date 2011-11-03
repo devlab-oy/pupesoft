@@ -537,6 +537,10 @@
 					if ($komento["Ostotilaus"] == 'email') {
 						$liite = $pdffilenimi;
 						$kutsu = t("Ostotilaus", $kieli)." $laskurow[tunnus]";
+						
+						if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+							$kutsu .= ", ".trim($laskurow["nimi"]).", ".trim($laskurow["toim_nimi"]);
+						}
 
 						require("inc/sahkoposti.inc");
 						$tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";

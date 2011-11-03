@@ -1964,6 +1964,9 @@
 					if ($srow["tyojono"] == $vrow['selite']) {
 						$sel = "selected";
 					}
+					else if ($vrow["selitetark_3"] == 'OLETUS') {
+						$sel = "selected";
+					}
 					echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
 				}
 

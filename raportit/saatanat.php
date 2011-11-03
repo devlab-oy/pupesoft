@@ -6,7 +6,7 @@
 			if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 		}
 
-		///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+		//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 		$useslave = 1;
 
 		$pupe_DataTables = "saatanat_taulu";
@@ -320,7 +320,7 @@
 
 			if ($eiliittymaa != 'ON') {
 				$sarakemaara = count($saatavat_array)+7;
-				
+
 				pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
 			}
 
@@ -563,7 +563,7 @@
 				// We need to explicitly close the workbook
 				$workbook->close();
 
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<br><br><form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Saatavat.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

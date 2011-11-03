@@ -1,5 +1,6 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
 	if (file_exists("../inc/parametrit.inc")) {
@@ -16,13 +17,15 @@
 					AND tunnus = '$tun'";
 		$comm_res = pupe_query($query);
 		$comm_row = mysql_fetch_assoc($comm_res);
+
 		echo $comm_row['comments'];
 		exit;
 	}
 
 	if ($_GET['tee'] == 'kommentti') {
 		if ($_GET['tilaus'] != '') {
-			$useslave = '';
+
+			$useslave = 0;
 			require('../inc/connect.inc');
 
 			$tilaus = (int) $_GET['tilaus'];
@@ -38,7 +41,7 @@
 				echo "<br><font class='message'>",t("Tyhjensit kommentin ostotilaukselta")," $tilaus</font><br>";
 			}
 			else {
-				echo "<br><font class='message'>",t("Lisäsit kommentin")," $kommentti ",t("ostotilaukselle")," $tilaus</font><br>";				
+				echo "<br><font class='message'>",t("Lisäsit kommentin")," $kommentti ",t("ostotilaukselle")," $tilaus</font><br>";
 			}
 			exit;
 		}
@@ -157,7 +160,7 @@
 						lasku.lahetepvm,
 						sum(tuote.tuotemassa*(tilausrivi.varattu+tilausrivi.kpl)) massa,
 						sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok,
-						lasku.comments, 
+						lasku.comments,
 						lasku.valkoodi
 						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')

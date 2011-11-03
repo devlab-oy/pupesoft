@@ -8,6 +8,7 @@
 	if (!isset($id)) $id = 0;
 	if (!isset($erikoispakkaus)) $erikoispakkaus = 0;
 	if (!isset($toimitustapa)) $toimitustapa = '';
+	if (!isset($ed_toimtapa)) $ed_toimtapa = '';
 	if (!isset($rahtikirjan_esisyotto)) $rahtikirjan_esisyotto = '';
 	if (!isset($jarj)) $jarj = '';
 	if (!isset($etsi)) $etsi = '';
@@ -2028,7 +2029,8 @@
 		if (!isset($merahti)) $merahti = $otsik['kohdistettu'];
 
 		// vaihdetaan merahti toimitustavan oletuksen mukaan, kun toimitustapa vaihdetaan
-		if ((isset($otsik["toimitustapa"]) and isset($toimitustapa) and $toimitustapa != $otsik["toimitustapa"]) or (isset($ed_toimtapa) and $toimitustapa != $ed_toimtapa)) {
+		if ((isset($otsik["toimitustapa"]) and $toimitustapa != "" and $toimitustapa != $otsik["toimitustapa"]) or ($ed_toimtapa != "" and $toimitustapa != "" and $toimitustapa != $ed_toimtapa)) {
+
 			$apuqu2 = "	SELECT merahti
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]'

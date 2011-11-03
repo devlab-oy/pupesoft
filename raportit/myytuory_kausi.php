@@ -1,11 +1,13 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-	
-	$useslave = 1;
+
 	require("../inc/parametrit.inc");
 
 	//Ja tässä laitetaan ne takas
@@ -13,12 +15,12 @@
 
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
-			readfile("/tmp/".$tmpfilenimi);	
+			readfile("/tmp/".$tmpfilenimi);
 			exit;
 		}
 	}
 	else {
-	
+
 		echo "<font class='head'>".t("Myynnit tuoteryhmittäin")."</font><hr>";
 
 		flush();
@@ -51,14 +53,14 @@
 			$yhtvarTOT=0;
 
 			$edosasto = "X";
-			
+
 			require_once ('inc/ProgressBar.class.php');
 			$bar = new ProgressBar();
 			$elements = mysql_num_rows($result); // total number of elements to process
 			$bar->initialize($elements); // print the empty bar
 
 			while ($trow = mysql_fetch_array($result)) {
-				
+
 				$bar->increase();
 
 				$query = "	SELECT
@@ -232,11 +234,11 @@
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table><br>";
 			}
-		
+
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
 			$txtnimi = md5(uniqid(mt_rand(), true)).".txt";
-		
+
 			file_put_contents("/tmp/$txtnimi", $ulos);
 
 			echo "<table>";
@@ -247,7 +249,7 @@
 			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
-		
+
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (csv)").":</th>";
 			echo "<form method='post' action='$PHP_SELF'>";

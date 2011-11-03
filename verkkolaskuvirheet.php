@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	if ($_REQUEST["tee"] == "NAYTATILAUS") {
 		$no_head = "yes";
 
@@ -191,11 +194,11 @@
 					}
 
 					echo "</td>";
-					
+
 					$tpp = substr($laskun_tapvm,6,2);
 					$tpk = substr($laskun_tapvm,4,2);
 					$tpv = substr($laskun_tapvm,0,4);
-					
+
 					echo "<td>".tv1dateconv($tpv."-".$tpk."-".$tpp)."</td>";
 					echo "</tr>";
 				}

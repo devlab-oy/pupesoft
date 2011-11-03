@@ -6147,11 +6147,11 @@ if (!function_exists("js_popup")) {
 				x = e.pageX;
 			}
 			else if (e.clientX) {
-				x = e.clientX + document.body.scrollLeft
-					+ document.documentElement.scrollLeft;
+				x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
 			}
 			return x;
 		}
+		
 		function getMouseY(e) {
 			var y = null;
 
@@ -6167,11 +6167,12 @@ if (!function_exists("js_popup")) {
 		}
 
 	    function toolTipShow(e, x, y) {
-	        toolTip.css({'top':y, 'left':x}).delay(1000).show('fast');
+	        toolTip.css({'top':y, 'left':x}).delay(500).show('fast');
 	    }
 
-	    function toolTipHide() {
-			toolTip.hide().clearQueue();
+	    function toolTipHide() {			
+			toolTip.clearQueue();
+			toolTip.hide();
 	    }
 
 	    //events for each element
@@ -11074,7 +11075,7 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (tableid == \"saatanat_taulu\") {
 								var saatavaty = new Array();
-								var sarakemaara = ".count($saatavat_array)."+5;
+								var sarakemaara = parametrit[tableid][0]-2;
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {

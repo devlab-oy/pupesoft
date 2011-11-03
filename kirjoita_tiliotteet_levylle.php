@@ -1,5 +1,8 @@
 <?php
-	
+
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	if (@include("inc/parametrit.inc"));
 	elseif (@include("parametrit.inc"));
 	else exit;
@@ -49,13 +52,13 @@
 			}
 		}
 	}
-		
+
 	echo "<font class='head'>Tiliotteiden siirto levylle</font><hr><br>";
 
 	if ($tee == 'all') { // haetaan sopivat tiliotteet
 		$lisa='';
 		if ($kausi != '') $lisa = "and DATE_FORMAT(alku, '%Y-%m') = '$kausi'";
-		
+
 		$query = "SELECT distinct alku, tilino
 					  FROM tiliotedata
 					  WHERE yhtio='$kukarow[yhtio]' and tyyppi = '1' $lisa";
@@ -71,12 +74,12 @@
 				ORDER BY alku, tilino, tunnus";
 		$result = mysql_query ($query)
 				or die ("Kysely ei onnistu $query<br>".mysql_error());
-		
+
 		$aineisto='';
-		
+
 		while ($tilioterow=mysql_fetch_array($result)) {
 			if (!isset($tilino)) echo "<font class='message'>Aloitan tiliotteen $tilioterow[tilino] alkaen $tilioterow[alku]</font><br>";
-			
+
 			if (($alku!=$tilioterow['alku'] or $tilino!=$tilioterow['tilino']) and isset($tilino)) {
 				$sisalto = $otsikko . $sisalto;
 				echo "<font class='message'>Tiliote $tilino alkaen $alku on nyt valmis</font><br>";
@@ -88,7 +91,7 @@
 				}
 				echo "<font class='message'>Aloitan tiliotteen $tilioterow[tilino] alkaen $tilioterow[alku]</font><br>";
 			}
-			
+
 			$alku=$tilioterow['alku'];
 			$tilino =$tilioterow['tilino'];
 			$tietue = $tilioterow['tieto'];
@@ -138,25 +141,25 @@
 					$otsikko .= "<td>".t("Saldo")." " . substr($tietue,65,6) . "</td>";
 					$otsikko .= "<td>" . substr($tietue,71,19) / 100 . "</td>";
 					$otsikko .= "</tr>";
-								
+
 					break;
 
 				case 'T10' :
-					kirjoitaote($tiliointi);		
+					kirjoitaote($tiliointi);
 					$ote='';
 					$tiliointi = $tilioterow['tiliointitunnus'];
-					
+
 					$koodi = substr($tietue, 49, 3);
 					$kirjpvm = substr($tietue, 30, 6);
 					$pvm = substr($tietue, 36, 6);
 					//Tilioidaan kuitenkin loppupeleissa kaikki kirjauspvm:lle.
-					
+
 					$pvm=$kirjpvm;
 
 					if ($pvm == "000000") { // Haa, pankki ei antanutkaan arvopvm‰‰, joten otetaan k‰ytt‰‰n tapahtumapvm
 						$pvm = $kirjpvm;
 					}
-					
+
 					//$sisalto .= "Tunnus: '" .  substr($tietue, 48, 1) . "'<br>";
 					$etumerkki = substr($tietue, 87, 1);
 					$maara = substr($tietue, 88, 18) / 100;
@@ -250,14 +253,14 @@
 
 				case 'T40':
 					kirjoitaote($tiliointi);
-					
+
 					$sisalto .= "<tr><td></td><td></td><td></td><td></td><td>".t("Saldo")." " . substr($tietue,6,6) . "</td>";
 					$sisalto .= "<td>" . substr($tietue,31,19) / 100 . "</td></tr>";
 					break;
 
 				case 'T50':
 					kirjoitaote($tiliointi);
-					
+
 					if (substr($tietue,6,1) == 1) $jakso = "p‰iv‰n";
 					if (substr($tietue,6,1) == 2) $jakso = "tiliotteen";
 					if (substr($tietue,6,1) == 3) $jakso = "kuukauden";
@@ -293,11 +296,11 @@
 			<input type='text' name='kausi' value=''> esim 2008-01
 			<input type='Submit' value='Siirr‰'>
 			</form>";
-	
+
 	$formi='formi';
 	$kentta='kausi';
-	
+
 	if (@include("inc/footer.inc"));
 	elseif (@include("footer.inc"));
-	else exit; 
+	else exit;
 ?>

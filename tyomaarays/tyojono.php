@@ -38,7 +38,7 @@
 					AND otunnus = '$tyomaarayksen_tunnus'";
 		$update_tyom_res = pupe_query($query);
 	}
-	
+
 	// Tyojonon muutos dropdownilla
 	if ($tyojono_muutos != '' and $tyomaarayksen_tunnus != '') {
 		$tyojono_muutos = mysql_real_escape_string($tyojono_muutos);
@@ -50,7 +50,7 @@
 					AND otunnus = '$tyomaarayksen_tunnus'";
 		$update_tyom_res = pupe_query($query);
 	}
-	
+
 	$chk = "";
 	if (trim($konserni) != '') {
 		$chk = "CHECKED";
@@ -91,12 +91,12 @@
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_suorittaja_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_toimitetaan_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_myyja_haku'></td>";
-	
+
 	echo "<td>";
 	echo "<select class='tyojono_sort'>";
 	echo "<option value='-'>".t('Ei valintaa')."</option>";
-	
-	// Haetaan tyojono avainsanat	
+
+	// Haetaan tyojono avainsanat
 	$tyojono_result = t_avainsana("TYOM_TYOJONO");
 	while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
 		echo "<option value='$tyojono_row[selitetark]'>$tyojono_row[selitetark]</option>";
@@ -104,15 +104,15 @@
 	echo "</select>";
 	echo "<select class='tyostatus_sort'>";
 	echo "<option value='-'>".t('Ei valintaa')."</option>";
-	
-	// Haetaan tyostatus avainsanat	
+
+	// Haetaan tyostatus avainsanat
 	$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
 	while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
 		echo "<option value='$tyostatus_row[selitetark]'>$tyostatus_row[selitetark]</option>";
 	}
 	echo "</select>";
 	echo "</td>";
-	
+
 	echo "<td valign='top'><input type='hidden'	size='10' class='search_field' name='search_tyojono_haku'></td>";
 	echo "<td valign='top'><input type='hidden' size='10' class='search_field' name='search_tyostatus_haku'></td>";
 	echo "</tr>";
@@ -418,7 +418,7 @@
 					echo "<option value='$tyojono_row[selite]'$sel>$tyojono_row[selitetark]</option>";
 				}
 				echo "</select>";
-				
+
 				// Haetaan tyostatukset
 				echo "<select name='tyostatus_muutos' onchange='submit();'>";
 				while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
@@ -429,7 +429,7 @@
 			}
 		}
 		else {
-			echo "$vrow[tyostatus]";
+			echo "$vrow[tyojono]<br>$vrow[tyostatus]";
 		}
 		// Laitetaan hiddeninä työstatus sorttauksen takia.
 		echo "<p style='visibility:hidden'>$vrow[tyostatus]</p>";

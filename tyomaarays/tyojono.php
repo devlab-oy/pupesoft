@@ -256,7 +256,7 @@
 			}
 		}
 		elseif ($vrow["tila"] == "L" or $vrow["tila"] == "N") {
-			$toimi = "RIVISYOTTO";
+			$toimi = "TYOMAARAYS";
 		}
 		elseif ($vrow["tila"] == "T") {
 			$toimi = "TARJOUS";

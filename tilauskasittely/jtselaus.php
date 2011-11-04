@@ -246,7 +246,7 @@
 				require ("jt_super.inc");
 				$jt_super = jt_super($laskurow["tunnus"]);
 
-				echo "$jt_super<br><br>";
+				if ($jt_super != "") echo "$jt_super<br><br>";
 
 				//Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
 				$silent = "SILENT";

@@ -19,11 +19,11 @@
 					JOIN liitetiedostot ON (liitetiedostot.yhtio = lasku.yhtio and liitetiedostot.liitos = 'lasku' AND liitetiedostot.liitostunnus = lasku.tunnus AND liitetiedostot.kayttotarkoitus IN ('FINVOICE', 'EDI'))
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND lasku.laskunro = '$laskunro'";
-		$lasku_res = mysql_query($query) or pupe_error($query);
+		$lasku_res = pupe_query($query);
 		$lasku_row = mysql_fetch_assoc($lasku_res);
 
 		if (mysql_num_rows($lasku_res) == 1 and $lasku_row['kayttotarkoitus'] == 'FINVOICE') {
-			
+
 			$onnistuiko = liita_tilaus_laskun_liitetiedostoksi($kukarow, $yhtiorow, $liitetaanko_editilaus_laskulle_hakemisto, $lasku_row['tunnus'], $lasku_row['asiakkaan_tilausnumero']);
 
 			if ($onnistuiko) echo "<br/>",t("Laskun")," {$laskunro} ",t("liitetiedostoksi lisättin tilaus")," {$lasku_row['asiakkaan_tilausnumero']}.<br/>";

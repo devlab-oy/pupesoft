@@ -1,6 +1,6 @@
 <?php
 
-	// käytetään slavea
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
 	require ("../inc/parametrit.inc");
@@ -13,11 +13,11 @@
 	if ($tee == "") {
 		$tee = "paiva";
 	}
-	
+
 	if ($tilhaku != '' and $toim == "KEIKKA" and $tee != 'tilaus') {
 		$tee = "tilhaku";
 	}
-	
+
 	if ($tee == "paiva" and !isset($vv) and !isset($kk) and !isset($pp)) {
 		$vv = date("Y");
 		$kk = date("m");
@@ -48,14 +48,14 @@
 
 	$etsi = '';
 
-	if (is_string($haku)) {		
+	if (is_string($haku)) {
 		$etsi = "and (lasku.nimi LIKE '%$haku%' or lasku.toim_nimi LIKE '%$haku%') ";
 	}
-	
+
 	if (is_numeric($haku)) {
 		$etsi = "and lasku.ytunnus LIKE '%$haku%' ";
 	}
-	
+
 	if ($keikkanrohaku != '' and $toim == 'KEIKKA' and is_numeric($keikkanrohaku)) {
 		$etsi = "and lasku.laskunro = $keikkanrohaku ";
 	}
@@ -68,7 +68,7 @@
 		// kuukausinäkymä
 		$query1 = "	SELECT DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
 					count(distinct lasku.tunnus) tilauksia,
-					count(distinct tilausrivi.tunnus) riveja,					
+					count(distinct tilausrivi.tunnus) riveja,
 					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
 					FROM lasku use index (yhtio_tila_luontiaika)
@@ -88,8 +88,8 @@
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
-					tila in ('L') and 
-					luontiaika >= '$vv-$kk-$pp 00:00:00' and 
+					tila in ('L') and
+					luontiaika >= '$vv-$kk-$pp 00:00:00' and
 					luontiaika <= '$vv-$kk-$pp 23:59:59'
 					$etsi
 					GROUP BY lasku.tunnus
@@ -195,7 +195,7 @@
 					uusiotunnus = '$tunnus' and
 					tyyppi!='D'
 					ORDER BY tilausrivi.tunnus";
-		
+
 		// tilausnumerohaku
 		$query4 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta,
 					round(sum(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
@@ -391,7 +391,7 @@
 		if ($tee == "paiva") {
 			$teemita = "tilaus";
 		}
-		
+
 		if ($tee == 'tilhaku') {
 			$teemita = "tilaus";
 		}
@@ -407,7 +407,7 @@
 			echo "<tr>";
 
 			for ($i = 0; $i < mysql_num_fields($result); $i++) {
-				
+
 				if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
 					echo "<td align='right'>$row[$i]</td>";
 				}
@@ -472,7 +472,7 @@
 
 
 		}
-		
+
 		if ($arvo != 0 or $summa != 0) {
 			echo "<tr>";
 			$i = 2;

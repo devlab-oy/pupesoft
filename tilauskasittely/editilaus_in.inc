@@ -255,8 +255,8 @@ while ($tietue = fgets($fd)) {
 	$orig_tieto = str_replace($from, $to, $tieto);
 	$tieto  = str_replace($from, $to, pupesoft_cleanstring($tieto));
 
-	// Jos kyseess‰ on UNA (ensimm‰inen Orders 91.1 segmentti), niin etsit‰‰n t‰ss‰ vaiheessa NAD SE
-	if ($tunnus == "UNA") {
+	// Jos kyseess‰ on UNH (ensimm‰inen Orders 91.1 segmentti), niin etsit‰‰n t‰ss‰ vaiheessa NAD SE
+	if ($tunnus == "UNH") {
 		$tunnus = "NADSE"; // Myyj‰
 
 		$nad_segmentit = explode("+", $nadse_segmentti);
@@ -275,6 +275,12 @@ while ($tietue = fgets($fd)) {
 				break;
 			case 'PL':
 				$tunnus = "NADPL"; // Edelleenlaskutettava
+				$nad_segmentit = explode("+", $tieto);
+				$nad_kentat = explode(":", $nad_segmentit[1]);
+				$tieto = $nad_kentat[0];
+				break;
+			case 'CN':
+				$tunnus = "NADCN"; // Tavaran vastaanottaja
 				$nad_segmentit = explode("+", $tieto);
 				$nad_kentat = explode(":", $nad_segmentit[1]);
 				$tieto = $nad_kentat[0];
@@ -482,6 +488,7 @@ while ($tietue = fgets($fd)) {
 		case 'ONADDP_PC' :
 		case 'NADBY' :
 		case 'NADPL' :
+		case 'NADCN' :
 			// ONADBY_PC - Ostajan osapuolen tunniste
 			// ONADDP_PC - Toimitusosoitteen osapuolen tunniste
 			// ONADCN_PC - Ostajan logistiikkakeskuksen tunniste (CN -tarkenne ei ole Itellan speksiss‰, joten t‰m‰ on itse p‰‰telty‰!)
@@ -848,6 +855,7 @@ while ($tietue = fgets($fd)) {
 				$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
 				$meapu = pupe_query($apuqu);
 				$apuro = mysql_fetch_array($meapu);
+
 				$maksaja = $apuro['merahti'];
 
 				// Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
@@ -1029,6 +1037,11 @@ while ($tietue = fgets($fd)) {
 
 				// Tallennetaan ohjelmamoduli
 				$ohjelmamoduli = strtoupper($edi_tyyppi);
+
+				// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+				if ($maksaja == "" and $editilaus_rahtivapaa != "") {
+					$maksaja = "K";
+				}
 
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
@@ -1389,11 +1402,12 @@ while ($tietue = fgets($fd)) {
 		case 'OLIN__END' :
 		case '*RE OSTOTILRIV' :
 		case 'RFF':
+		case 'PCD':
 
 			if ($edi_tyyppi == "edifact911") {
 				$kentat = explode(":", $tieto);
 
-				// Orders 91.1 tulee kaksi RFF segmentti‰ (VN ja WS). VN otsikon viite, joten ei liity tiausriveihin. WS on tilausrivin loppumisen merkki.
+				// Orders 91.1 tulee kaksi RFF segmentti‰ (VN ja WS). VN otsikon viite, joten ei liity tilausriveihin. WS on tilausrivin loppumisen merkki.
 				if ($kentat[0] == "VN") {
 					$asiakkaan_tilausnumero = $kentat[1];
 					$viite = $kentat[1]. ' ';

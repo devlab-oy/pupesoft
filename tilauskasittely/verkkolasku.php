@@ -882,7 +882,7 @@
 						$tulos_ulos .= "<br>\n".t("Rahtikulut").":<br>\n<table>";
 					}
 
-					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per p‰iv‰ miss‰ merahti (eli kohdistettu) = K
+					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per p‰iv‰ miss‰ merahti (eli kohdistettu) = K (K‰ytet‰‰n l‰hett‰j‰n rahtisopimusnumeroa)
 					// j‰lkivaatimukset omalle riville
 					$query   = "SELECT group_concat(distinct lasku.tunnus) tunnukset
 								FROM lasku, rahtikirjat, maksuehto
@@ -2173,8 +2173,8 @@
 					// siirret‰‰n laskutiedosto operaattorille
 					#$url           = "https://test-api.apix.fi/invoices";
 					$url            = "https://api.apix.fi/invoices";
-					$transferkey    = $yhtiorow['verkkosala_lah'];
-					$transferid     = $yhtiorow['verkkotunnus_lah'];
+					$transferkey    = $yhtiorow['apix_avain'];
+					$transferid     = $yhtiorow['apix_tunnus'];
 					$software       = "Pupesoft";
 					$version        = "1.0";
 					$timestamp      = gmdate("YmdHis");
@@ -2475,7 +2475,7 @@
 								$kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
 
 								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-									$kutsu .= " ".trim($laskurow["nimi"]);
+									$kutsu .= ", ".trim($laskurow["nimi"]);
 								}
 
 								$liite              = $pdffilenimi;

@@ -16,15 +16,15 @@
 	else {
 		echo "<font class='head'>".t("Ostoseuranta")."</font><hr>";
 
-		if(!aja_kysely()) {
+		if (!aja_kysely()) {
 			unset($_POST);
 		}
 
-		// käytetään slavea
+		//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 		$useslave = 1;
 		require ("inc/connect.inc");
 
-		if(count($_POST) > 0) {
+		if (count($_POST) > 0) {
 			if (isset($muutparametrit)) {
 				foreach (explode("##", $muutparametrit) as $muutparametri) {
 					list($a, $b) = explode("=", $muutparametri);

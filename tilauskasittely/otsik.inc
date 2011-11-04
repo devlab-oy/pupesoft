@@ -1928,7 +1928,6 @@
 
 				echo "</select>";
 
-
 				echo "	</td>
 						<td>".t("Työstatus").":</td><td>";
 
@@ -1946,6 +1945,26 @@
 
 				echo "</select>";
 				echo "</td></tr>";
+
+				echo "<tr><td>".t("Prioriteetti").":</td><td colspan=3>";
+				echo "<select name='prioriteetti'>";
+				
+				$vresult = t_avainsana("TYOM_PRIORIT");
+				echo "<option value = '' >".t("Ei prioriteettiä")."</option>";
+
+				while ($vrow=mysql_fetch_assoc($vresult)) {
+					$sel="";
+					if ($srow["prioriteetti"] == $vrow['selite']) {
+						$sel = "selected";
+					}
+					else if ($vrow["selitetark_3"] == 'OLETUS') {
+						$sel = "selected";
+					}
+					echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
+				}
+
+				echo "</select>";
+				echo "</td></tr>";				
 			}
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
 				//Täysin dynaaminen osio
@@ -3172,6 +3191,7 @@
 							viite	 		= '$viite',
 							tyojono			= '$tyojono',
 							tyostatus		= '$tyostatus',
+							prioriteetti	= '$prioriteetti',
 							jalleenmyyja 	= '$jalleenmyyja',
 							tehdas			= '$tehdas',
 							tyoaika			= '$tyoaika',

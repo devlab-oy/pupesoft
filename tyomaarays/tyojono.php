@@ -199,6 +199,7 @@
 				yhtio.yhtio yhtioyhtio,
 				a3.nimi suorittajanimi,
 				a2.jarjestys prioriteetti,
+				a5.jarjestys tyom_prioriteetti,
 				lasku.luontiaika,
 				group_concat(a4.selitetark_2) asekalsuorittajanimi,
 				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
@@ -212,14 +213,15 @@
 				LEFT JOIN kuka a3 ON a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja
 				LEFT JOIN kalenteri ON kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus
 				LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka
+				LEFT JOIN avainsana a5 ON a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti
 				WHERE $konsernit
 				and lasku.tila in ('A','L','N','S','C')
 				and lasku.alatila != 'X'
 				$lisa
-				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
 				$omattyot
 				$lisa2
-				ORDER BY prioriteetti, luontiaika ASC";
+				ORDER BY tyom_prioriteetti DESC, prioriteetti, luontiaika ASC";
 	$vresult = pupe_query($query);
 
 	$tyomaarays_tunti_yhteensa = array();

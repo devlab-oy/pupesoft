@@ -1032,10 +1032,10 @@
 
 				// Onko laskuriveillä useita alv-verokantoja?
 				$ealvi = array_unique($ealvi);
-
+								
 				// Katsotaan alv laskuerittelystä
 				if (count($ealvi) == 1 and $ealvi[0] == "") {
-					$ealvi[0] = $lisavat[0];
+					$ealvi = array($lisavat[0]);
 				}
 
 	 			// Tehdän pelkät oletustiliöinnit

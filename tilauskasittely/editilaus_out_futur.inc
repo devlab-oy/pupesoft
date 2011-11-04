@@ -117,11 +117,10 @@
 			$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.tilausrivilinkki
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '' AND tuote.ei_saldoa = '')
-						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-							AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-						AND tilausrivi.var != 'U'";
+						AND tilausrivi.var not in ('U','J')";
 			$tilausrivi_res = pupe_query($query);
 
 			if (mysql_num_rows($tilausrivi_res) == 0) return false;
@@ -201,10 +200,12 @@
 
 				// var J voi olla vain jos tilaustyyppi ei ole 7
 				// var J rivi laitetaan unikkoon ja p‰ivitet‰‰n rivin var H:ksi ettei se j‰‰ roikkumaan JT-selaukseen
+				/*
 				if ($tilausrivi_row['var'] == 'J') {
 					$query = "UPDATE tilausrivi SET var = 'H' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausrivi_row['tunnus']}'";
 					$update_res = pupe_query($query);
 				}
+				*/
 			}
 
 			if ($i == 1) {

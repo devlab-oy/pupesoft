@@ -1969,7 +1969,6 @@
 					}
 					echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
 				}
-
 				echo "</select>";
 
 				echo "	</td>
@@ -1978,6 +1977,7 @@
 				echo "<select name='tyostatus'>";
 
 				$vresult = t_avainsana("TYOM_TYOSTATUS");
+				echo "<option value = '' >".t("Ei työstatusta")."</option>";
 
 				while ($vrow=mysql_fetch_assoc($vresult)) {
 					$sel="";
@@ -1993,7 +1993,7 @@
 				echo "<tr><td>".t("Prioriteetti").":</td><td colspan=3>";
 				echo "<select name='prioriteetti'>";
 				
-				$vresult = t_avainsana("TYOM_PRIORIT");
+				$vresult = t_avainsana("TYOM_PRIORIT");	
 				echo "<option value = '' >".t("Ei prioriteettiä")."</option>";
 
 				while ($vrow=mysql_fetch_assoc($vresult)) {
@@ -2001,7 +2001,7 @@
 					if ($srow["prioriteetti"] == $vrow['selite']) {
 						$sel = "selected";
 					}
-					else if ($vrow["selitetark_3"] == 'OLETUS') {
+					else if ($vrow["selitetark_3"] == 'OLETUS' and !isset($srow["tyojono"])) {
 						$sel = "selected";
 					}
 					echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";

@@ -76,7 +76,7 @@
 			<th>".t("Toimitetaan")."</th>
 			<th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
 			<th>".t("Työjono")."/<br>".t("Työstatus")."</th>
-			<th>".t("Vaihda")."<br>".t("Työjonoa")." ".t("työstatusta")."</th>
+			<th>".t("Vaihda")."<br>".t("Työjonoa")." / ".t("työstatusta")."</th>
 			<th>".t("Muokkaa")."</th>
 			</tr>";
 
@@ -415,6 +415,7 @@
 
 				// Haetaan tyojonot
 				echo "<select name='tyojono_muutos' onchange='submit();'>";
+				echo "<option value=''>Ei jonoa</option>";
 				while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
 					$sel = $vrow['tyojono'] == $tyojono_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyojono_row[selite]'$sel>$tyojono_row[selitetark]</option>";
@@ -423,6 +424,7 @@
 
 				// Haetaan tyostatukset
 				echo "<select name='tyostatus_muutos' onchange='submit();'>";
+				echo "<option value=''>Ei statusta</option>";
 				while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
 					$sel = $vrow['tyostatus'] == $tyostatus_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyostatus_row[selite]'$sel>$tyostatus_row[selitetark]</option>";

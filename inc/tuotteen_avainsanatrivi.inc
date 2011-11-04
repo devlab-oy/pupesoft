@@ -197,4 +197,19 @@
 		}
 	}
 
-?>
+	if (mysql_field_name($result, $i) == 'nakyvyys') {
+		if (substr($trow['laji'], 0, 10) == 'lisatieto_') {
+	 		$sel = array_fill_keys(array($trow[$i]), " selected") + array('o' => '', 'K' => '');
+
+			$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+			$ulos .= "<option value=''>".t("Kyllä")."</option>";
+			$ulos .= "<option value='K'>".t("Kyllä")." (".t("ei otsikkoa").")</option>";
+			$ulos .= "<option value='o'{$sel['o']}>".t("Ei")."</option>";
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+		}
+		else {
+			$tyyppi = 0;
+		}
+	}

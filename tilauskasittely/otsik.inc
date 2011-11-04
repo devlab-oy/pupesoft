@@ -1959,9 +1959,12 @@
 				$vresult = t_avainsana("TYOM_TYOJONO");
 				echo "<option value = '' >".t("Ei työjonoon")."</option>";
 
-				while ($vrow=mysql_fetch_assoc($vresult)) {
+				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$sel="";
 					if ($srow["tyojono"] == $vrow['selite']) {
+						$sel = "selected";
+					}
+					else if ($vrow["selitetark_3"] == 'OLETUS' and !isset($srow["tyojono"])) {
 						$sel = "selected";
 					}
 					echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";

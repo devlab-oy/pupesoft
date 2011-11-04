@@ -16,10 +16,9 @@ $query = "	SELECT *
 			from liitetiedostot
 			where tunnus = '$id'
 			and liitos in ('kalenteri','tuote','sarjanumeron_lisatiedot')";
-$liiteres = mysql_query($query) or pupe_error($query);
+$liiteres = mysql_query($query) or die(mysql_error());
 
 if (mysql_num_rows($liiteres) > 0) {
-
 	$liiterow = mysql_fetch_assoc($liiteres);
 
 	header("Content-type: $liiterow[filetype]");
@@ -28,7 +27,6 @@ if (mysql_num_rows($liiteres) > 0) {
 	header("Content-Description: $liiterow[selite]");
 
 	echo $liiterow["data"];
-
 }
 
 ?>

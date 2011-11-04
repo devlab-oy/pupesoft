@@ -489,7 +489,7 @@
 				echo t("Syötä tilausnumeron, nimen tai laatijan osa");
 			}
 			else {
-				echo t("Syötä tilausnumeron, nimen, laatijan tai sopimuksen lisätidon osa");
+				echo t("Syötä tilausnumeron, nimen, laatijan tai sopimuksen lisätiedon osa");
 			}
 			echo "<input type='text' name='etsi'>";
 			echo "<input type='Submit' value = '".t("Etsi")."'>";
@@ -1233,13 +1233,13 @@
 						lasku.luontiaika,
 						if(kuka1.kuka != kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
 						concat_ws('###', sopimus_alkupvm, sopimus_loppupvm) sopimuspvm,
+						group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto1 separator '<br>') sarjanumero,
+						group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto2 separator '<br>') vasteaika,
 						lasku.alatila,
 						lasku.tila,
 						lasku.tunnus,
 						tunnusnippu,
-						sopimus_loppupvm,
-						group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto1 separator '<br>') sopimuksen_lisatieto1,
-						group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto2 separator '<br>') sopimuksen_lisatieto2
+						sopimus_loppupvm
 						FROM lasku use index (tila_index)
 						JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
 						JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio = lasku.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
@@ -1250,7 +1250,7 @@
 						AND tila = '0'
 						AND alatila NOT IN ('D')
 						$haku
-						GROUP BY 1,2,3,4,5,6,7,8,9,10,11
+						GROUP BY 1,2,3,4,5,6
 						ORDER by lasku.luontiaika desc
 						$rajaus";
 
@@ -1268,7 +1268,7 @@
 				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
-			$miinus = 7;
+			$miinus = 5;
 		}
 		else {
 			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,

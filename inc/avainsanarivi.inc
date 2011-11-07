@@ -385,7 +385,7 @@
 		$ulos = "<td><textarea rows=5 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
-
+	
 	if (($avain_sel["TYOM_PRIORIT"] == "SELECTED" or $avain_sel["TYOM_TYOJONO"] == "SELECTED" or $avain_sel["TYOM_TYOSTATUS"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_3") {
 
 		if ($trow[$i] == 'OLETUS') {
@@ -398,7 +398,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-
+	
 	if ($avain_sel['TYOM_TYOLINJA'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$query = "	SELECT selite, selitetark

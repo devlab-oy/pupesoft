@@ -71,28 +71,42 @@
 	}
 
 	echo "	<th>".t("Työm").".<br>".t("Viite")."</th>
+			<th>".t("Prio")."</th>
 			<th>".t("Ytunnus")."<br>".t("Asiakas")."</th>
 			<th>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
 			<th>".t("Toimitetaan")."</th>
 			<th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
 			<th>".t("Työjono")."/<br>".t("Työstatus")."</th>
-			<th>".t("Vaihda")."<br>".t("Työjonoa")." ".t("työstatusta")."</th>
 			<th>".t("Muokkaa")."</th>
+			<th style='visibility:hidden; display:none;'></th>
 			</tr>";
 
 	echo "<tr>";
 
 	if (trim($konserni) != '') {
-		echo "<td></td>";
+		echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_yhtio_haku'></td>";
 	}
 
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_myyntitilaus_haku'></td>";
+
+	// Haetaan prioriteetti avainsanat
+	echo "<td><input type='hidden'	size='10' class='search_field' name='search_prioriteetti_haku'>";
+	echo "<select class='prioriteetti_sort'>";
+	echo "<option value=''>".t('Ei valintaa')."</option>";
+
+	$prioriteetti_result = t_avainsana("TYOM_PRIORIT");
+	while ($prioriteetti_row = mysql_fetch_assoc($prioriteetti_result)) {
+		echo "<option value='$prioriteetti_row[selitetark]'>$prioriteetti_row[selitetark]</option>";
+	}
+	echo "</select></td>";
+
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_suorittaja_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_toimitetaan_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_myyja_haku'></td>";
 
 	echo "<td>";
+
 	echo "<select class='tyojono_sort'>";
 	echo "<option value='-'>".t('Ei valintaa')."</option>";
 
@@ -113,8 +127,8 @@
 	echo "</select>";
 	echo "</td>";
 
-	echo "<td valign='top'><input type='hidden'	size='10' class='search_field' name='search_tyojono_haku'></td>";
-	echo "<td valign='top'><input type='hidden' size='10' class='search_field' name='search_tyostatus_haku'></td>";
+	echo "<td><input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
+	echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_statusjono_haku'></td>";
 	echo "</tr>";
 	echo "</thead>";
 
@@ -199,6 +213,7 @@
 				yhtio.yhtio yhtioyhtio,
 				a3.nimi suorittajanimi,
 				a2.jarjestys prioriteetti,
+				a5.selitetark tyom_prioriteetti,
 				lasku.luontiaika,
 				group_concat(a4.selitetark_2) asekalsuorittajanimi,
 				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
@@ -212,14 +227,15 @@
 				LEFT JOIN kuka a3 ON a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja
 				LEFT JOIN kalenteri ON kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus
 				LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka
+				LEFT JOIN avainsana a5 ON a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti
 				WHERE $konsernit
 				and lasku.tila in ('A','L','N','S','C')
 				and lasku.alatila != 'X'
 				$lisa
-				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
 				$omattyot
 				$lisa2
-				ORDER BY prioriteetti, luontiaika ASC";
+				ORDER BY a5.selite, prioriteetti, luontiaika ASC";
 	$vresult = pupe_query($query);
 
 	$tyomaarays_tunti_yhteensa = array();
@@ -282,8 +298,10 @@
 			echo "<td valign='top'><span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]</td>";
 		}
 
-		echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
+		// Prioriteetti työjonoon
+		echo "<td>$vrow[tyom_prioriteetti]</td>";
 
+		echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
 
 		echo "<td valign='top' nowrap>";
 
@@ -378,21 +396,7 @@
 			$varilisa = "";
 		}
 
-		echo "<td valign='top' $varilisa>$vrow[tyojono] / <br>$vrow[tyostatus]</td>";
-
-		if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
-			if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
-				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
-			}
-			else {
-				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&tyojono=$tyojono&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
-			}
-		}
-		else {
-			$muoklinkki = "";
-		}
-
-		echo "<td>";
+		echo "<td $varilisa>";
 
 		if ($toim != 'TYOMAARAYS_ASENTAJA') {
 			$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
@@ -413,6 +417,7 @@
 
 				// Haetaan tyojonot
 				echo "<select name='tyojono_muutos' onchange='submit();'>";
+				echo "<option value=''>Ei jonoa</option>";
 				while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
 					$sel = $vrow['tyojono'] == $tyojono_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyojono_row[selite]'$sel>$tyojono_row[selitetark]</option>";
@@ -421,6 +426,7 @@
 
 				// Haetaan tyostatukset
 				echo "<select name='tyostatus_muutos' onchange='submit();'>";
+				echo "<option value=''>Ei statusta</option>";
 				while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
 					$sel = $vrow['tyostatus'] == $tyostatus_row['selitetark'] ? ' SELECTED' : '';
 					echo "<option value='$tyostatus_row[selite]'$sel>$tyostatus_row[selitetark]</option>";
@@ -431,11 +437,23 @@
 		else {
 			echo "$vrow[tyojono]<br>$vrow[tyostatus]";
 		}
-		// Laitetaan hiddeninä työstatus sorttauksen takia.
-		echo "<p style='visibility:hidden'>$vrow[tyostatus]</p>";
+
 		echo "</td>";
 
+		if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
+			if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
+				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
+			}
+			else {
+				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&tyojono=$tyojono&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
+			}
+		}
+		else {
+			$muoklinkki = "";
+		}
+
 		echo "<td valign='top'>$muoklinkki</td>";
+		echo "<td style='visibility:hidden; display:none;'>$vrow[tyojono] $vrow[tyostatus]</td>";
 		echo "</tr>";
 	}
 
@@ -445,7 +463,14 @@
 
 	// Konffataan datatablesit
 	$datatables_conf = array();
-	$datatables_conf[] = array($pupe_DataTables[0],7,8,true,true);
+
+	if (trim($konserni) != '') {
+		$datatables_conf[] = array($pupe_DataTables[0],9,9,true,true);
+
+	}
+	else {
+		$datatables_conf[] = array($pupe_DataTables[0],9,9,true,true);
+	}
 
 	if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
 

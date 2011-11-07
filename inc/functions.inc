@@ -6151,7 +6151,7 @@ if (!function_exists("js_popup")) {
 			}
 			return x;
 		}
-		
+
 		function getMouseY(e) {
 			var y = null;
 
@@ -6170,7 +6170,7 @@ if (!function_exists("js_popup")) {
 	        toolTip.css({'top':y, 'left':x}).delay(500).show('fast');
 	    }
 
-	    function toolTipHide() {			
+	    function toolTipHide() {
 			toolTip.clearQueue();
 			toolTip.hide();
 	    }
@@ -11669,16 +11669,25 @@ if (!function_exists("pupe_DataTables")) {
 				if (oSettings.oPreviousSearch['sSearch']!=''){
 					$('.search_field').val(oSettings.oPreviousSearch['sSearch']);
 				}
-				
+
+				// Prioriteetin rajausta dropdownilla
+				$('select.prioriteetti_sort').change(function() {
+					var prioriteetti = $('select.prioriteetti_sort option:selected');
+					var haku_arvo = prioriteetti.val();
+
+					console.log(prioriteetti.val());
+					datatablesit[0].fnFilter(haku_arvo, 1);
+				} );
+
 				// Työjonon ja työstatuksen rajausta dropdownilla
-				$('select.tyojono_sort, select.tyostatus_sort').change(function() { 
+				$('select.tyojono_sort, select.tyostatus_sort').change(function() {
 					var tyojono = $('select.tyojono_sort option:selected');
 					var tyostatus = $('select.tyostatus_sort option:selected');
 					var hakuarvo;
-					
+
 					// Jos tyojono tai tyostatus on tyhja, haetaan vain yhdellä ehdolla
-					haku_arvo = tyojono.text() +' / '+ tyostatus.text();
-					
+					haku_arvo = tyojono.text() +' '+ tyostatus.text();
+
 					if (tyojono.val() == '-') {
 						haku_arvo = tyostatus.text();
 					}
@@ -11689,10 +11698,8 @@ if (!function_exists("pupe_DataTables")) {
 						haku_arvo = '';
 					}
 
-					console.log(haku_arvo);
-					datatablesit[0].fnFilter(haku_arvo, 5);										
+					datatablesit[0].fnFilter(haku_arvo, 8);
 				} );
-				
 			} );
 		</script>";
 	}

@@ -386,7 +386,7 @@
 		$jatko = 0;
 	}
 	
-	if (($avain_sel["TYOM_PRIORIT"] == "SELECTED"  or $avain_sel["TRY"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_3") {
+	if ($avain_sel["TYOM_PRIORIT"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
 
 		if ($trow[$i] == 'OLETUS') {
 			$sel = "SELECTED";
@@ -399,7 +399,7 @@
 		$jatko = 0;
 	}
 	
-	if (($avain_sel["TYOM_TYOJONO"] == "SELECTED"  or $avain_sel["TRY"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_3") {
+	if ($avain_sel["TYOM_TYOJONO"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
 
 		if ($trow[$i] == 'OLETUS') {
 			$sel = "SELECTED";

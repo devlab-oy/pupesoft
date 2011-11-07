@@ -11670,6 +11670,15 @@ if (!function_exists("pupe_DataTables")) {
 					$('.search_field').val(oSettings.oPreviousSearch['sSearch']);
 				}
 				
+				// Prioriteetin rajausta dropdownilla
+				$('select.prioriteetti_sort').change(function() {
+					var prioriteetti = $('select.prioriteetti_sort option:selected');
+					var haku_arvo = prioriteetti.val();
+																
+					console.log(prioriteetti.val());
+					datatablesit[0].fnFilter(haku_arvo, 1);
+				} );
+				
 				// Työjonon ja työstatuksen rajausta dropdownilla
 				$('select.tyojono_sort, select.tyostatus_sort').change(function() { 
 					var tyojono = $('select.tyojono_sort option:selected');

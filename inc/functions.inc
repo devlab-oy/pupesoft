@@ -11669,20 +11669,16 @@ if (!function_exists("pupe_DataTables")) {
 				if (oSettings.oPreviousSearch['sSearch']!=''){
 					$('.search_field').val(oSettings.oPreviousSearch['sSearch']);
 				}
-<<<<<<< HEAD
 
-=======
-				
 				// Prioriteetin rajausta dropdownilla
 				$('select.prioriteetti_sort').change(function() {
 					var prioriteetti = $('select.prioriteetti_sort option:selected');
 					var haku_arvo = prioriteetti.val();
-																
+
 					console.log(prioriteetti.val());
 					datatablesit[0].fnFilter(haku_arvo, 1);
 				} );
-				
->>>>>>> b8f10ded273d5f79e24a7295eb09ce4f578cfc7f
+
 				// Työjonon ja työstatuksen rajausta dropdownilla
 				$('select.tyojono_sort, select.tyostatus_sort').change(function() {
 					var tyojono = $('select.tyojono_sort option:selected');
@@ -11704,7 +11700,6 @@ if (!function_exists("pupe_DataTables")) {
 
 					datatablesit[0].fnFilter(haku_arvo, 8);
 				} );
-
 			} );
 		</script>";
 	}

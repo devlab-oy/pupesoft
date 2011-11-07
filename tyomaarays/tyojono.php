@@ -99,7 +99,7 @@
 		echo "<option value='$prioriteetti_row[selitetark]'>$prioriteetti_row[selitetark]</option>";
 	}
 	echo "</select></td>";
-	
+
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_suorittaja_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_toimitetaan_haku'></td>";

@@ -1957,16 +1957,17 @@
 				echo "<select name='tyojono'>";
 
 				$vresult = t_avainsana("TYOM_TYOJONO");
-				echo "<option value = '' >".t("Ei työjonoon")."</option>";
+				echo "<option value = '' >".t("Ei työjonoa")."</option>";
 
 				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$sel="";
 					if ($srow["tyojono"] == $vrow['selite']) {
 						$sel = "selected";
 					}
-					else if ($vrow["selitetark_3"] == 'OLETUS' and !isset($srow["tyojono"])) {
+					elseif ($vrow["selitetark_3"] == 'OLETUS' and !isset($srow["tyojono"])) {
 						$sel = "selected";
 					}
+
 					echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
 				}
 				echo "</select>";
@@ -1979,11 +1980,15 @@
 				$vresult = t_avainsana("TYOM_TYOSTATUS");
 				echo "<option value = '' >".t("Ei työstatusta")."</option>";
 
-				while ($vrow=mysql_fetch_assoc($vresult)) {
+				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$sel="";
 					if ($srow["tyostatus"] == $vrow['selite']) {
 						$sel = "selected";
 					}
+					elseif ($vrow["selitetark_3"] == 'OLETUS' and !isset($srow["tyostatus"])) {
+						$sel = "selected";
+					}
+
 					echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
 				}
 
@@ -1992,23 +1997,24 @@
 
 				echo "<tr><td>".t("Prioriteetti").":</td><td colspan=3>";
 				echo "<select name='prioriteetti'>";
-				
-				$vresult = t_avainsana("TYOM_PRIORIT");	
+
+				$vresult = t_avainsana("TYOM_PRIORIT");
 				echo "<option value = '' >".t("Ei prioriteettiä")."</option>";
 
-				while ($vrow=mysql_fetch_assoc($vresult)) {
+				while ($vrow = mysql_fetch_assoc($vresult)) {
 					$sel="";
 					if ($srow["prioriteetti"] == $vrow['selite']) {
 						$sel = "selected";
 					}
-					else if ($vrow["selitetark_3"] == 'OLETUS' and !isset($srow["tyojono"])) {
+					elseif ($vrow["selitetark_3"] == 'OLETUS' and !isset($srow["prioriteetti"])) {
 						$sel = "selected";
 					}
+
 					echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
 				}
 
 				echo "</select>";
-				echo "</td></tr>";				
+				echo "</td></tr>";
 			}
 			if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
 				//Täysin dynaaminen osio

@@ -71,20 +71,20 @@
 	}
 
 	echo "	<th>".t("Työm").".<br>".t("Viite")."</th>
-			<th>".t("Prioriteetti")."</th>
+			<th>".t("Prio")."</th>
 			<th>".t("Ytunnus")."<br>".t("Asiakas")."</th>
 			<th>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
 			<th>".t("Toimitetaan")."</th>
 			<th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
 			<th>".t("Työjono")."/<br>".t("Työstatus")."</th>
-			<th>".t("Vaihda")."<br>".t("Työjonoa")." / ".t("työstatusta")."</th>
 			<th>".t("Muokkaa")."</th>
+			<th style='visibility:hidden; display:none;'></th>
 			</tr>";
 
 	echo "<tr>";
 
 	if (trim($konserni) != '') {
-		echo "<td></td>";
+		echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_yhtio_haku'></td>";
 	}
 
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_myyntitilaus_haku'></td>";
@@ -95,6 +95,7 @@
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_myyja_haku'></td>";
 
 	echo "<td>";
+
 	echo "<select class='tyojono_sort'>";
 	echo "<option value='-'>".t('Ei valintaa')."</option>";
 
@@ -115,8 +116,8 @@
 	echo "</select>";
 	echo "</td>";
 
-	echo "<td valign='top'><input type='hidden'	size='10' class='search_field' name='search_tyojono_haku'></td>";
-	echo "<td valign='top'><input type='hidden' size='10' class='search_field' name='search_tyostatus_haku'></td>";
+	echo "<td><input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
+	echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_statusjono_haku'></td>";
 	echo "</tr>";
 	echo "</thead>";
 
@@ -285,12 +286,11 @@
 		else {
 			echo "<td valign='top'><span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]</td>";
 		}
-		
+
 		// Prioriteetti työjonoon
 		echo "<td>$vrow[tyom_prioriteetti]</td>";
-		
-		echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
 
+		echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
 
 		echo "<td valign='top' nowrap>";
 
@@ -385,21 +385,7 @@
 			$varilisa = "";
 		}
 
-		echo "<td valign='top' $varilisa>$vrow[tyojono] / <br>$vrow[tyostatus]</td>";
-
-		if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
-			if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
-				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
-			}
-			else {
-				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&tyojono=$tyojono&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
-			}
-		}
-		else {
-			$muoklinkki = "";
-		}
-
-		echo "<td>";
+		echo "<td $varilisa>";
 
 		if ($toim != 'TYOMAARAYS_ASENTAJA') {
 			$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
@@ -440,11 +426,23 @@
 		else {
 			echo "$vrow[tyojono]<br>$vrow[tyostatus]";
 		}
-		// Laitetaan hiddeninä työstatus sorttauksen takia.
-		echo "<p style='visibility:hidden'>$vrow[tyostatus]</p>";
+
 		echo "</td>";
 
+		if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
+			if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
+				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
+			}
+			else {
+				$muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&tyojono=$tyojono&lopetus=$lopetusx'>".t("Muokkaa")."</a>";
+			}
+		}
+		else {
+			$muoklinkki = "";
+		}
+
 		echo "<td valign='top'>$muoklinkki</td>";
+		echo "<td style='visibility:hidden; display:none;'>$vrow[tyojono] $vrow[tyostatus]</td>";
 		echo "</tr>";
 	}
 
@@ -454,7 +452,14 @@
 
 	// Konffataan datatablesit
 	$datatables_conf = array();
-	$datatables_conf[] = array($pupe_DataTables[0],8,9,true,true);
+
+	if (trim($konserni) != '') {
+		$datatables_conf[] = array($pupe_DataTables[0],9,9,true,true);
+
+	}
+	else {
+		$datatables_conf[] = array($pupe_DataTables[0],9,9,true,true);
+	}
 
 	if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
 

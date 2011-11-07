@@ -385,29 +385,16 @@
 		$ulos = "<td><textarea rows=5 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
-	
-	if (($avain_sel["TYOM_PRIORIT"] == "SELECTED"  or $avain_sel["TRY"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_3") {
+
+	if (($avain_sel["TYOM_PRIORIT"] == "SELECTED" or $avain_sel["TYOM_TYOJONO"] == "SELECTED" or $avain_sel["TYOM_TYOSTATUS"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_3") {
 
 		if ($trow[$i] == 'OLETUS') {
 			$sel = "SELECTED";
 		}
 
 		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $sel>Ei oletus</option>";
-		$ulos .= "<option value='OLETUS' $sel>Oletus</option>";	
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-	
-	if (($avain_sel["TYOM_TYOJONO"] == "SELECTED"  or $avain_sel["TRY"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_3") {
-
-		if ($trow[$i] == 'OLETUS') {
-			$sel = "SELECTED";
-		}
-
-		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $sel>Ei oletus</option>";
-		$ulos .= "<option value='OLETUS' $sel>Oletus</option>";	
+		$ulos .= "<option value='' $sel>".t("Ei oletus")."</option>";
+		$ulos .= "<option value='OLETUS' $sel>".t("Oletus")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

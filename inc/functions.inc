@@ -11690,7 +11690,7 @@ if (!function_exists("pupe_DataTables")) {
 					}
 
 					console.log(haku_arvo);
-					datatablesit[0].fnFilter(haku_arvo, 5);										
+					datatablesit[0].fnFilter(haku_arvo, 6);										
 				} );
 				
 			} );

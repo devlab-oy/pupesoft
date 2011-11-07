@@ -71,6 +71,7 @@
 	}
 
 	echo "	<th>".t("Työm").".<br>".t("Viite")."</th>
+			<th>".t("Prioriteetti")."</th>
 			<th>".t("Ytunnus")."<br>".t("Asiakas")."</th>
 			<th>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
 			<th>".t("Toimitetaan")."</th>
@@ -87,6 +88,7 @@
 	}
 
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_myyntitilaus_haku'></td>";
+	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_prioriteetti_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_suorittaja_haku'></td>";
 	echo "<td valign='top'><input type='text' 	size='10' class='search_field' name='search_toimitetaan_haku'></td>";
@@ -199,7 +201,7 @@
 				yhtio.yhtio yhtioyhtio,
 				a3.nimi suorittajanimi,
 				a2.jarjestys prioriteetti,
-				a5.jarjestys tyom_prioriteetti,
+				a5.selitetark tyom_prioriteetti,
 				lasku.luontiaika,
 				group_concat(a4.selitetark_2) asekalsuorittajanimi,
 				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
@@ -221,7 +223,7 @@
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
 				$omattyot
 				$lisa2
-				ORDER BY tyom_prioriteetti DESC, prioriteetti, luontiaika ASC";
+				ORDER BY a5.selite DESC, prioriteetti, luontiaika ASC";
 	$vresult = pupe_query($query);
 
 	$tyomaarays_tunti_yhteensa = array();
@@ -283,7 +285,10 @@
 		else {
 			echo "<td valign='top'><span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]</td>";
 		}
-
+		
+		// Prioriteetti työjonoon
+		echo "<td>$vrow[tyom_prioriteetti]</td>";
+		
 		echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
 
 
@@ -449,7 +454,7 @@
 
 	// Konffataan datatablesit
 	$datatables_conf = array();
-	$datatables_conf[] = array($pupe_DataTables[0],7,8,true,true);
+	$datatables_conf[] = array($pupe_DataTables[0],8,9,true,true);
 
 	if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
 

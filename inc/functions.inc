@@ -11097,6 +11097,31 @@ if (!function_exists("pupe_DataTables")) {
 									$('#saatavat_yhteensa_'+j).html(saatavaty[j].toFixed(2));
 								}
 							}
+							
+							if (tableid == \"raportti_valmistuksista\") {
+								var saatavaty = new Array();
+								var sarakemaara = parametrit[tableid][0]-4;
+
+								// Summataan vain ruudulla näkyvät luvut
+								for (var i=iStart; i<iEnd; i++) {
+
+									for (var j=4; j<=sarakemaara; j++) {
+										if (typeof saatavaty[j] == 'undefined') saatavaty[j] = 0;
+										saatavaty[j] += aaData[aiDisplay[i]][j]*1;
+									}
+								}
+
+								// Tyhjennetään kaikki summat
+								$('td[name=yhteensa]').each(
+									function() {
+										$( this ).html('');
+									}
+								);
+
+								for (var j=4; j<=sarakemaara; j++) {
+									$('#yhteensa_'+j).html(saatavaty[j].toFixed(2));
+								}
+							}//fuck
 						}
 					} );
 				} );

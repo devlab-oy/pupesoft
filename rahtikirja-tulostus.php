@@ -214,6 +214,7 @@
 			$pakkaus       		= array();
 			$pakkauskuvaus 		= array();
 			$pakkauskuvaustark 	= array();
+			$kuljetusohjeet 	= "";
 			$kilot         		= array();
 			$kollit        		= array();
 			$kuutiot       		= array();
@@ -358,10 +359,13 @@
 				}
 
 				// Summataan kaikki painot yhteen
-				$query = "	SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark, sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri
+				$query = "	SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark,
+							sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri
 							FROM rahtikirjat
-							WHERE tunnus in ($tunnukset) and yhtio='$kukarow[yhtio]'
-							group by pakkaus, pakkauskuvaus, pakkauskuvaustark $groupby_lisa order by pakkaus, pakkauskuvaus, pakkauskuvaustark";
+							WHERE tunnus in ($tunnukset)
+							AND yhtio = '$kukarow[yhtio]'
+							GROUP BY pakkaus, pakkauskuvaus, pakkauskuvaustark $groupby_lisa
+							ORDER BY pakkaus, pakkauskuvaus, pakkauskuvaustark";
 				$pakka = mysql_query($query) or pupe_error($query);
 
 				while ($pak = mysql_fetch_assoc($pakka)) {
@@ -381,6 +385,16 @@
 					$kuutiotyht += $pak["kuutiot"];
 					$lavatyht   += $pak["lavametri"];
 				}
+
+				// Kuljetusohjeet
+				$query = "	SELECT trim(group_concat(DISTINCT viesti SEPARATOR ' ')) viesti
+							FROM rahtikirjat
+							WHERE tunnus in ($tunnukset)
+							AND yhtio = '$kukarow[yhtio]'";
+				$pakka = mysql_query($query) or pupe_error($query);
+				$pak = mysql_fetch_assoc($pakka);
+
+				$kuljetusohjeet = $pak["viesti"];
 
 				$tulostuskpl = $kollityht;
 

@@ -63,6 +63,19 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus = '$laskurow[tunnus]'";
 			$result = mysql_query($sqlquery) or pupe_error($sqlquery);
+			
+			//p‰ivitet‰‰n lis‰ksi aina teccom-ostotilauksissa tilausrivi.tunnus tilausrivi.tilaajanrivinro:ksi, 
+			//jotta sitten teccom asn/ostolaskuissa osataan pointata oikeaan riviin, ja handlataan tilanne, miss‰ rivi voi splittaantua jne (rivinumero on tallessa!)
+			
+			mysql_data_seek($result, 0);
+			while ($tilausrivirow = mysql_fetch_assoc($result)) {
+				$sqlquery = "	UPDATE tilausrivi SET
+								tilaajanrivinro = tunnus
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$tilausrivirow[tunnus]'";
+				$tresult = pupe_query($sqlquery);
+			}
+			
 		}
 		else {
 			echo "<font class='error'>".t("Tilauksen l‰hetys ep‰onnistui")."!</font><br>";

@@ -8931,7 +8931,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
 if (!function_exists("liite_popup")) {
 	function liite_popup($toiminto, $tuotetunnus = 0, $width=0, $height=0) {
-		global $kukarow, $yhtiorow, $PHP_SELF, $palvelin2, $pupe_root_polku;
+		global $kukarow, $yhtiorow, $PHP_SELF, $palvelin2, $pupe_root_polku, $toim;
 
 		if ($toiminto == "JS") {
 			echo "<SCRIPT type='text/javascript'>
@@ -8954,10 +8954,10 @@ if (!function_exists("liite_popup")) {
 							}
 
 							if (maxwidth == '0' && totalheight == '0') {
-								window.open('$PHP_SELF?ohje=off&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
+								window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
 							}
 							else {
-								window.open('$PHP_SELF?ohje=off&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
+								window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
 							}
 						}
 					//-->

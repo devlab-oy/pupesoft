@@ -76,7 +76,7 @@
 		echo "<table><form action='' name='laskuri' method='post'>";
 
 		//käydään kaikki ruksatut tilaukset läpi
-		if (sizeof($tunnus) != 0) {
+		if (count($tunnus) > 0) {
 			$laskutettavat = "";
 			foreach ($tunnus as $tun) {
 				echo "<input type='hidden' name='tunnus[]' value='$tun'>";
@@ -89,17 +89,17 @@
 						sum(round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},$yhtiorow[hintapyoristys])) loppusumma
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio AND lasku.tunnus=tilausrivi.otunnus)
-						WHERE var != 'J' and otunnus in ($laskutettavat) and tilausrivi.yhtio='$kukarow[yhtio]'
-						GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
-								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
-								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
-								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi";
+						WHERE var != 'J'
+						and otunnus in ($laskutettavat)
+						and tilausrivi.yhtio = '$kukarow[yhtio]'
+						GROUP BY 1,2,3";
 		$result = pupe_query($query_rivi);
 		$laskurow = mysql_fetch_array($result);
 
 		$query = "	SELECT laskunsummapyoristys
 					FROM asiakas
-					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+					WHERE tunnus='$laskurow[liitostunnus]'
+					and yhtio='$kukarow[yhtio]'";
 		$asres = pupe_query($query);
 		$asrow = mysql_fetch_array($asres);
 
@@ -1043,9 +1043,11 @@
 			$ketjutus_group = "";
 		}
 
-		// GROUP BY pitää olla sama kun verkkolasku.php:ssä rivi ~1150
+		// GROUP BY pitää olla sama kun verkkolasku.php:ssä rivi ~1243
 		// HUOM LISÄKSI laskutusviikonpäivä mukaan GROUP BY:hin!!!!
-		$query = "	SELECT lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
+		$query = "	SELECT
+					if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+					lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maksuehto, lasku.chn,
 					lasku.tila, lasku.alatila,
@@ -1069,7 +1071,7 @@
 					$vientilisa
 					$muutlisa
 					$haku
-					GROUP BY lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+					GROUP BY lasku.laskutusvkopv, ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
 					lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 					lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,

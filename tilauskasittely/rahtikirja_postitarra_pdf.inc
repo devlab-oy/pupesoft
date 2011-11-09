@@ -66,8 +66,8 @@
 	// tulostetaan niin monta lappua kun on kollejakin
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
-		$kuka    = sprintf("%02d",$tulostuskpl); 		// laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
-		
+		$kuka = sprintf("%02d",$tulostuskpl); 		// laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
+
 		if (substr($rivi["rahtikirjanro"], 0, 4) == "JJFI") {
 			$oma = sprintf("%09d", substr($rivi["rahtikirjanro"], -9));
 		}
@@ -93,7 +93,7 @@
 		if (class_exists("Image_Barcode")) {
 			//tehdään JJFI viivakoodi
 			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
-			
+
 			imagejpeg(Image_Barcode::draw($viiva1, 'code128', 'jpg', false, 3, 170), $nimi);
 
 			$fh = fopen($nimi, "r");
@@ -289,90 +289,20 @@
 		if ($rahdinmaksaja != "") {
 			$komm .= "MAKSAJA MUU KUIN LÄHETTÄJÄ.\n";
 		}
-		
+
 		if (is_array($vakit)) {
 			$komm .= "\n";
-			
+
 			foreach($vakit as $vak) {
 				$komm .= "$vak.\n";
 			}
 		}
 
-		if (trim($komm) != '') {
-			$kommentit = explode("\n", trim($komm));
-
-			$pohja  = 60;
-			$ed_akey = 0;
-			$rpit1 = 390;
-			$rpit2 = 380;
-
-			$maxoik = 18;
-
-			foreach ($kommentit as $akey => $kommentti) {
-
-				// Jos rivikommentti on pitkä niin rivitämme sen
-				if ($pdf->strlen($kommentti, $isobold) > ($rpit1-$maxoik)) {
-
-					$kommentti = str_replace(' ' ,' ##', $kommentti);
-					$kommentti = str_replace('.' ,'.##', $kommentti);
-					$kommentti = str_replace(',' ,',##', $kommentti);
-
-					$sanat = explode('##', $kommentti);
-					$lause = "";
-
-					foreach ($sanat as $sana) {
-
-						if ($pdf->strlen($lause, $isobold) > ($rpit2-$maxoik)) {
-
-							$pdf->draw_text($maxoik, $pohja, $lause, $firstpage, $isobold);
-							$lause = "";
-							$maxoik = 18;
-							$pohja  -= 12;
-
-							if ($pohja <= 22) {
-								break 2;
-							}
-						}
-
-						$lause .= $sana;
-					}
-
-					if ($pdf->strlen($lause, $isobold) <= ($rpit2-$maxoik)) {
-						$pdf->draw_text($maxoik, $pohja, $lause, $firstpage, $isobold);
-
-						$oikpos = $pdf->strlen($lause, $isobold) + 20;
-
-						if ($oikpos > $maxoik) {
-							$maxoik = $oikpos;
-						}
-					}
-					else {
-						$maxoik = 18;
-						$pohja -= 12;
-					}
-
-					if ($pohja <= 22) {
-						break;
-					}
-				}
-				elseif ($pdf->strlen($kommentti, $isobold) <= $rpit2) {
-					$pdf->draw_text($maxoik, $pohja, $kommentti, $firstpage, $isobold);
-
-					$oikpos = $pdf->strlen($kommentti, $isobold) + 20;
-
-					if ($oikpos > $maxoik) {
-						$maxoik = $oikpos;
-					}
-
-					if ($pohja <= 22) {
-						break;
-					}
-
-				}
-
-				$ed_akey = $akey;
-			}
+		if ($kuljetusohjeet != "") {
+			$komm .= "$kuljetusohjeet";
 		}
+
+		$pdf->draw_paragraph(70, 18, 15, 380, $komm, $firstpage, $isobold);
 
 		// koko kortin ympärille border
 		$pdf->draw_rectangle(0, 0,  598, 418, $firstpage, $rectparam);

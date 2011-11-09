@@ -5,11 +5,11 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta, jos mit‰‰n ei talleteta *//
 	$useslave = 1;
+	if (isset($_POST["uusirappari"]) and $_POST["uusirappari"] != "") $useslave = 0;
 
 	require("inc/parametrit.inc");
-
 	//Ja t‰ss‰ laitetaan ne takas
 	$sqlhaku = $sqlapu;
 

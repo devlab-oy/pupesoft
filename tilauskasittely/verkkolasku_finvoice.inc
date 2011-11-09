@@ -20,7 +20,7 @@ if (!function_exists('finvoice_otsik')) {
 		$senderpartyid 			= str_replace(" ", "", $yhtiorow['finvoice_senderpartyid']);
 		$senderintermediator	= str_replace(" ", "", $yhtiorow['finvoice_senderintermediator']);
 
-		//	Osataanko tämän käsitellä tämän pankin finvoiceaineistoa?
+		//	Osataanko käsitellä tämän pankin finvoiceaineistoa?
 		switch ($senderintermediator) {
 			case 'NDEAFIHH':
 			$tulostuspalvelu	= "tulostukseen";
@@ -138,7 +138,7 @@ if (!function_exists('finvoice_otsik')) {
 					$y_puhelin		= $alhiro['puhelin'];
 					$y_fax			= $alhiro['fax'];
 					$y_email		= $alhiro['email'];
-					$y_www			= $yhtiorow['www'];
+					$y_www			= $alhiro['www'];
 					$y_nimi 		= $lasrow["yhtio_nimi"];
 					$y_osoite 		= $lasrow["yhtio_osoite"];
 					$y_postino	 	= $lasrow["yhtio_postino"];

@@ -46,7 +46,7 @@ if (!function_exists('pupevoice_otsik')) {
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
-				$y_www			= $yhtiorow['www'];
+				$y_www			= $alhiro['www'];
 				$y_nimi 		= $lasrow["yhtio_nimi"];
 				$y_osoite 		= $lasrow["yhtio_osoite"];
 				$y_postino	 	= $lasrow["yhtio_postino"];

@@ -2360,7 +2360,7 @@ if (!function_exists('loppu_lahete')) {
 
 		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
 			// haetaan toimipaikan tiedot
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_toimipaikka]'";
+			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {
@@ -2369,6 +2369,7 @@ if (!function_exists('loppu_lahete')) {
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
 			}
 		}
 
@@ -2384,6 +2385,7 @@ if (!function_exists('loppu_lahete')) {
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
 			}
 		}
 

@@ -1487,6 +1487,7 @@ if (!function_exists('loppu')) {
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
 			}
 		}
 
@@ -1502,6 +1503,7 @@ if (!function_exists('loppu')) {
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
 			}
 		}
 

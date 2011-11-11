@@ -86,7 +86,9 @@
 					toim_maa    		= '',
 					laskutusvkopv		= '',
 					chn					= '',
-					verkkotunnus		= ''
+					verkkotunnus		= '',
+					toimitustapa		= '', 
+					toimitustavan_lahto = ''
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and tunnus	 		= '$kukarow[kesken]'";
 		$result = pupe_query($query);
@@ -489,6 +491,20 @@
 							WHERE tunnus = '$asiakasid'";
 				$assresult = pupe_query($squery);
 				$assrow = mysql_fetch_assoc($assresult);
+				
+				if (!checkdate($toimkk,$toimpp,$toimvv)) {
+					$toimpp = date("j");
+					$toimkk = date("n");
+					$toimvv = date("Y");
+					$toimpvm = $toimvv."-".$toimkk."-".$toimpp;
+				}
+				
+				if (!checkdate($kerkk,$kerpp,$kervv)) {
+					$kerpp = date("j");
+					$kerkk = date("n");
+					$kervv = date("Y");
+					$kerpvm = $kervv."-".$kerkk."-".$kerpp;
+				}
 
 				if (trim($assrow["toim_nimi"]) == "") {
 					$assrow["toim_nimi"]	= $assrow["nimi"];
@@ -518,7 +534,16 @@
 							toim_maa    		= '$assrow[toim_maa]',
 							laskutusvkopv		= '$assrow[laskutusvkopv]',
 							chn					= '$assrow[chn]',
-							verkkotunnus		= '$assrow[verkkotunnus]'
+							verkkotunnus		= '$assrow[verkkotunnus]', 
+							toimitustapa		= '$assrow[toimitustapa]', 
+							toimitustavan_lahto	= '$assrow[toimitustavan_lahto]', 
+							maksuehto			= '$assrow[maksuehto]', 
+							tilausvahvistus		= '$assrow[tilausvahvistus]', 
+							piiri				= '$assrow[piiri]', 
+							rahtivapaa			= '$assrow[rahtivapaa]',
+							toimaika 			= '$toimpvm', 
+							kerayspvm			= '$kerpvm', 
+							toimitusehto		= '$assrow[toimitusehto]'
 							WHERE yhtio 		= '$kukarow[yhtio]'
 							and tunnus	 		= '$kukarow[kesken]'
 							and liitostunnus	= 0";

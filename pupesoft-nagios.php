@@ -19,8 +19,8 @@ if ($_SERVER['REMOTE_ADDR'] !== '127.0.0.1' or $_SERVER['REMOTE_ADDR'] !== '::1'
 	}
 
 	if ($_GET["tee"] == "CONNECTION_USAGE" or $_GET["tee"] == "CONNECTION_USAGE_SLAVE") {
-		
-		if ($_GET["tee"] == "CONNECTION_USAGE" or $_GET["tee"] == "CONNECTION_USAGE_SLAVE") {
+
+		if ($_GET["tee"] == "CONNECTION_USAGE_SLAVE") {
 			if (isset($slavedb[1]) and $slavedb[1] != "" and isset($slaveuser[1]) and $slaveuser[1] != "" and isset($slavepass[1]) and $slavepass[1] != "") {
 				$link = mysql_connect($slavedb[1], $slaveuser[1], $slavepass[1]) or die ("CRITICAL - mysql_connect() failed on slave $STATE_CRITICAL");
 				mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on slave $STATE_CRITICAL");
@@ -28,7 +28,7 @@ if ($_SERVER['REMOTE_ADDR'] !== '127.0.0.1' or $_SERVER['REMOTE_ADDR'] !== '::1'
 			else {
 				echo "CRITICAL - Slave username/password/database not set $STATE_CRITICAL";
 				exit;
-			}			
+			}
 		}
 		else {
 			$link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("CRITICAL - mysql_connect() failed $STATE_CRITICAL");

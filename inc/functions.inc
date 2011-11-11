@@ -13481,6 +13481,201 @@ if (!function_exists("calculate_average")) {
 	}
 }
 
+if (!function_exists("splittaa_tilaus")) {
+	function splittaa_tilaus($otunnukset, $lisatyt_tilausrivit, $splitattava_tilausrivi = '', $splitattava_tilausrivi_kpl = '') {
+		global $kukarow;
+
+		echo "<br>otunnukset: $otunnukset<br>";
+
+		$uudelle_tilaukselle = array();
+
+		$lisatyt_tilausrivit_keys = array_keys($lisatyt_tilausrivit);
+
+		echo "jo lis‰tyt tilausrivit:";
+		echo "<pre>",var_dump($lisatyt_tilausrivit),"</pre>";
+
+		foreach (explode(",", $otunnukset) as $otun) {
+
+			$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$otun}'";
+			$tilausrivires = pupe_query($query);
+
+			while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
+
+				if (in_array($otun, $lisatyt_tilausrivit_keys) and !in_array($tilausrivirow['tunnus'], $lisatyt_tilausrivit[$otun])) {
+					echo "tilausrivin tunnus: $tilausrivirow[tunnus]<br>";
+					$uudelle_tilaukselle[$otun][$tilausrivirow['tunnus']] = $tilausrivirow['tunnus'];
+				}
+			}
+		}
+
+		if ($splitattava_tilausrivi != '') {
+			list($splitattava_tilausrivi_otunnus, $splitattava_tilausrivi) = explode("#", $splitattava_tilausrivi);
+
+			$uudelle_tilaukselle[$splitattava_tilausrivi_otunnus][$splitattava_tilausrivi] = $splitattava_tilausrivi;
+		}
+
+		echo "<br>Uudelle tilaukselle:";
+		echo "<pre>",var_dump($uudelle_tilaukselle),"</pre>";
+
+		foreach ($uudelle_tilaukselle as $otunn => $rivit) {
+
+			// Haetaan splitattava tilaus
+			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$otunn}'";
+			echo "$query<br><br>";
+			$laskusplitres = pupe_query($query);
+			$laskusplitrow = mysql_fetch_assoc($laskusplitres);
+
+			$fields = "yhtio";
+			$values = "'{$kukarow['yhtio']}'";
+
+			// Ei monisteta tunnusta
+			for ($i = 1; $i < mysql_num_fields($laskusplitres) - 1; $i++) {
+
+				$fieldname = mysql_field_name($laskusplitres,$i);
+
+				$fields .= ", {$fieldname}";
+
+				switch ($fieldname) {
+					default:
+						$values .= ", '".$laskusplitrow[$fieldname]."'";
+				}
+			}
+
+			$query = "INSERT INTO lasku ($fields) VALUES ($values)";
+			// echo "$query<br><br>";
+			$uusires = pupe_query($query);
+
+			$uusitunnus = mysql_insert_id();
+
+			echo "UUSI TILAUKSEN TUNNUS ON $uusitunnus<br><br>";
+
+			$query = "	SELECT *
+						FROM laskun_lisatiedot
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND otunnus = '{$otunn}'";
+			$laskulisatiedotsplitres = pupe_query($query);
+			$lisatiedot_row = mysql_fetch_assoc($laskulisatiedotsplitres);
+
+			$fields = "yhtio";
+			$values = "'$kukarow[yhtio]'";
+
+			// Ei monisteta tunnusta
+			for ($i = 1; $i < mysql_num_fields($laskulisatiedotsplitres) - 1; $i++) {
+
+				$fieldname = mysql_field_name($laskulisatiedotsplitres, $i);
+
+				$fields .= ", {$fieldname}";
+
+				switch ($fieldname) {
+					case 'otunnus':
+						$values .= ", '{$uusitunnus}'";
+						break;
+					default:
+						$values .= ", '{$lisatiedot_row[$fieldname]}'";
+				}
+			}
+
+			$query = "INSERT INTO laskun_lisatiedot ($fields) VALUES ($values)";
+			// echo "$query<br><br>";
+			$uusires = pupe_query($query);
+
+			foreach ($rivit as $tilriv) {
+
+				if ($splitattava_tilausrivi != '' and $splitattava_tilausrivi_kpl != '' and $tilriv == $splitattava_tilausrivi) {
+					$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+					$tilausrivisplitres = pupe_query($query);
+					$tilausrivisplitrow = mysql_fetch_assoc($tilausrivisplitres);
+
+					$fields = "yhtio";
+					$values = "'$kukarow[yhtio]'";
+
+					// Ei monisteta tunnusta
+					for ($i = 1; $i < mysql_num_fields($tilausrivisplitres) - 1; $i++) {
+
+						$fieldname = mysql_field_name($tilausrivisplitres, $i);
+
+						$fields .= ", {$fieldname}";
+
+						switch ($fieldname) {
+							case 'otunnus':
+								$values .= ", '{$uusitunnus}'";
+								break;
+							case 'varattu':
+								$values .= ", '".($tilausrivisplitrow['varattu'] - $splitattava_tilausrivi_kpl)."'";
+								break;
+							default:
+								$values .= ", '{$tilausrivisplitrow[$fieldname]}'";
+						}
+					}
+
+					$query = "INSERT INTO tilausrivi ($fields) VALUES ($values)";
+					$insertres = pupe_query($query);									
+					echo "$query<br><br>";
+
+					$uusitunnus_tilausrivi = mysql_insert_id();
+
+					$query = "SELECT * FROM tilausrivin_lisatiedot WHERE yhtio = '{$kukarow['yhtio']}' AND tilausrivitunnus = '{$tilriv}'";
+					$tilausrivin_lisatiedot_splitres = pupe_query($query);
+					$tilausrivin_lisatiedot_splitrow = mysql_fetch_assoc($tilausrivin_lisatiedot_splitres);
+
+					$fields = "yhtio";
+					$values = "'$kukarow[yhtio]'";
+
+					// Ei monisteta tunnusta
+					for ($i = 1; $i < mysql_num_fields($tilausrivin_lisatiedot_splitres) - 1; $i++) {
+
+						$fieldname = mysql_field_name($tilausrivin_lisatiedot_splitres, $i);
+
+						$fields .= ", {$fieldname}";
+
+						switch ($fieldname) {
+							case 'tilausrivitunnus':
+								$values .= ", '{$uusitunnus_tilausrivi}'";
+								break;
+							// case 'vanhaotunnus':
+							// 	$values .= ", '{$uusitunnus}'";
+							// 	break;
+							default:
+								$values .= ", '{$tilausrivin_lisatiedot_splitrow[$fieldname]}'";
+						}
+					}
+
+					$query = "INSERT INTO tilausrivin_lisatiedot ($fields) VALUES ($values)";
+					$insertres = pupe_query($query);									
+					echo "$query<br><br>";
+
+					$query = "UPDATE tilausrivi SET varattu = '{$splitattava_tilausrivi_kpl}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+					$updateres = pupe_query($query);									
+					echo "$query<br><br>";
+
+				}
+				else {
+					$query = "UPDATE tilausrivi SET otunnus = '{$uusitunnus}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+					echo "$query<br><br>";
+					$updateres = pupe_query($query);									
+				}
+			}							
+		}
+	}
+}
+
+// j‰rjestell‰‰n ker‰ilyniput bubble sortin avulla vartaamalla sit‰ ensimm‰isen alkion mediaaniin, eli ensimm‰isen = parhaaseen keskihajontaotokseen
+if (!function_exists('arrcmp')) {
+	function arrcmp($a, $b) {
+		global $main_value;
+
+		if (abs($a - $main_value) > abs($b - $main_value)) {
+			return -1;
+		}
+		elseif (abs($b - $main_value) > abs($a - $main_value)) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+}
+
 if (!function_exists("tee_keraysera2")) {
 	function tee_keraysera2($keraysvyohyke) {
 		global $kukarow, $yhtiorow;
@@ -13936,23 +14131,6 @@ if (!function_exists("tee_keraysera2")) {
 			// otetaan ensimm‰isen alkion mediaani talteen
 			$main_value = $kerailyniput[key($keskihajonta)];
 
-			// j‰rjestell‰‰n ker‰ilyniput bubble sortin avulla vartaamalla sit‰ ensimm‰isen alkion mediaaniin, eli ensimm‰isen = parhaaseen keskihajontaotokseen
-			if (!function_exists('arrcmp')) {
-				function arrcmp($a, $b) {
-					global $main_value;
-
-					if (abs($a - $main_value) > abs($b - $main_value)) {
-						return -1;
-					}
-					elseif (abs($b - $main_value) > abs($a - $main_value)) {
-						return 1;
-					}
-					else {
-						return 0;
-					}
-				}
-			}
-
 			uasort($kerailyniput, 'arrcmp');
 
 			echo "<br>";
@@ -14403,184 +14581,6 @@ if (!function_exists("tee_keraysera2")) {
 					break 2;
 				}
 
-				if (!function_exists("splittaa_tilaus")) {
-					function splittaa_tilaus($otunnukset, $lisatyt_tilausrivit, $splitattava_tilausrivi = '', $splitattava_tilausrivi_kpl = '') {
-						global $kukarow;
-
-						echo "<br>otunnukset: $otunnukset<br>";
-
-						$uudelle_tilaukselle = array();
-
-						$lisatyt_tilausrivit_keys = array_keys($lisatyt_tilausrivit);
-
-						echo "jo lis‰tyt tilausrivit:";
-						echo "<pre>",var_dump($lisatyt_tilausrivit),"</pre>";
-
-						foreach (explode(",", $otunnukset) as $otun) {
-
-							$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$otun}'";
-							$tilausrivires = pupe_query($query);
-
-							while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
-
-								if (in_array($otun, $lisatyt_tilausrivit_keys) and !in_array($tilausrivirow['tunnus'], $lisatyt_tilausrivit[$otun])) {
-									echo "tilausrivin tunnus: $tilausrivirow[tunnus]<br>";
-									$uudelle_tilaukselle[$otun][$tilausrivirow['tunnus']] = $tilausrivirow['tunnus'];
-								}
-							}
-						}
-
-						if ($splitattava_tilausrivi != '') {
-							list($splitattava_tilausrivi_otunnus, $splitattava_tilausrivi) = explode("#", $splitattava_tilausrivi);
-
-							$uudelle_tilaukselle[$splitattava_tilausrivi_otunnus][$splitattava_tilausrivi] = $splitattava_tilausrivi;
-						}
-
-						echo "<br>Uudelle tilaukselle:";
-						echo "<pre>",var_dump($uudelle_tilaukselle),"</pre>";
-
-						foreach ($uudelle_tilaukselle as $otunn => $rivit) {
-
-							// Haetaan splitattava tilaus
-							$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$otunn}'";
-							echo "$query<br><br>";
-							$laskusplitres = pupe_query($query);
-							$laskusplitrow = mysql_fetch_assoc($laskusplitres);
-
-							$fields = "yhtio";
-							$values = "'{$kukarow['yhtio']}'";
-
-							// Ei monisteta tunnusta
-							for ($i = 1; $i < mysql_num_fields($laskusplitres) - 1; $i++) {
-
-								$fieldname = mysql_field_name($laskusplitres,$i);
-
-								$fields .= ", {$fieldname}";
-
-								switch ($fieldname) {
-									default:
-										$values .= ", '".$laskusplitrow[$fieldname]."'";
-								}
-							}
-
-							$query = "INSERT INTO lasku ($fields) VALUES ($values)";
-							// echo "$query<br><br>";
-							$uusires = pupe_query($query);
-
-							$uusitunnus = mysql_insert_id();
-
-							echo "UUSI TILAUKSEN TUNNUS ON $uusitunnus<br><br>";
-
-							$query = "	SELECT *
-										FROM laskun_lisatiedot
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND otunnus = '{$otunn}'";
-							$laskulisatiedotsplitres = pupe_query($query);
-							$lisatiedot_row = mysql_fetch_assoc($laskulisatiedotsplitres);
-
-							$fields = "yhtio";
-							$values = "'$kukarow[yhtio]'";
-
-							// Ei monisteta tunnusta
-							for ($i = 1; $i < mysql_num_fields($laskulisatiedotsplitres) - 1; $i++) {
-
-								$fieldname = mysql_field_name($laskulisatiedotsplitres, $i);
-
-								$fields .= ", {$fieldname}";
-
-								switch ($fieldname) {
-									case 'otunnus':
-										$values .= ", '{$uusitunnus}'";
-										break;
-									default:
-										$values .= ", '{$lisatiedot_row[$fieldname]}'";
-								}
-							}
-
-							$query = "INSERT INTO laskun_lisatiedot ($fields) VALUES ($values)";
-							// echo "$query<br><br>";
-							$uusires = pupe_query($query);
-
-							foreach ($rivit as $tilriv) {
-
-								if ($splitattava_tilausrivi != '' and $splitattava_tilausrivi_kpl != '' and $tilriv == $splitattava_tilausrivi) {
-									$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
-									$tilausrivisplitres = pupe_query($query);
-									$tilausrivisplitrow = mysql_fetch_assoc($tilausrivisplitres);
-
-									$fields = "yhtio";
-									$values = "'$kukarow[yhtio]'";
-
-									// Ei monisteta tunnusta
-									for ($i = 1; $i < mysql_num_fields($tilausrivisplitres) - 1; $i++) {
-
-										$fieldname = mysql_field_name($tilausrivisplitres, $i);
-
-										$fields .= ", {$fieldname}";
-
-										switch ($fieldname) {
-											case 'otunnus':
-												$values .= ", '{$uusitunnus}'";
-												break;
-											case 'varattu':
-												$values .= ", '".($tilausrivisplitrow['varattu'] - $splitattava_tilausrivi_kpl)."'";
-												break;
-											default:
-												$values .= ", '{$tilausrivisplitrow[$fieldname]}'";
-										}
-									}
-
-									$query = "INSERT INTO tilausrivi ($fields) VALUES ($values)";
-									$insertres = pupe_query($query);									
-									echo "$query<br><br>";
-
-									$uusitunnus_tilausrivi = mysql_insert_id();
-
-									$query = "SELECT * FROM tilausrivin_lisatiedot WHERE yhtio = '{$kukarow['yhtio']}' AND tilausrivitunnus = '{$tilriv}'";
-									$tilausrivin_lisatiedot_splitres = pupe_query($query);
-									$tilausrivin_lisatiedot_splitrow = mysql_fetch_assoc($tilausrivin_lisatiedot_splitres);
-
-									$fields = "yhtio";
-									$values = "'$kukarow[yhtio]'";
-
-									// Ei monisteta tunnusta
-									for ($i = 1; $i < mysql_num_fields($tilausrivin_lisatiedot_splitres) - 1; $i++) {
-
-										$fieldname = mysql_field_name($tilausrivin_lisatiedot_splitres, $i);
-
-										$fields .= ", {$fieldname}";
-
-										switch ($fieldname) {
-											case 'tilausrivitunnus':
-												$values .= ", '{$uusitunnus_tilausrivi}'";
-												break;
-											// case 'vanhaotunnus':
-											// 	$values .= ", '{$uusitunnus}'";
-											// 	break;
-											default:
-												$values .= ", '{$tilausrivin_lisatiedot_splitrow[$fieldname]}'";
-										}
-									}
-
-									$query = "INSERT INTO tilausrivin_lisatiedot ($fields) VALUES ($values)";
-									$insertres = pupe_query($query);									
-									echo "$query<br><br>";
-
-									$query = "UPDATE tilausrivi SET varattu = '{$splitattava_tilausrivi_kpl}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
-									$updateres = pupe_query($query);									
-									echo "$query<br><br>";
-
-								}
-								else {
-									$query = "UPDATE tilausrivi SET otunnus = '{$uusitunnus}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
-									echo "$query<br><br>";
-									$updateres = pupe_query($query);									
-								}
-							}							
-						}
-					}
-				}
-
 				if (($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala'])
 					or ($kaytettava_pakkaus == '' and ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']) > $keraysvyohyketiedot['max_keraysera_pintaala']))) {
 
@@ -14994,6 +14994,8 @@ if (!function_exists("tee_keraysera2")) {
 							$rivi_massa = round(($kpl * $tuotenimi_row['tuotemassa']), 1);
 							$rivi_tilavuus = round(($kpl * ($tuotenimi_row['tuoteleveys'] * $tuotenimi_row['tuotekorkeus'] * $tuotenimi_row['tuotesyvyys']) * 1000), 1);
 
+							$erat['tilaukset'][$tuotenimi_row['otunnus']] = $tuotenimi_row['otunnus'];
+
 							echo "<td>$tuotenimi_row[otunnus]</td>";
 							echo "<td>$tilriv</td>";
 							echo "<td>$lask_row[ohjausmerkki]</td>";
@@ -15059,21 +15061,19 @@ if (!function_exists("tee_keraysera2")) {
 			echo "</table>";
 		}
 
-		exit;
-
-		if ($kukarow['eposti'] != '') {
-			$komento = 'email';
-
-			$pp = date("d");
-			$kk = date("m");
-			$vv = date("Y");
-
-			$kutsu = t("Ker‰yser‰ debug")." $vv-$kk-$pp";
-			$ctype = "TEXT";
-			$content_body = $debug_mail;
-
-			require("inc/sahkoposti.inc");
-		}
+		// if ($kukarow['eposti'] != '') {
+		// 	$komento = 'email';
+		// 
+		// 	$pp = date("d");
+		// 	$kk = date("m");
+		// 	$vv = date("Y");
+		// 
+		// 	$kutsu = t("Ker‰yser‰ debug")." $vv-$kk-$pp";
+		// 	$ctype = "TEXT";
+		// 	$content_body = $debug_mail;
+		// 
+		// 	require("inc/sahkoposti.inc");
+		// }
 
 		if ($keraysvyohyketiedot['ulkoinen_jarjestelma'] == 'K') {
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:

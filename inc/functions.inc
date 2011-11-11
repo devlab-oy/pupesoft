@@ -13904,6 +13904,7 @@ if (!function_exists("tee_keraysera2")) {
 
 				echo "<tr><td>$i</td><td>$std_deviation</td><td>$key</td></tr>";
 			}
+
 			echo "</table>";
 			echo "</td>";
 
@@ -14403,7 +14404,7 @@ if (!function_exists("tee_keraysera2")) {
 				}
 
 				if (!function_exists("splittaa_tilaus")) {
-					function splittaa_tilaus($otunnukset, $lisatyt_tilausrivit, $splitattava_tilausrivi = '') {
+					function splittaa_tilaus($otunnukset, $lisatyt_tilausrivit, $splitattava_tilausrivi = '', $splitattava_tilausrivi_kpl = '') {
 						global $kukarow;
 
 						echo "<br>otunnukset: $otunnukset<br>";
@@ -14427,6 +14428,12 @@ if (!function_exists("tee_keraysera2")) {
 									$uudelle_tilaukselle[$otun][$tilausrivirow['tunnus']] = $tilausrivirow['tunnus'];
 								}
 							}
+						}
+
+						if ($splitattava_tilausrivi != '') {
+							list($splitattava_tilausrivi_otunnus, $splitattava_tilausrivi) = explode("#", $splitattava_tilausrivi);
+
+							$uudelle_tilaukselle[$splitattava_tilausrivi_otunnus][$splitattava_tilausrivi] = $splitattava_tilausrivi;
 						}
 
 						echo "<br>Uudelle tilaukselle:";
@@ -14495,9 +14502,80 @@ if (!function_exists("tee_keraysera2")) {
 							$uusires = pupe_query($query);
 
 							foreach ($rivit as $tilriv) {
-								$query = "UPDATE tilausrivi SET otunnus = '{$uusitunnus}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
-								echo "$query<br><br>";
-								$updateres = pupe_query($query);									
+
+								if ($splitattava_tilausrivi != '' and $splitattava_tilausrivi_kpl != '' and $tilriv == $splitattava_tilausrivi) {
+									$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+									$tilausrivisplitres = pupe_query($query);
+									$tilausrivisplitrow = mysql_fetch_assoc($tilausrivisplitres);
+
+									$fields = "yhtio";
+									$values = "'$kukarow[yhtio]'";
+
+									// Ei monisteta tunnusta
+									for ($i = 1; $i < mysql_num_fields($tilausrivisplitres) - 1; $i++) {
+
+										$fieldname = mysql_field_name($tilausrivisplitres, $i);
+
+										$fields .= ", {$fieldname}";
+
+										switch ($fieldname) {
+											case 'otunnus':
+												$values .= ", '{$uusitunnus}'";
+												break;
+											case 'varattu':
+												$values .= ", '".($tilausrivisplitrow['varattu'] - $splitattava_tilausrivi_kpl)."'";
+												break;
+											default:
+												$values .= ", '{$tilausrivisplitrow[$fieldname]}'";
+										}
+									}
+
+									$query = "INSERT INTO tilausrivi ($fields) VALUES ($values)";
+									$insertres = pupe_query($query);									
+									echo "$query<br><br>";
+
+									$uusitunnus_tilausrivi = mysql_insert_id();
+
+									$query = "SELECT * FROM tilausrivin_lisatiedot WHERE yhtio = '{$kukarow['yhtio']}' AND tilausrivitunnus = '{$tilriv}'";
+									$tilausrivin_lisatiedot_splitres = pupe_query($query);
+									$tilausrivin_lisatiedot_splitrow = mysql_fetch_assoc($tilausrivin_lisatiedot_splitres);
+
+									$fields = "yhtio";
+									$values = "'$kukarow[yhtio]'";
+
+									// Ei monisteta tunnusta
+									for ($i = 1; $i < mysql_num_fields($tilausrivin_lisatiedot_splitres) - 1; $i++) {
+
+										$fieldname = mysql_field_name($tilausrivin_lisatiedot_splitres, $i);
+
+										$fields .= ", {$fieldname}";
+
+										switch ($fieldname) {
+											case 'tilausrivitunnus':
+												$values .= ", '{$uusitunnus_tilausrivi}'";
+												break;
+											// case 'vanhaotunnus':
+											// 	$values .= ", '{$uusitunnus}'";
+											// 	break;
+											default:
+												$values .= ", '{$tilausrivin_lisatiedot_splitrow[$fieldname]}'";
+										}
+									}
+
+									$query = "INSERT INTO tilausrivin_lisatiedot ($fields) VALUES ($values)";
+									$insertres = pupe_query($query);									
+									echo "$query<br><br>";
+
+									$query = "UPDATE tilausrivi SET varattu = '{$splitattava_tilausrivi_kpl}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+									$updateres = pupe_query($query);									
+									echo "$query<br><br>";
+
+								}
+								else {
+									$query = "UPDATE tilausrivi SET otunnus = '{$uusitunnus}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+									echo "$query<br><br>";
+									$updateres = pupe_query($query);									
+								}
 							}							
 						}
 					}
@@ -14759,38 +14837,16 @@ if (!function_exists("tee_keraysera2")) {
 							echo "KÄYTETÄÄN PAKKAUSTA $kaytettava_pakkaus:<br>";
 							echo "<pre>",var_dump($pakkaukset[$kaytettava_pakkaus]),"</pre>";
 
-							// HUOM.!! TULEVAISUUDEN ITEROINTI: TARVITAAN MYÖS MAX KERÄYSERÄN PAINO TS. KÄRRYN MAXIMI KANTAVUUS
-							// if (($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
-							// 	echo "Tuleva pakkaus ylittäisi keräyserän sallitun pinta-alan. Keräyserä valmis!<br>";
-							// 	echo "NYT PITÄISI SPLITATA RIVI!<br><br>";
-							// }
-
 							if (($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala'])
 								or ($kaytettava_pakkaus == '' and ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']) > $keraysvyohyketiedot['max_keraysera_pintaala']))) {
 
 								echo "Tuleva pakkaus ylittäisi keräyserän sallitun pinta-alan ($eran_koko_pintaala cm2 + (pakkauksen ".($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])." cm2 tai tuotteen $tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $tuoterow[y_maara]) > $keraysvyohyketiedot[max_keraysera_pintaala] cm2). Keräyserä valmis!<br>";
 
-								// tilaus loppuu, tehdään vielä tässä vaiheessa pakkaustsekki
-								// list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
+								$era_valmis = true;
 
-								if ($tuoterow['yksin_kerailyalustalle'] != '' or ($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']] and $tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] != '')) {
-									echo "Tuote kuuluu yksin keräysalustalle! Keräyserä valmis!<br><br>";
-									$era_valmis = true;
+								splittaa_tilaus($tilaukset, $lisatyt_tilausrivit, "{$tuoterow['otunnus']}#{$tuoterow['tunnus']}", $i);
 
-									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
-
-									break 3;
-								}
-
-								if (($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala'])
-									or ($kaytettava_pakkaus == '' and ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']) > $keraysvyohyketiedot['max_keraysera_pintaala']))) {
-									echo "Tuleva pakkaus ylittäisi JOKA TAPAUKSESSA keräyserän sallitun pinta-alan ($eran_koko_pintaala cm2 + (pakkauksen ".($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])." cm2 tai tuotteen $tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $tuoterow[y_maara]) > $keraysvyohyketiedot[max_keraysera_pintaala] cm2). Keräyserä valmis!<br>";
-									$era_valmis = true;
-
-									splittaa_tilaus($tilaukset, $lisatyt_tilausrivit);
-
-									break 3;
-								}
+								break 3;
 							}
 						}
 					}

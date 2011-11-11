@@ -536,7 +536,6 @@
 							chn					= '$assrow[chn]',
 							verkkotunnus		= '$assrow[verkkotunnus]', 
 							toimitustapa		= '$assrow[toimitustapa]', 
-							toimitustavan_lahto	= '$assrow[toimitustavan_lahto]', 
 							maksuehto			= '$assrow[maksuehto]', 
 							tilausvahvistus		= '$assrow[tilausvahvistus]', 
 							piiri				= '$assrow[piiri]', 

@@ -860,6 +860,9 @@
 				$apusort = str_pad($tasorow["taso"], 20, "Ö");
 				$tasonimi[$apusort] = $tasorow["nimi"];
 
+				// Jos tasolla on oletusarvo per kk. Esim poistot, jotka kirjataan vasta tilinpäätöksessä
+				if ($tasorow["oletusarvo"] != 0) $oletusarvo[$tasorow["taso"]] = $tasorow["oletusarvo"];
+
 				if ($toim == "TASOMUUTOS") {
 					$summattavattasot[$apusort] = $tasorow["summattava_taso"];
 				}
@@ -905,6 +908,17 @@
 									// Summat per kausi/taso
 									if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
 									else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
+
+									//Käytetään oletusarvo, jos sellainen on ja alkuperäinen arvo on
+									if (isset($summa[$kausi][$taso[$i]][(string) $sarake]) and ($summa[$kausi][$taso[$i]][(string) $sarake] == 0) and isset($oletusarvo[$taso[$i]])) {
+										if ($kausi == ($vka." - ".$vkl)) {
+											$jakaja = 1;
+											if ($vertailued != 1) $jakaja++;
+											if ($vertailubu != 1) $jakaja++;
+											$summa[$kausi][$taso[$i]][(string) $sarake] = $oletusarvo[$taso[$i]] * (count($kaudet) / $jakaja - 1);
+										}
+										elseif ($kausi != ($vkaed." - ".$vkled)) $summa[$kausi][$taso[$i]][(string) $sarake] = $oletusarvo[$taso[$i]];
+									}
 
 									//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
 									if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {

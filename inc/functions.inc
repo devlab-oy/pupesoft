@@ -13501,6 +13501,24 @@ if (!function_exists("splittaa_tilaus")) {
 
 			while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
 
+				// katsotaan onko tuoteperheen lapsituotteella "ohita ker‰ys"-t‰pp‰ p‰‰ll‰
+				if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] != $tilausrivirow['tunnus']) {
+
+					// haetaan tuoteperheen is‰tuote
+					$query = "SELECT tuoteno FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausrivirow['perheid']}'";
+					$isa_tuoteno_chk_res = pupe_query($query);
+					$isa_tuoteno_chk_row = mysql_fetch_assoc($isa_tuoteno_chk_res);
+
+					$query = "SELECT ohita_kerays FROM tuoteperhe WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$tilausrivirow['tuoteno']}' AND isatuoteno = '{$isa_tuoteno_chk_row['tuoteno']}'";
+					$ohita_kerays_chk_res = pupe_query($query);
+					$ohita_kerays_chk_row = mysql_fetch_assoc($ohita_kerays_chk_res);
+
+					if ($ohita_kerays_chk_row['ohita_kerays'] != '') {
+						continue;
+					}
+
+				}
+
 				if (in_array($otun, $lisatyt_tilausrivit_keys) and !in_array($tilausrivirow['tunnus'], $lisatyt_tilausrivit[$otun])) {
 					echo "tilausrivin tunnus: $tilausrivirow[tunnus]<br>";
 					$uudelle_tilaukselle[$otun][$tilausrivirow['tunnus']] = $tilausrivirow['tunnus'];
@@ -13650,6 +13668,34 @@ if (!function_exists("splittaa_tilaus")) {
 
 				}
 				else {
+
+					$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+					$tilausrivires = pupe_query($query);
+					$tilausrivirow = mysql_fetch_assoc($tilausrivires);
+
+					// katsotaan onko tuoteperheen lapsituotteella "ohita ker‰ys"-t‰pp‰ p‰‰ll‰
+					if ($tilausrivirow['perheid'] != 0 and $tilausrivirow['perheid'] = $tilausrivirow['tunnus']) {
+
+						$query = "SELECT tunnus, tuoteno FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$tilausrivirow['otunnus']}' AND perheid = '{$tilausrivirow['perheid']}' AND tunnus != '{$tilausrivirow['perheid']}'";
+						$lapsi_chk_res = pupe_query($query);
+
+						while ($lapsi_chk_row = mysql_fetch_assoc($lapsi_chk_res)) {
+
+							$query = "SELECT ohita_kerays FROM tuoteperhe WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$lapsi_chk_row['tuoteno']}' AND isatuoteno = '{$tilausrivirow['tuoteno']}'";
+							$ohita_kerays_chk_res = pupe_query($query);
+							$ohita_kerays_chk_row = mysql_fetch_assoc($ohita_kerays_chk_res);
+
+							if ($ohita_kerays_chk_row['ohita_kerays'] != '') {
+								// p‰ivitet‰‰n lapsituote samalle tilaukselle minne is‰tuotekin menee
+								$query = "UPDATE tilausrivi SET otunnus = '{$uusitunnus}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lapsi_chk_row['tunnus']}'";
+								echo "LAPSITUOTE $lapsi_chk_row[tuoteno] ohita ker‰ys on p‰‰ll‰!<br>$query<br><br>";
+								$updateres = pupe_query($query);									
+							}
+							
+						}
+
+					}
+
 					$query = "UPDATE tilausrivi SET otunnus = '{$uusitunnus}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
 					echo "$query<br><br>";
 					$updateres = pupe_query($query);									
@@ -13947,9 +13993,11 @@ if (!function_exists("tee_keraysera2")) {
 													AND toimitustavan_lahdot.asiakasluokka = lasku.hyvaksynnanmuutos
  												)
 					JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
+					LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi = 'P' AND tuoteperhe.ohita_kerays = '')
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tila = 'N'
 					AND lasku.alatila = 'A'
+					AND (tuoteperhe.ohita_kerays IS NULL OR tuoteperhe.ohita_kerays = '')
 					{$wherelisa}
 					{$groupby}
 					{$orderby}";

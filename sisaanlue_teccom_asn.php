@@ -19,9 +19,21 @@
 		$kukarow["yhtio"] = $argv[1];
 	}
 
-	$kansio 		= "/Users/sami/temp/asn_testi";			// muuta näiden polut oikeiksi
-	$kansio_valmis 	= "/Users/sami/temp/asn_testi/valmis";	// muuta näiden polut oikeiksi
-	$kansio_error 	= "/Users/sami/temp/asn_testi/error";		// muuta näiden polut oikeiksi
+	// $kansio 		= "/Users/sami/temp/asn_testi";			// muuta näiden polut oikeiksi
+	// $kansio_valmis 	= "/Users/sami/temp/asn_testi/valmis";	// muuta näiden polut oikeiksi
+	// $kansio_error 	= "/Users/sami/temp/asn_testi/error";		// muuta näiden polut oikeiksi
+	
+	//pupe-juures php sisaanlue_teccom_asn.php artr
+	$kansio 		= "/Users/tony/Desktop/teccom_testi/teccom-aineistot";			// muuta näiden polut oikeiksi
+	$kansio_valmis 	= "/Users/tony/Desktop/teccom_testi/teccom-aineistot/valmis";	// muuta näiden polut oikeiksi
+	$kansio_error 	= "/Users/tony/Desktop/teccom_testi/teccom-aineistot/error";		// muuta näiden polut oikeiksi
+	
+	//pupe-juures php sisaanlue_teccom_asn.php artr 
+	// $kansio 		= "/home/tony/teccom_testi/teccom-aineistot";			// muuta näiden polut oikeiksi
+	// $kansio_valmis 	= "/home/tony/teccom_testi/teccom-aineistot/valmis";	// muuta näiden polut oikeiksi
+	// $kansio_error 	= "/home/tony/teccom_testi/teccom-aineistot/error";		// muuta näiden polut oikeiksi
+	
+	
 
 	// setataan käytetyt muuttujat:
 	$asn_numero					= "";
@@ -275,7 +287,7 @@
 									if ($laatikkoid != "TOTAL PACKS") { // emme halua tietyltä toimittajalta keräyslaatikon aiheuttavan turhaa hälytystä
 		 								$sqlinsert =  "		INSERT INTO asn_sanomat SET
 		 													yhtio 				= '$kukarow[yhtio]',
-															laji				= 'asn'
+															laji				= 'asn',
 		 													toimittajanumero	= '$tavarantoimittajanumero',
 		 													asn_numero			= '$asn_numero',
 		 													saapumispvm 		= '$toimituspvm',

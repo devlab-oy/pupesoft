@@ -10,6 +10,7 @@
 			unset($edellinen_toimittaja);
 			unset($edellinen_asn_numero);
 			unset($edellinen_paketinnumero);
+			unset($edellinen_paketintunniste);
 			$paketin_tunnukset = array();
 			$paketin_rivit = array();
 			$paketin_tuotteet = array();
@@ -32,7 +33,7 @@
 				// Toimittaja vaihtuu tai ASN-sanoma vaihtuu tai paketti vaihtuu ja ei ole virheitä, teidään keikka ja suuntalava sekä kohdistetaan rivit
 				if ((isset($edellinen_toimittaja) and $edellinen_toimittaja != $row["toimittajanumero"]) or (isset($edellinen_asn_numero) and $edellinen_asn_numero != $row["asn_numero"]) or (isset($edellinen_paketinnumero) and $edellinen_paketinnumero != $row["paketinnumero"])) {
 					if ($virheet == 0) {
-						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset);
+						asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste);
 					}
 					else {
 						$virheet = 0;
@@ -58,7 +59,7 @@
 							AND tilausrivi.tyyppi = 'O'
 							AND tilausrivi.uusiotunnus = 0
 							AND tilausrivi.otunnus = '$row[tilausnumero]'
-							#AND (tilausrivi.tunnus = '$row[tilausrivinpositio]' OR tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]')";
+							AND tilausrivi.tilaajanrivinro = '$row[tilausrivinpositio]'";
 				$checkres = pupe_query($query);
 				$tilausrivirow = mysql_fetch_array($checkres);
 
@@ -84,6 +85,13 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tunnus = '$tilausrivirow[tunnus]'";
 					$upres = pupe_query($query);
+					
+					// päivitetään tilausrivin tunnus talteen asn_sanomat-tauluun, koska tämä kohdistuu kyseiseen riviin
+					$query = "	UPDATE asn_sanomat SET
+								tilausrivi = '{$tilausrivirow['tunnus']}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$row['tunnus']}'";
+					$upd_res = pupe_query($query);
 
 					// Tehdään uusi rivi, jossa on jäljelle jääneet kappaleet
 					$query = "	INSERT INTO tilausrivi SET
@@ -97,6 +105,7 @@
 								osasto = '$tilausrivirow[osasto]',
 								nimitys = '$tilausrivirow[nimitys]',
 								yksikko = '$tilausrivirow[yksikko]',
+								tilkpl = '$tilausrivirow[tilkpl]',
 								varattu = '$kappaleerotus',
 								hinta = '$tilausrivirow[hinta]',
 								laatija = '$tilausrivirow[laatija]',
@@ -105,7 +114,7 @@
 								hyllynro = '$tilausrivirow[hyllynro]',
 								hyllytaso = '$tilausrivirow[hyllytaso]',
 								hyllyvali = '$tilausrivirow[hyllyvali]',
-								tilaajanrivinro = '$tilausrivirow[tunnus]'";
+								tilaajanrivinro = '$tilausrivirow[tilaajanrivinro]'";
 					$inskres = pupe_query($query);
 				}
 				else {
@@ -121,13 +130,14 @@
 				$edellinen_toimittaja = $row["toimittajanumero"];
 				$edellinen_asn_numero = $row["asn_numero"];
 				$edellinen_paketinnumero = $row["paketinnumero"];
+				$edellinen_paketintunniste = $row["paketintunniste"];
 				$paketin_tunnukset[] = $row["tunnus"];
 				$paketin_rivit[] = $tilausrivirow["tunnus"];
 				$paketin_tuotteet[] = $tilausrivirow["tuoteno"];
 			}
 
 			if ($virheet == 0 and count($paketin_rivit) > 0) {
-				asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset);
+				asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste);
 			}
 			elseif ($virheet != 0) {
 				echo "VIRHE: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero\n\n";
@@ -139,7 +149,7 @@
 
 	if (!function_exists("asn_kohdista_suuntalava")) {
 
-		function asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset) {
+		function asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste) {
 
 			global $yhtiorow, $kukarow;
 
@@ -239,7 +249,7 @@
 				// Tehdään uusi suuntalava
 				$tee = "lisaa";
 				$otunnus = $keikan_tunnus;
-				$sscc = $edellinen_asn_numero;
+				$sscc = $edellinen_paketintunniste;
 				$tyyppi = 10;
 				$keraysvyohyke = $row['keraysvyohyke'];
 				$kaytettavyys = "Y";

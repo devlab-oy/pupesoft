@@ -684,7 +684,7 @@
 		$xml->{"pain.001.001.02"}->GrpHdr->NbOfTxs = $tapahtuma_maara;
 
 		// Kirjoitetaaan XML ja tehd‰‰n UTF8 encode
-		fwrite($toot, utf8_encode($xml->asXML()));
+		fwrite($toot, str_replace(chr(10),"",utf8_encode($xml->asXML())));
 		fclose($toot);
 
 		// Tehd‰‰n viel‰ t‰ss‰ vaiheessa XML validointi, vaikka ainesto onkin jo tehty. :(

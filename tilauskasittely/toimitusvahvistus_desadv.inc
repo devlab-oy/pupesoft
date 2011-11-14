@@ -37,9 +37,13 @@
 					AND lasku.tunnus in ($otunnukset)
 					ORDER BY lasku.tunnus";
 		$desadv_laskures = mysql_query($query) or pupe_error($query);
-
+		
+		$raja = 1;
+		
 		while ($desadv_laskurow = mysql_fetch_assoc($desadv_laskures)) {
-
+			
+			$lahtunniste = "";
+			
 			$query = "	SELECT *
 						FROM rahtikirjat
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -58,6 +62,28 @@
 			$desadv_message = '';
 			$error 			= '';
 			$x 				= 0; // yhteensä rivejä koko filessä
+			
+			$kuljetustunnus = "PUPESOFT".sprintf("%06.6",$rajaus); // tämä voi olla maksimissaan 14 merkkiäpitkä
+			
+			// ED2 ja UNA sekä UNB kehykset.
+			// NRQ:0 = Ei CON kuittauspyyntöä, NRQ:1 = CON kuittauspyyntö
+			$desadv_message  = "'''ED2:''':{$desadv_laskurow["asiakasovttunnus"]}:OVT':{$desadv_laskurow["yhtio_ovttunnus"]}:OVT'{$kuljetustunnus}'1'STX:EDIFACT'TYP:EDI'NRQ:0'''";
+			$desadv_message .= "UNA:+.? '";
+			
+			// Valmistelupäiväys ja valmisteluaika on now(), jollei parempaa tietoa tule.
+			$valpvm = date("ymd");
+			$valaika = date("Hi");
+			$lahtunniste = trim($desadv_laskurow["viesti"]);
+			
+			if ($lahtunniste == "") {
+				$lahtunniste = $valpvm.$valaika.$rajaus;
+			}
+			else {
+				$lahtunniste = substr($lahtunniste,0,14); // saa maksimissaan olla 14 merkkiä
+			}
+			
+			// Mikäli ei ole pakollista laittaa tämän rivin loppuun aineistotyyppiä, niin ei laiteta
+			$desadv_message .= "UNB+UNOC:1+{$desadv_laskurow["yhtio_ovttunnus"]}:30+{$desadv_laskurow["asiakasovttunnus"]}:30+{$valpvm}:{$valaika}+{$lahtunniste}++DESADVD00A++++'";
 
 			// UNH - message header
 			$desadv_message .= "UNH+$desadv_laskurow[laskutunnus]+DESADV:D:00A:UN'";
@@ -311,6 +337,10 @@
 			$x++;
 			$desadv_message .= "UNT+$x+$desadv_laskurow[laskutunnus]'";
 
+			// loppuun pakollinen UNZ ja EOF, UNZ ja EOF pitää olla erillisillä riveillä !!!
+			$desadv_message .= "\nUNZ+1+{$lahtunniste}'";
+			$desadv_message .= "\n'''EOF'''0'";
+			
 			$filenimi = $pupe_root_polku."/dataout/desadv_import-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 
 			//kirjoitetaan faili levylle..
@@ -332,6 +362,8 @@
 			else {
 				echo "<br/><font class='error'><br><hr>",t("AINEISTOA EI VOIDA LÄHETTÄÄ"),"!<br>",t("Aineistossa virheitä"),":<br>$error</font><hr><br>";
 			}
+			
+			$raja++;
 		}
 	}
 ?>

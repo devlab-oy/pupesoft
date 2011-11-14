@@ -7580,11 +7580,18 @@ if (!function_exists("livesearch_tuotehaku")) {
 					$kieltolisa .= " and tuote.hinnastoon != 'E' ";
 				}
 			}
-
+			
+			// Näytetään poistuvat tuotteet mutta ei poistettuja
+			if ($yhtiorow['livetuotehaku_poistetut'] == 'X') {
+				$naytetaanko_poistetut = "and (tuote.status != 'P' or (tuote.status = 'P' and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0))";
+			} 
+			else {
+				$naytetaanko_poistetut = "and tuote.status != 'P'";
+			}	
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						and tuote.status != 'P'
+						$naytetaanko_poistetut
 						$kieltolisa
 						$haku_query";
 			$result = pupe_query($query);

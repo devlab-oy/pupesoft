@@ -38,7 +38,7 @@
 					ORDER BY lasku.tunnus";
 		$desadv_laskures = mysql_query($query) or pupe_error($query);
 		
-		$raja = 1;
+		$rajaus = 1;
 		
 		while ($desadv_laskurow = mysql_fetch_assoc($desadv_laskures)) {
 			
@@ -63,7 +63,7 @@
 			$error 			= '';
 			$x 				= 0; // yhteensä rivejä koko filessä
 			
-			$kuljetustunnus = "PUPESOFT".sprintf("%06.6",$rajaus); // tämä voi olla maksimissaan 14 merkkiäpitkä
+			$kuljetustunnus = "PUPESOFT".sprintf("%06.6s",$rajaus); // tämä voi olla maksimissaan 14 merkkiäpitkä
 			
 			// ED2 ja UNA sekä UNB kehykset.
 			// NRQ:0 = Ei CON kuittauspyyntöä, NRQ:1 = CON kuittauspyyntö
@@ -363,7 +363,7 @@
 				echo "<br/><font class='error'><br><hr>",t("AINEISTOA EI VOIDA LÄHETTÄÄ"),"!<br>",t("Aineistossa virheitä"),":<br>$error</font><hr><br>";
 			}
 			
-			$raja++;
+			$rajaus++;
 		}
 	}
 ?>

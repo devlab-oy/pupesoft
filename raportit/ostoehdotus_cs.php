@@ -1,6 +1,4 @@
 <?php
-	// Tämä skripti käyttää slave-tietokantapalvelinta
-	$useslave = 1;
 
 	if (isset($_POST["tee"])) {
 		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;

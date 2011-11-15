@@ -1,8 +1,5 @@
 <?php
 
-///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-$useslave = 1;
-
 require ("../inc/parametrit.inc");
 
 echo "<font class='head'>",t("Varastonarvo"),"</font><hr>";
@@ -409,7 +406,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	}
 
 
-	
+
 	if ($tryittain != '') {
 		$tryittainlisa1 = "tuote.try,";
 		$groupby .= "tuote.try";
@@ -531,7 +528,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	if ($merkki != '') {
 		echo "<th>",t("Tuotemerkki"),"</th>";
 	}
-	
+
 	if ($tryittain != '') {
 		echo "<th>",t("Tuoteryhma"),"</th>";
 	}
@@ -544,11 +541,11 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 
 	echo "<th>",t("Varastonarvo"),"</th>";
 	echo "<th>",t("Bruttovarastonarvo"),"</th>";
-	
+
 	if ($tryittain != '') {
 		echo "<th>",t("Varastonkierto"),"</th>";
 	}
-	
+
 	echo "</tr>";
 
 	$varvo = 0;
@@ -608,9 +605,9 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 			}
 
 		}
-		
-		if ($tryittain != '') {			
-			
+
+		if ($tryittain != '') {
+
 			// tuotteen määrä varastossa nyt
 			$query = "	SELECT sum(saldo) varasto
 						FROM tuote
@@ -619,7 +616,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 						and tuote.try = '$row[0]' and tuote.ei_saldoa = ''";
 			$vres = mysql_query($query) or pupe_error($query);
 			$vrow = mysql_fetch_array($vres);
-			
+
 			// haetaan tuotteen myydyt kappaleet
 			$query  = "	SELECT ifnull(sum(kpl),0) kpl
 						FROM tuote
@@ -627,7 +624,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 						WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.try = '$row[0]' and tuote.ei_saldoa = ''";
 			$xmyyres = mysql_query($query) or pupe_error($query);
 			$xmyyrow = mysql_fetch_array($xmyyres);
-			
+
 			// haetaan tuotteen kulutetut kappaleet
 			$query  = "	SELECT ifnull(sum(kpl),0) kpl
 						FROM tuote
@@ -635,7 +632,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 						WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.try = '$row[0]' and tuote.ei_saldoa = ''";
 			$xkulres = mysql_query($query) or pupe_error($query);
 			$xkulrow = mysql_fetch_array($xkulres);
-			
+
 			// lasketaan varaston kiertonopeus
 			if ($vrow["varasto"] > 0) {
 				$kierto = round(($xmyyrow["kpl"] + $xkulrow["kpl"]) / $vrow["varasto"], 2);
@@ -643,13 +640,13 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 			else {
 				$kierto = 0;
 			}
-			
+
 			echo "<td align='right'>",str_replace(".",",",sprintf("%.2f",$kierto)),"</td>";
-			
+
 		}
-		
+
 		echo "</tr>";
-		
+
 	}
 
 	if ($varastosumma != 0) {

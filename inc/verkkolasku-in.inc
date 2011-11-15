@@ -705,7 +705,7 @@
 					}
 				}
 
-				// Laitetaan tänä päivä laskun tapahtumapäiväksi jos yhtiön parametri on tässä asennossa. (UNIKKO-INVOICE:ssa tapvm tulee erikseen, joten käytetään sitä siinä tapauksessa suoraan...)
+				// Laitetaan tänä päivä laskun kirjauspäiväksi jos yhtiön parametri on tässä asennossa. (UNIKKO-INVOICE:ssa tapvm tulee erikseen, joten käytetään sitä siinä tapauksessa suoraan...)
 				if ($yhtiorow['ostolaskujen_paivays'] == "1" and $laskun_tyyppi != "UNIKKO-INVOICE") {
 					$laskun_tapvm = date("Ymd");
 				}
@@ -713,6 +713,11 @@
 				$tpp = (int) substr($laskun_tapvm, 6, 2);
 				$tpk = (int) substr($laskun_tapvm, 4, 2);
 				$tpv = (int) substr($laskun_tapvm, 0, 4);
+
+				// Laskun laskupäivä
+				$vpp = (int) substr($laskun_lapvm, 6, 2);
+				$vpk = (int) substr($laskun_lapvm, 4, 2);
+				$vpv = (int) substr($laskun_lapvm, 0, 4);
 
 				// Tsekataan laskun päiväys
 				if (!checkdate($tpk, $tpp, $tpv)) {
@@ -785,7 +790,7 @@
 						list($erv,$erk,$erp) = explode("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d")+1,date("Y"))));
 					}
 					elseif ($err > 0) {
-						$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk, $tpp+$err, $tpv));
+						$newer = strftime("%Y-%m-%d", mktime(0,0,0,$vpk, $vpp+$err, $vpv));
 						$erp = (int) substr($newer, 8, 2);
 						$erk = (int) substr($newer, 5, 2);
 						$erv = (int) substr($newer, 0, 4);
@@ -813,7 +818,7 @@
 					$kapro = $trow['oletus_kapro'];
 
 					if ($krr > 0) {
-						$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk, $tpp+$krr, $tpv));
+						$newer = strftime("%Y-%m-%d", mktime(0,0,0,$vpk, $vpp+$krr, $vpv));
 						$krp = (int) substr($newer, 8, 2);
 						$krk = (int) substr($newer, 5, 2);
 						$krv = (int) substr($newer, 0, 4);
@@ -930,10 +935,6 @@
 					$olmapvm = $krv."-".$krk."-".$krp;
 				}
 
-				$vpp = (int) substr($laskun_lapvm, 6, 2);
-				$vpk = (int) substr($laskun_lapvm, 4, 2);
-				$vpv = (int) substr($laskun_lapvm, 0, 4);
-
 				// Kirjoitetaan lasku
 				$query = "	INSERT into lasku set
 							yhtio 				= '$yhtio',
@@ -1031,10 +1032,10 @@
 
 				// Onko laskuriveillä useita alv-verokantoja?
 				$ealvi = array_unique($ealvi);
-
+								
 				// Katsotaan alv laskuerittelystä
 				if (count($ealvi) == 1 and $ealvi[0] == "") {
-					$ealvi[0] = $lisavat[0];
+					$ealvi = array($lisavat[0]);
 				}
 
 	 			// Tehdän pelkät oletustiliöinnit

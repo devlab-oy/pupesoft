@@ -15,7 +15,7 @@
 					FROM asiakas
 					where yhtio = '$kukarow[yhtio]'
 					and tunnus = '$jataminut' ";
-		$jresult = mysql_query($jquery) or pupe_error($jquery);
+		$jresult = pupe_query($jquery);
 		$jrow = mysql_fetch_assoc($jresult);
 
 		echo "<br>".t("Jätetään asiakas").": $jrow[ytunnus] $jrow[nimi] ".$jrow['osoite']." ".$jrow['postino']." ".$jrow['postitp']."<br>";
@@ -29,7 +29,7 @@
 
 			// haetaan "Yhdistettävän" firman tiedot esille niin saadaan oikeat parametrit.
 			$asquery = "SELECT * FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND tunnus = '{$haettava}'";
-			$asresult = mysql_query($asquery) or pupe_error($asquery);
+			$asresult = pupe_query($asquery);
 
 			if (mysql_num_rows($asresult) == 1) {
 
@@ -43,7 +43,7 @@
 							WHERE ytunnus = '$asrow[ytunnus]'
 							AND asiakas = 0
 							AND yhtio ='$kukarow[yhtio]'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei asiakashintoja y-tunnuksella")."</font><br>";
@@ -69,7 +69,7 @@
 									and alkupvm          	= '$ahrow[alkupvm]'
 									and loppupvm         	= '$ahrow[loppupvm]'
 									and laji				= '$ahrow[laji]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -91,7 +91,7 @@
 										laji             	= '$ahrow[laji]',
 										laatija          	= '$kukarow[kuka]',
 										luontiaika       	= now()";
-							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
 						}
@@ -104,7 +104,7 @@
 							WHERE asiakas = '$asrow[tunnus]'
 							#AND ytunnus = ''
 							AND yhtio ='$kukarow[yhtio]'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei asiakashintoja asiakastunnuksella")."</font><br>";
@@ -131,7 +131,7 @@
 									and alkupvm          	= '$ahrow[alkupvm]'
 									and loppupvm         	= '$ahrow[loppupvm]'
 									and laji				= '$ahrow[laji]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -153,7 +153,7 @@
 										laji             	= '$ahrow[laji]',
 										laatija          	= '$kukarow[kuka]',
 										luontiaika       	= now()";
-							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
 						}
@@ -166,7 +166,7 @@
 							WHERE ytunnus = '$asrow[ytunnus]'
 							AND asiakas = 0
 							AND yhtio ='$kukarow[yhtio]'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei asiakasalennuksia y-tunnuksella")."</font><br>";
@@ -189,7 +189,7 @@
 									and minkpl           	= '$alrow[minkpl]'
 									and alkupvm          	= '$alrow[alkupvm]'
 									and loppupvm         	= '$alrow[loppupvm]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -209,7 +209,7 @@
 									loppupvm         	= '$alrow[loppupvm]',
 									laatija          	= '$kukarow[kuka]',
 									luontiaika       	= now()";
-							$alinsertresult = mysql_query($alinsert) or pupe_error($alinsert);
+							$alinsertresult = pupe_query($alinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
 						}
@@ -222,7 +222,7 @@
 							WHERE asiakas = '$asrow[tunnus]'
 							#AND ytunnus = ''
 							AND yhtio ='$kukarow[yhtio]'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei asiakasalennuksia asiakastunnuksella")."</font><br>";
@@ -246,7 +246,7 @@
 									and monikerta          	= '$alrow[monikerta]'
 									and alkupvm          	= '$alrow[alkupvm]'
 									and loppupvm         	= '$alrow[loppupvm]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -267,7 +267,7 @@
 										loppupvm         	= '$alrow[loppupvm]',
 										laatija          	= '$kukarow[kuka]',
 										luontiaika       	= now()";
-							$alinsertresult = mysql_query($alinsert) or pupe_error($alinsert);
+							$alinsertresult = pupe_query($alinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
 						}
@@ -279,7 +279,7 @@
 							FROM asiakaskommentti
 							WHERE yhtio ='$kukarow[yhtio]'
 							AND ytunnus = '$asrow[ytunnus]'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei löytynyt asiakaskommentteja asiakkaalta")."</font><br>";
@@ -294,7 +294,7 @@
 									and	kommentti 	= '$ahrow[kommentti]'
 									and	tuoteno   	= '$ahrow[tuoteno]'
 									and	ytunnus   	= '$jrow[ytunnus]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -305,7 +305,7 @@
 									 	ytunnus   	= '$jrow[ytunnus]',
 									 	laatija     = '$kukarow[kuka]',
 										luontiaika  = now()";
-							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakaskommentti", mysql_insert_id(), "", "");
 						}
@@ -318,7 +318,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND asiakas = 0
 							AND ytunnus = '$asrow[ytunnus]'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei löytynyt rahtisopimuksia y-tunnuksella")."</font><br>";
@@ -336,7 +336,7 @@
 									and rahtisopimus	= '$ahrow[rahtisopimus]'
 									and selite			= '$ahrow[selite]'
 									and muumaksaja		= '$ahrow[muumaksaja]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -350,7 +350,7 @@
 										muumaksaja		= '$ahrow[muumaksaja]',
 									 	laatija     	= '$kukarow[kuka]',
 										luontiaika  	= now()";
-							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id(), "", "");
 						}
@@ -362,7 +362,7 @@
 							WHERE yhtio ='$kukarow[yhtio]'
 							#AND ytunnus = ''
 							AND asiakas = '$asrow[tunnus]'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei löytynyt rahtisopimuksia asiakastunnuksella")."</font><br>";
@@ -380,7 +380,7 @@
 									and rahtisopimus	= '$ahrow[rahtisopimus]'
 									and selite			= '$ahrow[selite]'
 									and muumaksaja		= '$ahrow[muumaksaja]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -394,7 +394,7 @@
 										muumaksaja		= '$ahrow[muumaksaja]',
 									 	laatija     	= '$kukarow[kuka]',
 										luontiaika  	= now()";
-							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id(), "", "");
 						}
@@ -407,7 +407,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND liitostunnus = '$asrow[tunnus]'
 							and tyyppi != 'T'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei löytynyt yhteyshenkilöitä asiakkaalta")."</font><br>";
@@ -433,7 +433,7 @@
 									and fakta				= '$ahrow[fakta]'
 									and tilausyhteyshenkilo	= '$ahrow[tilausyhteyshenkilo]'
 									and oletusyhteyshenkilo	= '$ahrow[oletusyhteyshenkilo]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -455,7 +455,7 @@
 										oletusyhteyshenkilo	= '$ahrow[oletusyhteyshenkilo]',
 										laatija     		= '$kukarow[kuka]',
 										luontiaika  		= now()";
-							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "yhteyshenkilo", mysql_insert_id(), "", "");
 						}
@@ -467,7 +467,7 @@
 							FROM asiakkaan_avainsanat
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND liitostunnus = '$asrow[tunnus]'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei löytynyt avainsanoja asiakkaalta")."</font><br>";
@@ -483,7 +483,7 @@
 									and kieli    		= '$ahrow[kieli]'
 									and laji  			= '$ahrow[laji]'
 									and avainsana		= '$ahrow[avainsana]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -495,7 +495,7 @@
 										avainsana		= '$ahrow[avainsana]',
 										laatija     	= '$kukarow[kuka]',
 										luontiaika  	= now()";
-							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+							$ahinsertresult = pupe_query($ahinsert);
 
 							synkronoi($kukarow["yhtio"], "asiakkaan_avainsanat", mysql_insert_id(), "", "");
 						}
@@ -508,7 +508,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND liitos = 'asiakas'
 							AND liitostunnus = '$asrow[tunnus]'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei löytynyt liitteitä asiakkaalta")."</font><br>";
@@ -534,7 +534,7 @@
 									and image_channels 	= '$ahrow[image_channels]'
 									and kayttotarkoitus = '$ahrow[kayttotarkoitus]'
 									and jarjestys 		= '$ahrow[jarjestys]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -556,7 +556,7 @@
 										jarjestys 		= '$ahrow[jarjestys]',
 										laatija     	= '$kukarow[kuka]',
 										luontiaika  	= now()";
-							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+							$ahinsertresult = pupe_query($ahinsert);
 						}
 					}
 				}
@@ -567,7 +567,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND laji = 'Asiakas'
 							AND liitos = '$asrow[tunnus]'";
-				$hresult = mysql_query($hquery) or pupe_error($hquery);
+				$hresult = pupe_query($hquery);
 
 				if (mysql_num_rows($hresult) == 0) {
 					echo "<font class='error'>".t("Ei löytynyt dynaamisen puun liitoksia asiakkaalta")."</font><br>";
@@ -584,7 +584,7 @@
 									and laji 		= '$ahrow[laji]'
 									and puun_tunnus = '$ahrow[puun_tunnus]'
 									and jarjestys 	= '$ahrow[jarjestys]'";
-						$tarkesult = mysql_query($tarksql) or pupe_error($tarksql);
+						$tarkesult = pupe_query($tarksql);
 						$ahy = mysql_num_rows($tarkesult);
 
 						if ($ahy == 0) {
@@ -597,7 +597,7 @@
 										jarjestys 	= '$ahrow[jarjestys]',
 										laatija     = '$kukarow[kuka]',
 										luontiaika  = now()";
-							$ahinsertresult = mysql_query($ahinsert) or pupe_error($ahinsert);
+							$ahinsertresult = pupe_query($ahinsert);
 						}
 					}
 				}
@@ -607,7 +607,7 @@
 								FROM kalenteri
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND liitostunnus = '$asrow[tunnus]'";
-				$memores = mysql_query($memohaku) or pupe_error($memohaku);
+				$memores = pupe_query($memohaku);
 				$ahy = mysql_num_rows($memores);
 
 				if ($ahy != 0) {
@@ -617,7 +617,7 @@
 								SET asiakas = '$jrow[ytunnus]', liitostunnus = '$jrow[tunnus]'
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND liitostunnus = '$asrow[tunnus]'";
-					$memores = mysql_query($memosql) or pupe_error($memosql);
+					$memores = pupe_query($memosql);
 				}
 				else {
 					echo "<font class='error'>".t("Ei löytynyt CRM-tietoja asiakkaalta")."</font><br>";
@@ -625,12 +625,12 @@
 
 				// !!!!!!!! LASKUTUS OSIO !!!!!!!!!!!!
 				$lquery = "	SELECT group_concat(tunnus) tunnukset FROM lasku WHERE yhtio ='$kukarow[yhtio]' AND liitostunnus = '$asrow[tunnus]' AND tila not IN ('G','O','K','H','Y','M','P','Q','X')";
-				$lresult = mysql_query($lquery) or pupe_error($lquery);
+				$lresult = pupe_query($lquery);
 				$lrow = mysql_fetch_assoc($lresult);
 
 				if (trim($lrow['tunnukset']) != "") {
 					$lupdate = "UPDATE lasku SET liitostunnus = '$jrow[tunnus]' WHERE yhtio ='$kukarow[yhtio]' and liitostunnus='$asrow[tunnus]' AND tunnus IN ($lrow[tunnukset])";
-					$lupdateresult = mysql_query($lupdate) or pupe_error($lupdate);
+					$lupdateresult = pupe_query($lupdate);
 					echo "<font class='ok'>".t("Asiakkaan laskut päivitettiin")."</font><br>";
 				}
 				else {
@@ -639,7 +639,7 @@
 
 				// Muutetaan asiakkaan laji = 'P', jätetään varmuudeksi talteen, toistaiseksi.
 				$paivitys = "UPDATE asiakas set laji='P' where yhtio ='$kukarow[yhtio]' AND tunnus = '$asrow[tunnus]'";
-				$pairesult = mysql_query($paivitys) or pupe_error($paivitys);
+				$pairesult = pupe_query($paivitys);
 
 				synkronoi($kukarow["yhtio"], "asiakas", $asrow["tunnus"], $asrow, "");
 
@@ -657,7 +657,7 @@
 					pvmalku  		= now(),
 					laatija			= '$kukarow[kuka]',
 					luontiaika		= now()";
-		$result = mysql_query($kysely) or pupe_error($kysely);
+		$result = pupe_query($kysely);
 		$historia = "";
 	}
 
@@ -703,7 +703,7 @@
 				$lisa
 				ORDER BY $jarjestys
 				LIMIT 500";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	echo "<br><table>";
 	echo "<tr>";

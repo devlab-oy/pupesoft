@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	if (isset($_REQUEST["tee"])) {
 		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
 	}
@@ -59,7 +62,7 @@
 				AND hyvaksyja != ''
 				AND extranet = ''
 				ORDER BY nimi";
-	$hyvaksyja_result = mysql_query($query) or pupe_error($query);
+	$hyvaksyja_result = pupe_query($query);
 
 	echo "<tr><th>",t("Hyväksyjä"),"</th>";
 	echo "<td><select name='hyvaksyja' onchange='submit();'><option value=''>",t("Valitse hyväksyjä"),"</option>";
@@ -80,7 +83,7 @@
 				and tyyppi = 'K'
 				and kaytossa != 'E'
 				ORDER BY koodi+0, koodi, nimi";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	echo "<tr><th>",t("Kustannuspaikka"),"</th>";
 
@@ -139,7 +142,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laskunro = '{$laskunro}'
 					ORDER BY tunnus DESC";
-		$lasku_res = mysql_query($query) or pupe_error($query);
+		$lasku_res = pupe_query($query);
 		$lasku_row = mysql_fetch_assoc($lasku_res);
 
 		echo "<br/><br/><table>";
@@ -687,7 +690,7 @@
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND eposti != ''
 						AND extranet = ''";
-			$eposti_result = mysql_query($query) or pupe_error($query);
+			$eposti_result = pupe_query($query);
 
 			echo "<td><select name='asiakasemail'><option value='",t("Valitse vastaanottaja"),"</option>";
 
@@ -762,7 +765,7 @@
 					$hyvaksyjalisa
 					$pvmlisa
 					GROUP BY 1,2,3,4,5";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		echo "<table>";
 

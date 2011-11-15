@@ -1,6 +1,4 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-	$useslave = 1;
 
 	// DataTables päälle
 	$pupe_DataTables = "asiakkaantilaukset";
@@ -358,8 +356,7 @@
 			$litunn = $asiakasid;
 		}
 
-		if ($kukarow['hinnat'] == 0) $summaselli = " lasku.summa, ";
-		else $summaselli = "";
+		$summaselli = "";
 
 		if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
 			$yhtioekolisa = "yhtio.nimi, ";
@@ -382,6 +379,14 @@
 			else {
 				$jarj = "ORDER BY 2 desc, 1 asc";
 			}
+		}
+
+		if ($kukarow['hinnat'] == 0) {
+			$summaselli = " lasku.summa, ";
+		}
+
+		if ($kukarow['resoluutio'] == 'I') {
+			$summaselli .= " lasku.viesti tilausviite, ";
 		}
 
 		if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
@@ -433,19 +438,10 @@
 			$query .=	"$jarj";
 		}
 		else {
-			// jos on iiiiso näyttö niin näytetään myös viite
-			if ($kukarow['resoluutio'] == 'I') {
-				$query = "	SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.viesti tilausviite, lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-							FROM lasku use index (yhtio_tila_luontiaika)
-							$yhtioekojoin
-							WHERE lasku.$logistiikka_yhtiolisa ";
-			}
-			else {
-				$query = "	SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-							FROM lasku use index (yhtio_tila_luontiaika)
-							$yhtioekojoin
-							WHERE lasku.$logistiikka_yhtiolisa ";
-			}
+			$query = "	SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+						FROM lasku use index (yhtio_tila_luontiaika)
+						$yhtioekojoin
+						WHERE lasku.$logistiikka_yhtiolisa ";
 
 			if ($ytunnus{0} == '£') {
 				$query .= "	and lasku.nimi		= '$asiakasrow[nimi]'
@@ -465,11 +461,11 @@
 		}
 
 		if ($kaikki == "") {
-			$query .= " limit 51";
+			$query .= " LIMIT 51";
 			$limittrikkeri = "A";
 		}
 		else {
-			$query .= " limit 500 ";
+			$query .= " LIMIT 500 ";
 			$limittrikkeri = "X";
 		}
 
@@ -496,7 +492,7 @@
 			echo "<p><font class='error'>".t("HUOM")."! ".t("Näytetään vain 50 uusinta tilausta")."</font></p>";
 		}
 
-		if (mysql_num_rows($result)!=0) {
+		if (mysql_num_rows($result) > 0) {
 
 			if ($kukarow['resoluutio'] == 'I') {
 				if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {

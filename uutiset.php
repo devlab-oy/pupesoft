@@ -140,13 +140,13 @@ if ($tee == 'LISAA') {
 						kuittaus	= '$lukittu',
 						tapa		= '$tapa'";
 			$query .= $postquery;
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$katunnus = mysql_insert_id();
 
 			if ($liitostunnus != 0 && $kuva != '') {
 				// päivitetään kuvalle vielä linkki toiseensuuntaa
 				$query = "UPDATE liitetiedostot set liitostunnus='$katunnus' where tunnus='$liitostunnus'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 		}
 		$tee = "";
@@ -171,7 +171,7 @@ if ($tee == "SYOTA") {
 		$query  = "	SELECT *
 					from kalenteri
 					where tyyppi='$tyyppi' and tunnus='$tunnus' and yhtio='$kukarow[yhtio]' $kulisa";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$rivi = mysql_fetch_array($result);
@@ -385,7 +385,7 @@ if ($tee == "POISTA") {
 	$query  = "	UPDATE kalenteri
 				SET tyyppi = concat('DELETED ',tyyppi)
 				WHERE tyyppi='$tyyppi' and tunnus='$tunnus' and kuka='$kukarow[kuka]' and yhtio='$kukarow[yhtio]'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	$tee = "";
 }
@@ -408,7 +408,7 @@ if ($tee == "PRINTTAA") {
 				where tyyppi='$tyyppi'
 				and kalenteri.yhtio='$kukarow[yhtio]'
 				and kalenteri.tunnus='$tun'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$row = mysql_fetch_array($result);
 
 	/*
@@ -528,7 +528,7 @@ if ($tee == '') {
 				$querylisa_tapa
 				order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
 				$limit";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 
 	if (mysql_num_rows($result) > 0) {
 
@@ -551,7 +551,7 @@ if ($tee == '') {
 				$query  = "	SELECT *
 							from liitetiedostot
 							where tunnus = '$uutinen[kentta03]'";
-				$lisatietores = mysql_query($query) or pupe_error($query);
+				$lisatietores = pupe_query($query);
 
 				if (mysql_num_rows($lisatietores) > 0) {
 					$lisatietorow = mysql_fetch_array($lisatietores);
@@ -623,7 +623,7 @@ if ($tee == '') {
 						$query = "	SELECT tuoteno, nimitys
 						 			FROM tuote
 									WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
-						$tres = mysql_query($query) or pupe_error($query);
+						$tres = pupe_query($query);
 
 						//	Tämä me korvataan aina!
 						$search[] = "/$m[0]/";

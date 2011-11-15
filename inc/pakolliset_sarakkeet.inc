@@ -203,6 +203,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("LAJI", "MAA", "VALKOODI");
 				$joinattavat = array("TUOTENO" => "tuote");
+				$saakopoistaa = TRUE;
 				break;
 			case "rahtisopimukset" :
 				$pakolliset = array("YTUNNUS", "RAHTISOPIMUS", "TOIMITUSTAPA");
@@ -285,6 +286,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "auto_vari_tuote" :
 				$pakolliset = array("VARIKOODI", "TUOTENO", "NIMITYS");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
+				break;
+			case "auto_vari_korvaavat" :
+				$pakolliset = array("VARIKOODI","KORVAAVA_VARIKOODI");
+				$wherelliset = array("VARIKOODI","KORVAAVA_VARIKOODI","AVK_TUNNUS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$saakopoistaa = TRUE;
 				break;

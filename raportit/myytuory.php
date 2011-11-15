@@ -1,11 +1,13 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-	
-	$useslave = 1;
+
 	require("../inc/parametrit.inc");
 
 	//Ja tässä laitetaan ne takas
@@ -13,12 +15,12 @@
 
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
-			readfile("/tmp/".$tmpfilenimi);	
+			readfile("/tmp/".$tmpfilenimi);
 			exit;
 		}
 	}
 	else {
-	
+
 		echo "<font class='head'>".t("Myynnit tuoteryhmittäin")."</font><hr>";
 
 		flush();
@@ -33,7 +35,7 @@
 			$result = pupe_query($query);
 			$kk2 = $kk-1;
 			$vv2 = $vv-1;
-			
+
 			$kate30=0;
 			$kate90=0;
 			$kateVA=0;
@@ -80,10 +82,10 @@
 			echo "<table>";
 
 			while ($trow = mysql_fetch_array($result)) {
-				
+
 				//$bar->increase();
 				echo "<tr>";
-				
+
 				$query = "	SELECT
 							osasto,
 							try,
@@ -365,13 +367,13 @@
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table><br>";
 			}
-			
+
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
 			$txtnimi = md5(uniqid(mt_rand(), true)).".txt";
-			
+
 			file_put_contents("/tmp/$txtnimi", $ulos);
-	
+
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (txt)").":</th>";
 			echo "<form method='post' action='$PHP_SELF'>";
@@ -380,7 +382,7 @@
 			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
-			
+
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna raportti (csv)").":</th>";
 			echo "<form method='post' action='$PHP_SELF'>";

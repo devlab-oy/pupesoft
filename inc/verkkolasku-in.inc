@@ -875,9 +875,16 @@
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto ep‰onnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
-
-				if (isset($viite) and strlen($viite) > 0 and tarkista_viite($viite) === FALSE) {
+				
+				// Normaali viitetarkistus
+				if (isset($viite) and strlen($viite) > 0 and substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
 					$return .= "Viite '$viite' on v‰‰rin!\n";
+					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto ep‰onnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					return ($return);
+				}
+				// RF-viitetarkistus
+				if (isset($viite) and strlen($viite) > 0 and  substr($viite, 0, 2) == "RF" and tarkista_rfviite($viite) === FALSE) {
+					$return .= "RF-Viite '$viite' on v‰‰rin!\n";
 					mail($yhtiorow['alert_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto ep‰onnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}

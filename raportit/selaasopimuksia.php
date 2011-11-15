@@ -1,11 +1,14 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	// DataTables päälle
 	$pupe_DataTables = "selaasoppareita";
 
 	require('../inc/parametrit.inc');
 
-	pupe_DataTables(array(array($pupe_DataTables, 11, 11, true, true)));
+	pupe_DataTables(array(array($pupe_DataTables, 13, 13, true, true)));
 
 	$query_ale_lisa = generoi_alekentta('M');
 
@@ -26,6 +29,8 @@
 	echo "<th width='1'>".t("Kpl")."</th>";
 	echo "<th width='1'>".t("Hinta")."</th>";
 	echo "<th width='1'>".t("Rivihinta")."</th>";
+	echo "<th width='1'>".t("Sarjanumero")."</th>";
+	echo "<th width='1'>".t("Vasteaika")."</th>";
 	echo "</tr>";
 
 	// Hakukentät
@@ -41,6 +46,8 @@
 	echo "<td width='1'>	<input type='text' class='search_field' size='10' name='search_kpl'/></td>";
 	echo "<td>				<input type='text' class='search_field' size='10' name='search_hinta'/></td>";
 	echo "<td>				<input type='text' class='search_field' size='10' name='search_summa'/></td>";
+	echo "<td>				<input type='text' class='search_field' size='10' name='search_sarjanumero'/></td>";
+	echo "<td>				<input type='text' class='search_field' size='10' name='search_vasteaika'/></td>";
 	echo "</tr>";
 	echo "</thead>";
 	echo "<tbody>";
@@ -58,10 +65,13 @@
 				round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, {$yhtiorow["hintapyoristys"]}) rivihinta,
 				tilausrivi.varattu,
 				tilausrivi.hinta,
-				tilausrivi.kommentti
+				tilausrivi.kommentti,
+				tilausrivin_lisatiedot.sopimuksen_lisatieto1 sarjanumero,
+				tilausrivin_lisatiedot.sopimuksen_lisatieto2 vasteaika
 				FROM lasku use index (tila_index)
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus and (laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = '0')
+				JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 				WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 				AND tila = '0'
 				AND alatila NOT IN ('D')
@@ -81,6 +91,8 @@
 		echo "<td nowrap>{$rivit["varattu"]}</td>";
 		echo "<td nowrap align='right'>".hintapyoristys($rivit["hinta"])."</td>";
 		echo "<td nowrap align='right'>{$rivit["rivihinta"]}</td>";
+		echo "<td>{$rivit['sarjanumero']}</td>";
+		echo "<td>{$rivit['vasteaika']}</td>";
 		echo "</tr>";
 	}
 

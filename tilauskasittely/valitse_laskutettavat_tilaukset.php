@@ -57,7 +57,6 @@
 		exit;
 	}
 
-
 	if ($tee == 'NAYTATILAUS') {
 		require ("raportit/naytatilaus.inc");
 		echo "<hr>";
@@ -77,7 +76,7 @@
 		echo "<table><form action='' name='laskuri' method='post'>";
 
 		//k‰yd‰‰n kaikki ruksatut tilaukset l‰pi
-		if (sizeof($tunnus) != 0) {
+		if (count($tunnus) > 0) {
 			$laskutettavat = "";
 			foreach ($tunnus as $tun) {
 				echo "<input type='hidden' name='tunnus[]' value='$tun'>";
@@ -90,18 +89,18 @@
 						sum(round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},$yhtiorow[hintapyoristys])) loppusumma
 						FROM tilausrivi
 						JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio AND lasku.tunnus=tilausrivi.otunnus)
-						WHERE var != 'J' and otunnus in ($laskutettavat) and tilausrivi.yhtio='$kukarow[yhtio]'
-						GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
-								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
-								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
-								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi";
-		$result = mysql_query($query_rivi) or pupe_error($query_rivi);
+						WHERE var != 'J'
+						and otunnus in ($laskutettavat)
+						and tilausrivi.yhtio = '$kukarow[yhtio]'
+						GROUP BY 1,2,3";
+		$result = pupe_query($query_rivi);
 		$laskurow = mysql_fetch_array($result);
 
 		$query = "	SELECT laskunsummapyoristys
 					FROM asiakas
-					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
-		$asres = mysql_query($query) or pupe_error($query);
+					WHERE tunnus='$laskurow[liitostunnus]'
+					and yhtio='$kukarow[yhtio]'";
+		$asres = pupe_query($query);
 		$asrow = mysql_fetch_array($asres);
 
 		$summa = $laskurow["loppusumma"];
@@ -149,14 +148,39 @@
 				-->
 				</script>";
 
-		echo "<tr><th>".t("Laskun loppusumma")."</th><td align='right'>$loppusumma</td><td>$valkoodi</td></tr>";
+		echo "<tr>";
+		echo "<th>".t("Laskun loppusumma")."</th>";
+		echo "<td align='right'>$loppusumma</td>";
+		echo "<td>$valkoodi</td>";
+		echo "</tr>";
 
-		echo "<tr><td>".t("K‰teisell‰")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td><td>$valkoodi</td></tr>";
-		echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td><td>$valkoodi</td></tr>";
-		echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td><td>$valkoodi</td></tr>";
+		echo "<tr>";
+		echo "<td>".t("K‰teisell‰")."</td>";
+		echo "<td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td>";
+		echo "<td>$valkoodi</td>";
+		echo "</tr>";
 
-		echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$valkoodi</td></tr>";
-		echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyv‰ksy")."' disabled></td></tr>";
+		echo "<tr>";
+		echo "<td>".t("Pankkikortilla")."</td>";
+		echo "<td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td>";
+		echo "<td>$valkoodi</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<td>".t("Luottokortilla")."</td>";
+		echo "<td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td>";
+		echo "<td>$valkoodi</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>".t("Erotus")."</th>";
+		echo "<td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td>";
+		echo "<td>$valkoodi</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyv‰ksy")."' disabled></td>";
+		echo "</tr>";
 
 		echo "</form><br><br>";
 
@@ -186,7 +210,7 @@
 					and yhtio 		= '$kukarow[yhtio]'
 					and laskutettu != ''
 					and tyyppi		= 'L'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			// merkataan t‰ss‰ vaiheessa toimittamattomat rivi toimitetuiksi
@@ -198,7 +222,7 @@
 						and keratty    != ''
 						and toimitettu  = ''
 						and tyyppi      = 'L'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (isset($vaihdakateista) and $vaihdakateista == "KYLLA") {
 				$katlisa = ", kassalipas = '$kassalipas', maksuehto = '$maksutapa'";
@@ -213,7 +237,7 @@
 						$katlisa
 						where tunnus in ($laskutettavat)
 						and yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tee 			= "TARKISTA";
 			$laskutakaikki 	= "KYLLA";
@@ -234,7 +258,7 @@
 								and maksupositio.otunnus 	 = '$postun'
 								and maksupositio.uusiotunnus = 0
 								ORDER BY maksupositio.tunnus";
-					$rahres = mysql_query($query) or pupe_error($query);
+					$rahres = pupe_query($query);
 					$posrow = mysql_fetch_array($rahres);
 
 					for($ie=0; $ie < $posrow["ennakko_kpl"]; $ie++) {
@@ -264,7 +288,7 @@
 								LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus=uusiolasku.tunnus
 								WHERE lasku.yhtio 	 = '$kukarow[yhtio]'
 								and lasku.jaksotettu = '$postun'";
-					$postarkresult = mysql_query($query) or pupe_error($query);
+					$postarkresult = pupe_query($query);
 					$postarkrow = mysql_fetch_array($postarkresult);
 
 					if($postarkrow["yhteensa_kpl"] - $postarkrow["laskutettu_kpl"] == 1) {
@@ -350,7 +374,7 @@
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
 					maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale
 					ORDER BY lasku.tunnus";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		$kateinen = "";
 		$maa = "";
@@ -374,81 +398,10 @@
 			$tanaankk = date("m")-1;
 			$tanaanvv = date("Y");
 
-			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
-
-						function verify(){
-							var pp = document.lasku.laskpp;
-							var kk = document.lasku.laskkk;
-							var vv = document.lasku.laskvv;
-
-							pp = Number(pp.value);
-							kk = Number(kk.value)-1;
-							vv = Number(vv.value);
-
-							if (vv == 0 && pp == 0 && kk == -1) {
-								var tanaanpp = $tanaanpp;
-								var tanaankk = $tanaankk;
-								var tanaanvv = $tanaanvv;
-
-								var dateSyotetty = new Date(tanaanvv, tanaankk, tanaanpp);
-							}
-							else {
-								if (vv > 0 && vv < 1000) {
-									vv = vv+2000;
-								}
-
-								var dateSyotetty = new Date(vv,kk,pp);
-							}
-
-							var dateTallaHet = new Date();
-							var ero = (dateTallaHet.getTime() - dateSyotetty.getTime()) / 86400000;
-
-							var tilalkpp = $tilalkpp;
-							var tilalkkk = $tilalkkk;
-							var tilalkvv = $tilalkvv;
-							var dateTiliAlku = new Date(tilalkvv,tilalkkk,tilalkpp);
-							dateTiliAlku = dateTiliAlku.getTime();
-
-
-							var tilloppp = $tilloppp;
-							var tillopkk = $tillopkk;
-							var tillopvv = $tillopvv;
-							var dateTiliLoppu = new Date(tillopvv,tillopkk,tilloppp);
-							dateTiliLoppu = dateTiliLoppu.getTime();
-
-							dateSyotetty = dateSyotetty.getTime();
-
-							if (dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
-								var msg = '".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ ei sis‰lly kuluvaan tilikauteen!")."';
-
-								if (alert(msg)) {
-									return false;
-								}
-								else {
-									return false;
-								}
-							}
-							if (ero >= 2) {
-								var msg = '".t("Oletko varma, ett‰ haluat p‰iv‰t‰ laskun yli 2pv menneisyyteen?")."';
-								return confirm(msg);
-							}
-							if (ero < 0) {
-								var msg = '".t("VIRHE: Laskua ei voi p‰iv‰t‰ tulevaisuuteen!")."';
-
-								if (alert(msg)) {
-									return false;
-								}
-								else {
-									return false;
-								}
-							}
-						}
-					</SCRIPT>";
-
-			echo "<table>";
 			echo "<form method='post' action='$PHP_SELF' name='lasku' onSubmit = 'return verify()'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tee' value='TOIMITA'>";
+			echo "<table>";
 
 			//otetaan eka rivi ja k‰ytet‰‰n sit‰ otsikoiden tulostamiseen
 			$ekarow = mysql_fetch_assoc($res);
@@ -462,14 +415,53 @@
 			if ($ekarow["chn"] == '666') $toimitusselite = t("S‰hkˆpostiin");
 			if ($ekarow["chn"] == '667') $toimitusselite = t("Sis‰inen");
 
-			echo "<tr><th>".t("Ostaja:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
-			echo "<tr><td>$ekarow[ytunnus]</td><td>$ekarow[nimi]</td><td>$ekarow[osoite]</td><td>$ekarow[postino]</td><td>$ekarow[postitp]</td><td>$ekarow[maa]</td></tr>";
-			echo "<tr><th>".t("Toimitusosoite:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
-			echo "<tr><td>$toimitusselite</td><td>$ekarow[toim_nimi]</td><td>$ekarow[toim_osoite]</td><td>$ekarow[toim_postino]</td><td>$ekarow[toim_postitp]</td><td>$ekarow[toim_maa]</td></tr>";
+			echo "<tr>";
+			echo "<th>".t("Ostaja:")."</th>";
+			echo "<th>".t("Nimi")."</th>";
+			echo "<th>".t("Osoite")."</th";
+			echo "><th>".t("Postino")."</th>";
+			echo "<th>".t("Postitp")."</th>";
+			echo "<th>".t("Maa")."</th>";
+			echo "<tr>";
+			echo "<tr>";
+			echo "<td>$ekarow[ytunnus]</td>";
+			echo "<td>$ekarow[nimi]</td>";
+			echo "<td>$ekarow[osoite]</td>";
+			echo "<td>$ekarow[postino]</td>";
+			echo "<td>$ekarow[postitp]</td>";
+			echo "<td>$ekarow[maa]</td>";
+			echo "</tr>";
+			echo "<tr>";
+			echo "<th>".t("Toimitusosoite:")."</th>";
+			echo "<th>".t("Nimi")."</th>";
+			echo "<th>".t("Osoite")."</th>";
+			echo "<th>".t("Postino")."</th>";
+			echo "<th>".t("Postitp")."</th>";
+			echo "<th>".t("Maa")."</th><tr>";
+			echo "<tr><td>$toimitusselite</td>";
+			echo "<td>$ekarow[toim_nimi]</td>";
+			echo "<td>$ekarow[toim_osoite]</td>";
+			echo "<td>$ekarow[toim_postino]</td>";
+			echo "<td>$ekarow[toim_postitp]</td>";
+			echo "<td>$ekarow[toim_maa]</td></tr>";
 
 			if (trim($ekarow['laskutus_nimi']) != '') {
-				echo "<tr><th>".t("Laskutusosoite:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
-				echo "<tr><td>&nbsp;</td><td>$ekarow[laskutus_nimi] $ekarow[laskutus_nimitark]</td><td>$ekarow[laskutus_osoite]</td><td>$ekarow[laskutus_postino]</td><td>$ekarow[laskutus_postitp]</td><td>$ekarow[laskutus_maa]</td></tr>";
+				echo "<tr>";
+				echo "<th>".t("Laskutusosoite:")."</th>";
+				echo "<th>".t("Nimi")."</th>";
+				echo "<th>".t("Osoite")."</th>";
+				echo "<th>".t("Postino")."</th>";
+				echo "<th>".t("Postitp")."</th>";
+				echo "<th>".t("Maa")."</th>";
+				echo "<tr>";
+				echo "<tr>";
+				echo "<td>&nbsp;</td>";
+				echo "<td>$ekarow[laskutus_nimi] $ekarow[laskutus_nimitark]</td>";
+				echo "<td>$ekarow[laskutus_osoite]</td>";
+				echo "<td>$ekarow[laskutus_postino]</td>";
+				echo "<td>$ekarow[laskutus_postitp]</td>";
+				echo "<td>$ekarow[laskutus_maa]</td>";
+				echo "</tr>";
 			}
 
 			echo "</table><br>";
@@ -514,7 +506,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus = '$row[tunnus]'
 							and tyyppi  = 'L'";
-				$hyvre = mysql_query($query) or pupe_error($query);
+				$hyvre = pupe_query($query);
 				$hyvrow = mysql_fetch_array($hyvre);
 
 				echo "<tr class='aktiivi'><td><input type='checkbox' name='tunnus[$row[tunnus]]' value='$row[tunnus]' checked></td>";
@@ -534,6 +526,8 @@
 				echo "<td>".t("$teksti")."</td>";
 
 				echo "<td>$row[kukanimi]<br>".tv1dateconv($row["luontiaika"], "P")."</td>";
+
+				$js_laskutusvkopv = $row["laskutusvkopv"];
 
 				if ($row["laskutusvkopv"] == 0)		$teksti = t("Kaikki");
 				elseif ($row["laskutusvkopv"] == 2)	$teksti = t("Maanantai");
@@ -596,7 +590,6 @@
 				}
 
 				echo "<td>$teksti</td>";
-
 				echo "<td>$row[meh]</td>";
 
 				$rahti_hinta = "";
@@ -620,7 +613,7 @@
 					}
 
 					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-					$rhire = mysql_query($query) or pupe_error($query);
+					$rhire = pupe_query($query);
 					$trow  = mysql_fetch_array($rhire);
 
 					$netto = count($rahtihinta_ale) > 0 ? '' : 'N';
@@ -657,7 +650,7 @@
 									WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 									and lasku.jaksotettu 	= '$row[jaksotettu]'
 									GROUP BY lasku.jaksotettu";
-						$tarkres = mysql_query($query) or pupe_error($query);
+						$tarkres = pupe_query($query);
 						$tarkrow = mysql_fetch_array($tarkres);
 					}
 
@@ -688,13 +681,13 @@
 						$query = "	SELECT verkkotunnus
 									FROM asiakas
 									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[liitostunnus]' and verkkotunnus!=''";
-						$asres = mysql_query($query) or pupe_error($query);
+						$asres = pupe_query($query);
 						if(mysql_num_rows($asres) == 1) {
 							$asrow = mysql_fetch_array($asres);
 							$query = "	UPDATE lasku SET
 							 				verkkotunnus = '$asrow[verkkotunnus]'
 										WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]' and verkkotunnus=''";
-							$upres = mysql_query($query) or pupe_error($query);
+							$upres = pupe_query($query);
 						}
 						else {
 							echo "<td class='back'>&nbsp;<font class='message'>".t("VIRHE: Verkkotunnus puuttuu asiakkaalta ja laskulta!")."</font></td>";
@@ -714,7 +707,7 @@
 				echo "<input type='hidden' name='vaihdakateista' value='KYLLA'>";
 
 				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]'";
-				$kassares = mysql_query($query) or pupe_error($query);
+				$kassares = pupe_query($query);
 
 				echo "<select name='kassalipas'>";
 				echo "<option value=''>".t("Ei kassalipasta")."</option>";
@@ -743,7 +736,7 @@
 									and kaytossa = ''
 									and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$maa%')
 									ORDER BY tunnus";
-				$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
+				$maksuehtores = pupe_query($query_maksuehto);
 
 				if (mysql_num_rows($maksuehtores) > 1) {
 					echo "<tr><th>".t("Maksutapa")."</th><td colspan='3'>";
@@ -760,7 +753,7 @@
 						echo "<option value='$maksuehtorow[tunnus]' $sel>".t_tunnus_avainsanat($maksuehtorow, "teksti", "MAKSUEHTOKV")."</option>";
 					}
 
-					echo "<option value='seka'>Seka</option>";
+					echo "<option value='seka'>".t("Seka")."</option>";
 					echo "</select>";
 					echo "</td></tr>";
 
@@ -774,10 +767,9 @@
 			///* Haetaan asiakkaan kieli *///
 			$query = "	SELECT kieli
 						FROM asiakas
-						WHERE
-						tunnus='$ekarow[liitostunnus]'
-						AND yhtio ='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+						WHERE  yhtio ='$kukarow[yhtio]'
+						AND tunnus='$ekarow[liitostunnus]'";
+			$result = pupe_query($query);
 			$asrow = mysql_fetch_array($result);
 
 			if ($asrow["kieli"] != '') {
@@ -807,7 +799,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND laji = 'LASKUTUS_SAATE'
 							AND kieli = '$asrow[kieli]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				echo "<tr><th>".t("Valitse saatekirje").":</th>";
 				echo "<td colspan='3'><select name='saatekirje'>";
@@ -838,7 +830,7 @@
 							where yhtio='$kukarow[yhtio]' and tunnus='$ekarow[varasto]'
 							order by alkuhyllyalue,alkuhyllynro";
 			}
-			$prires= mysql_query($query) or pupe_error($query);
+			$prires= pupe_query($query);
 			$prirow= mysql_fetch_array($prires);
 
 			$query = "	SELECT *
@@ -846,7 +838,7 @@
 						WHERE
 						yhtio = '$kukarow[yhtio]'
 						ORDER by kirjoitin";
-			$kirre = mysql_query($query) or pupe_error($query);
+			$kirre = pupe_query($query);
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
@@ -886,19 +878,140 @@
 			echo "<tr><th>".t("Syˆt‰ poikkeava laskutusp‰iv‰m‰‰r‰ (pp-kk-vvvv)").":</th>
 					<td><input type='text' name='laskpp' value='' size='3'></td>
 					<td><input type='text' name='laskkk' value='' size='3'></td>
-					<td><input type='text' name='laskvv' value='' size='5'></td></tr>\n";
+					<td><input type='text' name='laskvv' value='' size='5'></td></tr>";
 
 			if ($yhtiorow["myyntilaskun_erapvmlaskenta"] == "K") {
 				echo "<tr><th>".t("Laske er‰p‰iv‰").":</th>
 					<td colspan='3'><select name='erpcmlaskenta'>";
 				echo "<option value=''>".t("Er‰p‰iv‰ lasketaan laskutusp‰iv‰st‰")."</option>";
 				echo "<option value='NOW'>".t("Er‰p‰iv‰ lasketaan t‰st‰ hetkest‰")."</option>";
-				echo "</select></td></tr>\n";
+				echo "</select></td></tr>";
 			}
 
 			echo "</table>";
 			echo "<br><input type='submit' value='".t("Laskuta")."'>";
+
+			echo "<input type='hidden' name='laskutusviikonteksti' value = '$teksti'>";
+			echo "<input type='hidden' name='laskutusviikonpaiva' value = '$js_laskutusvkopv'>";
+
 			echo "</form>";
+
+			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+
+						function verify(){
+
+							var naytetaanko_herja = false
+							var msg = '';
+
+							var pp = document.lasku.laskpp;
+							var kk = document.lasku.laskkk;
+							var vv = document.lasku.laskvv;
+
+							var laskutusviikonteksti = document.lasku.laskutusviikonteksti.value;
+							var laskutusviikonpaiva = document.lasku.laskutusviikonpaiva.value;
+
+							pp = Number(pp.value);
+							kk = Number(kk.value)-1;
+							vv = Number(vv.value);
+
+							// Mik‰li ei syˆtet‰ mit‰‰n 3 kentt‰‰n niin oletetaan t‰t‰p‰iv‰‰ maksup‰iv‰ksi
+							if (vv == 0 && pp == 0 && kk == -1) {
+								var tanaanpp = $tanaanpp;
+								var tanaankk = $tanaankk;
+								var tanaanvv = $tanaanvv;
+
+								var dateSyotetty = new Date(tanaanvv, tanaankk, tanaanpp);
+								var pvmcheck = new Date(tanaanvv, tanaankk, tanaanpp);
+
+								// Laitetaan yksi ylim‰‰r‰inen kuukausi niin saadaan tulostukseen oikea kk n‰kyviin
+								var tanaanoikeakk = $tanaankk+1;
+								if (tanaanoikeakk <10) {
+									tanaanoikeakk = '0'+tanaanoikeakk;
+								}
+								var paivamaara = tanaanpp+'.'+tanaanoikeakk+'.'+tanaanvv;
+
+							}
+							else {
+								// voidaan syˆtt‰‰ kentt‰‰ 2 pituinen vuosiarvo esim. 11 = 2011
+								if (vv > 0 && vv < 1000) {
+									vv = vv+2000;
+								}
+
+								var dateSyotetty = new Date(vv,kk,pp);
+								var pvmcheck = new Date(vv,kk,pp);
+
+								// Laitetaan yksi ylim‰‰r‰inen kuukausi niin saadaan tulostukseen oikea kk n‰kyviin
+								var oikeakk = kk+1;
+								if (oikeakk < 10) {
+									oikeakk = '0'+oikeakk;
+								}
+								var paivamaara = pp+'.'+oikeakk+'.'+vv;
+							}
+
+							var dateTallaHet = new Date();
+							var ero = (dateTallaHet.getTime() - dateSyotetty.getTime()) / 86400000;
+
+							var vertaa = pvmcheck.getDay(pvmcheck)+1;
+
+							var tilalkpp = $tilalkpp;
+							var tilalkkk = $tilalkkk;
+							var tilalkvv = $tilalkvv;
+							var dateTiliAlku = new Date(tilalkvv,tilalkkk,tilalkpp);
+							dateTiliAlku = dateTiliAlku.getTime();
+
+							var tilloppp = $tilloppp;
+							var tillopkk = $tillopkk;
+							var tillopvv = $tillopvv;
+							var dateTiliLoppu = new Date(tillopvv,tillopkk,tilloppp);
+							dateTiliLoppu = dateTiliLoppu.getTime();
+
+							dateSyotetty = dateSyotetty.getTime();
+
+							if (dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
+								var msg = msg+'".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ ei sis‰lly kuluvaan tilikauteen!")." ';
+							}
+
+							// ALERT errorit ennen confirmi‰, n‰in estet‰‰n ettei vahingossakaan p‰‰st‰ l‰pi.
+							if (ero < 0) {
+								var msg = msg+'".t("VIRHE: Laskua ei voi p‰iv‰t‰ tulevaisuuteen!")." ';
+							}
+
+							if (msg != '') {
+								if (alert(msg)) {
+									return false;
+								}
+								else {
+									return false;
+								}
+							}
+
+							if (laskutusviikonpaiva > 0 && laskutusviikonpaiva < 9 ) {
+								if (laskutusviikonpaiva != vertaa) {
+									naytetaanko_herja = true;
+									var msg = '".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+laskutusviikonteksti+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'? ';
+								}
+							}
+							else if (laskutusviikonpaiva < 0) {
+								if (laskutusviikonteksti != paivamaara) {
+									naytetaanko_herja = true;
+									var msg = '".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+laskutusviikonteksti+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'? ';
+								}
+							}
+							else if (laskutusviikonpaiva == 9) {
+								naytetaanko_herja = true;
+								var msg = '".t("Asiakkaan normaali laskutusp‰iv‰ on")." '+laskutusviikonteksti+'. ".t("Haluatko varmasti laskuttaa")." '+paivamaara+'? ';
+							}
+
+							if (ero >= 2) {
+								var msg = msg+'".t("Oletko varma, ett‰ haluat p‰iv‰t‰ laskun yli 2pv menneisyyteen?")." ';
+								naytetaanko_herja = true;
+							}
+
+							if (naytetaanko_herja == true) {
+								return confirm(msg);
+							}
+						}
+					</SCRIPT>";
 		}
 	}
 
@@ -911,7 +1024,13 @@
 		echo "<form action='$PHP_SELF' name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value=''>";
-		echo "<table><tr><th>".t("Etsi asiakasta")."</th><td><input type='text' name='etsi'></td><td class='back'><input type='Submit' value='".t("Etsi")."'></td></tr></table></form><br>";
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Etsi asiakasta")."</th>";
+		echo "<td><input type='text' name='etsi'></td>";
+		echo "<td class='back'><input type='Submit' value='".t("Etsi")."'></td>";
+		echo "</tr></table>";
+		echo "</form><br>";
 
 		$haku='';
 		if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
@@ -924,9 +1043,11 @@
 			$ketjutus_group = "";
 		}
 
-		// GROUP BY pit‰‰ olla sama kun verkkolasku.php:ss‰ rivi ~1150
+		// GROUP BY pit‰‰ olla sama kun verkkolasku.php:ss‰ rivi ~1243
 		// HUOM LISƒKSI laskutusviikonp‰iv‰ mukaan GROUP BY:hin!!!!
-		$query = "	SELECT lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
+		$query = "	SELECT
+					if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+					lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maksuehto, lasku.chn,
 					lasku.tila, lasku.alatila,
@@ -950,14 +1071,14 @@
 					$vientilisa
 					$muutlisa
 					$haku
-					GROUP BY lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+					GROUP BY lasku.laskutusvkopv, ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
 					lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 					lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
 					$ketjutus_group
 					ORDER BY lasku.ytunnus, lasku.nimi";
-		$tilre = mysql_query($query) or pupe_error($query);
+		$tilre = pupe_query($query);
 
 		if (mysql_num_rows($tilre) > 0) {
 			echo "<table>";
@@ -994,8 +1115,8 @@
 
 				$teksti = "";
 
-				if ($tilrow["laskutusvkopv"] == 0)		$teksti = t("Kaikki");
-				elseif ($tilrow["laskutusvkopv"] == 2)	$teksti = t("Maanantai");
+				if ($tilrow["laskutusvkopv"] == 0)	   $teksti = t("Kaikki");
+				elseif ($tilrow["laskutusvkopv"] == 2) $teksti = t("Maanantai");
 				elseif ($tilrow["laskutusvkopv"] == 3) $teksti = t("Tiistai");
 				elseif ($tilrow["laskutusvkopv"] == 4) $teksti = t("Keskiviikko");
 				elseif ($tilrow["laskutusvkopv"] == 5) $teksti = t("Torstai");
@@ -1092,5 +1213,5 @@
 		}
 	}
 
-	require("../inc/footer.inc");
+	require ("../inc/footer.inc");
 ?>

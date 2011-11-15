@@ -1465,8 +1465,8 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 		$ulkoinen_jarjestelma_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
 
 		if ($ulkoinen_jarjestelma_row['ulkoinen_jarjestelma'] == 'U') {
-
-			$query = "UPDATE lasku SET rahtivapaa = 'X' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
+			// Rahtivapaat aina l‰hett‰j‰n rahtisopparilla
+			$query = "UPDATE lasku SET rahtivapaa = 'X', kohdistettu = 'K' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
 			$rahtivapaa_upd_res = pupe_query($query);
 
 			$query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
@@ -1766,7 +1766,7 @@ if ($tee == '') {
 						AND myyja > 0";
 			$meapu = pupe_query($apuqu);
 
-			if (mysql_num_rows($meapu)==1) {
+			if (mysql_num_rows($meapu) == 1) {
 				$apuro = mysql_fetch_assoc($meapu);
 				$myyja = $apuro['tunnus'];
 
@@ -1836,12 +1836,36 @@ if ($tee == '') {
 			}
 		}
 
-		if ($kukarow["extranet"] != "") {
-			$apuqu2 = "SELECT merahti from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+		if ($toimitustapa != $laskurow["toimitustapa"]) {
+			$apuqu2 = "	SELECT merahti
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite  = '$toimitustapa'";
 			$meapu2 = pupe_query($apuqu2);
 			$meapu2row = mysql_fetch_assoc($meapu2);
 
-			$pika_paiv_merahti = " kohdistettu = '$meapu2row[merahti]', ";
+			if ($laskurow["rahtivapaa"] != "" and $meapu2row["merahti"] == "") {
+				if ($kukarow["extranet"] == "") {
+					echo "<font class='error'>".t("HUOM: Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella")."!</font><br><br>";
+				}
+
+				$meapu2row["merahti"] = "K";
+			}
+
+			if ($meapu2row["merahti"] != $laskurow["kohdistettu"]) {
+				if ($kukarow["extranet"] == "") {
+					echo "<font class='error'>".t("HUOM: K‰ytett‰v‰ rahtisopimus vaihdettiin")."!</font><br><br>";
+				}
+
+				$pika_paiv_merahti = " kohdistettu = '$meapu2row[merahti]', ";
+			}
+		}
+		elseif ($laskurow["rahtivapaa"] != "" and $laskurow["kohdistettu"] == "") {
+			if ($kukarow["extranet"] == "") {
+				echo "<font class='error'>".t("HUOM: Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella")."!</font><br><br>";
+			}
+
+			$pika_paiv_merahti = " kohdistettu = 'K', ";
 		}
 
 		$query  = "	UPDATE lasku SET
@@ -2950,6 +2974,7 @@ if ($tee == '') {
 
 	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or mysql_num_rows($numres) == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
 		$sytunnus 	 	 = $laskurow['ytunnus'];
+		$sliitostunnus	 = $laskurow['liitostunnus'];
 		$eiliittymaa 	 = "ON";
 		$luottorajavirhe = "";
 		$jvvirhe 		 = "";
@@ -4048,6 +4073,7 @@ if ($tee == '') {
 		$toimaika 			= "";
 		$tuotenimitys 		= "";
 		$tuoteno 			= "";
+		$tuoteno_array 		= "";
 		$var 				= "";
 		$var_array 			= "";
 		$sopimuksen_lisatieto1 = "";
@@ -4159,7 +4185,7 @@ if ($tee == '') {
 		echo "</form></table>";
 	}
 
-	 // erikoisceisi, jos halutaan pieni tuotekysely tilaustaulussa...
+	 // erikoisceisi, jos halutaan PIENITUOTEKYSELY tilaustaulussa, mutta emme halua n‰ytt‰‰ niit‰ kun lis‰t‰‰n lis‰varusteita
 	if ((($tuoteno != '' or (is_array($tuoteno_array) and count($tuoteno_array) > 1)) and $kpl == '' and $kukarow['extranet'] == '') or ($toim == "REKLAMAATIO" and isset($trow['tuoteno']) and $trow['tuoteno'] != '' and $kukarow['extranet'] == '')) {
 
 		if ($toim == "REKLAMAATIO" and $tuoteno == '') {
@@ -4795,7 +4821,7 @@ if ($tee == '') {
 				}
 
 				// voidaan lukita t‰m‰ tilausrivi
-				if ($row["uusiotunnus"] > 0 or $laskurow["tunnus"] != $row["otunnus"] or ($laskurow["tila"] == "V" and $row["toimitettuaika"] != '0000-00-00 00:00:00')) {
+				if ($row["uusiotunnus"] > 0 or $laskurow["tunnus"] != $row["otunnus"] or ($laskurow["tila"] == "V" and $row["kpl"] != 0)) {
 					$muokkauslukko_rivi = "LUKOSSA";
 				}
 				else {

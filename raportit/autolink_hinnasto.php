@@ -1,6 +1,8 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
+
 	if ($filenimi != '' and file_exists($filenimi)) {
 		header("Content-type: application/force-download");
 		header("Content-Disposition: attachment; filename=hindisk.zip");
@@ -18,6 +20,7 @@
 	}
 
 	require('../inc/parametrit.inc');
+
 	echo "<font class='head'>".t("Hinnastoajo").":</font><hr>";
 
 	if ($tee != '') {

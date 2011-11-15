@@ -4272,7 +4272,7 @@ if ($tee == '') {
 				//haetaan viimeisin hinta millä asiakas on tuotetta ostanut
 				$query =	"	SELECT tilausrivi.hinta, tilausrivi.otunnus, tilausrivi.laskutettuaika, {$query_ale_select_lisa} lasku.tunnus
 								FROM tilausrivi
-						   		JOIN lasku ON lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tilausrivi.otunnus and lasku.ytunnus = '$laskurow[ytunnus]' and lasku.ovttunnus = '$laskurow[ovttunnus]' and lasku.alatila = 'X'
+						   		JOIN lasku ON lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tilausrivi.otunnus and lasku.ytunnus = '$laskurow[ytunnus]' and lasku.ovttunnus = '$laskurow[ovttunnus]' and lasku.liitostunnus='$laskurow[liitostunnus]' and lasku.alatila = 'X'
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi = 'L'
 								and tilausrivi.kpl != 0

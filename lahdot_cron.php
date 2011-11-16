@@ -27,33 +27,6 @@
 
 	$paivia_eteenpain = 14;
 
-	// $query = "SELECT * FROM toimitustavan_lahdot WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY liitostunnus, asiakasluokka, lahdon_viikonpvm";
-	// $toimitustavan_lahdot_res = pupe_query($query);
-	// 
-	// while ($toimitustavan_lahdot_row = mysql_fetch_assoc($toimitustavan_lahdot_res)) {
-
-	// }
-
-	/*
-	CREATE TABLE lahdot (
-		yhtio VARCHAR(5) NOT NULL DEFAULT '',
-		pvm DATE NOT NULL DEFAULT '0000-00-00',
-		lahdon_viikonpvm INT(1) NOT NULL DEFAULT 0,
-		lahdon_kellonaika TIME NOT NULL DEFAULT '00:00:00',
-		viimeinen_tilausaika TIME NOT NULL DEFAULT '00:00:00',
-		kerailyn_aloitusaika TIME NOT NULL DEFAULT '00:00:00',
-		terminaalialue VARCHAR(150) NOT NULL DEFAULT '',
-		asiakasluokka VARCHAR(50) NOT NULL DEFAULT '',
-		aktiivi CHAR(1) NOT NULL DEFAULT '',
-		liitostunnus INT NOT NULL DEFAULT 0,
-		laatija VARCHAR(10) NOT NULL DEFAULT '',
-		luontiaika DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-		muutospvm DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-		muuttaja VARCHAR(10) NOT NULL DEFAULT '',
-		tunnus INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY
-	)
-	*/
-
 	for ($i = 0; $i <= $paivia_eteenpain; $i++) {
 
 		$time = mktime(0, 0, 0, date("m"), date("d") + $i, date("Y"));

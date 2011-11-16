@@ -32,9 +32,7 @@
 						laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month) and
 						laskutettuaika <= '$vv-$kk-$pp'
 						ORDER BY osasto, try";
-			$result = pupe_query($query);
-			$kk2 = $kk-1;
-			$vv2 = $vv-1;
+			$result = mysql_query($query) or pupe_error($query);
 
 			$kate30=0;
 			$kate90=0;
@@ -73,18 +71,15 @@
 
 			$edosasto = '';
 			$lask = 0;
-/*			
+
 			require_once ('inc/ProgressBar.class.php');
 			$bar = new ProgressBar();
 			$elements = mysql_num_rows($result); // total number of elements to process
 			$bar->initialize($elements); // print the empty bar
-*/
-			echo "<table>";
 
 			while ($trow = mysql_fetch_array($result)) {
 
-				//$bar->increase();
-				echo "<tr>";
+				$bar->increase();
 
 				$query = "	SELECT
 							osasto,
@@ -98,13 +93,13 @@
 							sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month), rivihinta-kate,0)) myynti12,
 							sum(if(tilausrivi.laskutettuaika >= '$vv-01-01', rivihinta,0)) summaVA,
 							sum(if(tilausrivi.laskutettuaika >= '$vv-01-01', kate,0)) kateVA,
-							sum(if(tilausrivi.laskutettuaika >= '$vv-01-01', kpl,0)) kplVA, 
-							sum(if(tilausrivi.laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month), rivihinta,0)) rullaava12
+							sum(if(tilausrivi.laskutettuaika >= '$vv-01-01', kpl,0)) kplVA
 							FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
 							WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and osasto='$trow[osasto]' and try='$trow[try]'
 							and laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month) and laskutettuaika <= '$vv-$kk-$pp'
 							group by 1,2";
-				$eresult = pupe_query($query);
+
+				$eresult = mysql_query($query) or pupe_error($query);
 				$row = mysql_fetch_array($eresult);
 
 				//varastonmuutos
@@ -118,7 +113,7 @@
 							tapahtuma.yhtio=tuote.yhtio and
 							tapahtuma.tuoteno=tuote.tuoteno and
 							tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'";
-				$result5 = pupe_query($query);
+				$result5 = mysql_query($query) or pupe_error($query);
 				$rowMUUTOS = mysql_fetch_array($result5);
 				$muutosval = $rowMUUTOS["muutos"];
 
@@ -134,7 +129,7 @@
 							and tuote.try 			  = '$trow[try]'
 							and tuote.ei_saldoa 	  = ''
 							and tuote.epakurantti100pvm = '0000-00-00'";
-				$result4 = pupe_query($query);
+				$result4 = mysql_query($query) or pupe_error($query);
 				$rowARVO = mysql_fetch_array($result4);
 				$varastonarvo = round($rowARVO["varasto"] - $muutosval, 2);
 
@@ -180,7 +175,6 @@
 						$ulos .= "\n";
 
 						$ulos .= "\n";
-						
 					}
 					$kate30=0;
 					$kate90=0;
@@ -193,8 +187,6 @@
 					$kplVA=0;
 					$varTOT=0;
 				}
-
-				echo "<td>$row[kplVA]</td><td>$row[summaVA]</td><td>$row[rullaava12]</td>";
 
 				$kate30+=$row["kate30"];
 				$kate90+=$row["kate90"];
@@ -256,8 +248,6 @@
 
 				$lask++;
 				$edosasto = $trow["osasto"];
-				
-				echo "</tr>";
 			}
 
 			if (($varTOT == 0 and $myynVA == 0) or $yht == 1) {
@@ -420,4 +410,5 @@
 
 		require ("../inc/footer.inc");
 	}
+	
 ?>

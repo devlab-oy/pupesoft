@@ -650,8 +650,8 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 			$thispage->writeString($kala, 4, "Supplier", $boldi);
 			$thispage->writeString($kala, 5, "Port of delivery", $boldi);
 			$thispage->writeString($kala, 6, "Destination(country)", $boldi);
-			$thispage->writeString($kala, 7, "Tilausviite", $boldi);
-			$thispage->writeString($kala, 8, "Asiakkaan tilausnumero", $boldi);
+			$thispage->writeString($kala, 7, "Reference", $boldi);
+			$thispage->writeString($kala, 8, "Customer order number", $boldi);
 
 			$kala++;
 		}

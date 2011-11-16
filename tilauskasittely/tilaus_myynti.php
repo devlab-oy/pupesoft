@@ -2490,11 +2490,18 @@ if ($tee == '') {
 							AND aktiivi = ''";
 				$lahdot_res = pupe_query($query);
 
+				$eka_kerta = true;
+
 				while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
 
 					$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
 
 					$sel = $toimitustavan_lahto == $lahto ? " selected" : ($laskurow['toimitustavan_lahto'] == $lahto ? " selected" : "");
+
+					if ($eka_kerta and $sel == "" and $toimitustavan_lahto == "" and $laskurow['toimitustavan_lahto'] == "0000-00-00 00:00:00") {
+						$sel = " selected";
+						$eka_kerta = false;
+					}
 
 					echo "<option value='{$lahto}'{$sel}>",tv1dateconv($lahto, "PITKA"),"</option>";
 				}

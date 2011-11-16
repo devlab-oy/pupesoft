@@ -1,136 +1,131 @@
 <?php
-	require ("inc/parametrit.inc");
-	
+
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
+	require ("../inc/parametrit.inc");
+
 	echo "<font class=head>".t("Tuoteryhmätilasto")."</font><hr>";
-	
+
+	if (!isset($kka))
+		$kka = date("m");
+	if (!isset($vva))
+		$vva = date("Y");
+	if (!isset($ppa))
+		$ppa = '01';
+
+	if (!isset($kkl))
+		$kkl = date("m");
+	if (!isset($vvl))
+		$vvl = date("Y");
+	if (!isset($ppl))
+		$ppl = date("d");
+
 	// käyttis
-	echo "<form action='$PHP_SELF' action='POST'>";
+	echo "<form action='$PHP_SELF' method='POST'>";
+	echo "<input type='hidden' name='tee' value='raportoi'>";
+
 	echo "<table>";
+	echo "<tr><th>".t("Alkupäivämäärä (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
+			<td><input type='text' name='kka' value='$kka' size='3'></td>
+			<td><input type='text' name='vva' value='$vva' size='5'></td></tr>";
 
-	$edellisvuosi = date("Y")-1;
-	$toissavuosi  = date("Y")-2;
-	$vv = date("Y");	
-	
-	if (!isset($kk1))
-		$kk1 = date("m");
-	if (!isset($vv1))
-		$vv1 = date("Y");
-	if (!isset($pp1))
-		$pp1 = '01';
-		
-	if (!isset($kk2))
-		$kk2 = date("m");
-	if (!isset($vv2))
-		$vv2 = date("Y");
-	if (!isset($pp2))
-		$pp2 = date("d");
-	
-	$asiakaspiirisql = "";
-		
-	echo "<input type='hidden' name='tee' value='kaikki'>";
-	echo "<input type='hidden' name='vv' value='$vv'>";
-	echo "<input type='hidden' name='edellisvuosi' value='$edellisvuosi'>";
-	echo "<input type='hidden' name='toissavuosi' value='$toissavuosi'>";	
-	echo "<tr><th>".t("Syötä päivämäärä (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='pp1' value='$pp1' size='3'></td>
-			<td><input type='text' name='kk1' value='$kk1' size='3'></td>
-			<td><input type='text' name='vv1' value='$vv1' size='5'></td></tr>";
-			
-	echo "<tr><th>".t("Syötä päivämäärä (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='pp2' value='$pp2' size='3'></td>
-			<td><input type='text' name='kk2' value='$kk2' size='3'></td>
-			<td><input type='text' name='vv2' value='$vv2' size='5'></td></tr>";	
-	
-	echo "<tr><td colspan='5'>";
-	
-	$monivalintalaatikot = array('ASIAKASPIIRI');
-	require ("tilauskasittely/monivalintalaatikot.inc");		
-	
-	echo "</td>";		
-	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."' name='painoinnappia'></td></tr>";
-	echo "</table></form>";
-	echo "<br>";
+	echo "<tr><th>".t("Loppupäivämäärä (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
+			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
+			<td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
 
+	echo "<tr><th>".t("Rajaukset")."</th><td colspan='3'>";
+
+	$monivalintalaatikot = array('ASIAKASPIIRI','<br>OSASTO','TRY');
+	require ("tilauskasittely/monivalintalaatikot.inc");
+
+	echo "</td></tr>";
+	echo "</table>";
+
+	echo "<br><input type='submit' value='".t("Aja raportti")."' name='painoinnappia'>";
+	echo "</form>";
+	echo "<br><br>";
 
 	if ($tee != '' and isset($painoinnappia)) {
-		// aletaan tekee taulukkoa.
-		$pvm1 = $vv1.'-'.$kk1.'-'.$pp1;
-		$pvm2 = $vv2.'-'.$kk2.'-'.$pp2;
-		
-		if (isset($mul_asiakaspiiri) and $mul_asiakaspiiri != "") {
-			$asiakaspiiri = "";
-			foreach ($mul_asiakaspiiri as $key => $value ) {
-				$asiakaspiiri .= $value.',';
-			}
-			if (trim($asiakaspiiri) != "") {
-				$asiakaspiiri = "(".substr($asiakaspiiri, 0, -1).")";
-				$asiakaspiirisql = " AND asiakas.piiri in $asiakaspiiri ";
-			}
-		}
-		
+
+		$edellisvuosi = $vvl-1;
+		$toissavuosi  = $vvl-2;
+
+		// Korjataan hieman monivalintalaatikon paluttamaa muuttujaa, koska tässä tiedot luetaan laskulta ja tilausriviltä
+		$lisa = str_ireplace("asiakas.", "lasku.", $lisa);
+		$lisa = str_ireplace("tuote.", "tilausrivi.", $lisa);
+
+		echo "<table><tr>
+			<th>",t("Valittu aikaväli"),"</th>
+			<td>{$ppa}</td>
+			<td>{$kka}</td>
+			<td>{$vva}</td>
+			<th>-</th>
+			<td>{$ppl}</td>
+			<td>{$kkl}</td>
+			<td>{$vvl}</td>
+			</tr></table><br><br>\n";
+
 		echo "<table>";
+		echo "<th>".t("Piiri")."</th>";
 		echo "<th>".t("Osasto")."</th>";
 		echo "<th>".t("Tuoteryhmä")."</th>";
-		echo "<th>".t("Myynti")."<br> $toissavuosi</th>";
-		echo "<th>".t("Myynti ")." $edellisvuosi</th>";
-		echo "<th>".t("Vertailu prosentti")."</th>";
-		echo "<th>".t("Myynti")."<br> $vv1</th>";
-		echo "<th>Kvarttaalimyynti ??</th>";
-
+		echo "<th>".t("Myynti")."<br>$toissavuosi</th>";
+		echo "<th>".t("Myynti")."<br>$edellisvuosi</th>";
+		echo "<th>".t("Myyntiind")."</th>";
+		echo "<th>".t("Myynti")."<br>$vvl</th>";
+		echo "<th>".t("Myynti")."<br>".t("aikavälillä")."</th>";
 
 		$query = "	SELECT
+					lasku.piiri,
 					tilausrivi.osasto,
 					tilausrivi.try,
-					round(sum(if(tilausrivi.laskutettuaika >= '{$vv1}-{$kk1}-{$pp1}' and tilausrivi.laskutettuaika <= '{$vv2}-{$kk2}-{$pp2}', tilausrivi.rivihinta, 0)), 2) aikavalilla,
-					round(sum(if(tilausrivi.laskutettuaika >= '{$vv1}-{$kk1}-{$pp1}' and tilausrivi.laskutettuaika <= '{$vv2}-{$kk2}-{$pp2}', tilausrivi.kate, 0)), 2) kate_aikavalilla, 
-					round(sum(if(tilausrivi.laskutettuaika >= '{$vv}-01-01', tilausrivi.rivihinta, 0)), 2) summaVA,
-					round(sum(if(tilausrivi.laskutettuaika >= '{$vv}-01-01', tilausrivi.kate, 0)), 2) kateVA,
-					round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.rivihinta, 0)), 2) edvuodenmyynti, 
-					round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.kate, 0)), 2) edvuodenkate,
-					round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.rivihinta, 0)), 2) toissavuodenmyynti, 
-					round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.kate, 0)), 2) toissavuodenkate
-					FROM tilausrivi use index (yhtio_tyyppi_osasto_try_laskutettuaika)
-					JOIN lasku on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-					JOIN asiakas on (asiakas.yhtio = tilausrivi.yhtio and asiakas.tunnus = lasku.liitostunnus $asiakaspiirisql)
-					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}' and tilausrivi.tyyppi = 'L' 
-					and	tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' 
-					and	tilausrivi.laskutettuaika <= '{$vv2}-{$kk2}-{$pp2}'
-					group by 1,2";
-query_dump($query);
-
+					round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0)), 2) aikavalilla,
+					round(sum(if(tilausrivi.laskutettuaika >= '{$vvl}-01-01' and tilausrivi.laskutettuaika <= '{$vvl}-12-31', tilausrivi.rivihinta, 0)), 2) myyntiVA,
+					round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.rivihinta, 0)), 2) edvuodenmyynti,
+					round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.rivihinta, 0)), 2) toissavuodenmyynti
+					FROM lasku
+					JOIN tilausrivi on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
+					WHERE lasku.yhtio   = '$kukarow[yhtio]'
+					and lasku.tila	 	= 'U'
+					and lasku.alatila 	= 'X'
+					$lisa
+					and	lasku.tapvm 	>= '{$toissavuosi}-{01}-{01}'
+					and	lasku.tapvm 	<= '{$vvl}-{$kkl}-{$ppl}'
+					GROUP BY lasku.piiri, tilausrivi.osasto, tilausrivi.try
+					ORDER BY lasku.piiri, tilausrivi.osasto, tilausrivi.try";
 		$eresult = pupe_query($query);
-		
+
 		while ($row = mysql_fetch_assoc($eresult)) {
-			
-			echo "<tr>";
+
 			$osastores = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
 			$osastorow = mysql_fetch_assoc($osastores);
-			if ($osastorow == "") {
-				$osastorow['selitetark'] = $row['osasto'];
-			}
-			
+
+			if ($osastorow['selitetark'] != "") $row['osasto'] = $row['osasto']." - ".$osastorow['selitetark'];
+
 			$tryres = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
 			$tryrow = mysql_fetch_assoc($tryres);
-			if ($tryrow == "") {
-				$tryrow['selitetark'] = $row['try'];
-			}
-			
-			// riviotsikoita
-			echo "<td>$osastorow[selitetark]</td>";
-			echo "<td>$tryrow[selitetark] </td>";
-	
-			echo "<td align='right'>$row[toissavuodenmyynti]</td>";
-			echo "<td align='right'>$row[toissavuodenkate]</td>";
-			echo "<td align='right'>$row[edvuodenmyynti]</td>";
-			echo "<td align='right'>$row[edvuodenkate]</td>";
-			echo "<td align='right'>$row[aikavalilla]</td>";
 
+			if ($tryrow['selitetark'] != "") $row['try'] = $row['try']." - ".$tryrow['selitetark'];
+
+			$myyntiind = 0;
+			if ($row["toissavuodenmyynti"] != 0) $myyntiind = round($row["edvuodenmyynti"] / $row["toissavuodenmyynti"], 1);
+
+			echo "<tr>";
+			echo "<td>$row[piiri]</td>";
+			echo "<td>$row[osasto]</td>";
+			echo "<td>$row[try]</td>";
+			echo "<td align='right'>$row[toissavuodenmyynti]</td>";
+			echo "<td align='right'>$row[edvuodenmyynti]</td>";
+			echo "<td align='right'>$myyntiind</td>";
+			echo "<td align='right'>$row[myyntiVA]</td>";
+			echo "<td align='right'>$row[aikavalilla]</td>";
 			echo "</tr>";
 		}
 		echo "</table>";
 	}
-	
-
 
 	require ("inc/footer.inc");
 ?>

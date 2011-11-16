@@ -15,7 +15,7 @@
 		exit;
 	}
 
-	echo "<font class=head>".t("Piiriraportointi")."</font><hr>";
+	echo "<font class=head>".t("Piiritilasto")."</font><hr>";
 
 	// käyttis
 	echo "<form action='$PHP_SELF' method='POST'>";
@@ -60,7 +60,6 @@
 	echo "<tr><th>".t("Rajaukset")."</th><td colspan='3'>";
 
 	$monivalintalaatikot = array('ASIAKASPIIRI','<br>OSASTO','TRY');
-
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
 	echo "</td></tr>";
@@ -110,6 +109,7 @@
 		$katenyt   = 0;
 		$kateed    = 0;
 		$edpiiri   = "";
+		$q_osatry  = "";
 		$osatry    = FALSE;
 
 		// Korjataan hieman monivalintalaatikon paluttamaa muuttujaa, koska tässä tiedot luetaan laskulta ja tilausriviltä
@@ -140,28 +140,27 @@
 
 		if ($rappari == "PITIBU") {
 			// Piiritilasto ja budjetinvertailu
-			$edellisvuosi = $vva-1;
-			$toissavuosi  = $vva-2;
+			$edellisvuosi = $vvl-1;
+			$toissavuosi  = $vvl-2;
 
 			$query = "	SELECT
 						$q_yhtio
-						tilausrivi.osasto,
-						tilausrivi.try,
 						lasku.piiri,
+						tilausrivi.osasto,
+						tilausrivi.try,						
 						round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.rivihinta, 0)), 2) aikavalilla,
 						round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}', tilausrivi.kate, 0)), 2) kate_aikavalilla,
-						round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-01-01' and tilausrivi.laskutettuaika <= '{$vva}-12-31', tilausrivi.rivihinta, 0)), 2) summaVA,
-						round(sum(if(tilausrivi.laskutettuaika >= '{$vva}-01-01' and tilausrivi.laskutettuaika <= '{$vva}-12-31', tilausrivi.kate, 0)), 2) kateVA,
+						round(sum(if(tilausrivi.laskutettuaika >= '{$vvl}-01-01' and tilausrivi.laskutettuaika <= '{$vvl}-12-31', tilausrivi.rivihinta, 0)), 2) summaVA,
+						round(sum(if(tilausrivi.laskutettuaika >= '{$vvl}-01-01' and tilausrivi.laskutettuaika <= '{$vvl}-12-31', tilausrivi.kate, 0)), 2) kateVA,
 						round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.rivihinta, 0)), 2) edvuodenmyynti,
 						round(sum(if(tilausrivi.laskutettuaika >= '{$edellisvuosi}-01-01' and tilausrivi.laskutettuaika <= '{$edellisvuosi}-12-31', tilausrivi.kate, 0)), 2) edvuodenkate,
 						round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.rivihinta, 0)), 2) toissavuodenmyynti,
 						round(sum(if(tilausrivi.laskutettuaika >= '{$toissavuosi}-01-01' and tilausrivi.laskutettuaika <= '{$toissavuosi}-12-31', tilausrivi.kate, 0)), 2) toissavuodenkate";
 
-			$q_lisa = "	GROUP BY $q_yhtio tilausrivi.osasto,tilausrivi.try,lasku.piiri+0
-						ORDER BY $q_yhtio tilausrivi.osasto,tilausrivi.try,lasku.piiri+0";
+			$q_lisa = "	GROUP BY $q_yhtio lasku.piiri+0,tilausrivi.osasto,tilausrivi.try
+						ORDER BY $q_yhtio lasku.piiri+0,tilausrivi.osasto,tilausrivi.try";
 
-
-			$q_alku  = "$toissavuosi-1-1";
+			$q_alku  = "$toissavuosi-01-01";
 			$q_loppu = "$vvl-$kkl-$ppl";
 		}
 		elseif ($rappari == "PIMY") {
@@ -170,19 +169,20 @@
 			$vvll = $vvl - 1;
 
 			if ($osatry) {
-				$q_yhtio .= "tilausrivi.osasto,tilausrivi.try,";
+				$q_osatry = ",tilausrivi.osasto,tilausrivi.try";
 			}
 
 			$query = "	SELECT
 						$q_yhtio
-						lasku.piiri,
+						lasku.piiri,						
 						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)),2) myyntinyt,
 						round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)),2) myyntied,
 						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)),2) katenyt,
-						round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)),2) kateed";
+						round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)),2) kateed
+						$q_osatry";
 
-			$q_lisa = "	GROUP BY $q_yhtio lasku.piiri+0
-						ORDER BY $q_yhtio lasku.piiri+0";
+			$q_lisa = "	GROUP BY lasku.piiri+0 $q_osatry
+						ORDER BY lasku.piiri+0 $q_osatry";
 
 			$q_alku  = "$vvaa-$kka-$ppa";
 			$q_loppu = "$vvl-$kkl-$ppl";
@@ -193,7 +193,7 @@
 			$vvll = $vvl - 1;
 
 			if ($osatry) {
-				$q_yhtio .= "tilausrivi.osasto,tilausrivi.try,";
+				$q_osatry = ",tilausrivi.osasto,tilausrivi.try";
 			}
 
 			$query = "	SELECT
@@ -205,10 +205,11 @@
 						round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate,0)),2) kateed,
 						round(sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.rivihinta,0)),2) myyntied,
 						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',  tilausrivi.kate,0)),2) katenyt,
-						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',  tilausrivi.rivihinta,0)),2) myyntinyt";
+						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',  tilausrivi.rivihinta,0)),2) myyntinyt
+						$q_osatry";
 
-			$q_lisa = "	GROUP BY $q_yhtio lasku.piiri+0,lasku.ytunnus,lasku.nimi,lasku.nimitark
-						ORDER BY $q_yhtio lasku.piiri+0,lasku.ytunnus,lasku.nimi,lasku.nimitark";
+			$q_lisa = "	GROUP BY $q_yhtio lasku.piiri+0 $q_osatry,lasku.ytunnus,lasku.nimi,lasku.nimitark
+						ORDER BY $q_yhtio lasku.piiri+0 $q_osatry,lasku.ytunnus,lasku.nimi,lasku.nimitark";
 
 			$q_alku  = "$vvaa-$kka-$ppa";
 			$q_loppu = "$vvl-$kkl-$ppl";
@@ -231,9 +232,20 @@
 					and	lasku.tapvm 	<= '$q_loppu'
 					$q_lisa";
 		$eresult = pupe_query($query);
-
+			
 		$rivimaara   = mysql_num_rows($eresult);
 		$rivilimitti = 1000;
+		
+		echo "<table><tr>
+			<th>",t("Valittu aikaväli"),"</th>
+			<td>{$ppa}</td>
+			<td>{$kka}</td>
+			<td>{$vva}</td>
+			<th>-</th>
+			<td>{$ppl}</td>
+			<td>{$kkl}</td>
+			<td>{$vvl}</td>
+			</tr></table><br><br>\n";
 
 		if ($rivimaara > $rivilimitti) {
 			echo "<br><font class='error'>",t("Hakutulos oli liian suuri"),"!</font><br>";
@@ -248,22 +260,18 @@
 				echo "<th>".t("Yhtiö")."</th>";
 			}
 
-			if ($rappari == "PITIBU") {
-				echo "<th>".t("Osasto")."</th>";
-				echo "<th>".t("Tuoteryhmä")."</th>";
+			if ($rappari == "PITIBU") {				
 				echo "<th>".t("Piiri")."</th>";
+				echo "<th>".t("Osasto")."</th>";
+				echo "<th>".t("Tuoteryhmä")."</th>";				
 				echo "<th>".t("Myynti")."<br>$toissavuosi</th>";
 				echo "<th>".t("Kate")."<br>$toissavuosi</th>";
 				echo "<th>".t("Myynti")."<br>$edellisvuosi</th>";
 				echo "<th>".t("Kate")."<br>$edellisvuosi</th>";
 				echo "<th>".t("Myynti")."<br>".t("aikavälillä")."</th>";
 				echo "<th>".t("Kate")."<br>".t("aikavälillä")."</th>";
-				echo "<th>".t("Myynti")."<br>$vva</th>";
-				echo "<th>".t("Kate")."<br>$vva</th>";
-				echo "<th>".t("Budjetti")."</th>";
-				echo "<th>".t("Budjetti")."</th>";
-				echo "<th>".t("Budjetti")."</th>";
-				echo "<th>".t("Budjetti")."</th>";
+				echo "<th>".t("Myynti")."<br>$vvl</th>";
+				echo "<th>".t("Kate")."<br>$vvl</th>";
 			}
 			elseif ($rappari == "PIMY") {
 				if ($osatry) {
@@ -302,21 +310,17 @@
 			}
 
 			if ($rappari == "PITIBU") {
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhmä"));
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Piiri"));
+				$worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
+				$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhmä"));				
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $toissavuosi");
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." $toissavuosi");
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $edellisvuosi");
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." $edellisvuosi");
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." ".t("aikavälillä"));
 				$worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." ".t("aikavälillä"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $vva");
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." $vva");
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Budjetti"));
-				$worksheet->writeString($excelrivi, $excelsarake++, t("Budjetti"));
-                $worksheet->writeString($excelrivi, $excelsarake++, t("Budjetti"));
-                $worksheet->writeString($excelrivi, $excelsarake++, t("Budjetti"));
+				$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $vvl");
+				$worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." $vvl");
 
 				$excelrivi++;
 			}
@@ -357,12 +361,12 @@
 				$osastores = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
 				$osastorow = mysql_fetch_assoc($osastores);
 
-				if ($osastorow['selitetark'] != "") $row['osasto'] = $osastorow['selitetark'];
+				if ($osastorow['selitetark'] != "") $row['osasto'] = $row['osasto']." - ".$osastorow['selitetark'];
 
 				$tryres = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
 				$tryrow = mysql_fetch_assoc($tryres);
 
-				if ($tryrow['selitetark'] != "") $row['try'] = $tryrow['selitetark'];
+				if ($tryrow['selitetark'] != "") $row['try'] = $row['try']." - ".$tryrow['selitetark'];
 			}
 
 			// Yhteensäsumma per piiri
@@ -407,9 +411,9 @@
 
 			if ($rappari == "PITIBU") {
 				if ($rivimaara <= $rivilimitti) {
-					echo "<td>$row[osasto]</td>";
-					echo "<td>$row[try] </td>";
 					echo "<td>$row[piiri]</td>";
+					echo "<td>$row[osasto]</td>";
+					echo "<td>$row[try] </td>";					
 					echo "<td align='right'>$row[toissavuodenmyynti]</td>";
 					echo "<td align='right'>$row[toissavuodenkate]</td>";
 					echo "<td align='right'>$row[edvuodenmyynti]</td>";
@@ -418,10 +422,6 @@
 					echo "<td align='right'>$row[kate_aikavalilla]</td>";
 					echo "<td align='right'>$row[summaVA]</td>";
 					echo "<td align='right'>$row[kateVA]</td>";
-					echo "<td align='right'></td>";
-					echo "<td align='right'></td>";
-					echo "<td align='right'></td>";
-					echo "<td align='right'></td>";
 					echo "</tr>";
 				}
 
@@ -437,10 +437,6 @@
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $row["kate_aikavalilla"]);
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $row["summaVA"]);
 					$worksheet->writeNumber($excelrivi, $excelsarake++, $row["kateVA"]);
-					$worksheet->writeString($excelrivi, $excelsarake++, "");
-					$worksheet->writeString($excelrivi, $excelsarake++, "");
-					$worksheet->writeString($excelrivi, $excelsarake++, "");
-					$worksheet->writeString($excelrivi, $excelsarake++, "");
 
 					$excelrivi++;
 				}

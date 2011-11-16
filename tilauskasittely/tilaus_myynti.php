@@ -2482,62 +2482,21 @@ if ($tee == '') {
 				echo "&nbsp;<select name='toimitustavan_lahto' onchange='submit()' {$state}>";
 				echo "<option value=''>",t("Valitse"),"</option>";
 
-				$toimitustavan_lahto_result = seuraava_lahtoaika($toimitustavan_tunnus);
+				$query = "	SELECT * 
+							FROM lahdot 
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND liitostunnus = '{$toimitustavan_tunnus}' 
+							AND asiakasluokka = '{$laskurow['hyvaksynnanmuutos']}' 
+							AND aktiivi = ''";
+				$lahdot_res = pupe_query($query);
 
-				$viimeinen_toimitustavan_lahto = false;
+				while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
 
-				if (mysql_num_rows($toimitustavan_lahto_result) > 0) {
+					$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
 
-					$sel_ensimmainen = true;
+					$sel = $toimitustavan_lahto == $lahto ? " selected" : ($laskurow['toimitustavan_lahto'] == $lahto ? " selected" : "");
 
-					while ($toimitustavan_lahto_row = mysql_fetch_assoc($toimitustavan_lahto_result)) {
-						$viimeinen_toimitustavan_lahto = $toimitustavan_lahto_row['lahto'];
-						$sel = $toimitustavan_lahto == $toimitustavan_lahto_row['lahto'] ? " selected" : ($laskurow['toimitustavan_lahto'] == $toimitustavan_lahto_row['lahto'] ? " selected" : "");
-
-						if ($sel == "" and $sel_ensimmainen) {
-							$sel = " selected";
-							$sel_ensimmainen = false;
-						}
-
-						echo "<option value='{$toimitustavan_lahto_row['lahto']}'{$sel}>",tv1dateconv($toimitustavan_lahto_row['lahto'], "PITKA"),"</option>";
-					}
-				}
-
-				if ($viimeinen_toimitustavan_lahto) {
-
-					list($viimeinen_toimitustavan_lahto_pvm, $viimeinen_toimitustavan_lahto_klo) = explode(" ", $viimeinen_toimitustavan_lahto);
-					list($toim_lah_vv, $toim_lah_kk, $toim_lah_pp) = explode("-", $viimeinen_toimitustavan_lahto_pvm);
-
-					// 2 vkoa
-					for ($i = 1; $i <= 14; $i++) {
-
-						$time = mktime(0, 0, 0, $toim_lah_kk, $toim_lah_pp+$i, $toim_lah_vv);
-
-						$aika = date("Y-m-d", $time);
-
-						// haetaan ajan viikonpäivä
-						$aika_vkonpvm = date("w", $time);
-
-						// tarkistetaan onko lähdön viikonpäivä olemassa
-						$query = "	SELECT *
-									FROM toimitustavan_lahdot
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND liitostunnus = '{$toimitustavan_tunnus}'
-									and lahdon_viikonpvm = '{$aika_vkonpvm}'
-									AND aktiivi != 'E'";
-						$chk_res = pupe_query($query);
-
-						if (mysql_num_rows($chk_res) == 0) {
-							continue;
-						}
-
-						$aika_vkonpvm_row = mysql_fetch_assoc($chk_res);
-
-						$aika = "{$aika} {$aika_vkonpvm_row['lahdon_kellonaika']}";
-
-						$sel = $toimitustavan_lahto == $aika ? " selected" : ($laskurow['toimitustavan_lahto'] == $aika ? " selected" : "");
-						echo "<option value='{$aika}'{$sel}>",tv1dateconv($aika, "PITKA"),"</option>";
-					}
+					echo "<option value='{$lahto}'{$sel}>",tv1dateconv($lahto, "PITKA"),"</option>";
 				}
 
 				echo "</select>";

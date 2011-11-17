@@ -609,6 +609,14 @@
 				}
 
 				if ($rakir_row['toimitusvahvistus'] != '') {
+					
+					$tulostauna		= "";
+
+					if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
+						$tulostauna = "KYLLA";
+						$rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+					}
+					
 					if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
 						require("tilauskasittely/$rakir_row[toimitusvahvistus]");
 					}

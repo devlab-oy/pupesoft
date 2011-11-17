@@ -175,7 +175,7 @@
 				$InstdAmt = $Amt->addChild('InstdAmt', $laskurow['summa']);							// InstructedAmount, Pakollinen kenttä
 			}
 			else {
-				$InstdAmt = $Amt->addChild('InstdAmt', $laskurow['summa'] - $laskurow['kasumma']);	// InstructedAmount, Pakollinen kenttä
+				$InstdAmt = $Amt->addChild('InstdAmt', round($laskurow['summa'] - $laskurow['kasumma'],2));	// InstructedAmount, Pakollinen kenttä
 			}
 			$InstdAmt->addAttribute('Ccy', $laskurow['valkoodi']);									// Currency, Pakollinen attribute
 

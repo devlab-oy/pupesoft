@@ -70,7 +70,7 @@
 				// ED2 ja UNA kehykset.
 				// NRQ:0 = Ei CON kuittauspyyntöä, NRQ:1 = CON kuittauspyyntö
 				$desadv_message  = "'''ED2:''':{$desadv_laskurow["asiakasovttunnus"]}:OVT':{$desadv_laskurow["yhtio_ovttunnus"]}:OVT'{$kuljetustunnus}'1'STX:EDIFACT'TYP:EDI'NRQ:0'''";
-				$desadv_message .= "UNA:+.? '";
+				$desadv_message .= "\nUNA:+.? '";
 
 				// Valmistelupäiväys ja valmisteluaika on now(), jollei parempaa tietoa tule.
 				$valpvm = date("ymd");
@@ -85,7 +85,8 @@
 				}
 
 				// UNB ja UNOC kehys
-				$desadv_message .= "UNB+UNOC:1+{$desadv_laskurow["yhtio_ovttunnus"]}:30+{$desadv_laskurow["asiakasovttunnus"]}:30+{$valpvm}:{$valaika}+{$lahtunniste}++DESADVD00A++++'";
+				// Kun menee tuotantoon niin ota '++++1' pois ja tilalle vain '++++'
+				$desadv_message .= "UNB+UNOC:1+{$desadv_laskurow["yhtio_ovttunnus"]}:30+{$desadv_laskurow["asiakasovttunnus"]}:30+{$valpvm}:{$valaika}+{$lahtunniste}++DESADVD00A++++1'";
 			}
 			// UNH - message header
 			$desadv_message .= "UNH+$desadv_laskurow[laskutunnus]+DESADV:D:00A:UN'";

@@ -27,7 +27,7 @@
 	$query = "	SELECT * 
 				FROM kirjoittimet 
 				WHERE yhtio = '$kukarow[yhtio]'
-				#and komento != 'email'
+				and komento != 'email'
 				order by kirjoitin";
 	$kires = mysql_query($query) or pupe_error($query);
 
@@ -56,7 +56,7 @@
 			$tee = "kirjoita";
 		}
 		else {
-			echo "<p>".t("Virhe: Ei löytynyt tuotetta tuoterekisteristä")."</p>";
+			echo "<p class='error'>".t("Virhe: Ei löytynyt tuotetta tuoterekisteristä")."</p>";
 			die();
 		}
 		
@@ -79,10 +79,10 @@
 			$out .= sprintf ('%16s', ' '); // 16 merkkiä alusta niin saadaan "nimitys / tuoteno" oikeaan paikkaan.
 			$out .= sprintf ('%-24s', $trow["tuoteno"]);
 			$out .= chr(10).chr(13);
-			$out .= chr(4);
+			$out .= chr(12);
 
 			if (!fwrite($fh, $out)) {
-				echo "Epäonnistunut tiedoston kirjoittaminen!";
+				echo "<p class='error'>".t("Virhe: Tiedoston kirjoittaminen ei onnistunut")."</p>";
 				die();
 			}
 			else {
@@ -107,7 +107,7 @@
 				$line = exec("$komento -P $tulostinjono $filenimi");
 			}
 			
-			echo "<p class='ok'>Tulostettiin tuotteelle {$trow["tuoteno"]} tarroja {$tulostakappale} kpl</p>";
+			echo "<p class='ok'>".t("Tulostettiin tuotteelle")." {$trow["tuoteno"]} ".t("tarroja")." {$tulostakappale} ".t("kpl")."</p>";
 			
 		}
 		else {

@@ -1401,11 +1401,7 @@
 						}
 						elseif ($pi > 2) {
 
-							if (is_numeric($arvo)) {
-								$arvo = number_format($arvo, $desi, '.', '');
-							}
-
-							if (isset($teexls) and $teexls == "OK") $worksheet->writeNumber($excelrivi, $pi-2, $arvo);
+							if (isset($teexls) and $teexls == "OK") $worksheet->writeNumber($excelrivi, $pi-2, (float) str_replace(" ","",str_replace(",",".", $arvo)));
 
 							if (isset($teepdf) and $teepdf == "OK") {
 								$oikpos = $pdf->strlen($arvo, $p);

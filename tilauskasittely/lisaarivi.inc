@@ -2486,6 +2486,7 @@
 			$kommentti 			= "";
 			$tuotenimitys 		= "";
 			$tuotenimitys_force = "";
+			$omalle_tilaukselle = "";
 			$rivinumero			= "";
 			$tilrivinumero		= "";
 		}

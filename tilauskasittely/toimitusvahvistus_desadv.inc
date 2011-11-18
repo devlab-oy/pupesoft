@@ -69,7 +69,7 @@
 
 				// ED2 ja UNA kehykset.
 				// NRQ:0 = Ei CON kuittauspyyntöä, NRQ:1 = CON kuittauspyyntö
-				$desadv_message  = "'''ED2:''':{$desadv_laskurow["asiakasovttunnus"]}:OVT':{$desadv_laskurow["yhtio_ovttunnus"]}:OVT'{$kuljetustunnus}'1'STX:EDIFACT'TYP:EDI'NRQ:0'''";
+				$desadv_message  = "'''ED2''':{$desadv_laskurow["asiakasovttunnus"]}:OVT':{$desadv_laskurow["yhtio_ovttunnus"]}:OVT'{$kuljetustunnus}'1'STX:EDIFACT'TYP:EDI'NRQ:0'''";
 				$desadv_message .= "\nUNA:+.? '";
 
 				// Valmistelupäiväys ja valmisteluaika on now(), jollei parempaa tietoa tule.

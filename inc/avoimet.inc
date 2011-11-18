@@ -129,7 +129,7 @@
 
 	echo "	<tr>
 			<th>".t("Vain toimittaja/asiakas").":</th>
-			<td colspan='3'><input type = 'text' name = 'ytunnus' value='$ytunnus'></td>
+			<td colspan='3'><input type = 'text' name = 'ytunnus' value='".tarkistahetu($ytunnus)."'></td>
 			</tr>";
 
 	if ($naytetaankokommentit != "") $komsel = "CHECKED";
@@ -441,7 +441,7 @@
 					$summa2+= $trow['avoinsaldo'];
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."raportit.php?toim=toimittajahaku&tee=A&ytunnus=$trow[ytunnus]&alku=0&laji=M&lopetus=".$palvelin2."raportit.php////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>$trow[ytunnus]</a></td>";
+					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."raportit.php?toim=toimittajahaku&tee=A&ytunnus=".tarkistahetu($trow[ytunnus])."&alku=0&laji=M&lopetus=".$palvelin2."raportit.php////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>".tarkistahetu($trow[ytunnus])."</a></td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maa]</td>";
 					echo "<td>$trow[maksutieto]";
@@ -456,7 +456,7 @@
 					echo "</td>";
 
 					if ($asitoimittain == "") {
-						echo "<td><a name='$trow[tunnus]' href='".$palvelin2."muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=".$palvelin2."raportit.php////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>$trow[laskunro]</a></td>";
+						echo "<td><a name='$trow[tunnus]' href='".$palvelin2."muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=".$palvelin2."raportit.php////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>$trow[laskunro]</a></td>";
 					}
 					else {
 						echo "<td>$trow[laskunro]</td>";
@@ -502,7 +502,7 @@
 					echo "</tr>";
 
 					if (isset($workbook)) {
-						$worksheet->writeString($excelrivi, 0, $trow["ytunnus"]);
+						$worksheet->writeString($excelrivi, 0, tarkistahetu($trow["ytunnus"]));
 						$worksheet->writeString($excelrivi, 1, $trow["nimi"]);
 						$worksheet->writeString($excelrivi, 2, $trow["maa"]);
 						$worksheet->write($excelrivi, 3, $trow["maksutieto"]);
@@ -754,7 +754,7 @@
 				if ($trow['tiliointiavoinsaldo'] != 0) {
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>$trow[ytunnus]</a></td>";
+					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow[ytunnus])."&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>".tarkistahetu($trow[ytunnus])."</a></td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maa]</td>";
 					echo "<td>$trow[maksutieto]</td>";
@@ -803,7 +803,7 @@
 					echo "</tr>";
 
 					if (isset($workbook)) {
-						$worksheet->writeString($excelrivi, 0, $trow["ytunnus"]);
+						$worksheet->writeString($excelrivi, 0, tarkistahetu($trow["ytunnus"]));
 						$worksheet->writeString($excelrivi, 1, $trow["nimi"]);
 						$worksheet->writeString($excelrivi, 2, $trow["maa"]);
 						$worksheet->write($excelrivi, 3, $trow["maksutieto"]);
@@ -859,7 +859,7 @@
 
 						$suoritussummatotal += $trow["suoritussumma"];
 
-						if ($trow["tunnus"] != NULL) echo "<td><a name='a_$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>$trow[ytunnus]</a></td>";
+						if ($trow["tunnus"] != NULL) echo "<td><a name='a_$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=".tarkistahetu($trow[ytunnus])."&asiakasid=$trow[tunnus]&alatila=Y&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=".tarkistahetu($ytunnus)."//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>".tarkistahetu($trow[ytunnus])."</a></td>";
 						else echo "<td>*".t("ei asiakasta")."*</td>";
 
 						echo "<td>$trow[nimi_maksaja]</td>";
@@ -901,7 +901,7 @@
 						echo "</tr>";
 
 						if (isset($workbook)) {
-							if ($trow["tunnus"] != NULL) $worksheet->write($excelrivi, 0, $trow["ytunnus"]);
+							if ($trow["tunnus"] != NULL) $worksheet->write($excelrivi, 0, tarkistahetu($trow["ytunnus"]));
 							else $worksheet->write($excelrivi, 0, "*".t("ei asiakasta")."*");
 							$worksheet->write($excelrivi, 1, $trow["nimi_maksaja"]);
 							$worksheet->write($excelrivi, 2, $trow["maa"]);

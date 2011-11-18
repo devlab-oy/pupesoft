@@ -1403,16 +1403,29 @@ while ($tietue = fgets($fd)) {
 		case '*RE OSTOTILRIV' :
 		case 'RFF':
 		case 'PCD':
+		case 'BGM':
 
 			if ($edi_tyyppi == "edifact911") {
 				$kentat = explode(":", $tieto);
-
+				$kentat_bgm = explode("+", $tieto); 
+				// BGM kentässä tulee 'BGM+QQQ+ABCDEFGHIJKLM'
+				// QQQ = arvot, 105=tilaus, 640=toimituskehoitus, 221=plokkitilaus/ennakkotilaus
+				// ABCDEFGHIJKLM = tossa tulee myymälän tilausnumero, joka pitäisi olla sama kuin RFF+VN kentän arvo.
+				
+				if ($asiakkaan_tilausnumero == "" and $kentat_bgm[0] == '105' and $kentat_bgm[1] != "") {
+					$asiakkaan_tilausnumero = $kentat_bgm[1];
+					$viite = $kentat_bgm[1]. ' ';
+					break;
+				}
+				
 				// Orders 91.1 tulee kaksi RFF segmenttiä (VN ja WS). VN otsikon viite, joten ei liity tilausriveihin. WS on tilausrivin loppumisen merkki.
-				if ($kentat[0] == "VN") {
+				if ($kentat[0] == "VN" and $asiakkaan_tilausnumero == "") {
 					$asiakkaan_tilausnumero = $kentat[1];
 					$viite = $kentat[1]. ' ';
 					break;
 				}
+				
+				
 			}
 
 			if ($editilaus_otsikko_ok == "KYLLA") {

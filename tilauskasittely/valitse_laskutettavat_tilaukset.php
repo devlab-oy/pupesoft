@@ -325,6 +325,7 @@
 	if ($tee == "VALITSE") {
 
 		$query = "	SELECT
+					if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
 					lasku.tunnus,
 					lasku.luontiaika,
 					lasku.chn,
@@ -370,10 +371,10 @@
 					$alatilat
 					$vientilisa
 					$muutlisa
-					GROUP BY lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
+					GROUP BY ketjutuskentta, lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
 					laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
 					maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale
-					ORDER BY lasku.tunnus";
+					ORDER BY ketjutuskentta, lasku.tunnus";
 		$res = pupe_query($query);
 
 		$kateinen = "";
@@ -496,7 +497,11 @@
 			$maksu_positiot = array();
 
 			while ($row = mysql_fetch_assoc($res)) {
-
+				
+				if (isset($edketjutus) and $edketjutus != $row["ketjutuskentta"]) {
+					echo "<tr><td class='back' align='center' colspan='5'><hr></td><td class='back' align='center'><font class='info'>Lasku:</font></td><td class='back' colspan='3'><hr></td></tr>";
+				}
+				
 				// jos yksikin on k‰teinen niin kaikki on k‰teist‰ (se hoidetaan jo ylh‰‰ll‰)
 				if ($row["kateinen"] != "") $kateinen = "X";
 				if ($row["maa"] != "") $maa = $row["maa"];
@@ -696,6 +701,8 @@
 				}
 
 				echo "</tr>";
+
+				$edketjutus = $row["ketjutuskentta"];
 			}
 			echo "</table><br>";
 
@@ -1046,7 +1053,6 @@
 		// GROUP BY pit‰‰ olla sama kun verkkolasku.php:ss‰ rivi ~1243
 		// HUOM LISƒKSI laskutusviikonp‰iv‰ mukaan GROUP BY:hin!!!!
 		$query = "	SELECT
-					if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
 					lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maksuehto, lasku.chn,
@@ -1071,7 +1077,7 @@
 					$vientilisa
 					$muutlisa
 					$haku
-					GROUP BY lasku.laskutusvkopv, ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+					GROUP BY lasku.laskutusvkopv, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
 					lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 					lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 					lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,

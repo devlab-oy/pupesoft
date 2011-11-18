@@ -214,9 +214,13 @@
 				<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'></td></tr>";
 
 		if ($toim == "SIIRTOTYOMAARAYS" or $toim == "VALMISTAVARASTOON") {
-			if ($srow['eilahetetta'] != '') $eilah = 'CHECKED';
-
-			echo "<tr><th>".t("Ohita keräys")."</th><td><input type='checkbox' name='eilahe' $eilah></td></tr>";
+			if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kerataanko_valmistukset"] == "E") {
+				echo "<input type='hidden' name='eilahe' value='o'>";
+			}
+			else {
+				if ($srow['eilahetetta'] != '') $eilah = 'CHECKED';
+				echo "<tr><th>".t("Ohita keräys")."</th><td><input type='checkbox' name='eilahe' $eilah></td></tr>";
+			}
 		}
 
 		echo "<tr>";

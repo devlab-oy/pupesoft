@@ -226,7 +226,7 @@
 						$tiliointiresult = pupe_query($query);
 
 						if ($tiliointirow = mysql_fetch_assoc ($tiliointiresult)) {
-							echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=2&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa LMP-erittely")."</a><br>";
+							echo "<a href='{$palvelin2}tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=2&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa LMP-erittely")."</a><br>";
 
 							$erilinkkiekotus = TRUE;
 						}
@@ -242,7 +242,7 @@
 						$tiliointiresult = pupe_query($query);
 
 						if ($tiliointirow = mysql_fetch_assoc ($tiliointiresult)) {
-							echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa viiteaineisto")."</a><br>";
+							echo "<a href='{$palvelin2}tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa viiteaineisto")."</a><br>";
 
 							$erilinkkiekotus = TRUE;
 						}
@@ -267,7 +267,7 @@
 
 				if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {
 					echo "<font class='message'>".t("Tapahtuma on käsitelty")." ".tv1dateconv($tiliotedataka)."<br>";
-					echo t("Alkuperäinen tiliöinti on")." <a href='".$palvelin2."muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]&lopetus=$lopetus$lopetuslisa'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
+					echo t("Alkuperäinen tiliöinti on")." <a href='{$palvelin2}muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]&lopetus=$lopetus$lopetuslisa'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
 
 					if (($tiliointirow['korjattu'] != "0000-00-00 00:00:00") and ($tiliointirow['korjattu'] != "@0000-00-00 00:00:00")) {
 						echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font>";
@@ -294,7 +294,7 @@
 			$boob = 0;
 
 			if (mysql_num_rows($suotoiresult) > 0) {
-				echo "<font class='message'><a href='".$palvelin2."suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&lopetus=$lopetus$lopetuslisa'>".t("Ostosuoritus")."</a></font><br>";
+				echo "<font class='message'><a href='{$palvelin2}suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&lopetus=$lopetus$lopetuslisa'>".t("Ostosuoritus")."</a></font><br>";
 				$boob = 1;
 			}
 
@@ -304,23 +304,23 @@
 
 			if (mysql_num_rows($suoasiresult) == 1) {
 				$suoasirow = mysql_fetch_assoc ($suoasiresult);
-				echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&lopetus=$lopetus$lopetuslisa'>".t("Myyntisuoritus")." ".substr($suoasirow["nimi"], 0, 34)."</a></font><br>";
+				echo "<font class='message'><a href='{$palvelin2}myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&lopetus=$lopetus$lopetuslisa'>".t("Myyntisuoritus")." ".substr($suoasirow["nimi"], 0, 34)."</a></font><br>";
 				$boob = 1;
 			}
 
 			if ($boob == 0) {
-				echo "<font class='message'><a href='".$palvelin2."suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&lopetus=$lopetus$lopetuslisa'>".t("Ostosuoritus")."</a></font><br>";
+				echo "<font class='message'><a href='{$palvelin2}suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&lopetus=$lopetus$lopetuslisa'>".t("Ostosuoritus")."</a></font><br>";
 			}
 
 			//	Annetaan Muu aina
-			echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku=$maksaa&lopetus=$lopetus$lopetuslisa'>".t("Myyntisuoritus muu")." </a></font>";
+			echo "<font class='message'><a href='{$palvelin2}myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku=$maksaa&lopetus=$lopetus$lopetuslisa'>".t("Myyntisuoritus muu")." </a></font>";
 
 		}
 		echo "</td><td class='$class'>";
 
 		if ($kuittikoodi == ' ') {
 			if ($eiselitetta == 1) $selite = '';
-			echo "<font class='message'><a href='".$palvelin2."tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&lopetus=$lopetus$lopetuslisa'>".t("Tee tiliotesääntö")."</a></font>";
+			echo "<font class='message'><a href='{$palvelin2}tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&lopetus=$lopetus$lopetuslisa'>".t("Tee tiliotesääntö")."</a></font>";
 		}
 
 		echo "</td></tr>";
@@ -359,9 +359,9 @@
 					if ($tiliotejarjestys != "") $seltiliotejarjestys = "SELECTED";
 
 					echo "<tr>
-							<th><a href='".$palvelin2."tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XX&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</th>
+							<th><a href='{$palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XX&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</th>
 							<th>";
-					echo "<form action='".$palvelin2."tilioteselailu.php' method='post'>";
+					echo "<form action='{$palvelin2}tilioteselailu.php' method='post'>";
 					echo "<input type='hidden' name='tee'     value='T'>";
 					echo "<input type='hidden' name='tyyppi'  value='$lopp_tyyppi'>";
 					echo "<input type='hidden' name='tilino'  value='$lopp_tilino'>";
@@ -374,7 +374,7 @@
 							</select>
 							</form>";
 					echo " </th>
-							<th><a href='".$palvelin2."tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=X&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a></th></tr>";
+							<th><a href='{$palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=X&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a></th></tr>";
 				}
 			}
 
@@ -573,11 +573,12 @@
 			if ($koodi == '704') {
 				$koodi = '720';
 			}
-
+			
+			// VVKKPP
 			$kirjpvm = substr($tietue, 30, 6);
 			$pvm 	 = substr($tietue, 36, 6);
 
-			//Tilioidaan kuitenkin loppupeleissa kaikki kirjauspvm:lle.
+			// Tiliöidään kuitenkin loppupeleissä kaikki kirjauspvm:lle.
 			$pvm	 = $kirjpvm;
 
 			if ($pvm == "000000") { // Haa, pankki ei antanutkaan arvopvmää, joten otetaan käyttöön tapahtumapvm
@@ -673,7 +674,7 @@
 				}
 
 				echo "<td class='$class'>";
-				echo "<form name='kuittaus' action='".$palvelin2."tilioteselailu.php#kuitattu_$anklinkki' method='post'>";
+				echo "<form name='kuittaus' action='{$palvelin2}tilioteselailu.php#kuitattu_$anklinkki' method='post'>";
 				echo "<input type='hidden' name='tee' value='T'>";
 				echo "<input type='hidden' name='tyyppi' value='$lopp_tyyppi'>";
 				echo "<input type='hidden' name='tilino' value='$lopp_tilino'>";

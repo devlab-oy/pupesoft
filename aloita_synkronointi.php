@@ -81,7 +81,7 @@ if ($tee == "SYNK") {
 		$lisa = "";
 
 		if ($table == "asiakas") {
-			$lisa = ", maksuehto READ";
+			$lisa = ", maksuehto READ, toimitustapa READ";
 		}
 
 		$query = "LOCK TABLES yhtio READ, yhtion_parametrit READ, synclog WRITE, $table WRITE $lisa";

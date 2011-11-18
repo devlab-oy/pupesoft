@@ -1,5 +1,6 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
 	require('../inc/parametrit.inc');
@@ -91,7 +92,7 @@
 					$sumyht += $summa[$i][$j];
 					$katyht += $kate[$i][$j];
 					$koksumyht += $summa[$i][$j];
-					$kokkatyht += $kate[$i][$j];					
+					$kokkatyht += $kate[$i][$j];
 				}
 				echo "</td>";
 			}
@@ -100,7 +101,7 @@
 		}
 
 		echo "<tr><th>".t("Yhteensä")."</th>";
-		
+
 		// yhteensärivit
 		for ($j=1; $j<13; $j++) {
 

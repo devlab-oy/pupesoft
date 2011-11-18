@@ -30,11 +30,11 @@ if ($kollityht > 0) {
 	}
 	else {
 		//Tulostetaan standardi kolliosoitelappu
-		$query = "	SELECT * 
-					FROM lasku 
-					WHERE yhtio = '$kukarow[yhtio]' 
-					and tunnus in ($otunnukset) 
-					ORDER BY tunnus 
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus in ($otunnukset)
+					ORDER BY tunnus
 					LIMIT 1";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($tempr);
@@ -335,7 +335,6 @@ if ($kollityht > 0) {
 
 		$pdf->draw_text(mm_pt(15),	mm_pt(116), substr($maarow['nimi'],5),								$firstpage, $iso);
 
-
 		$query = "	SELECT *
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -357,14 +356,30 @@ if ($kollityht > 0) {
 		$pdf->draw_rectangle(mm_pt(110),mm_pt(143),mm_pt(115),mm_pt(143),	$firstpage, $rectparam);
 
 		//Kuljetusohjeet = viivakoodi tulee tähän
-		$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
-		$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow["toimitustapa"],											$firstpage, $hugein);
-		$pdf->draw_text(mm_pt(20), mm_pt(45), "Paketteja - Paket - Packages: ".$kollityht,							$firstpage, $kirj);
-		$pdf->draw_text(mm_pt(20), mm_pt(40), $laskurow['viesti'],													$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(4), mm_pt(70), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(20), mm_pt(61), $laskurow["toimitustapa"],											$firstpage, $hugein);
+		$pdf->draw_text(mm_pt(20), mm_pt(56), "Paketteja - Paket - Packages: ".$kollityht,							$firstpage, $kirj);
 
-		if ($rakir_row['tulostustapa'] == 'K') {
-			$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
+		$komm = "";
+
+		if ($rakir_row['tulostustapa'] == 'K') $komm .= $laskurow['sisviesti1']."\n";
+
+		$komm .= $laskurow['viesti']."\n";
+
+		if (is_array($vakit)) {
+			$komm .= "\n";
+
+			foreach($vakit as $vak) {
+				$komm .= "$vak.\n";
+			}
 		}
+
+		if ($kuljetusohjeet != "") {
+			$komm .= $kuljetusohjeet;
+		}
+		
+		$pdf->draw_paragraph(mm_pt(55), mm_pt(20), mm_pt(35), mm_pt(140), $komm, $firstpage, $kirj);
+
 		// ylhäällä on "oikee" tapa tehdä, mutta me ei tiedetä tässä vaiheessa kollien määrää eikä painoa
 		$pdf->draw_text(mm_pt(4), mm_pt(30), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
 		if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];

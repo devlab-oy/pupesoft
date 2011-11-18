@@ -38,13 +38,41 @@
 		require ("inc/parametrit.inc");
 
 		echo "<font class='head'>Tiliotteen, LMP:n, kurssien, verkkolaskujen ja viitemaksujen k‰sittely</font><hr><br><br>";
+
+		echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>";
+		echo "<table>";
+		echo "	<tr>
+					<th>".t("Pankin aineisto").":</th>
+					<td><input type='file' name='userfile'></td>
+					<td class='back'><input type='submit' value='".t("K‰sittele tiedosto")."'></td>
+				</tr>";
+		echo "</table>";
+		echo "</form><br><br>";
+
+		echo "	<script type='text/javascript' language='JavaScript'>
+				<!--
+					function verify() {
+						msg = '".t("Oletko varma?")."';
+						return confirm(msg);
+					}
+				-->
+				</script>";
+
 	}
+
+	$forceta = FALSE;
 
 	// katotaan onko faili uploadattu
 	if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$userfile	= $_FILES['userfile']['name'];
 		$filenimi	= $_FILES['userfile']['tmp_name'];
 		$ok			= 1;
+	}
+	elseif (isset($virhe_file) and file_exists("/tmp/".basename($virhe_file))) {
+		$userfile	= "/tmp/".basename($virhe_file);
+		$filenimi	= "/tmp/".basename($virhe_file);
+		$ok			= 1;
+		$forceta 	= TRUE;
 	}
 
 	if ($ok == 1) {
@@ -147,7 +175,7 @@
 						$virhe++;
 					}
 					else {
-						$yritirow = mysql_fetch_array ($yritiresult);
+						$yritirow = mysql_fetch_array($yritiresult);
 					}
 
 					// Onko t‰m‰ aineisto jo ajettu?
@@ -204,8 +232,21 @@
 								$xtyyppi=0;
 								$virhe++;
 							}
-							else {
+							elseif (!$forceta)  {
 								echo "<font class='error'>T‰m‰ aineisto on jo aiemmin k‰sitelty!<br><br>Tili: $tilino<br>Ajalta: $alkupvm - $loppupvm<br>Yritys: $yritirow[yhtio]</font><br><br>";
+
+								if (!$php_cli) {
+									list($usec, $sec) = explode(' ', microtime());
+									mt_srand((float) $sec + ((float) $usec * 100000));
+									$tmpfile = md5(uniqid(mt_rand(), true)).".txt";
+
+									file_put_contents("/tmp/".$tmpfile, $kokoaineisto);
+
+									echo "<form action='$PHP_SELF' method='post' onSubmit='return verify();'>";
+									echo "<input type='hidden' name='virhe_file' value='$tmpfile'>
+											<input type='submit' value='".t("K‰sittele aineisto vaikka kyseisen p‰iv‰n/tilin aineisto on jo k‰sitelty")."'>";
+									echo "</form><br><br>";
+								}
 
 								$xtyyppi=0;
 								$virhe++;
@@ -240,7 +281,7 @@
 
 			//Jos meill‰ tuli virheit‰
 			if ($virhe > 0) {
-				echo "<font class='error'>Aineisto oli virheellinen. Sit‰ ei voitu tallentaa j‰rjestelm‰‰n.</font>";
+				echo "<font class='error'>".t("Aineistoa ei tallennettu j‰rjestelm‰‰n").".</font>";
 
 				//Poistetaan aineistot tiliotedatasta
 				$query = "DELETE FROM tiliotedata WHERE aineisto ='$aineistorow[aineisto]'";
@@ -317,17 +358,6 @@
 	}
 
 	if (!$php_cli) {
-		echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>";
-		echo "<table>";
-		echo "	<tr>
-					<th>Pankin aineisto:</th>
-					<td><input type='file' name='userfile'></td>
-					<td class='back'><input type='submit' value='K‰sittele tiedosto'></td>
-				</tr>";
-		echo "</table>";
-
-		echo "</form>";
-
 		require("inc/footer.inc");
 	}
 

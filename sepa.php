@@ -175,7 +175,7 @@
 				$InstdAmt = $Amt->addChild('InstdAmt', $laskurow['summa']);							// InstructedAmount, Pakollinen kentt‰
 			}
 			else {
-				$InstdAmt = $Amt->addChild('InstdAmt', $laskurow['summa'] - $laskurow['kasumma']);	// InstructedAmount, Pakollinen kentt‰
+				$InstdAmt = $Amt->addChild('InstdAmt', round($laskurow['summa'] - $laskurow['kasumma'],2));	// InstructedAmount, Pakollinen kentt‰
 			}
 			$InstdAmt->addAttribute('Ccy', $laskurow['valkoodi']);									// Currency, Pakollinen attribute
 
@@ -684,7 +684,7 @@
 		$xml->{"pain.001.001.02"}->GrpHdr->NbOfTxs = $tapahtuma_maara;
 
 		// Kirjoitetaaan XML ja tehd‰‰n UTF8 encode
-		fwrite($toot, utf8_encode($xml->asXML()));
+		fwrite($toot, str_replace(chr(10),"",utf8_encode($xml->asXML())));
 		fclose($toot);
 
 		// Tehd‰‰n viel‰ t‰ss‰ vaiheessa XML validointi, vaikka ainesto onkin jo tehty. :(

@@ -527,22 +527,11 @@
 
 		//kuljetusohjeita
 		$pdf->draw_text(62, 382 , "Kuljetusohjeet Transportinstruktioner",				$firstpage, $norm);
-
-		if (!isset($GLOBALS['tyhja'])) {
-			$query = "	SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
-						from rahtikirjat
-						where yhtio			= '$kukarow[yhtio]'
-						and otsikkonro		in ($otunnukset)";
-			$viestirar = mysql_query($query) or pupe_error($query);
-
-			$viestirarrow = mysql_fetch_array($viestirar);
-		}
-
-		$pdf->draw_paragraph(380, 62, 325, 410, $viestirarrow["viesti"],				$firstpage, $kirj);
+		$pdf->draw_paragraph(380, 62, 325, 410, $kuljetusohjeet,						$firstpage, $kirj);
 
 		$pdf->draw_text(62, 311 , "Muut tiedot Tillägsuppgifter",						$firstpage, $norm);
 
-		if(is_resource($lisatiedres)) {
+		if (is_resource($lisatiedres)) {
 			$ahven = 311;
 
 			while($lisatiedot = mysql_fetch_array($lisatiedres)) {

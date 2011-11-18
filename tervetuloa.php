@@ -229,7 +229,7 @@ if (!isset($tee) or $tee == '') {
 			$varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
 
 			echo "<tr$varilisa>";
-			echo "<td>{$tyorow["tunnus"]}</td>";
+			echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
 			echo "<td>{$tyorow["nimi"]}</td>";
 			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";
 			echo "</tr>";
@@ -251,7 +251,15 @@ if (!isset($tee) or $tee == '') {
 
 		$ulos = '';
 
-		for ($i = 201011; $i <= date("Ym"); $i++) {
+		// Katsotaan pienin tilikausi, josta lähetään esittämään
+		$min_query = "	SELECT date_format(ifnull(min(tilikausi_alku), '9999-01-01'), '%Y%m') min 
+						FROM tilikaudet 
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND tilikausi_alku >= '2010-11-01'";
+		$min_result = pupe_query($min_query);
+		$min_row = mysql_fetch_assoc($min_result);
+
+		for ($i = $min_row['min']; $i <= date("Ym"); $i++) {
 
 			if (substr($i, -2) == 13) {
 				$i += 88;

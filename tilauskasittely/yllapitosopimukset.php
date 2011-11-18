@@ -32,15 +32,21 @@
 	}
 
 	if ($tee == "laskuta" and count($laskutapvm) > 0) {
-
+		$poikkeus = "ei";
 		// haetaan funktio
 		require ("kopioi_tilaus.inc");
 
 		$laskuta_message = "";
 
+		if (checkdate($laskkk, $laskpp, $laskvv)) {
+			$poikkeus = "joo";
+			$poikkeuspvm = $laskpp.".".$laskkk.".".$laskvv;
+		}
+
 		foreach ($laskutapvm as $pointteri => $tapahtumapvm) {
 
 			$tilausnumero = $laskutatun[$pointteri];
+
 			list($tapvmvv,$tapvmkk,$tapvmpp) = explode("-", $tapahtumapvm);
 
 			//	Haetaan sopimuskausi ja kommentti
@@ -79,6 +85,7 @@
 
 			$tama_laskutus = array_search($tapahtumapvm, $laskutuspaivat);
 			$soplaskmaara = count($laskutuspaivat)-1;
+
 
 			// Onko tämä tän vuoden eka ja vika sopparilasku
 			if ($tama_laskutus == 0 and $tama_laskutus == $soplaskmaara) {
@@ -226,8 +233,14 @@
 					$tee 			= "TARKISTA";
 					$laskutakaikki 	= "KYLLA";
 					$silent		 	= "KYLLA";
-
-					$laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("päivälle")." ".date("d.m.Y").".</font><br>";
+					
+					if ($poikkeus == "joo") {
+						$laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("päivälle")." ".$poikkeuspvm.".</font><br>";
+					}
+					else {
+						$laskuta_message .= ", ".t("laskutetaan tilaus")." $ok ".t("päivälle")." ".date("d.m.Y").".</font><br>";
+					}
+					
 					require("verkkolasku.php");
 				}
 				else {
@@ -263,7 +276,7 @@
 
 	if (mysql_num_rows($result) > 0) {
 
-		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<form method='post' action='$PHP_SELF' name='yllapitosopimus' onSubmit = 'return verify()'>";
 		echo "<input type='hidden' name='tee' value='laskuta'>";
 
 		echo "<table>";
@@ -451,12 +464,127 @@
 			echo "<br><table>";
 			echo "<tr><th>".t("Laskuttamatta arvo yhteensä").": </th><td align='right'>$arvoyhteensa $yhtiorow[valkoodi]</td></tr>";
 			echo "<tr><th>".t("Laskuttamatta summa yhteensä").": </th><td align='right'>$summayhteensa $yhtiorow[valkoodi]</td></tr>";
+			echo "<tr>";
 			echo "</table>";
 		}
+		
+		echo "<br>";		
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Syötä Poikkeava Laskutuspäivämäärä (Pp-Kk-Vvvv)")."</th>";
+		echo "<td>	<input type='text' name='laskpp' value='' size='3'>
+					<input type='text' name='laskkk' value='' size='3'>
+					<input type='text' name='laskvv' value='' size='5'>";
+		echo "</td>";
+		echo "</tr>";
+		echo "<tr>";
+		echo "<th>".t("Älä aja laskutusta").":</th>";
+		echo "<td><input type='checkbox' name='jatakesken' value='JOO'></td>";
+		echo "</tr>";
+		echo "<tr><td class='back'></td><td class='back'><input type='submit' value='".t("Laskuta")."'></td></tr>";
+		echo "</table>";
 
-		echo "<br>".t("Älä aja laskutusta").": <input type='checkbox' name='jatakesken' value='JOO'>";
-		echo "<br><input type='submit' value='".t("Laskuta")."'>";
+		//päivämäärän tarkistus
+		$tilalk = explode("-", $yhtiorow["tilikausi_alku"]);
+		$tillop = explode("-", $yhtiorow["tilikausi_loppu"]);
+
+		$tilalkpp = $tilalk[2];
+		$tilalkkk = $tilalk[1]-1;
+		$tilalkvv = $tilalk[0];
+
+		$tilloppp = $tillop[2];
+		$tillopkk = $tillop[1]-1;
+		$tillopvv = $tillop[0];
+
+		$tanaanpp = date("d");
+		$tanaankk = date("m");
+		$tanaanvv = date("Y");
+
+
 		echo "</form>";
+		
+		echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+
+					function verify(){
+
+						var naytetaanko_herja = false
+						var msg = '';
+
+						var pp = document.yllapitosopimus.laskpp;
+						var kk = document.yllapitosopimus.laskkk;
+						var vv = document.yllapitosopimus.laskvv;
+
+
+						pp = Number(pp.value);
+						kk = Number(kk.value);
+						vv = Number(vv.value);
+
+						// Mikäli ei syötetä mitään 3 kenttään niin oletetaan tätäpäivää maksupäiväksi
+						if (vv == 0 && pp == 0 && kk == 0) {
+							var tanaanpp = $tanaanpp;
+							var tanaankk = $tanaankk;
+							var tanaanvv = $tanaanvv;
+							var falsekk = tanaankk-1;
+
+							var dateSyotetty = new Date(tanaanvv, falsekk, tanaanpp);
+							
+						}
+						else {
+							// voidaan syöttää kenttää 2 pituinen vuosiarvo esim. 11 = 2011
+							if (vv > 0 && vv < 1000) {
+								vv = vv+2000;
+							}
+							var falsekk = kk-1;
+
+							var dateSyotetty = new Date(vv,falsekk,pp);
+
+						}
+
+						var dateTallaHet = new Date();
+						var ero = (dateTallaHet.getTime() - dateSyotetty.getTime()) / 86400000;
+
+						var tilalkpp = $tilalkpp;
+						var tilalkkk = $tilalkkk;
+						var tilalkvv = $tilalkvv;
+						var dateTiliAlku = new Date(tilalkvv,tilalkkk,tilalkpp);
+						dateTiliAlku = dateTiliAlku.getTime();
+
+						var tilloppp = $tilloppp;
+						var tillopkk = $tillopkk;
+						var tillopvv = $tillopvv;
+						var dateTiliLoppu = new Date(tillopvv,tillopkk,tilloppp);
+						dateTiliLoppu = dateTiliLoppu.getTime();
+
+						dateSyotetty = dateSyotetty.getTime();
+						
+						if (dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
+							var msg = msg+'".t("VIRHE: Syötetty päivämäärä ei sisälly kuluvaan tilikauteen!")." ';
+						}
+
+						// ALERT errorit ennen confirmiä, näin estetään ettei vahingossakaan päästä läpi.
+						if (ero < 0) {
+							var msg = msg+'".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
+						}
+
+						if (msg != '') {
+							if (alert(msg)) {
+								return false;
+							}
+							else {
+								return false;
+							}
+						}
+
+						if (ero >= 2) {
+							var msg = msg+'".t("Oletko varma, että haluat päivätä laskun yli 2pv menneisyyteen?")." ';
+							naytetaanko_herja = true;
+						}
+
+						if (naytetaanko_herja == true) {
+							return confirm(msg);
+						}
+					}
+				</SCRIPT>";
 
 	}
 	else {

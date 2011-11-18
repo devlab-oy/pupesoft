@@ -253,6 +253,34 @@
 			</select>
 			</td></tr>";
 
+	echo "<tr><th valign='top'>".t("Maarajaus")."</th>";
+
+	if (!isset($maarajaus)) $maarajaus = '';
+
+	$query = "	SELECT distinct koodi, nimi
+			FROM maat
+			WHERE nimi != ''
+			ORDER BY koodi";
+	$vresult = pupe_query($query);
+
+	echo "<td colspan='3'><select name='maarajaus'><option value = '' >Ei valintaa</option>";
+
+	while ($vrow=mysql_fetch_array($vresult)) {
+		$sel='';
+		if (strtoupper($maarajaus) == strtoupper($vrow[0])) {
+			$sel = "selected";
+		}
+		echo "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+	}
+	echo "</select></td></tr>";
+
+	$sel='';
+	if (!isset($palvelut)) $palvelut = '';
+	if ($palvelut != "") {
+		$sel = "CHECKED";
+	}	
+	echo "<tr><th valign='top'>".t("Palveluiden alv-erittely")."</th><td colspan='3'><input type='checkbox' $palvelut>";
+
 	echo "</table><br>";
 
 	$monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI", "ASIAKASOSASTO", "ASIAKASRYHMA");
@@ -407,6 +435,9 @@
 		if ($alv != 'tyhja') {
 			$lisa1 .= " and tiliointi.vero = '$alv' ";
 		}
+echo "------->" .  $maarajaus;
+		if ($maarajaus != '') $lisa .= " and lasku.maa = '$maarajaus' ";
+		
 
 		$asiakasjoini  = "";
 		$konsernijoini = "";
@@ -450,6 +481,7 @@
 					$lisa
 					$konsernilisa
 					ORDER BY $jarj";
+
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {

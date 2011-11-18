@@ -10,6 +10,7 @@
 	// Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
 	// Tarvitaan $rahtikirjanro jossa on rahtikirjan numero
 	// Tarvitaan $toitarow jossa on laskun toimitustavan tiedot
+	// Passataan $tulostauna, mikäli se on tyhjä, niin ei tulosteta uusia headereitä
 
 	//jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 	if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
@@ -36,15 +37,19 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND lasku.tunnus in ($otunnukset)
 					ORDER BY lasku.tunnus";
-		$desadv_laskures = mysql_query($query) or pupe_error($query);
+		$desadv_laskures = pupe_query($query);
+
+		$rajaus = 1;
 
 		while ($desadv_laskurow = mysql_fetch_assoc($desadv_laskures)) {
+
+			$lahtunniste = "";
 
 			$query = "	SELECT *
 						FROM rahtikirjat
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus in ($tunnukset)";
-			$desadv_rakir_res = mysql_query($query) or pupe_error($query);
+			$desadv_rakir_res = pupe_query($query);
 
 			if (mysql_num_rows($desadv_rakir_res) > 0) {
 				$desadv_rakir_row = mysql_fetch_assoc($desadv_rakir_res);
@@ -59,6 +64,23 @@
 			$error 			= '';
 			$x 				= 0; // yhteensä rivejä koko filessä
 
+			if ($tulostauna != "") {
+				$kuljetustunnus = "PUPESOFT".sprintf("%06.6s",$rajaus); // tämä voi olla yhteensä max 14 merkkiäpitkä stringjono
+
+				// ED2 ja UNA kehykset.
+				// NRQ:0 = Ei CON kuittauspyyntöä, NRQ:1 = CON kuittauspyyntö
+				$desadv_message  = "'''ED2''':{$desadv_laskurow["asiakasovttunnus"]}:OVT':{$desadv_laskurow["yhtio_ovttunnus"]}:OVT'{$kuljetustunnus}'1'STX:EDIFACT'TYP:EDI'NRQ:0'''";
+				$desadv_message .= "\nUNA:+.? '";
+
+				// Valmistelupäiväys ja valmisteluaika on now(), jollei parempaa tietoa tule.
+				$valpvm = date("ymd");
+				$valaika = date("Hi");
+				$lahtunniste = $valpvm.$valaika.$rajaus;
+
+				// UNB ja UNOC kehys
+				// Ton DESADVD00A perässä on 4 plusmerkkiä, mikäli sinne viimeiseksi merkiksi laitetaan ennen hipsua 1 niin se on testisanoma
+				$desadv_message .= "UNB+UNOC:1+{$desadv_laskurow["yhtio_ovttunnus"]}:30+{$desadv_laskurow["asiakasovttunnus"]}:30+{$valpvm}:{$valaika}+{$lahtunniste}++DESADVD00A++++'";
+			}
 			// UNH - message header
 			$desadv_message .= "UNH+$desadv_laskurow[laskutunnus]+DESADV:D:00A:UN'";
 			$x++;
@@ -141,7 +163,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND liitostunnus = '$desadv_laskurow[liitostunnus]'
 						AND nimi = '$desadv_laskurow[tilausyhteyshenkilo]'";
-			$yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
+			$yhteyshenkiloresult = pupe_query($query);
 			$yhteyshenkiloasiakas = mysql_fetch_assoc($yhteyshenkiloresult);
 
 			$yhteyshenkilo = '';
@@ -156,7 +178,7 @@
 							FROM yhteyshenkilo
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus = '$desadv_laskurow[yhteyshenkilo_kaupallinen]'";
-				$yhteyshenkilo_kaupallinen_res = mysql_query($query) or pupe_error($query);
+				$yhteyshenkilo_kaupallinen_res = pupe_query($query);
 				$yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
 
 				$yhteyshenkilo = $yhteyshenkilo_kaupallinen_row['nimi'];
@@ -167,7 +189,7 @@
 							FROM yhteyshenkilo
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus = '$desadv_laskurow[yhteyshenkilo_tekninen]'";
-				$yhteyshenkilo_tekninen_res = mysql_query($query) or pupe_error($query);
+				$yhteyshenkilo_tekninen_res = pupe_query($query);
 				$yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
 
 				$yhteyshenkilo = $yhteyshenkilo_tekninen_row['nimi']; // max 35 merkkiä, R (riippuu maasta)
@@ -253,7 +275,7 @@
 							where yhtio = '$kukarow[yhtio]'
 							and otsikkonro = '$desadv_laskurow[laskutunnus]'
 							and rahtikirjanro = '$rahtikirjanro'";
-				$desadv_kollitres = mysql_query($query) or pupe_error($query);
+				$desadv_kollitres = pupe_query($query);
 			}
 
 			if (isset($desadv_kollitres) and mysql_num_rows($desadv_kollitres) > 0) {
@@ -273,7 +295,7 @@
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
  						AND tilausrivi.otunnus = '$desadv_laskurow[laskutunnus]'
 						GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
-			$tuotteet_res = mysql_query($query) or pupe_error($query);
+			$tuotteet_res = pupe_query($query);
 
 			$i = 1;
 
@@ -311,6 +333,12 @@
 			$x++;
 			$desadv_message .= "UNT+$x+$desadv_laskurow[laskutunnus]'";
 
+			if ($tulostauna != "") {
+				// loppuun pakollinen UNZ ja EOF. Huom! UNZ ja EOF pitää olla erillisillä riveillä !!!
+				$desadv_message .= "\nUNZ+1+{$lahtunniste}'";
+				$desadv_message .= "\n'''EOF'''0'";
+			}
+
 			$filenimi = $pupe_root_polku."/dataout/desadv_import-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 
 			//kirjoitetaan faili levylle..
@@ -332,6 +360,8 @@
 			else {
 				echo "<br/><font class='error'><br><hr>",t("AINEISTOA EI VOIDA LÄHETTÄÄ"),"!<br>",t("Aineistossa virheitä"),":<br>$error</font><hr><br>";
 			}
+
+			$rajaus++;
 		}
 	}
 ?>

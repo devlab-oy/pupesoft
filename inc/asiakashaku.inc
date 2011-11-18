@@ -363,7 +363,7 @@ elseif ($asiakasnro != '') {
 
 if ($monta == 0) {
 	if ($ytunnus) {
-		echo "<font class='error'>".t("Asiakas")." '$ytunnus' ".t("ei löydy")."!</font> ";
+		echo "<font class='error'>".t("Asiakas")." ". tarkistahetu($ytunnus)." ".t("ei löydy")."!</font> ";
 	}
 	elseif ($asiakasnro) {
 		echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font> ";

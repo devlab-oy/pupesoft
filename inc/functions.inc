@@ -11920,7 +11920,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 					$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
 				}
 
-				$selec = "	if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+				$selec = "	if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
 							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 							tiliointi.vero vero,
 							tiliointi.tilino tilino,
@@ -11929,7 +11929,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 				if ($yhteenvetolilmo) {
 					$selec = "	lasku.ytunnus ytunnus,
-								if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+								if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
 								max(lasku.nimi) laskunimi, ";
 					$group = "	ytunnus, maa";
 				}

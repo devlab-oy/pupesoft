@@ -640,7 +640,7 @@
 						echo "<td valign='top'>$trow[maa]</td>";
 						echo "<td valign='top'>$trow[valuutta]</td>";
 						echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$trow[tilino]//maarajaus=$trow[maa]</a></td>";
+						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
 						echo "<td valign='top'>$trow[nimi]</td>";
 						echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma']),"</td>";
 						echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";

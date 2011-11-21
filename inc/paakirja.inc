@@ -279,7 +279,7 @@
 	if ($palvelut != "") {
 		$sel = "CHECKED";
 	}	
-	echo "<tr><th valign='top'>".t("Palveluiden alv-erittely")."</th><td colspan='3'><input type='checkbox' $palvelut>";
+	echo "<tr><th valign='top'>".t("Palveluiden erittely")."</th><td colspan='3'><input type='checkbox' $palvelut>";
 
 	echo "</table><br>";
 
@@ -435,7 +435,7 @@
 		if ($alv != 'tyhja') {
 			$lisa1 .= " and tiliointi.vero = '$alv' ";
 		}
-echo "------->" .  $maarajaus;
+
 		if ($maarajaus != '') $lisa .= " and lasku.maa = '$maarajaus' ";
 		
 

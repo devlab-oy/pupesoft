@@ -5,6 +5,7 @@ use Net::SMTP;
 
 $dirri1    = "/home/elma/elma/edi/autolink_orders/";    # mist‰ haetaan
 $dirri2    = "/home/elma/elma/edi/autolink_orders/done/"; # minne siirret‰‰n
+$dirri3    = "/home/elma/elma/edi/autolink_orders/errors/"; # minne siirret‰‰n kun erroroi
 $pupedir   = "/var/www/html/pupesoft/tilauskasittely/"; # pupesoftin tilausk‰sittely hakemisto
 $komento   = "/usr/bin/php"; # ajettava komento
 $email     = "development\@devlab.fi"; # kenelle meilataan jos on ongelma

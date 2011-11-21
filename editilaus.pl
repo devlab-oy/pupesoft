@@ -7,8 +7,8 @@ $dirri1    = "/home/elma/elma/edi/autolink_orders/";    # mistä haetaan
 $dirri2    = "/home/elma/elma/edi/autolink_orders/done/"; # minne siirretään
 $pupedir   = "/var/www/html/pupesoft/tilauskasittely/"; # pupesoftin tilauskäsittely hakemisto
 $komento   = "/usr/bin/php"; # ajettava komento
-$email     = "atk\@arwidson.fi"; # kenelle meilataan jos on ongelma
-$emailfrom = "atk\@arwidson.fi"; # millä osoitteella meili lähetetään
+$email     = "development\@devlab.fi"; # kenelle meilataan jos on ongelma
+$emailfrom = "development\@devlab.fi"; # millä osoitteella meili lähetetään
 $tmpfile   = "/tmp/##edi-tmp";   # minne tehdään lock file
 
 # jos lukkofaili löytyy, mutta se on yli 15 minsaa vanha niin dellatan se
@@ -47,7 +47,7 @@ if (!-f $tmpfile) {
 			# loopataan tätä failia kunnes ok
 			while ($ok < 1) {
 
-				if ($vnimi==$nimi) {
+				if ($vnimi eq $nimi) {
 					$laskuri++;
 				}
 				else {
@@ -56,11 +56,16 @@ if (!-f $tmpfile) {
 
 				$vnimi=$nimi;
 
-				open(faili, $nimi) or die("Failin $nimi avaus epäonnistui.");
+				open("faili", $nimi) or die("Failin $nimi avaus epäonnistui.");
 				@rivit = <faili>;
 				$ok=0;
 
-				foreach $rivi (@rivit) {											
+				$whole_file="";
+
+				foreach $rivi (@rivit) {
+
+					$whole_file.=$rivi;
+
 					if ($rivi=~m"ICHG__END") {
 						$laskuri=0;
 						$ok=1;  # loppumerkki löytyi file on ok!
@@ -77,11 +82,26 @@ if (!-f $tmpfile) {
 						$laskuri=0;
 						$ok=1;  # loppumerkki löytyi file on ok!
 						$edi_tyyppi=" edifact911";  # tää on orderfaili, (huom. space tärkeä)
-						last;						
+						last;
 					}
 				}
 
-				close(faili);
+				close("faili");
+
+				# edifact911 failit tulee 80 merkkiä pitkillä rivillä, joten 'UNS\+S'-tägi voi olla kahdella rivillä
+				# otetaan tässä koko faili stringiin ja katotaan löytyykö haettu tägi
+				if ($ok < 1) {
+
+					$whole_file =~ s/\n//g;
+
+					$result = index($whole_file, "'UNS+S'");
+
+					if ($result >= 0) {
+						$laskuri=0;
+						$ok=1;  # loppumerkki löytyi file on ok!
+						$edi_tyyppi=" edifact911";  # tää on orderfaili, (huom. space tärkeä)
+					}
+				}
 
 				if ($ok > 0) {
 					#print "pupesoft editilaus.pl v1.1\n--------------------------\n\n";
@@ -107,8 +127,8 @@ if (!-f $tmpfile) {
 					$smtp->datasend("\nEditilaus: ".$nimi." taitaa olla viallinen. Siirrettiin faili $dirri2 hakemistoon. Tutki asia!");
 					$smtp->dataend();
 					$smtp->quit;
-					
-					$cmd = "mv -f $nimi $dirri2";
+
+					$cmd = "mv -f $nimi $dirri3";
 					system($cmd);
 
 					# ulos loopista
@@ -127,7 +147,7 @@ if (!-f $tmpfile) {
 	} # end readdir while
 
 	system("rm -f $tmpfile");
-	
+
 	# siivotaan yli 180 päivää vanhat aineistot
 	system("find $dirri2 -mtime +180 -delete");
 

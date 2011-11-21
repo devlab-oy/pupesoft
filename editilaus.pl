@@ -125,7 +125,7 @@ if (!-f $tmpfile) {
 					$smtp->to($email);
 					$smtp->data();
 					$smtp->datasend("Subject: Editilaus ERROR!\n\n");
-					$smtp->datasend("\nEditilaus: ".$nimi." taitaa olla viallinen. Siirrettiin faili $dirri2 hakemistoon. Tutki asia!");
+					$smtp->datasend("\nEditilaus: ".$nimi." taitaa olla viallinen. Siirrettiin faili $dirri3 hakemistoon. Tutki asia!");
 					$smtp->dataend();
 					$smtp->quit;
 

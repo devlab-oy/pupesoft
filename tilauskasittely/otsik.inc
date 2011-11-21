@@ -1071,8 +1071,14 @@
 						</tr>";
 			}
 
+			$state_chk = '';
+
+			if ($srow['toimitustavan_lahto'] > 0 and $srow['tila'] == 'L' and $srow['alatila'] == 'D') {
+				$state_chk = 'disabled';
+			}
+
 			echo "<tr><td>".t("Toimitustapa").":</td>";
-			echo "<td><select name='toimitustapa'>";
+			echo "<td><select name='toimitustapa' {$state_chk}>";
 
 			$query = "	SELECT tunnus, selite
 						FROM toimitustapa

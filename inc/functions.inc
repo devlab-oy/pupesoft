@@ -14056,9 +14056,20 @@ if (!function_exists("tee_keraysera2")) {
 
 		echo "$groupby<br>$orderby<br><br>";
 
+		/**
+		JOIN toimitustavan_lahdot ON (toimitustavan_lahdot.yhtio = toimitustapa.yhtio
+	 									AND toimitustavan_lahdot.liitostunnus = toimitustapa.tunnus
+	 									AND toimitustavan_lahdot.lahdon_kellonaika >= CURTIME()
+	 									AND toimitustavan_lahdot.lahdon_viikonpvm = {$viikonpaiva}
+	 									AND toimitustavan_lahdot.aktiivi = ''
+	 									AND toimitustavan_lahdot.kerailyn_aloitusaika <= CURTIME()
+	 									AND toimitustavan_lahdot.asiakasluokka = lasku.hyvaksynnanmuutos
+	 								)
+		*/
+
 		$query = "	SELECT lasku.liitostunnus,
 					lasku.nimi as asiakas_nimi,
-					toimitustavan_lahdot.tunnus as lahto,
+					lahdot.tunnus as lahto,
 					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
 					avainsana.selitetark_3 as prioriteetti,
 					LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
@@ -14074,14 +14085,15 @@ if (!function_exists("tee_keraysera2")) {
 					#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.tunnus = '{$keraysvyohyke}')
 					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
-				 	JOIN toimitustavan_lahdot ON (toimitustavan_lahdot.yhtio = toimitustapa.yhtio
-													AND toimitustavan_lahdot.liitostunnus = toimitustapa.tunnus
-													AND toimitustavan_lahdot.lahdon_kellonaika >= CURTIME()
-													AND toimitustavan_lahdot.lahdon_viikonpvm = {$viikonpaiva}
-													AND toimitustavan_lahdot.aktiivi = ''
-													AND toimitustavan_lahdot.kerailyn_aloitusaika <= CURTIME()
-													AND toimitustavan_lahdot.asiakasluokka = lasku.hyvaksynnanmuutos
- 												)
+				 	JOIN lahdot ON (lahdot.yhtio = toimitustapa.yhtio
+									AND lahdot.liitostunnus = toimitustapa.tunnus
+									AND lahdot.pvm = CURDATE()
+									#AND lahdot.lahdon_kellonaika >= CURTIME()
+									AND lahdot.lahdon_viikonpvm = {$viikonpaiva}
+									AND lahdot.aktiivi = ''
+									AND lahdot.kerailyn_aloitusaika <= CURTIME()
+									AND lahdot.asiakasluokka = lasku.hyvaksynnanmuutos
+ 									)
 					JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tila = 'N'

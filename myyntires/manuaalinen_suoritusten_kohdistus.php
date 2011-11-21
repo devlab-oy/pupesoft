@@ -425,16 +425,20 @@ if ($tila == 'tee_kohdistus') {
 				$tskres = pupe_query($query);
 				$tskrow = mysql_fetch_assoc($tskres);
 
-				if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi']) and round($suoritus["summa"] - ($tskrow["summa_valuutassa"] - $tskrow["alennus_valuutassa"]), 2) < 0) {
-					echo "<font class='error'>".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."</font><br><br>";
+				if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
+					if (round($suoritus["summa"] - ($tskrow["summa_valuutassa"] - $tskrow["alennus_valuutassa"]), 2) < 0) {
+						echo "<font class='error'>".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."</font><br><br>";
 
-					$tila 	= 'kohdistaminen';
-					$query 	= "UNLOCK TABLES";
-					$result = pupe_query($query);
+						$tila 	= 'kohdistaminen';
+						$query 	= "UNLOCK TABLES";
+						$result = pupe_query($query);
+					}
 				}
 				elseif (round($suoritus["summa"] - ($tskrow["summa"] - $tskrow["alennus"]), 2) < 0) {
 					echo "<font class='error'>".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."</font><br><br>";
-
+					echo "suoritussumma: {$suoritus["summa"]} laskusumma: {$tskrow["summa"]} laskusummavaluutassa: {$tskrow["summa_valuutassa"]}<br>";
+					echo "suoritusvalkoodi: {$suoritus["valkoodi"]} yhtiovalkoodi: {$yhtiorow['valkoodi']}<br>";
+					
 					$tila 	= 'kohdistaminen';
 					$query 	= "UNLOCK TABLES";
 					$result = pupe_query($query);

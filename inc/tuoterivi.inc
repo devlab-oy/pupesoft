@@ -90,7 +90,6 @@
 			$ulos .= "<option value='R' $sel[R]>".t("Raaka-aine")."</option>";
 			$ulos .= "<option value='K' $sel[K]>".t("Palvelu")."</option>";
 			$ulos .= "<option value='M' $sel[M]>".t("Muu/Informatiivinen")."</option>";
-			$ulos .= "<option value='N' $sel[N]>".t("Normaali / Kulutuote (ei näytetä myynninseurannassa)")."</option>";
 		}
 		$ulos .= "</select></td>";
 
@@ -121,7 +120,8 @@
 		or mysql_field_name($result, $i) == "osasto"
 		or mysql_field_name($result, $i) == "tuotemerkki"
 		or mysql_field_name($result, $i) == "malli"
-		or mysql_field_name($result, $i) == "mallitarkenne") {
+		or mysql_field_name($result, $i) == "mallitarkenne"
+		or mysql_field_name($result, $i) == "valmistuslinja") {
 
 		$sresult = t_avainsana(mysql_field_name($result, $i));
 		$sarnimi = mysql_field_name($result, $i);
@@ -130,7 +130,9 @@
 		if (mysql_num_rows($sresult) > 0) {
 			$ulos = "<td><select id='$sarnimi' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-			$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
+			if($sarnimi != "valmistuslinja"){
+				$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
+			}
 
 			while ($srow = mysql_fetch_array($sresult)) {
 				$sel = '';
@@ -188,7 +190,7 @@
 		else {
 			$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 			$ulos .= "<option value = '' $sela>".t("Saldollinen tuote")."</option>";
-			$ulos .= "<option value = 'o' $sel>".t("Saldoton tuote")." (".t("Ei varastokirjanpitoa").")</option>";
+			$ulos .= "<option value = 'o' $sel>".t("Saldoton tuote")."</option>";
 			$ulos .= "</select></td>";
 		}
 
@@ -228,7 +230,7 @@
 
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
- 		$sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
 
 		$query = "	SELECT count(*) saldo
 					FROM tuotepaikat
@@ -453,8 +455,7 @@
 					from kustannuspaikka
 					where yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$kptyyppi'
-					and kaytossa != 'E'
-					ORDER BY koodi+0, koodi, nimi";
+					and kaytossa != 'E'";
 		$vresult = pupe_query($tpque);
 
 		$sel="";
@@ -633,11 +634,11 @@
 
 	if (mysql_field_name($result, $i) == "yksin_kerailyalustalle") {
 
- 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('K', 'T'), '');
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value=''>".t("Ei")."</option>";
-		$ulos .= "<option value='K'{$sel['K']}>".t("Kyllä")."</option>";
+		$ulos .= "<option value='K'{$sel}>".t("Kyllä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -695,5 +696,5 @@
 		$ulos .= "<option value='K'{$sel}>".t("Käytössä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
-
+		
 	}

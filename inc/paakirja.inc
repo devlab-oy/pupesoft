@@ -436,7 +436,7 @@
 			$lisa1 .= " and tiliointi.vero = '$alv' ";
 		}
 
-		if ($maarajaus != '') $lisa .= " and lasku.maa = '$maarajaus' ";
+		if ($maarajaus != '') $lisa .= " and lasku.toim_maa = '$maarajaus' ";
 		
 
 		$asiakasjoini  = "";

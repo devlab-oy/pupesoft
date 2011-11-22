@@ -498,12 +498,18 @@
 					$toimvv = date("Y");
 					$toimpvm = $toimvv."-".$toimkk."-".$toimpp;
 				}
-				
+				else {
+					$toimpvm = $toimvv."-".$toimkk."-".$toimpp;
+				}
+
 				if (!checkdate($kerkk,$kerpp,$kervv)) {
 					$kerpp = date("j");
 					$kerkk = date("n");
 					$kervv = date("Y");
 					$kerpvm = $kervv."-".$kerkk."-".$kerpp;
+				}
+				else {
+				 	$kerpvm = $kervv."-".$kerkk."-".$kerpp;
 				}
 
 				if (trim($assrow["toim_nimi"]) == "") {

@@ -597,7 +597,7 @@
 					$updresult = mysql_query($query) or pupe_error($query);
 
 					$tee = "VALMISTA";
-					$virhe[$rivitunnus] .= "<font class='message'>".t("Valmistettava määrä päivitettiin")."!</font>";
+					$virhe[$rivitunnus] .= "<font class='message'>".t("Määrä päivitetty")."!</font>";
 				}
 			}
 			else {
@@ -923,6 +923,8 @@
 
 			$vanhaid = "KALA";
 
+			js_popup();
+
 			echo "	<form method='post' action='$PHP_SELF' autocomplete='off'>";
 			echo "	<input type='hidden' name='tee' value='TEEVALMISTUS'>
 					<input type='hidden' name='valmistettavat' value='$valmistettavat'>
@@ -1164,7 +1166,8 @@
 
 					if ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") {
 						// Isätuotteet, päivitetäänkö valmistettavat kappaleet koko reseptille
-						echo "<br>R:<input type = 'checkbox' name = 'rekru[$prow[tunnus]]' checked>";
+						echo "<br>R: <input class='tooltip' id='rekruohje' type='checkbox' name='rekru[$prow[tunnus]]' checked> ";
+						echo "<div id='div_rekruohje' class='popup' style='width: 200px'>R: ".t("Päivitetäänkö valmisteen kappalemuutos myös raaka-aineille").".</div>";
 					}
 
 					echo "</td>";
@@ -1200,7 +1203,7 @@
 				}
 
 				if ($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
-					echo "<td valign='top' align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' value='".$valmkpllat2[$prow["tunnus"]]."' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]]."</td>";
+					echo "<td valign='top' class='$class' align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' value='".$valmkpllat2[$prow["tunnus"]]."' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]]."</td>";
 				}
 				elseif ($prow["tunnus"] != $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
 					echo "<td valign='top' align='center'>".t("Usea valmiste")."</td>";
@@ -1294,7 +1297,7 @@
 
 			if (isset($virheitaoli) and $virheitaoli == "JOO") {
 
-				$forcenap = "<td>".t("Väkisinvalmista vaikka raaka-aineiden saldo ei riitä").". <input type='checkbox' name='vakisinhyvaksy' value='OK'></td>";
+				$forcenap = "<tr><td colspan='9' class='back'>".t("Väkisinvalmista vaikka raaka-aineiden saldo ei riitä").". <input type='checkbox' name='vakisinhyvaksy' value='OK'></td></tr>";
 
 				if (isset($kokovalmistus)) 								$kokovalmistus_force = $forcenap;
 				elseif (isset($osavalmistus) and (int) $kokopros > 0)	$osavalmistuspros_force = $forcenap;

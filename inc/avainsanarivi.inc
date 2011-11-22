@@ -68,11 +68,11 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TUOTEULK") 			$ulos .= "<option value='TUOTEULK' $avain_sel[TUOTEULK]>					".t("Tuotteiden avainsanojen laji")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VARASTOLUOKKA") 	$ulos .= "<option value='VARASTOLUOKKA' $avain_sel[VARASTOLUOKKA]>			".t("Varastoluokka")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VARASTORYHMA") 		$ulos .= "<option value='VARASTORYHMA' $avain_sel[VARASTORYHMA]>			".t("Varastoryhmä")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "VALMISTUSLINJA") 	$ulos .= "<option value='VALMISTUSLINJA' $avain_sel[VALMISTUSLINJA]>		".t("Valmistuslinja")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SARJANUMERON_LI") 	$ulos .= "<option value='SARJANUMERON_LI' $avain_sel[SARJANUMERON_LI]>		".t("Sarjanumeron lisätieto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PARAMETRI") 		$ulos .= "<option value='PARAMETRI' $avain_sel[PARAMETRI]>					".t("Tuotteen parametri")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LISATIETO") 		$ulos .= "<option value='LISATIETO' $avain_sel[LISATIETO]>					".t("Tuotteen lisätieto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TARRATYYPPI") 		$ulos .= "<option value='TARRATYYPPI' $avain_sel[TARRATYYPPI]>				".t("Tuotteen tarratyyppi")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "HAMMASTUS") 		$ulos .= "<option value='HAMMASTUS' $avain_sel[HAMMASTUS]>					".t("Tuotteen hammastus")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -118,7 +118,6 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_TYOSTATUS") 	$ulos .= "<option value='TYOM_TYOSTATUS' $avain_sel[TYOM_TYOSTATUS]>		".t("Työmääräysten työstatus")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_TYOLINJA") 	$ulos .= "<option value='TYOM_TYOLINJA' $avain_sel[TYOM_TYOLINJA]>			".t("Työmääräysten työlinja")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_TYOKENTAT") 	$ulos .= "<option value='TYOM_TYOKENTAT' $avain_sel[TYOM_TYOKENTAT]>		".t("Työmääräysten kentät")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_PRIORIT")	  	$ulos .= "<option value='TYOM_PRIORIT' $avain_sel[TYOM_PRIORIT]>			".t("Työmääräysten prioriteetti")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Viennin avainsanat")."'>";
@@ -155,7 +154,6 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "DYNAAMINEN_PUU") 	$ulos .= "<option value='DYNAAMINEN_PUU' $avain_sel[DYNAAMINEN_PUU]>		".t("Dynaamisen puun pääkategoriat")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM") 		$ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>					".t("Puuterivin kommentti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA") 	$ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>		".t("Extranet ulkoasuteema")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA") 	$ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>		".t("Ylläpitosopimuksen rivien kentät")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -386,20 +384,7 @@
 		$ulos = "<td><textarea rows=5 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
-	
-	if (($avain_sel["TYOM_PRIORIT"] == "SELECTED" or $avain_sel["TYOM_TYOJONO"] == "SELECTED" or $avain_sel["TYOM_TYOSTATUS"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_3") {
 
-		if ($trow[$i] == 'OLETUS') {
-			$sel = "SELECTED";
-		}
-
-		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $sel>".t("Ei oletus")."</option>";
-		$ulos .= "<option value='OLETUS' $sel>".t("Oletus")."</option>";
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-	
 	if ($avain_sel['TYOM_TYOLINJA'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$query = "	SELECT selite, selitetark

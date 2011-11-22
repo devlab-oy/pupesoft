@@ -7,8 +7,12 @@
 	echo "	<script type='text/javascript' language='JavaScript'>
 				$(document).ready(function() {
 
-					//$('td').css({'padding': '0px', 'margin': '0px', 'border': '0px'});
-					//$('td').css({'padding': '2px'});
+					$('td').css({'padding': '0px', 'white-space': 'nowrap'});
+
+					$('.center').css({'text-align': 'center'});
+					$('.data').css({'padding-left': '7px', 'padding-right': '7px'});
+
+					// $('.toggleable_tr td').css({'padding-left': '25px'});
 
 					$(':checkbox').click(function(event){
 						event.stopPropagation();
@@ -17,16 +21,26 @@
 					$('.toggleable').click(function(event){
 
 						if ($('#toggleable_'+this.id).is(':visible')) {
-							$('#toggleable_'+this.id).slideUp('fast');
+							// $('.toggleable_row_child').slideUp(200);
+							// $('#toggleable_'+this.id).slideUp(200);
+
+							$('.toggleable_row_child').hide();
+							$('#toggleable_'+this.id).hide();
+
+							$('tr[id!=\"toggleable_parent_'+id+'\"][class=\"toggleable_parent\"]').show();
+							$('tr[id!=\"toggleable_tr_'+id+'\"][class=\"toggleable_tr\"]').stop().show();
+
+							$(':checkbox').attr('checked', false);
 						}
 						else {
 							var id = this.id;
 							var parent_element = $('#toggleable_'+id).parent();
 
-							window.setTimeout(function(){
-								$('#toggleable_'+id).css('width', parent_element.width()+'px');
-								$('#toggleable_'+id).slideDown('fast');
-							}, 1);
+							$('tr[id!=\"toggleable_parent_'+id+'\"][class=\"toggleable_parent\"]').hide();
+							$('tr[id!=\"toggleable_tr_'+id+'\"][class=\"toggleable_tr\"]').hide();
+
+							// $('#toggleable_'+id).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).slideDown(200);
+							$('#toggleable_'+id).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show();
 						}
 					});
 
@@ -39,65 +53,88 @@
 							var id = this.id;
 							var parent_element = $('#toggleable_row_'+id).parent();
 
-							window.setTimeout(function(){
-								$('#toggleable_row_'+id).css('width', parent_element.width()+'px');
-								$('#toggleable_row_'+id).slideDown('fast');
-							}, 1);
+							// $('#toggleable_row_'+id).parent().prev().css({'padding-top': '10px'});
+
+							$('#toggleable_row_'+id).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 						}
+					});
+
+					$('.checkall').click(function(){
+
+						var id = $(this).attr('name');
+
+						if ($('.checkbox_'+id).is(':checked')) {
+							$('.checkbox_'+id).attr('checked', false);
+						}
+						else {
+							$('.checkbox_'+id).attr('checked', true);
+						}
+
 					});
 				});
 			</script>";
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
-	$query = "	SELECT lahdot.tunnus AS lahdon_tunnus,
-				lahdot.viimeinen_tilausaika,
-				lahdot.lahdon_kellonaika,
-				lahdot.kerailyn_aloitusaika,
-				lasku.hyvaksynnanmuutos AS prioriteetti,
-				toimitustapa.selite AS toimitustapa,
-				COUNT(DISTINCT lasku.tunnus) AS tilatut,
-				SUM(IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), 1, 0)) AS valmiina,
-				COUNT(DISTINCT tilausrivi.tunnus) AS suunnittelussa,
-				SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS keratyt,
-				GROUP_CONCAT(DISTINCT lasku.tunnus) AS tilaukset
+	$query = "	SELECT lahdot.tunnus AS 'lahdon_tunnus',
+				SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
+				SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
+				SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
+				avainsana.selitetark_3 AS 'prioriteetti',
+				toimitustapa.selite AS 'toimitustapa',
+				COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
+				SUM(IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), 1, 0)) AS 'valmiina',
+				COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
+				SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt',
+				COUNT(DISTINCT lasku.liitostunnus) AS 'asiakkaita',
+				GROUP_CONCAT(DISTINCT lasku.tunnus) AS 'tilaukset',
+				ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg_suun',
+				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', tilausrivi.varattu * tuote.tuotemassa, 0)), 0) AS 'kg_ker',
+				ROUND(SUM(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000)), 0) AS 'litrat_suun',
+				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
 				FROM lasku
 				JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi = '')
 				JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+				JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
 				GROUP BY 1,2,3,4,5,6";
 	$result = pupe_query($query);
 
-	echo "<table style='padding:0px; margin:0px; border:0px;'>";
+	echo "<table>";
 	echo "<tr>";
-	echo "<th></th>";
 	echo "<th>",t("Status"),"</th>";
-	echo "<th>",t("Lähdön"),"<br>",t("Tunnus"),"</th>";
+	echo "<th></th>";
+	echo "<th>",t("Lähtö"),"</th>";
 	echo "<th>",t("Prio"),"</th>";
 	echo "<th>",t("Toimitustapa"),"</th>";
-	echo "<th>",t("Viimeinen"),"<br>",t("Tilausaika"),"</th>";
+	echo "<th>",t("Viim til klo"),"</th>";
 	echo "<th>",t("Lähtöaika"),"</th>";
-	echo "<th>",t("Tilaukset")," /<br>",t("Valmiina"),"</th>";
-	echo "<th>",t("Rivikuorma"),"<br>",t("Suunnittelussa")," / ",t("Kerätyt"),"</th>";
-	echo "<th>",t("Keräyksen"),"<br>",t("Aloitusaika"),"</th>";
+	echo "<th>",t("Ker. alku klo"),"</th>";
+	echo "<th>",t("Til / valm"),"</th>";
+	echo "<th>",t("Rivit suun / ker"),"</th>";
+	echo "<th>",t("Kg suun / ker"),"</th>";
+	echo "<th>",t("Litrat suun / ker"),"</th>";
 	echo "</tr>";
 
 	while ($row = mysql_fetch_assoc($result)) {
 
-		echo "<tr>";
+		echo "<tr class='toggleable_parent' id='toggleable_parent_{$row['lahdon_tunnus']}'>";
 
-		echo "<td><input type='checkbox'></td>";
 		echo "<td></td>";
-		echo "<td class='toggleable' id='{$row['lahdon_tunnus']}'>{$row['lahdon_tunnus']}</td>";
-		echo "<td>{$row['prioriteetti']}</td>";
+		echo "<td><input type='checkbox' class='checkall' name='{$row['lahdon_tunnus']}'></td>";
+		echo "<td class='toggleable center' id='{$row['lahdon_tunnus']}'><a class='td'>{$row['lahdon_tunnus']}</a></td>";
+		echo "<td class='center'>{$row['prioriteetti']}</td>";
 		echo "<td>{$row['toimitustapa']}</td>";
-		echo "<td>{$row['viimeinen_tilausaika']}</td>";
-		echo "<td>{$row['lahdon_kellonaika']}</td>";
-		echo "<td>{$row['tilatut']} / {$row['valmiina']}</td>";
-		echo "<td>{$row['suunnittelussa']} / {$row['keratyt']}</td>";
-		echo "<td>{$row['kerailyn_aloitusaika']}</td>";
+		echo "<td class='center'>{$row['viimeinen_tilausaika']}</td>";
+		echo "<td class='center'>{$row['lahdon_kellonaika']}</td>";
+		echo "<td class='center'>{$row['kerailyn_aloitusaika']}</td>";
+		echo "<td class='center'>{$row['tilatut']} / {$row['valmiina']}</td>";
+		echo "<td class='center'>{$row['suunnittelussa']} / {$row['keratyt']}</td>";
+		echo "<td class='center'>{$row['kg_suun']} / {$row['kg_ker']}</td>";
+		echo "<td class='center'>{$row['litrat_suun']} / {$row['litrat_ker']}</td>";
 
 		echo "</tr>";
 
@@ -105,25 +142,28 @@
 					lasku.nimi AS asiakas_nimi,
 					lasku.toim_nimi AS asiakas_toim_nimi,
 					lasku.toim_postitp AS asiakas_toim_postitp,
+					avainsana.selitetark_3 AS 'prioriteetti',
 					GROUP_CONCAT(pakkaus.pakkauskuvaus) AS pakkauskuvaukset,
 					GROUP_CONCAT(kerayserat.sscc) AS sscc
 					FROM lasku
-					JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus)
-					JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+					LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus)
+					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+					JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus IN ({$row['tilaukset']})
-					GROUP BY 1,2,3,4";
+					GROUP BY 1,2,3,4,5";
 		$lahto_res = pupe_query($query);
 
-		echo "<tr>";
-		echo "<td colspan='10' class='back'>";
+		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}'>";
+		echo "<td colspan='12' class='back'>";
 		echo "<div id='toggleable_{$row['lahdon_tunnus']}' style='display:none;'>";
 
 		echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
 
 		echo "<tr>";
 		echo "<th></th>";
+		echo "<th>",t("Prio"),"</th>";
 		echo "<th>",t("Tilausnumero"),"</th>";
 		echo "<th>",t("Asiakas"),"</th>";
 		echo "<th>",t("Paikkakunta"),"</th>";
@@ -136,12 +176,12 @@
 
 		while ($lahto_row = mysql_fetch_assoc($lahto_res)) {
 
+			echo "<tr class='toggleable_row_tr' id='toggleable_row_tr_{$lahto_row['tilauksen_tunnus']}'>";
 
-			echo "<tr>";
-
-			echo "<td><input type='checkbox'></td>";
-			echo "<td class='toggleable_row' id='{$lahto_row['tilauksen_tunnus']}'>{$lahto_row['tilauksen_tunnus']}</td>";
-			echo "<td>{$lahto_row['asiakas_nimi']}";
+			echo "<td><input type='checkbox' class='checkbox_{$row['lahdon_tunnus']}'></td>";
+			echo "<td class='center'>{$lahto_row['prioriteetti']}</td>";
+			echo "<td class='toggleable_row' id='{$lahto_row['tilauksen_tunnus']}'><a class='td'>{$lahto_row['tilauksen_tunnus']}</a></td>";
+			echo "<td class='data'>{$lahto_row['asiakas_nimi']}";
 			if ($lahto_row['asiakas_nimi'] != $lahto_row['asiakas_toim_nimi']) echo "<br>{$lahto_row['asiakas_toim_nimi']}";
 			echo "</td>";
 			echo "<td>{$lahto_row['asiakas_toim_postitp']}</td>";
@@ -159,10 +199,10 @@
 			$til_res = pupe_query($query);
 			$til_row = mysql_fetch_assoc($til_res);
 
-			echo "<td>{$til_row['keraysvyohyke']}</td>";
+			echo "<td class='data'>{$til_row['keraysvyohyke']}</td>";
 			echo "<td>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
-			echo "<td>",str_replace(",", "<br>", $lahto_row['sscc']),"</td>";
-			echo "<td nowrap>",str_replace(",", "<br>", $lahto_row['pakkauskuvaukset']),"</td>";
+			echo "<td class='data'>",str_replace(",", "<br>", $lahto_row['sscc']),"</td>";
+			echo "<td class='data'>",str_replace(",", "<br>", $lahto_row['pakkauskuvaukset']),"</td>";
 			echo "<td>{$til_row['kg']}</td>";
 
 			echo "</tr>";
@@ -176,7 +216,7 @@
 						kerayserat.laatija AS keraaja,
 						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS keratyt
 						FROM tilausrivi
-						JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
+						LEFT JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
@@ -184,8 +224,8 @@
 			$rivi_res = pupe_query($query);
 			
 			echo "<tr>";
-			echo "<td colspan='9' class='back'>";
-			echo "<div id='toggleable_row_{$lahto_row['tilauksen_tunnus']}' style='display:none;'>";
+			echo "<td colspan='10' class='back'>";
+			echo "<div class='toggleable_row_child' id='toggleable_row_{$lahto_row['tilauksen_tunnus']}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";
 	
@@ -193,8 +233,8 @@
 			echo "<th>",t("SSCC"),"</th>";
 			echo "<th>",t("Tuotenumero"),"</th>";
 			echo "<th>",t("Nimitys"),"</th>";
-			echo "<th>",t("Suunniteltu"),"<br>",t("Määrä"),"</th>";
-			echo "<th>",t("Kerätty"),"<br>",t("Määrä"),"</th>";
+			echo "<th>",t("Suunniteltu määrä"),"</th>";
+			echo "<th>",t("Kerätty määrä"),"</th>";
 			echo "<th>",t("Yksikkö"),"</th>";
 			echo "<th>",t("Hyllypaikka"),"</th>";
 			echo "<th>",t("Kerääjä"),"</th>";
@@ -202,14 +242,14 @@
 			
 			while ($rivi_row = mysql_fetch_assoc($rivi_res)) {
 				echo "<tr>";
-				echo "<td>{$rivi_row['sscc']}</td>";
-				echo "<td>{$rivi_row['tuoteno']}</td>";
-				echo "<td>{$rivi_row['nimitys']}</td>";
-				echo "<td>{$rivi_row['kpl']}</td>";
-				echo "<td>{$rivi_row['keratyt']}</td>";
-				echo "<td>",t_avainsana("Y", "", " and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite"),"</td>";
-				echo "<td>{$rivi_row['hyllypaikka']}</td>";
-				echo "<td>{$rivi_row['keraaja']}</td>";
+				echo "<td class='tumma'>{$rivi_row['sscc']}</td>";
+				echo "<td class='tumma'>{$rivi_row['tuoteno']}</td>";
+				echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
+				echo "<td class='tumma'>{$rivi_row['kpl']}</td>";
+				echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
+				echo "<td class='tumma'>",t_avainsana("Y", "", " and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite"),"</td>";
+				echo "<td class='tumma'>{$rivi_row['hyllypaikka']}</td>";
+				echo "<td class='tumma'>{$rivi_row['keraaja']}</td>";
 				echo "</tr>";
 			}
 			

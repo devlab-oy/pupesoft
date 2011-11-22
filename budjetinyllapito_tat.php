@@ -1,6 +1,4 @@
 <?php
-	// $lisa = Monivalintalaatikosta tuleva muuttuja,
-	// Muut sielt‰ olevat muuttujat ovat MUL_ alkuisia, esim mul_try, mul_osasto
 	if (isset($_REQUEST["tee"])) {
 		if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
@@ -14,14 +12,12 @@
 	}
 	else {
 		enable_jquery();
-
+		// T‰ss‰ katsotaan mit‰ syˆtet‰‰n ja kopioidaan kaikkiin samannimisiin ja ID:ll‰ varustettuihin hidden syˆttˆkenttiin samat arvot.
+		// K‰ytet‰‰n kokonaisbudjetissa, samasumma per kk / summa jaetaan per kk
 		echo " <script type='text/javascript'>
 		   			$(document).ready(function() {
 		    			$('input[name^=luvut]').keyup(function() {
 		     				var id = $(this).attr('class');
-						//	console.log('id '+id);
-						//	console.log('val '+$(this).val());
-						//	console.log('name '+$('input[id^='+id+'_]').attr('name'));
 		     				$('input[id^='+id+'_]').val($(this).val());
 		    			});
 		   			});
@@ -154,13 +150,7 @@
 
 			// Huomaa n‰m‰ jos muutat excel-failin sarakkeita!!!!
 			if ($toim == "TUOTE") {
-				if ($headers[$lukualku] == "TYYPPI") {
-					$apuva = "on";
-					$lukualku = 2;
-				}
-				else {
-					$lukualku = 2;
-				}
+				$lukualku = 2;
 			}
 			elseif ($toim == "TOIMITTAJA") {
 				$lukualku = 3;
@@ -194,14 +184,6 @@
 
 					if ($tuoteryhmittain != "") {
 						$budj_taulunrivit[$liitun][$kasiind][$try] = trim($data->sheets[0]['cells'][$excei][$excej]);
-					}
-					elseif ($apuva != "") {
-						if (trim($data->sheets[0]['cells'][$excei][$excej]) == "ind") {
-							// emme tee mit‰‰n
-						}
-						else {
-							$budj_taulunrivit[$liitun][$kasiind][] = trim($data->sheets[0]['cells'][$excei][$excej]);
-						}
 					}
 					else {
 						$budj_taulunrivit[$liitun][$kasiind][] = trim($data->sheets[0]['cells'][$excei][$excej]);
@@ -260,7 +242,7 @@
 
 			// Tiedet‰‰n ett‰ tulee poikkeus ja sen arvo on "totta"
 			// Normaalisti $luvut[] ensimm‰isess‰ solussa tulee tuotteen tuoteno, nyt sielt‰ tulee TRY numero.
-			// Haetaan kaikki sen tuoteryhm‰n tuotteet ja jollain vitun taikatempulla vedet‰‰n arrayksi ja t‰st‰ eteenp‰in kauniina paskana.
+			// Haetaan kaikki sen tuoteryhm‰n tuotteet ja tehd‰‰n arrayksi.
 			// otetaan alkuper‰inen $luvut talteen.
 			$backup_luvut = $luvut;
 
@@ -286,6 +268,7 @@
 						}
 					}
 				}
+				// "kummatkin" tarkoittaa ett‰ tulee sek‰ TRY ja OSASTO
 				elseif ($poikkeus_haku == "kummatkin") {
 						foreach ($backup_luvut as $litunnus => $rivit) {
 
@@ -363,6 +346,12 @@
 									elseif ($budj_kohtelu == "maara" and $budj_taso == "samatasokk" and $summabudjetti == "on") {
 										//
 									}
+									elseif ($budj_kohtelu == "maara" and $budj_taso == "summataso" and $summabudjetti == "on") {
+										$jaettava = $solu;
+										$flipmuuttuja = $jaettava/($jakaja*$tuotteiden_lukumaara);
+										$tall_maara = round($flipmuuttuja,0);
+										$solu = 0;
+									}
 									elseif ($budj_kohtelu == "maara" and $budj_taso == "") {
 										// flipataan solu m‰‰r‰ksi ja solu tyhj‰ksi.
 										$tall_maara = $solu;
@@ -435,7 +424,7 @@
 								// Jokainen kombinaatio pit‰‰ laittaa erikseen, tai tulee virhe-ilmoitus.
 								// T‰m‰ on t‰rke‰ tehd‰ n‰in, niin voidaan yll‰pit‰‰ tulevaisuudessa erilaisia kombinaatioita paremmin.
 								// Jos teet t‰h‰n muutoksia niin tee ne myˆs update-puolelle.
-
+								
 								if ($budj_kohtelu == "euro" and $budj_taso == "summataso" and $summabudjetti == "on") {
 									$jaettava = $solu;
 									$flipmuuttuja = $jaettava/($jakaja*$tuotteiden_lukumaara);
@@ -446,6 +435,12 @@
 								}
 								elseif ($budj_kohtelu == "maara" and $budj_taso == "samatasokk" and $summabudjetti == "on") {
 									//
+								}
+								elseif ($budj_kohtelu == "maara" and $budj_taso == "summataso" and $summabudjetti == "on") {
+									$jaettava = $solu;
+									$flipmuuttuja = $jaettava/($jakaja*$tuotteiden_lukumaara);
+									$tall_maara = round($flipmuuttuja,0);
+									$solu = 0;
 								}
 								elseif ($budj_kohtelu == "maara" and $budj_taso == "") {
 									// flipataan solu m‰‰r‰ksi ja solu tyhj‰ksi.
@@ -795,16 +790,15 @@
 		}
 
 		if (trim($tkausi) != '') {
-			$query = "	SELECT *
-						FROM tilikaudet
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tunnus  = '$tkausi'";
-
 			if (checkdate($alkukk, $alkupp, $alkuvv) and checkdate($loppukk, $loppupp, $loppuvv)) {
 				$tilikaudetrow["tilikausi_alku"]	= $alkuvv.'-'.sprintf('%02.2s',$alkukk).'-'.sprintf('%02.2s',$alkupp);
 				$tilikaudetrow["tilikausi_loppu"]	= $loppuvv.'-'.sprintf('%02.2s',$loppukk).'-'.sprintf('%02.2s',$loppupp);
 			}
 			else {
+				$query = "	SELECT *
+							FROM tilikaudet
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$tkausi'";
 				$vresult = pupe_query($query);
 				if (mysql_num_rows($vresult) == 1) $tilikaudetrow = mysql_fetch_array($vresult);
 			}
@@ -833,11 +827,6 @@
 				else {
 					echo "<p class='error'>".t("VIRHE: Ei voida valita kokonaisbudjettia sek‰ jakoa kuukausittain!! Valitse Budjettiluvusta toinen vaihtoehto")."</p>";
 				}
-				exit;
-			}
-
-			if ($budj_kohtelu == "maara" and $budj_taso == "summataso" and $summabudjetti == "on") {
-				echo "<p class='error'>".t("VIRHE: Ei voida valita m‰‰r‰‰ kokonaisbudjetille joka jaetaan per kk. Valitse Budjettiluvusta Sama luku joka kuukaudelle")."</p>";
 				exit;
 			}
 

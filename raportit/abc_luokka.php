@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	echo "<font class='head'>".t("ABC-Analyysiä: ABC-luokka")." $ryhmanimet[$luokka]<hr></font>";
 
 	if ($toim == "kulutus") {

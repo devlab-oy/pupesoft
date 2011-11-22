@@ -82,14 +82,15 @@
 	if (mysql_field_name($result, $i) == "merahti") {
 		$sel1='';
 		$sel2='';
+
 		if ($trow[$i]=='K')
 			$sel1 = 'SELECTED';
 		else
 			$sel2 = 'SELECTED';
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='K' $sel1>".t("L‰hett‰j‰ maksaa rahdin")."</option>";
-		$ulos .= "<option value=''  $sel2>".t("Vastaanottaja maksaa rahdin")."</option>";
+		$ulos .= "<option value='K' $sel1>".t("K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta")."</option>";
+		$ulos .= "<option value=''  $sel2>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

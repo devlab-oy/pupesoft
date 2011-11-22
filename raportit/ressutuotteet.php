@@ -1,6 +1,8 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
+
 	require('../inc/parametrit.inc');
 
 	echo "<font class='head'>Varastotilannetarkistus (loppu oletuspaikalla, saldoa jossain muualla):</font><hr>";
@@ -23,7 +25,8 @@
 		else {
 			$nollatlisa = " tuotepaikat.saldo ";
 		}
-#TODO ei sortaa varastopaikkoja oikein
+
+		#TODO ei sortaa varastopaikkoja oikein
 		$query = "	SELECT tuotepaikat.tuoteno,
 					sum(if(tuotepaikat.oletus='X',tuotepaikat.saldo,0)) oletuspaikalla,
 					sum(if(tuotepaikat.oletus='',$nollatlisa,0)) muillapaikoilla,
@@ -44,7 +47,7 @@
 		echo "	<table><tr><th>Tuoteno</th><th>Nimitys</th><th>Toim_tuoteno</th><th>Varastopaikka</th><th>Oletus</th><th>Saldo</th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
-#TODO ei sorttaa varastopaikkoja oikein
+			#TODO ei sorttaa varastopaikkoja oikein
 			$query = "	SELECT tuotepaikat.tuoteno,
 						concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka,
 						tuotepaikat.saldo, tuotepaikat.oletus,

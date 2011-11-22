@@ -882,7 +882,7 @@
 						$tulos_ulos .= "<br>\n".t("Rahtikulut").":<br>\n<table>";
 					}
 
-					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per p‰iv‰ miss‰ merahti (eli kohdistettu) = K
+					// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per p‰iv‰ miss‰ merahti (eli kohdistettu) = K (K‰ytet‰‰n l‰hett‰j‰n rahtisopimusnumeroa)
 					// j‰lkivaatimukset omalle riville
 					$query   = "SELECT group_concat(distinct lasku.tunnus) tunnukset
 								FROM lasku, rahtikirjat, maksuehto
@@ -1048,15 +1048,16 @@
 						}
 					}
 
-					// Tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kun alhaalla) rivi ~1150
-					$query = "  SELECT group_concat(lasku.tunnus) tunnukset
+					// Tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kuin alhaalla) rivi ~1243
+					$query = "  SELECT
+								if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+								group_concat(lasku.tunnus) tunnukset
 								FROM lasku
 								LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 								where lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tunnus in ($tunnukset)
-								and lasku.ketjutus = ''
 								$laskutuslisa_tyyppi_ehto
-								GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+								GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
 								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
@@ -1066,19 +1067,6 @@
 
 					while ($row = mysql_fetch_assoc($result)) {
 						$yhdista[] = $row["tunnukset"];
-					}
-
-					// viel‰ laskut joita ei saa ketjuttaa
-					$query = "  SELECT tunnus
-								FROM lasku
-								where yhtio = '$kukarow[yhtio]'
-								and tunnus in ($tunnukset)
-								and ketjutus != ''
-								$laskutuslisa_tyyppi_ehto";
-					$result = pupe_query($query);
-
-					while ($row = mysql_fetch_assoc($result)) {
-						$yhdista[] = $row["tunnus"];
 					}
 
 					// haetaan laskutuslisa_tuotenumero-tuotteen tiedot
@@ -1238,20 +1226,22 @@
 				$ketjut = array();
 
 				//haetaan kaikki laskutusvalmiit tilaukset jotka saa ketjuttaa, viite pit‰‰ olla tyhj‰‰ muuten ei laskuteta
-				$query  = " SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+				$query  = " SELECT
+							if(lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+							lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
-							count(*) yht, group_concat(lasku.tunnus) tunnukset
+							count(lasku.tunnus) yht,
+							group_concat(lasku.tunnus) tunnukset
 							FROM lasku
 							LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
 							WHERE lasku.yhtio   = '$kukarow[yhtio]'
 							and lasku.alatila   = 'V'
 							and lasku.tila      = 'L'
-							and lasku.ketjutus  = ''
 							and lasku.viite     = ''
 							$lasklisa
-							GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+							GROUP BY ketjutuskentta, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi,
@@ -1276,30 +1266,6 @@
 					}
 
 					$ketjut[]  = $row["tunnukset"];
-				}
-
-				//haetaan kaikki laskutusvalmiit tilaukset joita *EI SAA* ketjuttaa, viite pit‰‰ olla tyhj‰‰ muuten ei laskuteta..
-				$query  = " SELECT *
-							FROM lasku use index (tila_index)
-							WHERE yhtio     = '$kukarow[yhtio]'
-							and alatila     = 'V'
-							and tila        = 'L'
-							and ketjutus   != ''
-							and viite       = ''
-							$lasklisa";
-				$result = pupe_query($query);
-
-				while ($row = mysql_fetch_assoc($result)) {
-
-					$ketjukpl  = 1;
-
-					// lis‰t‰‰n mukaan ketjuun
-					$ketjut[]  = $row["tunnus"];
-
-					if ($silent == "") {
-						$tulos_ulos .= "<tr><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[nimitark] </td><td>$row[postino]</td>\n
-										<td>$row[postitp]</td><td>$row[maksuehto]</td><td>$row[erpcm]</td><td>".t("Ketjutettu")." $ketjukpl ".t("kpl")."</td></tr>\n";
-					}
 				}
 
 				if ($silent == "") {
@@ -2154,9 +2120,9 @@
 					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
 					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
-					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
 					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
@@ -2173,8 +2139,8 @@
 					// siirret‰‰n laskutiedosto operaattorille
 					#$url           = "https://test-api.apix.fi/invoices";
 					$url            = "https://api.apix.fi/invoices";
-					$transferkey    = $yhtiorow['verkkosala_lah'];
-					$transferid     = $yhtiorow['verkkotunnus_lah'];
+					$transferkey    = $yhtiorow['apix_avain'];
+					$transferid     = $yhtiorow['apix_tunnus'];
 					$software       = "Pupesoft";
 					$version        = "1.0";
 					$timestamp      = gmdate("YmdHis");
@@ -2299,9 +2265,9 @@
 					$verkkolasmail .= "mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\n\n";
 					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
-					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
 					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
@@ -2358,9 +2324,9 @@
 					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
 					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
-					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
 					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
@@ -2407,9 +2373,9 @@
 					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
 					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
-					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
 					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
@@ -2475,7 +2441,7 @@
 								$kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
 
 								if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-									$kutsu .= " ".trim($laskurow["nimi"]);
+									$kutsu .= ", ".trim($laskurow["nimi"]);
 								}
 
 								$liite              = $pdffilenimi;

@@ -40,7 +40,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
 	$ulos .= "SNADCN_PO:$rakir_row[toim_postino]\n";								// vastaanottajan postino
 
 	if ($rakir_row['merahti'] == 'K') {
-		// jos rahtirivit lis‰t‰‰n tilaukselle (eli arwidson maksaa), k‰ytet‰‰n arwidsonin sopimusnumeroita
+		// K‰ytet‰‰n l‰hett‰j‰n rahtisopimusnumeroa
 		$ulos .= "SNADFP_PC:$toitarow[sopimusnro]@100\n";							// rahdinmaksajan sopimusnumero
 		$ulos .= "SNADFP_NA:$yhtiorow[nimi]\n";										// rahdinmaksajan nimi
 		$ulos .= "SNADFP_NX:\n";													// rahdinmaksajan nimitarkenne
@@ -50,7 +50,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
 		$ulos .= "SNADFP_CN:$yhtiorow[maa]\n";										// rahdinmaksajan maa
 	}
 	else {
-		// jos vastaanottaja masksaa rahdin, k‰ytet‰‰n asiakkaan sopimusnumeroita
+		// K‰ytet‰‰n vastaanottajan rahtisopimusnumeroa
 		$ulos .= "SNADFP_PC:$postirow[rahtisopimus]@100\n";							// rahdinmaksajan sopimusnumero
 		$ulos .= "SNADFP_NA:$postirow[nimi]\n";										// rahdinmaksajan nimi
 		$ulos .= "SNADFP_NX:$postirow[nimitark]\n";									// rahdinmaksajan nimitarkenne
@@ -70,7 +70,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
 	if (in_array("4", $x)) $ulos .= "SGIDHANPI:2Z3104\n";  							// erikoisk‰sitelt‰v‰
 	if (in_array("6", $x)) $ulos .= "SGIDHANPI:2Z3106\n";  							// lauantaijaleku
 	if (in_array("7", $x)) $ulos .= "SGIDHANPI:2Z3107\n";							// kuljetusyksikkˆkuljetus
-	
+
 	$ulos .= "SGIDPA_PC:$viivaedi\n";												// viivakoodi
 
 	 // jos kyseess‰ on postiennakko...
@@ -81,7 +81,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
 		$ulos .= "SGIDADERF:$postiennakkotilino\n";									// postiennakkotilinumero
 		$ulos .= "SGIDPQ_RF:$postiennakkoviite\n";									// postiennakkoviitenumero
 	}
-	
+
 	$ulos .= "SCNI__END:1\n";
 	$ulos .= "SMSG__END:$postirow[tunnus]\n";										// rahtikirjan numero
 	$ulos .= "ICHG__END:$postirow[tunnus]\n";										// tilauksen numero

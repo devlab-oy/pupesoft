@@ -255,8 +255,8 @@ while ($tietue = fgets($fd)) {
 	$orig_tieto = str_replace($from, $to, $tieto);
 	$tieto  = str_replace($from, $to, pupesoft_cleanstring($tieto));
 
-	// Jos kyseess‰ on UNA (ensimm‰inen Orders 91.1 segmentti), niin etsit‰‰n t‰ss‰ vaiheessa NAD SE
-	if ($tunnus == "UNA") {
+	// Jos kyseess‰ on UNH (ensimm‰inen Orders 91.1 segmentti), niin etsit‰‰n t‰ss‰ vaiheessa NAD SE
+	if ($tunnus == "UNH") {
 		$tunnus = "NADSE"; // Myyj‰
 
 		$nad_segmentit = explode("+", $nadse_segmentti);
@@ -275,6 +275,12 @@ while ($tietue = fgets($fd)) {
 				break;
 			case 'PL':
 				$tunnus = "NADPL"; // Edelleenlaskutettava
+				$nad_segmentit = explode("+", $tieto);
+				$nad_kentat = explode(":", $nad_segmentit[1]);
+				$tieto = $nad_kentat[0];
+				break;
+			case 'CN':
+				$tunnus = "NADCN"; // Tavaran vastaanottaja
 				$nad_segmentit = explode("+", $tieto);
 				$nad_kentat = explode(":", $nad_segmentit[1]);
 				$tieto = $nad_kentat[0];
@@ -482,6 +488,7 @@ while ($tietue = fgets($fd)) {
 		case 'ONADDP_PC' :
 		case 'NADBY' :
 		case 'NADPL' :
+		case 'NADCN' :
 			// ONADBY_PC - Ostajan osapuolen tunniste
 			// ONADDP_PC - Toimitusosoitteen osapuolen tunniste
 			// ONADCN_PC - Ostajan logistiikkakeskuksen tunniste (CN -tarkenne ei ole Itellan speksiss‰, joten t‰m‰ on itse p‰‰telty‰!)
@@ -848,6 +855,7 @@ while ($tietue = fgets($fd)) {
 				$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
 				$meapu = pupe_query($apuqu);
 				$apuro = mysql_fetch_array($meapu);
+
 				$maksaja = $apuro['merahti'];
 
 				// Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
@@ -1030,6 +1038,11 @@ while ($tietue = fgets($fd)) {
 				// Tallennetaan ohjelmamoduli
 				$ohjelmamoduli = strtoupper($edi_tyyppi);
 
+				// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
+				if ($maksaja == "" and $editilaus_rahtivapaa != "") {
+					$maksaja = "K";
+				}
+
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
 							aktiivinen_kuljetus					= '$suunnistus',
@@ -1159,6 +1172,33 @@ while ($tietue = fgets($fd)) {
 				else {
 					$kieltolisa = "";
 				}
+
+				// Tallennetaan alkuper‰inen aineisto tilauksen liitetiedostoksi
+				$liitefile = file_get_contents($mailfile);
+				$filesize  = strlen($liitefile);
+				$filename  = basename($mailfile);
+				$liitefile = mysql_real_escape_string($liitefile);
+				$fileslite = t("Tilausnumero")." $id";
+
+				$query = "	INSERT INTO liitetiedostot SET
+							yhtio    			= '$kukarow[yhtio]',
+							liitos   			= 'lasku',
+							liitostunnus 		= '$id',
+							data     			= '$liitefile',
+							selite   			= '$fileslite',
+							kieli				= '$yhtiorow[kieli]',
+							filename 			= '$filename',
+							filesize 			= '$filesize',
+							filetype 			= 'text/plain',
+							image_width			= '',
+							image_height		= '',
+							image_bits			= '',
+							image_channels		= '',
+							kayttotarkoitus		= 'EDI',
+							jarjestys			= '1',
+							laatija				= '$edi_laatija',
+							luontiaika			= now()";
+				$Xresult = pupe_query($query);
 
 				// HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meid‰n kannassa on eri kuin tilaukselta tullut nimi
 				if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr") {
@@ -1389,16 +1429,30 @@ while ($tietue = fgets($fd)) {
 		case 'OLIN__END' :
 		case '*RE OSTOTILRIV' :
 		case 'RFF':
+		case 'PCD':
+		case 'BGM':
 
 			if ($edi_tyyppi == "edifact911") {
 				$kentat = explode(":", $tieto);
+				$kentat_bgm = explode("+", $tieto);
+				// BGM kent‰ss‰ tulee 'BGM+QQQ+ABCDEFGHIJKLM'
+				// QQQ = arvot, 105=tilaus, 640=toimituskehoitus, 221=plokkitilaus/ennakkotilaus
+				// ABCDEFGHIJKLM = tossa tulee myym‰l‰n tilausnumero, joka pit‰isi olla sama kuin RFF+VN kent‰n arvo.
 
-				// Orders 91.1 tulee kaksi RFF segmentti‰ (VN ja WS). VN otsikon viite, joten ei liity tiausriveihin. WS on tilausrivin loppumisen merkki.
-				if ($kentat[0] == "VN") {
+				if ($asiakkaan_tilausnumero == "" and $kentat_bgm[0] == '105' and $kentat_bgm[1] != "") {
+					$asiakkaan_tilausnumero = $kentat_bgm[1];
+					$viite = $kentat_bgm[1]. ' ';
+					break;
+				}
+
+				// Orders 91.1 tulee kaksi RFF segmentti‰ (VN ja WS). VN otsikon viite, joten ei liity tilausriveihin. WS on tilausrivin loppumisen merkki.
+				if ($kentat[0] == "VN" and $asiakkaan_tilausnumero == "") {
 					$asiakkaan_tilausnumero = $kentat[1];
 					$viite = $kentat[1]. ' ';
 					break;
 				}
+
+
 			}
 
 			if ($editilaus_otsikko_ok == "KYLLA") {

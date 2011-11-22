@@ -1,24 +1,26 @@
 <?php
-	require ("../inc/parametrit.inc");
-	
-	echo "<font class='head'>".t("Lomaseuranta")."</font><hr>";
-	
 
-		
-		$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";			
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	$useslave = 1;
+
+	require ("../inc/parametrit.inc");
+
+	echo "<font class='head'>".t("Lomaseuranta")."</font><hr>";
+
+	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 	$result = mysql_query($query) or pupe_error($query);
 	$konsernit = "";
-	
-	while ($row = mysql_fetch_array($result)) {	
+
+	while ($row = mysql_fetch_array($result)) {
 		$konsernit .= " '".$row["yhtio"]."' ,";
-	}		
+	}
 	$lisa2 = " yhtio in (".substr($konsernit, 0, -1).") ";
-	
+
 	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Valitse k‰ytt‰j‰").":</th>";
-	
-	
+
+
 	echo "<form action='$PHP_SELF' method='POST'>";
 	echo "<td><select name='kuka' onchange='submit()'><option value=''>".t("Valitse k‰ytt‰j‰")."</option>";
 
@@ -32,10 +34,10 @@
 	}
 
 	echo "</select></td></tr>";
-	echo "</form></table><br><br>"; 
+	echo "</form></table><br><br>";
 
 	if ($kuka != '') {
-		
+
 		$query  = "SELECT max(lomaoikeus) lomaoikeus FROM kuka WHERE $lisa2 and kuka='$kuka'";
 		$vares = mysql_query($query) or pupe_error($query);
 		$varow = mysql_fetch_array($vares);
@@ -45,24 +47,24 @@
 		echo "<th>".t("Lomaoikeus").":</th>";
 		echo "<td>$varow[lomaoikeus]</td></tr>";
 		echo "</table><br><br>";
-		
+
 		//* listataan muistutukset *///
-		$query = "	SELECT kalenteri.tunnus, left(pvmalku,10) pvmalku, right(pvmalku,8) aikaalku, 
+		$query = "	SELECT kalenteri.tunnus, left(pvmalku,10) pvmalku, right(pvmalku,8) aikaalku,
 					left(pvmloppu,10) pvmloppu, right(pvmloppu,8) aikaloppu, kuka.nimi, kalenteri.tapa, kentta01, kuka.osasto, kuittaus, kalenteri.yhtio,
 					(datediff(pvmalku,pvmloppu)*-1)+1 ero
 					FROM kalenteri, kuka
 					where kalenteri.$lisa2
 					and kuka.yhtio=kalenteri.yhtio
 					and kalenteri.tyyppi = 'kalenteri'
-					and kalenteri.tapa in ('Kes‰loma','Talviloma') 
+					and kalenteri.tapa in ('Kes‰loma','Talviloma')
 					and kalenteri.kuka=kuka.kuka
 					and kuka.kuka='$kuka'
 					ORDER BY kalenteri.kuka, kalenteri.tapa, kalenteri.pvmalku";
 		$result = mysql_query($query) or pupe_error($query);
-					
+
 		if (mysql_num_rows($result) > 0) {
 			echo "<table>";
-			
+
 			echo "<tr>
 					<th>".("Tyyppi")."</th><th>".("Nimi")."</th>
 					<th>".("Osasto")."</th><th>".("Pvmalku")."</th>
@@ -71,15 +73,15 @@
 			echo "<th>".t("Hyv‰ksyj‰")."</th>";
 			echo "<th>".t("Pituus")."</th>";
 			echo "</tr>";
-			
-			while ($row = mysql_fetch_array($result)) {			
+
+			while ($row = mysql_fetch_array($result)) {
 				echo "<tr>
 						<td>$row[tapa]</td><td>$row[nimi]</td>
 						<td>$row[osasto]</td><td>$row[pvmalku]</td>
 						<td>$row[aikaalku]</td><td>$row[pvmloppu]</td>
 						<td>$row[aikaloppu]</td><td>$row[kentta01]</td>";
 				echo "<td>$row[kuittaus]</td>";
-				echo "<td>$row[ero]</td>";				
+				echo "<td>$row[ero]</td>";
 				echo "</tr>";
 			}
 			echo "</table>";

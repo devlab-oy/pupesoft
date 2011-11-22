@@ -1,6 +1,6 @@
 <?php
 
-///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
@@ -38,7 +38,7 @@ elseif($tee == "vie") {
 		$query = "	SELECT *
 					FROM tilikaudet
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		if (mysql_num_rows($result) != 1) {
 			echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei löytynyt")."</font>";
 			exit;
@@ -88,7 +88,7 @@ elseif($tee == "vie") {
 					LEFT JOIN tili ON tiliointi.yhtio = tili.yhtio and tili.tilino = tiliointi.tilino
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('Y')
 					ORDER BY lasku.mapvm, lasku.tunnus, tiliointi.tilino";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		if(mysql_num_rows($result)>0) {
 
 			$dirrikka = "/tmp/$kukarow[yhtio]-Kirjanpitoaineisto_".md5(uniqid());
@@ -142,7 +142,7 @@ elseif($tee == "vie") {
 					$query = "	SELECT *
 								FROM liitetiedostot
 								WHERE liitos = 'lasku' and liitostunnus = '$row[tunnus]'";
-					$lres = mysql_query($query) or pupe_error($query);
+					$lres = pupe_query($query);
 
 					if(mysql_num_rows($lres)>0) {
 						echo "Tallennan liitteet laskulta<br>";
@@ -247,7 +247,7 @@ else {
 				FROM tilikaudet
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY tilikausi_alku";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
 
@@ -275,7 +275,7 @@ else {
 				and kaytossa != 'E'
 				and tyyppi = 'K'
 				ORDER BY koodi+0, koodi, nimi";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
 
@@ -310,7 +310,7 @@ else {
 				and kaytossa != 'E'
 				and tyyppi = 'O'
 				ORDER BY koodi+0, koodi, nimi";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
 
@@ -332,7 +332,7 @@ else {
 				and kaytossa != 'E'
 				and tyyppi = 'P'
 				ORDER BY koodi+0, koodi, nimi";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = pupe_query($query);
 
 	echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
 

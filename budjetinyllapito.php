@@ -35,6 +35,7 @@ else {
 									FROM budjetti
 									WHERE yhtio  = '$kukarow[yhtio]'
 									AND kausi 	 = '$u_kausi'
+									AND tyyppi   = '$tasotyyppi'
 									AND taso 	 = '$u_taso'
 									AND tili 	 = '$u_tili'
 									AND kustp 	 = '$vkustp'
@@ -52,6 +53,7 @@ else {
 									$query = "	DELETE FROM budjetti
 												WHERE yhtio  = '$kukarow[yhtio]'
 												AND kausi 	 = '$u_kausi'
+												AND tyyppi   = '$tasotyyppi'
 												AND taso 	 = '$u_taso'
 												AND tili 	 = '$u_tili'
 												AND kustp 	 = '$vkustp'
@@ -64,6 +66,7 @@ else {
 												muuttaja = '$kukarow[kuka]',
 												muutospvm = now()
 												WHERE yhtio  = '$kukarow[yhtio]'
+												AND tyyppi   = '$tasotyyppi'
 												AND kausi 	 = '$u_kausi'
 												AND taso 	 = '$u_taso'
 												AND tili 	 = '$u_tili'
@@ -78,6 +81,7 @@ else {
 						elseif ($solu != 0) {
 							$query = "	INSERT INTO budjetti SET
 										summa 		= $solu,
+										tyyppi		= '$tasotyyppi',
 										yhtio 		= '$kukarow[yhtio]',
 										kausi 		= '$u_kausi',
 										taso 		= '$u_taso',
@@ -103,11 +107,23 @@ else {
 		$sel2="";
 		$sel3="";
 		$sel4="";
+		$sel5="";
 		switch ($tyyppi) {
-			case (1): $sel1 = 'selected';
-			case (2): $sel2 = 'selected';
-			case (3): $sel3 = 'selected';
-			case (4): $sel4 = 'selected';
+			case (1):
+				$sel1 = 'selected';
+				break;
+			case (2):
+				$sel2 = 'selected';
+				break;
+			case (3):
+				$sel3 = 'selected';
+				break;
+			case (4):
+				$sel4 = 'selected';
+				break;
+			case (5):
+				$sel5 = 'selected';
+				break;
 		}
 	}
 
@@ -118,11 +134,11 @@ else {
 	echo "	<tr>
 			<th>".t("Tyyppi")."</th>
 			<td><select name = 'tyyppi'>
-			<option value='4' $sel4>".t("Tuloslaskelma")."
-			<option value='2' $sel2>".t("Vastattavaa")."
-			<option value='1' $sel1>".t("Vastaavaa")."
-			</select></td></tr>
-			<tr>";
+			<option value='4' $sel4>".t("Tuloslaskelma")." ".t("sis‰inen")."</option>
+			<option value='5' $sel5>".t("Tuloslaskelma")." ".t("ulkoinen")."</option>
+			<option value='2' $sel2>".t("Vastattavaa")."</option>
+			<option value='1' $sel1>".t("Vastaavaa")."</option>
+			</select></td></tr>";
 
 	echo "<tr><th>".t("Tilikausi");
 
@@ -142,7 +158,8 @@ else {
 		echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"])."</option>";
 	}
 
-	echo "</select></th></tr>";
+	echo "</select></td></tr>";
+
 	echo "<tr><th>".t("Kustannuspaikka")."</th>";
 
 	$query = "	SELECT tunnus, nimi
@@ -230,10 +247,56 @@ else {
 	echo "</select></td></tr>";
 
 	echo "</table>";
-	echo t("Budjettiluvun voi poistaa huutomerkill‰ (!)")."<br><br>";
+	echo "<br>";
 	echo "<input type='submit' VALUE='".t("N‰yt‰/Tallenna")."'>";
+	echo "<br><br>";
 
-	echo "</table>";
+	$excelsarake = 0;
+	$excelrivi++;
+
+	$tasotyyppi = "U";
+	$tilityyppi = "ulkoinen_taso";
+
+	// Sis‰inen tuloslaskelma
+	if ($tyyppi == 4) {
+		$tasotyyppi = "S";
+		$tyyppi = 3;
+		$tilityyppi = "sisainen_taso";
+	}
+
+	// Ulkoinen tuloslaskelma
+	if ($tyyppi == 5) {
+		$tyyppi = 3;
+	}
+
+	// T‰m‰ tulee tallentaa kantaan
+	echo "<input type='hidden' name='tasotyyppi' value='$tasotyyppi'>";
+
+	// Haetaan kaikki tasot ja rakennetaan tuloslaskelma-array
+	$query = "	SELECT *
+				FROM taso
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tyyppi 	= '$tasotyyppi'
+				and LEFT(taso, 1) in (BINARY '$tyyppi')
+				and taso != ''
+				ORDER BY taso";
+	$tasores = mysql_query($query) or pupe_error($query);
+
+	// Jos meill‰ on tasoja piirret‰‰n taulukko
+	while ($tasorow = mysql_fetch_assoc($tasores)) {
+		// mill‰ tasolla ollaan (1,2,3,4,5,6)
+		$tasoluku = strlen($tasorow["taso"]);
+
+		// tasonimi talteen (rightp‰dd‰t‰‰n ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
+		$apusort = str_pad($tasorow["taso"], 20, "÷");
+		$tasonimi[$apusort] = $tasorow["nimi"];
+
+		// pilkotaan taso osiin
+		$taso = array();
+		for ($i = 0; $i < $tasoluku; $i++) {
+			$taso[$i] = substr($tasorow["taso"], 0, $i+1);
+		}
+	}
 
 	if (isset($tkausi)) {
 		$query = "	SELECT *
@@ -247,7 +310,7 @@ else {
 		}
 	}
 
-	if (is_array($tilikaudetrow)) {
+	if (is_array($tilikaudetrow) and count($tasonimi) > 0) {
 
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
@@ -321,9 +384,12 @@ else {
 		$worksheet->writeString($excelrivi, $excelsarake, t("Nimi"), $format_bold);
 		$excelsarake++;
 
+		echo t("Budjettiluvun voi poistaa huutomerkill‰ (!)")."<br><br>";
+
 		//Parametrit mihin t‰m‰ taulukko liittyy
-		echo "<table>";
-		echo "<tr><td class='back'></td>";
+		echo "<table>\n";
+		echo "<tr>\n";
+		echo "<td class='back'></td>\n";
 
 		$j = 0;
 		$raja = '0000-00';
@@ -346,7 +412,7 @@ else {
 			$raja = $vuosi."-".$kk;
 			$rajataulu[$j] = $vuosi.$kk;
 
-		 	echo "<th>$raja</th>";
+		 	echo "<th>$raja</th>\n";
 		 	$j++;
 
 			$worksheet->writeString($excelrivi, $excelsarake, $raja, $format_bold);
@@ -367,45 +433,7 @@ else {
 			}
 		}
 
-		echo "</tr>";
-
-		$excelsarake = 0;
-		$excelrivi++;
-
-		$tasotyyppi = "U";
-		$tilityyppi = "ulkoinen_taso";
-
-		if ($tyyppi == 4) { // Sis‰inen tuloslaskelma!!!
-			$tasotyyppi = "S";
-			$tyyppi = 3;
-			$tilityyppi = "sisainen_taso";
-		}
-
-		// Haetaan kaikki tasot ja rakennetaan tuloslaskelma-array
-		$query = "	SELECT *
-					FROM taso
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi 	= '$tasotyyppi'
-					and LEFT(taso, 1) in (BINARY '$tyyppi')
-					and taso != ''
-					ORDER BY taso";
-		$tasores = mysql_query($query) or pupe_error($query);
-
-		while ($tasorow = mysql_fetch_assoc($tasores)) {
-
-			// mill‰ tasolla ollaan (1,2,3,4,5,6)
-			$tasoluku = strlen($tasorow["taso"]);
-
-			// tasonimi talteen (rightp‰dd‰t‰‰n ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
-			$apusort = str_pad($tasorow["taso"], 20, "÷");
-			$tasonimi[$apusort] = $tasorow["nimi"];
-
-			// pilkotaan taso osiin
-			$taso = array();
-			for ($i = 0; $i < $tasoluku; $i++) {
-				$taso[$i] = substr($tasorow["taso"], 0, $i+1);
-			}
-		}
+		echo "</tr>\n";
 
 		// sortataan array indexin (tason) mukaan
 		ksort($tasonimi);
@@ -445,7 +473,7 @@ else {
 						$worksheet->writeString($excelrivi, $excelsarake, $tilirow['nimi']);
 						$excelsarake++;
 
-						echo "<tr><th nowrap>$tilirow[tilino] - $tilirow[nimi]</th>";
+						echo "<tr><th nowrap>$tilirow[tilino] - $tilirow[nimi]</th>\n";
 
 						for ($k = 0; $k < $j; $k++) {
 
@@ -458,13 +486,13 @@ else {
 								$nro = $budjetit[$key][$tilirow["tilino"]][$rajataulu[$k]];
 							}
 
-							echo "<td align='right' nowrap><input type='text' name = 'luvut[$key][$tilirow[tilino]][$rajataulu[$k]]' value='$nro' size='10'></td>";
+							echo "<td align='right' nowrap><input type='text' name = 'luvut[$key][$tilirow[tilino]][$rajataulu[$k]]' value='$nro' size='10'></td>\n";
 
 							$worksheet->write($excelrivi, $excelsarake, $nro);
 							$excelsarake++;
 						}
 
-						echo "</tr>";
+						echo "</tr>\n";
 
 						$excelsarake = 0;
 						$excelrivi++;
@@ -480,7 +508,7 @@ else {
 				$worksheet->writeString($excelrivi, $excelsarake, $value);
 				$excelsarake++;
 
-				echo "<tr><th nowrap>$key - $value</th>";
+				echo "<tr><th nowrap>$key - $value</th>\n";
 
 				for ($k = 0; $k < $j; $k++) {
 
@@ -493,7 +521,7 @@ else {
 						$nro = $budjetit[$key]["0"][$rajataulu[$k]];
 					}
 
-					echo  "<td class='$class' align='right' nowrap><input type='text' name = 'luvut[$key][0][$rajataulu[$k]]' value='$nro' size='10'></td>";
+					echo  "<td class='$class' align='right' nowrap><input type='text' name = 'luvut[$key][0][$rajataulu[$k]]' value='$nro' size='10'></td>\n";
 
 					$worksheet->write($excelrivi, $excelsarake, $nro);
 					$excelsarake++;
@@ -506,18 +534,18 @@ else {
 
 				// kakkostason j‰lkeen aina yks tyhj‰ rivi.. paitsi jos otetaan vain kakkostason raportti
 				if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
-					echo "<tr><td class='back'>&nbsp;</td></tr>";
+					echo "<tr><td class='back'>&nbsp;</td></tr>\n";
 				}
 
 				if (strlen($key) == 1 and ($rtaso > 1 or $rtaso == "TILI")) {
-					echo "<tr><td class='back'><br><br></td></tr>";
+					echo "<tr><td class='back'><br><br></td></tr>\n";
 				}
 			}
 
 			$edkey = $key;
 		}
 
-		echo "</form></table><br>";
+		echo "</table></form><br>";
 
 		$workbook->close();
 
@@ -543,6 +571,9 @@ else {
 		echo "</table>";
 		echo "</form>";
 
+	}
+	else {
+		echo t("Ei tasoja!");
 	}
 
 	require ("inc/footer.inc");

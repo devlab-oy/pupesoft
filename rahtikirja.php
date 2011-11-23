@@ -2293,16 +2293,28 @@
 
 			echo "</tr>";
 
-			$query = "	SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
-						from rahtikirjat use index (otsikko_index)
-						where yhtio			= '$kukarow[yhtio]'
-						and otsikkonro		= '$id'
-						and rahtikirjanro	= '$rakirno'";
-			$viestirar = pupe_query($query);
+
+			if ($tee == 'change') {
+				$query = "	SELECT GROUP_CONCAT(DISTINCT if(viesti!='',viesti,NULL) separator '. ') viesti
+							FROM rahtikirjat use index (otsikko_index)
+							WHERE yhtio			= '$kukarow[yhtio]'
+							AND otsikkonro		= '$id'
+							AND rahtikirjanro	= '$rakirno'";
+				$viestirar = pupe_query($query);
+			}
+			else {
+				$query = "	SELECT GROUP_CONCAT(DISTINCT if(tuote.kuljetusohje!='',tuote.kuljetusohje,NULL) separator '. ') viesti
+							FROM tilausrivi
+							JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+							WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
+							AND tilausrivi.otunnus	= '$id'
+							AND tilausrivi.tyyppi  != 'D'";
+				$viestirar = pupe_query($query);
+			}
 
 			$viestirarrow = mysql_fetch_assoc($viestirar);
 
-			echo "<tr><th>".t("Kuljetusohje")."</th><td><textarea name='viesti' cols='30' rows='3'>$viestirarrow[viesti]</textarea></td><th></th><td></td></tr>";
+			echo "<tr><th>".t("Kuljetusohje")."</th><td colspan='3'><textarea name='viesti' cols='60' rows='3'>$viestirarrow[viesti]</textarea></td></tr>";
 
 			if ($otsik['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
 				if (strpos($tunnukset,',') !== false) {

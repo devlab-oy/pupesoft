@@ -506,14 +506,23 @@
 			echo "</table>";
 
 			if ($sytunnus != '') {
+				
+				$liitoslisa = "";
+				
+				if ($sliitostunnus !="") {
+					$liitoslisa = "AND asiakas.tunnus='{$sliitostunnus}' ";
+				}
+				
 				$query = "	SELECT jv
 							FROM asiakas
 							JOIN maksuehto ON (maksuehto.yhtio = asiakas.yhtio and maksuehto.tunnus = asiakas.maksuehto and maksuehto.kaytossa = '' and maksuehto.jv != '')
 							WHERE asiakas.yhtio = '$saatavat_yhtio'
 							AND asiakas.ytunnus = '$sytunnus'
 							AND asiakas.laji != 'P'
+							{$liitoslisa}
 							$eta_asiakaslisa
 							LIMIT 1";
+				
 				$maksuehto_chk_res = pupe_query($query);
 				$maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
 

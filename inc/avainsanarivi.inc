@@ -73,6 +73,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "LISATIETO") 		$ulos .= "<option value='LISATIETO' $avain_sel[LISATIETO]>					".t("Tuotteen lisätieto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TARRATYYPPI") 		$ulos .= "<option value='TARRATYYPPI' $avain_sel[TARRATYYPPI]>				".t("Tuotteen tarratyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VALMISTUSLINJA") 	$ulos .= "<option value='VALMISTUSLINJA' $avain_sel[VALMISTUSLINJA]>		".t("Tuotteen valmistuslinja")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "HAMMASTUS") 		$ulos .= "<option value='HAMMASTUS' $avain_sel[HAMMASTUS]>					".t("Tuotteen hammastus")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -386,7 +387,7 @@
 		$ulos = "<td><textarea rows=5 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
-	
+
 	if (($avain_sel["TYOM_PRIORIT"] == "SELECTED" or $avain_sel["TYOM_TYOJONO"] == "SELECTED" or $avain_sel["TYOM_TYOSTATUS"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_3") {
 
 		if ($trow[$i] == 'OLETUS') {
@@ -399,7 +400,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if ($avain_sel['TYOM_TYOLINJA'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$query = "	SELECT selite, selitetark

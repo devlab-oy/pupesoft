@@ -47,9 +47,15 @@
 					$('.toggleable_row_order').click(function(event){
 
 						if ($('#toggleable_row_order_'+this.id).is(':visible')) {
+
+							$(this).removeClass('tumma');
+
 							$('#toggleable_row_order_'+this.id).slideUp('fast');
 						}
 						else {
+
+							$(this).addClass('tumma');
+
 							var id = this.id;
 							var parent_element = $('#toggleable_row_order_'+id).parent();
 
@@ -64,9 +70,14 @@
 						var id = this.id.split(\"#\", 2);
 
 						if ($('#toggleable_row_sscc_'+id[0]+'_'+id[1]).is(':visible')) {
+							$(this).removeClass('tumma');
+
 							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]).slideUp('fast');
 						}
 						else {
+
+							$(this).addClass('tumma');
+
 							var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[1]).parent();
 
 							// $('#toggleable_row_sscc_'+id[0]+'_'+id[1]).parent().prev().css({'padding-top': '10px'});
@@ -159,7 +170,7 @@
 					lasku.toim_nimi AS asiakas_toim_nimi,
 					lasku.toim_postitp AS asiakas_toim_postitp,
 					avainsana.selitetark_3 AS 'prioriteetti',
-					GROUP_CONCAT(pakkaus.pakkauskuvaus) AS pakkauskuvaukset,
+					GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS pakkausnumerot,
 					GROUP_CONCAT(DISTINCT kerayserat.sscc) AS sscc
 					FROM lasku
 					LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus)
@@ -232,7 +243,33 @@
 			}
 
 			echo "</td>";
-			echo "<td class='data'>",str_replace(",", "<br>", $lahto_row['pakkauskuvaukset']),"</td>";
+			echo "<td class='data'>";
+
+			if ($lahto_row['pakkausnumerot'] != '') {
+
+				$query = "	SELECT pakkaus.pakkauskuvaus
+							FROM kerayserat
+							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+							AND kerayserat.sscc IN ({$lahto_row['sscc']})
+							AND kerayserat.pakkausnro IN ({$lahto_row['pakkausnumerot']})
+							GROUP BY kerayserat.pakkausnro
+							ORDER BY kerayserat.sscc";
+				$pakkauskuvaus_res = pupe_query($query);
+
+				$num = mysql_num_rows($pakkauskuvaus_res);
+
+				$i = 0;
+
+				while ($pakkauskuvaus_row = mysql_fetch_assoc($pakkauskuvaus_res)) {
+					echo "{$pakkauskuvaus_row['pakkauskuvaus']}";
+
+					if ($i < $num) echo "<br>";
+
+				}
+			}
+
+			echo "</td>";
 			echo "<td>{$til_row['kg']}</td>";
 
 			echo "</tr>";

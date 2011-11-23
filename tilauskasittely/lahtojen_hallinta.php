@@ -10,7 +10,7 @@
 					$('td').css({'padding': '0px', 'white-space': 'nowrap'});
 
 					$('.center').css({'text-align': 'center'});
-					$('.data').css({'padding-left': '7px', 'padding-right': '7px'});
+					$('.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
 
 					// $('.toggleable_tr td').css({'padding-left': '25px'});
 
@@ -44,18 +44,34 @@
 						}
 					});
 
-					$('.toggleable_row').click(function(event){
+					$('.toggleable_row_order').click(function(event){
 
-						if ($('#toggleable_row_'+this.id).is(':visible')) {
-							$('#toggleable_row_'+this.id).slideUp('fast');
+						if ($('#toggleable_row_order_'+this.id).is(':visible')) {
+							$('#toggleable_row_order_'+this.id).slideUp('fast');
 						}
 						else {
 							var id = this.id;
-							var parent_element = $('#toggleable_row_'+id).parent();
+							var parent_element = $('#toggleable_row_order_'+id).parent();
 
-							// $('#toggleable_row_'+id).parent().prev().css({'padding-top': '10px'});
+							// $('#toggleable_row_order_'+id).parent().prev().css({'padding-top': '10px'});
 
-							$('#toggleable_row_'+id).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
+							$('#toggleable_row_order_'+id).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
+						}
+					});
+
+					$('.toggleable_row_sscc').click(function(event){
+
+						var id = this.id.split(\"#\", 2);
+
+						if ($('#toggleable_row_sscc_'+id[0]+'_'+id[1]).is(':visible')) {
+							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]).slideUp('fast');
+						}
+						else {
+							var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[1]).parent();
+
+							// $('#toggleable_row_sscc_'+id[0]+'_'+id[1]).parent().prev().css({'padding-top': '10px'});
+
+							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 						}
 					});
 
@@ -144,7 +160,7 @@
 					lasku.toim_postitp AS asiakas_toim_postitp,
 					avainsana.selitetark_3 AS 'prioriteetti',
 					GROUP_CONCAT(pakkaus.pakkauskuvaus) AS pakkauskuvaukset,
-					GROUP_CONCAT(kerayserat.sscc) AS sscc
+					GROUP_CONCAT(DISTINCT kerayserat.sscc) AS sscc
 					FROM lasku
 					LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus)
 					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
@@ -180,7 +196,7 @@
 
 			echo "<td><input type='checkbox' class='checkbox_{$row['lahdon_tunnus']}'></td>";
 			echo "<td class='center'>{$lahto_row['prioriteetti']}</td>";
-			echo "<td class='toggleable_row' id='{$lahto_row['tilauksen_tunnus']}'><a class='td'>{$lahto_row['tilauksen_tunnus']}</a></td>";
+			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}'><a class='td'>{$lahto_row['tilauksen_tunnus']}</a></td>";
 			echo "<td class='data'>{$lahto_row['asiakas_nimi']}";
 			if ($lahto_row['asiakas_nimi'] != $lahto_row['asiakas_toim_nimi']) echo "<br>{$lahto_row['asiakas_toim_nimi']}";
 			echo "</td>";
@@ -201,7 +217,21 @@
 
 			echo "<td class='data'>{$til_row['keraysvyohyke']}</td>";
 			echo "<td>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
-			echo "<td class='data'>",str_replace(",", "<br>", $lahto_row['sscc']),"</td>";
+			echo "<td class='data'>";
+
+			$arr = explode(",", $lahto_row['sscc']);
+			$cnt = count($arr);
+			$i = 1;
+
+			foreach ($arr as $sscc) {
+				echo "<a class='td toggleable_row_sscc' id='{$sscc}#{$i}'>{$sscc}</a>";
+
+				if ($i < $cnt) echo " ";
+
+				$i++;
+			}
+
+			echo "</td>";
 			echo "<td class='data'>",str_replace(",", "<br>", $lahto_row['pakkauskuvaukset']),"</td>";
 			echo "<td>{$til_row['kg']}</td>";
 
@@ -225,7 +255,7 @@
 			
 			echo "<tr>";
 			echo "<td colspan='10' class='back'>";
-			echo "<div class='toggleable_row_child' id='toggleable_row_{$lahto_row['tilauksen_tunnus']}' style='display:none;'>";
+			echo "<div class='toggleable_row_child' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";
 	
@@ -258,6 +288,68 @@
 			echo "</div>";
 			echo "</td>";
 			echo "</tr>";
+
+			reset($arr);
+
+			$i = 1;
+
+			foreach ($arr as $sscc) {
+
+				$query = "	SELECT tilausrivi.tuoteno,
+							kerayserat.otunnus,
+							tuote.nimitys,
+							kerayserat.kpl,
+							tilausrivi.yksikko,
+							CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
+							kerayserat.laatija AS keraaja,
+							SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS keratyt
+							FROM kerayserat
+							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+							AND kerayserat.sscc = '{$sscc}'
+							GROUP BY 1,2,3,4,5,6,7";
+				$rivi_res = pupe_query($query);
+
+				echo "<tr>";
+				echo "<td colspan='10' class='back'>";
+				echo "<div class='toggleable_row_child' id='toggleable_row_sscc_{$sscc}_{$i}' style='display:none;'>";
+
+				echo "<table style='width:100%;'>";
+
+				echo "<tr>";
+				echo "<th>",t("Tilausnumero"),"</th>";
+				echo "<th>",t("Tuotenumero"),"</th>";
+				echo "<th>",t("Nimitys"),"</th>";
+				echo "<th>",t("Suunniteltu m‰‰r‰"),"</th>";
+				echo "<th>",t("Ker‰tty m‰‰r‰"),"</th>";
+				echo "<th>",t("Yksikkˆ"),"</th>";
+				echo "<th>",t("Hyllypaikka"),"</th>";
+				echo "<th>",t("Ker‰‰j‰"),"</th>";
+				echo "</tr>";
+
+				while ($rivi_row = mysql_fetch_assoc($rivi_res)) {
+					echo "<tr>";
+					echo "<td class='tumma'>{$rivi_row['otunnus']}</td>";
+					echo "<td class='tumma'>{$rivi_row['tuoteno']}</td>";
+					echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
+					echo "<td class='tumma'>{$rivi_row['kpl']}</td>";
+					echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
+					echo "<td class='tumma'>",t_avainsana("Y", "", " and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite"),"</td>";
+					echo "<td class='tumma'>{$rivi_row['hyllypaikka']}</td>";
+					echo "<td class='tumma'>{$rivi_row['keraaja']}</td>";
+					echo "</tr>";
+				}
+
+				echo "</table>";
+
+				echo "</div>";
+				echo "</td>";
+				echo "</tr>";
+
+				$i++;
+
+			}
 		}
 
 		echo "</table>";

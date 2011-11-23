@@ -650,6 +650,8 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 			$thispage->writeString($kala, 4, "Supplier", $boldi);
 			$thispage->writeString($kala, 5, "Port of delivery", $boldi);
 			$thispage->writeString($kala, 6, "Destination(country)", $boldi);
+			$thispage->writeString($kala, 7, "Reference", $boldi);
+			$thispage->writeString($kala, 8, "Customer order number", $boldi);
 
 			$kala++;
 		}
@@ -708,6 +710,8 @@ if (!function_exists('rivi_kerayslista')) {
 			$thispage->writeString($kala, 0, $row["tuoteno"]);
 			$thispage->writeString($kala, 1, $row["nimitys"]);
 			$thispage->writeString($kala, 2, $row["eankoodi"]);
+			$thispage->writeString($kala, 7, $laskurow["viesti"]);
+            $thispage->writeString($kala, 8, $laskurow["asiakkaan_tilausnumero"]);
 
 			if ($row["var"] == "" or  $row["var"] == "H") {
 				$thispage->write($kala, 3, $row["tilkpl"]);
@@ -998,7 +1002,24 @@ if (!function_exists('rivi_kerayslista')) {
 				// Tulostataan myyntiera
 				if ($trow['myynti_era'] > 1) {
 					$oikpos = $pdf->strlen(round(($row['varattu']+$row['kpl'])/$trow['myynti_era'],2)." me", $norm);
-					$pdf->draw_text(520-$oikpos, $kala+5, round(($row['varattu']+$row['kpl'])/$trow['myynti_era'],2)." me",	$thispage, $norm);
+					$pdf->draw_text(525-$oikpos, $kala+7, round(($row['varattu']+$row['kpl'])/$trow['myynti_era'],2)." me",	$thispage, $pieni);
+				}
+
+				if ($yhtiorow["siirtolistatyyppi"] == "A") {
+
+					if ($trow['myynti_era'] > 1) {
+						$kala = $kala - $rivinkorkeus;
+					}
+					else {
+						$kala = $kala-7;
+					}
+
+					$oikpos = $pdf->strlen((float) $trow["myyntihinta"]." ".$yhtiorow["valkoodi"], $pieni);
+					$pdf->draw_text(520-$oikpos, $kala+15, (float) $trow["myyntihinta"]." ".$yhtiorow["valkoodi"],	$thispage, $pieni);
+
+					if ($trow['myynti_era'] > 1) {
+						$kala = $kala + $rivinkorkeus;
+					}
 				}
 
 				//Haetan sarjanumeron tiedot

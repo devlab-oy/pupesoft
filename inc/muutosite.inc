@@ -1,10 +1,10 @@
 <?php
 
 	require_once ("inc/tilinumero.inc");
-	
+
 	if (!isset($tila)) $tila = "";
 	if (!isset($komm)) $komm = "";
-	
+
 	function erottele($pvm) {
 		$paluu['pp'] = substr($pvm,-2);
 		$paluu['kk'] = substr($pvm,5,2);
@@ -713,11 +713,18 @@
 			$tila = '';
 		}
 
-		$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[tunnus]'";
+		$query = "SELECT nimi, laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[tunnus]'";
 		$keikres = pupe_query($query);
 
 		if (!(($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and mysql_num_rows($keikres) == 0 and $trow['tapvm'] >= $yhtiorow['tilikausi_alku'])) {
 			echo "<font class='error'>".t("Laskun tila tai tapvm on muuttunut tai se on liitetty keikkaan")."</font><br>";
+
+			if (mysql_num_rows($keikres) > 0) {
+				$keikrow = mysql_fetch_assoc($keikres);
+
+				echo "<font class='message'>".t("Keikka").": $keikrow[nimi] / $keikrow[laskunro]</font><br>";
+			}
+
 			$tee = 'E';
 			$tila = '';
 		}
@@ -991,10 +998,47 @@
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 						<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 						<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-						<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+						<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						</tr>
 						</form>";
 			}
+
+			$query = "	SELECT tunnus, liitos, liitostunnus
+						FROM tiliointi
+						WHERE yhtio  = '{$kukarow['yhtio']}'
+						AND ltunnus  = '{$tunnus}'
+						AND korjattu = ''";
+			$tunnukset_talteen_res = pupe_query($query);
+
+			$tiliointirivit = array();
+			$ed_iliitostunnus = array();
+			$iliitos = array();
+
+			$xxx = 1;
+
+			while ($tunnukset_talteen_row = mysql_fetch_assoc($tunnukset_talteen_res)) {
+				$tiliointirivit[$xxx] = $tunnukset_talteen_row['tunnus'];
+				$ed_iliitostunnus[$xxx] = $tunnukset_talteen_row['liitostunnus'];
+				$iliitos[$xxx] = $tunnukset_talteen_row['liitos'];
+				$xxx++;
+			}
+
+
+
+			echo "	<form action = 'tosite.php' method='post'>
+					<input type = 'hidden' name = 'lopetus' value = '{$lopetus}/SPLIT/$PHP_SELF////tee=E//tila=//tunnus=$tunnus'>
+					<input type = 'hidden' name='tee'  value=''>
+					<input type = 'hidden' name='tunnus' value='{$tunnus}'>
+					<input type = 'hidden' name='tiliointirivit' value='".urlencode(serialize($tiliointirivit))."' />
+					<input type = 'hidden' name='ed_iliitostunnus' value='".urlencode(serialize($ed_iliitostunnus))."' />
+					<input type = 'hidden' name='iliitos' value='".urlencode(serialize($iliitos))."' />
+					<input type = 'hidden' name='tullaan' value='muutosite' />
+					<tr>
+					<th>".t("Vaihda asiakas-/toimittajaliitos")."</th>
+					<td>&nbsp;</td><td class='back'><input type = 'submit' value = '".t("Hae")."'></td>
+					</tr>
+					</form>";
+
 		}
 		else {
 			if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku'] and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
@@ -1011,7 +1055,7 @@
 					echo "<td><input type = 'text' name = 'vpp' maxlength='2' size='2' value = '$lapvm[pp]'>
 						  <input type = 'text' name = 'vkk' maxlength='2' size='2' value = '$lapvm[kk]'>
 						  <input type = 'text' name = 'vvv' maxlength='4' size='4' value = '$lapvm[vv]'></td>
-						  <td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+						  <td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						  </tr>";
 					echo "</form>";
 				}
@@ -1026,7 +1070,7 @@
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 						<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 						<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-						<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+						<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						</tr>
 						</form>";
 			}
@@ -1046,7 +1090,7 @@
 							<tr>
 							<th>".t("summa")."</th>
 							<td><input type = 'text' name = 'summa' value='$trow[summa]'></td>
-							<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+							<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 							</tr>
 							</form>";
 					}
@@ -1067,7 +1111,7 @@
 								<input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 								<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 								<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-							<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+							<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 							</tr>
 							</form>";
 				}
@@ -1087,7 +1131,7 @@
 						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 						<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 						<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-						<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+						<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						</tr>
 						</form>";
 
@@ -1104,7 +1148,7 @@
 							<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 							<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 							<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-							<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+							<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 							</tr>
 							</form>";
 				}
@@ -1137,7 +1181,7 @@
 								echo "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
 							}
 							echo "</select></td>";
-							echo "<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+							echo "<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 							</tr>
 							</form>";
 				}
@@ -1158,14 +1202,14 @@
 					<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 					<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 					<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-					<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+					<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 					</tr>
 					</form>";
 			}
 		}
 
 		if (($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and mysql_num_rows($keikres) == 0 and $trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
-			
+
 			$vientia = '';
 			$vientib = '';
 			$vientic = '';
@@ -1178,7 +1222,7 @@
 			$vientij = '';
 			$vientik = '';
 			$vientil = '';
-			
+
 			if ($trow['vienti']=='A') $vientia = 'selected';
 			if ($trow['vienti']=='B') $vientib = 'selected';
 			if ($trow['vienti']=='C') $vientic = 'selected';
@@ -1219,7 +1263,7 @@
 							<option value='L' $vientil>".t("ei-EU raaka-aine")."</option>
 						</select>
 					</td>
-					<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+					<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 					</tr>
 					</form>";
 		}
@@ -1233,7 +1277,7 @@
 			echo "<tr>";
 			echo "<th>".t("laskunumero")."</th>";
 			echo "<td><input type='text' name='uusi_laskunumero' value='$trow[laskunro]'></td>";
-			echo "<td><input type='submit' value='".t("P‰ivit‰")."'></td>";
+			echo "<td class='back'><input type='submit' value='".t("P‰ivit‰")."'></td>";
 			echo "</tr>";
 			echo "</form>";
 		}
@@ -1247,7 +1291,7 @@
 					<tr>
 					<th>".t("Jaa ostolasku kahteen osaan").".<br>".t("Syˆt‰ uuden laskun summa")."</th>
 					<td><input type='text' name='syotetty_jakosumma' value=''> $trow[valkoodi]</td>
-					<td><input type = 'submit' value = '".t("Jaa")."'></td>
+					<td class='back'><input type = 'submit' value = '".t("Jaa")."'></td>
 					</tr>
 					</form>";
 		}
@@ -1262,7 +1306,7 @@
 					<tr>
 					<th>".t("Poista suoraveloitus")."</th>
 					<td>Lasku siirtyy takaisin hyv‰ksynt‰‰n</td>
-					<td><input type = 'submit' value = '".t("Poista")."'></td>
+					<td class='back'><input type = 'submit' value = '".t("Poista")."'></td>
 					</tr>
 					</form>";
 		}
@@ -1303,7 +1347,7 @@
 
 			echo "</select>";
 			echo "</td>";
-			echo "<td><input type = 'submit' value = '".t("Muuta")."'></td>";
+			echo "<td class='back'><input type = 'submit' value = '".t("Muuta")."'></td>";
 			echo "</tr>";
 			echo "</form>";
 		}
@@ -1316,7 +1360,7 @@
 				<tr>
 				<th>".t("Lis‰‰ kommentti")."</th>
 				<td><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
-				<td><input type = 'submit' value = '".t("Lis‰‰")."'></td>
+				<td class='back'><input type = 'submit' value = '".t("Lis‰‰")."'></td>
 				</tr>
 				</form>";
 
@@ -1331,7 +1375,7 @@
 						<tr>
 						<th>".t("Toimittajan tilinumero (kotimainen)")."</th>
 						<td><input type = 'text' name = 'tili' size='40' value = '".tilinumero_print($trow['tilinumero'])."'></td>
-						<td rowspan='3'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+						<td  class='back' rowspan='3'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						<td class='back'>".t("Lasku siirtyy takaisin hyv‰ksynt‰‰n")."</td>
 						</tr>
 						<tr>
@@ -1353,7 +1397,7 @@
 						<tr>
 						<th>".t('Pankkihaltija')."</th>
 						<td><input type = 'text' name = 'pankki_haltija' size='40' value = '$trow[pankki_haltija]'></td>
-						<td rowspan='8'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+						<td  class='back' rowspan='8'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						<td class='back'>".t("Lasku siirtyy takaisin hyv‰ksynt‰‰n")."</td>
 						</tr>
 						<tr>
@@ -1397,7 +1441,7 @@
 					<tr>
 					<th>".t('laskun viesti')."</th>
 					<td><input type = 'text' name = 'viesti' size='40' value = '$trow[viesti]'></td>
-					<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
+					<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 					</tr>
 					</form>";
 		}
@@ -1411,7 +1455,7 @@
 					<tr>
 					<th>".t("Palauta lasku maksatukseen")."</th>
 					<td></td>
-					<td><input type = 'submit' value = '".t("Siirr‰")."'></td>
+					<td class='back'><input type = 'submit' value = '".t("Siirr‰")."'></td>
 					</tr>
 					</form>";
 		}
@@ -1425,7 +1469,7 @@
 					<tr>
 					<th>".t("Palauta lasku hyv‰ksynt‰kierrokselle")."</th>
 					<td></td>
-					<td><input type = 'submit' value = '".t("Siirr‰")."'></td>
+					<td class='back'><input type = 'submit' value = '".t("Siirr‰")."'></td>
 					</tr>
 					</form>";
 		}
@@ -1461,9 +1505,7 @@
 							<option value='$yhtiorow[viivastyskorko]' $selviikorko>".t("Viiv‰styskorko")." $yhtiorow[viivastyskorko]%</option>
 						</select>
 						</td>
-						<td>
-						<input type = 'submit' value = '".t("P‰ivit‰")."'>
-						</td>
+						<td class='back'><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 						</tr>
 						</form>";
 			}

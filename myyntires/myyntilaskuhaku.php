@@ -1,6 +1,7 @@
 <?php
 
-	$useslave = 1; // k‰ytet‰‰n slavea
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	$useslave = 1;
 
 	// DataTables p‰‰lle
 	$pupe_DataTables = "myyntilaskuhaku";
@@ -33,6 +34,7 @@
 	echo "<option value = 'N'  {$seldr["N"]}>",t("nimell‰"),"</option>";
 	echo "<option value = 'V'  {$seldr["V"]}>",t("viitteell‰"),"</option>";
 	echo "<option value = 'L'  {$seldr["L"]}>",t("laskunnumerolla"),"</option>";
+	echo "<option value = 'A'  {$seldr["A"]}>",t("asiakasnumerolla"),"</option>";
 	echo "</select></td>";
 	echo "<td><input type = 'text' name = 'summa1' size=13> - <input type = 'text' name = 'summa2' size=13></td>";
 	echo "<td class='back'><input type = 'submit' value = '",t("Hae"),"'></td>";
@@ -40,10 +42,10 @@
 	echo "</table>";
 	echo "</form>";
 	echo "<hr>";
-	
+
 	$formi = 'valinta';
 	$kentta = 'summa1';
-	
+
 	if (trim($summa1) == "") {
 		$tee = "";
 	}
@@ -101,6 +103,27 @@
 		$jarj = "nimi, tapvm desc";
 	}
 
+	// A = Etsit‰‰n asiakannumeroa laskulta
+	if ($tee == 'A') {
+		$query	= "	SELECT group_concat(tunnus) asiakkaat
+					FROM asiakas
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					and asiakasnro = '$summa1'
+					and asiakasnro not in ('0','')";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+
+		$liitostunnus = -1;
+
+		if ($row["asiakkaat"] != "") {
+			$liitostunnus = $row["asiakkaat"];
+		}
+
+		$index = "";
+		$ehto = "tila = 'U' and liitostunnus in ($liitostunnus)";
+		$jarj = "nimi, tapvm desc";
+	}
+
 	// V = viitteell‰
 	if ($tee == 'V') {
 		$ehto = "tila = 'U' and viite = '{$summa1}'";
@@ -118,7 +141,8 @@
 		$alku += 0;
 
 		$query = "	SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
-					summa, valkoodi, ebid, tila, alatila, tunnus
+					summa, valkoodi, ebid, tila, alatila, tunnus,
+					mapvm, saldo_maksettu, ytunnus, liitostunnus
 					FROM lasku {$index}
 					WHERE {$ehto} and yhtio = '{$kukarow['yhtio']}'
 					ORDER BY {$jarj}
@@ -131,9 +155,9 @@
 		}
 		else {
 
-			pupe_DataTables($pupe_DataTables, 8, 8);
+			pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
 
-			echo "<table class='display' id='{$pupe_DataTables}'>";
+			echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
 			echo "<thead>
 					<tr>
@@ -147,14 +171,14 @@
 					<th>",t("Tila"),"</th>
 					</tr>
 					<tr>
-					<td><input type='text' name='search_pvm'></td>
-					<td><input type='text' name='search_erpvm'></td>
-					<td><input type='text' name='search_laskunro'></td>
-					<td><input type='text' name='search_nimi'></td>
-					<td><input type='text' name='search_summa'></td>
-					<td><input type='text' name='search_valuutta'></td>
-					<td><input type='text' name='search_ebid'></td>
-					<td><input type='text' name='search_tila'></td>
+					<td><input type='text' class='search_field' name='search_pvm'></td>
+					<td><input type='text' class='search_field' name='search_erpvm'></td>
+					<td><input type='text' class='search_field' name='search_laskunro'></td>
+					<td><input type='text' class='search_field' name='search_nimi'></td>
+					<td><input type='text' class='search_field' name='search_summa'></td>
+					<td><input type='text' class='search_field' name='search_valuutta'></td>
+					<td><input type='text' class='search_field' name='search_ebid'></td>
+					<td><input type='text' class='search_field' name='search_tila'></td>
 					</tr>
 				</thead>";
 
@@ -172,19 +196,33 @@
 
 				echo "<td valign='top'>",tv1dateconv($trow["erpcm"]),"</td>";
 				echo "<td valign='top'><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro={$trow['laskunro']}&lopetus={$lopetus}'>{$trow['laskunro']}</td>";
-				echo "<td valign='top'>{$trow['nimi']}</td>";
+				echo "<td valign='top'><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus={$lopetus}'>{$trow['nimi']}</a></td>";
 				echo "<td valign='top' align='right'>{$trow['summa']}</td>";
 				echo "<td valign='top'>{$trow['valkoodi']}</td>";
 
 				// tehd‰‰n lasku linkki
 				echo "<td>",ebid($trow['tunnus']),"</td>";
 
-				$laskutyyppi = $trow["tila"];
-				$alatila     = $trow["alatila"];
+				$maksuviesti = "";
 
-				require ("inc/laskutyyppi.inc");
+				if ($trow['mapvm'] != "0000-00-00") {
+					$maksuviesti = t("Maksettu");
+				}
+				elseif ($trow['mapvm'] == "0000-00-00" and $trow['saldo_maksettu'] != 0) {
+					$maksuviesti = t("Osasuoritettu");
 
-				echo "<td>",t("$laskutyyppi")," ",t("$alatila"),"</td>";
+					if ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
+						$maksuviesti .= " / ".t("Er‰‰ntynyt");
+					}
+				}
+				elseif ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
+					$maksuviesti = " ".t("Er‰‰ntynyt");
+				}
+				else {
+					$maksuviesti = t("Avoin");
+				}
+
+				echo "<td>$maksuviesti</td>";
 				echo "</tr>";
 			}
 

@@ -851,8 +851,11 @@ if (!function_exists('rivi_original')) {
 		if ($row["myyntihinta_maara"] > 1) {
 			$kala = $kala - 7;
 			$pdf_lasku->draw_text(390, $kala, hintapyoristys($veroton_hinta*$row["myyntihinta_maara"])." / $row[myyntihinta_maara] $row[yksikko]", $thispage, $pieni);
+			$kalakorjaus = 7;
 		}
-
+		else {
+			$kalakorjaus = 0;
+		}
 
 		// Ensimmäinen rivi piirretty
 		$kala = $kala - 10;
@@ -881,10 +884,13 @@ if (!function_exists('rivi_original')) {
 
 		// Kommentti
 		if (trim($row["kommentti"]) != '') {
+
 			$kommentit = explode("\n", trim($row["kommentti"]));
 
-			$pdf_lasku->draw_text(35, $kala, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
-			$kala = $kala - 10;
+			if (strpos($row["kommentti"], t("Tilaus", $kieli)." ".$row["otunnus"]." ".t("yhteensä", $kieli)) === FALSE) {
+				$pdf_lasku->draw_text(35, $kala+$kalakorjaus, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
+				$kala = $kala - 10;
+			}
 
 			foreach ($kommentit as $akey => $kommentti) {
 
@@ -909,7 +915,7 @@ if (!function_exists('rivi_original')) {
 
 					foreach ($sanat as $sana) {
 						if ($pdf_lasku->strlen($lause, $pieni) > $rpit2) {
-							$pdf_lasku->draw_text(35, $kala, trim($lause), $thispage, $pieni);
+							$pdf_lasku->draw_text(35, $kala+$kalakorjaus, trim($lause), $thispage, $pieni);
 							$kala  = $kala - 10;
 							$lause = "";
 						}
@@ -921,14 +927,14 @@ if (!function_exists('rivi_original')) {
 				}
 
 				if (trim($kommentti) != "") {
-					$pdf_lasku->draw_text(35, $kala, trim($kommentti), $thispage, $pieni);
+					$pdf_lasku->draw_text(35, $kala+$kalakorjaus, trim($kommentti), $thispage, $pieni);
 					$kala = $kala - 10;
 				}
 			}
 			$kala += 10;
 		}
 		elseif ($laskutyyppi != 6) {
-			$pdf_lasku->draw_text(35, $kala, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
+			$pdf_lasku->draw_text(35, $kala+$kalakorjaus, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
 		}
 
 		$kala = $kala - 15;
@@ -1289,7 +1295,7 @@ if (!function_exists('loppu')) {
 	function loppu ($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $thispage, $masrow, $sivu, $summa, $arvo, $page, $vientikala, $laskutyyppi, $vikasivu = "") {
 		global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
 
-		if ($yhtiorow["viivakoodi_laskulle"] == "K" and $laskurow["maa"] == "FI" and $laskurow["summa"] > 0 and $vikasivu != "" and function_exists("imagecreate")) {
+		if ($yhtiorow["viivakoodi_laskulle"] == "K" and $laskurow["maa"] == "FI" and $laskurow["summa"] > 0 and $vikasivu != "" and function_exists("imagecreate") and $laskurow["vienti"] == "" and strtoupper($laskurow["maa"]) == strtoupper($yhtiorow["maa"])) {
 			$piirra_viivakoodi = true;
 			$barcode_korkeus = 50;
 		}
@@ -1302,10 +1308,6 @@ if (!function_exists('loppu')) {
 			for ($pp=1; $pp<=$sivu; $pp++) {
 				$pdf_lasku->draw_text(500, 815, t("Sivu", $kieli).": $pp / $sivu", $page[$pp], $norm);
 			}
-		}
-
-		if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maa"])) {
-			$piirra_viivakoodi = false;
 		}
 
 		//yhteensärivi
@@ -1482,7 +1484,7 @@ if (!function_exists('loppu')) {
 
 		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
 			// haetaan toimipaikan tiedot
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_toimipaikka]'";
+			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
 			$alhire = pupe_query($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {
@@ -1535,7 +1537,19 @@ if (!function_exists('loppu')) {
 			$width = 340;
 			$height = $barcode_korkeus-1 * 1.2;
 			$style = BCS_IMAGE_JPEG;
-			$code = PalautaPankkiviivakoodi($pankkitiedot["pankkitili1"], $summa, $erapaiva, $laskurow["viite"]);
+
+			$onko_tili1_iban = tarkista_iban($pankkitiedot["pankkitili1"]);
+			$onko_iban1_iban = tarkista_iban($pankkitiedot["pankkiiban1"]);
+
+			if ($onkotili1iban != "") {
+				$code = PalautaPankkiviivakoodi($onkotili1iban, $summa, $erapaiva, $laskurow["viite"], 4);
+			}
+			elseif ($onko_iban1_iban != "") {
+				$code = PalautaPankkiviivakoodi($onko_iban1_iban, $summa, $erapaiva, $laskurow["viite"], 4);
+			}
+			else {
+				$code = PalautaPankkiviivakoodi($pankkitiedot["pankkitili1"], $summa, $erapaiva, $laskurow["viite"], 2);
+			}
 
 			$font = 5;
 			$xres = 1;
@@ -1762,11 +1776,16 @@ if (!function_exists('alvierittely')) {
 }
 
 if (!function_exists('PalautaPankkiviivakoodi')) {
-	function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.0000", $viitenumero = 0) {
-		$versio = 2;
+	function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.0000", $viitenumero = 0, $versio = 2) {
 
-		$pankkitili = $tilinumero;
-		include("inc/pankkitilinoikeellisuus.php");
+		if ($versio == '2') {
+			$pankkitili = $tilinumero;
+			include("inc/pankkitilinoikeellisuus.php");
+		}
+		else {
+			// tarkista_iban ei osaa tarkistaa kuin Suomalaisia tilinumeroita
+			$pankkitili = substr(tarkista_iban($tilinumero), 2); // Maatunnus pois
+		}
 
 		if ($pankkitili == "") {
 			return;
@@ -1785,7 +1804,15 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 		$konekielinen_summa = sprintf("%08d", $konekielinen_summa);
 
 		// Viitenumero
-		$konekielinen_viitenumero = sprintf("%020d", $viitenumero);
+		if ($versio == '2' or $versio == '4' ) {
+			$konekielinen_viitenumero = sprintf("%020d", $viitenumero);
+		}
+		elseif ($versio == '5') {
+			// Annettu viite pitaisi olla muodossa RFxxyy...yy, jossa xx on tarkistenumero
+			$tarkiste = substr($viitenumero,2,2);
+			$viitenumero = substr($viitenumero,4);
+			$konekielinen_viitenumero = $tarkiste.sprintf("%021d", $viitenumero);
+		}
 
 		// Erapaiva
 		$pp = substr($erapv, 0, 2);
@@ -1794,16 +1821,33 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 
 		$konekielinen_erapv = $vv.$kk.$pp;
 
-		$vara = "0000";
+		// Varalla
+		if ($versio=='2') {
+			$vara = "0000";
+		}
+		elseif ($versio=='4') {
+			$vara = "000";
+		}
+		else $vara = '';
 
 		// Koonti
-		$pankkiviivakoodi = $versio.$konekielinen_tilinumero.$konekielinen_summa.$konekielinen_viitenumero.$konekielinen_erapv.$vara;
+		$pankkiviivakoodi = $versio.$konekielinen_tilinumero.$konekielinen_summa;
+
+		if ($versio=='2') {
+			$pankkiviivakoodi .= $konekielinen_viitenumero.$konekielinen_erapv.$vara;
+		}
+		else {
+			$pankkiviivakoodi .= $vara.$konekielinen_viitenumero.$konekielinen_erapv;
+		}
 
 		// Tarkistusnumero
 		$viite = $pankkiviivakoodi;
 
-		// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
-		include("inc/generoiviite.inc");
+		// Vain versio kakkoseen tarkiste 1
+		if ($versio == '2') {
+			// Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
+			include("inc/generoiviite.inc");
+		}
 
 		return($viite);
 	}
@@ -2125,7 +2169,7 @@ if (!function_exists("tulosta_lasku")) {
 				$kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
 
 				if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-					$kutsu .= " ".trim($laskurow["nimi"]);
+					$kutsu .= ", ".trim($laskurow["nimi"]);
 				}
 
 				$liite 				= $pdf_laskufilenimi;
@@ -2158,7 +2202,7 @@ if (!function_exists("tulosta_lasku")) {
 					$kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-						$kutsu .= " ".trim($laskurow["nimi"]);
+						$kutsu .= ", ".trim($laskurow["nimi"]);
 					}
 
 					$liite 				= $pdf_laskufilenimi;

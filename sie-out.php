@@ -1,5 +1,8 @@
 <?php
 
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
+
 require('inc/parametrit.inc');
 
 // poimitaan kuluva päivä, raportin timestampille
@@ -43,10 +46,12 @@ if ($kausi!='') {
 
 		//Kustannuspaikan koodien haku
 		echo "<font class='message'>Tarkenteet</font><br>";
+
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]'
-					and kaytossa != 'E'";
+					and kaytossa != 'E'
+					ORDER BY tyyppi, koodi+0, koodi, nimi";
 		$result = mysql_query($query)
 					or die ("Kysely ei onnistu $query");
 		$ulos='';

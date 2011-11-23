@@ -8,7 +8,13 @@ if (isset($_POST["tee"])) {
 
 if ((($_REQUEST["toim"] != 'hyvaksynta') or ($_REQUEST["tee"] != 'T')) and ($_REQUEST["toim"] !='maksuvalmius')) $useslave = 1;
 
-if ($_REQUEST["toim"] == 'toimittajahaku' or $_REQUEST["toim"] == 'laskuhaku' or $_REQUEST["toim"] == 'avoimet' or $_REQUEST["toim"] == 'myyrespaakirja') {
+
+if ($_REQUEST["toim"] == 'avoimet') {
+	// DataTables päälle
+	$pupe_DataTables = array("avoimet0", "avoimet1");
+}
+
+if ($_REQUEST["toim"] == 'toimittajahaku' or $_REQUEST["toim"] == 'laskuhaku' or $_REQUEST["toim"] == 'myyrespaakirja') {
 	// DataTables päälle
 	$pupe_DataTables = $_REQUEST["toim"];
 }
@@ -59,6 +65,7 @@ if (isset($workbook) and $excelrivi>0) {
 	echo "<br><br><table>";
 	echo "<tr><th>".t("Tallenna Excel").":</th>";
 	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 	echo "<input type='hidden' name='kaunisnimi' value='".ucfirst(strtolower($toim)).".xls'>";
 	echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

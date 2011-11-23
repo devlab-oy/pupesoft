@@ -1,6 +1,4 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-	$useslave = 1;
 
 	// DataTables päälle
 	$pupe_DataTables = "asiakkaantilaukset";
@@ -358,8 +356,7 @@
 			$litunn = $asiakasid;
 		}
 
-		if ($kukarow['hinnat'] == 0) $summaselli = " lasku.summa, ";
-		else $summaselli = "";
+		$summaselli = "";
 
 		if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
 			$yhtioekolisa = "yhtio.nimi, ";
@@ -382,6 +379,14 @@
 			else {
 				$jarj = "ORDER BY 2 desc, 1 asc";
 			}
+		}
+
+		if ($kukarow['hinnat'] == 0) {
+			$summaselli = " lasku.summa, ";
+		}
+
+		if ($kukarow['resoluutio'] == 'I') {
+			$summaselli .= " lasku.viesti tilausviite, ";
 		}
 
 		if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
@@ -433,19 +438,10 @@
 			$query .=	"$jarj";
 		}
 		else {
-			// jos on iiiiso näyttö niin näytetään myös viite
-			if ($kukarow['resoluutio'] == 'I') {
-				$query = "	SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.viesti tilausviite, lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-							FROM lasku use index (yhtio_tila_luontiaika)
-							$yhtioekojoin
-							WHERE lasku.$logistiikka_yhtiolisa ";
-			}
-			else {
-				$query = "	SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
-							FROM lasku use index (yhtio_tila_luontiaika)
-							$yhtioekojoin
-							WHERE lasku.$logistiikka_yhtiolisa ";
-			}
+			$query = "	SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+						FROM lasku use index (yhtio_tila_luontiaika)
+						$yhtioekojoin
+						WHERE lasku.$logistiikka_yhtiolisa ";
 
 			if ($ytunnus{0} == '£') {
 				$query .= "	and lasku.nimi		= '$asiakasrow[nimi]'
@@ -465,11 +461,11 @@
 		}
 
 		if ($kaikki == "") {
-			$query .= " limit 51";
+			$query .= " LIMIT 51";
 			$limittrikkeri = "A";
 		}
 		else {
-			$query .= " limit 500 ";
+			$query .= " LIMIT 500 ";
 			$limittrikkeri = "X";
 		}
 
@@ -489,36 +485,35 @@
 		echo "<td class='back'>";
 		echo "<input type='submit' value='".t("Hae")."'>";
 		echo "</td></tr>";
-
-		echo "</form>";
 		echo "</table>";
+		echo "</form>";
 
 		if (mysql_num_rows($result) > 50 and $limittrikkeri == "A") {
 			echo "<p><font class='error'>".t("HUOM")."! ".t("Näytetään vain 50 uusinta tilausta")."</font></p>";
 		}
 
-		if (mysql_num_rows($result)!=0) {
+		if (mysql_num_rows($result) > 0) {
 
 			if ($kukarow['resoluutio'] == 'I') {
 				if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-					pupe_DataTables($pupe_DataTables, 10, 11);
+					pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
 				}
 				else {
-					pupe_DataTables($pupe_DataTables, 9, 10);
+					pupe_DataTables(array(array($pupe_DataTables, 9, 10)));
 				}
 			}
 			else {
 				if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-					pupe_DataTables($pupe_DataTables, 9, 10);
+					pupe_DataTables(array(array($pupe_DataTables, 9, 10)));
 				}
 				else {
-					pupe_DataTables($pupe_DataTables, 8, 9);
+					pupe_DataTables(array(array($pupe_DataTables, 8, 9)));
 				}
 			}
 
 			echo "<br>";
-			echo "<table class='display' id='$pupe_DataTables'>";
 
+			echo "<table class='display dataTable' id='$pupe_DataTables'>";
 			echo "<thead>";
 			echo "<tr>";
 
@@ -527,16 +522,16 @@
 			}
 
 			echo "<th>".t("Tyyppi")."</th>
-				  <th class='back'></th>";
+				  <th style='visibility:hidden;'></th>";
 			echo "</tr>";
 
 			echo "<tr>";
 
 			for ($i=0; $i < mysql_num_fields($result)-8; $i++) {
-				echo "<td><input type='text' name='search_".t(mysql_field_name($result,$i))."'></td>";
+				echo "<td><input type='text' class='search_field' name='search_".t(mysql_field_name($result,$i))."'></td>";
 			}
 
-			echo "<td><input type='text' name='search_tyyppi'></td>
+			echo "<td><input type='text' class='search_field' name='search_tyyppi'></td>
 			      <td class='back'></td>";
 			echo "</tr>";
 			echo "</thead>";
@@ -544,7 +539,7 @@
 
 			while ($row = mysql_fetch_array($result)) {
 
-				echo "<tr class='aktiivi'>";
+				echo "<tr>";
 
 				// Laatikot laskujen ympärille
 				if ($row["laskunro"] > 0 and $row["laskunro"] != $edlaskunro) {
@@ -706,9 +701,11 @@
 
 	if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
 		// Näytetään muuten vaan sopivia tilauksia
-		echo "<br><table>";
+
 		echo "<form action = '$PHP_SELF' method = 'post'>
 			<input type='hidden' name='toim' value='$toim'>";
+
+		echo "<br><table>";
 
 		if ($cleantoim == "OSTO") {
 			echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";

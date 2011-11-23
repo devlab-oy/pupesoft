@@ -37,7 +37,7 @@ if(!function_exists("liitetiedostottarkista")) {
 							WHERE yhtio 		= '$kukarow[yhtio]'
 							and liitos   		= '$liite_liitos'
 							and liitostunnus 	= '$liite_liitostunnus'";
-				$jres = mysql_query($query) or pupe_error($query);
+				$jres = pupe_query($query);
 				$jrow = mysql_fetch_array($jres);
 
 				$t[$i] = $jrow["jarjestys"]+1;
@@ -79,7 +79,7 @@ if(!function_exists("liitetiedostottarkista")) {
 							and liitostunnus	= '$liite_liitostunnus'
 							$kayttotarkoitus_lisa
 							and filename 		= '$file_name'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if (mysql_num_rows($result) > 0) {
 					$checkrow = mysql_fetch_array($result);
@@ -104,7 +104,7 @@ if(!function_exists("liitetiedostottarkista")) {
 					// Muutetaan tuotekuvan koko sopivaksi
 					if ($liite_kayttotarkoitus == "TK" and $type == "image" and strtoupper($liite_liitos) == 'TUOTE') {
 						$temp_file = $_FILES["liite_data"];
-						
+
 						$uusi_filu = muuta_kuvan_koko($thumb_size_y, $thumb_size_x, "thumb", $liite_liitos, "liite_data");
 
 						$liite_kayttotarkoitus = "TH";

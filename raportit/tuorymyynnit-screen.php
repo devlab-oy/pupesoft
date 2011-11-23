@@ -1,6 +1,8 @@
 <?php
-///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
+
 require ("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tuoteryhmien myynnit")."</font><hr>";
@@ -34,7 +36,7 @@ if ($submit != '' and $vv != '' and $kk != '') {
 		$where = "and osasto='$osasto'";
 	}
 	else {
-		$where = ""; 
+		$where = "";
 		$osasto = "kaikki";
 	}
 
@@ -52,7 +54,7 @@ if ($submit != '' and $vv != '' and $kk != '') {
 				round(sum(kpl), 0) kpl,
 				round(sum(kate) / sum(rivihinta) * 100, 1) katepro
 				from tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-				where yhtio = '$kukarow[yhtio]' 
+				where yhtio = '$kukarow[yhtio]'
 				and tyyppi = 'L'
 				and laskutettuaika >= '$ayy'
 				and laskutettuaika < '$lyy'

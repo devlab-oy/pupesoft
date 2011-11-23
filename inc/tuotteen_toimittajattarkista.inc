@@ -78,7 +78,7 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 								from toimi 
 								where yhtio = '$kukarow[yhtio]'
 								and tyyppi != 'P' 
-								and (ytunnus like '%$t[$i]%' or nimi like '%$t[$i]%')
+								and (ytunnus like '%$t[$i]%' or nimi like '%$t[$i]%' or toimittajanro like '%$t[$i]%')
 								order by nimi";
 					$sresult = mysql_query($query) or pupe_error($query);
 						
@@ -110,9 +110,11 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 				
 						$alasveto[$i] = "<input type='hidden' name='t[$i]' value='XXX'>
 										<select name='toimi_liitostunnus'>";
-										
+						
 						while ($srow = mysql_fetch_assoc($sresult)) {
-							$alasveto[$i] .= "<option value='$srow[tunnus]'>$srow[ytunnus] $srow[nimi] $srow[nimitark]</option>";
+							if ($srow['toimittajanro'] != '') $naytetaantoimittajanro = "(".$srow['toimittajanro'].")";
+							else $naytetaantoimittajanro = "";
+							$alasveto[$i] .= "<option value='$srow[tunnus]'>$srow[ytunnus] $srow[nimi] $srow[nimitark] $naytetaantoimittajanro </option>";
 						}
 					
 						$alasveto[$i] .= "</select>";

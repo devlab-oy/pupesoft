@@ -6,7 +6,7 @@
 			if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 		}
 
-		///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+		//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 		$useslave = 1;
 
 		$pupe_DataTables = "saatanat_taulu";
@@ -319,35 +319,9 @@
 			echo "<font class='head'>".t("Saatavat")." - $yhtiorow[nimi] - $sappl.$sakkl.$savvl</font><hr>";
 
 			if ($eiliittymaa != 'ON') {
-				$footerCallBack = ",
-					\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
-						var saatavaty = new Array();
-						var sarakemaara = ".count($saatavat_array)."+5;
-
-						// Summataan vain ruudulla n‰kyv‰t luvut
-						for (var i=iStart; i<iEnd; i++) {
-
-							for (var j=2; j<=sarakemaara; j++) {
-								if (typeof saatavaty[j] == 'undefined') saatavaty[j] = 0;
-								saatavaty[j] += aaData[aiDisplay[i]][j]*1;
-							}
-						}
-
-						// Tyhjennet‰‰n kaikki summat
-						$('td[name=saatavat_yhteensa]').each(
-							function() {
-								$( this ).html('');
-							}
-						);
-
-						for (var j=2; j<=sarakemaara; j++) {
-							$('#saatavat_yhteensa_'+j).html(saatavaty[j].toFixed(2));
-						}
-					}";
-
 				$sarakemaara = count($saatavat_array)+7;
 
-				pupe_DataTables($pupe_DataTables, $sarakemaara, $sarakemaara, $footerCallBack);
+				pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
 			}
 
 			// Linkki asiakasrappariin
@@ -358,7 +332,7 @@
 				$asirappari_linkki_alatila = "Y";
 			}
 
-			echo "<table class='display' id='$pupe_DataTables'>";
+			echo "<table class='display dataTable' id='$pupe_DataTables'>";
 			echo "<thead>";
 			echo "<tr>";
 			echo "<th>".t("Ytunnus")."</th>";
@@ -532,14 +506,23 @@
 			echo "</table>";
 
 			if ($sytunnus != '') {
+				
+				$liitoslisa = "";
+				
+				if ($sliitostunnus !="") {
+					$liitoslisa = "AND asiakas.tunnus='{$sliitostunnus}' ";
+				}
+				
 				$query = "	SELECT jv
 							FROM asiakas
 							JOIN maksuehto ON (maksuehto.yhtio = asiakas.yhtio and maksuehto.tunnus = asiakas.maksuehto and maksuehto.kaytossa = '' and maksuehto.jv != '')
 							WHERE asiakas.yhtio = '$saatavat_yhtio'
 							AND asiakas.ytunnus = '$sytunnus'
 							AND asiakas.laji != 'P'
+							{$liitoslisa}
 							$eta_asiakaslisa
 							LIMIT 1";
+				
 				$maksuehto_chk_res = pupe_query($query);
 				$maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
 
@@ -589,7 +572,7 @@
 				// We need to explicitly close the workbook
 				$workbook->close();
 
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<br><br><form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Saatavat.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

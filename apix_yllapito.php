@@ -129,8 +129,8 @@
 				$status_message2 .= "<font class='ok'>Päivitys onnistui, APIX laskutus käyttöönotettu!</font>";
 
 				$query = "	UPDATE yhtion_parametrit SET
-							verkkotunnus_lah = '$transfer_id',
-							verkkosala_lah = '$transfer_key',
+							apix_tunnus = '$transfer_id',
+							apix_avain = '$transfer_key',
 							verkkolasku_lah = 'apix',
 							finvoice_senderpartyid = '$yhtiorow[ovttunnus]',
 							finvoice_senderintermediator = '003723327487'

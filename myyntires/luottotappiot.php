@@ -236,7 +236,7 @@ if ($tila == 'N') {
 
 if ($tila == "") {
 
-	pupe_DataTables($pupe_DataTables, 5, 6);
+	pupe_DataTables(array(array($pupe_DataTables, 5, 6)));
 
 	$lisa = "";
 	$erachk = "";
@@ -270,7 +270,7 @@ if ($tila == "") {
 	echo "</table>";
 	echo "</form><br>";
 
-	echo "<table class='display' id='$pupe_DataTables'>";
+	echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
 	echo "<thead>
 			<tr>
@@ -282,11 +282,11 @@ if ($tila == "") {
 			<th class='back'></th>
 			</tr>
 			<tr>
-			<td><input type='text' name='search_ytunnus'></td>
-			<td><input type='text' name='search_asiakas'></td>
-			<td><input type='text' name='search_summa'></td>
-			<td><input type='text' name='search_kpl'></td>
-			<td><input type='text' name='search_laskut'></td>
+			<td><input type='text' class='search_field' name='search_ytunnus'></td>
+			<td><input type='text' class='search_field' name='search_asiakas'></td>
+			<td><input type='text' class='search_field' name='search_summa'></td>
+			<td><input type='text' class='search_field' name='search_kpl'></td>
+			<td><input type='text' class='search_field' name='search_laskut'></td>
 			<td class='back'></td>
 			</tr>
 		</thead>";

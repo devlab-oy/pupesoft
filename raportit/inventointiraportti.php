@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
@@ -21,7 +24,7 @@
 			$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 		}
 
-		// käytetään slavea
+		//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 		$useslave = 1;
 		require ("inc/connect.inc");
 
@@ -847,7 +850,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and kaytossa != 'E'
 						and tyyppi = 'K'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_kustp[]' multiple='TRUE' size='10' style='width:100%;'>";

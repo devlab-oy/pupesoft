@@ -65,10 +65,12 @@
 
 			$PmtInfId = $PmtInf->addChild('PmtInfId', $laskurow['tunnus']);																	// PaymentInformationIdentification, Pakollinen kentt‰
 			$PmtMtd = $PmtInf->addChild('PmtMtd', 'TRF'); 																					// PaymentMethod, Pakollinen kentt‰ (TRF = transfer)
-//			$PmtTpInf = $PmtInf->addChild('PmtTpInf');
+		if (tarkista_sepa($laskurow["maa"]) !== FALSE) {
+			$PmtTpInf = $PmtInf->addChild('PmtTpInf');																						// Jos SEPA maa, laitetaan n‰m‰ segmentit mukaan
 //			 	$InstrPrty = $PmtTpInf->addChild('InstrPrty');
-//			 	$SvcLvl = $PmtTpInf->addChild('SvcLvl');
-//			 		$SvcLvl->addChild('Cd', 'SEPA');
+			 	$SvcLvl = $PmtTpInf->addChild('SvcLvl');
+			 		$SvcLvl->addChild('Cd', 'SEPA');
+		}
 //			 	$LclInstrm = $PmtTpInf->addChild('LclInstrm');
 //			 		$LclInstrm->addChild('Cd', '');
 //			 	$CtgyPurp = $PmtTpInf->addChild('CtgyPurp');
@@ -173,7 +175,7 @@
 				$InstdAmt = $Amt->addChild('InstdAmt', $laskurow['summa']);							// InstructedAmount, Pakollinen kentt‰
 			}
 			else {
-				$InstdAmt = $Amt->addChild('InstdAmt', $laskurow['summa'] - $laskurow['kasumma']);	// InstructedAmount, Pakollinen kentt‰
+				$InstdAmt = $Amt->addChild('InstdAmt', round($laskurow['summa'] - $laskurow['kasumma'],2));	// InstructedAmount, Pakollinen kentt‰
 			}
 			$InstdAmt->addAttribute('Ccy', $laskurow['valkoodi']);									// Currency, Pakollinen attribute
 
@@ -256,7 +258,7 @@
 //				$Nm = $CdtrAgtAcct->addChild('Nm', '');
 
 			$Cdtr = $CdtTrfTxInf->addChild('Cdtr', '');																									// Creditor
-			
+
 			// jos pankkihaltijan nimi on syˆtetty, laitetaan se nimen tilalle
 			if (trim($laskurow['pankki_haltija']) != '') {
 				$Nm = $Cdtr->addChild('Nm', sprintf("%-1.70s", $laskurow['pankki_haltija']));															// Name, Pakollinen kentt‰ 1-70
@@ -682,7 +684,7 @@
 		$xml->{"pain.001.001.02"}->GrpHdr->NbOfTxs = $tapahtuma_maara;
 
 		// Kirjoitetaaan XML ja tehd‰‰n UTF8 encode
-		fwrite($toot, utf8_encode($xml->asXML()));
+		fwrite($toot, str_replace(chr(10),"",utf8_encode($xml->asXML())));
 		fclose($toot);
 
 		// Tehd‰‰n viel‰ t‰ss‰ vaiheessa XML validointi, vaikka ainesto onkin jo tehty. :(

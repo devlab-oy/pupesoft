@@ -11,7 +11,6 @@
 	// Pamautetaan toimitusvahvistus asiakkaalle jos menn‰‰n haaraan jossa ei toimiteta mit‰‰n
 	$toimitusvahvitus_laheta = FALSE;
 
-
 	// etuk‰teen maksettu lasku, pit‰‰ huomioida myˆs kpl
 	if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $laskurow["mapvm"] != '0000-00-00' and $laskurow["mapvm"] != '') {
 		$lis_plus_kpl = " + tilausrivi.kpl";
@@ -40,7 +39,7 @@
 				and tilausrivi.otunnus 	= '$laskurow[tunnus]'
 				and tilausrivi.tyyppi	= 'L'
 				and tilausrivi.tuoteno != '$yhtiorow[rahti_tuotenumero]'";
-	$tresult = mysql_query($query) or pupe_error($query);
+	$tresult = pupe_query($query);
 	$rivirow = mysql_fetch_array($tresult);
 
 	// Ker‰tt‰v‰t ja ei ker‰tt‰v‰ rivit
@@ -121,7 +120,7 @@
 		$query  = "	UPDATE tilausrivi
 					SET tyyppi='D'
 					WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆi ohjelmassa tilaus-valmis-valitsetila.php (1)")."<br>";
 
@@ -129,7 +128,7 @@
 					SET tila='D', alatila='$laskurow[tila]', comments = '$komm'
 					where tunnus='$laskurow[tunnus]'
 					and yhtio='$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s mit‰tˆitiin koska tilauksella ei ollut yht‰‰n ker‰tt‰v‰‰/laskutettavaa rivi‰."), $laskurow["tunnus"])."</font><br><br>\n";
 		$toimitusvahvitus_laheta = TRUE;
@@ -140,7 +139,7 @@
 					SET tila='N', alatila='U'
 					where tunnus='$laskurow[tunnus]'
 					and yhtio='$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli JT-rivej‰ ja osatoimitusta ei tehd‰, eli se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
 	}
@@ -151,7 +150,7 @@
 			// Jos tilauksella oli vain puuterivej‰ niin poistetaan rahtikulurivi jos sellanen on
 			$query  = "	DELETE FROM tilausrivi
 						WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆi ohjelmassa tilaus-valmis-valitsetila.php (2)")."<br>";
 
@@ -159,7 +158,7 @@
 						SET tila='D', alatila='$laskurow[tila]', comments = '$komm'
 						where tunnus='$laskurow[tunnus]'
 						and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s  oli pelk‰st‰‰n Puuterivej‰. Otsikko mit‰tˆitiin."), $laskurow["tunnus"])."</font><br><br>\n";
 			$toimitusvahvitus_laheta = TRUE;
@@ -168,13 +167,13 @@
 			// Jos tilauksella oli vain jt-rivej‰ niin poistetaan rahtikulurivi jos sellanen on
 			$query  = "	DELETE FROM tilausrivi
 						WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$query  = "	UPDATE lasku
 						SET tila='N', alatila='T'
 						where tunnus='$laskurow[tunnus]'
 						and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk‰st‰‰n JT-rivej‰ ja se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
 		}
@@ -183,14 +182,14 @@
 			// Jos tilauksella oli vain jt/puute-rivej‰ niin poistetaan rahtikulurivi jos sellanen on
 			$query  = "	DELETE FROM tilausrivi
 						WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			// P‰ivitet‰‰n tilaus tilaan 'odottaa jt-rivej‰'
 			$query  = "	UPDATE lasku
 						SET tila='N', alatila='T'
 						where tunnus='$laskurow[tunnus]'
 						and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk‰st‰‰n JT-rivej‰ ja Puuterivej‰ ja se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
 		}
@@ -206,7 +205,7 @@
 							and keratty 	= ''
 							and toimitettu 	= ''
 							and tyyppi 	   != 'D'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				// Jos on vienti‰ ja vain saldottomia niin menn‰‰n suoraan toimitetuksi
 				if ($laskurow["vienti"] != '' and $rivirow["riveja"] == $rivirow["saldottomat"]) {
@@ -229,7 +228,7 @@
 								and keratty    != ''
 								and toimitettu 	= ''
 								and tyyppi 	   != 'D'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 				elseif ($laskurow["vienti"] != '') {
 					$alat = "B";
@@ -243,7 +242,7 @@
 								and keratty    != ''
 								and toimitettu 	= ''
 								and tyyppi 	   != 'D'";
-					$result = mysql_query($query) or pupe_error($query);
+					$result = pupe_query($query);
 				}
 				else {
 					$alat = "C";
@@ -256,7 +255,7 @@
 							lahetepvm = now()
 							WHERE tunnus = '$laskurow[tunnus]'
 							AND yhtio = '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 			}
 			else {
 				// Jos on laskuettavia rivej‰ ja jos kyseess‰ ei ole k‰teinen, merkataan tilaukset ker‰tyksi ja toimitetuksi ja alatila 'D'
@@ -267,7 +266,7 @@
 							and var not in ('P','J','S')
 							and keratty		= ''
 							and toimitettu	= ''";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$query  = "	UPDATE tilausrivi
 							SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
@@ -277,7 +276,7 @@
 							and keratty    != ''
 							and toimitettu	= ''
 							and tyyppi 	   != 'D'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				// Jos meill‰ on maksupositioita laskulla, tulee se siirt‰‰ alatilaan J
 				if ($laskurow['jaksotettu'] != 0) {
@@ -293,7 +292,7 @@
 							lahetepvm = now()
 							WHERE tunnus = '$laskurow[tunnus]'
 							AND yhtio = '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
 			}
@@ -312,7 +311,7 @@
 					and tunnus = '$laskurow[tunnus]'
 					and tila in ('N','L')
 					and alatila in ('','A','F','U')";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///
 		if ($yhtiorow["lahetteen_tulostustapa"] != "K") {
@@ -333,19 +332,25 @@
 					FROM asiakas
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and tunnus = '$laskurow[liitostunnus]'";
-		$tresult = mysql_query($query) or pupe_error($query);
+		$tresult = pupe_query($query);
 		$asirow = mysql_fetch_array($tresult);
 
 		if ($asirow['toimitusvahvistus'] != '') {
 
 			// haetaan toimitustavan tiedot
 			$query    = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
-			$toitares = mysql_query($query) or pupe_error($query);
+			$toitares = pupe_query($query);
 			$toitarow = mysql_fetch_assoc($toitares);
 
 			$otunnukset		= $laskurow["tunnus"];
 			$tunnukset		= 0;
 			$rahtikirjanro	= 0;
+			$tulostauna		= "";
+			
+			if ($asirow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
+				$tulostauna = "KYLLA";
+				$asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+			}
 
 			if (@include("tilauskasittely/$asirow[toimitusvahvistus]")) {
 				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksesta %s l‰hetettiin toimitusvahvistus."), $laskurow["tunnus"])."</font><br><br>\n";

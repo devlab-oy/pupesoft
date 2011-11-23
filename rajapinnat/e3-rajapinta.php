@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	if (empty($argv)) {
 	    die('<p>Tämän scriptin voi ajaa ainoastaan komentoriviltä.</p>');
 	}

@@ -486,7 +486,12 @@ if (!function_exists('finvoice_alvierittely')) {
 			xml_add("VatBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow['rivihinta']),	 $tootfinvoice);
 			xml_add("VatRatePercent",												pp($alvrow['alv']),			 $tootfinvoice);
 			xml_add("VatRateAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow['alvrivihinta']), $tootfinvoice);
-			xml_add("VatFreeText",													"",					   		 $tootfinvoice);
+			if ($alvrow["alv"] > 600) {
+				xml_add("VatFreeText", t("Ostaja verovelvollinen AVL 8c §", $kieli), $tootfinvoice);
+			}
+			else {
+				xml_add("VatFreeText","",$tootfinvoice);
+			}
 			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
 		}
 	}

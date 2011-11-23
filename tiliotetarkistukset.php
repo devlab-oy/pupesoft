@@ -1,15 +1,19 @@
 <?php
+
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	require "inc/parametrit.inc";
-	
+
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	if ($tee == 'S') {
-		
+
 		$silent = "SILENT";
 
 		$query = "	SELECT * FROM tiliotedata
-					WHERE alku >= '$vv-$kk-$pp' 
-					and tilino = '$tilino' 
+					WHERE alku >= '$vv-$kk-$pp'
+					and tilino = '$tilino'
 					and tyyppi ='$tyyppi'
 					ORDER BY alku, tunnus";
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);

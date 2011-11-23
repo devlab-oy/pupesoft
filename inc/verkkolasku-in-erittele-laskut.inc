@@ -20,7 +20,7 @@
 				$type = "SOAP";
 			}
 
-			if (preg_match("/\<Finvoice Version\=\"1\.[0-3]\".*\>/i", $ln) > 0) {
+			if (preg_match("/\<Finvoice.*?Version\=\"1\.[0-3]\".*?\>/i", $ln) > 0) {
 				$type = "FINVOICE";
 
 				if (strpos($ln, "Version=\"1.3\"") !== FALSE) {

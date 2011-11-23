@@ -2267,6 +2267,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "livetuotehaku_poistetut") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Poistuvia/poistettuja tuotteita ei n‰ytet‰")."</option>";
+		$ulos .= "<option value = 'X' $sel[X]>".t("Poistuvat tuotteet n‰ytet‰‰n")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "naytetaanko_osaston_ja_tryn_selite") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2833,26 +2848,38 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == 'tuotteiden_jarjestys_raportoinnissa') {
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
-	
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
 		$sel = $trow[$i] == 'V' ? ' selected' : '';
-		
+
 		$ulos .= "<option value = ''>".t("Tuotenumeron mukaan");
 		$ulos .= "<option value = 'V' $sel>".t("Variaation, v‰rin ja koon mukaan");
 		$ulos .= "</select></td>";
-		
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == 'ennakkotilausten_toimitus') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = $trow[$i] == 'M' ? ' selected' : '';
+
+		$ulos .= "<option value = ''>".t("Ennakkotilaukset toimitetaan Ennakko-selaus ohjelmalla");
+		$ulos .= "<option value = 'M' $sel>".t("Ennakkotilaukset toimitetaan tilauskittain ja/tai Ennakko-selaus ohjelmalla");
+		$ulos .= "</select></td>";
+
 		$jatko = 0;
 	}
 	
-	if (mysql_field_name($result, $i) == 'ennakkotilausten_toimitus') {
+	if (mysql_field_name($result, $i) == 'raaka_aineet_valmistusmyynti') {
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
 	
-		$sel = $trow[$i] == 'M' ? ' selected' : '';
+		$sel = $trow[$i] == 'N' ? ' selected' : '';
 		
-		$ulos .= "<option value = ''>".t("Ennakkotilaukset toimitetaan Ennakko-selaus ohjelmalla");
-		$ulos .= "<option value = 'M' $sel>".t("Ennakkotilaukset toimitetaan tilauskittain ja/tai Ennakko-selaus ohjelmalla");
+		$ulos .= "<option value = ''>".t("N‰ytet‰‰n raaka-aineet valmistusmyynniss‰");
+		$ulos .= "<option value = 'N' $sel>".t("Ei n‰ytet‰ raaka-aineita valmistusmyynniss‰");
 		$ulos .= "</select></td>";
 		
 		$jatko = 0;

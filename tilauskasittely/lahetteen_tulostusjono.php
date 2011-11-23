@@ -247,7 +247,7 @@
 					lasku.yhtio yhtio,
 					lasku.yhtio_nimi yhtio_nimi
 					FROM lasku
-					JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
+					JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
 					WHERE
 					lasku.yhtio = '$kukarow[yhtio]'
@@ -792,7 +792,7 @@
 					GROUP_CONCAT(DISTINCT if (kommentti='',NULL,kommentti) separator '\n') AS kommentit,
 					lasku.mapvm
 					FROM lasku
-					JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
+					JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi != 'D')
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
 					LEFT JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus
 					WHERE

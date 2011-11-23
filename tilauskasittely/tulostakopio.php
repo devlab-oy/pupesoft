@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
 		$_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
 	}
@@ -1335,7 +1338,7 @@
 						$kutsu = t("SAD-lomake", $kieli);
 
 						if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-							$kutsu .= " ".trim($laskurow["nimi"]);
+							$kutsu .= ", ".trim($laskurow["nimi"]);
 						}
 
 						require("../inc/sahkoposti.inc");
@@ -1382,7 +1385,7 @@
 					$kutsu = t("Vientierittely", $kieli);
 
 					if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-						$kutsu .= " ".trim($laskurow["nimi"]);
+						$kutsu .= ", ".trim($laskurow["nimi"]);
 					}
 
 					require("../inc/sahkoposti.inc");

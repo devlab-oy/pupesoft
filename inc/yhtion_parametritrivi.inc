@@ -2872,5 +2872,17 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == 'raaka_aineet_valmistusmyynti') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'N' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("N‰ytet‰‰n raaka-aineet valmistusmyynniss‰");
+		$ulos .= "<option value = 'N' $sel>".t("Ei n‰ytet‰ raaka-aineita valmistusmyynniss‰");
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
 
 ?>

@@ -165,6 +165,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset  = array("REKNO", "AJONEUVOLAJI", "AUTOID", "MAA");
 				$kielletyt   = array();
 				$eiyhtiota 	 = "EILAATIJAA";
+				$saakopoistaa = TRUE;
 				break;
 			case "tuotteen_orginaalit" :
 				$pakolliset  = array("TUOTENO", "ORIG_TUOTENO");

@@ -125,11 +125,10 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	else {
 		$errormsg = t("Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen", $browkieli)."!";
 	}
-// Kirjataan epäonnistunut kirjautuminen virhelokiin... 
-$rh = $_SERVER['REMOTE_HOST'] ?: gethostbyaddr ($_SERVER['REMOTE_ADDR']); 
-$lmerkinta = 'Pupesoft/login failed. User: ' . $_REQUEST['user'] . ', 
-RIP: ' . $_SERVER['REMOTE_ADDR'] . ', RHOST: ' . $rh; 
-error_log ($lmerkinta, 0);
+	
+	// Kirjataan epäonnistunut kirjautuminen virhelokiin... 
+	error_log ("user $user: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
+
 }
 else {
 	require_once("inc/parametrit.inc");

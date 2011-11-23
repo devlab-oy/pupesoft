@@ -781,6 +781,31 @@
 
 		$query_ale_lisa = generoi_alekentta('M');
 
+		if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
+			$tyyppilisa = " and tilausrivi.tyyppi in ('L' $deletedlisa) ";
+		}
+		else {
+			// Onko käyttäjällä oikeus nähdä valmistuksia tai reseptejä
+			$oikeu_t1 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAVARASTOON");
+
+			if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "N") {
+				$oikeu_t2 = FALSE;
+			}
+			else {
+				$oikeu_t2 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAASIAKKAALLE");
+			}
+
+			$oikeu_t3 = tarkista_oikeus("tilauskasittely/valmista_tilaus.php", "");
+			$oikeu_t4 = tarkista_oikeus("tuoteperhe.php", "RESEPTI");
+
+			if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {
+				$tyyppilisa = " and tilausrivi.tyyppi in ('E','L','G','V','W','T' $deletedlisa) ";
+			}
+			else {
+				$tyyppilisa = " and tilausrivi.tyyppi in ('E','L','G','W','T' $deletedlisa) ";
+			}
+		}
+
 		// Tilausrivit
 		$query  = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
 					tilausrivi.kpl määrä,
@@ -798,7 +823,7 @@
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
-					and tilausrivi.tyyppi in ('E','L','G','V','W','T' $deletedlisa)
+					$tyyppilisa
 					ORDER BY tilausrivi.otunnus, $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
 		$result = pupe_query($query);
 
@@ -1046,7 +1071,7 @@
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and $where
 							$pklisa
-							and tilausrivi.tyyppi in ('E','L','G','V','W','T')";
+							$tyyppilisa";
 				$pkres = pupe_query($pkquery);
 				$pkrow = mysql_fetch_row($pkres);
 
@@ -1533,7 +1558,7 @@
 							FROM tilausrivi
 							WHERE $where
 							and yhtio	= '$kukarow[yhtio]'
-							and tyyppi in ('E','L','G','W','T')
+							$tyyppilisa
 							and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'
 							ORDER BY alv";
 			$alvresult = pupe_query($alvquery);
@@ -1549,7 +1574,11 @@
 								round(sum((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)*{$query_ale_lisa}),2) rivihinta
 								FROM tilausrivi
 								JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-								WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi in ('E','L','G','W','T') and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'";
+								WHERE $where
+								and tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.alv = '$alvrow[alv]'
+								$tyyppilisa
+								and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'";
 				}
 				else {
 					$aquery = "	SELECT
@@ -1557,7 +1586,11 @@
 								round(sum((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}),2) rivihinta
 								FROM tilausrivi
 								JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-								WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi in ('E','L','G','W','T') and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'";
+								WHERE $where
+								and tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.alv = '$alvrow[alv]'
+								$tyyppilisa
+								and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'";
 				}
 
 				$aresult = pupe_query($aquery);
@@ -1599,7 +1632,7 @@
 								FROM tilausrivi
 								WHERE $where
 								and yhtio	= '$kukarow[yhtio]'
-								and tyyppi in ('E','L','G','W','T')
+								$tyyppilisa
 								and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'
 								ORDER BY alv";
 				$alvresult = pupe_query($alvquery);
@@ -1613,7 +1646,11 @@
 									round(sum((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.varattu+tilausrivi.kpl)*{$query_ale_lisa}),2) rivihinta
 									FROM tilausrivi
 									JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-									WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi in ('E','L','G','W','T') and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
+									WHERE $where
+									and tilausrivi.yhtio = '$kukarow[yhtio]'
+									and tilausrivi.alv = '$alvrow[alv]'
+									$tyyppilisa
+									and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
 					}
 					else {
 						$aquery = "	SELECT
@@ -1621,7 +1658,11 @@
 									round(sum((tilausrivi.hinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) rivihinta
 									FROM tilausrivi
 									JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-									WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi in ('E','L','G','W','T') and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
+									WHERE $where
+									and tilausrivi.yhtio = '$kukarow[yhtio]'
+									and tilausrivi.alv = '$alvrow[alv]'
+									$tyyppilisa
+									and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
 					}
 
 					$aresult = pupe_query($aquery);

@@ -1,5 +1,8 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Tuotepaikkalistaus")."</font><hr>";
@@ -15,14 +18,14 @@
 	}
 
 	if ($tee == "TULOSTA") {
-		
+
 		$tulostimet[0] = "Tuotepaikkalistaus";
 		if (count($komento) == 0) {
 			require("inc/valitse_tulostin.inc");
 		}
 
 		$wherelisa = "";
-		
+
 		if ($ahyllyalue == '') {
 			$ahyllyalue = 0;
 		}
@@ -43,14 +46,14 @@
 			$wherelisa = " 	AND hyllyalue >= '$ahyllyalue' AND hyllynro >= '$ahyllynro' AND hyllyvali >= '$ahyllyvali' AND hyllytaso >= '$ahyllytaso'
 							AND hyllyalue <= '$lhyllyalue' AND hyllynro <= '$lhyllynro' AND hyllyvali <= '$lhyllyvali' AND hyllytaso <= '$lhyllytaso'";
 		}
-		
+
 		$jarj = "ORDER BY 1";
-		
+
 		if ($jarjestys == "hylly") {
 			$jarj = "ORDER BY 3";
 		}
-		
-		$tuotepaikka_query = "	SELECT tuote.tuoteno, tuote.nimitys, CONCAT_WS('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllyosoite 
+
+		$tuotepaikka_query = "	SELECT tuote.tuoteno, tuote.nimitys, CONCAT_WS('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllyosoite
 								FROM tuotepaikat
 								JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio=tuotepaikat.yhtio AND tuote.tuoteno=tuotepaikat.tuoteno)
 								WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
@@ -99,7 +102,7 @@
 
 					if ($rivit >= 50) {
 						fwrite($fh, $ots);
-						$rivit = 1;				
+						$rivit = 1;
 					}
 
 					$prn  = sprintf ('%-20.20s', 	$tuotepaikka_row["tuoteno"]);
@@ -119,7 +122,7 @@
 					// itse print komento...
 					$line = exec("$komento[Tuotepaikkalistaus] ".$filenimi.".ps", $output);
 				}
-				
+
 				echo "<font class='message'>".t("Tuotepaikkalistaus tulostuu")."!</font><br><br>";
 
 				//poistetaan tmp file samantien kuleksimasta...
@@ -146,9 +149,9 @@
 		echo "<td><input type='text' name='lhyllynro' value='$lhyllynro' size='4'></td>";
 		echo "<td><input type='text' name='lhyllyvali' value='$lhyllyvali' size='4'></td>";
 		echo "<td><input type='text' name='lhyllytaso' value='$lhyllytaso' size='4'></td></tr>";
-	
+
 		$sel = $jarjestys == "hylly" ? "hylly" : "tuoteno";
-	
+
 		echo "<tr><th>".t("Valitse listausjärjestys")."</th><td align='right' colspan='4'><select name='jarjestys'>";
 		echo "<option value='tuoteno' ";
 			if ($sel == "tuoteno") { echo "selected"; }
@@ -157,7 +160,7 @@
 			if ($sel == "hylly") { echo "selected"; }
 		echo ">".t("Paikka")."</option>";
 		echo "</select></td></tr>";
-	
+
 		echo "<tr><td class='back'><input type='submit' value='".t("Tulosta")."'></td></tr>";
 		echo "</form></table>";
 	}

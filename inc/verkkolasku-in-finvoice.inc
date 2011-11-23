@@ -90,6 +90,7 @@ $tuotetiedot	= $xml->InvoiceRow;
 $i				= 0;
 $rtuoteno		= array();
 $ealvi		 	= array("");
+$lisavat	 	= array("");
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
@@ -144,7 +145,6 @@ if (count($tuotetiedot) > 0) {
 
 // Verotiedot
 $vattiedot	= $xml->InvoiceDetails->VatSpecificationDetails;
-$lisavat	= array("");
 $i 			= 0;
 
 if (count($vattiedot) > 0) {

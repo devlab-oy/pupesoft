@@ -26,7 +26,13 @@
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 		$kuka    = sprintf("%02d",$tulostuskpl); 		// laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
-		$oma     = sprintf("%09d",$rtunnus); 			// 9, pitkä numero tulee rahtikirja taulun tunnuksesta, pitää olaa uniikki
+
+		if (substr($rivi["rahtikirjanro"], 0, 4) == "JJFI") {
+			$oma = sprintf("%09d", substr($rivi["rahtikirjanro"], -9));
+		}
+		else {
+			$oma = sprintf("%09d",$rtunnus); 			// 9, pitkä numero tulee rahtikirja taulun tunnuksesta, pitää olaa uniikki
+		}
 
 		// tehdään viivakoodit
 		$viiva1  = ">6JJFI";
@@ -196,6 +202,9 @@
 
 		if (strlen($keku) > 2) $kpos = "0355";
 		else $kpos = "0430";
+
+		// Laitetaan kuljetusohje
+		if ($kuljetusohjeet != "") $vakit[6] = $kuljetusohjeet;
 
 		$sivu .= "{PC003;$kpos,0090,15,15,H,00,B|}
                  {RC003;$keku|}

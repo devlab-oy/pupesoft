@@ -129,53 +129,55 @@
 			}
 		}
 		
-		$query = "	SELECT
+	$query = "	SELECT
 					SQL_CALC_FOUND_ROWS
-					lasku.tunnus,
-					lasku.viesti,
-					lasku.nimi,
-					lasku.tila,
-					lasku.alatila,
-					lasku.tilaustyyppi,
-					lasku.ytunnus,
-					lasku.toimaika,
-					tyomaarays.komm1,
-					tyomaarays.komm2,
-					tyomaarays.tyojono,
-					tyomaarays.tyostatus,
-					kuka.nimi myyja,
-					a1.selite tyojonokoodi,
-					a1.selitetark tyojono,
-					a2.selitetark tyostatus,
-					a2.selitetark_2 tyostatusvari,
-					yhtio.nimi yhtio,
-					yhtio.yhtio yhtioyhtio,
-					a3.nimi suorittajanimi,
-					a2.jarjestys prioriteetti,
-					lasku.luontiaika,
-					group_concat(a4.selitetark_2) asekalsuorittajanimi,
-					group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
-					FROM lasku
-					JOIN yhtio ON lasku.yhtio=yhtio.yhtio
-					JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
-					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
-					LEFT JOIN avainsana a1 ON a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono
-					LEFT JOIN avainsana a2 ON a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus
-					LEFT JOIN kuka a3 ON a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja
-					LEFT JOIN kalenteri ON kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus
-					LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka
-					WHERE $konsernit
-					and lasku.tila in ('A','L','N','S','C')
-					and lasku.alatila != 'X'
-					$lisa
+				lasku.tunnus,
+				lasku.viesti,
+				lasku.nimi,
+				lasku.tila,
+				lasku.alatila,
+				lasku.tilaustyyppi,
+				lasku.ytunnus,
+				lasku.toimaika,
+				tyomaarays.komm1,
+				tyomaarays.komm2,
+				tyomaarays.tyojono,
+				tyomaarays.tyostatus,
+				kuka.nimi myyja,
+				a1.selite tyojonokoodi,
+				a1.selitetark tyojono,
+				a2.selitetark tyostatus,
+				a2.selitetark_2 tyostatusvari,
+				yhtio.nimi yhtio,
+				yhtio.yhtio yhtioyhtio,
+				a3.nimi suorittajanimi,
+				a2.jarjestys prioriteetti,
+				a5.selitetark tyom_prioriteetti,
+				lasku.luontiaika,
+				group_concat(a4.selitetark_2) asekalsuorittajanimi,
+				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
+				FROM lasku
+				JOIN yhtio ON lasku.yhtio=yhtio.yhtio
+				JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
+				LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
+				LEFT JOIN avainsana a1 ON a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono
+				LEFT JOIN avainsana a2 ON a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus
+				LEFT JOIN kuka a3 ON a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja
+				LEFT JOIN kalenteri ON kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus
+				LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka
+				LEFT JOIN avainsana a5 ON a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti
+				WHERE $konsernit
+				and lasku.tila in ('A','L','N','S','C')
+				and lasku.alatila != 'X'
+				$lisa
 					$sWhere
 					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
-					$omattyot
-					$lisa2
+				$omattyot
+				$lisa2
 					$sOrder
 					$sLimit";
-		$vresult = pupe_query($query);
+	$vresult = pupe_query($query);
 
 		/* Data set length after filtering */
 		$sQuery = " SELECT FOUND_ROWS() ";
@@ -210,156 +212,156 @@
 			"aaData" => array()
 		);
 
-		$tyomaarays_tunti_yhteensa = array();
-		$tyomaarays_kuitti_yhteensa = array();
+	$tyomaarays_tunti_yhteensa = array();
+	$tyomaarays_kuitti_yhteensa = array();
 
-		while ($vrow = mysql_fetch_assoc($vresult)) {
+	while ($vrow = mysql_fetch_assoc($vresult)) {
 
 			$rivi = array();
 
-			$laskutyyppi = $vrow["tila"];
-			$alatila	 = $vrow["alatila"];
+		$laskutyyppi = $vrow["tila"];
+		$alatila	 = $vrow["alatila"];
 
-			//tehdään selväkielinen tila/alatila
+		//tehdään selväkielinen tila/alatila
+		require "inc/laskutyyppi.inc";
+
+		if ($vrow['tilaustyyppi'] != '' and $vrow['tila'] != 'C') {
+			$laskutyyppi = $vrow['tilaustyyppi'];
+
 			require "inc/laskutyyppi.inc";
+		}
 
-			if ($vrow['tilaustyyppi'] != '' and $vrow['tila'] != 'C') {
-				$laskutyyppi = $vrow['tilaustyyppi'];
-
-				require "inc/laskutyyppi.inc";
-			}
-
-			if (trim($konserni) != '') {
+		if (trim($konserni) != '') {
 				$rivi[] =  $vrow["yhtio"];
-			}
+		}
 
-			if ($vrow["tila"] == "A" or ($vrow['tila'] == 'L' and $vrow['tilaustyyppi'] == 'A')) {
-				if ($toim == 'TYOMAARAYS_ASENTAJA') {
-					$toimi = 'TYOMAARAYS_ASENTAJA';
-				}
-				else {
-					$toimi = 'TYOMAARAYS';
-				}
-			}
-			elseif ($vrow["tila"] == "L" or $vrow["tila"] == "N") {
-				$toimi = "RIVISYOTTO";
-			}
-			elseif ($vrow["tila"] == "T") {
-				$toimi = "TARJOUS";
-			}
-			elseif ($vrow["tila"] == "S") {
-				$toimi = "SIIRTOTYOMAARAYS";
-			}
-			elseif ($vrow['tila'] == 'C') {
-				$toimi = 'REKLAMAATIO';
-			}
-
-			$lopetusx = "";
-			if ($lopetus != "") $lopetusx = $lopetus;
-			$lopetusx .= "/SPLIT/{$palvelin2}tyomaarays/tyojono.php////konserni=$konserni//toim=$toim";
-
-			if (trim($vrow["komm1"]) != "") {
-				$rivi[] = "<span class='tooltip' id='$vrow[tunnus]'>$vrow[tunnus]</span><br>$vrow[viesti]<div id='div_$vrow[tunnus]' class='popup' style='width:500px;'>".t("Työmääräys").": $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."</div>";
+		if ($vrow["tila"] == "A" or ($vrow['tila'] == 'L' and $vrow['tilaustyyppi'] == 'A')) {
+			if ($toim == 'TYOMAARAYS_ASENTAJA') {
+				$toimi = 'TYOMAARAYS_ASENTAJA';
 			}
 			else {
-				$rivi[] = "<span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]";
+				$toimi = 'TYOMAARAYS';
 			}
+		}
+		elseif ($vrow["tila"] == "L" or $vrow["tila"] == "N") {
+			$toimi = "TYOMAARAYS";
+		}
+		elseif ($vrow["tila"] == "T") {
+			$toimi = "TARJOUS";
+		}
+		elseif ($vrow["tila"] == "S") {
+			$toimi = "SIIRTOTYOMAARAYS";
+		}
+		elseif ($vrow['tila'] == 'C') {
+			$toimi = 'REKLAMAATIO';
+		}
+
+		$lopetusx = "";
+		if ($lopetus != "") $lopetusx = $lopetus;
+		$lopetusx .= "/SPLIT/{$palvelin2}tyomaarays/tyojono.php////konserni=$konserni//toim=$toim";
+
+		if (trim($vrow["komm1"]) != "") {
+				$rivi[] = "<span class='tooltip' id='$vrow[tunnus]'>$vrow[tunnus]</span><br>$vrow[viesti]<div id='div_$vrow[tunnus]' class='popup' style='width:500px;'>".t("Työmääräys").": $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."</div>";
+		}
+		else {
+				$rivi[] = "<span class='tyom_id'>$vrow[tunnus]</span><br>$vrow[viesti]";
+		}
 
 			$rivi[] = "$vrow[ytunnus]<br>$vrow[nimi]";
 
 			$asekalenteri = "";
 
-			$olenko_asentaja_tassa_hommassa = FALSE;
+		$olenko_asentaja_tassa_hommassa = FALSE;
 
-			if ($vrow["asennuskalenteri"] != "") {
+		if ($vrow["asennuskalenteri"] != "") {
 
-				// vrow.asennuskalenteri = kaikki työnjohdon tekemät merkinnät tälle työmääräykselle
-				foreach (explode(",", $vrow["asennuskalenteri"]) as $asekale) {
+			// vrow.asennuskalenteri = kaikki työnjohdon tekemät merkinnät tälle työmääräykselle
+			foreach (explode(",", $vrow["asennuskalenteri"]) as $asekale) {
 
-					list($pvmalku, $pvmloppu, $selitetark_2, $tunnus, $selitetark, $asennussekunnit) = explode("##", $asekale);
-					list($alku_pvm, $alku_klo) = explode(" ", $pvmalku);
-					list($loppu_pvm, $loppu_klo) = explode(" ", $pvmloppu);
+				list($pvmalku, $pvmloppu, $selitetark_2, $tunnus, $selitetark, $asennussekunnit) = explode("##", $asekale);
+				list($alku_pvm, $alku_klo) = explode(" ", $pvmalku);
+				list($loppu_pvm, $loppu_klo) = explode(" ", $pvmloppu);
 
-					// jos ollaan asentaja
-					if ($toim == 'TYOMAARAYS_ASENTAJA') {
-						if ($kukarow['kuka'] == $selitetark) {
-							$olenko_asentaja_tassa_hommassa = TRUE;
-							list($url_vuosi, $url_kk, $url_pp) = explode("-", $alku_pvm);
+				// jos ollaan asentaja
+				if ($toim == 'TYOMAARAYS_ASENTAJA') {
+					if ($kukarow['kuka'] == $selitetark) {
+						$olenko_asentaja_tassa_hommassa = TRUE;
+						list($url_vuosi, $url_kk, $url_pp) = explode("-", $alku_pvm);
 
 							$asekalenteri .= "<a href='{$palvelin2}crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=TYOMAARAYS_ASENTAJA&lopetus=$lopetusx'>".tv1dateconv($alku_pvm, "", "LYHYT")." $selitetark_2</a><br>";
-						}
-						else {
-							$asekalenteri .= tv1dateconv($pvmloppu, "", "LYHYT")." $selitetark_2<br>";
-						}
 					}
+					else {
+							$asekalenteri .= tv1dateconv($pvmloppu, "", "LYHYT")." $selitetark_2<br>";
+					}
+				}
 
-					// jos ollaan työnjohto
-					if ($toim != 'TYOMAARAYS_ASENTAJA') {
-						$tyomaarays_tunti_yhteensa[$vrow['tunnus']][$selitetark_2] += $asennussekunnit;
+				// jos ollaan työnjohto
+				if ($toim != 'TYOMAARAYS_ASENTAJA') {
+					$tyomaarays_tunti_yhteensa[$vrow['tunnus']][$selitetark_2] += $asennussekunnit;
 
 						$asekalenteri .= "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$tunnus&tee=MUOKKAA&lopetus=$lopetusx'>";
 
-						if ($alku_pvm == $loppu_pvm) {
+					if ($alku_pvm == $loppu_pvm) {
 							$asekalenteri .= tv1dateconv($alku_pvm, '', 'LYHYT')." $alku_klo - $loppu_klo";
-						}
-						else {
+					}
+					else {
 							$asekalenteri .= tv1dateconv($alku_pvm, '', 'LYHYT')." $alku_klo - ".tv1dateconv($loppu_pvm, '', 'LYHYT')." $loppu_klo";
-						}
+					}
 
 						$asekalenteri .= " $selitetark_2</a><br>";
-					}
-				}
-
-				// lasketaan katotaan mitä asentajat on syöttänyt tunteja
-				$query = "	SELECT kalenteri.kuka, if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2) nimi, left(kalenteri.pvmalku, 10) pvmalku, left(kalenteri.pvmloppu, 10) pvmloppu,
-							sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu)) sekunnit,
-							SEC_TO_TIME(sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) aika
-							FROM kalenteri
-							LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA' and a4.selitetark=kalenteri.kuka
-							WHERE kalenteri.yhtio = '$kukarow[yhtio]'
-							AND kalenteri.tyyppi = 'kalenteri'
-							AND kalenteri.kentta02 = '$vrow[tunnus]'
-							GROUP BY 1,2,3,4
-							ORDER BY 1,2,3";
-				$tunti_chk_res = pupe_query($query);
-
-				while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
-					$tyomaarays_kuitti_yhteensa[$vrow['tunnus']][$tunti_chk_row["nimi"]] += $tunti_chk_row['sekunnit'];
-
-					// jos me itse ollaan ko. asentaja
-					if ($toim == 'TYOMAARAYS_ASENTAJA' and $kukarow['kuka'] == $tunti_chk_row["kuka"]) {
-						list($url_vuosi, $url_kk, $url_pp) = explode("-", $tunti_chk_row["pvmalku"]);
-						list($url_tunti, $url_min, $url_sek) = explode(":", $tunti_chk_row["aika"]);
-						$asekalenteri .= "<a href='{$palvelin2}crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=TYOMAARAYS_ASENTAJA&lopetus=$lopetusx'>".tv1dateconv($tunti_chk_row["pvmalku"], "", "LYHYT")." $tunti_chk_row[nimi]: ".(int) $url_tunti."h ".$url_min."m</a><br>";
-					}
 				}
 			}
+
+			// lasketaan katotaan mitä asentajat on syöttänyt tunteja
+			$query = "	SELECT kalenteri.kuka, if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2) nimi, left(kalenteri.pvmalku, 10) pvmalku, left(kalenteri.pvmloppu, 10) pvmloppu,
+						sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu)) sekunnit,
+						SEC_TO_TIME(sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) aika
+						FROM kalenteri
+						LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA' and a4.selitetark=kalenteri.kuka
+						WHERE kalenteri.yhtio = '$kukarow[yhtio]'
+						AND kalenteri.tyyppi = 'kalenteri'
+						AND kalenteri.kentta02 = '$vrow[tunnus]'
+						GROUP BY 1,2,3,4
+						ORDER BY 1,2,3";
+			$tunti_chk_res = pupe_query($query);
+
+			while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
+				$tyomaarays_kuitti_yhteensa[$vrow['tunnus']][$tunti_chk_row["nimi"]] += $tunti_chk_row['sekunnit'];
+
+				// jos me itse ollaan ko. asentaja
+				if ($toim == 'TYOMAARAYS_ASENTAJA' and $kukarow['kuka'] == $tunti_chk_row["kuka"]) {
+					list($url_vuosi, $url_kk, $url_pp) = explode("-", $tunti_chk_row["pvmalku"]);
+					list($url_tunti, $url_min, $url_sek) = explode(":", $tunti_chk_row["aika"]);
+						$asekalenteri .= "<a href='{$palvelin2}crm/kalenteri.php?tyomaarays=$vrow[tunnus]&year=$url_vuosi&kuu=$url_kk&paiva=$url_pp&toim=TYOMAARAYS_ASENTAJA&lopetus=$lopetusx'>".tv1dateconv($tunti_chk_row["pvmalku"], "", "LYHYT")." $tunti_chk_row[nimi]: ".(int) $url_tunti."h ".$url_min."m</a><br>";
+				}
+			}
+		}
 
 			$asekalenteri .= $vrow["suorittajanimi"];
 
 			$rivi[] = $asekalenteri;
 
-			if ($vrow["tyojono"] != "" and $toim != 'TYOMAARAYS_ASENTAJA') {
-				list($ankkuri_pp, $ankkuri_kk, $ankkuri_vv) = explode(".", tv1dateconv($vrow["toimaika"]));
-				$ankkuri_pp = (strlen($ankkuri_pp) == 2 and $ankkuri_pp{0} == 0) ? $ankkuri_pp{1} : $ankkuri_pp;
-				$ankkuri_kk = (strlen($ankkuri_kk) == 2 and $ankkuri_kk{0} == 0) ? $ankkuri_kk{1} : $ankkuri_kk;
+		if ($vrow["tyojono"] != "" and $toim != 'TYOMAARAYS_ASENTAJA') {
+			list($ankkuri_pp, $ankkuri_kk, $ankkuri_vv) = explode(".", tv1dateconv($vrow["toimaika"]));
+			$ankkuri_pp = (strlen($ankkuri_pp) == 2 and $ankkuri_pp{0} == 0) ? $ankkuri_pp{1} : $ankkuri_pp;
+			$ankkuri_kk = (strlen($ankkuri_kk) == 2 and $ankkuri_kk{0} == 0) ? $ankkuri_kk{1} : $ankkuri_kk;
 
-				$ankkuri = "{$ankkuri_pp}_{$ankkuri_kk}_{$ankkuri_vv}";
+			$ankkuri = "{$ankkuri_pp}_{$ankkuri_kk}_{$ankkuri_vv}";
 
 				$rivi[] = "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&lopetus=$lopetusx#$ankkuri'>{$vrow["toimaika"]}</a>";
-			}
-			else {
+		}
+		else {
 				$rivi[] = $vrow["toimaika"];
-			}
+		}
 
 			$rivi[] = "$vrow[myyja]<br>".t("$laskutyyppi")." ".t("$alatila");
 
-			if ($vrow["tyostatusvari"] != "") {
+		if ($vrow["tyostatusvari"] != "") {
 				$varilisa = "style='display: block; padding: 3px; width: 90%; background-color: $vrow[tyostatusvari];'";
-			}
-			else {
-				$varilisa = "";
-			}
+		}
+		else {
+			$varilisa = "";
+		}
 
 			$rivi[] = "<span $varilisa>$vrow[tyojono] / <br>$vrow[tyostatus]</span>";
 
@@ -415,10 +417,10 @@
 
 			$output['aaData'][] = $rivi;
 		}
-				
+
 		$output["tyomaarays_tunti_yhteensa"] = $tyomaarays_tunti_yhteensa;
 		$output["tyomaarays_kuitti_yhteensa"] = $tyomaarays_kuitti_yhteensa;
-		
+
 		function pupe_utf(&$item, $key) {
 			$item = utf8_encode($item);
 		}
@@ -429,14 +431,14 @@
 
 		#require ("../inc/footer.inc");
 		exit;
-	}
+				}
 
 	if ($toim == "OMAJONO") {
 		echo "<font class='head'>".t("Omat työmääräykset").":</font><hr><br>";
-	}
- 	else {
+			}
+		else {
 		echo "<font class='head'>".t("Työjono").":</font><hr><br>";
-	}
+		}
 
 	if (!isset($AIKA_ARRAY)) $AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
 
@@ -450,7 +452,7 @@
 			$mins = sprintf("%02d", $sekunnit / 60 % 60);
 
 			return $tunn.":".$mins;
-		}
+	}
 	}
 
 	if ($tyostatus_muutos != '' and $tyomaarayksen_tunnus != '') {
@@ -522,7 +524,7 @@
 	// Konffataan datatablesit
 	$datatables_conf = array();
 	$datatables_conf[] = array($pupe_DataTables[0],7,8,true,true,true,'YKS');
-	
+
 	/*
 	if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
 
@@ -587,9 +589,9 @@
 	elseif (count($tyomaarays_kuitti_yhteensa) > 0) {
 	*/
 		$datatables_conf[] = array($pupe_DataTables[1],2,2,false,true,false,'KAKS');
-		
+
 		echo "<div id='jupster'>KALAPEOPKSPOWKPOWEPK</div>";
-		
+
 		echo "<table class='display dataTable' id='$pupe_DataTables[1]'>";
 		echo "<thead>";
 		echo "<tr><th>",t("Työmääräys"),"</th><th>",t("Työmääräyksien asentajien tuntiyhteenveto"),"</th></tr>";
@@ -602,7 +604,7 @@
 				</tr>
 			</tbody>
 		</table>";
-		
+
 		/*
 		$total_yht = 0;
 

@@ -1,6 +1,7 @@
 <?php
 
-$useslave = 1; // käytetään slavea
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
 
 // Kutsutaanko CLI:stä
 $php_cli = FALSE;

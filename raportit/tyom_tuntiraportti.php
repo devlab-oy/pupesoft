@@ -1,12 +1,15 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	include('../inc/parametrit.inc');
 
 	if (!isset($tee)) $tee = '';
 
 	if (!function_exists("piirra_tuntiraportti")) {
 		function piirra_tuntiraportti($asentaja = "", $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro = '', $asiakasid = '', $asiakasosasto = '', $asiakasryhma = '', $tyojono = '', $tyostatus = '', $ytunnus = '') {
-			
+
 			if (trim($asentaja) != "") {
 				$asentaja = mysql_real_escape_string($asentaja);
 
@@ -17,7 +20,7 @@
 				$asenlisa = "";
 				$keiklisa = "";
 			}
-			
+
 			if (trim($tyom_nro) != '') {
 				$lisa .= " and lasku.tunnus = '".(int) $tyom_nro."' ";
 			}
@@ -49,7 +52,7 @@
 			if (trim($tyostatus) != '') {
 				$tyomaarayslisa .= " and tyomaarays.tyostatus = '".mysql_real_escape_string($tyostatus)."' ";
 			}
-			
+
 			if (trim($tyom_nro) == '' and trim($vva) != '' and trim($kka) != '' and trim($ppa) != '' and trim($vvl) != '' and trim($kkl) != '' and trim($ppl) != ''){
 				$vva = (int) $vva;
 				$kka = (int) $kka;
@@ -61,10 +64,10 @@
 				$lisa = " and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00' and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59' ";
 			}
 
-			$query = "	SELECT 
-						lasku.tunnus, lasku.nimi, lasku.nimitark, lasku.ytunnus, lasku.luontiaika, 
+			$query = "	SELECT
+						lasku.tunnus, lasku.nimi, lasku.nimitark, lasku.ytunnus, lasku.luontiaika,
 						(SELECT selitetark FROM avainsana WHERE avainsana.yhtio = lasku.yhtio AND avainsana.selite = tyomaarays.tyostatus AND avainsana.laji = 'TYOM_TYOSTATUS') tyostatus,
-						lasku.erikoisale, lasku.valkoodi, 
+						lasku.erikoisale, lasku.valkoodi,
 						group_concat(DISTINCT concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', kuka.nimi, '##', kuka.kuka) ORDER BY kalenteri.pvmalku) asennuskalenteri
 						FROM lasku
 						JOIN yhtio ON (lasku.yhtio = yhtio.yhtio)
@@ -79,19 +82,19 @@
 						GROUP BY 1,2,3,4,5,6,7,8
 						ORDER BY lasku.tunnus";
 			$sresult = mysql_query($query) or pupe_error($query);
-				
+
 			if (mysql_num_rows($sresult) > 0) {
-				
+
 				$echootsikot =  "<tr><th>".t("Työmääräys").":<br>".t("Nimi").":<br>".t("Ytunnus").":</th><th>".t("Työnjohdon työtunnit").":</th><th>".t("Asentajien työtunnit")."</th><th>".t("Työstatus").":</th><th>".t("Matkalaskut").":</th></tr>";
-					
+
 				$kaletunnit = array();
 				$asekaletunnit = array();
 				$rivihinnat = array();
 				$kplyht = '';
 				$i = 0;
-	
+
 				$query_ale_lisa = generoi_alekentta('M');
-	
+
 				while ($row = mysql_fetch_array($sresult)) {
 
 					$query  = "	SELECT DISTINCT matkalasku.nimi, tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.kpl, tilausrivi.kommentti, tilausrivi.rivihinta
@@ -110,13 +113,13 @@
 					$keikkares = mysql_query($query) or pupe_error($query);
 
 					if ($asentaja == "" or mysql_num_rows($keikkares) > 0 or $row["asennuskalenteri"] != "") {
-						
+
 						echo "$echootsikot";
-						
+
 						if ($asentaja == "") {
 							$echootsikot = "";
 						}
-						
+
 						echo "<tr>
 								<td valign='top'>$row[tunnus]<br/>$row[nimi]";
 
@@ -140,16 +143,16 @@
 
 								$kaletunnit[$nimi] += ($ltstamp - $atstamp)/60;
 
-								echo "<tr><td>$nimi:</td><td align='right'>".tv1dateconv($alku, "P")." - ".tv1dateconv($loppu, "P")."</td></tr>";																
+								echo "<tr><td>$nimi:</td><td align='right'>".tv1dateconv($alku, "P")." - ".tv1dateconv($loppu, "P")."</td></tr>";
 							}
 
 							echo "</table>";
 						}
 
-						$query = "	SELECT GROUP_CONCAT(tilausrivi.yksikko,'#',if(tuote.tuotetyyppi = 'K', tilausrivi.varattu, 0)) yksikko, 
+						$query = "	SELECT GROUP_CONCAT(tilausrivi.yksikko,'#',if(tuote.tuotetyyppi = 'K', tilausrivi.varattu, 0)) yksikko,
 									sum(if(tuote.tuotetyyppi = '', round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2), 0)) rivihinta_tuote,
 									sum(if(tuote.tuotetyyppi = 'K', round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2), 0)) rivihinta_tyo
-									FROM tilausrivi 
+									FROM tilausrivi
 									JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 									AND tilausrivi.otunnus = '$row[tunnus]'";
@@ -161,7 +164,7 @@
 
 						$rivihinnat['Tuotteet'][$row['valkoodi']] += $rivihinta_row['rivihinta_tuote'];
 						$rivihinnat['Työt'][$row['valkoodi']] += $rivihinta_row['rivihinta_tyo'];
-						
+
 						if ($rivihinta_row['yksikko'] != '') {
 							$kplyht = $rivihinta_row['yksikko'];
 						}
@@ -204,7 +207,7 @@
 						echo "</td>";
 
 						echo "<td valign='top' style='padding: 0px'>$row[tyostatus]</td>";
-	
+
 						echo "<td valign='top' style='padding: 0px;'>";
 
 						if (mysql_num_rows($keikkares) > 0) {
@@ -214,16 +217,16 @@
 								echo "<tr><td>$keikkarow[nimi]:</td><td>$keikkarow[nimitys]</td><td align='right'>".((float) $keikkarow["kpl"])."</td><td align='right'>".sprintf("%.2f", $keikkarow["hinta"])." $yhtiorow[valkoodi]</td></tr>";
 
 
-								$matkakulut[$keikkarow["nimi"]][$keikkarow["nimitys"]] += $keikkarow["rivihinta"];				
-							}	
+								$matkakulut[$keikkarow["nimi"]][$keikkarow["nimitys"]] += $keikkarow["rivihinta"];
+							}
 							echo "</table>";
 						}
-						echo "</td>";				
+						echo "</td>";
 						echo "</tr>";
-					}	
+					}
 
 					$i++;
-				}   
+				}
 
 				if (isset($rivihinnat) and count($rivihinnat) > 0) {
 					echo "<tr><td class='spec' valign='top'>".t("Tuotteet ja työt yhteensä").":</td>";
@@ -243,7 +246,7 @@
 								$yksgroup = array();
 
 								foreach (explode(',', $kplyht) as $yksikko_kpl) {
-									
+
 									list($yksikko, $kpl) = explode('#', $yksikko_kpl);
 									if ($yksikko != '' and $kpl != 0) {
 										$yksgroup[$yksikko] += $kpl;
@@ -256,7 +259,7 @@
 									echo "$kpl ".t_avainsana("Y", "", " and avainsana.selite='$yksikko'", "", "", "selite");
 									$i++;
 								}
-								
+
 							}
 
 							echo "</td><td class='spec' align='right'>$rivihinta $valuutta</td></tr>";
@@ -274,35 +277,35 @@
 					}
 
 					echo "</tr></table></td>";
-					echo "<td class='spec'>&nbsp;</td><td class='spec'>&nbsp;</td><td class='spec'>&nbsp;</td></tr>";			
+					echo "<td class='spec'>&nbsp;</td><td class='spec'>&nbsp;</td><td class='spec'>&nbsp;</td></tr>";
 				}
 
 				if ((isset($kaletunnit) and count($kaletunnit) > 0) or (isset($matkakulut) and count($matkakulut) > 0) or (isset($asekaletunnit) and count($asekaletunnit) > 0)) {
 					echo "<tr><td class='spec' valign='top'>".t("Tunnit yhteensä").":</td>";
-		
+
 					echo "<td class='spec' style='padding: 0px;' valign='top'><table width='100%'>";
-				
+
 					if (count($kaletunnit) > 0) {
 						foreach ($kaletunnit as $kuka => $minuutit) {
-			
-							$tunti		= floor($minuutit/60);				
+
+							$tunti		= floor($minuutit/60);
 							$minuutti	= sprintf('%02d', $minuutit - ($tunti*60));
-			
+
 							echo "<tr><td class='spec'>$kuka:</td><td class='spec' align='right'>$tunti:$minuutti ".t("tuntia")."</td></tr>";
 						}
 					}
-		
+
 					echo "</table></td>";
-		
+
 
 					echo "<td class='spec' style='padding: 0px' valign='top'><table width='100%'>";
 
 					if (count($asekaletunnit) > 0) {
 						foreach ($asekaletunnit as $kuka => $minuutit) {
-			
-							$tunti		= floor($minuutit/60);				
+
+							$tunti		= floor($minuutit/60);
 							$minuutti	= sprintf('%02d', $minuutit - ($tunti*60));
-			
+
 							echo "<tr><td class='spec'>$kuka:</td><td class='spec' align='right'>$tunti:$minuutti ".t("tuntia")."</td></tr>";
 						}
 					}
@@ -310,7 +313,7 @@
 					echo "</table></td>";
 
 					echo "<td class='spec'>&nbsp;</td><td class='spec' style='padding: 0px;' valign='top'><table width='100%'>";
-		
+
 					if (isset($matkakulut) and count($matkakulut) > 0) {
 						foreach ($matkakulut as $kuka => $matkat) {
 							foreach ($matkat as $tuoteno => $hinta) {
@@ -318,9 +321,9 @@
 							}
 						}
 					}
-				
+
 					echo "</table></td>";
-					echo "</tr>";			
+					echo "</tr>";
 					echo "<tr><td class='back'><br></td></tr>";
 				}
 			}
@@ -397,55 +400,55 @@
 
 	echo "<tr><th>",t("Työlinja"),"</th><td colspan='3'><select name='asentaja'>";
 	echo "<option value = ''>".t("Kaikki")."</option>";
-	
+
 	$sel = "";
 	if ($asentaja == "ASENTAJITTAIN") {
 		$sel = "selected";
 	}
-	
+
 	echo "<option value = 'ASENTAJITTAIN' $sel>".t("Asentajittain")."</option>";
-	
+
 	while ($vrow = mysql_fetch_assoc($vresult)) {
 		$sel = "";
 		if ($asentaja == $vrow['selitetark']) {
 			$sel = "selected";
 		}
-		
+
 		echo "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
 	}
-	
+
 	echo "</select></td></tr>";
 
 	$vresult = t_avainsana("TYOM_TYOJONO");
 
 	echo "<tr><th>",t("Työjono"),"</th><td colspan='3'><select name='tyojono'>";
 	echo "<option value = ''>".t("Kaikki")."</option>";
-	
+
 	while ($vrow = mysql_fetch_assoc($vresult)) {
 		$sel = "";
 		if ($tyojono == $vrow['selite']) {
 			$sel = "selected";
 		}
-		
+
 		echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
 	}
-	
+
 	echo "</select></td></tr>";
 
 	$vresult = t_avainsana("TYOM_TYOSTATUS");
 
 	echo "<tr><th>",t("Työstatus"),"</th><td colspan='3'><select name='tyostatus'>";
 	echo "<option value = ''>".t("Kaikki")."</option>";
-	
+
 	while ($vrow = mysql_fetch_assoc($vresult)) {
 		$sel = "";
 		if ($tyostatus == $vrow['selite']) {
 			$sel = "selected";
 		}
-		
+
 		echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
 	}
-	
+
 	echo "</select></td></tr>";
 
 	echo "	<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
@@ -479,13 +482,13 @@
 	}
 
 	if ($tee == 'raportoi') {
-		
+
 		echo "<table>";
-		
+
 		if ($asentaja == "ASENTAJITTAIN") {
 			$query = "SELECT kuka, nimi from kuka where yhtio = '$kukarow[yhtio]'";
 			$vresult = mysql_query($query) or pupe_error($query);
-			
+
 			while ($vrow=mysql_fetch_array($vresult)) {
 				piirra_tuntiraportti($vrow["kuka"], $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro, $asiakasid, $asiakasosasto, $asiakasryhma, $tyojono, $tyostatus, $ytunnus);
 			}
@@ -493,10 +496,10 @@
 		else {
 			piirra_tuntiraportti($asentaja, $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro, $asiakasid, $asiakasosasto, $asiakasryhma, $tyojono, $tyostatus, $ytunnus);
 		}
-		
+
 		echo "</table><br>";
 	}
 
 	require ("../inc/footer.inc");
-	
+
 ?>

@@ -1,6 +1,6 @@
 <?php
 
-// käytetään slavea jos sellanen on
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
 require ("../inc/parametrit.inc");
@@ -46,7 +46,7 @@ echo "<input type='submit' value='".t('Näytä tiliöinnit')."'>";
 echo "</form>";
 
 if ($tee == "tee") {
-	
+
 	if ($mitka = 'osto')
 		$valinta = "in ('H', 'M', 'P', 'Q', 'Y')";
 	else
@@ -72,7 +72,7 @@ if ($tee == "tee") {
 	echo "<tr>";
 	for ($i = 0; $i < mysql_num_fields($result); $i++) {
 		echo "<th>" . t(mysql_field_name($result,$i)) ."</th>";
-	}	
+	}
 	while ($trow=mysql_fetch_array ($result)) {
 		echo "<tr>";
 		for ($i=0; $i<mysql_num_fields($result); $i++) {

@@ -6,7 +6,7 @@
 			if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 		}
 
-		///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+		//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 		$useslave = 1;
 
 		$pupe_DataTables = "saatanat_taulu";
@@ -320,7 +320,7 @@
 
 			if ($eiliittymaa != 'ON') {
 				$sarakemaara = count($saatavat_array)+7;
-				
+
 				pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
 			}
 
@@ -506,14 +506,23 @@
 			echo "</table>";
 
 			if ($sytunnus != '') {
+				
+				$liitoslisa = "";
+				
+				if ($sliitostunnus !="") {
+					$liitoslisa = "AND asiakas.tunnus='{$sliitostunnus}' ";
+				}
+				
 				$query = "	SELECT jv
 							FROM asiakas
 							JOIN maksuehto ON (maksuehto.yhtio = asiakas.yhtio and maksuehto.tunnus = asiakas.maksuehto and maksuehto.kaytossa = '' and maksuehto.jv != '')
 							WHERE asiakas.yhtio = '$saatavat_yhtio'
 							AND asiakas.ytunnus = '$sytunnus'
 							AND asiakas.laji != 'P'
+							{$liitoslisa}
 							$eta_asiakaslisa
 							LIMIT 1";
+				
 				$maksuehto_chk_res = pupe_query($query);
 				$maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
 
@@ -563,7 +572,7 @@
 				// We need to explicitly close the workbook
 				$workbook->close();
 
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<br><br><form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Saatavat.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

@@ -1,5 +1,8 @@
 <?php
 
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
+
 if($_POST["tee"] == "tulosta") {
 	$nayta_pdf=1;
 }
@@ -15,9 +18,9 @@ if($tee == "tulosta") {
 			include_once("Barcode.php");
 		}
 	}
-	
+
 	require_once('pdflib/pupepdf.class.php');
-	
+
 	if (!function_exists('alku')) {
 		function alku ($pdf) {
 			global $yhtiorow, $kukarow, $fonts, $h;
@@ -37,7 +40,7 @@ if($tee == "tulosta") {
 
 
 				//	Tehdään sivu jotta saadaan currentPage kuntoon
-				$pdf->addPage("a4");	
+				$pdf->addPage("a4");
 
 				$h=282;
 			}
@@ -45,7 +48,7 @@ if($tee == "tulosta") {
 			return $pdf;
 		}
 	}
-	
+
 	$pdf = alku($pdf);
 	$i=0;
 	foreach($ketka as $kuka => $x) {
@@ -55,22 +58,22 @@ if($tee == "tulosta") {
 						WHERE yhtio='$kukarow[yhtio]' and tunnus='$kuka'";
 			$result = mysql_query($query) or pupe_error($query);
 			if(mysql_num_rows($result) > 0) {
-				
+
 				while($row = mysql_fetch_array($result)) {
-					
+
 					if($i==0) {
 						$w = 15;
 						$wk = 10;
 					}
 					else {
 						$w = 115;
-						$wk = 110;						
+						$wk = 110;
 						$i=-1;
 					}
 
 					$pdf->write($h, 1, $w, ($w+70), $row["nimi"], "norm", "C", "");
 					$h -= 20;
-					
+
 					if (class_exists("Image_Barcode")) {
 
 						//viivakoodi
@@ -81,14 +84,14 @@ if($tee == "tulosta") {
 
 						system("rm -f $nimi");
 					}
-					
+
 					if($i == 0) {
 						$h += 20;
 					}
 					else {
 						$h -= 10;
 					}
-					
+
 					$i++;
 				}
 			}
@@ -100,7 +103,7 @@ if($tee == "tulosta") {
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $filenimi");
 	fclose($fh);
 
-	echo file_get_contents($filenimi);	
+	echo file_get_contents($filenimi);
 }
 
 if($tee == "") {
@@ -125,9 +128,9 @@ if($tee == "") {
 
 	echo "	<tr>
 				<td colspan='2' class='back'><input type='submit' value='".t("Tulosta")."'></td>
-			</tr>";			
+			</tr>";
 	echo "	</table>
-	
+
 			</form>";
 }
 

@@ -540,7 +540,7 @@
 					$having_lisa
 					ORDER BY $order_lisa";
 		$result = pupe_query($query);
-		
+
 		echo "BR: $order_lisa";
 
 		$lask   = 0;

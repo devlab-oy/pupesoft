@@ -851,8 +851,11 @@ if (!function_exists('rivi_original')) {
 		if ($row["myyntihinta_maara"] > 1) {
 			$kala = $kala - 7;
 			$pdf_lasku->draw_text(390, $kala, hintapyoristys($veroton_hinta*$row["myyntihinta_maara"])." / $row[myyntihinta_maara] $row[yksikko]", $thispage, $pieni);
+			$kalakorjaus = 7;
 		}
-
+		else {
+			$kalakorjaus = 0;
+		}
 
 		// Ensimmäinen rivi piirretty
 		$kala = $kala - 10;
@@ -881,10 +884,13 @@ if (!function_exists('rivi_original')) {
 
 		// Kommentti
 		if (trim($row["kommentti"]) != '') {
+
 			$kommentit = explode("\n", trim($row["kommentti"]));
 
-			$pdf_lasku->draw_text(35, $kala, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
-			$kala = $kala - 10;
+			if (strpos($row["kommentti"], t("Tilaus", $kieli)." ".$row["otunnus"]." ".t("yhteensä", $kieli)) === FALSE) {
+				$pdf_lasku->draw_text(35, $kala+$kalakorjaus, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
+				$kala = $kala - 10;
+			}
 
 			foreach ($kommentit as $akey => $kommentti) {
 
@@ -909,7 +915,7 @@ if (!function_exists('rivi_original')) {
 
 					foreach ($sanat as $sana) {
 						if ($pdf_lasku->strlen($lause, $pieni) > $rpit2) {
-							$pdf_lasku->draw_text(35, $kala, trim($lause), $thispage, $pieni);
+							$pdf_lasku->draw_text(35, $kala+$kalakorjaus, trim($lause), $thispage, $pieni);
 							$kala  = $kala - 10;
 							$lause = "";
 						}
@@ -921,14 +927,14 @@ if (!function_exists('rivi_original')) {
 				}
 
 				if (trim($kommentti) != "") {
-					$pdf_lasku->draw_text(35, $kala, trim($kommentti), $thispage, $pieni);
+					$pdf_lasku->draw_text(35, $kala+$kalakorjaus, trim($kommentti), $thispage, $pieni);
 					$kala = $kala - 10;
 				}
 			}
 			$kala += 10;
 		}
 		elseif ($laskutyyppi != 6) {
-			$pdf_lasku->draw_text(35, $kala, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
+			$pdf_lasku->draw_text(35, $kala+$kalakorjaus, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
 		}
 
 		$kala = $kala - 15;
@@ -1478,7 +1484,7 @@ if (!function_exists('loppu')) {
 
 		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
 			// haetaan toimipaikan tiedot
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_toimipaikka]'";
+			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
 			$alhire = pupe_query($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {

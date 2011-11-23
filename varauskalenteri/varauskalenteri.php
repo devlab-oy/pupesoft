@@ -1,33 +1,34 @@
 <?php
 
 	include("../inc/parametrit.inc");
+
 	echo "<font class='head'>".t("Varauskalenteri")." $toim</font><hr>";
-		
+
 	if($tee == "SYOTA") {
 		include('varauskalenteri_syota.php');
 		if ($jatko != 1) {
 			exit;
 		}
 	}
-	
-	if($tee == "LISAA") {
+
+	if ($tee == "LISAA") {
 		include('varauskalenteri_lisaa.php');
 	}
-	
-	if($tee == "POISTA") {
+
+	if ($tee == "POISTA") {
 		include('varauskalenteri_poista.php');
 		if ($jatko != 1) {
 			exit;
 		}
 	}
-	
-	if($tee == "NAYTA") {
+
+	if ($tee == "NAYTA") {
 		include('varauskalenteri_nayta.php');
 		if ($jatko != 1) {
 			exit;
 		}
-	}	
-	
+	}
+
 	$MONTH_ARRAY  	= array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 	$paivat 		= array(1=> t('Maanantai'),t('Tiistai'),t('Keskiviikko'),t('Torstai'),t('Perjantai'),t('Lauantai'),t('Sunnuntai'));
 
@@ -66,31 +67,31 @@
 	if ($month == '') 	$month = date("n");
 	if ($year == '')  	$year  = date("Y");
 	if ($day == '') 	$day   = date("j");
-	
+
 	//lasketaan edellinen ja seuraava paiva kun siirytaan yksi paiva
 	$backmday = date("n",mktime(0, 0, 0, $month, $day-1,  $year));
 	$backyday = date("Y",mktime(0, 0, 0, $month, $day-1,  $year));
 	$backdday = date("j",mktime(0, 0, 0, $month, $day-1,  $year));
-	
+
 	$nextmday = date("n",mktime(0, 0, 0, $month, $day+1,  $year));
 	$nextyday = date("Y",mktime(0, 0, 0, $month, $day+1,  $year));
 	$nextdday = date("j",mktime(0, 0, 0, $month, $day+1,  $year));
-		
+
 	//lasketaan edellinen ja seuraava paiva kun siirytaan yksi kuukausi
 	$backmmonth = date("n",mktime(0, 0, 0, $month-1, $day,  $year));
 	$backymonth = date("Y",mktime(0, 0, 0, $month-1, $day,  $year));
 	$backdmonth = date("j",mktime(0, 0, 0, $month-1, $day,  $year));
-	
+
 	$nextmmonth = date("n",mktime(0, 0, 0, $month+1, $day,  $year));
 	$nextymonth = date("Y",mktime(0, 0, 0, $month+1, $day,  $year));
-	$nextdmonth = date("j",mktime(0, 0, 0, $month+1, $day,  $year)); 
-	
+	$nextdmonth = date("j",mktime(0, 0, 0, $month+1, $day,  $year));
+
 	//viela muuttujat mysql kyselyja varten, (etunollat pitaa olla...)
 	$mymonth = sprintf('%02d',$month);
 	$myday   = sprintf('%02d',$day);
-	
-	
-		
+
+
+
 	//paivan tapahtumat
 	echo "	<table align='left' width='50%'>
 			<tr>
@@ -105,39 +106,39 @@
 			<th align='left' width='130'>".t("Kuka")  ."</th>
 			<th align='left' colspan='2'>".t("Viesti")."</th>
 			</tr>";
-	
+
 	$min = 0;
 	$tun = 8;
-	
+
 	//N‰ytet‰‰n aina konsernikohtaisesti
 	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 	$result = mysql_query($query) or pupe_error($query);
 	$konsernit = "";
-	
-	while ($row = mysql_fetch_array($result)) {	
+
+	while ($row = mysql_fetch_array($result)) {
 		$konsernit .= " '".$row["yhtio"]."' ,";
-	}		
-	$konsernit = " and yhtio in (".substr($konsernit, 0, -1).") ";			
+	}
+	$konsernit = " and yhtio in (".substr($konsernit, 0, -1).") ";
 
 
 	for($i=800; $i < 2200; $i++) {
-		
+
 		$kello = sprintf('%02d',$tun).':'.sprintf('%02d',$min);
-		
+
 		if($i == 800) {
 			$query = "	select if('$year-$mymonth-$myday 00:00:00' > pvmalku, '08:00', substring(pvmalku,12,5)) aikaalku, substring(pvmloppu,12,5) aikaloppu, tapa, left(pvmloppu,10) pvmloppu, left(pvmalku,10) pvmalku, tunnus, kuka, kentta01, kentta02, kentta03, kentta04, kentta05, yhtio
-						from kalenteri 
-						where pvmalku < '$year-$mymonth-$myday' 
+						from kalenteri
+						where pvmalku < '$year-$mymonth-$myday'
 						and pvmloppu >= '$year-$mymonth-$myday'
-						and tyyppi='varauskalenteri' 
+						and tyyppi='varauskalenteri'
 						and tapa='$toim'
 						$konsernit";
 			$lres = mysql_query($query) or pupe_error($query);
-				
+
 			if(mysql_num_rows($lres) == 0) {
 				$query = "	select if('$year-$mymonth-$myday 00:00:00' > pvmalku, '08:00', substring(pvmalku,12,5)) aikaalku, substring(pvmloppu,12,5) aikaloppu, tapa, left(pvmloppu,10) pvmloppu, left(pvmalku,10) pvmalku, tunnus, kuka, kentta01, kentta02, kentta03, kentta04, kentta05, yhtio
-							from kalenteri 
-							where pvmalku <='$year-$mymonth-$myday $kello' 
+							from kalenteri
+							where pvmalku <='$year-$mymonth-$myday $kello'
 							and pvmloppu >= '$year-$mymonth-$myday $kello'
 							and tyyppi='varauskalenteri'
 							and tapa='$toim'
@@ -146,8 +147,8 @@
 		}
 		else {
 			$query = "	select if('$year-$mymonth-$myday 00:00:00' > pvmalku, '08:00', substring(pvmalku,12,5)) aikaalku, substring(pvmloppu,12,5) aikaloppu, tapa, left(pvmloppu,10) pvmloppu, left(pvmalku,10) pvmalku, tunnus, kuka, kentta01, kentta02, kentta03, kentta04, kentta05, yhtio
-						from kalenteri 
-						where pvmalku ='$year-$mymonth-$myday $kello' 
+						from kalenteri
+						where pvmalku ='$year-$mymonth-$myday $kello'
 						and pvmloppu >= '$year-$mymonth-$myday $kello'
 						and tyyppi='varauskalenteri'
 						and tapa='$toim'
@@ -155,64 +156,64 @@
 		}
 
 		$result = mysql_query($query) or pupe_error($query);
-			
+
 		if(mysql_num_rows($result) != 0) {
-			
-			$row = mysql_fetch_array($result);			
-			
+
+			$row = mysql_fetch_array($result);
+
 			if (str_replace('-','',$row["pvmloppu"]) > $year.$mymonth.$myday) {
-				$row["aikaloppu"] = "22:00-->";			
+				$row["aikaloppu"] = "22:00-->";
 			}
 			if (str_replace('-','',$row["pvmalku"]) < $year.$mymonth.$myday) {
 				$row["aikaalku"] = "-->08:00";
 			}
-			
-			
+
+
 			echo "	<tr>
 					<td nowrap><b>$row[aikaalku]-$row[aikaloppu]</b></td>
 					<td><a href='$PHP_SELF?tunnus=$row[tunnus]&year=$year&month=$month&day=$day&tee=POISTA&toim=$toim'>".t("Poista")."</a></td>";
-			
+
 			$query = "	select nimi
 						from kuka
-						where kuka='$row[kuka]' 
+						where kuka='$row[kuka]'
 						$konsernit";
-			$result = mysql_query($query) or pupe_error($query);	
-			$krow = mysql_fetch_array($result);		
-					
+			$result = mysql_query($query) or pupe_error($query);
+			$krow = mysql_fetch_array($result);
+
 			if ($krow["nimi"] != '') {
 				echo "<td>$krow[nimi] ($row[yhtio])</td>";
 			}
 			else {
 				echo "<td>$row[kuka] ($row[yhtio])</td>";
 			}
-			
-			
-			echo "<td colspan='2'>";			
-			
-			echo "<a href='$PHP_SELF?tee=NAYTA&year=$year&month=$month&day=$day&tunnus=$row[tunnus]&toim=$toim'>".t("Lis‰tiedot")."</a>";			
+
+
+			echo "<td colspan='2'>";
+
+			echo "<a href='$PHP_SELF?tee=NAYTA&year=$year&month=$month&day=$day&tunnus=$row[tunnus]&toim=$toim'>".t("Lis‰tiedot")."</a>";
 			echo "	&nbsp;&nbsp;$row[kentta05]</td>
-					</tr>"; 
-	
+					</tr>";
+
 			$aika = explode(':', $row["aikaloppu"]);
 			$tun = $aika[0];
 			$min = $aika[1];
-			
-			if ($tun <= 16) {	
+
+			if ($tun <= 16) {
 				$min = $min;
 			}
 			else{
 				$min = $min;
 			}
-			if($min == 60) { 
-				$tun = $tun+1; 
+			if($min == 60) {
+				$tun = $tun+1;
 				$min = "00";
-			}		
-		} 
+			}
+		}
 		else {
 			echo "	<tr>
 					<td><b>$kello</b></td>
 					<td>";
-			
+
 			if($tun.$min <= 2100) {
 				echo "<a href='$PHP_SELF?kello=$kello&year=$year&month=$month&day=$day&tee=SYOTA&toim=$toim'>".t("Lis‰‰")."</a>";
 			}
@@ -220,21 +221,21 @@
 					<td></td>
 					<td colspan='2'></td>
 					</tr>";
-					
-			if ($tun <= 16) {	
+
+			if ($tun <= 16) {
 				$min = $min+30;
 			}
 			else{
 				$min = $min+60;
 			}
-			if($min == 60) { 
-				$tun = $tun+1; 
+			if($min == 60) {
+				$tun = $tun+1;
 				$min = "00";
-			}		
+			}
 		}
-		$i = $tun.$min;		
+		$i = $tun.$min;
 	}
-	
+
 echo "</table>";
 
 
@@ -245,18 +246,18 @@ echo "<table width='250'>
 		<form action='$PHP_SELF?day=$day&year=$year&toim=$toim' method='post'>
 		<select name='month' Onchange='submit();'>";
 
-	$i=1;   
+	$i=1;
 	foreach($MONTH_ARRAY as $val) {
-		if($i == $month) { 
-			$sel = "selected"; 
+		if($i == $month) {
+			$sel = "selected";
 		}
-		else { 
-			$sel = ""; 
+		else {
+			$sel = "";
 		}
 		echo "<option value='$i' $sel>$val</option>";
 		$i++;
 	}
-	
+
 	echo "	</select>
 			</form>
 			</td>
@@ -265,15 +266,15 @@ echo "<table width='250'>
 			<th>Vk.</th>
 			<th>Ma</font></th>
 			<th>Ti</font></th>
-			<th>Ke</font></th> 
+			<th>Ke</font></th>
 			<th>To</font></th>
 			<th>Pe</font></th>
 			<th>La</font></th>
 			<th>Su</font></th>
 			</tr>";
-	
+
 	echo "<tr><th>".date("W",mktime(0, 0, 0, $month, 1, $year))."</th>";
-	
+
 	// kirjotetaan alkuun tyhji‰ soluja
 	for ($i=0; $i < weekday_number("1", $month, $year); $i++) {
 		echo "<td>&nbsp;</td>";
@@ -282,12 +283,12 @@ echo "<table width='250'>
 	// kirjoitetaan p‰iv‰m‰‰r‰t taulukkoon..
 	for ($i=1; $i <= days_in_month($month, $year); $i++) {
 		$pva = sprintf('%02d',$i);
-		
+
 		$query = "	select tunnus
 					from kalenteri
-					where pvmalku <= '$year-$mymonth-$pva 23:59:59' 
-					and pvmloppu >= '$year-$mymonth-$pva 00:00:00' 
-					and tyyppi='varauskalenteri' 
+					where pvmalku <= '$year-$mymonth-$pva 23:59:59'
+					and pvmloppu >= '$year-$mymonth-$pva 00:00:00'
+					and tyyppi='varauskalenteri'
 					and tapa='$toim'
 					$konsernit";
 		$result = mysql_query($query) or pupe_error($query);
@@ -321,17 +322,17 @@ echo "<table width='250'>
 				$weeknro = date("W",mktime(0, 0, 0, $month, $i+1, $year));
 				echo "</tr><tr><th>$weeknro</th>";
 			}
-			
+
 		}
 	}
-	
+
 	//kirjoitetaan loppuun tyhji‰ soluja
 	for ($i=0; $i < 6-weekday_number(days_in_month($month, $year), $month, $year); $i++) {
 		echo "<td>&nbsp;</td>";
 	}
 
 	echo "</tr>";
-	
+
 	echo "<tr><td class='back' align='center' colspan='8'><a href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth&toim=$toim'>".t("Edellinen")."</a>  - <a href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth&toim=$toim'>".t("Seuraava")."</a></td></tr>\n";
 
 	echo "</table></th></tr></table>";

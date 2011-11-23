@@ -2,6 +2,10 @@
 
 	//käyttöliittymä
 	if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  !== FALSE) {
+
+		//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+		$useslave = 1;
+
 		require ("inc/parametrit.inc");
 
 		echo "<font class='head'>".t("Muistuta käyttäjiä hyväksynnässä olevista ostolaskuista")."</font><hr>";

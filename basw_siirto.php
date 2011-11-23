@@ -5,6 +5,9 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	require("inc/parametrit.inc");
 
 	if ($tee == "lataa_tiedosto") {

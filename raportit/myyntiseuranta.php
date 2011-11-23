@@ -1,4 +1,5 @@
 <?php
+
 	// katsotaan tuleeko kaikki muuttujat REQUEST:ssa serialisoituna
 	if (isset($_REQUEST['kaikki_parametrit_serialisoituna'])) {
 
@@ -43,15 +44,16 @@
 
 		}
 
-		if(!aja_kysely()) {
+		if (!aja_kysely()) {
 			unset($_REQUEST);
 		}
 
-		// käytetään slavea
+		//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 		$useslave = 1;
+
 		require ("inc/connect.inc");
 
-		if(count($_REQUEST) > 0) {
+		if (count($_REQUEST) > 0) {
 			if(!function_exists("vararvo")) {
 				function vararvo($tuoteno, $vv, $kk, $pp) {
 					global $kukarow, $yhtiorow;

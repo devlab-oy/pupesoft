@@ -1,6 +1,6 @@
 <?php
 
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
 	require ("../inc/parametrit.inc");
@@ -10,14 +10,14 @@
 	if ($ppa != '' and $kka != '' and $vva != '') {
 
 		if ($raporttityyppi == "kerays") {
-			echo "<font class='head'>".t("Kerätyt rivit")." $ppa.$kka.$vva - $ppl.$kkl.$vvl</font>";			
+			echo "<font class='head'>".t("Kerätyt rivit")." $ppa.$kka.$vva - $ppl.$kkl.$vvl</font>";
 
 			$ajotapa = 'tilausrivi.kerattyaika';
 			$ajoindex = 'yhtio_tyyppi_kerattyaika';
 			$saldotonjoin = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')";
 		}
 		else {
-			echo "<font class='head'>".t("Myyntitilaukset")." $ppa.$kka.$vva - $ppl.$kkl.$vvl</font>";			
+			echo "<font class='head'>".t("Myyntitilaukset")." $ppa.$kka.$vva - $ppl.$kkl.$vvl</font>";
 
 			$ajotapa = 'tilausrivi.laadittu';
 			$ajoindex = 'yhtio_laadittu';
@@ -63,7 +63,7 @@
 		echo "<th>".t("Rivejä")."</th>";
 		echo "<th>".t("Nimikkeitä")."</th>";
 		echo "<th>".t("Rivejä")."</th>";
-		echo "<th>".t("Nimikkeitä")."</th>"; 
+		echo "<th>".t("Nimikkeitä")."</th>";
 		echo "<th>".t("Rivejä")."</th>";
 		echo "<th>".t("Nimikkeitä")."</th>";
 		echo "</tr>";
@@ -83,7 +83,7 @@
 		}
 
 		///* Yhteensärivi, annetaan tietokannan tehä työ, en jakssa summata while loopissa t. juppe*///
-		$query = "	SELECT 
+		$query = "	SELECT
 					count(*),
 					round(sum(kpl + varattu + jt)),
 					sum(IF(lasku.vienti = 'E', 1, 0)),

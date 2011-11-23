@@ -1,6 +1,8 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
+
 	require('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Loppuneet tuotteet").":</font><hr>";
@@ -22,7 +24,7 @@
 			$varastot = substr($varastot,0,-1);
 			$varastot = " and varastopaikat.tunnus in ($varastot) ";
 		}
-		
+
 		$query = "	SELECT tuote.osasto, tuote.try, tuotepaikat.tuoteno, tuote.nimitys, tuotepaikat.saldoaika,
 					concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka,
 					tuote.yksikko, tuotepaikat.inventointiaika, tuote.tahtituote, tuote.hinnastoon, tuote.status,

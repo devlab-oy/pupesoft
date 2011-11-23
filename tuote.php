@@ -1783,7 +1783,14 @@
 
 				// Onko käyttäjällä oikeus nähdä valmistuksia tai reseptejä
 				$oikeu_t1 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAVARASTOON");
-				$oikeu_t2 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAASIAKKAALLE");
+
+				if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "N") {
+					$oikeu_t2 = FALSE;
+				}
+				else {
+					$oikeu_t2 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAASIAKKAALLE");
+				}
+
 				$oikeu_t3 = tarkista_oikeus("tilauskasittely/valmista_tilaus.php", "");
 				$oikeu_t4 = tarkista_oikeus("tuoteperhe.php", "RESEPTI");
 

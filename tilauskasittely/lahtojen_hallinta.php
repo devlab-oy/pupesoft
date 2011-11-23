@@ -12,8 +12,6 @@
 					$('.center').css({'text-align': 'center'});
 					$('.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
 
-					// $('.toggleable_tr td').css({'padding-left': '25px'});
-
 					$(':checkbox').click(function(event){
 						event.stopPropagation();
 					});
@@ -21,11 +19,14 @@
 					$('.toggleable').click(function(event){
 
 						if ($('#toggleable_'+this.id).is(':visible')) {
-							// $('.toggleable_row_child').slideUp(200);
-							// $('#toggleable_'+this.id).slideUp(200);
 
 							$('.toggleable_row_child').hide();
 							$('#toggleable_'+this.id).hide();
+
+							$('.toggleable_row_order').removeClass('tumma');
+							$('.toggleable_row_sscc').removeClass('tumma');
+
+							$('.toggleable_row_tr').hide();
 
 							$('tr[id!=\"toggleable_parent_'+id+'\"][class=\"toggleable_parent\"]').show();
 							$('tr[id!=\"toggleable_tr_'+id+'\"][class=\"toggleable_tr\"]').stop().show();
@@ -36,10 +37,11 @@
 							var id = this.id;
 							var parent_element = $('#toggleable_'+id).parent();
 
+							$('.toggleable_row_tr').show();
+
 							$('tr[id!=\"toggleable_parent_'+id+'\"][class=\"toggleable_parent\"]').hide();
 							$('tr[id!=\"toggleable_tr_'+id+'\"][class=\"toggleable_tr\"]').hide();
 
-							// $('#toggleable_'+id).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).slideDown(200);
 							$('#toggleable_'+id).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show();
 						}
 					});
@@ -50,6 +52,8 @@
 
 							$(this).removeClass('tumma');
 
+							$('tr[id!=\"toggleable_row_tr_'+id+'\"][class=\"toggleable_row_tr\"]').show();
+
 							$('#toggleable_row_order_'+this.id).slideUp('fast');
 						}
 						else {
@@ -59,7 +63,7 @@
 							var id = this.id;
 							var parent_element = $('#toggleable_row_order_'+id).parent();
 
-							// $('#toggleable_row_order_'+id).parent().prev().css({'padding-top': '10px'});
+							$('tr[id!=\"toggleable_row_tr_'+id+'\"][class=\"toggleable_row_tr\"]').hide();
 
 							$('#toggleable_row_order_'+id).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 						}
@@ -67,10 +71,12 @@
 
 					$('.toggleable_row_sscc').click(function(event){
 
-						var id = this.id.split(\"#\", 2);
+						var id = this.id.split(\"#\", 3);
 
 						if ($('#toggleable_row_sscc_'+id[0]+'_'+id[1]).is(':visible')) {
 							$(this).removeClass('tumma');
+
+							$('tr[id!=\"toggleable_row_tr_'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
 
 							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]).slideUp('fast');
 						}
@@ -78,9 +84,9 @@
 
 							$(this).addClass('tumma');
 
-							var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[1]).parent();
+							$('tr[id!=\"toggleable_row_tr_'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
 
-							// $('#toggleable_row_sscc_'+id[0]+'_'+id[1]).parent().prev().css({'padding-top': '10px'});
+							var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[1]).parent();
 
 							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 						}
@@ -235,7 +241,7 @@
 			$i = 1;
 
 			foreach ($arr as $sscc) {
-				echo "<a class='td toggleable_row_sscc' id='{$sscc}#{$i}'>{$sscc}</a>";
+				echo "<a class='td toggleable_row_sscc' id='{$sscc}#{$i}#{$lahto_row['tilauksen_tunnus']}'>{$sscc}</a>";
 
 				if ($i < $cnt) echo " ";
 

@@ -164,6 +164,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "yhteensopivuus_rekisteri" :
 				$pakolliset  = array("REKNO", "AJONEUVOLAJI", "AUTOID", "MAA");
 				$kielletyt   = array();
+				$eiyhtiota 	 = "EILAATIJAA";
 				break;
 			case "tuotteen_orginaalit" :
 				$pakolliset  = array("TUOTENO", "ORIG_TUOTENO");

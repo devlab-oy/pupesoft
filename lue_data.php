@@ -552,8 +552,8 @@ if ($kasitellaan_tiedosto) {
 				flush();
 			}
 
-			if ($eiyhtiota == "") {
-				$valinta   = " yhtio = '$kukarow[yhtio]'";
+			if ($eiyhtiota == "" or $eiyhtiota == "EILAATIJAA") {
+				$valinta   = " yhtio = '{$kukarow['yhtio']}'";
 			}
 			elseif ($eiyhtiota == "TRIP") {
 				$valinta   = " tunnus > 0 ";
@@ -1014,6 +1014,9 @@ if ($kasitellaan_tiedosto) {
 					if ($eiyhtiota == "") {
 						$query = "INSERT into $table_mysql SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 					}
+					elseif ($eiyhtiota == "EILAATIJAA") {
+						$query = "INSERT INTO {$table_mysql} SET yhtio = '{$kukarow['yhtio']}' ";
+					}
 					elseif ($eiyhtiota == "TRIP") {
 						$query = "INSERT into $table_mysql SET laatija='$kukarow[kuka]', luontiaika=now() ";
 					}
@@ -1023,6 +1026,9 @@ if ($kasitellaan_tiedosto) {
 					if ($eiyhtiota == "") {
 						$query = "UPDATE $table_mysql SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
 	      			}
+					elseif ($eiyhtiota == "EILAATIJAA") {
+						$query = "UPDATE {$table_mysql} SET yhtio = '{$kukarow['yhtio']}' ";
+					}
 					elseif ($eiyhtiota == "TRIP") {
 						$query = "UPDATE $table_mysql SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 	      			}

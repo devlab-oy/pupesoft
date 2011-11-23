@@ -395,7 +395,7 @@
 		}
 
 		if ($asiakasid != "") {
-			$lisa1 .= " and ((lasku.liitostunnus='{$asiakasid}' and lasku.tila in ('U','L')) or (tiliointi.liitos = 'A' and tiliointi.liitostunnus='{$asiakasid}' and lasku.tila 'X')) ";
+			$lisa1 .= " and ((lasku.liitostunnus='{$asiakasid}' and lasku.tila in ('U','L')) or (tiliointi.liitos = 'A' and tiliointi.liitostunnus='{$asiakasid}' and lasku.tila = 'X')) ";
 		}
 
 		if ($toimittajaid != "") {

@@ -38,7 +38,7 @@ while ($rivi = fgets($fd)) {
  			$query = "	UPDATE kuka
 						SET kesken=0
 						WHERE session = '$session'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			$kukarow['kesken'] 	= 0;
 			$tilausnumero 		= 0;
@@ -55,13 +55,22 @@ while ($rivi = fgets($fd)) {
  						WHERE yhtio = '$kukarow[yhtio]'
 						and ytunnus = '$ytunnus'
 						$toim_lis
- 						ORDER BY tunnus
- 						LIMIT 1";
- 			$result = mysql_query($query) or die($query);
+						and laji not in ('P','R')";
+ 			$result = pupe_query($query);
 
  			if (mysql_num_rows($result) == 0) {
- 				die ("virheellinen asiakasnumero tiedostossa! ytunnus ='$ytunnus' $toim_lis");
+ 				echo t("VIRHE: Tiedoilla ei löydy yhtään asiakasta").": ytunnus = '$ytunnus' $toim_lis!<br>";
+
+				// Skipataan tämä rivi.....
+				continue;
+			}
+			elseif (mysql_num_rows($result) > 1) {
+ 				echo t("VIRHE: Tiedoilla löytyy useita asiakkaita").": ytunnus = '$ytunnus' $toim_lis!<br>";
+
+				// Skipataan tämä rivi.....
+				continue;
  			}
+
  			$arow = mysql_fetch_array($result);
 
 			// Luodaan uusi myyntitilausotsikko
@@ -81,7 +90,7 @@ while ($rivi = fgets($fd)) {
  					FROM tuote
  					WHERE tuoteno = '$tuoteno'
 					and yhtio = '$kukarow[yhtio]'";
- 		$rarresult = mysql_query($query) or pupe_error($query);
+ 		$rarresult = pupe_query($query);
 
  		if (mysql_num_rows($rarresult) == 1) {
  			$trow = mysql_fetch_array($rarresult);

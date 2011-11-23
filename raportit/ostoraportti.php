@@ -1,7 +1,5 @@
 <?php
 
-	$useslave = ($_REQUEST['tee'] == 'tallenna' or $_REQUEST['tee'] == 'uusiraportti') ? '' : 1;
-
 	if (isset($_REQUEST["tee"])) {
 		if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
@@ -20,7 +18,7 @@
 			exit;
 		}
 
-		$ala_tallenna = array(	"kysely", 
+		$ala_tallenna = array(	"kysely",
 								"uusirappari",
 								"edkysely",
 								"rtee",
@@ -68,6 +66,11 @@
 			$tee = 'JATKA';
 			$rappari = $kysely_kuka;
 		}
+
+		//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+		$useslave = 1;
+
+		require ("inc/connect.inc");
 
 		echo "<font class='head'>".t("Ostoraportti")."</font><hr>";
 

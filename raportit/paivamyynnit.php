@@ -1,5 +1,6 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
 	require('../inc/parametrit.inc');
@@ -7,11 +8,11 @@
 	echo "<font class='head'>".t("Myynnit päivittäin asiakasosastoittain")."</font><hr>";
 
 	if (!isset($vuosi)) $vuosi = date("Y");
-	
+
 	echo "<form method='post' action='$PHP_SELF'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
-	echo "<table>";	
+	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Anna vuosi")."</th>";
 	echo "<td><input type='text' name='vuosi' value='$vuosi' size='5'></td>";
@@ -36,10 +37,10 @@
 				$osastot[] = $ressu['osasto'];
 			}
 
-			$query = "	SELECT osasto, 
-						date_format(tapvm, '%j') pvm, 
-						tapvm, 
-						sum(kate) kate, 
+			$query = "	SELECT osasto,
+						date_format(tapvm, '%j') pvm,
+						tapvm,
+						sum(kate) kate,
 						sum(arvo) myynti,
 						sum(kate) / sum(arvo) * 100 katepro
 						FROM lasku use index (yhtio_tila_tapvm)
@@ -59,7 +60,7 @@
 				$tapvm[$apu] = $ressu['tapvm'];
 				$kate[$osastoapu][$apu]	= $ressu['kate'];
 				$myynt[$osastoapu][$apu] = $ressu['myynti'];
-				$katepro[$osastoapu][$apu] = $ressu['katepro'];				
+				$katepro[$osastoapu][$apu] = $ressu['katepro'];
 			}
 
 			echo "<table>";
@@ -82,11 +83,11 @@
 
 				foreach ($osastot as $osasto) {
 					$apu_myynt = $apu_kate = $apu_katepro = "";
-					
+
 					if ($myynt[$osasto][$i] != 0) $apu_myynt = sprintf("%.02f", $myynt[$osasto][$i]);
 					if ($kate[$osasto][$i] != 0) $apu_kate = sprintf("%.02f", $kate[$osasto][$i]);
 					if ($katepro[$osasto][$i] != 0) $apu_katepro = sprintf("%.02f", $katepro[$osasto][$i]);
-					
+
 					echo "<td nowrap style='text-align:right'>$apu_myynt</td>";
 					echo "<td nowrap style='text-align:right'>$apu_kate</td>";
 					echo "<td nowrap style='text-align:right'>$apu_katepro</td>";

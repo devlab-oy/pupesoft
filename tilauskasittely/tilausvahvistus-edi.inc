@@ -61,12 +61,20 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ale_query_select_lisa .= " tilausrivi.ale{$alepostfix},";
 	}
 
+	if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
+		$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
+	}
+	else {
+		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi,
 				tilausrivi.tuoteno, tilausrivi.varattu, tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv, tilausrivi.nimitys,
 				tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro, tilausrivi.yksikko
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				$tyyppilisa
 				and $wherelisa
 				ORDER BY tilausrivi.tunnus";
 	$tilvahresult = mysql_query($query) or pupe_error($query);

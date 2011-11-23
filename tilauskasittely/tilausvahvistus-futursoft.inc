@@ -61,6 +61,13 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ale_query_select_lisa .= " tilausrivi.ale{$alepostfix},";
 	}
 
+	if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
+		$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
+	}
+	else {
+		$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E','T') ";
+	}
+
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
@@ -69,6 +76,7 @@ if (!file_exists($tilvahvfilenimi)) {
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				$tyyppilisa
 				and $wherelisa
 				ORDER BY tilausrivi.tunnus";
 	$tilvahresult = mysql_query($query) or pupe_error($query);
@@ -156,26 +164,26 @@ if (!file_exists($tilvahvfilenimi)) {
 
 		if ($GLOBALS["futurtilvahhost"] != "" and $GLOBALS["futurtilvahuser"] != "" and $GLOBALS["futurtilvahpass"] != "") {
 
-			$conn_id = ftp_connect($GLOBALS["futurtilvahhost"]); 
+			$conn_id = ftp_connect($GLOBALS["futurtilvahhost"]);
 
 			// jos connectio ok, kokeillaan loginata
 			if ($conn_id) {
-				$login_result = ftp_login($conn_id, $GLOBALS["futurtilvahuser"], $GLOBALS["futurtilvahpass"]); 
+				$login_result = ftp_login($conn_id, $GLOBALS["futurtilvahuser"], $GLOBALS["futurtilvahpass"]);
 			}
 
 			// jos login ok kokeillaan uploadata
 			if ($login_result) {
-				$upload = ftp_put($conn_id, $ftpnimi, realpath($tilvahvfilenimi), FTP_ASCII); 
+				$upload = ftp_put($conn_id, $ftpnimi, realpath($tilvahvfilenimi), FTP_ASCII);
 			}
 
 			if ($conn_id) {
-				ftp_close($conn_id); 
+				ftp_close($conn_id);
 			}
 
 			// jos mikätahansa feilas niin palautetaan yks
 			if ($conn_id === FALSE or $login_result === FALSE or $upload === FALSE) {
 				$palautus = 1;
-				echo "Ongelma Futursoft tilausvahvistuksen lähetyksessä!<br/><br/>"; 
+				echo "Ongelma Futursoft tilausvahvistuksen lähetyksessä!<br/><br/>";
 			}
 		}
 		else {

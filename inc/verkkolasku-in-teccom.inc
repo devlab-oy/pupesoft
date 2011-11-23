@@ -161,6 +161,7 @@
 	$i				= 0;
 	$rtuoteno		= array();
 	$ealvi		 	= array("");
+	$lisavat		= array("");
 	$aputuoteno		= "";
 	$pituus			= "";
 

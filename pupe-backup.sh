@@ -7,8 +7,16 @@ DBSALASANA=$4
 BACKUPPAIVAT=$5
 
 # Katsotaan, onko salausavain syötetty
-if [ ! -n $6 ]; then
+if [ ! -z $6 ]; then
 	SALAUSAVAIN=$6
+fi
+
+if [ ! -z $7 ]; then
+	SAMBAHOST=$7
+	SAMBAUSER=$8
+	SAMBAPASS=$9
+	SAMBAREMDIR=${10}
+	SAMBALOCALDIR=${11}
 fi
 
 # Katsotaan, että parametrit on annettu
@@ -73,7 +81,7 @@ tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
 echo -n `date "+%Y-%m-%d %H:%M:%S"`
 echo " - Bzip2 done."
 
-if [ ! -n ${SALAUSAVAIN} ]; then
+if [ ! -z ${SALAUSAVAIN} ]; then
 	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
 
 	if [[ $? != 0 ]]; then
@@ -154,6 +162,36 @@ if [ -d etc/httpd/conf/ ]; then
 fi
 
 tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2  ${PUPEPOLKU}/inc/salasanat.php etc/cron.* ${BACKUPFILET}
+
+if [ ! -z ${SALAUSAVAIN} ]; then
+	checkcrypt=`mcrypt --unlink --key ${SALAUSAVAIN} --quiet ${BACKUPDIR}/${FILENAME}`
+
+	if [[ $? != 0 ]]; then
+		echo "Salaus ${BACKUPDIR}/${FILENAME} ei onnistunut!"
+		echo
+	fi
+fi
+
+#Siirretäänkö tuorein backuppi myös sambaserverille jos sellainen on konffattu
+if [ ! -z ${SAMBAHOST} ]; then
+	checksamba=`mount -t cifs -o username=${SAMBAUSER},password=${SAMBAPASS} //${SAMBAHOST}/${SAMBAREMDIR} ${SAMBALOCALDIR}`
+
+	if [[ $? != 0 ]]; then
+		echo "Sambamount ei onnistunut!"
+		echo
+	else
+		#Poistetaan vanha backuppi
+		rm -f ${SAMBALOCALDIR}/${DBKANTA}-backup-*
+		rm -f ${SAMBALOCALDIR}/linux-backup-*
+
+		# Siirretään tämä
+		cp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${SAMBALOCALDIR}
+		cp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${SAMBALOCALDIR}
+
+		umount ${SAMBALOCALDIR}
+	fi
+fi
+
 
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -mtime +${BACKUPPAIVAT} -delete

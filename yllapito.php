@@ -600,8 +600,11 @@
 							$ltpv = substr($laskuorow["tapvm"], 0, 4);
 						}
 
-						$oletus_erapvm = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_erapvm"], $ltpv));
-						$oletus_kapvm  = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_kapvm"], $ltpv));
+						if ($otsikrow["oletus_erapvm"] > 0) $oletus_erapvm = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_erapvm"], $ltpv));
+						else $oletus_erapvm = 0;
+
+						if ($otsikrow["oletus_kapvm"] > 0) $oletus_kapvm  = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_kapvm"], $ltpv));
+						else $oletus_kapvm = 0;
 
 						$otsikrow["oletus_kasumma"] = round($laskuorow["summa"] * $otsikrow['oletus_kapro'] / 100, 2);
 
@@ -614,8 +617,8 @@
 
 						// Jos lasku on hyv‰ksytty ja muutetaan hyvˆksynt‰‰n liittyvi‰ tietoja
 						if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
-							($laskuorow["erpcm"] != $oletus_erapvm) or
-							($laskuorow["kapvm"] != $oletus_kapvm) or
+							($oletus_erapvm > 0 and $laskuorow["erpcm"] != $oletus_erapvm) or
+							($oletus_erapvm > 0 and $laskuorow["kapvm"] != $oletus_kapvm) or
 							($laskuorow["kasumma"] != $otsikrow["oletus_kasumma"]) or
 							($laskuorow["tilinumero"] != $otsikrow["tilinumero"]) or
 							($laskuorow["ultilno"] != $otsikrow["ultilno"]) or
@@ -629,8 +632,8 @@
 							($laskuorow["suoraveloitus"] != $otsikrow["oletus_suoraveloitus"]) or
 							($laskuorow["sisviesti1"] != $otsikrow["ohjeitapankille"]))) {
 
-							#echo "Lasku palautetaan hyv‰ksynt‰‰n<br><table>";
-							#echo "<tr><td>$laskuorow[summa]</td></tr>";
+							#echo "<br><table>";
+							#echo "<tr><td>Lasku palautetaan hyv‰ksynt‰‰n</td><td>$laskuorow[summa]</td></tr>";
 							#echo "<tr><td>".$laskuorow["erpcm"]."</td><td>".$oletus_erapvm."</td></tr>";
 							#echo "<tr><td>".$laskuorow["kapvm"]."</td><td>".$oletus_kapvm."</td></tr>";
 							#echo "<tr><td>".$laskuorow["kasumma"]."</td><td>".$otsikrow["oletus_kasumma"]."</td></tr>";
@@ -1643,7 +1646,7 @@
 
 
 		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {
-			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot") and $toim == 'toimitustapa') {
+			if (tarkista_oikeus("yllapito.php", "toimitustavan_lahdot")) {
 				echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=toimitustavan_lahdot&from=yllapito&haku[1]=@$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 		}
@@ -1674,11 +1677,23 @@
 			}
 		}
 
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "auto_vari") {
+			if (tarkista_oikeus("yllapito.php", "auto_vari_tuote")) {
+				echo "<iframe id='auto_vari_tuote_iframe' name='auto_vari_tuote_iframe' src='yllapito.php?toim=auto_vari_tuote&from=yllapito&haku[1]=@$trow[varikoodi]&ohje=off&lukitse_avaimeen=$trow[varikoodi]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+			if (tarkista_oikeus("yllapito.php", "auto_vari_korvaavat")) {
+				echo "<iframe id='auto_vari_korvaavat_iframe' name='auto_vari_korvaavat_iframe' src='yllapito.php?toim=auto_vari_korvaavat&from=yllapito&haku[1]=@$trow[varikoodi]&ohje=off&lukitse_avaimeen=$trow[varikoodi]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			}
+		}
+
 		echo "</td></tr>";
 		echo "</table>";
 
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
-		if ($toim == "puun_alkio" or
+		if ($toim == "auto_vari" or
+			$toim == "auto_vari_tuote" or
+			$toim == "auto_vari_korvaavat" or
+			$toim == "puun_alkio" or
 			$toim == "toimitustavan_lahdot" or
 			$toim == "keraysvyohyke" or
 			$toim == "avainsana" or
@@ -1822,6 +1837,14 @@
 
 	if ($from == "yllapito" and $toim == "toimitustavan_lahdot") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('toimitustavan_lahdot_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "auto_vari_tuote") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('auto_vari_tuote_iframe' $jcsmaxheigth);</script>";
+	}
+
+	if ($from == "yllapito" and $toim == "auto_vari_korvaavat") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('auto_vari_korvaavat_iframe' $jcsmaxheigth);</script>";
 	}
 
 	if ($from == "yllapito" and $toim == "puun_alkio") {

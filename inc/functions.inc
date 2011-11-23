@@ -2004,11 +2004,11 @@ if (!function_exists("synkronoi")) {
 									and merahti			= '$aburow[merahti]'
 									and multi_jv		= '$aburow[multi_jv]'
 									and nouto			= '$aburow[nouto]'
-									and sallitut_maat	= '$aburow[sallitut_maat]'
-									";
+									and sallitut_maat	= '$aburow[sallitut_maat]'";
 						$tarkres=pupe_query($query);
+
 						if (mysql_num_rows($tarkres) == 1) {
-							$tarkrow=mysql_fetch_assoc($tarkres);
+							$tarkrow = mysql_fetch_assoc($tarkres);
 							$override["toimitustapa"] = $tarkrow["tunnus"];
 						}
 						else {
@@ -5816,6 +5816,24 @@ if (!function_exists("enable_ajax")) {
 
 	var keyStrokeIndex=-1;
 
+	function livesearch_blurhandler(id) {
+		if ( document.activeElement ) hf = document.activeElement;
+		else hf = document.focusNode;
+
+		if (hf.id != id) {
+
+			var selectOptions = document.getElementsByName('selectOptions'+id);
+
+			for (var iEl = 0; iEl < selectOptions.length; iEl++) {
+				if (document.getElementById(selectOptions[iEl].id).className != '') {
+					return false;
+				}
+			}
+
+			document.getElementById('livesearch_'+id).style.visibility = 'hidden';
+		}
+	}
+
 	function livesearch_keyhandler(event, haku_id, haku_formi, dont_submit_after) {
 
 		var selectOptions = document.getElementsByName('selectOptions'+haku_id);
@@ -5851,6 +5869,8 @@ if (!function_exists("enable_ajax")) {
 				}
 
 				selectOptions[keyStrokeIndex].className='liveSearchSelectedItem';
+
+				if (selectOptions[keyStrokeIndex].id) document.getElementById(selectOptions[keyStrokeIndex].id).scrollIntoView();
 			}
 		}
 		else if (event.keyCode == 13) {
@@ -6133,11 +6153,11 @@ if (!function_exists("js_popup")) {
 				x = e.pageX;
 			}
 			else if (e.clientX) {
-				x = e.clientX + document.body.scrollLeft
-					+ document.documentElement.scrollLeft;
+				x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
 			}
 			return x;
 		}
+
 		function getMouseY(e) {
 			var y = null;
 
@@ -6153,11 +6173,12 @@ if (!function_exists("js_popup")) {
 		}
 
 	    function toolTipShow(e, x, y) {
-	        toolTip.css({'top':y, 'left':x}).delay(1000).show('fast');
+	        toolTip.css({'top':y, 'left':x}).delay(500).show('fast');
 	    }
 
 	    function toolTipHide() {
-			toolTip.hide().clearQueue();
+			toolTip.clearQueue();
+			toolTip.hide();
 	    }
 
 	    //events for each element
@@ -7470,12 +7491,13 @@ if (!function_exists("livesearch_tilihaku")) {
 								<font style='font-weight:bold'>$row[tilino]</font> &raquo; $row[nimi]
 							</div><div name='selectValues$hakuid' id='$row[tilino]'></div>";
 					$limit++;
-					if ($limit > 14) {
+
+					if ($limit > 49) {
 						break;
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>Haulla löytyi ".mysql_num_rows($result). " tiliä.</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ",t("tiliä")," ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei tilejä.")."</font></div>";
@@ -7564,11 +7586,18 @@ if (!function_exists("livesearch_tuotehaku")) {
 					$kieltolisa .= " and tuote.hinnastoon != 'E' ";
 				}
 			}
-
+			
+			// Näytetään poistuvat tuotteet mutta ei poistettuja
+			if ($yhtiorow['livetuotehaku_poistetut'] == 'X') {
+				$naytetaanko_poistetut = "and (tuote.status != 'P' or (tuote.status = 'P' and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0))";
+			} 
+			else {
+				$naytetaanko_poistetut = "and tuote.status != 'P'";
+			}	
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						and tuote.status != 'P'
+						$naytetaanko_poistetut
 						$kieltolisa
 						$haku_query";
 			$result = pupe_query($query);
@@ -7599,12 +7628,13 @@ if (!function_exists("livesearch_tuotehaku")) {
 								<font style='font-weight:bold'>$row[tuoteno]</font> &raquo; $row[nimitys]
 							</div><div name='selectValues$hakuid' id='$row[tuoteno]'></div>";
 					$limit++;
-					if ($limit > 14) {
+
+					if ($limit > 49) {
 						break;
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>Haulla löytyi ".mysql_num_rows($result). " tuotetta, näytetään 15 tarkinta osumaa.</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ".t("tuotetta").", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."</font></div>";
@@ -7695,12 +7725,13 @@ if (!function_exists("livesearch_kayttajahaku")) {
 								<font style='font-weight:bold'>$row[nimi]</font> &raquo; ($row[kuka])
 							</div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
 					$limit++;
-					if ($limit > 14) {
+
+					if ($limit > 49) {
 						break;
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("käyttäjää"),".</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("käyttäjää"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei käyttäjiä.")."</font></div>";
@@ -7778,12 +7809,13 @@ if (!function_exists("livesearch_asiakashaku")) {
 								<font style='font-weight:bold'>$row[ytunnus] &raquo; $row[asiakkaan_tieto]</font>
 							</div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
 					$limit++;
-					if ($limit > 14) {
+
+					if ($limit > 49) {
 						break;
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("asiakasta"),".</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("asiakasta"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei asiakkaita.")."</font></div>";
@@ -7858,12 +7890,13 @@ if (!function_exists("livesearch_varastohaku")) {
 								<font style='font-weight:bold'>$row[hyllyt]</font>
 							</div><div name='selectValues$hakuid' id='$row[hyllyt]'></div>";
 					$limit++;
-					if ($limit > 14) {
+
+					if ($limit > 49) {
 						break;
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("varastoa"),".</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("varastoa"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei varastoa.")."</font></div>";
@@ -7892,17 +7925,10 @@ if (!function_exists("livesearch_kentta")) {
 					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
 							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&ohje=off&toim=$toim&livesearch_haku='+this.value);
-							keyStrokeIndex = -1;
-					}\"
-					onblur=\"var selectOptions = document.getElementsByName('selectOptions$hakuID');
-					for (var iEl = 0; iEl < selectOptions.length; iEl++) {
-						if (document.getElementById(selectOptions[iEl].id).className != '') {
-							return false;
-						}
-					}
-					document.getElementById('livesearch_$hakuID').style.visibility = 'hidden';\">
+							keyStrokeIndex = -1;}\"
+					onblur=\"setTimeout('livesearch_blurhandler(\'$hakuID\')', 100);\">
 				<div style='break:all'></div>
-				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px;'></div>";
+				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
 	}
 }
 
@@ -8413,23 +8439,28 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		}
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") !== FALSE) {
-			require("tulosta_tilausvahvistus_pdf.inc");
+			if (@include("tilauskasittely/tulosta_tilausvahvistus_pdf.inc"));
+			else require("tulosta_tilausvahvistus_pdf.inc");
 		}
 		else {
 			if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
-				require("tilausvahvistus-edi.inc");
+				if (@include("tilauskasittely/tilausvahvistus-edi.inc"));
+				else require("tilausvahvistus-edi.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-				require("tilausvahvistus-email.inc");
+				if (@include("tilauskasittely/tilausvahvistus-email.inc"));
+				else require("tilausvahvistus-email.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
-				require("tilausvahvistus-fax.inc");
+				if (@include("tilauskasittely/tilausvahvistus-fax.inc"));
+				else require("tilausvahvistus-fax.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
-				require("tilausvahvistus-futursoft.inc");
+				if (@include("tilauskasittely/tilausvahvistus-futursoft.inc"));
+				else require("tilausvahvistus-futursoft.inc");
 			}
 
 			if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
@@ -8445,7 +8476,8 @@ if (!function_exists("laheta_tilausvahvistus")) {
 					$toim_save = $toim;
 					if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
 
-					require("tulosta_tilausvahvistus_pdf.inc");
+					if (@include("tilauskasittely/tulosta_tilausvahvistus_pdf.inc"));
+					else require("tulosta_tilausvahvistus_pdf.inc");
 					$toim = $toim_save;
 				}
 			}
@@ -8840,7 +8872,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
 		$query = "	SELECT *
 					FROM yhtio
-					WHERE yhtio='$yhtio'";
+					WHERE yhtio = '$yhtio'";
 		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 		if (mysql_num_rows($result) == 0) {
@@ -8912,7 +8944,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
 if (!function_exists("liite_popup")) {
 	function liite_popup($toiminto, $tuotetunnus = 0, $width=0, $height=0) {
-		global $kukarow, $yhtiorow, $PHP_SELF, $palvelin2, $pupe_root_polku;
+		global $kukarow, $yhtiorow, $PHP_SELF, $palvelin2, $pupe_root_polku, $toim;
 
 		if ($toiminto == "JS") {
 			echo "<SCRIPT type='text/javascript'>
@@ -8935,10 +8967,10 @@ if (!function_exists("liite_popup")) {
 							}
 
 							if (maxwidth == '0' && totalheight == '0') {
-								window.open('$PHP_SELF?ohje=off&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
+								window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
 							}
 							else {
-								window.open('$PHP_SELF?ohje=off&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
+								window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
 							}
 						}
 					//-->
@@ -11056,7 +11088,7 @@ if (!function_exists("pupe_DataTables")) {
 
 							if (tableid == \"saatanat_taulu\") {
 								var saatavaty = new Array();
-								var sarakemaara = ".count($saatavat_array)."+5;
+								var sarakemaara = parametrit[tableid][0]-2;
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {
@@ -11619,8 +11651,8 @@ if (!function_exists("pupe_DataTables")) {
 					// fnFilter toistaiseksi vain ekalle tablelle
 					datatablesit[0].fnFilter( arvo, sarake );
 
-					// filtteröidään työjono.php:ssa myös alempaa taulua
-					if (datatablesit[0].attr(\"id\") == \"tyojono0\") {
+					// filtteröidään työjono.php:ssa myös alempaa taulua, jos ja vain jos alempi taulu on olemassa
+					if (datatablesit[0].attr(\"id\") == \"tyojono0\" && datatablesit[1] != undefined) {
 						var tyojono = [];
 
 						$(\"span[class=tyom_id]\").each(function(i) {
@@ -11650,6 +11682,37 @@ if (!function_exists("pupe_DataTables")) {
 				if (oSettings.oPreviousSearch['sSearch']!=''){
 					$('.search_field').val(oSettings.oPreviousSearch['sSearch']);
 				}
+
+				// Prioriteetin rajausta dropdownilla
+				$('select.prioriteetti_sort').change(function() {
+					var prioriteetti = $('select.prioriteetti_sort option:selected');
+					var haku_arvo = prioriteetti.val();
+
+					console.log(prioriteetti.val());
+					datatablesit[0].fnFilter(haku_arvo, 1);
+				} );
+
+				// Työjonon ja työstatuksen rajausta dropdownilla
+				$('select.tyojono_sort, select.tyostatus_sort').change(function() {
+					var tyojono = $('select.tyojono_sort option:selected');
+					var tyostatus = $('select.tyostatus_sort option:selected');
+					var hakuarvo;
+
+					// Jos tyojono tai tyostatus on tyhja, haetaan vain yhdellä ehdolla
+					haku_arvo = tyojono.text() +' '+ tyostatus.text();
+
+					if (tyojono.val() == '-') {
+						haku_arvo = tyostatus.text();
+					}
+					if (tyostatus.val() == '-') {
+						haku_arvo = tyojono.text();
+					}
+					if(tyojono.val() == '-' && tyostatus.val() == '-') {
+						haku_arvo = '';
+					}
+
+					datatablesit[0].fnFilter(haku_arvo, 8);
+				} );
 			} );
 		</script>";
 	}
@@ -11981,6 +12044,7 @@ if (!function_exists("palauta_vak_tiedot")) {
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.tyyppi  = 'L'
 					and tilausrivi.otunnus IN ($otunnus)
 					and tuote.vakkoodi not in ('','0')
 					and (tilausrivi.varattu+tilausrivi.kpl) > 0
@@ -14301,5 +14365,112 @@ if (!function_exists("tarkistaytunnus")) {
 			return FALSE;
 		}
 
+	}
+}
+
+if (!function_exists('gauge')) {
+	function gauge() {
+
+		/**
+		 * Mittari piirretään diviin id:llä chart_div
+		 * Tarvitaan args- ja options-oliot
+		 */
+
+		/** ESIMERKKI
+			var gauge = new Gauge();
+			var args = {
+				foo: ['BAR', 0]
+			}
+
+			var options = {	width: 800,
+							height: 220,
+							min: 0,
+							max: 400000,
+							redFrom: 200000,
+							redTo: 300000,
+							greenFrom: 350000,
+							greenTo: 400000,
+							yellowFrom: 300000,
+							yellowTo: 350000,
+							minorTicks: 5,
+							majorTicks: ['0', '50', '100', '150', '200', '250', '300', '350', '400']};
+
+			gauge.init(args, options);
+			gauge.draw($('#value_from').val(), options.max);
+		*/
+
+		echo "<script type='text/javascript' src='https://www.google.com/jsapi'></script>";
+		echo "	<script type='text/javascript' charset='utf-8'>
+
+					google.load('visualization', '1', {packages:['gauge']});
+					// google.setOnLoadCallback(drawChart);
+
+					var Gauge = (function() {
+						var data;
+						var options;
+						var chart;
+
+						return {
+							init: function(args, opt) {
+								data = new google.visualization.DataTable();
+								options = opt;
+
+								data.addColumn('string', 'Label');
+								data.addColumn('number', 'Value');
+
+								data.addRows(1);
+
+								var div_id;
+								var _i = 0;
+
+								for (var i in args) {
+									var _x = 0;
+									div_id = i;
+
+									for (var x in args[i]) {
+										data.setValue(_i, _x, args[i][x]);
+										_x++;
+									}
+									_i++;
+								}
+
+								$('#chart_div').append('<div id=\''+div_id+'\'></div>');
+								$('#'+div_id).css('float', 'left');
+								var div = document.getElementById(div_id);
+								chart = new google.visualization.Gauge(div);
+
+								chart.draw(data, options);
+
+								var body_bgcolor = $('body').css('background-color');
+								$('#chart_div *').css({'background-color': body_bgcolor});
+							},
+							draw: function(value, max) {
+
+								value = parseInt(value);
+
+								if (parseInt((value / (max / 40))) >= 4) {
+
+									var force = parseInt(value / (max / 40));
+									force = force < 2 ? 2 : force;
+									force = 1 + '.' + force;
+
+									var _dot120 = parseInt(value * force);
+									data.setValue(0, 1, _dot120);
+									chart.draw(data, options);
+
+									var _dot90 = parseInt(value * 0.9);
+									setTimeout(function(){data.setValue(0, 1, _dot90); chart.draw(data, options);}, 400);
+
+									setTimeout(function(){data.setValue(0, 1, value); chart.draw(data, options);}, 800);
+								}
+								else {
+									data.setValue(0, 1, value);
+									chart.draw(data, options);
+								}
+							}
+						}
+					});
+
+				</script>";
 	}
 }

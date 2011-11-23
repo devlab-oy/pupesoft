@@ -1,6 +1,8 @@
 <?php
-	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 	$useslave = 1;
+
 	require('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("V‰‰r‰t saldot").":</font><hr>";

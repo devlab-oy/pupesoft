@@ -1,22 +1,22 @@
 <?php
 
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	if (!isset($sakkl)) $sakkl = date("m");
 	if (!isset($savvl)) $savvl = date("Y");
 	if (!isset($sappl)) $sappl = date("d");
-		
+
 	if (isset($_POST["supertee"])) {
 		if($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-	
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-	$useslave = 1;
-	
+
 	require ("../inc/parametrit.inc");
 
 	if (isset($supertee)) {
 		if ($supertee == "lataa_tiedosto") {
-			readfile("/tmp/".$tmpfilenimi);	
+			readfile("/tmp/".$tmpfilenimi);
 			exit;
 		}
 	}
@@ -34,14 +34,14 @@
 			<th>".t("Näytä vain ne laskut jotka on päivätty ennen").":</th>
 			<td valign='top'><input type='text' name='sappl' value='$sappl' size='3'><input type='text' name='sakkl' value='$sakkl' size='3'><input type='text' name='savvl' value='$savvl' size='5'></td>
 			</tr>";
-	
+
 	$sel1 = '';
 	$sel2 = '';
 	$sel3 = '';
 	$sel4 = '';
 	$sel5 = '';
 	$sel6 = '';
-	
+
 	if ($grouppaus == '1,2') {
 		$sel1 = "SELECTED";
 	}
@@ -80,26 +80,26 @@
 
 	echo "<tr><th>Valitse valuutta:</th><td><select name='savalkoodi'>";
 	echo "<option value = ''>".t("Kaikki")."</option>";
-	
-	
+
+
 	while ($vrow = mysql_fetch_array($vresult)) {
 		$sel="";
 		if (strtoupper($vrow['nimi']) == strtoupper($savalkoodi)) {
 			$sel = "selected";
 		}
-		
+
 		echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
 	}
 
 	echo "</select></td></tr>";
-	
-	
+
+
 	$sel1 = '';
-	
+
 	if ($valuutassako == 'V') {
 		$sel1 = "SELECTED";
 	}
-	
+
 	echo "<tr><th>".t("Summat").":</th>";
 	echo "<td><select name='valuutassako'>";
 	echo "<option value = ''>".t("Yrityksen valuutassa")."</option>";
@@ -109,7 +109,7 @@
 	echo "</table><br>";
 
 	if ($tee == 'NAYTA') {
-		
+
 		$lisa = '';
 
 		if ($nimi != '') {
@@ -124,7 +124,7 @@
 		else {
 			$having = " HAVING ll != 0 ";
 		}
-		
+
 		if ($grouppaus == '1,2') {
 			$selecti = "lasku.ytunnus, lasku.nimi, group_concat(distinct lasku.liitostunnus) liitostunnus ";
 		}
@@ -146,13 +146,13 @@
 		else {
 			$selecti = "lasku.ytunnus, lasku.nimi, lasku.liitostunnus ";
 		}
-		
-		
+
+
 		if ($savalkoodi != "") {
 			$salisa = " and lasku.valkoodi='$savalkoodi' ";
 		}
 
-		
+
 		if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
 			$summalisa = "	sum(summa) ll,
 							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) <= 0, summa, 0)) aa,
@@ -202,27 +202,27 @@
 		$rivilask = 0;
 
 		if (mysql_num_rows($result) > 0) {
-		
+
 			if(include('Spreadsheet/Excel/Writer.php')) {
-		
+
 				//keksitään failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
 				mt_srand((float) $sec + ((float) $usec * 100000));
 				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-		
+
 				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
 				$workbook->setVersion(8);
 				$worksheet =& $workbook->addWorksheet('Sheet 1');
-	
+
 				$format_bold =& $workbook->addFormat();
 				$format_bold->setBold();
-	
+
 				$excelrivi = 0;
 			}
 
 			if(isset($workbook)) {
 				$excelsarake = 0;
-			
+
 				$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
@@ -242,7 +242,7 @@
 				$worksheet->write($excelrivi, $excelsarake, t("yli 121 pv"), $format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Yhteensä"), $format_bold);
-			
+
 				$excelsarake = 0;
 				$excelrivi++;
 			}
@@ -262,16 +262,16 @@
 			echo "</tr>";
 
 			while ($row = mysql_fetch_array($result)) {
-				
+
 				if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
 					$suorilisa = " sum(summa) summa ";
 				}
 				else {
 					$suorilisa = " sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa ";
 				}
-				
+
 				$query = "	SELECT
-							$suorilisa							
+							$suorilisa
 							FROM suoritus
 							WHERE yhtio='$kukarow[yhtio]'
 							and asiakas_tunnus in ($row[liitostunnus])
@@ -293,10 +293,10 @@
 					echo "<td valign='top' align='right'>".str_replace(".",",",$row["ff"])."</td>";
 					echo "<td valign='top' align='right'>".str_replace(".",",",$row["ll"])."</td>";
 					echo "</tr>";
-				
+
 					if(isset($workbook)) {
 						$excelsarake = 0;
-					
+
 						$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["ytunnus"]));
 						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["nimi"]));
@@ -317,7 +317,7 @@
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, $row["ll"]);
 						$excelsarake++;
-					
+
 						$excelsarake = 0;
 						$excelrivi++;
 					}
@@ -354,12 +354,12 @@
 			}
 
 			echo "</table>";
-			
+
 			if(isset($workbook)) {
-				
+
 				// We need to explicitly close the workbook
 				$workbook->close();
-				
+
 				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";

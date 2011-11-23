@@ -161,6 +161,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$joinattavat = array("TUOTENO" => "yhteensopivuus_tuote");
 				$saakopoistaa = TRUE;
 				break;
+			case "yhteensopivuus_rekisteri" :
+				$pakolliset  = array("REKNO", "AJONEUVOLAJI", "AUTOID", "MAA");
+				$kielletyt   = array();
+				break;
 			case "tuotteen_orginaalit" :
 				$pakolliset  = array("TUOTENO", "ORIG_TUOTENO");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");

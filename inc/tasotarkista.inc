@@ -3,7 +3,7 @@
 if(!function_exists("tasotarkista")) {
 	function tasotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
-		
+
 		static $tyyppitalteen;
 
 		if (mysql_field_name($result, $i) == "tyyppi") {
@@ -18,8 +18,16 @@ if(!function_exists("tasotarkista")) {
 			elseif (strpos(trim($t[$i]), "Ö") !== FALSE ) {
 				$virhe[$i] = t("Ö ei ole sallittu kirjain tasossa!");
 			}
+			elseif (in_array(strtoupper($tyyppitalteen), array('S','U')) and !in_array(substr(trim($t[$i]), 0, 1), array("1", "2", "3"))) {
+				$virhe[$i] = t("Taso tulee alkaa numerolla 1, 2 tai 3!");
+			}
 			else {
-				$query   = "select tunnus from taso where yhtio='$kukarow[yhtio]' and taso = BINARY '$t[$i]' and tyyppi='$tyyppitalteen' and tunnus != '$tunnus'";
+				$query = "	SELECT tunnus
+							FROM taso
+							WHERE yhtio = '{$kukarow["yhtio"]}'
+							AND taso = BINARY '$t[$i]'
+							AND tyyppi = '$tyyppitalteen'
+							AND tunnus != '$tunnus'";
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) > 0) {
@@ -33,6 +41,3 @@ if(!function_exists("tasotarkista")) {
 		}
 	}
 }
-
-
-?>

@@ -590,9 +590,23 @@
 		echo "<form action='$PHP_SELF' name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 
-		echo "<table>
-				<tr><th>".t("Etsi siirtolistaa").":</th><td><input type='text' name='etsi'></td></tr>
-				<tr><th>".t("Varasto")."</th><td><select name='varasto'>";
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>";
+
+		if ($toim == "MYYNTITILI") {
+			echo t("Etsi myyntitili");
+		}
+		else {
+			echo t("Etsi siirtolistaa");
+		}
+
+		echo "</th>";
+		echo "<td><input type='text' name='etsi'></td>";
+		echo "</tr>";
+		echo "<tr>";
+		echo "<th>".t("Varasto")."</th>";
+		echo "<td><select name='varasto'>";
 		echo "<option value=''>" . t('Kaikki varastot') . "</option>";
 
 		$query  = "SELECT tunnus, nimitys, maa FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";

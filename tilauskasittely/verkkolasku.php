@@ -2120,9 +2120,9 @@
 					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
 					$verkkolasmail .= t("Aineisto liitteenä")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
-					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
 					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
@@ -2265,9 +2265,9 @@
 					$verkkolasmail .= "mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\n\n";
 					$verkkolasmail .= t("Aineisto liitteenä")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
-					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
 					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
@@ -2324,9 +2324,9 @@
 					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
 					$verkkolasmail .= t("Aineisto liitteenä")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
-					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
 					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
@@ -2373,9 +2373,9 @@
 					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
 					$verkkolasmail .= t("Aineisto liitteenä")."!\n\n\n\n";
 					$verkkolasmail .= "--$bound\n";
-					$verkkolasmail .= "Content-Type: text/plain; name=\"$ftpfile\"\n" ;
+					$verkkolasmail .= "Content-Type: text/plain; name=\"".basename($ftpfile)."\"\n" ;
 					$verkkolasmail .= "Content-Transfer-Encoding: base64\n" ;
-					$verkkolasmail .= "Content-Disposition: attachment; filename=\"$ftpfile\"\n\n";
+					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";

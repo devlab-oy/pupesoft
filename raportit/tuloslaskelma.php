@@ -420,7 +420,7 @@
 				$kirjain 	= "U";
 				$aputyyppi 	= 1;
 				$tilikarttataso = "ulkoinen_taso";
-				$luku_kerroin = 1;				
+				$luku_kerroin = 1;
 			}
 			elseif ($tyyppi == "2") {
 				// Vastattavaa Velat
@@ -735,6 +735,11 @@
 			$vkaed = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv-1));
 			$vkled = date("Y/m", mktime(0, 0, 0, $alvk+1, 0, $alvv-1));
 
+			// Kuinka moneta saraketta luodaan jokaisesta kaudesta
+			$jakaja = 1;
+			if ($vertailued != 1) $jakaja++;
+			if ($vertailubu != 1) $jakaja++;
+
 			// Yhteensäotsikkomukaan
 			if ($ei_yhteensa == "") {
 				$alkuquery1 .= " ,sum(if (tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
@@ -913,9 +918,6 @@
 									//Käytetään oletusarvo, jos sellainen on ja alkuperäinen arvo on
 									if (isset($summa[$kausi][$taso[$i]][(string) $sarake]) and ($summa[$kausi][$taso[$i]][(string) $sarake] == 0) and isset($oletusarvo[$taso[$i]])) {
 										if ($kausi == ($vka." - ".$vkl)) {
-											$jakaja = 1;
-											if ($vertailued != 1) $jakaja++;
-											if ($vertailubu != 1) $jakaja++;
 											$summa[$kausi][$taso[$i]][(string) $sarake] = $oletusarvo[$taso[$i]] * (count($kaudet) / $jakaja - 1);
 										}
 										elseif ($kausi != ($vkaed." - ".$vkled)) $summa[$kausi][$taso[$i]][(string) $sarake] = $oletusarvo[$taso[$i]];

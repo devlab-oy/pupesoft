@@ -737,8 +737,8 @@
 
 			// Kuinka moneta saraketta luodaan jokaisesta kaudesta
 			$jakaja = 1;
-			if ($vertailued != 1) $jakaja++;
-			if ($vertailubu != 1) $jakaja++;
+			if ($vertailued != "") $jakaja++;
+			if ($vertailubu != "") $jakaja++;
 
 			// Yhteensäotsikkomukaan
 			if ($ei_yhteensa == "") {
@@ -867,7 +867,10 @@
 				$tasonimi[$apusort] = $tasorow["nimi"];
 
 				// Jos tasolla on oletusarvo per kk. Esim poistot, jotka kirjataan vasta tilinpäätöksessä
-				if ($tasorow["oletusarvo"] != 0) $oletusarvo[$tasorow["taso"]] = $tasorow["oletusarvo"];
+				if ($tasorow["oletusarvo"] != 0) {
+					$oletusarvo[$tasorow["taso"]] = $tasorow["oletusarvo"];
+					echo "Oletusarvo löytyi<br>";
+				}
 
 				if ($toim == "TASOMUUTOS") {
 					$summattavattasot[$apusort] = $tasorow["summattava_taso"];
@@ -915,14 +918,6 @@
 									if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
 									else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
 
-									//Käytetään oletusarvo, jos sellainen on ja alkuperäinen arvo on
-									if (isset($summa[$kausi][$taso[$i]][(string) $sarake]) and ($summa[$kausi][$taso[$i]][(string) $sarake] == 0) and isset($oletusarvo[$taso[$i]])) {
-										if ($kausi == ($vka." - ".$vkl)) {
-											$summa[$kausi][$taso[$i]][(string) $sarake] = $oletusarvo[$taso[$i]] * (count($kaudet) / $jakaja - 1);
-										}
-										elseif ($kausi != ($vkaed." - ".$vkled)) $summa[$kausi][$taso[$i]][(string) $sarake] = $oletusarvo[$taso[$i]];
-									}
-
 									//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
 									if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
 										$summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
@@ -939,6 +934,29 @@
 								//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
 								if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
 									$tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tulokset[$sarake][$kausi];
+								}
+							}
+						}
+					}
+				}
+				// Summataan kaikkia pienempiä summaustasoja sijoittaen puuttuvat oletusarvot
+				for ($i = $tasoluku - 1; $i >= 0; $i--) {
+					if (isset($oletusarvo[$taso[$i]])) {
+						foreach ($kaudet as $kausi) {
+							if (substr($kausi,0,4) != "budj") {
+								echo "Oletusarvo yritys2 " . $taso[$i] . " kausi " . $kausi . "<br>";
+								//Käytetään oletusarvo, jos sellainen on ja alkuperäinen arvo on
+								if (isset($summa[$kausi][$taso[$i]][(string) $sarake]) and ($summa[$kausi][$taso[$i]][(string) $sarake] == 0) or !isset($summa[$kausi][$taso[$i]][(string) $sarake])) {
+									echo "Oletusarvo yritys3 " . $taso[$i] . "$jakaja <br>";
+									if ($kausi == ($vka." - ".$vkl)) {
+										$summa[$kausi][$taso[$i]][(string) $sarake] = $oletusarvo[$taso[$i]] * (count($kaudet) / $jakaja - 1);
+									}
+									elseif ($kausi != ($vkaed." - ".$vkled)) $summa[$kausi][$taso[$i]][(string) $sarake] = $oletusarvo[$taso[$i]];
+								}
+
+								//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
+								if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
+									$summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
 								}
 							}
 						}

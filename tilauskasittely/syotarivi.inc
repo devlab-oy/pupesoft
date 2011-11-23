@@ -41,8 +41,13 @@
 			echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
 		}
 
-		echo "	<th align='left'>".t("Netto")."</th>
-				<td valign='top' class='back'></td>
+		echo "	<th align='left'>".t("Netto")."</th>";
+
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+			echo "<th align='left'>",t("Omalle tilaukselle"),"</th>";
+		}
+
+		echo "	<td valign='top' class='back'></td>
 				</tr>";
 
 		echo "<tr>$jarjlisa";
@@ -88,8 +93,13 @@
 			echo "</td>";
 		}
 
-		echo "	<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
-				<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'></td>
+		echo "	<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>";
+
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+			echo "<td><input type='text' name='omalle_tilaukselle' size='2' maxlength='1' value='{$omalle_tilaukselle}' /></td>";
+		}
+
+		echo "	<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'></td>
 				<td valign='top' class='back'>
 				<input type='hidden' name='perheid' value = '$perheid'>
 				<input type='hidden' name='perheid2' value = '$perheid2'>
@@ -121,7 +131,7 @@
 			echo "<th align='left' colspan='$nrospanni'>".t("Toimitusaika")."</th>";
 
 			if ($yhtiorow['rivinumero_syotto'] != '') {
-				echo "<th align='left'>".t("Rivinumero")."</th>";
+				echo "<th align='left'>".t("Rivinro")."</th>";
 			}
 
 			echo "</tr>";
@@ -190,7 +200,11 @@
 				$nrospanni2 = 6;
 
 				$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
-
+				
+				if ($yhtiorow['rivinumero_syotto'] != '') {
+					$nrospanni2++;
+				}
+				
 				echo "<tr>{$jarjlisa}
 						<th colspan='{$nrospanni2}' align='left'>",t("Tuotteen nimitys"),"</th>
 						</tr><tr>{$jarjlisa}
@@ -235,6 +249,10 @@
 
 		echo "	<th align='left'>".t("Netto")."</th>
 				<th align='left'>".t("Alv")."</th>";
+
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+			echo "<th align='left'>",t("Omalle tilaukselle"),"</th>";
+		}
 
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<th align='left'></th>";
@@ -342,6 +360,15 @@
 			echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 		}
 
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+			$sel = (isset($omalle_tilaukselle) and trim($omalle_tilaukselle) != '') ? ' selected' : '';
+
+			echo "<td><select name='omalle_tilaukselle'>";
+			echo "<option value=''>",t("Ei"),"</option>";
+			echo "<option value='K'{$sel}>",t("Kyllä"),"</option>";
+			echo "</select></td>";
+		}
+
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<td valign='top'></td>";
 		}
@@ -373,12 +400,16 @@
 			$nrospanni = 3;
 		}
 
+		if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+			$nrospanni++;
+		}
+	
 		$nrospanni += $yhtiorow['myynnin_alekentat'] - 1;
 
 		echo "<th colspan='$nrospanni' align='left'>".t("Kommentti")."</th>";
 
 		if ($yhtiorow['rivinumero_syotto'] != '') {
-			echo "<th align='left'>".t("Rivinumero")."</th>";
+			echo "<th align='left'>".t("Rivinro")."</th>";
 		}
 
 		echo "<td valign='top' class='back'></td></tr>";
@@ -457,6 +488,10 @@
 			$nrospanni2 = 7;
 
 			$nrospanni2 += $yhtiorow['myynnin_alekentat'] - 1;
+			
+			if ($yhtiorow['rivinumero_syotto'] != '') {
+				$nrospanni2++;
+			}
 
 			echo "</tr>
 				<tr>$jarjlisa

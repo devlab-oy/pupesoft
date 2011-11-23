@@ -453,7 +453,8 @@
 					from kustannuspaikka
 					where yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$kptyyppi'
-					and kaytossa != 'E'";
+					and kaytossa != 'E'
+					ORDER BY koodi+0, koodi, nimi";
 		$vresult = pupe_query($tpque);
 
 		$sel="";
@@ -632,11 +633,11 @@
 
 	if (mysql_field_name($result, $i) == "yksin_kerailyalustalle") {
 
-		$sel = $trow[$i] == 'K' ? ' selected' : '';
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('K', 'T'), '');
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value=''>".t("Ei")."</option>";
-		$ulos .= "<option value='K'{$sel}>".t("Kyllä")."</option>";
+		$ulos .= "<option value='K'{$sel['K']}>".t("Kyllä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

@@ -243,8 +243,14 @@
 	}
 
 	// Jos tilaus on tehdastilaus, niin tilaukselle saa laittaa vain tehdastilaustuotteita
-	if ($laskurow['tilaustyyppi'] == '7' and $trow['status'] != 'T') {
+	if ($laskurow['tilaustyyppi'] == '7' and $trow['status'] != 'T' and $trow['panttitili'] == '' and $trow["ei_saldoa"] == "") {
 		$varaosavirhe .= t("VIRHE: Tuote ei ole tehdastilaustuote")."!<br>";
+		$riviok++;
+		$tilausok++;
+	}
+
+	if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $row['omalle_tilaukselle'] != '' and fmod($row['varattu'], 1) != 0) {
+		$varaosavirhe .= t("VIRHE: Kappalem‰‰r‰ pit‰‰ olla kokonaisluku")."!<br>";
 		$riviok++;
 		$tilausok++;
 	}
@@ -360,9 +366,10 @@
 		}
 
 		//Katotaan voidaanko t‰m‰ myyd‰ joltain toiselta paikalta
-		if ($kpl_st > 0 and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G")) {
+		if (!in_array($row["var"], array('J','S','U','T','P')) and $kpl_st > 0 and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G")) {
 
 			$paikat .= "<option value='EIERAAVIELA#EIEI'>".t("Valitse er‰")."</option>";
+			$paikatlask++;
 
 			if ($trow["sarjanumeroseuranta"] == "F") {
 				$pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
@@ -372,6 +379,7 @@
 				$pepvmlisa1 = "";
 				$pepvmlisa2 = "";
 			}
+
 			$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 						tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 						sarjanumeroseuranta.sarjanumero era,

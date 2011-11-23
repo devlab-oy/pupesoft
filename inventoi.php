@@ -129,6 +129,14 @@
 
 		$virhe = 0;
 
+		// Inventoidaan EAN-koodilla
+		if (isset($tuoteno_ean) and $tuoteno_ean == "EAN") {
+			$tuoteno_ean_kentta = "eankoodi";
+		}
+		else {
+			$tuoteno_ean_kentta = "tuoteno";
+		}
+
 		if (count($tuote) > 0) {
 			foreach($tuote as $i => $tuotteet) {
 
@@ -149,13 +157,16 @@
 					$query = "	SELECT *
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
-								AND tuoteno = '$tuoteno'";
+								AND $tuoteno_ean_kentta = '$tuoteno'";
 					$tuote_res = pupe_query($query);
 					$tuote_row = mysql_fetch_assoc($tuote_res);
 
 					if (mysql_num_rows($tuote_res) != 1) {
 						echo "<font class='error'>".t("VIRHE: Tuotetta ei löydy")."! ($tuoteno)</font><br>";
 						$virhe = 1;
+					}
+					else {
+						$tuoteno = $tuote_row["tuoteno"];
 					}
 
 					if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl,0,1) == '+' or substr($kpl,0,1) == '-' or (float) $kpl != 0)) {
@@ -939,10 +950,32 @@
 						ORDER BY sorttauskentta, tuoteno";
 			$saldoresult = pupe_query($query);
 
-
 			if (mysql_num_rows($saldoresult) == 0) {
 				echo "<font class='error'>".t("Tuote")." '$tuoteno' ".t("ei löydy!")." ".t("Onko tuote saldoton tuote")."? ".t("Onko tuotteella varastopaikka")."?</font><br><br>";
 				$tee='';
+			}
+		}
+		elseif ($ean_koodi != "" and $lista == "") {
+			///* Inventoidaan tuotenumeron perusteella *///
+			$kutsu = " ".t("EAN-koodi")." $ean_koodi ";
+
+			$query = "	SELECT $select
+						FROM tuote use index (tuoteno_index)
+						JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
+						WHERE tuote.yhtio 		= '$kukarow[yhtio]'
+						and tuote.eankoodi		= '$ean_koodi'
+						and tuote.ei_saldoa		= ''
+						ORDER BY sorttauskentta, tuoteno";
+			$saldoresult = pupe_query($query);
+
+			if (mysql_num_rows($saldoresult) == 0) {
+				echo "<font class='error'>".t("EAN-koodi")." '$ean_koodi' ".t("ei löydy!")." ".t("Onko tuote saldoton tuote")."? ".t("Onko tuotteella varastopaikka")."?</font><br><br>";
+				$tee='';
+			}
+			else {
+				$tuoterow = mysql_fetch_assoc($saldoresult);
+				$tuoteno = $tuoterow["tuoteno"];
+				mysql_data_seek($saldoresult, 0);
 			}
 		}
 		elseif ($lista != "") {
@@ -1110,6 +1143,7 @@
 											WHERE sarjanumeroseuranta.yhtio = tt.yhtio and sarjanumeroseuranta.tuoteno = tt.tuoteno and sarjanumeroseuranta.hyllyalue = tt.hyllyalue
 											and sarjanumeroseuranta.hyllynro = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
 								and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and (tilausrivi_osto.laskutettuaika != '0000-00-00' or (tilausrivi_osto.laatija = 'Invent' and tilausrivi_osto.laskutettuaika = '0000-00-00')))
+								and ('$tuoterow[sarjanumeroseuranta]' not in ('E','F','G') or era_kpl != 0)
 								ORDER BY sarjanumero";
 					$sarjares = pupe_query($query);
 				}
@@ -1426,7 +1460,10 @@
 		echo livesearch_kentta("inve", "TUOTEHAKU", "tuoteno", 210);
 
 		echo "</td></tr>";
-		echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='25' name='lista'></td><td class='back'><input type='Submit' value='".t("Inventoi")."'></td></tr>";
+
+		echo "<tr><th>".t("EAN-koodi:")."</th><td><input type='text' size='15' name='ean_koodi'></td></tr>";
+
+		echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='6' name='lista'></td><td class='back'><input type='Submit' value='".t("Inventoi")."'></td></tr>";
 
 		echo "</form>";
 		echo "</table>";
@@ -1435,16 +1472,26 @@
 		echo "<form method='post' action='$PHP_SELF' enctype='multipart/form-data'>
 				<input type='hidden' name='tee' value='FILE'>
 				<input type='hidden' name='filusta' value='yep'>
-
-				<font class='message'>".t("Inventoi tiedostosta").":</font><br>
+				<br><br>
+				<font class='head'>".t("Inventoi tiedostosta")."</font><hr>
 				<table>
 				<tr><th colspan='4'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
 				<tr>";
+		echo "	<td>".t("Tuoteno")." / ".t("EAN")."</td><td>".t("Hyllyalue-Hyllynro-Hyllyväli-Hyllytaso")."</td><td>".t("Määrä")."</td><td>".t("Selite")."</td>";
+		echo "	</tr>";
 
-		echo "	<td>".t("Tuoteno")."</td><td>".t("Hyllyalue-Hyllynro-Hyllyväli-Hyllytaso")."</td><td>".t("Määrä")."</td><td>".t("Selite")."</td>";
-		echo "	</tr>
-				<tr><th>".t("Valitse tiedosto").":</th>
-				<td colspan='3'><input name='userfile' type='file'></td>
+		echo "	<tr><td class='back'><br></td></tr>";
+
+		echo "	<tr><th>".t("Valitse tiedosto").":</th>
+				<td colspan='3'><input name='userfile' type='file'></td></tr>
+				<tr><th>".t("Valitse tyyppi").":</th>
+				<td colspan='3'>
+				<select name='tuoteno_ean'>
+				<option value=''>".t("Tiedosto tuotenumerolla")."</option>
+				<option value='EAN' $tuoteno_ean_sel>".t("Tiedosto EAN-koodilla")."</option>
+				</select>
+				</td>
+
 				<td class='back'><input type='submit' value='".t("Inventoi")."'></td>
 				</tr>
 				</form>
@@ -1496,7 +1543,7 @@
 	}
 
 	// lukitaan tableja
-	$query = "unlock tables";
+	$query = "UNLOCK TABLES";
 	$result = pupe_query($query);
 
 	if ($mobiili != "YES") {

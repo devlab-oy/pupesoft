@@ -56,7 +56,7 @@
 			}
 
 			if ($toimittajaid != "") {
-				echo "<table><tr><th>".t("Valittu toimittaja")."</th><td>$toimittajarow[nimi] $toimittajarow[osoite] $toimittajarow[postino] $toimittajarow[postitp] ($toimittajarow[ytunnus])</td><td class='back'><a href = 'javascript:sndReq(\"keikka\", \"{$palvelin2}hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus&toimittajaid=\");'>Vaihda toimittaja</a></td></tr></table><br>";
+				echo "<table><tr><th>".t("Valittu toimittaja")."</th><td>$toimittajarow[nimi] $toimittajarow[osoite] $toimittajarow[postino] $toimittajarow[postitp] (".tarkistahetu($toimittajarow["ytunnus"]).")</td><td class='back'><a href = 'javascript:sndReq(\"keikka\", \"{$palvelin2}hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus&toimittajaid=\");'>Vaihda toimittaja</a></td></tr></table><br>";
 
 				//	Listataan keikat
 				$query = "	SELECT comments, lasku.tunnus otunnus, lasku.laskunro keikka, sum(tilausrivi.rivihinta) varastossaarvo, count(distinct tilausrivi.tunnus) kpl, sum(if (kpl = 0, 0, 1)) varastossa
@@ -747,6 +747,7 @@
 					WHERE tunnus = '$ptunnus'
 					and yhtio = '$kukarow[yhtio]'";
 		$result = pupe_query($query);
+
 		$tee = "E"; // N‰ytet‰‰n milt‰ tosite nyt n‰ytt‰‰
 	}
 
@@ -767,10 +768,13 @@
 
 		$laskurow = mysql_fetch_assoc($result);
 
-		$summa 		= str_replace ( ",", ".", $summa);
-		$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
-		$tositetila = $laskurow["tila"];
-		$tositeliit = $laskurow["liitostunnus"];
+		$summa 			= str_replace ( ",", ".", $summa);
+		$selausnimi 	= 'tili'; // Minka niminen mahdollinen popup on?
+		$tositetila 	= $laskurow["tila"];
+		$tositeliit 	= $laskurow["liitostunnus"];
+		$kustp_tark		= $kustp;
+		$kohde_tark		= $kohde;
+		$projekti_tark	= $projekti;
 
 		require ("inc/tarkistatiliointi.inc");
 
@@ -946,7 +950,7 @@
 		echo "</tr>";
 
 		echo "<tr>";
-		echo "<td>$laskurow[ytunnus]</td>";
+		echo "<td>".tarkistahetu($laskurow["ytunnus"])."</td>";
 		echo "<td>$laskurow[nimi]</td>";
 		echo "<td>$laskurow[postitp]</td>";
 		echo "</tr>";
@@ -1120,10 +1124,11 @@
 
 			echo "<tr><td>1. $vrow[nimi]</td><td>";
 
-			$query = "SELECT kuka, nimi
-			          FROM kuka
-			          WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
-			          ORDER BY nimi";
+			$query = "	SELECT kuka, nimi
+			          	FROM kuka
+			          	WHERE yhtio = '$kukarow[yhtio]'
+						and hyvaksyja = 'o'
+			          	ORDER BY nimi";
 			$vresult = pupe_query($query);
 
 			$ulos = '';
@@ -1194,7 +1199,6 @@
 					$query = "	SELECT kuka, nimi
 					          	FROM kuka
 					          	WHERE yhtio = '$kukarow[yhtio]'
-								and hyvaksyja = 'o'
 								and kuka = '$laskurow[$hyind]'
 					          	ORDER BY nimi";
 					$vresult = pupe_query($query);
@@ -1565,7 +1569,7 @@
 
 			echo "</td>";
 
-			echo "<td valign='top'>$trow[ytunnus]</td>";
+			echo "<td valign='top'>".tarkistahetu($trow["ytunnus"])."</td>";
 
 			if ($trow['comments'] != '') {
 				echo "<td valign='top'>$trow[nimi]<br><font class='error'>$trow[comments]</font></td>";

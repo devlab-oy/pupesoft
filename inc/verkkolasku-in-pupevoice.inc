@@ -8,7 +8,8 @@ $verkkotunnus_vas 		= array_shift($xml->xpath('Group2/NAD[@e3035="MR"]/@eC082.30
 $laskun_tyyppi 			= array_shift($xml->xpath('BGM/@eC002.1001'));
 $laskun_numero 			= array_shift($xml->xpath('BGM/@e1004'));
 $laskun_ebid 			= array_shift($xml->xpath('Group1/RFF[@eC506.1153="ZEB"]/@eC506.1154'));
-$laskun_paiva			= array_shift($xml->xpath('DTM[@eC507.2005="3"]/@eC507.2380'));
+$laskun_tapvm			= array_shift($xml->xpath('DTM[@eC507.2005="3"]/@eC507.2380'));
+$laskun_lapvm			= array_shift($xml->xpath('DTM[@eC507.2005="3"]/@eC507.2380'));
 $laskun_erapaiva		= array_shift($xml->xpath('Group8[PAT/@e4279="1"]/DTM[@eC507.2005="13"]/@eC507.2380'));
 $laskun_kapvm 			= "";
 $laskun_kasumma 		= "";
@@ -64,7 +65,8 @@ if ($laskun_summa_eur == 0) {
 $tuotetiedot = $xml->xpath('Group25');
 $i 			 = 0;
 $rtuoteno	 = array();
-$ealvi		 = array();
+$ealvi		 = array("");
+$lisavat	 = array("");
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
@@ -81,10 +83,10 @@ if (count($tuotetiedot) > 0) {
 			$xvat[$i] = $tuotetieto->xpath('Group33/TAX[@eC241.5153="VAT"]/@eC243.5278');
 
 			if (is_array($xvat[$i])) {
-				 $xvati = (float) $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
-
-				$rtuoteno[$i]["alv"] = $xvati;
-				$ealvi[] = $xvati;
+				$ealvi[$i] = $rtuoteno[$i]["alv"] = array_shift($xvat[$i]);
+			}
+			else {
+				$ealvi[$i] = $rtuoteno[$i]["alv"] = "";
 			}
 
 			$rtuoteno[$i]["riviinfo"] = array_shift($tuotetieto-> xpath('IMD/@eC273.7008.1'));
@@ -112,12 +114,11 @@ if (count($tuotetiedot) > 0) {
 
 // Verotiedot
 $vattiedot	= $xml->xpath('Group50');
-$lisavat	= array();
 $i			= 0;
 
 if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {
-		$lisavat[$i] = (float) array_shift($vattieto->xpath('TAX/@eC243.5278'));
+		$lisavat[$i] = array_shift($vattieto->xpath('TAX/@eC243.5278'));
 		$i++;
 	}
 }

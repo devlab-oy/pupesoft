@@ -19,6 +19,8 @@
 	if (!isset($generoitupass)) 	$generoitupass = "";
 	if (!isset($kumpi)) 			$kumpi = "";
 	if (!isset($oletus_asiakas)) 	$oletus_asiakas = "";
+	if (!isset($oletus_profiili))	$oletus_profiili = '';
+	if (!isset($oletus_asiakastiedot)) $oletus_asiakastiedot = '';
 
 	if (isset($toim) and $toim == 'extranet') {
 		echo "Extranet-";
@@ -27,7 +29,7 @@
 	echo t("Käyttäjähallinta"),":</font><hr>";
 
 	// tää on tällänän kikka.. älkää seotko.. en jaksa pyörittää toimia joka formista vaikka pitäs..
-	if (isset($toim)) $PHP_SELF = $PHP_SELF."?toim=$toim";
+	if (isset($toim)) $PHP_SELF = $PHP_SELF."?toim={$toim}";
 
 	if (isset($generatepass) and $generatepass != "") {
 		$generoitupass = trim(shell_exec("openssl rand -base64 12"));
@@ -52,7 +54,7 @@
 	}
 
 	if ($tee == "MUUTA" and $ytunnus_oa != "" and $ytunnus_oa != '0') {
-		$muutparametrit = "MUUTA#$selkuka#1#$oletus_asiakastiedot";
+		$muutparametrit = "MUUTA#{$selkuka}#1#{$oletus_asiakastiedot}";
 		$ytunnus 		= $ytunnus_oa;
 		$asiakasid 		= "";
 		$ytunnus_oat  	= "";
@@ -78,12 +80,12 @@
 		$tee = "MUUTA";
 		$firname = "";
 
-		$query = "UPDATE kuka SET oletus_asiakas = '' WHERE tunnus='$selkuka'";
-		$result = mysql_query($query) or pupe_error($query);
+		$query = "UPDATE kuka SET oletus_asiakas = '' WHERE tunnus = '{$selkuka}'";
+		$result = pupe_query($query);
 	}
 
 	if ($tee == "MUUTA" and $ytunnus_oat != "" and $ytunnus_oat != '0') {
-		$muutparametrit = "MUUTA#$selkuka#2#$oletus_asiakas";
+		$muutparametrit = "MUUTA#{$selkuka}#2#{$oletus_asiakas}";
 		$ytunnus 		= $ytunnus_oat;
 		$asiakasid 		= "";
 		$ytunnus_oa  	= "";
@@ -109,29 +111,29 @@
 		$tee = "MUUTA";
 		$firname = "";
 
-		$query = "UPDATE kuka SET oletus_asiakastiedot = '' WHERE tunnus='$selkuka'";
-		$result = mysql_query($query) or pupe_error($query);
+		$query = "UPDATE kuka SET oletus_asiakastiedot = '' WHERE tunnus = '{$selkuka}'";
+		$result = pupe_query($query);
 	}
 
 	// Poistetaan koko käyttäjä tältä yriykseltä!!
 	if ($tee == 'deluser') {
-		$query = "DELETE from kuka WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$query = "DELETE from kuka WHERE kuka = '{$selkuka}' and yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
 
-		$query = "DELETE from oikeu WHERE kuka = '$selkuka' and kuka != '' and profiili = '' and yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$query = "DELETE from oikeu WHERE kuka = '{$selkuka}' and kuka != '' and profiili = '' and yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
 
-		echo "<b>".t("Käyttäjä")." $selkuka ".t("poistettu")."!</b><br>";
+		echo "<b>",t("Käyttäjä")," {$selkuka} ",t("poistettu"),"!</b><br>";
 
 		$selkuka = $kukarow['tunnus'];
 		$tee = "";
 	}
 
 	if ($tee == 'delkesken') {
-		$query = "UPDATE kuka SET kesken=0 WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$query = "UPDATE kuka SET kesken = 0 WHERE kuka = '{$selkuka}' and yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
 
-		echo "<b>".t("Käyttäjän")." $selkuka ".t("keskenoleva tilaus vapautettu")."!</b><br>";
+		echo "<b>",t("Käyttäjän")," {$selkuka} ",t("keskenoleva tilaus vapautettu"),"!</b><br>";
 
 		$selkuka = $kukarow['tunnus'];
 		$tee = "";
@@ -140,15 +142,16 @@
 	if ($tee == 'deloikeu') {
 		$query = "	UPDATE kuka
 					SET profiilit 	= '',
-					muuttaja		= '$kukarow[kuka]',
+					muuttaja		= '{$kukarow['kuka']}',
 					muutospvm		= now()
-					WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+					WHERE kuka = '{$selkuka}' 
+					AND yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
 
-		$query = "DELETE from oikeu WHERE kuka = '$selkuka' and kuka != '' and profiili = '' and yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+		$query = "DELETE from oikeu WHERE kuka = '{$selkuka}' and kuka != '' and profiili = '' and yhtio = '{$kukarow['yhtio']}'";
+		$result = pupe_query($query);
 
-		echo "<b>".t("Käyttäjän")." $selkuka ".t("käyttöoikeudet")." ".t("poistettu")."!</b><br>";
+		echo "<b>",t("Käyttäjän")," {$selkuka} ",t("käyttöoikeudet")," ",t("poistettu"),"!</b><br>";
 
 		$selkuka = $kukarow['tunnus'];
 		$tee = "";
@@ -158,13 +161,13 @@
 	if ($tee == 'delpsw') {
 		$query = "	UPDATE kuka
 					SET salasana = '',
-					muuttaja	 = '$kukarow[kuka]',
+					muuttaja	 = '{$kukarow['kuka']}',
 					muutospvm	 = now()
-					WHERE kuka='$selkuka'";
-		$result = mysql_query($query) or pupe_error($query);
+					WHERE kuka = '{$selkuka}'";
+		$result = pupe_query($query);
 
-		echo "<b>".t("Käyttäjän")." $selkuka ".t("salasana poistettu")."!</b><br>";
-		$selkuka=$kukarow['tunnus'];
+		echo "<b>",t("Käyttäjän")," {$selkuka} ",t("salasana poistettu"),"!</b><br>";
+		$selkuka = $kukarow['tunnus'];
 	}
 
 	// Otetaan valitut organisaatiosegementit
@@ -188,16 +191,16 @@
 
 		$yhtio = $kukarow['yhtio'];
 
-		$query   = "SELECT * FROM kuka WHERE kuka='$ktunnus' and yhtio<>'$yhtio'";
-		$reskuka = mysql_query($query) or pupe_error($query);
+		$query   = "SELECT * FROM kuka WHERE kuka = '{$ktunnus}' and yhtio <> '{$yhtio}'";
+		$reskuka = pupe_query($query);
 
-		$query   = "SELECT * FROM kuka WHERE kuka='$ktunnus' and yhtio='$yhtio'";
-		$resyh   = mysql_query($query) or pupe_error($query);
+		$query   = "SELECT * FROM kuka WHERE kuka = '{$ktunnus}' and yhtio = '{$yhtio}'";
+		$resyh   = pupe_query($query);
 
 		if (mysql_num_rows($resyh) > 0) {
 			$monta = mysql_fetch_array($resyh);
-			echo "<font class='error'>".t("Käyttäjä")." $monta[kuka] ($monta[nimi]) ".t("on jo yrityksessä")." $yhtio.</font><br>";
-			$jatka=1; // ei perusteta
+			echo "<font class='error'>",t("Käyttäjä")," {$monta['kuka']} ({$monta['nimi']}) ",t("on jo yrityksessä")," {$yhtio}.</font><br>";
+			$jatka = 1; // ei perusteta
 		}
 
 		$salasana = "";
@@ -228,21 +231,19 @@
 			$naytetaan_tilaukset			= $monta['naytetaan_tilaukset'];
 			$profile 						= $monta['profiilit'];
 			$piirit	 						= $monta['piirit'];
+			$oletus_profiili				= $monta['oletus_profiili'];
 
-			echo "<font class='message'>".t("Käyttäjä")." $monta[kuka] ($monta[nimi]) ".t("löytyi muista yrityksistä.")."<br>";
-			echo t("Hänelle lisätään nyt myös oikeudet yritykselle")." $yhtio.<br>".t("Käyttäjätiedot kopioidaan yhtiöstä")." $monta[yhtio].</font><br>";
+			echo "<font class='message'>",t("Käyttäjä")," {$monta['kuka']} ({$monta['nimi']}) ",t("löytyi muista yrityksistä."),"<br>";
+			echo t("Hänelle lisätään nyt myös oikeudet yritykselle")," {$yhtio}.<br>",t("Käyttäjätiedot kopioidaan yhtiöstä")," {$monta['yhtio']}.</font><br>";
 		}
 
 		if (strlen($ktunnus) > 0 and $jatka != 1) {
 
 			if (count($profiili) > 0) {
-				foreach($profiili as $prof) {
-					$profile .= $prof.",";
-				}
-				$profile = substr($profile,0,-1);
+				$profile = implode(",", $profiili);
 			}
 
-			if (count($piiri)>0) {
+			if (count($piiri) > 0) {
 				$piirit = implode(",", $piiri);
 			}
 
@@ -269,56 +270,59 @@
 				}
 			}
 
+			$oletus_profiili = mysql_real_escape_string(trim($oletus_profiili));
+
 			$query = "	INSERT into kuka
-						SET nimi 						= '$firname',
-						kuka 							= '$ktunnus',
-						puhno 							= '$phonenum',
-						eposti 							= '$email',
-						kieli 							= '$lang',
-						ip								= '$ip',
-						taso 							= '$taso',
-						hinnat							= '$hinta',
-						saatavat						= '$saatavat',
-						osasto							= '$osasto',
-						salasana						= '$salasana',
-						keraajanro 						= '$keraajanro',
-						myyja 							= '$myyja',
-						varasto 						= '$varasto',
-						oletus_varasto					= '$oletus_varasto',
-						oletus_pakkaamo					= '$oletus_pakkaamo',
-						kirjoitin 						= '$kirjoitin',
-						kassamyyja 						= '$kassamyyja',
-						dynaaminen_kassamyynti 			= '$dynaaminen_kassamyynti',
-						jyvitys							= '$jyvitys',
-						oletus_asiakas 					= '$oletus_asiakas',
-						oletus_asiakastiedot 			= '$oletus_asiakastiedot',
-						oletus_ohjelma 					= '$oletus_ohjelma',
-						resoluutio						= '$resoluutio',
-						extranet						= '$extranet',
-						hyvaksyja						= '$hyvaksyja',
-						hyvaksyja_maksimisumma			= '$hyvaksyja_maksimisumma',
-						hierarkia						= '$hierarkia',
-						lomaoikeus						= '$lomaoikeus',
-						asema							= '$asema',
-						toimipaikka						= '$toimipaikka',
-						mitatoi_tilauksia				= '$mitatoi_tilauksia',
-						naytetaan_katteet_tilauksella 	= '$naytetaan_katteet_tilauksella',
-						naytetaan_asiakashinta 			= '$naytetaan_asiakashinta',
-						naytetaan_tuotteet				= '$naytetaan_tuotteet',
-						naytetaan_tilaukset				= '$naytetaan_tilaukset',
-						profiilit 						= '$profile',
-						piirit							= '$piirit',
-						fyysinen_sijainti				= '$fyysinen_sijainti',
-						keraysvyohyke					= '$keraysvyohyke',
-						laatija							= '$kukarow[kuka]',
+						SET nimi 						= '{$firname}',
+						kuka 							= '{$ktunnus}',
+						puhno 							= '{$phonenum}',
+						eposti 							= '{$email}',
+						kieli 							= '{$lang}',
+						ip								= '{$ip}',
+						taso 							= '{$taso}',
+						hinnat							= '{$hinta}',
+						saatavat						= '{$saatavat}',
+						osasto							= '{$osasto}',
+						salasana						= '{$salasana}',
+						keraajanro 						= '{$keraajanro}',
+						myyja 							= '{$myyja}',
+						varasto 						= '{$varasto}',
+						oletus_varasto					= '{$oletus_varasto}',
+						oletus_pakkaamo					= '{$oletus_pakkaamo}',
+						kirjoitin 						= '{$kirjoitin}',
+						kassamyyja 						= '{$kassamyyja}',
+						dynaaminen_kassamyynti 			= '{$dynaaminen_kassamyynti}',
+						jyvitys							= '{$jyvitys}',
+						oletus_asiakas 					= '{$oletus_asiakas}',
+						oletus_asiakastiedot 			= '{$oletus_asiakastiedot}',
+						oletus_profiili					= '{$oletus_profiili}',
+						oletus_ohjelma 					= '{$oletus_ohjelma}',
+						resoluutio						= '{$resoluutio}',
+						extranet						= '{$extranet}',
+						hyvaksyja						= '{$hyvaksyja}',
+						hyvaksyja_maksimisumma			= '{$hyvaksyja_maksimisumma}',
+						hierarkia						= '{$hierarkia}',
+						lomaoikeus						= '{$lomaoikeus}',
+						asema							= '{$asema}',
+						toimipaikka						= '{$toimipaikka}',
+						mitatoi_tilauksia				= '{$mitatoi_tilauksia}',
+						naytetaan_katteet_tilauksella 	= '{$naytetaan_katteet_tilauksella}',
+						naytetaan_asiakashinta 			= '{$naytetaan_asiakashinta}',
+						naytetaan_tuotteet				= '{$naytetaan_tuotteet}',
+						naytetaan_tilaukset				= '{$naytetaan_tilaukset}',
+						profiilit 						= '{$profile}',
+						piirit							= '{$piirit}',
+						fyysinen_sijainti				= '{$fyysinen_sijainti}',
+						keraysvyohyke					= '{$keraysvyohyke}',
+						laatija							= '{$kukarow['kuka']}',
 						luontiaika						= now(),
-						yhtio 							= '$yhtio'";
-			$result = mysql_query($query) or pupe_error($query);
+						yhtio 							= '{$yhtio}'";
+			$result = pupe_query($query);
 			$selkuka = mysql_insert_id();
 
-			echo "<font class='message'>".t("Käyttäjä perustettu")."! ($selkuka)</font><br><br>";
+			echo "<font class='message'>",t("Käyttäjä perustettu"),"! ({$selkuka})</font><br><br>";
 
-			echo "<font class='error'>".t("Valitse nyt käyttäjän oletusasiakas")."!</font><br><br>";
+			echo "<font class='error'>",t("Valitse nyt käyttäjän oletusasiakas"),"!</font><br><br>";
 
 			if ($yhtio != $kukarow["yhtio"]) {
 				$selkuka = "";
@@ -329,12 +333,12 @@
 
 			//poistetaan käyttäjän vanhat profiilioikeudet
 			$query = "	DELETE FROM oikeu
-						WHERE yhtio = '$yhtio'
-						AND kuka = '$ktunnus'
+						WHERE yhtio = '{$yhtio}'
+						AND kuka = '{$ktunnus}'
 						AND kuka != ''
 						AND profiili = ''
 						AND lukittu = ''";
-			$pres = mysql_query($query) or pupe_error($query);
+			$pres = pupe_query($query);
 
 			if (count($profiilit) > 0 and $profiilit[0] !='') {
 
@@ -343,54 +347,54 @@
 
 					$query = "	SELECT *
 								FROM oikeu
-								WHERE yhtio = '$yhtio'
-								AND kuka = '$prof'
-								AND profiili = '$prof'";
-					$pres = mysql_query($query) or pupe_error($query);
+								WHERE yhtio = '{$yhtio}'
+								AND kuka = '{$prof}'
+								AND profiili = '{$prof}'";
+					$pres = pupe_query($query);
 
 					while ($trow = mysql_fetch_array($pres)) {
 						//joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
 						//voi olla esim jos se on lukittuna annettu
 						$query = "	SELECT yhtio, paivitys
 									FROM oikeu
-									WHERE kuka		= '$ktunnus'
-									and sovellus	= '$trow[sovellus]'
-									and nimi		= '$trow[nimi]'
-									and alanimi 	= '$trow[alanimi]'
-									and nimitys		= '$trow[nimitys]'
-									and jarjestys 	= '$trow[jarjestys]'
-									and jarjestys2	= '$trow[jarjestys2]'
-									and hidden		= '$trow[hidden]'
-									and yhtio		= '$yhtio'";
-						$tarkesult = mysql_query($query) or pupe_error($query);
+									WHERE kuka		= '{$ktunnus}'
+									and sovellus	= '{$trow['sovellus']}'
+									and nimi		= '{$trow['nimi']}'
+									and alanimi 	= '{$trow['alanimi']}'
+									and nimitys		= '{$trow['nimitys']}'
+									and jarjestys 	= '{$trow['jarjestys']}'
+									and jarjestys2	= '{$trow['jarjestys2']}'
+									and hidden		= '{$trow['hidden']}'
+									and yhtio		= '{$yhtio}'";
+						$tarkesult = pupe_query($query);
 						$tarkesultrow = mysql_fetch_array($tarkesult);
 
 						if (mysql_num_rows($tarkesult) == 0) {
 							$query = "	INSERT into oikeu SET
-										kuka		= '$ktunnus',
-										sovellus	= '$trow[sovellus]',
-										nimi		= '$trow[nimi]',
-										alanimi 	= '$trow[alanimi]',
-										paivitys	= '$trow[paivitys]',
-										nimitys		= '$trow[nimitys]',
-										jarjestys 	= '$trow[jarjestys]',
-										jarjestys2	= '$trow[jarjestys2]',
-										hidden		= '$trow[hidden]',
-										yhtio		= '$yhtio'";
-							$rresult = mysql_query($query) or pupe_error($query);
+										kuka		= '{$ktunnus}',
+										sovellus	= '{$trow['sovellus']}',
+										nimi		= '{$trow['nimi']}',
+										alanimi 	= '{$trow['alanimi']}',
+										paivitys	= '{$trow['paivitys']}',
+										nimitys		= '{$trow['nimitys']}',
+										jarjestys 	= '{$trow['jarjestys']}',
+										jarjestys2	= '{$trow['jarjestys2']}',
+										hidden		= '{$trow['hidden']}',
+										yhtio		= '{$yhtio}'";
+							$rresult = pupe_query($query);
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
 							$query = "	UPDATE oikeu SET paivitys = '1'
-										WHERE kuka		= '$ktunnus'
-										AND sovellus	= '$trow[sovellus]'
-										AND nimi		= '$trow[nimi]'
-										AND alanimi 	= '$trow[alanimi]'
-										AND nimitys		= '$trow[nimitys]'
-										AND jarjestys 	= '$trow[jarjestys]'
-										AND jarjestys2	= '$trow[jarjestys2]'
-										AND hidden		= '$trow[hidden]'
-										AND yhtio		= '$yhtio'";
-							$rresult = mysql_query($query) or pupe_error($query);
+										WHERE kuka		= '{$ktunnus}'
+										AND sovellus	= '{$trow['sovellus']}'
+										AND nimi		= '{$trow['nimi']}'
+										AND alanimi 	= '{$trow['alanimi']}'
+										AND nimitys		= '{$trow['nimitys']}'
+										AND jarjestys 	= '{$trow['jarjestys']}'
+										AND jarjestys2	= '{$trow['jarjestys2']}'
+										AND hidden		= '{$trow['hidden']}'
+										AND yhtio		= '{$yhtio}'";
+							$rresult = pupe_query($query);
 						}
 					}
 				}
@@ -405,8 +409,8 @@
 			}
 		}
 		else {
-			echo "<font class='error'>".t("Uutta käyttäjää ei luotu")."!</font><br><br>";
-			$tee     = "MUUTA";
+			echo "<font class='error'>",t("Uutta käyttäjää ei luotu"),"!</font><br><br>";
+			$tee = "MUUTA";
 
 			if ($kopsaakuka == "JOO") {
 				$selkuka = "KOPSAAUUSI";
@@ -421,13 +425,13 @@
 
 	// Muutetaanko jonkun muun oikeuksia??
 	if (isset($selkuka) and $selkuka != '') {
-		$query = "SELECT * FROM kuka WHERE tunnus='$selkuka'";
+		$query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}'";
 	}
 	else {
-		$query = "SELECT * FROM kuka WHERE tunnus='$kukarow[tunnus]'";
+		$query = "SELECT * FROM kuka WHERE tunnus = '{$kukarow['tunnus']}'";
 	}
 
-	$result = mysql_query($query) or pupe_error($query);
+	$result = pupe_query($query);
 	$selkukarow = mysql_fetch_array($result);
 
 	//muutetaan kayttajan tietoja tai syotetaan uuden kayttajan tiedot
@@ -438,13 +442,10 @@
 		if (strlen($firname) > 0 and isset($submit_button)) {
 
 			if (count($profiili) > 0) {
-				foreach($profiili as $prof) {
-					$profile .= $prof.",";
-				}
-				$profile = substr($profile,0,-1);
+				$profile = implode(",", $profiili);
 			}
 
-			if (count($piiri)>0) {
+			if (count($piiri) > 0) {
 				$piirit = implode(",", $piiri);
 			}
 
@@ -453,11 +454,11 @@
 				$password = md5(trim($password));
 
 				$query = "	UPDATE kuka
-							SET salasana = '$password',
-							muuttaja	 = '$kukarow[kuka]',
+							SET salasana = '{$password}',
+							muuttaja	 = '{$kukarow['kuka']}',
 							muutospvm	 = now()
-							WHERE kuka='$kuka'";
-				$result = mysql_query($query) or pupe_error($query);
+							WHERE kuka = '{$kuka}'";
+				$result = pupe_query($query);
 			}
 
 			if (count($varasto) > 0) {
@@ -476,114 +477,114 @@
 			}
 
 			$query = "	UPDATE kuka
-						SET nimi 						= '$firname',
-						puhno 							= '$phonenum',
-						eposti 							= '$email',
-						kieli 							= '$lang',
-						ip								= '$ip',
-						taso 							= '$taso',
-						hinnat							= '$hinnat',
-						saatavat						= '$saatavat',
-						keraajanro 						= '$keraajanro',
-						myyja 							= '$myyja',
-						osasto							= '$osasto',
-						varasto 						= '$varasto',
-						oletus_varasto 					= '$oletus_varasto',
-						oletus_pakkaamo					= '$oletus_pakkaamo',
-						kirjoitin 						= '$kirjoitin',
-						oletus_asiakas 					= '$oletus_asiakas',
-						oletus_asiakastiedot 			= '$oletus_asiakastiedot',
-						resoluutio 						= '$resoluutio',
-						extranet						= '$extranet',
-						hyvaksyja						= '$hyvaksyja',
-						hyvaksyja_maksimisumma			= '$hyvaksyja_maksimisumma',
-						hierarkia						= '$hierarkia',
-						lomaoikeus						= '$lomaoikeus',
-						asema							= '$asema',
-						toimipaikka						= '$toimipaikka',
-						mitatoi_tilauksia				= '$mitatoi_tilauksia',
-						kassamyyja 						= '$kassamyyja',
-						dynaaminen_kassamyynti			= '$dynaaminen_kassamyynti',
-						jyvitys							= '$jyvitys',
-						oletus_ohjelma 					= '$oletus_ohjelma',
-						naytetaan_katteet_tilauksella 	= '$naytetaan_katteet_tilauksella',
-						naytetaan_asiakashinta 			= '$naytetaan_asiakashinta',
-						naytetaan_tuotteet				= '$naytetaan_tuotteet',
-						naytetaan_tilaukset				= '$naytetaan_tilaukset',
-						profiilit 						= '$profile',
-						piirit							= '$piirit',
-						fyysinen_sijainti				= '$fyysinen_sijainti',
-						keraysvyohyke					= '$keraysvyohyke',
-						muuttaja						= '$kukarow[kuka]',
+						SET nimi 						= '{$firname}',
+						puhno 							= '{$phonenum}',
+						eposti 							= '{$email}',
+						kieli 							= '{$lang}',
+						ip								= '{$ip}',
+						taso 							= '{$taso}',
+						hinnat							= '{$hinnat}',
+						saatavat						= '{$saatavat}',
+						keraajanro 						= '{$keraajanro}',
+						myyja 							= '{$myyja}',
+						osasto							= '{$osasto}',
+						varasto 						= '{$varasto}',
+						oletus_varasto 					= '{$oletus_varasto}',
+						oletus_pakkaamo					= '{$oletus_pakkaamo}',
+						kirjoitin 						= '{$kirjoitin}',
+						oletus_asiakas 					= '{$oletus_asiakas}',
+						oletus_asiakastiedot 			= '{$oletus_asiakastiedot}',
+						oletus_profiili					= '{$oletus_profiili}',
+						resoluutio 						= '{$resoluutio}',
+						extranet						= '{$extranet}',
+						hyvaksyja						= '{$hyvaksyja}',
+						hyvaksyja_maksimisumma			= '{$hyvaksyja_maksimisumma}',
+						hierarkia						= '{$hierarkia}',
+						lomaoikeus						= '{$lomaoikeus}',
+						asema							= '{$asema}',
+						toimipaikka						= '{$toimipaikka}',
+						mitatoi_tilauksia				= '{$mitatoi_tilauksia}',
+						kassamyyja 						= '{$kassamyyja}',
+						dynaaminen_kassamyynti			= '{$dynaaminen_kassamyynti}',
+						jyvitys							= '{$jyvitys}',
+						oletus_ohjelma 					= '{$oletus_ohjelma}',
+						naytetaan_katteet_tilauksella 	= '{$naytetaan_katteet_tilauksella}',
+						naytetaan_asiakashinta 			= '{$naytetaan_asiakashinta}',
+						naytetaan_tuotteet				= '{$naytetaan_tuotteet}',
+						naytetaan_tilaukset				= '{$naytetaan_tilaukset}',
+						profiilit 						= '{$profile}',
+						piirit							= '{$piirit}',
+						fyysinen_sijainti				= '{$fyysinen_sijainti}',
+						keraysvyohyke					= '{$keraysvyohyke}',
+						muuttaja						= '{$kukarow['kuka']}',
 						muutospvm						= now()
-						WHERE kuka	= '$kuka'
-						AND yhtio	= '$yhtio'";
-			$result = mysql_query($query) or pupe_error($query);
+						WHERE kuka	= '{$kuka}'
+						AND yhtio	= '{$yhtio}'";
+			$result = pupe_query($query);
 
 			$query = "	SELECT nimi, kuka, tunnus
 						FROM kuka
-						WHERE tunnus='$selkuka'";
-			$result = mysql_query($query) or pupe_error($query);
+						WHERE tunnus = '{$selkuka}'";
+			$result = pupe_query($query);
 			$selkukarow = mysql_fetch_array($result);
 
 			//päivitetään oikeudet jos profiileja on olemassa
 			$profiilit = explode(',', trim($profile));
 
-
 			//poistetaan käyttäjän vanhat profiilioikeudet
 			$query = "	DELETE FROM oikeu
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND kuka = '$kuka'
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND kuka = '{$kuka}'
 						AND kuka != ''
 						AND profiili = ''
 						AND lukittu = ''";
-			$pres = mysql_query($query) or pupe_error($query);
+			$pres = pupe_query($query);
 
 			if (count($profiilit) > 0 and $profiilit[0] != '') {
 				//käydään uudestaan profiili läpi
 				foreach($profiilit as $prof) {
 					$query = "	SELECT *
 								FROM oikeu
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND kuka = '$prof'
-								AND profiili = '$prof'";
-					$pres = mysql_query($query) or pupe_error($query);
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND kuka = '{$prof}'
+								AND profiili = '{$prof}'";
+					$pres = pupe_query($query);
 
 					while ($trow = mysql_fetch_array($pres)) {
 						//joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
 						//voi olla esim jos se on lukittuna annettu
 						$query = "	SELECT yhtio, paivitys
 									FROM oikeu
-									WHERE yhtio		= '$kukarow[yhtio]'
-									AND kuka		= '$kuka'
-									AND sovellus	= '$trow[sovellus]'
-									AND nimi		= '$trow[nimi]'
-									AND alanimi 	= '$trow[alanimi]'";
-						$tarkesult = mysql_query($query) or pupe_error($query);
+									WHERE yhtio		= '{$kukarow['yhtio']}'
+									AND kuka		= '{$kuka}'
+									AND sovellus	= '{$trow['sovellus']}'
+									AND nimi		= '{$trow['nimi']}'
+									AND alanimi 	= '{$trow['alanimi']}'";
+						$tarkesult = pupe_query($query);
 						$tarkesultrow = mysql_fetch_array($tarkesult);
 
 						if (mysql_num_rows($tarkesult) == 0) {
 							$query = "	INSERT into oikeu SET
-										kuka		= '$kuka',
-										sovellus	= '$trow[sovellus]',
-										nimi		= '$trow[nimi]',
-										alanimi 	= '$trow[alanimi]',
-										paivitys	= '$trow[paivitys]',
-										nimitys		= '$trow[nimitys]',
-										jarjestys 	= '$trow[jarjestys]',
-										jarjestys2	= '$trow[jarjestys2]',
-										hidden		= '$trow[hidden]',
-										yhtio		= '$kukarow[yhtio]'";
-							$rresult = mysql_query($query) or pupe_error($query);
+										kuka		= '{$kuka}',
+										sovellus	= '{$trow['sovellus']}',
+										nimi		= '{$trow['nimi']}',
+										alanimi 	= '{$trow['alanimi']}',
+										paivitys	= '{$trow['paivitys']}',
+										nimitys		= '{$trow['nimitys']}',
+										jarjestys 	= '{$trow['jarjestys']}',
+										jarjestys2	= '{$trow['jarjestys2']}',
+										hidden		= '{$trow['hidden']}',
+										yhtio		= '{$kukarow['yhtio']}'";
+							$rresult = pupe_query($query);
 						}
 						elseif ($trow["paivitys"] == '1' and $tarkesultrow["paivitys"] != '1') {
 							$query = "	UPDATE oikeu SET paivitys = '1'
-										WHERE yhtio		= '$kukarow[yhtio]'
-										AND kuka		= '$kuka'
-										AND sovellus	= '$trow[sovellus]'
-										AND nimi		= '$trow[nimi]'
-										AND alanimi 	= '$trow[alanimi]'";
-							$rresult = mysql_query($query) or pupe_error($query);
+										WHERE yhtio		= '{$kukarow['yhtio']}'
+										AND kuka		= '{$kuka}'
+										AND sovellus	= '{$trow['sovellus']}'
+										AND nimi		= '{$trow['nimi']}'
+										AND alanimi 	= '{$trow['alanimi']}'";
+							$rresult = pupe_query($query);
 						}
 					}
 				}
@@ -598,14 +599,14 @@
 				$query = "SELECT * FROM kuka";
 
 				if ($selkukarow['kuka'] != '') {
-					$query .= " WHERE kuka = '$selkukarow[kuka]' and yhtio = '$yhtio'";
+					$query .= " WHERE kuka = '{$selkukarow['kuka']}' and yhtio = '{$yhtio}'";
 				}
 				else {
 					$profiilit = $profile;
-					$query .= " WHERE session='$session' and yhtio = '$yhtio'";
+					$query .= " WHERE session = '{$session}' and yhtio = '{$yhtio}'";
 				}
 
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$krow = mysql_fetch_array ($result);
 
 				if (mysql_num_rows($result) != 1) {
@@ -614,7 +615,7 @@
 				}
 			}
 
-			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<form action='{$PHP_SELF}' method='post' autocomplete='off'>";
 
 			if ($toim == 'extranet') {
 				echo "<table>";
@@ -625,9 +626,9 @@
 
 			if ($selkuka != "UUSI" and $selkuka != "KOPSAAUUSI") {
 				echo "	<input type='hidden' name='tee' value='MUUTA'>
-						<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>
-						<input type='hidden' name='kuka' value='$selkukarow[kuka]'>";
-				echo "<tr><th align='left'>".t("Käyttäjätunnus").":</th><td><b>$krow[kuka]</b> ".t("Lastlogin").": $krow[lastlogin]</td></tr>";
+						<input type='hidden' name='selkuka' value='{$selkukarow['tunnus']}'>
+						<input type='hidden' name='kuka' value='{$selkukarow['kuka']}'>";
+				echo "<tr><th align='left'>",t("Käyttäjätunnus"),":</th><td><b>{$krow['kuka']}</b> ",t("Lastlogin"),": {$krow['lastlogin']}</td></tr>";
 			}
 			else {
 
@@ -636,18 +637,18 @@
 				}
 
 				echo "<input type='hidden' name='tee' value='UUSI'>";
-				echo "<tr><th align='left'>".t("Käyttäjätunnus").":</th>
+				echo "<tr><th align='left'>",t("Käyttäjätunnus"),":</th>
 				<td><input type='text' size='50' maxlength='10' name='ktunnus'></td></tr>";
 			}
 
 			if ($selkuka != "KOPSAAUUSI") {
 
-				echo "<tr><th align='left'>".t("Salasana").":</th><td><input type='text' size='50' maxlength='30' name='password' value='$generoitupass'></td><td class='back'> <a href='?generatepass=y&selkuka=$selkuka&toim=$toim'>".t("Generoi salasana")."</a></td></tr>";
-				echo "<tr><th align='left'>".t("Nimi").":</th><td><input type='text' size='50' value='$krow[nimi]' maxlength='30' name='firname'></td></tr>";
-				echo "<tr><th align='left'>".t("Puhelinnumero").":</th><td><input type='text' size='50' value='$krow[puhno]' maxlength='30' name='phonenum'></td></tr>";
-				echo "<tr><th align='left'>".t("Sähköposti").":&nbsp;</th><td><input type='text' size='50' value='$krow[eposti]' maxlength='50' name='email'></td></tr>";
-				if ($toim == 'extranet') echo "<tr><th align='left'>".t("IP").":&nbsp;</th><td><input type='text' size='16' value='$krow[ip]' maxlength='15' name='ip'></td></tr>";
-				echo "<tr><th align='left'>".t("Kieli").":&nbsp;</th><td><select name='lang'>";
+				echo "<tr><th align='left'>",t("Salasana"),":</th><td><input type='text' size='50' maxlength='30' name='password' value='{$generoitupass}'></td><td class='back'> <a href='?generatepass=y&selkuka={$selkuka}&toim={$toim}'>",t("Generoi salasana"),"</a></td></tr>";
+				echo "<tr><th align='left'>",t("Nimi"),":</th><td><input type='text' size='50' value='{$krow['nimi']}' maxlength='30' name='firname'></td></tr>";
+				echo "<tr><th align='left'>",t("Puhelinnumero"),":</th><td><input type='text' size='50' value='{$krow['puhno']}' maxlength='30' name='phonenum'></td></tr>";
+				echo "<tr><th align='left'>",t("Sähköposti"),":&nbsp;</th><td><input type='text' size='50' value='{$krow['eposti']}' maxlength='50' name='email'></td></tr>";
+				if ($toim == 'extranet') echo "<tr><th align='left'>",t("IP"),":&nbsp;</th><td><input type='text' size='16' value='{$krow['ip']}' maxlength='15' name='ip'></td></tr>";
+				echo "<tr><th align='left'>",t("Kieli"),":&nbsp;</th><td><select name='lang'>";
 
 				$query  = "show columns from sanakirja";
 				$fields =  mysql_query($query);
@@ -659,12 +660,12 @@
 							$sel = "selected";
 						}
 						if ($apurow[0] != "tunnus") {
-							$query = "SELECT distinct nimi from maat where koodi='$apurow[0]'";
-							$maare = mysql_query($query);
+							$query = "SELECT distinct nimi from maat where koodi = '{$apurow[0]}'";
+							$maare = pupe_query($query);
 							$maaro = mysql_fetch_array($maare);
 							$maa   = strtolower($maaro["nimi"]);
 							if ($maa=="") $maa = $apurow[0];
-							echo "<option value='$apurow[0]' $sel>".t($maa)."</option>";
+							echo "<option value='{$apurow[0]}' {$sel}>",t($maa),"</option>";
 						}
 					}
 				}
@@ -672,7 +673,7 @@
 
 				if ($toim != 'extranet') {
 
-					echo "<tr><th align='left'>".t("Hyväksyjä").":</td>";
+					echo "<tr><th align='left'>",t("Hyväksyjä"),":</td>";
 
 					if ($krow["hyvaksyja"] != '') {
 						$chk = "CHECKED";
@@ -680,7 +681,7 @@
 					else {
 						$chk = "";
 					}
-					echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
+					echo "<td><input type='checkbox' name='hyvaksyja' {$chk}></td></tr>";
 
 					$sel9 = $sel3 = $sel2 = $sel1 = "";
 
@@ -697,18 +698,18 @@
 						$sel9 = "SELECTED";
 					}
 
-					echo "<tr><th align='left'>".t("Hyväksyjätaso").":</th>";
+					echo "<tr><th align='left'>",t("Hyväksyjätaso"),":</th>";
 					echo "<td><select name='taso'>";
-					echo "<option value='9' $sel9>".t("Aloittelijahyväksyjä, tiliöintejä ei näytetä")."</option>";
-					echo "<option value='1' $sel1>".t("Perushyväksyjä, tiliöntejä ei voi muuttaa")."</option>";
-					echo "<option value='2' $sel2>".t("Tehohyväksyjä, tiliöntejä voi muuttaa")."</option>";
-					echo "<option value='3' $sel3>".t("Tehohyväksyjä, lukittujakin tiliöintejä voi muuttaa")."</option>";
+					echo "<option value='9' {$sel9}>",t("Aloittelijahyväksyjä, tiliöintejä ei näytetä"),"</option>";
+					echo "<option value='1' {$sel1}>",t("Perushyväksyjä, tiliöntejä ei voi muuttaa"),"</option>";
+					echo "<option value='2' {$sel2}>",t("Tehohyväksyjä, tiliöntejä voi muuttaa"),"</option>";
+					echo "<option value='3' {$sel3}>",t("Tehohyväksyjä, lukittujakin tiliöintejä voi muuttaa"),"</option>";
 					echo "</select></td></tr>";
 
 					if (!isset($krow['hyvaksyja_maksimisumma'])) $krow['hyvaksyja_maksimisumma'] = 0;
 
 					echo "<tr><th align='left'>",t("Hyväksyjän maksimisumma"),":</th>";
-					echo "<td><input type='text' name='hyvaksyja_maksimisumma' value='$krow[hyvaksyja_maksimisumma]'></td></tr>";
+					echo "<td><input type='text' name='hyvaksyja_maksimisumma' value='{$krow['hyvaksyja_maksimisumma']}'></td></tr>";
 
 					echo "<tr><th align='left'>",t("Hierarkia ja esimiehet"),":</th><td>";
 
@@ -740,7 +741,7 @@
 					}
 
 					$query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
-					$keraysvyohyke_result = mysql_query($query) or pupe_error($query);
+					$keraysvyohyke_result = pupe_query($query);
 
 					if (mysql_num_rows($keraysvyohyke_result) > 0) {
 
@@ -774,14 +775,14 @@
 					if ($krow["taso"] == "9") {
 						$sel9 = "SELECTED";
 					}
-					echo "<tr><th align='left'>".t("Taso").":</th>";
+					echo "<tr><th align='left'>",t("Taso"),":</th>";
 
 					echo "<td><select name='taso'>";
-					echo "<option value='1' $sel1>".t("Tehotilaaja, tilaukset menee suoraan tomitukseen")."</option>";
-					echo "<option value='2' $sel2>".t("Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta")."</option>";
-					echo "<option value='3' $sel3>".t("Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA")."</option>";
+					echo "<option value='1' {$sel1}>",t("Tehotilaaja, tilaukset menee suoraan tomitukseen"),"</option>";
+					echo "<option value='2' {$sel2}>",t("Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta"),"</option>";
+					echo "<option value='3' {$sel3}>",t("Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA"),"</option>";
 					if ($kukarow['yhtio'] == 'artr') {
-						echo "<option value='9' $sel9>".t("Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti")."</option>";
+						echo "<option value='9' {$sel9}>",t("Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti"),"</option>";
 					}
 					echo "</select></td></tr>";
 				}
@@ -801,12 +802,12 @@
 					$sel2 = "SELECTED";
 				}
 
-				echo "<tr><th align='left'>".t("Hinnat").":</th>";
+				echo "<tr><th align='left'>",t("Hinnat"),":</th>";
 
 				echo "<td><select name='hinnat'>";
-				echo "<option value='0'  $sel0>".t("Normaali")."</option>";
-				echo "<option value='1'  $sel1>".t("Näytetään vain tuotteen myyntihinta")."</option>";
-				echo "<option value='-1' $sel2>".t("Hintoja ei näytetä")."</option>";
+				echo "<option value='0'  {$sel0}>",t("Normaali"),"</option>";
+				echo "<option value='1'  {$sel1}>",t("Näytetään vain tuotteen myyntihinta"),"</option>";
+				echo "<option value='-1' {$sel2}>",t("Hintoja ei näytetä"),"</option>";
 				echo "</select></td></tr>";
 
 				if ($toim == 'extranet') {
@@ -829,42 +830,42 @@
 						$sel3 = "SELECTED";
 					}
 
-					echo "<tr><th align='left'>".t("Saatavat").":</th>";
+					echo "<tr><th align='left'>",t("Saatavat"),":</th>";
 
 					echo "<td><select name='saatavat'>";
-					echo "<option value='0' $sel0>".t("Näytetään saatavat, jätetään kesken jos maksamattomia laskuja")."</option>";
-					echo "<option value='1' $sel1>".t("Näytetään saatavat, siirretään aina tulostusjonoon")."</option>";
-					echo "<option value='2' $sel2>".t("Ei naytetä saatavia, jätetään kesken jos maksamattomia laskuja")."</option>";
-					echo "<option value='3' $sel3>".t("Ei naytetä saatavia, siirretään aina tulostusjonoon")."</option>";
+					echo "<option value='0' {$sel0}>",t("Näytetään saatavat, jätetään kesken jos maksamattomia laskuja"),"</option>";
+					echo "<option value='1' {$sel1}>",t("Näytetään saatavat, siirretään aina tulostusjonoon"),"</option>";
+					echo "<option value='2' {$sel2}>",t("Ei naytetä saatavia, jätetään kesken jos maksamattomia laskuja"),"</option>";
+					echo "<option value='3' {$sel3}>",t("Ei naytetä saatavia, siirretään aina tulostusjonoon"),"</option>";
 					echo "</select></td></tr>";
 				}
 
 				if ($toim != 'extranet') {
-					echo "<tr><th align='left'>".t("Myyjänro").":</th><td><input type='text' name='myyja' value='$krow[myyja]' size='5'></td></tr>";
-					echo "<tr><th align='left'>".t("Kerääjänro").":</th><td><input type='text' name='keraajanro' value='$krow[keraajanro]' size='5'></td></tr>";
+					echo "<tr><th align='left'>",t("Myyjänro"),":</th><td><input type='text' name='myyja' value='{$krow['myyja']}' size='5'></td></tr>";
+					echo "<tr><th align='left'>",t("Kerääjänro"),":</th><td><input type='text' name='keraajanro' value='{$krow['keraajanro']}' size='5'></td></tr>";
 
-					echo "<tr><th align='left'>".t("Osasto").":</td>";
-					echo "<td><select name='osasto'><option value=''>".t("Ei osastoa")."</option>";
+					echo "<tr><th align='left'>",t("Osasto"),":</td>";
+					echo "<td><select name='osasto'><option value=''>",t("Ei osastoa"),"</option>";
 
 					$vares = t_avainsana("HENKILO_OSASTO");
 
 					while ($varow = mysql_fetch_array($vares)) {
-						$sel='';
-						if ($varow['selite']==$krow["osasto"]) $sel = 'selected';
-						echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
+						$sel = '';
+						if ($varow['selite'] == $krow["osasto"]) $sel = 'selected';
+						echo "<option value='{$varow['selite']}' {$sel}>{$varow['selitetark']}</option>";
 					}
 
 					echo "</select></td></tr>";
 				}
 
-				echo "<tr><th align='left'>".t("Valitse käyttäjän oletusvarasto").":</td>";
+				echo "<tr><th align='left'>",t("Valitse käyttäjän oletusvarasto"),":</td>";
 				echo "<td>";
 
 				$query  = "	SELECT *
 							FROM varastopaikat
-							WHERE yhtio = '$kukarow[yhtio]'
-							order by tyyppi, nimitys";
-				$vares = mysql_query($query) or pupe_error($query);
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							ORDER BY tyyppi, nimitys";
+				$vares = pupe_query($query);
 
 				echo "<select name='oletus_varasto'>";
 				echo "<option value='0'>",t("Oletusvarasto"),"</option>";
@@ -873,18 +874,18 @@
 					if ($varow['tunnus'] == $krow['oletus_varasto']) {
 						$sel = 'selected';
 					}
-					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+					echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
 				}
 				echo "</select>";
 
-				echo "<tr><th align='left'>".t("Valitse varastot, joista käyttäjä saa myydä").":</td>";
+				echo "<tr><th align='left'>",t("Valitse varastot, joista käyttäjä saa myydä"),":</td>";
 				echo "<td>";
 
 				$query  = "	SELECT *
 							FROM varastopaikat
-							WHERE yhtio = '$kukarow[yhtio]'
-							order by tyyppi, nimitys";
-				$vares = mysql_query($query) or pupe_error($query);
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							ORDER BY tyyppi, nimitys";
+				$vares = pupe_query($query);
 
 				$varastot_array = explode(",", $krow["varasto"]);
 
@@ -892,22 +893,22 @@
 					$sel = $eri = '';
 					if (in_array($varow['tunnus'], $varastot_array)) $sel = 'CHECKED';
 					if ($varow["tyyppi"] == "E") $eri = "(E)";
-					echo "<input type='checkbox' name='varasto[]' value='$varow[tunnus]' $sel> $varow[nimitys] $eri<br>";
+					echo "<input type='checkbox' name='varasto[]' value='{$varow['tunnus']}' {$sel}> {$varow['nimitys']} {$eri}<br>";
 				}
 
 				echo "</td><td class='back'>",t("Ilman rajausta saa myydä kaikista normaalivarastoista"),"</td></tr>";
 
 				if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] != '') {
-					echo "<tr><th align='left'>".t("Oletus pakkaamo").":</td>";
-					echo "<td><select name='oletus_pakkaamo'><option value=''>".t("Ei pakkaamoa")."</option>";
+					echo "<tr><th align='left'>",t("Oletus pakkaamo"),":</td>";
+					echo "<td><select name='oletus_pakkaamo'><option value=''>",t("Ei pakkaamoa"),"</option>";
 
-					$query  = "SELECT distinct nimi FROM pakkaamo WHERE yhtio='$kukarow[yhtio]'";
-					$pakkaamores = mysql_query($query) or pupe_error($query);
+					$query  = "SELECT DISTINCT nimi FROM pakkaamo WHERE yhtio = '{$kukarow['yhtio']}'";
+					$pakkaamores = pupe_query($query);
 
 					while ($pakkaamorow = mysql_fetch_array($pakkaamores)) {
-						$sel='';
-						if ($pakkaamorow['nimi']==$krow["oletus_pakkaamo"]) $sel = 'selected';
-						echo "<option value='$pakkaamorow[nimi]' $sel>$pakkaamorow[nimi]</option>";
+						$sel = '';
+						if ($pakkaamorow['nimi'] == $krow["oletus_pakkaamo"]) $sel = 'selected';
+						echo "<option value='{$pakkaamorow['nimi']}' {$sel}>{$pakkaamorow['nimi']}</option>";
 					}
 
 					echo "</select></td></tr>";
@@ -915,39 +916,38 @@
 
 
 				if ($toim != 'extranet') {
-					echo "<tr><th align='left'>".t("Henkilökohtainen tulostin:")."</td>";
-					echo "<td><select name='kirjoitin'><option value=''>".t("Ei oletuskirjoitinta")."</option>";
+					echo "<tr><th align='left'>",t("Henkilökohtainen tulostin:"),"</td>";
+					echo "<td><select name='kirjoitin'><option value=''>",t("Ei oletuskirjoitinta"),"</option>";
 
-					$query  = "SELECT tunnus, kirjoitin FROM kirjoittimet WHERE yhtio='$kukarow[yhtio]'";
-					$vares = mysql_query($query) or pupe_error($query);
+					$query  = "SELECT tunnus, kirjoitin FROM kirjoittimet WHERE yhtio = '{$kukarow['yhtio']}'";
+					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_array($vares)) {
-						$sel='';
-						if ($varow['tunnus']==$krow["kirjoitin"]) $sel = 'selected';
-						echo "<option value='$varow[tunnus]' $sel>$varow[kirjoitin]</option>";
+						$sel = '';
+						if ($varow['tunnus'] == $krow["kirjoitin"]) $sel = 'selected';
+						echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['kirjoitin']}</option>";
 					}
 
 					echo "</select></td></tr>";
 
+					echo "<tr><th align='left'>",t("Kassamyyjä / oletuskassalipas"),":</td>";
+					echo "<td><select name='kassamyyja'><option value=''>",t("Ei oletuskassalipasta"),"</option>";
 
-					echo "<tr><th align='left'>".t("Kassamyyjä").":</td>";
-					echo "<td><select name='kassamyyja'><option value=''>".t("Ei kassamyyjä")."</option>";
-
-					$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' ORDER BY nimi";
-					$vares = mysql_query($query) or pupe_error($query);
+					$query = "SELECT * FROM kassalipas WHERE yhtio = '{$kukarow['yhtio']}' ORDER BY nimi";
+					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_array($vares)) {
-						$sel='';
-						if ($varow['tunnus']==$krow["kassamyyja"]) $sel = 'selected';
-						echo "<option value='$varow[tunnus]' $sel>$varow[nimi]</option>";
+						$sel = '';
+						if ($varow['tunnus'] == $krow["kassamyyja"]) $sel = 'selected';
+						echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['nimi']}</option>";
 					}
 
 					echo "</select></td></tr>";
 
-					echo "<tr><th align='left'>".t("Dynaaminen kassamyyjä").":</td>";
+					echo "<tr><th align='left'>",t("Kassamyyjä / kassalippaan valinta tilauksella"),":</td>";
 
-					$sel1="";
-					$sel2="";
+					$sel1 = "";
+					$sel2 = "";
 
 					if ($krow["dynaaminen_kassamyynti"] == "") {
 						$sel1 = "selected";
@@ -956,8 +956,8 @@
 						$sel2 = "selected";
 					}
 					echo "<td><select name='dynaaminen_kassamyynti'>";
-					echo "<option value='' $sel1>".t("Normaalimyyjä ei toimi kassamyyjänä")."</option>";
-					echo "<option value='o' $sel2>".t("Normaalimyyjä voi toimia tarpeen mukaan kassamyyjänä")."</option>";
+					echo "<option value='' {$sel1}>",t("Kassalipasta ei voi valita tilauksella"),"</option>";
+					echo "<option value='o' {$sel2}>",t("Kassalippaan voi valita tilauksella"),"</option>";
 					echo "</select></td>";
 
 					$sel0 = $sel1 = "";
@@ -969,15 +969,15 @@
 						$sel1 = "SELECTED";
 					}
 
-					echo "<tr><th align='left'>".t("Saatavat").":</th>";
+					echo "<tr><th align='left'>",t("Saatavat"),":</th>";
 
 					echo "<td><select name='saatavat'>";
-					echo "<option value='0' $sel0>".t("Ei näytetä saatavia kassakäyttäjänä")."</option>";
-					echo "<option value='1' $sel1>".t("Näytetään saatavat kassakäyttäjänä")."</option>";
+					echo "<option value='0' {$sel0}>",t("Ei näytetä saatavia kassakäyttäjänä"),"</option>";
+					echo "<option value='1' {$sel1}>",t("Näytetään saatavat kassakäyttäjänä"),"</option>";
 					echo "</select></td></tr>";
 				}
 				else {
-					echo "<tr><th align='left'>".t("Tilaukset suoraan laskutukseen").":</td>";
+					echo "<tr><th align='left'>",t("Tilaukset suoraan laskutukseen"),":</td>";
 
 					if ($krow["hyvaksyja"] != '') {
 						$chk = "CHECKED";
@@ -985,12 +985,12 @@
 					else {
 						$chk = "";
 					}
-					echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
+					echo "<td><input type='checkbox' name='hyvaksyja' {$chk}></td></tr>";
 				}
 
 				if ($selkuka != "UUSI") {
 
-					echo "<tr><th align='left'>".t("Oletusasiakas").":</th><td>";
+					echo "<tr><th align='left'>",t("Oletusasiakas"),":</th><td>";
 					echo "<table><tr>";
 					echo "<td><input type='text' name='ytunnus_oa'></td>";
 
@@ -999,29 +999,29 @@
 
 					if ($krow["oletus_asiakas"] != "") {
 
-						$query = "SELECT * from asiakas where tunnus='$krow[oletus_asiakas]'";
-						$vares = mysql_query($query) or pupe_error($query);
+						$query = "SELECT * FROM asiakas WHERE tunnus = '{$krow['oletus_asiakas']}'";
+						$vares = pupe_query($query);
 
 						if (mysql_num_rows($vares) == 1) {
 							$varow = mysql_fetch_array($vares);
 
-							echo "<td>$varow[ytunnus] $varow[nimi] $varow[nimitark]<br>$varow[toim_ovttunnus] $varow[toim_nimi] $varow[toim_nimitark] $varow[toim_postitp]
-									<input type='hidden' name='oletus_asiakas' value='$krow[oletus_asiakas]'></td>";
+							echo "<td>{$varow['ytunnus']} {$varow['nimi']} {$varow['nimitark']}<br>{$varow['toim_ovttunnus']} {$varow['toim_nimi']} {$varow['toim_nimitark']} {$varow['toim_postitp']}
+									<input type='hidden' name='oletus_asiakas' value='{$krow['oletus_asiakas']}'></td>";
 						}
 						else {
-							echo "<td>".t("Asiakas ei löydy")."!</td>";
+							echo "<td>",t("Asiakas ei löydy"),"!</td>";
 						}
 
 					}
 					else {
-						echo "<td>".t("Oletusasiakasta ei ole syötetty")."!</td>";
+						echo "<td>",t("Oletusasiakasta ei ole syötetty"),"!</td>";
 					}
 
 					echo "</tr></table>";
 					echo "</td></tr>";
 
 					if ($toim == 'extranet') {
-						echo "<tr><th align='left'>".t("Oletusasiakastiedot").":</th><td>";
+						echo "<tr><th align='left'>",t("Oletusasiakastiedot"),":</th><td>";
 						echo "<table><tr>";
 						echo "<td><input type='text' name='ytunnus_oat'></td>";
 
@@ -1030,83 +1030,100 @@
 
 						if ($krow["oletus_asiakastiedot"] != "") {
 
-							$query = "SELECT * from asiakas where tunnus='$krow[oletus_asiakastiedot]'";
-							$vares = mysql_query($query) or pupe_error($query);
+							$query = "SELECT * FROM asiakas WHERE tunnus = '{$krow['oletus_asiakastiedot']}'";
+							$vares = pupe_query($query);
 
 							if (mysql_num_rows($vares) == 1) {
 								$varow = mysql_fetch_array($vares);
 
-								echo "<td>$varow[ytunnus] $varow[nimi] $varow[nimitark]<br>$varow[toim_ovttunnus] $varow[toim_nimi] $varow[toim_nimitark] $varow[toim_postitp]
-										<input type='hidden' name='oletus_asiakastiedot' value='$krow[oletus_asiakastiedot]'></td>";
+								echo "<td>{$varow['ytunnus']} {$varow['nimi']} {$varow['nimitark']}<br>{$varow['toim_ovttunnus']} {$varow['toim_nimi']} {$varow['toim_nimitark']} {$varow['toim_postitp']}
+										<input type='hidden' name='oletus_asiakastiedot' value='{$krow['oletus_asiakastiedot']}'></td>";
 							}
 							else {
-								echo "<td>".t("Asiakas ei löydy")."!</td>";
+								echo "<td>",t("Asiakas ei löydy"),"!</td>";
 							}
 						}
 						else {
-							echo "<td>".t("Asiakastietoasiakasta ei ole syötetty")."!</td>";
+							echo "<td>",t("Asiakastietoasiakasta ei ole syötetty"),"!</td>";
 						}
 						echo "</tr></table>";
+						echo "</td></tr>";
+
+						echo "<tr><th align='left'>",t("Oletusprofiili"),":</th><td>";
+						echo "<table><tr><td><select name='oletus_profiili'>";
+
+						$query = "	SELECT DISTINCT profiili
+									FROM oikeu
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND profiili != ''
+									AND profiili LIKE 'extranet%'
+									ORDER BY profiili";
+						$pres = pupe_query($query);
+
+						echo "<option value=''></option>";
+
+						while ($prow = mysql_fetch_assoc($pres)) {
+							$sel = $krow['oletus_profiili'] == $prow['profiili'] ? ' selected' : '';
+							echo "<option value='{$prow['profiili']}'{$sel}>{$prow['profiili']}</option>";
+						}
+
+						echo "</select></td></tr></table>";
 						echo "</td></tr>";
 					}
 				}
 
 				if ($toim == 'extranet') {
-					$sel=array();
-					$sel[$krow["naytetaan_asiakashinta"]] = "SELECTED";
+					$sel = array_fill_keys(array($krow["naytetaan_asiakashinta"]), " selected") + array('A' => '');
 
-					echo "<tr><th align='left'>".t("Näytetään asiakashinta tuotehaussa").":</th>
+					echo "<tr><th align='left'>",t("Näytetään asiakashinta tuotehaussa"),":</th>
 							<td><select name='naytetaan_asiakashinta'>
-							<option value=''>".t("Näytetään tuotteen myyntihinta")."</option>
-							<option value='A' $sel[A]>".t("Näytetään asiakashinta")."</option>
+							<option value=''>",t("Näytetään tuotteen myyntihinta"),"</option>
+							<option value='A' {$sel['A']}>",t("Näytetään asiakashinta"),"</option>
 							</select></td></tr>";
 
 
-					$sel=array();
-					$sel[$krow["naytetaan_tuotteet"]] = "SELECTED";
+					$sel = array_fill_keys(array($krow["naytetaan_tuotteet"]), " selected") + array('A' => '');
 
-					echo "<tr><th align='left'>".t("Näytettävät tuotteet verkkokaupan tuotehaussa").":</th>
+					echo "<tr><th align='left'>",t("Näytettävät tuotteet verkkokaupan tuotehaussa"),":</th>
 							<td><select name='naytetaan_tuotteet'>
-							<option value=''>".t("Näytetään kaikki tuotteet")."</option>
-							<option value='A' $sel[A]>".t("Näytetään tuotteet joilla on asiakashinta tai asiakasale")."</option>
+							<option value=''>",t("Näytetään kaikki tuotteet"),"</option>
+							<option value='A' {$sel['A']}>",t("Näytetään tuotteet joilla on asiakashinta tai asiakasale"),"</option>
 							</select></td></tr>";
 
-					$sel=array();
-					$sel[$krow["naytetaan_tilaukset"]] = "SELECTED";
+					$sel = array_fill_keys(array($krow["naytetaan_tilaukset"]), " selected") + array('O' => '');
 
-					echo "<tr><th align='left'>".t("Näytettävät tilaukset verkkokaupassa").":</th>
+					echo "<tr><th align='left'>",t("Näytettävät tilaukset verkkokaupassa"),":</th>
 							<td><select name='naytetaan_tilaukset'>
-							<option value=''>".t("Näytetään kaikki tilaukset")."</option>
-							<option value='O' $sel[O]>".t("Näytetään vain omat tilaukset")."</option>
+							<option value=''>",t("Näytetään kaikki tilaukset"),"</option>
+							<option value='O' {$sel['O']}>",t("Näytetään vain omat tilaukset"),"</option>
 							</select></td></tr>";
 
-					$sel=array();
-					$sel[$krow["asema"]] = "SELECTED";
+					$sel = array_fill_keys(array($krow["asema"]), " selected") + array('NE' => '');
 
-					echo "<tr><th align='left'>".t("Näytetäänkö poistetut tuotteet extranetissä").":</th>
+					echo "<tr><th align='left'>",t("Näytetäänkö poistetut tuotteet extranetissä"),":</th>
 							<td><select name='asema'>
-							<option value=''>".t("Ei näytetä extranetissä")."</option>
-							<option value='NE' $sel[NE]>".t("Näytetään extranetissä")."</option>
+							<option value=''>",t("Ei näytetä extranetissä"),"</option>
+							<option value='NE' {$sel['NE']}>",t("Näytetään extranetissä"),"</option>
 							</select></td></tr>";
 
 				}
 
 				if ($toim != 'extranet') {
-					echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";
-					echo "<option value=''>".t("Ei oletusta")."</option>";
+					echo "<tr><th align='left'>",t("Oletusohjelma"),":</th><td><select name='oletus_ohjelma'>";
+					echo "<option value=''>",t("Ei oletusta"),"</option>";
 
-					$query  = "	SELECT distinct concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus
+					$query  = "	SELECT DISTINCT concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus
 								FROM oikeu
-								WHERE yhtio = '$kukarow[yhtio]'
-								and kuka = '$krow[kuka]'
-								ORDER by sovellus, nimitys";
-					$vares = mysql_query($query) or pupe_error($query);
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND kuka = '{$krow['kuka']}'
+								ORDER BY sovellus, nimitys";
+					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_array($vares)) {
-						$sel='';
+						$sel = '';
 						if ($varow['nimi'] == $krow["oletus_ohjelma"]) $sel = 'selected';
 
-						echo "<option value='$varow[nimi]' $sel>".t($varow["sovellus"])." - ".t($varow["nimitys"])."</option>";
+						echo "<option value='{$varow['nimi']}' {$sel}>",t($varow["sovellus"])," - ",t($varow["nimitys"]),"</option>";
 					}
 					echo "</select></td></tr>";
 
@@ -1123,11 +1140,11 @@
 						$sel3 = "SELECTED";
 					}
 
-					echo "<tr><th align='left'>".t("Näytön koko").":</th>
+					echo "<tr><th align='left'>",t("Näytön koko"),":</th>
 							<td><select name='resoluutio'>
-							<option value='P' $sel3>".t("Pieni")."</option>
-							<option value='N' $sel1>".t("Normaali")."</option>
-							<option value='I' $sel2>".t("Iso")."</option>
+							<option value='P' {$sel3}>",t("Pieni"),"</option>
+							<option value='N' {$sel1}>",t("Normaali"),"</option>
+							<option value='I' {$sel2}>",t("Iso"),"</option>
 							</select></td></tr>";
 
 					if ($krow['naytetaan_katteet_tilauksella'] == "") {
@@ -1146,39 +1163,39 @@
 						$sel3 = "SELECTED";
 					}
 
-					echo "<tr><th align='left'>".t("Katteet näytetään tilauksentekovaiheessa").":</th>
+					echo "<tr><th align='left'>",t("Katteet näytetään tilauksentekovaiheessa"),":</th>
 							<td><select name='naytetaan_katteet_tilauksella'>
-							<option value=''  $sel1>".t("Oletus")."</option>
-							<option value='Y' $sel2>".t("Kate näytetään")."</option>
-							<option value='N' $sel3>".t("Katetta ei näytetä")."</option>
+							<option value=''  {$sel1}>",t("Oletus"),"</option>
+							<option value='Y' {$sel2}>",t("Kate näytetään"),"</option>
+							<option value='N' {$sel3}>",t("Katetta ei näytetä"),"</option>
 							</select></td></tr>";
 
-					echo "<tr><th align='left'>".t("Lomaoikeus").":</th>
-							<td><input type='text' name='lomaoikeus' size='3' value='$krow[lomaoikeus]'></td></tr>";
+					echo "<tr><th align='left'>",t("Lomaoikeus"),":</th>
+							<td><input type='text' name='lomaoikeus' size='3' value='{$krow['lomaoikeus']}'></td></tr>";
 
-					echo "<tr><th align='left'>".t("Asema").":</td>";
-					echo "<td><select name='asema'><option value=''>".t("Ei asemaa")."</option>";
+					echo "<tr><th align='left'>",t("Asema"),":</td>";
+					echo "<td><select name='asema'><option value=''>",t("Ei asemaa"),"</option>";
 
 					$vares = t_avainsana("KUKAASEMA");
 
 					while ($varow = mysql_fetch_array($vares)) {
-						$sel='';
-						if ($varow['selite']==$krow["asema"]) $sel = 'selected';
-						echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
+						$sel = '';
+						if ($varow['selite'] == $krow["asema"]) $sel = 'selected';
+						echo "<option value='{$varow['selite']}' {$sel}>{$varow['selitetark']}</option>";
 					}
 
 					echo "</select></td></tr>";
 
-					echo "<tr><th align='left'>".t("Toimipaikka").":</td>";
-					echo "<td><select name='toimipaikka'><option value=''>".t("Oletustoimipaikka")."</option>";
+					echo "<tr><th align='left'>",t("Toimipaikka"),":</td>";
+					echo "<td><select name='toimipaikka'><option value=''>",t("Oletustoimipaikka"),"</option>";
 
-					$query  = "SELECT * FROM yhtion_toimipaikat WHERE yhtio='$kukarow[yhtio]' and vat_numero = '' order by nimi";
-					$vares = mysql_query($query) or pupe_error($query);
+					$query = "SELECT * FROM yhtion_toimipaikat WHERE yhtio = '{$kukarow['yhtio']}' AND vat_numero = '' ORDER BY nimi";
+					$vares = pupe_query($query);
 
 					while ($varow = mysql_fetch_array($vares)) {
-						$sel='';
-						if ($varow['tunnus']==$krow["toimipaikka"]) $sel = 'selected';
-						echo "<option value='$varow[tunnus]' $sel>$varow[ovtlisa] $varow[nimi]</option>";
+						$sel = '';
+						if ($varow['tunnus'] == $krow["toimipaikka"]) $sel = 'selected';
+						echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['ovtlisa']} {$varow['nimi']}</option>";
 					}
 
 					echo "</select></td></tr>";
@@ -1189,10 +1206,10 @@
 						$sel1 = "SELECTED";
 					}
 
-					echo "<tr><th align='left'>".t("Tilausten mitätöiminen").":</td>";
+					echo "<tr><th align='left'>",t("Tilausten mitätöiminen"),":</td>";
 					echo "<td><select name='mitatoi_tilauksia'>
-							<option value=''>".t("Käyttäjä saa mitätöidä tilauksia")."</option>
-							<option value='X' $sel1>".t("Käyttäjä ei saa mitätöidä tilauksia")."</option>";
+							<option value=''>",t("Käyttäjä saa mitätöidä tilauksia"),"</option>
+							<option value='X' {$sel1}>",t("Käyttäjä ei saa mitätöidä tilauksia"),"</option>";
 					echo "</select></td></tr>";
 
 					//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta
@@ -1207,10 +1224,10 @@
 							$sel2 = "SELECTED";
 						}
 
-						echo "<tr><th align='left'>".t("Jyvitys").":</td>";
+						echo "<tr><th align='left'>",t("Jyvitys"),":</td>";
 						echo "<td><select name='jyvitys'>
-								<option value='' $sel1>".t("Ei saa jyvittää myyntitilauksella")."</option>
-								<option value='X' $sel2>".t("Saa jyvittää myyntitilauksella")."</option>";
+								<option value='' {$sel1}>",t("Ei saa jyvittää myyntitilauksella"),"</option>
+								<option value='X' {$sel2}>",t("Saa jyvittää myyntitilauksella"),"</option>";
 						echo "</select></td></tr>";
 					}
 				}
@@ -1238,17 +1255,17 @@
 				}
 
 
-				$query = "	SELECT distinct profiili
+				$query = "	SELECT DISTINCT profiili
 							FROM oikeu
-							WHERE yhtio='$kukarow[yhtio]'
-							and profiili!=''
-							$andextra
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND profiili != ''
+							{$andextra}
 							ORDER BY profiili";
-				$pres = mysql_query($query) or pupe_error($query);
+				$pres = pupe_query($query);
 
 				$profiilit = explode(',', $krow["profiilit"]);
 
-				echo "<tr><th valign='top'>".t("Profiilit").":</th><td>";
+				echo "<tr><th valign='top'>",t("Profiilit"),":</th><td>";
 
 				while ($prow = mysql_fetch_array($pres)) {
 
@@ -1262,7 +1279,7 @@
 						}
 					}
 
-					echo "<input type='checkbox' name='profiili[]' value='$prow[profiili]' $chk> $prow[profiili]<br>";
+					echo "<input type='checkbox' name='profiili[]' value='{$prow['profiili']}' {$chk}> {$prow['profiili']}<br>";
 				}
 				echo "</td></tr>";
 
@@ -1271,7 +1288,7 @@
 
 					$piirit = explode(',', $krow["piirit"]);
 
-					echo "<tr><th valign='top'>".t("Valitse asiakaspiirit, joihin käyttäjä saa myydä").":</th><td>";
+					echo "<tr><th valign='top'>",t("Valitse asiakaspiirit, joihin käyttäjä saa myydä"),":</th><td>";
 
 					$pres = t_avainsana("PIIRI");
 
@@ -1282,9 +1299,9 @@
 							$chk = "CHECKED";
 						}
 
-						echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selite] - $prow[selitetark]<br>";
+						echo "<input type='checkbox' name='piiri[]' value='{$prow['selite']}' {$chk}>{$prow['selite']} - {$prow['selitetark']}<br>";
 					}
-					echo "</td><td class='back'>".t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin")."</td></tr>";
+					echo "</td><td class='back'>",t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin"),"</td></tr>";
 				}
 			}
 
@@ -1293,17 +1310,17 @@
 
 			if ($toim == 'extranet') {
 				$queryoik = "	SELECT tunnus
-								from oikeu
-								where nimi like '%yllapito.php'
-								and alanimi = 'extranet_kayttajan_lisatiedot'
-								and kuka = '$kukarow[kuka]'
-								and yhtio = '$yhtiorow[yhtio]'";
-				$res = mysql_query($queryoik) or pupe_error($queryoik);
+								FROM oikeu
+								WHERE nimi LIKE '%yllapito.php'
+								AND alanimi = 'extranet_kayttajan_lisatiedot'
+								AND kuka = '{$kukarow['kuka']}'
+								AND yhtio = '{$yhtiorow['yhtio']}'";
+				$res = pupe_query($queryoik);
 
 				if (mysql_num_rows($res) > 0) {
 					require ("inc/extranet_kayttajan_lisatiedot.inc");
 					echo "<td class='back'>";
-					echo "<iframe id='extranet_lisatiedot_iframe' name='extranet_lisatiedot_iframe' src='yllapito.php?toim=extranet_kayttajan_lisatiedot&from=yllapito&ohje=off&haku[4]=@$selkuka&lukitse_avaimeen=$selkuka' style='height: 700px; width: 700px; border: 0px; display: inline;' scrolling='yes' border='0' frameborder='0'></iFrame>";
+					echo "<iframe id='extranet_lisatiedot_iframe' name='extranet_lisatiedot_iframe' src='yllapito.php?toim=extranet_kayttajan_lisatiedot&from=yllapito&ohje=off&haku[4]=@{$selkuka}&lukitse_avaimeen={$selkuka}' style='height: 700px; width: 700px; border: 0px; display: inline;' scrolling='yes' border='0' frameborder='0'></iFrame>";
 					echo "</td>";
 				}
 				echo "</tr>";
@@ -1311,41 +1328,41 @@
 			}
 
 			if ($selkuka == "UUSI" or $selkuka == "KOPSAAUUSI") {
-				echo "<br><input type='submit' value='".t("Perusta uusi käyttäjä")."'></form>";
+				echo "<br><input type='submit' value='",t("Perusta uusi käyttäjä"),"'></form>";
 			}
 			else {
-				echo "<br><input type='submit' name='submit_button' value='".t("Päivitä käyttäjän")." $krow[kuka] ".t("tiedot")."'></form>";
+				echo "<br><input type='submit' name='submit_button' value='",t("Päivitä käyttäjän")," {$krow['kuka']} ",t("tiedot"),"'></form>";
 				echo "</td></tr></table>";
 
 				echo "<br><br><br><hr>";
 
 				echo "<table><tr><td class='back'>";
 
-				echo "<form action='$PHP_SELF' method='post'>
-					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
+				echo "<form action='{$PHP_SELF}' method='post'>
+					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='delkesken'>
-					<input type='submit' value='* ".t("Vapauta käyttäjän")." $selkukarow[nimi] ".t("keskenoleva tilaus")." *'>
+					<input type='submit' value='* ",t("Vapauta käyttäjän")," {$selkukarow['nimi']} ",t("keskenoleva tilaus")," *'>
 					</form>";
 				echo "</td><td class='back'>";
 
-				echo "<form action='$PHP_SELF' method='post'>
-					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
+				echo "<form action='{$PHP_SELF}' method='post'>
+					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='delpsw'>
-					<input type='submit' value='** ".t("Poista käyttäjän")." $selkukarow[nimi] ".t("salasana")." **'>
+					<input type='submit' value='** ",t("Poista käyttäjän")," {$selkukarow['nimi']} ",t("salasana")," **'>
 					</form>";
 				echo "</td><td class='back'>";
 
-				echo "<form action='$PHP_SELF' method='post'>
-					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
+				echo "<form action='{$PHP_SELF}' method='post'>
+					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='deloikeu'>
-					<input type='submit' value='*** ".t("Poista käyttäjän")." $selkukarow[nimi] ".t("käyttöoikeudet")." ***'>
+					<input type='submit' value='*** ",t("Poista käyttäjän")," {$selkukarow['nimi']} ",t("käyttöoikeudet")," ***'>
 					</form>";
 				echo "</td><td class='back'>";
 
-				echo "<form action='$PHP_SELF' method='post'>
-					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
+				echo "<form action='{$PHP_SELF}' method='post'>
+					<input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
 					<input type='hidden' name='tee' value='deluser'>
-					<input type='submit' value='**** ".t("Poista käyttäjä")." $selkukarow[nimi] ****'>
+					<input type='submit' value='**** ",t("Poista käyttäjä")," {$selkukarow['nimi']} ****'>
 					</form>";
 				echo "</td></tr></table>";
 			}
@@ -1356,15 +1373,15 @@
 
 		echo "<br>";
 		echo "<table>";
-		echo "<form action='$PHP_SELF' method='post' name='kayttajaformi' id='kayttajaformi'><input type='hidden' name='tee' value='MUUTA'>";
+		echo "<form action='{$PHP_SELF}' method='post' name='kayttajaformi' id='kayttajaformi'><input type='hidden' name='tee' value='MUUTA'>";
 
-		echo "<tr><th>".t("Hae")." ".$toim." ".t("käyttäjä").":</th>";
-		echo "<td>".livesearch_kentta("kayttajaformi", "KAYTTAJAHAKU", "selkuka", 300)."</td>";
-		echo "<td><input type='submit' value='".t("Muokkaa käyttäjän tietoja")."'></td></tr></form>";
+		echo "<tr><th>",t("Hae")," {$toim} ",t("käyttäjä"),":</th>";
+		echo "<td>",livesearch_kentta("kayttajaformi", "KAYTTAJAHAKU", "selkuka", 300),"</td>";
+		echo "<td><input type='submit' value='",t("Muokkaa käyttäjän tietoja"),"'></td></tr></form>";
 
 
-		echo "<form action='$PHP_SELF' method='post' name='kayttajaformi2' id='kayttajaformi2'><input type='hidden' name='tee' value='MUUTA'>";
-		echo "<tr><th>".t("Valitse")." ".$toim." ".t("käyttäjä").":</th>";
+		echo "<form action='{$PHP_SELF}' method='post' name='kayttajaformi2' id='kayttajaformi2'><input type='hidden' name='tee' value='MUUTA'>";
+		echo "<tr><th>",t("Valitse")," {$toim} ",t("käyttäjä"),":</th>";
 		echo "<td><select name='selkuka'>";
 
 		if ($toim == "extranet") $extrsel = "X";
@@ -1372,14 +1389,14 @@
 
 		$query = "	SELECT kuka.nimi, kuka.kuka, kuka.tunnus, if(count(oikeu.tunnus) > 0, 0, 1) aktiivinen
 					FROM kuka
-					LEFT JOIN oikeu ON oikeu.yhtio=kuka.yhtio and oikeu.kuka=kuka.kuka
-					WHERE  kuka.yhtio = '$kukarow[yhtio]'
-					and  kuka.extranet = '$extrsel'
+					LEFT JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+					WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+					AND kuka.extranet = '{$extrsel}'
 					GROUP BY 1,2,3
-					ORDER BY aktiivinen,  kuka.nimi";
-		$kukares = mysql_query($query) or pupe_error($query);
+					ORDER BY aktiivinen, kuka.nimi";
+		$kukares = pupe_query($query);
 
-		echo "<optgroup label='".t("Aktiiviset käyttäjät")."'>";
+		echo "<optgroup label='",t("Aktiiviset käyttäjät"),"'>";
 
 		$edakt = 0;
 		$poislisa = "";
@@ -1389,26 +1406,26 @@
 			else $sel = "";
 
 			if ($kurow["aktiivinen"] != $edakt) {
-				echo "</optgroup><optgroup label='".t("Poistetut käyttäjät")."'>";
+				echo "</optgroup><optgroup label='",t("Poistetut käyttäjät"),"'>";
 				$poislisa = "*";
 			}
 
-			echo "<option value='$kurow[tunnus]' $sel>$poislisa $kurow[nimi] ($kurow[kuka])</option>";
+			echo "<option value='{$kurow['tunnus']}' {$sel}>{$poislisa} {$kurow['nimi']} ({$kurow['kuka']})</option>";
 
 			$edakt = $kurow["aktiivinen"];
 		}
 
-		echo "</optgroup></select></td><td><input type='submit' value='".t("Muokkaa käyttäjän tietoja")."'></td></tr></form>";
+		echo "</optgroup></select></td><td><input type='submit' value='",t("Muokkaa käyttäjän tietoja"),"'></td></tr></form>";
 
-		echo "<form action='$PHP_SELF' method='post'>
+		echo "<form action='{$PHP_SELF}' method='post'>
 				<input type='hidden' name='tee' value='MUUTA'>
 				<input type='hidden' name='selkuka' value='UUSI'>";
-		echo "<tr><th>".t("Perusta uusi käyttäjä").":</th><td></td><td><input type='submit' value='".t("Luo uusi käyttäjä")."'></td></tr></form>";
+		echo "<tr><th>",t("Perusta uusi käyttäjä"),":</th><td></td><td><input type='submit' value='",t("Luo uusi käyttäjä"),"'></td></tr></form>";
 
-		echo "<form action='$PHP_SELF' method='post'>
+		echo "<form action='{$PHP_SELF}' method='post'>
 				<input type='hidden' name='tee' value='MUUTA'>
 				<input type='hidden' name='selkuka' value='KOPSAAUUSI'>";
-		echo "<tr><th>".t("Kopioi käyttäjä toisesta yrityksestä").":</th><td></td><td><input type='submit' value='".t("Luo uusi käyttäjä")."'></td></tr></form>";
+		echo "<tr><th>",t("Kopioi käyttäjä toisesta yrityksestä"),":</th><td></td><td><input type='submit' value='",t("Luo uusi käyttäjä"),"'></td></tr></form>";
 
 
 		echo "</table>";

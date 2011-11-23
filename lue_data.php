@@ -66,61 +66,111 @@ if (!$cli and $oikeurow['paivitys'] != '1') { // Saako päivittää
 }
 
 flush();
-
 if (!isset($table)) $table = '';
-
+$kasitellaan_tiedosto = FALSE;
 
 if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim($_FILES['userfile']['tmp_name']) != ''))) {
 
+	$kasitellaan_tiedosto = TRUE;
+
 	require ("inc/pakolliset_sarakkeet.inc");
+
+	if ($_FILES['userfile']['size'] == 0) {
+		echo "<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>";
+		$kasitellaan_tiedosto = FALSE;
+	}
 
 	$path_parts = pathinfo($_FILES['userfile']['name']);
 	$ext = strtoupper($path_parts['extension']);
 
-	if ($ext != "TXT" and $ext != "XLS" and $ext != "CSV") {
-		die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
-	}
-
-	if ($_FILES['userfile']['size'] == 0) {
-		die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
-	}
-
-	if ($ext == "XLS") {
-		require_once ('excel_reader/reader.php');
-
-		// ExcelFile
-		$data = new Spreadsheet_Excel_Reader();
-
-		// Set output Encoding.
-		$data->setOutputEncoding('CP1251');
-		$data->setRowColOffset(0);
-		$data->read($_FILES['userfile']['tmp_name']);
-	}
-
 	if (!$cli) echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
 
-	// luetaan eka rivi tiedostosta..
-	if ($ext == "XLS") {
-		$headers = array();
+	$retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT"));
 
-		for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-			$headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
+	if ($retval !== TRUE) {
+		echo "<font class='error'><br>".t("Väärä tiedostomuoto")."!</font>";
+		$kasitellaan_tiedosto = FALSE;
+	}
+}
+
+if ($kasitellaan_tiedosto) {
+
+	if ($ext == "CSV" or $ext == "TXT") {
+		/** Ladataan file **/
+		$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+
+		/** Laitetaan rivit arrayseen **/
+		$excelrivit = array();
+
+		$rowIndex = 0;
+
+		while ($rivi = fgets($file)) {
+			// luetaan rivi tiedostosta..
+			$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
+
+			for ($colIndex = 0; $colIndex < count($rivi); $colIndex++) {
+				$excelrivit[$rowIndex][$colIndex] = trim($rivi[$colIndex]);
+			}
+
+			$rowIndex++;
 		}
 
-		for ($excej = (count($headers)-1); $excej > 0 ; $excej--) {
-			if ($headers[$excej] != "") {
-				break;
-			}
-			else {
-				unset($headers[$excej]);
-			}
-		}
+		fclose($file);
 	}
 	else {
-		$file	 = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+		/** PHPExcel kirjasto **/
+		require_once "PHPExcel/PHPExcel/IOFactory.php";
 
-		$rivi    = fgets($file);
-		$headers = explode("\t", strtoupper(trim($rivi)));
+		/** Tunnistetaan tiedostomuoto **/
+		$inputFileType = PHPExcel_IOFactory::identify($_FILES['userfile']['tmp_name']);
+
+		/** Luodaan readeri **/
+		$objReader = PHPExcel_IOFactory::createReader($inputFileType);
+
+		/** Ladataan vain solujen datat (ei formatointeja jne) **/
+		$objReader->setReadDataOnly(true);
+
+		/** Ladataan file halutuilla parametreilla **/
+		$objPHPExcel = $objReader->load($_FILES['userfile']['tmp_name']);
+
+		/** Laitetaan rivit arrayseen **/
+		$excelrivit = array();
+
+		/** Aktivoidaan eka sheetti**/
+		$objPHPExcel->setActiveSheetIndex(0);
+
+		/** Loopataan tiedoston rivit **/
+		foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
+		    $cellIterator = $row->getCellIterator();
+		    $cellIterator->setIterateOnlyExistingCells(false);
+
+			$rowIndex = ($row->getRowIndex())-1;
+
+		    foreach ($cellIterator as $cell) {
+		        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
+
+				$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
+		    }
+		}
+
+		/** Tuhotaan excel oliot **/
+		unset($objReader);
+		unset($objPHPExcel);
+	}
+
+	/** Otetaan tiedoston otsikkorivi **/
+	$headers = $excelrivit[0];
+	$headers = array_map('trim', $headers);
+	$headers = array_map('strtoupper', $headers);
+
+	// Unsetatan tyhjät sarakkeet
+	for ($i = (count($headers)-1); $i > 0 ; $i--) {
+		if ($headers[$i] != "") {
+			break;
+		}
+		else {
+			unset($headers[$i]);
+		}
 	}
 
 	$taulut			= array();
@@ -220,65 +270,37 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 		}
 	}
 
+	// rivimäärä excelissä
+	$excelrivimaara = count($excelrivit);
+
+	// sarakemäärä excelissä
+	$excelsarakemaara = count($headers);
+
 	// Luetaan tiedosto loppuun ja tehdään taulukohtainen array koko datasta
-	if ($ext == "XLS") {
-		for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
-			for ($excej = 0; $excej < count($headers); $excej++) {
+	for ($excei = 1; $excei < $excelrivimaara; $excei++) {
+		for ($excej = 0; $excej < $excelsarakemaara; $excej++) {
 
-				$taulunrivit[$taulut[$excej]][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
+			$taulunrivit[$taulut[$excej]][$excei-1][] = trim($excelrivit[$excei][$excej]);
 
-				// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
-				foreach ($taulunotsikot as $taulu => $joinit) {
+			// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
+			foreach ($taulunotsikot as $taulu => $joinit) {
 
-					if (strpos($headers[$excej], ".") !== FALSE) {
-						list ($etu, $taka) = explode(".", $headers[$excej]);
-						if ($taka == "") $taka = $etu;
-					}
-					else {
-						$taka = $headers[$excej];
-					}
+				if (strpos($headers[$excej], ".") !== FALSE) {
+					list ($etu, $taka) = explode(".", $headers[$excej]);
+					if ($taka == "") $taka = $etu;
+				}
+				else {
+					$taka = $headers[$excej];
+				}
 
-					if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
-						$taulunrivit[$taulu][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
-					}
+				if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
+					$taulunrivit[$taulu][$excei-1][] = trim($excelrivit[$excei][$excej]);
 				}
 			}
 		}
-	}
-	else {
 
-		$excei = 0;
-
-		while ($rivi = fgets($file)) {
-			// luetaan rivi tiedostosta..
-			$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
-
-			for ($excej = 0; $excej < count($rivi); $excej++) {
-
-				$taulunrivit[$taulut[$excej]][$excei][] = trim($rivi[$excej]);
-
-				// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
-				foreach ($taulunotsikot as $taulu => $joinit) {
-
-					if (strpos($headers[$excej], ".") !== FALSE) {
-						list ($etu, $taka) = explode(".", $headers[$excej]);
-						if ($taka == "") $taka = $etu;
-					}
-					else {
-						$taka = $headers[$excej];
-					}
-
-					if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
-						$taulunrivit[$taulu][$excei][] = trim($rivi[$excej]);
-					}
-				}
-			}
-
-			if ($cli) echo " Luetaan rivit: $excei\r";
-			$excei++;
-		}
-		fclose($file);
-		if ($cli) echo "\n";
+		// Tuhotaan as we go, ku näitä ei enää tarvita...
+		unset($excelrivit[$excei]);
 	}
 
 	// Korjataan spessujoini yhteensopivuus_tuote_lisatiedot/yhteensopivuus_tuote
@@ -407,7 +429,6 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 
 		// $trows sisältää kaikki taulun sarakkeet ja tyypit tietokannasta
 		// $taulunotsikot[$taulu] sisältää kaikki sarakkeet saadusta tiedostosta
-
 		foreach ($taulunotsikot[$taulu] as $key => $column) {
 			if ($column != '') {
 				if ($column == "TOIMINTO") {
@@ -415,7 +436,7 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 					$postoiminto = (string) array_search($column, $taulunotsikot[$taulu]);
 				}
 				else {
-					if (!isset($trows[$table_mysql.".".$column])) {
+					if (!isset($trows[$table_mysql.".".$column]) and $column != "AVK_TUNNUS") {
 						echo "<font class='error'>".t("Saraketta")." \"$column\" ".t("ei löydy")." $table_mysql-".t("taulusta")."!</font><br>";
 						$vikaa++;
 					}
@@ -485,7 +506,6 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 			}
 
 			echo "<font class='error'>".t("Virheitä löytyi. Ei voida jatkaa")."!<br></font>";
-
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -533,10 +553,10 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 			}
 
 			if ($eiyhtiota == "") {
-				$valinta   = " YHTIO = '$kukarow[yhtio]'";
+				$valinta   = " yhtio = '$kukarow[yhtio]'";
 			}
 			elseif ($eiyhtiota == "TRIP") {
-				$valinta   = " TUNNUS > 0 ";
+				$valinta   = " tunnus > 0 ";
 			}
 
 			// Rakennetaan rivikohtainen array
@@ -570,6 +590,8 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 				$indeksi = array_merge($indeksi, $indeksi_where);
 				$indeksi = array_unique($indeksi);
 			}
+
+			$avkmuuttuja = FALSE;
 
 			foreach ($indeksi as $j) {
 				if ($taulunotsikot[$taulu][$j] == "TUOTENO") {
@@ -775,6 +797,18 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 
 					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='$apu_ytunnus'";
 				}
+				elseif ($table_mysql == 'auto_vari_korvaavat') {
+
+					if ($taulunotsikot[$taulu][$j] == "AVK_TUNNUS") {
+						$valinta = " yhtio = '$kukarow[yhtio]' and tunnus = '".trim(pupesoft_cleanstring($rivi[$j]))."'";
+
+						$apu_sarakkeet = array("AVK_TUNNUS");
+						$avkmuuttuja = TRUE;
+					}
+					elseif (!$avkmuuttuja) {
+						$valinta .= " and ".$taulunotsikot[$taulu][$j]."='".trim(pupesoft_cleanstring($rivi[$j]))."'";
+					}
+				}
 				else {
 					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='".trim(pupesoft_cleanstring($rivi[$j]))."'";
 				}
@@ -784,6 +818,7 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 					$tila = 'ohita';
 				}
 			}
+
 			if (substr($taulu, 0, 11) == 'puun_alkio_') {
 				$valinta .= " and laji = '".substr($taulu, 11)."' ";
 			}
@@ -1209,7 +1244,10 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 								// Tarvitaan tarkista.inc failissa
 								$toimi_liitostunnus = $tpttrow["tunnus"];
 
-								$query .= ", liitostunnus='$tpttrow[tunnus]' ";
+								if ($rivi[$postoiminto] != 'POISTA') {
+									$query .= ", liitostunnus='$tpttrow[tunnus]' ";
+								}
+
 								$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 							}
 						}
@@ -1669,7 +1707,8 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 		else echo "\nPäivitettiin $lask riviä\n";
 	}
 }
-else {
+
+if (!$cli) {
 
 	$indx = array(
 		'asiakas',
@@ -1718,7 +1757,8 @@ else {
 		'kuka',
 		'extranet_kayttajan_lisatiedot',
 		'auto_vari',
-		'auto_vari_tuote'
+		'auto_vari_tuote',
+		'auto_vari_korvaavat'
 	);
 
 	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
@@ -1729,7 +1769,7 @@ else {
 
 	$sel = array_fill_keys(array($table), " selected") + array_fill_keys($indx, '');
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action=''>
 			<input type='hidden' name='tee' value='file'>
 			<table>
 			<tr>
@@ -1779,23 +1819,26 @@ else {
 					<option value='yhteensopivuus_tuote_lisatiedot' $sel[yhteensopivuus_tuote_lisatiedot]>".t("Yhteensopivuus tuotteet lisätiedot")."</option>
 					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
 					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>
-					<option value='extranet_kayttajan_lisatiedot' $sel[extranet_kayttajan_lisatiedot]>".t("Extranet-käyttäjän lisätietoja")."</option>";
+					<option value='extranet_kayttajan_lisatiedot' $sel[extranet_kayttajan_lisatiedot]>".t("Extranet-käyttäjän lisätietoja")."</option>
+					<option value='varaston_hyllypaikat' {$sel['varaston_hyllypaikat']}>".t("Varaston hyllypaikat")."</option>
+					<option value='toimitustavan_lahdot' {$sel['toimitustavan_lahdot']}>".t("Toimitustavan lähdöt")."</option>";
 
-			$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
-			$dynaamiset_avainsanat = '';
+	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
+	$dynaamiset_avainsanat = '';
 
-		if ($kukarow['yhtio'] == 'mast') {
-			echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
-			echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
+	if ($kukarow['yhtio'] == 'mast') {
+		echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
+		echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
+		echo "<option value='auto_vari_korvaavat' $sel[auto_vari_korvaavat]>".t("Autoväri-korvaavat")."</option>";
+	}
+
+	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
+		if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
+			$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
 		}
 
-			while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
-				if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
-					$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
-				}
-
-				echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
-			}
+		echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
+	}
 
 	echo "	</select></td></tr>";
 

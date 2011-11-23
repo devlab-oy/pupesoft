@@ -1,7 +1,5 @@
 <?php
 
-	$useslave = ($_REQUEST['tee'] == 'tallenna' or $_REQUEST['tee'] == 'uusiraportti') ? '' : 1;
-
 	if (isset($_REQUEST["tee"])) {
 		if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if (isset($_REQUEST["kaunisnimi"]) and $_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
@@ -19,6 +17,60 @@
 			echo "<font class='error'>".t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta.")."</font><br>";
 			exit;
 		}
+
+		$ala_tallenna = array(	"kysely",
+								"uusirappari",
+								"edkysely",
+								"rtee",
+								"mul_osasto",
+								"mul_try",
+								"mul_tme",
+								"toimittajaid",
+								"ytunnus",
+								"asiakasosasto",
+								"asiakasid",
+								"asiakasno",
+								"abcrajaus",
+								"abcrajaustapa",
+								"abcrajausluokka");
+
+		if ($valitut["TALLENNAPAIVAM"] == '') {
+			array_push($ala_tallenna, "ppa1", "kka1", "vva1", "ppl1", "kkl1", "vvl1", "ppa2", "kka2", "vva2", "ppl2", "kkl2", "vvl2", "ppa3", "kka3", "vva3", "ppl3", "kkl3", "vvl3", "ppa4", "kka4", "vva4", "ppl4", "kkl4", "vvl4");
+		}
+
+		list($kysely_kuka, $kysely_mika) = explode("#", $kysely);
+
+		$kysely_warning = '';
+		$rappari = '';
+
+		if ($tee == "tallenna" and $kysely_kuka == $kukarow["kuka"]) {
+			tallenna_muisti($kysely_mika, $ala_tallenna);
+			$tee = 'JATKA';
+			$rappari = $kysely_kuka;
+		}
+		elseif ($tee == 'tallenna' and $kysely_kuka != $kukarow['kuka']) {
+			$tee = 'JATKA';
+			$kysely_warning = 'yes';
+			$kysely = '';
+		}
+
+		if ($tee == "uusiraportti") {
+			tallenna_muisti($uusirappari, $ala_tallenna);
+			$kysely = "$kukarow[kuka]#$uusirappari";
+			$tee = 'JATKA';
+			$rappari = $kysely_kuka;
+		}
+
+		if ($tee == "lataavanha") {
+			hae_muisti($kysely_mika, $kysely_kuka);
+			$tee = 'JATKA';
+			$rappari = $kysely_kuka;
+		}
+
+		//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+		$useslave = 1;
+
+		require ("inc/connect.inc");
 
 		echo "<font class='head'>".t("Ostoraportti")."</font><hr>";
 
@@ -312,8 +364,8 @@
 				if (is_array($value)) {
 					foreach ($value as $a => $b) {
 						$muutparametrit .= $key."[".$a."]=".$b."!°!";
-					}
-				}
+			}
+			}
 				elseif ($key != "valitse_toimittaja" and $key != "valitse_asiakas")  {
 					$muutparametrit .= $key."=".$value."!°!";
 				}
@@ -322,11 +374,11 @@
 
 		if (isset($valitse_toimittaja)) {
 			$toimittaja = $ytunnus;
-		}
+			}
 
 		if (isset($valitse_asiakas)) {
 			$asiakasnro = $ytunnus;
-		}
+				}
 
 		if ($tee == 'RAPORTOI' and $asiakasnro != '') {
 			$ytunnus = $asiakasnro;
@@ -335,7 +387,7 @@
 
 			if ($ytunnus != '') {
 				$asiakasnro = $ytunnus;
-			}
+				}
 			else {
 				$tee 		= "";
 				$asiakasid 	= "";
@@ -350,7 +402,7 @@
 			if ($ytunnus != '') {
 				$toimittaja = $ytunnus;
 				$ytunnus = '';
-			}
+				}
 			else {
 				$tee 			= "";
 				$toimittajaid 	= "";
@@ -369,7 +421,7 @@
 		while ($luokka_row = mysql_fetch_assoc($luokka_res)) {
 			$ryhmanimet[] = $luokka_row['luokka'];
 			$ryhmaprossat[] = $luokka_row['osuusprosentti'];
-		}
+				}
 
 		ob_start();
 
@@ -415,16 +467,16 @@
 		echo "<table>";
 		echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='toimittaja' value='$toimittaja'> ";
 
-		if ($toimittajaid != '') {
-			$query = "	SELECT nimi
-						FROM toimi
+			if ($toimittajaid != '') {
+				$query = "	SELECT nimi
+							FROM toimi
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$toimittajaid'";
-			$sresult = pupe_query($query);
-			$trow1 = mysql_fetch_array($sresult);
+				$sresult = pupe_query($query);
+				$trow1 = mysql_fetch_array($sresult);
 
 			echo $trow1["nimi"];
-		}
+			}
 
 		echo "</td></tr>";
 
@@ -502,15 +554,15 @@
 		echo "</td></tr>
 				<tr><th>".t("Asiakas")."</th><td><input type='text' size='20' name='asiakasnro' value='$asiakasnro'> ";
 
-		if ($asiakasid != '') {
-			$query = "	SELECT nimi
-						FROM asiakas
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus='$asiakasid'";
-			$sresult = pupe_query($query);
-			$trow2 = mysql_fetch_array($sresult);
+			if ($asiakasid != '') {
+				$query = "	SELECT nimi
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' and tunnus='$asiakasid'";
+				$sresult = pupe_query($query);
+				$trow2 = mysql_fetch_array($sresult);
 
 			echo $trow2["nimi"];
-		}
+			}
 
 
 		echo "</td></tr>
@@ -574,13 +626,13 @@
 
 					if ($valitut["KAUSI$ryhma"] == "$ryhma##$i") {
 						$chk = 'selected';
-					}
+			}
 					echo "<option value='$ryhma##$i' $chk>$i</option>";
-				}
+			}
 
 				if ($valitut["KAUSI$ryhma"] == "$ryhma##104") {
 					$chk = 'selected';
-				}
+			}
 
 				echo "<option value='$ryhma##104' $chk>104</option>";
 				echo "</select> $ryhma<br/>";
@@ -1010,9 +1062,9 @@
 				$varastot_yhtiot = " yhtio in ($varastot_yhtiot) ";
 			}
 
-			$joinlisa 	= '';
+			$joinlisa = '';
 			$tyyppilisa = '';
-			$tyyppi 	= '';
+			$tyyppi = '';
 
 			if (table_exists("yhteensopivuus_rekisteri")) {
 
@@ -1066,12 +1118,12 @@
 						if ($vm3 != '') {
 							$vm3 = (int) $vm3;
 							$joinlisa2 .= $tyyppi == 'auto' ? " AND yhteensopivuus_$tyyppi.alkuvuosi >= '$vm3' " : " AND yhteensopivuus_$tyyppi.vm >= '$vm3' ";
-						}
+				}
 
 						if ($vm4 != '') {
 							$vm4 = (int) $vm4;
 							$joinlisa2 .= $tyyppi == 'auto' ? " AND yhteensopivuus_$tyyppi.loppuvuosi <= '$vm4' " : " AND yhteensopivuus_$tyyppi.vm <= '$vm4' ";
-						}
+			}
 
 						$joinlisa2 .= ") ";
 					}
@@ -1877,17 +1929,17 @@
 
 								if ($tyyppilisa != "") {
 									if ($sarake == 'M‰‰r‰') {
-										$query = "	SELECT count(*) kpl
-													FROM yhteensopivuus_tuote
-													JOIN yhteensopivuus_rekisteri ON (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio AND yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
-													$joinlisa
-													WHERE yhteensopivuus_tuote.yhtio = '$kukarow[yhtio]'
-													AND yhteensopivuus_tuote.tuoteno IN ($tuotteet)
-													AND yhteensopivuus_tuote.tyyppi IN ($tyyppilisa)";
-										$asresult = pupe_query($query);
-										$kasrow = mysql_fetch_array($asresult);
-										$rek_kpl_maara = round($kasrow['kpl'], 2);
-									}
+									$query = "	SELECT count(*) kpl
+												FROM yhteensopivuus_tuote
+												JOIN yhteensopivuus_rekisteri ON (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio AND yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
+												$joinlisa
+												WHERE yhteensopivuus_tuote.yhtio = '$kukarow[yhtio]'
+												AND yhteensopivuus_tuote.tuoteno IN ($tuotteet)
+												AND yhteensopivuus_tuote.tyyppi IN ($tyyppilisa)";
+									$asresult = pupe_query($query);
+									$kasrow = mysql_fetch_array($asresult);
+									$rek_kpl_maara = round($kasrow['kpl'], 2);
+								}
 
 									if ($sarake == 'M‰‰r‰2') {
 										$query = "	SELECT count(*) kpl
@@ -2188,11 +2240,11 @@
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
 		}
-		else {
+				else {
 			ob_end_flush();
-		}
+				}
 
 		require("inc/footer.inc");
-	}
+				}
 
 ?>

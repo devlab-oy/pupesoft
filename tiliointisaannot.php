@@ -546,7 +546,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi = 'K'
 					and kaytossa != 'E'
-					ORDER BY nimi";
+					ORDER BY koodi+0, koodi, nimi";
 		$result = pupe_query($query);
 
 		$ulos = "<select name = 'kustp'><option value = ' '>".t("Ei kustannuspaikkaa")."</option>";

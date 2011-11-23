@@ -1,5 +1,8 @@
 <?php
 
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
+
 require("../inc/parametrit.inc");
 
 echo "<br><font class='head'>".t("Tiliöintien tilit")."</font><hr><br>";

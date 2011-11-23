@@ -1,6 +1,6 @@
 <?php
 
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
 	if (isset($_POST['tiliote']) and $_POST['tiliote'] == '1') {
@@ -402,6 +402,10 @@
 					$salisa = " and lasku.valkoodi='$savalkoodi' ";
 				}
 
+                if (!isset($jarjestys_suunta) or $jarjestys_suunta != "desc") {
+                    $jarjestys_suunta = "asc";
+                }
+
 				$query = "	SELECT laskunro, tapvm, erpcm,
 							summa-pyoristys-saldo_maksettu summa,
 							summa_valuutassa-pyoristys_valuutassa-saldo_maksettu_valuutassa summa_valuutassa,
@@ -423,7 +427,7 @@
 							$lisa
 							$salisa
 							$havlisa
-							ORDER BY $jarjestys";
+							ORDER BY $jarjestys $jarjestys_suunta";
 				$result = pupe_query($query);
 
 				echo "<form action = '$PHP_SELF?ojarj=".$ojarj.$ulisa."' method = 'post'>
@@ -474,6 +478,8 @@
 
 				echo "<form action = '$PHP_SELF' method = 'post'>
 						<input type='hidden' name = 'tila' value='$tila'>
+						<input type='hidden' name = 'ojarj' value='$ojarj'>
+						<input type='hidden' name = 'jarjestys_suunta' value='$jarjestys_suunta'>
 						<input type='hidden' name = 'ytunnus' value = '$ytunnus'>
 						<input type='hidden' name = 'asiakasid' value = '$asiakasid'>
 						<input type='hidden' name = 'valintra' value = '$valintra'>
@@ -482,18 +488,20 @@
 						<input type='hidden' name = 'alatila' value = '$alatila'>
 						<input type='hidden' name = 'lopetus' value = '$lopetus'>";
 
+                $jarjestys_suunta = ($jarjestys_suunta == "asc") ? "desc" : "asc";
+
 				echo "<table>";
 				echo "<tr>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=0".$ulisa."&lopetus=$lopetus'>".t("Laskunro")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=1".$ulisa."&lopetus=$lopetus'>".t("Pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=2".$ulisa."&lopetus=$lopetus'>".t("Eräpäivä")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=3".$ulisa."&lopetus=$lopetus'>".t("Summa")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("summa")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6".$ulisa."&lopetus=$lopetus'>".t("Maksu")."<br>".t("pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=7".$ulisa."&lopetus=$lopetus'>".t("Ikä")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=8".$ulisa."&lopetus=$lopetus'>".t("Korko")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9".$ulisa."&lopetus=$lopetus'>".t("Korkolasku")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=0&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Laskunro")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=1&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=2&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Eräpäivä")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=3&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Summa")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("summa")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Maksu")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=7&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Ikä")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=8&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Korko")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&tila=$tila&alatila=$alatila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9&jarjestys_suunta=$jarjestys_suunta".$ulisa."&lopetus=$lopetus'>".t("Korkolasku")."<br>".t("pvm")."</a></th>";
 				echo "<th valign='top'>".t("Osasuoritukset")."</th>";
 
 				echo "<td class='back'></td></tr>";

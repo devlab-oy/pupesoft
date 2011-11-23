@@ -1,4 +1,5 @@
 <?php
+
 	require('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Keikan varastopaikat")."</font><hr>";

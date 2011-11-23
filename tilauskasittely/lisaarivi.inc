@@ -703,14 +703,14 @@
 					// hoidetaan pois problematiikka jos meillä on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
 					if ($orvot > 0) {
 						if ($myytavissa >= $orvot) {
-					 	// poistaan orpojen varaamat tuotteet tältä paikalta
-					 	$myytavissa = $myytavissa - $orvot;
-					 	$orvot = 0;
+					 		// poistaan orpojen varaamat tuotteet tältä paikalta
+					 		$myytavissa = $myytavissa - $orvot;
+					 		$orvot = 0;
 						}
 						elseif ($orvot > $myytavissa) {
-					 	// poistetaan niin paljon orpojen saldoa ku voidaan
-					 	$orvot = $orvot - $myytavissa;
-					 	$myytavissa = 0;
+					 		// poistetaan niin paljon orpojen saldoa ku voidaan
+					 		$orvot = $orvot - $myytavissa;
+					 		$myytavissa = 0;
 						}
 					}
 
@@ -764,6 +764,113 @@
 					}
 				}
 
+				if (!function_exists('chk_varaston_saldo')) {
+					function chk_varaston_saldo($arr, $kpl) {
+						/*
+						- Pitäiskö eka kattoa löytyykö kaikki joltain yhdeltä paikalta?
+						- Katotaan missä oletuspaikka, riittääkö oletuspaikan varaston saldo?
+						- Riittääkö jonkun toisen varaston saldo?
+						- Jos ei niin splitataan.
+						*/
+
+						$chk_yksi_paikka = false;
+
+						// Pitäiskö eka kattoa löytyykö kaikki joltain yhdeltä paikalta?
+						foreach ($arr as $indx => $chk_row) {
+
+							if ($chk_row['myytavissa'] >= $kpl) {
+								unset($arr[$indx]);
+								array_unshift($arr, $chk_row);
+								$chk_yksi_paikka = true;
+								break;
+							}
+						}
+
+						if (!$chk_yksi_paikka) {
+
+							$chk_oletus_var = '';
+
+							reset($arr);
+
+							// Katotaan missä oletuspaikka
+							$chk_oletus_var = $arr[0]['varasto'];
+
+							$chk_saldo = 0;
+							$checked_saldo = false;
+
+							// riittääkö oletuspaikan varaston saldo?
+							foreach ($arr as $indx => $chk_row) {
+
+								if ($chk_row['varasto'] == $chk_oletus_var) {
+									$chk_saldo += $chk_row['myytavissa'];
+
+									if ($chk_saldo >= $kpl) {
+										$checked_saldo = true;
+										break;
+									}
+								}
+							}
+
+							reset($arr);
+
+							if ($checked_saldo) {
+								foreach ($arr as $indx => $chk_row) {
+									if ($chk_row['varasto'] == $chk_oletus_var) {
+										unset($arr[$indx]);
+										array_unshift($arr, $chk_row);
+									}
+								}
+							}
+							else {
+
+								// Riittääkö jonkun toisen varaston saldo?
+								$chk_distinct_varasto = array();
+
+								// loopataan distinct varasto
+								foreach ($arr as $indx => $chk_row) {
+									if (!isset($chk_distinct_varasto[$chk_row['varasto']])) {
+										$chk_distinct_varasto[$chk_row['varasto']] = $chk_row['varasto'];
+									}
+								}
+
+								reset($arr);
+
+								unset($chk_distinct_varasto[$chk_oletus_var]);
+
+								foreach ($chk_distinct_varasto as $varasto) {
+
+									$varaston_saldo = 0;
+									$varasto_set = '';
+
+									foreach ($arr as $indx => $chk_row) {
+										if ($varasto == $chk_row['varasto']) {
+											$varaston_saldo += $chk_row['myytavissa'];
+
+											if ($varaston_saldo >= $kpl) {
+												$varasto_set = $chk_row['varasto'];
+												break;
+											}
+										}
+									}
+
+									if ($varasto_set != '') {
+										reset($arr);
+
+										foreach ($arr as $indx => $chk_row) {
+											if ($chk_row['varasto'] == $varasto_set) {
+												unset($arr[$indx]);
+												array_unshift($arr, $chk_row);
+											}
+										}
+									}
+								}
+							}
+						}
+
+						return $arr;
+					}
+				}
+
 				// sortataan varastopaikkojen saldot by ostajan maa
 				$oma_maa = array();
 				$muu_maa = array();
@@ -782,6 +889,14 @@
 				usort($oma_maa, "zzrowcmp");
 				// sortataan muiden maiden varastopaikat saldo järkkään
 				usort($muu_maa, "zzrowcmp");
+
+				if ($yhtiorow['varaston_splittaus'] == 'K') {
+					// sortataan ostajan maan varastopaikat saldo järkkään
+					$oma_maa = chk_varaston_saldo($oma_maa, $kpl);
+
+					// sortataan muiden maiden varastopaikat saldo järkkään
+					$muu_maa = chk_varaston_saldo($muu_maa, $kpl);
+				}
 
 				// yhdistetään arrayt
 				$zzrow = array_merge($oma_maa, $muu_maa);
@@ -1308,6 +1423,8 @@
 									$sopimuslisays = "";
 								}
 
+								$omalle_tilaukselle_lisa = in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
+
 								if (mysql_num_rows($lisatied_res) > 0) {
 									$lisatied_row = mysql_fetch_array($lisatied_res);
 
@@ -1318,6 +1435,7 @@
 												muutospvm			= now(),
 												muuttaja			= '$kukarow[kuka]',
 												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]'
+												{$omalle_tilaukselle_lisa}
 												$sopimuslisays
 												$tlisatied_lisa
 												WHERE yhtio			 = '$kukarow[yhtio]'
@@ -1343,6 +1461,7 @@
 												jarjestys			= '$jarjestys',
 												luontiaika			= now(),
 												laatija 			= '$kukarow[kuka]'
+												{$omalle_tilaukselle_lisa}
 												$sopimuslisays
 												$tlisatied_lisa";
 
@@ -1417,10 +1536,10 @@
 													FROM sarjanumeroseuranta
 													WHERE yhtio		= '$kukarow[yhtio]'
 													and tuoteno		= '$myy_tuoteno[$indeksi]'
-													and hyllyalue = '$myy_hyllyalue[$indeksi]'
-													and hyllynro = '$myy_hyllynro[$indeksi]'
-													and hyllytaso = '$myy_hyllytaso[$indeksi]'
-													and hyllyvali = '$myy_hyllyvali[$indeksi]'
+													and hyllyalue	= '$myy_hyllyalue[$indeksi]'
+													and hyllynro 	= '$myy_hyllynro[$indeksi]'
+													and hyllytaso 	= '$myy_hyllytaso[$indeksi]'
+													and hyllyvali 	= '$myy_hyllyvali[$indeksi]'
 													and sarjanumero = '$myy_era[$indeksi]'";
 										$lisa_res = pupe_query($query);
 										$lisa_row = mysql_fetch_array($lisa_res);
@@ -1445,10 +1564,10 @@
 												takuu_alku 		= '$lisa_row[takuu_alku]',
 												takuu_loppu		= '$lisa_row[takuu_loppu]',
 												parasta_ennen	= '$lisa_row[parasta_ennen]',
-												hyllyalue 	= '$myy_hyllyalue[$indeksi]',
-												hyllynro 	= '$myy_hyllynro[$indeksi]',
-												hyllytaso 	= '$myy_hyllytaso[$indeksi]',
-												hyllyvali 	= '$myy_hyllyvali[$indeksi]',
+												hyllyalue 		= '$myy_hyllyalue[$indeksi]',
+												hyllynro 		= '$myy_hyllynro[$indeksi]',
+												hyllytaso 		= '$myy_hyllytaso[$indeksi]',
+												hyllyvali 		= '$myy_hyllyvali[$indeksi]',
 												sarjanumero 	= '$myy_era[$indeksi]'";
 									$lisa_res = pupe_query($query);
 								}
@@ -1499,6 +1618,7 @@
 								$kommentti 			= "";
 								$tuotenimitys 		= "";
 								$tuotenimitys_force = "";
+								$omalle_tilaukselle = "";
 
 							} // Tällä rundilla myydyt
 						} // Jos tuoteperhettä löytyi riittävästi tai myytiin pelkää isää
@@ -1550,7 +1670,7 @@
 
 				$var 		 = "S";
 				$paikka 	 = substr($superpaikka, strpos($superpaikka,'#')+1);
-				$rivinumero = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
+				$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
 			}
 		}
 
@@ -1758,7 +1878,7 @@
 				for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 					$ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
 				}
-				
+
 				if ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") {
 					$alemaara = 99999999999;
 				}
@@ -2202,6 +2322,8 @@
 						and tilausrivitunnus = '$lisatty_tun'";
 			$lisatied_res = pupe_query($query);
 
+			$omalle_tilaukselle_lisa = in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
+
 			if (mysql_num_rows($lisatied_res) > 0) {
 				$lisatied_row = mysql_fetch_array($lisatied_res);
 
@@ -2211,6 +2333,7 @@
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							muutospvm			= now(),
 							muuttaja			= '$kukarow[kuka]'
+							{$omalle_tilaukselle_lisa}
 							$tlisatied_lisa
 							WHERE yhtio			 = '$kukarow[yhtio]'
 							and tilausrivitunnus = '$lisatty_tun'";
@@ -2233,6 +2356,7 @@
 							ei_nayteta			= '$puu_ein[$i]',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'
+							{$omalle_tilaukselle_lisa}
 							$tlisatied_lisa";
 
 				if ($trow["sarjanumeroseuranta"] == "S" and $kpl < 0) {
@@ -2362,6 +2486,7 @@
 			$kommentti 			= "";
 			$tuotenimitys 		= "";
 			$tuotenimitys_force = "";
+			$omalle_tilaukselle = "";
 			$rivinumero			= "";
 			$tilrivinumero		= "";
 		}

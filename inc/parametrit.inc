@@ -198,6 +198,7 @@ unset($liitetaanko_editilaus_laskulle_hakemisto);
 
 unset($siirrasuoritustilille);
 unset($ohjewiki_url);
+unset($synkronoi_kiellot);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();
@@ -366,7 +367,14 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 		$kukarow = mysql_fetch_assoc($result);
 
 		// Unohdetaan tallennettu state jos tullaan suoraan indexsvassista
-		if (isset($pupe_DataTables) and $pupe_DataTables != "" and isset($indexvas) and $indexvas == 1) {
+		if (isset($pupe_DataTables) and isset($indexvas) and $indexvas == 1) {
+
+			if (!is_array($pupe_DataTables)) {
+				$pupe_DataTables_cookie = array($pupe_DataTables);
+			}
+			else {
+				$pupe_DataTables_cookie = $pupe_DataTables;
+			}
 
 			// DataTables cookie name SpryMedia_DataTables_TAULUNID_SKRIPTIN-NIMI
 			$dtpalvelin = parse_url($palvelin, PHP_URL_PATH);
@@ -384,11 +392,18 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				$dtpalvelin .= "tyomaarays/";
 			}
 
-			if (basename($phpnimi) == "selaasopimuksia.php") {
+			if (basename($phpnimi) == "selaasopimuksia.php" or basename($phpnimi) == "asiakkaantilaukset.php") {
 				$dtpalvelin .= "raportit/";
 			}
 
-			$bool = setcookie("SpryMedia_DataTables_".$pupe_DataTables."_".basename($phpnimi), "", time()+43200, $dtpalvelin);
+			if (basename($phpnimi) == "luottotappiot.php" or basename($phpnimi) == "myyntilaskuhaku.php") {
+				$dtpalvelin .= "myyntires/";
+			}
+
+			foreach ($pupe_DataTables_cookie as $datatable) {
+				#error_log("SpryMedia_DataTables_".$datatable."_".basename($phpnimi)." ".(time()+43200)." ".$dtpalvelin);
+				$bool = setcookie("SpryMedia_DataTables_".$datatable."_".basename($phpnimi), "", time()+43200, $dtpalvelin);
+			}
 		}
 
 	 	// T‰nne p‰‰see aina!
@@ -525,7 +540,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo $css;
 				echo "</style>\n";
 
-				if (isset($pupe_DataTables) and $pupe_DataTables != "") {
+				if (isset($pupe_DataTables)) {
 					echo "<style type=\"text/css\" title=\"currentStyle\">\n";
 					require("DataTables/media/css/pupe_datatables.php");
 					echo "</style>\n";

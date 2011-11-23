@@ -8,7 +8,8 @@ $verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 $laskun_tyyppi 			= $xml->InvoiceDetails->InvoiceTypeCode;
 $laskun_numero 			= $xml->InvoiceDetails->InvoiceNumber;
 $laskun_ebid 			= "FINVOICEXML";
-$laskun_paiva			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
+$laskun_tapvm			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
+$laskun_lapvm			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
 $laskun_erapaiva		= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOptionDate;
 $laskun_kapvm 			= "";
 $laskun_kasumma 		= "";
@@ -88,7 +89,8 @@ if ($laskun_tyyppi == "INV02") {
 $tuotetiedot	= $xml->InvoiceRow;
 $i				= 0;
 $rtuoteno		= array();
-$ealvi		 	= array();
+$ealvi		 	= array("");
+$lisavat	 	= array("");
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
@@ -105,10 +107,10 @@ if (count($tuotetiedot) > 0) {
 			$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ArticleName);
 			$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount);
 
-			$xvati = (float) str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+			$xvati = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 
 			$rtuoteno[$i]["alv"] = $xvati;
-			$ealvi[] = $xvati;
+			$ealvi[$i] = $xvati;
 
 			$rtuoteno[$i]["ale"] = (float) str_replace(",", ".", $tuotetieto->RowDiscountPercent);
 			$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
@@ -143,12 +145,11 @@ if (count($tuotetiedot) > 0) {
 
 // Verotiedot
 $vattiedot	= $xml->InvoiceDetails->VatSpecificationDetails;
-$lisavat	= array();
 $i 			= 0;
 
 if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {
-		$lisavat[$i] = (float) str_replace(",", ".", $vattieto->VatRatePercent);
+		$lisavat[$i] = str_replace(",", ".", $vattieto->VatRatePercent);
 		$i++;
 	}
 }

@@ -641,7 +641,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'XKAIKKI' or $tee == 'W
 // Olemassaolevaa tiliöintiä muutetaan, joten yliviivataan rivi ja annetaan perustettavaksi
 if ($tee == 'P') {
 
-	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi
+	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi, liitos, liitostunnus
 				FROM tiliointi
 				WHERE tunnus = '$ptunnus'
 				AND yhtio = '$kukarow[yhtio]'
@@ -669,6 +669,8 @@ if ($tee == 'P') {
 	$tositenro			= $tiliointirow['tosite'];
 	$ok					= 1;
 	$alv_tili			= $yhtiorow["alv"];
+	$liitos 			= $tiliointirow['liitos'];
+	$liitostunnus		= $tiliointirow['liitostunnus'];
 
 	// Katotaan voisiko meillä olla tässä joku toinen ALV tili
 	// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
@@ -728,10 +730,13 @@ if ($tee == 'U') {
 		$laskurow = mysql_fetch_assoc($result);
 	}
 
-	$summa 		= str_replace ( ",", ".", $summa);
-	$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
-	$tositetila = $laskurow["tila"];
-	$tositeliit = $laskurow["liitostunnus"];
+	$summa 			= str_replace ( ",", ".", $summa);
+	$selausnimi 	= 'tili'; // Minka niminen mahdollinen popup on?
+	$tositetila 	= $laskurow["tila"];
+	$tositeliit 	= $laskurow["liitostunnus"];
+	$kustp_tark		= $kustp;
+	$kohde_tark		= $kohde;
+	$projekti_tark	= $projekti;
 
 	require "inc/tarkistatiliointi.inc";
 
@@ -888,6 +893,9 @@ if ($tee == 'U') {
 
 	if ($ok != 1) {
 		require "inc/teetiliointi.inc";
+
+		$liitos = '';
+		$liitostunnus = 0;
 	}
 }
 
@@ -969,7 +977,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<tr><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
+		echo "<tr><th>".t("Ytunnus")."</th><td>".tarkistahetu($trow["ytunnus"])."</td></tr>";
 		echo "<tr><th>".t("Nimi")."</th><td>$trow[nimi]</td></tr>";
 		if ($trow["nimitark"] != "") echo "<tr><th>".t("Nimitark")."</th><td>$trow[nimitark]</td></tr>";
 		echo "<tr><th>".t("Osoite")."</th><td>$trow[osoite]</td></tr>";
@@ -1164,7 +1172,7 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<tr><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 			echo "<table>";
-			echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
+			echo "<tr><th>".t("Ytunnus")."</th><td>".tarkistahetu($trow["ytunnus"])."</td></tr>";
 			echo "<tr><th>".t("Nimi")."</th><td>$trow[nimi]</td></tr>";
 			if ($trow["nimitark"] != "") echo "<tr><th>".t("Nimitark")."</th><td>$trow[nimitark]</td></tr>";
 			echo "<tr><th>".t("Osoite")."</th><td>$trow[osoite]</td></tr>";
@@ -1194,7 +1202,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<tr><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
+		echo "<tr><th>".t("Ytunnus")."</th><td>".tarkistahetu($trow["ytunnus"])."</td></tr>";
 		echo "<tr><th>".t("Nimi")."</th><td>$trow[nimi]</td></tr>";
 		if ($trow["nimitark"] != "") echo "<tr><th>".t("Nimitark")."</th><td>$trow[nimitark]</td></tr>";
 		echo "<tr><th>".t("Osoite")."</th><td>$trow[osoite]</td></tr>";

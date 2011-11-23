@@ -30,27 +30,58 @@ $lask			= 0;
 $postoiminto 	= 'X';
 $kielletty		= 0;
 $table_apu		= '';
+$taulunrivit	= array();
 
 if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 	$path_parts = pathinfo($_FILES['userfile']['name']);
-	$ext = $path_parts['extension'];
+	$ext = strtoupper($path_parts['extension']);
 
-	if (strtoupper($ext) != "TXT" and strtoupper($ext) != "CSV") {
-		die ("<font class='error'><br>".t("Ainoastaan .txt ja .csv tiedostot sallittuja")."!</font>");
+	if ($ext != "TXT" and $ext != "XLS" and $ext != "CSV") {
+		die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
 	}
 
 	if ($_FILES['userfile']['size'] == 0) {
-		die ("<font class='error'><br>".t("Tiedosto oli tyhjä")."!</font>");
+		die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
 	}
 
-	$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+	if ($ext == "XLS") {
+		require_once ('excel_reader/reader.php');
 
-	echo "<font class='message'>",t("Tutkaillaan mitä olet lähettänyt"),".<br></font>";
+		// ExcelFile
+		$data = new Spreadsheet_Excel_Reader();
+
+		// Set output Encoding.
+		$data->setOutputEncoding('CP1251');
+		$data->setRowColOffset(0);
+		$data->read($_FILES['userfile']['tmp_name']);
+	}
 
 	// luetaan eka rivi tiedostosta..
-	$rivi    = fgets($file);
-	$otsikot = explode("\t", strtoupper(trim($rivi)));
+	if ($ext == "XLS") {
+		$headers = array();
+
+		for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
+			$headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
+		}
+
+		for ($excej = (count($headers)-1); $excej > 0 ; $excej--) {
+			if ($headers[$excej] != "") {
+				break;
+			}
+			else {
+				unset($headers[$excej]);
+			}
+		}
+	}
+	else {
+		$file	 = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+
+		$rivi    = fgets($file);
+		$headers = explode("\t", strtoupper(trim($rivi)));
+	}
+
+	echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
 
 	$table_apu = $table;
 	$table = ($table == 'tuoteresepti') ? 'tuoteperhe' : $table;
@@ -84,11 +115,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			echo t("mitenkäs tälläsen taulun valitsit"),"!?!";
 			exit;
 	}
-	// $trows 		sisältää kaikki taulun sarakkeet tietokannasta
-	// $otsikot 	sisältää kaikki sarakkeet saadusta tiedostosta
+	// $trows 	sisältää kaikki taulun sarakkeet tietokannasta
+	// $headers sisältää kaikki sarakkeet saadusta tiedostosta
 
-	foreach ($otsikot as $column) {
+	foreach ($headers as $column) {
+
 		$column = strtoupper(trim($column));
+
 		if ($column != '') {
 			//laitetaan kaikki paitsi valintasarake talteen.
 			if ($column != "TOIMINTO") {
@@ -96,19 +129,23 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					echo "<br><font class='message'>",t("Saraketta")," \"<b>",strtoupper($column),"</b>\" ",t("ei löydy")," $table-taulusta!</font>";
 					$vikaa++;
 				}
+
 				// yhtio ja tunnus kenttiä ei saa koskaan muokata...
-				if (($column == 'YHTIO') or ($column == 'TUNNUS')) {
+				if ($column == 'YHTIO' or $column == 'TUNNUS') {
 					echo "<br><font class='message'>",t("YHTIO ja/tai TUNNUS sarakkeita ei saa muuttaa"),"!</font>";
 					$vikaa++;
 				}
+
 				if (in_array($column, $pakolliset)) {
 					$tarkea++;
 				}
 			}
+
 			if ($column == "TOIMINTO") {
-					//TOIMINTO sarakkeen positio tiedostossa
-					$postoiminto = (string) array_search($column, $otsikot);
+				//TOIMINTO sarakkeen positio tiedostossa
+				$postoiminto = (string) array_search($column, $headers);
 			}
+
 			if (in_array($column, $kielletyt)) {
 				// katotaan ettei kiellettyjä sarakkkeita muuteta
 				echo t("Sarake"),": $column ",t("on kielletty sarake"),"!<br>";
@@ -118,30 +155,68 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 	}
 
 	// oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
-	if (($vikaa != 0) or  ($tarkea < count($pakolliset)) or ($postoiminto == 'X')) {
+	if ($vikaa != 0 or $tarkea < count($pakolliset) or $postoiminto == 'X') {
 		// suljetaan avattu faili.. kilttiä!
 		fclose ($file);
 		// ja kuollaan pois
 		die("<br><br><font class='error'>".t("Virheitä löytyi! Ei voida jatkaa")."!<br></font>");
 	}
 
-	if ($kielletty>0) {
+	if ($kielletty > 0) {
 		echo "<br><font class='message'>",t("Kiellettyjä löytyi, ei voida jatkaa"),"...<br></font>";
 		exit;
 	}
 
-	echo "<br><font class='message'>",t("Tiedosto ok, aloitellaan päivitys"),"...<br></font>";
+	echo "<font class='message'>",t("Tiedosto ok, aloitellaan päivitys"),"...<br><br></font>";
 	flush();
 
-	// luetaan tiedosto loppuun...
-	$rivi = fgets($file);
+	// Luetaan tiedosto loppuun ja tehdään taulukohtainen array koko datasta
+	if ($ext == "XLS") {
+		for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
+			for ($excej = 0; $excej < count($headers); $excej++) {
+				$taulunrivit[$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
+			}
+		}
+	}
+	else {
 
-	while (!feof($file)) {
-		// luetaan rivi tiedostosta..
-		//poistetaan hipsut kauttaviivat ja spacet
-		$poista	 = array("'", "\\", " ");
-		$rivi	 = str_replace($poista, "", $rivi);
-		$rivi	 = explode("\t", trim($rivi));
+		$excei = 0;
+
+		while ($rivi = fgets($file)) {
+			// luetaan rivi tiedostosta..
+			$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
+
+			for ($excej = 0; $excej < count($rivi); $excej++) {
+				$taulunrivit[$excei][] = trim($rivi[$excej]);
+			}
+
+			$excei++;
+		}
+		fclose($file);
+	}
+
+	echo "<table>";
+	echo "<tr>";
+
+	foreach ($headers as $key => $column) {
+		echo "<th>$key => $column</th>";
+	}
+
+	echo "</tr>";
+
+	foreach ($taulunrivit as $rivi) {
+		echo "<tr>";
+
+		for ($eriviindex = 0; $eriviindex < count($rivi); $eriviindex++) {
+			echo "<td>$eriviindex => $rivi[$eriviindex]</td>";
+		}
+	}
+
+	echo "</table><br>";
+	#exit;
+
+	// luetaan tiedosto loppuun...
+	foreach ($taulunrivit as $rivinumero => $rivi) {
 
 		// näin käsitellään korvaavat taulu
 		if ($table == "korvaavat" or $table == "vastaavat") {
@@ -149,13 +224,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			$haku = '';
 			for ($j = 0; $j < count($rivi); $j++) {
 				//otetaan rivin kaikki tuotenumerot talteen
-				$haku .= "'$rivi[$j]',";
+				if ($headers[$j] == "TUOTENO" and $rivi[$j] != "") {
+					$haku .= "'$rivi[$j]',";
+				}
 			}
 			$haku = substr($haku, 0, -1);
 
+			if ($haku == "") continue;
+
 			$fquery = "	SELECT distinct id
 						FROM $table
-						WHERE tuoteno in ($haku) and yhtio = '{$kukarow['yhtio']}'";
+						WHERE tuoteno in ($haku)
+						and yhtio = '{$kukarow['yhtio']}'";
 			$hresult = pupe_query($fquery);
 
 			if (mysql_num_rows($hresult) == 0) {
@@ -166,13 +246,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				$frow =  mysql_fetch_array($fresult);
 
 				$id = $frow[0] + 1;
-				echo t("Ei vielä missään")," $id!<br>";
+				#echo t("Ei vielä missään")," $id!<br>";
 			}
 			elseif (mysql_num_rows($hresult) == 1) {
 				$frow =  mysql_fetch_array($hresult);
 				$id = $frow[0];
-
-				echo t("Löytyi")," $id!<br>";
+				#echo t("Löytyi")," $id!<br>";
 			}
 			else {
 				echo t("Joku tuotteista")," ($haku) ",t("on jo useassa ketjussa! Korjaa homma"),"!<br>";
@@ -184,6 +263,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					$alku 		= "INSERT into $table SET yhtio = '{$kukarow['yhtio']}'";
 					$loppu 		= ", id='$id'";
 					$toiminto 	= "LISAA";
+				}
+				elseif (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
+					$toiminto 	= "MUUTA";
 				}
 				elseif (strtoupper(trim($rivi[$postoiminto])) == 'POISTA') {
 					$alku 		= "DELETE from $table where yhtio = '{$kukarow['yhtio']}' ";
@@ -198,24 +280,46 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				}
 
 				for ($j = 0; $j < count($rivi); $j++) {
-					if ($otsikot[$j] != "TOIMINTO" and trim($rivi[$j]) != '') {
+					if ($headers[$j] == "TUOTENO" and trim($rivi[$j]) != '') {
+
+						$jarjestys = 0;
+
+						// Katotaan onko seuraava sarake järjestys
+						if ($headers[$j+1] == "JARJESTYS") {
+							$jarjestys = $taulunrivit[$rivinumero][$j+1];
+						}
+
 						//katotaan, että tuote löytyy
 						$tquery = "	SELECT tuoteno
 									FROM tuote
-									WHERE tuoteno='$rivi[$j]' and yhtio = '{$kukarow['yhtio']}'";
+									WHERE tuoteno = '$rivi[$j]'
+									and yhtio = '{$kukarow['yhtio']}'";
 						$tresult = pupe_query($tquery);
 
 						if (mysql_num_rows($tresult) > 0) {
 							//katotaan, onko tuote jo jossain ketjussa
 							$kquery = "	SELECT tuoteno
 										FROM $table
-										WHERE tuoteno='$rivi[$j]' and id = '$id' and yhtio = '{$kukarow['yhtio']}'";
+										WHERE tuoteno = '$rivi[$j]'
+										and id = '$id'
+										and yhtio = '{$kukarow['yhtio']}'";
 							$kresult = pupe_query($kquery);
 
-							if ((mysql_num_rows($kresult) == 0 and $toiminto != 'POISTA') or (mysql_num_rows($kresult) == 1 and $toiminto == 'POISTA')) {
+							if ((mysql_num_rows($kresult) == 0 and $toiminto == 'LISAA') or (mysql_num_rows($kresult) == 1 and $toiminto == 'POISTA')) {
 
-								if($toiminto != 'POISTA') {
-									$kysely = ", tuoteno='$rivi[$j]'";
+								if ($toiminto == 'LISAA') {
+									if ($jarjestys == 0) {
+										$kquery = "	SELECT max(jarjestys) jarjestys
+													FROM $table
+													WHERE yhtio = '{$kukarow['yhtio']}'
+													and id = '$id'";
+										$iresult = pupe_query($kquery);
+										$irow = mysql_fetch_assoc($iresult);
+
+										$jarjestys = (int) $irow["jarjestys"] + 1;
+									}
+
+									$kysely = ", tuoteno='$rivi[$j]', jarjestys='$jarjestys' ";
 								}
 								else {
 									$kysely = " and tuoteno='$rivi[$j]'";
@@ -224,12 +328,43 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 								$query = $alku.$kysely.$loppu;
 								$iresult = mysql_query($query) or pupe_error($query);
 
-								if($toiminto != 'POISTA') {
+								if ($toiminto == 'LISAA') {
 									echo t("Lisättiin ketjuun")," $id {$rivi[$j]}!<br>";
 								}
 								else {
 									echo t("Poistettiin ketjusta")," $id {$rivi[$j]}!<br>";
 								}
+							}
+							elseif ($toiminto == "MUUTA" and $jarjestys > 0) {
+								// Korjataan muut järjestykset ja tehdään tilaa päivitettävälle tuotteelle
+								$kquery = "	SELECT tunnus, if(jarjestys=0, 999, jarjestys) jarj
+											FROM $table
+											WHERE yhtio = '{$kukarow['yhtio']}'
+											and id = '$id'
+											and tuoteno != '$rivi[$j]'
+											and (jarjestys >= $jarjestys or jarjestys = 0)
+											ORDER BY jarj, tuoteno";
+								$iresult = pupe_query($kquery);
+
+								$siirtojarj = $jarjestys+1;
+
+								while ($irow = mysql_fetch_assoc($iresult)) {
+									$kquery = "	UPDATE $table
+												SET jarjestys = $siirtojarj
+												WHERE tunnus = '$irow[tunnus]'";
+									$updres = pupe_query($kquery);
+
+									$siirtojarj++;
+								}
+
+								$kquery = "	UPDATE $table
+											SET jarjestys = $jarjestys
+											WHERE tuoteno = '$rivi[$j]'
+											and id = '$id'
+											and yhtio = '{$kukarow['yhtio']}'";
+								$iresult = pupe_query($kquery);
+								
+								$lask++;
 							}
 							else {
 								echo t("Tuote")," {$rivi[$j]} ",t("on jo tässä ketjussa"),"!<br>";
@@ -253,10 +388,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 			// tuoteresepteissä tyyppi pitää olla R, tuoteperheissä P
 			$tyyppi = ($table_apu == 'tuoteresepti') ? 'R' : 'P';
 
-			for ($r = 0; $r < count($otsikot); $r++) {
+			for ($r = 0; $r < count($headers); $r++) {
 
 				// jos käsitellään isätuote-kenttään
-				if (strtoupper(trim($otsikot[$r])) == "ISATUOTENO") {
+				if (strtoupper(trim($headers[$r])) == "ISATUOTENO") {
 
 					$query = "	SELECT tunnus
 								FROM tuote
@@ -289,7 +424,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 					}
 				}
 
-				if (strtoupper(trim($otsikot[$r])) == "TUOTENO") {
+				if (strtoupper(trim($headers[$r])) == "TUOTENO") {
 					$query = "	SELECT tunnus
 								FROM tuote
 								WHERE yhtio = '{$kukarow['yhtio']}'
@@ -315,9 +450,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 							AND tyyppi = '$tyyppi'";
 				$result = pupe_query($query);
 
-				for ($r = 0; $r < count($otsikot); $r++) {
+				for ($r = 0; $r < count($headers); $r++) {
 
-					if (strtoupper(trim($otsikot[$r])) == "TUOTENO") {
+					if (strtoupper(trim($headers[$r])) == "TUOTENO") {
 						$query  = "	INSERT INTO tuoteperhe SET
 									yhtio = '{$kukarow['yhtio']}',
 									isatuoteno = '$isatuote',
@@ -330,11 +465,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 				}
 			}
 		}
+	}
 
-		$rivi = fgets($file);
-	} // end while eof
-
-	fclose($file);
 	echo t("Päivitettiin")," $lask ",t("riviä"),"!";
 }
 else {
@@ -342,7 +474,7 @@ else {
 			<br><br>
 			<table border='0'>
 			<tr>
-				<td>",t("Valitse tietokannan taulu"),":</td>
+				<th>",t("Valitse tietokannan taulu"),":</th>
 				<td><select name='table'>
 					<option value='korvaavat'>",t("Korvaavat"),"</option>
 					<option value='vastaavat'>",t("Vastaavat"),"</option>
@@ -353,7 +485,7 @@ else {
 
 			<input type='hidden' name='tee' value='file'>
 
-			<tr><td>",t("Valitse tiedosto"),":</td>
+			<tr><th>",t("Valitse tiedosto"),":</th>
 				<td><input name='userfile' type='file'></td>
 				<td class='back'><input type='submit' value='",t("Lähetä"),"'></td>
 			</tr>

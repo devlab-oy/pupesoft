@@ -21,14 +21,15 @@ if ($tila == 'K') {
 }
 
 if ($tila == 'K' and is_array($luottotappio)) {
-	//AND tiliointi.tapvm = lasku.tapvm
 
 	$laskunrot = implode(",", $luottotappio);
 
 	if ($laskunrot != "") {
+
+		// Haetaan kaikki tiliöinnit paitsi varasto, varastonmuutos ja alv (tiliointi.aputunnus = 0)
 		$query = "	SELECT lasku.*, tiliointi.ltunnus, tiliointi.tilino, tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
 					FROM lasku
-					JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = ''
+					JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = '' and tiliointi.aputunnus = 0
 					AND tiliointi.tilino NOT IN ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[alv]'))
 					WHERE lasku.yhtio		= '$kukarow[yhtio]'
 					AND lasku.mapvm			= '0000-00-00'
@@ -235,7 +236,7 @@ if ($tila == 'N') {
 
 if ($tila == "") {
 
-	pupe_DataTables($pupe_DataTables, 5, 6);
+	pupe_DataTables(array(array($pupe_DataTables, 5, 6)));
 
 	$lisa = "";
 	$erachk = "";
@@ -269,7 +270,7 @@ if ($tila == "") {
 	echo "</table>";
 	echo "</form><br>";
 
-	echo "<table class='display' id='$pupe_DataTables'>";
+	echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
 	echo "<thead>
 			<tr>
@@ -281,11 +282,11 @@ if ($tila == "") {
 			<th class='back'></th>
 			</tr>
 			<tr>
-			<td><input type='text' name='search_ytunnus'></td>
-			<td><input type='text' name='search_asiakas'></td>
-			<td><input type='text' name='search_summa'></td>
-			<td><input type='text' name='search_kpl'></td>
-			<td><input type='text' name='search_laskut'></td>
+			<td><input type='text' class='search_field' name='search_ytunnus'></td>
+			<td><input type='text' class='search_field' name='search_asiakas'></td>
+			<td><input type='text' class='search_field' name='search_summa'></td>
+			<td><input type='text' class='search_field' name='search_kpl'></td>
+			<td><input type='text' class='search_field' name='search_laskut'></td>
 			<td class='back'></td>
 			</tr>
 		</thead>";

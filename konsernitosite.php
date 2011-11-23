@@ -47,7 +47,7 @@
 						filename   = '$filename',
 						filesize   = '$filesize',
 						filetype   = '$filetype'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$liitostunnus = mysql_insert_id();
 			$fnimi = $liitostunnus;
 		}
@@ -101,19 +101,16 @@
 
 				$totsumma[$kukarow['yhtio']] += $isumma[$i];
 
-				// Onko t‰m‰ konsernitili
-				if (strlen($itili[$i]) != 5 and strlen($itili[$i]) != 0) {
-//					$ivirhe[$i] .= t('Tili ei ole konsernitili (Ne ovat 5 merkki‰ pitki‰)') . '<br>';
-//					$gok = 1;
-				}
-
-				$ulos		= "";
-				$virhe		= "";
-				$tili		= $itili[$i];
-				$summa		= $isumma[$i];
-				$selausnimi	= "itili[$i]"; // Minka niminen mahdollinen popup on?
-				$tositetila = "X";
-				$tositeliit = 0;
+				$ulos			= "";
+				$virhe			= "";
+				$tili			= $itili[$i];
+				$summa			= $isumma[$i];
+				$selausnimi		= "itili[$i]"; // Minka niminen mahdollinen popup on?
+				$tositetila 	= "X";
+				$tositeliit 	= 0;
+				$kustp_tark		= $ikustp[$i];
+				$kohde_tark		= $ikohde[$i];
+				$projekti_tark	= $iprojekti[$i];
 
 				require ("inc/tarkistatiliointi.inc");
 
@@ -158,7 +155,7 @@
 					tila = 'X',
 					laatija = '$kukarow[kuka]',
 					luontiaika = now()";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 		$tunnus = mysql_insert_id($link);
 		$turvatunnus = $tunnus;
 
@@ -168,7 +165,7 @@
 						liitostunnus = '$tunnus',
 						selite = '$selite $summa'
 						WHERE tunnus = '$fnimi'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 		}
 
 		$totsumma = 0;
@@ -206,14 +203,14 @@
 							tila = 'X',
 							laatija = '$kukarow[kuka]',
 							luontiaika = now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$tunnus = mysql_insert_id ($link);
 
 				if (!empty($fnimi)) {
 
 					// kopioidaan liitetiedosto toiselta rivilt‰
 					$query = "SELECT * from liitetiedostot where tunnus='$fnimi'";
-					$res = mysql_query($query) or pupe_error($query);
+					$res = pupe_query($query);
 					$liite = mysql_fetch_assoc($res);
 
 					// n‰m‰ arvot vaihdetaan ainoastaan
@@ -227,7 +224,7 @@
 					}
 
 					$ins = "INSERT into liitetiedostot set " . implode(', ', $cols);
-					mysql_query($ins) or pupe_error($ins);
+					pupe_query($ins);
 
 					$fnimi = '';
 				}
@@ -295,7 +292,7 @@
 						WHERE konserni = '$yhtiorow[konserni]'
 						AND trim(konserni) != ''
 						AND yhtio != '$kukarow[yhtio]'";
-			$yresult = mysql_query($query) or pupe_error($query);
+			$yresult = pupe_query($query);
 
 			if (mysql_num_rows($yresult) < 1) {
 				echo "<font class='error'>".t("Konsernissasi ei ole yht‰‰n yrityst‰. N‰in ollen et voi k‰ytt‰‰ t‰t‰ toimintoa")."</font>";
@@ -422,7 +419,7 @@
 									FROM tili
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tilino = '$itili[$i]'";
-						$vresult = mysql_query($query) or pupe_error($query);
+						$vresult = pupe_query($query);
 
 						if (mysql_num_rows($vresult) == 1) {
 							$vrow = mysql_fetch_array($vresult);
@@ -441,8 +438,8 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = 'K'
 							and kaytossa != 'E'
-							ORDER BY nimi";
-				$vresult = mysql_query($query) or pupe_error($query);
+							ORDER BY koodi+0, koodi, nimi";
+				$vresult = pupe_query($query);
 
 				echo "<td><select name='ikustp[$i]'>";
 				echo "<option value =' '>".t("Ei kustannuspaikkaa");
@@ -462,8 +459,8 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = 'O'
 							and kaytossa != 'E'
-							ORDER BY nimi";
-				$vresult = mysql_query($query) or pupe_error($query);
+							ORDER BY koodi+0, koodi, nimi";
+				$vresult = pupe_query($query);
 
 				echo "<select name='ikohde[$i]'>";
 				echo "<option value =' '>".t("Ei kohdetta");
@@ -483,8 +480,8 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = 'P'
 							and kaytossa != 'E'
-							ORDER BY nimi";
-				$vresult = mysql_query($query) or pupe_error($query);
+							ORDER BY koodi+0, koodi, nimi";
+				$vresult = pupe_query($query);
 
 				echo "<select name='iprojekti[$i]'>";
 				echo "<option value =' '>".t("Ei projektia");

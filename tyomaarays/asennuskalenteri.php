@@ -665,7 +665,10 @@
 									$ed_tunnukset["$b"][] = $vrow['tunnus'];
 								}
 							}
-							natsort($varaukset[$b]);
+							
+							if (is_array($varaukset[$b])) {
+								natsort($varaukset[$b]);
+							}
 						}
 
 						$ed_tunnukset[] = $vrow['tunnus'];

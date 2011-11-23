@@ -7,9 +7,6 @@
 
 	require("inc/parametrit.inc");
 
-	//Ja t‰ss‰ laitetaan ne takas
-	$sqlhaku = $sqlapu;
-
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
 			readfile("/tmp/".$tmpfilenimi);
@@ -92,6 +89,11 @@
 		}
 
 		if ($rtee == "AJA" and is_array($kentat)) {
+
+			//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+			$useslave = 1;
+
+			require ("inc/connect.inc");
 
 			$where   = "";
 			$selecti = "";

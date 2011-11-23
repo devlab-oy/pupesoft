@@ -180,30 +180,53 @@ if ($tee == 'VIIVA') {
 	// 041215
 	// 00008
 
-	if (substr($nimi,0,1) != '2' or strlen($nimi) != 54) {
-		echo "<font class='error'>".t("Emme osaa kuin viivakoodi-versio kakkosta! Syöttämäsi tieto ei ole sitä!")."</font><br><br>";
-		$tee = "";
-	}
-	else {
+	if (strlen($nimi) == 54 and ( substr($nimi,0,1) == '2' or substr($nimi,0,1) == '4' or substr($nimi,0,1) == '5') ) {
+		$versio = substr($nimi,0,1);
 		$tee2	= "";
-		$tilino = substr($nimi,1,14);
-		$summa  = substr($nimi,15,8) / 100;
-		$viite  = ltrim(substr($nimi,23,20),"0"); // etunollat pois
-		$erv    = substr($nimi,43,2);
-		$erk    = substr($nimi,45,2);
-		$erp    = substr($nimi,47,2);
+		
+		if( $versio == '2' ){
+			$tilino = substr($nimi,1,14);
+			$summa  = substr($nimi,15,8) / 100;
+			$viite  = ltrim(substr($nimi,23,20),"0"); // etunollat pois
+			$erv    = substr($nimi,43,2);
+			$erk    = substr($nimi,45,2);
+			$erp    = substr($nimi,47,2);
+		}
+		elseif( $versio == '4' ){
+			$tilino	= substr($nimi,1,16);
+			$summa	= substr($nimi,17,8) / 100;
+			$viite 	= ltrim(substr($nimi,28,20),"0"); // etunollat pois
+			$erv 	= substr($nimi,48,2);
+			$erk 	= substr($nimi,50,2);
+			$erp 	= substr($nimi,52,2);
+		}
+		elseif( $versio == '5' ){
+			$tilino	= substr($nimi,1,16);
+			$summa	= substr($nimi,17,8) / 100;
+			$viite 	= "RF".substr($nimi,25,2).ltrim(substr($nimi,27,21),"0"); // Tarkistenumeron jälkeen tulevat täytenollat pois
+			$erv 	= substr($nimi,48,2);
+			$erk 	= substr($nimi,50,2);
+			$erp 	= substr($nimi,52,2);
+		}
 
 		//Toistaiseksi osataan vaan tarkistaa suomalaisten pankkitilien oikeellisuutta
 		if (strtoupper($yhtiorow['maa']) == 'FI') {
-			$pankkitili = $tilino;
-			require("inc/pankkitilinoikeellisuus.php");
-			$tilino = $pankkitili;
+			if($versio=='2'){
+				$pankkitili = $tilino;
+				require("inc/pankkitilinoikeellisuus.php");
+				$tilino = $pankkitili;
+				$hakuehto = "tilinumero";
+			}
+			else{
+				$hakuehto = "ultilno";
+				$tilino = tarkista_iban("FI".$tilino);
+			}
 		}
 
 		$query = "	SELECT tunnus
 					FROM toimi
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tilinumero = '$tilino'";
+					and $hakuehto = '$tilino'";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -211,11 +234,19 @@ if ($tee == 'VIIVA') {
 			$tee = "";
 		}
 		else {
-			$trow		 	= mysql_fetch_assoc($result);
+			$trow = mysql_fetch_assoc($result);
+
+			// Ei näytetä henkilötunnusta
+			$trow["ytunnus_clean"] = tarkistahetu($trow["ytunnus"]);
+
 			$toimittajaid 	= $trow["tunnus"];
 			$tee 			= "P";
 			$tee2 			= "V"; // Meillä on eroja virheentarkastuksissa, jos tiedot tuli viivakoodista
 		}
+	}
+	else {
+		echo "<font class='error'>".t("Virheellinen viivakoodi!")."</font><br><br>";
+		$tee = "";
 	}
 }
 
@@ -288,7 +319,10 @@ if ($tee == 'I') {
 			exit;
 		}
 
-		$trow = mysql_fetch_assoc ($result);
+		$trow = mysql_fetch_assoc($result);
+
+		// Ei näytetä henkilötunnusta
+		$trow["ytunnus_clean"] = tarkistahetu($trow["ytunnus"]);
 
 		if (isset($toitilinumero) and (strtoupper($trow['maa'])) == 'FI') {
 			$pankkitili = $toitilinumero;
@@ -558,7 +592,7 @@ if ($tee == 'I') {
 	}
 
  	// Käydään tiliöinnit läpi
-	for ($i=1; $i<$maara; $i++) {
+	for ($i = 1; $i < $maara; $i++) {
  		// Käsitelläänkö rivi??
 		if (strlen($itili[$i]) > 0) {
 			$turvasumma 	= $summa;
@@ -570,6 +604,9 @@ if ($tee == 'I') {
 			$ulos			= ""; // Mahdollinen popup tyhjennetaan
 			$tositetila 	= "U";
 			$tositeliit		= $trow["tunnus"];
+			$kustp_tark		= $ikustp[$i];
+			$kohde_tark		= $ikohde[$i];
+			$projekti_tark	= $iprojekti[$i];
 
 			require "inc/tarkistatiliointi.inc";
 
@@ -613,7 +650,10 @@ if ($tee == 'I') {
 			exit;
 		}
 
-		$trow = mysql_fetch_assoc ($result);
+		$trow = mysql_fetch_assoc($result);
+
+		// Ei näytetä henkilötunnusta
+		$trow["ytunnus_clean"] = tarkistahetu($trow["ytunnus"]);
 	}
 
 	if (strlen($trow['ytunnus']) == 0) {
@@ -845,6 +885,9 @@ if ($tee == 'P' or $tee == 'E') {
 
 		$trow = mysql_fetch_assoc($result);
 
+		// Ei näytetä henkilötunnusta
+		$trow["ytunnus_clean"] = tarkistahetu($trow["ytunnus"]);
+
 		// Oletusarvot toimittajalta, jos ekaaa kertaa täällä
 		if ($tee == 'P') {
 			$valkoodi 			= $trow['oletus_valkoodi'];
@@ -881,7 +924,7 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<table><tr><td valign='top' style='padding: 0px;'>";
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
-		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus])</td></tr>";
+		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus_clean])</td></tr>";
 		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maa]-$trow[postino] $trow[postitp], $trow[maa] $fakta</td></tr>";
 		echo "<tr><td><a href='yllapito.php?toim=toimi&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara//iframe=$iframe//skannattu_lasku=$skannattu_lasku//tultiin=$tultiin'>".t("Muuta toimittajan tietoja")."</a></td></tr>";
 		echo "</table>";
@@ -1385,7 +1428,7 @@ if ($tee == 'P' or $tee == 'E') {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = 'K'
 						and kaytossa != 'E'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$vresult = pupe_query($query);
 
 			echo "<td valign='top'>";
@@ -1411,7 +1454,7 @@ if ($tee == 'P' or $tee == 'E') {
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = 'O'
 						and kaytossa != 'E'
-						ORDER BY nimi";
+						ORDER BY koodi+0, koodi, nimi";
 			$vresult = pupe_query($query);
 
 			if (mysql_num_rows($vresult) > 0) {
@@ -1436,7 +1479,7 @@ if ($tee == 'P' or $tee == 'E') {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tyyppi = 'P'
 							and kaytossa != 'E'
-							ORDER BY nimi";
+							ORDER BY koodi+0, koodi, nimi";
 				$vresult = pupe_query($query);
 
 				echo "<select name='iprojekti[$i]'>";
@@ -1571,7 +1614,7 @@ if ($tee == 'I') {
 	$tositenro=0;
 
 	if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
-		$query = "LOCK TABLE tiliointi WRITE, lasku WRITE, sanakirja WRITE, liitetiedostot WRITE";
+		$query = "LOCK TABLE tiliointi WRITE, lasku WRITE, sanakirja WRITE, liitetiedostot WRITE, tili READ";
 		$result = pupe_query($query);
 
 		$alaraja = 41000000;
@@ -2110,11 +2153,11 @@ if ($tee == 'I') {
 	if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 		$query = "UNLOCK TABLES";
 		$result = pupe_query($query);
-		echo "<font class='message'>".t("Lasku perustettiin asiakkalle")." $trow[nimi]<br>";
+		echo "<font class='message'>".t("Lasku perustettiin toimittajalle")." $trow[nimi]<br>";
 		echo t("Summa")." $yleissumma $valkoodi = $omasumma $yhtiorow[valkoodi]".t('Tositenro on')." $tositenro<br></font><hr>";
 	}
 	else {
-		echo "<font class='message'>".t("Lasku perustettiin asiakkalle")." $trow[nimi]<br>";
+		echo "<font class='message'>".t("Lasku perustettiin toimittajalle")." $trow[nimi]<br>";
 		echo t("Summa")." $yleissumma $valkoodi = $omasumma $yhtiorow[valkoodi]<br></font><hr>";
 	}
 

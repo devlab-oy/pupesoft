@@ -17,9 +17,11 @@
 	if (!isset($kaale))			$kaale = "";
 	if (!isset($nimihaku))		$nimihaku = "";
 	if (!isset($eipankkiin))	$eipankkiin = "";
+	if (!isset($valuu))			$valuu = "";
+	if (!isset($erapvm))		$erapvm = "";
+	if (!isset($tee))			$tee = "";
 
 	echo "<font class='head'>".t("Laskujen maksatus")."</font><hr>";
-
 
 	// Katsotaan montakop‰iv‰‰ halutaan automaattisesti k‰ytt‰‰ kassa-alea
 	$oletusmaksupaiva_kasittely = "if(kapvm >= curdate() and kapvm < erpcm, kapvm, if(erpcm >= curdate(), erpcm, curdate()))";
@@ -117,7 +119,9 @@
 			$alatila = '';
 		}
 
-		$query = "	SELECT valuu.kurssi, round($maksettava * valuu.kurssi,2) summa, maksuaika, olmapvm, tilinumero, maa, kapvm, erpcm,
+		$query = "	SELECT valuu.kurssi, round($maksettava * valuu.kurssi,2) summa,
+					$maksettava summa_valuutassa,
+					maksuaika, olmapvm, tilinumero, maa, kapvm, erpcm,
 					ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1, valkoodi
 					FROM lasku
 					JOIN valuu ON (valuu.yhtio = lasku.yhtio and valuu.nimi = lasku.valkoodi)
@@ -194,41 +198,31 @@
 
 			$veloitusrow = mysql_fetch_assoc($result);
 
-			// Suoritetaan p‰itt‰in (vain kotivaluutassa)
-			if ($trow['valkoodi'] == $yhtiorow['valkoodi']) {
+			if (abs($veloitusrow['summa'] + $trow['summa_valuutassa']) < 0.01) {
 
-				if ($veloitusrow['summa'] + $trow['summa'] < 0.00) {
-					echo "<font class='error'>".t("Hyvityslaskua vastaavaa m‰‰r‰‰ veloituksia ei ole valittuna.")."<br>".t("Valitse samalle asiakkaalle lis‰‰ veloituksia, jos haluat valita t‰m‰n hyvityslaskun maksatukseen")."</font><br><br>";
-					$tee = 'S';
+				// Ei ole valittu mit‰ tehd‰‰n
+				if (!isset($valinta) or $valinta == '') {
+					echo "<font class='message'>".t("Hyvityslasku ja veloituslasku(t) n‰ytt‰v‰t menev‰n p‰itt‰in")."<br>".t("Haluatko, ett‰ ne suoritetaan heti ja j‰tet‰‰n l‰hett‰m‰tt‰ pankkiin")."?</font><br><br>";
+					echo "<form action = 'maksa.php' method='post'>
+					<input type='hidden' name = 'tee' value='G'>
+					<input type='hidden' name = 'valuu' value='$valuu'>
+					<input type='hidden' name = 'erapvm' value='$erapvm'>
+					<input type='hidden' name = 'kaikki' value='$kaikki'>
+					<input type='hidden' name = 'tapa' value='$tapa'>
+					<input type='hidden' name = 'tunnus' value='$tunnus'>
+					<input type='hidden' name = 'kaale' value='$kaale'>
+					<input type='hidden' name = 'poikkeus' value='$poikkeus'>
+					<input type='radio'  name = 'valinta' value='K' checked> ".t("Kyll‰")."
+					<input type='radio'  name = 'valinta' value='E'> ".t("Ei")."
+					<input type='submit' name = 'valitse' value='".t("Valitse")."'>";
+
+					require ("inc/footer.inc");
+					exit;
 				}
 
-				// Vain jos valuuttaa on yhtiˆn omaa rahaa
-				if (abs($veloitusrow['summa'] + $trow['summa']) < 0.01) {
-
-					// Ei ole valittu mit‰ tehd‰‰n
-					if ($valinta == '') {
-						echo "<font class='message'>".t("Hyvityslasku ja veloituslasku(t) n‰ytt‰v‰t menev‰n p‰itt‰in")."<br>".t("Haluatko, ett‰ ne suoritetaan heti ja j‰tet‰‰n l‰hett‰m‰tt‰ pankkiin")."?</font><br><br>";
-						echo "<form action = 'maksa.php' method='post'>
-						<input type='hidden' name = 'tee' value='G'>
-						<input type='hidden' name = 'valuu' value='$valuu'>
-						<input type='hidden' name = 'erapvm' value='$erapvm'>
-						<input type='hidden' name = 'kaikki' value='$kaikki'>
-						<input type='hidden' name = 'tapa' value='$tapa'>
-						<input type='hidden' name = 'tunnus' value='$tunnus'>
-						<input type='hidden' name = 'kaale' value='$kaale'>
-						<input type='hidden' name = 'poikkeus' value='$poikkeus'>
-						<input type='radio'  name = 'valinta' value='K' checked> ".t("Kyll‰")."
-						<input type='radio'  name = 'valinta' value='E'> ".t("Ei")."
-						<input type='submit' name = 'valitse' value='".t("Valitse")."'>";
-
-						require ("inc/footer.inc");
-						exit;
-					}
-
-					if ($valinta == 'E') {
-						echo "<font class='error'>".t("Valitut veloitukset ja hyvitykset menev‰t tasan p‰itt‰in (summa 0,-). Pankkiin ei kuitenkaan voi l‰hett‰‰ nolla-summaisia maksuja. Jos haluat l‰hett‰‰ n‰m‰ p‰itt‰in menev‰t veloitukset ja hyvitykset pankkiin, pit‰‰ sinun valita lis‰‰ veloituksia. Yhteissumman pit‰‰ olla suurempi kuin 0.")."</font><br><br>";
-						$tee = 'S';
-					}
+				if (isset($valinta) and $valinta == 'E') {
+					echo "<font class='error'>".t("Valitut veloitukset ja hyvitykset menev‰t tasan p‰itt‰in (summa 0,-). Pankkiin ei kuitenkaan voi l‰hett‰‰ nolla-summaisia maksuja. Jos haluat l‰hett‰‰ n‰m‰ p‰itt‰in menev‰t veloitukset ja hyvitykset pankkiin, pit‰‰ sinun valita lis‰‰ veloituksia. Yhteissumman pit‰‰ olla suurempi kuin 0.")."</font><br><br>";
+					$tee = 'S';
 				}
 			}
 			elseif ($veloitusrow['summa'] + $trow['summa'] < 0.01) {
@@ -238,7 +232,7 @@
 		}
 	}
 
-	// Suoritetaan p‰itt‰in (vain kotivaluutassa)
+	// Suoritetaan p‰itt‰in
 	if ($tee == 'G') {
 
 		$query = "	UPDATE lasku set
@@ -250,18 +244,20 @@
 					olmapvm 		= '$trow[olmapvm]'
 					WHERE tunnus = '$tunnus'
 					and yhtio 	 = '$kukarow[yhtio]'";
-		$result = pupe_query($query);
-
-		$kurssi = 1;
+		$xresult = pupe_query($query);
 
 		if (strtoupper($trow['maa']) == 'FI') {
 			$query = "	SELECT ytunnus, nimi, postitp,
-						round(summa * $kurssi, 2) 'maksusumma',
-						round(kasumma * $kurssi, 2) 'maksukasumma',
-						round(summa * vienti_kurssi, 2) 'vietysumma',
+						summa   'maksusumma',
+						kasumma 'maksukasumma',
+						summa   'maksusumma_valuutassa',
+						kasumma 'maksukasumma_valuutassa',
+						round(summa * vienti_kurssi, 2)   'vietysumma',
 						round(kasumma * vienti_kurssi, 2) 'vietykasumma',
+						summa   'vietysumma_valuutassa',
+						kasumma 'kasumma_valuutassa',
 						concat(summa, ' ', valkoodi) 'summa',
-						ebid, tunnus, alatila, vienti_kurssi, tapvm
+						ebid, tunnus, alatila, vienti_kurssi, tapvm, valkoodi
 						FROM lasku
 						WHERE yhtio 	= '$kukarow[yhtio]'
 						and tila 		= 'P'
@@ -269,16 +265,21 @@
 						and maksaja 	= '$kukarow[kuka]'
 						and maksu_tili 	= '$tili'
 						and maa 		= 'FI'
-						and tilinumero 	= '$trow[tilinumero]'";
+						and tilinumero 	= '$trow[tilinumero]'
+						ORDER BY tapvm desc";
 		}
 		else {
 			$query = "	SELECT ytunnus, nimi, postitp,
-						round(summa * $kurssi, 2) 'maksusumma',
-						round(kasumma * $kurssi, 2) 'maksukasumma',
-						round(summa * vienti_kurssi, 2) 'vietysumma',
+						summa   'maksusumma',
+						kasumma 'maksukasumma',
+						summa   'maksusumma_valuutassa',
+						kasumma 'maksukasumma_valuutassa',
+						round(summa * vienti_kurssi, 2)   'vietysumma',
 						round(kasumma * vienti_kurssi, 2) 'vietykasumma',
+						summa   'vietysumma_valuutassa',
+						kasumma 'kasumma_valuutassa',
 						concat(summa, ' ', valkoodi) 'summa',
-						ebid, tunnus, alatila, vienti_kurssi, tapvm
+						ebid, tunnus, alatila, vienti_kurssi, tapvm, valkoodi
 						FROM lasku
 						WHERE yhtio 	= '$kukarow[yhtio]'
 						and tila 		= 'P'
@@ -293,7 +294,8 @@
 						and pankki2 	= '$trow[pankki2]'
 						and pankki3 	= '$trow[pankki3]'
 						and pankki4 	= '$trow[pankki4]'
-						and sisviesti1 	= '$trow[sisviesti1]'";
+						and sisviesti1 	= '$trow[sisviesti1]'
+						ORDER BY tapvm desc";
 		}
 
 		$result = pupe_query($query);
@@ -304,13 +306,63 @@
 			exit;
 		}
 
+		// Otetaan max tapvm ja valuuttajutut talteen
+		$max_tapvm_laskurow = mysql_fetch_assoc($result);
+
+		if ($max_tapvm_laskurow['valkoodi'] != $yhtiorow["valkoodi"]) {
+			$kurssi = 0;
+
+			// Haetaan kurssi
+			$query = "	SELECT kurssi
+						FROM valuu_historia
+						WHERE kotivaluutta = '$yhtiorow[valkoodi]'
+						and valuutta = '$max_tapvm_laskurow[valkoodi]'
+						AND kurssipvm >= '$max_tapvm_laskurow[tapvm]'
+						AND kurssi > 0
+						ORDER BY kurssipvm
+						LIMIT 1";
+			$valuures = pupe_query($query);
+
+			if (mysql_num_rows($valuures) == 1) {
+				$valuurow = mysql_fetch_assoc($valuures);
+				$kurssi = $valuurow["kurssi"];
+			}
+
+			// Haetaan kurssi
+			$query = "	SELECT kurssi
+						FROM valuu
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND nimi = '$max_tapvm_laskurow[valkoodi]'
+						AND kurssi > 0";
+			$valuures = pupe_query($query);
+
+			if (mysql_num_rows($valuures) == 1) {
+				$valuurow = mysql_fetch_assoc($valuures);
+				$kurssi = $valuurow["kurssi"];
+			}
+
+			if ($kurssi == 0) {
+				echo "<font class='error'>$query".t("Ei lˆydetty sopivaa kurssia!")."</font><br>";
+				require ("inc/footer.inc");
+				exit;
+			}
+		}
+		else {
+			$kurssi = 1;
+		}
+
+		mysql_data_seek($result, 0);
+
 		while ($laskurow = mysql_fetch_assoc($result)) {
-			// Oletustiliˆinnit
-			$summa =  $trow['summa'];
-			$selite = "Suoritettu p‰itt‰in $laskurow[nimi]";
+
+			$laskurow["maksusumma"]   = round($laskurow["maksusumma"] * $kurssi, 2);
+			$laskurow["maksukasumma"] = round($laskurow["maksukasumma"] * $kurssi, 2);
 
 			// Kassa-ale
 			if ($laskurow['alatila'] != 'K') $laskurow['maksukasumma'] = 0;
+
+			// Luodaan tiliˆinnit
+			$selite = "Suoritettu p‰itt‰in $laskurow[nimi]";
 
 			$query = "	SELECT tilino, kustp, kohde, projekti
 						FROM tiliointi
@@ -326,38 +378,40 @@
 
 				// Ostovelat
 				$query = "	INSERT into tiliointi set
-							yhtio 		= '$kukarow[yhtio]',
-							ltunnus 	= '$laskurow[tunnus]',
-							tilino 		= '$ostovelkarow[tilino]',
-							kustp		= '$ostovelkarow[kustp]',
-							kohde		= '$ostovelkarow[kohde]',
-							projekti	= '$ostovelkarow[projekti]',
-							tapvm 		= '$trow[olmapvm]',
-							summa 		= '$laskurow[vietysumma]',
-							vero 		= 0,
-							selite 		= '$selite',
-							lukko 		= '',
-							laatija 	= '$kukarow[kuka]',
-							laadittu 	= now()";
+							yhtio 				= '$kukarow[yhtio]',
+							ltunnus 			= '$laskurow[tunnus]',
+							tilino 				= '$ostovelkarow[tilino]',
+							kustp				= '$ostovelkarow[kustp]',
+							kohde				= '$ostovelkarow[kohde]',
+							projekti			= '$ostovelkarow[projekti]',
+							tapvm 				= '$trow[olmapvm]',
+							summa 				= '$laskurow[vietysumma]',
+							summa_valuutassa 	= '$laskurow[vietysumma_valuutassa]',
+							vero 				= 0,
+							selite 				= '$selite',
+							lukko 				= '',
+							laatija 			= '$kukarow[kuka]',
+							laadittu 			= now()";
 				$xresult = pupe_query($query);
 
 				list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["selvittelytili"]);
 
 				// Rahatili = selvittely
 				$query = "	INSERT into tiliointi set
-							yhtio 		= '$kukarow[yhtio]',
-							ltunnus 	= '$laskurow[tunnus]',
-							tilino 		= '$yhtiorow[selvittelytili]',
-							kustp    	= '{$kustp_ins}',
-							kohde	 	= '{$kohde_ins}',
-							projekti 	= '{$projekti_ins}',
-							tapvm 		= '$trow[olmapvm]',
-							summa 		= -1 * ($laskurow[maksusumma] - $laskurow[maksukasumma]),
-							vero 		= 0,
-							selite 		= '$selite',
-							lukko 		= '',
-							laatija		= '$kukarow[kuka]',
-							laadittu	= now()";
+							yhtio 				= '$kukarow[yhtio]',
+							ltunnus 			= '$laskurow[tunnus]',
+							tilino 				= '$yhtiorow[selvittelytili]',
+							kustp    			= '{$kustp_ins}',
+							kohde	 			= '{$kohde_ins}',
+							projekti 			= '{$projekti_ins}',
+							tapvm 				= '$trow[olmapvm]',
+							summa 				= -1 * ($laskurow[maksusumma] - $laskurow[maksukasumma]),
+							summa_valuutassa 	= -1 * ($laskurow[maksusumma_valuutassa] - $laskurow[maksukasumma_valuutassa]),
+							vero 				= 0,
+							selite 				= '$selite',
+							lukko 				= '',
+							laatija				= '$kukarow[kuka]',
+							laadittu			= now()";
 				$xresult = pupe_query($query);
 
 				if ($laskurow['maksukasumma'] != 0) {
@@ -366,7 +420,7 @@
 
 					$query = "	SELECT *
 								FROM tiliointi
-								WHERE ltunnus 	= '$tunnus'
+								WHERE ltunnus 	= '$laskurow[tunnus]'
 								and yhtio   	= '$kukarow[yhtio]'
 								and tapvm   	= '$laskurow[tapvm]'
 								and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
@@ -376,68 +430,139 @@
 					while ($tiliointirow = mysql_fetch_assoc($yresult)) {
 						// Kuinka paljon on t‰m‰n viennin osuus
 						$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma'] * $laskurow['maksukasumma'],2);
+						$summa_valuutassa = round($tiliointirow['summa_valuutassa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma_valuutassa'] * $laskurow['maksukasumma_valuutassa'],2);
 
 						if ($tiliointirow['vero'] != 0) { // Netotetaan alvi
 							$alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)),2);
+							$alv_valuutassa = round($summa_valuutassa - $summa_valuutassa / (1 + ($tiliointirow['vero'] / 100)),2);
+
 							$summa -= $alv;
+							$summa_valuutassa -= $alv_valuutassa;
 						}
 
 						$totkasumma += $summa + $alv;
+						$totkasumma_valuutassa += $summa_valuutassa + $alv_valuutassa;
 
 						// Kassa-ale
 						$query = "	INSERT into tiliointi set
-									yhtio 		= '$kukarow[yhtio]',
-									ltunnus 	= '$laskurow[tunnus]',
-									tilino 		= '$yhtiorow[kassaale]',
-									kustp 		= '$tiliointirow[kustp]',
-									kohde 		= '$tiliointirow[kohde]',
-									projekti 	= '$tiliointirow[projekti]',
-									tapvm 		= '$trow[olmapvm]',
-									summa 		= $summa * -1,
-									vero 		= '$tiliointirow[vero]',
-									selite 		= '$selite',
-									lukko 		= '',
-									laatija 	= '$kukarow[kuka]',
-									laadittu	= now()";
+									yhtio 				= '$kukarow[yhtio]',
+									ltunnus 			= '$laskurow[tunnus]',
+									tilino 				= '$yhtiorow[kassaale]',
+									kustp 				= '$tiliointirow[kustp]',
+									kohde 				= '$tiliointirow[kohde]',
+									projekti 			= '$tiliointirow[projekti]',
+									tapvm 				= '$trow[olmapvm]',
+									summa 				= $summa * -1,
+									summa_valuutassa 	= $summa_valuutassa * -1,
+									vero 				= '$tiliointirow[vero]',
+									selite 				= '$selite',
+									lukko 				= '',
+									laatija 			= '$kukarow[kuka]',
+									laadittu			= now()";
 						$xresult = pupe_query($query);
 						$isa = mysql_insert_id ($link); // N‰in lˆyd‰mme t‰h‰n liittyv‰t alvit....
 
 						if ($tiliointirow['vero'] != 0) {
 							// Kassa-alen alv
 							$query = "	INSERT into tiliointi set
-										yhtio 		= '$kukarow[yhtio]',
-										ltunnus 	= '$laskurow[tunnus]',
-										tilino 		= '$yhtiorow[alv]',
-										kustp 		= 0,
-										kohde 		= 0,
-										projekti 	= 0,
-										tapvm 		= '$trow[olmapvm]',
-										summa 		= $alv * -1,
-										vero 		= 0,
-										selite 		= '$selite',
-										lukko 		= '1',
-										laatija 	= '$kukarow[kuka]',
-										laadittu 	= now(),
-										aputunnus 	= $isa";
+										yhtio 				= '$kukarow[yhtio]',
+										ltunnus 			= '$laskurow[tunnus]',
+										tilino 				= '$yhtiorow[alv]',
+										kustp 				= 0,
+										kohde 				= 0,
+										projekti 			= 0,
+										tapvm 				= '$trow[olmapvm]',
+										summa 				= $alv * -1,
+										summa_valuutassa 	= $alv_valuutassa * -1,
+										vero 				= 0,
+										selite 				= '$selite',
+										lukko 				= '1',
+										laatija 			= '$kukarow[kuka]',
+										laadittu 			= now(),
+										aputunnus 			= $isa";
 							$xresult = pupe_query($query);
 						}
 					}
 
-					//Hoidetaan mahdolliset pyˆristykset
-					if ($totkasumma != $laskurow["maksukasumma"]) {
-						$query = "	UPDATE tiliointi
-									SET summa = summa - $totkasumma + $laskurow[maksukasumma]
+					// Hoidetaan mahdolliset pyˆristykset
+					$heitto = round($totkasumma - $laskurow["maksukasumma"], 2);
+					$heitto_valuutassa = round($totkasumma_valuutassa - $laskurow["maksukasumma_valuutassa"], 2);
+
+					if (abs($heitto) >= 0.01) {
+						$query = "	UPDATE tiliointi SET
+									summa = summa + $heitto,
+									summa_valuutassa = summa_valuutassa + $heitto_valuutassa
 									WHERE tunnus = '$isa'
-									and yhtio	 = '$kukarow[yhtio]'";
+									and yhtio 	 = '$kukarow[yhtio]'";
 						$xresult = pupe_query($query);
 					}
 				}
 
+				if ($laskurow['valkoodi'] != $yhtiorow["valkoodi"]) {
+
+					$vesumma = round($laskurow["maksusumma"] - $laskurow["maksukasumma"] - $laskurow['vietysumma'], 2);
+
+					if (abs(round($vesumma, 2)) > 0) {
+
+						$totvesumma = 0;
+
+						$query = "	SELECT *
+									FROM tiliointi
+									WHERE ltunnus	= '$laskurow[tunnus]'
+									and yhtio 		= '$kukarow[yhtio]'
+									and tapvm 		= '$laskurow[tapvm]'
+									and tilino not in ('$yhtiorow[kassaale]', '$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+									and korjattu 	= ''";
+						$yresult = pupe_query($query);
+
+						while ($tiliointirow = mysql_fetch_assoc($yresult)) {
+							// Kuinka paljon on t‰m‰n viennin osuus
+							$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma'] * $vesumma, 2);
+
+							if (round($summa, 2) != 0) {
+								// Valuuttaero
+								$query = "	INSERT into tiliointi set
+											yhtio 		= '$kukarow[yhtio]',
+											ltunnus 	= '$laskurow[tunnus]',
+											tilino 		= '$yhtiorow[valuuttaero]',
+											kustp 		= '$tiliointirow[kustp]',
+											kohde 		= '$tiliointirow[kohde]',
+											projekti 	= '$tiliointirow[projekti]',
+											tapvm 		= '$trow[olmapvm]',
+											summa 		= $summa,
+											vero 		= 0,
+											selite 		= '$selite',
+											lukko 		= '',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+								$xresult = pupe_query($query);
+								$isa = mysql_insert_id ($link);
+
+								$totvesumma += $summa;
+							}
+						}
+
+						// Hoidetaan mahdolliset pyˆristykset
+						if ($totvesumma != $vesumma) {
+							echo "<font class='message'>".t("Joudun pyˆrist‰m‰‰n valuuttaeroa")."</font><br>";
+
+							$query = "	UPDATE tiliointi
+										SET summa = summa - $totvesumma + $vesumma
+										WHERE tunnus = '$isa' and yhtio='$kukarow[yhtio]'";
+							$xresult = pupe_query($query);
+						}
+					}
+				}
+
 				$query = "	UPDATE lasku set
-							tila 		 = 'Y',
-							mapvm 		 = '$trow[olmapvm]',
-							maksu_kurssi = $kurssi
-							WHERE tunnus = '$laskurow[tunnus]'";
+							maksaja 		= '$kukarow[kuka]',
+							maksuaika 		= now(),
+							maksu_kurssi 	= '$kurssi',
+							maksu_tili 		= '$tili',
+							tila 			= 'Y',
+							olmapvm 		= '$trow[olmapvm]'
+							WHERE tunnus = '$laskurow[tunnus]'
+							and yhtio 	 = '$kukarow[yhtio]'";
 				$xresult = pupe_query($query);
 
 			}
@@ -446,8 +571,8 @@
 			}
 		}
 
-		$tee = 'S';
 		echo t("Laskut merkitty suoritetuksi!")."<br><br>";
+		$tee = 'S';
 	}
 
 	// Poimitaan lasku
@@ -501,7 +626,7 @@
 			echo "<font class='error'>".t('Lasku katosi tai se ehdittiin juuri siirt‰‰ pankkiin')."</font><br>";
 		}
 		else {
-			$trow = mysql_fetch_assoc ($result);
+			$trow = mysql_fetch_assoc($result);
 
 			// Hyvityslasku --> vastaava m‰‰r‰ rahaa on oltava veloituspuolella
 			if ($trow['usumma'] > 0) {
@@ -931,6 +1056,9 @@
 			echo "<th valign='top'>".t("Ebid")."</th>";
 			echo "<th valign='top'>".t("Maksatus")."</th></tr>";
 
+			$summa = 0;
+			$valsumma = array();
+
 			while ($trow=mysql_fetch_assoc ($result)) {
 		        echo "<tr class='aktiivi'>";
 
@@ -987,13 +1115,11 @@
 
 				$summa += $trow["maksettava_ysumma"];
 
+				if (!isset($valsumma[$trow["valkoodi"]])) $valsumma[$trow["valkoodi"]] = $trow["maksettava_summa"];
+				else $valsumma[$trow["valkoodi"]] += $trow["maksettava_summa"];
+
 				if (strtoupper($trow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
 					echo "$trow[summa] $trow[valkoodi]";
-
-					$valsumma[$trow["valkoodi"]] += $trow["maksettava_summa"];
-				}
-				else {
-					$valsumma[$trow["valkoodi"]] += $trow["maksettava_summa"];
 				}
 
 				echo "</td>";
@@ -1026,12 +1152,20 @@
 				// tehd‰‰n lasku linkki
 				echo "<td nowrap valign='top'>";
 				$lasku_urlit = ebid($trow['tunnus'], true);
+
 				if (count($lasku_urlit) == 0) {
 					echo t("Paperilasku");
 				}
-				foreach ($lasku_urlit as $lasku_url) {
-					echo "<a href='$lasku_url' target='Attachment'>",t("N‰yt‰ liite"),"</a><br>";
+
+				if (is_array($lasku_urlit)) {
+					foreach ($lasku_urlit as $lasku_url) {
+						echo "<a href='$lasku_url' target='Attachment'>",t("N‰yt‰ liite"),"</a><br>";
+					}
 				}
+				else {
+					echo $lasku_urlit;
+				}
+
 				echo "</td>";
 
 				echo "<td valign='top'>
@@ -1112,12 +1246,12 @@
 		}
 		else {
 
-			pupe_DataTables($pupe_DataTables, 7, 11);
+			pupe_DataTables(array(array($pupe_DataTables, 7, 11)));
 
 			// N‰ytet‰‰n valitut laskut
 			echo "<br><font class='message'>".t("Maksuvalmiit laskut")."</font><hr>";
 
-			echo "<table class='display' id='$pupe_DataTables'>";
+			echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
 			echo "<thead>
 					<tr>
@@ -1134,13 +1268,13 @@
 					<th class='back'></th>
 					</tr>
 					<tr>
-					<td><input type='text' name='search_nimi'></td>
-					<td><input type='text' name='search_tilinumero'></td>
-					<td><input type='text' name='search_erpcm'></td>
-					<td><input type='text' name='search_kassaale'></td>
-					<td><input type='text' name='search_summa'></td>
-					<td><input type='text' name='search_laskunro'></td>
-					<td><input type='text' name='search_viite'></td>
+					<td><input type='text' class='search_field' name='search_nimi'></td>
+					<td><input type='text' class='search_field' name='search_tilinumero'></td>
+					<td><input type='text' class='search_field' name='search_erpcm'></td>
+					<td><input type='text' class='search_field' name='search_kassaale'></td>
+					<td><input type='text' class='search_field' name='search_summa'></td>
+					<td><input type='text' class='search_field' name='search_laskunro'></td>
+					<td><input type='text' class='search_field' name='search_viite'></td>
 					<td></td>
 					<td></td>
 					<td></td>

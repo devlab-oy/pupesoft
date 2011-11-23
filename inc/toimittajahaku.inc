@@ -9,12 +9,13 @@
 
 		if (!isset($kausi)) $kausi = '';
 		if (strlen($kausi) == 10) $laji = 'o';
+		if (!isset($aikalisa)) $aikalisa ='';
 
 		if ($laji == 'O') {
 			$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, postitp
 						FROM toimi
 						WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 			 	echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
@@ -22,10 +23,44 @@
 		 	$trow = mysql_fetch_array ($result);
 
 			echo "<table>";
-			echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Postitp")."</th></tr>";
-			echo "<tr><td>$trow[ytunnus]</td><td>$trow[nimi]</td><td>$trow[postitp]</td></tr>";
+			echo "<tr>";
+			echo "<th>".t("Ytunnus")."</th>";
+			echo "<th>".t("Nimi")."</th>";
+			echo "<th>".t("Postitp")."</th>";
+			echo "</tr>";
+			echo "<tr>";
+			echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
+			echo "<td>$trow[nimi]</td>";
+			echo "<td>$trow[postitp]</td>";
+			echo "</tr>";
 			echo "</table>";
-			
+
+			echo "<br>";
+			echo "<table>";
+			echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
+					<tr>
+					<input type='hidden' name='tunnus' value='$tunnus'>
+					<input type='hidden' name='tee' value='A'>";
+
+			$sel = array();
+			$sel[$laji]	= " selected";
+
+			echo "<th>".t("Laskuntyyppi")."</th>";
+			echo "<td><select name = 'laji'>
+					<option $sel[K] value = 'K'>".t("Kaikki")."
+					<option $sel[H] value = 'H'>".t("Hyväksyttävänä")."
+					<option $sel[M] value = 'M'>".t("Maksamatta")."
+					<option $sel[Q] value = 'Q'>".t("Odottaa suoritusta")."
+					<option $sel[Y] value = 'Y'>".t("Maksettu")."
+					<option $sel[O] value = 'O'>".t("Ostoraportti")."
+					</select></td>
+					<td class='back'><input type='Submit' value='".t("Näytä")."'></td>
+					</tr></form>";
+			echo "</table>";
+
+			echo "<br>";
+
+
 			$lisa='';
 
 			if (!isset($kausi)) $kausi='';
@@ -62,7 +97,7 @@
 					  	WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$tunnus' $lisa
 					  	and tila in ('H', 'M', 'P', 'Q', 'Y')
 					  	GROUP BY 1";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 			 	echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
@@ -113,24 +148,71 @@
 				$toimiliilisa = " and liitostunnus = '$tunnus' ";
 			}
 
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			if (mysql_num_rows($result) == 0) {
 			 	echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
 			}
 			else {
-				
 				echo "<table>";
-				echo "<tr><th>".t("Ytunnus")."</th><th>".t("Nimi")."</th><th>".t("Postitp")."</th></tr>";
-												
+				echo "<tr>";
+				echo "<th>".t("Ytunnus")."</th>";
+				echo "<th>".t("Nimi")."</th>";
+				echo "<th>".t("Postitp")."</th>";
+				echo "</tr>";
+
 		 		while ($trow = mysql_fetch_array($result)) {
-					echo "<tr><td>$trow[ytunnus]</td><td>$trow[nimi]</td><td>$trow[postitp]</td></tr>";
+					echo "<tr>";
+					echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
+					echo "<td>$trow[nimi]</td><td>$trow[postitp]</td>";
+					echo "</tr>";
 				}
-				
+
 				echo "</table>";
 				echo "<br>";
+				echo "<table>";
+				echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
+						<tr>
+						<input type='hidden' name='tunnus' value='$tunnus'>
+						<input type='hidden' name='tee' value='A'>";
 
-				echo "<a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO'>Näytä kaikki laskut</a><br><br>";
+				$sel = array();
+				$sel[$laji]	= " selected";
+
+				echo "<th>".t("Laskuntyyppi")."</th>";
+				echo "<td><select name = 'laji'>
+						<option $sel[K] value = 'K'>".t("Kaikki")."
+						<option $sel[H] value = 'H'>".t("Hyväksyttävänä")."
+						<option $sel[M] value = 'M'>".t("Maksamatta")."
+						<option $sel[Q] value = 'Q'>".t("Odottaa suoritusta")."
+						<option $sel[Y] value = 'Y'>".t("Maksettu")."
+						<option $sel[O] value = 'O'>".t("Ostoraportti")."
+						</select></td>
+						</tr>";
+
+				echo "<tr>";
+				echo "<th>".t("Alkupäivämäärä")."</th>";
+				echo "<td>";
+				echo "<input type='text' name='pp1' value='$pp1' size='4'>";
+				echo "<input type='text' name='kk1' value='$kk1' size='4'>";
+				echo "<input type='text' name='vv1' value='$vv1' size='4'>";
+				echo "</td>";
+				echo "</tr>";
+				echo "<tr>";
+				echo "<th>".t("Loppupäivämäärä")."</th>";
+				echo "<td>";
+				echo "<input type='text' name='pp2' value='$pp2' size='4'>";
+				echo "<input type='text' name='kk2' value='$kk2' size='4'>";
+				echo "<input type='text' name='vv2' value='$vv2' size='4'>";
+				echo "</td>";
+				echo "<td class='back'><input type='Submit' value='".t("Näytä")."'></td>";
+				echo "</tr>";
+				echo "</form>";
+				echo "</table>";
+
+				echo "<br>";
+
+				echo "<a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO'>".t("Näytä kaikki laskut")."</a><br><br>";
 
 				$lisa = '';
 
@@ -145,6 +227,22 @@
 
 				$alku += 0;
 
+				if (@checkdate($kk1, $pp1, $vv1)) {
+					$aikalisa = " AND lasku.tapvm >='$vv1-$kk1-$pp1' ";
+					$limit = "NO";
+				}
+				elseif ($kk1 != '' or $pp1 != '' or $vv1 != '') {
+					echo "<p><font class='error'>".t("Alkupäivämäärä virheellinen!")."</font></p>";
+				}
+
+                if (@checkdate($kk2, $pp2, $vv2)) {
+					$aikalisa .= " AND lasku.tapvm <='$vv2-$kk2-$pp2' ";
+					$limit = "NO";
+				}
+				elseif ($kk2 != '' or $pp2 != '' or $vv2 != '') {
+					echo "<p><font class='error'>".t("Loppupäivämäärä virheellinen!")."</font></p>";
+				}
+
 				if ($limit != "NO") {
 					$limlis = " LIMIT $alku, 50 ";
 				}
@@ -157,47 +255,20 @@
 						  	WHERE yhtio = '$kukarow[yhtio]'
 						  	$toimiliilisa
 							$lisa
+							$aikalisa
 						  	and tila in ('H', 'M', 'P', 'Q', 'Y')
 						  	ORDER BY tapvm desc
 							$limlis";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$seraavako = mysql_num_rows($result);
 
 				if (mysql_num_rows($result) == 0) {
 				 	echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
 				}
 
-				$footerCallBack = ",
-					\"fnFooterCallback\": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
-						var summat = new Array();
-						var valuutat = new Array();
-						var valuutta = '';
+				pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
 
-						for (var i=iStart; i<iEnd; i++) {
-							valuutta = aaData[aiDisplay[i]][2];
-							valuutat[valuutta] = valuutta;
-
-							if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
-							summat[valuutta] += aaData[aiDisplay[i]][1]*1;
-						}
-						
-						// Tyhjennetään kaikki summat
-						$('td[name=yhteensa]').each(
-							function() {
-								$( this ).html('');
-							}
-						);
-
-						// Ekotetaan vain ne valuutat jotka löytyy
-						for (valuutta in valuutat) {
-							if (typeof summat[valuutta] == 'undefined') summat[valuutta] = 0;
-							$('#yhteensa_'+valuutta).html(summat[valuutta].toFixed(2));
-						}
-					}";
-
-				pupe_DataTables($pupe_DataTables, 8, 8, $footerCallBack);
-
-				echo "<table class='display' id='$pupe_DataTables'>";
+				echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
 				echo "<thead>";
 				echo "<tr>
@@ -211,14 +282,14 @@
 						<th>".t("Tila/Vienti")."</th>
 						</tr>
 						<tr>
-						<td><input type='text' name='search_tapvm'></td>
-						<td><input type='text' name='search_summa'></td>
-						<td><input type='text' name='search_valuutta'></td>
-						<td><input type='text' name='search_laskunro'></td>
-						<td><input type='text' name='search_viite'></td>
-						<td><input type='text' name='search_keikka'></td>
-						<td><input type='text' name='search_ebid'></td>
-						<td><input type='text' name='search_tila'></td>
+						<td><input type='text' class='search_field' name='search_tapvm'></td>
+						<td><input type='text' class='search_field' name='search_summa'></td>
+						<td><input type='text' class='search_field' name='search_valuutta'></td>
+						<td><input type='text' class='search_field' name='search_laskunro'></td>
+						<td><input type='text' class='search_field' name='search_viite'></td>
+						<td><input type='text' class='search_field' name='search_keikka'></td>
+						<td><input type='text' class='search_field' name='search_ebid'></td>
+						<td><input type='text' class='search_field' name='search_tila'></td>
 					</tr>";
 
 				echo "</thead>";
@@ -253,7 +324,7 @@
 									AND keikka.vanhatunnus = 0
 									WHERE lasku.yhtio = '$kukarow[yhtio]'
 									AND lasku.vanhatunnus = '$trow[tunnus]'";
-						$keikka_res = mysql_query($query) or pupe_error($query);
+						$keikka_res = pupe_query($query);
 
 						while ($keikka_row = mysql_fetch_array($keikka_res)) {
 							echo "<a href='tilauskasittely/selaa_tilauksia.php?toim=KEIKKA&tee=tilaus&tunnus=$keikka_row[tunnus]'>".$keikka_row['laskunro']."</a><br>";
@@ -344,33 +415,34 @@
 					WHERE toimi.yhtio='$kukarow[yhtio]' $lisat
 					GROUP BY toimi.tunnus
 					ORDER BY selaus";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
 		}
+
 		if (mysql_num_rows($result) > 40) {
 			echo "<b>".t("Haulla löytyi liikaa toimittajia. Tarkenna hakua")."</b><br>";
 			$tee = '';
 		}
 		else {
 			echo "<table><tr>";
+			echo "<th>" . t("Ytunnus")."</th>";
+			echo "<th>" . t("Nimi")."</th>";
+			echo "<th>" . t("Postitp")."</th>";
+			echo "<th>" . t("Avoimet")."</th>";
+			echo "<th>" . t("Valitse")."</th><th></th></tr>";
 
-			for ($i = 1; $i < mysql_num_fields($result); $i++) {
-				echo "<th>" . t(mysql_field_name($result,$i))."</th>";
-			}
-
-			echo "<th>".t("valitse")."</th><th></th></tr>";
-
-			while ($trow = mysql_fetch_array ($result)) {
+			while ($trow = mysql_fetch_array($result)) {
 				echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
 						<tr>
 						<input type='hidden' name='tunnus' value='$trow[tunnus]'>
 						<input type='hidden' name='tee' value='A'>";
 
-				for ($i=1; $i<mysql_num_fields($result); $i++) {
-					echo "<td>$trow[$i]</td>";
-				}
+				echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
+				echo "<td>$trow[nimi]</td>";
+				echo "<td>$trow[postitp]</td>";
+				echo "<td>$trow[avoimet]</td>";
 
 				echo "<td><select name = 'laji'>
 						<option value = 'K'>".t("Kaikki")."

@@ -650,6 +650,8 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 			$thispage->writeString($kala, 4, "Supplier", $boldi);
 			$thispage->writeString($kala, 5, "Port of delivery", $boldi);
 			$thispage->writeString($kala, 6, "Destination(country)", $boldi);
+			$thispage->writeString($kala, 7, "Reference", $boldi);
+			$thispage->writeString($kala, 8, "Customer order number", $boldi);
 
 			$kala++;
 		}
@@ -708,6 +710,8 @@ if (!function_exists('rivi_kerayslista')) {
 			$thispage->writeString($kala, 0, $row["tuoteno"]);
 			$thispage->writeString($kala, 1, $row["nimitys"]);
 			$thispage->writeString($kala, 2, $row["eankoodi"]);
+			$thispage->writeString($kala, 7, $laskurow["viesti"]);
+            $thispage->writeString($kala, 8, $laskurow["asiakkaan_tilausnumero"]);
 
 			if ($row["var"] == "" or  $row["var"] == "H") {
 				$thispage->write($kala, 3, $row["tilkpl"]);

@@ -288,6 +288,8 @@
 				}
 			}
 
+			$alkuperainen_keskihankintahinta = $tuoterow["kehahin"];
+
 			if 		($tuoterow['epakurantti100pvm'] != '0000-00-00') $tuoterow['kehahin'] = 0;
 			elseif 	($tuoterow['epakurantti75pvm'] != '0000-00-00') $tuoterow['kehahin'] = round($tuoterow['kehahin'] * 0.25, 6);
 			elseif 	($tuoterow['epakurantti50pvm'] != '0000-00-00') $tuoterow['kehahin'] = round($tuoterow['kehahin'] * 0.5,  6);
@@ -333,7 +335,7 @@
 			$peralresult = pupe_query($query);
 			$peralrow = mysql_fetch_array($peralresult);
 
-			$query = "	SELECT distinct valkoodi, maa 
+			$query = "	SELECT distinct valkoodi, maa
 						from hinnasto
 						where yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoterow[tuoteno]'
@@ -440,9 +442,9 @@
 
 			//1
 			echo "<br>".t_avainsana("TUOTEMERKKI", "", " and avainsana.selite='$tuoterow[tuotemerkki]'", "", "", "selite")."</td>";
-		
+
 			echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
-		
+
 			$palautus = t_tuotteen_avainsanat($tuoterow, "pakkauskoko2");
 			if (is_array($palautus) and count($palautus) > 0) {
 				echo "<br>";
@@ -452,11 +454,11 @@
 			$palautus = t_tuotteen_avainsanat($tuoterow, "pakkauskoko3");
 			if (is_array($palautus) and count($palautus) > 0) {
 				echo "<br>";
-				echo "{$palautus["selite"]} ".t_avainsana("Y", "", "and avainsana.selite='{$palautus["selitetark"]}'", "", "", "selite");				
+				echo "{$palautus["selite"]} ".t_avainsana("Y", "", "and avainsana.selite='{$palautus["selitetark"]}'", "", "", "selite");
 			}
 
 			echo "</td>";
-		
+
 			echo "<td>$tuoterow[eankoodi]</td><td colspan='2'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
 			echo "<td>$tuoterow[hinnastoon]<br>".t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark")."</td>";
 			echo "</tr>";
@@ -525,6 +527,10 @@
 				echo " $tuoterow[yksikko]<br>";
 				echo hintapyoristys($tuoterow["kehahin"] * $tuoterow["myyntihinta_maara"]);
 				echo " $tuoterow[myyntihinta_maara] $tuoterow[yksikko]";
+			}
+
+			if ($alkuperainen_keskihankintahinta != $tuoterow["kehahin"]) {
+				echo "<br>($alkuperainen_keskihankintahinta)";
 			}
 
 			echo "</td>";
@@ -703,7 +709,7 @@
 
 				echo "</table><br>";
 			}
-			
+
 			//vastaavat tuotteet
 			$query  = "SELECT * FROM vastaavat WHERE tuoteno='$tuoteno' AND yhtio='$kukarow[yhtio]'";
 			$vastaresult = pupe_query($query);
@@ -837,23 +843,23 @@
 								and tuote.tuoteno = '$tuoteno'
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				}
-				
+
 				$sresult = pupe_query($query);
 
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_array ($sresult)) {
-												
+
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
 
 						//summataan kokonaissaldoa ja vain oman firman saldoa
 						$kokonaissaldo += $saldo;
 						$kokonaishyllyssa += $hyllyssa;
 						$kokonaismyytavissa += $myytavissa;
-							
+
 						if ($saldorow["yhtio"] == $kukarow["yhtio"]) {
 							$kokonaissaldo_tapahtumalle += $saldo;
 						}
-						
+
 						echo "<tr>
 								<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>
 								<td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>
@@ -1777,7 +1783,14 @@
 
 				// Onko käyttäjällä oikeus nähdä valmistuksia tai reseptejä
 				$oikeu_t1 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAVARASTOON");
-				$oikeu_t2 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAASIAKKAALLE");
+
+				if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "N") {
+					$oikeu_t2 = FALSE;
+				}
+				else {
+					$oikeu_t2 = tarkista_oikeus("tilauskasittely/tilaus_myynti.php", "VALMISTAASIAKKAALLE");
+				}
+
 				$oikeu_t3 = tarkista_oikeus("tilauskasittely/valmista_tilaus.php", "");
 				$oikeu_t4 = tarkista_oikeus("tuoteperhe.php", "RESEPTI");
 
@@ -1816,10 +1829,10 @@
 								echo "<div id='div_$prow[trivitunn]' class='popup' style='width:200px;'>";
 								echo "<table>";
 
-								$query = "	SELECT tilausrivi.nimitys, 
-											tilausrivi.tuoteno, 
-											tapahtuma.kpl * -1 'kpl', 
-											tapahtuma.hinta, 
+								$query = "	SELECT tilausrivi.nimitys,
+											tilausrivi.tuoteno,
+											tapahtuma.kpl * -1 'kpl',
+											tapahtuma.hinta,
 											tapahtuma.kpl * tapahtuma.hinta * -1 yhteensa
 											FROM tilausrivi
 											JOIN tapahtuma ON tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus

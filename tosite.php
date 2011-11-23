@@ -336,8 +336,7 @@
 							}
 						}
 						elseif(strtolower($otsikot[$e]) == "summa") {
-
-							${"i".strtolower($otsikot[$e])}[$maara] = round($eriv, 2);
+							${"i".strtolower($otsikot[$e])}[$maara] = sprintf("%.2f",round($eriv, 2));
 						}
 						else {
 
@@ -367,7 +366,7 @@
 		}
 
 		// turvasumma kotivaluutassa
-		$turvasumma = round($summa * $kurssi, 2);
+		$turvasumma = sprintf("%.2f",round($summa * $kurssi, 2));
 		// turvasumma valuutassa
 		$turvasumma_valuutassa = $summa;
 
@@ -389,10 +388,10 @@
 						$isummanumeric = preg_replace("/[^0-9\.]/", "", $isumma[$i]);
 
 						if ($isumma[$i]{0} == '-') {
-							$isumma[$i] = round(-1 * ($turvasumma_valuutassa * ($isummanumeric/100)), 2);
+							$isumma[$i] = sprintf("%.2f",round(-1 * ($turvasumma_valuutassa * ($isummanumeric/100)), 2));
 						}
 						else {
-							$isumma[$i] = round(1 * ($turvasumma_valuutassa * ($isummanumeric/100)), 2);
+							$isumma[$i] = sprintf("%.2f",round(1 * ($turvasumma_valuutassa * ($isummanumeric/100)), 2));
 						}
 					}
 					elseif ($isumma[$i] == '-') {
@@ -410,7 +409,7 @@
 				// otetaan valuuttasumma talteen
 				$isumma_valuutassa[$i] = $isumma[$i];
 				// käännetään kotivaluuttaan
-				$isumma[$i] = round($isumma[$i] * $kurssi, 2);
+				$isumma[$i] = sprintf("%.2f",round($isumma[$i] * $kurssi, 2));
 
 				if (strlen($selite) > 0 and strlen($iselite[$i]) == 0) { // Siirretään oletusselite tiliöinneille
 					$iselite[$i] = $selite;

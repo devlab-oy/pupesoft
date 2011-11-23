@@ -72,7 +72,7 @@
 			$pdf->draw_text(mm_pt($x), mm_pt($y - 4), t("Tuotenumero")." $eankoodirow[tuoteno]", $firstpage, $norm);
 		}
 
-		if ($koodi == 'eankoodi') {
+		if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== FALSE) {
 			$data = viivakoodi($eankoodirow['eankoodi'], "ean", $leveys, 130, "zz");
 		}
 		else {

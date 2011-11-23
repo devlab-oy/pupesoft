@@ -2885,4 +2885,16 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == 'tarkista_eankoodi') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Ei tarkisteta EAN13-koodia tuotteelta syöttö- eikä muokkausvaiheessa")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Tarkistetaan EAN13-koodi syöttö- ja muokkausvaiheessa")."</option>";
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
+
 ?>

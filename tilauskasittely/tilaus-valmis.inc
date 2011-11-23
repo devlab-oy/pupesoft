@@ -874,7 +874,6 @@ else {
 
 							}
 						}
-
 					}
 
 					if ($row['perheid'] > 0 and $row['tunnus'] == $row['perheid']) {

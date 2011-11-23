@@ -6151,7 +6151,7 @@ if (!function_exists("js_popup")) {
 			}
 			return x;
 		}
-		
+
 		function getMouseY(e) {
 			var y = null;
 
@@ -6170,7 +6170,7 @@ if (!function_exists("js_popup")) {
 	        toolTip.css({'top':y, 'left':x}).delay(500).show('fast');
 	    }
 
-	    function toolTipHide() {			
+	    function toolTipHide() {
 			toolTip.clearQueue();
 			toolTip.hide();
 	    }
@@ -7580,11 +7580,18 @@ if (!function_exists("livesearch_tuotehaku")) {
 					$kieltolisa .= " and tuote.hinnastoon != 'E' ";
 				}
 			}
-
+			
+			// Näytetään poistuvat tuotteet mutta ei poistettuja
+			if ($yhtiorow['livetuotehaku_poistetut'] == 'X') {
+				$naytetaanko_poistetut = "and (tuote.status != 'P' or (tuote.status = 'P' and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0))";
+			} 
+			else {
+				$naytetaanko_poistetut = "and tuote.status != 'P'";
+			}	
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						and tuote.status != 'P'
+						$naytetaanko_poistetut
 						$kieltolisa
 						$haku_query";
 			$result = pupe_query($query);
@@ -8931,7 +8938,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
 if (!function_exists("liite_popup")) {
 	function liite_popup($toiminto, $tuotetunnus = 0, $width=0, $height=0) {
-		global $kukarow, $yhtiorow, $PHP_SELF, $palvelin2, $pupe_root_polku;
+		global $kukarow, $yhtiorow, $PHP_SELF, $palvelin2, $pupe_root_polku, $toim;
 
 		if ($toiminto == "JS") {
 			echo "<SCRIPT type='text/javascript'>
@@ -8954,10 +8961,10 @@ if (!function_exists("liite_popup")) {
 							}
 
 							if (maxwidth == '0' && totalheight == '0') {
-								window.open('$PHP_SELF?ohje=off&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
+								window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
 							}
 							else {
-								window.open('$PHP_SELF?ohje=off&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
+								window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
 							}
 						}
 					//-->
@@ -11669,16 +11676,25 @@ if (!function_exists("pupe_DataTables")) {
 				if (oSettings.oPreviousSearch['sSearch']!=''){
 					$('.search_field').val(oSettings.oPreviousSearch['sSearch']);
 				}
-				
+
+				// Prioriteetin rajausta dropdownilla
+				$('select.prioriteetti_sort').change(function() {
+					var prioriteetti = $('select.prioriteetti_sort option:selected');
+					var haku_arvo = prioriteetti.val();
+
+					console.log(prioriteetti.val());
+					datatablesit[0].fnFilter(haku_arvo, 1);
+				} );
+
 				// Työjonon ja työstatuksen rajausta dropdownilla
-				$('select.tyojono_sort, select.tyostatus_sort').change(function() { 
+				$('select.tyojono_sort, select.tyostatus_sort').change(function() {
 					var tyojono = $('select.tyojono_sort option:selected');
 					var tyostatus = $('select.tyostatus_sort option:selected');
 					var hakuarvo;
-					
+
 					// Jos tyojono tai tyostatus on tyhja, haetaan vain yhdellä ehdolla
-					haku_arvo = tyojono.text() +' / '+ tyostatus.text();
-					
+					haku_arvo = tyojono.text() +' '+ tyostatus.text();
+
 					if (tyojono.val() == '-') {
 						haku_arvo = tyostatus.text();
 					}
@@ -11689,10 +11705,8 @@ if (!function_exists("pupe_DataTables")) {
 						haku_arvo = '';
 					}
 
-					console.log(haku_arvo);
-					datatablesit[0].fnFilter(haku_arvo, 5);										
+					datatablesit[0].fnFilter(haku_arvo, 8);
 				} );
-				
 			} );
 		</script>";
 	}

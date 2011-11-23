@@ -203,6 +203,9 @@
 		if (strlen($keku) > 2) $kpos = "0355";
 		else $kpos = "0430";
 
+		// Laitetaan kuljetusohje
+		if ($kuljetusohjeet != "") $vakit[6] = $kuljetusohjeet;
+
 		$sivu .= "{PC003;$kpos,0090,15,15,H,00,B|}
                  {RC003;$keku|}
 				 {PC115;0600,1205,05,05,I,00,B|}

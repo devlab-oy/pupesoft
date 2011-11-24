@@ -78,3 +78,5 @@
 
 	}
 
+	$query = "UPDATE lahdot SET vakisin_kerays = '' WHERE yhtio = '{$kukarow['yhtio']}'";
+	$upd_res = pupe_query($query);

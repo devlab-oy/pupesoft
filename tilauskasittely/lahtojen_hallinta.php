@@ -102,7 +102,7 @@
 						return b.id - a.id;
 					}
 
-					var sort_row_by_order_direction = true;
+					var sort_row_by_order_direction = false;
 
 					$('.sort_row_by_order').click(function(){
 						var arr = $('.toggleable_row_tr:visible');

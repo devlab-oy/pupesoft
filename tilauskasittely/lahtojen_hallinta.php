@@ -138,7 +138,8 @@
 				JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
-				GROUP BY 1,2,3,4,5,6,7,8";
+				GROUP BY 1,2,3,4,5,6,7,8
+				ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika, lahdot.tunnus";
 	$result = pupe_query($query);
 
 	echo "<table>";
@@ -204,7 +205,10 @@
 					lasku.toim_postitp AS 'asiakas_toim_postitp',
 					avainsana.selitetark_3 AS 'prioriteetti',
 					GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS 'pakkausnumerot',
-					GROUP_CONCAT(DISTINCT kerayserat.sscc) AS 'sscc'
+					GROUP_CONCAT(DISTINCT kerayserat.sscc) AS 'sscc',
+					GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tilat',
+					COUNT(kerayserat.tunnus) AS 'keraysera_rivi_count',
+					SUM(IF((kerayserat.tila = 'T' OR kerayserat.tila = 'R'), 1, 0)) AS 'keraysera_rivi_valmis'
 					FROM lasku
 					LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus)
 					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
@@ -223,6 +227,7 @@
 
 		echo "<tr>";
 		echo "<th></th>";
+		echo "<th>",t("Status"),"</th>";
 		echo "<th>",t("Prio"),"</th>";
 		echo "<th>",t("Tilausnumero"),"</th>";
 		echo "<th>",t("Asiakas"),"</th>";
@@ -239,6 +244,21 @@
 			echo "<tr class='toggleable_row_tr' id='toggleable_row_tr_{$lahto_row['tilauksen_tunnus']}'>";
 
 			echo "<td><input type='checkbox' class='checkbox_{$row['lahdon_tunnus']}'></td>";
+
+			echo "<td class='center'>";
+
+			if (strpos($lahto_row['tilat'], "K") !== FALSE) {
+				echo t("Aloitettu");
+			}
+			elseif ($lahto_row['keraysera_rivi_count'] > 0 and $lahto_row['keraysera_rivi_count'] == $lahto_row['keraysera_rivi_valmis']) {
+				echo t("Kerätty");
+			}
+			else {
+				echo t("Aloittamatta");
+			}
+
+			echo "</td>";
+
 			echo "<td class='center'>{$lahto_row['prioriteetti']}</td>";
 			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}'><a class='td'>{$lahto_row['tilauksen_tunnus']}</a></td>";
 			echo "<td class='data'>{$lahto_row['asiakas_nimi']}";
@@ -324,7 +344,7 @@
 			$rivi_res = pupe_query($query);
 			
 			echo "<tr>";
-			echo "<td colspan='10' class='back'>";
+			echo "<td colspan='11' class='back'>";
 			echo "<div class='toggleable_row_child' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";
@@ -382,7 +402,7 @@
 				$rivi_res = pupe_query($query);
 
 				echo "<tr>";
-				echo "<td colspan='10' class='back'>";
+				echo "<td colspan='11' class='back'>";
 				echo "<div class='toggleable_row_child' id='toggleable_row_sscc_{$sscc}_{$i}' style='display:none;'>";
 
 				echo "<table style='width:100%;'>";

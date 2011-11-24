@@ -1,5 +1,8 @@
 <?php
 
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
+
 require ("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Laadunvalvonta").":</font><hr>";

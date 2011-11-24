@@ -15,8 +15,8 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	$query = "	SELECT kuka.kuka, kuka.session, kuka.salasana
 				FROM kuka
 				JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.tunnus = kuka.oletus_asiakas AND asiakas.laji != 'P')
-				WHERE kuka.kuka = '$user' 
-				AND kuka.extranet != '' 
+				WHERE kuka.kuka = '$user'
+				AND kuka.extranet != ''
 				AND kuka.oletus_asiakas != ''";
 	$result = mysql_query($query) or pupe_error($query);
 	$krow = mysql_fetch_array($result);
@@ -70,6 +70,9 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	}
 	else {
 		$errormsg = "<br><font class='error'>".t("Käyttäjätunnusta ei löydy ja/tai",$browkieli)."<br>".t("Salasana on virheellinen",$browkieli)."!</font><br>";
+
+		// Kirjataan epäonnistunut kirjautuminen virhelokiin...
+		error_log ("user $user: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
 	}
 }
 else {

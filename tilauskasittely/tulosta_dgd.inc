@@ -27,6 +27,27 @@ if (!function_exists('alku_dgd')) {
 		$pdf->pages[$sivu]->drawText($yhtiorow["postino"]." ".$yhtiorow["postitp"], mm_pt(15), mm_pt(254), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["maa"], mm_pt(15), mm_pt(250), 'LATIN1');
 
+		// Rakirno
+		$query = "	SELECT r2.rahtikirjanro, group_concat(DISTINCT r2.otsikkonro) otsikkonro
+					FROM rahtikirjat r1
+					JOIN rahtikirjat r2 ON r1.yhtio=r2.yhtio and r1.rahtikirjanro=r2.rahtikirjanro and r2.rahtikirjanro!=0
+					WHERE r1.otsikkonro = '$laskurow[tunnus]'
+	            	AND r1.yhtio = '$kukarow[yhtio]'
+					GROUP BY 1";
+	    $res = mysql_query($query) or pupe_error($query);
+	    $rahtikirjanro = mysql_fetch_assoc($res);
+
+		if ($rahtikirjanro["rahtikirjanro"] != "") {
+			$laskurow["rahtikirjanro"] 	= $rahtikirjanro["rahtikirjanro"];
+			$laskurow["otsikkonro"] 	= $rahtikirjanro["otsikkonro"];
+		}
+		else {
+			$laskurow["rahtikirjanro"] 	= $laskurow["tunnus"];
+			$laskurow["otsikkonro"] 	= $laskurow["tunnus"];
+		}
+
+		$pdf->pages[$sivu]->drawText($laskurow["rahtikirjanro"], mm_pt(110), mm_pt(263), 'LATIN1');
+
 		$pdf->pages[$sivu]->drawText($laskurow["toim_nimi"], mm_pt(15), mm_pt(242), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($laskurow["toim_osoite"], mm_pt(15), mm_pt(238), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($laskurow["toim_postino"]." ".$laskurow["toim_postitp"], mm_pt(15), mm_pt(234), 'LATIN1');
@@ -38,6 +59,10 @@ if (!function_exists('alku_dgd')) {
 
 		$pdf->pages[$sivu]->drawLine(mm_pt(58), mm_pt(202), mm_pt(101), mm_pt(197));
 		$pdf->pages[$sivu]->drawLine(mm_pt(58), mm_pt(197), mm_pt(101), mm_pt(202));
+
+		// 9 Additional handling information
+		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"]." ".$yhtiorow["puhelin"], mm_pt(105), mm_pt(202), 'LATIN1');
+		
 
 		$pdf->pages[$sivu]->drawText($yhtiorow["nimi"], mm_pt(15), mm_pt(61), 'LATIN1');
 
@@ -113,6 +138,8 @@ if (!function_exists('uusi_sivu_dgd')) {
 		$pdf->pages[$sivu]->drawText($yhtiorow["postino"]." ".$yhtiorow["postitp"], mm_pt(15), mm_pt(254), 'LATIN1');
 		$pdf->pages[$sivu]->drawText($yhtiorow["maa"], mm_pt(15), mm_pt(250), 'LATIN1');
 
+		$pdf->pages[$sivu]->drawText($laskurow["rahtikirjanro"], mm_pt(110), mm_pt(263), 'LATIN1');
+
 		// Luodaan palautettavat
 		$return = array();
 
@@ -136,14 +163,9 @@ if (!function_exists('rivi_dgd')) {
 		$kala = 175;
 
 		$pdf->pages[$sivu]->setFont($norm, 8);
-		
-		if ($dgdtunnukset != '') {
-			list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($dgdtunnukset, $kieli, "DGD");
-		}
-		else {
-			list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['tunnus'], $kieli, "DGD");
-		}
-		
+
+		list($vakrakirtiedot, $vaktuotetiedot) = palauta_vak_tiedot($laskurow['otsikkonro'], $kieli, "DGD");
+
 		$kollimaara_yht = 0;
 
 		foreach ($vakrakirtiedot as $vakrakirrivi) {

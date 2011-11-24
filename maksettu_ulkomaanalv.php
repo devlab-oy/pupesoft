@@ -1,5 +1,8 @@
 <?php
 
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
+
 require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Maksettu ulkomaan arvonlisävero")."</font><hr><br>";
@@ -54,7 +57,10 @@ if($tee == "aja") {
 		echo "<font class='info'>".t("Maahan")." {$row["nimi"]}</font><br>";
 	}
 	if ($kustp!="") {
-		$query = "SELECT nimi from kustannuspaikka where tunnus='$kustp'";
+		$query = "	SELECT nimi
+					from kustannuspaikka
+					where yhtio='$kukarow[yhtio]'
+					and tunnus='$kustp'";
 		$result=mysql_query($query) or pupe_error($query);
 		$row=mysql_fetch_array($result);
 
@@ -62,7 +68,10 @@ if($tee == "aja") {
 		echo "<font class='info'>".t("kustannuspaikalle")." {$row["nimi"]}</font><br>";
 	}
 	if ($kohde!="") {
-		$query = "SELECT nimi from kustannuspaikka where tunnus='$kohde'";
+		$query = "	SELECT nimi
+					from kustannuspaikka
+					where yhtio='$kukarow[yhtio]'
+					and tunnus='$kohde'";
 		$result=mysql_query($query) or pupe_error($query);
 		$row=mysql_fetch_array($result);
 
@@ -70,7 +79,10 @@ if($tee == "aja") {
 		echo "<font class='info'>".t("Kohtelle")." {$row["nimi"]}</font><br>";
 	}
 	if ($proj!="") {
-		$query = "SELECT nimi from kustannuspaikka where tunnus='$proj'";
+		$query = "	SELECT nimi
+					from kustannuspaikka
+					where yhtio='$kukarow[yhtio]'
+					and tunnus='$proj'";
 		$result=mysql_query($query) or pupe_error($query);
 		$row=mysql_fetch_array($result);
 
@@ -257,7 +269,7 @@ if ($tee == '') {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
 				and tyyppi = 'K'
-				ORDER BY nimi";
+				ORDER BY koodi+0, koodi, nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='kustp'><option value=''>".t("Ei valintaa")."";
@@ -279,7 +291,7 @@ if ($tee == '') {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
 				and tyyppi = 'O'
-				ORDER BY nimi";
+				ORDER BY koodi+0, koodi, nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='kohde'><option value=''>Ei valintaa";
@@ -296,12 +308,12 @@ if ($tee == '') {
 	echo "</tr>";
 	echo "<tr><th>".t("Vain projekti")."</th>";
 
-	$query = "SELECT tunnus, nimi
+	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kaytossa != 'E'
 				and tyyppi = 'P'
-				ORDER BY nimi";
+				ORDER BY koodi+0, koodi, nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='proj'><option value=''>".t("Ei valintaa")."";
@@ -343,4 +355,5 @@ if ($tee == '') {
 }
 
 require("inc/footer.inc");
+
 ?>

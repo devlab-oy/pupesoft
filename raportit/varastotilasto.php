@@ -5,434 +5,257 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	$useslave = 1;
+
 	require ("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
 	}
-	else {
-		echo "<font class='head'>".t("Varastotilasto")."</font><hr>";
 
-		// k‰ytet‰‰n slavea
-		$useslave = 1;
-		require ("inc/connect.inc");
+	echo "<font class=head>".t("Varastotilasto")."</font><hr>";
 
-		if(count($_POST) > 0 and isset($go)) {
+	if (!isset($kka))
+		$kka = '01';
+	if (!isset($vva))
+		$vva = date("Y");
+	if (!isset($ppa))
+		$ppa = '01';
+
+	if (!isset($kkl))
+		$kkl = date("m");
+	if (!isset($vvl))
+		$vvl = date("Y");
+	if (!isset($ppl))
+		$ppl = date("d");
+
+	// k‰yttis
+	echo "<form action='$PHP_SELF' method='POST'>";
+	echo "<input type='hidden' name='tee' value='raportoi'>";
+
+	echo "<table>";
+	echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
+			<td><input type='text' name='kka' value='$kka' size='3'></td>
+			<td><input type='text' name='vva' value='$vva' size='5'></td></tr>";
+
+	echo "<tr><th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
+			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
+			<td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
 			
-				if (count($yhtiot) == 0) {
-					$yhtio = $kukarow["yhtio"];
-				}
-				else {
-					$yhtio  = "";
-					
-					foreach ($yhtiot as $apukala) {
-						$yhtio .= "'$apukala',";
-					}
-					
-					$yhtio = substr($yhtio,0,-1);
-				}
-			
-				$lisa = "";
-				$lisa2 = "";
+	echo "<tr><th>".t("Rajaukset")."</th><td colspan='3'>";
 
-				if (is_array($mul_osasto) and count($mul_osasto) > 0) {
-					$sel_osasto = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_osasto))."')";
-					$lisa .= " and tuote.osasto in $sel_osasto ";
-				}
+	$monivalintalaatikot = array('OSASTO', 'TRY', '<br>TUOTEMERKKI');
+	require ("tilauskasittely/monivalintalaatikot.inc");
 
-				if (is_array($mul_try) and count($mul_try) > 0) {
-					$sel_tuoteryhma = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_try))."')";
-					$lisa .= " and tuote.try in $sel_tuoteryhma ";
-				}
-				
-				if ($nollapiilo != '') {	
-					$lisa2 = " HAVING (saldo+varattu+tulossa+ostot+myynti+myynti_ed <> 0) ";
-				}
-				
-				if ($poispiilo != '') {	
-					if ($lisa2 == "") {
-						$lisa2 = " HAVING (status not in ('P','X') or saldo > 0)";
-					}
-					else {
-						$lisa2 .= " and (status not in ('P','X') or saldo > 0)";
-					}
-				}
-				
-				if ($yhtioittain != '') {	
-					$yhtioittain1 = " yhtio, ";
-					$yhtioittain2 = " ,4 ";
-				}
-				else {
-					$yhtioittain1 = "";
-					$yhtioittain2 = "";	
-				}
-				
-				
-				$vvaa = $vva - '1';
-				$vvll = $vvl - '1';
+	echo "</td></tr>";
 
-				$query = "	SELECT
-							tuote.status,
-							tuote.tuoteno, 
-							tuote.nimitys,
-							$yhtioittain1 
-							ifnull(sum((SELECT sum(saldo) 
-										FROM tuotepaikat 
-										WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno)), 0) saldo,
+	$nollapiilochk = "";
+	if (isset($nollapiilo) and $nollapiilo != '') $nollapiilochk	= "CHECKED";
+	echo "<tr><th>".t("Piilota nollarivit")."</th><td colspan='3'><input type='checkbox' name='nollapiilo' $nollapiilochk></td></tr>";
 
-							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = '' or tilausrivin_lisatiedot.osto_vai_hyvitys is null, varattu, 0)) 
-										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
-										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu <> 0)), 0) varattu,
+	echo "</table>";
+	echo "<br><input type='submit' value='".t("Aja raportti")."' name='painoinnappia'>";
+	echo "</form>";
+	echo "<br><br>";
 
-							(ifnull(sum((SELECT sum(varattu) 
-										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and lasku.tilaustyyppi='S'
-										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'G' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu <> 0)), 0) +
-							ifnull(sum((SELECT sum(saldo_varattu) 
-										FROM tuotepaikat 
-										WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno)), 0)) Varattu_lisavar,	
-										
-							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = 'O' or tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', varattu * -1, 0))
-										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
-										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu < 0) + 
-									(	SELECT sum(varattu) 
-										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu) 
-										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'O' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu > 0)), 0) tulossa,
-							
-							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = 'O' or tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', kpl * -1, 0))
-										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl' and tilausrivi.kpl < 0) + 
-									(	SELECT sum(kpl) 
-										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika) 
-										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'O' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')), 0) ostot,
-							
-							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = '' or tilausrivin_lisatiedot.osto_vai_hyvitys is null, kpl, 0)) 
-										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')), 0) myynti,
-							
-							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = '' or tilausrivin_lisatiedot.osto_vai_hyvitys is null, kpl, 0)) 
-										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl')), 0) myynti_ed	
-							FROM tuote
-							WHERE tuote.yhtio in ($yhtio)
-							$lisa
-							GROUP BY 1,2,3 $yhtioittain2
-							$lisa2
-							ORDER BY tuote.tuoteno, tuote.yhtio";
-				$result = mysql_query($query) or pupe_error($query);
+	if ($tee != "" and isset($painoinnappia)) {
 
-				$rivilimitti = 1000;
-				
-				if (mysql_num_rows($result) > $rivilimitti) {
-					echo "<br><font class='error'>".t("Hakutulos oli liian suuri")."!</font><br>";
-					echo "<font class='error'>".t("Tallenna/avaa tulos exceliss‰")."!</font><br><br>";
-				}
+		// valitun jakson vika p‰iv‰
+		$ppl = date("t", mktime(0, 0, 0, $kkl, 1, $vvl));
 
-				if (mysql_num_rows($result) > 0) {
-					if(@include('Spreadsheet/Excel/Writer.php')) {
+		if (@include('Spreadsheet/Excel/Writer.php')) {
 
-						//keksit‰‰n failille joku varmasti uniikki nimi:
-						list($usec, $sec) = explode(' ', microtime());
-						mt_srand((float) $sec + ((float) $usec * 100000));
-						$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+			//keksit‰‰n failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 
-						$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-						$workbook->setVersion(8);
-						$worksheet =& $workbook->addWorksheet('Sheet 1');
+			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+			$workbook->setVersion(8);
+			$worksheet =& $workbook->addWorksheet('Varastoluettelo');
 
-						$format_bold =& $workbook->addFormat();
-						$format_bold->setBold();
+			$format_bold =& $workbook->addFormat();
+			$format_bold->setBold();
 
-						$excelrivi = 0;
-					}
-					
-					echo "<table>";
-					echo "<tr>
-						<th>".t("Kausi nyt")."</th>
-						<td>$ppa</td>
-						<td>$kka</td>
-						<td>$vva</td>
-						<th>-</th>
-						<td>$ppl</td>
-						<td>$kkl</td>
-						<td>$vvl</td>
-						</tr>\n";
-					echo "<tr>
-						<th>".t("Kausi ed")."</th>
-						<td>$ppa</td>
-						<td>$kka</td>
-						<td>$vvaa</td>
-						<th>-</th>
-						<td>$ppl</td>
-						<td>$kkl</td>
-						<td>$vvll</td>
-						</tr>\n";
-					echo "</table><br>";
-
-					if (mysql_num_rows($result) <= $rivilimitti) echo "<table><tr>";
-
-					// echotaan kenttien nimet
-					for ($i=1; $i < mysql_num_fields($result); $i++) {
-						if (mysql_num_rows($result) <= $rivilimitti) echo "<th>".t(mysql_field_name($result,$i))."</th>";
-					}
-
-					if(isset($workbook)) {
-						for ($i=1; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, ($i-1), ucfirst(t(mysql_field_name($result,$i))), $format_bold);
-						$excelrivi++;
-					}
-
-					if (mysql_num_rows($result) <= $rivilimitti) echo "</tr>\n";
-
-					if (mysql_num_rows($result) > $rivilimitti) {
-						
-						require_once ('inc/ProgressBar.class.php');
-						$bar = new ProgressBar();
-						$elements = mysql_num_rows($result); // total number of elements to process
-						$bar->initialize($elements); // print the empty bar
-					}
-
-					while ($row = mysql_fetch_array($result)) {
-
-						if (mysql_num_rows($result) > $rivilimitti) $bar->increase();
-
-						if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
-
-						// echotaan kenttien sis‰ltˆ
-						for ($i=1; $i < mysql_num_fields($result); $i++) {
-							
-							// jos kyseessa on tuote
-							if (mysql_field_name($result, $i) == "tuoteno") {
-								$row[$i] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a>";
-							}							
-							
-
-							// jos kyseessa on tuoteosasto, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "osasto") {
-								$osre = t_avainsana("OSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
-								$osrow = mysql_fetch_array($osre);
-								
-								if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
-									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-								}
-							}
-
-							// jos kyseessa on tuoteryhm‰, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "tuoteryhm‰") {
-								$osre = t_avainsana("TRY", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
-								$osrow = mysql_fetch_array($osre);
-								
-								if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
-									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-								}
-							}
-
-							// hoidetaan pisteet piluiksi!!
-							if (is_numeric($row[$i]) and $row[$i] == 0) {
-								if (mysql_num_rows($result) <= $rivilimitti) echo "<td></td>";
-
-								if(isset($workbook)) {
-									$worksheet->writeString($excelrivi, ($i-1), "");
-								}
-							}
-							elseif (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
-								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
-
-								if(isset($workbook)) {
-									$worksheet->writeNumber($excelrivi, ($i-1), sprintf("%.02f",$row[$i]));
-								}
-							}
-							else {
-								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
-
-								if(isset($workbook)) {
-									$worksheet->writeString($excelrivi, ($i-1), strip_tags(str_replace("<br>", " / ", $row[$i])));
-								}
-							}
-						}
-
-						if (mysql_num_rows($result) <= $rivilimitti) echo "</tr>\n";
-						$excelrivi++;
-
-					}
-
-					if (mysql_num_rows($result) <= $rivilimitti) echo "</table>";
-
-					echo "<br>";
-
-					if(isset($workbook)) {
-						// We need to explicitly close the workbook
-						$workbook->close();
-
-						echo "<table>";
-						echo "<tr><th>".t("Tallenna tulos").":</th>";
-						echo "<form method='post' action='$PHP_SELF'>";
-						echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-						echo "<input type='hidden' name='kaunisnimi' value='Varastotilasto.xls'>";
-						echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-						echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-						echo "</table><br>";
-					}
-				}
-				echo "<br><br><hr>";
-			
+			$excelrivi = 0;
 		}
 
-		if ($lopetus == "") {
-			//K‰yttˆliittym‰
-			if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-			if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-			if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-			if (!isset($kkl)) $kkl = date("m");
-			if (!isset($vvl)) $vvl = date("Y");
-			if (!isset($ppl)) $ppl = date("d");
+		$query = "	SELECT *
+					FROM tuote
+					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+					{$lisa}
+					and (tuote.status != 'P' or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+					ORDER BY osasto, try, tuoteno";
+		$eresult = pupe_query($query);
 
-			echo "<br>\n\n\n";
-			echo "<form method='post' action='$PHP_SELF'>";
-			echo "<input type='hidden' name='tee' value='go'>";
-
-			$query = "	SELECT *
-						FROM yhtio
-						WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
-			$result = mysql_query($query) or pupe_error($query);
-
-			// voidaan valita listaukseen useita konserniyhtiˆit‰, jos k‰ytt‰j‰ll‰ on "PƒIVITYS" oikeus t‰h‰n raporttiin
-			if (mysql_num_rows($result) > 0 and $oikeurow['paivitys'] != "") {
-				echo "<table>";
-				echo "<tr>";
-				echo "<th>".t("Valitse yhtiˆ")."</th>";
-
-				if (!isset($yhtiot)) $yhtiot = array();
-
-				while ($row = mysql_fetch_array($result)) {
-					$sel = "";
-
-					if ($kukarow["yhtio"] == $row["yhtio"] and count($yhtiot) == 0) $sel = "CHECKED";
-					if (in_array($row["yhtio"], $yhtiot)) $sel = "CHECKED";
-
-					echo "<td><input type='checkbox' name='yhtiot[]' onchange='submit()' value='$row[yhtio]' $sel>$row[nimi]</td>";
-				}
-
-				echo "</tr>";
-				echo "</table><br>";
-			}
-			else {
-				echo "<input type='hidden' name='yhtiot[]' value='$kukarow[yhtio]'>";
-			}
-
-			echo "<table><tr>";
-
-			echo "<th>".t("Valitse tuoteosastot").":</th>";
-			echo "<th>".t("Valitse tuoteryhm‰t").":</th></tr>";
-
-			echo "<tr>";
-			echo "<td valign='top'>";
-
-			// n‰ytet‰‰n soveltuvat osastot
-			// tehd‰‰n avainsana query
-			$res2 = t_avainsana("OSASTO");
-
-			echo "<select name='mul_osasto[]' multiple='TRUE' size='10' style='width:100%;'>";
-
-			$mul_check = '';
-			if ($mul_osasto!="") {
-				if (in_array("PUPEKAIKKIMUUT", $mul_osasto)) {
-					$mul_check = 'SELECTED';
-				}
-			}
-			echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteosastoa")."</option>";
-
-			while ($rivi = mysql_fetch_array($res2)) {
-				$mul_check = '';
-				if ($mul_osasto!="") {
-					if (in_array($rivi['selite'],$mul_osasto)) {
-						$mul_check = 'SELECTED';
-					}
-				}
-
-				echo "<option value='$rivi[selite]' $mul_check>$rivi[selite] - $rivi[selitetark]</option>";
-			}
-
-			echo "</select>";
-
-			echo "</td>";
-			echo "<td valign='top' class='back'>";
-
-			// n‰ytet‰‰n soveltuvat tryt
-			// tehd‰‰n avainsana query
-			$res2 = t_avainsana("TRY");
-
-			echo "<select name='mul_try[]' multiple='TRUE' size='10' style='width:100%;'>";
-
-			$mul_check = '';
-			if ($mul_try!="") {
-				if (in_array("PUPEKAIKKIMUUT", $mul_try)) {
-					$mul_check = 'SELECTED';
-				}
-			}
-			echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoterym‰‰")."</option>";
-
-			while ($rivi = mysql_fetch_array($res2)) {
-				$mul_check = '';
-				if ($mul_try!="") {
-					if (in_array($rivi['selite'],$mul_try)) {
-						$mul_check = 'SELECTED';
-					}
-				}
-
-				echo "<option value='$rivi[selite]' $mul_check>$rivi[selite] - $rivi[selitetark]</option>";
-			}
-
-			echo "</select>";
-			echo "</td>";
-			echo "</tr>";
-			echo "</table><br>\n";
-			
-			if ($nollapiilo != '')	$nollapiilochk	= "CHECKED";
-			if ($poispiilo != '')	$poispiilochk	= "CHECKED";
-			if ($yhtioittain != '')	$yhtioittainchk	= "CHECKED";
-			
-			echo "<table>
+		$rivimaara   = mysql_num_rows($eresult);
+		$rivilimitti = 1000;
+		
+		echo "<table>
 				<tr>
-				<tr>
-				<th>".t("Piilota nollarivit")."</th>
-				<td><input type='checkbox' name='nollapiilo' $nollapiilochk></td>
+				<th>",t("Valittu aikav‰li"),"</th>
+				<td>{$ppa}</td>
+				<td>{$kka}</td>
+				<td>{$vva}</td>
+				<th>-</th>
+				<td>{$ppl}</td>
+				<td>{$kkl}</td>
+				<td>{$vvl}</td>
 				</tr>
-				<tr>
-				<th>".t("Piilota poistetut tuotteet")."</th>
-				<td><input type='checkbox' name='poispiilo' $poispiilochk></td>
-				</tr>
-				<tr>
-				<th>".t("N‰yt‰ saldot yhtiˆitt‰in")."</th>
-				<td><input type='checkbox' name='yhtioittain' $yhtioittainchk></td>
-				</tr>
-				</table><br>";
-			
-			// p‰iv‰m‰‰r‰rajaus
+			</table><br><br>";
+
+		if ($rivimaara > $rivilimitti) {
+			echo "<br><font class='error'>",t("Hakutulos oli liian suuri"),"!</font><br>";
+			echo "<font class='error'>",t("Tallenna/avaa tulos exceliss‰"),"!</font><br><br>";
+		}
+		else {
 			echo "<table>";
-			echo "<tr>
-				<th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-				<td><input type='text' name='ppa' value='$ppa' size='3'></td>
-				<td><input type='text' name='kka' value='$kka' size='3'></td>
-				<td><input type='text' name='vva' value='$vva' size='5'></td>
-				</tr>\n
-				<tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-				<td><input type='text' name='ppl' value='$ppl' size='3'></td>
-				<td><input type='text' name='kkl' value='$kkl' size='3'></td>
-				<td><input type='text' name='vvl' value='$vvl' size='5'></td>
-				</tr>\n";
-			echo "</table><br>";
-			
-			echo "<br>";
-			echo "<input type='submit' name ='go' value='".t("Aja raportti")."'>";
-			echo "</form>";
+			echo "<th>".t("Osasto")."</th>";
+			echo "<th>".t("Tuoteryhm‰")."</th>";
+			echo "<th>".t("Tuoteno")."</th>";
+			echo "<th>".t("Nimitys")."</th>";
+			echo "<th>".t("Varastosaldo")."</th>";
+			echo "<th>".t("Myyntihinta")."</th>";
+			echo "<th>".t("Varmuusvarasto")."</th>";
+			echo "<th>".t("Tilattu")."</th>";
+			echo "<th>".t("Toimaika")."</th>";
+			echo "<th>".t("Varattu")."</th>";
+			echo "<th>".t("Myynti")."<br>".t("aikav‰lill‰")."</th>";
+			echo "<th>".t("Myynti")."<br>6kk</th>";
+			echo "<th>".t("Myynti")."<br>3kk</th>";
 		}
 
-		require ("../inc/footer.inc");
+		if (isset($workbook)) {
+			$excelsarake = 0;
+
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm‰"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Varmuusvarasto"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Tilattu m‰‰r‰"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Toimitus aika"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Varattu saldo"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $vvl");
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 6kk"));
+			$worksheet->writeString($excelrivi, $excelsarake++, t("Myynti 3kk"));
+
+			$excelrivi++;
+		}
+
+		while ($row = mysql_fetch_assoc($eresult)) {
+
+			// ostopuoli
+			$query = "	SELECT min(toimaika) toimaika,
+						sum(varattu) tulossa
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND tuoteno = '{$row["tuoteno"]}'
+						AND tyyppi 	= 'O'
+						AND varattu > 0";
+			$ostoresult = pupe_query($query);
+			$ostorivi = mysql_fetch_assoc($ostoresult);
+
+			// myyntipuoli
+			$query = "	SELECT
+						round(sum(if(laskutettuaika >= '{$vvl}-01-01', rivihinta, 0)), 2) myyntiVA,
+						round(sum(if(laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 6 month), rivihinta, 0)), 2) myynti6kk,
+						round(sum(if(laskutettuaika >= date_sub('{$vvl}-{$kkl}-{$ppl}', interval 3 month), rivihinta, 0)), 2) myynti3kk
+						FROM tilausrivi
+						WHERE yhtio = '{$kukarow["yhtio"]}'
+						AND tuoteno = '{$row["tuoteno"]}'
+						AND tyyppi = 'L'
+						and laskutettuaika >= if(date_sub('{$vvl}-{$kkl}-{$ppl}',interval 6 month) < '{$vvl}-01-01', date_sub('{$vvl}-{$kkl}-{$ppl}',interval 6 month), '{$vvl}-01-01')
+						and laskutettuaika >= if(date_sub('{$vvl}-{$kkl}-{$ppl}',interval 6 month) < '{$vvl}-01-01', date_sub('{$vvl}-{$kkl}-{$ppl}',interval 6 month), '{$vvl}-01-01')
+						AND kpl != 0";
+			$myyntiresult = pupe_query($query);
+
+			$myyntirivi = mysql_fetch_assoc($myyntiresult);
+
+			$osastores = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
+			$osastorow = mysql_fetch_assoc($osastores);
+
+			if ($osastorow['selitetark'] != "") $row['osasto'] = $row['osasto']." - ".$osastorow['selitetark'];
+
+			$tryres = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
+			$tryrow = mysql_fetch_assoc($tryres);
+
+			if ($tryrow['selitetark'] != "") $row['try'] = $row['try']." - ".$tryrow['selitetark'];
+
+			list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+
+			$varattu = $saldo - $myytavissa;
+
+			// Jos kaikki luvut on nollaa, niin skipataan rivi
+			if ($nollapiilo != '' and (float) $saldo == 0 and (float) $ostorivi["tulossa"] == 0 and  (float) $varattu == 0 and (float) $myyntirivi["myyntiVA"] == 0) {
+				continue;
+			}
+
+			if ($rivimaara <= $rivilimitti) {
+				echo "<tr>";
+				echo "<td>$row[osasto]</td>";
+				echo "<td>$row[try]</td>";
+				echo "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
+				echo "<td>$row[nimitys]</td>";
+				echo "<td align='right'>$saldo</td>";
+				echo "<td align='right'>".hintapyoristys($row['myyntihinta'])."</td>";
+				echo "<td align='right'>$row[varmuus_varasto]</td>";
+				echo "<td align='right'>$ostorivi[tulossa]</td>";
+				echo "<td align='right'>".tv1dateconv($ostorivi['toimaika'])."</td>";
+				echo "<td align='right'>$varattu</td>";
+				echo "<td align='right'>$myyntirivi[myyntiVA]</td>";
+				echo "<td align='right'>$myyntirivi[myynti6kk]</td>";
+				echo "<td align='right'>$myyntirivi[myynti3kk]</td>";
+				echo "</tr>";
+			}
+
+			if (isset($workbook)) {
+				$excelsarake = 0;
+
+				$worksheet->writeString($excelrivi, $excelsarake++, $row["osasto"]);
+				$worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
+				$worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
+				$worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $row["varmuus_varasto"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $row["tulossa"]);
+				$worksheet->writeString($excelrivi, $excelsarake++, $row["toimaika"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $varattu);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myyntiVA"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti6kk"]);
+				$worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti3kk"]);
+
+				$excelrivi++;
+			}
+		}
+
+		if ($rivimaara <= $rivilimitti) {
+			echo "</table>";
+		}
+
+		echo "<br>";
+
+		if (isset($workbook)) {
+			// We need to explicitly close the workbook
+			$workbook->close();
+
+			echo "<table>";
+			echo "<tr><th>".t("Tallenna excel").":</th>";
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Varastotilasto.xls'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+			echo "</table><br>";
+		}
 	}
+
+	require ("inc/footer.inc");
 ?>

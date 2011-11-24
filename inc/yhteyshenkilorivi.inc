@@ -37,7 +37,7 @@
 		while($row = mysql_fetch_array($vresult)) {
 			$sel = "";
 			if ($row["selite"] == $trow[$i]) $sel = 'selected';
-			echo "<option value='$row[selite]' $sel> $row[selite] - $row[selitetark]</option>";
+			$ulos .= "<option value='$row[selite]' $sel> $row[selite] - $row[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";
@@ -53,7 +53,7 @@
 		while($row = mysql_fetch_array($vresult)) {
 			$sel = "";
 			if ($row["selite"] == $trow[$i]) $sel = 'selected';
-			echo "<option value='$row[selite]' $sel> $row[selite] - $row[selitetark]</option>";
+			$ulos .= "<option value='$row[selite]' $sel> $row[selite] - $row[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";

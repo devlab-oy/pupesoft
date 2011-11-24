@@ -66,61 +66,111 @@ if (!$cli and $oikeurow['paivitys'] != '1') { // Saako päivittää
 }
 
 flush();
-
 if (!isset($table)) $table = '';
-
+$kasitellaan_tiedosto = FALSE;
 
 if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim($_FILES['userfile']['tmp_name']) != ''))) {
 
+	$kasitellaan_tiedosto = TRUE;
+
 	require ("inc/pakolliset_sarakkeet.inc");
+
+	if ($_FILES['userfile']['size'] == 0) {
+		echo "<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>";
+		$kasitellaan_tiedosto = FALSE;
+	}
 
 	$path_parts = pathinfo($_FILES['userfile']['name']);
 	$ext = strtoupper($path_parts['extension']);
 
-	if ($ext != "TXT" and $ext != "XLS" and $ext != "CSV") {
-		die ("<font class='error'><br>".t("Ainoastaan .txt, .csv tai .xls tiedostot sallittuja")."!</font>");
-	}
-
-	if ($_FILES['userfile']['size'] == 0) {
-		die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
-	}
-
-	if ($ext == "XLS") {
-		require_once ('excel_reader/reader.php');
-
-		// ExcelFile
-		$data = new Spreadsheet_Excel_Reader();
-
-		// Set output Encoding.
-		$data->setOutputEncoding('CP1251');
-		$data->setRowColOffset(0);
-		$data->read($_FILES['userfile']['tmp_name']);
-	}
-
 	if (!$cli) echo "<font class='message'>".t("Tarkastetaan lähetetty tiedosto")."...<br><br></font>";
 
-	// luetaan eka rivi tiedostosta..
-	if ($ext == "XLS") {
-		$headers = array();
+	$retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT"));
 
-		for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-			$headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
+	if ($retval !== TRUE) {
+		echo "<font class='error'><br>".t("Väärä tiedostomuoto")."!</font>";
+		$kasitellaan_tiedosto = FALSE;
+	}
+}
+
+if ($kasitellaan_tiedosto) {
+
+	if ($ext == "CSV" or $ext == "TXT") {
+		/** Ladataan file **/
+		$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+
+		/** Laitetaan rivit arrayseen **/
+		$excelrivit = array();
+
+		$rowIndex = 0;
+
+		while ($rivi = fgets($file)) {
+			// luetaan rivi tiedostosta..
+			$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
+
+			for ($colIndex = 0; $colIndex < count($rivi); $colIndex++) {
+				$excelrivit[$rowIndex][$colIndex] = trim($rivi[$colIndex]);
+			}
+
+			$rowIndex++;
 		}
 
-		for ($excej = (count($headers)-1); $excej > 0 ; $excej--) {
-			if ($headers[$excej] != "") {
-				break;
-			}
-			else {
-				unset($headers[$excej]);
-			}
-		}
+		fclose($file);
 	}
 	else {
-		$file	 = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+		/** PHPExcel kirjasto **/
+		require_once "PHPExcel/PHPExcel/IOFactory.php";
 
-		$rivi    = fgets($file);
-		$headers = explode("\t", strtoupper(trim($rivi)));
+		/** Tunnistetaan tiedostomuoto **/
+		$inputFileType = PHPExcel_IOFactory::identify($_FILES['userfile']['tmp_name']);
+
+		/** Luodaan readeri **/
+		$objReader = PHPExcel_IOFactory::createReader($inputFileType);
+
+		/** Ladataan vain solujen datat (ei formatointeja jne) **/
+		$objReader->setReadDataOnly(true);
+
+		/** Ladataan file halutuilla parametreilla **/
+		$objPHPExcel = $objReader->load($_FILES['userfile']['tmp_name']);
+
+		/** Laitetaan rivit arrayseen **/
+		$excelrivit = array();
+
+		/** Aktivoidaan eka sheetti**/
+		$objPHPExcel->setActiveSheetIndex(0);
+
+		/** Loopataan tiedoston rivit **/
+		foreach ($objPHPExcel->getActiveSheet()->getRowIterator() as $row) {
+		    $cellIterator = $row->getCellIterator();
+		    $cellIterator->setIterateOnlyExistingCells(false);
+
+			$rowIndex = ($row->getRowIndex())-1;
+
+		    foreach ($cellIterator as $cell) {
+		        $colIndex = (PHPExcel_Cell::columnIndexFromString($cell->getColumn()))-1;
+
+				$excelrivit[$rowIndex][$colIndex] = trim(utf8_decode($cell->getCalculatedValue()));
+		    }
+		}
+
+		/** Tuhotaan excel oliot **/
+		unset($objReader);
+		unset($objPHPExcel);
+	}
+
+	/** Otetaan tiedoston otsikkorivi **/
+	$headers = $excelrivit[0];
+	$headers = array_map('trim', $headers);
+	$headers = array_map('strtoupper', $headers);
+
+	// Unsetatan tyhjät sarakkeet
+	for ($i = (count($headers)-1); $i > 0 ; $i--) {
+		if ($headers[$i] != "") {
+			break;
+		}
+		else {
+			unset($headers[$i]);
+		}
 	}
 
 	$taulut			= array();
@@ -220,65 +270,37 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 		}
 	}
 
+	// rivimäärä excelissä
+	$excelrivimaara = count($excelrivit);
+
+	// sarakemäärä excelissä
+	$excelsarakemaara = count($headers);
+
 	// Luetaan tiedosto loppuun ja tehdään taulukohtainen array koko datasta
-	if ($ext == "XLS") {
-		for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
-			for ($excej = 0; $excej < count($headers); $excej++) {
+	for ($excei = 1; $excei < $excelrivimaara; $excei++) {
+		for ($excej = 0; $excej < $excelsarakemaara; $excej++) {
 
-				$taulunrivit[$taulut[$excej]][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
+			$taulunrivit[$taulut[$excej]][$excei-1][] = trim($excelrivit[$excei][$excej]);
 
-				// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
-				foreach ($taulunotsikot as $taulu => $joinit) {
+			// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
+			foreach ($taulunotsikot as $taulu => $joinit) {
 
-					if (strpos($headers[$excej], ".") !== FALSE) {
-						list ($etu, $taka) = explode(".", $headers[$excej]);
-						if ($taka == "") $taka = $etu;
-					}
-					else {
-						$taka = $headers[$excej];
-					}
+				if (strpos($headers[$excej], ".") !== FALSE) {
+					list ($etu, $taka) = explode(".", $headers[$excej]);
+					if ($taka == "") $taka = $etu;
+				}
+				else {
+					$taka = $headers[$excej];
+				}
 
-					if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
-						$taulunrivit[$taulu][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
-					}
+				if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
+					$taulunrivit[$taulu][$excei-1][] = trim($excelrivit[$excei][$excej]);
 				}
 			}
 		}
-	}
-	else {
 
-		$excei = 0;
-
-		while ($rivi = fgets($file)) {
-			// luetaan rivi tiedostosta..
-			$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
-
-			for ($excej = 0; $excej < count($rivi); $excej++) {
-
-				$taulunrivit[$taulut[$excej]][$excei][] = trim($rivi[$excej]);
-
-				// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
-				foreach ($taulunotsikot as $taulu => $joinit) {
-
-					if (strpos($headers[$excej], ".") !== FALSE) {
-						list ($etu, $taka) = explode(".", $headers[$excej]);
-						if ($taka == "") $taka = $etu;
-					}
-					else {
-						$taka = $headers[$excej];
-					}
-
-					if (in_array($taka, $joinit) and $taulu != $taulut[$excej] and $taulut[$excej] == $joinattavat[$taulu][$taka]) {
-						$taulunrivit[$taulu][$excei][] = trim($rivi[$excej]);
-					}
-				}
-			}
-
-			if ($cli) echo " Luetaan rivit: $excei\r";
-			$excei++;
-		}
-		fclose($file);
-		if ($cli) echo "\n";
+		// Tuhotaan as we go, ku näitä ei enää tarvita...
+		unset($excelrivit[$excei]);
 	}
 
 	// Korjataan spessujoini yhteensopivuus_tuote_lisatiedot/yhteensopivuus_tuote
@@ -407,7 +429,6 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 
 		// $trows sisältää kaikki taulun sarakkeet ja tyypit tietokannasta
 		// $taulunotsikot[$taulu] sisältää kaikki sarakkeet saadusta tiedostosta
-
 		foreach ($taulunotsikot[$taulu] as $key => $column) {
 			if ($column != '') {
 				if ($column == "TOIMINTO") {
@@ -415,7 +436,7 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 					$postoiminto = (string) array_search($column, $taulunotsikot[$taulu]);
 				}
 				else {
-					if (!isset($trows[$table_mysql.".".$column])) {
+					if (!isset($trows[$table_mysql.".".$column]) and $column != "AVK_TUNNUS") {
 						echo "<font class='error'>".t("Saraketta")." \"$column\" ".t("ei löydy")." $table_mysql-".t("taulusta")."!</font><br>";
 						$vikaa++;
 					}
@@ -485,7 +506,6 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 			}
 
 			echo "<font class='error'>".t("Virheitä löytyi. Ei voida jatkaa")."!<br></font>";
-
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -532,11 +552,11 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 				flush();
 			}
 
-			if ($eiyhtiota == "") {
-				$valinta   = " YHTIO = '$kukarow[yhtio]'";
+			if ($eiyhtiota == "" or $eiyhtiota == "EILAATIJAA") {
+				$valinta   = " yhtio = '{$kukarow['yhtio']}'";
 			}
 			elseif ($eiyhtiota == "TRIP") {
-				$valinta   = " TUNNUS > 0 ";
+				$valinta   = " tunnus > 0 ";
 			}
 
 			// Rakennetaan rivikohtainen array
@@ -570,6 +590,8 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 				$indeksi = array_merge($indeksi, $indeksi_where);
 				$indeksi = array_unique($indeksi);
 			}
+
+			$avkmuuttuja = FALSE;
 
 			foreach ($indeksi as $j) {
 				if ($taulunotsikot[$taulu][$j] == "TUOTENO") {
@@ -775,6 +797,18 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 
 					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='$apu_ytunnus'";
 				}
+				elseif ($table_mysql == 'auto_vari_korvaavat') {
+
+					if ($taulunotsikot[$taulu][$j] == "AVK_TUNNUS") {
+						$valinta = " yhtio = '$kukarow[yhtio]' and tunnus = '".trim(pupesoft_cleanstring($rivi[$j]))."'";
+
+						$apu_sarakkeet = array("AVK_TUNNUS");
+						$avkmuuttuja = TRUE;
+					}
+					elseif (!$avkmuuttuja) {
+						$valinta .= " and ".$taulunotsikot[$taulu][$j]."='".trim(pupesoft_cleanstring($rivi[$j]))."'";
+					}
+				}
 				else {
 					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='".trim(pupesoft_cleanstring($rivi[$j]))."'";
 				}
@@ -784,6 +818,7 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 					$tila = 'ohita';
 				}
 			}
+
 			if (substr($taulu, 0, 11) == 'puun_alkio_') {
 				$valinta .= " and laji = '".substr($taulu, 11)."' ";
 			}
@@ -979,6 +1014,9 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 					if ($eiyhtiota == "") {
 						$query = "INSERT into $table_mysql SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 					}
+					elseif ($eiyhtiota == "EILAATIJAA") {
+						$query = "INSERT INTO {$table_mysql} SET yhtio = '{$kukarow['yhtio']}' ";
+					}
 					elseif ($eiyhtiota == "TRIP") {
 						$query = "INSERT into $table_mysql SET laatija='$kukarow[kuka]', luontiaika=now() ";
 					}
@@ -988,6 +1026,9 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 					if ($eiyhtiota == "") {
 						$query = "UPDATE $table_mysql SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
 	      			}
+					elseif ($eiyhtiota == "EILAATIJAA") {
+						$query = "UPDATE {$table_mysql} SET yhtio = '{$kukarow['yhtio']}' ";
+					}
 					elseif ($eiyhtiota == "TRIP") {
 						$query = "UPDATE $table_mysql SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 	      			}
@@ -1209,7 +1250,10 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 								// Tarvitaan tarkista.inc failissa
 								$toimi_liitostunnus = $tpttrow["tunnus"];
 
-								$query .= ", liitostunnus='$tpttrow[tunnus]' ";
+								if ($rivi[$postoiminto] != 'POISTA') {
+									$query .= ", liitostunnus='$tpttrow[tunnus]' ";
+								}
+
 								$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 							}
 						}
@@ -1669,7 +1713,8 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 		else echo "\nPäivitettiin $lask riviä\n";
 	}
 }
-else {
+
+if (!$cli) {
 
 	$indx = array(
 		'asiakas',
@@ -1712,13 +1757,15 @@ else {
 		'yhteensopivuus_auto',
 		'yhteensopivuus_auto_2',
 		'yhteensopivuus_mp',
+		'yhteensopivuus_rekisteri',
 		'yhteensopivuus_tuote',
 		'yhteensopivuus_tuote_lisatiedot',
 		'yhteyshenkilo',
 		'kuka',
 		'extranet_kayttajan_lisatiedot',
 		'auto_vari',
-		'auto_vari_tuote'
+		'auto_vari_tuote',
+		'auto_vari_korvaavat'
 	);
 
 	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
@@ -1729,73 +1776,77 @@ else {
 
 	$sel = array_fill_keys(array($table), " selected") + array_fill_keys($indx, '');
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action=''>
 			<input type='hidden' name='tee' value='file'>
 			<table>
 			<tr>
 				<td>".t("Valitse tietokannan taulu").":</td>
 				<td><select name='table' onchange='submit();'>
-					<option value='asiakas' $sel[asiakas]>".t("Asiakas")."</option>
-					<option value='asiakasalennus' $sel[asiakasalennus]>".t("Asiakasalennukset")."</option>
-					<option value='asiakashinta' $sel[asiakashinta]>".t("Asiakashinnat")."</option>
-					<option value='asiakaskommentti' $sel[asiakaskommentti]>".t("Asiakaskommentit")."</option>
-					<option value='asiakkaan_avainsanat' $sel[asiakkaan_avainsanat]>".t("Asiakkaan avainsanat")."</option>
-					<option value='abc_parametrit' $sel[abc_parametrit]>".t("ABC-parametrit")."</option>
-					<option value='autodata' $sel[autodata]>".t("Autodatatiedot")."</option>
-					<option value='autodata_tuote' $sel[autodata_tuote]>".t("Autodata tuotetiedot")."</option>
-					<option value='avainsana' $sel[avainsana]>".t("Avainsanat")."</option>
-					<option value='budjetti' $sel[budjetti]>".t("Budjetti")."</option>
-					<option value='etaisyydet' $sel[etaisyydet]>".t("Etäisyydet varastosta")."</option>
-					<option value='hinnasto' $sel[hinnasto]>".t("Hinnasto")."</option>
-					<option value='kalenteri' $sel[kalenteri]>".t("Kalenteritietoja")."</option>
-					<option value='kustannuspaikka' $sel[kustannuspaikka]>".t("Kustannuspaikat")."</option>
-					<option value='liitetiedostot' $sel[liitetiedostot]>".t("Liitetiedostot")."</option>
-					<option value='maksuehto' $sel[maksuehto]>".t("Maksuehto")."</option>
-					<option value='pakkaus' $sel[pakkaus]>".t("Pakkaustiedot")."</option>
-					<option value='perusalennus' $sel[perusalennus]>".t("Perusalennukset")."</option>
-					<option value='rahtimaksut' $sel[rahtimaksut]>".t("Rahtimaksut")."</option>
-					<option value='rahtisopimukset' $sel[rahtisopimukset]>".t("Rahtisopimukset")."</option>
-					<option value='rekisteritiedot' $sel[rekisteritiedot]>".t("Rekisteritiedot")."</option>
-					<option value='sanakirja' $sel[sanakirja]>".t("Sanakirja")."</option>
-					<option value='sarjanumeron_lisatiedot' $sel[sarjanumeron_lisatiedot]>".t("Sarjanumeron lisätiedot")."</option>
-					<option value='taso' $sel[taso]>".t("Tilikartan rakenne")."</option>
-					<option value='tili' $sel[tili]>".t("Tilikartta")."</option>
-					<option value='todo' $sel[todo]>".t("Todo-lista")."</option>
-					<option value='toimi' $sel[toimi]>".t("Toimittaja")."</option>
-					<option value='toimitustapa' $sel[toimitustapa]>".t("Toimitustapoja")."</option>
-					<option value='tullinimike' $sel[tullinimike]>".t("Tullinimikeet")."</option>
-					<option value='tuote' $sel[tuote]>".t("Tuote")."</option>
-					<option value='tuotepaikat' $sel[tuotepaikat]>".t("Tuotepaikat")."</option>
-					<option value='tuoteperhe' $sel[tuoteperhe]>".t("Tuoteperheet")."</option>
-					<option value='tuotteen_alv' $sel[tuotteen_alv]>".t("Tuotteiden ulkomaan ALV")."</option>
-					<option value='tuotteen_avainsanat' $sel[tuotteen_avainsanat]>".t("Tuotteen avainsanat")."</option>
-					<option value='tuotteen_orginaalit' $sel[tuotteen_orginaalit]>".t("Tuotteiden originaalit")."</option>
-					<option value='tuotteen_toimittajat' $sel[tuotteen_toimittajat]>".t("Tuotteen toimittajat")."</option>
-					<option value='vak' $sel[vak]>".t("VAK-tietoja")."</option>
-					<option value='yhteensopivuus_auto' $sel[yhteensopivuus_auto]>".t("Yhteensopivuus automallit")."</option>
-					<option value='yhteensopivuus_auto_2' $sel[yhteensopivuus_auto_2]>".t("Yhteensopivuus automallit 2")."</option>
-					<option value='yhteensopivuus_mp' $sel[yhteensopivuus_mp]>".t("Yhteensopivuus mp-mallit")."</option>
-					<option value='yhteensopivuus_tuote' $sel[yhteensopivuus_tuote]>".t("Yhteensopivuus tuotteet")."</option>
-					<option value='yhteensopivuus_tuote_lisatiedot' $sel[yhteensopivuus_tuote_lisatiedot]>".t("Yhteensopivuus tuotteet lisätiedot")."</option>
-					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
-					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>
-					<option value='extranet_kayttajan_lisatiedot' $sel[extranet_kayttajan_lisatiedot]>".t("Extranet-käyttäjän lisätietoja")."</option>";
+					<option value='asiakas' {$sel['asiakas']}>".t("Asiakas")."</option>
+					<option value='asiakasalennus' {$sel['asiakasalennus']}>".t("Asiakasalennukset")."</option>
+					<option value='asiakashinta' {$sel['asiakashinta']}>".t("Asiakashinnat")."</option>
+					<option value='asiakaskommentti' {$sel['asiakaskommentti']}>".t("Asiakaskommentit")."</option>
+					<option value='asiakkaan_avainsanat' {$sel['asiakkaan_avainsanat']}>".t("Asiakkaan avainsanat")."</option>
+					<option value='abc_parametrit' {$sel['abc_parametrit']}>".t("ABC-parametrit")."</option>
+					<option value='autodata' {$sel['autodata']}>".t("Autodatatiedot")."</option>
+					<option value='autodata_tuote' {$sel['autodata_tuote']}>".t("Autodata tuotetiedot")."</option>
+					<option value='avainsana' {$sel['avainsana']}>".t("Avainsanat")."</option>
+					<option value='budjetti' {$sel['budjetti']}>".t("Budjetti")."</option>
+					<option value='etaisyydet' {$sel['etaisyydet']}>".t("Etäisyydet varastosta")."</option>
+					<option value='hinnasto' {$sel['hinnasto']}>".t("Hinnasto")."</option>
+					<option value='kalenteri' {$sel['kalenteri']}>".t("Kalenteritietoja")."</option>
+					<option value='kustannuspaikka' {$sel['kustannuspaikka']}>".t("Kustannuspaikat")."</option>
+					<option value='liitetiedostot' {$sel['liitetiedostot']}>".t("Liitetiedostot")."</option>
+					<option value='maksuehto' {$sel['maksuehto']}>".t("Maksuehto")."</option>
+					<option value='pakkaus' {$sel['pakkaus']}>".t("Pakkaustiedot")."</option>
+					<option value='perusalennus' {$sel['perusalennus']}>".t("Perusalennukset")."</option>
+					<option value='rahtimaksut' {$sel['rahtimaksut']}>".t("Rahtimaksut")."</option>
+					<option value='rahtisopimukset' {$sel['rahtisopimukset']}>".t("Rahtisopimukset")."</option>
+					<option value='rekisteritiedot' {$sel['rekisteritiedot']}>".t("Rekisteritiedot")."</option>
+					<option value='sanakirja' {$sel['sanakirja']}>".t("Sanakirja")."</option>
+					<option value='sarjanumeron_lisatiedot' {$sel['sarjanumeron_lisatiedot']}>".t("Sarjanumeron lisätiedot")."</option>
+					<option value='taso' {$sel['taso']}>".t("Tilikartan rakenne")."</option>
+					<option value='tili' {$sel['tili']}>".t("Tilikartta")."</option>
+					<option value='todo' {$sel['todo']}>".t("Todo-lista")."</option>
+					<option value='toimi' {$sel['toimi']}>".t("Toimittaja")."</option>
+					<option value='toimitustapa' {$sel['toimitustapa']}>".t("Toimitustapoja")."</option>
+					<option value='tullinimike' {$sel['tullinimike']}>".t("Tullinimikeet")."</option>
+					<option value='tuote' {$sel['tuote']}>".t("Tuote")."</option>
+					<option value='tuotepaikat' {$sel['tuotepaikat']}>".t("Tuotepaikat")."</option>
+					<option value='tuoteperhe' {$sel['tuoteperhe']}>".t("Tuoteperheet")."</option>
+					<option value='tuotteen_alv' {$sel['tuotteen_alv']}>".t("Tuotteiden ulkomaan ALV")."</option>
+					<option value='tuotteen_avainsanat' {$sel['tuotteen_avainsanat']}>".t("Tuotteen avainsanat")."</option>
+					<option value='tuotteen_orginaalit' {$sel['tuotteen_orginaalit']}>".t("Tuotteiden originaalit")."</option>
+					<option value='tuotteen_toimittajat' {$sel['tuotteen_toimittajat']}>".t("Tuotteen toimittajat")."</option>
+					<option value='vak' {$sel['vak']}>".t("VAK-tietoja")."</option>
+					<option value='yhteensopivuus_auto' {$sel['yhteensopivuus_auto']}>".t("Yhteensopivuus automallit")."</option>
+					<option value='yhteensopivuus_auto_2' {$sel['yhteensopivuus_auto_2']}>".t("Yhteensopivuus automallit 2")."</option>
+					<option value='yhteensopivuus_mp' {$sel['yhteensopivuus_mp']}>".t("Yhteensopivuus mp-mallit")."</option>
+					<option value='yhteensopivuus_rekisteri' {$sel['yhteensopivuus_rekisteri']}>".t("Yhteensopivuus rekisterinumerot")."</option>
+					<option value='yhteensopivuus_tuote' {$sel['yhteensopivuus_tuote']}>".t("Yhteensopivuus tuotteet")."</option>
+					<option value='yhteensopivuus_tuote_lisatiedot' {$sel['yhteensopivuus_tuote_lisatiedot']}>".t("Yhteensopivuus tuotteet lisätiedot")."</option>
+					<option value='yhteyshenkilo' {$sel['yhteyshenkilo']}>".t("Yhteyshenkilöt")."</option>
+					<option value='kuka' {$sel['kuka']}>".t("Käyttäjätietoja")."</option>
+					<option value='extranet_kayttajan_lisatiedot' {$sel['extranet_kayttajan_lisatiedot']}>".t("Extranet-käyttäjän lisätietoja")."</option>
+					<option value='varaston_hyllypaikat' {$sel['varaston_hyllypaikat']}>".t("Varaston hyllypaikat")."</option>
+					<option value='toimitustavan_lahdot' {$sel['toimitustavan_lahdot']}>".t("Toimitustavan lähdöt")."</option>";
 
-			$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
-			$dynaamiset_avainsanat = '';
+	$dynaamiset_avainsanat_result = t_avainsana('DYNAAMINEN_PUU', '', " and selite != '' ");
+	$dynaamiset_avainsanat = '';
 
-		if ($kukarow['yhtio'] == 'mast') {
-			echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
-			echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
+	if ($kukarow['yhtio'] == 'mast') {
+		echo "<option value='auto_vari' $sel[auto_vari]>".t("Autoväri-datat")."</option>";
+		echo "<option value='auto_vari_tuote' $sel[auto_vari_tuote]>".t("Autoväri-värikirja")."</option>";
+		echo "<option value='auto_vari_korvaavat' $sel[auto_vari_korvaavat]>".t("Autoväri-korvaavat")."</option>";
+	}
+
+	while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
+		if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
+			$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
 		}
 
-			while ($dynaamiset_avainsanat_row = mysql_fetch_assoc($dynaamiset_avainsanat_result)) {
-				if ($table == 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])) {
-					$dynaamiset_avainsanat = 'puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite']);
-				}
-
-				echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
-			}
+		echo "<option value='puun_alkio_".strtolower($dynaamiset_avainsanat_row['selite'])."' ",$sel['puun_alkio_'.strtolower($dynaamiset_avainsanat_row['selite'])],">Dynaaminen_",strtolower($dynaamiset_avainsanat_row['selite']),"</option>";
+	}
 
 	echo "	</select></td></tr>";
 

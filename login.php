@@ -1,14 +1,14 @@
 <?php
 
 //kayttaja on syottanyt tietonsa login formiin
-if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {	
+if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 
 	$login = "yes";
 	require("inc/parametrit.inc");
 
 	$session = "";
 	$usea 	 = 0;
-	
+
 	srand((double) microtime() * 1000000);
 
 	$query = "	SELECT kuka.kuka, kuka.session, kuka.salasana, kuka.yhtio
@@ -79,11 +79,11 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 		if (!isset($err) or $err != 1) {
 			// Pitääkö vielä kysyä yritystä???
 			if ($usea != 1 or (isset($yhtio) and strlen($yhtio) > 0)) {
-				
+
 				for ($i=0; $i<25; $i++) {
 					$session = $session . chr(rand(65,90)) ;
 				}
-				
+
 				$query = "	UPDATE kuka
 							SET session = '$session',
 							lastlogin = now()
@@ -125,6 +125,9 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 	else {
 		$errormsg = t("Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen", $browkieli)."!";
 	}
+
+	// Kirjataan epäonnistunut kirjautuminen virhelokiin...
+	error_log ("user $user: authentication failure for \"/pupesoft/\": Password Mismatch", 0);
 }
 else {
 	require_once("inc/parametrit.inc");
@@ -201,7 +204,7 @@ if (isset($usea) and $usea == 1) {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio, if(yhtio.jarjestys=0, 9999, yhtio.jarjestys) jarj
 				FROM kuka
 				JOIN yhtio ON yhtio.yhtio = kuka.yhtio
-				WHERE kuka.kuka	= '$user'				
+				WHERE kuka.kuka	= '$user'
 				and kuka.extranet = ''
 				ORDER BY jarj, yhtio.nimi";
 	$result = mysql_query($query) or pupe_error($query);

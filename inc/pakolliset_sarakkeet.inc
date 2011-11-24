@@ -161,6 +161,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$joinattavat = array("TUOTENO" => "yhteensopivuus_tuote");
 				$saakopoistaa = TRUE;
 				break;
+			case "yhteensopivuus_rekisteri" :
+				$pakolliset  = array("REKNO", "AJONEUVOLAJI", "AUTOID", "MAA");
+				$kielletyt   = array();
+				$eiyhtiota 	 = "EILAATIJAA";
+				$saakopoistaa = TRUE;
+				break;
 			case "tuotteen_orginaalit" :
 				$pakolliset  = array("TUOTENO", "ORIG_TUOTENO");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
@@ -203,6 +209,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("LAJI", "MAA", "VALKOODI");
 				$joinattavat = array("TUOTENO" => "tuote");
+				$saakopoistaa = TRUE;
 				break;
 			case "rahtisopimukset" :
 				$pakolliset = array("YTUNNUS", "RAHTISOPIMUS", "TOIMITUSTAPA");
@@ -288,6 +295,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$saakopoistaa = TRUE;
 				break;
+			case "auto_vari_korvaavat" :
+				$pakolliset = array("VARIKOODI","KORVAAVA_VARIKOODI");
+				$wherelliset = array("VARIKOODI","KORVAAVA_VARIKOODI","AVK_TUNNUS");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$saakopoistaa = TRUE;
+				break;
 			case "vak" :
 				$pakolliset = array("YK_NRO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
@@ -295,6 +308,16 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "extranet_kayttajan_lisatiedot" :
 				$pakolliset = array("LIITOSTUNNUS", "LAJI", "SELITE");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
+			case "varaston_hyllypaikat":
+				$pakolliset = array("VARASTO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO");
+				$wherelliset = array("VARASTO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
+			case "toimitustavan_lahdot":
+				$pakolliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS");
+				$wherelliset = array("LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "AKTIIVI", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			default :

@@ -1,7 +1,6 @@
 <?php
 
-
-	// käytetään slavea
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 	$useslave = 1;
 
 	if (isset($_POST["tee"])) {
@@ -342,7 +341,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and kaytossa != 'E'
 						and tyyppi = 'K'
-						order by tunnus";
+						ORDER BY koodi+0, koodi, nimi";
 			$sresult = mysql_query($query) or pupe_error($query);
 
 			echo "<select name='kustannuspaikka'>";

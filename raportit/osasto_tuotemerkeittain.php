@@ -1,6 +1,6 @@
 <?php
 
-///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
 if (@include("../inc/parametrit.inc"));
@@ -317,12 +317,12 @@ if ($tee == 'go') {
 
 				$edosasto = $yhtrow["osasto"];
 			}
-			
-			
+
+
 			if ($kaikkimyynticuryht != 0 and $kaikkimyyntiedyht != 0)
 				$indlv = sprintf('%.2f',$kaikkimyynticuryht / $kaikkimyyntiedyht);
 			else $indlv = "n/a";
-			
+
 			echo "<tr>";
 			echo "<th>Yhteensä</th>";
 			echo "<th align='right'>".str_replace(".",",",$kaikkimyynticuryht)."</th>";
@@ -357,7 +357,7 @@ if ($tee == 'go') {
 			}
 
 			echo "</tr>";
-			
+
 			echo "</table><br>";
 		}
 		else {
@@ -439,7 +439,7 @@ if ($kukarow["extranet"] == '') {
 	echo "</select>";
 
 	if ($asiakasytunnus != "") $asiakas = $asiakasytunnus;
-	
+
 	echo "</td></tr>
 			<tr><th>".t("tai anna asiakkaan ytunnus (jos et, ajetaan kaikki yhteensä)")."</th><td colspan = '3'><input type='text' name='asiakas' value='$asiakas' size='15'></td></tr>";
 }

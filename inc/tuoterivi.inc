@@ -453,7 +453,8 @@
 					from kustannuspaikka
 					where yhtio = '$kukarow[yhtio]'
 					and tyyppi = '$kptyyppi'
-					and kaytossa != 'E'";
+					and kaytossa != 'E'
+					ORDER BY koodi+0, koodi, nimi";
 		$vresult = pupe_query($tpque);
 
 		$sel="";

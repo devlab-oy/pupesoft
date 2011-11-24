@@ -79,14 +79,14 @@ if (!isset($tultiin)) $tultiin = "";
 
 if ($kukarow["extranet"] != "") {
 	if ($tultiin == "futur") {
-		$extralisa = " and sovellus = 'Futursoft' ";
+		$extralisa = " and sovellus = 'Extranet Futursoft' ";
 	}
 	else {
 		$extralisa = " and sovellus = 'Extranet' ";
 	}
 }
 else {
-	$extralisa = " and sovellus not like 'Extranet%' and sovellus not like 'Futursoft%' ";
+	$extralisa = " and sovellus not like 'Extranet%'";
 }
 
 // mit‰ sovelluksia k‰ytt‰j‰ saa k‰ytt‰‰

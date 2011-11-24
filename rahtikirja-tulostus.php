@@ -578,6 +578,9 @@
 
 				// tulostetaan toimitustavan määrittelemä rahtikirja
 				if (@include("tilauskasittely/$toitarow[rahtikirja]")) {
+					
+					// Otetaan talteen tässä $rahtikirjanro talteen
+					$rahtikirjanro_alkuperainen = $rahtikirjanro;
 
 					if ($tulosta_vak_yleisrahtikirja != '') {
 						require("tilauskasittely/rahtikirja_pdf.inc");
@@ -586,6 +589,9 @@
 					if ($toitarow['erittely'] != '') {
 						require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 					}
+					
+					// palautetaan alkuperäinen $rahtikirjanro takaisin
+					$rahtikirjanro = $rahtikirjanro_alkuperainen;
 				}
 				else {
 					if (!isset($nayta_pdf)) echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";

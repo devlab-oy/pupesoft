@@ -1173,6 +1173,33 @@ while ($tietue = fgets($fd)) {
 					$kieltolisa = "";
 				}
 
+				// Tallennetaan alkuperäinen aineisto tilauksen liitetiedostoksi
+				$liitefile = file_get_contents($mailfile);
+				$filesize  = strlen($liitefile);
+				$filename  = basename($mailfile);
+				$liitefile = mysql_real_escape_string($liitefile);
+				$fileslite = t("Tilausnumero")." $id";
+
+				$query = "	INSERT INTO liitetiedostot SET
+							yhtio    			= '$kukarow[yhtio]',
+							liitos   			= 'lasku',
+							liitostunnus 		= '$id',
+							data     			= '$liitefile',
+							selite   			= '$fileslite',
+							kieli				= '$yhtiorow[kieli]',
+							filename 			= '$filename',
+							filesize 			= '$filesize',
+							filetype 			= 'text/plain',
+							image_width			= '',
+							image_height		= '',
+							image_bits			= '',
+							image_channels		= '',
+							kayttotarkoitus		= 'EDI',
+							jarjestys			= '1',
+							laatija				= '$edi_laatija',
+							luontiaika			= now()";
+				$Xresult = pupe_query($query);
+
 				// HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meidän kannassa on eri kuin tilaukselta tullut nimi
 				if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr") {
 
@@ -1407,25 +1434,25 @@ while ($tietue = fgets($fd)) {
 
 			if ($edi_tyyppi == "edifact911") {
 				$kentat = explode(":", $tieto);
-				$kentat_bgm = explode("+", $tieto); 
+				$kentat_bgm = explode("+", $tieto);
 				// BGM kentässä tulee 'BGM+QQQ+ABCDEFGHIJKLM'
 				// QQQ = arvot, 105=tilaus, 640=toimituskehoitus, 221=plokkitilaus/ennakkotilaus
 				// ABCDEFGHIJKLM = tossa tulee myymälän tilausnumero, joka pitäisi olla sama kuin RFF+VN kentän arvo.
-				
+
 				if ($asiakkaan_tilausnumero == "" and $kentat_bgm[0] == '105' and $kentat_bgm[1] != "") {
 					$asiakkaan_tilausnumero = $kentat_bgm[1];
 					$viite = $kentat_bgm[1]. ' ';
 					break;
 				}
-				
+
 				// Orders 91.1 tulee kaksi RFF segmenttiä (VN ja WS). VN otsikon viite, joten ei liity tilausriveihin. WS on tilausrivin loppumisen merkki.
 				if ($kentat[0] == "VN" and $asiakkaan_tilausnumero == "") {
 					$asiakkaan_tilausnumero = $kentat[1];
 					$viite = $kentat[1]. ' ';
 					break;
 				}
-				
-				
+
+
 			}
 
 			if ($editilaus_otsikko_ok == "KYLLA") {

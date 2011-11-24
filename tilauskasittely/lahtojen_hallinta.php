@@ -188,7 +188,8 @@
 				SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
 				SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
 				SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
-				avainsana.selitetark_3 AS 'prioriteetti',
+				#avainsana.selitetark_3 AS 'prioriteetti',
+				lasku.prioriteettinro AS 'prioriteetti',
 				toimitustapa.selite AS 'toimitustapa',
 				COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
 				SUM(IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), 1, 0)) AS 'valmiina',
@@ -205,7 +206,7 @@
 				JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-				JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
+				#JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
 				GROUP BY 1,2,3,4,5,6,7,8
@@ -273,7 +274,8 @@
 					lasku.nimi AS 'asiakas_nimi',
 					lasku.toim_nimi AS 'asiakas_toim_nimi',
 					lasku.toim_postitp AS 'asiakas_toim_postitp',
-					avainsana.selitetark_3 AS 'prioriteetti',
+					#avainsana.selitetark_3 AS 'prioriteetti',
+					lasku.prioriteettinro AS 'prioriteetti',
 					GROUP_CONCAT(DISTINCT kerayserat.nro) AS 'erat',
 					GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS 'pakkausnumerot',
 					GROUP_CONCAT(DISTINCT kerayserat.sscc) AS 'sscc',
@@ -284,7 +286,7 @@
 					LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus)
 					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-					JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
+					#JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus IN ({$row['tilaukset']})
 					GROUP BY 1,2,3,4,5";

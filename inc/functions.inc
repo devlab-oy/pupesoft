@@ -14071,7 +14071,8 @@ if (!function_exists("tee_keraysera2")) {
 					lasku.nimi as asiakas_nimi,
 					lahdot.tunnus as lahto,
 					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
-					avainsana.selitetark_3 as prioriteetti,
+					#avainsana.selitetark_3 as prioriteetti,
+					lasku.prioriteettinro as prioriteetti,
 					LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
 					{$select} as tunnus
 					#MIN(vh.indeksi) as minimi_indeksi,
@@ -14094,7 +14095,7 @@ if (!function_exists("tee_keraysera2")) {
 									AND lahdot.kerailyn_aloitusaika <= CURTIME()
 									AND lahdot.asiakasluokka = lasku.hyvaksynnanmuutos
  									)
-					JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
+					#JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tila = 'N'
 					AND lasku.alatila = 'A'

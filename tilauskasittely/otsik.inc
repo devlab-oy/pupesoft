@@ -2805,6 +2805,8 @@
 
 		$ohjausmerkki = trim($ohjausmerkki);
 
+		$prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$luokka}'", "", "", "selitetark_3");		
+
 		$query .= "	lasku SET
 					aktiivinen_kuljetus					= '',
 					alatila 							= '$alatila',
@@ -2819,6 +2821,7 @@
 					erpcm								= '$erpcmvv-$erpcmkk-$erpcmpp',
 					huolitsija 							= '$huolitsija',
 					hyvaksynnanmuutos 					= '$luokka',
+					prioriteettinro						= '$prioriteettinro',
 					jakelu 								= '$jakelu',
 					jaksotettu							= '$jaksotettu',
 					jtkielto							= '$jtkielto',

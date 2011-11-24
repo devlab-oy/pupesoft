@@ -58,19 +58,18 @@
 							$('#toggleable_row_order_'+this.id).slideUp('fast');
 
 							if ($('.toggleable_row_child:visible').length == 1) {
-								$('tr[id!=\"toggleable_row_tr_'+id+'\"][class=\"toggleable_row_tr\"]').show();
+								$('tr[id!=\"toggleable_row_tr_'+this.id+'\"][class=\"toggleable_row_tr\"]').show();
 							}
 						}
 						else {
 
 							$(this).addClass('tumma');
 
-							var id = this.id;
-							var parent_element = $('#toggleable_row_order_'+id).parent();
+							var parent_element = $('#toggleable_row_order_'+this.id).parent();
 
-							$('tr[id!=\"toggleable_row_tr_'+id+'\"][class=\"toggleable_row_tr\"]').hide();
+							$('tr[id!=\"toggleable_row_tr_'+this.id+'\"][class=\"toggleable_row_tr\"]').hide();
 
-							$('#toggleable_row_order_'+id).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
+							$('#toggleable_row_order_'+this.id).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 						}
 					});
 

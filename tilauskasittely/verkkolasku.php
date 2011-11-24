@@ -1350,9 +1350,14 @@
 
 							if ($seviite != 'SE') {
 								//  Jos viitenumero on v‰‰rin menn‰‰n oletuksilla!
-								if (tarkista_viite($viite) === FALSE) {
+								if (substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
 									$viite = $lasno;
 									$tulos_ulos .= "<font class='message'><br>\n".t("HUOM!!! laskun '%s' k‰sinsyotetty viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", $kieli, $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
+									require('inc/generoiviite.inc');
+								}
+								elseif (substr($viite, 0, 2) == "RF" and tarkista_rfviite($viite) === FALSE) {
+									$viite = $lasno;
+									$tulos_ulos .= "<font class='message'><br>\n".t("HUOM!!! laskun '%s' k‰sinsyotetty RF-viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", $kieli, $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
 									require('inc/generoiviite.inc');
 								}
 							}

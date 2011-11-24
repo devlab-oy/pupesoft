@@ -540,8 +540,13 @@ if ($tee == 'I') {
 		$tee = 'E';
 	}
 
-	if (strlen($viite) > 0 and tarkista_viite($viite) === FALSE) {
+	if (strlen($viite) > 0 and substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
 		$errormsg .= "<font class='error'>".t("Viite on v‰‰rin")."</font><br>";
+		$tee = 'E';
+	}
+	
+	if (strlen($viite) > 0 and substr($viite, 0, 2) == "RF" and tarkista_rfviite($viite) === FALSE) {
+		$errormsg .= "<font class='error'>".t("RF-Viite on v‰‰rin")."</font><br>";
 		$tee = 'E';
 	}
 

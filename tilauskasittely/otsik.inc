@@ -513,12 +513,12 @@
 				}
 
 				if (trim($assrow["toim_nimi"]) == "") {
-					$assrow["toim_nimi"]	= $assrow["nimi"];
-					$assrow["toim_nimitark"]= $assrow["nimitark"];
-					$assrow["toim_osoite"]	= $assrow["osoite"];
-					$assrow["toim_postino"]	= $assrow["postino"];
-					$assrow["toim_postitp"]	= $assrow["postitp"];
-					$assrow["toim_maa"]		= $assrow["maa"];
+					$assrow["toim_nimi"]		= $assrow["nimi"];
+					$assrow["toim_nimitark"]	= $assrow["nimitark"];
+					$assrow["toim_osoite"]		= $assrow["osoite"];
+					$assrow["toim_postino"]		= $assrow["postino"];
+					$assrow["toim_postitp"]		= $assrow["postitp"];
+					$assrow["toim_maa"]			= $assrow["maa"];
 				}
 
 				if (trim($assrow["laskutus_nimi"]) == "") {

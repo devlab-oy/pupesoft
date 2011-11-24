@@ -552,8 +552,8 @@ if ($kasitellaan_tiedosto) {
 				flush();
 			}
 
-			if ($eiyhtiota == "") {
-				$valinta   = " yhtio = '$kukarow[yhtio]'";
+			if ($eiyhtiota == "" or $eiyhtiota == "EILAATIJAA") {
+				$valinta   = " yhtio = '{$kukarow['yhtio']}'";
 			}
 			elseif ($eiyhtiota == "TRIP") {
 				$valinta   = " tunnus > 0 ";
@@ -1014,6 +1014,9 @@ if ($kasitellaan_tiedosto) {
 					if ($eiyhtiota == "") {
 						$query = "INSERT into $table_mysql SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 					}
+					elseif ($eiyhtiota == "EILAATIJAA") {
+						$query = "INSERT INTO {$table_mysql} SET yhtio = '{$kukarow['yhtio']}' ";
+					}
 					elseif ($eiyhtiota == "TRIP") {
 						$query = "INSERT into $table_mysql SET laatija='$kukarow[kuka]', luontiaika=now() ";
 					}
@@ -1023,6 +1026,9 @@ if ($kasitellaan_tiedosto) {
 					if ($eiyhtiota == "") {
 						$query = "UPDATE $table_mysql SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
 	      			}
+					elseif ($eiyhtiota == "EILAATIJAA") {
+						$query = "UPDATE {$table_mysql} SET yhtio = '{$kukarow['yhtio']}' ";
+					}
 					elseif ($eiyhtiota == "TRIP") {
 						$query = "UPDATE $table_mysql SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 	      			}
@@ -1751,6 +1757,7 @@ if (!$cli) {
 		'yhteensopivuus_auto',
 		'yhteensopivuus_auto_2',
 		'yhteensopivuus_mp',
+		'yhteensopivuus_rekisteri',
 		'yhteensopivuus_tuote',
 		'yhteensopivuus_tuote_lisatiedot',
 		'yhteyshenkilo',
@@ -1775,51 +1782,52 @@ if (!$cli) {
 			<tr>
 				<td>".t("Valitse tietokannan taulu").":</td>
 				<td><select name='table' onchange='submit();'>
-					<option value='asiakas' $sel[asiakas]>".t("Asiakas")."</option>
-					<option value='asiakasalennus' $sel[asiakasalennus]>".t("Asiakasalennukset")."</option>
-					<option value='asiakashinta' $sel[asiakashinta]>".t("Asiakashinnat")."</option>
-					<option value='asiakaskommentti' $sel[asiakaskommentti]>".t("Asiakaskommentit")."</option>
-					<option value='asiakkaan_avainsanat' $sel[asiakkaan_avainsanat]>".t("Asiakkaan avainsanat")."</option>
-					<option value='abc_parametrit' $sel[abc_parametrit]>".t("ABC-parametrit")."</option>
-					<option value='autodata' $sel[autodata]>".t("Autodatatiedot")."</option>
-					<option value='autodata_tuote' $sel[autodata_tuote]>".t("Autodata tuotetiedot")."</option>
-					<option value='avainsana' $sel[avainsana]>".t("Avainsanat")."</option>
-					<option value='budjetti' $sel[budjetti]>".t("Budjetti")."</option>
-					<option value='etaisyydet' $sel[etaisyydet]>".t("Etäisyydet varastosta")."</option>
-					<option value='hinnasto' $sel[hinnasto]>".t("Hinnasto")."</option>
-					<option value='kalenteri' $sel[kalenteri]>".t("Kalenteritietoja")."</option>
-					<option value='kustannuspaikka' $sel[kustannuspaikka]>".t("Kustannuspaikat")."</option>
-					<option value='liitetiedostot' $sel[liitetiedostot]>".t("Liitetiedostot")."</option>
-					<option value='maksuehto' $sel[maksuehto]>".t("Maksuehto")."</option>
-					<option value='pakkaus' $sel[pakkaus]>".t("Pakkaustiedot")."</option>
-					<option value='perusalennus' $sel[perusalennus]>".t("Perusalennukset")."</option>
-					<option value='rahtimaksut' $sel[rahtimaksut]>".t("Rahtimaksut")."</option>
-					<option value='rahtisopimukset' $sel[rahtisopimukset]>".t("Rahtisopimukset")."</option>
-					<option value='rekisteritiedot' $sel[rekisteritiedot]>".t("Rekisteritiedot")."</option>
-					<option value='sanakirja' $sel[sanakirja]>".t("Sanakirja")."</option>
-					<option value='sarjanumeron_lisatiedot' $sel[sarjanumeron_lisatiedot]>".t("Sarjanumeron lisätiedot")."</option>
-					<option value='taso' $sel[taso]>".t("Tilikartan rakenne")."</option>
-					<option value='tili' $sel[tili]>".t("Tilikartta")."</option>
-					<option value='todo' $sel[todo]>".t("Todo-lista")."</option>
-					<option value='toimi' $sel[toimi]>".t("Toimittaja")."</option>
-					<option value='toimitustapa' $sel[toimitustapa]>".t("Toimitustapoja")."</option>
-					<option value='tullinimike' $sel[tullinimike]>".t("Tullinimikeet")."</option>
-					<option value='tuote' $sel[tuote]>".t("Tuote")."</option>
-					<option value='tuotepaikat' $sel[tuotepaikat]>".t("Tuotepaikat")."</option>
-					<option value='tuoteperhe' $sel[tuoteperhe]>".t("Tuoteperheet")."</option>
-					<option value='tuotteen_alv' $sel[tuotteen_alv]>".t("Tuotteiden ulkomaan ALV")."</option>
-					<option value='tuotteen_avainsanat' $sel[tuotteen_avainsanat]>".t("Tuotteen avainsanat")."</option>
-					<option value='tuotteen_orginaalit' $sel[tuotteen_orginaalit]>".t("Tuotteiden originaalit")."</option>
-					<option value='tuotteen_toimittajat' $sel[tuotteen_toimittajat]>".t("Tuotteen toimittajat")."</option>
-					<option value='vak' $sel[vak]>".t("VAK-tietoja")."</option>
-					<option value='yhteensopivuus_auto' $sel[yhteensopivuus_auto]>".t("Yhteensopivuus automallit")."</option>
-					<option value='yhteensopivuus_auto_2' $sel[yhteensopivuus_auto_2]>".t("Yhteensopivuus automallit 2")."</option>
-					<option value='yhteensopivuus_mp' $sel[yhteensopivuus_mp]>".t("Yhteensopivuus mp-mallit")."</option>
-					<option value='yhteensopivuus_tuote' $sel[yhteensopivuus_tuote]>".t("Yhteensopivuus tuotteet")."</option>
-					<option value='yhteensopivuus_tuote_lisatiedot' $sel[yhteensopivuus_tuote_lisatiedot]>".t("Yhteensopivuus tuotteet lisätiedot")."</option>
-					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
-					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>
-					<option value='extranet_kayttajan_lisatiedot' $sel[extranet_kayttajan_lisatiedot]>".t("Extranet-käyttäjän lisätietoja")."</option>
+					<option value='asiakas' {$sel['asiakas']}>".t("Asiakas")."</option>
+					<option value='asiakasalennus' {$sel['asiakasalennus']}>".t("Asiakasalennukset")."</option>
+					<option value='asiakashinta' {$sel['asiakashinta']}>".t("Asiakashinnat")."</option>
+					<option value='asiakaskommentti' {$sel['asiakaskommentti']}>".t("Asiakaskommentit")."</option>
+					<option value='asiakkaan_avainsanat' {$sel['asiakkaan_avainsanat']}>".t("Asiakkaan avainsanat")."</option>
+					<option value='abc_parametrit' {$sel['abc_parametrit']}>".t("ABC-parametrit")."</option>
+					<option value='autodata' {$sel['autodata']}>".t("Autodatatiedot")."</option>
+					<option value='autodata_tuote' {$sel['autodata_tuote']}>".t("Autodata tuotetiedot")."</option>
+					<option value='avainsana' {$sel['avainsana']}>".t("Avainsanat")."</option>
+					<option value='budjetti' {$sel['budjetti']}>".t("Budjetti")."</option>
+					<option value='etaisyydet' {$sel['etaisyydet']}>".t("Etäisyydet varastosta")."</option>
+					<option value='hinnasto' {$sel['hinnasto']}>".t("Hinnasto")."</option>
+					<option value='kalenteri' {$sel['kalenteri']}>".t("Kalenteritietoja")."</option>
+					<option value='kustannuspaikka' {$sel['kustannuspaikka']}>".t("Kustannuspaikat")."</option>
+					<option value='liitetiedostot' {$sel['liitetiedostot']}>".t("Liitetiedostot")."</option>
+					<option value='maksuehto' {$sel['maksuehto']}>".t("Maksuehto")."</option>
+					<option value='pakkaus' {$sel['pakkaus']}>".t("Pakkaustiedot")."</option>
+					<option value='perusalennus' {$sel['perusalennus']}>".t("Perusalennukset")."</option>
+					<option value='rahtimaksut' {$sel['rahtimaksut']}>".t("Rahtimaksut")."</option>
+					<option value='rahtisopimukset' {$sel['rahtisopimukset']}>".t("Rahtisopimukset")."</option>
+					<option value='rekisteritiedot' {$sel['rekisteritiedot']}>".t("Rekisteritiedot")."</option>
+					<option value='sanakirja' {$sel['sanakirja']}>".t("Sanakirja")."</option>
+					<option value='sarjanumeron_lisatiedot' {$sel['sarjanumeron_lisatiedot']}>".t("Sarjanumeron lisätiedot")."</option>
+					<option value='taso' {$sel['taso']}>".t("Tilikartan rakenne")."</option>
+					<option value='tili' {$sel['tili']}>".t("Tilikartta")."</option>
+					<option value='todo' {$sel['todo']}>".t("Todo-lista")."</option>
+					<option value='toimi' {$sel['toimi']}>".t("Toimittaja")."</option>
+					<option value='toimitustapa' {$sel['toimitustapa']}>".t("Toimitustapoja")."</option>
+					<option value='tullinimike' {$sel['tullinimike']}>".t("Tullinimikeet")."</option>
+					<option value='tuote' {$sel['tuote']}>".t("Tuote")."</option>
+					<option value='tuotepaikat' {$sel['tuotepaikat']}>".t("Tuotepaikat")."</option>
+					<option value='tuoteperhe' {$sel['tuoteperhe']}>".t("Tuoteperheet")."</option>
+					<option value='tuotteen_alv' {$sel['tuotteen_alv']}>".t("Tuotteiden ulkomaan ALV")."</option>
+					<option value='tuotteen_avainsanat' {$sel['tuotteen_avainsanat']}>".t("Tuotteen avainsanat")."</option>
+					<option value='tuotteen_orginaalit' {$sel['tuotteen_orginaalit']}>".t("Tuotteiden originaalit")."</option>
+					<option value='tuotteen_toimittajat' {$sel['tuotteen_toimittajat']}>".t("Tuotteen toimittajat")."</option>
+					<option value='vak' {$sel['vak']}>".t("VAK-tietoja")."</option>
+					<option value='yhteensopivuus_auto' {$sel['yhteensopivuus_auto']}>".t("Yhteensopivuus automallit")."</option>
+					<option value='yhteensopivuus_auto_2' {$sel['yhteensopivuus_auto_2']}>".t("Yhteensopivuus automallit 2")."</option>
+					<option value='yhteensopivuus_mp' {$sel['yhteensopivuus_mp']}>".t("Yhteensopivuus mp-mallit")."</option>
+					<option value='yhteensopivuus_rekisteri' {$sel['yhteensopivuus_rekisteri']}>".t("Yhteensopivuus rekisterinumerot")."</option>
+					<option value='yhteensopivuus_tuote' {$sel['yhteensopivuus_tuote']}>".t("Yhteensopivuus tuotteet")."</option>
+					<option value='yhteensopivuus_tuote_lisatiedot' {$sel['yhteensopivuus_tuote_lisatiedot']}>".t("Yhteensopivuus tuotteet lisätiedot")."</option>
+					<option value='yhteyshenkilo' {$sel['yhteyshenkilo']}>".t("Yhteyshenkilöt")."</option>
+					<option value='kuka' {$sel['kuka']}>".t("Käyttäjätietoja")."</option>
+					<option value='extranet_kayttajan_lisatiedot' {$sel['extranet_kayttajan_lisatiedot']}>".t("Extranet-käyttäjän lisätietoja")."</option>
 					<option value='varaston_hyllypaikat' {$sel['varaston_hyllypaikat']}>".t("Varaston hyllypaikat")."</option>
 					<option value='toimitustavan_lahdot' {$sel['toimitustavan_lahdot']}>".t("Toimitustavan lähdöt")."</option>";
 

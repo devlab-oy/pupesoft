@@ -9,7 +9,7 @@
 
 					$('td').css({'padding': '0px', 'white-space': 'nowrap'});
 
-					$('.center').css({'text-align': 'center'});
+					$('.center').css({'text-align': 'center', 'padding-left': '7px', 'padding-right': '7px'});
 					$('.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
 
 					$(':checkbox').click(function(event){
@@ -110,6 +110,7 @@
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
 	$query = "	SELECT lahdot.tunnus AS 'lahdon_tunnus',
+				lahdot.pvm AS 'lahdon_pvm',
 				SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
 				SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
 				SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
@@ -133,7 +134,7 @@
 				JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
-				GROUP BY 1,2,3,4,5,6";
+				GROUP BY 1,2,3,4,5,6,7";
 	$result = pupe_query($query);
 
 	echo "<table>";
@@ -143,6 +144,7 @@
 	echo "<th>",t("Lähtö"),"</th>";
 	echo "<th>",t("Prio"),"</th>";
 	echo "<th>",t("Toimitustapa"),"</th>";
+	echo "<th>",t("Pvm"),"</th>";
 	echo "<th>",t("Viim til klo"),"</th>";
 	echo "<th>",t("Lähtöaika"),"</th>";
 	echo "<th>",t("Ker. alku klo"),"</th>";
@@ -161,6 +163,7 @@
 		echo "<td class='toggleable center' id='{$row['lahdon_tunnus']}'><a class='td'>{$row['lahdon_tunnus']}</a></td>";
 		echo "<td class='center'>{$row['prioriteetti']}</td>";
 		echo "<td>{$row['toimitustapa']}</td>";
+		echo "<td class='center'>{$row['lahdon_pvm']}</td>";
 		echo "<td class='center'>{$row['viimeinen_tilausaika']}</td>";
 		echo "<td class='center'>{$row['lahdon_kellonaika']}</td>";
 		echo "<td class='center'>{$row['kerailyn_aloitusaika']}</td>";
@@ -171,13 +174,13 @@
 
 		echo "</tr>";
 
-		$query = "	SELECT lasku.tunnus AS tilauksen_tunnus,
-					lasku.nimi AS asiakas_nimi,
-					lasku.toim_nimi AS asiakas_toim_nimi,
-					lasku.toim_postitp AS asiakas_toim_postitp,
+		$query = "	SELECT lasku.tunnus AS 'tilauksen_tunnus',
+					lasku.nimi AS 'asiakas_nimi',
+					lasku.toim_nimi AS 'asiakas_toim_nimi',
+					lasku.toim_postitp AS 'asiakas_toim_postitp',
 					avainsana.selitetark_3 AS 'prioriteetti',
-					GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS pakkausnumerot,
-					GROUP_CONCAT(DISTINCT kerayserat.sscc) AS sscc
+					GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS 'pakkausnumerot',
+					GROUP_CONCAT(DISTINCT kerayserat.sscc) AS 'sscc'
 					FROM lasku
 					LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus)
 					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
@@ -189,7 +192,7 @@
 		$lahto_res = pupe_query($query);
 
 		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}'>";
-		echo "<td colspan='12' class='back'>";
+		echo "<td colspan='13' class='back'>";
 		echo "<div id='toggleable_{$row['lahdon_tunnus']}' style='display:none;'>";
 
 		echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
@@ -219,10 +222,10 @@
 			echo "</td>";
 			echo "<td>{$lahto_row['asiakas_toim_postitp']}</td>";
 
-			$query = "	SELECT keraysvyohyke.nimitys AS keraysvyohyke,
-						COUNT(tilausrivi.tunnus) AS rivit,
-						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS keratyt,
-						ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS kg
+			$query = "	SELECT keraysvyohyke.nimitys AS 'keraysvyohyke',
+						COUNT(tilausrivi.tunnus) AS 'rivit',
+						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt',
+						ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg'
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = tuote.keraysvyohyke)
@@ -285,9 +288,9 @@
 						tuote.nimitys,
 						kerayserat.kpl,
 						tilausrivi.yksikko,
-						CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
-						kerayserat.laatija AS keraaja,
-						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS keratyt
+						CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS 'hyllypaikka',
+						kerayserat.laatija AS 'keraaja',
+						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
 						FROM tilausrivi
 						LEFT JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)

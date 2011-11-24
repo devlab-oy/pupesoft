@@ -163,9 +163,23 @@
 		echo "<td class='toggleable center' id='{$row['lahdon_tunnus']}'><a class='td'>{$row['lahdon_tunnus']}</a></td>";
 		echo "<td class='center'>{$row['prioriteetti']}</td>";
 		echo "<td>{$row['toimitustapa']}</td>";
-		echo "<td class='center'>{$row['lahdon_pvm']}</td>";
+		echo "<td class='center'>",tv1dateconv($row['lahdon_pvm']),"</td>";
 		echo "<td class='center'>{$row['viimeinen_tilausaika']}</td>";
-		echo "<td class='center'>{$row['lahdon_kellonaika']}</td>";
+
+		$exp_date = strtotime($row['lahdon_pvm'].' '.$row['lahdon_kellonaika'].':00');
+		$todays_date = strtotime(date('Y-m-d H:i:s'));
+
+		echo "<td class='center'>";
+
+		if ($todays_date > $exp_date) {
+			echo "<font class='error'>{$row['lahdon_kellonaika']}</font>";
+		}
+		else {
+			echo $row['lahdon_kellonaika'];
+		}
+
+		echo "</td>";
+
 		echo "<td class='center'>{$row['kerailyn_aloitusaika']}</td>";
 		echo "<td class='center'>{$row['tilatut']} / {$row['valmiina']}</td>";
 		echo "<td class='center'>{$row['suunnittelussa']} / {$row['keratyt']}</td>";

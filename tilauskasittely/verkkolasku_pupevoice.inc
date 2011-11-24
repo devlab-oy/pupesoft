@@ -31,56 +31,65 @@ if (!function_exists('pupevoice_otsik')) {
 		fputs($tootxml, "</CHN>\n");
 		fputs($tootxml, "<SellerPartyInformation>\n");
 
-		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
-		if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
+		// yhtiötiedot
+		$y_tiedot_ok	= FALSE;
+		$y_nimi 		= $lasrow["yhtio_nimi"];
+		$y_osoite 		= $lasrow["yhtio_osoite"];
+		$y_postino	 	= $lasrow["yhtio_postino"];
+		$y_postitp	 	= $lasrow["yhtio_postitp"];
+		$y_maa 			= $lasrow["yhtio_maa"];
+		$y_kotipaikka	= $lasrow["yhtio_kotipaikka"];
+		$y_vatnumero	= str_replace("0037", "", $lasrow["yhtio_ovttunnus"]);
+		$y_iban 		= $yhtiorow['pankkiiban1'];
+		$y_swift 		= $yhtiorow['pankkiswift1'];
 
+		if ((int) $lasrow["yhtio_toimipaikka"] != 0) {
 			// haetaan toimipaikan tiedot
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
-			$alhire = pupe_query($alhqur);
+			$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and tunnus='$lasrow[yhtio_toimipaikka]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {
+				$alhiro = mysql_fetch_assoc($alhire);
 
-				// haetaan toimipaikan tiedot
+				$y_tiedot_ok	= TRUE;
+				$y_puhelin		= $alhiro['puhelin'];
+				$y_fax			= $alhiro['fax'];
+				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
+			}
+		}
+
+		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
+		if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
+			// haetaan toimipaikan tiedot
+			$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			if (mysql_num_rows($alhire) == 1) {
+				$alhiro = mysql_fetch_assoc($alhire);
+
+				$y_tiedot_ok	= TRUE;
+				$y_puhelin		= $alhiro['puhelin'];
+				$y_fax			= $alhiro['fax'];
+				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
+			}
+		}
+
+		// jos ei olla haettu muualta, niin haetaan tiedot yhtiöltä
+		if (!$y_tiedot_ok) {
+			// haetaan toimipaikan tiedot
+			$alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$lasrow[yhtio]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			if (mysql_num_rows($alhire) == 1) {
 				$alhiro = mysql_fetch_assoc($alhire);
 
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
-				$y_www			= $yhtiorow['www'];
-				$y_nimi 		= $lasrow["yhtio_nimi"];
-				$y_osoite 		= $lasrow["yhtio_osoite"];
-				$y_postino	 	= $lasrow["yhtio_postino"];
-				$y_postitp	 	= $lasrow["yhtio_postitp"];
-				$y_maa 			= $lasrow["yhtio_maa"];
-				$y_kotipaikka	= $lasrow["yhtio_kotipaikka"];
-				$y_vatnumero	= $lasrow["yhtio_ovttunnus"];
+				$y_www			= $alhiro['www'];
 			}
-			else {
-				$y_puhelin		= $yhtiorow['puhelin'];
-				$y_fax			= $yhtiorow['fax'];
-				$y_email		= $yhtiorow['email'];
-				$y_www			= $yhtiorow['www'];
-				$y_nimi 		= $yhtiorow["nimi"];
-				$y_osoite 		= $yhtiorow["osoite"];
-				$y_postino	 	= $yhtiorow["postino"];
-				$y_postitp	 	= $yhtiorow["postitp"];
-				$y_maa 			= $yhtiorow["maa"];
-				$y_kotipaikka	= $yhtiorow["kotipaikka"];
-				$y_vatnumero	= $yhtiorow["ovttunnus"];
-			}
-		}
-		else {
-			$y_puhelin		= $yhtiorow['puhelin'];
-			$y_fax			= $yhtiorow['fax'];
-			$y_email		= $yhtiorow['email'];
-			$y_www			= $yhtiorow['www'];
-			$y_nimi 		= $yhtiorow["nimi"];
-			$y_osoite 		= $yhtiorow["osoite"];
-			$y_postino	 	= $yhtiorow["postino"];
-			$y_postitp	 	= $yhtiorow["postitp"];
-			$y_maa 			= $yhtiorow["maa"];
-			$y_kotipaikka	= $yhtiorow["kotipaikka"];
-			$y_vatnumero	= $yhtiorow["ovttunnus"];
 		}
 
 		// haetaan asiakkaan tiedot

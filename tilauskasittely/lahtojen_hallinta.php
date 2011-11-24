@@ -16,6 +16,9 @@
 						event.stopPropagation();
 					});
 
+					$('.vihrea').css({'background-image': 'url(\"{$palvelin2}pics/vaaleanvihrea.png\")'});
+					$('.keltainen').css({'background-image': 'url(\"{$palvelin2}pics/keltainen.png\")'});
+
 					$('.toggleable').click(function(event){
 
 						if ($('#toggleable_'+this.id).is(':visible')) {
@@ -111,6 +114,7 @@
 
 	$query = "	SELECT lahdot.tunnus AS 'lahdon_tunnus',
 				lahdot.pvm AS 'lahdon_pvm',
+				lahdot.vakisin_kerays,
 				SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
 				SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
 				SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
@@ -134,7 +138,7 @@
 				JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
-				GROUP BY 1,2,3,4,5,6,7";
+				GROUP BY 1,2,3,4,5,6,7,8";
 	$result = pupe_query($query);
 
 	echo "<table>";
@@ -158,16 +162,22 @@
 
 		echo "<tr class='toggleable_parent' id='toggleable_parent_{$row['lahdon_tunnus']}'>";
 
-		echo "<td></td>";
+		$exp_date = strtotime($row['lahdon_pvm'].' '.$row['lahdon_kellonaika'].':00');
+		$todays_date = strtotime(date('Y-m-d H:i:s'));
+
+		if ($todays_date >= $exp_date or $row['vakisin_kerays'] != '') {
+			echo "<td class='vihrea'></td>";
+		}
+		else {
+			echo "<td class='keltainen'></td>";
+		}
+
 		echo "<td><input type='checkbox' class='checkall' name='{$row['lahdon_tunnus']}'></td>";
 		echo "<td class='toggleable center' id='{$row['lahdon_tunnus']}'><a class='td'>{$row['lahdon_tunnus']}</a></td>";
 		echo "<td class='center'>{$row['prioriteetti']}</td>";
 		echo "<td>{$row['toimitustapa']}</td>";
 		echo "<td class='center'>",tv1dateconv($row['lahdon_pvm']),"</td>";
 		echo "<td class='center'>{$row['viimeinen_tilausaika']}</td>";
-
-		$exp_date = strtotime($row['lahdon_pvm'].' '.$row['lahdon_kellonaika'].':00');
-		$todays_date = strtotime(date('Y-m-d H:i:s'));
 
 		echo "<td class='center'>";
 

@@ -703,8 +703,8 @@
 		$sel = trim($trow[$i]) == 'E' ? ' selected' : '';
 
 		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
-		$ulos .= "<option value=''>".t("Ehdotetaan")."</option>";
-		$ulos .= "<option value='E'{$sel}>".t("Ei ehdoteta")."</option>";
+		$ulos .= "<option value=''>".t("Ehdotetaan ostoehdotusohjelmissa tilattavaksi")."</option>";
+		$ulos .= "<option value='E'{$sel}>".t("Ei ehdoteta ostoehdotusohjelmissa tilattavaksi")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

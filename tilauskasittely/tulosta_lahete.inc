@@ -2309,7 +2309,8 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 
 		$alakala = $kala;
 
-		if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"])) {
+		// tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
+		if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
 			#viivakoodi
 			$data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
 			$image = $pdf->jfif_embed($data);

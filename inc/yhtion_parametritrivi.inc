@@ -2872,28 +2872,28 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == 'raaka_aineet_valmistusmyynti') {
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
-	
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
 		$sel = $trow[$i] == 'N' ? ' selected' : '';
-		
+
 		$ulos .= "<option value = ''>".t("Näytetään raaka-aineet valmistusmyynnissä");
 		$ulos .= "<option value = 'N' $sel>".t("Ei näytetä raaka-aineita valmistusmyynnissä");
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == 'tarkista_eankoodi') {
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
-	
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
 		$sel = $trow[$i] == 'K' ? ' selected' : '';
-		
-		$ulos .= "<option value = ''>".t("Ei tarkisteta EAN13-koodia tuotteelta syöttö- eikä muokkausvaiheessa")."</option>";
-		$ulos .= "<option value = 'K' $sel>".t("Tarkistetaan EAN13-koodi syöttö- ja muokkausvaiheessa")."</option>";
+
+		$ulos .= "<option value = ''>".t("Ei tehdä tuotteen EAN13-koodin oikeellisuustarkistusta")."</option>";
+		$ulos .= "<option value = 'K' $sel>".t("Tarkistetaan tuotteen EAN13-koodin oikeellisuus")."</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
 

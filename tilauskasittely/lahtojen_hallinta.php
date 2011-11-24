@@ -49,7 +49,7 @@
 						}
 					});
 
-					$('.toggleable_row_order').click(function(event){
+					$('.toggleable_row_order').live('click', function(event){
 
 						if ($('#toggleable_row_order_'+this.id).is(':visible')) {
 
@@ -72,7 +72,7 @@
 						}
 					});
 
-					$('.toggleable_row_sscc').click(function(event){
+					$('.toggleable_row_sscc').live('click', function(event){
 
 						var id = this.id.split(\"#\", 3);
 
@@ -92,6 +92,73 @@
 							var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[1]).parent();
 
 							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
+						}
+					});
+
+					function compareId(a, b) {
+						return b.id - a.id;
+					}
+
+					var sort_row_by_order_direction = true;
+
+					$('.sort_row_by_order').click(function(){
+						var arr = $('.toggleable_row_tr:visible');
+						var _arr = new Array();
+						var _arrChildOrder = new Array();
+						var _arrChildSscc = new Array();
+
+						for (i = 0; i < arr.length; i++) {
+							var row = arr[i];
+
+							var id = $(row).attr('id').substring(18);
+
+							var temp = {'id': id, 'row': row};
+							_arr.push(temp);
+
+							var rowChildOrder = $('.toggleable_row_child_order_'+id);
+							var tempChildOrder = {'id': id, 'row': rowChildOrder};
+							_arrChildOrder.push(tempChildOrder);
+
+							var rowChildSscc = $('.toggleable_row_child_sscc_'+id);
+							var tempChildSscc = {'id': id, 'row': rowChildSscc};
+							_arrChildSscc.push(tempChildSscc);
+						}
+
+						$('.toggleable_row_tr:visible').remove();
+
+						for (i = 0; i < _arr.length; i++) {
+							$('.toggleable_row_child_order_'+_arr[i].id).remove();
+							$('.toggleable_row_child_sscc_'+_arr[i].id).remove();
+						}
+
+						var header_id = $('.toggleable_tr:visible').attr('id').substring(14);
+
+						if (sort_row_by_order_direction) {
+
+							_arr.sort(compareId);
+							_arrChildOrder.sort(compareId);
+							_arrChildSscc.sort(compareId);
+
+							for (i = 0; i < _arr.length; i++) {
+								$('.header_row_'+header_id).after(_arrChildSscc[i].row);
+								$('.header_row_'+header_id).after(_arrChildOrder[i].row);
+								$('.header_row_'+header_id).after(_arr[i].row);
+							}
+
+							sort_row_by_order_direction = false;
+						}
+						else {
+							_arr.sort(compareId).reverse();
+							_arrChildOrder.sort(compareId).reverse();
+							_arrChildSscc.sort(compareId).reverse();
+
+							for (i = 0; i < _arr.length; i++) {
+								$('.header_row_'+header_id).after(_arrChildSscc[i].row);
+								$('.header_row_'+header_id).after(_arrChildOrder[i].row);
+								$('.header_row_'+header_id).after(_arr[i].row);
+							}
+
+							sort_row_by_order_direction = true;
 						}
 					});
 
@@ -204,6 +271,7 @@
 					lasku.toim_nimi AS 'asiakas_toim_nimi',
 					lasku.toim_postitp AS 'asiakas_toim_postitp',
 					avainsana.selitetark_3 AS 'prioriteetti',
+					GROUP_CONCAT(DISTINCT kerayserat.nro) AS 'erat',
 					GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS 'pakkausnumerot',
 					GROUP_CONCAT(DISTINCT kerayserat.sscc) AS 'sscc',
 					GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tilat',
@@ -225,14 +293,15 @@
 
 		echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
 
-		echo "<tr>";
+		echo "<tr class='header_row_{$row['lahdon_tunnus']}'>";
 		echo "<th></th>";
 		echo "<th>",t("Status"),"</th>";
 		echo "<th>",t("Prio"),"</th>";
-		echo "<th>",t("Tilausnumero"),"</th>";
+		echo "<th class='sort_row_by_order'>",t("Tilausnumero"),"</th>";
 		echo "<th>",t("Asiakas"),"</th>";
 		echo "<th>",t("Paikkakunta"),"</th>";
 		echo "<th>",t("Keräysvyöhyke"),"</th>";
+		echo "<th>",t("Erä"),"</th>";
 		echo "<th>",t("Rivit")," / ",t("Kerätyt"),"</th>";
 		echo "<th>",t("SSCC"),"</th>";
 		echo "<th>",t("Pakkaus"),"</th>";
@@ -245,19 +314,22 @@
 
 			echo "<td><input type='checkbox' class='checkbox_{$row['lahdon_tunnus']}'></td>";
 
-			echo "<td class='center'>";
+			$status = $status_text = '';
 
 			if (strpos($lahto_row['tilat'], "K") !== FALSE) {
-				echo t("Aloitettu");
+				$status_text = t("Aloitettu");
+				$status = 2;
 			}
 			elseif ($lahto_row['keraysera_rivi_count'] > 0 and $lahto_row['keraysera_rivi_count'] == $lahto_row['keraysera_rivi_valmis']) {
-				echo t("Kerätty");
+				$status_text = t("Kerätty");
+				$status = 3;
 			}
 			else {
-				echo t("Aloittamatta");
+				$status_text = t("Aloittamatta");
+				$status = 1;
 			}
 
-			echo "</td>";
+			echo "<td class='data status_{$status}'>{$status_text}</td>";
 
 			echo "<td class='center'>{$lahto_row['prioriteetti']}</td>";
 			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}'><a class='td'>{$lahto_row['tilauksen_tunnus']}</a></td>";
@@ -280,6 +352,9 @@
 			$til_row = mysql_fetch_assoc($til_res);
 
 			echo "<td class='data'>{$til_row['keraysvyohyke']}</td>";
+
+			echo "<td class='data'>",str_replace(",", "<br />", $lahto_row['erat']),"</td>";
+
 			echo "<td>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
 			echo "<td class='data'>";
 
@@ -343,8 +418,8 @@
 						GROUP BY 1,2,3,4,5,6,7";
 			$rivi_res = pupe_query($query);
 			
-			echo "<tr>";
-			echo "<td colspan='11' class='back'>";
+			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}'>";
+			echo "<td colspan='12' class='back'>";
 			echo "<div class='toggleable_row_child' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";
@@ -401,8 +476,8 @@
 							GROUP BY 1,2,3,4,5,6,7";
 				$rivi_res = pupe_query($query);
 
-				echo "<tr>";
-				echo "<td colspan='11' class='back'>";
+				echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}'>";
+				echo "<td colspan='12' class='back'>";
 				echo "<div class='toggleable_row_child' id='toggleable_row_sscc_{$sscc}_{$i}' style='display:none;'>";
 
 				echo "<table style='width:100%;'>";

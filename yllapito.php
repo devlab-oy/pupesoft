@@ -600,8 +600,11 @@
 							$ltpv = substr($laskuorow["tapvm"], 0, 4);
 						}
 
-						$oletus_erapvm = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_erapvm"], $ltpv));
-						$oletus_kapvm  = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_kapvm"], $ltpv));
+						if ($otsikrow["oletus_erapvm"] > 0) $oletus_erapvm = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_erapvm"], $ltpv));
+						else $oletus_erapvm = 0;
+
+						if ($otsikrow["oletus_kapvm"] > 0) $oletus_kapvm  = date("Y-m-d", mktime(0, 0, 0, $ltpk, $ltpp+$otsikrow["oletus_kapvm"], $ltpv));
+						else $oletus_kapvm = 0;
 
 						$otsikrow["oletus_kasumma"] = round($laskuorow["summa"] * $otsikrow['oletus_kapro'] / 100, 2);
 
@@ -614,8 +617,8 @@
 
 						// Jos lasku on hyv‰ksytty ja muutetaan hyvˆksynt‰‰n liittyvi‰ tietoja
 						if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
-							($laskuorow["erpcm"] != $oletus_erapvm) or
-							($laskuorow["kapvm"] != $oletus_kapvm) or
+							($oletus_erapvm > 0 and $laskuorow["erpcm"] != $oletus_erapvm) or
+							($oletus_erapvm > 0 and $laskuorow["kapvm"] != $oletus_kapvm) or
 							($laskuorow["kasumma"] != $otsikrow["oletus_kasumma"]) or
 							($laskuorow["tilinumero"] != $otsikrow["tilinumero"]) or
 							($laskuorow["ultilno"] != $otsikrow["ultilno"]) or
@@ -629,8 +632,8 @@
 							($laskuorow["suoraveloitus"] != $otsikrow["oletus_suoraveloitus"]) or
 							($laskuorow["sisviesti1"] != $otsikrow["ohjeitapankille"]))) {
 
-							#echo "Lasku palautetaan hyv‰ksynt‰‰n<br><table>";
-							#echo "<tr><td>$laskuorow[summa]</td></tr>";
+							#echo "<br><table>";
+							#echo "<tr><td>Lasku palautetaan hyv‰ksynt‰‰n</td><td>$laskuorow[summa]</td></tr>";
 							#echo "<tr><td>".$laskuorow["erpcm"]."</td><td>".$oletus_erapvm."</td></tr>";
 							#echo "<tr><td>".$laskuorow["kapvm"]."</td><td>".$oletus_kapvm."</td></tr>";
 							#echo "<tr><td>".$laskuorow["kasumma"]."</td><td>".$otsikrow["oletus_kasumma"]."</td></tr>";

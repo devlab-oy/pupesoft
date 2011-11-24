@@ -1034,10 +1034,7 @@ if (!function_exists('loppu_tarjous')) {
 		global $kukarow, $yhtiorow, $boldi, $pieni, $norm, $rectparam, $kaanteinen_verotus;
 
 		// yhtiötiedot
-		$y_puhelin		= $yhtiorow['puhelin'];
-		$y_fax			= $yhtiorow['fax'];
-		$y_email		= $yhtiorow['email'];
-		$y_www			= $yhtiorow['www'];
+		$y_tiedot_ok	= FALSE;
 		$y_nimi 		= $laskurow["yhtio_nimi"];
 		$y_osoite 		= $laskurow["yhtio_osoite"];
 		$y_postino	 	= $laskurow["yhtio_postino"];
@@ -1050,30 +1047,50 @@ if (!function_exists('loppu_tarjous')) {
 
 		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
 			// haetaan toimipaikan tiedot
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_toimipaikka]'";
-			$alhire = pupe_query($alhqur);
+			$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {
-				// haetaan toimipaikan tiedot
-				$alhiro = mysql_fetch_array($alhire);
+				$alhiro = mysql_fetch_assoc($alhire);
+
+				$y_tiedot_ok	= TRUE;
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
 			}
 		}
 
 		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
 		if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
 			// haetaan toimipaikan tiedot
-			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
-			$alhire = pupe_query($alhqur);
+			$alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {
-				// haetaan toimipaikan tiedot
-				$alhiro = mysql_fetch_array($alhire);
+				$alhiro = mysql_fetch_assoc($alhire);
+
+				$y_tiedot_ok	= TRUE;
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
+			}
+		}
+
+		// jos ei olla haettu muualta, niin haetaan tiedot yhtiöltä
+		if (!$y_tiedot_ok) {
+			// haetaan toimipaikan tiedot
+			$alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			if (mysql_num_rows($alhire) == 1) {
+				$alhiro = mysql_fetch_assoc($alhire);
+
+				$y_puhelin		= $alhiro['puhelin'];
+				$y_fax			= $alhiro['fax'];
+				$y_email		= $alhiro['email'];
+				$y_www			= $alhiro['www'];
 			}
 		}
 
@@ -1367,7 +1384,7 @@ if (!function_exists('print_pdf_tarjous')) {
 			$kutsu = t("Tarjous", $kieli);
 
 			if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-				$kutsu .= " ".trim($laskurow["nimi"]);
+				$kutsu .= ", ".trim($laskurow["nimi"]);
 			}
 
 			echo t("Tarjous tulostuu")."...<br>";
@@ -1436,36 +1453,6 @@ if (!function_exists('tulosta_tarjous')) {
 					WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 		$result = pupe_query($query);
 		$asiakasrow = mysql_fetch_array($result);
-
-		//korjataan yhtiön tietoja
-		$query  = "	SELECT *
-					from kuka
-					where tunnus = '$laskurow[myyja]'
-					and yhtio = '$kukarow[yhtio]'";
-		$myyresult = pupe_query($query);
-
-		if (mysql_num_rows($myyresult) == 1) {
-			$myyrow = mysql_fetch_array($myyresult);
-
-			$kukarow["toimipaikka"] = $myyrow["toimipaikka"];
-		}
-
-		$query = "	SELECT *
-					FROM yhtion_toimipaikat
-					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[toimipaikka]'";
-		$result = pupe_query($query);
-
-		if (mysql_num_rows($result) == 1) {
-			$yhtion_toimipaikkarow = mysql_fetch_array($result);
-
-			$yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
-			$yhtiorow["nimi"] 		= $yhtion_toimipaikkarow["nimi"];
-			$yhtiorow["osoite"] 	= $yhtion_toimipaikkarow["osoite"];
-			$yhtiorow["postino"] 	= $yhtion_toimipaikkarow["postino"];
-			$yhtiorow["postitp"] 	= $yhtion_toimipaikkarow["postitp"];
-			$yhtiorow["puhelin"] 	= $yhtion_toimipaikkarow["puhelin"];
-
-		}
 
 		//oletuksia
 		$total 			= 0;

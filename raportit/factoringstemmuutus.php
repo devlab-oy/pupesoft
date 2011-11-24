@@ -1,5 +1,8 @@
 <?php
 
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
+
 require("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Factioringtäsmäytys")."</font><hr>";
@@ -12,7 +15,7 @@ if (!$vva) {
 echo "<table>";
 echo "<form name='stemmuutus' action='$PHP_SELF' method='post' autocomplete='off'>";
 
-$query = "	SELECT factoringyhtio 
+$query = "	SELECT factoringyhtio
 			FROM factoring
 			WHERE yhtio = '$kukarow[yhtio]'";
 $vresult = pupe_query($query);
@@ -118,9 +121,9 @@ if (isset($submit)) {
 	if (mysql_num_rows($res) == 1) {
 		$factoringrow = mysql_fetch_assoc($res);
 
-		$query = "	SELECT * 
-					FROM yriti 
-					WHERE yhtio = '$kukarow[yhtio]' 
+		$query = "	SELECT *
+					FROM yriti
+					WHERE yhtio = '$kukarow[yhtio]'
 					AND tilino  = '$factoringrow[pankki_tili]'";
 		$res = pupe_query($query);
 

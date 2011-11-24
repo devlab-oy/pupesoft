@@ -1,6 +1,4 @@
 <?php
-	// Tämä skripti käyttää slave-tietokantapalvelinta
-	$useslave = 1;
 
 	if (isset($_POST["tee"])) {
 		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
@@ -584,6 +582,7 @@
 					tuote.yhtio in ($yhtiot)
 					$lisaa
 					and tuote.ei_saldoa = ''
+					and tuote.ostoehdotus = ''
 					GROUP BY tuote.tuoteno
 					ORDER BY id, tuote.tuoteno, yhtio";
 		$res = mysql_query($query) or pupe_error($query);

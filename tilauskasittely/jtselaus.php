@@ -246,7 +246,7 @@
 				require ("jt_super.inc");
 				$jt_super = jt_super($laskurow["tunnus"]);
 
-				echo "$jt_super<br><br>";
+				if ($jt_super != "") echo "$jt_super<br><br>";
 
 				//Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
 				$silent = "SILENT";
@@ -856,7 +856,7 @@
 							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
-							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
+							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and ((lasku.tila = 'E' and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'X')) $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
@@ -875,7 +875,7 @@
 							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, {$ale_query_select_lisa}
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2,
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
-							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi,
+							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi, lasku.liitostunnus,
 							tilausrivin_lisatiedot.tilausrivilinkki
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -1336,6 +1336,7 @@
 									if (!isset($saatanat_chk[$jtrow['ytunnus']])) {
 
 										$sytunnus 	 	 = $jtrow['ytunnus'];
+										$sliitostunnus	 = $jtrow['liitostunnus'];
 										$eiliittymaa 	 = 'ON';
 										$luottorajavirhe = '';
 										$jvvirhe 		 = '';

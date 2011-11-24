@@ -19,6 +19,8 @@
 					$('.vihrea').css({'background-image': 'url(\"{$palvelin2}pics/vaaleanvihrea.png\")'});
 					$('.keltainen').css({'background-image': 'url(\"{$palvelin2}pics/keltainen.png\")'});
 
+					$('.row_order_direction').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
+
 					$('.toggleable').click(function(event){
 
 						if ($('#toggleable_'+this.id).is(':visible')) {
@@ -148,6 +150,8 @@
 								$('.header_row_'+header_id).after(_arr[i].row);
 							}
 
+							$('.row_order_direction').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
+
 							sort_row_by_order_direction = false;
 						}
 						else {
@@ -160,6 +164,8 @@
 								$('.header_row_'+header_id).after(_arrChildOrder[i].row);
 								$('.header_row_'+header_id).after(_arr[i].row);
 							}
+
+							$('.row_order_direction').attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png');
 
 							sort_row_by_order_direction = true;
 						}
@@ -302,7 +308,7 @@
 		echo "<th></th>";
 		echo "<th>",t("Status"),"</th>";
 		echo "<th>",t("Prio"),"</th>";
-		echo "<th class='sort_row_by_order'>",t("Tilausnumero"),"</th>";
+		echo "<th class='sort_row_by_order'>",t("Tilausnumero")," <img class='row_order_direction' /></th>";
 		echo "<th>",t("Asiakas"),"</th>";
 		echo "<th>",t("Paikkakunta"),"</th>";
 		echo "<th>",t("Keräysvyöhyke"),"</th>";

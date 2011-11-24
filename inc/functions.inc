@@ -9393,6 +9393,34 @@ if (!function_exists("viivakoodi")) {
 	}
 }
 
+if (!function_exists("tarkista_ean13")) {
+	function tarkista_ean13($eankoodi){
+		// Ensiksi eankoodi muutetaan Stringiksi
+		$eankoodi =(string)$eankoodi;
+		
+		$tarkistusmerkki = $eankoodi[12];
+		
+		// 1. Add the values of the digits in the even-numbered positions: 2, 4, 6, etc.
+		$even_sum = $eankoodi{1} + $eankoodi{3} + $eankoodi{5} + $eankoodi{7} + $eankoodi{9} + $eankoodi{11};
+		// 2. Multiply this result by 3.
+		$even_sum_three = $even_sum * 3;
+		// 3. Add the values of the digits in the odd-numbered positions: 1, 3, 5, etc.
+		$odd_sum = $eankoodi{0} + $eankoodi{2} + $eankoodi{4} + $eankoodi{6} + $eankoodi{8} + $eankoodi{10};
+		// 4. Sum the results of steps 2 and 3.
+		$total_sum = $even_sum_three + $odd_sum;
+		// 5. The check character is the smallest number which, when added to the result in step 4,  produces a multiple of 10.
+		$next_ten = (ceil($total_sum/10))*10;
+		$check_digit = $next_ten - $total_sum;
+		
+		if ($check_digit == $tarkistusmerkki) {
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
+	}
+}
+
 // Tämä funktio tekee alv-popupin, jossa on yhtiön maan mukaiset alv%tit
 if (!function_exists("alv_popup")) {
 	function alv_popup($nimi, $oletus) {

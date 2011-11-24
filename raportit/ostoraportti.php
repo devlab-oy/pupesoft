@@ -768,6 +768,7 @@
 							$lisaa
 							$abcwhere
 							and tuote.ei_saldoa = ''
+							and tuote.ostoehdotus = ''
 							ORDER BY id, tuote.tuoteno";
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
@@ -822,6 +823,7 @@
 							$lisa
 							$lisaa
 							and tuote.ei_saldoa = ''
+							and tuote.ostoehdotus = ''
 							$abcwhere
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";

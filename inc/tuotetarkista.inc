@@ -283,13 +283,8 @@ if(!function_exists("tuotetarkista")) {
 					$virhe[$i] = t("EAN-koodi on jo perustettu j‰rjestelm‰‰n");
 				}
 				
-				if ($yhtiorow["tarkista_eankoodi"] == "K") {
-					$enari = trim($t[$i]);
-
-					if (tarkista_ean13($enari) === FALSE) {
-						$virhe[$i] = t("EAN-koodi on virheellinen");
-					}
-					
+				if ($yhtiorow["tarkista_eankoodi"] == "K" and tarkista_ean13(trim($t[$i])) === FALSE) {
+					$virhe[$i] = t("EAN-koodi on virheellinen");
 				}
 
 			}

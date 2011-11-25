@@ -12,13 +12,9 @@
 		exit;
 	}
 
-	if ($tee == "TILAA_AJAX") {
-		
+	if (isset($tee) and $tee == "TILAA_AJAX") {
 		require_once("inc/tilaa_ajax.inc");
-	
 	}
-
-	require_once ('inc/ProgressBar.class.php');
 
 	echo "<font class='head'>".t("Ostoehdotus")."</font><hr>";
 

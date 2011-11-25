@@ -363,7 +363,7 @@
 		echo "<th class='sort_row_by' id='row_rows'>",t("Rivit")," / ",t("Kerätyt")," <img class='row_direction_rows' /></th>";
 		echo "<th class='sort_row_by' id='row_sscc'>",t("SSCC")," <img class='row_direction_sscc' /></th>";
 		echo "<th class='sort_row_by' id='row_package'>",t("Pakkaus")," <img class='row_direction_package' /></th>";
-		echo "<th class='sort_row_by' id='row_weight'>",t("Kg")," <img class='row_direction_weight' /></th>";
+		echo "<th class='sort_row_by' id='row_weight'>",t("Paino")," <img class='row_direction_weight' /></th>";
 		echo "</tr>";
 
 		$x = 0;

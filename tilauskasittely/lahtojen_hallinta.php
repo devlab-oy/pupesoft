@@ -23,7 +23,9 @@
 
 					$('.toggleable').click(function(event){
 
-						if ($('#toggleable_'+this.id).is(':visible')) {
+						var id = this.id.split(\"__\", 2);
+
+						if ($('#toggleable_'+id[0]+'__'+id[1]).is(':visible')) {
 
 							$('.toggleable_row_child').hide();
 							$('#toggleable_'+this.id).hide();
@@ -33,21 +35,20 @@
 
 							$('.toggleable_row_tr').hide();
 
-							$('tr[id!=\"toggleable_parent_'+id+'\"][class=\"toggleable_parent\"]').show();
-							$('tr[id!=\"toggleable_tr_'+id+'\"][class=\"toggleable_tr\"]').stop().show();
+							$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').show();
+							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').stop().show();
 
 							$(':checkbox').attr('checked', false);
 						}
 						else {
-							var id = this.id;
-							var parent_element = $('#toggleable_'+id).parent();
+							var parent_element = $('#toggleable_'+id[0]+'__'+id[1]).parent();
 
 							$('.toggleable_row_tr').show();
 
-							$('tr[id!=\"toggleable_parent_'+id+'\"][class=\"toggleable_parent\"]').hide();
-							$('tr[id!=\"toggleable_tr_'+id+'\"][class=\"toggleable_tr\"]').hide();
+							$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').hide();
+							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').hide();
 
-							$('#toggleable_'+id).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show();
+							$('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show();
 						}
 					});
 
@@ -284,9 +285,11 @@
 	echo "<th>",t("Litrat suun / ker"),"</th>";
 	echo "</tr>";
 
+	$y = 0;
+
 	while ($row = mysql_fetch_assoc($result)) {
 
-		echo "<tr class='toggleable_parent' id='toggleable_parent_{$row['lahdon_tunnus']}'>";
+		echo "<tr class='toggleable_parent' id='toggleable_parent_{$row['lahdon_tunnus']}__{$y}'>";
 
 		$exp_date = strtotime($row['lahdon_pvm'].' '.$row['lahdon_kellonaika'].':00');
 		$todays_date = strtotime(date('Y-m-d H:i:s'));
@@ -299,7 +302,7 @@
 		}
 
 		echo "<td><input type='checkbox' class='checkall' name='{$row['lahdon_tunnus']}'></td>";
-		echo "<td class='toggleable center' id='{$row['lahdon_tunnus']}'><a class='td'>{$row['lahdon_tunnus']}</a></td>";
+		echo "<td class='toggleable center' id='{$row['lahdon_tunnus']}__{$y}'><a class='td'>{$row['lahdon_tunnus']}</a></td>";
 		echo "<td class='center'>{$row['prioriteetti']}</td>";
 		echo "<td>{$row['toimitustapa']}</td>";
 		echo "<td class='center'>",tv1dateconv($row['lahdon_pvm']),"</td>";
@@ -348,9 +351,9 @@
 					GROUP BY 1,2,3,4,5,6,7";
 		$lahto_res = pupe_query($query);
 
-		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}'>";
+		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}__{$y}'>";
 		echo "<td colspan='13' class='back'>";
-		echo "<div id='toggleable_{$row['lahdon_tunnus']}' style='display:none;'>";
+		echo "<div id='toggleable_{$row['lahdon_tunnus']}__{$y}' style='display:none;'>";
 
 		echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
 
@@ -590,6 +593,7 @@
 		echo "</td>";
 		echo "</tr>";
 
+		$y++;
 	}
 
 	echo "</table>";

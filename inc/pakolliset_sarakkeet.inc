@@ -171,6 +171,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset  = array("TUOTENO", "ORIG_TUOTENO");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("TUOTENO", "ORIG_TUOTENO", "MERKKI");
+				$saakopoistaa = TRUE;
 				break;
 			case "autodata" :
 				$pakolliset = array("AUTODATAID");

@@ -28,7 +28,7 @@
 						if ($('#toggleable_'+id[0]+'__'+id[1]).is(':visible')) {
 
 							$('.toggleable_row_child').hide();
-							$('#toggleable_'+this.id).hide();
+							$('#toggleable_'+id[0]+'__'+id[1]).hide();
 
 							$('.toggleable_row_order').removeClass('tumma');
 							$('.toggleable_row_sscc').removeClass('tumma');
@@ -170,7 +170,7 @@
 							$('.toggleable_row_child_sscc_'+_arr[i].id+'__'+_arr[i].counter).remove();
 						}
 
-						var header_id = $('.toggleable_tr:visible').attr('id').substring(14);
+						var header_id = $('.toggleable_tr:visible').attr('id').substring(14).split(\"__\", 2);
 
 						if (window['sort_row_direction_'+title]) {
 
@@ -186,9 +186,9 @@
 							}
 
 							for (i = 0; i < _arr.length; i++) {
-								$('.header_row_'+header_id).after(_arrChildSscc[i].row);
-								$('.header_row_'+header_id).after(_arrChildOrder[i].row);
-								$('.header_row_'+header_id).after(_arr[i].row);
+								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
+								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
+								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
 							}
 
 							$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
@@ -209,9 +209,9 @@
 							}
 
 							for (i = 0; i < _arr.length; i++) {
-								$('.header_row_'+header_id).after(_arrChildSscc[i].row);
-								$('.header_row_'+header_id).after(_arrChildOrder[i].row);
-								$('.header_row_'+header_id).after(_arr[i].row);
+								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
+								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
+								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
 							}
 
 							$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png');
@@ -357,7 +357,7 @@
 
 		echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
 
-		echo "<tr class='header_row_{$row['lahdon_tunnus']}'>";
+		echo "<tr class='header_row_{$row['lahdon_tunnus']}__{$y}'>";
 		echo "<th></th>";
 		echo "<th class='sort_row_by' id='row_status'>",t("Status")," <img class='row_direction_status' /></th>";
 		echo "<th class='sort_row_by' id='row_prio'>",t("Prio")," <img class='row_direction_prio' /></th>";

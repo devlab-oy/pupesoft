@@ -140,7 +140,7 @@
 							var id = $(row).children('.toggleable_row_'+title).attr('id');
 							var counter = 0;
 
-							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc') {
+							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package') {
 								var id_temp = id.split(\"__\", 3);
 								id = id_temp[0];
 								counter = id_temp[2];
@@ -174,7 +174,7 @@
 
 						if (window['sort_row_direction_'+title]) {
 
-							if (title == 'client' || title == 'locality' || title == 'picking_zone') {
+							if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
 								_arr.sort(compareName);
 								_arrChildOrder.sort(compareName);
 								_arrChildSscc.sort(compareName);
@@ -197,7 +197,7 @@
 						}
 						else {
 
-							if (title == 'client' || title == 'locality' || title == 'picking_zone') {
+							if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
 								_arr.sort(compareName).reverse();
 								_arrChildOrder.sort(compareName).reverse();
 								_arrChildSscc.sort(compareName).reverse();
@@ -243,7 +243,6 @@
 				SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
 				SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
 				SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
-				#avainsana.selitetark_3 AS 'prioriteetti',
 				lasku.prioriteettinro AS 'prioriteetti',
 				toimitustapa.selite AS 'toimitustapa',
 				COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
@@ -261,7 +260,6 @@
 				JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-				#JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
 				GROUP BY 1,2,3,4,5,6,7,8
@@ -334,7 +332,7 @@
 					lasku.prioriteettinro AS 'prioriteetti',
 					kerayserat.nro AS 'erat',
 					kerayserat.sscc,
-					GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS 'pakkausnumerot',
+					kerayserat.pakkausnro AS 'pakkausnumerot',
 					GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tilat',
 					COUNT(kerayserat.tunnus) AS 'keraysera_rivi_count',
 					SUM(IF((kerayserat.tila = 'T' OR kerayserat.tila = 'R'), 1, 0)) AS 'keraysera_rivi_valmis'
@@ -342,10 +340,9 @@
 					LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus)
 					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-					#JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus IN ({$row['tilaukset']})
-					GROUP BY 1,2,3,4,5,6,7";
+					GROUP BY 1,2,3,4,5,6,7,8";
 		$lahto_res = pupe_query($query);
 
 		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}__{$y}'>";
@@ -365,7 +362,7 @@
 		echo "<th class='sort_row_by' id='row_batch'>",t("Erä")," <img class='row_direction_batch' /></th>";
 		echo "<th class='sort_row_by' id='row_rows'>",t("Rivit")," / ",t("Kerätyt")," <img class='row_direction_rows' /></th>";
 		echo "<th class='sort_row_by' id='row_sscc'>",t("SSCC")," <img class='row_direction_sscc' /></th>";
-		echo "<th>",t("Pakkaus"),"</th>";
+		echo "<th class='sort_row_by' id='row_package'>",t("Pakkaus")," <img class='row_direction_package' /></th>";
 		echo "<th>",t("Kg"),"</th>";
 		echo "</tr>";
 
@@ -421,8 +418,7 @@
 			echo "<td class='data toggleable_row_batch' id='{$lahto_row['erat']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['erat']}</td>";
 
 			echo "<td class='toggleable_row_rows' id='{$til_row['rivit']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
-			echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'><a class='td toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['sscc']}</a></td>";
-			echo "<td class='data'>";
+			echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'><a class='td'>{$lahto_row['sscc']}</a></td>";
 
 			if ($lahto_row['pakkausnumerot'] != '') {
 
@@ -431,24 +427,17 @@
 							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND kerayserat.sscc IN ({$lahto_row['sscc']})
-							AND kerayserat.pakkausnro IN ({$lahto_row['pakkausnumerot']})
-							GROUP BY kerayserat.pakkausnro
+							AND kerayserat.pakkausnro = '{$lahto_row['pakkausnumerot']}'
 							ORDER BY kerayserat.sscc";
 				$pakkauskuvaus_res = pupe_query($query);
+				$pakkauskuvaus_row = mysql_fetch_assoc($pakkauskuvaus_res);
 
-				$num = mysql_num_rows($pakkauskuvaus_res);
-
-				$i = 0;
-
-				while ($pakkauskuvaus_row = mysql_fetch_assoc($pakkauskuvaus_res)) {
-					echo "{$pakkauskuvaus_row['pakkauskuvaus']}";
-
-					if ($i < $num) echo "<br>";
-
-				}
+				echo "<td class='data toggleable_row_package' id='{$pakkauskuvaus_row['pakkauskuvaus']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$pakkauskuvaus_row['pakkauskuvaus']}</td>";
+			}
+			else {
+				echo "<td class='data toggleable_row_package' id='!__{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";
 			}
 
-			echo "</td>";
 			echo "<td>{$til_row['kg']}</td>";
 
 			echo "</tr>";

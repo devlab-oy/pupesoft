@@ -19,7 +19,7 @@
 					$('.vihrea').css({'background-image': 'url(\"{$palvelin2}pics/vaaleanvihrea.png\")'});
 					$('.keltainen').css({'background-image': 'url(\"{$palvelin2}pics/keltainen.png\")'});
 
-					$('.row_order_direction').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
+					$('.row_direction_order').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
 
 					$('.toggleable').click(function(event){
 
@@ -104,18 +104,42 @@
 						return b.id - a.id;
 					}
 
-					var sort_row_by_order_direction = false;
+					function compareName(a, b) {
+						if (b.id.toLowerCase() > a.id.toLowerCase()) {
+							return 1;
+						}
+						else if (b.id.toLowerCase() < a.id.toLowerCase()) {
+							return -1;
+						}
+						else {
+							return 0;
+						}
+					}
 
-					$('.sort_row_by_order').click(function(){
+					$('.sort_row_by').each(function() {
+						var title_sort = this.id.substring(4);
+
+						window['sort_row_direction_'+title_sort] = false;
+					});
+
+					$('.sort_row_by').click(function() {
+						var title = this.id.substring(4);
+
 						var arr = $('.toggleable_row_tr:visible');
 						var _arr = new Array();
+
 						var _arrChildOrder = new Array();
 						var _arrChildSscc = new Array();
 
 						for (i = 0; i < arr.length; i++) {
 							var row = arr[i];
 
-							var id = $(row).attr('id').substring(18);
+							var id = $(row).children('.toggleable_row_'+title).attr('id');
+
+							if (title == 'status' || title == 'prio' || title == 'client') {
+								var id_temp = id.split(\"#\", 2);
+								id = id_temp[0];
+							}
 
 							var temp = {'id': id, 'row': row};
 							_arr.push(temp);
@@ -138,11 +162,18 @@
 
 						var header_id = $('.toggleable_tr:visible').attr('id').substring(14);
 
-						if (sort_row_by_order_direction) {
+						if (window['sort_row_direction_'+title]) {
 
-							_arr.sort(compareId);
-							_arrChildOrder.sort(compareId);
-							_arrChildSscc.sort(compareId);
+							if (title == 'client') {
+								_arr.sort(compareName);
+								_arrChildOrder.sort(compareName);
+								_arrChildSscc.sort(compareName);
+							}
+							else {
+								_arr.sort(compareId);
+								_arrChildOrder.sort(compareId);
+								_arrChildSscc.sort(compareId);
+							}
 
 							for (i = 0; i < _arr.length; i++) {
 								$('.header_row_'+header_id).after(_arrChildSscc[i].row);
@@ -150,14 +181,22 @@
 								$('.header_row_'+header_id).after(_arr[i].row);
 							}
 
-							$('.row_order_direction').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
+							$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
 
-							sort_row_by_order_direction = false;
+							window['sort_row_direction_'+title] = false;
 						}
 						else {
-							_arr.sort(compareId).reverse();
-							_arrChildOrder.sort(compareId).reverse();
-							_arrChildSscc.sort(compareId).reverse();
+
+							if (title == 'client') {
+								_arr.sort(compareName).reverse();
+								_arrChildOrder.sort(compareName).reverse();
+								_arrChildSscc.sort(compareName).reverse();
+							}
+							else {
+								_arr.sort(compareId).reverse();
+								_arrChildOrder.sort(compareId).reverse();
+								_arrChildSscc.sort(compareId).reverse();
+							}
 
 							for (i = 0; i < _arr.length; i++) {
 								$('.header_row_'+header_id).after(_arrChildSscc[i].row);
@@ -165,9 +204,9 @@
 								$('.header_row_'+header_id).after(_arr[i].row);
 							}
 
-							$('.row_order_direction').attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png');
+							$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png');
 
-							sort_row_by_order_direction = true;
+							window['sort_row_direction_'+title] = true;
 						}
 					});
 
@@ -306,10 +345,10 @@
 
 		echo "<tr class='header_row_{$row['lahdon_tunnus']}'>";
 		echo "<th></th>";
-		echo "<th>",t("Status"),"</th>";
-		echo "<th>",t("Prio"),"</th>";
-		echo "<th class='sort_row_by_order'>",t("Tilausnumero")," <img class='row_order_direction' /></th>";
-		echo "<th>",t("Asiakas"),"</th>";
+		echo "<th class='sort_row_by' id='row_status'>",t("Status")," <img class='row_direction_status' /></th>";
+		echo "<th class='sort_row_by' id='row_prio'>",t("Prio")," <img class='row_direction_prio' /></th>";
+		echo "<th class='sort_row_by' id='row_order'>",t("Tilausnumero")," <img class='row_direction_order' /></th>";
+		echo "<th class='sort_row_by' id='row_client'>",t("Asiakas")," <img class='row_direction_client' /></th>";
 		echo "<th>",t("Paikkakunta"),"</th>";
 		echo "<th>",t("Keräysvyöhyke"),"</th>";
 		echo "<th>",t("Erä"),"</th>";
@@ -340,11 +379,11 @@
 				$status = 1;
 			}
 
-			echo "<td class='data status_{$status}'>{$status_text}</td>";
+			echo "<td class='data toggleable_row_status' id='{$status}#{$lahto_row['tilauksen_tunnus']}'>{$status_text}</td>";
 
-			echo "<td class='center'>{$lahto_row['prioriteetti']}</td>";
+			echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteetti']}#{$lahto_row['tilauksen_tunnus']}'>{$lahto_row['prioriteetti']}</td>";
 			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}'><a class='td'>{$lahto_row['tilauksen_tunnus']}</a></td>";
-			echo "<td class='data'>{$lahto_row['asiakas_nimi']}";
+			echo "<td class='data toggleable_row_client' id='{$lahto_row['asiakas_nimi']}#{$lahto_row['tilauksen_tunnus']}'>{$lahto_row['asiakas_nimi']}";
 			if ($lahto_row['asiakas_nimi'] != $lahto_row['asiakas_toim_nimi']) echo "<br>{$lahto_row['asiakas_toim_nimi']}";
 			echo "</td>";
 			echo "<td>{$lahto_row['asiakas_toim_postitp']}</td>";

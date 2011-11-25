@@ -11128,7 +11128,7 @@ if (!function_exists("pupe_DataTables")) {
 								for (var j=4; j<=sarakemaara; j++) {
 									$('#yhteensa_'+j).html(saatavaty[j].toFixed(2));
 								}
-							}//fuck
+							}
 						}
 					} );
 				} );

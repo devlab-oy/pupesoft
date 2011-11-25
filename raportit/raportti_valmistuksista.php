@@ -7,7 +7,12 @@
 		if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
 	}
+	
+	//* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
+	$useslave = 1;
+	
 	require ("../inc/parametrit.inc");
+	
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
@@ -60,7 +65,7 @@
 		echo "</form>";
 		echo "<br>";
 
-		if(include('Spreadsheet/Excel/Writer.php')) {
+		if (include('Spreadsheet/Excel/Writer.php')) {
 			//keksit‰‰n failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
@@ -78,6 +83,7 @@
 		}
 
 		if ($tee == "ajaraportti" and isset($submit_nappi)) {
+			
 			pupe_DataTables(array(array($pupe_DataTables[0], 9, 9)));
 
 			if (checkdate($kk1, $pp1, $vv1) and checkdate($kk2, $pp2, $vv2)) {
@@ -85,7 +91,7 @@
 				$pvmloppu	= $vv2."-".sprintf("%02.2s",$kk2)."-".sprintf("%02.2s",$pp2);
 			}
 			else {
-				echo "<p class='error'>Virhe!!! P‰iv‰m‰‰riss‰ oli jotain ongelmaa</p><br>";
+				echo "<p class='error'>".t("Virhe: P‰iv‰m‰‰riss‰ ongelmia")."</p><br>";
 				die();
 			}
 
@@ -100,7 +106,7 @@
 						lasku.tila,
 						lasku.alatila, tuote.try, tuote.osasto
 						FROM tuote
-						JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tilausrivi.tyyppi='W'
+						JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tilausrivi.tyyppi in ('W','M')
 											and tilausrivi.toimaika between '{$pvmalku}' and '{$pvmloppu}'
 											and tilausrivi.toimitettuaika = '0000-00-00 00:00:00')
 						JOIN lasku on (lasku.yhtio = tuote.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -121,7 +127,7 @@
 						lasku.tila,
 						lasku.alatila, tuote.try, tuote.osasto
 						FROM tuote
-						JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tilausrivi.tyyppi='W'
+						JOIN tilausrivi on (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tilausrivi.tyyppi in ('W','M')
 											and tilausrivi.toimitettuaika between '{$pvmalku} 00:00:00' and '{$pvmloppu} 23:59:59')
 						JOIN lasku on (lasku.yhtio = tuote.yhtio and lasku.tunnus = tilausrivi.otunnus)
 						WHERE tuote.yhtio = 'mast'
@@ -195,9 +201,9 @@
 					require ("inc/laskutyyppi.inc");
 
 					// otetaan selkokieliset nimet esiin avainsanoista
-					$linja = t_avainsana("VALMISTUSLINJA", "", "and avainsana.selite='$rivit[valmistuslinja]'", "", "", "selitetark");
+					$linja 	= t_avainsana("VALMISTUSLINJA", "", "and avainsana.selite='$rivit[valmistuslinja]'", "", "", "selitetark");
 					$osasto = t_avainsana("OSASTO", "", "and avainsana.selite='$rivit[osasto]'", "", "", "selitetark");
-					$try = t_avainsana("TRY", "", "and avainsana.selite='$rivit[try]'", "", "", "selitetark");
+					$try 	= t_avainsana("TRY", "", "and avainsana.selite='$rivit[try]'", "", "", "selitetark");
 
 					if($linja == "") $linja = t("Ei m‰‰ritelty");
 
@@ -234,6 +240,7 @@
 						$worksheet->write($excelrivi, $excelsarake, $rivit["toimitettuaika"]);
 						$excelsarake++;
 					}
+					
 					// tehd‰‰n array johon tallennetaan valmistuslinja, valmistettu, valmistetaan
 					$yhteenveto[$rivit["valmistuslinja"]]["valmistettu"] += $rivit["valmistettu"];
 					$yhteenveto[$rivit["valmistuslinja"]]["valmistetaan"] += $rivit["valmistetaan"];
@@ -245,8 +252,7 @@
 
 				echo "<tfoot>";
 				echo "<tr>";
-				echo "<th colspan='3'>".t("Sivun saldot Yhteens‰").":</th>";
-				echo "<td></td>";
+				echo "<th colspan='4'>".t("Yhteens‰").":</th>";
 				echo "<td valign='top' class='tumma' name='yhteensa' id='yhteensa_4' align='right'></td>";
 				echo "<td valign='top' class='tumma' name='yhteensa' id='yhteensa_5' align='right'></td>";
 				echo "</tr>";
@@ -291,5 +297,6 @@
 			}
 		}
 	}
+	
 	require ("inc/footer.inc");
 ?>

@@ -136,7 +136,7 @@
 
 							var id = $(row).children('.toggleable_row_'+title).attr('id');
 
-							if (title == 'status' || title == 'prio' || title == 'client') {
+							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone') {
 								var id_temp = id.split(\"#\", 2);
 								id = id_temp[0];
 							}
@@ -164,7 +164,7 @@
 
 						if (window['sort_row_direction_'+title]) {
 
-							if (title == 'client') {
+							if (title == 'client' || title == 'locality' || title == 'picking_zone') {
 								_arr.sort(compareName);
 								_arrChildOrder.sort(compareName);
 								_arrChildSscc.sort(compareName);
@@ -187,7 +187,7 @@
 						}
 						else {
 
-							if (title == 'client') {
+							if (title == 'client' || title == 'locality' || title == 'picking_zone') {
 								_arr.sort(compareName).reverse();
 								_arrChildOrder.sort(compareName).reverse();
 								_arrChildSscc.sort(compareName).reverse();
@@ -349,8 +349,8 @@
 		echo "<th class='sort_row_by' id='row_prio'>",t("Prio")," <img class='row_direction_prio' /></th>";
 		echo "<th class='sort_row_by' id='row_order'>",t("Tilausnumero")," <img class='row_direction_order' /></th>";
 		echo "<th class='sort_row_by' id='row_client'>",t("Asiakas")," <img class='row_direction_client' /></th>";
-		echo "<th>",t("Paikkakunta"),"</th>";
-		echo "<th>",t("Keräysvyöhyke"),"</th>";
+		echo "<th class='sort_row_by' id='row_locality'>",t("Paikkakunta")," <img class='row_direction_locality' /></th>";
+		echo "<th class='sort_row_by' id='row_picking_zone'>",t("Keräysvyöhyke")," <img class='row_direction_picking_zone' /></th>";
 		echo "<th>",t("Erä"),"</th>";
 		echo "<th>",t("Rivit")," / ",t("Kerätyt"),"</th>";
 		echo "<th>",t("SSCC"),"</th>";
@@ -383,10 +383,12 @@
 
 			echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteetti']}#{$lahto_row['tilauksen_tunnus']}'>{$lahto_row['prioriteetti']}</td>";
 			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}'><a class='td'>{$lahto_row['tilauksen_tunnus']}</a></td>";
+
 			echo "<td class='data toggleable_row_client' id='{$lahto_row['asiakas_nimi']}#{$lahto_row['tilauksen_tunnus']}'>{$lahto_row['asiakas_nimi']}";
 			if ($lahto_row['asiakas_nimi'] != $lahto_row['asiakas_toim_nimi']) echo "<br>{$lahto_row['asiakas_toim_nimi']}";
 			echo "</td>";
-			echo "<td>{$lahto_row['asiakas_toim_postitp']}</td>";
+
+			echo "<td class='toggleable_row_locality' id='{$lahto_row['asiakas_toim_postitp']}#{$lahto_row['tilauksen_tunnus']}'>{$lahto_row['asiakas_toim_postitp']}</td>";
 
 			$query = "	SELECT keraysvyohyke.nimitys AS 'keraysvyohyke',
 						COUNT(tilausrivi.tunnus) AS 'rivit',
@@ -401,7 +403,7 @@
 			$til_res = pupe_query($query);
 			$til_row = mysql_fetch_assoc($til_res);
 
-			echo "<td class='data'>{$til_row['keraysvyohyke']}</td>";
+			echo "<td class='data toggleable_row_picking_zone' id='{$til_row['keraysvyohyke']}#{$lahto_row['tilauksen_tunnus']}'>{$til_row['keraysvyohyke']}</td>";
 
 			echo "<td class='data'>",str_replace(",", "<br />", $lahto_row['erat']),"</td>";
 

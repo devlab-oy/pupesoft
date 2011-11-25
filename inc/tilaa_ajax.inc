@@ -122,6 +122,9 @@
 
 	echo json_encode('ok');
 
+	// Footteri hiljaiseksi
+	$no_head = "yes";
+
 	require ("../inc/footer.inc");
 	exit;
 ?>

@@ -697,12 +697,12 @@
 		$jatko = 0;
 
 	}
-	
+
 	if (mysql_field_name($result, $i) == "valmistuslinja") {
-		
-		$sresult = t_avainsana(mysql_field_name($result, $i));
+
+		$sresult = t_avainsana("valmistuslinja");
 		$valnimi = mysql_field_name($result, $i);
-		
+
 		// jos avainsanoja on perustettu tehdään dropdown
 		if (mysql_num_rows($sresult) > 0) {
 			$ulos = "<td><select id='$valnimi' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -723,5 +723,15 @@
 			$ulos .= "</td>";
 			$jatko = 0;
 		}
+	}
 
+	if (mysql_field_name($result, $i) == "ostoehdotus") {
+
+		$sel = trim($trow[$i]) == 'E' ? ' selected' : '';
+
+		$ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value=''>".t("Ehdotetaan ostoehdotusohjelmissa tilattavaksi")."</option>";
+		$ulos .= "<option value='E'{$sel}>".t("Ei ehdoteta ostoehdotusohjelmissa tilattavaksi")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
 	}

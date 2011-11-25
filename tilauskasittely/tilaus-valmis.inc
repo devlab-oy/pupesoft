@@ -1019,7 +1019,7 @@ else {
 								break;
 							case 'sisviesti2':
 								if ($row['omalle_tilaukselle'] != '') {
-									$values .= ", '{$laskurow['sisviesti2']}-{$sisviesti2_numerointi}'";
+									$values .= ", '{$sisviesti2_numerointi}-{$laskurow['sisviesti2']}'";
 									$sisviesti2_numerointi++;
 								}
 								else {

@@ -493,11 +493,7 @@ if (!function_exists('rivi_valm')) {
 if (!function_exists('rivi_valmistus')) {
 	function rivi_valmistus($thispage, $tyyppi = "") {
 		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $isakpl;
-		
-		$query = "SELECT * from tuote where yhtio='{$kukarow["yhtio"]}' and tuoteno = '{$row["tuoteno"]}'";
-		$results = pupe_query($query);
-		$trowi = mysql_fetch_assoc($results);
-		
+
 		$p["height"]	= 10;
 		$p["font"]		= "Times-Roman";
 
@@ -545,7 +541,6 @@ if (!function_exists('rivi_valmistus')) {
 		$lask_valm++;
 
 		$pdf->draw_text(125, $kala, t_tuotteen_avainsanat($row, 'nimitys'),	$thispage, $pb);
-		$tuotantolinja = $trowi['valmistuslinja']. " - ". t_avainsana('valmistuslinja',"","and avainsana.selite='$trowi[valmistuslinja]'","","","selitetark");
 
 		if (trim($row["kommentti"]) != '') {
 
@@ -575,10 +570,12 @@ if (!function_exists('rivi_valmistus')) {
 
 				$kala -= $rivinkorkeus;
 
-				if (strlen($tuotantolinja) > 5) {
-					$valihuomautus = "Tuotantolinja : ".$tuotantolinja."\n";
+				$faktarow["fakta"] = t("Työohje", $kieli).":\n".$faktarow["fakta"];
+
+				if ($row['valmistuslinja'] > 0) {
+					$tuotantolinja = $row['valmistuslinja']. " - ". t_avainsana('valmistuslinja', $kieli, "and avainsana.selite='$row[valmistuslinja]'", "", "", "selitetark");
+					$faktarow["fakta"] = t("Tuotantolinja", $kieli).": ".$tuotantolinja."\n".$faktarow["fakta"];
 				}
-				$faktarow["fakta"] = $valihuomautus.t("Työohje:", $kieli)."\n".$faktarow["fakta"];
 
 				foreach(explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
 					$pdf->draw_text(125,  $kala, $kommentti, $thispage, $p);

@@ -1147,15 +1147,6 @@
 				echo "</td><td></td><td></td></tr>";
 			}
 
-			$state_chk = '';
-
-			if ($srow['toimitustavan_lahto'] > 0 and $srow['tila'] == 'L' and $srow['alatila'] == 'D') {
-				$state_chk = 'disabled';
-			}
-
-			echo "<tr><td>".t("Toimitustapa").":</td>";
-			echo "<td><select name='toimitustapa' {$state_chk}>";
-
 			$query = "	SELECT tunnus, selite, merahti
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -1165,13 +1156,28 @@
 			$tresult = pupe_query($query);
 
 			while ($row = mysql_fetch_assoc($tresult)) {
+				echo "<div style='display: none; visibility: hidden;' id='merahti_ttapa_$row[tunnus]'>$row[merahti]</div>";
+			}
+
+			mysql_data_seek($tresult, 0);
+
+			$state_chk = '';
+
+			if ($srow['toimitustavan_lahto'] > 0 and $srow['tila'] == 'L' and $srow['alatila'] == 'D') {
+				$state_chk = 'disabled';
+			}
+
+			echo "<tr><td>".t("Toimitustapa").":</td>";
+			echo "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus();' {$state_chk}>";
+
+			while ($row = mysql_fetch_assoc($tresult)) {
 
 				$sel = "";
 				if ($row["selite"] == $srow["toimitustapa"]) {
 					$sel = 'selected';
 				}
 
-				echo "<option value='$row[selite]' $sel>";
+				echo "<option id='ttapa_$row[tunnus]' value='$row[selite]' $sel>";
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
 				echo "</option>";
 			}

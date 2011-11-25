@@ -80,26 +80,26 @@
 
 					$('.toggleable_row_sscc').live('click', function(event){
 
-						var id = this.id.split(\"__\", 4);
+						var id = this.id.split(\"__\", 3);
 
-						if ($('#toggleable_row_sscc_'+id[0]+'_'+id[1]+'_'+id[3]).is(':visible')) {
+						if ($('#toggleable_row_sscc_'+id[0]+'_'+id[2]).is(':visible')) {
 							$(this).removeClass('tumma');
 
-							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]+'_'+id[3]).slideUp('fast');
+							$('#toggleable_row_sscc_'+id[0]+'_'+id[2]).slideUp('fast');
 
 							if ($('.toggleable_row_child:visible').length == 1) {
-								$('tr[id!=\"toggleable_row_tr_'+id[2]+'__'+id[3]+'\"][class=\"toggleable_row_tr\"]').show();
+								$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
 							}
 						}
 						else {
 
 							$(this).addClass('tumma');
 
-							$('tr[id!=\"toggleable_row_tr_'+id[2]+'__'+id[3]+'\"][class=\"toggleable_row_tr\"]').hide();
+							$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
 
-							var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[1]+'_'+id[3]).parent();
+							var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[2]).parent();
 
-							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]+'_'+id[3]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
+							$('#toggleable_row_sscc_'+id[0]+'_'+id[2]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 						}
 					});
 
@@ -138,9 +138,9 @@
 							var row = arr[i];
 
 							var id = $(row).children('.toggleable_row_'+title).attr('id');
-							var counter = 'foo';
+							var counter = 0;
 
-							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch') {
+							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc') {
 								var id_temp = id.split(\"__\", 3);
 								id = id_temp[0];
 								counter = id_temp[2];
@@ -363,8 +363,8 @@
 		echo "<th class='sort_row_by' id='row_locality'>",t("Paikkakunta")," <img class='row_direction_locality' /></th>";
 		echo "<th class='sort_row_by' id='row_picking_zone'>",t("Keräysvyöhyke")," <img class='row_direction_picking_zone' /></th>";
 		echo "<th class='sort_row_by' id='row_batch'>",t("Erä")," <img class='row_direction_batch' /></th>";
-		echo "<th>",t("Rivit")," / ",t("Kerätyt"),"</th>";
-		echo "<th>",t("SSCC"),"</th>";
+		echo "<th class='sort_row_by' id='row_rows'>",t("Rivit")," / ",t("Kerätyt")," <img class='row_direction_rows' /></th>";
+		echo "<th class='sort_row_by' id='row_sscc'>",t("SSCC")," <img class='row_direction_sscc' /></th>";
 		echo "<th>",t("Pakkaus"),"</th>";
 		echo "<th>",t("Kg"),"</th>";
 		echo "</tr>";
@@ -420,22 +420,8 @@
 
 			echo "<td class='data toggleable_row_batch' id='{$lahto_row['erat']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['erat']}</td>";
 
-			echo "<td>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
-			echo "<td class='data'>";
-
-			$arr = explode(",", $lahto_row['sscc']);
-			$cnt = count($arr);
-			$i = 1;
-
-			foreach ($arr as $sscc) {
-				echo "<a class='td toggleable_row_sscc' id='{$sscc}__{$i}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$sscc}</a>";
-
-				if ($i < $cnt) echo " ";
-
-				$i++;
-			}
-
-			echo "</td>";
+			echo "<td class='toggleable_row_rows' id='{$til_row['rivit']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
+			echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'><a class='td toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['sscc']}</a></td>";
 			echo "<td class='data'>";
 
 			if ($lahto_row['pakkausnumerot'] != '') {
@@ -521,65 +507,57 @@
 
 			reset($arr);
 
-			$i = 1;
+			$query = "	SELECT tilausrivi.tuoteno,
+						kerayserat.otunnus,
+						tuote.nimitys,
+						kerayserat.kpl,
+						tilausrivi.yksikko,
+						CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
+						kerayserat.laatija AS keraaja,
+						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS keratyt
+						FROM kerayserat
+						JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+						AND kerayserat.sscc = '{$sscc}'
+						GROUP BY 1,2,3,4,5,6,7";
+			$rivi_res = pupe_query($query);
 
-			foreach ($arr as $sscc) {
+			echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+			echo "<td colspan='12' class='back'>";
+			echo "<div class='toggleable_row_child' id='toggleable_row_sscc_{$lahto_row['sscc']}_{$x}' style='display:none;'>";
 
-				$query = "	SELECT tilausrivi.tuoteno,
-							kerayserat.otunnus,
-							tuote.nimitys,
-							kerayserat.kpl,
-							tilausrivi.yksikko,
-							CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
-							kerayserat.laatija AS keraaja,
-							SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS keratyt
-							FROM kerayserat
-							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
-							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-							AND kerayserat.sscc = '{$sscc}'
-							GROUP BY 1,2,3,4,5,6,7";
-				$rivi_res = pupe_query($query);
+			echo "<table style='width:100%;'>";
 
-				echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-				echo "<td colspan='12' class='back'>";
-				echo "<div class='toggleable_row_child' id='toggleable_row_sscc_{$sscc}_{$i}_{$x}' style='display:none;'>";
+			echo "<tr>";
+			echo "<th>",t("Tilausnumero"),"</th>";
+			echo "<th>",t("Tuotenumero"),"</th>";
+			echo "<th>",t("Nimitys"),"</th>";
+			echo "<th>",t("Suunniteltu määrä"),"</th>";
+			echo "<th>",t("Kerätty määrä"),"</th>";
+			echo "<th>",t("Yksikkö"),"</th>";
+			echo "<th>",t("Hyllypaikka"),"</th>";
+			echo "<th>",t("Kerääjä"),"</th>";
+			echo "</tr>";
 
-				echo "<table style='width:100%;'>";
-
+			while ($rivi_row = mysql_fetch_assoc($rivi_res)) {
 				echo "<tr>";
-				echo "<th>",t("Tilausnumero"),"</th>";
-				echo "<th>",t("Tuotenumero"),"</th>";
-				echo "<th>",t("Nimitys"),"</th>";
-				echo "<th>",t("Suunniteltu määrä"),"</th>";
-				echo "<th>",t("Kerätty määrä"),"</th>";
-				echo "<th>",t("Yksikkö"),"</th>";
-				echo "<th>",t("Hyllypaikka"),"</th>";
-				echo "<th>",t("Kerääjä"),"</th>";
+				echo "<td class='tumma'>{$rivi_row['otunnus']}</td>";
+				echo "<td class='tumma'>{$rivi_row['tuoteno']}</td>";
+				echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
+				echo "<td class='tumma'>{$rivi_row['kpl']}</td>";
+				echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
+				echo "<td class='tumma'>",t_avainsana("Y", "", " and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite"),"</td>";
+				echo "<td class='tumma'>{$rivi_row['hyllypaikka']}</td>";
+				echo "<td class='tumma'>{$rivi_row['keraaja']}</td>";
 				echo "</tr>";
-
-				while ($rivi_row = mysql_fetch_assoc($rivi_res)) {
-					echo "<tr>";
-					echo "<td class='tumma'>{$rivi_row['otunnus']}</td>";
-					echo "<td class='tumma'>{$rivi_row['tuoteno']}</td>";
-					echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
-					echo "<td class='tumma'>{$rivi_row['kpl']}</td>";
-					echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
-					echo "<td class='tumma'>",t_avainsana("Y", "", " and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite"),"</td>";
-					echo "<td class='tumma'>{$rivi_row['hyllypaikka']}</td>";
-					echo "<td class='tumma'>{$rivi_row['keraaja']}</td>";
-					echo "</tr>";
-				}
-
-				echo "</table>";
-
-				echo "</div>";
-				echo "</td>";
-				echo "</tr>";
-
-				$i++;
-
 			}
+
+			echo "</table>";
+
+			echo "</div>";
+			echo "</td>";
+			echo "</tr>";
 
 			$x++;
 		}

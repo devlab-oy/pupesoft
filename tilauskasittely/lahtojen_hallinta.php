@@ -53,50 +53,52 @@
 
 					$('.toggleable_row_order').live('click', function(event){
 
-						if ($('#toggleable_row_order_'+this.id).is(':visible')) {
+						var id = this.id.split(\"__\", 2);
+
+						if ($('#toggleable_row_order_'+id[0]+'__'+id[1]).is(':visible')) {
 
 							$(this).removeClass('tumma');
 
-							$('#toggleable_row_order_'+this.id).slideUp('fast');
+							$('#toggleable_row_order_'+id[0]+'__'+id[1]).slideUp('fast');
 
 							if ($('.toggleable_row_child:visible').length == 1) {
-								$('tr[id!=\"toggleable_row_tr_'+this.id+'\"][class=\"toggleable_row_tr\"]').show();
+								$('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').show();
 							}
 						}
 						else {
 
 							$(this).addClass('tumma');
 
-							var parent_element = $('#toggleable_row_order_'+this.id).parent();
+							var parent_element = $('#toggleable_row_order_'+id[0]+'__'+id[1]).parent();
 
-							$('tr[id!=\"toggleable_row_tr_'+this.id+'\"][class=\"toggleable_row_tr\"]').hide();
+							$('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide();
 
-							$('#toggleable_row_order_'+this.id).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
+							$('#toggleable_row_order_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 						}
 					});
 
 					$('.toggleable_row_sscc').live('click', function(event){
 
-						var id = this.id.split(\"#\", 3);
+						var id = this.id.split(\"__\", 4);
 
-						if ($('#toggleable_row_sscc_'+id[0]+'_'+id[1]).is(':visible')) {
+						if ($('#toggleable_row_sscc_'+id[0]+'_'+id[1]+'_'+id[3]).is(':visible')) {
 							$(this).removeClass('tumma');
 
-							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]).slideUp('fast');
+							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]+'_'+id[3]).slideUp('fast');
 
 							if ($('.toggleable_row_child:visible').length == 1) {
-								$('tr[id!=\"toggleable_row_tr_'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
+								$('tr[id!=\"toggleable_row_tr_'+id[2]+'__'+id[3]+'\"][class=\"toggleable_row_tr\"]').show();
 							}
 						}
 						else {
 
 							$(this).addClass('tumma');
 
-							$('tr[id!=\"toggleable_row_tr_'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
+							$('tr[id!=\"toggleable_row_tr_'+id[2]+'__'+id[3]+'\"][class=\"toggleable_row_tr\"]').hide();
 
-							var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[1]).parent();
+							var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[1]+'_'+id[3]).parent();
 
-							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
+							$('#toggleable_row_sscc_'+id[0]+'_'+id[1]+'_'+id[3]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 						}
 					});
 
@@ -135,29 +137,36 @@
 							var row = arr[i];
 
 							var id = $(row).children('.toggleable_row_'+title).attr('id');
+							var counter = 'foo';
 
 							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone') {
-								var id_temp = id.split(\"#\", 2);
+								var id_temp = id.split(\"__\", 3);
 								id = id_temp[0];
+								counter = id_temp[2];
+							}
+							else {
+								var id_temp = id.split(\"__\", 2);
+								id = id_temp[0];
+								counter = id_temp[1];
 							}
 
-							var temp = {'id': id, 'row': row};
+							var temp = {'id': id, 'row': row, 'counter': counter};
 							_arr.push(temp);
 
-							var rowChildOrder = $('.toggleable_row_child_order_'+id);
-							var tempChildOrder = {'id': id, 'row': rowChildOrder};
+							var rowChildOrder = $('.toggleable_row_child_order_'+id+'__'+counter);
+							var tempChildOrder = {'id': id, 'row': rowChildOrder, 'counter': counter};
 							_arrChildOrder.push(tempChildOrder);
 
-							var rowChildSscc = $('.toggleable_row_child_sscc_'+id);
-							var tempChildSscc = {'id': id, 'row': rowChildSscc};
+							var rowChildSscc = $('.toggleable_row_child_sscc_'+id+'__'+counter);
+							var tempChildSscc = {'id': id, 'row': rowChildSscc, 'counter': counter};
 							_arrChildSscc.push(tempChildSscc);
 						}
 
 						$('.toggleable_row_tr:visible').remove();
 
 						for (i = 0; i < _arr.length; i++) {
-							$('.toggleable_row_child_order_'+_arr[i].id).remove();
-							$('.toggleable_row_child_sscc_'+_arr[i].id).remove();
+							$('.toggleable_row_child_order_'+_arr[i].id+'__'+_arr[i].counter).remove();
+							$('.toggleable_row_child_sscc_'+_arr[i].id+'__'+_arr[i].counter).remove();
 						}
 
 						var header_id = $('.toggleable_tr:visible').attr('id').substring(14);
@@ -321,9 +330,11 @@
 					lasku.toim_postitp AS 'asiakas_toim_postitp',
 					#avainsana.selitetark_3 AS 'prioriteetti',
 					lasku.prioriteettinro AS 'prioriteetti',
-					GROUP_CONCAT(DISTINCT kerayserat.nro) AS 'erat',
+					kerayserat.nro AS 'erat',
+					kerayserat.sscc,
+					#GROUP_CONCAT(DISTINCT kerayserat.nro) AS 'erat',
 					GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS 'pakkausnumerot',
-					GROUP_CONCAT(DISTINCT kerayserat.sscc) AS 'sscc',
+					#GROUP_CONCAT(DISTINCT kerayserat.sscc) AS 'sscc',
 					GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tilat',
 					COUNT(kerayserat.tunnus) AS 'keraysera_rivi_count',
 					SUM(IF((kerayserat.tila = 'T' OR kerayserat.tila = 'R'), 1, 0)) AS 'keraysera_rivi_valmis'
@@ -334,7 +345,7 @@
 					#JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus IN ({$row['tilaukset']})
-					GROUP BY 1,2,3,4,5";
+					GROUP BY 1,2,3,4,5,6,7";
 		$lahto_res = pupe_query($query);
 
 		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}'>";
@@ -358,9 +369,11 @@
 		echo "<th>",t("Kg"),"</th>";
 		echo "</tr>";
 
+		$x = 0;
+
 		while ($lahto_row = mysql_fetch_assoc($lahto_res)) {
 
-			echo "<tr class='toggleable_row_tr' id='toggleable_row_tr_{$lahto_row['tilauksen_tunnus']}'>";
+			echo "<tr class='toggleable_row_tr' id='toggleable_row_tr_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 
 			echo "<td><input type='checkbox' class='checkbox_{$row['lahdon_tunnus']}'></td>";
 
@@ -379,16 +392,16 @@
 				$status = 1;
 			}
 
-			echo "<td class='data toggleable_row_status' id='{$status}#{$lahto_row['tilauksen_tunnus']}'>{$status_text}</td>";
+			echo "<td class='data toggleable_row_status' id='{$status}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$status_text}</td>";
 
-			echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteetti']}#{$lahto_row['tilauksen_tunnus']}'>{$lahto_row['prioriteetti']}</td>";
-			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}'><a class='td'>{$lahto_row['tilauksen_tunnus']}</a></td>";
+			echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteetti']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['prioriteetti']}</td>";
+			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}__{$x}'><a class='td'>{$lahto_row['tilauksen_tunnus']}</a></td>";
 
-			echo "<td class='data toggleable_row_client' id='{$lahto_row['asiakas_nimi']}#{$lahto_row['tilauksen_tunnus']}'>{$lahto_row['asiakas_nimi']}";
+			echo "<td class='data toggleable_row_client' id='{$lahto_row['asiakas_nimi']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_nimi']}";
 			if ($lahto_row['asiakas_nimi'] != $lahto_row['asiakas_toim_nimi']) echo "<br>{$lahto_row['asiakas_toim_nimi']}";
 			echo "</td>";
 
-			echo "<td class='toggleable_row_locality' id='{$lahto_row['asiakas_toim_postitp']}#{$lahto_row['tilauksen_tunnus']}'>{$lahto_row['asiakas_toim_postitp']}</td>";
+			echo "<td class='toggleable_row_locality' id='{$lahto_row['asiakas_toim_postitp']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_toim_postitp']}</td>";
 
 			$query = "	SELECT keraysvyohyke.nimitys AS 'keraysvyohyke',
 						COUNT(tilausrivi.tunnus) AS 'rivit',
@@ -403,7 +416,7 @@
 			$til_res = pupe_query($query);
 			$til_row = mysql_fetch_assoc($til_res);
 
-			echo "<td class='data toggleable_row_picking_zone' id='{$til_row['keraysvyohyke']}#{$lahto_row['tilauksen_tunnus']}'>{$til_row['keraysvyohyke']}</td>";
+			echo "<td class='data toggleable_row_picking_zone' id='{$til_row['keraysvyohyke']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['keraysvyohyke']}</td>";
 
 			echo "<td class='data'>",str_replace(",", "<br />", $lahto_row['erat']),"</td>";
 
@@ -415,7 +428,7 @@
 			$i = 1;
 
 			foreach ($arr as $sscc) {
-				echo "<a class='td toggleable_row_sscc' id='{$sscc}#{$i}#{$lahto_row['tilauksen_tunnus']}'>{$sscc}</a>";
+				echo "<a class='td toggleable_row_sscc' id='{$sscc}__{$i}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$sscc}</a>";
 
 				if ($i < $cnt) echo " ";
 
@@ -470,9 +483,9 @@
 						GROUP BY 1,2,3,4,5,6,7";
 			$rivi_res = pupe_query($query);
 			
-			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}'>";
+			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 			echo "<td colspan='12' class='back'>";
-			echo "<div class='toggleable_row_child' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}' style='display:none;'>";
+			echo "<div class='toggleable_row_child' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}__{$x}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";
 	
@@ -528,9 +541,9 @@
 							GROUP BY 1,2,3,4,5,6,7";
 				$rivi_res = pupe_query($query);
 
-				echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}'>";
+				echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 				echo "<td colspan='12' class='back'>";
-				echo "<div class='toggleable_row_child' id='toggleable_row_sscc_{$sscc}_{$i}' style='display:none;'>";
+				echo "<div class='toggleable_row_child' id='toggleable_row_sscc_{$sscc}_{$i}_{$x}' style='display:none;'>";
 
 				echo "<table style='width:100%;'>";
 
@@ -567,6 +580,8 @@
 				$i++;
 
 			}
+
+			$x++;
 		}
 
 		echo "</table>";

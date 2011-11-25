@@ -140,7 +140,7 @@
 							var id = $(row).children('.toggleable_row_'+title).attr('id');
 							var counter = 'foo';
 
-							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone') {
+							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch') {
 								var id_temp = id.split(\"__\", 3);
 								id = id_temp[0];
 								counter = id_temp[2];
@@ -331,13 +331,10 @@
 					lasku.nimi AS 'asiakas_nimi',
 					lasku.toim_nimi AS 'asiakas_toim_nimi',
 					lasku.toim_postitp AS 'asiakas_toim_postitp',
-					#avainsana.selitetark_3 AS 'prioriteetti',
 					lasku.prioriteettinro AS 'prioriteetti',
 					kerayserat.nro AS 'erat',
 					kerayserat.sscc,
-					#GROUP_CONCAT(DISTINCT kerayserat.nro) AS 'erat',
 					GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS 'pakkausnumerot',
-					#GROUP_CONCAT(DISTINCT kerayserat.sscc) AS 'sscc',
 					GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tilat',
 					COUNT(kerayserat.tunnus) AS 'keraysera_rivi_count',
 					SUM(IF((kerayserat.tila = 'T' OR kerayserat.tila = 'R'), 1, 0)) AS 'keraysera_rivi_valmis'
@@ -365,7 +362,7 @@
 		echo "<th class='sort_row_by' id='row_client'>",t("Asiakas")," <img class='row_direction_client' /></th>";
 		echo "<th class='sort_row_by' id='row_locality'>",t("Paikkakunta")," <img class='row_direction_locality' /></th>";
 		echo "<th class='sort_row_by' id='row_picking_zone'>",t("Keräysvyöhyke")," <img class='row_direction_picking_zone' /></th>";
-		echo "<th>",t("Erä"),"</th>";
+		echo "<th class='sort_row_by' id='row_batch'>",t("Erä")," <img class='row_direction_batch' /></th>";
 		echo "<th>",t("Rivit")," / ",t("Kerätyt"),"</th>";
 		echo "<th>",t("SSCC"),"</th>";
 		echo "<th>",t("Pakkaus"),"</th>";
@@ -421,7 +418,7 @@
 
 			echo "<td class='data toggleable_row_picking_zone' id='{$til_row['keraysvyohyke']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['keraysvyohyke']}</td>";
 
-			echo "<td class='data'>",str_replace(",", "<br />", $lahto_row['erat']),"</td>";
+			echo "<td class='data toggleable_row_batch' id='{$lahto_row['erat']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['erat']}</td>";
 
 			echo "<td>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
 			echo "<td class='data'>";

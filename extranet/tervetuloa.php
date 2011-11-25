@@ -188,7 +188,7 @@ if ($tee == '') {
 			}
 
 			if ($kuva == '') {
-				$kuva = "<img src='http://www.pupesoft.com/pupesoft.gif' width='180'>";
+				$kuva = "<img src='http://api.devlab.fi/pupesoft.gif' width='180'>";
 			}
 
 			if ($uutinen['nimi'] == "") {
@@ -362,7 +362,7 @@ if ($tee == "PRINTTAA") {
 	}
 
 	if ($kuvaurl == '') {
-		$kuvaurl = "<img src='http://www.pupesoft.com/pupesoft.gif' width='130'>";
+		$kuvaurl = "<img src='http://api.devlab.fi/pupesoft.gif' width='130'>";
 	}
 
 	$otsikko        = $row["kentta01"];

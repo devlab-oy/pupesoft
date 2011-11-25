@@ -140,7 +140,7 @@
 							var id = $(row).children('.toggleable_row_'+title).attr('id');
 							var counter = 0;
 
-							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package') {
+							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package' || title == 'weight') {
 								var id_temp = id.split(\"__\", 3);
 								id = id_temp[0];
 								counter = id_temp[2];
@@ -363,7 +363,7 @@
 		echo "<th class='sort_row_by' id='row_rows'>",t("Rivit")," / ",t("Kerätyt")," <img class='row_direction_rows' /></th>";
 		echo "<th class='sort_row_by' id='row_sscc'>",t("SSCC")," <img class='row_direction_sscc' /></th>";
 		echo "<th class='sort_row_by' id='row_package'>",t("Pakkaus")," <img class='row_direction_package' /></th>";
-		echo "<th>",t("Kg"),"</th>";
+		echo "<th class='sort_row_by' id='row_weight'>",t("Kg")," <img class='row_direction_weight' /></th>";
 		echo "</tr>";
 
 		$x = 0;
@@ -438,7 +438,7 @@
 				echo "<td class='data toggleable_row_package' id='!__{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";
 			}
 
-			echo "<td>{$til_row['kg']}</td>";
+			echo "<td class='toggleable_row_weight' id='{$til_row['kg']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['kg']}</td>";
 
 			echo "</tr>";
 

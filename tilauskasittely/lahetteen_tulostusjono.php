@@ -2,7 +2,7 @@
 
 	require ("../inc/parametrit.inc");
 
-	if ($tee == "TILAA_AJAX") {
+	if (isset($tee) and $tee == "TILAA_AJAX") {
 		require_once("inc/tilaa_ajax.inc");
 	}
 

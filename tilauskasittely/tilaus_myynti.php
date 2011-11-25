@@ -3688,7 +3688,7 @@ if ($tee == '') {
 			$kommentti_array = array();
 			$lapsenlap_array = array();
 
-			function rekursiivinen_resepti($pertuoteno, $perkpl) {
+			function rekursiivinen_resepti($pertuoteno, $perkpl) {           
 				global $kukarow, $tuoteno_array, $riikoko, $kpl_array, $kommentti_array, $lapsenlap_array;
 
 				$query = "	SELECT tuoteno, kerroin
@@ -3864,7 +3864,11 @@ if ($tee == '') {
 			}
 
 			if (is_array($hyvityssaanto_kommentti_array)) {
-				$kommentti = $hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno];
+				// jos myyjä on reklamaatiossa syöttänyt riville kommentin niin se laitetaan ensimmäiselle sille tarkoitetulle riville
+				if ($kommentti !="") {
+					$kommentti .= " ";
+				}
+				$kommentti .= $hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno];
 			}
 			elseif (isset($kommentti_array[$tuoteno])) {
 				$kommentti = $kommentti_array[$tuoteno];

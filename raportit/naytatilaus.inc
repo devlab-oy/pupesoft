@@ -44,7 +44,7 @@
 		echo "<strong>".t("VIRHE: Tilausta ei lˆydy")."!</strong>$query<br>";
 		exit;
 	}
-	$laskurow = mysql_fetch_array($aresult);
+	$laskurow = mysql_fetch_assoc($aresult);
 
 	$vientikurssi = 1;
 
@@ -60,7 +60,7 @@
 					and otsikkonro = '$laskurow[tunnus]'
 					limit 1";
 		$rakre = pupe_query($query);
-		$rakirrow = mysql_fetch_array($rakre);
+		$rakirrow = mysql_fetch_assoc($rakre);
 	}
 
 	//	Onko koko projekti maksettu
@@ -71,7 +71,7 @@
 					FROM lasku
 					WHERE yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnus]' and tila = 'L'";
 		$mares = pupe_query($query);
-		$marow = mysql_fetch_array($mares);
+		$marow = mysql_fetch_assoc($mares);
 
 		if ($marow["laskuttamatta"] == 0 and $marow["maksamatta"] == 0) {
 			$laskurow["mapvm"] = $marow["maksettu"];
@@ -138,7 +138,7 @@
 	$lisares=pupe_query($query);
 
 	if (mysql_num_rows($lisares) > 0) {
-		$lisarow = mysql_fetch_array($lisares);
+		$lisarow = mysql_fetch_assoc($lisares);
 
 		echo "<tr>
 				<th>".t("Seuranta")."</th>
@@ -382,7 +382,7 @@
 					from kuka
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 		$myyresult = pupe_query($query);
-		$myyrow = mysql_fetch_array($myyresult);
+		$myyrow = mysql_fetch_assoc($myyresult);
 
 		if ($laskurow["tila"] == "O" or $laskurow["tila"] == "K") {
 			$komm .= "\n".t("Ostaja").":###".$myyrow['nimi'];
@@ -398,7 +398,7 @@
 					from kuka
 					where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
 		$laaresult = pupe_query($query);
-		$laarow = mysql_fetch_array($laaresult);
+		$laarow = mysql_fetch_assoc($laaresult);
 
 		if ($laarow["nimi"] == "") {
 			$laarow["nimi"] = $laskurow["laatija"];
@@ -451,7 +451,7 @@
 					where yhtio = '$kukarow[yhtio]'
 					and otunnus = '$laskurow[tunnus]'";
 		$reklaresult = pupe_query($query);
-		$reklarow = mysql_fetch_array($reklaresult);
+		$reklarow = mysql_fetch_assoc($reklaresult);
 
 		if (trim($reklarow['komm1']) != '') {
 			$komm .= "\n".t("Tyˆn kuvaus").":###".wordwrap(str_replace("\n","\n###", $reklarow['komm1']), 90, "\n###");
@@ -504,7 +504,7 @@
 		$liitemaara = 1;
 		echo "<tr><th>".t("Liitetiedosto")."</th><td colspan='5'>";
 
-		while ($liiterow = mysql_fetch_array($liiteres)) {
+		while ($liiterow = mysql_fetch_assoc($liiteres)) {
 			echo "<a href='{$palvelin2}view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara $liiterow[selite]</a> ";
 			$liitemaara++;
 		}
@@ -535,7 +535,7 @@
 				echo "<tr><th colspan='6'>".t("Keikkaan liitetyt ostolaskut:")."</th></tr>";
 				echo "<tr><td colspan='6'>";
 
-				while ($muutkeikrow = mysql_fetch_array($muutkeikres)) {
+				while ($muutkeikrow = mysql_fetch_assoc($muutkeikres)) {
 					$ebid = $muutkeikrow['ebid'];
 
 					$laskakak = 1;
@@ -567,7 +567,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = '$tunnus' and tila IN ('L','G','E','V','W','N','R')
 					GROUP BY tunnusnippu";
 		$result = pupe_query($query);
-		$row = mysql_fetch_array($result);
+		$row = mysql_fetch_assoc($result);
 
 
 		$where = " tilausrivi.otunnus IN ($row[tunnukset]) ";
@@ -661,7 +661,7 @@
 		$aputullimaara_yhteensa 		= "";
 		$rivinlisakulu_yhteensa 		= "";
 
-		while ($prow = mysql_fetch_array ($presult)) {
+		while ($prow = mysql_fetch_assoc ($presult)) {
 
 			echo "<tr class='aktiivi'>";
 			echo "<td valign='top'>$prow[tilaus]</td>";
@@ -718,7 +718,7 @@
 				$prow["kommentti"] .= "<br>";
 			}
 
-			while ($sarjarow = mysql_fetch_array($sarjares)) {
+			while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 				$prow["kommentti"] .= "# <a href='{$palvelin2}tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($prow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."&lopetus=$lopetus'>$sarjarow[sarjanumero]</a><br>";
 			}
 
@@ -815,6 +815,7 @@
 					tuote.sarjanumeroseuranta,
 					tuote.myyntihinta_maara,
 					tuote.status,
+					tuote.ei_saldoa,
 					if (tilausrivi.tyyppi='V', 0, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) rivihinta,
 					if (tilausrivi.tyyppi='V', 0, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) arvo,
 					if (tilausrivi.tyyppi='V', 0, if (tilausrivi.kpl!=0, tilausrivi.rivihinta * if (tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa})) summa,
@@ -893,17 +894,17 @@
 			echo "<th style='text-align:right;'>".t("Kate")."</th>";
 		}
 
-		echo "	<th style='text-align:right;'>".t("Alv%")."</th>";
-		
-		if ($yhtiorow["reaalisaldo_tulostuksessa"] == "K" and $toim == "VALMISTUS") {
+		echo "<th style='text-align:right;'>".t("Alv%")."</th>";
+
+		if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K" and $toim == "VALMISTUS") {
 			echo "<th style='text-align:right;'>".t("Reaalisaldo")."</th>";
 		}
 		else {
-			echo "	<th style='text-align:right;'>&nbsp;</th>
-					<th style='text-align:right;'>&nbsp;</th>";
+			echo "<td class='back'>&nbsp;</td>
+					<td class='back'>&nbsp;</td>";
 		}
 
-		
+
 		echo "</tr>";
 
 		$tuotetyyppi		= "";
@@ -924,7 +925,7 @@
 		$ennaa_yht		= 0;
 		$rihin_yht		= 0;
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_assoc($result)) {
 
 			if (strpos($row['sorttauskentta'], '÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷') !== FALSE) {
 				$erikoistuote_tuoteperhe[$row['perheid']] = $row['sorttauskentta'];
@@ -956,7 +957,7 @@
 
 			$tquery	= "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 			$tres	= pupe_query($tquery);
-			$trow 	= mysql_fetch_array($tres); // haetaan tuotteen tiedot..
+			$trow 	= mysql_fetch_assoc($tres); // haetaan tuotteen tiedot..
 
 			//Haetaan sarjanumeron tiedot
 			if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
@@ -1004,7 +1005,7 @@
 				}
 			}
 
-			while ($sarjarow = mysql_fetch_array($sarjares)) {
+			while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 				if ($kukarow['extranet'] == '') {
 					$row["kommentti"] .= "# <a href='{$palvelin2}tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($row["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."&lopetus=$lopetus'>$sarjarow[sarjanumero]</a><br>";
 				}
@@ -1103,10 +1104,10 @@
 					$borderlask = 0;
 
 					if ($row["kommentti"] != "") {
-						echo "<td valign='top' rowspan = '2' $class>$echorivino </td>";
+						echo "<td valign='top' rowspan = '2' $class>$echorivino</td>";
 					}
 					else {
-						echo "<td valign='top' $class>$echorivino </td>";
+						echo "<td valign='top' $class>$echorivino</td>";
 					}
 				}
 				else {
@@ -1114,7 +1115,7 @@
 						$tuoteperhe_kayty = $row['perheid'];
 					}
 
-					echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$echorivino </td>";
+					echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino</td>";
 				}
 			}
 			// normirivit tai jos tuoteperheit‰ ei pidet‰ yhdess‰, n‰ytet‰‰n lapsille rivinumerot
@@ -1187,7 +1188,7 @@
 					//annetaan valita tilausrivin tyyppi
 					mysql_data_seek($trivityyppi_result, 0);
 
-					while($trrow = mysql_fetch_array($trivityyppi_result)) {
+					while($trrow = mysql_fetch_assoc($trivityyppi_result)) {
 						$sel = "";
 						if ($trrow["selite"]==$row["positio"]) echo "$trrow[selitetark]";
 					}
@@ -1196,7 +1197,7 @@
 				if ($yhtiorow['tilauksen_kohteet'] == 'K' and $lasklisatied_row["asiakkaan_kohde"] > 0) {
 					$posq = "SELECT * FROM asiakkaan_positio WHERE yhtio = '$kukarow[yhtio]' and asiakkaan_kohde = '$lasklisatied_row[asiakkaan_kohde]' and tunnus = '$row[asiakkaan_positio]'";
 					$posres = pupe_query($posq);
-					$posrow = mysql_fetch_array($posres);
+					$posrow = mysql_fetch_assoc($posres);
 
 					echo "$posrow[tunnus] - $posrow[positio]";
 				}
@@ -1241,7 +1242,7 @@
 			   					and myyntirivitunnus = '$row[tunnus]'
 			   					LIMIT 1";
 			   		$sarjares = pupe_query($query);
-			   		$sarjarow = mysql_fetch_array($sarjares);
+			   		$sarjarow = mysql_fetch_assoc($sarjares);
 
 					echo ", $sarjarow[era]";
 
@@ -1419,7 +1420,7 @@
 
 						$ostohinta = 0;
 
-						while($sarjarow = mysql_fetch_array($sarjares)) {
+						while($sarjarow = mysql_fetch_assoc($sarjares)) {
 
 							// Haetaan hyvitett‰vien myyntirivien kautta alkuper‰iset ostorivit
 							$query  = "	SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
@@ -1434,7 +1435,7 @@
 										ORDER BY sarjanumeroseuranta.tunnus
 										LIMIT 1";
 							$sarjares1 = pupe_query($query);
-							$sarjarow1 = mysql_fetch_array($sarjares1);
+							$sarjarow1 = mysql_fetch_assoc($sarjares1);
 
 							$ostohinta += $sarjarow1["ostohinta"];
 						}
@@ -1487,11 +1488,11 @@
 			else {
 				echo "<td $classx align='right' valign='top' nowrap>".($row["alv"] * 1)."</td>";
 			}
-			
-			if ($yhtiorow["reaalisaldo_tulostuksessa"] == "K" and $toim == "VALMISTUS") {
+
+			if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K" and $toim == "VALMISTUS" and $row["ei_saldoa"] == "") {
 				$rsaldoclass = '';
 				list ($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
-				
+
 				$tilauksessa = "SELECT sum(tilausrivi.varattu) tulossa
 								FROM tilausrivi
 								WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
@@ -1500,26 +1501,25 @@
 								AND tilausrivi.varattu > 0";
 				$tilres = pupe_query($tilauksessa);
 				$tilrivi = mysql_fetch_assoc($tilres);
-				
+
 				$reaalisaldo = $myytavissa + $tilrivi["tulossa"];
-				
+
 				if ($reaalisaldo < 0) {
 					$rsaldoclass = 'error';
 				}
-				
-				echo "<td align='right' class=$rsaldoclass>{$reaalisaldo}</td>";
+
+				echo "<td class='spec'><font class='$rsaldoclass'>{$reaalisaldo}</font></td>";
 
 				if ($row["status"] == "T" and $reaalisaldo < $row["tilkpl"]) {
-					$arvaus = $row["tilkpl"];
 					// haetaan tuotteen toimittajan tiedot ja datat
-					$query2 = "	SELECT tt.liitostunnus, if (tt.jarjestys = 0, 9999, tt.jarjestys) sorttaus, tt.osto_era 
+					$query2 = "	SELECT tt.liitostunnus, if (tt.jarjestys = 0, 9999, tt.jarjestys) sorttaus, tt.osto_era
 								FROM tuotteen_toimittajat as tt
 								WHERE tt.yhtio = '{$kukarow["yhtio"]}'
 								AND tt.tuoteno = '$row[tuoteno]'
 								ORDER BY sorttaus
 								LIMIT 1";
 					$result2   = pupe_query($query2);
-					$toimirow2 = mysql_fetch_array($result2);
+					$toimirow2 = mysql_fetch_assoc($result2);
 
 					$ostoera = $toimirow2['osto_era'];
 					$toim_liitostunnus = $toimirow2['liitostunnus'];
@@ -1529,12 +1529,10 @@
 					$tarve[$toim_liitostunnus][$row["tuoteno"]]["reaali"] = $reaalisaldo;
 					$tarve[$toim_liitostunnus][$row["tuoteno"]]["tulossa"] = $tilrivi["tulossa"];
 					$tarve[$toim_liitostunnus][$row["tuoteno"]]["nimitys"] = $trow["nimitys"];
-					
+
 					$ehdotus[$toim_liitostunnus][$row["tuoteno"]]["plaah"] = 1;
-					
-				} 
-	
-			} 
+				}
+			}
 
 			if ($verkkokauppa != "" and $muokkaa != "") {
 				echo "<td class='back'><input type = 'button' onclick = \"if (confirm('".t("Oletko varma, ett‰ haluat mit‰tˆid‰ tilausrivin?")."')) { sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus=$row[tunnus]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'); }\" value='".t("Mit‰tˆi rivi")."'></td>";
@@ -1622,7 +1620,7 @@
 
 			$query_ale_lisa = generoi_alekentta('M');
 
-			while ($alvrow = mysql_fetch_array($alvresult)) {
+			while ($alvrow = mysql_fetch_assoc($alvresult)) {
 
 				// Valuuttajutut kuntoon
 				if ($alvrow["alv"] >= 500) {
@@ -1651,7 +1649,7 @@
 				}
 
 				$aresult = pupe_query($aquery);
-				$arow = mysql_fetch_array($aresult);
+				$arow = mysql_fetch_assoc($aresult);
 
 				if ($alvrow["alv"] >= 600) {
 					$alvi = t("K.V.");
@@ -1694,7 +1692,7 @@
 								ORDER BY alv";
 				$alvresult = pupe_query($alvquery);
 
-				while ($alvrow = mysql_fetch_array($alvresult)) {
+				while ($alvrow = mysql_fetch_assoc($alvresult)) {
 
 					// Valuuttajutut kuntoon
 					if ($alvrow["alv"] >= 500) {
@@ -1723,7 +1721,7 @@
 					}
 
 					$aresult = pupe_query($aquery);
-					$arow = mysql_fetch_array($aresult);
+					$arow = mysql_fetch_assoc($aresult);
 
 					if ($alvrow["alv"] >= 600) {
 						$alvi = t("K.V.");
@@ -1744,9 +1742,10 @@
 
 		echo "</table>";
 	}
+
 	// Tehd‰‰n yhteistilaus.
-	if ($yhtiorow["reaalisaldo_tulostuksessa"] == "K") {
-		
+	if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K") {
+
 		echo "<table>";
 		$nolla = 0;
 
@@ -1755,10 +1754,10 @@
 				global $kukarow, $yhtiorow;
 				// Haetaan tuotteen toimittajan liitostunnuksella toimitaulusta kaikki tiedot.
 				// halutaan n‰ytt‰‰ rivill‰ t‰ydellinen toimittajanimi pelk‰n tunnuksen sijasta.
-				 
+
 				$toimsql = "SELECT * from toimi where yhtio = '{$kukarow["yhtio"]}' and tunnus = '{$liitostunnus}'";
 				$toimres = pupe_query($toimsql);
-			
+
 				if (mysql_num_rows($toimres) >1) {
 					return FALSE;
 				}
@@ -1766,35 +1765,34 @@
 					$toimrivit = mysql_fetch_assoc($toimres);
 					return $toimrivit;
 				}
-				
 			}
 		}
 
 		foreach ($ehdotus as $toimind => $value) {
 			$ping = FALSE;
 			echo "<tr>";
-			
+
 			$toimittaja = tuot_toim($toimind);
-			
-			echo "<th colspan='5'>Toimittajalta: {$toimittaja["nimi"]}</th>";
+
+			echo "<th colspan='5'>".t("Toimittajalta").": {$toimittaja["nimi"]}</th>";
 
 				foreach ($value as $tuotenoind => $val) {
-					
+
 					if ($tarve[$toimind][$tuotenoind]["tulossa"] < $tarve[$toimind][$tuotenoind]["maara"]) {
-						
-						echo "<tr><td>Tuoteno: $tuotenoind <br> {$tarve[$toimind][$tuotenoind]["nimitys"]}</td>";
-						echo "<td align='right'>Tarve: {$tarve[$toimind][$tuotenoind]["maara"]} <br> Reaalisaldo: {$tarve[$toimind][$tuotenoind]["reaali"]} <br> Tulossa: {$tarve[$toimind][$tuotenoind]["tulossa"]}</td>";
-				
+
+						echo "<tr><td>".t("Tuoteno").": $tuotenoind <br> {$tarve[$toimind][$tuotenoind]["nimitys"]}</td>";
+						echo "<td align='right'>".t("Tarve").": {$tarve[$toimind][$tuotenoind]["maara"]} <br> ".t("Reaalisaldo").": {$tarve[$toimind][$tuotenoind]["reaali"]} <br> ".t("Tulossa").": {$tarve[$toimind][$tuotenoind]["tulossa"]}</td>";
+
 						$arvaus = $tarve[$toimind][$tuotenoind]["maara"]; // paljonko tarvitaan
 						$ostoera = $tarve[$toimind][$tuotenoind]["osto"]; // minimi tilaus
-				
+
 						if ($ostoera == 0 or $ostoera == "") {
 							$kerroin = 1;
 						}
 						else {
 							$kerroin = $ostoera;
 						}
-				
+
 						if ($arvaus < $kerroin) {
 							$arvaus = $kerroin;
 						}
@@ -1810,29 +1808,29 @@
 							}
 							$arvaus = (float) $test;
 						}
-						// mik‰li muutat n‰iden nimityksi‰, niin nimitykset pit‰‰ korjata myˆs lahetteen_tulostujono.php kohdan "NAYTATILAUS" javascriptiin. 
+						// mik‰li muutat n‰iden nimityksi‰, niin nimitykset pit‰‰ korjata myˆs lahetteen_tulostujono.php kohdan "NAYTATILAUS" javascriptiin.
 						echo "<td>";
 						echo "<input type='text' size='6' id='maara_$nolla' name='maara' value='$arvaus'>";
 						echo "<input type='button' value='".t("Tilaa tuotetta")."' class='tilaa' id='submit_$nolla'>";
 						echo "<input type='hidden' id='tuoteno_$nolla' name='tuoteno' value='$tuotenoind'>";
 						echo "<input type='hidden' id='toimittaja_$nolla' name='toimittaja' value='$toimind'>";
-						echo "</td>";	
+						echo "</td>";
 						$nolla++;
 					}
 					else {
-						echo "<tr><td>Tuoteno: $tuotenoind <br> {$tarve[$toimind][$tuotenoind]["nimitys"]}</td>";
-						echo "<td align='right'>Tarve: {$tarve[$toimind][$tuotenoind]["maara"]} <br> Tulossa: {$tarve[$toimind][$tuotenoind]["tulossa"]}</td>";
-						
+						echo "<tr><td>".t("Tuoteno").": $tuotenoind <br> {$tarve[$toimind][$tuotenoind]["nimitys"]}</td>";
+						echo "<td align='right'>".t("Tarve").": {$tarve[$toimind][$tuotenoind]["maara"]} <br> Tulossa: {$tarve[$toimind][$tuotenoind]["tulossa"]}</td>";
+
 					}
 				}
-				
+
 			echo "</tr>";
-		
+
 		}
-	
+
 		echo "</table>";
 	}
-	
+
 	//	N‰ytet‰‰n vaan t‰‰ tilaus jostain linkist‰..
 	if ($tee != "NAYTA") {
 		if ($laskurow["jaksotettu"] <> 0) {
@@ -1864,7 +1862,7 @@
 			$maksusopres = pupe_query($query);
 			$i=0;
 
-			while ($maksusoprow = mysql_fetch_array($maksusopres)) {
+			while ($maksusoprow = mysql_fetch_assoc($maksusopres)) {
 				$i++;
 				echo "<tr class='aktiivi'>
 						<td>$i</td>
@@ -1908,7 +1906,7 @@
 				echo "<th align='left'>".t("Tyyppi")."</th>";
 				echo "</tr>";
 
-				while ($row = mysql_fetch_array($result)) {
+				while ($row = mysql_fetch_assoc($result)) {
 
 					$ero="td";
 					if ($tunnus==$row['tilaus']) $ero="th";
@@ -1916,11 +1914,14 @@
 					echo "<tr class='aktiivi'>";
 
 					for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
-						if (mysql_field_name($result,$i) == 'toimaika') {
-							echo "<$ero>".tv1dateconv($row[$i])."</$ero>";
+
+						$fieldname = mysql_field_name($result, $i);
+
+						if ($fildname == 'toimaika') {
+							echo "<$ero>".tv1dateconv($row[$fieldname])."</$ero>";
 						}
 						else {
-							echo "<$ero>$row[$i]</$ero>";
+							echo "<$ero>".$row[$fieldname]."</$ero>";
 						}
 					}
 

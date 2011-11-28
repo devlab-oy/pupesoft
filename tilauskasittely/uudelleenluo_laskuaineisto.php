@@ -515,12 +515,12 @@
 
 				if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
 				else $pjat_sortlisa = "";
-				
+
 				$query_ale_lisa = generoi_alekentta('M');
-				
+
 				// Haetaan laskun kaikki rivit
 				$query = "  SELECT
-							if(tilausrivi.perheid > 0, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus), tilausrivi.tunnus) perhegroup,
+							if(tilausrivi.perheid > 0, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus), tilausrivi.tunnus) rivigroup,
 							tilausrivi.ale1,
 							tilausrivi.ale2,
 							tilausrivi.ale3,
@@ -538,7 +538,7 @@
 							tilausrivi.netto,
 							lasku.vienti_kurssi,
 							lasku.viesti laskuviesti,
-							lasku.asiakkaan_tilausnumero,										
+							lasku.asiakkaan_tilausnumero,
 							if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
 							if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
 							if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -550,11 +550,13 @@
 							min(tilausrivi.otunnus) otunnus,
 							min(tilausrivi.perheid) perheid,
 							min(tilausrivi.tunnus) tunnus,
-							min(tilausrivi.kommentti) kommentti,										
+							min(tilausrivi.kommentti) kommentti,
 							min(tilausrivi.tilaajanrivinro) tilaajanrivinro,
 							min(tilausrivi.laadittu) laadittu,
 							sum(tilausrivi.tilkpl) tilkpl,
 							sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+							group_concat(tilausrivi.tunnus) rivitunnukset,
+							count(*) rivigroup_maara,
 							sum(tilausrivi.rivihinta) rivihinta,
 							sum(tilausrivi.kpl) kpl,
 							$sorttauskentta
@@ -570,9 +572,10 @@
 							ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$tilres = mysql_query($query) or pupe_error($query);
 
-				$rivinumerot = array(0 => 0);
-				$rivilaskuri = 1;
-				$rivimaara   = mysql_num_rows($tilres);
+				$rivinumerot 	= array(0 => 0);
+				$rivilaskuri 	= 1;
+				$rivimaara   	= mysql_num_rows($tilres);
+				$rivigrouppaus 	= FALSE;
 
 				while ($tilrow = mysql_fetch_array($tilres)) {
 
@@ -590,6 +593,17 @@
 					}
 					else {
 						$tilrow["toimitettuaika"] = $tilrow["toimitettuaika"];
+					}
+
+					if ($row["rivigroup_maara"] > 1 and !$rivigrouppaus) {
+						$rivigrouppaus = TRUE;
+					}
+
+					// Otetaan yhteensäkommentti pois jos summataan rivejä
+					if ($rivigrouppaus) {
+						$tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+						$tilrow["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+						$tilrow["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 					}
 
 					// Laitetaan alennukset kommenttiin, koska laksulla on vain yksi alekenttä
@@ -630,10 +644,10 @@
 
 					$query = "	SELECT *
 								FROM sarjanumeroseuranta
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$tilrow[tuoteno]'
-								and $sarjanutunnus='$tilrow[tunnus]'
-								and sarjanumero != ''";
+								WHERE yhtio 		= '$kukarow[yhtio]'
+								and tuoteno 		= '$tilrow[tuoteno]'
+								and $sarjanutunnus in ($tilrow[rivitunnukset])
+								and sarjanumero    != ''";
 					$sarjares = mysql_query($query) or pupe_error($query);
 
 					if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0) {

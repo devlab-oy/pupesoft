@@ -641,10 +641,10 @@ if (!function_exists('rivi_lasku')) {
 
 			$query = "	SELECT DISTINCT sarjanumero, parasta_ennen
 						FROM sarjanumeroseuranta
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tuoteno = '$row[tuoteno]'
-						and $sarjanutunnus='$row[tunnus]'
-						and sarjanumero != ''
+						WHERE yhtio 		= '$kukarow[yhtio]'
+						and tuoteno 		= '$row[tuoteno]'
+						and $sarjanutunnus	in ($row[rivitunnukset])
+						and sarjanumero    != ''
 						ORDER BY sarjanumero";
 			$sarjares = pupe_query($query);
 
@@ -880,7 +880,7 @@ if (!function_exists('rivi_original')) {
 
 			$kommentit = explode("\n", trim($row["kommentti"]));
 
-			if (strpos($row["kommentti"], t("Tilaus", $kieli)." ".$row["otunnus"]." ".t("yhteensä", $kieli)) === FALSE) {
+			if (!preg_match("/".t("Tilaus", $kieli).":? ".$row["otunnus"]."/", $row["kommentti"])) {
 				$pdf_lasku->draw_text(35, $kala+$kalakorjaus, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
 				$kala = $kala - 10;
 			}
@@ -1951,7 +1951,7 @@ if (!function_exists("tulosta_lasku")) {
 
 		// haetaan tilauksen kaikki rivit
 		$query = "  SELECT
-					if(tilausrivi.perheid > 0, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus), tilausrivi.tunnus) perhegroup,
+					if(tilausrivi.perheid > 0, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus), tilausrivi.tunnus) rivigroup,
 					tilausrivi.ale1,
 					tilausrivi.ale2,
 					tilausrivi.ale3,
@@ -1969,7 +1969,7 @@ if (!function_exists("tulosta_lasku")) {
 					tilausrivi.netto,
 					lasku.vienti_kurssi,
 					lasku.viesti laskuviesti,
-					lasku.asiakkaan_tilausnumero,										
+					lasku.asiakkaan_tilausnumero,
 					if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
 					if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
 					if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -1981,11 +1981,13 @@ if (!function_exists("tulosta_lasku")) {
 					min(tilausrivi.otunnus) otunnus,
 					min(tilausrivi.perheid) perheid,
 					min(tilausrivi.tunnus) tunnus,
-					min(tilausrivi.kommentti) kommentti,										
+					min(tilausrivi.kommentti) kommentti,
 					min(tilausrivi.tilaajanrivinro) tilaajanrivinro,
 					min(tilausrivi.laadittu) laadittu,
 					sum(tilausrivi.tilkpl) tilkpl,
 					sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+					group_concat(tilausrivi.tunnus) rivitunnukset,
+					count(*) rivigroup_maara,
 					$lisa
 					$sorttauskentta
 					FROM tilausrivi
@@ -2008,11 +2010,14 @@ if (!function_exists("tulosta_lasku")) {
 				break;
 			}
 		}
+
 		mysql_data_seek($result, 0);
 
 		// aloitellaan laskun teko
 		list($page_lasku[$sivu], $kala) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus);
-
+		
+		$rivigrouppaus = FALSE;
+		
 		while ($row = mysql_fetch_assoc($result)) {
 
 			// Rivin toimitusaika
@@ -2024,6 +2029,17 @@ if (!function_exists("tulosta_lasku")) {
 			}
 			else {
 				$row["toimitettuaika"] = $row["toimitettuaika"];
+			}
+			
+			if ($row["rivigroup_maara"] > 1 and !$rivigrouppaus) {
+				$rivigrouppaus = TRUE;
+			}
+			
+			// Otetaan yhteensäkommentti pois jos summataan rivejä
+			if ($rivigrouppaus) {				
+				$row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+				$row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+				$row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 			}
 
 			if ($kala <= 130) {

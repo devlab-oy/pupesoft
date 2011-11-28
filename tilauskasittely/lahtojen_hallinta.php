@@ -21,7 +21,7 @@
 
 					$('.row_direction_order').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
 
-					$('.toggleable').click(function(event){
+					$('.toggleable').live('click', function(event){
 
 						var id = this.id.split(\"__\", 2);
 
@@ -123,100 +123,184 @@
 						var title_sort = this.id.substring(4);
 
 						window['sort_row_direction_'+title_sort] = false;
+
 					});
 
-					$('.sort_row_by').click(function() {
-						var title = this.id.substring(4);
+					$('.sort_parent_row_by').each(function() {
+						var title_sort = this.id.substring(11);
+						window['sort_parent_row_direction_'+title_sort] = false;
+					});
 
-						var arr = $('.toggleable_row_tr:visible');
-						var _arr = new Array();
+					$('.sort_row_by, .sort_parent_row_by').click(function() {
 
-						var _arrChildOrder = new Array();
-						var _arrChildSscc = new Array();
+						var parent_sort = $(this).hasClass('sort_parent_row_by') ? true : false;
 
-						for (i = 0; i < arr.length; i++) {
-							var row = arr[i];
+						var title = parent_sort ? this.id.substring(11) : this.id.substring(4);
 
-							var id = $(row).children('.toggleable_row_'+title).attr('id');
-							var counter = 0;
+						if (parent_sort) {
 
-							if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package' || title == 'weight') {
+							var arr = $('.toggleable_parent:visible');
+							var _arr = new Array();
+
+							var _arrChild = new Array();
+
+							for (i = 0; i < arr.length; i++) {
+								var row = arr[i];
+
+								var id = $(row).children('.toggleable_parent_row_'+title).attr('id');
+
 								var id_temp = id.split(\"__\", 3);
 								id = id_temp[0];
 								counter = id_temp[2];
+
+								var temp = {'id': id, 'row': row, 'counter': counter, 'link': id_temp[1]};
+								_arr.push(temp);
+
+								var rowChild = $('#toggleable_tr_'+id_temp[1]+'__'+counter);
+								var tempChild = {'id': id, 'row': rowChild, 'counter': counter};
+								_arrChild.push(tempChild);	
 							}
-							else {
-								var id_temp = id.split(\"__\", 2);
-								id = id_temp[0];
-								counter = id_temp[1];
-							}
 
-							var temp = {'id': id, 'row': row, 'counter': counter};
-							_arr.push(temp);
-
-							var rowChildOrder = $('.toggleable_row_child_order_'+id+'__'+counter);
-							var tempChildOrder = {'id': id, 'row': rowChildOrder, 'counter': counter};
-							_arrChildOrder.push(tempChildOrder);
-
-							var rowChildSscc = $('.toggleable_row_child_sscc_'+id+'__'+counter);
-							var tempChildSscc = {'id': id, 'row': rowChildSscc, 'counter': counter};
-							_arrChildSscc.push(tempChildSscc);
-						}
-
-						$('.toggleable_row_tr:visible').remove();
-
-						for (i = 0; i < _arr.length; i++) {
-							$('.toggleable_row_child_order_'+_arr[i].id+'__'+_arr[i].counter).remove();
-							$('.toggleable_row_child_sscc_'+_arr[i].id+'__'+_arr[i].counter).remove();
-						}
-
-						var header_id = $('.toggleable_tr:visible').attr('id').substring(14).split(\"__\", 2);
-
-						if (window['sort_row_direction_'+title]) {
-
-							if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
-								_arr.sort(compareName);
-								_arrChildOrder.sort(compareName);
-								_arrChildSscc.sort(compareName);
-							}
-							else {
-								_arr.sort(compareId);
-								_arrChildOrder.sort(compareId);
-								_arrChildSscc.sort(compareId);
-							}
+							$('.toggleable_parent:visible').remove();
 
 							for (i = 0; i < _arr.length; i++) {
-								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
-								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
-								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
+								$('.toggleable_tr_'+_arr[i].link+'__'+_arr[i].counter).remove();
 							}
 
-							$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
+							if (window['sort_parent_row_direction_'+title]) {
 
-							window['sort_row_direction_'+title] = false;
+								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
+									_arr.sort(compareName);
+									_arrChild.sort(compareName);
+								}
+								else {
+									_arr.sort(compareId);
+									_arrChild.sort(compareId);
+								}
+
+								for (i = 0; i < _arr.length; i++) {
+									$('.header_parent').after(_arrChild[i].row);
+									$('.header_parent').after(_arr[i].row);
+								}
+
+								$('.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
+
+								window['sort_parent_row_direction_'+title] = false;
+							}
+							else {
+
+								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
+									_arr.sort(compareName).reverse();
+									_arrChild.sort(compareName).reverse();
+								}
+								else {
+									_arr.sort(compareId).reverse();
+									_arrChild.sort(compareId).reverse();
+								}
+
+								for (i = 0; i < _arr.length; i++) {
+									$('.header_parent').after(_arrChild[i].row);
+									$('.header_parent').after(_arr[i].row);
+								}
+
+								$('.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png');
+
+								window['sort_parent_row_direction_'+title] = true;
+							}
+
 						}
 						else {
 
-							if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
-								_arr.sort(compareName).reverse();
-								_arrChildOrder.sort(compareName).reverse();
-								_arrChildSscc.sort(compareName).reverse();
+							var arr = $('.toggleable_row_tr:visible');
+							var _arr = new Array();
+
+							var _arrChildOrder = new Array();
+							var _arrChildSscc = new Array();
+
+							for (i = 0; i < arr.length; i++) {
+								var row = arr[i];
+
+								var id = $(row).children('.toggleable_row_'+title).attr('id');
+								var counter = 0;
+
+								if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package' || title == 'weight') {
+									var id_temp = id.split(\"__\", 3);
+									id = id_temp[0];
+									counter = id_temp[2];
+								}
+								else {
+									var id_temp = id.split(\"__\", 2);
+									id = id_temp[0];
+									counter = id_temp[1];
+								}
+
+								var temp = {'id': id, 'row': row, 'counter': counter};
+								_arr.push(temp);
+
+								var rowChildOrder = $('.toggleable_row_child_order_'+id+'__'+counter);
+								var tempChildOrder = {'id': id, 'row': rowChildOrder, 'counter': counter};
+								_arrChildOrder.push(tempChildOrder);
+
+								var rowChildSscc = $('.toggleable_row_child_sscc_'+id+'__'+counter);
+								var tempChildSscc = {'id': id, 'row': rowChildSscc, 'counter': counter};
+								_arrChildSscc.push(tempChildSscc);
 							}
-							else {
-								_arr.sort(compareId).reverse();
-								_arrChildOrder.sort(compareId).reverse();
-								_arrChildSscc.sort(compareId).reverse();
-							}
+
+							$('.toggleable_row_tr:visible').remove();
 
 							for (i = 0; i < _arr.length; i++) {
-								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
-								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
-								$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
+								$('.toggleable_row_child_order_'+_arr[i].id+'__'+_arr[i].counter).remove();
+								$('.toggleable_row_child_sscc_'+_arr[i].id+'__'+_arr[i].counter).remove();
 							}
 
-							$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png');
+							var header_id = $('.toggleable_tr:visible').attr('id').substring(14).split(\"__\", 2);
 
-							window['sort_row_direction_'+title] = true;
+							if (window['sort_row_direction_'+title]) {
+
+								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
+									_arr.sort(compareName);
+									_arrChildOrder.sort(compareName);
+									_arrChildSscc.sort(compareName);
+								}
+								else {
+									_arr.sort(compareId);
+									_arrChildOrder.sort(compareId);
+									_arrChildSscc.sort(compareId);
+								}
+
+								for (i = 0; i < _arr.length; i++) {
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
+								}
+
+								$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
+
+								window['sort_row_direction_'+title] = false;
+							}
+							else {
+
+								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
+									_arr.sort(compareName).reverse();
+									_arrChildOrder.sort(compareName).reverse();
+									_arrChildSscc.sort(compareName).reverse();
+								}
+								else {
+									_arr.sort(compareId).reverse();
+									_arrChildOrder.sort(compareId).reverse();
+									_arrChildSscc.sort(compareId).reverse();
+								}
+
+								for (i = 0; i < _arr.length; i++) {
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
+								}
+
+								$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png');
+
+								window['sort_row_direction_'+title] = true;
+							}
 						}
 					});
 
@@ -267,11 +351,11 @@
 	$result = pupe_query($query);
 
 	echo "<table>";
-	echo "<tr>";
+	echo "<tr class='header_parent'>";
 	echo "<th>",t("Status"),"</th>";
 	echo "<th></th>";
 	echo "<th>",t("Lähtö"),"</th>";
-	echo "<th>",t("Prio"),"</th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_prio'>",t("Prio")," <img class='parent_row_direction_prio' /></th>";
 	echo "<th>",t("Toimitustapa"),"</th>";
 	echo "<th>",t("Pvm"),"</th>";
 	echo "<th>",t("Viim til klo"),"</th>";
@@ -300,8 +384,8 @@
 		}
 
 		echo "<td><input type='checkbox' class='checkall' name='{$row['lahdon_tunnus']}'></td>";
-		echo "<td class='toggleable center' id='{$row['lahdon_tunnus']}__{$y}'><a class='td'>{$row['lahdon_tunnus']}</a></td>";
-		echo "<td class='center'>{$row['prioriteetti']}</td>";
+		echo "<td class='toggleable center' id='{$row['lahdon_tunnus']}__{$y}'><button type='button'>{$row['lahdon_tunnus']}</button></td>";
+		echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";
 		echo "<td>{$row['toimitustapa']}</td>";
 		echo "<td class='center'>",tv1dateconv($row['lahdon_pvm']),"</td>";
 		echo "<td class='center'>{$row['viimeinen_tilausaika']}</td>";
@@ -392,7 +476,7 @@
 			echo "<td class='data toggleable_row_status' id='{$status}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$status_text}</td>";
 
 			echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteetti']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['prioriteetti']}</td>";
-			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}__{$x}'><a class='td'>{$lahto_row['tilauksen_tunnus']}</a></td>";
+			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}__{$x}'><button type='button'>{$lahto_row['tilauksen_tunnus']}</button></td>";
 
 			echo "<td class='data toggleable_row_client' id='{$lahto_row['asiakas_nimi']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_nimi']}";
 			if ($lahto_row['asiakas_nimi'] != $lahto_row['asiakas_toim_nimi']) echo "<br>{$lahto_row['asiakas_toim_nimi']}";
@@ -508,7 +592,7 @@
 						JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-						AND kerayserat.sscc = '{$sscc}'
+						AND kerayserat.sscc = '{$lahto_row['sscc']}'
 						GROUP BY 1,2,3,4,5,6,7";
 			$rivi_res = pupe_query($query);
 

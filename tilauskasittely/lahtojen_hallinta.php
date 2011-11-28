@@ -18,6 +18,7 @@
 
 					$('.vihrea').css({'background-image': 'url(\"{$palvelin2}pics/vaaleanvihrea.png\")'});
 					$('.keltainen').css({'background-image': 'url(\"{$palvelin2}pics/keltainen.png\")'});
+					$('.punainen').css({'background-image': 'url(\"{$palvelin2}pics/punainen.png\")'});
 
 					$('.row_direction_order').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
 
@@ -179,7 +180,7 @@
 
 							if (window['sort_parent_row_direction_'+title]) {
 
-								if (title == 'delivery') {
+								if (title == 'delivery' || title == 'date' || title == 'time1') {
 									_arr.sort(compareName);
 									_arrChild.sort(compareName);
 								}
@@ -199,7 +200,7 @@
 							}
 							else {
 
-								if (title == 'delivery') {
+								if (title == 'delivery' || title == 'date' || title == 'time1') {
 									_arr.sort(compareName).reverse();
 									_arrChild.sort(compareName).reverse();
 								}
@@ -362,13 +363,13 @@
 
 	echo "<table>";
 	echo "<tr class='header_parent'>";
-	echo "<th>",t("Status"),"</th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_status'>",t("Status")," <img class='parent_row_direction_status' /></th>";
 	echo "<th></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_departure'>",t("Lähtö")," <img class='parent_row_direction_departure' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_prio'>",t("Prio")," <img class='parent_row_direction_prio' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_delivery'>",t("Toimitustapa")," <img class='parent_row_direction_delivery' /></th>";
-	echo "<th>",t("Pvm"),"</th>";
-	echo "<th>",t("Viim til klo"),"</th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_date'>",t("Pvm")," <img class='parent_row_direction_date' /></th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_time1'>",t("Viim til klo")," <img class='parent_row_direction_time1' /></th>";
 	echo "<th>",t("Lähtöaika"),"</th>";
 	echo "<th>",t("Ker. alku klo"),"</th>";
 	echo "<th>",t("Til / valm"),"</th>";
@@ -383,24 +384,32 @@
 
 		echo "<tr class='toggleable_parent' id='toggleable_parent_{$row['lahdon_tunnus']}__{$y}'>";
 
-		$exp_date = strtotime($row['lahdon_pvm'].' '.$row['lahdon_kellonaika'].':00');
-		$todays_date = strtotime(date('Y-m-d H:i:s'));
+		$exp_date = strtotime($row['lahdon_pvm']);
+		$exp_date_klo = strtotime($row['kerailyn_aloitusaika'].':00');
+		$todays_date = strtotime(date('Y-m-d'));
+		$todays_date_klo = strtotime(date('H:i:s'));
 
-		if ($todays_date >= $exp_date or $row['vakisin_kerays'] != '') {
-			echo "<td class='vihrea'></td>";
+		if ($todays_date > $exp_date and $todays_date_klo > $exp_date_klo) {
+			echo "<td class='punainen toggleable_parent_row_status' id='1__{$row['lahdon_tunnus']}__{$y}'></td>";
+		}
+		else if (($todays_date == $exp_date and $todays_date_klo > $exp_date_klo) or $row['vakisin_kerays'] != '') {
+			echo "<td class='vihrea toggleable_parent_row_status' id='2__{$row['lahdon_tunnus']}__{$y}'></td>";
 		}
 		else {
-			echo "<td class='keltainen'></td>";
+			echo "<td class='keltainen toggleable_parent_row_status' id='3__{$row['lahdon_tunnus']}__{$y}'></td>";
 		}
 
 		echo "<td><input type='checkbox' class='checkall' name='{$row['lahdon_tunnus']}'></td>";
 		echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'><button type='button'>{$row['lahdon_tunnus']}</button></td>";
 		echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";
 		echo "<td class='toggleable_parent_row_delivery' id='{$row['toimitustapa']}__{$row['lahdon_tunnus']}__{$y}'>{$row['toimitustapa']}</td>";
-		echo "<td class='center'>",tv1dateconv($row['lahdon_pvm']),"</td>";
-		echo "<td class='center'>{$row['viimeinen_tilausaika']}</td>";
+		echo "<td class='center toggleable_parent_row_date' id='{$row['lahdon_pvm']}__{$row['lahdon_tunnus']}__{$y}'>",tv1dateconv($row['lahdon_pvm']),"</td>";
+		echo "<td class='center toggleable_parent_row_time1' id='{$row['viimeinen_tilausaika']}__{$row['lahdon_tunnus']}__{$y}'>{$row['viimeinen_tilausaika']}</td>";
 
 		echo "<td class='center'>";
+
+		$exp_date = strtotime($row['lahdon_pvm'].' '.$row['lahdon_kellonaika'].':00');
+		$todays_date = strtotime(date('Y-m-d H:i:s'));
 
 		if ($todays_date > $exp_date) {
 			echo "<font class='error'>{$row['lahdon_kellonaika']}</font>";

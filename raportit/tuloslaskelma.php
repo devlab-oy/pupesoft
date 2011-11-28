@@ -869,7 +869,7 @@
 				// Jos tasolla on oletusarvo per kk. Esim poistot, jotka kirjataan vasta tilinpäätöksessä
 				if ($tasorow["oletusarvo"] != 0) {
 					$oletusarvo[$tasorow["taso"]] = $tasorow["oletusarvo"];
-					echo "Oletusarvo löytyi<br>";
+					//echo "Oletusarvo löytyi ".$tasorow["taso"]."<br>";
 				}
 
 				if ($toim == "TASOMUUTOS") {
@@ -940,30 +940,52 @@
 					}
 				}
 				// Summataan kaikkia pienempiä summaustasoja sijoittaen puuttuvat oletusarvot
-				for ($i = $tasoluku - 1; $i >= 0; $i--) {
-					if (isset($oletusarvo[$taso[$i]])) {
-						foreach ($kaudet as $kausi) {
-							if (substr($kausi,0,4) != "budj") {
-								echo "Oletusarvo yritys2 " . $taso[$i] . " kausi " . $kausi . "<br>";
-								//Käytetään oletusarvo, jos sellainen on ja alkuperäinen arvo on
-								if (isset($summa[$kausi][$taso[$i]][(string) $sarake]) and ($summa[$kausi][$taso[$i]][(string) $sarake] == 0) or !isset($summa[$kausi][$taso[$i]][(string) $sarake])) {
-									echo "Oletusarvo yritys3 " . $taso[$i] . "$jakaja <br>";
-									if ($kausi == ($vka." - ".$vkl)) {
-										$summa[$kausi][$taso[$i]][(string) $sarake] = $oletusarvo[$taso[$i]] * (count($kaudet) / $jakaja - 1);
-									}
-									elseif ($kausi != ($vkaed." - ".$vkled)) $summa[$kausi][$taso[$i]][(string) $sarake] = $oletusarvo[$taso[$i]];
-								}
 
-								//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
-								if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
-									$summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
+				$summattavakausi = array(); //Täällä on summa, jota summataan ylös
+				$summattavataso = ''; //Täällä on oletusarvon taso
+				$summattavaluku = 0; //Täällä on tason oletusarvo
+				$summattavaindeksi = $tasoluku -1;
+				$kumulointikausi = $vka . " - " . $vkl;
+
+				if (isset($oletusarvo[$taso[$summattavaindeksi]])) {
+					//echo "Oletus löytyi " .  $taso[$summattavaindeksi] ."<br>";
+					$summattavataso = $taso[$summattavaindeksi];
+					$summattavaluku = $oletusarvo[$taso[$summattavaindeksi]];
+
+					foreach ($sarakkeet as $sarake) {		
+						foreach ($kaudet as $kausi) {
+							if (substr($kausi,0,4) != "budj") {				
+								//Käytetään oletusarvo, jos alkuperäisen tason arvo on 0
+								if (isset($summa[$kausi][$taso[$summattavaindeksi]][(string) $sarake]) and ($summa[$kausi][$taso[$summattavaindeksi]][(string) $sarake] == 0) or
+									 !isset($summa[$kausi][$taso[$summattavaindeksi]][(string) $sarake])) {
+									 									
+									if (($kausi != ($vka." - ".$vkl)) and ($kausi != ($vkaed." - ".$vkled)) and ($kausi >= $vka)) {
+										//$summattavakausi[$kausi] = $summattavaluku * (count($kaudet) / $jakaja - 1);
+										//echo "Oletusarvo" . $taso[$summattavaindeksi]  . " "  . $sarake  .  " "  . $summattavakausi[$kausi] . "<br>";
+										$summattavakausi[$kausi] = $summattavaluku;
+									}
+								}
+														
+								for ($i = $tasoluku - 1; $i >= 0; $i--) {
+									if (isset($oletusarvo[$taso[$i]]) or ($summattavaluku != 0)) {
+										if (isset($summattavakausi[$kausi])) {
+											//echo "Summaan taolle " . $taso[$i] . " kaudelle " . $kausi .  " sarakkeelle " . $sarake . " " . $summattavakausi[$kausi] . "<br>";									
+											$summa[$kausi][$taso[$i]][(string) $sarake]	+= $summattavaluku;
+											//Kumuloidaan oikealle
+											$summa[$kumulointikausi][$taso[$i]][(string) $sarake]	+= $summattavaluku;
+											//echo "Kumuloin taolle " . $taso[$i] . " kaudelle " . $kumulointikausi .  " sarakkeelle " . $sarake . " " . $summa[$kumulointikausi][$taso[$i]][(string) $sarake] . "<br>";
+										}							
+										//Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
+										if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
+											$summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
+										}
+									}
 								}
 							}
 						}
 					}
 				}
 			}
-
 
 			if ($kaikkikaudet == "VY") {
 				// vika + yht

@@ -109,22 +109,16 @@
 
 					});
 
-					$('#filter_parent_row_date').live('change', function() {
+					$('#filter_parent_row_date').live('change', function(event) {
 
-						var selected = $(this).val();
+						event.stopPropagation();
 
-						selected = selected.replace(/(:|\.)/g,'\\$1');
+						var selected = $(this).val().replace(/(:|\.)/g,'\\$1');
 
 						if (selected == '') {
 							$('.toggleable_parent').show();
 						}
 						else {
-							// $('.toggleable_parent').children().find('.toggleable_parent_row_date');
-							//console.log($('.toggleable_parent').find('.toggleable_parent_row_date'));
-
-							//console.log($('td[id^=\"'+selected+'_\"]'));
-							//console.log($('td[id^=\"21\\.11\\.2011_\"]'));
-
 							$('.toggleable_parent').hide();
 							$('td[id^=\"'+selected+'\"]').parent().show();
 						}
@@ -158,7 +152,11 @@
 						window['sort_parent_row_direction_'+title_sort] = false;
 					});
 
-					$('.sort_row_by, .sort_parent_row_by').click(function() {
+					$('.sort_row_by, .sort_parent_row_by').click(function(event) {
+
+						if (event.target != this) {
+							return true;
+						}
 
 						var parent_sort = $(this).hasClass('sort_parent_row_by') ? true : false;
 

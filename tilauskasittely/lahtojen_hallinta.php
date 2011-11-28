@@ -39,6 +39,8 @@
 							$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').show();
 							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').stop().show();
 
+							$('#filter_parent_row_date option:first').attr('selected', true);
+
 							$(':checkbox').attr('checked', false);
 						}
 						else {
@@ -105,6 +107,27 @@
 							}
 						}
 
+					});
+
+					$('#filter_parent_row_date').live('change', function() {
+
+						var selected = $(this).val();
+
+						selected = selected.replace(/(:|\.)/g,'\\$1');
+
+						if (selected == '') {
+							$('.toggleable_parent').show();
+						}
+						else {
+							// $('.toggleable_parent').children().find('.toggleable_parent_row_date');
+							//console.log($('.toggleable_parent').find('.toggleable_parent_row_date'));
+
+							//console.log($('td[id^=\"'+selected+'_\"]'));
+							//console.log($('td[id^=\"21\\.11\\.2011_\"]'));
+
+							$('.toggleable_parent').hide();
+							$('td[id^=\"'+selected+'\"]').parent().show();
+						}
 					});
 
 					function compareId(a, b) {
@@ -338,7 +361,7 @@
 				SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
 				SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
 				SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
-				lasku.prioriteettinro AS 'prioriteetti',
+				avainsana.selitetark_3 AS 'prioriteetti',
 				toimitustapa.selite AS 'toimitustapa',
 				COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
 				SUM(IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), 1, 0)) AS 'valmiina',
@@ -352,6 +375,7 @@
 				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
 				FROM lasku
 				JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi = '')
+				JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lahdot.asiakasluokka)
 				JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -368,7 +392,25 @@
 	echo "<th class='sort_parent_row_by' id='parent_row_departure'>",t("Lähtö")," <img class='parent_row_direction_departure' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_prio'>",t("Prio")," <img class='parent_row_direction_prio' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_delivery'>",t("Toimitustapa")," <img class='parent_row_direction_delivery' /></th>";
-	echo "<th class='sort_parent_row_by' id='parent_row_date'>",t("Pvm")," <img class='parent_row_direction_date' /></th>";
+
+	$dates = array();
+
+	while ($row = mysql_fetch_assoc($result)) {
+		$dates[$row['lahdon_pvm']] = $row['lahdon_pvm'];
+	}
+
+	echo "<th class='sort_parent_row_by' id='parent_row_date'>",t("Pvm")," <img class='parent_row_direction_date' />";
+	echo "<br />";
+	echo "<select id='filter_parent_row_date'>";
+	echo "<option value=''>",t("Valitse"),"</option>";
+
+	foreach ($dates AS $pvm) {
+		echo "<option value='",tv1dateconv($pvm),"'>",tv1dateconv($pvm),"</option>";
+	}
+
+	echo "</select>";
+	echo"</th>";
+
 	echo "<th class='sort_parent_row_by' id='parent_row_time1'>",t("Viim til klo")," <img class='parent_row_direction_time1' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_time2'>",t("Lähtöaika")," <img class='parent_row_direction_time2' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_time3'>",t("Ker. alku klo")," <img class='parent_row_direction_time3' /></th>";
@@ -377,6 +419,8 @@
 	echo "<th class='sort_parent_row_by' id='parent_row_weight'>",t("Kg suun / ker")," <img class='parent_row_direction_weight' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_liters'>",t("Litrat suun / ker")," <img class='parent_row_direction_liters' /></th>";
 	echo "</tr>";
+
+	mysql_data_seek($result, 0);
 
 	$y = 0;
 
@@ -403,7 +447,7 @@
 		echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'><button type='button'>{$row['lahdon_tunnus']}</button></td>";
 		echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";
 		echo "<td class='toggleable_parent_row_delivery' id='{$row['toimitustapa']}__{$row['lahdon_tunnus']}__{$y}'>{$row['toimitustapa']}</td>";
-		echo "<td class='center toggleable_parent_row_date' id='{$row['lahdon_pvm']}__{$row['lahdon_tunnus']}__{$y}'>",tv1dateconv($row['lahdon_pvm']),"</td>";
+		echo "<td class='center toggleable_parent_row_date' id='",tv1dateconv($row['lahdon_pvm']),"__{$row['lahdon_tunnus']}__{$y}'>",tv1dateconv($row['lahdon_pvm']),"</td>";
 		echo "<td class='center toggleable_parent_row_time1' id='{$row['viimeinen_tilausaika']}__{$row['lahdon_tunnus']}__{$y}'>{$row['viimeinen_tilausaika']}</td>";
 
 		echo "<td class='center toggleable_parent_row_time2' id='{$row['lahdon_kellonaika']}__{$row['lahdon_tunnus']}__{$y}'>";

@@ -41,8 +41,8 @@
 					tuote.nimitys
 			FROM tuotteen_toimittajat
 			JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
-			JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.tuote AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-			WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
+			JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+			WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 			AND tuotteen_toimittajat.tuoteno in $tilattavat
 			ORDER BY tuotteen_toimittajat.toimittaja";
 		$result = mysql_query($query) or pupe_error($query);
@@ -109,7 +109,7 @@
 					$EDtoimittaja = $tilausrow['ytunnus'];
 
 					// Tehdään uusi header
-					$headervalues = "('$yhtiorow[yhtio]',
+					$headervalues = "('$kukarow[yhtio]',
 					'$yhtiorow[nimi]',
 					'$yhtiorow[osoite]',
 					'$yhtiorow[postino]',
@@ -149,7 +149,7 @@
 				// Tehdään rivi
 				$tilkpl = $tilattavatrow[ $tilausrow['tuoteno'] ];
 
-				$rivivalues = "('$yhtiorow[yhtio]',
+				$rivivalues = "('$kukarow[yhtio]',
 					'W',
 					now(),
 					now(),
@@ -348,7 +348,9 @@
 		if ($paivakulutus > 0) {
 			$riittopv = (floor($lapsenreaalisaldo / $paivakulutus) > 0 ? floor($lapsenreaalisaldo / $paivakulutus) : 0); // Näytetään negatiivinen riitto nollana
 		}
-		else $riittopv =  t('Ei tiedossa'); // Jos aiempaa kulutusta ei ole
+		else {
+			$riittopv =  t('Ei tiedossa'); // Jos aiempaa kulutusta ei ole
+		}
 
 		// Paljonko tuotetta ja sisartuotteita on valmistuksessa
 		$valmistuksessa = $lapsirow['valmistuksessa'] + $isarow['valmistuksessa'];
@@ -356,9 +358,12 @@
 		// Tuotteen ja sen sisartuotteiden yhteinen myyntiennuste
 		$myyntiennuste = $lapsenmyyntiennuste + $isanmyyntiennuste;
 
+		// Jos ei ole pakkauskokoa, oletetaan 1
+		$toimittajan_pakkauskoko = ((int) $toimittajarow['pakkauskoko'] == 0) ? 1 : $toimittajarow['pakkauskoko'];
+
 		// Valmistussuositus
 		$valmistussuositus = ($myyntiennuste > 0 ? ceil($myyntiennuste) : 0); // Näytetään negatiivinen suositus nollana
-		$valmistussuositus = ceil($valmistussuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'] ; // Pyöristetään pakkauskoon perusteella
+		$valmistussuositus = ceil($valmistussuositus / $toimittajan_pakkauskoko) * $toimittajarow['pakkauskoko'] ; // Pyöristetään pakkauskoon perusteella
 
 		$tuoterivi['riittopv'] 			= $riittopv;
 		$tuoterivi['reaalisaldo'] 		= $lapsenreaalisaldo;
@@ -400,16 +405,16 @@
 		$tilattu = null;
 
 		if ($osasto != '') {
-			$lisaa .= " and tilausrivi.osasto = '$osasto' ";
+			$lisaa .= " and tuote.osasto = '$osasto' ";
 		}
 		if ($tuoryh != '') {
-			$lisaa .= " and tilausrivi.try = '$tuoryh' ";
+			$lisaa .= " and tuote.try = '$tuoryh' ";
 		}
 		if ($tuotemerkki != '') {
-			$lisaa .= " and tilausrivi.tuotemerkki = '$tuotemerkki' ";
+			$lisaa .= " and tuote.tuotemerkki = '$tuotemerkki' ";
 		}
 		if ($toimittajaid != '') {
-			$lisaa2 .= " JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid') ";
+			$lisaa2 .= " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid') ";
 		}
 		if ($eliminoikonserni != '') {
 			$lisaa3 .= " and asiakas.konserniyhtio = '' ";

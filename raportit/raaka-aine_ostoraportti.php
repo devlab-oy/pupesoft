@@ -41,8 +41,8 @@
 					tuote.nimitys
 			FROM tuotteen_toimittajat
 			JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
-			JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.tuote AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-			WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
+			JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+			WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 			AND tuotteen_toimittajat.tuoteno in $tilattavat
 			ORDER BY tuotteen_toimittajat.toimittaja";
 		$result = mysql_query($query) or pupe_error($query);
@@ -109,7 +109,7 @@
 					$EDtoimittaja = $tilausrow['ytunnus'];
 
 					// Tehd‰‰n uusi header
-					$headervalues = "('$yhtiorow[yhtio]',
+					$headervalues = "('$kukarow[yhtio]',
 					'$yhtiorow[nimi]',
 					'$yhtiorow[osoite]',
 					'$yhtiorow[postino]',
@@ -149,7 +149,7 @@
 				// Tehd‰‰n rivi
 				$tilkpl = $tilattavatrow[$tilausrow['tuoteno']];
 
-				$rivivalues = "('$yhtiorow[yhtio]',
+				$rivivalues = "('$kukarow[yhtio]',
 				'O',
 				now(),
 				now(),
@@ -352,7 +352,10 @@
 		$tuoterivi['reaalisaldo'] 		= $lapsenreaalisaldo;
 		$tuoterivi['ostosuositus'] 		= $ostosuositus;
 
-		$tuoterivi['ostoeramaara'] = ceil($ostosuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'] ;
+		// Jos ei ole pakkauskokoa, oletetaan 1
+		$toimittajan_pakkauskoko = ((int) $toimittajarow['pakkauskoko'] == 0) ? 1 : $toimittajarow['pakkauskoko'];
+
+		$tuoterivi['ostoeramaara'] = ceil($ostosuositus / $toimittajan_pakkauskoko) * $toimittajarow['pakkauskoko'] ;
 
 		return $tuoterivi;
 	}

@@ -816,6 +816,7 @@
 					tuote.myyntihinta_maara,
 					tuote.status,
 					tuote.ei_saldoa,
+					tuote.valmistuslinja,
 					if (tilausrivi.tyyppi='V', 0, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) rivihinta,
 					if (tilausrivi.tyyppi='V', 0, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) arvo,
 					if (tilausrivi.tyyppi='V', 0, if (tilausrivi.kpl!=0, tilausrivi.rivihinta * if (tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa})) summa,
@@ -898,6 +899,7 @@
 
 		if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K" and $toim == "VALMISTUS") {
 			echo "<th style='text-align:right;'>".t("Reaalisaldo")."</th>";
+			echo "<th style='text-align:right;'>".t("Valmistuslinja")."</th>";
 		}
 		else {
 			echo "<td class='back'>&nbsp;</td>
@@ -926,6 +928,7 @@
 		$rihin_yht		= 0;
 
 		while ($row = mysql_fetch_assoc($result)) {
+			$linjannimi = "";
 
 			if (strpos($row['sorttauskentta'], '种种种种种种种种种种种') !== FALSE) {
 				$erikoistuote_tuoteperhe[$row['perheid']] = $row['sorttauskentta'];
@@ -1508,7 +1511,11 @@
 					$rsaldoclass = 'error';
 				}
 
-				echo "<td class='spec'><font class='$rsaldoclass'>{$reaalisaldo}</font></td>";
+				echo "<td class='spec' align='right'><font class='$rsaldoclass'>{$reaalisaldo}</font></td>";
+				$linjannimi = t_avainsana("VALMISTUSLINJA",''," and avainsana.selite='{$row["valmistuslinja"]}'",'','',"selitetark");
+				// mik鋖i on avainsanoissa valmistuslinjat luotu ja tuotteelle luotu niin tulostetaan ne n鋕yviin, muuten vaan tyhj滗
+				if ($linjannimi == "") $linjannimi = "&nbsp;";
+				echo "<td>{$linjannimi}</td>";
 
 				if ($row["status"] == "T" and $reaalisaldo < $row["tilkpl"]) {
 					// haetaan tuotteen toimittajan tiedot ja datat

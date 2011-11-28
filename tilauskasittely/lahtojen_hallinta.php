@@ -40,10 +40,14 @@
 							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').stop().show();
 
 							$('#filter_parent_row_date option:first').attr('selected', true);
+							$('#filter_parent_row_date').attr('disabled', false);
 
 							$(':checkbox').attr('checked', false);
 						}
 						else {
+
+							$('#filter_parent_row_date').attr('disabled', true);
+
 							var parent_element = $('#toggleable_'+id[0]+'__'+id[1]).parent();
 
 							$('.toggleable_row_tr').show();

@@ -149,11 +149,18 @@
 
 								var id = $(row).children('.toggleable_parent_row_'+title).attr('id');
 
-								var id_temp = id.split(\"__\", 3);
-								id = id_temp[0];
-								counter = id_temp[2];
+								if (title == 'departure') {
+									var id_temp = id.split(\"__\", 2);
+									id = id_temp[0];
+									counter = id_temp[1];
+								}
+								else {
+									var id_temp = id.split(\"__\", 3);
+									id = id_temp[0];
+									counter = id_temp[2];
+								}
 
-								var temp = {'id': id, 'row': row, 'counter': counter, 'link': id_temp[1]};
+								var temp = {'id': id, 'row': row, 'counter': counter, 'link': id_temp[0]};
 								_arr.push(temp);
 
 								var rowChild = $('#toggleable_tr_'+id_temp[1]+'__'+counter);
@@ -169,7 +176,7 @@
 
 							if (window['sort_parent_row_direction_'+title]) {
 
-								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
+								if (title == 'delivery') {
 									_arr.sort(compareName);
 									_arrChild.sort(compareName);
 								}
@@ -189,7 +196,7 @@
 							}
 							else {
 
-								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
+								if (title == 'delivery') {
 									_arr.sort(compareName).reverse();
 									_arrChild.sort(compareName).reverse();
 								}
@@ -354,9 +361,9 @@
 	echo "<tr class='header_parent'>";
 	echo "<th>",t("Status"),"</th>";
 	echo "<th></th>";
-	echo "<th>",t("Lähtö"),"</th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_departure'>",t("Lähtö")," <img class='parent_row_direction_departure' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_prio'>",t("Prio")," <img class='parent_row_direction_prio' /></th>";
-	echo "<th>",t("Toimitustapa"),"</th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_delivery'>",t("Toimitustapa")," <img class='parent_row_direction_delivery' /></th>";
 	echo "<th>",t("Pvm"),"</th>";
 	echo "<th>",t("Viim til klo"),"</th>";
 	echo "<th>",t("Lähtöaika"),"</th>";
@@ -384,9 +391,9 @@
 		}
 
 		echo "<td><input type='checkbox' class='checkall' name='{$row['lahdon_tunnus']}'></td>";
-		echo "<td class='toggleable center' id='{$row['lahdon_tunnus']}__{$y}'><button type='button'>{$row['lahdon_tunnus']}</button></td>";
+		echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'><button type='button'>{$row['lahdon_tunnus']}</button></td>";
 		echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";
-		echo "<td>{$row['toimitustapa']}</td>";
+		echo "<td class='toggleable_parent_row_delivery' id='{$row['toimitustapa']}__{$row['lahdon_tunnus']}__{$y}'>{$row['toimitustapa']}</td>";
 		echo "<td class='center'>",tv1dateconv($row['lahdon_pvm']),"</td>";
 		echo "<td class='center'>{$row['viimeinen_tilausaika']}</td>";
 

@@ -389,11 +389,11 @@
 		$todays_date = strtotime(date('Y-m-d'));
 		$todays_date_klo = strtotime(date('H:i:s'));
 
-		if ($todays_date > $exp_date and $todays_date_klo > $exp_date_klo) {
-			echo "<td class='punainen toggleable_parent_row_status' id='1__{$row['lahdon_tunnus']}__{$y}'></td>";
-		}
-		else if (($todays_date == $exp_date and $todays_date_klo > $exp_date_klo) or $row['vakisin_kerays'] != '') {
+		if (($todays_date == $exp_date and $todays_date_klo > $exp_date_klo) or $row['vakisin_kerays'] != '') {
 			echo "<td class='vihrea toggleable_parent_row_status' id='2__{$row['lahdon_tunnus']}__{$y}'></td>";
+		}
+		else if ($todays_date > $exp_date and $todays_date_klo > $exp_date_klo) {
+			echo "<td class='punainen toggleable_parent_row_status' id='1__{$row['lahdon_tunnus']}__{$y}'></td>";
 		}
 		else {
 			echo "<td class='keltainen toggleable_parent_row_status' id='3__{$row['lahdon_tunnus']}__{$y}'></td>";

@@ -180,7 +180,7 @@
 
 							if (window['sort_parent_row_direction_'+title]) {
 
-								if (title == 'delivery' || title == 'date' || title == 'time1') {
+								if (title == 'delivery' || title == 'date' || title == 'time1' || title == 'time2' || title == 'time3') {
 									_arr.sort(compareName);
 									_arrChild.sort(compareName);
 								}
@@ -200,7 +200,7 @@
 							}
 							else {
 
-								if (title == 'delivery' || title == 'date' || title == 'time1') {
+								if (title == 'delivery' || title == 'date' || title == 'time1' || title == 'time2' || title == 'time3') {
 									_arr.sort(compareName).reverse();
 									_arrChild.sort(compareName).reverse();
 								}
@@ -370,8 +370,8 @@
 	echo "<th class='sort_parent_row_by' id='parent_row_delivery'>",t("Toimitustapa")," <img class='parent_row_direction_delivery' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_date'>",t("Pvm")," <img class='parent_row_direction_date' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_time1'>",t("Viim til klo")," <img class='parent_row_direction_time1' /></th>";
-	echo "<th>",t("Lähtöaika"),"</th>";
-	echo "<th>",t("Ker. alku klo"),"</th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_time2'>",t("Lähtöaika")," <img class='parent_row_direction_time2' /></th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_time3'>",t("Ker. alku klo")," <img class='parent_row_direction_time3' /></th>";
 	echo "<th>",t("Til / valm"),"</th>";
 	echo "<th>",t("Rivit suun / ker"),"</th>";
 	echo "<th>",t("Kg suun / ker"),"</th>";
@@ -406,7 +406,7 @@
 		echo "<td class='center toggleable_parent_row_date' id='{$row['lahdon_pvm']}__{$row['lahdon_tunnus']}__{$y}'>",tv1dateconv($row['lahdon_pvm']),"</td>";
 		echo "<td class='center toggleable_parent_row_time1' id='{$row['viimeinen_tilausaika']}__{$row['lahdon_tunnus']}__{$y}'>{$row['viimeinen_tilausaika']}</td>";
 
-		echo "<td class='center'>";
+		echo "<td class='center toggleable_parent_row_time2' id='{$row['lahdon_kellonaika']}__{$row['lahdon_tunnus']}__{$y}'>";
 
 		$exp_date = strtotime($row['lahdon_pvm'].' '.$row['lahdon_kellonaika'].':00');
 		$todays_date = strtotime(date('Y-m-d H:i:s'));
@@ -420,7 +420,7 @@
 
 		echo "</td>";
 
-		echo "<td class='center'>{$row['kerailyn_aloitusaika']}</td>";
+		echo "<td class='center toggleable_parent_row_time3' id='{$row['kerailyn_aloitusaika']}__{$row['lahdon_tunnus']}__{$y}'>{$row['kerailyn_aloitusaika']}</td>";
 		echo "<td class='center'>{$row['tilatut']} / {$row['valmiina']}</td>";
 		echo "<td class='center'>{$row['suunnittelussa']} / {$row['keratyt']}</td>";
 		echo "<td class='center'>{$row['kg_suun']} / {$row['kg_ker']}</td>";

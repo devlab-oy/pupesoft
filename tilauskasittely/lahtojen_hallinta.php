@@ -22,6 +22,34 @@
 
 					$('.row_direction_order').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
 
+					function compareId(a, b) {
+						return b.id - a.id;
+					}
+
+					function compareName(a, b) {
+						if (b.id.toLowerCase() > a.id.toLowerCase()) {
+							return 1;
+						}
+						else if (b.id.toLowerCase() < a.id.toLowerCase()) {
+							return -1;
+						}
+						else {
+							return 0;
+						}
+					}
+
+					function sort_unique(arr) {
+						arr = arr.sort(function (a, b) { return a*1 - b*1; });
+						var ret = [arr[0]];
+						for (var i = 1; i < arr.length; i++) { // start loop at 1 as element 0 can never be a duplicate
+							if (arr[i-1] !== arr[i]) {
+								ret.push(arr[i]);
+							}
+						}
+
+						return ret;
+					}
+
 					$('.toggleable').live('click', function(event){
 
 						var id = this.id.split(\"__\", 2);
@@ -39,14 +67,16 @@
 							$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').show();
 							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').stop().show();
 
-							$('#filter_parent_row_date option:first').attr('selected', true);
-							$('#filter_parent_row_date').attr('disabled', false);
+							$('.filter_parent_row_by').find('option:first').each(function() {
+								$(this).attr('selected', true);
+								$(this).parent().attr('disabled', false);
+							});
 
 							$(':checkbox').attr('checked', false);
 						}
 						else {
 
-							$('#filter_parent_row_date').attr('disabled', true);
+							$('.filter_parent_row_by').attr('disabled', true);
 
 							var parent_element = $('#toggleable_'+id[0]+'__'+id[1]).parent();
 
@@ -113,36 +143,60 @@
 
 					});
 
-					$('#filter_parent_row_date').live('change', function(event) {
+					$('.filter_parent_row_by').live('focus', function(event) {
 
 						event.stopPropagation();
 
-						var selected = $(this).val().replace(/(:|\.)/g,'\\$1');
+						var title = this.id.substring(11);
 
-						if (selected == '') {
-							$('.toggleable_parent').show();
-						}
-						else {
-							$('.toggleable_parent').hide();
-							$('td[id^=\"'+selected+'\"]').parent().show();
+						var _arr = new Array();
+
+						$('.toggleable_parent_row_'+title+':visible').each(function() {
+							_arr.push($(this).html().replace(/(:|\.)/g,'\\$1'));
+						});
+
+						_arr = sort_unique(_arr);
+
+						var selected = $(this).children('option:selected').val();
+
+						$(this).children().remove();
+
+						$(this).prepend('<option value=\"\">",t("Valitse"),"</option>')
+
+						for (i = 0; i < _arr.length; i++) {
+							if (selected == _arr[i]) {
+								$(this).append('<option value=\"'+_arr[i]+'\" selected>'+_arr[i]+'</option>');
+							}
+							else {
+								$(this).append('<option value=\"'+_arr[i]+'\">'+_arr[i]+'</option>');
+							}
 						}
 					});
 
-					function compareId(a, b) {
-						return b.id - a.id;
-					}
+					$('.filter_parent_row_by').live('change', function(event) {
 
-					function compareName(a, b) {
-						if (b.id.toLowerCase() > a.id.toLowerCase()) {
-							return 1;
-						}
-						else if (b.id.toLowerCase() < a.id.toLowerCase()) {
-							return -1;
+						event.stopPropagation();
+
+						$('.toggleable_parent').hide();
+
+						var empty_all = true;
+
+						$('.filter_parent_row_by').each(function() {
+							var selected = $(this).val().replace(/(:|\.)/g,'\\$1');
+
+							if (selected != '') {
+								empty_all = false;
+								$('td[id^=\"'+selected+'\"]').parent().show();
+							}
+						});
+
+						if (empty_all) {
+							$('.toggleable_parent').show();
 						}
 						else {
-							return 0;
+							$(this).attr('selected', true);
 						}
-					}
+					});
 
 					$('.sort_row_by').each(function() {
 						var title_sort = this.id.substring(4);
@@ -176,7 +230,7 @@
 							for (i = 0; i < arr.length; i++) {
 								var row = arr[i];
 
-								var id = $(row).children('.toggleable_parent_row_'+title).attr('id');
+								var id = $(row).children('.toggleable_parent_row_'+title).attr('id').replace(/(:|\.)/g,'\\$1');
 
 								if (title == 'departure') {
 									var id_temp = id.split(\"__\", 2);
@@ -387,15 +441,32 @@
 				ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika, lahdot.tunnus";
 	$result = pupe_query($query);
 
+	$deliveries = array();
+	$dates = array();
+
+	while ($row = mysql_fetch_assoc($result)) {
+		$deliveries[$row['toimitustapa']] = $row['toimitustapa'];
+		$dates[$row['lahdon_pvm']] = $row['lahdon_pvm'];
+	}
+
 	echo "<table>";
 	echo "<tr class='header_parent'>";
 	echo "<th class='sort_parent_row_by' id='parent_row_status'>",t("Status")," <img class='parent_row_direction_status' /></th>";
 	echo "<th></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_departure'>",t("Lähtö")," <img class='parent_row_direction_departure' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_prio'>",t("Prio")," <img class='parent_row_direction_prio' /></th>";
-	echo "<th class='sort_parent_row_by' id='parent_row_delivery'>",t("Toimitustapa")," <img class='parent_row_direction_delivery' /></th>";
 
-	$dates = array();
+	echo "<th class='sort_parent_row_by' id='parent_row_delivery'>",t("Toimitustapa")," <img class='parent_row_direction_delivery' />";
+	echo "<br />";
+	echo "<select class='filter_parent_row_by' id='parent_row_delivery'>";
+	echo "<option value=''>",t("Valitse"),"</option>";
+
+	foreach ($deliveries AS $deli) {
+		echo "<option value='{$deli}'>{$deli}</option>";
+	}
+
+	echo "</select>";
+	echo "</th>";
 
 	while ($row = mysql_fetch_assoc($result)) {
 		$dates[$row['lahdon_pvm']] = $row['lahdon_pvm'];
@@ -403,7 +474,7 @@
 
 	echo "<th class='sort_parent_row_by' id='parent_row_date'>",t("Pvm")," <img class='parent_row_direction_date' />";
 	echo "<br />";
-	echo "<select id='filter_parent_row_date'>";
+	echo "<select class='filter_parent_row_by' id='parent_row_date'>";
 	echo "<option value=''>",t("Valitse"),"</option>";
 
 	foreach ($dates AS $pvm) {

@@ -372,10 +372,10 @@
 	echo "<th class='sort_parent_row_by' id='parent_row_time1'>",t("Viim til klo")," <img class='parent_row_direction_time1' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_time2'>",t("Lähtöaika")," <img class='parent_row_direction_time2' /></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_time3'>",t("Ker. alku klo")," <img class='parent_row_direction_time3' /></th>";
-	echo "<th>",t("Til / valm"),"</th>";
-	echo "<th>",t("Rivit suun / ker"),"</th>";
-	echo "<th>",t("Kg suun / ker"),"</th>";
-	echo "<th>",t("Litrat suun / ker"),"</th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_orders'>",t("Til / valm")," <img class='parent_row_direction_orders' /></th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_rows'>",t("Rivit suun / ker")," <img class='parent_row_direction_rows' /></th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_weight'>",t("Kg suun / ker")," <img class='parent_row_direction_weight' /></th>";
+	echo "<th class='sort_parent_row_by' id='parent_row_liters'>",t("Litrat suun / ker")," <img class='parent_row_direction_liters' /></th>";
 	echo "</tr>";
 
 	$y = 0;
@@ -421,10 +421,10 @@
 		echo "</td>";
 
 		echo "<td class='center toggleable_parent_row_time3' id='{$row['kerailyn_aloitusaika']}__{$row['lahdon_tunnus']}__{$y}'>{$row['kerailyn_aloitusaika']}</td>";
-		echo "<td class='center'>{$row['tilatut']} / {$row['valmiina']}</td>";
-		echo "<td class='center'>{$row['suunnittelussa']} / {$row['keratyt']}</td>";
-		echo "<td class='center'>{$row['kg_suun']} / {$row['kg_ker']}</td>";
-		echo "<td class='center'>{$row['litrat_suun']} / {$row['litrat_ker']}</td>";
+		echo "<td class='center toggleable_parent_row_orders' id='{$row['tilatut']}__{$row['lahdon_tunnus']}__{$y}'>{$row['tilatut']} / {$row['valmiina']}</td>";
+		echo "<td class='center toggleable_parent_row_rows' id='{$row['suunnittelussa']}__{$row['lahdon_tunnus']}__{$y}'>{$row['suunnittelussa']} / {$row['keratyt']}</td>";
+		echo "<td class='center toggleable_parent_row_weight' id='{$row['kg_suun']}__{$row['lahdon_tunnus']}__{$y}'>{$row['kg_suun']} / {$row['kg_ker']}</td>";
+		echo "<td class='center toggleable_parent_row_liters' id='{$row['litrat_suun']}__{$row['lahdon_tunnus']}__{$y}'>{$row['litrat_suun']} / {$row['litrat_ker']}</td>";
 
 		echo "</tr>";
 

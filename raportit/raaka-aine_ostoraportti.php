@@ -174,8 +174,6 @@
 		echo $rows." ".t('ostotilausta muodostettu.');
 	}
 
-	if ($yhtiot == "") $yhtiot = "'$kukarow[yhtio]'";
-
 	// Jos jt-rivit varaavat saldoa niin se vaikuttaa asioihin
 	if ($yhtiorow["varaako_jt_saldoa"] != "") {
 		$lisavarattu = " + tilausrivi.varattu";
@@ -366,20 +364,21 @@
 		// haetaan nimitietoa
 		if ($tuoryh != '') {
 			// tehd‰‰n avainsana query
-			$sresult = t_avainsana("TRY", "", "and avainsana.selite ='$tuoryh'", $yhtiot);
+			$sresult = t_avainsana("TRY", "", "and avainsana.selite ='$tuoryh'");
 			$trow1 = mysql_fetch_array($sresult);
 		}
 
 		if ($osasto != '') {
 			// tehd‰‰n avainsana query
-			$sresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$osasto'", $yhtiot);
+			$sresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$osasto'");
 			$trow2 = mysql_fetch_array($sresult);
 		}
 
 		if ($toimittajaid != '') {
 			$query = "	SELECT nimi
 						FROM toimi
-						WHERE yhtio in ($yhtiot) and tunnus='$toimittajaid'";
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tunnus = '$toimittajaid'";
 			$sresult = mysql_query($query) or pupe_error($query);
 			$trow3 = mysql_fetch_array($sresult);
 		}
@@ -425,7 +424,7 @@
 			// katsotaan valitut varastot
 			$query = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio in ($yhtiot)";
+						WHERE yhtio = '$kukarow[yhtio]'";
 			$vtresult = mysql_query($query) or pupe_error($query);
 
 			while ($vrow = mysql_fetch_array($vtresult)) {
@@ -442,7 +441,7 @@
 		$query = "	SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
 					FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $lisaa)
-					WHERE tilausrivi.yhtio in ($yhtiot)
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tyyppi IN  ('L','G')
 					and var = 'J'
 					and jt $lisavarattu > 0";
@@ -504,7 +503,7 @@
 					LEFT JOIN tuotteen_toimittajat ON (tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.yhtio = tuotteen_toimittajat.yhtio)
 					LEFT JOIN toimi ON (tuotteen_toimittajat.toimittaja = toimi.ytunnus AND tuote.yhtio = toimi.yhtio)
 					WHERE
-					tuote.yhtio in ($yhtiot)
+					tuote.yhtio = '$kukarow[yhtio]'
 					AND tuoteperhe.tyyppi = 'R'
 					$lisaa
 					and tuote.ei_saldoa = ''
@@ -620,7 +619,7 @@
 		echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
 		// tehd‰‰n avainsana query
-		$sresult = t_avainsana("OSASTO", "", "", $yhtiot);
+		$sresult = t_avainsana("OSASTO", "", "");
 
 		echo "<select name='osasto'>";
 		echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -638,7 +637,7 @@
 				<tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>";
 
 		// tehd‰‰n avainsana query
-		$sresult = t_avainsana("TRY", "", "", $yhtiot);
+		$sresult = t_avainsana("TRY", "", "");
 
 		echo "<select name='tuoryh'>";
 		echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -658,7 +657,8 @@
 		//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
 		$query = "	SELECT distinct tuotemerkki
 					FROM tuote
-					WHERE yhtio in ($yhtiot) and tuotemerkki != ''
+					WHERE yhtio = '$kukarow[yhtio]' 
+					AND tuotemerkki != ''
 					ORDER BY tuotemerkki";
 		$sresult = mysql_query($query) or pupe_error($query);
 
@@ -677,7 +677,7 @@
 		echo "</td></tr>";
 
 		// katotaan onko abc aputaulu rakennettu
-		$query  = "select count(*) from abc_aputaulu where yhtio in ($yhtiot) and tyyppi in ('TK','TR','TP')";
+		$query  = "SELECT count(*) from abc_aputaulu where yhtio = '$kukarow[yhtio]' and tyyppi in ('TK','TR','TP')";
 		$abcres = mysql_query($query) or pupe_error($query);
 		$abcrow = mysql_fetch_array($abcres);
 
@@ -735,12 +735,10 @@
 
 		echo "</table><table><br>";
 
-		$yhtiot = "'$kukarow[yhtio]'";
-
 		//Valitaan varastot joiden saldot huomioidaan
 		$query = "	SELECT *
 					FROM varastopaikat
-					WHERE yhtio in ($yhtiot)
+					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY yhtio, nimitys";
 		$vtresult = mysql_query($query) or pupe_error($query);
 

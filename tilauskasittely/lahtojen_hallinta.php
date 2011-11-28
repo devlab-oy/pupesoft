@@ -80,27 +80,30 @@
 
 					$('.toggleable_row_sscc').live('click', function(event){
 
-						var id = this.id.split(\"__\", 3);
+						if ($(this).html() != '') {
+							var id = this.id.split(\"__\", 3);
 
-						if ($('#toggleable_row_sscc_'+id[0]+'_'+id[2]).is(':visible')) {
-							$(this).removeClass('tumma');
+							if ($('#toggleable_row_sscc_'+id[0]+'_'+id[2]).is(':visible')) {
+								$(this).removeClass('tumma');
 
-							$('#toggleable_row_sscc_'+id[0]+'_'+id[2]).slideUp('fast');
+								$('#toggleable_row_sscc_'+id[0]+'_'+id[2]).slideUp('fast');
 
-							if ($('.toggleable_row_child:visible').length == 1) {
-								$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
+								if ($('.toggleable_row_child:visible').length == 1) {
+									$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
+								}
+							}
+							else {
+
+								$(this).addClass('tumma');
+
+								$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
+
+								var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[2]).parent();
+
+								$('#toggleable_row_sscc_'+id[0]+'_'+id[2]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 							}
 						}
-						else {
 
-							$(this).addClass('tumma');
-
-							$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
-
-							var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[2]).parent();
-
-							$('#toggleable_row_sscc_'+id[0]+'_'+id[2]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
-						}
 					});
 
 					function compareId(a, b) {
@@ -509,7 +512,13 @@
 			echo "<td class='data toggleable_row_batch' id='{$lahto_row['erat']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['erat']}</td>";
 
 			echo "<td class='toggleable_row_rows' id='{$til_row['rivit']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['rivit']} / {$til_row['keratyt']}</td>";
-			echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'><a class='td'>{$lahto_row['sscc']}</a></td>";
+
+			echo "<td class='data toggleable_row_sscc' id='{$lahto_row['sscc']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+
+			if ($lahto_row['sscc'] != '') {
+				echo "<button type='button'>{$lahto_row['sscc']}</button>";
+			}
+			echo "</td>";
 
 			if ($lahto_row['pakkausnumerot'] != '') {
 

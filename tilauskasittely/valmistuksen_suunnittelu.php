@@ -6,9 +6,164 @@ require("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Valmistusten suunnittelu")."</font><hr>";
 
-// Muodostetaan ostotilaukset
+// Muodostetaan valmistukset
 if(isset($muodostaValmistukset)){
-	echo t("Nyt pit‰isi muodostaa valmistukset");
+	// Ker‰t‰‰n tilattavat tuotteet
+	$tilattavat = "(";
+	$tilattavatrow = "";
+	foreach($_POST as $key => $value){
+		if(substr($key, 0,5) == "TUOTE" and $value != '0'){
+			$tuoteno = substr($key, 5);
+			$tilattavat .= "'$tuoteno',";
+			$tilattavatrow[$tuoteno] = @mysql_real_escape_string($value);
+		}
+	}
+	$tilattavat = substr($tilattavat,0,-1).")";
+	
+	// Haetaan tuotteiden tiedot
+	$query = "
+		SELECT tuotteen_toimittajat.tuoteno, tuotteen_toimittajat.toimittaja, tuotteen_toimittajat.toimitusaika, tuotteen_toimittajat.tunnus, tuotteen_toimittajat.ostohinta, tuotteen_toimittajat.valuutta,
+		toimi.nimi, toimi.osoite, toimi.postino, toimi.postitp, toimi.maa, toimi.oletus_valkoodi, toimi.ytunnus, toimi.ovttunnus,
+		tuote.osasto, tuote.try, tuote.yksikko, tuote.nimitys
+		FROM tuotteen_toimittajat
+		JOIN toimi
+		ON tuotteen_toimittajat.toimittaja = toimi.ytunnus
+		JOIN tuote
+		ON tuotteen_toimittajat.tuoteno = tuote.tuoteno
+		WHERE tuotteen_toimittajat.yhtio = '$yhtiorow[yhtio]'
+		AND tuotteen_toimittajat.tuoteno in $tilattavat
+		ORDER BY tuotteen_toimittajat.toimittaja";
+	$result = mysql_query($query) or pupe_error($query);
+	
+	if (mysql_num_rows($result) > 0) {
+		$rows = 0;
+		// Laskun headeri
+		$laskuheader = "
+			INSERT INTO lasku (
+			yhtio			
+			, yhtio_nimi			
+			, yhtio_osoite		
+			, yhtio_postino			
+			, yhtio_postitp	
+			, yhtio_maa
+			, toim_nimi
+			, toim_osoite
+			, toim_postino
+			, toim_postitp
+			, toim_maa
+			, nimi	
+			, osoite	
+			, postino
+			, postitp
+			, maa
+			, valkoodi
+			, toimaika
+			, laatija
+			, luontiaika
+			, tila
+			, maksuteksti
+			, toimitusehto
+			, liitostunnus
+			, ytunnus
+			, ovttunnus
+			, vienti_kurssi
+			, viikorkopros
+			, tilausyhteyshenkilo
+			) VALUES ";
+			
+		$riviheader = "
+			INSERT INTO tilausrivi (
+			yhtio		
+			, tyyppi
+			, toimaika
+			, kerayspvm
+			, otunnus
+			, tuoteno
+			, try
+			, osasto
+			, nimitys
+			, tilkpl
+			, yksikko
+			, varattu
+			, hinta
+			, laatija
+			, laadittu
+			) VALUES ";
+		
+		$EDtoimittaja = "";
+		while( $tilausrow = mysql_fetch_assoc($result) ){
+			if( $EDtoimittaja != $tilausrow['ytunnus'] ){
+				$EDtoimittaja = $tilausrow['ytunnus'];
+				
+				// Tehd‰‰n uusi header
+				$headervalues = "(
+				'$yhtiorow[yhtio]'				
+				, '$yhtiorow[nimi]'			
+				, '$yhtiorow[osoite]'			
+				, '$yhtiorow[postino]'			
+				, '$yhtiorow[postitp]'		
+				, '$yhtiorow[maa]'
+				, '$yhtiorow[nimi]'			
+				, '$yhtiorow[osoite]'			
+				, '$yhtiorow[postino]'			
+				, '$yhtiorow[postitp]'		
+				, '$yhtiorow[maa]'				
+				, '$tilausrow[nimi]'			
+				, '$tilausrow[osoite]'			
+				, '$tilausrow[postino]'			
+				, '$tilausrow[postitp]'		
+				, '$tilausrow[maa]'
+				, '$tilausrow[valuutta]'
+				, now()
+				, '$kukarow[kuka]'
+				, now()
+				, 'L'
+				, ''
+				, '$kukarow[oletus_toimituehto]'
+				, '$tilausrow[tunnus]'
+				, '$tilausrow[ytunnus]'
+				, '$tilausrow[ovttunnus]'
+				, 0
+				, '$kukarow[viivastyskorko]'
+				, '$kukarow[tilauksen_yhteyshenkilot]'
+				)";
+				// TODO: maksuteksti, vienti_kurssi
+
+				$query = $laskuheader.$headervalues;
+				mysql_query($query) or pupe_error($query);
+				$otunnus = @mysql_insert_id();
+				$rows++;
+			}
+			
+			// Tehd‰‰n rivi
+			$tilkpl = $tilattavatrow[ $tilausrow['tuoteno'] ];
+			
+			$rivivalues = "
+				(
+				'$yhtiorow[yhtio]'
+				, 'W'
+				, now()
+				, now()
+				, '$otunnus'
+				, '$tilausrow[tuoteno]'
+				, '$tilausrow[try]'
+				, '$tilausrow[osasto]'
+				, '$tilausrow[nimitys]'
+				, '$tilkpl'
+				, '$tilausrow[yksikko]'
+				, '$tilkpl'
+				, '$tilausrow[ostohinta]'
+				, '$kukarow[kuka]'
+				, now()
+				)";
+				
+			$query = $riviheader.$rivivalues;
+			mysql_query($query) or pupe_error($query);
+		}
+		
+	}
+	
+	echo $rows." ".t('valmistusta tehty.');
 }
 
 if ($yhtiot == "") $yhtiot = "'$kukarow[yhtio]'";
@@ -52,7 +207,7 @@ if(checkdate($kkl1ed, $ppl1ed, $vvl1ed)){
 else $lpvm = date('Y-m-d');
 
 // Tehd‰‰n yksi rivi taulukkoon
-function teerivi( $tuoteno, $sisartuoteno, $kerroin ){
+function teerivi( $tuoteno, $isatuoteno, $kerroin ){
 
 	// otetaan kaikki muuttujat mukaan funktioon mit‰ on failissakin
 	extract($GLOBALS);
@@ -83,6 +238,7 @@ function teerivi( $tuoteno, $sisartuoteno, $kerroin ){
 				sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,rivihinta,0)) rivihinta,
 				sum(if(tilausrivi.tyyppi = 'O' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.varattu,0)) tilattu,
 				sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
+				sum(if(tilausrivi.tyyppi = 'W' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' , kpl + tilkpl ,0)) valmistuksessa,
 				sum(if(tilausrivi.tyyppi = 'L' AND tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0)) jt,
 				sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)) ennakko
 				FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
@@ -102,7 +258,7 @@ function teerivi( $tuoteno, $sisartuoteno, $kerroin ){
 	else $budjetti_indeksi = 1;
 	
 	// Lasketaan is‰tuotteen myyntiennuste
-	$myyntiennuste = $isarow['EDkpl'] * $budjetti_indeksi - $isanreaalisaldo;
+	$isanmyyntiennuste = $isarow['EDkpl'] * $budjetti_indeksi - $isanreaalisaldo;
 	
 	// Haetaan lapsituotteen varastosaldo
 	$query = "	SELECT ifnull(sum(saldo),0) saldo 
@@ -129,6 +285,7 @@ function teerivi( $tuoteno, $sisartuoteno, $kerroin ){
 				sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.kate,0)) kate,
 				sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,rivihinta,0)) rivihinta,
 				sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
+				sum(if(tilausrivi.tyyppi = 'W' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' , kpl + tilkpl ,0)) valmistuksessa,
 				sum(if(tilausrivi.tyyppi = 'L' AND tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0)) jt,
 				sum(if(tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)) ennakko,
 				sum(if(tilausrivi.tyyppi in ('L','V','W') AND toimitettuaika >= '$vva1-01-01' AND toimitettuaika <= '$vvl1-12-31', kpl, 0)) vuosikulutus
@@ -148,26 +305,38 @@ function teerivi( $tuoteno, $sisartuoteno, $kerroin ){
 	$result = mysql_query($query) or pupe_error($query);
 	$toimittajarow = mysql_fetch_array($result); 
 	
+	// Haetaan lapsen budjetti-indeksi, jos sellainen on m‰‰ritetty
+	// TODO: haetaan budjetti-indeksi
+	if(1==2){
+	}
+	else $budjetti_indeksi = 1;
+	
 	$lapsenreaalisaldo = $lapsenvarastosaldo - $lapsirow['tilattu'] - $lapsirow['ennpois'];
-	$toimitusaika = $toimittajarow['toimitusaika'];
+	$lapsenmyyntiennuste = $lapsirow['EDkpl'] * $budjetti_indeksi - $lapsenreaalisaldo;
+	
 	$vuosikulutus = $lapsirow['vuosikulutus'];
 	$paivakulutus = ( $vuosikulutus > 0 ? round($vuosikulutus / 360) : 0 );
 	
-	$kulutusennuste = $myyntiennuste * $kerroin; //- $lapsenreaalisaldo;
-	$maaraennuste = $kulutusennuste + ($paivakulutus * $toimitusaika); // TODO: otetaanko todelliset vuodenp‰iv‰t vai k‰ytet‰‰nkˆ 360
 	if($paivakulutus > 0){
 		$riittopv = ( floor( $lapsenreaalisaldo / $paivakulutus ) > 0 ? floor( $lapsenreaalisaldo / $paivakulutus ) : 0 ); // N‰ytet‰‰n negatiivinen riitto nollana
 	}
 	else $riittopv =  t('Ei tiedossa'); // Jos aiempaa kulutusta ei ole
-	$ostosuositus = ( ($maaraennuste-$lapsenreaalisaldo) > 0 ? ceil($maaraennuste-$lapsenreaalisaldo) : 0); // N‰ytet‰‰n negatiivinen suositus nollana
+	
+	// Paljonko tuotetta ja sisartuotteita on valmistuksessa
+	$valmistuksessa = $lapsirow['valmistuksessa'] + $isarow['valmistuksessa'];
+	
+	// Tuotteen ja sen sisartuotteiden yhteinen myyntiennuste
+	$myyntiennuste = $lapsenmyyntiennuste + $isanmyyntiennuste;
+	
+	// Valmistussuositus
+	$valmistussuositus = ( $myyntiennuste > 0 ? ceil($myyntiennuste) : 0); // N‰ytet‰‰n negatiivinen suositus nollana
+	$valmistussuositus = ceil($valmistussuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'] ; // Pyˆristet‰‰n pakkauskoon perusteella
 
-	$tuoterivi['kulutusennuste'] 	= $kulutusennuste;
-	$tuoterivi['maaraennuste']		= $maaraennuste;
 	$tuoterivi['riittopv'] 			= $riittopv;
 	$tuoterivi['reaalisaldo'] 		= $lapsenreaalisaldo;
 	$tuoterivi['ostosuositus'] 		= $ostosuositus;
-	
-	$tuoterivi['ostoeramaara'] = ceil( $ostosuositus / $toimittajarow['pakkauskoko']);
+	$tuoterivi['valmistuksessa'] 	= $valmistuksessa;
+	$tuoterivi['valmistustarve'] 	= $valmistussuositus;
 	
 	return $tuoterivi;
 }
@@ -267,13 +436,13 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
 	if ($abcrajaus != "") {
 		// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
-		$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tilausrivi.yhtio
-					and abc_aputaulu.tuoteno = tilausrivi.tuoteno
+		$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
+					and abc_aputaulu.tuoteno = tuote.tuoteno
 					and abc_aputaulu.tyyppi = '$abcrajaustapa'
 					and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
 	}
 	else {
-		$abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tilausrivi.yhtio and abc_aputaulu.tuoteno = tilausrivi.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa') ";
+		$abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa') ";
 	}
 	
 	$toimilisa = "";
@@ -293,6 +462,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		, abc_aputaulu.luokka_osasto abcluokka_osasto
 		, abc_aputaulu.luokka_try abcluokka_try
 		FROM tilausrivi
+		JOIN tuote ON (tilausrivi.tuoteno = tuote.tuoteno AND tilausrivi.yhtio = tuote.yhtio)
 		$lisaa2
 		$abcjoin
 		JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
@@ -315,7 +485,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			, "try" 			=> t("tuoteryhm‰")
 			, "valmistuskpl" 	=> t("valmistuksen m‰‰r‰")
 			, "valmistuspvm" 	=> t("valmistuksen pvm")
-			, "valmistustila" 	=> t("valmistuksen tila")
+			, "valmistustila" 	=> t("valmistuksen tila") // TODO: t‰h‰n pit‰isi varmaan hakea kirjainta vastaava nimitys
 		);
 		
 		$tuoterivit  = array();
@@ -335,7 +505,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		}
 
 		// Kootaan raportti
-		$ulos = "<form action='' method='post'><table>";
+		$ulos = "<table>";
 		
 		// Header-rivi
 		$header = "<tr>";
@@ -364,9 +534,9 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 				}
 			}
 			$ulos .= "</tr>";
-		
 		}
-		$ulos .= "</table><input type='submit' name='muodostaValmistukset' value='".t('Muodosta valmistukset')."' /></form>";
+		
+		$ulos .= "</table>";
 		
 		// N‰ytet‰‰n valmistukset
 		echo $ulos;
@@ -374,41 +544,134 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	else echo t('Ei valmistuksia haetulla aikav‰lill‰')."<br>\n";
 	
 	// Haetaan valmistettavat tuotteet
-	$query = "	
-	SELECT 
-	lasku.kohde valmistuslinja
-	, tilausrivi.tuoteno
-	, tilausrivi.osasto
-	, tilausrivi.try
-	, tilausrivi.kpl+tilausrivi.tilkpl valmistuskpl
-	, DATE_FORMAT( lasku.luontiaika, GET_FORMAT(DATE, 'EUR')) valmistuspvm
-	, lasku.alatila valmistustila
-	, group_concat(distinct tuoteperhe.isatuoteno separator ',') sisartuoteno
-	, tuoteperhe.kerroin
-	, abc_aputaulu.luokka abcluokka
-	, abc_aputaulu.luokka_osasto abcluokka_osasto
-	, abc_aputaulu.luokka_try abcluokka_try
-	, group_concat(distinct tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '/') toimittaja
-	, group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '/') osto_era
-	, group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno
-	, group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys
-	, group_concat(distinct tuotteen_toimittajat.ostohinta order by tuotteen_toimittajat.tunnus separator '/') ostohinta
-	, group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
-	FROM tilausrivi
-	$lisaa2
-	$abcjoin
-	LEFT JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
-	LEFT JOIN tuoteperhe ON (tilausrivi.tuoteno = tuoteperhe.tuoteno)
-	LEFT JOIN tuotteen_toimittajat ON (tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno)
-	WHERE lasku.yhtio = '$kukarow[yhtio]'
-	AND tilausrivi.tyyppi != 'D'
-	AND tilausrivi.tyyppi = 'W'
-	AND lasku.luontiaika >= '$vva1-$kka1-$ppa1 00:00:00'
-	AND lasku.luontiaika < '$vvl1-$kkl1-$ppl1 00:00:00'
-	$lisaa
-	ORDER BY valmistuslinja, lasku.kohde DESC, lasku.luontiaika ASC";
-	$res = mysql_query($query) or pupe_error($query); echo $query;
+	$query = "	SELECT
+				tuoteperhe.isatuoteno tuoteno,
+				tuote.halytysraja,
+				tuote.tahtituote,
+				tuote.status,
+				tuote.nimitys,
+				tuote.myynti_era,
+				tuote.myyntihinta,
+				tuote.tuotemerkki,
+				tuote.osasto,
+				tuote.try,
+				tuote.aleryhma,
+				tuote.kohde valmistuslinja,
+				IF(tuoteperhe.tyyppi='S', group_concat(tuoteperhe.tuoteno separator ','), '') isatuoteno,
+				tuoteperhe.kerroin,
+				abc_aputaulu.luokka abcluokka,
+				abc_aputaulu.luokka_osasto abcluokka_osasto,
+				abc_aputaulu.luokka_try abcluokka_try,
+				tuote.luontiaika,
+				group_concat(distinct tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
+				group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '/') osto_era,
+				group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
+				group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
+				group_concat(distinct tuotteen_toimittajat.ostohinta order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
+				group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin,
+				toimi.nimi AS toimittajayhtio
+				FROM tuote
+				$lisaa2
+				$abcjoin
+				LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
+				LEFT JOIN tuoteperhe ON (tuote.tuoteno = tuoteperhe.isatuoteno AND tuote.yhtio = tuoteperhe.yhtio)
+				LEFT JOIN tuotteen_toimittajat ON (tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.yhtio = tuotteen_toimittajat.yhtio)
+				LEFT JOIN toimi ON (tuotteen_toimittajat.toimittaja = toimi.ytunnus AND tuote.yhtio = toimi.yhtio)
+				WHERE
+				tuote.yhtio in ($yhtiot)
+				AND tuoteperhe.tyyppi in ('R')
+				$lisaa
+				and tuote.ei_saldoa = ''
+				GROUP BY tuoteperhe.isatuoteno
+				ORDER BY tuoteno, toimittaja, tuote.try, tuote.tuoteno";
+	$res = mysql_query($query) or pupe_error($query);
 	
+	echo t("Valmistettavia tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
+	echo t("N‰ytet‰‰n suunnitellut valmistukset aikav‰lille").": $ppa1.$kka1.$vva1 - $ppl1.$kkl1.$vvl1";
+
+	$headerivi = array(
+		"tuoteno" 			=> t("tuotenumero")
+		, "nimitys" 		=> t("nimitys")
+		, "sisartuote" 		=> t("sisartuote")
+		, "abcluokka" 		=> t("abc-luokka")
+		, "valmistuksessa" 	=> t("valmistuksessa")
+		, "riittopv" 		=> t("riitto pv")
+		, "tuotantolinja"	=> t("tuotantolinja")
+		, "valmistustarve"	=> t("valmistustarve")
+	);
+	
+	$tuoterivit  = array();
+	
+	// loopataan tuotteet l‰pi
+	while ($row = mysql_fetch_array($res)) {
+
+		// haetaan abc luokille nimet
+		$abcnimi = $ryhmanimet[$row["abcluokka"]];
+		$abcnimi2 = $ryhmanimet[$row["abcluokka_osasto"]];
+		$abcnimi3 = $ryhmanimet[$row["abcluokka_try"]];
+		
+		$tuoterivi = array( "tuoteno"=>"", "nimitys"=>"", "sisartuote"=>"", "abcluokka"=>"", "valmistuksessa"=>"", "riittopv"=>"", "tuotantolinja"=>"", "valmistustarve"=>"" );
+		$tuoteno = $row['tuoteno'];
+		
+		$isatuoterow = explode(",", $row['isatuoteno'] );
+		$isatuotenrot = "(";
+		foreach($isatuoterow AS $isatuote){
+			$isatuotenrot .= "'$isatuote',";
+		}
+		$isatuotenrot = substr($isatuotenrot, 0, -1);
+		$isatuotenrot .= ")";
+	
+		$tuoterivi["try"] = $row['try'];
+		$tuoterivi["tuoteno"] = $tuoteno;
+		$tuoterivi["nimitys"] = t_tuotteen_avainsanat($row, 'nimitys');
+		$tuoterivi["sisartuote"] = $row['isatuoteno'];
+		$tuoterivi["tuotantolinja"] = $row['valmistuslinja']; // TODO: tarkoitetaanko tuotantolinjalla valmistuslinjaa?
+		$tuoterivi["abcluokka"] = $abcnimi;
+		
+		$tuoterivi = array_merge($tuoterivi, teerivi( $tuoteno, $isatuotenrot, $row['kerroin'] ) );
+		
+		$tuoterivit["$tuoteno"] = $tuoterivi;
+	}
+
+	// Kootaan raportti
+	$ulos = "<form action='' method='post'><table>";
+	
+	// Header-rivi
+	$header = "<tr>";
+	foreach($headerivi as $arvo){
+		$header .= "<th>$arvo</th>";
+	}
+	$header .= "</tr>";
+	
+	// Tuoterivit
+	foreach( $tuoterivit as $tuoterivi ){
+			// Tarkistetaan tarviiko valmistuslinjalle piirt‰‰ v‰liotsikkoa
+			if(!isset($EDlinja) or $EDlinja != $tuoterivi['tuotantolinja']){
+				$valmistuslinja = ( isset($tuoterivi['tuotantolinja']) ? $tuoterivi['tuotantolinja'] : t('Ei valmistuslinjaa') );
+				$ulos .= "<tr><th colspan = '2'>Valmistuslinja: $valmistuslinja</th></tr>";
+				$ulos .= $header;
+			}
+			$EDlinja = $tuoterivi['tuotantolinja'];
+	
+		$ulos .= "<tr>";
+		foreach( $tuoterivi as $avain => $arvo ){
+			if(array_key_exists( $avain, $headerivi ) ){
+				// Ostoer‰m‰‰r‰‰ voi muuttaa
+				if( $avain == 'valmistustarve' ){
+					$ulos .= "<td><input type='text' name='TUOTE$tuoterivi[tuoteno]' value='$arvo' /></td>";
+				}
+				else{
+					$ulos .= "<td>$arvo</td>";
+				}
+			}
+		}
+		$ulos .= "</tr>";
+
+	}
+	$ulos .= "</table><input type='submit' name='muodostaValmistukset' value='".t('Muodosta valmistukset')."' /></form>";
+	
+	// N‰ytet‰‰n valmistusehdotus
+	echo $ulos;	
 }
 
 // N‰ytet‰‰n k‰yttˆliittym‰

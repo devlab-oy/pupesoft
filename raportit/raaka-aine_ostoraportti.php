@@ -465,9 +465,9 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 				$lisaa2
 				$abcjoin
 				LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
-				LEFT JOIN tuoteperhe ON (tuote.tuoteno = tuoteperhe.tuoteno)
-				LEFT JOIN tuotteen_toimittajat ON (tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-				LEFT JOIN toimi ON (tuotteen_toimittajat.toimittaja = toimi.ytunnus)
+				LEFT JOIN tuoteperhe ON (tuote.tuoteno = tuoteperhe.tuoteno AND tuote.yhtio = tuoteperhe.yhtio)
+				LEFT JOIN tuotteen_toimittajat ON (tuote.tuoteno = tuotteen_toimittajat.tuoteno AND tuote.yhtio = tuotteen_toimittajat.yhtio)
+				LEFT JOIN toimi ON (tuotteen_toimittajat.toimittaja = toimi.ytunnus AND tuote.yhtio = toimi.yhtio)
 				WHERE
 				tuote.yhtio in ($yhtiot)
 				AND tuoteperhe.tyyppi = 'R'

@@ -7,7 +7,7 @@
 	echo "	<script type='text/javascript' language='JavaScript'>
 
 				$.expr[':'].containsi = function(a,i,m){
-				    return $(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0;
+				    return $(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
 				};
 
 				$(document).ready(function() {
@@ -24,8 +24,10 @@
 					$('.center').css({'text-align': 'center', 'padding-left': '7px', 'padding-right': '7px'});
 					$('.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
 
-					$(':checkbox').click(function(event){
+					$(':checkbox').live('click', function(event){
 						event.stopPropagation();
+
+						$(this).is(':checked') ? $(this).parent().parent().addClass('tumma') : $(this).parent().parent().removeClass('tumma');
 					});
 
 					$('.vihrea').css({'background-image': 'url(\"{$palvelin2}pics/vaaleanvihrea.png\")'});
@@ -533,13 +535,7 @@
 
 						var id = $(this).attr('name');
 
-						if ($('.checkbox_'+id).is(':checked')) {
-							$('.checkbox_'+id).attr('checked', false);
-						}
-						else {
-							$('.checkbox_'+id).attr('checked', true);
-						}
-
+						$(this).is(':checked') ? $('.checkbox_'+id).attr('checked', true).parent().parent().addClass('tumma') : $('.checkbox_'+id).attr('checked', false).parent().parent().removeClass('tumma');
 					});
 				});
 			</script>";

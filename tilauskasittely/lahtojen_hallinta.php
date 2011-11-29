@@ -5,6 +5,11 @@
 	enable_jquery();
 
 	echo "	<script type='text/javascript' language='JavaScript'>
+
+				$.expr[':'].containsi = function(a,i,m){
+				    return $(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0;
+				};
+
 				$(document).ready(function() {
 
 					$('td').css({'padding': '0px', 'white-space': 'nowrap'});
@@ -107,10 +112,20 @@
 							$('#toggleable_row_order_'+id[0]+'__'+id[1]).slideUp('fast');
 
 							if ($('.toggleable_row_child:visible').length == 1) {
+
+								$('.filter_row_by_select').find('option:first').each(function() {
+									$(this).attr('selected', true);
+									$(this).parent().attr('disabled', false);
+								});
+
+								$('.filter_row_by_text').attr('disabled', false).val('');
+
 								$('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').show();
 							}
 						}
 						else {
+
+							$('.filter_row_by_select, .filter_row_by_text').attr('disabled', true);
 
 							$(this).addClass('tumma');
 
@@ -133,10 +148,20 @@
 								$('#toggleable_row_sscc_'+id[0]+'_'+id[2]).slideUp('fast');
 
 								if ($('.toggleable_row_child:visible').length == 1) {
+
+									$('.filter_row_by_select').find('option:first').each(function() {
+										$(this).attr('selected', true);
+										$(this).parent().attr('disabled', false);
+									});
+
+									$('.filter_row_by_text').attr('disabled', false).val('');
+
 									$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
 								}
 							}
 							else {
+
+								$('.filter_row_by_select, .filter_row_by_text').attr('disabled', true);
 
 								$(this).addClass('tumma');
 
@@ -277,7 +302,7 @@
 
 						if (selected != '' && $(this).val() != '') {
 							var title = $(this).attr('id').substring(15);
-							selected = $(selected).children().filter('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
+							selected = $(selected).children().filter('.toggleable_row_client:containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
 
 							if (selected != '') {
 								empty_all = false;
@@ -285,11 +310,14 @@
 						}
 						else if (selected == '' && $(this).val() != '') {
 							var title = $(this).attr('id').substring(15);
-							selected = $('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
+							selected = $('.toggleable_row_client:containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
 
 							if (selected != '') {
 								empty_all = false;
 							}
+						}
+						else if (selected != '' && $(this).val() == '') {
+							empty_all = false;
 						}
 						else {
 							$('.toggleable_row_tr').show();
@@ -860,7 +888,6 @@
 
 				echo "<td class='toggleable_row_weight' id='{$paino_row['kg']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$paino_row['kg']}</td>";
 			}
-
 
 			echo "</tr>";
 

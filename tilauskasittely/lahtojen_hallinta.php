@@ -8,6 +8,13 @@
 				$(document).ready(function() {
 
 					$('td').css({'padding': '0px', 'white-space': 'nowrap'});
+					$('.toggleable_row_type').css({'white-space': 'pre-wrap'});
+
+					$('.toggleable_row_client').each(function() {
+						if ($(this).html().length > 30) {
+							$(this).css({'white-space': 'pre-wrap'});
+						}
+					});
 
 					$('.center').css({'text-align': 'center', 'padding-left': '7px', 'padding-right': '7px'});
 					$('.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
@@ -191,7 +198,7 @@
 								var title = $(this).parent().attr('id').substring(18);
 
 								if (selected != '') {
-									selected = $(selected).children().filter('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"]').parent();
+									selected = $(selected).children().filter('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_parent_row_'+title+'\"]').parent();
 								}
 								else {
 									selected = $('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_parent_row_'+title+'\"]').parent();
@@ -201,6 +208,96 @@
 
 						if (empty_all) {
 							$('.toggleable_parent').show();
+						}
+						else {
+							$(selected).show();
+							$(this).attr('selected', true);
+						}
+					});
+
+					$('.filter_row_by_select').live('change', function(event) {
+
+						event.stopPropagation();
+
+						$('.toggleable_row_tr').hide();
+
+						var empty_all = true;
+
+						var selected = '';
+
+						$('.filter_row_by_select option:selected').each(function() {
+
+							if ($(this).val() != '') {
+								empty_all = false;
+
+								var title = $(this).parent().attr('id').substring(17);
+
+								if (selected != '') {
+									selected = $(selected).children().filter('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
+								}
+								else {
+									selected = $('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
+								}
+							}
+						});
+
+						if (empty_all) {
+							$('.toggleable_row_tr').show();
+						}
+						else {
+							$(selected).show();
+							$(this).attr('selected', true);
+						}
+					});
+
+					$('.filter_row_by_text').live('keyup', function(event) {
+						event.stopPropagation();
+
+						$('.toggleable_row_tr').hide();
+
+						var empty_all = true;
+
+						var selected = '';
+
+						$('.filter_row_by_select option:selected').each(function() {
+
+							if ($(this).val() != '') {
+								empty_all = false;
+
+								var title = $(this).parent().attr('id').substring(17);
+
+								if (selected != '') {
+									selected = $(selected).children().filter('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
+								}
+								else {
+									selected = $('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
+								}
+							}
+						});
+
+						if (selected != '' && $(this).val() != '') {
+							var title = $(this).attr('id').substring(15);
+							selected = $(selected).children().filter('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
+
+							if (selected != '') {
+								empty_all = false;
+							}
+						}
+						else if (selected == '' && $(this).val() != '') {
+							var title = $(this).attr('id').substring(15);
+							selected = $('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
+
+							if (selected != '') {
+								empty_all = false;
+							}
+						}
+						else {
+							$('.toggleable_row_tr').show();
+							return true;
+						}
+
+						if (empty_all) {
+							$('.toggleable_row_tr').show();
 						}
 						else {
 							$(selected).show();
@@ -323,7 +420,7 @@
 								var id = $(row).children('.toggleable_row_'+title).attr('id');
 								var counter = 0;
 
-								if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package' || title == 'weight') {
+								if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package' || title == 'weight' || title == 'type') {
 									var id_temp = id.split(\"__\", 3);
 									id = id_temp[0];
 									counter = id_temp[2];
@@ -357,7 +454,7 @@
 
 							if (window['sort_row_direction_'+title]) {
 
-								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
+								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type') {
 									_arr.sort(compareName);
 									_arrChildOrder.sort(compareName);
 									_arrChildSscc.sort(compareName);
@@ -380,7 +477,7 @@
 							}
 							else {
 
-								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package') {
+								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type') {
 									_arr.sort(compareName).reverse();
 									_arrChildOrder.sort(compareName).reverse();
 									_arrChildSscc.sort(compareName).reverse();
@@ -583,6 +680,7 @@
 					lasku.toim_nimi AS 'asiakas_toim_nimi',
 					lasku.toim_postitp AS 'asiakas_toim_postitp',
 					lasku.prioriteettinro AS 'prioriteetti',
+					lasku.ohjausmerkki,
 					kerayserat.nro AS 'erat',
 					kerayserat.sscc,
 					kerayserat.pakkausnro AS 'pakkausnumerot',
@@ -595,7 +693,7 @@
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus IN ({$row['tilaukset']})
-					GROUP BY 1,2,3,4,5,6,7,8";
+					GROUP BY 1,2,3,4,5,6,7,8,9";
 		$lahto_res = pupe_query($query);
 
 		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}__{$y}'>";
@@ -604,12 +702,61 @@
 
 		echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
 
+		$priorities = $orders = array();
+		
+		while ($lahto_row = mysql_fetch_assoc($lahto_res)) {
+			$priorities[$lahto_row['prioriteetti']] = $lahto_row['prioriteetti'];
+			$orders[$lahto_row['tilauksen_tunnus']] = $lahto_row['tilauksen_tunnus'];
+		}
+
 		echo "<tr class='header_row_{$row['lahdon_tunnus']}__{$y}'>";
 		echo "<th></th>";
-		echo "<th class='sort_row_by' id='row_status'>",t("Status")," <img class='row_direction_status' /></th>";
-		echo "<th class='sort_row_by' id='row_prio'>",t("Prio")," <img class='row_direction_prio' /></th>";
-		echo "<th class='sort_row_by' id='row_order'>",t("Tilausnumero")," <img class='row_direction_order' /></th>";
-		echo "<th class='sort_row_by' id='row_client'>",t("Asiakas")," <img class='row_direction_client' /></th>";
+
+		echo "<th class='sort_row_by' id='row_status'>",t("Status")," <img class='row_direction_status' />";
+		echo "<br />";
+		echo "<select class='filter_row_by_select' id='child_row_select_status'>";
+		echo "<option value=''>",t("Valitse"),"</option>";
+		echo "<option value='1'>",t("Aloittamatta"),"</option>";
+		echo "<option value='2'>",t("Aloitettu"),"</option>";
+		echo "<option value='3'>",t("Kerätty"),"</option>";
+		echo "</select>";
+		echo "</th>";
+
+		sort($priorities);
+
+		echo "<th class='sort_row_by' id='row_prio'>",t("Prio")," <img class='row_direction_prio' />";
+		echo "<br />";
+		echo "<select class='filter_row_by_select' id='child_row_select_prio'>";
+		echo "<option value=''>",t("Valitse"),"</option>";
+
+		foreach ($priorities as $prio) {
+			echo "<option value='{$prio}'>{$prio}</option>";
+		}
+
+		echo "</select>";
+		echo "</th>";
+
+		sort($orders);
+
+		echo "<th class='sort_row_by' id='row_order'>",t("Tilausnumero")," <img class='row_direction_order' />";
+		echo "<br />";
+		echo "<select class='filter_row_by_select' id='child_row_select_order'>";
+		echo "<option value=''>",t("Valitse"),"</option>";
+
+		foreach ($orders as $ord) {
+			echo "<option value='{$ord}'>{$ord}</option>";
+		}
+
+		echo "</select>";
+		echo "</th>";
+
+		echo "<th class='sort_row_by' id='row_type'>",t("Tyyppi")," <img class='row_direction_type' /></th>";
+
+		echo "<th class='sort_row_by' id='row_client'>",t("Asiakas")," <img class='row_direction_client' />";
+		echo "<br />";
+		echo "<input type='text' class='filter_row_by_text' id='child_row_text_client' value='' />";
+		echo "</th>";
+
 		echo "<th class='sort_row_by' id='row_locality'>",t("Paikkakunta")," <img class='row_direction_locality' /></th>";
 		echo "<th class='sort_row_by' id='row_picking_zone'>",t("Keräysvyöhyke")," <img class='row_direction_picking_zone' /></th>";
 		echo "<th class='sort_row_by' id='row_batch'>",t("Erä")," <img class='row_direction_batch' /></th>";
@@ -618,6 +765,8 @@
 		echo "<th class='sort_row_by' id='row_package'>",t("Pakkaus")," <img class='row_direction_package' /></th>";
 		echo "<th class='sort_row_by' id='row_weight'>",t("Paino")," <img class='row_direction_weight' /></th>";
 		echo "</tr>";
+
+		mysql_data_seek($lahto_res, 0);
 
 		$x = 0;
 
@@ -646,17 +795,17 @@
 
 			echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteetti']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['prioriteetti']}</td>";
 			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}__{$x}'><button type='button'>{$lahto_row['tilauksen_tunnus']}</button></td>";
+			echo "<td class='toggleable_row_type' id='{$lahto_row['ohjausmerkki']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['ohjausmerkki']}</td>";
 
 			echo "<td class='data toggleable_row_client' id='{$lahto_row['asiakas_nimi']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_nimi']}";
-			if ($lahto_row['asiakas_nimi'] != $lahto_row['asiakas_toim_nimi']) echo "<br>{$lahto_row['asiakas_toim_nimi']}";
+			if ($lahto_row['asiakas_nimi'] != $lahto_row['asiakas_toim_nimi']) echo " {$lahto_row['asiakas_toim_nimi']}";
 			echo "</td>";
 
 			echo "<td class='toggleable_row_locality' id='{$lahto_row['asiakas_toim_postitp']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_toim_postitp']}</td>";
 
 			$query = "	SELECT keraysvyohyke.nimitys AS 'keraysvyohyke',
 						COUNT(tilausrivi.tunnus) AS 'rivit',
-						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt',
-						ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg'
+						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = tuote.keraysvyohyke)
@@ -681,9 +830,12 @@
 
 			if ($lahto_row['pakkausnumerot'] != '') {
 
-				$query = "	SELECT pakkaus.pakkauskuvaus
+				$query = "	SELECT pakkaus.pakkauskuvaus,
+							ROUND(kerayserat.kpl * tuote.tuotemassa, 0) AS 'kg'
 							FROM kerayserat
 							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 							WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 							AND kerayserat.sscc IN ({$lahto_row['sscc']})
 							AND kerayserat.pakkausnro = '{$lahto_row['pakkausnumerot']}'
@@ -692,12 +844,23 @@
 				$pakkauskuvaus_row = mysql_fetch_assoc($pakkauskuvaus_res);
 
 				echo "<td class='data toggleable_row_package' id='{$pakkauskuvaus_row['pakkauskuvaus']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$pakkauskuvaus_row['pakkauskuvaus']}</td>";
+
+				echo "<td class='toggleable_row_weight' id='{$pakkauskuvaus_row['kg']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$pakkauskuvaus_row['kg']}</td>";
 			}
 			else {
 				echo "<td class='data toggleable_row_package' id='!__{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";
+
+				$query = "	SELECT ROUND(SUM(tilausrivi.varattu * tuote.tuotemassa), 0) AS 'kg'
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'";
+				$paino_res = pupe_query($query);
+				$paino_row = mysql_fetch_assoc($paino_res);
+
+				echo "<td class='toggleable_row_weight' id='{$paino_row['kg']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$paino_row['kg']}</td>";
 			}
 
-			echo "<td class='toggleable_row_weight' id='{$til_row['kg']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$til_row['kg']}</td>";
 
 			echo "</tr>";
 
@@ -718,7 +881,7 @@
 			$rivi_res = pupe_query($query);
 			
 			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-			echo "<td colspan='12' class='back'>";
+			echo "<td colspan='13' class='back'>";
 			echo "<div class='toggleable_row_child' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}__{$x}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";
@@ -772,7 +935,7 @@
 			$rivi_res = pupe_query($query);
 
 			echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-			echo "<td colspan='12' class='back'>";
+			echo "<td colspan='13' class='back'>";
 			echo "<div class='toggleable_row_child' id='toggleable_row_sscc_{$lahto_row['sscc']}_{$x}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";

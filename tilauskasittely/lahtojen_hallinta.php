@@ -21,6 +21,8 @@
 						}
 					});
 
+					//$('#child_row_select_picking_zone').attr('size', 1);
+
 					$('.center').css({'text-align': 'center', 'padding-left': '7px', 'padding-right': '7px'});
 					$('.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
 
@@ -81,12 +83,9 @@
 							$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').show();
 							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').stop().show();
 
-							$('.filter_parent_row_by').find('option:first').each(function() {
-								$(this).attr('selected', true);
-								$(this).parent().attr('disabled', false);
-							});
+							$('.filter_parent_row_by').attr('disabled', false).trigger('change');
 
-							$(':checkbox').attr('checked', false);
+							$(':checkbox').attr('checked', false).parent().parent().removeClass('tumma');
 						}
 						else {
 
@@ -115,14 +114,11 @@
 
 							if ($('.toggleable_row_child:visible').length == 1) {
 
-								$('.filter_row_by_select').find('option:first').each(function() {
-									$(this).attr('selected', true);
-									$(this).parent().attr('disabled', false);
-								});
-
-								$('.filter_row_by_text').attr('disabled', false).val('');
-
 								$('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').show();
+
+								$('.filter_row_by_select').attr('disabled', false).trigger('change');
+
+								$('.filter_row_by_text').attr('disabled', false).trigger('keyup');
 							}
 						}
 						else {
@@ -304,7 +300,7 @@
 
 						if (selected != '' && $(this).val() != '') {
 							var title = $(this).attr('id').substring(15);
-							selected = $(selected).children().filter('.toggleable_row_client:containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
+							selected = $(selected).children().filter('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
 
 							if (selected != '') {
 								empty_all = false;
@@ -312,7 +308,7 @@
 						}
 						else if (selected == '' && $(this).val() != '') {
 							var title = $(this).attr('id').substring(15);
-							selected = $('.toggleable_row_client:containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
+							selected = $('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
 
 							if (selected != '') {
 								empty_all = false;
@@ -782,8 +778,30 @@
 		echo "</th>";
 
 		echo "<th class='sort_row_by' id='row_locality'>",t("Paikkakunta")," <img class='row_direction_locality' /></th>";
-		echo "<th class='sort_row_by' id='row_picking_zone'>",t("Keräysvyöhyke")," <img class='row_direction_picking_zone' /></th>";
-		echo "<th class='sort_row_by' id='row_batch'>",t("Erä")," <img class='row_direction_batch' /></th>";
+
+		$query = "	SELECT DISTINCT nimitys
+					FROM keraysvyohyke
+					WHERE yhtio = '{$kukarow['yhtio']}'";
+		$keraysvyohyke_result = pupe_query($query);
+
+		echo "<th class='sort_row_by' id='row_picking_zone'>",t("Keräysvyöhyke")," <img class='row_direction_picking_zone' />";
+		echo "<br />";
+		// echo "<select class='filter_row_by_select' id='child_row_select_picking_zone' multiple='multiple' size='4'>";
+		echo "<select class='filter_row_by_select' id='child_row_select_picking_zone'>";
+		echo "<option value=''>",t("Valitse"),"</option>";
+
+		while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
+			echo "<option value='{$keraysvyohyke_row['nimitys']}'>{$keraysvyohyke_row['nimitys']}</option>";
+		}
+
+		echo "</select>";
+		echo "</th>";
+
+		echo "<th class='sort_row_by' id='row_batch'>",t("Erä")," <img class='row_direction_batch' />";
+		echo "<br />";
+		echo "<input type='text' class='filter_row_by_text' id='child_row_text_batch' value='' size='6' />";
+		echo "</th>";
+
 		echo "<th class='sort_row_by' id='row_rows'>",t("Rivit")," / ",t("Kerätyt")," <img class='row_direction_rows' /></th>";
 		echo "<th class='sort_row_by' id='row_sscc'>",t("SSCC")," <img class='row_direction_sscc' /></th>";
 		echo "<th class='sort_row_by' id='row_package'>",t("Pakkaus")," <img class='row_direction_package' /></th>";
@@ -828,14 +846,17 @@
 			echo "<td class='toggleable_row_locality' id='{$lahto_row['asiakas_toim_postitp']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_toim_postitp']}</td>";
 
 			$query = "	SELECT keraysvyohyke.nimitys AS 'keraysvyohyke',
+						tuoteperhe.ohita_kerays AS 'ohitakerays',
 						COUNT(tilausrivi.tunnus) AS 'rivit',
 						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						JOIN keraysvyohyke ON (keraysvyohyke.yhtio = tuote.yhtio AND keraysvyohyke.tunnus = tuote.keraysvyohyke)
+						LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio AND tuoteperhe.tuoteno = tilausrivi.tuoteno AND tuoteperhe.tyyppi = 'P' AND tuoteperhe.ohita_kerays != '')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
-						GROUP BY 1";
+						GROUP BY 1,2
+						HAVING ohitakerays IS NULL";
 			$til_res = pupe_query($query);
 			$til_row = mysql_fetch_assoc($til_res);
 
@@ -855,7 +876,8 @@
 			if ($lahto_row['pakkausnumerot'] != '') {
 
 				$query = "	SELECT pakkaus.pakkauskuvaus,
-							ROUND(kerayserat.kpl * tuote.tuotemassa, 0) AS 'kg'
+							pakkaus.oma_paino,
+							(kerayserat.kpl * tuote.tuotemassa) AS 'kg'
 							FROM kerayserat
 							JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 							JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
@@ -869,7 +891,15 @@
 
 				echo "<td class='data toggleable_row_package' id='{$pakkauskuvaus_row['pakkauskuvaus']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$pakkauskuvaus_row['pakkauskuvaus']}</td>";
 
-				echo "<td class='toggleable_row_weight' id='{$pakkauskuvaus_row['kg']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$pakkauskuvaus_row['kg']}</td>";
+				$kg = $pakkauskuvaus_row['kg'] + $pakkauskuvaus_row['oma_paino'];
+
+				while ($pakkauskuvaus_row = mysql_fetch_assoc($pakkauskuvaus_res)) {
+					$kg += $pakkauskuvaus_row['kg'];
+				}
+
+				$kg = round($kg, 0);
+
+				echo "<td class='toggleable_row_weight' id='{$kg}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$kg}</td>";
 			}
 			else {
 				echo "<td class='data toggleable_row_package' id='!__{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";

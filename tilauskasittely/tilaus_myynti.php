@@ -5041,6 +5041,20 @@ if ($tee == '') {
 					$pknum = $pkrow[0] + $pkrow[1];
 					$borderlask = $pkrow[1];
 
+					// Tämä on sellainen lisäjuttu, jos tilausriveille on syötetty dynaamisia avainsanoja esim. sarjanumero, niin ne näytetään kommentin alla
+					$query = "	SELECT sum(if(tl.sopimuksen_lisatieto1 !='' or tl.sopimuksen_lisatieto2 !='', 1,0)) maara 
+								FROM tilausrivin_lisatiedot as tl
+								JOIN tilausrivi on (tl.yhtio=tilausrivi.yhtio and tl.tilausrivitunnus=tilausrivi.tunnus)
+								WHERE tl.yhtio = '$kukarow[yhtio]' 
+								{$tunnuslisa}
+								{$pklisa}";
+					$lisares = pupe_query($query);
+					$lisarow = mysql_fetch_row($lisares);
+
+					if ($lisarow[0] > 0) {
+						$pknum = $pknum + $lisarow[0];
+					}
+					
 					echo "<tr>";
 
 					if ($jarjlisa != "") {
@@ -5112,6 +5126,7 @@ if ($tee == '') {
 						if ($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '5')) {
 							$tuoteperhe_kayty = $row['perheid'];
 						}
+						
 						echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino</td>";
 					}
 				}
@@ -5132,8 +5147,10 @@ if ($tee == '') {
 						if ($jarjlisa != "") {
 							echo "<td rowspan = '2' width='15' class='back'>$buttonit</td>";
 						}
-
-						echo "<td $class rowspan = '2' valign='top'>$echorivino";
+						$rowspan_arvo = 2;
+						if ($row["sopimuksen_lisatieto1"] !="" or $row["sopimuksen_lisatieto2"] !="") $rowspan_arvo = 3;
+						
+						echo "<td $class rowspan = '{$rowspan_arvo}' valign='top'>$echorivino";
 					}
 					elseif ($tilauksen_jarjestys == '1' and $row['perheid'] != 0) {
 						echo "<td $class>&nbsp;</td>";
@@ -5142,8 +5159,9 @@ if ($tee == '') {
 						if ($jarjlisa != "") {
 							echo "<td width='15' class='back'>$buttonit</td>";
 						}
-
-						echo "<td  $class valign='top'>$echorivino";
+						$rowspan_arvo = 1;
+						if ($row["sopimuksen_lisatieto1"] !="" or $row["sopimuksen_lisatieto2"] !="") $rowspan_arvo = 2;
+						echo "<td  $class $class rowspan = '{$rowspan_arvo}' valign='top'>$echorivino";
 					}
 
 					if ($toim != "TARJOUS") {
@@ -6176,6 +6194,44 @@ if ($tee == '') {
 					echo "</tr>";
 
 				}
+				// tehdään vasteaika ja sarjanumero jotain
+				if ($row["sopimuksen_lisatieto1"] !="" or $row["sopimuksen_lisatieto2"] !="") {
+					// Katsotaan halutaanko dynaamisia kenttiä näkyviin
+					$dynamic_result = t_avainsana("SOPIMUS_KENTTA","", "and avainsana.selitetark != ''");
+					if (mysql_num_rows($yllapito_dynamic_result) > 0) {
+						echo "<tr>";
+
+						if ($borderlask == 0 and $pknum > 1) {
+							$kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
+							$kommclass2 = " style='border-bottom: 1px solid;'";
+						}
+						elseif ($pknum > 0) {
+							$kommclass1 = " style='border-right: 1px solid;'";
+							$kommclass2 = " ";
+						}
+						else {
+							$kommclass1 = "";
+							$kommclass2 = " ";
+						}
+
+						echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";						
+						
+						while ($dynamic_row = mysql_fetch_assoc($dynamic_result)) {
+							
+							if ($dynamic_row["selite"] == "sopimuksen_lisatieto1" and $row["sopimuksen_lisatieto1"] !="") {
+								echo $dynamic_row["selitetark"].":<br><font class='message'>".str_replace("\n", ", ", $row["sopimuksen_lisatieto1"])."</font><br>";
+							}
+
+							if ($dynamic_row["selite"] == "sopimuksen_lisatieto2" and $row["sopimuksen_lisatieto2"] !="") {
+								echo $dynamic_row["selitetark"].":<br><font class='message'>".str_replace("\n", ", ", $row["sopimuksen_lisatieto2"])."</font><br>";
+							}
+						}
+					
+						echo "</td>";
+						echo "</tr>";
+					}
+				}
+				
 			}
 
 			if ($kukarow['hinnat'] != -1 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {

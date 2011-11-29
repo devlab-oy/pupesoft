@@ -489,7 +489,7 @@
 				echo t("Syötä tilausnumeron, nimen tai laatijan osa");
 			}
 			else {
-				echo t("Syötä tilausnumeron, nimen, laatijan tai sopimuksen lisätiedon osa");
+				echo t("Syötä tilausnumeron, asiakkaan tilausnumeron, nimen, laatijan tai sopimuksen lisätiedon osa");
 			}
 			echo "<input type='text' name='etsi'>";
 			echo "<input type='Submit' value = '".t("Etsi")."'>";
@@ -507,7 +507,7 @@
 
 			if ($toim == 'YLLAPITO' and $etsi != "" and $haku != "") {
 				$haku = substr($haku, 0, -1); // Poistetaan vika sulku $hausta
-				$haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%$etsi%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%$etsi%')";
+				$haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%$etsi%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%$etsi%' or lasku.asiakkaan_tilausnumero like '%$etsi%')";
 			}
 
 			$seuranta = "";

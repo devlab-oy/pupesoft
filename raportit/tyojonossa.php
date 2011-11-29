@@ -32,6 +32,7 @@
 					tyomaarays.tyostatus,
 					ifnull(a3.nimi, 'tuntematon') tyojono1,
 					ifnull(a2.selitetark, 'tuntematon') tyostatus1,
+					a2.jarjestys sorttaus_kentta,
 					count(*) maara
 					FROM lasku
 					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus=lasku.tunnus and tyomaarays.tyojono != '')
@@ -42,7 +43,7 @@
 					AND lasku.tila in ('A','L','N','S','C')
 					AND lasku.alatila != 'X'
 					GROUP BY 1,2,3,4
-					ORDER BY suorittaja, tyostatus ASC";
+					ORDER BY suorittaja, sorttaus_kentta ASC";
 	}
 	else {
 		$query = "	SELECT
@@ -50,6 +51,7 @@
 					tyomaarays.tyostatus,
 					a1.selitetark tyojono1,
 					ifnull(a2.selitetark, 'tuntematon') tyostatus1,
+					a2.jarjestys sorttaus_kentta,
 					count(*) maara
 					FROM lasku
 					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus = lasku.tunnus and tyomaarays.tyojono != '')
@@ -59,7 +61,7 @@
 					AND lasku.tila in ('A','L','N','S','C')
 					AND lasku.alatila != 'X'
 					GROUP BY 1,2,3,4
-					ORDER BY tyojono, tyostatus ASC";
+					ORDER BY tyojono, sorttaus_kentta ASC";
 	}
 	$ekares = pupe_query($query);
 

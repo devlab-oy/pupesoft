@@ -108,7 +108,7 @@
 	echo "<td>";
 
 	echo "<select class='tyojono_sort'>";
-	echo "<option value='-'>".t('Ei valintaa')."</option>";
+	echo "<option value='-'>".t('Ei työjonossa')."</option>";
 
 	// Haetaan tyojono avainsanat
 	$tyojono_result = t_avainsana("TYOM_TYOJONO");
@@ -117,7 +117,7 @@
 	}
 	echo "</select>";
 	echo "<select class='tyostatus_sort'>";
-	echo "<option value='-'>".t('Ei valintaa')."</option>";
+	echo "<option value='-'>".t('Ei statusta')."</option>";
 
 	// Haetaan tyostatus avainsanat
 	$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");

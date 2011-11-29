@@ -24,6 +24,7 @@
 	echo "<th width='1'>".t("Tuoteno")."</th>";
 	echo "<th width='1'>".t("Nimitys")."</th>";
 	echo "<th width='1'>".t("Kommentti")."</th>";
+	echo "<th width='1'>".t("Sisäinen %s Kommentti",'',"<br>")."</th>";
 	echo "<th width='1'>".t("Alku pvm")."</th>";
 	echo "<th width='1'>".t("Loppu pvm")."</th>";
 	echo "<th width='1'>".t("Kpl")."</th>";
@@ -41,6 +42,7 @@
 	echo "<td>				<input type='text' class='search_field' size='20' name='search_tuoteno/'></td>";
 	echo "<td>				<input type='text' class='search_field' size='20' name='search_nimitys'/></td>";
 	echo "<td>				<input type='text' class='search_field' size='20' name='search_kommentti'/></td>";
+	echo "<td>				<input type='text' class='search_field' size='20' name='search_siskommentti'/></td>";
 	echo "<td width='1'>	<input type='text' class='search_field' size='12' name='search_rivinsopimus_alku'/></td>";
 	echo "<td width='1'>	<input type='text' class='search_field' size='12' name='search_rivinsopimus_loppu'/></td>";
 	echo "<td width='1'>	<input type='text' class='search_field' size='10' name='search_kpl'/></td>";
@@ -67,7 +69,8 @@
 				tilausrivi.hinta,
 				tilausrivi.kommentti,
 				tilausrivin_lisatiedot.sopimuksen_lisatieto1 sarjanumero,
-				tilausrivin_lisatiedot.sopimuksen_lisatieto2 vasteaika
+				tilausrivin_lisatiedot.sopimuksen_lisatieto2 vasteaika, 
+				laskun_lisatiedot.sopimus_lisatietoja sisainen_kommentti
 				FROM lasku use index (tila_index)
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus and (laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = '0')
@@ -86,6 +89,7 @@
 		echo "<td nowrap>{$rivit["tuoteno"]}</td>";
 		echo "<td>{$rivit["nimitys"]}</td>";
 		echo "<td>{$rivit["kommentti"]}</td>";
+		echo "<td>{$rivit["sisainen_kommentti"]}</td>";
 		echo "<td nowrap>{$rivit["rivinsopimus_alku"]}</td>";
 		echo "<td nowrap>{$rivit["rivinsopimus_loppu"]}</td>";
 		echo "<td nowrap>{$rivit["varattu"]}</td>";

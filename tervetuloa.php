@@ -197,7 +197,9 @@ if (!isset($tee) or $tee == '') {
 	$tyojonosql = "	SELECT lasku.tunnus,
 					lasku.nimi,
 					lasku.toimaika,
-					avainsana.selitetark_2 tyostatusvari
+					avainsana.selitetark_2 tyostatusvari, 
+					avainsana2.selitetark priori, 
+					avainsana2.jarjestys sorttaus 
 					FROM lasku
 					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio
 						AND tyomaarays.otunnus = lasku.tunnus
@@ -206,22 +208,26 @@ if (!isset($tee) or $tee == '') {
 					LEFT JOIN avainsana ON (avainsana.yhtio = tyomaarays.yhtio 
 						AND avainsana.selite = tyomaarays.tyostatus 
 						AND avainsana.laji = 'TYOM_TYOSTATUS')
+					LEFT JOIN avainsana avainsana2 ON (avainsana2.yhtio=tyomaarays.yhtio 
+						and avainsana2.laji='TYOM_PRIORIT' 
+						and avainsana2.selite=tyomaarays.prioriteetti)
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila in ('A','L','N','S','C')
 					AND lasku.alatila != 'X'
-					ORDER BY toimaika ASC";
+					ORDER BY toimaika ASC, sorttaus ASC";
 	$tyoresult = pupe_query($tyojonosql);
 
 	if (mysql_num_rows($tyoresult) > 0) {
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<td colspan='3' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
+		echo "<td colspan='4' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
 		echo "</tr>";
 		echo "<tr>";
 		echo "<th>".t("Työnumero")."</th>";
 		echo "<th>".t("Asiakas")."</th>";
 		echo "<th>".t("Päivämäärä")."</th>";
+		echo "<th>".t("Prioriteetti")."</th>";
 		echo "</tr>";
 
 	 	while ($tyorow = mysql_fetch_array($tyoresult)) {
@@ -232,6 +238,7 @@ if (!isset($tee) or $tee == '') {
 			echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
 			echo "<td>{$tyorow["nimi"]}</td>";
 			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";
+			echo "<td>{$tyorow["priori"]}</td>";
 			echo "</tr>";
 		}
 		echo "</table><br>";

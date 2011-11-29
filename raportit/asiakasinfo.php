@@ -1475,7 +1475,7 @@ if ($asiakasid > 0) {
 			}
 		}
 		else {
-			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Asikashinnat")."</a>";
+			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Asiakashinnat")."</a>";
 		}
 
 		if ($yhdistetty != '') {

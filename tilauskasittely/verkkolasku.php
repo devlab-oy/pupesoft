@@ -1361,7 +1361,6 @@
 									require('inc/generoiviite.inc');
 								}
 							}
-							unset($oviite);
 						}
 						else {
 							if ($seviite == 'SE') {
@@ -1370,7 +1369,6 @@
 							else {
 								require('inc/generoiviite.inc');
 							}
-
 						}
 
 						// p‰ivitet‰‰n ketjuun kuuluville laskuille sama laskunumero ja viite..

@@ -188,11 +188,13 @@
 							if ($(this).val() != '') {
 								empty_all = false;
 
+								var title = $(this).parent().attr('id');
+
 								if (selected != '') {
 									selected = $(selected).children().filter('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"]').parent();
 								}
 								else {
-									selected = $('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"]').parent();
+									selected = $('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_'+title+'\"]').parent();
 								}
 							}
 						});
@@ -449,12 +451,12 @@
 				ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika, lahdot.tunnus";
 	$result = pupe_query($query);
 
-	$deliveries = array();
-	$dates = array();
+	$deliveries = $dates = $priorities = array();
 
 	while ($row = mysql_fetch_assoc($result)) {
 		$deliveries[$row['toimitustapa']] = $row['toimitustapa'];
 		$dates[$row['lahdon_pvm']] = $row['lahdon_pvm'];
+		$priorities[$row['prioriteetti']] = $row['prioriteetti'];
 	}
 
 	echo "<table>";
@@ -462,7 +464,18 @@
 	echo "<th class='sort_parent_row_by' id='parent_row_status'>",t("Status")," <img class='parent_row_direction_status' /></th>";
 	echo "<th></th>";
 	echo "<th class='sort_parent_row_by' id='parent_row_departure'>",t("Lähtö")," <img class='parent_row_direction_departure' /></th>";
-	echo "<th class='sort_parent_row_by' id='parent_row_prio'>",t("Prio")," <img class='parent_row_direction_prio' /></th>";
+
+	echo "<th class='sort_parent_row_by' id='parent_row_prio'>",t("Prio")," <img class='parent_row_direction_prio' />";
+	echo "<br />";
+	echo "<select class='filter_parent_row_by' id='parent_row_prio'>";
+	echo "<option value=''>",t("Valitse"),"</option>";
+
+	foreach ($priorities AS $prio) {
+		echo "<option value='{$prio}'>{$prio}</option>";
+	}
+
+	echo "</select>";
+	echo "</th>";
 
 	echo "<th class='sort_parent_row_by' id='parent_row_delivery'>",t("Toimitustapa")," <img class='parent_row_direction_delivery' />";
 	echo "<br />";

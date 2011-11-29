@@ -54,7 +54,8 @@
 		// Haetaan isätuotteiden myynti
 		$query = "	SELECT
 					sum(if (tilausrivi.tyyppi = 'O' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.varattu,0)) tilattu,
-					sum(if ((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois
+					sum(if ((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
+					sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva1ed-$kka1ed-$ppa1ed' AND laskutettuaika <= '$vvl1ed-$kkl1ed-$ppl1ed' ,kpl+tilkpl,0)) EDkpl
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.tyyppi in ('L','V','E')
@@ -92,13 +93,14 @@
 		// Haetaan lapsituotteen myynti
 		$query = "	SELECT
 					sum(if (tilausrivi.tyyppi = 'O' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.varattu,0)) tilattu,
-					sum(if ((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois
+					sum(if ((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
+					sum(if(tilausrivi.tyyppi in ('L','V','W') AND toimitettuaika >= '$vva1-01-01' AND toimitettuaika <= '$vvl1-12-31', kpl, 0)) vuosikulutus
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.tyyppi in ('L','V','E')
 					AND ((tilausrivi.laskutettuaika >= '$apvm' AND tilausrivi.laskutettuaika <= '$lpvm') OR tilausrivi.laskutettuaika = '0000-00-00')
 					AND tilausrivi.tuoteno = '$tuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = mysql_query($query) or pupe_error($query); // TODO: vuosikulutuksen haku pitää tarkistaa
 		$lapsirow = mysql_fetch_array($result);
 
 		// Haetaan lapsituotteen toimittajatiedot

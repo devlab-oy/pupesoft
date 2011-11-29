@@ -143,35 +143,35 @@
 
 					});
 
-					$('.filter_parent_row_by').live('focus', function(event) {
-
-						event.stopPropagation();
-
-						var title = this.id.substring(11);
-
-						var _arr = new Array();
-
-						$('.toggleable_parent_row_'+title+':visible').each(function() {
-							_arr.push($(this).html().replace(/(:|\.)/g,'\\$1'));
-						});
-
-						_arr = sort_unique(_arr);
-
-						var selected = $(this).children('option:selected').val();
-
-						$(this).children().remove();
-
-						$(this).prepend('<option value=\"\">",t("Valitse"),"</option>')
-
-						for (i = 0; i < _arr.length; i++) {
-							if (selected == _arr[i]) {
-								$(this).append('<option value=\"'+_arr[i]+'\" selected>'+_arr[i]+'</option>');
-							}
-							else {
-								$(this).append('<option value=\"'+_arr[i]+'\">'+_arr[i]+'</option>');
-							}
-						}
-					});
+					// $('.filter_parent_row_by').live('focus', function(event) {
+					// 
+					// 	event.stopPropagation();
+					// 
+					// 	var title = this.id.substring(11);
+					// 
+					// 	var _arr = new Array();
+					// 
+					// 	$('.toggleable_parent_row_'+title+':visible').each(function() {
+					// 		_arr.push($(this).html().replace(/(:|\.)/g,'\\$1'));
+					// 	});
+					// 
+					// 	_arr = sort_unique(_arr);
+					// 
+					// 	var selected = $(this).children('option:selected').val();
+					// 
+					// 	$(this).children().remove();
+					// 
+					// 	$(this).prepend('<option value=\"\">",t("Valitse"),"</option>')
+					// 
+					// 	for (i = 0; i < _arr.length; i++) {
+					// 		if (selected == _arr[i]) {
+					// 			$(this).append('<option value=\"'+_arr[i]+'\" selected>'+_arr[i]+'</option>');
+					// 		}
+					// 		else {
+					// 			$(this).append('<option value=\"'+_arr[i]+'\">'+_arr[i]+'</option>');
+					// 		}
+					// 	}
+					// });
 
 					$('.filter_parent_row_by').live('change', function(event) {
 
@@ -181,12 +181,19 @@
 
 						var empty_all = true;
 
-						$('.filter_parent_row_by').each(function() {
-							var selected = $(this).val().replace(/(:|\.)/g,'\\$1');
+						var selected = '';
 
-							if (selected != '') {
+						$('.filter_parent_row_by option:selected').each(function() {
+
+							if ($(this).val() != '') {
 								empty_all = false;
-								$('td[id^=\"'+selected+'\"]').parent().show();
+
+								if (selected != '') {
+									selected = $(selected).children().filter('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"]').parent();
+								}
+								else {
+									selected = $('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"]').parent();
+								}
 							}
 						});
 
@@ -194,6 +201,7 @@
 							$('.toggleable_parent').show();
 						}
 						else {
+							$(selected).show();
 							$(this).attr('selected', true);
 						}
 					});

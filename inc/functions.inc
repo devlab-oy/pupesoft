@@ -11012,16 +11012,16 @@ if (!function_exists("pupe_DataTables")) {
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {
-									valuutta = aaData[aiDisplay[i]][8];
+									valuutta = aaData[aiDisplay[i]][9];
 									valuutat[valuutta] = valuutta;
 
-									if (aaData[aiDisplay[i]][6] == '') {
+									if (aaData[aiDisplay[i]][7] == '') {
 										if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
-										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][7]*1;
+										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][8]*1;
 									}
 									else {
 										if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-										avoimety[valuutta] += aaData[aiDisplay[i]][7]*1;
+										avoimety[valuutta] += aaData[aiDisplay[i]][8]*1;
 									}
 								}
 

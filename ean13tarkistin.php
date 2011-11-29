@@ -1,30 +1,34 @@
 <?php
+
 	$pupe_DataTables = array("eankoodi");
+
 	require("inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Listataan kaikki tuotteet joiden EAN-koodi on viallinen")."</font><hr>\n";
-	
-	echo "<p>".t("Painamalla AJA-nappia, tehdään listaus tuotteista joiden ean13-koodi on syötetty mutta viallinen. Tämä ajo voi kestää tovin.")."</p>";
-	echo "<p>".t("Huom! mikäli eankoodiksi on lyöty joku muu viivakoodi, niin se näyttää tässä tulosteessa vialliselta")."</p>";			
+
+	echo "<p>".t("HUOM: Mikäli EAN13-koodiksi on lyöty joku muu viivakoodi, niin se näyttää tässä tulosteessa vialliselta").".</p>";
+
 	echo "<form method='post' action=''>";
-	
-	echo "<br><input type='submit' name='tee' value='aja'>";
-	
+	echo "<br><input type='submit' name='tee' value='".t("Tee listaus")."'>";
 	echo "</form><br>";
-	
-	if ($tee == "aja") {
-		
+
+	if (isset($tee) and $tee != "") {
+
 		$query = " 	SELECT yhtio, eankoodi, tuoteno, nimitys, tunnus
 					FROM tuote
 					WHERE yhtio = '{$kukarow["yhtio"]}'
 					AND status in ('A','E','T')
-					AND eankoodi !=''";
+					AND eankoodi != ''";
 		$result = pupe_query($query);
 		$total = mysql_num_rows($result);
-		$count = 0; 
+
+		$count = 0;
+
 		// piirretään taulua
 		echo "<br>";
+
 		pupe_DataTables(array(array($pupe_DataTables[0], 3, 4, true, true)));
+
 		echo "<br>";
 		echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
 		echo "<thead>";
@@ -39,41 +43,36 @@
 		echo "<td><input type='text' 	size='10' class='search_field' name='search_nimitys_haku'></td>";
 		echo "<td><input type='text' 	size='10' class='search_field' name='search_eankoodi_haku'></td>";
 		echo "<td><input type='hidden' 	size='10' class='search_field' name='search_virhe_haku'></td>";
-		echo "</tr>";		
+		echo "</tr>";
 		echo "</thead>";
 		echo "<tbody>";
-		
+
 		while ($rivi = mysql_fetch_assoc($result)) {
 			$virhe = t("Viallinen ean13-koodi");
-			$bool = "";
-			$tuoteno = $rivi["tuoteno"];
-			$ean = $rivi["eankoodi"];
-			$nimitys = $rivi["nimitys"];
-			
-			if (tarkista_ean13($ean) === FALSE) {
-				
-				if (strlen($ean) != 13) {
+
+			if (tarkista_ean13($rivi["eankoodi"]) === FALSE) {
+
+				if (strlen($rivi["eankoodi"]) != 13) {
 					$virhe .= ",<br>".t("EAN-koodi vääränpituinen")."";
 				}
-				$bool = preg_match('/[^0-9]/',$ean);
-				if ($bool >0) {
+
+				if (preg_match('/[^0-9]/', $rivi["eankoodi"])) {
 					$virhe .= ",<br>".t("EAN-koodissa vääriä merkkejä tai välilyönti")."";
 				}
-				
+
 				echo "<tr>";
-				echo "<td>$tuoteno</td>";
-				echo "<td>$nimitys</td>";
-				echo "<td>$ean</td>";
+				echo "<td>{$rivi["tuoteno"]}</td>";
+				echo "<td>{$rivi["nimitys"]}</td>";
+				echo "<td>{$rivi["eankoodi"]}</td>";
 				echo "<td>{$virhe}</td>";
 				echo "</tr>";
 				$count++;
 			}
 		}
-		
-		$prosentti = round(($count/$total) * 100,2);
+
 		echo "</tbody>";
 		echo "</table>";
-		echo "<br><p>".t("Kaikkien tuotteiden lukumäärä")." {$total}, ".t("prosenttimäärä")." {$prosentti}%</p>";
 	}
+
 	require("inc/footer.inc");
 ?>

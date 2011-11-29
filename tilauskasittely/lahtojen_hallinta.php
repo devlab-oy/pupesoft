@@ -117,7 +117,6 @@
 								$('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').show();
 
 								$('.filter_row_by_select').attr('disabled', false).trigger('change');
-
 								$('.filter_row_by_text').attr('disabled', false).trigger('keyup');
 							}
 						}
@@ -147,12 +146,8 @@
 
 								if ($('.toggleable_row_child:visible').length == 1) {
 
-									$('.filter_row_by_select').find('option:first').each(function() {
-										$(this).attr('selected', true);
-										$(this).parent().attr('disabled', false);
-									});
-
-									$('.filter_row_by_text').attr('disabled', false).val('');
+									$('.filter_row_by_select').attr('disabled', false).trigger('change');
+									$('.filter_row_by_text').attr('disabled', false).trigger('keyup');
 
 									$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
 								}
@@ -299,7 +294,8 @@
 						});
 
 						if (selected != '' && $(this).val() != '') {
-							var title = $(this).attr('id').substring(15);
+							var tmp = $(this).attr('id').substring(15).split(\"__\", 3);
+							var title = tmp[0];
 							selected = $(selected).children().filter('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
 
 							if (selected != '') {
@@ -307,7 +303,8 @@
 							}
 						}
 						else if (selected == '' && $(this).val() != '') {
-							var title = $(this).attr('id').substring(15);
+							var tmp = $(this).attr('id').substring(15).split(\"__\", 3);
+							var title = tmp[0];
 							selected = $('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
 
 							if (selected != '') {
@@ -433,6 +430,11 @@
 
 						}
 						else {
+
+							var tmp = title.split(\"__\", 3);
+							title = tmp[0];
+							title_id = tmp[1];
+							title_counter = tmp[2];
 
 							var arr = $('.toggleable_row_tr:visible');
 							var _arr = new Array();
@@ -732,7 +734,7 @@
 		echo "<tr class='header_row_{$row['lahdon_tunnus']}__{$y}'>";
 		echo "<th></th>";
 
-		echo "<th class='sort_row_by' id='row_status'>",t("Status")," <img class='row_direction_status' />";
+		echo "<th class='sort_row_by' id='row_status__{$row['lahdon_tunnus']}__{$y}'>",t("Status")," <img class='row_direction_status' />";
 		echo "<br />";
 		echo "<select class='filter_row_by_select' id='child_row_select_status'>";
 		echo "<option value=''>",t("Valitse"),"</option>";
@@ -744,7 +746,7 @@
 
 		sort($priorities);
 
-		echo "<th class='sort_row_by' id='row_prio'>",t("Prio")," <img class='row_direction_prio' />";
+		echo "<th class='sort_row_by' id='row_prio__{$row['lahdon_tunnus']}__{$y}'>",t("Prio")," <img class='row_direction_prio' />";
 		echo "<br />";
 		echo "<select class='filter_row_by_select' id='child_row_select_prio'>";
 		echo "<option value=''>",t("Valitse"),"</option>";
@@ -758,7 +760,7 @@
 
 		sort($orders);
 
-		echo "<th class='sort_row_by' id='row_order'>",t("Tilausnumero")," <img class='row_direction_order' />";
+		echo "<th class='sort_row_by' id='row_order__{$row['lahdon_tunnus']}__{$y}'>",t("Tilausnumero")," <img class='row_direction_order' />";
 		echo "<br />";
 		echo "<select class='filter_row_by_select' id='child_row_select_order'>";
 		echo "<option value=''>",t("Valitse"),"</option>";
@@ -770,21 +772,21 @@
 		echo "</select>";
 		echo "</th>";
 
-		echo "<th class='sort_row_by' id='row_type'>",t("Tyyppi")," <img class='row_direction_type' /></th>";
+		echo "<th class='sort_row_by' id='row_type__{$row['lahdon_tunnus']}__{$y}'>",t("Tyyppi")," <img class='row_direction_type' /></th>";
 
-		echo "<th class='sort_row_by' id='row_client'>",t("Asiakas")," <img class='row_direction_client' />";
+		echo "<th class='sort_row_by' id='row_client__{$row['lahdon_tunnus']}__{$y}'>",t("Asiakas")," <img class='row_direction_client' />";
 		echo "<br />";
-		echo "<input type='text' class='filter_row_by_text' id='child_row_text_client' value='' />";
+		echo "<input type='text' class='filter_row_by_text' id='child_row_text_client__{$row['lahdon_tunnus']}__{$y}' value='' />";
 		echo "</th>";
 
-		echo "<th class='sort_row_by' id='row_locality'>",t("Paikkakunta")," <img class='row_direction_locality' /></th>";
+		echo "<th class='sort_row_by' id='row_locality__{$row['lahdon_tunnus']}__{$y}'>",t("Paikkakunta")," <img class='row_direction_locality' /></th>";
 
 		$query = "	SELECT DISTINCT nimitys
 					FROM keraysvyohyke
 					WHERE yhtio = '{$kukarow['yhtio']}'";
 		$keraysvyohyke_result = pupe_query($query);
 
-		echo "<th class='sort_row_by' id='row_picking_zone'>",t("Keräysvyöhyke")," <img class='row_direction_picking_zone' />";
+		echo "<th class='sort_row_by' id='row_picking_zone__{$row['lahdon_tunnus']}__{$y}'>",t("Keräysvyöhyke")," <img class='row_direction_picking_zone' />";
 		echo "<br />";
 		// echo "<select class='filter_row_by_select' id='child_row_select_picking_zone' multiple='multiple' size='4'>";
 		echo "<select class='filter_row_by_select' id='child_row_select_picking_zone'>";
@@ -797,15 +799,15 @@
 		echo "</select>";
 		echo "</th>";
 
-		echo "<th class='sort_row_by' id='row_batch'>",t("Erä")," <img class='row_direction_batch' />";
+		echo "<th class='sort_row_by' id='row_batch__{$row['lahdon_tunnus']}__{$y}'>",t("Erä")," <img class='row_direction_batch' />";
 		echo "<br />";
-		echo "<input type='text' class='filter_row_by_text' id='child_row_text_batch' value='' size='6' />";
+		echo "<input type='text' class='filter_row_by_text' id='child_row_text_batch__{$row['lahdon_tunnus']}__{$y}' value='' size='6' />";
 		echo "</th>";
 
-		echo "<th class='sort_row_by' id='row_rows'>",t("Rivit")," / ",t("Kerätyt")," <img class='row_direction_rows' /></th>";
-		echo "<th class='sort_row_by' id='row_sscc'>",t("SSCC")," <img class='row_direction_sscc' /></th>";
-		echo "<th class='sort_row_by' id='row_package'>",t("Pakkaus")," <img class='row_direction_package' /></th>";
-		echo "<th class='sort_row_by' id='row_weight'>",t("Paino")," <img class='row_direction_weight' /></th>";
+		echo "<th class='sort_row_by' id='row_rows__{$row['lahdon_tunnus']}__{$y}'>",t("Rivit")," / ",t("Kerätyt")," <img class='row_direction_rows' /></th>";
+		echo "<th class='sort_row_by' id='row_sscc__{$row['lahdon_tunnus']}__{$y}'>",t("SSCC")," <img class='row_direction_sscc' /></th>";
+		echo "<th class='sort_row_by' id='row_package__{$row['lahdon_tunnus']}__{$y}'>",t("Pakkaus")," <img class='row_direction_package' /></th>";
+		echo "<th class='sort_row_by' id='row_weight__{$row['lahdon_tunnus']}__{$y}'>",t("Paino")," <img class='row_direction_weight' /></th>";
 		echo "</tr>";
 
 		mysql_data_seek($lahto_res, 0);

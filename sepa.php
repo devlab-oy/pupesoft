@@ -369,6 +369,11 @@
 
 				while ($nettorow = mysql_fetch_array($result)) {
 
+					// Jos laskunumero on syötetty, lisätään se viestiin mukaan
+		            if ($nettorow['laskunro'] != 0 and $nettorow['laskunro'] != $nettorow['viesti']) {
+		                $nettorow['viesti'] = (trim($nettorow['viesti']) == "") ? $nettorow['laskunro'] : $nettorow['viesti']." ".$nettorow['laskunro'];
+		            }
+
 					if ($nettorow["summa"] < 0) {
 						$code = "CREN";				// hyvityslasku
 						$nettorow["summa"] *= -1;	// käännetään etumerkki
@@ -654,7 +659,7 @@
 		while ($laskurow = mysql_fetch_array($result)) {
 
             // Jos laskunumero on syötetty, lisätään se viestiin mukaan
-            if ($laskurow['laskunro'] != 0) {
+            if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
                 $laskurow['viesti'] = (trim($laskurow['viesti']) == "") ? $laskurow['laskunro'] : $laskurow['viesti']." ".$laskurow['laskunro'];
             }
 

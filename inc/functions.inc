@@ -7580,14 +7580,14 @@ if (!function_exists("livesearch_tuotehaku")) {
 					$kieltolisa .= " and tuote.hinnastoon != 'E' ";
 				}
 			}
-			
+
 			// Näytetään poistuvat tuotteet mutta ei poistettuja
 			if ($yhtiorow['livetuotehaku_poistetut'] == 'X') {
 				$naytetaanko_poistetut = "and (tuote.status != 'P' or (tuote.status = 'P' and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0))";
-			} 
+			}
 			else {
 				$naytetaanko_poistetut = "and tuote.status != 'P'";
-			}	
+			}
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -8604,6 +8604,7 @@ if (!function_exists("t_avainsana")) {
 		global $kukarow, $yhtiorow, $link;
 
 		$laji = mysql_real_escape_string($laji);
+		$orderlisa = "";
 
 		if ($kieli == "") {
 			$kieli = $kukarow["kieli"];
@@ -9397,9 +9398,9 @@ if (!function_exists("tarkista_ean13")) {
 	function tarkista_ean13($eankoodi){
 		// Ensiksi eankoodi muutetaan Stringiksi
 		$eankoodi =(string)$eankoodi;
-		
+
 		$tarkistusmerkki = $eankoodi[12];
-		
+
 		// 1. Add the values of the digits in the even-numbered positions: 2, 4, 6, etc.
 		$even_sum = $eankoodi{1} + $eankoodi{3} + $eankoodi{5} + $eankoodi{7} + $eankoodi{9} + $eankoodi{11};
 		// 2. Multiply this result by 3.
@@ -9411,7 +9412,7 @@ if (!function_exists("tarkista_ean13")) {
 		// 5. The check character is the smallest number which, when added to the result in step 4,  produces a multiple of 10.
 		$next_ten = (ceil($total_sum/10))*10;
 		$check_digit = $next_ten - $total_sum;
-		
+
 		if ($check_digit == $tarkistusmerkki) {
 			return TRUE;
 		}

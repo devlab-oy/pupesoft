@@ -131,7 +131,7 @@ if (!function_exists('finvoice_otsik')) {
 			$y_postitp	 	= $lasrow["yhtio_postitp"];
 			$y_maa 			= $lasrow["yhtio_maa"];
 			$y_kotipaikka	= $lasrow["yhtio_kotipaikka"];
-			$y_vatnumero	= str_replace("0037", "", $lasrow["yhtio_ovttunnus"]);
+			$y_vatnumero	= $lasrow["yhtio_ovttunnus"];
 			$y_iban 		= $yhtiorow['pankkiiban1'];
 			$y_swift 		= $yhtiorow['pankkiswift1'];
 

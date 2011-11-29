@@ -2,6 +2,9 @@
 
 	$pupe_DataTables = array("eankoodi");
 
+	// T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta
+	$useslave = 1;
+
 	require("inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Listataan kaikki tuotteet joiden EAN-koodi on viallinen")."</font><hr>\n";

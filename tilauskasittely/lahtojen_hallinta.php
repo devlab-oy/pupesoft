@@ -167,6 +167,11 @@
 
 						if ($('#toggleable_'+id[0]+'__'+id[1]).is(':visible')) {
 
+							$('.filter_row_by_text:visible').val('');
+							$('.filter_row_by_select:visible').each(function() {
+								$(this).children('option:first').attr('selected', true);
+							});
+
 							$('.toggleable_row_child').hide();
 							$('#toggleable_'+id[0]+'__'+id[1]).hide();
 
@@ -248,7 +253,7 @@
 										$(this).val() != '' ? $(this).trigger('keyup') : '';
 									});
 
-									$('.filter_row_by_select').attr('disabled', false);
+									$('.filter_row_by_select:visible').attr('disabled', false);
 
 									$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
 								}

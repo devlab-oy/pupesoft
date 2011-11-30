@@ -234,7 +234,7 @@
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
 				$omattyot
 				$lisa2
-				ORDER BY ifnull(a5.jarjestys, 9999), a2.selitetark, lasku.toimaika";
+				ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), a2.selitetark, lasku.toimaika";
 	$vresult = pupe_query($query);
 
 	$tyomaarays_tunti_yhteensa = array();

@@ -8,7 +8,7 @@
 
 	require('../inc/parametrit.inc');
 
-	pupe_DataTables(array(array($pupe_DataTables, 13, 13, true, true)));
+	pupe_DataTables(array(array($pupe_DataTables, 14, 14, true, true)));
 
 	$query_ale_lisa = generoi_alekentta('M');
 
@@ -18,38 +18,38 @@
 	echo "<table class='display dataTable' id='$pupe_DataTables'>";
 	echo "<thead>";
 	echo "<tr>";
-	echo "<th width='1'>".t("Sopimus")."</th>";
-	echo "<th width='1'>".t("Asiakkaan")."<br>".t("Tilausnumero")."</th>";
-	echo "<th width='1'>".t("Asiakas")."</th>";
-	echo "<th width='1'>".t("Tuoteno")."</th>";
-	echo "<th width='1'>".t("Nimitys")."</th>";
-	echo "<th width='1'>".t("Kommentti")."</th>";
-	echo "<th width='1'>".t("Sisäinen %s Kommentti",'',"<br>")."</th>";
-	echo "<th width='1'>".t("Alku pvm")."</th>";
-	echo "<th width='1'>".t("Loppu pvm")."</th>";
-	echo "<th width='1'>".t("Kpl")."</th>";
-	echo "<th width='1'>".t("Hinta")."</th>";
-	echo "<th width='1'>".t("Rivihinta")."</th>";
-	echo "<th width='1'>".t("Sarjanumero")."</th>";
-	echo "<th width='1'>".t("Vasteaika")."</th>";
+	echo "<th>".t("Sopimus")."</th>";
+	echo "<th>".t("Asiakkaan")."<br>".t("Tilausnumero")."</th>";
+	echo "<th>".t("Asiakas")."</th>";
+	echo "<th>".t("Tuoteno")."</th>";
+	echo "<th>".t("Nimitys")."</th>";
+	echo "<th>".t("Kommentti")."</th>";
+	echo "<th>".t("Sisäinen")."<br>".t("Kommentti")."</th>";
+	echo "<th>".t("Alku pvm")."</th>";
+	echo "<th>".t("Loppu pvm")."</th>";
+	echo "<th>".t("Kpl")."</th>";
+	echo "<th>".t("Hinta")."</th>";
+	echo "<th>".t("Rivihinta")."</th>";
+	echo "<th>".t("Sarjanumero")."</th>";
+	echo "<th>".t("Vasteaika")."</th>";
 	echo "</tr>";
 
 	// Hakukentät
 	echo "<tr>";
-	echo "<td width='1'>	<input type='text' class='search_field' name='search_tilausnumero'/></td>";
-	echo "<td width='1'>	<input type='text' class='search_field' name='search_asiakkaan_tilausnumero'/></td>";
-	echo "<td width='1'>	<input type='text' class='search_field' size='30' name='search_asiakas'/></td>";
-	echo "<td>				<input type='text' class='search_field' size='20' name='search_tuoteno/'></td>";
-	echo "<td>				<input type='text' class='search_field' size='20' name='search_nimitys'/></td>";
-	echo "<td>				<input type='text' class='search_field' size='20' name='search_kommentti'/></td>";
-	echo "<td>				<input type='text' class='search_field' size='20' name='search_siskommentti'/></td>";
-	echo "<td width='1'>	<input type='text' class='search_field' size='12' name='search_rivinsopimus_alku'/></td>";
-	echo "<td width='1'>	<input type='text' class='search_field' size='12' name='search_rivinsopimus_loppu'/></td>";
-	echo "<td width='1'>	<input type='text' class='search_field' size='10' name='search_kpl'/></td>";
-	echo "<td>				<input type='text' class='search_field' size='10' name='search_hinta'/></td>";
-	echo "<td>				<input type='text' class='search_field' size='10' name='search_summa'/></td>";
-	echo "<td>				<input type='text' class='search_field' size='10' name='search_sarjanumero'/></td>";
-	echo "<td>				<input type='text' class='search_field' size='10' name='search_vasteaika'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_tilausnumero'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_asiakkaan_tilausnumero'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_asiakas'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_tuoteno/'></td>";
+	echo "<td><input type='text' class='search_field' name='search_nimitys'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_kommentti'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_siskommentti'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_rivinsopimus_alku'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_rivinsopimus_loppu'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_kpl'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_hinta'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_summa'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_sarjanumero'/></td>";
+	echo "<td><input type='text' class='search_field' name='search_vasteaika'/></td>";
 	echo "</tr>";
 	echo "</thead>";
 	echo "<tbody>";
@@ -69,7 +69,7 @@
 				tilausrivi.hinta,
 				tilausrivi.kommentti,
 				tilausrivin_lisatiedot.sopimuksen_lisatieto1 sarjanumero,
-				tilausrivin_lisatiedot.sopimuksen_lisatieto2 vasteaika, 
+				tilausrivin_lisatiedot.sopimuksen_lisatieto2 vasteaika,
 				laskun_lisatiedot.sopimus_lisatietoja sisainen_kommentti
 				FROM lasku use index (tila_index)
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus and (laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
@@ -77,7 +77,7 @@
 				JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 				WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 				AND tila = '0'
-				AND alatila NOT IN ('D')
+				AND alatila != 'D'
 				ORDER by lasku.tunnus, rivinsopimus_alku ASC, rivinsopimus_loppu ASC";
 	$result = pupe_query($query);
 

@@ -560,7 +560,7 @@ if ($asiakasid > 0) {
 			$taulu  = "";
 
 			if ($aletaulu != "" or $tee == "eposti") {
-				$tuotejoin	= " JOIN tuote ON tuote.yhtio=perusalennus.yhtio and tuote.aleryhma=perusalennus.ryhma and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E' ";
+				$tuotejoin	= " JOIN tuote ON tuote.yhtio=perusalennus.yhtio and tuote.aleryhma=perusalennus.ryhma and tuote.hinnastoon != 'E' ";
 				$tuotewhere = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
 				$tuotegroup = " GROUP BY tuote.try, tuote.osasto, tuote.aleryhma ";
 				$tuotecols 	= ", tuote.osasto, tuote.try";
@@ -591,7 +591,7 @@ if ($asiakasid > 0) {
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
 							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
 							and asiakasalennus.asiakas = '$asiakasrow[tunnus]'
 							and asiakasalennus.asiakas > 0
@@ -620,7 +620,7 @@ if ($asiakasid > 0) {
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
 							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
 							and asiakasalennus.ytunnus = '$asiakasrow[ytunnus]'
 							and asiakasalennus.ytunnus != ''
@@ -710,7 +710,7 @@ if ($asiakasid > 0) {
 								FROM asiakasalennus
 								LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
 								LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-								JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+								JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
 								WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
 								and asiakasalennus.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
 								and asiakasalennus.asiakas_segmentti != ''
@@ -741,7 +741,7 @@ if ($asiakasid > 0) {
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
 							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
 							and asiakasalennus.asiakas_ryhma = '$asiakasrow[ryhma]'
 							and asiakasalennus.asiakas_ryhma != ''
@@ -772,7 +772,7 @@ if ($asiakasid > 0) {
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and tuote.hinnastoon != 'E'
 							WHERE asiakasalennus.yhtio = '$asiakas_yhtio'
 							and asiakasalennus.piiri = '$asiakasrow[piiri]'
 							and asiakasalennus.piiri != ''
@@ -988,8 +988,6 @@ if ($asiakasid > 0) {
 								and tuote.aleryhma = '$asrow[alennusryhmä]'
 								and tuote.hinnastoon != 'E'
 								and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-								and tuote.osasto != 0
-								and tuote.try != 0
 								LIMIT 1";
 					$testres = mysql_query($query) or pupe_error($query);
 
@@ -1148,7 +1146,7 @@ if ($asiakasid > 0) {
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
 							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
 							and asiakashinta.asiakas = '$asiakasrow[tunnus]'
 							and asiakashinta.asiakas > 0
@@ -1174,7 +1172,7 @@ if ($asiakasid > 0) {
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
 							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
 							and asiakashinta.ytunnus = '$asiakasrow[ytunnus]'
 							and asiakashinta.ytunnus > 0
@@ -1200,7 +1198,7 @@ if ($asiakasid > 0) {
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
 							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
 							and asiakashinta.asiakas = '$asiakasrow[tunnus]'
 							and asiakashinta.asiakas > 0
@@ -1226,7 +1224,7 @@ if ($asiakasid > 0) {
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
 							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
 							and asiakashinta.ytunnus = '$asiakasrow[ytunnus]'
 							and asiakashinta.ytunnus != ''
@@ -1252,7 +1250,7 @@ if ($asiakasid > 0) {
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
 							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
 							and asiakashinta.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
 							and asiakashinta.asiakas_segmentti !=''
@@ -1280,7 +1278,7 @@ if ($asiakasid > 0) {
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
 							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
 							and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]'
 							and asiakashinta.asiakas_ryhma != ''
@@ -1308,7 +1306,7 @@ if ($asiakasid > 0) {
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
 							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
 							and asiakashinta.piiri = '$asiakasrow[piiri]'
 							and asiakashinta.piiri != ''
@@ -1336,7 +1334,7 @@ if ($asiakasid > 0) {
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
 							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
 							and asiakashinta.asiakas_segmentti in ($alehi_assegmenttirow[tunnukset])
 							and asiakashinta.asiakas_segmentti != ''
@@ -1364,7 +1362,7 @@ if ($asiakasid > 0) {
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
 							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
 							and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]'
 							and asiakashinta.asiakas_ryhma != ''
@@ -1392,7 +1390,7 @@ if ($asiakasid > 0) {
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.osasto != 0 and tuote.try != 0 and tuote.hinnastoon != 'E'
+							JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.aleryhma=asiakashinta.ryhma and tuote.hinnastoon != 'E'
 							WHERE asiakashinta.yhtio = '$asiakas_yhtio'
 							and asiakashinta.piiri = '$asiakasrow[piiri]'
 							and asiakashinta.piiri != ''
@@ -1473,11 +1471,11 @@ if ($asiakasid > 0) {
 			$ashin .= "</table>";
 
 			if ($yhdistetty != "") {
-				$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Asikashinnat")."</a>";
+				$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Asiakashinnat")."</a>";
 			}
 		}
 		else {
-			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Asikashinnat")."</a>";
+			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Asiakashinnat")."</a>";
 		}
 
 		if ($yhdistetty != '') {

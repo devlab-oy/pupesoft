@@ -197,24 +197,17 @@ if (!isset($tee) or $tee == '') {
 	$tyojonosql = "	SELECT lasku.tunnus,
 					lasku.nimi,
 					lasku.toimaika,
-					avainsana.selitetark_2 tyostatusvari, 
-					avainsana2.selitetark priori, 
-					avainsana2.jarjestys sorttaus 
+					a2.selitetark tyostatus,
+					a2.selitetark_2 tyostatusvari,
+					a5.selitetark tyom_prioriteetti
 					FROM lasku
-					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio
-						AND tyomaarays.otunnus = lasku.tunnus
-						AND tyomaarays.tyojono != ''
-						AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
-					LEFT JOIN avainsana ON (avainsana.yhtio = tyomaarays.yhtio 
-						AND avainsana.selite = tyomaarays.tyostatus 
-						AND avainsana.laji = 'TYOM_TYOSTATUS')
-					LEFT JOIN avainsana avainsana2 ON (avainsana2.yhtio=tyomaarays.yhtio 
-						and avainsana2.laji='TYOM_PRIORIT' 
-						and avainsana2.selite=tyomaarays.prioriteetti)
+					JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
+					LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
+					LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila in ('A','L','N','S','C')
 					AND lasku.alatila != 'X'
-					ORDER BY toimaika ASC, sorttaus ASC";
+					ORDER BY ifnull(a5.jarjestys, 9999), a2.selitetark, lasku.toimaika";
 	$tyoresult = pupe_query($tyojonosql);
 
 	if (mysql_num_rows($tyoresult) > 0) {
@@ -225,20 +218,20 @@ if (!isset($tee) or $tee == '') {
 		echo "</tr>";
 		echo "<tr>";
 		echo "<th>".t("Työnumero")."</th>";
-		echo "<th>".t("Asiakas")."</th>";
-		echo "<th>".t("Päivämäärä")."</th>";
 		echo "<th>".t("Prioriteetti")."</th>";
+		echo "<th>".t("Asiakas")."</th>";
+		echo "<th>".t("Päivämäärä")."</th>";		
 		echo "</tr>";
 
 	 	while ($tyorow = mysql_fetch_array($tyoresult)) {
 			// Laitetetaan taustaväri jos sellainen on syötetty
 			$varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
 
-			echo "<tr$varilisa>";
+			echo "<tr $varilisa>";
 			echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
+			echo "<td>{$tyorow["tyom_prioriteetti"]}</td>";
 			echo "<td>{$tyorow["nimi"]}</td>";
-			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";
-			echo "<td>{$tyorow["priori"]}</td>";
+			echo "<td>".tv1dateconv($tyorow["toimaika"])."</td>";			
 			echo "</tr>";
 		}
 		echo "</table><br>";

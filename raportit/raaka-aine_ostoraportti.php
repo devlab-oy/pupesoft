@@ -12,10 +12,6 @@
 	if (!isset($vvl1)) $vvl1 = date("Y");
 	if (!isset($ppl1)) $ppl1 = date("d");
 
-	// Edellisen vuoden vastaavat kaudet
-	$edellinen_alku  = date("Y-m-d", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
-	$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
-
 	// Päivämäärätarkistus
 	if (!checkdate($kka1, $ppa1, $vva1)) {
 		echo "<font class='error'>".t("Virheellinen alkupäivä!")."</font><br>";
@@ -27,41 +23,41 @@
 		$tee = "";
 	}
 
-	// Tämä palauttaa yhden tuotteen ostosuosituksen tiedot
-	function teerivi($tuoteno, $isatuoteno) {
+	// Edellisen vuoden vastaavat kaudet
+	$edellinen_alku  = date("Y-m-d", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
+	$edellinen_loppu = date("Y-m-d", mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
 
-		// Kukarow käyttöön
-		global $kukarow;
+	// Syötetyt kaudet mysql muodossa
+	$nykyinen_alku  = "$vva1-$kka1-$ppa1";
+	$nykyinen_loppu = "$vvl1-$kkl1-$ppl1";
+
+	// Tämä palauttaa yhden tuotteen ostosuosituksen tiedot
+	function teerivi($tuoteno, $isatuoteno, $kerroin) {
+
+		// Kukarow ja päivämäärät globaaleina
+		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu;
 
 		// Haetaan isätuotteiden varastosaldo
-		$query = "	SELECT ifnull(sum(saldo),0) saldo
+		$query = "	SELECT ifnull(sum(saldo), 0) saldo
 					FROM tuotepaikat
-					JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio)
-					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-					AND concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-					AND concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+					WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
 					AND tuotepaikat.tuoteno = '$isatuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		// Lasketaan kaikilla varastopaikoilla olevat tuotteet yhteen
-		if (mysql_num_rows($result) > 0) {
-			$isanvarastosaldo = 0;
-			while ($varrow = mysql_fetch_array($result)) {
-				$isanvarastosaldo += floatval($varrow['saldo']);
-			}
-		}
+		$result = pupe_query($query);
+		$varrow = mysql_fetch_assoc($result);
+		$isanvarastosaldo = $varrow['saldo'];
 
 		// Haetaan isätuotteiden myynti
 		$query = "	SELECT
-					sum(if (tilausrivi.tyyppi = 'O' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.varattu,0)) tilattu,
-					sum(if ((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
-					sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$vva1ed-$kka1ed-$ppa1ed' AND laskutettuaika <= '$vvl1ed-$kkl1ed-$ppl1ed' ,kpl+tilkpl,0)) EDkpl
+					sum(if(tilausrivi.tyyppi = 'O' AND laskutettuaika >= '$nykyinen_alku' AND laskutettuaika <= '$nykyinen_loppu', tilausrivi.varattu, 0)) tilattu,
+					sum(if((tilausrivi.tyyppi = 'L' OR tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
+					sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$edellinen_alku' AND laskutettuaika <= '$edellinen_loppu', kpl+tilkpl, 0)) EDkpl
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.tyyppi in ('L','V','E')
-					AND ((tilausrivi.laskutettuaika >= '$apvm' AND tilausrivi.laskutettuaika <= '$lpvm') or tilausrivi.laskutettuaika = '0000-00-00')
-					AND tilausrivi.tuoteno = '$isatuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
+					AND tilausrivi.tuoteno = '$isatuoteno'
+					AND tilausrivi.laskutettuaika >= '$edellinen_alku'
+					AND tilausrivi.laskutettuaika <= '$nykyinen_loppu'";
+		$result = pupe_query($query);
 		$isarow = mysql_fetch_array($result);
 
 		// Haetaan budjetti-indeksi, jos sellainen on määritetty
@@ -75,59 +71,50 @@
 		// Haetaan lapsituotteen varastosaldo
 		$query = "	SELECT ifnull(sum(saldo),0) saldo
 					FROM tuotepaikat
-					JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio)
 					WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
-					AND concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-					AND concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					AND tuotepaikat.tuoteno = '$tuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
+		$varrow = mysql_fetch_array($result);
+		$lapsenvarastosaldo = $varrow['saldo'];
 
-		// Lasketaan kaikilla varastopaikoilla olevat tuotteet yhteen
-		if (mysql_num_rows($result) > 0) {
-			$lapsenvarastosaldo = 0;
-			while ($varrow = mysql_fetch_array($result)) {
-				$lapsenvarastosaldo += floatval($varrow['saldo']);
-			}
-		}
-
-		// Haetaan lapsituotteen myynti
-		$query = "	SELECT
-					sum(if (tilausrivi.tyyppi = 'O' AND laskutettuaika >= '$vva1-$kka1-$ppa1' AND laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.varattu,0)) tilattu,
-					sum(if ((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
-					sum(if(tilausrivi.tyyppi in ('L','V','W') AND toimitettuaika >= '$vva1-01-01' AND toimitettuaika <= '$vvl1-12-31', kpl, 0)) vuosikulutus
+		// Haetaan lapsituotteen vuosikulutus
+		$query = "	SELECT sum(tilausrivi.kpl) vuosikulutus
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-					AND tilausrivi.tyyppi in ('L','V','E')
-					AND ((tilausrivi.laskutettuaika >= '$apvm' AND tilausrivi.laskutettuaika <= '$lpvm') OR tilausrivi.laskutettuaika = '0000-00-00')
-					AND tilausrivi.tuoteno = '$tuoteno'";
-		$result = mysql_query($query) or pupe_error($query); // TODO: vuosikulutuksen haku pitää tarkistaa
+					AND tilausrivi.tyyppi = 'V'
+					AND tilausrivi.tuoteno = '$tuoteno'
+					AND tilausrivi.laskutettuaika >= DATE_SUB('$nykyinen_loppu', INTERVAL 1 YEAR)
+					AND tilausrivi.laskutettuaika <= '$nykyinen_loppu'";
+		$result = pupe_query($query);
 		$lapsirow = mysql_fetch_array($result);
 
+		# TODO nämä pitää hakea
+		$lapsirow['tilattu'] = $lapsirow['ennpois'] = 0;
+
 		// Haetaan lapsituotteen toimittajatiedot
-		$query = "	SELECT if (tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, 0) toimitusaika,
-					pakkauskoko,
-					toimittaja,
+		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, 0) toimitusaika,
+					tuotteen_toimittajat.pakkauskoko,
+					tuotteen_toimittajat.toimittaja,
 					toimi.nimi,
 					toimi.tunnus
 					FROM tuotteen_toimittajat
-					JOIN toimi ON (tuotteen_toimittajat.yhtio = toimi.yhtio AND tuotteen_toimittajat.toimittaja = toimi.ytunnus)
+					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 					WHERE tuotteen_toimittajat.yhtio = '{$kukarow["yhtio"]}'
-					AND tuoteno = '$tuoteno'
-					LIMIT 1"; // TODO: tarvisiko tätä sortata jotenkin?
-		$result = mysql_query($query) or pupe_error($query);
+					AND tuotteen_toimittajat.tuoteno = '$tuoteno'
+					ORDER BY if(jarjestys = 0, 9999, jarjestys)
+					LIMIT 1";
+		$result = pupe_query($query);
 		$toimittajarow = mysql_fetch_array($result);
-		
+
 		// Isätuotteen myyntiennuste
 		$isanreaalisaldo = $isanvarastosaldo - $isarow['tilattu'] - $isarow['ennpois'];
 		$isanmyyntiennuste = $isarow['EDkpl'] * $budjetti_indeksi - $isanreaalisaldo;
-	
+
 		// Lasketaan lapsituotteen ostosuositus
 		$lapsenreaalisaldo = $lapsenvarastosaldo - $lapsirow['tilattu'] - $lapsirow['ennpois'];
 		$toimitusaika = $toimittajarow['toimitusaika'];
 		$vuosikulutus = $lapsirow['vuosikulutus'];
-		$vuodenpaivat = 365 + date('L', mktime(0,0,0,0,0,$vvl1));
-		$paivakulutus = ($vuosikulutus > 0 ? round($vuosikulutus / $vuodenpaivat) : 0);
-
+		$paivakulutus = round($vuosikulutus / 360);
 		$kulutusennuste = $isanmyyntiennuste * $kerroin - $lapsenreaalisaldo;
 		$maaraennuste = $kulutusennuste + ($paivakulutus * $toimitusaika);
 
@@ -158,7 +145,7 @@
 	}
 
 	// Tehdään ostotilaukset
-	if ($tee == "TEE_OSTOTILAUKSET") {
+	if (isset($tee) and $tee == "TEE_OSTOTILAUKSET") {
 
 		// Kerätään tilattavat tuotteet
 		$tilattavat = "(";
@@ -198,7 +185,7 @@
 			WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 			AND tuotteen_toimittajat.tuoteno in $tilattavat
 			ORDER BY tuotteen_toimittajat.toimittaja";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {
 			$rows = 0;
@@ -294,7 +281,7 @@
 					// TODO: maksuteksti, vienti_kurssi
 
 					$query = $laskuheader.$headervalues;
-					mysql_query($query) or pupe_error($query);
+					pupe_query($query);
 					$otunnus = @mysql_insert_id();
 					$rows++;
 				}
@@ -319,16 +306,16 @@
 				now())";
 
 				$query = $riviheader.$rivivalues;
-				mysql_query($query) or pupe_error($query);
+				pupe_query($query);
 			}
 
 		}
 
 		echo $rows." ".t('ostotilausta muodostettu.');
 	}
-	
+
 	// Tehdään raportti
-	if ($tee == "RAPORTOI") {
+	if (isset($tee) and $tee == "RAPORTOI") {
 
 		$tuote_where       = ""; // tuote-rajauksia
 		$toimittaja_join   = ""; // toimittaja-rajauksia
@@ -366,7 +353,7 @@
 						and tyyppi IN  ('L','G')
 						and var = 'J'
 						and jt $lisavarattu > 0";
-			$vtresult = mysql_query($query) or pupe_error($query);
+			$vtresult = pupe_query($query);
 			$vrow = mysql_fetch_array($vtresult);
 
 			$jt_tuotteet = "''";
@@ -397,7 +384,7 @@
 					$tuote_where
 					GROUP BY tuote.tuoteno
 					ORDER BY toimittaja, tuote.try, tuote.tuoteno";
-		$res = mysql_query($query) or pupe_error($query);
+		$res = pupe_query($query);
 
 		echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
 		echo t("Näytetään ostoraportti aikavälille").": $ppa1.$kka1.$vva1 - $ppl1.$kkl1.$vvl1";
@@ -408,46 +395,53 @@
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<table>";
 
-			echo "<tr>";
-			echo "<th>".t("Tuotenumero")."</th>";
-			echo "<th>".t("Nimitys")."</th>";
-			echo "<th>".t("Kulutusennuste")."</th>";
-			echo "<th>".t("Määräennuste")."</th>";
-			echo "<th>".t("Riitto Pv")."</th>";
-			echo "<th>".t("Reaalisaldo")."</th>";
-			echo "<th>".t("Ostosuositus")."</th>";
-			echo "<th>".t("Ostoerämäärä")."</th>";
-			echo "</tr>";
-
 			$EDtoimittaja = false;
+
 			// loopataan tuotteet läpi
 			while ($row = mysql_fetch_assoc($res)) {
 
 				// Haetaan tuotteen tiedot
-				$tuoterivi = teerivi($row["tuoteno"], $row["isatuoteno"], $row["kerroin"]); // Annetaan funktiolle myös isätuoteno ja kerroin, ettei niitä tarvitse hakea erikseen
+				$tuoterivi = teerivi($row["tuoteno"], $row["isatuoteno"], $row["kerroin"]);
 
 				// Toimittaja vaihtuu
 				if ($tuoterivi['toimittajan_tunnus'] != $EDtoimittaja or $EDtoimittaja === false) {
-					$EDtoimittaja_ytunnus = $tuoterivi['toimittajan_ytunnus'];
-					$EDtoimittaja_nimi = $tuoterivi['toimittajan_nimi'];
-					
+
 					echo "<tr>";
-					echo "<th colspan='2'>$EDtoimittaja_ytunnus / $EDtoimittaja_nimi</th>";
+					echo "<td class='back' colspan='8'><font class='head'><br>{$tuoterivi["toimittajan_ytunnus"]} {$tuoterivi["toimittajan_nimi"]}</font></td>";
+					echo "</tr>";
+
+					echo "<tr>";
+					echo "<th>".t("Tuotenumero")."</th>";
+					echo "<th>".t("Nimitys")."</th>";
+					echo "<th>".t("Kulutusennuste")."</th>";
+					echo "<th>".t("Määräennuste")."</th>";
+					echo "<th>".t("Riitto Pv")."</th>";
+					echo "<th>".t("Reaalisaldo")."</th>";
+					echo "<th>".t("Ostosuositus")."</th>";
+					echo "<th>".t("Ostoerämäärä")."</th>";
 					echo "</tr>";
 				}
 
 				$EDtoimittaja = $tuoterivi['toimittajan_tunnus'];
+				$EDtoimittaja_ytunnus = $tuoterivi['toimittajan_ytunnus'];
+				$EDtoimittaja_nimi = $tuoterivi['toimittajan_nimi'];
 
 				echo "<tr>";
 				echo "<td>{$row["tuoteno"]}</td>";
 				echo "<td>{$row["nimitys"]}</td>";
-				echo "<td>{$tuoterivi["kulutusennuste"]}</td>";
-				echo "<td>{$tuoterivi["maaraennuste"]}</td>";
-				echo "<td>{$tuoterivi["riittopv"]}</td>";
-				echo "<td>{$tuoterivi["reaalisaldo"]}</td>";
-				echo "<td>{$tuoterivi["ostosuositus"]}</td>";
-				if(empty($EDtoimittaja)) echo "<td>{$tuoterivi["ostoeramaara"]}</td>"; // Tuotteella ei ole toimittajaa
-				else echo "<td><input type='text' name='ostettava_tuote[{$row["tuoteno"]}]' value='{$tuoterivi["ostoeramaara"]}'</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["kulutusennuste"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["maaraennuste"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["reaalisaldo"]}</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["ostosuositus"]}</td>";
+
+				// Tuotteella ei ole toimittajaa
+				if (empty($EDtoimittaja)) {
+					echo "<td style='text-align: right;'>{$tuoterivi["ostoeramaara"]}</td>";
+				}
+				else {
+					echo "<td style='text-align: right;'><input size='5' style='text-align: right;' type='text' name='ostettava_tuote[{$row["tuoteno"]}]' value='{$tuoterivi["ostoeramaara"]}'</td>";
+				}
 				echo "</tr>";
 			}
 
@@ -460,8 +454,8 @@
 		}
 	}
 
-	// Näytetään käyttöliittymä	
-	if ($tee == "") {
+	// Näytetään käyttöliittymä
+	if (!isset($tee) or $tee == "") {
 
 		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='RAPORTOI'>";
@@ -518,7 +512,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tuotemerkki != ''
 					ORDER BY tuotemerkki";
-		$sresult = mysql_query($query) or pupe_error($query);
+		$sresult = pupe_query($query);
 
 		echo "<select name='tuotemerkki'>";
 		echo "<option value=''>".t("Näytä kaikki")."</option>";
@@ -537,15 +531,15 @@
 
 		// katotaan onko abc aputaulu rakennettu
 		$query  = "SELECT count(*) from abc_aputaulu where yhtio = '$kukarow[yhtio]' and tyyppi in ('TK','TR','TP')";
-		$abcres = mysql_query($query) or pupe_error($query);
+		$abcres = pupe_query($query);
 		$abcrow = mysql_fetch_array($abcres);
 
 		// jos on niin näytetään tällänen vaihtoehto
 		if ($abcrow[0] > 0) {
 			echo "<tr><th>".t("ABC-luokkarajaus/rajausperuste")."</th><td>";
 
-			$sel = array();
-			$sel[$abcrajaus] = "SELECTED";
+			$sel = array_fill(0, 9, "");
+			$abcrajaus = (isset($abcrajaus)) ? (int) $abcrajaus : 0;
 
 			echo "<select name='abcrajaus'>
 			<option value=''>".t("Ei rajausta")."</option>
@@ -560,7 +554,8 @@
 			<option $sel[8] value='8'>".t("Luokka I-00 ja paremmat")."</option>
 			</select>";
 
-			$sel = array();
+			$sel = array("TK" => "", "TR" => "", "TP" => "");
+			$abcrajaustapa = (isset($abcrajaustapa)) ? $abcrajaustapa : "TK";
 			$sel[$abcrajaustapa] = "SELECTED";
 
 			echo "<select name='abcrajaustapa'>
@@ -571,8 +566,10 @@
 			</td></tr>";
 		}
 
+		$ytunnus = isset($ytunnus) ? trim($ytunnus) : "";
+		$toimittajaid = isset($toimittajaid) ? trim($toimittajaid) : "";
+
 		echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
-		echo "<input type='hidden' name='edytunnus' value='$ytunnus'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 
 		echo "<tr>";

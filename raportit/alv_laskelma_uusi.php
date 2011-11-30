@@ -194,7 +194,7 @@
 		elseif ($ryhma == 'fi318') {
 			// Rakannuspalveluiden ostot
 			$taso = 'fi320';
-		}		
+		}
 		elseif ($ryhma == 'fi314') {
 			// Palveluostot muista EU-maista
 			$taso = 'fi306';
@@ -457,7 +457,7 @@
 							<td class='spec'></td></tr>";
 					$verotot+=$vero;
 				}
-				
+
 				$query = "	SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
 							FROM tili
 							WHERE yhtio = '$kukarow[yhtio]' and alv_taso in ('fi320')";
@@ -496,7 +496,7 @@
 							<td class='spec'></td></tr>";
 					$verotot+=$vero;
 				}
-				
+
 			}
 
 			echo "<tr><td colspan='5' align='right' class='spec'>".t("Verokannat yhteensä").":</td>
@@ -1085,7 +1085,7 @@
 		echo "<table>";
 
 		if (!isset($vv)) $vv = date("Y");
-		if (!isset($kk)) $kk = date("n");
+		if (!isset($kk)) $kk = date("m");
 
 		echo "<tr>";
 		echo "<th>".t("Valitse kausi")."</th>";
@@ -1107,15 +1107,15 @@
 		$sel[$kk] = "SELECTED";
 
 		echo "<select name='kk'>
-				<option $sel[1] value = '1'>01</option>
-				<option $sel[2] value = '2'>02</option>
-				<option $sel[3] value = '3'>03</option>
-				<option $sel[4] value = '4'>04</option>
-				<option $sel[5] value = '5'>05</option>
-				<option $sel[6] value = '6'>06</option>
-				<option $sel[7] value = '7'>07</option>
-				<option $sel[8] value = '8'>08</option>
-				<option $sel[9] value = '9'>09</option>
+				<option $sel[01] value = '01'>01</option>
+				<option $sel[02] value = '02'>02</option>
+				<option $sel[03] value = '03'>03</option>
+				<option $sel[04] value = '04'>04</option>
+				<option $sel[05] value = '05'>05</option>
+				<option $sel[06] value = '06'>06</option>
+				<option $sel[07] value = '07'>07</option>
+				<option $sel[08] value = '08'>08</option>
+				<option $sel[09] value = '09'>09</option>
 				<option $sel[10] value = '10'>10</option>
 				<option $sel[11] value = '11'>11</option>
 				<option $sel[12] value = '12'>12</option>

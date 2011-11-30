@@ -16,6 +16,26 @@
 	if (!isset($itila)) $itila = '';
 	if (!isset($ialatila)) $ialatila = '';
 
+	if (!function_exists("kuka_kayttaja")) {
+		function kuka_kayttaja($keta_haetaan) {
+			global $kukarow, $yhtiorow;
+
+			$query = "	SELECT kuka.nimi
+						FROM kuka
+						WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+						AND kuka.kuka ='$keta_haetaan'";
+			$kukares = pupe_query($query);
+			$row = mysql_fetch_assoc($kukares);
+
+			if ($row["nimi"] !="") {
+				return $row["nimi"];
+			}
+			else {
+				return $keta_haetaan;
+			}
+		}
+	}
+
 	echo "<font class='head'>",t("Myyntilaskuhaku"),"</font><hr>";
 
 	$index = "";
@@ -23,7 +43,7 @@
 
 	echo "<br><form name = 'valinta' action = '' method='post'>";
 
-	$seldr = array_fill_keys(array($tee), " selected") + array('S','VS','N','V','L');
+	$seldr = array_fill_keys(array($tee), " selected") + array('S','VS','N','V','L','LN');
 
 	echo "<table>";
 	echo "<tr>";
@@ -35,6 +55,7 @@
 	echo "<option value = 'V'  {$seldr["V"]}>",t("viitteell‰"),"</option>";
 	echo "<option value = 'L'  {$seldr["L"]}>",t("laskunnumerolla"),"</option>";
 	echo "<option value = 'A'  {$seldr["A"]}>",t("asiakasnumerolla"),"</option>";
+	echo "<option value = 'LN'  {$seldr["LN"]}>",t("Laatijan/myyj‰n nimell‰"),"</option>";
 	echo "</select></td>";
 	echo "<td><input type = 'text' name = 'summa1' size=13> - <input type = 'text' name = 'summa2' size=13></td>";
 	echo "<td class='back'><input type = 'submit' value = '",t("Hae"),"'></td>";
@@ -48,6 +69,41 @@
 
 	if (trim($summa1) == "") {
 		$tee = "";
+	}
+
+	// LN = Etsit‰‰n myyj‰n tai laatijan nimell‰
+	if ($tee == 'LN') {
+		// haetaan vain aktiivisia k‰ytt‰ji‰
+		$query = "	SELECT kuka.myyja, kuka.kuka, if(count(oikeu.tunnus) > 0, 0, 1) aktiivinen, kuka.nimi
+					FROM kuka
+					LEFT JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+					WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+					AND (kuka.kuka like '%$summa1%' or kuka.nimi like '%$summa1%')
+					GROUP BY 1,2
+					having aktiivinen = 0
+					ORDER BY aktiivinen, kuka.nimi";
+		$kukares = pupe_query($query);
+
+		while ($row = mysql_fetch_assoc($kukares)) {
+			if ($row["kuka"] != "") $laatijat .= "'".$row["kuka"]."',";
+			if ($row["myyja"] != 0)	$myyja .= "'".$row["myyja"]."',";
+		}
+
+		$laatijat = substr($laatijat,0, -1);
+		$mmuuttuja = "";
+
+		if ($myyja !="") {
+			$myyja = substr($myyja,0, -1);
+			$mmuuttuja = " or myyja in ($myyja)";
+		}
+
+		if ($laatijat =="") {
+			$laatijat = "'".$summa1."'";
+		}
+
+		$index = " use index (tila_index) ";
+		$ehto = "tila = 'U' and (laatija in ($laatijat) $mmuuttuja)";
+		$jarj = "nimi, tapvm desc";
 	}
 
 	// VS = Etsit‰‰n valuuttasummaa laskulta
@@ -142,7 +198,7 @@
 
 		$query = "	SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
 					summa, valkoodi, ebid, tila, alatila, tunnus,
-					mapvm, saldo_maksettu, ytunnus, liitostunnus
+					mapvm, saldo_maksettu, ytunnus, liitostunnus, laatija
 					FROM lasku {$index}
 					WHERE {$ehto} and yhtio = '{$kukarow['yhtio']}'
 					ORDER BY {$jarj}
@@ -155,7 +211,7 @@
 		}
 		else {
 
-			pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
+			pupe_DataTables(array(array($pupe_DataTables, 9, 9)));
 
 			echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
@@ -169,6 +225,7 @@
 					<th>",t("Valuutta"),"</th>
 					<th>",t("Ebid"),"</th>
 					<th>",t("Tila"),"</th>
+					<th>",t("Laatija"),"</th>
 					</tr>
 					<tr>
 					<td><input type='text' class='search_field' name='search_pvm'></td>
@@ -179,6 +236,7 @@
 					<td><input type='text' class='search_field' name='search_valuutta'></td>
 					<td><input type='text' class='search_field' name='search_ebid'></td>
 					<td><input type='text' class='search_field' name='search_tila'></td>
+					<td><input type='text' class='search_field' name='search_laatija'></td>
 					</tr>
 				</thead>";
 
@@ -223,6 +281,7 @@
 				}
 
 				echo "<td>$maksuviesti</td>";
+				echo "<td>".kuka_kayttaja($trow["laatija"])."</td>";
 				echo "</tr>";
 			}
 

@@ -207,7 +207,7 @@ if (!isset($tee) or $tee == '') {
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila in ('A','L','N','S','C')
 					AND lasku.alatila != 'X'
-					ORDER BY ifnull(a5.jarjestys, 9999), a2.selitetark, lasku.toimaika";
+					ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), a2.selitetark, lasku.toimaika";
 	$tyoresult = pupe_query($tyojonosql);
 
 	if (mysql_num_rows($tyoresult) > 0) {

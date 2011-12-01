@@ -35,6 +35,11 @@
 	if (!isset($submit_button)) $submit_button = '';
 	if (!isset($budj_taulunrivit)) $budj_taulunrivit = array();
 
+	$alkukk = (isset($alkukk) and $alkukk != "") ? (int) $alkukk : "";
+	$alkuvv = (isset($alkuvv) and $alkuvv != "") ? (int) $alkuvv : "";
+	$loppukk = (isset($loppukk) and $loppukk != "") ? (int) $loppukk : "";
+	$loppuvv = (isset($loppuvv) and $loppuvv != "") ? (int) $loppuvv : "";
+
 	if (!isset($liitostunnukset)) $liitostunnukset = '';
 	else $liitostunnukset = urldecode($liitostunnukset);
 
@@ -636,22 +641,15 @@
 
 	if ($toim == "TUOTE") {
 
-		$alkukk = isset($alkukk) ? (int) $alkukk : "";
-		$alkuvv = isset($alkuvv) ? (int) $alkuvv : "";
-		$loppukk = isset($loppukk) ? (int) $loppukk : "";
-		$loppuvv = isset($loppuvv) ? (int) $loppuvv : "";
-
 		// Budjetin aikav‰li
 		// Ei ole relevanttia syˆtt‰‰ p‰iv‰m‰‰r‰‰ p‰iv‰ntarkkuudella kun budjetti on kk tasoa.
 		// Laitetaan hiddeniin arvo 1 niin p‰iv‰m‰‰r‰ checkist‰ p‰‰st‰‰n siististi l‰pi.
 		echo "<tr>";
 		echo "<th>".t("Anna budjetin aikav‰li (kk-vuosi)")."</th>";
 		echo "	<td>
-				<input type='hidden' name='alkupp' value='1' size='1'>
 				<input type='text' name='alkukk' value='$alkukk' size='3'>-
 				<input type='text' name='alkuvv' value='$alkuvv' size='4'>
 				&nbsp;
-				<input type='hidden' name='loppupp' value='1' size='1'>
 				<input type='text' name='loppukk' value='$loppukk' size='3'>-
 				<input type='text' name='loppuvv' value='$loppuvv' size='4'>
 				</td>";
@@ -664,7 +662,7 @@
 
 		if (!isset($budj_kohtelu)) {
 			$bkcheck = "";
-			$bkcheckb = "";			
+			$bkcheckb = "";
 		}
 		elseif ($budj_kohtelu == "isoi") {
 			$bkcheck = "SELECTED";
@@ -680,9 +678,9 @@
 		}
 
 		echo "<select name='budj_kohtelu' onchange='submit()';>";
-		echo "<option value = 'euro'>".t("Eurom‰‰r‰inen")."</option>";
-		echo "<option value = 'isoi' $bkcheck>".t("Indeksi kohtelu")."</option>";
-		echo "<option value = 'maara' $bkcheckb>".t("M‰‰r‰ kohtelu")."</option>";
+		echo "<option value = 'euro'>".t("Budjetti syˆtet‰‰n euroilla")."</option>";
+		echo "<option value = 'isoi' $bkcheck>".t("Budjetti syˆtet‰‰n indekseill‰")."</option>";
+		echo "<option value = 'maara' $bkcheckb>".t("Budjetti syˆtet‰‰n m‰‰rill‰")."</option>";
 		echo "</td>";
 		echo "</tr>";
 
@@ -727,9 +725,9 @@
 	}
 	else {
 		if ($toim == "TUOTE") {
-			
+
 			$tuoteno = isset($tuoteno) ? trim($tuoteno) : "";
-			
+
 			echo "<tr><th>",t("Valitse tuote"),"</th>";
 			echo "<td><input type='text' name='tuoteno' value='$tuoteno' /></td></tr>";
 
@@ -832,10 +830,26 @@
 	}
 
 	if (trim($tkausi) != '') {
-		// jos ollaan k‰sinsyˆtetty kausi, niin se otetaan ensin, mik‰li se on v‰‰rin niin otetaan oletus tilikaudesta
-		if (checkdate($alkukk, $alkupp, $alkuvv) and checkdate($loppukk, $loppupp, $loppuvv)) {
-			$tilikaudetrow["tilikausi_alku"]	= $alkuvv.'-'.sprintf('%02.2s',$alkukk).'-'.sprintf('%02.2s',$alkupp);
-			$tilikaudetrow["tilikausi_loppu"]	= $loppuvv.'-'.sprintf('%02.2s',$loppukk).'-'.sprintf('%02.2s',$loppupp);
+
+		$alkukk = (int) $alkukk;
+		$alkuvv = (int) $alkuvv;
+
+		$loppukk = (int) $loppukk;
+		$loppuvv = (int) $loppuvv;
+
+		if ($alkukk != 0 or $alkuvv != 0 or $loppukk != 0 or $loppuvv != 0) {
+			if (!checkdate($alkukk, 1, $alkuvv) or !checkdate($loppukk, 1, $loppuvv)) {
+				echo "<br><font class='error'>".t("Virheellinen kausi")."!</font><br>";
+				exit;
+			}
+
+			$tilikaudetrow["tilikausi_alku"]  = date("Y-m-d", mktime(0, 0, 0, $alkukk, 1, $alkuvv));
+			$tilikaudetrow["tilikausi_loppu"] = date("Y-m-d", mktime(0, 0, 0, $loppukk+1, 0, $loppuvv));
+
+			if ($tilikaudetrow["tilikausi_alku"] > $tilikaudetrow["tilikausi_loppu"]) {
+				echo "<br><font class='error'>".t("Virheellinen kausi")."!</font><br>";
+				exit;
+			}
 		}
 		else {
 			$query = "	SELECT *
@@ -843,7 +857,14 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$tkausi'";
 			$vresult = pupe_query($query);
-			if (mysql_num_rows($vresult) == 1) $tilikaudetrow = mysql_fetch_array($vresult);
+
+			if (mysql_num_rows($vresult) == 1) {
+				$tilikaudetrow = mysql_fetch_array($vresult);
+			}
+			else {
+				echo "<br><font class='error'>".t("Virheellinen kausi")."!</font><br>";
+				exit;
+			}
 		}
 	}
 
@@ -855,7 +876,31 @@
 		$lisa .= " and asiakas.tunnus = $asiakasid ";
 	}
 
-	if ($submit_button != "" and ($tuoteno != "" or $asiakasid > 0 or $toimittajaid > 0 or $lisa != "" or $lisa_parametri != "" or ($toim == "TUOTE" and $lisa_dynaaminen["tuote"] != "") or ($toim == "ASIAKAS" and $lisa_dynaaminen["asiakas"]) or $liitostunnukset != "") and is_array($tilikaudetrow)) {
+	// Virhetarkistuksia jos ollaan submitattu
+	if ($submit_button != "") {
+		
+		if ($toim == "TUOTE" and $tuoteno == "" and $lisa_dynaaminen["tuote"] == "" and $lisa == "" and $lisa_parametri == "" and $liitostunnukset == "") {
+			echo "<br><font class='error'>".t("On valittava tuote tai tuotekategoria")."!</font>";
+			$submit_button = "";
+		}
+
+		if ($toim == "ASIAKAS" and $asiakasid == "" and $lisa_dynaaminen["asiakas"] == "" and $lisa == "" and $lisa_parametri == "" and $liitostunnukset == "") {
+			echo "<br><font class='error'>".t("On valittava asiakas tai asiakaskategoria")."!";
+			$submit_button = "";
+		}
+		
+		if ($toim == "TOIMITTAJA" and $toimittajaid == "" and $liitostunnukset == "") {
+			echo "<br><font class='error'>".t("On valittava toimittaja")."!</font>";
+			$submit_button = "";
+		}
+
+		if (!is_array($tilikaudetrow)) {
+			echo "<br><font class='error'>".t("Kausi puuttuu")."!</font>";
+			$submit_button = "";			
+		}
+	}
+
+	if ($submit_button != "") {
 
 		if (!@include('Spreadsheet/Excel/Writer.php')) {
 			echo "<font class='error'>",t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta."),"</font><br>";
@@ -1322,7 +1367,7 @@
 		echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr>";
 		echo "</table></form><br />";
 	}
-	else {
+	else {		
 		echo "</form>";
 	}
 

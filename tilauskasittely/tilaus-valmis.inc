@@ -1034,7 +1034,7 @@ else {
 								break;
 							case 'sisviesti2':
 								if ($row['omalle_tilaukselle'] != '') {
-									$values .= ", '{$laskurow['sisviesti2']}-{$sisviesti2_numerointi}'";
+									$values .= ", '{$sisviesti2_numerointi}-{$laskurow['sisviesti2']}'";
 									$sisviesti2_numerointi++;
 								}
 								else {
@@ -1355,41 +1355,6 @@ else {
 
 						mail($yhtiorow['jt_email'], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content_body, $header, "-f $yhtiorow[postittaja_email]");
 						echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
-					}
-				}
-			} #end if jt_email
-
-			// Örum-keissi
-			if ($kukarow['yhtio'] == 'artr') {
-				// katsotaan onko vielä JT-tilauksia Unikko-järjestelmään
-				foreach ($tilausnumerot as $til_nro_x) {
-
-					$query = "	SELECT lasku.*, tilausrivi.hyllyalue, tilausrivi.hyllynro
-								FROM lasku
-								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND
-													tilausrivi.otunnus = lasku.tunnus AND
-													tilausrivi.var = 'J' AND
-													tilausrivi.tyyppi = 'L' AND
-													tilausrivi.jt+tilausrivi.varattu > 0)
-								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tunnus = '{$til_nro_x}'
-								AND lasku.tilaustyyppi != '7'";
-					$jt_chk_res = pupe_query($query);
-
-					if (mysql_num_rows($jt_chk_res) > 0) {
-						$jt_chk_row = mysql_fetch_assoc($jt_chk_res);
-
-						// Mihin varastoon
-						$varasto = kuuluukovarastoon($jt_chk_row["hyllyalue"], $jt_chk_row["hyllynro"]);
-
-						$query = "	SELECT ulkoinen_jarjestelma
-									FROM varastopaikat
-									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND tunnus = '{$varasto}'";
-						$ulkoinen_jarjestelma_res = pupe_query($query);
-						$varaston_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
-
-						$varasto_chk_array[$til_nro_x] = $varaston_row['ulkoinen_jarjestelma'];
 					}
 				}
 			}

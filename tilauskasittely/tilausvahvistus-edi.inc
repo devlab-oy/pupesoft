@@ -20,7 +20,7 @@ if (!file_exists($tilvahvfilenimi)) {
 					WHERE yhtio		= '$kukarow[yhtio]'
 					and vanhatunnus = '$laskurow[vanhatunnus]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -38,7 +38,7 @@ if (!file_exists($tilvahvfilenimi)) {
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and tunnusnippu = '$laskurow[tunnusnippu]'
 					and tila IN ('N','L','A')";
-		$abures = mysql_query($query) or pupe_error($query);
+		$abures = pupe_query($query);
 		$aburow = mysql_fetch_assoc($abures);
 
 		if ($aburow["tunnukset"] != "") {
@@ -76,17 +76,18 @@ if (!file_exists($tilvahvfilenimi)) {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				$tyyppilisa
 				and $wherelisa
+				and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
 				ORDER BY tilausrivi.tunnus";
-	$tilvahresult = mysql_query($query) or pupe_error($query);
+	$tilvahresult = pupe_query($query);
 
 	//Myyjän email
 	$query = "SELECT * FROM kuka WHERE tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
-	$kukaresult = mysql_query($query) or pupe_error($query);
+	$kukaresult = pupe_query($query);
 	$myyjarow = mysql_fetch_array($kukaresult);
 
 	//Maskuehto
 	$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-	$xresult = mysql_query($query) or pupe_error($query);
+	$xresult = pupe_query($query);
 
 	if (mysql_num_rows($xresult) == 0) {
 		echo "TILAUSVAHVISTUS: Maksuehto on kateissa!<br><br>";

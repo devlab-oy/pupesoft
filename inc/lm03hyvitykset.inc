@@ -52,17 +52,25 @@
 			$nettolaskujen_tunnukset = substr($nettolaskujen_tunnukset, 0, -1);
 
 			// Haetaan netotettavat laskut, tehd‰‰n nettotietue vai tarvittavista laskuista
-			$query = "	SELECT maksu_tili,
-				 		left(concat_ws(' ', lasku.nimi, nimitark),30) nimi,
-				 		left(concat_ws(' ', osoite, osoitetark),20) osoite,
-				 		left(concat_ws(' ', postino, postitp),20) postitp,
-				 		summa, lasku.valkoodi, viite, viesti,
-						tilinumero, lasku.tunnus, sisviesti2,
-						yriti.tilino ytilino, alatila, kasumma,
+			$query = "	SELECT lasku.maksu_tili,
+				 		left(concat_ws(' ', lasku.nimi, lasku.nimitark),30) nimi,
+				 		left(concat_ws(' ', lasku.osoite, lasku.osoitetark),20) osoite,
+				 		left(concat_ws(' ', lasku.postino, lasku.postitp),20) postitp,
+				 		lasku.summa,
+						lasku.valkoodi,
+						lasku.viite,
+						lasku.viesti,
+						lasku.laskunro,
+						lasku.tilinumero,
+						lasku.tunnus,
+						lasku.sisviesti2,
+						yriti.tilino ytilino,
+						lasku.alatila,
+						lasku.kasumma,
 						lasku.tunnus laskutunnus,
-						if (lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma
+						if (lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) maksettavasumma
 			  			FROM lasku
-						JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = maksu_tili)
+						JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
 			  			WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tunnus in ($nettolaskujen_tunnukset)
 			  			ORDER BY if(summa < 0, 1, 2), summa desc";
@@ -118,9 +126,13 @@
 				$laskutilno		= $laskurow["tilinumero"];
 				$laskusis1		= $laskurow["tunnus"];
 				$laskusis2		= $laskurow["sisviesti2"];
-			 	$laskuviesti	= $laskurow["viesti"];
 				$laskuvaluutta	= 1;
 				$laskutyyppi	= 5; // Laskuviesti
+				$laskuviesti	= $laskurow['viesti'];
+
+				if ($laskurow['laskunro'] != 0 and $laskurow['laskunro'] != $laskurow['viesti']) {
+	                $laskuviesti = (trim($laskuviesti) == "") ? $laskurow['laskunro'] : $laskuviesti." ".$laskurow['laskunro'];
+	            }
 
 				// Laskuviesti:
 				// 1 = viitenumero

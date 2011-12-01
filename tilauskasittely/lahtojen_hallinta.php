@@ -198,6 +198,13 @@
 							$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').hide();
 							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').hide();
 
+							$('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]')
+								.parent()
+								.parent()
+								.hide()
+								.next()
+								.hide();
+
 							$('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show();
 						}
 					});
@@ -217,12 +224,14 @@
 
 								$('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').show();
 
-								$('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]')
-									.parent()
-									.parent()
-									.show()
-									.next()
-									.show();
+								// $('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]')
+								// 	.parent()
+								// 	.parent()
+								// 	.show()
+								// 	.next()
+								// 	.show();
+
+								$('.toggleable_row_child_div_order, .toggleable_row_child_div_sscc').parent().parent().hide();
 
 								$('.filter_row_by_text:visible').attr('disabled', false).each(function() {
 									$(this).val() != '' ? $(this).trigger('keyup') : '';
@@ -268,8 +277,11 @@
 								if ($('.toggleable_row_child_div_order:visible, .toggleable_row_child_div_sscc:visible').length == 0) {
 
 									$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
-									$('div[id!=\"toggleable_row_order_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_order\"]').parent().parent().show();
-									$('div[id!=\"toggleable_row_sscc_'+id[0]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_sscc\"]').parent().parent().show();
+
+									// $('div[id!=\"toggleable_row_order_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_order\"]').parent().parent().show();
+									// $('div[id!=\"toggleable_row_sscc_'+id[0]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_sscc\"]').parent().parent().show();
+
+									$('.toggleable_row_child_div_order, .toggleable_row_child_div_sscc').parent().parent().hide();
 
 									$('.filter_row_by_text:visible').attr('disabled', false).each(function() {
 										$(this).val() != '' ? $(this).trigger('keyup') : '';

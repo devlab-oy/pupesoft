@@ -49,7 +49,7 @@
 		// Haetaan is‰tuotteiden myynti
 		$query = "	SELECT
 					sum(if(tilausrivi.tyyppi = 'O' AND laskutettuaika >= '$nykyinen_alku' AND laskutettuaika <= '$nykyinen_loppu', tilausrivi.varattu, 0)) tilattu,
-					sum(if((tilausrivi.tyyppi = 'L' OR tilausrivi.tyyppi = 'V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
+					sum(if( tilausrivi.tyyppi in ('L','V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
 					sum(if(tilausrivi.tyyppi = 'L' AND laskutettuaika >= '$edellinen_alku' AND laskutettuaika <= '$edellinen_loppu', kpl+tilkpl, 0)) EDkpl
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
@@ -78,7 +78,9 @@
 		$lapsenvarastosaldo = $varrow['saldo'];
 
 		// Haetaan lapsituotteen vuosikulutus
-		$query = "	SELECT sum(tilausrivi.kpl) vuosikulutus
+		$query = "	SELECT sum(if(tilausrivi.tyyppi = 'V', tilausrivi.kpl, 0)) vuosikulutus,
+					sum(if(tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)) tilattu,
+					sum(if(tilausrivi.tyyppi in ('L','V') AND tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.tyyppi = 'V'
@@ -87,9 +89,6 @@
 					AND tilausrivi.laskutettuaika <= '$nykyinen_loppu'";
 		$result = pupe_query($query);
 		$lapsirow = mysql_fetch_array($result);
-
-		# TODO n‰m‰ pit‰‰ hakea
-		$lapsirow['tilattu'] = $lapsirow['ennpois'] = 0;
 
 		// Haetaan lapsituotteen toimittajatiedot
 		$query = "	SELECT if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, 0) toimitusaika,
@@ -270,7 +269,7 @@
 					'$kukarow[kuka]',
 					now(),
 					'O',
-					'TOP',
+					'',
 					'$kukarow[oletus_toimituehto]',
 					'$tilausrow[tunnus]',
 					'$tilausrow[ytunnus]',
@@ -345,6 +344,10 @@
 		}
 
 		if ($abcrajaus != "") {
+			// TODO: n‰it‰ kahta ei ole setattu ainakaan t‰ss‰ tiedostossa, voiko koko muuttujat poistaa?
+			if(!isset($lisaa)) $lisaa = null;
+			if(!isset($lisavarattu)) $lisavarattu = null;
+		
 			// katotaan JT:ss‰ olevat tuotteet ABC-analyysi‰ varten, koska ne pit‰‰ includata aina!
 			$query = "	SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
 						FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)

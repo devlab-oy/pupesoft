@@ -39,6 +39,7 @@
 	$alkuvv = (isset($alkuvv) and $alkuvv != "") ? (int) $alkuvv : "";
 	$loppukk = (isset($loppukk) and $loppukk != "") ? (int) $loppukk : "";
 	$loppuvv = (isset($loppuvv) and $loppuvv != "") ? (int) $loppuvv : "";
+	$summabudjetti = isset($summabudjetti) ? trim($summabudjetti) : "";
 
 	if (!isset($liitostunnukset)) $liitostunnukset = '';
 	else $liitostunnukset = urldecode($liitostunnukset);
@@ -46,31 +47,183 @@
 	$maxrivimaara = 1000;
 
 	// Tämä funkkari palauttaa syötetyn tuotteen sen kuukauden myynnin arvon ja kpl-määrän
-	if (!function_exists("tuotteenmyynti")) {
-		function tuotteenmyynti($tuoteno, $alkupvm) {
-			// Tarvitaan vain tuoteno ja kuukauden ensimmäinen päivä
-			global $kukarow, $toim;
+	function tuotteenmyynti($tuoteno, $alkupvm) {
+		// Tarvitaan vain tuoteno ja kuukauden ensimmäinen päivä
+		global $kukarow, $toim;
 
-			$query = " 	SELECT round(sum(if(tyyppi='L', rivihinta, 0)),2) summa,
-						round(sum(kpl),0) maara
-						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-						WHERE yhtio	= '{$kukarow["yhtio"]}'
-						AND tyyppi in ('L','V')
-						AND tuoteno	= '{$tuoteno}'
-						AND laskutettuaika >= '{$alkupvm}'
-						AND laskutettuaika <= last_day('{$alkupvm}')";
-			$result = pupe_query($query);
-			$rivi = mysql_fetch_assoc($result);
+		$query = " 	SELECT round(sum(if(tyyppi='L', rivihinta, 0)),2) summa,
+					round(sum(kpl),0) maara
+					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+					WHERE yhtio	= '{$kukarow["yhtio"]}'
+					AND tyyppi in ('L','V')
+					AND tuoteno	= '{$tuoteno}'
+					AND laskutettuaika >= '{$alkupvm}'
+					AND laskutettuaika <= last_day('{$alkupvm}')";
+		$result = pupe_query($query);
+		$rivi = mysql_fetch_assoc($result);
 
-			if ($rivi) {
-				$palauta = array($rivi["summa"], $rivi["maara"]);
+		if ($rivi) {
+			$palauta = array($rivi["summa"], $rivi["maara"]);
+		}
+		else {
+			$palauta = array(0.0, 0.0);
+		}
+
+		return $palauta;
+	}
+
+	// funkkarin $org_sar passataan alkuperäiset sarakkeet, jota taas käytetään "ohituksessa"
+	function piirra_budj_rivi ($row, $tryrow = "", $ohitus = "", $org_sar = "") {
+		global $kukarow, $toim, $worksheet, $excelrivi, $budj_taulu, $rajataulu, $budj_taulunrivit, $xx, $budj_sarak, $sarakkeet, $rivimaara, $maxrivimaara, $grouppaus, $haen, $passaan, $budj_kohtelu;
+
+		$excelsarake = 0;
+
+		$worksheet->write($excelrivi, $excelsarake, $row[$budj_sarak]);
+		$excelsarake++;
+
+		if ($toim == "ASIAKAS" or $toim == "TOIMITTAJA") {
+			$worksheet->writeString($excelrivi, $excelsarake, $row['ytunnus']);
+			$excelsarake++;
+		}
+
+		if ($toim == "ASIAKAS") {
+			$worksheet->writeString($excelrivi, $excelsarake, $row['asiakasnro']);
+			$excelsarake++;
+		}
+
+		if ($toim == "TUOTE") {
+			$worksheet->writeString($excelrivi, $excelsarake, $row['nimitys']);
+			$excelsarake++;
+
+			if ($grouppaus != "") {
+				if ($rivimaara < $maxrivimaara) echo "<tr><td>$row[selitetark]</td>";
 			}
 			else {
-				$palauta = array(0.0, 0.0);
+				if ($rivimaara < $maxrivimaara) echo "<tr><td>$row[tuoteno] $row[nimitys]</td>";
+			}
+		}
+		elseif ($toim == "ASIAKAS" or $toim == "TOIMITTAJA") {
+			$worksheet->writeString($excelrivi, $excelsarake, $row['nimi'].' '.$row['nimitark']);
+			$excelsarake++;
+			if ($rivimaara < $maxrivimaara) echo "<tr><td>$row[ytunnus] $row[asiakasnro]<br>$row[nimi] $row[nimitark]<br>$row[toim_nimi] $row[toim_nimitark]</td>";
+		}
+
+		if (is_array($tryrow)) {
+			if ($rivimaara < $maxrivimaara) echo "<td>$tryrow[selite] $tryrow[selitetark]</td>";
+
+			$worksheet->write($excelrivi, $excelsarake, $tryrow["selite"]);
+			$excelsarake++;
+
+			$try = $tryrow["selite"];
+			$try_ind = $try;
+		}
+		else {
+			$try = "";
+			$try_ind = 0;
+		}
+
+		if ($ohitus != "") {
+			$sarakkeet = 1;
+		}
+
+		for ($k = 0; $k < $sarakkeet; $k++) {
+			$ik = $rajataulu[$k];
+
+			if (isset($budj_taulunrivit[$row[$budj_sarak]][$ik][$try_ind])) {
+				$nro = (float) trim($budj_taulunrivit[$row[$budj_sarak]][$ik][$try_ind]);
+			}
+			else {
+				$query = "	SELECT *
+							FROM $budj_taulu
+							WHERE yhtio			= '$kukarow[yhtio]'
+							and kausi		 	= '$ik'
+							and $budj_sarak		= '$row[$budj_sarak]'
+							and dyna_puu_tunnus	= ''
+							and osasto			= ''
+							and try				= ''";
+				$xresult = pupe_query($query);
+				$nro = '';
+
+				if (mysql_num_rows($xresult) == 1) {
+					$brow = mysql_fetch_assoc($xresult);
+					$nro = $brow['summa'];
+
+					// normaalisti näytetään summaa, mutta tuotteella, mikäli käsitellään määrää niin näytetään määrä tai indeksissä indeksi
+					if ($budj_kohtelu == "maara" and $toim == "TUOTE") {
+						$nro = $brow['maara'];
+					}
+					if ($budj_kohtelu == "isoi" and $toim == "TUOTE") {
+						$nro = $brow['indeksi'];
+					}
+				}
 			}
 
-			return $palauta;
+			if ($rivimaara < $maxrivimaara) echo "<td>";
+
+			if (is_array($tryrow)) {
+				if ($rivimaara < $maxrivimaara) echo "<input type='text' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$tryrow["selite"]}]' value='{$nro}' size='8'></td>";
+			}
+			elseif ($ohitus != "") {
+				// mikäli muutat "poikkeus" tai "poikkeus_haku" nimityksiä tai arvoja tai lisäät haaroja, niin muuta/lisää ne myös kohtaan riville 258
+				// jossa käsitellään ne arrayn luonnissa
+				// ÄLÄ MUUTA "<input type='text' class = '{$row[$budj_sarak]}'"
+				// Mikäli teet muutoksia niin muuta myös jqueryyn riville noin 17
+
+				if ($grouppaus != "") {
+					if ($haen == "try" and $passaan == "yksi"){
+						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
+						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
+						echo "<input type='hidden' name = 'poikkeus_haku' value='try'>";
+					}
+					elseif ($haen == "osasto" and $passaan == "yksi") {
+						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["osasto"]}][{$ik}][]' value='{$nro}' size='8'>";
+						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
+						echo "<input type='hidden' name = 'poikkeus_haku' value='osasto'>";
+					}
+					elseif ($haen == "try" and $passaan == "kaksi") {
+						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
+						echo "<input type='hidden' name = 'poikkeus' value='totta'>";
+						echo "<input type='hidden' name = 'poikkeus_haku' value='kummatkin'>";
+					}
+				}
+				else {
+					echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
+				}
+
+				for ($a = 1; $a < $org_sar; $a++) {
+					$ik = $rajataulu[$a];
+					if ($grouppaus != "") {
+						if ($haen == "try" and $passaan == "yksi"){
+							echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
+						}
+						elseif ($haen == "osasto" and $passaan == "yksi") {
+							echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row["osasto"]}][{$ik}][]' value='{$nro}' size='8'>";
+						}
+						elseif ($haen == "try" and $passaan == "kaksi") {
+							echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
+						}
+					}
+					else {
+						echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
+					}
+				}
+
+				echo "</td>";
+			}
+			else {
+				if ($rivimaara < $maxrivimaara) echo "<input type='text' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
+			}
+
+			if ($rivimaara < $maxrivimaara) echo "</td>";
+
+			$worksheet->write($excelrivi, $excelsarake, $nro);
+			$excelsarake++;
 		}
+
+		if ($rivimaara < $maxrivimaara) echo "</tr>";
+
+		$xx++;
+		$excelrivi++;
 	}
 
 	if (isset($vaihdaasiakas)) {
@@ -99,6 +252,7 @@
 		$budj_sarak = "asiakkaan_tunnus";
 	}
 	else {
+		echo "<font class='error'>Anna ohjelmalle alanimi: TUOTE, TOIMITTAJA tai ASIAKAS.</font>";
 		exit;
 	}
 
@@ -231,12 +385,6 @@
 
 				$alkaakk	= substr($tilikausirivi["tilikausi_alku"],0,4).substr($tilikausirivi["tilikausi_alku"],5,2);
 				$loppuukk	= substr($tilikausirivi["tilikausi_alku"],0,4).substr($tilikausirivi["tilikausi_loppu"],5,2);
-
-				$sql = "SELECT PERIOD_DIFF('{$loppuukk}','{$alkaakk}')+1 as jakaja";
-				$result = pupe_query($sql);
-				$rivi = mysql_fetch_assoc($result);
-
-				$jakaja = $rivi["jakaja"];
 			}
 			else {
 				// jos ollaan syötetty käsin kausi
@@ -245,13 +393,13 @@
 
 				$alkaakk	= $alkuvv.$alkukk;
 				$loppuukk	= $loppuvv.$loppukk;
-
-				$sql = "SELECT PERIOD_DIFF('{$loppuukk}','{$alkaakk}')+1 as jakaja";
-				$result = pupe_query($sql);
-				$rivi = mysql_fetch_assoc($result);
-
-				$jakaja = $rivi["jakaja"];
 			}
+			
+			$sql = "SELECT PERIOD_DIFF('{$loppuukk}','{$alkaakk}')+1 as jakaja";
+			$result = pupe_query($sql);
+			$rivi = mysql_fetch_assoc($result);
+
+			$jakaja = $rivi["jakaja"];
 		}
 
 		// muuttuja "poikkeus" tulee aina kun ollaan valittu 'Anna Kokonaisbudjetti Osastolle Tai Tuoteryhmälle'
@@ -322,13 +470,15 @@
 		$tuotteiden_lukumaara = count($luvut);
 
 		foreach ($luvut as $liitostunnus => $rivi) {
+
 			foreach ($rivi as $kausi => $solut) {
+
 				foreach ($solut as $try => $solu) {
 
-					$solu = str_replace(",", ".", $solu);
+					$solu = str_replace(",", ".", trim($solu));
 					if ($try == 0) $try = "";
 
-					if ($solu == '!' or $solu = (float) $solu or $summabudjetti == "on") {
+					if ($solu == '!' or is_float($solu) or $summabudjetti == "on") {
 
 						if ($solu == '!') $solu = 0;
 
@@ -358,7 +508,6 @@
 								// Jokainen kombinaatio pitää laittaa erikseen, tai tulee virhe-ilmoitus.
 								// Tämä on tärkeä tehdä näin, niin voidaan ylläpitää tulevaisuudessa erilaisia kombinaatioita paremmin.
 								// Jos teet tähän muutoksia niin tee ne myös insert-puolelle.
-
 
 								if ($budj_kohtelu == "euro" and $budj_taso == "summataso" and $summabudjetti == "on") {
 									$jaettava = $solu;
@@ -1050,7 +1199,7 @@
 
 		echo "<br />";
 
-		if ($tuoteryhmittain != "") {
+		if (isset($tuoteryhmittain) and $tuoteryhmittain != "") {
 			// Haetaan tuoteryhmät
 			$res = t_avainsana("TRY");
 			$rivimaara = mysql_num_rows($res)*mysql_num_rows($result);
@@ -1086,7 +1235,7 @@
 			if ($rivimaara < $maxrivimaara) echo "<tr><th>",t("Asiakas"),"</th>";
 		}
 
-		if ($tuoteryhmittain != "") {
+		if (isset($tuoteryhmittain) and $tuoteryhmittain != "") {
 			if ($rivimaara < $maxrivimaara) echo "<th>",t("Tuoteryhmä"),"</th>";
 
 			$worksheet->write($excelrivi, $excelsarake, t("Tuoteryhmä"), $format_bold);
@@ -1146,161 +1295,7 @@
 		// tätä tarvitaan ohituksessa että menee oikein.
 		$ohituksen_alkuperaiset_sarakkeet = $sarakkeet;
 
-		// funkkarin $org_sar passataan alkuperäiset sarakkeet, jota taas käytetään "ohituksessa"
-		function piirra_budj_rivi ($row, $tryrow = "", $ohitus = "", $org_sar = "") {
-			global $kukarow, $toim, $worksheet, $excelrivi, $budj_taulu, $rajataulu, $budj_taulunrivit, $xx, $budj_sarak, $sarakkeet, $rivimaara, $maxrivimaara, $grouppaus, $haen, $passaan, $budj_kohtelu;
-
-			$excelsarake = 0;
-
-			$worksheet->write($excelrivi, $excelsarake, $row[$budj_sarak]);
-			$excelsarake++;
-
-			if ($toim == "ASIAKAS" or $toim == "TOIMITTAJA") {
-				$worksheet->writeString($excelrivi, $excelsarake, $row['ytunnus']);
-				$excelsarake++;
-			}
-
-			if ($toim == "ASIAKAS") {
-				$worksheet->writeString($excelrivi, $excelsarake, $row['asiakasnro']);
-				$excelsarake++;
-			}
-
-			if ($toim == "TUOTE") {
-				$worksheet->writeString($excelrivi, $excelsarake, $row['nimitys']);
-				$excelsarake++;
-
-				if ($grouppaus != "") {
-					if ($rivimaara < $maxrivimaara) echo "<tr><td>$row[selitetark]</td>";
-				}
-				else {
-					if ($rivimaara < $maxrivimaara) echo "<tr><td>$row[tuoteno] $row[nimitys]</td>";
-				}
-			}
-			elseif ($toim == "ASIAKAS" or $toim == "TOIMITTAJA") {
-				$worksheet->writeString($excelrivi, $excelsarake, $row['nimi'].' '.$row['nimitark']);
-				$excelsarake++;
-				if ($rivimaara < $maxrivimaara) echo "<tr><td>$row[ytunnus] $row[asiakasnro]<br>$row[nimi] $row[nimitark]<br>$row[toim_nimi] $row[toim_nimitark]</td>";
-			}
-
-			if (is_array($tryrow)) {
-				if ($rivimaara < $maxrivimaara) echo "<td>$tryrow[selite] $tryrow[selitetark]</td>";
-
-				$worksheet->write($excelrivi, $excelsarake, $tryrow["selite"]);
-				$excelsarake++;
-
-				$try = $tryrow["selite"];
-				$try_ind = $try;
-			}
-			else {
-				$try = "";
-				$try_ind = 0;
-			}
-
-			if ($ohitus != "") {
-				$sarakkeet = 1;
-			}
-
-			for ($k = 0; $k < $sarakkeet; $k++) {
-				$ik = $rajataulu[$k];
-
-				if (isset($budj_taulunrivit[$row[$budj_sarak]][$ik][$try_ind])) {
-					$nro = (float) trim($budj_taulunrivit[$row[$budj_sarak]][$ik][$try_ind]);
-				}
-				else {
-					$query = "	SELECT *
-								FROM $budj_taulu
-								WHERE yhtio			= '$kukarow[yhtio]'
-								and kausi		 	= '$ik'
-								and $budj_sarak		= '$row[$budj_sarak]'
-								and dyna_puu_tunnus	= ''
-								and osasto			= ''
-								and try				= '$try'";
-					$xresult = pupe_query($query);
-					$nro = '';
-
-					if (mysql_num_rows($xresult) == 1) {
-						$brow = mysql_fetch_assoc($xresult);
-						$nro = $brow['summa'];
-
-						// normaalisti näytetään summaa, mutta tuotteella, mikäli käsitellään määrää niin näytetään määrä tai indeksissä indeksi
-						if ($budj_kohtelu == "maara" and $toim == "TUOTE") {
-							$nro = $brow['maara'];
-						}
-						if ($budj_kohtelu == "isoi" and $toim == "TUOTE") {
-							$nro = $brow['indeksi'];
-						}
-					}
-				}
-
-				if ($rivimaara < $maxrivimaara) echo "<td>";
-
-				if (is_array($tryrow)) {
-					if ($rivimaara < $maxrivimaara) echo "<input type='text' name = 'luvut[{$row[$budj_sarak]}][{$ik}][{$tryrow["selite"]}]' value='{$nro}' size='8'></td>";
-				}
-				elseif ($ohitus != "") {
-					// mikäli muutat "poikkeus" tai "poikkeus_haku" nimityksiä tai arvoja tai lisäät haaroja, niin muuta/lisää ne myös kohtaan riville 258
-					// jossa käsitellään ne arrayn luonnissa
-					// ÄLÄ MUUTA "<input type='text' class = '{$row[$budj_sarak]}'"
-					// Mikäli teet muutoksia niin muuta myös jqueryyn riville noin 17
-
-					if ($grouppaus != "") {
-						if ($haen == "try" and $passaan == "yksi"){
-							echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
-							echo "<input type='hidden' name = 'poikkeus' value='totta'>";
-							echo "<input type='hidden' name = 'poikkeus_haku' value='try'>";
-						}
-						elseif ($haen == "osasto" and $passaan == "yksi") {
-							echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["osasto"]}][{$ik}][]' value='{$nro}' size='8'>";
-							echo "<input type='hidden' name = 'poikkeus' value='totta'>";
-							echo "<input type='hidden' name = 'poikkeus_haku' value='osasto'>";
-						}
-						elseif ($haen == "try" and $passaan == "kaksi") {
-							echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
-							echo "<input type='hidden' name = 'poikkeus' value='totta'>";
-							echo "<input type='hidden' name = 'poikkeus_haku' value='kummatkin'>";
-						}
-					}
-					else {
-						echo "<input type='text' class = '{$row[$budj_sarak]}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
-					}
-
-					for ($a = 1; $a < $org_sar; $a++) {
-						$ik = $rajataulu[$a];
-						if ($grouppaus != "") {
-							if ($haen == "try" and $passaan == "yksi"){
-								echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
-							}
-							elseif ($haen == "osasto" and $passaan == "yksi") {
-								echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row["osasto"]}][{$ik}][]' value='{$nro}' size='8'>";
-							}
-							elseif ($haen == "try" and $passaan == "kaksi") {
-								echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row["osasto"]},{$row["try"]}][{$ik}][]' value='{$nro}' size='8'>";
-							}
-						}
-						else {
-							echo "<input type='hidden' id = '{$row[$budj_sarak]}_{$ik}' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
-						}
-					}
-
-					echo "</td>";
-				}
-				else {
-					if ($rivimaara < $maxrivimaara) echo "<input type='text' name = 'luvut[{$row[$budj_sarak]}][{$ik}][]' value='{$nro}' size='8'>";
-				}
-
-				if ($rivimaara < $maxrivimaara) echo "</td>";
-
-				$worksheet->write($excelrivi, $excelsarake, $nro);
-				$excelsarake++;
-			}
-
-			if ($rivimaara < $maxrivimaara) echo "</tr>";
-
-			$xx++;
-			$excelrivi++;
-		}
-
-		if ($tuoteryhmittain != "") {
+		if (isset($tuoteryhmittain) and $tuoteryhmittain != "") {
 			while ($tryrow = mysql_fetch_assoc($res)) {
 				while ($row = mysql_fetch_assoc($result)) {
 					piirra_budj_rivi($row, $tryrow);
@@ -1314,7 +1309,7 @@
 				piirra_budj_rivi($row, '', 'OHITA', $ohituksen_alkuperaiset_sarakkeet);
 			}
 		}
-		elseif ($tuotteetilmanbudjettia) {
+		elseif (isset($tuotteetilmanbudjettia) and $tuotteetilmanbudjettia) {
 			// Mikäli ollaan valittu käyttöliittymästä "Näytä Vain Ne Tuotteet Joilla Ei Ole Budjettia"
 			// niin ensin haetaan tuotteet ja kausi, luodaan array,
 			// sen jälkeen verrataan $row:n tuoteno luotuun arrayseen. Loopataan kaudet läpi.

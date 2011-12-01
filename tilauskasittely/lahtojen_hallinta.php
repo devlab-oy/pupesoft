@@ -725,6 +725,7 @@
 
 		$query = "	SELECT lasku.tunnus AS 'tilauksen_tunnus',
 					lasku.vanhatunnus AS 'tilauksen_vanhatunnus',
+					lasku.tilaustyyppi AS 'tilauksen_tilaustyyppi',
 					lasku.nimi AS 'asiakas_nimi',
 					lasku.toim_nimi AS 'asiakas_toim_nimi',
 					lasku.toim_postitp AS 'asiakas_toim_postitp',
@@ -746,7 +747,7 @@
 		$lahto_res = pupe_query($query);
 
 		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}__{$y}'>";
-		echo "<td colspan='14' class='back'>";
+		echo "<td colspan='15' class='back'>";
 		echo "<div id='toggleable_{$row['lahdon_tunnus']}__{$y}' style='display:none;'>";
 
 		echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
@@ -794,7 +795,8 @@
 		echo "<input type='text' class='filter_row_by_text' id='child_row_text_orderold__{$row['lahdon_tunnus']}__{$y}' value='' size='10' />";
 		echo "</th>";
 
-		echo "<th class='sort_row_by' id='row_type__{$row['lahdon_tunnus']}__{$y}'>",t("Tyyppi")," <img class='row_direction_type' /></th>";
+		echo "<th class='sort_row_by' id='row_type__{$row['lahdon_tunnus']}__{$y}'>",t("Tilaustyyppi")," <img class='row_direction_type' /></th>";
+		echo "<th class='sort_row_by' id='row_control__{$row['lahdon_tunnus']}__{$y}'>",t("Ohjausmerkki")," <img class='row_direction_control' /></th>";
 
 		echo "<th class='sort_row_by' id='row_client__{$row['lahdon_tunnus']}__{$y}'>",t("Asiakas")," <img class='row_direction_client' />";
 		echo "<br />";
@@ -836,6 +838,16 @@
 
 		$x = 0;
 
+		$type_array = array(
+			"N" => t("Normaalitilaus"),
+			"E" => t("Ennakkotilaus"),
+			"T" => t("Tarjoustilaus"),
+			"2" => t("Varastotäydennys"),
+			"7" => t("Tehdastilaus"),
+			"8" => t("Muiden mukana"),
+			"A" => t("Työmääräys")
+		);
+
 		while ($lahto_row = mysql_fetch_assoc($lahto_res)) {
 
 			echo "<tr class='toggleable_row_tr' id='toggleable_row_tr_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
@@ -862,7 +874,10 @@
 			echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteetti']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['prioriteetti']}</td>";
 			echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}__{$x}'><button type='button'>{$lahto_row['tilauksen_tunnus']}</button></td>";
 			echo "<td class='toggleable_row_orderold' id='{$lahto_row['tilauksen_vanhatunnus']}__{$x}'>{$lahto_row['tilauksen_vanhatunnus']}</td>";
-			echo "<td class='toggleable_row_type' id='{$lahto_row['ohjausmerkki']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['ohjausmerkki']}</td>";
+
+			echo "<td class='data toggleable_row_type' id='{$lahto_row['tilauksen_tilaustyyppi']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$type_array[$lahto_row['tilauksen_tilaustyyppi']]}</td>";
+
+			echo "<td class='toggleable_row_control' id='{$lahto_row['ohjausmerkki']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['ohjausmerkki']}</td>";
 
 			echo "<td class='data toggleable_row_client' id='{$lahto_row['asiakas_nimi']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_nimi']}";
 			if ($lahto_row['asiakas_nimi'] != $lahto_row['asiakas_toim_nimi']) echo " {$lahto_row['asiakas_toim_nimi']}";
@@ -959,7 +974,7 @@
 			$rivi_res = pupe_query($query);
 			
 			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-			echo "<td colspan='14' class='back' style='display:none;'>";
+			echo "<td colspan='15' class='back' style='display:none;'>";
 			echo "<div class='toggleable_row_child_div_order' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}__{$x}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";
@@ -1013,7 +1028,7 @@
 			$rivi_res = pupe_query($query);
 
 			echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-			echo "<td colspan='14' class='back' style='display:none;'>";
+			echo "<td colspan='15' class='back' style='display:none;'>";
 			echo "<div class='toggleable_row_child_div_sscc' id='toggleable_row_sscc_{$lahto_row['sscc']}__{$x}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";

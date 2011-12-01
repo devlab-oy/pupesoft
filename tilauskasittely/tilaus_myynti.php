@@ -1451,7 +1451,12 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 	$result = pupe_query($query);
 
 	// katsotaan onko tilausrivit Unikko-j‰rjestelm‰‰n
-	$query = "SELECT hyllyalue, hyllynro FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$tilausnumero}'";
+	$query = "	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro
+				FROM tilausrivi
+				JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.ei_saldoa='')
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.otunnus = '{$tilausnumero}'
+				AND tilausrivi.tyyppi != 'D'";
 	$varasto_chk_res = pupe_query($query);
 
 	while ($varasto_chk_row = mysql_fetch_assoc($varasto_chk_res)) {
@@ -1526,6 +1531,48 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
 
 	if ($kukarow["extranet"] == "" and $lopetus != '') {
 		lopetus($lopetus, "META");
+	}
+}
+
+if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VALMIS_VAINSALDOTTOMIA' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+	// Reklamaatio on valmis laskutettavaksi
+	// katsotaan onko tilausrivit Unikko-j‰rjestelm‰‰n
+	$query = "	SELECT tilausrivi.tunnus
+				FROM tilausrivi
+				JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.ei_saldoa='')
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.otunnus = '{$tilausnumero}'
+				AND tilausrivi.tyyppi != 'D'";
+	$varasto_chk_res = pupe_query($query);
+
+	// Ei saa olla saldollisia tuotteita
+	if (mysql_num_rows($varasto_chk_res) == 0) {
+		$query = "	UPDATE lasku set
+					tila = 'L',
+					alatila = 'D'
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus 	= '$tilausnumero'
+					AND tila 	= 'C'
+					AND alatila = 'A'";
+		$result = pupe_query($query);
+
+		$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
+		$result = pupe_query($query);
+
+		echo "<font class='message'>".t("Reklamaatio: %s kuitattu vastaanotetuksi", '', $tilausnumero).".</font><br><br>";
+
+		$tee				= '';
+		$tilausnumero		= '';
+		$laskurow			= '';
+		$kukarow['kesken']	= '';
+
+		if ($kukarow["extranet"] == "" and $lopetus != '') {
+			lopetus($lopetus, "META");
+		}
+	}
+	else {
+		echo "<font class='error'>".t("VIRHE: Reklamaatiolla oli saldollisia tuotteita")."!</font><br><br>";
+		$tee = '';
 	}
 }
 
@@ -3864,7 +3911,11 @@ if ($tee == '') {
 			}
 
 			if (is_array($hyvityssaanto_kommentti_array)) {
-				$kommentti = $hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno];
+				// jos myyj‰ on reklamaatiossa syˆtt‰nyt riville kommentin niin se laitetaan ensimm‰iselle sille tarkoitetulle riville
+				if ($kommentti !="") {
+					$kommentti .= " ";
+				}
+				$kommentti .= $hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno];
 			}
 			elseif (isset($kommentti_array[$tuoteno])) {
 				$kommentti = $kommentti_array[$tuoteno];
@@ -4338,26 +4389,6 @@ if ($tee == '') {
 	// jos ollaan jo saatu tilausnumero aikaan listataan kaikki tilauksen rivit..
 	if ((int) $kukarow["kesken"] != 0) {
 
-		// tarkistetaan kuuluuko kaikki reklamaation rivit samaan varastoon
-		if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'U') {
-
-			$varasto_chk_array = array();
-
-			$query = "SELECT hyllyalue, hyllynro FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$kukarow['kesken']}'";
-			$varasto_chk_res = pupe_query($query);
-
-			while ($varasto_chk_row = mysql_fetch_assoc($varasto_chk_res)) {
-				// Mihin varastoon
-				$varasto_chk = kuuluukovarastoon($varasto_chk_row["hyllyalue"], $varasto_chk_row["hyllynro"]);
-				$varasto_chk_array[$varasto_chk] = $varasto_chk;
-			}
-
-			if (count($varasto_chk_array) > 1) {
-				echo t("VIRHE: Tuotteet eiv‰t kuulu samaan varastoon"),"!<br>";
-				$tilausok++;
-			}
-		}
-
 		if (($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $laskurow["tunnusnippu"] > 0 and $projektilla == "") {
 			$tilrivity	= "'L','E'";
 
@@ -4467,6 +4498,8 @@ if ($tee == '') {
 					tuote.vaaditaan_kpl2,
 					tuote.yksikko,
 					tuote.status,
+					tuote.ei_saldoa,
+					tuote.vakkoodi,
 					$sorttauskentta
 					FROM tilausrivi use index (yhtio_otunnus)
 					LEFT JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
@@ -4508,17 +4541,17 @@ if ($tee == '') {
 				$saldoaikalisa = "";
 			}
 
-			$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
-							FROM tilausrivi
-							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi not in ('','0'))
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-							AND tilausrivi.otunnus = '$laskurow[tunnus]'
-							AND tilausrivi.tyyppi = 'L'
-							AND tilausrivi.var NOT IN ('P', 'J')";
-			$vakresult = pupe_query($vakquery);
-			$vakrow = mysql_fetch_assoc($vakresult);
+			$vak_chk_array = array();
 
-			if ($vakrow['vaktuotteet'] != '') {
+			while ($vakrow = mysql_fetch_assoc($result)) {
+				if ($vakrow["vakkoodi"] != "0" and $vakrow["vakkoodi"] != "" and $vakrow["var"] != "P" and $vakrow["var"] != "J") {
+					$vak_chk_array[$vakrow["tuoteno"]] = $vakrow["tuoteno"];
+				}
+			}
+
+			mysql_data_seek($result, 0);
+
+			if (count($vak_chk_array) > 0) {
 				if ($kukarow['extranet'] == '') {
 					// jos vak-toimituksissa halutaan k‰ytt‰‰ vaihtoehtoista toimitustapaa
 					if ($tm_toimitustaparow['vak_kielto'] != '' and $tm_toimitustaparow['vak_kielto'] != 'K') {
@@ -4551,24 +4584,49 @@ if ($tee == '') {
 							echo "<br/><br/>";
 						}
 						else {
-							echo "<font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
+							echo "<br><font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! (".implode(",", $vak_chk_array).")</font><br>";
 							echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
 						}
 						$tilausok++;
 					}
 					elseif ($tm_toimitustaparow['vak_kielto'] == 'K') {
-						echo "<font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
+						echo "<br><font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! (".implode(",", $vak_chk_array).")</font><br>";
 						echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
 						$tilausok++;
 					}
 				}
 				else {
 					if ($tm_toimitustaparow['vak_kielto'] == 'K' or ($tm_toimitustaparow['vak_kielto'] != '' and $tm_toimitustaparow['nouto'] == '')) {
-						echo "<font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
+						echo "<br><font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! (".implode(",", $vak_chk_array).")</font><br>";
 						echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
 						$tilausok++;
 					}
 				}
+			}
+
+			// tarkistetaan kuuluuko kaikki reklamaation rivit samaan varastoon
+			if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'U') {
+
+				$varasto_chk_array = array();
+				$reklamaatio_saldoton_count = 0;
+
+				while ($varasto_chk_row = mysql_fetch_assoc($result)) {
+					if ($varasto_chk_row["ei_saldoa"] == "") {
+						// Mihin varastoon
+						$varasto_chk = kuuluukovarastoon($varasto_chk_row["hyllyalue"], $varasto_chk_row["hyllynro"]);
+						$varasto_chk_array[$varasto_chk] = $varasto_chk;
+					}
+					else {
+						$reklamaatio_saldoton_count++;
+					}
+				}
+
+				if (count($varasto_chk_array) > 1) {
+					echo "<br><font class='error'>".t("VIRHE: Tuotteet eiv‰t kuulu samaan varastoon"),"!</font><br>";
+					$tilausok++;
+				}
+
+				mysql_data_seek($result, 0);
 			}
 
 			echo "<br><table>";
@@ -7056,24 +7114,39 @@ if ($tee == '') {
 					echo "</form></td>";
 				}
 				else {
-					echo "<td class='back' valign='top'>
-							<form name='rlepaamaan' action='$PHP_SELF' method='post'>
-							<input type='hidden' name='toim' value='$toim'>
-							<input type='hidden' name='lopetus' value='$lopetus'>
-							<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-							<input type='hidden' name='projektilla' value='$projektilla'>
-							<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-							<input type='hidden' name='mista' value = '$mista'>";
 
-					if ($mista == 'vastaanota' and ($laskurow["alatila"] == "A" or $laskurow["alatila"] == "B" or $laskurow["alatila"] == "C")) {
-						echo "<input type='hidden' name='tee' value='VASTAANOTTO'>";
-						echo "<input type='submit' value='* ".t("Reklamaatio Vastaanotettu")." *'>";
+					if ($reklamaatio_saldoton_count == $rivilaskuri) {
+						// Vain saldottomia tuotteita
+						echo "<td class='back' valign='top'>
+								<form name='rlepaamaan' action='$PHP_SELF' method='post'>
+								<input type='hidden' name='toim' value='$toim'>
+								<input type='hidden' name='lopetus' value='$lopetus'>
+								<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+								<input type='hidden' name='projektilla' value='$projektilla'>
+								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+								<input type='hidden' name='mista' value = '$mista'>
+								<input type='hidden' name='tee' value = 'VALMIS_VAINSALDOTTOMIA'>
+								<input type='submit' value='* ".t("Reklamaatio valmis")." *'>";
 					}
-					elseif ($mista != 'vastaanota' and ($laskurow["alatila"] == "" or $laskurow["alatila"] == "A")) {
-						echo "<input type='hidden' name='tee' value='ODOTTAA'>";
-						echo "<input type='submit' value='* ".t("Reklamaatio Odottaa Tuotteita saapuvaksi")." *'>";
-					}
+					else {
+						echo "<td class='back' valign='top'>
+								<form name='rlepaamaan' action='$PHP_SELF' method='post'>
+								<input type='hidden' name='toim' value='$toim'>
+								<input type='hidden' name='lopetus' value='$lopetus'>
+								<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+								<input type='hidden' name='projektilla' value='$projektilla'>
+								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+								<input type='hidden' name='mista' value = '$mista'>";
 
+						if ($mista == 'vastaanota' and ($laskurow["alatila"] == "A" or $laskurow["alatila"] == "B" or $laskurow["alatila"] == "C")) {
+							echo "<input type='hidden' name='tee' value='VASTAANOTTO'>";
+							echo "<input type='submit' value='* ".t("Reklamaatio Vastaanotettu")." *'>";
+						}
+						elseif ($mista != 'vastaanota' and ($laskurow["alatila"] == "" or $laskurow["alatila"] == "A")) {
+							echo "<input type='hidden' name='tee' value='ODOTTAA'>";
+							echo "<input type='submit' value='* ".t("Reklamaatio Odottaa Tuotteita saapuvaksi")." *'>";
+						}
+					}
 					echo "</form></td>";
 				}
 			}

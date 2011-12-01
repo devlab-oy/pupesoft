@@ -2026,11 +2026,13 @@
 			</script> ";
 
 		// jos ei olla submitattu t‰t‰ ruutua, otetaan merahti otsikolta
-		if (!isset($merahti)) $merahti = $otsik['kohdistettu'];
+		if (!isset($merahti)) {
+			$merahti = $otsik['kohdistettu'];
+			$ed_merahti = $otsik['kohdistettu'];
+		}
 
 		// vaihdetaan merahti toimitustavan oletuksen mukaan, kun toimitustapa vaihdetaan
-		if ((isset($otsik["toimitustapa"]) and $toimitustapa != "" and $toimitustapa != $otsik["toimitustapa"]) or ($ed_toimtapa != "" and $toimitustapa != "" and $toimitustapa != $ed_toimtapa)) {
-
+		if ($toimitustapa != "" and $toimitustapa != $ed_toimtapa) {
 			$apuqu2 = "	SELECT merahti
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -2038,11 +2040,11 @@
 			$meapu2 = pupe_query($apuqu2);
 			$meapu2row = mysql_fetch_assoc($meapu2);
 
-			if ($meapu2row["merahti"] != $otsik["kohdistettu"]) {
+			$merahti = $meapu2row["merahti"];
+
+			if ($merahti != $ed_merahti) {
 				echo "<font class='error'>".t("HUOM: K‰ytett‰v‰ rahtisopimus vaihdettiin")."!</font><br><br>";
 			}
-
-			$merahti = $meapu2row["merahti"];
 		}
 
 		if (isset($otsik["rahtivapaa"]) and $otsik["rahtivapaa"] != "" and $merahti == "") {
@@ -2103,10 +2105,6 @@
 
 			$toitarow = array();
 
-			if (isset($toimitustapa)) {
-				echo "<input type='hidden' name='ed_toimtapa' value='$toimitustapa'>";
-			}
-
 			echo "<select name='toimitustapa' onchange='submit()'>\n";
 
 			while ($row = mysql_fetch_assoc($result)) {
@@ -2127,7 +2125,12 @@
 				echo "<option $select value='$row[selite]'>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>\n";
 			}
 
-			echo "</select></td></tr>\n";
+			echo "</select>";
+
+			echo "<input type='hidden' name='ed_toimtapa' value='$toimitustapa'>";
+			echo "<input type='hidden' name='ed_merahti' value='$merahti'>";
+
+			echo "</td></tr>\n";
 
 			// Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
 			if ($merahti == "K" or $otsik['rahtivapaa'] != "") {
@@ -2166,7 +2169,6 @@
 				$rsop["rahtisopimus"] = t("Lis‰‰ rahtisopimus");
 			}
 
-			//
 			if ($kukarow['yhtio'] == $lasku_yhtio_originaali) {
 				echo "<a href='".$palvelin2."yllapito.php?toim=rahtisopimukset$ylisa&tee=add&lopetus=$PHP_SELF////toim=$toim//tunnukset=$tunnukset//lopetus=$lopetus//id=$id//tee=$tee//merahti=$merahti//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>$rsop[rahtisopimus]</a><br/>";
 			}

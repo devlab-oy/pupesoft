@@ -492,17 +492,22 @@
 					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa and toimitustapa.nouto != '')
 					where lasku.$logistiikka_yhtiolisa
 					and lasku.tila = 'L'
-					and lasku.alatila in ('C', 'B')
+					and lasku.alatila in ('C','B')
 					and lasku.vienti = ''
 					ORDER BY lasku.toimaika";
 		$tilre = pupe_query($query);
-
+		
 		while ($tilrow = mysql_fetch_array($tilre)) {
 			// etsit‰‰n sopivia tilauksia
 			$query = "	SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, maksuehto.teksti maksuehto, toimitustapa, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija, toimaika
 						FROM lasku
 						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
-						WHERE lasku.tunnus = '$tilrow[otunnus]' and tila = 'L' $haku and lasku.$logistiikka_yhtiolisa and (alatila = 'C' or alatila = 'B') ORDER by laadittu desc";
+						WHERE lasku.tunnus = '$tilrow[otunnus]' 
+						and lasku.tila = 'L' 
+						$haku 
+						and lasku.$logistiikka_yhtiolisa 
+						and lasku.alatila in ('C','B')
+						ORDER by laadittu desc";
 			$result = pupe_query($query);
 
 			//piirret‰‰n taulukko...
@@ -580,7 +585,7 @@
 					WHERE lasku.tunnus	= '$id'
 					and lasku.yhtio		= '$kukarow[yhtio]'
 					and lasku.tila		= 'L'
-					and (lasku.alatila = 'C' or lasku.alatila = 'B')";
+					and lasku.alatila in ('C','B')";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result)==0){

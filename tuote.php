@@ -616,6 +616,25 @@
 			echo "<td colspan='5'>".wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>")."</td>";
 			echo "</tr>";
 
+			//9
+			echo "<tr>";
+			echo "<th>".t("Korkeus")."</th>";
+			echo "<th>".t("Leveys")."</th>";
+			echo "<th>".t("Syvyys")."</th>";
+			echo "<th>".t("Paino")."</th>";
+			echo "<th></th>";
+			echo "<th></th>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td>$tuoterow[tuotekorkeus] m</td>";
+			echo "<td>$tuoterow[tuoteleveys] m</td>";
+			echo "<td>$tuoterow[tuotesyvyys] m</td>";
+			echo "<td>$tuoterow[tuotemassa] kg</td>";
+			echo "<td></td>";
+			echo "<td></td>";
+			echo "</tr>";
+
 			echo "</table>";
 
 			// Onko liitetiedostoja

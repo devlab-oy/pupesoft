@@ -151,7 +151,7 @@
 
 		if ($ryhma == 'fi307') {
 			// Kohdekuukauden vähennettävä vero
-			$maalisa = " and lasku.maa in ('FI', '') ";
+			$maalisa = " and lasku.toim_maa in ('FI', '') ";
 		}
 
 		if ($ryhma == 'fi309') {
@@ -161,7 +161,7 @@
 			$maarow = mysql_fetch_assoc($result);
 
 			// Kaikki ei-EU-maat plus FI ja tyhjä
-			$maalisa = " and lasku.maa in ('','FI', $maarow[maat]) ";
+			$maalisa = " and lasku.toim_maa in ('','FI', $maarow[maat]) ";
 
 			$_309lisa 	 = " or alv_taso like '%fi300%' ";
 			$vainveroton = " and tiliointi.vero = 0 ";
@@ -194,7 +194,7 @@
 		elseif ($ryhma == 'fi318') {
 			// Rakannuspalveluiden ostot
 			$taso = 'fi320';
-		}		
+		}
 		elseif ($ryhma == 'fi314') {
 			// Palveluostot muista EU-maista
 			$taso = 'fi306';
@@ -241,9 +241,9 @@
 
 			if ($ryhma == 'fi307') $tiliointilisa .= " and tiliointi.vero > 0 ";
 
-			echo "<br><font class='head'>".t("Arvonlisäveroerittely kaudelta")." $alvv-$alvk</font><hr>";
+			echo "<br><font class='head'>".t("Arvonlisäveroerittely kaudelta")." $alvv-$alvk " . t("taso") . " $ryhma</font><hr>";
 
-			$query = "	SELECT if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+			$query = "	SELECT if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
 						if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 						tiliointi.vero,
 						tiliointi.tilino,
@@ -314,7 +314,7 @@
 				echo "<td valign='top'>$trow[maa]</td>";
 				echo "<td valign='top'>$trow[valuutta]</td>";
 				echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-				echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$trow[tilino]</a></td>";
+				echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
 				echo "<td valign='top'>$trow[nimi]</td>";
 				echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma']),"</td>";
 				echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
@@ -341,10 +341,10 @@
 				$edmaa 	   = $trow["maa"];
 			}
 
-			// Tälle kuukaudelle tiliöidyt kassa alennukset
+			// Tälle kuukaudelle tiliöidyt kassa-alennukset
 			if ($ryhma == "fi305" or $ryhma == "fi306" or $ryhma == 'fi311' or $ryhma == 'fi312' or $ryhma == "fi313" or $ryhma == "fi314") {
 
-				// Tälle kuukaudelle tiliöidyt kassa alennukset
+				// Tälle kuukaudelle tiliöidyt kassa-alennukset
 				if ($ryhma == "fi305" or $ryhma == "fi306") {
 					list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", $ryhma, $oletus_verokanta);
 				}
@@ -376,7 +376,7 @@
 						echo "<td valign='top'>$trow[maa]</td>";
 						echo "<td valign='top'>$trow[valuutta]</td>";
 						echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$trow[tilino]</a></td>";
+						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
 						echo "<td valign='top'>$trow[nimi]</td>";
 						echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma']),"</td>";
 						echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
@@ -457,7 +457,7 @@
 							<td class='spec'></td></tr>";
 					$verotot+=$vero;
 				}
-				
+
 				$query = "	SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
 							FROM tili
 							WHERE yhtio = '$kukarow[yhtio]' and alv_taso in ('fi320')";
@@ -496,7 +496,7 @@
 							<td class='spec'></td></tr>";
 					$verotot+=$vero;
 				}
-				
+
 			}
 
 			echo "<tr><td colspan='5' align='right' class='spec'>".t("Verokannat yhteensä").":</td>
@@ -508,7 +508,7 @@
 
 			if ($ryhma == 'fi311' or $ryhma == 'fi312') {
 
-				$query = "	SELECT if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+				$query = "	SELECT if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
 							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 							tilausrivi.alv vero,
 							group_concat(DISTINCT lasku.tunnus) ltunnus,
@@ -589,7 +589,7 @@
 					echo "<td valign='top'>$trow[maa]</td>";
 					echo "<td valign='top'>$trow[valuutta]</td>";
 					echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-					echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$trow[tilino]</a></td>";
+					echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
 					echo "<td valign='top'>$trow[nimi]</td>";
 					echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";
 					echo "<td valign='top' align='right' nowrap>$trow[verot]</td>";
@@ -640,7 +640,7 @@
 						echo "<td valign='top'>$trow[maa]</td>";
 						echo "<td valign='top'>$trow[valuutta]</td>";
 						echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$trow[tilino]</a></td>";
+						echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=VSRALVKK_UUSI_erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]'>$trow[tilino]</a></td>";
 						echo "<td valign='top'>$trow[nimi]</td>";
 						echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma']),"</td>";
 						echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
@@ -690,7 +690,7 @@
 			$cleantaso 		 = $taso;
 
 			if ($taso == 'fi307') {
-				$maalisa = "JOIN lasku ON lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.maa in ('FI', '')";
+				$maalisa = "JOIN lasku ON lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.toim_maa in ('FI', '')";
 			}
 
 			if ($taso == 'fi309') {
@@ -699,7 +699,7 @@
 				$maarow = mysql_fetch_assoc($result);
 
 				// Kaikki ei-EU-maat plus FI ja tyhjä
-				$maalisa = "JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.maa in ('','FI', $maarow[maat])";
+				$maalisa = "JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.toim_maa in ('','FI', $maarow[maat])";
 
 				$_309lisa 	 = " or alv_taso like '%fi300%' ";
 				$vainveroton = " and tiliointi.vero = 0 ";
@@ -1085,7 +1085,7 @@
 		echo "<table>";
 
 		if (!isset($vv)) $vv = date("Y");
-		if (!isset($kk)) $kk = date("n");
+		if (!isset($kk)) $kk = date("m");
 
 		echo "<tr>";
 		echo "<th>".t("Valitse kausi")."</th>";
@@ -1107,15 +1107,15 @@
 		$sel[$kk] = "SELECTED";
 
 		echo "<select name='kk'>
-				<option $sel[1] value = '1'>01</option>
-				<option $sel[2] value = '2'>02</option>
-				<option $sel[3] value = '3'>03</option>
-				<option $sel[4] value = '4'>04</option>
-				<option $sel[5] value = '5'>05</option>
-				<option $sel[6] value = '6'>06</option>
-				<option $sel[7] value = '7'>07</option>
-				<option $sel[8] value = '8'>08</option>
-				<option $sel[9] value = '9'>09</option>
+				<option $sel[01] value = '01'>01</option>
+				<option $sel[02] value = '02'>02</option>
+				<option $sel[03] value = '03'>03</option>
+				<option $sel[04] value = '04'>04</option>
+				<option $sel[05] value = '05'>05</option>
+				<option $sel[06] value = '06'>06</option>
+				<option $sel[07] value = '07'>07</option>
+				<option $sel[08] value = '08'>08</option>
+				<option $sel[09] value = '09'>09</option>
 				<option $sel[10] value = '10'>10</option>
 				<option $sel[11] value = '11'>11</option>
 				<option $sel[12] value = '12'>12</option>

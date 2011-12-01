@@ -7580,14 +7580,14 @@ if (!function_exists("livesearch_tuotehaku")) {
 					$kieltolisa .= " and tuote.hinnastoon != 'E' ";
 				}
 			}
-			
+
 			// Näytetään poistuvat tuotteet mutta ei poistettuja
 			if ($yhtiorow['livetuotehaku_poistetut'] == 'X') {
 				$naytetaanko_poistetut = "and (tuote.status != 'P' or (tuote.status = 'P' and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0))";
-			} 
+			}
 			else {
 				$naytetaanko_poistetut = "and tuote.status != 'P'";
-			}	
+			}
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -8604,6 +8604,7 @@ if (!function_exists("t_avainsana")) {
 		global $kukarow, $yhtiorow, $link;
 
 		$laji = mysql_real_escape_string($laji);
+		$orderlisa = "";
 
 		if ($kieli == "") {
 			$kieli = $kukarow["kieli"];
@@ -9390,6 +9391,34 @@ if (!function_exists("viivakoodi")) {
 		}
 
 		return $barcode;
+	}
+}
+
+if (!function_exists("tarkista_ean13")) {
+	function tarkista_ean13($eankoodi){
+		// Ensiksi eankoodi muutetaan Stringiksi
+		$eankoodi =(string)$eankoodi;
+
+		$tarkistusmerkki = $eankoodi[12];
+
+		// 1. Add the values of the digits in the even-numbered positions: 2, 4, 6, etc.
+		$even_sum = $eankoodi{1} + $eankoodi{3} + $eankoodi{5} + $eankoodi{7} + $eankoodi{9} + $eankoodi{11};
+		// 2. Multiply this result by 3.
+		$even_sum_three = $even_sum * 3;
+		// 3. Add the values of the digits in the odd-numbered positions: 1, 3, 5, etc.
+		$odd_sum = $eankoodi{0} + $eankoodi{2} + $eankoodi{4} + $eankoodi{6} + $eankoodi{8} + $eankoodi{10};
+		// 4. Sum the results of steps 2 and 3.
+		$total_sum = $even_sum_three + $odd_sum;
+		// 5. The check character is the smallest number which, when added to the result in step 4,  produces a multiple of 10.
+		$next_ten = (ceil($total_sum/10))*10;
+		$check_digit = $next_ten - $total_sum;
+
+		if ($check_digit == $tarkistusmerkki) {
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
 	}
 }
 
@@ -10983,16 +11012,16 @@ if (!function_exists("pupe_DataTables")) {
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {
-									valuutta = aaData[aiDisplay[i]][8];
+									valuutta = aaData[aiDisplay[i]][9];
 									valuutat[valuutta] = valuutta;
 
-									if (aaData[aiDisplay[i]][6] == '') {
+									if (aaData[aiDisplay[i]][7] == '') {
 										if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
-										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][7]*1;
+										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][8]*1;
 									}
 									else {
 										if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-										avoimety[valuutta] += aaData[aiDisplay[i]][7]*1;
+										avoimety[valuutta] += aaData[aiDisplay[i]][8]*1;
 									}
 								}
 
@@ -11920,7 +11949,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 					$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
 				}
 
-				$selec = "	if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+				$selec = "	if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
 							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 							tiliointi.vero vero,
 							tiliointi.tilino tilino,
@@ -11929,7 +11958,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 				if ($yhteenvetolilmo) {
 					$selec = "	lasku.ytunnus ytunnus,
-								if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+								if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
 								max(lasku.nimi) laskunimi, ";
 					$group = "	ytunnus, maa";
 				}

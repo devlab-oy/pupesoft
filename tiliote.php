@@ -177,7 +177,7 @@
 					else {
 						$yritirow = mysql_fetch_assoc($yritiresult);
 					}
-					
+
 					$query = "	SELECT myyntireskontrakausi_alku, myyntireskontrakausi_loppu, ostoreskontrakausi_alku, ostoreskontrakausi_loppu, tilikausi_alku, tilikausi_loppu
 								FROM yhtio
 								WHERE yhtio = '{$yritirow['yhtio']}'";
@@ -294,8 +294,9 @@
 					}
 
 					$arkistotunnari = substr($tietue, 12, 18);
+					$taso = substr($tietue, 187, 1);
 
-					if ((!is_numeric($arkistotunnari) and trim($arkistotunnari) != "") or (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0)) {
+					if (($taso == ' ') and ((!is_numeric($arkistotunnari) and trim($arkistotunnari) != "") or (is_numeric($arkistotunnari) and (int) $arkistotunnari != 0))) {
 						// Katsotaan löytyykö tällä tunnuksella suoritus
 						$query = "	SELECT alku
 									FROM tiliotedata

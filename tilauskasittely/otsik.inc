@@ -1602,6 +1602,7 @@
 				echo "<option value='T' $sel[T]>".t("Tarjoustilaus")."</option>";
 				echo "<option value='2' $sel[2]>".t("Varastotäydennys")."</option>";
 				echo "<option value='7' $sel[7]>".t("Tehdastilaus")."</option>";
+				echo "<option value='S' $sel[S]>".t("Sarjatilaus")."</option>";
 				echo "<option value='8' $sel[8]>".t("Muiden mukana")."</option>";
 				echo "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
 

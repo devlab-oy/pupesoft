@@ -12,6 +12,10 @@
 		$orderlisa = '';
 	}
 
+	if (!isset($avainlisa)) {
+		$avainlisa = "";
+	}
+
 	if (!isset($noautosubmit)) {
 		$autosubmit = " onchange='submit();' ";
 	}
@@ -277,7 +281,7 @@
 	foreach ($monivalintalaatikot as $monivalintalaatikko) {
 		$monivalintalaatikko = strip_tags($monivalintalaatikko);
 
-		if (substr($monivalintalaatikko, 0, 10) == "dynaaminen") {
+		if (mysql_num_rows($dynpuu_count_result) > 0 and substr($monivalintalaatikko, 0, 10) == "dynaaminen") {
 			$param = substr($monivalintalaatikko, 11);
 
 			mysql_data_seek($dynpuu_count_result, 0);

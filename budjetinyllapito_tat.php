@@ -140,7 +140,7 @@
 							and $budj_sarak		= '$row[$budj_sarak]'
 							and dyna_puu_tunnus	= ''
 							and osasto			= ''
-							and try				= ''";
+							and try				= '$try'";
 				$xresult = pupe_query($query);
 				$nro = '';
 
@@ -394,7 +394,7 @@
 				$alkaakk	= $alkuvv.$alkukk;
 				$loppuukk	= $loppuvv.$loppukk;
 			}
-			
+
 			$sql = "SELECT PERIOD_DIFF('{$loppuukk}','{$alkaakk}')+1 as jakaja";
 			$result = pupe_query($sql);
 			$rivi = mysql_fetch_assoc($result);
@@ -1027,7 +1027,7 @@
 
 	// Virhetarkistuksia jos ollaan submitattu
 	if ($submit_button != "") {
-		
+
 		if ($toim == "TUOTE" and $tuoteno == "" and $lisa_dynaaminen["tuote"] == "" and $lisa == "" and $lisa_parametri == "" and $liitostunnukset == "") {
 			echo "<br><font class='error'>".t("On valittava tuote tai tuotekategoria")."!</font>";
 			$submit_button = "";
@@ -1037,7 +1037,7 @@
 			echo "<br><font class='error'>".t("On valittava asiakas tai asiakaskategoria")."!";
 			$submit_button = "";
 		}
-		
+
 		if ($toim == "TOIMITTAJA" and $toimittajaid == "" and $liitostunnukset == "") {
 			echo "<br><font class='error'>".t("On valittava toimittaja")."!</font>";
 			$submit_button = "";
@@ -1045,7 +1045,7 @@
 
 		if (!is_array($tilikaudetrow)) {
 			echo "<br><font class='error'>".t("Kausi puuttuu")."!</font>";
-			$submit_button = "";			
+			$submit_button = "";
 		}
 	}
 
@@ -1362,7 +1362,7 @@
 		echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr>";
 		echo "</table></form><br />";
 	}
-	else {		
+	else {
 		echo "</form>";
 	}
 

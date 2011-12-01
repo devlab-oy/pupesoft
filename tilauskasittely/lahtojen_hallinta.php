@@ -172,7 +172,7 @@
 								$(this).children('option:first').attr('selected', true);
 							});
 
-							$('.toggleable_row_child').hide();
+							$('.toggleable_row_child_div_order:visible, .toggleable_row_child_div_sscc:visible').hide();
 							$('#toggleable_'+id[0]+'__'+id[1]).hide();
 
 							$('.toggleable_row_order').removeClass('tumma');
@@ -211,21 +211,29 @@
 							$(this).removeClass('tumma');
 
 							$('#toggleable_row_order_'+id[0]+'__'+id[1]).slideUp('fast');
+							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().hide();
 
-							if ($('.toggleable_row_child:visible').length == 1) {
+							if ($('.toggleable_row_child_div_order:visible, .toggleable_row_child_div_sscc:visible').length == 0) {
 
 								$('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').show();
+
+								$('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]')
+									.parent()
+									.parent()
+									.show()
+									.next()
+									.show();
 
 								$('.filter_row_by_text:visible').attr('disabled', false).each(function() {
 									$(this).val() != '' ? $(this).trigger('keyup') : '';
 								});
 
-								$('.filter_row_by_select').attr('disabled', false);
+								$('.filter_row_by_select:visible').attr('disabled', false);
 							}
 						}
 						else {
 
-							$('.filter_row_by_select, .filter_row_by_text').attr('disabled', true);
+							$('.filter_row_by_select:visible, .filter_row_by_text:visible').attr('disabled', true);
 
 							$(this).addClass('tumma');
 
@@ -233,6 +241,15 @@
 
 							$('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide();
 
+							$('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]')
+								.parent()
+								.parent()
+								.hide()
+								.next()
+								.hide();
+
+							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().parent().show();
+							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().show();
 							$('#toggleable_row_order_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 						}
 					});
@@ -242,33 +259,41 @@
 						if ($(this).html() != '') {
 							var id = this.id.split(\"__\", 3);
 
-							if ($('#toggleable_row_sscc_'+id[0]+'_'+id[2]).is(':visible')) {
+							if ($('#toggleable_row_sscc_'+id[0]+'__'+id[2]).is(':visible')) {
 								$(this).removeClass('tumma');
 
-								$('#toggleable_row_sscc_'+id[0]+'_'+id[2]).slideUp('fast');
+								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).slideUp('fast');
+								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().hide();
 
-								if ($('.toggleable_row_child:visible').length == 1) {
+								if ($('.toggleable_row_child_div_order:visible, .toggleable_row_child_div_sscc:visible').length == 0) {
+
+									$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
+									$('div[id!=\"toggleable_row_order_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_order\"]').parent().parent().show();
+									$('div[id!=\"toggleable_row_sscc_'+id[0]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_sscc\"]').parent().parent().show();
 
 									$('.filter_row_by_text:visible').attr('disabled', false).each(function() {
 										$(this).val() != '' ? $(this).trigger('keyup') : '';
 									});
 
 									$('.filter_row_by_select:visible').attr('disabled', false);
-
-									$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
 								}
 							}
 							else {
 
-								$('.filter_row_by_select, .filter_row_by_text').attr('disabled', true);
+								$('.filter_row_by_select:visible, .filter_row_by_text:visible').attr('disabled', true);
 
 								$(this).addClass('tumma');
 
+								var parent_element = $('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent();
+
 								$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
 
-								var parent_element = $('#toggleable_row_sscc_'+id[0]+'_'+id[2]).parent();
+								$('div[id!=\"toggleable_row_order_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_order\"]').parent().parent().hide();
+								$('div[id!=\"toggleable_row_sscc_'+id[0]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_sscc\"]').parent().parent().hide();
 
-								$('#toggleable_row_sscc_'+id[0]+'_'+id[2]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
+								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().parent().show();
+								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().show();
+								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 							}
 						}
 
@@ -917,8 +942,8 @@
 			$rivi_res = pupe_query($query);
 			
 			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-			echo "<td colspan='13' class='back'>";
-			echo "<div class='toggleable_row_child' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}__{$x}' style='display:none;'>";
+			echo "<td colspan='13' class='back' style='display:none;'>";
+			echo "<div class='toggleable_row_child_div_order' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}__{$x}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";
 	
@@ -971,8 +996,8 @@
 			$rivi_res = pupe_query($query);
 
 			echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-			echo "<td colspan='13' class='back'>";
-			echo "<div class='toggleable_row_child' id='toggleable_row_sscc_{$lahto_row['sscc']}_{$x}' style='display:none;'>";
+			echo "<td colspan='13' class='back' style='display:none;'>";
+			echo "<div class='toggleable_row_child_div_sscc' id='toggleable_row_sscc_{$lahto_row['sscc']}__{$x}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";
 

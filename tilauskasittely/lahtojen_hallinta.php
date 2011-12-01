@@ -108,7 +108,7 @@
 
 						var empty_all = true;
 
-						var selected = '';
+						var selectedx = '';
 
 						$('.filter_row_by_select option:selected').each(function() {
 
@@ -117,47 +117,50 @@
 
 								var title = $(this).parent().attr('id').substring(17);
 
-								if (selected != '') {
-									selected = $(selected).children().filter('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
+								if (selectedx != '') {
+									selectedx = $(selectedx).children().filter('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
 								}
 								else {
-									selected = $('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
+									selectedx = $('td[id^=\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\"][class~=\"toggleable_row_'+title+'\"]').parent();
 								}
 							}
 						});
 
-						if (selected != '' && $(this).val() != '') {
-							var tmp = $(this).attr('id').substring(15).split(\"__\", 3);
-							var title = tmp[0];
-							selected = $(selected).children().filter('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
+						$('.filter_row_by_text').each(function() {
 
-							if (selected != '') {
+							if (selectedx != '' && $(this).val() != '') {
+								var tmp = $(this).attr('id').substring(15).split(\"__\", 3);
+								var title = tmp[0];
+								selectedx = $(selectedx).children().filter('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
+
+								if (selectedx != '') {
+									empty_all = false;
+								}
+							}
+							else if (selectedx == '' && $(this).val() != '') {
+								var tmp = $(this).attr('id').substring(15).split(\"__\", 3);
+								var title = tmp[0];
+								selectedx = $('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
+
+								if (selectedx != '') {
+									empty_all = false;
+								}
+							}
+							else if (selectedx != '' && $(this).val() == '') {
 								empty_all = false;
 							}
-						}
-						else if (selected == '' && $(this).val() != '') {
-							var tmp = $(this).attr('id').substring(15).split(\"__\", 3);
-							var title = tmp[0];
-							selected = $('.toggleable_row_'+title+':containsi(\"'+$(this).val().replace(/(:|\.)/g,'\\$1')+'\")').parent();
-
-							if (selected != '') {
-								empty_all = false;
+							else {
+								//$('.toggleable_row_tr').show();
+								//return true;
+								// empty_all = true;
 							}
-						}
-						else if (selected != '' && $(this).val() == '') {
-							empty_all = false;
-						}
-						else {
-							$('.toggleable_row_tr').show();
-							return true;
-						}
+						})
 
 						if (empty_all) {
 							$('.toggleable_row_tr').show();
 						}
 						else {
-							$(selected).show();
-							$(this).attr('selected', true);
+							$(selectedx).show();
 						}
 					});
 

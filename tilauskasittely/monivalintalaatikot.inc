@@ -88,6 +88,11 @@
 	$lisa_parametri			 = "";
 	$lisa_dynaaminen		 = array("tuote" => "", "asiakas" => "");
 
+	$lisa = isset($lisa) ? trim($lisa) : "";
+	$ulisa = isset($ulisa) ? trim($ulisa) : "";
+	$kieltolisa = isset($kieltolisa) ? trim($kieltolisa) : "";
+	$extra_poislisa = isset($extra_poislisa) ? trim($extra_poislisa) : "";
+
 	// Setataan muuttujat
 	if (!isset($mul_osasto)) 		$mul_osasto = array();
 	if (!isset($mul_try)) 			$mul_try = array();

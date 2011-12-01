@@ -964,13 +964,14 @@
 						tilausrivi.yksikko,
 						CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS 'hyllypaikka',
 						kerayserat.laatija AS 'keraaja',
-						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl, 0)) AS 'keratyt'
+						tilausrivi.kerattyaika,
+						IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl, 0) AS 'keratyt'
 						FROM tilausrivi
 						LEFT JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
-						GROUP BY 1,2,3,4,5,6,7";
+						ORDER BY kerayserat.sscc, tilausrivi.tuoteno";
 			$rivi_res = pupe_query($query);
 			
 			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
@@ -985,6 +986,7 @@
 			echo "<th>",t("Nimitys"),"</th>";
 			echo "<th>",t("Suunniteltu m‰‰r‰"),"</th>";
 			echo "<th>",t("Ker‰tty m‰‰r‰"),"</th>";
+			echo "<th>",t("Poikkeama m‰‰r‰"),"</th>";
 			echo "<th>",t("Yksikkˆ"),"</th>";
 			echo "<th>",t("Hyllypaikka"),"</th>";
 			echo "<th>",t("Ker‰‰j‰"),"</th>";
@@ -997,6 +999,13 @@
 				echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
 				echo "<td class='tumma'>{$rivi_row['kpl']}</td>";
 				echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
+				echo "<td class='tumma'>";
+
+				if ($rivi_row['kerattyaika'] != '0000-00-00 00:00:00' and $rivi_row['keratyt'] - $rivi_row['kpl'] != 0) {
+					echo ($rivi_row['keratyt'] - $rivi_row['kpl']);
+				}
+
+				echo "</td>";
 				echo "<td class='tumma'>",t_avainsana("Y", "", " and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite"),"</td>";
 				echo "<td class='tumma'>{$rivi_row['hyllypaikka']}</td>";
 				echo "<td class='tumma'>{$rivi_row['keraaja']}</td>";
@@ -1018,13 +1027,14 @@
 						tilausrivi.yksikko,
 						CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
 						kerayserat.laatija AS keraaja,
-						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS keratyt
+						tilausrivi.kerattyaika,
+						IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl, 0) AS 'keratyt'
 						FROM kerayserat
 						JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
 						AND kerayserat.sscc = '{$lahto_row['sscc']}'
-						GROUP BY 1,2,3,4,5,6,7";
+						ORDER BY kerayserat.otunnus, tilausrivi.tuoteno";
 			$rivi_res = pupe_query($query);
 
 			echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
@@ -1039,6 +1049,7 @@
 			echo "<th>",t("Nimitys"),"</th>";
 			echo "<th>",t("Suunniteltu m‰‰r‰"),"</th>";
 			echo "<th>",t("Ker‰tty m‰‰r‰"),"</th>";
+			echo "<th>",t("Poikkeama m‰‰r‰"),"</th>";
 			echo "<th>",t("Yksikkˆ"),"</th>";
 			echo "<th>",t("Hyllypaikka"),"</th>";
 			echo "<th>",t("Ker‰‰j‰"),"</th>";
@@ -1051,6 +1062,15 @@
 				echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
 				echo "<td class='tumma'>{$rivi_row['kpl']}</td>";
 				echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
+
+				echo "<td class='tumma'>";
+
+				if ($rivi_row['kerattyaika'] != '0000-00-00 00:00:00' and $rivi_row['keratyt'] - $rivi_row['kpl'] != 0) {
+					echo ($rivi_row['keratyt'] - $rivi_row['kpl']);
+				}
+
+				echo "</td>";
+
 				echo "<td class='tumma'>",t_avainsana("Y", "", " and avainsana.selite='{$rivi_row['yksikko']}'", "", "", "selite"),"</td>";
 				echo "<td class='tumma'>{$rivi_row['hyllypaikka']}</td>";
 				echo "<td class='tumma'>{$rivi_row['keraaja']}</td>";

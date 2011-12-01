@@ -74,14 +74,13 @@
 	// LN = Etsitään myyjän tai laatijan nimellä
 	if ($tee == 'LN') {
 		// haetaan vain aktiivisia käyttäjiä
-		$query = "	SELECT kuka.myyja, kuka.kuka, if(count(oikeu.tunnus) > 0, 0, 1) aktiivinen, kuka.nimi
+		$query = "	SELECT kuka.myyja, kuka.kuka, if(count(oikeu.tunnus) > 0, 0, 1) aktiivinen
 					FROM kuka
-					LEFT JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+					JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 					WHERE kuka.yhtio = '{$kukarow['yhtio']}'
 					AND (kuka.kuka like '%$summa1%' or kuka.nimi like '%$summa1%')
 					GROUP BY 1,2
-					having aktiivinen = 0
-					ORDER BY aktiivinen, kuka.nimi";
+					having aktiivinen = 0";
 		$kukares = pupe_query($query);
 
 		while ($row = mysql_fetch_assoc($kukares)) {

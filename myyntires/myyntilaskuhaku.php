@@ -74,29 +74,25 @@
 	// LN = Etsitään myyjän tai laatijan nimellä
 	if ($tee == 'LN') {
 		// haetaan vain aktiivisia käyttäjiä
-		$query = "	SELECT kuka.myyja, kuka.kuka, if(count(oikeu.tunnus) > 0, 0, 1) aktiivinen
+		$query = "	SELECT group_concat(distinct concat('\'',kuka.kuka,'\'')) kuka, group_concat(distinct concat('\'',kuka.myyja,'\'')) myyja, if(count(oikeu.tunnus) > 0, 0, 1) aktiivinen
 					FROM kuka
 					JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 					WHERE kuka.yhtio = '{$kukarow['yhtio']}'
 					AND (kuka.kuka like '%$summa1%' or kuka.nimi like '%$summa1%')
-					GROUP BY 1,2
 					having aktiivinen = 0";
 		$kukares = pupe_query($query);
 
 		while ($row = mysql_fetch_assoc($kukares)) {
-			if ($row["kuka"] != "") $laatijat .= "'".$row["kuka"]."',";
-			if ($row["myyja"] != 0)	$myyja .= "'".$row["myyja"]."',";
+			$laatijat	= $row["kuka"];
+			$myyja		= $row["myyja"];
 		}
 
-		$laatijat = substr($laatijat,0, -1);
 		$mmuuttuja = "";
-
 		if ($myyja !="") {
-			$myyja = substr($myyja,0, -1);
 			$mmuuttuja = " or myyja in ($myyja)";
 		}
 
-		if ($laatijat =="") {
+		if ($laatijat == "") {
 			$laatijat = "'".$summa1."'";
 		}
 

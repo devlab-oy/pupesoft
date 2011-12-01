@@ -1582,11 +1582,32 @@
 								echo "<div id='div_kommentti".$row[$fieldname]."' class='popup' style='width: 500px;'>";
 								echo $row_comments["comments"];
 								echo "</div>";
-								echo "<a class='tooltip' id='kommentti".$row[$fieldname]."'>".str_replace(",", "<br>*", $row[$fieldname])."</a></td>";
+								echo "<a class='tooltip' id='kommentti".$row[$fieldname]."'>".str_replace(",", "<br>*", $row[$fieldname])."</a>";
 							}
 							else {
-								echo "<td class='$class' align='right' valign='top'>".str_replace(",", "<br>*", $row[$fieldname])."</td>";
+								echo "<td class='$class' align='right' valign='top'>".str_replace(",", "<br>*", $row[$fieldname]);
 							}
+
+							if ($kukarow["yhtio"] == "savt") {
+								$query_comments = "	SELECT viesti
+													FROM lasku use index (primary)
+													WHERE yhtio = '$kukarow[yhtio]'
+													AND tunnus in ({$row[$fieldname]})
+													AND viesti != ''
+													LIMIT 1";
+								$result_comments = pupe_query($query_comments);
+								$row_comments = mysql_fetch_assoc($result_comments);
+
+								$row_comments["viesti"] = preg_replace("/[^0-9]/", "", $row_comments["viesti"]);
+
+								if ($row_comments["viesti"] != "") {
+									echo "<br><a target='_blank' href='https://devlab.zendesk.com/tickets/{$row_comments["viesti"]}'>{$row_comments["viesti"]}</a>";
+								}
+							}
+
+							echo "</td>";
+
+
 						}
 						elseif ($fieldname == "seuranta") {
 

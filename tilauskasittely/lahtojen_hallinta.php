@@ -964,7 +964,7 @@
 						tilausrivi.yksikko,
 						CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS 'hyllypaikka',
 						kerayserat.laatija AS 'keraaja',
-						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 1, 0)) AS 'keratyt'
+						SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', kerayserat.kpl, 0)) AS 'keratyt'
 						FROM tilausrivi
 						LEFT JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)

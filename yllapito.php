@@ -1724,6 +1724,7 @@
 			$toim == "tilikaudet" or
 			$toim == "hyvityssaannot" or
 			$toim == "varaston_hyllypaikat" or
+			$toim == "tuotteen_orginaalit" or
 			($toim == "liitetiedostot" and $poistolukko == "") or
 			($toim == "tuote" and $poistolukko == "") or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {

@@ -84,6 +84,7 @@ if (!isset($tilausrivi_alvillisuus)) $tilausrivi_alvillisuus = "";
 if (!isset($valitsetoimitus_vaihdarivi)) $valitsetoimitus_vaihdarivi = "";
 if (!isset($saako_liitaa_laskuja_tilaukseen)) $saako_liitaa_laskuja_tilaukseen = "";
 if (!isset($omalle_tilaukselle)) $omalle_tilaukselle = '';
+if (!isset($lisax)) $lisax = '';
 
 // Setataan lopetuslinkki, jotta pääsemme takaisin tilaukselle jos käydään jossain muualla
 $tilmyy_lopetus = "{$palvelin2}tilauskasittely/tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -4440,6 +4441,20 @@ if ($tee == '') {
 		}
 		elseif ($toim == "YLLAPITO") {
 
+			$dynamic_result = t_avainsana("SOPIMUS_KENTTA","", "and avainsana.selitetark != ''");
+
+			if (mysql_num_rows($dynamic_result) > 0) {
+				$kommentti_select = "concat(tilausrivi.kommentti";
+				// ketjutetaan kommentti, ja avainsanat samaan. Laitetaan html-koodia että avainsana on mustalla, muuten ne olisi samallavärillä kuin kommentti.
+				while($drow = mysql_fetch_assoc($dynamic_result)) {
+					$kommentti_select .= ",if(tilausrivin_lisatiedot.{$drow["selite"]} !='',concat('<br><font color=\"black\">{$drow["selitetark"]}:</font> ',tilausrivin_lisatiedot.{$drow["selite"]}),'')";
+				}
+				$kommentti_select .= ") kommentti,";
+			}
+			else {
+				$kommentti_select = "tilausrivi.kommentti,";
+			}
+
 			$tilrivity	= "'L','0'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
@@ -4500,6 +4515,7 @@ if ($tee == '') {
 					tuote.status,
 					tuote.ei_saldoa,
 					tuote.vakkoodi,
+					$kommentti_select
 					$sorttauskentta
 					FROM tilausrivi use index (yhtio_otunnus)
 					LEFT JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
@@ -5068,12 +5084,13 @@ if ($tee == '') {
 						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
 					}
 
-					$query = "	SELECT sum(if(kommentti != '' or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or $vastaavattuotteet = 1, 1, 0)), count(*)
+					$query = "	SELECT sum(if(kommentti != '' or (tilausrivin_lisatiedot.sopimuksen_lisatieto1 !='' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 !='') or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or $vastaavattuotteet = 1, 1, 0)), count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
-								WHERE yhtio = '$kukarow[yhtio]'
+								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								$tunnuslisa
 								$pklisa
-								and tyyppi != 'D'";
+								and tilausrivi.tyyppi != 'D'";
 					$pkres = pupe_query($query);
 					$pkrow = mysql_fetch_row($pkres);
 
@@ -5095,20 +5112,6 @@ if ($tee == '') {
 					$pknum = $pkrow[0] + $pkrow[1];
 					$borderlask = $pkrow[1];
 
-					// Tämä on sellainen lisäjuttu, jos tilausriveille on syötetty dynaamisia avainsanoja esim. sarjanumero, niin ne näytetään kommentin alla
-					$query = "	SELECT sum(if(tl.sopimuksen_lisatieto1 !='' or tl.sopimuksen_lisatieto2 !='', 1,0)) maara 
-								FROM tilausrivin_lisatiedot as tl
-								JOIN tilausrivi on (tl.yhtio=tilausrivi.yhtio and tl.tilausrivitunnus=tilausrivi.tunnus)
-								WHERE tl.yhtio = '$kukarow[yhtio]' 
-								{$tunnuslisa}
-								{$pklisa}";
-					$lisares = pupe_query($query);
-					$lisarow = mysql_fetch_row($lisares);
-
-					if ($lisarow[0] > 0) {
-						$pknum = $pknum + $lisarow[0];
-					}
-					
 					echo "<tr>";
 
 					if ($jarjlisa != "") {
@@ -5180,7 +5183,6 @@ if ($tee == '') {
 						if ($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '5')) {
 							$tuoteperhe_kayty = $row['perheid'];
 						}
-						
 						echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino</td>";
 					}
 				}
@@ -5201,10 +5203,8 @@ if ($tee == '') {
 						if ($jarjlisa != "") {
 							echo "<td rowspan = '2' width='15' class='back'>$buttonit</td>";
 						}
-						$rowspan_arvo = 2;
-						if ($row["sopimuksen_lisatieto1"] !="" or $row["sopimuksen_lisatieto2"] !="") $rowspan_arvo = 3;
-						
-						echo "<td $class rowspan = '{$rowspan_arvo}' valign='top'>$echorivino";
+
+						echo "<td $class rowspan = '2' valign='top'>$echorivino";
 					}
 					elseif ($tilauksen_jarjestys == '1' and $row['perheid'] != 0) {
 						echo "<td $class>&nbsp;</td>";
@@ -5213,9 +5213,8 @@ if ($tee == '') {
 						if ($jarjlisa != "") {
 							echo "<td width='15' class='back'>$buttonit</td>";
 						}
-						$rowspan_arvo = 1;
-						if ($row["sopimuksen_lisatieto1"] !="" or $row["sopimuksen_lisatieto2"] !="") $rowspan_arvo = 2;
-						echo "<td  $class $class rowspan = '{$rowspan_arvo}' valign='top'>$echorivino";
+
+						echo "<td  $class valign='top'>$echorivino";
 					}
 
 					if ($toim != "TARJOUS") {
@@ -6248,45 +6247,7 @@ if ($tee == '') {
 					echo "</tr>";
 
 				}
-				// tehdään vasteaika ja sarjanumero jotain
-				if ($row["sopimuksen_lisatieto1"] !="" or $row["sopimuksen_lisatieto2"] !="") {
-					// Katsotaan halutaanko dynaamisia kenttiä näkyviin
-					$dynamic_result = t_avainsana("SOPIMUS_KENTTA","", "and avainsana.selitetark != ''");
-					if (mysql_num_rows($yllapito_dynamic_result) > 0) {
-						echo "<tr>";
-
-						if ($borderlask == 0 and $pknum > 1) {
-							$kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
-							$kommclass2 = " style='border-bottom: 1px solid;'";
 						}
-						elseif ($pknum > 0) {
-							$kommclass1 = " style='border-right: 1px solid;'";
-							$kommclass2 = " ";
-						}
-						else {
-							$kommclass1 = "";
-							$kommclass2 = " ";
-						}
-
-						echo "<td $kommclass1 colspan='".($sarakkeet-1)."' valign='top'>";						
-						
-						while ($dynamic_row = mysql_fetch_assoc($dynamic_result)) {
-							
-							if ($dynamic_row["selite"] == "sopimuksen_lisatieto1" and $row["sopimuksen_lisatieto1"] !="") {
-								echo $dynamic_row["selitetark"].":<br><font class='message'>".str_replace("\n", ", ", $row["sopimuksen_lisatieto1"])."</font><br>";
-							}
-
-							if ($dynamic_row["selite"] == "sopimuksen_lisatieto2" and $row["sopimuksen_lisatieto2"] !="") {
-								echo $dynamic_row["selitetark"].":<br><font class='message'>".str_replace("\n", ", ", $row["sopimuksen_lisatieto2"])."</font><br>";
-							}
-						}
-					
-						echo "</td>";
-						echo "</tr>";
-					}
-				}
-				
-			}
 
 			if ($kukarow['hinnat'] != -1 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 				// Laskeskellaan tilauksen loppusummaa (mitätöidyt ja raaka-aineet eivät kuulu jengiin)

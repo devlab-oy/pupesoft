@@ -214,6 +214,9 @@
 
 					$('.toggleable_row_order').live('click', function(event){
 
+						var parent = $(this).parent().parent().parent().parent();
+						var parent_id = $(parent).attr('id');
+
 						var id = this.id.split(\"__\", 2);
 
 						if ($('#toggleable_row_order_'+id[0]+'__'+id[1]).is(':visible')) {
@@ -221,20 +224,11 @@
 							$(this).removeClass('tumma');
 
 							$('#toggleable_row_order_'+id[0]+'__'+id[1]).slideUp('fast');
-							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().hide();
+							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().hide().parent().hide();
 
 							if ($('.toggleable_row_child_div_order:visible, .toggleable_row_child_div_sscc:visible').length == 0) {
 
-								$('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').show();
-
-								// $('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]')
-								// 	.parent()
-								// 	.parent()
-								// 	.show()
-								// 	.next()
-								// 	.show();
-
-								$('.toggleable_row_child_div_order, .toggleable_row_child_div_sscc').parent().parent().hide();
+								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').show().next().hide().next().hide();
 
 								$('.filter_row_by_text:visible').attr('disabled', false).each(function() {
 									$(this).val() != '' ? $(this).trigger('keyup') : '';
@@ -251,14 +245,7 @@
 
 							var parent_element = $('#toggleable_row_order_'+id[0]+'__'+id[1]).parent();
 
-							$('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide();
-
-							$('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]')
-								.parent()
-								.parent()
-								.hide()
-								.next()
-								.hide();
+							$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide().next().hide().next().hide();
 
 							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().parent().show();
 							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().show();
@@ -269,22 +256,21 @@
 					$('.toggleable_row_sscc').live('click', function(event){
 
 						if ($(this).html() != '') {
+
+							var parent = $(this).parent().parent().parent().parent();
+							var parent_id = $(parent).attr('id');
+
 							var id = this.id.split(\"__\", 3);
 
 							if ($('#toggleable_row_sscc_'+id[0]+'__'+id[2]).is(':visible')) {
 								$(this).removeClass('tumma');
 
 								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).slideUp('fast');
-								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().hide();
+								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().hide().parent().hide();
 
 								if ($('.toggleable_row_child_div_order:visible, .toggleable_row_child_div_sscc:visible').length == 0) {
 
-									$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
-
-									// $('div[id!=\"toggleable_row_order_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_order\"]').parent().parent().show();
-									// $('div[id!=\"toggleable_row_sscc_'+id[0]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_sscc\"]').parent().parent().show();
-
-									$('.toggleable_row_child_div_order, .toggleable_row_child_div_sscc').parent().parent().hide();
+									$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show().next().hide().next().hide();
 
 									$('.filter_row_by_text:visible').attr('disabled', false).each(function() {
 										$(this).val() != '' ? $(this).trigger('keyup') : '';
@@ -301,10 +287,7 @@
 
 								var parent_element = $('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent();
 
-								$('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
-
-								$('div[id!=\"toggleable_row_order_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_order\"]').parent().parent().hide();
-								$('div[id!=\"toggleable_row_sscc_'+id[0]+'__'+id[2]+'\"][class=\"toggleable_row_child_div_sscc\"]').parent().parent().hide();
+								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide().next().hide().next().hide();
 
 								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().parent().show();
 								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().show();

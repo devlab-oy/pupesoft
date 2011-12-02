@@ -74,30 +74,26 @@
 	// LN = Etsitään myyjän tai laatijan nimellä
 	if ($tee == 'LN') {
 		// haetaan vain aktiivisia käyttäjiä
-		$query = "	SELECT group_concat(distinct concat('\'',kuka.kuka,'\'')) kuka, group_concat(distinct concat('\'',kuka.myyja,'\'')) myyja, if(count(oikeu.tunnus) > 0, 0, 1) aktiivinen
+		$query = "	SELECT group_concat(distinct concat('\'',kuka.kuka,'\'')) kuka, group_concat(distinct concat(kuka.myyja)) myyja
 					FROM kuka
 					JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 					WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-					AND (kuka.kuka like '%$summa1%' or kuka.nimi like '%$summa1%')
-					having aktiivinen = 0";
+					AND (kuka.kuka like '%$summa1%' or kuka.nimi like '%$summa1%')";
 		$kukares = pupe_query($query);
 
-		while ($row = mysql_fetch_assoc($kukares)) {
-			$laatijat	= $row["kuka"];
-			$myyja		= $row["myyja"];
+		$row = mysql_fetch_assoc($kukares);
+		
+		if ($row["myyja"] !="") {
+			$myyja = " or myyja in ({$row["myyja"]})";
 		}
-
-		$mmuuttuja = "";
-		if ($myyja !="") {
-			$mmuuttuja = " or myyja in ($myyja)";
-		}
-
-		if ($laatijat == "") {
-			$laatijat = "'".$summa1."'";
+		
+		// Jos ei löytynyt käyttäjistä niin kokeillaan hakusanalla
+		if ($row["kuka"] == "") {
+			$row["kuka"] = "'".$summa1."'";
 		}
 
 		$index = " use index (tila_index) ";
-		$ehto = "tila = 'U' and (laatija in ($laatijat) $mmuuttuja)";
+		$ehto = "tila = 'U' and (laatija in ({$row["kuka"]}) $myyja)";
 		$jarj = "nimi, tapvm desc";
 	}
 
@@ -281,7 +277,7 @@
 			}
 
 			echo "</tbody>";
-			echo "</table><br />";
+			echo "</table><br /><br />";
 
 			if ($alku > 0) {
 				$siirry = $alku - 50;

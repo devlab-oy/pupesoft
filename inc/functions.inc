@@ -14135,7 +14135,7 @@ if (!function_exists("tee_keraysera2")) {
 	 								)
 		*/
 
-		$query = "	SELECT lasku.liitostunnus,
+		$query = "	(SELECT lasku.liitostunnus,
 					lasku.nimi as asiakas_nimi,
 					lahdot.tunnus as lahto,
 					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
@@ -14170,11 +14170,11 @@ if (!function_exists("tee_keraysera2")) {
 					AND lasku.vakisin_kerays = ''
 					{$wherelisa}
 					{$groupby}
-					{$orderby}
+					{$orderby})
 
 					UNION
 
-					SELECT lasku.liitostunnus,
+					(SELECT lasku.liitostunnus,
 					lasku.nimi as asiakas_nimi,
 					999999999 as lahto,
 					1 as erotus,
@@ -14198,9 +14198,8 @@ if (!function_exists("tee_keraysera2")) {
 					AND lasku.tila = 'N'
 					AND lasku.alatila = 'A'
 					AND lasku.vakisin_kerays != ''
-					{$wherelisa}
 					{$groupby}
-					{$orderby}";
+					{$orderby})";
 		echo "<pre>",str_replace("\t", "", $query),"</pre>";
 		$res = pupe_query($query);
 

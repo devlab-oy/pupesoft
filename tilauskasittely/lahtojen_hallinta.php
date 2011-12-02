@@ -361,6 +361,12 @@
 						}
 					});
 
+					$('.filter_parent_row_by option').each(function() {
+						if ($(this).is(':selected') && $(this).val() != '') {
+							$(this).trigger('change');
+						}
+					});
+
 					// tehd‰‰n 2. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan miss‰ asennoissa ne oli
 					$('.sort_row_by').each(function() {
 						var title_sort = this.id.substring(4);
@@ -623,16 +629,33 @@
 		$carriers[$row['rahdinkuljettaja']] = $row['rahdinkuljettaja'];
 	}
 
+	if (!isset($parent_row_select_status)) $parent_row_select_status = "";
+	if (!isset($parent_row_select_prio)) $parent_row_select_prio = "";
+	if (!isset($parent_row_select_carrier)) $parent_row_select_carrier = "";
+	if (!isset($parent_row_select_delivery)) $parent_row_select_delivery = "";
+	if (!isset($parent_row_select_date)) $parent_row_select_date = "";
+
+	echo "<form method='post' action=''>";
 	echo "<table>";
+
+	echo "<tr>";
+	echo "<td colspan='14' class='back'>";
+	echo "<input type='submit' name='aloita_kerays' value='",t("Aloita ker‰ys"),"' />";
+	echo "</td>";
+	echo "</tr>";
+
 	echo "<tr class='header_parent'>";
 
 	echo "<th class='sort_parent_row_by' id='parent_row_status'>",t("Status")," <img class='parent_row_direction_status' />";
 	echo "<br />";
-	echo "<select class='filter_parent_row_by' id='parent_row_select_status'>";
+
+	$sel = array_fill_keys(array($parent_row_select_status), " selected") + array(1 => '', 2 => '', 3 => '');
+
+	echo "<select class='filter_parent_row_by' name='parent_row_select_status' id='parent_row_select_status'>";
 	echo "<option value=''>",t("Valitse"),"</option>";
-	echo "<option value='3'>",t("Aloittamatta"),"</option>";
-	echo "<option value='2'>",t("Aloitettu"),"</option>";
-	echo "<option value='1'>",t("Aika ylitetty"),"</option>";
+	echo "<option value='3'{$sel[3]}>",t("Aloittamatta"),"</option>";
+	echo "<option value='2'{$sel[2]}>",t("Aloitettu"),"</option>";
+	echo "<option value='1'{$sel[1]}>",t("Aika ylitetty"),"</option>";
 	echo "</select>";
 	echo "</th>";
 
@@ -641,13 +664,16 @@
 
 	echo "<th class='sort_parent_row_by' id='parent_row_prio'>",t("Prio")," <img class='parent_row_direction_prio' />";
 	echo "<br />";
-	echo "<select class='filter_parent_row_by' id='parent_row_select_prio'>";
+	echo "<select class='filter_parent_row_by' name='parent_row_select_prio' id='parent_row_select_prio'>";
 	echo "<option value=''>",t("Valitse"),"</option>";
 
 	sort($priorities);
 
 	foreach ($priorities AS $prio) {
-		echo "<option value='{$prio}'>{$prio}</option>";
+
+		$sel = $parent_row_select_prio == $prio ? " selected" : "";
+
+		echo "<option value='{$prio}'{$sel}>{$prio}</option>";
 	}
 
 	echo "</select>";
@@ -655,13 +681,16 @@
 
 	echo "<th class='sort_parent_row_by' id='parent_row_carrier'>",t("Rahdinkuljettaja")," <img class='parent_row_direction_carrier' />";
 	echo "<br />";
-	echo "<select class='filter_parent_row_by' id='parent_row_select_carrier'>";
+	echo "<select class='filter_parent_row_by' name='parent_row_select_carrier' id='parent_row_select_carrier'>";
 	echo "<option value=''>",t("Valitse"),"</option>";
 
 	sort($carriers);
 
 	foreach ($carriers AS $carr) {
-		echo "<option value='{$carr}'>{$carr}</option>";
+
+		$sel = $parent_row_select_carrier == $carr ? " selected" : "";
+
+		echo "<option value='{$carr}'{$sel}>{$carr}</option>";
 	}
 
 	echo "</select>";
@@ -669,13 +698,16 @@
 
 	echo "<th class='sort_parent_row_by' id='parent_row_delivery'>",t("Toimitustapa")," <img class='parent_row_direction_delivery' />";
 	echo "<br />";
-	echo "<select class='filter_parent_row_by' id='parent_row_select_delivery'>";
+	echo "<select class='filter_parent_row_by' name='parent_row_select_delivery' id='parent_row_select_delivery'>";
 	echo "<option value=''>",t("Valitse"),"</option>";
 
 	sort($deliveries);
 
 	foreach ($deliveries AS $deli) {
-		echo "<option value='{$deli}'>{$deli}</option>";
+
+		$sel = $parent_row_select_delivery == $deli ? " selected" : "";
+
+		echo "<option value='{$deli}'{$sel}>{$deli}</option>";
 	}
 
 	echo "</select>";
@@ -683,13 +715,18 @@
 
 	echo "<th class='sort_parent_row_by' id='parent_row_date'>",t("Pvm")," <img class='parent_row_direction_date' />";
 	echo "<br />";
-	echo "<select class='filter_parent_row_by' id='parent_row_select_date'>";
+	echo "<select class='filter_parent_row_by' name='parent_row_select_date' id='parent_row_select_date'>";
 	echo "<option value=''>",t("Valitse"),"</option>";
 
 	sort($dates);
 
 	foreach ($dates AS $pvm) {
-		echo "<option value='",tv1dateconv($pvm),"'>",tv1dateconv($pvm),"</option>";
+
+		$pvm = tv1dateconv($pvm);
+
+		$sel = $parent_row_select_date == $pvm ? " selected" : "";
+
+		echo "<option value='{$pvm}'{$sel}>{$pvm}</option>";
 	}
 
 	echo "</select>";
@@ -1148,5 +1185,6 @@
 	}
 
 	echo "</table>";
+	echo "</form>";
 
 	require ("inc/footer.inc");

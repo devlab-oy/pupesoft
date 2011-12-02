@@ -161,7 +161,7 @@
 		}
 		elseif ($jv == 'vainvak') {
 			if (!isset($nayta_pdf)) echo t("Vain VAK").". ";
-			$vainvakilliset = " JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+			$vainvakilliset = " JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi not in ('','0')) ";
 		}
 		else {
@@ -578,7 +578,7 @@
 
 				// tulostetaan toimitustavan m‰‰rittelem‰ rahtikirja
 				if (@include("tilauskasittely/$toitarow[rahtikirja]")) {
-					
+
 					// Otetaan talteen t‰ss‰ $rahtikirjanro talteen
 					$rahtikirjanro_alkuperainen = $rahtikirjanro;
 
@@ -589,7 +589,7 @@
 					if ($toitarow['erittely'] != '') {
 						require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 					}
-					
+
 					// palautetaan alkuper‰inen $rahtikirjanro takaisin
 					$rahtikirjanro = $rahtikirjanro_alkuperainen;
 				}
@@ -615,14 +615,14 @@
 				}
 
 				if ($rakir_row['toimitusvahvistus'] != '') {
-					
+
 					$tulostauna		= "";
 
 					if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
 						$tulostauna = "KYLLA";
 						$rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
 					}
-					
+
 					if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
 						require("tilauskasittely/$rakir_row[toimitusvahvistus]");
 					}

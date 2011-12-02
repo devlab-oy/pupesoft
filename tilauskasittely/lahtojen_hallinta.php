@@ -107,7 +107,6 @@
 						}
 						else {
 							$(selected).show();
-							$(this).attr('selected', true);
 						}
 					});
 
@@ -209,14 +208,12 @@
 							$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').hide();
 							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').hide();
 
-							$('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]')
-								.parent()
-								.parent()
-								.hide()
-								.next()
-								.hide();
+							// $('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]').parent().parent().hide().next().hide();
+							// console.log($('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]').parent().parent());
 
-							$('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show().children().children().children().show();
+							$('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show().children().children().children().filter('tr[class=\"toggleable_row_tr\"]').show();
+							$('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show().children().children().children().filter('tr[id^=\"toggleable_row_child_\"]').hide()
+
 						}
 					});
 
@@ -237,7 +234,7 @@
 
 							if ($('.toggleable_row_child_div_order:visible, .toggleable_row_child_div_sscc:visible').length == 0) {
 
-								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').show().next().hide().next().hide();
+								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').show();
 
 								var text_search = false;
 
@@ -264,6 +261,8 @@
 							var parent_element = $('#toggleable_row_order_'+id[0]+'__'+id[1]).parent();
 
 							$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide().next().hide().next().hide();
+							$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_order_'+id[0]+'__'+id[1]+'\"][class^=\"toggleable_row_child_order_\"]').hide();
+							// $('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_sscc_'+id[0]+'__'+id[1]+'\"][class^=\"toggleable_row_child_sscc_\"]').hide();
 
 							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().parent().show();
 							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().show();
@@ -289,7 +288,7 @@
 
 								if ($('.toggleable_row_child_div_order:visible, .toggleable_row_child_div_sscc:visible').length == 0) {
 
-									$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show().next().hide().next().hide();
+									$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').show();
 
 									var text_search = false;
 
@@ -315,7 +314,9 @@
 
 								var parent_element = $('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent();
 
-								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide().next().hide().next().hide();
+								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
+								// $('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_order_'+id[0]+'__'+id[2]+'\"][class^=\"toggleable_row_child_order_\"]').hide();
+								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_sscc_'+id[0]+'__'+id[2]+'\"][class^=\"toggleable_row_child_sscc_\"]').hide();
 
 								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().parent().show();
 								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().show();
@@ -817,6 +818,9 @@
 					GROUP BY 1,2,3,4,5,6,7,8,9,10";
 		$lahto_res = pupe_query($query);
 
+		if (!isset($child_row_select_status)) $child_row_select_status = "";
+		if (!isset($child_row_select_prio)) $child_row_select_prio = "";
+
 		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}__{$y}'>";
 		echo "<td colspan='14' class='back'>";
 		echo "<div id='toggleable_{$row['lahdon_tunnus']}__{$y}' style='display:none;'>";
@@ -834,11 +838,14 @@
 
 		echo "<th class='sort_row_by' id='row_status__{$row['lahdon_tunnus']}__{$y}'>",t("Status")," <img class='row_direction_status' />";
 		echo "<br />";
-		echo "<select class='filter_row_by_select' id='child_row_select_status'>";
+
+		$sel = array_fill_keys(array($child_row_select_status), " selected") + array(1 => '', 2 => '', 3 => '');
+
+ 		echo "<select class='filter_row_by_select' name='child_row_select_status' id='child_row_select_status'>";
 		echo "<option value=''>",t("Valitse"),"</option>";
-		echo "<option value='1'>",t("Aloittamatta"),"</option>";
-		echo "<option value='2'>",t("Aloitettu"),"</option>";
-		echo "<option value='3'>",t("Kerätty"),"</option>";
+		echo "<option value='1'{$sel[1]}>",t("Aloittamatta"),"</option>";
+		echo "<option value='2'{$sel[2]}>",t("Aloitettu"),"</option>";
+		echo "<option value='3'{$sel[3]}>",t("Kerätty"),"</option>";
 		echo "</select>";
 		echo "</th>";
 
@@ -846,7 +853,7 @@
 
 		echo "<th class='sort_row_by' id='row_prio__{$row['lahdon_tunnus']}__{$y}'>",t("Prio")," <img class='row_direction_prio' />";
 		echo "<br />";
-		echo "<select class='filter_row_by_select' id='child_row_select_prio'>";
+		echo "<select class='filter_row_by_select' name='child_row_select_prio' id='child_row_select_prio'>";
 		echo "<option value=''>",t("Valitse"),"</option>";
 
 		foreach ($priorities as $prio) {
@@ -910,6 +917,7 @@
 		$x = 0;
 
 		$type_array = array(
+			"" 	=> "",
 			"N" => t("Normaalitilaus"),
 			"E" => t("Ennakkotilaus"),
 			"T" => t("Tarjoustilaus"),
@@ -1063,7 +1071,7 @@
 						ORDER BY kerayserat.sscc, tilausrivi.tuoteno";
 			$rivi_res = pupe_query($query);
 			
-			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 			echo "<td colspan='15' class='back' style='display:none;'>";
 			echo "<div class='toggleable_row_child_div_order' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}__{$x}' style='display:none;'>";
 
@@ -1107,8 +1115,6 @@
 			echo "</td>";
 			echo "</tr>";
 
-			reset($arr);
-
 			$query = "	SELECT tilausrivi.tuoteno,
 						kerayserat.otunnus,
 						tuote.nimitys,
@@ -1126,7 +1132,7 @@
 						ORDER BY kerayserat.otunnus, tilausrivi.tuoteno";
 			$rivi_res = pupe_query($query);
 
-			echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
+			echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 			echo "<td colspan='15' class='back' style='display:none;'>";
 			echo "<div class='toggleable_row_child_div_sscc' id='toggleable_row_sscc_{$lahto_row['sscc']}__{$x}' style='display:none;'>";
 

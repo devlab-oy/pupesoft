@@ -21,8 +21,6 @@
 						}
 					});
 
-					//$('#child_row_select_picking_zone').attr('size', 1);
-
 					$('.center').css({'text-align': 'center', 'padding-left': '7px', 'padding-right': '7px'});
 					$('.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
 
@@ -574,6 +572,7 @@
 				SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
 				avainsana.selitetark_3 AS 'prioriteetti',
 				toimitustapa.selite AS 'toimitustapa',
+				toimitustapa.rahdinkuljettaja,
 				COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
 				SUM(IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), 1, 0)) AS 'valmiina',
 				COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
@@ -592,16 +591,17 @@
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
-				GROUP BY 1,2,3,4,5,6,7,8
+				GROUP BY 1,2,3,4,5,6,7,8,9
 				ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika, lahdot.tunnus";
 	$result = pupe_query($query);
 
-	$deliveries = $dates = $priorities = array();
+	$deliveries = $dates = $priorities = $carriers = array();
 
 	while ($row = mysql_fetch_assoc($result)) {
 		$deliveries[$row['toimitustapa']] = $row['toimitustapa'];
 		$dates[$row['lahdon_pvm']] = $row['lahdon_pvm'];
 		$priorities[$row['prioriteetti']] = $row['prioriteetti'];
+		$carriers[$row['rahdinkuljettaja']] = $row['rahdinkuljettaja'];
 	}
 
 	echo "<table>";
@@ -629,6 +629,20 @@
 
 	foreach ($priorities AS $prio) {
 		echo "<option value='{$prio}'>{$prio}</option>";
+	}
+
+	echo "</select>";
+	echo "</th>";
+
+	echo "<th class='sort_parent_row_by' id='parent_row_carrier'>",t("Rahdinkuljettaja")," <img class='parent_row_direction_carrier' />";
+	echo "<br />";
+	echo "<select class='filter_parent_row_by' id='parent_row_select_carrier'>";
+	echo "<option value=''>",t("Valitse"),"</option>";
+
+	sort($carriers);
+
+	foreach ($carriers AS $carr) {
+		echo "<option value='{$carr}'>{$carr}</option>";
 	}
 
 	echo "</select>";
@@ -697,6 +711,7 @@
 		echo "<td><input type='checkbox' class='checkall' name='{$row['lahdon_tunnus']}'></td>";
 		echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'><button type='button'>{$row['lahdon_tunnus']}</button></td>";
 		echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";
+		echo "<td class='toggleable_parent_row_carrier' id='{$row['rahdinkuljettaja']}__{$row['lahdon_tunnus']}__{$y}'>{$row['rahdinkuljettaja']}</td>";
 		echo "<td class='toggleable_parent_row_delivery' id='{$row['toimitustapa']}__{$row['lahdon_tunnus']}__{$y}'>{$row['toimitustapa']}</td>";
 		echo "<td class='center toggleable_parent_row_date' id='",tv1dateconv($row['lahdon_pvm']),"__{$row['lahdon_tunnus']}__{$y}'>",tv1dateconv($row['lahdon_pvm']),"</td>";
 		echo "<td class='center toggleable_parent_row_time1' id='{$row['viimeinen_tilausaika']}__{$row['lahdon_tunnus']}__{$y}'>{$row['viimeinen_tilausaika']}</td>";
@@ -747,7 +762,7 @@
 		$lahto_res = pupe_query($query);
 
 		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}__{$y}'>";
-		echo "<td colspan='15' class='back'>";
+		echo "<td colspan='14' class='back'>";
 		echo "<div id='toggleable_{$row['lahdon_tunnus']}__{$y}' style='display:none;'>";
 
 		echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";

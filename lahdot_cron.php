@@ -41,6 +41,8 @@
 
 		while ($t_row = mysql_fetch_assoc($toimitustavan_lahdot_res)) {
 
+			$asiakasluokka = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$t_row['asiakasluokka']}'", "", "", "selitetark_3");
+
 			$query = "	SELECT * 
 						FROM lahdot 
 						WHERE yhtio = '{$kukarow['yhtio']}'
@@ -50,7 +52,7 @@
 						AND viimeinen_tilausaika = '{$t_row['viimeinen_tilausaika']}'
 						AND kerailyn_aloitusaika = '{$t_row['kerailyn_aloitusaika']}'
 						AND terminaalialue = '{$t_row['terminaalialue']}'
-						AND asiakasluokka = '{$t_row['asiakasluokka']}'
+						AND asiakasluokka = '{$asiakasluokka}'
 						AND liitostunnus = '{$t_row['liitostunnus']}'";
 			$chk_res = pupe_query($query);
 
@@ -64,7 +66,7 @@
 							viimeinen_tilausaika = '{$t_row['viimeinen_tilausaika']}',
 							kerailyn_aloitusaika = '{$t_row['kerailyn_aloitusaika']}',
 							terminaalialue = '{$t_row['terminaalialue']}',
-							asiakasluokka = '{$t_row['asiakasluokka']}',
+							asiakasluokka = '{$asiakasluokka}',
 							aktiivi = '',
 							liitostunnus = '{$t_row['liitostunnus']}',
 							laatija = '{$kukarow['kuka']}',
@@ -78,5 +80,13 @@
 
 	}
 
-	$query = "UPDATE lahdot SET vakisin_kerays = '' WHERE yhtio = '{$kukarow['yhtio']}'";
+	$query = "UPDATE lahdot SET vakisin_kerays = '' WHERE yhtio = '{$kukarow['yhtio']}' AND vakisin_kerays != ''";
+	$upd_res = pupe_query($query);
+
+	$query = "	UPDATE lasku SET 
+				vakisin_kerays = '' 
+				WHERE yhtio = '{$kukarow['yhtio']}' 
+				AND vakisin_kerays != ''
+				AND lasku.tila = 'N' 
+				AND lasku.alatila = 'A'";
 	$upd_res = pupe_query($query);

@@ -577,11 +577,14 @@
 					});
 
 					// 1. tason checkboxin eventti
-					$('.checkall').click(function(){
+					$('.checkall_child').click(function(){
 
-						var id = $(this).attr('name');
-
-						$(this).is(':checked') ? $('.checkbox_'+id).attr('checked', true).parent().parent().addClass('tumma') : $('.checkbox_'+id).attr('checked', false).parent().parent().removeClass('tumma');
+						if ($(this).is(':checked')) {
+							$('input:checkbox:visible').filter('input:checkbox:visible:not(.checkall_parent, .checkall_child)').attr('checked', true).parent().parent().addClass('tumma');
+						}
+						else {
+							$('input:checkbox:visible').filter('input:checkbox:visible:not(.checkall_parent, .checkall_child)').attr('checked', false).parent().parent().removeClass('tumma');
+						}
 					});
 				});
 
@@ -765,7 +768,7 @@
 			echo "<td class='keltainen toggleable_parent_row_status' id='3__{$row['lahdon_tunnus']}__{$y}'></td>";
 		}
 
-		echo "<td><input type='checkbox' class='checkall' name='{$row['lahdon_tunnus']}'></td>";
+		echo "<td><input type='checkbox' class='checkall_parent' id='{$row['lahdon_tunnus']}'></td>";
 		echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'><button type='button'>{$row['lahdon_tunnus']}</button></td>";
 		echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";
 		echo "<td class='toggleable_parent_row_carrier' id='{$row['rahdinkuljettaja']}__{$row['lahdon_tunnus']}__{$y}'>{$row['rahdinkuljettaja']}</td>";
@@ -834,7 +837,7 @@
 		}
 
 		echo "<tr class='header_row_{$row['lahdon_tunnus']}__{$y}'>";
-		echo "<th></th>";
+		echo "<th><input type='checkbox' class='checkall_child'></th>";
 
 		echo "<th class='sort_row_by' id='row_status__{$row['lahdon_tunnus']}__{$y}'>",t("Status")," <img class='row_direction_status' />";
 		echo "<br />";
@@ -931,7 +934,7 @@
 
 			echo "<tr class='toggleable_row_tr' id='toggleable_row_tr_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 
-			echo "<td><input type='checkbox' class='checkbox_{$row['lahdon_tunnus']}'></td>";
+			echo "<td><input type='checkbox' class='checkbox_{$lahto_row['tilauksen_tunnus']}' id='checkbox_{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";
 
 			$status = $status_text = '';
 

@@ -326,8 +326,9 @@ else {
 
 		$tilausriviquery = "SELECT SUM(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * $query_ale_lisa) rivihinta
 							FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tilausrivi.otunnus = '$laskurow[tunnus]'";
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							AND tilausrivi.otunnus = '$laskurow[tunnus]'
+							AND tilausrivi.tyyppi != 'D'";
 		$rivihintaresult = pupe_query($tilausriviquery);
 		$totaalirivi = mysql_fetch_assoc($rivihintaresult);
 
@@ -370,14 +371,15 @@ else {
 							JOIN tilausrivin_lisatiedot USE INDEX (tilausrivitunnus) ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 							AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-							AND tilausrivi.otunnus = '$laskurow[tunnus]'";
+							AND tilausrivi.otunnus = '$laskurow[tunnus]'
+							AND tilausrivi.tyyppi != 'D'";
 				$step1re = pupe_query($query);
 
 				while ($step1row = mysql_fetch_assoc($step1re)) {
 					// etsitään istätilausten kaikki lapset
 					$query = "	SELECT group_concat(DISTINCT tilausrivi.otunnus) uudet_otunnukset
 								FROM tilausrivin_lisatiedot
-								JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+								JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus AND tilausrivi.tyyppi != 'D')
 								WHERE tilausrivin_lisatiedot.yhtio = '$kukarow[yhtio]'
 								and tilausrivin_lisatiedot.vanha_otunnus = '$step1row[vanha_otunnus]'";
 					$step2re = pupe_query($query);
@@ -388,7 +390,8 @@ else {
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus in ($step2row[uudet_otunnukset])
-								AND tuoteno IN ($rahtinro_tuoteno_lisa)";
+								AND tuoteno IN ($rahtinro_tuoteno_lisa)
+								AND tyyppi != 'D'";
 					$step3re = pupe_query($query);
 
 					// jos ei niin pitää rahdittaa!
@@ -404,10 +407,11 @@ else {
 			$rahtimaksu_tunnukset = implode(",", $rahtimaksu_tunnukset);
 
 			$query = "	SELECT tunnus
-						from tilausrivi
-						where yhtio = '$kukarow[yhtio]'
-						and otunnus = '$laskurow[tunnus]'
-						and tuoteno IN ($rahtinro_tuoteno_lisa)";
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND otunnus = '$laskurow[tunnus]'
+						AND tyyppi != 'D'
+						AND tuoteno IN ($rahtinro_tuoteno_lisa)";
 			$result = pupe_query($query);
 
 			//jos tilauksella on jo rahtikulu niin ei lisätä sitä uudestaan
@@ -492,6 +496,7 @@ else {
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND otunnus = '$laskurow[tunnus]'
+								AND tyyppi != 'D'
 								AND tuoteno = '$yhtiorow[jalkivaatimus_tuotenumero]'";
 					$result = pupe_query($query);
 
@@ -541,6 +546,7 @@ else {
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus = '$laskurow[tunnus]'
+						AND tyyppi != 'D'
 						and tuoteno IN ({$rahtinro_tuoteno_lisa})";
 			$result = pupe_query($query);
 
@@ -737,6 +743,7 @@ else {
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.omalle_tilaukselle != '')
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 							AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+							AND tilausrivi.tyyppi != 'D'
 							AND tilausrivi.varattu > 1
 							AND tilausrivi.var NOT IN ('J','P')
 							ORDER BY tilausrivi.tunnus";
@@ -813,7 +820,13 @@ else {
 							$query = "UPDATE tilausrivi SET perheid = '{$split_tilausrivin_tunnus}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$split_tilausrivin_tunnus}'";
 							$update_res = pupe_query($query);
 
-							$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}' AND perheid = '{$row['tunnus']}' AND tunnus != '{$row['tunnus']}'";
+							$query = "	SELECT *
+										FROM tilausrivi
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND otunnus = '{$laskurow['tunnus']}'
+										AND tyyppi != 'D'
+										AND perheid = '{$row['tunnus']}'
+										AND tunnus != '{$row['tunnus']}'";
 							$lapsires = pupe_query($query);
 
 							while ($lapsirow = mysql_fetch_assoc($lapsires)) {
@@ -879,7 +892,13 @@ else {
 					if ($row['perheid'] > 0 and $row['tunnus'] == $row['perheid']) {
 						// jos on tuoteperhe, niin päivitetään lapsille varattu
 
-						$query = "SELECT * FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}' AND perheid = '{$row['tunnus']}' AND tunnus != '{$row['tunnus']}'";
+						$query = "	SELECT *
+									FROM tilausrivi
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND otunnus = '{$laskurow['tunnus']}'
+									AND tyyppi != 'D'
+									AND perheid = '{$row['tunnus']}'
+									AND tunnus != '{$row['tunnus']}'";
 						$lapsires = pupe_query($query);
 
 						while ($lapsirow = mysql_fetch_assoc($lapsires)) {
@@ -908,6 +927,7 @@ else {
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
+						AND tilausrivi.tyyppi != 'D'
 						and (tilausrivi.hyllyalue != '' OR tilausrivin_lisatiedot.omalle_tilaukselle != '')
 						and tilausrivi.varattu > 0
 						and tilausrivi.var not in ('J','P')
@@ -1188,7 +1208,9 @@ else {
 				foreach ($tilausnumerot as $tilausnumero) {
 					$query = "	SELECT min(kerayspvm) kerayspvm, min(toimaika) toimaika
 					 			from tilausrivi
-								where yhtio='$kukarow[yhtio]' and otunnus='$tilausnumero'";
+								where yhtio='$kukarow[yhtio]'
+								and otunnus='$tilausnumero'
+								AND tyyppi != 'D'";
 					$result = pupe_query($query);
 					$toimaikatilrirow = mysql_fetch_assoc($result);
 
@@ -1300,6 +1322,7 @@ else {
 								FROM lasku
 								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND
 													tilausrivi.otunnus = lasku.tunnus AND
+													tilausrivi.tyyppi != 'D' AND
 													tilausrivi.var = 'J' AND
 													tilausrivi.tyyppi in ('L','G') AND
 													tilausrivi.jt+tilausrivi.varattu > 0)

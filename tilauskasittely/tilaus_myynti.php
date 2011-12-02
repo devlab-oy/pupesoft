@@ -2577,7 +2577,7 @@ if ($tee == '') {
 								FROM lahdot 
 								WHERE yhtio = '{$kukarow['yhtio']}' 
 								AND liitostunnus = '{$toimitustavan_tunnus}' 
-								AND asiakasluokka = '{$laskurow['hyvaksynnanmuutos']}' 
+								AND asiakasluokka = '{$laskurow['prioriteettinro']}' 
 								AND aktiivi = ''";
 					$lahdot_res = pupe_query($query);
 

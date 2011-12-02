@@ -14156,17 +14156,48 @@ if (!function_exists("tee_keraysera2")) {
 					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 				 	JOIN lahdot ON (lahdot.yhtio = toimitustapa.yhtio
 									AND lahdot.liitostunnus = toimitustapa.tunnus
-									AND lahdot.pvm = CURDATE()
+									AND (lahdot.pvm = CURDATE() or lahdot.vakisin_kerays != '')
 									#AND lahdot.lahdon_kellonaika >= CURTIME()
-									AND lahdot.lahdon_viikonpvm = {$viikonpaiva}
+									AND (lahdot.lahdon_viikonpvm = {$viikonpaiva} or lahdot.vakisin_kerays != '')
 									AND lahdot.aktiivi = ''
-									AND lahdot.kerailyn_aloitusaika <= CURTIME()
-									AND lahdot.asiakasluokka = lasku.hyvaksynnanmuutos
+									AND (lahdot.kerailyn_aloitusaika <= CURTIME() or lahdot.vakisin_kerays != '')
+									AND (lahdot.asiakasluokka = lasku.prioriteettinro or lahdot.vakisin_kerays != '')
  									)
 					#JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tila = 'N'
 					AND lasku.alatila = 'A'
+					AND lasku.vakisin_kerays = ''
+					{$wherelisa}
+					{$groupby}
+					{$orderby}
+
+					UNION
+
+					SELECT lasku.liitostunnus,
+					lasku.nimi as asiakas_nimi,
+					999999999 as lahto,
+					1 as erotus,
+					#avainsana.selitetark_3 as prioriteetti,
+					lasku.prioriteettinro as prioriteetti,
+					LOWER(TRIM(lasku.ohjausmerkki)) AS ohjausmerkki,
+					{$select} as tunnus
+					#MIN(vh.indeksi) as minimi_indeksi,
+					#SUM(ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu), 4)) tilauksen_koko
+					FROM lasku
+					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.var NOT IN ('P', 'J'))
+					#JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = '{$keraysvyohyke}')
+					JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
+					#JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.tunnus = '{$keraysvyohyke}')
+					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
+					#JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
+					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+					AND lasku.tila = 'N'
+					AND lasku.alatila = 'A'
+					AND lasku.vakisin_kerays != ''
 					{$wherelisa}
 					{$groupby}
 					{$orderby}";

@@ -5,6 +5,7 @@
 	enable_jquery();
 
 	echo "	<script type='text/javascript' language='JavaScript'>
+				<!--
 
 				$.expr[':'].containsi = function(a,i,m){
 				    return $(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
@@ -12,34 +13,43 @@
 
 				$(document).ready(function() {
 
+					// laitetaan jokaiselle TD:lle padding 0, jotta saadaan mahdollisimman paljon tietoa näkyviin samaan aikaan, nowrap kuitenkin jotta tekstit olisivat luettavammassa muodossa
 					$('td').css({'padding': '0px', 'white-space': 'nowrap'});
+
+					// tilaustyyppi-kentässä halutaan wrapata teksti, koska ne voivat olla tosi pitkiä
 					$('.toggleable_row_type').css({'white-space': 'pre-wrap'});
 
+					// jos asiakkaan nimi on yli 30 merkkiä pitkä, wrapataan TD
 					$('.toggleable_row_client').each(function() {
 						if ($(this).html().length > 30) {
 							$(this).css({'white-space': 'pre-wrap'});
 						}
 					});
 
+					// laitetaan pikkasen paddingia vasemmalle ja oikealle puolelle data ja center sarakkeisiin.
 					$('.center').css({'text-align': 'center', 'padding-left': '7px', 'padding-right': '7px'});
 					$('.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
 
+					$('.vihrea').css({'background-image': 'url(\"{$palvelin2}pics/vaaleanvihrea.png\")'});
+					$('.keltainen').css({'background-image': 'url(\"{$palvelin2}pics/keltainen.png\")'});
+					$('.punainen').css({'background-image': 'url(\"{$palvelin2}pics/punainen.png\")'});
+
+					// oletuksena ollaan sortattu 2. tason rivit nousevaan järjestykseen tilausnumeron mukaan
+					$('.row_direction_order').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
+
+					// nappien click eventti
 					$(':checkbox').live('click', function(event){
 						event.stopPropagation();
 
 						$(this).is(':checked') ? $(this).parent().parent().addClass('tumma') : $(this).parent().parent().removeClass('tumma');
 					});
 
-					$('.vihrea').css({'background-image': 'url(\"{$palvelin2}pics/vaaleanvihrea.png\")'});
-					$('.keltainen').css({'background-image': 'url(\"{$palvelin2}pics/keltainen.png\")'});
-					$('.punainen').css({'background-image': 'url(\"{$palvelin2}pics/punainen.png\")'});
-
-					$('.row_direction_order').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
-
+					// numeroiden vertailu
 					function compareId(a, b) {
 						return b.id - a.id;
 					}
 
+					// tekstin vertailu
 					function compareName(a, b) {
 						if (b.id.toLowerCase() > a.id.toLowerCase()) {
 							return 1;
@@ -52,6 +62,7 @@
 						}
 					}
 
+					// uniikit arvot arrayssa
 					function sort_unique(arr) {
 						arr = arr.sort(function (a, b) { return a*1 - b*1; });
 						var ret = [arr[0]];
@@ -64,6 +75,7 @@
 						return ret;
 					}
 
+					// 2. tason alasvetovalikolla filteröinti
 					$('.filter_row_by_select').live('change', function(event) {
 
 						event.stopPropagation();
@@ -99,6 +111,7 @@
 						}
 					});
 
+					// 2. tason tekstikentällä rajaaminen
 					$('.filter_row_by_text').live('keyup', function(event) {
 						event.stopPropagation();
 
@@ -162,6 +175,7 @@
 						}
 					});
 
+					// 1. tason lähdön napin eventti
 					$('.toggleable').live('click', function(event){
 
 						var id = this.id.split(\"__\", 2);
@@ -210,6 +224,7 @@
 						}
 					});
 
+					// 2. tason tilausnumeronapin eventti
 					$('.toggleable_row_order').live('click', function(event){
 
 						var parent = $(this).parent().parent().parent().parent();
@@ -260,6 +275,7 @@
 						}
 					});
 
+					// 2. tason sscc-napin eventti
 					$('.toggleable_row_sscc').live('click', function(event){
 
 						if ($(this).html() != '') {
@@ -313,6 +329,7 @@
 
 					});
 
+					// 1. tason alasvetovalikolla filteröinti
 					$('.filter_parent_row_by').live('change', function(event) {
 
 						event.stopPropagation();
@@ -348,6 +365,7 @@
 						}
 					});
 
+					// tehdään 2. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan missä asennoissa ne oli
 					$('.sort_row_by').each(function() {
 						var title_sort = this.id.substring(4);
 
@@ -355,11 +373,13 @@
 
 					});
 
+					// tehdään 1. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan missä asennoissa ne oli
 					$('.sort_parent_row_by').each(function() {
 						var title_sort = this.id.substring(11);
 						window['sort_parent_row_direction_'+title_sort] = false;
 					});
 
+					// 1. ja 2. tason sarakkeiden sorttaus
 					$('.sort_row_by, .sort_parent_row_by').click(function(event) {
 
 						if (event.target != this) {
@@ -553,6 +573,7 @@
 						}
 					});
 
+					// 1. tason checkboxin eventti
 					$('.checkall').click(function(){
 
 						var id = $(this).attr('name');
@@ -560,6 +581,8 @@
 						$(this).is(':checked') ? $('.checkbox_'+id).attr('checked', true).parent().parent().addClass('tumma') : $('.checkbox_'+id).attr('checked', false).parent().parent().removeClass('tumma');
 					});
 				});
+
+				//-->
 			</script>";
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";

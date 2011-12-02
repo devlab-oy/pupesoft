@@ -11012,16 +11012,16 @@ if (!function_exists("pupe_DataTables")) {
 
 								// Summataan vain ruudulla näkyvät luvut
 								for (var i=iStart; i<iEnd; i++) {
-									valuutta = aaData[aiDisplay[i]][8];
+									valuutta = aaData[aiDisplay[i]][9];
 									valuutat[valuutta] = valuutta;
 
-									if (aaData[aiDisplay[i]][6] == '') {
+									if (aaData[aiDisplay[i]][7] == '') {
 										if (typeof avoimetsuoriy[valuutta] == 'undefined') avoimetsuoriy[valuutta] = 0;
-										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][7]*1;
+										avoimetsuoriy[valuutta] += aaData[aiDisplay[i]][8]*1;
 									}
 									else {
 										if (typeof avoimety[valuutta] == 'undefined') avoimety[valuutta] = 0;
-										avoimety[valuutta] += aaData[aiDisplay[i]][7]*1;
+										avoimety[valuutta] += aaData[aiDisplay[i]][8]*1;
 									}
 								}
 
@@ -11949,7 +11949,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 					$kakerroinlisa = $ktrow["palvelut"]/$ktrow["yhteensa"];
 				}
 
-				$selec = "	if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+				$selec = "	if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
 							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 							tiliointi.vero vero,
 							tiliointi.tilino tilino,
@@ -11958,7 +11958,7 @@ if (!function_exists("alvilmo_kassa_ale_erittely")) {
 
 				if ($yhteenvetolilmo) {
 					$selec = "	lasku.ytunnus ytunnus,
-								if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+								if(lasku.toim_maa = '', '$yhtiorow[maa]', lasku.toim_maa) maa,
 								max(lasku.nimi) laskunimi, ";
 					$group = "	ytunnus, maa";
 				}

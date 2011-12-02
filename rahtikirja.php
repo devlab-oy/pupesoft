@@ -61,7 +61,7 @@
 			$jvehto = " having jv='' ";
 		}
 		elseif ($jv == 'vainvak') {
-			$vainvakilliset = " JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+			$vainvakilliset = " JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
 								JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi not in ('','0')) ";
 		}
 		else {
@@ -296,9 +296,9 @@
 		// Haetaan sopivia tilauksia
 		$query = "	SELECT DISTINCT lasku.tunnus, lasku.nimi
 					FROM lasku use index (tila_index)
-					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '' and tilausrivi.keratty != 'saldoton'
-					LEFT JOIN toimitustapa use index (selite_index) ON toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
-					LEFT JOIN varastopaikat on varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
+					JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '' and tilausrivi.keratty != 'saldoton' AND tilausrivi.tyyppi != 'D')
+					LEFT JOIN toimitustapa use index (selite_index) ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa)
+					LEFT JOIN varastopaikat on (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
 					WHERE lasku.$logistiikka_yhtiolisa
 					and lasku.tila = 'L'
 					and lasku.alatila = 'C'
@@ -517,10 +517,10 @@
 						rahtikirjat.pakkaus,
 						lasku.pakkaamo
 						FROM lasku use index (tila_index)
-						JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != ''
+						JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '' AND tilausrivi.tyyppi != 'D')
 						$joinmaksuehto
-						LEFT JOIN toimitustapa use index (selite_index) ON toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
-						LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
+						LEFT JOIN toimitustapa use index (selite_index) ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa)
+						LEFT JOIN rahtikirjat use index (otsikko_index) ON (rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = '$tila'
 						$alatilassa
@@ -1307,7 +1307,7 @@
 					sum(rahtikirjat.kollit) kollit,
 					count(distinct lasku.tunnus) tunnukset_lkm
 					FROM lasku use index (tila_index)
-					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '' and tilausrivi.keratty != 'saldoton'
+					JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '' and tilausrivi.keratty != 'saldoton' AND tilausrivi.tyyppi != 'D')
 					$joinmaksuehto
 					LEFT JOIN toimitustapa use index (selite_index) ON toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
 					LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
@@ -1371,7 +1371,7 @@
 				if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] != '') {
 					$query = "	SELECT count(distinct lasku.tunnus) kpl, GROUP_CONCAT(DISTINCT if(lasku.tunnus not in ($row[tunnukset]), lasku.tunnus, null) order by lasku.tunnus) odottaa
 								FROM lasku
-								JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
+								JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' AND tilausrivi.tyyppi != 'D')
 								WHERE lasku.$logistiikka_yhtiolisa
 								AND lasku.tila in ('L','N','G')
 								AND lasku.alatila not in ('X','V','D','B')
@@ -2393,7 +2393,10 @@
 			$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus IN ($tunnukset) and tilausrivi.var != 'J'";
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.otunnus IN ($tunnukset)
+						AND tilausrivi.tyyppi != 'D'
+						and tilausrivi.var != 'J'";
 
 			$painoresult = pupe_query($query);
 			$painorow = mysql_fetch_assoc($painoresult);
@@ -2425,7 +2428,9 @@
 			$query  = "	SELECT round(sum(tuotekorkeus*tuoteleveys*$splisa*(varattu+kpl)),10) tilavuus, sum(varattu+kpl) kpl, sum(if(tuotekorkeus!=0 and tuoteleveys!=0 and $splisa!=0, varattu+kpl, 0)) kplok
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus IN ($tunnukset)";
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.otunnus IN ($tunnukset)
+						AND tilausrivi.tyyppi != 'D'";
 			$tilavuusresult = pupe_query($query);
 			$tilavuusrow = mysql_fetch_assoc($tilavuusresult);
 

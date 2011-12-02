@@ -74,7 +74,7 @@
 	// LN = Etsitään myyjän tai laatijan nimellä
 	if ($tee == 'LN') {
 		// haetaan vain aktiivisia käyttäjiä
-		$query = "	SELECT group_concat(distinct concat('\'',kuka.kuka,'\'')) kuka, group_concat(distinct concat(kuka.myyja)) myyja
+		$query = "	SELECT group_concat(distinct concat('\'',kuka.kuka,'\'')) kuka, group_concat(distinct concat(if(kuka.myyja=0, null, kuka.myyja))) myyja
 					FROM kuka
 					JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
 					WHERE kuka.yhtio = '{$kukarow['yhtio']}'
@@ -82,11 +82,11 @@
 		$kukares = pupe_query($query);
 
 		$row = mysql_fetch_assoc($kukares);
-		
+
 		if ($row["myyja"] !="") {
 			$myyja = " or myyja in ({$row["myyja"]})";
 		}
-		
+
 		// Jos ei löytynyt käyttäjistä niin kokeillaan hakusanalla
 		if ($row["kuka"] == "") {
 			$row["kuka"] = "'".$summa1."'";

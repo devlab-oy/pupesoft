@@ -182,8 +182,8 @@
 
 						if ($('#toggleable_'+id[0]+'__'+id[1]).is(':visible')) {
 
-							$('.filter_row_by_text:visible').val('');
-							$('.filter_row_by_select:visible').each(function() {
+							$('.filter_row_by_text:visible').attr('disabled', false).val('');
+							$('.filter_row_by_select:visible').attr('disabled', false).each(function() {
 								$(this).children('option:first').attr('selected', true);
 							});
 
@@ -192,8 +192,6 @@
 
 							$('.toggleable_row_order').removeClass('tumma');
 							$('.toggleable_row_sscc').removeClass('tumma');
-
-							$('.toggleable_row_tr').hide();
 
 							$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').show();
 							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').stop().show();
@@ -208,8 +206,6 @@
 
 							var parent_element = $('#toggleable_'+id[0]+'__'+id[1]).parent();
 
-							$('.toggleable_row_tr').show();
-
 							$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').hide();
 							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').hide();
 
@@ -220,7 +216,7 @@
 								.next()
 								.hide();
 
-							$('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show();
+							$('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show().children().children().children().show();
 						}
 					});
 

@@ -978,7 +978,7 @@
 			$query = "	SELECT tilausrivi.tuoteno,
 						kerayserat.sscc,
 						tuote.nimitys,
-						kerayserat.kpl,
+						tilausrivi.tilkpl AS 'suunniteltu',
 						tilausrivi.yksikko,
 						CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS 'hyllypaikka',
 						kerayserat.laatija AS 'keraaja',
@@ -1015,12 +1015,12 @@
 				echo "<td class='tumma'>{$rivi_row['sscc']}</td>";
 				echo "<td class='tumma'>{$rivi_row['tuoteno']}</td>";
 				echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
-				echo "<td class='tumma'>{$rivi_row['kpl']}</td>";
+				echo "<td class='tumma'>{$rivi_row['suunniteltu']}</td>";
 				echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
 				echo "<td class='tumma'>";
 
-				if ($rivi_row['kerattyaika'] != '0000-00-00 00:00:00' and $rivi_row['keratyt'] - $rivi_row['kpl'] != 0) {
-					echo ($rivi_row['keratyt'] - $rivi_row['kpl']);
+				if ($rivi_row['kerattyaika'] != '0000-00-00 00:00:00' and $rivi_row['keratyt'] - $rivi_row['suunniteltu'] != 0) {
+					echo ($rivi_row['keratyt'] - $rivi_row['suunniteltu']);
 				}
 
 				echo "</td>";
@@ -1041,7 +1041,7 @@
 			$query = "	SELECT tilausrivi.tuoteno,
 						kerayserat.otunnus,
 						tuote.nimitys,
-						kerayserat.kpl,
+						tilausrivi.tilkpl AS 'suunniteltu',
 						tilausrivi.yksikko,
 						CONCAT(tilausrivi.hyllyalue,'-',tilausrivi.hyllynro,'-',tilausrivi.hyllyvali,'-',tilausrivi.hyllytaso) AS hyllypaikka,
 						kerayserat.laatija AS keraaja,
@@ -1078,13 +1078,13 @@
 				echo "<td class='tumma'>{$rivi_row['otunnus']}</td>";
 				echo "<td class='tumma'>{$rivi_row['tuoteno']}</td>";
 				echo "<td class='tumma'>{$rivi_row['nimitys']}</td>";
-				echo "<td class='tumma'>{$rivi_row['kpl']}</td>";
+				echo "<td class='tumma'>{$rivi_row['suunniteltu']}</td>";
 				echo "<td class='tumma'>{$rivi_row['keratyt']}</td>";
 
 				echo "<td class='tumma'>";
 
-				if ($rivi_row['kerattyaika'] != '0000-00-00 00:00:00' and $rivi_row['keratyt'] - $rivi_row['kpl'] != 0) {
-					echo ($rivi_row['keratyt'] - $rivi_row['kpl']);
+				if ($rivi_row['kerattyaika'] != '0000-00-00 00:00:00' and $rivi_row['keratyt'] - $rivi_row['suunniteltu'] != 0) {
+					echo ($rivi_row['keratyt'] - $rivi_row['suunniteltu']);
 				}
 
 				echo "</td>";

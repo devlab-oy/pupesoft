@@ -294,6 +294,7 @@
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
  						AND tilausrivi.otunnus = '$desadv_laskurow[laskutunnus]'
+						AND tilausrivi.tyyppi != 'D'
 						GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
 			$tuotteet_res = pupe_query($query);
 

@@ -2,7 +2,7 @@
 
 	require ("../inc/parametrit.inc");
 
-	if (isset($aloita_kerays)) {
+	if (isset($man_aloitus)) {
 
 		if (isset($checkbox_child) and count($checkbox_child) > 0) {
 
@@ -15,9 +15,58 @@
 			}
 		}
 		else {
-			echo "<font class='error'>Et valinnut yht‰‰n tilausta</font><br /><br />";
+			echo "<font class='error'>",t("Et valinnut yht‰‰n tilausta"),"!</font><br /><br />";
 		}
+	}
 
+	if (isset($vaihda_prio)) {
+
+		if (isset($checkbox_child) and (is_array($checkbox_child) or is_string(trim($checkbox_child)))) {
+
+			if (isset($uusi_prio) and is_numeric(trim($uusi_prio)) and trim($uusi_prio) > 1) {
+
+				$checkbox_child = unserialize(urldecode($checkbox_child));
+
+				$uusi_prio = (int) $uusi_prio;
+
+				foreach ($checkbox_child as $tilausnumero) {
+
+					$tilausnumero = (int) $tilausnumero;
+
+					$query = "UPDATE lasku SET prioriteettinro = '{$uusi_prio}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
+					$res = pupe_query($query);
+				}
+			}
+			else {
+
+				if (isset($uusi_prio) and !is_numeric(trim($uusi_prio))) {
+					echo "<font class='error'>",t("Virheellinen prioriteetti"),"!</font><br />";
+
+					$checkbox_child = unserialize(urldecode($checkbox_child));
+				}
+
+				if (isset($valittu_lahto)) {
+					$valittu_lahto = trim($valittu_lahto);
+				}
+
+				echo "<form method='post' action='?vaihda_prio=X'>";
+				echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
+				echo "<input type='hidden' name='checkbox_child' value='",urlencode(serialize($checkbox_child)),"' />";
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>",t("Anna uusi prio"),"</th>";
+				echo "<td><input type='text' name='uusi_prio' value='' size='3' />&nbsp;<input type='submit' value='",t("Vaihda"),"' /></td>";
+				echo "</tr>";
+				echo "</table>";
+				echo "</form>";
+
+				require ("inc/footer.inc");
+				exit;
+			}
+		}
+		else {
+			echo "<font class='error'>",t("Et valinnut yht‰‰n tilausta"),"!</font><br /><br />";
+		}
 	}
 
 	enable_jquery();
@@ -64,9 +113,10 @@
 					$('.center').css({'text-align': 'center', 'padding-left': '7px', 'padding-right': '7px'});
 					$('.data').css({'padding-left': '7px', 'padding-right': '7px', 'padding-bottom': '0px', 'padding-top': '0px'});
 
-					$('.vihrea').css({'background-image': 'url(\"{$palvelin2}pics/vaaleanvihrea.png\")'});
-					$('.keltainen').css({'background-image': 'url(\"{$palvelin2}pics/keltainen.png\")'});
-					$('.punainen').css({'background-image': 'url(\"{$palvelin2}pics/punainen.png\")'});
+					$('.vihrea.toggleable_parent_row_status').css({'background-image': 'url(\"{$palvelin2}pics/vaaleanvihrea.png\")'});
+					$('.keltainen.toggleable_parent_row_status').css({'background-image': 'url(\"{$palvelin2}pics/keltainen.png\")'});
+					$('.punainen.toggleable_parent_row_status').css({'background-image': 'url(\"{$palvelin2}pics/punainen.png\")'});
+					$('.sininen.toggleable_parent_row_manual').css({'background-image': 'url(\"{$palvelin2}pics/blue_h.png\")'});
 
 					// oletuksena ollaan sortattu 2. tason rivit nousevaan j‰rjestykseen tilausnumeron mukaan
 					$('.row_direction_order').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
@@ -214,6 +264,8 @@
 
 						if ($('#toggleable_'+id[0]+'__'+id[1]).is(':visible')) {
 
+							$('#valittu_lahto').val('');
+
 							$('.filter_row_by_text:visible').attr('disabled', false).val('');
 							$('.filter_row_by_select:visible').attr('disabled', false).each(function() {
 								$(this).children('option:first').attr('selected', true);
@@ -235,6 +287,8 @@
 						else {
 
 							$('.filter_parent_row_by').attr('disabled', true);
+
+							$('#valittu_lahto').val(id[0]+'__'+id[1]);
 
 							var parent_element = $('#toggleable_'+id[0]+'__'+id[1]).parent();
 
@@ -438,7 +492,7 @@
 
 								var id = $(row).children('.toggleable_parent_row_'+title).attr('id').replace(/(:|\.)/g,'\\$1');
 
-								if (title == 'departure') {
+								if (title == 'departure' || title == 'manual') {
 									var id_temp = id.split(\"__\", 2);
 									id = id_temp[0];
 									counter = id_temp[1];
@@ -465,7 +519,7 @@
 
 							if (window['sort_parent_row_direction_'+title]) {
 
-								if (title == 'delivery' || title == 'date' || title == 'time1' || title == 'time2' || title == 'time3') {
+								if (title == 'delivery' || title == 'date' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
 									_arr.sort(compareName);
 									_arrChild.sort(compareName);
 								}
@@ -486,7 +540,7 @@
 							}
 							else {
 
-								if (title == 'delivery' || title == 'date' || title == 'time1' || title == 'time2' || title == 'time3') {
+								if (title == 'delivery' || title == 'date' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
 									_arr.sort(compareName).reverse();
 									_arrChild.sort(compareName).reverse();
 								}
@@ -619,6 +673,11 @@
 							$('input:checkbox:visible').filter('input:checkbox:visible:not(.checkall_parent, .checkall_child)').attr('checked', false).parent().parent().removeClass('tumma');
 						}
 					});
+
+					if ($('#valittu_lahto').val() != '') {
+						var val = $('#valittu_lahto').val();
+						$('#'+val).trigger('click');
+					}
 				});
 
 				//-->
@@ -672,17 +731,20 @@
 	if (!isset($parent_row_select_delivery)) $parent_row_select_delivery = "";
 	if (!isset($parent_row_select_date)) $parent_row_select_date = "";
 	if (!isset($parent_row_select_manual)) $parent_row_select_manual = "";
+	if (!isset($valittu_lahto)) $valittu_lahto = "";
 
 	echo "<form method='post' action=''>";
 	echo "<table>";
 
 	echo "<tr>";
 	echo "<td colspan='14' class='back'>";
-	echo "<input type='submit' name='aloita_kerays' value='",t("Aloita ker‰ys"),"' />";
+	echo "<input type='submit' name='man_aloitus' value='",t("Man. aloitus"),"' />&nbsp;";
+	echo "<input type='submit' name='vaihda_prio' value='",t("Vaihda prio"),"' />";
+	echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
 	echo "</td>";
 	echo "</tr>";
 
-	echo "<tr><td colspan='14' class='back'></td></tr>";
+	echo "<tr><td colspan='14' class='back'>&nbsp;</td></tr>";
 
 	echo "<tr class='header_parent'>";
 
@@ -816,7 +878,7 @@
 		}
 
 		if (strpos($row['vakisin_kerays'], "X") !== false) {
-			echo "<td class='center toggleable_parent_row_manual' id='X__{$row['lahdon_tunnus']}__{$y}'>X</td>";
+			echo "<td class='center sininen toggleable_parent_row_manual' id='X__{$row['lahdon_tunnus']}__{$y}'>&nbsp;</td>";
 		}
 		else {
 			echo "<td class='center toggleable_parent_row_manual' id='!__{$row['lahdon_tunnus']}__{$y}'>&nbsp;</td>";

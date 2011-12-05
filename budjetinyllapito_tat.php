@@ -23,6 +23,9 @@
 	$lisa = isset($lisa) ? trim($lisa) : "";
 	$lisa_parametri = isset($lisa_parametri) ? trim($lisa_parametri) : "";
 	$lisa_dynaaminen = isset($lisa_dynaaminen) ? $lisa_dynaaminen : array("tuote" => "", "asiakas" => "");
+	$ytunnus = isset($ytunnus) ? trim($ytunnus) : "";
+	$asiakasid = isset($asiakasid) ? (int) $asiakasid : 0;
+	$toimittajaid = isset($toimittajaid) ? (int) $toimittajaid : 0;
 
 	$maxrivimaara = 64000;
 
@@ -34,11 +37,12 @@
 
 	// Tämä funkkari palauttaa syötetyn tuotteen sen kuukauden myynnin arvon ja kpl-määrän
 	function tuotteenmyynti($tuoteno, $alkupvm) {
-		// Tarvitaan vain tuoteno ja kuukauden ensimmäinen päivä
-		global $kukarow, $toim;
 
-		$query = " 	SELECT round(sum(if(tyyppi='L', rivihinta, 0)),2) summa,
-					round(sum(kpl),0) maara
+		// Tarvitaan vain tuoteno ja kuukauden ensimmäinen päivä
+		global $kukarow;
+
+		$query = " 	SELECT ifnull(round(sum(if(tyyppi='L', rivihinta, 0)), 2), 0) summa,
+					ifnull(round(sum(kpl), 0), 0) maara
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 					WHERE yhtio	= '{$kukarow["yhtio"]}'
 					AND tyyppi in ('L','V')
@@ -48,14 +52,7 @@
 		$result = pupe_query($query);
 		$rivi = mysql_fetch_assoc($result);
 
-		if ($rivi) {
-			$palauta = array($rivi["summa"], $rivi["maara"]);
-		}
-		else {
-			$palauta = array(0.0, 0.0);
-		}
-
-		return $palauta;
+		return array($rivi["summa"], $rivi["maara"]);
 	}
 
 	// funkkarin $org_sar passataan alkuperäiset sarakkeet, jota taas käytetään "ohituksessa"
@@ -456,6 +453,7 @@
 
 						$update_vai_insert = "";
 
+						// Huutomerkillä poistetaan budjetti
 						if ($solu == "!") {
 							$update_vai_insert = "DELETE";
 						}
@@ -538,8 +536,9 @@
 						}
 						elseif ($budj_kohtelu == "isoi" and $solu > 0.00) {
 
-							$edvuosi = substr($kausi,0,4)-1;
-							$haettavankkpvm = $edvuosi.'-'.substr($kausi,4,2).'-01';
+							$edvuosi = substr($kausi, 0, 4)-1;
+							$haettavankkpvm = $edvuosi.'-'.substr($kausi, 4, 2).'-01';
+							
 							list($myyntihistoriassa, $maarahistoriassa) = tuotteenmyynti($liitostunnus, $haettavankkpvm);
 
 							if ($myyntihistoriassa == 0.00) {
@@ -555,13 +554,16 @@
 						elseif ($solu == 0) {
 							// poistohaara
 						}
+						elseif ($toim == "TOIMITTAJA" or $toim == "ASIAKAS") {
+							// perushaara toimittaja ja asiakasbudjetille, ei tehdä mitään. 
+						}
 						else {
 							echo "<font class='error'>".t("Virhe 2: Törmättiin virheeseen ja emme tallentaneet tietoa %s-tauluun",$kukarow["kieli"],$budj_taulu)." '$budj_kohtelu' / '$budj_taso' / '$summabudjetti' / $solu </font><br>";
 							break 3;
 						}
 
-						// Poistetaan tietue jos 
-						if ($update_vai_insert == "DELETE") {
+						// Poistetaan tietue jos on huutomerkki tai jos summa on nolla!
+						if ($update_vai_insert == "DELETE" or $solu == 0) {
 							$query = "	DELETE FROM $budj_taulu
 										WHERE yhtio 			= '$kukarow[yhtio]'
 										AND $budj_sarak		 	= '$liitostunnus'
@@ -570,7 +572,7 @@
 										AND osasto 				= ''
 										AND try 				= '$try'";
 							$result = pupe_query($query);
-							$pois++;
+							$pois += mysql_affected_rows();
 						}
 						elseif ($update_vai_insert == "UPDATE") {
 							$query	= "	UPDATE $budj_taulu SET
@@ -586,7 +588,7 @@
 										AND osasto 				= ''
 										AND try 				= '$try'";
 							$result = pupe_query($query);
-							$paiv++;
+							$paiv += mysql_affected_rows();
 						}
 						elseif ($update_vai_insert == "INSERT") {
 							$query = "	INSERT INTO $budj_taulu SET
@@ -604,7 +606,7 @@
 										muutospvm 			= now(),
 										muuttaja 			= '$kukarow[kuka]'";
 							$result = pupe_query($query);
-							$lisaa++;
+							$lisaa += mysql_affected_rows();
 						}
 						else {
 							echo "<font class='error'>".t("Ohitettiin $budj_sarak $liitostunnus", $kukarow["kieli"])."</font><br>";
@@ -733,64 +735,66 @@
 				</td>";
 		echo "</tr>";
 
-		// indeksi vai euromäärä
-		echo "<tr>";
-		echo "<th>".t("Anna budjetin käsittelytyyppi")."</th>";
-		echo "<td>";
-
-		if ($budj_kohtelu == "isoi") {
-			$bkcheck = "SELECTED";
-			$bkcheckb = "";
-		}
-		elseif ($budj_kohtelu == "maara") {
-			$bkcheck = "";
-			$bkcheckb = "SELECTED";
-		}
-		else {
-			$bkcheck = "";
-			$bkcheckb = "";
-		}
-
-		echo "<select name='budj_kohtelu' onchange='submit()';>";
-		echo "<option value = 'euro'>".t("Budjetti syötetään euroilla")."</option>";
-		echo "<option value = 'isoi' $bkcheck>".t("Budjetti syötetään indekseillä")."</option>";
-		echo "<option value = 'maara' $bkcheckb>".t("Budjetti syötetään määrillä")."</option>";
-		echo "</td>";
-		echo "</tr>";
-
-		// Kuukausittain vai samatasokk
-		echo "<tr>";
-		echo "<th>".t("Budjettiluku")."</th>";
-		echo "<td>";
-
-		if ($budj_taso == "samatasokk") {
-			$btcheck1 = "SELECTED";
-			$btcheck2 = "";
-		}
-		elseif ($budj_taso == "summataso") {
-			$btcheck1 = "";
-			$btcheck2 = "SELECTED";
-		}
-		else {
-			$btcheck1 = "";
-			$btcheck2 = "";
-		}
-
-		echo "<select name='budj_taso' onchange='submit()';>";
-		echo "<option value = ''>".t("Kuukausittain aikavälillä")."</option>";
-		echo "<option value = 'samatasokk' $btcheck1>".t("Jokaiselle kuukaudelle sama arvo")."</option>";
-		echo "<option value = 'summataso' $btcheck2>".t("Summa jaetaan kuukausille tasan")."</option>";
-		echo "</td>";
-		echo "</tr>";
-
-		// Tuoteosasto tai ryhmätason budjetti.
-		echo "<tr>";
-		echo "<th>".t("Anna kokonaisbudjetti osastolle tai tuoteryhmälle")."</th>";
-
-		$scheck = ($summabudjetti != "") ? "CHECKED": "";
-		echo "<td><input type='checkbox' name='summabudjetti' $scheck></td>";
-
 		if ($toim == "TUOTE") {
+
+			// indeksi vai euromäärä
+			echo "<tr>";
+			echo "<th>".t("Anna budjetin käsittelytyyppi")."</th>";
+			echo "<td>";
+
+			if ($budj_kohtelu == "isoi") {
+				$bkcheck = "SELECTED";
+				$bkcheckb = "";
+			}
+			elseif ($budj_kohtelu == "maara") {
+				$bkcheck = "";
+				$bkcheckb = "SELECTED";
+			}
+			else {
+				$bkcheck = "";
+				$bkcheckb = "";
+			}
+
+			echo "<select name='budj_kohtelu' onchange='submit()';>";
+			echo "<option value = 'euro'>".t("Budjetti syötetään euroilla")."</option>";
+			echo "<option value = 'isoi' $bkcheck>".t("Budjetti syötetään indekseillä")."</option>";
+			echo "<option value = 'maara' $bkcheckb>".t("Budjetti syötetään määrillä")."</option>";
+			echo "</td>";
+			echo "</tr>";
+
+			// Kuukausittain vai samatasokk
+			echo "<tr>";
+			echo "<th>".t("Budjettiluku")."</th>";
+			echo "<td>";
+
+			if ($budj_taso == "samatasokk") {
+				$btcheck1 = "SELECTED";
+				$btcheck2 = "";
+			}
+			elseif ($budj_taso == "summataso") {
+				$btcheck1 = "";
+				$btcheck2 = "SELECTED";
+			}
+			else {
+				$btcheck1 = "";
+				$btcheck2 = "";
+			}
+
+			echo "<select name='budj_taso' onchange='submit()';>";
+			echo "<option value = ''>".t("Kuukausittain aikavälillä")."</option>";
+			echo "<option value = 'samatasokk' $btcheck1>".t("Jokaiselle kuukaudelle sama arvo")."</option>";
+			echo "<option value = 'summataso' $btcheck2>".t("Summa jaetaan kuukausille tasan")."</option>";
+			echo "</td>";
+			echo "</tr>";
+			
+			// Tuoteosasto tai ryhmätason budjetti.
+			echo "<tr>";
+			echo "<th>".t("Anna kokonaisbudjetti osastolle tai tuoteryhmälle")."</th>";
+
+			$scheck = ($summabudjetti != "") ? "CHECKED": "";
+			echo "<td><input type='checkbox' name='summabudjetti' $scheck></td>";
+			echo "</tr>";
+			
 			echo "<tr><th>",t("Valitse tuote"),"</th>";
 			echo "<td><input type='text' name='tuoteno' value='$tuoteno' /></td></tr>";
 
@@ -811,13 +815,12 @@
 			if ($toimittajaid > 0) {
 				$query = "	SELECT *
 							FROM toimi
-							WHERE yhtio = '$kukarow[yhtio]'
+							WHERE yhtio = '{$kukarow["yhtio"]}'
 							AND tunnus = '$toimittajaid'";
 				$result = pupe_query($query);
 				$toimirow = mysql_fetch_assoc($result);
 
-				echo "<td>$toimirow[nimi] $toimirow[nimitark]<br>";
-				echo "$toimirow[toim_nimi] $toimirow[toim_nimitark]";
+				echo "<td>{$toimirow["nimi"]} {$toimirow["nimitark"]}";
 				echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'></td>";
 			}
 			else {
@@ -1082,13 +1085,23 @@
 						{$grouppaus}";
 		}
 		elseif ($toim == "TOIMITTAJA") {
-			$query = "	SELECT DISTINCT toimi.tunnus toimittajan_tunnus, toimi.ytunnus, toimi.ytunnus toimittajanro, toimi.nimi, toimi.nimitark
+			$query = "	SELECT DISTINCT toimi.tunnus toimittajan_tunnus, 
+						toimi.ytunnus, 
+						toimi.ytunnus asiakasnro, 
+						toimi.nimi, 
+						toimi.nimitark,
+						'' toim_nimi, # Nämä vaan sen takia, ettei tule noticeja tablen piirtämissessä (toimittaja query pitää olla sama kun asiakasquory alla)
+						'' toim_nimitark
 						FROM toimi
 						WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
 						$lisa";
 		}
 		elseif ($toim == "ASIAKAS") {
-			$query = "	SELECT DISTINCT asiakas.tunnus asiakkaan_tunnus, asiakas.ytunnus, asiakas.asiakasnro, asiakas.nimi, asiakas.nimitark,
+			$query = "	SELECT DISTINCT asiakas.tunnus asiakkaan_tunnus, 
+						asiakas.ytunnus, 
+						asiakas.asiakasnro, 
+						asiakas.nimi, 
+						asiakas.nimitark,
 						IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimi, '') toim_nimi,
 						IF(STRCMP(TRIM(CONCAT(asiakas.toim_nimi, ' ', asiakas.toim_nimitark)), TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark))) != 0, asiakas.toim_nimitark, '') toim_nimitark
 						FROM asiakas

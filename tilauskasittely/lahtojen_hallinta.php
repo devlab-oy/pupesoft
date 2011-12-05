@@ -2,6 +2,24 @@
 
 	require ("../inc/parametrit.inc");
 
+	if (isset($aloita_kerays)) {
+
+		if (isset($checkbox_child) and count($checkbox_child) > 0) {
+
+			foreach ($checkbox_child as $tilausnumero) {
+
+				$tilausnumero = (int) $tilausnumero;
+
+				$query = "UPDATE lasku SET vakisin_kerays = 'X' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilausnumero}'";
+				$res = pupe_query($query);
+			}
+		}
+		else {
+			echo "<font class='error'>Et valinnut yht‰‰n tilausta</font><br /><br />";
+		}
+
+	}
+
 	enable_jquery();
 
 	echo "	<script type='text/javascript' language='JavaScript'>
@@ -12,6 +30,22 @@
 				};
 
 				$(document).ready(function() {
+
+					// disabloidaan enterin painallus
+					$(window).keydown(function(event) {
+						if (event.keyCode == 13) {
+							event.preventDefault();
+							return false;
+						}
+					});
+
+					// disabloidaan enterin painallus
+					$(window).keyup(function(event) {
+						if (event.keyCode == 13) {
+							event.preventDefault();
+							return false;
+						}
+					});
 
 					// laitetaan jokaiselle TD:lle padding 0, jotta saadaan mahdollisimman paljon tietoa n‰kyviin samaan aikaan, nowrap kuitenkin jotta tekstit olisivat luettavammassa muodossa
 					$('td').css({'padding': '0px', 'white-space': 'nowrap'});
@@ -112,7 +146,6 @@
 
 					// 2. tason tekstikent‰ll‰ rajaaminen
 					$('.filter_row_by_text').live('keyup', function(event) {
-						event.stopPropagation();
 
 						$('.toggleable_row_tr').hide();
 
@@ -595,13 +628,13 @@
 
 	$query = "	SELECT lahdot.tunnus AS 'lahdon_tunnus',
 				lahdot.pvm AS 'lahdon_pvm',
-				lahdot.vakisin_kerays,
 				SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
 				SUBSTRING(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
 				SUBSTRING(lahdot.kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika',
 				avainsana.selitetark_3 AS 'prioriteetti',
 				toimitustapa.selite AS 'toimitustapa',
 				toimitustapa.rahdinkuljettaja,
+				GROUP_CONCAT(lasku.vakisin_kerays) AS 'vakisin_kerays',
 				COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
 				SUM(IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), 1, 0)) AS 'valmiina',
 				COUNT(DISTINCT tilausrivi.tunnus) AS 'suunnittelussa',
@@ -614,13 +647,13 @@
 				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
 				FROM lasku
 				JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi = '')
-				JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lahdot.asiakasluokka)
+				JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
 				JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
-				GROUP BY 1,2,3,4,5,6,7,8,9
+				GROUP BY 1,2,3,4,5,6,7,8
 				ORDER BY lahdot.pvm, lahdot.lahdon_kellonaika, lahdot.tunnus";
 	$result = pupe_query($query);
 
@@ -638,6 +671,7 @@
 	if (!isset($parent_row_select_carrier)) $parent_row_select_carrier = "";
 	if (!isset($parent_row_select_delivery)) $parent_row_select_delivery = "";
 	if (!isset($parent_row_select_date)) $parent_row_select_date = "";
+	if (!isset($parent_row_select_manual)) $parent_row_select_manual = "";
 
 	echo "<form method='post' action=''>";
 	echo "<table>";
@@ -647,6 +681,8 @@
 	echo "<input type='submit' name='aloita_kerays' value='",t("Aloita ker‰ys"),"' />";
 	echo "</td>";
 	echo "</tr>";
+
+	echo "<tr><td colspan='14' class='back'></td></tr>";
 
 	echo "<tr class='header_parent'>";
 
@@ -660,6 +696,17 @@
 	echo "<option value='3'{$sel[3]}>",t("Aloittamatta"),"</option>";
 	echo "<option value='2'{$sel[2]}>",t("Aloitettu"),"</option>";
 	echo "<option value='1'{$sel[1]}>",t("Aika ylitetty"),"</option>";
+	echo "</select>";
+	echo "</th>";
+
+	echo "<th class='sort_parent_row_by' id='parent_row_manual'>",t("Man. aloitus")," <img class='parent_row_direction_manual' />";
+	echo "<br />";
+
+	$sel = $parent_row_select_manual != "" ? " selected" : "";
+
+	echo "<select class='filter_parent_row_by' name='parent_row_select_manual' id='parent_row_select_manual'>";
+	echo "<option value=''>",t("Valitse"),"</option>";
+	echo "<option value='X'{$sel}>",t("Man. aloitus"),"</option>";
 	echo "</select>";
 	echo "</th>";
 
@@ -758,7 +805,7 @@
 		$todays_date = strtotime(date('Y-m-d'));
 		$todays_date_klo = strtotime(date('H:i:s'));
 
-		if (($todays_date == $exp_date and $todays_date_klo > $exp_date_klo) or $row['vakisin_kerays'] != '') {
+		if ($todays_date == $exp_date and $todays_date_klo > $exp_date_klo) {
 			echo "<td class='vihrea toggleable_parent_row_status' id='2__{$row['lahdon_tunnus']}__{$y}'></td>";
 		}
 		else if ($todays_date >= $exp_date and $todays_date_klo > $exp_date_klo) {
@@ -766,6 +813,13 @@
 		}
 		else {
 			echo "<td class='keltainen toggleable_parent_row_status' id='3__{$row['lahdon_tunnus']}__{$y}'></td>";
+		}
+
+		if (strpos($row['vakisin_kerays'], "X") !== false) {
+			echo "<td class='center toggleable_parent_row_manual' id='X__{$row['lahdon_tunnus']}__{$y}'>X</td>";
+		}
+		else {
+			echo "<td class='center toggleable_parent_row_manual' id='!__{$row['lahdon_tunnus']}__{$y}'>&nbsp;</td>";
 		}
 
 		echo "<td><input type='checkbox' class='checkall_parent' id='{$row['lahdon_tunnus']}'></td>";
@@ -806,6 +860,7 @@
 					lasku.toim_postitp AS 'asiakas_toim_postitp',
 					lasku.prioriteettinro AS 'prioriteetti',
 					lasku.ohjausmerkki,
+					lasku.vakisin_kerays,
 					kerayserat.nro AS 'erat',
 					kerayserat.sscc,
 					kerayserat.pakkausnro AS 'pakkausnumerot',
@@ -818,7 +873,7 @@
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus IN ({$row['tilaukset']})
-					GROUP BY 1,2,3,4,5,6,7,8,9,10";
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11";
 		$lahto_res = pupe_query($query);
 
 		if (!isset($child_row_select_status)) $child_row_select_status = "";
@@ -842,13 +897,14 @@
 		echo "<th class='sort_row_by' id='row_status__{$row['lahdon_tunnus']}__{$y}'>",t("Status")," <img class='row_direction_status' />";
 		echo "<br />";
 
-		$sel = array_fill_keys(array($child_row_select_status), " selected") + array(1 => '', 2 => '', 3 => '');
+		$sel = array_fill_keys(array($child_row_select_status), " selected") + array(1 => '', 2 => '', 3 => '', 4 => '');
 
  		echo "<select class='filter_row_by_select' name='child_row_select_status' id='child_row_select_status'>";
 		echo "<option value=''>",t("Valitse"),"</option>";
 		echo "<option value='1'{$sel[1]}>",t("Aloittamatta"),"</option>";
 		echo "<option value='2'{$sel[2]}>",t("Aloitettu"),"</option>";
 		echo "<option value='3'{$sel[3]}>",t("Ker‰tty"),"</option>";
+		echo "<option value='4'{$sel[4]}>",t("Man. aloitus"),"</option>";
 		echo "</select>";
 		echo "</th>";
 
@@ -934,11 +990,15 @@
 
 			echo "<tr class='toggleable_row_tr' id='toggleable_row_tr_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 
-			echo "<td><input type='checkbox' class='checkbox_{$lahto_row['tilauksen_tunnus']}' id='checkbox_{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";
+			echo "<td><input type='checkbox' class='checkbox_{$lahto_row['tilauksen_tunnus']}' name='checkbox_child[{$lahto_row['tilauksen_tunnus']}]' value='{$lahto_row['tilauksen_tunnus']}' id='checkbox_{$lahto_row['tilauksen_tunnus']}__{$x}'></td>";
 
 			$status = $status_text = '';
 
-			if (strpos($lahto_row['tilat'], "K") !== FALSE) {
+			if ($lahto_row['vakisin_kerays'] != '') {
+				$status_text = t("Man. aloitus");
+				$status = 4;
+			}
+			elseif (strpos($lahto_row['tilat'], "K") !== FALSE) {
 				$status_text = t("Aloitettu");
 				$status = 2;
 			}

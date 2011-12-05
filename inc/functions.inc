@@ -13317,44 +13317,7 @@ if (!function_exists("pisin_tuote")) {
 			}
 		}
 
-<<<<<<< HEAD
 		$pisin_tuote_array = array_intersect_key($pisin_tuote_array, $tmp_arr);
-=======
-		$query = "	SELECT lasku.tunnus,
-					keraysvyohyke.nimitys as keraysvyohyke_nimitys,
-					lasku.liitostunnus,
-					lasku.nimi as asiakas_nimi,
-					SUBSTRING(lasku.h1time, 12, 8) aika,
-					asiakas.tunnus as asiakas_tunnus,
-					toimitustavan_lahdot.tunnus as lahto,
-					(TIME_TO_SEC(TIMEDIFF(lahdon_kellonaika, CURTIME())) / 60) as erotus,
-					lasku.hyvaksynnanmuutos as prioriteetti,
-					lasku.h1time,
-					lasku.sisviesti2,
-					keraysvyohyke.tunnus as keraysvyohyke_tunnus,
-					MIN(vh.indeksi) as minimi_indeksi,
-					SUM(ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu+tilausrivi.kpl), 4)) tilauksen_koko
-					FROM lasku
-					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
-					JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke IN ({$keraysvyohyke}))
-					JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.tunnus IN ({$keraysvyohyke}))
-					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
-				 	JOIN toimitustavan_lahdot ON (toimitustavan_lahdot.yhtio = toimitustapa.yhtio
-													AND toimitustavan_lahdot.liitostunnus = toimitustapa.tunnus
-													AND toimitustavan_lahdot.lahdon_kellonaika >= CURTIME()
-													AND toimitustavan_lahdot.lahdon_viikonpvm = {$viikonpaiva}
-													AND toimitustavan_lahdot.aktiivi = ''
-													AND toimitustavan_lahdot.kerailyn_aloitusaika <= CURTIME()
- 												)
-					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-					AND lasku.tila = 'N'
-					AND lasku.alatila = 'A'
-					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
-					ORDER BY lahto, erotus, lasku.hyvaksynnanmuutos, tilauksen_koko DESC, minimi_indeksi, lasku.h1time ASC, lasku.sisviesti2, keraysvyohyke.nimitys";
-		$res = pupe_query($query);
->>>>>>> master
 
 		return $pisin_tuote_array;
 	}
@@ -13444,30 +13407,9 @@ if (!function_exists("valitse_pakkaus")) {
 
 			$kaytettava_pakkaus = $tmp;
 
-<<<<<<< HEAD
 			echo "kaytettava_pakkaus : $kaytettava_pakkaus<br>";
 		}
 		else {
-=======
-			$query = "	SELECT tilausrivi.tunnus, tilausrivi.otunnus,
-						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}) * (tilausrivi.varattu+tilausrivi.kpl), 4) as tuotteen_koko,
-						tilausrivi.tuoteno,
-						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 4) y_koko,
-						round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}), 2) tuotekorkeus,
-						round(if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}), 2) tuoteleveys,
-						round(if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 2) tuotesyvyys,
-						(tilausrivi.varattu+tilausrivi.kpl) y_maara,
-						tuote.yksin_kerailyalustalle,
-						tuote.tuotemassa y_paino
-						FROM tilausrivi
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke IN ({$keraysvyohyke}))
-						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
-						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.otunnus = '{$row['tunnus']}'
-						AND tilausrivi.tyyppi != 'D'
-						ORDER BY tuote.yksin_kerailyalustalle ASC, y_koko DESC";
-			$tuoteres = pupe_query($query);
->>>>>>> master
 
 			$pisin_tuote_array = pisin_tuote($pisin_tuote_array, $pisin_tuote_per_asiakas);
 			$pisin_tuote = array_shift($pisin_tuote_array);
@@ -14195,7 +14137,7 @@ if (!function_exists("tee_keraysera2")) {
 					#SUM(ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu), 4)) tilauksen_koko
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.var NOT IN ('P', 'J'))
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.var NOT IN ('P', 'J') AND tilausrivi.tyyppi != 'D')
 					#JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = '{$keraysvyohyke}')
 					JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
@@ -14234,7 +14176,7 @@ if (!function_exists("tee_keraysera2")) {
 					#SUM(ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu), 4)) tilauksen_koko
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.var NOT IN ('P', 'J'))
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.var NOT IN ('P', 'J') AND tilausrivi.tyyppi != 'D')
 					#JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso AND vh.keraysvyohyke = '{$keraysvyohyke}')
 					JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke = '{$keraysvyohyke}')
@@ -14626,6 +14568,7 @@ if (!function_exists("tee_keraysera2")) {
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus IN ({$tilaukset})
+						AND tilausrivi.tyyppi != 'D'
 						ORDER BY tuote.yksin_kerailyalustalle ASC, pisin_sorttaus DESC, vh.indeksi ASC";
 			$tuoteres = pupe_query($query);
 
@@ -15568,7 +15511,7 @@ if (!function_exists("tee_keraysera")) {
 					SUM(ROUND((if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin})) * (tilausrivi.varattu+tilausrivi.kpl), 4)) tilauksen_koko
 					FROM lasku
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
 					JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.keraysvyohyke IN ({$keraysvyohyke}))
 					JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio AND keraysvyohyke.tunnus IN ({$keraysvyohyke}))
@@ -15715,6 +15658,7 @@ if (!function_exists("tee_keraysera")) {
 						JOIN varaston_hyllypaikat vh ON (vh.yhtio = tilausrivi.yhtio AND vh.hyllyalue = tilausrivi.hyllyalue AND vh.hyllynro = tilausrivi.hyllynro AND vh.hyllyvali = tilausrivi.hyllyvali AND vh.hyllytaso = tilausrivi.hyllytaso)
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
 						AND tilausrivi.otunnus = '{$row['tunnus']}'
+						AND tilausrivi.tyyppi != 'D'
 						ORDER BY tuote.yksin_kerailyalustalle ASC, y_koko DESC";
 			$tuoteres = pupe_query($query);
 

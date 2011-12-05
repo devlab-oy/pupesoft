@@ -191,7 +191,7 @@
 			$isa_varattu = $row['varattu'];
 
 			// Is‰tuotteen myyntiennuste
-			$isa_reaalisaldo = $isa_saldo - $isa_tilattu - $isa_varattu;
+			$isa_reaalisaldo = $isa_saldo + $isa_tilattu - $isa_varattu;
 			$isa_myyntiennuste = $isa_budjetoitu_myynti - $isa_reaalisaldo;
 
 			// Jos myyntiennuste on miinusta, nollataan ennuste, ettei se v‰henn‰ raaka-aine tarvetta (jo valmistetuista tuotteista ei voida k‰ytt‰‰ raaka-aineita)
@@ -203,7 +203,7 @@
 		}
 
 		// Lasketaan lapsituotteen ostosuositus
-		$lapsi_reaalisaldo = $lapsi_saldo - $lapsi_tilattu - $lapsi_varattu;
+		$lapsi_reaalisaldo = $lapsi_saldo + $lapsi_tilattu - $lapsi_varattu;
 		$lapsi_toimitusaika = $toimittajarow['toimitusaika'];
 		$lapsi_paivakulutus = round($lapsi_vuosikulutus / 360);
 		$lapsi_riittopv = ($lapsi_paivakulutus == 0) ? t("Ei tiedossa") : floor($lapsi_reaalisaldo / $lapsi_paivakulutus);

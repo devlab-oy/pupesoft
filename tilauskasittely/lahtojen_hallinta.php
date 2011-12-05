@@ -23,7 +23,7 @@
 
 		if (isset($checkbox_child) and (is_array($checkbox_child) or is_string(trim($checkbox_child)))) {
 
-			if (isset($uusi_prio) and is_numeric(trim($uusi_prio)) and trim($uusi_prio) > 1) {
+			if (isset($uusi_prio) and is_numeric(trim($uusi_prio)) and trim($uusi_prio) > 0) {
 
 				$checkbox_child = unserialize(urldecode($checkbox_child));
 
@@ -66,6 +66,112 @@
 		}
 		else {
 			echo "<font class='error'>",t("Et valinnut yhtään tilausta"),"!</font><br /><br />";
+		}
+	}
+
+	if (isset($muokkaa_lahto)) {
+
+		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
+
+			$virhe = "";
+
+			if (isset($lahto_muokkaus_kellonaika) and trim($lahto_muokkaus_kellonaika) != ''
+			and isset($lahto_muokkaus_aloitusaika) and trim($lahto_muokkaus_aloitusaika) != ''
+			and isset($lahto_muokkaus_tilausaika) and trim($lahto_muokkaus_tilausaika) != '') {
+
+				$array_chk = array($lahto_muokkaus_kellonaika, $lahto_muokkaus_aloitusaika, $lahto_muokkaus_tilausaika); 
+
+				foreach ($array_chk as $klo) {
+					$klo_arr = explode(":", $klo);
+
+					if (strpos($klo, " ") !== FALSE or !is_numeric($klo_arr[0]) or !is_numeric($klo_arr[1]) or isset($klo_arr[2])) {
+						$virhe = t("Anna kellonaika muodossa hh:mm")."!";
+						break;
+					}
+					elseif ($klo_arr[0] > 23 or $klo_arr[1] > 59 or $klo_arr[0] < 0 or $klo_arr[1] < 0) {
+						$virhe = t("Virheellinen kellonaina")."!";
+						break;
+					}
+				}
+
+			}
+
+			if ($virhe == "" and isset($lahto_muokkaus_aktiivi)) {
+
+				$checkbox_parent = unserialize(urldecode($checkbox_parent));
+
+				if (is_array($checkbox_parent) and count($checkbox_parent) > 0) {
+					if ($lahto_muokkaus_aktiivi == "P") {
+						$lahto_muokkaus_aktiivi = "P";
+					}
+					elseif ($lahto_muokkaus_aktiivi == "E") {
+						$lahto_muokkaus_aktiivi = "E";
+					}
+					else {
+						$lahto_muokkaus_aktiivi = "";
+					}
+
+					foreach ($checkbox_parent as $lahto) {
+						$query = "	UPDATE lahdot SET
+									lahdon_kellonaika = '{$lahto_muokkaus_kellonaika}:00',
+									viimeinen_tilausaika = '{$lahto_muokkaus_tilausaika}:00',
+									kerailyn_aloitusaika = '{$lahto_muokkaus_aloitusaika}:00',
+									aktiivi = '{$lahto_muokkaus_aktiivi}'
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$lahto}'";
+						$upd_res = pupe_query($query);
+					}
+				}
+				else {
+					echo "<font class='error'>",t("Virhe lähdön tallentamisessa"),"!</font><br /><br />";
+				}
+
+			}
+			else {
+
+				if ($virhe != "") {
+					echo "<font class='error'>{$virhe}</font><br /><br />";
+
+					$checkbox_parent = unserialize(urldecode($checkbox_parent));
+				}
+
+				$lahto = (int) $checkbox_parent[0];
+
+				$query = "	SELECT SUBSTRING(lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
+							SUBSTRING(viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
+							SUBSTRING(kerailyn_aloitusaika, 1, 5) AS 'kerailyn_aloitusaika'
+							FROM lahdot WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
+				$lahto_res = pupe_query($query);
+				$lahto_row = mysql_fetch_assoc($lahto_res);
+
+				echo "<form method='post' action='?muokkaa_lahto=X'>";
+				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
+				echo "<table>";
+				echo "<tr><th>",t("Lähtö"),"</th><td>",implode(" , ", $checkbox_parent),"</td></tr>";
+				echo "<tr><th>",t("Aktiivi"),"</th><td>";
+				echo "<select name='lahto_muokkaus_aktiivi'>";
+
+				$sel = $lahto_row['aktiivi'] != "" ? " selected" : "";
+
+				echo "<option value=''>",t("Aktiivi"),"</option>";
+				echo "<option value='P'>",t("Pysäytetty"),"</option>";
+				echo "<option value='E'{$sel}>",t("Ei aktiivi"),"</option>";
+
+				echo "</select>";
+				echo "</td></tr>";
+				echo "<tr><th>",t("Lähdön kellonaika"),"</th><td><input type='text' name='lahto_muokkaus_kellonaika' value='{$lahto_row['lahdon_kellonaika']}' /></td></tr>";
+				echo "<tr><th>",t("Viimeinen tilausaika"),"</th><td><input type='text' name='lahto_muokkaus_tilausaika' value='{$lahto_row['viimeinen_tilausaika']}' /></td></tr>";
+				echo "<tr><th>",t("Keräilyn aloitusaika"),"</th><td><input type='text' name='lahto_muokkaus_aloitusaika' value='{$lahto_row['kerailyn_aloitusaika']}' /></td></tr>";
+				echo "<tr><td colspan='2' class='back'><input type='submit' value='",t("Tallenna"),"' /></td></tr>";
+				echo "</table>";
+				echo "</form>";
+
+				require ("inc/footer.inc");
+				exit;
+			}
+		}
+		else {
+			echo "<font class='error'>",t("Et valinnut yhtään lähtöä"),"!</font><br /><br />";
 		}
 	}
 
@@ -705,7 +811,7 @@
 				ROUND(SUM(tilausrivi.varattu * (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000)), 0) AS 'litrat_suun',
 				ROUND(SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys * 1000), 0)), 0) AS 'litrat_ker'
 				FROM lasku
-				JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi = '')
+				JOIN lahdot ON (lahdot.yhtio = lasku.yhtio AND lahdot.tunnus = lasku.toimitustavan_lahto AND lahdot.aktiivi IN ('', 'P'))
 				JOIN avainsana ON (avainsana.yhtio = lahdot.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selitetark_3 = lahdot.asiakasluokka)
 				JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
@@ -737,14 +843,15 @@
 	echo "<table>";
 
 	echo "<tr>";
-	echo "<td colspan='14' class='back'>";
+	echo "<td colspan='15' class='back'>";
 	echo "<input type='submit' name='man_aloitus' value='",t("Man. aloitus"),"' />&nbsp;";
-	echo "<input type='submit' name='vaihda_prio' value='",t("Vaihda prio"),"' />";
+	echo "<input type='submit' name='vaihda_prio' value='",t("Vaihda prio"),"' />&nbsp;";
+	echo "<input type='submit' name='muokkaa_lahto' value='",t("Muokkaa lähtö"),"' />";
 	echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
 	echo "</td>";
 	echo "</tr>";
 
-	echo "<tr><td colspan='14' class='back'>&nbsp;</td></tr>";
+	echo "<tr><td colspan='15' class='back'>&nbsp;</td></tr>";
 
 	echo "<tr class='header_parent'>";
 
@@ -884,7 +991,8 @@
 			echo "<td class='center toggleable_parent_row_manual' id='!__{$row['lahdon_tunnus']}__{$y}'>&nbsp;</td>";
 		}
 
-		echo "<td><input type='checkbox' class='checkall_parent' id='{$row['lahdon_tunnus']}'></td>";
+		echo "<td><input type='checkbox' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'></td>";
+
 		echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'><button type='button'>{$row['lahdon_tunnus']}</button></td>";
 		echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";
 		echo "<td class='toggleable_parent_row_carrier' id='{$row['rahdinkuljettaja']}__{$row['lahdon_tunnus']}__{$y}'>{$row['rahdinkuljettaja']}</td>";
@@ -942,7 +1050,7 @@
 		if (!isset($child_row_select_prio)) $child_row_select_prio = "";
 
 		echo "<tr class='toggleable_tr' id='toggleable_tr_{$row['lahdon_tunnus']}__{$y}'>";
-		echo "<td colspan='14' class='back'>";
+		echo "<td colspan='15' class='back'>";
 		echo "<div id='toggleable_{$row['lahdon_tunnus']}__{$y}' style='display:none;'>";
 
 		echo "<table style='width:100%; padding:0px; margin:0px; border:0px;'>";
@@ -1196,7 +1304,7 @@
 						AND tilausrivi.otunnus = '{$lahto_row['tilauksen_tunnus']}'
 						ORDER BY kerayserat.sscc, tilausrivi.tuoteno";
 			$rivi_res = pupe_query($query);
-			
+
 			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
 			echo "<td colspan='15' class='back' style='display:none;'>";
 			echo "<div class='toggleable_row_child_div_order' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}__{$x}' style='display:none;'>";

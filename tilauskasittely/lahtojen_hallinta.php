@@ -112,6 +112,25 @@
 					}
 
 					foreach ($checkbox_parent as $lahto) {
+
+						$lahto = (int) $lahto;
+
+						if ($lahto_muokkaus_aktiivi == "E") {
+
+							$query = "	SELECT tunnus 
+										FROM lasku 
+										WHERE yhtio = '{$kukarow['yhtio']}' 
+										AND toimitustavan_lahto = '{$lahto}'
+										AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
+							$chk_res = pupe_query($query);
+
+							if (mysql_num_rows($chk_res) > 0) {
+								echo "<font class='error'>",t("Virhe lähdössä")," {$lahto}! ",t("Lähtö sisältää tilauksia"),". ",t("Sallitut tilat ovat aktiivi ja pysäytetty"),".</font><br />";
+
+								continue;
+							}
+						}
+
 						$query = "	UPDATE lahdot SET
 									lahdon_kellonaika = '{$lahto_muokkaus_kellonaika}:00',
 									viimeinen_tilausaika = '{$lahto_muokkaus_tilausaika}:00',
@@ -147,7 +166,7 @@
 				echo "<form method='post' action='?muokkaa_lahto=X'>";
 				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
 				echo "<table>";
-				echo "<tr><th>",t("Lähtö"),"</th><td>",implode(" , ", $checkbox_parent),"</td></tr>";
+				echo "<tr><th>",t("Lähtö"),"</th><td>",implode(", ", $checkbox_parent),"</td></tr>";
 				echo "<tr><th>",t("Aktiivi"),"</th><td>";
 				echo "<select name='lahto_muokkaus_aktiivi'>";
 

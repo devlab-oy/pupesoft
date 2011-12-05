@@ -11770,7 +11770,7 @@ if (!function_exists('hae_suuntalava')) {
 }
 
 if (!function_exists("seuraava_lahtoaika")) {
-	function seuraava_lahtoaika($ttunnus, $aika_vkonpvm = '') {
+	function seuraava_lahtoaika($ttunnus, $asiakasluokka) {
 
 		global $yhtiorow, $kukarow;
 
@@ -11781,6 +11781,7 @@ if (!function_exists("seuraava_lahtoaika")) {
 		// Päivämäärä array, nimellinen ilmentymä toiselle puolelle on kiva.
 
 		$viikonpaiva = date("w", time());
+		$asiakasluokka = (int) $asiakasluokka;
 
 		$pvmnimet = array();
 		$pvmnimet[1] = t("Maanantai");
@@ -11791,51 +11792,37 @@ if (!function_exists("seuraava_lahtoaika")) {
 		$pvmnimet[6] = t("Lauantai");
 		$pvmnimet[0] = t("Sunnuntai");
 
-		if ($aika_vkonpvm != '') {
-			$viikonpaiva = $aika_vkonpvm;
-			$select = array(1 => "", 2 => "", 3 => "");
-			$limit = "LIMIT 1";
-		}
-		else {
-			$select = array(
-						1 => "concat(curdate(), ' ', lahdon_kellonaika) as lahto,",
-						2 => "concat(adddate(curdate(), (lahdon_viikonpvm-{$viikonpaiva})), ' ', lahdon_kellonaika) as lahto,",
-						3 => "concat(adddate(curdate(),  (7-{$viikonpaiva}+lahdon_viikonpvm)), ' ', lahdon_kellonaika) as lahto,"
-						);
-			$limit = "";
-		}
-
-		$query = 	"	(SELECT '1' prio, {$select[1]} lahdon_viikonpvm, lahdon_kellonaika
-						FROM toimitustavan_lahdot
+		$query = 	"	(SELECT '1' prio, concat(curdate(), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+						FROM lahdot
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND liitostunnus = '{$ttunnus}'
 						and viimeinen_tilausaika > curtime()
 						and lahdon_viikonpvm = '{$viikonpaiva}'
+						and asiakasluokka = '{$asiakasluokka}'
 						AND aktiivi != 'E')
 
 						UNION
 
-						(SELECT '2' prio, {$select[2]} lahdon_viikonpvm, lahdon_kellonaika
-						FROM toimitustavan_lahdot
+						(SELECT '2' prio, concat(adddate(curdate(), (lahdon_viikonpvm-{$viikonpaiva})), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+						FROM lahdot
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND liitostunnus = '{$ttunnus}'
 						and lahdon_viikonpvm > '{$viikonpaiva}'
+						and asiakasluokka = '{$asiakasluokka}'
 						AND aktiivi != 'E')
 
 						UNION
 
-						(SELECT '3' prio, {$select[3]} lahdon_viikonpvm, lahdon_kellonaika
-						FROM toimitustavan_lahdot
+						(SELECT '3' prio, concat(adddate(curdate(),  (7-{$viikonpaiva}+lahdon_viikonpvm)), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+						FROM lahdot
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND liitostunnus = '{$ttunnus}'
 						AND lahdon_viikonpvm <= '{$viikonpaiva}'
+						and asiakasluokka = '{$asiakasluokka}'
 						AND aktiivi != 'E')
 
-						ORDER BY prio, lahdon_viikonpvm, lahdon_kellonaika
-						{$limit}";
+						ORDER BY prio, lahdon_viikonpvm, lahdon_kellonaika";
 		$result = pupe_query($query);
-
-		return $result;
 
 		if (mysql_num_rows($result) > 0) {
 			$rivi = mysql_fetch_assoc($result);

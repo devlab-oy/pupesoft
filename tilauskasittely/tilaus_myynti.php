@@ -2591,11 +2591,15 @@ if ($tee == '') {
 
 						if ($eka_kerta and $sel == "" and $laskurow['toimitustavan_lahto'] == "0" and $state != 'DISABLED') {
 
-							$query = "UPDATE lasku SET toimitustavan_lahto = '{$lahdot_row['tunnus']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
-							$upd_res = pupe_query($query);
+							$lahto_x = seuraava_lahtoaika($lahdot_row['liitostunnus'], $laskurow['prioriteettinro']);
 
-							$sel = " selected";
-							$eka_kerta = false;
+							if ($lahto_x == $lahto) {
+								$query = "UPDATE lasku SET toimitustavan_lahto = '{$lahdot_row['tunnus']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
+								$upd_res = pupe_query($query);
+
+								$sel = " selected";
+								$eka_kerta = false;
+							}
 						}
 
 						echo "<option value='{$lahdot_row['tunnus']}'{$sel}>",tv1dateconv($lahto, "PITKA"),"</option>";

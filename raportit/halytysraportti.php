@@ -442,6 +442,9 @@
 			if ($valitut["poistuvat"] != '') {
 				$lisaa .= " and tuote.status != 'X' ";
 			}
+			if ($valitut["ostoehdotus"] != '') {
+				$lisaa .= " and tuote.ostoehdotus != 'E' ";
+			}
 			if ($valitut["EIHINNASTOON"] != '') {
 				$lisaa .= " and tuote.hinnastoon != 'E' ";
 			}
@@ -640,7 +643,6 @@
 							WHERE tuote.$yhtiot
 							$lisaa
 							and tuote.ei_saldoa = ''
-							and tuote.ostoehdotus = ''
 							ORDER BY id, tuote.tuoteno";
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
@@ -691,15 +693,15 @@
 							WHERE tuote.$yhtiot
 							$lisaa
 							and tuote.ei_saldoa = ''
-							and tuote.ostoehdotus = ''
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";
 			}
 			$res = pupe_query($query);
 
-			//	Oletetaan että käyttäjä ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
+			//	Oletetaan että käyttäjä ei halyua/saa ostaa poistuvia, poistettuja ja ostoehdotuksettomia tuotteita!
 			if (!isset($valitut["poistetut"])) $valitut["poistetut"] = "checked";
 			if (!isset($valitut["poistuvat"])) $valitut["poistuvat"] = "checked";
+			//if (!isset($valitut["ostoehdotus"])) $valitut["ostoehdotus"] = "checked";
 
 			if ($valitut["poistetut"] != '' and $valitut["poistuvat"] == '') {
 				echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistuvat näytetään").".<br>";
@@ -710,7 +712,12 @@
 			if ($valitut["poistetut"] == '' and $valitut["poistuvat"] != '') {
 				echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistetut näytetään").".<br>";
 			}
-
+			if ($valitut["ostoehdotus"] != '') {
+				echo "<font class='message'>".t("Vain ostoehdotettavat tuotteet").".<br>";
+			}
+			if ($valitut["ostoehdotus"] == '') {
+				echo "<font class='message'>".t("Vain ostoehdotettavat tuotteet, ostoehdotukseen kuulumattomat näytetään").".<br>";
+			}
 			if ($valitut["OSTOTVARASTOITTAIN"] != '') {
 				echo "<font class='message'>".t("Tilatut eritellään varastoittain").".<br>";
 			}
@@ -2695,7 +2702,30 @@
 			echo "<tr><th>".t("Älä näytä poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[poistuvat]' value='POISTUVAT' $chk></td></tr>";
 
 
-			//Näytetäänkö poistetut tuotteet
+
+
+			//Näytetäänkö ostoehdottamattomat tuotteet
+			$query = "	SELECT selitetark
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji = 'HALYRAP'
+						and selite	= '$rappari'
+						and selitetark = 'OSTOEHDOTUS'";
+			$sresult = pupe_query($query);
+			$srow = mysql_fetch_assoc($sresult);
+
+			$chk = "";
+			if (($srow["selitetark"] == "OSTOEHDOTUS" and $tee == "JATKA") or $valitut["ostoehdotus"] != '' or $defaultit == "PÄÄLLE") {
+				$chk = "CHECKED";
+			}
+
+			echo "<tr><th>".t("Älä näytä ostoehdotukseen kuulumattomia tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[ostoehdotus]' value='OSTOEHDOTUS' $chk></td></tr>";
+			
+			
+			
+			
+
+			//Näytetäänkö ei hinnastoon tuotteet
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'

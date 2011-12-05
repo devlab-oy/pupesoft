@@ -12,10 +12,6 @@
 		$orderlisa = '';
 	}
 
-	if (!isset($avainlisa)) {
-		$avainlisa = "";
-	}
-
 	if (!isset($noautosubmit)) {
 		$autosubmit = " onchange='submit();' ";
 	}
@@ -92,6 +88,7 @@
 	$ulisa = isset($ulisa) ? trim($ulisa) : "";
 	$kieltolisa = isset($kieltolisa) ? trim($kieltolisa) : "";
 	$extra_poislisa = isset($extra_poislisa) ? trim($extra_poislisa) : "";
+	$avainlisa = isset($avainlisa) ? trim($avainlisa) : "";
 
 	// Setataan muuttujat
 	if (!isset($mul_osasto)) 		$mul_osasto = array();

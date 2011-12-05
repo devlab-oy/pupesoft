@@ -95,8 +95,23 @@
 				}
 				else {
 					$stili  = $tiliointi2_row["tilino"];
-					$tapvm  = date("Y-m-d");
+					$tapvm  = $tiliointi1_row["tapvm"];
 					$selite = t('Suoritus poistettu');
+				}
+
+				//vertaillaan tilikauteen
+				list($vv1,$kk1,$pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+				list($vv2,$kk2,$pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
+
+				$myrealku  = (int) date('Ymd', mktime(0,0,0,$kk1,$pp1,$vv1));
+				$myreloppu = (int) date('Ymd', mktime(0,0,0,$kk2,$pp2,$vv2));
+
+				$tsekpvm = str_replace("-", "", $tapvm);
+
+				if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
+					echo "<br><font class='error'>".t("HUOM: Suorituksen päivämäärä oli suljetulla kaudella. Tiliöinti tehtiin tälle päivälle")."!</font><br><br>";
+
+					$tapvm  = date("Y-m-d");
 				}
 
 				$query = "	INSERT INTO tiliointi SET

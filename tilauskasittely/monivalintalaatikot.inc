@@ -84,6 +84,12 @@
 	$lisa_parametri			 = "";
 	$lisa_dynaaminen		 = array("tuote" => "", "asiakas" => "");
 
+	$lisa = isset($lisa) ? trim($lisa) : "";
+	$ulisa = isset($ulisa) ? trim($ulisa) : "";
+	$kieltolisa = isset($kieltolisa) ? trim($kieltolisa) : "";
+	$extra_poislisa = isset($extra_poislisa) ? trim($extra_poislisa) : "";
+	$avainlisa = isset($avainlisa) ? trim($avainlisa) : "";
+
 	// Setataan muuttujat
 	if (!isset($mul_osasto)) 		$mul_osasto = array();
 	if (!isset($mul_try)) 			$mul_try = array();
@@ -277,7 +283,7 @@
 	foreach ($monivalintalaatikot as $monivalintalaatikko) {
 		$monivalintalaatikko = strip_tags($monivalintalaatikko);
 
-		if (substr($monivalintalaatikko, 0, 10) == "dynaaminen") {
+		if (mysql_num_rows($dynpuu_count_result) > 0 and substr($monivalintalaatikko, 0, 10) == "dynaaminen") {
 			$param = substr($monivalintalaatikko, 11);
 
 			mysql_data_seek($dynpuu_count_result, 0);

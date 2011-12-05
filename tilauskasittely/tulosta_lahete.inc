@@ -85,7 +85,8 @@ if (!function_exists('alku_lahete')) {
 			$query  = "	SELECT max(kerattyaika) kerattyaika
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
-						and otunnus = '$laskurow[tunnus]'";
+						and otunnus = '$laskurow[tunnus]'
+						AND tyyppi != 'D'";
 			$keraresult = mysql_query($query) or pupe_error($query);
 			$kerarow = mysql_fetch_assoc($keraresult);
 
@@ -216,6 +217,7 @@ if (!function_exists('alku_lahete')) {
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus IN ($laskurow[nippu])
+							AND tyyppi != 'D'
 							and toimaika != '0000-00-00'";
 				$toimaikares = mysql_query($query) or pupe_error($query);
 
@@ -576,7 +578,11 @@ if (!function_exists('uusi_sivu_lahete')) {
 		}
 		else {
 			// haetaan max(kerattyaika)
-			$query  = "SELECT max(kerattyaika) as kerattyaika from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+			$query  = "	SELECT max(kerattyaika) as kerattyaika
+						from tilausrivi
+						where yhtio = '$kukarow[yhtio]'
+						and otunnus = '$laskurow[tunnus]'
+						AND tyyppi != 'D'";
 			$keraresult = mysql_query($query) or pupe_error($query);
 			$kerarow = mysql_fetch_assoc($keraresult);
 
@@ -1093,6 +1099,7 @@ if (!function_exists('rivi_lahete')) {
 							and tilausrivi.perheid = '$row[perheid]'
 							and tuote.tuotetyyppi != 'R'
 							and tilausrivi.tyyppi != 'V'
+							AND tilausrivi.tyyppi != 'D'
 							ORDER BY tilausrivi.tunnus";
 				$perheresult = mysql_query($query) or pupe_error($query);
 
@@ -1192,6 +1199,7 @@ if (!function_exists('rivi_lahete')) {
 								JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.otunnus in ($perherow[tunnukset])
+								AND tilausrivi.tyyppi != 'D'
 								and tilausrivi.perheid = '$row[perheid]'";
 					$riresult = mysql_query($query) or pupe_error($query);
 					$perherow = mysql_fetch_assoc($riresult);

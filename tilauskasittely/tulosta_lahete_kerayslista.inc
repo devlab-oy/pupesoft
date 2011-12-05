@@ -813,6 +813,7 @@ if (!function_exists('rivi_kerayslista')) {
 									JOIN tuote tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.otunnus in ($perherow[tunnukset])
+									AND tilausrivi.tyyppi != 'D'
 									and tilausrivi.perheid = '$row[perheid]'
 									ORDER BY tilausrivi.tunnus";
 						$perheresult = mysql_query($query) or pupe_error($query);

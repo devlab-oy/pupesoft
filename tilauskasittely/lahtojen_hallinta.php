@@ -271,6 +271,22 @@
 						}
 					}
 
+					function compareDate(a, b) {
+
+						var a_date = a.id.substr(6) + a.id.substr(3, 2) + a.id.substr(0, 2);
+						var b_date = b.id.substr(6) + b.id.substr(3, 2) + b.id.substr(0, 2);
+
+						if (b_date > a_date) {
+							return 1;
+						}
+						else if (b_date < a_date) {
+							return -1;
+						}
+						else {
+							return 0;
+						}
+					}
+
 					// uniikit arvot arrayssa
 					function sort_unique(arr) {
 						arr = arr.sort(function (a, b) { return a*1 - b*1; });
@@ -644,9 +660,13 @@
 
 							if (window['sort_parent_row_direction_'+title]) {
 
-								if (title == 'delivery' || title == 'date' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
+								if (title == 'delivery' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
 									_arr.sort(compareName);
 									_arrChild.sort(compareName);
+								}
+								else if (title == 'date') {
+									_arr.sort(compareDate);
+									_arrChild.sort(compareDate);
 								}
 								else {
 									_arr.sort(compareId);
@@ -665,9 +685,13 @@
 							}
 							else {
 
-								if (title == 'delivery' || title == 'date' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
+								if (title == 'delivery' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
 									_arr.sort(compareName).reverse();
 									_arrChild.sort(compareName).reverse();
+								}
+								else if (title == 'date') {
+									_arr.sort(compareDate).reverse();
+									_arrChild.sort(compareDate).reverse();
 								}
 								else {
 									_arr.sort(compareId).reverse();

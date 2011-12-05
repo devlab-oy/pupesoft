@@ -260,115 +260,98 @@
 	// Tehd‰‰n ostotilaukset
 	if (isset($tee) and $tee == "TEE_OSTOTILAUKSET") {
 
-		// Ker‰t‰‰n tilattavat tuotteet
-		$tilattavat = "(";
-		$tilattavatrow = array();
+		$rows = 0;
+		$edellinen_toimittaja = false;
+		
+		foreach ($ostettava_maara as $index => $maara) {
 
-		foreach ($_POST["ostettava_tuote"] as $key => $value) {
-			if ($value != 0) {
-				$tuoteno = @mysql_real_escape_string($key);
-				$tilattavat .= "'$tuoteno',";
-				$tilattavatrow[$tuoteno] = @mysql_real_escape_string($value);
-			}
-		}
-		$tilattavat = substr($tilattavat,0,-1).")";
+			$maara = (float) $maara;
+			$toimittaja = mysql_real_escape_string($ostettava_toimittaja[$index]);
+			$tuoteno = mysql_real_escape_string($ostettava_tuoteno[$index]);
 
-		// Haetaan tuotteiden tiedot
-		$query = "	SELECT tuotteen_toimittajat.tuoteno,
-					tuotteen_toimittajat.toimittaja,
-					tuotteen_toimittajat.toimitusaika,
-					tuotteen_toimittajat.tunnus,
-					tuotteen_toimittajat.ostohinta,
-					tuotteen_toimittajat.valuutta,
-					toimi.nimi,
-					toimi.osoite,
-					toimi.postino,
-					toimi.postitp,
-					toimi.maa,
-					toimi.oletus_valkoodi,
-					toimi.ytunnus,
-					toimi.ovttunnus,
-					tuote.osasto,
-					tuote.try,
-					tuote.yksikko,
-					tuote.nimitys
-			FROM tuotteen_toimittajat
-			JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.ytunnus = tuotteen_toimittajat.toimittaja)
-			JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-			WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-			AND tuotteen_toimittajat.tuoteno in $tilattavat
-			ORDER BY tuotteen_toimittajat.toimittaja";
-		$result = pupe_query($query);
+			// Oikellisuustarkastus hoidetaan javascriptill‰, ei voi tulla kun numeroita!
+			if ($maara != 0) {
 
-		if (mysql_num_rows($result) > 0) {
+				if ($edellinen_toimittaja != $toimittaja) {
 
-			$rows = 0;
-			$EDtoimittaja = "";
+					$query = "	SELECT *
+								FROM toimi
+								WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
+								AND toimi.tunnus = '$toimittaja'";
+					$result = pupe_query($query);
+					$toimittajarow = mysql_fetch_assoc($result);
 
-			while ($tilausrow = mysql_fetch_assoc($result)) {
-
-				if ($EDtoimittaja != $tilausrow['ytunnus']) {
-
-					$EDtoimittaja = $tilausrow['ytunnus'];
-
-					// Tehd‰‰n uusi header
 					$query = "	INSERT INTO lasku SET
-								yhtio               = '$kukarow[yhtio]',
-								yhtio_nimi          = '$yhtiorow[nimi]',
-								yhtio_osoite        = '$yhtiorow[osoite]',
-								yhtio_postino       = '$yhtiorow[postino]',
-								yhtio_postitp       = '$yhtiorow[postitp]',
-								yhtio_maa           = '$yhtiorow[maa]',
-								toim_nimi           = '$yhtiorow[nimi]',
-								toim_osoite         = '$yhtiorow[osoite]',
-								toim_postino        = '$yhtiorow[postino]',
-								toim_postitp        = '$yhtiorow[postitp]',
-								toim_maa            = '$yhtiorow[maa]',
-								nimi                = '$tilausrow[nimi]',
-								osoite              = '$tilausrow[osoite]',
-								postino             = '$tilausrow[postino]',
-								postitp             = '$tilausrow[postitp]',
-								maa                 = '$tilausrow[maa]',
-								valkoodi            = '$tilausrow[valuutta]',
+								yhtio               = '{$kukarow["yhtio"]}',
+								yhtio_nimi          = '{$yhtiorow["nimi"]}',
+								yhtio_osoite        = '{$yhtiorow["osoite"]}',
+								yhtio_postino       = '{$yhtiorow["postino"]}',
+								yhtio_postitp       = '{$yhtiorow["postitp"]}',
+								yhtio_maa           = '{$yhtiorow["maa"]}',
+								toim_nimi           = '{$yhtiorow["nimi"]}',
+								toim_osoite         = '{$yhtiorow["osoite"]}',
+								toim_postino        = '{$yhtiorow["postino"]}',
+								toim_postitp        = '{$yhtiorow["postitp"]}',
+								toim_maa            = '{$yhtiorow["maa"]}',
+								nimi                = '{$toimittajarow["nimi"]}',
+								osoite              = '{$toimittajarow["osoite"]}',
+								postino             = '{$toimittajarow["postino"]}',
+								postitp             = '{$toimittajarow["postitp"]}',
+								maa                 = '{$toimittajarow["maa"]}',
+								valkoodi            = '{$toimittajarow["oletus_valkoodi"]}',
 								toimaika            = now(),
-								laatija             = '$kukarow[kuka]',
+								laatija             = '{$kukarow["kuka"]}',
 								luontiaika          = now(),
 								tila                = 'O',
-								toimitusehto        = '$kukarow[oletus_toimituehto]',
-								liitostunnus        = '$tilausrow[tunnus]',
-								ytunnus             = '$tilausrow[ytunnus]',
-								ovttunnus           = '$tilausrow[ovttunnus]',
-								viikorkopros        = '$kukarow[viivastyskorko]',
-								tilausyhteyshenkilo = '$kukarow[tilauksen_yhteyshenkilot]'";
+								toimitusehto        = '{$toimittajarow["toimitusehto"]}',
+								liitostunnus        = '{$toimittajarow["tunnus"]}',
+								ytunnus             = '{$toimittajarow["ytunnus"]}',
+								ovttunnus           = '{$toimittajarow["ovttunnus"]}',
+								tilausyhteyshenkilo = '{$toimittajarow["yhteyshenkilo"]}'";
 					$result = pupe_query($query);
 					$otunnus = mysql_insert_id();
+
 					$rows++;
+					$edellinen_toimittaja = $toimittaja;
 				}
 
-				// Tehd‰‰n rivi
-				$tilkpl = $tilattavatrow[$tilausrow['tuoteno']];
+				$query = "	SELECT tuote.try,
+							tuote.osasto,
+							tuote.nimitys,
+							tuote.yksikko,
+							tuotteen_toimittajat.ostohinta
+							FROM tuote
+							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio
+								AND tuotteen_toimittajat.tuoteno = tuote.tuoteno
+								AND tuotteen_toimittajat.liitostunnus = '{$toimittajarow["tunnus"]}')
+							WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+							AND tuote.tunnus = '$toimittaja'";
+				$result = pupe_query($query);
+				$tuoterow = mysql_fetch_assoc($result);
 
 				$query = "	INSERT INTO tilausrivi SET
-							yhtio     = '$kukarow[yhtio]',
+							yhtio     = '{$kukarow["yhtio"]}',
 							tyyppi    = 'O',
 							toimaika  = now(),
 							kerayspvm = now(),
 							otunnus   = '$otunnus',
-							tuoteno   = '$tilausrow[tuoteno]',
-							try       = '$tilausrow[try]',
-							osasto    = '$tilausrow[osasto]',
-							nimitys   = '$tilausrow[nimitys]',
-							tilkpl    = '$tilkpl',
-							yksikko   = '$tilausrow[yksikko]',
-							varattu   = '$tilkpl',
-							hinta     = '$tilausrow[ostohinta]',
-							laatija   = '$kukarow[kuka]',
+							tuoteno   = '$tuoteno',
+							try       = '{$tuoterow["try"]}',
+							osasto    = '{$tuoterow["osasto"]}',
+							nimitys   = '{$tuoterow["nimitys"]}',
+							tilkpl    = '$maara',
+							yksikko   = '{$tuoterow["yksikko"]}',
+							varattu   = '$maara',
+							hinta     = '{$tuoterow["ostohinta"]}',
+							laatija   = '{$kukarow["kuka"]}',
 							laadittu  = now()";
 				$result = pupe_query($query);
 			}
 		}
 
 		echo $rows." ".t('ostotilausta muodostettu.');
+		echo "<br><br>";
+		$tee = "";
 	}
 
 	// Tehd‰‰n raportti
@@ -448,6 +431,8 @@
 		echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
 		echo t("N‰ytet‰‰n ostotarve aikav‰lille").": $nykyinen_alku - $nykyinen_loppu";
 
+		$ostoehdotus_riveja = 0;
+
 		if (mysql_num_rows($res) > 0) {
 
 			// Kootaan raportti
@@ -456,6 +441,7 @@
 
 			$EDtoimittaja = false;
 			$toimittaja_header_piirretty = false;
+			$formin_pointteri = 0;
 
 			// loopataan tuotteet l‰pi
 			while ($row = mysql_fetch_assoc($res)) {
@@ -490,6 +476,8 @@
 					continue;
 				}
 
+				$ostoehdotus_riveja++;
+
 				// Pit‰‰ s‰ilytt‰‰ table-headeria muuttujassa, sill‰ voi olla ett‰ toimittajalle ei tule yht‰‰n tuoterivi‰ ehdotukseen (eik‰ haluta piirt‰‰ turhaa headeri‰)
 				if ($toimittaja_header_piirretty == false) {
 					echo $toimittaja_header;
@@ -510,21 +498,30 @@
 					echo "<td style='text-align: right;'>{$tuoterivi["ostoeramaara"]}</td>";
 				}
 				else {
-					echo "<td style='text-align: right;'><input size='8' style='text-align: right;' type='text' name='ostettava_tuote[{$row["tuoteno"]}]' value='{$tuoterivi["ostoeramaara"]}'</td>";
+					echo "<td style='text-align: right;'>";
+					echo "<input size='8' style='text-align: right;' type='text' name='ostettava_maara[$formin_pointteri]' value='{$tuoterivi["ostoeramaara"]}'>";
+					echo "<input type='hidden' name='ostettava_tuoteno[$formin_pointteri]' value='{$row["tuoteno"]}'>";
+					echo "<input type='hidden' name='ostettava_toimittaja[$formin_pointteri]' value='{$tuoterivi["toimittajan_tunnus"]}'>";
+					echo "</td>";
+					$formin_pointteri++;
 				}
 				echo "</tr>";
 			}
 
 			echo "</table>";
-			echo "<br>";
 
-			echo "<input type='hidden' name='tee' value='TEE_OSTOTILAUKSET' />";
-			echo "<input type='submit' name='muodosta_ostotilaukset' value='".t('Muodosta ostotilaukset')."' />";
+			if ($ostoehdotus_riveja > 0) {
+				echo "<br>";
+				echo "<input type='hidden' name='tee' value='TEE_OSTOTILAUKSET' />";
+				echo "<input type='submit' name='muodosta_ostotilaukset' value='".t('Muodosta ostotilaukset')."' />";
+				echo "<br><br>";
+			}
+
 			echo "</form>";
-			echo "<br><br>";
 			$tee = "";
 		}
-		else {
+
+		if ($ostoehdotus_riveja == 0) {
 			echo "<br><br>";
 			echo "<font class='error'>Antamallasi rajauksella ei lˆydy yht‰‰n tuotetta ehdotukseen.</font><br>";
 			echo "<br>";

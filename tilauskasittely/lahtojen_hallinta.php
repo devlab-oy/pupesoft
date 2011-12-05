@@ -1045,7 +1045,8 @@
 			"2" => t("Varastotäydennys"),
 			"7" => t("Tehdastilaus"),
 			"8" => t("Muiden mukana"),
-			"A" => t("Työmääräys")
+			"A" => t("Työmääräys"),
+			"S" => t("Sarjatilaus")
 		);
 
 		while ($lahto_row = mysql_fetch_assoc($lahto_res)) {

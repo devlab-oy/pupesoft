@@ -317,7 +317,6 @@
 				}
 
 				$pdf->draw_rectangle($kala+30, 20, 70, 580, $thispage, $rectparam);
-
 				$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40, $thispage, $rectparam);
 				$pdf->draw_rectangle($kala+30, 40,  $kala+10, 290, $thispage, $rectparam);
 				$pdf->draw_rectangle($kala+30, 290, $kala+10, 350, $thispage, $rectparam);
@@ -342,33 +341,10 @@
 		if (!function_exists('rivi')) {
 			function rivi($params) {
 				global $yhtiorow, $kukarow;
-
+				
 				// Luodaan muuttujat
 				extract($params);
-
-				// viivat rivien v‰liin...
-				$x[0] = 20;
-				$x[1] = 580;
-				$y[0] = $y[1] = $kala + 15 - 5;
-
-				$pdf->draw_line($x, $y, $thispage, $rectparam);
-
-				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-				if ($kala <= 100) {
-					$sivu++;
-
-					// Luodaan palautettavat
-					$return = compact(array_keys($params));
-
-					$return = loppu($return);
-					$params = alku($return);
-
-					// Luodaan muuttujat
-					extract($params);
-
-					$page[$sivu] = $thispage;
-				}
-
+				
 				// Mahtuuko rivi t‰lle sivulle
 				$kalatest = $kala;
 
@@ -378,7 +354,7 @@
 				//Fuulataan t‰m‰, jotta voidaan kokeilla mahtuuko rivi sivulle
 				$returntest["thispage"] = "TESTISIVU";
 
-				$returntest = rivi_fool($returntest);
+				$returntest = piirra_rivi($returntest);
 
 				// Otetaan vain kalamuuttuja t‰st‰
 				$kalatest = $returntest["kala"];
@@ -398,7 +374,29 @@
 
 					$page[$sivu] = $thispage;
 				}
+				
+				$return = compact(array_keys($params));
+				
+				$params = piirra_rivi($return);
+				
+				return $params;
+			}
+		}
 
+		if (!function_exists('piirra_rivi')) {
+			function piirra_rivi($params) {
+				global $yhtiorow, $kukarow;
+
+				// Luodaan muuttujat
+				extract($params);
+
+				// viivat rivien v‰liin...
+				$x[0] = 20;
+				$x[1] = 580;
+				$y[0] = $y[1] = $kala + 15 - 5;
+
+				$pdf->draw_line($x, $y, $thispage, $rectparam);
+			
 				$pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]],$thispage, $pieni);
 
 				if ($toim == "HAAMU") {
@@ -482,123 +480,6 @@
 
 			}
 		}
-
-		// T‰m‰ rivi_fool tarvitaan kun tarkistetaan mahtuuko sivulle vai ei.
-		// jos koettaan rivn sis‰ll‰ kutsua rivi, niin j‰‰d‰‰n ikuiseen looppiin.
-		if (!function_exists('rivi_fool')) {
-			function rivi_fool($params) {
-				global $yhtiorow, $kukarow;
-
-				// Luodaan muuttujat
-				extract($params);
-
-				// viivat rivien v‰liin...
-				$x[0] = 20;
-				$x[1] = 580;
-				$y[0] = $y[1] = $kala + 15 - 5;
-
-				$pdf->draw_line($x, $y, $thispage, $rectparam);
-
-				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-				if ($kala <= 100) {
-					$sivu++;
-
-					// Luodaan palautettavat
-					$return = compact(array_keys($params));
-
-					$return = loppu($return);
-					$params = alku($return);
-
-					// Luodaan muuttujat
-					extract($params);
-
-					$page[$sivu] = $thispage;
-				}
-
-				$pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]], $thispage, $pieni);
-
-				if ($toim == "HAAMU") {
-					$pdf->draw_text(45, $kala, $row["tuoteno"], $thispage, $norm);
-				}
-				else {
-
-					if ($row["toim_tuoteno"] != "") {
-						$pdf->draw_text(45,  $kala, $row["toim_tuoteno"], $thispage, $norm);
-					}
-					else {
-						$pdf->draw_text(45,  $kala, $row["tuoteno"], $thispage, $norm);
-					}
-
-					if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"])) {
-						$oikpos = $pdf->strlen("(".$row["tuoteno"].")", $pieni);
-						$pdf->draw_text(290-$oikpos, $kala, "(".$row["tuoteno"].")", $thispage, $pieni);
-					}
-				}
-
-				$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]), $thispage, $norm);
-
-				//	Tarkastetaan olisiko toimittajalla yksikkˆ!
-				$query = "	SELECT toim_yksikko
-							FROM tuotteen_toimittajat
-							WHERE yhtio 		= '$kukarow[yhtio]'
-							and tuoteno 		= '$row[tuoteno]'
-							and liitostunnus 	= '$laskurow[liitostunnus]'
-							LIMIT 1";
-				$rarres = pupe_query($query);
-				$rarrow	 = mysql_fetch_array($rarres);
-
-				//	Jos toimittajalla on yksikkˆ ohitetaan tuotteen yksikkˆ
-				if ($rarrow["toim_yksikko"] != "") {
-					$omyks = $rarrow["toim_yksikko"];
-				}
-				else {
-					$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
-				}
-
-				$oikpos = $pdf->strlen(($row["varattu"]*1)." ".$omyks, $norm);
-				$pdf->draw_text(415-$oikpos, $kala, ($row["varattu"]*1)." ".$omyks, $thispage, $norm);
-
-				$oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
-				$pdf->draw_text(475-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
-
-				if ($row["ale1"] != 0) {
-					$oikpos = $pdf->strlen(($row["ale1"]*1)."%", $norm);
-					$pdf->draw_text(510-$oikpos, $kala, ($row["ale1"]*1)."%", $thispage, $norm);
-				}
-
-				$oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
-				$pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
-
-	            if ($nimitykset != "") {
-
-	 				//K‰‰nnet‰‰n nimitys
-					$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
-
-					// jos meill‰ on toimittajan nimitys syˆtetty k‰ytet‰‰n sit‰ aina
-					if ($row["toim_nimitys"] != "") $row["nimitys"] = $row["toim_nimitys"];
-
-	                $kala = $kala - 15;
-	                $pdf->draw_text(45,  $kala, $row["nimitys"], $thispage, $norm);
-	                $lask++;
-	            }
-
-				if (trim($row["kommentti"]) != '') {
-					foreach(explode("\n", wordwrap(trim($row["kommentti"]), 90, "\n")) as $kommentti) {
-						$kala = $kala - 15;
-						$pdf->draw_text(45,  $kala, $kommentti,	$thispage, $norm);
-						$lask++;
-					}
-				}
-
-				$kala = $kala - 15;
-
-				// Luodaan palautettavat
-				$return = compact(array_keys($params));
-				return $return;
-
-			}
-		}
-
 
 		if (!function_exists('loppu')) {
 			function loppu ($params) {
@@ -789,7 +670,6 @@
 						and tilausrivi.yhtio	 = '$kukarow[yhtio]'
 						$haamulisa
 						ORDER BY tilausrivi.tunnus";
-
 		}
 
 		$result = pupe_query($query);
@@ -845,7 +725,6 @@
 						'laitetaanko_yhteensarivi'	=> 0,
 						'total'						=> 0,
 		);
-
 
 		// Aloitellaan l‰hetteen teko
 		$params = alku($params);

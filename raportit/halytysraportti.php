@@ -442,6 +442,9 @@
 			if ($valitut["poistuvat"] != '') {
 				$lisaa .= " and tuote.status != 'X' ";
 			}
+			if ($valitut["ei_ostoehd"] != '') {
+				$lisaa .= " and tuote.ostoehdotus != 'E' ";
+			}
 			if ($valitut["EIHINNASTOON"] != '') {
 				$lisaa .= " and tuote.hinnastoon != 'E' ";
 			}
@@ -640,7 +643,6 @@
 							WHERE tuote.$yhtiot
 							$lisaa
 							and tuote.ei_saldoa = ''
-							and tuote.ostoehdotus = ''
 							ORDER BY id, tuote.tuoteno";
 			}
 			//Ajetaan raportti tuotteittain, varastopaikoittain
@@ -691,34 +693,37 @@
 							WHERE tuote.$yhtiot
 							$lisaa
 							and tuote.ei_saldoa = ''
-							and tuote.ostoehdotus = ''
 							$varastot
 							order by id, tuote.tuoteno, varastopaikka";
 			}
 			$res = pupe_query($query);
 
-			//	Oletetaan että käyttäjä ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
-			if (!isset($valitut["poistetut"])) $valitut["poistetut"] = "checked";
-			if (!isset($valitut["poistuvat"])) $valitut["poistuvat"] = "checked";
-
-			if ($valitut["poistetut"] != '' and $valitut["poistuvat"] == '') {
-				echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistuvat näytetään").".<br>";
-			}
-			if ($valitut["poistetut"] != '' and $valitut["poistuvat"] != '') {
+			if (isset($valitut["poistetut"]) and $valitut["poistetut"] != '' and isset($valitut["poistuvat"]) and $valitut["poistuvat"] != '') {
 				echo "<font class='message'>".t("Vain aktiiviset tuotteet").".<br>";
 			}
-			if ($valitut["poistetut"] == '' and $valitut["poistuvat"] != '') {
+			if (isset($valitut["poistetut"]) and $valitut["poistetut"] != '' and !isset($valitut["poistuvat"])) {
+				echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistuvat näytetään").".<br>";
+			}
+			if (!isset($valitut["poistetut"]) and isset($valitut["poistuvat"]) and $valitut["poistuvat"] != '') {
 				echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistetut näytetään").".<br>";
 			}
 
-			if ($valitut["OSTOTVARASTOITTAIN"] != '') {
+			if (isset($valitut["ei_ostoehd"]) and $valitut["ei_ostoehd"] != '') {
+				echo "<font class='message'>".t("Vain ostoehdotettavat tuotteet").".<br>";
+			}
+			else {
+				echo "<font class='message'>".t("Ostoehdotettavat tuotteet ja ostoehdotukseen kuulumattomat näytetään").".<br>";
+			}
+
+			if (isset($valitut["OSTOTVARASTOITTAIN"]) and $valitut["OSTOTVARASTOITTAIN"] != '') {
 				echo "<font class='message'>".t("Tilatut eritellään varastoittain").".<br>";
 			}
 
-			if ($valitut["VAINUUDETTUOTTEET"] != '') {
+			if (isset($valitut["VAINUUDETTUOTTEET"]) and $valitut["VAINUUDETTUOTTEET"] != '') {
 				echo "<font class='message'>".t("Listaa vain 12kk sisällä perustetut tuotteet").".<br>";
 			}
-			if ($valitut["UUDETTUOTTEET"] != '') {
+
+			if (isset($valitut["UUDETTUOTTEET"]) and $valitut["UUDETTUOTTEET"] != '') {
 				echo "<font class='message'>".t("Ei listata 12kk sisällä perustettuja tuotteita").".<br>";
 			}
 
@@ -1313,6 +1318,15 @@
 
 						if (isset($workbook)) {
 							$worksheet->writeNumber($excelrivi, $excelsarake, $ostettavahaly);
+							$excelsarake++;
+						}
+					}
+
+					if ($valitut["SARAKE13B"] != '') {
+						$rivi .= "$ostettavahalytilausmaara\t";
+
+						if (isset($workbook)) {
+							$worksheet->writeNumber($excelrivi, $excelsarake, $ostettavahalytilausmaara);
 							$excelsarake++;
 						}
 					}
@@ -2461,7 +2475,7 @@
 					<input type='hidden' name='abcrajaus' value='$abcrajaus'>
 					<input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>
 					<input type='hidden' name='KAIKKIJT' value='$KAIKKIJT'>
-						
+
 					<table>
 					<tr><th>".t("Osasto")."</th><td colspan='3'>$osasto $trow[selitetark]</td></tr>
 					<tr><th>".t("Tuoteryhmä")."</th><td colspan='3'>$tuoryh $srow[selitetark]</td></tr>
@@ -2561,7 +2575,7 @@
 
 			foreach ($kaudet_oletus as $kaunimi => $kausi1) {
 
-				echo "<tr><th>Ostoehdotus $kaunimi:</th><td colspan='3'><select name='valitut[KAUSI$kaulas]'>";
+				echo "<tr><th>".t("Ostoehdotus")." $kaunimi:</th><td colspan='3'><select name='valitut[KAUSI$kaulas]'>";
 
 				foreach ($kaudet_kaikki as $kausi2) {
 					$query = "	SELECT selitetark
@@ -2694,8 +2708,24 @@
 
 			echo "<tr><th>".t("Älä näytä poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[poistuvat]' value='POISTUVAT' $chk></td></tr>";
 
+			//Näytetäänkö ostoehdottamattomat tuotteet
+			$query = "	SELECT selitetark
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji = 'HALYRAP'
+						and selite	= '$rappari'
+						and selitetark = 'EI_OSTOEHD'";
+			$sresult = pupe_query($query);
+			$srow = mysql_fetch_assoc($sresult);
 
-			//Näytetäänkö poistetut tuotteet
+			$chk = "";
+			if (($srow["selitetark"] == "EI_OSTOEHD" and $tee == "JATKA") or $valitut["ei_ostoehd"] != '' or $defaultit == "PÄÄLLE") {
+				$chk = "CHECKED";
+			}
+
+			echo "<tr><th>".t("Älä näytä ostoehdotukseen kuulumattomia tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[ei_ostoehd]' value='EI_OSTOEHD' $chk></td></tr>";
+
+			//Näytetäänkö ei hinnastoon tuotteet
 			$query = "	SELECT selitetark
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'

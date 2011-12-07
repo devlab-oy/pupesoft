@@ -35,12 +35,7 @@
 	}
 	//muuten siitä tehdään peedeeäffä
 	else {
-		//viivakoodien tulostamista varten
-		define (__TRACE_ENABLED__, false);
-		define (__DEBUG_ENABLED__, false);
 
-		require_once("barcode/barcode.php");
-		require_once("barcode/c39object.php");
 		require_once("pdflib/phppdflib.class.php");
 
 		if ($kieli== '') {
@@ -89,22 +84,6 @@
 				}
 
 				$thispage = $pdf->new_page("a4");
-
-				//oletukset viivakoodeille
-				$output   = "png";
-				$width    = "140";
-				$height   = "20";
-				$xres     = "1";
-				$font     = "2";
-				$drawtext = "off";
-
-				$style  = BCS_ALIGN_CENTER;
-				$style |= ($output  == "png" ) ? BCS_IMAGE_PNG  : 0;
-				$style |= ($output  == "jpeg") ? BCS_IMAGE_JPEG : 0;
-				$style |= ($border  == "on"  ) ? BCS_BORDER 	  : 0;
-				$style |= ($drawtext== "on"  ) ? BCS_DRAW_TEXT  : 0;
-				$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
-				$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
 				tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
@@ -207,10 +186,8 @@
 				list($ff_string, $ff_font) = pdf_fontfit($laskurow["tilausyhteyshenkilo"], 105, $pdf, $norm);
 				$pdf->draw_text(310, 719, $ff_string, $thispage, $ff_font);
 
-
 				$pdf->draw_text(430, 729, t("Laadittu", $kieli), $thispage, $pieni);
 				$pdf->draw_text(430, 719, tv1dateconv($laskurow["luontiaika"]),	$thispage, $norm);
-
 
 				$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 				$pdf->draw_text(310, 708, t("Toimitusehto", $kieli), $thispage, $pieni);
@@ -341,10 +318,10 @@
 		if (!function_exists('rivi')) {
 			function rivi($params) {
 				global $yhtiorow, $kukarow;
-				
+
 				// Luodaan muuttujat
 				extract($params);
-				
+
 				// Mahtuuko rivi tälle sivulle
 				$kalatest = $kala;
 
@@ -374,11 +351,11 @@
 
 					$page[$sivu] = $thispage;
 				}
-				
+
 				$return = compact(array_keys($params));
-				
+
 				$params = piirra_rivi($return);
-				
+
 				return $params;
 			}
 		}
@@ -396,7 +373,7 @@
 				$y[0] = $y[1] = $kala + 15 - 5;
 
 				$pdf->draw_line($x, $y, $thispage, $rectparam);
-			
+
 				$pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]],$thispage, $pieni);
 
 				if ($toim == "HAAMU") {

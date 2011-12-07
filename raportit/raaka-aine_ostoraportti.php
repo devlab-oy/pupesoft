@@ -2,6 +2,27 @@
 
 	require("../inc/parametrit.inc");
 
+	// Otetaan jQuery mukaan
+	echo "<script src='{$palvelin2}inc/jquery.min.js'></script>";
+
+	// Salitaan vain numeroita ja piste/pilkku input kentissä
+	echo '<script language="javascript">
+	$(document).ready(function() {
+	    $("#vain_numeroita").keydown(function(event) {
+	        // sallitaan backspace (8) ja delete (46)
+	        if ( event.keyCode == 46 || event.keyCode == 8 ) {
+	            // anna sen vaan tapahtua...
+	        }
+	        else {
+	            // 48-57 on norminäppäimistön numerot, numpad numerot on 96-105, piste on 190 ja pilkku 188
+	            if ((event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 ) && event.keyCode != 188 && event.keyCode != 190) {
+	                event.preventDefault();
+	            }
+	        }
+	    });
+	});
+	</script>';
+
 	echo "<font class='head'>".t("Raaka-aineiden ostoraportti")."</font><hr>";
 
 	// Ehdotetaan oletuksena ehdotusta ensikuun myynnille sekä siitä plus 3 kk
@@ -262,10 +283,10 @@
 
 		$rows = 0;
 		$edellinen_toimittaja = false;
-		
+
 		foreach ($ostettava_maara as $index => $maara) {
 
-			$maara = (float) $maara;
+			$maara = (float) str_replace(",", ".", $maara);
 			$toimittaja = mysql_real_escape_string($ostettava_toimittaja[$index]);
 			$tuoteno = mysql_real_escape_string($ostettava_tuoteno[$index]);
 
@@ -499,7 +520,7 @@
 				}
 				else {
 					echo "<td style='text-align: right;'>";
-					echo "<input size='8' style='text-align: right;' type='text' name='ostettava_maara[$formin_pointteri]' value='{$tuoterivi["ostoeramaara"]}'>";
+					echo "<input size='8' style='text-align: right;' type='text' name='ostettava_maara[$formin_pointteri]' value='{$tuoterivi["ostoeramaara"]}' id='vain_numeroita'>";
 					echo "<input type='hidden' name='ostettava_tuoteno[$formin_pointteri]' value='{$row["tuoteno"]}'>";
 					echo "<input type='hidden' name='ostettava_toimittaja[$formin_pointteri]' value='{$tuoterivi["toimittajan_tunnus"]}'>";
 					echo "</td>";

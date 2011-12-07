@@ -4445,14 +4445,18 @@ if ($tee == '') {
 
 			if (mysql_num_rows($dynamic_result) > 0) {
 				$kommentti_select = "concat(tilausrivi.kommentti";
+				$laskentalisa_riveille = " or (";
 				// ketjutetaan kommentti, ja avainsanat samaan. Laitetaan html-koodia että avainsana on mustalla, muuten ne olisi samallavärillä kuin kommentti.
 				while($drow = mysql_fetch_assoc($dynamic_result)) {
 					$kommentti_select .= ",if(tilausrivin_lisatiedot.{$drow["selite"]} !='',concat('<br><font color=\"black\">{$drow["selitetark"]}:</font> ',tilausrivin_lisatiedot.{$drow["selite"]}),'')";
+					$laskentalisa_riveille .= "tilausrivin_lisatiedot.{$drow["selite"]} !='' or ";
 				}
 				$kommentti_select .= ") kommentti,";
+				$laskentalisa_riveille = substr($laskentalisa_riveille,0,-3).") ";
 			}
 			else {
 				$kommentti_select = "tilausrivi.kommentti,";
+				$laskentalisa_riveille = "";
 			}
 
 			$tilrivity	= "'L','0'";
@@ -5084,7 +5088,7 @@ if ($tee == '') {
 						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
 					}
 
-					$query = "	SELECT sum(if(kommentti != '' or (tilausrivin_lisatiedot.sopimuksen_lisatieto1 !='' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 !='') or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or $vastaavattuotteet = 1, 1, 0)), count(*)
+					$query = "	SELECT sum(if(kommentti != '' {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or $vastaavattuotteet = 1, 1, 0)), count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
 								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'

@@ -46,6 +46,9 @@
 		if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epäonnistui!");
 
 		foreach ($ulos as $print) {
+			// poistetaan mysql-sarakkeen kommentti koska se kaataa sqlupdate-ohjelman
+			$print = preg_replace("/ COMMENT '[^']*',/", ",", $print);
+			
 			fputs($toot, $print."\n");
 		}
 

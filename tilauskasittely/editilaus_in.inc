@@ -1273,7 +1273,7 @@ while ($tietue = fgets($fd)) {
 
 				// Spessukase
 				if ($yhtiorow["yhtio"] == "artr") {
-
+					// 1. Etsitään aktiivisia tuotteita kaikki spacet poistettuina
 					$query = "	SELECT *
 								FROM tuote
 								WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -1283,8 +1283,21 @@ while ($tietue = fgets($fd)) {
 					$result = mysql_query($query) or die($query);
 
 					if (mysql_num_rows($result) == 0) {
-						// Laitetaan kolmanneksi merkiksi space
-						$tieto = substr($tieto, 0, 2). " ". substr($tieto, 2);
+						// Laitetaan kolmanneksi merkiksi space...
+						$tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
+
+						// 2. Etsitään kaikkia tuotteita
+						$query = "	SELECT *
+									FROM tuote
+									WHERE yhtio = '{$kukarow["yhtio"]}'
+									and tuoteno = '{$tieto}'
+									{$kieltolisa}";
+						$result = mysql_query($query) or die($query);
+
+						if (mysql_num_rows($result) == 0) {
+							// ...Poistetaan kolmannesta merkistä space
+							$tieto = substr($tieto, 0, 2).substr($tieto, 3);
+						}
 					}
 				}
 
@@ -1296,30 +1309,6 @@ while ($tietue = fgets($fd)) {
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 0) {
-					
-					// Spessukase jatkuu
-					if ($yhtiorow["yhtio"] == "artr") {
-						
-						// Poistetaan kolmannesta merkistä space ja katsotaan kaikista tuotteista (myös poistetuista). Jos silläkää ei löydy, välitetään alk.per tuoteno eteenpäin.
-						$tieto = substr($tieto, 0, 2) . substr($tieto, 3);
-						
-						$query = "	SELECT *
-									FROM tuote
-									WHERE yhtio = '{$kukarow["yhtio"]}'
-									and tuoteno = '{$tieto}'
-									{$kieltolisa}";
-						$result = mysql_query($query) or die($query);
-						
-						if (mysql_num_rows($result) == 1) {
-							$trow = mysql_fetch_array($result);
-							$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
-							$tuoteno = $trow['tuoteno'];
-							$tuoteerror = 0; // tuote ok
-							//breikataan tähän jos löytyi, niin ei valuta pistämään riviä virheeksi.
-							break;
-						}
-					}
-					
 					///* Lisätään tilaukselle dummytuote ja kommentti *///
 					$edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
 					$tuoteerrortxt .= " $tieto";

@@ -300,6 +300,210 @@
 						return ret;
 					}
 
+					var column_sort = function(event) {
+
+						if (event.target != this) {
+							return true;
+						}
+
+						var parent_sort = $(this).hasClass('sort_parent_row_by') ? true : false;
+
+						var title = parent_sort ? this.id.substring(11) : this.id.substring(4);
+
+						if (parent_sort) {
+
+							var arr = $('.toggleable_parent:visible');
+							var _arr = new Array();
+
+							var _arrChild = new Array();
+
+							for (i = 0; i < arr.length; i++) {
+								var row = arr[i];
+
+								var id = $(row).children('.toggleable_parent_row_'+title).attr('id').replace(/(:|\.)/g,'\\$1');
+
+								if (title == 'departure' || title == 'manual') {
+									var id_temp = id.split(\"__\", 2);
+									id = id_temp[0];
+									counter = id_temp[1];
+								}
+								else {
+									var id_temp = id.split(\"__\", 3);
+									id = id_temp[0];
+									counter = id_temp[2];
+								}
+
+								var temp = {'id': id, 'row': row, 'counter': counter, 'link': id_temp[0]};
+								_arr.push(temp);
+
+								var rowChild = $('#toggleable_tr_'+id_temp[1]+'__'+counter);
+								var tempChild = {'id': id, 'row': rowChild, 'counter': counter};
+								_arrChild.push(tempChild);	
+							}
+
+							$('.toggleable_parent:visible').remove();
+
+							for (i = 0; i < _arr.length; i++) {
+								$('.toggleable_tr_'+_arr[i].link+'__'+_arr[i].counter).remove();
+							}
+
+							if (window['sort_parent_row_direction_'+title]) {
+
+								if (title == 'delivery' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
+									_arr.sort(compareName);
+									_arrChild.sort(compareName);
+								}
+								else if (title == 'date') {
+									_arr.sort(compareDate);
+									_arrChild.sort(compareDate);
+								}
+								else {
+									_arr.sort(compareId);
+									_arrChild.sort(compareId);
+								}
+
+								for (i = 0; i < _arr.length; i++) {
+									$('.header_parent').after(_arrChild[i].row);
+									$('.header_parent').after(_arr[i].row);
+								}
+
+								$('.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png').show();
+								$('.sort_parent_row_by').children('img[class!=\"parent_row_direction_'+title+'\"]').hide();
+
+								window['sort_parent_row_direction_'+title] = false;
+							}
+							else {
+
+								if (title == 'delivery' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
+									_arr.sort(compareName).reverse();
+									_arrChild.sort(compareName).reverse();
+								}
+								else if (title == 'date') {
+									_arr.sort(compareDate).reverse();
+									_arrChild.sort(compareDate).reverse();
+								}
+								else {
+									_arr.sort(compareId).reverse();
+									_arrChild.sort(compareId).reverse();
+								}
+
+								for (i = 0; i < _arr.length; i++) {
+									$('.header_parent').after(_arrChild[i].row);
+									$('.header_parent').after(_arr[i].row);
+								}
+
+								$('.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png').show();
+								$('.sort_parent_row_by').children('img[class!=\"parent_row_direction_'+title+'\"]').hide();
+
+								window['sort_parent_row_direction_'+title] = true;
+							}
+
+						}
+						else {
+
+							var tmp = title.split(\"__\", 3);
+							title = tmp[0];
+							title_id = tmp[1];
+							title_counter = tmp[2];
+
+							var arr = $('.toggleable_row_tr:visible');
+							var _arr = new Array();
+
+							var _arrChildOrder = new Array();
+							var _arrChildSscc = new Array();
+
+							for (i = 0; i < arr.length; i++) {
+								var row = arr[i];
+
+								var id = $(row).children('.toggleable_row_'+title).attr('id');
+								var counter = 0;
+
+								if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package' || title == 'weight' || title == 'type' || title == 'clientprio') {
+									var id_temp = id.split(\"__\", 3);
+									id = id_temp[0];
+									counter = id_temp[2];
+								}
+								else {
+									var id_temp = id.split(\"__\", 2);
+									id = id_temp[0];
+									counter = id_temp[1];
+								}
+
+								var temp = {'id': id, 'row': row, 'counter': counter};
+								_arr.push(temp);
+
+								var rowChildOrder = $('.toggleable_row_child_order_'+id+'__'+counter);
+								var tempChildOrder = {'id': id, 'row': rowChildOrder, 'counter': counter};
+								_arrChildOrder.push(tempChildOrder);
+
+								var rowChildSscc = $('.toggleable_row_child_sscc_'+id+'__'+counter);
+								var tempChildSscc = {'id': id, 'row': rowChildSscc, 'counter': counter};
+								_arrChildSscc.push(tempChildSscc);
+							}
+
+							$('.toggleable_row_tr:visible').remove();
+
+							for (i = 0; i < _arr.length; i++) {
+								$('.toggleable_row_child_order_'+_arr[i].id+'__'+_arr[i].counter).remove();
+								$('.toggleable_row_child_sscc_'+_arr[i].id+'__'+_arr[i].counter).remove();
+							}
+
+							var header_id = $('.toggleable_tr:visible').attr('id').substring(14).split(\"__\", 2);
+
+							if (window['sort_row_direction_'+title]) {
+
+								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type' || title == 'clientprio') {
+									_arr.sort(compareName);
+									_arrChildOrder.sort(compareName);
+									_arrChildSscc.sort(compareName);
+								}
+								else {
+									_arr.sort(compareId);
+									_arrChildOrder.sort(compareId);
+									_arrChildSscc.sort(compareId);
+								}
+
+								for (i = 0; i < _arr.length; i++) {
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
+								}
+
+								$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png').show();
+								$('.sort_row_by').children('img[class!=\"row_direction_'+title+'\"]').hide();
+
+								window['sort_row_direction_'+title] = false;
+							}
+							else {
+
+								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type' || title == 'clientprio') {
+									_arr.sort(compareName).reverse();
+									_arrChildOrder.sort(compareName).reverse();
+									_arrChildSscc.sort(compareName).reverse();
+								}
+								else {
+									_arr.sort(compareId).reverse();
+									_arrChildOrder.sort(compareId).reverse();
+									_arrChildSscc.sort(compareId).reverse();
+								}
+
+								for (i = 0; i < _arr.length; i++) {
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
+								}
+
+								$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png').show();
+								$('.sort_row_by').children('img[class!=\"row_direction_'+title+'\"]').hide();
+
+								window['sort_row_direction_'+title] = true;
+							}
+						}
+					};
+
+					// 1. ja 2. tason sarakkeiden sorttaus
+					$('.sort_row_by, .sort_parent_row_by').click(column_sort);
+
 					// 2. tason alasvetovalikolla filteröinti
 					$('.filter_row_by_select').live('change', function(event) {
 
@@ -466,6 +670,8 @@
 
 								var text_search = false;
 
+								// $('.filter_row_by_text:visible').attr('disabled', false);
+
 								$('.filter_row_by_text:visible').attr('disabled', false).each(function() {
 									if ($(this).val() != '') {
 										$(this).trigger('keyup');
@@ -490,6 +696,7 @@
 
 							$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide().next().hide().next().hide();
 							$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_order_'+id[0]+'__'+id[1]+'\"][class^=\"toggleable_row_child_order_\"]').hide();
+
 							// $('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_sscc_'+id[0]+'__'+id[1]+'\"][class^=\"toggleable_row_child_sscc_\"]').hide();
 
 							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().parent().show();
@@ -520,6 +727,8 @@
 
 									var text_search = false;
 
+									// $('.filter_row_by_text:visible').attr('disabled', false);
+
 									$('.filter_row_by_text:visible').attr('disabled', false).each(function() {
 										if ($(this).val() != '') {
 											$(this).trigger('keyup');
@@ -532,19 +741,24 @@
 									if (!text_search) {
 										$('.filter_row_by_select:visible').trigger('change');
 									}
+
+									$('.sort_row_by:visible, .sort_parent_row_by:visible').bind('click', column_sort);
 								}
 							}
 							else {
 
 								$('.filter_row_by_select:visible, .filter_row_by_text:visible').attr('disabled', true);
 
+								$('.sort_row_by:visible, .sort_parent_row_by:visible').unbind('click');
+
 								$(this).addClass('tumma');
 
 								var parent_element = $('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent();
 
 								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
-								// $('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_order_'+id[0]+'__'+id[2]+'\"][class^=\"toggleable_row_child_order_\"]').hide();
 								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_sscc_'+id[0]+'__'+id[2]+'\"][class^=\"toggleable_row_child_sscc_\"]').hide();
+
+								// $('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_order_'+id[0]+'__'+id[2]+'\"][class^=\"toggleable_row_child_order_\"]').hide();
 
 								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().parent().show();
 								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().show();
@@ -608,208 +822,6 @@
 					$('.sort_parent_row_by').each(function() {
 						var title_sort = this.id.substring(11);
 						window['sort_parent_row_direction_'+title_sort] = false;
-					});
-
-					// 1. ja 2. tason sarakkeiden sorttaus
-					$('.sort_row_by, .sort_parent_row_by').click(function(event) {
-
-						if (event.target != this) {
-							return true;
-						}
-
-						var parent_sort = $(this).hasClass('sort_parent_row_by') ? true : false;
-
-						var title = parent_sort ? this.id.substring(11) : this.id.substring(4);
-
-						if (parent_sort) {
-
-							var arr = $('.toggleable_parent:visible');
-							var _arr = new Array();
-
-							var _arrChild = new Array();
-
-							for (i = 0; i < arr.length; i++) {
-								var row = arr[i];
-
-								var id = $(row).children('.toggleable_parent_row_'+title).attr('id').replace(/(:|\.)/g,'\\$1');
-
-								if (title == 'departure' || title == 'manual') {
-									var id_temp = id.split(\"__\", 2);
-									id = id_temp[0];
-									counter = id_temp[1];
-								}
-								else {
-									var id_temp = id.split(\"__\", 3);
-									id = id_temp[0];
-									counter = id_temp[2];
-								}
-
-								var temp = {'id': id, 'row': row, 'counter': counter, 'link': id_temp[0]};
-								_arr.push(temp);
-
-								var rowChild = $('#toggleable_tr_'+id_temp[1]+'__'+counter);
-								var tempChild = {'id': id, 'row': rowChild, 'counter': counter};
-								_arrChild.push(tempChild);	
-							}
-
-							$('.toggleable_parent:visible').remove();
-
-							for (i = 0; i < _arr.length; i++) {
-								$('.toggleable_tr_'+_arr[i].link+'__'+_arr[i].counter).remove();
-							}
-
-							if (window['sort_parent_row_direction_'+title]) {
-
-								if (title == 'delivery' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
-									_arr.sort(compareName);
-									_arrChild.sort(compareName);
-								}
-								else if (title == 'date') {
-									_arr.sort(compareDate);
-									_arrChild.sort(compareDate);
-								}
-								else {
-									_arr.sort(compareId);
-									_arrChild.sort(compareId);
-								}
-
-								for (i = 0; i < _arr.length; i++) {
-									$('.header_parent').after(_arrChild[i].row);
-									$('.header_parent').after(_arr[i].row);
-								}
-
-								$('.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png').show();
-								$('.sort_parent_row_by').children('img[class!=\"parent_row_direction_'+title+'\"]').hide();
-
-								window['sort_parent_row_direction_'+title] = false;
-							}
-							else {
-
-								if (title == 'delivery' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
-									_arr.sort(compareName).reverse();
-									_arrChild.sort(compareName).reverse();
-								}
-								else if (title == 'date') {
-									_arr.sort(compareDate).reverse();
-									_arrChild.sort(compareDate).reverse();
-								}
-								else {
-									_arr.sort(compareId).reverse();
-									_arrChild.sort(compareId).reverse();
-								}
-
-								for (i = 0; i < _arr.length; i++) {
-									$('.header_parent').after(_arrChild[i].row);
-									$('.header_parent').after(_arr[i].row);
-								}
-
-								$('.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png').show();
-								$('.sort_parent_row_by').children('img[class!=\"parent_row_direction_'+title+'\"]').hide();
-
-								window['sort_parent_row_direction_'+title] = true;
-							}
-
-						}
-						else {
-
-							var tmp = title.split(\"__\", 3);
-							title = tmp[0];
-							title_id = tmp[1];
-							title_counter = tmp[2];
-
-							var arr = $('.toggleable_row_tr:visible');
-							var _arr = new Array();
-
-							var _arrChildOrder = new Array();
-							var _arrChildSscc = new Array();
-
-							for (i = 0; i < arr.length; i++) {
-								var row = arr[i];
-
-								var id = $(row).children('.toggleable_row_'+title).attr('id');
-								var counter = 0;
-
-								if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package' || title == 'weight' || title == 'type') {
-									var id_temp = id.split(\"__\", 3);
-									id = id_temp[0];
-									counter = id_temp[2];
-								}
-								else {
-									var id_temp = id.split(\"__\", 2);
-									id = id_temp[0];
-									counter = id_temp[1];
-								}
-
-								var temp = {'id': id, 'row': row, 'counter': counter};
-								_arr.push(temp);
-
-								var rowChildOrder = $('.toggleable_row_child_order_'+id+'__'+counter);
-								var tempChildOrder = {'id': id, 'row': rowChildOrder, 'counter': counter};
-								_arrChildOrder.push(tempChildOrder);
-
-								var rowChildSscc = $('.toggleable_row_child_sscc_'+id+'__'+counter);
-								var tempChildSscc = {'id': id, 'row': rowChildSscc, 'counter': counter};
-								_arrChildSscc.push(tempChildSscc);
-							}
-
-							$('.toggleable_row_tr:visible').remove();
-
-							for (i = 0; i < _arr.length; i++) {
-								$('.toggleable_row_child_order_'+_arr[i].id+'__'+_arr[i].counter).remove();
-								$('.toggleable_row_child_sscc_'+_arr[i].id+'__'+_arr[i].counter).remove();
-							}
-
-							var header_id = $('.toggleable_tr:visible').attr('id').substring(14).split(\"__\", 2);
-
-							if (window['sort_row_direction_'+title]) {
-
-								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type') {
-									_arr.sort(compareName);
-									_arrChildOrder.sort(compareName);
-									_arrChildSscc.sort(compareName);
-								}
-								else {
-									_arr.sort(compareId);
-									_arrChildOrder.sort(compareId);
-									_arrChildSscc.sort(compareId);
-								}
-
-								for (i = 0; i < _arr.length; i++) {
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
-								}
-
-								$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png').show();
-								$('.sort_row_by').children('img[class!=\"row_direction_'+title+'\"]').hide();
-
-								window['sort_row_direction_'+title] = false;
-							}
-							else {
-
-								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type') {
-									_arr.sort(compareName).reverse();
-									_arrChildOrder.sort(compareName).reverse();
-									_arrChildSscc.sort(compareName).reverse();
-								}
-								else {
-									_arr.sort(compareId).reverse();
-									_arrChildOrder.sort(compareId).reverse();
-									_arrChildSscc.sort(compareId).reverse();
-								}
-
-								for (i = 0; i < _arr.length; i++) {
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
-								}
-
-								$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png').show();
-								$('.sort_row_by').children('img[class!=\"row_direction_'+title+'\"]').hide();
-
-								window['sort_row_direction_'+title] = true;
-							}
-						}
 					});
 
 					// 1. tason checkboxin eventti
@@ -1034,7 +1046,7 @@
 			echo "<td class='center toggleable_parent_row_manual' id='!__{$row['lahdon_tunnus']}__{$y}'>&nbsp;</td>";
 		}
 
-		echo "<td><input type='checkbox' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'></td>";
+		echo "<td><input type='checkbox' class='checkall_parent' name='checkbox_parent[]' id='{$row['lahdon_tunnus']}' value='{$row['lahdon_tunnus']}'></td>";
 
 		echo "<td class='toggleable center toggleable_parent_row_departure' id='{$row['lahdon_tunnus']}__{$y}'><button type='button'>{$row['lahdon_tunnus']}</button></td>";
 		echo "<td class='center toggleable_parent_row_prio' id='{$row['prioriteetti']}__{$row['lahdon_tunnus']}__{$y}'>{$row['prioriteetti']}</td>";
@@ -1071,6 +1083,7 @@
 					lasku.nimi AS 'asiakas_nimi',
 					lasku.toim_nimi AS 'asiakas_toim_nimi',
 					lasku.toim_postitp AS 'asiakas_toim_postitp',
+					asiakas.luokka AS 'asiakas_luokka',
 					lasku.prioriteettinro AS 'prioriteetti',
 					lasku.ohjausmerkki,
 					lasku.vakisin_kerays,
@@ -1081,12 +1094,12 @@
 					COUNT(kerayserat.tunnus) AS 'keraysera_rivi_count',
 					SUM(IF((kerayserat.tila = 'T' OR kerayserat.tila = 'R'), 1, 0)) AS 'keraysera_rivi_valmis'
 					FROM lasku
+					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus)
 					LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 					AND lasku.tunnus IN ({$row['tilaukset']})
-					GROUP BY 1,2,3,4,5,6,7,8,9,10,11";
+					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12";
 		$lahto_res = pupe_query($query);
 
 		if (!isset($child_row_select_status)) $child_row_select_status = "";
@@ -1147,6 +1160,8 @@
 
 		echo "<th class='sort_row_by' id='row_type__{$row['lahdon_tunnus']}__{$y}'>",t("Tilaustyyppi")," <img class='row_direction_type' /></th>";
 		echo "<th class='sort_row_by' id='row_control__{$row['lahdon_tunnus']}__{$y}'>",t("Ohjausmerkki")," <img class='row_direction_control' /></th>";
+
+		echo "<th class='sort_row_by' id='row_clientprio__{$row['lahdon_tunnus']}__{$y}'>",t("PriLk")," <img class='row_direction_clientprio' /></th>";
 
 		echo "<th class='sort_row_by' id='row_client__{$row['lahdon_tunnus']}__{$y}'>",t("Asiakas")," <img class='row_direction_client' />";
 		echo "<br />";
@@ -1234,6 +1249,8 @@
 			echo "<td class='data toggleable_row_type' id='{$lahto_row['tilauksen_tilaustyyppi']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$type_array[$lahto_row['tilauksen_tilaustyyppi']]}</td>";
 
 			echo "<td class='toggleable_row_control' id='{$lahto_row['ohjausmerkki']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['ohjausmerkki']}</td>";
+
+			echo "<td class='data toggleable_row_clientprio' id='{$lahto_row['asiakas_luokka']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_luokka']}</td>";
 
 			echo "<td class='data toggleable_row_client' id='{$lahto_row['asiakas_nimi']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_nimi']}";
 			if ($lahto_row['asiakas_nimi'] != $lahto_row['asiakas_toim_nimi']) echo " {$lahto_row['asiakas_toim_nimi']}";

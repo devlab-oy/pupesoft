@@ -74,7 +74,7 @@ if ($tee == "synkronoi") {
 
 	$ok = FALSE;
 
-	if ($file = fopen("http://www.devlab.fi/softa/referenssitullinimikkeet.sql","r")) {
+	if ($file = fopen("http://api.devlab.fi/referenssitullinimikkeet.sql","r")) {
 		$ok = TRUE;
 	}
 	elseif ($file = fopen("http://10.0.1.2/referenssitullinimikkeet.sql","r")) {

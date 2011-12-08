@@ -121,7 +121,8 @@
 		or mysql_field_name($result, $i) == "osasto"
 		or mysql_field_name($result, $i) == "tuotemerkki"
 		or mysql_field_name($result, $i) == "malli"
-		or mysql_field_name($result, $i) == "mallitarkenne") {
+		or mysql_field_name($result, $i) == "mallitarkenne"
+		or mysql_field_name($result, $i) == "valmistuslinja") {
 
 		$sresult = t_avainsana(mysql_field_name($result, $i));
 		$sarnimi = mysql_field_name($result, $i);
@@ -698,32 +699,6 @@
 
 	}
 
-	if (mysql_field_name($result, $i) == "valmistuslinja") {
-
-		$sresult = t_avainsana("valmistuslinja");
-		$valnimi = mysql_field_name($result, $i);
-
-		// jos avainsanoja on perustettu tehdään dropdown
-		if (mysql_num_rows($sresult) > 0) {
-			$ulos = "<td><select id='$valnimi' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-
-			$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
-
-			while ($srow = mysql_fetch_array($sresult)) {
-				$sel = '';
-				if ($trow[$i] == $srow["selite"] and $srow["selite"] != "") {
-					$sel = "selected";
-				}
-
-				$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
-			}
-
-			$ulos .= "</select>";
-
-			$ulos .= "</td>";
-			$jatko = 0;
-		}
-	}
 
 	if (mysql_field_name($result, $i) == "ostoehdotus") {
 

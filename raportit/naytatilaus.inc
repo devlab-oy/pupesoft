@@ -1501,7 +1501,7 @@
 				echo "<td $classx align='right' valign='top' nowrap>".($row["alv"] * 1)."</td>";
 			}
 
-			if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K" and $toim == "VALMISTUS") {
+			if ($toim == "VALMISTUS") {
 
 				if ($row["ei_saldoa"] != "") {
 
@@ -1541,7 +1541,7 @@
 						echo "<td>{$linjannimi}</td>";
 					}
 
-					if ($row["status"] == "T") {
+					if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K" and $row["status"] == "T") {
 
 						// haetaan tuotteen toimittajan tiedot ja datat
 						$query2 = "	SELECT tt.liitostunnus, if (tt.jarjestys = 0, 9999, tt.jarjestys) sorttaus, tt.osto_era

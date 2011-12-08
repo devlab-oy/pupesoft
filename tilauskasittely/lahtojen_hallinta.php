@@ -365,7 +365,7 @@
 								var length = _arr.length;
 
 								for (i = 0; i < length; i++) {
-									$('.header_parent').after(_arr[i].row, _arrChild[i].row);
+									$('#header_parent').after(_arr[i].row, _arrChild[i].row);
 								}
 
 								$('.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png').show();
@@ -391,7 +391,7 @@
 								var length = _arr.length;
 
 								for (i = 0; i < length; i++) {
-									$('.header_parent').after(_arr[i].row, _arrChild[i].row);
+									$('#header_parent').after(_arr[i].row, _arrChild[i].row);
 								}
 
 								$('.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png').show();
@@ -468,7 +468,7 @@
 								var length = _arr.length;
 
 								for (i = 0; i < length; i++) {
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row, _arrChildOrder[i].row, _arrChildSscc[i].row);
+									$('#header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row, _arrChildOrder[i].row, _arrChildSscc[i].row);
 								}
 
 								$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png').show();
@@ -492,7 +492,7 @@
 								var length = _arr.length;
 
 								for (i = 0; i < length; i++) {
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row, _arrChildOrder[i].row, _arrChildSscc[i].row);
+									$('#header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row, _arrChildOrder[i].row, _arrChildSscc[i].row);
 								}
 
 								$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png').show();
@@ -920,7 +920,7 @@
 
 	echo "<tr><td colspan='15' class='back'>&nbsp;</td></tr>";
 
-	echo "<tr class='header_parent'>";
+	echo "<tr class='header_parent' id='header_parent'>";
 
 	echo "<th class='sort_parent_row_by' id='parent_row_status'>",t("Status")," <img class='parent_row_direction_status' />";
 	echo "<br />";
@@ -1129,7 +1129,7 @@
 			$priorities[$lahto_row['prioriteetti']] = $lahto_row['prioriteetti'];
 		}
 
-		echo "<tr class='header_row_{$row['lahdon_tunnus']}__{$y}'>";
+		echo "<tr class='header_row_{$row['lahdon_tunnus']}__{$y}' id='header_row_{$row['lahdon_tunnus']}__{$y}'>";
 		echo "<th><input type='checkbox' class='checkall_child'></th>";
 
 		echo "<th class='sort_row_by' id='row_status__{$row['lahdon_tunnus']}__{$y}'>",t("Status")," <img class='row_direction_status' />";

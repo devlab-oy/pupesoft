@@ -362,9 +362,10 @@
 									_arrChild.sort(compareId);
 								}
 
-								for (i = 0; i < _arr.length; i++) {
-									$('.header_parent').after(_arrChild[i].row);
-									$('.header_parent').after(_arr[i].row);
+								var length = _arr.length;
+
+								for (i = 0; i < length; i++) {
+									$('.header_parent').after(_arr[i].row, _arrChild[i].row);
 								}
 
 								$('.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png').show();
@@ -387,9 +388,10 @@
 									_arrChild.sort(compareId).reverse();
 								}
 
-								for (i = 0; i < _arr.length; i++) {
-									$('.header_parent').after(_arrChild[i].row);
-									$('.header_parent').after(_arr[i].row);
+								var length = _arr.length;
+
+								for (i = 0; i < length; i++) {
+									$('.header_parent').after(_arr[i].row, _arrChild[i].row);
 								}
 
 								$('.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png').show();
@@ -463,10 +465,10 @@
 									_arrChildSscc.sort(compareId);
 								}
 
-								for (i = 0; i < _arr.length; i++) {
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
+								var length = _arr.length;
+
+								for (i = 0; i < length; i++) {
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row, _arrChildOrder[i].row, _arrChildSscc[i].row);
 								}
 
 								$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png').show();
@@ -487,10 +489,10 @@
 									_arrChildSscc.sort(compareId).reverse();
 								}
 
-								for (i = 0; i < _arr.length; i++) {
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildSscc[i].row);
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arrChildOrder[i].row);
-									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row);
+								var length = _arr.length;
+
+								for (i = 0; i < length; i++) {
+									$('.header_row_'+header_id[0]+'__'+header_id[1]).after(_arr[i].row, _arrChildOrder[i].row, _arrChildSscc[i].row);
 								}
 
 								$('.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png').show();
@@ -628,10 +630,14 @@
 							$('.filter_parent_row_by').attr('disabled', false).trigger('change');
 
 							$(':checkbox').attr('checked', false).parent().parent().removeClass('tumma');
+
+							$('.sort_parent_row_by:visible').bind('click', column_sort);
 						}
 						else {
 
 							$('.filter_parent_row_by').attr('disabled', true);
+
+							$('.sort_parent_row_by:visible').unbind('click');
 
 							$('#valittu_lahto').val(id[0]+'__'+id[1]);
 
@@ -684,17 +690,23 @@
 								if (!text_search) {
 									$('.filter_row_by_select:visible').trigger('change');
 								}
+
+								$('.sort_row_by:visible').bind('click', column_sort);
 							}
 						}
 						else {
 
 							$('.filter_row_by_select:visible, .filter_row_by_text:visible').attr('disabled', true);
 
+							$('.sort_row_by:visible').unbind('click');
+
 							$(this).addClass('tumma');
 
 							var parent_element = $('#toggleable_row_order_'+id[0]+'__'+id[1]).parent();
 
-							$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide().next().hide().next().hide();
+							// $('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide().next().hide().next().hide();
+
+							$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide();
 							$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_order_'+id[0]+'__'+id[1]+'\"][class^=\"toggleable_row_child_order_\"]').hide();
 
 							// $('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_sscc_'+id[0]+'__'+id[1]+'\"][class^=\"toggleable_row_child_sscc_\"]').hide();
@@ -742,14 +754,14 @@
 										$('.filter_row_by_select:visible').trigger('change');
 									}
 
-									$('.sort_row_by:visible, .sort_parent_row_by:visible').bind('click', column_sort);
+									$('.sort_row_by:visible').bind('click', column_sort);
 								}
 							}
 							else {
 
 								$('.filter_row_by_select:visible, .filter_row_by_text:visible').attr('disabled', true);
 
-								$('.sort_row_by:visible, .sort_parent_row_by:visible').unbind('click');
+								$('.sort_row_by:visible').unbind('click');
 
 								$(this).addClass('tumma');
 
@@ -1366,7 +1378,7 @@
 			$rivi_res = pupe_query($query);
 
 			echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-			echo "<td colspan='15' class='back' style='display:none;'>";
+			echo "<td colspan='16' class='back' style='display:none;'>";
 			echo "<div class='toggleable_row_child_div_order' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}__{$x}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";
@@ -1427,7 +1439,7 @@
 			$rivi_res = pupe_query($query);
 
 			echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-			echo "<td colspan='15' class='back' style='display:none;'>";
+			echo "<td colspan='16' class='back' style='display:none;'>";
 			echo "<div class='toggleable_row_child_div_sscc' id='toggleable_row_sscc_{$lahto_row['sscc']}__{$x}' style='display:none;'>";
 
 			echo "<table style='width:100%;'>";

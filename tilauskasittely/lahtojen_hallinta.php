@@ -542,7 +542,7 @@
 					});
 
 					// 2. tason tekstikentällä rajaaminen
-					$('.filter_row_by_text').live('keyup', function(event) {
+					$('.filter_row_by_text').live('keyup', function() {
 
 						$('.toggleable_row_tr').hide();
 
@@ -605,7 +605,7 @@
 					});
 
 					// 1. tason lähdön napin eventti
-					$('.toggleable').live('click', function(event){
+					$('.toggleable').live('click', function(){
 
 						var id = this.id.split(\"__\", 2);
 
@@ -625,7 +625,7 @@
 							$('.toggleable_row_sscc').removeClass('tumma');
 
 							$('tr[id!=\"toggleable_parent_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_parent\"]').show();
-							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').stop().show();
+							$('tr[id!=\"toggleable_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_tr\"]').show();
 
 							$('.filter_parent_row_by').attr('disabled', false).trigger('change');
 
@@ -649,14 +649,21 @@
 							// $('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]').parent().parent().hide().next().hide();
 							// console.log($('div[id!=\"toggleable_row_order_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_child_div_order\"]').parent().parent());
 
-							$('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show().children().children().children().filter('tr[class=\"toggleable_row_tr\"]').show();
-							$('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show().children().children().children().filter('tr[id^=\"toggleable_row_child_\"]').hide()
+							$('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show();
+
+							var children = $('#toggleable_'+id[0]+'__'+id[1]).children().children().children();
+
+							children.filter('tr[class=\"toggleable_row_tr\"]').show();
+							children.filter('tr[id^=\"toggleable_row_child_\"]').hide();
+							
+							// $('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show().children().children().children().filter('tr[class=\"toggleable_row_tr\"]').show();
+							// $('#toggleable_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-top': '15px'}).show().children().children().children().filter('tr[id^=\"toggleable_row_child_\"]').hide()
 
 						}
 					});
 
 					// 2. tason tilausnumeronapin eventti
-					$('.toggleable_row_order').live('click', function(event){
+					$('.toggleable_row_order').live('click', function(){
 
 						var parent = $(this).parent().parent().parent().parent();
 						var parent_id = $(parent).attr('id');
@@ -706,19 +713,21 @@
 
 							// $('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide().next().hide().next().hide();
 
-							$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide();
-							$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_order_'+id[0]+'__'+id[1]+'\"][class^=\"toggleable_row_child_order_\"]').hide();
+							var children = $('#'+parent_id).children().children();
+
+							children.children('tr[id!=\"toggleable_row_tr_'+id[0]+'__'+id[1]+'\"][class=\"toggleable_row_tr\"]').hide();
+							children.children('tr[id!=\"toggleable_row_child_order_'+id[0]+'__'+id[1]+'\"][class^=\"toggleable_row_child_order_\"]').hide();
 
 							// $('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_sscc_'+id[0]+'__'+id[1]+'\"][class^=\"toggleable_row_child_sscc_\"]').hide();
 
-							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().parent().show();
-							$('#toggleable_row_order_'+id[0]+'__'+id[1]).parent().show();
+							parent_element.parent().show();
+							parent_element.show();
 							$('#toggleable_row_order_'+id[0]+'__'+id[1]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 						}
 					});
 
 					// 2. tason sscc-napin eventti
-					$('.toggleable_row_sscc').live('click', function(event){
+					$('.toggleable_row_sscc').live('click', function(){
 
 						if ($(this).html() != '') {
 
@@ -767,13 +776,15 @@
 
 								var parent_element = $('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent();
 
-								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
-								$('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_sscc_'+id[0]+'__'+id[2]+'\"][class^=\"toggleable_row_child_sscc_\"]').hide();
+								var children = $('#'+parent_id).children().children();
+
+								children.children('tr[id!=\"toggleable_row_tr_'+id[1]+'__'+id[2]+'\"][class=\"toggleable_row_tr\"]').hide();
+								children.children('tr[id!=\"toggleable_row_child_sscc_'+id[0]+'__'+id[2]+'\"][class^=\"toggleable_row_child_sscc_\"]').hide();
 
 								// $('#'+parent_id).children().children().children('tr[id!=\"toggleable_row_child_order_'+id[0]+'__'+id[2]+'\"][class^=\"toggleable_row_child_order_\"]').hide();
 
-								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().parent().show();
-								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).parent().show();
+								parent_element.parent().show();
+								parent_element.show();
 								$('#toggleable_row_sscc_'+id[0]+'__'+id[2]).css({'width': parent_element.width()+'px', 'padding-bottom': '15px'}).delay(1).slideDown('fast');
 							}
 						}

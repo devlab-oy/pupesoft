@@ -1052,7 +1052,7 @@ if ($tila == '') {
 
 	$limit 		= "";
 	$lisa2 		= "";
-	$lisa3 		= " and lasku.tila in ('O','K','D') ";
+	$lisa3		= "and ((lasku.tila = 'O' and lasku.alatila = 'A') or lasku.tila in ('K','D'))"; // Lasku 'O' ja alatila 'A', koska halutaan näyttää vain ne tilaukset jotka ei ole kesken 
 	$uusilisa 	= "";
 	$alku 		= (int) $alku;
 

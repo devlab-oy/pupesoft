@@ -1976,6 +1976,17 @@ if ($tee == '') {
 
 		$laskurow = mysql_fetch_assoc($result);
 
+		// Päivitetään rahtikirjatiedot jos ne on syötetty
+		if ($laskurow["alatila"] == "B" or $laskurow["alatila"] == "D" or $laskurow["alatila"] == "J" or $laskurow["alatila"] == "E") {
+			$query4 = "	UPDATE rahtikirjat
+						SET toimitustapa = '$laskurow[toimitustapa]',
+						merahti = '$laskurow[kohdistettu]'
+						where yhtio = '$kukarow[yhtio]'
+						and otsikkonro = '$kukarow[kesken]'
+						and tulostettu = '0000-00-00 00:00:00'";
+			$result = pupe_query($query4);
+		}
+
 		if ($yhtiorow["tilauksen_kohteet"] == "K") {
 			$query 	= "	SELECT *
 						from laskun_lisatiedot
@@ -2546,7 +2557,22 @@ if ($tee == '') {
 				exit;
 			}
 
-			echo "<td><select name='toimitustapa' onchange='submit()' $state>";
+			// Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
+			$query = "	SELECT *
+						FROM rahtikirjat
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						AND otsikkonro 	= '$kukarow[kesken]'
+						AND tulostettu != '0000-00-00 00:00:00'
+						LIMIT 1";
+			$rakre_chkres = pupe_query($query);
+
+			$state_chk = "";
+
+			if (mysql_num_rows($rakre_chkres) > 0) {
+				$state_chk = 'disabled';
+			}
+
+			echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk}>";
 
 			// Otetaan toimitustavan tiedot ja käytetään niitä läpi tilausmyynnin!
 			$tm_toimitustaparow = mysql_fetch_assoc($tresult);

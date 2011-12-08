@@ -68,11 +68,11 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TUOTEULK") 			$ulos .= "<option value='TUOTEULK' $avain_sel[TUOTEULK]>					".t("Tuotteiden avainsanojen laji")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VARASTOLUOKKA") 	$ulos .= "<option value='VARASTOLUOKKA' $avain_sel[VARASTOLUOKKA]>			".t("Varastoluokka")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VARASTORYHMA") 		$ulos .= "<option value='VARASTORYHMA' $avain_sel[VARASTORYHMA]>			".t("Varastoryhmä")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "VALMISTUSLINJA") 	$ulos .= "<option value='VALMISTUSLINJA' $avain_sel[VALMISTUSLINJA]>		".t("Valmistuslinja")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SARJANUMERON_LI") 	$ulos .= "<option value='SARJANUMERON_LI' $avain_sel[SARJANUMERON_LI]>		".t("Sarjanumeron lisätieto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PARAMETRI") 		$ulos .= "<option value='PARAMETRI' $avain_sel[PARAMETRI]>					".t("Tuotteen parametri")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LISATIETO") 		$ulos .= "<option value='LISATIETO' $avain_sel[LISATIETO]>					".t("Tuotteen lisätieto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TARRATYYPPI") 		$ulos .= "<option value='TARRATYYPPI' $avain_sel[TARRATYYPPI]>				".t("Tuotteen tarratyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "VALMISTUSLINJA") 	$ulos .= "<option value='VALMISTUSLINJA' $avain_sel[VALMISTUSLINJA]>		".t("Tuotteen valmistuslinja")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "HAMMASTUS") 		$ulos .= "<option value='HAMMASTUS' $avain_sel[HAMMASTUS]>					".t("Tuotteen hammastus")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
@@ -400,7 +400,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if ($avain_sel['TYOM_TYOLINJA'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$query = "	SELECT selite, selitetark

@@ -114,7 +114,7 @@
 
 		foreach ($summa as $myyja => $kausi_array) {
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			echo "<td>$myyja_nimi[$myyja] ($myyja)</td>";
 
 			$yhteensa_summa = 0;

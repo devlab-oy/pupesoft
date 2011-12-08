@@ -142,7 +142,7 @@ elseif (file_exists("pics/pupesoft_logo.gif")) {
 	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.gif' border='0'>";
 }
 else {
-	echo "<a target='_top' href='/'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'>";
+	echo "<a target='_top' href='/'><img src='http://api.devlab.fi/pupesoft.gif' border='0'>";
 }
 
 echo "</a></td>
@@ -181,7 +181,7 @@ if (isset($usea) and $usea == 1) {
 	echo "</table>";
 
 	echo "$errormsg<br>";
-	echo "<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>";
+	echo "<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>";
 }
 else {
 
@@ -204,7 +204,7 @@ else {
 			$errormsg
 			<br><input type='submit' value='".t("Kirjaudu sisään",$browkieli)."'>
 			<br><br>
-			<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>
+			<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.devlab.fi/'>Devlab Oy</a> - <a href='license.php'>Licence Agreement</a></font>
 			</form>
 	";
 }

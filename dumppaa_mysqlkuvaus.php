@@ -46,6 +46,9 @@
 		if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epäonnistui!");
 
 		foreach ($ulos as $print) {
+			// poistetaan mysql-sarakkeen kommentti koska se kaataa sqlupdate-ohjelman
+			$print = preg_replace("/ COMMENT '[^']*',/", ",", $print);
+			
 			fputs($toot, $print."\n");
 		}
 
@@ -63,7 +66,7 @@
 		$curlfile = "/tmp/".$tmpfilenimi;
 
 		$ch  = curl_init();
-		curl_setopt ($ch, CURLOPT_URL, "http://www.devlab.fi/sqlupdate.php");
+		curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/sqlupdate.php");
 		curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 		curl_setopt ($ch, CURLOPT_HEADER, 1);
@@ -95,7 +98,7 @@
 
 		// Löytyykö custom updateja?
 		$ch  = curl_init();
-		curl_setopt ($ch, CURLOPT_URL, "http://www.devlab.fi/sqlupdate.sql");
+		curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/sqlupdate.sql");
 		curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 		curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);

@@ -417,7 +417,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 				echo "<table width='100%' height='70%'>";
 				echo "<tr>";
 				echo "<td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>";
-				echo "<img src='http://www.pupesoft.com/pupesoft.gif'><br><br>";
+				echo "<img src='http://api.devlab.fi/pupesoft.gif'><br><br>";
 				echo "Käyttäjä {$kukarow["kuka"]} pyysi toimintoa $phpnimi $toim, joka on kielletty!";
 				echo "</td>";
 				echo "</tr>";

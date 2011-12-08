@@ -249,7 +249,9 @@
 		if ((int) $postirow["yhtio_toimipaikka"] != 0) {
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$postirow[yhtio_toimipaikka]' and lasku_logo != ''";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus = '$postirow[yhtio_toimipaikka]'
+						and lasku_logo != ''";
 			$result = mysql_query($query) or pupe_error("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {

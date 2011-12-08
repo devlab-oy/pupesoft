@@ -78,7 +78,7 @@ else {
 
 	// katotaan ollaanko valittu tilaajaksi joku muu toimipiste
 	if ($laskurow["vanhatunnus"] != 0) {
-		$query  = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[vanhatunnus]'";
+		$query  = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
 		$ediotr = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($ediotr) == 1) {

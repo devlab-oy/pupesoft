@@ -86,7 +86,9 @@
 					toim_maa    		= '',
 					laskutusvkopv		= '',
 					chn					= '',
-					verkkotunnus		= ''
+					verkkotunnus		= '',
+					toimitustapa		= '',
+					toimitustavan_lahto = ''
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and tunnus	 		= '$kukarow[kesken]'";
 		$result = pupe_query($query);
@@ -277,14 +279,18 @@
 
 				unset($jatka);
 			}
-
 		}
 	}
 
 	//	Tarkastetaan käsinsyötetty viite
 	if (isset($jatka) and $kasinsyotetty_viite != "" and $yhtiorow["viitteen_kasinsyotto"] != "") {
-		if (tarkista_viite($kasinsyotetty_viite) === FALSE) {
-			echo "<font class='error'>".t("VIRHE: Syötetty viite '%' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
+		if (substr($kasinsyotetty_viite, 0, 2) != "RF" and tarkista_viite($kasinsyotetty_viite) === FALSE) {
+			echo "<font class='error'>".t("VIRHE: Syötetty viite '%s' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
+			$tee	= "OTSIK";
+			unset($jatka);
+		}
+		elseif (substr($kasinsyotetty_viite, 0, 2) == "RF" and tarkista_rfviite($kasinsyotetty_viite) === FALSE) {
+			echo "<font class='error'>".t("VIRHE: Syötetty RF-viite '%s' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
 			$tee	= "OTSIK";
 			unset($jatka);
 		}
@@ -490,13 +496,42 @@
 				$assresult = pupe_query($squery);
 				$assrow = mysql_fetch_assoc($assresult);
 
+				if (!checkdate($toimkk,$toimpp,$toimvv)) {
+					$toimpp = date("j");
+					$toimkk = date("n");
+					$toimvv = date("Y");
+					$toimpvm = $toimvv."-".$toimkk."-".$toimpp;
+				}
+				else {
+					$toimpvm = $toimvv."-".$toimkk."-".$toimpp;
+				}
+
+				if (!checkdate($kerkk,$kerpp,$kervv)) {
+					$kerpp = date("j");
+					$kerkk = date("n");
+					$kervv = date("Y");
+					$kerpvm = $kervv."-".$kerkk."-".$kerpp;
+				}
+				else {
+				 	$kerpvm = $kervv."-".$kerkk."-".$kerpp;
+				}
+
 				if (trim($assrow["toim_nimi"]) == "") {
-					$assrow["toim_nimi"]	= $assrow["nimi"];
-					$assrow["toim_nimitark"]= $assrow["nimitark"];
-					$assrow["toim_osoite"]	= $assrow["osoite"];
-					$assrow["toim_postino"]	= $assrow["postino"];
-					$assrow["toim_postitp"]	= $assrow["postitp"];
-					$assrow["toim_maa"]		= $assrow["maa"];
+					$assrow["toim_nimi"]		= $assrow["nimi"];
+					$assrow["toim_nimitark"]	= $assrow["nimitark"];
+					$assrow["toim_osoite"]		= $assrow["osoite"];
+					$assrow["toim_postino"]		= $assrow["postino"];
+					$assrow["toim_postitp"]		= $assrow["postitp"];
+					$assrow["toim_maa"]			= $assrow["maa"];
+				}
+
+				if (trim($assrow["laskutus_nimi"]) == "") {
+					$assrow["laskutus_nimi"]	   = $assrow["nimi"];
+				 	$assrow["laskutus_nimitark"]   = $assrow["nimitark"];
+				 	$assrow["laskutus_osoite"]	   = $assrow["osoite"];
+				 	$assrow["laskutus_postino"]	   = $assrow["postino"];
+				 	$assrow["laskutus_postitp"]	   = $assrow["postitp"];
+				 	$assrow["laskutus_maa"]		   = $assrow["maa"];
 				}
 
 				$query = "	UPDATE lasku
@@ -518,7 +553,15 @@
 							toim_maa    		= '$assrow[toim_maa]',
 							laskutusvkopv		= '$assrow[laskutusvkopv]',
 							chn					= '$assrow[chn]',
-							verkkotunnus		= '$assrow[verkkotunnus]'
+							verkkotunnus		= '$assrow[verkkotunnus]',
+							toimitustapa		= '$assrow[toimitustapa]',
+							maksuehto			= '$assrow[maksuehto]',
+							tilausvahvistus		= '$assrow[tilausvahvistus]',
+							piiri				= '$assrow[piiri]',
+							rahtivapaa			= '$assrow[rahtivapaa]',
+							toimaika 			= '$toimpvm',
+							kerayspvm			= '$kerpvm',
+							toimitusehto		= '$assrow[toimitusehto]'
 							WHERE yhtio 		= '$kukarow[yhtio]'
 							and tunnus	 		= '$kukarow[kesken]'
 							and liitostunnus	= 0";

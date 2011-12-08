@@ -23,6 +23,8 @@
 	if (!isset($lopetus)) $lopetus = "";
 	if (!isset($linkurl)) $linkurl = "";
 	if (!isset($kieli)) $kieli = "";
+	if (!isset($tee)) $tee = "";
+	$toimittajan_ostotilaus = array();
 
 	$query = "	SELECT lasku.*,
 				laskun_lisatiedot.laskutus_nimi,
@@ -901,7 +903,9 @@
 
 		if ($toim == "VALMISTUS") {
 			$avainsanat = t_avainsana("VALMISTUSLINJA");
-			
+
+			echo "<th>".t("Reaalisaldo")."</th>";
+
 			if (mysql_num_rows($avainsanat) > 0) {
 				echo "<th style='text-align:right;'>".t("Valmistuslinja")."</th>";
 				$naytetaan_valmistuslinja = true;
@@ -1497,48 +1501,65 @@
 				echo "<td $classx align='right' valign='top' nowrap>".($row["alv"] * 1)."</td>";
 			}
 
-			if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K" and $toim == "VALMISTUS" and $row["ei_saldoa"] == "") {
+			if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K" and $toim == "VALMISTUS") {
 
-				list ($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+				if ($row["ei_saldoa"] != "") {
 
-				$tilauksessa = "SELECT sum(tilausrivi.varattu) tulossa
-								FROM tilausrivi
-								WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-								AND tilausrivi.tuoteno = '{$row["tuoteno"]}'
-								AND tilausrivi.tyyppi = 'O'
-								AND tilausrivi.varattu > 0";
-				$tilres = pupe_query($tilauksessa);
-				$tilrivi = mysql_fetch_assoc($tilres);
+					echo "<td style='text-align:right;'>".t("Saldoton")."</td>";
 
-				$reaalisaldo = $myytavissa + $tilrivi["tulossa"];
-
-				if ($naytetaan_valmistuslinja) {
-					$linjannimi = t_avainsana("VALMISTUSLINJA",''," and avainsana.selite='{$row["valmistuslinja"]}'",'','',"selitetark");
-					if ($linjannimi == "") $linjannimi = t("Ei Linjaa");
-					echo "<td>{$linjannimi}</td>";
+					if ($naytetaan_valmistuslinja) {
+						$linjannimi = t_avainsana("VALMISTUSLINJA",''," and avainsana.selite='{$row["valmistuslinja"]}'",'','',"selitetark");
+						if ($linjannimi == "") $linjannimi = t("Ei Linjaa");
+						echo "<td>{$linjannimi}</td>";
+					}
 				}
+				else {
 
-				if ($row["status"] == "T" and $reaalisaldo < $row["tilkpl"]) {
-					// haetaan tuotteen toimittajan tiedot ja datat
-					$query2 = "	SELECT tt.liitostunnus, if (tt.jarjestys = 0, 9999, tt.jarjestys) sorttaus, tt.osto_era
-								FROM tuotteen_toimittajat as tt
-								WHERE tt.yhtio = '{$kukarow["yhtio"]}'
-								AND tt.tuoteno = '{$row["tuoteno"]}'
-								ORDER BY sorttaus
-								LIMIT 1";
-					$result2   = pupe_query($query2);
-					$toimirow2 = mysql_fetch_assoc($result2);
+					list ($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
 
-					$ostoera = $toimirow2['osto_era'];
-					$toim_liitostunnus = $toimirow2['liitostunnus'];
+					$tilauksessa = "SELECT sum(tilausrivi.varattu) tulossa
+									FROM tilausrivi
+									WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+									AND tilausrivi.tuoteno = '{$row["tuoteno"]}'
+									AND tilausrivi.tyyppi = 'O'
+									AND tilausrivi.varattu > 0";
+					$tilres = pupe_query($tilauksessa);
+					$tilrivi = mysql_fetch_assoc($tilres);
 
-					$tarve[$toim_liitostunnus][$row["tuoteno"]]["maara"] += $row["tilkpl"];
-					$tarve[$toim_liitostunnus][$row["tuoteno"]]["osto"] = $ostoera;
-					$tarve[$toim_liitostunnus][$row["tuoteno"]]["reaali"] = $reaalisaldo;
-					$tarve[$toim_liitostunnus][$row["tuoteno"]]["tulossa"] = $tilrivi["tulossa"];
-					$tarve[$toim_liitostunnus][$row["tuoteno"]]["nimitys"] = $trow["nimitys"];
+					$reaalisaldo = $myytavissa + $tilrivi["tulossa"];
 
-					$ehdotus[$toim_liitostunnus][$row["tuoteno"]]["plaah"] = 1;
+					if ($row["status"] == "T") {
+						echo "<td style='text-align:right;'>".t("Tehdastilaustuote")."</td>";
+					}
+					else {
+						echo "<td style='text-align:right;'>$reaalisaldo</td>";
+					}
+
+					if ($naytetaan_valmistuslinja) {
+						$linjannimi = t_avainsana("VALMISTUSLINJA",''," and avainsana.selite='{$row["valmistuslinja"]}'",'','',"selitetark");
+						if ($linjannimi == "") $linjannimi = t("Ei Linjaa");
+						echo "<td>{$linjannimi}</td>";
+					}
+
+					if ($row["status"] == "T") {
+
+						// haetaan tuotteen toimittajan tiedot ja datat
+						$query2 = "	SELECT tt.liitostunnus, if (tt.jarjestys = 0, 9999, tt.jarjestys) sorttaus, tt.osto_era
+									FROM tuotteen_toimittajat as tt
+									WHERE tt.yhtio = '{$kukarow["yhtio"]}'
+									AND tt.tuoteno = '{$row["tuoteno"]}'
+									ORDER BY sorttaus
+									LIMIT 1";
+						$result2   = pupe_query($query2);
+						$toimirow2 = mysql_fetch_assoc($result2);
+
+						if (!isset($toimittajan_ostotilaus[$toimirow2["liitostunnus"]][$row["tuoteno"]]["tarve"])) $toimittajan_ostotilaus[$toimirow2["liitostunnus"]][$row["tuoteno"]]["tarve"] = 0;
+
+						$toimittajan_ostotilaus[$toimirow2["liitostunnus"]][$row["tuoteno"]]["tarve"] += $row["tilkpl"];
+						$toimittajan_ostotilaus[$toimirow2["liitostunnus"]][$row["tuoteno"]]["osto_era"] = $toimirow2['osto_era'];
+						$toimittajan_ostotilaus[$toimirow2["liitostunnus"]][$row["tuoteno"]]["reaalisaldo"] = $reaalisaldo;
+						$toimittajan_ostotilaus[$toimirow2["liitostunnus"]][$row["tuoteno"]]["nimitys"] = $row["nimitys"];
+					}
 				}
 			}
 
@@ -1754,9 +1775,6 @@
 	// Tehdään yhteistilaus.
 	if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K") {
 
-		echo "<table>";
-		$nolla = 0;
-
 		if (!function_exists("tuot_toim")) {
 			function tuot_toim($liitostunnus) {
 				global $kukarow, $yhtiorow;
@@ -1776,64 +1794,65 @@
 			}
 		}
 
-		foreach ($ehdotus as $toimind => $value) {
-			$ping = FALSE;
+		echo "<font class='head'>".t("Tilaa valmistuksen tehdastilaustuotteet")."</font><hr>";
+
+		$toimittajan_ostotilaus_indeksi = 0;
+
+		if (count($toimittajan_ostotilaus) == 0) {
+			echo "<font class='message'>".t("Ei tehdastilaustuotteita")."</font>";
+		}
+
+		echo "<table>";
+
+		foreach ($toimittajan_ostotilaus as $toimittajan_tunnus => $toimittajan_ostotilaus_array) {
+
+			$toimittaja = tuot_toim($toimittajan_tunnus);
+
+			echo "<tr>";
+			echo "<td class='back' colspan='5'><font class='message'><br>{$toimittaja["nimi"]}</font></th>";
 			echo "<tr>";
 
-			$toimittaja = tuot_toim($toimind);
+			echo "<tr>";
+			echo "<th>".t("Tuoteno")."</th>";
+			echo "<th>".t("Nimitys")."</th>";
+			echo "<th>".t("Tarve")."</th>";
+			echo "<th>".t("Reaalisaldo")."</th>";
+			echo "<th></th>";
+			echo "<tr>";
 
-			echo "<th colspan='5'>".t("Toimittajalta").": {$toimittaja["nimi"]}</th>";
+			foreach ($toimittajan_ostotilaus_array as $tuotenumero => $tuote_array) {
 
-				foreach ($value as $tuotenoind => $val) {
+				// Muuttujat
+				$tarve = $tuote_array["tarve"];
+				$ostoera = $tuote_array["osto_era"];
+				$reaalisaldo = $tuote_array["reaalisaldo"];
+				$nimitys = $tuote_array["nimitys"];
 
-					if ($tarve[$toimind][$tuotenoind]["tulossa"] < $tarve[$toimind][$tuotenoind]["maara"]) {
+				echo "<tr>";
+				echo "<td>$tuotenumero</td>";
+				echo "<td>$nimitys</td>";
+				echo "<td align='right'>$tarve</td>";
+				echo "<td align='right'>$reaalisaldo</td>";
 
-						echo "<tr><td>".t("Tuoteno").": $tuotenoind <br> {$tarve[$toimind][$tuotenoind]["nimitys"]}</td>";
-						echo "<td align='right'>".t("Tarve").": {$tarve[$toimind][$tuotenoind]["maara"]} <br> ".t("Reaalisaldo").": {$tarve[$toimind][$tuotenoind]["reaali"]} <br> ".t("Tulossa").": {$tarve[$toimind][$tuotenoind]["tulossa"]}</td>";
-
-						$arvaus = $tarve[$toimind][$tuotenoind]["maara"]; // paljonko tarvitaan
-						$ostoera = $tarve[$toimind][$tuotenoind]["osto"]; // minimi tilaus
-
-						if ($ostoera == 0 or $ostoera == "") {
-							$kerroin = 1;
-						}
-						else {
-							$kerroin = $ostoera;
-						}
-
-						if ($arvaus < $kerroin) {
-							$arvaus = $kerroin;
-						}
-						else {
-							// mikäli on tulossa niin otetaan se huomioon
-							$arvaus = $arvaus - $tarve[$toimind][$tuotenoind]["tulossa"];
-							(int) $kokonaisluku = number_format($arvaus / $kerroin,0,'','');
-							(float) $jakojaannos = fmod($arvaus,$kerroin);
-
-							$test = $kokonaisluku * $kerroin;
-							if ($arvaus > $test) {
-								$test = ($kokonaisluku + 1) * $kerroin;
-							}
-							$arvaus = (float) $test;
-						}
-						// mikäli muutat näiden nimityksiä, niin nimitykset pitää korjata myös lahetteen_tulostujono.php kohdan "NAYTATILAUS" javascriptiin.
-						echo "<td>";
-						echo "<input type='text' size='6' id='maara_$nolla' name='maara' value='$arvaus'>";
-						echo "<input type='button' value='".t("Tilaa tuotetta")."' class='tilaa' id='submit_$nolla'>";
-						echo "<input type='hidden' id='tuoteno_$nolla' name='tuoteno' value='$tuotenoind'>";
-						echo "<input type='hidden' id='toimittaja_$nolla' name='toimittaja' value='$toimind'>";
-						echo "</td>";
-						$nolla++;
-					}
-					else {
-						echo "<tr><td>".t("Tuoteno").": $tuotenoind <br> {$tarve[$toimind][$tuotenoind]["nimitys"]}</td>";
-						echo "<td align='right'>".t("Tarve").": {$tarve[$toimind][$tuotenoind]["maara"]} <br> Tulossa: {$tarve[$toimind][$tuotenoind]["tulossa"]}</td>";
-
-					}
+				// Jos ei ole ostoerää, niin yksi
+				if ((int) $ostoera == 0) {
+					$ostoera = 1;
 				}
 
-			echo "</tr>";
+				// Pyöristetään tilattava määrä ylöspäin seuraavaan ostoerään
+				$tilattava_maara = ceil($tarve / $ostoera) * $ostoera;
 
+				// mikäli muutat näiden nimityksiä, niin nimitykset pitää korjata myös lahetteen_tulostujono.php kohdan "NAYTATILAUS" javascriptiin.
+				echo "<td>";
+				echo "<input type='text' size='6' id='maara_$toimittajan_ostotilaus_indeksi' name='maara' value='$tilattava_maara'>";
+				echo "<input type='hidden' id='tuoteno_$toimittajan_ostotilaus_indeksi' name='tuoteno' value='$tuotenumero'>";
+				echo "<input type='hidden' id='toimittaja_$toimittajan_ostotilaus_indeksi' name='toimittaja' value='$toimittajan_tunnus'>";
+				echo "</td>";
+				echo "<td class='back'><input type='button' value='".t("Tee Ostotilaus")."' class='tilaa' id='submit_$toimittajan_ostotilaus_indeksi'></td>";
+				echo "</tr>";
+
+				$toimittajan_ostotilaus_indeksi++;
+			}
 		}
 
 		echo "</table>";

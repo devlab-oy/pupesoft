@@ -2592,8 +2592,9 @@ if ($tee == '') {
 								FROM lahdot 
 								WHERE yhtio = '{$kukarow['yhtio']}' 
 								AND liitostunnus = '{$toimitustavan_tunnus}' 
-								AND asiakasluokka = '{$laskurow['prioriteettinro']}' 
-								AND aktiivi = ''";
+								AND asiakasluokka = '{$laskurow['prioriteettinro']}'
+								AND aktiivi = ''
+								AND (pvm > '".date("Y-m-d")."' OR (pvm = '".date("Y-m-d")."' AND viimeinen_tilausaika > '".date("H:i:s")."'))";
 					$lahdot_res = pupe_query($query);
 
 					$eka_kerta = true;

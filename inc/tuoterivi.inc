@@ -121,7 +121,8 @@
 		or mysql_field_name($result, $i) == "osasto"
 		or mysql_field_name($result, $i) == "tuotemerkki"
 		or mysql_field_name($result, $i) == "malli"
-		or mysql_field_name($result, $i) == "mallitarkenne") {
+		or mysql_field_name($result, $i) == "mallitarkenne"
+		or mysql_field_name($result, $i) == "valmistuslinja") {
 
 		$sresult = t_avainsana(mysql_field_name($result, $i));
 		$sarnimi = mysql_field_name($result, $i);
@@ -130,7 +131,9 @@
 		if (mysql_num_rows($sresult) > 0) {
 			$ulos = "<td><select id='$sarnimi' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-			$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
+			if ($sarnimi != "valmistuslinja") {
+				$ulos .= "<option value = ''>".t("Ei valintaa")."</option>";
+			}
 
 			while ($srow = mysql_fetch_array($sresult)) {
 				$sel = '';
@@ -228,7 +231,7 @@
 
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
- 		$sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
+ 		$sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
 
 		$query = "	SELECT count(*) saldo
 					FROM tuotepaikat
@@ -697,7 +700,7 @@
 		$jatko = 0;
 
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ostoehdotus") {
 
 		$sel = trim($trow[$i]) == 'E' ? ' selected' : '';

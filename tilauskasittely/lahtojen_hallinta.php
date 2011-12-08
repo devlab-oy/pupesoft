@@ -194,6 +194,50 @@
 		}
 	}
 
+	if (isset($tulosta_rahtikirjat)) {
+
+		if (isset($checkbox_parent) and is_array($checkbox_parent) and count($checkbox_parent) > 0) {
+
+			echo "<pre>",var_dump($checkbox_parent),"</pre>";
+
+			foreach ($checkbox_parent as $lahto) {
+
+				$lahto = (int) $lahto;
+
+				$query = "	SELECT tunnus 
+							FROM lasku
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tila = 'L'
+							AND alatila = 'B'
+							AND toimitustavan_lahto = '{$lahto}'";
+				$result = pupe_query($query);
+
+				while ($row = mysql_fetch_assoc($result)) {
+					echo "tunnus: $row[tunnus]<br>";
+				}
+
+				$query = "	SELECT toimitustapa.selite 
+							FROM lahdot
+							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
+							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+							AND lahdot.tunnus = '{$lahto}'";
+				$toimitustapa_result = pupe_query($query);
+				$toimitustapa_row = mysql_fetch_assoc($toimitustapa_result);
+
+				$tee = '';
+				$etsi_button2 = 'foo';
+				$etsi_nro2 = ' ';
+				$preselect_toimitustapa = $toimitustapa_row['selite'];
+
+				echo "<br>";
+			}
+
+		}
+		else {
+			echo "<font class='error'>",t("Et valinnut yhtään lähtöä"),"!</font><br /><br />";
+		}
+	}
+
 	enable_jquery();
 
 	echo "	<script type='text/javascript' language='JavaScript'>
@@ -998,6 +1042,7 @@
 	echo "<input type='submit' name='man_aloitus' value='",t("Man. aloitus"),"' />&nbsp;";
 	echo "<input type='submit' name='vaihda_prio' value='",t("Vaihda prio"),"' />&nbsp;";
 	echo "<input type='submit' name='muokkaa_lahto' value='",t("Muokkaa lähtö"),"' />";
+	echo "<input type='submit' name='tulosta_rahtikirjat' value='",t("Tulosta rahtikirjat"),"' />";
 	echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
 	echo "</td>";
 	echo "</tr>";

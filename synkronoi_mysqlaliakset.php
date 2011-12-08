@@ -24,7 +24,7 @@ if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
 
 if ($tee == "TEE") {
 
-	$file = fopen("http://www.devlab.fi/softa/referenssialiakset.sql","r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+	$file = fopen("http://api.devlab.fi/referenssialiakset.sql","r") or die (t("Tiedoston avaus ep‰onnistui")."!");
 
 	$taulut = array();
 	$rivit = array();

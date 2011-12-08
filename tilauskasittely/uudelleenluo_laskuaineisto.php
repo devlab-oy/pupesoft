@@ -160,7 +160,7 @@
 		if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti epäonnistui!");
 
 		// lock tables
-		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot t_lisa READ, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ";
+		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ";
 		$locre = mysql_query($query) or pupe_error($query);
 
 		//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -564,7 +564,7 @@
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-							WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+							WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
 							and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 							and tilausrivi.kpl != 0
 							and tilausrivi.uusiotunnus 	= '$lasrow[tunnus]'
@@ -572,9 +572,9 @@
 							ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$tilres = mysql_query($query) or pupe_error($query);
 
-				$rivinumerot 	= array(0 => 0);
-				$rivilaskuri 	= 1;
-				$rivimaara   	= mysql_num_rows($tilres);
+				$rivinumerot = array(0 => 0);
+				$rivilaskuri = 1;
+				$rivimaara   = mysql_num_rows($tilres);
 				$rivigrouppaus 	= FALSE;
 
 				while ($tilrow = mysql_fetch_array($tilres)) {
@@ -644,10 +644,10 @@
 
 					$query = "	SELECT *
 								FROM sarjanumeroseuranta
-								WHERE yhtio 		= '$kukarow[yhtio]'
-								and tuoteno 		= '$tilrow[tuoteno]'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$tilrow[tuoteno]'
 								and $sarjanutunnus in ($tilrow[rivitunnukset])
-								and sarjanumero    != ''";
+								and sarjanumero != ''";
 					$sarjares = mysql_query($query) or pupe_error($query);
 
 					if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0) {

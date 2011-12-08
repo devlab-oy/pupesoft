@@ -1008,7 +1008,7 @@
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
 						if (tilausrivi.tyyppi!='O' and tilausrivi.tyyppi!='W', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm,
-						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro, tilausrivi.jaksotettu, tilausrivin_lisatiedot.osto_vai_hyvitys
+						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tila laskutila, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro, tilausrivi.jaksotettu, tilausrivin_lisatiedot.osto_vai_hyvitys
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
@@ -1054,12 +1054,20 @@
 					$keikka 	 = "";
 
 					if ($jtrow["tyyppi"] == "O") {
-						$tyyppi = t("Ostotilaus");
-						$merkki = "+";
 
-						if ($jtrow["keikkanro"] > 0) {
-							$keikka = " / ".$jtrow["keikkanro"];
+						if ($jtrow["laskutila"] == "K") {
+							$tyyppi = t("Lisätty suoraan keikalle");
+							$keikka = " / ".$jtrow["laskunro"];
 						}
+						else {
+							$tyyppi = t("Ostotilaus");
+
+							if ($jtrow["keikkanro"] > 0) {
+								$keikka = " / ".$jtrow["keikkanro"];
+							}
+						}
+
+						$merkki = "+";
 					}
 					elseif ($jtrow["tyyppi"] == "E") {
 						$tyyppi = t("Ennakkotilaus");

@@ -897,14 +897,19 @@
 
 		echo "<th style='text-align:right;'>".t("Alv%")."</th>";
 
-		if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K" and $toim == "VALMISTUS") {
-			echo "<th style='text-align:right;'>".t("Reaalisaldo")."</th>";
-			echo "<th style='text-align:right;'>".t("Valmistuslinja")."</th>";
+		$naytetaan_valmistuslinja = false;
+
+		if ($toim == "VALMISTUS") {
+			$avainsanat = t_avainsana("VALMISTUSLINJA");
+			
+			if (mysql_num_rows($avainsanat) > 0) {
+				echo "<th style='text-align:right;'>".t("Valmistuslinja")."</th>";
+				$naytetaan_valmistuslinja = true;
+			}
 		}
-		else {
-			echo "<td class='back'>&nbsp;</td>
-					<td class='back'>&nbsp;</td>";
-		}
+
+		echo "<td class='back'>&nbsp;</td>
+		<td class='back'>&nbsp;</td>";
 
 
 		echo "</tr>";
@@ -1493,7 +1498,7 @@
 			}
 
 			if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K" and $toim == "VALMISTUS" and $row["ei_saldoa"] == "") {
-				$rsaldoclass = '';
+
 				list ($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
 
 				$tilauksessa = "SELECT sum(tilausrivi.varattu) tulossa
@@ -1507,22 +1512,18 @@
 
 				$reaalisaldo = $myytavissa + $tilrivi["tulossa"];
 
-				if ($reaalisaldo < 0) {
-					$rsaldoclass = 'error';
+				if ($naytetaan_valmistuslinja) {
+					$linjannimi = t_avainsana("VALMISTUSLINJA",''," and avainsana.selite='{$row["valmistuslinja"]}'",'','',"selitetark");
+					if ($linjannimi == "") $linjannimi = t("Ei Linjaa");
+					echo "<td>{$linjannimi}</td>";
 				}
-
-				echo "<td class='spec' align='right'><font class='$rsaldoclass'>{$reaalisaldo}</font></td>";
-				$linjannimi = t_avainsana("VALMISTUSLINJA",''," and avainsana.selite='{$row["valmistuslinja"]}'",'','',"selitetark");
-				// mik‰li on avainsanoissa valmistuslinjat luotu ja tuotteelle luotu niin tulostetaan ne n‰kyviin, muuten vaan tyhj‰‰
-				if ($linjannimi == "") $linjannimi = "&nbsp;";
-				echo "<td>{$linjannimi}</td>";
 
 				if ($row["status"] == "T" and $reaalisaldo < $row["tilkpl"]) {
 					// haetaan tuotteen toimittajan tiedot ja datat
 					$query2 = "	SELECT tt.liitostunnus, if (tt.jarjestys = 0, 9999, tt.jarjestys) sorttaus, tt.osto_era
 								FROM tuotteen_toimittajat as tt
 								WHERE tt.yhtio = '{$kukarow["yhtio"]}'
-								AND tt.tuoteno = '$row[tuoteno]'
+								AND tt.tuoteno = '{$row["tuoteno"]}'
 								ORDER BY sorttaus
 								LIMIT 1";
 					$result2   = pupe_query($query2);

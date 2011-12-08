@@ -25,6 +25,10 @@
 		echo "<font class='head'>".t("Tuotteen lis‰varusteet")."</font><hr>";
 		$hakutyyppi = "L";
 	}
+	elseif ($toim == "VSUUNNITTELU") {
+		echo "<font class='head'>".t("Samankaltaisten tuotteiden m‰‰rittely")."</font><hr>";
+		$hakutyyppi = "S";
+	}
 	else {
 		echo "<font class='head'>".t("Tuotereseptit")."</font><hr>";
 		$hakutyyppi = "R";
@@ -53,6 +57,9 @@
 				}
 				elseif ($toim == "TUOTEKOOSTE") {
 					echo t("Syˆt‰ tuote jolle tuotekooste kopioidaan");
+				}
+				elseif ($toim == "VSUUNNITTELU") {
+					echo t("Syˆt‰ tuote jolle samankaltaisuus kopioidaan");
 				}
 				else {
 					echo t("Syˆt‰ valmiste jolle resepti kopioidaan");
@@ -117,6 +124,9 @@
 				elseif ($toim == "TUOTEKOOSTE") {
 					echo t("Tuotekooste kopioitu");
 				}
+				elseif ($toim == "VSUUNNITTELU") {
+					echo t("Samankaltaisuus kopioitu");
+				}
 				else {
 					echo t("Resepti kopioitu");
 				}
@@ -176,6 +186,9 @@
 		elseif ($toim == "TUOTEKOOSTE") {
 			echo t("Etsi tuotekoostetta");
 		}
+		elseif ($toim == "VSUUNNITTELU") {
+			echo "<th>".t("Etsi samankaltaisia")."</th>";
+		}
 		else{
 			echo "<th>".t("Etsi tuoteresepti‰").": </th>";
 		}
@@ -183,9 +196,9 @@
 		echo "<td>".livesearch_kentta($formi, "TUOTEHAKU", "hakutuoteno", 210)."</td>";
 		echo "<tr><th>".t("Rajaa hakum‰‰r‰‰")."</th>";
 		echo "<td>";
-		
+
 		if (!isset($limitti)) $limitti = 100;
-		
+
 		if ($limitti == 100) {
 			$sel1 = "selected";
 		}
@@ -201,7 +214,7 @@
 		else {
 			$sel4 = "selected";
 		}
-		
+
 		echo "<select name='limitti'>";
 		echo "<option value='100' $sel1>".t("100 ensimm‰ist‰")."</option>";
 		echo "<option value='1000' $sel2>".t("1000 ensimm‰ist‰")."</option>";
@@ -422,6 +435,10 @@
 					echo "<br><font class='error'>".t("Tuotekoostetta ei ole m‰‰ritelty tuotteelle")." $hakutuoteno!</font><br>";
 					echo "<br><font class='head'>".t("Lis‰‰ tuotekooste tuotteelle").": $hakutuoteno</font><hr><br>";
 				}
+				elseif ($toim == "VSUUNNITTELU") {
+					echo "<br><font class='error'>".t("Samankaltaisuutta ei ole m‰‰ritelty tuotteelle")." $hakutuoteno!</font><br>";
+					echo "<br><font class='head'>".t("Lis‰‰ samankaltaisuus tuotteelle").": $hakutuoteno</font><hr><br>";
+				}
 				else{
 					echo "<br><font class='error'>".t("Tuotenumeroa")." $hakutuoteno ".t("ei lˆydy mist‰‰n tuotereseptist‰")."!</font><br>";
 					echo "<br><font class='head'>".t("Lis‰‰ raaka-aine valmisteelle").": $hakutuoteno</font><hr><br>";
@@ -441,11 +458,18 @@
 
 				echo "<tr>";
 
-				echo "<tr><td>".livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", 140, '', 'X')."</td>
-						<td><input type='text' name='kerroin' size='20'></td>
-						<td><input type='text' name='hintakerroin' size='20'></td>
-						<td><input type='text' name='alekerroin' size='20'></td>";
-				#echo "	<td><input type='text' name='rivikommentti' size='20'></td>";
+				echo "<tr><td>".livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", 140, '', 'X')."</td>";
+
+				if ($toim == "VSUUNNITTELU") {
+					echo "<td><input type='hidden' name='kerroin' value='1'>1</td>";
+				}
+				else{
+					echo "	<td><input type='text' name='kerroin' size='20'></td>
+							<td><input type='text' name='hintakerroin' size='20'></td>
+							<td><input type='text' name='alekerroin' size='20'></td>";
+					#echo "	<td><input type='text' name='rivikommentti' size='20'></td>";
+				}
+
 				echo "	<td class='back'><input type='submit' value='".t("Lis‰‰ rivi")."'></td></form></tr>";
 				echo "</table>";
 			}
@@ -478,6 +502,9 @@
 					echo "<th>".t("Tuotenumero").": </th>";
 				}
 				elseif ($toim == "TUOTEKOOSTE") {
+					echo "<th>".t("Tuotenumero").": </th>";
+				}
+				elseif ($toim == "VSUUNNITTELU") {
 					echo "<th>".t("Tuotenumero").": </th>";
 				}
 				else {
@@ -561,6 +588,9 @@
 				elseif ($toim == "TUOTEKOOSTE") {
 					echo "<th>".t("Tuotekoosteen faktat").": </th>";
 				}
+				elseif ($toim == "VSUUNNITTELU") {
+					echo "<th>".t("Samankaltaisuuden faktat").": </th>";
+				}
 				else {
 					echo "<th>".t("Reseptin faktat").": </th></tr>";
 				}
@@ -618,6 +648,9 @@
 				elseif ($toim == "TUOTEKOOSTE") {
 					echo "<th>".t("Tuotekoosteet")."</th><th>".t("Nimitys")."</th><th>".t("Kerroin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
 				}
+				elseif ($toim == "VSUUNNITTELU") {
+					echo "<th>".t("Samankaltaisuudet")."</th><th>".t("Nimitys")."</th><th>".t("Kerroin")."</th><td class='back'></td></tr>";
+				}
 				else {
 					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Pituus kerroin")."</th><td class='back'></td></tr>";
 				}
@@ -650,7 +683,7 @@
 
 					echo "<tr><td>".livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", 140, '', 'X')."</td><td></td>";
 
-					if ($toim != "LISAVARUSTE") {
+					if ($toim != "LISAVARUSTE" and $toim != "VSUUNNITTELU") {
 						echo "<td><input type='text' name='kerroin' size='10'></td>";
 					}
 
@@ -659,11 +692,14 @@
 								<td><input type='text' name='alekerroin' size='10'></td>";
 						#echo "<td><input type='text' name='rivikommentti' size='10'></td>";
 					}
-					elseif ($toim != "LISAVARUSTE") {
+					elseif ($toim != "LISAVARUSTE" and $toim != "VSUUNNITTELU") {
 						echo "<td></td>";
 					}
 
-					echo "<td></td><td></td>";
+					if ($toim == "VSUUNNITTELU"){
+						echo "<td><input type='hidden' name='kerroin' value='1'/>1</td>";
+					}
+					else echo "<td></td><td></td>";
 
 					echo "	<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
 							</form>
@@ -708,8 +744,9 @@
 							#echo "<td align='right'>$prow[rivikommentti]</td>";
 						}
 
-
-						echo "<td align='right'>$tuoterow[kehahin]</td><td align='right'>".round($lapsiyht,6)."</td>";
+						if ($toim != "VSUUNNITTELU") {
+							echo "<td align='right'>$tuoterow[kehahin]</td><td align='right'>".round($lapsiyht, 6)."</td>";
+						}
 
 						if ($toim == "RESEPTI") {
 							if ($prow["omasivu"] != "") {
@@ -764,7 +801,7 @@
 							<td><input type='text' name='tuoteno' size='20' value='$zrow[tuoteno]'></td>
 							<td></td>";
 
-						if ($toim != "LISAVARUSTE") {
+						if ($toim != "LISAVARUSTE" and $toim != "VSUUNNITTELU") {
 							echo "	<td><input type='text' name='kerroin' size='10' value='$zrow[kerroin]'></td>";
 						}
 
@@ -774,7 +811,9 @@
 							#echo "	<td><input type='text' name='rivikommentti' size='10' value='$zrow[rivikommentti]'></td>";
 						}
 
-						echo "<td>$tuoterow[kehahin]</td><td>".round($lapsiyht,6)."</td>";
+						if ($toim != "VSUUNNITTELU") {
+							echo "<td>$tuoterow[kehahin]</td><td>".round($lapsiyht, 6)."</td>";
+						}
 
 						if($toim == "RESEPTI") {
 							$sel1=$sel2="";
@@ -866,7 +905,7 @@
 
 		$lisa1 = "";
 		$lisalimit = "";
-		
+
 		if ($limitti !='' and $limitti !="U") {
 			$limitteri = " limit $limitti";
 		}
@@ -876,7 +915,7 @@
 		else {
 			$limitteri = "";
 		}
-		
+
 		if ($isatuoteno_haku != '') {
 			$lisa1 .= " and tuoteperhe.isatuoteno like '%$isatuoteno_haku%' ";
 		}

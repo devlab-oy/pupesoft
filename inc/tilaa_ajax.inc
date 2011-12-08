@@ -39,7 +39,7 @@
 
 	$tilausyhteyshenkilo = $yhrow['nimi'];
 
-	$verkkotunnus	= $srow["verkkotunnus"];
+	$verkkotunnus	= $srow["ovttunnus"];
 
 	$valkoodi 		= $srow["oletus_valkoodi"];
 

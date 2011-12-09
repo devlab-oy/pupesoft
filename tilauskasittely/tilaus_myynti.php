@@ -2645,10 +2645,6 @@ if ($tee == '') {
 			echo "</select>";
 			}
 
-			if ($laskurow['toimitustavan_lahto'] > 0 and $laskurow['tila'] == 'L' and $laskurow['alatila'] == 'D') {
-				$state = $state_tmp;
-			}
-
 			if ($laskurow["rahtivapaa"] != "") {
 				echo " (",t("Rahtivapaa"),") ";
 			}

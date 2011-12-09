@@ -394,12 +394,18 @@
 									counter = id_temp[2];
 								}
 
-								var temp = {'id': id, 'row': row, 'counter': counter, 'link': id_temp[0]};
-								_arr.push(temp);
+								_arr.push({
+									'id': id, 
+									'row': row, 
+									'counter': counter, 
+									'link': id_temp[0]
+								});
 
-								var rowChild = $('#toggleable_tr_'+id_temp[0]+'__'+counter);
-								var tempChild = {'id': id, 'row': rowChild, 'counter': counter};
-								_arrChild.push(tempChild);	
+								_arrChild.push({
+									'id': id, 
+									'row': $('#toggleable_tr_'+id_temp[0]+'__'+counter), 
+									'counter': counter
+								});	
 							}
 
 							$('tr.toggleable_parent:visible').remove();
@@ -426,7 +432,7 @@
 								var length = _arr.length;
 
 								for (i = 0; i < length; i++) {
-									$('#header_parent').after(_arr[i].row, _arrChild[i].row);
+									$('#header_parent').after(_arr[i].row, _arrChild[i].row);									
 								}
 
 								$('img.parent_row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png').show();
@@ -492,16 +498,23 @@
 									counter = id_temp[1];
 								}
 
-								var temp = {'id': id, 'row': row, 'counter': counter};
-								_arr.push(temp);
+								_arr.push({
+									'id': id, 
+									'row': row, 
+									'counter': counter
+								});
 
-								var rowChildOrder = $('#toggleable_row_child_order_'+id+'__'+counter);
-								var tempChildOrder = {'id': id, 'row': rowChildOrder, 'counter': counter};
-								_arrChildOrder.push(tempChildOrder);
+								_arrChildOrder.push({
+									'id': id, 
+									'row': $('#toggleable_row_child_order_'+id+'__'+counter), 
+									'counter': counter
+								});
 
-								var rowChildSscc = $('#toggleable_row_child_sscc_'+id+'__'+counter);
-								var tempChildSscc = {'id': id, 'row': rowChildSscc, 'counter': counter};
-								_arrChildSscc.push(tempChildSscc);
+								_arrChildSscc.push({
+									'id': id, 
+									'row': $('#toggleable_row_child_sscc_'+id+'__'+counter), 
+									'counter': counter
+								});
 							}
 
 							$('tr.toggleable_row_tr:visible').remove();
@@ -787,9 +800,7 @@
 
 							var parent = $(this).parent().parent().parent().parent();
 							var parent_id = $(parent).attr('id');
-
 							var id = this.id.split(\"__\", 3);
-
 							var toggleable_row_sscc = $('#toggleable_row_sscc_'+id[0]+'__'+id[2]);
 
 							if (toggleable_row_sscc.is(':visible')) {
@@ -850,9 +861,7 @@
 
 						$('tr.toggleable_parent').hide();
 
-						var empty_all = true;
-
-						var selected = '';
+						var empty_all = true, selected = '';
 
 						$('select.filter_parent_row_by option:selected').each(function() {
 

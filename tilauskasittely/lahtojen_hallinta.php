@@ -672,6 +672,8 @@
 
 						if ($('#toggleable_'+id[0]+'__'+id[1]).is(':visible')) {
 
+							$('th.sort_row_by:visible').on('click', column_sort);
+
 							$('#valittu_lahto').val('');
 
 							$('input.filter_row_by_text:visible').attr('disabled', false).val('');
@@ -752,14 +754,14 @@
 									$('select.filter_row_by_select:visible').trigger('change');
 								}
 
-								$('th.sort_row_by:visible').bind('click', column_sort);
+								$('th.sort_row_by:visible').on('click', column_sort);
 							}
 						}
 						else {
 
 							$('select.filter_row_by_select:visible, input.filter_row_by_text:visible').attr('disabled', true);
 
-							$('th.sort_row_by:visible').unbind('click');
+							$('th.sort_row_by:visible').off();
 
 							$(this).addClass('tumma');
 
@@ -811,14 +813,14 @@
 										$('select.filter_row_by_select:visible').trigger('change');
 									}
 
-									$('th.sort_row_by:visible').bind('click', column_sort);
+									$('th.sort_row_by:visible').on('click', column_sort);
 								}
 							}
 							else {
 
 								$('select.filter_row_by_select:visible, input.filter_row_by_text:visible').attr('disabled', true);
 
-								$('th.sort_row_by:visible').unbind('click');
+								$('th.sort_row_by:visible').off();
 
 								$(this).addClass('tumma');
 

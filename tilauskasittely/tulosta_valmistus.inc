@@ -570,7 +570,12 @@ if (!function_exists('rivi_valmistus')) {
 
 				$kala -= $rivinkorkeus;
 
-				$faktarow["fakta"] = t("Työohje:", $kieli)."\n".$faktarow["fakta"];
+				$faktarow["fakta"] = t("Työohje", $kieli).":\n".$faktarow["fakta"];
+
+				if ($row['valmistuslinja'] > 0) {
+					$tuotantolinja = $row['valmistuslinja']. " - ". t_avainsana('valmistuslinja', $kieli, "and avainsana.selite='$row[valmistuslinja]'", "", "", "selitetark");
+					$faktarow["fakta"] = t("Tuotantolinja", $kieli).": ".$tuotantolinja."\n".$faktarow["fakta"];
+				}
 
 				foreach(explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
 					$pdf->draw_text(125,  $kala, $kommentti, $thispage, $p);

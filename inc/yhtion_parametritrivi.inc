@@ -2896,5 +2896,17 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == 'teeostotilaus_valmistuksen_tulosjonosta') {
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";		
+	
+		$sel = $trow[$i] == 'K' ? ' selected' : '';
+		
+		$ulos .= "<option value = ''>".t("Valmistusten tulostusjonosta ei luoda ostotilauksia");
+		$ulos .= "<option value = 'K' $sel>".t("Valmistusten tulostusjonosta voi luoda ostotilauksia");
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
 
 ?>

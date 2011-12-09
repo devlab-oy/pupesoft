@@ -1183,10 +1183,6 @@
 			echo "<tr><td>".t("Toimitustapa").":</td>";
 			echo "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus();' {$state_chk}>";
 
-			if ($srow['toimitustavan_lahto'] > 0 and $srow['tila'] == 'L' and $srow['alatila'] == 'D') {
-				$state_chk = 'disabled';
-			}
-
 			while ($row = mysql_fetch_assoc($tresult)) {
 
 				$sel = "";

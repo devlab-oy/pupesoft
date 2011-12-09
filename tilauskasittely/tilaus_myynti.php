@@ -329,16 +329,25 @@ if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukar
 
 if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0 and $toim != "TARJOUS") {
 
-	$query = "	(
-					SELECT tunnus
+	$query = "	(	SELECT tunnus
 					FROM tilausrivi
-					WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$edtilausnumero' and tunnus = '$rivitunnus' and uusiotunnus = 0 and toimitettuaika = '0000-00-00 00:00:00'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and otunnus = '$edtilausnumero'
+					and tyyppi != 'D'
+					and tunnus  = '$rivitunnus'
+					and uusiotunnus = 0
+					and toimitettuaika = '0000-00-00 00:00:00'
 				)
 				UNION
-				(
-					SELECT tunnus
+				(	SELECT tunnus
 					FROM tilausrivi
-					WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$edtilausnumero' and perheid>0 and perheid='$rivitunnus' and uusiotunnus = 0 and toimitettuaika = '0000-00-00 00:00:00'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and otunnus = '$edtilausnumero'
+					and tyyppi != 'D'
+					and perheid > 0
+					and perheid = '$rivitunnus'
+					and uusiotunnus = 0
+					and toimitettuaika = '0000-00-00 00:00:00'
 				)";
 	$result = pupe_query($query);
 
@@ -673,9 +682,11 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 	else {
 		$tunnarit = $kukarow["kesken"];
 	}
+
 	$query = "	SELECT jarjestys, tunnus
 				FROM tilausrivin_lisatiedot
-				WHERE yhtio = '$kukarow[yhtio]' and tilausrivitunnus='$rivitunnus'";
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tilausrivitunnus = '$rivitunnus'";
 	$abures = pupe_query($query);
 	$aburow = mysql_fetch_assoc($abures);
 
@@ -691,7 +702,10 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 	$query = "	SELECT jarjestys, tilausrivin_lisatiedot.tunnus
 				FROM tilausrivi
 				JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus $ehto
-	 			WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi !='D' and otunnus IN ($tunnarit) and (perheid=0 or perheid=tilausrivi.tunnus)
+	 			WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				and tilausrivi.tyyppi != 'D'
+				and tilausrivi.otunnus IN ($tunnarit)
+				and (tilausrivi.perheid=0 or tilausrivi.perheid=tilausrivi.tunnus)
 				ORDER BY jarjestys $j
 				LIMIT 1";
 	$result = pupe_query($query);
@@ -720,6 +734,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 				FROM tilausrivi
 				JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.positio = 'JT')
 				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.tyyppi != 'D'
 				AND tilausrivi.otunnus = '{$kukarow['kesken']}'";
 	$jt_rivien_muisti_res = pupe_query($query);
 
@@ -1089,11 +1104,11 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 	if ($toim == "VALMISTAASIAKKAALLE") {
 		$query = "	SELECT yhtio
-					from tilausrivi
-					where yhtio = '$kukarow[yhtio]'
-					and otunnus = '$kukarow[kesken]'
-					and tyyppi in ('W','M','V')
-					and varattu > 0";
+					FROM tilausrivi
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND otunnus = '$kukarow[kesken]'
+					AND tyyppi in ('W','M','V')
+					AND varattu > 0";
 		$sres  = pupe_query($query);
 
 		if (mysql_num_rows($sres) == 0) {
@@ -1962,6 +1977,17 @@ if ($tee == '') {
 
 		$laskurow = mysql_fetch_assoc($result);
 
+		// Päivitetään rahtikirjatiedot jos ne on syötetty
+		if ($laskurow["alatila"] == "B" or $laskurow["alatila"] == "D" or $laskurow["alatila"] == "J" or $laskurow["alatila"] == "E") {
+			$query4 = "	UPDATE rahtikirjat
+						SET toimitustapa = '$laskurow[toimitustapa]',
+						merahti = '$laskurow[kohdistettu]'
+						where yhtio = '$kukarow[yhtio]'
+						and otsikkonro = '$kukarow[kesken]'
+						and tulostettu = '0000-00-00 00:00:00'";
+			$result = pupe_query($query4);
+		}
+
 		if ($yhtiorow["tilauksen_kohteet"] == "K") {
 			$query 	= "	SELECT *
 						from laskun_lisatiedot
@@ -2532,7 +2558,22 @@ if ($tee == '') {
 				exit;
 			}
 
-			echo "<td><select name='toimitustapa' onchange='submit()' $state>";
+			// Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
+			$query = "	SELECT *
+						FROM rahtikirjat
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						AND otsikkonro 	= '$kukarow[kesken]'
+						AND tulostettu != '0000-00-00 00:00:00'
+						LIMIT 1";
+			$rakre_chkres = pupe_query($query);
+
+			$state_chk = "";
+
+			if (mysql_num_rows($rakre_chkres) > 0) {
+				$state_chk = 'disabled';
+			}
+
+			echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk}>";
 
 			// Otetaan toimitustavan tiedot ja käytetään niitä läpi tilausmyynnin!
 			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
@@ -3017,7 +3058,8 @@ if ($tee == '') {
 	$query  = "	SELECT yhtio
 				FROM tilausrivi
 				WHERE yhtio	= '$kukarow[yhtio]'
-				and otunnus = '$kukarow[kesken]'";
+				AND otunnus = '$kukarow[kesken]'
+				AND tyyppi != 'D'";
 	$numres = pupe_query($query);
 
 	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or mysql_num_rows($numres) == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
@@ -3228,6 +3270,7 @@ if ($tee == '') {
 					LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.otunnus = '$kukarow[kesken]'
+					AND tilausrivi.tyyppi != 'D'
 					and (tilausrivi.tunnus = '$rivitunnus' or (tilausrivi.perheid!=0 and tilausrivi.perheid = '$rivitunnus' and (tilausrivin_lisatiedot.ei_nayteta = 'P' or tilausrivi.tyyppi IN ('W','V'))) or (tilausrivi.perheid2!=0 and tilausrivi.perheid2 = '$rivitunnus' and (tilausrivin_lisatiedot.ei_nayteta = 'P' or tilausrivi.tyyppi IN ('W','V'))))
 					ORDER BY tunnus";
 		$lapsires = pupe_query($query);
@@ -4048,9 +4091,9 @@ if ($tee == '') {
 		   				FROM tilausrivi
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 		   				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.tyyppi  = 'O'
-		   				and tilausrivi.tunnus  = '$tilausrivi[tilausrivilinkki]'
-						and tilausrivin_lisatiedot.suoratoimitettuaika != '0000-00-00'";
+						AND tilausrivi.tyyppi  = 'O'
+		   				AND tilausrivi.tunnus  = '$tilausrivi[tilausrivilinkki]'
+						AND tilausrivin_lisatiedot.suoratoimitettuaika != '0000-00-00'";
 			$suoratoimresult = pupe_query($query);
 
 			if ($suoratoimrow = mysql_fetch_assoc($suoratoimresult)) {
@@ -4322,15 +4365,15 @@ if ($tee == '') {
 				$query_ale_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
 				//haetaan viimeisin hinta millä asiakas on tuotetta ostanut
-				$query =	"	SELECT tilausrivi.hinta, tilausrivi.otunnus, tilausrivi.laskutettuaika, {$query_ale_select_lisa} lasku.tunnus
-								FROM tilausrivi
-						   		JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]' and lasku.tila = 'L' and lasku.alatila = 'X'
-								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-								and tilausrivi.tyyppi = 'L'
-								and tilausrivi.kpl != 0
-								and tilausrivi.tuoteno = '{$tuote['tuoteno']}'
-								ORDER BY tilausrivi.tunnus desc
-								LIMIT 1";
+				$query = "	SELECT tilausrivi.hinta, tilausrivi.otunnus, tilausrivi.laskutettuaika, {$query_ale_select_lisa} lasku.tunnus
+							FROM tilausrivi
+							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]' and lasku.tila = 'L' and lasku.alatila = 'X'
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.tyyppi = 'L'
+							and tilausrivi.kpl != 0
+							and tilausrivi.tuoteno = '{$tuote['tuoteno']}'
+							ORDER BY tilausrivi.tunnus desc
+							LIMIT 1";
 				$viimhintares = pupe_query($query);
 
 				if (mysql_num_rows($viimhintares) != 0) {
@@ -7002,9 +7045,10 @@ if ($tee == '') {
 			//	Onko vielä optiorivejä?
 			$query  = "	SELECT tilausrivin_lisatiedot.tunnus
 						FROM lasku
-						JOIN tilausrivi ON  tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+						JOIN tilausrivi ON  tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D'
 						JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.positio = 'Optio'
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$kukarow[kesken]'";
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tunnus = '$kukarow[kesken]'";
 			$optiotarkres = pupe_query($query);
 
 			if (mysql_num_rows($optiotarkres) == 0) {
@@ -7263,7 +7307,8 @@ if ($tee == '') {
 						FROM tilausrivi
 						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.positio = 'Ei varaa saldoa')
 						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-						AND tilausrivi.otunnus = '$tilausnumero'";
+						AND tilausrivi.otunnus = '$tilausnumero'
+						AND tilausrivi.tyyppi != 'D'";
 			$varattu_check_res = pupe_query($query);
 
 			$varattu_nollana = false;

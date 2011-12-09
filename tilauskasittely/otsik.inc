@@ -440,6 +440,15 @@
 
 	}
 
+	// Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
+	$query = "	SELECT *
+				FROM rahtikirjat
+				WHERE yhtio 	= '$kukarow[yhtio]'
+				AND otsikkonro 	= '$kukarow[kesken]'
+				AND tulostettu != '0000-00-00 00:00:00'
+				LIMIT 1";
+	$rakre_chkres = pupe_query($query);
+
 	if ($tila == "" and !isset($jatka)) {
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
 			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
@@ -1117,6 +1126,12 @@
 			}
 			echo "</td>";
 
+			$state_chk = '';
+
+			if (mysql_num_rows($rakre_chkres) > 0) {
+				$state_chk = 'disabled';
+			}
+
 			// haetaan oletus rahdinmaksaja
 			$apu_rahdinmaksaja = $srow["kohdistettu"];
 
@@ -1137,7 +1152,7 @@
 			$sel[$apu_rahdinmaksaja] = "selected";
 
 			echo "<td>".t("Rahtisopimus").":</td>
-				<td><select id='merahti' name='maksaja'>
+				<td><select id='merahti' name='maksaja' {$state_chk}>
 					<option value='O'>".t("Oletus")."</option>
 					<option value='K' $sel[K]>".t("Käytetään lähettäjän rahtisopimusta")."</option>
 					<option value=''  $sel[V]>".t("Käytetään vastaanottajan rahtisopimusta")."</option>
@@ -1167,7 +1182,7 @@
 			mysql_data_seek($tresult, 0);
 
 			echo "<tr><td>".t("Toimitustapa").":</td>";
-			echo "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus();'>";
+			echo "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus();' {$state_chk}>";
 
 			$lahtoseleted = FALSE;
 
@@ -1915,7 +1930,7 @@
 			echo "</select></td>";
 
 			echo "<td>",t("Rahtivapaa"),":</td>";
-			echo "<td><input type='checkbox' id='rahtivapaa' name='rahtivapaa' $rahtivapaa_chk></td>";
+			echo "<td><input type='checkbox' id='rahtivapaa' name='rahtivapaa' $rahtivapaa_chk  {$state_chk}></td>";
 			echo "</tr>";
 
 			if ($yhtiorow['laskutuskielto'] != 0) {
@@ -3357,6 +3372,17 @@
 							otunnus 					= '$kukarow[kesken]'";
 				$query3 .= $postquery3;
 				$result = pupe_query($query3);
+			}
+
+			// Päivitetään rahtikirjatiedot jos ne on syötetty
+			if ($alatila == "B" or $alatila == "D" or $alatila == "J" or $alatila == "E") {
+				$query4 = "	UPDATE rahtikirjat
+							SET toimitustapa = '$toimitustapa',
+							merahti = '$maksaja'
+							where yhtio = '$kukarow[yhtio]'
+							and otsikkonro = '$kukarow[kesken]'
+							and tulostettu = '0000-00-00 00:00:00'";
+				$result = pupe_query($query4);
 			}
 
 			//	Tahdistetaan toimitukset

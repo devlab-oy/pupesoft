@@ -445,6 +445,7 @@
 				FROM rahtikirjat
 				WHERE yhtio 	= '$kukarow[yhtio]'
 				AND otsikkonro 	= '$kukarow[kesken]'
+				AND otsikkonro != 0
 				AND tulostettu != '0000-00-00 00:00:00'
 				LIMIT 1";
 	$rakre_chkres = pupe_query($query);

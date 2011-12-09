@@ -1971,6 +1971,17 @@ if ($tee == '') {
 
 		$laskurow = mysql_fetch_assoc($result);
 
+		// P‰ivitet‰‰n rahtikirjatiedot jos ne on syˆtetty
+		if ($laskurow["alatila"] == "B" or $laskurow["alatila"] == "D" or $laskurow["alatila"] == "J" or $laskurow["alatila"] == "E") {
+			$query4 = "	UPDATE rahtikirjat
+						SET toimitustapa = '$laskurow[toimitustapa]',
+						merahti = '$laskurow[kohdistettu]'
+						where yhtio = '$kukarow[yhtio]'
+						and otsikkonro = '$kukarow[kesken]'
+						and tulostettu = '0000-00-00 00:00:00'";
+			$result = pupe_query($query4);
+		}
+
 		if ($yhtiorow["tilauksen_kohteet"] == "K") {
 			$query 	= "	SELECT *
 						from laskun_lisatiedot
@@ -2540,13 +2551,22 @@ if ($tee == '') {
 				exit;
 			}
 
-			$state_tmp = $state;
+			// Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
+			$query = "	SELECT *
+						FROM rahtikirjat
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						AND otsikkonro 	= '$kukarow[kesken]'
+						AND tulostettu != '0000-00-00 00:00:00'
+						LIMIT 1";
+			$rakre_chkres = pupe_query($query);
 
-			if ($laskurow['toimitustavan_lahto'] > 0 and $laskurow['tila'] == 'L' and $laskurow['alatila'] == 'D') {
-				$state = 'DISABLED';
+			$state_chk = "";
+
+			if (mysql_num_rows($rakre_chkres) > 0) {
+				$state_chk = 'disabled';
 			}
 
-			echo "<td><select name='toimitustapa' onchange='submit()' {$state}>";
+			echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk}>";
 
 			// Otetaan toimitustavan tiedot ja k‰ytet‰‰n niit‰ l‰pi tilausmyynnin!
 			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
@@ -2567,7 +2587,7 @@ if ($tee == '') {
 				echo t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
 
 				echo "</option>";
-			}
+				}
 			echo "</select>";
 
 			if ($toimitustavan_tunnus > 0 and $kukarow['extranet'] == "") {
@@ -2586,7 +2606,7 @@ if ($tee == '') {
 					$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
 
 					echo "<option value='{$lahdot_row['tunnus']}' selected>",tv1dateconv($lahto, "PITKA"),"</option>";
-				}
+			}
 				else {
 					$query = "	SELECT * 
 								FROM lahdot 
@@ -2622,7 +2642,7 @@ if ($tee == '') {
 					}
 				}
 
-				echo "</select>";
+			echo "</select>";
 			}
 
 			if ($laskurow['toimitustavan_lahto'] > 0 and $laskurow['tila'] == 'L' and $laskurow['alatila'] == 'D') {

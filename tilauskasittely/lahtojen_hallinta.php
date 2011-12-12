@@ -796,8 +796,6 @@
 
 							$('th.sort_row_by:visible').off();
 
-							$('th.sort_row_by:visible').on('click', column_sort);
-
 							$('#valittu_lahto').val('');
 
 							$('input.filter_row_by_text:visible').attr('disabled', false).val('');
@@ -839,6 +837,8 @@
 
 							children.filter('tr[class=\"toggleable_row_tr\"]').show();
 							children.filter('tr[id^=\"toggleable_row_child_\"]').hide();
+
+							$('th.sort_row_by:visible').on('click', column_sort);
 						}
 					});
 

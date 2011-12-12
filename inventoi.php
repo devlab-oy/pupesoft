@@ -81,7 +81,7 @@
 					// luetaan rivi tiedostosta..
 					$tuo		= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][0]));
 					$hyl		= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][1]));
-					$maa		= mysql_real_escape_string(str_replace(",", ".", trim($data->sheets[0]['cells'][$excei][2])));
+					$maa		= (float) str_replace(",", ".", trim($data->sheets[0]['cells'][$excei][2]));
 					$lisaselite	= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][3]));
 
 					if ($tuo != '' and $hyl != '' and $maa != '') {
@@ -99,7 +99,7 @@
 					$rivi		= explode("\t", trim($rivi));
 					$tuo		= mysql_real_escape_string(trim($rivi[0]));
 					$hyl		= mysql_real_escape_string(trim($rivi[1]));
-					$maa		= mysql_real_escape_string(str_replace(",", ".", trim($rivi[2])));
+					$maa		= (float) str_replace(",", ".", trim($rivi[2]));
 					$lisaselite	= mysql_real_escape_string(trim($rivi[3]));
 
 					if ($tuo != '' and $hyl != '' and $maa != '') {
@@ -148,7 +148,7 @@
 				$hyllynro	= $tuotetiedot[2];
 				$hyllyvali  = $tuotetiedot[3];
 				$hyllytaso	= $tuotetiedot[4];
-				$kpl		= $maara[$i];
+				$kpl		= (float) str_replace(",", ".", $maara[$i]);
 				$poikkeama  = 0;
 				$skp		= 0;
 

@@ -53,7 +53,8 @@
 						AND kerailyn_aloitusaika = '{$t_row['kerailyn_aloitusaika']}'
 						AND terminaalialue = '{$t_row['terminaalialue']}'
 						AND asiakasluokka = '{$asiakasluokka}'
-						AND liitostunnus = '{$t_row['liitostunnus']}'";
+						AND liitostunnus = '{$t_row['liitostunnus']}'
+						AND varasto = '{$t_row['varasto']}'";
 			$chk_res = pupe_query($query);
 
 			if (mysql_num_rows($chk_res) == 0) {
@@ -69,6 +70,7 @@
 							asiakasluokka = '{$asiakasluokka}',
 							aktiivi = '',
 							liitostunnus = '{$t_row['liitostunnus']}',
+							varasto = '{$t_row['varasto']}',
 							laatija = '{$kukarow['kuka']}',
 							luontiaika = now(),
 							muutospvm = now(),

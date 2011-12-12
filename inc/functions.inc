@@ -11797,7 +11797,7 @@ if (!function_exists('hae_suuntalava')) {
 }
 
 if (!function_exists("seuraava_lahtoaika")) {
-	function seuraava_lahtoaika($ttunnus, $asiakasluokka) {
+	function seuraava_lahtoaika($ttunnus, $asiakasluokka, $varasto) {
 
 		global $yhtiorow, $kukarow;
 
@@ -11809,6 +11809,7 @@ if (!function_exists("seuraava_lahtoaika")) {
 
 		$viikonpaiva = date("w", time());
 		$asiakasluokka = (int) $asiakasluokka;
+		$varasto = (int) $varasto;
 
 		$pvmnimet = array();
 		$pvmnimet[1] = t("Maanantai");
@@ -11826,6 +11827,7 @@ if (!function_exists("seuraava_lahtoaika")) {
 						and viimeinen_tilausaika > curtime()
 						and lahdon_viikonpvm = '{$viikonpaiva}'
 						and asiakasluokka = '{$asiakasluokka}'
+						and varasto = '{$varasto}'
 						AND aktiivi != 'E')
 
 						UNION
@@ -11836,6 +11838,7 @@ if (!function_exists("seuraava_lahtoaika")) {
 						AND liitostunnus = '{$ttunnus}'
 						and lahdon_viikonpvm > '{$viikonpaiva}'
 						and asiakasluokka = '{$asiakasluokka}'
+						and varasto = '{$varasto}'
 						AND aktiivi != 'E')
 
 						UNION
@@ -11846,6 +11849,7 @@ if (!function_exists("seuraava_lahtoaika")) {
 						AND liitostunnus = '{$ttunnus}'
 						AND lahdon_viikonpvm <= '{$viikonpaiva}'
 						and asiakasluokka = '{$asiakasluokka}'
+						and varasto = '{$varasto}'
 						AND aktiivi != 'E')
 
 						ORDER BY prio, lahdon_viikonpvm, lahdon_kellonaika";

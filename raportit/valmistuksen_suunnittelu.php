@@ -2,7 +2,28 @@
 
 	require("../inc/parametrit.inc");
 
-	echo "<font class='head'>".t("Valmistusten suunnittelu")."</font><hr>";
+	// Otetaan jQuery mukaan
+	echo "<script src='{$palvelin2}inc/jquery.min.js'></script>";
+
+	// Salitaan vain numeroita ja piste/pilkku input kentissä
+	echo '<script language="javascript">
+	$(document).ready(function() {
+	    $("#vain_numeroita").keydown(function(event) {
+	        // sallitaan backspace (8) ja delete (46)
+	        if ( event.keyCode == 46 || event.keyCode == 8 ) {
+	            // anna sen vaan tapahtua...
+	        }
+	        else {
+	            // 48-57 on norminäppäimistön numerot, numpad numerot on 96-105, piste on 190 ja pilkku 188
+	            if ((event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 ) && event.keyCode != 188 && event.keyCode != 190) {
+	                event.preventDefault();
+	            }
+	        }
+	    });
+	});
+	</script>';
+
+	echo "<font class='head'>".t("Valmistuksien suunnittelu")."</font><hr>";
 
 	// Ehdotetaan oletuksena ehdotusta ensikuun valmistuksille sekä siitä plus 3 kk
 	if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")+1, 1, date("Y")));
@@ -41,7 +62,7 @@
 	// Tämä palauttaa yhden tuotteen valmistuksen tiedot
 	function teerivi($tuoteno, $valittu_toimittaja) {
 
-		// Kukarow käyttöön ja päivämäärät globaaleina
+		// Kukarow ja päivämäärät globaaleina
 		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu;
 
 		// Tehdään kaudet päivämääristä
@@ -161,29 +182,29 @@
 		}
 
 		// Haetaan budjetoitu myynti
-		$query = "	SELECT ifnull(sum(maara), 0) maara
-					FROM budjetti_tuote
-					WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
-					AND budjetti_tuote.kausi >= '$alku_kausi'
-					AND budjetti_tuote.kausi <= '$loppu_kausi'
+			$query = "	SELECT ifnull(sum(maara), 0) maara
+						FROM budjetti_tuote
+						WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
+						AND budjetti_tuote.kausi >= '$alku_kausi'
+						AND budjetti_tuote.kausi <= '$loppu_kausi'
 					AND budjetti_tuote.tuoteno = '$tuoteno'";
-		$result = pupe_query($query);
-		$row = mysql_fetch_assoc($result);
-		$budjetoitu_myynti = $row['maara'];
-
-		// Jos ei ole budjettia, otetaan edellisen kauden myynti ja käytetään sitä
-		if ($budjetoitu_myynti == 0) {
-			$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) myynti_ed
-						FROM tilausrivi
-						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-						AND tilausrivi.tyyppi = 'L'
-						AND tilausrivi.tuoteno = '$tuoteno'
-						AND tilausrivi.laskutettuaika >= '$edellinen_alku'
-						AND tilausrivi.laskutettuaika <= '$edellinen_loppu'";
 			$result = pupe_query($query);
 			$row = mysql_fetch_assoc($result);
+		$budjetoitu_myynti = $row['maara'];
+
+			// Jos ei ole budjettia, otetaan edellisen kauden myynti ja käytetään sitä
+		if ($budjetoitu_myynti == 0) {
+				$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) myynti_ed
+							FROM tilausrivi
+							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+							AND tilausrivi.tyyppi = 'L'
+						AND tilausrivi.tuoteno = '$tuoteno'
+							AND tilausrivi.laskutettuaika >= '$edellinen_alku'
+							AND tilausrivi.laskutettuaika <= '$edellinen_loppu'";
+				$result = pupe_query($query);
+				$row = mysql_fetch_assoc($result);
 			$budjetoitu_myynti = $row["myynti_ed"];
-		}
+			}
 
 		// Lasketaan valmistussuositus
 		$reaalisaldo = $varastosaldo - $tilattu - $varattu;
@@ -249,13 +270,14 @@
 			$toimittaja = mysql_real_escape_string($valmistettava_toimittaja[$index]);
 			$tuoteno = mysql_real_escape_string($valmistettava_tuoteno[$index]);
 
-echo "$maara,$toimittaja,$tuoteno<br/>"; 
+echo "$maara,$toimittaja,$tuoteno<br/>";
 continue;
 
 			// Oikellisuustarkastus hoidetaan javascriptillä, ei voi tulla kun numeroita!
 			if ($maara != 0) {
 
 				if ($edellinen_toimittaja != $toimittaja) {
+
 					$query = "	SELECT *
 								FROM toimi
 								WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
@@ -343,7 +365,6 @@ continue;
 		$toimittaja_join   = ""; // toimittaja-rajauksia
 		$toimittaja_select = ""; // toimittaja-rajauksia
 		$abc_join          = ""; // abc-rajauksia
-		$abc_select		   = ""; // abc-rajauksia
 
 		if ($osasto != '') {
 			$tuote_where .= " and tuote.osasto = '$osasto'";
@@ -368,18 +389,26 @@ continue;
 		}
 
 		if ($abcrajaus != "") {
-			$abc_select = "abc_aputaulu.luokka,";
-			if(!isset($lisaa)) $lisaa = null;
-			if(!isset($lisavarattu)) $lisavarattu = null;
+
+			if ($yhtiorow["varaako_jt_saldoa"] != "") {
+				$lisavarattu = " + tilausrivi.varattu";
+			}
+			else {
+				$lisavarattu = "";
+			}
 
 			// katotaan JT:ssä olevat tuotteet ABC-analyysiä varten, koska ne pitää includata aina!
 			$query = "	SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
 						FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $lisaa)
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tyyppi IN  ('L','G')
-						and var = 'J'
-						and jt $lisavarattu > 0";
+						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
+							AND tuote.tuoteno = tilausrivi.tuoteno
+							AND tuote.ei_saldoa = ''
+							AND tuote.status != 'P'
+							$tuote_where)
+						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+						AND tilausrivi.tyyppi IN  ('L','G')
+						AND tilausrivi.var = 'J'
+						AND tilausrivi.jt $lisavarattu > 0";
 			$vtresult = pupe_query($query);
 			$vrow = mysql_fetch_array($vtresult);
 
@@ -471,6 +500,7 @@ continue;
 					$abc_join
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
+					AND tuote.status != 'P'
 					$tuote_where
 					GROUP BY tuoteperhe.isatuoteno
 					ORDER BY tuoteperhe.isatuoteno, tuote.try, tuote.tuoteno";
@@ -482,17 +512,17 @@ continue;
 
 		if (mysql_num_rows($res) > 0) {
 
-				// Kootaan raportti
-				echo "<form action='$PHP_SELF' method='post'>";
-				echo "<table>";
+			// Kootaan raportti
+			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<table>";
 
 				$EDlinja = false;
 				$valmistaja_header_piirretty = false;
-				$formin_pointteri = 0;
-
+			$formin_pointteri = 0;
 
 			// loopataan tuotteet läpi
 			while ($row = mysql_fetch_assoc($res)) {
+
 				// Haetaan tuotteen tiedot
 				$tuoterivi = teerivi($row["tuoteno"], $toimittajaid);
 				$abcluokka = ( isset($row["luokka"]) ? $row["luokka"] : false );
@@ -537,15 +567,16 @@ continue;
 				echo "<td>$abcluokka</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["valmistuksessa"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
-				echo "<td>{$row["valmistuslinja"]}</td>"; // TODO: meinataanko tuotantolinjalla samaa kuin valmistuslinjalla?
+				echo "<td>{$row["valmistuslinja"]}</td>";
 
 				echo "<td style='text-align: right;'>";
-				echo "<input size='8' style='text-align: right;' type='text' name='valmistettava_maara[$formin_pointteri]' value='{$tuoterivi["valmistustarve"]}'>";
+				echo "<input size='8' style='text-align: right;' type='text' name='valmistettava_maara[$formin_pointteri]' value='{$tuoterivi["valmistustarve"]}' id='vain_numeroita'>";
 				echo "<input type='hidden' name='valmistettava_tuoteno[$formin_pointteri]' value='{$row["tuoteno"]}'>";
 				echo "<input type='hidden' name='valmistettava_toimittaja[$formin_pointteri]' value='{$tuoterivi["toimittajan_tunnus"]}'>";
 				echo "</td>";
-				$formin_pointteri++;
 				echo "</tr>";
+
+				$formin_pointteri++;
 			}
 
 			echo "</table>";
@@ -615,6 +646,7 @@ continue;
 			echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 		}
 		echo "</select>";
+
 		echo "</td>";
 		echo "</tr>";
 
@@ -714,6 +746,7 @@ continue;
 		echo "<input type='text' name='vvl1' value='$vvl1' size='5'>";
 		echo "</td>";
 		echo "</tr>";
+
 		echo "</table>";
 
 		echo "<br><input type='submit' name='ehdotusnappi' value = '".t("Suunnittele valmistus")."'></form>";

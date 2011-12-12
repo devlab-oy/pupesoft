@@ -441,14 +441,15 @@
 	}
 
 	// Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
-	$query = "	SELECT *
-				FROM rahtikirjat
-				WHERE yhtio 	= '$kukarow[yhtio]'
-				AND otsikkonro 	= '$kukarow[kesken]'
-				AND otsikkonro != 0
-				AND tulostettu != '0000-00-00 00:00:00'
-				LIMIT 1";
-	$rakre_chkres = pupe_query($query);
+	if ($kukarow["kesken"] != 0) {
+		$query = "	SELECT *
+					FROM rahtikirjat
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					AND otsikkonro 	= '$kukarow[kesken]'
+					AND tulostettu != '0000-00-00 00:00:00'
+					LIMIT 1";
+		$rakre_chkres = pupe_query($query);
+	}
 
 	if ($tila == "" and !isset($jatka)) {
 		if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {

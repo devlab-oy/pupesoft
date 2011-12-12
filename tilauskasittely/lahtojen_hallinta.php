@@ -246,6 +246,25 @@
 					}
 				}
 				
+				foreach ($checkbox_parent as $lahto) {
+
+					$lahto = (int) $lahto;
+
+					$query = "	SELECT tunnus, toimitustapa
+								FROM lasku
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tila = 'L'
+								AND alatila = 'B'
+								AND toimitustavan_lahto = '{$lahto}'";
+					$result = pupe_query($query);
+					
+					if (mysql_num_rows($result) == 0) {
+
+						$query = "UPDATE lahdot SET aktiivi = 'S' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
+						$upd_res = pupe_query($query);
+
+					}
+				}
 			}
 			else {
 				echo "<form method='post' action='?tulosta_rahtikirjat=X&select_varasto={$select_varasto}'>";
@@ -278,7 +297,7 @@
 
 					$sel = (isset($laskukomento) and $laskukomento == $kirow['komento']) ? " selected" : "";
 
-					echo "<option id='K{$kirow['tunnus']}' value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+					echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
 				}
 
 				echo "</select></td></tr>";
@@ -293,7 +312,7 @@
 
 					$sel = (isset($komento) and $komento == $kirow['tunnus']) ? " selected" : "";
 
-					echo "<option id='K{$kirow['tunnus']}' value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
+					echo "<option value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
 				}
 
 				echo "</select></td></tr>";
@@ -312,6 +331,10 @@
 				}
 
 				echo "</select></td></tr>";
+
+				echo "<tr><td class='back' colspan='2'>";
+				echo "<input type='submit' value='",t("Tulosta rahtikirjat"),"'>";
+				echo "</td></tr>";
 
 				echo "</table>";
 				echo "</form>";
@@ -1117,6 +1140,7 @@
 		echo "<input type='submit' name='muokkaa_lahto' value='",t("Muokkaa lähtö"),"' />&nbsp;";
 		echo "<input type='submit' name='tulosta_rahtikirjat' value='",t("Tulosta rahtikirjat"),"' />";
 		echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
+		echo "<input type='hidden' name='select_varasto' id='select_varasto' value='{$select_varasto}' />";
 		echo "</td>";
 		echo "</tr>";
 

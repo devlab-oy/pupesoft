@@ -399,6 +399,20 @@
 					// oletuksena ollaan sortattu 2. tason rivit nousevaan j‰rjestykseen tilausnumeron mukaan
 					$('img.row_direction_order').attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png');
 
+					// tehd‰‰n 2. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan miss‰ asennoissa ne oli
+					$('th.sort_row_by').each(function() {
+						var title_sort = this.id.substring(4);
+
+						window['sort_row_direction_'+title_sort] = false;
+
+					});
+
+					// tehd‰‰n 1. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan miss‰ asennoissa ne oli
+					$('th.sort_parent_row_by').each(function() {
+						var title_sort = this.id.substring(11);
+						window['sort_parent_row_direction_'+title_sort] = false;
+					});
+
 					// nappien click eventti
 					$(':checkbox').live('click', function(event){
 						event.stopPropagation();
@@ -613,7 +627,7 @@
 
 							var header_id = $('tr.toggleable_tr:visible').attr('id').substring(14).split(\"__\", 2);
 
-							if (window['sort_row_direction_'+title]) {
+							if (window['sort_row_direction_'+title+'__'+title_id+'__'+title_counter]) {
 
 								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type' || title == 'clientprio' || title == 'manual') {
 									_arr.sort(compareName);
@@ -635,7 +649,7 @@
 								$('img.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-up-green.png').show();
 								$('th.sort_row_by').children('img[class!=\"row_direction_'+title+'\"]').hide();
 
-								window['sort_row_direction_'+title] = false;
+								window['sort_row_direction_'+title+'__'+title_id+'__'+title_counter] = false;
 							}
 							else {
 
@@ -659,7 +673,7 @@
 								$('img.row_direction_'+title).attr('src', '{$palvelin2}pics/lullacons/arrow-double-down-green.png').show();
 								$('th.sort_row_by').children('img[class!=\"row_direction_'+title+'\"]').hide();
 
-								window['sort_row_direction_'+title] = true;
+								window['sort_row_direction_'+title+'__'+title_id+'__'+title_counter] = true;
 							}
 						}
 					};
@@ -773,6 +787,8 @@
 						var toggleable = $('#toggleable_'+id[0]+'__'+id[1]);
 
 						if (toggleable.is(':visible')) {
+
+							$('th.sort_row_by:visible').off();
 
 							$('th.sort_row_by:visible').on('click', column_sort);
 
@@ -979,20 +995,6 @@
 						if ($(this).is(':selected') && $(this).val() != '') {
 							$(this).trigger('change');
 						}
-					});
-
-					// tehd‰‰n 2. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan miss‰ asennoissa ne oli
-					$('th.sort_row_by').each(function() {
-						var title_sort = this.id.substring(4);
-
-						window['sort_row_direction_'+title_sort] = false;
-
-					});
-
-					// tehd‰‰n 1. tason sorttausnuolista globaalit muuttujat dynaamisesti, jotta muistetaan miss‰ asennoissa ne oli
-					$('th.sort_parent_row_by').each(function() {
-						var title_sort = this.id.substring(11);
-						window['sort_parent_row_direction_'+title_sort] = false;
 					});
 
 					// 1. tason checkboxin eventti

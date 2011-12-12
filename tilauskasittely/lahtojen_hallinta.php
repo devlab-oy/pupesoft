@@ -1114,7 +1114,7 @@
 		echo "<td colspan='15' class='back'>";
 		echo "<input type='submit' name='man_aloitus' value='",t("Man. aloitus"),"' />&nbsp;";
 		echo "<input type='submit' name='vaihda_prio' value='",t("Vaihda prio"),"' />&nbsp;";
-		echo "<input type='submit' name='muokkaa_lahto' value='",t("Muokkaa lähtö"),"' />";
+		echo "<input type='submit' name='muokkaa_lahto' value='",t("Muokkaa lähtö"),"' />&nbsp;";
 		echo "<input type='submit' name='tulosta_rahtikirjat' value='",t("Tulosta rahtikirjat"),"' />";
 		echo "<input type='hidden' name='valittu_lahto' id='valittu_lahto' value='{$valittu_lahto}' />";
 		echo "</td>";

@@ -13896,8 +13896,10 @@ if (!function_exists('arrcmp')) {
 }
 
 if (!function_exists("tee_keraysera2")) {
-	function tee_keraysera2($keraysvyohyke) {
+	function tee_keraysera2($keraysvyohyke, $varasto) {
 		global $kukarow, $yhtiorow;
+
+		$varasto = (int) $varasto;
 
 		// toimitustavan lähtöjen viikonpäivä
 		$viikonpaiva = date('w');
@@ -14184,6 +14186,7 @@ if (!function_exists("tee_keraysera2")) {
 					AND lasku.tila = 'N'
 					AND lasku.alatila = 'A'
 					AND lasku.vakisin_kerays = ''
+					AND lasku.varasto = '{$varasto}'
 					{$wherelisa}
 					{$groupby}
 					{$orderby})
@@ -14214,6 +14217,7 @@ if (!function_exists("tee_keraysera2")) {
 					AND lasku.tila = 'N'
 					AND lasku.alatila = 'A'
 					AND lasku.vakisin_kerays != ''
+					AND lasku.varasto = '{$varasto}'
 					{$groupby}
 					{$orderby})";
 		echo "<pre>",str_replace("\t", "", $query),"</pre>";

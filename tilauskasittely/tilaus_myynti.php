@@ -2590,7 +2590,7 @@ if ($tee == '') {
 				}
 			echo "</select>";
 
-			if ($toimitustavan_tunnus > 0 and $kukarow['extranet'] == "") {
+			if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "") {
 				echo "&nbsp;<select name='toimitustavan_lahto' onchange='submit()' {$state}>";
 				echo "<option value=''>",t("Valitse"),"</option>";
 

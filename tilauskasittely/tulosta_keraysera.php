@@ -58,6 +58,25 @@
 		}
 		echo "</select>&nbsp;<input type='submit' value='",t("Valitse"),"' /></td>";
 		echo "</tr>";
+
+		echo "<tr><th>",t("Valitse varasto"),"</th><td>&nbsp;";
+		echo "<select name='select_varasto'>";
+
+		$query = "	SELECT tunnus, nimitys
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					ORDER BY nimitys";
+		$varastores = pupe_query($query);
+
+		while ($varastorow = mysql_fetch_assoc($varastores)) {
+
+			$sel = $select_varasto == $varastorow['tunnus'] ? " selected" : "";
+
+			echo "<option value='{$varastorow['tunnus']}'{$sel}>{$varastorow['nimitys']}</option>";
+		}
+
+		echo "</select>";
+		echo "</td></tr>";
 		echo "</table>";
 		echo "</form>";
 	}
@@ -344,6 +363,9 @@
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>",t("Ker‰‰j‰‰")," {$keraajanro} ",t("ei lˆydy"),"!</font><br>";
 		}
+		elseif ($select_varasto == '') {
+			echo "<font class='error'>",t("Et valinnut varastoa"),"!</font><br>";
+		}
 		else {
 
 			$keraaja = mysql_fetch_assoc($result);
@@ -368,14 +390,17 @@
 			echo "<input type='hidden' name='keraajanro' value='{$keraajanro}' />";
 			echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
 			echo "<input type='hidden' name='who' value='{$who}' />";
+			echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 
 			echo "<table><tr><th>",t("Valitse reittietiketin tulostin"),"</th><td>";
 			echo "<select name='komento[reittietiketti]'>";
 			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
+			$select_varasto = (int) $select_varasto;
+
 			$querykieli = "	SELECT DISTINCT kirjoittimet.kirjoitin, kirjoittimet.komento, keraysvyohyke.tunnus, keraysvyohyke.printteri8, kirjoittimet.tunnus as kir_tunnus
 							FROM kirjoittimet
-							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$kukarow['keraysvyohyke']}))
+							JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$kukarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
 							JOIN kuka ON (kuka.yhtio = keraysvyohyke.yhtio AND kuka.keraysvyohyke = keraysvyohyke.tunnus AND kuka.kuka = '{$who}')
 							WHERE kirjoittimet.yhtio = '{$kukarow['yhtio']}'
 							GROUP BY 1,2,3,4,5
@@ -407,7 +432,7 @@
 
 				$querykieli = "	SELECT kirjoittimet.kirjoitin, kirjoittimet.komento, keraysvyohyke.tunnus, keraysvyohyke.printteri0, kirjoittimet.tunnus as kir_tunnus
 								FROM kirjoittimet
-								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$kukarow['keraysvyohyke']}))
+								JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$kukarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
 								JOIN kuka ON (kuka.yhtio = keraysvyohyke.yhtio AND kuka.keraysvyohyke = keraysvyohyke.tunnus)
 								WHERE kirjoittimet.yhtio = '{$kukarow['yhtio']}'
 								GROUP BY 1,2,3,4,5
@@ -435,11 +460,11 @@
 				echo "</form>";
 			}
 
-			if ($tee == 'keraysera' and trim($keraysvyohyke) != '') {
+			if ($tee == 'keraysera' and trim($keraysvyohyke) != '' and $select_varasto > 0) {
 
 				echo "<font class='head'>Ker‰‰j‰: $who</font><br>";
 
-				$erat = tee_keraysera2($keraysvyohyke);
+				$erat = tee_keraysera2($keraysvyohyke, $select_varasto);
 
 				if (count($erat['tilaukset']) != 0) {
 					$otunnukset = implode(",", $erat['tilaukset']);

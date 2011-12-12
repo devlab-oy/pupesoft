@@ -1015,6 +1015,40 @@
 
 	echo "<font class='head'>",t("Lähtöjen hallinta"),"</font><hr>";
 
+	if (!isset($parent_row_select_status)) $parent_row_select_status = "";
+	if (!isset($parent_row_select_prio)) $parent_row_select_prio = "";
+	if (!isset($parent_row_select_carrier)) $parent_row_select_carrier = "";
+	if (!isset($parent_row_select_delivery)) $parent_row_select_delivery = "";
+	if (!isset($parent_row_select_date)) $parent_row_select_date = "";
+	if (!isset($parent_row_select_manual)) $parent_row_select_manual = "";
+	if (!isset($valittu_lahto)) $valittu_lahto = "";
+	if (!isset($varasto)) $varasto = 0;
+
+	echo "<form method='post' action=''>";
+	echo "<table>";
+
+	echo "<tr><th>",t("Valitse varasto"),"</th><td class='back' style='vertical-align:middle;'>&nbsp;";
+	echo "<select name='varasto' onchange='submit()'>";
+	echo "<option value=''>",t("Valitse"),"</option>";
+
+	$query = "	SELECT tunnus, nimitys
+				FROM varastopaikat
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				ORDER BY nimitys";
+	$varastores = pupe_query($query);
+
+	while ($varastorow = mysql_fetch_assoc($varastores)) {
+
+		$sel = $varasto == $varastorow['tunnus'] ? " selected" : "";
+
+		echo "<option value='{$varastorow['tunnus']}'{$sel}>{$varastorow['nimitys']}</option>";
+	}
+
+	echo "</select>";
+	echo "</td></tr>";
+	echo "</table>";
+	echo "</form>";
+
 	$query = "	SELECT lahdot.tunnus AS 'lahdon_tunnus',
 				lahdot.pvm AS 'lahdon_pvm',
 				SUBSTRING(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
@@ -1040,6 +1074,10 @@
 				JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
 				JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+				JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+				and concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+				and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+				AND varastopaikat.tunnus = '{$varasto}')
 				WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 				AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))
 				GROUP BY 1,2,3,4,5,6,7,8
@@ -1055,13 +1093,7 @@
 		$carriers[$row['rahdinkuljettaja']] = $row['rahdinkuljettaja'];
 	}
 
-	if (!isset($parent_row_select_status)) $parent_row_select_status = "";
-	if (!isset($parent_row_select_prio)) $parent_row_select_prio = "";
-	if (!isset($parent_row_select_carrier)) $parent_row_select_carrier = "";
-	if (!isset($parent_row_select_delivery)) $parent_row_select_delivery = "";
-	if (!isset($parent_row_select_date)) $parent_row_select_date = "";
-	if (!isset($parent_row_select_manual)) $parent_row_select_manual = "";
-	if (!isset($valittu_lahto)) $valittu_lahto = "";
+	echo "<br /><br />";
 
 	echo "<form method='post' action=''>";
 	echo "<table>";

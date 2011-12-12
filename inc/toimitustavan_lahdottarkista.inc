@@ -36,6 +36,14 @@
 				}
 			}
 
+			if (mysql_field_name($result, $i) == "varasto") {
+				if (trim($t[$i]) == "") {
+					$virhe[$i] .= t("Varasto puuttuu")."!";
+				}
+				else {
+					$t[$i] = (int) $t[$i];
+				}
+			}
 		}
 	}
 

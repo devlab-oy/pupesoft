@@ -196,42 +196,127 @@
 
 	if (isset($tulosta_rahtikirjat)) {
 
-		if (isset($checkbox_parent) and is_array($checkbox_parent) and count($checkbox_parent) > 0) {
+		if (isset($checkbox_parent) and ((is_array($checkbox_parent) and count($checkbox_parent) > 0) or is_string($checkbox_parent))) {
 
-			echo "<pre>",var_dump($checkbox_parent),"</pre>";
+			if (isset($jv) and (isset($laskukomento) and isset($komento) and isset($valittu_rakiroslapp_tulostin))) {
+				$checkbox_parent = unserialize(urldecode($checkbox_parent));
 
-			foreach ($checkbox_parent as $lahto) {
+				foreach ($checkbox_parent as $lahto) {
 
-				$lahto = (int) $lahto;
+					$sel_ltun = array();
 
-				$query = "	SELECT tunnus 
-							FROM lasku
+					$lahto = (int) $lahto;
+
+					$query = "	SELECT tunnus, toimitustapa, varasto
+								FROM lasku
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tila = 'L'
+								AND alatila = 'B'
+								AND toimitustavan_lahto = '{$lahto}'";
+					$result = pupe_query($query);
+
+					while ($row = mysql_fetch_assoc($result)) {
+						$sel_ltun[] = $row['tunnus'];
+
+						$toimitustapa_varasto = $row['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$row['varasto'];
+					}
+
+					if (count($sel_ltun) > 0) {
+
+						// $query = "	SELECT toimitustapa.selite 
+						// 			FROM lahdot
+						// 			JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
+						// 			WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
+						// 			AND lahdot.tunnus = '{$lahto}'";
+						// $toimitustapa_result = pupe_query($query);
+						// $toimitustapa_row = mysql_fetch_assoc($toimitustapa_result);
+						// 
+						// $toimitustapa_varasto = $laskurow['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$laskurow['varasto'];
+
+						$tee				  = "tulosta";
+
+						$nayta_pdf = 'foo';
+
+						require ("rahtikirja-tulostus.php");
+					}
+					else {
+						echo "<font class='error'>",t("Lähdössä")," {$lahto} ",t("ei ole tulostettavia rahtikirjoja"),"!</font><br /><br />";
+					}
+				}
+				
+			}
+			else {
+				echo "<form method='post' action='?tulosta_rahtikirjat=X'>";
+				echo "<input type='hidden' name='checkbox_parent' value='",urlencode(serialize($checkbox_parent)),"' />";
+				echo "<table>";
+				echo "<tr><td>",t("Tulosta kaikki rahtikirjat"),":</td>";
+				echo "<td><input type='radio' name='jv' value='' checked></td></tr>";
+
+				echo "<tr><td>",t("Tulosta vain jälkivaatimukset"),":</td>";
+				echo "<td><input type='radio' name='jv' value='vainjv'></td></tr>";
+
+				echo "<tr><td>",t("Älä tulosta jälkivaatimuksia"),":</td>";
+				echo "<td><input type='radio' name='jv' value='eijv'></td></tr>";
+
+				echo "<tr><td>",t("Tulosta vain rahtikirjoja joilla on VAK-koodeja"),":</td>";
+				echo "<td><input type='radio' name='jv' id='jv' value='vainvak'></td></tr>";
+
+				echo "<tr><td>",t("Valitse jälkivaatimuslaskujen tulostuspaikka"),":</td>";
+				echo "<td><select id='kirjoitin' name='laskukomento'>";
+				echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
+
+				$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
+							FROM kirjoittimet
 							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tila = 'L'
-							AND alatila = 'B'
-							AND toimitustavan_lahto = '{$lahto}'";
-				$result = pupe_query($query);
+							GROUP BY komento
+							ORDER BY kirjoitin";
+				$kires = pupe_query($query);
 
-				while ($row = mysql_fetch_assoc($result)) {
-					echo "tunnus: $row[tunnus]<br>";
+				while ($kirow = mysql_fetch_assoc($kires)) {
+
+					$sel = (isset($laskukomento) and $laskukomento == $kirow['komento']) ? " selected" : "";
+
+					echo "<option id='K{$kirow['tunnus']}' value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
 				}
 
-				$query = "	SELECT toimitustapa.selite 
-							FROM lahdot
-							JOIN toimitustapa ON (toimitustapa.yhtio = lahdot.yhtio AND toimitustapa.tunnus = lahdot.liitostunnus)
-							WHERE lahdot.yhtio = '{$kukarow['yhtio']}'
-							AND lahdot.tunnus = '{$lahto}'";
-				$toimitustapa_result = pupe_query($query);
-				$toimitustapa_row = mysql_fetch_assoc($toimitustapa_result);
+				echo "</select></td></tr>";
 
-				$tee = '';
-				$etsi_button2 = 'foo';
-				$etsi_nro2 = ' ';
-				$preselect_toimitustapa = $toimitustapa_row['selite'];
+				echo "<tr><td>",t("Valitse tulostin"),":</td>";
+				echo "<td><select name='komento'>";
+				echo "<option value='' selected>",t("Oletustulostimelle"),"</option>";
 
-				echo "<br>";
+				mysql_data_seek($kires, 0);
+
+				while ($kirow = mysql_fetch_assoc($kires)) {
+
+					$sel = (isset($komento) and $komento == $kirow['tunnus']) ? " selected" : "";
+
+					echo "<option id='K{$kirow['tunnus']}' value='{$kirow['tunnus']}'{$sel}>{$kirow['kirjoitin']}</option>";
+				}
+
+				echo "</select></td></tr>";
+
+				echo "<tr><td>",t("Tulosta osoitelaput"),"</td>";
+				echo "<td><select name='valittu_rakiroslapp_tulostin'>";
+				echo "<option value=''>",t("Ei tulosteta"),"</option>";
+
+				mysql_data_seek($kires, 0);
+
+				while ($kirrow = mysql_fetch_assoc($kires)) {
+
+					$sel = (isset($valittu_rakiroslapp_tulostin) and $valittu_rakiroslapp_tulostin == $kirrow['tunnus']) ? " selected" : "";
+
+					echo "<option value='{$kirrow['tunnus']}'{$sel}>{$kirrow['kirjoitin']}</option>";
+				}
+
+				echo "</select></td></tr>";
+
+				echo "</table>";
+				echo "</form>";
+
+				require ("inc/footer.inc");
+				exit;
 			}
-
 		}
 		else {
 			echo "<font class='error'>",t("Et valinnut yhtään lähtöä"),"!</font><br /><br />";

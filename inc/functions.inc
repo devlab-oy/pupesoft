@@ -14177,6 +14177,7 @@ if (!function_exists("tee_keraysera2")) {
 									AND lahdot.aktiivi = ''
 									AND (lahdot.kerailyn_aloitusaika <= CURTIME() or lahdot.vakisin_kerays != '')
 									AND (lahdot.asiakasluokka = lasku.prioriteettinro or lahdot.vakisin_kerays != '')
+									AND (lahdot.tunnus = lasku.toimitustavan_lahto or lahdot.vakisin_kerays != '')
  									)
 					#JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = lasku.hyvaksynnanmuutos)
 					WHERE lasku.yhtio = '{$kukarow['yhtio']}'

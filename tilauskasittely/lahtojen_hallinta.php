@@ -1411,7 +1411,7 @@
 			$x = 0;
 
 			$type_array = array(
-				"" 	=> "",
+				"" 	=> t("Normaalitilaus"),
 				"N" => t("Normaalitilaus"),
 				"E" => t("Ennakkotilaus"),
 				"T" => t("Tarjoustilaus"),

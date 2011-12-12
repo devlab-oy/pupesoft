@@ -365,6 +365,7 @@ continue;
 		$toimittaja_join   = ""; // toimittaja-rajauksia
 		$toimittaja_select = ""; // toimittaja-rajauksia
 		$abc_join          = ""; // abc-rajauksia
+		$abc_select        = ""; // abc-select
 
 		if ($osasto != '') {
 			$tuote_where .= " and tuote.osasto = '$osasto'";
@@ -418,47 +419,66 @@ continue;
 				$jt_tuotteet = $vrow[0];
 			}
 
+			$abc_select = "abc_aputaulu.luokka, ";
+
 			// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
 			$abc_join = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
 						AND abc_aputaulu.tuoteno = tuote.tuoteno
 						AND abc_aputaulu.tyyppi = '$abcrajaustapa'
 						AND (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
 		}
+		else {
+			$abc_join = " LEFT JOIN abc_aputaulu ON (abc_aputaulu.yhtio = tuote.yhtio
+							AND abc_aputaulu.tuoteno = tuote.tuoteno
+							AND abc_aputaulu.tyyppi = '$abcrajaustapa')";
+		}
 
 		// Haetaan tehdyt valmistukset
-		$query = "
-			SELECT
-			lasku.kohde valmistuslinja
-			, tilausrivi.tuoteno
-			, tilausrivi.osasto
-			, tilausrivi.try
-			, tilausrivi.kpl+tilausrivi.tilkpl maara
-			, DATE_FORMAT( lasku.luontiaika, GET_FORMAT(DATE, 'EUR')) pvm
-			, lasku.alatila tila
-			FROM tilausrivi
-			JOIN tuote ON (tilausrivi.tuoteno = tuote.tuoteno AND tilausrivi.yhtio = tuote.yhtio)
-			$abc_join
-			JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio AND lasku.tunnus=tilausrivi.otunnus AND lasku.tila != 'D')
-			WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-			AND tilausrivi.tyyppi = 'W'
-			AND lasku.luontiaika >= '$nykyinen_alku 00:00:00'
-			AND lasku.luontiaika < '$nykyinen_loppu 00:00:00'
-			$tuote_where
-			ORDER BY lasku.kohde DESC, lasku.luontiaika ASC";
+		$query = "	SELECT
+					lasku.kohde valmistuslinja,
+					tilausrivi.tuoteno,
+					tilausrivi.osasto,
+					tilausrivi.try,
+					tilausrivi.kpl+tilausrivi.tilkpl maara,
+					DATE_FORMAT(lasku.luontiaika, GET_FORMAT(DATE, 'EUR')) pvm,
+					lasku.alatila tila
+					FROM lasku
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+						AND tilausrivi.otunnus = lasku.tunnus
+						AND tilausrivi.tyyppi = 'W')
+					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+					AND lasku.tila = 'V'
+					AND lasku.toimaika >= '$nykyinen_alku'
+					AND lasku.toimaika <= '$nykyinen_loppu'
+					ORDER BY lasku.kohde, lasku.toimaika";
 		$res = pupe_query($query);
 
-		if(mysql_num_rows($res) > 0){
+		if (mysql_num_rows($res) > 0) {
 			// Näytetään tehdyt ja suunnitellut valmistukset
 			$EDlinja = false;
+			$valmistettu_yhteensa = 0;
 
-			echo t("Näytetään tehdyt ja suunnitellut valmistukset aikavälille").": $nykyinen_alku - $nykyinen_loppu <br>\n";
+			echo t("Valmistukset aikavälillä").": $nykyinen_alku - $nykyinen_loppu <br>\n";
 			echo t("Valmistuksia")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
 
 			echo "<table>";
-			while($row = mysql_fetch_assoc($res)){
+
+			while ($row = mysql_fetch_assoc($res)){
+
 				// Valmistuslinja vaihtuu
 				if ($row['valmistuslinja'] != $EDlinja or $EDlinja === false) {
-					$valmistuslinja = ( !empty($row["valmistuslinja"]) ? $row["valmistuslinja"] : t("Ei valmistuslinjaa") );
+
+					// Yhteensärivi
+					if ($EDlinja !== false) {
+						echo "<tr>";
+						echo "<th colspan='3'>".t("Yhteensä")."</th>";
+						echo "<th style='text-align: right;'>$valmistettu_yhteensa</th>";
+						echo "<th colspan='2'></th>";
+						echo "</tr>";
+						$valmistettu_yhteensa = 0;
+					}
+
+					$valmistuslinja = !empty($row["valmistuslinja"]) ? $row["valmistuslinja"] : t("Ei valmistuslinjaa");
 
 					echo "<tr>";
 					echo "<td class='back' colspan='8'><font class='head'><br>$valmistuslinja</font></td>";
@@ -468,42 +488,57 @@ continue;
 					echo "<th>".t("Tuotenumero")."</th>";
 					echo "<th>".t("Osasto")."</th>";
 					echo "<th>".t("Tuoteryhmä")."</th>";
-					echo "<th>".t("Valmistuksen määrä")."</th>";
-					echo "<th>".t("Valmistuksen pvm")."</th>";
-					echo "<th>".t("Valmistuksen tila")."</th>";
+					echo "<th>".t("Määrä")."</th>";
+					echo "<th>".t("Pvm")."</th>";
+					echo "<th>".t("Tila")."</th>";
 					echo "</tr>";
 				}
-				$EDlinja = $row['valmistuslinja'];
 
-				echo "<tr>";
+				$EDlinja = $row['valmistuslinja'];
+				$valmistettu_yhteensa += $row["maara"];
+
+				echo "<tr class='aktiivi'>";
 				echo "<td>{$row["tuoteno"]}</td>";
 				echo "<td>{$row["osasto"]}</td>";
 				echo "<td>{$row["try"]}</td>";
-				echo "<td>{$row["maara"]}</td>";
+				echo "<td style='text-align: right;'>{$row["maara"]}</td>";
 				echo "<td>{$row["pvm"]}</td>";
-				echo "<td>{$row["tila"]}</td>"; // TODO: tähän pitäisi saada jotain selkokielistä
+
+				$laskutyyppi = "V";
+				$alatila = $row["tila"];
+				require ("inc/laskutyyppi.inc");
+
+				echo "<td>$laskutyyppi $alatila</td>";
 				echo "</tr>";
 			}
+
+			echo "<tr>";
+			echo "<th colspan='3'>".t("Yhteensä")."</th>";
+			echo "<th style='text-align: right;'>$valmistettu_yhteensa</th>";
+			echo "<th colspan='2'></th>";
+			echo "</tr>";
+
 			echo "</table>";
 		}
-		else echo t("Annetuilla rajauksilla ei löytynyt tehtyjä tai suunniteltuja valmistuksia.");
+		else {
+			echo t("Annetulle aikavälille ei löydy valmistuksia.");
+		}
 
 		// Haetaan valmisteet, jotka osuvat hakuehtoihin
-		$query = "	SELECT tuoteperhe.isatuoteno tuoteno,
+		$query = "	SELECT tuote.tuoteno,
 					tuote.nimitys,
 					tuote.kohde valmistuslinja,
-					$abc_select
+					abc_aputaulu.luokka,
 					$toimittaja_select
 					FROM tuote
-					JOIN tuoteperhe ON (tuote.tuoteno = tuoteperhe.isatuoteno AND tuote.yhtio = tuoteperhe.yhtio AND tuoteperhe.tyyppi = 'R')
+					JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio AND tuoteperhe.isatuoteno = tuote.tuoteno AND tuoteperhe.tyyppi = 'R')
 					$toimittaja_join
 					$abc_join
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
 					AND tuote.status != 'P'
 					$tuote_where
-					GROUP BY tuoteperhe.isatuoteno
-					ORDER BY tuoteperhe.isatuoteno, tuote.try, tuote.tuoteno";
+					ORDER BY tuote.try, tuote.tuoteno";
 		$res = pupe_query($query);
 
 		echo "<br/><br/><font class='head'>".t("Ehdotetut valmistukset")."</font><br/>";
@@ -516,8 +551,8 @@ continue;
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<table>";
 
-				$EDlinja = false;
-				$valmistaja_header_piirretty = false;
+			$EDlinja = false;
+			$valmistaja_header_piirretty = false;
 			$formin_pointteri = 0;
 
 			// loopataan tuotteet läpi
@@ -525,7 +560,7 @@ continue;
 
 				// Haetaan tuotteen tiedot
 				$tuoterivi = teerivi($row["tuoteno"], $toimittajaid);
-				$abcluokka = ( isset($row["luokka"]) ? $row["luokka"] : false );
+				$abcluokka = isset($row["luokka"]) ? $row["luokka"] : "";
 
 				// Valmistuslinja vaihtuu
 				if ($row['valmistuslinja'] != $EDlinja or $EDlinja === false) {

@@ -112,7 +112,7 @@
 		echo "<tr>";
 
 		if ($luottovakuutettu == "K") {
-			$luottolisa = "K";
+			$luottolisa = " and asiakas.luottovakuutettu = 'K'";
 			$checked = "CHECKED";
 		}
 		else {
@@ -247,7 +247,7 @@
 					min(lasku.tunnus) latunnari
 					FROM lasku use index (yhtio_tila_mapvm)
 					JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl')
-					JOIN asiakas on (asiakas.yhtio  = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.luottovakuutettu = '$luottolisa')
+					JOIN asiakas on (asiakas.yhtio  = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus $luottolisa)
 					WHERE lasku.yhtio = '$saatavat_yhtio'
 					and (lasku.mapvm > '$savvl-$sakkl-$sappl' or lasku.mapvm = '0000-00-00')
 					and lasku.tapvm	<= '$savvl-$sakkl-$sappl'

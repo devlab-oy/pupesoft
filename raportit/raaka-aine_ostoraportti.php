@@ -406,18 +406,26 @@
 		}
 
 		if ($abcrajaus != "") {
-			// TODO: näitä kahta ei ole setattu ainakaan tässä tiedostossa, voiko koko muuttujat poistaa?
-			if(!isset($lisaa)) $lisaa = null;
-			if(!isset($lisavarattu)) $lisavarattu = null;
+
+			if ($yhtiorow["varaako_jt_saldoa"] != "") {
+				$lisavarattu = " + tilausrivi.varattu";
+			}
+			else {
+				$lisavarattu = "";
+			}
 
 			// katotaan JT:ssä olevat tuotteet ABC-analyysiä varten, koska ne pitää includata aina!
 			$query = "	SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
 						FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $lisaa)
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tyyppi IN  ('L','G')
-						and var = 'J'
-						and jt $lisavarattu > 0";
+						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio 
+							AND tuote.tuoteno = tilausrivi.tuoteno 
+							AND tuote.ei_saldoa = '' 
+							AND tuote.status != 'P' 
+							$tuote_where)
+						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+						AND tilausrivi.tyyppi IN  ('L','G')
+						AND tilausrivi.var = 'J'
+						AND tilausrivi.jt $lisavarattu > 0";
 			$vtresult = pupe_query($query);
 			$vrow = mysql_fetch_array($vtresult);
 
@@ -444,6 +452,7 @@
 					$abc_join
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
+					AND tuote.status != 'P'
 					$tuote_where
 					GROUP BY 1, 2, 3
 					ORDER BY toimittaja, tuote.try, tuote.tuoteno";

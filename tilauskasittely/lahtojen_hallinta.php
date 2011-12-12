@@ -330,7 +330,7 @@
 	echo "	<script type='text/javascript' language='JavaScript'>
 				<!--
 
-				$.expr[':'].containsi = function(a,i,m){
+				$.expr[':'].containsi = function(a,i,m) {
 				    return $(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
 				};
 
@@ -718,6 +718,12 @@
 
 					// 2. tason tekstikentällä rajaaminen
 					$('input.filter_row_by_text').live('keyup', function() {
+
+						// ei ajeta listaa jos painetaan nuolinäppäimiä
+						if (event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
+							event.preventDefault();
+							return false;
+						}
 
 						$('tr.toggleable_row_tr').hide();
 

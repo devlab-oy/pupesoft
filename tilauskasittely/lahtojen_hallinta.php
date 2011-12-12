@@ -235,7 +235,7 @@
 						// 
 						// $toimitustapa_varasto = $laskurow['toimitustapa']."!!!!".$kukarow['yhtio']."!!!!".$laskurow['varasto'];
 
-						$tee				  = "tulosta";
+						$tee = "tulosta";
 
 						$nayta_pdf = 'foo';
 
@@ -574,7 +574,7 @@
 								var id = $(row).children('td.toggleable_row_'+title).attr('id');
 								var counter = 0;
 
-								if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package' || title == 'weight' || title == 'type' || title == 'clientprio') {
+								if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package' || title == 'weight' || title == 'type' || title == 'clientprio' || title == 'manual') {
 									var id_temp = id.split(\"__\", 3);
 									id = id_temp[0];
 									counter = id_temp[2];
@@ -615,7 +615,7 @@
 
 							if (window['sort_row_direction_'+title]) {
 
-								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type' || title == 'clientprio') {
+								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type' || title == 'clientprio' || title == 'manual') {
 									_arr.sort(compareName);
 									_arrChildOrder.sort(compareName);
 									_arrChildSscc.sort(compareName);
@@ -639,7 +639,7 @@
 							}
 							else {
 
-								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type' || title == 'clientprio') {
+								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type' || title == 'clientprio' || title == 'manual') {
 									_arr.sort(compareName).reverse();
 									_arrChildOrder.sort(compareName).reverse();
 									_arrChildSscc.sort(compareName).reverse();
@@ -1336,9 +1336,10 @@
 			echo "<option value='1'{$sel[1]}>",t("Aloittamatta"),"</option>";
 			echo "<option value='2'{$sel[2]}>",t("Aloitettu"),"</option>";
 			echo "<option value='3'{$sel[3]}>",t("Kerätty"),"</option>";
-			echo "<option value='4'{$sel[4]}>",t("Man. aloitus"),"</option>";
 			echo "</select>";
 			echo "</th>";
+
+			echo "<th class='sort_row_by' id='row_manual__{$row['lahdon_tunnus']}__{$y}'>M <img class='row_direction_manual' /></th>";
 
 			sort($priorities);
 
@@ -1429,11 +1430,7 @@
 
 				$status = $status_text = '';
 
-				if ($lahto_row['vakisin_kerays'] != '') {
-					$status_text = t("Man. aloitus");
-					$status = 4;
-				}
-				elseif (strpos($lahto_row['tilat'], "K") !== FALSE) {
+				if (strpos($lahto_row['tilat'], "K") !== FALSE) {
 					$status_text = t("Aloitettu");
 					$status = 2;
 				}
@@ -1447,6 +1444,13 @@
 				}
 
 				echo "<td class='data toggleable_row_status' id='{$status}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$status_text}</td>";
+
+				if ($lahto_row['vakisin_kerays'] != '') {
+					echo "<td class='data toggleable_row_manual' id='{$lahto_row['vakisin_kerays']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['vakisin_kerays']}</td>";
+				}
+				else {
+					echo "<td class='data toggleable_row_manual' id='!__{$lahto_row['tilauksen_tunnus']}__{$x}'>&nbsp;</td>";
+				}
 
 				echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteetti']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['prioriteetti']}</td>";
 				echo "<td class='toggleable_row_order' id='{$lahto_row['tilauksen_tunnus']}__{$x}'><button type='button'>{$lahto_row['tilauksen_tunnus']}</button></td>";

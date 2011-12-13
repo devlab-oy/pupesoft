@@ -1813,7 +1813,6 @@ if ($tee == '') {
 	// Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty ja arvoja vaihdettu
 	if ($kukarow["kesken"] > 0 and (
 		(isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
-		(isset($toimitustapa) and $toimitustapa != '' and $toimitustavan_lahto != '' and $laskurow["toimitustavan_lahto"] != $toimitustavan_lahto) or
 		(isset($viesti) and $viesti != $laskurow["viesti"]) or
 		(isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
 		(isset($myyjanro) and $myyjanro > 0) or
@@ -1845,7 +1844,7 @@ if ($tee == '') {
 			$pika_paiv_myyja = " myyja = '$myyja', ";
 		}
 
-		if (!isset($toimitustavan_lahto) or $toimitustapa != $laskurow['toimitustapa']) $toimitustavan_lahto = "0000-00-00 00:00:00";
+		if ($toimitustapa != $laskurow['toimitustapa']) $toimitustavan_lahto = array();
 
 		if ($maksutapa != '') {
 			$laskurow["maksuehto"] = $maksutapa;
@@ -1927,7 +1926,6 @@ if ($tee == '') {
 
 		$query  = "	UPDATE lasku SET
 					toimitustapa		= '$toimitustapa',
-					toimitustavan_lahto	= '$toimitustavan_lahto',
 					viesti 				= '$viesti',
 					tilausvahvistus 	= '$tilausvahvistus',
 					$pika_paiv_merahti
@@ -2589,61 +2587,6 @@ if ($tee == '') {
 				echo "</option>";
 				}
 			echo "</select>";
-
-			if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "") {
-				echo "&nbsp;<select name='toimitustavan_lahto' onchange='submit()' {$state}>";
-				echo "<option value=''>",t("Valitse"),"</option>";
-
-				if ($laskurow['toimitustavan_lahto'] > 0 and $laskurow['tila'] == 'L' and $laskurow['alatila'] == 'D') {
-
-					$query = "	SELECT * 
-								FROM lahdot 
-								WHERE yhtio = '{$kukarow['yhtio']}' 
-								AND tunnus = '{$laskurow['toimitustavan_lahto']}'";
-					$lahdot_res = pupe_query($query);
-					$lahdot_row = mysql_fetch_assoc($lahdot_res);
-
-					$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
-
-					echo "<option value='{$lahdot_row['tunnus']}' selected>",tv1dateconv($lahto, "PITKA"),"</option>";
-			}
-				else {
-					$query = "	SELECT * 
-								FROM lahdot 
-								WHERE yhtio = '{$kukarow['yhtio']}' 
-								AND liitostunnus = '{$toimitustavan_tunnus}' 
-								AND asiakasluokka = '{$laskurow['prioriteettinro']}'
-								AND aktiivi = ''
-								AND (pvm > '".date("Y-m-d")."' OR (pvm = '".date("Y-m-d")."' AND viimeinen_tilausaika > '".date("H:i:s")."'))";
-					$lahdot_res = pupe_query($query);
-
-					$eka_kerta = true;
-
-					while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
-
-						$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
-
-						$sel = $toimitustavan_lahto == $lahdot_row['tunnus'] ? " selected" : ($laskurow['toimitustavan_lahto'] == $lahdot_row['tunnus'] ? " selected" : "");
-
-						if ($eka_kerta and $sel == "" and $laskurow['toimitustavan_lahto'] == "0" and $state != 'DISABLED') {
-
-							$lahto_x = seuraava_lahtoaika($lahdot_row['liitostunnus'], $laskurow['prioriteettinro']);
-
-							if ($lahto_x == $lahto) {
-								$query = "UPDATE lasku SET toimitustavan_lahto = '{$lahdot_row['tunnus']}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
-								$upd_res = pupe_query($query);
-
-								$sel = " selected";
-								$eka_kerta = false;
-							}
-						}
-
-						echo "<option value='{$lahdot_row['tunnus']}'{$sel}>",tv1dateconv($lahto, "PITKA"),"</option>";
-					}
-				}
-
-			echo "</select>";
-			}
 
 			if ($laskurow["rahtivapaa"] != "") {
 				echo " (",t("Rahtivapaa"),") ";
@@ -6778,6 +6721,145 @@ if ($tee == '') {
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
 
+				if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "") {
+
+					echo "<tr>{$jarjlisa}";
+
+					echo "<form name='tilaus' action='' method='post' autocomplete='off'>
+							<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
+							<input type='hidden' name='mista' value='{$mista}'>
+							<input type='hidden' name='toim' value='{$toim}'>
+							<input type='hidden' name='lopetus' value='{$lopetus}'>
+							<input type='hidden' name='ruutulimit' value = '{$ruutulimit}'>
+							<input type='hidden' name='projektilla' value='{$projektilla}'>";
+
+					echo "<th colspan='2' nowrap>",t("Lähdöt"),"</th>";
+					echo "<td colspan='2' nowrap class='back'>&nbsp;</td>";
+
+					echo "</tr><tr>";
+
+					if (!isset($toimitustavan_lahto)) $toimitustavan_lahto = array();
+
+					if ($laskurow['toimitustavan_lahto'] > 0 and $laskurow['tila'] == 'L' and $laskurow['alatila'] == 'D') {
+
+						$query = "	SELECT * 
+									FROM lahdot 
+									WHERE yhtio = '{$kukarow['yhtio']}' 
+									AND tunnus = '{$laskurow['toimitustavan_lahto']}'";
+						$lahdot_res = pupe_query($query);
+						$lahdot_row = mysql_fetch_assoc($lahdot_res);
+
+						$query = "SELECT nimitys FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahdot_row['varasto']}'";
+						$varasto_chk_res = pupe_query($query);
+						$varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
+
+						echo "<th colspan='2' nowrap>{$varasto_chk_row['nimitys']}</th>";
+
+						echo "<td colspan='2' nowrap class='back'>";
+
+						echo "<select name='toimitustavan_lahto[{$lahdot_row['varasto']}]' onchange='submit()' {$state}>";
+						echo "<option value=''>",t("Valitse"),"</option>";
+
+						$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
+
+						echo "<option value='{$lahdot_row['tunnus']}' selected>",tv1dateconv($lahto, "PITKA"),"</option>";
+
+						$toimitustavan_lahto[$lahdot_row['varasto']] = $lahdot_row['tunnus'];
+
+						echo "</select>";
+						echo "</form>";
+						echo "</td>";
+					}
+					else {
+
+						//haetaan kaikkien tilausrivien varastopaikat
+						$query = "	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro
+									FROM tilausrivi
+									WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+									and tilausrivi.otunnus = '{$laskurow['tunnus']}'
+									AND tilausrivi.tyyppi != 'D'
+									and tilausrivi.hyllyalue != ''
+									and tilausrivi.varattu > 0
+									and tilausrivi.var NOT IN ('J','P')";
+						$chk_res = pupe_query($query);
+
+						$chk_arr = array();
+
+						while ($chk_row = mysql_fetch_assoc($chk_res)) {
+							// Mihin varastoon
+							$varasto = kuuluukovarastoon($chk_row["hyllyalue"], $chk_row["hyllynro"]);
+
+							$chk_arr[$varasto] = $varasto;
+						}
+
+						$i_counter = 0;
+
+						foreach ($chk_arr as $vrst) {
+
+							$query = "SELECT nimitys FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$vrst}'";
+							$varasto_chk_res = pupe_query($query);
+							$varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
+
+							if ($i_counter > 0) {
+								echo "</tr><tr>";
+							}
+
+							echo "<th colspan='2' nowrap>{$varasto_chk_row['nimitys']}</th>";
+
+							$query = "	SELECT * 
+										FROM lahdot 
+										WHERE yhtio = '{$kukarow['yhtio']}' 
+										AND liitostunnus = '{$toimitustavan_tunnus}' 
+										AND asiakasluokka = '{$laskurow['prioriteettinro']}'
+										AND aktiivi IN ('', 'P')
+										AND varasto = '{$vrst}'
+										AND ((pvm = '".date("Y-m-d")."' AND viimeinen_tilausaika > '".date("H:i:s")."') OR pvm > '".date("Y-m-d")."')
+										ORDER BY pvm, lahdon_kellonaika";
+							// echo "<pre>",str_replace("\t", "", $query),"</pre>";
+							$lahdot_res = pupe_query($query);
+
+							echo "<td colspan='2' nowrap class='back'><select name='toimitustavan_lahto[{$vrst}]' onchange='submit();' {$state}>";
+							echo "<option value=''>",t("Valitse"),"</option>";
+
+							$eka_kerta = true;
+
+							$toimitustavan_lahto_chk = $toimitustavan_lahto;
+
+							while ($lahdot_row = mysql_fetch_assoc($lahdot_res)) {
+
+								$lahto = $lahdot_row['pvm'].' '.$lahdot_row['lahdon_kellonaika'];
+
+								$sel = (count($toimitustavan_lahto_chk) > 0 and in_array($lahdot_row['tunnus'], $toimitustavan_lahto_chk)) ? " selected" : ($laskurow['toimitustavan_lahto'] == $lahdot_row['tunnus'] ? " selected" : "");
+
+								if ($eka_kerta and $sel == "" and $laskurow['toimitustavan_lahto'] == "0" and strtolower($state) != 'disabled' and (count($toimitustavan_lahto_chk) == 0 or !in_array($lahto, $toimitustavan_lahto_chk))) {
+
+									$lahto_x = seuraava_lahtoaika($lahdot_row['liitostunnus'], $laskurow['prioriteettinro'], $vrst);
+
+									if ($lahto_x == $lahto) {
+										$sel = " selected";
+										$eka_kerta = false;
+									}
+								}
+
+								if ($sel != "") {
+									$toimitustavan_lahto[$vrst] = $lahdot_row['tunnus'];
+								}
+
+								echo "<option value='{$lahdot_row['tunnus']}'{$sel}>",tv1dateconv($lahto, "PITKA"),"</option>";
+							}
+
+							echo "</select>";
+							echo "</td>";
+
+							$i_counter++;
+						}
+					}
+
+					echo "</form>";
+					echo "</tr>";
+				}
+
+
 				//annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
 				if ($kukarow["extranet"] == "" and (($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "K") or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI")) {
 
@@ -7249,6 +7331,10 @@ if ($tee == '') {
 					<input type='hidden' name='mista' value = '$mista'>
 					<input type='hidden' name='rahtipainohinta' value='$rahtihinta'>
 					<input type='hidden' name='kaikkiyhteensa' value='".sprintf('%.2f',$summa)."'>";
+
+				if ($yhtiorow['kerayserat'] == 'K' and $kukarow['extranet'] == "" and isset($toimitustavan_lahto)) {
+					echo "<input type='hidden' name='toimitustavan_lahto' value='",urlencode(serialize($toimitustavan_lahto)),"' />";
+				}
 
 				if ($arvo_ulkomaa != 0) {
 					echo "<input type='hidden' name='toimitetaan_ulkomaailta' value='YES'>";

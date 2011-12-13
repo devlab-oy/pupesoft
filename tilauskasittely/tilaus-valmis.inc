@@ -965,6 +965,10 @@ else {
 			$i_counter 				= 1;
 			$tilaus_splitattu 		= FALSE;
 
+			if ($yhtiorow['kerayserat'] == 'K' and $kukarow['extranet'] == "" and isset($toimitustavan_lahto)) {
+				$toimitustavan_lahto = unserialize(urldecode($toimitustavan_lahto));
+			}
+
 			while ($row = mysql_fetch_assoc($result)) {
 
 				// Mihin varastoon
@@ -1119,6 +1123,15 @@ else {
 						if (isset($tulalue_kpl_array[$tulostusalue])) $tulalue_kpl_array[$tulostusalue]++;
 						else $tulalue_kpl_array[$tulostusalue] = 1;
 					}
+				}
+
+				if ($yhtiorow['kerayserat'] == 'K' and $kukarow['extranet'] == "" and isset($toimitustavan_lahto) and count($toimitustavan_lahto) > 0 and isset($toimitustavan_lahto[$varasto])) {
+
+					$query = "	UPDATE lasku SET
+								toimitustavan_lahto = '{$toimitustavan_lahto[$varasto]}'
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tunnus = '{$laskurow['tunnus']}'";
+					$upd_res = pupe_query($query);
 				}
 
 				//	edellinen varasto talteen

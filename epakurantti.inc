@@ -26,6 +26,9 @@ if ($tuoteno != "" and ($tee == "paalle" or $tee == "25paalle" or $tee == "puoli
 	}
 	$tuoterow = mysql_fetch_assoc($result);
 
+	// Otetaan tuotteen saldo talteen
+	$epakuranttimuutos_saldo = $tuoterow["saldo"];
+
 	// lasketaan varastonarvo
 	$muutos = $tuoterow['saldo'] * $tuoterow['kehahin'];
 
@@ -240,6 +243,8 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 		// jos ollaan laittamassa tuotetta puoliep‰kurantiksi, puoliep‰kuranttia t‰ysep‰kurantiksi tai laittamassa puoliep‰kuranttia kurantiksi tai jotain, muutetaan kehahin
 		$kerr2 = 1-$kerr;
 
+		$alkuperainen_keskihankintahinta = $tuoterow["kehahin"];
+		
 		$tuoterow["kehahin"] = $tuoterow["kehahin"] - ($tuoterow["kehahin"]*$kerr2);
 
 		if ($tee == 'pois') {
@@ -259,8 +264,9 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 			}
 
 			//jos yhtiˆ haluaa ett‰ uusi keskihankinta lasketaan, perusuen ep‰kuranttien myynnist‰, kun poistetaan epakurantista.
+			#TODO t‰m‰ on RIKKi, MATIKKA v‰‰rin sek‰ muutosta ei huomioida KIRJANPIDOSSA
 			if ($tee == 'pois' and $yhtiorow['epakur_kehahin_paivitys'] == 'X') {
-				$query = 	"SELECT tapahtuma.kplhinta, tapahtuma.selite, tuote.kehahin
+				$query =  "	SELECT tapahtuma.kplhinta, tapahtuma.selite, tuote.kehahin
 							FROM tapahtuma, tuote
 							WHERE tapahtuma.yhtio = tuote.yhtio
 							and tapahtuma.tuoteno = tuote.tuoteno
@@ -293,6 +299,36 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 				}
 			}
 
+			// Tehd‰‰n selkokielinen selite
+			$epakurantti_selite = "Ep‰kuranttimuutos: ".t("Tuote")." {$tuoterow["tuoteno"]} ".t("p‰ivitet‰‰n")." ";
+
+			if ($tee == "paalle") {
+				$epakurantti_selite .= "100% ".t("ep‰kurantiksi");
+				$epakurantti_uusi_kehahin = 0;
+			}
+			elseif ($tee == "25paalle") {
+				$epakurantti_selite .= "25% ".t("ep‰kurantiksi");
+				$epakurantti_uusi_kehahin = round($alkuperainen_keskihankintahinta * 0.75, 6);
+			}
+			elseif ($tee == "puolipaalle") {
+				$epakurantti_selite .= "50% ".t("ep‰kurantiksi");
+				$epakurantti_uusi_kehahin = round($alkuperainen_keskihankintahinta * 0.50, 6);
+			}
+			elseif ($tee == "75paalle") {
+				$epakurantti_selite .= "75% ".t("ep‰kurantiksi");
+				$epakurantti_uusi_kehahin = round($alkuperainen_keskihankintahinta * 0.25, 6);				
+			}
+			elseif ($tee == "pois") {
+				$epakurantti_selite .= t("kurantiksi");
+				$epakurantti_uusi_kehahin = $alkuperainen_keskihankintahinta;
+			}
+			else {
+				$epakurantti_selite .= "$tee";
+				$epakurantti_uusi_kehahin = $alkuperainen_keskihankintahinta;				
+			}
+
+			$epakurantti_selite .= ". ".t("Keskihankintahinta").": $alkuperainen_keskihankintahinta ".t("Uusi keskihankintahinta").": $epakurantti_uusi_kehahin ".t("Saldo").": $epakuranttimuutos_saldo ".t("Varastonmuutos").": $muutos";
+
 			///* Tehd‰‰n tapahtuma *///
 			$query = "	INSERT into tapahtuma set
 						yhtio   	= '$kukarow[yhtio]',
@@ -301,7 +337,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 						kpl     	= '$tuoterow[saldo]',
 						hinta   	= round('$tuoterow[kehahin]', 6),
 						kplhinta	= round('$tuoterow[kehahin]', 6),
-						selite  	= '$tee. ".t("Keskihankintahinta").": $tuoterow[kehahin] ".t("Varastonmuutos").": $muutos',
+						selite  	= '$epakurantti_selite',
 						laatija    	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = pupe_query($query);
@@ -317,6 +353,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 								yhtio      = '$kukarow[yhtio]',
 								tapvm      = now(),
 								tila       = 'X',
+								alatila    = 'E',
 								viite      = '$tapahtumaid',
 								laatija    = '$kukarow[kuka]',
 								luontiaika = now()";
@@ -348,7 +385,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 							summa    = '$muutos',
 							vero     = 0,
 							lukko    = '',
-							selite   = 'Tuote $tuoterow[tuoteno] ep‰kuranttimuutos',
+							selite   = '$epakurantti_selite',
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);
@@ -364,7 +401,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 							summa    = $muutos * -1,
 							vero     = 0,
 							lukko    = '',
-							selite   = 'Tuote $tuoterow[tuoteno] ep‰kuranttimuutos',
+							selite   = '$epakurantti_selite',
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = pupe_query($query);

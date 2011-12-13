@@ -2,12 +2,6 @@
 
 	require("../inc/parametrit.inc");
 
-	$osasto = 50;
-	$tuoryh = 109;
-	$toimittajaid = 26471;
-	$kka1 = $kkl1 = "11";
-	$vva1 = $vvl1 = "2011";
-
 	// Otetaan jQuery mukaan
 	echo "<script src='{$palvelin2}inc/jquery.min.js'></script>";
 
@@ -265,19 +259,29 @@
 
 	if (isset($tee) and $tee == "TEE_VALMISTUKSET") {
 
-		$rows = 0;
 		$edellinen_valmistuslinja = "X";
+
+		$lahde_varasto = mysql_real_escape_string($lahde_varasto);
+		$kohde_varasto = mysql_real_escape_string($kohde_varasto);
+		$valmistus_ajankohta = mysql_real_escape_string($valmistus_ajankohta);
 
 		foreach ($valmistettava_maara as $index => $maara) {
 
 			$maara = (float) $maara;
 			$tuoteno = mysql_real_escape_string($valmistettava_tuoteno[$index]);
 			$valmistuslinja = mysql_real_escape_string($valmistuslinja[$index]);
-			
+
 			// Oikellisuustarkastus hoidetaan javascriptillä, ei voi tulla kun numeroita!
 			if ($maara != 0) {
 
 				if ($edellinen_valmistuslinja != $valmistuslinja) {
+
+					$aquery = "	SELECT *
+								FROM varastopaikat
+								WHERE yhtio = '{$kukarow["yhtio"]}'
+								and tunnus = '$kohde_varasto'";
+					$vtresult = pupe_query($aquery);
+					$vtrow = mysql_fetch_array($vtresult);
 
 					$query = "	INSERT INTO lasku SET
 								yhtio               = '{$kukarow["yhtio"]}',
@@ -286,58 +290,83 @@
 								yhtio_postino       = '{$yhtiorow["postino"]}',
 								yhtio_postitp       = '{$yhtiorow["postitp"]}',
 								yhtio_maa           = '{$yhtiorow["maa"]}',
-								toim_nimi           = '{$yhtiorow["nimi"]}',
-								toim_osoite         = '{$yhtiorow["osoite"]}',
-								toim_postino        = '{$yhtiorow["postino"]}',
-								toim_postitp        = '{$yhtiorow["postitp"]}',
-								toim_maa            = '{$yhtiorow["maa"]}',
-								nimi                = '{$yhtiorow["nimi"]}',
-								osoite              = '{$yhtiorow["osoite"]}',
-								postino             = '{$yhtiorow["postino"]}',
-								postitp             = '{$yhtiorow["postitp"]}',
-								maa                 = '{$yhtiorow["maa"]}',
-								valkoodi            = '{$yhtiorow["oletus_valkoodi"]}',
-								toimaika            = now(),
+								maa					= '{$vtrow["maa"]}',
+								nimi 				= '{$vtrow["nimitys"]}',
+								nimitark			= '{$vtrow["nimi"]}',
+								osoite				= '{$vtrow["osoite"]}',
+								postino				= '{$vtrow["postino"]}',
+								postitp				= '{$vtrow["postitp"]}',
+								ytunnus				= '{$vtrow["nimitys"]}',
+								toimaika            = '$valmistus_ajankohta',
+								kerayspvm			= '$valmistus_ajankohta',
 								laatija             = '{$kukarow["kuka"]}',
 								luontiaika          = now(),
-								tila                = 'V'";
+								tila                = 'V',
+								kohde				= '$valmistuslinja',
+								varasto				= '$lahde_varasto',
+								clearing			= '$kohde_varasto',
+								tilaustyyppi		= 'W',
+								liitostunnus		= '9999999999'";
 					$result = pupe_query($query);
 					$otunnus = mysql_insert_id();
 
-					$rows++;
+					$query = "	SELECT *
+								FROM lasku
+								WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+								AND lasku.tunnus = '$otunnus'";
+					$result = pupe_query($query);
+					$laskurow = mysql_fetch_assoc($result);
+
+					echo "<font class='message'>".t("Valmistus")." $otunnus ".t("luotu").".</font><br>";
+
 					$edellinen_valmistuslinja = $valmistuslinja;
 				}
 
-				$query = "	SELECT tuote.try,
-							tuote.osasto,
-							tuote.nimitys,
-							tuote.yksikko
+				$query = "	SELECT *
 							FROM tuote
 							WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 							AND tuote.tuoteno = '$tuoteno'";
 				$result = pupe_query($query);
-				$tuoterow = mysql_fetch_assoc($result);
+				$trow = mysql_fetch_assoc($result);
 
-				$query = "	INSERT INTO tilausrivi SET
-							yhtio     = '{$kukarow["yhtio"]}',
-							tyyppi    = 'W',
-							toimaika  = now(),
-							kerayspvm = now(),
-							otunnus   = '$otunnus',
-							tuoteno   = '$tuoteno',
-							try       = '{$tuoterow["try"]}',
-							osasto    = '{$tuoterow["osasto"]}',
-							nimitys   = '{$tuoterow["nimitys"]}',
-							tilkpl    = '$maara',
-							yksikko   = '{$tuoterow["yksikko"]}',
-							varattu   = '$maara',
-							laatija   = '{$kukarow["kuka"]}',
-							laadittu  = now()";
-				$result = pupe_query($query);
+				$trow				= $trow;						// jossa on tuotteen kaikki tiedot
+				$rivinumero			= "";							// kentässä on joko tilaajan rivinumero tai konserninsisäisissä kaupoissa sisäinen toimittajanumero
+				$laskurow			= $laskurow;					// jossa on laskun kaikki tiedot
+				$kukarow["kesken"]	= $otunnus;						// jossa on käyttäjällä keskenoleva tilausnumero
+				$kpl				= $maara;						// jossa on tilattu kappalemäärä
+				$tuoteno			= $trow["tuoteno"];				// jossa on tilattava tuotenumero
+				$toimaika			= $laskurow["toimaika"];		// arvioitu toimitusaika
+				$kerayspvm			= $laskurow["toimaika"];		// toivottu keräysaika
+				$hinta				= "";							// käyttäjän syöttämä hinta
+				$netto				= "";							// käyttäjän syöttämä netto
+				$ale				= "";							// käyttäjän syöttämä ale (generoidaan yhtiön parametreistä)
+				$ale2				= "";							// käyttäjän syöttämä ale2 (generoidaan yhtiön parametreistä)
+				$ale3				= "";							// käyttäjän syöttämä ale3 (generoidaan yhtiön parametreistä)
+				$var				= "";							// H,J,P varrit
+				$varasto			= "";							// myydään vain tästä/näistä varastosta
+				$paikka				= "";							// myydään vain tältä paikalta
+				$rivitunnus			= "";							// tietokannan tunnus jolle rivi lisätään
+				$rivilaadittu		= "";							// vanhan rivin laadittuaika, säilytetään se
+				$korvaavakielto		= "";							// Jos erisuuri kuin tyhjä niin ei myydä korvaavia
+				$jtkielto			= "";							// Jos erisuuri kuin tyhjä niin ei laiteta JT:Seen
+				$perhekielto		= "";							// Jos erisuuri kuin tyhjä niin ei etsitä ollenkaan perheitä
+				$varataan_saldoa	= "";							// Jos == EI niin ei varata saldoa (tietyissä keisseissä), tai siis ei ainakan tehdä saldotsekkiä
+				$kutsuja			= "";							// Kuka tätä skriptiä kutsuu
+				$myy_sarjatunnus	= "";							// Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+				$osto_sarjatunnus	= "";							// Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+				$jaksotettu			= "";							// Kuuluuko tilausrivi mukaan jaksotukseen
+				$perheid			= "";							// Tuoteperheen perheid
+				$perheid2			= "";							// Lisävarusteryhmän perheid2
+				$orvoteikiinnosta	= "";							// Meitä ei kiinnosta orvot jos tämä ei ole tyhjä.
+				$osatoimkielto		= "";							// Jos saldo ei riitä koko riville niin ei lisätä riviä ollenkaan
+				$olpaikalta			= "";							// pakotetaan myymään oletuspaikalta
+				$tuotenimitys		= "";							// tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
+				$tuotenimitys_force	= "";							// tuotteen nimitys muutetaan systemitasolla
+
+				require ("tilauskasittely/lisaarivi.inc");
 			}
 		}
 
-		echo $rows." ".t('valmistusta muodostettu.');
 		echo "<br><br>";
 		$tee = "";
 	}
@@ -597,6 +626,7 @@
 				if ($isatuotteen_pakkauskoko != 1) {
 					foreach ($kasiteltavat_tuotteet as $key => $kasittelyssa) {
 						// Lasketaan paljonko tämän tuotteen valmistusmaara on koko valmistuksesta
+						#TODO: pitää haskata speksin "Jos tarve olisi ollut 950, tehtäisiin silti vain 870, koska 950 ei ole 50% yli erästä eikä kannata valmistaa."
 						$kasiteltavat_tuotteet[$key]["valmistusmaara"] = round($kasittelyssa["valmistussuositus"] / $valmistettava_yhteensa * $isatuotteen_pakkauskoko);
 					}
 				}
@@ -626,6 +656,10 @@
 
 			// Kootaan raportti
 			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<input type='hidden' name='kohde_varasto' value='$kohde_varasto'>";
+			echo "<input type='hidden' name='lahde_varasto' value='$lahde_varasto'>";
+			echo "<input type='hidden' name='valmistus_ajankohta' value='$nykyinen_loppu'>";
+
 			echo "<table>";
 
 			$EDlinja = false;
@@ -675,6 +709,7 @@
 				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
 				echo "<td>$valmistuslinja</td>";
 
+				#TODO: pitää tarkistaa, riittääkö raaka-aineiden saldo ja antaa mahdollisuus pakottaa valmistuksen luominen
 				echo "<td style='text-align: right;'>";
 				echo "<input size='8' style='text-align: right;' type='text' name='valmistettava_maara[$formin_pointteri]' value='{$tuoterivi["valmistusmaara"]}' id='vain_numeroita'>";
 				echo "<input type='hidden' name='valmistettava_tuoteno[$formin_pointteri]' value='{$tuoterivi["tuoteno"]}'>";
@@ -710,6 +745,36 @@
 		echo "<input type='hidden' name='tee' value='RAPORTOI'>";
 
 		echo "<table>";
+
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow["yhtio"]}'
+					order by tyyppi, nimitys";
+		$result = pupe_query($query);
+
+		echo "<tr><th>".t("Valmisteiden kohdevarasto")."</th>";
+
+		echo "<td><select name='kohde_varasto'>";
+
+		while ($row = mysql_fetch_assoc($result)) {
+			$sel = $row['tunnus'] == $kohde_varasto ? "selected" : "";
+			echo "<option value='{$row["tunnus"]}' $sel>{$row["nimitys"]}</option>";
+		}
+		echo "</select></td></tr>";
+
+		mysql_data_seek($result, 0);
+
+		echo "<tr><th>".t("Käytä raaka-aineita varastosta")."</th>";
+
+		echo "<td><select name='lahde_varasto'>";
+		echo "<option value=''>".t("Käytä kaikista")."</option>";
+
+		while ($row = mysql_fetch_assoc($result)) {
+			$sel = $row['tunnus'] == $lahde_varasto ? "selected" : "";
+			echo "<option value='{$row["tunnus"]}' $sel>{$row["nimitys"]}</option>";
+		}
+		echo "</select></td></tr>";
+
 		echo "<tr>";
 		echo "<th>".t("Osasto")."</th>";
 		echo "<td>";

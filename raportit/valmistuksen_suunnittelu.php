@@ -20,6 +20,10 @@
 	            }
 	        }
 	    });
+		$("a.toggle_rivit").click(function(event) {
+			event.preventDefault();
+			$("tr.togglettava_rivi_"+$(this).attr("id")).toggle();
+		});
 	});
 	</script>';
 
@@ -463,7 +467,9 @@ continue;
 
 			echo "<table>";
 
-			while ($row = mysql_fetch_assoc($res)){
+			$toggle_counter = 0;
+
+			while ($row = mysql_fetch_assoc($res)) {
 
 				// Valmistuslinja vaihtuu
 				if ($row['valmistuslinja'] != $EDlinja or $EDlinja === false) {
@@ -472,19 +478,19 @@ continue;
 					if ($EDlinja !== false) {
 						echo "<tr>";
 						echo "<th colspan='3'>".t("Yhteensä")."</th>";
-						echo "<th style='text-align: right;'>$valmistettu_yhteensa</th>";
-						echo "<th colspan='2'></th>";
+						echo "<th colspan='3' style='text-align: right;'>$valmistettu_yhteensa</th>";
 						echo "</tr>";
 						$valmistettu_yhteensa = 0;
 					}
 
 					$valmistuslinja = !empty($row["valmistuslinja"]) ? $row["valmistuslinja"] : t("Ei valmistuslinjaa");
+					$toggle_counter++;
 
 					echo "<tr>";
-					echo "<td class='back' colspan='8'><font class='head'><br>$valmistuslinja</font></td>";
+					echo "<td class='back' colspan='8'><font class='head'><br>$valmistuslinja &raquo; </font> <a href='' class='toggle_rivit' id='$toggle_counter'>".t("Näytä tuotteet")."</a></td>";
 					echo "</tr>";
 
-					echo "<tr>";
+					echo "<tr class='togglettava_rivi_$toggle_counter' style='display: none;'>";
 					echo "<th>".t("Tuotenumero")."</th>";
 					echo "<th>".t("Osasto")."</th>";
 					echo "<th>".t("Tuoteryhmä")."</th>";
@@ -497,7 +503,7 @@ continue;
 				$EDlinja = $row['valmistuslinja'];
 				$valmistettu_yhteensa += $row["maara"];
 
-				echo "<tr class='aktiivi'>";
+				echo "<tr class='aktiivi togglettava_rivi_$toggle_counter' style='display: none;'>";
 				echo "<td>{$row["tuoteno"]}</td>";
 				echo "<td>{$row["osasto"]}</td>";
 				echo "<td>{$row["try"]}</td>";
@@ -510,12 +516,12 @@ continue;
 
 				echo "<td>$laskutyyppi $alatila</td>";
 				echo "</tr>";
+
 			}
 
 			echo "<tr>";
 			echo "<th colspan='3'>".t("Yhteensä")."</th>";
-			echo "<th style='text-align: right;'>$valmistettu_yhteensa</th>";
-			echo "<th colspan='2'></th>";
+			echo "<th colspan='3' style='text-align: right;'>$valmistettu_yhteensa</th>";
 			echo "</tr>";
 
 			echo "</table>";

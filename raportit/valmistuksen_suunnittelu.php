@@ -2,6 +2,12 @@
 
 	require("../inc/parametrit.inc");
 
+	$osasto = 50;
+	$tuoryh = 109;
+	$toimittajaid = 26471;
+	$kka1 = $kkl1 = "11";
+	$vva1 = $vvl1 = "2011";
+
 	// Otetaan jQuery mukaan
 	echo "<script src='{$palvelin2}inc/jquery.min.js'></script>";
 
@@ -260,28 +266,18 @@
 	if (isset($tee) and $tee == "TEE_VALMISTUKSET") {
 
 		$rows = 0;
-		$edellinen_toimittaja = false;
+		$edellinen_valmistuslinja = "X";
 
 		foreach ($valmistettava_maara as $index => $maara) {
 
 			$maara = (float) $maara;
-			$toimittaja = mysql_real_escape_string($valmistettava_toimittaja[$index]);
 			$tuoteno = mysql_real_escape_string($valmistettava_tuoteno[$index]);
-
-echo "$maara,$toimittaja,$tuoteno<br/>";
-continue;
-
+			$valmistuslinja = mysql_real_escape_string($valmistuslinja[$index]);
+			
 			// Oikellisuustarkastus hoidetaan javascriptillä, ei voi tulla kun numeroita!
 			if ($maara != 0) {
 
-				if ($edellinen_toimittaja != $toimittaja) {
-
-					$query = "	SELECT *
-								FROM toimi
-								WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
-								AND toimi.tunnus = '$toimittaja'";
-					$result = pupe_query($query);
-					$toimittajarow = mysql_fetch_assoc($result);
+				if ($edellinen_valmistuslinja != $valmistuslinja) {
 
 					$query = "	INSERT INTO lasku SET
 								yhtio               = '{$kukarow["yhtio"]}',
@@ -295,39 +291,30 @@ continue;
 								toim_postino        = '{$yhtiorow["postino"]}',
 								toim_postitp        = '{$yhtiorow["postitp"]}',
 								toim_maa            = '{$yhtiorow["maa"]}',
-								nimi                = '{$toimittajarow["nimi"]}',
-								osoite              = '{$toimittajarow["osoite"]}',
-								postino             = '{$toimittajarow["postino"]}',
-								postitp             = '{$toimittajarow["postitp"]}',
-								maa                 = '{$toimittajarow["maa"]}',
-								valkoodi            = '{$toimittajarow["oletus_valkoodi"]}',
+								nimi                = '{$yhtiorow["nimi"]}',
+								osoite              = '{$yhtiorow["osoite"]}',
+								postino             = '{$yhtiorow["postino"]}',
+								postitp             = '{$yhtiorow["postitp"]}',
+								maa                 = '{$yhtiorow["maa"]}',
+								valkoodi            = '{$yhtiorow["oletus_valkoodi"]}',
 								toimaika            = now(),
 								laatija             = '{$kukarow["kuka"]}',
 								luontiaika          = now(),
-								tila                = 'L',
-								toimitusehto        = '{$toimittajarow["toimitusehto"]}',
-								liitostunnus        = '{$toimittajarow["tunnus"]}',
-								ytunnus             = '{$toimittajarow["ytunnus"]}',
-								ovttunnus           = '{$toimittajarow["ovttunnus"]}',
-								tilausyhteyshenkilo = '{$toimittajarow["yhteyshenkilo"]}'";
+								tila                = 'V'";
 					$result = pupe_query($query);
 					$otunnus = mysql_insert_id();
 
 					$rows++;
-					$edellinen_toimittaja = $toimittaja;
+					$edellinen_valmistuslinja = $valmistuslinja;
 				}
 
 				$query = "	SELECT tuote.try,
 							tuote.osasto,
 							tuote.nimitys,
-							tuote.yksikko,
-							tuotteen_toimittajat.ostohinta
+							tuote.yksikko
 							FROM tuote
-							JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio
-								AND tuotteen_toimittajat.tuoteno = tuote.tuoteno
-								AND tuotteen_toimittajat.liitostunnus = '{$toimittajarow["tunnus"]}')
 							WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-							AND tuote.tunnus = '$toimittaja'";
+							AND tuote.tuoteno = '$tuoteno'";
 				$result = pupe_query($query);
 				$tuoterow = mysql_fetch_assoc($result);
 
@@ -344,7 +331,6 @@ continue;
 							tilkpl    = '$maara',
 							yksikko   = '{$tuoterow["yksikko"]}',
 							varattu   = '$maara',
-							hinta     = '{$tuoterow["ostohinta"]}',
 							laatija   = '{$kukarow["kuka"]}',
 							laadittu  = now()";
 				$result = pupe_query($query);
@@ -624,9 +610,19 @@ continue;
 		}
 
 		// Loopataan läpi tehty array
-		$valmistus_riveja = 0;
 
 		if (count($valmistettavat_tuotteet) > 0) {
+
+			// Sortataan 2 dimensoinen array. Pitää ensiksi tehdä sortattavista keystä omat arrayt
+			$apusort_jarj0 = $apusort_jarj1 = array();
+
+			foreach ($valmistettavat_tuotteet as $apusort_key => $apusort_row) {
+			    $apusort_jarj0[$apusort_key] = $apusort_row['valmistuslinja'];
+				$apusort_jarj1[$apusort_key] = $apusort_row['riittopv'];
+			}
+
+			// Sortataan by valmistuslinja, riittopv
+			array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_ASC, $valmistettavat_tuotteet);
 
 			// Kootaan raportti
 			echo "<form action='$PHP_SELF' method='post'>";
@@ -653,20 +649,13 @@ continue;
 					$valmistaja_header .= "<th>".t("ABC-luokka")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistuksessa")."</th>";
 					$valmistaja_header .= "<th>".t("Riitto Pv")."</th>";
-					$valmistaja_header .= "<th>".t("Tuotantolinja")."</th>";
+					$valmistaja_header .= "<th>".t("Valmistuslinja")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistustarve")."</th>";
 					$valmistaja_header .= "</tr>";
 					$valmistaja_header_piirretty = false;
 				}
 
 				$EDlinja = $tuoterivi['valmistuslinja'];
-
-				// Jos tuotetta ei tarvitse valmistaa, ei näytetä sitä ostoehdotuksessa
-				if ($tuoterivi['valmistusmaara'] <= 0) {
-					continue;
-				}
-
-				$valmistus_riveja++;
 
 				// Pitää säilyttää table-headeria muuttujassa, sillä voi olla että valmistuslinjalle ei tule yhtään tuoteriviä ehdotukseen (eikä haluta piirtää turhaa headeriä)
 				if ($valmistaja_header_piirretty == false) {
@@ -689,6 +678,7 @@ continue;
 				echo "<td style='text-align: right;'>";
 				echo "<input size='8' style='text-align: right;' type='text' name='valmistettava_maara[$formin_pointteri]' value='{$tuoterivi["valmistusmaara"]}' id='vain_numeroita'>";
 				echo "<input type='hidden' name='valmistettava_tuoteno[$formin_pointteri]' value='{$tuoterivi["tuoteno"]}'>";
+				echo "<input type='hidden' name='valmistuslinja[$formin_pointteri]' value='{$tuoterivi["valmistuslinja"]}'>";
 				echo "</td>";
 				echo "</tr>";
 
@@ -697,18 +687,15 @@ continue;
 
 			echo "</table>";
 
-			if ($valmistus_riveja > 0) {
-				echo "<br>";
-				echo "<input type='hidden' name='tee' value='TEE_VALMISTUKSET' />";
-				echo "<input type='submit' name='muodosta_valmistukset' value='".t('Muodosta valmistukset')."' />";
-				echo "<br><br>";
-			}
+			echo "<br>";
+			echo "<input type='hidden' name='tee' value='TEE_VALMISTUKSET' />";
+			echo "<input type='submit' name='muodosta_valmistukset' value='".t('Muodosta valmistukset')."' />";
+			echo "<br><br>";
 
 			echo "</form>";
 			$tee = "";
 		}
-
-		if ($valmistus_riveja == 0) {
+		else {
 			echo "<br><br>";
 			echo "<font class='error'>".t("Antamallasi rajauksella ei löydy yhtään tuotetta ehdotukseen").".</font><br>";
 			echo "<br>";

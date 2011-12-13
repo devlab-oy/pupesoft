@@ -16,6 +16,9 @@
 
 	$kukarow['yhtio'] = (string) $argv[1];
 	$kukarow['kuka'] = 'cron';
+	$kukarow['kieli'] = 'fi';
+
+	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
 	// $pvmnimet[1] = t("Maanantai");
 	// $pvmnimet[2] = t("Tiistai");

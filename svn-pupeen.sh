@@ -1,7 +1,9 @@
 #!/bin/bash
 
+hosti=`hostname`
+
 echo
-echo "Tervetuloa Pupesoft-narupalveluun"
+echo "Tervetuloa ${hosti} Pupesoft-narupalveluun"
 echo "---------------------------------"
 echo
 echo "Haetaan tietokantamuutokset.."
@@ -26,7 +28,7 @@ else
 
 			echo -n "Tehdaanko muutos (k/e)? "
 			read jatketaanko </dev/tty
-			
+
 			if [ $jatketaanko = "k" ]; then
 				eval $line
 				echo -n "Tietokantamuutos tehty!"

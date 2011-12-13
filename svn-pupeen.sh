@@ -1,36 +1,62 @@
 #!/bin/bash
 
+hosti=`hostname`
+
 echo
-echo "Tervetuloa Pupesoft-narupalveluun"
+echo "Tervetuloa ${hosti} Pupesoft-narupalveluun"
 echo "---------------------------------"
 echo
-echo -n "Haetaan tietokantamuutokset.."
+echo "Haetaan tietokantamuutokset.."
 
 pupedir=`dirname $0`
+
+# Tutkitaan tietokantarakenne...
 dumppi=`php ${pupedir}/dumppaa_mysqlkuvaus.php komentorivilta`
 
-if [ -z "${dumppi}" ]; then
-	echo " Tietokanta ajantasalla!"
+if [ -z "$dumppi" ]; then
+	echo "Tietokanta ajantasalla!"
 	echo
+	rm -f /tmp/_mysqlkuvays.sql
 else
-	echo " Muutoksia loytyi!"
-	echo
-	echo -e ${dumppi}
-	echo
-	echo "HUOM: Tee tarvittavat tietokantamuutoket ennen kuin jatkat!"
-	echo
+	echo -e $dumppi > /tmp/_mysqlkuvaus.tmp
+
+	while read line
+	do
+		if [ -n "$line" ]; then
+			echo $line
+		fi
+	done < "/tmp/_mysqlkuvaus.tmp"
+
+	echo -n "Tehdaanko tietokantamuutokset (k/e)? "
+	read jatketaanko
+
+	if [ "$jatketaanko" = "k" ]; then
+		while read line
+		do
+			if [ -n "$line" ]; then
+				eval $line
+			fi
+		done < "/tmp/_mysqlkuvaus.tmp"
+
+		echo -n "Tietokantamuutokset tehty!"
+		echo
+	else
+		echo -n "Tietokantamuutoksia ei tehty!"
+		echo
+	fi
+
+	rm -f /tmp/_mysqlkuvays.sql
+	rm -f /tmp/_mysqlkuvays.tmp
 fi
 
-echo -n "Jatketaanko (k/e)? "
+echo -n "Paivitetaanko Pupesoft (k/e)? "
 read jatketaanko
-echo
 
-if [ ${jatketaanko} = "k" ]; then
-	echo "Paivitetaan Pupesoft..."
-	echo
-	cd ${pupedir}
+if [ "$jatketaanko" = "k" ]; then
+	cd $pupedir
 	git checkout .             # revertataan kaikki local muutokset
 	git pull origin master     # paivitetaan aina varmasti master branchi
+	echo "Pupesoft paivitetty!"
 else
 	echo "Pupesoftia ei paivitetty!"
 fi

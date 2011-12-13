@@ -4,21 +4,42 @@ echo
 echo "Tervetuloa Pupesoft-narupalveluun"
 echo "---------------------------------"
 echo
-echo -n "Haetaan tietokantamuutokset.."
+echo "Haetaan tietokantamuutokset.."
 
 pupedir=`dirname $0`
+
+# Tutkitaan tietokantarakenne...
 dumppi=`php ${pupedir}/dumppaa_mysqlkuvaus.php komentorivilta`
 
 if [ -z "${dumppi}" ]; then
 	echo " Tietokanta ajantasalla!"
 	echo
+	rm -f /tmp/_mysqlkuvays.sql
 else
-	echo " Muutoksia loytyi!"
-	echo
-	echo -e ${dumppi}
-	echo
-	echo "HUOM: Tee tarvittavat tietokantamuutoket ennen kuin jatkat!"
-	echo
+
+	echo -e $dumppi > /tmp/_mysqlkuvaus.tmp
+
+	while read line
+	do
+		if [ -n "$line" ]; then
+			echo $line
+
+			echo -n "Tehdaanko muutos (k/e)? "
+			read jatketaanko </dev/tty
+			
+			if [ $jatketaanko = "k" ]; then
+				eval $line
+				echo -n "Tietokantamuutos tehty!"
+				echo
+			else
+				echo -n "Tietokantamuutosta ei tehty!"
+				echo
+			fi
+		fi
+	done < "/tmp/_mysqlkuvaus.tmp"
+
+	rm -f /tmp/_mysqlkuvays.sql
+	rm -f /tmp/_mysqlkuvays.tmp
 fi
 
 echo -n "Jatketaanko (k/e)? "

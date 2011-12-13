@@ -63,8 +63,8 @@
 	$ytunnus = isset($ytunnus) ? trim($ytunnus) : "";
 	$toimittajaid = isset($toimittajaid) ? trim($toimittajaid) : "";
 
-	// Tämä palauttaa yhden tuotteen valmistuksen tiedot
-	function teerivi($tuoteno, $valittu_toimittaja) {
+	// Tämä palauttaa tuotteen valmistuksen tiedot
+	function teerivi($tuoteno, $valittu_toimittaja, $abc_rajaustapa) {
 
 		// Kukarow ja päivämäärät globaaleina
 		global $kukarow, $edellinen_alku, $edellinen_loppu, $nykyinen_alku, $nykyinen_loppu;
@@ -73,41 +73,29 @@
 		$alku_kausi = substr(str_replace("-", "", $nykyinen_alku), 0, 6);
 		$loppu_kausi = substr(str_replace("-", "", $nykyinen_loppu), 0, 6);
 
-		// Haetaan samankaltaiset isätuotteet
-		$query = "	SELECT isatuoteno
-					FROM tuoteperhe
-					WHERE yhtio = '{$kukarow["yhtio"]}'
-					AND tuoteno = '{$tuoteno}'
-					AND tyyppi = 'S'";
-		$isatuote_result = pupe_query($query);
+		$ryhmanimet = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
 
-		// Loopataan isätuotteet läpi ja haetaan sisaret
-		$sisaret = null;
-
-		while ($isatuote_row = mysql_fetch_assoc($isatuote_result)){
-			// Haetaan samankaltaiset isätuotteet
-			$query = "	SELECT group_concat(tuoteno separator ', ') sisaret
-						FROM tuoteperhe
-						WHERE yhtio = '{$kukarow["yhtio"]}'
-						AND isatuoteno = '{$isatuote_row["isatuoteno"]}'
-						AND tyyppi = 'S'";
-			$sisar_result = pupe_query($query);
-			$sisar_row = mysql_fetch_assoc($sisar_result);
-
-			$sisaret .= $sisar_row['sisaret'];
-		}
+		// Haetaan tuotteen ABC luokka
+		$query = "	SELECT abc_aputaulu.luokka
+					FROM abc_aputaulu
+					WHERE abc_aputaulu.yhtio = '{$kukarow["yhtio"]}'
+					AND abc_aputaulu.tyyppi = '$abc_rajaustapa'
+					AND abc_aputaulu.tuoteno = '$tuoteno'";
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
+		$abcluokka = $ryhmanimet[$row['luokka']];
 
 		// Haetaan tuotteen varastosaldo
-		$query = "	SELECT ifnull(sum(saldo),0) saldo
+		$query = "	SELECT ifnull(sum(tuotepaikat.saldo),0) saldo
 					FROM tuotepaikat
 					WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
 					AND tuotepaikat.tuoteno = '$tuoteno'";
 		$result = pupe_query($query);
-		$row = $row = mysql_fetch_assoc($result);
+		$row = mysql_fetch_assoc($result);
 		$varastosaldo = $row['saldo'];
 
-		// Haetaan tuotteen vuosikulutus
-		$query = "	SELECT sum(tilausrivi.kpl) vuosikulutus
+		// Haetaan tuotteen vuosikulutus (= myynti)
+		$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) vuosikulutus
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.tyyppi = 'L'
@@ -118,7 +106,7 @@
 		$vuosikulutus = $row['vuosikulutus'];
 
 		// Haetaan tuotteen tilauksessa oleva määrä
-		$query = "	SELECT sum(tilausrivi.varattu) tilattu
+		$query = "	SELECT ifnull(sum(tilausrivi.varattu), 0) tilattu
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.tyyppi = 'O'
@@ -128,11 +116,11 @@
 		$row = mysql_fetch_assoc($result);
 		$tilattu = $row['tilattu'];
 
-		// Haetaan tuotteen varattu määrä
-		$query = "	SELECT sum(tilausrivi.varattu) varattu
+		// Haetaan tuotteen varattu määrä (myynti)
+		$query = "	SELECT ifnull(sum(tilausrivi.varattu), 0) varattu
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-					AND tilausrivi.tyyppi = 'V'
+					AND tilausrivi.tyyppi = 'L'
 					AND tilausrivi.tuoteno = '$tuoteno'
 					AND tilausrivi.varattu != 0";
 		$result = pupe_query($query);
@@ -140,18 +128,15 @@
 		$varattu = $row['varattu'];
 
 		// Haetaan valmistettavana oleva määrä
-		$query = " 	SELECT sum(tilausrivi.varattu) valmistuksessa
+		$query = " 	SELECT ifnull(sum(tilausrivi.varattu), 0) valmistuksessa
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
 					AND tilausrivi.tyyppi in ('V','W')
 					AND tilausrivi.tuoteno = '$tuoteno'
-					AND tilausrivi.varattu != 0
-					AND tilausrivi.kerayspvm >= '$nykyinen_alku'
-					AND tilausrivi.kerayspvm <= '$nykyinen_loppu'"; //TODO: katsotaanko päivämääräehto oikeasta päivämäärästä
+					AND tilausrivi.varattu != 0";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
-
-		$valmistuksessa = $row['valmistuksessa'] > 0 ? $row['valmistuksessa'] : 0;
+		$valmistuksessa = $row['valmistuksessa'];
 
 		// Jos ollaan rajattu toimittaja käyttöliittymässä, haetaan sen tiedot eikä oletustoimittajaa
 		$toimittaja_rajaus = ($valittu_toimittaja > 0) ? "and toimi.tunnus = '$valittu_toimittaja'" : "";
@@ -186,49 +171,58 @@
 		}
 
 		// Haetaan budjetoitu myynti
-			$query = "	SELECT ifnull(sum(maara), 0) maara
-						FROM budjetti_tuote
-						WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
-						AND budjetti_tuote.kausi >= '$alku_kausi'
-						AND budjetti_tuote.kausi <= '$loppu_kausi'
+		$query = "	SELECT ifnull(sum(budjetti_tuote.maara), 0) maara
+					FROM budjetti_tuote
+					WHERE budjetti_tuote.yhtio = '{$kukarow["yhtio"]}'
+					AND budjetti_tuote.kausi >= '$alku_kausi'
+					AND budjetti_tuote.kausi <= '$loppu_kausi'
 					AND budjetti_tuote.tuoteno = '$tuoteno'";
-			$result = pupe_query($query);
-			$row = mysql_fetch_assoc($result);
+		$result = pupe_query($query);
+		$row = mysql_fetch_assoc($result);
 		$budjetoitu_myynti = $row['maara'];
 
-			// Jos ei ole budjettia, otetaan edellisen kauden myynti ja käytetään sitä
+		// Jos ei ole budjettia, otetaan edellisen kauden myynti ja käytetään sitä
 		if ($budjetoitu_myynti == 0) {
-				$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) myynti_ed
-							FROM tilausrivi
-							WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-							AND tilausrivi.tyyppi = 'L'
+			$query = "	SELECT ifnull(sum(tilausrivi.kpl), 0) myynti_ed
+						FROM tilausrivi
+						WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+						AND tilausrivi.tyyppi = 'L'
 						AND tilausrivi.tuoteno = '$tuoteno'
-							AND tilausrivi.laskutettuaika >= '$edellinen_alku'
-							AND tilausrivi.laskutettuaika <= '$edellinen_loppu'";
-				$result = pupe_query($query);
-				$row = mysql_fetch_assoc($result);
+						AND tilausrivi.laskutettuaika >= '$edellinen_alku'
+						AND tilausrivi.laskutettuaika <= '$edellinen_loppu'";
+			$result = pupe_query($query);
+			$row = mysql_fetch_assoc($result);
 			$budjetoitu_myynti = $row["myynti_ed"];
-			}
+		}
 
-		// Lasketaan valmistussuositus
-		$reaalisaldo = $varastosaldo - $tilattu - $varattu;
+		// Lasketaan reaalisaldo
+		$reaalisaldo = $varastosaldo + $tilattu - $varattu;
+
+		// Lasketaan myyntiennuste
 		$myyntiennuste = $budjetoitu_myynti - $reaalisaldo;
 		$myyntiennuste = ($myyntiennuste < 0) ? 0 : $myyntiennuste;
-		$toimitusaika = $toimittajarow['toimitusaika'];
+
+		// Lasketaan riittopäivät
 		$paivakulutus = round($vuosikulutus / 360);
 		$riittopv = ($paivakulutus == 0) ? t("Ei tiedossa") : floor($reaalisaldo / $paivakulutus);
-		$kulutusennuste = $myyntiennuste - $reaalisaldo;
-		$maaraennuste = ($paivakulutus * $toimitusaika) + $kulutusennuste;
+
+		// Lasketaan määräennuste (paljon kuluu toimittajan toimitusajan aikana + arvioitu myynti)
+		$maaraennuste = ($paivakulutus * $toimittajarow['toimitusaika']) + $myyntiennuste;
+
+		// Lasketaan paljon kannattaisi valmistaa
 		$valmistussuositus = ceil($maaraennuste - $reaalisaldo);
+
+		// Pyöristetään suositus ylöspäin seuraavaan pakkauskokoon
 		$valmistusmaara = ceil($valmistussuositus / $toimittajarow['pakkauskoko']) * $toimittajarow['pakkauskoko'];
 
 		// Palautettava array
 		$tuoterivi = array();
-		$tuoterivi['sisartuote'] 			= $sisaret;
-		$tuoterivi['valmistuksessa'] 		= $valmistuksessa;
-		$tuoterivi['riittopv'] 				= $riittopv;
-		$tuoterivi['valmistustarve'] 		= $valmistusmaara;
-		$tuoterivi['toimittajan_tunnus'] 	= $toimittajarow['tunnus'];
+		$tuoterivi['pakkauskoko']		= $toimittajarow['pakkauskoko'];
+		$tuoterivi['valmistuksessa'] 	= $valmistuksessa;
+		$tuoterivi['riittopv'] 			= $riittopv;
+		$tuoterivi['valmistussuositus'] = $valmistussuositus;
+		$tuoterivi['valmistusmaara'] 	= $valmistusmaara;
+		$tuoterivi['abcluokka']			= $abcluokka;
 
 		return $tuoterivi;
 	}
@@ -369,7 +363,6 @@ continue;
 		$toimittaja_join   = ""; // toimittaja-rajauksia
 		$toimittaja_select = ""; // toimittaja-rajauksia
 		$abc_join          = ""; // abc-rajauksia
-		$abc_select        = ""; // abc-select
 
 		if ($osasto != '') {
 			$tuote_where .= " and tuote.osasto = '$osasto'";
@@ -423,8 +416,6 @@ continue;
 				$jt_tuotteet = $vrow[0];
 			}
 
-			$abc_select = "abc_aputaulu.luokka, ";
-
 			// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
 			$abc_join = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
 						AND abc_aputaulu.tuoteno = tuote.tuoteno
@@ -454,10 +445,11 @@ continue;
 					AND lasku.tila = 'V'
 					AND lasku.toimaika >= '$nykyinen_alku'
 					AND lasku.toimaika <= '$nykyinen_loppu'
-					ORDER BY lasku.kohde, lasku.toimaika";
+					ORDER BY lasku.kohde, lasku.toimaika, tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno";
 		$res = pupe_query($query);
 
 		if (mysql_num_rows($res) > 0) {
+
 			// Näytetään tehdyt ja suunnitellut valmistukset
 			$EDlinja = false;
 			$valmistettu_yhteensa = 0;
@@ -483,7 +475,8 @@ continue;
 						$valmistettu_yhteensa = 0;
 					}
 
-					$valmistuslinja = !empty($row["valmistuslinja"]) ? $row["valmistuslinja"] : t("Ei valmistuslinjaa");
+					$valmistuslinja = t_avainsana("VALMISTUSLINJA", "", "and avainsana.selite='{$tuoterivi["valmistuslinja"]}'", "", "", "selitetark");
+					$valmistuslinja = empty($valmistuslinja) ? t("Ei valmistuslinjaa") : $valmistuslinja;
 					$toggle_counter++;
 
 					echo "<tr>";
@@ -530,28 +523,110 @@ continue;
 			echo t("Annetulle aikavälille ei löydy valmistuksia.");
 		}
 
-		// Haetaan valmisteet, jotka osuvat hakuehtoihin
-		$query = "	SELECT tuote.tuoteno,
-					tuote.nimitys,
-					tuote.kohde valmistuslinja,
-					abc_aputaulu.luokka,
-					$toimittaja_select
+		// Haetaan valmistettavat isätuotteet, jotka osuvat hakuehtoihin
+		// Jos tuotteella on samankaltaisia tuotteita, haetaan vain "samankaltaisuuden" isätuotteet mukaan
+		$query = "	SELECT
+					ifnull(samankaltaiset.isatuoteno, tuote.tuoteno) tuoteno,
+					ifnull(samankaltainen_tuote.nimitys, tuote.nimitys) nimitys,
+					ifnull(samankaltainen_tuote.valmistuslinja, tuote.valmistuslinja) valmistuslinja
 					FROM tuote
-					JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio AND tuoteperhe.isatuoteno = tuote.tuoteno AND tuoteperhe.tyyppi = 'R')
+					JOIN tuoteperhe ON (tuoteperhe.yhtio = tuote.yhtio
+						AND tuoteperhe.isatuoteno = tuote.tuoteno
+						AND tuoteperhe.tyyppi = 'R')
+					LEFT JOIN tuoteperhe AS samankaltaiset ON (samankaltaiset.yhtio = tuote.yhtio
+						AND samankaltaiset.tuoteno = tuote.tuoteno
+						AND samankaltaiset.tyyppi = 'S')
+					LEFT JOIN tuote AS samankaltainen_tuote ON (samankaltainen_tuote.yhtio = tuote.yhtio
+						AND samankaltainen_tuote.tuoteno = samankaltaiset.isatuoteno)
 					$toimittaja_join
 					$abc_join
 					WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
 					AND tuote.ei_saldoa = ''
 					AND tuote.status != 'P'
 					$tuote_where
-					ORDER BY tuote.try, tuote.tuoteno";
+					GROUP BY tuoteno, nimitys, valmistuslinja";
 		$res = pupe_query($query);
 
-		echo "<br/><br/><font class='head'>".t("Ehdotetut valmistukset")."</font><br/>";
+		echo "<br/><br/><font class='head'>".t("Ehdotetut valmistukset")."</font><br/><hr>";
 
+		// Kerätään valmistettavien tuotteiden tiedot arrayseen
+		$valmistettavat_tuotteet = array();
+
+		while ($row = mysql_fetch_assoc($res)) {
+
+			// Kerätään mahdolliset samankaltaiset yhteen arrayseen
+			$kasiteltavat_tuotteet = array();
+			$kasiteltavat_key = 0;
+
+			// Haetaan tuotteen tiedot
+			$kasiteltavat_tuotteet[$kasiteltavat_key] = teerivi($row["tuoteno"], $toimittajaid, $abcrajaustapa);
+			$kasiteltavat_tuotteet[$kasiteltavat_key]["tuoteno"] = $row["tuoteno"];
+			$kasiteltavat_tuotteet[$kasiteltavat_key]["nimitys"] = $row["nimitys"];
+			$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $row["valmistuslinja"];
+
+			// Otetaan isätuotteen pakkauskoko talteen, sillä sen perusteella tulee laskea "samankaltaisten" valmistusmäärä
+			$isatuotteen_pakkauskoko = $kasiteltavat_tuotteet[$kasiteltavat_key]["pakkauskoko"];
+
+			// Katsotaan onko kyseessä "samankaltainen" isätuote ja haetaan lapsituotteiden infot
+			$query = "	SELECT tuote.tuoteno,
+						tuote.nimitys,
+						tuote.valmistuslinja
+						FROM tuoteperhe
+						JOIN tuote USING (yhtio, tuoteno)
+						WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+						AND tuoteperhe.isatuoteno = '{$row["tuoteno"]}'
+						AND tuoteperhe.tyyppi = 'S'";
+			$samankaltainen_result = pupe_query($query);
+
+			if (mysql_num_rows($samankaltainen_result) > 0) {
+				$samankaltaiset_tuotteet = "{$row["tuoteno"]} ";
+			}
+			else {
+				$samankaltaiset_tuotteet = "";
+			}
+
+			while ($samankaltainen_row = mysql_fetch_assoc($samankaltainen_result)) {
+				$kasiteltavat_key++;
+				$kasiteltavat_tuotteet[$kasiteltavat_key] = teerivi($samankaltainen_row["tuoteno"], $toimittajaid, $abcrajaustapa);
+				$kasiteltavat_tuotteet[$kasiteltavat_key]["tuoteno"] = $samankaltainen_row["tuoteno"];
+				$kasiteltavat_tuotteet[$kasiteltavat_key]["nimitys"] = $samankaltainen_row["nimitys"];
+				$kasiteltavat_tuotteet[$kasiteltavat_key]["valmistuslinja"] = $samankaltainen_row["valmistuslinja"];
+				$samankaltaiset_tuotteet .= "{$samankaltainen_row["tuoteno"]} ";
+			}
+
+			// Loopataan käsitellyt tuotteet ja lasketaan yhteensä valmistettava määrä. Lisäksi poistetaan arraystä kaikki tuotteet, jota ei tule valmistaa
+			$valmistettava_yhteensa = 0;
+			foreach ($kasiteltavat_tuotteet as $key => $kasittelyssa) {
+				if ($kasittelyssa["valmistussuositus"] <= 0) {
+					unset($kasiteltavat_tuotteet[$key]);
+				}
+				else {
+					$valmistettava_yhteensa += $kasittelyssa["valmistussuositus"];
+				}
+			}
+
+			// Jos meille jäi jotain valmistettavaa
+			if ($valmistettava_yhteensa != 0) {
+				// Jos meillä oli joku poikkeava pakkauskoko tuotteelle, lasketaan valmistusmäärä uudestaan
+				if ($isatuotteen_pakkauskoko != 1) {
+					foreach ($kasiteltavat_tuotteet as $key => $kasittelyssa) {
+						// Lasketaan paljonko tämän tuotteen valmistusmaara on koko valmistuksesta
+						$kasiteltavat_tuotteet[$key]["valmistusmaara"] = round($kasittelyssa["valmistussuositus"] / $valmistettava_yhteensa * $isatuotteen_pakkauskoko);
+					}
+				}
+
+				// Lisätään käsitellyt tuotteet valmistettavien tuotteiden arrayseen
+				foreach ($kasiteltavat_tuotteet as $kasittelyssa) {
+					$kasittelyssa["sisartuote"] = $samankaltaiset_tuotteet;
+					$valmistettavat_tuotteet[] = $kasittelyssa;
+				}
+			}
+		}
+
+		// Loopataan läpi tehty array
 		$valmistus_riveja = 0;
 
-		if (mysql_num_rows($res) > 0) {
+		if (count($valmistettavat_tuotteet) > 0) {
 
 			// Kootaan raportti
 			echo "<form action='$PHP_SELF' method='post'>";
@@ -562,16 +637,14 @@ continue;
 			$formin_pointteri = 0;
 
 			// loopataan tuotteet läpi
-			while ($row = mysql_fetch_assoc($res)) {
-
-				// Haetaan tuotteen tiedot
-				$tuoterivi = teerivi($row["tuoteno"], $toimittajaid);
-				$abcluokka = isset($row["luokka"]) ? $row["luokka"] : "";
+			foreach ($valmistettavat_tuotteet as $tuoterivi) {
 
 				// Valmistuslinja vaihtuu
-				if ($row['valmistuslinja'] != $EDlinja or $EDlinja === false) {
+				if ($tuoterivi['valmistuslinja'] != $EDlinja or $EDlinja === false) {
 					$valmistaja_header = "<tr>";
-					$valmistaja_header .= "<td class='back' colspan='8'><font class='head'><br>".t("Valmistuslinja")." {$row["valmistuslinja"]}</font></td>";
+					$valmistuslinja = t_avainsana("VALMISTUSLINJA", "", "and avainsana.selite='{$tuoterivi["valmistuslinja"]}'", "", "", "selitetark");
+					$valmistuslinja = empty($valmistuslinja) ? t("Ei valmistuslinjaa") : $valmistuslinja;
+					$valmistaja_header .= "<td class='back' colspan='8'><font class='head'><br>$valmistuslinja</font></td>";
 					$valmistaja_header .= "</tr>";
 					$valmistaja_header .= "<tr>";
 					$valmistaja_header .= "<th>".t("Tuotenumero")."</th>";
@@ -586,10 +659,10 @@ continue;
 					$valmistaja_header_piirretty = false;
 				}
 
-				$EDlinja = $row['valmistuslinja'];
+				$EDlinja = $tuoterivi['valmistuslinja'];
 
 				// Jos tuotetta ei tarvitse valmistaa, ei näytetä sitä ostoehdotuksessa
-				if ($tuoterivi['valmistustarve'] <= 0) {
+				if ($tuoterivi['valmistusmaara'] <= 0) {
 					continue;
 				}
 
@@ -601,19 +674,21 @@ continue;
 					$valmistaja_header_piirretty = true;
 				}
 
-				echo "<tr>";
-				echo "<td>{$row["tuoteno"]}</td>";
-				echo "<td>{$row["nimitys"]}</td>";
+				$valmistuslinja = t_avainsana("VALMISTUSLINJA", "", "and avainsana.selite='{$tuoterivi["valmistuslinja"]}'", "", "", "selitetark");
+				$valmistuslinja = empty($valmistuslinja) ? t("Ei valmistuslinjaa") : $valmistuslinja;
+
+				echo "<tr class='aktiivi'>";
+				echo "<td>{$tuoterivi["tuoteno"]}</td>";
+				echo "<td>{$tuoterivi["nimitys"]}</td>";
 				echo "<td>{$tuoterivi["sisartuote"]}</td>";
-				echo "<td>$abcluokka</td>";
+				echo "<td>{$tuoterivi["abcluokka"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["valmistuksessa"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
-				echo "<td>{$row["valmistuslinja"]}</td>";
+				echo "<td>$valmistuslinja</td>";
 
 				echo "<td style='text-align: right;'>";
-				echo "<input size='8' style='text-align: right;' type='text' name='valmistettava_maara[$formin_pointteri]' value='{$tuoterivi["valmistustarve"]}' id='vain_numeroita'>";
-				echo "<input type='hidden' name='valmistettava_tuoteno[$formin_pointteri]' value='{$row["tuoteno"]}'>";
-				echo "<input type='hidden' name='valmistettava_toimittaja[$formin_pointteri]' value='{$tuoterivi["toimittajan_tunnus"]}'>";
+				echo "<input size='8' style='text-align: right;' type='text' name='valmistettava_maara[$formin_pointteri]' value='{$tuoterivi["valmistusmaara"]}' id='vain_numeroita'>";
+				echo "<input type='hidden' name='valmistettava_tuoteno[$formin_pointteri]' value='{$tuoterivi["tuoteno"]}'>";
 				echo "</td>";
 				echo "</tr>";
 
@@ -621,8 +696,6 @@ continue;
 			}
 
 			echo "</table>";
-
-			echo t("Valmistettavia tuotenimikkeitä")." $formin_pointteri ".t("kpl").".<br>\n";
 
 			if ($valmistus_riveja > 0) {
 				echo "<br>";
@@ -637,7 +710,7 @@ continue;
 
 		if ($valmistus_riveja == 0) {
 			echo "<br><br>";
-			echo "<font class='error'>Antamallasi rajauksella ei löydy yhtään tuotetta ehdotukseen.</font><br>";
+			echo "<font class='error'>".t("Antamallasi rajauksella ei löydy yhtään tuotetta ehdotukseen").".</font><br>";
 			echo "<br>";
 			$tee = "";
 		}

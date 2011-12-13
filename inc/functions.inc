@@ -11820,7 +11820,7 @@ if (!function_exists("seuraava_lahtoaika")) {
 		$pvmnimet[6] = t("Lauantai");
 		$pvmnimet[0] = t("Sunnuntai");
 
-		$query = 	"	(SELECT '1' prio, concat(curdate(), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+		$query = 	"	(SELECT '1' prio, concat(curdate(), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika, pvm
 						FROM lahdot
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND liitostunnus = '{$ttunnus}'
@@ -11828,31 +11828,34 @@ if (!function_exists("seuraava_lahtoaika")) {
 						and lahdon_viikonpvm = '{$viikonpaiva}'
 						and asiakasluokka = '{$asiakasluokka}'
 						and varasto = '{$varasto}'
-						AND aktiivi != 'E')
+						AND aktiivi IN ('', 'P')
+						and pvm >= curdate())
 
 						UNION
 
-						(SELECT '2' prio, concat(adddate(curdate(), (lahdon_viikonpvm-{$viikonpaiva})), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+						(SELECT '2' prio, concat(adddate(curdate(), (lahdon_viikonpvm-{$viikonpaiva})), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika, pvm
 						FROM lahdot
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND liitostunnus = '{$ttunnus}'
 						and lahdon_viikonpvm > '{$viikonpaiva}'
 						and asiakasluokka = '{$asiakasluokka}'
 						and varasto = '{$varasto}'
-						AND aktiivi != 'E')
+						AND aktiivi IN ('', 'P')
+						and pvm >= adddate(curdate(), (lahdon_viikonpvm-2)))
 
 						UNION
 
-						(SELECT '3' prio, concat(adddate(curdate(),  (7-{$viikonpaiva}+lahdon_viikonpvm)), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika
+						(SELECT '3' prio, concat(adddate(curdate(),  (7-{$viikonpaiva}+lahdon_viikonpvm)), ' ', lahdon_kellonaika) as lahto, lahdon_viikonpvm, lahdon_kellonaika, pvm
 						FROM lahdot
 						WHERE yhtio = '{$kukarow['yhtio']}'
 						AND liitostunnus = '{$ttunnus}'
 						AND lahdon_viikonpvm <= '{$viikonpaiva}'
 						and asiakasluokka = '{$asiakasluokka}'
 						and varasto = '{$varasto}'
-						AND aktiivi != 'E')
+						AND aktiivi IN ('', 'P')
+						and pvm >= adddate(curdate(),  (7-2+lahdon_viikonpvm)))
 
-						ORDER BY prio, lahdon_viikonpvm, lahdon_kellonaika";
+						ORDER BY pvm, prio, lahdon_viikonpvm, lahdon_kellonaika";
 		$result = pupe_query($query);
 
 		if (mysql_num_rows($result) > 0) {

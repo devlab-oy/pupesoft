@@ -1075,12 +1075,12 @@ if (!function_exists("saldo_myytavissa")) {
 						$myytavissa -= $kerarow["keratty"];
 						$hyllyssa -= $kerarow["keratty"];
 
-						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon
+						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon (asiakkaallevalmistukset eiv‰t muuta myyt‰viss‰olevaa m‰‰r‰‰ ku tuoteet on samantien varattu asiakkaalle jolle ne valmistetaan)
 						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
 							$query = "	SELECT
 										ifnull(sum(tilausrivi.varattu),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
 										JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero) ON sarjanumeroseuranta.yhtio = tilausrivi.yhtio
 										and sarjanumeroseuranta.tuoteno 			= tilausrivi.tuoteno
 										and sarjanumeroseuranta.hyllyalue 			= tilausrivi.hyllyalue
@@ -1105,7 +1105,7 @@ if (!function_exists("saldo_myytavissa")) {
 							$query = "	SELECT
 										ifnull(sum(tilausrivi.varattu),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi in ('W','V')
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
 										WHERE tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 										and tilausrivi.yhtio = '$yhtiolisa'
 										and tilausrivi.tyyppi in ('W','M')
@@ -11135,7 +11135,7 @@ if (!function_exists("pupe_DataTables")) {
 									$('#saatavat_yhteensa_'+j).html(saatavaty[j].toFixed(2));
 								}
 							}
-							
+
 							if (tableid == \"raportti_valmistuksista\")†{
 								var saatavaty = new Array();
 								var sarakemaara = parametrit[tableid][0]-4;

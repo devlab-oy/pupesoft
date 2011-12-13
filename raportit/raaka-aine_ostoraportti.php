@@ -346,7 +346,7 @@
 								AND tuotteen_toimittajat.tuoteno = tuote.tuoteno
 								AND tuotteen_toimittajat.liitostunnus = '{$toimittajarow["tunnus"]}')
 							WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-							AND tuote.tunnus = '$toimittaja'";
+							AND tuote.tuoteno = '$tuoteno'";
 				$result = pupe_query($query);
 				$tuoterow = mysql_fetch_assoc($result);
 

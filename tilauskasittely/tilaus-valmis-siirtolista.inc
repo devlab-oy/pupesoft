@@ -2,7 +2,7 @@
 
 	if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 		$tvs_tila 		= "V";
-		$tvs_tyyppi		= "'V'";
+		$tvs_tyyppi		= "'V','L'";
 		$tvs_tyyppi_2	= ",'W','M'";
 	}
 	elseif ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") {
@@ -630,7 +630,7 @@
 								WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
 								and tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.var in ('','H')
-								and tilausrivi.tyyppi != 'D'
+								and tilausrivi.tyyppi not in ('D','L')
 								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 

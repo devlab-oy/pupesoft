@@ -111,16 +111,15 @@
 
 		echo "<tr>";
 
+		$luottolisa = "";
+		$checked = "";
+
 		if ($luottovakuutettu == "K") {
-			$luottolisa = " and asiakas.luottovakuutettu = 'K'";
+			$luottolisa = " JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.luottovakuutettu = 'K') ";
 			$checked = "CHECKED";
 		}
-		else {
-			$luottolisa = "";
-			$checked = "";
-		}
 
-		echo "<th>".t("Vain luottovakuutetut")."</th>";
+		echo "<th>".t("Näytä vain luottovakuutetut asiakkaat").":</th>";
 		echo "<td><input type='checkbox' name='luottovakuutettu' value='K' $checked></td>";
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Näytä")."'></td></tr>";
 		echo "</tr>";
@@ -247,7 +246,7 @@
 					min(lasku.tunnus) latunnari
 					FROM lasku use index (yhtio_tila_mapvm)
 					JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl')
-					JOIN asiakas on (asiakas.yhtio  = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus $luottolisa)
+					$luottolisa
 					WHERE lasku.yhtio = '$saatavat_yhtio'
 					and (lasku.mapvm > '$savvl-$sakkl-$sappl' or lasku.mapvm = '0000-00-00')
 					and lasku.tapvm	<= '$savvl-$sakkl-$sappl'
@@ -260,7 +259,7 @@
 					$having
 					ORDER BY 1,2,3";
 		$result = pupe_query($query);
-
+		
 		$saatavat_yhteensa 	= array();
 		$avoimia_yhteensa 	= 0;
 		$kaato_yhteensa		= 0;
@@ -506,13 +505,13 @@
 			echo "</table>";
 
 			if ($sytunnus != '') {
-				
+
 				$liitoslisa = "";
-				
+
 				if ($sliitostunnus !="") {
 					$liitoslisa = "AND asiakas.tunnus='{$sliitostunnus}' ";
 				}
-				
+
 				$query = "	SELECT jv
 							FROM asiakas
 							JOIN maksuehto ON (maksuehto.yhtio = asiakas.yhtio and maksuehto.tunnus = asiakas.maksuehto and maksuehto.kaytossa = '' and maksuehto.jv != '')
@@ -522,7 +521,7 @@
 							{$liitoslisa}
 							$eta_asiakaslisa
 							LIMIT 1";
-				
+
 				$maksuehto_chk_res = pupe_query($query);
 				$maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
 

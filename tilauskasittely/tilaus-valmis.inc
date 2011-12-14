@@ -298,6 +298,8 @@ else {
 				}
 
 				require ("tilauskasittely/verkkolasku.php");
+
+				unset($valittu_tulostin);
 			}
 		}
 	}
@@ -610,6 +612,8 @@ else {
 			}
 
 			require ("tilauskasittely/verkkolasku.php");
+
+			unset($valittu_tulostin);
 		}
 		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
 		elseif (($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') and $kateisohitus == "") {
@@ -713,6 +717,8 @@ else {
 				}
 
 				require ("tilauskasittely/verkkolasku.php");
+
+				unset($valittu_tulostin);
 			}
 		}
 		else {
@@ -930,7 +936,7 @@ else {
 				// $sorttaus = "vh.keraysvyohyke, {$sorttaus}";
 			}
 
-			//haetaan kaikkien tilausrivien varastopaikat
+			//haetaan kaikkien tilausrivien varastopaikat (varattu+kpl koska magenton tilaukset on laskutettu jo tässä vaiheessa...)
 			$query = "	SELECT tilausrivi.otunnus, tilausrivi.perheid, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika, tilausrivin_lisatiedot.erikoistoimitus_myynti, tilausrivin_lisatiedot.omalle_tilaukselle,
 						{$kerayserat_select}
 						concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
@@ -941,7 +947,7 @@ else {
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
 						AND tilausrivi.tyyppi != 'D'
 						and (tilausrivi.hyllyalue != '' OR tilausrivin_lisatiedot.omalle_tilaukselle != '')
-						and tilausrivi.varattu > 0
+						and tilausrivi.varattu+tilausrivi.kpl > 0
 						and tilausrivi.var not in ('J','P')
 						ORDER BY $sorttaus";
 			$result = pupe_query($query);

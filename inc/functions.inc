@@ -14562,3 +14562,62 @@ if (!function_exists('gauge')) {
 				</script>";
 	}
 }
+
+// Lasketaan moneenko valmisteeseen raaka-aineet riitt‰‰
+if (!function_exists('raaka_aineiden_riitto')) {
+
+	function raaka_aineiden_riitto($tuoteno, $varasto = 0) {
+
+		global $kukarow;
+
+		// K‰ytett‰v‰t muuttujat
+		$join_lisa = "";
+		$varasto = (int) $varasto;
+		$tuoteno = mysql_real_escape_string($tuoteno);
+
+		// Katotaan halutaanko saldo vaan jostain tietyst‰ varastosta (varastopaikat.tunnus), silloin unohdetaan edell‰ annettu tyyppi kokonaan
+		if ($varasto != 0) {			
+			$join_lisa = "	JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+							JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+							and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+							and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+							and varastopaikat.tunnus in ($varasto)";
+		}
+
+		// Loopataan lapsituotteet l‰pi
+		$query = "	SELECT tuoteperhe.tuoteno,
+					tuoteperhe.kerroin
+					FROM tuoteperhe
+					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio 
+						AND tuote.tuoteno = tuoteperhe.tuoteno
+						AND tuote.ei_saldoa = '')
+					$join_lisa
+					WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+					AND tuoteperhe.isatuoteno = '$tuoteno'
+					AND tuoteperhe.tyyppi = 'R'";
+		$result = pupe_query($query);
+
+		if (mysql_num_rows($result) == 0) {
+			return 0;
+		}
+
+		$voidaan_valmistaa = 9999999999999;
+
+		// Katotaan moneeko valmisteeseen lapsien saldo riitt‰‰
+		while ($row = mysql_fetch_assoc($result)) {
+			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($row["tuoteno"], '', $varasto);
+
+			$riitto = $myytavissa / $row["kerroin"];
+
+			// Otetaan telteen pienin riitto
+			if ($riitto < $voidaan_valmistaa) {
+			 	$voidaan_valmistaa = $riitto;
+			}
+		}
+
+		// N‰ytet‰‰n alle nollat nollana ja pyˆristet‰‰n desimaalit alas
+		$voidaan_valmistaa = $voidaan_valmistaa < 0 ? 0 : floor($voidaan_valmistaa);
+
+		return $voidaan_valmistaa;
+	}
+}

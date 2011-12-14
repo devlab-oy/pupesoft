@@ -196,7 +196,7 @@
 		}
 
 		// Lasketaan reaalisaldo
-		$reaalisaldo = $varastosaldo + $tilattu - $varattu;
+		$reaalisaldo = $varastosaldo + $tilattu + $valmistuksessa - $varattu;
 
 		// Lasketaan myyntiennuste
 		$myyntiennuste = $budjetoitu_myynti - $reaalisaldo;
@@ -261,15 +261,27 @@
 
 		$edellinen_valmistuslinja = "X";
 
+		// Sortataan array uudestaan, jos käyttäjä on vaihtanut valmistuslinjoja
+		// Sortataan 2 dimensoinen array. Pitää ensiksi tehdä sortattavista keystä omat arrayt
+		$apusort_jarj0 = $apusort_jarj1 = array();
+
+		foreach ($valmistettavat_tuotteet as $apusort_key => $apusort_row) {
+		    $apusort_jarj0[$apusort_key] = $apusort_row['valmistuslinja'];
+			$apusort_jarj1[$apusort_key] = $apusort_row['riittopv'];
+		}
+
+		// Sortataan by valmistuslinja, riittopv
+		array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_ASC, $valmistettavat_tuotteet);
+
 		$lahde_varasto = mysql_real_escape_string($lahde_varasto);
 		$kohde_varasto = mysql_real_escape_string($kohde_varasto);
 		$valmistus_ajankohta = mysql_real_escape_string($valmistus_ajankohta);
 
-		foreach ($valmistettava_maara as $index => $maara) {
+		foreach ($valmistettavat_tuotteet as $tuoterivi) {
 
-			$maara = (float) $maara;
-			$tuoteno = mysql_real_escape_string($valmistettava_tuoteno[$index]);
-			$valmistuslinja = mysql_real_escape_string($valmistuslinja[$index]);
+			$maara = (float) $tuoterivi["valmistusmaara"];
+			$tuoteno = mysql_real_escape_string($tuoterivi["tuoteno"]);
+			$valmistuslinja = mysql_real_escape_string($tuoterivi["valmistuslinja"]);
 
 			// Oikellisuustarkastus hoidetaan javascriptillä, ei voi tulla kun numeroita!
 			if ($maara != 0) {
@@ -490,7 +502,7 @@
 						$valmistettu_yhteensa = 0;
 					}
 
-					$valmistuslinja = t_avainsana("VALMISTUSLINJA", "", "and avainsana.selite='{$tuoterivi["valmistuslinja"]}'", "", "", "selitetark");
+					$valmistuslinja = t_avainsana("VALMISTUSLINJA", "", "and avainsana.selite='{$row["valmistuslinja"]}'", "", "", "selitetark");
 					$valmistuslinja = empty($valmistuslinja) ? t("Ei valmistuslinjaa") : $valmistuslinja;
 					$toggle_counter++;
 
@@ -655,7 +667,7 @@
 			array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_ASC, $valmistettavat_tuotteet);
 
 			// Kootaan raportti
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='kohde_varasto' value='$kohde_varasto'>";
 			echo "<input type='hidden' name='lahde_varasto' value='$lahde_varasto'>";
 			echo "<input type='hidden' name='valmistus_ajankohta' value='$nykyinen_loppu'>";
@@ -697,23 +709,43 @@
 					$valmistaja_header_piirretty = true;
 				}
 
-				$valmistuslinja = t_avainsana("VALMISTUSLINJA", "", "and avainsana.selite='{$tuoterivi["valmistuslinja"]}'", "", "", "selitetark");
-				$valmistuslinja = empty($valmistuslinja) ? t("Ei valmistuslinjaa") : $valmistuslinja;
-
 				echo "<tr class='aktiivi'>";
 				echo "<td>{$tuoterivi["tuoteno"]}</td>";
 				echo "<td>{$tuoterivi["nimitys"]}</td>";
 				echo "<td>{$tuoterivi["sisartuote"]}</td>";
 				echo "<td>{$tuoterivi["abcluokka"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["valmistuksessa"]}</td>";
-				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
-				echo "<td>$valmistuslinja</td>";
+				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";				
+				echo "<td>";
+				
+				$result = t_avainsana("VALMISTUSLINJA");
+
+				// jos avainsanoja on perustettu tehdään dropdown
+				if (mysql_num_rows($result) > 0) {
+
+					echo "<select name='valmistettavat_tuotteet[$formin_pointteri][valmistuslinja]' ".js_alasvetoMaxWidth($nimi, 300).">";
+					echo "<option value = ''>".t("Ei valmistuslinjaa")."</option>";
+
+					while ($srow = mysql_fetch_array($result)) {
+						$sel = ($tuoterivi["valmistuslinja"] == $srow["selite"]) ? "selected" : "";
+						echo "<option value='{$srow["selite"]}' $sel>{$srow["selitetark"]}</option>";
+					}
+
+					echo "</select>";
+				}
+				else {
+					echo "$valmistuslinja";
+					echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][valmistuslinja]' value='{$tuoterivi["valmistuslinja"]}'>";
+					
+				}
+
+				echo "</td>";
 
 				#TODO: pitää tarkistaa, riittääkö raaka-aineiden saldo ja antaa mahdollisuus pakottaa valmistuksen luominen
 				echo "<td style='text-align: right;'>";
-				echo "<input size='8' style='text-align: right;' type='text' name='valmistettava_maara[$formin_pointteri]' value='{$tuoterivi["valmistusmaara"]}' id='vain_numeroita'>";
-				echo "<input type='hidden' name='valmistettava_tuoteno[$formin_pointteri]' value='{$tuoterivi["tuoteno"]}'>";
-				echo "<input type='hidden' name='valmistuslinja[$formin_pointteri]' value='{$tuoterivi["valmistuslinja"]}'>";
+				echo "<input size='8' style='text-align: right;' type='text' name='valmistettavat_tuotteet[$formin_pointteri][valmistusmaara]' value='{$tuoterivi["valmistusmaara"]}' id='vain_numeroita'>";
+				echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][tuoteno]' value='{$tuoterivi["tuoteno"]}'>";
+				echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][riittopv]' value='{$tuoterivi["riittopv"]}'>";
 				echo "</td>";
 				echo "</tr>";
 

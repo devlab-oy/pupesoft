@@ -630,7 +630,7 @@
 								WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
 								and tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.var in ('','H')
-								and tilausrivi.tyyppi not in ('D','L')
+								and tilausrivi.tyyppi != 'D'
 								ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 

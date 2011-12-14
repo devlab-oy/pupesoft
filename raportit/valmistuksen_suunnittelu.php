@@ -83,7 +83,7 @@
 					AND abc_aputaulu.tuoteno = '$tuoteno'";
 		$result = pupe_query($query);
 		$row = mysql_fetch_assoc($result);
-		$abcluokka = $ryhmanimet[$row['luokka']];
+		$abcluokka = isset($ryhmanimet[$row['luokka']]) ? $ryhmanimet[$row['luokka']] : t("Ei tiedossa");
 
 		// Haetaan tuotteen varastosaldo
 		$query = "	SELECT ifnull(sum(tuotepaikat.saldo),0) saldo
@@ -282,6 +282,7 @@
 			$maara = (float) $tuoterivi["valmistusmaara"];
 			$tuoteno = mysql_real_escape_string($tuoterivi["tuoteno"]);
 			$valmistuslinja = mysql_real_escape_string($tuoterivi["valmistuslinja"]);
+			$vakisin_hyvaksy = isset($tuoterivi["hyvaksy"]) and $tuoterivi["hyvaksy"] != "" ? "H" : "";
 
 			// Oikellisuustarkastus hoidetaan javascriptillä, ei voi tulla kun numeroita!
 			if ($maara != 0) {
@@ -354,7 +355,7 @@
 				$ale				= "";							// käyttäjän syöttämä ale (generoidaan yhtiön parametreistä)
 				$ale2				= "";							// käyttäjän syöttämä ale2 (generoidaan yhtiön parametreistä)
 				$ale3				= "";							// käyttäjän syöttämä ale3 (generoidaan yhtiön parametreistä)
-				$var				= "";							// H,J,P varrit
+				$var				= $vakisin_hyvaksy;				// H,J,P varrit
 				$varasto			= "";							// myydään vain tästä/näistä varastosta
 				$paikka				= "";							// myydään vain tältä paikalta
 				$rivitunnus			= "";							// tietokannan tunnus jolle rivi lisätään
@@ -695,6 +696,7 @@
 					$valmistaja_header .= "<th>".t("ABC-luokka")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistuksessa")."</th>";
 					$valmistaja_header .= "<th>".t("Riitto Pv")."</th>";
+					$valmistaja_header .= "<th>".t("Raaka-aine riitto")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistuslinja")."</th>";
 					$valmistaja_header .= "<th>".t("Valmistustarve")."</th>";
 					$valmistaja_header .= "</tr>";
@@ -715,15 +717,20 @@
 				echo "<td>{$tuoterivi["sisartuote"]}</td>";
 				echo "<td>{$tuoterivi["abcluokka"]}</td>";
 				echo "<td style='text-align: right;'>{$tuoterivi["valmistuksessa"]}</td>";
-				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";				
+				echo "<td style='text-align: right;'>{$tuoterivi["riittopv"]}</td>";
+
+				// Tarkistetaanko moneenko valmisteeseen meillä on raaka-aineita
+				$raaka_aineiden_riitto = raaka_aineiden_riitto($tuoterivi["tuoteno"], (int) $lahde_varasto);
+				echo "<td style='text-align: right;'>$raaka_aineiden_riitto</td>";
+
 				echo "<td>";
-				
+
 				$result = t_avainsana("VALMISTUSLINJA");
 
 				// jos avainsanoja on perustettu tehdään dropdown
 				if (mysql_num_rows($result) > 0) {
 
-					echo "<select name='valmistettavat_tuotteet[$formin_pointteri][valmistuslinja]' ".js_alasvetoMaxWidth($nimi, 300).">";
+					echo "<select name='valmistettavat_tuotteet[$formin_pointteri][valmistuslinja]' tabindex='-1'>";
 					echo "<option value = ''>".t("Ei valmistuslinjaa")."</option>";
 
 					while ($srow = mysql_fetch_array($result)) {
@@ -736,16 +743,24 @@
 				else {
 					echo "$valmistuslinja";
 					echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][valmistuslinja]' value='{$tuoterivi["valmistuslinja"]}'>";
-					
+
 				}
 
 				echo "</td>";
 
-				#TODO: pitää tarkistaa, riittääkö raaka-aineiden saldo ja antaa mahdollisuus pakottaa valmistuksen luominen
 				echo "<td style='text-align: right;'>";
-				echo "<input size='8' style='text-align: right;' type='text' name='valmistettavat_tuotteet[$formin_pointteri][valmistusmaara]' value='{$tuoterivi["valmistusmaara"]}' id='vain_numeroita'>";
+				echo "<input size='8' style='text-align: right;' type='text' name='valmistettavat_tuotteet[$formin_pointteri][valmistusmaara]' value='{$tuoterivi["valmistusmaara"]}' id='vain_numeroita' tabindex='".($formin_pointteri+1)."'>";
 				echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][tuoteno]' value='{$tuoterivi["tuoteno"]}'>";
 				echo "<input type='hidden' name='valmistettavat_tuotteet[$formin_pointteri][riittopv]' value='{$tuoterivi["riittopv"]}'>";
+				echo "</td>";
+				echo "<td class='back'>";
+
+				if ($raaka_aineiden_riitto < $tuoterivi["valmistusmaara"]) {
+					echo "<font class='error'>".t("Raaka-aineiden saldo ei riitä")."!</font><br>";
+					echo "<input type='checkbox' name='valmistettavat_tuotteet[$formin_pointteri][hyvaksy]'>";
+					echo "<font class='errir'> ".t("Hyväksy väkisin")."</font><br>";
+				}
+
 				echo "</td>";
 				echo "</tr>";
 

@@ -1,4 +1,4 @@
-<?php
+	<?php
 
 	require("../inc/parametrit.inc");
 
@@ -640,11 +640,10 @@
 				if ($isatuotteen_pakkauskoko != 1) {
 
 					// Pyöristetään koko samankaltaisten nippu ylöspäin seuraavaan pakkauskokoon
-					$samankaltaisten_valmistusmaara = ceil($valmistettava_yhteensa / $isatuotteen_pakkauskoko) * $isatuotteen_pakkauskoko;
+					$samankaltaisten_valmistusmaara = round($valmistettava_yhteensa / $isatuotteen_pakkauskoko) * $isatuotteen_pakkauskoko;
 
 					foreach ($kasiteltavat_tuotteet as $key => $kasittelyssa) {
 						// Lasketaan paljonko tämän tuotteen valmistusmaara on koko valmistuksesta
-						#TODO: pitää haskata speksin "Jos tarve olisi ollut 950, tehtäisiin silti vain 870, koska 950 ei ole 50% yli erästä eikä kannata valmistaa."
 						$kasiteltavat_tuotteet[$key]["valmistusmaara"] = round($kasittelyssa["valmistussuositus"] / $valmistettava_yhteensa * $samankaltaisten_valmistusmaara);
 					}
 				}

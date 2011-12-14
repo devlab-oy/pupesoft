@@ -282,7 +282,7 @@
 			$maara = (float) $tuoterivi["valmistusmaara"];
 			$tuoteno = mysql_real_escape_string($tuoterivi["tuoteno"]);
 			$valmistuslinja = mysql_real_escape_string($tuoterivi["valmistuslinja"]);
-			$vakisin_hyvaksy = isset($tuoterivi["hyvaksy"]) and $tuoterivi["hyvaksy"] != "" ? "H" : "";
+			$vakisin_hyvaksy = (isset($tuoterivi["hyvaksy"]) and $tuoterivi["hyvaksy"] != "") ? "H" : "";
 
 			// Oikellisuustarkastus hoidetaan javascriptillä, ei voi tulla kun numeroita!
 			if ($maara != 0) {
@@ -462,13 +462,14 @@
 					tilausrivi.tuoteno,
 					tilausrivi.osasto,
 					tilausrivi.try,
-					tilausrivi.kpl+tilausrivi.tilkpl maara,
+					tilausrivi.kpl+tilausrivi.varattu maara,
 					DATE_FORMAT(lasku.luontiaika, GET_FORMAT(DATE, 'EUR')) pvm,
 					lasku.alatila tila
 					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
 						AND tilausrivi.otunnus = lasku.tunnus
-						AND tilausrivi.tyyppi = 'W')
+						AND tilausrivi.tyyppi = 'W'
+						AND tilausrivi.var != 'P')
 					WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
 					AND lasku.tila = 'V'
 					AND lasku.toimaika >= '$nykyinen_alku'
@@ -637,10 +638,14 @@
 			if ($valmistettava_yhteensa != 0) {
 				// Jos meillä oli joku poikkeava pakkauskoko tuotteelle, lasketaan valmistusmäärä uudestaan
 				if ($isatuotteen_pakkauskoko != 1) {
+
+					// Pyöristetään koko samankaltaisten nippu ylöspäin seuraavaan pakkauskokoon
+					$samankaltaisten_valmistusmaara = ceil($valmistettava_yhteensa / $isatuotteen_pakkauskoko) * $isatuotteen_pakkauskoko;
+
 					foreach ($kasiteltavat_tuotteet as $key => $kasittelyssa) {
 						// Lasketaan paljonko tämän tuotteen valmistusmaara on koko valmistuksesta
 						#TODO: pitää haskata speksin "Jos tarve olisi ollut 950, tehtäisiin silti vain 870, koska 950 ei ole 50% yli erästä eikä kannata valmistaa."
-						$kasiteltavat_tuotteet[$key]["valmistusmaara"] = round($kasittelyssa["valmistussuositus"] / $valmistettava_yhteensa * $isatuotteen_pakkauskoko);
+						$kasiteltavat_tuotteet[$key]["valmistusmaara"] = round($kasittelyssa["valmistussuositus"] / $valmistettava_yhteensa * $samankaltaisten_valmistusmaara);
 					}
 				}
 

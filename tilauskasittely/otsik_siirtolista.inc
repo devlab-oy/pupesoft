@@ -176,7 +176,7 @@
 
 				$valmistuslinja_result = t_avainsana("VALMISTUSLINJA");
 
-				echo "<select name='valmistuslinja' ".js_alasvetoMaxWidth($nimi, 300).">";
+				echo "<select name='valmistuslinja'>";
 				echo "<option value = ''>".t("Ei valmistuslinjaa")."</option>";
 
 				while ($valmistuslinja_row = mysql_fetch_array($valmistuslinja_result)) {

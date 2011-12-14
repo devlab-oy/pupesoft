@@ -249,10 +249,10 @@
 		$toimipaikkaquery = "	SELECT *
 								FROM yhtion_toimipaikat
 								WHERE yhtio='$kukarow[yhtio]' AND tunnus='$asiakastiedot[yhtio_toimipaikka]'";
-
 		$toimipaikkares = pupe_query($toimipaikkaquery);
 		$toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
-	} else {
+	}
+	else {
 		$toimipaikkarow["nimi"] 		= $yhtiorow["nimi"];
 		$toimipaikkarow["osoite"] 		= $yhtiorow["osoite"];
 		$toimipaikkarow["postino"] 		= $yhtiorow["postino"];

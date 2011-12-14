@@ -1713,7 +1713,7 @@
 
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
-						if ($verkkokauppa == "" and $row['status'] == 'A' and $myytavissa <= 0) {
+						if ($verkkokauppa == "" and ($row['status'] == 'A' or $row['status'] == '') and $myytavissa <= 0) {
 
 							$tulossa_query = " 	SELECT min(toimaika) paivamaara
 							 					FROM tilausrivi

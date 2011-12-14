@@ -2,6 +2,10 @@
 
 	require ("../inc/parametrit.inc");
 
+	if (isset($tee) and $tee == "TILAA_AJAX") {
+		require_once("inc/tilaa_ajax.inc");
+	}
+
 	if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
 		echo "<font class='error'>".t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia")."!</font>";
 		exit;
@@ -87,6 +91,48 @@
 		if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
 			$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		}
+		
+		enable_ajax();
+
+		echo "<script type='text/javascript' language='javascript'>";
+		require_once("inc/jquery.min.js");
+		echo "</script>";
+
+		echo "<script type=\"text/javascript\" charset=\"utf-8\">
+
+			$('.tilaa').live('click', function(){
+
+				var submitid = $(this).attr(\"id\");
+				var osat 	 = submitid.split(\"_\");
+
+				var tuoteno 	= $(\"#tuoteno_\"+osat[1]).val();
+				var toimittaja 	= $(\"#toimittaja_\"+osat[1]).val();
+				var maara 		= $(\"#maara_\"+osat[1]).val();
+
+				// JOS haluat debuggia niin näytä alert-boxi, 
+				// mikäli se ei tule näkyviin, niin input-kentissä on jotain häikkää
+			//	alert(submitid+' '+tuoteno+' '+toimittaja+' '+maara);
+
+				$.post('{$_SERVER['SCRIPT_NAME']}',
+					{ 	tee: 'TILAA_AJAX',
+						tuoteno: tuoteno,
+						toimittaja: toimittaja,
+						maara: maara,
+						no_head: 'yes',
+						ohje: 'off' },
+					function(return_value) {
+						var message = jQuery.parseJSON(return_value);
+
+						if (message == \"ok\") {
+							$(\"#\"+submitid).val('".t("Tilattu")."').attr('disabled',true);
+							$(\"#maara_\"+osat[1]).attr('disabled',true);
+						}
+					}
+				);
+			});
+			
+			</script>";
+
 	}
 
 	if ($tee2 == 'TULOSTA') {

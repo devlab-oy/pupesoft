@@ -28,7 +28,7 @@ $kieliarray = array("se","en","de","no","dk","ee");
 
 if ($tee == "TEE" or $tee == "UPDATE") {
 
-	$file	 = fopen("http://www.devlab.fi/softa/referenssisanakirja.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
+	$file	 = fopen("http://api.devlab.fi/referenssisanakirja.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
 	$rivi    = fgets($file);
 	$otsikot = explode("\t", strtoupper(trim($rivi)));
 

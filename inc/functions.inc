@@ -11872,14 +11872,20 @@ if (!function_exists("xml_add")) {
 		$ulos = "<$joukko>";
 
 		if (strlen($tieto) > 0 or $minpituus != '') {
-			$tieto = xmlentities($tieto);
 
 			if ($maxpituus != "" and is_numeric($maxpituus) and strlen($tieto) > $maxpituus) {
 				$tieto = substr($tieto, 0, $maxpituus);
 			}
 
+			$tieto = xmlentities($tieto);
+			
 			if ($minpituus != "" and is_numeric($minpituus) and strlen($tieto) < $minpituus) {
-				$tieto = str_pad($tieto, $minpituus);
+				if ($yhtiorow["verkkolasku_lah"] == "maventa" and ($joukko == "InvoiceRecipientTownName" or $joukko == "InvoiceRecipientPostCodeIdentifier")) {
+					$tieto = str_pad($tieto, $minpituus,'.');
+				}
+				else {
+					$tieto = str_pad($tieto, $minpituus);
+				}
 			}
 
 			$ulos .= $tieto;

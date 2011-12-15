@@ -41,7 +41,7 @@
 		exit;
 	}
 
-	if (isset($tee) and $tee == 'kuittaa_alv_ilmoitus') {
+	if (isset($tee) and $tee == 'kuittaa_alv_ilmoitus' and $aputee == 'kuittaa_erotus') {
 
 		$query = "	SELECT lasku.tunnus
 					FROM lasku
@@ -52,15 +52,21 @@
 					AND lasku.nimi = 'ALVTOSITEMAKSUUN$loppukk'";
 		$tositelinkki_result = mysql_query($query) or pupe_error($query);
 
-		if (trim($maksettava_alv_tili) != '' and mysql_num_rows($tositelinkki_result) == 0) {
+		if (trim($maksettava_alv_tili) != '' and trim($erotus_tili) != '' and mysql_num_rows($tositelinkki_result) == 0) {
 
 			$query = "	SELECT *
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$maksettava_alv_tili'";
 			$tilires = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($tilires) == 1) {
+			
+			$query = "	SELECT *
+						FROM tili
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tilino = '$erotus_tili'";
+			$erotilires = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($tilires) == 1 and mysql_num_rows($erotilires) == 1) {
 
 				$alvtili_yht = (float) $alvtili_yht;
 	            $alvmaks_yht = (float) $alvmaks_yht;
@@ -105,8 +111,9 @@
 				require("inc/teetiliointi.inc");
 
 				if ($alvpyor_yht != 0) {
+					
 					$summa 				= $alvpyor_yht;
-					$tili 				= $yhtiorow["pyoristys"];
+					$tili 				= $erotus_tili;
 					$kustp 				= '';
 					$selite 			= t("ALV")." $kk $vv ".t("maksuun");
 					$vero 				= 0;
@@ -819,7 +826,11 @@
 	}
 
 	function alvlaskelma($kk, $vv) {
-		global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta, $maksettava_alv_tili, $palvelin2;
+		global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta, $maksettava_alv_tili, $palvelin2, $erotus_tili,$alv_laskelman_sallittu_erotus;
+		// Sallittu erotus on luku kuinka paljon sallitaan ALV-ilmoitus erotus poikkeavan
+		if (!isset($alv_laskelman_sallittu_erotus)) {
+			$alv_laskelman_sallittu_erotus = 1;
+		}
 
 		echo "<font class='head'>".t("ALV-laskelma")."</font><hr>";
 
@@ -994,7 +1005,7 @@
 			}
 
 			if (tarkista_oikeus("muutosite.php")) {
-
+				
 				$query = "	SELECT lasku.tunnus
 							FROM lasku
 							JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus)
@@ -1008,8 +1019,9 @@
 					$tositelinkki_row = mysql_fetch_assoc($tositelinkki_result);
 					echo "<a href='../muutosite.php?tee=E&tunnus={$tositelinkki_row['tunnus']}&lopetus={$palvelin2}raportit/alv_laskelma_uusi.php////kk=$kk//vv=$vv'>",t("Katso tositetta"),"</a><br /><br />";
 				}
-				elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $fi308, 2)) <= 1 and (int) date("Ym") > (int) $vv.$kk) {
-					echo "<form method='post' name='alv_ilmoituksen_kuittaus'><table>";
+				elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $fi308, 2)) <= $alv_laskelman_sallittu_erotus and (int) date("Ym") > (int) $vv.$kk) {
+					echo "<form method='post' name='alv_ilmoituksen_kuittaus'>";
+					echo "<table>";
 					echo "<input type='hidden' name='alkukk' value='{$startmonth}' />";
 					echo "<input type='hidden' name='loppukk' value='{$endmonth}' />";
 					echo "<input type='hidden' name='vv' value='$vv' />";
@@ -1021,14 +1033,23 @@
 					echo "<tr><th>",t("Anna maksettava ALV-tili"),"</th><td>";
 
 					if (isset($maksettava_alv_tili) and trim($maksettava_alv_tili) != '') {
-						echo livesearch_kentta("alv_ilmoituksen_kuittaus", "TILIHAKU", "maksettava_alv_tili", 200, $maksettava_alv_tili);
+						echo livesearch_kentta("alv_ilmoituksen_kuittaus", "TILIHAKU", "maksettava_alv_tili", 200, $maksettava_alv_tili,'EISUBMIT');
 						echo "<input type='hidden' name='tee' value='kuittaa_alv_ilmoitus' />";
 					}
 					else {
 						echo livesearch_kentta("alv_ilmoituksen_kuittaus", "TILIHAKU", "maksettava_alv_tili", 200);
 						echo "<input type='hidden' name='tee' value='' />";
 					}
-
+					
+					echo "<tr><th>",t("Anna erotuksen tili"),"</th><td>";
+					if (isset($erotus_tili) and trim($erotus_tili) != '') {
+						echo livesearch_kentta("erotuksen_kuittaus", "TILIHAKU", "erotus_tili", 200, $erotus_tili,'EISUBMIT');
+						echo "<input type='hidden' name='aputee' value='kuittaa_erotus' />";
+					}
+					else {
+						echo livesearch_kentta("erotuksen_kuittaus", "TILIHAKU", "erotus_tili", 200, $yhtiorow["pyoristys"],'EISUBMIT');
+						echo "<input type='hidden' name='tee' value='' />";
+					}
 					echo "</td><td class='back'><input type='submit' value='",t("Kuittaa ALV-ilmoitus"),"' /></td></tr>";
 					echo "</table></form><br />";
 				}

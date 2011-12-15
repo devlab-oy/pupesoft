@@ -751,7 +751,7 @@
 					});
 
 					// 2. tason tekstikentällä rajaaminen
-					$('input.filter_row_by_text').live('keyup', function() {
+					$('input.filter_row_by_text').live('keyup', function(event) {
 
 						// ei ajeta listaa jos painetaan nuolinäppäimiä
 						if (event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {

@@ -266,7 +266,7 @@
 			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti epäonnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES tili READ, lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ, pakkaus READ, panttitili WRITE, lasku AS ux_otsikko WRITE, lasku AS lx_otsikko WRITE";
+			$query = "LOCK TABLES tili READ, lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot t_lisa READ, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ, pakkaus READ, panttitili WRITE, lasku AS ux_otsikko WRITE, lasku AS lx_otsikko WRITE";
 			$locre = pupe_query($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -1773,27 +1773,66 @@
 							if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
 							else $pjat_sortlisa = "";
 
-							// Kirjoitetaan rivitietoja tilausriveiltä
-							$query = "  SELECT tilausrivi.*, tuote.eankoodi, lasku.vienti_kurssi, lasku.viesti laskuviesti,
-										if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika,
-										if (tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,
-										$sorttauskentta,
-										if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
+							$query_ale_lisa = generoi_alekentta('M');
+
+							// Haetaan laskun kaikki rivit
+							$query = "  SELECT
+										if(tilausrivi.perheid > 0, ifnull((SELECT vanha_otunnus from tilausrivin_lisatiedot t_lisa where t_lisa.yhtio=tilausrivi.yhtio and t_lisa.tilausrivitunnus=tilausrivi.perheid and t_lisa.omalle_tilaukselle != ''), tilausrivi.tunnus), tilausrivi.tunnus) rivigroup,
+										tilausrivi.ale1,
+										tilausrivi.ale2,
+										tilausrivi.ale3,
+										tilausrivi.alv,
+										tuote.eankoodi,
+										tuote.ei_saldoa,
+										tilausrivi.erikoisale,
+										tilausrivi.nimitys,
+										tilausrivin_lisatiedot.osto_vai_hyvitys,
+										tuote.sarjanumeroseuranta,
+										tilausrivi.tuoteno,
+										tilausrivi.uusiotunnus,
+										tilausrivi.yksikko,
+										tilausrivi.hinta,
+										tilausrivi.netto,
+										lasku.vienti_kurssi,
+										lasku.viesti laskuviesti,
+										lasku.asiakkaan_tilausnumero,
+										if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
+										if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
+										if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
+										min(tilausrivi.hyllyalue) hyllyalue,
+										min(tilausrivi.hyllynro) hyllynro,
+										min(tilausrivi.keratty) keratty,
+										min(if (tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika)) toimaika,
+										min(if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d'))) toimitettuaika,
+										min(tilausrivi.otunnus) otunnus,
+										min(tilausrivi.perheid) perheid,
+										min(tilausrivi.tunnus) tunnus,
+										min(tilausrivi.kommentti) kommentti,
+										min(tilausrivi.tilaajanrivinro) tilaajanrivinro,
+										min(tilausrivi.laadittu) laadittu,
+										sum(tilausrivi.tilkpl) tilkpl,
+										sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+										group_concat(tilausrivi.tunnus) rivitunnukset,
+										count(*) rivigroup_maara,
+										sum(tilausrivi.rivihinta) rivihinta,
+										sum(tilausrivi.kpl) kpl,
+										$sorttauskentta
 										FROM tilausrivi
 										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-										and tilausrivi.otunnus in ($tunnukset)
-										and tilausrivi.kpl <> 0
-										and tilausrivi.tyyppi = 'L'
+										JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+										LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+										WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
 										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+										and tilausrivi.kpl != 0
+										and tilausrivi.otunnus in ($tunnukset)
+										GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
 										ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 							$tilres = pupe_query($query);
 
-							$rivinumerot = array(0 => 0);
-							$rivilaskuri = 1;
-							$rivimaara   = mysql_num_rows($tilres);
+							$rivinumerot 	= array(0 => 0);
+							$rivilaskuri 	= 1;
+							$rivimaara   	= mysql_num_rows($tilres);
+							$rivigrouppaus 	= FALSE;
 
 							while ($tilrow = mysql_fetch_assoc($tilres)) {
 
@@ -1811,6 +1850,17 @@
 								}
 								else {
 									$tilrow["toimitettuaika"] = $tilrow["toimitettuaika"];
+								}
+
+								if ($row["rivigroup_maara"] > 1 and !$rivigrouppaus) {
+									$rivigrouppaus = TRUE;
+								}
+
+								// Otetaan yhteensäkommentti pois jos summataan rivejä
+								if ($rivigrouppaus) {
+									$tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+									$tilrow["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+									$tilrow["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
 								}
 
 								// Laitetaan alennukset kommenttiin, koska laksulla on vain yksi alekenttä
@@ -1851,10 +1901,10 @@
 
 								$query = "  SELECT *
 											FROM sarjanumeroseuranta
-											WHERE yhtio = '$kukarow[yhtio]'
-											and tuoteno = '$tilrow[tuoteno]'
-											and $sarjanutunnus='$tilrow[tunnus]'
-											and sarjanumero != ''";
+											WHERE yhtio 		= '$kukarow[yhtio]'
+											and tuoteno 		= '$tilrow[tuoteno]'
+											and $sarjanutunnus in ($tilrow[rivitunnukset])
+											and sarjanumero    != ''";
 								$sarjares = pupe_query($query);
 
 								if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0) {
@@ -2661,9 +2711,6 @@
 
 			// Kuukauden viimeinen päivä
 			$vika_pv = laskutuspaiva("vika");
-
-			$lasklisa .= "
-							    ";
 
 			$query = "  SELECT
 						sum(if (lasku.laskutusvkopv = '0', 1, 0)) normaali,

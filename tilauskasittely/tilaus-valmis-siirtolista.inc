@@ -2,7 +2,7 @@
 
 	if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 		$tvs_tila 		= "V";
-		$tvs_tyyppi		= "'V'";
+		$tvs_tyyppi		= "'V','L'";
 		$tvs_tyyppi_2	= ",'W','M'";
 	}
 	elseif ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") {
@@ -623,7 +623,8 @@
 
 					$query = " 	SELECT tilausrivi.*,
 								$sorttauskentta,
-								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi
+								if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+								tuote.valmistuslinja
 								FROM tilausrivi use index (yhtio_otunnus)
 								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 								WHERE tilausrivi.otunnus = '$laskurow[tunnus]'

@@ -20,3 +20,14 @@ cd ${POLKU};php hae_valuutat_cron.php
 # Siivotaan dataout dirikasta vanhat failit pois
 touch ${POLKU}/dataout
 find ${POLKU}/dataout -mtime +${BACKUPSAVEDAYS} -not -path '*/.svn*' -delete
+
+# Jos Nagios on käytössä, niin tsekataan apachen fatalit errorit
+if [ -f "/home/nagios/nagios-pupesoft.sh" ]; then
+	fatalitvirheet=`grep -i fatal /var/log/httpd/*error_log`
+
+	if [ -n "${fatalitvirheet}" ]; then
+		echo "${fatalitvirheet}" >> /home/nagios/nagios-pupesoft.log
+		chown nagios:apache /home/nagios/nagios-pupesoft.log
+		chmod 660 /home/nagios/nagios-pupesoft.log
+	fi
+fi

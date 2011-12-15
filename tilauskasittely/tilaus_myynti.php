@@ -2603,6 +2603,11 @@ if ($tee == '') {
 			}
 			echo "</select>";
 
+			// Huom: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+			if ($state_chk == 'disabled') {
+				echo "<input type='hidden' name='toimitustapa' value='$laskurow[toimitustapa]'>";
+			}
+
 			if ($laskurow["rahtivapaa"] != "") {
 				echo " (".t("Rahtivapaa").") ";
 			}

@@ -1267,7 +1267,7 @@
 			echo "<tr class='toggleable_parent' id='toggleable_parent_{$row['lahdon_tunnus']}__{$y}'>";
 
 			$exp_date = strtotime($row['lahdon_pvm']);
-			$exp_date_klo = strtotime($row['kerailyn_aloitusaika'].':00');
+			$exp_date_klo = strtotime($row['lahdon_kellonaika'].':00');
 			$todays_date = strtotime(date('Y-m-d'));
 			$todays_date_klo = strtotime(date('H:i:s'));
 

@@ -502,12 +502,16 @@
 
 							var _arrChild = new Array();
 
+							var _getId = new Array('departure', 'manual');
+							var _sortByNameParent = new Array('delivery', 'time1', 'time2', 'time3', 'manual');
+							var _sortByDate = new Array('date');
+
 							for (i = 0; i < arr.length; i++) {
 								var row = arr[i];
 
 								var id = $(row).children('td.toggleable_parent_row_'+title).attr('id').replace(/(:|\.)/g,'\\$1');
 
-								if (title == 'departure' || title == 'manual') {
+								if (_getId.indexOf(title) >= 0) {
 									var id_temp = id.split(\"__\", 2);
 									id = id_temp[0];
 									counter = id_temp[1];
@@ -540,11 +544,11 @@
 
 							if (window['sort_parent_row_direction_'+title]) {
 
-								if (title == 'delivery' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
+								if (_sortByNameParent.indexOf(title) >= 0) {
 									_arr.sort(compareName);
 									_arrChild.sort(compareName);
 								}
-								else if (title == 'date') {
+								else if (_sortByDate[title]) {
 									_arr.sort(compareDate);
 									_arrChild.sort(compareDate);
 								}
@@ -567,11 +571,11 @@
 							}
 							else {
 
-								if (title == 'delivery' || title == 'time1' || title == 'time2' || title == 'time3' || title == 'manual') {
+								if (_sortByNameParent.indexOf(title) >= 0) {
 									_arr.sort(compareName).reverse();
 									_arrChild.sort(compareName).reverse();
 								}
-								else if (title == 'date') {
+								else if (_sortByDate[title]) {
 									_arr.sort(compareDate).reverse();
 									_arrChild.sort(compareDate).reverse();
 								}
@@ -607,13 +611,16 @@
 							var _arrChildOrder = new Array();
 							var _arrChildSscc = new Array();
 
+							var _getId = new Array('status', 'prio', 'client', 'locality', 'picking_zone', 'batch', 'sscc', 'package', 'weight', 'type', 'clientprio', 'manual', 'control');
+							var _sortByNameChild = new Array('client', 'locality', 'picking_zone', 'package', 'type', 'clientprio', 'manual', 'control');
+
 							for (i = 0; i < arr.length; i++) {
 								var row = arr[i];
 
 								var id = $(row).children('td.toggleable_row_'+title).attr('id');
 								var counter = 0;
 
-								if (title == 'status' || title == 'prio' || title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'batch' || title == 'sscc' || title == 'package' || title == 'weight' || title == 'type' || title == 'clientprio' || title == 'manual') {
+								if (_getId.indexOf(title) >= 0) {
 									var id_temp = id.split(\"__\", 3);
 									id = id_temp[0];
 									counter = id_temp[2];
@@ -654,7 +661,7 @@
 
 							if (window['sort_row_direction_'+title+'__'+title_id+'__'+title_counter]) {
 
-								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type' || title == 'clientprio' || title == 'manual') {
+								if (_sortByNameChild.indexOf(title) >= 0) {
 									_arr.sort(compareName);
 									_arrChildOrder.sort(compareName);
 									_arrChildSscc.sort(compareName);
@@ -679,7 +686,7 @@
 							}
 							else {
 
-								if (title == 'client' || title == 'locality' || title == 'picking_zone' || title == 'package' || title == 'type' || title == 'clientprio' || title == 'manual') {
+								if (_sortByNameChild.indexOf(title) >= 0) {
 									_arr.sort(compareName).reverse();
 									_arrChildOrder.sort(compareName).reverse();
 									_arrChildSscc.sort(compareName).reverse();
@@ -1496,7 +1503,12 @@
 
 				echo "<td class='data toggleable_row_type' id='{$lahto_row['tilauksen_tilaustyyppi']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$type_array[$lahto_row['tilauksen_tilaustyyppi']]}</td>";
 
-				echo "<td class='toggleable_row_control' id='{$lahto_row['ohjausmerkki']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['ohjausmerkki']}</td>";
+				if (trim($lahto_row['ohjausmerkki']) == '') {
+					echo "<td class='toggleable_row_control' id='!__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['ohjausmerkki']}</td>";
+				}
+				else {
+					echo "<td class='toggleable_row_control' id='{$lahto_row['ohjausmerkki']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['ohjausmerkki']}</td>";
+				}
 
 				echo "<td class='data toggleable_row_clientprio' id='{$lahto_row['asiakas_luokka']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['asiakas_luokka']}</td>";
 

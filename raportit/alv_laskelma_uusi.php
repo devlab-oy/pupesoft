@@ -50,7 +50,7 @@
 					AND lasku.tapvm = '{$loppukk}'
 					AND lasku.tila = 'X'
 					AND lasku.nimi = 'ALVTOSITEMAKSUUN$loppukk'";
-		$tositelinkki_result = mysql_query($query) or pupe_error($query);
+		$tositelinkki_result = pupe_query($query);
 
 		if (trim($maksettava_alv_tili) != '' and trim($erotus_tili) != '' and mysql_num_rows($tositelinkki_result) == 0) {
 
@@ -58,13 +58,13 @@
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$maksettava_alv_tili'";
-			$tilires = mysql_query($query) or pupe_error($query);
+			$tilires = pupe_query($query);
 			
 			$query = "	SELECT *
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tilino = '$erotus_tili'";
-			$erotilires = mysql_query($query) or pupe_error($query);
+			$erotilires = pupe_query($query);
 			
 			if (mysql_num_rows($tilires) == 1 and mysql_num_rows($erotilires) == 1) {
 
@@ -93,7 +93,7 @@
 							comments	= '',
 							laatija 	= '{$kukarow['kuka']}',
 							luontiaika 	= now()";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$tunnus = mysql_insert_id ($link);
 
 				require("inc/teetiliointi.inc");
@@ -164,7 +164,7 @@
 		if ($ryhma == 'fi309') {
 			// 0-verokannan alainen liikevaihto
 			$query = "SELECT group_concat(DISTINCT concat('\'',koodi,'\'')) maat FROM maat WHERE eu = ''";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 			$maarow = mysql_fetch_assoc($result);
 
 			// Kaikki ei-EU-maat plus FI ja tyhjä
@@ -226,7 +226,7 @@
 					FROM tili
 					WHERE yhtio = '$kukarow[yhtio]'
 					and (alv_taso like '%$taso%' $_309lisa)";
-		$tilires = mysql_query($query) or pupe_error($query);
+		$tilires = pupe_query($query);
 		$tilirow = mysql_fetch_assoc($tilires);
 
 		if ($tilirow['tilit300'] != '' or $tilirow['tilitMUU'] != '') {
@@ -279,7 +279,7 @@
 			$query .= "	)
 						GROUP BY 1, 2, 3, 4, 5
 						ORDER BY maa, valuutta, vero, tilino, nimi";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = pupe_query($query);
 
 			echo "<table><tr>";
 			echo "<th valign='top'>" . t("Maa") . "</th>";
@@ -420,7 +420,7 @@
 				$query = "	SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
 							FROM tili
 							WHERE yhtio = '$kukarow[yhtio]' and alv_taso in ('fi305', 'fi306')";
-				$tilires = mysql_query($query) or pupe_error($query);
+				$tilires = pupe_query($query);
 				$tilirow = mysql_fetch_assoc($tilires);
 
 				$vero = 0.0;
@@ -433,7 +433,7 @@
 							AND tilino in ($tilirow[tilit])
 							AND tapvm >= '$alkupvm'
 							AND tapvm <= '$loppupvm'";
-					$verores = mysql_query($query) or pupe_error($query);
+					$verores = pupe_query($query);
 
 					while ($verorow = mysql_fetch_assoc ($verores)) {
 						$vero += $verorow['veronmaara'];
@@ -468,7 +468,7 @@
 				$query = "	SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
 							FROM tili
 							WHERE yhtio = '$kukarow[yhtio]' and alv_taso in ('fi320')";
-				$tilires = mysql_query($query) or pupe_error($query);
+				$tilires = pupe_query($query);
 				$tilirow = mysql_fetch_assoc($tilires);
 
 				$vero = 0.0;
@@ -481,7 +481,7 @@
 							AND tilino in ($tilirow[tilit])
 							AND tapvm >= '$alkupvm'
 							AND tapvm <= '$loppupvm'";
-					$verores = mysql_query($query) or pupe_error($query);
+					$verores = pupe_query($query);
 
 					while ($verorow = mysql_fetch_assoc ($verores)) {
 						$vero += $verorow['veronmaara'];
@@ -533,7 +533,7 @@
 							and lasku.vienti = 'E'
 							GROUP BY 1, 2, 3
 							ORDER BY maa, valuutta, vero";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 
 				if ($ryhma == 'fi311') {
 					echo "<font class='head'>",t("Josta tavaramyyntiä"),":</font><hr>";
@@ -586,7 +586,7 @@
 								WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 								AND tiliointi.ltunnus in ($trow[ltunnus])
 								AND tiliointi.tilino in ($tilirow[tilitMUU])";
-					$tili_res = mysql_query($query) or pupe_error($query);
+					$tili_res = pupe_query($query);
 					$tili_row = mysql_fetch_assoc($tili_res);
 
 					$trow['tilino'] = $tili_row['tilino'];
@@ -702,7 +702,7 @@
 
 			if ($taso == 'fi309') {
 				$query = "SELECT group_concat(DISTINCT concat('\'',koodi,'\'')) maat FROM maat WHERE eu = ''";
-				$result = mysql_query($query) or pupe_error($query);
+				$result = pupe_query($query);
 				$maarow = mysql_fetch_assoc($result);
 
 				// Kaikki ei-EU-maat plus FI ja tyhjä
@@ -741,7 +741,7 @@
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]'
 						and (alv_taso like '%$taso%' $_309lisa)";
-			$tilires = mysql_query($query) or pupe_error($query);
+			$tilires = pupe_query($query);
 			$tilirow = mysql_fetch_assoc($tilires);
 
 			$vero = 0.0;
@@ -778,7 +778,7 @@
 								AND tiliointi.tapvm <= '$endmonth'";
 				}
 
-				$verores = mysql_query($query) or pupe_error($query);
+				$verores = pupe_query($query);
 
 				while ($verorow = mysql_fetch_assoc($verores)) {
 					if ($tulos == $oletus_verokanta) $tulos = 'veronmaara';
@@ -843,7 +843,7 @@
 			$query = "	SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi300%'";
-			$tilires = mysql_query($query) or pupe_error($query);
+			$tilires = pupe_query($query);
 
 			$fi3xx = array();
 
@@ -864,7 +864,7 @@
 							AND vero > 0
 							GROUP BY vero
 							ORDER BY vero DESC";
-				$verores = mysql_query($query) or pupe_error($query);
+				$verores = pupe_query($query);
 
 				while ($verorow = mysql_fetch_assoc ($verores)) {
 
@@ -992,7 +992,7 @@
 						AND tiliointi.tilino = '$yhtiorow[alv]'
 						AND tiliointi.tapvm >= '$startmonth'
 						AND tiliointi.tapvm <= '$endmonth'";
-			$verores = mysql_query($query) or pupe_error($query);
+			$verores = pupe_query($query);
 			$verorow = mysql_fetch_assoc ($verores);
 
 			// ei näytetä yhteensä-laatikkoa turhaan
@@ -1013,7 +1013,7 @@
 							AND lasku.tapvm = '{$endmonth}'
 							AND lasku.tila = 'X'
 							AND lasku.nimi = 'ALVTOSITEMAKSUUN$endmonth'";
-				$tositelinkki_result = mysql_query($query) or pupe_error($query);
+				$tositelinkki_result = pupe_query($query);
 
 				if (mysql_num_rows($tositelinkki_result) > 0) {
 					$tositelinkki_row = mysql_fetch_assoc($tositelinkki_result);

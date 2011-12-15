@@ -1629,7 +1629,7 @@
 				$rivi_res = pupe_query($query);
 
 				echo "<tr class='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_order_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-				echo "<td colspan='16' class='back' style='display:none;'>";
+				echo "<td colspan='17' class='back' style='display:none;'>";
 				echo "<div class='toggleable_row_child_div_order' id='toggleable_row_order_{$lahto_row['tilauksen_tunnus']}__{$x}' style='display:none;'>";
 
 				echo "<table style='width:100%;'>";
@@ -1690,7 +1690,7 @@
 				$rivi_res = pupe_query($query);
 
 				echo "<tr class='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}' id='toggleable_row_child_sscc_{$lahto_row['tilauksen_tunnus']}__{$x}'>";
-				echo "<td colspan='16' class='back' style='display:none;'>";
+				echo "<td colspan='17' class='back' style='display:none;'>";
 				echo "<div class='toggleable_row_child_div_sscc' id='toggleable_row_sscc_{$lahto_row['sscc']}__{$x}' style='display:none;'>";
 
 				echo "<table style='width:100%;'>";

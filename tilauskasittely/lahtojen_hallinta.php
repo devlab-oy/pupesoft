@@ -1324,7 +1324,7 @@
 
 			$query = "	SELECT lasku.tunnus AS 'tilauksen_tunnus',
 						lasku.vanhatunnus AS 'tilauksen_vanhatunnus',
-						lasku.tilaustyyppi AS 'tilauksen_tilaustyyppi',
+						IF(lasku.tilaustyyppi = '', 'N', lasku.tilaustyyppi) AS 'tilauksen_tilaustyyppi',
 						lasku.nimi AS 'asiakas_nimi',
 						lasku.toim_nimi AS 'asiakas_toim_nimi',
 						lasku.toim_postitp AS 'asiakas_toim_postitp',
@@ -1450,7 +1450,6 @@
 			$x = 0;
 
 			$type_array = array(
-				"" 	=> t("Normaalitilaus"),
 				"N" => t("Normaalitilaus"),
 				"E" => t("Ennakkotilaus"),
 				"T" => t("Tarjoustilaus"),

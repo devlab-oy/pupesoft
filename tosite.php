@@ -652,6 +652,7 @@
 			echo "<font class='message'>".t("Tosite luotu")."!</font>\n";
 			echo "	<form action = 'muutosite.php' method='post'>
 					<input type='hidden' name='tee' value='E'>
+					<input type='hidden' name='lopetus' value='{$lopetus}'>
 					<input type='hidden' name='tunnus' value='{$tunnus}'>
 					<input type='Submit' value='".t("Näytä tosite")."'>
 					</form><br><hr><br>";
@@ -839,7 +840,11 @@
 
 			foreach ($tiliointirivit as $xxx => $rivix) {
 
-				$query = "SELECT * FROM tiliointi WHERE yhtio = '{$kukarow['yhtio']}' AND ltunnus = '{$tunnus}' AND tunnus = '{$rivix}'";
+				$query = "	SELECT * 
+							FROM tiliointi 
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND ltunnus = '{$tunnus}' 
+							AND tunnus = '{$rivix}'";
 				$info_res = pupe_query($query);
 				$info_row = mysql_fetch_assoc($info_res);
 
@@ -1216,7 +1221,10 @@
 			if (isset($ivirhe[$i])) echo "<font class='error'>{$ivirhe[$i]}</font>";
 			echo "</td>\n";
 			echo "</tr>\n";
-
+			
+			// Ei rikota rivinvaihtoja
+			$iselite[$i] = str_ireplace("<br>", "(br)", $iselite[$i]);
+			
 			echo "<tr><td colspan='".(5+$cspan)."' nowrap><input type='text' name='iselite[{$i}]' value='{$iselite[$i]}' maxlength='150' size='80' placeholder='".t("Selite")."'></td></tr>\n";
 			echo "<tr style='height: 5px;'></tr>\n";
 		}

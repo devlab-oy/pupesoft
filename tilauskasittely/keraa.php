@@ -155,33 +155,49 @@
 	}
 
 	if ($tee == 'P') {
-		$query = "SELECT kerayslista from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
-		$testresult = mysql_query($query) or pupe_error($query);
-		$testrow = mysql_fetch_assoc($testresult);
 
-		if ($testrow['kerayslista'] > 0) {
-			//haetaan kaikki tälle klöntille kuuluvat otsikot
-			$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
-						FROM lasku
-						WHERE yhtio		= '$kukarow[yhtio]'
-						and kerayslista	= '$id'
-						and kerayslista != 0
-						and tila		in ($tila)
-						$tilaustyyppi
-						HAVING tunnukset is not null";
-			$toimresult = mysql_query($query) or pupe_error($query);
+		if ($yhtiorow['kerayserat'] == 'K') {
+			$query = "	SELECT lasku.varasto, GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') AS 'tilaukset'
+						FROM kerayserat
+						JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
+						WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+						AND kerayserat.nro = '{$id}'
+						GROUP BY 1";
+			$testresult = pupe_query($query);
+			$testrow = mysql_fetch_assoc($testresult);
 
-			//jos rivejä löytyy niin tiedetään, että tämä on keräysklöntti
-			if (mysql_num_rows($toimresult) > 0) {
-				$toimrow = mysql_fetch_assoc($toimresult);
-				$tilausnumeroita = $toimrow["tunnukset"];
+			$tilausnumeroita = $testrow['tilaukset'];
+		}
+		else {
+
+			$query = "SELECT kerayslista from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
+			$testresult = mysql_query($query) or pupe_error($query);
+			$testrow = mysql_fetch_assoc($testresult);
+
+			if ($testrow['kerayslista'] > 0) {
+				//haetaan kaikki tälle klöntille kuuluvat otsikot
+				$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
+							FROM lasku
+							WHERE yhtio		= '$kukarow[yhtio]'
+							and kerayslista	= '$id'
+							and kerayslista != 0
+							and tila		in ($tila)
+							$tilaustyyppi
+							HAVING tunnukset is not null";
+				$toimresult = mysql_query($query) or pupe_error($query);
+
+				//jos rivejä löytyy niin tiedetään, että tämä on keräysklöntti
+				if (mysql_num_rows($toimresult) > 0) {
+					$toimrow = mysql_fetch_assoc($toimresult);
+					$tilausnumeroita = $toimrow["tunnukset"];
+				}
+				else {
+					$tilausnumeroita = $id;
+				}
 			}
 			else {
 				$tilausnumeroita = $id;
 			}
-		}
-		else {
-			$tilausnumeroita = $id;
 		}
 
 		// katotaan aluks onko yhtään tuotetta sarjanumeroseurannassa tällä keräyslistalla
@@ -1250,7 +1266,6 @@
 							and lasku.tunnus in ($tilausnumeroita)
 							and lasku.tila in ($tila)
 							and lasku.alatila = '$hakualatila'";
-
 				$lasresult = mysql_query($query) or pupe_error($query);
 
 				$lask_nro = "";
@@ -1366,11 +1381,11 @@
 												yhtio = '{$kukarow['yhtio']}'";
 								$ker_res = mysql_query($query_ker) or pupe_error($query_ker);
 
-								$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
-								$alatila_upd_res = mysql_query($query) or pupe_error($query);
-
 								// jos kyseessä on toimitustapa jonka rahtikirja on hetitulostus, tulostetaan myös rahtikirja tässä vaiheessa
 								if ($laskurow['tulostustapa'] == 'H' and $laskurow["nouto"] == "") {
+
+									$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['tunnus']}'";
+									$alatila_upd_res = mysql_query($query) or pupe_error($query);
 
 									// päivitetään keräyserän tila "Rahtikirja tulostettu"-tilaan
 									$query = "UPDATE kerayserat SET tila = 'R' WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskurow['tunnus']}'";
@@ -1759,6 +1774,11 @@
 								require ("osoitelappu_pdf.inc");
 							}
 						}
+					}
+
+					if ($yhtiorow['kerayserat'] == 'K') {
+						$query = "UPDATE lasku SET alatila = 'B' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus IN ({$tilausnumeroita})";
+						$alatila_upd_res = mysql_query($query) or pupe_error($query);
 					}
 
 					echo "<br><br>";
@@ -2862,7 +2882,10 @@
 				echo "<option value=''>".t("Ei tulosteta")."</option>";
 
 				while ($kirrow = mysql_fetch_assoc($kirre)) {
-					echo "<option value='$kirrow[tunnus]' ".$sel_lahete[$kirrow["tunnus"]].">$kirrow[kirjoitin]</option>";
+
+					$sel = $sel_lahete[$kirrow["tunnus"]] ? " selected" : "";
+
+					echo "<option value='{$kirrow['tunnus']}'{$sel}>{$kirrow['kirjoitin']}</option>";
 				}
 
 				echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'>";

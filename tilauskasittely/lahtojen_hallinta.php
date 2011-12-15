@@ -1270,13 +1270,14 @@
 
 			$exp_date = strtotime($row['lahdon_pvm']);
 			$exp_date_klo = strtotime($row['lahdon_kellonaika'].':00');
+			$ker_date_klo = strtotime($row['kerailyn_aloitusaika'].':00');
 			$todays_date = strtotime(date('Y-m-d'));
 			$todays_date_klo = strtotime(date('H:i:s'));
 
-			if ($todays_date == $exp_date and $todays_date_klo > $exp_date_klo) {
+			if ($todays_date == $exp_date and $todays_date_klo > $ker_date_klo) {
 				echo "<td class='vihrea toggleable_parent_row_status' id='2__{$row['lahdon_tunnus']}__{$y}'></td>";
 			}
-			else if ($todays_date >= $exp_date and $todays_date_klo > $exp_date_klo) {
+			elseif (($todays_date > $exp_date) or ($todays_date == $exp_date and $todays_date_klo > $exp_date_klo)) {
 				echo "<td class='punainen toggleable_parent_row_status' id='1__{$row['lahdon_tunnus']}__{$y}'></td>";
 			}
 			else {

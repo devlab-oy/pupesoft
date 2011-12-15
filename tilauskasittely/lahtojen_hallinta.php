@@ -1258,7 +1258,9 @@
 		echo "<th class='sort_parent_row_by' id='parent_row_liters'>",t("Litrat suun / ker")," <img class='parent_row_direction_liters' /></th>";
 		echo "</tr>";
 
-		mysql_data_seek($result, 0);
+		if (mysql_num_rows($result)) {
+			mysql_data_seek($result, 0);
+		}
 
 		$y = 0;
 

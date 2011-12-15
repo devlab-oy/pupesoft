@@ -13,7 +13,7 @@
 
 	while ($toimirow = mysql_fetch_array($result)) {
 
-		$vastaus = luoiban($toimirow["tilinumero"]);
+		$vastaus = luoiban(preg_replace("/[^0-9]/", "", $toimirow["tilinumero"]));
 		$iban = trim($vastaus["iban"]);
 		$bic = trim($vastaus["swift"]);
 
@@ -25,7 +25,6 @@
 			$update = mysql_query($query) or pupe_error($query);
 			$laskuri++;
 		}
-
 	}
 
 	$query = "	SELECT tilino, iban, bic, tunnus
@@ -35,7 +34,7 @@
 
 	while ($toimirow = mysql_fetch_array($result)) {
 
-		$vastaus = luoiban($toimirow["tilino"]);
+		$vastaus = luoiban(preg_replace("/[^0-9]/", "", $toimirow["tilino"]));
 		$iban = trim($vastaus["iban"]);
 		$bic = trim($vastaus["swift"]);
 
@@ -47,7 +46,6 @@
 			$update = mysql_query($query) or pupe_error($query);
 			$laskuri++;
 		}
-
 	}
 
 	$query = "	SELECT ultilno, swift, tilinumero, tunnus
@@ -59,7 +57,7 @@
 
 	while ($toimirow = mysql_fetch_array($result)) {
 
-		$vastaus = luoiban($toimirow["tilinumero"]);
+		$vastaus = luoiban(preg_replace("/[^0-9]/", "", $toimirow["tilinumero"]));
 		$iban = trim($vastaus["iban"]);
 		$bic = trim($vastaus["swift"]);
 
@@ -71,7 +69,6 @@
 			$update = mysql_query($query) or pupe_error($query);
 			$laskuri++;
 		}
-
 	}
 
 	echo "\nPaivitettiin $laskuri rivia\n\n";

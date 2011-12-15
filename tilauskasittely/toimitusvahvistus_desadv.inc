@@ -65,7 +65,7 @@
 			$x 				= 0; // yhteensä rivejä koko filessä
 
 			if ($tulostauna != "") {
-				$kuljetustunnus = "PUPESOFT".sprintf("%06.6s",$rajaus); // tämä voi olla yhteensä max 14 merkkiäpitkä stringjono
+				$kuljetustunnus = "PS".sprintf("%012.12s",$desadv_laskurow["laskutunnus"]); // tämä voi olla yhteensä max 14 merkkiäpitkä stringjono
 
 				// ED2 ja UNA kehykset.
 				// NRQ:0 = Ei CON kuittauspyyntöä, NRQ:1 = CON kuittauspyyntö
@@ -294,6 +294,7 @@
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
  						AND tilausrivi.otunnus = '$desadv_laskurow[laskutunnus]'
+						AND tilausrivi.tyyppi != 'D'
 						GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
 			$tuotteet_res = pupe_query($query);
 

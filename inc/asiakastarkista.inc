@@ -302,20 +302,18 @@ if(!function_exists("asiakastarkista")) {
 				$errori = 1;
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "laskutus_nimi" and trim($t[$i]) != '') {
 				$laskutus_talteen  = trim($t[$i]);
 				$laskutus_talteen_i = $i;
 		}
-		
+
 		if (mysql_field_name($result, $i) == "laskutus_osoite" or mysql_field_name($result, $i) == "laskutus_postino" or mysql_field_name($result, $i) == "laskutus_postitp") {
-			
+
 			if ($laskutus_talteen != "" and trim($t[$i]) == "") {
-				$virhe[$i] = t("Pakollinenkenttä, jos laskutus nimi on annettu!!");
-				$virhe[$laskutus_talteen_i] = t("Pakollisia: laskutusosoite, laskutus postinumero, laskutus postitoimipaikka !!");
+				$virhe[$i] = t("Pakollinen kenttä kun laskutus nimi on annettu")."!";
+				$virhe[$laskutus_talteen_i] = t("Pakollisia: laskutusosoite, laskutus postinumero, laskutus postitoimipaikka")."!";
 			}
 		}
-		
-		
 	}
 }

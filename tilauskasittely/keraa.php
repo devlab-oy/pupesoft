@@ -1996,7 +1996,6 @@
 						{$haku}
 						GROUP BY 1,2,3
 						{$jarjx}";
-			echo "<pre>",str_replace("\t", " ", $query),"</pre>";
 		}
 		else {
 

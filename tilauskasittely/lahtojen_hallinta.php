@@ -1430,7 +1430,6 @@
 
 			echo "<th class='sort_row_by' id='row_picking_zone__{$row['lahdon_tunnus']}__{$y}'>",t("Keräysvyöhyke")," <img class='row_direction_picking_zone' />";
 			echo "<br />";
-			// echo "<select class='filter_row_by_select' id='child_row_select_picking_zone' multiple='multiple' size='4'>";
 			echo "<select class='filter_row_by_select' id='child_row_select_picking_zone'>";
 			echo "<option value=''>",t("Valitse"),"</option>";
 

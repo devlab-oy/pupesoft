@@ -270,6 +270,11 @@ if ($kasitellaan_tiedosto) {
 		}
 	}
 
+	// Otetaan tuotteiden oletusalv hanskaan
+	if (in_array("tuote", $taulut)) {
+		$oletus_alvprossa = alv_oletus();
+	}
+
 	// rivim‰‰r‰ exceliss‰
 	$excelrivimaara = count($excelrivit);
 
@@ -1457,7 +1462,7 @@ if ($kasitellaan_tiedosto) {
 					}
 				}
 
-				//tarkistetaan asiakasalennus ja asiakashinta keisseiss‰ onko t‰llanen rivi jo olemassa
+				// tarkistetaan asiakasalennus ja asiakashinta keisseiss‰ onko t‰llanen rivi jo olemassa
 				if ($hylkaa == 0 and ($chasiakas != 0 or $chasiakas_ryhma != '' or $chytunnus != '' or $chpiiri != '' or $chsegmentti != 0) and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
 					if ($chasiakas_ryhma != '') {
 						$and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
@@ -1514,6 +1519,11 @@ if ($kasitellaan_tiedosto) {
 
 				if (substr($taulu, 0, 11) == 'puun_alkio_' and $rivi[$postoiminto] != 'POISTA') {
 					$query .= " , laji = '{$table_tarkenne}' ";
+				}
+
+				// lis‰t‰‰n tuote, mutta ei olla speksattu alvia ollenkaan...
+				if ($rivi[$postoiminto] == 'LISAA' and $table_mysql == 'tuote' and stripos($query, ", alv = ") === FALSE) {
+					$query .= ", alv = '$oletus_alvprossa' ";
 				}
 
 				if ($rivi[$postoiminto] == 'MUUTA') {
@@ -1599,7 +1609,6 @@ if ($kasitellaan_tiedosto) {
 							$tassafailissa = TRUE;
 						}
 						else {
-
 							$t[$i] = isset($tarkrow[mysql_field_name($result, $i)]) ? $tarkrow[mysql_field_name($result, $i)] : "";
 
 							// T‰m‰ rivi ei oo exceliss‰
@@ -1650,6 +1659,7 @@ if ($kasitellaan_tiedosto) {
 								default:
 									$virheApu = "";
 							}
+
 							echo t("Virhe rivill‰").": $rivilaskuri <font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." (".$t[$i].")</font><br>";
 							$errori = 1;
 						}

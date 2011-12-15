@@ -1007,7 +1007,8 @@
 						FROM tiliointi
 						WHERE yhtio  = '{$kukarow['yhtio']}'
 						AND ltunnus  = '{$tunnus}'
-						AND korjattu = ''";
+						AND korjattu = ''
+						ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.laadittu, tiliointi.tunnus";
 			$tunnukset_talteen_res = pupe_query($query);
 
 			$tiliointirivit = array();
@@ -1022,8 +1023,6 @@
 				$iliitos[$xxx] = $tunnukset_talteen_row['liitos'];
 				$xxx++;
 			}
-
-
 
 			echo "	<form action = 'tosite.php' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '{$lopetus}/SPLIT/$PHP_SELF////tee=E//tila=//tunnus=$tunnus'>

@@ -1917,13 +1917,25 @@
 		echo "</table>";
 
 		$haku = '';
+		$kerayserahaku = '';
 
 		if (!is_numeric($etsi) and $etsi != '') {
 			$haku .= "AND lasku.nimi LIKE '%{$etsi}%'";
 		}
 
 		if (is_numeric($etsi) and $etsi != '') {
-			$haku .= "AND lasku.tunnus = '{$etsi}'";
+
+			if ($yhtiorow['kerayserat'] == 'K') {
+
+				$query = "SELECT nro FROM kerayserat WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$etsi}'";
+				$nro_chk_res = pupe_query($query);
+				$nro_chk_row = mysql_fetch_assoc($nro_chk_res);
+
+				$kerayserahaku = "AND kerayserat.nro = '{$nro_chk_row['nro']}'";
+			}
+			else {
+				$haku .= "AND lasku.tunnus = '{$etsi}'";
+			}
 		}
 
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
@@ -1975,7 +1987,7 @@
 						lasku.yhtio_nimi AS 'yhtio_nimi',
 						kerayserat.nro AS 'keraysera',
 						GROUP_CONCAT(DISTINCT lasku.toimitustapa ORDER BY lasku.toimitustapa SEPARATOR '<br />') AS 'toimitustapa',
-						GROUP_CONCAT(DISTINCT asiakas.luokka ORDER BY asiakas.luokka SEPARATOR ', ') AS 'prioriteetti',
+						GROUP_CONCAT(DISTINCT avainsana.selitetark_3 ORDER BY avainsana.selitetark_3 SEPARATOR ', ') AS 'prioriteetti',
 						GROUP_CONCAT(DISTINCT concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, CONCAT(\"(\", lasku.ytunnus, \")\")) SEPARATOR '<br />') AS 'asiakas',
 						GROUP_CONCAT(DISTINCT lasku.tunnus ORDER BY lasku.tunnus SEPARATOR ', ') AS 'tunnus',
 						COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja'
@@ -1988,8 +2000,9 @@
 							tilausrivi.keratty = '' AND 
 							tilausrivi.kerattyaika = '0000-00-00 00:00:00' AND
 							((tilausrivi.laskutettu = '' AND tilausrivi.laskutettuaika 	= '0000-00-00') OR lasku.mapvm != '0000-00-00'))
-						JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus AND kerayserat.tila = 'K')
+						JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio AND kerayserat.otunnus = lasku.tunnus AND kerayserat.tila = 'K' {$kerayserahaku})
 						JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+						JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.laji = 'ASIAKASLUOKKA' AND avainsana.kieli = '{$yhtiorow['kieli']}' AND avainsana.selite = asiakas.luokka)
 						WHERE lasku.{$logistiikka_yhtiolisa}
 						AND lasku.tila = 'L'
 						AND lasku.alatila = 'A'

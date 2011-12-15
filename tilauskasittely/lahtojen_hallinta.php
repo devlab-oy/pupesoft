@@ -250,15 +250,31 @@
 
 					$lahto = (int) $lahto;
 
-					$query = "	SELECT tunnus, toimitustapa
+					$query = "	SELECT lasku.tunnus, lasku.varasto, lasku.prioriteettinro, toimitustapa.tunnus AS liitostunnus
 								FROM lasku
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND tila = 'L'
-								AND alatila = 'B'
-								AND toimitustavan_lahto = '{$lahto}'";
+								JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tila = 'L'
+								AND lasku.alatila = 'B'
+								AND lasku.toimitustavan_lahto = '{$lahto}'";
 					$result = pupe_query($query);
 					
 					if (mysql_num_rows($result) == 0) {
+
+						$query = "UPDATE lahdot SET aktiivi = 'S' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
+						$upd_res = pupe_query($query);
+
+					}
+					else {
+
+						while ($row = mysql_fetch_assoc($result)) {
+							$lahto_x = seuraava_lahtoaika($row['liitostunnus'], $row['prioriteettinro'], $row['varasto'], $lahto);
+
+							if ($lahto_x !== false) {
+								$query = "UPDATE lasku SET toimitustavan_lahto = '{$lahto_x}', toimitustavan_lahto_siirto = '{$lahto}' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$row['tunnus']}'";
+								$upd_res = pupe_query($query);
+							}
+						}
 
 						$query = "UPDATE lahdot SET aktiivi = 'S' WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lahto}'";
 						$upd_res = pupe_query($query);
@@ -611,8 +627,8 @@
 							var _arrChildOrder = new Array();
 							var _arrChildSscc = new Array();
 
-							var _getId = new Array('status', 'prio', 'client', 'locality', 'picking_zone', 'batch', 'sscc', 'package', 'weight', 'type', 'clientprio', 'manual', 'control');
-							var _sortByNameChild = new Array('client', 'locality', 'picking_zone', 'package', 'type', 'clientprio', 'manual', 'control');
+							var _getId = new Array('status', 'prio', 'client', 'locality', 'picking_zone', 'batch', 'sscc', 'package', 'weight', 'type', 'clientprio', 'manual', 'control', 'transfer');
+							var _sortByNameChild = new Array('client', 'locality', 'picking_zone', 'package', 'type', 'clientprio', 'manual', 'control', 'transfer');
 
 							for (i = 0; i < arr.length; i++) {
 								var row = arr[i];
@@ -1103,6 +1119,7 @@
 					avainsana.selitetark_3 AS 'prioriteetti',
 					toimitustapa.selite AS 'toimitustapa',
 					toimitustapa.rahdinkuljettaja,
+					lasku.toimitustavan_lahto_siirto,
 					GROUP_CONCAT(lasku.vakisin_kerays) AS 'vakisin_kerays',
 					COUNT(DISTINCT lasku.tunnus) AS 'tilatut',
 					SUM(IF((lasku.tila = 'L' AND lasku.alatila IN ('B', 'C')), 1, 0)) AS 'valmiina',
@@ -1342,6 +1359,7 @@
 						kerayserat.nro AS 'erat',
 						kerayserat.sscc,
 						kerayserat.pakkausnro,
+						IF(lasku.toimitustavan_lahto_siirto = 0, '', lasku.toimitustavan_lahto_siirto) AS toimitustavan_lahto_siirto, 
 						GROUP_CONCAT(DISTINCT kerayserat.tila) AS 'tilat',
 						COUNT(kerayserat.tunnus) AS 'keraysera_rivi_count',
 						SUM(IF((kerayserat.tila = 'T' OR kerayserat.tila = 'R'), 1, 0)) AS 'keraysera_rivi_valmis'
@@ -1351,7 +1369,7 @@
 						LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 						AND lasku.tunnus IN ({$row['tilaukset']})
-						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12";
+						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13";
 			$lahto_res = pupe_query($query);
 
 			if (!isset($child_row_select_status)) $child_row_select_status = "";
@@ -1386,6 +1404,7 @@
 			echo "</th>";
 
 			echo "<th class='sort_row_by' id='row_manual__{$row['lahdon_tunnus']}__{$y}'>M <img class='row_direction_manual' /></th>";
+			echo "<th class='sort_row_by' id='row_transfer__{$row['lahdon_tunnus']}__{$y}'>S <img class='row_direction_transfer' /></th>";
 
 			sort($priorities);
 
@@ -1494,6 +1513,13 @@
 				}
 				else {
 					echo "<td class='data toggleable_row_manual' id='!__{$lahto_row['tilauksen_tunnus']}__{$x}'>&nbsp;</td>";
+				}
+
+				if ($lahto_row['toimitustavan_lahto_siirto'] != '') {
+					echo "<td class='data toggleable_row_transfer' id='{$lahto_row['toimitustavan_lahto_siirto']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['toimitustavan_lahto_siirto']}</td>";
+				}
+				else {
+					echo "<td class='data toggleable_row_transfer' id='!__{$lahto_row['tilauksen_tunnus']}__{$x}'>&nbsp;</td>";
 				}
 
 				echo "<td class='center toggleable_row_prio' id='{$lahto_row['prioriteetti']}__{$lahto_row['tilauksen_tunnus']}__{$x}'>{$lahto_row['prioriteetti']}</td>";

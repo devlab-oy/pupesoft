@@ -1677,6 +1677,9 @@
 							elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
 								finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "NOSOAPAPIX");
 							}
+							elseif ($yhtiorow["verkkolasku_lah"] == "maventa") {
+								finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+							}
 							else {
 								pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);
 							}
@@ -1720,7 +1723,7 @@
 								elseif ($lasrow["chn"] == "112") {
 									finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
 								}
-								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
+								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
 									finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
 								}
 								else {
@@ -1735,7 +1738,7 @@
 							elseif ($lasrow["chn"] == "112") {
 								finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow);
 							}
-							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
+							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
 								finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
 							}
 
@@ -1988,7 +1991,7 @@
 								elseif ($lasrow["chn"] == "112") {
 									finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 								}
-								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
+								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
 									finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 								}
 								else {
@@ -2013,7 +2016,7 @@
 								//Nämä menee verkkolaskuputkeen
 								$verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
 							}
-							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix") {
+							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
 								finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
 
 								if ($yhtiorow["verkkolasku_lah"] == "apix") {
@@ -2284,6 +2287,53 @@
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}
 				}
+				elseif ($yhtiorow["verkkolasku_lah"] == "maventa" and file_exists(realpath($nimifinvoice))) {
+					// Täytetään api_keys, näillä kirjaudutaan Maventaan
+					$api_keys = array();
+					$api_keys["user_api_key"] 	= $yhtiorow['maventa_api_avain'];
+					$api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
+
+					// Vaihtoehtoinen company_uuid
+					if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
+						$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
+					}
+
+					// Testaus
+					#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+
+					// Tuotanto
+					$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+
+					// Luetaan filu ja tehdään invoice_put_file() per lasku
+					$maventa_fh = fopen($nimifinvoice, 'r');
+
+					$laskun_rivit = "";
+
+					while ($rivi = fgets($maventa_fh)) {
+						if (substr($rivi, 0, 18) == "<SOAP-ENV:Envelope" and $laskun_rivit != "") {
+							preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
+							$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
+
+							if ($silent == "" or $silent == "VIENTI") {
+								$tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
+							}
+
+							$laskun_rivit = "";
+						}
+
+						$laskun_rivit .= $rivi;
+					}
+
+					// Myös vika lasku
+					if ($laskun_rivit != "") {
+						preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
+						$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
+
+						if ($silent == "" or $silent == "VIENTI") {
+							$tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
+						}
+					}
+				}
 				elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
 					if ($silent == "" or $silent == "VIENTI") {
 						$tulos_ulos .= "<br><br>\n".t("FTP-siirto iPost Finvoice:")."<br>\n";
@@ -2551,7 +2601,7 @@
 			echo "$tulos_ulos";
 
 			// Annetaan mahdollisuus tallentaa finvoicetiedosto jos se on luotu..
-			if (file_exists($nimifinvoice) and (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) and $yhtiorow["verkkolasku_lah"] == "finvoice") {
+			if (isset($nimifinvoice) and file_exists($nimifinvoice) and (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) and $yhtiorow["verkkolasku_lah"] == "finvoice") {
 				echo "<br><table><tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";

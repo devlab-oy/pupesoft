@@ -90,8 +90,11 @@
 			$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
 		}
 
-		// Otetaan käyttöön. // muutettava sitten viralliseen osoitteeseen kun on valmis.
-		$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+		// Testaus
+		#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+
+		// Tuotanto
+		$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
 		// Luetaan filu ja tehdään invoice_put_file() per lasku
 		$maventa_fh = fopen("$pupe_root_polku/dataout/".basename($filenimi), 'r');
@@ -101,9 +104,9 @@
 		while ($rivi = fgets($maventa_fh)) {
 			if (substr($rivi, 0, 18) == "<SOAP-ENV:Envelope" and $laskun_rivit != "") {
 				preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $laskun_rivit, $invoice_number);
-				$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);				
+				$status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], $laskun_rivit);
 				echo "Maventa-lasku $invoice_number[1]: $status<br>\n";
-				
+
 				$laskun_rivit = "";
 			}
 

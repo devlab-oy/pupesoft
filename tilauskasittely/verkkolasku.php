@@ -2298,8 +2298,11 @@
 						$api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
 					}
 
-					// Otetaan käyttöön. // muutettava sitten viralliseen osoitteeseen kun on valmis.
-					$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+					// Testaus
+					#$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+
+					// Tuotanto
+					$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
 					// Luetaan filu ja tehdään invoice_put_file() per lasku
 					$maventa_fh = fopen($nimifinvoice, 'r');

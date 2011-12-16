@@ -494,8 +494,6 @@
 					// 2. tason checkboxin eventti
 					$('input.checkall_child').live('click', function(){
 
-						console.log('foo');
-
 						if ($(this).is(':checked')) {
 							$('input:checkbox:visible').filter('input:checkbox:visible:not(input.checkall_parent, input.checkall_child)').attr('checked', true).parent().parent().addClass('tumma');
 						}

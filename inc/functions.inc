@@ -501,6 +501,20 @@ if (!function_exists("table_exists")) {
 	}
 }
 
+if (!function_exists("maventa_invoice_put_file")) {
+	function maventa_invoice_put_file($client, $api_keys, $invoice_number, $xmlstring) {
+		$files_out['file'] = base64_encode($xmlstring);
+		$files_out['filename'] = "$invoice_number.xml";
+		$files_out['attachment_type'] = 'FINVOICE';
+
+		$return_value = $client->invoice_put_file($api_keys, $files_out);
+
+		$objecti = $return_value[0];
+
+		return $objecti->status;
+	}
+}
+
 if (!function_exists("vapauta_sarjanumerot")) {
 	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="", $dellaa_ostorivi = TRUE) {
 		global $kukarow, $yhtiorow;
@@ -11878,7 +11892,7 @@ if (!function_exists("xml_add")) {
 			}
 
 			$tieto = xmlentities($tieto);
-			
+
 			if ($minpituus != "" and is_numeric($minpituus) and strlen($tieto) < $minpituus) {
 				if ($yhtiorow["verkkolasku_lah"] == "maventa" and ($joukko == "InvoiceRecipientTownName" or $joukko == "InvoiceRecipientPostCodeIdentifier")) {
 					$tieto = str_pad($tieto, $minpituus,'.');
@@ -14549,7 +14563,7 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		$tuoteno = mysql_real_escape_string($tuoteno);
 
 		// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
-		if ($varasto != 0) {			
+		if ($varasto != 0) {
 			$join_lisa = "	JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 							JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 							and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
@@ -14561,7 +14575,7 @@ if (!function_exists('raaka_aineiden_riitto')) {
 		$query = "	SELECT tuoteperhe.tuoteno,
 					tuoteperhe.kerroin
 					FROM tuoteperhe
-					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio 
+					JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
 						AND tuote.tuoteno = tuoteperhe.tuoteno
 						AND tuote.ei_saldoa = '')
 					$join_lisa

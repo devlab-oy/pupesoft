@@ -409,8 +409,7 @@
 								FROM lasku
 								JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio AND toimitustapa.selite = lasku.toimitustapa)
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-								AND lasku.tila = 'L'
-								AND lasku.alatila = 'B'
+								AND ((lasku.tila = 'N' AND lasku.alatila = 'A') OR (lasku.tila = 'L' AND lasku.alatila IN ('A','C')))
 								AND lasku.toimitustavan_lahto = '{$lahto}'";
 					$result = pupe_query($query);
 					

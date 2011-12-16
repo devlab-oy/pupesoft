@@ -22,7 +22,7 @@
 
 		// Livesearch jutut
 		enable_ajax();
-		
+
 		echo "<font class='head'>".t("Saatavat")." - $yhtiorow[nimi]</font><hr>";
 
 		echo "<form action='$PHP_SELF' method='post'>";
@@ -200,7 +200,7 @@
 			$grouppauslisa = "lasku.nimi";
 		}
 		elseif ($grouppaus == 'kustannuspaikka') {
-			$selecti = "tiliointi.kustp ytunnus";
+			$selecti = "tiliointi.kustp kustannuspaikka";
 			$grouppauslisa = "tiliointi.kustp";
 		}
 		else {
@@ -265,7 +265,7 @@
 					{$having}
 					ORDER BY 1,2,3";
 		$result = pupe_query($query);
-		
+
 		$saatavat_yhteensa 	= array();
 		$avoimia_yhteensa 	= 0;
 		$kaato_yhteensa		= 0;
@@ -293,7 +293,7 @@
 
 			if (isset($workbook)) {
 				$excelsarake = 0;
-				
+
 				if ($grouppaus != "kustannuspaikka") {
 					$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
 					$excelsarake++;
@@ -336,7 +336,7 @@
 				else {
 					$sarakemaara = count($saatavat_array)+7;
 				}
-				
+
 				pupe_DataTables(array(array($pupe_DataTables, $sarakemaara, $sarakemaara)));
 			}
 
@@ -351,6 +351,7 @@
 			echo "<table class='display dataTable' id='$pupe_DataTables'>";
 			echo "<thead>";
 			echo "<tr>";
+			
 			if ($grouppaus != "kustannuspaikka") {
 				echo "<th>".t("Ytunnus")."</th>";
 				echo "<th>".t("Nimi")."</th>";
@@ -358,7 +359,7 @@
 			else {
 				echo "<th>".t("Kustannuspaikka")."</th>";
 			}
-			
+
 			echo "<th align='right'>".t("Alle")." {$saatavat_array[0]} ".t("pv")."</th>";
 
 			for ($sa = 1; $sa < count($saatavat_array); $sa++) {
@@ -434,20 +435,20 @@
 					if ($row["yli_{$saatavat_array[count($saatavat_array)-1]}"] == 0) $row["yli_{$saatavat_array[count($saatavat_array)-1]}"] = "";
 
 					echo "<tr class='aktiivi'>";
-					
+
 					if ($grouppaus != "kustannuspaikka") {
 						echo "<td valign='top'>";
 						echo "<a name='$row[latunnari]' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$row[ytunnus]&asiakasid=$row[litu]&alatila=$asirappari_linkki_alatila&tila=tee_raportti&lopetus=$PHP_SELF////tee=$tee//sytunnus=$sytunnus//sanimi=$sanimi//yli=$yli//sappl=$sappl//sakkl=$sakkl//savvl=$savvl//grouppaus=$grouppaus//savalkoodi=$savalkoodi//valuutassako=$valuutassako///$row[latunnari]'>$row[ytunnus]</a>";
 						echo "</td>";
 					}
-					
+
 					if ($grouppaus == "kustannuspaikka") {
 						$query = "	SELECT nimi, koodi
 									FROM kustannuspaikka
 									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = '{$row["ytunnus"]}'";
+									and tunnus = '{$row["kustannuspaikka"]}'";
 						$nimiresult = pupe_query($query);
-						
+
 						if (mysql_num_rows($nimiresult) == 1) {
 							$nimirow = mysql_fetch_assoc($nimiresult);
 							echo "<td valign='top'>{$nimirow["nimi"]} {$nimirow["koodi"]}</td>";
@@ -477,7 +478,7 @@
 
 					if (isset($workbook)) {
 						$excelsarake = 0;
-						
+
 						if ($grouppaus != "kustannuspaikka") {
 							$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["ytunnus"]));
 							$excelsarake++;
@@ -488,6 +489,7 @@
 							$worksheet->writeString($excelrivi, $excelsarake, $kustpmuuttuja);
 							$excelsarake++;
 						}
+						
 						$worksheet->writeNumber($excelrivi, $excelsarake, $row["alle_$saatavat_array[0]"]);
 						$excelsarake++;
 
@@ -532,13 +534,13 @@
 			if ($eiliittymaa != 'ON' or $rivilask >= 1) {
 				$colspan = 2;
 				$sumlask = 2;
-				
+
 				echo "<tr>";
 				if ($grouppaus == "kustannuspaikka") {
 					$colspan = 1;
 					$sumlask = 1;
 				}
-				
+
 				echo "<td valign='top' class='tumma' align='right' colspan='$colspan'>".t("Yhteensä").":</td>";
 
 				echo "<td valign='top' class='tumma' name='saatavat_yhteensa' id='saatavat_yhteensa_$sumlask' align='right'>".$saatavat_yhteensa["alle_$saatavat_array[0]"]."*** </td>";

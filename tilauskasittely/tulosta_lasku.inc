@@ -1996,7 +1996,7 @@ if (!function_exists("tulosta_lasku")) {
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
 					and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-					and tilausrivi.kpl != 0
+					and tilausrivi.varattu+tilausrivi.kpl != 0
 					$where
 					GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
 					ORDER BY tilausrivi.otunnus, $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
@@ -2015,9 +2015,9 @@ if (!function_exists("tulosta_lasku")) {
 
 		// aloitellaan laskun teko
 		list($page_lasku[$sivu], $kala) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus);
-		
+
 		$rivigrouppaus = FALSE;
-		
+
 		while ($row = mysql_fetch_assoc($result)) {
 
 			// Rivin toimitusaika
@@ -2030,13 +2030,13 @@ if (!function_exists("tulosta_lasku")) {
 			else {
 				$row["toimitettuaika"] = $row["toimitettuaika"];
 			}
-			
+
 			if ($row["rivigroup_maara"] > 1 and !$rivigrouppaus) {
 				$rivigrouppaus = TRUE;
 			}
-			
+
 			// Otetaan yhteensäkommentti pois jos summataan rivejä
-			if ($rivigrouppaus) {				
+			if ($rivigrouppaus) {
 				$row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 				$row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 				$row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);

@@ -50,20 +50,24 @@ if (!function_exists('finvoice_otsik')) {
 
 		//	Aloitellaan aineiston luontia
 		if (($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") or $lasrow["chn"] == "112") {
+			$receiverpartyid = "";
+			$receiverintermediator = "";
 
 			if ($yhtiorow["verkkolasku_lah"] == "iPost") {
 				$receiverpartyid = $lasrow["verkkotunnus"];
 				$receiverintermediator = "003710948874";
 			}
-			elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
-				list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
-
-				if ($receiverintermediator == "") {
-					$receiverintermediator = "003723327487";
+			else {
+				if (strpos($lasrow["verkkotunnus"], "@") !== FALSE) {
+					list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+				}
+				else {
+					$receiverpartyid = $lasrow["verkkotunnus"];
 				}
 			}
-			else {
-				list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+
+			if ($yhtiorow["verkkolasku_lah"] == "apix" and $receiverintermediator == "") {
+				$receiverintermediator = "003723327487";
 			}
 
 			// jos t‰nne ei saada mit‰‰n arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
@@ -318,7 +322,7 @@ if (!function_exists('finvoice_otsik')) {
 				xml_add("InvoiceRecipientPostCodeIdentifier", 					$tarkrow["laskutus_postino"],	$tootfinvoice, 35, 1);
 				xml_add("CountryCode", 											$tarkrow["laskutus_maa"], 		$tootfinvoice, 2);
 				xml_add("CountryName", 											$tarkrow["laskutus_maa"], 		$tootfinvoice, 35);
-				xml_add("InvoiceRecipientPostOfficeBoxIdentifier",				"", 							$tootfinvoice, 35); 
+				xml_add("InvoiceRecipientPostOfficeBoxIdentifier",				"", 							$tootfinvoice, 35);
 				fputs($tootfinvoice, "</InvoiceRecipientPostalAddressDetails>\r\n");
 				fputs($tootfinvoice, "</InvoiceRecipientPartyDetails>\r\n");
 
